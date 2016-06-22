@@ -1,6 +1,16 @@
 README for ABINIT
 =================
 
+ABINIT is an atomic-scale simulation software suite.
+
+Most of the relevant information can be found on the ABINIT [website](http://www.abinit.org)
+and the [Forum](http://forum.abinit.org).
+
+Many documentation files can be found in the doc directory.
+See the file [INSTALL](INSTALL) for generic compilation and installation instructions.
+Please see the file [COPYING](COPYING) for copying conditions.
+
+## LICENSE
 
 	Copyright (C) 2006-2016 ABINIT Group
 
@@ -20,17 +30,3 @@ README for ABINIT
 	along with this program; see the file COPYING. If not, write to
 	the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 	Boston, MA 02111-1307, USA.
-
-
-
-ABINIT is an atomic-scale simulation software suite.
-
-Please see the file COPYING for copying conditions.
-Many documentation files can be found in the doc directory.
-See the file INSTALL for generic compilation and installation instructions.
-
-Most of the relevant information can be found on the ABINIT website, and the ABINIT Forum
-
-	http://www.abinit.org/
-	http://forum.abinit.org/
-
