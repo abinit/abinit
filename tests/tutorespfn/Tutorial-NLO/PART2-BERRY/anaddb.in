@@ -1,0 +1,12 @@
+# General informations
+#**********************
+   rfmeth  1
+   asr     1
+   chneut  2
+
+# Flags
+#*******
+   elaflag  3
+ piezoflag  3
+ instrflag  1
+

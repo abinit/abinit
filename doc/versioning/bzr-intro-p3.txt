@@ -1,0 +1,292 @@
+Introduction to Bazaar, part three (by Yann Pouillon)
+=====================================================
+
+
+
+The ABINIT Central Archive (aka "The Forge")
+--------------------------------------------
+
+Before being officially released, all contributions have to pass through
+the ABINIT Forge, which is a collection of Bazaar
+repositories, one per developer. In order to ease the maintenance, the
+lifetime of each repository spans one minor version of ABINIT (e.g. 5.5)
+including development and release stages.
+
+A repository always contains *public branches* following strict
+naming conventions, and may host *private branches* the names are
+free-form. The following names are reserved for the public branches,
+which are created automatically:
+
+ * devel-public
+ * x.y.1-public
+ * x.y.2-public
+ * x.y.3-public
+ * x.y.4-public
+ * x.y.5-public
+
+where x stands for a major version number, and y for a minor version
+number. A private branch is automatically created for each existing
+public branch, replacing "public" by "private" in the name. The
+creation of additional private branches has to be requested to a forge
+maintainer.
+
+There is a reference repository, codename *trunk*, from which all
+the other ones are initialised, and to which all merges converge. All
+committers are supposed to keep their branches in sync with the
+corresponding ones in *trunk* when requested to by the gatekeeper. All
+merges to *trunk* are performed from the public branches only.
+
+All committers are kindly requested to use their public branches wisely.
+Each time they commit there, a nightly build followed by a run of the
+test suite is automatically performed. A report is then sent to the
+gatekeeper who decides whether the branch involved may be merged into
+the trunk.
+
+Access to the ABINIT Forge is possible through SSH only, and
+may be activated upon request to the project leader. Using the
+*bzr-over-ssh* protocol is highly recommended for performance reasons,
+while *sftp* will work very slowly but fine. The full URL of a
+branch thus reads:
+
+<code>
+bzr+ssh://forge.abinit.org/forge/abinit/&lt;version&gt;/&lt;repository&gt;/&lt;branch&gt;/
+</code>
+
+where the version is a two-digit version number of ABINIT, and each
+repository is named after the login of its owner. For instance, to
+access Matteo Giantomassi's public development branch of ABINIT 5.5, one
+will use:
+
+<code>
+bzr+ssh://forge.abinit.org/forge/abinit/5.5/gmatteo/devel-public/
+</code>
+
+In order to facilitate the downloading from / uploading to the forge, a
+helper script has been made available in ABINIT 5.3.5 and may be found
+with its documentation in the *extras/bzr_helpers/* subdirectory of the
+ABINIT source tree.
+
+
+
+Useful commands
+---------------
+
+You will need to know a few commands only to be able to unleash the
+great potential of Bazaar. Here is a list of the commands you will likely
+use most of the time:
+
+<center>
+ <table cellpadding="5" cellspacing="5" border="1">
+  <tr><th>Type ...</th><th>To ...</th></tr>
+  <tr><td>bzr help</td><td>Get help</td></tr>
+  <tr><td>bzr info</td><td>Get detailed information about a bzr-managed directory</td></tr>
+  <tr><td>bzr status</td><td>Get a status report about a working tree</td></tr>
+  <tr><td>bzr init</td><td>Start a new branch from scratch</td></tr>
+  <tr><td>bzr branch</td><td>Start a new branch from an existing one</td></tr>
+  <tr><td>bzr push</td><td>Publish a branch to a remote location</td></tr>
+  <tr><td>bzr pull</td><td>Synchronise a branch with a remote location</td></tr>
+  <tr><td>bzr checkout</td><td>Create a new working tree for a remote branch</td></tr>
+  <tr><td>bzr update</td><td>Synchronise a checkout with its parent branch</td></tr>
+  <tr><td>bzr commit</td><td>Save a revision of a working tree</td></tr>
+  <tr><td>bzr merge</td><td>Import the contents of another branch</td></tr>
+  <tr><td>bzr resolved</td><td>Mark a merge conflict as resolved</td></tr>
+ </table>
+</center>
+
+You should use *bzr help* to know a little bit about them before using
+them intensely.
+
+
+
+Branches and checkouts
+----------------------
+
+The *bzr branch* command creates an autonomous working tree from
+the Forge (or from another branch). This copies down the
+complete history of the branch, and all operations can be performed
+locally. You may keep in sync with the parent branch by typing *bzr
+pull*, and publish your changes by means of *bzr push*.
+
+A *checkout* is much like a branch, except that the history is kept on
+the Forge. The remote branch is thus updated each time you
+commit, unless you specify the "--local" option to *bzr*. To keep a
+local copy in sync with the Forge, you just need to type *bzr
+update*.
+
+Depending on the way you work and your development environment, you may
+prefer one of these two methods, or use some clever combinations. The
+only limit is fixed by your imagination, and a little bit of thinking
+before starting will help you greatly.
+
+<div class="info">
+<b>IMPORTANT</b>
+<p>If the working tree is empty just after having downloaded a branch,
+type <i>bzr checkout</i> to unfold it.</p>
+</div>
+
+
+
+Moving files and directories
+----------------------------
+
+Bazaar handles moving and renaming files very nicely, provided that you
+take a few precautions. You should always issue a *bzr status*
+before moving files / directories, and **check that
+<u>either all or none</u> of the involved files / directories are
+versioned**. If not so, their history might be lost.
+
+If none of the files is versioned, just do as if bzr didn't exist. If
+all files are already versioned, you should move them using the *bzr mv*
+command.
+
+
+
+Writing usable changelogs
+-------------------------
+
+Since your changes need to be understandable by the gatekeeper as well
+as by other developers, your changelogs have to follow a set of minimal
+rules, in particular regarding their structure. To further optimise
+their management, we are following the GNU changelog format. Here is a
+template:
+
+<div style="margin-left: 5em; margin-right: 5em; font-family: monospace;">
+<pre>
+One short summary line (no trailing dot)
+
+* dir1/sub1/file1: Some changes. Make full sentences.
+
+* dir2/sub2/file2,dir3/sub3/file3: Some other changes.
+* dir4/sub4/file4: Related changes (no blank line before).
+
+* Additional notes and issues.
+</pre>
+</div>
+
+Please make sure that all lines contain less than 80 characters and
+start at the first column (the best is to make sure that automatic
+wrapping is enabled in your preferred editor). This will allow automatic
+global changelog generation when needed.
+
+The best practice is to write your changelogs along as you develop.
+It is much more efficient than waiting for commit-time, because you will
+remember what you have just done much more precisely than you would two
+or three weeks later. In the long run this will help everybody
+- including yourself - save a lot of time, for your changelogs will gain
+a lot in clarity.
+
+For a complete reference on the topic, we refer you to the corresponding
+[Free Software Foundation
+document](http://www.gnu.org/prep/standards/html_node/Change-Logs.html).
+Reading the "Change Logs" section entirely once is highly recommended.
+
+
+
+Committing
+----------
+
+As ABINIT is a collective effort, committing your changes properly is a
+little bit more than typing *bzr commit*. We **highly recommend** that
+you complete the following check-list for each commit:
+
+ 1. Check the working tree with *bzr status*.
+ 2. Process files marked as unknown.
+    Go back to step 1 until no file is marked as unknown.
+ 3. Write a changelog if it does not already exists.
+ 4. bzr commit --strict [-F logfile]
+    (use the -F option only if your changelog is in a file).
+
+Partial commits are possible by adding files and directories at the end
+of the command-line (use with care).
+
+<div class="info">
+<b>IMPORTANT</b>
+<p>Make sure that the EDITOR environment variable is set before
+committing.</p>
+</div>
+
+
+
+Merging branches
+----------------
+
+When you want to import the contents of a branch into another one,
+you will type *bzr merge branch_url* and let Bazaar do the job for you.
+Merge will automatically calculate the changes that exist in the branch
+you're merging from and which are not in yours, then attempt to apply
+them to your branch.
+
+If you are careful enough and merge the branches you need into yours
+regularly, most of your merges will be straightforward. However, sooner
+or later, you will run into a *conflict* with someone else's
+contributions. Though *solving conflicts* is rarely a delicate matter,
+it has to be done manually and methodically.
+
+If you want things to go smoothly in all cases, you do have to take a
+systematic precaution: **always commit your latest changes before
+merging**. If something goes wrong, or if it takes a lot of time to
+solve the conflicts, you will still be able to continue to develop in
+parallel within the unmerged branch. The same applies once you are
+satisfied: **always commit immediately after a successful merge**.
+Then, and only then, you may continue safely your developments.
+
+
+
+Solving conflicts
+-----------------
+
+In case of conflict, 3 files with the same basename are created. The
+filename of the common base (i.e. before divergence) is appended with
+*.BASE*, the filename of the file containing your changes is appended
+with *.THIS*, and the filename with the changes from the other tree is
+appended with *.OTHER*.
+
+Using a program such as *kdiff3* or *xxdiff*, you can comfortably merge
+them into one file and save the result as the orginal filename. With
+*kdiff3* the command-line will look like:
+
+<pre>
+kdiff3 myfile.BASE myfile.OTHER myfile.THIS
+</pre>
+
+and the resulting file should be saved as *myfile*.
+
+Before committing you must use the *bzr resolve myfile* command,
+which will **remove** the *.OTHER*, *.THIS* and *.BASE* files. Always
+use it with great care, and keep in mind that, if *myfile* does not exist
+when you call *bzr resolve*, it will just be considered as removed by
+*bzr*.
+
+
+
+Moving changes between trees
+----------------------------
+
+When you make changes in the wrong tree, or when the changes turn out to
+be bigger than expected, you may want to start a new branch. To move
+your changes from one tree (*OLDDIR*) to another (*NEWDIR*), just type:
+
+<pre>
+cd NEWDIR
+bzr merge --uncommitted OLDDIR
+</pre>
+
+This will apply all of the **uncommitted changes** you made in
+*OLDDIR* to *NEWDIR*. It will not apply committed changes,
+even if they would be applied to *NEWDIR* with a regular merge.
+The changes will remain in *OLDDIR*, but you can use *bzr revert
+OLDDIR* to remove them, once you're satisfied with *NEWDIR*.
+
+Note: *NEWDIR* does not have to be a copy of *OLDDIR*, but they
+should be related. The more different they are, the greater the chance
+of conflicts.
+
+
+
+Conclusion
+----------
+
+This little tour in "Bazaarland" is now finished. You should now be able
+to use *bzr* efficiently in the context of ABINIT, provided that you do
+your part of the deal, which is: **PRACTICE!**
+

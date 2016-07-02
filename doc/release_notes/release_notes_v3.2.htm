@@ -1,0 +1,264 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2001 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors .
+</h5>
+
+<pre>
+Many thanks to the following contributors to the ABINIT project
+between May 2001 and October 2001:
+Christophe Audouze, Jean-Michel Beuken, Razvan Caracas,
+Rex Godby, Francois Jollet, Masayoshi Mikami,
+Valerio Olevano, Giovanni Onida, Jean-Yves Raty,
+Lucia Reining, Gian-Marco Rignanese, Aline Roy,
+Luc Sindic, Jay Sullivan, Yasuko Suzukawa
+Stefan Tausendpfund, Marc Torrent, Matthieu Verstraete
+Gilles Zerah.
+
+I think it is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 3.2, released on October 18, 2001.
+
+Changes with respect to version 3.1 :
+
+A. Changes for the installation.
+B. Most noticeable changes in the package
+C. WARNINGS.
+D. Other changes.
+
+__________________________________________________________________
+
+A.  Changes for the installation.
+
+A1. Note that the directories Src_defs and Src_main have been created.
+
+    The Src_main directory contains the sources of all the main
+    programs (abinit.f, cut3d.f, ...), that are no more
+    in the ~abinit top directory.
+    The files basis_defs.f and psp_defs.f have been placed
+    in the Src_defs directory, and their name changed to defs_basis.f
+    and defs_psps.f . Other defs file have been placed there.
+    See Infos/dirs_and_files
+
+A2. The files makefile_macros have been changed a lot.
+    All the makefile_macros files provided in the package have been
+    updated (and most must still be tried on the proper platform !)
+    See the help.makefile_macros file for the up-to-date description of
+    these files (in order to adapt your makefile_macros file,
+    if it is not one of those provided in the package).
+
+    (1) Default values have been provided for most macros in the
+    makefile_macros files.
+    (2) The meaning of the BLAS and LAPACK macros has changed,
+    while BLAS_A and LAPACK_A have disappeared.
+    (3) The BLAS library has been placed on the same
+    footing as the other libraries (no need of "make blas"
+    before "make allseq")
+
+    Also, it is now possible to give tuned compiler options for the
+    specific directories Src_2ffts, Src2_nonlocal and Src_4wfs.
+
+
+A3. New makefile_macros files have been created, noticeably
+    for clusters of Intel/Linux and DecAlpha/Linux machines :
+    ~abinit/Machine_dept_files/Intel_P6/makefile_macros.PGI_MPICH
+    and
+    ~abinit/Machine_dept_files/Intel_P6/makefile_macros.DecLinux.tux ,
+    as well as for the use of the new Intel compiler (ifc) for Linux
+    (see http://www.intel.com/software/products/compilers/f50/linux),
+    ~abinit/Machine_dept_files/Intel_P6/makefile_macros.Intel .
+
+    The file
+    ~abinit/Machine_dept_files/Intel_P6/makefile_macros.PGI_paral
+    has been moved to
+    ~abinit/Machine_dept_files/Intel_P6/makefile_macros.PGI_Lam .
+
+    ABINIT has been modified for compilation under the 3.2-3
+    release of the PGI compiler, and some makefile_macros
+    are based on that release, noticeably
+    ~abinit/Machine_dept_files/Intel_P6/makefile_macros.PGI_prof
+
+    A makefile_macros for MacOS X has been created, but more tests
+    must still be done to release this Mac version of ABINIT.
+
+    (JMB + XG)
+
+__________________________________________________________________
+
+B.  Most noticeable changes.
+
+B1. Calculations of the band structure in the GW approximation are now
+    possible. This is based on a program originally started
+    by R.W. Godby, developped over the years by V. Olevano, G. Onida,
+    L. Reining, M. Torrent, and incorporated in ABINIT
+    by G.-M. Rignanese. The adequate output of ABINIT
+    has been coded by M. Torrent, and modified by V. Olevano.
+
+    For the time being, the documentation is
+    still to be written (and this will take time !).
+    An example of GW calculation is given in Test_v3, tests 30 to 32.
+
+B2. The recognition of the space group number (1 to 230)
+    from the list of symmetry operations works now : it is
+    tested extensively for all the 230 space groups
+    in Test_v3, cases 15 to 19.
+    (RC + XG)
+
+B3. The response-function calculations work with nsppol=2
+    (spin-polarized calculations). See Test_v3, cases 22 to 24.
+
+B4. For antiferromagnetic materials, the CPU time can be divided
+    by a factor of two, thanks to the use of Shubnikov symmetries.
+    For ground-state calculation, use nsppol=1 with nspden=2
+    (see the help file, as well as Test_v3/t20.in).
+    For response-function calculations, Shubnikov symmetries
+    are used to decrease the number of perturbations,
+    with nsppol=1 and nspden=2 , see Test_v3/t24.in .
+    The recognition of Shubnikov symmetries is implemented, as
+    well as their generation, but the latter needs still some testing,
+    and the corresponding input variables are still to be documented.
+    (XG + RC)
+
+B5. The format of the ifc input file has been completely changed.
+    Keywords are used now. These are documented in ifc_help.htm .
+    The old input files do NOT work anymore.
+    Examples of the new input files can be found in Test_v2 :
+    cases 13,15,16,17,18,19,20,21,22,24,25,28,29,32,39 .
+
+B6. The implementation of non-collinear spin-magnetization
+    calculations.
+    The exchange-correlation part is computed by changing the
+    direction of the magnetization, to make it directed
+    along z (and always positive). This involves no approximation
+    in the LDA case, while for the GGA, other implementations
+    are possible. In particular, a small deviation from
+    anti-ferromagnetism will not exactly reduce to the antiferromagnetic
+    case when the deviation tends to zero. However, this effect
+    is expected to be small.
+    WARNING : Forces, stresses and response-functions
+    are not yet coded, and symmetries cannot be used yet !
+    See nsppol==4 and Test_v3/t27.in .
+    (Contributed by Gilles Zerah).
+
+B8. In the framework of the self-documentation project, the Infos/Theory
+    directory has been created. At present, it contains three documents
+    that present the basic theory underlying the code, and that
+    concerns (I) the definition of the cell and atoms geometry
+    (and symmetries), (II) the definitions, storage, and
+    conversion of one wavefunction,
+    (III) the definitions, storage, and conversion of a
+    set of wavefunctions. In the future, these documents should
+    be linked to the sources. Investigation continue on how
+    to make this in the framework of ROBODOC and TtH.
+    (Contributed by MMikami, Yasuko Suzukawa , and XG)
+
+__________________________________________________________________
+
+C.  WARNINGS
+
+C1. For developpers : there has been big changes due to the
+    introduction of structured (derived) datatypes, and
+    the associated modules defs_common.f, ...
+    For example, the number of arguments of gstate.f has changed
+    from 90 to 25 !
+    It is strongly adviced to the developpers to carefully read
+    the defs_*.f files contained in the subdirectory Src_defs .
+
+C2. For developpers : the name of the module
+    basis_defs.f has been changed to defs_basis.f . This module
+    is used in all ABINIT routines.
+
+C3. For developpers : the unit number associated with the main abinit
+    output, previously "iout" is now defined
+    in the module defs_basis.f , and no more
+    in the abinit.f file.  It is called ab_out .
+    Since the defs_basis module is used in all abinit routines,
+    one can suppress the "iout" argument in many routines
+    (but this is still to be done for most routines).
+    The unit number associated with the temporary files, previously
+    defined in abinit.f as "unit00" is now also defined in the module
+    defs_basis.f, with the name tmp_unit . Many routines have left
+    their "unit00" argument.
+
+C4. For developpers : the routine rhohxc.f has been moved to
+    rhohxc_coll.f , due to the implementation of the non-collinear
+    magnetism. A new rhohxc.f is the interface towards rhohxc_coll.f
+    in non-spin-polarized and collinear magnetization cases.
+    See B6.
+
+__________________________________________________________________
+
+D.  Other changes (or current developments, not yet finalized).
+
+
+D0. In the case nsppol=2, the magnetic moment of the unit cell
+    can be constrained to a predefined value. See the input
+    variable fixmom. (Contributed by Jay Sullivan).
+
+D1. In the input file, the sign "!" is now considered as the
+    beginning of a comment, similarly to "#".
+    See abinis_help.html .
+
+D2. The analysis of interatomic force constants has been speeded
+    by a large factor (the sorting algorithm scaling was N2, it is
+    now N Log N). For example the test 39, that was 2 minutes
+    on a PIII at 450 MHz is now a dozen of seconds.
+
+D3. A new scheme allowing the computation of electronic structure
+    at finite temperature, with special k point smearing,
+    has been devised by M. Verstraete. See the input variables
+    tphysel and tsmear.
+
+D4. Oscillator strengths are now available in TDDFT. It is
+    possible also to compute the dynamic polarisability (for
+    which a small utility program exist,
+    see ~abinit/Utilities/dynamic_pol.f . This should work,
+    but is considered to be in development (more tests are needed).
+    See iscf=-1 .
+    Contributed by JYRaty .
+
+D5. It is possible to determine the inner eigenvalues of the
+    energy spectrum,
+    thanks to the use of the conjugate gradient algorithm
+    on the operator (H-eshift)^2. See the input variables wfoptalg
+    and eshift. Not very efficient yet, so to be considered
+    under development.
+    Contributed by CAudouze, GZerah and XG.
+
+D6. A bug in the computation of the maximum residual has been
+    removed : nbdbuf was not properly taken into account.
+
+D7. Introduction of kssform input variable, for further developments
+    related to GW, by Valerio Olevano
+
+D8. Change int to nint in cut3d, by MMikami and MVerstraete.
+
+D9. The Makefile and makemake scripts have been extensively rewritten,
+    and simplified.
+
+D10. The arguments of many routines have been changed, in preparation
+     of the PAW implementation. (contribution by FJollet and MTorrent)
+
+D11. A script for the preparation of input files for testing the
+     pseudopotentials of the whole periodic table is in preparation,
+     see Test_physics/Solid.pl (contribution by RCaracas).
+
+D12. A package (in development) towards the use of autoconf
+     has been contributed by STausendpfund. It is in the directory Configure.
+</pre>
+

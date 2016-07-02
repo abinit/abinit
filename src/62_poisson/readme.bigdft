@@ -1,0 +1,8 @@
+These routines are wrapper around the Poisson solver of BigDFT. 
+It is used to compute the convolution with 1/r and to compute 
+the exchange and correlation related stuffs (potential, energies...).
+
+To do it, one must use a kernel. 
+Create it with psolver_kernel() (iaction == 2 to get it and build it if not already created). 
+Then it can be used in psolver_rhohxc()) that is the equivalent with free boundary conditions to rhohxc(). 
+It can also be used in psolver_hartree() which only does the convolution and does not compute XC.

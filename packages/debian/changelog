@@ -1,0 +1,57 @@
+abinit (6.6.0-1) lucid; urgency=low
+
+  * New upstream release.
+  * New binary package split.
+
+ -- Yann Pouillon <yann.pouillon@gmail.com>  Fri, 04 Feb 2011 12:44:13 +0100
+
+abinit (5.3.4.dfsg-3build1) lucid; urgency=low
+
+  * Rebuild for fortran transition.
+
+ -- Stefan Potyra <sistpoty@ubuntu.com>  Sat, 03 Apr 2010 04:53:19 +0200
+
+abinit (5.3.4.dfsg-3) unstable; urgency=low
+
+  * Add XS-DM-Upload-Allowed: yes
+  * shifted Build-Depends to use the new gfortran based Lapack and Blas
+    packages in order to phase out packages dependent on the old g2c/g77
+    (Closes: #463942)
+  * Homepage field converted to the new style
+  * Standards version updated to 3.7.3
+  * Old FSF address fixed in debian/copyright
+  * abinit-doc moved to the section doc.
+  * doc/Makefile.in patch moved to debian/patches managed by quilt 
+
+ -- Ondrej Certik <ondrej@certik.cz>  Tue, 05 Feb 2008 14:09:20 +0100
+
+abinit (5.3.4.dfsg-2) unstable; urgency=low
+
+  [Ondrej Certik]
+  * Renamed /usr/bin/newsp to /usr/bin/newsp.abinit. Bug fix: "file
+    conflicts between packages", thanks to Michael Ablassmeier (Closes:
+    #442237).
+
+ -- Christophe Prud'homme <prudhomm@debian.org>  Fri, 14 Sep 2007 13:05:00 +0200
+
+abinit (5.3.4.dfsg-1) unstable; urgency=low
+
+  [Christophe Prud'homme]
+  * Uploaded abinit to main (Closes: #434912)
+  * debian/control: updated Maintainers and added Uploaders section
+  * debian/rules: enable optimization flags (-O2)
+
+  [Ondrej Certik]
+  * Removed non-free files and unnecessary libraries from the upstream tarball
+    (see debian/copyright for more details)
+
+ -- Christophe Prud'homme <prudhomm@debian.org>  Sat, 28 Jul 2007 15:04:18 +0200
+
+abinit (5.3.4-0oc1) unstable; urgency=low
+
+  * Unofficial release, packages work, but are not lintian clean yet and
+    other small issues are still there.
+  * Initial release (Closes: #434912)
+
+ -- Ondrej Certik <ondrej@certik.cz>  Fri, 27 Jul 2007 18:53:34 +0200
+

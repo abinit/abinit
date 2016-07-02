@@ -1,0 +1,211 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2000 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors .
+</h5>
+
+<pre>
+Many thanks to the following contributors to the ABINIT project
+between March 2000 and July 2000:
+Jean-Michel Beuken, Francois Detraux, Razvan Caracas, Alessio Filipetti,
+Martin Fuchs, Francois Jollet, Bernard Magne, Masayoshi Mikami,
+Gian-Marco Rignanese, Jean-Yves Raty,
+Aline Roy, Luc Sindic, Massimiliano Stengel, Gilles Zerah.
+
+I think it is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 2.3, released on July 31, 2000.
+
+Changes with respect to version 2.2 :
+
+A. Changes for the installation.
+B. Most noticeable changes in the code.
+C. WARNINGS.
+D. Other changes.
+
+__________________________________________________________________
+
+A.  Changes for the installation.
+
+A1. (nothing for this version)
+
+__________________________________________________________________
+
+B.  Most noticeable changes.
+
+B1. The abinis_help has been split into two parts (a list of
+    input variables, and the explanation part), and translated
+    to HTML, with the creation of adequate hyperlinks.
+    It is available from the Web site, as well as from the
+    usual ~abinit/doc/users directory (see ~abinit/doc/users/abinis_help.html
+    and ~abinit/doc/input_variables/keyhr.html).
+    Also, the tutorial is now available under HTML, with links
+    to the above-mentioned files
+    (see ~abinit/doc/tutorial/welcome.html).
+    This work has been done by Razvan Caracas.
+
+B2. The spin-orbit coupling has been coded.
+    Presently, the total energy, the density and the electronic
+    structure should be OK. Forces and stresses are not yet working.
+    There are new input variables : "nspinor", "nspden", "pspso".
+    Also, "spinat" has been modified, as the magnetization
+    becomes a vector.
+    See tests 74 and 75 of Test_v2 .
+    This work has been done by G. Zerah, F. Jollet and X. Gonze.
+
+B3. ABINIT has been placed under CVS, locally, as well
+    as on the SourceForge Web site (http://www.sourceforge.net).
+    Developpers might have a look
+    at  ~abinit/doc/developers/collab .
+
+B4. The determination of symmetries has been improved :
+    the Bravais lattice and the point group are automatically
+    recognized and written ; the non-primitive cells
+    can be automatically reduced to primitive cells
+    (see option -1 to the input variable "brvltt").
+    Also, the k point generator is better :
+    nkpt can be automatically computed ;
+    other grids than Monkhorst-Pack one are available
+    (see the input variable "kptrlatt");
+    the best k point grid can be automatically selected
+    (see the input variable "prtkpt").
+    In the process of doing this, the meaning of the
+    input variable "kptpot" had to be changed, see C5.
+
+B5. Introduction of Nose-Hoover thermostat (ionmov=8),
+    by J.-Y. Raty. Related input parameters :
+    "noseinert", "noseit", "noseft".
+
+B6. An additional parallelisation for SMP machines,
+    using OpenMP, has been coded by A. Roy.
+    Note, however, that it should NOT yet be used, since
+    it has not been optimized, and many things
+    are still to be be understood in order to provide speed-up.
+    FFTs are parallelized on one of the dimensions ;
+    non-local pseudopotential part of the Hamiltonian is parallelized
+    over plane waves, as are orthogonalisation operations.
+
+__________________________________________________________________
+
+C.  WARNINGS
+
+C1. The new input variable "nbdbuf" (see D17) has been introduced.
+    With its default value, it modifies the stopping criterion
+    of non-self-consistent calculations and metallic response-function
+    calculations, compared to version 2.2.
+    In order to recover the old behaviour in these cases, use
+    nbdbuf 0
+
+C2. The input variable "spinat" is now a vector (see B2), instead
+    of a scalar in version 2.2.
+    In order to recover the old behaviour in this case, use
+    vectors having the old slcalar value for the z-component.
+
+C3. The header of wavefunction, density and potential files
+    has additional variables : pspso, nspden, nspinor, fermie .
+    Also, the body of the wavefunction files now contains the
+    occupation numbers.
+    ABINITv2.2 and before are not able to read the new files.
+    ABINITv2.3 is able to read all files.
+    Cut3d from the web site does NOT work with the new header.
+    A new version of cut3d is in preparation.
+
+C4. The mean of the potential has been redefined, to give agreement
+    with the Janak's theorem. Eigenenergies are changed with respect
+    to the previous version. You can recover the old values
+    by hand, by subtracting the mean of the XC potential.
+
+C5. There has been large modifications of the routines
+    that preprocess the input file.
+    Previously, inprep.f called indims.f, and inmain.f
+    called invars.f .
+    Now, there is first invars0.f, then invars1m.f that
+    calls invars1.f, then invars2m.f that calls invars2.f
+    (the 'm' stands for 'multi').
+
+C6. The meaning of the input variable "kptopt" has changed :
+    a band structure calculation needs a negative value,
+    and initialization of the input variables "nkdiv" and "kptbounds".
+    The input variable "ngkpt" has dimension
+    ngkpt(1:3) instead of ngkpt(1:4).
+    The input variable "nshiftk" must be used instead of ngkpt(4)
+    Additional WARNING : ABINIT is unable to see whether
+    you have modified your old files to the new setting ! It will
+    default nshiftk to 1 , and so use only one shift, even
+    if you are listing 2 or 4 shifts.
+
+
+__________________________________________________________________
+
+D.  Other changes.
+
+D1. The parallel version on a Cray T3E has been considerably
+    speeded up by A. Roy
+
+D2. The susceptibility and dielectric matrix can now been computed
+    for imaginary frequencies, by M. Fuchs
+    New input variables : "ikhxc", "nfreqsus", "freqsusin", "freqsuslo"
+
+D3. A tentative makefile_macros file for parallel version of SP2
+    has been communicated by B. Magne .
+
+D4. Bug corrected : the use of XF history is now correct
+    in the parallel version, by M. Stengel.
+
+D5. GW development is going on, by G.-M. Rignanese.
+    See the new input variable "optdriver".
+
+D6. ABINIT has been installed on NEC, by G.-M. Rignanese.
+    Not yet optimized. See ~abinit/Machine_dept_files/NEC .
+
+D7. The MPI parallel version is available for HP S-Class and N-Class
+    machines, by L. Sindic.
+
+D8. Additional new input variables, related to timing and automatic
+    exit : "chkexit", "timopt".
+
+D9. Ifc code : for FCC lattices, it is now possible to sample the
+    q Brillouin Zone with the Gamma point
+    only (using a 1x1x1 BCC sampling), see Test_v2#39.
+
+D10. Additional miscellaneous informations, about
+     visualisation of densities (VASP Data Viewer, XCrysDen),
+     and phonon modes (PLOTMTV), by M. Mikami, see ~abinit/Infos/Miscellaneous
+
+D11. For response-function calculations, the f-sum rule is now
+     correct for partial occupation numbers
+
+D12. Test_paral : tests #5 and #6 created, test #2 modified.
+
+D13. Test_cpu : increased the run time, to improve statistics. Also,
+     suppresses ngfft 16 and 18.
+
+D14. The time analysis has been improved, and is now OK for RF
+
+D15. A database of atomic masses has been created.
+     See the input variable "amu".
+
+D16. The self-documentation project is now documented (!),
+     in ~abinit/doc/developers/rules_coding , section 10.e .
+
+D17. The input variable "nbdbuf" has been introduced.
+     It defines a buffer of wavefunctions, to stabilize calculations
+     of metallic response-function, and to get rid off
+     spurious effects in the non-self-consistent optimization
+     of wavefunctions.
+</pre>

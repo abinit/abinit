@@ -1,0 +1,35 @@
+In this directory, one has gathered (perhaps temporarily)
+the tests that could NOT be executed in parallel, or
+should be executed in parallel independently of the present seq only runs.
+They have been taken from different test directories 
+at the time of the v5.9.0 merge.
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+
+For the description of tests, see the corresponding original directories.
+
+The reasons are :
+
+1) Not parallelised capabilities of ABINIT
+v2#81,82, v3#03,04,05 -> Berry phase calculation, with positive value of nberry
+v4#90 -> CASINO output
+
+2) Numerically incorrect cases, when MPI plugin is used
+  (to be corrected as soon as possible)
+v4#55 -> finite electric field 
+v4#78,80 -> finite electric field phonon calculations, 
+v5#101 ->TFvW preconditioner
+v5#112,113 -> Berry phase in PAW
+
+
+Added one more test, v6.15.0 (XG120521), calculation with red_efieldbar (finite electric field),
+because the seq and paral runs differ. Actualy linked with v4#55 behaviour ...
+v6#121
+Actually, I do not understand how some other berryopt 4 calculation actually 
+give essentially the same result (v5#23, v6#43, tutorespfn#ffield_6), or a difference
+that is acceptable (v6#111).
+
+Added five more tests (v6#122-126), v6.15.1 (XG120616), similar reason than for the test v6#121.
+
+Added v7#70, v7.9.3 (XG1400901, similar reason than for the test v6#121.

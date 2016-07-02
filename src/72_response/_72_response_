@@ -1,0 +1,101 @@
+!!****d* ABINIT/72_response
+!! NAME
+!! 72_response
+!!
+!! DESCRIPTION
+!! This directory contains level-6 routines used
+!! to treat responses to perturbations within ABINIT,
+!! that are lower-level than the MPI-parallelized
+!! routines.
+!! (Should be described in more details, but might be
+!! further split)
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! corrmetalwf1.F90
+!! d2frnl.F90
+!! d2kindstr2.F90
+!! ddb_io_out.F90
+!! ddb_write_blok.F90
+!! dfpt_accrho.F90
+!! dfpt_cgwf.F90
+!! dfpt_dyfro.F90
+!! dfpt_dyout.F90
+!! dfpt_dyxc1.F90
+!! dfpt_eltfrhar.F90
+!! dfpt_eltfrkin.F90
+!! dfpt_eltfrloc.F90
+!! dfpt_eltfrxc.F90
+!! dfpt_etot.F90
+!! dfpt_ewald.F90
+!! dfpt_gatherdy.F90
+!! dfpt_mkcore.F90
+!! dfpt_mkrho.F90
+!! dfpt_mkvxcstr.F90
+!! dfpt_mkvxcstrgga.F90
+!! dfpt_newvtr.F90
+!! dfpt_nselt.F90
+!! dfpt_nstdy.F90
+!! dfpt_nsteltwf.F90
+!! dfpt_nstpaw.F90
+!! dfpt_nstwf.F90
+!! dfpt_phfrq.F90
+!! dfpt_prtene.F90
+!! dfpt_prtph.F90
+!! dfpt_rhofermi.F90
+!! dfpt_rhotov.F90
+!! dfpt_scfcv.F90
+!! dfpt_sydy.F90
+!! dfpt_sygra.F90
+!! dfpt_symph.F90
+!! dfpt_vlocal.F90
+!! dfpt_vtorho.F90
+!! dfpt_vtowfk.F90
+!! dfpt_wfkfermi.F90
+!! dfptff_bec.F90
+!! dfptff_die.F90
+!! dfptff_ebp.F90
+!! dfptff_edie.F90
+!! dfptff_gbefd.F90
+!! dfptff_gradberry.F90
+!! dfptff_initberry.F90
+!! dfptnl_doutput.F90
+!! dfptnl_resp.F90
+!! eig2stern.F90
+!! eig2tot.F90
+!! eigen_meandege.F90
+!! elph2_fanddw.F90
+!! elt_ewald.F90
+!! eltxccore.F90
+!! gaugetransfo.F90
+!! getshell.F90
+!! hartrestr.F90
+!! inpgkk.F90
+!! interfaces_72_response.F90
+!! kptfine_av.F90
+!! m_rf2.F90
+!! m_ddb.F90
+!! m_dvdb.F90
+!! m_efmas.F90
+!! m_eig2d.F90
+!! m_paral_pert.F90
+!! newfermie1.F90
+!! outbsd.F90
+!! outddbnc.F90
+!! outgkk.F90
+!! qmatrix.F90
+!! redgr.F90
+!! rf2_init.F90
+!! rotate_rho.F90
+!! smeared_delta.F90
+!! sytens.F90
+!! vlocalstr.F90
+!! wrtloctens.F90
+!!
+!!***

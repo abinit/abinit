@@ -1,0 +1,327 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2008 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project
+between December 2007 and February 2009. These release notes
+are relative to improvements of ABINITv5.6 with respect to v5.5.
+
+The list of contributors includes :
+B. Amadon, E. Arras, J.-M. Beuken, F. Bottin, F. Bruneval, D. Caliste, Chunping Hu, M. Cote,
+T. Deutsch, M. Giantomassi, D. Hamann, A. Jacques, J. Janssen,
+F. Jollet, T. Jourdan, S. Leroux, C. Motta, S. Pesant,
+Y. Pouillon, T. Rangel, G.-M. Rignanese, R. Shaltaf, L. Sindic, M. Torrent,
+M. Verstraete, G. Zerah, J. Zwanziger
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 5.6, released on September 3, 2008.
+
+Changes with respect to version 5.5 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS
+
+A.1 The input variable ratsph is now an array ratsph(ntypat).
+
+A.2 The input variable exchn2n3 has been replaced by exchn2n3d,
+    because the former was terminated with a digit, which is incompatible
+    with the indexing of the input variables by the dataset number.
+
+A.3 The interface to the configure system for the production of the parallel version of abinit (abinip),
+    has changed. In brief, if you were using the "manual" generation previously,
+    you likely have to switch to the "auto-detection" (enable_mpi=yes).
+    Also, with enable_mpi=yes, the user should provide the path to
+    the correct MPI directory prefix, e.g.
+    with_mpi_prefix="/usr/local/mpich-1.2.7p1-intel-9.1-64".
+    The "manual" generation of the MPI support (enable_mpi=manual)
+    needs many configure variables to be define explicitely, unlike
+    previously.
+
+    More details :
+    Interface changes to the configure system :
+    configure: reporting user interface changes:
+    configure:  * new option --enable-error-handlers is available
+    configure:  * new option --enable-gw-dpc is available
+    configure:  * --enable-mpi has a new meaning
+    configure:    please check that enable-mpi="yes" is OK for you
+    configure:  * new option --enable-scalapack is available
+    configure:  * --with-fc-name renamed --with-fc-vendor
+    configure:  * new option --with-mpi-level is available
+    configure:  * new option --with-plugins-prefix is available
+    configure:  * new option --with-plugins-srcdir is available
+    configure:  * new option --with-scalapack-includes is available
+    configure:  * new option --with-scalapack-libs is available
+    configure:  * --enable-tricks has a new meaning
+    configure:    please check that enable-tricks="yes" is OK for you
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B.1 The PAW can be used to perform GW calculations.
+    Compared to the norm-conserving case, this will allow
+    to get closer to all-electron calculations,
+    and also will allow to gain CPU (when the planewave energy cut-off to be used is smaller)
+    This new capability of ABINIT is exemplified in v5#66 .
+    Work done by Matteo Giantomassi.
+
+B.2 The convergence of the GW calculations with respect to the number of bands
+    has been improved dramatically, thanks to the extrapolar method,
+    described in Phys.Rev.B78, 085125 (2008).
+    This should results in a 3-5 speed up of GW calculations for realistic systems,
+    thanks to a large lowering of the number of unoccupied bands needed to obtain the same accuracy.
+    See the new input variables gwcomp and gwencomp, and the new
+    automatic tests v5#65, 69 and paral#V .
+    Work by Fabien Bruneval. Test v5#69 provided by Matteo Giantomassi.
+
+B.3 Non-collinear magnetism (with spinors) is available for PAW calculations.
+    Also, spin-orbit interaction is available for PAW calculations.
+    For the spin-orbit calculation, the new input variable pawnsporb has
+    been defined.
+    Automatic test v5#17
+    Work done by Marc Torrent, with participation of T. Jourdan and E. Arras.
+
+B.4 LDA+U is now available in production (always need PAW).
+    See the (already existing) input variables usepawu, upawu, jpawu
+    as well as some new ones : dmatudiag, lpawu, dmatpuopt, usedmatpu
+    (and the internal variable natpawu).
+    Automatic tests v5#08, 11, 19, 53
+    Work done by Bernard Amadon.
+
+    LDA+U is available with non-collinear magnetism and with spin-orbit interaction
+    Automatic test v5#16 for non-collinear magnetism
+    Work done by M. Torrent
+
+    A tutorial is available to explain the use of LDA+U,
+    see the menu of the tutorials, work by Simon Pesant, helped
+    by M. Coté and XG. In this tutorial, several additional examples
+    are given.
+
+    A lm-dependent energy shift can be applied atom by atom,
+    see the input variables natvshift, atvshift. This would e.g. allow
+    to compute the value of the U according to the method by
+    Coccochioni and de Gironcoli.
+    Automatic tests v5#14 and 15 are available. Work done by XG.
+
+B.5 In the framework of band/FFT/k-point parallelisation,
+    spin-polarized (nsppol=2 or nspden=2) as well as PAW method calculations
+    are now allowed.
+    PAW case is shown in the test paral#R .
+    Precondition of density and/or correction of forces (see iprcch) and time-reversal
+    symmetry (istwfk=2) are now available for beta tests.
+    Work done by F. Bottin, with M. Torrent, F. Jollet and G. Zerah.
+
+    Also allowed within band/FFT/k-point parallelization : optics_paw.
+    Work by M. Torrent.
+
+    The computation of the static susceptibility is now compatible with
+    band/FFT/k-point parallelisation (done in sequential on the nfftdiel grid).
+    Work done by G. Zerah.
+
+B.6 The static susceptibility can now be computed within PAW, opening access
+    to the extrapolar algorithm to speed up and/or stabilize the SCF cycles.
+    The iprcel input variable can thus be used with the following values : 4x, 6x, 14x .
+    Automatic test paral#R.
+    Work done by M. Torrent.
+
+B.7 The Wannier90 library, interfaced with ABINIT, can now
+    be used in production,
+    work by Tonatiuh Rangel, Bernard Amadon, and Don Hamann, helped by G.-M. Rignanese, as well as
+    Y. Pouillon for the build system.
+    New test has been provided in the tests/wannier90 directory (B. Amadon).
+    Related input variables w90iniprj, w90lplot, w90nplot, w90prtunk.
+    However, the testing procedure is still rather incomplete. Only the .out is tested.
+
+B.8 Anti ferromagnetic symmetries can be used for GW calculations,
+    providing significant speed up for antiferromagnetic materials.
+    Test v5#68. Work done by Matteo Giantomassi.
+    See also section D.15 .
+
+B.9 A cut-off for the Coulomb interaction, to be used for GW calculations
+    of nanosystems (clusters and wires) has been introduced.
+    See the new input variable vcutgeo, as well as icutcoul, and the related rcut.
+    One test is provided, paral#V , for a finite system.
+    More tests should be provided for the case of the cylinder geometry.
+    Work done by M. Giantomassi. Test paral#V provided by F. Bruneval.
+
+B.10 Local exchange (=atom-centered-only part of the exchange)
+     has been coded within the PAW.
+     Input variables : useexexch, lexexch.
+     Automatic test v5#18 is available, testing local part of PBE0 hybrid functional.
+     Work done by Francois Jollet.
+
+B.11 The ability to compute the Fermi contact interaction at each nuclear
+    site, that is, the electronic density at each nuclear site, has been coded (PAW).
+    This is needed for the computation of isomer shifts to model Mossbauer spectra.
+    Input variable prtfc.  Automatic test v5#34.
+    Also, the input variable prtefg, coupled with ptcharge,
+    allows to compute the Electric Field Gradient using an ionic point charge model .
+    Automatic test number v5#35.
+    Work done by Joe Zwanziger, with some help from M. Torrent.
+
+B.12 For very high electronic temperatures, the direct computation
+    of the density based on the recursion method (instead of the
+    iterative determination of the eigenfunctions) has been coded.
+    Input variables recnpath, recnrec, recptrott, rectesteg,
+    recrcut, recefermi, rectolden.
+    Still to be documented. Automatic test paral T (to be activated !).
+    Reference ?
+    Work by Stephane Leroux and Gilles Zerah.
+
+B.13 Make the ABINIT parser independent for third party codes
+     through a libabinis.a library.
+     Introduction of language bindings for C and Python.
+     See src/bindings/README .
+     Based on the libabinis.a library, one can parse an ABINIT input
+     file and access all scalar and array data of all datasets on this file through
+     get routines using the name of the attribute as a keyword.
+     A simple pyGtk interface has been created to read ABINIT input
+     file to demonstrate the capabilities of Python bindings.
+     Further developments will be done later to access the geometry tools
+     (symmetry finder ...) with the binding.
+     The binding can be used by V_Sim (http://www-drfmc.cea.fr/sp2m/L_Sim/V_Sim/index.en.html)
+     Work by Damien Caliste.
+
+B.14 The m-projected DOS is now available via the input variable prtdosm,
+     and has been parallelised (including band/FFT), and made compatible with mkmem=0
+     (among other improvements). Tests to be provided.
+     Work by M. Torrent
+
+B.15 The algorithm of D. Alfe (Comp. Phys. Comm. 118, 31 (1999)) for the
+     prediction of the density, especially useful for the parallel case,
+     has been implemented. It is available with iprcch 5 or 6.
+     Tests to be provided.
+     Work by M. Torrent
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+
+C.1 The PAW part of ABINIT has been largely rewritten :
+    creation of methods to manipulate the objects, routines to modularise the
+    operations, etc. This was needed to gather the new developements
+    related to GW as well as response-function.
+    Some speed-up of PAW calculations thanks to the storage in memory
+    of the coefficients of the scalar product between wavefunctions and
+    projectors (cprj). Input variable pawusecp. Default value is such
+    that the cprj coefficients are now always stored
+    Also, new DEV variables for PAW : e.g. pawnhatxc .
+    Work by M. Torrent and M. Giantomassi.
+
+C.2 The robustness of the build system (bug fixing) has been
+    improved a lot by Y. Pouillon . Also, several problems have been
+    observed, isolated, fixed by Y. Pouillon, J.-M. Beuken, D. Caliste and A. Jacques.
+
+C.3 Preparation of a testing farm (platforms, compilers) by JM Beuken.
+    At present, the machine chum has been customized with 6 compilers.
+    New config/build-examples/*cf files have been prepared.
+
+C.4 The GW part of the code can now use double precision complex
+    or single precision complex. This is to allow better portability and testing.
+    At present, only accessible through modification by hand of the
+    meaning of gwp and gwpc in src/defs_basis.F90 .
+    Work by Matteo Giantomassi.
+
+    abiruls.pl has been updated to accomodate this modification (L. Sindic)
+
+C.5 Cleaning : lib has been replaced by plugins ; lib/light
+    has been suppressed ; lib/numeric transferred to src
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D.1 PAW + Response function  (phonons) is under development, by M. Torrent.
+
+D.2 For GW calculations, more choice is offered concerning
+    memory management. Input variable gwmem.
+    Test v5#65. Work done by Matteo Giantomassi.
+
+D.3 In order to restart calculations of Sigma, one will be able to rely on the susceptibility,
+    thanks to the input variables irdsuscep and getsuscep .
+    Doc and automatic tests missing.
+    Work in progress, by Matteo Giantomassi.
+
+D.4 The input variable prtgkk can be used to ease the preparation of the
+    computation of electron-phonon matrix elements.
+    See automatic test v5#85,86,87,88.
+    Associated input variable prepgkk.
+    Work done by Matthieu Verstraete.
+
+D.5 The response to a magnetic field (with PAW) is under development.
+    Work by Joe Zwanziger. Input variable rfmgfd.
+
+D.6 The ability to define the number of bands per processor for the lobpcg
+    algorithm has been coded. Input variable bandpp.
+    No automatic test available yet.
+    Work by Francois Bottin.
+
+D.7 New test v5#67, for the input variable mbpt_sciss, namely the
+    scissor operator possibly used in GW calculations.
+    Contributed by Riad Shaltaf.
+
+D.8 New test paral#U, to test the parallelism of GW calculations without
+    plasmon pole models. Contributed by F. Bruneval.
+
+D.9 Cut3D output of wavefunction : option 14, to output wfs using the Gaussian/cube format.
+    Work by F. Bruneval.
+
+D.10 New input variable prtspcur, only for development, by MVerstraete.
+    Associated tests v5#95,96,97,98
+
+D.11 New test v5#91, for the development of the lobpcgII algorithm.
+     Work by S. Leroux and G. Zerah .
+
+D.12 Maintenance work on abilint by T. Deutsch
+
+D.13 Decomposition of the frequency-dependent response of a slab
+     into a bulk contribution and a surface contribution.
+     Work by C. Motta. Tests and documentation to be provided.
+
+D.14 For spin polarized systems, density and magnetization are mixed,
+     instead of up and down density.
+     Work by M. Torrent
+
+D.15 Work on GW for spin-polarized and spinorial cases.
+     In particular, for spin-polarized case, COH and contour integration method are treated.
+     Work by M. Giantomassi
+
+D.16 Work on parallelism of GW, by F. Bruneval.
+
+D.17 Work on LDA + DMFT, by B. Amadon.
+
+D.18 Allowing GW for charged system, by F. Bruneval. Test to be provided ?!
+
+D.19 In addition, miscellaneous bug fixes by many developers (see the list of contributors),
+     many bug fixes in documentation, improvements in the tutorials ...
+
+D.20 Allowed to use '*' in the input file, without specifying the number of times the value has to be repeated.
+
+</pre>
+

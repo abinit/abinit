@@ -1,0 +1,80 @@
+!!****d* ABINIT/13paw
+!! NAME
+!! 13paw
+!!
+!! DESCRIPTION
+!! This directory contains level-3 routines related to the
+!! Projector Augmented Wave methodology.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! atomden.F90
+!! calc_ubare.F90
+!! chkpawovlp.F90
+!! convert_notation.F90
+!! denfgr.F90
+!! dsdr_k_paw.F90
+!! expibi.F90
+!! fourier_interpol.F90
+!! initrhoij.F90
+!! int_ang.F90
+!! interfaces_65_paw.F90
+!! linear_optics_paw.F90
+!! m_paw_dmft.F90
+!! m_paw_pwaves_lmn.F90
+!! m_paw_slater.F90
+!! m_pawfgr.F90
+!! m_pawhr.F90
+!! m_pawpwij.F90
+!! make_efg_onsite.F90
+!! make_fc_paw.F90
+!! nhatgrid.F90
+!! optics_paw.F90
+!! optics_paw_core.F90
+!! partial_dos_fractions_paw.F90
+!! paw_mknewh0.F90
+!! paw_symcprj.F90
+!! pawaccrhoij.F90
+!! pawdenpot.F90
+!! pawdensities.F90
+!! pawdfptenergy.F90
+!! pawgrnl.F90
+!! pawgylmg.F90
+!! pawinit.F90
+!! pawmkaewf.F90
+!! pawmknhat.F90
+!! pawmknhat_psipsi.F90
+!! pawmkrho.F90
+!! pawmkrhoij.F90
+!! pawnabla_init.F90
+!! pawnhatfr.F90
+!! pawpolev.F90
+!! pawprt.F90
+!! pawpuxinit.F90
+!! pawsushat.F90
+!! pawuenergy.F90
+!! pawuj_det.F90
+!! pawuj_ini.F90
+!! pawuj_red.F90
+!! pawuj_utils.F90
+!! pawxenergy.F90
+!! prtfatbands.F90
+!! qijb_kk.F90
+!! read_atomden.F90
+!! setnoccmmp.F90
+!! setrhoijpbe0.F90
+!! setsymrhoij.F90
+!! simple_j_dia.F90
+!! smatrix_k_paw.F90
+!! smatrix_pawinit.F90
+!! spline_paw_fncs.F90
+!! transgrid.F90
+!! wvl_nhatgrid.F90
+!!
+!!***

@@ -1,0 +1,27 @@
+  Raman scattering in AlAs
+  ========================
+
+  General parameters:
+                        epsel = 9.9484608
+                 d_123 (pm/V) = 32.772254
+                         zeff = 2.105999
+                  wto (cm^-1) = 360.26344
+                  wlo (cm^-1) = 393.15983
+
+  Faust-Henry coefficient:
+                            C = -0.4024874
+
+  Raman polarizability (A^2):
+                          ato = -8.4222112
+                          alo = -12.418168
+
+  Raman tensor of TO and LO modes:
+                          dto = -0.0998891
+                          dlo = -0.1472819
+                      dlo/dto = 1.4744546
+
+  Enhancement factor:
+       (wto/wlo)*(dlo/dto)**2 = 1.9921126
+
+  Electrooptic tensor (pm/V):
+                         rijk = -0.7914101

@@ -1,0 +1,176 @@
+!Local variables-------------------------------
+!scalars
+ integer :: nx,ny,nz,ldx,ldy,ldz,ierr,npw_k,mgfft,ifft,istwf_k,ikpt,ldxyz,ipw,old_nthreads,ount
+ real(dp),parameter :: atol_sp=tol6, atol_dp=tol12 ! Tolerances on the absolute error
+ real(dp) :: max_abserr,ucvol
+ character(len=500) :: msg,info
+!arrays
+ integer, ABI_CONTIGUOUS pointer :: kg_k(:,:)
+ integer,allocatable :: gbound(:,:)
+ real(dp) :: kpoint(3),crand(2),kpoints(3,9)
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+ real(dp),allocatable :: cg(:,:),cg_ref(:,:),cr(:,:)
+ complex(spc),allocatable :: ugsp(:),ug_refsp(:),ursp(:)
+ complex(dpc),allocatable :: ug(:),ug_ref(:),ur(:)
+
+! *************************************************************************
+
+ ount = std_out; if (PRESENT(unit)) ount = unit
+
+ if (nthreads > 0) then
+   old_nthreads = xomp_get_max_threads() 
+   call xomp_set_num_threads(nthreads)
+ end if
+
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+ nx  = ngfft(1);  ny = ngfft(2);  nz = ngfft(3)
+ ldx = ngfft(4); ldy = ngfft(5); ldz = ngfft(6)
+ mgfft = MAXVAL(ngfft(1:3))
+
+ ldxyz = ldx*ldy*ldz
+
+ ABI_MALLOC(cg_ref, (2, ldxyz*ndat))
+ ABI_MALLOC(cg,     (2, ldxyz*ndat))
+ ABI_MALLOC(cr,     (2, ldxyz*ndat))
+
+ ABI_MALLOC(ug_ref, (ldxyz*ndat))
+ ABI_MALLOC(ug,     (ldxyz*ndat))
+ ABI_MALLOC(ur,     (ldxyz*ndat))
+
+ ABI_MALLOC(ug_refsp, (ldxyz*ndat))
+ ABI_MALLOC(ugsp,     (ldxyz*ndat))
+ ABI_MALLOC(ursp,     (ldxyz*ndat))
+
+ kpoints = RESHAPE( (/ &
+&  0.1, 0.2, 0.3,&
+&  0.0, 0.0, 0.0,&
+&  0.5, 0.0, 0.0,&
+&  0.0, 0.0, 0.5,&
+&  0.5, 0.0, 0.5,&
+&  0.0, 0.5, 0.0,&
+&  0.5, 0.5, 0.0,&
+&  0.0, 0.5, 0.5,&
+&  0.5, 0.5, 0.5 /), (/3,9/) )
+
+ do ikpt=1,SIZE(kpoints,DIM=2)
+   kpoint = kpoints(:,ikpt)
+
+   istwf_k = set_istwfk(kpoint)        
+   call get_kg(kpoint,istwf_k,ecut,gmet,npw_k,kg_k) 
+
+   ABI_MALLOC(gbound, (2*mgfft+8,2))
+   call sphereboundary(gbound,istwf_k,kg_k,mgfft,npw_k)
+
+   ! ================================================
+   ! === Test the double precision 2*real version ===
+   ! ================================================
+   do ipw=1,npw_k*ndat
+     call RANDOM_NUMBER(crand)
+     cg_ref(:,ipw) = crand(:)
+   end do
+                                                                                   
+   if (istwf_k == 2) then
+     do ipw=1,npw_k*ndat,npw_k
+       cg_ref(2,ipw) = zero
+     end do
+   end if
+                                                                                   
+   cg = cg_ref
+                                                                                   
+   call FFT_PREF(fftug_dp) (npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,cg,cr)
+   call FFT_PREF(fftur_dp) (npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,cr,cg)
+                                                                                   
+   ierr = COUNT(ABS(cg - cg_ref) > atol_dp)
+   nfailed = nfailed + ierr
+
+   write(info,"(a,i1,a)")FFTLIB//" fftu_dp, istwfk ",istwf_k," :"
+   if (ierr /= 0) then
+     max_abserr = MAXVAL(ABS(cg - cg_ref))
+     write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
+   else
+     write(msg,"(a)")" OK"
+   end if
+   call wrtout(ount,strcat(info,msg),"COLL")
+
+   ! =================================================
+   ! === Test the single precision complex version ===
+   ! =================================================
+   do ipw=1,npw_k*ndat
+     call RANDOM_NUMBER(crand)
+     ug_refsp(ipw) = CMPLX(crand(1), crand(2))
+   end do
+                                                                                      
+   if (istwf_k == 2) then
+     do ipw=1,npw_k*ndat,npw_k
+       ug_refsp(ipw) = REAL(ug_refsp(ipw))
+     end do
+   end if
+                                                                                      
+   ugsp = ug_refsp
+                                                                                      
+   call FFT_PREF(fftug) (npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ugsp,ursp)
+   call FFT_PREF(fftur) (npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ursp,ugsp)
+                                                                                      
+   ierr = COUNT(ABS(ugsp - ug_refsp) > atol_sp)
+   nfailed = nfailed + ierr
+
+   write(info,"(a,i1,a)")FFTLIB//" fftu_spc, istwfk ",istwf_k," :"
+   if (ierr /= 0) then
+     max_abserr = MAXVAL(ABS(ugsp - ug_refsp))
+     write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
+   else
+     write(msg,"(a)")" OK"
+   end if
+   call wrtout(ount,strcat(info,msg),"COLL")
+
+   ! =================================================
+   ! === Test the double precision complex version ===
+   ! =================================================
+   do ipw=1,npw_k*ndat
+     call RANDOM_NUMBER(crand)
+     ug_ref(ipw) = DCMPLX(crand(1), crand(2))
+   end do
+
+   if (istwf_k == 2) then
+     do ipw=1,npw_k*ndat,npw_k
+       ug_ref(ipw) = REAL(ug_ref(ipw))
+     end do
+   end if
+
+   ug = ug_ref
+
+   call FFT_PREF(fftug) (npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
+   call FFT_PREF(fftur) (npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
+
+   ierr = COUNT(ABS(ug - ug_ref) > atol_dp)
+   nfailed = nfailed + ierr
+
+   write(info,"(a,i1,a)")FFTLIB//" fftu_dpc, istwfk ",istwf_k," :"
+   if (ierr /= 0) then
+     max_abserr = MAXVAL(ABS(ug - ug_ref))
+     write(msg,"(a,es9.2,a)")" FAILED (max_abserr = ",max_abserr,")"
+   else
+     write(msg,"(a)")" OK"
+   end if
+   call wrtout(ount,strcat(info,msg),"COLL")
+     
+   ABI_FREE(kg_k)
+   ABI_FREE(gbound)
+ end do
+
+ ABI_FREE(cg_ref)
+ ABI_FREE(cg)
+ ABI_FREE(cr)
+
+ ABI_FREE(ug_ref)
+ ABI_FREE(ug)
+ ABI_FREE(ur)
+
+ ABI_FREE(ug_refsp)
+ ABI_FREE(ugsp)
+ ABI_FREE(ursp)
+
+ if (nthreads > 0) then
+   call xomp_set_num_threads(old_nthreads)
+ end if

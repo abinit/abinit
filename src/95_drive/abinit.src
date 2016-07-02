@@ -1,0 +1,50 @@
+ # -*- Python -*-
+#
+# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Source files making up the 95_drive library
+#
+
+# Source file attributes
+ABI_SRC_NIL = 0     # No attribute
+ABI_SRC_BLT = 1     # The file is built by a script
+ABI_SRC_DEP = 2     # The file depends on other files
+
+# Source files
+sources = [
+#"afterscfloop.F90",
+ "bethe_salpeter.F90",
+ "driver.F90",
+ "dtfil_init.F90",
+ "dtfil_init_time.F90",
+ "dtfil_init_img.F90",
+#"elpolariz.F90",
+ "eph.F90",
+ "gstate.F90",
+ "gstateimg.F90",
+ "gwls_sternheimer.F90",
+ "iofn1.F90",
+ "dfptnl_loop.F90",
+ "dfpt_looppert.F90",
+#"m_scfcv.F90",
+ "mover.F90",
+ "m_argparse.F90",
+ "nonlinear.F90",
+#"outscfcv.F90",
+ "pawuj_drive.F90",
+ "respfn.F90",
+#"scfcv.F90",
+ "screening.F90",
+ "sigma.F90",
+ "testfi.F90",
+ "timana.F90",
+ "wfk_analyze.F90",
+]
+# IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
+# This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

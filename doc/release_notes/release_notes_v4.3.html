@@ -1,0 +1,250 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2004 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors .
+</h5>
+
+<pre>
+Many thanks to the following contributors to the ABINIT project
+between September 2003 and March 2004 :
+
+J.-M. Beuken, M. Boulet, F. Bruneval, M. Cote', A. Garcia, D. Hamann,
+Hasegawa-san, Iguchi-san, J. Iniguez,
+J. Jansen, F. Jollet, M. Lee, M. Merli, Mikami-san, J.-P. Minet, Y.-M. Niquet,
+Nishida-san, A. Oganov, V. Olevano, V. Recoules, A. Roy, L. Sindic, I. Souza, M. Torrent,
+F. Tournus, D. Vanderbilt, M. Veithen, M. Verstraete, X. Wu
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 4.3, released on February 18, 2004.
+
+Changes with respect to version 4.2 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Most noticeable changes in the package (for developers)
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS
+
+A1. Several input variables, related to the GW calculations, have been renamed :
+     nbndsto is now nbandkss
+     ncomsto is now npwkss
+     the routine outstat is now outkss
+     ngwpt   is now nkptgw
+     ecutmat is now ecutsigx
+     npwmat  is now npwsigx
+     nshmat  is now nshsigx
+     plasfrq is now ppmfrq.
+
+A2. The file format "_EM1", used in GW, has been transformed to "_SCR", to avoid
+    some undesirable effect in the multi-dataset mode (the last character
+    of "_EM1" is a digit). Thus the variable "geteps" has been renamed "getscr",
+    and the input variable "irdeps" has been renamed "irdscr".
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B1. The development of the features related to strain perturbation continues :
+
+    - the computation of the piezoelectricity tensor has been implemented (D. Hamann),
+     See Test_v4 #65-66.
+    - the analysis of the DDB containing response to strain perturbation
+     has been implemented : one start from
+     clamped ion elastic tensor, clamped ion piezoelectric tensor, as well as
+     clamped ion internal strains, in order to compute corresponding
+    "relaxed ions" quantities (Xifan Wu and Don Hamann).
+     See Test_v4 #67-70
+    - related documentation, from D. Vanderbilt : ~abinit/Infos/Theory/lr.pdf
+
+    So, in short : you can now compute the physical tensors (elastic constant
+    and piezoelectricity coefficients).
+
+    Remember : there are still limitations
+    in the use of this strain perturbation : LDA only,
+    non-spin-polarized systems, no spin-orbit coupling.
+
+B2. The tutorial GW is now fully operational.
+    See ~/Infos/Tutorial/welcome.html. Contributions by V. Olevano, F. Bruneval and XG .
+    There is also a considerable speed-up of sigma (optdriver=4) on
+    vector architecture (VOlevano) and on superscalar architectures (XG).
+
+B3. The help file for cut3d has been translated in html, and is now accessible
+    from the Web.
+
+B4. One can use the MPI I/O library to access the files in parallel, on massively parallel machines
+    (not clusters, where the temporaries are local to each machine), with a centralized
+    disk space, to which all processors have access : in case of mkmem=0,
+    avoid degradation of performance (by MBoulet). See the input variable accesswff .
+    One needs also to specify the -DMPIO compilation flag, see ~/Infos/makefile_macros_help .
+
+B5. New Time-dependent XC kernels for the ACFD computation
+    of the correlation energy have been implemented : the BPG kernel, the energy-optimized
+    kernels for Dobson and Wang. That part of ABINIT has been cleaned completely.
+    There are 7 new tests : Test_v4#80-86. Work by YM Niquet.
+
+B6. The finite-electric field formalism has been implemented (for insulators only,
+    with nsppol=1, nspinor=1). Documentation is provided for the input variable berryopt=4.
+    Also consult the automatic test Test_v4#78 .
+    This work has been done by MVeithen, starting from the implementation
+    done using an earlier version of ABINIT, by J. Iniguez and I. Souza .
+
+B7. The constrained-polarization formalism (Na Sai et al, PRB 66, 104108 (2002))
+    has been implemented in ANADDB, by MVeithen. There are 3 tests of this implementation,
+    see Test_v4#75,76,77.
+
+B8. The berry phase routine has been rewritten, so that it works now in parallel.
+    Please, see the variable berryopt. However, not all options available with the
+    old berryphase routine are available with the new one.
+    This work has been done by M Veithen.
+
+__________________________________________________________________
+
+C. Most noticeable changes for the developers
+
+C1. Due to modification B4, there have been large modifications of all routines
+    in which there were IOs to a wavefunction file. A library
+    of routines to access the Wavefunction files has been written,
+    and is located in Src_0basis (a directory in which parallel
+    routines can be stored, unlike Src_4iowfdenpot).
+    A new datastructure "wffile_type" has been created, to contain
+    all the information that allows to access a wavefunction file.
+    This also prepare the use of NetCDF.
+    Work by MBoulet and XG
+
+C2. The NetCDF library v3.5.0 has been included in the ABINIT package.
+    It can be compiled thanks to 'make netcdf' (modifications
+    of the makefile_macros might be needed - see
+    makefile_macros.PGI_dummy, as an example, as well as the
+    explanation given in the fourth section of makefile_macros_help ).
+    The set-up use in a ABINIT program is exemplified in the
+    'make abinetcdf' and 'make testabinet'.
+    Work by JP Minet
+
+C3. The XMLf90 library v1.1 of A. Garcia has been included in the
+    ABINIT distribution. However, it is not yet used.
+
+C4. All the definitions of structured datatypes have been
+    gathered in one unique file ~abinit/src/defs/defs_datatypes .
+    Indeed, the previously imagined system, in which supposedly
+    the datastructures most specifically linked to one Src directory
+    would be defined in the corresponding defs file, was not followed
+    in practice. Moreover, one had observed a large increase of the number of
+    defs files, sometimes one for only one datatype. Finally,
+    it was difficult to see to which file belong each definition.
+    On the other hand, there is apparently little problem
+    in having only one big file for all datatype definitions :
+    - everybody knows in which file are the definitions
+    - with the single instruction "use defs_datatypes", all the datatypes are accessible
+     for the compilation of a file
+    - there is no increase in CPUtime or memory due to this concentration
+
+C5. The treatment of the sequential and parallel versions have been
+    made more similar, thanks to the more extensive use of the mpi_enreg
+    datatype (see, in ~/Src_defs/defs_datatypes,
+    the new records of this datatype : paral_compil_kpt and paral_compil_fft),
+    as well as the encapsulation of all operations summing
+    data over groups of processors. Because of this, most of the sections
+    that were selected by the -DMPI flag do not call anymore the MPI library
+    (only small subroutine do it), and the corresponding routines have been
+    taken out of the Src_8seqpar directory (the latter contained routines
+    whose sequential and parallel version differed).
+    Work by MBoulet and XG
+
+C6. The directory Src_1managempi has been created. It contains
+    some routines previously in Src_8seqpar or Src_0basis. See modif C5.
+
+C7. Due to modification A2, there have been numerous changes in the names
+    of routines : rdem1 to rdscr , wrem1 to wrscr , testepsm1 to testscr ,
+    rdepsm1 to rdppscr .
+
+C8. The extension of all current *.htm files has been changed to *.html . The
+    hyperlinks to these files have been updated.
+
+C9. The automatic tests are now driven by the script "RunTests", present
+    in the main directory. Configuration files "*.cnf" are present
+    in the Test subdirectories. The writing of automatic test has been
+    largely simplified by this new script.
+    Work by L. Sindic.
+
+C10. makemake has been modified so that CPP is used for all library
+    directories (while it was only used for fftnew until now).
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D1. Improvements to the Infos directory content (FAQ, Miscellaneous)
+    have been made by Mikami-san.
+
+D2. New test J for parallelism : use of disk for GS and RF
+
+D3. Parallelization of berry phase calculations. Should be tested.
+    By M Veithen.
+
+D4. Output of cut3d for Open DX : given now in Angstrom.
+    From M Cote
+
+D5. New makefile_macros for "stardust" HP machine, from AOganov
+    New makefile_macros for an Itanium2 machine, from Mikami-san
+
+D6. PAW in progress. Numerous modifications, for speed. From MTorrent and FJollet.
+    As announced in v4.1, the PAW part of ABINIT is available for BETA TESTING,
+    although forces and stresses remain still to be implemented.
+    Two pseudopotentials are available in ~abinit/tests/Psps_for_tests, while
+    for other pseudos ... use the translator !
+
+D7. Bug fix : iexit=1 from gstate, not being related to an abinit.exit
+    file. From Don Hamann.
+
+D8. For OpenVMS, use of VMS version numbers in case a file already
+    exist. From JJansen.
+
+D9. New input variables : boxcutmin , optforces
+
+D10. The Fermi level has been generalized to the case of insulators :
+    the so-called "HOMO" (highest occupied molecular orbital) energy
+    is now delivered, in case of an insulator (occopt==0,1 or 2).
+
+D11. The average exchange-correlation potential is now printed
+    in the main output file. Because the averages of the local potential and Hartree
+    potential are set to zero (they are actually undefined), this is also
+    the average of the local part of the Hamiltonian.
+
+D12. Work on delocalised coordinates and on electron-phonon interaction
+    has started. Some routines are included in v4.3, but debugging
+    is going on (M. Verstraete).
+
+D13. FFT parallelism is going on. Work by ARoy and XG.
+
+D14. In spin-polarized case, cut3d can deal now directly with the total density,
+     not only the spin up, spin down or magnetization densities.
+
+D15. There is now a manual for the conducti utility : conducti_manual.tex
+     (from V. Recoules).
+
+D16. Bug fixes, small modifications, etc ... by F. Tournus, M. Lee, Nishida-san,
+    Mikami-san, M. Merli, J.-M. Beuken, D. Hamann, Hasegawa-san, F. Bruneval,
+    M. Verstraete, A. Oganov, M. Torrent, A. Roy, M. Veithen, Y. Pouillon,
+    J. Junquera, V. Recoules
+
+</pre>

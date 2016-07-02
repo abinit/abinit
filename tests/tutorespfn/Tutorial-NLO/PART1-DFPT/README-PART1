@@ -1,0 +1,24 @@
+NLO Tutorial
+
+PART1-DFPT
+
+Five different steps:
+
+1. alas_nonlin_ng6.in
+- linear and non-linear responses to E field and atomic displacements
+- generates 2 DDBs
+
+2. alas_strain_ng6.in
+- strain perturbation
+- generates 1 DDB
+
+3. mrgddb.in
+- merge the 3 previous DDB into alas_DDB
+
+4. anaddb.in
+- analyse the previous DDB to get various responses
+
+5. alas_fdiff.in
+- compute d chi / d tau by finite differences
+- deduce the Raman coefficient a and the Faust-Henry coefficient
+- include some tools to compute the coefficients

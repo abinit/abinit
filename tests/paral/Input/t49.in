@@ -1,0 +1,57 @@
+#Print the density and the wf in parallel in the first dataset
+#then read it. Run in parallel using accesswf=1
+ndtset 2
+prtden1 1
+getden2 -1
+getwfk2 -1
+#------------------------------------------------------
+# A simple calculation on silicon
+occopt 7 tsmear 0.001
+kptrlatt 1 0 0 0 2 0 0 0 1
+istwfk 4*1
+nshift 4 shiftk 1/2 1/2 1/2 1/2 0.0 0.0 0.0 1/2 0.0 0.0 0.0 1/2
+toldff 1.e-7 tolmxf 1.0d-5
+nstep 21
+ecut 10.0 diemac 12.0 enunit 2
+ngfft 12 12 12
+ ixc 3
+ acell 3*10.366
+ rprim 0.0 0.5 0.5
+       0.5 0.0 0.5
+       0.5 0.5 0.0
+ xred 0.0  0.0  0.0
+      0.22 0.22 0.22
+ znucl 14
+ nband 12
+ ntypat 1 typat 1 1  natom 2
+ npkpt 1
+ npband 2
+ npfft 2
+ paral_kgb 1
+
+
+#Obsolete entries (now set by default)
+#fftalg 401 wfoptalg 4
+#densfor_pred 6 intxc 0
+#iomode 1
+#nsym 0
+
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% psp_files = 14si.phoney_mod
+#%% [paral_info]
+#%% nprocs_to_test =  4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test = t49_MPI4.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%%   Si, Bulk, 2 atoms , parallelism -DMPI_IO .Test of ground state
+#%%   Only with 4 procs, no sequential version (tests accesswf 1)
+#%%<END TEST_INFO>

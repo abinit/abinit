@@ -1,0 +1,38 @@
+#ifdef HAVE_FFT_FFTW3 
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: rank=3,nt_all=-1
+ integer :: my_flags,dist,ii,stride
+ integer(KIND_FFTW_PLAN) :: my_plan
+!arrays
+ integer :: embed(rank),n(rank)
+
+! *************************************************************************
+
+ my_flags=FFTW_ESTIMATE; if (PRESENT(fftw_flags)) my_flags= fftw_flags
+
+ stride = 1
+ dist   = ldx*ldy*ldz
+ embed  = (/ldx,ldy,ldz/) 
+ n      = (/nx ,ny ,nz/) 
+
+ my_plan = fftw3_plan_many_dft(rank, n, ndat, ff, embed, stride, dist, gg, embed, stride, dist, isign, my_flags, nt_all)
+
+ ! Now perform the 3D FFT via FFTW.
+ call fftw3_execute_dft(my_plan, ff, gg)
+
+ call fftw3_destroy_plan(my_plan)
+
+ if (isign==FFTW_FORWARD) then ! -1, FFTW returns not normalized FTs
+   call xscal(ldx*ldy*ldz*ndat, one/(nx*ny*nz), gg, 1)  
+ end if
+
+#else 
+ MSG_ERROR("FFTW3 support not activated")
+ ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,isign/))
+ ABI_UNUSED(ff)
+ ABI_UNUSED(gg)
+ if (PRESENT(fftw_flags)) then
+   ABI_UNUSED(fftw_flags)
+ end if
+#endif

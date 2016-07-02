@@ -1,0 +1,5 @@
+#
+Warning = 'Nonstandard type declaration'
+#
+#src_excluded = ['10_defs']
+src_excluded = ['interfaces','28_numeric_noabirule','01_macroavnew_ext','01_linalg_ext']

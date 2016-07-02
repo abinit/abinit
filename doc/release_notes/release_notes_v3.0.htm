@@ -1,0 +1,197 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2000 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors .
+</h5>
+
+<pre>
+Many thanks to the following contributors to the ABINIT project
+between August 2000 and December 2000:
+Stephane Bernard, Stanimir Bonev,
+Razvan Caracas, Francois Detraux, Martin Fuchs, Philippe Ghosez,
+Francois Jollet, Masayoshi Mikami, Sa Nai,
+Jean-Yves Raty, Gian-Marco Rignanese,
+Aline Roy, Luc Sindic, Marc Torrent, David Vanderbilt,
+Matthieu Verstraete, Gilles Zerah.
+
+I think it is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 3.0, released on December 23, 2000.
+
+Changes with respect to version 2.3 :
+
+A. Changes for the installation.
+B. Most noticeable changes in the code.
+C. WARNINGS.
+D. Other changes.
+
+__________________________________________________________________
+
+A.  Changes for the installation.
+
+A1. Information : the directories Src_cut3d, Src_suscep and Src_nonlocal
+    have been created. They are similar to other Src_* directories.
+    They contain routines related to the cut3d utility,
+    as well as to the computation of the
+    susceptibility matrix, and the application of the non-local
+    operator.
+
+__________________________________________________________________
+
+
+B.  Most noticeable changes.
+
+B1. The ~abinit/doc/input_variables/keyhr.html file has been split into eight
+    parts, as it was too long for frequent downloading.
+    This work has been done by Razvan Caracas.
+
+B2. The computation of forces including the
+    spin-orbit coupling is now available, in addition to the
+    total energy and the electronic eigenenergies.
+    This work has been done by M. Torrent, helped by
+    G. Zerah, F. Jollet and me.
+    Stresses and response functions are not yet available with
+    spin-orbit coupling.
+    F. Jollet, with S. Bernard, has also implemented
+    the use of spin-orbit for Troullier-Martins type
+    pseudopotentials, with the pspcod=5 format. See for example
+    the file ~abinit/tests/Psps_for_tests/73ta.tm_so .
+
+B3. The computation of the polarisation using the Berry phase
+    has been coded by Na Sai (helped by D. Vanderbilt).
+    It is available for nsppol=1 or 2, but not yet with nspinor=2.
+    See the input parameter kberry.
+
+B4. Introduction of Langevin dynamics (ionmov=8),
+    by J.-Y. Raty. See also the new input variable "friction".
+
+B5. The utility program cut3d has been incorporated in the
+    ABINIT package. Also, additional features are available:
+    a file in the MOLEKEL format can be generated (this latter
+    feature by R. Caracas). cut3d was originally developped
+    by G.-M. Rignanese, followed by R. Caracas.
+
+B6. The converter of input wavefunctions is much general,
+    and can now, for example, start from spin unpolarized
+    wavefunctions a spin-polarized calculation, or vice-versa.
+    The same is true for scalar or spinor wavefunctions.
+    Also, symmetry can be used to generate a wavefunction at one
+    k point, starting from another, symmetric k point.
+    This allows to get rid off the NSC generation of unperturbed
+    wavefunctions in the full Brillouin Zone, that was previously
+    needed for RF calculations. Also in this case, the WFQ file
+    is no more needed, if the k+q grid can be deduced from the
+    k grid exactly.
+    See test 90 of Test_v2 and the following ones.
+
+B7. The format of all source files as been changed, in order to
+    allow for processing by the Robodoc self-documentation
+    program (see http://www.xs4all.nl/~rfsber/Robo/robodoc.html
+    and http://www.xs4all.nl/~rfsber/Robo/manual.html).
+    See also the Warning C2.
+    The ~abinit/doc/developers/rules_coding file has been
+    updated accordingly. By the same token, the GNU GPL
+    distribution licence has been mentioned in all source files,
+    as well as documentation files.
+    The pilot group was lead by M. Mikami, and included
+    G. Zerah and me. Many developpers have contributed
+    to the final reformatting :
+    R. Caracas, F. Detraux, M. Fuchs, Ph. Ghosez,
+    X. Gonze, F. Jollet, M. Mikami, J.-Y. Raty, M. Torrent,
+    M. Verstraete, G. Zerah.
+
+B8. Routines (symlist.f and symspgr.f)
+    that identify the spatial group of symmetry
+    have been written by R. Caracas. However, the corresponding
+    output is still only present in the log file,
+    not yet in the main input file.
+
+B9. RF calculations can now be done with non-ordered set of atoms
+    ("type" should no more be increasing), as well as for
+    dilatmx/=1.0, or for non-zero ecutsm.
+
+__________________________________________________________________
+
+C.  WARNINGS
+
+
+C1. The input variable noseit has been replaced by mditemp,
+    while noseft has been replaced by mdftemp.
+
+C2. (For developpers)
+    In order to ease the writing of the script that generates
+    "PARENT" routines before the self-documentation call to Robodoc,
+    it was needed to impose a few additional coding rules :
+    - subroutines should be used instead of functions
+    - only one subroutine per file
+    - the instruction CALL should
+     always be the first of an instruction line. In particular,
+     the construct :
+
+        IF(condition) CALL subroutine       !to be avoided
+
+     should be avoided, and replaced by
+
+        IF(condition) THEN
+         CALL subroutine
+        ENDIF
+
+    (see ~abinit/doc/developers/rules_coding)
+
+C3. The parallel section of all the makefile_macros files
+    has been simplified.
+    The ~abinit/Infos/help.makefile_macros file
+    contains now the description of the keywords
+    for generation of the MPI-parallel version of abinit.
+    Please report to us if there is some problem
+    on your machine, if you are using one of these
+    makefile_macros files.
+
+__________________________________________________________________
+
+D.  Other changes.
+
+D1. Two new input variables have been introduced, to govern
+    the disk I/O in the parallel case : localrdwf and localhead
+
+D2. Symmetry characters for the phonon eigenmodes at Gamma
+    are computed automatically (coded by GMR).
+
+D3. Installation on Hitachi machine by Mikami-san.
+
+D4. The new 'getvel' and 'wall' input variables
+    have been introduced by J.-Y. Raty.
+
+D5. Note the rule 8.e of ~abinit/doc/developers/rules_for_coding
+
+D6. A new file format (_STO) for wavefunctions is available, see the
+    input variable nbndsto. Contributed by M. Torrent.
+
+D7. The new input variable 'prtwf' has been introduced,
+    to eventually suppress the wavefunction file writing.
+
+D8. New makefile_macros, for DEC and Sun. Contributed by M. Torrent.
+
+D9. Cut3d bug correction, by S. Bonev. For other bug corrections,
+    see the changes from v2.3.3 to v2.3.5 .
+
+D10. During the implementation of the ACFD computation of RPA correlation
+    (by M. Fuchs), two new options for ixc have been coded :
+    ixc=9 (exchange + RPA correlation part of the Perdew-Wang 92 functional)
+    ixc=13 (Van Leeuwen-Baerends XC potential)
+</pre>

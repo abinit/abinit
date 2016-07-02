@@ -1,0 +1,117 @@
+
+Problem report
+
+This is the description of the ABINIT problem report format.
+Later, it will be placed on the Web.
+Please refer to the ABINIT Netiquette list as well,
+before sending your report via e-mail.
+
+Copyright (C) 2000-2016 ABINIT group (MM,XG)
+This file is distributed under the terms of the
+GNU General Public License, see ~abinit/COPYING
+or http://www.gnu.org/copyleft/gpl.txt .
+For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+
+===============================================
+
+In case of a problem with ABINIT, what can you do ?
+
+First, please refer to ~abinit/KNOWN_PROBLEMS
+to see if your problem is reported or not.
+If you think that you have found a bug, you
+should report it. The best is of course when
+you have a bug fix. However usually, you will
+ask for help to the ABINIT group.
+Note that on the side of the developpers,
+there is no obligation to look at your problem,
+it is a pure courtesy ... (You know, ABINIT is free ...)
+
+In the case where you have a bug fix,
+please send by mail (to gonze@pcpm.ucl.ac.be) :
+1) A short description of the problem
+  (do not forget the description of the platform,
+   if it is platform-dependent, as well as
+   the version of code in which this problem appeared)
+2) The modified routine(s), in the form of a tar.gz
+  file, if there is more than one routine.
+
+If you have a problem without bug fix and ask us to solve it,
+we would like you to make a first effort :
+
+- First, examine the log file, to see whether
+there might be a WARNING or COMMENT message
+suggesting that you
+have made a mistake in your input file.
+
+- Second, try to reduce the run so as
+to make the problem appear within two minutes on
+your machine. Basically, you should reduce ecut,
+and reduce the k point sampling. You might as well
+try with a smaller cell, if the problem allows it.
+If the problem disappear when trying to reduce these,
+or if the run becomes meaningless, you should signal it to us.
+Note that some bugs seen in production runs at 20 Hartree
+or more, can be seen also with 2 Hartree or less !
+The physical results might be crazy, but this is not
+important if the bug is still visible ...
+
+- Third, take the most debugged version of ABINIT
+available for production, and see whether the bug is still
+present.
+
+- Fourth, fill the bug report form below, and mail
+it to gonze@pcpm.ucl.ac.be .
+
+The bug report format is :
+
+1) Version of ABINIT
+   .
+
+2) Machine type : vendor + some hardware characteristics (processor)
+   .
+
+3) Operating system (including version number)
+   "uname -a" will work on most platforms.
+   "oslevel" will be preferable on IBM workstations (AIX).
+   .
+
+4) Fortran Compiler & C Compiler(cpp) (including version number)
+   For the compiler version number, type man "compiler command" etc.
+   e.g.
+        pgf90 (PGI compiler on Linux) :  pgf90 -V
+        xlf   (on IBM platform)       :  lslpp -l
+   You might this information following
+   http://www.fortran-2000.com/ArnaudRecipes/Version.html
+   Otherwise, ask your system administrator.
+   If you use your executables compiled by yourself,
+   please give relevant compiler options (or attach your makefile_macros).
+   .
+
+5) A short description of the problem
+   .
+   .
+   .
+
+6) Error message, or compiler message ...
+   This is mandatory, of course.
+   .
+   .
+   .
+
+7) The time after which the problem occurs.
+   If it is larger than two minutes on your machine,
+   you must indicate why it was not possible
+   to decrease it further thanks to reduction of ecut
+   or nkpt, or natom
+   .
+
+
+Moreover, you MUST attach to your mail a tar.gz file
+with ALL the input files related to the problem
+(input files(s), files file(s), pseudopotential file(s)).
+Note that if you have a problem with the response
+function part of the code, you must also send the
+input file to the prior ground-state calculation.
+You might include in the tar.gz file the output or log files.
+(But please be careful about your e-mail size.)
+

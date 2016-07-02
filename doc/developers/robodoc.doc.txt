@@ -1,0 +1,17 @@
+
+---------------------
+(The following section is aimed at helping developers to solve problems related to robodoc error messages)
+(It comes from the file doc/developers/robodoc.doc.txt)
+
+A robodoc section must always start with a "begin marker", and end with a "end marker".
+In ABINIT, the begin marker is usually
+!!****f*
+or
+!!****m*
+while the end marker is always
+!!***
+
+A common problem when generating .html for ABINIT thanks to Robodoc, is the lack of an end marker
+for each begin marker. The solution is simple : find the end of the robodoc section (often, either
+the end of file, or just before the next begin marker), and insert
+!!***

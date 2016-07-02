@@ -1,0 +1,77 @@
+!!****d* ABINIT/57_iovars
+!! NAME
+!! 57_iovars
+!!
+!! DESCRIPTION
+!! This directory contains level-3 routines used
+!! to treat the input and output of ABINIT variables.
+!! The main entry point to
+!! this library are the routines
+!! invars0.F90, invars2.F90 (input of variables),
+!! chkinp.F90 (checking of variables),
+!! outvars.F90 (echo of variables).
+!! Some other routines related to the IO of ABINIT variables
+!! are MPI-parallel, and can be found in the
+!! 08seqpar directory
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! append_xyz.F90
+!! chkdpr.F90
+!! chkinp.F90
+!! chkint.F90
+!! chkint_eq.F90
+!! chkint_ge.F90
+!! chkint_le.F90
+!! chkint_ne.F90
+!! chkint_prt.F90
+!! chkneu.F90
+!! chkvars.F90
+!! compute_kgb_indicator.F90
+!! create_nc_file.F90
+!! finddistrproc.F90
+!! getdim_nloc.F90
+!! importxyz.F90
+!! indefo.F90
+!! indefo1.F90
+!! ingeo.F90
+!! ingeobld.F90
+!! inkpts.F90
+!! inqpt.F90
+!! interfaces_57_iovars.F90
+!! invacuum.F90
+!! invars0.F90
+!! invars1.F90
+!! invars1m.F90
+!! invars2.F90
+!! invars2m.F90
+!! m_ab7_invars_f90.F90
+!! m_ingeo_img.F90
+!! macroin.F90
+!! macroin2.F90
+!! memana.F90
+!! memorf.F90
+!! memory.F90
+!! memory_eval.F90
+!! mpi_setup.F90
+!! out_acknowl.F90
+!! outqmc.F90
+!! outvar_a_h.F90
+!! outvar_i_n.F90
+!! outvar_o_z.F90
+!! outvars.F90
+!! outxml.F90
+!! parsefile.F90
+!! prtocc.F90
+!! prttagm.F90
+!! prttagm_images.F90
+!! write_var_netcdf.F90
+!! wvl_memory.F90
+!!
+!!***

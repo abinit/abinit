@@ -1,0 +1,233 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2006 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project
+between September 2005 and June 2006. These release notes
+are relative to the progresses that have been made in ABINITv5.1 compared to v4.6.
+This combines "normal" contributions, on top of v4.6, that were included
+in an internally available v4.7,
+and a completely redesigned build mechanism, tested in v5.0 .
+
+Concerning the latter, most of the work has been done by Yann Pouillon who deserves
+very special thanks... There has been contributions to the build mechanism
+due to a few testers also
+(Pierre-Matthieu Anglade, Thierry Deutsch, Masayoshi Mikami,
+ Gian-Marco Rignanese, ...).
+
+The list of "normal" contributors includes :
+P.-M. Anglade, J. Bhattacharjee, J.-M. Beuken, F. Bottin,
+P. Boulanger, F. Bruneval, M. Cote, T. Deutsch, M. Giantomassi, T. Hoefler, J. Jansen
+F. Jollet, S. Le Roux, Z. Levine, Mikami-san,
+P. Plaenitz, Y. Pouillon, G.-M. Rignanese,
+A. Roy, R. Shaltaf, L. Sindic, B. Tardif, M. Torrent, M. Verstraete,
+U. Waghmare, E. Walter, G. Zerah
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 5.1, released on February 22, 2006.
+
+Changes with respect to version 4.6 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS
+
+A1. See the changes described in C1-C4.
+
+A2. The electron-phonon calculation still contained some bugs, that have been
+    corrected in the v5.1.2, and then v5.1.3 by M. Verstraete (see D9). The tutorial
+    has been updated.
+
+A3. Some small numerical changes have been done in the PAW, by MTorrent (on the order
+    of 0.2 mHa on the total energy, see tests/tutorial paw1_2, paw1_3, paw1_3).
+
+A4. The default value of mqgrid and mqgriddg has been raised from 1201 to 3001.
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B1. The build system has been completely redesigned, as well as the structure
+    of the ABINIT package. These changes are described in C1-C4.
+
+B2. GW part of ABINIT  (improvements by F. Bruneval):
+    (1) The GW part of ABINIT is now able to treat metals
+    (2) The GW calculations can be done without plasmon-pole model
+    (3) Hartree-Fock, screened exchange and COHSEX are implemented
+    (4) The Faleev method, see PRL <b>93</b>, 126406 (2004), is implemented.
+    Moreover, it is possible to do some self-consistency steps, by exploiting
+    different datasets (of course this is still rather primitive ...).
+    See the input variable gwcalctyp , as well as automatic tests Test_v4#84 to 88.
+    See also Fabien Bruneval's thesis, for results obtained for Cuprous Oxyde (Cu2O) thanks
+    to these techniques. A paper is in preparation.
+
+B3. GW part of ABINIT  (improvements by R. Shaltaf, supervised by GM Rignanese):
+    (1) Introduction of two new Plasmon Pole models
+            for GW calculations. See the input variable "ppmodel".
+    (2) Parallelisation of GW calculations on k points. Test case M has been created
+            in tests/paral to show how this is working.
+    (3) Added automatic tests for mrgscr utility,
+
+B4. New utilities have been created : AbinitInputMaker, StructureViewer, BandStructureMaker
+    They can be found in util/users.
+    They have been provided by Benjamin Tardif (under supervision of M. Cote, with also some help by Paul Boulanger)
+    BandStructureMaker can be used in production (see the help file doc/users/AbinitBandStructureMaker_manual.pdf),
+    the other utilities are still under development.
+    BandStructureMaker provides an easy way to rapidly plot electronic band structures
+    from Abinit output files.
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C1. The package has been completely reordered by Yann Pouillon,
+    with the appearance of
+    five main subdirectories of the top directory : src, lib, tests,
+    doc, config .
+
+    "src" now contains all the old "Src_xx" directories, whose names
+    have been changed by the suppression of the prefix "Src". Inside
+    these subdirectories, the structure is the same as previously
+
+    "lib" now contains all the old "Lib_xx" directories, whose names
+    have been changed by the suppression of the prefix "Lib". Inside
+    these subdirectories, the structure is the same as previously
+
+    "tests" now contains the old directories Tutorial, and Test_XX .
+    Inside these subdirectories there has been some reordering,
+    including the creation of "Input" subdirectories, containing
+    all the input files.
+
+    "doc" replaces the old "Infos". New subdirectories have been
+    created inside "doc", to group the information for the
+    users, the one for the maintainers, etc .
+
+    "config" is a brand new directory, that contains most of the
+    scripts and information needed to build ABINIT using the new build
+    system.
+
+    There are also less important subdirectories, like "util" or
+    "extras" in which some previously existing files have been grouped,
+    with some new ones.
+
+C2. The new build mechanism, set up by Yann Pouillon, is completely
+    different with respect to the one of v4.6. The basic mechanism
+    is described in part in the ~abinit/doc/install_notes/install_v5.1.html
+    file. The reading of this file is mandatory to understand
+    the modifications of the present v5.1 with respect to v4.6 .
+    Automake and autoconf are used. For a more elaborate
+    understanding of the build mechanism, the interesting person
+    should dive inside ~abinit/config ...
+
+C3. There are now Makefile files in each directory. These Makefile
+    files have been produced automatically by automake and autoconf. Most of them
+    include only the basic targets defined by automake. The Makefile
+    of several directories (~abinit, ~abinit/tests, ~abinit/doc, ~abinit/src)
+    also contain additional, more elaborate targets.
+    They can be obtained by typing "make help" or also
+    "make help_dev" in the corresponding directory.
+
+C4. Two new src subdirectories have been created : 06geomoptim and 04occeig.
+    Also, many routines have been moved from one of the src subdirectories
+    to another, that corresponds better to their level of use, or in view of
+    minimizing the time needed to compile partly the sources.
+
+C5. It is possible now to produce an executable that only deals with the
+    GW part of abinit. Compilation is much faster, since it avoids compiling
+    many routines e.g. those needed for the response functions.
+    Simply type 'make abinitgw' just after 'configure', in the top
+    ABINIT directory. An executable named 'abinitgw' will be produced.
+
+C6. A new directory ~abinit/src/02nlstrain has been created, and contains
+    all the cont*str*.F90 routines previously stored in 02nonlocal.
+    This is to allow changing the options of compilations of these routines,
+    in order to allow for faster compilation, if they are not used.
+
+C7. Not everything is working yet ... For a list of problems,
+    see the file ~abinit/KNOWN_PROBLEMS. This is the new name of the
+    old ~ABINIT/Infos/known_problems file of v4.6 .
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D1. Localized Wannier functions can be computed, thanks to new capabilities
+    of cut3d, provided by Joydeep Bhattacharjee, supervised by Umesh Waghmare.
+    See Test_v4#47-49, and the cut3d help file on the Web,
+    or ~ABINIT/Infos/cut3d_help.html
+    Note : not yet maximally localized Wannier functions ; still somehow in development :
+    should be in main abinit instead of cut3d.
+
+D2. New input variable inclvkb, to allow some speed up of the GW-screening calculation,
+    at the expense of some loss of accuracy.
+
+D3. Parallelisation on the perturbations, by Philipp Plaenitz
+    See new input variables paral_rf and ngroup_rf
+    See Test_paral case K  (warning : to be tested more carefully)
+
+D4. Parallelisation on the FFT based on MPI, by Torsten Hoefler.
+    See new input variable gpara.
+    Warning : still in development.
+
+D5. There is a new utility, named abilint, currently developed,
+    by TDeutsch. This has the aim of building automatically
+    interfaces between routines, to ease the checkings by compilers.
+    (in development, not integrated in v5.1.1, although present in the GNUArch repository)
+
+D6. Improvements in the PAW part of ABINIT, by M. Torrent, F. Jollet and F. Bottin
+    Tests of differeznt mixing schemes for PAW (see tests/v4/Input/t07.in).
+    Actually, the PAW of ABINIT can now be used in production. Announcement
+    by M. Torrent will follow...
+
+D7. New version of lobpcg : wfoptalg=5 (lobpcgII)  (S. Le Roux, ARoy and GZerah)
+    See GZ mail on Nov 7
+
+D8. Work on the self-consistency, by PM Anglade.
+    (in development, not integrated in v5.1.1, although present in the GNUArch repository)
+
+D9. Bugs have been correctred in the electron-phonon part : in some cases,
+    the computed phonon lifetimes of some branches were exchanged.
+
+D10. Parallelisation of the FFT in the case wfoptalg=4 (ARoy and GZerah)
+     Still undergoing changes, also connected to modifications D3 and D4.
+
+D11. Bug fixes, from v5.1.2 to v5.1.4, by YPouillon, FBruneval, JJanssen, MBoulet,
+     SPesant, MVerstra, MTorrent, JJansen, Lu Jianmin, ZLevine, EWalter, PPlaenitz, MMikami,
+     LSindic, MGiantomassi.
+
+D12. New input variables for electron-phonon case have been added, from MVerstraete.
+     These new input variables are : gkk2exist, gkk2write, gkk_rptexist, gkk_rptwrite,
+     gkqexist, gkqwrite, phfrqexist, phfrqwrite.
+
+D13. It is now possible to read the starting electronic density from a _DEN file
+     for self-consistent GS calculations (it was only possible for non SC runs before).
+     In this case, both are read, and one obtains a perfect restart.
+     Test have been changed : tests/v2/Input/t11.in and tests/v3/Input/t18.in
+     (From MTorrent)
+
+</pre>

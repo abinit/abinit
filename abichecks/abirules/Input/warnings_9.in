@@ -1,0 +1,5 @@
+#
+Warning = 'DOUBLE COMPLEX at (1) does not conform to the Fortran 95 standard'
+#
+#src_excluded = ['10_defs']
+src_excluded = ['interfaces','01_linalg_ext']

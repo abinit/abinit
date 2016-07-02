@@ -1,0 +1,134 @@
+#!/usr/bin/env python
+#
+# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+from ConfigParser import ConfigParser,NoOptionError
+from time import gmtime,strftime
+
+import commands
+import os
+import re
+import sys
+
+class MyConfigParser(ConfigParser):
+
+  def optionxform(self,option):
+    return str(option)
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Subroutines
+#
+
+# Makefile header
+def makefile_header():
+
+  return """
+# ---------------------------------------------------------------------------- #
+
+#
+# Individual targets for binaries
+#
+
+"""
+
+
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Main program
+#
+
+# Initial setup
+my_name    = "add-targets-binaries"
+my_configs = {
+  "libs":"config/specs/corelibs.conf",
+  "bins":"config/specs/binaries.conf"}
+my_output  = "Makefile.am"
+
+# Check if we are in the top of the ABINIT source tree
+if ( not os.path.exists("configure.ac") or
+     not os.path.exists("src/98_main/abinit.F90") ):
+  print "%s: You must be in the top of an ABINIT source tree." % my_name
+  print "%s: Aborting now." % my_name
+  sys.exit(1)
+
+# Read config file(s)
+for cnf_file in my_configs.values():
+  if ( not os.path.exists(cnf_file) ):
+    print "%s: Could not find config file (%s)." % (my_name,cnf_file)
+    print "%s: Aborting now." % my_name
+    sys.exit(2)
+
+# Init corelibs
+lib_cnf = MyConfigParser()
+lib_cnf.read(my_configs["libs"])
+abinit_corelibs = lib_cnf.sections()
+abinit_corelibs.sort()
+
+# Init binaries
+bin_cnf = MyConfigParser()
+bin_cnf.read(my_configs["bins"])
+main_bins = bin_cnf.sections()
+main_bins.sort()
+
+# Start writing to Makefile.am
+mf = file(my_output,"a")
+mf.write(makefile_header())
+
+# Process each binary
+for bin in main_bins:
+
+  # Init
+  if ( bin_cnf.has_option(bin,"dependencies") ):
+    bin_deps = "yes"
+  else:
+    bin_deps = "no"
+  bin_libs = bin_cnf.get(bin,"libraries").split()
+  bin_opt = bin_cnf.get(bin,"optional")
+
+  bin_make = "\n\tcd src/98_main && $(MAKE) %s$(EXEEXT) @SET_MAKE@" % (bin)
+
+  # List all libraries the binary depends on
+  for lib in bin_libs:
+
+    # Set directory for library
+    lib_opt = "yes"
+    if ( lib in abinit_corelibs ):
+      lib_dir = "src/%s" % (lib)
+      lib_tgt = "lib%s.a" % (lib)
+      lib_opt = lib_cnf.get(lib,"optional")
+    else:
+      sys.stderr.write("Error: unknown library of %s: %s\n" % (bin,lib))
+      sys.exit(4)
+
+    if ( lib_opt == "yes" ):
+      bin_make = "\nendif" + bin_make
+    bin_make = "\n\tcd %s && $(MAKE) %s @SET_MAKE@" % \
+      (lib_dir,lib_tgt) + bin_make
+    if ( lib_opt == "yes" ):
+      bin_make = "\nif DO_BUILD_%s" % (lib.upper()) + bin_make
+
+  # Delegate the build of external dependencies
+  if ( bin_deps == "yes" ):
+    bin_make = "\n\tcd fallbacks && $(MAKE) @SET_MAKE@"  + bin_make
+
+  # Check for optional binaries
+  if ( bin_opt == "yes" ):
+    bin_make = "\nif DO_BUILD_%s%s\n" % (bin.upper(),bin_make) \
+      + "else\n\t@echo 'The build of %s has been disabled'\nendif" % (bin)
+
+  # Define target
+  bin_make = "%s:"  % (bin) + bin_make
+
+  # Write results
+  mf.write("# Individual build of %s\n%s\n\n" % (bin,bin_make))
+
+mf.close()

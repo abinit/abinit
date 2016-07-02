@@ -1,0 +1,92 @@
+# CO molecule test the getwfk in ETSF
+# Application to the hgrid convergence.
+
+#Definition of the SCF procedure
+nstep 2          # unrealistic value, only used for tests
+tolwfr 1.0d-4    # Tolerence on gradient norm, physical value
+nwfshist 8       # Wavefunction DIIS
+iscf 0           # Mixing value for wavelets
+
+# Force symetries
+nsym 1
+symrel   1  0  0   0  1  0   0  0  1
+
+#Definition of the unit cell
+acell 25 20 20
+rprim
+1. 0. 0.
+0. 1. 0.
+0. 0. 1.
+
+natom 2
+
+nband 5
+
+# WVL
+usewvl 1
+wvl_hgrid1 0.6     # Very high value, unphysical.
+wvl_hgrid2 0.55
+wvl_hgrid3 0.5
+wvl_hgrid4 0.45
+wvl_crmult 4.5     # Quite nice physical value
+wvl_frmult 8.
+wvl_nprccg 15
+wvl_bigdft_comp 1 #to follow the BigDFT workflow
+icoulomb 1      # Use Poisson solver
+optforces 0       # Don't compute the forces inside the SCF loop
+optstress 0       # Don't compute stress (required for wavelets)
+nscforder 14      # order of wavelet for Poisson solver
+
+
+#Definition of the k-point grid 
+ngkpt  1  1  1
+nshiftk 1
+shiftk  0. 0. 0.
+istwfk 1
+
+#Definition of the atom types
+ntypat 2
+znucl 6 8
+
+#Definition of the atoms
+typat 1 2
+
+#Geometric positions
+xcart
+ 4. 2.5 2.5
+ 6. 2.5 2.5
+
+#Exchange-correlation functional
+ixc 1             # LDA Teter Pade parametrization
+
+#Definition of the planewave basis set
+ecut  5
+
+# Input/output
+#ndtset 4    # XG090719 Original value. However, causing crash when the switch from abinis to abinit (paral) occurred
+             # on the following machines : testf+gcc44.0 , chpit + intel 11.1
+ ndtset 2    # XG090719 With this value, things seem OK.
+getwfk -1    # Restart from previous wave-functions.
+prtden 0     # Don't print the density
+prtwf 1      # Output the wave-functions
+iomode 3  # ETSF IO access
+
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = HAVE_TRIO_ETSF_IO
+#%% [files]
+#%% files_to_test = 
+#%%   t18.out, tolnlines = 0, tolabs = 1.320e-10, tolrel = 1.174e-13
+#%% psp_files = 06c.pspgth, 08o.pspgth
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = D. Caliste
+#%% keywords = ETSF_IO
+#%% description = 
+#%%   CO molecule to test the ETSF restart inside several datasets, also test the
+#%%   reformating of wavelets after wvl_hgrid changed (need compilation with --enable-bigdft).
+#%%<END TEST_INFO>

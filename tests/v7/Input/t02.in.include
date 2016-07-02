@@ -1,0 +1,15 @@
+#################################################################
+# Automatic test for ABINIT:                                    #
+#    This file has to be included in an input file              #
+#    Contains a set of k-points                                 #
+#################################################################
+
+!3x3x3 Monkhorst pack for FCC lattice
+
+ kptopt 1
+ ngkpt 3 3 3
+ nshiftk 4
+ shiftk 1/2 1/2 1/2
+        1/2 0   0
+        0   1/2 0
+        0   0   1/2

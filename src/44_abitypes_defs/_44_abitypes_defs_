@@ -1,0 +1,28 @@
+!!****d* ABINIT/44_abitypes_defs
+!! NAME
+!! 44_abitypes_defs
+!!
+!! DESCRIPTION
+!!  FIXME: Description is missing
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! defs_abitypes.F90
+!! defs_xc.F90
+!! interfaces_44_abitypes_defs.F90
+!! m_args_gs.F90
+!! m_distribfft.F90
+!! m_efield.F90
+!! m_efmas_defs.F90
+!! m_energies.F90
+!! m_results_gs.F90
+!! m_results_img.F90
+!! m_results_respfn.F90
+!!
+!!***

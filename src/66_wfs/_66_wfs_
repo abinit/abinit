@@ -1,0 +1,52 @@
+!!****d* ABINIT/14wfs
+!! NAME
+!! 14wfs
+!!
+!! DESCRIPTION
+!! This directory contains level-4 routines used
+!! to treat wavefunctions. The main entry points to
+!! this library are the routines :
+!! - getghc.F90 : apply the Hamiltonian to one wavefunction,
+!!  use the routines in 53_ffts and 65_nonlocal
+!! - projbd.F90 and orthon.F90 : project and orthonormalize
+!!  the wavefunctions
+!! - wfconv.F90 : convert one wavefunction with some
+!!  parameters to another wavefunction with some other
+!!  parameters (like PW sphere, spin or spinor characteristics
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! chebfi.F90
+!! fock_getghc.F90
+!! fxphas.F90
+!! fxphas_seq.F90
+!! getdc1.F90
+!! getgh1c.F90
+!! getgh2c.F90
+!! getghc.F90
+!! getghcnd.F90
+!! getgsc.F90
+!! interfaces_66_wfs.F90
+!! m_bandfft_kpt.F90
+!! m_esymm.F90
+!! m_invovl.F90
+!! prep_bandfft_tabs.F90
+!! prep_fourwf.F90
+!! prep_getghc.F90
+!! prep_index_wavef_bandpp.F90
+!! prep_nonlop.F90
+!! prep_sort_wavef_spin.F90
+!! prep_wavef_sym_do.F90
+!! prep_wavef_sym_undo.F90
+!! pw_orthon.F90
+!! rayleigh_ritz.F90
+!! subdiago.F90
+!! wfconv.F90
+!!
+!!***

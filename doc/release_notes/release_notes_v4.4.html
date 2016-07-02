@@ -1,0 +1,242 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2004 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors .
+</h5>
+
+<pre>
+Many thanks to the following contributors to the ABINIT project
+between March 2004 and September 2004:
+
+F. Bottin, J. Bouchet, R. Caracas, C. Darrigan, M. Delaveau, T. Deutsch, F. Detraux,
+P. Ghosh, D. Hamann, J. Iniguez, J. Janssen, F. Jollet, R. Meyer, Mikami-san, Y.-M. Niquet,
+V. Olevano, Y. Pouillon, A. Roy, S. Sharma, M. Torrent, D. Vanderbilt, M. Veithen,
+M. Verstraete.
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 4.4, released on August 28, 2004.
+
+Changes with respect to version 4.3 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Most noticeable changes in the package (for developers)
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS
+
+A1. Switch to the 2002 adjustment of fundamental constants from the NIST,
+    replacing the 1998 values. See Src_defs/defs_basis.f .
+    Changes are at the 1.0d-6 relative level.
+
+A2. In the GW calculation, the Vxc that is used in v4.4 is no more the
+    relativistic version of the Ceperley-Alder functional (that was actually
+    present only in this part of ABINIT).
+    See D6 for more information. Contributed by YM Niquet.
+
+    The choice of XC functional
+    in this part of ABINIT is now governed by the input variable ixc.
+    The default value is ixc=1 , that gives a different value of Vxc than
+    in v4.3 or earlier versions. Thus, the results of a GW calculation
+    will be slightly different in v4.4 than in v4.3 (on the order of
+    0.01 ... 0.02 eV for absolute value of eigenenergies, and much
+    less -about 1 meV-  for the gap values).
+
+A3. The smoothing function for the kinetic energy of plane waves
+    has been changed. See D9 for more information. Contributed by DHamann.
+
+    Now, its second derivative is continuous at the
+    cut-off energy. This change affect all calculations in which
+    the input variable ecutsm is non-zero. In this case, note that
+    the present version gives slightly different results than
+    previously. Moreover, one should not use
+    ground-state wavefunction files produced with version v4.3 or older
+    to start response function calculations with v4.4 with non-zero ecutsm.
+    This has been forbidden in the hdr_io.f routine.
+
+A4. The PAW input variable pawmqgrdg has been suppressed.
+
+A5. The name of tar files has been changed.
+    The main tar is no more src_tests.x.y.z.tar.gz but has become
+    abinit-x.y.z.tar.gz . Similar changes have been performed
+    with other tar files (binaries, etc ... ).
+    In particular, all "underline"
+    before version number have been replaced by a "dash".
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B1. The computation of linear and non-linear optics has been implemented,
+    by S. Sharma. See "optic" utility.
+    Still to be documented, although Test_v4#57 provides an example.
+    The interface of "optic" with ABINIT has been implemented by M. Verstraete.
+    References :
+    1. S. Sharma, J. K. Dewhurst and C. Ambrosch-Draxl, Phys. Rev. B {\bf 67} 165332 2003
+    2. J. L. P. Hughes and J. E. Sipe, Phys. Rev. B {\bf 53} 10 751 1996
+    3. S. Sharma and C. Ambrosch-Draxl, Physica Scripta T 109 2004
+    4. J. E. Sipe and Ed. Ghahramani, Phys. Rev. B {\bf 48} 11 705 1993
+
+
+B2. The electron-phonon coupling is now treated : there is a new utility "mrggkk",
+    and new capabilities of anaddb (input variable "elphflag" - however, still
+    to be documented), developed by Matthieu Verstraete.
+    This new capability of ABINIT is available for beta-testing.
+    In case you are interested, please contact mverstra@pcpm.ucl.ac.be .
+    Only EXPERT users, strongly motivated, should contact him.
+    No automatic test is yet available.
+
+B3. PAW : GGA is implemented (M. Torrent, F. Jollet and F. Bottin (CEA-Bruyeres-le-Chatel))
+    Other modifications related to PAW : note the new variables
+    pawmixtyp, pawsphmix, pawxcdev, pawnzlm, pawvlbox, ngfftdg, bxctmindg .
+    The documentation of the PAW input variables has been improved.
+
+B4. The development of the features related to strain perturbation continues :
+    spin-polarized response function calculations for the strain perturbation
+    are available (by D. Hamann)
+    See Test_v4 #79.
+    Remember, there are still limitations
+    in the use of this strain perturbation : LDA only, no spin-orbit coupling.
+
+B5. MPI parallelization over k-points of the non-linear responses computations
+    (by M. Veithen).
+
+B6. Finite electric field calculations : MPI parallelism over k points,
+    and use of symmetry operations, by M. Veithen and J. Iniguez.
+    See Test_v4#55 (among others).
+
+__________________________________________________________________
+
+C. Most noticeable changes for the developers
+
+C1. The GNU-Arch repository is now effective, and has been used to merge
+    the present version 4.4 (set up by Y. Pouillon).
+
+C2. Due to C1, change of names for .mod -> _mod
+                                   .so  -> _so
+    Creation of many new files, to conform with GNU style
+    (THANKS, INSTALL, INSTALLME, NEWS, ...). However, the old
+    mechanisms are still used.
+    The temporary directories in which tests are executed have changed
+    name : the first character is now "," instead of "_" (e.g. ,test_20040724
+    instead of _test_20040724). This is because all files starting with
+    "," are treated as temporary by GNU-Arch by default).
+
+C3. The use of 'intent' declarations in all routines is now the rule
+    rather than the exception ! This is the outcome of a global "beautify"
+    operation, lead between August 17 and August 20, with the following developers :
+    J. Bouchet, R. Caracas, T. Deutsch, F. Detraux, D. Hamann,
+    Mikami-san, M. Torrent, F. Jollet, Y. Pouillon,
+    M. Veithen, M. Verstraete, and my self. V. Olevano also contributed, later.
+    Also, during this "beautify" operation, the description of each routine
+    has been checked, as well as the description of all arguments.
+    This was quite heroic ! Lot of similarity with the initial porting
+    under ROBODOC, in December 2000, by a dozen of developers also ...
+
+C4. Changed the name of all source files : switched from .f suffix to .F90 suffix .
+    (by Y. Pouillon)
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D1. New version of anaddb notes, by D. Vanderbilt
+
+D2. Possibility to use a new pseudopotential format, from DHamann.
+    See ~abinit/doc/psp_infos/psp8.info
+    The format 8 for ABINIT pseudopotentials is designed to allow users
+    who wish to experiment with pseudopotentials, possibly with non-standard
+    features, to have great flexibility in doing so.  It does not correspond
+    to any publicly available tabulation, or the output format of any
+    publicly available program, although codes such as FHI98PP (see
+    psp6.info) could easily be modified to produce this format.  An extended
+    discussion follows below the annotated example.
+
+D3. Band-by-band decomposition of the electronic dielectric tensor
+    (by M. Veithen). See Test_v3#77.
+
+D4. FFT parallelism implementation continues : work by ARoy.
+
+D5. Use of NetCDF for molecular dynamics trajectories. From MDelaveau.
+    See input variable "nctime".
+    Also, NetCDF for wavefunction, density, potential files. From MVerstraete.
+    Still to be documented.
+
+D6. (See also the Warning A2)
+    This modification has been implemented by Y.-M. Niquet.
+    In the GW calculation, the Vxc that is used in v4.4 is no more the
+    relativistic version of the Ceperley-Alder functional (that was actually
+    present only in this part of ABINIT). The choice of XC functional
+    in this part of ABINIT is now governed by the input variable ixc.
+    The default value is ixc=1 , that gives a different value of Vxc than
+    in v4.3 or earlier versions.
+
+    In order to recover the older results, the value ixc=0 must be used
+    specifically in the GW calculation part. However, this practice
+    is discouraged, since none of the pseudopotentials has been
+    generated using this XC functional.
+
+    More information : the eigenenergy changes (with respect to DFT), in the usual
+    GW approximation (diagonal approximation)  are computed using
+    Delta eig = < wavefunction | Sigma - Vxc | wavefunction > / Z .
+    The Vxc in this formula is specifically the one that is affected
+    by the new implementation.
+
+D7. Computation of the kinetic energy contribution to the band gap energy
+    in the GW (ACFD-RPA) approximation. Implemented by YM Niquet.
+    See routine csigme.f and fkin.f .
+
+D8. The opportunity to symmetrize the dynamical matrix, inside anaddb,
+    is now offered. See the new input variable for anaddb "symdynmat".
+    Thanks to this option, artificial symmetry breaking in case of
+    body-centered tetragonal lattices can be avoided.
+
+D9. Change of smoothing function for the kinetic energy, governed by ecutsm.
+    Modification by Don Hamann.
+    Now, its second derivative is continuous at the
+    cut-off energy. This change affect all calculations in which
+    the input variable ecutsm is non-zero. See warning A3.
+
+D10. New input variable, to activate use of Thomas-Fermi kinetic energy functional :
+     tfkinfunc.
+
+D11. Performance improvements (sdirot.f, orthon.f and vtowfk.f routines) by Ralf Meyer.
+
+D12. Possibility to print eigenenergies in a separate file, with suffix _EIG
+     See the input variable "prteig". Contributed by M. Verstraete
+
+D13. The document "netiquette.html", by Mikami-san, describe the ABINIT netiquette.
+
+D14. The conducti utility works now for the full conductivity tensor, not only its trace.
+     Contributed by P. Ghosh.
+
+D15. The new ROBODOC version 4.0.24 has been used, thanks to Mikami-san
+     (who produced the robodoc.rc file).
+
+D16. Bug fixes, and additional small modifications : C. Darrigan, D. Hamann, M. Verstraete, J. Janssen ...
+
+D17. When iscf=-2, the eigenvalues for all the k points are printed anyway (like with prtvol>=2) ...
+
+D18. In the input file, the sign '=' is now treated as a blank (a separator),
+     to avoid some beginner's errors,
+     especially that OCTOPUS uses = signs (so, '=' signs are now admitted as separators !).
+</pre>

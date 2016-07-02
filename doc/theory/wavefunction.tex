@@ -1,0 +1,496 @@
+%\title{ABINIT data structures and their theoretical justifications}
+\documentclass{article}
+\title{Representation and conversion of one wavefunction\\
+       {\normalsize{(X. Gonze, Y. Suzukawa, M. Mikami)}}}
+\begin{document}
+\maketitle
+
+\section{Notations and theoretical considerations}
+\label{sec:A1}
+\hspace*{\parindent}
+\vskip 1em
+* A Bloch wavefunction characterized by a wavevector ${\bf k}$ is such
+that
+\[\psi_{\bf k}({\bf r})=u_{\bf k}({\bf r}) e^{i2\pi {\bf k}\cdot{\bf r} }\]
+
+where $u_{\bf k}({\bf r})$ is periodic, that is
+\[u_{\bf k}({\bf r}+{\bf R}_{latt})=u_{\bf k}({\bf r})\]
+
+where ${\bf R}_{latt}$ is a vector of the real space lattice.
+
+\vskip 1em
+* Representation by plane waves
+\begin{eqnarray*}
+u_{\bf k}({\bf r})&=&\sum_{\bf G}c_{\bf k}({\bf G})e^{i2\pi {\bf G}\cdot{\bf r}} \\
+\psi_{\bf k}({\bf r})&=&\sum_{\bf G}c_{\bf k}({\bf G})
+e^{i2\pi ({\bf k}+{\bf G})\cdot{\bf r}}
+\end{eqnarray*}
+
+\vskip 1em
+* Normalisation
+\[\sum_{\bf G}|c_{\bf k}({\bf G})|^2=1\]
+
+\vskip 1em
+* For a \underline{spinor} wavefunction, there is an additional
+variable, the spin $\sigma$ that can take two values, that is
+$\sigma=\uparrow$ (spin up) or $\sigma=\downarrow$ (spin down) \\
+The following relations hold :
+
+\begin{eqnarray*}
+u_{\bf k}({\bf r},\sigma)&=&\sum_{\bf G}c_{\bf k}({\bf G},\sigma)
+e^{i2\pi {\bf G} \cdot {\bf r}} \\
+\psi_{\bf k}({\bf r},\sigma)&=&\sum_{\bf G}c_{\bf k}({\bf G},\sigma)
+e^{i2\pi({\bf k}+{\bf G})\cdot{\bf r}} \\
+\sum_{\sigma}\sum_{\bf G}|c_{\bf k}({\bf G},\sigma)|^2&=&1
+\end{eqnarray*}
+
+\section{Properties of the wavefunctions (scalar case)}
+\label{sec:B1}
+\hspace*{\parindent}
+\vskip 1em
+* For ground-state wavefunctions, there is the Schr\"{o}dinger equation
+
+\[H|\psi_{n{\bf k}}>=\varepsilon_{n{\bf k}}|\psi_{n{\bf k}}>\]
+
+where \\
+\hspace*{15ex} $H$ is the Hamiltonian operator  \\
+\hspace*{15ex} $n$ labels the state (or the band) \\
+\hspace*{15ex} $\varepsilon_{n{\bf k}}$ is the eigenvalue \\
+
+\vskip 1em
+* As the wavevector labelling of an eigenstate comes from the property
+\[\psi_{\bf k}({\bf r}+{\bf R}_{latt})=e^{i2\pi{\bf k}{\bf R}_{latt}}
+\psi_{\bf k}({\bf r})\]
+
+in which ${\bf k}$ can be replaced by ${\bf k}+{\bf G}_{latt}$ where
+${\bf G}_{latt}$ is any reciprocal space lattice vector, we can
+\underline{choose} the wavefunctions at ${\bf k}$ and ${\bf k}+{\bf G}_{latt}$
+to be equal, or to make a linear combination of wavefunctions with the
+same energy. We introduce the notation ``L.C.'' when linear combinations
+are allowed when equating two wavefunction.
+\begin{eqnarray*}
+\psi_{n({\bf k}+{\bf G}_{latt})}({\bf r})&\stackrel{\rm L.C.}{=}&
+\psi_{n{\bf k}}({\bf r})
+\end{eqnarray*}
+
+When there is no specific reason to prefer a linear combination, the
+equality relation will be used. This is a choice of ``gauge''.
+Note that a phase factor might be allowed in taking the linear combination.
+
+\label{sec:B2}
+\vskip 1em
+* The ${\bf k} \leftrightarrow {\bf k}+{\bf G}_{latt}$ correspondence
+translates to
+\begin{eqnarray*}
+u_{n({\bf k}+{\bf G}_{latt})}({\bf r})\cdot
+e^{i2\pi {\bf G}_{latt}\cdot{\bf r}}&\stackrel{\rm L.C.}{=}&
+u_{n{\bf k}}({\bf r}) \\
+c_{n({\bf k}+{\bf G}_{latt})}({\bf G}-{\bf G}_{latt})
+&\stackrel{\rm L.C.}{=}&c_{n{\bf k}}({\bf G}) \\
+\end{eqnarray*}
+
+\vskip 1em
+* The time-reversal symmetry (non-magnetic case) of the Hamiltonian
+gives the following relation
+\begin{eqnarray*}
+\psi_{n{\bf k}}({\bf r})&\stackrel{\rm L.C.}{=}&\psi^{*}_{n(-{\bf k})}({\bf r}) \\
+u_{n{\bf k}}({\bf r})&\stackrel{\rm L.C.}{=}&u^{*}_{n(-{\bf k})}({\bf r}) \\
+c_{n{\bf k}}({\bf G})&\stackrel{\rm L.C.}{=}&c^{*}_{n(-{\bf k})}(-{\bf G})
+\end{eqnarray*}
+
+\vskip 1em
+* For the ${\bf k}$ wavevectors that are half a reciprocal lattice vector
+$(2{\bf k}={\bf G}_{latt})$, there is a special relationship between
+coefficients of the wavefunction :
+
+\[
+c_{n{\bf k}}({\bf G}) \stackrel{\rm L.C.}{=} c_{n({\bf k}-{\bf G}_{latt})}
+({\bf G}+{\bf G}_{latt})
+\stackrel{\rm L.C.}{=} c_{n(-{\bf k})}({\bf G}+{\bf G}_{latt})
+\stackrel{\rm L.C.}{=} c^{*}_{n{\bf k}}(-{\bf G}-{\bf G}_{latt})
+\]
+
+That is, coefficients at ${\bf G}$ and $-{\bf G}-{\bf G}_{latt}$ are related.
+This will allow to decrease by a factor of 2 the storage space for these
+specific ${\bf k}$ points.
+
+\section{Properties of the wavefunctions (spinor case)}
+\label{sec:C1}
+\hspace*{\parindent}
+
+\vskip 1em
+* One must distinguish two classes of Hamiltonians :
+\begin{itemize}
+\item the Hamiltonian is spin-diagonal
+\item the Hamiltonian mixes the spin components
+\end{itemize}
+
+In the first class, one finds usual non-spin-polarized, non-spin-orbit
+Hamiltonians, in which case the spin up-spin up and spin down-spin
+down parts of the Hamiltonian are equal, as well as spin-polarized
+Hamiltonian when the magnetic field varies in strength but
+\underline{not} in direction.
+
+In the second class, one finds Hamiltonians that include the
+spin-orbit splitting as well as non-collinear spin systems.
+
+In the first class, the wavefunctions can be made entirely of
+\underline{either} spin-up components \underline{or} spin-down
+components, and treated independently of those made of opposite spin.
+This corresponds to {\tt nsppol} = 2.
+
+In the second class, one must stay with spinor wavefunctions.
+This corresponds to {\tt nspinor} = 2.
+
+These two classes are mutually exclusive. The possibilities are thus :
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}[h]{|cc|c|}
+\hline
+ nsppol &  nspinor &    \\
+\hline
+   1   &     1    &         scalar wavefunctions    \\
+   2   &     1    &         spin-polarized wavefunctions  \\
+   1   &     2    &         spinor wavefunctions  \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\section{Plane wave basis set sphere}
+\label{sec:D1}
+\hspace*{\parindent}
+
+\vskip 1em
+* In order to avoid dealing with an infinite number of plane waves
+$\{e^{i2\pi({\bf k}+{\bf G})r}\}$ to represent Bloch wavefunctions,
+one selects those with a kinetic energy lower than some cut-off
+$E_{\rm kin-cut}$.
+The set of allowed ${\bf G}$ vectors will be noted by
+$\{{\bf G}_{{\bf k},E_{\rm kin-cut}}\}$
+
+\[{\bf G}_{latt}\in \{{\bf G}\}_{{\bf k},E_{\rm kin-cut}}
+\mbox{\ \ if \ \ } \frac{(2\pi)^{2}({\bf G}_{latt}+{\bf k})^{2}}{2}
+< E_{\rm kin-cut}
+\]
+
+Expressed in reduced coordinates :
+\[
+\frac{(2\pi)^{2}}{2} \sum_{ij}({\bf G}^{red}_{latt,i}+{\bf k}^{red}_{i})
+{\bf G}^{met}_{ij}({\bf G}^{red}_{latt,j}+k^{red}_{j}) < E_{\rm kin-cut}
+\]
+
+\vskip 1em
+* The kinetic energy cut-off is computed from the input variables
+{\tt ecut} and {\tt dilatmx} , to give the effective value :
+\[ {\tt ecut\_eff} = {\tt ecut} * ({\tt dilatmx}) ** 2 \]
+
+\vskip 1em
+* For ''time-reversal ${\bf k}$-points'' ($2{\bf k}={\bf G}_{latt}$,
+see section \pageref{sec:B2}), not all coefficients must be stored. A specific
+storage mode, governed by the input variable {\tt istwfk} has been
+introduced for the following ${\bf k}$ points:
+
+\[
+\Bigl(0 0 0\Bigr),\left(0 0 \frac{1}{2}\right),\left(0 \frac{1}{2}0\right),
+\left(0 \frac{1}{2} \frac{1}{2}\right),\left(\frac{1}{2} 0 0 \right),
+\left(\frac{1}{2} 0 \frac{1}{2}\right),\left(\frac{1}{2} \frac{1}{2}0\right),
+\left(\frac{1}{2} \frac{1}{2} \frac{1}{2}\right)
+\]
+
+For these points, the number of ${\bf G}$ vectors to be taken into account,
+is decreased by about a factor of 2. \\
+For the ${\bf G}$'s that are not treated, the coefficients
+\label{sec:D2}
+$c_{n{\bf k}}({\bf G})$ can be recovered from those that are treated,
+thanks to \[c_{n{\bf k}}({\bf G}) = c^{*}_{n{\bf k}}(-{\bf G}-{\bf G}_{latt})\]
+
+\vskip 1em
+* The number of plane waves is {\tt npw} \\
+For ${\tt ipw}=1\cdots {\tt npw}$, the reduced coordinates of ${\bf G}$
+are contained in the array {\tt kg}:
+\[
+\mbox{these are integer numbers}
+\cases{
+  {\bf G}^{red}_{1}=& {\tt kg}(1,{\tt ipw}) \cr
+  {\bf G}^{red}_{2}=& {\tt kg}(2,{\tt ipw}) \cr
+  {\bf G}^{red}_{3}=& {\tt kg}(3,{\tt ipw}) \cr
+}
+\]
+
+This list of ${\bf G}$ vectors is computed in the routine
+{\tt kpgsph.f}. \\ \\
+
+[To be continued : explain the time reversed $k$-point structure]
+
+\vskip 1em
+\section{FFT grid and FFT box}
+\label{sec:E1}
+\hspace*{\parindent}
+
+\vskip 1em
+* For the generation of the density from wavefunctions, as well as for
+the application of the local part of the potential, one needs to be
+able to compute $\psi_{n{\bf k}}({\bf r})$ or $u_{n{\bf k}}({\bf r})$
+for a 3D-mesh of ${\bf r}$-points, extremely fast, from the values
+$c_{n{\bf k}}({\bf G})$.
+
+[note : spin up and spin down parts can be treated separately in this
+operation, so they do not need to be specified otherwise in this
+section \ref{sec:E1}.]
+
+\vskip 1em
+* The FFT algorithm starts from values of a function
+\[
+z (j_{1},j_{2},j_{3}) \, \mbox{for} \,
+j_{1}=0\cdots(N_{1}-1),j_{2}=0\cdots(N_{2}-1),j_{3}=0\cdots(N_{3}-1)
+\]
+and compute fast the transformed
+\[
+\tilde{z}(l_{1},l_{2},l_{3}) \, \mbox{for} \,
+l_{1}=0\cdots(N_{1}-1),l_{2}=0\cdots(N_{2}-1),l_{3}=0\cdots(N_{3}-1)
+\]
+with
+\[
+\tilde{z}(l_{1},l_{2},l_{3})=\sum_{j_{1},j_{2},j_{3}} z(j_{1},j_{2},j_{3})
+e^{i2\pi\left(\frac{j_{1}l_{1}}{N_{1}}+\frac{j_{2}l_{2}}{N_{2}}+\frac{j_{3}l_{3}}{N_{3}}\right)}
+\]
+
+\vskip 1em
+* We want, on a FFT grid, the values of $u_{\bf k}({\bf r})$ for
+\begin{eqnarray*}
+r^{red}_{1}&=&\frac{0}{N_{1}},\frac{1}{N_{1}},\cdots
+\frac{N_{1}-1}{N_{1}}\left(=\frac{l_{1}}{N_{1}}\right) \\
+r^{red}_{2}&=&\frac{0}{N_{2}},\frac{1}{N_{1}},\cdots
+\frac{N_{2}-1}{N_{2}}\left(=\frac{l_{2}}{N_{2}}\right) \\
+r^{red}_{3}&=&\frac{0}{N_{3}},\frac{1}{N_{3}},\cdots
+\frac{N_{3}-1}{N_{3}}\left(=\frac{l_{3}}{N_{3}}\right)
+\end{eqnarray*}
+(the choice of $N_{1},N_{2},N_{3}$ is not discussed here.)
+
+Note that we do not want $u_{k}(r)$ \underline{everywhere} : these
+specific values allow to use the FFT algorithm. The effect of
+$G^{red}_{1}$ or $G^{red}_{1}+N_{1}$ (or any value of $G^{red}_{1}$
+modulo $N$) will be similar.
+
+\label{sec:E2}
+\vskip 1em
+* \begin{eqnarray*}
+u_{{\bf k}}({\bf r})&=&\sum_{\bf G} c_{\bf k}({\bf G})
+e^{i2\pi {\bf G} \cdot {\bf r}} \\
+ &=&\sum_{\bf G} c_{\bf k}({\bf G}) e^{i2\pi(G^{red}_{1}r^{red}_{1} +
+G^{red}_{2}r^{red}_{2} + G^{red}_{3}r^{red}_{3})}
+\end{eqnarray*}
+
+Let us represent $u_{\bf k}({\bf r})$ by the segment
+{\tt wf\_real} $(1:2,1:N_{1},1:N_{2},1:N_{3})$
+where the first index refer to the real or imaginary part and the
+three others to the integer values $l_{1}+1,l_{2}+1,l_{3}+1$
+
+Let us map the $c_{\bf k}({\bf G})$ coefficients on a similar segment\\
+ {\tt wf\_reciprocal}$(1:2,1:N_{1},1:N_{2},1:N_{3})$ \\
+with a similar meaning of {\tt wf\_reciprocal}$(1:2,j_{1}+1,j_{2}+1,j_{3}+1)$:
+\begin{eqnarray*}
+j_{1}&=&{\tt mod}({\bf G}^{red}_{1},N_{1}) [\Rightarrow j_{1}\in[0,N_{1}-1]]\\
+j_{2}&=&{\tt mod}({\bf G}^{red}_{2},N_{2}) \\
+j_{3}&=&{\tt mod}({\bf G}^{red}_{3},N_{3})
+\end{eqnarray*}
+
+Then :
+\begin{eqnarray*}
+\lefteqn{
+{\tt wf\_real}(\cdot ,l_{1}+1,l_{2}+1,l_{3}+1)}  \\
+&=& \sum^{N_{1}-1}_{j_{1}=0}
+\sum^{N_{2}-1}_{j_{2}=0} \sum^{N_{3}-1}_{j_{3}=0} {\tt wf\_reciprocal}
+(\cdot ,j_{1}+1,j_{2}+1,j_{3}+1) \times
+e^{i2\pi(\frac{j_{1}l_{1}}{N_{1}}+\frac{j_{2}l_{2}}{N_{2}}+\frac{j_{3}l_{3}}{N_{3}})}
+\end{eqnarray*}
+This is, up to the array indexing convention, precisely the operation
+done by the FFT algorithm.
+
+\vskip 1em
+* For FFT efficiency (minimisation of cache conflicts), the arrays
+{\tt wf\_real} and {\tt wf\_reciprocal} are not dimensioned
+{\tt wf}$(2,N_{1},N_{2},N_{3})$, but {\tt wf}$(2,N_{4},N_{5},N_{6})$ where\\
+\hspace{15ex}if $N_{1}$ even, $N_{4}=N_{1}+1$; if $N_{1}$ odd, $N_{4}=N_{1}$ \\
+\hspace{15ex}if $N_{2}$ even, $N_{5}=N_{2}+1$; if $N_{2}$ odd, $N_{5}=N_{2}$ \\
+\hspace{15ex}if $N_{3}$ even, $N_{6}=N_{3}+1$; if $N_{3}$ odd, $N_{6}=N_{3}$ \\
+
+
+\section{Wavefunctions and spatial symmetries.}
+\label{sec:F1}
+\hspace*{\parindent}
+
+\vskip 1em
+* If some spatial symmetry operation commutes with the Hamiltonian :
+\[[H,S_{\bf t}]=0\]
+then
+\begin{eqnarray*}
+H|\psi>=\varepsilon|\psi>&\Rightarrow&
+S_{\bf t}H|\psi>=\varepsilon S_{t}|\psi> \\
+ &\Rightarrow& H[S_{\bf t}|\psi>]=\varepsilon[S_{\bf t}|\psi]
+\end{eqnarray*}
+
+$S_{\bf t}|\psi>$ is also an eigenvector, with the same eigenvalue as $|\psi>$.
+
+However its wavevector is different :
+\begin{eqnarray*}
+\psi_{n{\bf k}}({\bf r}+{\bf R}) &=&
+ e^{i2\pi {\bf k} {\bf R}} \psi_{n{\bf k}}({\bf r}) \\
+\Rightarrow (S_{\bf t} \psi_{n{\bf k}})({\bf r}+{\bf R})&=&
+\psi_{n{\bf k}}((S_{\bf t})^{-1}({\bf r}+{\bf R})) \\
+ &=&\psi_{n{\bf k}}(\sum_{\beta}S^{-1}_{\alpha\beta}(r_{\beta}+R_{\beta}-t_{\beta})) \\
+ &=&\psi_{n{\bf k}}(\sum_{\beta}S^{-1}_{\alpha\beta}(r_{\beta}-t_{\beta})+\sum_{\beta}S^{-1}_{\alpha\beta}R_{\beta}) \\
+ &=&\psi_{n{\bf k}}((S_{t})^{-1}({\bf r})+\sum_{\beta}S^{-1}_{\alpha\beta}R_{\beta}) \\
+\noalign{\hbox{($S^{-1}_{\alpha\beta} R_{\beta}$ must be a vector of the real space lattice if $S_{t}$ leaves the lattice invariant)}}
+ &=&e^{i2\pi \sum_{\alpha\beta} k_{\alpha}
+S^{-1}_{\alpha\beta} R_{\beta}} \psi_{n{\bf k}}((S_{t})^{-1}({\bf r})) \\
+ &=&e^{i2\pi {\bf k}'\cdot{\bf R}}(S_{\bf t}\psi_{n{\bf k}})({\bf r})
+\end{eqnarray*}
+
+where $({\bf k}')_{\alpha} = \sum_{\beta} S^{-1}_{\beta\alpha} k_{\beta}$
+
+For a vector in the reciprocal space
+\[({\bf k}')_{\beta} = (S_{\bf t}({\bf k}))_{\beta} = \sum_{\beta}
+S^{-1}_{\beta\alpha} k_{\beta}\]
+
+i.e. the inverse transpose of $S_{\alpha\beta}$ is used.
+
+\label{sec:F2}
+* The preceeding result means
+\begin{eqnarray*}
+\psi_{n(S^{-1,t}{\bf k})}
+ &\stackrel{\rm L.C.}{=}& (S_{t}\psi_{n{\bf k}})({\bf r}) \\
+ &\stackrel{\rm L.C.}{=}& \psi_{n{\bf k}} (\sum_{\beta}
+ S^{-1}_{\alpha\beta}(r_{\beta}-t_{\beta}))
+\end{eqnarray*}
+\begin{eqnarray*}
+&\Longrightarrow& u_{n(S^{-1,t} k)}({\bf r}) e^{i2\pi \sum_{\alpha\beta}
+S^{-1,t}_{\alpha\beta} k_{\beta} r_{\alpha}} \stackrel{\rm L.C.}{=}
+e^{i2\pi \sum_{\alpha\beta} k_{\alpha}
+S^{-1}_{\alpha\beta}(r_{\beta}-t_{\beta})} \times u_{n{\bf k}}(\sum_{\beta}
+S^{-1}_{\alpha\beta}(r_{\beta}-t_{\beta})) \\
+&\Longrightarrow& u_{n(S^{-1,t} k)}({\bf r}) \stackrel{\rm L.C.}{=}
+e^{-i2\pi \sum_{\alpha\beta} k_{\alpha} S^{-1}_{\alpha\beta}
+t_{\beta}} u_{nk}(\sum_{\beta}
+S^{-1}_{\alpha\beta}(r_{\beta}-t_{\beta})) \\
+&\Longrightarrow& \sum_{{\bf G}} c_{n(S^{-1,t}k )}({\bf G})
+ e^{i2\pi{\bf G}\cdot{\bf r}}
+\stackrel{\rm L.C.}{=} e^{-i2\pi \sum_{\alpha\beta} k_{\alpha}
+S^{-1}_{\alpha\beta} t_{\beta}} \sum_{{\bf G}'} c_{n{\bf k}}({\bf G}')
+ e^{i2\pi \sum_{\alpha\beta} G'_{\alpha}S^{-1}_{\alpha\beta}
+ (r_{\beta}-t_{\beta})} \\
+&\Longrightarrow& c_{n(S^{-1,t} k)}(\sum_{\alpha} G'_{\alpha}
+S^{-1}_{\alpha\beta}) \stackrel{\rm L.C.}{=} e^{-i2\pi
+\sum_{\alpha\beta}(k_{\alpha}+G'_{\alpha}) S^{-1}_{\alpha\beta}
+t_{\beta}} c_{n{\bf k}}({\bf G}') \\
+\end{eqnarray*}
+
+This formula allows to derive coefficients $c_{n}$ at one ${\bf k}$ point
+from these at a symmetric ${\bf k}$ point.
+
+\section{Conversion of wavefunctions [routine {\tt wfconv.f}]}
+\label{sec:G1}
+\hspace*{\parindent}
+
+\vskip 1em
+* The aim is to derive the wavefunction corresponding to a set of
+parameters, from the wavefunction corresponding to another set of
+parameters. This set of parameters is made of :
+\begin{itemize}
+\item {\tt nspinor} (1 if scalar wavefunction, 2 if spinor wavefunction)
+\item {\tt kpt}     (the ${\bf k}$-point)
+\item {\tt kg}      (the set of plane waves, determined by
+$E_{\rm kin-cut}$,${\bf G}^{\rm met}$ and ${\bf k}$)
+\item {\tt istwfk}  (the storage mode)
+\end{itemize}
+
+\vskip 1em
+* Changing nspinor : \\
+- from nspinor=1 to nspinor=2: the scalar wavefunctions are used to
+generate \underline{two} spinor wavefunctions
+\begin{eqnarray*}
+c({\bf G}) &\rightarrow& c_{1}({\bf G}, \sigma)
+= \cases{
+c({\bf G}) & \mbox{(if $\sigma = \uparrow $ )}   \cr
+0          & \mbox{(if $\sigma = \downarrow $ )} \cr
+} \\
+           &\rightarrow& c_{2}({\bf G}, \sigma)
+= \cases{
+0          & \mbox{(if $\sigma = \uparrow $ )}   \cr
+c({\bf G}) & \mbox{(if $\sigma = \downarrow $ )} \cr
+}
+\end{eqnarray*}
+- from nspinor=2 to nspinor=1: this is conceptually not well defined, as
+the natural ''inverse'' of the previous recipe
+\[c_{1}({\bf G},\sigma) \rightarrow c({\bf G}) = c_{1}({\bf G},\uparrow)\]
+will not lead to a normalized wavefunction.
+
+One state out of two must be ignored also. \\
+Despite this criticism, this natural procedure is followed in
+{\tt wfconv.f}.
+
+\label{sec:G2}
+\vskip 1em
+* Changing {\tt kpt}, from ${\tt kpt}_{1}({\bf k}_{1})$
+to ${\tt kpt}_{2}({\bf k}_{2})$ \\
+Suppose (no time-reversal use)
+\begin{eqnarray*}
+(k^{red}_{2})_{\alpha} & = & (\Delta G^{red})_{\alpha} + \sum_{\beta}
+S^{red}_{\beta\alpha} k^{red}_{1,\beta}  \mbox{\ [see \ {\tt listkk.f}]} \\
+(G^{red}_{2})_{\alpha} & = & -(\Delta G^{red})_{\alpha} + \sum_{\beta}
+S^{red}_{\beta\alpha} G^{red}_{1,\beta}
+\end{eqnarray*}
+
+According to the results in sections \ref{sec:B2} and \ref{sec:F2},
+\[c_{n{\bf k}_{1}}({\bf G}_{1}) = e^{-i2\pi
+\sum_{\alpha}({\bf k}_{1}+{\bf G}_{1})^{red}_{\alpha} t^{red}_{\alpha}}
+c_{n{\bf k}_{2}}({\bf G}_{2})\]
+
+or equivalently
+\[c_{n{\bf k}_{2}}({\bf G}_{2}) = e^{i2\pi
+\sum_{\alpha}({\bf k}_{1}+{\bf G}_{1})^{red}_{\alpha} t^{red}_{\alpha}}
+c_{n{\bf k}_{1}}({\bf G}_{1})\]
+
+If the time-reversal symmetry is used, we have instead
+\begin{eqnarray*}
+(k^{red}_{2})_{\alpha} & = & (\Delta G^{red})_{\alpha} - \sum_{\beta}
+S^{red}_{\beta\alpha} k^{red}_{1,\beta}  \mbox{\ [see \ {\tt listkk.f}]} \\
+(G^{red}_{2})_{\alpha} & = & -(\Delta G^{red})_{\alpha} - \sum_{\beta}
+S^{red}_{\beta\alpha} G^{red}_{1,\beta}
+\end{eqnarray*}
+
+which leads to
+\[c_{n{\bf k}_{2}}({\bf G}_{2}) = ( e^{i2\pi
+\sum_{\alpha}({\bf k}_{1}+{\bf G}_{1})^{red}_{\alpha} t^{red}_{\alpha}}
+c_{n{\bf k}_{1}}({\bf G}_{1}))^* \]
+
+The phase factor is computed in {\tt ph1d3d.f} \\
+The resulting function, at ${\bf G}_{1}$ is placed in a FFT box in
+{\tt sphere.f} ({\tt iflag}=1) \\
+The conversion from ${\bf G}_{1}$ to ${\bf G}_{2}$ is made when reading
+the coefficients in the FFT box, to place them in
+$c_{n}{\bf k}_{2}({\bf G}_{2})$, in {\tt sphere.f} also
+({\tt iflag}= -1).
+
+\vskip 1em
+* The change of {\tt istwfk} is accomplished when using {\tt sphere.f},
+as the representation in the FFT box is a \underline{full} representation,
+where all the non-zero coefficients are assigned to their ${\bf G}$ vector,
+even if they are the symmetric of another coefficient.
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+

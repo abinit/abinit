@@ -1,0 +1,90 @@
+# O2 molecule in a big box
+# Computing the relaxed geometry using ionmov=1
+#  and increasing the Kinetic Energy cut-off
+#  each 10 steps
+#
+# The objective is to test the variables:
+#   getvel   : GET VEL   from ...
+#   getxcart : GET XCART from ...
+#   getwfk   : GET WFK   from ...
+#
+
+# Atomic structure
+#-----------------
+xcart  -1 0.0 0.0  # The starting values of the
+        1 0.0 0.0  # atomic coordinates
+#Definition of the unit cell
+acell 10 10 10    # The keyword "acell" refers to the
+                  # lengths of the primitive vectors (in Bohr)
+#rprim 1 0 0  0 1 0  0 0 1 # This line, defining orthogonal primitive vectors,
+                           # is commented, because it is precisely the
+                           # default value of rprim
+#Definition of the atom types
+ntypat 1          # There is only one type of atom
+znucl 8           # The keyword "znucl" refers to the atomic number of the
+                  # possible type(s) of atom. The pseudopotential(s)
+                  # mentioned in the "files" file must correspond
+                  # to the type(s) of atom. Here, the only type is Hydrogen.
+#Definition of the atoms
+natom 2           # There are two atoms
+typat 1 1         # They both are of type 1, that is, Hydrogen
+
+# Structure optimization
+#-----------------------
+ionmov  1              # Molecular dynamics with viscosity
+ntime   10             # Maximum number of molecular dynamics time steps
+
+# DATASET configuration
+#----------------------
+ndtset 3
+#Definition of the planewave basis set
+ecut: 5         # Maximal kinetic energy cut-off, in Hartree
+ecut+ 5
+
+
+toldff  5.0d-5         # Will stop the SCF cycle when, twice in a row,
+                       # the difference between two consecutive evaluations of
+                       # forces differ by less than toldff (in Hartree/Bohr)
+
+#Definition of the k-point grid
+kptopt 0          # Enter the k points manually
+nkpt 1            # Only one k point is needed for isolated system,
+                  # taken by default to be 0.0 0.0 0.0
+
+#Definition of the SCF procedure
+nstep 15         # Maximal number of SCF cycles
+#toldfe is no more defined, as toldff is used above...
+diemac 2.0        # Although this is not mandatory, it is worth to
+                  # precondition the SCF cycle. The model dielectric
+                  # function used as the standard preconditioner
+                  # is described in the "dielng" input variable section.
+                  # Here, we follow the prescriptions for molecules
+                  # in a big box
+
+getxcart -1       # GET XCART from the last dataset (-1)
+getvel -1         # GET VEL   from the last dataset (-1)
+getwfk -1         # GET WFK   from the last dataset (-1)
+
+#Avoid printing densities
+prtden 0
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t04.out, tolnlines=    0,   tolabs=  0.0,         tolrel= 0.0, fld_options = -medium
+#%% psp_files = 8o.pspnc
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Compute the bond length of the O2 molecule, increasing the ecut 10 Ha each 10 steps
+#%%   This test pretends to show the use of getvel
+#%%   It starts with the two atoms separated by 2 Bohr, move the atoms using ionmov=1
+#%%   and each 10 move steps it increases the ecut but preserving the last positions (xcart)
+#%%   taking the last wavefunction and taking the last values of the velocities.
+#%%<END TEST_INFO>

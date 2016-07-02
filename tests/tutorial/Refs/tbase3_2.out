@@ -1,0 +1,24 @@
+
+.Version 8.0.3 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+
+.Copyright (C) 1998-2016 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : Mon  4 Apr 2016.
+- ( at 09h40 )
+  
+- input  file    -> tbase3_2.in
+- output file    -> tbase3_2.out
+- root for input  files -> tbase3_2i
+- root for output files -> tbase3_2o
+

@@ -1,0 +1,77 @@
+
+This directory contains the file needed for the build-in tests of the
+abinit code (sequential version).
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+_____________________________________________________________________
+
+A set of seven build-in tests exist in the abinit code.
+These short tests should be used as frequently as possible
+in the course of development or modification of the existing code.
+
+1) Usage
+
+In the main directory, type the command make
+with one of the following keywords test_fast , test_v1 , test_v5,
+test_bigdft, test_etsf_io, test_libxc, test_wannier90 like : 
+
+make test_fast
+
+The code (sequential version) will run automatically, and print
+on screen different status files during the execution, 
+followed by an automatic check of the exactness of 
+the results obtained (total energy, eigenvalues, nuclei positions, 
+forces and stresses). If everything is OK, the final output 
+on screen is rather short :
+
+--------------------------------------------
+ Status file, reporting on built-in test fast
+
+ ==> The run finished cleanly.
+     Moreover, comparison of the total energy, and other (few) relevant quantities with reference values has been successful.
+     This does not mean that no problem is present, however.
+     Please run the complete set of ABINIT tests to gain a better confidence in your installation.
+
+If there is a problem, the final output on screen will describe briefly
+the error. 
+--------------------------------------------
+
+The computed values are converged up to some level of convergence.
+The code takes into account predefined levels of convergence,
+in such a way that this suite of test should still be valid if
+the algorithm in the code is modified, even profoundly.
+Indeed, only the final result is checked, not the intermediate results.
+Unlike the basic algorithm, the parameters of the calculation 
+(ecut, ngfft, nkpt ...) 
+should not change for this suite of test to be valid.
+
+2) Description of the tests
+
+test_fast :   H2 molecule, determination of the H-H distance by the Broyden
+          algorithm. 
+
+test_v1 :   Yb cristal, self-consistent
+
+test_v5 :   HBe molecule, spin-polarized, determination of forces
+
+test_bigdft : H atom within BigDFT
+
+test_etsf_io : Ca atom with PAW, writing a ETSF_IO wavefunction file.
+
+test_libxc : Bi atom with PAW, GGA PBE from LibXC
+
+test_wannier90 : GaAs crystal with few bands.
+
+
+The physical content is weak, because the cut-off energies are unreasonably low.
+
+
+3) Related information
+
+The files that define the suite of tests are contained in the built-in 
+directory. These should NOT be changed, even for debugging. It is
+much better to do the debugging in the fast directory, or to duplicate
+the built-in directory, and not to rely on the "make" mechanism for
+the debugging.
+

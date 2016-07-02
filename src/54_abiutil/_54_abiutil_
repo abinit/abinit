@@ -1,0 +1,28 @@
+!!****d* ABINIT/52_abiutil
+!! NAME
+!! 52_abiutil
+!!
+!! DESCRIPTION
+!! This directory contains small utility routines that are
+!! used in different places in the ABINIT package.
+!! These utility can be related to the treatment of characters,
+!! to basic mathematical operations, or to basic chemistry and
+!! physics data.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! calcdensph.F90
+!! find_getdtset.F90
+!! interfaces_54_abiutil.F90
+!! m_dtset.F90
+!! m_results_out.F90
+!! m_scf_history.F90
+!! mkfilename.F90
+!!
+!!***

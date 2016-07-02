@@ -1,0 +1,492 @@
+
+.Version 8.0.3 of CUT3D 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+
+.Copyright (C) 1998-2016 ABINIT group . 
+ CUT3D comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : Mon  4 Apr 2016.
+- ( at 08h20 )
+  
+
+  What is the name of the 3D function (density, potential or wavef) file ?
+  => Your 3D function file is: t04o_DEN
+
+- Your file contains unformatted binary header + 3D data
+
+ ===============================================================================
+ ECHO of the ABINIT file header 
+ 
+ First record :
+.codvsn,headform,fform = 8.0.3    80   52
+ 
+ Second record :
+ bantot,intxc,ixc,natom  =     2     0     1     2
+ ngfft(1:3),nkpt         =    64    45    45     1
+ nspden,nspinor          =     1     1
+ nsppol,nsym,npsp,ntypat =     1     1     1     1
+ occopt,pertcase,usepaw  =     1     0     0
+ ecut,ecutdg,ecutsm      =  2.0000000000E+01  2.0000000000E+01  0.0000000000E+00
+ ecut_eff                =  2.0000000000E+01
+ qptn(1:3)               =  0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+ rprimd(1:3,1)           =  1.5000000000E+01  0.0000000000E+00  0.0000000000E+00
+ rprimd(1:3,2)           =  0.0000000000E+00  1.0000000000E+01  0.0000000000E+00
+ rprimd(1:3,3)           =  0.0000000000E+00  0.0000000000E+00  1.0000000000E+01
+ stmbias,tphysel,tsmear  =  0.0000000000E+00  0.0000000000E+00  1.0000000000E-02
+
+ Third record :
+ istwfk=   2
+ nband =   2
+ npwarr= 3210
+ so_psp=   1
+ symafm=
+          1
+ symrel=
+           1   0   0   0   1   0   0   0   1
+ type  =   1   1
+ kptns =                 (max 50 k-points will be written)
+            0.000000E+00    0.000000E+00    0.000000E+00
+ wtk =
+          1.00
+   occ =
+          2.00  0.00
+ tnons =
+          0.000000  0.000000  0.000000
+  znucl=  1.00
+
+ Pseudopotential info :
+ title=Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
+  znuclpsp=  1.00, zionpsp=  1.00, pspso=  0, pspdat= 10605, pspcod=  3, pspxc=  1
+  lmnmax  =  1
+ 
+ Last record :
+ residm,etot,fermie=    8.416143E-19   -1.127481096274E+00   -3.636638E-01
+ xred =
+           -4.921158E-02    0.000000E+00    0.000000E+00
+            4.921158E-02    0.000000E+00    0.000000E+00
+ End the ECHO of the ABINIT file header 
+ ===============================================================================
+
+ ===========================================================
+
+ ECHO important input variables ...
+
+  Dimensional primitive vectors (ABINIT equivalent: rprimd):
+    1.500000E+01    0.000000E+00    0.000000E+00
+    0.000000E+00    1.000000E+01    0.000000E+00
+    0.000000E+00    0.000000E+00    1.000000E+01
+  Grid density (ABINIT equivalent: ngfft):    64   45   45
+  Number of atoms       :           2
+  Number of atomic types:           1
+
+   #    Atomic positions (cartesian coordinates - Bohr)
+   1   -7.381737E-01    0.000000E+00    0.000000E+00
+   2    7.381737E-01    0.000000E+00    0.000000E+00
+
+  This file is a Density or Potential file 
+
+  3D function was read. Ready for further treatment.
+
+ ===========================================================
+
+  What is your choice ? Type:
+   0 => exit
+   1 => point  (interpolation of data for a single point)
+   2 => line   (interpolation of data along a line)
+   3 => plane  (interpolation of data in a plane)
+   4 => volume (interpolation of data in a volume)
+   5 => 3D formatted data (output the bare 3D data - one column)
+   6 => 3D indexed data (bare 3D data, preceeded by 3D index)
+   7 => 3D Molekel formatted data 
+   8 => 3D data with coordinates (tecplot ASCII format)
+   9 => output .xsf file for XCrysDen
+  11 => compute atomic charge using the Hirshfeld method
+  14 => Gaussian/cube wavefunction module
+
+ Your choice is  0
+
+  Exit requested by user
+  Task            0  has been done !
+
+ More analysis of the 3D file ? ( 0=no ; 1=default=yes ; 2= treat another file - restricted usage)
+
+  What is the name of the 3D function (density, potential or wavef) file ?
+  => Your 3D function file is: t04o_VHA
+
+- Your file contains unformatted binary header + 3D data
+
+ ===============================================================================
+ ECHO of the ABINIT file header 
+ 
+ First record :
+.codvsn,headform,fform = 8.0.3    80  102
+ 
+ Second record :
+ bantot,intxc,ixc,natom  =     2     0     1     2
+ ngfft(1:3),nkpt         =    64    45    45     1
+ nspden,nspinor          =     1     1
+ nsppol,nsym,npsp,ntypat =     1     1     1     1
+ occopt,pertcase,usepaw  =     1     0     0
+ ecut,ecutdg,ecutsm      =  2.0000000000E+01  2.0000000000E+01  0.0000000000E+00
+ ecut_eff                =  2.0000000000E+01
+ qptn(1:3)               =  0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+ rprimd(1:3,1)           =  1.5000000000E+01  0.0000000000E+00  0.0000000000E+00
+ rprimd(1:3,2)           =  0.0000000000E+00  1.0000000000E+01  0.0000000000E+00
+ rprimd(1:3,3)           =  0.0000000000E+00  0.0000000000E+00  1.0000000000E+01
+ stmbias,tphysel,tsmear  =  0.0000000000E+00  0.0000000000E+00  1.0000000000E-02
+
+ Third record :
+ istwfk=   2
+ nband =   2
+ npwarr= 3210
+ so_psp=   1
+ symafm=
+          1
+ symrel=
+           1   0   0   0   1   0   0   0   1
+ type  =   1   1
+ kptns =                 (max 50 k-points will be written)
+            0.000000E+00    0.000000E+00    0.000000E+00
+ wtk =
+          1.00
+   occ =
+          2.00  0.00
+ tnons =
+          0.000000  0.000000  0.000000
+  znucl=  1.00
+
+ Pseudopotential info :
+ title=Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
+  znuclpsp=  1.00, zionpsp=  1.00, pspso=  0, pspdat= 10605, pspcod=  3, pspxc=  1
+  lmnmax  =  1
+ 
+ Last record :
+ residm,etot,fermie=    8.416143E-19   -1.127481096274E+00   -3.636638E-01
+ xred =
+           -4.921158E-02    0.000000E+00    0.000000E+00
+            4.921158E-02    0.000000E+00    0.000000E+00
+ End the ECHO of the ABINIT file header 
+ ===============================================================================
+
+ ===========================================================
+
+ ECHO important input variables ...
+
+  Dimensional primitive vectors (ABINIT equivalent: rprimd):
+    1.500000E+01    0.000000E+00    0.000000E+00
+    0.000000E+00    1.000000E+01    0.000000E+00
+    0.000000E+00    0.000000E+00    1.000000E+01
+  Grid density (ABINIT equivalent: ngfft):    64   45   45
+  Number of atoms       :           2
+  Number of atomic types:           1
+
+   #    Atomic positions (cartesian coordinates - Bohr)
+   1   -7.381737E-01    0.000000E+00    0.000000E+00
+   2    7.381737E-01    0.000000E+00    0.000000E+00
+
+  This file is a Density or Potential file 
+
+  3D function was read. Ready for further treatment.
+
+ ===========================================================
+
+  What is your choice ? Type:
+   0 => exit
+   1 => point  (interpolation of data for a single point)
+   2 => line   (interpolation of data along a line)
+   3 => plane  (interpolation of data in a plane)
+   4 => volume (interpolation of data in a volume)
+   5 => 3D formatted data (output the bare 3D data - one column)
+   6 => 3D indexed data (bare 3D data, preceeded by 3D index)
+   7 => 3D Molekel formatted data 
+   8 => 3D data with coordinates (tecplot ASCII format)
+   9 => output .xsf file for XCrysDen
+  11 => compute atomic charge using the Hirshfeld method
+  14 => Gaussian/cube wavefunction module
+
+ Your choice is  0
+
+  Exit requested by user
+  Task            0  has been done !
+
+ More analysis of the 3D file ? ( 0=no ; 1=default=yes ; 2= treat another file - restricted usage)
+
+  What is the name of the 3D function (density, potential or wavef) file ?
+  => Your 3D function file is: t04o_VHXC
+
+- Your file contains unformatted binary header + 3D data
+
+ ===============================================================================
+ ECHO of the ABINIT file header 
+ 
+ First record :
+.codvsn,headform,fform = 8.0.3    80  102
+ 
+ Second record :
+ bantot,intxc,ixc,natom  =     2     0     1     2
+ ngfft(1:3),nkpt         =    64    45    45     1
+ nspden,nspinor          =     1     1
+ nsppol,nsym,npsp,ntypat =     1     1     1     1
+ occopt,pertcase,usepaw  =     1     0     0
+ ecut,ecutdg,ecutsm      =  2.0000000000E+01  2.0000000000E+01  0.0000000000E+00
+ ecut_eff                =  2.0000000000E+01
+ qptn(1:3)               =  0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+ rprimd(1:3,1)           =  1.5000000000E+01  0.0000000000E+00  0.0000000000E+00
+ rprimd(1:3,2)           =  0.0000000000E+00  1.0000000000E+01  0.0000000000E+00
+ rprimd(1:3,3)           =  0.0000000000E+00  0.0000000000E+00  1.0000000000E+01
+ stmbias,tphysel,tsmear  =  0.0000000000E+00  0.0000000000E+00  1.0000000000E-02
+
+ Third record :
+ istwfk=   2
+ nband =   2
+ npwarr= 3210
+ so_psp=   1
+ symafm=
+          1
+ symrel=
+           1   0   0   0   1   0   0   0   1
+ type  =   1   1
+ kptns =                 (max 50 k-points will be written)
+            0.000000E+00    0.000000E+00    0.000000E+00
+ wtk =
+          1.00
+   occ =
+          2.00  0.00
+ tnons =
+          0.000000  0.000000  0.000000
+  znucl=  1.00
+
+ Pseudopotential info :
+ title=Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
+  znuclpsp=  1.00, zionpsp=  1.00, pspso=  0, pspdat= 10605, pspcod=  3, pspxc=  1
+  lmnmax  =  1
+ 
+ Last record :
+ residm,etot,fermie=    8.416143E-19   -1.127481096274E+00   -3.636638E-01
+ xred =
+           -4.921158E-02    0.000000E+00    0.000000E+00
+            4.921158E-02    0.000000E+00    0.000000E+00
+ End the ECHO of the ABINIT file header 
+ ===============================================================================
+
+ ===========================================================
+
+ ECHO important input variables ...
+
+  Dimensional primitive vectors (ABINIT equivalent: rprimd):
+    1.500000E+01    0.000000E+00    0.000000E+00
+    0.000000E+00    1.000000E+01    0.000000E+00
+    0.000000E+00    0.000000E+00    1.000000E+01
+  Grid density (ABINIT equivalent: ngfft):    64   45   45
+  Number of atoms       :           2
+  Number of atomic types:           1
+
+   #    Atomic positions (cartesian coordinates - Bohr)
+   1   -7.381737E-01    0.000000E+00    0.000000E+00
+   2    7.381737E-01    0.000000E+00    0.000000E+00
+
+  This file is a Density or Potential file 
+
+  3D function was read. Ready for further treatment.
+
+ ===========================================================
+
+  What is your choice ? Type:
+   0 => exit
+   1 => point  (interpolation of data for a single point)
+   2 => line   (interpolation of data along a line)
+   3 => plane  (interpolation of data in a plane)
+   4 => volume (interpolation of data in a volume)
+   5 => 3D formatted data (output the bare 3D data - one column)
+   6 => 3D indexed data (bare 3D data, preceeded by 3D index)
+   7 => 3D Molekel formatted data 
+   8 => 3D data with coordinates (tecplot ASCII format)
+   9 => output .xsf file for XCrysDen
+  11 => compute atomic charge using the Hirshfeld method
+  14 => Gaussian/cube wavefunction module
+
+ Your choice is  0
+
+  Exit requested by user
+  Task            0  has been done !
+
+ More analysis of the 3D file ? ( 0=no ; 1=default=yes ; 2= treat another file - restricted usage)
+
+  What is the name of the 3D function (density, potential or wavef) file ?
+  => Your 3D function file is: t04o_POT
+
+- Your file contains unformatted binary header + 3D data
+
+ ===============================================================================
+ ECHO of the ABINIT file header 
+ 
+ First record :
+.codvsn,headform,fform = 8.0.3    80  102
+ 
+ Second record :
+ bantot,intxc,ixc,natom  =     2     0     1     2
+ ngfft(1:3),nkpt         =    64    45    45     1
+ nspden,nspinor          =     1     1
+ nsppol,nsym,npsp,ntypat =     1     1     1     1
+ occopt,pertcase,usepaw  =     1     0     0
+ ecut,ecutdg,ecutsm      =  2.0000000000E+01  2.0000000000E+01  0.0000000000E+00
+ ecut_eff                =  2.0000000000E+01
+ qptn(1:3)               =  0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+ rprimd(1:3,1)           =  1.5000000000E+01  0.0000000000E+00  0.0000000000E+00
+ rprimd(1:3,2)           =  0.0000000000E+00  1.0000000000E+01  0.0000000000E+00
+ rprimd(1:3,3)           =  0.0000000000E+00  0.0000000000E+00  1.0000000000E+01
+ stmbias,tphysel,tsmear  =  0.0000000000E+00  0.0000000000E+00  1.0000000000E-02
+
+ Third record :
+ istwfk=   2
+ nband =   2
+ npwarr= 3210
+ so_psp=   1
+ symafm=
+          1
+ symrel=
+           1   0   0   0   1   0   0   0   1
+ type  =   1   1
+ kptns =                 (max 50 k-points will be written)
+            0.000000E+00    0.000000E+00    0.000000E+00
+ wtk =
+          1.00
+   occ =
+          2.00  0.00
+ tnons =
+          0.000000  0.000000  0.000000
+  znucl=  1.00
+
+ Pseudopotential info :
+ title=Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
+  znuclpsp=  1.00, zionpsp=  1.00, pspso=  0, pspdat= 10605, pspcod=  3, pspxc=  1
+  lmnmax  =  1
+ 
+ Last record :
+ residm,etot,fermie=    8.416143E-19   -1.127481096274E+00   -3.636638E-01
+ xred =
+           -4.921158E-02    0.000000E+00    0.000000E+00
+            4.921158E-02    0.000000E+00    0.000000E+00
+ End the ECHO of the ABINIT file header 
+ ===============================================================================
+
+ ===========================================================
+
+ ECHO important input variables ...
+
+  Dimensional primitive vectors (ABINIT equivalent: rprimd):
+    1.500000E+01    0.000000E+00    0.000000E+00
+    0.000000E+00    1.000000E+01    0.000000E+00
+    0.000000E+00    0.000000E+00    1.000000E+01
+  Grid density (ABINIT equivalent: ngfft):    64   45   45
+  Number of atoms       :           2
+  Number of atomic types:           1
+
+   #    Atomic positions (cartesian coordinates - Bohr)
+   1   -7.381737E-01    0.000000E+00    0.000000E+00
+   2    7.381737E-01    0.000000E+00    0.000000E+00
+
+  This file is a Density or Potential file 
+
+  3D function was read. Ready for further treatment.
+
+ ===========================================================
+
+  What is your choice ? Type:
+   0 => exit
+   1 => point  (interpolation of data for a single point)
+   2 => line   (interpolation of data along a line)
+   3 => plane  (interpolation of data in a plane)
+   4 => volume (interpolation of data in a volume)
+   5 => 3D formatted data (output the bare 3D data - one column)
+   6 => 3D indexed data (bare 3D data, preceeded by 3D index)
+   7 => 3D Molekel formatted data 
+   8 => 3D data with coordinates (tecplot ASCII format)
+   9 => output .xsf file for XCrysDen
+  11 => compute atomic charge using the Hirshfeld method
+  14 => Gaussian/cube wavefunction module
+
+ Your choice is  0
+
+  Exit requested by user
+  Task            0  has been done !
+
+ More analysis of the 3D file ? ( 0=no ; 1=default=yes ; 2= treat another file - restricted usage)
+
+  Provide some global information about the density and/or potential file(s)
+
+-  File number     1, with name "t04o_DEN"
+  Number of grid points =      129600 ; Volume of real space cell (Bohr^3)=  1.500000E+03
+   Spin-component number     1
+      Sum of values, mean, mean times cell volume=    1.728000E+02    1.333333E-03    2.000000E+00
+
+-  File number     2, with name "t04o_VHA"
+  Number of grid points =      129600 ; Volume of real space cell (Bohr^3)=  1.500000E+03
+   Spin-component number     1
+      Sum of values, mean, mean times cell volume=   -3.043787E-12   -2.348601E-17   -3.522902E-14
+
+-  File number     3, with name "t04o_VHXC"
+  Number of grid points =      129600 ; Volume of real space cell (Bohr^3)=  1.500000E+03
+   Spin-component number     1
+      Sum of values, mean, mean times cell volume=   -6.859211E+03   -5.292601E-02   -7.938901E+01
+
+-  File number     4, with name "t04o_POT"
+  Number of grid points =      129600 ; Volume of real space cell (Bohr^3)=  1.500000E+03
+   Spin-component number     1
+      Sum of values, mean, mean times cell volume=   -6.859211E+03   -5.292601E-02   -7.938901E+01
+
+ Provide some global joint information about the stored density and potential file(s)
+
+  File numbers:     1    1
+   Spin-component number     1
+      Dot product of values, mean, mean times cell volume=    1.312261E+01    1.012547E-04    1.518821E-01
+
+  File numbers:     1    2
+   Spin-component number     1
+      Dot product of values, mean, mean times cell volume=    1.391168E+02    1.073432E-03    1.610148E+00
+
+  File numbers:     1    3
+   Spin-component number     1
+      Dot product of values, mean, mean times cell volume=    6.758086E+01    5.214572E-04    7.821858E-01
+
+  File numbers:     1    4
+   Spin-component number     1
+      Dot product of values, mean, mean times cell volume=   -1.518317E+02   -1.171541E-03   -1.757312E+00
+
+  File numbers:     2    2
+   Spin-component number     1
+      Dot product of values, mean, mean times cell volume=    3.766230E+03    2.906042E-02    4.359063E+01
+
+  File numbers:     2    3
+   Spin-component number     1
+      Dot product of values, mean, mean times cell volume=    2.295604E+03    1.771300E-02    2.656950E+01
+
+  File numbers:     2    4
+   Spin-component number     1
+      Dot product of values, mean, mean times cell volume=   -2.181054E+03   -1.682912E-02   -2.524368E+01
+
+  File numbers:     3    3
+   Spin-component number     1
+      Dot product of values, mean, mean times cell volume=    1.789734E+03    1.380967E-02    2.071451E+01
+
+  File numbers:     3    4
+   Spin-component number     1
+      Dot product of values, mean, mean times cell volume=   -8.820413E+02   -6.805874E-03   -1.020881E+01
+
+  File numbers:     4    4
+   Spin-component number     1
+      Dot product of values, mean, mean times cell volume=    2.344720E+03    1.809197E-02    2.713796E+01
+-
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
+
+  Thank you for using me
+

@@ -1,0 +1,185 @@
+Introduction to Bazaar, part two (by Yann Pouillon)
+===================================================
+
+
+
+Introducing repositories, branches, and checkouts
+-------------------------------------------------
+
+From now on, the development of ABINIT will be managed through an
+ensemble of *Bazaar repositories*. Each repository stores a group of
+*related branches*, allowing optimisation of the management of their
+history. There is exactly one repository per developer, corresponding to
+each minor version of ABINIT. For example, when ABINIT 5.4.2 is out, new
+repositories will be created for the 5.5 version and developers will be
+invited to use them for their new developments. Another example:
+according to the development policy of ABINIT, when the 5.7.3 version is
+released, the maintainers will be able to prune history by just removing
+all 5.4 repositories.
+
+The structure of a repository is basically a collection of directories
+containing the whole history of particular development efforts. Each of
+these directories is called a *branch*. The choice of creating branches
+is up to the developer and is totally free, though it is recommended to
+minimise their number and to organise them topically. When a branch
+contains a directly-usable version of the source code, it is called a
+*working tree*. With such branches it would be in principle possible to
+work directly within the repository, but this is not the case for
+ABINIT. The developers have to create working trees on their own
+computers either by *branching* or *checking out*, which are two ways of
+cloning the repository branches. It is also possible to incorporate
+the developments contained in one branch into another, by *merging*.
+
+The difference between a *Bazaar branch* and a *Bazaar checkout* is
+that, in the case of a branch the history is kept locally within the
+working tree, while for a checkout the history is kept remotely in a
+repository. Please note that the remote location need not be the central
+ABINIT archive, but might be a repository owned by a developer. In other
+terms, a branch is completely autonomous, whereas a checkout still
+depends on a network connection. Nonetheless, if a developer needs to
+work off-line with a checkout, an option of bzr permits local *commits*,
+and the history will be transferred on *commit* when the network is
+available again. It is even possible to *unbind* a checkout temporarily
+from its repository in order to work locally for a longer amount of
+time.
+
+The *commit* operation is critical, since it corresponds to the moments
+when history is saved, and thus to the available snapshots - aka
+*revisions* - of a development. A valuable piece of advice for any
+Version Control System (VCS) is: **commit early, commit often!** The
+more you commit, the easier it will be to go backwards if a problem
+occurs. The longer you wait before commiting your changes, the more
+probable it is that someone else modifies the code in such a way that a
+*conflict* occurs.  If you're developing a new feature, it's probably
+best to land the feature as soon as it is relatively stable. This allows
+other developers to see what you've done, comment on it, and above all
+test it.
+
+
+
+Workflows
+---------
+
+_Note: this section is greatly inspired from the *Workflows* document
+found on the Bazaar website, at:
+[http://bazaar-vcs.org/Workflows](http://bazaar-vcs.org/Workflows)._
+
+Bazaar supports many different kinds of workflow, ranging from
+centralised lock-step development to totally free-form. These are mostly
+separate from data-storage concerns. There are well-defined ways to make
+sure all branches are stored in a central location, and we will not
+discuss them here.
+
+
+
+### Centralised / Lock-step ###
+
+This is essentially the same as the CVS and SVN workflow. All developers
+work on the same branch (or branches). They run "bzr update" to get
+their checkout up-to-date, then "bzr commit" to commit.
+
+<div class="info">
+Advantage over CVS and SVN: much better branching and merging.
+</div>
+
+The developers of ABINIT typically use this workflow to manage the
+synchronisation of their efforts between two computers, e.g. between
+their laptops and workstations.
+
+
+
+### Lock-step with local commits ###
+
+This is essentially the same as the above, except that when developers
+are making a series of changes, they do "commit --local" or unbind their
+checkout, then commit their work to the shared mainline when it is
+complete.
+
+<div class="info">
+Advantage over lock-step: less chance for a bad commit to interfere with
+everyone else's work.
+</div>
+
+It can profit to groups of developers involved in the same effort and
+who have to constantly keep up-to-date with the others. This workflow
+may also be used for highly experimental developments, by developers
+unable to refrent for committing, or when the connection to the central
+ABINIT archive is not permanent.
+
+
+
+### Decentralised with shared mainline ###
+
+In this workflow, each developer has their own branch or branches, plus
+commit rights to the main branch. They do their work in their personal
+branch, then merge it into the mainline when it is ready.
+
+<div class="info">
+Advantages over lock-step w/ local commits: easier organisation of work;
+developers can merge one another's personal branches when working on something together.
+</div>
+
+This can be typically used by a group of developers working at the same
+place on the same development through a local repository. When they are
+satisfied with the status of their code, they can *push* their mainline
+into the central ABINIT archive.
+
+
+
+### Decentralised with automatic gatekeeper ###
+
+In this workflow, each developer has their own branch or branches, plus
+read-only access to the mainline. A software gatekeeper (e.g. a Patch
+Queue Manager) has commit rights to the main branch. When a developer
+wants their work merged, they request the gatekeeper to merge it. The
+gatekeeper does a merge, a compile, and runs the test suite. If the code
+passes, it is merged into the mainline.
+
+<div class="info">
+Advantage over decentralised with shared mainline: code is always tested
+before it enters the mainline.
+</div>
+
+This is what we propose to develop in order to relieve the human
+gatekeeper of a substantial part of his task.
+
+
+
+### Decentralised with human gatekeeper ###
+
+In this workflow, each developer has their own branch or branches, plus
+read-only access to the main branch. One developer (the gatekeeper) has
+commit rights to the main branch. When a developer wants their work
+merged, they ask the gatekeeper to merge it. The gatekeeper does code
+review, and merges the work into if it meets standards.
+
+<div class="info">
+Advantage over decentralised with automatic gatekeeper: code is always
+reviewed before it enters the mainline.
+</div>
+
+This is the development model of ABINIT from 2004, and will continue to
+be the main way of integrating new contributions. What changes now is
+that the other development models can be used concurrently with no
+interference. As you can see, Bazaar provides a lot of freedom and
+flexibility.
+
+
+
+What now?
+---------
+
+The next part will deal with the use of Bazaar in the context of ABINIT.
+We will present the structure of the archive, speak about writing usable
+changelogs, give advice for merging and dealing with conflicts, and
+raise your awareness about some basic precautions which have to be taken
+in order to have everything going smoothly.
+
+In the meantime, those who don't have Bazaar installed yet are kindly
+invited to do so and to report their success or failure to the GNU Arch
+mailing list.
+
+Completing the [Bazaar tutorials](http://bazaar-vcs.org/Tutorials) is
+also strongly recommended, as the next part will suppose familiarity
+with bzr.
+

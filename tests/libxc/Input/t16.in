@@ -1,0 +1,80 @@
+# Crystalline silicon
+# Sigma calculation from the merged screening file of the previous test
+# The results should be EXACTLY the same as the ones obtained in dataset 6
+# of the test v6/t14
+
+optdriver  4
+gwcalctyp  29
+istwfk    *1
+irdwdk     1
+irdscr     1
+awtr       1
+symsigma   0
+inclvkb    2
+icutcoul   3   #  old deprecated value of icutcoul, only used for legacy
+
+ecutsigx   4.0
+nband      16
+
+nkptgw     3
+kptgw      0.0  0.0  0.0
+            0.5  0.0  0.0
+            0.5  0.5  0.0
+bdgw       1 14
+            1 14
+            1 14
+
+ixc        -208012
+usekden     1
+
+ecut        6
+ecutsm      0.5
+occopt      1
+enunit      1
+
+kptopt      1
+ngkpt       2 2 2
+nshiftk     1
+shiftk      0.0 0.0 0.0
+
+diemac      12.0
+
+#Structure
+
+acell     3*10.2625546
+rprim       0.0  0.5  0.5
+            0.5  0.0  0.5
+            0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat      1
+znucl       14
+
+# Definition of the atoms
+natom       2
+typat       1 1
+xred
+  -1/8 -1/8 -1/8
+   1/8  1/8  1/8
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t14.in, t15.in, t16.in
+#%% [files]
+#%% files_to_test = 
+#%%   t16.out, tolnlines=    1,   tolabs=  1.1e-3,      tolrel= 3.0e-4, fld_options = -easy
+#%% psp_files = 14si.bj_noNLCC.psp 
+#%% [paral_info]
+#%% max_nprocs = 3
+#%% [extra_info]
+#%% authors = D. Waroquiers, M. Stankovski
+#%% keywords = 
+#%% description = 
+#%%   Silicon:
+#%%   Sigma calculation using the merged screening file of test 15 and kss file of test 14. The results
+#%%   obtained should be exactly the same as the ones obtained in dataset 6 of test 14.
+#%%   (the pseudopotential used has been made with the becke-johnson exchange-correlation and without
+#%%   non linear core corrections)
+#%%<END TEST_INFO>

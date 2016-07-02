@@ -1,0 +1,40 @@
+!!****d* ABINIT/68_dmft
+!! NAME
+!! 68_dmft
+!!
+!! DESCRIPTION
+!!  FIXME: Description is missing
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! compute_levels.F90
+!! datafordmft.F90
+!! dmft_solve.F90
+!! dyson.F90
+!! fermi_green.F90
+!! hubbard_one.F90
+!! hybridization_asymptotic_coefficient.F90
+!! impurity_solve.F90
+!! interfaces_68_dmft.F90
+!! ldau_self.F90
+!! local_ks_green.F90
+!! m_energy.F90
+!! m_entropyDMFT.F90
+!! m_green.F90
+!! m_hu.F90
+!! m_matlu.F90
+!! m_oper.F90
+!! m_self.F90
+!! newton.F90
+!! psichi_renormalization.F90
+!! qmc_prep_ctqmc.F90
+!! spectral_function.F90
+!! testcode_ctqmc.F90
+!!
+!!***

@@ -1,0 +1,42 @@
+!!****d* ABINIT/52_fft_mpi_noabirule
+!! NAME
+!! 52_fft_mpi_noabirule
+!!
+!! DESCRIPTION
+!! This subdirectory contains the source and object files related
+!! to new routines from the FFT package of Stefan Goedecker (2005 version),
+!! These routines are written in F90, but do not follow the ABINIT
+!! coding rules (~abinit/doc/developers/rules_coding).
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! bound.F90
+!! dfti_c2c_ip.finc
+!! dfti_c2c_op.finc
+!! dfti_fftpad.finc
+!! dfti_fftrisc.finc
+!! fftug.finc
+!! fftur.finc
+!! fftw3_c2c_ip.finc
+!! fftw3_c2c_op.finc
+!! fftw3_fftpad.finc
+!! fftw3_fftrisc.finc
+!! getng.F90
+!! indirect_parallel_Fourier.F90
+!! interfaces_52_fft_mpi_noabirule.F90
+!! m_dfti.F90
+!! m_fft_mesh.F90
+!! m_fftcore.F90
+!! m_fftw3.F90
+!! m_sg2002.F90
+!! m_sgfft.F90
+!! sphereboundary.F90
+!! utests_fftu.finc
+!!
+!!***

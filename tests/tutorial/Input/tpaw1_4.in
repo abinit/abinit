@@ -1,0 +1,63 @@
+# =======================================
+# Input for PAW1 tutorial
+# Diamond at experimental volume
+# =======================================
+
+#Output of the total DOS
+ prtdos 1
+
+#Output of the projected DOS (with PAW contribs)
+# prtdos 3  pawprtdos 1
+# natsph 1 iatsph 1 ratsph 1.5
+
+
+#Cell and atoms definition
+ acell 3*3.567 angstrom
+ rprim 0.0 1/2 1/2
+       1/2 0.0 1/2
+       1/2 1/2 0.0
+ ntypat 1  natom 2  typat 2*1
+ xred 0.0 0.0 0.0
+      1/4 1/4 1/4
+ znucl 6  nband 6
+
+#Basis definitions
+ ecut 12.
+ ecutsm 0.5
+ pawecutdg 24.
+
+#SCF cycle parameters
+ tolwfr 1.0d-12 nbdbuf 2  #nbdbuf:does not take care of empty bands
+ nstep 10
+
+#K-points and sym
+ nsym 0       
+ occopt 7  tsmear 0.005
+ ngkpt 10 10 10
+ nshiftk 4
+ shiftk 0.5 0.5 0.5
+        0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5
+
+#I/O parameters
+ prtwf 0 prtden 0 prteig 0
+
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tpaw1_4.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options = -easy
+#%% psp_files =  6c.lda.atompaw
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Torrent
+#%% keywords = PAW
+#%% description = 
+#%%   Input for PAW1 tutorial
+#%%   Diamond at experimental volume
+#%%<END TEST_INFO>

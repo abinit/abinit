@@ -1,0 +1,10 @@
+
+This directory, ~abinit/tests/tutorespfn, provides the files needed
+for the ABINIT tutorial. 
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+Related explanations can be found in 
+~abinit/doc/tutorial, in particular within the welcome.html file.
+
+

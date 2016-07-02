@@ -1,0 +1,267 @@
+# Additional files to distribute
+EXTRA_DIST += \
+	KNOWN_PROBLEMS \
+	PACKAGING \
+	README.ChangeLog \
+	README.GPU \
+	README.xlf \
+	RELNOTES \
+	autogen.sh \
+	mkrobodoc.sh \
+	post_configure_nag.sh \
+	pre_configure_nag.sh \
+	wipeout.sh
+
+# Additional files to clean
+CLEANFILES += \
+	config.fc_info.tmp
+
+# Files to install
+install-data-local: config.pc
+	$(INSTALL) -d -m 755 $(DESTDIR)$(libdir)/pkgconfig
+	$(INSTALL_DATA) -m 644 config.pc \
+	 $(DESTDIR)$(libdir)/pkgconfig/abinit.pc
+
+# Files to uninstall
+uninstall-local:
+	/bin/rm -f $(DESTDIR)$(libdir)/pkgconfig/abinit.pc
+
+# Tests
+basic_tests:
+	cd $(top_builddir)/tests && $(MAKE) tests_in @SET_MAKE@
+
+# Let Automake know how to perform basic tests
+#check-local:
+#$(MAKE) basic_tests @SET_MAKE@
+check-local:
+	cat $(top_srcdir)/tests/built-in/README
+
+# Set of internal tests
+test_fast:
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_fast.files >& testin_fast.stdout && cat testin_fast_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
+
+test_v1:
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_v1.files >& testin_v1.stdout && cat testin_v1_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
+
+test_v5:
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_v5.files >& testin_v5.stdout && cat testin_v5_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
+
+test_bigdft:
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_bigdft.files >& testin_bigdft.stdout && cat testin_bigdft_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
+
+test_etsf_io:
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_etsf_io.files >& testin_etsf_io.stdout && cat testin_etsf_io_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
+
+test_libxc:
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_libxc.files >& testin_libxc.stdout && cat testin_libxc_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
+
+test_wannier90:
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_wannier90.files >& testin_wannier90.stdout && cat testin_wannier90_tmp_STATUS  && rm -f abinit *DDB *EIG *out* *nc *WFK *DEN *chk *eig *mmn *amn
+
+tests_in:
+	$(MAKE) test_fast test_v1 test_v5 test_bigdft test_etsf_io test_libxc test_wannier90
+
+# ---------------------------------------------------------------------------- #
+
+# Help
+help:
+	@more $(top_srcdir)/doc/help_make/help_make_top
+
+help_dev dev_help dev:
+	@more $(top_srcdir)/doc/help_make/help_make_top_dev
+
+# ---------------------------------------------------------------------------- #
+
+# robodoc-html-x.x.x.tar contains all html files produced by ROBODOC
+robodoc:
+	rm -rf tmp-robodoc robodoc-html && mkdir tmp-robodoc
+	cp -rf $(top_srcdir)/src/[0-9]* tmp-robodoc
+	cp $(top_srcdir)/config/robodoc/robodoc-html.rc tmp-robodoc/robodoc.rc
+	cd tmp-robodoc && rm */*.in && rm */interfaces* && robodoc > ../robodoc.log 2> ../robodoc.err
+	mv -f tmp-robodoc/www/robodoc robodoc-html
+	tardir=robodoc-html && $(am__tar) | GZIP=$(GZIP_ENV) gzip -c >robodoc-html-$(VERSION).tar.gz
+	rm -rf robodoc-html tmp-robodoc
+	cat $(top_srcdir)/doc/developers/robodoc.doc.txt >> robodoc.err
+
+# infos_html-x.x.x.tar contains all html files needed for the Web site
+infos_html:
+	-rm -fr infos_htm* tmp-infos*
+	cp -fr doc tmp-infos-$(VERSION)
+	cp developers/various/var-file-index.py tmp-infos-$(VERSION)
+	cp -fr KNOWN_PROBLEMS tmp-infos-$(VERSION)/known_problems
+	mkdir tmp-infos-$(VERSION)/Tests
+	mkdir tmp-infos-$(VERSION)/Tests/Test_fast tmp-infos-$(VERSION)/Tests/Test_v1 tmp-infos-$(VERSION)/Tests/Test_v2 
+	mkdir tmp-infos-$(VERSION)/Tests/Test_v3 tmp-infos-$(VERSION)/Tests/Test_v4 tmp-infos-$(VERSION)/Tests/Test_v5 
+	mkdir tmp-infos-$(VERSION)/Tests/Test_v6 tmp-infos-$(VERSION)/Tests/Test_v67mbpt tmp-infos-$(VERSION)/Tests/Test_v7
+	mkdir tmp-infos-$(VERSION)/Tests/Test_bigdft tmp-infos-$(VERSION)/Tests/Test_etsf_io
+	mkdir tmp-infos-$(VERSION)/Tests/Test_libxc tmp-infos-$(VERSION)/Tests/Test_wannier90 
+	mkdir tmp-infos-$(VERSION)/Tests/Test_mpiio tmp-infos-$(VERSION)/Tests/Test_atompaw
+	mkdir tmp-infos-$(VERSION)/Tests/Test_psml
+	mkdir tmp-infos-$(VERSION)/Tests/Test_tutorial tmp-infos-$(VERSION)/Tests/Test_tutorespfn
+	cp -fr tests/fast/Input tmp-infos-$(VERSION)/Tests/Test_fast
+	cp -fr tests/v1/Input tmp-infos-$(VERSION)/Tests/Test_v1
+	cp -fr tests/v2/Input tmp-infos-$(VERSION)/Tests/Test_v2
+	cp -fr tests/v3/Input tmp-infos-$(VERSION)/Tests/Test_v3
+	cp -fr tests/v4/Input tmp-infos-$(VERSION)/Tests/Test_v4
+	cp -fr tests/v5/Input tmp-infos-$(VERSION)/Tests/Test_v5
+	cp -fr tests/v6/Input tmp-infos-$(VERSION)/Tests/Test_v6
+	cp -fr tests/v67mbpt/Input tmp-infos-$(VERSION)/Tests/Test_v67mbpt
+	cp -fr tests/v7/Input tmp-infos-$(VERSION)/Tests/Test_v7
+	cp -fr tests/bigdft/Input tmp-infos-$(VERSION)/Tests/Test_bigdft
+	cp -fr tests/etsf_io/Input tmp-infos-$(VERSION)/Tests/Test_etsf_io
+	cp -fr tests/libxc/Input tmp-infos-$(VERSION)/Tests/Test_libxc
+	cp -fr tests/wannier90/Input tmp-infos-$(VERSION)/Tests/Test_wannier90
+	cp -fr tests/mpiio/Input tmp-infos-$(VERSION)/Tests/Test_mpiio
+	cp -fr tests/atompaw/Input tmp-infos-$(VERSION)/Tests/Test_atompaw
+	cp -fr tests/psml/Input tmp-infos-$(VERSION)/Tests/Test_psml
+	cp -fr tests/tutorial/Input tmp-infos-$(VERSION)/Tests/Test_tutorial
+	cp -fr tests/tutorespfn/Input tmp-infos-$(VERSION)/Tests/Test_tutorespfn
+	cd tmp-infos-$(VERSION) ; python var-file-index.py
+	cp tmp-infos-$(VERSION)/developers/contributing.html tmp-infos-$(VERSION)
+	-rm -f tmp-infos-$(VERSION)/features/features.html tmp-infos-$(VERSION)/release_notes/release_notes.html tmp-infos-$(VERSION)/installation_notes/install.html
+	cp -fr tmp-infos-$(VERSION)/features/features_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/features/features.html
+	cp -fr tmp-infos-$(VERSION)/release_notes/rel*_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/release_notes/release_notes.html
+	cp -fr tmp-infos-$(VERSION)/inst*_notes/inst*_v$(ABINIT_VERSION_MAJOR).$(ABINIT_VERSION_MINOR).html tmp-infos-$(VERSION)/install_notes/install.html
+	tar -cvf infos_html-$(VERSION).tar                \
+          tmp-infos-$(VERSION)/Tests \
+          tmp-infos-$(VERSION)/input_variables tmp-infos-$(VERSION)/users tmp-infos-$(VERSION)/tutorial tmp-infos-$(VERSION)/known_problems \
+          tmp-infos-$(VERSION)/gallery/Plot1.jpg tmp-infos-$(VERSION)/gallery/pcpm.gif tmp-infos-$(VERSION)/gallery/mode.png  \
+          tmp-infos-$(VERSION)/*/*.css \
+          tmp-infos-$(VERSION)/install_notes/install.html tmp-infos-$(VERSION)/install_notes/list_internal_links.js \
+          tmp-infos-$(VERSION)/release_notes/release_notes.html \
+          tmp-infos-$(VERSION)/features/features.html tmp-infos-$(VERSION)/features/list_internal_links.js \
+          tmp-infos-$(VERSION)/presentation/presentation.pdf
+	gzip infos_html-$(VERSION).tar
+	-rm -fr tmp-infos-$(VERSION)
+
+#Run abilint
+run_abilint :
+	python $(srcdir)/config/scripts/abilint --graph=directories . .
+
+# ---------------------------------------------------------------------------- #
+
+# Default number of processors for parallel builds
+multi_nprocs = 4
+
+# Special targets for parallel builds, in order to work around random
+# failures (e.g. LibXC, NetCDF) and make sure dependencies are met
+multi:
+	cd fallbacks && $(MAKE) @SET_MAKE@
+	$(MAKE) -j$(multi_nprocs) @SET_MAKE@
+
+multi_dual mj2:
+	$(MAKE) multi multi_nprocs=2 @SET_MAKE@
+
+multi_quad mj4:
+	$(MAKE) multi multi_nprocs=4 @SET_MAKE@
+
+multi_octo mj8:
+	$(MAKE) multi multi_nprocs=8 @SET_MAKE@
+
+# ---------------------------------------------------------------------------- #
+
+check_list:
+	@cat $(top_srcdir)/doc/maintainers/check_list.txt
+
+# ---------------------------------------------------------------------------- #
+
+# Generate binary tarball
+abinit_binpkgdir = $(ABINIT_BINARY_PACKAGE)
+binary_package:
+	-rm -rf $(abinit_binpkgdir) $(abinit_binpkgdir).tgz
+	$(MKDIR_P) $(abinit_binpkgdir)
+	$(MAKE) $(MAKEFLAGS) distdir @SET_MAKE@ && \
+	 chmod -R u+w $(distdir) && \
+	 mv $(distdir) $(abinit_binpkgdir)
+	$(MAKE) $(MAKEFLAGS) install @SET_MAKE@ DESTDIR=$(PWD)/$(abinit_binpkgdir)
+	$(MKDIR_P) $(abinit_binpkgdir)/$(abinit_datdir)
+	cd $(abinit_binpkgdir); \
+	 mv $(distdir)/tests ./$(abinit_datdir); \
+	 mv $(distdir)/scripts ./$(abinit_datdir); \
+	 mv $(distdir)/extras/matlab_data_analysis ./$(abinit_datdir); \
+	 mv $(distdir)/extras/post_processing ./$(abinit_datdir); \
+	 rm -rf $(distdir); \
+	 tardir=. && \
+	 $(am__tar) | GZIP=$(GZIP_ENV) gzip -c >../$(abinit_binpkgdir).tgz
+
+binary_package_lite:
+	-rm -rf $(abinit_binpkgdir) $(abinit_binpkgdir).tgz
+	$(MKDIR_P) $(abinit_binpkgdir)
+	$(MAKE) $(MAKEFLAGS) distdir  && \
+	 chmod -R u+w $(distdir) && \
+	 mv $(distdir) $(abinit_binpkgdir)
+	$(MAKE) $(MAKEFLAGS) install  DESTDIR=$(PWD)/$(abinit_binpkgdir)
+	$(MKDIR_P) $(abinit_binpkgdir)/$(abinit_datdir)
+	chmod o+rX $(abinit_binpkgdir); \
+	cd $(abinit_binpkgdir); \
+	 mv $(distdir)/scripts ./$(abinit_datdir); \
+	 rm -rf $(distdir); \
+	 mv usr/local/* .; \
+	 rm -rf usr share/doc; \
+	 mkdir -p etc; \
+	 chmod -R o+rX *
+
+dist-lite: distdir
+	tardir=$(distdir) && \
+	  cd $(distdir)/doc; rm -rf build* features inp* t* users  && \
+	  cd ../tests; rm -rf v* tuto* Psps* paral mpiio libxc gpu fast bigdft* && \
+	  cd ../abichecks; rm -rf abirules buildsys && \
+	  cd ../..; \
+	  rm -rf $(distdir)/packages && \
+	  rm -rf $(distdir)/developers && \
+	  rm -rf $(distdir)/scripts/post_processing && \
+	  $(am__tar) | GZIP=$(GZIP_ENV) gzip -c >$(distdir).tar.gz
+	$(am__remove_distdir)
+
+bin_prep:
+	rm -fr abinitbin-$(VERSION) abinitbin.tar abinitbin_seq-$(VERSION)* abinitbin_seqpar-$(VERSION)*
+	mkdir abinitbin-$(VERSION)
+	tar -cvf abinitbin.tar AUTHORS COPYING INSTALL KNOWN_PROBLEMS NEWS README* RELNOTES THANKS src \
+            doc scripts developers tests/Psps* tests/v*/Input tests/tutorial tests/paral tests/buil* tests/Scripts tests/cpu \
+            tests/tutorespfn tests/bigdft tests/etsf_io tests/libxc tests/wannier90 tests/atompaw tests/mpiio tests/psml
+	mv abinitbin.tar abinitbin-$(VERSION)
+	cd abinitbin-$(VERSION) ; tar -xvf abinitbin.tar ; \
+            rm -fr abinitbin.tar ; \
+            cd src ; rm -fr */*.a ; \
+            rm -fr 00*/*.F90 ; rm -fr 00*/*.o ; \
+            rm -fr 01*/*.F90 ; rm -fr 01*/*.o ; \
+            rm -fr 11*/*.F90 ; rm -fr 11*/*.o ; \
+            rm -fr 12*/*.F90 ; rm -fr 12*/*.o ; \
+            rm -fr 13*/*.F90 ; rm -fr 13*/*.o ; \
+            rm -fr 14*/*.F90 ; rm -fr 14*/*.o ; \
+            rm -fr 15*/*.F90 ; rm -fr 15*/*.o ; \
+            rm -fr 16*/*.F90 ; rm -fr 16*/*.o ; \
+            rm -fr 17*/*.F90 ; rm -fr 17*/*.o ; \
+            rm -fr 18*/*.F90 ; rm -fr 18*/*.o ; \
+            rm -fr 19*/*.F90 ; rm -fr 19*/*.o ; \
+            rm -fr */*.F90 ; rm -fr */*.o ; \
+            cd ../tests ; rm -fr */,* ; cd .. ; \
+            mkdir opt ; mv src/98_main/* opt ; rm -fr src ; \
+            cp ../developers/maintainers/Makefile_topdir_binarypack Makefile ; \
+            cp ../developers/maintainers/Makefile_testdir_binarypack tests/Makefile ;
+
+# FIXME: there is no point anymore in having 2 binary distributions
+bin_seq: bin_prep
+	cd abinitbin-$(VERSION) ; rm -fr tests/paral
+	tar -cvf abinitbin_seq-$(VERSION).tar abinitbin-$(VERSION)
+	chmod 644 abinitbin_seq-$(VERSION).tar
+	gzip abinitbin_seq-$(VERSION).tar
+	rm -fr abinitbin-$(VERSION)
+
+bin_seqpar: bin_prep
+	tar -cvf abinitbin_seqpar-$(VERSION).tar abinitbin-$(VERSION)
+	chmod 644 abinitbin_seqpar-$(VERSION).tar
+	gzip abinitbin_seqpar-$(VERSION).tar
+	cd abinitbin-$(VERSION) ; rm -fr tests/paral
+	tar -cvf abinitbin_seq-$(VERSION).tar abinitbin-$(VERSION)
+	chmod 644 abinitbin_seq-$(VERSION).tar
+	gzip abinitbin_seq-$(VERSION).tar
+	rm -fr abinitbin-$(VERSION)
+
+# ---------------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------- #
+
+# Thorough clean-up
+maintainer-clean-local:
+	rm -f infos_html* robodoc-html*
+	find . -name '*.~[0-9]~' -exec rm -f {} \;

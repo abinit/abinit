@@ -1,0 +1,979 @@
+
+.Version 6.13.3 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu4.4 computer) 
+
+.Copyright (C) 1998-2016 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : Tue 24 Apr 2012.
+- ( at 18h 8 )
+  
+- input  file    -> /home/gonze/ABINIT/ABINITv6.13.3/trunk/6.13.3-private/tests/v1/Input/t07.in
+- output file    -> t07.out
+- root for input  files -> t06o
+- root for output files -> t07o
+
+
+ Symmetries : space group F-4 3 m (#216); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need of the present run
+   intxc =         1  ionmov =         0    iscf =         5 xclevel =         1
+  lmnmax =         3   lnmax =         3   mband =         4  mffmem =         1
+P  mgfft =        16   mkmem =        10 mpssoang=         2     mpw =       170
+  mqgrid =      3001   natom =         1    nfft =      4096    nkpt =        10
+  nloalg =         4  nspden =         1 nspinor =         1  nsppol =         1
+    nsym =        24  n1xccc =         0  ntypat =         1  occopt =         7
+================================================================================
+P This job should need less than                       2.306 Mbytes of memory.
+P Max. in main chain + fourwf.f
+P         33 blocks of mpw  integer numbers, for      0.021 Mbytes.
+P        121 blocks of mpw  real(dp)  numbers, for      0.157 Mbytes.
+P          2 blocks of nfft integer numbers, for      0.031 Mbytes.
+P         28 blocks of nfft real(dp)  numbers, for      0.875 Mbytes.
+P            Additional     real(dp)  numbers, for      0.253 Mbytes.
+P            With residue estimated to be             0.969 Mbytes.
+P
+P Comparison of the memory needs of different chains
+P Main chain + fourwf.f                 2.306 Mbytes.
+P Main chain + nonlop.f + opernl.f      2.235 Mbytes.
+P XC chain                              2.207 Mbytes.
+P mkrho chain                           2.125 Mbytes.
+P fourdp chain                          2.090 Mbytes.
+- parallel k-point chain                2.012 Mbytes.
+P newvtr chain                          2.074 Mbytes.
+  Rough estimation (10% accuracy) of disk space for files :
+  WF disk file :      0.106 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+--------------------------------------------------------------------------------
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values                                      
+-   accesswff0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-
+- outvars: echo of global parameters not present in the input file              
+-  max_nthreads =    0
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell      7.6000000000E+00  7.6000000000E+00  7.6000000000E+00 Bohr
+              amu      2.69815390E+01
+             ecut      1.00000000E+01 Hartree
+           enunit           2
+            intxc           1
+           irdwfk           1
+             iscf           5
+              kpt      3.75000000E-01  3.75000000E-01  3.75000000E-01
+                       3.75000000E-01  3.75000000E-01  1.25000000E-01
+                       5.00000000E-01  5.00000000E-01  1.25000000E-01
+                       3.75000000E-01  3.75000000E-01  6.25000000E-01
+                       3.75000000E-01  1.25000000E-01  1.25000000E-01
+                       2.50000000E-01  5.00000000E-01  1.25000000E-01
+                       3.75000000E-01  1.25000000E-01  6.25000000E-01
+                       0.00000000E+00  1.25000000E-01  5.00000000E-01
+                       1.25000000E-01  1.25000000E-01  1.25000000E-01
+                       2.50000000E-01  2.50000000E-01  1.25000000E-01
+           kptopt           0
+P           mkmem          10
+            natom           1
+            nband           4
+            ngfft          16      16      16
+             nkpt          10
+            nline           3
+            nstep           7
+             nsym          24
+           ntypat           1
+              occ      2.000000  1.000000  0.000000  0.000000
+                       2.000000  1.000000  0.000000  0.000000
+                       2.000000  1.000000  0.000000  0.000000
+                       2.000000  1.000000  0.000000  0.000000
+                       2.000000  1.000000  0.000000  0.000000
+                       2.000000  1.000000  0.000000  0.000000
+                       2.000000  1.000000  0.000000  0.000000
+                       2.000000  1.000000  0.000000  0.000000
+                       2.000000  1.000000  0.000000  0.000000
+                       2.000000  1.000000  0.000000  0.000000
+           occopt           7
+           prtdos           1
+           prtvol          10
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+          spgroup         216
+           symrel      1  0  0   0  1  0   0  0  1       0  1 -1   1  0 -1   0  0 -1
+                      -1  0  0  -1  0  1  -1  1  0       0 -1  1   0 -1  0   1 -1  0
+                      -1  0  1  -1  0  0  -1  1  0       0 -1  0   0 -1  1   1 -1  0
+                       0 -1  1   1 -1  0   0 -1  0       0  1 -1   0  0 -1   1  0 -1
+                       0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
+                       1  0 -1   0  1 -1   0  0 -1       1 -1  0   0 -1  0   0 -1  1
+                      -1  0  0  -1  1  0  -1  0  1       0  1  0   1  0  0   0  0  1
+                       0  0  1   0  1  0   1  0  0       1  0  0   0  0  1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  1  0   0  0  1   1  0  0
+                      -1  0  1  -1  1  0  -1  0  0       0  0 -1   0  1 -1   1  0 -1
+                       1  0 -1   0  0 -1   0  1 -1       1 -1  0   0 -1  1   0 -1  0
+                       0 -1  0   1 -1  0   0 -1  1      -1  1  0  -1  0  0  -1  0  1
+           tolwfr      1.00000000E-14
+           tsmear      5.00000000E-02 Hartree
+            typat      1
+              wtk        0.03125    0.09375    0.09375    0.09375    0.09375    0.18750
+                         0.18750    0.09375    0.03125    0.09375
+            znucl       13.00000
+
+================================================================================
+
+ chkinp: Checking input parameters for consistency.
+
+================================================================================
+== DATASET  1 ==================================================================
+-   nproc =    1
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  3.8000000  3.8000000  G(1)= -0.1315789  0.1315789  0.1315789
+ R(2)=  3.8000000  0.0000000  3.8000000  G(2)=  0.1315789 -0.1315789  0.1315789
+ R(3)=  3.8000000  3.8000000  0.0000000  G(3)=  0.1315789  0.1315789 -0.1315789
+ Unit cell volume ucvol=  1.0974400E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
+         ecut(hartree)=     10.000   => boxcut(ratio)=   2.09149
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv6.13.3/trunk/6.13.3-private/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv6.13.3/trunk/6.13.3-private/tests/Psps_for_tests/13al.pspgth
+- Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
+- 13.00000   3.00000    960528                znucl, zion, pspdat
+    2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+ rloc=   0.4500000
+  cc1=  -6.8340578; cc2=   0.0000000; cc3=   0.0000000; cc4=   0.0000000
+  rrs=   0.4654363; h1s=   2.8140777; h2s=   1.9395165
+  rrp=   0.5462433; h1p=   1.9160118
+-  Local part computed in reciprocal space.
+
+ pspatm : COMMENT -
+  the projectors are not normalized,
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
+  However, this does not influence the results obtained hereafter.
+ pspatm: epsatm=   -5.99108991
+         --- l  ekb(1:nproj) -->
+             0    1.005823    0.184862
+             1    0.220213
+ pspatm: atomic psp has been read  and splines computed
+
+  -1.79732697E+01                                ecore*ucvol(ha*bohr**3)
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t06o_WFK
+P newkpt: treating      4 bands with npw=     162 for ikpt=   1 by node    0
+P newkpt: treating      4 bands with npw=     163 for ikpt=   2 by node    0
+P newkpt: treating      4 bands with npw=     168 for ikpt=   3 by node    0
+P newkpt: treating      4 bands with npw=     170 for ikpt=   4 by node    0
+P newkpt: treating      4 bands with npw=     161 for ikpt=   5 by node    0
+P newkpt: treating      4 bands with npw=     164 for ikpt=   6 by node    0
+P newkpt: treating      4 bands with npw=     167 for ikpt=   7 by node    0
+P newkpt: treating      4 bands with npw=     166 for ikpt=   8 by node    0
+P newkpt: treating      4 bands with npw=     168 for ikpt=   9 by node    0
+P newkpt: treating      4 bands with npw=     162 for ikpt=  10 by node    0
+
+ setup2: Arith. and geom. avg. npw (full set) are     165.188     165.165
+
+================================================================================
+
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+
+ ETOT  1  -2.1002145402905    -2.100E+00 3.175E-03 7.085E-05
+
+ prteigrs : about to open file t07o_EIG
+ Fermi (or HOMO) energy (hartree) =   0.34690   Average Vxc (hartree)=  -0.34512
+ Eigenvalues (hartree) for nkpt=  10  k points:
+ kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.3750  0.3750  0.3750 (reduced coord)
+   0.07261   0.31414   0.74611   0.74611
+      occupation numbers for kpt#   1
+   2.00000   1.64590   0.00000   0.00000
+ kpt#   2, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.1250 (reduced coord)
+   0.07249   0.46677   0.55428   0.60019
+      occupation numbers for kpt#   2
+   2.00000   0.00070   0.00000   0.00000
+ kpt#   3, nband=  4, wtk=  0.09375, kpt=  0.5000  0.5000  0.1250 (reduced coord)
+   0.19229   0.36073   0.42868   0.56360
+      occupation numbers for kpt#   3
+   1.99999   0.69575   0.02072   0.00000
+ kpt#   4, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.6250 (reduced coord)
+   0.19383   0.27262   0.44038   0.63700
+      occupation numbers for kpt#   4
+   1.99999   1.96437   0.00819   0.00000
+ kpt#   5, nband=  4, wtk=  0.09375, kpt=  0.3750  0.1250  0.1250 (reduced coord)
+   0.03151   0.42983   0.59136   0.78308
+      occupation numbers for kpt#   5
+   2.00000   0.01900   0.00000   0.00000
+ kpt#   6, nband=  4, wtk=  0.18750, kpt=  0.2500  0.5000  0.1250 (reduced coord)
+   0.11329   0.35142   0.51619   0.59216
+      occupation numbers for kpt#   6
+   2.00000   0.89824   0.00000   0.00000
+ kpt#   7, nband=  4, wtk=  0.18750, kpt=  0.3750  0.1250  0.6250 (reduced coord)
+   0.23207   0.31169   0.40078   0.47964
+      occupation numbers for kpt#   7
+   1.99884   1.68064   0.12753   0.00017
+ kpt#   8, nband=  4, wtk=  0.09375, kpt=  0.0000  0.1250  0.5000 (reduced coord)
+   0.15372   0.23479   0.62837   0.67374
+      occupation numbers for kpt#   8
+   2.00000   1.99848   0.00000   0.00000
+ kpt#   9, nband=  4, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
+  -0.05150   0.65695   0.78172   0.78172
+      occupation numbers for kpt#   9
+   2.00000   0.00000   0.00000   0.00000
+ kpt#  10, nband=  4, wtk=  0.09375, kpt=  0.2500  0.2500  0.1250 (reduced coord)
+  -0.00985   0.54429   0.67332   0.73451
+      occupation numbers for kpt#  10
+   2.00000   0.00000   0.00000   0.00000
+ Fermi (or HOMO) energy (eV) =   9.43964   Average Vxc (eV)=  -9.39120
+ Eigenvalues (   eV  ) for nkpt=  10  k points:
+ kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.3750  0.3750  0.3750 (reduced coord)
+   1.97572   8.54813  20.30261  20.30261
+ kpt#   2, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.1250 (reduced coord)
+   1.97256  12.70141  15.08266  16.33201
+ kpt#   3, nband=  4, wtk=  0.09375, kpt=  0.5000  0.5000  0.1250 (reduced coord)
+   5.23257   9.81587  11.66488  15.33641
+ kpt#   4, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.6250 (reduced coord)
+   5.27431   7.41826  11.98339  17.33364
+ kpt#   5, nband=  4, wtk=  0.09375, kpt=  0.3750  0.1250  0.1250 (reduced coord)
+   0.85730  11.69615  16.09184  21.30877
+ kpt#   6, nband=  4, wtk=  0.18750, kpt=  0.2500  0.5000  0.1250 (reduced coord)
+   3.08289   9.56268  14.04623  16.11353
+ kpt#   7, nband=  4, wtk=  0.18750, kpt=  0.3750  0.1250  0.6250 (reduced coord)
+   6.31482   8.48164  10.90574  13.05169
+ kpt#   8, nband=  4, wtk=  0.09375, kpt=  0.0000  0.1250  0.5000 (reduced coord)
+   4.18297   6.38903  17.09890  18.33334
+ kpt#   9, nband=  4, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
+  -1.40146  17.87640  21.27158  21.27158
+ kpt#  10, nband=  4, wtk=  0.09375, kpt=  0.2500  0.2500  0.1250 (reduced coord)
+  -0.26805  14.81089  18.32204  19.98703
+
+ ETOT  2  -2.1002145947759    -5.449E-08 8.620E-06 2.032E-06
+
+ prteigrs : about to open file t07o_EIG
+ Fermi (or HOMO) energy (hartree) =   0.34692   Average Vxc (hartree)=  -0.34512
+ Eigenvalues (hartree) for nkpt=  10  k points:
+ kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.3750  0.3750  0.3750 (reduced coord)
+   0.07263   0.31416   0.74612   0.74612
+      occupation numbers for kpt#   1
+   2.00000   1.64589   0.00000   0.00000
+ kpt#   2, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.1250 (reduced coord)
+   0.07252   0.46679   0.55430   0.60021
+      occupation numbers for kpt#   2
+   2.00000   0.00070   0.00000   0.00000
+ kpt#   3, nband=  4, wtk=  0.09375, kpt=  0.5000  0.5000  0.1250 (reduced coord)
+   0.19232   0.36075   0.42870   0.56362
+      occupation numbers for kpt#   3
+   1.99999   0.69580   0.02072   0.00000
+ kpt#   4, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.6250 (reduced coord)
+   0.19385   0.27264   0.44040   0.63702
+      occupation numbers for kpt#   4
+   1.99999   1.96436   0.00819   0.00000
+ kpt#   5, nband=  4, wtk=  0.09375, kpt=  0.3750  0.1250  0.1250 (reduced coord)
+   0.03153   0.42985   0.59135   0.78073
+      occupation numbers for kpt#   5
+   2.00000   0.01900   0.00000   0.00000
+ kpt#   6, nband=  4, wtk=  0.18750, kpt=  0.2500  0.5000  0.1250 (reduced coord)
+   0.11332   0.35145   0.51621   0.59218
+      occupation numbers for kpt#   6
+   2.00000   0.89822   0.00000   0.00000
+ kpt#   7, nband=  4, wtk=  0.18750, kpt=  0.3750  0.1250  0.6250 (reduced coord)
+   0.23209   0.31172   0.40080   0.47966
+      occupation numbers for kpt#   7
+   1.99884   1.68062   0.12755   0.00017
+ kpt#   8, nband=  4, wtk=  0.09375, kpt=  0.0000  0.1250  0.5000 (reduced coord)
+   0.15375   0.23482   0.62839   0.67375
+      occupation numbers for kpt#   8
+   2.00000   1.99848   0.00000   0.00000
+ kpt#   9, nband=  4, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
+  -0.05148   0.65697   0.78174   0.78174
+      occupation numbers for kpt#   9
+   2.00000   0.00000   0.00000   0.00000
+ kpt#  10, nband=  4, wtk=  0.09375, kpt=  0.2500  0.2500  0.1250 (reduced coord)
+  -0.00983   0.54431   0.67334   0.73444
+      occupation numbers for kpt#  10
+   2.00000   0.00000   0.00000   0.00000
+ Fermi (or HOMO) energy (eV) =   9.44026   Average Vxc (eV)=  -9.39120
+ Eigenvalues (   eV  ) for nkpt=  10  k points:
+ kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.3750  0.3750  0.3750 (reduced coord)
+   1.97639   8.54877  20.30299  20.30299
+ kpt#   2, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.1250 (reduced coord)
+   1.97323  12.70205  15.08318  16.33249
+ kpt#   3, nband=  4, wtk=  0.09375, kpt=  0.5000  0.5000  0.1250 (reduced coord)
+   5.23323   9.81643  11.66553  15.33689
+ kpt#   4, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.6250 (reduced coord)
+   5.27497   7.41892  11.98393  17.33409
+ kpt#   5, nband=  4, wtk=  0.09375, kpt=  0.3750  0.1250  0.1250 (reduced coord)
+   0.85798  11.69675  16.09134  21.24475
+ kpt#   6, nband=  4, wtk=  0.18750, kpt=  0.2500  0.5000  0.1250 (reduced coord)
+   3.08356   9.56333  14.04676  16.11401
+ kpt#   7, nband=  4, wtk=  0.18750, kpt=  0.3750  0.1250  0.6250 (reduced coord)
+   6.31549   8.48230  10.90629  13.05221
+ kpt#   8, nband=  4, wtk=  0.09375, kpt=  0.0000  0.1250  0.5000 (reduced coord)
+   4.18364   6.38968  17.09939  18.33379
+ kpt#   9, nband=  4, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
+  -1.40077  17.87701  21.27210  21.27210
+ kpt#  10, nband=  4, wtk=  0.09375, kpt=  0.2500  0.2500  0.1250 (reduced coord)
+  -0.26736  14.81152  18.32253  19.98510
+
+ ETOT  3  -2.1002145950233    -2.474E-10 5.396E-07 2.661E-06
+
+ prteigrs : about to open file t07o_EIG
+ Fermi (or HOMO) energy (hartree) =   0.34693   Average Vxc (hartree)=  -0.34512
+ Eigenvalues (hartree) for nkpt=  10  k points:
+ kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.3750  0.3750  0.3750 (reduced coord)
+   0.07264   0.31417   0.74612   0.74612
+      occupation numbers for kpt#   1
+   2.00000   1.64588   0.00000   0.00000
+ kpt#   2, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.1250 (reduced coord)
+   0.07252   0.46680   0.55430   0.60021
+      occupation numbers for kpt#   2
+   2.00000   0.00070   0.00000   0.00000
+ kpt#   3, nband=  4, wtk=  0.09375, kpt=  0.5000  0.5000  0.1250 (reduced coord)
+   0.19232   0.36075   0.42870   0.56362
+      occupation numbers for kpt#   3
+   1.99999   0.69582   0.02072   0.00000
+ kpt#   4, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.6250 (reduced coord)
+   0.19386   0.27265   0.44040   0.63702
+      occupation numbers for kpt#   4
+   1.99999   1.96436   0.00820   0.00000
+ kpt#   5, nband=  4, wtk=  0.09375, kpt=  0.3750  0.1250  0.1250 (reduced coord)
+   0.03154   0.42985   0.59135   0.78073
+      occupation numbers for kpt#   5
+   2.00000   0.01900   0.00000   0.00000
+ kpt#   6, nband=  4, wtk=  0.18750, kpt=  0.2500  0.5000  0.1250 (reduced coord)
+   0.11332   0.35145   0.51621   0.59218
+      occupation numbers for kpt#   6
+   2.00000   0.89821   0.00000   0.00000
+ kpt#   7, nband=  4, wtk=  0.18750, kpt=  0.3750  0.1250  0.6250 (reduced coord)
+   0.23209   0.31172   0.40080   0.47966
+      occupation numbers for kpt#   7
+   1.99884   1.68062   0.12756   0.00017
+ kpt#   8, nband=  4, wtk=  0.09375, kpt=  0.0000  0.1250  0.5000 (reduced coord)
+   0.15375   0.23482   0.62839   0.67376
+      occupation numbers for kpt#   8
+   2.00000   1.99848   0.00000   0.00000
+ kpt#   9, nband=  4, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
+  -0.05147   0.65697   0.78174   0.78174
+      occupation numbers for kpt#   9
+   2.00000   0.00000   0.00000   0.00000
+ kpt#  10, nband=  4, wtk=  0.09375, kpt=  0.2500  0.2500  0.1250 (reduced coord)
+  -0.00982   0.54432   0.67334   0.73444
+      occupation numbers for kpt#  10
+   2.00000   0.00000   0.00000   0.00000
+ Fermi (or HOMO) energy (eV) =   9.44038   Average Vxc (eV)=  -9.39121
+ Eigenvalues (   eV  ) for nkpt=  10  k points:
+ kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.3750  0.3750  0.3750 (reduced coord)
+   1.97653   8.54890  20.30305  20.30305
+ kpt#   2, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.1250 (reduced coord)
+   1.97337  12.70218  15.08326  16.33256
+ kpt#   3, nband=  4, wtk=  0.09375, kpt=  0.5000  0.5000  0.1250 (reduced coord)
+   5.23337   9.81653  11.66565  15.33696
+ kpt#   4, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.6250 (reduced coord)
+   5.27510   7.41906  11.98402  17.33415
+ kpt#   5, nband=  4, wtk=  0.09375, kpt=  0.3750  0.1250  0.1250 (reduced coord)
+   0.85812  11.69687  16.09142  21.24468
+ kpt#   6, nband=  4, wtk=  0.18750, kpt=  0.2500  0.5000  0.1250 (reduced coord)
+   3.08369   9.56346  14.04685  16.11409
+ kpt#   7, nband=  4, wtk=  0.18750, kpt=  0.3750  0.1250  0.6250 (reduced coord)
+   6.31562   8.48243  10.90638  13.05229
+ kpt#   8, nband=  4, wtk=  0.09375, kpt=  0.0000  0.1250  0.5000 (reduced coord)
+   4.18377   6.38981  17.09946  18.33385
+ kpt#   9, nband=  4, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
+  -1.40063  17.87712  21.27219  21.27219
+ kpt#  10, nband=  4, wtk=  0.09375, kpt=  0.2500  0.2500  0.1250 (reduced coord)
+  -0.26722  14.81164  18.32260  19.98519
+
+ ETOT  4  -2.1002145953622    -3.389E-10 1.933E-08 2.977E-08
+
+ prteigrs : about to open file t07o_EIG
+ Fermi (or HOMO) energy (hartree) =   0.34693   Average Vxc (hartree)=  -0.34512
+ Eigenvalues (hartree) for nkpt=  10  k points:
+ kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.3750  0.3750  0.3750 (reduced coord)
+   0.07263   0.31416   0.74612   0.74612
+      occupation numbers for kpt#   1
+   2.00000   1.64589   0.00000   0.00000
+ kpt#   2, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.1250 (reduced coord)
+   0.07252   0.46679   0.55430   0.60021
+      occupation numbers for kpt#   2
+   2.00000   0.00070   0.00000   0.00000
+ kpt#   3, nband=  4, wtk=  0.09375, kpt=  0.5000  0.5000  0.1250 (reduced coord)
+   0.19232   0.36075   0.42870   0.56362
+      occupation numbers for kpt#   3
+   1.99999   0.69581   0.02072   0.00000
+ kpt#   4, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.6250 (reduced coord)
+   0.19385   0.27264   0.44040   0.63701
+      occupation numbers for kpt#   4
+   1.99999   1.96436   0.00820   0.00000
+ kpt#   5, nband=  4, wtk=  0.09375, kpt=  0.3750  0.1250  0.1250 (reduced coord)
+   0.03153   0.42985   0.59135   0.78072
+      occupation numbers for kpt#   5
+   2.00000   0.01900   0.00000   0.00000
+ kpt#   6, nband=  4, wtk=  0.18750, kpt=  0.2500  0.5000  0.1250 (reduced coord)
+   0.11332   0.35145   0.51621   0.59218
+      occupation numbers for kpt#   6
+   2.00000   0.89821   0.00000   0.00000
+ kpt#   7, nband=  4, wtk=  0.18750, kpt=  0.3750  0.1250  0.6250 (reduced coord)
+   0.23209   0.31172   0.40080   0.47966
+      occupation numbers for kpt#   7
+   1.99884   1.68061   0.12756   0.00017
+ kpt#   8, nband=  4, wtk=  0.09375, kpt=  0.0000  0.1250  0.5000 (reduced coord)
+   0.15375   0.23482   0.62839   0.67375
+      occupation numbers for kpt#   8
+   2.00000   1.99848   0.00000   0.00000
+ kpt#   9, nband=  4, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
+  -0.05147   0.65697   0.78173   0.78173
+      occupation numbers for kpt#   9
+   2.00000   0.00000   0.00000   0.00000
+ kpt#  10, nband=  4, wtk=  0.09375, kpt=  0.2500  0.2500  0.1250 (reduced coord)
+  -0.00982   0.54431   0.67334   0.73444
+      occupation numbers for kpt#  10
+   2.00000   0.00000   0.00000   0.00000
+ Fermi (or HOMO) energy (eV) =   9.44032   Average Vxc (eV)=  -9.39121
+ Eigenvalues (   eV  ) for nkpt=  10  k points:
+ kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.3750  0.3750  0.3750 (reduced coord)
+   1.97647   8.54883  20.30292  20.30292
+ kpt#   2, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.1250 (reduced coord)
+   1.97331  12.70210  15.08319  16.33246
+ kpt#   3, nband=  4, wtk=  0.09375, kpt=  0.5000  0.5000  0.1250 (reduced coord)
+   5.23331   9.81647  11.66557  15.33686
+ kpt#   4, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.6250 (reduced coord)
+   5.27504   7.41899  11.98394  17.33405
+ kpt#   5, nband=  4, wtk=  0.09375, kpt=  0.3750  0.1250  0.1250 (reduced coord)
+   0.85806  11.69680  16.09133  21.24454
+ kpt#   6, nband=  4, wtk=  0.18750, kpt=  0.2500  0.5000  0.1250 (reduced coord)
+   3.08363   9.56339  14.04677  16.11399
+ kpt#   7, nband=  4, wtk=  0.18750, kpt=  0.3750  0.1250  0.6250 (reduced coord)
+   6.31556   8.48236  10.90632  13.05219
+ kpt#   8, nband=  4, wtk=  0.09375, kpt=  0.0000  0.1250  0.5000 (reduced coord)
+   4.18371   6.38974  17.09937  18.33374
+ kpt#   9, nband=  4, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
+  -1.40069  17.87703  21.27206  21.27206
+ kpt#  10, nband=  4, wtk=  0.09375, kpt=  0.2500  0.2500  0.1250 (reduced coord)
+  -0.26729  14.81156  18.32249  19.98509
+
+ ETOT  5  -2.1002145953676    -5.367E-12 4.541E-09 1.007E-08
+
+ prteigrs : about to open file t07o_EIG
+ Fermi (or HOMO) energy (hartree) =   0.34692   Average Vxc (hartree)=  -0.34512
+ Eigenvalues (hartree) for nkpt=  10  k points:
+ kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.3750  0.3750  0.3750 (reduced coord)
+   0.07263   0.31416   0.74612   0.74612
+      occupation numbers for kpt#   1
+   2.00000   1.64589   0.00000   0.00000
+ kpt#   2, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.1250 (reduced coord)
+   0.07252   0.46679   0.55430   0.60021
+      occupation numbers for kpt#   2
+   2.00000   0.00070   0.00000   0.00000
+ kpt#   3, nband=  4, wtk=  0.09375, kpt=  0.5000  0.5000  0.1250 (reduced coord)
+   0.19232   0.36075   0.42870   0.56362
+      occupation numbers for kpt#   3
+   1.99999   0.69581   0.02072   0.00000
+ kpt#   4, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.6250 (reduced coord)
+   0.19385   0.27264   0.44040   0.63701
+      occupation numbers for kpt#   4
+   1.99999   1.96436   0.00820   0.00000
+ kpt#   5, nband=  4, wtk=  0.09375, kpt=  0.3750  0.1250  0.1250 (reduced coord)
+   0.03153   0.42985   0.59135   0.78072
+      occupation numbers for kpt#   5
+   2.00000   0.01900   0.00000   0.00000
+ kpt#   6, nband=  4, wtk=  0.18750, kpt=  0.2500  0.5000  0.1250 (reduced coord)
+   0.11332   0.35145   0.51621   0.59218
+      occupation numbers for kpt#   6
+   2.00000   0.89821   0.00000   0.00000
+ kpt#   7, nband=  4, wtk=  0.18750, kpt=  0.3750  0.1250  0.6250 (reduced coord)
+   0.23209   0.31172   0.40080   0.47966
+      occupation numbers for kpt#   7
+   1.99884   1.68061   0.12756   0.00017
+ kpt#   8, nband=  4, wtk=  0.09375, kpt=  0.0000  0.1250  0.5000 (reduced coord)
+   0.15375   0.23482   0.62839   0.67375
+      occupation numbers for kpt#   8
+   2.00000   1.99848   0.00000   0.00000
+ kpt#   9, nband=  4, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
+  -0.05147   0.65697   0.78173   0.78173
+      occupation numbers for kpt#   9
+   2.00000   0.00000   0.00000   0.00000
+ kpt#  10, nband=  4, wtk=  0.09375, kpt=  0.2500  0.2500  0.1250 (reduced coord)
+  -0.00982   0.54431   0.67334   0.73444
+      occupation numbers for kpt#  10
+   2.00000   0.00000   0.00000   0.00000
+ Fermi (or HOMO) energy (eV) =   9.44031   Average Vxc (eV)=  -9.39121
+ Eigenvalues (   eV  ) for nkpt=  10  k points:
+ kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.3750  0.3750  0.3750 (reduced coord)
+   1.97646   8.54882  20.30290  20.30290
+ kpt#   2, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.1250 (reduced coord)
+   1.97330  12.70210  15.08318  16.33245
+ kpt#   3, nband=  4, wtk=  0.09375, kpt=  0.5000  0.5000  0.1250 (reduced coord)
+   5.23330   9.81646  11.66556  15.33685
+ kpt#   4, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.6250 (reduced coord)
+   5.27503   7.41898  11.98393  17.33404
+ kpt#   5, nband=  4, wtk=  0.09375, kpt=  0.3750  0.1250  0.1250 (reduced coord)
+   0.85805  11.69679  16.09132  21.24452
+ kpt#   6, nband=  4, wtk=  0.18750, kpt=  0.2500  0.5000  0.1250 (reduced coord)
+   3.08362   9.56338  14.04676  16.11398
+ kpt#   7, nband=  4, wtk=  0.18750, kpt=  0.3750  0.1250  0.6250 (reduced coord)
+   6.31556   8.48236  10.90631  13.05218
+ kpt#   8, nband=  4, wtk=  0.09375, kpt=  0.0000  0.1250  0.5000 (reduced coord)
+   4.18370   6.38973  17.09936  18.33373
+ kpt#   9, nband=  4, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
+  -1.40070  17.87702  21.27204  21.27204
+ kpt#  10, nband=  4, wtk=  0.09375, kpt=  0.2500  0.2500  0.1250 (reduced coord)
+  -0.26729  14.81155  18.32248  19.98507
+
+ ETOT  6  -2.1002145953680    -4.552E-13 1.273E-10 2.338E-11
+
+ prteigrs : about to open file t07o_EIG
+ Fermi (or HOMO) energy (hartree) =   0.34692   Average Vxc (hartree)=  -0.34512
+ Eigenvalues (hartree) for nkpt=  10  k points:
+ kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.3750  0.3750  0.3750 (reduced coord)
+   0.07263   0.31416   0.74612   0.74612
+      occupation numbers for kpt#   1
+   2.00000   1.64589   0.00000   0.00000
+ kpt#   2, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.1250 (reduced coord)
+   0.07252   0.46679   0.55430   0.60021
+      occupation numbers for kpt#   2
+   2.00000   0.00070   0.00000   0.00000
+ kpt#   3, nband=  4, wtk=  0.09375, kpt=  0.5000  0.5000  0.1250 (reduced coord)
+   0.19232   0.36075   0.42870   0.56362
+      occupation numbers for kpt#   3
+   1.99999   0.69581   0.02072   0.00000
+ kpt#   4, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.6250 (reduced coord)
+   0.19385   0.27264   0.44040   0.63701
+      occupation numbers for kpt#   4
+   1.99999   1.96436   0.00820   0.00000
+ kpt#   5, nband=  4, wtk=  0.09375, kpt=  0.3750  0.1250  0.1250 (reduced coord)
+   0.03153   0.42985   0.59135   0.78072
+      occupation numbers for kpt#   5
+   2.00000   0.01900   0.00000   0.00000
+ kpt#   6, nband=  4, wtk=  0.18750, kpt=  0.2500  0.5000  0.1250 (reduced coord)
+   0.11332   0.35145   0.51621   0.59218
+      occupation numbers for kpt#   6
+   2.00000   0.89821   0.00000   0.00000
+ kpt#   7, nband=  4, wtk=  0.18750, kpt=  0.3750  0.1250  0.6250 (reduced coord)
+   0.23209   0.31172   0.40080   0.47966
+      occupation numbers for kpt#   7
+   1.99884   1.68061   0.12756   0.00017
+ kpt#   8, nband=  4, wtk=  0.09375, kpt=  0.0000  0.1250  0.5000 (reduced coord)
+   0.15375   0.23482   0.62839   0.67375
+      occupation numbers for kpt#   8
+   2.00000   1.99848   0.00000   0.00000
+ kpt#   9, nband=  4, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
+  -0.05147   0.65697   0.78173   0.78173
+      occupation numbers for kpt#   9
+   2.00000   0.00000   0.00000   0.00000
+ kpt#  10, nband=  4, wtk=  0.09375, kpt=  0.2500  0.2500  0.1250 (reduced coord)
+  -0.00982   0.54431   0.67334   0.73444
+      occupation numbers for kpt#  10
+   2.00000   0.00000   0.00000   0.00000
+ Fermi (or HOMO) energy (eV) =   9.44031   Average Vxc (eV)=  -9.39121
+ Eigenvalues (   eV  ) for nkpt=  10  k points:
+ kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.3750  0.3750  0.3750 (reduced coord)
+   1.97646   8.54882  20.30290  20.30290
+ kpt#   2, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.1250 (reduced coord)
+   1.97330  12.70210  15.08318  16.33245
+ kpt#   3, nband=  4, wtk=  0.09375, kpt=  0.5000  0.5000  0.1250 (reduced coord)
+   5.23330   9.81646  11.66556  15.33685
+ kpt#   4, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.6250 (reduced coord)
+   5.27503   7.41898  11.98393  17.33404
+ kpt#   5, nband=  4, wtk=  0.09375, kpt=  0.3750  0.1250  0.1250 (reduced coord)
+   0.85805  11.69679  16.09132  21.24452
+ kpt#   6, nband=  4, wtk=  0.18750, kpt=  0.2500  0.5000  0.1250 (reduced coord)
+   3.08362   9.56338  14.04676  16.11398
+ kpt#   7, nband=  4, wtk=  0.18750, kpt=  0.3750  0.1250  0.6250 (reduced coord)
+   6.31556   8.48236  10.90631  13.05218
+ kpt#   8, nband=  4, wtk=  0.09375, kpt=  0.0000  0.1250  0.5000 (reduced coord)
+   4.18370   6.38973  17.09936  18.33373
+ kpt#   9, nband=  4, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
+  -1.40070  17.87702  21.27204  21.27204
+ kpt#  10, nband=  4, wtk=  0.09375, kpt=  0.2500  0.2500  0.1250 (reduced coord)
+  -0.26729  14.81155  18.32248  19.98508
+
+ ETOT  7  -2.1002145953680     3.553E-15 8.096E-11 3.002E-13
+
+ prteigrs : about to open file t07o_EIG
+ Fermi (or HOMO) energy (hartree) =   0.34692   Average Vxc (hartree)=  -0.34512
+ Eigenvalues (hartree) for nkpt=  10  k points:
+ kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.3750  0.3750  0.3750 (reduced coord)
+   0.07263   0.31416   0.74612   0.74612
+      occupation numbers for kpt#   1
+   2.00000   1.64589   0.00000   0.00000
+ kpt#   2, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.1250 (reduced coord)
+   0.07252   0.46679   0.55430   0.60021
+      occupation numbers for kpt#   2
+   2.00000   0.00070   0.00000   0.00000
+ kpt#   3, nband=  4, wtk=  0.09375, kpt=  0.5000  0.5000  0.1250 (reduced coord)
+   0.19232   0.36075   0.42870   0.56362
+      occupation numbers for kpt#   3
+   1.99999   0.69581   0.02072   0.00000
+ kpt#   4, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.6250 (reduced coord)
+   0.19385   0.27264   0.44040   0.63701
+      occupation numbers for kpt#   4
+   1.99999   1.96436   0.00820   0.00000
+ kpt#   5, nband=  4, wtk=  0.09375, kpt=  0.3750  0.1250  0.1250 (reduced coord)
+   0.03153   0.42985   0.59135   0.78072
+      occupation numbers for kpt#   5
+   2.00000   0.01900   0.00000   0.00000
+ kpt#   6, nband=  4, wtk=  0.18750, kpt=  0.2500  0.5000  0.1250 (reduced coord)
+   0.11332   0.35145   0.51621   0.59218
+      occupation numbers for kpt#   6
+   2.00000   0.89821   0.00000   0.00000
+ kpt#   7, nband=  4, wtk=  0.18750, kpt=  0.3750  0.1250  0.6250 (reduced coord)
+   0.23209   0.31172   0.40080   0.47966
+      occupation numbers for kpt#   7
+   1.99884   1.68061   0.12756   0.00017
+ kpt#   8, nband=  4, wtk=  0.09375, kpt=  0.0000  0.1250  0.5000 (reduced coord)
+   0.15375   0.23482   0.62839   0.67375
+      occupation numbers for kpt#   8
+   2.00000   1.99848   0.00000   0.00000
+ kpt#   9, nband=  4, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
+  -0.05147   0.65697   0.78173   0.78173
+      occupation numbers for kpt#   9
+   2.00000   0.00000   0.00000   0.00000
+ kpt#  10, nband=  4, wtk=  0.09375, kpt=  0.2500  0.2500  0.1250 (reduced coord)
+  -0.00982   0.54431   0.67334   0.73444
+      occupation numbers for kpt#  10
+   2.00000   0.00000   0.00000   0.00000
+ Fermi (or HOMO) energy (eV) =   9.44031   Average Vxc (eV)=  -9.39121
+ Eigenvalues (   eV  ) for nkpt=  10  k points:
+ kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.3750  0.3750  0.3750 (reduced coord)
+   1.97646   8.54882  20.30290  20.30290
+ kpt#   2, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.1250 (reduced coord)
+   1.97330  12.70209  15.08318  16.33245
+ kpt#   3, nband=  4, wtk=  0.09375, kpt=  0.5000  0.5000  0.1250 (reduced coord)
+   5.23330   9.81646  11.66556  15.33685
+ kpt#   4, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.6250 (reduced coord)
+   5.27503   7.41898  11.98393  17.33404
+ kpt#   5, nband=  4, wtk=  0.09375, kpt=  0.3750  0.1250  0.1250 (reduced coord)
+   0.85805  11.69679  16.09132  21.24452
+ kpt#   6, nband=  4, wtk=  0.18750, kpt=  0.2500  0.5000  0.1250 (reduced coord)
+   3.08362   9.56338  14.04676  16.11398
+ kpt#   7, nband=  4, wtk=  0.18750, kpt=  0.3750  0.1250  0.6250 (reduced coord)
+   6.31556   8.48236  10.90631  13.05218
+ kpt#   8, nband=  4, wtk=  0.09375, kpt=  0.0000  0.1250  0.5000 (reduced coord)
+   4.18370   6.38973  17.09936  18.33373
+ kpt#   9, nband=  4, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
+  -1.40070  17.87702  21.27204  21.27204
+ kpt#  10, nband=  4, wtk=  0.09375, kpt=  0.2500  0.2500  0.1250 (reduced coord)
+  -0.26729  14.81155  18.32248  19.98508
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  1.88179497E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.88179497E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.88179497E-05  sigma(2 1)=  0.00000000E+00
+
+
+ scprqt:  WARNING -
+  nstep=    7 was not enough SCF cycles to converge;
+  maximum residual=  8.096E-11 exceeds tolwfr=  1.000E-14
+
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   2.1385E-12; max=  8.0964E-11
+   0.3750  0.3750  0.3750    1  8.56846E-15 kpt; spin; max resid(k); each band:
+  2.74E-15 3.05E-15 8.57E-15 8.57E-15
+   0.3750  0.3750  0.1250    1  7.90575E-15 kpt; spin; max resid(k); each band:
+  2.61E-15 3.12E-15 7.91E-15 2.86E-15
+   0.5000  0.5000  0.1250    1  8.27120E-15 kpt; spin; max resid(k); each band:
+  8.27E-15 3.55E-15 3.43E-15 2.90E-15
+   0.3750  0.3750  0.6250    1  4.03607E-15 kpt; spin; max resid(k); each band:
+  2.75E-15 2.74E-15 4.04E-15 2.81E-15
+   0.3750  0.1250  0.1250    1  4.43365E-12 kpt; spin; max resid(k); each band:
+  2.64E-15 3.15E-15 3.73E-15 4.43E-12
+   0.2500  0.5000  0.1250    1  4.51961E-15 kpt; spin; max resid(k); each band:
+  2.64E-15 2.96E-15 3.81E-15 4.52E-15
+   0.3750  0.1250  0.6250    1  3.97469E-15 kpt; spin; max resid(k); each band:
+  2.80E-15 2.86E-15 3.80E-15 3.97E-15
+   0.0000  0.1250  0.5000    1  4.57355E-15 kpt; spin; max resid(k); each band:
+  2.83E-15 2.79E-15 4.57E-15 2.82E-15
+   0.1250  0.1250  0.1250    1  3.42778E-15 kpt; spin; max resid(k); each band:
+  3.18E-15 3.43E-15 2.84E-15 2.84E-15
+   0.2500  0.2500  0.1250    1  8.09644E-11 kpt; spin; max resid(k); each band:
+  3.01E-15 3.19E-15 3.51E-15 8.10E-11
+ reduced coordinates (array xred) for    1 atoms
+       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+ length scales=  7.600000000000  7.600000000000  7.600000000000 bohr
+              =  4.021746785284  4.021746785284  4.021746785284 angstroms
+ prteigrs : about to open file t07o_EIG
+ Fermi (or HOMO) energy (hartree) =   0.34692   Average Vxc (hartree)=  -0.34512
+ Eigenvalues (hartree) for nkpt=  10  k points:
+ kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.3750  0.3750  0.3750 (reduced coord)
+   0.07263   0.31416   0.74612   0.74612
+      occupation numbers for kpt#   1
+   2.00000   1.64589   0.00000   0.00000
+ kpt#   2, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.1250 (reduced coord)
+   0.07252   0.46679   0.55430   0.60021
+      occupation numbers for kpt#   2
+   2.00000   0.00070   0.00000   0.00000
+ kpt#   3, nband=  4, wtk=  0.09375, kpt=  0.5000  0.5000  0.1250 (reduced coord)
+   0.19232   0.36075   0.42870   0.56362
+      occupation numbers for kpt#   3
+   1.99999   0.69581   0.02072   0.00000
+ kpt#   4, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.6250 (reduced coord)
+   0.19385   0.27264   0.44040   0.63701
+      occupation numbers for kpt#   4
+   1.99999   1.96436   0.00820   0.00000
+ kpt#   5, nband=  4, wtk=  0.09375, kpt=  0.3750  0.1250  0.1250 (reduced coord)
+   0.03153   0.42985   0.59135   0.78072
+      occupation numbers for kpt#   5
+   2.00000   0.01900   0.00000   0.00000
+ kpt#   6, nband=  4, wtk=  0.18750, kpt=  0.2500  0.5000  0.1250 (reduced coord)
+   0.11332   0.35145   0.51621   0.59218
+      occupation numbers for kpt#   6
+   2.00000   0.89821   0.00000   0.00000
+ kpt#   7, nband=  4, wtk=  0.18750, kpt=  0.3750  0.1250  0.6250 (reduced coord)
+   0.23209   0.31172   0.40080   0.47966
+      occupation numbers for kpt#   7
+   1.99884   1.68061   0.12756   0.00017
+ kpt#   8, nband=  4, wtk=  0.09375, kpt=  0.0000  0.1250  0.5000 (reduced coord)
+   0.15375   0.23482   0.62839   0.67375
+      occupation numbers for kpt#   8
+   2.00000   1.99848   0.00000   0.00000
+ kpt#   9, nband=  4, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
+  -0.05147   0.65697   0.78173   0.78173
+      occupation numbers for kpt#   9
+   2.00000   0.00000   0.00000   0.00000
+ kpt#  10, nband=  4, wtk=  0.09375, kpt=  0.2500  0.2500  0.1250 (reduced coord)
+  -0.00982   0.54431   0.67334   0.73444
+      occupation numbers for kpt#  10
+   2.00000   0.00000   0.00000   0.00000
+ Fermi (or HOMO) energy (eV) =   9.44031   Average Vxc (eV)=  -9.39121
+ Eigenvalues (   eV  ) for nkpt=  10  k points:
+ kpt#   1, nband=  4, wtk=  0.03125, kpt=  0.3750  0.3750  0.3750 (reduced coord)
+   1.97646   8.54882  20.30290  20.30290
+ kpt#   2, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.1250 (reduced coord)
+   1.97330  12.70209  15.08318  16.33245
+ kpt#   3, nband=  4, wtk=  0.09375, kpt=  0.5000  0.5000  0.1250 (reduced coord)
+   5.23330   9.81646  11.66556  15.33685
+ kpt#   4, nband=  4, wtk=  0.09375, kpt=  0.3750  0.3750  0.6250 (reduced coord)
+   5.27503   7.41898  11.98393  17.33404
+ kpt#   5, nband=  4, wtk=  0.09375, kpt=  0.3750  0.1250  0.1250 (reduced coord)
+   0.85805  11.69679  16.09132  21.24452
+ kpt#   6, nband=  4, wtk=  0.18750, kpt=  0.2500  0.5000  0.1250 (reduced coord)
+   3.08362   9.56338  14.04676  16.11398
+ kpt#   7, nband=  4, wtk=  0.18750, kpt=  0.3750  0.1250  0.6250 (reduced coord)
+   6.31556   8.48236  10.90631  13.05218
+ kpt#   8, nband=  4, wtk=  0.09375, kpt=  0.0000  0.1250  0.5000 (reduced coord)
+   4.18370   6.38973  17.09936  18.33373
+ kpt#   9, nband=  4, wtk=  0.03125, kpt=  0.1250  0.1250  0.1250 (reduced coord)
+  -1.40070  17.87702  21.27204  21.27204
+ kpt#  10, nband=  4, wtk=  0.09375, kpt=  0.2500  0.2500  0.1250 (reduced coord)
+  -0.26729  14.81155  18.32248  19.98508
+ Total charge density [el/Bohr^3]
+,     Maximum=    3.2729E-02  at reduced coord.    0.8125    0.8750    0.8750
+,Next maximum=    3.2729E-02  at reduced coord.    0.4375    0.8750    0.8750
+,     Minimum=    8.3196E-05  at reduced coord.    0.0000    0.0000    0.0000
+,Next minimum=    1.0786E-03  at reduced coord.    0.0625    0.0000    0.0000
+,  Integrated=    3.0000E+00
+
+--------------------------------------------------------------------------------
+ Components of total free energy (in Hartree) :
+
+    Kinetic energy  =  8.92232470948187E-01
+    Hartree energy  =  4.40523866553110E-03
+    XC energy       = -8.05709487134613E-01
+    Ewald energy    = -2.71472096493581E+00
+    PspCore energy  = -1.63774509167489E-01
+    Loc. psp. energy=  3.26610748188684E-01
+    NL   psp  energy=  3.74670603111397E-01
+    >>>>> Internal E= -2.08628590032411E+00
+
+    -kT*entropy     = -1.39286950439041E-02
+    >>>>>>>>> Etotal= -2.10021459536802E+00
+
+ Other information on the energy :
+    Total energy(eV)= -5.71497455429337E+01 ; Band energy (Ha)=   5.5258628875E-01
+--------------------------------------------------------------------------------
+
+          ===> extra information on forces <===
+ ewald contribution to reduced grads
+    1       0.000000000000      0.000000000000     -0.000000000000
+ nonlocal contribution to red. grads
+    1       0.000000000000      0.000000000000     -0.000000000000
+ local psp contribution to red. grads
+    1      -0.000000000000      0.000000000000      0.000000000000
+ residual contribution to red. grads
+    1       0.000000000000     -0.000000000000      0.000000000000
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  1.88179497E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.88179497E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.88179497E-05  sigma(2 1)=  0.00000000E+00
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -5.5364E-01 GPa]
+- sigma(1 1)=  5.53643101E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  5.53643101E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  5.53643101E-01  sigma(2 1)=  0.00000000E+00
+
+== END DATASET(S) ==============================================================
+================================================================================
+  
+ -outvars: echo values of variables after computation  --------
+            acell      7.6000000000E+00  7.6000000000E+00  7.6000000000E+00 Bohr
+              amu      2.69815390E+01
+             ecut      1.00000000E+01 Hartree
+           enunit           2
+           etotal     -2.1002145954E+00
+            fcart     -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            intxc           1
+           irdwfk           1
+             iscf           5
+              kpt      3.75000000E-01  3.75000000E-01  3.75000000E-01
+                       3.75000000E-01  3.75000000E-01  1.25000000E-01
+                       5.00000000E-01  5.00000000E-01  1.25000000E-01
+                       3.75000000E-01  3.75000000E-01  6.25000000E-01
+                       3.75000000E-01  1.25000000E-01  1.25000000E-01
+                       2.50000000E-01  5.00000000E-01  1.25000000E-01
+                       3.75000000E-01  1.25000000E-01  6.25000000E-01
+                       0.00000000E+00  1.25000000E-01  5.00000000E-01
+                       1.25000000E-01  1.25000000E-01  1.25000000E-01
+                       2.50000000E-01  2.50000000E-01  1.25000000E-01
+           kptopt           0
+P           mkmem          10
+            natom           1
+            nband           4
+            ngfft          16      16      16
+             nkpt          10
+            nline           3
+            nstep           7
+             nsym          24
+           ntypat           1
+              occ      2.000000  1.645887  0.000000  0.000000
+                       2.000000  0.000698  0.000000  0.000000
+                       1.999988  0.695809  0.020723  0.000000
+                       1.999985  1.964362  0.008195  0.000000
+                       2.000000  0.019004  0.000000  0.000000
+                       2.000000  0.898210  0.000002  0.000000
+                       1.998838  1.680615  0.127559  0.000174
+                       2.000000  1.998480  0.000000  0.000000
+                       2.000000  0.000000  0.000000  0.000000
+                       2.000000  0.000000  0.000000  0.000000
+           occopt           7
+           prtdos           1
+           prtvol          10
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+          spgroup         216
+           strten      1.8817949671E-05  1.8817949671E-05  1.8817949671E-05
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           symrel      1  0  0   0  1  0   0  0  1       0  1 -1   1  0 -1   0  0 -1
+                      -1  0  0  -1  0  1  -1  1  0       0 -1  1   0 -1  0   1 -1  0
+                      -1  0  1  -1  0  0  -1  1  0       0 -1  0   0 -1  1   1 -1  0
+                       0 -1  1   1 -1  0   0 -1  0       0  1 -1   0  0 -1   1  0 -1
+                       0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
+                       1  0 -1   0  1 -1   0  0 -1       1 -1  0   0 -1  0   0 -1  1
+                      -1  0  0  -1  1  0  -1  0  1       0  1  0   1  0  0   0  0  1
+                       0  0  1   0  1  0   1  0  0       1  0  0   0  0  1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  1  0   0  0  1   1  0  0
+                      -1  0  1  -1  1  0  -1  0  0       0  0 -1   0  1 -1   1  0 -1
+                       1  0 -1   0  0 -1   0  1 -1       1 -1  0   0 -1  1   0 -1  0
+                       0 -1  0   1 -1  0   0 -1  1      -1  1  0  -1  0  0  -1  0  1
+           tolwfr      1.00000000E-14
+           tsmear      5.00000000E-02 Hartree
+            typat      1
+              wtk        0.03125    0.09375    0.09375    0.09375    0.09375    0.18750
+                         0.18750    0.09375    0.03125    0.09375
+            znucl       13.00000
+
+================================================================================
+
+
+- Timing analysis has been suppressed with timopt=0
+
+
+
+================================================================================
+
+ Suggested references for the acknowledgment of ABINIT usage.
+
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+
+ [1] ABINIT : First-principles approach of materials and nanosystem properties.
+ X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
+ D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
+ S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
+ M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
+ M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
+ Computer Phys. Comm. 180, 2582-2615 (2009).
+ Comment : the third generic paper describing the ABINIT project.
+ Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+ is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+ The licence allows the authors to put it on the Web.
+
+ [2] A brief introduction to the ABINIT software package.
+ X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
+ M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
+ L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
+ Z. Kristallogr. 220, 558-562 (2005).
+ Comment : the second generic paper describing the ABINIT project. Note that this paper
+ should be cited especially if you are using the GW part of ABINIT, as several authors
+ of this part are not in the list of authors of the first or third paper.
+ The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+ Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+ the licence allows the authors to put it on the Web).
+
+
+ And optionally :
+
+ [3] First-principles computation of material properties : the ABINIT software project. 
+ X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
+ M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
+ Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
+ Comment : the original paper describing the ABINIT project.
+
+ [4] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
+ on computers with overlapping multiply-add instructions.
+ S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
+
+ [5] Towards a potential-based conjugate gradient algorithm for order-N self-consistent
+ total energy calculations.
+ X. Gonze, Phys. Rev. B 54, 4383 (1996).
+ Comment : The potential-based conjugate-gradient algorithm, used when iscf=5, is not published.
+ However, many elements of this algorithm have been explained in the paper above.
+-
+- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.3
+
+================================================================================
+
+ Calculation completed.
+.Delivered    8 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.3  wall=          1.3

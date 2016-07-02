@@ -1,0 +1,23 @@
+!!****d* ABINIT/64_atompaw
+!! NAME
+!! 64_atompaw
+!!
+!! DESCRIPTION
+!! This directory contain routines used
+!! within the main program LWF (under development).
+!! Until now, only level-2 routines are actually used,
+!! but this might change in the future ...
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (MT,GJ)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! interfaces_64_atompaw.F90
+!! m_atom.F90
+!! m_lmn_indices.F90
+!!
+!!***

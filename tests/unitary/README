@@ -1,0 +1,15 @@
+This directory, unitary, contains unitary tests which
+are related to low-level libraries used in abinit.
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+
+------------------------------------------------------------------
+
+* Tests fourdp_XX rely on fftprof to test the routine fourdp.F90
+
+* Tests fourwf_XX rely on fftprof to test the routine fourwf.F90
+
+* Tests fftgw_XX rely on fftprof to test the fft routines that are called in the GW part of ABINIT
+
+------------------------------------------------------------------

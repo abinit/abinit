@@ -1,0 +1,80 @@
+This directory, v2, contains tests which exercise parts 
+of the ABINIT package, especially those features acquired
+during the development of the version 2.
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+
+Tests 1 to 39 as well as 90 to 99 focus on RF features.
+Tests 40 to 89 focus on GS features.
+
+Tests 1 to 8 are simple tests of phonon frequency calculations,
+   reproducing results obtained by using the "old" RESPFN code. 
+Tests 9 and 11 are further simple tests, with a local psp and q/=0,
+   as well as partial occupation numbers 
+Test 12 is also a simple test with q/=0, BCC.
+Tests 13 to 15 treat different DDBs for SiO2 thanks to MRGDDB and ANADDB,
+   reproducing results obtained by using the "old" versions of 
+   these codes.
+Tests 16 and 17 treat a Si DDB, and reproduce IFCs, phonon frequencies
+   zero-point contribution to Helmholtz energy and entropy at 298K,
+   as published in the paper by Rignanese et al, PRB53, 4488 (1996).
+Tests 18 to 21 treat a BaTiO3 DDB, and reproduce the convergence
+   study with sampling of the Brillouin zone for q wavevectors,
+   as done in Ghosez et al, Ferroelectrics 206-207, 205 (1998),
+   as well as the analysis of IFCs in term of dipole-dipole 
+   contributions and short-ranged contributions. Eigenvectors are also
+   analyzed.
+Test 22 deal with a ZrO2 DDB.
+Tests 23 to 24 reconstitute a BaTiO3 DDB for Gamma and X points,
+   and then produce the phonon frequencies at these points, that
+   can be compared with results of test 18.
+Test 25 treats a PbZrO3 DDB.
+Tests 26 to 29 compute phonon band structures for Al.
+Tests 30, 31 and 32 show the complete procedure needed to generate
+   a phonon band structure, from the ground-state calculations to the
+   interpolation of dynamical matrices. In order to keep the CPU time
+   reasonable, the parameters (ecut, nkpt and sampling of q wavevectors)
+   are much too small.
+Test 33 to 36 compute accurately the derivatives of the energy
+   for a H2 or Al2 molecule in a big box, and compare to finite-differences.
+Test 37 compares the frequencies at two different q points, one in a position
+   of high symmetry, and one in a position of low symmetry.
+Test 38 focuses on pseudopotentials with a non-linear core correction.
+Test 39 FCC unit cell. Show how to use only the q Gamma point
+     to obtain symmetric IFCs using Anaddb.
+
+Tests 40 to 89 are related to GS computations. 
+
+Tests 40 and 41 checks the interplay between GGA, 
+   non-linear XC core correction, spin, forces and stresses.
+Test 42 : TDDFT based on xOEP
+Tests 43 and 44 check the k point generator and the input array angdeg
+Tests 45 and 46 check SCF and numeric convergence in the metallic case
+Test 47 checks the generation of charge densities for selected states
+Test 48 and 49 check a modified Broyden algorithm (ionmov=3) and
+   the Verlet algorithm (ionmov=6 and 7)
+Test 50 and 51 test metallic, spin-polarized, non-linear XC core
+   correction, GGA calculation of stress.
+Test 52 to 55 checks the symmetry finder.
+Test 56 tests a FHI pseudopotential with non-linear XC core correction
+Test 57 checks the calculation of frequency dependent susceptibilities.
+Test 58 test the mechanism for vacuum identification
+Tests 59 to 60 checks the correctness of space group symbols to generate
+   conventional as well as primitive cells.
+Tests 61 to 73 test the different sets of k points generated automatically
+   using prtkpt/=0.
+Tests 74 and 75 : the effect of spin-orbit coupling
+Test 76 : conversion of input wavefunctions
+Test 77 to 80 : cut3d
+Test 81 and 82 : Berry phase calculation of the polarization
+Test 83 : FCC Ni ferromagnetic 
+Tests 84, 85 and 86 : again the effect of spin-orbit coupling
+Tests 87 and 88 : Nose thermostat and Langevin dynamics.
+
+Tests 90 and beyond are related to RF computations.
+
+Tests 90 to 97 test carefully metallic RF of phonons: H, Li and Ni in
+   simple cubic structure, with double and quadruple supercells.
+Test 98 present RF for insulator with non-zero ecutsm and dilatmx
+Test 99 RF of Niobium, at a rather large wavelength

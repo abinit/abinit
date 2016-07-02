@@ -1,0 +1,81 @@
+#GaAs in hypothetical wurzite (hexagonal) structure
+
+ndtset 3 
+jdtset 1 2 3 
+# Set 1 : initial self-consistency
+
+kptopt1   1
+tolvrs1 1.0d-10
+
+#set 2 the ddk 
+rfelfd2 2  # only derivative of the gs wf
+rfdir2 1 1 1
+nqpt2 1
+qpt2 0.0 0.0 0.0 #only the gamma point
+getwfk2 1
+getddk2 2
+kptopt2 3
+iscf2 -3
+tolwfr2 1.0d-10
+
+# Set 3 : response-function strain calculation
+
+rfphon3 1
+rfatpol3 1 4 
+rfelfd3 3
+rfdir3 1 1 1
+nqpt3 1
+qpt3 0 0 0
+rfstrs3  3
+getwfk3 1
+getddk3 2
+kptopt3 3
+tolvrs3 1.0d-10
+
+#common input data
+paral_rf 1 # activate parallelization over perturbations
+#ngroup_rf 2 # number of groups for  parallelization over perturbations
+
+   ecut   4.0
+  paral_kgb 0
+  nband   8
+  ngkpt   2  2  2
+nshiftk   1
+ shiftk   0.0 0.0 0.5
+  nstep   100
+ acell    7.5526  7.5526  12.3333
+  rprim   0.866025403784439  0.5  0.0
+         -0.866025403784439  0.5  0.0
+          0.0                0.0  1.0
+  natom   4
+ ntypat   2 
+  zatnum  31 33
+  typat   1 1 2 2
+   xred   0.3333333333333333  0.6666666666666667  0.000878861213
+          0.6666666666666667  0.3333333333333333  0.500878861213
+          0.3333333333333333  0.6666666666666667  0.374132194455
+          0.6666666666666667  0.3333333333333333  0.874132194455
+ znucl    31 33
+
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% psp_files = 31ga.pspnc, 33as.pspnc
+#%% [paral_info]
+#%% nprocs_to_test = 1, 2, 4, 10
+#%% max_nprocs = 10
+#%% [NCPU_1]
+#%% [NCPU_2]
+#%% [NCPU_4]
+#%% [NCPU_10]
+#%% [extra_info]
+#%% keywords =  NC, DFPT
+#%% authors = P. Plaenitz
+#%% description = 
+#%%  GaAs in hypothetical wurtzite structure; GS and RF calculation
+#%%  parallelism over the perturbations (contributed by PPlaenitz)
+#%%  (not activated in the automatic testing suite at present - v4.7)
+#%%<END TEST_INFO>

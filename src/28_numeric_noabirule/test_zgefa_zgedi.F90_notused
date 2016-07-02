@@ -1,0 +1,142 @@
+!{\src2tex{textfont=tt}}
+!!****p* ABINIT/test_zgefa_zgedi
+!! NAME
+!! test_zgefa_zgedi
+!!
+!! FUNCTION
+!! Routine to test dzgefa and dzgedi
+!!
+!! COPYRIGHT
+!! Copyright (C) 2008-2016 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!!      zgefa,dzgefa,zgedi,dzgedi
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+program test_zgefa_zgedi
+
+ use defs_basis, only:std_out_default
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'test_zgefa_zgedi'
+ use interfaces_28_numeric_noabirule
+!End of the abilint section
+
+ implicit none
+!Test zgefa, dzgefa, zgedi, dzgedi
+ integer, parameter :: n=4,n_test=10
+ complex*16 :: za(n,n),zdet(2),zwork(n)
+ real*8 :: a(2,n,n),det(2,n),work(2,n),r(2)
+ integer :: ipvt_z(n),ipvt_d(n)
+ integer :: info,i,j,i_test
+
+ do i_test=1,n_test
+    call random_number(a)
+    call copy_a()
+    write(std_out_default,*) i_test,"------------------- diff a and za"
+    call diff_a_za()
+    write(std_out_default,*) i_test,"------------------- zgefa"
+    call zgefa(za,n,n,ipvt_z,info)
+    !write(std_out_default,*) za
+    write(std_out_default,*) i_test,"------------------- dzgefa"
+    call dzgefa(a,n,n,ipvt_d,info)
+    !write(std_out_default,*) a
+    write(std_out_default,*) i_test,"------------------- diff zgefa"
+    call diff_a_za()
+    write(std_out_default,*) i_test,"------------------- zgedi"
+    call zgedi(za,n,n,ipvt_z,zdet,zwork,10)
+    !write(std_out_default,*) za
+    !write(std_out_default,*) zdet
+    write(std_out_default,*) i_test,"------------------- dzgedi"
+    call dzgedi(a,n,n,ipvt_d,det,work,10)
+    !write(std_out_default,*) a
+    !write(std_out_default,*) det
+    write(std_out_default,*) i_test,"------------------- diff zgedi"
+    call diff_a_za()
+    !write(std_out_default,*) za
+    write(std_out_default,*) i_test,"------------------- diff ipvt"
+    write(std_out_default,*) ipvt_z-ipvt_d
+ end do
+
+contains
+
+ subroutine copy_a()
+
+ use m_profiling_abi
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'copy_a'
+!End of the abilint section
+
+  integer :: i,j
+  do j=1,n
+    do i=1,n
+      za(i,j) = cmplx(a(1,i,j),a(2,i,j),kind=8)
+    end do
+  end do
+ end subroutine copy_a
+
+ subroutine copy_za()
+
+ use m_profiling_abi
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'copy_za'
+!End of the abilint section
+
+  integer :: i,j
+  do j=1,n
+    do i=1,n
+      a(1,i,j) = real(za(i,j))
+      a(2,i,j) = imag(za(i,j))
+    end do
+  end do
+ end subroutine copy_za
+
+ subroutine diff_a_za()
+
+ use m_profiling_abi
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'diff_a_za'
+!End of the abilint section
+
+  integer :: i
+  integer :: j
+  do i=1,n
+     do j=1,n
+       r(1)=a(1,j,i)-real(za(j,i))
+       r(2)=a(2,j,i)-imag(za(j,i))
+       if (abs(r(1))+abs(r(2)) > 1.d-14) then
+          write(unit=6,fmt='(2i3,2x,2(1pe15.8))') j,i,r
+       end if   
+     end do
+  end do
+ end subroutine diff_a_za
+
+end program test_zgefa_zgedi
+
+!!***

@@ -1,0 +1,99 @@
+==================================================================================
+WHAT IS ABINT POST-PROCESS APPLICATION (APPA) ?
+
+APPA is a graphical (or text) post-processor for ABINIT dedicated to the
+analysis of Molecular Dynamics output files (trajectories).
+
+Output files from large scale molecular dynamics simulations are not easy to manage.
+All the data can be extracted from output files in NetCDF or ACSCII(text) formats.
+APPA is a graphical tool written in python (PyQt4 library) able to read ABINIT output,
+easy to use in order to follow a trajectory from molecular dynamics simulation
+(total energy, pressure...).
+It is also possible to calculate velocity autocorrelation function from the simulation,
+radial pair distribution, vibrational density of states, etc....
+If Python is able to handle efficiently these kinds of output files, this one is not suited
+to compute some quantities coming from large-scale MD simulation. That?s why APPA also uses Fortran,
+and thanks to the F2PY library, the connection between these both languages is possible.
+
+
+==================================================================================
+INSTALLATION
+
+Requirements:
+ python version >= 2.7
+ PyQT4 
+ Numpy
+
+To take benefit from optimized computational routines
+written in Fortran:
+ cd fortran
+ f2py -c math.f90 --fcompiler='gfortran' -m math
+ f2py -c topology.f90 --fcompiler='gfortran' -m topology
+ f2py -c positions.f90 --fcompiler='gfortran' -m positions
+
+
+==================================================================================
+RUNNING APPA
+
+With a Graphical User Interface:
+ appa.py
+
+
+Text version:
+ appa_nw.py
+
+
+==================================================================================
+COMMAND LINE INTERFACE
+
+#The "text" version can be used via an input file.
+#This input file must have extension ".APPA".
+#Launch it by: appa_nw.py input.APPA
+
+#List of Input Keywords:
+#    file               #Give the path of your output file
+#    stepmin            #Give the initial step of your simulation (-1 for minimum step)
+#    stepmax            #Give the final step of your simulation   (-1 for maximum step)
+#    potential_energy   #Print the potential energy
+#    total_energy       #Print the total energy
+#    kinetic_energy     #Print the kinetic_energy
+#    temperature        #Print the temperature
+#    pressure           #Print the pressure
+#    stress             #Print the stress
+#    vacf               #Compute velocity autoceraltion function
+#    vdos               #Compute vibrational density of state
+#    vdosres            #Give the resolution for the gaussian (between 1 and 100)
+
+
+#You can select the output file format by appending 1,2 or 3 after the keyword:
+#   stress 1  # PDF   format
+#   stress 2  # ASCII format
+#   stress 3  # PDF + ASCII 
+#   stress    # PDF + ASCII
+
+
+#EXEMPLE:
+
+#output 1
+file Al.out
+stepmin 1
+stepmax 1000
+potential_energy 2
+total_energy 2
+kinetic_energy 
+temperature 1
+pressure 
+stress 3 
+vacf 2
+vdos 2
+rdf 2 
+vdosres 8
+
+#output 2
+file Al_1o_HIST
+stepmin -599
+stepmax 95959000 
+total_energy 2
+temperature
+stress 3
+vdosres 1

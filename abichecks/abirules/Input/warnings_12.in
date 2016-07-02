@@ -1,0 +1,5 @@
+#
+warning = True
+Warning = 'may be used uninitialized'
+#
+#src_excluded = ['10_defs']

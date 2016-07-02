@@ -1,0 +1,4 @@
+EXTRA_DIST += \
+  ptg.py \
+  ptgroup_data
+

@@ -1,0 +1,68 @@
+# Python wrapper for the main ABINIT binaries
+
+from optparse import OptionParser
+
+import sys
+
+# Set-up defaults
+abinit_libdir  = "@pkg_libdir@"
+abinit_version = "abinit (@PACKAGE_NAME@) @VERSION@ (@abi_sys_name@ @abi_build@)"
+
+cnf_file   = ""
+dat_dir    = "@pkg_datadir@"
+inp_list   = "abinit.files"
+inp_file   = ""
+log_file   = ""
+out_file   = ""
+dat_radix  = ""
+
+# Build option parser
+parser = OptionParser(usage="%prog [options] [files_filename]",
+                      version=abinit_version)
+parser.add_option("-c","--config",dest="cnf_file",
+                  help="read configuration from FILE",metavar="FILE")
+parser.add_option("-d","--datadir",dest="dat_dir",
+                  help="look for auxilliary data (e.g. psps) in DIR",
+                  metavar="DIR")
+parser.add_option("-f","--files",dest="inp_list",
+                  help="read file list from FILE",metavar="FILE")
+parser.add_option("-i","--input",dest="inp_file",
+                  help="read input from FILE",metavar="FILE")
+parser.add_option("-l","--log",dest="log_file",
+                  help="log messages to FILE",metavar="FILE")
+parser.add_option("-m","--module",dest="run_module",
+                  help="run specified post-processing module",
+                  metavar="POST-PROCESSOR")
+parser.add_option("-o","--output",dest="out_file",
+                  help="output results to FILE",metavar="FILE")
+parser.add_option("-r","--radix",dest="dat_radix",
+                  help="use specified radix to name data files")
+parser.add_option("-I","--info",action="store_true",dest="info",
+                  default=False,
+                  help="show available info and exit")
+parser.add_option("-V","--verbose",action="store_true",dest="verbose",
+                  default=False,
+                  help="output information on what is being done")
+parser.add_option("-p","--parallel",action="store_true",dest="parallel",
+                  default=False,
+                  help="run abinit (parallel builds only)")
+parser.add_option("-s","--sequential",action="store_true",dest="sequential",
+                  default=False,
+                  help="run abinit (default)")
+
+# Get command-line options
+(opts,args) = parser.parse_args()
+
+if not opts and not args:
+ parser.exit()
+
+if ( opts.run_module ):
+ run_module = opts.run_module
+else:
+ run_module = "abinit"
+
+if ( opts.info ):
+ print "available info on ABINIT"
+ sys.exit(0)
+
+verbose = opts.verbose

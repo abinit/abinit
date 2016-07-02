@@ -1,0 +1,39 @@
+!!****d* ABINIT/41_xc_lowlevel
+!! NAME
+!! 41_xc_lowlevel
+!!
+!! DESCRIPTION
+!!  FIXME: Description is missing
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! check_kxc.F90
+!! drivexc.F90
+!! drivexc_main.F90
+!! echo_xc_name.F90
+!! interfaces_41_xc_lowlevel.F90
+!! invcb.F90
+!! m_libxc_functionals.F90
+!! mkdenpos.F90
+!! size_dvxc.F90
+!! xchcth.F90
+!! xchelu.F90
+!! xciit.F90
+!! xclb.F90
+!! xcmult.F90
+!! xcpbe.F90
+!! xcpositron.F90
+!! xcpzca.F90
+!! xcspol.F90
+!! xctetr.F90
+!! xctfw.F90
+!! xcwign.F90
+!! xcxalp.F90
+!!
+!!***

@@ -1,0 +1,32 @@
+Description of the procedure to be used to do LDA+U Calculations.
+
+This feature is available only in PAW. The LDA+U framework is described in
+the paper [1] and [2].
+Two choices of double counting are provided: the Full Localized limit
+and the Around Mean Field approximation.
+Our implementation is described in [5].
+It follows the main lines of the paper [4].
+Forces and stress are implemented.
+For details on keywords (lpawu,upawu,jpawu,usedmatpu,dmatpuopt,dmatudiag) see keyword usepawu in input variables.
+
+In both the output and log files, we can find:
+- The LDA+U contribution of energy which is contained inside the PAW Spherical terms in the output file.
+- The Decomposition of the LDA+U energy is given (Interaction energy, Double
+  counting term, and sum of the two) in the log file.
+- The orbital density matrix (n_{m,m'}^{\sigma}), also called occupation
+  matrix (corresponding to eq 9 of ref [4]  and eq 1 of ref [2], see also
+  [5] and variable dmapuopt) is also
+  given for each atom in the basis of real spherical harmonics.
+  It is given at each SCF step in the log file: one can thus check the
+  convergency of the calculation.
+
+Consistency between total energy and forces in LDA+U have been checked.
+
+The reader can find somes examples in the directory Test_v5 (t08.in, t19.in, t11.in, t53.in..)
+
+[1] V. I. Anisimov, J. Zaanen, and O. K. Andersen PRB 44, 943 (1991) <br>
+[2] A.I. Lichtenstein, V.I. Anisimov and J. Zaanen  PRB 52, 5467 (1995) <br>
+[3] M. T. Czyzyk and G.  A. Sawatzky PRB 49, 14211 (1994) <br>
+[4] O. Bengone, M. Alouani, P. Blöchl, and J. Hugel PRB 62, 16392 (2000) <br>
+[5] B. Amadon, F. Jollet and M. Torrent Phys. Rev. B 77, 155104 (2008).
+

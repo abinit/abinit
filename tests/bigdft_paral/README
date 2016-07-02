@@ -1,0 +1,5 @@
+This directory, bigdft_paral, contains tests which exercise parallel
+features of the ABINIT package, specifically when the BIGDFT library is used..
+
+Please, see the README file in the tests directory (above this one) to get help.
+

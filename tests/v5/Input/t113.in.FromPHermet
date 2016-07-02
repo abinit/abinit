@@ -1,0 +1,52 @@
+# GaAs, Berry phase computation in PAW
+#
+#Elementary cell definition
+#**************************
+   acell 3*5.66 angstrom
+   rprim 0.0 0.5 0.5
+         0.5 0.0 0.5
+         0.5 0.5 0.0
+   natom 2
+   ntypat 2
+   znucl 13 33
+   typat 1 2
+
+#SCF definition
+#**************
+   iscf 17
+   nstep 100
+
+
+#Plane wave basis set
+#********************
+#  usepaw 1
+   pawecutdg 80.
+
+   ecut  40.
+   kptopt 1 
+   ngkpt 6 6 6 
+   nshiftk 4
+   shiftk 0.5 0.5 0.5
+          0.5 0.0 0.0
+          0.0 0.5 0.0
+          0.0 0.0 0.5
+   toldfe 1.0d-12
+
+# Berry phase calculation of the polarization
+#********************************************
+   berryopt -1
+   rfdir 1 1 1
+
+ndtset 3
+jdtset 1 2 3
+
+   xcart1   0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            2.6739624669E+00  2.6739624669E+00  2.6739624669E+00
+
+   xcart2   1.0000000000E-02  0.0000000000E+00  0.0000000000E+00
+            2.6739624669E+00  2.6739624669E+00  2.6739624669E+00
+
+   xcart3  -1.0000000000E-02  0.0000000000E+00  0.0000000000E-00
+            2.6739624669E+00  2.6739624669E+00  2.6739624669E+00
+
+nbdbuf 0

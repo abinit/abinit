@@ -1,0 +1,26 @@
+HOWTO to obtain a standalone libPAW library from ABINIT sources
+=====
+Just type 'make dist' (or simply 'make') in the present directory
+
+Other commands:
+ make clean: clean all libPAW files (source file directory & tarball)
+ make libpaw: build the libPAW source file directory
+ make libpaw-tarball: create the tarball from the libPAW source file directory
+
+Then you get a tarball containing the libPAW library;
+you can use it as explained below:
+
+----------------------------------------------------------------------------
+
+HOWTO to compile a standalone libPAW library
+=====
+Untar the libpaw.tar.gz file
+
+Edit the makefile.in file and adjust some parameters
+ FC : Fortran compiler (use mpif90 to include MPI)
+ FCFLAGS= Fortran compiler flags
+
+If you want to embbed libPAW in a host code, it might be useful to edit
+the src/libpaw.h file.
+
+Type 'make libpaw'

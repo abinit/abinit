@@ -1,0 +1,24 @@
+!!****d* ABINIT/56_io_mpi
+!! NAME
+!! 56_io_mpi
+!!
+!! DESCRIPTION
+!!  FIXME: Description is missing
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! hdr_vs_dtset.F90
+!! interfaces_56_io_mpi.F90
+!! m_abi_etsf.F90
+!! m_exit.F90
+!! m_hdr.F90
+!! outxfhist.F90
+!! rwwf.F90
+!!
+!!***

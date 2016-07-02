@@ -1,0 +1,398 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+           "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Developing for ABINIT</title>
+</head>
+<body>
+
+<h1>Developing for ABINIT</h1>
+
+<h2>Foreword</h2>
+
+<p>
+This tutorial introduces ABINIT to the new developers.
+We want here to give a first insight into the internals of ABINIT. In other
+words, you will look at what's under the cap.
+Being an ABINIT user is not required though it will help a lot, in particular
+when writing a test case for your contribution.
+However some experience in programming is necessary if you want to take
+maximum benefit from this lesson. In particular, some ease with
+Fortran&nbsp;90, 95 or 2003 will be truly welcome.
+Familiarity with the command line will be wonderful too.
+</p>
+
+<hr>
+
+<h2><a name="toc">Table of contents</a></h2>
+
+<ul>
+ <li><a href="#context">Context</a></li>
+ <li><a href="#objectives">Objectives</a></li>
+ <li><a href="#tasks">Tasks</a></li>
+ <ul>
+  <li><a href="#get">Get the source and compile the code</a></li>
+  <li><a href="#identify">Identify the subroutines to modify</a></li>
+  <li><a href="#new_routine">Add the new input variable and its
+   associated routine</a></li>
+  <li><a href="#test">Add a test to the test suite</a></li>
+  <li><a href="#patch">Create a patch for the project leader</a></li>
+ </ul>
+</ul>
+
+<hr>
+
+<h2><a name="context">Context</a></h2>
+
+<p>
+The ABINIT package is aimed at being used
+by different groups of people, without mandatory control by the
+main contributors of the ABINIT group. In the same
+way, the ABINIT development project is fundamentally open
+to the contributions of various persons,
+not located in Louvain-la-neuve or other major development sites of ABINIT. 
+These external contributors are <i>de facto</i> members of the ABINIT group.
+</p>
+
+<p>
+People using the code might consider adding their personal
+subroutines without trying to make them part of the
+official ABINIT package.
+However, this has two drawbacks for them: in subsequent versions,
+their modifications will not be incorporated, so that they might
+have to check and modify the interface for each new version;
+moreover, their addition is not tested by other users
+of the code, then some nasty bugs might remain unnoticed.
+Our opinion is that it would also be nicer from them to share the
+fruits of their coding efforts with other users of the code.
+</p>
+
+<p>
+Of course, a collaborative effort has some drawbacks as well.
+In particular, the collaboration between distant developers should
+be carefully planned, since orthogonal modifications of the
+same piece of code by two different people at the same time
+is very likely to happen, generating "negative progress", i.e.
+a large waste of time when synchronization is to be done.
+It is also necessary to use a well-defined coding style, to
+provide test case files, and to comment the modifications and additions
+as much as possible, in order to facilitate the maintenance
+and the future modifications.
+</p>
+
+<p>
+A lot of information for the ABINIT developers
+can be found in the <a href="http://dev.abinit.org">developer's corner,</a>,
+especially,
+<a href="http://dev.abinit.org/doc/for-new-developers/how-to-contribute">How to contribute</a>,
+and
+<a href="http://dev.abinit.org/doc/particulars">Specificities</a>,
+</p>
+
+<hr>
+
+<h2><a name="objectives">Objectives</a></h2>
+
+<p>
+The main goals of this lesson are to provide you with a useful understanding
+of the source tree structure and the build process, as well as sensibilize
+you to the rules and procedures followed for the development of ABINIT.
+In the example we have chosen, we will suppose that you want to add an
+input variable to the code and create the corresponding subroutine.
+For simplicity, we will now imagine that you have designed a new
+exchange-correlation functional and that you want to test it with ABINIT.
+Here are the steps we will take:
+<ol>
+ <li>Get the source and compile the code.</li>
+ <li>Identify the subroutines to modify.</li>
+ <li>Add the new input variable and its associated routine.</li>
+ <li>Add a test to the test suite.</li>
+ <li>Create a patch for the project leader.</li>
+</ol>
+</p>
+
+<p>
+For this lesson, your input variable will be a real number called
+"<i>lesson</i>". The task devoted to your routine is just to print
+this variable.
+</p>
+
+<hr>
+
+<h2><a name="tasks">Tasks</a></h2>
+
+<h3><a name="get">Get the source and compile the code</a></h3>
+
+<p>
+There are two ways of getting the source code of ABINIT:
+<ul>
+ <li>directly from the ABINIT web site (<a href="http://www.abinit.org/">abinit.org/</a>) by downloading the tarball;</li>
+ <li>from the ABINIT forge, using <a href="http://bazaar.canonical.com/en/">Bazaar</a>.</li>
+</ul>
+</p>
+
+<p>
+While the first method is straightforward, the second one requires you to
+know how to use <i>BZR</i>, <a href="http://www.canonical.com/">Canonical</a>'s
+implementation of <a href="http://www.gnu.org/software/gnu-arch/">GNU Arch</a>.
+There is a comprehensive tutorial for Bazaar on the ABINIT web site, in
+the <i>Developer's corner</i> section.
+</p>
+
+<p>
+Once you have got the tarball, uncompress it by typing:
+</p>
+
+<div class="code">
+tar&nbsp;xvzf&nbsp;abinit-<i>&lt;version&gt;</i>.tar.gz
+</div>
+
+<p>
+where <i>&lt;version&gt;</i> is the version number you downloaded,
+e.g. "7.4.2".
+Then go into the newly-created <i>abinit-&lt;version&gt;</i> directory
+and have a look at it.
+To get get more familiar with the source tree structure, have a closer look
+at the <a href="http://dev.abinit.org/doc/for-adv-developers/source-tree">Directories and files</a> Web page.
+Then answer the following questions:
+</p>
+
+<p>
+Q1. If you need off-line documentation, in which directories will you
+look for?
+</p>
+
+<p>
+Q2. Where can be found the tests?
+</p>
+
+<p>
+Q3. What do the numbers in the names of the "<i>src</i>" subdirectories
+stand for?
+</p>
+
+<p>
+Q4. In the source subdirectories, what do the <i>abinit.src</i>
+files contain? In your opinion, what is their purpose?
+</p>
+
+<p>
+Q5. What kind of tests are available? How important do you think they are?
+</p>
+
+<p>
+Now you can try to build ABINIT. Information on how to do it is stored
+inside the INSTALL file. Please read it now.
+</p>
+
+<p>
+Before actually starting the compilation, type:
+<div class="code">
+./configure --help | more
+</div>
+and read carefully the output. You might then find useful to have a look
+at the template for config files stored in
+<i>~abinit/doc/build/config-template.ac</i> which will provide you with more
+details on the configuration.
+</p>
+
+<p>
+The compilation will likely take more than 10 minutes. In the meantime,
+you can proceed to the next task.
+</p>
+
+<h3><a name="identify">Identify the subroutines to modify</a></h3>
+
+<p>
+At this point, you have to discover what parts of the code will have to
+be modified in order to have your contribution correctly integrated.
+First choose randomly a few subroutines in one of the "<i>src/*</i>"
+subdirectories and have a look at them, putting emphasis on their headers.
+Then try to answer the following questions:
+</p>
+
+<p>
+Q6. How would you identify the subroutines involved in the treatment
+of input variables?
+</p>
+
+<p>
+Q7. Where are the routines handling exchange-correlation? Which input
+variables are they strongly related to?
+</p>
+
+<p>
+Q8. Which subroutine would you choose as a parent for yours?
+</p>
+
+<p>
+Q9. Where is the <i>wrtout</i> subroutine? What is its purpose? How does
+it work?
+</p>
+
+<h3><a name="new_routine">Add the new input variable and its
+associated routine</a></h3>
+
+<p>
+Please examine the file
+<i>~abinit/doc/developers/programmer_guide.txt</i>
+and <i>~abinit/doc/developers/rules_coding.txt</i>.
+This might help writing your own subroutine.
+To actually start, go to the subdirectory you've identified before and
+type:
+<div class="code">
+sh ../../util/developers/mkroutine.sh handle_lesson
+</div>
+This will create a file named <i>handle_lesson.F90</i>, <i>handle_lesson</i>
+being the name of your subroutine.
+</p>
+
+<p>
+Add treatment code for your input variable to the files you have
+identified previously.
+Then write your subroutine and add a call to it at a suitable place.
+When you're done, issue <tt>./config/scripts/makemake</tt> from the top
+source directory, to have the build system aware of the presence of your
+new routine.
+Last but not least, rebuild <i>abinit</i>.
+</p>
+
+<h3><a name="test">Add a test to the test suite</a></h3>
+
+<p>
+Since your contribution is to be integrated into the version 7 (8, 9 ...) of ABINIT,
+all associated tests should go to the
+<tt>&#126;</tt><i>ABINIT/tests/v7/</i> directory (or v8/ or v9/ ....
+Wander a little bit around the subdirectories of <i>tests/</i>, and have a look
+at their content. Examine one of the input files, contained in the v7 (8, 9 ...) 
+subdirectory. Note content of the bottom of the file.
+Each test is identified by an index, attributed after consulting the
+ABINIT coordinator. He decided that your contribution will be checked
+by test #999. Read
+<a href="http://dev.abinit.org/environment/buildbot/howto-add-a-new-test-in-the-test-suite"> the Web documentation
+that describes how to add a new test</a>
+</p>
+
+<p>
+Q10. What do you need to do in order to have a new test added?
+</p>
+
+<p>
+Implement your test and issue <tt>./Runtests.py v7[999]</tt>
+in the <i>tests/</i> subdirectory, to check that it works fine.
+</p>
+
+<h3><a name="patch">Create a patch for the project leader</a></h3>
+
+<p>
+There are two ways of creating a patch, depending on whether you are
+using Bazaar or not.
+If yes, you just have to register your new files, write a change log and
+commit your changes.
+This procedure is highly recommended, as it is very fast and as the
+project leader will be provided with a lot of flexibility and
+information to handle your contribution.
+If not, you have to create a patch with a full description of your
+changes and send it by email or ftp.
+</p>
+
+<p>
+To get some comfort, the project leader needs a patch both in universal
+format and where new files are considered empty in the old version.
+</p>
+
+<p>
+Q11. Which options will you give to the <i>diff</i> command to produce the patch ?
+</p>
+
+<p>
+Q12. How will you proceed exactly to create it ?
+</p>
+
+<hr>
+
+<h3><a name="solutions">Solutions</a></h3>
+
+<p>
+Even if we provide you here with the answers to some of the questions,
+we highly recommend you to try by yourself before looking at them. Please
+read this section only as a last resort.
+</p>
+
+<p>
+R1. In <i>~abinit/doc/</i>, of course.
+</p>
+
+<p>
+R2. In <i>~abinit/tests/</i>, of course.
+</p>
+
+<p>
+R3. According to <a href="http://dev.abinit.org/doc/for-adv-developers/source-tree">Directories and files</a>,
+ they correspond to a hierarchical structuring of the dependencies within
+ABINIT. The higher the level, the more the dependencies on lower levels.
+</p>
+
+<p>
+R4. They contain the list of source files to compile, and allow the
+developers to explore several ways at once by giving them the choice
+of what to put in ABINIT. Thanks to their presence, no developer needs know
+all the internals of the build system.
+</p>
+
+<p>
+R5. The available documentation describes all tests in detail and stresses
+their importance quite enough. Just read the suggested files.
+</p>
+
+<p>
+R6. I would issue a <i>grep</i> command for a random input variable in order
+to trace the handling of input variables throughout the code.
+</p>
+
+<p>
+R7. These routines can be found in <i>~abinit/src/56_xc</i>, and are driven
+by the <i>ixc</i> input variable.
+</p>
+
+<p>
+R8. The <i>~abinit/src/56_xc/drivexc.F90</i> routine, for instance.
+</p>
+
+<p>
+R9. Look in <i>~abinit/src/14_hidewrite/wrtout.F90</i>, the header
+contains detailed explanations.
+</p>
+
+<p>
+R10. You need to follow 
+<a href="http://dev.abinit.org/environment/buildbot/howto-add-a-new-test-in-the-test-suite"> the Web documentation
+that describes how to add a new test</a>
+</p>
+
+<p>
+R11. "-u -r -N".
+</p>
+
+<p>
+R12. Supposing that you have downloaded ABINIT 7.4.1, the following set of
+commands will do:
+</p>
+<ul>
+ <li><tt>cd /path/to/my/source/dir/abinit-7.4.1</tt></li>
+ <li><tt>make distclean</tt></li>
+ <li><tt>cd ..</tt></li>
+ <li><tt>mv abinit-7.4.1 abinit-7.4.1-lesson</tt></li>
+ <li><tt>tar xvzf /path/to/abinit/tarball/abinit-7.4.1.tar.gz</tt></li>
+ <li><tt>mv abinit-7.4.1 abinit-7.4.1-orig</tt></li>
+ <li><tt><tt>diff -urN abinit-7.4.1-orig abinit-7.4.1-lesson &gt;
+  abinit-7.4.1-lesson.patch</tt></li>
+ <li><tt>gzip --best abinit-7.4.1-lesson.patch</tt></li>
+</ul>
+
+<p><i>Note: in case you are using Bazaar, you will have to exclude the '.bzr*'
+files from the diff by adding "<tt>-x '.bzr*'</tt>" to the other
+options.</i></p>
+
+</body>
+</html>

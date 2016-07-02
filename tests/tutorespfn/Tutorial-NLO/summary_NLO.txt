@@ -1,0 +1,94 @@
+******************************************************************************
+*                                                                            *
+*          ABINIT tutorial: nonlinear response, Berry phase                  *
+*                           & finite electric fields                         *
+*                                                                            *
+******************************************************************************
+
+
+1) Parameters used in all calculations
+--------------------------------------
+   system		AlAs
+   code			ABINITv4.4.4
+
+   acell		theoretical lattice constant computed for the 
+			same k-point grid as the corresponding response 
+                        properties
+   ixc			3
+   ecut			5
+   ecutsm		0.5
+   dilatmx		1.05
+   nbdbuf		0
+   nshiftk		4
+   nband		4 (number of occupied bands)
+
+   pseudopotentials	13al.pspnc
+			33as.pspnc
+
+
+2) Structural optimizations
+---------------------------
+
+===================================
+  ngkpt		       acell
+-----------------------------------
+ 6  6  6	10.6395177524329601
+ 8  8  8	10.6396307919372131
+10 10 10	10.6396442853730768
+12 12 12	10.6397077264277993
+14 14 14	10.6396719133078097
+16 16 16	10.6396728602652111
+===================================
+
+
+3) Density functional perturbation theory calculations
+------------------------------------------------------
+
+3A) NGKPT 6 6 6
+---------------
+Born effective charge of Al: Z* = 2.105999E+00
+Nonlinear optical susceptibility (pm/V): d = 32.772254
+d chi / d tau (Bohr^-1) of Al = -0.099889084
+w_TO (cm^-1) = 3.602635E+02
+w_LO (cm^-1) = 3.931598E+02
+Electronic dielectric tensor = 9.94846084
+Relaxed ion dielectric tensor = 11.84823634
+Proper piezoelectric constants(clamped ion)(Unit:c/m^2) = -0.69401363
+Proper piezoelectric constants(relaxed ion)(Unit:c/m^2) = -0.04228777
+Electronic EO constant (pm/V): -1.324507791
+Ionic EO constant (pm/V): 0.533097548
+Total EO constant (pm/V): -0.791410242
+
+Faust-Henry coefficient: C = -0.4024874
+Raman polarizability (A^2):
+        ato = -8.4222112
+        alo = -12.418168
+
+Finite difference calculation: d chi / d tau (Bohr^-1) of Al = -0.1066171
+
+4) Ground-state Berry phase calculations
+----------------------------------------
+
+Finite differences of the polarization w.r.t. atomic displacements
+Born effective charge of Al: Z* = 2.1273874
+
+Finite difference calculation of the ddk
+Born effective charge of Al: Z* = 2.1273577300
+Proper piezoelectric constants(clamped ion)(Unit:c/m^2) = -0.69084784
+Proper piezoelectric constants(relaxed ion)(Unit:c/m^2) = -0.03251216
+
+Finite differences of the polarization w.r.t. strain
+Proper piezoelectric constants(clamped ion)(Unit:c/m^2) = -0.6909505
+Proper piezoelectric constants(relaxed ion)(Unit:c/m^2) = -0.0326305
+
+5) Finite electric field calculations
+-------------------------------------
+Electronic dielectric constant: 8.72523139872855
+Nonlinear optical susceptibility (pm/V): d = 29.7685679334192
+Born effective charge of Al: 2.12729059075091
+d chi / d tau (Bohr^-1) of Al = -0.0616968881813368
+
+Static dielectric constant: 10.665771361062
+
+Proper piezoelectric constants(clamped ion)(Unit:c/m^2) = -0.690881351221756
+Proper piezoelectric constants(relaxed ion)(Unit:c/m^2) = -0.0325937630208201

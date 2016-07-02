@@ -1,0 +1,41 @@
+# -*- Python -*-
+#
+# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Source files making up the 3xc library
+#
+
+# Source file attributes
+ABI_SRC_NIL = 0     # No attribute
+ABI_SRC_BLT = 1     # The file is built by a script
+ABI_SRC_DEP = 2     # The file depends on other files
+
+# Source files
+sources = [
+"calc_smeared_density.F90",
+"dfpt_mkvxc.F90",
+"dfpt_mkvxc_noncoll.F90",
+"dfpt_mkvxcgga.F90",
+"gammapositron.F90",
+"gammapositron_fft.F90",
+"hartre.F90",
+"interfaces_56_xc.F90",
+"m_electronpositron.F90",
+"m_kxc.F90",
+"m_xc_vdw.F90",
+"mkcore.F90",
+"phase.F90",
+"rhohxc.F90",
+"rhohxcpositron.F90",
+"xcpot.F90",
+"xcden.F90",
+"xchybrid_ncpp_cc.F90"
+]
+# IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
+# This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

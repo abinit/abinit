@@ -1,0 +1,10 @@
+ABINIT Notice Messages
+======================
+
+Message rules:
+
+ * all lines should be less that 60-character long;
+ * environment variables will be replaced.
+
+Please note that, since the messages are eval'd, some characters will
+have to be properly escaped, e.g. '(' ---> '\\('.

@@ -1,0 +1,78 @@
+ <!--1--><SECTION sectiontitle='Structure' tag='1'>
+ <!--2--><CHOICE instruction='Use a CML file to define the structure ?' tag='2'>
+ <!--3--><DECISION description='yes' tag='3'>
+ <!--4--><KEYBOARDENTRY instruction='Enter the name of the cml file' variablename='cmlfile' textlen='1' tag='4'/>
+         </DECISION>
+ <!--5--><DECISION description='no' tag='5'>
+ <!--6--><KEYBOARDENTRY instruction='Enter the scale cell vector (acell)' variablename='acell' textlen='1' tag='6'/>
+ <!--7--><CHOICE instruction='How will you define the real space primitive translations ?' tag='7'>
+ <!--8--><DECISION description='By entering a 3x3 matrix' tag='8'>
+ <!--9--><KEYBOARDENTRY instruction='Enter real space primitive translations (rprim)' variablename='rprim' textlen='3' tag='9'/>
+         </DECISION>
+<!--10--><DECISION description='By entering the 3 angles between the real space primitive translations' tag='10'>
+<!--11--><KEYBOARDENTRY instruction='Enter the 3 angles between the real space primitive translations (angdeg)' variablename='angdeg' textlen='1' tag='11'/>
+         </DECISION>
+<!--12--><DECISION description='By choosing from a list of standard lattices' tag='12'>
+<!--13--><MOUSEENTRY instruction='Choose the lattice corresponding to your structure' tag='13'>
+<!--14--><OPTION description='Simple cubic lattice' variablename='angdeg' variablevalue='90 90 90' tag='14'/>
+<!--15--><OPTION description='Hexagonal lattice' variablename='angdeg' variablevalue='90 90 120' tag='15'/>
+         </MOUSEENTRY>
+         </DECISION>
+         </CHOICE>
+<!--16--><KEYBOARDENTRY instruction='Enter the number of atoms contained in the unit cell (natom)' variablename='natom' textlen='1' tag='16'/>
+<!--17--><CHOICE instruction='Will you use the symmetry builder to define the atomic positions ?' tag='17'>
+<!--18--><DECISION description='yes' tag='18'>
+<!--19--><KEYBOARDENTRY instruction='Enter the number of irreducible atoms (natrd)' variablename='natrd' textlen='1' tag='19'/>
+<!--20--><CHOICE instruction='How will you define the symmetries ?' tag='20'>
+<!--21--><DECISION description='By using space group symmetries' tag='21'>
+<!--22--><KEYBOARDENTRY instruction='Enter the space group number you wish to use (spgroup)' variablename='spgroup' textlen='1' tag='22'/>
+         </DECISION>
+<!--23--><DECISION description='By entering the symmetries manually' tag='23'>
+<!--24--><KEYBOARDENTRY instruction='How many symmetries will you define ? (nsym)' variablename='nsym' textlen='1' tag='24'/>
+<!--25--><KEYBOARDENTRY instruction='Enter the symmetries in real space (symrel)' variablename='symrel' textlen='getvalue nsym' tag='25'/>
+<!--26--><KEYBOARDENTRY instruction='Enter the nonsymmorphic  translation vectors associated with the symmetries (tnons)' variablename='tnons' textlen='getvalue nsym' tag='26'/>
+         </DECISION>
+         </CHOICE>
+<!--27--><KEYBOARDENTRY instruction='How many different types of irreducible atom do you have ? (ntypat)' variablename='ntypat' textlen='1' tag='27'/>
+<!--28--><KEYBOARDENTRY instruction='Enter the atomic number of each type of irreducible atom (znucl)' variablename='znucl' textlen='1' tag='28'/>
+<!--29--><KEYBOARDENTRY instruction='Enter the type of each irreducible atom (typat)' variablename='typat' textlen='1' tag='29'/>
+<!--30--><CHOICE instruction='How will you define the irreducible atomic positions ?' tag='30'>
+<!--31--><DECISION description='By entering the cartesian coordinates of each irreducible atom' tag='31'>
+<!--32--><CHOICE instruction='In wich units will you enter the irreducible atomic positions ?' tag='32'>
+<!--33--><DECISION description='In bohrs' tag='33'>
+<!--34--><KEYBOARDENTRY instruction='Enter the cartesian coordinates of each irreducible atom, in bohrs' variablename='xcart' textlen='getvalue natrd' tag='34'/>
+         </DECISION>
+<!--35--><DECISION description='In angstroms' tag='35'>
+<!--36--><KEYBOARDENTRY instruction='Enter the cartesian coordinates of each irreducible atom, in angstroms' variablename='xangst' textlen='getvalue natrd' tag='36'/>
+         </DECISION>
+         </CHOICE>
+         </DECISION>
+<!--37--><DECISION description='By entering the reduced coordinates of each irreducible atom' tag='37'>
+<!--38--><KEYBOARDENTRY instruction='Enter the reduced coordinates of each irreducible atom' variablename='xred' textlen='getvalue natrd' tag='38'/>
+         </DECISION>
+         </CHOICE>
+         </DECISION>
+<!--39--><DECISION description='no' tag='39'>
+<!--40--><KEYBOARDENTRY instruction='How many different types of atom do you have ? (ntypat)' variablename='ntypat' textlen='1' tag='40'/>
+<!--41--><KEYBOARDENTRY instruction='Enter the atomic number of each type of atom (znucl)' variablename='znucl' textlen='1' tag='41'/>
+<!--42--><KEYBOARDENTRY instruction='Enter the type of each atom (typat)' variablename='typat' textlen='1' tag='42'/>
+<!--43--><CHOICE instruction='How will you define the atomic positions ?' tag='43'>
+<!--44--><DECISION description='By entering the cartesian coordinates of each atom' tag='44'>
+<!--45--><CHOICE instruction='In wich units will you enter the atomic positions ?' tag='45'>
+<!--46--><DECISION description='In bohrs' tag='46'>
+<!--47--><KEYBOARDENTRY instruction='Enter the cartesian coordinates of each atom, in bohrs' variablename='xcart' textlen='getvalue natom' tag='47'/>
+         </DECISION>
+<!--48--><DECISION description='In angstroms' tag='48'>
+<!--49--><KEYBOARDENTRY instruction='Enter the cartesian coordinates of each atom, in angstroms' variablename='xangst' textlen='getvalue natom' tag='49'/>
+         </DECISION>
+         </CHOICE>
+         </DECISION>
+<!--50--><DECISION description='By entering the reduced coordinates of each atom' tag='50'>
+<!--51--><KEYBOARDENTRY instruction='Enter the reduced coordinates of each atom' variablename='xred' textlen='getvalue natom' tag='51'/>
+         </DECISION>
+         </CHOICE>
+         </DECISION>
+         </CHOICE>
+         </DECISION>
+         </CHOICE>
+         </SECTION>

@@ -1,0 +1,24 @@
+  2      ! Nb of columns
+  1      ! Column of X-axis
+  2      ! Column of Y-axis
+  1      ! What is X: 1 for Volume, 2 for Acell
+  1      ! 1 for V=a^3/4, 2 for V=a^3/2
+  2      ! Unit for L: 1 for angstrom, 2 for u.a.
+  3      ! Unit for E: 1 for Ryd, 2 for Ev, 3 for Ha, 4 for ?
+  1      ! Mupliplier for V (V will be multiplied by this factor)
+  1      ! Mupliplier for E (E will be divided by this factor)
+  9     ! Nb of input points
+108.42727 -2.4365154709
+106.21622 -2.4364023938
+106.77683 -2.4364673968
+107.33226 -2.4365074702
+107.88243 -2.4365232854
+108.96668 -2.4364846528
+109.50059 -2.4364314992
+110.02891 -2.4363566153
+110.55157 -2.4362604694
+  3     ! Order of v^(-2/3) polynomial
+ -2     ! ?
+  0     ! ?
+  0     ! ?
+  0     ! ?

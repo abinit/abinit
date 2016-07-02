@@ -1,0 +1,573 @@
+\documentclass[11pt,fleqn]{article}
+
+\usepackage{bm}
+
+\hoffset=-0.06\textwidth
+\textwidth=1.12\textwidth
+\voffset=-0.08\textheight
+\textheight=1.16\textheight
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\def\n{\noindent}
+\def\dis{\displaystyle}
+
+\def\bea{\begin{eqnarray}}
+\def\nn{\nonumber\\}
+\def\eea{\end{eqnarray}}
+\def\beq{\begin{equation}}
+\def\eeq{\end{equation}}
+
+
+\def\wt#1{\widetilde{#1}}
+%\def\wtt#1{\widetilde{\widetilde{#1}}}
+
+\def\P{{\bf P}}
+\def\a{{\bf a}}
+\def\b{{\bf b}}
+% \def\E{{\cal E}}
+% \def\EE{{\displaystyle{\pmb{\cal E}}}}
+\def\E{\mathcal{E}}
+\def\EE{\bm{\E}}
+\def\D{{\bf D}}
+\def\G{{\bf G}}
+\def\u{{\bf u}}
+\def\r{{\bf r}}
+\def\rb{{\bar{\bf r}}}
+\def\v{{\bf v}}
+\def\k{{\bf k}}
+\def\R{{\bf R}}
+\def\I{{\bf I}}
+\def\K{{\bf K}}
+\def\A{{\bf A}}
+\def\0{{\bf 0}}
+\def\X{{\bf X}}
+\def\II{{\cal I}}
+\def\bij{{\ev{ij}}}
+\def\bji{{\ev{ji}}}
+\def\sij{{_{ij}}}
+\def\smn{{_{mn}}}
+\def\sLC{_{\rm LC}}
+\def\sIC{_{\rm IC}}
+\def\pb{^{\rm bulk}}
+\def\tm{\widetilde{m}}
+
+\def\ee{{\varepsilon}}
+
+\def\pb{\bar{p}}
+\def\eb{\bar{\ee}}
+\def\db{\bar{d}}
+
+\def\cH{{\cal H}}
+
+\def\emn{\eta_{\mu\nu}}
+\def\bmn{{_{\mu\nu}}}
+
+\def\nhat{\hat{\bf n}}
+
+\def\sa{{_\alpha}}
+\def\sb{{_\beta}}
+\def\sab{_{\alpha\beta}}
+\def\sba{_{\beta\alpha}}
+\def\parx{\partial_{k_x}}
+\def\pary{\partial_{k_y}}
+\def\para{\partial_{k_\alpha}}
+\def\parb{\partial_{k_\beta}}
+\def\park{\partial_{\rm k}}
+\def\partx{\wt{\partial}_{k_x}}
+\def\party{\wt{\partial}_{k_y}}
+\def\parta{\wt{\partial}_{k_\alpha}}
+\def\Mt{{\wt{M}}}
+
+\def\ddkk{\frac{d^2k}{(2\pi)^2}}
+
+\def\eps{\epsilon}
+\def\epso{\eps_0}
+
+\def\O{\Omega}
+\def\Oo{\Omega_0}
+\def\Oi{\frac{1}{\Omega}}
+\def\foo{\frac{4\pi}{\O}}
+\def\too{\frac{2\pi}{\O}}
+\def\oof{\frac{\O}{4\pi}}
+
+\def\bc{_{\rm c}}
+\def\veps{\varepsilon}
+
+\def\half{{\textstyle{1\over2}}}
+\def\halfsq{{\textstyle{1\over\sqrt{2}}}}
+
+\def\tpl{{\left(\frac{2\pi}{L}\right)}}
+\def\ltp{{\left(\frac{L}{2\pi}\right)}}
+
+\def\ket#1{\vert#1\rangle}
+\def\bra#1{\langle#1\vert}
+\def\ip#1#2{\langle#1\vert#2\rangle}
+\def\me#1#2#3{\langle#1\vert#2\vert#3\rangle}
+\def\ev#1{\langle#1\rangle}
+\def\dag{^\dagger}
+
+\def\pmb#1{\setbox0=\hbox{$#1$}%
+  \kern-.01em\copy0\kern-\wd0
+  \kern.02em\copy0\kern-\wd0
+  \kern-.01em\raise.02em\box0 }
+
+\def\F{\mathcal{F}}
+\def\Et{{\widetilde{E}}}
+\def\Ft{{\widetilde{\F}}}
+\def\Ut{{\widetilde{U}}}
+\def\Ht{{\widetilde{H}}}
+
+\def\equ#1{Eq.~(\ref{#1})}
+
+\def\bmic{_{\rm mic}}
+\def\bmac{_{\rm mac}}
+\def\belec{_{\rm elec}}
+
+\def\maxE{\max_{\EE}}
+\def\minP{\min_{\P}}
+\def\minD{\min_{\D}}
+\def\maxD{\max_{\D}}
+\def\minu{\min_{u}}
+\def\minv{\min_{v}}
+\def\minw{\min_{w}}
+\def\minp{\min_{p}}
+\def\maxeb{\max_{\eb}}
+\def\minX{\min_{\X}}
+\def\maxX{\max_{\X}}
+
+\def\gg{g_{ij}}
+
+\def\ABINIT{{{\tt ABINIT}}} 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\begin{center}
+
+{\large\bf
+Notes for the implementation of constant electric field\\
+and constant electric displacement field\\
+methods in \ABINIT }
+\par\bigskip
+D. Vanderbilt and J. Hong\\
+May 21, 2012
+
+\end{center}
+
+
+\vskip 0.4cm
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The purpose of these notes is to provide the theoretical
+and formal background for the implementation of the constant
+electric field~\cite{siv} and constant electric displacement
+field~\cite{ssv} methods in the context of first-principles
+electronic structure theory, in particular as they are
+implementated in the \ABINIT~\cite{abinit} code package. The
+full theory can be found in the above two references. Most of
+the present notes are adopted from the supplementary material
+of Ref.~\cite{ssv}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Energy functionals}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% :::::::::::::::::::::::::::::::::::::::::::
+\subsection{Units}
+% :::::::::::::::::::::::::::::::::::::::::::
+
+We use Gaussian units so that $\D=\EE+4\pi\P$, etc., where we use
+$\EE$ to denote the electric field. Energies like
+$E$, $U$, $\F$ and $\Ft$ are {\em energies per unit cell} with
+units of energy. 
+
+% :::::::::::::::::::::::::::::::::::::::::::
+\subsection{Energy functionals for constant field calculation}
+% :::::::::::::::::::::::::::::::::::::::::::
+Internal energy $U$ is introduced for constant displacement field
+calculation~\cite{ssv}:
+
+\begin{equation}
+U(\mathbf{D},v) = E_{\rm KS}(v) +
+\frac{\Omega}{8\pi} [ \mathbf{D} - 4\pi \mathbf{P}(v) ]^2 \;.
+\label{fixd}
+\end{equation}
+$U(\mathbf{D},v)$ depends directly on an external vector parameter 
+$\mathbf{D}$, and indirectly on the internal (ionic and electronic) 
+coordinates $v$ through the Kohn-Sham energy $E_{\rm KS}$ and the 
+Berry-phase polarization $\mathbf{P}$~\cite{kv}.
+
+The electric enthalpy $\F$ is introduced for constant $\E$
+calculation:~\cite{siv} 
+%
+\begin{equation}
+\mathcal{F}(\bm{\mathcal{E}},v) = E_{\rm KS}(v) - \Omega\, \bm{\mathcal{E}} \cdot \mathbf{P}(v)
+\;.
+\label{fixe}
+\end{equation}
+%
+However, according to Ref.~\cite{ssv}, $\Ft$ is a more natural
+functional to be used in constant $\E$ calculation:
+\begin{equation}
+\tilde{\mathcal{F}} = U - \frac{\Omega}{4\pi} \EE \cdot \mathbf{D}
+                    = \mathcal{F} - \frac{\Omega}{8\pi} \mathcal{E}^2 \;.
+\label{fixet}
+\end{equation}
+%
+(Since $\mathcal{F}$ and $\tilde{\mathcal{F}}$ only differ by a function
+of $\EE$, both of them yield the same equilibrium state at fixed $\EE$.)
+
+% :::::::::::::::::::::::::::::::::::::::::::
+\section{Strains and strain derivatives}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%==========================================
+\subsection{Introducing reduced field variables}
+%==========================================
+
+For treating variable strain, it is strongly advantageous to change
+to internal variables.
+To define internal variables for the fields, we let $\a_j$ be the
+lattice vectors, and $g_{ij}=\a_i\cdot \a_j$ be the metric.
+We also let $\b_i$ be dual vectors defined as $\mathbf{a}_i\cdot\mathbf{b}_j=\delta_{ij}$, 
+in which the conventional factor of $2\pi$ is {\it not included}, so that
+ $\b_i\cdot\b_j=(g^{-1})_{ij}$.
+There are now two choices of reduced variables.  Referencing to
+the reciprocal vectors, we get reduced variables
+%
+\beq
+p_i=\Omega\,\b_i\cdot\P
+\qquad \Longleftrightarrow \qquad
+\P=\frac{1}{\O}\,\sum_i p_i\,\a_i \;,
+\eeq
+\beq
+\ee_i=\frac{\Omega}{4\pi}\,\b_i\cdot\EE
+\qquad \Longleftrightarrow \qquad
+\EE=\frac{4\pi}{\O}\,\sum_i \ee_i\,\a_i \;,
+\eeq
+\beq
+d_i = \frac{\Omega}{4\pi}\,\b_i\cdot\D
+\qquad \Longleftrightarrow \qquad
+\D=\frac{4\pi}{\O}\,\sum_i d_i\,\a_i \;.
+\eeq
+%
+where the inverse relations are given to the right.
+The relation $\D=\EE+4\pi\P$ becomes 
+%
+\beq
+d_i=\ee_i+p_i.
+\eeq
+%
+The reduced variables $d_i$, $\ee_i$, and $p_i$ have units of charge,
+and are related to the free charge, total charge, and bound charge,
+respectively, found on a surface of orientation $\hat{\b}_i$ if the
+fields vanish in the vacuum.
+Note that, aside from a factor of $e/2\pi$, the $p_i$ are nothing other
+than the Berry phases $\phi_i$ as given, e.g., in Eq.~(23) of
+Ref.~\cite{proper}.
+
+The other choice is to refer to the real-space lattice
+vectors, i.e.,
+%
+\beq
+\pb_i= 4\pi\,\a_i\cdot\P
+\qquad \Longleftrightarrow \qquad
+\P= \frac{1}{4\pi}\, \sum_i \pb_i\,\b_i \;,
+\eeq
+\beq
+\eb_i= \a_i\cdot\EE
+\qquad \Longleftrightarrow \qquad
+\EE= \sum_i \eb_i\,\b_i \;,
+\eeq
+\beq
+\db_i= \a_i\cdot\D
+\qquad \Longleftrightarrow \qquad
+\D= \sum_i \db_i\,\b_i \;.
+\eeq
+%
+The relation $\D=\EE+4\pi\P$ becomes 
+%
+\beq
+\db_i=\eb_i+\pb_i.
+\eeq
+%
+The reduced variables $\pb_i$, $\eb_i$, and $\db_i$ have units of
+electric potential (energy/charge),
+and are related to the potential drop across the unit cell in
+direction $\hat{\a}_i$ arising from the displacement field, the
+total field, and the depolarization field, respectively.  They
+are related to the unbarred quantities by
+%
+\beq
+\pb_i=\foo\,\gg\,p_j \;,
+\qquad
+\eb_i=\foo\,\gg\,\ee_j \;,
+\qquad
+\db_i=\foo\,\gg\,d_j \;,
+\eeq
+where an implied sum notation is used.
+
+The reduced field variables introduced here are closely related to
+those discussed in Ref.~\cite{siv} (see, e.g., Eq.~(5) therein) and
+in Sec.~II.C.3 and the Appendix of of Ref.~\cite{wvh}.
+Eqs.~(A4) and (A5) of Ref.~\cite{wvh} introduce field
+variables that are reminiscent of $p_i$ and $\eb_i$ here,
+but there they were defined in such a way as to coincide
+with the ordinary $\P$ and $\EE$ in the absence of strains or
+rotations.  More closely related are the $\P'$ and $\ee_\mu$
+variables defined in (A13) and (A14) of Ref.~\cite{wvh}, which are identical
+to our $p_i$ and $\eb_i$ except for a factor of the charge quantum
+$e$.
+
+%=======================================
+\subsection{Energy functionals in reduced variables}
+%=======================================
+
+The equation analogous to Eq.~(\ref{fixe}) is
+%
+\beq
+\F(\eb)=E(p)-\foo\,\gg\,\ee_i\,p_j
+      =E(p)-\eb_i\,p_i \;.
+\label{eq:fixeb}
+\eeq
+%
+Note that the natural variable of function $\F$ is $\eb$, not $\ee$.
+That is, the variable conjugate to $p_i$ is
+$(4\pi/\O)\gg\ee_j=\eb_i$. This is the reason why we recommend to
+use $\eb$ in the constant electric field calculation (as implemented
+in \ABINIT).
+We also have
+%
+\beq
+\eb_i=\frac{dE}{dp_i} \;,\qquad p_i=-\,\frac{d\F}{d\eb}\;.
+\eeq
+%
+Then Eq.~(\ref{fixet}) becomes\footnote{The volume $\O$ was erroneously
+omitted in Eq.(33) of the supplementary notes of Ref.~\cite{ssv}.}
+%
+\beq
+\Ft(\eb)=\F(\eb)-\frac{\O}{8\pi}\,(g^{-1})_{ij}\,\eb_i\,\eb_j
+        =E(p)-\eb_i\,p_i-\frac{\O}{8\pi}\,(g^{-1})_{ij}\,\eb_i\,\eb_j
+\eeq
+%
+and Eq.~(\ref{fixd}) becomes
+%
+\beq
+U=E+\too\,\gg\,\ee_i\,\ee_i
+ =E+\frac{1}{2}\,\eb_i\,\ee_i 
+ =E+\frac{\O}{8\pi}\,(g^{-1})_{ij}\,\eb_i\,\eb_j\;.
+\label{eq:fixdred}
+\eeq
+We also have
+%
+\beq
+d_i=-\,\frac{d\Ft}{d\eb_i} \;,\qquad \eb_i=\frac{dU}{dd_i}  \;.
+\eeq
+
+For the electric enthalpy function, we can imagine a large number
+$N$ of crystalline cell layers sandwiched between capacitor
+electrodes with a voltage $V$ applied across the electrodes.  If
+the cell is strained as a result of the applied voltage or for any
+other reason, the voltage drop per cell will remain $V/N$,
+corresponding to a fixed $\eb$.  It thus makes sense that this is
+the natural variable for this kind of problem.  On the other hand,
+the variable $\ee$ would change with strain, and so is not an
+appropriate choice of variable in this context.
+
+On the other hand, instead of a capacitor with fixed voltage
+across the plates, we can imagine a slab with fixed free charge
+on the surfaces.  More precisely, it would be fixed free
+charge per surface cell, not per unit area, under general strain
+deformations.  This corresponds to fixed $d$, and so it is
+natural that $U(d)$ has natural variable $d$, not $\db$.
+
+%=======================================
+\subsection{Strain, strain derivatives, and the stress tensor}
+%=======================================
+
+Let $\emn$ be the strain tensor, and define the stresses
+$\sigma_{\mu\nu}^E=\Omega^{-1}dE/d\emn$,
+$\sigma_{\mu\nu}^\F=\Omega^{-1}d\F/d\emn$,
+$\sigma_{\mu\nu}^{\Ft}=\Omega^{-1}d\Ft/d\emn$, and
+$\sigma_{\mu\nu}^U=\Omega^{-1}dU/d\emn$.
+Then
+%
+\beq
+\frac{d\O}{d\emn}=\O\delta_{\mu\nu}
+\label{AA}
+\eeq
+%
+and
+%
+\beq
+\frac{d\gg}{d\emn} = a_{i\mu}\,a_{j\nu} + a_{j\mu}\,a_{i\nu}  \;.
+\label{BB}
+\eeq
+%
+The Hellmann-Feynman theorem applied to the electric enthalphy is
+%
+\beq
+\left(\frac{d\F(\eb,\eta;v)}{d\emn}\right)_{\eb}=
+\frac{\partial \F(\eb,\eta;v)}{\partial\emn} +
+ \frac{\partial \F(\eb,\eta;v)}{\partial v}\,\frac{dv}{d\emn}
+\eeq
+%
+but since $\partial \F/\partial v=0$ at the equilibrium state of the internal
+variables $\{v\}$, the second term vanishes.  Using
+$\F(\eb) =E(p)-\eb_i\,p_i$ we find
+%
+\beq
+\frac{d\F(\eb,\eta)}{d\emn}=\frac{\partial E(p,\eta)}{\partial\emn}
+-\eb_i\,\frac{\partial p_i}{\partial\emn} \;.
+\eeq
+%
+But if we assume that the internal variables are atomic
+coordinates in lattice-vector units and coefficients of plane-wave
+basis functions in a norm-conserving context, it follows that
+$\partial p_i/\partial\emn=0$.  Thus
+%
+\beq
+\sigma^\F_{\mu\nu}=
+\frac{1}{\O}\,\frac{d\F}{d\emn}=
+\frac{1}{\O}\,\frac{\partial E}{\partial\emn} = \sigma^E_{\mu\nu}
+\eeq
+%
+which is just the stress tensor appearing in the usual KS theory.
+In the case of USPP or PAW approaches, $\partial p_i/\partial\emn$
+does not vanish, and augmentation terms need to be included.
+
+For the internal energy, we again use the Hellmann-Feynman argument
+to write $dU/d\emn=\partial U/\partial d\emn$.  Now the natural
+variable being held fixed is $d$, and again $p$ is unchanged under
+a homogeneous strain if the internal variables are chosen properly,
+and since $d_i=\ee_i+p_i$, this means $\ee$ is also fixed (while
+$\eb$ is not).  We choose to write Eq.~(\ref{eq:fixdred}) as
+%
+\beq
+U(\eta,d)=E+\too\,\gg\,\ee_i\,\ee_j
+\eeq
+%
+so that, using Eqs.~(\ref{AA}) and (\ref{BB}),
+%
+\beq
+\sigma^U_{\mu\nu}=
+\frac{1}{\O}\,\frac{dU}{d\emn}
+= \frac{1}{\O}\,\frac{\partial E}{\partial\emn}
++\,\frac{2\pi}{\O^2}\,
+\Big[\,
+2\,a_{i\mu}\,a_{j\nu}\,\ee_i\,\ee_j -\delta_{\mu\nu}\,\gg\,\ee_i\,\ee_i
+\,\Big]
+\eeq
+%
+or
+%
+\beq
+\sigma^U_{\mu\nu}=\sigma^{\rm KS}_{\mu\nu}+\,\frac{1}{8\pi}\,
+\Big[\, 2\,\E_\mu\,\E_\nu - \delta_{\mu\nu}\,\E^2 \,\Big]
+\eeq
+%
+where the second term is just the Maxwell stress tensor arising from the
+macroscopic electric field.  It is straightforward to show that
+$\sigma^{\Ft}=\sigma^U$.  Thus, there are basically two stress
+tensors, one ($\sigma^\F_{\mu\nu}=\sigma^E_{\mu\nu}$) that does not include
+the Maxwell stress, and another ($\sigma^{\Ft}=\sigma^U$) that does.
+
+%=======================================
+\section{\ABINIT\ implementation}
+%=======================================
+
+In the \ABINIT\ implementation, $\Ft$ and $U$ have been chosen as
+the energy functionals for fixed electric field or fixed electric
+displacement field cases, respectively. The corresponding
+fields are the reduced variables $\eb_i$ or $d_i$, in
+units of a.u.  Therefore, the stress tensor includes the Maxwell
+stress. The ion positions and cell parameters can be optimized
+either under fixed $\eb_i$ or fixed $d_i$ boundary conditions.
+This mode of operation, in which the user inputs target reduced
+fields for the constrained calculation, is the recommended one
+when the lattice vectors are going to be relaxed.
+
+When the cell parameters are \textit{not} going to be relaxed, it
+may be more convenient to work with the unreduced field variables
+$\EE$ or $\D$ instead; \ABINIT\ also allows this option, in which
+the unreduced target field is input directly (in a.u.).
+
+The \ABINIT\ implementation does also allow calculations at fixed
+unreduced $\EE$ or $\D$ with relaxation of the cell parameters,
+but this option should be used with caution.  It is important to
+note that the energy functionals of Eq.~(\ref{eq:fixeb})
+and Eq.~(\ref{eq:fixdred}) are still used in these cases.
+Thus, when working at fixed $\EE$ for example, the code
+searches for a value of $\eb_i$ such that the equilibrium
+structure at fixed $\eb_i$ has the unreduced field $\EE$ matching
+the target one.  This procedure is not variational in the usual
+sense.  During such a run, the reported forces and
+stresses that are used to guide the minimization are not, in
+principle, equal to the numerical derivatives of the energy
+functional.  For these reasons, it is recommended to choose
+the reduced-field options when relaxing the cell parameters
+along with the internal coordinates.
+
+Relaxed-cell calculations at fixed $\E$ and $D$ along
+one dimension were implemented first by M.~Stengel in a private
+code package ({\tt LAUTREC}) as described in Ref.~\cite{ssv}
+and references therein.  Tests of the current \ABINIT\
+implementation (which supports fixed three-dimensional $\EE$ or
+$\D$) were presented in Ref.~\cite{hv}, showing excellent agreement
+with the {\tt LAUTREC} implementation.
+
+
+%===============================
+%===============================
+\begin{thebibliography}{99}
+%===============================
+%===============================
+\bibitem{siv}
+I. Souza, J. \'{I}\~{n}iguez, and D. Vanderbilt, Phys. Rev. Lett. {\bf 89},
+117602 (2002).
+
+\bibitem{ssv} 
+Massimiliano Stengel, Nicola A. Spaldin, and David Vanderbilt,
+Nat Phys {\bf 5}, 304 (2009).
+
+\bibitem{abinit}  {\sf ABINIT} is a common project of the
+  Universit\'{e} Catholique de Louvain, Corning Incorporated, and
+  other contributors (http://www.abinit.org).  X. Gonze, J.-M.
+  Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M.  Rignanese, L.
+  Sindic, M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A.
+  Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan, Comput.
+  Mater. Sci. {\bf 25}, 478-492 (2002).
+
+\bibitem{kv}
+R.~D. King-Smith, David Vanderbilt,  Phys. Rev. B, {\bf 47},R1651,(1993).
+
+\bibitem{proper}
+D. Vanderbilt, J. Phys. Chem. Solids {\bf 61}, 147 (2000).
+
+\bibitem{wvh}
+X. Wu, D. Vanderbilt, and D.R. Hamann, Phys. Rev. B {\bf 72}, 035105 (2005).
+
+\bibitem{hv} Jiawang Hong and David Vanderbilt, Phys. Rev. B
+  {\bf 84}, 115107 (2011).
+
+
+%\bibitem{dieguez}
+%O. Di\'eguez and D. Vanderbilt, Phys. Rev. Lett. {\bf 96}, 056401 (2006).
+
+%\bibitem{umari}
+%P. Umari and A. Pasquarello, Phys. Rev. Lett. {\bf 89}, 157602 (2002).
+
+%\bibitem{ksv}
+%R.D. King-Smith and D. Vanderbilt, Phys. Rev. {\bf 47}, 1651 (1993).
+
+
+
+\end{thebibliography}
+
+\end {document}

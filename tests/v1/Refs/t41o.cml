@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<molecule id="crystal1" xmlns="http://www.xml-cml.org/schema/cml2/core">
+ <crystal>
+  <scalar title="a" units="angstrom">4.508589817187</scalar>
+  <scalar title="b" units="angstrom">4.508589817187</scalar>
+  <scalar title="c" units="angstrom">12.784921359534</scalar>
+  <scalar title="alpha" units="degrees">90.000000000000</scalar>
+  <scalar title="beta"  units="degrees">90.000000000000</scalar>
+  <scalar title="gamma" units="degrees">90.000000000000</scalar>
+ </crystal>
+ <!-- "ITC" refers to the space group number in the International Tables for Crystallography -->
+ <symmetry id="s1" pointGroup="ITC:123">
+  <matrix id="symOp1" rows="3" columns="4">
+    1 0 0 0.000000000000
+    0 1 0 0.000000000000
+    0 0 1 0.000000000000
+  </matrix>
+  <matrix id="symOp2" rows="3" columns="4">
+    0 1 0 0.000000000000
+    1 0 0 0.000000000000
+    0 0 1 0.000000000000
+  </matrix>
+  <matrix id="symOp3" rows="3" columns="4">
+    1 0 0 0.000000000000
+    0 1 0 0.000000000000
+    0 0 -1 0.000000000000
+  </matrix>
+  <matrix id="symOp4" rows="3" columns="4">
+    0 1 0 0.000000000000
+    1 0 0 0.000000000000
+    0 0 -1 0.000000000000
+  </matrix>
+  <matrix id="symOp5" rows="3" columns="4">
+    1 0 0 0.000000000000
+    0 -1 0 0.000000000000
+    0 0 1 0.000000000000
+  </matrix>
+  <matrix id="symOp6" rows="3" columns="4">
+    0 -1 0 0.000000000000
+    1 0 0 0.000000000000
+    0 0 1 0.000000000000
+  </matrix>
+  <matrix id="symOp7" rows="3" columns="4">
+    1 0 0 0.000000000000
+    0 -1 0 0.000000000000
+    0 0 -1 0.000000000000
+  </matrix>
+  <matrix id="symOp8" rows="3" columns="4">
+    0 -1 0 0.000000000000
+    1 0 0 0.000000000000
+    0 0 -1 0.000000000000
+  </matrix>
+  <matrix id="symOp9" rows="3" columns="4">
+    -1 0 0 0.000000000000
+    0 1 0 0.000000000000
+    0 0 1 0.000000000000
+  </matrix>
+  <matrix id="symOp10" rows="3" columns="4">
+    0 1 0 0.000000000000
+    -1 0 0 0.000000000000
+    0 0 1 0.000000000000
+  </matrix>
+  <matrix id="symOp11" rows="3" columns="4">
+    -1 0 0 0.000000000000
+    0 1 0 0.000000000000
+    0 0 -1 0.000000000000
+  </matrix>
+  <matrix id="symOp12" rows="3" columns="4">
+    0 1 0 0.000000000000
+    -1 0 0 0.000000000000
+    0 0 -1 0.000000000000
+  </matrix>
+  <matrix id="symOp13" rows="3" columns="4">
+    -1 0 0 0.000000000000
+    0 -1 0 0.000000000000
+    0 0 1 0.000000000000
+  </matrix>
+  <matrix id="symOp14" rows="3" columns="4">
+    0 -1 0 0.000000000000
+    -1 0 0 0.000000000000
+    0 0 1 0.000000000000
+  </matrix>
+  <matrix id="symOp15" rows="3" columns="4">
+    -1 0 0 0.000000000000
+    0 -1 0 0.000000000000
+    0 0 -1 0.000000000000
+  </matrix>
+  <matrix id="symOp16" rows="3" columns="4">
+    0 -1 0 0.000000000000
+    -1 0 0 0.000000000000
+    0 0 -1 0.000000000000
+  </matrix>
+ </symmetry>
+ <atomArray>
+  <atom id="1" elementType="Mo" xFract="0.000000000000" yFract="0.000000000000" zFract="0.000000000000"/>
+  <atom id="2" elementType="Mo" xFract="0.500000000000" yFract="0.500000000000" zFract="0.000000000000"/>
+  <atom id="3" elementType="Mo" xFract="0.500000000000" yFract="0.000000000000" zFract="0.125000000000"/>
+  <atom id="4" elementType="Mo" xFract="0.000000000000" yFract="0.500000000000" zFract="0.125000000000"/>
+  <atom id="5" elementType="Mo" xFract="0.000000000000" yFract="0.000000000000" zFract="0.250000000000"/>
+  <atom id="6" elementType="Mo" xFract="0.500000000000" yFract="0.500000000000" zFract="0.250000000000"/>
+  <atom id="7" elementType="Mo" xFract="0.500000000000" yFract="0.000000000000" zFract="-0.125000000000"/>
+  <atom id="8" elementType="Mo" xFract="0.000000000000" yFract="0.500000000000" zFract="-0.125000000000"/>
+  <atom id="9" elementType="Mo" xFract="0.000000000000" yFract="0.000000000000" zFract="-0.250000000000"/>
+  <atom id="10" elementType="Mo" xFract="0.500000000000" yFract="0.500000000000" zFract="-0.250000000000"/>
+ </atomArray>
+</molecule>

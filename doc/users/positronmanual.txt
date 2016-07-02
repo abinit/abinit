@@ -1,0 +1,31 @@
+Description of the procedure to be used to do a positron lifetime calculation:
+
+We have coded two formalisms for calculating the positron lifetime calculation. The main difference between the two
+approaches is that in one case we consider that the electrons are not perturbed by the presence of the positron.
+This is almost correct for a positron in a perfect bulk material. But this approximation fails when defects exist in
+the material. For example, the positron will be trapped by a vacancy. Then locally its density will be important and
+though will influence the electrons density.
+In the following we will concentrate on the first formalism only.
+
+First of all, one have to keep in mind that two different pseudopotentials have to be used to calculate
+the GS of the positron. The first one for the GS calculation of the electrons and the second one for the GS
+calculation of the positron. For the first one, there is only one restriction : no NLCC is allowed.
+The second one has to be of the FHI type. Moreover it must contain at its
+end, the All-electrons core density generated with FHI. At least this particular pseudopotential must verify
+lmax=lloc=0 and pspxc=0 (no self-interaction terms must be taken
+into account for the positron).
+
+
+The calculation is done in two steps.
+The first one is the GS calculation for the electrons. The only specific thing to
+do is to set prtden and prtvha to 1 in the input file. This will create the
+associated files _DEN and _VHA which are used as input files for the GS calcuation
+of the positron.
+
+The second step is the GS calculation of the positron and subsequently its
+lifetime. Only two new variables are to be added in the imput file : "positron=1"
+and "ixcpositron". The later one corresponds to the type of electron-positron
+correlation that is used. A proper calculation must be done using one band and
+only the gamma point in the BZ.
+
+The reader can find an example in the directory Test_v4 (t95 and t96 tests).

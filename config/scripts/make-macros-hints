@@ -1,0 +1,232 @@
+#!/usr/bin/env python
+#
+# Copyright (C) 2009-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Management of hints flags
+#
+
+from ConfigParser import ConfigParser
+from time import gmtime,strftime
+
+import os
+import re
+import sys
+
+
+class MyConfigParser(ConfigParser):
+
+  def optionxform(self,option):
+    return str(option)
+
+
+def indent_snippet(level,text):
+  spaces = ""
+  for i in range(level):
+    spaces += "  "
+
+  return spaces + re.sub("\n([^$\n])","\n"+spaces+"\\1",text)
+
+
+def sh_cases(case_data,case_indent=0,case_item=True):
+
+  if ( isinstance(case_data,dict) ):
+    if ( len(case_data.keys()) > 2 ):
+      ret = indent_snippet(case_indent,"case \"${%s}\" in\n" % \
+        (case_data["case"]))
+      case_indent += 1
+      for item in case_data:
+        if ( (item != "case") and (item != "default") ):
+          ret += indent_snippet(case_indent,"%s)\n" % (item)) + \
+	    indent_snippet(case_indent+1,"%s_hnt=\"%s\"\n" % \
+	      (case_data["case"],item)) + \
+            sh_cases(case_data[item],case_indent+1,case_item=True)
+      if ( "default" in case_data ):
+        ret += indent_snippet(case_indent,"*)\n") + \
+	    indent_snippet(case_indent+1,"%s_hnt=\"default\"\n" % \
+	      (case_data["case"])) + \
+          sh_cases(case_data["default"],case_indent+1,case_item=True)
+      case_indent -= 1
+      ret += indent_snippet(case_indent, \
+        "esac   # [case: %s, indent: %d, item: %s]\n" % \
+          (case_data["case"],case_indent,case_item))
+      if ( (case_indent > 0) and case_item ):
+        ret += indent_snippet(case_indent,";;\n")
+    elif ( len(case_data.keys()) == 2 ):
+      if ( "default" in case_data ):
+        ret = indent_snippet(case_indent,"%s_hnt=\"default\"\n" % \
+          (case_data["case"])) + \
+          sh_cases(case_data["default"],case_indent,case_item)
+      else:
+        test_value = case_data.keys()
+        test_value.remove("case")
+        test_value = test_value[0]
+        ret = indent_snippet(case_indent,"if test \"${%s}\" = \"%s\"; then\n" % \
+          (case_data["case"],test_value))
+        case_indent += 1
+        ret += indent_snippet(case_indent,"%s_hnt=\"%s\"\n" % \
+          (case_data["case"],test_value)) + \
+          sh_cases(case_data[test_value],case_indent,case_item=False)
+        case_indent -= 1
+        ret += indent_snippet(case_indent,"fi\n")
+    else:
+      raise ValueError, "case_data must contain at least 2 items"
+      
+  else:
+    ret = case_data.strip()
+    if ( len(ret) > 0 ):
+      ret = indent_snippet(case_indent,"%s\n" % (case_data.strip()))
+    ret += indent_snippet(case_indent,";;\n")
+
+  return ret
+
+
+def make_flags(config,hntflags_names):
+
+  ret = ""
+
+  for (key,val) in config.iteritems():
+    if ( key in hntflags_names ):
+      ret += "%s='%s'\n" % (hntflags_names[key],val)
+    else:
+      #print "Warning key not in hntflags", key, val
+      ret += "%s='%s'\n" % (key,val)
+
+  return ret
+
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Main program
+#
+
+# Initial setup
+my_name     = "make-macros-hints"
+my_config   = "config/maintainers/hints.conf"
+my_confdir  = "config/hints"
+my_output   = "config/m4/auto-hints.m4"
+
+# Check if we are in the top of the ABINIT source tree
+if ( not os.path.exists("configure.ac") or
+     not os.path.exists("src/98_main/abinit.F90") ):
+  print "%s: You must be in the top of an ABINIT source tree." % my_name
+  print "%s: Aborting now." % my_name
+  sys.exit(1)
+
+# Check if we have a config file
+if ( not os.path.exists(my_config) ):
+  print "%s: Could not find config file (%s)." % (my_name,my_config)
+  print "%s: Aborting now." % my_name
+  sys.exit(2)
+
+# Check if we have a config directory
+if ( not os.path.exists(my_confdir) ):
+  print "%s: Could not find config dir (%s)." % (my_name,my_confdir)
+  print "%s: Aborting now." % my_name
+  sys.exit(3)
+
+# What time is it?
+now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
+
+# Init
+hnt_cnf = MyConfigParser()
+hnt_cnf.read(my_config)
+
+# Init hintsging variables
+hnt_files = os.listdir(my_confdir)
+hnt_macro = ""
+
+# Get compiler types
+compilers = hnt_cnf.sections()
+
+# Process config files
+for compilo in compilers:
+
+  # Get compiler vendors
+  xc_vendors = hnt_cnf.get(compilo,"vendors").split()
+  xc_vendors.append("default")
+
+  # Get hints info
+  hnt_mods = hnt_cnf.get(compilo,"modifiers").split()
+  hnt_stages = hnt_cnf.get(compilo,"stages").split()
+
+  # Get flag names
+  xc_flags = dict()
+  for stg in hnt_stages:
+    xc_flags[stg] = hnt_cnf.get(compilo,stg)
+  for mod in hnt_mods:
+    xc_flags[mod] = hnt_cnf.get(compilo,mod)
+
+  # Create new vendor case
+  hnt_config = { "case":hnt_cnf.get(compilo,"vendor_test") }
+
+  # Look for vendor-dependent data
+  for xc_vendor in xc_vendors:
+
+    # Look for version-dependent data
+    re_hnt_file = re.compile("%s_%s_.*-hints.conf" % (compilo,xc_vendor))
+    versions = list()
+    for src in hnt_files:
+      if ( re_hnt_file.match(src) ):
+        versions.append(re.sub(".*_(.*)-hints.conf","\\1",src))
+
+    # Create new version case
+    hnt_config[xc_vendor] = { "case":hnt_cnf.get(compilo,"version_test") }
+
+    if ( len(versions) > 0 ):
+      for xc_version in versions:
+
+        # Create new OS case
+        hnt_config[xc_vendor][xc_version] = \
+          { "case":hnt_cnf.get(compilo,"system_test") }
+
+        # Parse config file
+        cnf_file = "%s_%s_%s-hints.conf" % (compilo,xc_vendor,xc_version)
+        cnf = MyConfigParser()
+        cnf.read(os.path.join(my_confdir,cnf_file))
+
+        # Extract defaults
+        hnt_config[xc_vendor][xc_version]["default"] = \
+          make_flags(cnf.defaults(),xc_flags)
+
+        for sys_spec in cnf.sections():
+          (sys_os,sys_arch) = sys_spec.split("-")
+          if ( sys_os == "any" ):
+            sys_spec_case = "*-%s" % (sys_arch)
+          elif ( sys_arch == "any" ):
+            sys_spec_case = "%s-*" % (sys_os)
+          else:
+            sys_spec_case = sys_spec
+          hnt_config[xc_vendor][xc_version][sys_spec_case] = \
+	    make_flags(dict(cnf.items(sys_spec)),xc_flags)
+    else:
+      del hnt_config[xc_vendor]
+
+  # Create new macro
+  hnt_macro += "\n\nAC_DEFUN([ABI_%s_HINTS],[\n" % (compilo.upper())
+  hnt_macro += "  dnl Init\n"
+  hnt_macro += "  abi_%s_vendor_hnt=\"none\"\n" % (compilo)
+  hnt_macro += "  abi_%s_version_hnt=\"none\"\n" % (compilo)
+  hnt_macro += "  abi_sys_spec_hnt=\"none\"\n"
+  hnt_macro += "\n  dnl Look for hints flags\n"
+  hnt_macro += "  AC_MSG_CHECKING([which %s hints to apply])\n\n" % \
+    (compilo)
+  if ( len(hnt_config.keys()) > 1 ):
+    hnt_macro += "  dnl Case built from config/hints/%s_*.conf\n" % (compilo)
+    hnt_macro += indent_snippet(1,sh_cases(hnt_config))
+  else:
+    hnt_macro += "  dnl WARNING: no config files were found for language\n"
+  hnt_macro += "\n  dnl Display settings\n"
+  hnt_macro += "  AC_MSG_RESULT([" \
+    "${abi_%s_vendor_hnt}/${abi_%s_version_hnt}/${abi_sys_spec_hnt}])\n\n" % \
+      (compilo,compilo)
+  hnt_macro += "]) #ABI_%s_HINTS\n" % (compilo.upper())
+
+# Write data
+file(my_output,"w").write(hnt_macro)

@@ -1,0 +1,37 @@
+!!****d* ABINIT/68_recursion
+!! NAME
+!! 68_recursion
+!!
+!! DESCRIPTION
+!!  FIXME: Description is missing
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! defs_rectypes.F90
+!! density_rec.F90
+!! entropyrec.F90
+!! fermisolverec.F90
+!! first_rec.F90
+!! getngrec.F90
+!! gran_potrec.F90
+!! green_kernel.F90
+!! interfaces_68_recursion.F90
+!! m_hidecudarec.F90
+!! m_pretty_rec.F90
+!! m_rec.F90
+!! m_rec_tools.F90
+!! nlenergyrec.F90
+!! pspnl_hgh_rec.F90
+!! pspnl_operat_rec.F90
+!! recursion.F90
+!! recursion_nl.F90
+!! vn_nl_rec.F90
+!! vtorhorec.F90
+!!
+!!***

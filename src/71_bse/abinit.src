@@ -1,0 +1,38 @@
+# -*- Python -*-
+#
+# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Source files making up the 71_bse library
+#
+
+# Source file attributes
+ABI_SRC_NIL = 0     # No attribute
+ABI_SRC_BLT = 1     # The file is built by a script
+ABI_SRC_DEP = 2     # The file depends on other files
+
+# Source files
+sources = [
+"exc_build_block.F90",
+"exc_den.F90",
+"exc_build_ham.F90",
+"exc_plot.F90",
+"m_bse_io.F90",
+"m_exc_diago.F90",
+"m_exc_itdiago.F90",
+"m_exc_spectra.F90",
+"m_haydock.F90",
+"m_haydock_io.F90",
+"m_hexc.F90",
+"m_interp.F90",
+"setup_bse.F90",
+"setup_bse_interp.F90",
+"sumrule.F90",
+]
+# IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
+# This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

@@ -1,0 +1,61 @@
+t36o_WFK
+1      ! band
+1      ! ispinor
+6.25   ! radius of the sphere
+12     ! exit
+1      ! continue
+1      ! band
+2      ! ispinor
+6.25   ! radius of the sphere
+12     ! exit
+1      ! continue
+2      ! band
+1      ! ispinor
+6.25   ! radius of the sphere
+12     ! exit
+1      ! continue
+2      ! band
+2      ! ispinor
+6.25   ! radius of the sphere
+12     ! exit
+1      ! continue
+3      ! band
+1      ! ispinor
+6.25   ! radius of the sphere
+12     ! exit
+1      ! continue
+3      ! band
+2      ! ispinor
+6.25   ! radius of the sphere
+12     ! exit
+1      ! continue
+4      ! band
+1      ! ispinor
+6.25   ! radius of the sphere
+12     ! exit
+1      ! continue
+4      ! band
+2      ! ispinor
+6.25   ! radius of the sphere
+12     ! exit
+2      ! final exit
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = cut3d
+#%% [files]
+#%% files_to_test = t37.out, tolnlines = 0, tolabs =0.0, tolrel = 0.0 
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Test 37 is not portable, and has been disabled
+#%%   Analysis of the angular momentum content of the wavefunctions
+#%%   of the previous test (Ta in a big box) using cut3d .
+#%%   Test v4 #37 is not portable : the spin decomposition of the
+#%%   spinor wavefunctions is not gauge invariant. This
+#%%   test has been disabled.
+#%%<END TEST_INFO>

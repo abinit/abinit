@@ -1,0 +1,14 @@
+================================
+README: build-system test series
+================================
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+Description
+===========
+
+Tests 01 to 09 check the status of the source tree.
+
+Tests 10 to 19 provide basic build-system consistency checking.
+
+Tests 20 to 29 enforce good maintenance practices.

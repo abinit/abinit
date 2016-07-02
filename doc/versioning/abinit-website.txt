@@ -1,0 +1,12 @@
+The new website of ABINIT
+=========================
+
+Project management
+------------------
+
+A BTS and PMS:
+
+ * of our own or;
+ * Launchpad.
+
+A commit ML.

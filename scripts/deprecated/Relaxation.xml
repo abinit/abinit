@@ -1,0 +1,41 @@
+<SECTION sectiontitle='Relaxation'>
+  <CHOICE instruction='Which kind of relaxation do you wish to perform ?'>
+    
+    <DECISION description='optimize the atomic positions only'>
+      <MOUSEENTRY instruction='Choose the technique used to optimize the atomic positions (ionmov)'>
+	<OPTION description='molecular dynamics with optional viscous damping' variablename='ionmov' variablevalue='1'/>
+	<OPTION description='conjugate gradient algorithm for simultaneous optimization of potential and ionic degrees of freedom' variablename='ionmov' variablevalue='4'/>
+	<OPTION description='simple relaxation of ionic positions according to (converged) forces' variablename='ionmov' variablevalue='5'/>
+	<OPTION description='molecular dynamics using the Verlet algorithm' variablename='ionmov' variablevalue='6'/>
+	<OPTION description='quenched molecular dynamics using the Verlet algorithm' variablename='ionmov' variablevalue='7'/>
+	<OPTION description='molecular dynamics with Nose-Hoover thermostat, using the Verlet algorithm' variablename='ionmov' variablevalue='8'/>
+	<OPTION description='Langevin molecular dynamics' variablename='ionmov' variablevalue='9'/>
+	<OPTION description='isokinetic ensemble molecular dynamics' variablename='ionmov' variablevalue='12'/>	
+      </MOUSEENTRY>
+    </DECISION>
+    
+    <DECISION description='optimize the atomic positions as well as the cell geometry'>
+      <MOUSEENTRY instruction='Choose the technique used to optimize the atmic positions (ionmov)'>
+	<OPTION description='structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS)' variablename='ionmov' variablevalue='2'/>
+	<OPTION description='BFGS minimization, modified to take into account the total energy as well as the gradients (as in usual BFGS)' variablename='ionmov' variablevalue='3'/>
+      </MOUSEENTRY>
+      <MOUSEENTRY instruction='Choose the technique used to optimize the geometry of the unit cell (optcell)'>
+	<OPTION description='optimisation of volume only (rprim unchanged ; homogenous dilatation of acell)' variablename='optcell' variablevalue='1'/>
+	<OPTION description='full optimization of cell geometry (modify rprim and acell)' variablename='optcell' variablevalue='2'/>
+	<OPTION description='constant-volume optimization of cell geometry (modify acell and rprim under constant volume constraint)' variablename='optcell' variablevalue='3'/>
+	<OPTION description='optimize acell(1) while keeping acell(2) and acell(3) unchanged (only works if acell(1) is orthogonal to acell(2) and acell(3))' variablename='optcell' variablevalue='4'/>
+	<OPTION description='optimize acell(2) while keeping acell(1) and acell(3) unchanged (only works if acell(2) is orthogonal to acell(1) and acell(3))' variablename='optcell' variablevalue='5'/>
+	<OPTION description='optimize acell(3) while keeping acell(1) and acell(2) unchanged (only works if acell(3) is orthogonal to acell(1) and acell(2))' variablename='optcell' variablevalue='6'/>
+	<OPTION description='optimize acell(2) and acell(3) while keeping acell(1) unchanged (only works if acell(1) is orthogonal to acell(2) and acell(3))' variablename='optcell' variablevalue='7'/>
+	<OPTION description='optimize acell(1) and acell(3) while keeping acell(2) unchanged (only works if acell(2) is orthogonal to acell(1) and acell(3))' variablename='optcell' variablevalue='8'/>
+	<OPTION description='optimize acell(1) and acell(2) while keeping acell(3) unchanged (only works if acell(3) is orthogonal to acell(1) and acell(2))' variablename='optcell' variablevalue='9'/>
+      </MOUSEENTRY>
+      <KEYBOARDENTRY instruction='Enter the maximal permitted scaling of the lattice parameters during the cell optimization (dilatmx)'	variablename='dilatmx' textlen='1'/>
+      <KEYBOARDENTRY instruction='Enter the energy cutoff smearing (ecutsm) (recommended value : 0.5 Ha)' variablename='ecutsm' textlen='1'/>
+    </DECISION>
+
+    <KEYBOARDENTRY instruction='Enter the  maximal absolute force tolerance (in hartree/bohr) below which BFGS structural relaxation iterations will stop (tolmxf)' variablename='tolmxf' textlen='1'/>
+    <KEYBOARDENTRY instruction='Enter the maximum number of structural optimization steps over which calculation will automatically stop (ntime)' variablename='ntime' textlen='1'/>
+
+  </CHOICE>
+</SECTION>

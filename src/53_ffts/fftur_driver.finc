@@ -1,0 +1,86 @@
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: cplex0=0,option3=3,npwin0=0,ndat1=1
+ integer :: nx,ny,nz,ldx,ldy,ldz,fftalg,fftalga,fftalgc,fftcache
+ integer :: dat,rspad,gspad,ix,iy,iz,ifft,ipw
+ real(dp),parameter :: weight1_i=one,weight1_r=one
+ character(len=500) :: msg
+!arrays
+ integer :: kg_kin0(3,0)
+ real(dp) :: dum_denpot(0,0,0),dum_fofgin(0,0)
+ real(dp),allocatable :: fofgout(:,:),fofr(:,:,:,:),fg_box(:,:,:,:)
+
+! *************************************************************************
+
+ fftalg=ngfft(7); fftalga=fftalg/100; fftalgc=MOD(fftalg,10); fftcache=ngfft(8)
+ nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
+
+ SELECT CASE (fftalga)
+
+ CASE (FFT_FFTW3)
+   ldx=nx; ldy=ny; ldz=nz ! No augmentation, the caller does not support it.
+   call fftw3_fftur(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,nspinor*ndat,istwf_k,mgfft,kg_k,gbound_k,ur,ug)
+
+ CASE (FFT_DFTI)
+   ldx=nx; ldy=ny; ldz=nz ! No augmentation, the caller does not support it.
+   call dfti_fftur(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,nspinor*ndat,istwf_k,mgfft,kg_k,gbound_k,ur,ug)
+
+ CASE (FFT_SG, FFT_SG2002)
+   ! Goedecker routines.
+   ! 1) sg_fftrisc does not support istwkf >= 2 for the u(r) --> u(G) transform.
+   ldx=ngfft(4); ldy=ngfft(5); ldz=ngfft(6)
+   ABI_MALLOC(fofgout,(2,npw_k))
+   ABI_MALLOC(fofr,(2,ldx,ldy,ldz))
+
+   if (istwf_k/=1) then
+     ABI_MALLOC(fg_box,(2,ldx,ldy,ldz))
+   end if
+
+   do dat=1,nspinor*ndat
+     gspad = (dat-1)*npw_k
+     rspad = (dat-1)*nfft
+     !
+     ! Fill fofr from input ur array.
+     do iz=1,nz  
+       do iy=1,ny
+         do ix=1,nx
+           ifft = ix + (iy-1)*nx + (iz-1)*nx*ny + rspad
+           fofr(1,ix,iy,iz) = REAL( ur(ifft))
+           fofr(2,ix,iy,iz) = AIMAG(ur(ifft))
+         end do
+       end do
+     end do
+
+     if (istwf_k==1) then
+       !
+       ! option=3 --> real space to reciprocal space.
+       ! NOTE that in this case, istwf_k=1 must be used. 
+       ! this is not thread-safe! use ndat1
+       call sg_fftrisc(cplex0,dum_denpot,dum_fofgin,fofgout,fofr,&
+&        gbound_k,gbound_k,istwf_k,kg_kin0,kg_k,mgfft,ndat1,ngfft,npwin0,npw_k,ldx,ldy,ldz,&
+&        option3,weight1_r,weight1_i)
+
+     else
+       ! Zero-padded on the Box, then transfer data from box to sphere. ndat=1 here.
+       call sg_fftpad(fftcache,mgfft,nx,ny,nz,ldx,ldy,ldz,ndat1,gbound_k,-1,fofr,fg_box)
+
+       call cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat1,npw_k,kg_k,fg_box,fofgout,rscal=one/(nx*ny*nz))
+     end if
+
+     do ipw=1,npw_k ! Have to convert from REAL to CMPLX
+       ug(ipw+gspad) = DCMPLX(fofgout(1,ipw), fofgout(2,ipw))
+     end do
+     !
+   end do ! dat
+
+   ABI_FREE(fofgout)
+   ABI_FREE(fofr)
+
+   if (allocated(fg_box)) then
+     ABI_FREE(fg_box)
+   end if
+
+ CASE DEFAULT
+   write(msg,"(a,i0)")"Wrong fftalga= ",fftalga
+   MSG_ERROR(msg)
+ END SELECT

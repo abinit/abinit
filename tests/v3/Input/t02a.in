@@ -1,0 +1,95 @@
+# Rhombohedral Bi treated as a metal ; 2 special points
+# Comparison of forces without and with spin-orbit
+# The value of u is not the equilibrium one.
+
+ prtvol 10
+
+ ndtset 9
+
+#Datasets 1-3 : GS
+ xred1  0.2309d0   2*0.231d0
+       3*-0.231d0
+
+ xred2    3*0.231d0
+          3*-0.231d0
+ getwfk2 -1
+
+ xred3  0.2311d0   2*0.231d0
+        3*-0.231d0
+ getwfk3 -1
+
+
+#Dataset 4 : RF
+ nqpt4     1
+ qpt4      3*0.0d0
+ rfphon4   1
+ getwfk4   2
+ toldfe4   1.0d-7
+ tolvrs4   0.0d0
+ xred4     3*0.231d0
+           3*-0.231d0
+ kptopt4   2
+
+#Dataset 5 : SO + RF
+ nqpt5     1
+ qpt5      3*0.0d0
+ rfphon5   1
+ getwfk5   2
+ toldfe5   1.0d-7
+ tolvrs5   0.0d0
+ xred5     3*0.231d0
+           3*-0.231d0
+ kptopt5   2
+ nspinor5  2
+ nband5    18
+ so_psp5    1
+
+#Datasets 6-8 : GS with spin-orbit
+ xred6     0.2309d0   2*0.231d0
+           3*-0.231d0
+ nspinor6  2
+ nband6    18
+
+ xred7     3*0.231d0
+           3*-0.231d0
+ getwfk7  -1
+ nspinor7  2
+ nband7    18
+
+
+ xred8     0.2311d0   2*0.231d0
+           3*-0.231d0
+ getwfk8  -1
+ nspinor8  2
+ nband8    18
+
+#Datasets 9 : RF with spin-orbit
+ nqpt9     1
+ qpt9      3*0.0d0
+ rfphon9   1
+ getwfk9   7
+ toldfe9   1.0d-7
+ tolvrs9   0.0d0
+ xred9     3*0.231d0
+           3*-0.231d0
+ kptopt9   2
+ nspinor9  2
+ nband9    18
+
+#Common data
+ acell 3*9.0d0
+ angdeg 3*57.25d0
+ ecut  2.0d0
+ kptopt 1
+ natom  2
+ nband  9
+ ngkpt 2 2 2
+ nstep 20
+ ntypat  1
+ occopt  4
+ rfatpol   1 2
+ rfdir     1 1 1
+ tsmear 0.02d0
+ tolvrs  1.0d-16
+ typat  1 1
+ znucl 83.d0

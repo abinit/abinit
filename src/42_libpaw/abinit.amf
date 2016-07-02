@@ -1,0 +1,6 @@
+noinst_HEADERS = \
+ libpaw.h \
+ libpaw-coding-rules.txt
+
+EXTRA_DIST += \
+ m_libpaw_defs.F90

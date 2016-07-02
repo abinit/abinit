@@ -1,0 +1,209 @@
+%\title{ABINIT data structures and their theoretical justifications}
+
+\documentclass{article}
+%\documentstyle{article}
+
+\title{Geometric considerations \\
+       {\normalsize{(X. Gonze, Y. Suzukawa, M. Mikami)}}}
+
+\begin{document}
+\maketitle
+
+\section{Real space}
+\hspace*{\parindent}
+\vskip 1em
+* The three primitive translation vectors are {\bf R}$_{1p}$,
+{\bf R}$_{2p}$, {\bf R}$_{3p}$.
+% CAUTION : $\vec{R}_{1p}$ etc. does not work due to the specification.
+% See the TtH manual.
+
+Representation in Cartesian coordinates (atomic units):
+%\[\vec{R}_{1p} \rightarrow rprimd(1:3,1)\]
+\[{\bf R}_{1p} \rightarrow {\tt rprimd(1:3,1)}\]
+\[{\bf R}_{2p} \rightarrow {\tt rprimd(1:3,2)}\]
+\[{\bf R}_{3p} \rightarrow {\tt rprimd(1:3,3)}\]
+
+Related input variables : {\tt acell,rprim,angdeg}
+
+\vskip 1em
+* Atomic positions are specified by the coordinates {\bf x}$_{\tau}$
+for $\tau=1 \dots N_{atom}$ where $N_{atom}$ is the member of atoms.
+
+Representation in reduced coordinates
+\begin{eqnarray*}
+{\bf x}_{\tau} &=& x^{red}_{1\tau} \cdot {\bf R}_{1p}
+ + x^{red}_{2\tau} \cdot {\bf R}_{2p}
+ + x^{red}_{3\tau} \cdot {\bf R}_{3p} \\
+ \tau &\rightarrow& {\tt iatom} \\
+ N_{atom} &\rightarrow& {\tt natom} \\
+ x^{red}_{1\tau} &\rightarrow& {\tt xred(1,iatom)} \\
+ x^{red}_{2\tau} &\rightarrow& {\tt xred(2,iatom)} \\
+ x^{red}_{3\tau} &\rightarrow& {\tt xred(3,iatom)}
+\end{eqnarray*}
+
+Related input variables : {\tt xangst,xcart,xred}
+
+\vskip 1em
+* The volume of the primitive unit cell is
+\begin{eqnarray*}
+\Omega_{O{\bf r}} &=& {\bf R}_1 \cdot ({\bf R}_2 \times {\bf R}_3)  \\
+\Omega_{O{\bf r}} &\rightarrow& {\tt ucvol} \,{\rm (unit \ cell \ volume)}
+\end{eqnarray*}
+Computed in {\tt metric.f}
+
+\vskip 1em
+* The scalar products in the reduced representation are valuated thanks to
+\[ {\bf r} \cdot {\bf r'} =\left(
+\begin{array}{ccc}
+r^{red}_{1} & r^{red}_{2} & r^{red}_{1}
+\end{array}
+\right)
+\left(
+\begin{array}{ccc}
+{\bf R}_{1p} \cdot {\bf R}_{1p} & {\bf R}_{1p} \cdot {\bf R}_{2p} &
+{\bf R}_{1p} \cdot {\bf R}_{3p} \\
+{\bf R}_{2p} \cdot {\bf R}_{1p} & {\bf R}_{2p} \cdot {\bf R}_{2p} &
+{\bf R}_{2p} \cdot {\bf R}_{3p} \\
+{\bf R}_{3p} \cdot {\bf R}_{1p} & {\bf R}_{3p} \cdot {\bf R}_{2p} &
+{\bf R}_{3p} \cdot {\bf R}_{3p}
+\end{array}
+\right)
+\left(
+\begin{array}{c}
+r^{red \prime}_{1} \\
+r^{red \prime}_{2} \\
+r^{red \prime}_{3}
+\end{array}
+\right) \]
+
+that is
+${\bf r} \cdot {\bf r'} = \sum_{ij} r^{red}_{i} {\bf R}^{met}_{ij}
+r^{red \prime}_{j}$
+
+where ${\bf R}^{met}_{ij}$ is the metric tensor in real space :
+
+\[{\bf R}^{met}_{ij} \rightarrow {\tt rmet(i,j)}\]
+
+Computed in {\tt metric.f}.
+
+\vskip 1em
+\section{Reciprocal space}
+\hspace*{\parindent}
+\vskip 1em
+* The three primitive translation vectors in reciprocal space are
+${\bf G}_{1p}$,${\bf G}_{2p}$,${\bf G}_{3p}$ (computed in {\tt metric.f})
+
+\begin{eqnarray*}
+{\bf G}_{1p}&=&\frac{1}{\Omega_{O{\bf r}}}({\bf R}_{2p}\times{\bf R}_{3p})
+ \rightarrow {\tt gprimd(1:3,1)} \\
+{\bf G}_{2p}&=&\frac{1}{\Omega_{O{\bf r}}}({\bf R}_{3p}\times{\bf R}_{1p})
+ \rightarrow {\tt gprimd(1:3,2)} \\
+{\bf G}_{3p}&=&\frac{1}{\Omega_{O{\bf r}}}({\bf R}_{1p}\times{\bf R}_{2p})
+ \rightarrow {\tt gprimd(1:3,3)}
+\end{eqnarray*}
+
+This definition is such that \({\bf G}_{ip}\cdot{\bf R}_{jp}=\delta_{ij}\)
+
+[WARNING: often, a factor of $2\pi$ is present in definition of
+ ${\bf G}_{ip}$, but not here, for historical reasons.]
+
+\vskip 1em
+* Reduced representation of vectors (K) in reciprocal space
+
+\({\bf K}=K^{red}_{1}{\bf G}_{1p}+K^{red}_{2}{\bf G}_{2p}
++K^{red}_{3}{\bf G}^{red}_{3p} \rightarrow
+(K^{red}_{1},K^{red}_{2},K^{red}_{3}) \)
+
+e.g. the reduced representation of ${\bf G}_{1p}$ is (1,0,0).
+
+\vskip 1em
+* The reduced representation of the vectors of the reciprocal space
+lattice is made of triplets of integers.
+
+\vskip 1em
+*The scalar products in the reduced representation are evaluated
+thanks to
+
+\[ {\bf K} \cdot {\bf K'}=\left(
+\begin{array}{ccc}
+K^{red}_{1} & K^{red}_{2} & K^{red}_{1}
+\end{array}
+\right)
+\left(
+\begin{array}{ccc}
+{\bf G}_{1p} \cdot {\bf G}_{1p} & {\bf G}_{1p} \cdot {\bf G}_{2p}
+& {\bf G}_{1p} \cdot {\bf G}_{3p} \\
+{\bf G}_{2p} \cdot {\bf G}_{1p} & {\bf G}_{2p} \cdot {\bf G}_{2p}
+& {\bf G}_{2p} \cdot {\bf G}_{3p} \\
+{\bf G}_{3p} \cdot {\bf G}_{1p} & {\bf G}_{3p} \cdot {\bf G}_{2p}
+& {\bf G}_{3p} \cdot {\bf G}_{3p}
+\end{array}
+\right)
+\left(
+\begin{array}{c}
+K^{red \prime}_{1} \\
+K^{red \prime}_{2} \\
+K^{red \prime}_{3}
+\end{array}
+\right) \]
+
+that is \({\bf K} \cdot {\bf K'} =
+\sum_{ij} K^{red}_{i}{\bf G}^{met}_{ij}K^{red \prime}_{j}\)
+
+where ${\bf G}^{met}_{ij}$ is the metric tensor in reciprocal space :
+\[{\bf G}^{met}_{ij} \rightarrow {\tt gmet(i,j)}\]
+(computed in {\tt metric.f}).
+
+\section{Symmetries}
+\hspace*{\parindent}
+\vskip 1em
+* A symmetry operation in real space sends the point ${\bf r}$ to the point
+${\bf r'}={\bf S_t}\{{\bf r}\}$ whose coordinates are
+$({\bf r'})_{\alpha}=\sum_{\beta}S_{\alpha \beta}r_{\beta}
++ t_{\alpha}$ (Cartesian coordinates).
+
+\vskip 1em
+* The symmetry operations that preserves the crystalline structure are
+those that send every atom location on an atom location with the same
+atomic type.
+
+\vskip 1em
+* The application of a symmetry operation to a function of spatial
+coordinates ${\bf V}$ is such that :
+
+\[({\bf S_t}{\bf V})({\bf r})={\bf V}(({\bf S_t})^{-1}\{{\bf r}\}\]
+\[({\bf S_t})^{-1}\{{\bf r}\}=\sum_{\beta} S^{-1}_{\alpha \beta}
+ (r_{\beta}-t_{\beta})\]
+
+\vskip 1em
+* For each symmetry operation,$isym=1 \dots nsym$, the $3\times3$
+${\bf S}^{red}$ matrix is stored in {\tt symrel(:,:,isym)}.
+
+[in reduced coordinates :
+ $r'^{red}_{\alpha}=\sum_{\beta}S^{red}_{\alpha \beta}
+ r^{red}_{\beta}+t^{red}_{\beta}$ ]
+
+and the vector ${\bf t}^{red}$ is stored in {\tt tnons (:,isym)}.
+
+\vskip 1em
+* The conversion between reduced coordinates and Cartesian coordinates is
+$r'_{\gamma}=\sum_{\alpha \beta}(R_{\alpha p})_{\gamma}
+[S^{red}_{\alpha \beta} r^{red}_{\beta}+t^{red}_{\alpha}]$
+
+with $[{\rm as} \ G_{ip} \cdot R_{jp}=\delta_{ij}]$
+\[
+r_{\delta}=\sum_{\alpha}(R_{\alpha p})_\delta
+r^{red}_{\alpha} \rightarrow
+\sum_{\beta}(G_{\beta p})_{\delta} r_{\delta}=r^{red}_{\beta}
+\].
+
+So \[S_{\gamma \delta}=\sum_{\alpha \beta}(R_{\alpha p})_{\gamma}
+S^{red}_{\alpha \beta}(G_{\beta p})_{\gamma}\]
+
+\end{document}
+
+
+
+
+
+

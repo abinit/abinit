@@ -1,0 +1,5 @@
+#
+#Warning = 'Same actual argument associated with INTENT(OUT)'
+Warning = 'Same actual argument associated with INTENT'
+#
+#src_excluded = ['10_defs']

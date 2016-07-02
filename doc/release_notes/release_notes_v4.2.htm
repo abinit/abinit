@@ -1,0 +1,208 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2003 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors .
+</h5>
+
+<pre>
+Many thanks to the following contributors to the ABINIT project
+between June 2003 and September 2003 :
+
+J.-M. Beuken, M. Boulet, F. Bruneval, M. Cote', A. Garcia, D. Hamann,
+J. Jansen, F. Jollet, G. Jomard, J. Junquera, M. Mikami,
+A. Oganov, P. Ordejon, D. Prendergast, L. Sindic,  J.-M. Soler,
+M. Storr, M. Tijssens, M. Torrent, D. Vanderbilt, M. Veithen, M. Verstraete,
+E. Willighagen, X. Wu
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 4.2, released on September 23, 2003.
+
+Changes with respect to version 4.1 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Most noticeable changes in the package (for developers)
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS
+
+A1. The header of the wavefunction, density and potential
+    files have been changed, and contain now the additional information concerning
+    the STM voltage bias (stmbias)
+    See the description of the new header in section 6.4 of abinis_help.html .
+    The files containing the old header should still be read
+    correctly (so, there is backward compatibility, as usual).
+
+A2. The pseudopotential section of the DDB now contains the "usepaw"
+    variable.
+
+A3. The total energy in the PAW code has been redefined : a core charge
+    term has been added between v4.2.2 and v4.2.3 .
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B1. The strain perturbation is now available, for both uniaxial and
+    shear cases, with access to the "rigid-ion" elastic constants,
+    second-derivatives of the total energy with respect to strain,
+    and the "internal strains" mixed second-derivatives of the
+    total energy with respect to strain and atomic positions.
+    We thank D. Hamann for this "tour-de-force". There are still limitations
+    in the use of this strain perturbation : insulators only, LDA only,
+    non-spin-polarized systems, no spin-orbit coupling.
+    pointer to html ... Additional tests have been performed by Xifan Wu
+    Related automatic tests : Test_v4 #61-#63 .
+
+B2. A new utility "macroave" has been provided by J. Junquera and P. Ordejon (including
+    routines by J. Soler and A. Garcia).
+    The Macroave program implements the macroscopic average technique,
+    introduced by A. Baldereschi and coworkers
+    (A. Baldereschi, S. Baroni, and R. Resta, Phys. Rev. Lett. {\bf 61}, 734 (1988) ),
+    to analyse heterojunctions.
+    This method relates microscopic quantities, typical outputs of first-principles codes,
+    with macroscopic magnitudes,
+    needed to perform electrostatic analysis.
+    Within this methodology, one is able of washing out all the
+    wiggles of the rapidly-varying functions of position (resembling
+    the underlying atomic structure) of the microscopic quantities,
+    blowing up only the macroscopic features.
+    See the content of the ~abinit/Infos/Macroave_Docs directory .
+    Related automatic tests : Test_v4 #40-#45 .
+
+B3. As concern the PAW project, Marc Torrent, Francois Jollet and Gerald Jomard
+    have written a translator allowing to use N. Holzwarth and co-workers
+    PAW-potential generator in ABINIT. They have fully documented this translator in
+    http://www.abinit.org/ABINIT/AtomPAW2Abinit-Manual-html/HolzwarthPAW.htm
+    The translator is available on the ABINIT Web site, at
+    http://www.abinit.org/ABINIT/AtomPAW2Abinit-Manual-html/AtomPAW2Abinit.tar.gz
+    Tests show excellent agreement with available results for several solids.
+    For information :
+    - they have also generated other PAW-potential files, based
+    on David Vanderbilt's ultrasoft pseudopotential generators (details to be provided
+    later ...), that can be used by ABINIT ;
+    - the PAW part of ABINIT seems to be quite stable now
+    As announced in v4.1, the PAW part of ABINIT is available for BETA TESTING,
+    although forces and stresses remain still to be implemented.
+    Two pseudopotentials are available in ~abinit/tests/Psps_for_tests, while
+    for other pseudos ... use the translator !
+    Note the Warning A3.
+
+B4. It is now possible to build the charge density corresponding to the states
+    close to the Fermi energy, below or above, in a range of energies specified
+    by the input variable stmbias (see also A1), and print it, thanks to the input variable
+    prtstm. Such a charge density map allows to build approximate
+    Scanning Tunneling Microscope profiles of a surface.
+    Later, such an analysis should be provided in cut3d.
+    Also, more accurate treatments of STM might be developed in the future.
+    Related automatic tests : Test_v4 #46 .
+
+__________________________________________________________________
+
+C. Most noticeable changes for the developers
+
+C1. The derived datatype anaddb_dtset is now used to contain
+    all the input variables inside anaddb. So, the anaddb utility
+    main routine has been simplified. In the future,
+    the creation of new input variables and their transfer to inner routines
+    will be easier. Routines that were modified : anaddb.f,
+    invars9.f, outvars9.f, defs_common.f, thm9.f, mkifc9.f, diel9.f
+
+C2. The new directory Lib_macroave has been created.
+    This directory contains library subroutines used
+    by the macroave utility, see B2.
+
+C3. The variable "nfft" is now the number of points treated by that
+    particular processor, in the framework of the space parallelism
+    (or FFT parallelism - these terms will be used as equivalent).
+    The total number of FFT points is "nfftot".
+    The variable "npw" (or similar variables) is now the number of
+    planewaves treated by that particular processor. The total
+    number of planewaves is "npwtot".
+
+    A new input variable "exchn2n3" has been introduced, in order
+    to develop the use of the new FFT routines, that are parallelized.
+    The exchange of y and z for the spreading of planewaves is operational.
+    The document ~abinit/doc/developers/FFT_in_parallel
+    describes the steps to be taken, at this stage of the
+    FFT parallelism development.
+
+    At present, the space (or FFT) parallelism is not yet available,
+    but developers should pay attention to the nfft/nfftot
+    and npw/npwtot distinctions:
+    the space parallelism should be available in a few months.
+    Also, operations that involve global treatment of the space
+    (like scalar product of plane waves,
+    or computation of average potential) should be
+    made by relying on the routines contained in the Src2_spacepar
+    directory, that will soon be parallelized over the space.
+
+    These are mostly basic numerical routines, in the
+    spirit of BLAS, but adapted to wavefunctions or
+    density and potentials, in which one has to take
+    into account, on one side, the nspinor, isrtwfk, nspden
+    or cplex characteristics, and, on the other side,
+    the specific spread of the components in G- or R- space
+    for parallelisation.
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D1. ABINIT can now be used under OpenVMS. The needed modifications
+    have been made by JJansen.
+
+D2. The input variable "dosdeltae" has been introduced. It allows
+    to control the grid of energy on which the DOS is computed.
+
+D3. Improvements to the Infos directory content (FAQ, Miscellaneous)
+    have been made by Mikami-san.
+
+D4. The input files and README of the Test* and Tutorial directories
+    have been included in the binary tar.gz file. This library
+    of input files can prove very useful to people who are directly
+    dumping binaries from the Web site.
+
+D5. The makefile_macros file for the T3Efhi has been removed, as well as
+    all occurences of the T3Efhi CPP definition, in abinit. Actually, that
+    feature had been produced at the time when the compiler of that particular
+    CRAY T3E was buggy, and unable to compile correctly opernl4a .
+
+D6. Discussion notes by D. Vanderbilt and Xifan Wu : systematic treatment
+    of crystal displacements, strains and polarization.
+    ~abinit/Infos/Theory/lr.pdf
+
+D7. A library of input files is now available on the Web. It is the
+    set of input files present in Test_fast, Test_v1, Test_v2, Test_v3 and Test_v4.
+    Later, one should have a "How To" section in the Web page, referring to
+    these input files.
+
+D8. The preparation of GW calculations can now be done in parallel (debugging
+    of outstat.f by M. Torrent)
+
+D9. Availability of static binary executables for P6 (for both IFC and PGI compilers)
+
+D10. Bug fixes, small modifications, etc ... by M. Boulet, M. Verstra,
+    E. Willighagen, M. Storr, M. Cote, M. Veithen, M. Tijssens, D. Prendergast,
+    L. Sindic, A. Oganov, J.-M. Beuken, F. Bruneval.
+
+</pre>

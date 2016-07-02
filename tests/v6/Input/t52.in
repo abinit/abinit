@@ -1,0 +1,29 @@
+t52.ddb.out
+He BCC primitive cell  EIGR2D file
+8
+t50o_DS2_EIGR2D
+t50o_DS3_EIGR2D
+t50o_DS4_EIGR2D
+t50o_DS5_EIGR2D
+t50o_DS6_EIGR2D
+t50o_DS7_EIGR2D
+t50o_DS8_EIGR2D
+t50o_DS9_EIGR2D
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% test_chain = t50.in, t51.in, t52.in, t53.in
+#%% [files]
+#%% files_to_test = 
+#%%   t52.ddb.out, tolnlines=   21,   tolabs=  0.02,        tolrel= 1.1, fld_options = -ridiculous
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   He BCC primitive cell. Fake smooth pseudopotential.
+#%%   Follow-up of test 50. Merge the EIGR2D files.
+#%%<END TEST_INFO>

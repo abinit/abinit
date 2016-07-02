@@ -1,0 +1,4 @@
+This directory, fast, contains tests which exercise parts 
+of the ABINIT package.
+
+Please, see the README file in the tests directory (above this one) to get help. 

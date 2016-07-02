@@ -1,0 +1,5 @@
+#
+Warning = 'Unused variable'
+#
+#src_excluded = ['10_defs']
+src_excluded = ['12_hide_mpi','68_dmft']

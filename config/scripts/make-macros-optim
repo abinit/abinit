@@ -1,0 +1,250 @@
+#!/usr/bin/env python
+#
+# Copyright (C) 2009-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Management of optimizations
+#
+
+from ConfigParser import ConfigParser
+from time import gmtime,strftime
+
+import os
+import re
+import sys
+
+
+class MyConfigParser(ConfigParser):
+
+  def optionxform(self,option):
+    return str(option)
+
+
+def indent_snippet(level,text):
+  spaces = ""
+  for i in range(level):
+    spaces += "  "
+
+  return spaces + re.sub("\n([^$\n])","\n"+spaces+"\\1",text)
+
+
+def sh_cases(case_data,case_indent=0,case_item=True):
+
+  if ( isinstance(case_data,dict) ):
+    if ( len(case_data.keys()) > 2 ):
+      ret = indent_snippet(case_indent,"case \"${%s}\" in\n" % \
+        (case_data["case"]))
+      case_indent += 1
+      for item in case_data:
+        if ( (item != "case") and (item != "default") ):
+          ret += indent_snippet(case_indent,"%s)\n" % (item)) + \
+	    indent_snippet(case_indent+1,"%s_opt=\"%s\"\n" % \
+	      (case_data["case"],item)) + \
+            sh_cases(case_data[item],case_indent+1,case_item=True)
+      if ( "default" in case_data ):
+        ret += indent_snippet(case_indent,"*)\n") + \
+	    indent_snippet(case_indent+1,"%s_opt=\"default\"\n" % \
+	      (case_data["case"])) + \
+          sh_cases(case_data["default"],case_indent+1,case_item=True)
+      case_indent -= 1
+      ret += indent_snippet(case_indent, \
+        "esac   # [case: %s, indent: %d, item: %s]\n" % \
+          (case_data["case"],case_indent,case_item))
+      if ( (case_indent > 0) and case_item ):
+        ret += indent_snippet(case_indent,";;\n")
+    elif ( len(case_data.keys()) == 2 ):
+      if ( "default" in case_data ):
+        ret = indent_snippet(case_indent,"%s_opt=\"default\"\n" % \
+          (case_data["case"])) + \
+          sh_cases(case_data["default"],case_indent,case_item)
+      else:
+        test_value = case_data.keys()
+        test_value.remove("case")
+        test_value = test_value[0]
+        ret = indent_snippet(case_indent,"if test \"${%s}\" = \"%s\"; then\n" % \
+          (case_data["case"],test_value))
+        case_indent += 1
+        ret += indent_snippet(case_indent,"%s_opt=\"%s\"\n" % \
+          (case_data["case"],test_value)) + \
+          sh_cases(case_data[test_value],case_indent,case_item=False)
+        case_indent -= 1
+        ret += indent_snippet(case_indent,"fi\n")
+    else:
+      raise ValueError, "case_data must contain at least 2 items"
+      
+  else:
+    return indent_snippet(case_indent,"%s\n;;\n" % (case_data.strip()))
+
+  return ret
+
+
+def make_flags(config,build_mode,optflags_names,optim_test,optim_levels):
+
+  lvl_index = dict()
+  flags = dict()
+
+  for i in range(len(optim_levels)):
+    lvl_index[optim_levels[i]] = i
+
+  for (key,val) in config.iteritems():
+    (level,stage) = key.split("_")
+    if ( not level in optim_levels ):
+      raise ValueError, "unknown optim level '%s'" % (level)
+    if ( not stage in flags ):
+      flags[stage] = [ "" for i in range(len(optim_levels)) ]
+    flags[stage][lvl_index[level]] = val
+
+  ret = { "case":optim_test }
+
+  for level in optim_levels:
+    if ( not level in ret ):
+      ret[level] = ""
+
+    for stage in flags:
+      if ( build_mode == "replace" ):
+        optflags = flags[stage][lvl_index[level]]
+      else:
+        optflags = ""
+        for lvl in optim_levels:
+          if ( build_mode == "prepend" ):
+            optflags = flags[stage][lvl_index[lvl]] + " " + optflags
+          elif ( build_mode == "append" ):
+            optflags += " " + flags[stage][lvl_index[lvl]]
+          else:
+            raise ValueError, "unknown build mode '%s'" % (build_mode)
+          if ( lvl == level ):
+            break
+
+      ret[level] += "%s=\"%s\"\n" % (optflags_names[stage],optflags)
+
+  return ret
+
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Main program
+#
+
+# Initial setup
+my_name     = "make-macros-optim"
+my_config   = "config/maintainers/optim.conf"
+my_confdir  = "config/optim"
+my_output   = "config/m4/auto-optim.m4"
+
+# Check if we are in the top of the ABINIT source tree
+if ( not os.path.exists("configure.ac") or
+     not os.path.exists("src/98_main/abinit.F90") ):
+  print "%s: You must be in the top of an ABINIT source tree." % my_name
+  print "%s: Aborting now." % my_name
+  sys.exit(1)
+
+# Check if we have a config file
+if ( not os.path.exists(my_config) ):
+  print "%s: Could not find config file (%s)." % (my_name,my_config)
+  print "%s: Aborting now." % my_name
+  sys.exit(2)
+
+# Check if we have a config directory
+if ( not os.path.exists(my_confdir) ):
+  print "%s: Could not find config dir (%s)." % (my_name,my_confdir)
+  print "%s: Aborting now." % my_name
+  sys.exit(3)
+
+# What time is it?
+now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
+
+# Init
+opt_cnf = MyConfigParser()
+opt_cnf.read(my_config)
+
+# Init optimization variables
+opt_files = os.listdir(my_confdir)
+opt_macro = ""
+
+# Get compiler types
+compilers = opt_cnf.sections()
+
+# Process config files
+for compilo in compilers:
+
+  # Get compiler vendors
+  xc_vendors = opt_cnf.get(compilo,"vendors").split()
+
+  # Get optimization levels
+  opt_levels = opt_cnf.get(compilo,"levels").split()
+  opt_stages = opt_cnf.get(compilo,"stages").split()
+  optim_test = opt_cnf.get(compilo,"optim_test")
+  opt_mode   = opt_cnf.get(compilo,"mode")
+
+  # Get flag names
+  xc_flags = dict()
+  for stg in opt_cnf.get(compilo,"stages").split():
+    xc_flags[stg] = opt_cnf.get(compilo,stg)
+
+  # Create new vendor case
+  opt_config = { "case":opt_cnf.get(compilo,"vendor_test") }
+
+  # Look for vendor-dependent data
+  for xc_vendor in xc_vendors:
+
+    # Look for version-dependent data
+    re_opt_file = re.compile("%s_%s_.*-optim.conf" % (compilo,xc_vendor))
+    versions = list()
+    for src in opt_files:
+      if ( re_opt_file.match(src) ):
+        versions.append(re.sub(".*_(.*)-optim.conf","\\1",src))
+
+    # Create new version case
+    opt_config[xc_vendor] = { "case":opt_cnf.get(compilo,"version_test") }
+
+    if ( len(versions) > 0 ):
+      for xc_version in versions:
+
+        # Create new CPU case
+        opt_config[xc_vendor][xc_version] = \
+          { "case":opt_cnf.get(compilo,"cpu_vendor_test") }
+
+        # Parse config file
+        cnf_file = "%s_%s_%s-optim.conf" % (compilo,xc_vendor,xc_version)
+        cnf = MyConfigParser()
+        cnf.read(os.path.join(my_confdir,cnf_file))
+
+        # Extract defaults
+        opt_config[xc_vendor][xc_version]["default"] = \
+          make_flags(cnf.defaults(),opt_mode,xc_flags,optim_test,opt_levels)
+
+        for cpu in cnf.sections():
+          opt_config[xc_vendor][xc_version][cpu] = \
+	    make_flags(dict(cnf.items(cpu)),opt_mode,xc_flags,optim_test, \
+              opt_levels)
+    else:
+      del opt_config[xc_vendor]
+
+  # Create new macro
+  opt_macro += "\n\nAC_DEFUN([ABI_%s_OPTFLAGS],[\n" % (compilo.upper())
+  opt_macro += "  dnl Init\n"
+  opt_macro += "  abi_%s_vendor_opt=\"none\"\n" % (compilo)
+  opt_macro += "  abi_%s_version_opt=\"none\"\n" % (compilo)
+  opt_macro += "  abi_cpu_spec_opt=\"none\"\n"
+  opt_macro += "\n  dnl Look for optimizations\n"
+  opt_macro += "  AC_MSG_CHECKING([which %s optimizations to apply])\n\n" % \
+    (compilo)
+  if ( len(opt_config.keys()) > 1 ):
+    opt_macro += "  dnl Case built from config/optim/%s_*.conf\n" % (compilo)
+    opt_macro += indent_snippet(1,sh_cases(opt_config))
+  else:
+    opt_macro += "  dnl WARNING: no config files were found for language\n"
+  opt_macro += "\n  dnl Display settings\n"
+  opt_macro += "  AC_MSG_RESULT([" \
+    "${abi_%s_vendor_opt}/${abi_%s_version_opt}/${abi_cpu_spec_opt}])\n\n" % \
+      (compilo,compilo)
+  opt_macro += "]) #ABI_%s_OPTFLAGS\n" % (compilo.upper())
+
+# Write data
+file(my_output,"w").write(opt_macro)

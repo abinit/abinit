@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<molecule id="crystal1" xmlns="http://www.xml-cml.org/schema/cml2/core">
+ <crystal>
+  <scalar title="a" units="angstrom">7.196810036824</scalar>
+  <scalar title="b" units="angstrom">7.196810036824</scalar>
+  <scalar title="c" units="angstrom">7.196810036824</scalar>
+  <scalar title="alpha" units="degrees">90.000000000000</scalar>
+  <scalar title="beta"  units="degrees">90.000000000000</scalar>
+  <scalar title="gamma" units="degrees">90.000000000000</scalar>
+ </crystal>
+ <!-- "ITC" refers to the space group number in the International Tables for Crystallography -->
+ <symmetry id="s1" pointGroup="ITC:16">
+  <matrix id="symOp1" rows="3" columns="4">
+    1 0 0 0.000000000000
+    0 1 0 0.000000000000
+    0 0 1 0.000000000000
+  </matrix>
+  <matrix id="symOp2" rows="3" columns="4">
+    -1 0 0 0.000000000000
+    0 -1 0 0.000000000000
+    0 0 1 0.000000000000
+  </matrix>
+  <matrix id="symOp3" rows="3" columns="4">
+    -1 0 0 0.000000000000
+    0 1 0 0.000000000000
+    0 0 -1 0.000000000000
+  </matrix>
+  <matrix id="symOp4" rows="3" columns="4">
+    1 0 0 0.000000000000
+    0 -1 0 0.000000000000
+    0 0 -1 0.000000000000
+  </matrix>
+ </symmetry>
+ <atomArray>
+  <atom id="1" elementType="C" xFract="0.500000000000" yFract="0.000000000000" zFract="0.000000000000"/>
+  <atom id="2" elementType="C" xFract="0.000000000000" yFract="0.500000000000" zFract="0.000000000000"/>
+  <atom id="3" elementType="C" xFract="0.500000000000" yFract="0.500000000000" zFract="0.000000000000"/>
+  <atom id="4" elementType="C" xFract="0.000000000000" yFract="0.000000000000" zFract="0.500000000000"/>
+  <atom id="5" elementType="C" xFract="0.500000000000" yFract="0.000000000000" zFract="0.500000000000"/>
+  <atom id="6" elementType="C" xFract="0.000000000000" yFract="0.500000000000" zFract="0.500000000000"/>
+  <atom id="7" elementType="C" xFract="0.500000000000" yFract="0.500000000000" zFract="0.500000000000"/>
+  <atom id="8" elementType="C" xFract="0.125000000000" yFract="0.125000000000" zFract="0.125000000000"/>
+  <atom id="9" elementType="C" xFract="0.625000000000" yFract="0.125000000000" zFract="0.125000000000"/>
+  <atom id="10" elementType="C" xFract="0.125000000000" yFract="0.625000000000" zFract="0.125000000000"/>
+  <atom id="11" elementType="C" xFract="0.625000000000" yFract="0.625000000000" zFract="0.125000000000"/>
+  <atom id="12" elementType="C" xFract="0.125000000000" yFract="0.125000000000" zFract="0.625000000000"/>
+  <atom id="13" elementType="C" xFract="0.625000000000" yFract="0.125000000000" zFract="0.625000000000"/>
+  <atom id="14" elementType="C" xFract="0.125000000000" yFract="0.625000000000" zFract="0.625000000000"/>
+  <atom id="15" elementType="C" xFract="0.625000000000" yFract="0.625000000000" zFract="0.625000000000"/>
+  <atom id="16" elementType="C" xFract="0.250000000000" yFract="0.250000000000" zFract="0.000000000000"/>
+  <atom id="17" elementType="C" xFract="0.750000000000" yFract="0.250000000000" zFract="0.000000000000"/>
+  <atom id="18" elementType="C" xFract="0.250000000000" yFract="0.750000000000" zFract="0.000000000000"/>
+  <atom id="19" elementType="C" xFract="0.750000000000" yFract="0.750000000000" zFract="0.000000000000"/>
+  <atom id="20" elementType="C" xFract="0.250000000000" yFract="0.250000000000" zFract="0.500000000000"/>
+  <atom id="21" elementType="C" xFract="0.750000000000" yFract="0.250000000000" zFract="0.500000000000"/>
+  <atom id="22" elementType="C" xFract="0.250000000000" yFract="0.750000000000" zFract="0.500000000000"/>
+  <atom id="23" elementType="C" xFract="0.750000000000" yFract="0.750000000000" zFract="0.500000000000"/>
+  <atom id="24" elementType="C" xFract="0.250000000000" yFract="0.000000000000" zFract="0.250000000000"/>
+  <atom id="25" elementType="C" xFract="0.750000000000" yFract="0.000000000000" zFract="0.250000000000"/>
+  <atom id="26" elementType="C" xFract="0.250000000000" yFract="0.500000000000" zFract="0.250000000000"/>
+  <atom id="27" elementType="C" xFract="0.750000000000" yFract="0.500000000000" zFract="0.250000000000"/>
+  <atom id="28" elementType="C" xFract="0.250000000000" yFract="0.000000000000" zFract="0.750000000000"/>
+  <atom id="29" elementType="C" xFract="0.750000000000" yFract="0.000000000000" zFract="0.750000000000"/>
+  <atom id="30" elementType="C" xFract="0.250000000000" yFract="0.500000000000" zFract="0.750000000000"/>
+  <atom id="31" elementType="C" xFract="0.750000000000" yFract="0.500000000000" zFract="0.750000000000"/>
+  <atom id="32" elementType="C" xFract="0.000000000000" yFract="0.250000000000" zFract="0.250000000000"/>
+  <atom id="33" elementType="C" xFract="0.500000000000" yFract="0.250000000000" zFract="0.250000000000"/>
+  <atom id="34" elementType="C" xFract="0.000000000000" yFract="0.750000000000" zFract="0.250000000000"/>
+  <atom id="35" elementType="C" xFract="0.500000000000" yFract="0.750000000000" zFract="0.250000000000"/>
+  <atom id="36" elementType="C" xFract="0.000000000000" yFract="0.250000000000" zFract="0.750000000000"/>
+  <atom id="37" elementType="C" xFract="0.500000000000" yFract="0.250000000000" zFract="0.750000000000"/>
+  <atom id="38" elementType="C" xFract="0.000000000000" yFract="0.750000000000" zFract="0.750000000000"/>
+  <atom id="39" elementType="C" xFract="0.500000000000" yFract="0.750000000000" zFract="0.750000000000"/>
+  <atom id="40" elementType="C" xFract="0.375000000000" yFract="0.375000000000" zFract="0.125000000000"/>
+  <atom id="41" elementType="C" xFract="0.875000000000" yFract="0.375000000000" zFract="0.125000000000"/>
+  <atom id="42" elementType="C" xFract="0.375000000000" yFract="0.875000000000" zFract="0.125000000000"/>
+  <atom id="43" elementType="C" xFract="0.875000000000" yFract="0.875000000000" zFract="0.125000000000"/>
+  <atom id="44" elementType="C" xFract="0.375000000000" yFract="0.375000000000" zFract="0.625000000000"/>
+  <atom id="45" elementType="C" xFract="0.875000000000" yFract="0.375000000000" zFract="0.625000000000"/>
+  <atom id="46" elementType="C" xFract="0.375000000000" yFract="0.875000000000" zFract="0.625000000000"/>
+  <atom id="47" elementType="C" xFract="0.875000000000" yFract="0.875000000000" zFract="0.625000000000"/>
+  <atom id="48" elementType="C" xFract="0.375000000000" yFract="0.125000000000" zFract="0.375000000000"/>
+  <atom id="49" elementType="C" xFract="0.875000000000" yFract="0.125000000000" zFract="0.375000000000"/>
+  <atom id="50" elementType="C" xFract="0.375000000000" yFract="0.625000000000" zFract="0.375000000000"/>
+  <atom id="51" elementType="C" xFract="0.875000000000" yFract="0.625000000000" zFract="0.375000000000"/>
+  <atom id="52" elementType="C" xFract="0.375000000000" yFract="0.125000000000" zFract="0.875000000000"/>
+  <atom id="53" elementType="C" xFract="0.875000000000" yFract="0.125000000000" zFract="0.875000000000"/>
+  <atom id="54" elementType="C" xFract="0.375000000000" yFract="0.625000000000" zFract="0.875000000000"/>
+  <atom id="55" elementType="C" xFract="0.875000000000" yFract="0.625000000000" zFract="0.875000000000"/>
+  <atom id="56" elementType="C" xFract="0.125000000000" yFract="0.375000000000" zFract="0.375000000000"/>
+  <atom id="57" elementType="C" xFract="0.625000000000" yFract="0.375000000000" zFract="0.375000000000"/>
+  <atom id="58" elementType="C" xFract="0.125000000000" yFract="0.875000000000" zFract="0.375000000000"/>
+  <atom id="59" elementType="C" xFract="0.625000000000" yFract="0.875000000000" zFract="0.375000000000"/>
+  <atom id="60" elementType="C" xFract="0.125000000000" yFract="0.375000000000" zFract="0.875000000000"/>
+  <atom id="61" elementType="C" xFract="0.625000000000" yFract="0.375000000000" zFract="0.875000000000"/>
+  <atom id="62" elementType="C" xFract="0.125000000000" yFract="0.875000000000" zFract="0.875000000000"/>
+  <atom id="63" elementType="C" xFract="0.625000000000" yFract="0.875000000000" zFract="0.875000000000"/>
+ </atomArray>
+</molecule>

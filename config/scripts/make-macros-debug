@@ -1,0 +1,254 @@
+#!/usr/bin/env python
+#
+# Copyright (C) 2009-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Management of debug flags
+#
+
+from ConfigParser import ConfigParser
+from time import gmtime,strftime
+
+import os
+import re
+import sys
+
+
+class MyConfigParser(ConfigParser):
+
+  def optionxform(self,option):
+    return str(option)
+
+
+def indent_snippet(level,text):
+  spaces = ""
+  for i in range(level):
+    spaces += "  "
+
+  return spaces + re.sub("\n([^$\n])","\n"+spaces+"\\1",text)
+
+
+def sh_cases(case_data,case_indent=0,case_item=True):
+
+  if ( isinstance(case_data,dict) ):
+    if ( len(case_data.keys()) > 2 ):
+      ret = indent_snippet(case_indent,"case \"${%s}\" in\n" % \
+        (case_data["case"]))
+      case_indent += 1
+      for item in case_data:
+        if ( (item != "case") and (item != "default") ):
+          ret += indent_snippet(case_indent,"%s)\n" % (item)) + \
+	    indent_snippet(case_indent+1,"%s_dbg=\"%s\"\n" % \
+	      (case_data["case"],item)) + \
+            sh_cases(case_data[item],case_indent+1,case_item=True)
+      if ( "default" in case_data ):
+        ret += indent_snippet(case_indent,"*)\n") + \
+	    indent_snippet(case_indent+1,"%s_dbg=\"default\"\n" % \
+	      (case_data["case"])) + \
+          sh_cases(case_data["default"],case_indent+1,case_item=True)
+      case_indent -= 1
+      ret += indent_snippet(case_indent, \
+        "esac   # [case: %s, indent: %d, item: %s]\n" % \
+          (case_data["case"],case_indent,case_item))
+      if ( (case_indent > 0) and case_item ):
+        ret += indent_snippet(case_indent,";;\n")
+    elif ( len(case_data.keys()) == 2 ):
+      if ( "default" in case_data ):
+        ret = indent_snippet(case_indent,"%s_dbg=\"default\"\n" % \
+          (case_data["case"])) + \
+          sh_cases(case_data["default"],case_indent,case_item)
+      else:
+        test_value = case_data.keys()
+        test_value.remove("case")
+        test_value = test_value[0]
+        ret = indent_snippet(case_indent,"if test \"${%s}\" = \"%s\"; then\n" % \
+          (case_data["case"],test_value))
+        case_indent += 1
+        ret += indent_snippet(case_indent,"%s_dbg=\"%s\"\n" % \
+          (case_data["case"],test_value)) + \
+          sh_cases(case_data[test_value],case_indent,case_item=False)
+        case_indent -= 1
+        ret += indent_snippet(case_indent,"fi\n")
+    else:
+      raise ValueError, "case_data must contain at least 2 items"
+      
+  else:
+    return indent_snippet(case_indent,"%s\n;;\n" % (case_data.strip()))
+
+  return ret
+
+
+def make_flags(config,build_mode,dbgflags_names,debug_test,debug_levels):
+
+  lvl_index = dict()
+  flags = dict()
+
+  for i in range(len(debug_levels)):
+    lvl_index[debug_levels[i]] = i
+
+  for (key,val) in config.iteritems():
+    (level,stage) = key.split("_")
+    if ( not level in debug_levels ):
+      raise ValueError, "unknown debug level '%s'" % (level)
+    if ( not stage in flags ):
+      flags[stage] = [ "" for i in range(len(debug_levels)) ]
+    flags[stage][lvl_index[level]] = val
+
+  ret = { "case":debug_test }
+
+  for level in debug_levels:
+    if ( not level in ret ):
+      ret[level] = ""
+
+    for stage in flags:
+      if ( build_mode == "replace" ):
+        dbgflags = flags[stage][lvl_index[level]]
+      else:
+        dbgflags = ""
+        for lvl in debug_levels:
+          if ( build_mode == "prepend" ):
+            dbgflags = flags[stage][lvl_index[lvl]] + " " + dbgflags
+          elif ( build_mode == "append" ):
+            dbgflags += " " + flags[stage][lvl_index[lvl]]
+          else:
+            raise ValueError, "unknown build mode '%s'" % (build_mode)
+          if ( lvl == level ):
+            break
+
+      dbgflags = dbgflags.strip()
+
+      if ( dbgflags != "" ):
+        ret[level] += "%s=\"${%s} %s\"\n" % \
+          (dbgflags_names[stage],dbgflags_names[stage],dbgflags)
+
+  return ret
+
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Main program
+#
+
+# Initial setup
+my_name     = "make-macros-debug"
+my_config   = "config/maintainers/debug.conf"
+my_confdir  = "config/debug"
+my_output   = "config/m4/auto-debug.m4"
+
+# Check if we are in the top of the ABINIT source tree
+if ( not os.path.exists("configure.ac") or
+     not os.path.exists("src/98_main/abinit.F90") ):
+  print "%s: You must be in the top of an ABINIT source tree." % my_name
+  print "%s: Aborting now." % my_name
+  sys.exit(1)
+
+# Check if we have a config file
+if ( not os.path.exists(my_config) ):
+  print "%s: Could not find config file (%s)." % (my_name,my_config)
+  print "%s: Aborting now." % my_name
+  sys.exit(2)
+
+# Check if we have a config directory
+if ( not os.path.exists(my_confdir) ):
+  print "%s: Could not find config dir (%s)." % (my_name,my_confdir)
+  print "%s: Aborting now." % my_name
+  sys.exit(3)
+
+# What time is it?
+now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
+
+# Init
+dbg_cnf = MyConfigParser()
+dbg_cnf.read(my_config)
+
+# Init debugging variables
+dbg_files = os.listdir(my_confdir)
+dbg_macro = ""
+
+# Get compiler types
+compilers = dbg_cnf.sections()
+
+# Process config files
+for compilo in compilers:
+
+  # Get compiler vendors
+  xc_vendors = dbg_cnf.get(compilo,"vendors").split()
+
+  # Get debugging levels
+  dbg_levels = dbg_cnf.get(compilo,"levels").split()
+  dbg_stages = dbg_cnf.get(compilo,"stages").split()
+  debug_test = dbg_cnf.get(compilo,"debug_test")
+  dbg_mode   = dbg_cnf.get(compilo,"mode")
+
+  # Get flag names
+  xc_flags = dict()
+  for stg in dbg_cnf.get(compilo,"stages").split():
+    xc_flags[stg] = dbg_cnf.get(compilo,stg)
+
+  # Create new vendor case
+  dbg_config = { "case":dbg_cnf.get(compilo,"vendor_test") }
+
+  # Look for vendor-dependent data
+  for xc_vendor in xc_vendors:
+
+    # Look for version-dependent data
+    re_dbg_file = re.compile("%s_%s_.*-debug.conf" % (compilo,xc_vendor))
+    versions = list()
+    for src in dbg_files:
+      if ( re_dbg_file.match(src) ):
+        versions.append(re.sub(".*_(.*)-debug.conf","\\1",src))
+
+    # Create new version case
+    dbg_config[xc_vendor] = { "case":dbg_cnf.get(compilo,"version_test") }
+
+    if ( len(versions) > 0 ):
+      for xc_version in versions:
+
+        # Create new CPU case
+        dbg_config[xc_vendor][xc_version] = \
+          { "case":dbg_cnf.get(compilo,"cpu_vendor_test") }
+
+        # Parse config file
+        cnf_file = "%s_%s_%s-debug.conf" % (compilo,xc_vendor,xc_version)
+        cnf = MyConfigParser()
+        cnf.read(os.path.join(my_confdir,cnf_file))
+
+        # Extract defaults
+        dbg_config[xc_vendor][xc_version]["default"] = \
+          make_flags(cnf.defaults(),dbg_mode,xc_flags,debug_test,dbg_levels)
+
+        for cpu in cnf.sections():
+          dbg_config[xc_vendor][xc_version][cpu] = \
+	    make_flags(dict(cnf.items(cpu)),dbg_mode,xc_flags,debug_test, \
+              dbg_levels)
+    else:
+      del dbg_config[xc_vendor]
+
+  # Create new macro
+  dbg_macro += "\n\nAC_DEFUN([ABI_%s_DBGFLAGS],[\n" % (compilo.upper())
+  dbg_macro += "  dnl Init\n"
+  dbg_macro += "  abi_%s_vendor_dbg=\"none\"\n" % (compilo)
+  dbg_macro += "  abi_%s_version_dbg=\"none\"\n" % (compilo)
+  dbg_macro += "  abi_cpu_spec_dbg=\"none\"\n"
+  dbg_macro += "\n  dnl Look for debug flags\n"
+  dbg_macro += "  AC_MSG_CHECKING([which %s debug flags to apply])\n\n" % \
+    (compilo)
+  if ( len(dbg_config.keys()) > 1 ):
+    dbg_macro += "  dnl Case built from config/debug/%s_*.conf\n" % (compilo)
+    dbg_macro += indent_snippet(1,sh_cases(dbg_config))
+  else:
+    dbg_macro += "  dnl WARNING: no config files were found for language\n"
+  dbg_macro += "\n  dnl Display settings\n"
+  dbg_macro += "  AC_MSG_RESULT([" \
+    "${abi_%s_vendor_dbg}/${abi_%s_version_dbg}/${abi_cpu_spec_dbg}])\n\n" % \
+      (compilo,compilo)
+  dbg_macro += "]) #ABI_%s_DBGFLAGS\n" % (compilo.upper())
+
+# Write data
+file(my_output,"w").write(dbg_macro)

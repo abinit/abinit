@@ -1,0 +1,47 @@
+#
+# Suffixes
+#
+
+SUFFIXES = .html .pdf .tex .gv .md
+
+# --------------------------------------------------------------------------- #
+
+#
+# Rules to build Graphviz documents
+#
+
+if DO_BUILD_GV
+.gv.pdf:
+	$(GRAPHVIZ_DOT) $(GVDFLAGS) -T pdf -o $@ $<
+else
+.gv.pdf:
+	@echo "Please install or upgrade Graphviz to build $@"
+endif
+
+# --------------------------------------------------------------------------- #
+
+#
+# Rules to build LaTeX documents
+#
+
+if DO_BUILD_TEX
+.tex.pdf:
+	TEXINPUTS="$(abs_builddir):$(abs_srcdir):" \
+	  $(LATEX) $(TEXFLAGS) $(TEXFLAGS_EXTRA) $<
+	TEXINPUTS="$(abs_builddir):$(abs_srcdir):" \
+	  $(LATEX) $(TEXFLAGS) $(TEXFLAGS_EXTRA) $<
+else
+.tex.pdf:
+	@echo "Please install LaTeX to build $@"
+endif
+
+# --------------------------------------------------------------------------- #
+
+#
+# Rules to build MarkDown documents
+#
+
+.md.html:
+	$(MARKDOWN) $(MDFLAGS) $< >$@
+
+# --------------------------------------------------------------------------- #

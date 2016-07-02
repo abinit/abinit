@@ -1,0 +1,28 @@
+!!****d* ABINIT/68_rsprc
+!! NAME
+!! 68_rsprc
+!!
+!! DESCRIPTION
+!! This directory contains
+!! - some routines used for real-space preconditionning of the scf cycle
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! interfaces_68_rsprc.F90
+!! mod_prc_memory.F90
+!! moddiel_csrb.F90
+!! newrho.F90
+!! newvtr.F90
+!! prcref.F90
+!! prcref_PMA.F90
+!! prcrskerker1.F90
+!! prcrskerker2.F90
+!! wvl_prcref.F90
+!!
+!!***

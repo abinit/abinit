@@ -1,0 +1,73 @@
+!!****d* ABINIT/70_gw
+!! NAME
+!! 70_gw
+!!
+!! DESCRIPTION
+!! This directory contains level-5 routines used
+!! to treat the GW approximation.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! calc_rpa_functional.F90
+!! calc_sig_ppm_comp.F90
+!! calc_sigc_cd.F90
+!! calc_sigc_me.F90
+!! calc_sigc_pole_cd.F90
+!! calc_sigx_me.F90
+!! calc_ucrpa.F90
+!! calc_vhxc_me.F90
+!! calc_wf_qp.F90
+!! cchi0.F90
+!! cchi0q0.F90
+!! cchi0q0_intraband.F90
+!! cohsex_me.F90
+!! debug_tools.F90
+!! dotproductqrc.F90
+!! fsumrule.F90
+!! gw_tools.F90
+!! gwcompleteness.F90
+!! gwls_ComputeCorrelationEnergy.F90
+!! gwls_ComputePoles.F90
+!! gwls_DielectricArray.F90
+!! gwls_GWanalyticPart.F90
+!! gwls_GWlanczos.F90
+!! gwls_GenerateEpsilon.F90
+!! gwls_LanczosBasis.F90
+!! gwls_LanczosResolvents.F90
+!! gwls_Projected_AT.F90
+!! gwls_Projected_BT.F90
+!! gwls_QR_factorization.F90
+!! gwls_TimingLog.F90
+!! gwls_hamiltonian.F90
+!! gwls_lineqsolver.F90
+!! gwls_model_polarisability.F90
+!! gwls_polarisability.F90
+!! gwls_valenceWavefunctions.F90
+!! gwls_wf.F90
+!! interfaces_70_gw.F90
+!! m_chi0.F90
+!! m_dyson_solver.F90
+!! m_eet.F90
+!! m_fft_prof.F90
+!! m_model_screening.F90
+!! m_ppmodel.F90
+!! m_qparticles.F90
+!! m_screen.F90
+!! m_screening.F90
+!! m_sigma.F90
+!! mlwfovlp_qp.F90
+!! my_calc_wfwfg.F90
+!! paw_qpscgw.F90
+!! prep_calc_ucrpa.F90
+!! random_stopping_power.F90
+!! read_plowannier.F90
+!! setup_screening.F90
+!! setup_sigma.F90
+!!
+!!***

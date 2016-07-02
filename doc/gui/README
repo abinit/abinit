@@ -1,0 +1,45 @@
+
+The ABINIT GUI is under active development.
+For practical purposes, and given the size of the packages 
+(altogether, more than 60 MB as of August 2013), 
+it has been decided not to deliver it with the main ABINIT package.
+Please, find below the adequate links ...
+
+------------------------------------------------
+WHERE TO FIND SOURCES AND BINARIES ?
+------------------------------------------------
+
+The AbinitGUI sources are hosted by GitHUB and the repository of the last stable version can be downloaded using the following link:
+
+https://github.com/abinitgui/abinitgui.git
+
+------------------------------------------------
+
+The AbinitGUI binaries (but also sources) of the last stable version as well as additional material can be found elsewhere:
+
+http://flavio.be/AbinitGUI.php
+
+There you can download the pseudo-potential filetree organized for AbinitGUI (PSP.zip) and other external post-processing libraries adapted for AbinitGUI (abipy.tar.gz & pymatgen.tar.gz).
+
+------------------------------------------------
+
+Please report any problem or bug to abinitgui@gmail.com.
+
+------------------------------------------------
+
+Authors of the Abinit GUI
+=========================
+
+The AbinitGUI has been created by:
+
+  * Flavio Abreu Araujo <flavio.abreuaraujo@uclouvain.be>
+
+It is now developed by:
+  
+  * Flavio Abreu Araujo <flavio.abreuaraujo@uclouvain.be>
+  * Yannick Gillet <yannick.gillet@uclouvain.be>
+
+Its build system has been written by:
+
+  * Yann Pouillon <yann.pouillon@ehu.es>
+  * Flavio Abreu Araujo <flavio.abreuaraujo@uclouvain.be>

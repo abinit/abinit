@@ -1,0 +1,2934 @@
+
+.Version 8.0.3 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+
+.Copyright (C) 1998-2016 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : Mon  4 Apr 2016.
+- ( at 12h02 )
+  
+- input  file    -> t03.in
+- output file    -> t03.out
+- root for input  files -> t03i
+- root for output files -> t03o
+
+
+ DATASET   11 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 11.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      16  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =           4
+       mpw =         164          nfft =        4096          nkpt =           4
+================================================================================
+P This job should need less than                       2.164 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.042 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET   12 : space group R3 m (#160); Bravais hR (rhombohedral)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 12.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      16  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       6    n1xccc =       0    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =          10
+       mpw =         164          nfft =        4096          nkpt =          10
+================================================================================
+P This job should need less than                       2.239 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.102 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET   13 : space group R3 m (#160); Bravais hR (rhombohedral)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 13.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      16  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       6    n1xccc =       0    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =           4        mffmem =           1         mkmem =          10
+       mpw =         164          nfft =        4096          nkpt =          10
+================================================================================
+P This job should need less than                       2.239 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.102 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET   21 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 21.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      16  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       2
+    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           4
+       mpw =         164          nfft =        4096          nkpt =           4
+================================================================================
+P This job should need less than                       2.306 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.082 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET   22 : space group R3 m (#160); Bravais hR (rhombohedral)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 22.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      16  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       2
+    nsppol =       1      nsym =       6    n1xccc =       0    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =          10
+       mpw =         164          nfft =        4096          nkpt =          10
+================================================================================
+P This job should need less than                       2.565 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.202 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET   23 : space group R3 m (#160); Bravais hR (rhombohedral)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 23.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       6
+     lnmax =       6     mgfft =      16  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       2
+    nsppol =       1      nsym =       6    n1xccc =       0    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =          10
+       mpw =         164          nfft =        4096          nkpt =          10
+================================================================================
+P This job should need less than                       2.565 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.202 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET   31 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 31.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       9
+     lnmax =       9     mgfft =      16  mpssoang =       5    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       2
+    nsppol =       1      nsym =      24    n1xccc =       0    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           4
+       mpw =         164          nfft =        4096          nkpt =           4
+================================================================================
+P This job should need less than                       2.596 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.082 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET   32 : space group R3 m (#160); Bravais hR (rhombohedral)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 32.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       9
+     lnmax =       9     mgfft =      16  mpssoang =       5    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       2
+    nsppol =       1      nsym =       6    n1xccc =       0    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =          10
+       mpw =         164          nfft =        4096          nkpt =          10
+================================================================================
+P This job should need less than                       2.854 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.202 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET   33 : space group R3 m (#160); Bravais hR (rhombohedral)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 33.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       9
+     lnmax =       9     mgfft =      16  mpssoang =       5    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       2
+    nsppol =       1      nsym =       6    n1xccc =       0    ntypat =       2
+    occopt =       1   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =          10
+       mpw =         164          nfft =        4096          nkpt =          10
+================================================================================
+P This job should need less than                       2.854 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.202 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+--------------------------------------------------------------------------------
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values                                      
+-   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-
+- outvars: echo of global parameters not present in the input file              
+-  max_nthreads =    0
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell      1.0683188747E+01  1.0683188747E+01  1.0683188747E+01 Bohr
+              amu      6.97230000E+01  7.49215900E+01
+         berryopt11        -1
+         berryopt12         4
+         berryopt13         4
+         berryopt21        -1
+         berryopt22         4
+         berryopt23         4
+         berryopt31        -1
+         berryopt32         4
+         berryopt33         4
+           diemac      8.00000000E+00
+             ecut      5.00000000E+00 Hartree
+           efield11    0.00000000E+00  0.00000000E+00  0.00000000E+00
+           efield12    5.00000000E-05  5.00000000E-05  5.00000000E-05
+           efield13    1.00000000E-04  1.00000000E-04  1.00000000E-04
+           efield21    0.00000000E+00  0.00000000E+00  0.00000000E+00
+           efield22    5.00000000E-05  5.00000000E-05  5.00000000E-05
+           efield23    1.00000000E-04  1.00000000E-04  1.00000000E-04
+           efield31    0.00000000E+00  0.00000000E+00  0.00000000E+00
+           efield32    5.00000000E-05  5.00000000E-05  5.00000000E-05
+           efield33    1.00000000E-04  1.00000000E-04  1.00000000E-04
+-          fftalg         312
+           getwfk11         0
+           getwfk12        -1
+           getwfk13        -1
+           getwfk21         0
+           getwfk22        -1
+           getwfk23        -1
+           getwfk31         0
+           getwfk32        -1
+           getwfk33        -1
+           jdtset       11   12   13   21   22   23   31   32   33
+              kpt11   -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+              kpt12   -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+                       5.00000000E-01  2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       2.50000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+              kpt13   -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+                       5.00000000E-01  2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       2.50000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+              kpt21   -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+              kpt22   -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+                       5.00000000E-01  2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       2.50000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+              kpt23   -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+                       5.00000000E-01  2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       2.50000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+              kpt31   -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+              kpt32   -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+                       5.00000000E-01  2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       2.50000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+              kpt33   -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+                       5.00000000E-01  2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       2.50000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+           kptopt           4
+         kptrlatt        2    2   -2     -2    2   -2     -2    2    2
+          kptrlen      2.13663775E+01
+P           mkmem11         4
+P           mkmem12        10
+P           mkmem13        10
+P           mkmem21         4
+P           mkmem22        10
+P           mkmem23        10
+P           mkmem31         4
+P           mkmem32        10
+P           mkmem33        10
+            natom           2
+            nband11         4
+            nband12         4
+            nband13         4
+            nband21         8
+            nband22         8
+            nband23         8
+            nband31         8
+            nband32         8
+            nband33         8
+           ndtset           9
+            ngfft          16      16      16
+             nkpt11         4
+             nkpt12        10
+             nkpt13        10
+             nkpt21         4
+             nkpt22        10
+             nkpt23        10
+             nkpt31         4
+             nkpt32        10
+             nkpt33        10
+          nspinor11         1
+          nspinor12         1
+          nspinor13         1
+          nspinor21         2
+          nspinor22         2
+          nspinor23         2
+          nspinor31         2
+          nspinor32         2
+          nspinor33         2
+            nstep           8
+             nsym11        24
+             nsym12         6
+             nsym13         6
+             nsym21        24
+             nsym22         6
+             nsym23         6
+             nsym31        24
+             nsym32         6
+             nsym33         6
+           ntypat           2
+              occ11    2.000000  2.000000  2.000000  2.000000
+              occ12    2.000000  2.000000  2.000000  2.000000
+              occ13    2.000000  2.000000  2.000000  2.000000
+              occ21    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000
+              occ22    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000
+              occ23    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000
+              occ31    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000
+              occ32    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000
+              occ33    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000
+           prtden           0
+            rfdir           1       1       1
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+           shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
+           so_psp11         0       0
+           so_psp12         0       0
+           so_psp13         0       0
+           so_psp21         0       0
+           so_psp22         0       0
+           so_psp23         0       0
+           so_psp31         1       1
+           so_psp32         1       1
+           so_psp33         1       1
+          spgroup11       216
+          spgroup12       160
+          spgroup13       160
+          spgroup21       216
+          spgroup22       160
+          spgroup23       160
+          spgroup31       216
+          spgroup32       160
+          spgroup33       160
+           symafm11      1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1
+           symafm12      1    1    1    1    1    1
+           symafm13      1    1    1    1    1    1
+           symafm21      1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1
+           symafm22      1    1    1    1    1    1
+           symafm23      1    1    1    1    1    1
+           symafm31      1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1
+           symafm32      1    1    1    1    1    1
+           symafm33      1    1    1    1    1    1
+           symrel11    1  0  0   0  1  0   0  0  1       0 -1  1   0 -1  0   1 -1  0
+                      -1  0  0  -1  0  1  -1  1  0       0  1 -1   1  0 -1   0  0 -1
+                      -1  0  0  -1  1  0  -1  0  1       0 -1  1   1 -1  0   0 -1  0
+                       1  0  0   0  0  1   0  1  0       0  1 -1   0  0 -1   1  0 -1
+                      -1  0  1  -1  1  0  -1  0  0       0 -1  0   1 -1  0   0 -1  1
+                       1  0 -1   0  0 -1   0  1 -1       0  1  0   0  0  1   1  0  0
+                       1  0 -1   0  1 -1   0  0 -1       0 -1  0   0 -1  1   1 -1  0
+                      -1  0  1  -1  0  0  -1  1  0       0  1  0   1  0  0   0  0  1
+                       0  0 -1   0  1 -1   1  0 -1       1 -1  0   0 -1  1   0 -1  0
+                       0  0  1   1  0  0   0  1  0      -1  1  0  -1  0  0  -1  0  1
+                       0  0  1   0  1  0   1  0  0       1 -1  0   0 -1  0   0 -1  1
+                       0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
+           symrel12    1  0  0   0  1  0   0  0  1       1  0  0   0  0  1   0  1  0
+                       0  1  0   0  0  1   1  0  0       0  1  0   1  0  0   0  0  1
+                       0  0  1   1  0  0   0  1  0       0  0  1   0  1  0   1  0  0
+           symrel13    1  0  0   0  1  0   0  0  1       1  0  0   0  0  1   0  1  0
+                       0  1  0   0  0  1   1  0  0       0  1  0   1  0  0   0  0  1
+                       0  0  1   1  0  0   0  1  0       0  0  1   0  1  0   1  0  0
+           symrel21    1  0  0   0  1  0   0  0  1       0 -1  1   0 -1  0   1 -1  0
+                      -1  0  0  -1  0  1  -1  1  0       0  1 -1   1  0 -1   0  0 -1
+                      -1  0  0  -1  1  0  -1  0  1       0 -1  1   1 -1  0   0 -1  0
+                       1  0  0   0  0  1   0  1  0       0  1 -1   0  0 -1   1  0 -1
+                      -1  0  1  -1  1  0  -1  0  0       0 -1  0   1 -1  0   0 -1  1
+                       1  0 -1   0  0 -1   0  1 -1       0  1  0   0  0  1   1  0  0
+                       1  0 -1   0  1 -1   0  0 -1       0 -1  0   0 -1  1   1 -1  0
+                      -1  0  1  -1  0  0  -1  1  0       0  1  0   1  0  0   0  0  1
+                       0  0 -1   0  1 -1   1  0 -1       1 -1  0   0 -1  1   0 -1  0
+                       0  0  1   1  0  0   0  1  0      -1  1  0  -1  0  0  -1  0  1
+                       0  0  1   0  1  0   1  0  0       1 -1  0   0 -1  0   0 -1  1
+                       0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
+           symrel22    1  0  0   0  1  0   0  0  1       1  0  0   0  0  1   0  1  0
+                       0  1  0   0  0  1   1  0  0       0  1  0   1  0  0   0  0  1
+                       0  0  1   1  0  0   0  1  0       0  0  1   0  1  0   1  0  0
+           symrel23    1  0  0   0  1  0   0  0  1       1  0  0   0  0  1   0  1  0
+                       0  1  0   0  0  1   1  0  0       0  1  0   1  0  0   0  0  1
+                       0  0  1   1  0  0   0  1  0       0  0  1   0  1  0   1  0  0
+           symrel31    1  0  0   0  1  0   0  0  1       0 -1  1   0 -1  0   1 -1  0
+                      -1  0  0  -1  0  1  -1  1  0       0  1 -1   1  0 -1   0  0 -1
+                      -1  0  0  -1  1  0  -1  0  1       0 -1  1   1 -1  0   0 -1  0
+                       1  0  0   0  0  1   0  1  0       0  1 -1   0  0 -1   1  0 -1
+                      -1  0  1  -1  1  0  -1  0  0       0 -1  0   1 -1  0   0 -1  1
+                       1  0 -1   0  0 -1   0  1 -1       0  1  0   0  0  1   1  0  0
+                       1  0 -1   0  1 -1   0  0 -1       0 -1  0   0 -1  1   1 -1  0
+                      -1  0  1  -1  0  0  -1  1  0       0  1  0   1  0  0   0  0  1
+                       0  0 -1   0  1 -1   1  0 -1       1 -1  0   0 -1  1   0 -1  0
+                       0  0  1   1  0  0   0  1  0      -1  1  0  -1  0  0  -1  0  1
+                       0  0  1   0  1  0   1  0  0       1 -1  0   0 -1  0   0 -1  1
+                       0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
+           symrel32    1  0  0   0  1  0   0  0  1       1  0  0   0  0  1   0  1  0
+                       0  1  0   0  0  1   1  0  0       0  1  0   1  0  0   0  0  1
+                       0  0  1   1  0  0   0  1  0       0  0  1   0  1  0   1  0  0
+           symrel33    1  0  0   0  1  0   0  0  1       1  0  0   0  0  1   0  1  0
+                       0  1  0   0  0  1   1  0  0       0  1  0   1  0  0   0  0  1
+                       0  0  1   1  0  0   0  1  0       0  0  1   0  1  0   1  0  0
+            tnons11    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons12    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons13    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons21    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons22    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons23    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons31    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons32    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons33    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+           tolvrs      1.00000000E-20
+            typat      1  2
+              wtk11      0.12500    0.37500    0.37500    0.12500
+              wtk12      0.09375    0.18750    0.18750    0.09375    0.09375    0.09375
+                         0.09375    0.09375    0.03125    0.03125
+              wtk13      0.09375    0.18750    0.18750    0.09375    0.09375    0.09375
+                         0.09375    0.09375    0.03125    0.03125
+              wtk21      0.12500    0.37500    0.37500    0.12500
+              wtk22      0.09375    0.18750    0.18750    0.09375    0.09375    0.09375
+                         0.09375    0.09375    0.03125    0.03125
+              wtk23      0.09375    0.18750    0.18750    0.09375    0.09375    0.09375
+                         0.09375    0.09375    0.03125    0.03125
+              wtk31      0.12500    0.37500    0.37500    0.12500
+              wtk32      0.09375    0.18750    0.18750    0.09375    0.09375    0.09375
+                         0.09375    0.09375    0.03125    0.03125
+              wtk33      0.09375    0.18750    0.18750    0.09375    0.09375    0.09375
+                         0.09375    0.09375    0.03125    0.03125
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.4133250000E+00  1.4133250000E+00  1.4133250000E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.6707971868E+00  2.6707971868E+00  2.6707971868E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
+            znucl       31.00000   33.00000
+
+================================================================================
+
+ chkinp: Checking input parameters for consistency, jdtset=  11.
+
+ chkinp: Checking input parameters for consistency, jdtset=  12.
+
+ chkinp: Checking input parameters for consistency, jdtset=  13.
+
+ chkinp: Checking input parameters for consistency, jdtset=  21.
+
+ chkinp: Checking input parameters for consistency, jdtset=  22.
+
+ chkinp: Checking input parameters for consistency, jdtset=  23.
+
+ chkinp: Checking input parameters for consistency, jdtset=  31.
+
+ chkinp: Checking input parameters for consistency, jdtset=  32.
+
+ chkinp: Checking input parameters for consistency, jdtset=  33.
+
+================================================================================
+== DATASET 11 ==================================================================
+-   nproc =    1
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3415944  5.3415944  G(1)= -0.0936050  0.0936050  0.0936050
+ R(2)=  5.3415944  0.0000000  5.3415944  G(2)=  0.0936050 -0.0936050  0.0936050
+ R(3)=  5.3415944  5.3415944  0.0000000  G(3)=  0.0936050  0.0936050 -0.0936050
+ Unit cell volume ucvol=  3.0481948E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
+         ecut(hartree)=      5.000   => boxcut(ratio)=   2.10419
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/31ga.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/31ga.hgh
+- Hartwigsen-Goedecker-Hutter psp for ga, from PRB58, 3641 (1998) paper
+- 31.00000   3.00000      1124                znucl, zion, pspdat
+    3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+ rloc=   0.5600000
+ cc1 =   0.0000000; cc2 =   0.0000000; cc3 =   0.0000000; cc4 =   0.0000000
+ rrs =   0.6107910; h11s=   2.3693250; h22s=  -0.2490150; h33s=  -0.5517960
+ rrp =   0.7045960; h11p=   0.7463050; h22p=  -0.5131320; h33p=   0.0000000
+                    k11p=   0.0296070; k22p=  -0.0008730; k33p=   0.0000000
+ rrd =   0.9825800; h11d=   0.0754370; h22d=   0.0000000; h33d=   0.0000000
+                    k11d=   0.0014860; k22d=   0.0000000; k33d=   0.0000000
+-  Local part computed in reciprocal space.
+
+ pspatm : COMMENT -
+  the projectors are not normalized,
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
+  However, this does not influence the results obtained hereafter.
+ pspatm: epsatm=    5.91122074
+         --- l  ekb(1:nproj) -->
+             0   -0.636687   -0.017197    1.920868
+             1   -0.676457    0.963544
+             2    0.945855
+ pspatm: atomic psp has been read  and splines computed
+
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/33as.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/33as.hgh
+- Hartwigsen-Goedecker-Hutter psp for as, from PRB58, 3641 (1998) paper
+- 33.00000   5.00000      1124                znucl, zion, pspdat
+    3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+ rloc=   0.5200000
+ cc1 =   0.0000000; cc2 =   0.0000000; cc3 =   0.0000000; cc4 =   0.0000000
+ rrs =   0.4564000; h11s=   4.5607610; h22s=   1.6923890; h33s=  -1.3738040
+ rrp =   0.5505620; h11p=   1.8122470; h22p=  -0.6467270; h33p=   0.0000000
+                    k11p=   0.0524660; k22p=   0.0205620; k33p=   0.0000000
+ rrd =   0.6852830; h11d=   0.3123730; h22d=   0.0000000; h33d=   0.0000000
+                    k11d=   0.0042730; k22d=   0.0000000; k33d=   0.0000000
+-  Local part computed in reciprocal space.
+
+ pspatm : COMMENT -
+  the projectors are not normalized,
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
+  However, this does not influence the results obtained hereafter.
+ pspatm: epsatm=    8.49486654
+         --- l  ekb(1:nproj) -->
+             0   -0.541009    0.585426    1.599968
+             1   -0.242708    0.660717
+             2    0.314361
+ pspatm: atomic psp has been read  and splines computed
+
+   1.15248698E+02                                ecore*ucvol(ha*bohr**3)
+--------------------------------------------------------------------------------
+
+_setup2: Arith. and geom. avg. npw (full set) are     163.500     163.498
+  initberry: for direction 1, nkstr =   2, nstr =     16
+  initberry: for direction 2, nkstr =   2, nstr =     16
+  initberry: for direction 3, nkstr =   2, nstr =     16
+
+================================================================================
+
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+ ETOT  1  -8.5038034937059    -8.504E+00 2.187E-03 5.163E-01
+ ETOT  2  -8.5288954384723    -2.509E-02 2.994E-03 1.480E-01
+ ETOT  3  -8.5292672645197    -3.718E-04 3.442E-06 6.066E-03
+ ETOT  4  -8.5292792466799    -1.198E-05 5.057E-08 1.852E-04
+ ETOT  5  -8.5292795535789    -3.069E-07 2.899E-09 7.376E-06
+ ETOT  6  -8.5292795640787    -1.050E-08 6.864E-11 4.749E-08
+ ETOT  7  -8.5292795641393    -6.064E-11 5.127E-13 1.063E-09
+ ETOT  8  -8.5292795641404    -1.126E-12 4.624E-15 3.321E-12
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.50000  0.00000  0.00000 (in reduced coordinates)
+ -0.04680  0.04680  0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     2.817897192E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.218210281E-01
+    Remapping in [-1,1]    -7.218210281E-01
+
+           Polarization    -1.460585857E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.356707140E-01 C/m^2
+
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.00000  0.50000  0.00000 (in reduced coordinates)
+  0.04680 -0.04680  0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     2.817897192E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.218210281E-01
+    Remapping in [-1,1]    -7.218210281E-01
+
+           Polarization    -1.460585857E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.356707140E-01 C/m^2
+
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.00000  0.00000  0.50000 (in reduced coordinates)
+  0.04680  0.04680 -0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     2.817897192E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.218210281E-01
+    Remapping in [-1,1]    -7.218210281E-01
+
+           Polarization    -1.460585857E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.356707140E-01 C/m^2
+
+
+ Polarization in cartesian coordinates (a.u.):
+ (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
+     Electronic berry phase:        0.987605120E-03   0.987605120E-03   0.987605120E-03
+     Ionic:                        -0.262856942E-01  -0.262856942E-01  -0.262856942E-01  
+     Total:                        -0.252980891E-01  -0.252980891E-01  -0.252980891E-01
+
+ Polarization in cartesian coordinates (C/m^2):
+ (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
+     Electronic berry phase:        0.565055914E-01   0.565055914E-01   0.565055914E-01
+     Ionic:                        -0.150392973E+01  -0.150392973E+01  -0.150392973E+01  
+     Total:                        -0.144742414E+01  -0.144742414E+01  -0.144742414E+01
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  6.64458628E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  6.64458628E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  6.64458628E-04  sigma(2 1)=  0.00000000E+00
+
+
+ scprqt:  WARNING -
+  nstep=    8 was not enough SCF cycles to converge;
+  potential residual=  3.321E-12 exceeds tolvrs=  1.000E-20
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          0.98004487
+    2        2.00000          2.21931929
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   2.4641E-15; max=  4.6240E-15
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.250000000000      0.250000000000      0.250000000000
+ rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000      0.000000000000
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      1.41332500000000     1.41332500000000     1.41332500000000
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+ length scales= 10.683188747042 10.683188747042 10.683188747042 bohr
+              =  5.653300000000  5.653300000000  5.653300000000 angstroms
+ prteigrs : about to open file t03o_DS11_EIG
+ Fermi (or HOMO) energy (hartree) =   0.10386   Average Vxc (hartree)=  -0.31803
+ Eigenvalues (hartree) for nkpt=   4  k points:
+ kpt#   1, nband=  4, wtk=  0.12500, kpt= -0.2500  0.0000  0.0000 (reduced coord)
+  -0.29563   -0.01407    0.10386    0.10386
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+--------------------------------------------------------------------------------
+ Components of total free energy (in Hartree) :
+
+    Kinetic energy  =  3.05386148608693E+00
+    Hartree energy  =  7.49374593087460E-01
+    XC energy       = -2.37335874343767E+00
+    Ewald energy    = -8.42180148087932E+00
+    PspCore energy  =  3.78088367183697E-01
+    Loc. psp. energy= -2.98102395185782E+00
+    NL   psp  energy=  1.06558016567629E+00
+    >>>>>>>>> Etotal= -8.52927956414043E+00
+
+ Other information on the energy :
+    Total energy(eV)= -2.32093500269079E+02 ; Band energy (Ha)=  -4.5812492208E-01
+--------------------------------------------------------------------------------
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  6.64458628E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  6.64458628E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  6.64458628E-04  sigma(2 1)=  0.00000000E+00
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.9549E+01 GPa]
+- sigma(1 1)=  1.95490445E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.95490445E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.95490445E+01  sigma(2 1)=  0.00000000E+00
+
+================================================================================
+== DATASET 12 ==================================================================
+-   nproc =    1
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET  11.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3415944  5.3415944  G(1)= -0.0936050  0.0936050  0.0936050
+ R(2)=  5.3415944  0.0000000  5.3415944  G(2)=  0.0936050 -0.0936050  0.0936050
+ R(3)=  5.3415944  5.3415944  0.0000000  G(3)=  0.0936050  0.0936050 -0.0936050
+ Unit cell volume ucvol=  3.0481948E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
+         ecut(hartree)=      5.000   => boxcut(ratio)=   2.10419
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t03o_DS11_WFK
+_setup2: Arith. and geom. avg. npw (full set) are     163.500     163.498
+  initberry: for direction 1, nkstr =   2, nstr =     16
+  initberry: for direction 2, nkstr =   2, nstr =     16
+  initberry: for direction 3, nkstr =   2, nstr =     16
+
+ initberry: COMMENT - 
+  As a rough estimate,
+  to be below the critical field, the bandgap of your system
+  should be larger than    0.03 eV.
+
+
+================================================================================
+
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+ ETOT  1  -8.5276273831025    -8.528E+00 8.317E-05 2.304E-01
+ ETOT  2  -8.5280983061130    -4.709E-04 1.990E-07 1.054E-02
+ ETOT  3  -8.5281234289694    -2.512E-05 4.813E-07 1.925E-04
+ ETOT  4  -8.5281237688160    -3.398E-07 1.978E-07 4.278E-06
+ ETOT  5  -8.5281237752866    -6.471E-09 1.940E-07 2.059E-07
+ ETOT  6  -8.5281237754386    -1.520E-10 1.941E-07 1.480E-09
+ ETOT  7  -8.5281237754396    -9.539E-13 1.941E-07 3.183E-11
+ ETOT  8  -8.5281237754396     1.066E-14 1.941E-07 4.094E-13
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.50000  0.00000  0.00000 (in reduced coordinates)
+ -0.04680  0.04680  0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     2.920653011E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.207934699E-01
+    Remapping in [-1,1]    -7.207934699E-01
+
+           Polarization    -1.458506620E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.344810836E-01 C/m^2
+
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.00000  0.50000  0.00000 (in reduced coordinates)
+  0.04680 -0.04680  0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     2.920653021E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.207934698E-01
+    Remapping in [-1,1]    -7.207934698E-01
+
+           Polarization    -1.458506619E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.344810834E-01 C/m^2
+
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.00000  0.00000  0.50000 (in reduced coordinates)
+  0.04680  0.04680 -0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     2.920653036E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.207934696E-01
+    Remapping in [-1,1]    -7.207934696E-01
+
+           Polarization    -1.458506619E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.344810833E-01 C/m^2
+
+
+ Polarization in cartesian coordinates (a.u.):
+ (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
+     Electronic berry phase:        0.102361857E-02   0.102361856E-02   0.102361856E-02
+     Ionic:                        -0.262856942E-01  -0.262856942E-01  -0.262856942E-01  
+     Total:                        -0.252620757E-01  -0.252620757E-01  -0.252620757E-01
+
+ Polarization in cartesian coordinates (C/m^2):
+ (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
+     Electronic berry phase:        0.585660921E-01   0.585660920E-01   0.585660919E-01
+     Ionic:                        -0.150392973E+01  -0.150392973E+01  -0.150392973E+01  
+     Total:                        -0.144536363E+01  -0.144536363E+01  -0.144536363E+01
+
+ Stress tensor under a constant electric field:
+
+ Cartesian components of Maxwell stress tensor (hartree/bohr^3)
+ Maxstr(1 1)= -7.91571747E-12 Maxstr(3 2)=  1.58314349E-11
+ Maxstr(2 2)= -7.91571747E-12 Maxstr(3 1)=  1.58314349E-11
+ Maxstr(3 3)= -7.91571747E-12 Maxstr(2 1)=  1.58314349E-11
+
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  6.64056675E-04  sigma(3 2)=  6.65210215E-07
+  sigma(2 2)=  6.64056675E-04  sigma(3 1)=  6.65210215E-07
+  sigma(3 3)=  6.64056675E-04  sigma(2 1)=  6.65210215E-07
+
+
+ scprqt:  WARNING -
+  nstep=    8 was not enough SCF cycles to converge;
+  potential residual=  4.094E-13 exceeds tolvrs=  1.000E-20
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          0.98010622
+    2        2.00000          2.21937816
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   4.2231E-08; max=  1.9409E-07
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.250000000000      0.250000000000      0.250000000000
+ rms dE/dt=  1.2540E-03; max dE/dt=  1.2540E-03; dE/dt below (all hartree)
+    1      -0.001254047713     -0.001254047713     -0.001254047713
+    2       0.001253967533      0.001253967533      0.001253967533
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      1.41332500000000     1.41332500000000     1.41332500000000
+
+ cartesian forces (hartree/bohr) at end:
+    1      0.00011738139731     0.00011738139731     0.00011738139731
+    2     -0.00011738139731    -0.00011738139731    -0.00011738139731
+ frms,max,avg= 1.1738140E-04 1.1738140E-04   3.753E-09  3.753E-09  3.753E-09 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1      0.00603599363019     0.00603599363019     0.00603599363019
+    2     -0.00603599363019    -0.00603599363019    -0.00603599363019
+ frms,max,avg= 6.0359936E-03 6.0359936E-03   1.930E-07  1.930E-07  1.930E-07 e/A
+ length scales= 10.683188747042 10.683188747042 10.683188747042 bohr
+              =  5.653300000000  5.653300000000  5.653300000000 angstroms
+ prteigrs : about to open file t03o_DS12_EIG
+ Fermi (or HOMO) energy (hartree) =   0.10386   Average Vxc (hartree)=  -0.31803
+ Eigenvalues (hartree) for nkpt=  10  k points:
+ kpt#   1, nband=  4, wtk=  0.09375, kpt= -0.2500  0.0000  0.0000 (reduced coord)
+  -0.29563   -0.01408    0.10385    0.10386
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+--------------------------------------------------------------------------------
+ Components of total free energy (in Hartree) :
+
+    Kinetic energy  =  3.05389295771644E+00
+    Hartree energy  =  7.49381878498514E-01
+    XC energy       = -2.37335922374475E+00
+    Ewald energy    = -8.42180148087932E+00
+    PspCore energy  =  3.78088367183697E-01
+    Loc. psp. energy= -2.98114693925739E+00
+    NL   psp  energy=  1.06566570010330E+00
+    Electric energy =  1.15496493992223E-03
+    Kohn-Sham energy= -8.52927874037951E+00
+    >>>>>>>>> Etotal= -8.52812377543959E+00
+
+ Other information on the energy :
+    Total energy(eV)= -2.32062049659079E+02 ; Band energy (Ha)=  -4.5811678225E-01
+--------------------------------------------------------------------------------
+
+Constant unreduced E calculation  - final values:
+ (a. u.)
+       E:   5.000000000E-05   5.000000000E-05   5.000000000E-05  
+       P:  -2.526207568E-02  -2.526207568E-02  -2.526207568E-02  
+
+    ebar:   5.341594374E-04   5.341594374E-04   5.341594374E-04  
+    pbar:  -3.391406103E+00  -3.391406102E+00  -3.391406102E+00  
+
+       e:   1.135277294E-04   1.135277294E-04   1.135277294E-04  
+       p:  -7.207934699E-01  -7.207934698E-01  -7.207934696E-01  
+
+ (S.I.), that is V/m for E, and C/m^2 for P
+-      E:   2.571103160E+07   2.571103160E+07   2.571103160E+07  
+       P:  -1.445363634E+00  -1.445363634E+00  -1.445363635E+00  
+
+
+ Please check: COMMENT - 
+  As a rough estimate,
+  to be below the critical field, the bandgap of your system
+  should be larger than    0.03 eV.
+
+--------------------------------------------------------------------------------
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  6.64056675E-04  sigma(3 2)=  6.65210215E-07
+  sigma(2 2)=  6.64056675E-04  sigma(3 1)=  6.65210215E-07
+  sigma(3 3)=  6.64056675E-04  sigma(2 1)=  6.65210215E-07
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.9537E+01 GPa]
+- sigma(1 1)=  1.95372186E+01  sigma(3 2)=  1.95711569E-02
+- sigma(2 2)=  1.95372186E+01  sigma(3 1)=  1.95711569E-02
+- sigma(3 3)=  1.95372186E+01  sigma(2 1)=  1.95711569E-02
+
+================================================================================
+== DATASET 13 ==================================================================
+-   nproc =    1
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET  12.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3415944  5.3415944  G(1)= -0.0936050  0.0936050  0.0936050
+ R(2)=  5.3415944  0.0000000  5.3415944  G(2)=  0.0936050 -0.0936050  0.0936050
+ R(3)=  5.3415944  5.3415944  0.0000000  G(3)=  0.0936050  0.0936050 -0.0936050
+ Unit cell volume ucvol=  3.0481948E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
+         ecut(hartree)=      5.000   => boxcut(ratio)=   2.10419
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t03o_DS12_WFK
+_setup2: Arith. and geom. avg. npw (full set) are     163.500     163.498
+  initberry: for direction 1, nkstr =   2, nstr =     16
+  initberry: for direction 2, nkstr =   2, nstr =     16
+  initberry: for direction 3, nkstr =   2, nstr =     16
+
+ initberry: COMMENT - 
+  As a rough estimate,
+  to be below the critical field, the bandgap of your system
+  should be larger than    0.06 eV.
+
+
+================================================================================
+
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+ ETOT  1  -8.5269697919163    -8.527E+00 7.805E-07 1.348E-05
+ ETOT  2  -8.5269698176941    -2.578E-08 7.807E-07 1.092E-07
+ ETOT  3  -8.5269698179874    -2.932E-10 7.808E-07 5.051E-09
+ ETOT  4  -8.5269698179943    -6.914E-12 7.807E-07 1.025E-10
+ ETOT  5  -8.5269698179944    -1.030E-13 7.807E-07 5.884E-12
+ ETOT  6  -8.5269698179944     1.599E-14 7.807E-07 9.360E-14
+ ETOT  7  -8.5269698179944    -2.842E-14 7.807E-07 5.728E-15
+ ETOT  8  -8.5269698179944    -3.553E-14 7.807E-07 4.918E-16
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.50000  0.00000  0.00000 (in reduced coordinates)
+ -0.04680  0.04680  0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     3.023747860E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.197625214E-01
+    Remapping in [-1,1]    -7.197625214E-01
+
+           Polarization    -1.456420522E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.332875281E-01 C/m^2
+
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.00000  0.50000  0.00000 (in reduced coordinates)
+  0.04680 -0.04680  0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     3.023747833E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.197625217E-01
+    Remapping in [-1,1]    -7.197625217E-01
+
+           Polarization    -1.456420523E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.332875284E-01 C/m^2
+
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.00000  0.00000  0.50000 (in reduced coordinates)
+  0.04680  0.04680 -0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     3.023747809E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.197625219E-01
+    Remapping in [-1,1]    -7.197625219E-01
+
+           Polarization    -1.456420523E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.332875286E-01 C/m^2
+
+
+ Polarization in cartesian coordinates (a.u.):
+ (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
+     Electronic berry phase:        0.105975081E-02   0.105975081E-02   0.105975082E-02
+     Ionic:                        -0.262856942E-01  -0.262856942E-01  -0.262856942E-01  
+     Total:                        -0.252259434E-01  -0.252259434E-01  -0.252259434E-01
+
+ Polarization in cartesian coordinates (C/m^2):
+ (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
+     Electronic berry phase:        0.606333898E-01   0.606333900E-01   0.606333903E-01
+     Ionic:                        -0.150392973E+01  -0.150392973E+01  -0.150392973E+01  
+     Total:                        -0.144329634E+01  -0.144329634E+01  -0.144329634E+01
+
+ Stress tensor under a constant electric field:
+
+ Cartesian components of Maxwell stress tensor (hartree/bohr^3)
+ Maxstr(1 1)= -3.16628699E-11 Maxstr(3 2)=  6.33257398E-11
+ Maxstr(2 2)= -3.16628699E-11 Maxstr(3 1)=  6.33257398E-11
+ Maxstr(3 3)= -3.16628699E-11 Maxstr(2 1)=  6.33257398E-11
+
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  6.63646896E-04  sigma(3 2)=  1.33194112E-06
+  sigma(2 2)=  6.63646896E-04  sigma(3 1)=  1.33194112E-06
+  sigma(3 3)=  6.63646896E-04  sigma(2 1)=  1.33194112E-06
+
+
+ scprqt:  WARNING -
+  nstep=    8 was not enough SCF cycles to converge;
+  potential residual=  4.918E-16 exceeds tolvrs=  1.000E-20
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          0.98017000
+    2        2.00000          2.21943554
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   1.6928E-07; max=  7.8072E-07
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.250000000000      0.250000000000      0.250000000000
+ rms dE/dt=  2.5102E-03; max dE/dt=  2.5101E-03; dE/dt below (all hartree)
+    1      -0.002510296193     -0.002510296193     -0.002510296193
+    2       0.002510131232      0.002510131232      0.002510131232
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      1.41332500000000     1.41332500000000     1.41332500000000
+
+ cartesian forces (hartree/bohr) at end:
+    1      0.00023496858211     0.00023496858211     0.00023496858211
+    2     -0.00023496858211    -0.00023496858211    -0.00023496858211
+ frms,max,avg= 2.3496858E-04 2.3496858E-04   7.721E-09  7.721E-09  7.721E-09 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1      0.01208256927757     0.01208256927757     0.01208256927757
+    2     -0.01208256927757    -0.01208256927757    -0.01208256927757
+ frms,max,avg= 1.2082569E-02 1.2082569E-02   3.970E-07  3.970E-07  3.970E-07 e/A
+ length scales= 10.683188747042 10.683188747042 10.683188747042 bohr
+              =  5.653300000000  5.653300000000  5.653300000000 angstroms
+ prteigrs : about to open file t03o_DS13_EIG
+ Fermi (or HOMO) energy (hartree) =   0.10387   Average Vxc (hartree)=  -0.31803
+ Eigenvalues (hartree) for nkpt=  10  k points:
+ kpt#   1, nband=  4, wtk=  0.09375, kpt= -0.2500  0.0000  0.0000 (reduced coord)
+  -0.29563   -0.01408    0.10385    0.10387
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+--------------------------------------------------------------------------------
+ Components of total free energy (in Hartree) :
+
+    Kinetic energy  =  3.05392366016525E+00
+    Hartree energy  =  7.49386613938723E-01
+    XC energy       = -2.37335882607294E+00
+    Ewald energy    = -8.42180148087932E+00
+    PspCore energy  =  3.78088367183697E-01
+    Loc. psp. energy= -2.98126769668752E+00
+    NL   psp  energy=  1.06575310054756E+00
+    Electric energy =  2.30644381013418E-03
+    Kohn-Sham energy= -8.52927626180456E+00
+    >>>>>>>>> Etotal= -8.52696981799443E+00
+
+ Other information on the energy :
+    Total energy(eV)= -2.32030648880081E+02 ; Band energy (Ha)=  -4.5810939157E-01
+--------------------------------------------------------------------------------
+
+Constant unreduced E calculation  - final values:
+ (a. u.)
+       E:   1.000000000E-04   1.000000000E-04   1.000000000E-04  
+       P:  -2.522594343E-02  -2.522594343E-02  -2.522594343E-02  
+
+    ebar:   1.068318875E-03   1.068318875E-03   1.068318875E-03  
+    pbar:  -3.386555387E+00  -3.386555387E+00  -3.386555388E+00  
+
+       e:   2.270554588E-04   2.270554588E-04   2.270554588E-04  
+       p:  -7.197625214E-01  -7.197625217E-01  -7.197625219E-01  
+
+ (S.I.), that is V/m for E, and C/m^2 for P
+-      E:   5.142206319E+07   5.142206319E+07   5.142206319E+07  
+       P:  -1.443296337E+00  -1.443296336E+00  -1.443296336E+00  
+
+
+ Please check: COMMENT - 
+  As a rough estimate,
+  to be below the critical field, the bandgap of your system
+  should be larger than    0.06 eV.
+
+--------------------------------------------------------------------------------
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  6.63646896E-04  sigma(3 2)=  1.33194112E-06
+  sigma(2 2)=  6.63646896E-04  sigma(3 1)=  1.33194112E-06
+  sigma(3 3)=  6.63646896E-04  sigma(2 1)=  1.33194112E-06
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.9525E+01 GPa]
+- sigma(1 1)=  1.95251625E+01  sigma(3 2)=  3.91870541E-02
+- sigma(2 2)=  1.95251625E+01  sigma(3 1)=  3.91870541E-02
+- sigma(3 3)=  1.95251625E+01  sigma(2 1)=  3.91870541E-02
+
+================================================================================
+== DATASET 21 ==================================================================
+-   nproc =    1
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3415944  5.3415944  G(1)= -0.0936050  0.0936050  0.0936050
+ R(2)=  5.3415944  0.0000000  5.3415944  G(2)=  0.0936050 -0.0936050  0.0936050
+ R(3)=  5.3415944  5.3415944  0.0000000  G(3)=  0.0936050  0.0936050 -0.0936050
+ Unit cell volume ucvol=  3.0481948E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
+         ecut(hartree)=      5.000   => boxcut(ratio)=   2.10419
+--------------------------------------------------------------------------------
+
+_setup2: Arith. and geom. avg. npw (full set) are     163.500     163.498
+  initberry: for direction 1, nkstr =   2, nstr =     16
+  initberry: for direction 2, nkstr =   2, nstr =     16
+  initberry: for direction 3, nkstr =   2, nstr =     16
+
+================================================================================
+
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+ ETOT  1  -8.5271238905469    -8.527E+00 7.709E-03 5.636E-01
+ ETOT  2  -8.5292590450073    -2.135E-03 2.338E-07 1.945E-02
+ ETOT  3  -8.5292783514770    -1.931E-05 5.192E-08 9.438E-04
+ ETOT  4  -8.5292795024376    -1.151E-06 1.200E-08 4.973E-05
+ ETOT  5  -8.5292795637967    -6.136E-08 4.357E-10 3.876E-07
+ ETOT  6  -8.5292795641361    -3.393E-10 1.362E-12 7.623E-09
+ ETOT  7  -8.5292795641403    -4.231E-12 4.979E-15 2.017E-10
+ ETOT  8  -8.5292795641405    -1.634E-13 2.642E-16 5.322E-13
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.50000  0.00000  0.00000 (in reduced coordinates)
+ -0.04680  0.04680  0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     2.817897005E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.218210300E-01
+    Remapping in [-1,1]    -7.218210300E-01
+
+           Polarization    -1.460585860E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.356707162E-01 C/m^2
+
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.00000  0.50000  0.00000 (in reduced coordinates)
+  0.04680 -0.04680  0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     2.817897005E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.218210300E-01
+    Remapping in [-1,1]    -7.218210300E-01
+
+           Polarization    -1.460585860E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.356707162E-01 C/m^2
+
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.00000  0.00000  0.50000 (in reduced coordinates)
+  0.04680  0.04680 -0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     2.817897005E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.218210300E-01
+    Remapping in [-1,1]    -7.218210300E-01
+
+           Polarization    -1.460585860E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.356707162E-01 C/m^2
+
+
+ Polarization in cartesian coordinates (a.u.):
+ (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
+     Electronic berry phase:        0.987605054E-03   0.987605054E-03   0.987605054E-03
+     Ionic:                        -0.262856942E-01  -0.262856942E-01  -0.262856942E-01  
+     Total:                        -0.252980892E-01  -0.252980892E-01  -0.252980892E-01
+
+ Polarization in cartesian coordinates (C/m^2):
+ (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
+     Electronic berry phase:        0.565055876E-01   0.565055876E-01   0.565055876E-01
+     Ionic:                        -0.150392973E+01  -0.150392973E+01  -0.150392973E+01  
+     Total:                        -0.144742414E+01  -0.144742414E+01  -0.144742414E+01
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  6.64458717E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  6.64458717E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  6.64458717E-04  sigma(2 1)=  0.00000000E+00
+
+
+ scprqt:  WARNING -
+  nstep=    8 was not enough SCF cycles to converge;
+  potential residual=  5.322E-13 exceeds tolvrs=  1.000E-20
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          0.98004493
+    2        2.00000          2.21931922
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   1.3216E-16; max=  2.6417E-16
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.250000000000      0.250000000000      0.250000000000
+ rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000      0.000000000000
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      1.41332500000000     1.41332500000000     1.41332500000000
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+ length scales= 10.683188747042 10.683188747042 10.683188747042 bohr
+              =  5.653300000000  5.653300000000  5.653300000000 angstroms
+ prteigrs : about to open file t03o_DS21_EIG
+ Fermi (or HOMO) energy (hartree) =   0.10386   Average Vxc (hartree)=  -0.31803
+ Eigenvalues (hartree) for nkpt=   4  k points:
+ kpt#   1, nband=  8, wtk=  0.12500, kpt= -0.2500  0.0000  0.0000 (reduced coord)
+  -0.29563   -0.29563   -0.01407   -0.01407    0.10386    0.10386    0.10386    0.10386
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+--------------------------------------------------------------------------------
+ Components of total free energy (in Hartree) :
+
+    Kinetic energy  =  3.05386146367677E+00
+    Hartree energy  =  7.49374560989828E-01
+    XC energy       = -2.37335873576233E+00
+    Ewald energy    = -8.42180148087932E+00
+    PspCore energy  =  3.78088367183697E-01
+    Loc. psp. energy= -2.98102388573747E+00
+    NL   psp  energy=  1.06558014638838E+00
+    >>>>>>>>> Etotal= -8.52927956414045E+00
+
+ Other information on the energy :
+    Total energy(eV)= -2.32093500269079E+02 ; Band energy (Ha)=  -4.5812470081E-01
+--------------------------------------------------------------------------------
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  6.64458717E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  6.64458717E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  6.64458717E-04  sigma(2 1)=  0.00000000E+00
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.9549E+01 GPa]
+- sigma(1 1)=  1.95490471E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.95490471E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.95490471E+01  sigma(2 1)=  0.00000000E+00
+
+================================================================================
+== DATASET 22 ==================================================================
+-   nproc =    1
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET  21.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3415944  5.3415944  G(1)= -0.0936050  0.0936050  0.0936050
+ R(2)=  5.3415944  0.0000000  5.3415944  G(2)=  0.0936050 -0.0936050  0.0936050
+ R(3)=  5.3415944  5.3415944  0.0000000  G(3)=  0.0936050  0.0936050 -0.0936050
+ Unit cell volume ucvol=  3.0481948E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
+         ecut(hartree)=      5.000   => boxcut(ratio)=   2.10419
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t03o_DS21_WFK
+_setup2: Arith. and geom. avg. npw (full set) are     163.500     163.498
+  initberry: for direction 1, nkstr =   2, nstr =     16
+  initberry: for direction 2, nkstr =   2, nstr =     16
+  initberry: for direction 3, nkstr =   2, nstr =     16
+
+ initberry: COMMENT - 
+  As a rough estimate,
+  to be below the critical field, the bandgap of your system
+  should be larger than    0.03 eV.
+
+
+================================================================================
+
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+ ETOT  1  -8.5276274054605    -8.528E+00 8.329E-05 2.304E-01
+ ETOT  2  -8.5280983172905    -4.709E-04 2.025E-07 1.053E-02
+ ETOT  3  -8.5281234313084    -2.511E-05 4.827E-07 1.923E-04
+ ETOT  4  -8.5281237727127    -3.414E-07 2.010E-07 4.192E-06
+ ETOT  5  -8.5281237763383    -3.626E-09 1.974E-07 1.931E-07
+ ETOT  6  -8.5281237771211    -7.828E-10 1.973E-07 3.001E-09
+ ETOT  7  -8.5281237772549    -1.338E-10 1.975E-07 1.307E-10
+ ETOT  8  -8.5281237772707    -1.576E-11 1.975E-07 6.300E-12
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.50000  0.00000  0.00000 (in reduced coordinates)
+ -0.04680  0.04680  0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     2.921134467E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.207886553E-01
+    Remapping in [-1,1]    -7.207886553E-01
+
+           Polarization    -1.458496877E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.344755096E-01 C/m^2
+
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.00000  0.50000  0.00000 (in reduced coordinates)
+  0.04680 -0.04680  0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     2.921134189E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.207886581E-01
+    Remapping in [-1,1]    -7.207886581E-01
+
+           Polarization    -1.458496883E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.344755128E-01 C/m^2
+
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.00000  0.00000  0.50000 (in reduced coordinates)
+  0.04680  0.04680 -0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     2.921132619E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.207886738E-01
+    Remapping in [-1,1]    -7.207886738E-01
+
+           Polarization    -1.458496915E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.344755310E-01 C/m^2
+
+
+ Polarization in cartesian coordinates (a.u.):
+ (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
+     Electronic berry phase:        0.102378693E-02   0.102378698E-02   0.102378725E-02
+     Ionic:                        -0.262856942E-01  -0.262856942E-01  -0.262856942E-01  
+     Total:                        -0.252619073E-01  -0.252619073E-01  -0.252619070E-01
+
+ Polarization in cartesian coordinates (C/m^2):
+ (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
+     Electronic berry phase:        0.585757248E-01   0.585757276E-01   0.585757433E-01
+     Ionic:                        -0.150392973E+01  -0.150392973E+01  -0.150392973E+01  
+     Total:                        -0.144535400E+01  -0.144535400E+01  -0.144535398E+01
+
+ Stress tensor under a constant electric field:
+
+ Cartesian components of Maxwell stress tensor (hartree/bohr^3)
+ Maxstr(1 1)= -7.91571747E-12 Maxstr(3 2)=  1.58314349E-11
+ Maxstr(2 2)= -7.91571747E-12 Maxstr(3 1)=  1.58314349E-11
+ Maxstr(3 3)= -7.91571747E-12 Maxstr(2 1)=  1.58314349E-11
+
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  6.64063399E-04  sigma(3 2)=  6.73264518E-07
+  sigma(2 2)=  6.64063399E-04  sigma(3 1)=  6.73264518E-07
+  sigma(3 3)=  6.64063399E-04  sigma(2 1)=  6.73264518E-07
+
+
+ scprqt:  WARNING -
+  nstep=    8 was not enough SCF cycles to converge;
+  potential residual=  6.300E-12 exceeds tolvrs=  1.000E-20
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          0.98010458
+    2        2.00000          2.21937730
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   4.2422E-08; max=  1.9752E-07
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.250000000000      0.250000000000      0.250000000000
+ rms dE/dt=  1.2625E-03; max dE/dt=  1.2741E-03; dE/dt below (all hartree)
+    1      -0.001250916082     -0.001250916082     -0.001250916082
+    2       0.001274075376      0.001274075376      0.001274075376
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      1.41332500000000     1.41332500000000     1.41332500000000
+
+ cartesian forces (hartree/bohr) at end:
+    1      0.00011817592659     0.00011817592659     0.00011817592659
+    2     -0.00011817592659    -0.00011817592659    -0.00011817592659
+ frms,max,avg= 1.1817593E-04 1.1817593E-04  -1.084E-06 -1.084E-06 -1.084E-06 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1      0.00607684996511     0.00607684996511     0.00607684996511
+    2     -0.00607684996511    -0.00607684996511    -0.00607684996511
+ frms,max,avg= 6.0768500E-03 6.0768500E-03  -5.574E-05 -5.574E-05 -5.574E-05 e/A
+ length scales= 10.683188747042 10.683188747042 10.683188747042 bohr
+              =  5.653300000000  5.653300000000  5.653300000000 angstroms
+ prteigrs : about to open file t03o_DS22_EIG
+ Fermi (or HOMO) energy (hartree) =   0.10386   Average Vxc (hartree)=  -0.31803
+ Eigenvalues (hartree) for nkpt=  10  k points:
+ kpt#   1, nband=  8, wtk=  0.09375, kpt= -0.2500  0.0000  0.0000 (reduced coord)
+  -0.29563   -0.29563   -0.01408   -0.01408    0.10385    0.10385    0.10386    0.10386
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+--------------------------------------------------------------------------------
+ Components of total free energy (in Hartree) :
+
+    Kinetic energy  =  3.05389093237818E+00
+    Hartree energy  =  7.49379876555888E-01
+    XC energy       = -2.37335850031581E+00
+    Ewald energy    = -8.42180148087932E+00
+    PspCore energy  =  3.78088367183697E-01
+    Loc. psp. energy= -2.98114253843806E+00
+    NL   psp  energy=  1.06566460900852E+00
+    Electric energy =  1.15495723623633E-03
+    Kohn-Sham energy= -8.52927873450691E+00
+    >>>>>>>>> Etotal= -8.52812377727068E+00
+
+ Other information on the energy :
+    Total energy(eV)= -2.32062049708906E+02 ; Band energy (Ha)=  -4.5811841486E-01
+--------------------------------------------------------------------------------
+
+Constant unreduced E calculation  - final values:
+ (a. u.)
+       E:   5.000000000E-05   5.000000000E-05   5.000000000E-05  
+       P:  -2.526190732E-02  -2.526190727E-02  -2.526190699E-02  
+
+    ebar:   5.341594374E-04   5.341594374E-04   5.341594374E-04  
+    pbar:  -3.391383475E+00  -3.391383478E+00  -3.391383497E+00  
+
+       e:   1.135277294E-04   1.135277294E-04   1.135277294E-04  
+       p:  -7.207886553E-01  -7.207886581E-01  -7.207886738E-01  
+
+ (S.I.), that is V/m for E, and C/m^2 for P
+-      E:   2.571103160E+07   2.571103160E+07   2.571103160E+07  
+       P:  -1.445354002E+00  -1.445353999E+00  -1.445353983E+00  
+
+
+ Please check: COMMENT - 
+  As a rough estimate,
+  to be below the critical field, the bandgap of your system
+  should be larger than    0.03 eV.
+
+--------------------------------------------------------------------------------
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  6.64063399E-04  sigma(3 2)=  6.73264518E-07
+  sigma(2 2)=  6.64063399E-04  sigma(3 1)=  6.73264518E-07
+  sigma(3 3)=  6.64063399E-04  sigma(2 1)=  6.73264518E-07
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.9537E+01 GPa]
+- sigma(1 1)=  1.95374164E+01  sigma(3 2)=  1.98081226E-02
+- sigma(2 2)=  1.95374164E+01  sigma(3 1)=  1.98081226E-02
+- sigma(3 3)=  1.95374164E+01  sigma(2 1)=  1.98081226E-02
+
+================================================================================
+== DATASET 23 ==================================================================
+-   nproc =    1
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET  22.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3415944  5.3415944  G(1)= -0.0936050  0.0936050  0.0936050
+ R(2)=  5.3415944  0.0000000  5.3415944  G(2)=  0.0936050 -0.0936050  0.0936050
+ R(3)=  5.3415944  5.3415944  0.0000000  G(3)=  0.0936050  0.0936050 -0.0936050
+ Unit cell volume ucvol=  3.0481948E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
+         ecut(hartree)=      5.000   => boxcut(ratio)=   2.10419
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t03o_DS22_WFK
+_setup2: Arith. and geom. avg. npw (full set) are     163.500     163.498
+  initberry: for direction 1, nkstr =   2, nstr =     16
+  initberry: for direction 2, nkstr =   2, nstr =     16
+  initberry: for direction 3, nkstr =   2, nstr =     16
+
+ initberry: COMMENT - 
+  As a rough estimate,
+  to be below the critical field, the bandgap of your system
+  should be larger than    0.06 eV.
+
+
+================================================================================
+
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+ ETOT  1  -8.5269697983760    -8.527E+00 7.919E-07 1.349E-05
+ ETOT  2  -8.5269698253021    -2.693E-08 7.936E-07 8.713E-08
+ ETOT  3  -8.5269698259609    -6.588E-10 7.935E-07 3.211E-09
+ ETOT  4  -8.5269698260460    -8.509E-11 7.937E-07 8.825E-11
+ ETOT  5  -8.5269698260434     2.563E-12 7.937E-07 3.133E-12
+ ETOT  6  -8.5269698260390     4.427E-12 7.937E-07 7.413E-14
+ ETOT  7  -8.5269698260401    -1.073E-12 7.937E-07 6.418E-15
+ ETOT  8  -8.5269698260553    -1.526E-11 7.937E-07 2.004E-12
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.50000  0.00000  0.00000 (in reduced coordinates)
+ -0.04680  0.04680  0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     3.024725732E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.197527427E-01
+    Remapping in [-1,1]    -7.197527427E-01
+
+           Polarization    -1.456400735E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.332762070E-01 C/m^2
+
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.00000  0.50000  0.00000 (in reduced coordinates)
+  0.04680 -0.04680  0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     3.024728190E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.197527181E-01
+    Remapping in [-1,1]    -7.197527181E-01
+
+           Polarization    -1.456400686E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.332761785E-01 C/m^2
+
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.00000  0.00000  0.50000 (in reduced coordinates)
+  0.04680  0.04680 -0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     3.024729857E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.197527014E-01
+    Remapping in [-1,1]    -7.197527014E-01
+
+           Polarization    -1.456400652E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.332761592E-01 C/m^2
+
+
+ Polarization in cartesian coordinates (a.u.):
+ (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
+     Electronic berry phase:        0.106009470E-02   0.106009427E-02   0.106009397E-02
+     Ionic:                        -0.262856942E-01  -0.262856942E-01  -0.262856942E-01  
+     Total:                        -0.252255995E-01  -0.252256000E-01  -0.252256003E-01
+
+ Polarization in cartesian coordinates (C/m^2):
+ (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
+     Electronic berry phase:        0.606530652E-01   0.606530406E-01   0.606530239E-01
+     Ionic:                        -0.150392973E+01  -0.150392973E+01  -0.150392973E+01  
+     Total:                        -0.144327666E+01  -0.144327669E+01  -0.144327670E+01
+
+ Stress tensor under a constant electric field:
+
+ Cartesian components of Maxwell stress tensor (hartree/bohr^3)
+ Maxstr(1 1)= -3.16628699E-11 Maxstr(3 2)=  6.33257398E-11
+ Maxstr(2 2)= -3.16628699E-11 Maxstr(3 1)=  6.33257398E-11
+ Maxstr(3 3)= -3.16628699E-11 Maxstr(2 1)=  6.33257398E-11
+
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  6.63649032E-04  sigma(3 2)=  1.33481794E-06
+  sigma(2 2)=  6.63649032E-04  sigma(3 1)=  1.33481794E-06
+  sigma(3 3)=  6.63649032E-04  sigma(2 1)=  1.33481794E-06
+
+
+ scprqt:  WARNING -
+  nstep=    8 was not enough SCF cycles to converge;
+  potential residual=  2.004E-12 exceeds tolvrs=  1.000E-20
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          0.98017136
+    2        2.00000          2.21943375
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   1.7019E-07; max=  7.9371E-07
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.250000000000      0.250000000000      0.250000000000
+ rms dE/dt=  2.5209E-03; max dE/dt=  2.5376E-03; dE/dt below (all hartree)
+    1      -0.002504121727     -0.002504121727     -0.002504121727
+    2       0.002537614270      0.002537614270      0.002537614270
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      1.41332500000000     1.41332500000000     1.41332500000000
+
+ cartesian forces (hartree/bohr) at end:
+    1      0.00023596587666     0.00023596587666     0.00023596587666
+    2     -0.00023596587666    -0.00023596587666    -0.00023596587666
+ frms,max,avg= 2.3596588E-04 2.3596588E-04  -1.568E-06 -1.568E-06 -1.568E-06 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1      0.01213385222070     0.01213385222070     0.01213385222070
+    2     -0.01213385222070    -0.01213385222070    -0.01213385222070
+ frms,max,avg= 1.2133852E-02 1.2133852E-02  -8.061E-05 -8.061E-05 -8.061E-05 e/A
+ length scales= 10.683188747042 10.683188747042 10.683188747042 bohr
+              =  5.653300000000  5.653300000000  5.653300000000 angstroms
+ prteigrs : about to open file t03o_DS23_EIG
+ Fermi (or HOMO) energy (hartree) =   0.10387   Average Vxc (hartree)=  -0.31803
+ Eigenvalues (hartree) for nkpt=  10  k points:
+ kpt#   1, nband=  8, wtk=  0.09375, kpt= -0.2500  0.0000  0.0000 (reduced coord)
+  -0.29563   -0.29563   -0.01408   -0.01408    0.10385    0.10385    0.10387    0.10387
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+--------------------------------------------------------------------------------
+ Components of total free energy (in Hartree) :
+
+    Kinetic energy  =  3.05392299277409E+00
+    Hartree energy  =  7.49385851708324E-01
+    XC energy       = -2.37335863576669E+00
+    Ewald energy    = -8.42180148087932E+00
+    PspCore energy  =  3.78088367183697E-01
+    Loc. psp. energy= -2.98126615372203E+00
+    NL   psp  energy=  1.06575282024802E+00
+    Electric energy =  2.30641239859701E-03
+    Kohn-Sham energy= -8.52927623845391E+00
+    >>>>>>>>> Etotal= -8.52696982605531E+00
+
+ Other information on the energy :
+    Total energy(eV)= -2.32030649099429E+02 ; Band energy (Ha)=  -4.5811011492E-01
+--------------------------------------------------------------------------------
+
+Constant unreduced E calculation  - final values:
+ (a. u.)
+       E:   1.000000000E-04   1.000000000E-04   1.000000000E-04  
+       P:  -2.522559955E-02  -2.522559998E-02  -2.522560027E-02  
+
+    ebar:   1.068318875E-03   1.068318875E-03   1.068318875E-03  
+    pbar:  -3.386509299E+00  -3.386509270E+00  -3.386509250E+00  
+
+       e:   2.270554588E-04   2.270554588E-04   2.270554588E-04  
+       p:  -7.197527427E-01  -7.197527181E-01  -7.197527014E-01  
+
+ (S.I.), that is V/m for E, and C/m^2 for P
+-      E:   5.142206319E+07   5.142206319E+07   5.142206319E+07  
+       P:  -1.443276661E+00  -1.443276686E+00  -1.443276703E+00  
+
+
+ Please check: COMMENT - 
+  As a rough estimate,
+  to be below the critical field, the bandgap of your system
+  should be larger than    0.06 eV.
+
+--------------------------------------------------------------------------------
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  6.63649032E-04  sigma(3 2)=  1.33481794E-06
+  sigma(2 2)=  6.63649032E-04  sigma(3 1)=  1.33481794E-06
+  sigma(3 3)=  6.63649032E-04  sigma(2 1)=  1.33481794E-06
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.9525E+01 GPa]
+- sigma(1 1)=  1.95252253E+01  sigma(3 2)=  3.92716929E-02
+- sigma(2 2)=  1.95252253E+01  sigma(3 1)=  3.92716929E-02
+- sigma(3 3)=  1.95252253E+01  sigma(2 1)=  3.92716929E-02
+
+================================================================================
+== DATASET 31 ==================================================================
+-   nproc =    1
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3415944  5.3415944  G(1)= -0.0936050  0.0936050  0.0936050
+ R(2)=  5.3415944  0.0000000  5.3415944  G(2)=  0.0936050 -0.0936050  0.0936050
+ R(3)=  5.3415944  5.3415944  0.0000000  G(3)=  0.0936050  0.0936050 -0.0936050
+ Unit cell volume ucvol=  3.0481948E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
+         ecut(hartree)=      5.000   => boxcut(ratio)=   2.10419
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/31ga.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/31ga.hgh
+- Hartwigsen-Goedecker-Hutter psp for ga, from PRB58, 3641 (1998) paper
+- 31.00000   3.00000      1124                znucl, zion, pspdat
+    3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+ rloc=   0.5600000
+ cc1 =   0.0000000; cc2 =   0.0000000; cc3 =   0.0000000; cc4 =   0.0000000
+ rrs =   0.6107910; h11s=   2.3693250; h22s=  -0.2490150; h33s=  -0.5517960
+ rrp =   0.7045960; h11p=   0.7463050; h22p=  -0.5131320; h33p=   0.0000000
+                    k11p=   0.0296070; k22p=  -0.0008730; k33p=   0.0000000
+ rrd =   0.9825800; h11d=   0.0754370; h22d=   0.0000000; h33d=   0.0000000
+                    k11d=   0.0014860; k22d=   0.0000000; k33d=   0.0000000
+-  Local part computed in reciprocal space.
+
+ pspatm : COMMENT -
+  the projectors are not normalized,
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
+  However, this does not influence the results obtained hereafter.
+ pspatm: epsatm=    5.91122074
+         --- l  ekb(1:nproj) -->
+             0   -0.636687   -0.017197    1.920868
+             1   -0.676457    0.963544
+             2    0.945855
+  spin-orbit 1   -0.001080    0.036458
+  spin-orbit 2    0.018632
+ pspatm: atomic psp has been read  and splines computed
+
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/33as.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/33as.hgh
+- Hartwigsen-Goedecker-Hutter psp for as, from PRB58, 3641 (1998) paper
+- 33.00000   5.00000      1124                znucl, zion, pspdat
+    3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+ rloc=   0.5200000
+ cc1 =   0.0000000; cc2 =   0.0000000; cc3 =   0.0000000; cc4 =   0.0000000
+ rrs =   0.4564000; h11s=   4.5607610; h22s=   1.6923890; h33s=  -1.3738040
+ rrp =   0.5505620; h11p=   1.8122470; h22p=  -0.6467270; h33p=   0.0000000
+                    k11p=   0.0524660; k22p=   0.0205620; k33p=   0.0000000
+ rrd =   0.6852830; h11d=   0.3123730; h22d=   0.0000000; h33d=   0.0000000
+                    k11d=   0.0042730; k22d=   0.0000000; k33d=   0.0000000
+-  Local part computed in reciprocal space.
+
+ pspatm : COMMENT -
+  the projectors are not normalized,
+  so that the KB energies are not consistent with 
+  definition in PRB44, 8503 (1991). 
+  However, this does not influence the results obtained hereafter.
+ pspatm: epsatm=    8.49486654
+         --- l  ekb(1:nproj) -->
+             0   -0.541009    0.585426    1.599968
+             1   -0.242708    0.660717
+             2    0.314361
+  spin-orbit 1    0.006581    0.019610
+  spin-orbit 2    0.004300
+ pspatm: atomic psp has been read  and splines computed
+
+--------------------------------------------------------------------------------
+
+_setup2: Arith. and geom. avg. npw (full set) are     163.500     163.498
+  initberry: for direction 1, nkstr =   2, nstr =     16
+  initberry: for direction 2, nkstr =   2, nstr =     16
+  initberry: for direction 3, nkstr =   2, nstr =     16
+
+================================================================================
+
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+ ETOT  1  -8.5276768461225    -8.528E+00 8.757E-03 5.655E-01
+ ETOT  2  -8.5298827463740    -2.206E-03 8.729E-08 1.956E-02
+ ETOT  3  -8.5299022732514    -1.953E-05 5.560E-08 9.783E-04
+ ETOT  4  -8.5299034930199    -1.220E-06 1.271E-08 5.163E-05
+ ETOT  5  -8.5299035559527    -6.293E-08 4.513E-10 3.849E-07
+ ETOT  6  -8.5299035562869    -3.342E-10 1.267E-12 7.641E-09
+ ETOT  7  -8.5299035562912    -4.263E-12 4.949E-15 2.016E-10
+ ETOT  8  -8.5299035562914    -1.670E-13 2.597E-16 5.559E-13
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.50000  0.00000  0.00000 (in reduced coordinates)
+ -0.04680  0.04680  0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     2.809650818E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.219034918E-01
+    Remapping in [-1,1]    -7.219034918E-01
+
+           Polarization    -1.460752720E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.357661844E-01 C/m^2
+
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.00000  0.50000  0.00000 (in reduced coordinates)
+  0.04680 -0.04680  0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     2.809650818E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.219034918E-01
+    Remapping in [-1,1]    -7.219034918E-01
+
+           Polarization    -1.460752720E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.357661844E-01 C/m^2
+
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.00000  0.00000  0.50000 (in reduced coordinates)
+  0.04680  0.04680 -0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     2.809650818E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.219034918E-01
+    Remapping in [-1,1]    -7.219034918E-01
+
+           Polarization    -1.460752720E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.357661844E-01 C/m^2
+
+
+ Polarization in cartesian coordinates (a.u.):
+ (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
+     Electronic berry phase:        0.984714964E-03   0.984714964E-03   0.984714964E-03
+     Ionic:                        -0.262856942E-01  -0.262856942E-01  -0.262856942E-01  
+     Total:                        -0.253009793E-01  -0.253009793E-01  -0.253009793E-01
+
+ Polarization in cartesian coordinates (C/m^2):
+ (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
+     Electronic berry phase:        0.563402318E-01   0.563402318E-01   0.563402318E-01
+     Ionic:                        -0.150392973E+01  -0.150392973E+01  -0.150392973E+01  
+     Total:                        -0.144758949E+01  -0.144758949E+01  -0.144758949E+01
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  6.64327236E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  6.64327236E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  6.64327236E-04  sigma(2 1)=  0.00000000E+00
+
+
+ scprqt:  WARNING -
+  nstep=    8 was not enough SCF cycles to converge;
+  potential residual=  5.559E-13 exceeds tolvrs=  1.000E-20
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          0.98024995
+    2        2.00000          2.21991506
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   1.3535E-16; max=  2.5968E-16
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.250000000000      0.250000000000      0.250000000000
+ rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000      0.000000000000
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      1.41332500000000     1.41332500000000     1.41332500000000
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+ length scales= 10.683188747042 10.683188747042 10.683188747042 bohr
+              =  5.653300000000  5.653300000000  5.653300000000 angstroms
+ prteigrs : about to open file t03o_DS31_EIG
+ Fermi (or HOMO) energy (hartree) =   0.10818   Average Vxc (hartree)=  -0.31802
+ Eigenvalues (hartree) for nkpt=   4  k points:
+ kpt#   1, nband=  8, wtk=  0.12500, kpt= -0.2500  0.0000  0.0000 (reduced coord)
+  -0.29560   -0.29560   -0.01420   -0.01420    0.09944    0.09944    0.10810    0.10818
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+--------------------------------------------------------------------------------
+ Components of total free energy (in Hartree) :
+
+    Kinetic energy  =  3.05492762925237E+00
+    Hartree energy  =  7.49632229410286E-01
+    XC energy       = -2.37341677651976E+00
+    Ewald energy    = -8.42180148087932E+00
+    PspCore energy  =  3.78088367183697E-01
+    Loc. psp. energy= -2.98236403664295E+00
+    NL   psp  energy=  1.06503051190431E+00
+    >>>>>>>>> Etotal= -8.52990355629136E+00
+
+ Other information on the energy :
+    Total energy(eV)= -2.32110479959023E+02 ; Band energy (Ha)=  -4.5850941890E-01
+--------------------------------------------------------------------------------
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  6.64327236E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  6.64327236E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  6.64327236E-04  sigma(2 1)=  0.00000000E+00
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.9545E+01 GPa]
+- sigma(1 1)=  1.95451788E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.95451788E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.95451788E+01  sigma(2 1)=  0.00000000E+00
+
+================================================================================
+== DATASET 32 ==================================================================
+-   nproc =    1
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET  31.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3415944  5.3415944  G(1)= -0.0936050  0.0936050  0.0936050
+ R(2)=  5.3415944  0.0000000  5.3415944  G(2)=  0.0936050 -0.0936050  0.0936050
+ R(3)=  5.3415944  5.3415944  0.0000000  G(3)=  0.0936050  0.0936050 -0.0936050
+ Unit cell volume ucvol=  3.0481948E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
+         ecut(hartree)=      5.000   => boxcut(ratio)=   2.10419
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t03o_DS31_WFK
+_setup2: Arith. and geom. avg. npw (full set) are     163.500     163.498
+  initberry: for direction 1, nkstr =   2, nstr =     16
+  initberry: for direction 2, nkstr =   2, nstr =     16
+  initberry: for direction 3, nkstr =   2, nstr =     16
+
+ initberry: COMMENT - 
+  As a rough estimate,
+  to be below the critical field, the bandgap of your system
+  should be larger than    0.03 eV.
+
+
+================================================================================
+
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+ ETOT  1  -8.5282481996696    -8.528E+00 8.377E-05 2.308E-01
+ ETOT  2  -8.5287224913387    -4.743E-04 2.024E-07 1.063E-02
+ ETOT  3  -8.5287478176546    -2.533E-05 4.983E-07 1.918E-04
+ ETOT  4  -8.5287481614738    -3.438E-07 2.009E-07 4.375E-06
+ ETOT  5  -8.5287481664233    -4.950E-09 1.968E-07 2.090E-07
+ ETOT  6  -8.5287481665868    -1.635E-10 1.971E-07 2.620E-09
+ ETOT  7  -8.5287481666036    -1.679E-11 1.971E-07 4.671E-11
+ ETOT  8  -8.5287481666064    -2.782E-12 1.971E-07 3.406E-12
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.50000  0.00000  0.00000 (in reduced coordinates)
+ -0.04680  0.04680  0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     2.951202476E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.204879752E-01
+    Remapping in [-1,1]    -7.204879752E-01
+
+           Polarization    -1.457888459E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.341274046E-01 C/m^2
+
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.00000  0.50000  0.00000 (in reduced coordinates)
+  0.04680 -0.04680  0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     2.945578668E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.205442133E-01
+    Remapping in [-1,1]    -7.205442133E-01
+
+           Polarization    -1.458002255E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.341925128E-01 C/m^2
+
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.00000  0.00000  0.50000 (in reduced coordinates)
+  0.04680  0.04680 -0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     2.941316052E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.205868395E-01
+    Remapping in [-1,1]    -7.205868395E-01
+
+           Polarization    -1.458088508E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.342418622E-01 C/m^2
+
+
+ Polarization in cartesian coordinates (a.u.):
+ (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
+     Electronic berry phase:        0.103160743E-02   0.103259294E-02   0.103333991E-02
+     Ionic:                        -0.262856942E-01  -0.262856942E-01  -0.262856942E-01  
+     Total:                        -0.252540868E-01  -0.252531013E-01  -0.252523543E-01
+
+ Polarization in cartesian coordinates (C/m^2):
+ (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
+     Electronic berry phase:        0.590231731E-01   0.590795585E-01   0.591222964E-01
+     Ionic:                        -0.150392973E+01  -0.150392973E+01  -0.150392973E+01  
+     Total:                        -0.144490655E+01  -0.144485017E+01  -0.144480743E+01
+
+ Stress tensor under a constant electric field:
+
+ Cartesian components of Maxwell stress tensor (hartree/bohr^3)
+ Maxstr(1 1)= -7.91571747E-12 Maxstr(3 2)=  1.58314349E-11
+ Maxstr(2 2)= -7.91571747E-12 Maxstr(3 1)=  1.58314349E-11
+ Maxstr(3 3)= -7.91571747E-12 Maxstr(2 1)=  1.58314349E-11
+
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  6.63929425E-04  sigma(3 2)=  6.67899018E-07
+  sigma(2 2)=  6.63929425E-04  sigma(3 1)=  6.67899018E-07
+  sigma(3 3)=  6.63929425E-04  sigma(2 1)=  6.67899018E-07
+
+
+ scprqt:  WARNING -
+  nstep=    8 was not enough SCF cycles to converge;
+  potential residual=  3.406E-12 exceeds tolvrs=  1.000E-20
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          0.98031155
+    2        2.00000          2.21997253
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   4.2534E-08; max=  1.9714E-07
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.250000000000      0.250000000000      0.250000000000
+ rms dE/dt=  1.2566E-03; max dE/dt=  1.2591E-03; dE/dt below (all hartree)
+    1      -0.001254051553     -0.001254051553     -0.001254051553
+    2       0.001259106641      0.001259106641      0.001259106641
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      1.41332500000000     1.41332500000000     1.41332500000000
+
+ cartesian forces (hartree/bohr) at end:
+    1      0.00011762210017     0.00011762210017     0.00011762210017
+    2     -0.00011762210017    -0.00011762210017    -0.00011762210017
+ frms,max,avg= 1.1762210E-04 1.1762210E-04  -2.366E-07 -2.366E-07 -2.366E-07 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1      0.00604837106795     0.00604837106795     0.00604837106795
+    2     -0.00604837106795    -0.00604837106795    -0.00604837106795
+ frms,max,avg= 6.0483711E-03 6.0483711E-03  -1.217E-05 -1.217E-05 -1.217E-05 e/A
+ length scales= 10.683188747042 10.683188747042 10.683188747042 bohr
+              =  5.653300000000  5.653300000000  5.653300000000 angstroms
+ prteigrs : about to open file t03o_DS32_EIG
+ Fermi (or HOMO) energy (hartree) =   0.10818   Average Vxc (hartree)=  -0.31802
+ Eigenvalues (hartree) for nkpt=  10  k points:
+ kpt#   1, nband=  8, wtk=  0.09375, kpt= -0.2500  0.0000  0.0000 (reduced coord)
+  -0.29559   -0.29559   -0.01420   -0.01420    0.09944    0.09945    0.10810    0.10818
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+--------------------------------------------------------------------------------
+ Components of total free energy (in Hartree) :
+
+    Kinetic energy  =  3.05495806774418E+00
+    Hartree energy  =  7.49637685700306E-01
+    XC energy       = -2.37341664365184E+00
+    Ewald energy    = -8.42180148087932E+00
+    PspCore energy  =  3.78088367183697E-01
+    Loc. psp. energy= -2.98248370286299E+00
+    NL   psp  energy=  1.06511498191868E+00
+    Electric energy =  1.15455824092469E-03
+    Kohn-Sham energy= -8.52990272484730E+00
+    >>>>>>>>> Etotal= -8.52874816660637E+00
+
+ Other information on the energy :
+    Total energy(eV)= -2.32079040206797E+02 ; Band energy (Ha)=  -4.5850307816E-01
+--------------------------------------------------------------------------------
+
+Constant unreduced E calculation  - final values:
+ (a. u.)
+       E:   5.000000000E-05   5.000000000E-05   5.000000000E-05  
+       P:  -2.525408681E-02  -2.525310131E-02  -2.525235434E-02  
+
+    ebar:   5.341594374E-04   5.341594374E-04   5.341594374E-04  
+    pbar:  -3.390151163E+00  -3.390217314E+00  -3.390267454E+00  
+
+       e:   1.135277294E-04   1.135277294E-04   1.135277294E-04  
+       p:  -7.204879752E-01  -7.205442133E-01  -7.205868395E-01  
+
+ (S.I.), that is V/m for E, and C/m^2 for P
+-      E:   2.571103160E+07   2.571103160E+07   2.571103160E+07  
+       P:  -1.444906553E+00  -1.444850168E+00  -1.444807430E+00  
+
+
+ Please check: COMMENT - 
+  As a rough estimate,
+  to be below the critical field, the bandgap of your system
+  should be larger than    0.03 eV.
+
+--------------------------------------------------------------------------------
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  6.63929425E-04  sigma(3 2)=  6.67899018E-07
+  sigma(2 2)=  6.63929425E-04  sigma(3 1)=  6.67899018E-07
+  sigma(3 3)=  6.63929425E-04  sigma(2 1)=  6.67899018E-07
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.9533E+01 GPa]
+- sigma(1 1)=  1.95334748E+01  sigma(3 2)=  1.96502642E-02
+- sigma(2 2)=  1.95334748E+01  sigma(3 1)=  1.96502642E-02
+- sigma(3 3)=  1.95334748E+01  sigma(2 1)=  1.96502642E-02
+
+================================================================================
+== DATASET 33 ==================================================================
+-   nproc =    1
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET  32.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.3415944  5.3415944  G(1)= -0.0936050  0.0936050  0.0936050
+ R(2)=  5.3415944  0.0000000  5.3415944  G(2)=  0.0936050 -0.0936050  0.0936050
+ R(3)=  5.3415944  5.3415944  0.0000000  G(3)=  0.0936050  0.0936050 -0.0936050
+ Unit cell volume ucvol=  3.0481948E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  16  16  16
+         ecut(hartree)=      5.000   => boxcut(ratio)=   2.10419
+--------------------------------------------------------------------------------
+
+-inwffil : will read wavefunctions from disk file t03o_DS32_WFK
+_setup2: Arith. and geom. avg. npw (full set) are     163.500     163.498
+  initberry: for direction 1, nkstr =   2, nstr =     16
+  initberry: for direction 2, nkstr =   2, nstr =     16
+  initberry: for direction 3, nkstr =   2, nstr =     16
+
+ initberry: COMMENT - 
+  As a rough estimate,
+  to be below the critical field, the bandgap of your system
+  should be larger than    0.06 eV.
+
+
+================================================================================
+
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+ ETOT  1  -8.5275945907862    -8.528E+00 7.937E-07 1.361E-05
+ ETOT  2  -8.5275946176139    -2.683E-08 7.931E-07 1.120E-07
+ ETOT  3  -8.5275946178519    -2.380E-10 7.932E-07 3.121E-09
+ ETOT  4  -8.5275946179266    -7.473E-11 7.932E-07 1.557E-10
+ ETOT  5  -8.5275946179207     5.940E-12 7.933E-07 1.239E-12
+ ETOT  6  -8.5275946179210    -3.784E-13 7.933E-07 6.615E-14
+ ETOT  7  -8.5275946179209     1.172E-13 7.933E-07 1.487E-13
+ ETOT  8  -8.5275946179147     6.246E-12 7.933E-07 6.530E-13
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.50000  0.00000  0.00000 (in reduced coordinates)
+ -0.04680  0.04680  0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     3.054851295E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.194514871E-01
+    Remapping in [-1,1]    -7.194514871E-01
+
+           Polarization    -1.455791153E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.329274356E-01 C/m^2
+
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.00000  0.50000  0.00000 (in reduced coordinates)
+  0.04680 -0.04680  0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     3.049257478E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.195074252E-01
+    Remapping in [-1,1]    -7.195074252E-01
+
+           Polarization    -1.455904342E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.329921967E-01 C/m^2
+
+
+ Computing the polarization (Berry phase) for reciprocal vector:
+  0.00000  0.00000  0.50000 (in reduced coordinates)
+  0.04680  0.04680 -0.04680 (in cartesian coordinates - atomic units)
+ Number of strings:    16
+ Number of k points in string:    2
+
+ Summary of the results
+ Electronic Berry phase     3.044989296E-02
+            Ionic phase    -7.500000000E-01
+            Total phase    -7.195501070E-01
+    Remapping in [-1,1]    -7.195501070E-01
+
+           Polarization    -1.455990708E-02 (a.u. of charge)/bohr^2
+           Polarization    -8.330416105E-01 C/m^2
+
+
+ Polarization in cartesian coordinates (a.u.):
+ (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
+     Electronic berry phase:        0.106794338E-02   0.106892363E-02   0.106967158E-02
+     Ionic:                        -0.262856942E-01  -0.262856942E-01  -0.262856942E-01  
+     Total:                        -0.252177509E-01  -0.252167706E-01  -0.252160227E-01
+
+ Polarization in cartesian coordinates (C/m^2):
+ (the sum of the electronic and ionic Berry phase has been folded into [-1, 1])
+     Electronic berry phase:        0.611021259E-01   0.611582106E-01   0.612010042E-01
+     Ionic:                        -0.150392973E+01  -0.150392973E+01  -0.150392973E+01  
+     Total:                        -0.144282760E+01  -0.144277152E+01  -0.144272872E+01
+
+ Stress tensor under a constant electric field:
+
+ Cartesian components of Maxwell stress tensor (hartree/bohr^3)
+ Maxstr(1 1)= -3.16628699E-11 Maxstr(3 2)=  6.33257398E-11
+ Maxstr(2 2)= -3.16628699E-11 Maxstr(3 1)=  6.33257398E-11
+ Maxstr(3 3)= -3.16628699E-11 Maxstr(2 1)=  6.33257398E-11
+
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  6.63515984E-04  sigma(3 2)=  1.33115119E-06
+  sigma(2 2)=  6.63515984E-04  sigma(3 1)=  1.33115119E-06
+  sigma(3 3)=  6.63515984E-04  sigma(2 1)=  1.33115119E-06
+
+
+ scprqt:  WARNING -
+  nstep=    8 was not enough SCF cycles to converge;
+  potential residual=  6.530E-13 exceeds tolvrs=  1.000E-20
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          0.98037663
+    2        2.00000          2.22002980
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   1.7041E-07; max=  7.9330E-07
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.250000000000      0.250000000000      0.250000000000
+ rms dE/dt=  2.5052E-03; max dE/dt=  2.5014E-03; dE/dt below (all hartree)
+    1      -0.002508910137     -0.002508910137     -0.002508910137
+    2       0.002501412419      0.002501412419      0.002501412419
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      1.41332500000000     1.41332500000000     1.41332500000000
+
+ cartesian forces (hartree/bohr) at end:
+    1      0.00023449564892     0.00023449564892     0.00023449564892
+    2     -0.00023449564892    -0.00023449564892    -0.00023449564892
+ frms,max,avg= 2.3449565E-04 2.3449565E-04   3.509E-07  3.509E-07  3.509E-07 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1      0.01205825007730     0.01205825007730     0.01205825007730
+    2     -0.01205825007730    -0.01205825007730    -0.01205825007730
+ frms,max,avg= 1.2058250E-02 1.2058250E-02   1.804E-05  1.804E-05  1.804E-05 e/A
+ length scales= 10.683188747042 10.683188747042 10.683188747042 bohr
+              =  5.653300000000  5.653300000000  5.653300000000 angstroms
+ prteigrs : about to open file t03o_DS33_EIG
+ Fermi (or HOMO) energy (hartree) =   0.10818   Average Vxc (hartree)=  -0.31802
+ Eigenvalues (hartree) for nkpt=  10  k points:
+ kpt#   1, nband=  8, wtk=  0.09375, kpt= -0.2500  0.0000  0.0000 (reduced coord)
+  -0.29559   -0.29559   -0.01420   -0.01420    0.09945    0.09945    0.10810    0.10818
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+--------------------------------------------------------------------------------
+ Components of total free energy (in Hartree) :
+
+    Kinetic energy  =  3.05498904731045E+00
+    Hartree energy  =  7.49642489188471E-01
+    XC energy       = -2.37341622870919E+00
+    Ewald energy    = -8.42180148087932E+00
+    PspCore energy  =  3.78088367183697E-01
+    Loc. psp. energy= -2.98260585997230E+00
+    NL   psp  energy=  1.06520343588841E+00
+    Electric energy =  2.30561207509708E-03
+    Kohn-Sham energy= -8.52990022998978E+00
+    >>>>>>>>> Etotal= -8.52759461791469E+00
+
+ Other information on the energy :
+    Total energy(eV)= -2.32047650550547E+02 ; Band energy (Ha)=  -4.5849567714E-01
+--------------------------------------------------------------------------------
+
+Constant unreduced E calculation  - final values:
+ (a. u.)
+       E:   1.000000000E-04   1.000000000E-04   1.000000000E-04  
+       P:  -2.521775086E-02  -2.521677061E-02  -2.521602266E-02  
+
+    ebar:   1.068318875E-03   1.068318875E-03   1.068318875E-03  
+    pbar:  -3.385273741E+00  -3.385339540E+00  -3.385389745E+00  
+
+       e:   2.270554588E-04   2.270554588E-04   2.270554588E-04  
+       p:  -7.194514871E-01  -7.195074252E-01  -7.195501070E-01  
+
+ (S.I.), that is V/m for E, and C/m^2 for P
+-      E:   5.142206319E+07   5.142206319E+07   5.142206319E+07  
+       P:  -1.442827601E+00  -1.442771516E+00  -1.442728722E+00  
+
+
+ Please check: COMMENT - 
+  As a rough estimate,
+  to be below the critical field, the bandgap of your system
+  should be larger than    0.06 eV.
+
+--------------------------------------------------------------------------------
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  6.63515984E-04  sigma(3 2)=  1.33115119E-06
+  sigma(2 2)=  6.63515984E-04  sigma(3 1)=  1.33115119E-06
+  sigma(3 3)=  6.63515984E-04  sigma(2 1)=  1.33115119E-06
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -1.9521E+01 GPa]
+- sigma(1 1)=  1.95213109E+01  sigma(3 2)=  3.91638134E-02
+- sigma(2 2)=  1.95213109E+01  sigma(3 1)=  3.91638134E-02
+- sigma(3 3)=  1.95213109E+01  sigma(2 1)=  3.91638134E-02
+
+== END DATASET(S) ==============================================================
+================================================================================
+  
+ -outvars: echo values of variables after computation  --------
+            acell      1.0683188747E+01  1.0683188747E+01  1.0683188747E+01 Bohr
+              amu      6.97230000E+01  7.49215900E+01
+         berryopt11        -1
+         berryopt12         4
+         berryopt13         4
+         berryopt21        -1
+         berryopt22         4
+         berryopt23         4
+         berryopt31        -1
+         berryopt32         4
+         berryopt33         4
+           diemac      8.00000000E+00
+             ecut      5.00000000E+00 Hartree
+           efield11    0.00000000E+00  0.00000000E+00  0.00000000E+00
+           efield12    5.00000000E-05  5.00000000E-05  5.00000000E-05
+           efield13    1.00000000E-04  1.00000000E-04  1.00000000E-04
+           efield21    0.00000000E+00  0.00000000E+00  0.00000000E+00
+           efield22    5.00000000E-05  5.00000000E-05  5.00000000E-05
+           efield23    1.00000000E-04  1.00000000E-04  1.00000000E-04
+           efield31    0.00000000E+00  0.00000000E+00  0.00000000E+00
+           efield32    5.00000000E-05  5.00000000E-05  5.00000000E-05
+           efield33    1.00000000E-04  1.00000000E-04  1.00000000E-04
+           etotal11   -8.5292795641E+00
+           etotal12   -8.5281237754E+00
+           etotal13   -8.5269698180E+00
+           etotal21   -8.5292795641E+00
+           etotal22   -8.5281237773E+00
+           etotal23   -8.5269698261E+00
+           etotal31   -8.5299035563E+00
+           etotal32   -8.5287481666E+00
+           etotal33   -8.5275946179E+00
+            fcart11   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            fcart12    1.1738139731E-04  1.1738139731E-04  1.1738139731E-04
+                      -1.1738139731E-04 -1.1738139731E-04 -1.1738139731E-04
+            fcart13    2.3496858211E-04  2.3496858211E-04  2.3496858211E-04
+                      -2.3496858211E-04 -2.3496858211E-04 -2.3496858211E-04
+            fcart21   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            fcart22    1.1817592659E-04  1.1817592659E-04  1.1817592659E-04
+                      -1.1817592659E-04 -1.1817592659E-04 -1.1817592659E-04
+            fcart23    2.3596587666E-04  2.3596587666E-04  2.3596587666E-04
+                      -2.3596587666E-04 -2.3596587666E-04 -2.3596587666E-04
+            fcart31   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            fcart32    1.1762210017E-04  1.1762210017E-04  1.1762210017E-04
+                      -1.1762210017E-04 -1.1762210017E-04 -1.1762210017E-04
+            fcart33    2.3449564892E-04  2.3449564892E-04  2.3449564892E-04
+                      -2.3449564892E-04 -2.3449564892E-04 -2.3449564892E-04
+-          fftalg         312
+           getwfk11         0
+           getwfk12        -1
+           getwfk13        -1
+           getwfk21         0
+           getwfk22        -1
+           getwfk23        -1
+           getwfk31         0
+           getwfk32        -1
+           getwfk33        -1
+           jdtset       11   12   13   21   22   23   31   32   33
+              kpt11   -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+              kpt12   -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+                       5.00000000E-01  2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       2.50000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+              kpt13   -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+                       5.00000000E-01  2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       2.50000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+              kpt21   -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+              kpt22   -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+                       5.00000000E-01  2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       2.50000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+              kpt23   -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+                       5.00000000E-01  2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       2.50000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+              kpt31   -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+              kpt32   -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+                       5.00000000E-01  2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       2.50000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+              kpt33   -2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  0.00000000E+00  5.00000000E-01
+                       5.00000000E-01  0.00000000E+00  2.50000000E-01
+                      -2.50000000E-01  2.50000000E-01  2.50000000E-01
+                       2.50000000E-01  0.00000000E+00  0.00000000E+00
+                      -2.50000000E-01  2.50000000E-01 -2.50000000E-01
+                       5.00000000E-01  2.50000000E-01  5.00000000E-01
+                      -2.50000000E-01  5.00000000E-01  5.00000000E-01
+                       2.50000000E-01  2.50000000E-01  2.50000000E-01
+                      -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
+           kptopt           4
+         kptrlatt        2    2   -2     -2    2   -2     -2    2    2
+          kptrlen      2.13663775E+01
+P           mkmem11         4
+P           mkmem12        10
+P           mkmem13        10
+P           mkmem21         4
+P           mkmem22        10
+P           mkmem23        10
+P           mkmem31         4
+P           mkmem32        10
+P           mkmem33        10
+            natom           2
+            nband11         4
+            nband12         4
+            nband13         4
+            nband21         8
+            nband22         8
+            nband23         8
+            nband31         8
+            nband32         8
+            nband33         8
+           ndtset           9
+            ngfft          16      16      16
+             nkpt11         4
+             nkpt12        10
+             nkpt13        10
+             nkpt21         4
+             nkpt22        10
+             nkpt23        10
+             nkpt31         4
+             nkpt32        10
+             nkpt33        10
+          nspinor11         1
+          nspinor12         1
+          nspinor13         1
+          nspinor21         2
+          nspinor22         2
+          nspinor23         2
+          nspinor31         2
+          nspinor32         2
+          nspinor33         2
+            nstep           8
+             nsym11        24
+             nsym12         6
+             nsym13         6
+             nsym21        24
+             nsym22         6
+             nsym23         6
+             nsym31        24
+             nsym32         6
+             nsym33         6
+           ntypat           2
+              occ11    2.000000  2.000000  2.000000  2.000000
+              occ12    2.000000  2.000000  2.000000  2.000000
+              occ13    2.000000  2.000000  2.000000  2.000000
+              occ21    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000
+              occ22    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000
+              occ23    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000
+              occ31    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000
+              occ32    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000
+              occ33    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
+                       1.000000  1.000000
+           prtden           0
+            rfdir           1       1       1
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+           shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
+           so_psp11         0       0
+           so_psp12         0       0
+           so_psp13         0       0
+           so_psp21         0       0
+           so_psp22         0       0
+           so_psp23         0       0
+           so_psp31         1       1
+           so_psp32         1       1
+           so_psp33         1       1
+          spgroup11       216
+          spgroup12       160
+          spgroup13       160
+          spgroup21       216
+          spgroup22       160
+          spgroup23       160
+          spgroup31       216
+          spgroup32       160
+          spgroup33       160
+           strten11    6.6445862837E-04  6.6445862837E-04  6.6445862837E-04
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten12    6.6405667536E-04  6.6405667536E-04  6.6405667536E-04
+                       6.6521021519E-07  6.6521021519E-07  6.6521021519E-07
+           strten13    6.6364689625E-04  6.6364689625E-04  6.6364689625E-04
+                       1.3319411216E-06  1.3319411216E-06  1.3319411216E-06
+           strten21    6.6445871742E-04  6.6445871742E-04  6.6445871742E-04
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten22    6.6406339948E-04  6.6406339948E-04  6.6406339948E-04
+                       6.7326451774E-07  6.7326451774E-07  6.7326451774E-07
+           strten23    6.6364903200E-04  6.6364903200E-04  6.6364903200E-04
+                       1.3348179352E-06  1.3348179352E-06  1.3348179352E-06
+           strten31    6.6432723556E-04  6.6432723556E-04  6.6432723556E-04
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten32    6.6392942524E-04  6.6392942524E-04  6.6392942524E-04
+                       6.6789901824E-07  6.6789901824E-07  6.6789901824E-07
+           strten33    6.6351598368E-04  6.6351598368E-04  6.6351598368E-04
+                       1.3311511869E-06  1.3311511869E-06  1.3311511869E-06
+           symafm11      1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1
+           symafm12      1    1    1    1    1    1
+           symafm13      1    1    1    1    1    1
+           symafm21      1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1
+           symafm22      1    1    1    1    1    1
+           symafm23      1    1    1    1    1    1
+           symafm31      1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1
+           symafm32      1    1    1    1    1    1
+           symafm33      1    1    1    1    1    1
+           symrel11    1  0  0   0  1  0   0  0  1       0 -1  1   0 -1  0   1 -1  0
+                      -1  0  0  -1  0  1  -1  1  0       0  1 -1   1  0 -1   0  0 -1
+                      -1  0  0  -1  1  0  -1  0  1       0 -1  1   1 -1  0   0 -1  0
+                       1  0  0   0  0  1   0  1  0       0  1 -1   0  0 -1   1  0 -1
+                      -1  0  1  -1  1  0  -1  0  0       0 -1  0   1 -1  0   0 -1  1
+                       1  0 -1   0  0 -1   0  1 -1       0  1  0   0  0  1   1  0  0
+                       1  0 -1   0  1 -1   0  0 -1       0 -1  0   0 -1  1   1 -1  0
+                      -1  0  1  -1  0  0  -1  1  0       0  1  0   1  0  0   0  0  1
+                       0  0 -1   0  1 -1   1  0 -1       1 -1  0   0 -1  1   0 -1  0
+                       0  0  1   1  0  0   0  1  0      -1  1  0  -1  0  0  -1  0  1
+                       0  0  1   0  1  0   1  0  0       1 -1  0   0 -1  0   0 -1  1
+                       0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
+           symrel12    1  0  0   0  1  0   0  0  1       1  0  0   0  0  1   0  1  0
+                       0  1  0   0  0  1   1  0  0       0  1  0   1  0  0   0  0  1
+                       0  0  1   1  0  0   0  1  0       0  0  1   0  1  0   1  0  0
+           symrel13    1  0  0   0  1  0   0  0  1       1  0  0   0  0  1   0  1  0
+                       0  1  0   0  0  1   1  0  0       0  1  0   1  0  0   0  0  1
+                       0  0  1   1  0  0   0  1  0       0  0  1   0  1  0   1  0  0
+           symrel21    1  0  0   0  1  0   0  0  1       0 -1  1   0 -1  0   1 -1  0
+                      -1  0  0  -1  0  1  -1  1  0       0  1 -1   1  0 -1   0  0 -1
+                      -1  0  0  -1  1  0  -1  0  1       0 -1  1   1 -1  0   0 -1  0
+                       1  0  0   0  0  1   0  1  0       0  1 -1   0  0 -1   1  0 -1
+                      -1  0  1  -1  1  0  -1  0  0       0 -1  0   1 -1  0   0 -1  1
+                       1  0 -1   0  0 -1   0  1 -1       0  1  0   0  0  1   1  0  0
+                       1  0 -1   0  1 -1   0  0 -1       0 -1  0   0 -1  1   1 -1  0
+                      -1  0  1  -1  0  0  -1  1  0       0  1  0   1  0  0   0  0  1
+                       0  0 -1   0  1 -1   1  0 -1       1 -1  0   0 -1  1   0 -1  0
+                       0  0  1   1  0  0   0  1  0      -1  1  0  -1  0  0  -1  0  1
+                       0  0  1   0  1  0   1  0  0       1 -1  0   0 -1  0   0 -1  1
+                       0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
+           symrel22    1  0  0   0  1  0   0  0  1       1  0  0   0  0  1   0  1  0
+                       0  1  0   0  0  1   1  0  0       0  1  0   1  0  0   0  0  1
+                       0  0  1   1  0  0   0  1  0       0  0  1   0  1  0   1  0  0
+           symrel23    1  0  0   0  1  0   0  0  1       1  0  0   0  0  1   0  1  0
+                       0  1  0   0  0  1   1  0  0       0  1  0   1  0  0   0  0  1
+                       0  0  1   1  0  0   0  1  0       0  0  1   0  1  0   1  0  0
+           symrel31    1  0  0   0  1  0   0  0  1       0 -1  1   0 -1  0   1 -1  0
+                      -1  0  0  -1  0  1  -1  1  0       0  1 -1   1  0 -1   0  0 -1
+                      -1  0  0  -1  1  0  -1  0  1       0 -1  1   1 -1  0   0 -1  0
+                       1  0  0   0  0  1   0  1  0       0  1 -1   0  0 -1   1  0 -1
+                      -1  0  1  -1  1  0  -1  0  0       0 -1  0   1 -1  0   0 -1  1
+                       1  0 -1   0  0 -1   0  1 -1       0  1  0   0  0  1   1  0  0
+                       1  0 -1   0  1 -1   0  0 -1       0 -1  0   0 -1  1   1 -1  0
+                      -1  0  1  -1  0  0  -1  1  0       0  1  0   1  0  0   0  0  1
+                       0  0 -1   0  1 -1   1  0 -1       1 -1  0   0 -1  1   0 -1  0
+                       0  0  1   1  0  0   0  1  0      -1  1  0  -1  0  0  -1  0  1
+                       0  0  1   0  1  0   1  0  0       1 -1  0   0 -1  0   0 -1  1
+                       0  0 -1   1  0 -1   0  1 -1      -1  1  0  -1  0  1  -1  0  0
+           symrel32    1  0  0   0  1  0   0  0  1       1  0  0   0  0  1   0  1  0
+                       0  1  0   0  0  1   1  0  0       0  1  0   1  0  0   0  0  1
+                       0  0  1   1  0  0   0  1  0       0  0  1   0  1  0   1  0  0
+           symrel33    1  0  0   0  1  0   0  0  1       1  0  0   0  0  1   0  1  0
+                       0  1  0   0  0  1   1  0  0       0  1  0   1  0  0   0  0  1
+                       0  0  1   1  0  0   0  1  0       0  0  1   0  1  0   1  0  0
+            tnons11    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons12    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons13    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons21    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons22    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons23    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons31    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons32    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons33    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+           tolvrs      1.00000000E-20
+            typat      1  2
+              wtk11      0.12500    0.37500    0.37500    0.12500
+              wtk12      0.09375    0.18750    0.18750    0.09375    0.09375    0.09375
+                         0.09375    0.09375    0.03125    0.03125
+              wtk13      0.09375    0.18750    0.18750    0.09375    0.09375    0.09375
+                         0.09375    0.09375    0.03125    0.03125
+              wtk21      0.12500    0.37500    0.37500    0.12500
+              wtk22      0.09375    0.18750    0.18750    0.09375    0.09375    0.09375
+                         0.09375    0.09375    0.03125    0.03125
+              wtk23      0.09375    0.18750    0.18750    0.09375    0.09375    0.09375
+                         0.09375    0.09375    0.03125    0.03125
+              wtk31      0.12500    0.37500    0.37500    0.12500
+              wtk32      0.09375    0.18750    0.18750    0.09375    0.09375    0.09375
+                         0.09375    0.09375    0.03125    0.03125
+              wtk33      0.09375    0.18750    0.18750    0.09375    0.09375    0.09375
+                         0.09375    0.09375    0.03125    0.03125
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.4133250000E+00  1.4133250000E+00  1.4133250000E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.6707971868E+00  2.6707971868E+00  2.6707971868E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
+            znucl       31.00000   33.00000
+
+================================================================================
+
+
+- Timing analysis has been suppressed with timopt=0
+
+
+
+================================================================================
+
+ Suggested references for the acknowledgment of ABINIT usage.
+
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+-
+- [1] ABINIT : First-principles approach of materials and nanosystem properties.
+- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
+- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
+- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
+- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
+- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
+- Computer Phys. Comm. 180, 2582-2615 (2009).
+- Comment : the third generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- The licence allows the authors to put it on the Web.
+-
+- [2] A brief introduction to the ABINIT software package.
+- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
+- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
+- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
+- Z. Kristallogr. 220, 558-562 (2005).
+- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- should be cited especially if you are using the GW part of ABINIT, as several authors
+- of this part are not in the list of authors of the first or third paper.
+- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- the licence allows the authors to put it on the Web).
+-
+- And optionally:
+-
+- [3] First-principles computation of material properties : the ABINIT software project. 
+- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
+- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
+- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
+- Comment : the original paper describing the ABINIT project.
+-
+- [4] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
+- on computers with overlapping multiply-add instructions.
+- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
+-
+- Proc.   0 individual time (sec): cpu=         20.7  wall=         21.0
+
+================================================================================
+
+ Calculation completed.
+.Delivered  23 WARNINGs and  24 COMMENTs to log file.
++Overall time at end (sec) : cpu=         20.7  wall=         21.0

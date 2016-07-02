@@ -1,0 +1,383 @@
+
+.Version 8.0.3 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+
+.Copyright (C) 1998-2016 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : Mon  4 Apr 2016.
+- ( at 10h45 )
+  
+- input  file    -> t02.in
+- output file    -> t02_MPI10.out
+- root for input  files -> t02_MPI10i
+- root for output files -> t02_MPI10o
+
+
+ Symmetries : space group P1 (#  1); Bravais aP (primitive triclinic)
+--------------------------------------------------------------------------------
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values                                      
+-   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 = 10
+-
+- outvars: echo of global parameters not present in the input file              
+-  max_nthreads =    0
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell      1.6500000000E+01  1.5500000000E+01  1.5500000000E+01 Bohr
+              amu      1.20110000E+01  1.59994000E+01
+      chksymbreak           0
+           diemix      4.00000000E-01
+-          fftalg         312
+         icoulomb           1
+           istwfk        1
+           kptopt           0
+P           mkmem           1
+            natom           3
+            nband           8
+            ngfft           2       2       2
+          ngfftdg           2       2       2
+             nkpt           1
+        nscforder          14
+            nstep          10
+             nsym           1
+           ntypat           2
+         nwfshist           4
+              occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000
+        optforces           0
+        optstress           0
+-      paral_atom           0
+         pawmixdg           1
+           prtden           0
+           prteig           0
+            prtwf           0
+          spgroup           1
+           tolvrs      1.00000000E+00
+            typat      1  2  2
+           usewvl           1
+       wvl_crmult      3.00000000E+00
+       wvl_frmult      1.00000000E+00
+        wvl_hgrid      4.00000000E-01
+       wvl_nprccg           5
+           xangst      4.3657119709E+00  4.1011233666E+00  4.1011233666E+00
+                       3.2057119709E+00  4.1011233666E+00  4.1011233666E+00
+                       5.5257119708E+00  4.1011233666E+00  4.1011233666E+00
+            xcart      8.2500000000E+00  7.7500000000E+00  7.7500000000E+00
+                       6.0579176859E+00  7.7500000000E+00  7.7500000000E+00
+                       1.0442082314E+01  7.7500000000E+00  7.7500000000E+00
+             xred      5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
+                       3.6714652642E-01  5.0000000000E-01  5.0000000000E-01
+                       6.3285347358E-01  5.0000000000E-01  5.0000000000E-01
+            znucl        6.00000    8.00000
+
+================================================================================
+
+ chkinp: Checking input parameters for consistency.
+
+================================================================================
+== DATASET  1 ==================================================================
+-   nproc =   10   -> not optimal: autoparal keyword recommended in input file
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)= 16.5000000  0.0000000  0.0000000  G(1)=  0.0606061  0.0000000  0.0000000
+ R(2)=  0.0000000 15.5000000  0.0000000  G(2)=  0.0000000  0.0645161  0.0000000
+ R(3)=  0.0000000  0.0000000 15.5000000  G(3)=  0.0000000  0.0000000  0.0645161
+ Unit cell volume ucvol=  3.9641250E+03 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+
+ Coarse grid specifications (used for wave-functions):
+
+ Fine grid specifications (used for densities):
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/C.atompaw.wvl
+- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/C.atompaw.wvl
+- Paw atomic data for element C - Generated by atompaw v3.0.1.5 & AtomPAW2Abinit v3.3.1
+-  6.00000   4.00000  20121025                znucl, zion, pspdat
+    7    7    1    0       406   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+ Pseudopotential format is: paw5
+ basis_size (lnmax)=  2 (lmn_size=  4), orbitals=   0   1
+ Spheres core radius: rc_sph= 1.00000000
+ 5 radial meshes are used:
+  - mesh 1: r(i)=step*(i-1), size= 406 , step= 0.25000E-02
+  - mesh 2: r(i)=step*(i-1), size= 401 , step= 0.25000E-02
+  - mesh 3: r(i)=step*(i-1), size= 888 , step= 0.25000E-02
+  - mesh 4: r(i)=step*(i-1), size=4001 , step= 0.25000E-02
+  - mesh 5: r(i)=step*(i-1), size=6007 , step= 0.25000E-02
+ Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
+ Radius for shape functions = sphere core radius
+ Radial grid used for partial waves is grid 1
+ Radial grid used for projectors is grid  2
+ Radial grid used for (t)core density is grid 3
+ Radial grid used for Vloc is grid 4
+ Radial grid used for pseudo valence density is grid 5
+ Compensation charge density is not taken into account in XC energy/potential
+ pspatm: atomic psp has been read  and splines computed
+
+  radii_cf(1)=   1.5843663; radii_cf(2)=   0.2326773; rad_cov=   0.2326773
+- pspini: atom type   2  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/O.atompaw.wvl
+- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/O.atompaw.wvl
+- Paw atomic data for element O - Generated by atompaw v3.0.1.5 & AtomPAW2Abinit v3.3.1
+-  8.00000   6.00000  20121011                znucl, zion, pspdat
+    7    7    1    0      1910   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+ Pseudopotential format is: paw5
+ basis_size (lnmax)=  2 (lmn_size=  4), orbitals=   0   1
+ Spheres core radius: rc_sph= 1.00329515
+ 5 radial meshes are used:
+  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=1910 , AA= 0.49934E-03 BB= 0.39947E-02
+  - mesh 2: r(i)=AA*[exp(BB*(i-1))-1], size=1905 , AA= 0.49934E-03 BB= 0.39947E-02
+  - mesh 3: r(i)=AA*[exp(BB*(i-1))-1], size=2025 , AA= 0.49934E-03 BB= 0.39947E-02
+  - mesh 4: r(i)=AA*[exp(BB*(i-1))-1], size=2480 , AA= 0.49934E-03 BB= 0.39947E-02
+  - mesh 5: r(i)=AA*[exp(BB*(i-1))-1], size=2529 , AA= 0.49934E-03 BB= 0.39947E-02
+ Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
+ Radius for shape functions = sphere core radius
+ Radial grid used for partial waves is grid 1
+ Radial grid used for projectors is grid  2
+ Radial grid used for (t)core density is grid 3
+ Radial grid used for Vloc is grid 4
+ Radial grid used for pseudo valence density is grid 5
+ Compensation charge density is not taken into account in XC energy/potential
+ pspatm: atomic psp has been read  and splines computed
+
+  radii_cf(1)=   1.2155757; radii_cf(2)=   0.2217861; rad_cov=   0.2217861
+   7.23115076E+01                                ecore*ucvol(ha*bohr**3)
+--------------------------------------------------------------------------------
+
+ setup2: nwvl coarse and fine are    7960       0
+
+================================================================================
+
+     iter   Etot(hartree)      deltaE(h)  grdnorm    nres2
+ ETOT  1  -37.922089099752    -3.792E+01 6.008E-02 4.252E+01
+ ETOT  2  -37.731594614347     1.905E-01 9.503E-03 4.108E+00
+ ETOT  3  -37.722109617274     9.485E-03 5.387E-03 9.073E-01
+
+ At SCF step    3       nres2   =  9.07E-01 < tolvrs=  1.00E+00 =>converged.
+
+ PAW TEST:
+ ==== Compensation charge inside spheres ============
+ The following values must be close to each other ...
+ Compensation charge over spherical meshes =      0.362126161723858
+ Compensation charge over fft grid         =      0.363351026946252
+
+ ==== Results concerning PAW augmentation regions ====
+
+ Total pseudopotential strength Dij (hartree):
+ Atom #  1
+   0.34785  -0.00000  -0.00000   0.00001
+  -0.00000  -0.04839  -0.00000  -0.00000
+  -0.00000  -0.00000  -0.04884  -0.00000
+   0.00001  -0.00000  -0.00000  -0.04895
+ Atom #  3
+   1.16836   0.00028  -0.00001  -0.00138
+   0.00028  -0.19325  -0.00000  -0.00000
+  -0.00001  -0.00000  -0.19324  -0.00000
+  -0.00138  -0.00000  -0.00000  -0.19436
+
+
+ Augmentation waves occupancies Rhoij:
+ Atom #  1
+   1.51543  -0.00260   0.00008   0.00004
+  -0.00260   1.52899  -0.00022  -0.00034
+   0.00008  -0.00022   0.96916  -0.00002
+   0.00004  -0.00034  -0.00002   0.96817
+ Atom #  3
+   1.85542   0.22827   0.00024   0.00314
+   0.22827   1.40252  -0.00102  -0.00111
+   0.00024  -0.00102   1.42819   0.00005
+   0.00314  -0.00111   0.00005   1.43105
+
+
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
+ reduced coordinates (array xred) for    3 atoms
+       0.500000000000      0.500000000000      0.500000000000
+       0.311027386718      0.500000000000      0.500000000000
+       0.688972613282      0.500000000000      0.500000000000
+ rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000      0.000000000000
+    3       0.000000000000      0.000000000000      0.000000000000
+
+ cartesian coordinates (angstrom) at end:
+    1      3.06922780982200     2.43421515951400     2.43421515951400
+    2      1.90922780986293     2.43421515951400     2.43421515951400
+    3      4.22922780978107     2.43421515951400     2.43421515951400
+ length scales= 11.600000000000  9.200000000000  9.200000000000 bohr
+              =  6.138455619644  4.868430319028  4.868430319028 angstroms
+ Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=  -0.02660
+ Eigenvalues (hartree) for nkpt=   1  k points:
+ kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -1.04758   -1.01187   -0.46319   -0.44068   -0.44002   -0.42467   -0.29435   -0.29339
+
+--------------------------------------------------------------------------------
+ Components of total free energy (in Hartree) :
+
+    Kinetic energy  =  2.37025498930620E+01
+    Hartree energy  =  6.14180081688679E+01
+    XC energy       = -8.25900897101330E+00
+    Ion-ion energy  =  3.01083584208382E+01
+    PspCore energy  =  0.00000000000000E+00
+    Loc. psp. energy= -1.47592254982925E+02
+    Spherical terms =  3.04890506091824E+00
+    >>>>>>>>> Etotal= -3.75734424102519E+01
+
+ "Double-counting" decomposition of free energy:
+    Band energy     = -8.76422868195560E+00
+    Ion-ion energy  =  3.01083584208382E+01
+    PspCore energy  =  0.00000000000000E+00
+    Dble-C XC-energy= -5.89064872888347E+01
+    Spherical terms = -1.59752067322234E-01
+    >>>> Etotal (DC)= -3.77221096172743E+01
+
+  >Total energy in eV           = -1.02242536436697E+03
+  >Total DC energy in eV        = -1.02647080480465E+03
+--------------------------------------------------------------------------------
+
+== END DATASET(S) ==============================================================
+================================================================================
+  
+ -outvars: echo values of variables after computation  --------
+            acell      1.1600000000E+01  9.2000000000E+00  9.2000000000E+00 Bohr
+              amu      1.20110000E+01  1.59994000E+01
+      chksymbreak           0
+           diemix      4.00000000E-01
+           etotal     -3.7722109617E+01
+            fcart      9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+-          fftalg         312
+         icoulomb           1
+           istwfk        1
+           kptopt           0
+P           mkmem           1
+            natom           3
+            nband           8
+            ngfft           2       2       2
+          ngfftdg           2       2       2
+             nkpt           1
+        nscforder          14
+            nstep          10
+             nsym           1
+           ntypat           2
+         nwfshist           4
+              occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
+                       2.000000  2.000000
+        optforces           0
+        optstress           0
+-      paral_atom           0
+         pawmixdg           1
+           prtden           0
+           prteig           0
+            prtwf           0
+          spgroup           1
+           strten      9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+           tolvrs      1.00000000E+00
+            typat      1  2  2
+           usewvl           1
+       wvl_crmult      3.00000000E+00
+       wvl_frmult      1.00000000E+00
+        wvl_hgrid      4.00000000E-01
+       wvl_nprccg           5
+           xangst      3.0692278098E+00  2.4342151595E+00  2.4342151595E+00
+                       1.9092278099E+00  2.4342151595E+00  2.4342151595E+00
+                       4.2292278098E+00  2.4342151595E+00  2.4342151595E+00
+            xcart      5.8000000000E+00  4.6000000000E+00  4.6000000000E+00
+                       3.6079176859E+00  4.6000000000E+00  4.6000000000E+00
+                       7.9920823141E+00  4.6000000000E+00  4.6000000000E+00
+             xred      5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
+                       3.1102738672E-01  5.0000000000E-01  5.0000000000E-01
+                       6.8897261328E-01  5.0000000000E-01  5.0000000000E-01
+            znucl        6.00000    8.00000
+
+================================================================================
+
+
+- Timing analysis has been suppressed with timopt=0
+
+
+
+================================================================================
+
+ Suggested references for the acknowledgment of ABINIT usage.
+
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+-
+- [1] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
+- M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
+- Comment : PAW calculations. Strong suggestion to cite this paper.
+-
+- [2] Daubechies wavelets as a basis set for density functional pseudopotential calculations.
+- L. Genovese, A. Neelov, S. Goedecker, T. Deutsch, S.A. Ghasemi, A. Willand, D. Caliste, O. Zilberberg, M. Rayson, A. Bergman et R. Schneider,
+- J. Chem. Phys. 129, 014109 (2008).
+- Comment : to be cited in case BigDFT project is used, i.e. usewvl=1.
+-
+- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
+- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
+- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
+- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
+- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
+- Computer Phys. Comm. 180, 2582-2615 (2009).
+- Comment : the third generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- The licence allows the authors to put it on the Web.
+-
+- [4] A brief introduction to the ABINIT software package.
+- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
+- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
+- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
+- Z. Kristallogr. 220, 558-562 (2005).
+- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- should be cited especially if you are using the GW part of ABINIT, as several authors
+- of this part are not in the list of authors of the first or third paper.
+- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- the licence allows the authors to put it on the Web).
+-
+- And optionally:
+-
+- [5] First-principles computation of material properties : the ABINIT software project. 
+- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
+- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
+- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
+- Comment : the original paper describing the ABINIT project.
+-
+- Proc.   0 individual time (sec): cpu=         35.4  wall=         10.6
+
+================================================================================
+
+ Calculation completed.
+.Delivered   0 WARNINGs and   0 COMMENTs to log file.
++Overall time at end (sec) : cpu=        344.7  wall=        105.1

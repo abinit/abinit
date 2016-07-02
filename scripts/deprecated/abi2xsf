@@ -1,0 +1,143 @@
+#!/bin/bash
+
+# Shanavas K. V.
+# Synchrotron Radiation Section
+# Bhabha Atomic Research Center, Mumbai
+# email: shanavas@barc.ernet.in, ph: 022-25591312
+#
+# script to convert abinit output file to 
+# Xcrysden Structure File format
+# Written by Shanavas on Mon Apr 25 15:38:34 IST 2005
+
+
+if [ $# -lt 1 ]; then
+    echo  "
+Usage: abi2xsf [option] abi-out
+
+-c    Convert from bohr to ang (default)
+-i    Initial structure 
+-f    Final structure (default)
+-a    Animation file (initial & final)
+-s    Structural Optimization run
+
+Defaults are assumed when no options are provided"
+    exit 1
+fi
+   
+c=0.52918
+st=2
+case $1 in
+    -c|-c?|-?c)
+        echo $1
+        exit 0
+	c=0.52918;
+	shift
+	;;
+    -i|-?i|-i?)
+	st=1
+	shift
+	;;
+    -f|-?f|-f?)
+	st=2
+	shift
+	;;
+    -a|-?a|-a?)
+	st=0
+	shift
+	;;
+    -s|-?s|-s?)
+	st=-1
+	shift
+	;;*)	
+esac
+
+if [ ! -r "$1" ]; then
+    echo "File $1 does not exist!"
+    exit 1
+fi
+  
+oc=`grep -c 'Cartesian coordinates (bohr)' $1`
+let rp=`grep -c 'rprim' $1`
+
+if [ $st -eq -1 ]&&[ $rp -gt $oc ]; then
+    st=-2
+fi
+if [ $st -eq -1 ]&&[  $oc -lt 1 ]; then
+    echo "Not a structural optimization run!"
+    exit 1
+fi
+cat $1 | gawk -v co=$c -v fi=$st -v oc=$oc '
+BEGIN {
+  st=0
+  cna=0
+  cnr=0
+}
+
+{  if ($1 ~ /^natom/) {nat=$2;} 
+   if ($1 ~ /^ntypat/) {nty=$2;}
+   if ($1 ~ /^typat/) {cnt=1; nl=0; for (i=2; i<=nat+1; i++)
+           {if ($i == "" && nl != 1) {getline; nl=1;}
+           {if (nl) {typ[i]=$cnt; cnt++;}
+           else {typ[i]=$i;} cnt=1;}}}  
+   if ($0 ~ /^- pspatm:/) {getline; getline; anu[cnt]= $1; cnt++;}
+   if (fi == -2) {
+           if ($1 ~ /^acell/) {cna++; acl[1,cna]=$2;acl[2,cna]=$3;acl[3,cna]=$4;}}
+   else {
+           if ($1 ~ /^acell/) {acl[1]=$2;acl[2]=$3;acl[3]=$4;}}
+   if (fi == -2) {
+       if ($1 ~ /^rprim/) {cnr++; rpr[1,cnr]=$2; rpr[2,cnr]=$3; rpr[3,cnr]=$4;
+             getline; rpr[4,cnr]=$1; rpr[5,cnr]=$2; rpr[6,cnr]=$3;
+             getline; rpr[7,cnr]=$1; rpr[8,cnr]=$2; rpr[9,cnr]=$3;
+             for (i=1; i<=9; i++) {rpr[i,cnr]=rpr[i,cnr]*acl[i-int((i-1)/3)*3,cnr]*co}}}
+   else {
+         if ($1 ~ /^rprim/) {rpr[1]=$2; rpr[2]=$3; rpr[3]=$4;
+             getline; rpr[4]=$1; rpr[5]=$2; rpr[6]=$3;
+             getline; rpr[7]=$1; rpr[8]=$2; rpr[9]=$3;
+
+             for (i=1; i<=9; i++) {rpr[i]=rpr[i]*acl[i-int((i-1)/3)*3]*co}}}
+   if (fi < 0) 
+       { if ($0 ~ /Cartesian \coordinates/) 
+          { st++;
+            for (i=1; i<=nat; i++) {getline; xca[i,1,st]=$1; xca[i,2,st]=$2; xca[i,3,st]=$3;}}}
+   else {
+       if ($1 ~ /^xcart/) 
+          { st++; xca[1,1,st]=$2; xca[1,2,st]=$3; xca[1,3,st]=$4; 
+            for (i=2; i<=nat; i++) {getline; xca[i,1,st]=$1; xca[i,2,st]=$2; xca[i,3,st]=$3;}}}
+}
+   END {
+    if (fi == 0) { 
+        print "ANIMSTEPS 2";
+        print "CRYSTAL";print "PRIMVEC";
+        printf ("%10.5f %10.5f %10.5f\n", rpr[1],rpr[2],rpr[3]);
+        printf ("%10.5f %10.5f %10.5f\n",rpr[4],rpr[5],rpr[6]);
+        printf ("%10.5f %10.5f %10.5f\n",rpr[7],rpr[8],rpr[9]);
+        for (st=1;st<=2;st++) {
+        print "PRIMCOORD",st;
+        print nat,"1";
+        for (i=1; i<=nat; i++) {printf ("%d %10.5f %10.5f %10.5f\n",int(anu[typ[i+1]]),xca[i,1,st]*co,xca[i,2,st]*co,xca[i,3,st]*co);}}}
+    if (fi < 0) {
+        print "ANIMSTEPS",oc;print "CRYSTAL";
+      if (fi != -2) {
+        print " PRIMVEC";
+        printf (" %10.5f %10.5f %10.5f\n", rpr[1],rpr[2],rpr[3]);
+        printf (" %10.5f %10.5f %10.5f\n",rpr[4],rpr[5],rpr[6]);
+        printf (" %10.5f %10.5f %10.5f\n",rpr[7],rpr[8],rpr[9]);}
+
+        for (st=1;st<=oc;st++) {
+         if (fi == -2) {
+        print " PRIMVEC";
+        printf (" %10.5f %10.5f %10.5f\n", rpr[1,st+1],rpr[2,st+1],rpr[3,st+1]);
+        printf (" %10.5f %10.5f %10.5f\n",rpr[4,st+1],rpr[5,st+1],rpr[6,st+1]);
+        printf (" %10.5f %10.5f %10.5f\n",rpr[7,st+1],rpr[8,st+1],rpr[9,st+1]);}
+        print " PRIMCOORD",st;
+        print "",nat,"1";
+        for (i=1; i<=nat; i++) {printf (" %d %10.5f %10.5f %10.5f\n",int(anu[typ[i+1]]),xca[i,1,st]*co,xca[i,2,st]*co,xca[i,3,st]*co);}}}
+    if (fi > 0) {
+        print " CRYSTAL";print "PRIMVEC";
+        printf (" %10.5f %10.5f %10.5f\n", rpr[1],rpr[2],rpr[3]);
+        printf (" %10.5f %10.5f %10.5f\n",rpr[4],rpr[5],rpr[6]);
+        printf (" %10.5f %10.5f %10.5f\n",rpr[7],rpr[8],rpr[9]);
+        print " PRIMCOORD";
+        print "",nat,"1";
+        for (i=1; i<=nat; i++) {printf (" %d %10.5f %10.5f %10.5f\n",int(anu[typ[i+1]]),xca[i,1,fi]*co,xca[i,2,fi]*co,xca[i,3,fi]*co);}}
+}'>$1.xsf

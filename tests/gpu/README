@@ -1,0 +1,5 @@
+This directory, gpu, contains tests which exercise parts
+of the ABINIT package, related to the use of Graphics Processing Units.
+
+Please, see the README file in the tests directory (above this one) to get help.
+

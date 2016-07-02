@@ -1,0 +1,159 @@
+#!/usr/bin/env python
+#
+# Copyright (C) 2014-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+from ConfigParser import ConfigParser
+from time import gmtime,strftime
+
+import fnmatch
+import os
+import re
+import sys
+
+class MyConfigParser(ConfigParser):
+
+  def optionxform(self,option):
+    return str(option)
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Main program
+#
+
+# Initial setup
+my_name    = "make-file-lists"
+my_configs = {
+  "subs":"config/specs/buildsys.conf",
+  "junk":"config/specs/junk.conf"}
+
+sep = "# ---------------------------------------------------------------------------- #\n\n"
+
+# Check if we are in the top of the ABINIT source tree
+if ( not os.path.exists("configure.ac") or
+     not os.path.exists("src/98_main/abinit.F90") ):
+  sys.stderr.write("%s: You must be in the top of an ABINIT source tree.\n" % my_name)
+  sys.stderr.write("%s: Aborting now.\n" % my_name)
+  sys.exit(1)
+
+# Check config file(s)
+for jnk_file in my_configs.values():
+  if ( not os.path.exists(jnk_file) ):
+    sys.stderr.write("%s: Could not find config file (%s).\n" % (my_name,jnk_file))
+    sys.stderr.write("%s: Aborting now.\n" % my_name)
+    sys.exit(2)
+
+# What time is it?
+now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
+
+# Init
+cnf = MyConfigParser()
+cnf.read(my_configs["subs"])
+jnk = MyConfigParser()
+jnk.read(my_configs["junk"])
+jnk_dflt = dict(jnk.defaults())
+
+# Check whether we want to display ignored files
+do_show_ign = False
+if ( len(sys.argv) > 1 ):
+  if ( sys.argv[1] == "show-ignored" ):
+    do_show_ign = True
+
+# Find the root config directory
+master_root = ""
+master_list = []
+for my_root in cnf.sections():
+  master_list += cnf.get(my_root, "subdirs").split()
+  if ( cnf.get(my_root,"type") == "master" ):
+    master_root = cnf.get(my_root,"root")
+    master_list.append(master_root)
+    if ( not os.path.exists(os.path.join(master_root,"dist")) ):
+      os.mkdir(os.path.join(master_root,"dist"))
+master_list.sort()
+
+if ( master_root == "" ):
+  sys.stderr.write("%s: Could not find master root directory.\n")
+  sys.stderr.write("%s: Aborting now.\n" % my_name)
+  sys.exit(3)
+
+# Explore the directory tree
+for my_root in cnf.sections():
+  my_files = []
+  ign_dirs = jnk_dflt["dirs"].split()
+  ign_files = jnk_dflt["files"].split()
+  if ( my_root in jnk.sections() ):
+    ign_dirs += jnk.get(my_root,"dirs").split()
+    ign_files += jnk.get(my_root,"files").split()
+  if ( cnf.get(my_root,"type") == "master" ):
+    sub_tree = [master_root]
+  else:
+    sub_tree = []
+  sub_tree += cnf.get(my_root,"subdirs").split()
+
+  for my_subdir in sub_tree:
+    my_files = []
+    for root, dirs, files in os.walk(my_subdir):
+      for ign in ign_dirs:
+        if ( fnmatch.fnmatch(os.path.basename(root),ign) ):
+          while ( len(dirs) > 0 ):
+            try:
+              dirs.remove(dirs[0])
+            except:
+              pass
+          while ( len(files) > 0 ):
+            try:
+              files.remove(file[0])
+            except:
+              pass
+          if ( do_show_ign ):
+            sys.stderr.write("%s: ignoring directory %s\n" % \
+              (my_name,root))
+
+      for sub in dirs:
+        sub_dirpath = os.path.join(root,sub)
+        for ign in ign_dirs:
+          if ( fnmatch.fnmatch(sub_dirpath,ign) ):
+            #sys.stderr.write("SDIR %s %s\n" % (sub,ign))
+            dirs.remove(sub)
+            if ( do_show_ign ):
+              sys.stderr.write("%s: ignoring directory %s\n" % \
+                (my_name,os.path.join(root,sub)))
+            break
+          elif ( (ign.find(os.path.sep) == -1) and \
+                 fnmatch.fnmatch(sub,ign) ):
+            #sys.stderr.write("SDIR %s %s\n" % (sub,ign))
+            dirs.remove(sub)
+            if ( do_show_ign ):
+              sys.stderr.write("%s: ignoring directory %s\n" % \
+                (my_name,os.path.join(root,sub)))
+            break
+      for src in files:
+        src_ok = True
+        src_subpath = os.path.join(root,src)
+        for ign in ign_files:
+          if ( fnmatch.fnmatch(src_subpath,ign) ):
+            #sys.stderr.write("FILE %s %s\n" % (src_subpath,ign))
+            src_ok = False
+            break
+          elif ( (ign.find("/") == -1) and fnmatch.fnmatch(src,ign) ):
+            #sys.stderr.write("FILE %s %s\n" % (src_subpath,ign))
+            src_ok = False
+            break
+        if ( src_ok ):
+          my_files.append(os.path.join(root,src))
+        else:
+          if ( do_show_ign ):
+            sys.stderr.write("%s: ignoring file %s\n" % \
+              (my_name,os.path.join(root,src)))
+
+    my_files.sort()
+    file("%s/dist/%s.lst" % (master_root,my_subdir),"w").write("\n".join(my_files) + "\n")
+
+# Make sure the newly created files will be distributed
+file("%s/dist/%s.lst" % (master_root,master_root),"a").write(
+  "config/dist/" + ".lst\nconfig/dist/".join(master_list) + ".lst\n")

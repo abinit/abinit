@@ -1,0 +1,9 @@
+This directory, wannier90, contains tests which exercise parts 
+of the ABINIT package, related to the features needed to use the Wannier90 library.
+
+Tests 11, 12 and 13 examine the approaches of Silvestrelli vdW-WF1, vdW-WF2 and vdW-QHO-WF
+respectively, to calculate van der Waals or dispersion energy.
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+

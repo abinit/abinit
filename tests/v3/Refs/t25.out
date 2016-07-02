@@ -1,0 +1,705 @@
+
+.Version 8.0.3 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+
+.Copyright (C) 1998-2016 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : Mon  4 Apr 2016.
+- ( at 11h57 )
+  
+- input  file    -> t25.in
+- output file    -> t25.out
+- root for input  files -> t25i
+- root for output files -> t25o
+
+
+ DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  1.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
+     natom =       1  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       1    n1xccc =       0    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           2        mffmem =           1         mkmem =           1
+       mpw =          12          nfft =         512          nkpt =           1
+================================================================================
+P This job should need less than                       0.547 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+================================================================================
+
+
+ DATASET    2 : space group P-1 (#  2); Bravais aP (primitive triclinic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  2.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       2    n1xccc =       0    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           2        mffmem =           1         mkmem =           1
+       mpw =          12          nfft =         512          nkpt =           1
+================================================================================
+P This job should need less than                       0.566 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
+================================================================================
+
+
+ DATASET    3 : space group P2 (#  3); Bravais mP (primitive monocl.)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  3.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       2    n1xccc =       0    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           2        mffmem =           1         mkmem =           1
+       mpw =          12          nfft =         640          nkpt =           1
+================================================================================
+P This job should need less than                       0.597 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+================================================================================
+
+
+ DATASET    4 : space group P2_1 (#  4); Bravais mP (primitive monocl.)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  4.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       2    n1xccc =       0    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           2        mffmem =           1         mkmem =           1
+       mpw =          12          nfft =         640          nkpt =           1
+================================================================================
+P This job should need less than                       0.597 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+================================================================================
+
+
+ DATASET    5 : space group C2 (#  5); Bravais mC (1-face-center monocl.)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  5.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       2    n1xccc =       0    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           2        mffmem =           1         mkmem =           1
+       mpw =           6          nfft =         288          nkpt =           1
+================================================================================
+P This job should need less than                       0.511 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+================================================================================
+
+
+ DATASET    6 : space group Pm (#  6); Bravais mP (primitive monocl.)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  6.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       2    n1xccc =       0    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           2        mffmem =           1         mkmem =           1
+       mpw =          12          nfft =         640          nkpt =           1
+================================================================================
+P This job should need less than                       0.597 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+================================================================================
+
+
+ DATASET    7 : space group Pc (#  7); Bravais mP (primitive monocl.)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  7.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       2    n1xccc =       0    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           2        mffmem =           1         mkmem =           1
+       mpw =          12          nfft =         640          nkpt =           1
+================================================================================
+P This job should need less than                       0.597 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+================================================================================
+
+
+ DATASET    8 : space group Cm (#  8); Bravais mC (1-face-center monocl.)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  8.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       2    n1xccc =       0    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           2        mffmem =           1         mkmem =           1
+       mpw =           6          nfft =         288          nkpt =           1
+================================================================================
+P This job should need less than                       0.511 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+================================================================================
+
+
+ DATASET    9 : space group Cc (#  9); Bravais mC (1-face-center monocl.)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  9.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       2    n1xccc =       0    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           2        mffmem =           1         mkmem =           1
+       mpw =           6          nfft =         288          nkpt =           1
+================================================================================
+P This job should need less than                       0.511 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+================================================================================
+
+
+ DATASET   10 : space group P2/m (# 10); Bravais mP (primitive monocl.)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 10.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
+     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           3        mffmem =           1         mkmem =           1
+       mpw =          12          nfft =         640          nkpt =           1
+================================================================================
+P This job should need less than                       0.613 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+================================================================================
+
+
+ DATASET   11 : space group P2_1/m (# 11); Bravais mP (primitive monocl.)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 11.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
+     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           3        mffmem =           1         mkmem =           1
+       mpw =          12          nfft =         640          nkpt =           1
+================================================================================
+P This job should need less than                       0.613 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+================================================================================
+
+
+ DATASET   12 : space group C2/m (# 12); Bravais mC (1-face-center monocl.)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 12.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
+     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           3        mffmem =           1         mkmem =           1
+       mpw =           6          nfft =         288          nkpt =           1
+================================================================================
+P This job should need less than                       0.526 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+================================================================================
+
+
+ DATASET   13 : space group P2/c (# 13); Bravais mP (primitive monocl.)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 13.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
+     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           3        mffmem =           1         mkmem =           1
+       mpw =          12          nfft =         640          nkpt =           1
+================================================================================
+P This job should need less than                       0.613 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+================================================================================
+
+
+ DATASET   14 : space group P2_1/c (# 14); Bravais mP (primitive monocl.)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 14.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =      10  mpssoang =       1    mqgrid =    3001
+     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           3        mffmem =           1         mkmem =           1
+       mpw =          12          nfft =         640          nkpt =           1
+================================================================================
+P This job should need less than                       0.613 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
+================================================================================
+
+
+ DATASET   15 : space group C2/c (# 15); Bravais mC (1-face-center monocl.)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 15.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =       8  mpssoang =       1    mqgrid =    3001
+     natom =       4  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =       4    n1xccc =       0    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           3        mffmem =           1         mkmem =           1
+       mpw =           6          nfft =         288          nkpt =           1
+================================================================================
+P This job should need less than                       0.526 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
+================================================================================
+
+--------------------------------------------------------------------------------
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values                                      
+-   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-
+- outvars: echo of global parameters not present in the input file              
+-  max_nthreads =    0
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell1     7.0000000000E+00  8.0000000000E+00  9.0000000000E+00 Bohr
+            acell2     7.0000000000E+00  8.0000000000E+00  9.0000000000E+00 Bohr
+            acell3     7.0000000000E+00  8.0000000000E+00  9.0000000000E+00 Bohr
+            acell4     7.0000000000E+00  8.0000000000E+00  9.0000000000E+00 Bohr
+            acell5     1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
+            acell6     7.0000000000E+00  8.0000000000E+00  9.0000000000E+00 Bohr
+            acell7     7.0000000000E+00  8.0000000000E+00  9.0000000000E+00 Bohr
+            acell8     1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
+            acell9     1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
+            acell10    7.0000000000E+00  8.0000000000E+00  9.0000000000E+00 Bohr
+            acell11    7.0000000000E+00  8.0000000000E+00  9.0000000000E+00 Bohr
+            acell12    1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
+            acell13    7.0000000000E+00  8.0000000000E+00  9.0000000000E+00 Bohr
+            acell14    7.0000000000E+00  8.0000000000E+00  9.0000000000E+00 Bohr
+            acell15    1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
+              amu      1.00794000E+00
+             ecut      1.00000000E+00 Hartree
+-          fftalg         312
+           istwfk        2
+           jdtset        1    2    3    4    5    6    7    8    9   10
+                        11   12   13   14   15
+           kptopt           0
+P           mkmem           1
+            natom1          1
+            natom2          2
+            natom3          2
+            natom4          2
+            natom5          2
+            natom6          2
+            natom7          2
+            natom8          2
+            natom9          2
+            natom10         4
+            natom11         4
+            natom12         4
+            natom13         4
+            natom14         4
+            natom15         4
+            nband1          2
+            nband2          2
+            nband3          2
+            nband4          2
+            nband5          2
+            nband6          2
+            nband7          2
+            nband8          2
+            nband9          2
+            nband10         3
+            nband11         3
+            nband12         3
+            nband13         3
+            nband14         3
+            nband15         3
+           ndtset          15
+            ngfft1          8       8       8
+            ngfft2          8       8       8
+            ngfft3          8       8      10
+            ngfft4          8       8      10
+            ngfft5          6       6       8
+            ngfft6          8       8      10
+            ngfft7          8       8      10
+            ngfft8          6       6       8
+            ngfft9          6       6       8
+            ngfft10         8       8      10
+            ngfft11         8       8      10
+            ngfft12         6       6       8
+            ngfft13         8       8      10
+            ngfft14         8       8      10
+            ngfft15         6       6       8
+             nkpt           1
+            nline           1
+            nstep           1
+             nsym1          1
+             nsym2          2
+             nsym3          2
+             nsym4          2
+             nsym5          2
+             nsym6          2
+             nsym7          2
+             nsym8          2
+             nsym9          2
+             nsym10         4
+             nsym11         4
+             nsym12         4
+             nsym13         4
+             nsym14         4
+             nsym15         4
+           ntypat           1
+              occ1     1.000000  0.000000
+              occ2     2.000000  0.000000
+              occ3     2.000000  0.000000
+              occ4     2.000000  0.000000
+              occ5     2.000000  0.000000
+              occ6     2.000000  0.000000
+              occ7     2.000000  0.000000
+              occ8     2.000000  0.000000
+              occ9     2.000000  0.000000
+              occ10    2.000000  2.000000  0.000000
+              occ11    2.000000  2.000000  0.000000
+              occ12    2.000000  2.000000  0.000000
+              occ13    2.000000  2.000000  0.000000
+              occ14    2.000000  2.000000  0.000000
+              occ15    2.000000  2.000000  0.000000
+           prtvol          -1
+            rprim1     1.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       8.7155742748E-02  9.9619469809E-01  0.0000000000E+00
+                       1.7364817767E-01  3.2813435772E-01  9.2853333471E-01
+            rprim2     1.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       8.7155742748E-02  9.9619469809E-01  0.0000000000E+00
+                       1.7364817767E-01  3.2813435772E-01  9.2853333471E-01
+            rprim3     1.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       6.1232339957E-17  1.0000000000E+00  0.0000000000E+00
+                       1.7364817767E-01  5.0599455709E-17  9.8480775301E-01
+            rprim4     1.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       6.1232339957E-17  1.0000000000E+00  0.0000000000E+00
+                       1.7364817767E-01  5.0599455709E-17  9.8480775301E-01
+            rprim5     3.5000000000E+00  4.0000000000E+00  0.0000000000E+00
+                      -3.5000000000E+00  4.0000000000E+00  0.0000000000E+00
+                       1.5628335990E+00  4.5539510139E-16  8.8632697771E+00
+            rprim6     1.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       6.1232339957E-17  1.0000000000E+00  0.0000000000E+00
+                       1.7364817767E-01  5.0599455709E-17  9.8480775301E-01
+            rprim7     1.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       6.1232339957E-17  1.0000000000E+00  0.0000000000E+00
+                       1.7364817767E-01  5.0599455709E-17  9.8480775301E-01
+            rprim8     3.5000000000E+00  4.0000000000E+00  0.0000000000E+00
+                      -3.5000000000E+00  4.0000000000E+00  0.0000000000E+00
+                       1.5628335990E+00  4.5539510139E-16  8.8632697771E+00
+            rprim9     3.5000000000E+00  4.0000000000E+00  0.0000000000E+00
+                      -3.5000000000E+00  4.0000000000E+00  0.0000000000E+00
+                       1.5628335990E+00  4.5539510139E-16  8.8632697771E+00
+            rprim10    1.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       6.1232339957E-17  1.0000000000E+00  0.0000000000E+00
+                       1.7364817767E-01  5.0599455709E-17  9.8480775301E-01
+            rprim11    1.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       6.1232339957E-17  1.0000000000E+00  0.0000000000E+00
+                       1.7364817767E-01  5.0599455709E-17  9.8480775301E-01
+            rprim12    3.5000000000E+00  4.0000000000E+00  0.0000000000E+00
+                      -3.5000000000E+00  4.0000000000E+00  0.0000000000E+00
+                       1.5628335990E+00  4.5539510139E-16  8.8632697771E+00
+            rprim13    1.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       6.1232339957E-17  1.0000000000E+00  0.0000000000E+00
+                       1.7364817767E-01  5.0599455709E-17  9.8480775301E-01
+            rprim14    1.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       6.1232339957E-17  1.0000000000E+00  0.0000000000E+00
+                       1.7364817767E-01  5.0599455709E-17  9.8480775301E-01
+            rprim15    3.5000000000E+00  4.0000000000E+00  0.0000000000E+00
+                      -3.5000000000E+00  4.0000000000E+00  0.0000000000E+00
+                       1.5628335990E+00  4.5539510139E-16  8.8632697771E+00
+          spgroup1          1
+          spgroup2          2
+          spgroup3          3
+          spgroup4          4
+          spgroup5          5
+          spgroup6          6
+          spgroup7          7
+          spgroup8          8
+          spgroup9          9
+          spgroup10        10
+          spgroup11        11
+          spgroup12        12
+          spgroup13        13
+          spgroup14        14
+          spgroup15        15
+           symafm1       1
+           symafm2       1    1
+           symafm3       1    1
+           symafm4       1    1
+           symafm5       1    1
+           symafm6       1    1
+           symafm7       1    1
+           symafm8       1    1
+           symafm9       1    1
+           symafm10      1    1    1    1
+           symafm11      1    1    1    1
+           symafm12      1    1    1    1
+           symafm13      1    1    1    1
+           symafm14      1    1    1    1
+           symafm15      1    1    1    1
+           symrel1     1  0  0   0  1  0   0  0  1
+           symrel2     1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+           symrel3     1  0  0   0  1  0   0  0  1      -1  0  0   0  1  0   0  0 -1
+           symrel4     1  0  0   0  1  0   0  0  1      -1  0  0   0  1  0   0  0 -1
+           symrel5     1  0  0   0  1  0   0  0  1       0  1  0   1  0  0   0  0 -1
+           symrel6     1  0  0   0  1  0   0  0  1       1  0  0   0 -1  0   0  0  1
+           symrel7     1  0  0   0  1  0   0  0  1       1  0  0   0 -1  0   0  0  1
+           symrel8     1  0  0   0  1  0   0  0  1       0 -1  0  -1  0  0   0  0  1
+           symrel9     1  0  0   0  1  0   0  0  1       0 -1  0  -1  0  0   0  0  1
+           symrel10    1  0  0   0  1  0   0  0  1      -1  0  0   0  1  0   0  0 -1
+                      -1  0  0   0 -1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+           symrel11    1  0  0   0  1  0   0  0  1      -1  0  0   0  1  0   0  0 -1
+                      -1  0  0   0 -1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+           symrel12    1  0  0   0  1  0   0  0  1       0  1  0   1  0  0   0  0 -1
+                      -1  0  0   0 -1  0   0  0 -1       0 -1  0  -1  0  0   0  0  1
+           symrel13    1  0  0   0  1  0   0  0  1      -1  0  0   0  1  0   0  0 -1
+                      -1  0  0   0 -1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+           symrel14    1  0  0   0  1  0   0  0  1      -1  0  0   0  1  0   0  0 -1
+                      -1  0  0   0 -1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+           symrel15    1  0  0   0  1  0   0  0  1       0  1  0   1  0  0   0  0 -1
+                      -1  0  0   0 -1  0   0  0 -1       0 -1  0  -1  0  0   0  0  1
+            tnons1     0.0000000  0.0000000  0.0000000
+            tnons2     0.0000000  0.0000000  0.0000000    -0.0000000 -0.0000000 -0.0000000
+            tnons3     0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons4     0.0000000  0.0000000  0.0000000     0.0000000  0.5000000  0.0000000
+            tnons5     0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons6     0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons7     0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
+            tnons8     0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons9     0.0000000  0.0000000  0.0000000    -0.0000000 -0.0000000  0.5000000
+            tnons10    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons11    0.0000000  0.0000000  0.0000000     0.0000000  0.5000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.5000000  0.0000000
+            tnons12    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+            tnons13    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.5000000
+            tnons14    0.0000000  0.0000000  0.0000000     0.0000000  0.5000000  0.5000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.5000000  0.5000000
+            tnons15    0.0000000  0.0000000  0.0000000    -0.0000000 -0.0000000  0.5000000
+                       0.0000000  0.0000000  0.0000000    -0.0000000 -0.0000000  0.5000000
+           toldfe      1.00000000E-06 Hartree
+            typat1     1
+            typat2     1  1
+            typat3     1  1
+            typat4     1  1
+            typat5     1  1
+            typat6     1  1
+            typat7     1  1
+            typat8     1  1
+            typat9     1  1
+            typat10    1  1  1  1
+            typat11    1  1  1  1
+            typat12    1  1  1  1
+            typat13    1  1  1  1
+            typat14    1  1  1  1
+            typat15    1  1  1  1
+           xangst1     7.7603762877E-01  8.0450104669E-01  4.8644509137E-01
+           xangst2     7.7603762877E-01  8.0450104669E-01  4.8644509137E-01
+                       4.1241854141E+00  4.9755782009E+00  3.9357830120E+00
+           xangst3     7.2069262958E-01  6.3501265031E-01  5.1592643956E-01
+                       3.8105637520E+00  6.3501265031E-01  4.1743139201E+00
+           xangst4     7.2069262958E-01  6.3501265031E-01  5.1592643956E-01
+                       3.8105637520E+00  2.7517214847E+00  4.1743139201E+00
+           xangst5    -1.1314276005E+00  2.7517214847E+00  5.1592643956E-01
+                       1.9584435219E+00  2.7517214847E+00  4.1743139201E+00
+           xangst6     7.2069262958E-01  6.3501265031E-01  5.1592643956E-01
+                       7.2069262958E-01  3.5984050184E+00  5.1592643956E-01
+           xangst7     7.2069262958E-01  6.3501265031E-01  5.1592643956E-01
+                       1.1342005903E+00  3.5984050184E+00  2.8610466194E+00
+           xangst8    -1.1314276005E+00  2.7517214847E+00  5.1592643956E-01
+                      -1.1314276005E+00  1.4816961841E+00  5.1592643956E-01
+           xangst9    -1.1314276005E+00  2.7517214847E+00  5.1592643956E-01
+                      -7.1791963978E-01  1.4816961841E+00  2.8610466194E+00
+           xangst10    7.2069262958E-01  6.3501265031E-01  5.1592643956E-01
+                       3.8105637520E+00  6.3501265031E-01  4.1743139201E+00
+                       3.8105637520E+00  3.5984050184E+00  4.1743139201E+00
+                       7.2069262958E-01  3.5984050184E+00  5.1592643956E-01
+           xangst11    7.2069262958E-01  6.3501265031E-01  5.1592643956E-01
+                       3.8105637520E+00  2.7517214847E+00  4.1743139201E+00
+                       3.8105637520E+00  3.5984050184E+00  4.1743139201E+00
+                       7.2069262958E-01  1.4816961841E+00  5.1592643956E-01
+           xangst12   -1.1314276005E+00  2.7517214847E+00  5.1592643956E-01
+                       1.9584435219E+00  2.7517214847E+00  4.1743139201E+00
+                       1.9584435219E+00  1.4816961841E+00  4.1743139201E+00
+                      -1.1314276005E+00  1.4816961841E+00  5.1592643956E-01
+           xangst13    7.2069262958E-01  6.3501265031E-01  5.1592643956E-01
+                       3.3970557913E+00  6.3501265031E-01  1.8291937403E+00
+                       3.8105637520E+00  3.5984050184E+00  4.1743139201E+00
+                       1.1342005903E+00  3.5984050184E+00  2.8610466194E+00
+           xangst14    7.2069262958E-01  6.3501265031E-01  5.1592643956E-01
+                       3.3970557913E+00  2.7517214847E+00  1.8291937403E+00
+                       3.8105637520E+00  3.5984050184E+00  4.1743139201E+00
+                       1.1342005903E+00  1.4816961841E+00  2.8610466194E+00
+           xangst15   -1.1314276005E+00  2.7517214847E+00  5.1592643956E-01
+                       1.5449355612E+00  2.7517214847E+00  1.8291937403E+00
+                       1.9584435219E+00  1.4816961841E+00  4.1743139201E+00
+                      -7.1791963978E-01  1.4816961841E+00  2.8610466194E+00
+            xcart1     1.4664985872E+00  1.5202866519E+00  9.1924800137E-01
+            xcart2     1.4664985872E+00  1.5202866519E+00  9.1924800137E-01
+                       7.7935809538E+00  9.4024801524E+00  7.4375520111E+00
+            xcart3     1.3619116959E+00  1.2000000000E+00  9.7495967548E-01
+                       7.2009219031E+00  1.2000000000E+00  7.8883101016E+00
+            xcart4     1.3619116959E+00  1.2000000000E+00  9.7495967548E-01
+                       7.2009219031E+00  5.2000000000E+00  7.8883101016E+00
+            xcart5    -2.1380883041E+00  5.2000000000E+00  9.7495967548E-01
+                       3.7009219031E+00  5.2000000000E+00  7.8883101016E+00
+            xcart6     1.3619116959E+00  1.2000000000E+00  9.7495967548E-01
+                       1.3619116959E+00  6.8000000000E+00  9.7495967548E-01
+            xcart7     1.3619116959E+00  1.2000000000E+00  9.7495967548E-01
+                       2.1433284954E+00  6.8000000000E+00  5.4065945640E+00
+            xcart8    -2.1380883041E+00  5.2000000000E+00  9.7495967548E-01
+                      -2.1380883041E+00  2.8000000000E+00  9.7495967548E-01
+            xcart9    -2.1380883041E+00  5.2000000000E+00  9.7495967548E-01
+                      -1.3566715046E+00  2.8000000000E+00  5.4065945640E+00
+            xcart10    1.3619116959E+00  1.2000000000E+00  9.7495967548E-01
+                       7.2009219031E+00  1.2000000000E+00  7.8883101016E+00
+                       7.2009219031E+00  6.8000000000E+00  7.8883101016E+00
+                       1.3619116959E+00  6.8000000000E+00  9.7495967548E-01
+            xcart11    1.3619116959E+00  1.2000000000E+00  9.7495967548E-01
+                       7.2009219031E+00  5.2000000000E+00  7.8883101016E+00
+                       7.2009219031E+00  6.8000000000E+00  7.8883101016E+00
+                       1.3619116959E+00  2.8000000000E+00  9.7495967548E-01
+            xcart12   -2.1380883041E+00  5.2000000000E+00  9.7495967548E-01
+                       3.7009219031E+00  5.2000000000E+00  7.8883101016E+00
+                       3.7009219031E+00  2.8000000000E+00  7.8883101016E+00
+                      -2.1380883041E+00  2.8000000000E+00  9.7495967548E-01
+            xcart13    1.3619116959E+00  1.2000000000E+00  9.7495967548E-01
+                       6.4195051036E+00  1.2000000000E+00  3.4566752131E+00
+                       7.2009219031E+00  6.8000000000E+00  7.8883101016E+00
+                       2.1433284954E+00  6.8000000000E+00  5.4065945640E+00
+            xcart14    1.3619116959E+00  1.2000000000E+00  9.7495967548E-01
+                       6.4195051036E+00  5.2000000000E+00  3.4566752131E+00
+                       7.2009219031E+00  6.8000000000E+00  7.8883101016E+00
+                       2.1433284954E+00  2.8000000000E+00  5.4065945640E+00
+            xcart15   -2.1380883041E+00  5.2000000000E+00  9.7495967548E-01
+                       2.9195051036E+00  5.2000000000E+00  3.4566752131E+00
+                       3.7009219031E+00  2.8000000000E+00  7.8883101016E+00
+                      -1.3566715046E+00  2.8000000000E+00  5.4065945640E+00
+             xred1     1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
+             xred2     1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
+                       8.3000000000E-01  8.5000000000E-01  8.9000000000E-01
+             xred3     1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
+                       8.3000000000E-01  1.5000000000E-01  8.9000000000E-01
+             xred4     1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
+                       8.3000000000E-01  6.5000000000E-01  8.9000000000E-01
+             xred5     3.2000000000E-01  9.8000000000E-01  1.1000000000E-01
+                       9.8000000000E-01  3.2000000000E-01  8.9000000000E-01
+             xred6     1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
+                       1.7000000000E-01  8.5000000000E-01  1.1000000000E-01
+             xred7     1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
+                       1.7000000000E-01  8.5000000000E-01  6.1000000000E-01
+             xred8     3.2000000000E-01  9.8000000000E-01  1.1000000000E-01
+                       2.0000000000E-02  6.8000000000E-01  1.1000000000E-01
+             xred9     3.2000000000E-01  9.8000000000E-01  1.1000000000E-01
+                       2.0000000000E-02  6.8000000000E-01  6.1000000000E-01
+             xred10    1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
+                       8.3000000000E-01  1.5000000000E-01  8.9000000000E-01
+                       8.3000000000E-01  8.5000000000E-01  8.9000000000E-01
+                       1.7000000000E-01  8.5000000000E-01  1.1000000000E-01
+             xred11    1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
+                       8.3000000000E-01  6.5000000000E-01  8.9000000000E-01
+                       8.3000000000E-01  8.5000000000E-01  8.9000000000E-01
+                       1.7000000000E-01  3.5000000000E-01  1.1000000000E-01
+             xred12    3.2000000000E-01  9.8000000000E-01  1.1000000000E-01
+                       9.8000000000E-01  3.2000000000E-01  8.9000000000E-01
+                       6.8000000000E-01  2.0000000000E-02  8.9000000000E-01
+                       2.0000000000E-02  6.8000000000E-01  1.1000000000E-01
+             xred13    1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
+                       8.3000000000E-01  1.5000000000E-01  3.9000000000E-01
+                       8.3000000000E-01  8.5000000000E-01  8.9000000000E-01
+                       1.7000000000E-01  8.5000000000E-01  6.1000000000E-01
+             xred14    1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
+                       8.3000000000E-01  6.5000000000E-01  3.9000000000E-01
+                       8.3000000000E-01  8.5000000000E-01  8.9000000000E-01
+                       1.7000000000E-01  3.5000000000E-01  6.1000000000E-01
+             xred15    3.2000000000E-01  9.8000000000E-01  1.1000000000E-01
+                       9.8000000000E-01  3.2000000000E-01  3.9000000000E-01
+                       6.8000000000E-01  2.0000000000E-02  8.9000000000E-01
+                       2.0000000000E-02  6.8000000000E-01  6.1000000000E-01
+            znucl        1.00000
+
+================================================================================
+
+ chkinp: Checking input parameters for consistency, jdtset=   1.
+
+ chkinp: Checking input parameters for consistency, jdtset=   2.
+
+ chkinp: Checking input parameters for consistency, jdtset=   3.
+
+ chkinp: Checking input parameters for consistency, jdtset=   4.
+
+ chkinp: Checking input parameters for consistency, jdtset=   5.
+
+ chkinp: Checking input parameters for consistency, jdtset=   6.
+
+ chkinp: Checking input parameters for consistency, jdtset=   7.
+
+ chkinp: Checking input parameters for consistency, jdtset=   8.
+
+ chkinp: Checking input parameters for consistency, jdtset=   9.
+
+ chkinp: Checking input parameters for consistency, jdtset=  10.
+
+ chkinp: Checking input parameters for consistency, jdtset=  11.
+
+ chkinp: Checking input parameters for consistency, jdtset=  12.
+
+ chkinp: Checking input parameters for consistency, jdtset=  13.
+
+ chkinp: Checking input parameters for consistency, jdtset=  14.
+
+ chkinp: Checking input parameters for consistency, jdtset=  15.
+
+ abinit : before driver, prtvol=-1, debugging mode => will skip driver
+
+== END DATASET(S) ==============================================================
+================================================================================
+
+ abinit : before driver, prtvol=-1, debugging mode => will skip outvars
+
+
+- Timing analysis has been suppressed with timopt=0
+
+
+
+ abinit : before driver, prtvol=-1, debugging mode => will skip acknowledgments
+-
+- Proc.   0 individual time (sec): cpu=          1.7  wall=          1.7
+
+================================================================================
+
+ Calculation completed.
+.Delivered   2 WARNINGs and  16 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.7  wall=          1.7

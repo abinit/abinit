@@ -1,0 +1,243 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2003 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors .
+</h5>
+
+<pre>
+Many thanks to the following contributors to the ABINIT project
+between February 2003 and May 2003 :
+J.-M. Beuken, F. Bruneval, M. Boulet, R. Caracas, F. Dortu, D. Hamann,
+Ph. Ghosez, F. Jollet, N. Marzari, T. Maxisch, M. Mikami, F. Nastos,
+A. Oganov, V. Olevano, W. Pichl, G. Pourtois,
+J. Raynolds, V. Recoules, G.-M. Rignanese,
+A. Roy, L. Sindic, M. Torrent, B. Van Renterghem, M. Veithen, M. Verstraete,
+E. Willighagen
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 4.1, released on May 15, 2003.
+
+Changes with respect to version 4.0 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Most noticeable changes in the package (for developers)
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS
+
+A1. The name of the input variables "type" and "ntype" have been changed
+    to "typat" and "ntypat" (for TYPes of AToms). For the time being,
+    the old input variables are still recognized.
+    This was needed, because "type" is a FORTRAN90 reserved word,
+    also used in many different contexts, so that the old name
+    was causing some problems.
+    See the list of abinit input variables.
+
+A2. The header of the wavefunction, density and potential
+    files have been changed, and contain now the additional information concerning
+    the perturbation (pertcase) and the q-wavevector (qptn).
+    See the description of the new header in section 6.4 of abinis_help.html .
+    The files containing the old header should still be read
+    correctly (so, there is backward compatibility, as usual).
+
+A3. The header of the (formatted) DOS file includes now the Fermi energy.
+    Some people might have to update automatic script using such files (M. Verstraete).
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B1. The PAW part of ABINIT is available for BETA TESTING (M. Torrent and F. Jollet).
+    The context in which it is expected to work is as follows :
+    the computation of electronic energies, charge density and
+    total energy in self-consistent calculations, for nspinor=1,
+    spin-unpolarized or spin-polarized (nsppol=1 or nsppol=2),
+    sequential as well as parallel.
+    See the test cases Test_v4#4, 5 and 6, as well as the new
+    input variables pawecutdg, pawlcutd, pawmqgridg, pawnphi, pawntheta .
+    NOT YET FOR BETA TESTING : forces, stresses, RF, GW, nonlinear responses, TDDFT,
+    or utilities like cut3d, conducti ...
+    Two pseudopotentials are available in ~abinit/tests/Psps_for_tests, while
+    for other pseudos, contact Francois Jollet or Marc Torrent.
+
+B2. The FAQ section of the Web site has been considerably
+    improved and expanded by Masayoshi Mikami,
+    see http://www.abinit.org/FAQ.html
+
+B3. Improvements of the GW computations :
+    it is now possible to start a GW computation without
+    first diagonalizing the full Hamiltonian matrix.
+    Use kssform=3 . Also, the problems with the inversion
+    symmetry and the non-symmorphic symmetries have been solved.
+    (Valerio Olevano and Fabien Bruneval)
+
+B4. The MRGDDB and ANADDB utilities are now able to
+    treat the Derivative Data Bases containing
+    the 3rd order derivatives of the energy, generated using
+    the 2n+1 theorem of perturbation theory in ABINIT.
+    Thus, ANADDB can be used to derive the
+    for electro-optic coefficients, including the displacement
+    of atoms, and also deliver the derivative of the
+    dielectric tensor with respect to atomic displacements,
+    leading to Raman cross-sections.
+    Example : Test_v4 #40,#41 and #42 .
+    (M. Veithen, +some help from Ph. Ghosez and XG)
+
+__________________________________________________________________
+
+C. Most noticeable changes for the developers
+
+C1. The new directory Src_2spacepar has been created.
+    This directory contains level-2 subroutines used
+    to treat operations in reciprocal or real space that
+    need to be parallelized in these spaces.
+    These are mostly basic numerical routines, in the
+    spirit of BLAS, but adapted to wavefunctions or
+    density and potentials, in which one has to take
+    into account, on one side, the nspinor, isrtwfk, nspden
+    or cplex characteristics, and, on the other side,
+    the specific spread of the components in G- or R- space
+    for parallelisation.
+    Different routines have been created, to be called when
+    operations involving talking between different processors
+    have to be performed. Many routines in the remaining of the
+    code are already using them. More routines should be written.
+
+C2. The new directory Src_1contract has been created.
+    This directory contains level-1 subroutines used
+    to favour the re-use of routines through the so-called
+    "design-by-contract" idea. These subroutines can be called
+    at the beginning of other routines, to check the validity of their
+    arguments. The corresponding section is left by the CPP preprocessor
+    only if it is called with the -DCONTRACT option.
+    At present, only routines from the Src_2spacepar
+    use that technique.
+    See ~abinit/infos/makefile_macros_help , as well as
+    ~abinit/Mach*/*P6*/makefile_macros.PGI_dummy .
+
+C3. Powerful options of the script "abirules" (written by L. Sindic),
+    have been used on all the *.f files. So, many declarations
+    in most of the *.f files have been modified.
+
+    Reminder : the goal of this script is the automatic modification
+    of the Fortran source, in view of the fulfilment
+    of the ABINIT coding rules. In particular,
+    this script can automatically reorder (using alphabetic classification)
+    the variables in declaration lines, or even accross declaration lines.
+    This means that the developer should not worry too much now about
+    the ordering of input variable declarations, it will be done automatically.
+    For those interested, the command to be executed to apply abirules is
+    make abirules
+    from the main directory. The abirules script is in ~abinit/abirules .
+
+C4. All the automatic tests can now be used in parallel.
+    The user has to define a "COMMAND_PAR" line
+    (the adequate command to run abinip) in the makefile_macros
+    (see an example in Mach*/*P6*/makefile_macros.PGI_dummy),
+    and then issue "make tests_paral" . The Makefile, makemake,
+    and Run.pl files, in the
+    Test_fast, Test_v1, Test_v2, Test_v3, Test_v3 and Tutorial
+    directories have been modified such as to recognize a fake
+    machine name ("paral"), and then to drive the automatic
+    tests using the "COMMAND_PAR" definition.
+
+C5. Read A1.
+    Then, not only the name of the input variables "type" and "ntype"
+    have been changed
+    to "typat" and "ntypat" (for TYPes of AToms) inside the code,
+    but also many other variables, that are linked to "type", were changed,
+    e.g. itype and mtype have been changed to itypat and mtypat.
+
+C6. Read A2, about the header of the wavefunction, density and potential
+    files that have been changed.
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D1. The 'Run' perl scripts for the Test_fast, Test_v*, Test_cpu ,
+   as well as the 'serieX' perl script have been updated, for
+   execution under Windows 9x (L. Sindic)
+
+D2. ABINIT now checks whether the input dilatmx is sufficient
+   for the tentative change of primitive cells. Previously,
+   no check was made, and a large increase of cell volume
+   could crash the code.
+
+D3. The 'hiding' of the MPI calls present in most parallel routines
+   has begun : the goal is to allow MPI-independent writing of code,
+   still executing correctly in parallel. The MPI calls are
+   encapsulated, presently in the defs_xderive and def_xfuncmpi
+   modules. (M. Boulet and A. Roy).
+
+D4. Possibility to compile "quickly" ABINIT, see the
+   keywords quick_xxx or quickp_xxx when you issue
+   make help_dev
+   (M. Torrent).
+
+D5. The utility conducti has been improved by V. Recoules :
+   use of Gaussian smearing to obtain smoother curves.
+
+D6. The utility band2eps has been contributed by F. Dortu
+   and M. Veithen. This utility allows to draw phonon dispersion
+   curves automatically, in a file written in Encapsulated PostScript (eps).
+   Moreover, a color code allows to emphasize the contribution of individual
+   atoms to the corresponding eigenvector (at most three types of atoms).
+   See Test_v4#50-#51, and the ~abinit/Infos/band2eps.help file .
+
+D7. The angular momentum decomposition of the
+   electronic Density-Of-States using
+   the tetrahedron method is in progress (M. Verstraete).
+
+D8. Response to strains have been coded by D. Hamann,
+   and transferred recently to v4.0. Might be present in v4.2 .
+
+D9. The (fake) name of the machine chosen to run the automatic tests
+   from the top directory (e.g. make tests_allseq) is now "test",
+   and no more "t3e".
+
+D10. The Bader (AIM) code has been modified, to secure better
+   portability accross platforms, by eliminating problems
+   with the order of critical points. The automatic test
+   analysis has also been tuned.
+
+D11. If the input value of ixc is not provided, ABINIT will examine
+   the pseudopotentials, and if all agree on one XC approximation,
+   the corresponding ixc will be used.
+   See the description of the input value ixc.
+
+D12. Switch from CML1 to CML2, by E. Willighagen
+
+D13. New makefile_macros :
+   Mach*/HP/makefile_macros.imec (from GPourtois)
+   Mach*/SGI/makefile_macros_green (from AOganov)
+   Mach*/DEC/makefile_macros.janus (from TMaxisch)
+   Mach*/IBM/makefile_macros.Raynolds (from J. Raynolds)
+   Mach*/P6/makefile_macros.PGI_dummy (with B. van Renterghem)
+   Mach*/P6/makefile_macros.IFC_dummy (with B. van Renterghem)
+   Mach*/P6/makefile_macros.IFC_cernunnos (from WPichl)
+
+D14. Other contributions (mostly debugging) by L. Sindic, N. Marzari,
+   F. Nastos, W. Pichl, L. Pizzagalli, A. Oganov, G.-M. RIgnanese, R. Caracas, M. Verstra
+
+</pre>

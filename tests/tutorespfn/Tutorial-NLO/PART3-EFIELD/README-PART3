@@ -1,0 +1,15 @@
+NLO Tutorial
+
+PART3-EFIELD 
+
+Finite electric field calculations in order
+to get various quantities from field evolution
+of forces, polarization, stress
+
+Two steps :
+
+1. alas_clampedion.in
+Finite electric field calculation at fixed ionic positions
+
+2. alas_relaxedion.in
+Finite electric field calculation at relaxed atomic positions

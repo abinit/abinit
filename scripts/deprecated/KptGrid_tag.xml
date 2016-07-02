@@ -1,0 +1,55 @@
+ <!--1--><SECTION sectiontitle='KptGrid' tag='1'>
+ <!--2--><CHOICE instruction='K point grid options' tag='2'>
+ <!--3--><DECISION description='Specify directly the points of the grid' tag='3'>
+ <!--4--><DIRECTENTRY  variablename='kptopt' variablevalue='0' tag='4'/>
+ <!--5--><KEYBOARDENTRY instruction='Number of points in the grid' variablename='nkpt' textlen='1' tag='5'/>
+ <!--6--><KEYBOARDENTRY instruction='Reduced coordinates in reciproqual space of the k points' variablename='kpt' textlen='getvalue nkpt' tag='6'/>
+ <!--7--><KEYBOARDENTRY instruction='Normalizing denominator for each k point' variablename='kptnrm' textlen='1' tag='7'/>
+         </DECISION>
+ <!--8--><DECISION description='Rely on the program to generate a Monkhorst-Pack grid' tag='8'>
+ <!--9--><MOUSEENTRY instruction='Symmetries to generate k points in the IRBZ' tag='9'>
+<!--10--><OPTION description='Take fully into account the symmetry' variablename='kptopt' variablevalue='1' tag='10'/>
+<!--11--><OPTION description='Take into account only time-reversal symmetry' variablename='kptopt' variablevalue='2' tag='11'/>
+<!--12--><OPTION description='Do not take into account any symmetry' variablename='kptopt' variablevalue='3' tag='12'/>
+         </MOUSEENTRY>
+<!--13--><CHOICE instruction='Define k points in:' tag='13'>
+<!--14--><DECISION description='Real space with a super-lattice' tag='14'>
+<!--15--><KEYBOARDENTRY instruction='Define the three vectors in reduced coordinates (real space)' variablename='kptrlatt' textlen='3' tag='15'/>
+         </DECISION>
+<!--16--><DECISION description='Reciproqual space' tag='16'>
+<!--17--><KEYBOARDENTRY instruction='Vector containing the number of points for each primitive axis' variablename='ngkpt' textlen='1' tag='17'/>
+         </DECISION>
+         </CHOICE>
+<!--18--><CHOICE instruction='How do you want to define the grid shifts' tag='18'>
+<!--19--><DECISION description='Specify the shifts manually' tag='19'>
+<!--20--><KEYBOARDENTRY instruction='Number of shifts to be made' variablename='nshiftk' textlen='1' tag='20'/>
+<!--21--><KEYBOARDENTRY instruction='Define the vectors of each shift(reduced )' variablename='shiftk' textlen='getvalue nshiftk' tag='21'/>
+         </DECISION>
+<!--22--><DECISION description='Choose the typically efficient shifts for Bravais Lattices' tag='22'>
+<!--23--><CHOICE instruction='Bravais Lattices' tag='23'>
+<!--24--><DECISION description='FCC lattice' tag='24'>
+<!--25--><DIRECTENTRY variablename='nshiftk' variablevalue='4' tag='25'/>
+<!--26--><DIRECTENTRY variablename='shiftk' variablevalue='0.5 0.5 0.5' tag='26'/>
+<!--27--><DIRECTENTRY variablename='      ' variablevalue='0.5 0.0 0.0' tag='27'/>
+<!--28--><DIRECTENTRY variablename='      ' variablevalue='0.0 0.0 0.5' tag='28'/>
+         </DECISION>
+<!--29--><DECISION description='BCC lattice' tag='29'>
+<!--30--><DIRECTENTRY variablename='nshiftk' variablevalue='2' tag='30'/>
+<!--31--><DIRECTENTRY variablename='shiftk' variablevalue='0.25 0.25 0.25' tag='31'/>
+<!--32--><DIRECTENTRY variablename='      ' variablevalue='-0.25 -0.25 -0.25' tag='32'/>
+         </DECISION>
+<!--33--><DECISION description='Hexagonal lattice' tag='33'>
+<!--34--><DIRECTENTRY variablename='nshiftk' variablevalue='1' tag='34'/>
+<!--35--><DIRECTENTRY variablename='shiftk' variablevalue='0.0 0.0 0.5' tag='35'/>
+         </DECISION>
+         </CHOICE>
+         </DECISION>
+         </CHOICE>
+         </DECISION>
+<!--36--><DECISION description='Generate points on segments for a non-consistent calculation (Band structure)' tag='36'>
+<!--37--><KEYBOARDENTRY instruction='Enter the negative of the number of segments (-3 for 3 segments)' variablename='kptopt' textlen='1' tag='37'/>
+<!--38--><KEYBOARDENTRY instruction='Enter the coordinates of the points boundaries of the segments' variablename='kptbounds' textlen='getvalue kptopt' tag='38'/>
+<!--39--><KEYBOARDENTRY instruction='Enter the number of divisions in the segments (remember #points=#divisions + 1)' variablename='ndivk' textlen='getvalue kptopt' tag='39'/>
+         </DECISION>
+         </CHOICE>
+         </SECTION>

@@ -1,0 +1,582 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_gemm_nonlop
+!! NAME
+!! m_gemm_nonlop
+!!
+!! FUNCTION
+!!  This module provides functions to compute the nonlocal operator by means of the BLAS GEMM
+!!  routine. By treating ndat simultaneous wavefunctions, it is able to exploit BLAS3 routines,
+!!  which leads to excellent CPU efficiency and OpenMP scalability.
+!!
+!! COPYRIGHT
+!! Copyright (C) 2014-2016 ABINIT group (AL)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+! TODO list :
+! Don't allocate the full nkpt structures, only those that are treated by this proc: use same init as in m_bandfft_kpt
+! support more options (forces & stresses mostly)
+! Support RF/other computations (only GS right now)
+! handle the case where nloalg(2) < 0, ie no precomputation of ph3d
+! more systematic checking of the workflow (right now, only works if init/make/gemm/destroy, no multiple makes, etc)
+! Avoid allocating the complex matrix when istwfk > 1
+! Merge with chebfi's invovl
+
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+! Commented for now because it causes bugs on Shiva's OpenBLAS (?!)
+! #if defined HAVE_LINALG_GEMM3M
+! #define ZGEMM ZGEMM3M
+! #endif
+
+module m_gemm_nonlop
+
+ use m_profiling_abi
+
+ use defs_basis
+ use defs_abitypes
+ use m_errors
+ use m_xmpi
+
+ implicit none
+ private
+
+ ! Use these routines in order : first call init, then call make_gemm_nonlop for each k point,
+ ! then call gemm_nonlop to do the actual computation, and call destroy when done. See gstate and vtorho.
+ public :: init_gemm_nonlop
+ public :: make_gemm_nonlop
+ public :: gemm_nonlop
+ public :: destroy_gemm_nonlop
+!!***
+
+!!****t* m_invovl/gemm_nonlop_type
+!! NAME
+!! gemm_nonlop_type
+!!
+!! FUNCTION
+!! Contains information needed to apply the nonlocal operator
+!!
+!! SOURCE
+ type,public :: gemm_nonlop_type
+
+   integer :: nprojs
+
+   real(dp), allocatable :: projs(:, :, :)
+   ! (2, npw, nprojs)
+   real(dp), allocatable :: projs_r(:, :, :)
+   ! (1, npw, nprojs)
+   real(dp), allocatable :: projs_i(:, :, :)
+   ! (1, npw, nprojs)
+ end type gemm_nonlop_type
+!!***
+
+ type(gemm_nonlop_type), public, allocatable :: gemm_nonlop_kpt(:)
+ !(nkpt)
+
+ integer, public :: gemm_nonlop_ikpt_this_proc_being_treated
+ !! This is oh so very crude, but I can't find any other way to do it without passing ikpt deep down to nonlop
+ logical, public :: gemm_nonlop_use_gemm = .false.
+ ! Public variable indicating whether we should call gemm_nonlop or fall back to the usual nonlop. Set to false
+ ! in order not to interfere with non-GS calls to nonlop.
+
+contains
+
+!!****f* m_invovl/init_gemm_nonlop
+!! NAME
+!! init_gemm_nonlop
+!!
+!! FUNCTION
+!! Initalization of the gemm_nonlop_kpt array
+!!
+!! INPUTS
+!! nkpt= number of k-points
+!!
+!! PARENTS
+!!      gstate
+!!
+!! CHILDREN
+!!      dgemm,opernlc_ylm,xmpi_sum,zgemm
+!!
+!! SOURCE
+ subroutine init_gemm_nonlop(nkpt)
+  use m_profiling_abi
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'init_gemm_nonlop'
+!End of the abilint section
+
+  integer,intent(in) :: nkpt
+  integer :: ikpt
+  
+! *************************************************************************
+  
+  ! TODO only allocate the number of kpt treated by this proc
+  ABI_DATATYPE_ALLOCATE(gemm_nonlop_kpt, (nkpt))
+  do ikpt=1,nkpt
+    gemm_nonlop_kpt(ikpt)%nprojs = -1
+  end do
+
+ end subroutine init_gemm_nonlop
+!!***
+
+!!****f* m_invovl/destroy_gemm_nonlop
+!! NAME
+!! destroy_gemm_nonlop
+!!
+!! FUNCTION
+!! Initalization of the gemm_nonlop_kpt array
+!!
+!! INPUTS
+!! nkpt= number of k-points
+!!
+!! PARENTS
+!!      gstate
+!!
+!! CHILDREN
+!!      dgemm,opernlc_ylm,xmpi_sum,zgemm
+!!
+!! SOURCE
+ subroutine destroy_gemm_nonlop(nkpt)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'destroy_gemm_nonlop'
+!End of the abilint section
+
+  implicit none
+  
+  integer,intent(in) :: nkpt
+  integer :: ikpt
+
+! *************************************************************************
+  
+  ! TODO add cycling if kpt parallelism
+  do ikpt = 1,nkpt
+    if(gemm_nonlop_kpt(ikpt)%nprojs /= -1) then
+      ABI_DEALLOCATE(gemm_nonlop_kpt(ikpt)%projs)
+      ABI_DEALLOCATE(gemm_nonlop_kpt(ikpt)%projs_r)
+      ABI_DEALLOCATE(gemm_nonlop_kpt(ikpt)%projs_i)
+      gemm_nonlop_kpt(ikpt)%nprojs = -1
+    end if
+  end do
+
+  ABI_DATATYPE_DEALLOCATE(gemm_nonlop_kpt)
+
+ end subroutine destroy_gemm_nonlop
+!!***
+
+
+!!****f* m_invovl/make_gemm_nonlop
+!! NAME
+!! make_gemm_nonlop
+!!
+!! FUNCTION
+!! Build the gemm_nonlop array
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!      energy,vtorho
+!!
+!! CHILDREN
+!!      dgemm,opernlc_ylm,xmpi_sum,zgemm
+!!
+!! SOURCE
+ subroutine make_gemm_nonlop(ikpt, ham)
+  use defs_basis
+  use m_hamiltonian, only : gs_hamiltonian_type
+  use m_profiling_abi
+  use defs_abitypes
+  use m_xmpi
+  use m_abi_linalg
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'make_gemm_nonlop'
+!End of the abilint section
+
+  implicit none
+
+  type(gs_hamiltonian_type),intent(inout) :: ham
+
+  integer :: nprojs
+
+  real(dp) :: atom_projs(2, ham%npw_fft_k, ham%lmnmax)
+  real(dp) :: temp(ham%npw_fft_k)
+
+  integer :: itypat, ilmn, nlmn, npw, ia, iaph3d, shift
+  integer :: il, ipw
+  logical :: parity
+  integer :: ikpt
+
+! *************************************************************************
+  
+  iaph3d = 1
+  npw = ham%npw_fft_k
+
+  if(gemm_nonlop_kpt(ikpt)%nprojs /= -1) then
+    ! We have been here before, cleanup before remaking
+    ABI_DEALLOCATE(gemm_nonlop_kpt(ikpt)%projs)
+    ABI_DEALLOCATE(gemm_nonlop_kpt(ikpt)%projs_r)
+    ABI_DEALLOCATE(gemm_nonlop_kpt(ikpt)%projs_i)
+    gemm_nonlop_kpt(ikpt)%nprojs = -1
+  end if
+
+  ! build nprojs
+  nprojs = 0
+  do itypat=1,ham%ntypat
+    nprojs = nprojs + count(ham%indlmn(3,:,itypat)>0)*ham%nattyp(itypat)
+  end do
+
+  gemm_nonlop_kpt(ikpt)%nprojs = nprojs
+
+  ABI_ALLOCATE(gemm_nonlop_kpt(ikpt)%projs, (2, npw, gemm_nonlop_kpt(ikpt)%nprojs))
+  gemm_nonlop_kpt(ikpt)%projs = zero
+  if(ham%istwf_k > 1) then
+    ! We still allocate the complex matrix, in case we need it for spinors. TODO could be avoided
+    ABI_ALLOCATE(gemm_nonlop_kpt(ikpt)%projs_r, (1, npw, gemm_nonlop_kpt(ikpt)%nprojs))
+    ABI_ALLOCATE(gemm_nonlop_kpt(ikpt)%projs_i, (1, npw, gemm_nonlop_kpt(ikpt)%nprojs))
+    gemm_nonlop_kpt(ikpt)%projs_r = zero
+    gemm_nonlop_kpt(ikpt)%projs_i = zero
+  else
+    ! Still allocate so we can deallocate it in destroy_gemm_nonlop
+    ABI_ALLOCATE(gemm_nonlop_kpt(ikpt)%projs_r, (1, 1, 1))
+    ABI_ALLOCATE(gemm_nonlop_kpt(ikpt)%projs_i, (1, 1, 1))
+  end if
+
+  shift = 0
+  do itypat = 1, ham%ntypat
+    nlmn = count(ham%indlmn(3,:,itypat)>0)
+
+    do ia = 1, ham%nattyp(itypat)
+
+      !! build atom_projs, from opernlb
+      !! P = 4pi/sqrt(ucvol)* conj(diag(ph3d)) * ffnl * diag(parity), with parity = (-i)^l
+      atom_projs(:,:,:) = 0
+
+      ! start from 4pi/sqrt(ucvol)*ffnl
+      ! atom_projs(1, :, 1:nlmn) = four_pi/sqrt(ham%ucvol) * ham%ffnl_k(:, 1, 1:nlmn)
+      ! TODO vectorize (DCOPY with stride)
+      do ipw=1, npw
+        atom_projs(1,ipw, 1:nlmn) = four_pi/sqrt(ham%ucvol) * ham%ffnl_k(ipw, 1, 1:nlmn, itypat)
+      end do
+
+      ! multiply by (-i)^l
+      do ilmn=1,nlmn
+        il=mod(ham%indlmn(1,ilmn, itypat),4);
+        parity=(mod(il,2)==0)
+        if (il>1) then
+          ! multiply by -1
+          atom_projs(:,:,ilmn) = -atom_projs(:,:,ilmn)
+        end if
+        if(.not. parity) then
+          ! multiply by -i
+          temp = atom_projs(2,:,ilmn)
+          atom_projs(2,:,ilmn) = -atom_projs(1,:,ilmn)
+          atom_projs(1,:,ilmn) =  temp
+        end if
+      end do
+
+      ! multiply by conj(ph3d)
+      do ilmn=1,nlmn
+        temp = atom_projs(1, :, ilmn)
+        atom_projs(1, :, ilmn) = atom_projs(1, :, ilmn) * ham%ph3d_k(1, :, iaph3d) &
+&                              + atom_projs(2, :, ilmn) * ham%ph3d_k(2, :, iaph3d)
+        atom_projs(2, :, ilmn) = atom_projs(2, :, ilmn) * ham%ph3d_k(1, :, iaph3d) &
+&                              - temp                   * ham%ph3d_k(2, :, iaph3d)
+      end do
+
+      !! atom_projs is built, copy to projs
+      gemm_nonlop_kpt(ikpt)%projs(:, :, shift+1:shift+nlmn) = atom_projs(:, :, 1:nlmn)
+      if(ham%istwf_k > 1) then
+        gemm_nonlop_kpt(ikpt)%projs_r(1, :, shift+1:shift+nlmn) = atom_projs(1, :, 1:nlmn)
+        gemm_nonlop_kpt(ikpt)%projs_i(1, :, shift+1:shift+nlmn) = atom_projs(2, :, 1:nlmn)
+      end if
+      shift = shift + nlmn
+      iaph3d = iaph3d + 1
+    end do
+  end do
+
+ end subroutine make_gemm_nonlop
+!!***
+
+!!****f* m_invovl/gemm_nonlop
+!! NAME
+!! gemm_nonlop
+!!
+!! FUNCTION
+!! Replacement of nonlop
+!! 
+!! same prototype as nonlop
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!      nonlop
+!!
+!! CHILDREN
+!!      dgemm,opernlc_ylm,xmpi_sum,zgemm
+!!
+!! SOURCE
+ subroutine gemm_nonlop(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimffnlin,dimffnlout,&
+&                 enl,enlout,ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,&
+&                 kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&
+&                 mpi_enreg,mpsang,mpssoang,natom,nattyp,ndat,ngfft,nkpgin,nkpgout,nloalg,&
+&                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,phkxredin,&
+&                 phkxredout,ph1d,ph3din,ph3dout,signs,sij,svectout,&
+&                 tim_nonlop,ucvol,useylm,vectin,vectout,&
+&                 use_gpu_cuda)
+  use defs_basis
+  use defs_abitypes
+  use m_hamiltonian, only : gs_hamiltonian_type
+  use m_profiling_abi
+  use defs_abitypes
+  use m_xmpi
+  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby
+  use m_time,          only : cwtime
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'gemm_nonlop'
+ use interfaces_66_nonlocal
+!End of the abilint section
+
+  implicit none
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: choice,cpopt,dimenl1,dimenl2,dimffnlin,dimffnlout,idir
+  integer,intent(in) :: istwf_k,lmnmax,matblk,mgfft,mpsang,mpssoang,natom,ndat,nkpgin
+  integer,intent(in) :: nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO
+  integer,intent(in) :: paw_opt,signs,tim_nonlop,useylm
+  integer,optional,intent(in) :: use_gpu_cuda
+  real(dp),intent(in) :: lambda(ndat),ucvol
+  type(MPI_type),intent(inout) :: mpi_enreg
+  !arrays
+  integer,intent(in) :: atindx1(natom),indlmn(6,lmnmax,ntypat),kgin(3,npwin)
+  integer,intent(in) :: kgout(3,npwout),nattyp(ntypat),ngfft(18),nloalg(3)
+  real(dp),intent(in) :: enl(dimenl1,dimenl2,nspinortot**2)
+  real(dp),intent(in) :: ffnlin(npwin,dimffnlin,lmnmax,ntypat)
+  real(dp),intent(in) :: ffnlout(npwout,dimffnlout,lmnmax,ntypat),gmet(3,3)
+  real(dp),intent(in) :: gprimd(3,3),kpgin(npwin,nkpgin*useylm)
+  real(dp),intent(in) :: kpgout(npwout,nkpgout*useylm),kptin(3),kptout(3)
+  real(dp),intent(in) :: phkxredin(2,natom),phkxredout(2,natom),ph1d(2,*)
+  real(dp),intent(in) :: sij(dimenl1,ntypat*((paw_opt+1)/3))
+  real(dp),intent(inout) :: ph3din(2,npwin,matblk),ph3dout(2,npwout,matblk)
+  real(dp),intent(inout) :: vectin(2,npwin*nspinor*ndat)
+  real(dp),intent(inout) :: enlout(nnlout*ndat)
+  real(dp),intent(out) :: svectout(2,npwout*nspinor*(paw_opt/3)*ndat)
+  real(dp),intent(inout) :: vectout(2,npwout*nspinor*ndat) !vz_i
+  type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
+
+  ! locals
+  integer :: idat, nprojs, shift, iatom, nlmn, ierr, ibeg, iend
+  integer :: cplex, cplex_enl, cplex_fac
+  integer :: iatm, ndgxdt, ndgxdtfac, nd2gxdt, nd2gxdtfac, optder, itypat, ilmn
+  integer :: cplex_dgxdt(1), cplex_d2gxdt(1)
+  real(dp) :: dgxdt_dum_in(1,1,1,1,1), dgxdt_dum_out(1,1,1,1,1),dgxdt_dum_out2(1,1,1,1,1)
+  real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
+  real(dp), allocatable :: sij_typ(:)
+  real(dp), allocatable :: projections(:,:,:), s_projections(:,:,:), vnl_projections(:,:,:)
+  real(dp), allocatable :: temp_realvec(:)  
+
+! *************************************************************************  
+
+  ! We keep the same interface as nonlop, but we don't use many of those
+  ABI_UNUSED((/ffnlin,ffnlout,gmet,gprimd,kpgin,kpgout/))
+  ABI_UNUSED((/ph1d(1,1),ph3din,ph3dout/))
+  ABI_UNUSED((/phkxredin,phkxredout,ucvol/))
+  ABI_UNUSED((/mgfft,mpsang,mpssoang/))
+  ABI_UNUSED((/kptin,kptout/))
+  ABI_UNUSED((/idir,nloalg,ngfft,kgin,kgout,ngfft,only_SO,tim_nonlop,use_gpu_cuda,signs/))
+  ABI_UNUSED((/enlout/))
+
+  cplex=2;if (istwf_k>1) cplex=1
+  cplex_enl=1;if (paw_opt>0) cplex_enl=2*dimenl1/(lmnmax*(lmnmax+1)) ! is enl complex?
+  cplex_fac=cplex;if ((nspinortot==2.or.cplex_enl==2).and.paw_opt>0) cplex_fac=2 ! is vnl_projections complex?
+
+  nprojs = gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%nprojs
+
+  ! These will store the non-local factors for vectin, svectout and vectout respectively
+  ABI_ALLOCATE(projections,(cplex, nprojs,nspinor*ndat))
+  ABI_ALLOCATE(s_projections,(cplex, nprojs,nspinor*ndat))
+  ABI_ALLOCATE(vnl_projections,(cplex_fac, nprojs,nspinor*ndat))
+  projections = zero
+  s_projections = zero
+  vnl_projections = zero
+
+  if(nprojs == 0) then
+    ! TODO check if this is correct
+    vectout = zero
+    if(paw_opt>0) svectout = vectin
+    return
+  end if
+
+  if(cpopt >= 2) then
+    ! retrieve from cprjin
+    do idat=1, ndat*nspinor
+      shift = 0
+      do iatom = 1, natom
+        nlmn = cprjin(iatom, idat)%nlmn
+        projections(1:cplex, shift+1:shift+nlmn, idat) = cprjin(iatom, idat)%cp(1:cplex, 1:nlmn)
+        shift = shift + nlmn
+      end do
+    end do
+  else
+    ! opernla
+    if(cplex == 2) then
+      call ZGEMM('C', 'N', nprojs, ndat, npwin*nspinor, cone, &
+&                gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwin*nspinor,&
+&                vectin, npwin*nspinor, czero, projections, nprojs)
+    else
+       ABI_ALLOCATE(temp_realvec,(MAX(npwout,npwin)*nspinor*ndat))
+      ! only compute real part of projections = P^* psi => projections_r = P_r^T psi_r + P_i^T psi_i
+      temp_realvec(1:npwin*nspinor*ndat) = vectin(1,1:npwin*nspinor*ndat)
+      if(istwf_k == 2 .and. mpi_enreg%me_g0 == 1) then
+        do idat=1, ndat
+          temp_realvec(1+(idat-1)*npwin*nspinor) = temp_realvec(1+(idat-1)*npwin*nspinor)/2
+        end do
+      end if
+      call DGEMM('T', 'N', nprojs, ndat, npwin*nspinor, one, &
+&                gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs_r, npwin*nspinor, &
+&                temp_realvec, npwin*nspinor, zero, projections, nprojs)
+      temp_realvec(1:npwin*nspinor*ndat) = vectin(2,1:npwin*nspinor*ndat)
+      if(istwf_k == 2 .and. mpi_enreg%me_g0 == 1) then
+        do idat=1, ndat
+          temp_realvec(1+(idat-1)*npwin*nspinor) = zero
+        end do
+      end if
+      call DGEMM('T', 'N', nprojs, ndat, npwin*nspinor, one, &
+&                gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs_i, npwin*nspinor, &
+&                temp_realvec, npwin*nspinor, one , projections, nprojs)
+      projections = projections * 2
+       ABI_DEALLOCATE(temp_realvec)
+    end if
+    call xmpi_sum(projections,mpi_enreg%comm_fft,ierr)
+
+    if(cpopt >= 0) then
+      ! store in cprjin
+      do idat=1, ndat*nspinor
+        shift = 0
+        do iatom = 1, natom
+          nlmn = cprjin(iatom, idat)%nlmn
+          cprjin(iatom, idat)%cp(1:cplex, 1:nlmn) = projections(1:cplex, shift+1:shift+nlmn, idat)
+          shift = shift + nlmn
+        end do
+      end do
+    end if
+  end if
+
+  if(choice > 0) then
+
+    if(choice /= 7) then
+      ! opernlc
+      iatm = 0
+      ndgxdt = 0
+      ndgxdtfac = 0
+      nd2gxdt = 0
+      nd2gxdtfac = 0
+      optder = 0
+      
+      shift = 0
+      ABI_ALLOCATE(sij_typ,(((paw_opt+1)/3)*lmnmax*(lmnmax+1)/2))
+      do itypat=1, ntypat
+        nlmn=count(indlmn(3,:,itypat)>0)
+        if (paw_opt>=2) then
+          if (cplex_enl==1) then
+            do ilmn=1,nlmn*(nlmn+1)/2
+              sij_typ(ilmn)=sij(ilmn,itypat)
+            end do
+          else
+            do ilmn=1,nlmn*(nlmn+1)/2
+              sij_typ(ilmn)=sij(2*ilmn-1,itypat)
+            end do
+          end if
+        end if
+
+        ibeg = shift+1
+        iend = shift+nattyp(itypat)*nlmn
+
+        do idat = 1,ndat
+          call opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,dgxdt_dum_in,dgxdt_dum_out,dgxdt_dum_out2,&
+&         d2gxdt_dum_in,d2gxdt_dum_out,d2gxdt_dum_out2,dimenl1,dimenl2,enl,projections(:, ibeg:iend, idat),&
+&         vnl_projections(:, ibeg:iend, idat),s_projections(:, ibeg:iend, idat),&
+&         iatm,indlmn(:,:,itypat),itypat,lambda(idat),mpi_enreg,natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
+&         nattyp(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ)
+        end do
+
+        shift = shift + nattyp(itypat)*nlmn
+        iatm = iatm+nattyp(itypat)
+      end do
+      ABI_DEALLOCATE(sij_typ)
+    else
+      s_projections = projections
+    end if
+
+    ! opernlb
+    if(paw_opt == 3 .or. paw_opt == 4) then
+      ! Get svectout from s_projections
+      if(cplex == 2) then
+        call ZGEMM('N', 'N', npwout*nspinor, ndat, nprojs, cone, &
+&                  gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwout*nspinor, &
+&                  s_projections, nprojs, czero, svectout, npwout*nspinor)
+      else
+         ABI_ALLOCATE(temp_realvec,(MAX(npwout,npwin)*nspinor*ndat))
+        call DGEMM('N', 'N', npwout*nspinor, ndat, nprojs, one, &
+&                  gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs_r, npwout*nspinor, &
+&                  s_projections, nprojs, zero, temp_realvec, npwout*nspinor)
+        svectout(1,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
+        call DGEMM('N', 'N', npwout*nspinor, ndat, nprojs, one, &
+&                  gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs_i, npwout*nspinor,&
+&                  s_projections, nprojs, zero, temp_realvec, npwout*nspinor)
+        svectout(2,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
+         ABI_DEALLOCATE(temp_realvec)
+      end if
+      if(choice /= 7) svectout = svectout + vectin ! TODO understand this
+    end if
+    if(paw_opt == 0 .or. paw_opt == 1 .or. paw_opt == 4) then
+      ! Get vectout from vnl_projections
+      if(cplex_fac == 2) then
+        call ZGEMM('N', 'N', npwout*nspinor, ndat, nprojs, cone, &
+&                 gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwout*nspinor, &
+&                 vnl_projections, nprojs, czero, vectout, npwout*nspinor)
+      else
+         ABI_ALLOCATE(temp_realvec,(MAX(npwout,npwin)*nspinor*ndat))
+        call DGEMM('N', 'N', npwout*nspinor, ndat, nprojs, one, &
+&                  gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs_r, npwout*nspinor, &
+&                  vnl_projections, nprojs, zero, temp_realvec, npwout*nspinor)
+        vectout(1,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
+        call DGEMM('N', 'N', npwout*nspinor, ndat, nprojs, one, &
+&                  gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%projs_i, npwout*nspinor, &
+&                  vnl_projections, nprojs, zero, temp_realvec, npwout*nspinor)
+        vectout(2,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
+         ABI_DEALLOCATE(temp_realvec)
+      end if
+    end if
+  end if
+
+  ABI_DEALLOCATE(projections)
+  ABI_DEALLOCATE(s_projections)
+  ABI_DEALLOCATE(vnl_projections)
+ end subroutine gemm_nonlop
+!***
+end module m_gemm_nonlop
+!!***

@@ -1,0 +1,34 @@
+!!****d* ABINIT/71_bse
+!! NAME
+!! 71_bse
+!!
+!! DESCRIPTION
+!! This directory contains routines used
+!! to treat the Bethe-Salpeter equation.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! exc_build_block.F90
+!! exc_build_ham.F90
+!! exc_den.F90
+!! exc_plot.F90
+!! interfaces_71_bse.F90
+!! m_bse_io.F90
+!! m_exc_diago.F90
+!! m_exc_itdiago.F90
+!! m_exc_spectra.F90
+!! m_haydock.F90
+!! m_haydock_io.F90
+!! m_hexc.F90
+!! m_interp.F90
+!! setup_bse.F90
+!! setup_bse_interp.F90
+!! sumrule.F90
+!!
+!!***

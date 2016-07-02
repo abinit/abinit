@@ -1,0 +1,186 @@
+abinit for Debian
+-----------------
+
+How to run the lesson 1 from the tutorial: install the abinit-doc package, and
+create the file "t1x.files":
+
+$ cat t1x.files 
+/usr/share/doc/abinit-doc/tests/tutorial/Input/t11.in
+t11.out
+t1xi
+t1xo
+t1x
+/usr/share/doc/abinit-doc/tests/Psps_for_tests/01h.pspgth
+
+Then run abinit using:
+
+$ abinis < t1x.files > log
+
+Now test, that you got a correct result by:
+
+$ zcat /usr/share/doc/abinit-doc/tests/tutorial/Refs/t11.out.gz | diff t11.out -
+
+You should get only minor differences (different filenames, differences in
+energies like 1e-10 etc.). The output on my computer is:
+
+2,3c2,3
+< .Version 5.3.4  of ABINIT 
+< .(sequential version, prepared for a i486_linux_UNKNOWN computer) 
+---
+> .Version 5.3.3  of ABINIT 
+> .(sequential version, prepared for a x86_64_linux_pgi computer) 
+17c17
+< .Starting date : Fri 27 Jul 2007.
+---
+> .Starting date : Fri 23 Feb 2007.
+19c19
+< - input  file    -> /usr/share/doc/abinit-doc/tests/tutorial/Input/t11.in
+---
+> - input  file    ->
+> /home/gonze/ABINIT/ABINITv5.3.3/abinit-release--gonze--5.3.3/tests/tutorial/Input/t11.in
+21,22c21,22
+< - root for input  files -> t1xi
+< - root for output files -> t1xo
+---
+> - root for input  files -> t11i
+> - root for output files -> t11o
+35c35
+< P This job should need less than                       7.900 Mbytes of
+memory.
+---
+> P This job should need less than                       4.169 Mbytes of
+> memory.
+92,93c92,93
+< - pspini: atom type   1  psp file is
+/usr/share/doc/abinit-doc/tests/Psps_for_tests/01h.pspgth
+< - pspatm: opening atomic psp file
+/usr/share/doc/abinit-doc/tests/Psps_for_tests/01h.pspgth
+---
+> - pspini: atom type   1  psp file is
+> /home/gonze/ABINIT/ABINITv5.3.3/abinit-release--gonze--5.3.3/tests/Psps_for_tests/01h.pspgth
+> - pspatm: opening atomic psp file
+> /home/gonze/ABINIT/ABINITv5.3.3/abinit-release--gonze--5.3.3/tests/Psps_for_tests/01h.pspgth
+122c122
+<  ETOT  1  -1.1013391225240    -1.101E+00 4.220E-04 8.396E+00 2.458E-02
+2.458E-02
+---
+>  ETOT  1  -1.1013391225242    -1.101E+00 4.220E-04 8.396E+00 2.458E-02
+>  2.458E-02
+124c124
+<  ETOT  3  -1.1037170965208    -2.313E-05 7.389E-08 1.549E-02 1.207E-03
+3.662E-02
+---
+>  ETOT  3  -1.1037170965209    -2.313E-05 7.389E-08 1.549E-02 1.207E-03
+>  3.662E-02
+127c127
+<  ETOT  6  -1.1037224213136    -9.039E-11 5.808E-12 3.076E-07 1.238E-06
+3.741E-02
+---
+>  ETOT  6  -1.1037224213136    -9.037E-11 5.808E-12 3.076E-07 1.238E-06
+>  3.741E-02
+130c130
+<   for the second time, diff in etot=  9.039E-11 < toldfe=  1.000E-06
+---
+>   for the second time, diff in etot=  9.037E-11 < toldfe=  1.000E-06
+148,149c148,149
+<     1       0.374055887121      0.000000000000      0.000000000000
+<     2      -0.374055887121      0.000000000000      0.000000000000
+---
+>     1       0.374055887122      0.000000000000      0.000000000000
+>     2      -0.374055887122      0.000000000000      0.000000000000
+156,157c156,157
+<     1     -0.03740558871212     0.00000000000000     0.00000000000000
+<     2      0.03740558871212     0.00000000000000     0.00000000000000
+---
+>     1     -0.03740558871217     0.00000000000000     0.00000000000000
+>     2      0.03740558871217     0.00000000000000     0.00000000000000
+161,162c161,162
+<     1     -1.92347258370300     0.00000000000000     0.00000000000000
+<     2      1.92347258370300     0.00000000000000     0.00000000000000
+---
+>     1     -1.92347258370579     0.00000000000000     0.00000000000000
+>     2      1.92347258370579     0.00000000000000     0.00000000000000
+166c166
+<  prteigrs : about to open file t1xo_EIG
+---
+>  prteigrs : about to open file t11o_EIG
+180,182c180,182
+<     Kinetic energy  =  1.00347260970075E+00
+<     Hartree energy  =  7.18370391928635E-01
+<     XC energy       = -6.34653320022680E-01
+---
+>     Kinetic energy  =  1.00347260970065E+00
+>     Hartree energy  =  7.18370391928606E-01
+>     XC energy       = -6.34653320022650E-01
+184,185c184,185
+<     PspCore energy  = -1.92143215271888E-05
+<     Loc. psp. energy= -2.34194400712442E+00
+---
+>     PspCore energy  = -1.92143215271889E-05
+>     Loc. psp. energy= -2.34194400712430E+00
+187c187
+<     >>>>>>>>> Etotal= -1.10372242131363E+00
+---
+>     >>>>>>>>> Etotal= -1.10372242131361E+00
+190c190
+<     Total energy(eV)= -3.00338151876361E+01 ; Band energy (Ha)=
+-7.3049716750E-01
+---
+>     Total energy(eV)= -3.00338151876356E+01 ; Band energy (Ha)=
+>     -7.3049716750E-01
+247,248c247,248
+< - Total cpu        time (s,m,h):          1.8        0.03      0.001
+< - Total wall clock time (s,m,h):          1.9        0.03      0.001
+---
+> - Total cpu        time (s,m,h):          1.7        0.03      0.000
+> - Total wall clock time (s,m,h):          1.8        0.03      0.001
+255,272c255,273
+< - fourwf(pot)            0.592  32.7      0.600  30.8             75
+< - timing timab           0.364  20.1      0.363  18.6             10
+< - fourdp                 0.236  13.1      0.227  11.7             31
+< - invars2                0.136   7.5      0.135   6.9              1
+< - xc:pot/=fourdp         0.068   3.8      0.066   3.4              7
+< - abinit(2)              0.052   2.9      0.054   2.8              1
+< - forces                 0.048   2.7      0.047   2.4              6
+< - symrhg(no FFT)         0.040   2.2      0.041   2.1              6
+< - fourwf(den)            0.028   1.5      0.026   1.3              6
+< - stress                 0.016   0.9      0.018   0.9              1
+< - vtorho(4)-mkrho-       0.012   0.7      0.010   0.5              6
+< - ewald                  0.012   0.7      0.012   0.6              1
+< - setsym                 0.012   0.7      0.012   0.6              1
+< - vtorho  (1)            0.008   0.4      0.013   0.7              6
+< - vtorho-kpt loop        0.004   0.2      0.016   0.8              6
+< - vtowfk(ssdiag)         0.000   0.0      0.077   4.0             -1
+< - status                 0.000   0.0      0.141   7.2            230
+< - 49   others            0.032   1.8      0.027   1.4
+---
+> - timing timab           0.390  22.7      0.444  24.3              8
+> - fourwf(pot)            0.380  22.1      0.345  18.9             75
+> - invars2                0.260  15.1      0.269  14.7              1
+> - fourdp                 0.150   8.7      0.162   8.9             31
+> - xc:pot/=fourdp         0.100   5.8      0.079   4.3              7
+> - symrhg(no FFT)         0.100   5.8      0.102   5.6              6
+> - abinit(2)              0.060   3.5      0.087   4.8              1
+> - forces                 0.060   3.5      0.055   3.0              6
+> - vtorho(4)-mkrho-       0.040   2.3      0.013   0.7              6
+> - stress                 0.020   1.2      0.017   0.9              1
+> - fourwf(den)            0.010   0.6      0.013   0.7              6
+> - ewald                  0.010   0.6      0.011   0.6              1
+> - setsym                 0.010   0.6      0.015   0.8              1
+> - vtorho-kpt loop        0.010   0.6      0.003   0.2              6
+> - ewald2                 0.010   0.6      0.007   0.4              1
+> - getghc-other           0.010   0.6      0.008   0.4             -1
+> - projbd                 0.010   0.6      0.009   0.5            118
+> - vtorho  (1)            0.000   0.0      0.012   0.7              6
+> - 48   others            0.000   0.0      0.022   1.2
+274c275
+< - subtotal               1.660  91.8      1.885  96.8
+---
+> - subtotal               1.630  94.8      1.673  91.6
+280c281
+< +Overall time at end (sec) : cpu=          1.8  wall=          1.9
+---
+> +Overall time at end (sec) : cpu=          1.7  wall=          1.8
+
+
+ -- Ondrej Certik <ondrej@certik.cz>  Fri, 27 Jul 2007 18:53:34 +0200

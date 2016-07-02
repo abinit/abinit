@@ -1,0 +1,662 @@
+% Copyright 1999, Valerio Olevano
+\documentclass[fleqn]{article}
+\usepackage{amsmath,amssymb}
+\pagestyle{headings}
+\setlength{\hoffset}{0pt} %\hoffset=0pt
+\setlength{\voffset}{0pt} %\voffset0pt
+\setlength{\evensidemargin}{0pt} %\evensidemargin=70pt
+\setlength{\oddsidemargin}{0pt}
+\setlength{\topmargin}{0pt} %\topmargin=22pt
+%\headheight=13pt
+%\headsep=19pt
+\setlength{\textheight}{595pt} %\textheight=595pt
+\setlength{\textwidth}{450pt} %\textwidth=360pt
+%\marginparsep=7pt
+%\marginparwidth=106pt
+%\footskip=27pt
+%\marginparpush=5pt
+%\paperwidth=597pt
+%\paperheight=845pt
+\setlength{\leftmargin}{0pt}
+\setlength{\parindent}{0pt}
+
+
+\title{\bf GW Approximation in $\omega k$ space}
+\author{\bf Valerio Olevano}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\newpage
+%\chapter{GWA in $\omega k$ space}
+
+\section{Green function $G^{(0)}$}
+
+\[
+  G^{(0)}(\zeta_1,\zeta_2;\omega) =
+  \sum_i \frac{\phi^{(0)}_i(\zeta_1) \phi^{(0)*}_i(\zeta_2)}
+  {\omega - \epsilon^{(0)}_i + i \eta \mathrm{\, sgn} \left( \epsilon^{(0)}_i - \mu \right)}
+\]
+
+\[
+  G^{(0)}(r_1,r_2;\omega) =
+  \sum_i \frac{\phi^{(0)}_i(r_1) \phi^{(0)*}_i(r_2)}
+  {\omega - \epsilon^{(0)}_i + i \eta \mathrm{\, sgn} \left( \epsilon^{(0)}_i - \mu \right)}
+\]
+\begin{eqnarray*}
+  \quad
+  G^{(0)}(r_1,r_2;\omega) &=&
+  \sum_{\xi_1 \xi_2} G^{(0)}(\zeta_1,\zeta_2;\omega)
+  \\ &=&
+  \sum_{\xi_1 \xi_2}    \sum_i \frac{\phi^{(0)}_i(\zeta_1) \phi^{(0)*}_i(\zeta_2)}
+  {\omega - \epsilon^{(0)}_i + i \eta \mathrm{\, sgn} \left( \epsilon^{(0)}_i - \mu \right)}
+  \\
+  &=& \sum_{\xi_1}  \sum_i \frac{\phi^{(0)}_i(\zeta_1)}
+  {\omega - \epsilon^{(0)}_i + i \eta \mathrm{\, sgn} \left( \epsilon^{(0)}_i - \mu \right)}
+  \left( \phi^{(0)*}_i(r_2,\xi_2=-1/2) + \phi^{(0)*}_i(r_2,\xi_2=+1/2) \right)
+  \\
+  &=& \sum_{\xi_1}  \sum_i \frac{\phi^{(0)}_i(\zeta_1)}
+  {\omega - \epsilon^{(0)}_i + i \eta \mathrm{\, sgn} \left( \epsilon^{(0)}_i - \mu \right)}
+  \phi^{(0)*}_i(r_2)
+  \\
+  &=&  \sum_i \left( \phi^{(0)}_i(r_1,\xi_1=-1/2) + \phi^{(0)}_i(r_1,\xi_1=+1/2) \right)
+  \frac{\phi^{(0)*}_i(r_2)}
+  {\omega - \epsilon^{(0)}_i + i \eta \mathrm{\, sgn} \left( \epsilon^{(0)}_i - \mu \right)}
+\end{eqnarray*}
+
+\newpage
+
+\section{Screened Interaction}
+
+\[
+W(\zeta_1,\zeta_2,\omega) = \int d\zeta_3 \, \varepsilon^{-1}(\zeta_1,\zeta_3,\omega) w(\zeta_3,\zeta_2)
+\]
+\[
+W(\zeta_1,\zeta_2,\omega) =
+W(r_1,r_2,\omega) = \int dr_3 \, \varepsilon^{-1}(r_1,r_3,\omega) w(r_3,r_2)
+\qquad \textrm{spin independent (but it's not the case of $\varepsilon$)}
+\]
+
+\[
+  w(r_1,r_2) = \frac{1}{|r_1-r_2|}
+  \qquad \textrm{coulombian many body interaction}
+\]
+
+\[
+  w(q,G) = \frac{4 \pi}{|q+G|^2}
+  \qquad \textrm{fourier transform of the coulombian interaction}
+\]
+
+\begin{eqnarray*}
+\quad
+W(r_1,r_2,\omega) &=& \int dr_3 \, \varepsilon^{-1}(r_1,r_3,\omega) w(r_3,r_2) \\
+W(r_1,r_2,\omega)
+  &=& \int dr_3 \, \frac{1}{(2\pi)^3} \int_{\rm BZ} dq \, \sum_{G_1,G_3} e^{i (q+G_1) r_1}
+  \varepsilon^{-1}(q,G_1,G_3,\omega) e^{-i (q+G_3) r_3} \cdot \\ && \cdot
+  \frac{1}{(2\pi)^3} \int_{\rm BZ} dq_1\, \sum_{G_2} e^{i (q_1+G_2) r_3}
+  \frac{4\pi}{(q_1+G_2)^2} e^{-i (q_1+G_2) r_2} \\ &&
+  \int dr_3 \, e^{-i (q+G_3) r_3} e^{i (q_1+G_2) r_3} = (2\pi)^3 \delta(q-q_1) \delta(G_3-G_2) \\
+  W(r_1,r_2,\omega)
+  &=& \frac{1}{(2\pi)^3} \int_{\rm BZ} dq \, \sum_{G_1,G_2} e^{i (q+G_1) r_1}
+  \varepsilon^{-1}(q,G_1,G_2,\omega)  \frac{4\pi}{(q+G_2)^2} e^{-i (q+G_2) r_2}
+\end{eqnarray*}
+
+\begin{eqnarray*}
+W(r_1,r_2,\omega) &=& \frac{1}{\Omega} \sum_{q,G_1,G_2}
+e^{i (q+G_1) r_1} W(q,G_1,G_2,\omega) e^{-i (q+G_2) r_2} \\
+&=&  \frac{1}{\Omega} \sum_{q,G_1,G_2}
+  e^{i (q+G_1) r_1} \varepsilon^{-1}(q,G_1,G_2,\omega) \frac{4\pi}{|q+G_2|^2} e^{-i (q+G_2) r_2}
+\end{eqnarray*}
+
+\[
+W(q,G_1,G_2,\omega) =
+\varepsilon^{-1}(q,G_1,G_2,\omega) \frac{4 \pi}{|q+G_2|^2}
+= \bar{\varepsilon}^{-1}(q,G_1,G_2,\omega) \frac{4 \pi}{|q+G_1| |q+G_2|}
+\]
+
+$\bar{\varepsilon}$ = symmetrized epsilon.
+
+\newpage
+
+
+\section{Single Plasmon Pole Model}
+
+\[
+  \varepsilon^{-1}(\omega) =
+  \delta + \frac{\Omega^2}{\omega^2 - \tilde{\omega}^2}
+\]
+
+\[
+  \varepsilon^{-1}(G,G',q,\omega) =
+  \delta(G,G') + \frac{\Omega^2(G,G',q)}{\omega^2 - \tilde{\omega}^2(G,G',q)}
+\]
+The poles are in $\omega = \pm \tilde{\omega}$.
+\[
+  A(G,G',q) = - \frac{\Omega^2(G,G',q)}{\tilde{\omega}^2(G,G',q)} =
+  \varepsilon^{-1}(G,G',q,0) - \delta(G,G')
+\]
+
+\[
+  \tilde{\omega}^2(G,G',q) =
+  \left[ \frac{A(G,G',q)}{\varepsilon^{-1}(G,G',q,0) - \varepsilon^{-1}(G,G',q,iE_0)} - 1 \right] E_0^2
+\]
+
+\begin{eqnarray*}
+  &&
+  \varepsilon^{-1}(iE_0) = \delta + \frac{\Omega^2}{-E_0^2 - \tilde{\omega}^2}
+  \\ &&
+ \varepsilon^{-1}(iE_0) [E_0^2 + \tilde{\omega}^2] =
+  \delta [E_0^2 + \tilde{\omega}^2] - \frac{\Omega^2}{\tilde{\omega}^2} \tilde{\omega}^2 =
+  \delta E_0^2 + \varepsilon^{-1}(0) \tilde{\omega}^2
+  \\ &&
+  \tilde{\omega}^2 =
+  \frac{\varepsilon^{-1}(iE_0) - \delta}{\varepsilon^{-1}(0) - \varepsilon^{-1}(iE_0)} E_0^2
+  \\ && \phantom{\tilde{\omega}^2} =
+  \left[ \frac{\varepsilon^{-1}(iE_0) - \delta}{\varepsilon^{-1}(0) - \varepsilon^{-1}(iE_0)} +
+  \frac{\varepsilon^{-1}(0) - \varepsilon^{-1}(iE_0)}{\varepsilon^{-1}(0) - \varepsilon^{-1}(iE_0)}
+  -1 \right] E_0^2
+  \\ &&
+  \tilde{\omega}^2 =
+  \left[ \frac{\varepsilon^{-1}(0) - \delta}{\varepsilon^{-1}(0) - \varepsilon^{-1}(iE_0)} - 1 \right] E_0^2
+  = \left[ \frac{A}{\varepsilon^{-1}(0) - \varepsilon^{-1}(iE_0)} - 1 \right] E_0^2
+\end{eqnarray*}
+
+\newpage
+
+\section{GW approximation for the Self-Energy}
+
+\[
+  \tilde{\Sigma}^{\rm GW}_{\rm M}(x_1,x_2) = i G(x_1,x_2) W(x_1^+,x_2)
+\]
+
+% Fourier Transform of the Mass Operator
+\[
+  \tilde{\Sigma}^{\rm GW}_{\rm M}(\zeta_1,\zeta_2,\omega) =
+  \frac{i}{2 \pi} \int d\omega' \, e^{-i \omega' \eta}
+  G(\zeta_1,\zeta_2,\omega-\omega')
+  W(\zeta_1,\zeta_2,\omega')
+\]
+
+$W$ is spin-independent and $G$ does not take factors 2 on spin sum:
+
+\[
+  \tilde{\Sigma}^{\rm GW}_{\rm M}(r_1,r_2,\omega) =
+  \frac{i}{2 \pi} \int d\omega' \, e^{-i \omega' \eta}
+  G(r_1,r_2,\omega-\omega')
+  W(r_1,r_2,\omega')
+\]
+
+\begin{eqnarray*}
+  \tilde{\Sigma}^{\rm GW}_{\rm M}(r_1,r_2,\omega) &=&
+  \frac{i}{2 \pi} \int d\omega' \, e^{-i \omega' \eta}
+  \sum_i \frac{\phi^{(0)}_i(r_1) \phi^{(0)*}_i(r_2)}
+  {\omega - \omega' - \epsilon^{(0)}_i + i \eta \mathrm{\, sgn} \left( \epsilon^{(0)}_i - \mu \right)} \cdot \\
+  && \cdot \frac{1}{\Omega} \sum_{q,G_1,G_2}
+  e^{i (q+G_1) r_1} \bar{\varepsilon}^{-1}(q,G_1,G_2,\omega')
+  \frac{4\pi}{|q+G_1||q+G_2|} e^{-i (q+G_2) r_2}
+\end{eqnarray*}
+
+\section{Matrix elements of the Self-Energy operator}
+
+\begin{eqnarray*}
+\langle \phi^{(0)}_j(r_1) | \tilde{\Sigma}^{\rm GW}_{\rm M}(r_1,r_2,\omega) | \phi^{(0)}_j(r_2) \rangle
+&=&  \frac{i}{2 \pi} \frac{1}{\Omega} \sum_{q,G_1,G_2}
+   \frac{4\pi}{|q+G_1||q+G_2|} \sum_i \cdot \\ && \cdot
+  \int dr_1 \, \phi^{(0)*}_j(r_1) e^{i (q+G_1) r_1} \phi^{(0)}_i(r_1)
+  \int dr_2  \, \phi^{(0)*}_i(r_2) e^{-i (q+G_2) r_2} \phi^{(0)}_j(r_2) \cdot \\ && \cdot
+  \int_{-\infty}^{+\infty} d\omega' \, e^{-i \omega' \eta}
+   \frac{1}{\omega - \omega' - \epsilon^{(0)}_i + i \eta \mathrm{\, sgn} \left( \epsilon^{(0)}_i - \mu \right)}
+  \bar{\varepsilon}^{-1}(q,G_1,G_2,\omega')
+\end{eqnarray*}
+
+\[
+i = \{n_i,k_i\}
+\]
+\[
+\rho_{ij}(G) = \int dr  \, \phi^{(0)*}_i(r) e^{-i (q+G) r} \phi^{(0)}_j(r)
+\qquad \textrm{with} \qquad q = k_j - k_i - G_0, \quad q \in {\rm 1BZ}
+\]
+
+\begin{eqnarray*}
+\langle j | \tilde{\Sigma}^{\rm GW}_{\rm M}(\omega) | j \rangle
+&=&  \frac{i}{2 \pi} \frac{1}{\Omega} \sum_i \sum_{G_1,G_2} \delta(q-(k_j - k_i - G_0))
+   \frac{4\pi}{|q+G_1||q+G_2|}
+  \rho^*_{ij}(G_1) \rho_{ij}(G_2)  \cdot \\ && \cdot
+  \int_{-\infty}^{+\infty} d\omega'' \, e^{i \omega'' \eta}
+   \frac{1}{\omega'' + \omega - \epsilon^{(0)}_i + i \eta \mathrm{\, sgn} \left( \epsilon^{(0)}_i - \mu \right)}
+  \bar{\varepsilon}^{-1}(q,G_1,G_2,\omega'')
+\end{eqnarray*}
+
+\begin{eqnarray*}
+\varepsilon^{-1}(q,G,G',\omega) &\rightarrow& \delta(G,G')
+  \qquad \rightarrow \Sigma_x \qquad \textrm{Sigma exchange} \\
+  \varepsilon^{-1}(q,G,G',\omega) &\rightarrow&
+  \frac{\Omega^2(q,G,G')}{\omega^2 - \tilde{\omega}^2(q,G,G')}
+  \qquad \rightarrow \Sigma_c \qquad \textrm{Sigma correlation}
+\end{eqnarray*}
+
+\section{Self-Energy: exchange term}
+
+\begin{eqnarray*}
+\langle j | \tilde{\Sigma}^{\rm GW}_{x}(\omega) | j \rangle
+&=&  \frac{i}{2 \pi} \frac{1}{\Omega} \sum_i \sum_{G_1} \delta(q-(k_j - k_i - G_0))
+   \frac{4\pi}{|q+G_1|^2}
+  | \rho_{ij}(G_1)|^2  \cdot \\ && \cdot
+  \oint_{{\overset{\curvearrowleft}{\rightarrow}}} d\omega'' \, e^{i \omega'' \eta}
+   \frac{1}{\omega'' + \omega - \epsilon^{(0)}_i + i \eta \mathrm{\, sgn} \left( \epsilon^{(0)}_i - \mu \right)}
+\end{eqnarray*}
+Only the the poles of G in the upper half imaginary $\omega$-plane are included
+in the closed, anti-clockwise path. They correspond to the particle poles
+(excitation corresponding to occupied states).
+The integral yields ($f_i=0,1$ occupation number):
+\[
+\oint d\omega'' ... = 2 \pi i f_i {\rm Res}_i = 2 \pi i f_i
+\]
+
+\begin{eqnarray*}
+\langle j | \tilde{\Sigma}^{\rm GW}_{x} | j \rangle
+&=&  - \frac{4 \pi}{\Omega} \sum_i f_i \sum_{G_1} \delta(q-(k_j - k_i - G_0))
+   \frac{1}{|q+G_1|^2}
+  | \rho_{ij}(G_1) |^2
+\end{eqnarray*}
+it does not depend on $\omega$ because it constitutes only a shift
+term of the poles along the real axis which doesn't change the integral.
+
+\newpage
+
+\section{Self-Energy: correlation term}
+
+\begin{eqnarray*}
+\langle j | \tilde{\Sigma}^{\rm GW}_{c}(\omega) | j \rangle
+&=&  \frac{i}{2 \pi} \frac{1}{\Omega} \sum_i \sum_{G_1,G_2} \delta(q-(k_j - k_i - G_0))
+   \frac{4\pi}{|q+G_1||q+G_2|}
+  \rho^*_{ij}(G_1) \rho_{ij}(G_2)  \cdot \\ && \cdot
+  \oint_{{\overset{\curvearrowleft}{\rightarrow}}} d\omega'' \, e^{i \omega'' \eta}
+   \frac{1}{\omega'' + \omega - \epsilon^{(0)}_i + i \eta \mathrm{\, sgn} \left( \epsilon^{(0)}_i - \mu \right)}
+   \frac{\Omega^2(q,G_1,G_2)}{\omega''^2 - (\tilde{\omega}(q,G_1,G_2) - i \eta)^2}
+\end{eqnarray*}
+The plasmon pole model presents a pole in the upper half plane for $\omega''$ negative
+at $-\tilde{\omega}+i\eta$ and a pole in the bottom half plane for $\omega''$ positive
+at $\tilde{\omega}-i\eta$
+\begin{eqnarray*}
+  \oint_{{\overset{\curvearrowleft}{\rightarrow}}} d\omega'' \, e^{i \omega'' \eta}
+   \frac{1}{\omega'' + \omega - \epsilon^{(0)}_i + i \eta \mathrm{\, sgn} \left( \epsilon^{(0)}_i - \mu \right)}
+   \frac{1}{(\omega'' - \tilde{\omega} + i \eta)(\omega'' + \tilde{\omega} - i \eta)}
+\end{eqnarray*}
+
+The included poles are in $\omega'' = - \tilde{\omega} + i \eta$ and if $f_i=1$ in
+$\omega'' = \epsilon^{(0)}_i - \omega + i \eta$.
+\begin{eqnarray*}
+\oint_{{\overset{\curvearrowleft}{\rightarrow}}} d\omega'' \, ... &=&
+2 \pi i \left( \frac{f_i}{(\epsilon^{(0)}_i - \omega)^2 - \tilde{\omega}^2} +
+             \frac{1}{\omega - \tilde{\omega} - \epsilon^{(0)}_i} \frac{1}{-2\tilde{\omega}} \right)
+ \\ &=& - i \pi \left(  \frac{1}{\tilde{\omega} (\omega - \tilde{\omega} - \epsilon^{(0)}_i)} -
+    \frac{2 f_i}{(\omega - \epsilon^{(0)}_i)^2 - \tilde{\omega}^2} \right) \\
+  &=& - i \pi \left( \frac{\omega - \epsilon^{(0)}_i + \tilde{\omega}}{\tilde{\omega} ( \omega - \epsilon^{(0)}_i + \tilde{\omega})  ( \omega - \epsilon^{(0)}_i - \tilde{\omega})} -
+ \frac{\tilde{\omega} 2 f_i}{\tilde{\omega} ( \omega - \epsilon^{(0)}_i + \tilde{\omega})  ( \omega - \epsilon^{(0)}_i - \tilde{\omega})} \right) \\
+  &=& - i \pi \frac{\omega - \epsilon^{(0)}_i - \tilde{\omega}(2f_i - 1)}{\tilde{\omega} ( \omega - \epsilon^{(0)}_i + \tilde{\omega})  ( \omega - \epsilon^{(0)}_i - \tilde{\omega})} \frac{\omega - \epsilon^{(0)}_i + \tilde{\omega}(2f_i - 1)}{\omega - \epsilon^{(0)}_i + \tilde{\omega}(2f_i - 1)} \\
+  &=& - i \pi \frac{(\omega - \epsilon^{(0)}_i)^2 - \tilde{\omega}^2 (2 f_i - 1)^2}
+  {(\omega - \epsilon^{(0)}_i)^2 - \tilde{\omega}^2}
+\frac{1}{\tilde{\omega} ( \omega - \epsilon^{(0)}_i + \tilde{\omega} (2 f_i - 1))} \\
+  &=& - i \pi \frac{1}{\tilde{\omega} ( \omega - \epsilon^{(0)}_i + \tilde{\omega} (2 f_i - 1))}
+\end{eqnarray*}
+Here we mean that we should replace $\tilde{\omega} \rightarrow \tilde{\omega} - i\eta$
+and $ \epsilon^{(0)}_i \rightarrow \epsilon^{(0)}_i -i \eta \mathrm{\, sgn}(\epsilon^{(0)}_i - \mu)$
+
+As $(2 f_i - 1)^2$ is always 1.
+
+\begin{eqnarray*}
+\langle j | \tilde{\Sigma}^{\rm GW}_{c}(\omega) | j \rangle
+&=&  \frac{2 \pi}{\Omega} \sum_i \sum_{G_1,G_2} \delta(q-(k_j - k_i - G_0))
+   \frac{\rho^*_{ij}(G_1) \rho_{ij}(G_2)}{|q+G_1||q+G_2|}
+   \cdot \\ && \cdot
+   \frac{\Omega^2(q,G_1,G_2)}
+  {\tilde{\omega}(q,G_1,G_2) ( \omega - \epsilon^{(0)}_i + \tilde{\omega}(q,G_1,G_2) (2 f_i - 1))}
+\end{eqnarray*}
+
+
+\newpage
+
+\section{Self-Energy: correlation term without plasmon pole model}
+
+\begin{eqnarray*}
+\langle j | \tilde{\Sigma}^{\rm GW}_{c}(\omega) | j \rangle
+&=&  \frac{i}{2 \pi} \frac{1}{\Omega} \sum_i \sum_{q,G_1,G_2} \delta(q-(k_j - k_i - G_0))
+   \frac{4\pi}{|q+G_1||q+G_2|}
+  \rho^*_{ij}(G_1) \rho_{ij}(G_2)  \cdot \\ && \cdot
+  \int_{-\infty}^{+\infty} d\omega'' \, e^{i \omega'' \eta}
+   \frac{1}{\omega'' + \omega - \epsilon^{(0)}_i + i \eta \mathrm{\, sgn} \left( \epsilon^{(0)}_i - \mu \right)}
+  \bar\varepsilon^{-1}_c(q,G_1,G_2,\omega'')
+\end{eqnarray*}
+where the correlation part of the inverse dielectric matrix is
+\[
+  \bar\varepsilon^{-1}_c(q,G_1,G_2,\omega) =
+  \bar\varepsilon^{-1}(q,G_1,G_2,\omega) - \delta(G_1,G_2)
+\]
+the dielectric function is symmetric in $\omega$
+\[
+  \bar\varepsilon^{-1}(q,G_1,G_2,-\omega) =  \bar\varepsilon^{-1}(q,G_1,G_2,\omega)
+\]
+\begin{eqnarray*}
+\langle j | \tilde{\Sigma}^{\rm GW}_{c}(\omega) | j \rangle
+&=&  \frac{1}{\Omega} \sum_i \sum_{q,G_1,G_2} \delta(q-(k_j - k_i - G_0))
+   \frac{4\pi}{|q+G_1||q+G_2|}
+  \rho^*_{ij}(G_1) \rho_{ij}(G_2)  \cdot \\ && \cdot \Big\{
+  - \frac{1}{\pi} \int_0^\infty d \omega' \, \bar\varepsilon^{-1}_c(q,G_1,G_2,i\omega')
+  \frac{\omega - \epsilon^{(0)}_i}{(\omega - \epsilon^{(0)}_i)^2 + \omega'^2} + \\ &&
+ + \bar\varepsilon^{-1}_c(q,G_1,G_2,\epsilon^{(0)}_i - \omega)
+  \left( \theta(\omega - \epsilon^{(0)}_i) - \theta(\mu - \epsilon^{(0)}_i) \right) \Big\}
+\end{eqnarray*}
+The second term comes into paly only in two cases:
+when $i$ is conduction with $+$ sign (many cases at high energies):
+\[
+  \mu < \epsilon^{(0)}_i < \omega
+\]
+and when $i$ is valence with $-$ sign (few cases):
+\[
+  \omega < \epsilon^{(0)}_i < \mu
+\]
+For the dielectric function we must use the tetraedral method to integrate
+or otherwise use a small imaginary part in $\omega$ to account for finite
+k-point sampling.
+
+\newpage
+
+
+\section{Imaginary part of the Self-Energy}
+
+\[
+  \tilde{\Sigma}^{\rm GW}_c(r_1,r_2,\omega) =
+  \frac{i}{2 \pi} \int d\omega' \, e^{-i \omega' \eta}
+  G(r_1,r_2,\omega-\omega')
+  W_c(r_1,r_2,\omega')
+\]
+
+
+\[
+G(r_1,r_2,\omega) = \int d\omega' \, \frac{A(\omega')}{\omega-\omega'+i\eta \mathrm{\, sgn}(\omega'-\mu)}
+\]
+\[
+W_c(r_1,r_2,\omega) = W(r_1,r_2,\omega) - v(r_1,r_2)
+\]
+\[
+W_c(r_1,r_2,\omega) = \int d\omega' \, \frac{D(\omega')}{\omega-\omega'+i\eta \mathrm{\, sgn}(\omega')}
+\]
+\[
+W_c(r_1,r_2,\omega) = {\rm vp} \int d\omega' \, \frac{D(\omega')}{\omega-\omega'}
+  - i \pi {\rm sgn}(\omega') \delta(\omega-\omega') D(\omega') =
+  {\rm vp} \int d\omega' \, \frac{D(\omega')}{\omega-\omega'}
+  - i \pi {\rm sgn}(\omega) D(\omega)
+\]
+\[
+D(r_1,r_2,\omega) = - \frac{1}{\pi} \Im W_c(r_1,r_2,\omega) \mathrm{\, sgn}(\omega)
+\]
+\[
+D(r_1,r_2,-\omega) = - D(r_1,r_2,\omega)
+\]
+\[
+  W_c(r_1,r_2,\omega) = W_c(r_1,r_2,-\omega)
+\]
+\[
+  \Rightarrow \Re W_c(-\omega) = {\rm vp} \int d\omega' \, \frac{D(\omega')}{-\omega-\omega'}
+    = {\rm vp} \int d\omega' \, \frac{D(-\omega')}{\omega+\omega'} = \Re W_c(\omega)
+\]
+
+\[
+  \tilde{\Sigma}^{\rm GW}_c(r_1,r_2,\omega) =
+  \frac{i}{2 \pi} \int d\omega' \, e^{i \omega' \eta}
+  G(r_1,r_2,\omega+\omega')
+  W_c(r_1,r_2,\omega')
+\]
+
+\begin{eqnarray*}
+  \quad
+  \tilde{\Sigma}^{\rm GW}_c(r_1,r_2,\omega) =
+  \frac{i}{2 \pi} \int d\omega' \, & e^{i \omega' \eta} & \left(
+    \int_{-\infty}^\mu d\omega_1 \, \frac{A(\omega_1)}{\omega+\omega'-\omega_1-i\eta} +
+    \int_\mu^\infty d\omega_1 \, \frac{A(\omega_1)}{\omega+\omega'-\omega_1+i\eta} \right) \cdot
+    \\ &&
+    \left( \int_{-\infty}^0 d\omega_2 \, \frac{D(\omega_2)}{\omega'-\omega_2-i\eta} +
+    \int_o^\infty d\omega_2 \, \frac{D(\omega_2)}{\omega'-\omega_2+i\eta} \right)
+\end{eqnarray*}
+The terms contributing to the integral in $\omega'$ are only those who present
+poles both up and down the real axis, as for those presenting poles only up or only
+down, you can close the contour integration path in the upper or in the bottom half plane
+resulting in zero.
+\begin{eqnarray*}
+  \quad
+  \tilde{\Sigma}^{\rm GW}_c(r_1,r_2,\omega) =
+  \frac{i}{2 \pi} \int d\omega' \, & e^{i \omega' \eta} &
+    \left( \int_\mu^\infty d\omega_1 \, \frac{A(\omega_1)}{\omega+\omega'-\omega_1+i\eta}
+    \int_{-\infty}^0 d\omega_2 \, \frac{D(\omega_2)}{\omega'-\omega_2-i\eta} \right)
+    \\ &+&
+    \left( \int_{-\infty}^\mu d\omega_1 \, \frac{A(\omega_1)}{\omega+\omega'-\omega_1-i\eta} \cdot
+     \int_0^\infty d\omega_2 \, \frac{D(\omega_2)}{\omega'-\omega_2+i\eta} \right)
+\end{eqnarray*}
+Then, closing the contour integration up ($e^{i \omega' \eta}$)
+and considering the residual of the
+poles which are in $\omega' = \omega_2 + i \eta$ for the first term
+and in $\omega' = \omega_1 - \omega + i \eta$ for the second term,
+in the upper plane ($2\pi i {\rm Res}$)
+\begin{eqnarray*}
+  \quad
+  \tilde{\Sigma}^{\rm GW}_c(r_1,r_2,\omega) &=& \frac{i}{2 \pi} 2 \pi i \left\{
+  \int^{\infty}_\mu d\omega_1 \, \int_{-\infty}^0 d\omega_2 \,
+  \frac{A(\omega_1)D(\omega_2)}{\omega+\omega_2-\omega_1+i\eta} +
+  \int^\mu_{-\infty} d\omega_1 \, \int_0^\infty d\omega_2 \,
+  \frac{A(\omega_1)D(\omega_2)}{-\omega+\omega_1-\omega_2+i\eta} \right\}
+  \\ &=&
+  - \left\{
+  \int^{\infty}_{\mu} d\omega_1 \, \int_{-\infty}^\infty d\omega_2 \, \theta(-\omega_2)
+  \frac{A(\omega_1)D(\omega_2)}{\omega+\omega_2-\omega_1+i\eta} +
+  \int^\mu_{-\infty} d\omega_1 \, \int_{-\infty}^\infty d\omega_2 \, \theta(\omega_2)
+  \frac{A(\omega_1)D(\omega_2)}{-\omega+\omega_1-\omega_2+i\eta} \right\}
+\end{eqnarray*}
+\[
+  \qquad
+    \int d\omega \, \frac{1}{\omega \pm i\eta} = {\rm vp} \int d\omega \frac{1}{\omega} \mp i \pi \delta{\omega}
+\]
+\begin{eqnarray*}
+  \quad
+  i \Im \tilde{\Sigma}^{\rm GW}_c(r_1,r_2,\omega) &=& - \left\{
+  \int^{\infty}_{\mu} d\omega_1 \, (-i \pi) A(\omega_1) D(-\omega+\omega_1) \theta(-\omega_1+\omega) +
+  \int^\mu_{-\infty} d\omega_1 \, (-i \pi) A(\omega_1) D(-\omega+\omega_1) \theta(-\omega+\omega_1) \right\}
+\end{eqnarray*}
+\begin{eqnarray*}
+  \quad
+  \Im \tilde{\Sigma}^{\rm GW}_c(r_1,r_2,\omega) &=& -
+  \int_{-\infty}^\infty d\omega_1 \, \pi A(\omega_1) D(-\omega+\omega_1)
+  \big(
+  -\theta(\omega_1-\omega) \theta(\mu-\omega_1) - \theta(\omega-\omega_1) \theta(\omega_1-\mu)
+  \big)
+  \\ &=& -
+  \int_{-\infty}^\infty d\omega_1 \, \pi A(\omega_1) D(\omega-\omega_1)
+  \big(
+  \theta(\omega_1-\omega) \theta(\mu-\omega_1) + \theta(\omega-\omega_1) \theta(\omega_1-\mu)
+  \big)
+  \\ &=&
+  - \int_{-\infty}^\infty d\omega_1 \, \pi A(\omega_1)
+  \frac{-1}{\pi} \Im W_c(\omega-\omega_1) \mathrm{\, sgn}(\omega-\omega_1)
+  \big(
+  \theta(\omega_1-\omega) \theta(\mu-\omega_1) + \theta(\omega-\omega_1) \theta(\omega_1-\mu)
+  \big)
+  \\ &=&
+  - \int_{-\infty}^\infty d\omega_1 \, A(\omega_1) \Im W_c(\omega-\omega_1)
+  \big(
+  \theta(\omega_1-\omega) \theta(\mu-\omega_1) - \theta(\omega-\omega_1) \theta(\omega_1-\mu)
+  \big)
+\end{eqnarray*}
+In the $G^0W^{\rm RPA}$ approximation
+\[
+  A(r_1,r_2,\omega) = \sum_i \phi_i^{(0)}(r_1) \phi_i^{(0)*}(r_2) \delta(\omega-\epsilon_i^{(0)})
+\]
+\begin{eqnarray*}
+  \Im \tilde{\Sigma}^{\rm GW}_c(r_1,r_2,\omega) &=&
+  - \sum_i \phi_i^{(0)}(r_1) \phi_i^{(0)*}(r_2) \Im W_c(r_1,r_2,\omega-\epsilon_i^{(0)})
+  \big( \theta(\epsilon_i^{(0)}-\omega) \theta(\mu-\epsilon_i^{(0)})
+  - \theta(\omega-\epsilon_i^{(0)}) \theta(\epsilon_i^{(0)}-\mu) \big)
+\end{eqnarray*}
+\begin{eqnarray*}
+  \Im \tilde{\Sigma}^{\rm GW}_c(r_1,r_2,\omega) &=&
+  \left\{ \begin{array}{ll}
+  - \sum_i^{\rm occ} \phi_i^{(0)}(r_1) \phi_i^{(0)*}(r_2) \Im W_c(r_1,r_2,\omega-\epsilon_i^{(0)})
+  \theta(\epsilon_i^{(0)}-\omega) & \omega \le \mu \\
+  + \sum_i^{\rm unocc} \phi_i^{(0)}(r_1) \phi_i^{(0)*}(r_2) \Im W_c(r_1,r_2,\omega-\epsilon_i^{(0)})
+  \theta(\omega-\epsilon_i^{(0)}) & \omega > \mu
+  \end{array} \right.
+\end{eqnarray*}
+\begin{eqnarray*}
+  \quad
+  \langle j | \Im \tilde{\Sigma}^{\rm GW}_c(\omega) | j \rangle
+  &=& \int dr_1 dr_2 \, \phi_j^{(0)*}(r_1) \phi_j^{(0)}(r_2)
+  \\ && (-) \sum_i \phi_i^{(0)}(r_1) \phi_i^{(0)*}(r_2)
+  \big( \theta(\epsilon_i^{(0)}-\omega) \theta(\mu-\epsilon_i^{(0)})
+  - \theta(\omega-\epsilon_i^{(0)}) \theta(\epsilon_i^{(0)}-\mu) \big)
+  \\ &&
+      \frac{1}{\Omega} \sum_{q,G_1,G_2}
+      e^{i(q+G_1)r_1} \Im \bar\varepsilon^{-1}_c(q,G_1,G_2,\omega-\epsilon_i^{(0)}) e^{-i(q+G_2)r_2}
+      \frac{4\pi}{|q+G_1||q+G_2|}
+\end{eqnarray*}
+So that the final result is
+\begin{eqnarray*}
+  \langle j | \Im \tilde{\Sigma}^{\rm GW}_c(\omega) | j \rangle &=&
+  - \frac{1}{\Omega} \sum_i   \big( \theta(\epsilon_i^{(0)}-\omega) \theta(\mu-\epsilon_i^{(0)})
+  - \theta(\omega-\epsilon_i^{(0)}) \theta(\epsilon_i^{(0)}-\mu) \big)
+  \\ &&
+  \sum_{q,G_1,G_2} \delta(q - (k_j-k_i-G_0))
+  \rho^*_{ij}(G_1) \rho_{ij}(G_2) \frac{4\pi}{|q+G_1||q+G_2|}
+  \Im \bar\varepsilon^{-1}_c(q,G_1,G_2,\omega-\epsilon_i^{(0)})
+\end{eqnarray*}
+
+\[
+  \qquad
+  \theta(\epsilon_i^{(0)}-\omega) \theta(\mu-\epsilon_i^{(0)})
+  - \theta(\omega-\epsilon_i^{(0)}) \theta(\epsilon_i^{(0)}-\mu) =
+  \theta(\mu-\epsilon_i^{(0)}) - \theta(\omega-\epsilon_i^{(0)}) =
+  \theta(\epsilon_i^{(0)}-\omega) f_i - \theta(\omega-\epsilon_i^{(0)}) (1- f_i)
+\]
+\[
+  - \Im  \varepsilon_c^{-1}(\omega) = -\Im \varepsilon_c^{-1}(-\omega)
+  \qquad\textrm{even function}
+\]
+
+\appendix
+
+%\chapter{Definitions, Fourier transforms}
+
+\section{Definitions, notations}
+
+\[
+\Omega = N_k \Omega_{\rm cell} \qquad \textrm{Crystal Volume}
+\]
+\[
+\Omega_{\rm BZ} = \frac{(2\pi)^3}{\Omega_{\rm cell}}
+\]
+
+\[
+\frac{1}{(2 \pi)^3} \int_{\rm BZ} dk = \frac{1}{\Omega} \sum_k^{\rm BZ}
+\]
+
+\[
+\frac{1}{\Omega_{\rm BZ}} \int_{\rm BZ} dk = \frac{1}{N_k} \sum_k^{\rm BZ}
+\]
+
+\section{Fourier transform definition}
+
+\[
+  f(\omega) = \int dt \, e^{-i\omega t} f(t)
+  \qquad \textrm{direct fourier transform}
+\]
+\[
+  f(t) = \frac{1}{2\pi} \int d\omega \, f(\omega) e^{i\omega t}
+  \qquad \textrm{inverse fourier transform}
+\]
+
+\newpage
+
+\section{Fourier transform of a two lattice indices quantity}
+
+\begin{eqnarray*}
+&&
+f(q,G_1,G_2) = \frac{1}{(2 \pi)^3} \int dr_1 dr_2 \, e^{-i (q+G_1) r_1} f(r_1.r_2) e^{i (q+G_2) r_2}
+\\ &&
+f(r_1,r_2) = \frac{1}{(2 \pi)^3} \int_{\rm BZ} dq \, \sum_{G_1,G_2}
+e^{i (q+G_1) r_1} f(q,G_1.G_2) e^{-i (q+G_2) r_2}
+\\ &&
+f(r_1,r_2) = \frac{1}{\Omega} \sum_{q,G_1,G_2}
+e^{i (q+G_1) r_1} f(q,G_1.G_2) e^{-i (q+G_2) r_2}
+\end{eqnarray*}
+
+Demonstration:
+\begin{eqnarray*}
+\quad &&
+f(Q_1,Q_2) = \frac{1}{(2 \pi)^3} \int dr_1 dr_2 \, e^{-i Q_1 r_1} f(r_1.r_2) e^{i Q_2 r_2}
+\qquad \textrm{definition fourier transform}
+\\ &&
+f(r_1,r_2) = \frac{1}{(2 \pi)^3} \int dQ_1 dQ_2 \, e^{i Q_1 r_1} f(Q_1.Q_2) e^{-i Q_2 r_2}
+\qquad \textrm{definition inverse fourier transform}
+\\ && \quad
+f(r_1+R,r_2+R) = f(r_1,r_2)
+\qquad \textrm{lattice periodicity}
+\\ && \quad
+\frac{1}{(2 \pi)^3} \int dQ_1 dQ_2 \, e^{i Q_1 (r_1+R)} f(Q_1.Q_2) e^{-i Q_2 (r_2+R)}
+= \frac{1}{(2 \pi)^3} \int dQ_1 dQ_2 \, e^{i Q_1 r_1} f(Q_1.Q_2) e^{-i Q_2 r_2}
+\\ && \quad
+\frac{1}{(2 \pi)^3} \int dq_1 dq_2 \, \sum_{G_1,G_2}
+e^{i (q_1+G_1) (r_1+R)} f(q_1.q_2,G_1,G_2) e^{-i (q_2+G_2) (r_2+R)}
+\\ && \quad
+= \frac{1}{(2 \pi)^3} \int dq_1 dq_2 \, \sum_{G_1,G_2}
+e^{i (q_1+G_1) r_1} f(q_1.q_2,G_1,G_2) e^{-i (q_2+G_2) r_2}
+\\ && \quad
+e^{i G_1 R} = e^{-i G_2 R} = 1
+\\ && \quad
+e^{i (q_1 - q_2) R} = 1 \quad \Rightarrow \quad q_1 = q_2
+\quad \Rightarrow \quad f(q_1.q_2,G_1,G_2) = f(q_1,G_1,G_2) \delta(q_1-q_2)
+\end{eqnarray*}
+
+\newpage
+
+
+\section{Case $q \rightarrow 0, G=0$ for $\rho^2(q,G=0) / q^2$}
+
+\[
+F = \frac{1}{\Omega} \sum_q^{\rm BZ} \frac{f(q)}{q^2} =
+\frac{1}{\Omega} f(q=0) I_{\rm SZ} + \frac{1}{\Omega} \sum_{q\ne 0}^{\rm BZ} \frac{f(q)}{q^2}
+\]
+
+\[
+I_{\rm SZ} = \frac{\Omega}{(2\pi)^3} \int_{\Omega_{\rm BZ}/N_k} d{\bf q} \frac{1}{q^2} =
+\frac{N_k}{\Omega_{\rm BZ}} \int_{\Omega_{\rm BZ}/N_k} d{\bf q} \frac{1}{q^2}
+\]
+
+If we assume a spheric Brillouin zone of volume $V$ and radius $(3 V/4\pi)^{1/3}$:
+\[
+\frac{1}{V} \int_V d{\bf q} \frac{1}{q^2} = \frac{4\pi}{V} \int_0^{(3 V/4\pi)^{1/3}} dq
+= 3^{1/3} (4\pi)^{2/3} V^{-2/3}
+\]
+\[
+I_{\rm SZ} = 7.79 \left( \frac{\Omega_{\rm BZ}}{N_k}\right)^{-2/3}
+\]
+In the case of a Brillouin Zone shape such for an fcc material:
+\[
+I_{\rm SZ} = 7.44 \left( \frac{\Omega_{\rm BZ}}{N_k}\right)^{-2/3}
+\]
+For other materials:
+
+sc: 6.188
+
+fcc: 7.431
+
+bcc: 6.946
+
+wz: 5.255 (hcp for ideal u=3/8 wurzite)
+
+
+
+
+
+
+
+
+\end{document}

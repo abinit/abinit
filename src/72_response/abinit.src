@@ -1,0 +1,100 @@
+# -*- Python -*-
+#
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Source files making up the 6response library
+#
+
+# Source file attributes
+ABI_SRC_NIL = 0     # No attribute
+ABI_SRC_BLT = 1     # The file is built by a script
+ABI_SRC_DEP = 2     # The file depends on other files
+
+# Source files
+sources = [
+ "corrmetalwf1.F90",
+ "ddb_io_out.F90",
+ "ddb_write_blok.F90",
+ "dfptff_bec.F90",
+ "dfptff_die.F90",
+ "dfptff_ebp.F90",
+ "dfptff_edie.F90",
+ "dfptff_gbefd.F90",
+ "dfptnl_doutput.F90",
+ "dfptff_gradberry.F90",
+ "dfptff_initberry.F90",
+ "dfptnl_resp.F90",
+ "dfpt_cgwf.F90",
+ "dfpt_accrho.F90",
+ "dfpt_dyfro.F90",
+ "dfpt_dyout.F90",
+ "dfpt_dyxc1.F90",
+ "dfpt_eltfrhar.F90",
+ "dfpt_eltfrkin.F90",
+ "dfpt_eltfrloc.F90",
+ "dfpt_eltfrxc.F90",
+ "dfpt_etot.F90",
+ "dfpt_ewald.F90",
+ "dfpt_gatherdy.F90",
+ "dfpt_mkrho.F90",
+ "dfpt_mkvxcstr.F90",
+ "dfpt_mkvxcstrgga.F90",
+ "dfpt_mkcore.F90",
+ "dfpt_newvtr.F90",
+ "dfpt_nselt.F90",
+ "dfpt_nstdy.F90",
+ "dfpt_nsteltwf.F90",
+ "dfpt_nstpaw.F90",
+ "dfpt_nstwf.F90",
+ "dfpt_phfrq.F90",
+ "dfpt_prtph.F90",
+ "dfpt_prtene.F90",
+ "dfpt_rhofermi.F90",
+ "dfpt_rhotov.F90",
+ "dfpt_scfcv.F90",
+ "dfpt_sydy.F90",
+ "dfpt_sygra.F90",
+ "dfpt_symph.F90",
+ "dfpt_vlocal.F90",
+ "dfpt_vtorho.F90",
+ "dfpt_vtowfk.F90",
+ "dfpt_wfkfermi.F90",
+ "d2kindstr2.F90",
+ "d2frnl.F90",
+ "eigen_meandege.F90",
+ "elph2_fanddw.F90",
+ "eltxccore.F90",
+ "elt_ewald.F90",
+ "eig2stern.F90",
+ "eig2tot.F90",
+ "gaugetransfo.F90",
+ "getshell.F90",
+ "hartrestr.F90",
+ "inpgkk.F90",
+ "kptfine_av.F90",
+ "m_ddb.F90",
+ "m_dvdb.F90",
+ "m_efmas.F90",
+ "m_eig2d.F90",
+ "m_rf2.F90",
+ "m_paral_pert.F90",
+ "newfermie1.F90",
+ "outbsd.F90",
+ "outddbnc.F90",
+ "outgkk.F90",
+ "qmatrix.F90",
+ "redgr.F90",
+ "rf2_init.F90",
+ "rotate_rho.F90",
+ "smeared_delta.F90",
+ "sytens.F90",
+ "vlocalstr.F90",
+ "wrtloctens.F90",
+]
+# IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
+# This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

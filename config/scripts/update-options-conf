@@ -1,0 +1,59 @@
+#!/usr/bin/env python
+#
+# Copyright (C) 2010-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+from time import gmtime,strftime
+
+import commands
+import os
+import re
+import sys
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Main program
+#
+
+# Initial setup
+my_name   = "update-options-conf"
+my_config = "config/specs/options.conf"
+
+# Check if we are in the top of the ABINIT source tree
+if ( not os.path.exists("configure.ac") or
+     not os.path.exists("src/98_main/abinit.F90") ):
+  print "%s: You must be in the top of an ABINIT source tree." % my_name
+  print "%s: Aborting now." % my_name
+  sys.exit(1)
+
+# Check config file(s)
+if ( not os.path.exists(my_config) ):
+  print "%s: Could not find config file (%s)." % (my_name,cnf_file)
+  print "%s: Aborting now." % my_name
+  sys.exit(2)
+
+# What time is it?
+now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
+
+# Init
+re_st1 = re.compile("^status.*(removed)")
+re_st2 = re.compile("^status.*(changed|new|renamed)")
+re_sec = re.compile("^\\[.*\\]$")
+opt_inp = file(my_config,"r").readlines()
+opt_out = ""
+
+# Process config file
+for line in opt_inp:
+
+  if ( re_st1.match(line) ):
+    opt_out += re.sub("removed","dropped",line)
+  elif ( not re_st2.match(line) ):
+    opt_out += line
+
+# Rewrite config file
+file(my_config,"w").write(opt_out)

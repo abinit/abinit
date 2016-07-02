@@ -1,0 +1,16 @@
+This directory, v67mbpt, contains tests which
+are related to the development of the Many-Body Perturbation Theory in
+version 6.x.x  and 7.x.x.of Abinit
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+
+------------------------------------------------------------------
+
+* Tests 01-10 are for GW calculations (screening and sigma part)
+
+* Tests 11-20 concern the Bethe-Salpeter solver
+
+* Tests beyond 20 shoud follow a classification that has not yet been established. 
+
+------------------------------------------------------------------

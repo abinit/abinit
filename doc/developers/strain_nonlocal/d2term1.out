@@ -1,0 +1,469 @@
+elseif(rank==0) then#
+cm(1,1)=Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m11)(s1,s2)#
+cm(1,2)=Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+   4*Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+   Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m22)(s1,s2)#
+cm(1,3)=Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+   4*Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+   Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m33)(s1,s2)#
+cm(1,4)=2*(Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+     2*Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+     2*Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+     Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m23)(s1,s2))#
+cm(1,5)=2*(Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+     Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m13)(s1,s2))#
+cm(1,6)=2*(Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+     Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m12)(s1,s2))#
+cm(1,7)=2*(Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+     Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m22)(s1,s2))#
+cm(1,8)=2*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+     2*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+     2*Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+     Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(1,9)=2*(2*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+     Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+     Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+     2*Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m23)(s1,s2))#
+cm(1,10)=2*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+     Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(1,11)=Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m22)(s1,s2)#
+cm(1,12)=Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+   4*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+   Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m33)(s1,s2)#
+cm(1,13)=2*(Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+     Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m23)(s1,s2))#
+cm(1,14)=2*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+     Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(1,15)=Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m33)(s1,s2)#
+elseif(rank==1) then#
+cm(1,1)=m11(s1,s2)*Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m11)(s1,s2)#
+cm(2,1)=m12(s1,s2)*Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m11)(s1,s2)#
+cm(3,1)=m13(s1,s2)*Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m11)(s1,s2)#
+cm(1,2)=2*m12(s1,s2)*(Derivative(0,1)(m12)(s1,s2)*
+       Derivative(1,0)(m11)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m12)(s1,s2)) +
+   m11(s1,s2)*(Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+      4*Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m22)(s1,s2))#
+cm(2,2)=2*m22(s1,s2)*(Derivative(0,1)(m12)(s1,s2)*
+       Derivative(1,0)(m11)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m12)(s1,s2)) +
+   m12(s1,s2)*(Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+      4*Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m22)(s1,s2))#
+cm(3,2)=2*m23(s1,s2)*(Derivative(0,1)(m12)(s1,s2)*
+       Derivative(1,0)(m11)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m12)(s1,s2)) +
+   m13(s1,s2)*(Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+      4*Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m22)(s1,s2))#
+cm(1,3)=2*m13(s1,s2)*(Derivative(0,1)(m13)(s1,s2)*
+       Derivative(1,0)(m11)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m13)(s1,s2)) +
+   m11(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+      4*Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(2,3)=2*m23(s1,s2)*(Derivative(0,1)(m13)(s1,s2)*
+       Derivative(1,0)(m11)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m13)(s1,s2)) +
+   m12(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+      4*Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(3,3)=2*m33(s1,s2)*(Derivative(0,1)(m13)(s1,s2)*
+       Derivative(1,0)(m11)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m13)(s1,s2)) +
+   m13(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+      4*Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(1,4)=2*((m13(s1,s2)*Derivative(0,1)(m12)(s1,s2) +
+        m12(s1,s2)*Derivative(0,1)(m13)(s1,s2) +
+        m11(s1,s2)*Derivative(0,1)(m23)(s1,s2))*Derivative(1,0)(m11)(s1,s2) +
+     (m13(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+        2*m11(s1,s2)*Derivative(0,1)(m13)(s1,s2))*Derivative(1,0)(m12)(s1,s2) \
++ (m12(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+        2*m11(s1,s2)*Derivative(0,1)(m12)(s1,s2))*Derivative(1,0)(m13)(s1,s2) \
++ m11(s1,s2)*Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m23)(s1,s2))#
+cm(2,4)=2*((m23(s1,s2)*Derivative(0,1)(m12)(s1,s2) +
+        m22(s1,s2)*Derivative(0,1)(m13)(s1,s2) +
+        m12(s1,s2)*Derivative(0,1)(m23)(s1,s2))*Derivative(1,0)(m11)(s1,s2) +
+     (m23(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+        2*m12(s1,s2)*Derivative(0,1)(m13)(s1,s2))*Derivative(1,0)(m12)(s1,s2) \
++ (m22(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+        2*m12(s1,s2)*Derivative(0,1)(m12)(s1,s2))*Derivative(1,0)(m13)(s1,s2) \
++ m12(s1,s2)*Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m23)(s1,s2))#
+cm(3,4)=2*((m33(s1,s2)*Derivative(0,1)(m12)(s1,s2) +
+        m23(s1,s2)*Derivative(0,1)(m13)(s1,s2) +
+        m13(s1,s2)*Derivative(0,1)(m23)(s1,s2))*Derivative(1,0)(m11)(s1,s2) +
+     (m33(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+        2*m13(s1,s2)*Derivative(0,1)(m13)(s1,s2))*Derivative(1,0)(m12)(s1,s2) \
++ (m23(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+        2*m13(s1,s2)*Derivative(0,1)(m12)(s1,s2))*Derivative(1,0)(m13)(s1,s2) \
++ m13(s1,s2)*Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m23)(s1,s2))#
+cm(1,5)=m13(s1,s2)*Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+   2*m11(s1,s2)*(Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m13)(s1,s2))#
+cm(2,5)=m23(s1,s2)*Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+   2*m12(s1,s2)*(Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m13)(s1,s2))#
+cm(3,5)=m33(s1,s2)*Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+   2*m13(s1,s2)*(Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m13)(s1,s2))#
+cm(1,6)=m12(s1,s2)*Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+   2*m11(s1,s2)*(Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m12)(s1,s2))#
+cm(2,6)=m22(s1,s2)*Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+   2*m12(s1,s2)*(Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m12)(s1,s2))#
+cm(3,6)=m23(s1,s2)*Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+   2*m13(s1,s2)*(Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m12)(s1,s2))#
+cm(1,7)=m12(s1,s2)*(Derivative(0,1)(m22)(s1,s2)*
+       Derivative(1,0)(m11)(s1,s2) +
+      4*Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m22)(s1,s2)) +
+   2*m11(s1,s2)*(Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+      Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m22)(s1,s2))#
+cm(2,7)=m22(s1,s2)*(Derivative(0,1)(m22)(s1,s2)*
+       Derivative(1,0)(m11)(s1,s2) +
+      4*Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m22)(s1,s2)) +
+   2*m12(s1,s2)*(Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+      Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m22)(s1,s2))#
+cm(3,7)=m23(s1,s2)*(Derivative(0,1)(m22)(s1,s2)*
+       Derivative(1,0)(m11)(s1,s2) +
+      4*Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m22)(s1,s2)) +
+   2*m13(s1,s2)*(Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+      Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m22)(s1,s2))#
+cm(1,8)=2*m13(s1,s2)*Derivative(0,1)(m23)(s1,s2)*
+    Derivative(1,0)(m11)(s1,s2) +
+   m12(s1,s2)*Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+   2*(2*m13(s1,s2)*Derivative(0,1)(m13)(s1,s2) +
+      m11(s1,s2)*Derivative(0,1)(m33)(s1,s2))*Derivative(1,0)(m12)(s1,s2) +
+   4*(m13(s1,s2)*Derivative(0,1)(m12)(s1,s2) +
+      m12(s1,s2)*Derivative(0,1)(m13)(s1,s2) +
+      m11(s1,s2)*Derivative(0,1)(m23)(s1,s2))*Derivative(1,0)(m13)(s1,s2) +
+   2*(m13(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+      2*m11(s1,s2)*Derivative(0,1)(m13)(s1,s2))*Derivative(1,0)(m23)(s1,s2) +
+   (m12(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+      2*m11(s1,s2)*Derivative(0,1)(m12)(s1,s2))*Derivative(1,0)(m33)(s1,s2)#
+cm(2,8)=2*m23(s1,s2)*Derivative(0,1)(m23)(s1,s2)*
+    Derivative(1,0)(m11)(s1,s2) +
+   m22(s1,s2)*Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+   2*(2*m23(s1,s2)*Derivative(0,1)(m13)(s1,s2) +
+      m12(s1,s2)*Derivative(0,1)(m33)(s1,s2))*Derivative(1,0)(m12)(s1,s2) +
+   4*(m23(s1,s2)*Derivative(0,1)(m12)(s1,s2) +
+      m22(s1,s2)*Derivative(0,1)(m13)(s1,s2) +
+      m12(s1,s2)*Derivative(0,1)(m23)(s1,s2))*Derivative(1,0)(m13)(s1,s2) +
+   2*(m23(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+      2*m12(s1,s2)*Derivative(0,1)(m13)(s1,s2))*Derivative(1,0)(m23)(s1,s2) +
+   (m22(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+      2*m12(s1,s2)*Derivative(0,1)(m12)(s1,s2))*Derivative(1,0)(m33)(s1,s2)#
+cm(3,8)=2*m33(s1,s2)*Derivative(0,1)(m23)(s1,s2)*
+    Derivative(1,0)(m11)(s1,s2) +
+   m23(s1,s2)*Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+   2*(2*m33(s1,s2)*Derivative(0,1)(m13)(s1,s2) +
+      m13(s1,s2)*Derivative(0,1)(m33)(s1,s2))*Derivative(1,0)(m12)(s1,s2) +
+   4*(m33(s1,s2)*Derivative(0,1)(m12)(s1,s2) +
+      m23(s1,s2)*Derivative(0,1)(m13)(s1,s2) +
+      m13(s1,s2)*Derivative(0,1)(m23)(s1,s2))*Derivative(1,0)(m13)(s1,s2) +
+   2*(m33(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+      2*m13(s1,s2)*Derivative(0,1)(m13)(s1,s2))*Derivative(1,0)(m23)(s1,s2) +
+   (m23(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+      2*m13(s1,s2)*Derivative(0,1)(m12)(s1,s2))*Derivative(1,0)(m33)(s1,s2)#
+cm(1,9)=m13(s1,s2)*Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+   2*m12(s1,s2)*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+   4*(m13(s1,s2)*Derivative(0,1)(m12)(s1,s2) +
+      m12(s1,s2)*Derivative(0,1)(m13)(s1,s2) +
+      m11(s1,s2)*Derivative(0,1)(m23)(s1,s2))*Derivative(1,0)(m12)(s1,s2) +
+   2*(2*m12(s1,s2)*Derivative(0,1)(m12)(s1,s2) +
+      m11(s1,s2)*Derivative(0,1)(m22)(s1,s2))*Derivative(1,0)(m13)(s1,s2) +
+   (m13(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+      2*m11(s1,s2)*Derivative(0,1)(m13)(s1,s2))*Derivative(1,0)(m22)(s1,s2) +
+   2*(m12(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+      2*m11(s1,s2)*Derivative(0,1)(m12)(s1,s2))*Derivative(1,0)(m23)(s1,s2)#
+cm(2,9)=m23(s1,s2)*Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+   2*m22(s1,s2)*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+   4*(m23(s1,s2)*Derivative(0,1)(m12)(s1,s2) +
+      m22(s1,s2)*Derivative(0,1)(m13)(s1,s2) +
+      m12(s1,s2)*Derivative(0,1)(m23)(s1,s2))*Derivative(1,0)(m12)(s1,s2) +
+   2*(2*m22(s1,s2)*Derivative(0,1)(m12)(s1,s2) +
+      m12(s1,s2)*Derivative(0,1)(m22)(s1,s2))*Derivative(1,0)(m13)(s1,s2) +
+   (m23(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+      2*m12(s1,s2)*Derivative(0,1)(m13)(s1,s2))*Derivative(1,0)(m22)(s1,s2) +
+   2*(m22(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+      2*m12(s1,s2)*Derivative(0,1)(m12)(s1,s2))*Derivative(1,0)(m23)(s1,s2)#
+cm(3,9)=m33(s1,s2)*Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+   2*m23(s1,s2)*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m11)(s1,s2) +
+   4*(m33(s1,s2)*Derivative(0,1)(m12)(s1,s2) +
+      m23(s1,s2)*Derivative(0,1)(m13)(s1,s2) +
+      m13(s1,s2)*Derivative(0,1)(m23)(s1,s2))*Derivative(1,0)(m12)(s1,s2) +
+   2*(2*m23(s1,s2)*Derivative(0,1)(m12)(s1,s2) +
+      m13(s1,s2)*Derivative(0,1)(m22)(s1,s2))*Derivative(1,0)(m13)(s1,s2) +
+   (m33(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+      2*m13(s1,s2)*Derivative(0,1)(m13)(s1,s2))*Derivative(1,0)(m22)(s1,s2) +
+   2*(m23(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+      2*m13(s1,s2)*Derivative(0,1)(m12)(s1,s2))*Derivative(1,0)(m23)(s1,s2)#
+cm(1,10)=m13(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*
+       Derivative(1,0)(m11)(s1,s2) +
+      4*Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m33)(s1,s2)) +
+   2*m11(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+      Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(2,10)=m23(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*
+       Derivative(1,0)(m11)(s1,s2) +
+      4*Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m33)(s1,s2)) +
+   2*m12(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+      Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(3,10)=m33(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*
+       Derivative(1,0)(m11)(s1,s2) +
+      4*Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m33)(s1,s2)) +
+   2*m13(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+      Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(1,11)=m11(s1,s2)*Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+   2*m12(s1,s2)*(Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+      Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m22)(s1,s2))#
+cm(2,11)=m12(s1,s2)*Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+   2*m22(s1,s2)*(Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+      Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m22)(s1,s2))#
+cm(3,11)=m13(s1,s2)*Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+   2*m23(s1,s2)*(Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+      Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m22)(s1,s2))#
+cm(1,12)=2*m13(s1,s2)*(2*Derivative(0,1)(m23)(s1,s2)*
+       Derivative(1,0)(m12)(s1,s2) +
+      Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+      Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+      2*Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m23)(s1,s2)) +
+   2*m12(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+      2*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+      2*Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+      Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m33)(s1,s2)) +
+   m11(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+      4*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+      Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(2,12)=2*m23(s1,s2)*(2*Derivative(0,1)(m23)(s1,s2)*
+       Derivative(1,0)(m12)(s1,s2) +
+      Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+      Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+      2*Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m23)(s1,s2)) +
+   2*m22(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+      2*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+      2*Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+      Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m33)(s1,s2)) +
+   m12(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+      4*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+      Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(3,12)=2*m33(s1,s2)*(2*Derivative(0,1)(m23)(s1,s2)*
+       Derivative(1,0)(m12)(s1,s2) +
+      Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+      Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+      2*Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m23)(s1,s2)) +
+   2*m23(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+      2*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+      2*Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+      Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m33)(s1,s2)) +
+   m13(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+      4*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+      Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(1,13)=2*(m13(s1,s2)*(Derivative(0,1)(m22)(s1,s2)*
+         Derivative(1,0)(m12)(s1,s2) +
+        Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m22)(s1,s2)) +
+     m12(s1,s2)*(2*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+        Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+        Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+        2*Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m23)(s1,s2)) +
+     m11(s1,s2)*(Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+        Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m23)(s1,s2)))#
+cm(2,13)=2*(m23(s1,s2)*(Derivative(0,1)(m22)(s1,s2)*
+         Derivative(1,0)(m12)(s1,s2) +
+        Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m22)(s1,s2)) +
+     m22(s1,s2)*(2*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+        Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+        Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+        2*Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m23)(s1,s2)) +
+     m12(s1,s2)*(Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+        Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m23)(s1,s2)))#
+cm(3,13)=2*(m33(s1,s2)*(Derivative(0,1)(m22)(s1,s2)*
+         Derivative(1,0)(m12)(s1,s2) +
+        Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m22)(s1,s2)) +
+     m23(s1,s2)*(2*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m12)(s1,s2) +
+        Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+        Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+        2*Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m23)(s1,s2)) +
+     m13(s1,s2)*(Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+        Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m23)(s1,s2)))#
+cm(1,14)=2*(m13(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*
+         Derivative(1,0)(m12)(s1,s2) +
+        2*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+        2*Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+        Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m33)(s1,s2)) +
+     m12(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+        Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m33)(s1,s2)) +
+     m11(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+        Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m33)(s1,s2)))#
+cm(2,14)=2*(m23(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*
+         Derivative(1,0)(m12)(s1,s2) +
+        2*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+        2*Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+        Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m33)(s1,s2)) +
+     m22(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+        Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m33)(s1,s2)) +
+     m12(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+        Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m33)(s1,s2)))#
+cm(3,14)=2*(m33(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*
+         Derivative(1,0)(m12)(s1,s2) +
+        2*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+        2*Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+        Derivative(0,1)(m12)(s1,s2)*Derivative(1,0)(m33)(s1,s2)) +
+     m23(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+        Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m33)(s1,s2)) +
+     m13(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+        Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m33)(s1,s2)))#
+cm(1,15)=m11(s1,s2)*Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m33)(s1,s2) +
+   2*m13(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+      Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(2,15)=m12(s1,s2)*Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m33)(s1,s2) +
+   2*m23(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+      Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(3,15)=m13(s1,s2)*Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m33)(s1,s2) +
+   2*m33(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m13)(s1,s2) +
+      Derivative(0,1)(m13)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(1,16)=m12(s1,s2)*Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m22)(s1,s2)#
+cm(2,16)=m22(s1,s2)*Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m22)(s1,s2)#
+cm(3,16)=m23(s1,s2)*Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m22)(s1,s2)#
+cm(1,17)=2*m13(s1,s2)*(Derivative(0,1)(m23)(s1,s2)*
+       Derivative(1,0)(m22)(s1,s2) +
+      Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m23)(s1,s2)) +
+   m12(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+      4*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+      Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(2,17)=2*m23(s1,s2)*(Derivative(0,1)(m23)(s1,s2)*
+       Derivative(1,0)(m22)(s1,s2) +
+      Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m23)(s1,s2)) +
+   m22(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+      4*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+      Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(3,17)=2*m33(s1,s2)*(Derivative(0,1)(m23)(s1,s2)*
+       Derivative(1,0)(m22)(s1,s2) +
+      Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m23)(s1,s2)) +
+   m23(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+      4*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+      Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(1,18)=m13(s1,s2)*Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+   2*m12(s1,s2)*(Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+      Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m23)(s1,s2))#
+cm(2,18)=m23(s1,s2)*Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+   2*m22(s1,s2)*(Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+      Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m23)(s1,s2))#
+cm(3,18)=m33(s1,s2)*Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+   2*m23(s1,s2)*(Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m22)(s1,s2) +
+      Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m23)(s1,s2))#
+cm(1,19)=m13(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*
+       Derivative(1,0)(m22)(s1,s2) +
+      4*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+      Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m33)(s1,s2)) +
+   2*m12(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+      Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(2,19)=m23(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*
+       Derivative(1,0)(m22)(s1,s2) +
+      4*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+      Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m33)(s1,s2)) +
+   2*m22(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+      Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(3,19)=m33(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*
+       Derivative(1,0)(m22)(s1,s2) +
+      4*Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+      Derivative(0,1)(m22)(s1,s2)*Derivative(1,0)(m33)(s1,s2)) +
+   2*m23(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+      Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(1,20)=m12(s1,s2)*Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m33)(s1,s2) +
+   2*m13(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+      Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(2,20)=m22(s1,s2)*Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m33)(s1,s2) +
+   2*m23(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+      Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(3,20)=m23(s1,s2)*Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m33)(s1,s2) +
+   2*m33(s1,s2)*(Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m23)(s1,s2) +
+      Derivative(0,1)(m23)(s1,s2)*Derivative(1,0)(m33)(s1,s2))#
+cm(1,21)=m13(s1,s2)*Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m33)(s1,s2)#
+cm(2,21)=m23(s1,s2)*Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m33)(s1,s2)#
+cm(3,21)=m33(s1,s2)*Derivative(0,1)(m33)(s1,s2)*Derivative(1,0)(m33)(s1,s2)#
+elseif(rank==2) then#
+cm(1,1)=1.*m11(s1,s2)**2*Derivative(0,1)(m11)(s1,s2)*
+   Derivative(1,0)(m11)(s1,s2)#
+cm(2,1)=((6.*m12(s1,s2)**2 - 2.*m11(s1,s2)*m22(s1,s2))*
+     Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m11)(s1,s2))/4.#
+cm(3,1)=((6.*m13(s1,s2)**2 - 2.*m11(s1,s2)*m33(s1,s2))*
+     Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m11)(s1,s2))/4.#
+cm(4,1)=((6.*m12(s1,s2)*m13(s1,s2) - 2.*m11(s1,s2)*m23(s1,s2))*
+     Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m11)(s1,s2))/2.#
+cm(5,1)=2.*m11(s1,s2)*m13(s1,s2)*Derivative(0,1)(m11)(s1,s2)*
+   Derivative(1,0)(m11)(s1,s2)#
+cm(6,1)=2.*m11(s1,s2)*m12(s1,s2)*Derivative(0,1)(m11)(s1,s2)*
+   Derivative(1,0)(m11)(s1,s2)#
+cm(1,2)=(12*(2*(6.*m12(s1,s2)**2 - 2.*m11(s1,s2)*m22(s1,s2))*
+         Derivative(0,1)(m11)(s1,s2) +
+        32.*m11(s1,s2)*m12(s1,s2)*Derivative(0,1)(m12)(s1,s2) +
+        8.*m11(s1,s2)**2*Derivative(0,1)(m22)(s1,s2))*
+      Derivative(1,0)(m11)(s1,s2) +
+     384.*m11(s1,s2)*(m12(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+        m11(s1,s2)*Derivative(0,1)(m12)(s1,s2))*Derivative(1,0)(m12)(s1,s2) \
++ 96.*m11(s1,s2)**2*Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m22)(s1,s2))/
+   96.#
+cm(2,2)=(3*(8.*m22(s1,s2)**2*Derivative(0,1)(m11)(s1,s2) +
+        32.*m12(s1,s2)*m22(s1,s2)*Derivative(0,1)(m12)(s1,s2) +
+        2*(6.*m12(s1,s2)**2 - 2.*m11(s1,s2)*m22(s1,s2))*
+         Derivative(0,1)(m22)(s1,s2))*Derivative(1,0)(m11)(s1,s2) +
+     4*(24.*m12(s1,s2)*m22(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+        6*(6.*m12(s1,s2)**2 - 2.*m11(s1,s2)*m22(s1,s2))*
+         Derivative(0,1)(m12)(s1,s2))*Derivative(1,0)(m12)(s1,s2) +
+     6*(6.*m12(s1,s2)**2 - 2.*m11(s1,s2)*m22(s1,s2))*
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m22)(s1,s2))/24.#
+cm(3,2)=(6*((6.*m23(s1,s2)**2 - 2.*m22(s1,s2)*m33(s1,s2))*
+         Derivative(0,1)(m11)(s1,s2) +
+        4*(6.*m13(s1,s2)*m23(s1,s2) - 2.*m12(s1,s2)*m33(s1,s2))*
+         Derivative(0,1)(m12)(s1,s2) +
+        (6.*m13(s1,s2)**2 - 2.*m11(s1,s2)*m33(s1,s2))*
+         Derivative(0,1)(m22)(s1,s2))*Derivative(1,0)(m11)(s1,s2) +
+     4*(6*(6.*m13(s1,s2)*m23(s1,s2) - 2.*m12(s1,s2)*m33(s1,s2))*
+         Derivative(0,1)(m11)(s1,s2) +
+        6*(6.*m13(s1,s2)**2 - 2.*m11(s1,s2)*m33(s1,s2))*
+         Derivative(0,1)(m12)(s1,s2))*Derivative(1,0)(m12)(s1,s2) +
+     6*(6.*m13(s1,s2)**2 - 2.*m11(s1,s2)*m33(s1,s2))*
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m22)(s1,s2))/24.#
+cm(4,2)=(3*(8.*m22(s1,s2)*m23(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+        8*(3.*m13(s1,s2)*m22(s1,s2) + 1.*m12(s1,s2)*m23(s1,s2))*
+         Derivative(0,1)(m12)(s1,s2) +
+        2*(6.*m12(s1,s2)*m13(s1,s2) - 2.*m11(s1,s2)*m23(s1,s2))*
+         Derivative(0,1)(m22)(s1,s2))*Derivative(1,0)(m11)(s1,s2) +
+     4*(6*(3.*m13(s1,s2)*m22(s1,s2) + 1.*m12(s1,s2)*m23(s1,s2))*
+         Derivative(0,1)(m11)(s1,s2) +
+        6*(6.*m12(s1,s2)*m13(s1,s2) - 2.*m11(s1,s2)*m23(s1,s2))*
+         Derivative(0,1)(m12)(s1,s2))*Derivative(1,0)(m12)(s1,s2) +
+     6*(6.*m12(s1,s2)*m13(s1,s2) - 2.*m11(s1,s2)*m23(s1,s2))*
+      Derivative(0,1)(m11)(s1,s2)*Derivative(1,0)(m22)(s1,s2))/12.#
+cm(5,2)=(12*(m23(s1,s2)*(12.*m12(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+           24.*m11(s1,s2)*Derivative(0,1)(m12)(s1,s2)) +
+        m13(s1,s2)*(-4.*m22(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+           8.*(m12(s1,s2)*Derivative(0,1)(m12)(s1,s2) +
+              m11(s1,s2)*Derivative(0,1)(m22)(s1,s2))))*
+      Derivative(1,0)(m11)(s1,s2) +
+     16*(6*(1.*m12(s1,s2)*m13(s1,s2) + 3.*m11(s1,s2)*m23(s1,s2))*
+         Derivative(0,1)(m11)(s1,s2) +
+        24.*m11(s1,s2)*m13(s1,s2)*Derivative(0,1)(m12)(s1,s2))*
+      Derivative(1,0)(m12)(s1,s2) +
+     96.*m11(s1,s2)*m13(s1,s2)*Derivative(0,1)(m11)(s1,s2)*
+      Derivative(1,0)(m22)(s1,s2))/48.#
+cm(6,2)=(12*(8.*m12(s1,s2)**2*Derivative(0,1)(m12)(s1,s2) +
+        24.*m11(s1,s2)*m22(s1,s2)*Derivative(0,1)(m12)(s1,s2) +
+        8.*m12(s1,s2)*(m22(s1,s2)*Derivative(0,1)(m11)(s1,s2) +
+           m11(s1,s2)*Derivative(0,1)(m22)(s1,s2)))*
+      Derivative(1,0)(m11)(s1,s2) +
+     16*(6*(1.*m12(s1,s2)**2 + 3.*m11(s1,s2)*m22(s1,s2))*
+         Derivative(0,1)(m11)(s1,s2) +
+        24.*m11(s1,s2)*m12(s1,s2)*Derivative(0,1)(m12)(s1,s2))*
+      Derivative(1,0)(m12)(s1,s2) +
+     96.*m11(s1,s2)*m12(s1,s2)*Derivative(0,1)(m11)(s1,s2)*
+      Derivative(1,0)(m22)(s1,s2))/48.#

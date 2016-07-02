@@ -1,0 +1,131 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2006 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~ABINIT/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~ABINIT/Infos/contributors .
+</h5>
+
+<pre>
+Many thanks to the following contributors to the ABINIT project
+between September 2005 and January 2006 :
+
+(TO BE UPDATED)
+N. Bandeira, J.-M. Beuken, F. Bottin, M. Cote,
+J.-F. Danel, T. Deutsch, K. Dewhurst, P. Fons, M. Gatti, Ph. Ghosez,
+D. Hamann, F. Jollet, C. Morari, Mikami-san, G. Onida,
+S. Pesant, Y. Pouillon, G.-M. Rignanese, A. Roy,
+R. Shaltaf, S. Sharma, K.V. Shavanas, W. Shelton,
+M. Torrent, D. Vanderbilt, B. Van Renterghem, M. Veithen,
+M. Verstraete, E. Walter, C. Wiegert, X. Wu, G. Zerah, J. Zwanziger.
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 4.7, released on January, 20, 2006 (internal release only).
+
+Changes with respect to version 4.6 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS
+
+<OLD>
+A1. The number of filenames to be specified in anaddb.files has increased to 6.
+    The help file has been accordingly modified, see ~ABINIT/Infos/anaddb_help.html
+
+A2. The input variable zatnum has been definitely suppressed
+    (it was replaced by znucl since v3.4, more than two years ago, but still tolerated).
+</OLD>
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+<NEW>
+B1. GW part of ABINIT  (improvements by F. Bruneval):
+    (1) The GW part of ABINIT is now able to treat metals
+    (2) The GW part of ABINIT can be done without plasmon-pole model
+    (3) Hartree-Fock, screened exchange and COHSEX are implemented
+    (4) The Faleev method, see PRL <b>93</b>, 126406 (2004), is implemented.
+    Moreover, it is possible to do some self-consistency steps, by exploiting
+    different datasets (of course this is still rather primitive ...).
+    See the input variable gwcalctyp , as well as automatic tests Test_v4#84 to 88.
+    See also Fabien Bruneval's thesis, for results obtained for Cuprous Oxyde (Cu2O) thanks
+    to these techniques. A paper is in preparation.
+
+B2. GW part of ABINIT  (improvements by R. Shaltaf):
+    (1) Introduction of two new Plasmon Pole models
+            for GW calculations. See input variable : ppmodel.
+    (2) Parallelisation of GW calculations on k points. Still to be
+            documented, contact shaltaf@pcpm.ucl.ac.be for informations
+
+B3. Parallelisation of the FFT in the case wfoptalg=4 (ARoy and GZerah) See GZ mail on Nov 7
+
+B4. New version of lobpcg : wfoptalg=5 (lobpcgII)  (S. Le Roux, ARoy and GZerah) See GZ mail on Nov 7
+
+B5. Localized Wannier functions can be computed, thanks to new capabilities
+    of cut3d, provided by Joydeep Bhattacharjee and Umesh Waghmare.
+    See Test_v4#47-49, and the cut3d help file on the Web,
+    or ~ABINIT/Infos/cut3d_help.html
+    Note : not yet maximally localized Wannier functions ; still some how in development :
+    should be in main abinit instead of cut3d.
+</NEW>
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C1. In the file RunTests.pl,
+    add the ncdump program in the list of program (CODE_NCDUMP) that can be called
+    during a test. The path is (in the abinit folder): Lib_netcdf/bin/ncdump
+    When called, ncdump generate an ASCII file of the netCDF file and then the function
+    fldiff is used to compare this file with the reference(ASCII file).
+    Add the Cut3d option "-nofld". When Cut3d is called during a test and the option
+    is "-nofld", Cut3d run but the fldiff function is not called after.
+    New Tests_v4#100 and 101, Test_v4/README..
+    From M. Coté .
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D1. On-going work on band parallelisation in lobpcgccwf (A. Roy and G. Zerah).
+    (See mail ARoy 050531).
+
+<NEW>
+D2. New input variable inclvkb, to allow some speed up of the GW-screening calculation,
+    at the expense of some loss of accuracy.
+
+B3. GW part of ABINIT  (improvements by R. Shaltaf, still in testing):
+    (1) Introduction of two new Plasmon Pole models
+            for GW calculations. See input variable : ppmodel.
+    (2) Parallelisation of GW calculations on k points. Still to be
+            documented, contact shaltaf@pcpm.ucl.ac.be for informations
+
+D3. Philipp Plaenitz : parallelisation on the perturbations
+    See new input variables paral_rf and ngroup_rf
+    See Test_paral case K  (warning : still in development)
+
+D4. Thorsten Hoefler : parallelisation on the FFT based on MPI.
+    See new input variable gpara.
+    Warning : still in development.
+</pre>

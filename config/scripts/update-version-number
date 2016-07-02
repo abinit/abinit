@@ -1,0 +1,60 @@
+#!/usr/bin/env python
+#
+# Copyright (C) 2010-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+from time import gmtime,strftime
+
+import os
+import re
+import sys
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Main program
+#
+
+# Initial setup
+my_name   = "update-version-number"
+
+# Check if we are in the top of the ABINIT source tree
+if ( not os.path.exists("configure.ac") or
+     not os.path.exists("src/98_main/abinit.F90") ):
+  sys.stderr.write("%s: You must be at the top of an ABINIT source tree.\n" % \
+    (my_name))
+  sys.stderr.write("%s: Aborting now.\n" % (my_name))
+  sys.exit(1)
+
+# Check that we have a version number to put
+if ( len(sys.argv) < 2 ):
+  sys.stderr.write("%s: You must provide a version number.\n" % (my_name))
+  sys.exit(2)
+
+# What time is it?
+now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
+
+# Init
+tgt_version = sys.argv[1]
+
+# Prepare regular expressions
+ac_init = re.compile(r"^(AC_INIT\([^, ]*,)[^, ]*(.*)$", re.MULTILINE)
+
+# Change the version number in configure.ac
+ac_data = file("configure.ac", "r").read()
+ac_data = re.sub(ac_init, "\\1[%s]\\2" % (tgt_version), ac_data)
+file("configure.ac", "w").write(ac_data)
+
+# Change the version number in doc/configure.ac
+ac_data = file("doc/configure.ac", "r").read()
+ac_data = re.sub(ac_init, "\\1[%s]\\2" % (tgt_version), ac_data)
+file("doc/configure.ac", "w").write(ac_data)
+
+# Change the version number in tests/configure.ac
+ac_data = file("tests/configure.ac", "r").read()
+ac_data = re.sub(ac_init, "\\1[%s]\\2" % (tgt_version), ac_data)
+file("tests/configure.ac", "w").write(ac_data)

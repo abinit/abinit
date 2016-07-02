@@ -1,0 +1,39 @@
+!!****d* ABINIT/43_wvl_wrappers
+!! NAME
+!! 43_wvl_wrappers
+!!
+!! DESCRIPTION
+!!  FIXME: Description is missing
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! defs_PSolver.F90
+!! defs_wvltypes.F90
+!! interfaces_43_wvl_wrappers.F90
+!! m_abi2big.F90
+!! nullify_wvl_data.F90
+!! paw2wvl.F90
+!! paw2wvl_ij.F90
+!! wvl_cprjreorder.F90
+!! wvl_denspot_free.F90
+!! wvl_denspot_set.F90
+!! wvl_descr_atoms_set.F90
+!! wvl_descr_atoms_set_sym.F90
+!! wvl_descr_free.F90
+!! wvl_descr_psp_set.F90
+!! wvl_paw_free.F90
+!! wvl_projectors_free.F90
+!! wvl_projectors_set.F90
+!! wvl_setboxgeometry.F90
+!! wvl_setngfft.F90
+!! wvl_wfs_free.F90
+!! wvl_wfs_lr_copy.F90
+!! wvl_wfs_set.F90
+!!
+!!***

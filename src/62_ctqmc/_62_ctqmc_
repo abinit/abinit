@@ -1,0 +1,33 @@
+!!****d* ABINIT/62_ctqmc
+!! NAME
+!! 62_ctqmc
+!!
+!! DESCRIPTION
+!!  FIXME: Description is missing
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! interfaces_62_ctqmc.F90
+!! m_BathOperator.F90
+!! m_Ctqmc.F90
+!! m_CtqmcInterface.F90
+!! m_FFTHyb.F90
+!! m_GreenHyb.F90
+!! m_ImpurityOperator.F90
+!! m_ListCdagC.F90
+!! m_MapHyb.F90
+!! m_MatrixHyb.F90
+!! m_OurRng.F90
+!! m_Stat.F90
+!! m_Vector.F90
+!! m_VectorInt.F90
+!! m_data4entropyDMFT.F90
+!! m_global.F90
+!!
+!!***

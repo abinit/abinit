@@ -1,0 +1,5 @@
+num_wann 4
+num_iter 200
+
+!plotting
+wannier_plot =true

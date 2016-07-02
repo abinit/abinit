@@ -1,0 +1,202 @@
+\documentclass{article}
+%\documentclass[twocolumn,aps,prb]{revtex4}
+%\documentclass[preprint,aps,prb]{revtex4}
+
+%\usepackage[francais]{babel}
+%\usepackage{amsmath,amstext,amsthm,vmargin,enumerate,graphicx,caption}
+
+%\usepackage{graphicx}% Include figure files
+%\usepackage{dcolumn}% Align table columns on decimal point
+%\usepackage{bm}% bold math
+
+\begin{document}
+\
+\\
+%HEADER=======================================================================
+{\huge\textbf{Abinit Band Structure Maker \\ \\ MANUAL}} \ \ version 1.2 \\
+\\
+written by Benjamin Tardif \\
+benjamin.tardif@umontreal.ca \\
+questions, bug report and suggestions are welcome ! \\
+\\
+\\
+%PURPOSE======================================================================
+{\Large\textbf{Purpose :}} \\
+\\
+The purpose of this program is to provide an easy way to rapidly plot band structures from Abinit output files. \\
+\\
+\\
+%REQUIREMENTS=================================================================
+{\Large\textbf{Requirements :}} \\
+\\
+Before using the program, you need to have the python interpreter installed on your computer as well as the numerical python extension. \\
+\\
+python can be downloaded at : \textit{http://www.python.org/download} \\
+Numeric can be downloaded at : \textit{http://sourceforge.net/projects/numpy} \\
+\\
+\\
+%HOW TO USE THE PROGRAM=======================================================
+{\Large\textbf{How to use the program :}} \\
+\\
+\\
+%=====STEP 1====================================================================
+{\large{STEP 1 : produce a \textit{.dbs} file}} \\
+\\
+The first thing to do is to extract datas from an Abinit output file and produce a \textit{.dbs} file. (dbs stands for Data for Band Structure).
+To do so, you must execute the program and specify the name of the \textit{.out} file you wish to use. You can either launch the program alone : \\
+\\
+\texttt{> python AbinitBandStructureMaker.py} \\
+\\
+and enter the file name when asked, or you can directly enter the file name in the command line : \\
+\\
+\texttt{> python AbinitBandStructureMaker.py \textit{file.out}} \\
+\\
+If more than one dataset is present in your \textit{.out} file, the program will ask you to select the dataset(s) for which you wish to extract the k-point coordinates and associated energy eigenvalues. \\
+\\
+To select multiple datasets, enter corresponding numbers separated by commas.
+You can specify a group of successive datasets by entering two numbers separated by a minus sign,
+the two numbers being respectively the number of the first and the last dataset of the group. For example : \\
+
+\texttt{1,3-6,8} \\
+\\
+means that you want to extract datas from datasets 1,3,4,5,6 and 8. \\
+\\
+Once the datasets are entered correctly, the program will extract all the necessary datas and produce a \textit{.dbs} file. If everything goes well, you'll get the following message : \\
+\\
+\texttt{> "\textit{file.out.dbs}"  file created successfully} \\
+\\
+\\
+%=====STEP 2====================================================================
+{\large{STEP 2 : edit the \textit{.dbs} file}} \\
+\\
+Now that the \textit{.dbs} file has been created, you can modify it before plotting the band structure. Edit the \textit{.dbs} with the program of your choice.
+You can edit the following sections : \\
+\\
+\texttt{GRAPH TITLE:} \\
+Enter the title of your graph \\
+\\
+\texttt{NUMBER OF VALENCE BANDS:} \\
+Enter the number of valence bands in your system, which is the same as the number of the \textit{HOMO} (\textit{H}igher \textit{O}ccupied \textit{M}olecular \textit{O}rbital) band. \\
+\\
+\texttt{FERMI ENERGY (eV):} \\
+Enter the fermi energy, in eV. A dotted line will be placed on your graph at the fermi level. If you don't know the fermi energy of your system, write the word \texttt{automatic} instead of a number. In that case, the fermi energy will take the value of the highest energy eigenvalue present in the \textit{HOMO} band. \\
+\\
+\texttt{SPECIAL K-POINTS (reduced coord):} \\
+In this section, you must write a list of all special k-points used to plot the graph. Special k-points are k-points situated at each end of k-directions along which you want to calculate the band structure. Special k-points usually corresponds to the vertices of the Brillouin zone. Each line in this section contains the caption and the reduced coordinates of the k-point. For example : \\
+
+\texttt{\{sG\}= 0.0000  0.0000  0.0000} \\
+\\
+represents the gamma point. The reduced coordinates are to be multiplied by the reciprocal vectors to give the position of the k-point in the Brillouin zone. The caption of the k-point, written between braces, determines the letter or the symbol that will be plotted on the graph to represent this k-point. \\
+\\
+All captions in the \textit{.dbs} file are of the form : \texttt{\{xx\}} \\
+The first letter can be either \texttt{"l"} (for letter) or \texttt{"s"} (for symbol). \\
+The second letter can be any alphabet letter (lower of upper case). \\
+\\
+For example: \\
+The caption \texttt{\{sG\}} will be represented on the graph by : $\Gamma$ \\
+The caption \texttt{\{sg\}} will be represented on the graph by : $\gamma$ \\
+The caption \texttt{\{lX\}} will be represented on the graph by : \texttt{X} \\
+The caption \texttt{\{lx\}} will be represented on the graph by : \texttt{x} \\
+\\
+Note that it it not possible to give two different k-points the same caption. \\
+\\
+\texttt{BAND STRUCTURE SCHEME:} \\
+The band structure scheme represents all the k-directions along which you wish to plot the band structure. It consists on a serie of k-points, identified by their respective caption, separated either by \texttt{"-"} (minus sign) or by \texttt{" "} (empty space). \\
+\\
+For each group of two captions separated by a minus sign, the program will plot a band structure using all the appropriate k-points available in the database between the two corresponding k-points. \\
+\\
+If you leave an empty space between two captions, the program will leave an empty space in the graph allowing you to plot many disconnected k-directions on the same graph. For example : \\
+
+\texttt{\{sG\}-\{lX\}-\{lK\} \{sG\}-\{lP\}} \\
+\\
+will give you a plot containing the band structure along the $\Gamma$-X direction, immediately followed by the X-K direction, than an empty space will be laid on the graph before plotting the band structure along the $\Gamma$-P direction. \\
+\\
+Note that all captions used to specify the band structure scheme must be defined in the special k-points section.\\
+\\
+\texttt{DATABASE:} \\
+(This section must not be modified by the user.)\\
+The database contains a list of k-points reduced coordinates and associated energy eigenvalues (in eV). \\
+\\
+\\
+\\
+\texttt{DATABASE KEY:} \\
+(This section must not be modified by the user.) \\
+The database key contains multiple informations regarding the system geometry and convergence criteria used to calculate energy eigenvalues of each k-point. In order for the band structure graph to be valid, it is important that all k-points plotted had their energy eigenvalues obtained from the same system and calculated using the same convergence criteria. Before adding any datas to the database, such a key is calculated for each dataset and compared to the database key. \\
+\\
+\\
+%=====STEP 3====================================================================
+{\large{STEP 3 : produce a \textit{.agr} file}} \\
+\\
+Now that you have a customized \textit{.dbs} file, you must extract datas from this file to produce a \textit{.agr file} (a formatted file readable by \textit{xmgrace}). \\
+\\
+To produce a \textit{.agr} file, execute the program and specify the name of the \textit{.dbs} file you wish to use : \\
+\\
+\texttt{> python AbinitBandStructureMaker.py \textit{file.out.dbs}} \\
+\\
+If everything goes well, you'll get the following message : \\
+\\
+\texttt{> "\textit{file.out.agr}"  file created successfully} \\
+\\
+\\
+%=====STEP 4====================================================================
+{\large{STEP 4 : plot the band structure}} \\
+\\
+Now that you possess a \textit{.agr} file, you just need to execute \textit{xmgrace} and use the \textit{.agr} file to plot the band structure. \\
+\\
+\texttt{> xmgrace \textit{file.out.agr}} \\
+\\
+\\
+%XMGRACE AUTOMATIC LAUNCH SETUP==============================================
+{\Large\textbf{\textit{xmgrace} automatic launch setup :}} \\
+\\
+Add the keyword \texttt{-setautolaunch} in the command line to choose whether or not you want to automatically launch \textit{xmgrace} each time a \textit{.agr} file is created (default is \texttt{no}). You will also be asked to enter the \textit{xmgrace} launch command, which is the command you usually write in your shell to launch \textit{xmgrace} (default is \texttt{xmgrace}). \\
+\\
+\\
+\\
+\\
+\\
+%ENERGY SHIFT SETUP============================================================
+{\Large\textbf{Energy shift setup :}} \\
+\\
+Add the keyword \texttt{-setenergyshift} in the command line to choose wheter or not you want to shift energy eigenvalues to bring the Fermi energy to zero (default is \texttt{yes}). \\
+\\
+\\
+%LINE COLOR SETUP==============================================================
+{\Large\textbf{Line color setup :}} \\
+\\
+Add the keyword \texttt{-setlinecolor} in the command line to choose the color of energy bands (default is \texttt{blue} for the valence bands ; \texttt{red} for the conduction bands). \\
+\\
+The 16 colors recognized by \textit{xmgrace} are : \\
+\texttt{white, black, red, green, blue, yellow, brown, grey, violet, cyan, magenta, orange, indigo, maroon, turquoise, green4} \\
+\\
+\\
+%LINE WIDTH SETUP===============================================================
+{\Large\textbf{Line width setup :}} \\
+\\
+Add the keyword \texttt{-setlinewidth} in the command line to choose the thickness of energy band lines, Fermi energy line and separator lines (default is \texttt{1} for energy band lines ;  \texttt{1} for Fermi energy line ; \texttt{1} for separator lines). \\
+\\
+\\
+%EMPTY SPACE(S) WIDTH SETUP====================================================
+{\Large\textbf{Empty space(s) width setup :}} \\
+\\
+Add the keyword \texttt{-setspacewidth} in the command line to choose the percentage of the total graph width to be occupied by empty space(s), if any. Empty spaces are empty regions of the graph laid between disconnected k-directions in the band structure. Remember that you can place such empty spaces by putting a \texttt{" "} (empty space) instead of a \texttt{"-"} (minus sign) between two captions in the band structure scheme section of the \textit{.dbs} file. \\
+\\
+\\
+%GLOBAL SETUP==================================================================
+{\Large\textbf{Global setup :}} \\
+\\
+Add the keyword \texttt{-setup} in the command line if you want to perform a global setup and set all the available options mentionned above in the same run. \\
+\\
+\\
+%RESTORE DEFAULT SETUP=======================================================
+{\Large\textbf{Restore default setup :}} \\
+\\
+Add the keyword \texttt{-setdefault} in the command line to restore the default setup.\\
+\\
+\\
+%DEBUG MODE===================================================================
+{\Large\textbf{Debug mode :}} \\
+\\
+Add the keyword \texttt{-debug} in the command line to activate the debug mode. While the debug mode is activated, many informations otherwise unseen will be printed on the screen during the execution. This feature is useful if you want to keep a trace of what the code does. It is also a good way to locate exactly where bugs happen, if any.
+
+\end{document}

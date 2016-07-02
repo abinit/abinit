@@ -1,0 +1,16 @@
+digraph connectors {
+  DFT -> LINALG;
+  DFT -> TRIO;
+  DFT -> GPU;
+  DFT -> MPI;
+  MATH -> LINALG;
+  MATH -> MPI;
+  FFT -> LINALG;
+  FFT -> GPU;
+  FFT -> MPI;
+  LINALG -> GPU;
+  LINALG -> MPI;
+  TIMER -> MPI;
+  TRIO -> MPI;
+  GPU -> MPI;
+}

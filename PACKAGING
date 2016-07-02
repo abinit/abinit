@@ -1,0 +1,123 @@
+Packaging Abinit
+================
+
+Which versions may be packaged?
+-------------------------------
+
+Abinit uses a x.y.z version numbering scheme, with the following
+meanings:
+
+  * x: major version number, changes around every 5 years
+  * y: minor version number
+         +---> even values : production releases
+         +---> odd values  : development releases
+  * z: patch level, usually between 0 and 3
+
+Development releases should not be packaged.
+
+
+
+External packages buildable within Abinit
+-----------------------------------------
+
+Abinit depends on several other packages:
+
+  * BLAS (mandatory)
+  * LAPACK (mandatory)
+  * NetCDF (will become mandatory soon)
+  * ETSF I/O (might become mandatory soon)
+  * LibXC (recommended)
+  * FoX (may be safely disabled)
+  * AtomPAW (may safely be disabled)
+  * BigDFT (recommended)
+  * Wannier90 (recommended)
+
+It is possible to build them within Abinit, by using the corresponding
+--with-(dft|linalg|trio)-flavor flags of the configure script. In this
+case their source tarballs will be downloaded from their home pages or
+the Abinit website, and stored into ~/.abinit/tarballs in order to avoid
+multiple downloads, unless you use the --with-fallbacks-tardir option of
+configure.
+
+The best way to deal with external packages is however to make use of
+pre-compiled versions already available on your system. In this case you
+may use the --disable-fallbacks option of configure, in conjunction with
+the following options:
+
+  * --with-*-bins, for the executables;
+  * --with-*-incs, for the C headers and Fortran modules;
+  * --with-*-libs, for the libraries.
+
+Please note that "make -j<n>" will work only if you use externally
+compiled packages. Having external BLAS, LAPACK, and NetCDF libraries
+may nonetheless be sufficient.
+
+
+
+Other external packages
+-----------------------
+
+Abinit may use the following other packages:
+
+  * FFTW3;
+  * GSL;
+  * ScaLAPACK.
+
+
+
+Building Abinit
+---------------
+
+The configure script of Abinit provides many options, in order to keep
+manual adjustments of the environment variables at the minimum. It is
+also possible to store the options in a config file (see
+~abinit/doc/build/config-template.ac for details), in order to facilitate
+the reuse of platform-specific options. When packaging Abinit you will
+likely want to disable this mechanism, by using the
+--disable-config-file option of configure, or provide your own version
+through the --with-config-file option.
+
+Build flags are managed so that one can tune separately:
+
+  * debug flags (--with-*-dbgflags options);
+  * optimization flags (--with-*-optflags options);
+  * hints necessary to have the compilers behaving properly
+    (--enable-hints option).
+
+It is however possible to bypass this mechanism by manually providing
+CFLAGS, CXXFLAGS, and FCFLAGS, which, when set, will systematically
+override the build system settings.
+
+
+
+Testing Abinit
+--------------
+
+At present 'make check' runs the whole serial part of the Abinit test
+suite, comprising more than 600 tests, which can at times prove quite
+computer-intensive. We have started to work on making a reduced
+selection of the most frequently failing tests, that would be more
+suitable for packaging.
+
+Abinit does not yet provide unit tests. A partial coverage of the code
+at this level will be provided in the future.
+
+
+
+Installing Abinit
+-----------------
+
+Abinit now installs in a FHS-compliant way, hence there should not be
+any particular issue at the packaging level. It currently installs the
+main programs, the documentation, and the test suite (in
+<prefix>/share/abinit). Manpages will come as well at some point in the
+future (help is gladly welcome).
+
+
+
+Troubleshooting
+---------------
+
+Please contact Yann Pouillon <yann.pouillon@ehu.es> should you encounter
+any important issue.
+

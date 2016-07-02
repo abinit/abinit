@@ -1,0 +1,51 @@
+**************
+* Check_list *
+**************
+
+A. All merges, when appropriate
+-------------------------------
+A.1 Update the year, use the script developers/maintainers/change_year.sh (read it first ...)
+A.2 Update herald.F90
+A.3 Update KNOWN_PROBLEMS
+A.4 Run the "On-demand only slaves"
+A.5 Check manually that "make tests_in" works (on one of the slaves)
+A.6 Run python abi_yml2html.py inside doc/input_variables
+A.7 Run abilint (to avoid source files be updated by each separate developer)
+A.8 Write letter to JMB, to initialize the new branches
+
+B. For all merges of a development version
+------------------------------------------
+B.1 src/make parents , src/make abiauty
+
+C. For the final merge of a development version  
+-----------------------------------------------
+C.1 src/make abiauty  and perhaps at some point again abirules ...
+C.2 Update all reference files.
+C.3 Initialize the next release notes, install notes, features ...
+C.4 Ask the developers to publish their intention of work on DevWiki (when it exists).
+C.5 Ask the "local farmers" (YP, JZ, MT, MC) to test the buildsys on local machine.
+
+D. For the first merge of a production version (possibly for the first release also)
+------------------------------------------------------------------------------------
+Prepare release notes ...
+D.1 Find the starting revision of the corresponding development version
+D.2 bzr status to find the list of NEW input files, 
+    and identify corresponding capability
+D.3 bzr diff  of the src/*/chkvars.F90 file, to identify new input variables
+D.4 Scan the bzr log file.
+D.5 Identify lacking or incomplete documentation and testing !
+D.6 Check and update contributor file
+D.7 Contact the relevant people
+D.8 (Obsolete - should be replaced by automatic generation on another machine)
+Run the green_intel12 slave on the trunk PUBLIC branch => static binary for the group.
+
+Also update install notes, features, doc/maintainers/statistics.txt
+Look at presentation, theory (doc/make presentation theory)
+
+E. For the second and other merges of a production version
+-----------------------------------------------
+Prepare the release, which means (send a letter to JMB) :
+E.1 Make available the files tar.gz, infos.html, robodoc (from shiva)
+E.2 Also update install notes, features. 
+(The delivery of binary packages has been disabled, as of v7.11.5)
+*******************************************************************

@@ -1,0 +1,12 @@
+# FIXME: the following file belongs to nVidia Corp.
+#        IT MUST BE REMOVED AS SOON AS POSSIBLE!!!
+#nodist_lib52_manage_cuda_a_SOURCES = fortran.c
+
+# FIXME: the following file belongs to nVidia Corp.
+#        IT MUST BE REMOVED AS SOON AS POSSIBLE!!!
+#EXTRA_DIST = deviceQuery.cu
+
+#noinst_HEADERS = cuda_rec_head.h
+
+dev_spec.$(OBJEXT): dev_spec.cu 
+timing_cuda.$(OBJEXT): timing_cuda.cu 

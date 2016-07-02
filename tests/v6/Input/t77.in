@@ -1,0 +1,80 @@
+use_k_fine 0
+ep_int_gkk 0
+ep_keepbands 1
+kptrlatt 2 0 0   0 2 0   0 0 4
+kptrlatt_fine 2 0 0   0 2 0   0 0 4
+
+# turn on calculation of the electron-phonon quantities
+elphflag 1
+ifltransport 1
+ep_scalprod 1
+
+# Path in reciprocal space along which the phonon linewidths
+#  and band structure will be calculated
+nqpath 12
+qpath
+  1/3 1/3 0
+  0 0 0
+  1/2 0 0
+  1/3 1/3 0
+  1/3 1/3 1/2
+  0 0 1/2
+  1/2 0 1/2
+  1/3 1/3 1/2
+  1/2 0 1/2
+  1/2 0 0
+  0 0 0
+  0 0 1/2
+
+# Coulomb pseudopotential parameter
+mustar 0.01
+
+# Minimalistic qpoint grid
+ngqpt 2 2 2
+
+# Use standard set of temperatures (default for ntemper, tempermin, temperinc)
+
+#  impose acoustic sum rule in a symmetric way
+asr 2
+dipdip 0
+
+#  bravais lattice necessary
+brav 1
+
+# qpt grid
+nqshft 1
+q1shft 0.0 0.0 0.0
+#
+ifcflag 1
+ifcana 1
+#  ifc for all atoms?
+natifc 0
+atifc 1 2 3
+
+#  print dielectric matrix with freq dependence
+dieflag 0
+
+#  print out eigenvectors and symmetrize dyn matrix
+eivec 1
+
+#Wavevector list number 1 (Reduced coordinates and normalization factor)
+nph1l 1
+qph1l
+              0.00000000E+00  0.00000000E+00  0.00000000E+00 1
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% [files]
+#%% files_to_test = 
+#%%   t77.out,  tolnlines =   41,   tolabs=  1.1,         tolrel= 1.1
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = B. Xu
+#%% keywords = 
+#%% description = 
+#%%   anaddb run using fine k-gird for Fermi surface integration use_k_fine
+#%%   should give identical results to 75, but does not work as yet
+#%%<END TEST_INFO>

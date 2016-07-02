@@ -1,0 +1,44 @@
+Date released : date mentioned in the release notes
+
+Then, the other indicators should refer to the first production version
+
+Size of tar.gz      : ls -l *tar.gz    (on shiva)
+Number of F90 files : ls src/*/*.F90 | wc
+Number of F90 lines : cat src/*/*.F90 | wc
+Number of tests     : ls tests/*/Input/t*in | wc
+
+
+Note : the sudden increase of size of tar.gz file in v7.0 is due to the school
+in Bruyeres-le-Chatel, in Nov 2011, whose new files have been included in the
+package at the end of v6.
+
+=====================================================================
+Version  Date       Size         Number        Number        Number 
+         released   tar.gz       of F90 files  of F90 lines  of tests
+                    (10e6Bytes)
+=====================================================================
+4.3      2004 Feb   14.5          726          252602        432 
+4.4      2004 Aug   15.3          764          267715        439 
+4.5      2005 Feb   17.9          836          292978        455 
+4.6      2005 Jul   21.0          849          300656        511
+5.1      2006 Feb   20.7          887          302500        523 
+5.2      2006 Aug   21.1         1013          365109        530
+5.3      2007 Jan   23.8         1046          383515        553
+5.4      2007 Jun   34.1         1106          394748        578 
+5.5      2007 Nov   37.3         1130          407768        596
+5.6      2008 Sep   30.6         1210          448138        635
+5.7      2009 Jan   32.2         1254          496054        642
+5.8-5.9  2009 May   34.9         1298          524105        689
+6.0      2010 Jan   40.3         1383          580146        790
+6.2      2010 Jun   42.0         1482          634525        817
+6.4      2010 Sep   42.5         1404          609071        819
+6.6      2011 Feb   45.1         1533          670848        824
+6.8      2011 Jun   43.6         1561          690429        870
+6.10     2011 Oct   43.9         1586          702045        877
+6.12     2012 Jan   43.9         1604          747032        922
+7.0      2012 Nov   61.7         1611          769993        961
+7.2      2013 Mar   63.7         1610          798944       1011
+7.4      2013 Aug   69.2         1608          807917        982
+7.6      2014 Jan   71.7         1590          835775        993
+7.8      2014 Jun   66.3         1410          823976       1007
+7.10     2014 Nov   70.0         1389          831335       1019

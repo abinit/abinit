@@ -1,0 +1,20 @@
+t09o_DEN-etsf.nc
+5
+t10.out
+0
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = cut3d
+#%% [files]
+#%% files_to_test =
+#%%   t10.out, tolnlines =  0, tolabs =  0.000e+00, tolrel =  0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = D. Caliste
+#%% keywords = 
+#%% description = 
+#%%   Read the density file from test #9 to be sure that values are correctly output.
+#%%<END TEST_INFO>

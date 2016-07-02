@@ -1,0 +1,5 @@
+EXTRA_DIST += \
+  fftug_driver.finc \
+  fftur_driver.finc \
+  fftbox_ip_driver.finc \
+  fftbox_op_driver.finc

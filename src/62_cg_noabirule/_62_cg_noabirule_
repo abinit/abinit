@@ -1,0 +1,27 @@
+!!****d* ABINIT/62_cg_noabirule
+!! NAME
+!! 62_cg_noabirule
+!!
+!! DESCRIPTION
+!! This directory contains
+!! - a few subroutines useful for a generic conjugate gradient
+!! They do not call routines in other directories, hence constitute a standalone library.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! bracketing.F90
+!! brent.F90
+!! cgpr.F90
+!! dotproduct.F90
+!! frskerker1.F90
+!! frskerker2.F90
+!! interfaces_62_cg_noabirule.F90
+!! linmin.F90
+!!
+!!***

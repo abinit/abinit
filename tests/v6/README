@@ -1,0 +1,17 @@
+This directory, v6, contains tests which
+are related to the development of the various development in
+version 6.x.x of Abinit
+
+------------------------------------------------------------------
+
+* Tests 1-20 concern ground state (excluding PAW, to be placed in 41-49)
+  also tests 31-34
+
+* Tests 21-30 are related to geometry optimization, molecular dynamics, etc
+
+* Tests 41-49 are related to PAW (excluding response functions,
+    and electronic excitations, both to be placed later).
+
+* Tests 35-40 and 50-99 concern response functions
+
+------------------------------------------------------------------

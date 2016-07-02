@@ -1,0 +1,164 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fullpage}
+\usepackage{lmodern}
+
+\usepackage{amsmath,amsfonts,amssymb}
+
+\usepackage{hyperref}
+
+\title{Chebyshev filtering for Abinit users}
+\author{Antoine Levitt}
+\date{\today}
+\begin{document}
+\maketitle
+\tableofcontents
+\section{When to use and not to use Chebfi}
+Chebyshev filtering (Chebfi) is a method to solve the linear
+eigenvalue problem, and can be used as a SCF solver in Abinit. It was
+proposed for use in DFT by Zhou et al. \cite{zhou2006self}, and
+implemented in Abinit by Levitt and Torrent \cite{levitt2014parallel}.
+
+The design goal is for Chebfi to replace LOBPCG as the solver of
+choice for large-scale computations in Abinit. By performing less
+orthogonalizations and diagonalizations than LOBPCG, scaling to higher
+processor counts is possible (see the experiments in
+\cite{levitt2014parallel}).
+
+\section{How to use Chebfi}
+Simply set \texttt{wfoptalg} to 1, and set the \texttt{np*} variables,
+as in LOBPCG. In particular, begin by setting \texttt{npkpt} and
+\texttt{npspinor} to the maximum value possible: the tasks are mostly
+independent and the speedup nearly optimal. As a starting point, for
+large processor counts, use \texttt{npfft} $\approx$ \texttt{npband},
+and \texttt{np\_slk} $=$ \texttt{nband}/10.
+\section{Convergence}
+Mostly due to the absence of a preconditionner in Chebfi, the
+convergence is sometimes worse than with LOBPCG. In some cases the
+difference is unnoticeable, in others it might be uncompetitively
+slow: try for yourself on your system! When convergence is poor, it is
+usually a good idea to use more bands than strictly necessary, by
+increasing \texttt{nband}. This increases the cost per iteration but
+improves convergence: a trade-off is needed. Note that the last bands
+will always converge very slowly or not at all, by design: use
+\texttt{nbdbuf} to discard these when computing the wavefunction
+residual.
+\section{Chebfi vs LOBPCG}
+Chebfi is usually faster per iteration than LOBPCG, up to factors of
+about 5 for high processor counts. It is much less prone to
+instabilities and spurious NaNs. It is easier to tune: the options
+\texttt{bandpp} and \texttt{use\_slk} are not used, and the
+convergence behaviour does not depend on the parallelization - the
+results are the same than with the serial version). On the other hand,
+for some systems, Chebfi might be very slow to converge.
+\section{Performance}
+\subsection{Environment}
+For good performance it is \emph{imperative} to use optimized linear
+algebra libraries. On Intel systems, MKL is a good choice. On other
+systems, use the vendor-provided library, or good free ones such as
+OpenBLAS. Never use the BLAS/LAPACK fallback in Abinit.
+
+Any good compiler with a reasonable level of optimization (gfortran or
+ifort with O2 or greater) should be fine. You should also have a good
+MPI implementation.
+
+For large computations, you need to have ScaLAPACK installed. You
+should also use the optional ELPA library to speed up the
+diagonalizations.
+
+FFTs are usually faster with the FFTW library: see \texttt{fftalg}.
+\subsection{Measures}
+Use the \texttt{timopt} variable to print a breakdown of time spent at
+the end of the output file. If available, PAPI (\texttt{papiopt})
+might give more precise measurments. You are looking for the bit that
+looks like
+\begin{verbatim}
+ Partitioning of chebfi
+- chebfi                        45.939  34.0     48.072  29.0             48
+ 
+- chebfi(getghc)                27.306  20.2     28.015  16.9            240
+- chebfi(opernla)                3.505   2.6      3.583   2.2            192
+- chebfi(opernlb)                3.055   2.3      3.124   1.9            192
+- chebfi(inv_s)                  2.218   1.6      2.273   1.4            192
+- chebfi(alltoall)               0.261   0.2      0.260   0.2             96
+- chebfi(rotation)               2.089   1.5      2.146   1.3             48
+- chebfi(subdiago)               1.552   1.2      2.596   1.6             48
+- chebfi(subham)                 1.000   0.7      1.024   0.6             48
+- chebfi(residuals)              0.239   0.2      0.242   0.1             48
+- chebfi(update_eigens)          0.226   0.2      0.220   0.1             48
+- chebfi(sync)                   3.045   2.3      3.068   1.9             96
+\end{verbatim}
+
+The interesting part is the third column, that gives the percent of
+total time spent in specific routines. The code scales well (is not
+limited by communications) when \texttt{getghc},\texttt{opernla},
+\texttt{opernlb} and \texttt{inv\_s} dominate. It has stopped scaling
+when the communications dominate : \texttt{alltoall},
+\texttt{subdiago} and \texttt{subham}. A large \texttt{sync} is
+usually the sign of a suboptimal MPI implementation.
+
+Also interesting is the breakdown of \texttt{getghc}, that gives the
+time spent in Fourier and nonlocal operator applications. 
+\begin{verbatim}
+ Partitioning of getghc
+- getghc                        26.335  19.5     27.025  16.3            240
+ 
+- fourwf%getghc                 15.291  11.3     15.692   9.5            240
+- nonlop%getghc                 10.849   8.0     11.138   6.7            240
+- getghc-other                   0.195   0.1      0.195   0.1            -12
+\end{verbatim}
+
+For large computations, the time spent in the FFT (fourwf) operations
+should be small.
+
+\section{Tuning and trade-offs}
+\subsection{\texttt{nline}}
+This option controls the number of applications of the Hamiltonian per
+band per iteration. If it is too small, Rayleigh-Ritz steps are too
+frequent, which degrades parallel scaling. If it is too large, too
+much time is spent optimizing wavefunctions, while the density is not
+converged. Don't increase it too much (above 10), or instabilities
+will occur.
+\subsection{\texttt{np\_slk}}
+\texttt{np\_slk} is the number of processors involved in ScaLAPACK
+calls. It might be interesting to set this to a lower value than the
+total number of processors, as diagonalization stops scaling well
+before the rest of the code.
+
+Try varying this and monitoring the \texttt{subdiago} metric. If the
+time spent in \texttt{subham} is too high, try reducing
+\texttt{np\_slk}. A characteristic value is around \texttt{nband/10},
+but your mileage may vary. 
+\subsection{\texttt{npfft} vs \texttt{npband}}
+For large computations, it is usually a good idea to use as large a
+value of \texttt{npfft} as possible (the maximum value is limited by
+the size of the FFT grid). If the time spent in \texttt{fourwf} is too
+large, decrease \texttt{npfft}.
+\subsection{\texttt{use\_gemm\_nonlop}}
+This might improve substantially the computation of the nonlocal part
+of the Hamiltonian (\texttt{nonlop}). Its usefulness increases with
+the number of bands treated by processor, ie
+\texttt{nband}/\texttt{npband}.
+\subsection{Memory}
+Some arrays are distributed on \texttt{npfft} processors only ; some
+are distributed on \texttt{np\_slk} only. If you run out of memory,
+increasing one of these variables might solve the problem.
+
+\begin{thebibliography}{ZSTC06}
+
+\bibitem[LT14]{levitt2014parallel}
+Antoine Levitt and Marc Torrent.
+\newblock Parallel eigensolvers in plane-wave density functional theory.
+\newblock {\em arXiv preprint arXiv:1406.4350}, 2014.
+
+\bibitem[ZSTC06]{zhou2006self}
+Yunkai Zhou, Yousef Saad, Murilo~L Tiago, and James~R Chelikowsky.
+\newblock Self-consistent-field calculations using chebyshev-filtered subspace
+  iteration.
+\newblock {\em Journal of Computational Physics}, 219(1):172--184, 2006.
+
+\end{thebibliography}
+% \bibliographystyle{alpha}
+% \bibliography{refs}
+\end{document}

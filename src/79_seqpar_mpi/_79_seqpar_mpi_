@@ -1,0 +1,35 @@
+!!****d* ABINIT/79_seqpar_mpi
+!! NAME
+!! 79_seqpar_mpi
+!!
+!! DESCRIPTION
+!! This directory contains level-8 routines that
+!! have two versions, one sequential, and one MPI-parallel.
+!! So, they must be handled in a special way.
+!! The unique source present in this directory
+!! for each routine, is preprocessed, and gives
+!! two different binaries. These are gathered in two different
+!! archive files.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! dfptnl_mv.F90
+!! interfaces_79_seqpar_mpi.F90
+!! inwffil.F90
+!! lobpcgwf.F90
+!! m_lobpcg.F90
+!! tddft.F90
+!! vtorho.F90
+!! vtowfk.F90
+!! wfsinp.F90
+!! wvl_wfsinp_disk.F90
+!! wvl_wfsinp_reformat.F90
+!! wvl_wfsinp_scratch.F90
+!!
+!!***

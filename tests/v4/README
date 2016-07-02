@@ -1,0 +1,72 @@
+This directory, v4, contains tests which
+are related to the development of PAW in ABINITv3.x/4.x
+and other developments of v4.x
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+
+------------------------------------------------------------------
+* Tests 1 to 3 concern the use of Ylm for the nonlocal operator
+  application (instead of Legendre Polynomials).
+
+Test 1 is related to the computation of energy, forces and (soon)stresses
+Test 2 is related to the computation of response function
+Test 3 concerns the use of Phoney pseudopotentials
+
+------------------------------------------------------------------
+
+* Tests 4 to 9 concern the computation of GS total energy using
+  PAW features.
+
+Test 4 is related to the simple computation of total energy,
+Test 5 concerns the use of differents orthogonalisation algorithms
+Test 6 concerns the convergence versus the number of PW (ecut)
+Test 7 tests the differents mixing schemes in PAW formalism.
+Test 8 tests magnetism, GGA and compensation density in PAW formalism.
+Test 9 tests the use of mkmem=0 with PAW
+
+------------------------------------------------------------------
+* Tests 10 concern the computation of the XC energy
+  using the ACFD formalism.
+  (Test 10 was provided by YM Niquet, modified by GAF)
+
+------------------------------------------------------------------
+
+* Test 17 concern PAW and some variables for experienced users
+
+------------------------------------------------------------------
+
+* Test 20 concern psp format 8, from DRHamann
+
+------------------------------------------------------------------
+* Tests 21 to 29 concern symmetry recognition and use
+
+Tests 21 to 29 test the generation and recognition of the
+magnetic space groups, Shubnikov type III, for
+orthorhombic, tetragonal, rhombohedral and hexagonal systems
+
+------------------------------------------------------------------
+* Tests 30 to 49 concern Atom-in-molecule (Bader) utility tests,
+ computation of the partial DOS, angular momenta projections,
+ macroscopic average, STM charge density, Wannier functions (LOrbitals)
+
+Mg simple cubic, MgO molecule, Ta (with spin-orbit), Si diamond,
+distorted diamond, Al surface
+
+------------------------------------------------------------------
+* Tests 50 to 83 concern linear and non-linear response computations
+ as well as finite-electric field computations, and their analysis
+
+------------------------------------------------------------------
+* Tests 84 and 89 concern GW, Hartree-Fock and COHSEX
+
+------------------------------------------------------------------
+* Tests 89 and 90 concern interfaces with other codes
+
+------------------------------------------------------------------
+* Tests 91 to 99 concern diverse topics
+
+------------------------------------------------------------------
+* Tests 100 and 101 concern generation of netCDF file with cut3d
+
+------------------------------------------------------------------

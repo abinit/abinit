@@ -1,0 +1,37 @@
+ <!--1--><SECTION sectiontitle='Relaxation' tag='1'>
+ <!--2--><CHOICE instruction='Which kind of relaxation do you wish to perform ?' tag='2'>
+ <!--3--><DECISION description='optimize the atomic positions only' tag='3'>
+ <!--4--><MOUSEENTRY instruction='Choose the technique used to optimize the atomic positions (ionmov)' tag='4'>
+ <!--5--><OPTION description='molecular dynamics with optional viscous damping' variablename='ionmov' variablevalue='1' tag='5'/>
+ <!--6--><OPTION description='conjugate gradient algorithm for simultaneous optimization of potential and ionic degrees of freedom' variablename='ionmov' variablevalue='4' tag='6'/>
+ <!--7--><OPTION description='simple relaxation of ionic positions according to (converged) forces' variablename='ionmov' variablevalue='5' tag='7'/>
+ <!--8--><OPTION description='molecular dynamics using the Verlet algorithm' variablename='ionmov' variablevalue='6' tag='8'/>
+ <!--9--><OPTION description='quenched molecular dynamics using the Verlet algorithm' variablename='ionmov' variablevalue='7' tag='9'/>
+<!--10--><OPTION description='molecular dynamics with Nose-Hoover thermostat, using the Verlet algorithm' variablename='ionmov' variablevalue='8' tag='10'/>
+<!--11--><OPTION description='Langevin molecular dynamics' variablename='ionmov' variablevalue='9' tag='11'/>
+<!--12--><OPTION description='isokinetic ensemble molecular dynamics' variablename='ionmov' variablevalue='12' tag='12'/>
+         </MOUSEENTRY>
+         </DECISION>
+<!--13--><DECISION description='optimize the atomic positions as well as the cell geometry' tag='13'>
+<!--14--><MOUSEENTRY instruction='Choose the technique used to optimize the atmic positions (ionmov)' tag='14'>
+<!--15--><OPTION description='structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS)' variablename='ionmov' variablevalue='2' tag='15'/>
+<!--16--><OPTION description='BFGS minimization, modified to take into account the total energy as well as the gradients (as in usual BFGS)' variablename='ionmov' variablevalue='3' tag='16'/>
+         </MOUSEENTRY>
+<!--17--><MOUSEENTRY instruction='Choose the technique used to optimize the geometry of the unit cell (optcell)' tag='17'>
+<!--18--><OPTION description='optimisation of volume only (rprim unchanged ; homogenous dilatation of acell)' variablename='optcell' variablevalue='1' tag='18'/>
+<!--19--><OPTION description='full optimization of cell geometry (modify rprim and acell)' variablename='optcell' variablevalue='2' tag='19'/>
+<!--20--><OPTION description='constant-volume optimization of cell geometry (modify acell and rprim under constant volume constraint)' variablename='optcell' variablevalue='3' tag='20'/>
+<!--21--><OPTION description='optimize acell(1) while keeping acell(2) and acell(3) unchanged (only works if acell(1) is orthogonal to acell(2) and acell(3))' variablename='optcell' variablevalue='4' tag='21'/>
+<!--22--><OPTION description='optimize acell(2) while keeping acell(1) and acell(3) unchanged (only works if acell(2) is orthogonal to acell(1) and acell(3))' variablename='optcell' variablevalue='5' tag='22'/>
+<!--23--><OPTION description='optimize acell(3) while keeping acell(1) and acell(2) unchanged (only works if acell(3) is orthogonal to acell(1) and acell(2))' variablename='optcell' variablevalue='6' tag='23'/>
+<!--24--><OPTION description='optimize acell(2) and acell(3) while keeping acell(1) unchanged (only works if acell(1) is orthogonal to acell(2) and acell(3))' variablename='optcell' variablevalue='7' tag='24'/>
+<!--25--><OPTION description='optimize acell(1) and acell(3) while keeping acell(2) unchanged (only works if acell(2) is orthogonal to acell(1) and acell(3))' variablename='optcell' variablevalue='8' tag='25'/>
+<!--26--><OPTION description='optimize acell(1) and acell(2) while keeping acell(3) unchanged (only works if acell(3) is orthogonal to acell(1) and acell(2))' variablename='optcell' variablevalue='9' tag='26'/>
+         </MOUSEENTRY>
+<!--27--><KEYBOARDENTRY instruction='Enter the maximal permitted scaling of the lattice parameters during the cell optimization (dilatmx)'	variablename='dilatmx' textlen='1' tag='27'/>
+<!--28--><KEYBOARDENTRY instruction='Enter the energy cutoff smearing (ecutsm) (recommended value : 0.5 Ha)' variablename='ecutsm' textlen='1' tag='28'/>
+         </DECISION>
+<!--29--><KEYBOARDENTRY instruction='Enter the  maximal absolute force tolerance (in hartree/bohr) below which BFGS structural relaxation iterations will stop (tolmxf)' variablename='tolmxf' textlen='1' tag='29'/>
+<!--30--><KEYBOARDENTRY instruction='Enter the maximum number of structural optimization steps over which calculation will automatically stop (ntime)' variablename='ntime' textlen='1' tag='30'/>
+         </CHOICE>
+         </SECTION>

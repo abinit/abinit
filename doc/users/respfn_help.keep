@@ -1,0 +1,52 @@
+(This file contains old material of the respfn_help.htm
+ file, that could be reuse later)
+
+(WARNING for the next paragraph : the stationary formulation
+ that was present in RESPFN has not (yet) been implemented in abinit).
+The generation of the 2DTE can be made by two different methods.
+The first method is stationary, which means that the error in the
+2DTE is quadratic with respect of the error in the 1WF. The
+second method is non-stationary, with the error in the 2DTE being
+linear with respect to the error in the 1WF.
+In order to build the 2DTE with respect to perturbations
+j1 and j2, the stationary method needs the 1WF with respect
+to both j1 and j2, while the non-stationary method is able to
+generate it using either the 1WF corresponding to j1 OR the
+1WF corresponding to j2.
+Also, the stationary method uses more central memory and disk space,
+and sometimes the nonstationary method is the only one possible.
+It is the user's responsability to insure that the central memory
+and disk space are sufficient.
+Only one method exists for the calculation of the 3DTE. The central
+memory and disk space requirements are even larger than for the stationary
+method for calculating 2DTE, and in order to get the 3DTE with respect to
+perturbations j1, j2 and j3, the 1WFs with respect to j1, j2 and j3
+are needed.
+(END of WARNING)
+
+(NOT PRESENT IN VERSION 2.0)
+In the second part, the 2DTE and 3DTE are generated, according to
+the parameters rfmeth and rf3.
+* stationary expression : at some time, all 1RHO
+    have to reside in the central memory together, and at some
+    other time, all 1WF for one k point also have to be
+    in the central memory.
+    They are all read from their wf1out(ipert) and
+    v1out(ipert) files. Because the memory requirements are large,
+    the non-stationary method, albeit less accurate, can be useful.
+    The stationary 2DTE is computed in the stady3.f subroutine,
+    and the dimensioning of some arrays is to be done directly
+    in stady3.f (see the section on memory management).
+    The output of the stationary calculation is the set of all
+    second derivatives of the total energy that come from the
+    mixing of the perturbations that are asked by the user
+    in the input file.
+* 3DTE : All the 1WF, 1VR and 1RHO have also to reside in
+    the central memory. The calculation of 3DTE is in the
+    current version of the RESPFN code also
+    done inside the stady3.f subroutine.
+    (Note : in the present version, the calculation of 3DTE
+     has been disabled.)
+(END OF NOT PRESENT IN VERSION 2.0)
+
+

@@ -1,0 +1,91 @@
+# Finite difference calculation of d chi / d tau of AlAs
+# (M. Veithen, 29.4.2005)
+
+#Definition de la maille elementaire
+#**********************************
+   acell 3*10.6395177524329601
+   rprim 0.0 0.5 0.5
+         0.5 0.0 0.5
+         0.5 0.5 0.0
+
+#Definition des atomes
+#*********************
+   natom 2
+   ntypat 2
+   znucl 13 33
+   typat 1 2
+   ixc 3
+
+#Definition de la procedure scf
+#******************************
+   iscf 5
+   nstep 100
+
+
+#Definition de la base d'ondes planes
+#************************************
+   ecut  5
+   ecutsm 0.5
+   dilatmx 1.05
+   ngkpt 6 6 6
+   nshiftk 4
+   shiftk 0.5 0.5 0.5
+          0.5 0.0 0.0
+          0.0 0.5 0.0
+          0.0 0.0 0.5
+
+ndtset 12
+jdtset
+ 11 12 13 14
+ 21 22 23 24
+ 31 32 33 34
+
+
+xcart1?    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           2.6598794381E+00  2.6598794381E+00  2.6598794381E+00
+
+xcart2?    0.0100000000E+00  0.0000000000E+00  0.0000000000E+00
+           2.6598794381E+00  2.6598794381E+00  2.6598794381E+00
+
+xcart3?   -0.0100000000E+00  0.0000000000E+00  0.0000000000E+00
+           2.6598794381E+00  2.6598794381E+00  2.6598794381E+00
+
+#DATASET1 : scf calculation: GS WF in the BZ
+#********************************************
+   prtden?1   1
+   kptopt?1   1
+   toldfe?1  1.0d-12
+
+#DATASET2 : non scf calculation: GS WF in the whole BZ
+#*****************************************************
+   getden?2  -1
+   getwfk?2  -1
+   kptopt?2   2
+     iscf?2  -2
+   tolwfr?2   1.0d-22
+    nband?2   4
+
+
+#DATASET3 : ddk on the MP grid of k-points
+#*****************************************
+   getwfk?3  -1
+    rfdir?3   1 1 1
+   rfelfd?3   2
+   tolwfr?3   1.0d-22
+    nband?3   4
+   kptopt?3   2
+
+
+#DATASET4 : dielectric tensor calculation
+#****************************************
+   getwfk?4  -2
+   getddk?4  -1
+    rfdir?4   1 1 1
+   toldfe?4   1.0d-12
+   rfelfd?4   3
+    nband?4   4
+   kptopt?4   2
+    prtwf?4   0
+
+nbdbuf 0
+

@@ -1,0 +1,102 @@
+# -*- Python -*-
+#
+# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Source files making up the 7ddb library
+#
+
+# Source file attributes
+ABI_SRC_NIL = 0     # No attribute
+ABI_SRC_BLT = 1     # The file is built by a script
+ABI_SRC_DEP = 2     # The file depends on other files
+
+# Source files
+sources = [
+ "alignph.F90",
+ "complete_gamma.F90",
+ "complete_gamma_tr.F90",
+ "complete_gkk.F90",
+ "complete_gkq.F90",
+ "completeperts.F90",
+ "d2c_weights.F90",
+ "d2c_wtq.F90",
+ "ddb_compare.F90",
+ "defs_elphon.F90",
+ "ddb_diel.F90",
+ "ddb_elast.F90",
+ "electrooptic.F90",
+ "eliashberg_1d.F90",
+ "elphon.F90",
+ "ep_el_weights.F90",
+ "ep_fs_weights.F90",
+ "ep_ph_weights.F90",
+ "ep_setupqpt.F90",
+ "freeze_displ_allmodes.F90",
+ "ftgkk.F90",
+ "fxgkkphase.F90",
+ "gam_mult_displ.F90",
+ "get_all_gkk2.F90",
+ "get_all_gkq.F90",
+ "get_all_gkr.F90",
+ "get_fs_bands.F90",
+ "get_veloc_tr.F90",
+ "get_nv_fs_en.F90",
+ "get_nv_fs_temp.F90",
+ "get_tau_k.F90",
+ "harmonic_thermo.F90",
+ "ddb_hybrid.F90",
+ "anaddb_init.F90",
+ "ddb_internalstr.F90",
+ "integrate_gamma.F90",
+ "integrate_gamma_alt.F90",
+ "integrate_gamma_tr.F90",
+ "integrate_gamma_tr_lova.F90",
+ "interpolate_gkk.F90",
+ "k_neighbors.F90",
+ "lin_interpq_gam.F90",
+ "mblktyp1.F90",
+ "mblktyp5.F90",
+ "mka2f.F90",
+ "mka2fQgrid.F90",
+ "mka2f_tr.F90",
+ "mka2f_tr_lova.F90",
+ "mkfskgrid.F90",
+ "mkfsqgrid.F90",
+ "mkqptequiv.F90",
+ "mrgddb_init.F90",
+ "m_anaddb_dataset.F90",
+ "m_atprj.F90",
+ "m_ifc.F90",
+ "m_phonons.F90",
+ "m_phonon_supercell.F90",
+ "m_primcell_ddb_info.F90",
+ "m_sortph.F90",
+ "mkph_linwid.F90",
+ "mk_irredpert.F90",
+ "nmsq_gam_sumfs.F90",
+ "nmsq_gam.F90",
+ "nmsq_pure_gkk.F90",
+ "nmsq_pure_gkk_sumfs.F90",
+ "normsq_gkq.F90",
+ "order_fs_kpts.F90",
+ "outelph.F90",
+ "ddb_piezo.F90",
+ "printvtk.F90",
+ "prt_gkk_yambo.F90",
+ "ramansus.F90",
+ "rchkgsheader.F90",
+ "read_el_veloc.F90",
+ "read_gkk.F90",
+ "relaxpol.F90",
+ "symgamma.F90",
+ "test_ftgkk.F90",
+ "thmeig.F90",
+ ]
+# IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
+# This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

@@ -1,0 +1,95 @@
+--------------------------------------------------------------------------------
+--------------------
+5. GLOBAL VARIABLES AND MODULES
+--------------------------------------------------------------------------------
+--------------------
+
+
+5.a
+Global variables are the local variables of a particular scoping unit, the
+main program. Contrary to the so called 'non-static local variables' of any
+subprogram, global variables are static IN FACT, i.e. they 'live' during all
+the program execution. Therefore, with the aim of optimizing memory ressources,
+global variables should be avoided (note that abinit.f defines 70 global arrays).
+
+Furthermore:
+- 90 % of variables (at least) are not necessary all the time but may have a
+'temporary' life.
+- a FORTRAN 90 code should be written as a logical, natural and rigourous chain
+of modules and subprograms. Therefore, (almost) nothing should be done in the
+main program itself.
+
+Now, let us detail a complete example of defining such a chain:
+
+
+1) Having defined the 'basis_defs' module (see subsection 1b and 1c),
+it may be useful to define a second module for dealing with parallelization
+implementations:
+
+   module paral_defs
+   ! ...
+   use basis_defs
+   ! ...
+   #ifdef MPI
+   include 'mpif.h'
+   #endif
+   ! ...
+   #define constant parameter
+   integer, constant :: all_proc = -1
+   ! ...
+   end module paral_defs
+
+Note that since it includes a fixed-format FORTRAN system file, this module is
+written also in fixed format.
+
+
+2) Let us continue with another module including some basis subroutines.
+The first is a subroutine which stops a program (you cannot find a more basic
+subroutine !). The second manages execution errors returned by MPI subroutines
+and may call the first one. The third...
+
+   module proc
+   ! ...
+   use paral_defs
+   ! ...
+   ! suggested constants to use as calling arguments of 'stop_all_proc' subr.
+   #define constant parameter
+   integer, constant :: stop_all_proc_normal = 0
+   integer, constant :: stop_all_proc_premature = 1
+   ! ...
+   contains
+   ! ...
+   subroutine stop_all_proc(termination)
+   ! ...
+   end subroutine stop_all_proc
+   ! ...
+   subroutine mng_mpi_err(err_code,calling_sub_pgm,MPI_sub_pgm,rank_proc,msg)
+   ! ...
+   end subroutine mng_mpi_err
+   ! ...
+   end module proc
+
+
+3) Another modules may be added so as to build a chain of modules.
+So we have:
+- basis_defs
+- paral_defs which includes basis_defs
+- proc which includes paral_defs
+- tools...
+- ...
+- basis: by a convention I suggest, basis if the whole module which includes all
+      scoping units (all .F90 files) in the directory named 'basis'.
+
+
+4) The previous scheme may be repeated for several directories.
+For instance, imagine a program whose source code is distributed in
+directories named
+Src_basis, Src_utilities, Src_FFT, Src_NR, Src_BLAS, Src_LAPACK, Src_MPI,
+Src_crystallography, Src_DFT, Src_DFPT, etc...
+Any subprogram located in 'Src_DFPT' directory may include 'use Src_DFT' for
+instance, without having to know details of module organization in directory
+Src_DFT.
+
+
+5) The last directory contains the main program itself and some other
+subprograms which are not included in modules.

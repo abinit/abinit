@@ -1,0 +1,858 @@
+<HTML>
+<HEAD>
+   <TITLE>installation notes for V4.0</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+<H1><CENTER>
+
+<HR>
+
+Installation notes for ABINIT v4.0</CENTER></H1>
+
+<P>
+
+<HR>
+
+This file provides a description of the operations needed to install
+the ABINIT package, to generate the executable and to make the
+tests.</P>
+
+<P>See a recent version of the
+<a href="../new_user_guide.html">new user's guide</a>, for an
+introduction to the abinit package. See a recent version of the
+<a href="../abinis_help.html">abinis help</a> file
+for learning how to use the code. Both of them can be
+found in the Infos subdirectory.</P>
+
+<P>Any comment or suggestion to improve the procedure will be
+welcome ! Simply contact the
+<A HREF="mailto:gonze@pcpm.ucl.ac.be"> ABINIT group</A>.</P>
+
+<P>Created 981109<BR>
+Last updated XG 20030106</P>
+
+<h5>Copyright (C) 1998-2003 ABINIT group (XG,DCA)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors .
+</h5>
+
+<P>
+
+<HR>
+
+</P>
+
+<H2>Summary :</H2>
+
+<UL>
+   <LI><A HREF="#get _version"><B>How to get a version of ABINIT
+   ?</B></A></LI>
+
+   <LI><A HREF="#make_executable"><B>How to make the executable
+   ?</B></A></LI>
+
+   <LI><A HREF="#make_internal_tests"><B>How to make the internal
+   tests ?</B></A></LI>
+
+   <LI><A HREF="#make_tests"><B>How to make the other tests
+   ?</B></A></LI>
+
+   <LI><A HREF="#others"><B>Things that are NOT in the installation
+   files.</B></A></LI>
+
+   <LI><A HREF="#make_installationfiles"><B>For advanced users :
+   how to make the installation files ?</B></A></LI>
+
+</UL>
+
+<P>
+
+<HR>
+
+</P>
+
+<H2><A NAME="get _version"></A>How to get a version of ABINIT ?</H2>
+
+<P>We will distinguish three cases :</P>
+
+<OL>
+   <LI>you have a F90 compiler under UNIX/Linux (or MacOS X) and
+   you want to compile the source files.</LI>
+
+   <LI>you run one of the UNIX/Linux (or MacOS X) platforms
+   on which ABINIT is installed
+   before each release, and you do not want to compile the source files.</LI>
+
+   <LI>you want to run ABINIT under DOS/Windows.</LI>
+
+</OL>
+
+<P>In the three cases, the installation files are available on the web site.</P>
+
+<P>You must download different files for the different cases(<I>x.x.x is the
+version</I>).</P>
+
+<P><B>Case 1 (under UNIX/Linux or MacOS X, and you want to compile) :</B></P>
+<BLOCKQUOTE>
+<P>download the file <B>src_tests_<I>x.x.x</I>.tar.gz</B>
+    </P>
+<P><B>or</B></P>
+<P>download the four files <B>src_tests<I>X</I>_<I>x.x.x</I>.tar.gz</B>
+  where <B><I>X</I></B> is <B><I>A, B, C or D</I></B>
+    </P>
+</BLOCKQUOTE>
+
+<BLOCKQUOTE>The <B>src_tests_<I>x.x.x</I>.tar.gz</B>
+   gzipped tar file contains <B>all</B> the sources of the
+   ABINIT code (including the files needed for generating the FFTs,
+   NumRecip and Lapack libraries), the complete Infos directory, the
+   complete set of Tests, all the scripts and makefiles, the
+   pseudopotentials needed for tests.<BR>
+   It does NOT contain the object files and the binary executable
+   files. <BR>
+   You might as well download separately four different tar.gz
+   files named src_testsA_<I>x.x.x</I>.tar.gz, src_testsB_<I>x.x.x</I>.tar.gz
+   src_testsC_<I>x.x.x</I>.tar.gz, and src_testsD_<I>x.x.x</I>.tar.gz .
+   This opportunity is provided in case you have a slow connection
+   to the ABINIT Web site, and think your ftp connection might be not
+   stable enough to download the entire src_tests_<I>x.x.x</I>.tar.gz file :
+   the four different
+   files are each about one quarter of the single file, and altogether they contain
+   also the full ABINIT package.</BLOCKQUOTE>
+
+<P><B>Case 2 (under UNIX/Linux or Mac OS X, and you do not want to compile) :</B></P>
+<BLOCKQUOTE>
+ <P>download <B><I>platform</I>_seq_<I>x.x.x</I>.tar.gz</B>,
+    for the sequential version only, </P>
+ <P><B>or</B></P>
+ <P>download <B><I>platform</I>_par_<I>x.x.x</I>.tar.gz</B>,
+    for the parallel version only (if it exists for the platform), </P>
+ <P><B>or</B></P>
+ <P>download <B><I>platform</I>_<I>x.x.x</I>.tar.gz</B>,
+    for sequential and parallel versions (if both exist for the platform). </P>
+</BLOCKQUOTE>
+
+<BLOCKQUOTE>Such gzipped tar files contains the binary executable
+   files (sequential, or parallel, or both),
+   the complete Infos directory, and the different files
+   needed to execute either the
+   <A HREF="#make_internal_tests"><B> 5 internal tests </B></A>
+   (sequential version),
+   or <A HREF="#make_tests"><B> tests </B></A>
+   from the Test_paral directory (parallel version), or both.
+   In what follows, we will focus on the
+   sequential executable (called abinis). One should begin to use
+   the parallel executable (called abinip) only when sufficient
+   experience has been gained with abinis. <BR>
+   The gzipped tar file does NOT contain the source files,
+   neither the Test_fast, Test_v1, Test_v2, Test_v3, Test_v4,
+   and Test_cpu directories, nor the corresponding
+   pseudopotentials. The possible platforms are :
+<UL>
+   <LI>pclinux_pgi (PC under Linux, using the Portland Group Inc. compiler),</LI>
+   <LI>pclinux_ifc (PC under Linux, using the Intel compiler - a bit faster),</LI>
+   <LI>ibm_pw2 (IBM with Power 2 processors),</LI>
+   <LI>ibm_44p (IBM model 44P with Power III+ processors),</LI>
+   <LI>compaq_ev56 (DEC/Compaq machines with EV56 alpha processors),</LI>
+   <LI>compaq_ev67 (DEC/Compaq machines with EV67 alpha processors),</LI>
+   <LI>hp_pa7200 (HP PA RISC processors, model 7200),</LI>
+   <LI>hp_pa8000 (HP PA RISC processors, model 8000),</LI>
+   <LI>hp_pa8500 (HP PA RISC processors, model 8500),</LI>
+   <LI>sgi_r12000,</LI>
+   <LI>sgi_r14000,</LI>
+   <LI>sun_ultrasparc,</LI>
+   <LI>fujitsu_vpp,</LI>
+   <LI>nec</LI>
+   <LI>mac OS X</LI>
+</UL>
+   For the Intel/Linux machines, the binaries contain all
+   the library routines statically linked. They should be very portable
+   (and they have been ported to more than 5 different machines in different
+   countries, or of different construction ). However, they have been compiled
+   by a compiler that generates code that needs an IP number to work.
+   So, they will not run if your machine has not been IP'ed.
+   For the other platforms,
+   the executable does not contain all the library routines
+   (they are linked dynamically), so they might not be as portable.
+   The portability of the executable has been checked only
+   for IBM PW2 and SGI Origin 2000 platforms.
+   </BLOCKQUOTE>
+
+<P><B>Case 3 (you want to run ABINIT under DOS/Windows) :</B></P>
+<BLOCKQUOTE>
+ <P>download <B>intel_DOSWin_seq_<I>x.x.x</I>.exe</B>,
+    for the sequential version.</P>
+</BLOCKQUOTE>
+
+<BLOCKQUOTE>
+   This is a self-extracting zip file that contains the binary executable
+   files, the complete Infos directory, and the different files
+   needed to execute the 5 internal tests. It does NOT contain the source files,
+   nor the Test_fast, Test_v1, Test_v2, Test_v3, Test_v4
+   and Test_cpu directories, and the corresponding
+   pseudopotentials.<BR>
+   Note : in order to compile ABINIT under DOS/Windows, you need the PGI workstation
+   environment. The procedure to be followed differs from what will be explained
+   below, and will not be described.
+   Contact the <A HREF="mailto:gonze@pcpm.ucl.ac.be"> ABINIT group</A> if needed.
+</BLOCKQUOTE>
+
+<P>So, execute the following actions :</P>
+
+<BLOCKQUOTE><B>1)</B> Transfer the above-mentioned file(s) to your
+   machine, in a directory referred to here as ~local_ABINITv<I>x.x.x</I> .
+   You should have about 100 MB of disk space to install the code,
+   maybe more, depending on the version, and the number of tests that you
+   will do.
+
+   <P><B>2a)</B> Under UNIX/Linux, gunzip (on some machine you need gzip -d)
+   and untar the file
+   '<B>src_tests_<I>x.x.x</I>.tar.gz</B>' or
+   '<B><I>platform</I>_<I>x.x.x</I>.tar.gz</B>' (or the sequential
+   or parallel reduction of the latter file) :</P>
+
+   <BLOCKQUOTE>gunzip <B>src_tests_<I>x.x.x</I>.tar.gz</B> |
+      tar -xvf -
+
+      <P>or</P>
+
+      <P>gunzip <B><I>platform</I>_<I>x.x.x</I>.tar.gz</B> |
+      tar -xvf -</P>
+   </BLOCKQUOTE>
+
+   <P><B>2b)</B> Under Windows, double-click the icon of the file
+   intel_DOSWin_seq_x.x.x.exe to retrieve the files and directories.
+   You can also run it as a command in a DOS window or use your favorite
+   unzipping utility.  </P>
+</BLOCKQUOTE>
+
+<P>If correctly done, a whole set of
+subdirectories should have been created. One of them is called
+'Infos'. It contains many important informations.
+In particular, you will find the description of the different
+subdirectories in the
+~local_ABINITv<I>x.x.x</I>/Infos/dirs_and_files file.
+This file also describes the content of the Infos
+directory, that is, all the information files.</P>
+
+<P><B>*** It is strongly adviced to the installer to read (and print) NOW the
+~local_ABINITv<I>x.x.x</I>/Infos/dirs_and_files file. ***</B></P>
+
+<P>
+
+<HR>
+
+</P>
+
+<H2><A NAME="make_executable"></A>How to make the executables ?</H2>
+
+<P>If you were in case 2, then you already have the binary
+executables abinis, newsp, mrgddb and anaddb, so that you might skip the present
+section and
+<A HREF="#make_internal_tests">go to the internal testing</A>.
+However, just for fun, if you are in UNIX or Linux, you
+can issue the make command, in the ~local_ABINITv<I>x.x.x</I>
+directory :</P>
+
+<BLOCKQUOTE><B>make</B></BLOCKQUOTE>
+
+<P>This will print the list of the basic keywords for the make
+utility. This list of basic keywords is completed by keywords specific to
+developers, obtained by typing
+</P>
+
+<BLOCKQUOTE><B>make dev</B></BLOCKQUOTE>
+
+<P>We now suppose that you have a F90 compiler and you want to
+compile the source files (case 1).
+You must provide to the 'make' utility some
+information: the location
+of F90 and C compilers on your machine, the cpp utility, the blas
+library, the location of PERL ...
+For this, you must create in the ~local_ABINITv<I>x.x.x</I> directory a
+file (or a symbolic link) named 'makefile_macros',
+that you will have to design starting from already existing example files.
+Examples of such files are contained in the subdirectories of the
+~local_ABINITv<I>x.x.x</I>/Machine_dept_files directory.
+Actually, if one of the existing 'makefile_macros' file is suitable
+for you, you will have simply to issue an instruction like the following :</P>
+
+<BLOCKQUOTE><B>ln -s</B> Machine_dept_files/DEC/makefile_macros.newton makefile_macros</BLOCKQUOTE>
+
+<P>(here, a symbolic link is created, so that 'makefile_macros' refers to
+Machine_dept_files/DEC/makefile_macros.newton , a file suitable for
+the DEC machine named 'newton' at the PCPM).
+In order to generate a new 'makefile_macros' file, a help file
+called 'help.makefile_macros' can be found in the
+~local_ABINITv<I>x.x.x</I>/Infos directory. You can ask some
+help to the <A HREF="mailto:gonze@pcpm.ucl.ac.be"> ABINIT group</A>.
+When you have succeeded to create one such file, please send it
+to us, so that it can be maintained in the next versions of the code.</P>
+
+
+<P>When the 'makefile_macros' file is ready, you will have to issue
+the 'make' command, followed by some keyword.</P>
+
+<P>To get the sequential version of all the executables,
+you must type :</P>
+
+<BLOCKQUOTE><B>make allseq</B>
+<P> or </P>
+<B>make allseq >& log.file</B>
+</BLOCKQUOTE>
+
+<P>(allseq is an abbreviation for <I>all sequential</I> executables;
+   log.file can be any filename, and is useful
+    when the messages from make are too long)</P>
+
+<P>Issuing this 'make allseq' command will trigger a whole set of
+actions (not easy to follow, as you will see).<BR>
+The make utility will use the file 'Makefile', that calls a script
+called 'makemake', to produce another makefile, called
+'tmp_makefile', that calls the 'makearch' script from different
+subdirectories, that create themselves 'tmp_makefile' files, that
+compile the fortran source (and eventually one C file), create
+libraries and link the different objects.<BR>
+Moreover, usually, this works without problem !</P>
+
+<P>Let's us suppose that you do not issue the powerful 'make allseq'
+command, but that you want to create one-by-one the libraries and
+executables.</P>
+
+<P>Then, for the sequential version, you must create :</P>
+
+<UL>
+   <LI>the lapack library (make lapack)</LI>
+
+   <LI>the numrecip library (make numrecip)</LI>
+
+   <LI>the new FFT library (make fftnew)</LI>
+
+   <LI>the perl scripts (make perl)</LI>
+
+   <LI>and on some platforms, the blas library (make blas)</LI>
+</UL>
+
+<P>Alternatively, the libraries can be created at once by
+issuing 'make libs'.</P>
+
+<P>Then, you can issue 'make abinis' to make the sequential version
+of abinit, and 'make newsp' to make newsp, the wavefunction
+translator. The latter is needed for different tests of abinis
+(see below). You can also issue 'make mrgddb' to make the
+code that merge the derivative databases, 'make anaddb' to make
+the code that analyze interatomic force constant,
+'make aim' for the Bader analysis utility,
+'make cut3d' for the analyzer of three-dimensional density, potential
+or wavefunction files.</P>
+
+<P>In order to get a transferable executable on Intel/Linux machines,
+it might be needed to generate a static BLAS library. For this purpose,
+issue 'make blas'. Be consistent with this choice, at the level
+of the 'makefile_macros' file. This possibility is also used
+for the Fujitsu machines.</P>
+
+<P>Informations needed to generate the parallel version of ABINIT
+can be found in the ~local_ABINITv<I>x.x.x</I>/Infos/paral_use file.
+</P>
+
+<P> Suppose that something is going wrong in one of the above-mentioned
+steps, then, you can issue one of the 'clean_xxx' keywords (those
+mentioned by typing 'make') to clean the directory where something
+wrong happened.</P>
+
+<P>With a bit of luck, you will succeed to
+generate the executables. You are ready to perform
+the tests.</P>
+
+<P>In some cases, one wish to keep the binaries for different platforms
+in the same ~local_ABINITv<I>x.x.x</I> directory. It is
+possible to make the
+compilation execute in such a way that the result is stored in
+a machine-dependent subdirectory. Prior to the compilation on one
+platform, issue : </P>
+
+<BLOCKQUOTE><B>make bindir</B>
+</BLOCKQUOTE>
+
+<P>Thanks to this command, a 'tmp_bindir' file will be created,
+containing the definition of a variable $(BINDIR). Usually, this
+variable will be BinAbinit/machine_architecture ,
+where machine_architecture is the result of the execution of the
+`arch` command on the platform. This definition
+will be included in the make mechanism, and all the binaries
+will be put in $(BINDIR). For the compilation on another
+platform, the 'make bindir' command must be performed again,
+before compilation, and the binaries generated by that other
+compilation will be put in the corresponding directory.
+It is also possible to change the tmp_bindir file, to define
+another location, not obtained by the `arch` command.
+Note that, if any, the cleaning will be directed to the $(BINDIR)
+directory, which is the expected behaviour. However, presently, the
+tests (internal as well as v1, and others) CANNOT use the
+executables in the machine-dependent location : if the tests
+are to be done, one must first copy the proper executable in the
+~local_ABINITv<I>x.x.x</I> directory.
+</P>
+
+<P>
+
+<HR>
+
+</P>
+
+<H2><A NAME="make_internal_tests"></A>How to make the internal tests
+? (sequential version only) &nbsp;</H2>
+
+<P>The abinis code has five small internal tests, that can be issued
+automatically, and that check themselves whether the results that
+have been obtained are right or wrong. At most 3 MB of
+memory is required, and 1 MB of disk space. PERL must be installed
+on your machine for these tests to work. You can get PERL from
+<a href="http://www.perl.org">http://www.perl.org</a> .
+In the DOS/Windows case, perl.exe MUST be
+accessible through the DOS PATH</P>
+
+<P>You can begin with the test number 1. Simply issue the command
+:</P>
+
+<BLOCKQUOTE><B>make test1</B></BLOCKQUOTE>
+
+<P>It will run during a dozen of seconds. It will first
+print&nbsp;</P>
+
+<BLOCKQUOTE>cd Test_in; Run 1<BR>
+ Built-in test 1 will be run through dotest script<BR>
+ dotest: Starting built-in test 1<BR>
+ ../abinis &lt; test1.files &gt; test1.log
+</BLOCKQUOTE>
+
+<P>then, you will eventually (if you are on a slow machine) see
+different instances of the status file, like the following :</P>
+
+<BLOCKQUOTE>Status file, with repetition rate 49 , status number
+   99&nbsp;
+
+   <P>Level abinit : call gstate<BR>
+   Level gstate : call brdmin<BR>
+   Level brdmin : call scfcv_ini<BR>
+   Level scfcv : call vtorho<BR>
+   istep = 2<BR>
+   Level vtorho : compute rhog</P></BLOCKQUOTE>
+
+<P>then, the important information is as follows :</P>
+
+<BLOCKQUOTE>Status file, reporting on test 1&nbsp;
+
+   <P>OK for total energy<BR>
+   OK for nuclei positions<BR>
+   OK for forces<BR>
+   OK for stresses&nbsp;</P></BLOCKQUOTE>
+
+<P>This means that the internal test 1 ran successfully. If you do
+not get this message, then the executables were not properly
+generated, or there is a problem with the make and scripts that drive
+the internal test. In this case, after having tried to solve the
+problem by yourself, you should contact somebody in the
+<A HREF="mailto:gonze@pcpm.ucl.ac.be"> ABINIT group</A>.</P>
+
+<P>Note : the script detects the end of the run by using the 'ps'
+command following by a 'grep' command.
+This can lead to strange effects if a file whose name contain
+'abinis' is currently visualized, or if another job is running under
+a name that contains 'abinis'.<BR>
+So, close your files before running the tests, and also check that
+there are no running jobs whose name contains 'abinis'.</P>
+
+<P>Supposing test1 was OK, then you have to issue the command 'make
+tests'.</P>
+
+<P>The test 1 will be done once more, followed by the 4 other
+internal tests. Again, we hope that you will get the positive
+diagnostics for the other tests. Altogether, these tests are about 50 sec
+on a Intel/PIII 450 MHz machine where no other job is running.</P>
+
+<P>For further information on these internal tests, see the file
+~local_ABINITv<I>x.x.x</I>/Test_in/README .</P>
+
+<P>You might now read the
+<a href="../new_user_guide.html">new user's guide</a>, in order
+to learn how to use the code. This is useful if
+you consider that the installation has been successful, or if
+you want to continue the tests.</P>
+
+<P>
+
+<HR>
+
+</P>
+
+<H2><A NAME="make_tests"></A>How to make the other tests (case 1 only)?</H2>
+
+<P>(Case 1 only, since in case 2, only the minimal testing tools have been
+transferred)</P>
+
+<P>Although it is possible to make the other tests without knowing
+really how to use the code (since all steps involved - the run and subsequent
+analysis - are done automatically), it is the right time to read
+the <a href="../new_user_guide.html">new user's guide</a>.
+
+<P>After this reading, you should look at the
+subdirectory Test_fast, and, later, Test_v1 and
+Test_cpu, where tests of the sequential version of ABINIT (abinis) can be
+done automatically. For tests of the parallel version (abinip)
+see the directory Test_paral, as well as the
+~local_ABINITv<I>x.x.x</I>/Infos/paral_use file.
+For tests of the response function features of abinis, and for
+tests of mrgddb and anaddb, see the subdirectory Test_v2.
+Test_v3 and Test_v4
+presents further tests of recently implemented features of ABINIT.</P>
+
+<P>In order to execute these tests, you will need a larger disk space than
+for the simple installation of the code (the total additional disk space
+required is on the order of 100 MB). After having checked the results
+of the tests, the user can easily retain the output files in a
+compressed form, and get rid off the wavefunction files by
+issuing</P>
+
+<BLOCKQUOTE><B>make decrease_size_tests</B></BLOCKQUOTE>
+
+<P>in the ~local_ABINITv<I>x.x.x</I> directory. Separate
+commands are available for each of the Test directories.</P>
+
+<P>You might as well remove all working directories by issuing </P>
+
+<BLOCKQUOTE><B>make clean_tests</B></BLOCKQUOTE>
+
+<P>in the ~local_ABINITv<I>x.x.x</I> directory. Separate
+commands are available for each of the Test directories. This
+command remove all the subdirectories that begin with '_',
+which is the case of the working subdirectories. If you want to keep
+some of them, remove their initial '_', then issue make clean_tests.
+You can still decrease the size of such renamed directories by the
+make decrease_size_tests command.</P>
+
+<P><B>1) Test_fast&nbsp; </B> (for the sequential version only)</P>
+
+<P>This subdirectory contains a basic set of tests of the code, aimed
+at testing whether the code is coherent in time (successive
+versions), and exercising many parts of the code. However, they do
+not examine its accuracy on physical problems, mainly because the
+number of plane waves used is too small, and some tests are not run
+to self-consistent convergence. 32 MB of memory should be enough for these
+tests (with no other application running, however).<BR>
+Read the ~local_ABINITv<I>x.x.x</I>/Test_fast/README file
+carefully (at least the beginning),
+then read the beginning of the scripts 'Run'. Note that
+it is a perl script. <BR>
+To run the tests, simply issue :</P>
+
+<BLOCKQUOTE><B>(Run machine_name) &gt;&amp; log</B></BLOCKQUOTE>
+
+<P>where machine_name will usually be the name of your machine (any
+other character string is fine, however).</P>
+
+<P>The script will create a directory whose name will be build from the
+machine name and today's date. All the results will be in that
+directory. The output files will be automatically compared, thanks to
+a 'diff' command, to a set of reference files, either from the
+plane_wave code (the corresponding difference files are prefixed by
+'diff.'), or from a recent run of the ABINIT code (the corresponding
+difference files are prefixed by 'difnew.').</P>
+
+<P> In addition to 'diff', another comparing tool called 'fldiff' -for 'floating
+diff'- is also used. It treats in a more clever way the comparison
+of floating numbers between the output files and the reference files.
+As used presently in the 'Run' script, for each run, only one
+single file, called 'fldiff.report', will be produced.
+If for one test case, the two files differ by the number of lines,
+the 'fldiff.report' file will report that it cannot compare the two files.
+Usually this problem will be seen at the level of 'command signs' appearing
+sometimes in the first column of the output files, so a
+typical error message (announcing something went wrong) will be:</P>
+
+<BLOCKQUOTE>
+<P>
+Case_1 <BR>
+22     <BR>
+The diff analysis cannot be pursued : the command sign differ.  <BR>
+</P>
+</BLOCKQUOTE>
+
+<P> By contrast, it will
+identify the floating numbers and ignore their differences if they are
+within some prescribed tolerance (fldiff should become an expert system
+in this respect : for example, in the present version, it is already
+able to ignore most differences in timings).
+If everything goes fine for a test,
+fldiff should identify only the differences in :
+<UL>
+   <LI> the dates of execution (eventually) ;</LI>
+
+   <LI> the version numbers (eventually) ;</LI>
+
+   <LI> the platform description (eventually) ;</LI>
+
+   <LI> the overall execution time
+        (this is ALWAYS printed, even without differences).</LI>
+</UL>
+So, a successful execution of one test case may be announced as follows
+in the fldiff.report file :</P>
+
+<BLOCKQUOTE>
+<P>
+Case_1 <BR>
+2      <BR>
+<  Version 4.0.2  of ABINIT  <BR>
+>  Version 4.0.0  of ABINIT  <BR>
+5      <BR>
+<  Starting date : Tue 28 Jan 2003.  <BR>
+>  Starting date : Mon 27 Jan 2003.  <BR>
+202    <BR>
+< +Overall time at end (sec) : cpu=          7.1  wall=          8.0   <BR>
+> +Overall time at end (sec) : cpu=          7.3  wall=          8.0   <BR>
+</P>
+</BLOCKQUOTE>
+
+<P> The fldiff.report file will have one such section for each Test_case
+that was run. It begins with the number of the test case, then
+includes a few blocks of three lines: the number of the line
+where something is happening, followed by the content of the two lines.</P>
+
+<P>If differences (besides those described above) are found,
+then there is a problem, or the double precision
+tolerance needs to be adjusted (as time goes, this should become better).
+More information on the
+fldiff script can be found in
+the ~local_ABINITv<I>x.x.x</I>/Utilities/fldiff file.
+If needed, you can send by e-mail the fldiff.report to the
+<A HREF="mailto:gonze@pcpm.ucl.ac.be"> ABINIT group</A>
+for help understanding it and fixing possible bugs.
+&nbsp;</P>
+
+<P><B>2) Test_v1</B>&nbsp; (for the sequential version only) </P>
+
+<P>This directory contains tests built in the same spirit as those
+in the Test_fast directory, but that exercise features not present in
+the plane_wave code, like the treatment of metals, the GGA, the
+new pseudopotentials, the multi-dataset mode, the cell parameters
+optimization, and the spatial symmetry groups database.<BR>
+These were developed during the development time of the version 1
+of ABINIT.<BR>
+Of course, the automatic difference procedure only compares to recent
+runs of the ABINIT code. As for the 'fast' test cases, the fldiff.report
+file is also available. 64 MB of memory should be enough for these
+tests (with no other application running, however). </P>
+
+<P><B>3) Test_v2</B>&nbsp; (for the sequential version only) </P>
+
+<P>This directory contains tests built in the same spirit as those
+in the Test_fast directory, but that exercise features not present in
+the plane_wave code, nor in version 1 of the ABINIT package, mainly
+the response function features, and the use of the mrgddb and anaddb
+codes.
+Again, the automatic difference procedure only compares to recent
+runs of the ABINIT code. As for the 'fast' test cases, the fldiff.report
+file is also available. 64 MB of memory should be enough for these
+tests (with no other application running, however). </P>
+
+<P><B>4) Test_v3 and Test_v4 </B>&nbsp; (for the sequential version only) </P>
+
+<P>This directory contains tests built in the same spirit as those
+in the Test_fast directory, but that exercise features not present in
+the plane_wave code, nor in version 1 or 2 of the ABINIT package,
+noticeably the use of the GW code, the utilities Cut3d, AIM, ..,
+the PAW ... .
+Again, the automatic difference procedure only compares to recent
+runs of the ABINIT code. As for the 'fast' test cases, the fldiff.report
+file is also available. 64 MB of memory should be enough for these
+tests (with no other application running, however). </P>
+
+
+<P><B>5) Test_cpu </B> (for the sequential version only)</P>
+
+<P>This subdirectory contains the scripts, and input files needed for
+testing the cpu time, either on progressively finer real space grids,
+or on progressively bigger unit cells.
+Please read the README file of this directory.
+Also for this suite of tests, you have simply to issue</P>
+
+<BLOCKQUOTE><B>(Run machine_name) &gt;&amp; log</B></BLOCKQUOTE>
+
+<P>Unlike in the previous case, many directories will be created (more
+than 10 in the present version). Their name begins with the test name (A1,
+A2, A3, A4, B1, B2, B3, B4, C3, D3), and is followed by the machine name
+and the date. Inside these directories, many runs are done.<BR>
+There is a 'report' file that summarizes the timing of the different
+runs, and there is a 'diff' file, that compares these timings with
+the reference (output files from a PII at 450 MHz, usually).
+The structure of these
+tests is more complex than that of the Test_fast and Test_v1 directories.
+The tools used are the 'serie' scripts (serieA,serieB,
+serieC and serieD) as well as the 'getrep' script. For an explanation,
+contact the <A HREF="mailto:gonze@pcpm.ucl.ac.be"> ABINIT group</A>.
+For the largest tests (B and D series), up to 200 MB of central memory
+are required.
+</P>
+
+<P><B>6) Test_paral</B>&nbsp; (needs both abinis and abinip)</P>
+
+<P>This directory contains tests built in the same spirit as those
+in the Test_fast directory, but that exercise the parallel version
+of the ABINIT code.<BR>
+The 'Run' script consider one of the different input files, and
+for this file, it will perform first a sequential
+run (using abinis),
+then use the parallel code (abinip) with one processing node, then perform
+different parallel runs with an increasing number of processing nodes.
+As for the other series of test, the diff and the fldiff utilities
+are used automatically.</P>
+
+
+<P><B>7) How to run all the sequential tests, or a subset of these suited
+for developers ?</B></P>
+
+<P>In the main directory, it is possible to issue </P>
+
+<BLOCKQUOTE><B>make tests_allseq &gt;&amp; log</B></BLOCKQUOTE>
+
+<P>in which case, all the tests in Test_fast, Test_v1, Test_v2,
+Test_v3, Test_v4, Tutorial, Test_cpu and the sequential tests of Test_paral
+will be issued. The choice of the name of the machine is not let
+to the user : it is "t3e" (even if you run on a PC !). </P>
+
+<P>Also in the main directory, if you issue </P>
+
+<BLOCKQUOTE><B>make tests_dev &gt;&amp; log</B></BLOCKQUOTE>
+
+<P>the tests in Test_fast, Test_v1, Test_v2,
+Test_v3, Test_v4, and the sequential tests of Test_paral
+will be issued. As in the preceeding case, the name of the machine
+if fixed ("t3e"). In addition, a summary file, containing
+all the fldiff report files is created, then tarred and gzipped.
+It is given the name summary_tests.tar.gz, and might be sent by
+mail for the merge of a new contribution.</P>
+
+
+<HR>
+
+<H2><A NAME=others></A>Things that are NOT in the installation
+files.&nbsp;</H2>
+
+<UL>
+   <LI><B>Pseudopotentials :</B><BR>
+   The installation files contain a few pseudopotentials, for
+   testing purposes. But many other pseudopotential have been
+   generated. There exist presently two complete sets of ready-to-use
+   LDA pseudopotentials, for the whole periodic table : those
+   generated by Doug Allan and Alex Khein for the plane_wave code,
+   and those published by
+   Hartwigsen, Goedecker and Hutter (Phys. Rev. B 58, 3641 (1998)).
+   Also, the Fritz-Haber-Institute code, that is freely available at
+   <A HREF=http://www.FHI-Berlin.MPG.DE/th/fhi98md/fhi98PP>
+   http://www.FHI-Berlin.MPG.DE/th/fhi98md/fhi98PP</A>,
+   can be used to generate LDA as well as GGA pseudopotentials,
+   that can be read by the code after minor modifications,
+   see the Web site.
+   </LI>
+
+   <P>
+
+   <LI>The Web site <a href="http://www.abinit.org">http://www.abinit.org</a>
+   contains many other things ...<BR>
+   </B>The benchmarks results, the mailing lists, ...
+   </LI>
+
+   <LI>The community Web site <a href="http://cst-www.nrl.navy.mil/~erwin/abinit">http://cst-www.nrl.navy.mil/~erwin/abinit</a>
+   is an additional source of information<BR>
+   </LI>
+
+</UL>
+
+<P>
+
+<HR>
+
+</P>
+
+<H2><A NAME="make_installationfiles"></A>
+    For advanced users : how to make the installation files ?</H2>
+
+<P><B>Case 1 (source and tests) : you want to produce the file
+src_tests_<I>x.x.x</I>.tar.gz</B></P>
+
+<P>Here, for example, we suppose that you have modified
+the code (in order to implement a new feature). This modification
+works, so it is time to synchronize with the main code. If the
+modifications are rather large, it is worthwhile to send your complete
+version to the ABINIT group.</P>
+
+<P>First, you should give a version number
+to your version. Simply modify the appropriate variable
+in the Makefile file of your ~local_ABINIT directory.
+Then issue
+<BLOCKQUOTE><B>make new_version_number</B></BLOCKQUOTE>
+to touch the few routines that need this version number, then
+<BLOCKQUOTE><B>make allseq</B></BLOCKQUOTE>
+as for the installation.</P>
+
+<P>When you think everything can be frozen, you must issue
+<BLOCKQUOTE><B>make src_tests</B></BLOCKQUOTE>
+That's all ..</P>
+
+<P><B>Case 2 (version for a specific platform) : you
+want to contribute a specific binary executable e.g.
+you work on a SGI machine, and want to produce the file
+sgi_r14000_<I>x.x.x</I>.tar.gz</B></P>
+
+<P>The requirements are : all executables (abinis, newsp and abinip) are
+working, and you have not erased one of the files needed for the tests,
+both sequential and parallel. Also, the version number is supposed correct
+(see above to modify it). In this case, simply issue :
+
+<BLOCKQUOTE><B>make sgi_r14000 </B></BLOCKQUOTE>
+
+For the sequential version only, or the parallel version only, use
+
+<BLOCKQUOTE><B>make sgi_r14000_seq </B></BLOCKQUOTE>
+or
+<BLOCKQUOTE><B>make sgi_r14000_par </B></BLOCKQUOTE>
+
+For the other platforms, use the appropriate platform name, mentioned
+at the beginning of the present document, or obtained by typing
+
+<BLOCKQUOTE><B>make dev </B></BLOCKQUOTE>
+
+<P>
+
+<HR>
+
+page :<A HREF="/ABINIT/index.html"><B> Home</B></A><B> </B>|
+<A HREF="/ci/calc.html"><B>Calcul Intensif</B></A><B> </B>| <A
+HREF="/Fr/PCPM/abinit.html"><B>Calcul
+<I>ab initio</I></B></A>
+
+<HR ALIGN=left>
+
+<TABLE BORDER=0 CELLPADDING=0>
+   <TR>
+      <TD WIDTH=385>
+         <P>6 January 2003>.<BR>
+         Responsable : Xavier Gonze &lt; <A
+HREF="mailto:gonze@pcpm.ucl.ac.be">gonze@pcpm.ucl.ac.be</A>&gt;<BR>
+         Conception : <A HREF="/~beuken">Jean-Michel Beuken</A> &lt;
+         <A
+HREF="mailto:beuken@pcpm.ucl.ac.be">beuken@pcpm.ucl.ac.be</A>&gt;</P>
+      </TD>
+      <TD>
+         <P></P>
+      </TD>
+   </TR>
+</TABLE>
+</P>
+
+<P></P>
+</BODY>
+</HTML>

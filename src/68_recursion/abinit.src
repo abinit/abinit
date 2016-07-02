@@ -1,0 +1,44 @@
+# -*- Python -*-
+#
+# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Source files making up the 67_recursion library
+#
+
+# Source file attributes
+ABI_SRC_NIL = 0     # No attribute
+ABI_SRC_BLT = 1     # The file is built by a script
+ABI_SRC_DEP = 2     # The file depends on other files
+
+# Source files
+sources = [
+ "defs_rectypes.F90",
+ "density_rec.F90",
+ "entropyrec.F90",
+ "gran_potrec.F90",
+ "fermisolverec.F90",
+ "first_rec.F90",
+ "getngrec.F90",
+ "green_kernel.F90",
+ "m_hidecudarec.F90",
+ "m_pretty_rec.F90",
+ "m_rec.F90",
+ "m_rec_tools.F90",
+ "nlenergyrec.F90",
+ "pspnl_hgh_rec.F90",
+ "pspnl_operat_rec.F90",
+ "recursion.F90",
+ "recursion_nl.F90",
+ "vn_nl_rec.F90",
+ "vtorhorec.F90"]
+
+
+
+# IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
+# This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

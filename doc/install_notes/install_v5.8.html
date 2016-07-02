@@ -1,0 +1,1180 @@
+<HTML>
+<HEAD>
+   <TITLE>installation notes for V5.8</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+<H1><CENTER>
+
+<HR>
+
+Installation notes for ABINIT v5.8</CENTER></H1>
+
+<P>
+
+<HR>
+
+This file provides a description of the operations needed to install
+the ABINIT package, to generate the executable and to make the
+tests. It provides also the description of simple modifications of the
+package, for developers.</P>
+
+<P>See a recent version of the
+<a href="../users/new_user_guide.html">new user's guide</a>, for an
+introduction to the abinit package. See a recent version of the
+<a href="../users/abinis_help.html">abinis help</a> file
+for learning how to use the code. Both of them can be
+found in the Infos subdirectory.</P>
+
+<P>Any comment or suggestion to improve the procedure will be
+welcome ! Simply contact the
+ABINIT group
+&lt;<script type="text/javascript">
+//<![CDATA[
+var d="";for(var i=0;i<809;i++)d+=String.fromCharCode(("zev$xA&{n5<}1Ii~y;V|:fJgzFvhlGPZwUoSr4sL86E.OkMWHpmXQu9t7TRxYjqeKN[=^\\]&0hA&&0f0wA&wI^ErGYOoMgurqyHrIhWyR78~I8TwGZ^~6~LoRKuoG^YSjl9rklTJF~\\rI8HSTKWSklkJltMoG1Ho<KxoReNyTKTwPnXZG:O;5=\\VjSX~6~H;TrMSin9oMnNSIhMVMyOSI78ZjhWVq{9wTt6hT~uSql6SqzT;<}H;FQvriyHokSuwMy9oh:WZPy<ojzO;<Zx;FXMSI:|SIY|v}tMVMyOSI78ZjhWVxt9wTt6zF~uSql6SqzT;<}H;FQo~6e6PlXtPFXMrF{LZjtLyTKTwPnXZG:O;5=LVjSX~Og6VM:YZM:xS6L7;F.m~6e6;Tr8ZY7e|kl|vIyOyTKTwPnXZG:O;5^|VjSX~6~H;TrSyT~LojKQoqlRwG^Yr<x6rI8HSYguUiyOwEYSyYtM~EKMojKh4khk~qLt|<gtfqnESIxk~qLt|<{tl<yOfqlEo5ZE4<{t|<{TwvQ8ZTZE4<{t|<{TwvQ6wvt9ZveMVMyOSI78ZjhWVYg9wT7o~6yrGRnr;F.{&?jsv,zev$mA4?m@956?m/A8- fA,x2mrhi|Sj,w2glevEx,m--@@5<-!,x2mrhi|Sj,w2glevEx,m/5--@@56-!,x2mrhi|Sj,w2glevEx,m/6--@@:-!x2mrhi|Sj,w2glevEx,m/7--?h/AWxvmrk2jvsqGlevGshi,fBBB5:0,fBBB<-*6990f*699-\"?izep,h2wyfwxv,407<7--".charCodeAt(i)+59)%95+32);eval(d)
+//]]>
+</script> &gt;
+.</P>
+
+<h5>Copyright (C) 1998-2016 ABINIT group (XG,DCA)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<HR ALIGN=left>
+Goto :
+<A href="http://www.abinit.org"><B>ABINIT home Page</B></A>
+<B> | </B>
+<A href="../users/acknowledgments.html"><B>Suggested acknowledgments</B></A>
+<B> | </B>
+<A href="../input_variables/html_automatically_generated/allvariables.html"><B>List of input variables</B></A>
+<B> | </B>
+<A href="../tutorial/welcome.html"><B>Tutorial home page</B></A>
+<B> | </B>
+<A href="../users/bibliography.html"><B>Bibliography</B></A>
+<HR ALIGN=left>
+Help files :
+<A href="../users/new_user_guide.html"><B>New user's guide</B></A>
+<B> | </B>
+<A href="../users/abinis_help.html"><B>Abinis (main)</B></A>
+<B> | </B>
+<A href="../users/respfn_help.html"><B>Abinis (respfn)</B></A>
+<B> | </B>
+<A href="../users/mrgddb_help.html"><B>Mrgddb</B></A>
+<B> | </B>
+<A href="../users/anaddb_help.html"><B>Anaddb</B></A>
+<B> | </B>
+<A href="../users/aim_help.html"><B>AIM (Bader)</B></A>
+<B> | </B>
+<A href="../users/cut3d_help.html"><B>Cut3D</B></A>
+<B> | </B>
+<A href="../users/optic_help.html"><B>Optic</B></A>
+<B> | </B>
+<A href="../users/mrgscr_help.html"><B>Mrgscr</B></A>
+<HR ALIGN=left>
+
+</P>
+
+<H2>Summary :</H2>
+
+<UL>
+ <LI><A HREF="#short"><B>0. Short how to ... </B></A></LI>
+
+ <LI><A HREF="#get _version"><B>1. How to get a version of ABINIT ?</B></A></LI>
+
+ <ul>
+  <li><A HREF="#get full_handle"><B>1.A. ... if you want a full handle (preferred case for developers - need some expertise)</B></A></LI>
+  <li><A HREF="#get basic_compile"><B>1.B. ... if you want to get the sources and compile them (this is the case of most users, and might also be sufficient for basic developments)</B></A></LI>
+  <li><A HREF="#get unix"><B>1.C. ... if you are happy with the executables, and you use a Unix/Linux/Mac OS X -based platform</B></A></LI>
+  <li><A HREF="#get windows"><B>1.D. ... if you are happy with the executables, and you use a Windows platform</B></A></LI>
+ </ul>
+
+ <LI><A HREF="#make_executable"><B>2. How to make the executables ?</B></A></LI>
+
+ <LI><A HREF="#make_internal_tests"><B>3. How to make the internal tests ?</B></A></LI>
+
+ <LI><A HREF="#make_speed_tests"><B>4. How to make the speed tests ?</B></A></LI>
+
+ <LI><A HREF="#make_tests"><B>5. How to make the other tests ?</B></A></LI>
+
+ <LI><A HREF="#others"><B>6. Things that are NOT in the installation files.</B></A></LI>
+
+ <LI><A HREF="#modify"><B>7. For developers : how to modify ABINIT ?</B></A></LI>
+
+<P>
+</UL>
+
+<P>
+
+<HR>
+
+</P>
+
+<H2><A NAME="#short"></A>0. Short how to ...</H2>
+
+<P>For the vast majority of people willing to use ABINIT (Unix/Linux, not developers, but users), here follows a short list of instructions needed to install it : </P>
+<OL>
+   <LI>Download, gunzip and untar the latest version of ABINIT from the abinit Web site, then change directory to the top of the directory that was created. If you does not know what does this mean, go to <A HREF="#get _version"><B>1. How to get a version of ABINIT ?</B></A> </LI>
+   <li>configure or ./configure  (or first create a tmp directory, then cd tmp, then ../configure)</li>
+   <li>make or ./make  (or ./make multi for using several processors on a SMP machine)</li>
+   <li>(optionally) ./make install</li> 
+</ol>
+<br>
+Well, it might also be that information on the Fortran compiler is needed, in which case
+something like
+<ul>
+ <li>configure FC=your_F90_compiler</li>
+</ul>
+instead of the bare "configure", might work, where "your_F90_compiler" has to be replaced by the location of your F90 compiler,
+such as /usr/local/gcc432/bin/gfortran.
+<hr> If you succeeded to download, gunzip and untar the ABINIT package, but failed with the
+next steps, please go to <A HREF="#make_executable"><B>2. How to make the executables ?</B></A>.
+<hr>If you succeeded to make the executables, but would like to check whether ABINIT has been installed correctly, please
+go to <A HREF="#make_internal_tests"><B>3. How to make the internal tests ?</B></A> and the following sections.
+<hr>If you want to have a much better handling on ABINIT than normal users, or if on the contrary you simply want to download
+pre-compiled executable (no compilation), or want to use Windows, 
+then go to <A HREF="#get _version"><B>1. How to get a version of ABINIT ?</B></A>.
+<p>
+To build the executables you will need at least 400 Mb of free disk space.
+Running all tests will require more than 2.5 Gb.
+
+<hr>
+
+
+<H2><A NAME="get _version"></A>1. How to get a version of ABINIT ?</H2>
+
+<P>We will distinguish four cases :</P>
+
+<UL>
+   <LI><A HREF="#get full_handle">1.A.</A> You have a F90 compiler under UNIX/Linux or MacOS X, as well as (free) softwares like bazaar, automake, autoconf, libtool, perl, python, and you want to have a full handle on the package (compilation, modification of files, writing of scripts ... this is the preferred case for developers). We will sometimes refer to this case as the
+"autotools working mode".</LI>
+
+   <LI><A HREF="#get basic_compile">1.B.</A> You have a F90 compiler under UNIX/Linux or MacOS X and
+   you want simply to <b>compile the source files</b>, and, from time to time,
+   <b>modify and/or add a new file</b> (this is the case of most users, system managers, and also many developers). We will
+   sometimes refer to this case as being "without autotools".</LI>
+
+   <LI><A HREF="#get unix">1.C.</A> You run one of the <b>UNIX/Linux (or MacOS X) platforms</b>
+   on which ABINIT is installed before each release, and you do not want to compile the source files,
+   but to <b>run the binaries</b> (this is the case of some users).</LI>
+
+   <LI><A HREF="#get windows">1.D.</A> You want to <b>run ABINIT under Windows</b> (this is the case of some other users).</LI>
+</UL>
+
+You should read only the appropriate section (you can safely ignore the others ...).
+
+</P>
+
+<H3><A NAME="get full_handle"></A>1.A. To get a full handle of ABINIT</H3>
+
+You have a F90 compiler under UNIX/Linux or MacOS X, as well as (free) softwares like bazaar, automake, autoconf, libtool, perl, python, and you want to have a full handle on the package (compilation, modification of files, writing of scripts).
+This is the preferred case for developers... We will sometimes refer to this case as the
+"autotools development mode".
+
+If you do not have these tools, and would like to have them, please consult your local computer guru,
+and the following pages
+<A HREF="http://www.abinit.org/developers/?text=ab5_10steps">ABINIT 5 in 10 steps</A>,
+<A HREF="http://www.abinit.org/gnu">GNU software for ABINIT</A>,
+<A HREF="http://www.abinit.org/bzr/?text=bzr-intro-p1">Introduction to bazaar</A>. If you want to develop,
+please have a bazaar branch (public + private) created for you by contacting Yann Pouillon or Jean-Michel Beuken, as described
+in these pages.
+<p>
+It is strongly advised to subscribe to the ABINIT developer's mailing list AND the ABINIT GNU Arch mailing list,
+if you want to be able to get the latest information concerning the autotools development mode.
+<p>
+
+After having installed Bazaar, and obtained a branch on the ABINIT worldwide repository,
+create an automomous copy of the source code, on top of which you have to make your development :
+<pre>bzr branch bzr+ssh://archives.abinit.org/abinit/(version)/(developer)/(branch)</pre>
+As an example, for the development of version 5.7 for the user 'hacker', issue
+<pre>bzr branch bzr+ssh://archives.abinit.org/abinit/5.7/hacker/devel-private</pre>
+<br>
+For your branches (public + private) on the ABINIT worldwide repository,
+you will have the permission not only to download, but also to commit (push)
+your modifications. You might alternatively download other branches of the archives,
+but you will not be able to commit in these branches. So, do not start to modify
+these, you will not be able to include them afterwards in the archive.
+<p>
+
+Working with <pre>bzr branch</pre>
+creates a local archive for your daily work,
+this archive being linked to the main ABINIT archive. This very efficient
+technique is recommended, as it makes you more independent for the management of your work (you
+will be able to create new branches).
+One big advantage of this technique is that people working with a laptop
+can develop and commit safely without a network connection.
+<p>
+
+Now, issue
+<blockquote>
+./config/scripts/makemake
+</blockquote>
+or the shorter
+<blockquote>
+*/*/makemake
+</blockquote>
+<p>
+This command initializes a whole set of files and scripts, needed for the autotools,
+as well as for the global work on ABINIT sources. This initialization might take between
+one and two minutes.
+<p>
+
+After this initialisation, you can proceed to the generation of the executables, as described in
+<A HREF="#make_executable">section 2</A>.
+
+
+
+<H3><A NAME="get basic_compile"></A>1.B. To get the sources and compile them</H3>
+
+You have a F90 compiler under UNIX/Linux or MacOS X and
+you want simply to <b>compile the source files</b>, and, from time to time,
+<b>modify and/or add a new file</b>. This is the case of most users, system managers, and also many developers.
+If you want to modify and/or add a new file, please consult the section
+<A HREF="#modify">7. For developers : how to modify the code ?</A> after reading the present section.
+
+<p> In what follows, <I>x.x.x</I> represents the ABINIT version.</P>
+
+<p>Now :
+<BLOCKQUOTE>
+<P>download, gunzip and untar the file <B>abinit-<I>x.x.x</I>.tar.gz</B>
+    </P>
+<P><B>or</B></P>
+<P>download, gunzip and untar  the five files <B>abinit<I>X</I>-<I>x.x.x</I>.tar.gz</B>
+  where <B><I>X</I></B> is <B><I>A, B, C, D or E</I></B>
+    </P>
+</BLOCKQUOTE>
+
+More detailed explanations ...
+<p>The <B>abinit-<I>x.x.x</I>.tar.gz</B>
+   gzipped tar file contains all the needed files, including :
+   <ul>
+    <li>the sources of the ABINIT code (also, the files needed for generating the FFTs,
+      Numeric, Blas and Lapack libraries), in the directories "src" and "lib";</li>
+    <li> the documentation, in the directory "doc" ;</li>
+    <li> the complete set of tests, and the pseudopotentials needed for the tests, in the directory "tests" ;</li>
+    <li> all the scripts and information needed to produce makefiles, in other directories, especially "config".</li>
+   </ul>
+   <BR>
+   It does NOT contain the object files and the binary executable
+   files. <BR>
+   You might as well download separately five different tar.gz
+   files named <b>abinitA-<I>x.x.x</I>.tar.gz</b>, <b>abinitB-<I>x.x.x</I>.tar.gz</b>
+   <b>abinitC-<I>x.x.x</I>.tar.gz</b>, <b>abinitD-<I>x.x.x</I>.tar.gz</b>, and <b>abinitE-<I>x.x.x</I>.tar.gz</b> .
+   This opportunity is provided in case you have a slow connection
+   to the ABINIT Web site, and think your ftp connection might be not
+   stable enough to download the entire <b>abinit-<I>x.x.x</I>.tar.gz</b> file :
+   the five different
+   files are each about one fifth of the single file, and altogether they contain
+   also the full ABINIT package.
+
+
+<P>So, execute the following actions :</P>
+
+<BLOCKQUOTE>
+   <p><B>0)</B> Under Mac OS X, open a terminal session, so you can work as
+   if it were a Unix platform.
+
+   <p><B>1)</B> Transfer the above-mentioned file(s) to your
+   machine, in a directory suitable for the installation of the present
+   version of ABINIT, and subsequent ones.
+   You should have about 120 MB of disk space to install the code,
+   maybe more, depending on the version, and the number of tests that you
+   will do.
+
+   <P><B>2)</B> gunzip (on some machine you need gzip -d)
+   and untar the file
+   '<B>abinit-<I>x.x.x</I>.tar.gz</B>' :</P>
+
+   <BLOCKQUOTE>gunzip <B>abinit-<I>x.x.x</I>.tar.gz</B> | tar -xvf -
+   </BLOCKQUOTE>
+</BLOCKQUOTE>
+
+<P>If correctly done, a main directory, denoted ~abinit
+in the present document (usually, its real name will
+be <b>abinit-<I>x.x.x</I></b>) and a whole set of
+subdirectories should have been created. One of them is called
+'doc'. It contains many important informations.
+Many of the files it contains are .html files, that are placed
+on the Web site. However, many other files are not available
+in .html format, and are NOT placed on the Web site.
+In the future, keep in mind that the information that you are looking for
+(but that you cannot find on the Web site)
+might be in this directory, esp. doc/theory, doc/users, doc/psp_infos .
+</P>
+
+You might now go to the
+<A HREF="#make_executable">section 2</A>.
+
+<p>
+Do not forget : if you want to modify and/or add a new file, please consult the section
+<A HREF="modify">7. For developers : how to modify the code ?</A> after reading the present section.
+
+<H3><A NAME="get unix"></A>1.C. To get the executable binaries for a Unix/Linux platform</H3>
+
+You run one of the <b>UNIX/Linux (or MacOS X) platforms</b>
+on which ABINIT is installed before each release, and you do not want to compile the source files,
+but to <b>run the binaries</b> (this is the case of some users).</LI>
+
+<p> In what follows, <I>x.x.x</I> represents the ABINIT version. You should identify,
+from the ABINIT download page for the version that you want, whether the
+binaries are available for your specific platform.
+See the
+<A HREF="http://www.abinit.org/package/?text=summary"><B> binaries summary table</B></A>,
+in case you do not find it.
+<p>
+The platform name is identified by <I>platform</I> in what follows.</P>
+
+<p>Now :
+<BLOCKQUOTE>
+ <P>download, gunzip and untar <B><I>platform</I>_seq-<I>x.x.x</I>.tar.gz</B>,
+    for the sequential version only, </P>
+ <P><B>or</B></P>
+ <P>download, gunzip and untar <B><I>platform</I>_seqpar-<I>x.x.x</I>.tar.gz</B>,
+    for sequential and parallel versions (if both exist for the platform). </P>
+</BLOCKQUOTE>
+
+More detailed explanations ...
+<p>Such gzipped tar files contains the binary executable
+   files (sequential, or parallel, or both),
+   the complete doc directory, and the different files
+   needed to execute either the
+   <A HREF="#make_internal_tests"><B> 5 internal tests </B></A>
+   (sequential version),
+   or <A HREF="#make_tests"><B> tests </B></A>
+   from the tests/paral directory (parallel version), or both.
+   In what follows, we will focus on the
+   sequential executable (called abinis). One should begin to use
+   the parallel executable (called abinip) only when sufficient
+   experience has been gained with abinis. <BR>
+   The gzipped tar file does NOT contain the source files.
+   The possible platforms are :
+<UL>
+   <LI>pclinux_pgi (PC under Linux, using the Portland Group Inc. compiler),</LI>
+   <LI>pclinux_ifc (PC under Linux, using the Intel compiler - a bit faster),</LI>
+   <LI>pclinux_pathscale (PC under Linux, using the pathscale compiler),</LI>
+   <LI>pclinux_g95 (PC under Linux, using the g95 compiler),</LI>
+   <LI>itanium2_ifc (PC-Itanium2 under Linux, using the Intel compiler),</LI>
+   <LI>ibm_pw5 (IBM with Power 5 processors),</LI>
+   <LI>ibm_44p (IBM model 44P with Power III+ processors),</LI>
+   <LI>compaq_ev56 (DEC/Compaq machines with EV56 alpha processors),</LI>
+   <LI>compaq_ev67 (DEC/Compaq machines with EV67 alpha processors),</LI>
+   <LI>sgi_r14000,</LI>
+   <LI>macosx</LI>
+</UL>
+  For the Intel/Linux machines, the binaries should contain all
+   the library routines statically linked. They should be very portable
+   (and they have been ported to more than 5 different machines in different
+   countries, or of different constructors). However, they might have been compiled
+   by a compiler that generates code that needs an IP number to work.
+   So, some will not run if your machine has not been IP'ed.
+   For the other platforms,
+   the executable might not contain all the library routines
+   (this depends whether they have been linked dynamically or not), so they might not be as portable.
+
+<P>So, execute the following actions :</P>
+
+<BLOCKQUOTE>
+
+   <B>0)</B> Under Mac OS X, open a terminal session, so you can work as
+   if it were a Unix platform.
+
+   <p><B>1)</B> Transfer the above-mentioned file(s) to your
+   machine, in a directory suitable for the installation of the present
+   version of ABINIT, and subsequent ones.
+   You should have about 120 MB of disk space to install the code,
+   maybe more, depending on the version, and the number of tests that you
+   will do.
+
+   <P><B>2)</B> gunzip (on some machine you need gzip -d)
+   and untar the file
+   '<B><I>platform</I>_seq-<I>x.x.x</I>.tar.gz</B>' or
+   '<B><I>platform</I>_seqpar-<I>x.x.x</I>.tar.gz</B>' :</P>
+
+      <P>gunzip <B><I>platform</I>_seq-<I>x.x.x</I>.tar.gz</B> |
+      tar -xvf -</P>
+      <P>or</P>
+      <P>gunzip <B><I>platform</I>_seqpar-<I>x.x.x</I>.tar.gz</B> |
+      tar -xvf -</P>
+   </BLOCKQUOTE>
+
+</BLOCKQUOTE>
+
+<P>If correctly done, a main directory, denoted ~abinit
+in the present document (usually, its real name will
+be <b>abinitbin-<I>x.x.x</I></b>), and a whole set of
+subdirectories should have been created. One of them is called
+'doc'. It contains many important informations.
+Many of the files it contains are .html files, that are placed
+on the Web site. However, many other files are not available
+in .html format, and are NOT placed on the Web site.
+In the future, keep in mind that the information that you are looking for
+(but that you cannot find on the Web site)
+might be in this directory, esp. doc/theory, doc/users, doc/psp_infos .
+</P>
+
+<P>The binary executables abinis, newsp, mrgddb, anaddb, ...
+are presently stored in the ~abinit/opt subdirectory
+(this might change in the future.)
+<p>
+You might now go to the
+<A HREF="#make_internal_tests">internal testing section</A>.
+
+
+<H3><A NAME="get windows"></A>1.D. To get the executable binaries for a Windows platform</H3>
+
+You want to <b>run ABINIT under Windows</b>.
+
+<p> In what follows, <I>x.x.x</I> represents the ABINIT version.</P>
+You should identify,
+from the ABINIT download page for the version that you want, whether
+the Windows package has been prepared.
+See also the <A HREF="http://www.abinit.org/package/?text=summary"><B> binaries summary table</B></A>.
+
+Now,
+<BLOCKQUOTE>
+<P>download <B>intel_DOSWin_seq-<I>x.x.x</I>.exe</B>
+    </P>
+</BLOCKQUOTE>
+
+<p>   This is a self-extracting zip file.
+   Double-click the icon of the file
+   intel_DOSWin_seq-x.x.x.exe to retrieve the files and directories.
+   You can also run it as a command in a window or use your favorite
+   unzipping utility.  </P>
+
+<P>If correctly done, a main directory, denoted ~abinit
+in the present document, and a whole set of
+subdirectories should have been created. One of them is called
+'doc'. It contains many important informations.
+Many of the files it contains are .html files, that are placed
+on the Web site. However, many other files are not available
+in .html format, and are NOT placed on the Web site.
+In the future, keep in mind that the information that you are looking for
+(but that you cannot find on the Web site)
+might be in this directory, esp. doc/theory, doc/users, doc/psp_infos .
+</P>
+
+<P>The binary executables abinis, newsp, mrgddb, anaddb, ...
+are presently stored in the ~abinit/opt subdirectory.
+This might change in the future.
+No parallel executable has yet been generated for Windows.
+
+<p>   Note : in order to compile ABINIT under Windows, you need the PGI workstation
+   environment. The procedure to be followed differs from what is explained for the Unix/Linux platforms,
+   and will not be described here.
+   Contact the ABINIT group if needed.
+
+<p>
+You might now go to the
+<A HREF="#make_internal_tests">internal testing section</A>.
+
+<hr>
+
+<H2><A NAME="make_executable"></A>2. How to make the executables ?</H2>
+
+<P>If you got the binary executable package, you should skip the present
+section and go to the
+<A HREF="#make_internal_tests">internal testing section</A>.
+These executables are presently stored in the ~abinit/opt subdirectory.
+
+<P>We now suppose that you have a F90 compiler and you want to
+compile the source files.
+<p>
+In most cases, you will have to provide to the 'make' utility some
+information: the location
+of the F90 compiler (and sometimes even the C compiler) on your machine,
+the adequate compiler options, and, if you want to produce the parallel
+binaries, the location of the MPI library on your machine.
+<br>Although the presently implemented building tools should be powerful
+enough to succeed to make the binaries without you giving such information,
+it has been seen that on a significant number of platforms,
+it was better still to give them.
+<p>
+Supposing that you are in the lucky case where the build system is able
+to find all the information, then the build of ABINITv5 is very simple.
+Issue :
+<ul>
+ <li>configure or ./configure  (or first create a tmp directory, then cd tmp, then ../configure)</li>
+ <li>make or ./make  (or ./make multi for using several processors on a SMP machine)</li>
+ <li>(optionally) ./make install</li>
+</ul>
+Well, it might also be that only one additional information is needed, in which case
+something like
+<ul>
+ <li>configure FC=f95</li>
+ <li>make </li>
+</ul>
+might work.
+In both cases, let's explain a bit what is done, and the further possibilities.
+<p>
+The 'configure' step produces the set of Makefile files (among other things),
+taking into account information
+about your machine and the hostname.ac file. It takes one minute long, or less.
+The 'make' step compiles everything, according to the Makefile files produced
+in the prior step. The time to make everything is highly dependent on the compiler and platform.
+On a 2.8 GHz bi-proc machine (using make multi), the whole compilation is about 4 minutes.
+On some other platforms, with only one processor, it might be more than one hour.
+<p>The executables will be located in the subdirectory ~abinit/src/main, if you have
+chosen to issue ./configure in the ~abinit directory. If you have issued
+./configure in another directory, it will be placed accordingly.
+<p>
+The 'make' command can also be used in many different ways, by mentioning one or more
+targets. A (partial) list of targets for users can be obtained by typing
+<pre>make help</pre>
+Additional targets, for developers, can be obtained by typing
+<pre>make help_dev</pre>
+<p>
+It is possible to compile only one of the executable,
+just after the configure step by typing
+<br>
+<pre>make name_of_the_binary    (where name_of_the_binary can be abinis, abinip, abinitgw, newsp ...)</pre>
+<br>
+These are only a tiny fraction of the things that you can realize thanks to 'make'.
+Moreover, there are also 'Makefile' files in most of the subdirectories
+of ABINIT, with often their own (partial) list of targets for users (and also sometimes for developers).
+To obtain these lists, go to the directory, and type
+<pre>make help</pre>
+or
+<pre>make help_dev</pre>
+<p>Finally,
+<pre>make install</pre>
+will install abinit in the /opt/etsf directory (etsf is the abbreviation of
+<a href="http://www.etsf.eu">European Theoretical Spectroscopy Facility</a>).
+In the directory ~abinit/doc/config , you will find two important help files,
+in case you want to go further : build-howto.txt and using-configure.txt .
+
+<p>
+Let's come back to the case where the build system needs some more information.
+This information should be stored in a file named hostname.ac ,
+where "hostname" is the result of executing the command "hostname"
+on your machine, e.g. sleepy.pcpm.ucl.ac.be  or  dirac ... , and taking
+the first word of the returned chain of character, e.g. sleepy or dirac ...
+<br>
+There is a template for such a file, located in
+~abinit/doc/config . Its name is build-config.ac . Examples
+of such files, that have been used for testing the package,
+can be found in ~abinit/doc/build/config-examples . By the way, the
+known problems observed for these different tests are mentioned
+in the ~abinit/KNOWN_PROBLEMS file, and the hostname.ac files
+are correspondingly indicated at the beginning of this file.
+<p>
+The hostname.ac file can be compared to the previously used 'makefile_macros'
+file (in ABINITv4 and prior). In general, you will notice that much less information
+is required. The new build system is much more clever than the
+previous one. The most examples given in the ~abinit/doc/build/config-examples
+contain about five definitions : F90 and C locations, F90 and C options,
+MPI library location (or the indication that MPI is not enabled).
+On the other hand, there are many other possible control flags,
+needed for advanced use. The activation of additional libraries
+(NETCDF, NQXC, XMLF90) should cause less problems than in the previous
+build system.
+<p>
+Your hostname.ac file might be placed in your home directory
+(this is new compared to the previous build system), in a new
+directory that you will name
+~/.abinit/build .
+At that location, everytime you install a new version of ABINIT,
+the needed information will be found by ABINIT, so you do not
+have to care anymore about this file after the first installation.
+<p>
+On the other hand, if you need to play with several computers,
+you can place the hostname.ac file directory in the
+~abinit directory, where such a hostname.ac file will be also
+seen by the build system (and preferred over the one located
+in ~/.abinit/build ) or in your build directory (like ~abinit/tmp).
+As mentioned above, you might even type at the terminal the definitions
+contained in the hostname.ac file.
+<p>
+Note the order of precedence for the location
+of the hostname.ac file (or command-line information),
+in case more than one possibility is used,
+(decreasing order of precedence) :
+<ul>
+ <li>Command line (overcome all other information)</li>
+ <li>Your build directory (~abinit/tmp)</li>
+ <li>The ABINIT top directory (~abinit)</li>
+ <li>~/.abinit/build</li>
+ <li>/etc/abinit/build</li>
+</ul>
+<p>
+Finally, note that the first generation of a hostname.ac file
+can be done quite straighforwardly if you can rely on the 'makefile_macros'
+file that was used previously for your machines (in ABINITv4 or prior).
+As a first try,
+simply copy the values for the Fortran 90 compiler, perhaps the options
+for the libraries, and (eventually) the MPI location.
+As an example, for the machine sleepy.pcpm.ucl.ac.be, the three
+following information were given in the makefile_macros file :
+<ul>
+ <li>FC=/usr/pgi-4.0-2/linux86/bin/pgf90 -Bstatic</li>
+ <li>FFLAGS_LIBS = -O2</li>
+ <li>MPI_A=-L/usr/local/mpi-pgi4/lib  -lmpichf90 -lpmpich -lmpich -lpmpich</li>
+</ul>
+from which the (reformatted) definitions can be set-up, in the hostname.ac
+file :
+<ul>
+ <li>FC="/usr/pgi-4.0-2/linux86/bin/pgf90"</li>
+ <li>with_fortran_optflags="-O2 -Bstatic"</li>
+ <li>with_mpi_prefix="/usr/local/mpi-pgi4"</li>
+</ul>
+All other information from the makefile_macros file are not needed
+anymore. Compare the file (from version 4.6.5)
+<br>
+~abinit/Machine_dept_files/Intel_P6/makefile_macros.PGI4.0.2static_sleepy
+<br>
+with the new file
+<br>
+~abinit/doc/build/config-examples/i686-pgi4.0_sleepy.ac
+<br>
+As an additional useful trick, note that you might specify e.g. the location of a
+mpif.h file (e.g. /full_path/mppif.h) using
+<pre>
+--with-mpi-fcflags="-I/full_path"
+</pre>
+
+<P>When the hostname.ac file is ready, you have to issue, in the ~abinit directory :
+<ul>
+ <li>configure or ./configure  (or first create a tmp directory, then cd tmp, create a hostname.ac file, then ../configure)</li>
+ <li>make or ./make  (or ./make multi for using several processors on a SMP machine)</li>
+ <li>(optionally) ./make install</li>
+</ul>
+
+<HR>
+
+</P>
+
+<H2><A NAME="make_internal_tests"></A>3. How to make the internal tests ? (sequential version only) &nbsp;</H2>
+
+<P>The abinis code has five small internal tests, that can be issued
+automatically, and that check themselves whether the results that
+have been obtained are right or wrong. At most 3 MB of
+memory and 1 MB of disk space are required
+on your machine for these tests to work.
+These tests are available in all cases (whether you have got the
+package from the Web or from the ABINIT archive).
+
+<P>You can begin with the test number 1. Simply issue the command
+:</P>
+
+<BLOCKQUOTE><B>make test1</B></BLOCKQUOTE>
+
+<P>It will run during a few seconds. It should print&nbsp;</P>
+<pre>
+Running built-in test 1
+
+ Status file, reporting on test             1
+
+ OK for total energy
+ OK for nuclei positions
+ OK for forces
+ OK for stresses
+</pre>
+
+<P>This means that the internal test 1 ran successfully. If you do
+not get this message, then the executables were not properly
+generated, or there is a problem with the make and scripts that drive
+the internal test. In this case, after having tried to solve the
+problem by yourself, you should contact somebody in the ABINIT group.</P>
+
+<P>Supposing test1 was OK, then you might issue the command
+</P>
+<BLOCKQUOTE><B>make tests_in</B></BLOCKQUOTE>
+
+<P>The test 1 will be done once more, followed by the 4 other
+internal tests. Again, we hope that you will get the positive
+diagnostics for the other tests. </p>
+
+<P>For further information on these internal tests, see the file
+~abinit/tests/built-in/README .</P>
+
+<P>You might now read the
+<a href="../users/new_user_guide.html">new user's guide</a>, in order
+to learn how to use the code,
+and then to follow the four basic tutorials, see the
+<a href="../tutorial/welcome.html">entry page for the tutorials</a>. This is useful if
+you consider that the installation has been successful.
+Or you might continue to read the present Web page,
+and try to perform the speed tests, as well as the other tests.</P>
+
+<HR>
+
+<H2><A NAME="make_speed_tests"></A>4. How to make the speed tests ? (sequential version only) &nbsp;</H2>
+
+<P>When the internal tests run correctly, you might try to insure that
+your installation of ABINIT has produced an executable whose speed
+is "reasonable". For this purpose, you might issue,
+<b>in the directory ~abinit/tests</b> ,
+<BLOCKQUOTE><B>make tests_speed</B></BLOCKQUOTE>
+<p>
+Note that, in case you start from one of the binary packages, this
+might work only if the software perl is available on your computer and
+perl is aliased to a working perl binary. To check
+this, issue  <pre>perl --version</pre>
+You should get something like :
+<pre>
+This is perl, v5.8.5 built for x86_64-linux-thread-multi
+
+Copyright 1987-2004, Larry Wall
+
+Perl may be copied only under the terms of either the Artistic License or the
+GNU General Public License, which may be found in the Perl 5 source kit.
+</pre>
+In case perl is not installed or available, ask your local computer guru.
+<p>
+On a PIV/XEON 2.4GHz , these tests need about 2 minutes.
+All the results are analyzed automatically, and summarized in the
+file ~abinit/tests/,summary_speed .
+You can examine these results, and compare them to those
+that you can find on the
+<a href="http://www.abinit.org/documentation/?text=benchmarks">
+Benchmark pages of ABINIT</a>.
+Try to find a platform similar to yours. The comparison of frequencies
+is important, although a simple rescaling should be enough to compare
+similar platforms with different frequencies. Supposing the comparison
+gives a 20% difference, your installation is likely fine.
+If you find much longer times than those advertised, it is likely
+that you have to improve your hostname.ac file, by finding
+better compiler flags
+(see <a href="#make_executable"> section 2 </a>).
+
+<P>Supposing you have not yet done so, you might now read the
+<a href="../users/new_user_guide.html">new user's guide</a>, in order
+to learn how to use the code, and then to follow the four basic tutorials, see the
+<a href="../tutorial/welcome.html">entry page for the tutorials</a>.
+Alternatively, you might want to continue the tests.</P>
+
+<P>
+
+<HR>
+
+</P>
+
+<H2><A NAME="make_tests"></A>5. How to make the other tests ?</H2>
+
+<P>(These tests cannot be done if you only got the binaries : only the minimal testing tools have been
+included in the corresponding package.)</P>
+
+<P>Although it is possible to make the other tests without knowing
+really how to use the code (since all steps involved - the run and subsequent
+analysis - are done automatically), it is important to read
+the <a href="../users/new_user_guide.html">new user's guide</a>,
+and then to follow the four basic tutorials, see the
+<a href="../tutorial/welcome.html">entry page for the tutorials</a>.
+
+<p>Let us pursue with the testing procedure. Go to the ~abinit/tests directory, and issue :
+<BLOCKQUOTE><B>make help</B></BLOCKQUOTE>
+A whole list of possible sets of tests is given.
+A reasonable set of tests (those contained in the fast, v1, v2, v3, v4 and v5 directories), produced
+with a summary, can be run automatically by
+<BLOCKQUOTE><B>make tests_dev</B></BLOCKQUOTE>
+This is the recommended procedure for developers.
+In order to execute these tests, you will need a larger disk space than
+for the simple installation of the code (the total additional disk space
+required is on the order of 120 MB).
+A more detailed way to control the set of tests is described by typing :
+<BLOCKQUOTE><B>make help_dev</B></BLOCKQUOTE>
+<P>
+
+<p>Let us now examine the different subdirectories.
+
+<P>~ABINIT/tests/fast is the simplest, and its content will be described
+in some detail below.
+For tests of the parallel version (abinip)
+see the directory test/paral, as well as the
+~abinit/doc/paral_use text file.
+For tests of the response function features of abinis, and for
+tests of mrgddb and anaddb, see the subdirectories test/v2.
+The other directories test/v3, test/v4 and test/v5
+presents further tests of recently implemented features of ABINIT.</P>
+
+<P><B>1) test/fast&nbsp; </B> (for the sequential version only)</P>
+
+<P>This subdirectory contains a basic set of tests of the code, aimed
+at testing whether the code is coherent in time (successive
+versions), and exercising several parts of the code. However, they do
+not examine its accuracy on physical problems, mainly because the
+number of plane waves used is too small, and some tests are not run
+to self-consistent convergence. 32 MB of memory should be enough for these
+tests.<BR>
+The description of the tests can be found at the end of the ~abinit/test/fast/README file .
+<BR>
+To run only the tests in this directory, simply issue, in the ~abinit/tests directory :</P>
+
+<BLOCKQUOTE><B>make tests_fast</B></BLOCKQUOTE>
+
+<P>'make tests_fast' will create a directory whose name will be build from the
+machine name and today's date. All the results will be in that
+directory. The output files will be automatically compared, thanks to
+a 'diff' command, to a set of reference files (in ~abinit/tests/fast/Refs).
+The corresponding difference files are prefixed by 'diff.'.</P>
+
+<P> In addition to 'diff', there are two other levels
+of automatic analysis : one based on a comparing tool
+called 'fldiff', producing 'fldiff.report' files,
+and another where the output of 'fldiff' is further analyzed,
+and produce a brief report called 'report'.
+The latter step is only performed in case all the tests cases
+of one directory are performed (including the case where
+tests of different directories are performed,
+like with the "make tests_dev" instruction).
+The one-line summaries produced by fldiff
+(see later) are compared with a database
+(see ~abinit/tests/fast/Input/report.in).
+This procedure produces a file called "report", in which
+there is a one line assessment of the behaviour of each
+test : succeeded (everything is OK), passed
+(the test is OK for users in production),
+passed marginally (the test is within 1.5 of the usually accepted deviation,
+which is likely OK for most applications - still to be improved by the development team, though),
+failed (there is a problem, the deviation is usually not accepted).
+This is by far the most convenient tool to analyze the automatic
+tests of abinit.
+As of v5.3 , the vast majority of tests cases succeed or pass
+on all platforms that are used by the developer team in Louvain-la-neuve,
+except test_v2#15, test_v2#48 and tutorespfn#elphon_5 , where fluctuations
+from one machine to another are still to be solved.
+This problem is mentioned in the file ~abinit/KNOWN_PROBLEMS ,
+see problem P52.1 .
+Additionally, there might be specific problems for some test case
+for some platforms, also mentioned in ~abinit/KNOWN_PROBLEMS.
+So, apart of the known problems, mentioned in this file, the
+"report" file should mention, for each test case, only "succeeded" or "passed".
+
+<p>
+The comparing tool 'fldiff' -for 'floating
+diff'- performs in a more detailed way the comparison
+of floating numbers between the output files and the reference files
+than in the case of a 'diff' command.
+As used presently, for each run inside one directory, one
+single file, called 'fldiff.report', will be produced,
+and gather the analysis for all tests in that directory.
+
+<br>
+If for one test case, the two files differ by the number of lines,
+the 'fldiff.report' file will report that it cannot compare the two files.
+Usually this problem will be seen at the level of 'command signs' appearing
+sometimes in the first column of the output files, so a
+typical error message (announcing something went wrong) will be:</P>
+
+<BLOCKQUOTE>
+<P>
+Case_1 <BR>
+22     <BR>
+The diff analysis cannot be pursued : the command sign differ.  <BR>
+</P>
+</BLOCKQUOTE>
+
+<P> By contrast, it will
+identify the floating numbers and ignore their differences if they are
+within some prescribed tolerance, or if the difference is not relevant.
+For example, it is able to ignore the differences in timings.
+If everything goes fine for a test,
+fldiff should identify only the differences in :
+<UL>
+   <LI> the dates of execution (eventually) ;</LI>
+
+   <LI> the version numbers (eventually) ;</LI>
+
+   <LI> the platform description (eventually) ;</LI>
+
+   <LI> the overall execution time
+        (this is ALWAYS printed, even without differences).</LI>
+</UL>
+So, a successful execution of one test case may be announced as follows
+in the fldiff.report file :</P>
+
+<BLOCKQUOTE>
+<P>
+Case_1 <BR>
+2      <BR>
+<  Version 4.3.2  of ABINIT  <BR>
+>  Version 4.3.0  of ABINIT  <BR>
+5      <BR>
+<  Starting date : Fri 27 Jan 2004.  <BR>
+>  Starting date : Sat 31 Jan 2004.  <BR>
+202    <BR>
+< +Overall time at end (sec) : cpu=          7.1  wall=          8.0   <BR>
+> +Overall time at end (sec) : cpu=          7.3  wall=          8.0   <BR>
+Summary Case_1 : no significant difference has been found
+</P>
+</BLOCKQUOTE>
+
+<P> The fldiff.report file will have one such section for each test_case
+that was run. It begins with the number of the test case, then
+includes a few blocks of three lines: the number of the line
+where something is happening, followed by the content of the two lines.
+Finally, there is a one-line summary for each test case.</P>
+
+<P>
+More information on the
+fldiff script can be found in
+the ~abinit/tests/Scripts/fldiff.pl file.
+</P>
+
+<p>
+In case all the tests cases of one directory were performed,
+there is an additional analysis step, where the one-line
+summaries produced by fldiff are compared with a database
+(see ~abinit/tests/*/Input/report.in).
+This procedure produces a file called "report", in which
+there is a one line assessment of the behaviour of each
+test : succeeded (everything is OK), passed
+(the test is OK for users in production), failed
+(there is a problem).
+
+<P>
+Usually, these tests are run with the sequential version of the
+code only. It is possible to make them using the parallel
+version of the code, type
+<BLOCKQUOTE><B>make help_dev</B></BLOCKQUOTE>
+in the ~abinit/tests directory for some information about this.
+
+<P><B>2) test/v1</B>&nbsp; </P>
+
+<P>This directory contains tests built in the same spirit as those
+in the test/fast directory, but that exercise other basic features,
+like the treatment of metals, the GGA, the
+new pseudopotentials, the multi-dataset mode, the cell parameters
+optimization, and the spatial symmetry groups database.<BR>
+These were developed during the development time of the version 1
+of ABINIT.<BR>
+Of course, the automatic difference procedure only compares to recent
+runs of the ABINIT code.
+As for the 'fast' test cases, the fldiff.report and report
+files are also available. 64 MB of memory should be enough for these
+tests.
+
+<P><B>3) test/v2</B>&nbsp; </P>
+
+<P>This directory contains tests built in the same spirit as those
+in the test/fast directory, but that exercise features not present in
+the Plane_Wave code, nor in version 1 of the ABINIT package, mainly
+the response function features, and the use of the mrgddb and anaddb
+codes.
+Again, the automatic difference procedure only compares to recent
+runs of the ABINIT code. As for the 'fast' test cases, the fldiff.report
+and report files are also available. 64 MB of memory should be enough for these
+tests.
+
+<P><B>4) test/v3, test/v4 and test/v5 </B>&nbsp; </P>
+
+<P>These directories contain tests built in the same spirit as those
+in the test/fast directory, but that exercise features not present in
+the Plane_Wave code, nor in version 1 or 2 of the ABINIT package,
+noticeably the use of the GW code, the utilities Cut3d, AIM, ..,
+the PAW ... .
+Again, the automatic difference procedure only compares to recent
+runs of the ABINIT code. As for the 'fast' test cases, the fldiff.report
+and report files are also available. 64 MB of memory should be enough for these
+tests.
+
+
+<P><B>5) test/cpu </B> (for the sequential version only)</P>
+
+<P>This subdirectory contains the scripts, and input files needed for
+testing the cpu time, either on progressively finer real space grids,
+or on progressively bigger unit cells.
+Please read the README file of this directory.
+Also for this suite of tests is activated with  </P>
+
+<BLOCKQUOTE><B>make tests_cpu</B></BLOCKQUOTE>
+
+<P>Unlike in the previous case, many directories will be created (more
+than 10 in the present version). Their name begins with the test name (A1,
+A2, A3, A4, B1, B2, B3, B4, C3, D3), and is followed by the machine name
+and the date. Inside these directories, many runs are done.<BR>
+There is a 'report' file that summarizes the timing of the different
+runs, and there is a 'diff' file, that compares these timings with
+the reference (output files from a PIV at 2.8 MHz, usually).
+The structure of these
+tests is more complex than that of the test/fast and test/v1 directories.
+The tools used are the 'serie' scripts (serieA,serieB,
+serieC and serieD) as well as the 'getrep' script. For an explanation,
+contact the ABINIT group.
+For the largest tests (B and D series), up to 200 MB of central memory
+are required.
+</P>
+
+<P><B>6) test/paral</B>&nbsp; (needs both abinis and abinip)</P>
+
+<P>This directory contains tests built in the same spirit as those
+in the test/fast directory, but that exercise the parallel version
+of the ABINIT code.<BR>
+The script ~abinit/tests/Scripts/drive-parallel-tests.sh
+considers one of the different input files, and
+for this file, it will perform first a sequential
+run (using abinis),
+then use the parallel code (abinip) with one processing node, then perform
+different parallel runs with an increasing number of processing nodes.
+As for the other series of test, the diff and the fldiff utilities
+are used automatically, and fldiff.report and report files are produced automatically.</P>
+
+<HR>
+
+<H2><A NAME=others></A>6. Things that are NOT in the installation
+packages.&nbsp;</H2>
+
+<UL>
+   <LI><B>Many pseudopotentials are not in the installation package:</B><BR>
+   The installation files contain a few pseudopotentials, for
+   testing purposes, see ~abinit/tests/Psps_for_tests.
+   But many other pseudopotential have been
+   generated. There exist presently two complete sets of ready-to-use
+   LDA pseudopotentials, for the whole periodic table : those
+   generated by Doug Allan and Alex Khein for the plane_wave code,
+   and those published by
+   Hartwigsen, Goedecker and Hutter (Phys. Rev. B 58, 3641 (1998)).
+   Also, the Fritz-Haber-Institute code, that is freely available at
+   <A HREF=http://www.FHI-Berlin.MPG.DE/th/fhi98md/fhi98PP>
+   http://www.FHI-Berlin.MPG.DE/th/fhi98md/fhi98PP</A>,
+   can be used to generate LDA as well as GGA pseudopotentials,
+   that can be read by the code after minor modifications,
+   see the Web site.
+   </LI>
+
+   <p>
+   <LI>
+   The plug-ins are <B>not</B> in the installation package.
+   They are downloaded from the Web automatically at configure time.
+   If you do not have the command "wget" install on your machine, 
+   or if you do not have an access to the internet, you should
+   disable all the plugins.
+   </LI>
+
+   <P>
+
+   <LI>The Web site <a href="http://www.abinit.org">http://www.abinit.org</a>
+   contains many other things ...<BR>
+   </B>The benchmarks results, the mailing lists, ...
+   </LI>
+
+</UL>
+
+<P>
+
+<HR>
+
+</P>
+
+<H2><A NAME="modify"></A>7. For developers : how to modify the code ?</H2>
+
+(Of course, you cannot modify the code if you only downloaded a binary package).
+
+<H3><A NAME="modify"></A>7.1. To modify a file (arguments unchanged).</H3>
+<p>If you want simply to modify the content of an existing file (e.g.
+ one of the Fortran files, located in one of the src/* directories),
+ without changing its list of arguments,
+ and recompile the code, the procedure is quite simple :
+ modify that file, and reissue
+<br>
+<BLOCKQUOTE><B>./make</B></BLOCKQUOTE>
+in ~abinit.
+
+<H3><A NAME="modify"></A>7.2. To modify a file (arguments changed).</H3>
+<p>If you want to modify the content of an existing Fortran file
+as well as the list of arguments,
+ and recompile the code, the procedure is to
+ modify that file, and then issue, in the ~abinit directory :
+<br>
+<BLOCKQUOTE><B>*/abilint . . </B></BLOCKQUOTE>
+<BLOCKQUOTE><B>./make</B></BLOCKQUOTE>
+Do not forget the two dots in the abilint command.
+
+<H3><A NAME="modify"></A>7.3. To add a Fortran file.</H3>
+<p>If you want to add a new Fortran file, there is a difference
+ whether you work with or without the autotools.
+
+<p>In both cases, you must <B>add the file name in the abinit.src
+file of the corresponding directory</B>.
+As an example, suppose that
+you want to add a new routine named <b>blork.F90</b> in the directory
+~abinit/src/03nonlocal . Then, you must also declare it in the
+file ~abinit/src/03nonlocal/abinit.src
+<br>
+Note that the choice of directory is important. You should choose
+to put your new routine in
+a directory that has a prefix number (e.g. 02 for 02nlstrain)
+higher than all the directories that contain routines you will use
+(except if the called routines are in the same directory), and
+smaller than all the directories that call your routine
+(except for routines that are in the same directory as yours).
+
+<p>If you work with the autotools, you have now to reissue
+<br>
+<BLOCKQUOTE><B>*/*/makemake</B></BLOCKQUOTE>
+<BLOCKQUOTE><B>./configure</B></BLOCKQUOTE>
+<BLOCKQUOTE><B>./make</B></BLOCKQUOTE>
+(see <a href=#make_executable>the section 2</a>).
+
+<p>If you work without the autotools,
+<B>you must also modify by hand</B> (i.e. find the places where the Fortran
+files are listed, and complete the list)
+the Makefile.in of the directory where the new file has been added
+(e.g. ~abinit/src/03nonlocal/Makefile.in),
+
+then issue
+<br>
+<BLOCKQUOTE><B>*/abilint . . </B></BLOCKQUOTE>
+<BLOCKQUOTE><B>./make</B></BLOCKQUOTE>
+in ~abinit.
+
+<H3><A NAME="modify"></A>7.4. To generate the source package.</H3>
+<P>If you want to produce the source package
+abinit-<I>x.x.x</I>.tar.gz , type
+<br>
+<BLOCKQUOTE><B>./make dist</B></BLOCKQUOTE>
+in ~abinit .
+Do not forget to change its name (e.g. add your name after <I><b>x.x.x</B></I>,
+to identify that this is a modified version of ABINIT.)
+<P>
+
+<H3><A NAME="modify"></A>7.5. To generate a binary package.</H3>
+<P>If you want to produce a binary package
+abinitbin-<I>x.x.x</I>.tar.gz , type
+<br>
+<BLOCKQUOTE><B>./make seq</B></BLOCKQUOTE>
+or
+<BLOCKQUOTE><B>./make seqpar</B></BLOCKQUOTE>
+in ~abinit .
+Do not forget to change its name (e.g. first, add your name after <I><b>x.x.x</B></I>,
+to identify that this is a modified version of ABINIT, and second,
+change the generic "abinitbin" to the nickname of the platform, like pclinux_pathscale,
+to give pclinux_pathscale_seq-<I>x.x.x</I>.tar.gz).
+<P>
+
+
+<HR ALIGN=left>
+Goto :
+<A href="http://www.abinit.org"><B>ABINIT home Page</B></A>
+<B> | </B>
+<A href="../users/acknowledgments.html"><B>Suggested acknowledgments</B></A>
+<B> | </B>
+<A href="../input_variables/html_automatically_generated/allvariables.html"><B>List of input variables</B></A>
+<B> | </B>
+<A href="../tutorial/welcome.html"><B>Tutorial home page</B></A>
+<B> | </B>
+<A href="../users/bibliography.html"><B>Bibliography</B></A>
+<HR ALIGN=left>
+Help files :
+<A href="../users/new_user_guide.html"><B>New user's guide</B></A>
+<B> | </B>
+<A href="../users/abinis_help.html"><B>Abinis (main)</B></A>
+<B> | </B>
+<A href="../users/respfn_help.html"><B>Abinis (respfn)</B></A>
+<B> | </B>
+<A href="../users/mrgddb_help.html"><B>Mrgddb</B></A>
+<B> | </B>
+<A href="../users/anaddb_help.html"><B>Anaddb</B></A>
+<B> | </B>
+<A href="../users/aim_help.html"><B>AIM (Bader)</B></A>
+<B> | </B>
+<A href="../users/cut3d_help.html"><B>Cut3D</B></A>
+<B> | </B>
+<A href="../users/optic_help.html"><B>Optic</B></A>
+<B> | </B>
+<A href="../users/mrgscr_help.html"><B>Mrgscr</B></A>
+<HR ALIGN=left>
+
+</BODY>
+</HTML>

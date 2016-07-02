@@ -1,0 +1,41 @@
+
+Checklist
+
+This file provides a check list (memento) for developpers
+
+Copyright (C) 2002-2016 ABINIT group (XG)
+This file is distributed under the terms of the
+GNU General Public License, see ~abinit/COPYING
+or http://www.gnu.org/copyleft/gpl.txt .
+For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+
+*******************************************************************
+
+1. Introduction.
+2. Check list
+
+*******************************************************************
+
+1. Introduction
+
+A few days before the developers sent their contributions
+for the merge, it is worth that they examine whether they
+have not forgotten to do "something". This is the aim of
+this checklist.
+
+2. Check list
+
+Have you mentioned your initials (or full name) in the
+copyright of the routine you have modified ?
+
+Have you set up one (or a few) test cases, so as to provide
+the input and output files as references, to check that
+the merge of your routines has been succesful ?
+The CPU time of this test should exceed 30secs on a PC at 400MHz,
+or 15 secs on a better workstation.
+
+Are you sure that your modifications do not deteriorate
+the performance of the code in the regime where your
+modifications are not used ? You should inspect your
+modifications for both memory use and CPU time.
+

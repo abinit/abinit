@@ -1,0 +1,66 @@
+# -*- Python -*-
+#
+# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Source files making up the numeric library
+#
+
+# Source file attributes
+ABI_SRC_NIL = 0     # No attribute
+ABI_SRC_BLT = 1     # The file is built by a script
+ABI_SRC_DEP = 2     # The file depends on other files
+
+# Source files
+sources = [
+ "coeffs_gausslegint.F90",
+ "cspint.F90",
+ "dzgedi.F90",
+ "dzgefa.F90",
+ "gamma_function.F90",
+ "interp.F90",
+ "intrpl.F90",
+ "j0y0.F90",
+ "j1y1.F90",
+ "jacobi.F90",
+ "k0.F90",
+ "k1.F90",
+ "lebedev_laikov.F90",
+ "lib_four.F90",
+ "ludcmp.F90",
+ "m_abilasi.F90",
+ "m_abi_linalg.F90",
+ "m_array.F90",
+ "m_cgtools.F90",
+ "m_cplxtools.F90",
+ "m_blas.F90",
+ "m_bspline.F90",
+ "m_elpa.F90",
+ "m_gaussian_quadrature.F90",
+ "m_lebedev.F90",
+ "m_levenberg_marquardt.F90",
+ "m_numeric_tools.F90",
+ "m_per_cond.F90",
+ "m_random_zbq.F90",
+ "m_slk.F90",
+ "m_splines.F90",
+ "smooth.F90",
+ "sort_int.F90",
+ "sort_dp.F90",
+ "uniformrandom.F90",
+#"zgedi.F90",
+#"zgefa.F90",
+ ]
+# IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
+# This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.
+
+checkers = {
+  "test_spline_integrate":[],
+# "test_zgefa_zgedi":[]
+ }
+

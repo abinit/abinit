@@ -1,0 +1,132 @@
+
+Copyright (C) 2003-2016 ABINIT group (XG)
+This file is distributed under the terms of the
+GNU General Public License, see ~abinit/COPYING
+or http://www.gnu.org/copyleft/gpl.txt .
+For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+
+*******************************************************************
+
+This README is in the Infos/Theory directory of the abinit package.
+It has the aim to described the purpose and content of this "Theory"
+directory.
+
+-------------------------------------------------------------------
+
+0. Introduction
+
+There is a gap between the theory, as published in the scientific
+papers, on which a code like ABINIT is build, and the documentation
+that can be contained in the different routines. Indeed,
+scientific papers cannot refer to specific routines to describe
+where and how the formulas are implemented, while the information
+that can be put in a routine cannot conveniently have the
+mathematical format that is required to represent formulas.
+
+The documentation
+that you will find in this directory has precisly the aim to
+bridge the gap. In the future, we hope to be able
+to set up a system of hyperlinks that will connect
+the routines, the theory files, and the scientific
+papers.
+
+--------------------------------------------------------------------
+
+1. Classification of theory documents
+
+First, we will describe two types of theory documents, that are
+included in this directory :
+- those of which the sources are available (e.g. a .tex file)
+- those of which the sources are not available (e.g. a .pdf or .ps file)
+The documents of the first type (.tex) are much more flexible, of course,
+can have hyperlinks, and can be maintained.
+Note that the compiled version of the .tex documents
+can be prepared automatically by typing
+make theory
+in the ~abinit/doc directory.
+
+There are other theory documents, not present in this directory.
+Indeed, one does not have often the time to generate
+a nice .tex file. Handwritten documents can still be a valuable
+source of information about the code. Conference presentations
+(e.g. in PowerPoint) can be also quite interesting. So,
+it was decided to constitute a library of documents that would
+also include some scanned hand-written documents and
+ppt presentations.
+Still, such documents can be very large, and the direct
+inclusion within the ABINIT package is not be worth.
+We consider these to form a third class of documents.
+Such documents are available on the ABINIT community Web site :
+http:// ...
+
+---------------------------------------------------------------
+
+2. List of documents
+
+
+
+2.1. .tex in the Theory directory
+
+2.1.1. geometry.tex
+
+ABINIT data structures and their theoretical justifications
+Geometric considerations
+Describes real space and reciprocal space conventions,
+as well as symmetry operations
+
+2.1.2. 1WF.tex
+
+ABINIT data structures and their theoretical justifications
+Representation and conversion of one wavefunction
+
+2.1.3. set_WFs.tex
+
+ABINIT data structures and their theoretical justifications
+Representation and conversion of the set of wavefunctions
+
+2.1.4. noncol.tex
+
+Non colinear magnetism
+
+
+
+2.2. Other documents in the Theory directory
+
+2.2.1. gwa.pdf
+
+The GW formalism : basic equations, and conventions
+
+2.2.2. vanderbilt-anaddb-notes.pdf
+
+Systematic treatment of crystal displacements, strains and
+polarization. Discussion notes by D. Vanderbilt.
+
+2.2.3. elasticity-oganov.pdf
+
+Elastic constants, definitions and some discussion by A. Oganov.
+
+2.2.4. elasticity-hamann_oganov_040611.pdf
+
+A note written by Don Hamann to A. Oganov. More info should be provided.
+
+
+
+2.3. Documents on the community Web site
+
+2.3.1. The ppt presentations of the 1st ABINIT developer
+workshop, Louvain-la-Neuve, November 6-8, 2002.
+(see the index of the community Web site)
+
+2.3.2. SpinOrbit.XG.pdf
+
+Handwritten notes on the implementation of the spin-orbit
+(by XGonze, scanned by Y. Suzukawa and M. Mikami)
+
+2.3.3. SpinOrbit.FJ.pdf
+
+Handwritten notes on the implementation of the spin-orbit,
+(by FJollet, scanned by Y. Suzukawa and M. Mikami)
+in French
+
+-----------------------------------------------------------------
+

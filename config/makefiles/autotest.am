@@ -1,0 +1,38 @@
+# -*- Automake -*-
+#
+# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+# Generate a package description for Autotest
+$(srcdir)/package.m4: $(top_srcdir)/configure.ac
+	{ \
+	    echo '# Signature of the current package.'; \
+	    echo 'm4_define([AT_PACKAGE_NAME],      [@PACKAGE_NAME@])'; \
+	    echo 'm4_define([AT_PACKAGE_TARNAME],   [@PACKAGE_TARNAME@])'; \
+	    echo 'm4_define([AT_PACKAGE_VERSION],   [@PACKAGE_VERSION@])'; \
+	    echo 'm4_define([AT_PACKAGE_STRING],    [@PACKAGE_STRING@])'; \
+	    echo 'm4_define([AT_PACKAGE_BUGREPORT], [@PACKAGE_BUGREPORT@])'; \
+	 } > $(srcdir)/package.m4
+
+# Description of the test suite
+EXTRA_DIST = atconfig.in atlocal.in testsuite.at testsuite
+TESTSUITE  = $(srcdir)/testsuite
+AUTOTEST   = $(AUTOM4TE) --language=autotest
+
+check-local: atconfig atlocal $(TESTSUITE)
+	$(SHELL) $(TESTSUITE)
+
+$(TESTSUITE): $(srcdir)/testsuite.at
+	$(AUTOTEST) -I $(srcdir) $@.at -o $@.tmp
+	mv $@.tmp $@
+
+atconfig: $(top_builddir)/config.status
+	cd $(top_builddir) && $(SHELL) ./config.status tests/$@
+
+atlocal: $(srcdir)/atlocal.in $(top_builddir)/config.status
+	cd $(top_builddir) && $(SHELL) ./config.status tests/$@
+

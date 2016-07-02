@@ -1,0 +1,559 @@
+
+.Version 6.8.1  of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu4.4 computer) 
+
+.Copyright (C) 1998-2016 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : Thu 23 Jun 2011.
+- ( at 13h57 )
+  
+- input  file    -> /home/waroquiers/devel/6.8.1-private/build/../tests/libxc/Input/t16.in
+- output file    -> t16.out
+- root for input  files -> t16i
+- root for output files -> t16o
+
+
+ Symmetries : space group Fd -3 m (#227); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need of the present run
+   intxc =         0  ionmov =         0    iscf =         7 xclevel =         2
+  lmnmax =         3   lnmax =         3   mband =        16  mffmem =         1
+P  mgfft =        16   mkmem =         3 mpssoang=         3     mpw =       190
+  mqgrid =      3001   natom =         2    nfft =      4096    nkpt =         3
+  nloalg =         4  nspden =         1 nspinor =         1  nsppol =         1
+    nsym =        48  n1xccc =         0  ntypat =         1  occopt =         1
+================================================================================
+P This job should need less than                       1.876 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+  WF disk file :      0.141 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+--------------------------------------------------------------------------------
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values                                      
+-   accesswff0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-
+- outvars: echo of global parameters not present in the input file              
+-   nproc =    1
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell      1.0262554600E+01  1.0262554600E+01  1.0262554600E+01 Bohr
+              amu      2.80855000E+01
+             bdgw           1      14       1      14       1      14
+           diemac      1.20000000E+01
+             ecut      5.99747930E+00 Hartree
+         ecutsigx      3.74842456E+00 Hartree
+          ecutwfn      5.99747930E+00 Hartree
+           ecutsm      5.00000000E-01 Hartree
+           enunit           1
+        gwcalctyp          29
+          inclvkb           2
+           irdkss           1
+           irdscr           1
+           istwfk        1    1    1
+              ixc     -208012
+              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+            kptgw      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+          kptrlen      1.45134439E+01
+         kptrlatt      2  0  0   0  2  0   0  0  2
+P           mkmem           3
+            natom           2
+            nband          16
+            ngfft          16      16      16
+           nkptgw           3
+             nkpt           3
+          npwsigx         113
+           npwwfn         181
+             nsym          48
+           ntypat           1
+              occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+        optdriver           4
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+          spgroup         227
+           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
+                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
+                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1
+                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1
+                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0
+                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
+                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1
+                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0
+                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1
+                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1
+                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
+                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1
+                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0
+                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1
+                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
+                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1
+                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
+                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
+                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
+                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
+            tnons      0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.5000000  0.0000000     0.0000000  0.5000000  0.0000000
+                       0.5000000  0.0000000  0.0000000     0.5000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
+                       0.5000000  0.0000000  0.0000000     0.5000000  0.0000000  0.0000000
+                       0.0000000  0.5000000  0.0000000     0.0000000  0.5000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
+                       0.5000000  0.0000000  0.0000000     0.5000000  0.0000000  0.0000000
+                       0.0000000  0.5000000  0.0000000     0.0000000  0.5000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
+                       0.0000000  0.5000000  0.0000000     0.0000000  0.5000000  0.0000000
+                       0.5000000  0.0000000  0.0000000     0.5000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
+                       0.0000000  0.5000000  0.0000000     0.0000000  0.5000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.5000000  0.0000000  0.0000000     0.5000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.5000000  0.0000000     0.0000000  0.5000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
+                       0.5000000  0.0000000  0.0000000     0.5000000  0.0000000  0.0000000
+            typat      1  1
+          usekden           1
+              wtk        0.12500    0.50000    0.37500
+           xangst     -6.7883874953E-01 -6.7883874953E-01 -6.7883874953E-01
+                       6.7883874953E-01  6.7883874953E-01  6.7883874953E-01
+            xcart     -1.2828193250E+00 -1.2828193250E+00 -1.2828193250E+00
+                       1.2828193250E+00  1.2828193250E+00  1.2828193250E+00
+             xred     -1.2500000000E-01 -1.2500000000E-01 -1.2500000000E-01
+                       1.2500000000E-01  1.2500000000E-01  1.2500000000E-01
+            znucl       14.00000
+
+================================================================================
+
+ chkinp: Checking input parameters for consistency.
+
+================================================================================
+== DATASET  1 ==================================================================
+
+ SIGMA: Calculation of the GW corrections
+
+ Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
+ Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
+.Using double precision arithmetic ; gwpc =  8
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.1312773  5.1312773  G(1)= -0.0974416  0.0974416  0.0974416
+ R(2)=  5.1312773  0.0000000  5.1312773  G(2)=  0.0974416 -0.0974416  0.0974416
+ R(3)=  5.1312773  5.1312773  0.0000000  G(3)=  0.0974416  0.0974416 -0.0974416
+ Unit cell volume ucvol=  2.7021313E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/waroquiers/devel/6.8.1-private/build/../tests/Psps_for_tests/14si.bj_noNLCC.psp
+- pspatm: opening atomic psp file    /home/waroquiers/devel/6.8.1-private/build/../tests/Psps_for_tests/14si.bj_noNLCC.psp
+-   Si  APE 1.x : Troullier-Martins scheme, , llocal= 2
+- 14.00000   4.00000  20110507                znucl, zion, pspdat
+    6    0    2    2      2400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    0.00000000000000    0.00000000000000    0.00000000000000   rchrg,fchrg,qchrg
+  1.007785          amesh (Hamman grid)
+ pspatm: epsatm=   -3.47502210
+         --- l  ekb(1:nproj) -->
+             0    4.763149
+             1    2.580046
+ pspatm: atomic psp has been read  and splines computed
+
+  -5.56003536E+01                                ecore*ucvol(ha*bohr**3)
+--------------------------------------------------------------------------------
+
+ ==== K-mesh for the wavefunctions ====
+ Number of points in the irreducible wedge :     3
+ Reduced coordinates and weights :
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
+
+ Together with 48 symmetry operations and time-reversal symmetry 
+ yields     8 points in the full Brillouin Zone.
+
+
+ ==== Q-mesh for screening function ====
+ Number of points in the irreducible wedge :     3
+ Reduced coordinates and weights :
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
+
+ Together with 48 symmetry operations and time-reversal symmetry 
+ yields     8 points in the full Brillouin Zone.
+
+
+ setmesh: FFT mesh size selected  =  18x 18x 18
+          total number of points  =     5832
+
+
+ k       eigenvalues [eV]
+  1         -4.85   6.66   6.66   6.66  10.01  10.01  10.01  11.62  15.04  15.04
+            15.54  18.88  18.88  18.88  23.24  31.68
+  2         -2.51   0.10   5.55   5.55   9.22  10.76  10.76  15.43  17.94  17.94
+            18.84  18.84  18.84  20.85  27.20  27.62
+  3         -0.74  -0.74   3.99   3.99   8.20   8.20  18.00  18.00  18.09  18.09
+            19.90  19.90  20.68  20.68  26.92  26.92
+
+ test on the normalization of the wavefunctions
+ min sum_G |a(n,k,G)| =  0.998245
+ max sum_G |a(n,k,G)| =  1.000000
+ test on the orthogonalization of the wavefunctions (NB: this is not invariant for degenerate states)
+- min sum_G a(n,k,G)a(n",k,G) =  0.000000
+- max sum_G a(n,k,G)a(n",k,G) =  0.001078
+
+ Number of electrons calculated from density =    7.9986; Expected =    8.0000
+ average of density, n =  0.029601
+ r_s =    2.0054
+ omega_plasma =   16.5962 [eV]
+
+
+ rdqps: reading QP wavefunctions of the previous step 
+        looking for file t16i_QPS
+ file not found, 1st iteration initialized with KS eigenelements
+
+ Number of electrons calculated from density =    7.9986; Expected =    8.0000
+ average of density, n =  0.029601
+ r_s =    2.0054
+ omega_plasma =   16.5962 [eV]
+
+
+--------------------------------------------------------------------------------
+
+ QP results after the unitary transformation in the KS subspace: 
+
+  Number of electrons    =    7.9986
+
+  QP Band energy    [Ha] =  6.37847300006280E-01
+  QP Hartree energy [Ha] =  6.74769016308352E-01
+
+--------------------------------------------------------------------------------
+
+ === KS Band Gaps ===
+  >>>> For spin  1
+   Minimum optical gap =   3.3530 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap     =   1.5444 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+ SIGMA fundamental parameters:
+ MODEL GW without PLASMON POLE MODEL
+ number of plane-waves for SigmaX                  113
+ number of plane-waves for SigmaC and W             15
+ number of plane-waves for wavefunctions           181
+ number of bands                                    16
+ number of independent spin polarizations            1
+ number of spinorial components                      1
+ number of k-points in IBZ                           3
+ number of q-points in IBZ                           3
+ number of symmetry operations                      48
+ number of k-points in BZ                            8
+ number of q-points in BZ                            8
+ number of frequencies for dSigma/dE                 1
+ frequency step for dSigma/dE [eV]                0.00
+ number of omega for Sigma on real axis              0
+ max omega for Sigma on real axis  [eV]           0.00
+ zcut for avoiding poles [eV]                     0.10
+
+ EPSILON^-1 parameters (SCR file):
+ dimension of the eps^-1 matrix on file             15
+ dimension of the eps^-1 matrix used                15
+ number of plane-waves for wavefunctions           181
+ number of bands                                    12
+ number of q-points in IBZ                           3
+ number of frequencies                              17
+ number of real frequencies                         13
+ number of imag frequencies                          4
+
+ matrix elements of self-energy operator (all in [eV])
+
+ Self-Consistent on Energies and Wavefunctions
+
+ k =    0.000   0.000   0.000
+ Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+    1    -4.847   -10.718    -4.847     5.870   -16.392     6.613     1.000     0.000    -9.779     0.938    -3.909    -3.936
+    2     6.658   -12.341     6.658    18.999   -13.847     2.897     1.000     0.000   -10.949     1.392     8.050     8.044
+    3     6.658   -12.341     6.658    18.999   -13.847     2.895     1.000     0.000   -10.952     1.390     8.048     8.047
+    4     6.658   -12.341     6.658    18.999   -13.847     2.897     1.000     0.000   -10.950     1.392     8.050     8.049
+    5    10.011    -9.653    10.011    19.664    -4.768    -3.388     1.000     0.000    -8.156     1.497    11.508    11.503
+    6    10.011    -9.653    10.011    19.664    -4.768    -3.392     1.000     0.000    -8.160     1.493    11.504    11.508
+    7    10.011    -9.653    10.011    19.664    -4.768    -3.387     1.000     0.000    -8.155     1.499    11.509    11.510
+    8    11.623    -9.775    11.623    21.399    -4.610    -4.154     1.000     0.000    -8.764     1.011    12.635    12.635
+    9    15.037   -10.233    15.037    25.271    -4.148    -3.378     1.000     0.000    -7.527     2.706    17.744    15.888
+   10    15.037   -10.233    15.037    25.271    -4.148    -3.381     1.000     0.000    -7.530     2.704    17.741    17.740
+   11    15.535    -7.022    15.535    22.557    -2.300    -4.397     1.000     0.000    -6.697     0.325    15.860    17.743
+   12    18.882    -7.418    18.882    26.300    -1.885    -5.033     1.000     0.000    -6.918     0.500    19.381    19.383
+   13    18.882    -7.418    18.882    26.300    -1.885    -5.017     1.000     0.000    -6.902     0.516    19.397    19.401
+   14    18.882    -7.418    18.882    26.300    -1.885    -5.014     1.000     0.000    -6.900     0.518    19.400    19.403
+
+ E^0_gap          3.353
+ E^GW_gap         3.458
+ DeltaE^GW_gap    0.105
+
+
+ k =    0.500   0.000   0.000
+ Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+    1    -2.512   -11.195    -2.512     8.683   -15.929     5.207     1.000     0.000   -10.722     0.473    -2.039    -2.049
+    2     0.096   -10.455     0.096    10.552   -13.831     3.536     1.000     0.000   -10.295     0.160     0.257     0.214
+    3     5.554   -11.868     5.554    17.422   -13.658     2.981     1.000     0.000   -10.677     1.191     6.745     6.713
+    4     5.554   -11.868     5.554    17.422   -13.658     2.981     1.000     0.000   -10.677     1.191     6.745     6.715
+    5     9.220    -9.550     9.220    18.770    -4.868    -3.442     1.000     0.000    -8.310     1.239    10.460    10.465
+    6    10.756    -9.329    10.756    20.084    -4.320    -3.437     1.000     0.000    -7.757     1.572    12.327    12.324
+    7    10.756    -9.329    10.756    20.084    -4.320    -3.440     1.000     0.000    -7.760     1.568    12.324    12.327
+    8    15.433    -6.666    15.433    22.099    -1.905    -4.270     1.000     0.000    -6.175     0.491    15.925    15.929
+    9    17.941   -10.450    17.941    28.390    -3.834    -4.114     1.000     0.000    -7.948     2.502    20.443    20.456
+   10    17.941   -10.450    17.941    28.390    -3.834    -4.115     1.000     0.000    -7.949     2.501    20.442    20.479
+   11    18.838    -9.526    18.838    28.364    -3.663    -4.262     1.000     0.000    -7.925     1.600    20.439    20.485
+   12    18.845    -9.715    18.845    28.560    -3.392    -4.213     1.000     0.000    -7.605     2.111    20.955    20.927
+   13    18.845    -9.715    18.845    28.560    -3.392    -4.234     1.000     0.000    -7.625     2.090    20.935    20.966
+   14    20.849    -9.433    20.849    30.282    -3.210    -4.779     1.000     0.000    -7.989     1.444    22.293    22.299
+
+ E^0_gap          3.666
+ E^GW_gap         3.714
+ DeltaE^GW_gap    0.048
+
+
+ k =    0.500   0.500   0.000
+ Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+    1    -0.738   -11.213    -0.738    10.474   -15.138     4.006     1.000     0.000   -11.132     0.081    -0.657    -0.701
+    2    -0.738   -11.213    -0.738    10.474   -15.138     3.984     1.000     0.000   -11.153     0.059    -0.679    -0.675
+    3     3.993   -11.163     3.993    15.156   -13.345     3.087     1.000     0.000   -10.258     0.904     4.898     4.843
+    4     3.993   -11.163     3.993    15.156   -13.345     3.088     1.000     0.000   -10.257     0.905     4.899     4.844
+    5     8.202    -8.472     8.202    16.674    -4.106    -3.357     1.000     0.000    -7.464     1.009     9.211     9.204
+    6     8.202    -8.472     8.202    16.674    -4.107    -3.356     1.000     0.000    -7.462     1.010     9.212     9.217
+    7    18.001    -9.755    18.001    27.756    -3.607    -4.188     1.000     0.000    -7.795     1.959    19.960    19.943
+    8    18.001    -9.755    18.001    27.756    -3.607    -4.203     1.000     0.000    -7.811     1.944    19.945    19.959
+    9    18.089   -11.174    18.089    29.263    -4.423    -3.938     1.000     0.000    -8.361     2.813    20.903    20.955
+   10    18.089   -11.174    18.089    29.263    -4.423    -3.942     1.000     0.000    -8.365     2.809    20.899    20.957
+   11    19.905   -10.316    19.905    30.221    -3.422    -4.353     1.000     0.000    -7.776     2.540    22.445    22.440
+   12    19.905   -10.316    19.905    30.221    -3.422    -4.352     1.000     0.000    -7.775     2.541    22.446    22.451
+   13    20.677    -9.726    20.677    30.403    -3.470    -4.399     1.000     0.000    -7.869     1.857    22.534    22.552
+   14    20.677    -9.726    20.677    30.403    -3.470    -4.397     1.000     0.000    -7.867     1.859    22.536    22.561
+
+ E^0_gap          4.209
+ E^GW_gap         4.312
+ DeltaE^GW_gap    0.103
+
+
+ New Fermi energy :        3.170271E-01 Ha ,    8.626745E+00 eV
+ New Exchange energy :    -2.099924E+00 Ha ,   -5.714184E+01 eV
+
+ === QP Band Gaps ===
+  >>>> For spin  1
+   Minimum optical gap =   3.4541 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap     =   1.1550 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+                                        Bottom of conduction at :   0.5000  0.5000  0.0000
+
+ writing QP data on file : t16o_QPS
+
+ Convergence of QP corrections
+ >>>>> For spin  1 <<<<<
+   kptgw no:  1; Maximum DeltaE = (   2.706  -0.000) for band index:  9
+   kptgw no:  2; Maximum DeltaE = (   2.502  -0.000) for band index:  9
+   kptgw no:  3; Maximum DeltaE = (   2.813   0.000) for band index:  9
+
+== END DATASET(S) ==============================================================
+================================================================================
+  
+ -outvars: echo values of variables after computation  --------
+            acell      1.0262554600E+01  1.0262554600E+01  1.0262554600E+01 Bohr
+              amu      2.80855000E+01
+             bdgw           1      14       1      14       1      14
+           diemac      1.20000000E+01
+             ecut      5.99747930E+00 Hartree
+         ecutsigx      3.74842456E+00 Hartree
+          ecutwfn      5.99747930E+00 Hartree
+           ecutsm      5.00000000E-01 Hartree
+           enunit           1
+           etotal      0.0000000000E+00
+            fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+        gwcalctyp          29
+          inclvkb           2
+           irdkss           1
+           irdscr           1
+           istwfk        1    1    1
+              ixc     -208012
+              kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+            kptgw      0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+          kptrlen      1.45134439E+01
+         kptrlatt      2  0  0   0  2  0   0  0  2
+P           mkmem           3
+            natom           2
+            nband          16
+            ngfft          16      16      16
+           nkptgw           3
+             nkpt           3
+          npwsigx         113
+           npwwfn         181
+             nsym          48
+           ntypat           1
+              occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+        optdriver           4
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+          spgroup         227
+           strten      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
+                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
+                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1
+                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1
+                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0
+                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
+                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1
+                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0
+                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1
+                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1
+                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
+                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1
+                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0
+                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1
+                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
+                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1
+                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
+                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
+                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
+                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
+            tnons      0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.5000000  0.0000000     0.0000000  0.5000000  0.0000000
+                       0.5000000  0.0000000  0.0000000     0.5000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
+                       0.5000000  0.0000000  0.0000000     0.5000000  0.0000000  0.0000000
+                       0.0000000  0.5000000  0.0000000     0.0000000  0.5000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
+                       0.5000000  0.0000000  0.0000000     0.5000000  0.0000000  0.0000000
+                       0.0000000  0.5000000  0.0000000     0.0000000  0.5000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
+                       0.0000000  0.5000000  0.0000000     0.0000000  0.5000000  0.0000000
+                       0.5000000  0.0000000  0.0000000     0.5000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
+                       0.0000000  0.5000000  0.0000000     0.0000000  0.5000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.5000000  0.0000000  0.0000000     0.5000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.5000000  0.0000000     0.0000000  0.5000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
+                       0.5000000  0.0000000  0.0000000     0.5000000  0.0000000  0.0000000
+            typat      1  1
+          usekden           1
+              wtk        0.12500    0.50000    0.37500
+           xangst     -6.7883874953E-01 -6.7883874953E-01 -6.7883874953E-01
+                       6.7883874953E-01  6.7883874953E-01  6.7883874953E-01
+            xcart     -1.2828193250E+00 -1.2828193250E+00 -1.2828193250E+00
+                       1.2828193250E+00  1.2828193250E+00  1.2828193250E+00
+             xred     -1.2500000000E-01 -1.2500000000E-01 -1.2500000000E-01
+                       1.2500000000E-01  1.2500000000E-01  1.2500000000E-01
+            znucl       14.00000
+
+================================================================================
+
+
+- Timing analysis has been suppressed with timopt=0
+
+
+
+================================================================================
+
+ Suggested references for the acknowledgment of ABINIT usage.
+
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+-
+- [1] Effect of self-consistency on quasiparticles in solids
+- F. Bruneval, N. Vast, L. Reining, Phys. Rev. B 74, 045102 (2006).
+- Comment : in case gwcalctyp >= 10.
+-
+- [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
+- using density-functional theory.
+- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- Comment : Some pseudopotential generated using the FHI code were used.
+-
+- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
+- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
+- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
+- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
+- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
+- Computer Phys. Comm. 180, 2582-2615 (2009).
+- Comment : the third generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- The licence allows the authors to put it on the Web.
+-
+- [4] A brief introduction to the ABINIT software package.
+- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
+- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
+- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
+- Z. Kristallogr. 220, 558-562 (2005).
+- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- should be cited especially if you are using the GW part of ABINIT, as several authors
+- of this part are not in the list of authors of the first or third paper.
+- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- the licence allows the authors to put it on the Web).
+-
+-
+- And optionally :
+-
+- [5] First-principles computation of material properties : the ABINIT software project. 
+- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
+- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
+- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
+- Comment : the original paper describing the ABINIT project.
+-
+- Proc.   0 individual time (sec): cpu=          2.0  wall=          2.0
+
+================================================================================
+
+ Calculation completed.
+.Delivered    2 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.0  wall=          2.0

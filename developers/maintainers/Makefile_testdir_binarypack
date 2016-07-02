@@ -1,0 +1,6 @@
+tests_speed :
+	if test ! -e cpu; then mkdir -p cpu; fi
+	perl Scripts/run-standard-tests.pl test ../../../../../opt `pwd` cpu A3 A3
+	perl Scripts/run-standard-tests.pl test ../../../../../opt `pwd` cpu B3 B3
+	cd cpu/tmp-test* && ../../Scripts/benchabinit.sh > ../../tmp-summary_speed
+	echo " You might now examine the content of the  tmp-summary_speed  file "

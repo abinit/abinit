@@ -1,0 +1,4 @@
+# Label XX at (1) defined but not used , where XX is a line number
+Warning = 'at (1) defined but not used'
+#
+#src_excluded = ['10_defs']

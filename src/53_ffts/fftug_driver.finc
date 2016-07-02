@@ -1,0 +1,103 @@
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: cplex0=0,option0=0,ndat1=1,iflag1=1,me_g0=1
+ integer :: nx,ny,nz,ldx,ldy,ldz,fftalg,fftalga,fftalgc,dat
+ integer :: ig,rspad,gspad,ix,iy,iz,ifft,fftcache
+ real(dp),parameter :: weight1_r=one,weight1_i=one,xnorm1=one
+ character(len=500) :: msg
+!arrays
+ integer :: shiftg(3),symm(3,3),dum_kg_kout(0,0)
+ real(dp) :: dum_denpot(0,0,0),dum_fofgout(0,0)
+ real(dp),allocatable :: fofgin(:,:),fofr(:,:,:,:),ftarr(:,:,:,:)
+
+! *************************************************************************
+
+ fftalg=ngfft(7); fftcache=ngfft(8)
+ fftalga=fftalg/100; fftalgc=MOD(fftalg,10)
+ nx=ngfft(1); ny=ngfft(2); nz=ngfft(3)
+
+ SELECT CASE (fftalga)
+
+ CASE (FFT_FFTW3) 
+   ldx=nx; ldy=ny; ldz=nz ! No augmentation, the caller does not support it.
+   call fftw3_fftug(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,nspinor*ndat,istwf_k,mgfft,kg_k,gbound_k,ug,ur)
+
+ CASE (FFT_DFTI) 
+   ldx=nx; ldy=ny; ldz=nz ! No augmentation, the caller does not support it.
+   call dfti_fftug(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,nspinor*ndat,istwf_k,mgfft,kg_k,gbound_k,ug,ur)
+
+ CASE (FFT_SG, FFT_SG2002) 
+   ldx=ngfft(4); ldy=ngfft(5); ldz=ngfft(6) ! Here augmentation is supported.
+   ABI_MALLOC(fofgin,(2,npw_k))
+   ABI_MALLOC(fofr,(2,ldx,ldy,ldz))
+
+   if (istwf_k<=2) then
+
+     do dat=1,nspinor*ndat
+       gspad = (dat-1)*npw_k
+       rspad = (dat-1)*nfft
+       ! Have to convert from CPLX to REAL.
+       ! Cannot use ZCOPY or C tricks here because this is a template used 
+       ! both for single and double precision.
+       do ig=1,npw_k 
+         fofgin(1,ig) = DBLE (ug(ig+gspad))
+         fofgin(2,ig) = AIMAG(ug(ig+gspad))
+       end do
+
+       !this is not thread-safe! use ndat1
+       call sg_fftrisc(cplex0,dum_denpot,fofgin,dum_fofgout,fofr,gbound_k,gbound_k,istwf_k,&
+&        kg_k,dum_kg_kout,mgfft,ndat1,ngfft,npw_k,0,ldx,ldy,ldz,option0,weight1_r,weight1_i)
+
+       ! Fill the output array on the ngfft(1:3) mesh.
+       do iz=1,nz  
+         do iy=1,ny
+           do ix=1,nx
+             ifft = ix + (iy-1)*nx + (iz-1)*nx*ny + rspad
+             ur(ifft) = DCMPLX(fofr(1,ix,iy,iz), fofr(2,ix,iy,iz))
+           end do
+         end do
+       end do
+       !
+     end do ! dat
+
+   else  
+     !
+     ! sg_fftrisc does not accept istwf_k>2 when option=0.
+     ! in this case nspinor is always 1.
+     !
+     ABI_MALLOC(ftarr,(2,ldx,ldy,ldz))
+     do dat=1,nspinor*ndat
+       gspad = (dat-1)*npw_k
+       rspad = (dat-1)*nfft
+
+       do ig=1,npw_k ! Have to convert from CPLX to REAL.
+         fofgin(1,ig) = DBLE (ug(ig+gspad))
+         fofgin(2,ig) = AIMAG(ug(ig+gspad))
+       end do
+       !
+       ! Reconstruct the full G-sphere.
+       call sphere(fofgin,ndat1,npw_k,fofr,nx,ny,nz,ldx,ldy,ldz,kg_k,istwf_k,iflag1,me_g0,shiftg,symm,xnorm1)
+
+       ! ndat=1 here.
+       call sg_fftpad(fftcache,mgfft,nx,ny,nz,ldx,ldy,ldz,1,gbound_k,+1,fofr,ftarr)
+
+       do iz=1,nz  ! Fill the output array on the ngfft(1:3) mesh.
+         do iy=1,ny
+           do ix=1,nx
+             ifft = ix + (iy-1)*nx + (iz-1)*nx*ny + rspad
+             ur(ifft) = DCMPLX(ftarr(1,ix,iy,iz), ftarr(2,ix,iy,iz))
+           end do
+         end do
+       end do
+     end do
+     ABI_FREE(ftarr)
+     !
+   end if
+
+   ABI_FREE(fofgin)
+   ABI_FREE(fofr)
+
+ CASE DEFAULT
+   write(msg,"(a,i0)")"Wrong fftalga= ",fftalga
+   MSG_ERROR(msg)
+ END SELECT

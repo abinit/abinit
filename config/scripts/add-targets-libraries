@@ -1,0 +1,103 @@
+#!/usr/bin/env python
+#
+# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+from ConfigParser import ConfigParser,NoOptionError
+from time import gmtime,strftime
+
+import commands
+import os
+import re
+import sys
+
+class MyConfigParser(ConfigParser):
+
+  def optionxform(self,option):
+    return str(option)
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Subroutines
+#
+
+# Makefile header
+def makefile_header():
+
+  return """
+# ---------------------------------------------------------------------------- #
+
+#
+# Targets for libabinit
+#
+
+# Set temporary directory
+libabinit_tmpdir = tmp-libabinit-objects
+
+"""
+
+
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Main program
+#
+
+# Initial setup
+my_name    = "add-targets-libraries"
+my_configs = ["config/specs/corelibs.conf"]
+
+# Check if we are in the top of the ABINIT source tree
+if ( not os.path.exists("configure.ac") or
+     not os.path.exists("src/98_main/abinit.F90") ):
+  print "%s: You must be in the top of an ABINIT source tree." % my_name
+  print "%s: Aborting now." % my_name
+  sys.exit(1)
+
+# Read config file(s)
+for cnf_file in my_configs:
+  if ( os.path.exists(cnf_file) ):
+    if ( re.search("\.cf$",cnf_file) ):
+      execfile(cnf_file)
+  else:
+    print "%s: Could not find config file (%s)." % (my_name,cnf_file)
+    print "%s: Aborting now." % my_name
+    sys.exit(2)
+
+# What time is it?
+now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
+
+# Init
+cnf = MyConfigParser()
+cnf.read(my_configs[0])
+abinit_corelibs = cnf.sections()
+abinit_corelibs.sort()
+
+# Init targets
+tgt_lib = """# Main target
+libabinit.a:
+	test ! -e "$(libabinit_tmpdir)"
+	$(INSTALL) -d -m 755 $(libabinit_tmpdir)
+"""
+
+# Process each library
+for lib in abinit_corelibs:
+  tgt_lib += "\n\tcd $(libabinit_tmpdir) && $(AR) xv $(abs_top_builddir)/src/%s/lib%s.a" \
+      % (lib,lib)
+
+# Finish setting targets
+tgt_lib += """
+	$(AR) $(ARFLAGS) libabinit.a $(libabinit_tmpdir)/*.$(OBJEXT)
+	rm -rf $(libabinit_tmpdir)
+"""
+
+# Write targets
+mf = file("Makefile.am","a")
+mf.write(makefile_header()+tgt_lib)
+mf.close()

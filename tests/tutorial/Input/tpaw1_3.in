@@ -1,0 +1,58 @@
+# =======================================
+# Input for PAW1 tutorial
+# Diamond at experimental volume
+# =======================================
+
+#Datasets: convergence on pawecutdg
+ndtset 10   pawecutdg: 12. pawecutdg+ 3.
+
+#Cell and atoms definition
+ acell 3*3.567 angstrom
+ rprim 0.0 1/2 1/2
+       1/2 0.0 1/2
+       1/2 1/2 0.0
+ ntypat 1  natom 2  typat 2*1
+ xred 0.0 0.0 0.0
+      1/4 1/4 1/4
+ znucl 6  nband 6
+
+#Basis definitions
+ ecut 12.
+ ecutsm 0.5
+
+#SCF cycle parameters
+ tolvrs 1.0d-10
+ nstep 20
+
+#K-points and sym
+ nsym 0       
+ occopt 1
+ ngkpt 6 6 6
+ nshiftk 4
+ shiftk 0.5 0.5 0.5
+        0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5
+
+#I/O parameters
+ prtwf 1 prtden 0  prteig 0
+ getwfk -1
+
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tpaw1_3.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
+#%% psp_files =  6c.lda.atompaw 
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Torrent
+#%% keywords = PAW
+#%% description = 
+#%%   Input for PAW1 tutorial
+#%%   Diamond at experimental volume
+#%%<END TEST_INFO>

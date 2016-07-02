@@ -1,0 +1,34 @@
+!!****d* ABINIT/42_nlstrain
+!! NAME
+!! 42_nlstrain
+!!
+!! DESCRIPTION
+!! This directory contains level-2 routines that are related to the
+!! treatment of the unit cell, the atomic positions inside
+!! the unit cell (reduced coordinates or cartesian coordinates),
+!! and the symmetry operations related
+!! to the cell and atoms. In particular, the symmetry
+!! recognition (symanal.F90, symspgr.F90),
+!! the Bravais lattice recognition (symbrav.F90),
+!! as well as the space group database (symgroup.F90)
+!! can be found here.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! contistr01.F90
+!! contistr03.F90
+!! contistr12.F90
+!! contstr21.F90
+!! contstr23.F90
+!! contstr25.F90
+!! contstr25a.F90
+!! contstr26.F90
+!! interfaces_42_nlstrain.F90
+!!
+!!***

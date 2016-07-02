@@ -1,0 +1,4 @@
+#
+Warning = 'CHARACTER expression will be truncated in assignment'
+#
+#src_excluded = ['10_defs']

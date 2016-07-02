@@ -1,0 +1,49 @@
+# C atom
+
+ixc -12207
+usekden 1
+
+acell 3*17
+
+ecut  25
+diemac 1.
+
+nstep 12
+
+kptopt 0
+nkpt 1
+kpt 0 0 0
+natom 1
+nband 4
+occopt 0
+occ 2 2/3 2/3 2/3
+ntypat 1
+tolwfr 1.0d-16
+typat 1
+wtk 1
+znucl 6
+xred 3*0
+rprim 0.5 0.5 0.0
+      0.0 0.5 0.5
+      0.5 0.0 0.5
+
+prtden 0 prtwf 0
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t08.out, tolnlines=   25,   tolabs=  1.0e+00,      tolrel= 1.1 ,  fld_options = -medium 
+#%% psp_files = 6-C.fhi
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Oliveira
+#%% keywords = 
+#%% description = 
+#%%   Isolated Carbon atom
+#%%   Test the Becke-Johnson mGGA functional, generating directly XC potentials. 
+#%%   Convergence parameters are quite high, and the test is reasonably portable.
+#%%<END TEST_INFO>

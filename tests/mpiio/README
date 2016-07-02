@@ -1,0 +1,12 @@
+This directory, paral, contains tests which exercise parallel
+features of the ABINIT package, for which mpiio is activated.
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+
+Tests 01 to 20 are related to ground-state (and TDDFT) parallel computations, based on k-point, spin and image parallelism only (no band-FFT).
+Tests 21 to 50 are related to ground-state parallel band-FFT computations, possibly combined with the other levels of parallelisation.
+Tests 51 to 70 are related to response-function parallel computations
+Tests 71 to 90 are related to GW calculations
+Tests 91 to 99 are other types of calculations (DMFT at present).
+

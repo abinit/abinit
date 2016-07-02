@@ -1,0 +1,22 @@
+1           # static
+output/t14  # output
+y           # do compute temperature dependance
+0 600 300   # Temperature range and step
+y           # do compute lifetime
+3           # number of q-points
+0.125       # weight of the q-points
+0.5         #
+0.375       #
+../data_LiF/odat_calc_DS5_DDB.nc
+../data_LiF/odat_calc_DS9_DDB.nc
+../data_LiF/odat_calc_DS13_DDB.nc
+../data_LiF/odat_calc_DS6_EIG.nc
+../data_LiF/odat_calc_DS10_EIG.nc
+../data_LiF/odat_calc_DS14_EIG.nc
+../data_LiF/odat_calc_DS7_EIGR2D.nc
+../data_LiF/odat_calc_DS11_EIGR2D.nc
+../data_LiF/odat_calc_DS15_EIGR2D.nc
+../data_LiF/odat_calc_DS7_EIGI2D.nc
+../data_LiF/odat_calc_DS11_EIGI2D.nc
+../data_LiF/odat_calc_DS15_EIGI2D.nc
+../data_LiF/odat_calc_DS3_EIG.nc

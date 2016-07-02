@@ -1,0 +1,63 @@
+#!/usr/bin/python
+
+# Note: this script mirrors the sections found in the
+#       ~abinit/doc/build/config-template.ac file.
+
+from snack import *
+
+# Init
+cfg_template = "doc/build/config-template.ac"
+
+# Global build options
+screen = SnackScreen()
+
+ret = EntryWindow(screen, 'C support',
+  'Set build parameters for C source files. Please note that setting' + \
+  ' CPPFLAGS and/or CFLAGS will override any other similar flag.',
+  ['CPP', 'CPPFLAGS_DEBUG', 'CPPFLAGS_OPTIM', 'CPPFLAGS_EXTRA', 'CPPFLAGS',
+   'CC', 'CFLAGS_DEBUG', 'CFLAGS_OPTIM', 'CFLAGS_EXTRA', 'CFLAGS'])
+
+screen.finish()
+
+status = ret[0]
+values = ret[1]
+
+# OK or Cancel
+print "Pressed %s" % (status)
+
+# Print every single item
+for item in values:
+	print item
+
+#ent_prefix = Entry(90, "Install prefix")
+#ent_prefix.set("${HOME}/abinit")
+#
+#chk_64bits = CheckBox("Enable 64-bit flags")
+#chk_hints  = CheckBox("Enable compiler hints", 1)
+#
+#lst_debug = Listbox(height=40, width=90, returnExit=1)
+#lst_debug.append("no")
+#lst_debug.append("yes")
+#lst_debug.append("basic")
+#lst_debug.append("enhanced")
+#lst_debug.append("paranoid")
+#lst_debug.append("naughty")
+#
+#lst_optim = Listbox(height=40, width=90, returnExit=1)
+#lst_optim.append("no")
+#lst_optim.append("yes")
+#lst_optim.append("safe")
+#lst_optim.append("standard")
+#lst_optim.append("agressive")
+#
+#grid = GridForm(screen,"Global build options", 5, 1)
+#grid.add(ent_prefix)
+#grid.add(chk_64bits)
+#grid.add(chk_hints)
+#grid.add(lst_debug)
+#grid.add(lst_optim)
+#
+#result = grid.runOnce()
+#screen.finish()
+#
+#print result

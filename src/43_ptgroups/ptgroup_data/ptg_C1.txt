@@ -1,0 +1,12 @@
+Symmetry operations for the point group C1 (1)
+
+1 : x,y,z           => 1                   
+
+[[ 1.  0.  0.]
+ [ 0.  1.  0.]
+ [ 0.  0.  1.]]
+
+Irreducible representations for the point group C1 (1)
+Irrep A ( dimension  1 )
+
+1 : 1.0                 

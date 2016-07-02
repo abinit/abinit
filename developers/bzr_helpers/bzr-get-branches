@@ -1,0 +1,117 @@
+#!/bin/bash
+
+# Stop at first error
+set -e
+
+# Init
+my_base="${HOME}/abinit"
+my_user=`id -un`
+my_forge="bzr+ssh://forge.abinit.org/abinit"
+my_name=`basename "${0}"`
+my_version="${1}"
+my_branch="${2}"
+my_repo=`cut -d. -f1-2 <<<"${my_version}"`
+
+# Require a version as argument
+if test "${#}" -lt 1; then
+
+cat <<EOF
+Usage: ${my_name} <3-digit-version> [custom-branch]
+
+This script will create version-based Bazaar repositories in a directory
+tree of your choice. Each repository will correspond to a minor Abinit
+version and be named after it.
+
+Before running this script for the first time, you'll have to change its
+'my_base' variable, in order to point to the place where you want to
+store your repositories. By default, it points to a /abinit partition.
+
+If your login on the current machine is different from the one you have
+on the Abinit Forge, you'll have to change the 'my_user' variable as
+well.
+
+This script assumes that your network connection and SSH parameters are
+properly set and fully working. We don't provide any support for related
+issues.
+
+If a branch already exists locally, it will be updated. Otherwise it
+will be created and the script will take care of setting the push
+address.
+
+For any minor version of Abinit, only the first download will take some
+time. All subsequent downloads will be considerably faster, provided
+that your network bandwidth is constant over time.
+
+By default, this script downloads your private branch plus that of the
+trunk. If you want to further increase the speed-up, just comment the
+sections of the script you have no use of.
+
+If you specify a custom branch as second argument to the script
+(e.g. "training"), it will be downloaded in addition to the other ones.
+
+Happy hacking!
+
+EOF
+
+exit 0
+
+fi
+
+# Create repository if needed
+if test ! -d "${my_base}/${my_repo}"; then
+  if test -e "${my_repo}"; then
+    echo "${my_name}: Error: repository ${my_repo} exists and is not a directory" >&2
+    exit 1
+  fi
+  bzr init-repo --trees "${my_base}/${my_repo}"
+fi
+
+# Get user private branch
+cd "${my_base}/${my_repo}"
+if test -d "${my_version}-private"; then
+  (cd "${my_version}-private" && bzr pull)
+else
+  if test -e "${my_version}-private"; then
+    echo "${my_name}: Error: branch ${my_version}-private exists and is not a directory" >&2
+    exit 11
+  fi
+  bzr branch \
+    ${my_forge}/${my_user}/${my_version}-private
+  cd "${my_version}-private"
+  bzr push --remember \
+    ${my_forge}/${my_user}/${my_version}-private
+  cd ..
+fi
+
+# Get user custom branch
+cd "${my_base}/${my_repo}"
+if test "${my_branch}" != ""; then
+  if test -d "${my_version}-${my_branch}"; then
+    (cd "${my_version}-${my_branch}" && bzr pull)
+  else
+    if test -e "${my_version}-${my_branch}"; then
+      echo "${my_name}: Error: branch ${my_version}-${my_branch} exists and is not a directory" >&2
+      exit 11
+    fi
+    bzr branch \
+      ${my_forge}/${my_user}/${my_version}-${my_branch}
+    cd "${my_version}-${my_branch}"
+    bzr push --remember \
+      ${my_forge}/${my_user}/${my_version}-${my_branch}
+    cd ..
+  fi
+fi
+
+# Get trunk private branch
+cd "${my_base}/${my_repo}"
+if test -d "${my_version}-trunk"; then
+  (cd "${my_version}-trunk" && bzr pull)
+else
+  if test -e "${my_version}-trunk"; then
+    echo "${my_name}: Error: branch ${my_version}-trunk exists and is not a directory" >&2
+    exit 11
+  fi
+  bzr branch \
+    ${my_forge}/trunk/${my_version}-private \
+    ${my_version}-trunk
+fi

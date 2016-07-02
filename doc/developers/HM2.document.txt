@@ -1,0 +1,186 @@
+
+--------------------------------------------------------------------------------
+2. HEADER OF SUBPROGRAMS (FUNCTIONS OR SUBROUTINES)
+--------------------------------------------------------------------------------
+
+
+TO IMPROVE READIBILITY of source code, please adopt a systematic order in header
+of functions and subroutines as shown in following example(in omitting empty
+sections) :
+
+(TITLE)
+      (recursive) function/subroutine toto
+
+(HEADER INTRODUCTION)
+      ! glossary
+      ! general notes
+      ! precompilation options     ! for subprograms " contained " in a module
+               ! this section should be (preferably) placed at beginning of module
+      ! module dependencies        ! for subprograms " contained " in a module
+               ! this section should be (preferably) placed at beginning of module
+
+(EXTERNAL PART OF HEADER)
+      implicit none                      ! for subprograms " contained " in a module,
+               ! " implicit none " should be (preferably) placed at beginning of module
+      ! function type
+      ! formal arguments
+      ! external references (without known interfaces)
+
+(LOCAL PART OF HEADER)
+      ! local constants and parameters
+      ! local types
+      ! interfaces of inner private subprograms
+      ! non-static local variables
+      ! static local variables (which may be initialized here)
+      ! auxiliary non-static local variables
+
+(SOURCE CODE ITSELF)
+      ! source code
+
+      end function/subroutine toto
+
+
+Each section is detailed now.
+
+
+2.a
+Section 'glossary' details the meaning of abreviations and notations
+   which are invoked, especially in section 2.b 'general notes'.
+Here is an example related to crystallography:
+      PSE               point symmetry element
+         PSEC              point symmetry element class
+            PSECN             PSEC name (c2,i,sh,etc...) (a3 format)
+            PSECS             PSEC size (nb of PSEs in PSEC) (i2 format)
+      PSO               point symmetry operation/operator
+         PSOM            PSO matrix
+
+
+2.b
+Section 'general notes' gives all information about the subprogram. Free format.
+
+
+2.c
+Section 'precompilation options' gives the list of all available keywords
+at PREPROCESSING TIME (explanations are given in section 2.b 'general notes')
+For instance:
+   ! precompilation options:
+   ! -DMPI: MPI parallelization environment
+   ! -Dsgi: SGI architecture       (anyway, 'sgi' is a reserved keyword)
+   ! -Dcache=xxx: for fixing value of an identifier (see hereafter)
+   ! ...
+   ! local constants and parameters
+   #ifndef cache
+   #define cache 1024
+   #endif
+   integer, parameter :: cache_size=cache
+   ! ....
+
+
+2.d
+Section 'module dependencies' gives the list of all required modules
+(containing declarations of constants, parameters, structured types,
+interfaces/source code of subprograms) used/called by subprogram 'toto'.
+See section 5.
+
+
+The second part of the header deals with global declarations
+and then begins with 'implicit none'.
+
+
+2.e
+Section 'function type' defines type of returned result for a function
+See subsection 1.d.
+
+
+2.f
+Section 'formal arguments' gives the list of all formal (i.e.  non-calling)
+arguments of subprogram 'toto'.
+They should be given not by alphabetic order, nor by types
+(integers, reals...) but by their 'INTENT' (in, inout, out) for clarity
+and by analogy with common libraries (LAPACK, etc...)
+   (and by convention, when a subroutine returns an error code,
+   it is the first 'intent(out)' formal argument)
+Exception: FORTRAN 90 requires that OPTIONAL formal arguments are
+the last arguments, even if some of them have an 'intent(in)'.
+
+THE INTENT MUST ALWAYS BE PRECISED, except for pointers (which have
+no intent) and subprogram names given as formal arguments (rare).
+Nevertheless, pointers should be placed in list of formal arguments
+according their 'quasi_intent' in source code (read/modified/affected data).
+On the other hand, a subprogram given as formal argument behaves
+always like 'intent(in)'. In that case, the formal argument consists off
+the explicit interface of the subprogram.
+
+A formal argument belonging to a structured type (see subsection 1.g),
+must have an 'intent(in)' (respectively 'intent(out)') if all fields of the
+structure are read-only (resp. write-only). In all other cases, specify an
+'intent(inout)' and detail (with comments) the status for each field.
+
+HUGE BENEFITS RELATED TO READIBILITY
+
+
+2.g
+Section 'external references' gives the list of all external subprograms
+for 'toto', for which no interface is known. For instance:
+      ! external references
+      external :: iargc, getenv, diabolo
+      #ifdef MPI
+      external :: mpi_comm_rank
+      #endif
+      integer(i4b) :: iargc
+'iargc' must be declared as external (being not an intrinsic F90 fct) and
+and typed (here as integer) since it is a function.
+Note that a single line 'external, integer(i4b) :: iargc' is not accepted
+by many compilers.
+All the other (non-necessary) declarations above, as external, may be omitted.
+
+
+Here begins the third part of the header, which deals only with what is
+purely local to subprogram 'toto'.
+
+
+2.h
+Sections 'local constants and parameters/types' gives the list of all local
+constants and parameters / types of the subprogram.
+Declarations of types here (and not in a module) are rare.
+
+
+2.i
+Section 'interfaces of inner private subprograms' gives the list of each
+BLOC-INTERFACE (see below subsection 3.d) of subprograms called inside 'toto'.
+This section is not very frequent since all the subprograms of a program,
+which are called (at least) in two different parts of the whole source code,
+have usually their bloc-interface defined once, in a specific module.
+So this section deals only with 'private' subprograms of 'toto'.
+
+
+2.j
+Section 'non-static local variables' gives the list of all
+DYNAMICALLY-ALLOCATED VARIABLES. There are three kinds:
+   'AUTOMATIC' (default; this keyword may be omitted)
+   'ALLOCATABLE': the allocation/deallocation of memory is made in 'toto'
+with 'allocate/deallocate'. These statements provide error codes which should
+be present AND managed, generally by an error message and a 'stop' of all processus
+   'POINTER': memory is allocated in another subprogram which is called
+inside 'toto' (the pointer must be 'nullified' before this call) and will
+be deallocated as soon as possible, either in 'toto' or elsewhere, after
+exiting 'toto'.
+
+HUGE BENEFITS RELATED TO CPU MEMORY IN USING APPROPRIATELY
+EACH KIND OF NON-STATIC LOCAL VARIABLE.
+
+
+2.k
+Section 'static local variables' gives the list of all static
+local variables which may be initialized as in:
+      integer(i4b), static :: call_nb = 0
+Do not use 'data' which is obsolete.
+
+
+2.l Section 'auxiliary non-static local variables' gives the list of
+all local variables which have a purely technical role
+(indexes for loops, arrays, etc...)
+
+BENEFITS : a clear distinction between variables which have or not physical meaning.
+Note also that it facilitates searches of variables with 'grep' or inside text editors.
+

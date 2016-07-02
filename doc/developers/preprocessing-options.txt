@@ -1,0 +1,195 @@
+Preprocessing options
+=====================
+
+FIXME: this document is still incomplete.
+
+Naming conventions
+------------------
+
+Names may contain capital letters, digits and underscores only. They
+must start with a letter.
+
+Directives related to features that may or may not be present depending
+on the configuration must begin by the keyword *HAVE\_*, e.g.
+*HAVE\_CONFIG\_H, HAVE\_NETCDF, HAVE\_ETSF\_XC, etc.
+
+Version-specific directives must have the number directly attached to
+the name, e.g. *MPI2*, *FC_PGI6*, etc.
+
+In this respect, ABINIT abides strictly by the GNU Coding Standards.
+This means in particular that:
+
+ * all user-defined compiler directives should be upper case;
+
+ * ...
+
+
+
+If statements
+-------------
+
+*If* statements should all begin with '<tt>#if</tt>'. We kindly ask you not
+to use '<tt>#ifdef</tt>', but '<tt>#if defined</tt>' instead. A line
+ending an *if* statement must contain the '<tt>#endif</tt>' keyword
+only. The same holds for '<tt>#else</tt>'.
+
+Example:
+
+<pre>
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+</pre>
+
+We thank you in advance for following these simple rules, as it will greatly
+simplify the automatic checks and fixes.
+
+
+
+Options list for ABINIT 5
+-------------------------
+
+### Generic options ###
+
+	ABINITGW	Light version of ABINIT, for GW calculations
+	CONTRACT	Design-by-contract code
+	HAVE_CONFIG_H	Mandatory: use config.h if present
+
+
+
+### Architecture-related options ###
+
+	OS_IRIX		IRIX operating system
+	OS_LINUX	Linux operating system
+	OS_MACOSX	Mac OS X operating system
+	OS_WINDOWS	DOS/Windows operating system
+	VMS		VAX/VMS architecture
+
+
+
+### Optional library options ###
+
+	HAVE_COMPAQ_FFT		HP/Compaq/DEC FFT library
+	HAVE_FFTW		FFTW library
+	HAVE_FFTWTHREADS	FFTW library (threaded version)
+
+	HAVE_HP_MLIB		HP mathematical library
+	HAVE_SCALAPACK		SCALAPACK linear algebra library
+	HAVE_SGI_MATH		SGI mathematical library
+	HAVE_IBM_ESSL		IBM mathematical library
+	HAVE_IBM_ESSL_OLD	IBM mathematical library (old version)
+	HAVE_NEC_ASL		NEC mathematical library
+
+	HAVE_NETCDF		NetCDF file I/O library
+
+	HAVE_BIGDFT		BigDFT wavelet library
+	HAVE_ETSF_IO		ETSF file I/O library
+	HAVE_LIBXC		LibXC exchange-correlation library
+	HAVE_PSML		Fortran XML pseudopotential I/O library from Alberto Garcia (beta in Feb 2015)
+
+
+
+### MPI options ###
+
+MPI options may not be included in the config.h file, as it would preclude
+the build of sequential code. They should be specified within the compiler
+command line, with the --with-mpi-cppflags options of configure if needed.
+
+	MPI		MPI statements follow
+	MPI1		MPI version 1
+	MPI2		MPI version 2
+	MPI3		MPI version 3
+	MPI_EXT		MPI HTOR routines (?)
+	MPI_FFT		Parallel FFT
+	MPI_IO		Parallel I/O
+	MPI_TRACE	Timing within parallel routines
+
+
+
+### Compiler options ###
+
+	FC_ABSOFT	ABSoft Fortran compiler
+	FC_COMPAQ	HP/Compaq/DEC Fortran compiler
+	FC_FUJITSU	Fujitsu Fortran compiler
+	FC_GNU		GNU Fortran compiler (gfortran)
+	FC_G95		G95 Fortran compiler (g95)
+	FC_HITACHI	Hitachi Fortran compiler
+	FC_HP		HP Fortran compiler
+	FC_IBM		IBM XL Fortran compiler
+	FC_INTEL	Intel Fortran compiler
+	FC_MIPSPRO	SGI MipsPro Fortran compiler
+	FC_NAG		NAGWare Fortran compiler
+	FC_NEC		NEC Fortran compiler
+	FC_PGI		PGI Fortran compiler
+	FC_PGI6		PGI Fortran compiler version 6.0
+	FC_SUN		Sun Fortran compiler
+
+
+
+### Fortran options ###
+
+	HAVE_FORTRAN_EXIT		The Fortran compiler accepts exit()
+	USE_CCLOCK			Use C clock for timings
+
+
+
+### Unmaintained options ###
+
+	OPENMP		OpenMP parallelism
+	T3E		Cray T3E architecture
+	TEST_AIM	Optional checks for AIM
+
+
+
+### Removed options ###
+
+#### OLD_INIT ####
+
+Was used in *src/04wfs/wfconv.F90* to initialize the wavefunctions, and has
+been replaced for a long time by a more efficient method.
+
+#### PGIWin ####
+
+The PGI Fortran compiler is no longer used to build Abinit under Windows,
+since it is too buggy.
+
+#### ultrix ####
+
+Ultrix was an operating system based on a 4.2BSD Unix with some features
+from System V. It was first released in 1984. Its purpose was to provide
+a DEC-supported native Unix for VAX. The last major release of Ultrix was
+version 4.5 in 1995, which supported DECstations and VAXen. There were some
+subsequent Y2K patches. There has been no ABINIT user on Ultrix quite some
+time.
+
+
+
+Options replaced since ABINIT 4
+-------------------------------
+
+	The option ...		has been replaced by ...
+	--------------		------------------------
+	__IFC			FC_INTEL
+	__VMS			VMS
+	CHGSTDIO		READ_FROM_FILE
+	FFTW			HAVE_FFTW
+	FFTWTHREADS		HAVE_FFTWTHREADS
+	MPIEXT			MPI_EXT
+	NAGf95			FC_NAG
+	P6			i386
+	TRACE			MPI_TRACE
+	bim			HAVE_IBM_ESSL
+	bmi			HAVE_IBM_ESSL
+	cen			HAVE_NEC_ASL, FC_NEC
+	dec_alpha		FC_COMPAQ
+	hp			HAVE_HP_MLIB, FC_HP
+	hpux			HAVE_HP_MLIB
+	ibm			FC_IBM
+	macosx			OS_MACOSX
+	mpi			MPI
+	nec			HAVE_NEC_ASL, FC_NEC
+	nolib			HAVE_COMPAQ_FFT
+	sgi			HAVE_SGI_MATH, FC_MIPSPRO
+	sr8k			FC_HITACHI
+	vpp			FC_FUJITSU
+

@@ -1,0 +1,696 @@
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/rf2_init
+!!
+!! NAME
+!! rf2_init
+!!
+!! FUNCTION
+!! Compute terms needed for the 2nd order Sternheimer equation with respect k perturbation.
+!! All terms are stored in a rf2_t object.
+!!
+!! COPYRIGHT
+!! Copyright (C) 2015-2016 ABINIT group (LB)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!!  cg(2,mpw*nspinor*mband*nsppol)=planewave coefficients of wavefunctions at k
+!!  rf2 : the object we want to initialize
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  eig0_k(mband*nsppol)=GS eigenvalues at k (hartree)
+!!  eig1_k(2*mband*mband*nsppol)=1st-order eigenvalues at k,q (hartree)
+!!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
+!!  icg=shift to be applied on the location of data in the array cg
+!!  idir=direction of the perturbation
+!!  ikpt=number of the k-point
+!!  ipert=type of the perturbation
+!!  isppol=index of current spin component
+!!  mpi_enreg=informations about MPI parallelization
+!!  mpw=maximum dimensioned size of npw or wfs at k
+!!  nband_k=number of bands at this k point for that spin polarization
+!!  nspinor=number of spinorial components of the wavefunctions
+!!  nsppol=1 for unpolarized, 2 for spin-polarized
+!!  rf_hamkq <type(rf_hamiltonian_type)>=all data for the 1st-order Hamiltonian at k,q
+!!  rf_hamk_dir2 <type(rf_hamiltonian_type)>= (used only when ipert=natom+11, so q=0)
+!!    same as rf_hamkq, but the direction of the perturbation is different
+!!  occ_k(nband_k)=occupation number for each band (usually 2) for each k.
+!!  rocceig(nband_k,nband_k)= (occ_kq(m)-occ_k(n))/(eig0_kq(m)-eig0_k(n))
+!!  wffddk=struct info for wf ddk file.
+!!  ddk<wfk_t>=struct info for DDK file.
+!!
+!! OUTPUT
+!!  rf2%RHS_Stern
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      dfpt_vtowfk
+!!
+!! CHILDREN
+!!      cg_zaxpy,cg_zscal,dotprod_g,rf2_accumulate_bands,rf2_apply_hamiltonian
+!!      rf2_getidirs,wffreaddatarec,wfk_read_bks,wrtout
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+subroutine rf2_init(cg,rf2,dtset,eig0_k,eig1_k,gs_hamkq,icg,idir,ikpt,ipert,isppol,mkmem,&
+                     mpi_enreg,mpw,nband_k,nsppol,rf_hamkq,rf_hamk_dir2,occ_k,rocceig,wffddk,ddk_f)
+
+ use defs_basis
+ use defs_datatypes
+ use defs_abitypes
+ use m_xmpi
+ use m_errors
+ use m_wffile
+ use m_wfk
+ use m_hamiltonian
+ use m_cgtools
+ use m_rf2
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'rf2_init'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+! *************************************************************************
+!Arguments -------------------------------
+!scalars
+
+ integer,intent(in) :: icg,idir,ipert,isppol,ikpt
+ integer,intent(in) :: mkmem,mpw,nband_k,nsppol
+ type(dataset_type),intent(in) :: dtset
+ type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
+ type(rf_hamiltonian_type),intent(inout),target :: rf_hamkq,rf_hamk_dir2
+ type(MPI_type),intent(inout) :: mpi_enreg
+
+!arrays
+ real(dp),intent(in) :: cg(2,mpw*gs_hamkq%nspinor*dtset%mband*mkmem*nsppol)
+ real(dp),intent(in) :: eig0_k(dtset%mband)
+ real(dp),intent(inout) :: eig1_k(2*dtset%mband**2) ! Here eig1_k contains 2nd order eigenvalues...
+ real(dp),intent(in) :: occ_k(nband_k),rocceig(nband_k,nband_k)
+ type(rf2_t),intent(inout) :: rf2
+ type(wffile_type),intent(inout) :: wffddk(4)
+ type(wfk_t),intent(inout) :: ddk_f(4)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: berryopt=0,tim_getghc=1,tim_getgh1c=1,tim_getgh2c=1,level=19
+ integer :: iband,idir1,idir2,ierr
+ integer :: igs,ipert1,ipert2,ipw,ispinor,jband,kdir1
+ integer :: natom,print_info
+ integer :: size_wf,shift_band1,shift_band2
+ integer :: shift_dir1_lambda,shift_dir2_lambda,shift_dir1,shift_dir2,shift_jband_lambda
+ real(dp) :: doti,dotr,dot2i,dot2r,invocc,tol_final,factor
+ character(len=500) :: msg
+!arrays
+ integer :: file_index(2)
+ real(dp) :: lambda_ij(2),eig1_k_jband(2*nband_k)
+ real(dp),allocatable :: cg_jband(:,:,:),dsusdu(:,:),dudk(:,:),dudkdk(:,:),dudk_dir2(:,:)
+ real(dp),allocatable :: eig1_k_stored(:),eig1_k_tmp(:),gvnl1(:,:)
+ real(dp),allocatable :: work1(:,:),work2(:,:),work3(:,:)
+ type(rf_hamiltonian_type),pointer :: rf_hamk_idir
+
+! *********************************************************************
+
+ DBG_ENTER("COLL")
+
+#ifdef DEV_MG_WFK
+ ABI_UNUSED((/wffddk(1)%unwff/))
+#endif
+
+ size_wf=gs_hamkq%npw_k*gs_hamkq%nspinor
+ natom = gs_hamkq%natom
+ print_info = 0
+ if (dtset%prtvol == -level.or.dtset%prtvol == -20.or.dtset%prtvol == -21) print_info = 1 ! also active a lot of tests
+!Define some atrributes of the rf2 object
+ rf2%nband_k = nband_k
+ rf2%size_wf = size_wf
+
+ if(ipert<natom+10.or.ipert>natom+11) then
+   write(msg,'(a)') 'ipert must be equal to natom+10 or natom+11 for rf2 calculations.'
+   MSG_BUG(msg)
+ end if
+
+!Define perturbations and idirs
+ rf2%iperts(1) = gs_hamkq%natom+1
+ rf2%iperts(2) = gs_hamkq%natom+1
+ if (ipert==natom+11)  rf2%iperts(2) = gs_hamkq%natom+2
+
+ if (ipert==natom+10.and.idir<=3) then
+   rf2%ndir=1
+   rf2%idirs(1)=idir ; rf2%idirs(2)=idir
+ else
+   rf2%ndir=2
+   call rf2_getidirs(idir,idir1,idir2)
+   rf2%idirs(1)=idir1
+   rf2%idirs(2)=idir2
+ end if
+
+!Allocate work spaces for one band
+ ABI_ALLOCATE(work1,(2,size_wf))
+ ABI_ALLOCATE(work2,(2,size_wf))
+ work1(:,:)=zero
+ work2(:,:) = zero
+
+! **************************************************************************************************
+! Get info from ddk files
+! **************************************************************************************************
+
+! "eig1_k_stored" contains dLambda_{nm}/dk_dir every bands n and m and ndir (=1 or 2) directions
+ ABI_ALLOCATE(eig1_k_stored,(2*rf2%ndir*nband_k**2))
+ eig1_k_stored=zero
+
+! "dudk" contains du/dk_dir for every bands and ndir (=1 or 2) directions
+ ABI_STAT_ALLOCATE(dudk,(2,rf2%ndir*nband_k*size_wf), ierr)
+ ABI_CHECK(ierr==0, "out of memory in m_rf2 : dudk")
+ dudk=zero
+
+ if (print_info/=0) then
+   write(msg,'(4(a,i2))') 'RF2_INIT : ipert-natom = ',ipert-natom,' , idir = ',idir,&
+   ' , ikpt = ',ikpt,' , isppol = ',isppol
+   call wrtout(std_out,msg,'COLL')
+ end if
+
+ ABI_ALLOCATE(eig1_k_tmp,(2*nband_k))
+
+ file_index(1)=1 ! dir1
+ file_index(2)=2 ! dir2
+ if (ipert==natom+11) then ! see dfpt_looppert.F90
+   file_index(1)=3 ! dir1
+   file_index(2)=2 ! dir2
+ end if
+
+ do kdir1=1,rf2%ndir
+   idir1=rf2%idirs(kdir1)
+   ipert1=rf2%iperts(kdir1)
+   do iband=1,nband_k
+#ifndef DEV_MG_WFK
+     call WffReadDataRec(eig1_k_tmp,ierr,2*nband_k,wffddk(file_index(kdir1)))
+     call WffReadDataRec(work1,ierr,2,size_wf,wffddk(file_index(kdir1)))
+#else
+     call wfk_read_bks(ddk_f(file_index(kdir1)), iband, ikpt, isppol, xmpio_single, cg_bks=work1,eig1_bks=eig1_k_tmp)
+#endif
+!    Filter the wavefunctions for large modified kinetic energy
+!    The GS wavefunctions should already be non-zero
+     do ispinor=1,gs_hamkq%nspinor
+       igs=(ispinor-1)*gs_hamkq%npw_k
+       do ipw=1+igs,gs_hamkq%npw_k+igs
+         if(gs_hamkq%kinpw_kp(ipw-igs)>huge(zero)*1.d-11)then
+           work1(1,ipw)=zero
+           work1(2,ipw)=zero
+         end if
+       end do
+     end do
+!    Copy work1 in "dudk"
+     shift_band1=(iband-1)*size_wf
+     shift_dir1=(kdir1-1)*nband_k*size_wf
+     dudk(:,1+shift_band1+shift_dir1:size_wf+shift_band1+shift_dir1)=work1(:,:)
+!    Copy eig1_k_tmp in "eig1_k_stored"
+     shift_band1=(iband-1)*2*nband_k
+     shift_dir1_lambda=2*(kdir1-1)*nband_k**2
+     eig1_k_stored(1+shift_band1+shift_dir1_lambda:2*nband_k+shift_band1+shift_dir1_lambda)=eig1_k_tmp(:)
+   end do
+ end do
+
+ ABI_ALLOCATE(dudkdk,(2,0))
+ ABI_ALLOCATE(dudk_dir2,(2,0))
+
+!Get dudkdk for ipert==natom+11
+ if(ipert==natom+11) then
+   ABI_DEALLOCATE(dudkdk)
+   ABI_ALLOCATE(dudkdk,(2,nband_k*size_wf))
+   if (idir>3) then
+     ABI_DEALLOCATE(dudk_dir2)
+     ABI_ALLOCATE(dudk_dir2,(2,nband_k*size_wf))
+   end if
+   do iband=1,nband_k
+#ifndef DEV_MG_WFK
+     call WffReadDataRec(eig1_k_tmp,ierr,2*nband_k,wffddk(1))
+     call WffReadDataRec(work1,ierr,2,size_wf,wffddk(1))
+#else
+     call wfk_read_bks(ddk_f(1), iband, ikpt, isppol, xmpio_single, cg_bks=work1,eig1_bks=eig1_k_tmp)
+#endif
+     shift_band1=(iband-1)*size_wf
+     dudkdk(:,1+shift_band1:size_wf+shift_band1)=work1(:,:)
+!    Check that < u^(0) | u^(2) > = - Re[< u^(1) | u^(1) >]
+     if (print_info/=0 .and. gs_hamkq%usepaw==0) then
+!      Compute < u^(0) | u^(2) >
+       do jband=1,nband_k
+         work2(:,:) = cg(:,1+shift_band1+icg:size_wf+shift_band1+icg)
+         call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,work2,work1,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+         if (idir<=3 .and. iband==jband .and. abs(occ_k(iband))>tol8) then
+!          Compute < u^(1) | u^(1) > = Re[< u^(1) | u^(1) >]
+           work2(:,:) = dudk(:,1+shift_band1:size_wf+shift_band1)
+           call dotprod_g(dot2r,dot2i,gs_hamkq%istwf_k,size_wf,2,work2,work2,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+           dotr = dotr + dot2r
+           doti = doti + dot2i
+           dotr = sqrt(dotr**2+doti**2)
+           if (dotr > tol7) then
+             write(msg,'(a,i2,a,es22.13E3)') 'RF2 TEST dudkdk iband = ',iband,&
+             ' : NOT PASSED. | < u^(0) | u^(2) > + Re[< u^(1) | u^(1) >] | = ',dotr
+             call wrtout(std_out,msg)
+!           else
+!             write(msg,'(a,i2,a)') 'RF2 TEST dudkdk iband = ',iband,' : OK.'
+!             call wrtout(std_out,msg)
+           end if
+         end if ! idir<=3
+       end do ! jband
+     end if ! print_info
+!Read ddk for idir2
+     if (idir>3) then
+#ifndef DEV_MG_WFK
+       call WffReadDataRec(eig1_k_tmp,ierr,2*nband_k,wffddk(4))
+       call WffReadDataRec(work1,ierr,2,size_wf,wffddk(4))
+#else
+       call wfk_read_bks(ddk_f(4), iband, ikpt, isppol, xmpio_single, cg_bks=work1,eig1_bks=eig1_k_tmp)
+#endif
+       dudk_dir2(:,1+shift_band1:size_wf+shift_band1)=work1(:,:)
+     end if
+   end do !iband
+ end if ! ipert=natom+11
+
+ ABI_DEALLOCATE(eig1_k_tmp)
+
+! **************************************************************************************************
+! COMPUTATION OF "dsusdu", A PART OF "A_mn" AND A PART OF "Lambda_mn" (see defs in m_rf2)
+! **************************************************************************************************
+
+! "dsusdu" contains dS/dk_dir |u_band> + S|du_band/dk_dir> for every bands and ndir (=1 or 2) directions 
+ ABI_STAT_ALLOCATE(dsusdu,(2,rf2%ndir*nband_k*size_wf), ierr)
+ ABI_CHECK(ierr==0, "out of memory in rf2_init : dsusdu")
+ dsusdu=zero
+
+ ABI_ALLOCATE(rf2%amn,(2,nband_k**2))
+ rf2%amn=zero
+
+ ABI_ALLOCATE(rf2%lambda_mn,(2,nband_k**2))
+ rf2%lambda_mn(:,:)=zero
+
+!Allocate work spaces for one band
+ ABI_ALLOCATE(work3,(2,size_wf))
+ ABI_ALLOCATE(cg_jband,(2,size_wf*print_info*nband_k,2))
+ ABI_ALLOCATE(gvnl1,(2,size_wf))
+ work3(:,:) = zero
+ if (print_info/=0) then
+   cg_jband(:,:,1) = cg(:,1+icg:size_wf*nband_k+icg)
+   cg_jband(1,:,2) = -dudk(2,1:size_wf*nband_k) ! for dir1
+   cg_jband(2,:,2) =  dudk(1,1:size_wf*nband_k) ! for dir1
+ else
+   cg_jband(:,:,:) = zero
+ end if
+ gvnl1(:,:) = zero
+
+ factor=one
+ if(ipert==natom+10 .and. idir<=3) factor=two ! in order to not compute same terms twice
+
+ do kdir1=1,rf2%ndir
+   idir1=rf2%idirs(kdir1)
+   ipert1=rf2%iperts(kdir1)
+   shift_dir1=(kdir1-1)*nband_k*size_wf
+   shift_dir1_lambda=(kdir1-1)*2*nband_k**2
+   if(ipert==natom+10 .and. idir<=3) then
+     shift_dir2=0
+     idir2 = idir1
+     ipert2 = ipert1
+     rf_hamk_idir => rf_hamkq
+   else
+     shift_dir2=(2-kdir1)*nband_k*size_wf
+     idir2 = rf2%idirs(3-kdir1)
+     ipert2 = rf2%iperts(3-kdir1)
+     if (kdir1==1) rf_hamk_idir => rf_hamkq
+     if (kdir1==2) rf_hamk_idir => rf_hamk_dir2
+   end if
+
+!  LOOP OVER BANDS
+   do jband=1,nband_k ! = band n
+     shift_band1=(jband-1)*size_wf
+     shift_jband_lambda=(jband-1)*2*nband_k
+     if (abs(occ_k(jband))>tol8) then
+
+!      Extract first order wavefunction for jband (in work1)
+       work1(:,:)=dudk(:,1+shift_band1+shift_dir1:size_wf+shift_band1+shift_dir1)
+
+       if (print_info/=0) then
+         eig1_k_jband(:)=eig1_k_stored(1+shift_jband_lambda+shift_dir1_lambda:2*nband_k+shift_jband_lambda+shift_dir1_lambda)
+       end if
+
+!      Compute H^(0) | du/dk_dir1 > (in work2) and S^(0) | du/dk_dir1 > (in work3)
+       call rf2_apply_hamiltonian(cg_jband,rf2,eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir1,0,&
+       mpi_enreg,print_info,dtset%prtvol,rf_hamk_idir,work1,work2,work3)
+
+       if (gs_hamkq%usepaw==0) work3(:,:)=work1(:,:) ! Store | du/dk_dir1 > in work3
+
+!      Copy infos in dsusdu
+       dsusdu(:,1+shift_band1+shift_dir1:size_wf+shift_band1+shift_dir1)=work3(:,:)&
+       +dsusdu(:,1+shift_band1+shift_dir1:size_wf+shift_band1+shift_dir1)
+
+       if (print_info/=0) then
+         write(msg,'(a)') 'RF2 TEST before accumulate_bands choice=1'
+         call wrtout(std_out,msg)
+       end if
+
+!      For every occupied iband, we compute :
+!      < du/dk_dir2(iband) | H^(0) | du/dk_dir1(jband) > and add it to lambda_mn
+!      < du/dk_dir2(iband) | S^(0) | du/dk_dir1(jband) > and add it to amn
+       do iband=1,rf2%nband_k  ! = band m
+         if (abs(occ_k(iband))>tol8) then
+           shift_band2=(iband-1)*size_wf
+           work1(:,:)=dudk(:,1+shift_band2+shift_dir2:size_wf+shift_band2+shift_dir2)
+           call rf2_accumulate_bands(rf2,1,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
+           jband,print_info,work1,work2,work3)
+         end if
+       end do
+
+!      Extract GS wavefunction for jband
+       work1 = cg(:,1+shift_band1+icg:size_wf+shift_band1+icg)
+
+       if (ipert1==natom+2) then
+!        Extract ddk and multiply by i :
+         if(idir<=3) then ! in this case : idir1=idir2
+           gvnl1(1,:) = -dudk(2,1+shift_band1:size_wf+shift_band1)
+           gvnl1(2,:) =  dudk(1,1+shift_band1:size_wf+shift_band1)
+         else
+           gvnl1(1,:) = -dudk_dir2(2,1+shift_band1:size_wf+shift_band1)
+           gvnl1(2,:) =  dudk_dir2(1,1+shift_band1:size_wf+shift_band1)
+         end if
+       end if
+
+!      Compute dH/dk_dir1 | u^(0) > (in work2) and dS/dk_dir1 | u^(0) > (in work3)
+       call rf2_apply_hamiltonian(cg_jband,rf2,eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir1,ipert1,&
+       mpi_enreg,print_info,dtset%prtvol,rf_hamk_idir,work1,work2,work3)
+
+!      Copy infos in dsusdu
+       if (gs_hamkq%usepaw==1) then
+         dsusdu(:,1+shift_band1+shift_dir1:size_wf+shift_band1+shift_dir1)=work3(:,:)&
+         +dsusdu(:,1+shift_band1+shift_dir1:size_wf+shift_band1+shift_dir1)
+       end if
+
+       if (print_info/=0) then
+         write(msg,'(a)') 'RF2 TEST before accumulate_bands choice=2'
+         call wrtout(std_out,msg)
+       end if
+
+!      For every occupied iband, we compute :
+!      < du/dk_dir2(iband) | dH/dk_dir1 | u^(0)(jband) > and add it to lambda_mn
+!      < du/dk_dir2(iband) | dS/dk_dir1 | u^(0)(jband) > and add it to amn
+
+       do iband=1,rf2%nband_k  ! = band m
+         if (abs(occ_k(iband))>tol8) then
+           shift_band2=(iband-1)*size_wf
+           work1(:,:)=dudk(:,1+shift_band2+shift_dir2:size_wf+shift_band2+shift_dir2)
+           call rf2_accumulate_bands(rf2,2,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
+           jband,print_info,work1,work2,work3)
+         end if
+       end do
+
+     end if ! empty band test
+   end do ! jband
+ end do ! idir1
+
+! **************************************************************************************************
+! COMPUTATION OF "RHS_Stern", THE LAST PART OF "A_mn" AND A PART OF "Lambda_mn"
+! **************************************************************************************************
+
+ ABI_STAT_ALLOCATE(rf2%RHS_Stern,(2,nband_k*size_wf), ierr)
+ ABI_CHECK(ierr==0, "out of memory in m_rf2 : RHS_Stern")
+ rf2%RHS_Stern(:,:)=zero
+
+ do jband=1,nband_k
+   if (abs(occ_k(jband))>tol8) then
+     shift_band1=(jband-1)*size_wf
+
+!    Computation of terms containing H^(2)
+     if (ipert/=natom+11 .or. gs_hamkq%usepaw==1) then ! Otherwise H^(2) = 0
+
+!      Extract GS wavefunction (in work1)
+       work1(:,:)=cg(:,1+shift_band1+icg:size_wf+shift_band1+icg)
+
+!      Compute  : d^2H/(dk_dir1 dk_dir2)|u^(0)>  (in work2)
+!      and      : d^2S/(dk_dir1 dk_dir2)|u^(0)>  (in work3)
+       call rf2_apply_hamiltonian(cg_jband,rf2,eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir,ipert,&
+       mpi_enreg,print_info,dtset%prtvol,rf_hamkq,work1,work2,work3)
+
+       if (print_info/=0) then
+         write(msg,'(a)') 'RF2 TEST before accumulate_bands choice=3'
+         call wrtout(std_out,msg)
+       end if
+
+!      For every occupied iband, we compute :
+!      < u^(0)(iband) | d^2H/(dk_dir1 dk_dir2) | u^(0)(jband) > and add it to lambda_mn
+!      < u^(0)(iband) | d^2S/(dk_dir1 dk_dir2) | u^(0)(jband) > and add it to amn
+       do iband=1,rf2%nband_k  ! = band m
+         if (abs(occ_k(iband))>tol8) then
+           shift_band2=(iband-1)*size_wf
+           work1(:,:)=cg(:,1+shift_band2+icg:size_wf+shift_band2+icg)
+           if(ipert == natom+10) then
+             ipert1 = natom+1
+             ipert2 = natom+1
+           else
+             ipert1 = natom+1
+             ipert2 = natom+2
+           end if
+           call rf2_getidirs(idir,idir1,idir2)
+           call rf2_accumulate_bands(rf2,3,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
+           jband,print_info,work1,work2,work3)
+         end if
+       end do
+
+!      Add d^2H/(dk_dir1 dk_dir2)|u^(0)> to RHS_Stern :
+       if (gs_hamkq%usepaw==1) work2(:,:)=work2(:,:)-eig0_k(jband)*work3(:,:) ! if PAW : we add H^(2)-eps^(0) S^(2)
+       work1(:,:)=rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
+       call cg_zaxpy(size_wf,(/one,zero/),work2,work1)
+       rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)=work1(:,:)
+
+     end if ! end H^(2)
+
+     do kdir1=1,rf2%ndir
+       shift_dir1=(kdir1-1)*nband_k*size_wf
+       shift_dir1_lambda=(kdir1-1)*2*nband_k**2
+       idir1=rf2%idirs(kdir1)
+       ipert1=rf2%iperts(kdir1)
+       if(ipert==natom+10 .and. idir<=3) then
+         idir2=idir1
+         ipert2=ipert1
+         shift_dir2=0
+         shift_dir2_lambda=0
+         rf_hamk_idir => rf_hamkq
+       else
+         idir2=rf2%idirs(2-kdir1+1)
+         ipert2=rf2%iperts(2-kdir1+1)
+         shift_dir2=(2-kdir1)*nband_k*size_wf
+         shift_dir2_lambda=(2-kdir1)*2*nband_k**2
+         if (kdir1==1) rf_hamk_idir => rf_hamk_dir2 ! dir2
+         if (kdir1==2) rf_hamk_idir => rf_hamkq ! dir1
+       end if
+       shift_jband_lambda=(jband-1)*2*nband_k
+       if (print_info/=0) then
+         eig1_k_jband(:)=eig1_k_stored(1+shift_jband_lambda+shift_dir2_lambda:2*nband_k+shift_jband_lambda+shift_dir2_lambda)
+       end if
+
+!      Extract first order wavefunction : | du/dk_dir1 > (in work1)
+       work1(:,:)=dudk(:,1+shift_band1+shift_dir1:size_wf+shift_band1+shift_dir1)
+
+       if (ipert2 == natom+2) then
+!        Extract dkdk and multiply by i :
+         gvnl1(1,:) = -dudkdk(2,1+shift_band1:size_wf+shift_band1)
+         gvnl1(2,:) =  dudkdk(1,1+shift_band1:size_wf+shift_band1)
+       end if
+
+!      Compute dH/dk_dir2 | du/dk_dir1 > (in work2) and dS/dk_dir2 | du/dk_dir1 > (in work3)
+       call rf2_apply_hamiltonian(cg_jband,rf2,eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir2,ipert2,&
+       mpi_enreg,print_info,dtset%prtvol,rf_hamk_idir,work1,work2,work3)
+
+       if (print_info/=0) then
+         write(msg,'(a)') 'RF2 TEST before accumulate_bands choice=4'
+         call wrtout(std_out,msg)
+       end if
+
+!      For every occupied iband, we compute :
+!      < u^(0)(iband) | dH/dk_dir2 | du/dk_dir1(jband) > and add it to lambda_mn
+!      < u^(0)(iband) | dS/dk_dir2 | du/dk_dir1(jband) > and add it to amn
+       do iband=1,rf2%nband_k  ! = band m
+         if (abs(occ_k(iband))>tol8) then
+           shift_band2=(iband-1)*size_wf
+           work1(:,:)=cg(:,1+shift_band2+icg:size_wf+shift_band2+icg)
+           call rf2_accumulate_bands(rf2,4,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
+           jband,print_info,work1,work2,work3)
+         end if
+       end do
+
+!      Add dH/dk_dir2 | du/dk_dir1 > to RHS_Stern :
+       if (gs_hamkq%usepaw==1) work2(:,:)=work2(:,:)-eig0_k(jband)*work3(:,:) ! if PAW : we add H^(1)-eps^(0) S^(1)
+       work1(:,:)=rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
+       call cg_zaxpy(size_wf,(/factor*one,zero/),work2,work1)
+       rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)=work1(:,:)
+
+!      Compute : -factor * sum_iband ( Lambda^(1)_{iband,jband} * dsusdu_{iband} )
+       shift_jband_lambda=(jband-1)*2*nband_k
+       do iband=1,nband_k
+         if (abs(occ_k(iband))>tol8) then ! if empty band, nothing to do
+
+!          Extract lambda_ij(iband,jband) for dir1
+           lambda_ij(1)=eig1_k_stored(2*iband-1+shift_jband_lambda+shift_dir1_lambda)
+           lambda_ij(2)=eig1_k_stored(2*iband  +shift_jband_lambda+shift_dir1_lambda)
+!           print '(2(a,i1),2(a,es22.13E3))','iband = ',iband,' jband = ',jband,' Lambda_ij = ',lambda_ij(1),',',lambda_ij(2)
+
+!          Extract dsusdu for iband and dir2 (in work2)
+           shift_band2=(iband-1)*size_wf
+           work2(:,:)=dsusdu(:,1+shift_band2+shift_dir2:size_wf+shift_band2+shift_dir2)
+
+!          Compute Lambda_{iband,jband} * dsusdu_{iband} (in work2)
+           call cg_zscal(size_wf,lambda_ij,work2)
+
+!          Add it to RHS_Stern
+           work1(:,:)=rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
+           call cg_zaxpy(size_wf,(/-factor*one,zero/),work2,work1) ! do not forget the minus sign!
+           rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)=work1(:,:)
+
+         end if ! empty band test
+       end do ! iband
+
+     end do ! kdir1
+
+   end if ! empty band test
+ end do ! jband
+
+ ABI_DEALLOCATE(cg_jband)
+ ABI_DEALLOCATE(dudk)
+ ABI_DEALLOCATE(dudkdk)
+ ABI_DEALLOCATE(dudk_dir2)
+ ABI_DEALLOCATE(dsusdu)
+ ABI_DEALLOCATE(eig1_k_stored)
+
+! Compute the part of 2nd order wavefunction that belongs to the space of empty bands
+ do jband=1,nband_k
+   shift_band1=(jband-1)*size_wf
+   if (abs(occ_k(jband))>tol8) then
+     invocc = one/occ_k(jband)
+     work1(:,:)=rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
+     do iband=1,nband_k
+       if (iband /= jband) then
+         if (print_info/=0) then
+           if (abs(occ_k(iband) - occ_k(jband)) > tol12 .and. occ_k(iband) > tol8) then
+             write(msg,'(a,i2,a,i2)') 'RF2 TEST ACTIVE SPACE : jband = ',jband,' iband = ',iband
+             call wrtout(std_out,msg)
+             write(msg,'(a)') 'ERROR : occ_k(iband) /= occ_k(jband) (and both are >0)'
+             call wrtout(std_out,msg)
+           end if
+           if (abs(eig0_k(iband) - eig0_k(jband)) < tol8 ) then
+             write(msg,'(a,i2,a,i2)') 'RF2 TEST ACTIVE SPACE : jband = ',jband,' iband = ',iband
+             call wrtout(std_out,msg)
+             write(msg,'(a,es22.13e3)') 'WARNING : DEGENERATE BANDS  Eig(jband) = Eig(jband) = ',eig0_k(jband)
+             call wrtout(std_out,msg)
+           end if
+           if ( (eig0_k(iband) - eig0_k(jband) < -tol12) .and. (jband < iband) ) then
+             write(msg,'(a,i2,a,i2)') 'RF2 TEST ACTIVE SPACE : jband = ',jband,' iband = ',iband
+             call wrtout(std_out,msg)
+             write(msg,'(a)') 'ERROR : Eig(jband) < Eig(iband) with jband < iband'
+             call wrtout(std_out,msg)
+             write(msg,'(a,es22.13e3)') 'Eig(jband) = ',eig0_k(jband)
+             call wrtout(std_out,msg)
+             write(msg,'(a,es22.13e3)') 'Eig(iband) = ',eig0_k(iband)
+             call wrtout(std_out,msg)
+           end if
+         end if ! end tests
+         if ( abs(occ_k(iband))<tol8 ) then ! for empty bands only
+           shift_band2=(iband-1)*size_wf
+           work2(:,:)=cg(:,1+shift_band2+icg:size_wf+shift_band2+icg)
+           call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,work2,work1,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+!          Store it in a_mn
+!          /!\ There is a factor "-2" to simplify the use of amn in the following.
+!          /!\ Occupied and empty bands will be treated in a same way.
+           rf2%amn(:,iband+(jband-1)*nband_k)=-two*rocceig(iband,jband)*invocc*(/dotr,doti/)&
+           +rf2%amn(:,iband+(jband-1)*nband_k)
+         end if ! empty band test
+       end if ! iband \= jband
+     end do ! iband
+   end if  ! empty band test
+ end do ! jband
+
+! **************************************************************************************************
+!  COMPUTATION OF "dcwavef" AND "Lambda_mn" FROM "A_mn"
+! **************************************************************************************************
+
+ ABI_STAT_ALLOCATE(rf2%dcwavef,(2,nband_k*size_wf), ierr)
+ ABI_CHECK(ierr==0, "out of memory in m_rf2 : dcwavef")
+ rf2%dcwavef=zero
+
+ do jband=1,nband_k
+   shift_band1=(jband-1)*size_wf
+   if (abs(occ_k(jband))>tol8) then
+     do iband=1,nband_k
+       shift_band2=(iband-1)*size_wf
+
+!      Extract GS wavefunction for iband
+       work1(:,:)=cg(:,1+shift_band2+icg:size_wf+shift_band2+icg)
+
+       work2(:,:)=rf2%dcwavef(:,1+shift_band1:size_wf+shift_band1)
+       call cg_zaxpy(size_wf,-half*rf2%amn(:,iband+(jband-1)*nband_k),work1,work2)
+       rf2%dcwavef(:,1+shift_band1:size_wf+shift_band1)=work2(:,:)
+
+       if (abs(occ_k(iband))>tol8 .and. abs(occ_k(jband))>tol8) then
+         rf2%lambda_mn(:,iband+(jband-1)*nband_k) = -half*(eig0_k(iband)+eig0_k(jband))*rf2%amn(:,iband+(jband-1)*nband_k)&
+         + rf2%lambda_mn(:,iband+(jband-1)*nband_k)
+
+         eig1_k(2*iband-1+(jband-1)*2*nband_k) = rf2%lambda_mn(1,iband+(jband-1)*nband_k)
+         eig1_k(2*iband  +(jband-1)*2*nband_k) = rf2%lambda_mn(2,iband+(jband-1)*nband_k)
+
+       end if ! empty band test
+     end do ! iband
+   end if ! empty band test
+ end do ! jband
+
+! **************************************************************************************************
+!  FINAL TEST
+! **************************************************************************************************
+
+ tol_final = tol6
+ if (print_info/=0) then
+   do jband=1,nband_k
+     if (abs(occ_k(jband))>tol8) then
+       shift_band1=(jband-1)*size_wf
+       work1(:,:)=rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
+       work2(:,:)=cg(:,1+shift_band1+icg:size_wf+shift_band1+icg)
+       call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,work1,work2,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+       dotr = dotr - rf2%lambda_mn(1,jband+(jband-1)*nband_k)
+       doti = doti - rf2%lambda_mn(2,jband+(jband-1)*nband_k)
+       dotr = sqrt(dotr**2+doti**2)
+       if (dotr > tol_final) then
+         write(msg,'(a,i2,a,es22.13E3)') 'RF2 TEST FINAL iband = ',jband,' : NOT PASSED dotr = ',dotr
+         call wrtout(std_out,msg)
+       else
+         write(msg,'(a,i2,a,es22.13E3,a,es7.1E2)') &
+         'RF2 TEST FINAL iband = ',jband,' : OK. |test| = ',dotr,' < ',tol_final
+         call wrtout(std_out,msg)
+       end if
+     end if
+   end do
+ end if
+
+! **************************************************************************************************
+!  JOB FINISHED
+! **************************************************************************************************
+
+! Deallocations of arrays
+ if (print_info==0) ABI_DEALLOCATE(rf2%amn)
+ ABI_DEALLOCATE(work1)
+ ABI_DEALLOCATE(work2)
+ ABI_DEALLOCATE(work3)
+
+! call timab(566,2,tsec)
+
+ DBG_EXIT("COLL")
+
+end subroutine rf2_init
+!!***

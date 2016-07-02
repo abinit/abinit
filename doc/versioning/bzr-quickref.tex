@@ -1,0 +1,341 @@
+% Bazaar Quick Reference
+% Copyright (C) 2008-2016 ABINIT Group (Yann Pouillon).
+% Originally written by Yann Pouillon.
+%
+% This program is free software; you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation; either version 2 of the License, or
+% (at your option) any later version.
+%
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with this program; if not, write to the Free Software
+% Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+%
+\documentclass[tumble,foldmark,a4paper]{leaflet}
+\usepackage[utf8]{inputenc}
+\usepackage{textcomp}
+\usepackage{url}
+\usepackage{palatino}
+\usepackage{xcolor}
+
+\definecolor{infobg}{rgb}{0.8,0.8,1.0}
+\definecolor{infofg}{rgb}{0.0,0.0,0.3}
+\definecolor{warnbg}{rgb}{1.0,0.8,0.8}
+\definecolor{warnfg}{rgb}{0.3,0.0,0.0}
+
+\renewcommand*\foldmarkrule{.3mm}
+\renewcommand*\foldmarklength{190mm}
+
+\setlength\fboxsep{0pt}
+\setlength\fboxrule{0.5pt}
+
+\begin{document}
+
+\begin{center}
+{\Large {\bf ABINIT FORGE}}
+
+\vspace{32mm}
+
+\includegraphics{bzr-logo}
+
+\vspace{24mm}
+
+{\Huge Quick reference for \\[0.5em] committers}
+
+\vspace{40mm}
+
+Copyright \textcopyright\ 2008-2016 ABINIT Group. \\
+Written and maintained by Yann Pouillon.
+\end{center}
+
+\newpage
+
+\section*{Read this first}
+
+The Abinit website contains a section dedicated to Bazaar. Please read
+the documents located therein carefully (URL: one line, no space).
+\begin{center}
+ \url{http://dev.abinit.org/} \\
+ $\hookrightarrow$ \url{environment/bazaar/}
+\end{center}
+
+\section*{Structure of the Abinit Forge}
+
+Full URL of a branch (one line, no space):
+\begin{center}
+ \url{bzr+ssh://forge.abinit.org/abinit/} \\
+ $\hookrightarrow$ \url{<repository>/<branch>/}
+\end{center}
+
+Repository name: \textit{trunk}, or committer login. \\
+
+Branch names:
+\begin{center}
+\begin{itemize}
+ \item \texttt{x.y.z-private}
+ \item \texttt{x.y.z-public}
+ \item \texttt{x.y.z-training}
+\end{itemize}
+\end{center}
+
+\texttt{x}: major version number (era)\\
+\texttt{y}: minor version number (development cycle) \\
+\texttt{z}: micro version number (patch level) \\
+
+The \textit{private} branch is where all developments go. \\
+The \textit{public} branch contains what is merged into \textit{trunk}. \\
+The \textit{training} branch is there for learning, and is created for
+beginners and tutors only. \\
+
+\vspace{1em}
+
+\begin{center}
+\colorbox{infobg}{\framebox{\parbox{7.8cm}{%
+  \color{infofg}
+  \begin{center}
+   \textbf{BEFORE ACCESSING THE FORGE} \\
+   \vspace{0.5em}
+   {\small
+    \texttt{export EDITOR="/path/to/my/editor"} (BASH) \\
+    in \$HOME/.bashrc \\
+    \vspace{0.5em}
+    \textit{or} \\
+    \vspace{0.5em}
+    \texttt{setenv EDITOR "/path/to/my/editor"} (CSH) \\
+    in \$HOME/.cshrc
+   }
+  \end{center}
+}}}
+\end{center}
+
+\newpage
+
+\section*{Useful commands}
+
+\begin{center}
+ \begin{tabular}{l l}
+  \textbf{bzr ...} & \textbf{Result} \\
+  \hline
+  \texttt{help} & Get help \\
+  \texttt{info} & Get source tree info \\
+  \texttt{status} & Get status report \\
+ \end{tabular}
+\end{center}
+
+\section*{Working with branches (recommended)}
+
+A \textit{branch} is an autonomous copy of the source code. All history
+is kept locally, except when explicitely \textit{published} by the
+committer.
+
+\vspace{-0.5em}
+
+\begin{center}
+ \begin{tabular}{l l}
+  \textbf{Action} & \textbf{Command} \\
+  \hline
+  Get & \texttt{bzr branch url $[$local\_dir$]$} \\
+  Sync & \texttt{bzr pull $[$url$]$} \\
+  Publish & \texttt{bzr push $[$url$]$} \\
+  Off-line & \texttt{bzr commit} \\
+ \end{tabular}
+\end{center}
+
+Typical use: decentralized development. \\
+
+If the working tree is empty, run \texttt{bzr~checkout} from within. If
+it is inconsistent or outdated, run \texttt{bzr~update} from within. \\
+
+Public branches can and should only be synchronized with private ones by
+using the \texttt{\texttildelow{}abinit/extras/bzr\_helpers/bzr-publish}
+script from already-pushed private branches.
+
+\section*{Working with checkouts}
+
+A \textit{checkout} is a branch, the history of which is kept on the
+Forge. It can however be used off-line temporarily.
+
+\vspace{-0.5em}
+
+\begin{center}
+ \begin{tabular}{l l}
+  \textbf{Action} & \textbf{Command} \\
+  \hline
+  Get & \texttt{bzr checkout url $[$local\_dir$]$} \\
+  Sync & \texttt{bzr update} \\
+  Publish & \texttt{bzr commit} \\
+  Off-line & \texttt{bzr commit --local} \\
+ \end{tabular}
+\end{center}
+
+Typical use: fast network connections.
+
+\newpage
+
+\section*{Writing changelogs}
+
+Template:
+
+\vspace{-0.5em}
+
+\begin{verbatim}
+One short summary line (no trailing dot)
+
+* dir1/sub1/file1: Some changes. Make
+full sentences.
+
+* dir2/sub2/file2,dir3/sub3/file3: Some
+other changes.
+* dir4/sub4/file4: Related changes (no
+blank line before).
+
+* Additional notes and issues.
+\end{verbatim}
+
+GNU changelog format: please make sure that all lines are $<$ 80
+characters and start at the first column. For a complete reference
+(one-line URL, no space):
+\begin{center}
+ \url{http://www.gnu.org/prep/standards/} \\
+ $\hookrightarrow$ \url{html_node/Change-Logs.html}
+\end{center}
+
+\section*{Committing}
+
+Check-list:
+{\tt
+\begin{enumerate}
+ \item bzr status
+ \item Process files marked as unknown. \\
+       Go back to 1 until no file is marked as unknown.
+ \item Write changelog (see above).
+ \item bzr commit --strict $[$-F logfile$]$ \\
+       Use -F option if your changelog is in a file.
+ \item Push at least once a day.
+\end{enumerate}
+}
+
+\vspace{0.5em}
+
+\begin{center}
+\colorbox{infobg}{\framebox{\parbox{7cm}{%
+  \color{infofg}
+  \begin{center}
+    \textbf{NOTE} \\
+    \vspace{0.5em}
+    Pushing to a public branch triggers heavy processes on various
+    computers. Please use your private branch as much as possible.
+  \end{center}
+}}}
+\end{center}
+
+\newpage
+
+\section*{Merging branches and solving conflicts}
+
+Merge check-list:
+{\tt
+\begin{enumerate}
+ \item Commit.
+ \item bzr merge \ldots
+ \item Solve conflicts (if any).
+ \item Write merge changelog.
+ \item Commit.
+\end{enumerate}
+}
+
+\begin{center}
+\colorbox{warnbg}{\framebox{\parbox{6cm}{%
+  \color{warnfg}
+  \begin{center}
+    \textbf{IMPORTANT} \\
+    \vspace{0.5em}
+    \centerline{\textbf{\textit{\underline{ALWAYS}}} commit}
+    \centerline{just before \textit{\underline{and}} after merging!}
+  \end{center}
+}}}
+\end{center}
+
+\vspace{0.5em}
+
+Conflict check-list:
+{\tt
+\begin{enumerate}
+ \item File myfile has a conflict \\
+  $\Longrightarrow$ myfile.BASE: before divergence \\
+  $\Longrightarrow$ myfile.THIS: local version \\
+  $\Longrightarrow$ myfile.OTHER: from other tree
+ \item kdiff3 myfile.BASE myfile.THIS \\
+  $\hookrightarrow$ myfile.OTHER \# One line only
+ \item Save result as myfile.
+ \item bzr resolve myfile \\
+ $\longrightarrow$ removes files created at step 1!
+\end{enumerate}
+}
+
+\begin{center}
+\colorbox{warnbg}{\framebox{\parbox{6cm}{%
+  \color{warnfg}
+  \begin{center}
+    \textbf{IMPORTANT} \\
+    \vspace{0.5em}
+    If \textit{myfile} does not exist when typing \texttt{bzr~resolved},
+    it will automatically be marked as \textit{removed} by bzr.
+  \end{center}
+}}}
+\end{center}
+
+\newpage
+
+\section*{Useful addresses}
+
+\begin{center}
+\textbf{Abinit Forge} \\
+\url{bzr+ssh://archives.abinit.org/abinit/} \\
+$\hookrightarrow$ \url{<developer>/<branch>/} \\
+\textit{All of the URL should be typed at once (one line only, no space).}
+\end{center}
+
+\begin{center}
+\textbf{Abinit Website - Developer's Corner} \\
+\url{http://dev.abinit.org/} \\
+\textit{Reference information for developers.}
+\end{center}
+
+\begin{center}
+\textbf{Abinit Forums} \\
+\url{http://forum.abinit.org/} \\
+\textit{\textbf{\textcolor{red}{All new committers have to ask to be
+added to the ``Committers'' group.}}}
+\end{center}
+
+\begin{center}
+\textbf{Bazaar Website} \\
+\url{http://bazaar-vcs.org/} \\
+\textit{Home page of the Bazaar Version Control System.}
+\end{center}
+
+\section*{Mailing lists}
+
+\begin{center}
+\textbf{Announcements} \\
+\url{announce@abinit.org} \\
+\textit{Low-traffic list for important announcements about Abinit.}
+\end{center}
+
+\begin{center}
+\textbf{Committer List} \\
+\url{gnuarch@abinit.org} \\
+\textit{For developers having an access to the Abinit Forge (restricted).}
+\end{center}
+
+\section*{Need help?}
+
+To get help on all Bazaar commands, just remember \texttt{bzr~help}.
+
+\end{document}

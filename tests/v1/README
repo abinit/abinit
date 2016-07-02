@@ -1,0 +1,42 @@
+This directory, v1, contains tests which exercise parts 
+of the ABINIT package, especially those features acquired
+during the development of the version 1.
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+
+Tests 1 to 9 are related with occupation numbers and treatment of metals
+Tests 10 to 20 examine different exchange-correlation functionals, in the 
+              spin-unpolarized case.
+Tests 21 to 23 examine different exchange-correlation functionals, in the
+              spin-polarized case.
+Tests 24, 25, 28 and 29 make additional tests related with XC, especially GGA.
+Test 30 examine Fermi-Amaldi functional
+Tests 31 to 38 test different isolated atoms : test Troullier-Martins, 
+              Hartwigsen-Goedecker-Hutter pseudopotentials,
+              old Teter pseudopotentials (code ATOM), 
+              FHI pseudopotentials (code FHI98PP) or
+              pseudopotentials on Hamann's grid;
+              also test non-sphericity and spin-polarization
+Test  39   the use of the spinat variable
+Test  40 to 42 are tests with a medium or large number of atoms
+Tests 40, 42 and 43  test the geometry builder and the mix of type of atoms
+Tests 44 and 45  test the option ionmov=4, with iscf=5 and 2,
+              while test 45 also initialize test 46 and 47.
+Tests 46 and 47  test the option iscf=1 (determination of the SCF eigenvalue).
+Test 48 to 50 test option densfor_pred=2 or 3,  with ionmov=4, and iscf=2 or 5
+Tests 51 to 58 test dielectric matrix
+Tests 59 and many following ones (until 97) test or use multi-data set features
+Test  67 and 68 determines an optimal densty parameter.
+Test  69 and 70 computes excited states thanks to TDDFT
+Test  71 to 73 test iprcel=55 and 65
+Test  74 uses multidataset with geometric series
+Test  75 uses the restartxf option
+Test  76 to 82 relates to cell optimization : use of ecutsm, dilatmx, optcell .
+Test  83 and 84 uses double-loop datasets.
+Test  85 and 86 test iatfixx, iatfixy and iatfixz.
+Test  87 to 89 uses different combinations of fftalg=1xx and istwfk 
+Test  90 to 96 test the symmetriser
+         (more tests of the symmetriser should be set up)
+Tests 97 to 99 test the ability to exit a job (exit file or cpu limit). 
+             98 and 99 are machine-dependent !

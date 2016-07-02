@@ -1,0 +1,24 @@
+Symmetry operations for the point group Cs (m) 
+1 : x,y,z           => 1                   
+
+[[ 1.  0.  0.]
+ [ 0.  1.  0.]
+ [ 0.  0.  1.]]
+
+2 : x,-y,z          => m [ 0 1 0 ]         
+
+[[ 1.  0.  0.]
+ [ 0. -1.  0.]
+ [ 0.  0.  1.]]
+
+Irreducible representations for the point group Cs (m) 
+Irrep A' ( dimension  1 )
+1 : 1.0                 
+
+2 : 1.0                 
+
+Irrep A'' ( dimension  1 )
+1 : 1.0                 
+
+2 : -1.0                
+

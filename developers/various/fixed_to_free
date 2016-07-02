@@ -1,0 +1,42 @@
+#!/bin/csh
+#
+# Copyright (C) 1998-2016 ABINIT group (XG,LSi)
+# This file is distributed under the terms of the
+# GNU General Public License, see ~abinit/COPYING
+# or http://www.gnu.org/copyleft/gpl.txt .
+# For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+# 
+# The purpose of this script is to translate fortran files
+# that are written in fixed format to free format
+# and move them in the directory  ..
+# Usage :
+# fixed_to_free file1 file2 ...
+# Note : it uses the perl script FT77to90, that must be in the same 
+# directory as fixed_to_free
+
+# Count the number of files
+set number_arg=$#argv
+
+set index=1
+echo "the following files will be treated :"
+while ($index <= $number_arg)
+  echo " $argv[$index] "
+  @ index++
+end
+
+echo " number of files = $number_arg "
+
+# Set up a loop on all the files
+set index=1
+while ($index <= $number_arg)
+  set file=$argv[$index]
+  echo " file $file is now treated "
+  FT77to90 -lf $file
+  mv *90.f tmp.$file
+  sed -e 's/^     //' tmp.$file > tmp.$file.1
+  rm tmp.$file
+  sed -e 's/^\!     /\!/' tmp.$file.1 > tmp.$file
+  rm tmp.$file.1
+  mv tmp.$file ../$file
+  @ index++
+end

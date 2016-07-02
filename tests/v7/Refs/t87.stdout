@@ -1,0 +1,102 @@
+
+.Version 8.0.3 of MRGDV 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+
+.Copyright (C) 1998-2016 ABINIT group . 
+ MRGDV comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : Mon  4 Apr 2016.
+- ( at 16h56 )
+  
+>>> Enter name of output file: 
+>>> Enter total number of DFPT POT files: 
+>>> Enter name of POT file 1 : 
+>>> Enter name of POT file 2 : 
+>>> Enter name of POT file 3 : 
+>>> Enter name of POT file 4 : 
+>>> Enter name of POT file 5 : 
+>>> Enter name of POT file 6 : 
+>>> Enter name of POT file 7 : 
+>>> Enter name of POT file 8 : 
+>>> Enter name of POT file 9 : 
+>>> Enter name of POT file 10 : 
+>>> Enter name of POT file 11 : 
+>>> Enter name of POT file 12 : 
+>>> Enter name of POT file 13 : 
+>>> Enter name of POT file 14 : 
+- Reading header of file [1]: t85o_DS2_POT1
+- Reading header of file [2]: t85o_DS3_POT1
+- Reading header of file [3]: t85o_DS3_POT2
+- Reading header of file [4]: t85o_DS4_POT1
+- Reading header of file [5]: t85o_DS4_POT2
+- Reading header of file [6]: t85o_DS5_POT1
+- Reading header of file [7]: t85o_DS6_POT1
+- Reading header of file [8]: t85o_DS6_POT2
+- Reading header of file [9]: t85o_DS6_POT3
+- Reading header of file [10]: t85o_DS7_POT1
+- Reading header of file [11]: t85o_DS7_POT3
+- Reading header of file [12]: t85o_DS8_POT1
+- Reading header of file [13]: t85o_DS9_POT1
+- Reading header of file [14]: t85o_DS9_POT2
+Merged successfully 14 files
+ ==== Info on the dvdb% object ====
+ Number of q-points:            8
+qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+
+qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+
+qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+
+qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+
+qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=independent, found=Yes
+
+qpoint: [-2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=independent, found=Yes
+
+qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=symmetric, found=No
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+
+qpoint: [-2.5000E-01,  5.0000E-01,  2.5000E-01] is present in the DVDB file
+ The list of irreducible perturbations for this q vector is:
+    1)  idir= 1, ipert=   1, type=independent, found=Yes
+    2)  idir= 2, ipert=   1, type=independent, found=Yes
+    3)  idir= 3, ipert=   1, type=symmetric, found=No
+
+All the independent perturbations are available
+ Done

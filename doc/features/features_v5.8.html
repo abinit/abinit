@@ -1,0 +1,1097 @@
+<html>
+<head>
+<title> ABINIT. List of features.</title>
+<body bgcolor="#ffffff">
+<p>
+<h1>ABINIT. List of features. </h1>
+<p><b>This file describes the major features of the ABINIT package.</b>
+</p>
+
+<h5>Copyright (C) 1998-2016 ABINIT group (DCA,XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<HR ALIGN=left>
+
+Goto :
+<A href="http://www.abinit.org"><B>ABINIT home Page</B></A>
+<B> | </B>
+<A href="../users/acknowledgments.html"><B>Suggested acknowledgments</B></A>
+<B> | </B>
+<A href="../input_variables/html_automatically_generated/allvariables.html"><B>List of input variables</B></A>
+<B> | </B>
+<A href="../tutorial/welcome.html"><B>Tutorial home page</B></A>
+<B> | </B>
+<A href="../users/bibliography.html"><B>Bibliography</B></A>
+<HR ALIGN=left>
+Help files :
+<A href="../users/new_user_guide.html"><B>New user's guide</B></A>
+<B> | </B>
+<A href="../users/abinis_help.html"><B>Abinis (main)</B></A>
+<B> | </B>
+<A href="../users/respfn_help.html"><B>Abinis (respfn)</B></A>
+<B> | </B>
+<A href="../users/mrgddb_help.html"><B>Mrgddb</B></A>
+<B> | </B>
+<A href="../users/anaddb_help.html"><B>Anaddb</B></A>
+<B> | </B>
+<A href="../users/aim_help.html"><B>AIM (Bader)</B></A>
+<B> | </B>
+<A href="../users/cut3d_help.html"><B>Cut3D</B></A>
+<B> | </B>
+<A href="../users/optic_help.html"><B>Optic</B></A>
+<B> | </B>
+<A href="../users/mrgscr_help.html"><B>Mrgscr</B></A>
+<HR ALIGN=left>
+
+<h3><b>Contents: </b></h3>
+<ul>
+ <li><a href="#0">0.</a> Related documentation.
+ <li><a href="#1">1.</a> Available physical properties.
+  <ul>
+   <li><a href="#1.A">1.A.</a> Total energy of an assembly of nuclei and electrons placed in a repeated cell.</li>
+   <li><a href="#1.B">1.B.</a> Derivatives of the total energy and eigenenergies.</li>
+   <li><a href="#1.C">1.C.</a> Excited states.</li>
+   <li><a href="#1.D">1.D.</a> Displacement of atoms, and changes of cell parameters.</li>
+   <li><a href="#1.E">1.E.</a> Properties at the nuclei sites.</li>
+   <li><a href="#1.F">1.F.</a> Analysis and graphical tools.</li>
+   <li><a href="#1.G">1.G.</a> Interfacing with other codes.</li>
+  </ul>
+ <li><a href="#2">2.</a> Speed and memory.
+  <ul>
+   <li><a href="#2.A">2.A.</a> Speed in the sequential version.</li>
+   <li><a href="#2.B">2.B.</a> Speed in the parallel version.</li>
+   <li><a href="#2.C">2.C.</a> Memory.</li>
+  </ul>
+ <li><a href="#3">3.</a> The user's point of view.
+  <ul>
+   <li><a href="#3.A">3.A.</a> The Web site.</li>
+   <li><a href="#3.B">3.B.</a> Portability.</li>
+   <li><a href="#3.C">3.C.</a> Running jobs, input and output files.</li>
+   <li><a href="#3.D">3.D.</a> Documentation.</li>
+   <li><a href="#3.E">3.E.</a> Generation of the k-points, geometries, and starting wavefunctions.</li>
+   <li><a href="#3.F">3.F.</a> Automatic determination of input parameters.</li>
+  </ul>
+ <li><a href="#4">4.</a> The programmer's point of view.
+</ul>
+
+<p>
+<HR ALIGN=left>
+<h3><b><a name="0">0.</a> Related documentation</b></h3>
+
+Besides the documentation available on the Web,
+there is a wealth of information inside the package itself, see the
+directory "doc".
+The reader might consult the latest version of the "doc/users/context.txt" file
+for the description of the ABINIT project and its history.
+The latest version of the "doc/developers/planning.txt" file will give an idea of
+possible future developments.
+The different versions of the "doc/release_notes/*html" files will allow to
+see the actual development of the project since version 1.5,
+released in August 1998.
+
+<p>
+<HR ALIGN=left>
+<h3><b><a name="1">1.</a> Available physical properties</b></h3>
+
+<h4><b><a name="1.A">1.A.</a> Computation of the total energy of an assembly of nuclei and electrons
+placed in a repeated cell.</b></h4>
+
+<ul>
+<li>
+1.A.1. The computation can be done using (1) plane waves and norm-conserving
+pseudopotentials, or, (2) so-called
+"Projector-Augmented Waves" (PAW method), with appropriate pseudoatomic data,
+or (3) wavelets, see 1.A.14.
+</li>
+<br>
+<li>
+1.A.2. The total energy computation is done according to the Density Functional
+Theory. Many exchange-correlation functionals are available,
+through two different implementations : one is the native ABINIT implementation,
+the other is the ETSF library of XC functionals (LibXC is a plug-in to ABINIT).
+In the native ABINIT set,
+most of the important local approximations (LDA) are
+available, including the Perdew-Zunger one. Two different local spin density
+(LSD) are available, including the Perdew Wang 92, and one due to M. Teter.
+The Perdew-Burke-Ernzerhof,  the revPBE, the RPBE
+and the HCTH GGAs (spin unpolarized as well as polarized)
+are also available.
+In the LibXC plug-in,  as interfaced with AIBINIT, at present December 2008,
+there are 16 functional forms of the LDA type, and 41 functional forms of the GGA type.
+Note that for response-function type calculations, only the native ABINIT functionals
+can be used, and not even all of them.
+</li>
+<br>
+<li>
+1.A.3. Self-consistent calculations will generate the DFT ground-state,
+with associated energy and density. Afterwards, a non-self-consistent
+calculation might generate eigenenergies at a large number
+of k-points, for band structures. The electronic Density-Of-States
+can be computed either within the tetrahedron method, or using a smearing
+technique.
+</li>
+<br>
+<li>
+1.A.4. The program admits many different types of pseudopotentials.
+There are two complete sets of pseudopotentials available for
+the whole periodic table, one of the Troullier-Martins type,
+one of the Goedecker type (this one include the spin-orbit coupling).
+Four codes are available to generate
+new pseudopotentials when needed. Two of them are able to generate
+pseudopotentials with a core hole, in order to compute core-level shifts.
+Two of them are able to generate GGA pseudopotentials.
+The ultra-soft pseudopotentials are approximations of the
+Projector Augmented Wave approach, and are treated within this framework.
+Pseudopotentials can be mixed, to generate "alchemical" pseudoatoms.
+</li>
+<br>
+<li>
+1.A.5. Metallic as well as insulating systems can be treated. Schemes for
+determination of the occupation number include the Fermi broadening,
+the Gaussian broadening, the Gaussian-Hermite broadening, as well as
+the modifications proposed by Marzari. Finite temperatures
+can also be treated using a smearing scheme (Verstraete scheme).
+</li>
+<br>
+<li>
+1.A.6. The cell may be orthogonal or non-orthogonal.
+Any kind of symmetries and corresponding sets of k-point can be input,
+and taken into account in the computation.
+</li>
+<br>
+<li>
+1.A.7. The electronic system may be computed in the
+spin-unpolarized or spin-polarized
+case, with the possibility to impose occupation numbers of majority and
+minority spins, and the spins of the starting configuration.
+A specific option for efficient treatment of
+anti-ferromagnetism (Shubnikov groups) is available.
+The treatment of non-collinear magnetism is available.
+The total magnetic moment of the unit cell can be constrained.
+</li>
+<br>
+<li>
+1.A.8. The total energy, forces, stresses, and electronic structure
+can be provided with the spin-orbit coupling included.
+</li>
+<br>
+<li>
+1.A.9. A finite electric field can be imposed on insulators, using the proper
+Hamiltonian for periodic systems based on Berry's phase.
+</li>
+<br>
+<li>
+1.A.10. The decomposition of energy in its different component (local potential,
+XC, hartree ...) is provided.
+</li>
+<br>
+<li>
+1.A.11. Inner electronic eigenvalues can be computed thanks to the
+minimisation of the residual with respect to a target energy value.
+</li>
+<br>
+<li>
+1.A.12. The charge density of states close to the Fermi energy can be output,
+and provide a simple approach to STM image calculations (not for PAW).
+</li>
+<br>
+<li>
+1.A.13. The lifetime of positrons can be computed.
+</li>
+<br>
+<li>
+1.A.14. The use of wavelets (instead of plane waves) is also being implemented.
+At present, it works for the SCF cycles : one can get density, total energy
+and forces, in some basic cases (HGH or GTH pseudopotentials only).
+Available also : the finite size corrections to the
+total energy, restart on wavefunctions following the ETSF norm and geometry
+relaxation using BFGS. Molecular dynamic is also available for
+test purposes.
+</li>
+<br>
+<li>
+1.A.15. The DFT+U approximation is also available (LDA+U, GGA+U), on the basis
+of PAW calculations.
+</li>
+<br>
+
+<li>
+1.A.16. The local exchange (atomic exact exchange) approximation is also available, on the basis
+of PAW calculations.
+</li>
+<br>
+
+<li>
+1.A.17. Possibility to add a jellium slab in the cell.
+</li>
+
+<li>
+1.A.18. The kinetic energy density can be computed, as well as the electron localisation function
+        (in the norm-conserving pseudopotential case). The ELF is not available in the non-collinear spin case.
+</li>
+
+
+
+</ul>
+
+<h4><b><a name="1.B">1.B.</a> Derivatives of the total energy and eigenenergies (incl. linear and non-linear DFPT responses)</b></h4>
+
+<ul>
+<li>
+1.B.1. Hellman-Feynman forces are computed from an analytical formula,
+and corresponds exactly to the limit of finite differences of energy
+for infinitesimally small atomic displacements when the ground-state
+calculation is at convergence. This feature is available for all the
+cases where the total energy can be computed.
+A correction for non-converged
+cases allows to get accurate forces with less converged wavefunctions
+than without it. The decomposition of the forces in their different
+components can be provided.
+
+</li>
+<br>
+<li>
+1.B.2. Stress can also be computed. This feature is available for all
+the cases where the total energy can be computed (except wavelets).
+The decomposition of the stresses in their different
+components can be provided. A smearing scheme applied to the kinetic
+energy allows to get smooth energy curves as a function of
+lattice parameters and angles.
+Alternatively, a facility for correcting the computed stress
+by the Pulay stress is provided.
+
+</li>
+<br>
+<li>
+1.B.3. The polarization can be computed within the Berry phase
+formulation. This feature is available for insulators,
+magnetic or non-magnetic, but not yet when spin-orbit splitting
+is present or for PAW. The localisation tensor can also be computed.
+Constrained-polarization calculations can be performed, following Na Sai
+et al, PRB 66, 104108 (2002).
+
+</li>
+<br>
+<li>
+1.B.4. For norm-conserving pseudopotentials, accurate responses
+to atomic displacements and homogeneous electric fields
+are available, and allows to compute the interatomic force constants,
+the Born effective charges, the dielectric constant, the phonon band
+structure. Symmetry characters of the phonons at Gamma
+are computed. Thermodynamical properties, like the free energy,
+the heat capacity or the entropy, can also be computed, in the
+quasi-harmonic approximation.
+The atomic temperature factors (Debye-Waller factors) are also available.
+Available also for the GGAs (except the HCTH one).
+
+</li>
+<br>
+<li>
+1.B.5. For norm-conserving pseudopotentials, accurate responses
+to strain perturbations are available,
+and allow to compute, presently, the elastic constants
+("rigid-ion" as well as "relaxed"), the piezoelectricity tensor,
+as well as the so-called "internal strains", change of forces to atoms
+due to a strain, or change of the stress due to an atomic displacement.
+(no treatment of spin-orbit coupling yet).
+
+</li>
+<br>
+<li>
+1.B.6. For norm-conserving pseudopotentials, approximate or accurate susceptibility matrix
+and dielectric matrix can be computed, thanks to a sum over states.
+(no treatment of spin-polarized cases or spin-orbit coupling yet)
+
+</li>
+<br>
+<li>
+1.B.7. For norm-conserving pseudopotentials, derivatives of the
+electronic eigenenergies with respect
+to the wavevector can be computed analytically.
+
+</li>
+<br>
+<li>
+1.B.8. For norm-conserving pseudopotentials and PAW, optical conductivity
+can be computed, thanks to the Kubo-Greenwood formula.
+(no treatment of spin-orbit coupling yet)
+
+</li>
+<br>
+<li>
+1.B.9. For norm-conserving pseudopotentials,
+the band-by-band decomposition of the Born effective charges,
+and the localisation tensor is available.
+(no treatment of spin-polarized cases or spin-orbit coupling yet)
+
+</li>
+<br>
+<li>
+1.B.10. For norm-conserving pseudopotentials, selected non-linear
+response coefficients can be computed thanks to the
+2n+1 theorem of perturbation theory. At present :
+- the electro-optic coefficients
+- the Raman cross sections
+(no treatment of spin-polarized cases or spin-orbit coupling yet)
+
+</li>
+<br>
+<li>
+1.B.11. For norm-conserving pseudopotentials,
+electron-phonon matrix elements are available directly from the
+output of a linear-response phonon calculation. They can be analyzed
+to give e.g. the phonon linewidth or superconducting temperature.
+(no treatment of spin-polarized cases or spin-orbit coupling yet),
+or the thermal conductivity (phonon transport, limited by electron-phonon
+collisions), and the electrical conductivity (electron transport,
+limited by electron-phonon collisions)
+</li>
+<br>
+
+<li>
+1.B.12. For norm-conserving pseudopotentials,
+the computation of responses with respect to atomic displacement
+is possible when a finite electric field is present.
+This feature is available for insulators,
+non-magnetic, no spin-orbit coupling.
+Computation of other linear or non-linear responses within
+an electric field is not yet possible.
+</li>
+<br>
+
+</ul>
+
+
+<h4><b><a name="1.C">1.C.</a> Excited states.</b></h4>
+<br>
+
+<ul>
+<li>
+1.C.1. Computation of ionisation energies (N -> N-1 electrons)
+and affinities (N -> N+1 electrons) in the GW approximation.
+Four plasmon pole models are available, but that calculation
+can also be done by a full integration over frequencies.
+ABINIT is able to treat insulators as well as metals, but
+should be improved to treat polymers or clusters.
+In the GW implementation, it is possible to disable the full computation,
+and actually do an Hartree-Fock, screened exchange or COHSEX calculation.
+Self-consistency is implemented at a very primitive level.
+The Faleev method, see PRL <b>93</b>, 126406 (2004), is implemented.
+Available for the non-spin-polarized as well as spin-polarized case,
+but not yet for spinor wavefunctions.
+Spectral method for set-up of the frequency-dependent matrices
+is available.
+GW is available for norm-conserving as well as PAW methodology.
+Not wavelets.
+Convergence over the number of unoccupied band is much improved
+with respect to usual implementations of GW, thanks to the
+"extrapolar" method.
+The Coulomb interaction can be cut-off in real space, in order
+to treat efficiently in the supercell methodology : finite systems
+and 1D-periodic systems (like polymers, nanowires or nanotubes)
+</li>
+<br>
+<li>
+1.C.2. Excited states of atoms and molecules
+can be computed within TDDFT (Casida approach - only norm-conserving
+pseudopotentials)). Oscillator strengths
+are available. In the non-spin-polarized case, spin-singlet as well
+as spin-triplet excitations are computed. Spin-polarized
+case is also available.
+
+</li>
+<br>
+<li>
+1.C.3. Frequency-dependent linear optical response is available,
+for all components of the tensor (xx,yy,zz,xy,yz,zx),
+real as well as imaginary part. This property is computed within the very simple
+"sum-over-state" approximation (i.e. without local field corrections).
+See the "optics" utility, for norm-conserving pseudopotentials and PAW.
+</li>
+<br>
+<li>
+1.C.4. Frequency-dependent non-linear optical response is available,
+for all components of the tensor (xxx,yyy,zzz,xyz ... ),
+real as well as imaginary part. This property is computed within the very simple
+"sum-over-state" approximation (i.e. without local field corrections).
+See the "optics" utility, for norm-conserving pseudopotentials only.
+</li>
+<br>
+
+<li>
+1.C.5. Frequency-dependent electronic conductivity,
+dielectric tensor, index of refraction, reflectivity, absorption,
+the thermal conductivity, and the thermopower
+(electron transport, high temperature, Kubo-Greenwood formalism)
+real as well as imaginary part. This property is computed within the very simple
+"sum-over-state" approximation (i.e. without local field corrections).
+See the "conducti" utility, for norm-conserving pseudopotentials,
+as well as PAW.
+</li>
+<br>
+
+</ul>
+
+
+<h4><b><a name="1.D">1.D.</a> Displacement of atoms, and changes of cell parameters.</b></h4>
+
+<ul>
+<li>
+1.D.1. Different algorithms (Broyden; modified Broyden; Verlet with sudden
+stop of atoms) allows to find the equilibrium configuration
+of the nuclei, for which the forces vanish. The cell parameters
+can also be optimized concurently with the atomic positions.
+Specified lattice parameters, or angles, or atomic positions,
+can be kept fixed if needed.
+
+</li>
+<br>
+<li>
+1.D.2. Two molecular dynamics algorithm (Numerov or Verlet)
+allow to perform simulations in real
+(simulated) time. The displacement of atoms may be computed according to
+Newton's law, or by adding a friction force to it.
+Nose-Hoover thermostat is available with Verlet algorithm.
+Langevin dynamics is also available.
+
+</li>
+<br>
+<li>
+1.D.3. The code can provide an automatic analysis of bond lengths and angles,
+and the atomic coordinates in a format suitable for vizualisation with XMOL.
+</li>
+<br>
+</ul>
+
+
+<h4><b><a name="1.E">1.E.</a> Properties at the nuclei sites.</b></h4>
+
+<ul>
+<li>
+1.E.1. Electric field gradients at nuclei sites are available.
+(Only in the Projector Augmented Waves formalism).
+</li>
+<br>
+</ul>
+
+<ul>
+<li>
+1.E.2. The Fermi contact term is also available (needed
+to compute isomer shifts in Mossbauer spectroscopy)
+(Only in the Projector Augmented Waves formalism).
+</li>
+<br>
+</ul>
+
+
+
+<h4><b><a name="1.F">1.F.</a> Analysis and graphical tools.</b></h4>
+
+<ul>
+<li>
+1.F.1. A post-processor, called "cut3d", is available to analyse density,
+potential and wavefunction files. It is able to change the format of these
+files, to extract the data on a 2D plane, or along a 1D line.
+It can perform the Hirshfeld computation of atomic charges.
+It can analyse the charge contained in an atomic sphere,
+and determine the angular momentum projected charge (l=0 to 4)
+contained in that sphere.
+(only available for norm-conserving pseudopotentials)
+
+</li>
+<br>
+<li>
+1.F.2. Another post-processor, called "aim", is available to
+perform the Bader "Atom-In-Molecule" analysis of the density.
+(only available for norm-conserving pseudopotentials)
+
+</li>
+<br>
+<li>
+1.F.3. A special part in the tutorial (see later) indicates how
+to generate properly formatted data for the visualisation of :
+<ul>
+ <li>the band structure (visualisation thanks to XMGR)</li>
+ <li>total energies vs different parameters (also using XMGR)</li>
+ <li>the charge density (3D isosurfaces)</li>
+</ul>
+ (the cut3d postprocessor must be used, followed by matlab)
+The cut3d postprocessor also allows to prepare 2D charge density plots.
+
+</li>
+<br>
+<li>
+1.F.4. The post-processor band2eps allows to draw phonon dispersion
+curves automatically, in a file written in Encapsulated PostScript (eps).
+Moreover, a color code allows to emphasize the contribution of individual
+atoms to the corresponding eigenvector (at most three types of atoms).
+</li>
+<br>
+<li>
+
+1.F.5. Utilities to view the structures and make the band structure
+are available (StructureViewer, BandStructureMaker).
+</li>
+<br>
+</ul>
+
+
+<h4><b><a name="1.G">1.e.</a> Interfacing with other codes.</b></h4>
+
+<ul>
+<li>
+1.G.1. ABINIT is interfaced with WanT (see http://www.wannier-transport.org).
+WanT, as a postprocessor of ABINIT results, allows to compute
+maximally localized Wannier functions, as well as transport
+properties through nanostructures.
+
+</li>
+<br>
+<li>
+1.G.2. ABINIT is interfaced with CASINO, a code for Quantum Monte Carlo
+calculation of the properties of solids and molecules.
+
+</li>
+<br>
+<li>
+1.G.3. XML pseudopotentials can be used, these being common with the SIESTA
+code.
+
+</li>
+<br>
+<li>
+1.G.4. The _WFK functions can be used as starting basis
+by the TDDFT, GW and/or Bethe-Salpether softwares EXC, SELF and DP
+code, see http://www.abinit.org/community/?text=links .
+</li>
+<br>
+
+<li>
+1.G.5. ABINIT can produce and read files following the Nanoquanta/ETSF
+file format (http://www.etsf.eu/fileformats)
+</li>
+<br>
+
+<li>
+1.G.6. ABINIT is interfaced with Wannier90 (see http://www.wannier90.org).
+Wannier90, as a postprocessor of ABINIT results, allows to compute
+maximally localized Wannier functions, as well as transport
+properties through nanostructures.
+</li>
+<br>
+
+<li>
+1.G.7. ABINIT is interfaced with V_Sim , a structure and density visualisation tool.
+(http://www-drfmc.cea.fr/sp2m/L_Sim/V_Sim/index.en.html)
+</li>
+<br>
+
+</ul>
+
+
+<p>
+<HR ALIGN=left>
+<h3><b><a name="2">2.</a> Speed and memory.</b></h3>
+
+<h4><b><a name="2.A">2.A.</a> Speed in the sequential version.</b></h4>
+
+<ul>
+<li>
+2.A.1. Depending on the number of atoms, there are two regimes in the
+code : at low number of atoms and electrons,
+the CPU time is dominated by Fast Fourier
+Transforms with an average scaling O(N^2 log N) where N is some
+number characteristics of the size of the system (atoms, electrons);
+at large number of atoms and electrons, the CPU time is dominated
+by non-local operator aplication and orthogonalisation, with
+an average scaling O(N^3).
+
+</li>
+<br>
+<li>
+2.A.2. The complex-to-complex Fast Fourier Transform routine for application
+of the Hamiltonian has been highly optimized, and take into account
+the fact that the wavefunction do not fill the reciprocal space FFT box.
+Library FFTs are also available, but they are found to be slower than the
+present FFT routine, developed starting from a routine
+provided by S. Goedecker.
+A real-to-complex FFT is used for treating potential and densities
+of the ground state, since they are real.
+For selected k-points, invariant under time-reversal symmetry,
+( (0 0 0), (1/2 0 0), (0 1/2 0), (0 0 1/2), (1/2 1/2 0) ... (1/2 1/2 1/2) ),
+the number of planewave explicitly treated is divided by two. A
+real-to-complex FFT is used then.
+
+</li>
+<br>
+<li>
+2.A.3. The non-local potential is applied in reciprocal space. It has been
+optimized carefully, although there is still some speed-up to be
+coded when the k-point is invariant under time-reversal.
+The orthogonalisation procedure can be done twice per loop or only once.
+
+</li>
+<br>
+<li>
+2.A.4. At the level of the generation of electronic eigenfunctions, an efficient
+band-by-band preconditioned conjugate-gradient algorithm is used,
+in its non-self-consistent version. An alternative algorithm "lobpcg"
+is also available.
+
+</li>
+<br>
+<li>
+2.A.5. At the level of the self-consistency loop, an efficient
+potential-based preconditioned conjugate-gradient algorithm is used.
+Simple mixing is also available, as well as the Anderson algorithm.
+Preconditioning of this algorithm is achieved through a model
+dielectric function, or through an approximate dielectric matrix.
+</li>
+<br>
+</ul>
+
+<h4><b><a name="2.B">2.B.</a> Speed in the parallel version.</b></h4>
+
+<ul>
+<li>
+2.B.1. For ground-state calculations, the code has been parallelized
+on the k-points, on the spins, on the bands,
+and on the FFT grid and plane wave coefficients.
+For the k-point and spin parallelisations (using MPI), the communication
+load is generally
+very small. This allows it to be used on a cluster of workstations.
+However, the number of nodes that can be used in parallel might
+be small, and depends strongly on the physics of the problem.
+A combined FFT / band parallelisation is available, and has shown
+very large speed up on powerful computers with a large number of processors
+and high-speed interconnect. The combination of FFT / band / k point and spin
+parallelism is also available, and quite efficient for such computers.
+Available for norm-conserving as well as PAW cases.
+</li>
+<br>
+<li>
+2.B.2. For response calculations, the code has been parallelized
+on k-points, spins, and bands (MPI), as well as
+on the FFT grid and plane wave coefficients (OpenMP).
+For the k-points, spins and bands parallelisation,
+the communication load is rather
+small also, and, unlike for the GS calculations, the number
+of nodes that can be used in parallel will be large,
+nearly independently of the physics of the problem.
+The FFT grid parallelisation (using OpenMP) works only
+for SMP machines, and is still to be
+optimized.
+
+</li>
+<br>
+<li>
+2.B.3. GW calculations are parallelized over k-points.
+They are also parallelized over bands, but the two parallelisation
+cannot be used currently at present.
+
+</li>
+<br>
+<li>
+2.B.4. A careful study of the speed-up should still be done,
+in both the GS and RF cases.
+</li>
+<br>
+</ul>
+
+<h4><b><a name="2.C">2.C.</a> Memory.</b></h4>
+
+<ul>
+<li>
+2.C.1. The requirements of the different conjugate gradient algorithms
+on memory are relatively low, especially when the number of atoms
+is large. Optionally, it is even possible to use disk space
+to save memory, at the expense of computing time.
+In particular, when the number of k points is large, they can
+be stored in memory one at a time. Phase factors in the application of
+the non-local operator can also be recomputed at each application,
+in order to save memory. For k-points that are invariant under
+time-reversal symmetry, the storage required for wavefunctions
+is half the storage for other k-point.
+</li>
+<br>
+</ul>
+
+<p>
+<HR ALIGN=left>
+<h3><b><a name="3">3.</a> The user's point of view.</b></h3>
+
+<h4><b><a name="3.A">3.A.</a> The Web site.</b></h4>
+
+<ul>
+<li>
+3.A.1. A Web site can be accessed. The complete sources (and all the tests)
+of the ABINIT package are available there.
+Executables for many different platforms are also available,
+in specific packages that also include
+the 'Infos' directory are also available.
+Installation notes, current features of ABINIT,
+the tutorial, on-line help can be vizualized directly from the web.
+
+</li>
+<br>
+<li>
+3.A.2. Also available from the Web site :
+ <ul>
+ <li> the pseudopotentials </li>
+ <li> some utilities (including cut3d, a density analyser) </li>
+ <li> five mailing lists
+(one for "official announcements", one for the developpers, one for the developers using the GNU Arch repository, one "forum mailing list" , one for the advisory committee) </li>
+ <li> the ABINIT bibliography database, that contains references of papers
+in which ABINIT or one of its predecessors have been used </li>
+ <li> the FAQ (frequently asked questions) database </li>
+ <li> ... (many more infos)</li>
+ </ul>
+</li>
+<br>
+</ul>
+
+
+<h4><b><a name="3.B">3.B.</a> Portability.</b></h4>
+
+<ul>
+<li>
+3.B.1. The ABINIT package has been installed successfully on the
+following different platforms :
+
+<ul>
+ <li> PC/Linux based on PPro, PII, PIII, PIV processors, with
+ PGI compiler, Intel compiler, fujitsu compiler, NAG compiler, g95 compiler, pathscale and gfort compiler.</li>
+ <li> PC under Windows </li>
+ <li> ItaniumII </li>
+ <li> HP/SPP1600, HP/S-class, HP/N-class based on the HP 7200, 8000
+ and 8500 processors </li>
+ <li> Compaq/DEC alpha workstations under OSF, based on EV56, EV6, EV67 or EV68 </li>
+ <li> Compaq/DEC alpha workstations under Linux, based on EV56 </li>
+ <li> IBM RS6000 based on Power 2, 3+, 4 and 5 processors </li>
+ <li> SGI Origin 2000 and O2 </li>
+ <li> CRAY T3E </li>
+ <li> FUJITSU VPP-700 </li>
+ <li> Sun ultrasparc II </li>
+ <li> NEC </li>
+ <li> HITACHI SR8000 </li>
+ <li> Mac OS X </li>
+</ul>
+
+</li>
+<br>
+<li>
+3.B.2. In particular, the parallel version is available on clusters of
+Intel/Linux, DEC or IBM workstations, as well as on
+CRAY T3E, SGI Origin 2000, HP/SPP1600, HP/S-class, HP/N-class,
+FUJITSU VPP-700 machines, HITACHI SR8000, IBM 44P, Sun ultrasparc.
+
+</li>
+<br>
+<li>
+3.B.3. Installation is made thanks to the autotools (autoconf and automake)
+as well as different scripts. All machine-dependent parameters
+are grouped in one single short file for each machine.
+The parallel and sequential
+version of the code, as well as the different versions for the different
+machines, are prepared on-the-fly,
+so that there is only one unique source code.
+
+</li>
+<br>
+<li>
+3.B.4. Binaries for different machines can be managed in the
+same main directory, as they might be placed automatically in different
+sub-directories.
+</li>
+<br>
+</ul>
+
+<h4><b><a name="3.C">3.C.</a> Running jobs, input and output files.</b></h4>
+
+<ul>
+<li>
+3.C.1. The input variables are gathered in one unique file,
+read by a text processing facility build in the code.
+Many defaults values are provided, so that
+the input file can be kept rather short.
+
+</li>
+<br>
+<li>
+3.C.2. Many different stopping criteria allow the user to target the accuracy
+he or she wants to obtain.
+
+</li>
+<br>
+<li>
+3.C.3. The outputs are provided to one main file and one auxiliary file,
+as well as different specialized files (for density, potential,
+wavefunctions, ...) .
+The main file is shorter than the auxiliary file, and well formatted,
+while all important results are gathered
+there. It can be used for archival purposes. The auxiliary (log) file
+will contain all exception messages.
+
+</li>
+<br>
+<li>
+3.C.4. Exception handling is provided through four different types
+of messages : COMMENT, WARNING, BUG and ERROR. In each case, the
+accurate meaning of the exception is described, as well as the
+eventual action to be taken by the user.
+
+</li>
+<br>
+<li>
+3.C.5. Statistics of foreseen memory and disk usage is printed at
+the beginning of the run. Statistics of CPU time usage
+is printed at the end of the run.
+
+</li>
+<br>
+<li>
+3.C.6. There is a facility to stop the run in a clean way at any time.
+The user may specify a cpu time limit, after which the job must end
+smoothly.
+
+</li>
+<br>
+<li>
+3.C.7. A status file, updated very frequently, gives an on-the-fly
+report of progress of the current run.
+
+</li>
+<br>
+<li>
+3.C.8. The code can handle multiple datasets contained in the input
+file, where generic input variables valid for all datasets
+can be defined. These calculations for different dataset
+can be chained, so that in one run, many complex tasks can be accomplished.
+This allows easy convergence studies.
+
+</li>
+<br>
+<li>
+3.C.9. The code can start the current run from a wavefunction input file
+generated in a previous run. This allows to cut down the number
+of iteration to self-consistency, or to perform other tasks.
+This can be done even if the previous job
+had different computational parameters, like different k points,
+different energy cut-off, spin-unpolarized or spin-polarized wavefunctions,
+scalr or spinor wavefunctions ... Of course, the restart from
+wildly different parameters will not save a lot of CPU time.
+
+</li>
+<br>
+<li>
+3.C.10. ABINIT can produce CML (Chemical Markup Language) output files.
+It can also read the CML files it produced.
+</li>
+<br>
+</ul>
+
+<h4><b><a name="3.D">3.D.</a> Documentation.</b></h4>
+
+<ul>
+<li>
+3.D.1. A new_user_guide and a few rather detailed help files
+(abinis_help, respfn_help, anaddb_help, mrgddb_help, newsp_help,
+aim_help ... ) are available on-line.
+
+</li>
+<br>
+<li>
+3.D.2. A tutorial with more than 15 lessons is available on-line.
+It starts with the computation of
+different properties of the H2 molecule, describes convergence studies,
+then focuses on bulk Silicon, bulk Al and Al surface. It describes
+the use of response-function features, the GW calculation of band structures,
+the PAW  methodology, computation of spin-dependent properties,
+analysis tools, the phonon band structure, linear and non-linear optics,
+electro-optic effects, electron-phonon coupling, phonon linewidths due
+to electron-phonon interaction, Raman scattering efficiencies, piezoelectricity,
+the computation of elastic constants, parallelism, the source code, etc ...
+
+</li>
+<br>
+<li>
+3.D.3. Many test cases are provided, and can help the user in setting up a run.
+
+</li>
+<br>
+<li>
+3.D.4. An ABINIT bibliography database, that contains references of papers
+in which ABINIT or one of its predecessors is available on the Web site.
+</li>
+<br>
+</ul>
+
+<h4><b><a name="3.E">3.E.</a> Generation of the k-points, geometries, and starting wavefunctions.</b></h4>
+
+<ul>
+<li>
+3.E.1. The code can automatically generate symmetries from the primitive cell
+and the position of atoms. In this case, it identifies
+automatically the Bravais lattice, point group and space group.
+Alternatively, it can start from the
+symmetries and generate the atomic positions from the irreducible
+set. Also, a database of the 230 spatial groups of symmetry
+is built inside ABINIT.
+
+</li>
+<br>
+<li>
+3.E.2. Anti-ferromagnetic symmetry operations, and associated
+magnetic space groups (Shubnikov groups) can be treated with the
+same facility as usual space groups, including a database of the
+1191 Shubnikov groups.
+
+</li>
+<br>
+<li>
+3.E.3. A geometry builder is available inside the code.
+It can take one (or two) group
+of atoms, rotate it, translate it and repeat it, then create vacancies.
+
+</li>
+<br>
+<li>
+3.E.4. The generation of special k point sets (Monkhorst-Pack sets)
+and band structure k points can also be done directly inside ABINIT.
+A list of interesting k point sets, can be generated automatically,
+including a measure of their accuracy in term of integration
+within the Brillouin Zone.
+
+</li>
+<br>
+<li>
+3.E.5. A utility for generating wavefunctions with new characteristic
+(cut-off, k-point) from already existing wavefunctions with
+different characteristics is available (newsp).
+</li>
+<br>
+</ul>
+
+<h4><b><a name="3.F">3.F.</a> Automatic determination of input parameters.</b></h4>
+
+<ul>
+<li>
+3.F.1. Many defaults values are provided.
+
+</li>
+<br>
+<li>
+3.F.2. The FFT grid parameters can be automatically generated
+from the cut-off energy and geometry of the system.
+
+</li>
+<br>
+<li>
+3.F.3. The number of bands and starting occupation numbers can be automatically
+generated from the input set of atoms.
+
+</li>
+<br>
+<li>
+3.F.4. There is a database of atomic masses.
+</li>
+<br>
+</ul>
+
+<p>
+<HR ALIGN=left>
+<h3><b><a name="4">4.</a> The programmer's point of view.</b></h3>
+
+<ul>
+<li>
+4.A. The code is distributed without charge under the
+GNU General Public Licence (GPL). This
+garantees that the future modifications of the code
+stay available to the developpers and users for free.
+This Copyright is often referred to as a "Copyleft".
+
+</li>
+<br>
+<li>
+4.B. The code is written in clean Fortran90. Strict programming rules
+have been followed. These are documented. Comments are numerous, and
+all in english.
+
+</li>
+<br>
+<li>
+4.C. Quick, fully automatic, testing of the code is available in the makefile,
+giving diagnostics on the validity of computed energy, forces, stresses
+and eigenvalues for five typical cases.
+
+</li>
+<br>
+<li>
+4.D. More extensive testing is provided in five batteries of tests
+(altogether more than 450 different runs), with automatic comparison
+with results of preceding versions. A specialized diff script (called
+'fldiff') has been written in order to ease the diagnostic on the
+suite of tests. A short one-line-per-test file is produced (report file).
+In addition to tests of the correctness of the execution,
+for the sequential or parallel version of the main code, as well as some
+utilities, there are automatic diagnostics of the speed of crucial
+routines, and the response to a load of up to 4 instances of the
+main code, running concurrently.
+
+</li>
+<br>
+<li>
+4.E. Debugging facilities are provided inside the code, and can be directly
+accessed from the input file. The compilation can be done in both
+debugging or normal mode : the C-preprocessed files are either kept
+or removed automatically.
+
+</li>
+<br>
+<li>
+4.F. "Design-by-contract" utility routines are present, as well as
+a flag to preprocess the sources, and eliminate the design-by-contract
+features in production mode.
+</li>
+<br>
+</ul>
+
+<HR ALIGN=left>
+Goto :
+<A href="http://www.abinit.org"><B>ABINIT home Page</B></A>
+<B> | </B>
+<A href="../users/acknowledgments.html"><B>Suggested acknowledgments</B></A>
+<B> | </B>
+<A href="../input_variables/html_automatically_generated/allvariables.html"><B>List of input variables</B></A>
+<B> | </B>
+<A href="../tutorial/welcome.html"><B>Tutorial home page</B></A>
+<B> | </B>
+<A href="../users/bibliography.html"><B>Bibliography</B></A>
+<HR ALIGN=left>
+Help files :
+<A href="../users/new_user_guide.html"><B>New user's guide</B></A>
+<B> | </B>
+<A href="../users/abinis_help.html"><B>Abinis (main)</B></A>
+<B> | </B>
+<A href="../users/respfn_help.html"><B>Abinis (respfn)</B></A>
+<B> | </B>
+<A href="../users/mrgddb_help.html"><B>Mrgddb</B></A>
+<B> | </B>
+<A href="../users/anaddb_help.html"><B>Anaddb</B></A>
+<B> | </B>
+<A href="../users/aim_help.html"><B>AIM (Bader)</B></A>
+<B> | </B>
+<A href="../users/cut3d_help.html"><B>Cut3D</B></A>
+<B> | </B>
+<A href="../users/optic_help.html"><B>Optic</B></A>
+<B> | </B>
+<A href="../users/mrgscr_help.html"><B>Mrgscr</B></A>
+<HR ALIGN=left>
+
+</body>
+</html>
+

@@ -1,0 +1,141 @@
+# Title:
+various cpu tests of the sequential version of abinit
+#
+# Before running RunTests.pl with this file, read README in this directory.
+#
+# Copyright (C) 2003-2016 ABINIT group (LSi)
+# This file is distributed under the terms of the
+# GNU General Public License, see ~abinit/COPYING
+# or http://www.gnu.org/copyleft/gpl.txt .
+# For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+#
+# for all the following tests, use unix-style file paths
+# they will be converted by function transpath if necessary
+# file paths may contain a perl variable (e.g. $PSPS)
+#
+#   The following lines describe the tests to be run. The general syntax of 
+# these lines is:	[testID | end] [command | program] parameters.
+#
+#   The first word is the test identification. All consecutive lines that begin
+# with the same word will be executed in that order. "testID" can be 'end' to
+# signal the normal end of a tests sequence: multiple 'end's are allowed.
+#   The second word specifies an ABINIT module, procedure or system command
+# to be run. The following system commands are available: copy, erase
+# The following keywords refer to ABINIT programs or procedure:
+# 	abinit | seq	exercise the sequential version of abinit
+#	aim		exercise the atom-in-molecule Bader analysis
+#	ana | anaddb	exercise anaddb
+#	band2eps	exercise band2eps
+#	cpuserie	run a serie of cpu tests of sequential version of abinit
+#	cut3d		exercise cut3d
+#	conducti	exercise conducti
+#	lwf		exercise lwf
+#	macroave	exercise macroave
+#	mrg | mrgddb	exercise mrgddb
+#
+#   parameters for copy and erase are file or directory names
+#
+#   parameters for mrgddb must comply to the following format:
+#	[fn1] 'short description' (fn2 fn3 ... fnLast)
+#   fn2 ... fnLast can reside in the Test directory as normal or g-zipped files
+# they will be copied, and unzipped if necessary, to the working directory
+# before the test and the copy will be deleted after
+#
+#   parameters for the other programs are either file paths derived from the
+# subroutines 'doseqtest' ... in the old Run.pl scripts, or
+# options to tailor the flow of results analysis and other operations before
+# or after the tests;
+# format for file paths is: fnI=path
+# format for pseudo-potential file paths is: pspI=path
+# format for the GEO file is: GEO=path
+# format for the DS3_DOS_AT000x file name is: DS3AT=path
+# format for FFT algorithm for a cpu tests serie is: fftalg=ABC
+# format for options is: opt=option
+# option can be either a standard option of the fldiff script (-easy , -medium , -ridiculous),
+# options to tailor the analysis of the results after test completion:
+#	-nofld	don't run fldiff
+#	-diflog  apply diff/fldiff to the .log file
+#	-DOS	apply diff/fldiff to the o_DOS file
+#	-DS2	apply diff/fldiff to the o_DS2_DOS file
+#	+xml	also apply diff/fldiff to the .cml file
+# or the following options to modify the flow of operations during the test:
+#     -keepfn4
+#     -istwfk1	for a cpu tests serie
+#     -istwfk11	for a cpu tests serie
+#
+# default options to call fldiff are: -ignore -ignoreP 
+#
+#   Default file names for the test with Id NNN (1 to 3 characters string):
+# 1) mrg/mrgddb
+# fn1 = tNNN.ddb.out
+# 2) abinit/seq
+# fn1 = ../tNNN.in
+# fn2 = tNNN.out
+# fn3 =	tNNNi
+# fn4 = tNNNo
+# fn5 = tNNN
+# fn6-fn9,psp1-psp4 = none
+# 4) ana/anaddb
+# fn1 = ../tNNN.in
+# fn2 = tNNN.out
+# fn3 = tNNN.ddb.in
+#   fn3 can reside in the Test directory as a normal or g-zipped file
+# it will be copied, and unzipped if necessary, to the working directory before
+# the test and the copy will be deleted after
+# fn4 = tNNN.md
+# 5) cut3d
+# fn1 = ../tNNN.in
+# fn2 = tNNN.out
+# 6) aim
+# fn1 = ../tNNN.in
+# fn2 = tNNNi_DEN
+# fn3 = tNNN
+# fn4-fn5,psp1-psp2 = none
+# 7) conducti
+# fn1 = ../tNNN.in
+# fn2 = tNNN.out
+# fn3 =	tNNN
+# 8) lwf
+# fn1 = ../tNNN.in
+# fn2 = ../tNNN.moldyn.in
+# fn3 = tNNN.out
+# fn4 = tNNN.wandata
+# 9) band2eps
+# fn1 = ../tNNN.in
+# fn2 = tNNN.out.eps
+# fn3 = ../tNNN.in.freq
+# fn4 = ../tNNN.in.displ
+# 10) macroave
+# fn1 = ../tNNN.in
+# fn2 = tNNN_DEN.MAV
+# fn3 = tNNN_DEN.PAV
+# fn4 = tNNN
+# 11) cpuserie [Xnn]
+# fn1 = inputX
+# fn2 is the Reference file which name is built with the serie letter X [A-D]
+# followed by a number; the default value for this number is 3
+# fn2 = reportX3
+#
+# ***********************************************************************
+# see the comments of the doserieX subroutine in the script RunTests.pl #
+# for explanations of the operations                                    #
+# ***********************************************************************
+A1 cpuserie fftalg=101 opt=-istwfk11
+A2 cpuserie fftalg=200 opt=-istwfk11
+A3 cpuserie fftalg=112 opt=-istwfk11
+A4 cpuserie fftalg=401 opt=-istwfk11
+A5 cpuserie fftalg=412 opt=-istwfk11
+# fn2 number will be 6 for series number 6 or higher
+A6 cpuserie fn2=reportA6 fftalg=112
+A7 cpuserie fn2=reportA6 fftalg=412
+B1 cpuserie fftalg=101 opt=-istwfk1
+B2 cpuserie fftalg=200 opt=-istwfk1
+B3 cpuserie fftalg=112 opt=-istwfk1
+B4 cpuserie fftalg=401 opt=-istwfk1
+B5 cpuserie fftalg=412 opt=-istwfk1
+# fn2 number will be 6 for series number 6 or higher
+B6 cpuserie fn2=reportB6 fftalg=112
+B7 cpuserie fn2=reportB6 fftalg=412
+C3 cpuserie
+# Note that case D uses inputB
+D3 cpuserie fn1=inputB opt=-istwfk1

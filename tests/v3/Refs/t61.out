@@ -1,0 +1,208 @@
+
+.Version 8.0.3 of CUT3D 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+
+.Copyright (C) 1998-2016 ABINIT group . 
+ CUT3D comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : Mon  4 Apr 2016.
+- ( at 07h33 )
+  
+
+  What is the name of the 3D function (density, potential or wavef) file ?
+  => Your 3D function file is: t60o_DEN
+
+- Your file contains unformatted binary header + 3D data
+
+ ===============================================================================
+ ECHO of the ABINIT file header 
+ 
+ First record :
+.codvsn,headform,fform = 8.0.3    80   52
+ 
+ Second record :
+ bantot,intxc,ixc,natom  =    10     0     1     2
+ ngfft(1:3),nkpt         =    36    36    36     2
+ nspden,nspinor          =     1     1
+ nsppol,nsym,npsp,ntypat =     1    48     2     2
+ occopt,pertcase,usepaw  =     1     0     0
+ ecut,ecutdg,ecutsm      =  2.5000000000E+01  2.5000000000E+01  0.0000000000E+00
+ ecut_eff                =  2.5000000000E+01
+ qptn(1:3)               =  0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+ rprimd(1:3,1)           =  0.0000000000E+00  5.2350000000E+00  5.2350000000E+00
+ rprimd(1:3,2)           =  5.2350000000E+00  0.0000000000E+00  5.2350000000E+00
+ rprimd(1:3,3)           =  5.2350000000E+00  5.2350000000E+00  0.0000000000E+00
+ stmbias,tphysel,tsmear  =  0.0000000000E+00  0.0000000000E+00  1.0000000000E-02
+
+ Third record :
+ istwfk=   1   1
+ nband =   5   5
+ npwarr= 1719 1724
+ so_psp=   1   1
+ symafm=
+          1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+          1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ symrel=
+           1   0   0   0   1   0   0   0   1    -1   0   0   0  -1   0   0   0  -1
+           0  -1   1   0  -1   0   1  -1   0     0   1  -1   0   1   0  -1   1   0
+          -1   0   0  -1   0   1  -1   1   0     1   0   0   1   0  -1   1  -1   0
+           0   1  -1   1   0  -1   0   0  -1     0  -1   1  -1   0   1   0   0   1
+          -1   0   0  -1   1   0  -1   0   1     1   0   0   1  -1   0   1   0  -1
+           0  -1   1   1  -1   0   0  -1   0     0   1  -1  -1   1   0   0   1   0
+           1   0   0   0   0   1   0   1   0    -1   0   0   0   0  -1   0  -1   0
+           0   1  -1   0   0  -1   1   0  -1     0  -1   1   0   0   1  -1   0   1
+          -1   0   1  -1   1   0  -1   0   0     1   0  -1   1  -1   0   1   0   0
+           0  -1   0   1  -1   0   0  -1   1     0   1   0  -1   1   0   0   1  -1
+           1   0  -1   0   0  -1   0   1  -1    -1   0   1   0   0   1   0  -1   1
+           0   1   0   0   0   1   1   0   0     0  -1   0   0   0  -1  -1   0   0
+           1   0  -1   0   1  -1   0   0  -1    -1   0   1   0  -1   1   0   0   1
+           0  -1   0   0  -1   1   1  -1   0     0   1   0   0   1  -1  -1   1   0
+          -1   0   1  -1   0   0  -1   1   0     1   0  -1   1   0   0   1  -1   0
+           0   1   0   1   0   0   0   0   1     0  -1   0  -1   0   0   0   0  -1
+           0   0  -1   0   1  -1   1   0  -1     0   0   1   0  -1   1  -1   0   1
+           1  -1   0   0  -1   1   0  -1   0    -1   1   0   0   1  -1   0   1   0
+           0   0   1   1   0   0   0   1   0     0   0  -1  -1   0   0   0  -1   0
+          -1   1   0  -1   0   0  -1   0   1     1  -1   0   1   0   0   1   0  -1
+           0   0   1   0   1   0   1   0   0     0   0  -1   0  -1   0  -1   0   0
+           1  -1   0   0  -1   0   0  -1   1    -1   1   0   0   1   0   0   1  -1
+           0   0  -1   1   0  -1   0   1  -1     0   0   1  -1   0   1   0  -1   1
+          -1   1   0  -1   0   1  -1   0   0     1  -1   0   1   0  -1   1   0   0
+ type  =   1   2
+ kptns =                 (max 50 k-points will be written)
+           -2.500000E-01    5.000000E-01    0.000000E+00
+           -2.500000E-01    0.000000E+00    0.000000E+00
+ wtk =
+          0.75  0.25
+   occ =
+          2.00  2.00  2.00  2.00  0.00  2.00  2.00  2.00  2.00  0.00
+ tnons =
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+  znucl= 11.00 17.00
+
+ Pseudopotential info :
+ title= Troullier-Martins psp for element  Na        Mon Oct 31 11:14:49 EST 1994
+  znuclpsp= 11.00, zionpsp=  1.00, pspso=  0, pspdat=940714, pspcod=  1, pspxc=  1
+  lmnmax  =  2
+ title= Troullier-Martins psp for element  Cl        Thu Oct 27 17:32:09 EDT 1994
+  znuclpsp= 17.00, zionpsp=  7.00, pspso=  0, pspdat=940714, pspcod=  1, pspxc=  1
+  lmnmax  =  2
+ 
+ Last record :
+ residm,etot,fermie=    1.767583E-09   -2.299289491072E+01   -5.546495E-02
+ xred =
+            0.000000E+00    0.000000E+00    0.000000E+00
+            5.000000E-01    5.000000E-01    5.000000E-01
+ End the ECHO of the ABINIT file header 
+ ===============================================================================
+
+ ===========================================================
+
+ ECHO important input variables ...
+
+  Dimensional primitive vectors (ABINIT equivalent: rprimd):
+    0.000000E+00    5.235000E+00    5.235000E+00
+    5.235000E+00    0.000000E+00    5.235000E+00
+    5.235000E+00    5.235000E+00    0.000000E+00
+  Grid density (ABINIT equivalent: ngfft):    36   36   36
+  Number of atoms       :           2
+  Number of atomic types:           2
+
+   #    Atomic positions (cartesian coordinates - Bohr)
+   1    0.000000E+00    0.000000E+00    0.000000E+00
+   2    5.235000E+00    5.235000E+00    5.235000E+00
+
+  This file is a Density or Potential file 
+
+  3D function was read. Ready for further treatment.
+
+ ===========================================================
+
+  What is your choice ? Type:
+   0 => exit
+   1 => point  (interpolation of data for a single point)
+   2 => line   (interpolation of data along a line)
+   3 => plane  (interpolation of data in a plane)
+   4 => volume (interpolation of data in a volume)
+   5 => 3D formatted data (output the bare 3D data - one column)
+   6 => 3D indexed data (bare 3D data, preceeded by 3D index)
+   7 => 3D Molekel formatted data 
+   8 => 3D data with coordinates (tecplot ASCII format)
+   9 => output .xsf file for XCrysDen
+  11 => compute atomic charge using the Hirshfeld method
+  14 => Gaussian/cube wavefunction module
+
+ Your choice is 11
+
+ Please, give the filename of the all-electron density file
+ for the first type of atom, with atomic number=    1.100000E+01
+  The name you entered is : 0.11-Na.8.density.AE
+
+ Please, give the filename of the all-electron density file
+ for the first type of atom, with atomic number=    1.700000E+01
+  The name you entered is : 0.17-Cl.8.density.AE
+
+
+ hirsh : accumulating density for atom    1
+
+ hirsh : accumulating density for atom    2
+
+     Atom       Zion       Hirshfeld Charge       Net charge 
+
+        1     1.000000E+00    -8.922569E-01     1.077431E-01
+        2     7.000000E+00    -7.107726E+00    -1.077259E-01
+
+    Total     8.000000E+00    -7.999983E+00     1.725010E-05
+
+  Task           11  has been done !
+
+ More analysis of the 3D file ? ( 0=no ; 1=default=yes ; 2= treat another file - restricted usage)
+
+  Provide some global information about the density and/or potential file(s)
+
+-  File number     1, with name "t60o_DEN"
+  Number of grid points =       46656 ; Volume of real space cell (Bohr^3)=  2.869327E+02
+   Spin-component number     1
+      Sum of values, mean, mean times cell volume=    1.300821E+03    2.788110E-02    8.000000E+00
+
+ Provide some global joint information about the stored density and potential file(s)
+
+  File numbers:     1    1
+   Spin-component number     1
+      Dot product of values, mean, mean times cell volume=    1.598621E+02    3.426400E-03    9.831462E-01
+-
+- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.3
+
+  Thank you for using me
+

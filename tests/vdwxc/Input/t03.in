@@ -1,0 +1,66 @@
+# Unit cell
+acell 3*10.0 angstrom
+chkprim 0
+
+# Atoms
+ntypat 1
+znucl 4
+natom 2
+typat 1 1
+
+# Positions
+xcart
+   -1.5 0.0 0.0
+    1.5 0.0 0.0
+
+# Convergence
+prtden 0
+prteig 0
+prtwf 0
+ecut  15.0
+nstep 50
+toldfe 1.0d-6
+ixc -102130
+
+# vdW-DF parameters
+vdw_xc               1
+vdw_df_zab        -0.8491
+vdw_df_ndpts        10
+vdw_df_dcut        5.0
+vdw_df_dratio     10.0
+vdw_df_dsoft       1.0
+vdw_df_phisoft    -1.0
+vdw_df_nqpts        10
+vdw_df_qcut        5.0
+vdw_df_qratio     10.0
+vdw_df_nrpts       128
+vdw_df_rcut       10.0
+vdw_df_rsoft       0.0
+vdw_df_ngpts        -1
+vdw_df_gcut        5.0
+vdw_df_acutmin    10.0
+vdw_df_aratio     10.0
+vdw_df_damax       1.0
+vdw_df_damin       1.0e-2
+vdw_df_nsmooth       3
+vdw_df_threshold   1.0e-2
+vdw_df_tolerance   1.0e-13
+vdw_df_tweaks        0
+irdvdw               1
+prtvdw               1
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t03.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Yann Pouillon, Camilo Espejo
+#%% keywords = vdwxc
+#%% description =
+#%%   Fake test to ensure abirules compliance of vdW-DF input variables.
+#%%<END TEST_INFO>

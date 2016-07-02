@@ -1,0 +1,18 @@
+from snack import *
+
+screen = SnackScreen()
+upperleft = Widget()
+upperright = Widget()
+lowerleft = Widget()
+lowerright = Widget()
+g = Grid(2, 2)
+g.setField(upperleft, 0, 0, (0, 0, 1, 1))
+g.setField(upperright, 1, 0)
+g.setField(lowerleft, 0, 1)
+g.setField(lowerright, 1, 1, growx = 1, growy = 1)
+screen.gridWrappedWindow(g, "Title Text")
+f = Form()
+f.add(g)
+result = f.run()
+screen.popWindow()
+screen.finish() 

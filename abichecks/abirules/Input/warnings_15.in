@@ -1,0 +1,4 @@
+# 
+Warning = 'Nonconforming tab character'
+#
+#src_excluded = ['10_defs']

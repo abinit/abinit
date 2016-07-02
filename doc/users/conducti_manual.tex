@@ -1,0 +1,175 @@
+\documentclass[a4,12pts]{article}
+
+\usepackage{graphicx}
+\usepackage{bm}
+
+\begin{document}
+
+\title{Optical conductivity using abinit with norm-conserving pseudopotentials}
+\author{V. Recoules}
+
+\maketitle
+
+\section{Kubo-Greewood formula implementation}
+The real part of the optical conductivity versus frequency $\omega$ is
+computed using the
+Kubo-Greenwood formulation \cite{KUBO57, GREE58} and can be expressed as :
+%
+\begin {eqnarray}
+\sigma(\omega) =&&{\frac {2\pi} {3 }}{\frac 1 \Omega}\sum_{\bm k} W({\bm k})
+ \sum_{n,m}(f_n^{\bm{k}}-f_m^{\bm{k}}) \nonumber \\
+&&{\frac 1 {(2 \pi)^2}}\times \left | \left < \psi_n^{\bm{k}} \left |
+\frac{\partial \hat{H}}{\partial \bm{k}} \right|\psi_m^{\bm{k}}\right >
+  \right|^2 \delta(E_m^{\bm{k}}-E_n^{\bm{k}}- \omega)
+ \label{KUGR}
+\end {eqnarray}
+%
+where
+\begin{itemize}
+\item $\Omega$ is the volume of the unit cell,
+\item $W(\bm{k})$ is the $\bm{k}$-point weight in the Monkhorst-Pack scheme,
+\item $f_n^{\bm{k}}$ is the Fermi-Dirac occupations for the band n and the k-point $\bm{k}$,
+\item the matrix element $\left < \psi_n^{\bm{k}} \left |
+\frac{\partial \hat{H}}{\partial \bm{k}} \right|\psi_m^{\bm{k}}\right >$
+ are  computed using a response function calculation.
+Technical details on the computation of matrix
+elements can be found in Refs.  \cite{GONZ97, GONZL97}.
+\item The $\delta$ function can be resolved by averaging over a finite frequency interval
+$\Delta \omega$ \cite{PFAF97}:
+%
+\begin{equation}
+ \sigma(\omega_l) = \frac{1}{\Delta \omega} \int_{\omega_l-\frac{\Delta \omega}{2}}
+  ^{\omega_l+\frac{\Delta \omega}{2}} \sigma(\omega) d\omega
+ \label{AVER}
+\end{equation}
+This was done until version 4.0.2, and now, a Gaussian is used to represent the delta function:
+%
+\begin{equation}
+G(\omega)=\frac{1}{\sqrt{\pi}\Delta}exp\left[ -((E_m^{\bm{k}}-E_n^{\bm{k}}-\hbar \omega)/\Delta)^2
+\right]
+\end{equation}
+%
+\end{itemize}
+%
+
+
+
+
+\section{Abinit computation}
+An example of input file for abinit is given in Test\_v3/t78.in. Five linked
+calculations have to be run to obtained all the needed quantities to evaluate
+the optical conductivity.
+\begin{itemize}
+\item First calculation is a scf evaluation of the electronic density, with iscf=3 and
+prtden=1. The Fermi-Dirac occupations is obtained at this step.
+\item Second calculation is a non-scf calculation (iscf=-2) starting from the previous electronic density
+and wave functions. It gives the Khon-Sham eigenvalues needed.
+\item The three last calculations are calculations of response function (iscf=-3) and
+gives the derivative of the Hamiltonian with respect to the wave vector
+for the three directions. There is one calculation for each direction.
+They start from the wave functions of the previous non-scf calculation (getwfk=2).
+
+\end{itemize}
+
+
+\section{conducti module}
+An example of input file for conducti is given in Test\_v3/t79.in.
+\begin{verbatim}
+1                 ! 1 for norm-conserving calculations
+t78o_DS3_1WF4
+t78o_DS4_1WF5
+t78o_DS5_1WF6
+t78o_DS2_WFK
+9.5E-04
+1.00000
+0.00735 2.0
+\end{verbatim}
+
+\begin {itemize}
+\item the three first lines are the name of the xxx\_1WFxx function for the three directions,
+\item  then there is the
+name of the wave function file obtained with the non-scf calculation.
+\item The temperature is given in a.u.
+\item The weight of the k-vector is given exactly with the same format as the output file.
+\item The first number is the value of $\Delta$ in a.u., the conductivity is computed up to the second number.
+\end{itemize}.
+
+
+When conducti runs, you will have to answer with the name of the input file containing all the
+above informations and the name of the output file.
+
+\section{Output content}
+First, you get some information (as rprimd, the number of bands, of k-points, etc..) to be
+sure that the reading is okay.
+
+The sum rule is computed \cite{KUBO57}:
+%
+\begin{equation}
+ S= \frac{2 m_e \Omega}{\pi e^2 n_e} \int_0^\infty \sigma(\omega) d\omega
+\end{equation}
+%
+where $m_e$ is the electron mass and $n_e$ the electronic density. S must be equal to 1 (or
+as close as possible).
+To obtain a well converged sum rule, more unoccupied electronic
+states is needed than for the
+determination of the DC electrical conductivity $\sigma(\omega \rightarrow 0)$.
+
+At last, since a finite number of excited states is included in the calculation,
+$\sigma(\omega)$ is computed correctly for $\hbar\omega<|E_{\rm max}-E_{\rm f}|$ where
+$E_{\rm f}$ is the Fermi level and $E_{\rm max}$ is the energy of the highest level computed.
+This value is computed.
+
+
+The output file contain the energy value in Ha and eV and the optical conductivity in
+a.u and (ohm.cm)$^{-1}$.
+
+The DC electrical conductivity $\sigma_{{\rm DC}}$ computation is made by
+extrapolating optical conductivity to $\omega=0$. An example
+of application is given in \cite{RECO02}.
+
+Conducti produces different files, with the following brief description :
+(1) the zero limit of *.STP is the thermopower ; (2) *.SIG is the real part of the
+optical conductivity, the zero limit gives the electrical conductivity ;
+(3) the zero limit of *.KTH gives the thermal conductivity ;
+(4) *.TENS is the electrical tensor including the non-diegonal terms.
+
+\begin{thebibliography}{1}
+
+\bibitem{KUBO57}
+R.~Kubo.
+\newblock Statistichal -mechanical theory of irreversible precesses. i.
+\newblock {\em Journal of the Physical Society of Japan}, \textbf{12}, 570 (1957).
+
+\bibitem{GREE58}
+D.~A. Grenwood.
+\newblock The boltzmann equation in the theory of electrical conduction in
+  metals.
+\newblock {\em Proc. Phys. Soc.}, \textbf{715}, 585 (1958).
+
+\bibitem{GONZ97}
+X.~Gonze.
+\newblock First-principles responses of solids to atomic displacements and
+  homogenous electric fiels : implementation of a conjugate-gradient algorithm.
+\newblock {\em Phys. Rev. B}, \textbf{55}, 10337 (1997).
+
+\bibitem{GONZL97}
+X.~Gonze and C.~Lee.
+\newblock Dynamicals matrices, born effective charges, dielectric permittivity
+  tensors and interatomics force constants from density functional perturbation
+  theory.
+\newblock {\em Phys. Rev. B}, \textbf{55}, 10355 (1997).
+
+\bibitem{PFAF97}
+O.~Pfaffenzeller and D.~Hohl.
+\newblock Structure and electrical conductivity in fluid-density hydrogen.
+\newblock {\em J. Phys.:Cond. Matter.}, \textbf{9}, 11023 (1997).
+
+\bibitem{RECO02}
+V.~Recoules, P.~Renaudin, J.~Cl{\'e}rouin, P.~Noiret, and G.~Z{\'e}rah.
+\newblock Electrical conductivity of hot expanded aluminum: Experimental
+  measurements and {\it ab initio} calculations.
+\newblock {\em Phys. Rev. E}, \textbf{66}, 056412 (2002).
+
+\end{thebibliography}
+
+\end{document}

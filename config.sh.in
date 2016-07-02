@@ -1,0 +1,33 @@
+#
+# Default configuration parameters obtained from Autoconf
+#
+
+# Package information
+abinit_target="@ABINIT_TARGET@"
+abinit_binpkg="@ABINIT_BINARY_PACKAGE@"
+abinit_host="@target@"
+
+# Version
+abinit_version="@ABINIT_VERSION@"
+abinit_version_base="@ABINIT_VERSION_BASE@"
+abinit_version_major="@ABINIT_VERSION_MAJOR@"
+abinit_version_minor="@ABINIT_VERSION_MINOR@"
+abinit_version_micro="@ABINIT_VERSION_MICRO@"
+abinit_version_build="@ABINIT_VERSION_BUILD@"
+
+# Locations
+abinit_srcdir="@abinit_srcdir@"
+abinit_builddir="@abinit_builddir@"
+abinit_distdir="@PACKAGE@-@VERSION@"
+
+# Installation
+abinit_prefix="@abinit_prefix@"
+abinit_bindir="@abinit_bindir@"
+abinit_datdir="@abinit_datdir@"
+abinit_docdir="@abinit_docdir@"
+abinit_incdir="@abinit_incdir@"
+abinit_libdir="@abinit_libdir@"
+abinit_mandir="@abinit_mandir@"
+
+# Nightly builds
+nightly_timeout="@nightly_timeout@"

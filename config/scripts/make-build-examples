@@ -1,0 +1,102 @@
+#!/usr/bin/env python
+#
+# Copyright (C) 2009-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+from ConfigParser import ConfigParser
+from time import gmtime,strftime
+
+import os
+import re
+import sys
+
+class MyConfigParser(ConfigParser):
+
+  def optionxform(self,option):
+    return str(option)
+
+
+
+def key_is_ok(key):
+
+  # Init keys to ignore
+  cnf_ignore = ["status"]
+
+  if ( key in cnf_ignore ):
+    return False
+  else:
+    return True
+
+
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Main program
+#
+
+# Initial setup
+my_name     = "make-build-examples"
+my_configs  = ["config/specs/testfarm.conf","config/specs/examples.conf"]
+my_template = "doc/build/config-template.ac"
+my_outdir   = "doc/build/config-examples"
+
+# Check if we are in the top of the ABINIT source tree
+if ( not os.path.exists("configure.ac") or
+     not os.path.exists("src/98_main/abinit.F90") ):
+  print "%s: You must be in the top of an ABINIT source tree." % my_name
+  print "%s: Aborting now." % my_name
+  sys.exit(1)
+
+# Check if we have a config file
+for my_config in my_configs:
+  if ( not os.path.exists(my_config) ):
+    print "%s: Could not find config file (%s)." % (my_name,my_config)
+    print "%s: Aborting now." % my_name
+    sys.exit(2)
+
+# Check if we have a template
+if ( os.path.exists(my_template) ):
+  inp_data = file(my_template,"r").readlines()
+else:
+  print "%s: Could not find template file (%s)." % (my_name,my_template)
+  print "%s: Aborting now." % my_name
+  sys.exit(3)
+
+# What time is it?
+now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
+
+# Process config files and write examples
+for my_config in my_configs:
+  cnf = MyConfigParser()
+  cnf.read(my_config)
+
+  for sec in cnf.sections():
+    cnf_vars = dict(cnf.items(sec))
+    cnf_keys = cnf_vars.keys()
+    cnf_keys.sort()
+    out_data = ""
+
+    # Uncomment variables in template data
+    for line in inp_data:
+      do_print = True
+      for key in cnf_keys:
+        if ( re.match("#%s=" % (key),line) or \
+          (re.match("#fcflags_opt_",line) and re.match("fcflags_opt_",key)) ):
+          if ( key_is_ok(key) ):
+            out_data += "%s=\"%s\"\n" % (key,cnf_vars[key])
+            do_print = False
+      if ( do_print ):
+        out_data += line
+
+    # Select file location
+    my_subdir = ""
+    if ( cnf_vars["status"] == "uncertified" ):
+      my_subdir = "uncertified/"
+
+    # Write data
+    file("%s/%s%s.ac" % (my_outdir,my_subdir,sec),"w").write(out_data)

@@ -1,0 +1,70 @@
+# Title:
+Suite of various tests of the conformance of source routines to abirules
+#
+# Copyright (C) 2003-2016 ABINIT group (LSi)
+# This file is distributed under the terms of the
+# GNU General Public License, see ~abinit/COPYING
+# or http://www.gnu.org/copyleft/gpl.txt .
+# For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+#
+# for all the following tests, use unix-style file paths
+# they will be converted by function transpath if necessary
+# file paths may contain a perl variable (e.g. $PSPS)
+#
+#   The following lines describe the tests to be run. The general syntax of
+# these lines is:	testID [command | program] parameters.
+#
+#   The first word is the test identification. All consecutive lines that begin
+# with the same word will be executed in that order.
+#   The second word specifies an ABINIT module or system command to be run. The
+# following system commands are available: copy, erase
+# The following keywords refer to ABINIT programs:
+# 	abinis | seq	run the sequential version of abinis
+#
+#   parameters for copy and erase are file or directory names
+#   parameters for the programs are either file paths derived from the
+# subroutines 'doseqtest' ... in the old Run.pl scripts, or
+# options to tailor the flow of results analysis and other operations before
+# or after the tests;
+# format for file paths is: fnI=path
+# format for pseudo-potential file paths is: pspI=path
+# format for the GEO file is: GEO=path
+# format for options is: opt=option
+# option can be either a standard option of the fldiff script (-easy , -medium),
+# options to tailor the analysis of the results after test completion:
+#	-nofld	don't run fldiff
+#	-DOS	appply fdiff/ldiff to the o_DOS file
+#	+xml	also apply diff/fldiff to the .cml file
+# or the following options to modify the flow of operations during the test:
+#	-keepfn4
+# default options to call fldiff are: -ignore -ignoreP
+#
+#   Default file names for the test with Id NNN (1 to 3 characters string):
+# 1) abinis/seq
+# fn1 = ../tNNN.in
+# fn2 = tNNN.out
+# fn3 =	tNNNi
+# fn4 = tNNNo
+# fn5 = tNNN
+# fn6-fn9, psp1-psp4 = none
+#
+01 docchk
+#02 chkinpvars   # Would be nice to be able to activate this test ...
+03 warnchk 3
+04 warnchk 4
+05 warnchk 5
+06 warnchk 6
+07 warnchk 7
+#08 warnchk 8   # One should not activate this test
+09 warnchk 9
+10 warnchk 10
+11 warnchk 11
+#12 warnchk 12  # One should not activate this test
+13 warnchk 13
+14 warnchk 14
+15 warnchk 15
+16 check_forbidden
+17 check_ascii
+18 check_inlined_macros
+19 check_forbidden_in_doc_yml
+make report

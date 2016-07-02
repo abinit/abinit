@@ -1,0 +1,145 @@
+This directory, v3, contains tests which 
+are related to the development of ABINITv3.x
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+
+------------------------------------------------------------------
+* Tests 1 to 19 concern response-function (RF) calculations
+
+Tests 1 and 2 are related to the computation of the stresses and
+responses with spin-orbit coupling.
+
+Tests 3 to 5 are related to Berry phase computation of polarisation
+and derivative with respect to wavevector
+
+Tests 6 test of RF with dilatmx
+ 
+Tests 7 and 8 concerns RF for GGA with q=0
+
+Test 9 computes the derivative of the eigenenergies
+with respect to k from finite differences and analytical derivative
+
+Tests 10 to 12 test spin-polarized RF calculation (ferromagnetic and
+anti-ferromagnetic)
+
+Tests 13 and 14 test the writing, reading and conversion 
+of spinor wavefunction and the responses with spin-orbit coupling
+
+Test 15 test spin-polarized GS and RF calculation, at varying occupation
+number
+
+Tests 16 to 18 test GGA RF : spin-polarization, non-linear core 
+correction, non-zero q vectors.
+
+Test 19 test spin-polarized GS and RF calculation, at fixed occupation
+number, for atomic Fe.
+
+------------------------------------------------------------------
+* Tests 20 to 29 concern symmetry recognition and use
+
+Test 20 test Shubnikov symmetries
+
+Test 21 test the recognition of several enantiomorph space groups
+
+Test 22 test different ways to generate the NiO 
+antiferromagnetic structure
+
+Test 23 and 24 test the generation and recognition of the
+magnetic space groups, Shubnikov type III, for triclinic, monoclinic
+and cubic systems.
+
+Tests 25 to 29 test the generation and recognition of the
+space groups, from spgroup number 1 to 230.
+
+------------------------------------------------------------------
+* Tests 30 to 31 concern GW
+
+Tests 30 and 31 are two simple tests of GW
+
+------------------------------------------------------------------
+* Tests 32 to 39 concern again symmetry recognition and use
+
+Tests 32 to 39 test the generation and recognition of the
+magnetic space groups, Shubnikov type IV.
+
+------------------------------------------------------------------
+* Tests 40 to 69 concern different topics (not yet well-ordered)
+
+Test 40 concerns generalized constraints placed on forces
+
+Test 42 tests hexagonal cell optimisation
+
+Test 43 tests boxcutmin
+
+Test 45 tests inner eigenvalues algorithm for wf optimisation.
+
+Test 46 tests DOS computation, using the tetrahedron method
+
+Test 47 tests the coupling of magnetism and spin-orbit (nspinor=2,nspden=4)
+
+Tests 48 and 49 test HCTH GGA functional
+
+Test 50 tests 2002' SGoedecker FFT
+
+Test 51 tests fixed magnetic moment calculation
+
+Tests 52 and 53 test different input file format 
+
+Tests 54 and 55 test TDDFT excitation energies, oscillator strengths,
+ polarisability and Cauchy coefficients.
+ 
+Tests 56 and 57 test Bader charge analysis
+
+Tests 58 and 59 are for cut3d testing (wavefunction files)
+
+Tests 60 and 61 test Hirshfeld charge analysis
+
+Tests 62 to 67 are again for cut3d testing (wavefunction files, angular analysis)
+
+Tests 68 to 69 are for CML testing
+
+-----------------------------------------------------------------
+* Tests 70 to 87 concern again RF
+
+Tests 70 and 71 : different GGA functionals
+
+Tests 72 and 73 : RF with non-zero wavevectors for GGA functionals
+
+Tests 74 and 75 : accuracy of the finite-difference testing of RF,
+  effect of symmetrisation and XC grid, and 
+  warning in the case of metallic occupation numbers at Gamma
+
+Test 76 : GGA, RF non-zero wavevector, metallic.
+
+Test 77 : band-by-band decomposition of Born effective charge
+ and localization tensor
+
+Tests 78 and 79 : test of optical conductivity
+
+Test 80 : examine the rotational frequency of H2 molecule
+
+Tests 81 and 82 : GS and RF calculation, for combined local and non-local psps
+
+Test 83 : test of non-linear features
+
+Test 84 : rhombohedral cell of Bi
+
+Test 85 : NiTi from MTijssens, with q= 0 0 0.1
+
+Test 86 : spin-polarized Si from Hasegawa-san, with q= 0.5 0 0
+
+-----------------------------------------------------------------
+* Tests 87 to 89 : GW and mrgscr utility
+
+-----------------------------------------------------------------
+* Tests 90 to 95 : alchemical psps
+
+-----------------------------------------------------------------
+* Tests 96 and 97 : Lattice Wannier Functions
+
+***************
+
+*Tests 100 and 102 : partial screening files and mrgscr utility
+
+

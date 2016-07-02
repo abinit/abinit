@@ -1,0 +1,5 @@
+EXTRA_DIST += \
+  dfti_fftrisc.finc dfti_fftpad.finc dfti_c2c_ip.finc dfti_c2c_op.finc \
+  fftw3_fftrisc.finc fftw3_fftpad.finc fftw3_c2c_ip.finc fftw3_c2c_op.finc \
+  fftug.finc fftur.finc \
+  utests_fftu.finc

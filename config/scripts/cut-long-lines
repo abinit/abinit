@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Init
+my_name=`basename "${0}"`
+
+# Read text from stdin and spit filtered content on stdout
+while read line; do
+  line_len=`echo "${line}" | wc -c`
+  if test "${line_len}" -gt "132"; then
+    eol=`echo "${line}" | sed -e 's/.*\(.\)$/\1/'`
+    line=`echo "${line}" | cut -b1-72`
+    line="${line} ...${eol}"
+  fi
+  echo "${line}"
+done

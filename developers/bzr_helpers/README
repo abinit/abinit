@@ -1,0 +1,70 @@
+Helper scripts for Bazaar
+=========================
+
+The scripts located in this directory are basic helpers to make your
+access to the ABINIT Forge easier and more efficient. They have not been
+tuned for dummies though, which means that they do not check the
+relevance and sensibility of their arguments.
+
+You might have to edit the scripts if your login on the ABINIT Forge is
+different from the one you have on your machine. Just fill the
+"archive_user" variable in such a case.
+
+Documentation about Bazaar may be found in "~abinit/doc/versioning".
+
+
+
+abinit-forge-branch
+-------------------
+
+This script is meant to facilitate the downloads and uploads of branch
+revisions from/into the ABINIT Forge. To get detailed instructions on
+how to use it, just call it without arguments.
+
+
+
+bzr-get-branches
+----------------
+
+This script creates a local Bazaar repository, fetches the Abinit
+branches corresponding to a specified revision, and automagically sets
+the push and pull URLs. In addition, it makes the trunk available
+locally to speed-up synchronization merges.
+
+Note: the repository location has to be set manually by editing the
+script before running it for the first time. 
+
+
+
+bzr-publish
+-----------
+
+This script enables the mirroring of private branches into public ones.
+It is meant to be used without arguments from a fully configured private
+branch, i.e. where push and pull URLs are properly set. It will only
+operate if these conditions are met.
+
+
+
+bzr-resolve
+-----------
+
+This script helps resolving merge conflicts as automatically as
+possible. It then uses kdiff3 to bring the conflicts that can only be
+resolved manually to the attention of the developer. This script does
+not take any argument.
+
+Note: you must install kdiff3 on your system before being able to use
+this script. See http://kdiff3.sourceforge.net/ for details.
+
+
+
+bzr-make-patch
+--------------
+
+This script creates a universal patch containing all the changes that
+have occurred in a bzr branch. It is meant to be run from within a bzr
+working tree. You may optionally specify a starting revision, in order
+to include only your latest changes. To get detailed instructions on how
+to use it, just call it without arguments.
+

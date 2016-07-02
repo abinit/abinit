@@ -1,0 +1,139 @@
+%\documentclass[prb,byrevtex]{revtex4-1}
+\documentclass{article}
+
+\usepackage{graphicx}
+\usepackage{amssymb}
+%%\usepackage[version=3]{mhchem}
+
+\newcommand{\dC}{$^\circ$C}
+
+\begin{document}
+
+\title{Linear Optics in the PAW Formalism: A Small Addition to {\tt ABINIT}}
+
+\author{J. W. Zwanziger (jzwanzig@dal.ca),
+{\it Department of Chemistry and Institute for Research in Materials,
+Dalhousie University, Halifax, NS B3H 4J3 Canada}}
+
+\date{\today}
+
+\maketitle
+
+% main text
+\section{Summary}
+
+This document describes a modest extension of the {\tt conducti} program,
+suitable for calculating linear optical response in the PAW formalism.
+The original {\tt conducti} program, which has been part of {\tt abinit} for
+some time, computes the optical conductivity in the Kubo-Greenwood formalism
+using norm-conserving pseudopotentials. Recently, this functionality was
+supplemented by the use of the PAW formalism, making it significantly
+faster in many respects. In addition, the PAW formalism can be used to
+compute the frequency dependent dielectric tensor in a similar way, and
+indeed this is part of recent releases. However, the implementation up to
+version 5.4 was coded such that only principle dielectric tensor values
+were treated, therefore crystals of arbitrarily (low) symmetry were not
+fully treated, and also there was no provision for a scissors correction. I
+have re-written the linear optics calculation for {\tt conducti}, using
+the PAW formalism as implemented already, but including provisions for a
+scissors correction and all crystal symmetries.
+
+\section{Computation}
+
+Components of the imaginary part of the linear dielectric tensor are
+computed as a function of energy from the perturbative formula\cite{Gajdos:06}
+\begin{equation}
+\label{baseform}
+\epsilon_2^{ab}(\omega) = \frac{4\pi^2}{\Omega\omega^2}\sum_{n,m,\mathbf{k}} f_{nm}w_{\mathbf{k}}
+\delta(\omega_{n,\mathbf{k}}-\omega_{m,\mathbf{k}}+\Delta-\omega)
+\langle n_{\mathbf{k}}|-i\nabla_a|m_{\mathbf{k}}\rangle\langle n_{\mathbf{k}}|-i\nabla_b|m_{\mathbf{k}}\rangle^\ast
+\end{equation}
+where atomic units are assumed, and thus $\omega$ is an energy in Hartrees,
+and all factors of $e$, $m$, and $\hbar$ are unity.  Superscripts $a$
+and $b$ refer to cartesian directions, and the momentum operator is $-i\nabla_a =
+-i \partial/\partial x_a$. Indices $n$ and $m$ refer to bands. The factor
+$f_{nm}$ is the difference in occupation number between two bands. Summation over
+the irreducible part of the Brillouin Zone uses
+{\bf k} points. The Dirac delta function
+in Eq.~\ref{baseform} is applied by replacing it with a Gaussian function, with
+a width that acts to smear features of the spectrum and is an input parameter.
+The factor $\Delta$ is the scissors correction,\cite{Levine:89} and is also an
+input parameter. Finally, $\Omega$ is the unit cell volume.
+
+
+After computation
+of $\epsilon_2^{ab}$, the tensor is symmetrized, because in general the
+integration is over only the irreducible part of the Brillouin Zone. The
+tensor over the full Brillouin Zone is constructed as follows:
+\begin{equation}
+\epsilon_2^{ab}({\mathrm{BZ}}) = \frac{1}{\mathrm{nsym}} \sum_{\mathrm{i=1}}^{\mathrm{nsym}}S_i^{-1}\epsilon_2^{ab}({\mathrm{IBZ}})S_i,
+\end{equation}
+where the sum is over the {\tt nsym} point group symmetry elements $S$.
+
+The real part of the dielectric tensor is computed from the imaginary part
+by a Kramers-Kronig transform:
+\begin{equation}
+\epsilon_1^{ab}(\omega) = 1 + \frac{2}{\pi}{\cal P}\int d\omega' \frac{\omega' \epsilon_2^{ab}(\omega')}{\omega'^2-\omega^2}
+\end{equation}
+where ${\cal P}$ means to take the principal value.
+
+\section{Usage}
+
+First, do a normal ground state calculation, using PAW data (not
+norm-conserving pseudopotentials) with {\tt prtwf 1} and {\tt prtnabla 1}
+to save the wavefunction and momentum matrix elements. Next, prepare two files,
+one that contains just the names of your input and output files, and the second (the
+input file) that contains the relevant parameters. Thus for example I have one file
+called {\tt con.files} that contains two lines: {\tt con.in} and {\tt con.out}. Then
+my input file, {\tt con.in}, contains the following data:
+\begin{verbatim}
+3 # option for the program conducti, telling it to do linear optics calculation
+sio # base name of files to read from ground state calculation
+0.018 # scissors correction to apply, in Hartrees
+0.009 0.0001 2.0 1000 # smearing width, minimum and maximum energies (all in Ha)
+                      # and number of points to compute
+\end{verbatim}
+Then feed the file of file names to {\tt conducti}:
+\begin{verbatim}
+conducti < file.files
+\end{verbatim}
+The code will report some some details, and generate two files, {\tt con.out\_real} and
+{\tt con.out\_imag} containing the real and imaginary parts of the dielectric tensor, as a
+function of energy. These files have 7 columns, which are: energy, $\epsilon^{xx}$,
+$\epsilon^{yy}$, $\epsilon^{zz}$, $\epsilon^{yz}$, $\epsilon^{xz}$, and $\epsilon^{xy}$.
+
+
+\begin{thebibliography}{2}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+\expandafter\ifx\csname bibnamefont\endcsname\relax
+  \def\bibnamefont#1{#1}\fi
+\expandafter\ifx\csname bibfnamefont\endcsname\relax
+  \def\bibfnamefont#1{#1}\fi
+\expandafter\ifx\csname citenamefont\endcsname\relax
+  \def\citenamefont#1{#1}\fi
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\providecommand{\bibinfo}[2]{#2}
+\providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem[{\citenamefont{Gajdo\v{s} et~al.}(2006)\citenamefont{Gajdo\v{s},
+  Hummer, Kresse, Furthm\"{u}ller, and Bechstedt}}]{Gajdos:06}
+\bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Gajdo\v{s}}},
+  \bibinfo{author}{\bibfnamefont{K.}~\bibnamefont{Hummer}},
+  \bibinfo{author}{\bibfnamefont{G.}~\bibnamefont{Kresse}},
+  \bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Furthm\"{u}ller}},
+  \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{F.}~\bibnamefont{Bechstedt}},
+  \bibinfo{journal}{Phys. Rev. B} \textbf{\bibinfo{volume}{73}},
+  \bibinfo{pages}{045112} (\bibinfo{year}{2006}).
+
+\bibitem[{\citenamefont{Levine and Allan}(1989)}]{Levine:89}
+\bibinfo{author}{\bibfnamefont{Z.~H.} \bibnamefont{Levine}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{D.~C.} \bibnamefont{Allan}},
+  \bibinfo{journal}{Phys. Rev. Lett.} \textbf{\bibinfo{volume}{63}},
+  \bibinfo{pages}{1719} (\bibinfo{year}{1989}).
+
+\end{thebibliography}
+\end{document}
+

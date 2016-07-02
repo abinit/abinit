@@ -1,0 +1,302 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2008 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project
+between August 2006 and February 2007. These release notes
+are relative to improvements of ABINITv5.3 with respect to v5.2.
+
+The list of contributors includes :
+B. Amadon, P.-M. Anglade, M. Arai, M. Beland, F. Bottin, P. Boulanger, M. Boulet,
+F. Bruneval, D. Caliste, J.-P. Crocombette, T. Deutsch, L. Diaz, L. Genovese,
+A. Ghasemi, M. Giantomassi, S. Goedecker, D. Hamann, T. Hoefler, F. Jollet,
+S. Mazevet, M. Mohr, A. Neelov, V. Olevano, Y. Pouillon, V. Recoules,
+G.-M. Rignanese, D. Sangalli, S. Sarholz, R. Shaltaf, M. Torrent,
+M. Verstraete, G. Zerah, O. Zilberberg
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 5.3, released on January 21, 2007.
+
+Changes with respect to version 5.2 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS
+
+A1. Several default values have been changed.
+    The old behaviour of the code can be obtained by specifying by hand, in the
+    input file, the old default values.
+    The list of changed variables for abinis/abinip is as follows ...
+    iscf     7 in the norm-conserving case, 17 in the PAW case (previously 5 and 14)
+    prtden   1  (previously 0)
+    prteig   1  (previously 0)
+    chkexit  0  (previously 1 for the sequential version, and 2 for the parallel version)
+    nstep   30  (previously 1)
+    For anaddb, some input variables were also changed :
+    asr      1  (previously 0)
+    symdynmat 1 (previously 0)
+    The input files of the automatic tests have been appended, as needed, by the old default values
+    of variables (in most cases, only iscf !). Gradually, this should be suppressed, to test preferably the default
+    values, but it will take some time to update all the reference files.
+
+A2. The automatic test directory for the tutorial "~abinit/tests/tutorial"
+    has been split in two directories : one with the old name, and a new
+    "~abinit/tests/tutorespfn", with all the tutorials that use
+    the response function (phonon/homogeneous electric field/strain) part of ABINIT.
+
+A3. In GW calculations, the plasmon-pole model 2 was coded for materials with an inversion symmetry,
+    but applied irrespective of this constraint. Its generalisation to materials
+    without an inversion symmetry has been coded, see D12. As a consequence
+    numerical results for materials without an inversion symmetry might change. For SiC,
+    changes are on the order of 0.05 - 0.1 eV.
+
+A4. The default value for the configure option smart-config has been set to "no"
+
+A5. There has been improvement of the MPI support, by Yann Pouillon.
+    Note that "--enable-mpi=yes" is now the default and triggers auto-detection.
+    Note that this auto-detection nevertheless expects "--with-mpi-prefix" to be filled
+    (and no other "--with-mpi-*" will be read). By contrast with "--enable-mpi=force",
+    auto-detection is by-passed, and "--with-mpi-*" are to be set manually.
+    So, the behaviour of the build system has changed in this respect.
+    The user/developer might have to update his config file (hostname.ac file)
+    accordingly. More information to be found in the directory ~abinit/doc/config ,
+    in the file addendum-mpi.html .
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B.1 DFT+U (LDA+U / GGA+U) has been implemented within the PAW framework,
+    and is now available in production.
+    A short documentation is available in dev/users/HowtodoLDA+U.txt
+    See also test case v5/t08 and input variable usepawu.
+    Work done by B. Amadon and coworker F. Jollet.
+
+B.2 The Band/FFT parallelisation is available, for testing purposes,
+    for a specific combination of run parameters, see the input variables
+    npfft, npband (+ others, like fft_opt_lob). This parallelisation
+    has been developed by F. Bottin and G. Zerah, using the S. Goedecker
+    FFT routines, with also some initial help by M. Boulet (and T. Hoefler).
+    Preprocessing flags -DSCALAPACK and -DMPI_FFT are needed.
+    Do not use the -DMPI preprocessing flag.
+    A typical input file can be found in ~abinit/tests/paral/t_bandfft.in .
+    With this input file, a 300 speed-up has been demonstrated, on 468 processors.
+
+B.3 The thermal conductivity (phonon transport, limited by electron-phonon
+    collisions), and the electrical conductivity (electron transport,
+    limited by electron-phonon collisions) can now be computed inside anaddb.
+    This has been developed by JP Crocombette, with help by M. Verstraete and F. Jollet.
+    These functionalities are activated by the anaddb input variable ifltransport .
+    Automatic test should be provided.
+
+B.4 The electrical conductivity, the thermal conductivity, and the thermopower
+    (electron transport, high temperature, Kubo-Greenwood formalism), can be computed
+    using PAW. The input variable prtnabla must be activated.
+    Notes on the use of these features and their implementation can be found in
+    ~abinit/doc/users/conductivity_paw_manu.tex (see also the
+    similar notes for the norm-conserving pseudopotential case,
+    ~abinit/doc/users/conducti_manual.tex).
+    This implementation has been realized by S. Mazevet, with help by
+    V. Recoules, M. Torrent, and F. Jollet.
+    Automatic test should be provided.
+
+B.5 Spin-polarized systems can now be treated in GW (nsppol=2).
+    Also, Symmorphic symmetries are now used in the GW part of ABINIT in order to reduce
+    the time needed for the computation of chi and sigma at q points
+    that are invariant under some symmetry operations.
+    See the input variables symsigma and symchi.
+    An automatic test is provided : v5#62 (BCC hydrogen)
+    Note 1 : the default is such that these savings are not activated,
+    this should be changed ...
+    Note 2 : parallelism over bands in GW is not compatible with nsppol=2 as of v5.3.0)
+    Contribution by M. Giantomassi.
+
+B.6 ( WARNING : the parallelism over bands appear not to give exactly the same
+    result as the sequential version. Hence, it has been temporarily made unavailable,
+    except for expert users ... )
+    Parallelism over bands is available for GW. See the input variable gwpara.
+    This parallelism allows for memory savings, and is quite efficient.
+    At present, either the band parallelism or the k point parallelism is available
+    in GW, they cannot be used simultaneously.
+    This has been implemented by R. Shaltaf.
+    (Note, however, that parallelism over bands in GW is not compatible with nsppol=2 as of v5.3.0)
+    Automatic test for band parallelism : paral#N
+
+B.7 ABINIT is able to produce the different kind of files that follow the Nanoquanta/ETSF
+    file format specification (http://www.etsf.eu/fileformats) :
+    density/potential files and wavefunction files.
+    This NetCDF-based fileformat is intended to be the standard file format for exchanging
+    data between the softwares of the nanoquanta EU Network of Excellence.
+    At present, they can be read by the V_Sim visualization program
+    (http://www-drfmc.cea.fr/sp2m/L_Sim/V_Sim/index.en.html).
+    The implementation has been done by D. Caliste, with some help by Y. Pouillon,
+    and is based on a library developed by D. Caliste for Nanoquanta.
+    See the tests contained in the new directory tests/etsf-io .
+    The use of Nanoquanta/ETSF file specification is activated by the
+    use of the input variable accesswff set to 3.
+    ABINIT needs to be compiled with the NetCDF and etsf-io libraries in order
+    to produce these files.
+
+B.8 This version of ABINIT is able to deal with wavelets
+    for representing the wavefunctions. At present, the full SCF loop is working:
+    density and total energies are computed. Forces are also computed.
+    Only HGH and GTH pseudopotentials are supported.
+    This version is still only for developpers.
+    Effort from the BigDFT community : S. Goedecker, L. Genovese, T. Deutsch,
+    A. Neelov, D. Caliste, A. Ghasemi, O. Zilberberg.
+    See C1
+    Automatic tests are available in tests/bigdft
+
+B.9 The Casida approach to excitation energies in case of finite systems
+    has been generalized to the (collinear) spin-polarized case, by D. Sangalli,
+    in collaboration with GM Rignanese and XGonze.
+    See the automatic tests v5#61 and #62.
+
+B.10 The atomic temperature factors (root mean square expectation values of the
+    atomic displacements due to thermal fluctuations) are available.
+    This had been initially implemented by C. Lee in RESPFN, the precursor of
+    optdriver=2 part of ABINIT (before 1997),
+    but has been recently debugged and reinstalled by P. Boulanger.
+    This is automatically activated in ANADDB with the input variable thmflag .
+    An automatic test (v5#22) has been introduced by P. Boulanger
+
+B.11. A new tutorial lesson on GW is available.
+   It concerns the metallic case, and the computation of spectral functions.
+   It has been developed by F. Bruneval.
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C1. All the names of the directories in src have been changed.
+    Most of the directories underwent a trivial change : change
+    of the first digit of the name, usually a "0" to "1", e.g. :
+    01util is now 32_util . The directory 01managempi
+    has been split in three parts : 51_manage_mpi, 12_hide_mpi
+    and 59_io_mpi . Some other directories had their level adjusted,
+    e.g. 02psp is now 13psp (instead of simply 12psp),
+    and 04rsprc is now 65_rsprc. Some other dirs has been created,
+    like 21paral_md .
+    These changes were needed in order to treat correctly the
+    dependencies between directories, for which several misplacements
+    had been seen thanks to the use of abilint.
+
+C2. New directories have been created for the wavelets :
+    lib/bigdft to host the BigDFT library
+    src/62_wvl_wfs to host new ABINIT routines needed to drive wavelet computations
+    See D1
+
+C3. The dataset content is now copied outsied of driver.F90, by the routine dtsetcopy.F90.
+    Warning : the allocated dtset arrays must be deallocated in dtsetfree.F90
+
+C4. It is now possible to launch sets of tests focused either on PAW,
+    GW or TDDFT (Casida approach). In the test directory, issue :
+    make tests_paw   (or the other possibilitites tests_gw or tests_tddft)
+    Documented : in tests dir, issue  make help
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D1. Many bug fixes for the build system, from Y. Pouillon.
+
+D2. Hessian and DIIS for geometry optimization, by D. Caliste .
+    When ionmov=20 . Under development, not yet working.
+    No documentation, no automatic tests.
+
+D3. Improvements of abilint.py , to make it faster. By T. Deutsch.
+
+D4. Introduced new values for input variable iprcel, for testing
+    and development purposes, by PM Anglade
+
+D5. Modify ABINIT to be able to perform quadruple precision computations,
+    by PM Anglade
+
+D6. New input variable tolrff (SCF convergence tolerance criterion,
+    similar aim as toldff, but easier to use), by MVerstraete.
+
+D7. Cleaning and beautification of the elphon part of ABINIT, by Matteo Giantomassi.
+
+D8. Improvements of MPIO parallelism, by M Boulet and G. Zerah
+
+D9. It is possible to compute an "average frequency" for phonons
+    (as a function of temperature), that might be used to obtain
+    an estimate of the Gruneisen parameter.
+    See the associated input variable iavfrq. Developed by M. Torrent.
+    Should provide an automatic test ...
+
+D10. Two new input variables have been introduced in anaddb, for the electron-phonon
+     treatment : ep_b_min and ep_b_max . Still to be described.
+
+D11. A new utility, anascr, is available to analyse the screening
+     files produced by GW computations.
+     Work done by M. Giantomassi.
+     Should provide an automatic test and some documentation ...
+
+D12. The plasmon pole model 2 needed a modification to work for
+     systems without inversion symmetry. This has been implemented
+     by M. Giantomassi.
+     See tests/v3, case 31.
+
+D13. A new approach to the computation of the commutator of the non-local
+     part of the pseudopotential with the position operator has been
+     implemented by M. Giantomassi, with inclvkb=2 .
+     Not yet available with the parallelisation over bands.
+     Automatic test needed.
+
+D14. Simple mixing damping of the density mixing for GW self-consistency,
+     from F. Bruneval. See the input variable rhoqpmix.
+     See tests/v4, case 88 .
+
+D15. Introduce thmflag=2 in anaddb, by P. Boulanger.
+     Used to print phonon frequencies associated with grid 2.
+     There should be an automatic test.
+
+D16. Test of core-level shifts, for NH2-CH3 vs NH3, from GMRignanese
+
+D17. The PAW approach can take benefit of the antiferromagnetic symmetry.
+     This has been coded by M Torrent.
+     Still need an automatic test.
+
+D18. The build system has undergone many minor changes, mostly bug fixes, by Y. Pouillon.
+
+D19. Cleaning of the old NetCDF implementation, by Y. Pouillon
+
+D20. Moments of the Eliashberg function are now computed, from M. Verstraete
+
+D21. Introduction of a new input variable pawstgylm, to allow CPU/storage trading, from M. Torrent
+     There should be an automatic test.
+
+D22. Other bug fixes, by D. Hamann, M. Arai, S. Sarholz, GM Rignanese, V Olevano, D. Caliste,
+      T. Deutsch, M. Mohr, L. Diaz, B. Amadon, M. Beland, R. Meyer
+
+D23. make multi  has been improved
+
+D24. There is a new option to the "configure" script : "enable-cclock", which triggers the use of the C clock for timings.
+
+</pre>

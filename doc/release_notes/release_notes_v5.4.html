@@ -1,0 +1,254 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2008 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project
+between February 2007 and October 2007. These release notes
+are relative to improvements of ABINITv5.4 with respect to v5.3.
+
+The list of contributors includes :
+B. Amadon, P.-M. Anglade, M. Arai, F. Bottin, P. Boulanger,
+F. Bruneval, D. Caliste, E. Cances, S. Caravati, M. Crack, T. Deutsch,
+Luis Diaz, L. Genovese,
+A. Ghasemi, M. Giantomassi, S. Goedecker, D. Hamann, N. Helbig, F. Jollet,
+T. Nishimatsu, H. Mathis, S. Mazevet, A. Neelov, Y. Pouillon, C. Redaelli,
+R. Shaltaf, M. Torrent,
+M. Verstraete, Xinjie Wang, Zhigang Wu, G. Zerah, O. Zilberberg, J. Zwanziger
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 5.4, released on June 6, 2007.
+
+Changes with respect to version 5.3 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS
+
+A.1 A life cycle is now defined for each version : 14 months after the
+    initial release of some version of ABINIT, there will be a warning,
+    asking the user to switch to a more recent version. After 18 months,
+    ABINIT will stop.
+
+A.2 The input variable so_typat has been declared obsolete, and replaced
+    by so_psp . Although the new variable so_psp should play a role similar
+    to so_typat, there are two major differences :
+    (1) so_psp is defined
+    to affect each pseudopotential, and not each type of atom (this is to permit
+    to use alchemical mixing of spin-orbit part, and to explore easily a dependence
+    of the calculation on the strength of the spin-orbit coupling)
+    (2) so_psp is to be set to 0 to suppress the treatment of the spin-orbit
+    coupling, while so_typat had to be set to 1 . On the contrary, setting so_psp to 1
+    means that spinorbit coupling will be used, with the correct formulation deduced
+    by the content of the pseudopotential file.
+    So, some input files with nspinor=2 and for which pseudopotential(s) with spin-orbit are used
+    might have to be adapted with respect to v5.3 or earlier version .
+
+A.3 The strain is now symmetrized, during the geometry optimization procedure.
+    See the new routine strainsym.F90 . This means that
+    the output of some geometry optimization might slightly differ from the
+    previous versions, in which only the stress was symmetrized. In principle,
+    this correction should fix some problems, where it was observed that
+    the symmetry was lost during geometry optimization.
+
+A.4 In case of GW calculation, there is a potential bad scaling (Npw^4) of the findggp.F90
+    routine. If this happens, one should simply disactivate this routine, by inserting
+    a "return" statement as the first executable instruction.
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B.1 Electric field gradient at nuclei site is now available.
+    Coding from J. Zwanziger
+    See test v5 # 51 , computation of EFG for stishovite.
+
+B.2 A new format for pseudopotentials is available,
+    pspcod=10, giving access to a library of pseudopotentials
+    also used by CPMD.
+    It is a slightly modified version of the existing HGH and GTH
+    formats (pspcod=2 and 3), but there are some differences in the
+    definition of the parameters.
+    The library is available at
+    http://cvs.berlios.de/cgi-bin/viewcvs.cgi/cp2k/potentials/Goedecker/abinit
+    In this library, the already existing HGH and GTH pseudopotentials
+    are provided ('pade' folder) in this new format, but there
+    are also pseudopotentials for other XC flavors, like the PBE,
+    and the HCTH-120 and HCTH-407 (see section B3).
+    Tests are available v5#54 and 55 .
+    Implementation of reading by S. Caravati, generation of psps by M. Crack.
+
+B.3 The whole family of HCTH XC functionals is now available :
+    in addition to HCTH-93, that was already present, the HCTH-120, HCTH_147
+    and HCTH-407 are now available. A few pseudopotentials exist,
+    see section B.2 . These functionals are thought to be particularly
+    accurate for simulation of biological systems and water.
+    ( Should be tested - test also the different HCTH functionals,
+    120, 147 and 407, with the 93 and a similar pseudo (local, simply smoothed) for H,
+    then use a tailored pseudo for HCTH 120 and 407 ).
+
+B.3. The Wu and Cohen GGA XC functional is now available, use ixc=23 .
+    Reference : Z. Wu and R.E. Cohen, Phys. Rev. B 73, 235116 (2006).
+    See tests v5 # 28, 48 and 49.
+
+B.4 The coupled k-point+Spin/Band/FFT parallelisation is available, for testing purposes.
+    Tests should be set up.
+    Work by F. Bottin anf G. Zerah.
+
+B.5 Spectral method for set-up of the frequency-dependent matrices, in the GW calculation.
+    Tests should be set up
+    GW can take advantage of non-symmorphic symmetry operations. See test v5#64.
+    Work by M. Giantomassi
+
+B.6 Many new features or improvements in PAW (some additional tests should be provided) :
+     - Added possibility to print partial DOS in PAW (contrib. from S. Mazevet + M. Torrent)
+     - new feature: integrated density inside atomic spheres
+     - new feature: keeping density matrix constant during the first
+         SCF iterations for PAW+U (from M.Torrent & B.Amadon)
+     - Some inputs for tests have been changed in order to take into account new prtdensph keyword
+         (see also new test v5 #11)
+
+B.7 Computation of optical quantities, from the utility conducti in the PAW case :
+    frequency-dependent dielectric tensor (both real and imaginary part),
+    index of refraction, conductivity, reflectivity, absorption
+    A test is available : v5#9 and 10.
+    (S. Mazevet and F. Jollet)
+
+B.8 Possibility to add a jellium slab (and also bulk), by S. Caravati.
+    See tests v5#56-59 . New input variables : jellslab,
+    slabwsrad, slabzbeg, slabzend .
+
+B.9 Complete cubic-scaling implementation of the wavelet part of
+    ABINIT (BigDFT project). This version includes, the ground state
+    computation (energy and forces), the finite size corrections to the
+    total energy, restart on wavefunctions following the ETSF norm and geometry
+    relaxation using BFGS. Molecular dynamic is also available for
+    test purposes. Memory occupation optimisation is still under development.
+     Effort from the BigDFT community : S. Goedecker, L. Genovese, T. Deutsch,
+     A. Neelov, D. Caliste, A. Ghasemi, O. Zilberberg.
+
+B.10 Born effective charges and dielectric tensor calculations can now be computed
+     in a finite electric field.
+     For the time being, such computations are activated by setting
+     rfuser to 1 . This should be changed in a future version of ABINIT.
+     See automatic test v5#23.
+     Contribution by Xinjie Wang.
+
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+C.1 See D.2 . The variable names being now checked, when a new variable
+    is added, the list of admitted variables in chkvars.F90 must be updated.
+
+C.2 Creation of a new subdirectory of src : src/21rdm , for developments
+    related to Reduced-Density Matrix functional Theory, by N. Helbig
+    helped by M. Giantomassi..
+
+C.3 A new directory has been created, to host the Wannier90 library.
+    See D.3
+
+C.4 The Poisson solver library is now outside of ABINIT within its
+    parent library: BigDFT. Thus, using icoultrtmt = 1 needs to
+    compile with --enbale-bigdft. The directory 12poisson has been
+    removed and replaced by 62_poisson because the XC is also computed
+    now by the Poisson solver routine (since rhor is directly available).
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D.1 New automatic test Tv5#43 : test Bismuth atom, spin-polarized,
+    with collinear settings, as well as spinor settings.
+
+D.2 The existence of variable names mentioned in the input file is now checked,
+    so that typos are identified.
+
+D.3 Interfacing with Wannier 90 done, by B. Amadon . Use prtwant=2 .
+    Not yet in production
+
+D.4 Berry phase for PAW, by F. Jollet (see mail)
+    Not yet in production
+
+D.5 ODA mixing scheme, by E. Cances and F. Jollet (see mail)
+    Not yet in production
+
+D.6 Update to the upstream up-coming version of the ETSF-IO library, by
+    D. Caliste. This change allow to define precise variables into the
+    output files. It also brings the support for experimental wavelet
+    basis set. See KNOWN_PROBLEM #P54.11.
+
+D.7 Work in progress : computation of the temperature dependence of the band gap
+    THe new input variable ieig2rf has been defined.
+    (P. Boulanger)
+
+D.8 Parallelism over bands for GW computations has been reinstalled. Test N is OK again.
+    A minor problem KNOWN_PROBLEM #P53.27 is still there, though .
+    Work by M. Giantomassi
+
+D.9 Many bug fixes and improvements for the build system, from Y. Pouillon
+
+D.10 Possibility to have plug-ins, from Y. Pouillon.
+     Wannier90 library activation follow this path.
+
+D.11 Cleaning of ABINIT concerning the use of precision, by P.M. Anglade .
+
+D.12 Work on improved preconditioners, by P.M. Anglade .
+
+D.13 M. Giantomassi provided Test v5#63 for GW calculations with antiferromagnetic
+     symmetries.
+
+D.14 Work on the switch to bzr version control system, and associated documentation,
+     by Y. Pouillon .
+
+D.15 Description of path in reciprocal space (kptbound input variable)
+     for the rhombohedral lattice (in doc/input_variables/vargs.html)
+
+D.16 For PAW, it is now possible to develop the XC term in the spherical part of the
+     energy up to 2nd moments. See the input variable pawxcdev.
+     Implemented by M. Torrent.
+
+D.17 Bug fixes by : F. Bruneval, M. Giantomassi, D. Hamann, M. Torrent, Y. Pouillon,
+     M. Verstraete
+
+D.18 Cut3d has been (partly) generalized to non-collinear spin. Work by Luis Diaz.
+     See tests v5 # 32 and 33 .
+
+D.19 abirules.pl insert automatically the release date, from L. Sindic
+
+D.20 Parallelism over k points for quasi-particle self-consistent GW has been enabled
+     by Don Hamann. A new test case (case O) has been created in the suite of parallel tests).
+
+D.21 Bug fixes by : M. Arai, F. Bruneval, M. Giantomassi, D. Hamann, M. Torrent, Y. Pouillon,
+     M. Verstraete, L. Sindic, T. Nishimatsu, H. Mathis, C. Redaelli
+
+D.22 Implementation of the reversible integrator of Martyna et al,
+     see ionmov=13 for more explanations,
+     by G. Zerah. New input variables : nnos , qmass , bmass , vmass .
+
+</pre>

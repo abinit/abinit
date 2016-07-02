@@ -1,0 +1,50 @@
+# -*- Python -*-
+#
+# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Source files making up the 4wfs library
+#
+
+# Source file attributes
+ABI_SRC_NIL = 0     # No attribute
+ABI_SRC_BLT = 1     # The file is built by a script
+ABI_SRC_DEP = 2     # The file depends on other files
+
+# Source files
+sources = [
+ "m_esymm.F90",    # Modules first
+ "m_bandfft_kpt.F90",  # Modules first
+ "m_invovl.F90",
+ "chebfi.F90",
+ "fxphas.F90",
+ "fxphas_seq.F90",
+ "getdc1.F90",
+ "getghcnd.F90",
+ "fock_getghc.F90",
+ "getghc.F90",
+ "getgh1c.F90",
+ "getgh2c.F90",
+ "getgsc.F90",
+ "m_bandfft_kpt.F90",
+ "m_esymm.F90",
+ "prep_bandfft_tabs.F90",
+ "prep_fourwf.F90",
+ "prep_getghc.F90",
+ "prep_nonlop.F90",
+ "prep_wavef_sym_do.F90",
+ "prep_wavef_sym_undo.F90",
+ "prep_index_wavef_bandpp.F90",
+ "prep_sort_wavef_spin.F90",
+ "pw_orthon.F90",
+ "rayleigh_ritz.F90",
+ "subdiago.F90",
+ "wfconv.F90",
+]
+# IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
+# This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

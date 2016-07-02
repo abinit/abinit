@@ -1,0 +1,36 @@
+This package was debianized by Yann Pouillon on
+Fri, 04 Feb 2011 18:08:13 +0100.
+
+The current Debian maintainer is Debian Scientific Computing Team.
+
+It was downloaded from http://ftp.abinit.org/abinit-6.6.1.tar.gz
+
+Upstream Author: 
+
+    Prof. Xavier Gonze
+    Université catholique de Louvain
+    Lab PCPM (Physico-Chemistry and Physics of Materials)
+    1, Place Croix du Sud
+    Louvain-la-Neuve, BELGIUM
+    Tel : +3210472076 Fax : +3210473452
+
+Copyright and License: 
+
+    Copyright (C) 1998-2016 ABINIT group
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation in its version 3.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; see the file COPYING. If not, write to
+	the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, 
+	Boston, MA 02110-1301, USA.
+
+The Debian packaging is (C) 2011, Yann Pouillon <yann.pouillon@gmail.com> and
+is licensed under the GPL-3, see `/usr/share/common-licenses/GPL-3'.

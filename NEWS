@@ -1,0 +1,291 @@
+Latest news
+===========
+
+User-visible changes
+--------------------
+
+### Main binaries of Abinit ###
+
+When building Abinit 6, the greatest difference with respect to Abinit 5
+is that only one flavour of the "abinit" main binary will be built at
+once. The former "abinis" and "abinip" flavours have been replaced by
+wrapper scripts which will work only after a "make install" has been
+performed. These wrappers have been made available to facilitate the
+transition and will be removed in version 6.1 or 6.2.
+
+More precisely, this means that all occurences of "abinis" and "abinip"
+in calculation scripts will have to be replaced by calls to "abinit", or
+by symbolic links. If you wish however to continue using concurrently a
+serial and a parallel version of Abinit, you'll have to build them
+separately. In order to easily distinguish them at install-time, you may
+use the "--with-program-suffix" option of the configure script.
+
+This change was necessary to be able to run the whole test suite on any
+flavour of Abinit (e.g. with MPI, ScaLAPACK, or FFTW support), and to
+make the management of the Fortran modules possible. The main results
+are an increased modularity of the source code, an improved robustness,
+and an earlier detection of bugs and design flaws.
+
+
+
+### Parallel builds ###
+
+It is now possible to build Abinit in parallel - with "make -j<n>" -
+using an arbitrary value of "<n>". Tests have been performed up to 16
+processors, resulting in the very good speed-up factor of 15.1. This is
+particularly important on architectures where the build is slow, e.g.
+Itaniums with the Intel Fortran compiler.
+
+Parallel builds will nevertheless work for the core source of Abinit
+only. Convenience targets are thus provided to work around the
+limitations of the plugins: "multi" and "mj4". It is possible to tune
+the number of processors for "multi" by specifying e.g.:
+
+  make multi multi_nprocs=16
+
+on the command-line. For mj4, which is mainly used for automatic builds,
+the number of processors is fixed to 4.
+
+
+
+### Test suite ###
+
+Several improvements have been done to the test suite, in order to
+better support the various situations it can be used within. In
+particular, "make check" now properly succeeds when all tests pass.
+
+
+
+### Install ###
+
+The install prefix of Abinit is now fully left to the user's choice. The
+build system will not try anymore to add further prefixes, such as
+version numbers. This change greatly improves the flexibility of the
+install procedure and was long-awaited by packagers.
+
+
+
+### MPI ###
+
+MPI support in Abinit has been thoroughly cleaned-up, plus made more
+robust and more consistent. The build system is also much stricter about
+the way options can be specified.
+
+At configure-time, the build system now behaves the following way:
+
+  * if no option is given, the build system will take the decision
+    whether to enable MPI depending on the build environment; the
+    parallel code will be built if MPI-capable C and Fortran compilers
+    are found, as well as a working MPI runner;
+
+  * if --enable-mpi is specified, the build system will activate the
+    build of the parallel code, regardless of what has been detected;
+    it is supposed that the users know what they are doing (ahem!);
+
+  * if --with-mpi-prefix is used, the build system will set the build
+    parameters according to what if finds in the specified directory;
+    in this case, manually setting the compilers or the MPI runner is
+    strictly forbidden.
+
+
+
+### XLF ###
+
+XLF is not wrapped anymore by the build system, which allows for a
+finer-grained control of the build but may also cause some new problems.
+
+Please consult ~abinit/README.xlf for troubleshooting, and do not
+hesitate to enhance this file with your successful tricks by sending
+them to Yann Pouillon <yann.pouillon@ehu.es>.
+
+
+
+### Config files ###
+
+The build system is now much less tolerant about obsolete options to the
+configure script. Outdated config files will thus likely cause errors.
+
+Build examples (found in ~abinit/doc/build/config-examples), as well as
+their template (~abinit/doc/build/config-template.ac), have been
+substantially modified, to match the changes in the build system. All
+personal config files (usually found in ~/.abinit/build/) should be
+updated using this material as reference.
+
+
+
+Developer-visible changes
+-------------------------
+
+### Fortran modules ###
+
+All ".mod" files generated during the build of Abinit are now stored in
+a separate directory, src/mods/. This strategy addresses several tricky
+issues for the build system. In particular:
+
+  * it is now much simpler to access them, since there is only one
+    directory to include;
+
+  * it is much easier to clean them all, and check that they have
+    actually been removed.
+
+This option has however not been activated for the plugins, since their
+respective build systems do not support this kind of trick.
+
+
+
+### Hand-written include files ###
+
+Hand-written include files, i.e. C headers at present, should be stored
+in src/incs/ to be properly recognized by the build system.
+
+The "DBG_ASSERT" and "ABI_ASSERT" macros of abi_common.h have been
+deactivated because they were not portable enough. They should be fixed
+and improved.
+
+
+
+### Installable libraries ###
+
+The support for installable libraries, aka "exports", is still under
+heavy development. Such libraries are built in src/libs/ when the
+"--enable-exports" option of configure is used.
+
+For the moment, this feature is used to export Python bindings to the
+Abinit parser, for use in other codes usch as V_Sim. Only GCC is
+currently supported, and the full activation of this feature will
+require the implementation of Libtool support into the build system.
+
+Please contact Yann Pouillon <yann.pouillon@ehu.es> if you are
+interested by this feature.
+
+
+
+### Compile flags ###
+
+The management of compile flags has undergone several improvements. They
+include:
+
+  * the complete separation of optimization and debug flags;
+
+  * the enhancement of debug flags (many more warnings);
+
+  * the creation of a specific flag category for tricks;
+
+  * the ability to specify additional flags via environment variables,
+    i.e. "*FLAGS_EXTRA".
+
+The extra flags provide a significant additional flexibility, since they
+do not short-circuit the build system auto-detection process, contrary
+to the use of bare flags. For instance:
+
+  FCFLAGS_EXTRA="-dummy_option"
+
+will be _appended_ to the compile flags set by the build system, while:
+
+  FCFLAGS="-dummy_option"
+
+will _replace_ them.
+
+This way of doing is also meant to minimize the interferences between
+the various steps of the configuration.
+
+
+
+### Python ###
+
+The proper detection of the Python environment is still under
+development but has improved substanitially. More efforts will be
+devoted to this part in the near future, and feature requests are now
+welcome. Please send them to Yann Pouillon <yann.pouillon@ehu.es>.
+
+
+
+### MPI ###
+
+MPI preprocessing options are not handled anymore through external
+CPPFLAGS, but via the "config.h" include file. As a consequence, they
+have been renamed from "MPI_*" to "HAVE_MPI_*". This is to keep in mind
+when developing new parallel code.
+
+The confusing "--enable-mpi-io-buggy" option of configure has been
+replaced by "--enable-mpi-io-test", for developers who want to check and
+tune new MPI I/O related developments. It defines the HAVE_MPI_IO_TEST
+macro, which should encapsulate such experimental code.
+
+
+
+Maintainer-visible changes
+--------------------------
+
+### M4 macros ###
+
+M4 macros have been refactored and strict naming conventions have been
+adopted. See ~abinit/config/m4/ for details.
+
+
+
+### Makefiles ###
+
+The "defsinterfaces" target in config/makefiles/top.am has now
+disappeared. It was previously required by the simultaneous build of the
+serial and parallel libraries and has become completely useless.
+
+
+
+### Information for packagers ###
+
+The ~abinit/PACKAGING file contains essential information for packagers.
+All maintainers of Abinit should feel free to improve and enhance this
+file.
+
+
+
+### File naming conventions ###
+
+Legacies remaining from the prior use of TLA (an ancestor of the Bazaar
+version control system) have all been removed. All incriminated files
+have been renamed from ",,*" to "tmp-*". This is particularly visible in
+the test suite.
+
+This change was necessary because the Autotools use commas as separators
+for sed substitutions, which was resulting in spurious crashes of the
+configure script under some circumstances.
+
+
+
+### Test suite ###
+
+The timeout utility used for nightly builds has been moved from
+src/nightly/ to tests/Nightly/.
+
+The fldiff has been hacked to ignore extra output when MPI support is
+activated. The absence of ripple effects should be checked carefully.
+
+
+
+### MPI ###
+
+Several binaries have had MPI support added, so that they can be tested
+when the parallel code is built: anaddb, cut3d, lwf, mrgddb, mrgscr.
+Though this should not affect developers, these changes should
+only be considered temporary and a better solution provided.
+
+
+
+### Checker scripts ###
+
+The preprocessing option checker has been rewritten in Python and
+re-targetted at finding forbidden options. It may be updated and
+enhanced at will (see util/source/check-cpp-options.py).
+
+This script should be used on a more systematic basis, together with the
+conflict marker checker (util/source/check-conflict-markers.py).
+
+
+
+Other news
+----------
+
+More news can be found in the ~abinit/doc/release_notes/ directory,
+more specifically in the latest of the release_notes_v*.*. files.
+

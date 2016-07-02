@@ -1,0 +1,26 @@
+!!****d* ABINIT/42_parser
+!! NAME
+!! 42_parser
+!!
+!! DESCRIPTION
+!! This directory contains level-2 routines used
+!! to parse the main abinit input file. The entry points to
+!! this library are the routines instrng.F90 and intagm.F90 .
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! inarray.F90
+!! incomprs.F90
+!! inread.F90
+!! inreplsp.F90
+!! instrng.F90
+!! intagm.F90
+!! interfaces_42_parser.F90
+!!
+!!***

@@ -1,0 +1,14 @@
+Comparison between baz and bzr
+==============================
+
+The following table summarises the differences between baz and bzr for the
+initial revision of the development tree of abinit 5.4. The tests have been
+performed using the same computer and configuration.
+
+			BAZ		BZR		Diff
+	Tree size	210Mb		182Mb		-28Mb
+	Files		16404		11182		-5222
+	Retrieval
+	Status
+	Commit
+

@@ -1,0 +1,11 @@
+num_wann 4
+num_iter 50
+
+!plotting
+!wannier_plot =true
+write_xyz = true
+begin projections
+Ar:sp3:r=4
+end projections
+!translate_home_cell= true
+!guiding_centres=true 

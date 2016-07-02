@@ -1,0 +1,96 @@
+<SECTION sectiontitle='Calculation'>
+
+	<MOUSEENTRY instruction='Choose your functional:'>
+		<OPTION description='0. No exchange-correlation' variablename='ixc' variablevalue='0'/>
+		<OPTION description='1.  LDA or LSD, Tater Pade parametrization' variablename='ixc' variablevalue='1'/>
+		<OPTION description='2.  LDA, Perdew-Zunger-Ceperley-Alder(no spin)' variablename='ixc' variablevalue='2'/>
+		<OPTION description='3.  LDA, old Teter rational polynomial parametrization (no spin)' variablename='ixc' variablevalue='3'/>
+		<OPTION description='4.  LDA, Wigner functional (no spin)' variablename='ixc' variablevalue='4'/>
+		<OPTION description='5.  LDA, Hedin-Lundqvist functional (no spin)' variablename='ixc' variablevalue='5'/>
+		<OPTION description='6.  LDA, "X-alpha" functional (no spin)' variablename='ixc' variablevalue='6'/>
+		<OPTION description='7.  LDA or LSD, Perdew-Wang 92 functional' variablename='ixc' variablevalue='7'/>
+		<OPTION description='8.  LDA or LSD, x-only part of the Perdew-Wang 92 functional' variablename='ixc' variablevalue='8'/>
+		<OPTION description='9.  LDA or LSD, x- and RPA correlation part of the Perdew-Wang 92 functional' variablename='ixc' variablevalue='9'/>
+		<OPTION description='10. GGA, Perdew-Burke-Ernzerhof GGA functional' variablename='ixc' variablevalue='11'/>
+		<OPTION description='11. GGA, x-only part of Perdew-Burke-Ernzerhof GGA functional' variablename='ixc' variablevalue='12'/>
+		<OPTION description='12. GGA potential of van Leeuwen-Baerends, while for energy, Perdew-Wang 92 functional' variablename='ixc' variablevalue='13'/>
+		<OPTION description='13. GGA, revPBE of Y. Zhang and W. Yang' variablename='ixc' variablevalue='14'/>
+		<OPTION description='14. GGA, RPBE of B. Hammer, L.B. Hansen and J.K. Norskov' variablename='ixc' variablevalue='15'/>
+		<OPTION description='15. GGA, HTCH of F.A. Hamprecht, A.J. Cohen, D.J. Tozer, N.C. Handy' variablename='ixc' variablevalue='16'/>
+		<OPTION description='16. Fermi-Amaldi xc (Hartree energy), for TDDFT tests. No spin-pol. Does not work for RF' variablename='ixc' variablevalue='20'/>
+		<OPTION description='17. same as 20, except that the xc-kernel is the LDA (ixc=1) one' variablename='ixc' variablevalue='21'/>
+		<OPTION description='18. same as 20, except that the xc-kernel is the Burke-Petersilka-Gross hybrid' variablename='ixc' variablevalue='22'/>
+        </MOUSEENTRY>
+
+	<KEYBOARDENTRY instruction='Energy cutoff of basis (specify units: Ha, Ry, eV, K)' variablename='ecut' textlen='1'/>
+	<KEYBOARDENTRY instruction='Number of bands to include:' variablename='nband' textlen='1'/>
+
+	<CHOICE instruction='Is the system semiconducting or metallic:'>
+		<DECISION description='Semiconducting'>
+			<CHOICE instruction='How do you want to specify occupation:'>
+				<DECISION description='By manually entering the occupation of the bands'>
+					<CHOICE instruction='Choose the method of generation'>
+						<DECISION description="All K points have the same number of bands and the same occupancies of bands">
+							<DIRECTENTRY variablename='occopt' variablevalue='0'/>
+							<KEYBOARDENTRY instruction='Specify the occupation of the bands' variablename='occ' textlen='1' />
+						</DECISION> 
+						<DECISION description='k points may optionally have different numbers of bands and different occupancies'>
+							<DIRECTENTRY variablename='occopt' variablevalue='2'/>
+							<KEYBOARDENTRY instruction='Specify the occupation for EACH bands, for EACH k point and EACH spin' variablename='occ' textlen='1'/>
+						</DECISION>
+                                        </CHOICE>
+				</DECISION>
+				<DECISION description='By allowing the code to specify automatically the occupation for a semiconductor'>
+					<DIRECTENTRY variablename='occopt' variablevalue='1'/>  
+				</DECISION>
+			</CHOICE>
+		</DECISION>
+		<DECISION description='Metallic'>
+			<MOUSEENTRY instruction='Choose the smearing type used for the occupation'>
+				<OPTION description='Fermi-Dirac smearing (finite-temperature metal)' variablename='occopt' variablevalue='3'/>
+				<OPTION description='"Cold smearing" of N. Marzari with a=-.5634 (minimization of the bump)' variablename='occopt' variablevalue='4'/>
+				<OPTION description='"Cold smearing" of N. Marzari with a=-.8165 (monotonic function in the tail)' variablename='occopt' variablevalue='5'/>
+				<OPTION description='Smearing of Methfessel and Paxton ' variablename='occopt' variablevalue='6'/>
+				<OPTION description='Gaussian smearing' variablename='occopt' variablevalue='7'/>
+			</MOUSEENTRY>
+			<KEYBOARDENTRY instruction='Specify the temperature of the smearing (give units: Ha, Ry, eV, K)' variablename='tsmear' textlen='1'/>
+		</DECISION>
+	</CHOICE>	
+
+	<KEYBOARDENTRY instruction='Preconditioning of the residual potential to be transferred in the SCF (Default 1.0)' variablename='diemix' textlen='1'/>
+	<KEYBOARDENTRY instruction='Give model for the Dielectric Macroscopic constant (speed up SCF procedure, Default 1d6)' variablename='diemac' textlen='1'/>
+
+	<MOUSEENTRY instruction='Control the self consistency'>
+		<OPTION description='1.  Get the largest eigenvalue of the SCF cycle (developper option)' variablename='iscf' variablevalue='1'/>
+		<OPTION description='2.  SCF cycle, simple mixing of the potential' variablename='iscf' variablevalue='2'/>
+		<OPTION description='3.  SCF cycle, Anderson mixing of the potential' variablename='iscf' variablevalue='3'/>
+		<OPTION description='4.  SCF cycle, Anderson mixing of the potential based on the two previous iterations' variablename='iscf' variablevalue='4'/>
+		<OPTION description='5.  SCF cycle, CG based on the minim. of the energy with respect to the potential(DEFAULT)' variablename='iscf' variablevalue='5'/>
+		<OPTION description='6.  SCF cycle, Pulay mixing of the potential based on the npulayit previous iterations' variablename='iscf' variablevalue='7'/>
+		<OPTION description='7.  SCF cycle, simple mixing of the density' variablename='iscf' variablevalue='12'/>
+		<OPTION description='8.  SCF cycle, Anderson mixing of the density' variablename='iscf' variablevalue='13'/>
+		<OPTION description='9.  SCF cycle, Anderson mixing of the density based on the two previous iterations (DEFAULT PAW)' variablename='iscf' variablevalue='14'/>
+		<OPTION description='10. SCF cycle, CG based on the minim. of the energy with respect to the density' variablename='iscf' variablevalue='15'/>
+		<OPTION description='11. SCF cycle, Pulay mixing of the density based on the npulayit previous iterations' variablename='iscf' variablevalue='17'/>
+		<OPTION description='12. Non-self-consistent calculation is to be done (see documentation)' variablename='iscf' variablevalue='-2'/>
+		<OPTION description='13. Like 12, but initialize occ and wtk (see documentation)' variablename='iscf' variablevalue='-3'/>
+		<OPTION description='14. Like 12, but followed by the determination of excited states within TDDFT' variablename='iscf' variablevalue='-1'/>
+	</MOUSEENTRY> 
+
+	<KEYBOARDENTRY instruction='Maximum number of SCF iterations' variablename='nstep' textlen='1'/>
+	
+	<CHOICE instruction='Choose the SCF cycle convergence criteria'>
+		<DECISION description='Converge on the difference on the energy'>
+		<KEYBOARDENTRY instruction='Minimum difference of energy (specify units: Ha, Ry, eV, K)' variablename='toldfe' textlen='1'/>
+		</DECISION>
+		<DECISION description='Converge on the difference on the force'>
+		<KEYBOARDENTRY instruction='Minimum difference of the force (no units)' variablename='toldff' textlen='1'/>
+		</DECISION>
+		<DECISION description='Converge on the difference of the wavefunction'>
+		<KEYBOARDENTRY instruction='Minimum difference of the wavefunction (no units)' variablename='tolwfr' textlen='1'/>
+		</DECISION>
+		<DECISION description='Converge on the difference of the potential'>
+		<KEYBOARDENTRY instruction='Minimum difference of the potential (no units)' variablename='tolvrs' textlen='1'/>
+		</DECISION>
+	</CHOICE>
+</SECTION>

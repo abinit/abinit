@@ -1,0 +1,186 @@
+     FIXME: this file is outdated.
+
+     Paral_use
+
+     HOW TO RUN THE PARALLEL VERSION OF ABINIT ?
+
+     Copyright (C) 1999-2016 ABINIT group (XG,DCA)
+     This file is distributed under the terms of the
+     GNU General Public License, see ~abinit/COPYING
+     or http://www.gnu.org/copyleft/gpl.txt .
+     For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+
+     The reader should have read the ~abinit/doc/users/abinit_help.html file,
+     and be sufficiently experienced with the use of the sequential
+     code (abinit).
+
+     The parallelisation described in this document is the one
+     implemented using MPI. There is another parallelisation,
+     in development, based on OpenMP, for SMP machines.
+     Since this parallelisation is in development, it is
+     not yet described in detail. Let us simply mention that
+     it uses comments (parallelisation directives),
+     except in the Src_*/rhohxc.f routine,
+     for which the -DOPENMP directive should be used at compile time.
+
+     ========================================
+
+     0) Present implementation of parallelism.
+
+     - ABINIT can benefit of parallelism for different k-points and
+      spin-polarisation
+     - ABINIT can also benefit of parallelism for different bands,
+      in the case of response functions, quite automatically.
+     - ABINIT can also benefit of parallelism for different bands,
+      for the ground-state calculations, but the user has
+      to set up a few input variables, and moreover, the algorithm
+      that is used is not exactly the same as without band
+      parallelism (and might not be as stable).
+
+     There is little limitations of this combined approach
+     (k-points, spin-polarisation, bands) for
+     response functions, but if you are conducting ground-state
+     calculations, and if you are using only ONE k-point (which is frequent
+     for molecules in a big box, or for large systems - more than
+     20 atoms) you will be quite limited, by using the only available
+     band parallelisation (typically, 4-8 processors or less).
+
+     The parallelisation over k-points is very efficient in terms
+     of communications (so that running
+     it on a cluster of workstations linked by an Ethernet
+     100 Mbits/sec network is OK). 
+     The parallelisation over bands is less efficient, but you might
+     be very happy with it, depending on your problem, and your type
+     of machines.
+
+     The library of routines called MPI has been used to implement
+     the parallelism. So, MPI must be available on the machine(s)
+     you want to use.
+
+
+     1) How to make the parallel code
+
+     FIXME: this section is outdated.
+     You should set up a makefile_macros file with specific indications
+     for parallelism. Presently, there are examples of such files for :
+     - SMP machines (DEC/Compaq, CRAY_T3E, SGI Origin, HP, Compaq,
+      Fujitsu, Ultrasparc, Intel)
+     - cluster running MPI under MPICH (DEC/Compaq, Intel)
+     - cluster running MPI under LAM (IBM workstations)
+     They can be found in the appropriate subdirectories of the
+     ~/abinit/Mach_dept_files directory.
+     You might also have to provide a machine-dependent
+     mpif.h file also (or more precisely, a link from mpif.h
+     in the ~abinit directory to the appropriate mpif.h file).
+
+     Then, supposing that the library archives have already been
+     made (nothing special about them in the parallel case) you have to issue :
+
+     make abinit
+
+     This will make 'abinit', the parallel version of ABINIT.
+
+
+     2) How to use the parallel code.
+
+     Different examples are given in the Test_paral directory.
+     The command to be used will differ from machine to machine.
+     Usually, you will have to define the number of processor
+     in the command (alternatively, sometimes, this number
+     is specified in an environment variable).
+     Except in the case of ground-state band parallelism (see later), the input file
+     in the sequential case is the same as in the parallel case.
+
+     For example (compare with the sequential case) :
+
+     - on a CRAY machine, the command line might be
+
+       mpprun -n number_of_processors abinit < files >& log
+
+       or
+
+       mpirun -np number_of_processors abinit < files >& log
+
+       where number_of_processors is the number of processors on which
+       the job must be run. The user's path might have to be updated
+       to find the commands mpprun or mpirun.
+
+     - on an IBM cluster, under LAM, one has first to boot the cluster,
+       using a command like
+
+       lamboot cluster_file
+
+       where cluster_file is a file that contains the name of machines
+       belonging to the cluster. Then, one will issue
+
+       mpirun -w -c number_of_processors abinit < files >& log
+
+       where number_of_processors is the number of processors on which
+       the job must be run. The user's path might have to be updated
+       to find the command mpirun. Then, one might have to wipe the cluster :
+
+       wipe cluster_file
+
+     - on a DEC cluster, under MPICH, one will issue
+
+       mpirun -np number_of_processors                           \ (continued)
+            -machinefile cluster_file abinit < files >& log
+
+       where cluster_file is a file that contains the name of machines
+       belonging to the cluster, and number_of_processors is the
+       number of processors on which
+       the job must be run. The user's path might have to be updated
+       to find the command mpirun.
+
+
+     When running on a cluster, one might have to pay attention to
+     paths for files in the "files" file. Depending on the way the
+     cluster is set up, one might be forced to use absolute paths
+     for these file names instead of relative paths.
+
+     The "log" file is actually closed by each processor, at the
+     very beginning of the run, and a new file, different
+     for each processor, is created. Its name
+     is derived from the tmp root name,
+     followed by "LOG", and the number of the processor.
+
+     In order to use the band parallelism for the ground-state,
+     you need to use the following input variables :
+     wfoptalg 1
+     nbdblock  (to be set to the number of processors
+                you would like to use to treat one k point,
+                typically 4-8, higher might cause unstabilities)
+     See Test_v3#41 for an example.
+
+
+     3) Optimisation
+
+     Compared with the sequential version, there is nearly no
+     additional tuning of speed, memory or disk usage to be
+     done by the user.
+
+     - We have already seen how to define the number of processor.
+
+     - The wavefunctions belonging to different k points and/or spin polarization
+      will be spread on the different processors. This will save
+      a lot of memory. 
+
+     - One might also pay attention to the input variable
+     "localrdwf", for which the above-mentioned issue is
+     also important, although less critical for cluster machines.
+     In this case, the default is always
+     0, as it is usually more convenient to work with only
+     one file, read by one processor, then transmitted to the others.
+
+
+     4) Usaged of compilation options and keywords for parallelisation
+
+
+      - if the option -DMPI is introduced in cpp flags, the parallelisation over
+        k-points, spin or perturbations is activated.
+
+      - A band/FFT parallelisation can be added to the previous one with the keywords paral_kgb.
+        To be activated, band/FFT parallelisation requires the option compilation -DMPI to be present.
+        Thus, the work load is split over the two dimensions of a band/FFT 3d cartesian grid.
+        By default, this parallelisation is off.
+        This parallelisation can not be specified for each datasets.

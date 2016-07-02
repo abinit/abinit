@@ -1,0 +1,29 @@
+!!****d* ABINIT/69_wfdesc
+!! NAME
+!! 69_wfdesc
+!!
+!! DESCRIPTION
+!! This directory contains routines used
+!! to treat the Bethe-Salpeter equation.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! calc_optical_mels.F90
+!! classify_bands.F90
+!! interfaces_69_wfdesc.F90
+!! m_io_kss.F90
+!! m_oscillators.F90
+!! m_shirley.F90
+!! m_wfd.F90
+!! outkss.F90
+!! wfd_mkrho.F90
+!! wfd_pawrhoij.F90
+!! wfd_vnlpsi.F90
+!!
+!!***

@@ -1,0 +1,6 @@
+<SECTIONS>
+  <SECTION sectionname='Structure'   associatedfile='Structure_tag.xml'   requirements='None'/>
+  <SECTION sectionname='Calculation' associatedfile='Calculation_tag.xml' requirements='Structure'/>
+  <SECTION sectionname='Relaxation'  associatedfile='Relaxation_tag.xml'  requirements='Structure'/>
+  <SECTION sectionname='KptGrid'     associatedfile='KptGrid_tag.xml'     requirements='Structure'/>
+</SECTIONS>

@@ -1,0 +1,68 @@
+# Bi atom : reference test (very quick) for all LibXC functionals. nstep=1, nline=1.
+# Not accurate, only portability check.
+
+ndtset 3
+jdtset 2 3 4
+
+# mGGAs : different mGGA exchanges + PW92 correlation
+ixc1 -12202 
+ixc2 -12203 
+ixc3 -12204 
+ixc4 -12205 
+
+# mGGAs : Becke 88 exchange + mGGA correlation
+ixc5 -106232 
+
+usekden 1
+
+#Common data
+acell 3*10
+diemac 2.0d0
+diemix 0.5d0
+ecut 10
+
+nband 4 4
+ kptopt 0
+nkpt 1
+nstep 1
+nline 1
+occopt 2
+occ 1 1 1 1  1 0 0 0
+tolwfr 1.0d-14
+xred 3*0
+
+ntypat 1
+natom 1
+typat 1
+znucl 83
+
+nspinor 1
+nsppol  2
+nspden  2
+spinat  1 0 0
+
+#Avoid to print densities and wavefunctions
+prtden 0
+prtwf  0
+prteig 0
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t12.out, tolnlines=    0,   tolabs=  0.0,         tolrel= 0.0
+#%% psp_files = 83bi.psphgh
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   Isolated Bismuth atom
+#%%   Test energy mGGA functionals from libXC
+#%%   Spin-polarized case.
+#%%   This is to check the portability for different platform.
+#%%   Extremely quick (nstep=1, nline=1). 
+#%%<END TEST_INFO>

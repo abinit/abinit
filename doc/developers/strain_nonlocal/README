@@ -1,0 +1,368 @@
+	This directory contains documentation of the development of the
+routines which implement the nonlocal pseudopotential operations in
+response-function (RF) strain calculations.  These were written by D.
+R. Hamann in 2002-2003, and the were first included in the 4.2 release.
+While conceptually straightforward, the expressions to be evaluated are
+highly complex, and the only practical way to develop the code was to
+use a symbolic-manipulation program and automated post-processing.
+These tools are collected here, and their structure and usage are
+explained as an aid to future developers who embark on related
+projects.
+
+
+*********************** INTRODUCTION *********************************
+
+	The underlying theoretical approach to treating strain within
+density-functional perturbation theory is presented in strainpert.pdf,
+which is a preprint that has been submitted to Phys. Rev. B.  It is
+also posted on arXiv.org as cond-mat/0409269.  Before proceeding
+further, it would be well to read this at least through Sec. III-E.
+The equation numbers below refer to this preprint.
+
+	The application of the nonlocal psp's in ground-state (GS)
+calculations to find wavefunctions, energies, forces, and stresses was
+developed by D. C. Allan.  He introduced the tensor formulation, Eq.
+(51), and routines implementing Eq. (52) for nonlocal wave-function
+operations, and the ground-state expectation values of Eq. (54) for
+stresses.  His approach was extended to RF atomic-displacement
+calculations by Allan and X. Gonze.  The necessary expressions were
+derived and coded by hand in routines metcon, cont13, cont22, cont24,
+etc. all in directory src/03nonlocal.  These are all called by nonlop,
+which is used in both GS and RF calculations.  The new RF strain
+routines were designed to parallel these existing routines as closely
+as possible in their operations, arguments, and structures within which
+they are called.  The new "machine-coded" routines are the following:
+
+To evaluate the action of the first strain derivatives of the psp's on
+wave functions, Eq. (54):
+
+	metstr.F90
+
+To evaluate the zero-order wave function expectation values of strain-
+strain second derivatives, Eq. (55):
+
+	contstr21.F90
+	contstr22.F90
+	contstr23.F90
+	contstr24.F90
+	contstr25a.F90
+	contstr25.F90
+	contstr26.F90
+
+To evaluate the zero-order wave function expectation values of mixed
+strain -- atomic-displacement second derivatives ("internal strain"),
+Eq. (56):
+
+	contistr01.F90
+	contistr03.F90
+	contistr10.F90
+	contistr12.F90
+	contistr21.F90
+	contistr30.F90
+
+	As discussed in Sec. III-E, the derivative nonlocal operators
+couple "right (|K>)" and "left (<K'|)" tensors of different ranks.  The
+"active" arguments aa and bb of all these routines are complex one-
+dimensional arrays indexed by a dictionary order of the Eq. (51)
+tensors, which have been summed over the wave-function c coefficients
+in Eq. (33) with appropriate f form factors and their derivatives as in
+Eqs. (48), (54-56).  In metstr, the bb argument is an output array of
+the same structure to be used in forming the argument "vectout" of
+nonlop.  Retaining the established calling structure, separate calling
+statements are invoked for each particular right-to-left change in
+tensor rank.  (These are noted in the comments in nonlop.)  For metstr,
+the argument "iterm" determines the rank coupling.  However, the
+second-derivative expressions are so complicated that each different
+rank coupling has been coded in a separate routine in the contstr*,
+contistr* series.
+
+
+********************** MATHEMATICA PROGRAMS **************************
+
+	The challenging task in creating these routines was to find the C
+coefficients in Eqs. (54-56).  For each set of subscripts indicating a
+particular pair of left and right tensor components, C is a different
+polynomial in certain subsets of the 3X3 metric-tensor and metric-
+tensor-derivative elements.  While hand computation of the many
+thousands of required polynomials is essentially impossible, the
+symbolic manipulation capabilities of Mathematica (henceforth "M") in
+fact enable this to be carried out in just a few lines of "core" M
+code.  The following four M programs are included in this directory:
+
+	make_metstr3.m
+	make_met2str.m
+	make_metintstr.m
+	make_metintstrv.m
+
+These routines are all very similar.  I will discuss make_met2str.m in
+detail, and note the differences for the others.  Some experience with
+M must be assumed at this point, and it would probably be well to have
+a reference at hand (eg. S. Wolfram, Mathematica, 3rd ed.,
+(Wolfram Media, Champaign, IL, 1996).  A later edition should do.  One
+need not necessarily know how to write programs in M to follow the
+subsequent discussion -- experience using it interactively should
+suffice.
+
+	Make_met2str.m evaluates the C coefficients in Eq. (55), the
+strain-strain second derivative term.  First, let's discuss the use of
+this program.  From an interactive M window, one first loads the file,
+executing the command
+
+	<<make_met2str.m
+
+This defines a function MakeMet2str[iterm,outfile], and one then
+executes the following series of commands,
+
+	MakeMet2str[1,"d2term1.out"]
+	MakeMet2str[2,"d2term2.out"]
+	...
+	MakeMet2str[6,"d2term6.out"]
+
+(where the outfile names are obviously arbitrary).  A few hundred lines
+of d2term1.out are included in this directory to give an idea of what
+the output looks like (there are 13,063 lines total!).
+
+	Turning to the program itself, I will refer to line numbers:
+
+Lines 1-23
+These are a comment which was carried over from the first routine
+of the series, metstr3.m, and does not accurately reflect what the
+current routine does.  However, it gives the general idea.
+
+Lines 25-28
+	The function name, some M program conventions, and a list of
+{private variables}.
+
+Lines 35-165
+	A dictionary of tensor products of k components, extending
+Allan's scheme to (agh!) 7th rank.  This is a two-index M List.  The
+indices following each line are comments for the programmer's benefit.
+
+Lines 168-298
+	The same thing for kp (<K'| in Eq. (55)).
+
+Lines 306-308
+	Definitions of the vectors k and kp as Lists of 3 components.
+
+Lines 314-315
+	The metric tensor m is defined as a 3X3 List of components, each
+of which is a function of two strain variables s1 and s2.  There are
+only 6 functions, not 9, building in the required symmetry of the
+metric tensor.  The functions m11[s1,s2], etc. have not been defined.
+Therefore, M will represent their derivatives symbolically, which is
+what we want.
+
+Lines 317,319
+	These define dot products and squared magnitudes of our vectors
+following Eq. (23).  Recall that k, kp are reduced wave vectors, which
+is why the m comes in.
+
+Line 376
+	This List defines the modified Legendre polynomials in Eq. (49).
+
+Line 326
+	The start of a do loop over rank (the loop control is at its end
+in M, line 369).  rank is the equivalent of the angular momentum l.
+
+Lines 328-337
+	This is a List of 6 possible polynomials "poly," each formed from
+derivatives of the squared magnitudes of k and/or kp and/or of the
+Legendre's, grouped so that each of the 6 represents a particular
+increment between input and output tensor rank.  Each invocation of the
+routine only uses one of these based on the "iterm" input variable for
+reasons of code structure discussed in the introduction.  This is where
+the formal derivatives of the undefined metric tensor component
+functions are introduced.
+
+Lines 339,340
+	These 6-term lists specify the input-output rank couplings, once
+again selected by the input iterm.
+
+Lines 345-346
+	This outputs some text and indices for the Fortran code.
+
+Lines 348-349
+	The number of elements of the input and output tensors for the
+current rank and iterm.
+
+Lines 354-357
+	The start of a double do loop on input and output tensor indices,
+and THE ONLY SIGNIFICANT COMPUTATION IN THE ENTIRE PROGRAM!  This is
+where M does in a few lines (and a few to a few ten's of computer
+minutes on a fairly old PIII machine) the work of a hundred graduate
+students for a hundred years.  From the horrendously complex poly, the
+"Coefficient" function extracts the coefficient of the product of the
+specified pair of k, kp tensor elements.  It is smart enough to ignore
+the order of the tensor components in poly, and probably does a pretty
+good job of collecting terms and identifying common subexpressions.
+Feeding the result to the "Simplify" function further cleans up and
+shortens the expression, probably better than could be done by hand.
+
+Lines 358-365
+	The results are written to the output file.  Note that cm is the
+C in Eq. (55), with the m, m' subscript indices.  The l subscript and
+nu, nu' pair are respectively rank and iterm.  The superscript indices
+belong to the metric-tensor derivative components of C, which will be
+evaluated when the Fortran routines are executed.  The # symbol here and
+elsewhere in the output is a flag to be used in post-processing.
+
+Lines 367-369
+	These are the controls at the ends of the triply-nested do loops.
+
+	Differences in the other M routines are as follows.
+make_metintstr.m evaluates C's in Eq. (56) for mixed strain -- atomic-
+displacement derivatives.  This is similar to make_met2str.m in almost
+all respects.  The difference is that the List poly is defined differently.
+Here, we have only one strain derivative.  Since the atomic-displacement
+derivative here is being taken with respect to a reduced atomic
+coordinate, this derivative simply brings down a reduced k or kp
+component (from the phase or "structure factor" exponential) without
+any metric tensor components.  This and the rank-coupling Lists above
+have 5 members in this case.  The C coefficients are output as members
+of a 3-dimensional cm array here, their first index being the atomic-
+displacement direction and the second and third m, m' as above.
+
+	make_metintstrv.m is the routine that was actually used for the
+internal strain routines.  The difference is explained in the comment
+lines 31-36.
+
+	make_metstr3.m is historically the first of this set.  It
+evaluates C's in Eq. (54), the first strain derivative expression.  The
+structure here is slightly different in that "rank" is an input
+variable and "iterm" is an (unrolled) internal loop.  The 3 poly's are
+defined on lines 333, 364, and 395.  Since there were some differences
+in the text to be output for the Fortran code, it was easier to write
+the "iterm" loop as unrolled.  The C coefficient cm is written as a 4-
+index array here, since it will be saved in the Fortran routine metstr
+and used for many executions.  After loading the file, MakeMetstr
+should be executed with the input variable rank set to 1, 2, and 3 (p,
+d, and f) and the resulting output files concatenated befor post-
+processing.  It appears from the comments to have been necessary to do
+rank = 0 by hand (something probably blew up).  This was a finite task.
+
+************************* POST PROCESSING ****************************
+
+	In case you haven't looked at the sample of d2term1.out, do so
+now.  The M output for the formal derivatives of the undefined metric
+tensor component functions, "Derivative(1,0)(m11)(s1,s1)," etc. is not
+Fortran.  The shell scripts fort_fix3.scr, fort_2fix.scr, and
+fort_fixis.scr post-process the raw M output for the C's in Eqs. (54),
+(55), and (56) respectively.  There are basically two sections to each
+script.  First, sed is invoked (with an in-line editing script) to
+substitute Fortran-friendly (and much shorter) notations for the metric
+tensor and metric-tensor derivative elements.  Each of these scripts
+replaces the file on which it operates (which is specified as an inline
+argument, eg. "./fort_2fix.scr d2term1.out"), so it is a good idea to
+make a copy first.
+
+	sed continues with some housekeeping.  Multiplication by 1 as an
+operation is eliminated.  Where M has put floating-point number with no
+decimal places, they are made into integers (eg. 6. -> 6).  Where there
+are decimals, "d0" is appended to make sure we don't get single-
+precision.  (Note that integers, of which there are lots, will not
+interfere with double-precision evaluation of these expressions.)  The
+one place we don't want integers is as divisors, so we restore double
+precision (eg. /48. -> /48 -> /48.d0).
+
+	Now we have cleaned-up, acceptable Fortran statements, but have
+many short lines which do not have proper free-form F90 continuation.
+The sed output is saved to a temporary file and further processed by
+format_code.x, the executable compiled from format_code.c, to fix the
+continuation and "compactify" the Fortran.  format_code.c simply copies
+its standard input to its standard output one character at a time, but
+deletes input newline characters. It counts and tests characters, and
+inserts newlines, continuation &'s, and spaces to produce reasonably
+uniform line lengths and follow Abinit indentation rules.  It breaks
+lines after )'s or the last of several adjacent )'s in an attempt to
+make the code at least somewhat readable, not that anyone would really
+want to.  It also makes use of the "#" characters inserted in the M
+programs to flag the start of each new "cm(i,j)=" statement.
+
+	The post-processed result of the excerpt of d2term1.out is shown
+in d2term1.fort, and starts at line 97 in contstr21.  This and the
+other full routines start by computing the needed metric tensor
+derivatives, evaluate all the necessary cm terms, save them for re-use
+where possible, and do the actual operations on the aa and bb array
+arguments at the very end.
+
+	The post-processing produced nearly error-free code.  There was a
+very small amount of hand-editing, no more than a few lines in each
+routine at most to fix a few things that caused compiler errors.  While
+the c program inserted a warning comment (for possible hand editing) in
+places when the number of continuation lines exceeded the Fortran 90
+Standard maximum, none of the compilers that have been used since this
+has been part of Abinit seemed to mind, so these comments were deleted.
+
+********************** INTERFACE WITH NONLOP *************************
+
+	nonlop is a long and complicated routine, so a broad-brush
+outline of what it does is in order.  Basically, it has two halves.  If
+the input variable signs==1, only the first half is executed and
+expectation values of the nonlocal psp's are output.  If signs=2, both
+halves are executed; the first to evaluate the "right" side of the
+separable nonlocal potential (or its derivatives) operating on the
+input wave function, and the second half to deliver plane wave matrix
+elements of the "left" side based on coefficients evaluated in the
+first half.
+
+	The computation of (form factors X tensors), (FFXT), acting on the
+input wave function is done in the opernl* routines.  (These routines
+all do the same thing, but are coded differently for better performance
+with different computer architectures.)  The same routines also have an
+"output" mode if needed in the second half of nonlop, but the discussion
+below will focus on the "input" mode.
+
+	The opernl3 routine has a loop over wave-vector blocks, and calls
+the routine mkffkg3 inside this loop. mkffkg3 internally loops over the
+wave vectors in the current block with index ipw.  The required
+products of tensors, form factors, and form factor derivatives vary
+widely depending on what is being done (the "choice" input variable),
+and the number of projectors for each angular momentum for the current
+type of atom.  The first thing mkffkg3 does is to compute the required
+tensor products of components each wave vector in the block, the
+kpgx(ipw,ii) array. This corresponds exactly to the tensor definitions
+in make_met2str.m (regarding ii as a one-dimensional index of the tnk
+List).  The remainder of the program packs the leading dimension of the
+output array ffkg(iffkg,ipw) with FFXT's in an order determined by a
+number of if's and do loops.  There is no simple mapping of the
+implicit composite of indices into iffkg.  However, referring to the
+tnk definition at the start of make_met2str.m, ffkg has sequential
+groups of elements corresponding to the full range of j in each (*i,j*)
+set.
+
+	opernl3 forms dot products on the plane wave index of ffkg and
+the wave function (including a phase factor), running over the entire
+index range iffkg=1,nffkg without regard to the composite nature of the
+iffkg index.  This is the most time-consuming part, and justifies the
+arcane packing of ffkg.  The remainder of the routine PARTIALLY UNPACKS
+the dot-product(iffkg) array into several output arrays, mimicking the
+if and do structure of mkffkg to recreate the composite identity of the
+iffkg index.  The reader is directed to the OUTPUT description in
+opernl3 for details.  The lead index of these arrays generally
+corresponds to a segment of 1,nffkg.
+
+	Now we come to the rationale for the detailed discussion of the
+last few paragraphs.  Segments of the output arrays of operln3 are the
+aa, bb arguments of our new routines for strain-perturbation RF
+calculations.  It was necessary to expand mkffkg3 to include the new
+FFXT's needed for these calculations, and to expand the set of output
+arrays and the unpacking part of opernl3 accordingly. The calling
+statements for the strain routines must comply with the iffkg structure
+(in its partially unpacked form) to pass the proper array segments as
+aa, bb arguments.
+
+	The other significant addition to implement the nonlocal strain
+operations was the need to extend mkffnl, the routine which computes
+the Eq. (48) form factors and their derivatives, to include the second
+derivatives.  This is called by a number of routines prior to calling
+nonlop.
+
+	We have discussed the "input" actions of opernl3, which produce
+expectation values.  The "output" mode producing wave functions utilizes
+only one of the new routines, metstr, and further extensions of opernl3
+(in the sign==-1, choice==3 section) to do the required "partial
+repacking" into the full iffkg index range.
+
+	The alternative routines opernl2 (calling mkffkg) and opernl4a,
+opernl4b function in the same manner as opernl3 and mkffkg3, with
+differences such as index ordering and loop unrolling.

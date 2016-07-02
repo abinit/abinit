@@ -1,0 +1,83 @@
+!Local variables ------------------------------
+!scalars
+ integer :: ifft,ix,iy,iz,nx,ny,nz,ldx,ldy,ldz,dat,fftalga,padat
+ real(dp) :: fact
+ character(len=500) :: msg
+!arrays
+ real(dp),allocatable :: arr(:,:,:,:),ftarr(:,:,:,:) 
+
+! *************************************************************************
+
+  nx = plan%dims(1);   ny=plan%dims(2);   nz=plan%dims(3)
+ ldx = plan%embed(1); ldy=plan%embed(2); ldz=plan%embed(3)
+ fftalga = plan%fftalg/100
+
+ SELECT CASE (fftalga)
+
+ CASE (FFT_FFTW3) 
+   call fftw3_c2c_ip(nx,ny,nz,ldx,ldy,ldz,plan%ndat,plan%isign,ff)
+
+ CASE (FFT_DFTI) 
+   call dfti_c2c_ip(nx,ny,nz,ldx,ldy,ldz,plan%ndat,plan%isign,ff)
+
+ CASE (FFT_SG, FFT_SG2002)
+   ! Fallback to sg_fft_cc
+   ! 1) we have to change shape and type complex -> double because we have an explicit interface. 
+   ! 2) transform is out-of-place here
+   ! 3) Cannot use [ZC]copy: this is a template used both for single and double precision.
+
+   ABI_MALLOC(arr,  (2,ldx,ldy,ldz))
+   ABI_MALLOC(ftarr,(2,ldx,ldy,ldz))
+   
+   do dat=1,plan%ndat
+     padat = (dat-1) * plan%ldxyz
+     !  
+     ! Copy input data in arr
+     do iz=1,nz
+       do iy=1,ny
+         do ix=1,nx
+           ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy + padat
+           arr(1,ix,iy,iz) = DBLE (ff(ifft))
+           arr(2,ix,iy,iz) = AIMAG(ff(ifft)) 
+         end do 
+       end do
+     end do
+     
+     ! c2c with ndat = 1
+     call sg_fft_cc(plan%fftcache,nx,ny,nz,ldx,ldy,ldz,1,plan%isign,arr,ftarr)
+     !  
+     ! Copy results stored in ftarr
+     !
+     if (plan%isign==-1) then  
+       ! Copy and scale the transform
+       fact = one/plan%nfft
+       do iz=1,nz
+         do iy=1,ny
+           do ix=1,nx
+             ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy + padat
+             ff(ifft) = fact * DCMPLX(ftarr(1,ix,iy,iz), ftarr(2,ix,iy,iz))
+           end do 
+         end do
+       end do
+       !
+     else
+       ! Direct copy.
+       do iz=1,nz
+         do iy=1,ny
+           do ix=1,nx
+             ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy + padat
+             ff(ifft) = DCMPLX(ftarr(1,ix,iy,iz), ftarr(2,ix,iy,iz))
+           end do 
+         end do
+       end do
+     end if
+     
+   end do
+   
+   ABI_FREE(arr)
+   ABI_FREE(ftarr)
+
+ CASE DEFAULT
+   write(msg,'(a,i0)')"Wrong fftalga ",fftalga
+   MSG_ERROR(msg)
+ END SELECT

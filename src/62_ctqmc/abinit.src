@@ -1,0 +1,39 @@
+# -*- Python -*-
+#
+# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Source files making up the 67_recursion library
+#
+
+# Source file attributes
+ABI_SRC_NIL = 0     # No attribute
+ABI_SRC_BLT = 1     # The file is built by a script
+ABI_SRC_DEP = 2     # The file depends on other files
+
+# Source files
+sources = [
+ "m_BathOperator.F90",
+ "m_data4entropyDMFT.F90",
+ "m_Ctqmc.F90",
+ "m_CtqmcInterface.F90",
+ "m_FFTHyb.F90",
+ "m_GreenHyb.F90",
+ "m_ImpurityOperator.F90",
+ "m_ListCdagC.F90",
+ "m_MapHyb.F90",
+ "m_MatrixHyb.F90",
+ "m_OurRng.F90",
+ "m_Stat.F90",
+ "m_Vector.F90",
+ "m_VectorInt.F90",
+ "m_global.F90"
+ ]
+
+# IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
+# This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

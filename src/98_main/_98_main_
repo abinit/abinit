@@ -1,0 +1,39 @@
+!!****d* ABINIT/98_main
+!! NAME
+!! 98_main
+!!
+!! DESCRIPTION
+!! This directory contains the Fortran programs top routines,
+!! presently abinit.f, mrgddb.f, anaddb.f, lwf.f,
+!! conducti.f, chi.f, sig.f, aim.f and cut3d.f.
+!! Main routine for conducting LDA calculations by self-consistent cycles.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! abinit.F90
+!! aim.F90
+!! anaddb.F90
+!! band2eps.F90
+!! bsepostproc.F90
+!! conducti.F90
+!! cut3d.F90
+!! fftprof.F90
+!! fold2Bloch.F90
+!! ioprof.F90
+!! lapackprof.F90
+!! macroave.F90
+!! mrgddb.F90
+!! mrgdv.F90
+!! mrggkk.F90
+!! mrgscr.F90
+!! optic.F90
+!! ujdet.F90
+!! vdw_kernelgen.F90
+!!
+!!***

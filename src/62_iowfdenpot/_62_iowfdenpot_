@@ -1,0 +1,33 @@
+!!****d* ABINIT/62_iowfdenpot
+!! NAME
+!! 62_iowfdenpot
+!!
+!! DESCRIPTION
+!! This directory contains level-4 routines used
+!! to treat the input/output of wavefunction files,
+!! density files and potential files.
+!! These are mostly utility routines, used in different parts
+!! of ABINIT, connected to the header input/output, or the
+!! reading of some part of files. The density and potential
+!! file I/O is treated by ioarr.F90 .
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! WffReadEigK.F90
+!! WffReadSkipK.F90
+!! initwf.F90
+!! interfaces_62_iowfdenpot.F90
+!! m_io_screening.F90
+!! m_wfk.F90
+!! out1dm.F90
+!! outwant.F90
+!! randac.F90
+!! rdnpw.F90
+!!
+!!***

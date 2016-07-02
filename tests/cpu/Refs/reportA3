@@ -1,0 +1,108 @@
+ getcut  wavevector=  0.0000  0.0000  0.0000  ngfft=  20  20  20
+         ecut(hartree)=      4.900   => boxcut(ratio)=   2.00709
+ setup2: Arith. and geom. avg. npw (full set) are     491.500     491.457
+    Total energy(eV)=-2.01899417298265E+02 ; Band energy (Ha)= -1.6271486170E+00
+ Detailed analysis of some time consuming routines 
+                          tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata
+                         (sec)                (msec)              (microsec)
+- fourwf(pot)            0.385       240       1.603     16000       0.100
+- fourwf(den)            0.061        64       0.946      8000       0.118
+- fourdp                 0.092        71       1.293      8000       0.162
+- nonlop(apply)          0.053       240       0.220       982       0.224
+- nonlop(forces)         0.016        64       0.244       982       0.249
+- nonlop(stress)         0.004         8       0.488       982       0.497
+- projbd                 0.008       320       0.024      1966       0.012
+- xc:pot/=fourdp         0.062         9       6.944      8000       0.868
+
++Overall time at end (sec) : cpu=          1.4  wall=          1.4
+ 
+ getcut  wavevector=  0.0000  0.0000  0.0000  ngfft=  24  24  24
+         ecut(hartree)=      7.000   => boxcut(ratio)=   2.01510
+ setup2: Arith. and geom. avg. npw (full set) are     889.500     889.483
+    Total energy(eV)=-2.03035421425050E+02 ; Band energy (Ha)= -1.6642060012E+00
+ Detailed analysis of some time consuming routines 
+                          tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata
+                         (sec)                (msec)              (microsec)
+- fourwf(pot)            0.789       240       3.288     27648       0.119
+- fourwf(den)            0.104        64       1.617     13824       0.117
+- fourdp                 0.160        71       2.256     13824       0.163
+- nonlop(apply)          0.057       240       0.236      1778       0.133
+- nonlop(forces)         0.033        64       0.519      1778       0.292
+- nonlop(stress)         0.010         8       1.221      1778       0.687
+- projbd                 0.025       320       0.079      3558       0.022
+- xc:pot/=fourdp         0.117         9      13.021     13824       0.942
+
++Overall time at end (sec) : cpu=          2.1  wall=          2.1
+ 
+ getcut  wavevector=  0.0000  0.0000  0.0000  ngfft=  30  30  30
+         ecut(hartree)=     10.800   => boxcut(ratio)=   2.02789
+ setup2: Arith. and geom. avg. npw (full set) are    1714.500    1714.263
+    Total energy(eV)=-2.03612344352608E+02 ; Band energy (Ha)= -1.6423498799E+00
+ Detailed analysis of some time consuming routines 
+                          tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata
+                         (sec)                (msec)              (microsec)
+- fourwf(pot)            1.691       240       7.048     54000       0.131
+- fourwf(den)            0.252        64       3.937     27000       0.146
+- fourdp                 0.371        71       5.227     27000       0.194
+- nonlop(apply)          0.162       240       0.675      3428       0.197
+- nonlop(forces)         0.057        64       0.885      3428       0.258
+- nonlop(stress)         0.014         8       1.709      3428       0.499
+- projbd                 0.051       320       0.159      6858       0.023
+- xc:pot/=fourdp         0.225         9      24.957     27000       0.924
+
++Overall time at end (sec) : cpu=          4.0  wall=          4.0
+ 
+ getcut  wavevector=  0.0000  0.0000  0.0000  ngfft=  32  32  32
+         ecut(hartree)=     12.500   => boxcut(ratio)=   2.01062
+ setup2: Arith. and geom. avg. npw (full set) are    2103.500    2103.500
+    Total energy(eV)=-2.03710393787283E+02 ; Band energy (Ha)= -1.6903821581E+00
+ Detailed analysis of some time consuming routines 
+                          tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata
+                         (sec)                (msec)              (microsec)
+- fourwf(pot)            1.840       240       7.666     65536       0.117
+- fourwf(den)            0.287        64       4.486     32768       0.137
+- fourdp                 0.422        71       5.942     32768       0.181
+- nonlop(apply)          0.195       240       0.814      4206       0.193
+- nonlop(forces)         0.061        64       0.946      4206       0.225
+- nonlop(stress)         0.016         8       1.953      4206       0.464
+- projbd                 0.064       320       0.201      8414       0.024
+- xc:pot/=fourdp         0.277         9      30.816     32768       0.940
+
++Overall time at end (sec) : cpu=          4.5  wall=          4.5
+ 
+ getcut  wavevector=  0.0000  0.0000  0.0000  ngfft=  36  36  36
+         ecut(hartree)=     15.900   => boxcut(ratio)=   2.00557
+ setup2: Arith. and geom. avg. npw (full set) are    2997.500    2997.365
+    Total energy(eV)=-2.03797092225623E+02 ; Band energy (Ha)= -1.6499021071E+00
+ Detailed analysis of some time consuming routines 
+                          tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata
+                         (sec)                (msec)              (microsec)
+- fourwf(pot)            2.834       240      11.808     93312       0.127
+- fourwf(den)            0.443        64       6.927     46656       0.148
+- fourdp                 0.664        71       9.353     46656       0.200
+- nonlop(apply)          0.273       240       1.139      5994       0.190
+- nonlop(forces)         0.084        64       1.312      5994       0.219
+- nonlop(stress)         0.021         8       2.686      5994       0.448
+- projbd                 0.096       320       0.299     11990       0.025
+- xc:pot/=fourdp         0.375         9      41.666     46656       0.893
+
++Overall time at end (sec) : cpu=          6.2  wall=          6.2
+ 
+ getcut  wavevector=  0.0000  0.0000  0.0000  ngfft=  40  40  40
+         ecut(hartree)=     19.500   => boxcut(ratio)=   2.01223
+ setup2: Arith. and geom. avg. npw (full set) are    4091.500    4091.427
+    Total energy(eV)=-2.03134382068984E+02 ; Band energy (Ha)= -1.8820080579E+00
+ Detailed analysis of some time consuming routines 
+                          tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata
+                         (sec)                (msec)              (microsec)
+- fourwf(pot)            3.963       240      16.512    128000       0.129
+- fourwf(den)            0.609        64       9.522     64000       0.149
+- fourdp                 0.859        71      12.104     64000       0.189
+- nonlop(apply)          0.389       240       1.619      8182       0.198
+- nonlop(forces)         0.125        64       1.953      8182       0.239
+- nonlop(stress)         0.031         8       3.906      8182       0.477
+- projbd                 0.123       320       0.385     16366       0.023
+- xc:pot/=fourdp         0.514         9      57.074     64000       0.892
+
++Overall time at end (sec) : cpu=          8.5  wall=          8.5
+ 

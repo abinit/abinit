@@ -1,0 +1,218 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2002 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors .
+</h5>
+
+<pre>
+Many thanks to the following contributors to the ABINIT project
+between November 2001 and February 2002:
+J.-M. Beuken, J.-F. Brie're, M. Cote', R. Caracas,
+G. De Cock, T. Deutsch, Ph. Ghosez, F. Jollet,
+B. Magne, M. Mikami, V. Olevano, J.-Y. Raty, V. Recoules, A. Roy,
+L. Sindic, S. Tausendpfund, M. Torrent, M. Verstraete,
+M. Veithen, G. Zerah
+
+I think it is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 3.3, released on March 8, 2002.
+
+Changes with respect to version 3.2 :
+
+A. Changes for the installation.
+B. Most noticeable changes in the package
+C. WARNINGS.
+D. Other changes.
+
+__________________________________________________________________
+
+A.  News concerning the installation.
+
+A1. Files for installation on MAC under OS X are available
+    (~abinit/Machine_dept_files/MAC/makefile_macros.macosx).
+    The files previously needed for previous versions of MacOS
+    have been deleted.
+    (JMB + XG)
+
+A2. The automatic testing has been made much more portable, so that
+    the fldiff files are usually much easier to decipher (XG)
+    New commands to make the automatic tests are available :
+    make tests_allseq
+    make tests_dev
+    (Just type   make dev   to have a brief explanation,
+     or see the end of the section "How to make the other tests ?"
+     in the installation notes for v3.3)
+
+A3. New directories have been created :
+    Src_3paw (for Projector Augmented Wave routines - FJ and MT),
+    Src_7lwf (for Lattice Wannier Functions, RC).
+
+A4. The abinit Web site is now located at http://www.abinit.org
+
+__________________________________________________________________
+
+B.  Most noticeable changes.
+
+B1. A MPI band-by-band parallelism for the ground state calculations
+    has been coded by Aline Roy.
+    See the input variables nbdblock (should be equal to the
+    number of processors the user wishes for this
+    parallelisation), and wfoptalg (that should be equal to 1).
+    The code must have been compiled with the
+    MPI flags in the makefile_macros for this option to be available.
+    This parallelization can be used at the same time as the MPI k-point
+    parallelisation, the MPI spin-parallelisation, or the OpenMP
+    parallelisation over plane wave coefficients.
+
+    WARNING : although this is an exciting new feature,
+    the algorithm used in this parallelisation will likely be efficient
+    only for a quite small number of processors (lower than 10 ?).
+    Also, we have NOT worked on the decrease of the memory needs.
+    Another type of algorithm is presently under study by Christophe Audouze
+    and Francois Alouges.
+
+    However, we hope that it will be a very useful parallelisation
+    as soon as the parallelisation over k points is not interesting
+    (especially when nkpt=1 !!). Further developments are likely
+    in v3.4 . Still, if you want to be testers of this
+    possibility, please go on ...
+
+B2. Improvements for Time-Dependent DFT for excited states (iscf=-1).
+    The option mkmem==0 allows now to store
+    the real space wavefunctions on disk : it is possible to
+    use TDDFT for much bigger systems than previously. This has been
+    done by J.-Y. Raty, who has tested SiH clusters with about 70 atoms.
+    Also, the possibility to restart the calculation has been implemented.
+    This has also been done by J.-Y. Raty.
+    The computation of Cauchy coefficients has been implemented
+    and a new test of TDDFT, for N2, is available (both by XG).
+
+B3. New GGAS are available (however, corresponding pseudopotentials
+    should still be generated) :
+    - ixc=14 => revPBE of Y. Zhang and W. Yang, Phys. Rev. Lett. 80, 890 (1998)
+    - ixc=15 => RPBE of B. Hammer, L.B. Hansen and J.K. Norskov,
+                 Phys. Rev. B 59, 7413 (1999)
+    - ixc=16 => HCTH functional of F.A. Hamprecht, A.J. Cohen,
+                 D.J. Tozer and N.C. Handy, J. Chem. Phys. 109, 6264 (1998).
+    The latter should be particularly accurate for chemical
+    applications (outperforms the B3LYP in the energetics of
+    small molecules). (XG)
+
+B4. Response functions are available for different GGAs :
+    PBE and associated functionals : ixc=11,12,14,and 15.
+    The tests have been quite intensive.
+    It has been checked with spin-polarized or not,
+    non-linear XC correction or not, also q=0 or not, or electric field.
+    See Test_v3, test cases #7,8,16,17,18, 62-66.
+    The memory needs have not yet been optimized.
+    (XG)
+
+B5. The localization tensor
+    (see C. Sgiarovello, M. Peressi, and R. Resta, Phys. Rev. B 64,
+    115200 (2001)), has been coded by M. Veithen,
+    as well as the band-by-band decompositions of the Born
+    effective charges (see Ph. Ghosez and X. Gonze,
+     J. Phys.: Condens. Matter 12, 9179 (2000)), and the
+    localization tensor (see M. Veithen, X. Gonze, and Ph. Ghosez,
+    AIP proceedings, to be published).
+    However, at the level of the localisation tensor, no symmetry
+    is yet used, so that its use is not straightforward,
+    contact Marek Veithen if you want to use it.
+
+B6. The computation of the optical conductivity tensor using
+    the Kubo-Greenwood formula has been coded by V. Recoules (in
+    collaboration with G. Zerah). It is available as a new utility :
+    conducti . See Test_v3, cases 68 (ABINIT preparation)
+    and 69 (conducti run). A comprehensive documentation
+    is still to be written.
+
+__________________________________________________________________
+
+C.  WARNINGS
+
+C1. Switch to 1998 Recommended Values of the Fundamental Constants.
+    This typically changed the values of many quantities
+    by one part per 1.0d5 . See ~abinit/src/*/defs_basis.f
+    By the way, the use of conversion factors defined in defs_basis.f
+    has been enforced in several routines. (XG)
+
+C2. Two differences in the protocol for developpers, see the
+    ~abinit/doc/developers/collab document.
+    1) The list of routines allocated to one developper is not
+       needed anymore : the use of CVS is sufficiently effective
+       at merging time. Still the concept of "task" remains :
+       two developers should work on the same functionality
+       of ABINIT
+    2) The delivery of the output of the automatic tests is now
+       mandatory. To help this, the automatic tests
+       can be executed now using the command
+       make tests_dev
+       in the ~abinit directory. This command produces
+       a "summary_tests.tar.gz" to be mailed with the modified
+       routines, comments, new automatic tests, new documentation,
+       etc ...
+
+__________________________________________________________________
+
+D.  Other changes (or on-going developments, not yet finalized).
+
+D1. A package (in development) towards the use of autoconf
+    has been contributed by STausendpfund.
+
+D2. JF Briere (in collaboration with M Cote) has developped
+    the use of the Data Explorer (IBM) freeware to analyze the results
+    of ABINIT, via cut3d, especially the analysis of wavefunction
+    files.
+
+D3. The ROBODOC list is now established automatically, and
+    the script abirules can be used to check or to enforce
+    more features than previously
+    (e.g. the change of the copyright year 2001 -> 2002
+    has been done automatically).
+    (contributed by Luc Sindic)
+
+D4. Test 8 has been created (spin-parallel) (XG)
+
+D5. The work on the GW part of ABINIT continues : many
+    small modifications or bug elimination (Valerio Olevano)
+
+D6. Different input variables, whose dimension are energies or
+    lengths, can now be input with an alternative unit than atomic units.
+    (XG)
+
+    For example, acell can now be specified in Angstrom.
+    This is explained in ~abinit/doc/users/abinis_help.html , section 3.2,
+    see the description of the 'ENERGY' and 'LENGTH' characteristics
+    of input variables. See also the input variables acell,
+    ecut, tsmear, ..., and the tests cases Test_v3#52 and 53.
+    Also, logical and character values in input files
+    are now allowed in response to selected token.
+    See also Test_v3#52 and 53. Until now, the latter is not particularly
+    useful, and the documentation is still lacking.
+    However, this is a step towards being able to read parts of the
+    SIESTA and GAUSSIAN input files.
+
+D7. Implementation of lattice Wannier functions was started,
+    by Razvan Caracas. See the Src_7lwf directory, and Src_main/lwf.f .
+
+D8. More URLs in Infos/other_codes and Infos/Miscellaneous/Crystals,
+    from MMikami
+
+D9. Bugs removed : G. DeCock, M. Verstraete, M. Mikami, G.-M. Rignanese,
+    T. Deutsch and some of the above-mentioned collaborators.
+</pre>

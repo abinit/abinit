@@ -1,0 +1,74 @@
+Analysis of the size of the tar.gz file
+
+Done on the basis of gonze/7.2.1-training/329 (generated March 21, 2013).
+
+ls -l gives 63 598 552 bytes.
+gunzip + ls -l gives 266 035 200 bytes.
+gunzip + tar -xvf + du -s gives 537904  (512 bytes blocks = 275 406 848 bytes)
+gunzip + tar -xvf + tar -cvf + ls -l gives 272 933 376 bytes.
+gunzip + tar -xvf + tar -cvf + gzip + ls -l gives 65 238 747 bytes.
+gunzip + tar -xvf + tar -cvf + gzip + gunzip + ls -l  gives again 272 933 376 bytes.
+gunzip + tar -xvf + tar -cvf + gzip + gunzip + tar -xvf + du -s gives again 537904  (512 bytes blocks = 275 406 848 bytes)
+
+Analysis of the 275 406 848 byte  7.2.1 directory.
+(du -s inside the directory)
+For the total of 537904 blocks one has the major contributions from :
+
+348800  tests    (64.8%)
+ 95336  doc      (17.7%)
+ 66880  src      (12.4%)
+  9184  gui      (1.7%)
+  8288  fallbacks(1.5%)
+  3328  config   (0.6%)
+  2168  configure(0.4%)
+  1752  util     (0.3%)
+
+535736  total major (99.6%)
+
+Analysis of the tar.gz file (65 238 747 bytes.)
+Tar then zip the corresponding dirs
+
+35168436 tests     (53.9%)
+18772061 doc       (28.8%)
+ 5935460 src       (9.1%)
+  960298 gui       (1.5%)
+ 3645507 fallbacks (5.6%)
+  219572 config    (0.3%)
+  144465 configure (0.2%)
+  160029 util      (0.2%)
+
+65005828 total major (99.6%)
+
+
+
+
+
+Analysis of older version (du -s inside the directory)
+Keep only > 5000
+
+ABINITv6.10.3 (December 2011)
+93176	doc
+7024	fallbacks
+8768	gui
+54352	src
+359912	tests
+
+-rw-r--r--  1 gonze  staff  18992974 Apr 15 13:29 doc.tar.gz
+-rw-r--r--  1 gonze  staff   3485417 Apr 15 13:29 fallbacks.tar.gz
+-rw-r--r--  1 gonze  staff    876786 Apr 15 13:30 gui.tar.gz
+-rw-r--r--  1 gonze  staff   4639369 Apr 15 13:30 src.tar.gz
+-rw-r--r--  1 gonze  staff  44062888 Apr 15 13:30 tests.tar.gz
+
+ABINITv6.8.2
+-rw-r--r--  1 gonze  staff   8281451 Apr 27 15:50 doc.tar.gz
+-rw-r--r--  1 gonze  staff   5302902 Apr 27 15:51 src.tar.gz
+-rw-r--r--  1 gonze  staff  28666233 Apr 27 15:51 tests.tar.gz
+
+The increase is due to the ABINIT school on parallelism in Bruyeres-le-Chatel.
+One should clean the corresponding dirs ...
+In particular, doc/tutorial/theory_mbt contains many large .svg files .
+   (doc/tutorial/theory_mbt accounts for 4.0MB in the tar.gz file)
+and
+tests/Psps_for_tests contains many large pseudopotential files
+   (that account for 13.9 MB in the tar.gz file)
+

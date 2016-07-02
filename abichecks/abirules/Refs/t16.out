@@ -1,0 +1,10 @@
+
+---------------------------------------------------------------------
+ Looking for forbidden statements in ABINIT src files:               
+  - forbidden access to standard output/standard error               
+  - forbidden allocate/deallocate statements                         
+  - forbidden explicit MPI_COMM_WORLD communicator                   
+---------------------------------------------------------------------
+----------->
+- There are 1619 F90 or header files in the complete set.
+- No Error or Warning !

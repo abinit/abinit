@@ -1,0 +1,6 @@
+This directory, abirules, contains tests which examine
+whether some of the abirules are followed or not.
+Some other correctness tests are also executed.
+
+Please, see the README file in the tests directory (above this one) to get help.
+

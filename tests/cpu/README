@@ -1,0 +1,71 @@
+
+This directory is used to make tests of speed of machines.
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+THIS FILE IS OBSOLETE
+
+Start these tests by using run-standard-tests in the ABINIT tests directory.
+Different series of runs will be executed.
+These are :
+
+A1 , for tests with small real space grids (and corresponding ecut),
+  in a 10x10x10 cubic cell containing two atoms aligned to form a chain.
+  The real space grids have linear size 16, 18, 20, 24, 30, 32, 36 and 40.
+  Two k-points (0 0 0) and (0 0 1/2) are used.
+  The variable fftalg is set to 101 and istwfk is set to 1 1.
+  On a Pentium Pro 200 MHz, the whole test takes about 3 minutes.
+
+A2, same as A1, but with fftalg 200 , istwfk 1 1
+
+A3, same as A1, but with fftalg 112 , istwfk 1 1
+       The output of this run serves as reference for the A series,
+       except A6.
+
+A4, same as A1, but with fftalg 400 , istwfk 1 1
+
+A5, same as A1, but with fftalg 401 , istwfk 1 1
+
+A6, same as A1, but with fftalg 112, and istwfk being the default.
+       WARNING : the numerical results differs from those of the
+       other Ax tests.
+
+
+B1 , for tests with large real space grids (and corresponding ecut),
+  in a 10x10x10 cubic cell containing two atoms aligned to form a chain.
+  The real space grids have linear size 48, 60, 64, 72, 80, 90, 96.
+  One k-point (0 0 0) is used.
+  The variable fftalg is set to 101 and istwfk is set to 1 1.
+  On a Pentium Pro, the whole test takes about 12 minutes.
+
+B2, same as B1, but with fftalg 200 , istwfk 1 
+
+B3, same as B1, but with fftalg 112 , istwfk 1
+       The output of this run serves as reference for the B series,
+       except B6.
+
+B4, same as B1, but with fftalg 400 , istwfk 1
+
+B5, same as B1, but with fftalg 401 , istwfk 1
+
+B6, same as B1, but with fftalg 112, and istwfk being the default.
+       WARNING : the numerical results differs from those of the
+       other Bx tests.
+
+C3 , for tests with larger and larger unit cells :
+  10x10x10 , 10x10x20 , 10x20x20 and 20x20x20 , containing 2, 4, 8 and 16 atoms.
+  The variable fftalg is set to 112. One k point is used.
+  On a Pentium Pro 200 MHz, the whole test takes about 1 minutes.
+  This test should be worked again, since the boxes with 2 and 4 atoms
+  are too fast, and to not allow to deliver accurate time measurements.
+  
+
+D3, same as B3, except k points, and with real space grids having
+  linear size 25, 27, 45, 50, 54, 75, 81.
+
+For each of these cases, a directory where all the results of the tests 
+are stored is created.
+It contains also a report on the suite of test, and the difference
+of this report with a reference report.
+
+   

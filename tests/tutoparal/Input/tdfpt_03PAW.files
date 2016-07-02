@@ -1,0 +1,8 @@
+tdfpt_03.in
+tdfpt_03.out
+tdfpt_03.i
+tdfpt_03.o
+tdfpt_03.tmp
+../../Psps_for_tests/ba_ps.abinit.paw
+../../Psps_for_tests/Ti-LDA-uspp.paw
+../../Psps_for_tests/8o.paw

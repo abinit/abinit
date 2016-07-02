@@ -1,0 +1,42 @@
+
+README for Macroave
+===================
+
+This directory contains the documentation relative to the
+macroave (for macro-average) code developed by P. Ordejon,
+J. Junquera, with contributions by J. Soler and A. Garcia.
+They kindly provided this code, for inclusion in the ABINIT
+distribution, under the GPL license, starting with ABINITv4.2 .
+
+With respect to the package received in July 2003, the following
+modifications have been performed (I have tried to keep as close
+as possible to the original delivered package):
+
+ - the main routine macroave.f , has been translated
+   to Fortran 90 free format, and re-formatted for ROBODOC
+   treatment (this is the only file that was modified);
+ - the ABINIT compilation procedure has been followed, instead
+   of the initial one.
+
+The macroave.tex , on the other hand, has not been modified,
+and, in particular, the section 2 (Compilation), is not
+coherent with the implementation in ABINIT.
+This means that the ABINIT user should simply skip this section,
+and, as usual, to compile, type the command :
+
+ * **make macroave**
+
+in the *~ABINIT/* directory. This will work, provided the
+user has set up the *makefile_macros* file appropriate
+for their machine.
+
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+
+Copyright (C) 2003-2016 ABINIT group (XG)
+This file is distributed under the terms of the
+GNU General Public License, see ~ABINIT/COPYING
+or http://www.gnu.org/copyleft/gpl.txt .
+For the initials of contributors, see ~ABINIT/Infos/contributors .
+

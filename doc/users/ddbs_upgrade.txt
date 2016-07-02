@@ -1,0 +1,130 @@
+
+ddbs.upgrade
+
+This document indicates how to upgrade DDBs produced
+with the RESPFN code to the format needed for ABINIT.
+The changes should be easy to do by hand.
+
+Copyright (C) 1999-2016 ABINIT group (XG)
+This file is distributed under the terms of the
+GNU General Public License, see ~abinit/COPYING
+or http://www.gnu.org/copyleft/gpl.txt .
+For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+
+----------------------------------------------------------
+
+I. Modifications to be done
+II. An example
+
+----------------------------------------------------------
+
+I. Modifications to be done
+
+1) Third line of the DDB, change
+
+ Version number    940629
+
+(or another version number)
+by
+
++DDB, Version number    990527
+
+The blanks and non-blanks are important !!
+
+
+2) Insert a blank in the first column of the lines that are comprised
+between those two lines that begin with 'natom' and 'zatom', provided their
+first character is a letter (and not a digit). Those
+that begins with a digit can also be modified, but this is
+not mandatory.
+
+3) Suppress the lines that begin with
+     apwsph
+     date
+     lloc
+
+4) Add a line
+ nsppol         1
+
+   just after the line that begins with  nkpt, and a line
+ occopt         0
+
+ (or occopt     2 , depending on the array occ )
+
+   just after the line that begins with  ntype.
+
+
+
+
+Additional information : although the input variables ng, ntype, tn, type, wftol
+and zatom of Corning and Respfn have been replaced by
+ngfft, ntypat, xred, typat, tolwfr and zion in ABINIT, the old names are
+still recognized.
+-------------------------------------------------------------
+
+II. An example.
+
+We only show the beginning of a DDB.
+Replace :
+
+
+ **** DERIVATIVE DATABASE ****
+ Version number    940629
+
+ Note : temporary (transfer) database
+
+ natom         5
+  nkpt       108
+  nsym         1
+ ntype         3
+occopt         0
+ nband        20
+ acell   .75589000000000D+01   .75589000000000D+01   .75589000000000D+01
+   amu   .13734000000000D+03   .47900000000000D+02   .16000000000000D+02
+apwsph   .75589000000000D+01   .75589000000000D+01   .75589000000000D+01
+  date     21794
+  ecut   .45000000000000D+02
+  iscf         1
+   ixc         5
+   kpt   .83333333333333D-01   .83333333333333D-01   .83333333333333D-01
+        -.83333333333333D-01   .83333333333333D-01   .83333333333333D-01
+         .83333333333333D-01  -.83333333333333D-01   .83333333333333D-01
+         .83333333333333D-01   .83333333333333D-01  -.83333333333333D-01
+         .83333333333333D-01   .83333333333333D-01   .25000000000000D+00
+        -.83333333333333D-01   .83333333333333D-01   .25000000000000D+00
+         .83333333333333D-01  -.83333333333333D-01   .25000000000000D+00
+  ...
+
+
+
+by
+
+
+
+ **** DERIVATIVE DATABASE ****
++DDB, Version number    990527
+
+ Note : temporary (transfer) database
+
+  natom         5
+   nkpt       108
+ nsppol         1
+   nsym         1
+ ntypat         3
+ occopt         0
+  nband        20
+  acell   .75589000000000D+01   .75589000000000D+01   .75589000000000D+01
+    amu   .13734000000000D+03   .47900000000000D+02   .16000000000000D+02
+   ecut   .45000000000000D+02
+   iscf         1
+    ixc         5
+    kpt   .83333333333333D-01   .83333333333333D-01   .83333333333333D-01
+        -.83333333333333D-01   .83333333333333D-01   .83333333333333D-01
+         .83333333333333D-01  -.83333333333333D-01   .83333333333333D-01
+         .83333333333333D-01   .83333333333333D-01  -.83333333333333D-01
+         .83333333333333D-01   .83333333333333D-01   .25000000000000D+00
+        -.83333333333333D-01   .83333333333333D-01   .25000000000000D+00
+         .83333333333333D-01  -.83333333333333D-01   .25000000000000D+00
+  ...
+
+

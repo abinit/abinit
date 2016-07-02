@@ -1,0 +1,35 @@
+==============================================================================
+
+make
+
+Typing "make" in the top directory (~abinit) leads to the compilation of all
+abinit sources, either standard, or following specific indications
+of a config file, see ~abinit/doc/build/config-template.ac for details.
+Usually, "make" should be prepared with configure,
+and even "./config/scripts/makemake" for developers using the bzr repository.
+
+------------------------------------------------------------------------------
+Specific keywords to be used with the ABINIT "make" in the top directory :
+help                 prints the present message
+help_dev (or dev)    prints additional keywords for developers
+mj4                  same as "make", but launches 4 processes
+multi multi_nprocs=XX  same as "make", but launches XX processes
+check-local (or tests_in)
+                     performs seven basic tests (after compilation)
+test_fast            performs the first basic test 
+                     (similarly, test_X with X=v1,v5,bigdft,etsf_io,libxc,
+                     wannier90 will execute the corresponding internal test)
+clean                cleans all the compiled files, executables, outputs, etc
+                     (does not remove the files that have been generated
+                      by */*/makemake ; issue */*/clean-source-tree instead)
+------------------------------------------------------------------------------
+For the (re)compilation of selected main codes, change the directory to
+src/main and type  "make name_of_main" where name_of_main is your main code.
+   (NOTE : at present, this works only after a first full compilation)
+For the (re)compilation of selected libraries, change the directory to
+a specific subdirectory of src or lib, and type  "make".
+For additional automatic tests (beyond the 5 basic ones), change the directory
+to  tests, and type  "make help"
+For additional cleaning, change the directory to the target directory,
+and type "make help" or (directly) "make clean"
+==============================================================================

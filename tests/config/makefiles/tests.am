@@ -1,0 +1,5 @@
+EXTRA_DIST = \
+	autogen.sh \
+	wipeout.sh \
+	config/scripts \
+	config/specs

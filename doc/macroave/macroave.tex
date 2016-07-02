@@ -1,0 +1,432 @@
+%macroave.tex
+%
+%   Javier Junquera  Jun  07, 2003
+%
+%   Manual for the Macroave program
+
+
+%\documentstyle[twocolumn,prb,aps]{revtex}
+%\documentstyle[prb,aps]{revtex}
+\documentstyle[11pt]{article}
+%\documentstyle{article}
+
+\tolerance 10000
+\textheight 22cm
+\textwidth 16cm
+\oddsidemargin 1mm
+\topmargin -15mm
+
+\baselineskip=14pt
+\parskip 5pt
+\parindent 1em
+
+\begin{document}
+
+% TITLE PAGE --------------------------------------------------------------
+
+\begin{titlepage}
+
+\begin{center}
+
+\vspace{1cm}
+
+{\huge {\sc User's Guide}}
+
+\vspace{4cm}
+
+{\Huge {\bf MACROAVE 1.1.0} }
+
+\vspace{3cm}
+
+{\Large {\it June 07, 2003} }
+
+\vspace{3cm}
+
+{\Large Javier Junquera}
+
+\vspace{5pt}
+
+{\it D\'epartement de Physique, Universit\'e de Li\`ege,
+              B\^atiment B-5, B-4000 Sart-Tilman, Belgium}
+
+\vspace{7mm}
+
+{\Large Pablo Ordej\'on}
+
+\vspace{5pt}
+
+{\it Institut de Ci\`encia de Materials de Barcelona - CSIC,
+Campus de la U.A.B.,
+08193 Bellaterra, Barcelona, Spain}
+
+\vspace{3cm}
+{\bf javier.junquera@ulg.ac.be}
+
+\end{center}
+
+\end{titlepage}
+
+% END TITLE PAGE --------------------------------------------------------------
+
+\tableofcontents
+
+\newpage
+
+
+
+\section{Introduction}
+\label{sec:intro}
+
+ The {\sc Macroave} program implements
+ the {\it macroscopic average technique},
+ introduced by A. Baldereschi and coworkers
+ (A. Baldereschi, S. Baroni, and R. Resta,
+ Phys. Rev. Lett. {\bf 61}, 734 (1988) ).
+ This is an extremely powerful method that relates
+ microscopic quantities, typical outputs of first-principles codes,
+ with macroscopic magnitudes,
+ needed to perform electrostatic analysis.
+ Within this methodology, we will be able of washing out all the
+ wiggles of the rapidly-varying functions of position (resembling
+ the underlying atomic structure) of the microscopic quantities,
+ blowing up only the macroscopic features.
+
+ It is a basic tool to calculate some important magnitudes in
+ surface or interface-related problems, such as:
+
+ \begin{itemize}
+    \item Band offsets and Work functions: \\
+          L. Colombo, R. Resta and S. Baroni, Phys Rev B  {\bf 44}, 5572 (1991)
+    \item Effective charges: \\
+          R. Martin and K. Kunc,  Phys Rev B  {\bf 24}, 2081 (1981)
+    \item High-frequency dielectric constants: \\
+          F. Bernardini and V. Fiorentini, Phys. Rev. B {\bf 58}, 15292 (1998)
+ \end{itemize}
+
+ {\sc Macroave} reads the magnitude, $f \left( \vec{r} \right)$,
+ whose macroscopic average will be calculated
+ (typically, charge densities or potentials)
+ at the points of a three-dimensional uniform real space grid,
+ as it is dumped into output files by standard first-principle codes.
+ Then it performs the macroscopic average in a two step process:
+
+ \begin{itemize}
+    \item First: a planar average of $f \left( \vec{r} \right)$
+          on planes parallel to the interface. \\
+          (To establish the notation, we will call the plane parallel
+          to the surface or the interface the $(x,y)$ plane, whereas the
+          perpendicular direction will be referred to as
+          the $z$ axis).
+
+          \begin{equation}
+             \overline{f} \left( z \right) =
+             \frac{1}{S} \int_{S}
+             f \left( \vec{r} \right) dx dy
+             \label{eq:planar}
+          \end{equation}
+
+          \noindent where $S$ is the surface of the unit cell perpendicular
+                    to the given direction.
+     \item Second: a final convolution of $\overline{f} \left( z \right)$
+           with filter functions. We choose
+           step functions, $\Theta$, of length $l$.
+
+            \begin{equation}
+                \omega_{l} \left( z \right)
+                 = \frac{1}{l} \Theta\left( \frac{l}{2} - |z| \right)
+                \label{eq:step}
+            \end{equation}
+
+
+
+            \begin{equation}
+               \overline{ \overline{f}} \left( z \right) =
+                       \int dz' \int dz'' \omega_{l_{1}} \left( z-z' \right)
+                       \omega_{l_{2}} \left( z'-z'' \right)
+                       \overline{f} \left( z'' \right)
+               \label{eq:macro}
+            \end{equation}
+ \end{itemize}
+
+ Currently, {\sc Macroave} can handle directly the microscopic
+ information provided by {\sc Siesta}
+ and {\sc Abinit}, but it should be easily adapted to any other
+ first-principle code.
+
+ Coded by J. Junquera and P. Ordej\'on, April 1999
+
+ Adapted for {\sc Abinit} by J. Junquera, October 2002
+
+
+ This is a short description of the compilation procedures
+ and of the datafile format for the {\sc Macroave} code.
+ This version is a very preliminary release of the code.
+ Please report problems, bugs and suggestions to
+ javier.junquera@ulg.ac.be
+
+\section{Compilation}
+
+\noindent
+
+ In this section we give all the steps required to install
+ the program.
+ We assume that you use UNIX and you will install {\sc Macroave} in
+ $\sim$/Macroave/Src, where $\sim$ indicates your home directory.
+ The commands you must type are in {\tt typewriter} font,
+ and {\tt \$} indicates the prompt.
+
+ Uncompress and unpack the gzipped tar file macroave.tar.gz
+
+ {\tt \$ gunzip macroave.tar.gz}
+
+ {\tt \$ tar -xvf macroave.tar}
+
+ Now, we suppose you have a fortran-90 compiler and you want to compile
+ the source files, included in the directory  {\tt Macroave/Src}.
+ Go into this subdirectory
+
+ {\tt \$ cd Macroave/Src}
+
+ The compilation of the program is done using a Makefile that is
+ provided with the code. This Makefile will generate the
+ executable file in several architectures, with a minimum of tuning
+ required from the user. The only variables you must set up
+ (included in a file called arch.make) are:
+
+  \begin{itemize}
+    \item FC : location of the fortran-90 compiler.
+    \item FFLAGS : flags to optimize the compilation in your platform.
+  \end{itemize}
+
+ Edit the arch.make file and set up the options that suit your platform.
+
+ Then, you just need to run the `make' utility
+ as usual, typing make in the source directory:
+
+ {\tt \$ make}
+
+ Since {\sc Macroave} is written in fortran-90 and the memory
+ is allocated dynamically,
+ the executable file, called macroave, should work for any job.
+
+\section{Running the program}
+
+ As it was mentionned in the introduction (Section ~\ref{sec:intro}),
+ {\sc Macroave} needs as input the microscopic magnitude,
+ $f \left( \vec{r} \right)$, whose macroscopic average we want to calculate.
+ $f \left( \vec{r} \right)$ will be, typically, a charge density
+ or a given potential (electrostatic, exchange-correlation only, total,...).
+ This information, that will be supplied by a first-principles
+ electronic-simulation code,
+ is usually stored at the points of a three-dimensional
+ real-space grid.
+
+ Obviously, the first thing we must do is to run the
+ electronic-simulation program
+ for the system we are interested in,
+ setting up the variables that instruct to write the corresponding
+ magnitude.
+ At the current time, {\sc Macroave} is able to digest directly
+ the output files supplied by {\sc Siesta} and {\sc Abinit}.
+ The relevant input variables {\it in these first-principles codes} are:
+
+ \begin{itemize}
+    \item {\sc Siesta}
+       \begin{itemize}
+          \item SaveRho
+          \item SaveDeltaRho
+          \item SaveElectrostaticPotential
+          \item SaveTotalPotential
+          \item SaveIonicCharge
+          \item SaveTotalCharge
+          \item LocalDensityOfStates
+       \end{itemize}
+    \item {\sc Abinit}
+       \begin{itemize}
+          \item prtpot
+          \item prtvha
+          \item prtvhxc
+          \item prtvxc
+          \item prtden
+       \end{itemize}
+ \end{itemize}
+
+ We refer the reader to the User's Guide of {\sc Siesta} or {\sc Abinit}
+ to learn more about these different options.
+
+ Once the simulation is finished, and the relevant output files
+ written, then move to the directory where the job was run (let's call it
+ {\tt $\sim$/rundir})
+
+ {\tt cd $\sim$/rundir}
+
+
+ Edit the {\sc macroave}'s input file (called {\it macroave.in})
+ and set up the right values for the different variables. This
+ file will be fully explained in section ~\ref{section:input}.
+
+ Execute macroave.x
+
+ {\tt \$ $\sim$/Macroave/Src/macroave.x }
+
+ The output is dumped in files which will be described
+ in Section ~\ref{section:output}.
+
+\section{Input data file}
+\label{section:input}
+
+ Apart from the information taken from the electronic-simulation
+ code, {\sc Macroave} requires only an input data file,
+ named {\it macroave.in}.
+
+ This input file has eigth lines:
+
+ \begin{description}
+ \itemsep 10pt
+ \parsep 0pt
+
+ \item[{\bf first line}] ({\it string}):
+      Name of the first-principles code used to generate the
+      microscopic magnitude, $f \left( \vec{r} \right)$.
+      At present, it only accepts two options:
+
+      \begin{itemize}
+         \item Siesta
+         \item Abinit
+      \end{itemize}
+
+ \item[{\bf second line}] ({\it string}):
+      Microscopic magnitude whose macroscopic average will be calculated:
+      \begin{itemize}
+         \item Potential
+         \item Charge
+      \end{itemize}
+
+ \item[{\bf third line}] ({\it string}):
+      Name of the file (output of the first-principles code)
+      where the magnitude $f \left( \vec{r} \right)$ is stored.
+      In the case of {\sc Siesta}, only the {\bf SystemLabel} is required
+      (see {\sc Siesta} User's Guide).
+
+ \item[{\bf fourth line}] ({\it integer}):
+      Number of convolutions with step functions required to
+      perform the macroscopic average. It can take only two different
+      values:
+      \begin{itemize}
+         \item 1 (for surface-related problems).
+         \item 2 (for interface-related problems).
+      \end{itemize}
+
+
+ \item[{\bf fifth line}] ({\it real}):
+      Length of the first step function used to perform
+      the macroscopic average (see Eq. ~\ref{eq:step})
+
+      {\it Units:} bohrs
+
+ \item[{\bf sixth line}] ({\it real}):
+      Length of the second step function used to perform
+      the macroscopic average (see Eq. ~\ref{eq:step})
+
+      {\it Units:} bohrs
+
+      {\it Use:} Only use if the number of convolutions is equal to 2.
+
+ \item[{\bf seventh line}] ({\it integer}):
+      Electronic charge of the system
+
+      {\it Units:} electrons
+
+      {\it Use:} Only use if we are computing the macroscopic average of
+                 charge densities.
+
+ \item[{\bf eigth line}] ({\it string}):
+      Kind of interpolation to get $f \left( \vec{r} \right)$
+      at a fine FFT grid, starting from the grid used
+      in the first-principles code.
+
+      At the current time, it only accepts two different values
+
+      \begin{itemize}
+         \item Spline
+         \item Linear
+      \end{itemize}
+
+ \end{description}
+
+
+%\vspace{5pt}
+%\subsection{\bf {\it SystemLabel}.ION}
+%This file contains information about the nuclei: their positions and
+%charges.
+%
+%The first line is the number of atoms you have in the system.
+%
+%Then you must have as much as lines as the number of atoms. Each line has
+%two numbers: the first one must be the z coordinate of the atom (we
+%suppose that the normal to the interface is the z-axis), and then
+%the charge of the nuclei. This charge is not the atomic number but the
+%difference of the atomic number and the core electrons. For example, for
+%Si it is 4.
+
+\section{Output files}
+\label{section:output}
+
+%Several output files are produced, with quantities related
+%with the averages of the charge densities and the electrostatic potentials
+%produced by them.
+%Each file is defined in the following paragraph.
+
+ Two output files are produced, containing the information
+ about the planar (see Eq. ~\ref{eq:planar}) and the
+ macroscopic average (see Eq. ~\ref{eq:macro}) of
+ $f \left( \vec{r} \right)$.
+
+ Contains, in two colums, values of $z$ and the profile
+ of the planar or macroscopic average.
+
+ The name of these output files is the same as the one
+ introduced in the third line of the input, plus an extension:
+
+ \begin{description}
+ \itemsep 10pt
+ \parsep 0pt
+
+ \item[.PAV] for the planar average.
+
+      {\it Units:}
+      \begin{itemize}
+         \item electrons/bohr$^3$ if $f \left( \vec{r} \right)$ is a charge
+               density.
+         \item eV if $f \left( \vec{r} \right)$ is a potential.
+               density.
+      \end{itemize}
+
+ \item[.MAV] for the macroscopic average.
+
+      {\it Units:}
+      \begin{itemize}
+         \item electrons/bohr$^3$ if $f \left( \vec{r} \right)$ is a charge
+               density.
+         \item eV if $f \left( \vec{r} \right)$ is a potential.
+               density.
+      \end{itemize}
+
+ \end{description}
+
+
+ \section{Examples}
+
+ In directory {\tt $\sim$/Macroave/Examples} you will find some
+ examples of input files.
+
+ \section{Known bugs and errors}
+
+ \begin{itemize}
+    \item The code only works for unit cells with a third axis which is perpendicular to the first two.
+    \item Spin polarization not implemented yet.
+          The planar average, and the corresponding macroscopic average
+          are only implemented for the first component of array RHO.
+ \end{itemize}
+
+\end{document}

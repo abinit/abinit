@@ -1,0 +1,21 @@
+  begin = 1
+  L_tail  = list_1%tail
+  IF ( L_tail .EQ. 0 ) THEN
+    firstHigher = -1 
+  ELSE  IF ( list_1%list(L_tail,Cdag_) .LT. time ) THEN
+    firstHigher = -1
+  ELSE 
+    DO WHILE ( L_tail .GT. begin )
+      old_tail  = L_tail
+      L_tail = (L_tail-begin) / 2 + begin
+      IF ( list_1%list(L_tail,Cdag_) .LT. time ) THEN
+        begin = L_tail + 1
+        L_tail  = old_tail
+      END IF
+    END DO
+    IF ( list_1%list(begin,Cdag_) .GT. time ) THEN
+      firstHigher = begin
+    ELSE
+      firstHigher = L_tail
+    END IF
+  END IF

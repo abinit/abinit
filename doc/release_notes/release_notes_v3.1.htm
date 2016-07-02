@@ -1,0 +1,215 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2001 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors .
+</h5>
+
+<pre>
+Many thanks to the following contributors to the ABINIT project
+between January 2001 and April 2001:
+Razvan Caracas, Nathalie Capron, Thierry Deutsch, Martin Fuchs,
+Ikutaro Hamada, Francois Jollet, Gyuchang Jun,
+Herve Matthis, Masayoshi Mikami, Sa Nai,
+Jean-Yves Raty, Gian-Marco Rignanese,
+Catherine Roult, Aline Roy, Luc Sindic, Pascal Thibaudeau,
+Marc Torrent, David Vanderbilt,
+Matthieu Verstraete, Gilles Zerah.
+
+I think it is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 3.1, released on April xx, 2001.
+
+Changes with respect to version 3.0 :
+
+A. Changes for the installation.
+B. Most noticeable changes in the code.
+C. WARNINGS.
+D. Other changes.
+
+__________________________________________________________________
+
+A.  Changes for the installation.
+
+A1. Information : the directories Test_v3 and Test_physics
+    have been created. They are similar to other Test* directories.
+    Test_v3 contain the new quick tests of ABINIT related to ABINITv3.1,
+    while Test_physics contain tests that are much longer to execute...
+    The tests 11 to 13 of the latter present
+    the computation of a Nb phonon band structure.
+
+A2. Information : the Src directories have been completely
+    reorganised and split in different directories.
+    The Src directories are now ordered according to
+    a level of complexity, and related routines
+    have been gathered in order to emphasize the
+    modularity of ABINIT.
+    The directory Lib_ffts has been transformed into the
+    Src_ffts directory : all the fft files were
+    translated in the style of ABINIT, to F90.
+
+    This reodering should ease the choice of
+    derived datatypes (structures), see B1, to be
+    introduced gradually in the forthcoming
+    versions of ABINIT.
+    For more information of the different directories,
+    see the ~abinit/Infos/dirs_and_files file.
+
+A3. Information : the HTML-formatted sources are available
+    (they had been available already for v3.0.3)
+
+__________________________________________________________________
+
+
+B.  Most noticeable changes.
+
+B1. Improved coding rules have been established. The initial
+    impetus has been given by H. Matthis. A working
+    group (H. Matthis, G. Zerah, P. Thibaudeau,
+    M. Verstraete, G.-M. Rignanese and X. Gonze)
+    has discussed all the proposed modifications.
+    The result is a new version of the
+    ~abinit/doc/developers document.
+    Developpers are stronly adviced to have a look
+    at this document.
+    Briefly, new rules and advices are set up for the
+    use of :
+    - modules
+    - pointers
+    - derived datatypes (structures),
+    - F90 interfaces of routines
+    - optional arguments of routines.
+    New (or modified) rules will be enforced gradually.
+    There are already a few examples of the new
+    constructs in ABINITv3.1. However, the use
+    of derived datatypes is a big issue, and will lead
+    to major modifications of the code in the forthcoming
+    versions.
+    The directory Src_0basis has been created, with
+    the basis_defs module (very important for developpers !!!),
+    as well as some other low-level
+    routines, like wrtout, leave_new, timein, timeab, and
+    the machine-dependent routines. Some of them are
+    using calls to MPI features.
+
+
+B2. The computation of stresses and response
+    to atomic displacements (phonons) including the
+    spin-orbit coupling is now available (in addition to the
+    total energy, forces and the electronic eigenenergies,
+    that were already present in v3.0).
+    The stress work has been done by M. Torrent, helped by
+    F. Jollet, G. Zerah and X. Gonze.
+    The response with respect to homogeneous electric
+    field is not yet there, but it will come.
+    NOTE : response with respect to atomic displacement
+    in the spin-orbit case is still under testing.
+    There seems to be a bug in v3.1.0 .
+
+B3. The determination of the parents to each subroutine
+    can now be obtained, thanks to the "parents.pl" script,
+    written by L. Sindic. A new script, called 'abirules'
+    has been started : thanks to this scripts, coding
+    rules can be checked, and even enforced.
+
+B4. The MPI-parallelism over spin is now implemented, in the
+    case nsppol=2. It is combined with the k-point
+    parallelism. It has been coded by A. Roy.
+    By the same token, the MPI-parallelism over bands for the
+    ground state has been prepared. See also the
+    introduction of the wfoptalg input variable.
+
+B5. General linear constraints on the displacements
+    of atoms can now be enforced in optimisation of structures,
+    or molecular dynamics. Coded by S. Erwin.
+    See the new keywords nconeq, natcon, iatcon, wtatcon,
+    as well as test 5 of Test_v3 .
+
+B6. The Fast Fourier Transform module has been the subject of
+    many changes and improvements:
+    The FFTs from the NEC lib can be used, by F. Finocchi and C. Roult.
+    The FFTs from the SGI lib can be used, by H. Matthis and P. Thibaudeau
+    The FFTs from the FFTW lib can be used, by H. Matthis and P. Thibaudeau
+    Also, the set of routines have been completely reorganised, and the
+    optimisation for OpenMP-parallelism is going on, with A. Roy.
+
+B7. The computation of the Berry phase has been generalized:
+    it can use the time-reversal symmetry, it is able
+    to use wavefunctions on disk (so, the constraint nkpt=mkmem
+    has been waived), by M. Veithen.
+    The computation of the derivative of the wavefunctions
+    with respect to k, in the Berry phase finite-difference
+    approximation, has been coded by Na Sai. The same
+    generality as for Berry phase is available.
+    The new input variable "berryopt" has been introduced.
+
+B8. The number of perturbation types is no more restricted
+    to natom+4 (phonons, electric field, stress). The possibility
+    for the developpers to define their own perturbation(s) has been
+    granted. See the input variable rfuser . Perturbations
+    ipert=natom+5 and ipert=natom+6 are dedicated to that use.
+    This paves the way to the introduction of perturbations
+    like the alchemical perturbation, occupation number perturbation,
+    of magnetic field perturbation.
+
+__________________________________________________________________
+
+C.  WARNINGS
+
+C1. Developpers should read the new module Src_0basis/basis_defs.f :
+    it is used in ALL source files. This will change some of your
+    coding habits.
+
+C2. It is no more needed to specify FFTS_A in
+    makefile_macros, as Lib_ffts has become Src_ffts, see
+    point A1.
+
+C3. The default value for nberry has changed (from 0 to 1);
+    berryopt is needed for Berry phase calculations, or
+    related derivatives with respect to k wavevector.
+    See section B7.
+
+__________________________________________________________________
+
+D.  Other changes.
+
+D1. The derivative with respect to the wavevector (RF : ddk) can now
+    be computed for pseudopotentials with a non-local l=3
+    part. This also allows non-local l=3 part for the derivative
+    with respect to an electric field.
+
+D2. The expectation value of the derivative of the Hamiltonian
+    with respect to the wavevector, for each eigenfunction, is
+    now printed, in the ddk case. Thanks to the Hellman-Feynman theorem,
+    it is equivalent to the derivative of the eigenenergies
+    with respect to the wavevector, when the eigenenergies
+    are not degenerate. See Test_v3 #02 .
+
+D3. Installation on a Linux/PC, using the NAG compiler, by N. Capron.
+
+D4. Optimisation on a NEC/SX5, by F. Finocchi and C. Roult.
+
+D6. Cut3d can produce XCrysDen and tecplot formats, by M. Verstraete.
+
+D7. Many bugs or errors have been removed. Contributions by
+    R. Caracas, T. Deutsch, J.-Y. Raty, G.-M. Rignanese,
+    M. Torrent, M. Verstraete, Gyuchang Jun,
+    L. Sindic, I. Hamada, N. Capron, M. Mikami.
+
+D8. Other developments have been going on, but are not yet available
+    for general usage ...
+</pre>

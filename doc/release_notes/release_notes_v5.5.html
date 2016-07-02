@@ -1,0 +1,255 @@
+<html>
+<head>
+<title>Release notes</title>
+</head>
+<body>
+
+<h5>Copyright (C) 2008 ABINIT group (XG)
+<br> This file is distributed under the terms of the GNU General Public License, see
+~abinit/COPYING or <a href="http://www.gnu.org/copyleft/gpl.txt">
+http://www.gnu.org/copyleft/gpl.txt </a>.
+<br> For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+</h5>
+
+<pre>
+Many thanks to the contributors to the ABINIT project
+between June 2007 and May 2008. These release notes
+are relative to improvements of ABINITv5.5 with respect to v5.4.
+
+The list of contributors includes :
+B. Amadon, P.-M. Anglade, A. Bergman, F. Bottin, D. Caliste,
+R. Caracas, H. Chunping, T. Deutsch, L. Diaz, L. Genovese,
+A. Ghasemi, Ph. Ghosez, M. Giantomassi, S. Goedecker, D. Hamann,
+N. Helbig, F. Jollet, E. Luppi, A. Neelov, T. Nishimatsu,
+V. Olevano, Y. Pouillon, G.-M. Rignanese, L. Sindic, M. Torrent, V. Veniard,
+M. Verstraete, X. Wang, G. Zerah, O. Zilberberg, J. Zwanziger
+
+It is worth to read carefully
+all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases ...
+This might take some time ...
+Please note the WARNINGS !
+
+Xavier
+
+__________________________________________________________________
+
+Version 5.5, released on November 23, 2007.
+
+Changes with respect to version 5.4 :
+
+A. WARNINGS.
+B. Most noticeable achievements (for users)
+C. Changes in the package, for developers
+D. Other changes (or on-going developments, not finalized)
+
+__________________________________________________________________
+
+A.  WARNINGS
+
+A.1 Since its very beginning of its availability inside ABINIT,
+    the utility "optic" had not been correctly interfaced with
+    the main ABINIT program.
+    In particular, at the level of the linear optical response,
+    the anti-resonant contribution was missing.
+    Also, an incorrect factor for the matrix elements of the
+    momentum operator was taken into account.
+    These problems have been identified and corrected by E. Luppi and V. Veniard.
+
+A.2 The ordering of symmetry operations, for GW calculations,
+    has been modified, due to the implementation of non-symmorphic
+    operations (by M. Giantomassi), and the needed coherence in mrgscr.
+    As a consequence, the selection of the q points in the irreducible
+    part of the Brillouin zone has changed. This might
+    induce some backward incompatibility.
+
+A.3 Two bugs have been fixed in the computation of forces in the PAW
+    case, by M. Torrent.
+    Numerical values might be affected at the level of 10d-3 Ha/Bohr
+    or so. The previous (incorrect) behaviour might still be activated
+    by changing the value of the abinit_prior55 variables in the subroutines
+    pawxcm.F90 and nres2vres.F90, if needed for backwards checks ...
+
+A.4 The default value for pawmixdg was documented to be 0, but was actually 1.
+    This has been fixed: the default for pawmixdg is indeed 0 now.
+
+A.5 The v5.5.1 default value for the input variable fftgw corresponds to a
+    computation not completely identical to the references for v5.4
+    The quantities computed within the GW approximation might have slightly
+    changed.
+
+A.6 Change of name for GW computations : spectral has become spmeth .
+
+A.7 Change of name for treatment of Coulomb interation : icoultrtmt has become icoulomb .
+
+A.8 The cpp flag -DMPI_FFT is not used anymore. It has been replaced
+    by the use of the input variable paral_kgb , see B.2 .
+    The use of MPI_IO has also been cleaned, and a new automatic test
+    has been introduced, paral#Q (but not activated by default,
+    because the MPI_IO library is not yet standard on all machines
+    that have MPI).
+    Work by F. Bottin and G. Zerah
+
+A.9 All the lines of the header of the _DOS files now start with a '#' sign in the first colum
+
+__________________________________________________________________
+
+B.  Most noticeable achievements
+
+B.1 The wavelet (BigDFT) part of ABINIT can be used for production.
+    It corresponds also to the release of the version 1.0 of the
+    BigDFT library.
+    The BigDFT library is now compiled by default.
+    The automatic tests in the directory tests/bigdft are integrated
+    in the standard suite of tests, driven by
+    make tests_acc
+    Collinear spin polarisation has been implemented
+    (see tests BigDFT #12 and #13).
+    Other minor improvements include the implementation of Krack
+    pseudo-potentials (see point B.2 of release notes v5.4) and the
+    fractional occupation (fixed, not evolving during minimisation).
+    See several input variables (to be listed). In particular,
+    in case of Bigdft wavelet Poisson solver use, see nscforder.
+    Effort from the BigDFT community: D. Caliste, L. Genovese,
+    S. Goedecker, T. Deutsch, A. Neelov, A. Bergman, O. Zilberberg.
+
+B.2 The coupled k-point+Spin/Band/FFT parallelisation can be used for production
+    (although the user-friendliness might be improved).
+    Related input variables : paral_kgb, npband, npfft, npkpt.
+    Test paral#P4 is an example of a Band/FFT parallelism.
+    Test paral#R4 is another example of a Band/FFT parallelism, with PAW.
+    Work by F. Bottin and G. Zerah.
+
+B.3 Berry phase can be computed with PAW.
+    See automatic test v5#12 and 13.
+    Work by P. Hermet, B. Amadon, F. Jollet and Ph. Ghosez.
+    (Warning : in v5.5.2, still seg fault to be solved)
+
+B.4 The response with respect to electric field, in the presence of
+    spin-orbit coupling, can be computed, giving access
+    to Born effective charges and dielectric tensor. Work by XG and M. Torrent.
+    See automatic test v5#24
+    (Warning : in v5.5.2, still some checks to be done ...)
+
+B.5 Computation of Electric Field Gradient is available
+    within LDA+U. See automatic test v5 # 53.
+    Also in the spin-polarized case.
+    Coding from J. Zwanziger, with help from M. Torrent.
+    Also, additional test for EFG test v5 # 52 (Stishovite GGA)
+
+B.6 Large improvement in GW computations (v5.5.1 to be documented),
+    including cut offs for specific geometries.
+    New automatic tests to be set up.
+    New input Variables nshadd, icutcoul, rcut.
+    Work by M. Giantomassi.
+
+B.7 PAW can now be used to compute optics properties.
+    New routine linear_optics_paw , as an option to conducti .
+    To be documented with automatic tests.
+    Work by J. Zwanziger.
+
+B.8 The m-resolved density of states is available.
+    Coded by T. Nishimatsu.
+    Automatic tests to be provided (Tv4#35, 38, 39 will be modified
+    if lines 476 and later are activated in tetrahedron.F90),
+    domain of use should be examined.
+
+B.9 NetCDF and ETSF_IO libraries are now correctly integrated in the build system.
+    (v5.5.4 : already tested for four different compilers on PC, should still
+     be tested for more platforms).
+
+__________________________________________________________________
+
+C. Changes for the developers
+
+
+C.1 Introduction of the abiauty script by LSindic .
+    The indentation of the F90 files is now automatic.
+
+C.2 The new precisions 'gwp' and 'gwpc' have been introduced, see defs_basis.F90 .
+    They will allow to do GW calculations either in single precision
+    or in double precision, to make the automatic tests more accurate.
+
+C.3 The default length for file names has been changed from 132 to 264 ,
+    see defs_basis.F90 .
+
+C.4 The values for the fundamental constants have been changed
+    from the 2002 adjustment to the 2006 adjustment,
+    see defs_basis.F90 .
+
+C.5 The test cases bigdft#06, 07 and 08 have been desactivated, since they
+    required the activation of the ETSF_IO library, that is not yet in production.
+
+C.6 The platform that produces the references is now PC Intel + Ifort 8.1 .
+
+C.7 The possibility of NOT using HAVE_FORTRAN_INTERFACES has been desactivated
+    and the build system has been simplified accordingly (Y. Pouillon, T. Deutsch)
+
+__________________________________________________________________
+
+D.  Other changes
+(or on-going developments, not yet finalized).
+
+D.1 New input variables ndivsm (for : number of division of the
+    smallest segment) for the construction of band structures.
+    This alternative to ndivk is easier to use.
+    (v5.5.1 : no automatic test yet)
+    Coding from Matteo Giantomassi
+
+D.2 NMR chemical shielding factor is in development.
+    See the new input variables prtcs and corecs (diamagnetic
+    contribution from core to be defined by the user).
+    Coding from J. Zwanziger
+
+D.3 New input variable dmatpuopt.
+    To define the expression of the density matrix in LDA+U (PAW)
+    Automatic test needed, doc needed.
+    Coding by B. Amadon.
+
+D.4 Reduced matrix functional theory coding is going on.
+    Work by N. Helbig. New input variable : rdmnb.
+    To be documented.
+
+D.5 Work on the switch to bzr version control system, and associated documentation,
+     by Y. Pouillon .
+
+D.6 Improvements of the build system, including new automatic options,
+    by Y. Pouillon.
+
+D.7 Preparation of nightly builds for developpers using bzr, by Y. Pouillon.
+
+D.8 Modifications of the doc needed to have ABINIT in Debian, by Y. Pouillon, D. Hamann,
+    V. Olevano.
+
+D.9 Use of rfelfd=3 , instead of rfuser for finite electric field
+     computation of Born effective charges and dielectric tensor,
+     by Xinjie Wang
+
+D.10 Implementation of response functions within PAW. Work going on,
+     by M. Torrent.
+
+D.11 Spin-polarized is OK with prtsurf input variable, from M. Verstraete.
+
+D.12 Improvement of NetCDF support by Y. Pouillon
+
+D.13 Extension of the ODA mixing in the GGA case
+     Coding by F. Jollet.
+
+D.14 Prediction of the density for self-consistency, using D. Alfe's algorithm
+     (iprcch>4).
+     Improvement of the prediction of rhoij for self-consistency in case of PAW,
+     by M. Torrent
+
+D.15 The ETSF-IO library can be used for the KSS file.
+     Coding by M. Giantomassi.
+
+D.16 Documentation improvements by : Y. Pouillon
+
+D.17 The analysis of maxima and minima of the density, spin-density and magnetization
+     is now much more extensive than previously for collinear and non-collinear spin
+     polarized cases. Work by Luis Diaz.
+
+D.18 Bug fixes by : D. Caliste, R. Caracas, Hu Chunping, M. Cote, T. Deutsch,
+     L. Sindic, M. Verstraete
+
+</pre>

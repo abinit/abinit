@@ -1,0 +1,528 @@
+
+Contributors
+
+The ABINIT package : list of contributors.
+
+Copyright (C) 2000-2016 ABINIT group (XG)
+This file is distributed under the terms of the
+GNU General Public License, see ~abinit/COPYING
+or http://www.gnu.org/copyleft/gpl.txt .
+For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+
+*******************************************************************
+
+The ABINIT project has been initiated by the Universite Catholique
+de Louvain (X. Gonze) and Corning Incorporated (D.C. Allan),
+see ~abinit/doc/users/context .
+
+Seven other institutions have also clearly shown their implication
+in the ABINIT project :
+- l'Universite de Liege (Ph. Ghosez, M. Verstraete),
+- le Commissariat a l'Energie Atomique, Bruyeres-le-chatel (F. Jollet, M. Torrent, B. Amadon),
+- Mitsubishi Chemical Corp (M. Mikami).
+- l'Ecole Polytechnique de Palaiseau (L. Reining)
+- Rutgers University (D. Hamann, D. Vanderbilt)
+- U. de Montréal (M. Coté)
+- le Commissariat a l'Energie Atomique, Grenoble (T. Deutsch, D. Caliste),
+- CINVESTAV, Queretaro, Mexico (A. Romero),
+
+Coming now to individuals,
+
+direct contributors to ABINIT (versions 7.0 to 7.11-8.0) are :
+name                      email
+Flavio Abreu Araujo       flavio.abreuaraujo@uclouvain.be
+Joseba Alberdi            joseba.alberdi@ehu.es
+Bernard Amadon            bernard.amadon@cea.fr
+Gabriel Antonius          gabriel.antonius@gmail.com
+Thomas Applencourt        thomas.applencourt@irsamc.ups-tlse.fr
+Frederic Arnardi          frederic.arnardi@student.ecp.fr
+Lucas Baguet              lucas.baguet@cea.fr
+Arjan Berger              arjan.berger@irsamc.ups-tlse.fr
+Jean-Michel Beuken        jean-michel.beuken@uclouvain.be
+Jordan Bieder             jordan.bieder@cea.fr
+Anton Bokhanchuk          antonbokhanchuk@gmail.com
+François Bottin           francois.bottin@cea.fr
+Eric Bousquet             eric.Bousquet@ulg.ac.be
+Fabien Bruneval           fabien.bruneval@cea.fr
+Damien Caliste            damien.caliste@cea.fr
+Wei Chen                  waynechen@gmail.com, wei.chen@epfl.ch
+Michel Cote               Michel.Cote@umontreal.ca
+Ron Cohen                 rcohen@ciw.edu
+Florent Dahm              florent.dahm@c-s.fr
+Jean-Francois Danel       jean-francois.danel@cea.fr
+Muriel Delaveau           muriel.delaveau@cea.fr
+Thierry Deutsch           tdeutsch@cea.fr
+Boris Dorado              boris.dorado@cea.fr
+Camilo Espejo             utadeocespejo@gmail.com
+Guillermo Avendano Franco guillermo.avendano@uclouvain.be
+Alberto Garcia            albertog@icmab.es
+Gregory Geneste           gregory.geneste@cea.fr
+Luigi Genovese            luigi.genovese@cea.fr
+Alexis Gerossier          alexis.gerossier@supelec.fr 
+Matteo Giantomassi        matteo.giantomassi@uclouvain.be
+Yannick Gillet            yannick.gillet@uclouvain.be
+Xavier Gonze              xavier.gonze@uclouvain.be
+Natalie Holzwarth         natalie@wfu.edu
+Jiawang Hong              hongjw10@physics.rutgers.edu
+Georg Huhs                georg.huhs@bsc.es
+Alain Jacques             alain.jacques@uclouvain.be
+Francois Jollet           francois.jollet@cea.fr
+Gerald Jomard             gerald.jomard@cea.fr
+Javier Junquera           javier.junquera@unican.es
+Jonathan Laflamme Janssen laflammejanssenjonathan@gmail.com 
+R. Laasner
+Marco Mancini             man74cio@gmail.com , marco.mancini@obspm.fr
+Miguel Marques            miguel.marques@univ-lyon1.fr
+Alexandre Martin          alexandre.martin@cea.fr
+Cyril Martins             cyril.martins@cea.fr
+Renato Miceli
+Laurent Nguyen            laurent.nguyen@c-s.fr
+Takeshi Nishimatsu        t-nissie@imr.tohoku.ac.jp
+Micael Oliveira           micael@teor.fis.uc.pt
+Alfredo Pasquarello       Alfredo.Pasquarello@epfl.ch
+Valentin Planes           valentinplanes@live.fr
+Samuel Ponce              samuel.ponce@uclouvain.be
+Yann Pouillon             yann.pouillon@ehu.es
+Tonatiuh Rangel           tonatiuh_rangel@hotmail.com
+Vanina Recoules           vanina.recoules@cea.fr
+Fabio Ricci               fabio.ricci@ulg.ac.be
+Gian-Marco Rignanese      gian-marco.rignanese@uclouvain.be
+Aldo Romero               aromero@qro.cinvestav.mx
+Bruno Rousseau            bruno.rousseau@umontreal.ca
+Oleg Rubel                orubel@lakeheadu.ca
+Davide Sangalli           davide.sangalli@gmail.com
+Abdullah Shukri           abdulluhshukri@yahoo.com
+Martin Stankovski         martin.stankovski@uclouvain.be
+Massimiliano Stengel      mstengel@icmab.es
+Marc Torrent              marc.torrent@cea.fr
+David Vanderbilt          dhv@physics.rutgers.edu
+Michiel Van Setten        michiel.vansetten@uclouvain.be
+Benoit Van Troeye         benoit.vantroeye@gmail.com
+Matthieu Verstraete       Matthieu.Verstraete@ulg.ac.be
+David Waroquiers          david.waroquiers@uclouvain.be
+Julia Wiktor              julia.wiktor@cea.fr
+Bin Xu                    bxu@ulg.ac.be
+Vittorio Zecca            vitti570@gmail.com
+Joe Zwanziger             jzwanzig@dal.ca
+
+direct contributors to ABINIT (version 6.0 to 6.12) are :
+name                      email
+Donat Adams               donat.adams@cea.fr
+Stephan Albrecht
+Bernard Amadon            bernard.amadon@cea.fr
+Pierre-Matthieu Anglade   anglade@gmail.com
+Gabriel Antonius          gabriel.antonius@gmail.com
+Arjan Berger              arjan.berger@polytechnique.edu
+Jean-Michel Beuken        jean-michel.beuken@uclouvain.be
+Simon Blackburn           simon.blackburn@umontreal.ca
+Francois Bottin           bottin@bruyeres.cea.fr
+Paul Boulanger            Paul.Boulanger@umontreal.ca
+Eric Bousquet             eric.bousquet@ulg.ac.be
+Fabien Bruneval           fabien.bruneval@cea.fr
+Damien Caliste            damien.caliste@cea.fr
+Marco Cazzaniga           marco.cazzaniga@unimi.it
+Vincent Chevrier          vincent.chevrier@dahn.phys.dal.ca
+Michel Cote               Michel.Cote@umontreal.ca
+Manuel Cotelo             mcotelo@gmail.com
+Fabiana Da Pieve          fabiana.dapieve@uclouvain.be
+Florent Dahm              florent.dahm@c-s.fr
+Hichem Dammak             hichem.dammak@ecp.fr
+Muriel Delaveau           muriel.delaveau@cea.fr
+Thierry Deutsch           tdeutsch@cea.fr
+Luis Diaz                 ledssiul@gmail.com
+Camilo Espejo             cespejo@qro.cinvestav.mx
+Liu Fang                  Fliu@lsec.cc.ac.cn
+Don Fanucci               slabanja@chalmers.se
+Guillermo Avendano Franco guillermo.avendano@uclouvain.be
+Matteo Gatti              matteo.gatti@polytechnique.fr
+Gregory Geneste           gregory.geneste@cea.fr
+Matteo Giantomassi        matteo.giantomassi@uclouvain.be
+Yannick Gillet            yannick.gillet@uclouvain.be
+Xavier Gonze              xavier.gonze@uclouvain.be
+Ikutaro Hamada            ikutaro@wpi-aimr.tohoku.ac.jp
+Jiawang Hong              hongjw10@physics.rutgers.edu
+Lianhua He                helh@lsec.cc.ac.cn
+Natalie Holzwarth         natalie@wfu.edu
+Chunping Hu               hu.chunping@nims.go.jp
+Alain Jacques             alain.jacques@uclouvain.be
+Francois Jollet           jollet@bruyeres.cea.fr
+Gerald Jomard             gerald.jomard@cea.fr
+Andrew Knyazev            andrew.knyazev@ucdenver.edu
+Stephane Le Roux          stephane.leroux@uclouvain.be
+Aurelien Lherbier         aurelien.lherbier@uclouvain.be
+Igor Lukacevic            ilukacevic@fizika.unios.hr
+Marco Mancini             man74cio@gmail.com
+Nicola Manini             Nicola.Manini@mi.infn.it
+Steven Miller             smille13@villanova.edu
+Takeshi Nishimatsu        t-nissie@imr.tohoku.ac.jp
+Valerio Olevano           valerio.olevano@grenoble.cnrs.fr
+Micael Oliveira           micael@teor.fis.uc.pt
+Giovanni Onida            Giovanni.Onida@mi.infn.it
+Yann Pouillon             yann.pouillon@ehu.es
+Samuel Ponce              samuel.ponce@uclouvain.be
+Pierre-Yves Prodhomme     P.Prodhomme@fkf.mpg.de
+Markus Rammp              mjr@rzg.mpg.de
+Tonatiuh Rangel           tonatiuh.rangel@uclouvain.be
+Lucia Reining             lucia.reining@polytechnique.fr
+Gian-Marco Rignanese      gian-marco.rignanese@uclouvain.be
+Tom Robinson              robinson@cscs.ch
+Aldo Romero               aromero@qro.cinvestav.mx
+Francesco Sottile         Francesco.Sottile@polytechnique.fr
+Martin Stankovski         martin.stankovski@uclouvain.be
+Marc Torrent              marc.torrent@cea.fr
+Matthieu Verstraete       mjv500@york.ac.uk
+David Vanderbilt          dhv@physics.rutgers.edu
+Eric Walter               ejwalt@wm.edu
+David Waroquiers          david.waroquiers@uclouvain.be
+Zeila Zanolli             zeilazanolli@gmail.com
+Joe Zwanziger             jzwanzig@dal.ca
+
+
+direct contributors to ABINIT (versions 5.0 to 5.9) are :
+name                      email
+Bernard Amadon            bernard.amadon@cea.fr
+Pierre-Matthieu Anglade   anglade@pcpm.ucl.ac.be
+Masao Arai                ARAI.Masao@nims.go.jp
+Emmanuel Arras            emmanuel.arras@cea.fr
+Guillermo Avendano Franco guillermo.avendano@uclouvain.be
+Joydeep Battacharjee      joydeep@jncasr.ac.in
+Michel Beland             michel.beland@rqchp.qc.ca
+Jean-Michel Beuken        beuken@pcpm.ucl.ac.be
+Francois Bottin           bottin@bruyeres.cea.fr
+Paul Boulanger            boulange@ppcpm.ucl.ac.be
+Mireille Boulet           boulet@bruyeres.cea.fr
+Fabien Bruneval           fabien.bruneval@polytechnique.fr
+Damien Caliste            caliste@pcpm.ucl.ac.be
+Eric Cances               (to be completed)
+Sebastiano Caravati       sebastiano.caravati@mater.unimib.it
+Razvan Caracas            razvan.caracas@ens-lyon.fr
+Hu Chunping               hu@issp.u-tokyo.ac.jp
+Michel Cote'              michel.cote@UMontreal.CA
+Matthias Crack            (to be completed)
+Jean-Paul Crocombette     jpcrocombette@cea.fr
+Thierry Deutsch           tdeutsch@cea.fr
+Luigi Genovese            luigi.genovese@gmail.com
+Alireza Ghasemi           (to be completed)
+Stefan Goedecker          stefan.goedecker@unibas.ch
+Matteo Giantomassi        giantomassi@pcpm.ucl.ac.be
+Xavier Gonze              gonze@pcpm.ucl.ac.be
+Don Hamann                drhamann@mat-simresearch.com
+Nicole Helbig             helbig@pcpm.ucl.ac.be
+Thorsten Hoefler          torsten.hoefler@cs.tu-chemnitz.de
+Chunping Hu               hu.chunping@nims.go.jp
+Jacob (Jouk) Jansen       joukj@hrem.stm.tudelft.nl
+Jonathan Janssen          jonathan.laflamme.janssen@umontreal.ca
+Lu Jianmin                jmlv@imr.ac.cn
+Francois Jollet           jollet@bruyeres.cea.fr
+Thomas Jourdan            thomas.jourdan@cea.fr
+Flavien Lambert           flavien.lambert@cea.fr
+Stephane Le Roux          stephane.leroux@cea.fr
+Zachary Levine            zlevine@nist.gov
+Bo Liu                    iloveabinit@gmail.com
+Aurelien Lherbier         aurelien.lherbier@uclouvain.be
+Deyu Lu                   dylu@ucdavis.edu
+Eleonora Luppi            luppi@theory.polytechnique.fr
+Marco Mancini             man74cio@gmail.com
+Herve Mathis              herve.mathis@cea.fr
+Stephane Mazevet          stephane.mazevet@cea.fr
+Ralph Meyer               ralf@thp.uni-due.de
+Masayoshi Mikami          mmikami@atlas.rc.m-kagaku.co.jp
+Marcel Mohr               marcel@physik.tu-berlin.de
+Alexander Neelov          (to be completed)
+Takeshi Nishimatsu        takeshi@physics.rutgers.edu
+Valerio Olevano           valerio.olevano@grenoble.cnrs.fr
+Micael Oliveira           micael@teor.fis.uc.pt
+Hartwin Peelaers          hartwin.peelaers@ua.ac.be
+Philipp Plaenitz          philipp.plaenitz@s1999.tu-chemnitz.de
+Yann Pouillon             pouillon@pcpm.ucl.ac.be
+Tonatiuh Rangel           tonatiuh.rangel@uclouvain.be
+Vanina Recoules           vanina.recoules@cea.fr
+Claudio Redaelli          redaelli@cscs.ch
+Aline Roy                 roy@bruyeres.cea.fr
+Gian-Marco Rignanese      rignanese@pcpm.ucl.ac.be
+Samuel Sarholz            sarholz@rz.rwth-aachen.de
+Riad Shaltaf              shaltaf@pcpm.ucl.ac.be
+Luc Sindic                sindic@pcpm.ucl.ac.be
+Benjamin Tardif           benjamin.tardi@umontreal.ca
+Marc Torrent              marc.torrent@cea.fr
+Valerie Veniard           valerie.veniard@polytechnique.fr
+Matthieu Verstraete       mjv500@york.ac.uk
+Umesh Waghmare            waghmare@jncasr.ac.in
+Xinjie Wang               xinjie@physics.rutgers.edu
+Gilles Zerah              zerah@bruyeres.cea.fr
+Zhou "Bob John"           bobjohn.lzu@gmail.com
+Oded Zilberberg           (to be completed)
+Joe Zwanziger             jzwanzig@dal.ca
+
+
+direct contributors to ABINIT (versions 4.1 to 4.6) are :
+
+name                    initials          email
+Doug Allan                dca         allandc@corning.com
+Bohdan Andriyevsky        bandri      bandri@tu.koszalin.pl
+Fred Arnold               farnold     fparnold@binghampton.edu
+Nuno Bandeira             nbandera    nuno.bandeira@ist.utl.pt
+Michel Beland             mbeland     michel.beland@rqchp.qc.ca
+Jean-Michel Beuken        jmb         beuken@pcpm.ucl.ac.be
+Paul Boulanger            pboulanger  paul.boulanger@umontreal.ca
+Mireille Boulet           mboulet     boulet@bruyeres.cea.fr
+Francois Bottin           fbottin     bottin@bruyeres.cea.fr
+Fabien Bruneval           fbruneval   fabien.bruneval@polytechnique.fr
+Razvan Caracas            rc          caracas@pcpm.ucl.ac.be
+Narayani Choudhury        nchoudhury  n.choudhury@gl.ciw.edu
+Fabrizio Cleri            fcleri      fabrizio.cleri@casaccia.enea.it
+Michel Cote'              mcote       michel.cote@UMontreal.CA
+Jean-Francois Danel       jfdanel     jean-francois.danel@cea.fr
+Clovis Darrigan           cdarrigan   clovis.darrigan@cea.fr
+Thierry Deutsch           td          tdeutsch@cea.fr
+Kay Dewhurst              kdewhurst   kay.dewhurst@uni-graz.at
+Alexey Dick               adick       dick@fhi-berlin.mpg.de
+Paul Fons                 pfons       paul-fons@aist.go.jp
+Alberto Garcia            agarcia     wdpgaara@lg.ehu.es
+Matteo Gatti              matgat      mat.gat@tiscali.it
+Luigi Genovese            lg          luigi.genovese@gmail.com
+Philippe Ghosez           phg         Philippe.Ghosez@ulg.ac.be
+Prasenjit Ghosh           pghosh      prasenjit@jncasr.ac.in
+Xavier Gonze              xg          gonze@pcpm.ucl.ac.be
+Don Hamann                drh         drhamann@mat-simresearch.com
+Sebastien Hamel           shamel      s.hamel@polymtl.ca
+Takumi Hasegawa           thasegawa   hase@lee.phys.titech.ac.jp
+Luc Henrard               lhenrard    luc.henrard@fundp.ac.be
+N.D.M.Hine                ndmhine     nicholas.hine@imperial.ac.uk
+Steven Homolya            shomolya    steven.homolya@spme.monash.edu.au
+Yusuke Iguchi             yiguchi     iguchi@coral.t.u-tokyo.ac.jp
+Jorge Iniguez             jiniguez    jiniguez@nist.gov
+Jacob (Jouk) Jansen       jjansen     joukj@hrem.stm.tudelft.nl
+Lu Jianmin                jmlv        jmlv@imr.ac.cn
+Francois Jollet           fj          jollet@bruyeres.cea.fr
+Gerald Jomard             gjomard     gerald.jomard@cea.fr
+Javier Junquera           jjunquera   jjunquer@physics.rutgers.edu
+Luc Kazandjian            lkazandjian luc.kazandjian@cea.fr
+Sylvain Latil             slatil      s.latil@sussex.ac.uk
+Mikey Lee                 mikeylee    mikey_lee@263.sina.com
+Javier Lopez              jlopez      sklnw@hotmail.com
+Nicola Marzari            nmarzari    marzari@MIT.EDU
+Thomas Maxisch            tmaxisch    Thomas.Maxisch@epfl.ch
+Marcello Merli            mmerli      merli@crystal.unipv.it
+Ralf Meyer                rmeyer      Ralf.Meyer@umontreal.ca
+Masayoshi Mikami          mm          mmikami@atlas.rc.m-kagaku.co.jp
+Jean-Paul Minet           jpminet     minet@pcpm.ucl.ac.be
+Christian Morari          cmorari     morari@pcpm.ucl.ac.be
+Yann-Michel Niquet        ymniquet    niquet@pcpm.ucl.ac.be
+Kunio Nishida             knishida    mm02191@murata.co.jp
+Fred Nastos               fn          nastos@physics.utoronto.ca
+Artem Oganov              aoganov     a.oganov@ucl.ac.uk
+Giovanni Onida            gonida      giovanni.onida@unimi.it
+Pablo Ordejon             pordejon    ordejon@icmab.es
+Valerio Olevano           vo          valerio.olevano@polytechnique.fr
+Bart Partoens             bpartoens   bart.partoens@ua.ac.be
+Wolfgang Pichl            wpichl      pichl@ap.univie.ac.at
+Yann Pouillon             ypouillon   pouillon@pcpm.ucl.ac.be
+Geoffrey Pourtois         gpourtois   geoffrey.pourtois@imec.be
+Simon Pesant              spesant     simon.pesant@umontreal.ca
+David Prendergast         dprendergast prendergast2@llnl.gov
+Wirawan Purwanto          wpurvanto   wirawan@camelot.physics.wm.edu
+James Raynolds            jraynolds   jraynolds@uamail.albany.edu
+Vanina Recoules           vr          vanina.recoules@cea.fr
+Gian-Marco Rignanese      gmr         rignanese@pcpm.ucl.ac.be
+Eric Roman                eroman      ESRoman@berkeley.edu
+Aline Roy                 ar          roy@bruyeres.cea.fr
+Miguel Salvado            ms          mass@sauron.quimica.uniovi.es
+Riad Shaltaf              rshaltaf    shaltaf@pcpm.ucl.ac.be
+Sangeeta Sharma           ssharma     sangeeta.sharma@uni-graz.at
+K.V. Shanavas             kshanavas   shanavas@barc.ernet.in
+William Shelton           wshelton    sheltonwajr@ornl.gov
+Luc Sindic                lsi         sindic@pcpm.ucl.ac.be
+Jose Soler                jsoler      jose.soler@uam.es
+Ivo Souza                 isouza      isouza@socrates.Berkeley.EDU
+Derek Stewart             dstewart    stewart@cnf.cornell.edu
+Mark Storr                mstorr      M.T.Storr@reading.ac.uk
+Martin Tijssens           mtijssens   M.G.A.Tijssens@LR.TUDelft.NL
+Marc Torrent              mt          torrent@bruyeres.cea.fr
+Florent Tournus           ftournus    tournus@pcpm.ucl.ac.be
+M.D.Towler                mdtowler    mdt26@cam.ac.uk
+David Vanderbilt          dhv         dhv@physics.rutgers.edu
+Bernard Van Renterghem    bvr         bvr@pcpm.ucl.ac.be
+Marek Veithen             mkv         Marek.Veithen@ulg.ac.be
+Matthieu Verstraete       mv          mverstra@pcpm.ucl.ac.be
+Craig Wiegert             cwiegert    wiegert@physast.uga.edu
+Egon Willighagen          ew          egonw@sci.kun.nl
+Eric J. Walter            ewalter     ewalter@particle.physics.wm.edu
+David M. Wood             dmwood      dmwood@Mines.EDU
+Xifan Wu                  xw          wuxifan@physics.rutgers.edu
+Gilles Zerah              gz          zerah@bruyeres.cea.fr
+Yao Zhenhua               yzhenhua    smayzh@cz3.nus.edu.sg
+Barry Zorman              bzorman     Barry.Zorman@asu.edu
+
+
+direct contributors to ABINIT (versions 4.0 or before) are :
+
+name                    initials          email
+Doug Allan                dca         allandc@corning.com
+Christophe Audouze        cau         christophe.audouze@math.u-psud.fr
+Givanni Bachelet          gb          bachelet@pil.phys.uniroma1.it
+Fabio Bernardini          fb          fabio.bernardini@dsf.unica.it
+Jean-Michel Beuken        jmb         beuken@pcpm.ucl.ac.be
+Lilia Boeri               lboeri      lilia@pil.phys.uniroma1.it
+Francois Bottin           fb          (to be completed)
+Mireille Boulet           mboulet     boulet@bruyeres.cea.fr
+Jean-Francois Briere      jfb         jean-francois.briere@UMontreal.CA
+Fabien Bruneval           fbruneval   fabien.bruneval@polytechnique.fr
+Nathalie Capron-Joubert   ncj         ncapron@ccr.jussieu.fr
+Razvan Caracas            rc          caracas@pcpm.ucl.ac.be
+Petr Casek                pcasek      casek@gps.jussieu.fr
+Michel Cote'              mcote       michel.cote@UMontreal.CA
+Francois Detraux          fd          detraux@pcpm.ucl.ac.be
+Thierry Deutsch           td          tdeutsch@cea.fr
+Steve Erwin               se          erwin@dave.nrl.navy.mil
+Fabio Finocchi            ff          finocchi@gps.jussieu.fr
+Martin Fuchs              mf          fuchs@pcpm.ucl.ac.be
+Javier Fuhr               jf          fuhr@crmc2.univ-mrs.fr
+Lu Fu-Fa                  lff         g930102@ccit.edu.tw
+Philippe Ghosez           phg         Philippe.Ghosez@ulg.ac.be
+Xavier Gonze              xg          gonze@pcpm.ucl.ac.be
+Rex Godby                 rg          rwg3@york.ac.uk
+Stefan Goedecker          sgoedecker  goedecke@drfmc.ceng.cea.fr
+Ikutaro Hamada            ih          hamada@aquarius.mp.es.osaka-u.ac.jp
+Don Hamann                drh         drhamann@mat-simresearch.com
+Francois Jollet           fj          jollet@bruyeres.cea.fr
+Gyuchang Jun              gj          geoid@leland.Stanford.EDU
+Chris Krenn               ck          crkrenn@llnl.gov
+Nicola Marzari            nmarzari    marzari@MIT.EDU
+A. Masago                 am          (to be completed)
+Herve Matthis             hm          mathis@ripault.cea.fr
+Thomas Maxisch            tmaxisch    Thomas.Maxisch@epfl.ch
+Masayoshi Mikami          mm          mmikami@atlas.rc.m-kagaku.co.jp
+Jun Mimaki                jmimaki     mimaki@cms.phys.s.u_tokyo.ac.jp
+Fred Nastos               fn          nastos@physics.utoronto.ca
+Ivan Naumov               in          inaumov@physics.rutgers.edu
+Artem Oganov              aoganov     a.oganov@ucl.ac.uk
+Valerio Olevano           vo          valerio.olevano@polytechnique.fr
+Giovanni Onida            go          giovanni.onida@mi.infn.it
+Wolfgang Pichl            wpichl      pichl@ap.univie.ac.at
+Laurent Pizzagalli        lpizzagalli pizza@univ-poitiers.fr
+Geoffrey Pourtois         gpourtois   geoffrey.pourtois@imec.be
+Jean-Yves Raty            jyr         jyraty@ulg.ac.be
+James Raynolds            jraynolds   jraynolds@uamail.albany.edu
+Vanina Recoules           vr          vanina.recoules@cea.fr
+Lucia Reining             lr          reining@mirto.polytechnique.fr
+Gian-Marco Rignanese      gmr         rignanese@pcpm.ucl.ac.be
+Doug Ritchie              dr          ritchie@neon.sao.nrc.ca
+Catherine Roult           cr          Catherine.Roult@idris.fr
+Aline Roy                 ar          roy@bruyeres.cea.fr
+Na Sai                    ns          nsai@physics.rutgers.edu
+Miguel Salvado            ms          mass@sauron.quimica.uniovi.es
+Luc Sindic                lsi         sindic@pcpm.ucl.ac.be
+Jorge Sofo                jsofo       sofo@psu.edu
+Jay Sullivan              js          sullivan@dave.nrl.navy.mil
+Yazuko Suzukawa           ys          @ (to be completed)
+Stefan Tausendpfund       st          Stefan.Tausendpfund@physik.uni-regensburg.de
+Pascal Thibaudeau         pt          Pascal.THIBAUDEAU@cea.fr
+Martin Tijssens           mtijssens   M.G.A.Tijssens@LR.TUDelft.NL
+Marc Torrent              mt          torrent@bruyeres.cea.fr
+David Vanderbilt          dhv         dhv@physics.rutgers.edu
+Bernard Van Renterghem    bvr         bvr@pcpm.ucl.ac.be
+Marek Veithen             mkv         Marek.Veithen@ulg.ac.be
+Matthieu Verstraete       mv          mverstra@pcpm.ucl.ac.be
+Gilles Zerah              gz          zerah@bruyeres.cea.fr
+Mike Zhang                mz          mz24cn@hotmail.com
+
+
+
+direct contributors to ABINIT (version 3.0 or before) are :
+
+name                    initials          email
+Doug Allan                dca         allandc@corning.com
+Gabriel Bester            gbester     gabriel_bester@nrel.gov
+Jean-Michel Beuken        jmb         beuken@pcpm.ucl.ac.be
+Stephane Bernard          sb          stephane.bernard@cea.fr
+Razvan Caracas            rc          caracas@gem.ucl.ac.be
+Francois Detraux          fd          detraux@pcpm.ucl.ac.be
+Steve Erwin               se          erwin@dave.nrl.navy.mil
+Alessio Filipetti         af          alessio@mrl.ucsb.edu
+Martin Fuchs              mf          fuchs@pcpm.ucl.ac.be
+Xavier Gonze              xg          gonze@pcpm.ucl.ac.be
+Francois Jollet           fj          jollet@bruyeres.cea.fr
+Bernard Magne             bm          magne@bruyeres.cea.fr
+Masayoshi Mikami          mm          mmikami@atlas.rc.m-kagaku.co.jp
+Alexander Quandt          aq          quandt@physics.georgetown.edu
+Jean-Yves Raty            jyr         jyraty@ulg.ac.be
+Gian-Marco Rignanese      gmr         rignanese@pcpm.ucl.ac.be
+Aline Roy                 ar          roy@bruyeres.cea.fr
+Na Sai                    sn          @ (to be completed)
+Massimiliano Stengel      ms          stengel@dimca20.univ.trieste.it
+Patrick Tepesch           pt          tepesch@corning.com
+Marc Torrent              mt          torrent@bruyeres.cea.fr
+John Tse                  jts         tse@jtsg.sims.nrc.ca
+Matthieu Verstraete       mv          mverstra@pcpm.ucl.ac.be
+Gilles Zerah              gz          zerah@bruyeres.cea.fr
+
+
+Advisory committee (v5)
+
+Doug Allan                dca         allandc@corning.com
+Michel Cote'              mcote       michel.cote@UMontreal.CA
+Thierry Deutsch           tdeutsch    tdeutsch@cea.fr
+Philippe Ghosez           phg         Philippe.Ghosez@ulg.ac.be
+Xavier Gonze              xg          gonze@pcpm.ucl.ac.be
+Don Hamann                drh         drhamann@mat-simresearch.com
+Nicola Spaldin            nspaldin    nicola@mrl.ucsb.edu
+Francois Jollet           fj          jollet@bruyeres.cea.fr
+Masayoshi Mikami          mm          mmikami@atlas.rc.m-kagaku.co.jp
+Lucia Reining             lr          reining@mirto.polytechnique.fr
+Gian-Marco Rignanese      gmr         rignanese@pcpm.ucl.ac.be
+Gilles Zerah              gz          zerah@bruyeres.cea.fr
+
+
+Advisory committee (v4)
+
+Doug Allan                dca         allandc@corning.com
+Steve Erwin               se          erwin@dave.nrl.navy.mil
+Philippe Ghosez           phg         Philippe.Ghosez@ulg.ac.be
+Xavier Gonze              xg          gonze@pcpm.ucl.ac.be
+Don Hamann                drh         drhamann@mat-simresearch.com
+Nicola Spaldin            nspaldin    nicola@mrl.ucsb.edu
+Francois Jollet           fj          jollet@bruyeres.cea.fr
+Masayoshi Mikami          mm          mmikami@atlas.rc.m-kagaku.co.jp
+Lucia Reining             lr          reining@mirto.polytechnique.fr
+Gian-Marco Rignanese      gmr         rignanese@pcpm.ucl.ac.be
+Gilles Zerah              gz          zerah@bruyeres.cea.fr
+
+
+Advisory committee (v3)
+
+Doug Allan                dca         allandc@corning.com
+Philippe Ghosez           phg         Philippe.Ghosez@ulg.ac.be
+Xavier Gonze              xg          gonze@pcpm.ucl.ac.be
+Nicola Hill               nh          nahill@mrl.ucsb.edu
+Masayoshi Mikami          mm          mmikami@atlas.rc.m-kagaku.co.jp
+Karin Rabe                kr          karin@physics.rutgers.edu
+Lucia Reining             lr          reining@mirto.polytechnique.fr
+Gian-Marco Rignanese      gmr         rignanese@pcpm.ucl.ac.be
+David Teter               dt          dmteter@sandia.gov
+Gilles Zerah              gz          zerah@bruyeres.cea.fr
+
+
+Also, the following persons have contributed to either the Corning code
+or the Respfn code (predecessors of ABINIT), or produced pseudopotentials :
+
+name                    initials  email
+Jean-Christophe Charlier  jcc     charlier@pcpm.ucl.ac.be
+                                  (1992, Cornell U.)
+Philippe Ghosez           phg     Philippe.Ghosez@ulg.ac.be
+                                  (1992-1998, U.C.L., tests of respfn)
+Stefan Goedecker          sg      goedecker@drfmc.ceng.cea.fr
+                                  (1993, Cornell U., and pseudopotentials)
+Alexander Khein           ak
+                                  (pseudopotentials)
+Changyol Lee              cl
+                                  (1993-1994, Cornell U.)
+Zachary Levine            zl      zachary.levine@nist.gov
+                                  (1987-1989, Cornell U.; 1989-1994, Ohio S.U.)
+Mike Teter                mpt     teter@msc.cornell.edu
+                                  (pseudopotentials)
+
+
+Roughly 1300 persons are registered on the mailing lists (Feb 2011).
+Many of them test ABINIT carefully. Although it is not possible
+to list them, we thank all for their contribution for the ABINIT effort.

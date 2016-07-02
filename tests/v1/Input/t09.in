@@ -1,0 +1,55 @@
+# Oxygen molecule, with occopt=2 and nsppol=2,
+# for comparison with case 08.
+ acell 7 7 9
+ diemac 1.0d0
+ diemix 0.333333333333d0
+ ecut 14
+ kptopt 0
+ kpt   3*0.0
+ natom  2
+ nband 8 8
+ nkpt 1
+ nsppol 2   nstep 20
+ nsym 1
+ ntypat  1
+ occ 1.0  1.0  1.0  1.0  1.0  1.0  1.0  0.0
+     1.0  1.0  1.0  1.0  1.0  0.0  0.0  0.0
+ occopt 2
+ rprim 1 0 0  0 1 0  0 0 1
+ spinat 0.0 0.0 1.0
+        0.0 0.0 1.0
+ toldfe 1.d-7
+ typat  1 1
+ wtk  1
+ xangst   0.0 0.0  0.55
+          0.0 0.0 -0.55
+ znucl  8.0
+
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit 
+#%% [files]
+#%% files_to_test = t09.out ,tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% psp_files = 8o.pspnc
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = Unknown
+#%% description = 
+#%% O2 molecule, treated as a spin-polarized molecule, with fixed occupation
+#%% numbers (occopt=2), with nsppol=2 . Gives total energy of -32.09792 Hartree
+#%% 10.-20. Isolated Helium atom tests.
+#%% These tests exercise different xc functionals, in the spin-unpolarized case.
+#%% The helium atom is isolated in a box of size 5x5x5, with one
+#%% special point (1/4 1/4 1/4), 200 Ha cut-off, used with 
+#%% a potential close to the bare He potential 
+#%% (erfc with 0.001 bohr decay length). Errors due to the smallness
+#%% of the supercell size are on the order of 1 mHa, as well as those
+#%% due to the representation of the Coulomb potential by a erfc function.
+#%% The remaining is due to finiteness of the basis set.
+#%% The estimation of the latter errors is presented in the test_cases
+#%% 17 and 18. In all these tests, intxc=0.
+#%%<END TEST_INFO>

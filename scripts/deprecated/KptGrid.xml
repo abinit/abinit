@@ -1,0 +1,60 @@
+<SECTION sectiontitle='KptGrid'>
+
+	<CHOICE instruction='K point grid options'>
+		<DECISION description='Specify directly the points of the grid'>
+			<DIRECTENTRY  variablename='kptopt' variablevalue='0'/>
+			<KEYBOARDENTRY instruction='Number of points in the grid' variablename='nkpt' textlen='1'/>
+			<KEYBOARDENTRY instruction='Reduced coordinates in reciproqual space of the k points' variablename='kpt' textlen='getvalue nkpt'/>
+			<KEYBOARDENTRY instruction='Normalizing denominator for each k point' variablename='kptnrm' textlen='1'/> 			
+		</DECISION>
+
+		<DECISION description='Rely on the program to generate a Monkhorst-Pack grid'>
+			<MOUSEENTRY instruction='Symmetries to generate k points in the IRBZ'>
+				<OPTION description='Take fully into account the symmetry' variablename='kptopt' variablevalue='1'/>
+				<OPTION description='Take into account only time-reversal symmetry' variablename='kptopt' variablevalue='2'/>
+				<OPTION description='Do not take into account any symmetry' variablename='kptopt' variablevalue='3'/>
+			</MOUSEENTRY>
+
+			<CHOICE instruction='Define k points in:'>
+				<DECISION description='Real space with a super-lattice'>
+					<KEYBOARDENTRY instruction='Define the three vectors in reduced coordinates (real space)' variablename='kptrlatt' textlen='3'/>
+				</DECISION>
+				<DECISION description='Reciproqual space'>
+					<KEYBOARDENTRY instruction='Vector containing the number of points for each primitive axis' variablename='ngkpt' textlen='1'/>
+				</DECISION>
+			</CHOICE>
+
+			<CHOICE instruction='How do you want to define the grid shifts'>
+				<DECISION description='Specify the shifts manually'>
+					<KEYBOARDENTRY instruction='Number of shifts to be made' variablename='nshiftk' textlen='1'/>
+					<KEYBOARDENTRY instruction='Define the vectors of each shift(reduced )' variablename='shiftk' textlen='getvalue nshiftk'/>
+				</DECISION>
+				<DECISION description='Choose the typically efficient shifts for Bravais Lattices'>
+					<CHOICE instruction='Bravais Lattices'>
+						<DECISION description='FCC lattice'>
+							<DIRECTENTRY variablename='nshiftk' variablevalue='4'/>
+							<DIRECTENTRY variablename='shiftk' variablevalue='0.5 0.5 0.5'/>
+							<DIRECTENTRY variablename='      ' variablevalue='0.5 0.0 0.0'/>
+							<DIRECTENTRY variablename='      ' variablevalue='0.0 0.0 0.5'/>
+						</DECISION>
+						<DECISION description='BCC lattice'>
+							<DIRECTENTRY variablename='nshiftk' variablevalue='2'/>
+							<DIRECTENTRY variablename='shiftk' variablevalue='0.25 0.25 0.25'/>
+							<DIRECTENTRY variablename='      ' variablevalue='-0.25 -0.25 -0.25'/>
+						</DECISION>
+						<DECISION description='Hexagonal lattice'>
+							<DIRECTENTRY variablename='nshiftk' variablevalue='1'/>
+							<DIRECTENTRY variablename='shiftk' variablevalue='0.0 0.0 0.5'/>
+						</DECISION>
+					</CHOICE>
+				</DECISION>
+			</CHOICE>
+		</DECISION>
+
+		<DECISION description='Generate points on segments for a non-consistent calculation (Band structure)'>
+			<KEYBOARDENTRY instruction='Enter the negative of the number of segments (-3 for 3 segments)' variablename='kptopt' textlen='1'/>
+			<KEYBOARDENTRY instruction='Enter the coordinates of the points boundaries of the segments' variablename='kptbounds' textlen='getvalue kptopt'/>
+			<KEYBOARDENTRY instruction='Enter the number of divisions in the segments (remember #points=#divisions + 1)' variablename='ndivk' textlen='getvalue kptopt'/>
+		</DECISION>
+	</CHOICE>
+</SECTION>

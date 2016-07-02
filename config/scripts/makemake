@@ -1,0 +1,662 @@
+#!/usr/bin/env python
+#
+# Copyright (C) 2011-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+from ConfigParser import ConfigParser
+from time import gmtime, strftime
+
+import commands
+import os
+import re
+import stat
+import sys
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Internal classes and functions
+#
+
+# Personalized configuration parser
+class MyConfigParser(ConfigParser):
+
+  def optionxform(self, option):
+    return str(option)
+
+                    # ------------------------------------ #
+
+# Display section header
+def print_header(name, title):
+
+  print("[%s] === %s ===" % (name, title))
+
+                    # ------------------------------------ #
+
+# Display message
+def print_message(name, title):
+
+  print("[%s] %s" % (name, title))
+
+                    # ------------------------------------ #
+
+# Run external commands and check for errors
+def run_script(name, title, cmdline, stop_on_error=True,
+      indent_output=True):
+
+  print("[%s]   %s" % (name, title))
+  (ret, msg) = commands.getstatusoutput(cmdline)
+  if ( msg != "" ):
+    if ( indent_output ):
+      sys.stderr.write("    " + re.sub("\n", "\n    ", msg) + "\n")
+    else:
+      sys.stderr.write(msg + "\n")
+  if ( (ret != 0) and stop_on_error ):
+    sys.stderr.write("[%s] Aborting now!\n" % (name))
+    sys.exit(1)
+
+  return ret
+
+                    # ------------------------------------ #
+
+# Translate version strings into usable numbers
+def translate_version(name, version_string):
+
+  # Init
+  ret = version_string
+  ret = ret.split(".")
+
+  # Force x.y.z version numbers
+  while ( len(ret) < 3 ):
+    ret.append("0")
+  if ( len(ret) > 3 ):
+    ret = ret[0:3]
+
+  # Force 2 digits
+  for i in range(len(ret)):
+    try:
+      if ( int(ret[i]) < 10 ):
+        ret[i] = "0"+ret[i]
+      elif ( int(ret[i]) > 99 ):
+        sys.stderr.write(
+          "[%s] Error: cannot handle 3-digit version numbers\n" % (name))
+        sys.stderr.write("[%s] Aborting now!\n" % (name))
+        sys.exit(1)
+    except ValueError:
+      if ( (i == 2) and (re.match("^[0-9][a-z]$", ret[i])) ):
+        ret[i] = re.sub("[a-z]", "", ret[i])
+        if ( len(ret[i]) < 2 ):
+          ret[i] = "0" + ret[i]
+      else:
+        sys.stderr.write(
+          "[%s] WARNING: invalid version number '%s' set to 0\n" % \
+            (name, ret[i]))
+        ret[i] = "00"
+
+  # Finish
+  ret = int("".join(ret))
+
+  return ret
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Main program
+#
+
+# Initial setup
+my_name     = "makemake"
+my_configs  = {
+  "make":"config/specs/makemake.conf",
+  "bsys":"config/specs/buildsys.conf",
+  "bins":"config/specs/binaries.conf"}
+
+# Check if we are in the top of the ABINIT source tree
+if ( not os.path.exists("configure.ac") or
+     not os.path.exists("src/98_main/abinit.F90") ):
+  sys.stderr.write("[%s] You must be in the top of an ABINIT source tree!\n" % \
+    (my_name))
+  sys.stderr.write("[%s] Aborting now!\n" % (my_name))
+  sys.exit(1)
+
+# Check if we have config files
+if ( os.path.exists(my_configs["make"]) ):
+  mcnf = MyConfigParser()
+  mcnf.read(my_configs["make"])
+else:
+  sys.stderr.write("[%s] Could not find config file (%s)" % \
+    (my_name, my_configs["make"]))
+  sys.stderr.write("[%s] Aborting now!" % (my_name))
+  sys.exit(10)
+if ( os.path.exists(my_configs["bsys"]) ):
+  bcnf = MyConfigParser()
+  bcnf.read(my_configs["bsys"])
+else:
+  sys.stderr.write("[%s] Could not find config file (%s)" % \
+    (my_name, my_configs["bsys"]))
+  sys.stderr.write("[%s] Aborting now!" % (my_name))
+  sys.exit(11)
+if ( os.path.exists(my_configs["bins"]) ):
+  xcnf = MyConfigParser()
+  xcnf.read(my_configs["bins"])
+else:
+  sys.stderr.write("[%s] Could not find config file (%s)" % \
+    (my_name, my_configs["bins"]))
+  sys.stderr.write("[%s] Aborting now!" % (my_name))
+  sys.exit(12)
+
+# Parse command-line arguments
+from optparse import OptionParser
+my_help = "Usage: %prog [options] vdW-DF_file"
+parser = OptionParser(usage=my_help, version="%prog for Abinit 6")
+parser.add_option("-a", "--without-autotools", action="store_false",
+  dest="run_autotools", default=True,
+  help="Skip Autotools-related operations")
+parser.add_option("-b", "--without-buildsys", action="store_false",
+  dest="run_buildsys", default=True,
+  help="Skip build-system update")
+parser.add_option("-c", "--clean", action="store_true",
+  dest="run_clean", default=False,
+  help="Clean source tree")
+parser.add_option("-k", "--keep-source", action="store_false",
+  dest="run_wipe", default=True,
+  help="Keep script-generated files when cleaning source tree")
+parser.add_option("-l", "--without-abilint", action="store_false",
+  dest="run_abilint", default=True,
+  help="Skip abilint")
+parser.add_option("-m", "--without-makefiles", action="store_false",
+  dest="run_makefiles", default=True,
+  help="Skip makefile generation")
+parser.add_option("-s", "--without-source", action="store_false",
+  dest="run_source", default=True,
+  help="Skip source tree update (will skip abilint as well)")
+parser.add_option("-t", "--toggle", action="store", metavar="LIST",
+  dest="toggle",
+  help="Comma-separated list of subsystems to toggle")
+parser.add_option("-x", "--without-subsystems", action="store_false",
+  dest="run_subsystems", default=True,
+  help="Skip subsystem synchronization")
+(opts, args) = parser.parse_args()
+
+# What time is it?
+now = strftime("%Y/%m/%d %H:%M:%S +0000", gmtime())
+try:
+  start_time = int(strftime("%s", gmtime()))
+except:
+  start_time = 0
+
+# Banner
+print_message(my_name, "Starting at %s" % (now))
+print_message(my_name, "-------------------------------------")
+
+# Make sure the directory tree is writable
+print_header(my_name, "Source tree consistency")
+run_script(my_name, "Enabling write permission for all dirs & files",
+  "chmod -R u+w .")
+
+# Special case: clean-up
+if ( opts.run_clean ):
+  my_name = "abiclean"
+  print_header(my_name, "Temporary directories and files")
+  run_script(my_name, "Removing Bazaar backup files",
+    "find src -name '*.~[0-9]~' -exec rm -f {} \;")
+  run_script(my_name, "Removing temporary build dirs",
+    "rm -rf tmp*")
+  run_script(my_name, "Removing temporary test dirs",
+    "find . -depth -name 'tmp-*' -exec rm -rf {} \;")
+  run_script(my_name, "Removing old files",
+    "find src -name '*.old' -exec rm -f {} \;")
+
+  print_header(my_name, "Abinit scripts outputs")
+  run_script(my_name, "Removing abirules logs",
+    "rm -f src/abirules.log")
+  run_script(my_name, "Removing abirules outputs",
+    "find src -name '*.abirules' -exec rm -f {} \;")
+  run_script(my_name, "Removing abiauty outputs",
+    "find src -name '*.abiauty' -exec rm -f {} \;")
+  run_script(my_name, "Removing file lists",
+    "rm -f config/dist/*.lst")
+  run_script(my_name, "Removing M4 macros",
+    "rm -f config/m4/auto-*.m4")
+  run_script(my_name, "Removing abilint outputs ",
+    "rm -f .abilint abilint.log abilint.out")
+  run_script(my_name, "Removing abinit.dep files",
+    "find src -name 'abinit.dep' -exec rm {} \;")
+  run_script(my_name, "Removing abinit.dir files",
+    "find src -name 'abinit.dir' -exec rm {} \;")
+  run_script(my_name, "Removing configuration dumper input",
+    "rm -f config.dump.in")
+
+  print_header(my_name, "Core-managed documentation")
+  run_script(my_name, "Removing certified build examples",
+    "rm -f doc/build/config-examples/*.ac")
+  run_script(my_name, "Removing uncertified build examples",
+    "rm -f doc/build/config-examples/uncertified/*.ac")
+  run_script(my_name, "Removing RoboDOC tarball",
+    "rm -f infos_html*.tar.gz robodoc-html*.tar.gz")
+
+  # Identify subdirs to clean, delegate the rest to the subsystems
+  print_header(my_name, "Core-managed build files")
+  run_script(my_name, "Removing top Makefiles",
+    "rm -f Makefile.am Makefile.in Makefile")
+  cln_dirs = ["."]
+  for bsub in bcnf.sections():
+    if ( bcnf.get(bsub, "type") == "master" ):
+      cln_dirs += bcnf.get(bsub, "subdirs").split()
+    elif ( (bcnf.get(bsub, "type") == "subsystem") and \
+           (bcnf.get(bsub, "mode") == "attached") ):
+      cln_dirs += bcnf.get(bsub, "subdirs").split()
+  for dcln in cln_dirs:
+    run_script(my_name, "Removing local data in %s/" % dcln,
+      "rm -f %s/config/local/*" % dcln)
+    run_script(my_name, "Removing autoheader outputs in %s/" % dcln,
+      "cd %s && rm -f config.h.in* config.h" % dcln)
+    run_script(my_name, "Removing autoconf outputs in %s/" % dcln,
+      "cd %s && rm -rf aclocal.m4 autom4te.cache configure confstat*" % dcln)
+    if ( os.path.isdir("%s/config/gnu" % dcln) ):
+      run_script(my_name, "Removing automake helpers in %s/" % dcln,
+        "cd %s/config/gnu && rm -f compile config.guess config.sub depcomp install-sh ltmain.sh missing" % dcln)
+    run_script(my_name, "Removing configure logs in %s/" % dcln,
+      "cd %s && rm -f core config.log config.status stamp-h1" % dcln)
+    if ( dcln != "." ):
+      run_script(my_name, "Removing .deps dirs in %s/" % dcln,
+        "find %s -depth -name '.deps' -exec rm -rf {} \;" % dcln)
+      run_script(my_name, "Removing Makefile.am files in %s/" % dcln,
+        "find %s -name Makefile.am -exec rm -f {} \;" % dcln)
+      run_script(my_name, "Removing Makefile.in files in %s/" % dcln,
+        "find %s -name Makefile.in -exec rm -f {} \;" % dcln)
+      run_script(my_name, "Removing Makefile files in %s/" % dcln,
+        "find %s -name Makefile -exec rm -f {} \;" % dcln)
+      run_script(my_name, "Removing libraries and object files in %s/" % dcln,
+        "find %s -name '*.a' -o -name '*.o' -exec rm {} \;" % dcln)
+  run_script(my_name, "Removing binary Fortran modules in src/",
+    "find src -name '*.mod' -exec rm {} \;")
+  abinit_bins = xcnf.sections()
+  abinit_bins.sort()
+  abinit_bins = "src/98_main/" + " src/98_main/".join(abinit_bins)
+  run_script(my_name, "Removing main Abinit binaries",
+    "rm -f %s" % (abinit_bins))
+
+  print_header(my_name, "Script-generated source files")
+  if ( opts.run_wipe ):
+    run_script(my_name, "Removing Fortran interfaces",
+      "find src -name 'interfaces_*.F90' -exec rm {} \;")
+    run_script(my_name, "Removing CPP options dumper routine",
+      "rm -f src/10_dumpinfo/m_cppopts_dumper.F90")
+    run_script(my_name, "Removing optimization flags dumper routine",
+      "rm -f src/10_dumpinfo/m_optim_dumper.F90")
+    run_script(my_name, "Removing input variable checking routines",
+      "rm -f src/57_iovars/ab7_invars_f90.inc src/57_iovars/ab7_invars_f90_get.f90")
+    run_script(my_name, "Removing C headers for Python bindings",
+      "rm -f bindings/parser/ab7_invars.h bindings/parser/ab7_invars_c.h bindings/parser/ab7_invars_py.h")
+    run_script(my_name, "Removing Python pickle file for Abinit datasets",
+      "rm -f bindings/parser/dtset.pickle")
+  else:
+    print_message(my_name,
+      "*** Skipping script-generated source file removal ***")
+
+  print_header(my_name, "Files produced by the configure script")
+  run_script(my_name, "Removing top config.* files",
+    "rm -f config.dump config.mk config.optim config.pc config.py config.sh")
+  run_script(my_name, "Removing Fortran modules containing package info",
+    "rm -f src/01manage_mpi/defs_info.F90 src/10_dumpinfo/m_build_info.F90")
+
+  print_header(my_name, "Subsystems")
+  for subsys in bcnf.sections():
+    if ( bcnf.get(subsys, "type") == "subsystem" ):
+      for subdir in bcnf.get(subsys, "subdirs").split():
+        run_script(my_name, "Sluicing out the %s subsystem (subdir: %s)" % \
+          (subsys, subdir),
+          "cd %s && ./wipeout.sh" % subdir, indent_output=False)
+
+  now = strftime("%Y/%m/%d %H:%M:%S +0000", gmtime())
+  print_message(my_name, "--------------------------------------")
+  print_message(my_name, "Finishing at %s" % (now))
+  try:
+    end_time = int(strftime("%s", gmtime()))
+  except:
+    end_time = 0
+  print_message(my_name, "Time elapsed: %ds" % (end_time - start_time))
+  sys.exit(0)
+
+# Get Autotools versions
+(m4_ret, m4_version) = commands.getstatusoutput("m4 --version | sed 's/o/ /g' ")
+(ac_ret, ac_version) = commands.getstatusoutput("autoconf --version")
+(am_ret, am_version) = commands.getstatusoutput("automake --version")
+(lt_ret, lt_version) = commands.getstatusoutput("libtool  --version")
+
+# Extract and process version numbers
+if ( m4_ret == 0 ):
+  m4_version = m4_version.split("\n")[0]
+  m4_version = re.sub(r"^(GNU [Mm]4|m4 \(GNU M4\)) ", "", m4_version)
+  m4_version = re.sub(" .*", "", m4_version)
+  m4_version = translate_version(my_name, m4_version)
+else:
+  m4_version = 0
+
+if ( ac_ret == 0 ):
+  ac_version = ac_version.split("\n")[0]
+  ac_version = re.sub(".*\(GNU Autoconf\) ", "", ac_version)
+  ac_version = re.sub(" .*", "", ac_version)
+  ac_version = translate_version(my_name, ac_version)
+else:
+  ac_version = 0
+
+if ( am_ret == 0 ):
+  am_version = am_version.split("\n")[0]
+  am_version = re.sub(".*\(GNU automake\) ", "", am_version)
+  am_version = re.sub(" .*", "", am_version)
+  am_version = translate_version(my_name, am_version)
+else:
+  am_version = 0
+
+if ( lt_ret == 0 ):
+  lt_version = lt_version.split("\n")[0]
+  lt_version = re.sub(".*\(GNU libtool\) ", "", lt_version)
+  lt_version = re.sub(" .*", "", lt_version)
+  lt_version = translate_version(my_name, lt_version)
+else:
+  lt_version = 0
+
+if ( m4_version < 10408 ):
+  sys.stderr.write("[%s] Error: M4 is too old (%d) - " % \
+    (my_name, m4_version) + \
+    "please install v1.4.8 or above\n%s: Aborting now\n" % (my_name))
+  sys.exit(10)
+
+if ( ac_version < 26100 ):
+  sys.stderr.write("[%s] Error: Autoconf is too old (%d) - " % \
+    (my_name, ac_version) + \
+    "please install v2.61 or above\n%s: Aborting now\n" % (my_name))
+  sys.exit(20)
+
+if ( am_version < 11000 ):
+  sys.stderr.write("[%s] Error: Automake is too old (%d) - " % \
+    (my_name, am_version) + \
+    "please install v1.10 or above\n%s: Aborting now\n" % (my_name))
+  sys.exit(30)
+
+# Make version information available to other scripts
+at_info = file("config/local/autotools.sh", "w")
+at_info.write("""# Autotools version information
+abi_m4_version="%6.6d"
+abi_ac_version="%6.6d"
+abi_am_version="%6.6d"
+abi_lt_version="%6.6d"
+""" % (m4_version, ac_version, am_version, lt_version))
+at_info.close()
+
+# Update build system
+print_header(my_name, "Build system update")
+
+if ( opts.run_buildsys ):
+  run_script(my_name, "Resetting configuration dumper",
+    "./config/scripts/make-config-dump-in")
+  run_script(my_name, "Generating macros for the Autotools",
+    "./config/scripts/make-macros-autotools")
+  run_script(my_name, "Generating macros for dumpers",
+    "./config/scripts/make-macros-dumpers")
+  run_script(my_name, "Generating macros for environment variables",
+    "./config/scripts/make-macros-environment")
+  run_script(my_name, "Generating macros for command-line options",
+    "./config/scripts/make-macros-options")
+  run_script(my_name, "Generating macros for hints",
+    "./config/scripts/make-macros-hints")
+  run_script(my_name, "Generating macros for debugging",
+    "./config/scripts/make-macros-debug")
+  run_script(my_name, "Generating macros for default optimizations",
+    "./config/scripts/make-macros-optim")
+  run_script(my_name, "Generating macros for per-directory optimizations",
+    "./config/scripts/make-macros-dirflags")
+  run_script(my_name, "Generating macros for core libraries",
+    "./config/scripts/make-macros-corelibs")
+  run_script(my_name, "Generating macros for fallback linking",
+    "./config/scripts/make-macros-linking")
+  run_script(my_name, "Generating macros for configure output",
+    "./config/scripts/make-macros-output")
+  run_script(my_name, "Generating macros for include flags",
+    "./config/scripts/make-macros-incflags")
+else:
+  print_message(my_name, "*** Skipping build system update ***")
+
+# Update source tree
+print_header(my_name, "Source tree update")
+
+if ( opts.run_source ):
+  run_script(my_name, "Removing build examples",
+    "./config/scripts/clean-build-examples")
+  run_script(my_name, "Generating build examples",
+    "./config/scripts/make-build-examples")
+  run_script(my_name, "Generating CPP option dumper",
+    "./config/scripts/make-cppopts-dumper")
+
+  if ( opts.run_abilint ):
+    abilint_cmdline = "./config/scripts/abilint %s" % \
+      (re.sub("\n", " ", mcnf.get("abilint", "arguments")))
+    print_message(my_name, "Updating Fortran interfaces")
+    print_message(my_name, "---> running %s" % (abilint_cmdline))
+    abilint_exitcode = os.system(abilint_cmdline)
+
+    if ( abilint_exitcode != 0 ):
+      sys.stderr.write("""
+     ****************************************************************
+     ***                     FATAL ERROR!                         ***
+     ****************************************************************
+     ***                                                          ***
+     *** The abilint script returned an non-zero exit code. As a  ***
+     *** consequence, the Fortran interfaces will likely produce  ***
+     *** build-time errors. The 'abilint.log' file has been left  ***
+     *** for your investigations. Its standard output has been    *** 
+     *** also redirected to 'abilint.out'.                        ***
+     *** It might be that the cache file (.abilint) has to be     ***
+     *** regenerated. Remove that file and issue abilint again.   ***
+     ***                                                          ***
+     *** Please have a careful look at abilint's outputs before   ***
+     *** sending a bug report.                                    ***
+     ***                                                          ***
+     ****************************************************************
+
+""")
+      sys.stderr.write("[%s] Aborting now\n" % (my_name))
+      sys.exit(1)
+  else:
+    print_message(my_name, "  *** Skipping update of Fortran interfaces ***")
+
+  if ( os.path.exists(os.path.join("bindings", "parser", "dtset.pickle")) ):
+    run_script(my_name, "Generating dtset source files",
+      "./config/scripts/make-sources-parser")
+else:
+  print_message(my_name, "*** Skipping source tree update ***")
+
+# Generate subsystem data
+print_header(my_name, "Synchronization of subsystems")
+
+if ( opts.run_subsystems ):
+  run_script(my_name, "Wiping out former file lists for subsystems",
+    "rm -f config/dist/*.lst")
+
+  sub_togls = []
+  togl_mode = {"attached":"detached", "detached":"attached"}
+
+  if ( opts.toggle ):
+    sub_togls = opts.toggle.split(",")
+    sub_mlist = file("config/dist/custom-modes.lst", "w")
+
+  for subsys in bcnf.sections():
+    if ( bcnf.get(subsys, "type") == "subsystem" ):
+      for subdir in bcnf.get(subsys, "subdirs").split():
+        run_script(my_name, "Sluicing out the %s subsystem (subdir: %s)" % \
+          (subsys, subdir),
+          "cd %s && ./wipeout.sh" % subsys, indent_output=False)
+        run_script(my_name, "Refreshing the %s subsystem (subdir: %s)" % \
+          (subsys, subdir),
+          "cd %s && ./autogen.sh" % subsys,
+          indent_output=False)
+      sub_mode = bcnf.get(subsys, "mode")
+      if ( subsys in sub_togls ):
+        sub_mode = togl_mode[sub_mode]
+        sub_mlist.write("%s %s\n" % (subsys, sub_mode))
+
+  if ( opts.toggle ):
+    sub_mlist.close()
+
+  run_script(my_name, "Generating file lists for subsystems",
+    "./config/scripts/make-file-lists")
+  run_script(my_name, "Generating macros for subsystems",
+    "./config/scripts/make-macros-subsystems")
+else:
+  print_message(my_name, "*** Skipping synchronization of subsystems ***")
+
+# Generate makefiles
+print_header(my_name, "Makefile generation (for Automake)")
+
+if ( opts.run_makefiles ):
+  run_script(my_name, "Generating makefiles for core libraries",
+    "./config/scripts/make-makefiles-corelibs")
+  run_script(my_name, "Generating makefiles for binaries",
+    "./config/scripts/make-makefiles-binaries")
+  run_script(my_name, "Generating makefiles for exports",
+    "./config/scripts/make-makefiles-exports")
+  run_script(my_name, "Generating makefiles for abichecks",
+    "./config/scripts/make-makefiles-abichecks")
+  run_script(my_name, "Generating intermediate makefiles",
+    "./config/scripts/make-makefiles-inter")
+  run_script(my_name, "Generating top makefile",
+    "./config/scripts/make-makefiles-top")
+  run_script(my_name, "Adding individual binary targets to top makefile",
+    "./config/scripts/add-targets-binaries")
+  run_script(my_name, "Adding individual library targets to top makefile",
+    "./config/scripts/add-targets-libraries")
+else:
+  print_message(my_name, "*** Skipping makefile generation ***")
+
+# Build Autotools framework
+# Note: do not use "automake --force-missing", as it overwrites the
+#       INSTALL file.
+print_header(my_name, "Autotools framework generation")
+
+if ( opts.run_autotools ):
+  run_script(my_name, "Generating aclocal.m4",
+    "aclocal -I config/m4")
+  run_script(my_name, "Generating config.h.in",
+    "autoheader")
+  run_script(my_name, "Generating configure script",
+    "autoconf")
+  #run_script(my_name, "Generating libtool scripts",
+  #  "libtoolize --automake --copy --force")
+  run_script(my_name, "Generating Makefile.in for each directory",
+    "automake --add-missing --copy")
+else:
+  print_message(my_name, "*** Skipping Autotools framework generation ***")
+
+# Bazaar branch information
+branch_info = commands.getoutput("bzr version-info --custom --template=\"{branch_nick} {revno} {clean}\n\"").split()
+branch_version = branch_info[0].split("-")[0]
+config_version = re.search("^AC_INIT[^\n]*",
+  file("configure.ac", "r").read(), re.MULTILINE).group(0).split(",")[1][1:-1]
+
+# Display warnings
+if ( m4_version < 10411 ):
+  print """
+     ****************************************************************
+     ***                        WARNING!                          ***
+     ****************************************************************
+     ***                                                          ***
+     *** Versions of M4 prior to 1.4.11 are known to crash the    ***
+     *** configure script in some situations and have a few       ***
+     *** security issues.                                         ***
+     ***                                                          ***
+     *** Use at your own risks.                                   ***
+     ***                                                          ***
+     ****************************************************************
+"""
+
+if ( ac_version < 26300 ):
+  print """
+     ****************************************************************
+     ***                        WARNING!                          ***
+     ****************************************************************
+     ***                                                          ***
+     *** Autoconf 2.63 fixes regressions, Fortran-related bugs,   ***
+     *** and performance issues, introduced by Autoconf 2.62 and  ***
+     *** earlier versions. You are thus strongly advised to       ***
+     *** upgrade your version of Autoconf if you want to          ***
+     *** contribute to Abinit with a fully functional build       ***
+     *** system.                                                  ***
+     ***                                                          ***
+     *** Thanks a lot in advance for your understanding.          ***
+     ***                                                          ***
+     ****************************************************************
+"""
+
+if ( am_version < 11001 ):
+  print """
+     ****************************************************************
+     ***                        WARNING!                          ***
+     ****************************************************************
+     ***                                                          ***
+     *** Automake 1.10 has been released in 2006 and contains     ***
+     *** several portability issues. More recent versions are     ***
+     *** now available which fix many long-standing bugs.         ***
+     ***                                                          ***
+     *** You are strongly advised to upgrade your version of      ***
+     *** Automake at your earliest convenience.                   ***
+     ***                                                          ***
+     *** Thanks a lot in advance for your understanding.          ***
+     ***                                                          ***
+     ****************************************************************
+"""
+
+if ( lt_version < 20202 ):
+  print """
+     ****************************************************************
+     ***                        WARNING!                          ***
+     ****************************************************************
+     ***                                                          ***
+     *** Libtool integration into ABINIT has now started. You     ***
+     *** will have to install Libtool 2.2.2 or later if you want  ***
+     *** to benefit from the advanced features it provides.       ***
+     ***                                                          ***
+     *** Some features of the build system will be disabled until ***
+     *** you install a proper version of Libtool.                 ***
+     ***                                                          ***
+     ****************************************************************
+"""
+
+if ( (branch_version != "") and (branch_version != config_version) ):
+  if ( len(branch_version) > 5 ):
+    btmp = branch_version[0:4] + "*"
+  else:
+    btmp = branch_version
+  if ( len(config_version) > 5 ):
+    ctmp = config_version[0:4] + "*"
+  else:
+    ctmp = config_version
+  print """
+     ****************************************************************
+     ***                        WARNING!                          ***
+     ****************************************************************
+     ***                                                          ***
+     *** The version number contained in the branch name (%5s)  ***
+     *** does not match that found in configure.ac (%5s).       ***
+     *** You might want to address this consistency issue         ***
+     *** before continuing.                                       ***
+     ***                                                          ***
+     ****************************************************************
+""" % (btmp, ctmp)
+
+# Footer
+now = strftime("%Y/%m/%d %H:%M:%S +0000", gmtime())
+print_message(my_name, "--------------------------------------")
+print_message(my_name, "Finishing at %s" % (now))
+
+# The end
+try:
+  end_time = int(strftime("%s", gmtime()))
+except:
+  end_time = 0
+print_message(my_name, "Time elapsed: %ds" % (end_time - start_time))

@@ -1,0 +1,52 @@
+How to a add a new input variable to Abinit
+
+Created and updated (2011.05.20)
+
+To create a new input variable you need to edit the following routines:
+
+--------------------------------------------------------------------------------
+1. Define the new variable inside the dataset_type 
+   follow the alphabetic ordering for each kind of variable
+
+FILENAME: src/44_abitypes_defs/defs_abitypes.F90. EXAMPLES:
+
+  ! Scalars
+  integer :: ntypat
+
+  ! Pointers to arrays
+  integer, pointer :: typat(:)  ! typat(natom)
+
+--------------------------------------------------------------------------------
+2. Add the line to copy the dtset (routine dtsetcopy in src/54_abiutil/m_dtset.F90). EXAMPLES
+
+   ! Scalars
+   dtout%ntypat = dtin%ntypat
+
+   ! Pointers to arrays
+   call deep_copy( dtin%typat, dtout%typat)
+
+--------------------------------------------------------------------------------
+3. If the new variable is a pointer one has to nullify the pointer in 
+   the routine dtset_nullify. The memory is deallocated in the routine
+   dtset_free (see m_dtset.F90)
+
+--------------------------------------------------------------------------------
+4. Add the line for the checking of input variables (src/57_iovars/chkinp.F90
+   Use the routines chkint_eq, chkint_ne, chkint_ge, chkint_le, chkdpr
+
+--------------------------------------------------------------------------------
+5. Add the line for the checking of variables (src/57_iovars/chkvars.F90)
+   Follow the alphabetic ordering
+
+--------------------------------------------------------------------------------
+6. Add the default value in src/57_iovars/indefo.F90
+
+--------------------------------------------------------------------------------
+7. Initialize variables for the ABINIT code, for one particular dataset in src/57_iovars/invars2.F90
+
+--------------------------------------------------------------------------------
+8. NOT NEEDED Include the variable in the list of input variables
+(src/57_iovars/is_input_variable.F90) this is done automatically by a perl script
+
+--------------------------------------------------------------------------------
+9. Add the variable for printing (src/57_iovars/outvars.F90)

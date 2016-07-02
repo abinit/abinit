@@ -1,0 +1,36 @@
+Ni 28                                       ! Definition of material
+GGA-PBE scalarrelativistic loggrid 700      ! All-electrons calc.: GGA+scalar-relativstic - log.grid with 700 pts
+4 4 3 0 0 0                                 ! Max. n per angular momentum: 4s 3p 3d
+3 2 8                                       ! Partially occupied states: 3d: occ=8
+4 1 0                                       !                            4p: occ=0
+0 0 0                                       !             End of occupation section
+c                                           ! 1s: core state
+c                                           ! 2s: core state
+c                                           ! 3s: core state
+v                                           ! 4s: valence state
+c                                           ! 2p: core state
+c                                           ! 3p: core state
+v                                           ! 4p: valence state
+v                                           ! 3d: valence state
+2                                           ! Max. l for partial waves basis
+2.3                                         ! r_PAW radius
+y                                           ! Do we add an additional s partial wave ? yes
+3.                                          ! Reference energy for this new s partial wave (Ryd)
+n                                           ! Do we add an additional s partial wave ? no
+y                                           ! Do we add an additional p partial wave ? yes
+4.                                          ! Reference energy for this p new partial wave (Ryd)
+n                                           ! Do we add an additional p partial wave ? no
+y                                           ! Do we add an additional d partial wave ? yes
+1.                                          ! Reference energy for this new d partial wave (Ryd)
+n                                           ! Do we add an additional s partial wave ? no
+vanderbilt                                  ! Scheme for PS partial waves and projectors
+3 0. troulliermartins                       ! Scheme for pseudopotential (l_loc=3, E_loc=0Ry)
+2.3                                         ! r_c matching radius for first  s partial wave
+2.3                                         ! r_c matching radius for second s partial wave
+2.3                                         ! r_c matching radius for first  p partial wave
+2.3                                         ! r_c matching radius for second p partial wave
+2.3                                         ! r_c matching radius for first  d partial wave
+2.3                                         ! r_c matching radius for second d partial wave
+2                                           ! Option for ABINIT file creation
+default                                     ! All parameters set to default for ABINIT file
+0                                           ! End of file

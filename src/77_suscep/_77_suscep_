@@ -1,0 +1,28 @@
+!!****d* ABINIT/77_suscep
+!! NAME
+!! 77_suscep
+!!
+!! DESCRIPTION
+!! This directory contains level-7 routines used
+!! to treat the susceptibility within ABINIT,
+!! that are lower-level than the MPI-parallelized
+!! routines. Also treated, and the associated
+!! GW computation of bandstructures, and Adiabatic-connection
+!! fluctuation-dissipation energy. These routines
+!! are called by the following routines : suscep.F90, suscep_dyn.F90,
+!! suscep_stat.F90 .
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! interfaces_77_suscep.F90
+!! suscep_stat.F90
+!! susk.F90
+!! suskmm.F90
+!!
+!!***

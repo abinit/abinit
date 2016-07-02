@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+#
+# Copyright (C) 2009-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+from time import gmtime,strftime
+
+import os
+import re
+import sys
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Main program
+#
+
+# Initial setup
+my_name    = "clean-build-examples"
+
+# Check if we are in the top of the ABINIT source tree
+if ( not os.path.exists("configure.ac") or
+     not os.path.exists("src/98_main/abinit.F90") ):
+ print "%s: You must be in the top of an ABINIT source tree." % my_name
+ print "%s: Aborting now." % my_name
+ sys.exit(1)
+
+# Init
+re_cf = re.compile("\.cf$")
+re_garbage = re.compile("#")
+
+# What time is it?
+now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
+
+# Process all existing build examples
+for (root,dirs,files) in os.walk("./config/build-examples"):
+
+  for src in files:
+    if ( re_cf.search(src) ):
+      cf_inp = file(os.path.join(root,src),"r").readlines()
+      cf_out = list()
+      cf_chk = dict()
+
+      for line in cf_inp:
+        if ( not re_garbage.match(line) ):
+          cf_out.append(line)
+          (key,val) = re.sub("\t+","\t",line).split("\t")
+          cf_chk[key] = val
+
+      file(os.path.join(root,src),"w").write("".join(cf_out))
+
+      if ( "filename" not in cf_chk ):
+        sys.stderr.write("%s: Error: %s has no 'filename' field\n" % \
+          (my_name,os.path.join(root,src)))

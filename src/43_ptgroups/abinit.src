@@ -1,0 +1,57 @@
+# -*- Python -*-
+#
+# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Source files making up the 2geometry library
+#
+
+# Source file attributes
+ABI_SRC_NIL = 0     # No attribute
+ABI_SRC_BLT = 1     # The file is built by a script
+ABI_SRC_DEP = 2     # The file depends on other files
+
+# Source files
+sources = [
+ "m_defs_ptgroups.F90",
+ "m_ptgroups.F90",
+ "ptg_C1.F90", 
+ "ptg_Ci.F90",
+ "ptg_C2.F90",
+ "ptg_Cs.F90",
+ "ptg_C2h.F90",
+ "ptg_D2.F90",  
+ "ptg_C2v.F90",  
+ "ptg_D2h.F90",
+ "ptg_C4.F90",
+ "ptg_S4.F90",
+ "ptg_C4h.F90",
+ "ptg_D4.F90",
+ "ptg_C4v.F90",
+ "ptg_D2d.F90",
+ "ptg_D4h.F90",
+ "ptg_C3.F90",
+ "ptg_C3i.F90",
+ "ptg_D3.F90",
+ "ptg_C3v.F90",
+ "ptg_D3d.F90",
+ "ptg_C6.F90",
+ "ptg_C3h.F90",
+ "ptg_C6h.F90",
+ "ptg_D6.F90",
+ "ptg_C6v.F90",
+ "ptg_D3h.F90",
+ "ptg_D6h.F90",
+ "ptg_T.F90",
+ "ptg_Th.F90",
+ "ptg_O.F90",
+ "ptg_Td.F90",
+ "ptg_Oh.F90",
+]
+# IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
+# This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

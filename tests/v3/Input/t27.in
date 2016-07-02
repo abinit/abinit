@@ -1,0 +1,58 @@
+# Fake H crystal.
+# Test tetragonal spacegroups
+
+ndtset 68
+
+spgroup: 75
+spgroup+ 1
+
+#This is for spgroup 75 to 122
+natom1 4     natom2 4    natom3 4    natom4 4    natom5  4
+natom6 4     natom7 4    natom8 4    natom9 8    natom10 8
+natom11 8    natom12 8   natom13 8   natom14 8   natom15  8
+natom16 8    natom17 8   natom18 8   natom19 8   natom20  8
+natom21 8    natom22 8   natom23 8   natom24 8   natom25  8
+natom26 8    natom27 8   natom28 8   natom29 8   natom30  8
+natom31 8    natom32 8   natom33 8   natom34 8   natom35  8
+natom36 8    natom37 8   natom38 8   natom39 8   natom40  8
+natom41 8    natom42 8   natom43 8   natom44 8   natom45  8
+natom46 8    natom47 8   natom48 8
+
+natom   16   # this is for spgroup 123 to 142
+
+# Common data
+prtvol -1          # stop in abinit (main program), before call driver.
+brvltt -1          # important to reduce the conventional cell to primitive,
+                   # and allow the recognition of space group
+acell 7 7 9
+angdeg  90 90 90
+ntypat 1
+znucl 1
+natrd 1
+xred 0.17 0.15 0.11
+typat 1
+ecut 1
+  kptopt 0
+nkpt 1
+nline 1
+nstep 1
+toldfe 1.0d-6
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t27.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% psp_files = 01h.bare
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = Unknown
+#%% keywords = 
+#%% description = 
+#%%   H based fake crystals.
+#%%   Test the generation and recognition of the
+#%%   tetragonal space groups, from spgroup 75 to 142.
+#%%<END TEST_INFO>

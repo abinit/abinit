@@ -1,0 +1,111 @@
+items:
+    SOURCE
+    NAME
+    COPYRIGHT
+    SYNOPSIS
+    USAGE
+    FUNCTION
+    DESCRIPTION
+    PURPOSE
+    AUTHOR
+    CREATION DATE
+    MODIFICATION HISTORY
+    HISTORY
+    INPUTS
+    ARGUMENTS
+    OPTIONS
+    PARAMETERS
+    SWITCHES
+    OUTPUT
+    SIDE EFFECTS
+    RESULT
+    RETURN VALUE
+    EXAMPLE
+    NOTES
+    DIAGNOSTICS
+    WARNINGS
+    ERRORS
+    BUGS
+    TODO
+    IDEAS
+    PORTABILITY
+    SEE ALSO
+    METHODS
+    NEW METHODS
+    ATTRIBUTES
+    NEW ATTRIBUTES
+    TAGS
+    COMMANDS
+    DERIVED FROM
+    DERIVED BY
+    USES
+    CHILDREN
+    USED BY
+    PARENTS
+options:
+    --src ./
+    --doc ./www/robodoc
+    --html
+    --multidoc
+    --index
+    --tabsize 8
+    --tell
+    --toc
+    --source_line_numbers
+ignore files:
+    ChangeLog
+    *.tar
+    *.tar.gz
+    Makefile*
+    Psps_for_tests
+    AUTHORS
+    README
+    COPYING
+    HISTORY
+    INSTALL*
+    NEWS
+    THANKS
+    TODO
+    config
+    doc
+    tests
+    util
+    abinit
+    aim
+    anaddb
+    band2eps
+    changes*
+    conducti
+    cut3d
+    descrip*
+    *.mms
+    macroave
+    mrgddb
+    paral_list
+    object_list
+    tmp*
+    vms
+    *.log
+    *.o
+    *.a
+    *.MOD
+    *~
+    *.htm*
+    *.rc
+    *.DIST
+    *.ORG
+    *.SAVE
+    *.pl
+    *,*
+    {*
+    .*
+header markers:
+    !!****
+headertypes:
+    p "Programs" robo_programs
+    m "Modules"  robo_modules
+    d "Directories" robo_directories
+remark markers:
+    !!
+end markers:
+    !!***

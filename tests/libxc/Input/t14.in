@@ -1,0 +1,239 @@
+# Crystalline silicon
+# Multiple datasets testing TB09+GW, the cd_use_tangrid and other related variables
+# This test goes also with test v6/t15 (mrgscr) and v6/t16
+
+ndtset 10
+
+#DATASET 1 : SCF calculation of the density
+
+tolvrs1     1.0d-16
+nstep1      15
+prtkden1    1
+nband1      5
+
+#DATASET 2 : Generation of the KSS file
+
+tolwfr2     1.0d-16
+iscf2      -2
+nstep2      12
+prtkden2    1
+nband2      18
+nbdbuf2     4
+nbandkss2   16
+kssform2    3
+getden2     1
+getwfk2     1
+istwfk2    *1
+
+#DATASET 3 : Screening calculation (one-shot GW with GN PPM)
+
+optdriver3  3
+istwfk3    *1
+getwfk3     2
+inclvkb3    2
+ppmodel3    1
+
+ecuteps3    1.0
+nband3      16
+
+#DATASET 4 : Sigma calculation (one-shot GW with GN PPM)
+
+optdriver4  4
+getwfk4     2
+getscr4     3
+istwfk4    *1
+
+ppmodel4    1
+ecutsigx4   4.0
+nband4      14
+symsigma4   1
+inclvkb4    2
+nkptgw4     1
+kptgw4      0.0  0.0  0.0
+bdgw4       4 5
+
+#DATASET 5 : Screening calculation iter 1 (QPSCGW with Contour Deformation and tangrid)
+
+optdriver5  3
+gwcalctyp5  29
+istwfk5    *1
+getwfk5     2
+inclvkb5    2
+
+ecuteps5    1.0
+nband5      12
+
+spmeth5     1
+nomegasf5   250
+
+cd_use_tangrid5 1
+cd_max_freq5    100 eV
+cd_halfway_freq5 25 eV
+nfreqre5     13
+nfreqim5     4
+
+#DATASET 6 : Sigma calculation iter 1 (QPSCGW with Contour Deformation and tangrid)
+
+optdriver6  4
+gwcalctyp6  29
+istwfk6    *1
+getwfk6     2
+getscr6     5
+symsigma6   0
+inclvkb6    2
+
+ecutsigx6   4.0
+nband6      16
+
+nkptgw6     3
+kptgw6      0.0  0.0  0.0
+            0.5  0.0  0.0
+            0.5  0.5  0.0
+bdgw6       1 14
+            1 14
+            1 14
+
+#DATASET 7 : Screening calculation iter 2 (QPSCGW with Contour Deformation and tangrid)
+
+optdriver7  3
+gwcalctyp7  29
+istwfk7    *1
+getwfk7     2
+getqps7     6
+inclvkb7    2
+
+ecuteps7    1.0
+nband7      12
+
+spmeth7     1
+nomegasf7   250
+
+cd_use_tangrid7 1
+cd_max_freq7    100 eV
+cd_halfway_freq7 25 eV
+nfreqre7     13
+nfreqim7     4
+
+#DATASET 8 : Sigma calculation iter 2 (QPSCGW with Contour Deformation and tangrid)
+
+optdriver8  4
+gwcalctyp8  29
+istwfk8    *1
+getwfk8     2
+getqps8     6
+getscr8     5
+symsigma8   0
+inclvkb8    2
+
+ecutsigx8   4.0
+nband8      16
+
+nkptgw8     3
+kptgw8      0.0  0.0  0.0
+            0.5  0.0  0.0
+            0.5  0.5  0.0
+bdgw8       1 14
+            1 14
+            1 14
+
+#DATASET 9 : Screening calculation iter 1 (QPSCGW with Contour Deformation and tangrid) subset 1 7
+
+optdriver9  3
+gwcalctyp9  29
+istwfk9    *1
+getwfk9     2
+inclvkb9    2
+
+ecuteps9    1.0
+nband9      12
+
+spmeth9     1
+nomegasf9   250
+
+cd_use_tangrid9 1
+cd_max_freq9    100 eV
+cd_halfway_freq9 25 eV
+cd_subset_freq9 1 7
+nfreqre9     13
+nfreqim9     4
+
+#DATASET 10 : Screening calculation iter 1 (QPSCGW with Contour Deformation and tangrid) subset 8 13
+
+optdriver10 3
+gwcalctyp10 29
+istwfk10   *1
+getwfk10    2
+inclvkb10   2
+
+ecuteps10   1.0
+nband10     12
+
+spmeth10    1
+nomegasf10  250
+
+cd_use_tangrid10 1
+cd_max_freq10   100 eV
+cd_halfway_freq10 25 eV
+cd_subset_freq10 8 13
+nfreqre10    13
+nfreqim10    0
+
+# COMMON TO ALL DATASETS
+
+ixc        -208012
+usekden     1
+
+ecut        6
+ecutsm      0.5
+occopt      1
+enunit      1
+
+kptopt      1
+ngkpt       2 2 2
+nshiftk     1
+shiftk      0.0 0.0 0.0
+
+diemac      12.0
+
+#Structure
+
+acell     3*10.2625546
+rprim       0.0  0.5  0.5
+            0.5  0.0  0.5
+            0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat      1
+znucl       14
+
+# Definition of the atoms
+natom       2
+typat       1 1
+xred
+  -1/8 -1/8 -1/8
+   1/8  1/8  1/8
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t14.in, t15.in, t16.in
+#%% [files]
+#%% files_to_test = 
+#%%   t14.out, tolnlines=    0,   tolabs=  0.0, tolrel= 0.0, fld_options = -medium
+#%% psp_files = 14si.bj_noNLCC.psp
+#%% [shell]
+#%%   ww_cp t14o_DS2_KSS t16i_KSS
+#%% [paral_info]
+#%% max_nprocs = 3
+#%% [extra_info]
+#%% authors = D. Waroquiers, M. Stankovski
+#%% keywords = GW
+#%% description = 
+#%%   Silicon:
+#%%   Calculation of GW corrections (one-shot with PPM and QPSCGW) starting from one metaGGA functional
+#%%   (Tran and Blaha 2009). Test of the variables cd_use_tangrid, cd_max_freq, cd_halfway_freq and
+#%%   cd_subset_freq. Datasets 9 and 10 prepares two screening files to be merged in test 15.
+#%%   (the pseudopotential used has been made with the becke-johnson exchange-correlation and without
+#%%   non linear core corrections)
+#%%<END TEST_INFO>

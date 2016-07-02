@@ -1,0 +1,9 @@
+Configuration/installation tools
+================================
+
+- abinit_config/
+    User interface for configuration.
+
+- upgrade-build-config
+    Update the ~/.abinit/build/hostname.ac file.
+

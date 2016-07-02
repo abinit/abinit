@@ -1,0 +1,40 @@
+!!****d* ABINIT/53_ffts
+!! NAME
+!! 53_ffts
+!!
+!! DESCRIPTION
+!! This directory contains level-2 routines related
+!! to Fast Fourier Transform within the ABINIT package.
+!! Most come from the Corning version of Stefan Goedecker's package,
+!! written in F77 in 1994, and have been translated
+!! to F90 and ABINIT's style.
+!! The two entry points to ABINIT FFTs are fourwf.f and fourdp.f .
+!! The indexing of planewaves on the FFT grid is also done
+!! by routines in this directory :
+!! boundy.f, indfft.f and kgindex.f .
+!! The more recent 2002 version of Stefan Goedecker's FFTs
+!! are contained in Lib_fftnew
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (TD)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! ccfft.F90
+!! fftbox_ip_driver.finc
+!! fftbox_op_driver.finc
+!! fftpac.F90
+!! fftug_driver.finc
+!! fftur_driver.finc
+!! fourdp.F90
+!! fourdp_6d.F90
+!! fourwf.F90
+!! interfaces_53_ffts.F90
+!! kgindex.F90
+!! m_fft.F90
+!! zerosym.F90
+!!
+!!***

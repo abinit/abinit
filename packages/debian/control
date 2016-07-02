@@ -1,0 +1,93 @@
+Source: abinit
+Section: science
+Priority: optional
+Maintainer: Yann Pouillon <yann.pouillon@gmail.com>
+Build-Depends: debhelper (>= 7), autotools-dev, quilt (>= 0.46-4),
+ gfortran (>= 4:4.2), liblapack-dev (>= 3.0.20000531a-1.1),
+ libetsf-io-dev (>= 1.0.3), libnetcdf-dev (>= 4.1.1)
+Standards-Version: 3.8.4
+Homepage: http://www.abinit.org/
+
+Package: abinit
+Architecture: any
+Depends: abinit-common (= ${binary:Version}), ${shlibs:Depends},
+ ${misc:Depends}
+Recommends: abinit-doc
+Suggests: abinit-test
+Description: Electronic structure calculations - Main binaries
+ ABINIT is a package whose main program allows one to find the total energy,
+ charge density and electronic structure of systems made of electrons and
+ nuclei (molecules and periodic solids) within Density Functional Theory (DFT),
+ using pseudopotentials and a planewave basis. 
+ .
+ ABINIT also includes options to optimize the geometry according to the DFT
+ forces and stresses, or to perform molecular dynamics simulations using these
+ forces, or to generate dynamical matrices, Born effective charges, and
+ dielectric tensors. Excited states can be computed within the Time-Dependent
+ Density Functional Theory (for molecules), or within Many-Body Perturbation
+ Theory (the GW approximation). In addition to the main ABINIT code, different
+ utility programs are provided.
+ .
+ This package contains all programs needed to perform calculations. For
+ documentation and tests, install the abinit-doc and abinit-test packages.
+
+Package: abinit-common
+Architecture: all
+Depends: ${misc:Depends}
+Description: Electronic structure calculations - Common data files
+ ABINIT is a package whose main program allows one to find the total energy,
+ charge density and electronic structure of systems made of electrons and
+ nuclei (molecules and periodic solids) within Density Functional Theory (DFT),
+ using pseudopotentials and a planewave basis. 
+ .
+ ABINIT also includes options to optimize the geometry according to the DFT
+ forces and stresses, or to perform molecular dynamics simulations using these
+ forces, or to generate dynamical matrices, Born effective charges, and
+ dielectric tensors. Excited states can be computed within the Time-Dependent
+ Density Functional Theory (for molecules), or within Many-Body Perturbation
+ Theory (the GW approximation). In addition to the main ABINIT code, different
+ utility programs are provided.
+ .
+ This package contains common data, such as pseudopotentials, necessary
+ to run the test suite and the tutorials.
+
+Package: abinit-doc
+Architecture: all
+Section: doc
+Depends: ${misc:Depends}
+Description: Electronic structure calculations - Documentation
+ ABINIT is a package whose main program allows one to find the total energy,
+ charge density and electronic structure of systems made of electrons and
+ nuclei (molecules and periodic solids) within Density Functional Theory (DFT),
+ using pseudopotentials and a planewave basis. 
+ .
+ ABINIT also includes options to optimize the geometry according to the DFT
+ forces and stresses, or to perform molecular dynamics simulations using these
+ forces, or to generate dynamical matrices, Born effective charges, and
+ dielectric tensors. Excited states can be computed within the Time-Dependent
+ Density Functional Theory (for molecules), or within Many-Body Perturbation
+ Theory (the GW approximation). In addition to the main ABINIT code, different
+ utility programs are provided.
+ .
+ This package contains the documentation of abinit.
+
+Package: abinit-test
+Architecture: all
+Section: devel
+Depends: perl (>> 5.6), ${misc:Depends}
+Description: Electronic structure calculations - Test suite
+ ABINIT is a package whose main program allows one to find the total energy,
+ charge density and electronic structure of systems made of electrons and
+ nuclei (molecules and periodic solids) within Density Functional Theory (DFT),
+ using pseudopotentials and a planewave basis. 
+ .
+ ABINIT also includes options to optimize the geometry according to the DFT
+ forces and stresses, or to perform molecular dynamics simulations using these
+ forces, or to generate dynamical matrices, Born effective charges, and
+ dielectric tensors. Excited states can be computed within the Time-Dependent
+ Density Functional Theory (for molecules), or within Many-Body Perturbation
+ Theory (the GW approximation). In addition to the main ABINIT code, different
+ utility programs are provided.
+ .
+ This package contains the test suite of abinit.
+

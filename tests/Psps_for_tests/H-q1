@@ -1,0 +1,5 @@
+Goedecker pseudopotential for H
+    1   1  070301 zatom,zion,pspdat
+10  1 -1 2 2001 0  pspcod,pspxc,lmax,lloc,mmax,r2well
+     0.20000000    2    -4.18023680     0.72507482                                  rloc nloc c1 c2
+    0                                                                               nnonloc

@@ -1,0 +1,16 @@
+  fsign = 1.d0
+  t_val = time
+  IF ( t_val .LT. 0.d0 ) THEN
+    ! if t < 0 this%F(t,activeF) = -this%F(t+beta,activeF)
+    t_val = t_val + this%beta
+    fsign  = -1.d0 
+  END IF
+
+  ratioh = t_val * this%inv_dt + 1.d0 ! t / delta t
+  index = INT(ratioh)
+  ratioh = ratioh - DBLE(index)
+
+  !  interpolation first order
+  ! index + 1 can be sizeHybrid + 1 => value is 0 (cf. BathOperator_init routine)
+  hybrid = fsign * (this%F(index,activeF) + &
+      ratioh * ( this%F(index+1,activeF) - this%F(index,activeF) ))

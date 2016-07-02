@@ -1,0 +1,28 @@
+ #test silicon linear chain : generate potential and wf at k
+ acell   3*10.00                                                                
+ ecut  1.20                                                                    
+ densty 1.2
+ diemac 12.0d0
+ intxc 1
+ kptopt 0
+ kpt                                                                           
+   0.00000   0.00000   0.00000
+   0.00000   0.00000   0.50000
+ natom  2 nband 04                                                             
+ ngfft  3*16 
+ nkpt  2                                                             
+ nline 2                                                                       
+ nstep 8                                                                      
+ nsym 1
+ ntypat  1                                                             
+ occ  4*2.0d0                                                                  
+ occopt 0
+ prtvol 10
+ rprim   1.0 0.0 0.0    0.0 1.0 0.0   0.0 0.0 1.0                              
+ timopt -1
+ xred 0.0 0.0 -0.15
+      0.0 0.0  0.15                                                          
+ tolwfr 1.e-22
+ typat  1 1        
+ wtk 2*1
+ znucl 14.0

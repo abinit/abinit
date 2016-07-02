@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<molecule id="crystal1" xmlns="http://www.xml-cml.org/schema/cml2/core">
+ <crystal>
+  <scalar title="a" units="angstrom">10.583544171800</scalar>
+  <scalar title="b" units="angstrom">10.583544171800</scalar>
+  <scalar title="c" units="angstrom">15.875316257700</scalar>
+  <scalar title="alpha" units="degrees">90.000000000000</scalar>
+  <scalar title="beta"  units="degrees">90.000000000000</scalar>
+  <scalar title="gamma" units="degrees">90.000000000000</scalar>
+ </crystal>
+ <!-- "ITC" refers to the space group number in the International Tables for Crystallography -->
+ <symmetry id="s1" pointGroup="ITC:1">
+  <matrix id="symOp1" rows="3" columns="4">
+    1 0 0 0.000000000000
+    0 1 0 0.000000000000
+    0 0 1 0.000000000000
+  </matrix>
+ </symmetry>
+ <atomArray>
+  <atom id="1" elementType="H" xFract="0.125000000000" yFract="0.000000000000" zFract="0.666666666667"/>
+  <atom id="2" elementType="H" xFract="0.250000000000" yFract="0.375000000000" zFract="0.666666666667"/>
+  <atom id="3" elementType="H" xFract="0.375000000000" yFract="0.500000000000" zFract="0.666666666667"/>
+  <atom id="4" elementType="H" xFract="0.750000000000" yFract="0.625000000000" zFract="0.666666666667"/>
+  <atom id="5" elementType="H" xFract="0.000000000000" yFract="0.125000000000" zFract="0.666666666667"/>
+  <atom id="6" elementType="H" xFract="0.125000000000" yFract="0.250000000000" zFract="0.666666666667"/>
+  <atom id="7" elementType="H" xFract="0.500000000000" yFract="0.375000000000" zFract="0.666666666667"/>
+  <atom id="8" elementType="H" xFract="0.875000000000" yFract="0.750000000000" zFract="0.666666666667"/>
+  <atom id="9" elementType="H" xFract="-0.100000000000" yFract="0.100000000000" zFract="-0.066666666667"/>
+  <atom id="10" elementType="H" xFract="0.100000000000" yFract="-0.100000000000" zFract="-0.066666666667"/>
+  <atom id="11" elementType="H" xFract="0.150000000000" yFract="0.350000000000" zFract="-0.066666666667"/>
+  <atom id="12" elementType="H" xFract="0.350000000000" yFract="0.150000000000" zFract="-0.066666666667"/>
+  <atom id="13" elementType="H" xFract="0.400000000000" yFract="0.100000000000" zFract="-0.066666666667"/>
+  <atom id="14" elementType="H" xFract="0.600000000000" yFract="-0.100000000000" zFract="-0.066666666667"/>
+  <atom id="15" elementType="H" xFract="0.650000000000" yFract="0.350000000000" zFract="-0.066666666667"/>
+  <atom id="16" elementType="H" xFract="0.850000000000" yFract="0.150000000000" zFract="-0.066666666667"/>
+  <atom id="17" elementType="H" xFract="-0.100000000000" yFract="0.600000000000" zFract="-0.066666666667"/>
+  <atom id="18" elementType="H" xFract="0.100000000000" yFract="0.400000000000" zFract="-0.066666666667"/>
+  <atom id="19" elementType="H" xFract="0.150000000000" yFract="0.850000000000" zFract="-0.066666666667"/>
+  <atom id="20" elementType="H" xFract="0.350000000000" yFract="0.650000000000" zFract="-0.066666666667"/>
+  <atom id="21" elementType="H" xFract="0.400000000000" yFract="0.600000000000" zFract="-0.066666666667"/>
+  <atom id="22" elementType="H" xFract="0.600000000000" yFract="0.400000000000" zFract="-0.066666666667"/>
+  <atom id="23" elementType="H" xFract="0.650000000000" yFract="0.850000000000" zFract="-0.066666666667"/>
+  <atom id="24" elementType="H" xFract="0.850000000000" yFract="0.650000000000" zFract="-0.066666666667"/>
+  <atom id="25" elementType="O" xFract="0.000000000000" yFract="0.000000000000" zFract="0.666666666667"/>
+  <atom id="26" elementType="O" xFract="0.250000000000" yFract="0.250000000000" zFract="0.666666666667"/>
+  <atom id="27" elementType="O" xFract="0.500000000000" yFract="0.500000000000" zFract="0.666666666667"/>
+  <atom id="28" elementType="O" xFract="0.750000000000" yFract="0.750000000000" zFract="0.666666666667"/>
+  <atom id="29" elementType="Si" xFract="0.000000000000" yFract="0.000000000000" zFract="0.000000000000"/>
+  <atom id="30" elementType="Si" xFract="0.500000000000" yFract="0.000000000000" zFract="0.000000000000"/>
+  <atom id="31" elementType="Si" xFract="0.000000000000" yFract="0.500000000000" zFract="0.000000000000"/>
+  <atom id="32" elementType="Si" xFract="0.500000000000" yFract="0.500000000000" zFract="0.000000000000"/>
+  <atom id="33" elementType="Si" xFract="0.000000000000" yFract="0.000000000000" zFract="0.333333333333"/>
+  <atom id="34" elementType="Si" xFract="0.500000000000" yFract="0.000000000000" zFract="0.333333333333"/>
+  <atom id="35" elementType="Si" xFract="0.000000000000" yFract="0.500000000000" zFract="0.333333333333"/>
+  <atom id="36" elementType="Si" xFract="0.500000000000" yFract="0.500000000000" zFract="0.333333333333"/>
+  <atom id="37" elementType="Si" xFract="0.125000000000" yFract="0.125000000000" zFract="0.083333333333"/>
+  <atom id="38" elementType="Si" xFract="0.625000000000" yFract="0.125000000000" zFract="0.083333333333"/>
+  <atom id="39" elementType="Si" xFract="0.125000000000" yFract="0.625000000000" zFract="0.083333333333"/>
+  <atom id="40" elementType="Si" xFract="0.625000000000" yFract="0.625000000000" zFract="0.083333333333"/>
+  <atom id="41" elementType="Si" xFract="0.125000000000" yFract="0.125000000000" zFract="0.416666666667"/>
+  <atom id="42" elementType="Si" xFract="0.625000000000" yFract="0.125000000000" zFract="0.416666666667"/>
+  <atom id="43" elementType="Si" xFract="0.125000000000" yFract="0.625000000000" zFract="0.416666666667"/>
+  <atom id="44" elementType="Si" xFract="0.625000000000" yFract="0.625000000000" zFract="0.416666666667"/>
+  <atom id="45" elementType="Si" xFract="0.250000000000" yFract="0.250000000000" zFract="0.000000000000"/>
+  <atom id="46" elementType="Si" xFract="0.750000000000" yFract="0.250000000000" zFract="0.000000000000"/>
+  <atom id="47" elementType="Si" xFract="0.250000000000" yFract="0.750000000000" zFract="0.000000000000"/>
+  <atom id="48" elementType="Si" xFract="0.750000000000" yFract="0.750000000000" zFract="0.000000000000"/>
+  <atom id="49" elementType="Si" xFract="0.250000000000" yFract="0.250000000000" zFract="0.333333333333"/>
+  <atom id="50" elementType="Si" xFract="0.750000000000" yFract="0.250000000000" zFract="0.333333333333"/>
+  <atom id="51" elementType="Si" xFract="0.250000000000" yFract="0.750000000000" zFract="0.333333333333"/>
+  <atom id="52" elementType="Si" xFract="0.750000000000" yFract="0.750000000000" zFract="0.333333333333"/>
+  <atom id="53" elementType="Si" xFract="0.375000000000" yFract="0.375000000000" zFract="0.083333333333"/>
+  <atom id="54" elementType="Si" xFract="0.875000000000" yFract="0.375000000000" zFract="0.083333333333"/>
+  <atom id="55" elementType="Si" xFract="0.375000000000" yFract="0.875000000000" zFract="0.083333333333"/>
+  <atom id="56" elementType="Si" xFract="0.875000000000" yFract="0.875000000000" zFract="0.083333333333"/>
+  <atom id="57" elementType="Si" xFract="0.375000000000" yFract="0.375000000000" zFract="0.416666666667"/>
+  <atom id="58" elementType="Si" xFract="0.875000000000" yFract="0.375000000000" zFract="0.416666666667"/>
+  <atom id="59" elementType="Si" xFract="0.375000000000" yFract="0.875000000000" zFract="0.416666666667"/>
+  <atom id="60" elementType="Si" xFract="0.875000000000" yFract="0.875000000000" zFract="0.416666666667"/>
+  <atom id="61" elementType="Si" xFract="0.250000000000" yFract="0.000000000000" zFract="0.166666666667"/>
+  <atom id="62" elementType="Si" xFract="0.750000000000" yFract="0.000000000000" zFract="0.166666666667"/>
+  <atom id="63" elementType="Si" xFract="0.250000000000" yFract="0.500000000000" zFract="0.166666666667"/>
+  <atom id="64" elementType="Si" xFract="0.750000000000" yFract="0.500000000000" zFract="0.166666666667"/>
+  <atom id="65" elementType="Si" xFract="0.250000000000" yFract="0.000000000000" zFract="0.500000000000"/>
+  <atom id="66" elementType="Si" xFract="0.750000000000" yFract="0.000000000000" zFract="0.500000000000"/>
+  <atom id="67" elementType="Si" xFract="0.250000000000" yFract="0.500000000000" zFract="0.500000000000"/>
+  <atom id="68" elementType="Si" xFract="0.750000000000" yFract="0.500000000000" zFract="0.500000000000"/>
+  <atom id="69" elementType="Si" xFract="0.375000000000" yFract="0.125000000000" zFract="0.250000000000"/>
+  <atom id="70" elementType="Si" xFract="0.875000000000" yFract="0.125000000000" zFract="0.250000000000"/>
+  <atom id="71" elementType="Si" xFract="0.375000000000" yFract="0.625000000000" zFract="0.250000000000"/>
+  <atom id="72" elementType="Si" xFract="0.875000000000" yFract="0.625000000000" zFract="0.250000000000"/>
+  <atom id="73" elementType="Si" xFract="0.375000000000" yFract="0.125000000000" zFract="0.583333333333"/>
+  <atom id="74" elementType="Si" xFract="0.875000000000" yFract="0.125000000000" zFract="0.583333333333"/>
+  <atom id="75" elementType="Si" xFract="0.375000000000" yFract="0.625000000000" zFract="0.583333333333"/>
+  <atom id="76" elementType="Si" xFract="0.875000000000" yFract="0.625000000000" zFract="0.583333333333"/>
+  <atom id="77" elementType="Si" xFract="0.000000000000" yFract="0.250000000000" zFract="0.166666666667"/>
+  <atom id="78" elementType="Si" xFract="0.500000000000" yFract="0.250000000000" zFract="0.166666666667"/>
+  <atom id="79" elementType="Si" xFract="0.000000000000" yFract="0.750000000000" zFract="0.166666666667"/>
+  <atom id="80" elementType="Si" xFract="0.500000000000" yFract="0.750000000000" zFract="0.166666666667"/>
+  <atom id="81" elementType="Si" xFract="0.000000000000" yFract="0.250000000000" zFract="0.500000000000"/>
+  <atom id="82" elementType="Si" xFract="0.500000000000" yFract="0.250000000000" zFract="0.500000000000"/>
+  <atom id="83" elementType="Si" xFract="0.000000000000" yFract="0.750000000000" zFract="0.500000000000"/>
+  <atom id="84" elementType="Si" xFract="0.500000000000" yFract="0.750000000000" zFract="0.500000000000"/>
+  <atom id="85" elementType="Si" xFract="0.125000000000" yFract="0.375000000000" zFract="0.250000000000"/>
+  <atom id="86" elementType="Si" xFract="0.625000000000" yFract="0.375000000000" zFract="0.250000000000"/>
+  <atom id="87" elementType="Si" xFract="0.125000000000" yFract="0.875000000000" zFract="0.250000000000"/>
+  <atom id="88" elementType="Si" xFract="0.625000000000" yFract="0.875000000000" zFract="0.250000000000"/>
+  <atom id="89" elementType="Si" xFract="0.125000000000" yFract="0.375000000000" zFract="0.583333333333"/>
+  <atom id="90" elementType="Si" xFract="0.625000000000" yFract="0.375000000000" zFract="0.583333333333"/>
+  <atom id="91" elementType="Si" xFract="0.125000000000" yFract="0.875000000000" zFract="0.583333333333"/>
+  <atom id="92" elementType="Si" xFract="0.625000000000" yFract="0.875000000000" zFract="0.583333333333"/>
+ </atomArray>
+</molecule>

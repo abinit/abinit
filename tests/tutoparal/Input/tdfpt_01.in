@@ -1,0 +1,30 @@
+#   FCC Al; 10 special points
+
+#timopt -1
+
+ acell 3*7.56
+ densty 1.2
+ ecut 10
+
+ enunit 2  
+
+ localrdwf 1
+ ngkpt 8 8 8 
+ nshiftk 4
+ shiftk 0.5 0.5 0.5
+        0.5 0.0 0.0
+        0.0 0.5 0.0
+        0.0 0.0 0.5
+
+ natom  1 nband 5
+ nline 3  nstep 20
+ ntypat  1
+ occopt  4  prtden 1   prtvol 10
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ timopt 2
+ tnons   72*0.0d0
+ tolvrs 1.0d-18
+ typat  1  
+ xred  0.0 0.0 0.0
+ znucl 13.0
+

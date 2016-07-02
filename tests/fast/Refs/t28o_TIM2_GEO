@@ -1,0 +1,266 @@
+
+ ABINIT package : GEO file
+
+ Maximal coordination number, as estimated by the user :  4
+  giving a maximum of   16 nearest neighbors and next nearest neighbors, 
+                  and    6 distinct angles between nearest neighbors
+
+ Primitive vectors of the periodic cell (bohr)
+   R(1)=  10.26311   0.00000   0.00000
+   R(2)=   0.00000  10.26311   0.00000
+   R(3)=   0.00000   0.00000  10.26311
+
+ Atom list        Reduced coordinates          Cartesian coordinates (bohr)
+   Si(1)      0.00087   0.00000   0.00000       0.00894   0.00000   0.00000
+   Si(2)      0.25000   0.25000   0.25000       2.56578   2.56578   2.56578
+   Si(3)      0.00000   0.50000   0.50000       0.00000   5.13156   5.13156
+   Si(4)      0.25000   0.75000   0.75000       2.56578   7.69733   7.69733
+   Si(5)      0.50000   0.00000   0.50000       5.13156   0.00000   5.13156
+   Si(6)      0.75000   0.25000   0.75000       7.69733   2.56578   7.69733
+   Si(7)      0.50000   0.50000   0.00000       5.13156   5.13156   0.00000
+   Si(8)      0.75000   0.75000   0.25000       7.69733   7.69733   2.56578
+
+ XMOL data : natom, followed by cartesian coordinates in Angstrom
+
+   8
+
+   Si   0.00473  -0.00000   0.00000
+   Si   1.35775   1.35775   1.35775
+   Si   0.00000   2.71550   2.71550
+   Si   1.35775   4.07325   4.07325
+   Si   2.71550   0.00000   2.71550
+   Si   4.07325   1.35775   4.07325
+   Si   2.71550   2.71550   0.00000
+   Si   4.07325   4.07325   1.35775
+
+================================================================================
+ Si(1)   
+
+ Bond lengths
+  Si(1) - Si(2) 0 0 0     bond length is    4.43890 bohr  ( or   2.34897 Angst.)
+  Si(1) - Si(4) 0-1-1     bond length is    4.43890 bohr  ( or   2.34897 Angst.)
+  Si(1) - Si(6)-1 0-1     bond length is    4.44923 bohr  ( or   2.35443 Angst.)
+  Si(1) - Si(8)-1-1 0     bond length is    4.44923 bohr  ( or   2.35443 Angst.)
+  Si(1) - Si(5) 0 0-1     bond length is    7.25080 bohr  ( or   3.83696 Angst.)
+  Si(1) - Si(5) 0 0 0     bond length is    7.25080 bohr  ( or   3.83696 Angst.)
+  Si(1) - Si(7) 0-1 0     bond length is    7.25080 bohr  ( or   3.83696 Angst.)
+  Si(1) - Si(7) 0 0 0     bond length is    7.25080 bohr  ( or   3.83696 Angst.)
+  Si(1) - Si(3) 0-1-1     bond length is    7.25712 bohr  ( or   3.84030 Angst.)
+  Si(1) - Si(3) 0 0-1     bond length is    7.25712 bohr  ( or   3.84030 Angst.)
+  Si(1) - Si(3) 0-1 0     bond length is    7.25712 bohr  ( or   3.84030 Angst.)
+  Si(1) - Si(3) 0 0 0     bond length is    7.25712 bohr  ( or   3.84030 Angst.)
+  Si(1) - Si(5)-1 0-1     bond length is    7.26344 bohr  ( or   3.84365 Angst.)
+  Si(1) - Si(5)-1 0 0     bond length is    7.26344 bohr  ( or   3.84365 Angst.)
+  Si(1) - Si(7)-1-1 0     bond length is    7.26344 bohr  ( or   3.84365 Angst.)
+  Si(1) - Si(7)-1 0 0     bond length is    7.26344 bohr  ( or   3.84365 Angst.)
+
+ Bond angles
+  Si(2) 0 0 0 - Si(1) - Si(4) 0-1-1        bond angle is     109.65968 degrees
+  Si(2) 0 0 0 - Si(1) - Si(6)-1 0-1        bond angle is     109.47095 degrees
+  Si(2) 0 0 0 - Si(1) - Si(8)-1-1 0        bond angle is     109.47095 degrees
+  Si(4) 0-1-1 - Si(1) - Si(6)-1 0-1        bond angle is     109.47095 degrees
+  Si(4) 0-1-1 - Si(1) - Si(8)-1-1 0        bond angle is     109.47095 degrees
+  Si(6)-1 0-1 - Si(1) - Si(8)-1-1 0        bond angle is     109.28320 degrees
+
+================================================================================
+ Si(2)   
+
+ Bond lengths
+  Si(2) - Si(1) 0 0 0     bond length is    4.43890 bohr  ( or   2.34897 Angst.)
+  Si(2) - Si(3) 0 0 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(2) - Si(5) 0 0 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(2) - Si(7) 0 0 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(2) - Si(4) 0-1-1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(2) - Si(4) 0 0-1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(2) - Si(4) 0-1 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(2) - Si(4) 0 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(2) - Si(6)-1 0-1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(2) - Si(6) 0 0-1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(2) - Si(6)-1 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(2) - Si(6) 0 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(2) - Si(8)-1-1 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(2) - Si(8) 0-1 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(2) - Si(8)-1 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(2) - Si(8) 0 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+
+ Bond angles
+  Si(1) 0 0 0 - Si(2) - Si(3) 0 0 0        bond angle is     109.56545 degrees
+  Si(1) 0 0 0 - Si(2) - Si(5) 0 0 0        bond angle is     109.42409 degrees
+  Si(1) 0 0 0 - Si(2) - Si(7) 0 0 0        bond angle is     109.42409 degrees
+  Si(3) 0 0 0 - Si(2) - Si(5) 0 0 0        bond angle is     109.47122 degrees
+  Si(3) 0 0 0 - Si(2) - Si(7) 0 0 0        bond angle is     109.47122 degrees
+  Si(5) 0 0 0 - Si(2) - Si(7) 0 0 0        bond angle is     109.47122 degrees
+
+================================================================================
+ Si(3)   
+
+ Bond lengths
+  Si(3) - Si(2) 0 0 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(3) - Si(4) 0 0 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(3) - Si(6)-1 0 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(3) - Si(8)-1 0 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(3) - Si(5)-1 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(3) - Si(5) 0 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(3) - Si(5)-1 1 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(3) - Si(5) 0 1 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(3) - Si(7)-1 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(3) - Si(7) 0 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(3) - Si(7)-1 0 1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(3) - Si(7) 0 0 1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(3) - Si(1) 0 0 0     bond length is    7.25712 bohr  ( or   3.84030 Angst.)
+  Si(3) - Si(1) 0 1 0     bond length is    7.25712 bohr  ( or   3.84030 Angst.)
+  Si(3) - Si(1) 0 0 1     bond length is    7.25712 bohr  ( or   3.84030 Angst.)
+  Si(3) - Si(1) 0 1 1     bond length is    7.25712 bohr  ( or   3.84030 Angst.)
+
+ Bond angles
+  Si(2) 0 0 0 - Si(3) - Si(4) 0 0 0        bond angle is     109.47122 degrees
+  Si(2) 0 0 0 - Si(3) - Si(6)-1 0 0        bond angle is     109.47122 degrees
+  Si(2) 0 0 0 - Si(3) - Si(8)-1 0 0        bond angle is     109.47122 degrees
+  Si(4) 0 0 0 - Si(3) - Si(6)-1 0 0        bond angle is     109.47122 degrees
+  Si(4) 0 0 0 - Si(3) - Si(8)-1 0 0        bond angle is     109.47122 degrees
+  Si(6)-1 0 0 - Si(3) - Si(8)-1 0 0        bond angle is     109.47122 degrees
+
+================================================================================
+ Si(4)   
+
+ Bond lengths
+  Si(4) - Si(1) 0 1 1     bond length is    4.43890 bohr  ( or   2.34897 Angst.)
+  Si(4) - Si(3) 0 0 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(4) - Si(5) 0 1 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(4) - Si(7) 0 0 1     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(4) - Si(2) 0 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(4) - Si(2) 0 1 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(4) - Si(2) 0 0 1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(4) - Si(2) 0 1 1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(4) - Si(6)-1 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(4) - Si(6) 0 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(4) - Si(6)-1 1 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(4) - Si(6) 0 1 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(4) - Si(8)-1 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(4) - Si(8) 0 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(4) - Si(8)-1 0 1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(4) - Si(8) 0 0 1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+
+ Bond angles
+  Si(1) 0 1 1 - Si(4) - Si(3) 0 0 0        bond angle is     109.56545 degrees
+  Si(1) 0 1 1 - Si(4) - Si(5) 0 1 0        bond angle is     109.42409 degrees
+  Si(1) 0 1 1 - Si(4) - Si(7) 0 0 1        bond angle is     109.42409 degrees
+  Si(3) 0 0 0 - Si(4) - Si(5) 0 1 0        bond angle is     109.47122 degrees
+  Si(3) 0 0 0 - Si(4) - Si(7) 0 0 1        bond angle is     109.47122 degrees
+  Si(5) 0 1 0 - Si(4) - Si(7) 0 0 1        bond angle is     109.47122 degrees
+
+================================================================================
+ Si(5)   
+
+ Bond lengths
+  Si(5) - Si(2) 0 0 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(5) - Si(4) 0-1 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(5) - Si(6) 0 0 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(5) - Si(8) 0-1 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(5) - Si(1) 0 0 0     bond length is    7.25080 bohr  ( or   3.83696 Angst.)
+  Si(5) - Si(1) 0 0 1     bond length is    7.25080 bohr  ( or   3.83696 Angst.)
+  Si(5) - Si(3) 0-1 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(5) - Si(3) 1-1 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(5) - Si(3) 0 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(5) - Si(3) 1 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(5) - Si(7) 0-1 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(5) - Si(7) 0 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(5) - Si(7) 0-1 1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(5) - Si(7) 0 0 1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(5) - Si(1) 1 0 0     bond length is    7.26344 bohr  ( or   3.84365 Angst.)
+  Si(5) - Si(1) 1 0 1     bond length is    7.26344 bohr  ( or   3.84365 Angst.)
+
+ Bond angles
+  Si(2) 0 0 0 - Si(5) - Si(4) 0-1 0        bond angle is     109.47122 degrees
+  Si(2) 0 0 0 - Si(5) - Si(6) 0 0 0        bond angle is     109.47122 degrees
+  Si(2) 0 0 0 - Si(5) - Si(8) 0-1 0        bond angle is     109.47122 degrees
+  Si(4) 0-1 0 - Si(5) - Si(6) 0 0 0        bond angle is     109.47122 degrees
+  Si(4) 0-1 0 - Si(5) - Si(8) 0-1 0        bond angle is     109.47122 degrees
+  Si(6) 0 0 0 - Si(5) - Si(8) 0-1 0        bond angle is     109.47122 degrees
+
+================================================================================
+ Si(6)   
+
+ Bond lengths
+  Si(6) - Si(3) 1 0 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(6) - Si(5) 0 0 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(6) - Si(7) 0 0 1     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(6) - Si(1) 1 0 1     bond length is    4.44923 bohr  ( or   2.35443 Angst.)
+  Si(6) - Si(2) 0 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(6) - Si(2) 1 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(6) - Si(2) 0 0 1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(6) - Si(2) 1 0 1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(6) - Si(4) 0-1 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(6) - Si(4) 1-1 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(6) - Si(4) 0 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(6) - Si(4) 1 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(6) - Si(8) 0-1 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(6) - Si(8) 0 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(6) - Si(8) 0-1 1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(6) - Si(8) 0 0 1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+
+ Bond angles
+  Si(3) 1 0 0 - Si(6) - Si(5) 0 0 0        bond angle is     109.47122 degrees
+  Si(3) 1 0 0 - Si(6) - Si(7) 0 0 1        bond angle is     109.47122 degrees
+  Si(3) 1 0 0 - Si(6) - Si(1) 1 0 1        bond angle is     109.37721 degrees
+  Si(5) 0 0 0 - Si(6) - Si(7) 0 0 1        bond angle is     109.47122 degrees
+  Si(5) 0 0 0 - Si(6) - Si(1) 1 0 1        bond angle is     109.51821 degrees
+  Si(7) 0 0 1 - Si(6) - Si(1) 1 0 1        bond angle is     109.51821 degrees
+
+================================================================================
+ Si(7)   
+
+ Bond lengths
+  Si(7) - Si(2) 0 0 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(7) - Si(4) 0 0-1     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(7) - Si(6) 0 0-1     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(7) - Si(8) 0 0 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(7) - Si(1) 0 0 0     bond length is    7.25080 bohr  ( or   3.83696 Angst.)
+  Si(7) - Si(1) 0 1 0     bond length is    7.25080 bohr  ( or   3.83696 Angst.)
+  Si(7) - Si(3) 0 0-1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(7) - Si(3) 1 0-1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(7) - Si(3) 0 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(7) - Si(3) 1 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(7) - Si(5) 0 0-1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(7) - Si(5) 0 1-1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(7) - Si(5) 0 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(7) - Si(5) 0 1 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(7) - Si(1) 1 0 0     bond length is    7.26344 bohr  ( or   3.84365 Angst.)
+  Si(7) - Si(1) 1 1 0     bond length is    7.26344 bohr  ( or   3.84365 Angst.)
+
+ Bond angles
+  Si(2) 0 0 0 - Si(7) - Si(4) 0 0-1        bond angle is     109.47122 degrees
+  Si(2) 0 0 0 - Si(7) - Si(6) 0 0-1        bond angle is     109.47122 degrees
+  Si(2) 0 0 0 - Si(7) - Si(8) 0 0 0        bond angle is     109.47122 degrees
+  Si(4) 0 0-1 - Si(7) - Si(6) 0 0-1        bond angle is     109.47122 degrees
+  Si(4) 0 0-1 - Si(7) - Si(8) 0 0 0        bond angle is     109.47122 degrees
+  Si(6) 0 0-1 - Si(7) - Si(8) 0 0 0        bond angle is     109.47122 degrees
+
+================================================================================
+ Si(8)   
+
+ Bond lengths
+  Si(8) - Si(3) 1 0 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(8) - Si(5) 0 1 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(8) - Si(7) 0 0 0     bond length is    4.44406 bohr  ( or   2.35169 Angst.)
+  Si(8) - Si(1) 1 1 0     bond length is    4.44923 bohr  ( or   2.35443 Angst.)
+  Si(8) - Si(2) 0 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(8) - Si(2) 1 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(8) - Si(2) 0 1 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(8) - Si(2) 1 1 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(8) - Si(4) 0 0-1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(8) - Si(4) 1 0-1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(8) - Si(4) 0 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(8) - Si(4) 1 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(8) - Si(6) 0 0-1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(8) - Si(6) 0 1-1     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(8) - Si(6) 0 0 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+  Si(8) - Si(6) 0 1 0     bond length is    7.25711 bohr  ( or   3.84030 Angst.)
+
+ Bond angles
+  Si(3) 1 0 0 - Si(8) - Si(5) 0 1 0        bond angle is     109.47122 degrees
+  Si(3) 1 0 0 - Si(8) - Si(7) 0 0 0        bond angle is     109.47122 degrees
+  Si(3) 1 0 0 - Si(8) - Si(1) 1 1 0        bond angle is     109.37721 degrees
+  Si(5) 0 1 0 - Si(8) - Si(7) 0 0 0        bond angle is     109.47122 degrees
+  Si(5) 0 1 0 - Si(8) - Si(1) 1 1 0        bond angle is     109.51821 degrees
+  Si(7) 0 0 0 - Si(8) - Si(1) 1 1 0        bond angle is     109.51821 degrees

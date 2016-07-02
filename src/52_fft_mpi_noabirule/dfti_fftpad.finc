@@ -1,0 +1,244 @@
+#ifdef HAVE_FFT_DFTI
+ integer :: kk,ii,jj,sidx,cnt,dat,line,zplane,status,nthreads
+ character(len=500) :: msg
+ type(zpad_t) :: zpad
+ type(DFTI_DESCRIPTOR),pointer :: Desc1,Desc2,Desc3
+!arrays
+
+ nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
+
+ call zpad_init(zpad,nx,ny,nz,ldx,ldy,ldz,mgfft,gbound)
+
+ SELECT CASE (isign)
+
+ CASE (+1) ! G --> R
+   !
+   ! 1) Transform along x.
+   !    1D transform of f(Gx,Gy,Gz) along Gx for each Gx-line intersecting the G-sphere
+
+   status = DftiCreateDescriptor(Desc1, DEV_DFTI_PRECISION, DFTI_COMPLEX, 1, nx)
+   DFTI_CHECK(status)
+   !
+   ! TODO
+   ! this value was added in mkl version 11.0.
+   ! It's the only way to avoid side effect in mkl_set_num_threads thus making this routine thread safe 
+   !status = DftiSetValue(Desc1, DFTI_THREAD_LIMIT, 1)
+   status = DftiSetValue(Desc1, DFTI_NUMBER_OF_USER_THREADS, nthreads)
+
+   status = DftiCommitDescriptor(Desc1)
+   DFTI_CHECK(status)
+
+!$OMP PARALLEL DO PRIVATE(dat,line,jj,kk,sidx,status) 
+   do cnt=0,(zpad%nlinex*ndat)-1 
+     dat  = 1 + cnt / zpad%nlinex
+     line = 1 + MOD(cnt, zpad%nlinex)
+     jj   = zpad%linex2ifft_yz(1,line)
+     kk   = zpad%linex2ifft_yz(2,line)
+     sidx = 1+ (jj-1)*ldx + (kk-1)*ldx*ldy + (dat-1) * ldx*ldy*ldz
+     status = DftiComputeBackward(Desc1, ff(sidx:)) ! Pass the base address.
+     DFTI_CHECK(status)
+   end do
+
+   status = DftiFreeDescriptor(Desc1)
+   DFTI_CHECK(status)
+   !
+   ! 2) Transform along y: 
+   ! nx 1D transforms of f(x,Gy,Gz) along Gy for each Gz plane intersecting the sphere.
+
+   status = DftiCreateDescriptor(Desc2, DEV_DFTI_PRECISION, DFTI_COMPLEX, 1, ny)
+   DFTI_CHECK(status)
+
+   !status = DftiSetValue(Desc2, DFTI_THREAD_LIMIT, 1)
+   status = DftiSetValue(Desc2, DFTI_NUMBER_OF_TRANSFORMS, nx)
+   status = DftiSetValue(Desc2, DFTI_INPUT_DISTANCE,  1)
+   status = DftiSetValue(Desc2, DFTI_INPUT_STRIDES,  (/0,ldx/))
+   status = DftiSetValue(Desc2, DFTI_NUMBER_OF_USER_THREADS, nthreads)
+
+   status = DftiCommitDescriptor(Desc2)
+   DFTI_CHECK(status)
+
+!$OMP PARALLEL DO PRIVATE(dat,zplane,kk,sidx,status) 
+   do cnt=0,(zpad%n_zplanes*ndat)-1 
+     dat    = 1 + cnt / zpad%n_zplanes
+     zplane = 1 + MOD(cnt, zpad%n_zplanes)
+     kk     = zpad%zplane(1,zplane)
+     sidx   = 1 + (kk-1)*ldx*ldy + (dat-1) *ldx*ldy*ldz
+     status = DftiComputeBackward(Desc2, ff(sidx:))
+     DFTI_CHECK(status)
+   end do
+
+   status = DftiFreeDescriptor(Desc2)
+   DFTI_CHECK(status)
+   !
+   ! 3) Transform along z.
+   !    ldx*ldy 1D transforms of f(x,y,Gz) along Gz.
+   !    Note that we have to visit the entire augmented x-y plane!
+
+   if (ndat==1 .or. nthreads==1 .or. MOD(ndat,nthreads)/=0) then
+     !
+     ! Use MKL internal threading if single FFT or ndat is not divisible by nthreads
+     !status = DftiSetValue(Desc3, DFTI_THREAD_LIMIT, nthreads)
+     status = DftiCreateDescriptor(Desc3, DEV_DFTI_PRECISION, DFTI_COMPLEX, 1, nz)
+     DFTI_CHECK(status)
+                                                                            
+     status = DftiSetValue(Desc3, DFTI_NUMBER_OF_TRANSFORMS, ldx*ldy)
+     status = DftiSetValue(Desc3, DFTI_INPUT_DISTANCE,  1)
+     status = DftiSetValue(Desc3, DFTI_INPUT_STRIDES,  (/0,ldx*ldy/))
+
+     status = DftiCommitDescriptor(Desc3)
+     DFTI_CHECK(status)
+
+     do dat=1,ndat
+       sidx = 1 + (dat-1) *ldx*ldy*ldz
+       status = DftiComputeBackward(Desc3, ff(sidx:))
+       DFTI_CHECK(status)
+     end do
+
+     status = DftiFreeDescriptor(Desc3)
+     DFTI_CHECK(status)
+
+   else 
+     ! Split ndat transforms among the threads.
+     !call mkl_set_num_threads(1)
+     status = DftiCreateDescriptor(Desc3, DEV_DFTI_PRECISION, DFTI_COMPLEX, 1, nz)
+     DFTI_CHECK(status)
+                                                                            
+     status = DftiSetValue(Desc3, DFTI_NUMBER_OF_TRANSFORMS, ldx*ldy)
+     status = DftiSetValue(Desc3, DFTI_INPUT_DISTANCE,  1)
+     status = DftiSetValue(Desc3, DFTI_INPUT_STRIDES,  (/0,ldx*ldy/))
+     status = DftiSetValue(Desc3, DFTI_NUMBER_OF_USER_THREADS, nthreads)
+     !status = DftiSetValue(Desc2, DFTI_THREAD_LIMIT, 1)
+                                                                             
+     status = DftiCommitDescriptor(Desc3)
+     DFTI_CHECK(status)
+
+!$OMP PARALLEL DO PRIVATE(sidx,status) 
+     do dat=1,ndat
+       sidx = 1 + (dat-1) *ldx*ldy*ldz
+       status = DftiComputeBackward(Desc3, ff(sidx:))
+       DFTI_CHECK(status)
+     end do
+                                                                             
+     status = DftiFreeDescriptor(Desc3)
+     DFTI_CHECK(status)
+   end if
+ 
+ CASE (-1) ! R --> G. Inverse of the algoritm used for G --> R
+   !
+   ! 1) Transform along z. Note We have to visit the entire augmented x-y plane!
+   if (ndat==1 .or. nthreads==1 .or. MOD(ndat,nthreads)/=0) then
+     !
+     ! Use MKL internal threading if single FFT or ndat is not divisible by nthreads
+     status = DftiCreateDescriptor(Desc3, DEV_DFTI_PRECISION, DFTI_COMPLEX, 1, nz)
+     DFTI_CHECK(status)
+
+     status = DftiSetValue(Desc3, DFTI_NUMBER_OF_TRANSFORMS, ldx*ldy)
+     status = DftiSetValue(Desc3, DFTI_INPUT_DISTANCE,  1)
+     status = DftiSetValue(Desc3, DFTI_INPUT_STRIDES,  (/0,ldx*ldy/))
+     !status = DftiSetValue(Desc3, DFTI_THREAD_LIMIT, nthreads)
+
+     status = DftiCommitDescriptor(Desc3)
+     DFTI_CHECK(status)
+
+     do dat=1,ndat
+       sidx = 1 + (dat-1) *ldx*ldy*ldz
+       status = DftiComputeForward(Desc3, ff(sidx:))
+       DFTI_CHECK(status)
+     end do
+
+     status = DftiFreeDescriptor(Desc3)
+     DFTI_CHECK(status)
+   else 
+     ! Split ndat transforms among the threads.
+     status = DftiCreateDescriptor(Desc3, DEV_DFTI_PRECISION, DFTI_COMPLEX, 1, nz)
+     DFTI_CHECK(status)
+                                                                            
+     status = DftiSetValue(Desc3, DFTI_NUMBER_OF_TRANSFORMS, ldx*ldy)
+     status = DftiSetValue(Desc3, DFTI_INPUT_DISTANCE,  1)
+     status = DftiSetValue(Desc3, DFTI_INPUT_STRIDES,  (/0,ldx*ldy/))
+     status = DftiSetValue(Desc3, DFTI_NUMBER_OF_USER_THREADS, nthreads)
+     !status = DftiSetValue(Desc3, DFTI_THREAD_LIMIT, 1)
+                                                                            
+     status = DftiCommitDescriptor(Desc3)
+     DFTI_CHECK(status)
+                                                                            
+!$OMP PARALLEL DO PRIVATE(sidx,status) 
+     do dat=1,ndat
+       sidx = 1 + (dat-1) *ldx*ldy*ldz
+       status = DftiComputeForward(Desc3, ff(sidx:))
+       DFTI_CHECK(status)
+     end do
+                                                                            
+     status = DftiFreeDescriptor(Desc3)
+     DFTI_CHECK(status)
+   end if
+   !
+   ! 2) Transform along y.
+
+   !call mkl_set_num_threads(1)
+   status = DftiCreateDescriptor(Desc2, DEV_DFTI_PRECISION, DFTI_COMPLEX, 1, ny)
+   DFTI_CHECK(status)
+
+   !status = DftiSetValue(Desc2, DFTI_THREAD_LIMIT, 1)
+   status = DftiSetValue(Desc2, DFTI_NUMBER_OF_TRANSFORMS, nx)
+   status = DftiSetValue(Desc2, DFTI_INPUT_DISTANCE,  1)
+   status = DftiSetValue(Desc2, DFTI_INPUT_STRIDES,  (/0,ldx/))
+
+   status = DftiSetValue(Desc2, DFTI_NUMBER_OF_USER_THREADS, nthreads)
+
+   status = DftiCommitDescriptor(Desc2)
+   DFTI_CHECK(status)
+
+!$OMP PARALLEL DO PRIVATE(dat,zplane,kk,sidx,status) 
+   do cnt=0,(zpad%n_zplanes*ndat)-1 
+     dat    = 1 + cnt / zpad%n_zplanes
+     zplane = 1 + MOD(cnt, zpad%n_zplanes)
+     kk     = zpad%zplane(1,zplane)
+     sidx   = 1 + ldx*ldy*(kk-1) + (dat-1) *ldx*ldy*ldz
+     status = DftiComputeForward(Desc2, ff(sidx:))
+     DFTI_CHECK(status)
+   end do
+
+   status = DftiFreeDescriptor(Desc2)
+   DFTI_CHECK(status)
+   !
+   ! 3) Transform along x. 
+   !
+   status = DftiCreateDescriptor(Desc1, DEV_DFTI_PRECISION, DFTI_COMPLEX, 1, nx)
+   DFTI_CHECK(status)
+
+   !status = DftiSetValue(Desc1, DFTI_THREAD_LIMIT, 1)
+   status = DftiSetValue(Desc1, DFTI_NUMBER_OF_USER_THREADS, nthreads)
+
+   ! Normalize the transform.
+   status = DftiSetValue(Desc1, DFTI_FORWARD_SCALE, one/(nx*ny*nz))
+
+   status = DftiCommitDescriptor(Desc1)
+   DFTI_CHECK(status)
+
+!$OMP PARALLEL DO PRIVATE(dat,line,jj,kk,sidx,status) 
+   do cnt=0,(zpad%nlinex*ndat)-1 
+     dat  = 1 + cnt / zpad%nlinex
+     line = 1 + MOD(cnt, zpad%nlinex)
+     jj   = zpad%linex2ifft_yz(1,line)
+     kk   = zpad%linex2ifft_yz(2,line)
+     sidx = 1+ (jj-1)*ldx + (kk-1)*ldx*ldy + (dat-1) * ldx*ldy*ldz
+     status = DftiComputeForward(Desc1, ff(sidx:)) ! Pass the base address.
+     DFTI_CHECK(status)
+   end do
+
+   status = DftiFreeDescriptor(Desc1)
+   DFTI_CHECK(status)
+
+ CASE DEFAULT 
+   MSG_BUG("Wrong isign")
+ END SELECT
+
+ call zpad_free(zpad)
+
+#else
+ MSG_ERROR("FFT_DFTI support not activated")
+ ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,nthreads/))
+ ABI_UNUSED(gbound(1,1))
+ ABI_UNUSED(ff(1))
+#endif

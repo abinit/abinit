@@ -1,0 +1,29 @@
+NLO Tutorial
+
+PART2-BERRY PHASE (in zero field)
+
+Compute various quantities from Delta P
+
+Four different steps
+
+1. alas_zstar.in
+Z* from finite difference of the polarization 
+under atomic displacements
+
+2. alas_ddk.in
+Finite difference calculation of the ddk
+(method of Na Sai with Marek's implementation)
+Linear response calculation with finite difference ddk
+Provides coherent number for comparison with
+finite difference calculations of Z* and piezo coefficients
+
+3. alas_piezo_clampedion.in
+Clamped ion piezoelectric coefficients from finite difference 
+calculation of the polarization under macroscopic strains
+(ions fixed).
+
+4. alas_piezo_relaxedion.in
+Relaxed ion piezoelectric coefficients from finite difference 
+calculation of the polarization under macroscopic strains
+(relaxed ions).
+

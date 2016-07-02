@@ -1,0 +1,62 @@
+# -*- Python -*-
+#
+# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Source files making up the 3nonlocal library
+#
+
+# Source file attributes
+ABI_SRC_NIL = 0     # No attribute
+ABI_SRC_BLT = 1     # The file is built by a script
+ABI_SRC_DEP = 2     # The file depends on other files
+
+# Source files
+sources = [
+ "cont22cso.F90",
+ "cont22so.F90",
+ "cont24.F90",
+ "cont33cso.F90",
+ "cont33so.F90",
+ "cont35.F90",
+ "cont22.F90",
+ "cont3.F90",
+ "cont13.F90",
+ "ctocprj.F90",
+ "ddkten.F90",
+ "dfpt_mkffkg.F90",
+ "getcprj.F90",
+ "metcon.F90",
+ "metcon_so.F90",
+ "metric_so.F90",
+ "metstr.F90",
+ "mkffkg.F90",
+ "mkffnl.F90",
+ "mkkpg.F90",
+ "m_commutator_vkbr.F90",
+ "m_fock.F90",
+ "m_gemm_nonlop.F90",
+ "m_hamiltonian.F90",
+ "nonlop.F90",
+ "nonlop_gpu.F90",
+ "nonlop_pl.F90",
+ "nonlop_ylm.F90",
+ "opernl2.F90",
+ "opernl3.F90",
+ "opernl4a.F90",
+ "opernl4b.F90",
+ "opernla_ylm.F90",
+ "opernlb_ylm.F90",
+ "opernlc_ylm.F90",
+ "opernld_ylm.F90",
+ "scalewf_nonlop.F90",
+ "strsocv.F90",
+ "trace2.F90",
+]
+# IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
+# This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

@@ -1,0 +1,27 @@
+!!****d* ABINIT/56_mixing
+!! NAME
+!! 56_mixing
+!!
+!! DESCRIPTION
+!!  FIXME: Description is missing
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! aprxdr.F90
+!! dotprodm_v.F90
+!! dotprodm_vn.F90
+!! findminscf.F90
+!! interfaces_56_mixing.F90
+!! m_ab7_mixing.F90
+!! scfcge.F90
+!! scfeig.F90
+!! scfopt.F90
+!! sqnormm_v.F90
+!!
+!!***

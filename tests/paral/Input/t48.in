@@ -1,0 +1,54 @@
+#Print the density and the wf in parallel in the first dataset
+#then read it. Run in parallel using accesswf=1
+pawprtvol 1
+pawecutdg 45.
+nline 13
+nsppol 2
+spinat 0.0 0.0 1.0 0.0 0.0 1.0
+ndtset 3
+prtden1 1
+getden3 -1
+getwfk2 -1
+getden4 -1
+getwfk4 -1
+#------------------------------------------------------
+# A simple calculation on silicon
+occopt 7 tsmear 0.001
+kptrlatt 1 0 0 0 2 0 0 0 1
+istwfk 4*1
+nshift 4 shiftk 1/2 1/2 1/2 1/2 0.0 0.0 0.0 1/2 0.0 0.0 0.0 1/2
+toldff 1.e-7 tolmxf 1.0d-5
+nstep 21
+ecut 10.0 diemac 12.0 enunit 2
+ngfft 12 12 12
+ ixc 1
+ acell 3*10.366
+ rprim 0.0 0.5 0.5
+       0.5 0.0 0.5
+       0.5 0.5 0.0
+ xred 0.0  0.0  0.0
+      0.22 0.22 0.22
+ znucl 6
+ nband 12
+ ntypat 1 typat 1 1  natom 2
+ npkpt 1
+ npband 2
+ npfft 2
+ paral_kgb 1
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% psp_files = 6c_lda.paw
+#%% [paral_info]
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test = t48_MPI4.out, tolnlines=   0,   tolabs=  0.0,      tolrel= 0.0
+#%% [extra_info]
+#%% keywords =  PAW
+#%% authors = Unknown
+#%% description = This is to test MPI_IO PAW (with the MPI flag), only with 4 procs in parallel
+#%%<END TEST_INFO>

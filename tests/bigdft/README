@@ -1,0 +1,17 @@
+This directory, bigdft, contains tests which exercise parts 
+of the ABINIT package, especially those features acquired
+during the inclusion of the BigDFT library (wavelet based computations).
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+
+Tests 1,2,3 is related to the basic ground state computation with H atoms.
+Tests 4,5 is related to the basic ground state computation with several atoms.
+Tests 8 is related to the basic ground state computation with ETSF restart from datasets.
+Test  9 is supposed to test the tail correction.
+Test 10 is supposed to test the reformating of wavefunction and rho reallocation.
+
+Tests 2x are dealing with the Poisson solver.
+
+Tests 3x are dealing with PAW and wavelets:
+

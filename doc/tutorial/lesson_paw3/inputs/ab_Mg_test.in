@@ -1,0 +1,76 @@
+# C - diamond structure
+ndtset 18 
+udtset 9 2
+
+# GS convergence fix
+istwfk *1
+
+#Definition of the unit cell
+acell 2*3.20927 5.21033 angstrom
+angdeg 90 90 60
+
+#Definition of the atom types
+ntypat 1          # 
+znucl 12          # The pseudopotential(s) 
+                  # mentioned in the "files" file must correspond
+                  # to the type(s) of atom. 
+
+#Definition of the atoms
+natom 2           # 2 atoms per cell
+typat 1 1 
+xred                    # This keyword indicates that the location of the atoms
+                        # will follow, one triplet of number for each atom
+   1/3   1/3   1/4
+   2/3   2/3   3/4
+
+ecut:?  5.0
+ecut+?  5.0
+pawecutdg 110.0
+ecutsm 0.5
+
+# Parameters for metals
+tsmear 0.4109816517E-02
+occopt 7
+
+# Dataset 1
+# Ground-state run
+kptopt?1 1
+nshiftk?1 1
+shiftk?1 0.0 0.0 0.5
+ngkpt 10 10 10
+tolvrs?1 1.0d-14
+nstep?1  150
+getwfk21 11
+getwfk31 21
+getwfk41 31
+getwfk51 41
+getwfk61 51
+getwfk71 61
+getwfk81 71
+getwfk91 81
+nbdbuf?1 5
+nband?1  25
+
+# Dataset 2
+# Definition of the k-point grid
+# the band structure
+iscf?2    -2
+getden?2  -1
+kptopt?2  -7
+nband?2   20
+nbdbuf?2   0
+ndivk?2    6 6 6 10 6 6 6 # divisions of the 6 segments
+kptbounds?2 
+           0   0   1/2 # A
+           1/2 0   1/2 # L
+           1/3 1/3 1/2 # H
+           0   0   1/2 # A
+           0   0   0   # Gamma
+           1/2 0   0   # M
+           1/3 1/3 0   # K
+           0   0   0   # Gamma
+
+tolwfr?2  1.0d-18
+enunit?2  0             # Will output the eigenenergies in Ha
+nstep?2   150
+

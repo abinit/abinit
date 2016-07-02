@@ -1,0 +1,17 @@
+#!/usr/bin/env python
+
+import commands
+import os
+import re
+import sys
+
+# Init
+re_priv = re.compile(r"bzr\+ssh://forge.abinit.org/abinit/[a-z_]+/[0-9]+\.[0-9]+\.[0-9]+-private[/]*")
+branch = commands.getoutput("bzr info | grep 'push branch: ' | sed -e 's/.*push branch: //'")
+
+# Check branch correctness and go
+if ( re_priv.match(branch) ):
+  os.system("bzr push %s" % re.sub("-private","-public",branch))
+else:
+  sys.stderr.write("%s: Error: default push branch is not an official private branch\n" % (os.path.basename(sys.argv[0])))
+  sys.exit(1)

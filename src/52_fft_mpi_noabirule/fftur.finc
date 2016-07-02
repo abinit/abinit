@@ -1,0 +1,66 @@
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: ndat1=1,option3=3,cplex0=0,npwin0=0
+ integer :: ldxyz,gsp_pt,box_pt,nthreads,dat,ug_ptr,ur_ptr
+ real(dp),parameter :: weight_i=one,weight_r=one
+ logical :: use_fftrisc
+!arrays
+ integer :: ngfft(18),kg_kin0(3,0)
+ real(dp) :: denpot(0,0,0) 
+
+! *************************************************************************
+
+ ldxyz = ldx*ldy*ldz
+
+ nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
+
+ ! TODO ndat > 1 with threads and istwf_k == 2.
+ !use_fftrisc = (mod(fftalg,10)==2 .and. istwf_k==1 .and. ndat==1)
+ use_fftrisc = (mod(fftalg,10)==2 .and. istwf_k==1)
+
+ if (use_fftrisc) then
+   !call wrtout(std_out,ABI_FUNC//" in fftur.finc","COLL")
+   ! Initialize ngfft
+   ngfft(1:8) = (/nx, ny, nz, ldx, ldy, ldz, fftalg, fftcache/)
+
+   call C_F_pointer(C_loc(ug), real_ug, shape=[2, npw_k*ndat])
+   call C_F_pointer(C_loc(ur), real_ur, shape=[2, ldx*ldy*ldz*ndat])
+
+   if (ndat==1) then
+     !write(std_out,*)"seq ndat",xomp_in_parallel()
+     call FFT_PREF(fftrisc) (cplex0,denpot,dum_ugin,real_ug,real_ur,&
+&      gbound,gbound,istwf_k,kg_kin0,kg_k,mgfft,ngfft,npwin0,npw_k,ldx,ldy,ldz,option3,weight_r,weight_i)
+   else
+!$OMP PARALLEL DO PRIVATE(ug_ptr, ur_ptr)
+     do dat=1,ndat
+       ug_ptr = 1 + (dat-1)*npw_k
+       ur_ptr = 1 + (dat-1)*ldx*ldy*ldz
+       call FFT_PREF(fftrisc) (cplex0,denpot,dum_ugin,real_ug(:,ug_ptr:),real_ur(:,ur_ptr:),&
+&        gbound,gbound,istwf_k,kg_kin0,kg_k,mgfft,ngfft,npwin0,npw_k,ldx,ldy,ldz,option3,weight_r,weight_i)
+     end do
+   end if
+
+ else
+
+   if (.not. SPAWN_THREADS_HERE(ndat,nthreads)) then
+     ! Inplace ur --> ug 
+     call FFT_PREF(fftpad) (ur,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,-1,gbound)
+
+     ! Copy data in ug
+     call TK_PREF(box2gsph) (nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,ur,ug)
+
+   else ! Spawn OMP threads here.
+
+!$OMP PARALLEL DO PRIVATE(gsp_pt, box_pt)
+     do dat=1,ndat
+       gsp_pt = 1 + dist * npw_k * (dat-1)
+       box_pt = 1 + dist * ldxyz * (dat-1)
+
+       call FFT_PREF(fftpad) (ur(box_pt:),nx,ny,nz,ldx,ldy,ldz,ndat1,mgfft,-1,gbound)
+
+       call TK_PREF(box2gsph) (nx,ny,nz,ldx,ldy,ldz,ndat1,npw_k,kg_k,ur(box_pt:),ug(gsp_pt:))
+     end do
+
+   end if
+
+ end if

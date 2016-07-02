@@ -1,0 +1,33 @@
+ # Seebeck Coefficint as a function of temperature.
+ #  the formalism is isotropic, so non-cubic crystals may be wrong
+ #  
+ #  Columns are: 
+ #  temperature[K]   S [au]   S [SI]     
+ #  
+ # Seebeck for isppol, itrten =            1           1
+    0.1000000000D+03   -0.7787090322D-01   -0.6710402788D-05
+ 
+ # Seebeck for isppol, itrten =            1           2
+    0.1000000000D+03    0.3773714409D-02    0.3251939126D-06
+ 
+ # Seebeck for isppol, itrten =            1           3
+    0.1000000000D+03    0.1664016987D-03    0.1433940505D-07
+ 
+ # Seebeck for isppol, itrten =            1           4
+    0.1000000000D+03    0.4082655092D-02    0.3518163907D-06
+ 
+ # Seebeck for isppol, itrten =            1           5
+    0.1000000000D+03   -0.7512551799D-01   -0.6473823527D-05
+ 
+ # Seebeck for isppol, itrten =            1           6
+    0.1000000000D+03   -0.3899530765D-03   -0.3360359394D-07
+ 
+ # Seebeck for isppol, itrten =            1           7
+    0.1000000000D+03    0.3940552493D-03    0.3395709224D-07
+ 
+ # Seebeck for isppol, itrten =            1           8
+    0.1000000000D+03   -0.6821820571D-04   -0.5878596740D-08
+ 
+ # Seebeck for isppol, itrten =            1           9
+    0.1000000000D+03   -0.3821041803D-01   -0.3292722764D-05
+ 

@@ -1,0 +1,26 @@
+&CONTROL
+tasks = "fourwf",
+fftalgs = 110, 111, 112, 410, 411, 412, 312, 512
+ncalls = 5,
+max_nthreads = 1,
+ndat = 1,
+/
+&SYSTEM
+ecut = 45,         
+rprimd = 12, 0, 0, 0, 11, 0, 0, 0, 13,
+kpoint = 0.5, 0.5, 0.0,
+/
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = fftprof
+#%% [files]
+#%% files_to_test = tfourwf_11.stdout, tolnlines=0, tolabs=0.0, tolrel=0.0
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = M. Giantomassi 
+#%% description = Test fourwf with ndat=1 and istwfk = 7
+#%%    TODO: 411, 412 are buggy
+#%%<END TEST_INFO>

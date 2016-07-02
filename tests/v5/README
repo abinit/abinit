@@ -1,0 +1,27 @@
+This directory, v5, contains tests which
+are related to the development of the various development in
+version 5.x.x of Abinit
+
+Please, see the README file in the tests directory (above this one) to get help.
+
+
+
+------------------------------------------------------------------
+
+* Tests 1-4 are related to molecular dynamics
+
+* Tests 5-20 are related to PAW
+
+* Tests 21-29 concern response functions
+
+* Tests 31-40 are related to PAW
+
+* Tests 41-60 concern ground state
+
+* Tests 60-72 concern electronic excitations
+
+* Tests 73-80 concern ground state
+
+* Tests 80-99 concern response functions
+
+------------------------------------------------------------------

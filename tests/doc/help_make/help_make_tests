@@ -1,0 +1,31 @@
+==============================================================================
+Use the script  runtests.py  for a flexible use of the test suite.
+To get help, issue                   ./runtests.py --help | more
+
+To run the new test suite inside a tmp directory (e.g. ~abinit/tmp/tests) :
+../../tests/runtests.py
+this will create a directory tmp/tests/Test_suite
+Useful option when using manually the test suite : "-t0"
+   (which disable the timeout routine)
+
+Keywords to use with the make command for test directory (automated sets of tests) :
+
+check_local    Standard set of tests, used on the test farm slaves
+tests_abirules Launch the abirules tests
+               (Warning : for some of the tests, the file make.log
+                must be present in the top directory. This means one has
+                to compile with the command   make > make.log 2>&1 )
+tests_buildsys Launch the buildsys tests
+tests_in       Launch several small tests (3 mandatory ones, for basic 
+               capabilities of ABINIT, and 4 optional, to test
+               bigdft, etsf_io, libxc, wannier90, if they are installed)
+
+One should check whether the following keywords still work :
+benchabinit
+tests_bench    Test accuracy+cpu for benchmarks (with a report)
+tests_speed    Test cpu for benchmarks (quick, with a report)
+
+To add a new test, see 
+http://dev.abinit.org/environment/buildbot/howto-add-a-new-test-in-the-test-suite
+
+==============================================================================

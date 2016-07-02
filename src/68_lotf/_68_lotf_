@@ -1,0 +1,21 @@
+!!****d* ABINIT/68_lotf
+!! NAME
+!! 68_lotf
+!!
+!! DESCRIPTION
+!!  FIXME: Description is missing
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! interfaces_68_lotf.F90
+!! m_eval_lotf.F90
+!! m_lotf.F90
+!! m_pred_lotf.F90
+!!
+!!***

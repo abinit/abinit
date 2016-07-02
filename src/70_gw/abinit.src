@@ -1,0 +1,74 @@
+# -*- Python -*-
+#
+# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Source files making up the 70_gw library
+#
+
+# Source file attributes
+ABI_SRC_NIL = 0     # No attribute
+ABI_SRC_BLT = 1     # The file is built by a script
+ABI_SRC_DEP = 2     # The file depends on other files
+
+# Source files
+sources = [
+ "calc_rpa_functional.F90",
+ "calc_sigc_cd.F90",
+ "calc_sigc_pole_cd.F90",
+ "calc_sig_ppm_comp.F90",
+ "calc_sigc_me.F90",
+ "calc_sigx_me.F90",
+ "calc_ucrpa.F90",
+ "calc_vhxc_me.F90",
+ "calc_wf_qp.F90",
+ "cchi0.F90",
+ "cchi0q0.F90",
+ "cchi0q0_intraband.F90",
+ "cohsex_me.F90",
+ "debug_tools.F90",
+ "dotproductqrc.F90",
+ "gwcompleteness.F90",
+ "gwls_hamiltonian.F90",
+ "gwls_wf.F90",
+ "gwls_valenceWavefunctions.F90",
+ "gwls_lineqsolver.F90",
+ "gwls_polarisability.F90",
+ "gwls_TimingLog.F90",
+ "gwls_model_polarisability.F90",
+ "gwls_QR_factorization.F90",
+ "gwls_GWlanczos.F90",
+ "gwls_GenerateEpsilon.F90",
+ "gwls_LanczosBasis.F90",
+ "gwls_DielectricArray.F90",
+ "gwls_GWanalyticPart.F90",
+ "gwls_LanczosResolvents.F90",
+ "gwls_Projected_AT.F90",
+ "gwls_Projected_BT.F90",
+ "gwls_ComputePoles.F90",
+ "gwls_ComputeCorrelationEnergy.F90",
+ "gw_tools.F90",
+ "my_calc_wfwfg.F90",
+ "mlwfovlp_qp.F90",
+ "m_chi0.F90",
+ "m_dyson_solver.F90",
+ "m_fft_prof.F90",
+ "m_model_screening.F90",
+ "m_ppmodel.F90",
+ "m_qparticles.F90",
+ "m_screening.F90",
+ "m_screen.F90",
+ "m_sigma.F90",
+ "paw_qpscgw.F90",
+ "prep_calc_ucrpa.F90",
+ "random_stopping_power.F90",
+ "read_plowannier.F90",
+ "setup_screening.F90",
+ "setup_sigma.F90",
+ ]
+# IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

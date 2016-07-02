@@ -1,0 +1,34 @@
+check tests_in :
+	for bit in in_1 in_2 in_3 in_bigdft in_etsf_io in_libxc in_wannier90 ; \
+           do  echo "Running built-in test $${bit}"; \
+           cd tests ; Scripts/run-basic-tests.sh built-in $${bit}; cd .. ; \
+           done
+
+testin_1 : 
+	echo "Running built-in test in_1"
+	cd tests ; Scripts/run-basic-tests.sh built-in in_1
+
+testin_2 : 
+	echo "Running built-in test in_2"
+	cd tests ; Scripts/run-basic-tests.sh built-in in_2
+
+testin_3 :
+	echo "Running built-in test in_3"
+	cd tests ; Scripts/run-basic-tests.sh built-in in_3
+
+testin_bigdft :
+	echo "Running built-in test in_bigdft"
+	cd tests ; Scripts/run-basic-tests.sh built-in in_bigdft 
+
+testin_etsf_io :
+	echo "Running built-in test in_etsf_io"
+	cd tests ; Scripts/run-basic-tests.sh built-in in_etsf_io
+
+testin_libxc :
+	echo "Running built-in test in_libxc"
+	cd tests ; Scripts/run-basic-tests.sh built-in in_libxc
+
+testin_wannier90 :
+	echo "Running built-in test in_wannier90"
+	cd tests ; Scripts/run-basic-tests.sh built-in in_wannier90
+

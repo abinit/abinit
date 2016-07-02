@@ -1,0 +1,4 @@
+# Type specified for intrinsic function 'real' at (1) is ignored
+Warning = 'Type specified for intrinsic function'
+#
+#src_excluded = ['10_defs']

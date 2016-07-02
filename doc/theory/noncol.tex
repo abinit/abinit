@@ -1,0 +1,103 @@
+%\title{ABINIT data structures and their theoretical justifications}
+\documentclass{article}
+\title{Non colinear magnetism\\
+       {\normalsize{(G. Z\'erah)}}}
+\begin{document}
+\maketitle
+
+\section{Notations and theoretical considerations}
+\label{sec:A1}
+\hspace*{\parindent}
+\vskip 1em
+* We will denote the spinor by $\Psi^{\alpha \beta}$, ${\alpha, \beta}$ being the two spin indexes.
+\vskip 1em
+* The magnetic properties are well represented by introducing the spin density matrix:
+$\rho^{\alpha,\beta}(r)=\sum_n f_n <r|\Psi_n^\alpha>
+<\Psi_n^\beta|r>$ where the sum runs over all states and $f_n$ is the occupation of state $n$.
+\vskip 1em
+* With  $\rho^{\alpha,\beta}(r)$, we can express the scalar density by
+$\rho(r)=\sum_{\alpha,\alpha} \rho^{\alpha,\alpha}(r)$
+and the magnetization density $\vec m(r)$ (in units of $\hbar /2$) whose components are
+$m_i(r)=\sum_{\alpha,\beta} \rho^{\alpha,\beta}(r) \sigma_i^{\alpha,\beta}$, where the $\sigma_i$ are
+the Pauli matrices.
+\vskip 1em
+* In general, $E_{xc}$ is a functional of $\rho^{\alpha,\beta}(r)$, or equivalently  of $\vec m(r)$
+and $\rho(r)$. It is therefore denoted as $E_{xc}(n(r), \vec m(r))$
+\vskip 1em
+* The expression of $V_{xc}$
+taking into account the above expression of $E_{xc}$ is:
+$$
+V_{xc}^{\alpha,\beta}(r)={\delta E_{xc} \over \delta \rho (r)} delta_{\alpha,\beta}+
+\sum_{i=1}^3 {\delta E_{xc} \over \delta m_i (r) }\sigma_i^{\alpha,\beta}
+$$
+\vskip 1em
+* In the LDA approximation, due to its rotational invariance, $E_{xc}$ is indeed a functional of $n(r)$ and $|m(r)|$ only.
+In the GGA approximation, we {\it assume} that it is a functional of $n(r)$ and $|m(r)|$ and their gradients.(This is not the
+most general functional of $\vec m(r)$ dependent upon first order derivatives, and rotationally invariant.)
+We therefore use exactly the same functional as in the spin polarized situation, using the local direction
+of $\vec m(r)$ as polarization direction.
+We the have $ {\delta E_{xc} \over \delta m_i (r) }={\delta E_{xc} \over \delta |m_i (r)| }
+\widehat {m(r)}$, where $\widehat {m(r)}={m(r) \over |m(r)|}$.
+Now, in the LDA-GGA formulations, $n\uparrow+n\downarrow=n$ and $|n\uparrow-n\downarrow|=|m|$
+and therefore, if we set $n\uparrow=(n+m)/2$ and $n\downarrow=(n-n\uparrow)$, we have:
+$$
+{\delta E_{xc} \over \delta \rho (r)}={1 \over 2}({\delta E_{xc} \over \delta n\uparrow(r)}+
+{\delta E_{xc} \over \delta n\downarrow(r)})
+$$
+and
+$$
+{\delta E_{xc} \over \delta |m (r)| }={1 \over 2}({\delta E_{xc} \over \delta n\uparrow(r)}-
+{\delta E_{xc} \over \delta n\downarrow(r)})
+$$
+This makes the connection with the more usual spin polarized case.
+\vskip 1em
+* Expression of $V_{xc}$ in LDA-GGA
+$$
+V_{xc}(r)={\delta E_{xc} \over \delta \rho (r)} \delta_{\alpha,\beta}+ {\delta E_{xc} \over \delta |m (r)| }
+ {\widehat m(r)}.\sigma
+$$
+* Implementation
+\vskip 1em
+* Computation of $\rho^{\alpha,\beta}(r)=\sum_n f_n <r|\Psi^\alpha>
+<\Psi^\beta|r>$
+One would like to use the routine {\tt mkrho.f} which does precisely this. But this routine transforms only real quantities, whereas
+$\rho^{\alpha,\beta}(r)$ is hermitian and can have complex elements.
+The ``trick'' is to use only the real quantities:
+\begin{eqnarray*}
+\rho^{1,1}(r)&=&\sum_n f_n <r|\Psi^1>
+<\Psi^1> \\
+\rho^{2,2}(r)&=&\sum_n f_n <r|\Psi^2>
+<\Psi^2> \\
+\rho(r)+m_x(r)&=&\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n \\
+\rho(r)+m_y(r)&=&\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n
+\end{eqnarray*}
+and compute  $(\rho(r), \vec m(r))$ with the help of the aditionnal:
+\begin{eqnarray*}
+\rho(r)&=&\rho^{1,1}(r)+\rho^{2,2}(r) \\
+m_z(r)&=&\rho^{1,1}(r) - \rho^{2,2}(r)
+\end{eqnarray*}
+
+Note that only the forurier transform are performed in {\tt mkrho.f} the final transformation to
+$(\rho(r), \vec m(r))$ is performed in {\tt symrhg.f}.
+\vskip 1em
+* The computation of $V_{xc}$ is performed in {\tt rhohxc.f}. The only transformation to this routine, is
+to compute $|\vec m(r)|$ as input of the usual (i.e spin polarized)  {\tt rhohxc.f} and yield back
+the four component $V_{xc}$, from the expression of ${\delta E_{xc} \over \delta |m (r)| }$.
+
+\vskip 1em
+* For more information, see: Hobbs et al., PRB, 62, 11556 ; Perdew et al. PRB, 46, 6671
+(for the xc functional)
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,44 @@
+# -*- Python -*-
+#
+# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Source files making up the 3xc library
+#
+
+# Source file attributes
+ABI_SRC_NIL = 0     # No attribute
+ABI_SRC_BLT = 1     # The file is built by a script
+ABI_SRC_DEP = 2     # The file depends on other files
+
+# Source files
+sources = [
+"libxc_tools.c",
+"check_kxc.F90",
+"drivexc.F90",
+"drivexc_main.F90",
+"echo_xc_name.F90",
+"invcb.F90",
+"m_libxc_functionals.F90",
+"mkdenpos.F90",
+"size_dvxc.F90",
+"xchcth.F90",
+"xchelu.F90",
+"xciit.F90",
+"xclb.F90",
+"xcmult.F90",
+"xcpbe.F90",
+"xcpositron.F90",
+"xcpzca.F90",
+"xcspol.F90",
+"xctetr.F90",
+"xctfw.F90",
+"xcwign.F90",
+"xcxalp.F90" ]
+# IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
+# This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

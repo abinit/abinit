@@ -1,0 +1,106 @@
+ ============================================================= 
+ ABINIT Input variables: Regenerate html from abinit_vars.yml  
+ ============================================================= 
+Will use abinit_vars.yml as input file
+
+ ============================================================= 
+ ABINIT Input variables: Check in documentation                
+ ============================================================= 
+FAIL:  getdelfd  does not appear in any var*html files 
+FAIL:  getdelfd  does not appear in the central allvariables.html file 
+FAIL:  getdkdk  does not appear in any var*html files 
+FAIL:  getdkdk  does not appear in the central allvariables.html file 
+FAIL:  getdkde  does not appear in any var*html files 
+FAIL:  getdkde  does not appear in the central allvariables.html file 
+FAIL:  getpawden  does not appear in any var*html files 
+FAIL:  getpawden  does not appear in the central allvariables.html file 
+FAIL:  irdpawden  does not appear in any var*html files 
+FAIL:  irdpawden  does not appear in the central allvariables.html file 
+FAIL:  rf2_dkde  does not appear in any var*html files 
+FAIL:  rf2_dkde  does not appear in the central allvariables.html file 
+FAIL:  rf2_pert1_dir  does not appear in any var*html files 
+FAIL:  rf2_pert1_dir  does not appear in the central allvariables.html file 
+FAIL:  rf2_pert2_dir  does not appear in any var*html files 
+FAIL:  rf2_pert2_dir  does not appear in the central allvariables.html file 
+FAIL:  rf1atpol  does not appear in any var*html files 
+FAIL:  rf1atpol  does not appear in the central allvariables.html file 
+FAIL:  rf1dir  does not appear in any var*html files 
+FAIL:  rf1dir  does not appear in the central allvariables.html file 
+FAIL:  rf1elfd  does not appear in any var*html files 
+FAIL:  rf1elfd  does not appear in the central allvariables.html file 
+FAIL:  rf1phon  does not appear in any var*html files 
+FAIL:  rf1phon  does not appear in the central allvariables.html file 
+FAIL:  rf2atpol  does not appear in any var*html files 
+FAIL:  rf2atpol  does not appear in the central allvariables.html file 
+FAIL:  rf2dir  does not appear in any var*html files 
+FAIL:  rf2dir  does not appear in the central allvariables.html file 
+FAIL:  rf2elfd  does not appear in any var*html files 
+FAIL:  rf2elfd  does not appear in the central allvariables.html file 
+FAIL:  rf2phon  does not appear in any var*html files 
+FAIL:  rf2phon  does not appear in the central allvariables.html file 
+FAIL:  rf3atpol  does not appear in any var*html files 
+FAIL:  rf3atpol  does not appear in the central allvariables.html file 
+FAIL:  rf3dir  does not appear in any var*html files 
+FAIL:  rf3dir  does not appear in the central allvariables.html file 
+FAIL:  rf3elfd  does not appear in any var*html files 
+FAIL:  rf3elfd  does not appear in the central allvariables.html file 
+FAIL:  rf3phon  does not appear in any var*html files 
+FAIL:  rf3phon  does not appear in the central allvariables.html file 
+ ============================================================= 
+ ABINIT Input variables: Check in test suite                   
+ ============================================================= 
+FAIL:  bs_eh_cutoff  does not appear in automatic test suite 
+FAIL:  cpum  does not appear in automatic test suite 
+FAIL:  cpuh  does not appear in automatic test suite 
+FAIL:  diismemory  does not appear in automatic test suite 
+FAIL:  ga_algor  does not appear in automatic test suite 
+FAIL:  getbscoup  does not appear in automatic test suite 
+FAIL:  getdelfd  does not appear in automatic test suite 
+FAIL:  getdkdk  does not appear in automatic test suite 
+FAIL:  getdkde  does not appear in automatic test suite 
+FAIL:  gethaydock  does not appear in automatic test suite 
+FAIL:  getpawden  does not appear in automatic test suite 
+FAIL:  gw_nstep  does not appear in automatic test suite 
+FAIL:  gw_sctype  does not appear in automatic test suite 
+FAIL:  gw_toldfeig  does not appear in automatic test suite 
+FAIL:  irdbscoup  does not appear in automatic test suite 
+FAIL:  irdhaydock  does not appear in automatic test suite 
+FAIL:  irdpawden  does not appear in automatic test suite 
+FAIL:  npwkss  does not appear in automatic test suite 
+FAIL:  pawcross  does not appear in automatic test suite 
+FAIL:  pawprt_b  does not appear in automatic test suite 
+FAIL:  pawprt_k  does not appear in automatic test suite 
+FAIL:  papiopt  does not appear in automatic test suite 
+FAIL:  rfuser  does not appear in automatic test suite 
+FAIL:  rf2_dkdk  does not appear in automatic test suite 
+FAIL:  rf2_dkde  does not appear in automatic test suite 
+FAIL:  rf2_pert1_dir  does not appear in automatic test suite 
+FAIL:  rf2_pert2_dir  does not appear in automatic test suite 
+FAIL:  rf1atpol  does not appear in automatic test suite 
+FAIL:  rf1dir  does not appear in automatic test suite 
+FAIL:  rf1elfd  does not appear in automatic test suite 
+FAIL:  rf1phon  does not appear in automatic test suite 
+FAIL:  rf2atpol  does not appear in automatic test suite 
+FAIL:  rf2dir  does not appear in automatic test suite 
+FAIL:  rf2elfd  does not appear in automatic test suite 
+FAIL:  rf2phon  does not appear in automatic test suite 
+FAIL:  rf3atpol  does not appear in automatic test suite 
+FAIL:  rf3dir  does not appear in automatic test suite 
+FAIL:  rf3elfd  does not appear in automatic test suite 
+FAIL:  rf3phon  does not appear in automatic test suite 
+FAIL:  useria  does not appear in automatic test suite 
+FAIL:  userib  does not appear in automatic test suite 
+FAIL:  useric  does not appear in automatic test suite 
+FAIL:  userid  does not appear in automatic test suite 
+FAIL:  userie  does not appear in automatic test suite 
+FAIL:  userra  does not appear in automatic test suite 
+FAIL:  userrb  does not appear in automatic test suite 
+FAIL:  userrc  does not appear in automatic test suite 
+FAIL:  userrd  does not appear in automatic test suite 
+FAIL:  userre  does not appear in automatic test suite 
+ ============================================================= 
+ ANADDB Input variables: Check in documentation                
+ ============================================================= 
+ ============================================================= 
+ ANADDB Input variables: Check in test suite                   
+ ============================================================= 

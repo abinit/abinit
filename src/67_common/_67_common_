@@ -1,0 +1,130 @@
+!!****d* ABINIT/67_common
+!! NAME
+!! 67_common
+!!
+!! DESCRIPTION
+!! This directory contains level-5 routines used
+!! to optimize wavefunctions, density and/or the atomic
+!! geometry, that are lower-level than the MPI-parallelized
+!! routines.
+!! (Should be described in more details, but might be
+!! further split)
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! berryphase.F90
+!! berryphase_new.F90
+!! calc_efg.F90
+!! calc_fc.F90
+!! cgq_builder.F90
+!! cgwf.F90
+!! clnup1.F90
+!! clnup2.F90
+!! conducti_nc.F90
+!! conducti_paw.F90
+!! conducti_paw_core.F90
+!! constrf.F90
+!! dens_in_sph.F90
+!! dielmt.F90
+!! dieltcel.F90
+!! emispec_paw.F90
+!! energy.F90
+!! erlxconv.F90
+!! etheta.F90
+!! etotfor.F90
+!! evdw_wannier.F90
+!! extraprho.F90
+!! extrapwf.F90
+!! fconv.F90
+!! fixsym.F90
+!! forces.F90
+!! forstr.F90
+!! forstrnps.F90
+!! fresid.F90
+!! fresidrsp.F90
+!! getcgqphase.F90
+!! hartre1.F90
+!! init_e_field_vars.F90
+!! initberry.F90
+!! initmv.F90
+!! initro.F90
+!! interfaces_67_common.F90
+!! ionion_realspace.F90
+!! ionion_surface.F90
+!! jellium.F90
+!! ks_ddiago.F90
+!! linemin.F90
+!! m_ioarr.F90
+!! m_iowf.F90
+!! m_plowannier.F90
+!! m_vcoul.F90
+!! mag_constr.F90
+!! mag_constr_e.F90
+!! make_efg_el.F90
+!! make_efg_ion.F90
+!! make_grad_berry.F90
+!! mkcore_inner.F90
+!! mkcore_paw.F90
+!! mkcore_wvl.F90
+!! mkgrid_fft.F90
+!! mklocl.F90
+!! mklocl_realspace.F90
+!! mklocl_recipspace.F90
+!! mklocl_wavelets.F90
+!! mkresi.F90
+!! mkrho.F90
+!! mksubham.F90
+!! mlwfovlp.F90
+!! mlwfovlp_proj.F90
+!! mlwfovlp_projpaw.F90
+!! mlwfovlp_pw.F90
+!! mlwfovlp_radial.F90
+!! mlwfovlp_seedname.F90
+!! mlwfovlp_setup.F90
+!! mlwfovlp_ylmfac.F90
+!! mlwfovlp_ylmfar.F90
+!! moddiel.F90
+!! msig.F90
+!! newkpt.F90
+!! nres2vres.F90
+!! odamix.F90
+!! optics_vloc.F90
+!! partial_dos_fractions.F90
+!! posdoppler.F90
+!! poslifetime.F90
+!! posratecore.F90
+!! prtefield.F90
+!! prteigrs.F90
+!! prtene.F90
+!! prtimg.F90
+!! prtrhomxmn.F90
+!! prtxf.F90
+!! prtxvf.F90
+!! rhotov.F90
+!! scprqt.F90
+!! setup1.F90
+!! setup_positron.F90
+!! setvtr.F90
+!! spin_current.F90
+!! stress.F90
+!! strhar.F90
+!! sygrad.F90
+!! symrhg.F90
+!! testsusmat.F90
+!! uderiv.F90
+!! update_e_field_vars.F90
+!! vdw_dftd2.F90
+!! vdw_dftd3.F90
+!! vso_realspace_local.F90
+!! vtorhotf.F90
+!! waveformat.F90
+!! wvl_initro.F90
+!! wvl_mkrho.F90
+!!
+!!***

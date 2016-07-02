@@ -1,0 +1,5 @@
+ Dummy atom with Z=0 for clean jellium calculation (abinit takes covalent radius = 1)
+   0.0       0.0        031407                zatom, zion, pspdat
+   4   1  -1   0      2001    .00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    .00000000    .0000000000    .0000000000    .00000000   rms,ekb1,ekb2,epsatm
+

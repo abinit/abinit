@@ -1,0 +1,104 @@
+
+.Version 8.0.3 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+
+.Copyright (C) 1998-2016 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : Mon  4 Apr 2016.
+- ( at 11h38 )
+  
+- input  file    -> tgspw_01.in
+- output file    -> tgspw_01.out
+- root for input  files -> tgspw_01i
+- root for output files -> tgspw_01o
+
+     npimage|       npkpt|    npspinor|       npfft|      npband|     bandpp |       nproc|      weight|
+   1 ->    1|   1 ->    1|   1 ->    1|   1 ->   22|   1 ->  108|   1 ->   65|   1 ->  108|   1 ->  108|
+           1|           1|           1|          12|           9|           1|         108|      55.13 |
+           1|           1|           1|          10|           9|           1|          90|      54.98 |
+           1|           1|           1|           9|           9|           1|          81|      54.85 |
+           1|           1|           1|           9|          12|           1|         108|      54.37 |
+           1|           1|           1|          12|           9|           2|         108|      52.86 |
+ Received max_ncpus 108 possible choices for nproc; only the first 250 ones are printed...
+
+--- !Autoparal
+#Autoparal section for GS calculations with paral_kgb
+info:
+    autoparal: 1
+    paral_kgb: 1
+    max_ncpus: 108
+    nspinor: 1
+    nsppol: 1
+    nkpt: 1
+    mband: 648
+configurations:
+    - tot_ncpus: 108
+      mpi_ncpus: 108
+      efficiency:  0.510460973
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 12,
+            npband: 9,
+            bandpp: 1,
+            }
+    - tot_ncpus: 90
+      mpi_ncpus: 90
+      efficiency:  0.610840698
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 10,
+            npband: 9,
+            bandpp: 1,
+            }
+    - tot_ncpus: 81
+      mpi_ncpus: 81
+      efficiency:  0.677166618
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 9,
+            npband: 9,
+            bandpp: 1,
+            }
+    - tot_ncpus: 108
+      mpi_ncpus: 108
+      efficiency:  0.503454684
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 9,
+            npband: 12,
+            bandpp: 1,
+            }
+    - tot_ncpus: 108
+      mpi_ncpus: 108
+      efficiency:  0.489442106
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 12,
+            npband: 9,
+            bandpp: 2,
+            }
+...
+
+ Launch a parallel version of ABINIT with a number of processors among the above list,
+ and the associated input variables npkpt, npband, npfft and bandpp. 
+ The optimal weight is close to nproc and the higher should be better.

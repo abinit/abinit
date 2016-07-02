@@ -1,0 +1,53 @@
+!!****d* ABINIT/43_ptgroups
+!! NAME
+!! 43_ptgroups
+!!
+!! DESCRIPTION
+!! This directory contains routines that are related to the
+!! recognition of point groups and their irreducible representations.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (MG)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! interfaces_43_ptgroups.F90
+!! m_defs_ptgroups.F90
+!! m_ptgroups.F90
+!! ptg_C1.F90
+!! ptg_C2.F90
+!! ptg_C2h.F90
+!! ptg_C2v.F90
+!! ptg_C3.F90
+!! ptg_C3h.F90
+!! ptg_C3i.F90
+!! ptg_C3v.F90
+!! ptg_C4.F90
+!! ptg_C4h.F90
+!! ptg_C4v.F90
+!! ptg_C6.F90
+!! ptg_C6h.F90
+!! ptg_C6v.F90
+!! ptg_Ci.F90
+!! ptg_Cs.F90
+!! ptg_D2.F90
+!! ptg_D2d.F90
+!! ptg_D2h.F90
+!! ptg_D3.F90
+!! ptg_D3d.F90
+!! ptg_D3h.F90
+!! ptg_D4.F90
+!! ptg_D4h.F90
+!! ptg_D6.F90
+!! ptg_D6h.F90
+!! ptg_O.F90
+!! ptg_Oh.F90
+!! ptg_S4.F90
+!! ptg_T.F90
+!! ptg_Td.F90
+!! ptg_Th.F90
+!!
+!!***

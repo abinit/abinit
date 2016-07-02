@@ -1,0 +1,94 @@
+# -*- Python -*-
+#
+# Copyright (C) 2005-2016 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Source files making up the 2geometry library
+#
+
+# Source file attributes
+ABI_SRC_NIL = 0     # No attribute
+ABI_SRC_BLT = 1     # The file is built by a script
+ABI_SRC_DEP = 2     # The file depends on other files
+
+# Source files
+sources = [
+ "bldgrp.F90",
+ "bonds_lgth_angles.F90",
+ "chiscwrt.F90",
+ "chkdilatmx.F90",
+ "chkgrp.F90",
+ "chkorthsy.F90",
+ "chkprimit.F90",
+ "chkrprimd.F90",
+ "dbeta.F90",
+ "dist2.F90",
+ "fcart2fred.F90",
+ "fillcell.F90",
+ "fred2fcart.F90",
+ "gensymshub.F90",
+ "gensymshub4.F90",
+ "gensymspgr.F90",
+ "getptgroupma.F90",
+ "getspinrot.F90",
+ "holocell.F90",
+ "ioniondist.F90",
+ "irreducible_set_pert.F90",
+ "littlegroup_pert.F90",
+ "metric.F90",
+ "mkeuler.F90",
+ "mkradim.F90",
+ "mkrdim.F90",
+ "mksupercell.F90",
+ "m_ab7_symmetry.F90",
+ "m_crystal.F90",
+ "m_dynmat.F90",
+ "m_ewald.F90",
+ "polcart.F90",
+ "prt_cif.F90",
+ "prtposcar.F90",
+ "prtspgroup.F90",
+ "ptgmadata.F90",
+ "randomcellpos.F90",
+ "remove_inversion.F90",
+ "shellstruct.F90",
+ "smallprim.F90",
+ "spgdata.F90",
+ "strconv.F90",
+ "stresssym.F90",
+ "symanal.F90",
+ "symatm.F90",
+ "symaxes.F90",
+ "symbrav.F90",
+ "symcharac.F90",
+ "symchk.F90",
+ "symdet.F90",
+ "symfind.F90",
+ "symkpt.F90",
+ "symlatt.F90",
+ "symlist_bcc.F90",
+ "symlist_fcc.F90",
+ "symlist_others.F90",
+ "symlist_prim.F90",
+ "symptgroup.F90",
+ "symplanes.F90",
+ "symredcart.F90",
+ "symrelrot.F90",
+ "symsgcube.F90",
+ "symsghexa.F90",
+ "symsgmono.F90",
+ "symsgortho.F90",
+ "symsgtetra.F90",
+ "symspgr.F90",
+ "symmetrize_rprimd.F90",
+ "symmetrize_xred.F90",
+ "xred2xcart.F90",
+ "xcart2xred.F90",
+]
+# IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
+# This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

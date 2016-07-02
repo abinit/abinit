@@ -1,0 +1,233 @@
+
+.Version 8.0.5 of CUT3D 
+.(MPI version, prepared for a x86_64_darwin15.4.0_gnu5.3 computer) 
+
+.Copyright (C) 1998-2016 ABINIT group . 
+ CUT3D comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : Sat  7 May 2016.
+- ( at 22h46 )
+  
+
+  What is the name of the 3D function (density, potential or wavef) file ?
+  => Your 3D function file is: t12o_DS1_WFK
+
+- Your file contains unformatted binary header + 3D data
+
+ ===============================================================================
+ ECHO of the ABINIT file header 
+ 
+ First record :
+.codvsn,headform,fform = 8.0.5    80    2
+ 
+ Second record :
+ bantot,intxc,ixc,natom  =    16     0     7     1
+ ngfft(1:3),nkpt         =    16    16    16     2
+ nspden,nspinor          =     1     1
+ nsppol,nsym,npsp,ntypat =     1    48     1     1
+ occopt,pertcase,usepaw  =     1     0     0
+ ecut,ecutdg,ecutsm      =  8.0000000000E+00  8.0000000000E+00  0.0000000000E+00
+ ecut_eff                =  8.0000000000E+00
+ qptn(1:3)               =  0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+ rprimd(1:3,1)           =  0.0000000000E+00  4.0000000000E+00  4.0000000000E+00
+ rprimd(1:3,2)           =  4.0000000000E+00  0.0000000000E+00  4.0000000000E+00
+ rprimd(1:3,3)           =  4.0000000000E+00  4.0000000000E+00  0.0000000000E+00
+ stmbias,tphysel,tsmear  =  0.0000000000E+00  0.0000000000E+00  1.0000000000E-02
+
+ Third record :
+ istwfk=   1   1
+ nband =   8   8
+ npwarr=  136  144
+ so_psp=   1
+ symafm=
+          1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+          1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+ symrel=
+           1   0   0   0   1   0   0   0   1    -1   0   0   0  -1   0   0   0  -1
+           0  -1   1   0  -1   0   1  -1   0     0   1  -1   0   1   0  -1   1   0
+          -1   0   0  -1   0   1  -1   1   0     1   0   0   1   0  -1   1  -1   0
+           0   1  -1   1   0  -1   0   0  -1     0  -1   1  -1   0   1   0   0   1
+          -1   0   0  -1   1   0  -1   0   1     1   0   0   1  -1   0   1   0  -1
+           0  -1   1   1  -1   0   0  -1   0     0   1  -1  -1   1   0   0   1   0
+           1   0   0   0   0   1   0   1   0    -1   0   0   0   0  -1   0  -1   0
+           0   1  -1   0   0  -1   1   0  -1     0  -1   1   0   0   1  -1   0   1
+          -1   0   1  -1   1   0  -1   0   0     1   0  -1   1  -1   0   1   0   0
+           0  -1   0   1  -1   0   0  -1   1     0   1   0  -1   1   0   0   1  -1
+           1   0  -1   0   0  -1   0   1  -1    -1   0   1   0   0   1   0  -1   1
+           0   1   0   0   0   1   1   0   0     0  -1   0   0   0  -1  -1   0   0
+           1   0  -1   0   1  -1   0   0  -1    -1   0   1   0  -1   1   0   0   1
+           0  -1   0   0  -1   1   1  -1   0     0   1   0   0   1  -1  -1   1   0
+          -1   0   1  -1   0   0  -1   1   0     1   0  -1   1   0   0   1  -1   0
+           0   1   0   1   0   0   0   0   1     0  -1   0  -1   0   0   0   0  -1
+           0   0  -1   0   1  -1   1   0  -1     0   0   1   0  -1   1  -1   0   1
+           1  -1   0   0  -1   1   0  -1   0    -1   1   0   0   1  -1   0   1   0
+           0   0   1   1   0   0   0   1   0     0   0  -1  -1   0   0   0  -1   0
+          -1   1   0  -1   0   0  -1   0   1     1  -1   0   1   0   0   1   0  -1
+           0   0   1   0   1   0   1   0   0     0   0  -1   0  -1   0  -1   0   0
+           1  -1   0   0  -1   0   0  -1   1    -1   1   0   0   1   0   0   1  -1
+           0   0  -1   1   0  -1   0   1  -1     0   0   1  -1   0   1   0  -1   1
+          -1   1   0  -1   0   1  -1   0   0     1  -1   0   1   0  -1   1   0   0
+ type  =   1
+ kptns =                 (max 50 k-points will be written)
+           -2.500000E-01    5.000000E-01    0.000000E+00
+           -2.500000E-01    0.000000E+00    0.000000E+00
+ wtk =
+          0.75  0.25
+   occ =
+          2.00  2.00  2.00  2.00  0.00  0.00  0.00  0.00  2.00  2.00
+          2.00  2.00  0.00  0.00  0.00  0.00
+ tnons =
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+          0.000000  0.000000  0.000000    0.000000  0.000000  0.000000
+  znucl= 18.00
+
+ Pseudopotential info :
+ title=  Ar  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
+  znuclpsp= 18.00, zionpsp=  8.00, pspso=  0, pspdat=******, pspcod=  6, pspxc=  7
+  lmnmax  =  2
+ 
+ Last record :
+ residm,etot,fermie=    5.702789E-17   -2.113379599952E+01   -4.441666E-02
+ xred =
+            0.000000E+00    0.000000E+00    0.000000E+00
+ End the ECHO of the ABINIT file header 
+ ===============================================================================
+
+ ===========================================================
+
+ ECHO important input variables ...
+
+  Dimensional primitive vectors (ABINIT equivalent: rprimd):
+    0.000000E+00    4.000000E+00    4.000000E+00
+    4.000000E+00    0.000000E+00    4.000000E+00
+    4.000000E+00    4.000000E+00    0.000000E+00
+  Grid density (ABINIT equivalent: ngfft):    16   16   16
+  Number of atoms       :           1
+  Number of atomic types:           1
+
+   #    Atomic positions (cartesian coordinates - Bohr)
+   1    0.000000E+00    0.000000E+00    0.000000E+00
+
+  This file is a WF file. 
+
+ For which k-points? (1 to    2)
+  => Your k-point is :            1
+
+
+ For which band ? (1 to     8)
+  => Your band number is :            5
+
+  => Your spin polarisation number is :            1
+
+ Do you want to analyze a GW wavefunction? (1=yes,0=no)
+ => Your choice is :           1
+
+ What is the name of the QPS file?
+ Do you want the atomic analysis for this state : 
+ (kpt,band)= (    1    5)? 
+ If yes, enter the radius of the atomic spheres, in bohr 
+ If no, enter 0 
+ You entered ratsph=      6.00000000 Bohr 
+
+ Atomic sphere analysis 
+
+ wffile : kpgmax, bessargmax, nradint =     2.828427E+00    1.067000E+02  1067
+ Angular analysis 
+ 
+ Atom #   1 is  Ar, in-sphere charge =  4.942836
+ l=0, charge= 0.321014, m=-l,l splitting: 0.321
+ l=1, charge= 0.331354, m=-l,l splitting: 0.057 0.217 0.057
+ l=2, charge= 2.057137, m=-l,l splitting: 0.288 0.031 1.420 0.031 0.288
+ l=3, charge= 1.427842, m=-l,l splitting: 0.157 0.036 0.356 0.330 0.356 0.036 0.157
+ l=4, charge= 0.805489, m=-l,l splitting: 0.191 0.072 0.033 0.106 0.004 0.106 0.033 0.072 0.191
+
+ Sum of angular contributions for all atomic spheres 
+ l=0, charge = 0.321014 proportion = 0.064945
+ l=1, charge = 0.331354 proportion = 0.067037
+ l=2, charge = 2.057137 proportion = 0.416185
+ l=3, charge = 1.427842 proportion = 0.288871
+ l=4, charge = 0.805489 proportion = 0.162961
+
+ Total over all atoms and l=0 to 4 :  4.942836
+ 
+ Charge in the sphere around each atom 
+ Atom number    1 :  charge =    7.09134295
+
+  3D wave function was read. Ready for further treatment.
+
+ ===========================================================
+
+  What is your choice ? Type:
+   0 => exit to k-point / band / spin-pol loop
+   1 => 3D formatted real and imaginary data
+        (output the bare 3D data - two column,R,I)
+   2 => 3D formatted real data
+        (output the bare 3D data - one column)
+   3 => 3D formatted imaginary data
+        (output the bare 3D data - one column)
+   4 => 3D indexed real and imaginary data
+        (3D data, preceeded by 3D index)
+   5 => 3D indexed real data
+        (bare 3D data, preceeded by 3D index)
+   6 => 3D indexed imaginary data
+        (bare 3D data, preceeded by 3D index)
+   7 => 3D Data Explorer formatted data 
+        (Real file and Imaginary file)
+   8 => 3D Data Explorer formatted data 
+        (Only the Real file)
+   9 => 3D Data Explorer formatted data 
+        (Only the Imaginary file)
+  10 => 3D Data Explorer formatted data and position files
+  11 => XCrysden formatted data (norm of wf) and position files
+  12 => NetCDF data and position file
+  13 => XCrysden/VENUS wavefunction (real part of data)
+  14 => Gaussian/cube wavefunction module
+
+ Your choice is 14
+
+ 
+  Enter the root of an output file:
+   The root of your file is : t13
+   The corresponding filename is : t13_k1_b5
+
+ Output a cube file of 3D volumetric data
+
+  Task           14  has been done !
+
+  Run interpolation again? (1=default=yes,0=no)
+-
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
+
+  Thank you for using me
+

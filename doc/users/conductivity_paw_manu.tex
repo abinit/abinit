@@ -1,0 +1,70 @@
+%\documentclass[superscriptaddress]{revtex4-1}
+\documentclass{article}
+
+\begin{document}
+%
+\title{Conductivity calculations using the PAW formalism }
+
+\author{S. Mazevet, V. Recoules, M. Torrent, et F. Jollet,
+{\it D\'epartement de Physique Th\'eorique et Appliqu\'ee,
+CEA/DAM \^Ile-de-France,
+BP12, 91680 Bruy\`eres-le-Ch\^atel Cedex, France}}
+
+\date{\today}
+
+\vspace{0.5cm}
+To perform a conductivity calculation within the PAW formalism you need to first use
+a PAW potential and run a ground state calculation with the \textit{prtnabla} variable
+ set to 1 and \textit{prtwfk=1}.
+This calculates the necessary matrix elements and creates a file named filename \_OPT.
+
+The postprocessor \textit{conducti} read the file filename \_OPT and calculate
+the electrical and thermal conductivity.
+
+\textit{conducti < filename.files}
+
+where \textit{filename.files} contains the input and output filenames.
+\vspace{0.25cm}
+
+\textit{filename.in} contains the following variables in the PAW case:
+
+
+2            ! 2 for PAW calculations
+
+
+filename     ! generic name of the ground state data files obtained with   prtwfk=1
+
+
+0.073119 0.0000001 5.00 1000   !gaussian width, omega\_min, omega\_max, nbr pts
+\vspace{0.5cm}
+
+Warning the conducti input file is for the moment different when used in the
+PAW and NCPP modes. With NCPP, the input file is (see \textit{/doc/users/conducti\_manuel.tex})
+
+
+
+
+1                 ! 1 for norm-conserving calculations
+
+
+t78o\_DS3\_1WF4 ! 1st DDK file
+
+
+t78o\_DS4\_1WF5 ! 2nd DDK file
+
+
+t78o\_DS5\_1WF6 ! 3rd DDK file
+
+
+t78o\_DS2\_WFK  ! ground state data file obtained with   prtwfk=1
+
+
+9.50049E-04   ! temperature
+
+
+1.000         ! k point weigth
+
+
+0.00735  2.0  ! Gaussian and frequency width; omega-max
+
+\end{document}

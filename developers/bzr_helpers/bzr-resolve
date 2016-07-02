@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Check whether kdiff3 is here
+kdiff3 --version >/dev/null 2>&1
+if test "${?}" != "0"; then
+  echo "Error: kdiff3 not found!" >&2
+  echo "Aborting." >&2
+  exit 1
+fi
+
+# Show disclaimer
+cat <<EOF
+USE AT YOUR OWN RISKS!
+
+This script is meant to help you solving Bazaar conflicts between
+branches, taking the most possible from the capabilities of kdiff3. It
+is supposed that you know how to use kdiff3.
+
+While it is possible to solve the conflicts automatically in some cases,
+human intervention is necessary most of the time. That's why you will
+see the user interface of kdiff3 pop-up regularly. Each time it happens,
+you have to solve the conflicts, save the file, and close the window,
+and so on, until all solvable conflicts have been iterated over.
+
+In some cases, you may want to mark yourself the conflicts as solved
+later. The script will thus systematically ask you for confirmation to
+mark the conflicts you worked on as solved. Conflicts that were not
+solved either automatically or manually will remain.
+
+Please note that the ".orig" files are not removed in any case.
+
+EOF
+sleep 5
+
+# Iterate over solvable conflicts
+for f in `bzr conflicts | grep -v '^Path' | awk '{print $4}'`; do
+  if test ! -e "${f}.orig"; then
+    base=""
+    test -e "${f}.BASE" && base="${f}.BASE"
+    kdiff3 --auto -o ${f} ${base} ${f}.THIS ${f}.OTHER
+  fi
+done
+
+# Ask for confirmation
+echo -n "Mark solved conflicts as resolved (y/N)? "
+read yesno
+
+# Mark conflicts as solved
+if test "${yesno}" = "Y" -o "${yesno}" = "y"; then
+  for f in `bzr conflicts | grep -v '^Path' | awk '{print $4}'`; do
+    test -e "${f}.orig" && bzr resolve ${f}
+  done
+fi
+
+echo ""
+echo "Remaining conflicts:"
+bzr conflicts
+echo ""
+echo "Done."

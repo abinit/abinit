@@ -1,0 +1,387 @@
+
+.Version 8.0.3 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+
+.Copyright (C) 1998-2016 ABINIT group . 
+ ANADDB comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : Mon  4 Apr 2016.
+- ( at 12h02 )
+  
+
+================================================================================
+
+ -outvars_anaddb: echo values of input variables ----------------------
+
+ Flags :
+     ifcflag         1
+    elphflag         1
+ Miscellaneous information :
+       eivec         1
+         asr         2
+ Interatomic Force Constants Inputs :
+      dipdip         0
+      ifcana         1
+      ifcout         0
+ Description of grid 1 :
+        brav         1
+       ngqpt         2         2         2
+      nqshft         1
+      q1shft
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00
+ Elphon calculation will be carried out
+   elphsmear    0.100000E-01
+    a2fsmear    0.200000E-04
+      mustar    0.100000E-01
+      nqpath        12
+       qpath
+                0.333333E+00     0.333333E+00     0.000000E+00
+                0.000000E+00     0.000000E+00     0.000000E+00
+                0.500000E+00     0.000000E+00     0.000000E+00
+                0.333333E+00     0.333333E+00     0.000000E+00
+                0.333333E+00     0.333333E+00     0.500000E+00
+                0.000000E+00     0.000000E+00     0.500000E+00
+                0.500000E+00     0.000000E+00     0.500000E+00
+                0.333333E+00     0.333333E+00     0.500000E+00
+                0.500000E+00     0.000000E+00     0.500000E+00
+                0.500000E+00     0.000000E+00     0.000000E+00
+                0.000000E+00     0.000000E+00     0.000000E+00
+                0.000000E+00     0.000000E+00     0.500000E+00
+    telphint         1
+ Smeared weight integration for elphon
+Elphon: extra electrons per unit cell =     0.100000E+00
+    kptrlatt  4   0   0     0   4   0     0   0   4
+ Will keep band dependency in gkk in memory.
+ WARNING: the memory requirements will be multiplied by nbands**2 !!!
+ scalar product will be performed when assembling the gamma matrices.
+ WARNING: with this option you can not distinguish which 
+    linewidth comes from which phonon mode !!!
+ Will perform transport calculation in elphon to get
+ resistivity and thermal conductivity as a function of T
+
+ Minimum temperature for transport outputs:     1.000000E+02 K
+ Maximum temperature for transport outputs:     1.100000E+03 K
+ Number of temperature points for transport outputs:     10
+
+ First list of wavevector (reduced coord.) :
+       nph1l         2
+       qph1l
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00    1.000E+00
+                     5.00000000E-01  0.00000000E+00  0.00000000E+00    1.000E+00
+Phonon displacements will be output, frozen into supercells
+ Chosen amplitude of frozen displacements =     0.1000000000E+02
+Phonon band structure files, with atomic projections, will be output 
+ Chosen atoms for projection = 
+     1     2
+
+================================================================================
+
+ read the DDB information and perform some checks
+
+-begin at tcpu      0.029  and twall      0.029 sec
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  5.5762039  0.0000000  0.0000000  G(1)=  0.1793335  0.1035382  0.0000000
+ R(2)= -2.7881019  4.8291342  0.0000000  G(2)=  0.0000000  0.2070765  0.0000000
+ R(3)=  0.0000000  0.0000000  8.8543118  G(3)=  0.0000000  0.0000000  0.1129393
+ Unit cell volume ucvol=  2.3843101E+02 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Calculation of the interatomic forces 
+
+-begin at tcpu      0.034  and twall      0.034 sec
+       Homogeneous q point set in the B.Z.
+ Grid q points  :        8
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  3)   0.00000000E+00  5.00000000E-01  0.00000000E+00
+  4)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+  5)   0.00000000E+00  0.00000000E+00  5.00000000E-01
+  6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+  7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+  8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+
+ The interatomic forces have been obtained
+
+================================================================================
+
+ Properties based on electron-phonon coupling 
+
+ Found     2 symmetries that leave the perturbation invariant.
+ Found     2 symmetries that leave the perturbation invariant.
+ Found     6 symmetries that leave the perturbation invariant.
+ Found     2 symmetries that leave the perturbation invariant.
+ Found     2 symmetries that leave the perturbation invariant.
+ Found     6 symmetries that leave the perturbation invariant.
+ Found     2 symmetries that leave the perturbation invariant.
+ Found     2 symmetries that leave the perturbation invariant.
+ Found     2 symmetries that leave the perturbation invariant.
+ Found     2 symmetries that leave the perturbation invariant.
+ Found     2 symmetries that leave the perturbation invariant.
+ Found     2 symmetries that leave the perturbation invariant.
+ The set of symmetries contains only one element for this perturbation.
+ The set of symmetries contains only one element for this perturbation.
+ Found     6 symmetries that leave the perturbation invariant.
+ The set of symmetries contains only one element for this perturbation.
+ The set of symmetries contains only one element for this perturbation.
+ Found     6 symmetries that leave the perturbation invariant.
+ The set of symmetries contains only one element for this perturbation.
+ The set of symmetries contains only one element for this perturbation.
+ Found     2 symmetries that leave the perturbation invariant.
+ The set of symmetries contains only one element for this perturbation.
+ The set of symmetries contains only one element for this perturbation.
+ Found     2 symmetries that leave the perturbation invariant.
+
+ Output of the linewidths for the first point of each segment. Linewidths are given in Hartree.
+
+ Q point =    3.333333E-01    3.333333E-01    0.000000E+00   isppol =    1
+ Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
+       1        1.510416E-03    7.273647E-06    3.682590E-02
+       2        1.760080E-03    2.610219E-06    9.732101E-03
+       3        1.760080E-03    2.607481E-06    9.721893E-03
+       4        1.814886E-03    8.237904E-06    2.888766E-02
+       5        1.814886E-03    8.012297E-06    2.809653E-02
+       6        2.075154E-03    8.976554E-06    2.407705E-02
+
+ Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
+ Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
+       1        0.000000E+00    8.111677E-16    0.000000E+00
+       2        0.000000E+00    1.442240E-08    0.000000E+00
+       3        0.000000E+00    9.684134E-09    0.000000E+00
+       4        1.049696E-03    1.517494E-05    1.590723E-01
+       5        1.049696E-03    1.018571E-05    1.067723E-01
+       6        2.778532E-03    2.326062E-06    3.480044E-03
+
+ Q point =    5.000000E-01    0.000000E+00    0.000000E+00   isppol =    1
+ Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
+       1        9.956626E-04    6.542456E-06    7.622732E-02
+       2        1.330052E-03    3.279741E-06    2.141395E-02
+       3        1.660483E-03    1.456274E-05    6.100541E-02
+       4        2.079686E-03    2.130736E-06    5.690214E-03
+       5        2.147570E-03    8.215715E-06    2.057525E-02
+       6        2.355010E-03    3.653867E-06    7.609596E-03
+
+ Q point =    3.333333E-01    3.333333E-01    0.000000E+00   isppol =    1
+ Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
+       1        1.510416E-03    7.273647E-06    3.682590E-02
+       2        1.760080E-03    2.610219E-06    9.732101E-03
+       3        1.760080E-03    2.607481E-06    9.721893E-03
+       4        1.814886E-03    8.237904E-06    2.888766E-02
+       5        1.814886E-03    8.012297E-06    2.809653E-02
+       6        2.075154E-03    8.976554E-06    2.407705E-02
+
+ Q point =    3.333333E-01    3.333333E-01    5.000000E-01   isppol =    1
+ Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
+       1        8.290816E-04    8.789675E-06    1.476973E-01
+       2        8.290816E-04    8.789675E-06    1.476973E-01
+       3        1.692076E-03    8.770707E-06    3.538255E-02
+       4        1.692076E-03    8.770707E-06    3.538255E-02
+       5        2.323611E-03    8.792817E-06    1.881028E-02
+       6        2.323611E-03    8.792817E-06    1.881028E-02
+
+ Q point =    0.000000E+00    0.000000E+00    5.000000E-01   isppol =    1
+ Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
+       1        7.134321E-04    1.247889E-06    2.831816E-02
+       2        7.134321E-04    1.314782E-06    2.983614E-02
+       3        7.134321E-04    2.257411E-06    5.122706E-02
+       4        7.134321E-04    2.190518E-06    4.970908E-02
+       5        1.797700E-03    7.385018E-06    2.639437E-02
+       6        1.797700E-03    7.385018E-06    2.639437E-02
+
+ Q point =    5.000000E-01    0.000000E+00    5.000000E-01   isppol =    1
+ Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
+       1        1.137077E-03    1.270145E-05    1.134666E-01
+       2        1.137077E-03    1.270145E-05    1.134666E-01
+       3        1.281754E-03    7.850765E-06    5.519462E-02
+       4        1.281754E-03    7.850765E-06    5.519462E-02
+       5        2.515385E-03    6.831838E-06    1.247162E-02
+       6        2.515385E-03    6.831838E-06    1.247162E-02
+
+ Q point =    3.333333E-01    3.333333E-01    5.000000E-01   isppol =    1
+ Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
+       1        8.290816E-04    8.789675E-06    1.476973E-01
+       2        8.290816E-04    8.789675E-06    1.476973E-01
+       3        1.692076E-03    8.770707E-06    3.538255E-02
+       4        1.692076E-03    8.770707E-06    3.538255E-02
+       5        2.323611E-03    8.792817E-06    1.881028E-02
+       6        2.323611E-03    8.792817E-06    1.881028E-02
+
+ Q point =    5.000000E-01    0.000000E+00    5.000000E-01   isppol =    1
+ Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
+       1        1.137077E-03    1.270145E-05    1.134666E-01
+       2        1.137077E-03    1.270145E-05    1.134666E-01
+       3        1.281754E-03    7.850765E-06    5.519462E-02
+       4        1.281754E-03    7.850765E-06    5.519462E-02
+       5        2.515385E-03    6.831838E-06    1.247162E-02
+       6        2.515385E-03    6.831838E-06    1.247162E-02
+
+ Q point =    5.000000E-01    0.000000E+00    0.000000E+00   isppol =    1
+ Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
+       1        9.956626E-04    6.542456E-06    7.622732E-02
+       2        1.330052E-03    3.279741E-06    2.141395E-02
+       3        1.660483E-03    1.456274E-05    6.100541E-02
+       4        2.079686E-03    2.130736E-06    5.690214E-03
+       5        2.147570E-03    8.215715E-06    2.057525E-02
+       6        2.355010E-03    3.653867E-06    7.609596E-03
+
+ Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
+ Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
+       1        0.000000E+00    8.111677E-16    0.000000E+00
+       2        0.000000E+00    1.442240E-08    0.000000E+00
+       3        0.000000E+00    9.684134E-09    0.000000E+00
+       4        1.049696E-03    1.517494E-05    1.590723E-01
+       5        1.049696E-03    1.018571E-05    1.067723E-01
+       6        2.778532E-03    2.326062E-06    3.480044E-03
+
+ Q point =    0.000000E+00    0.000000E+00    5.000000E-01   isppol =    1
+ Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
+       1        7.134321E-04    1.247889E-06    2.831816E-02
+       2        7.134321E-04    1.314782E-06    2.983614E-02
+       3        7.134321E-04    2.257411E-06    5.122706E-02
+       4        7.134321E-04    2.190518E-06    4.970908E-02
+       5        1.797700E-03    7.385018E-06    2.639437E-02
+       6        1.797700E-03    7.385018E-06    2.639437E-02
+
+
+ Superconductivity : isotropic evaluation of parameters from electron-phonon coupling.
+
+ mka2f: lambda <omega^2> =     4.749329E-07
+ mka2f: lambda <omega^3> =     7.437737E-10
+ mka2f: lambda <omega^4> =     1.294488E-12
+ mka2f: lambda <omega^5> =     2.441640E-15
+ mka2f: isotropic lambda =     2.984059E-01
+ mka2f: omegalog  =     1.058059E-03 (Ha)     3.341081E+02 (Kelvin)
+ mka2f: input mustar =     1.000000E-02
+-mka2f: MacMillan Tc =     7.921268E-06 (Ha)     2.501335E+00 (Kelvin)
+ mka2f_tr_lova: 1/3 trace of TRANSPORT lambda for isppol   1 =      3.773993E-01
+
+================================================================================
+
+ Treat the first list of vectors 
+
+-begin at tcpu      2.420  and twall      2.424 sec
+ 
+  Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
+ Phonon energies in Hartree :
+   0.000000E+00  0.000000E+00  0.000000E+00  1.049696E-03  1.049696E-03
+   2.778532E-03
+ Phonon frequencies in cm-1    :
+-  0.000000E+00  0.000000E+00  0.000000E+00  2.303815E+02  2.303815E+02
+-  6.098173E+02
+
+ Eigendisplacements 
+ (will be given, for each mode : in cartesian coordinates
+   for each atom the real part of the displacement vector,
+   then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
+  Mode number    1   Energy    0.000000E+00
+ Attention : low frequency mode.
+   (Could be unstable or acoustic mode)
+-  1  0.00000000E+00  3.56775809E-07 -2.39346938E-03
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+-  2  0.00000000E+00  3.56775809E-07 -2.39346938E-03
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    2   Energy    0.000000E+00
+ Attention : low frequency mode.
+   (Could be unstable or acoustic mode)
+-  1  0.00000000E+00  2.39346938E-03  3.56775816E-07
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+-  2  0.00000000E+00  2.39346938E-03  3.56775816E-07
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    3   Energy    0.000000E+00
+ Attention : low frequency mode.
+   (Could be unstable or acoustic mode)
+-  1  2.39346941E-03  0.00000000E+00  0.00000000E+00
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+-  2  2.39346941E-03  0.00000000E+00  0.00000000E+00
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    4   Energy    1.049696E-03
+-  1  9.46169125E-07 -2.39346922E-03  0.00000000E+00
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+-  2 -9.46169125E-07  2.39346922E-03  0.00000000E+00
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    5   Energy    1.049696E-03
+-  1  2.39346922E-03  9.46169125E-07  0.00000000E+00
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+-  2 -2.39346922E-03 -9.46169125E-07  0.00000000E+00
+-     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    6   Energy    2.778532E-03
+;  1  0.00000000E+00  0.00000000E+00  2.39346941E-03
+;     0.00000000E+00  0.00000000E+00  0.00000000E+00
+;  2  0.00000000E+00  0.00000000E+00 -2.39346941E-03
+;     0.00000000E+00  0.00000000E+00  0.00000000E+00
+
+ Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
+ Symmetry characters of vibration mode #   1
+       degenerate with vibration modes #   2 to    3
+  3.0 -3.0  1.0 -1.0  2.0 -2.0  1.0 -1.0  0.0  0.0  1.0 -1.0 -1.0  1.0  1.0 -1.0
+ -0.0  0.0  1.0 -1.0  2.0 -2.0  1.0 -1.0
+ Symmetry characters of vibration mode #   4
+        degenerate with vibration mode #   5
+  2.0  2.0  0.0  0.0 -1.0 -1.0  0.0  0.0 -1.0 -1.0 -0.0 -0.0  2.0  2.0  0.0  0.0
+ -1.0 -1.0  0.0  0.0 -1.0 -1.0 -0.0 -0.0
+ Symmetry characters of vibration mode #   6
+  1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0
+  1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0
+ 
+  Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
+ Phonon energies in Hartree :
+   9.956626E-04  1.330052E-03  1.660483E-03  2.079686E-03  2.147570E-03
+   2.355010E-03
+ Phonon frequencies in cm-1    :
+-  2.185227E+02  2.919126E+02  3.644339E+02  4.564382E+02  4.713370E+02
+-  5.168649E+02
+
+ Eigendisplacements 
+ (will be given, for each mode : in cartesian coordinates
+   for each atom the real part of the displacement vector,
+   then the imaginary part of the displacement vector - absolute values smaller than 1.0d-7 are set to zero)
+  Mode number    1   Energy    9.956626E-04
+;  1  1.19673470E-03 -2.07280531E-03  0.00000000E+00
+;     0.00000000E+00  0.00000000E+00  0.00000000E+00
+;  2  1.19673470E-03 -2.07280531E-03  0.00000000E+00
+;     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    2   Energy    1.330052E-03
+;  1  0.00000000E+00  0.00000000E+00  2.39346941E-03
+;     0.00000000E+00  0.00000000E+00  0.00000000E+00
+;  2  0.00000000E+00  0.00000000E+00  2.39346941E-03
+;     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    3   Energy    1.660483E-03
+;  1  1.19673470E-03 -2.07280531E-03  0.00000000E+00
+;     0.00000000E+00  0.00000000E+00  0.00000000E+00
+;  2 -1.19673470E-03  2.07280531E-03  0.00000000E+00
+;     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    4   Energy    2.079686E-03
+;  1  0.00000000E+00  0.00000000E+00  2.39346941E-03
+;     0.00000000E+00  0.00000000E+00  0.00000000E+00
+;  2  0.00000000E+00  0.00000000E+00 -2.39346941E-03
+;     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    5   Energy    2.147570E-03
+;  1  2.07280531E-03  1.19673470E-03  0.00000000E+00
+;     0.00000000E+00  0.00000000E+00  0.00000000E+00
+;  2 -2.07280531E-03 -1.19673470E-03  0.00000000E+00
+;     0.00000000E+00  0.00000000E+00  0.00000000E+00
+  Mode number    6   Energy    2.355010E-03
+;  1  2.07280531E-03  1.19673470E-03  0.00000000E+00
+;     0.00000000E+00  0.00000000E+00  0.00000000E+00
+;  2  2.07280531E-03  1.19673470E-03  0.00000000E+00
+;     0.00000000E+00  0.00000000E+00  0.00000000E+00
+-
+- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.5
+
+================================================================================
+
++Total cpu time      2.424  and wall time      2.455 sec
+
+ anaddb : the run completed succesfully.
