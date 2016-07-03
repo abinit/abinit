@@ -696,11 +696,11 @@ with_trio_flavor="netcdf+etsf_io"
 
 # Include flags for the ETSF_IO library (default is unset)
 #
-#with_etsf_io_incs="-I/opt/etsf/include"
+with_etsf_io_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
 
 # Link flags for the ETSF_IO library (default is unset)
 #
-#with_etsf_io_libs="-L/opt/etsf/lib -letsf_io"
+with_etsf_io_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -letsf_io_low_level -letsf_io_utils -letsf_io"
 
                        # ------------------------------ #
 
@@ -948,11 +948,11 @@ with_dft_flavor="libxc"
 
 # Include flags for the LibXC library (default is unset)
 #
-#with_libxc_incs="-I/opt/etsf/include"
+with_libxc_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-#with_libxc_libs="-L/opt/etsf/lib -lxc"
+with_libxc_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -lxcf90 -lxc"
 
                        # ------------------------------ #
 

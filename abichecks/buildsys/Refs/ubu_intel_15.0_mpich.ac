@@ -94,7 +94,7 @@
 
 # Disable vectorization with AVX-enable processor in problematic procedures
 #
-enable_avx_safe_mode="yes"
+enable_avx_safe_mode="no"
 
 # Where to install ABINIT (default is /usr/local)
 #
