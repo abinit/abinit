@@ -94,7 +94,7 @@
 
 # Disable vectorization with AVX-enable processor in problematic procedures
 #
-#enable_avx_safe_mode="yes"
+enable_avx_safe_mode="no"
 
 # Where to install ABINIT (default is /usr/local)
 #
@@ -106,7 +106,7 @@
 
 # C preprocessor (should not be set in most cases)
 #
-#CPP="/usr/bin/cpp"
+CPP="icc -E"
 
 # C preprocessor custom debug flags (when enable_debug=yes)
 #
@@ -515,7 +515,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/usr/local/openmpi_gcc48"
+with_mpi_prefix="/usr/local/mpich3-3.2_ifort16"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -764,7 +764,7 @@ with_trio_flavor="netcdf+etsf_io"
 #   * By default, Abinit will use the internal Goedecker FFT library
 #   * This connector is highly experimental - USE AT YOUR OWN RISKS!
 #
-#with_fft_flavor="fftw3"
+with_fft_flavor="fftw3-mkl"
 
 # Include flags for the FFT library (default is unset)
 #
@@ -772,7 +772,7 @@ with_trio_flavor="netcdf+etsf_io"
 
 # Link flags for the FFT library (default is unset)
 #
-#with_fft_libs="-L/usr/local/lib/fftw -lfftw3"
+with_fft_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -847,15 +847,15 @@ with_trio_flavor="netcdf+etsf_io"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="netlib"
+with_linalg_flavor="mkl"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_incs="-I/usr/local/netlib_gcc48/include"
+#with_linalg_incs="-I/usr/local/include"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/usr/local/netlib_gcc48/lib64 -llapack -lblas"
+with_linalg_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -918,7 +918,7 @@ with_linalg_libs="-L/usr/local/netlib_gcc48/lib64 -llapack -lblas"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="atompaw+libxc+wannier90"
+with_dft_flavor="libxc"
 
                        # ------------------------------ #
 

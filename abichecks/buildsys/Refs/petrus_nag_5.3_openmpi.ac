@@ -289,7 +289,7 @@
 # Forced Fortran preprocessor flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-#FPPFLAGS="-P"
+FPPFLAGS="-P -traditional-cpp"
 
                        # ------------------------------ #
 
@@ -315,12 +315,12 @@
 
 # Fortran compiler additional custom flags
 #
-#FCFLAGS_EXTRA="-O2"
+FCFLAGS_EXTRA="-g -L/usr/local/nag/lib"
 
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-FCFLAGS="-pg -g -Wall -pedantic -march=native -mtune=native -funroll-loops -O2 -Wstrict-aliasing=2 -fgcse-sm -ftree-vectorize -ffree-line-length-none -ffixed-line-length-none -fbounds-check"
+#FCFLAGS="-O2"
 
 # Fortran linker custom debug flags (when enable_debug=yes)
 #
@@ -366,7 +366,7 @@ FCFLAGS="-pg -g -Wall -pedantic -march=native -mtune=native -funroll-loops -O2 -
 # Combine this option with enable_debug="yes" to keep preprocessed source
 # files (they are removed by default, except if their build fails)
 #
-#enable_fc_wrapper="yes"
+enable_fc_wrapper="yes"
 
 # Choose whether to read file lists from standard input or "ab.files"
 # (default is yes = standard input)
@@ -515,7 +515,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/usr/local/openmpi-1.10.1_gcc49"
+with_mpi_prefix="/usr/local/openmpi-1.6.5_nag5.3.1"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -690,17 +690,17 @@ with_mpi_prefix="/usr/local/openmpi-1.10.1_gcc49"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="etsf_io+netcdf"
+with_trio_flavor="netcdf+etsf_io"
 
                        # ------------------------------ #
 
 # Include flags for the ETSF_IO library (default is unset)
 #
-with_etsf_io_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
+with_etsf_io_incs="-I/usr/local/etsfio/include"
 
 # Link flags for the ETSF_IO library (default is unset)
 #
-with_etsf_io_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -letsf_io_utils -letsf_io -letsf_io_low_level"
+with_etsf_io_libs="-L/usr/local/etsfio/lib -letsf_io_low_level -letsf_io_utils -letsf_io"
 
                        # ------------------------------ #
 
@@ -716,11 +716,11 @@ with_etsf_io_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -letsf_io_utils -letsf
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
+with_netcdf_incs="-I/usr/local/netcdf/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -lnetcdf"
+with_netcdf_libs="-L/usr/local/netcdf/lib -lnetcdff -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -764,15 +764,15 @@ with_netcdf_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -lnetcdf"
 #   * By default, Abinit will use the internal Goedecker FFT library
 #   * This connector is highly experimental - USE AT YOUR OWN RISKS!
 #
-with_fft_flavor="fftw3-mkl"
+with_fft_flavor="fftw3"
 
 # Include flags for the FFT library (default is unset)
 #
-#with_fft_incs="-I/usr/local/include/fftw"
+with_fft_incs="-I/usr/include/"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
+with_fft_libs="-L/usr/lib64 -lfftw3 -lfftw3f"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -847,7 +847,7 @@ with_fft_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_gf_lp64 -lmkl_s
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="mkl"
+with_linalg_flavor="netlib"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
@@ -855,7 +855,7 @@ with_linalg_flavor="mkl"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
+with_linalg_libs="-L/usr/local/fallbacks_nag/lib -llapack -lblas"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -918,55 +918,55 @@ with_linalg_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_gf_lp64 -lmk
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="atompaw+bigdft+libxc+wannier90"
+with_dft_flavor="none"
 
                        # ------------------------------ #
 
 # Full path to the AtomPAW executables (default is unset)
 #
-with_atompaw_bins="/usr/local/fallbacks/gnu/4.9/mpi/bin"
+#with_atompaw_bins="/usr/local/bin"
 
 # Include flags for the AtomPAW library (default is unset)
 #
-with_atompaw_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
+#with_atompaw_incs="-I/usr/local/include/atompaw"
 
 # Link flags for the AtomPAW library (default is unset)
 #
-with_atompaw_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -latompaw"
+#with_atompaw_libs="-L/usr/local/lib/atompaw -latompaw"
 
                        # ------------------------------ #
 
 # Include flags for the BigDFT library (default is unset)
 #
-with_bigdft_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
+#with_bigdft_incs="-I/usr/local/include/bigdft"
 
 # Link flags for the BigDFT library (default is unset)
 #
-with_bigdft_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -lbigdft-1 -labinit -lyaml"
+#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft -lpoissonsolver -labinit"
 
                        # ------------------------------ #
 
 # Include flags for the LibXC library (default is unset)
 #
-with_libxc_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
+#with_libxc_incs="-I/opt/etsf/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -lxcf90 -lxc"
+#with_libxc_libs="-L/opt/etsf/lib -lxc"
 
                        # ------------------------------ #
 
 # Full path to the Wannier90 executables (default is unset)
 #
-with_wannier90_bins="/usr/local/fallbacks/gnu/4.9/mpi/bin"
+#with_wannier90_bins="/usr/local/bin"
 
 # Include flags for the Wannier90 library (default is unset)
 #
-with_wannier90_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
+#with_wannier90_incs="-I/usr/local/include/wannier90"
 
 # Link flags for the Wannier90 library (default is unset)
 #
-with_wannier90_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -lwannier90"
+#with_wannier90_libs="-L${HOME}/lib/wannier90 -lwannier90"
 
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
 #
@@ -1059,7 +1059,7 @@ enable_memory_profiling="no"
 
 # Activate maintainer checks (default is no)
 #
-enable_maintainer_checks="yes"
+enable_maintainer_checks="no"
 
 # Fortran compiler vendor to be used by the build system (default is unset)
 #

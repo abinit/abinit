@@ -118,7 +118,7 @@
 
 # C preprocessor additional custom flags
 #
-CPPFLAGS_EXTRA="-DHAVE_TEST_TIME_PARTITIONING"
+#CPPFLAGS_EXTRA="-P"
 
 # Forced C preprocessor flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -332,7 +332,7 @@ CPPFLAGS_EXTRA="-DHAVE_TEST_TIME_PARTITIONING"
 
 # Fortran linker custom flags
 #
-#FC_LDFLAGS_EXTRA="-Bstatic"
+FC_LDFLAGS_EXTRA="-Wl,-z,muldefs"
 
 # Forced Fortran linker flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -515,7 +515,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/usr/local/openmpi_gcc47"
+with_mpi_prefix="/usr/local/openmpi-1.6.5_gcc47"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -537,7 +537,7 @@ with_mpi_prefix="/usr/local/openmpi_gcc47"
 #
 # Note: this is highly experimental - USE AT YOUR OWN RISKS!
 #
-#enable_gpu="yes"
+enable_gpu="yes"
 
 # Flavor of the GPU library to use (default is cuda-single)
 #
@@ -547,7 +547,7 @@ with_mpi_prefix="/usr/local/openmpi_gcc47"
 #   * cuda-double : Cuda with double-precision arithmetic
 #   * none        : not implemented (will replace enable_gpu)
 #
-#with_gpu_flavor="cuda-double"
+with_gpu_flavor="cuda-double"
 
 # Include flags for the GPU library (default is unset)
 #
@@ -606,7 +606,7 @@ with_mpi_prefix="/usr/local/openmpi_gcc47"
 
 # Forced nVidia C compiler flags (should not be set)
 #
-#NVCC_CFLAGS="-arch=sm_13"
+NVCC_CFLAGS="-O3 -arch=sm_13 -Xptxas=-v --use_fast_math --compiler-options -O3,-fPIC"
 
 # Forced nVidia linker flags (should not be set)
 #
@@ -690,37 +690,37 @@ with_mpi_prefix="/usr/local/openmpi_gcc47"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf+etsf_io+psml"
+with_trio_flavor="netcdf+etsf_io"
 
                        # ------------------------------ #
 
 # Include flags for the ETSF_IO library (default is unset)
 #
-#with_etsf_io_incs="-I/opt/etsf/include"
+with_etsf_io_incs="-I/usr/local/fallbacks/gnu/4.7/mpi/include"
 
 # Link flags for the ETSF_IO library (default is unset)
 #
-#with_etsf_io_libs="-L/opt/etsf/lib -letsf_io"
+with_etsf_io_libs="-L/usr/local/fallbacks/gnu/4.7/mpi/lib -letsf_io_low_level -letsf_io_utils -letsf_io"
 
                        # ------------------------------ #
 
 # Include flags for the psml library (default is unset)
 #
-with_psml_incs="-I/usr/local/psml/include"
+#with_psml_incs="-I/usr/local/include/psml"
 
 # Link flags for the psml library (default is unset)
 #
-with_psml_libs="-L/usr/local/psml/lib -lpsml"
+#with_psml_libs="-L/usr/local/lib/psml -lpsml"
 
                        # ------------------------------ #
 
 # Include flags for the NetCDF library (default is unset)
 #
-#with_netcdf_incs="-I/usr/local/include/netcdf"
+with_netcdf_incs="-I/usr/local/fallbacks/gnu/4.7/mpi/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-#with_netcdf_libs="-L/usr/local/lib/netcdf -lnetcdff -lnetcdf"
+with_netcdf_libs="-L/usr/local/fallbacks/gnu/4.7/mpi/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -847,15 +847,15 @@ with_psml_libs="-L/usr/local/psml/lib -lpsml"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="none"
+with_linalg_flavor="mkl+magma"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
-#with_linalg_incs="-I/usr/local/include"
+with_linalg_incs="-I${MAGMA_ROOT}/include -I${MKLROOT}/include"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-#with_linalg_libs="-L/usr/local/lib -llapack -lblas"
+with_linalg_libs="-L${MAGMA_ROOT}/lib -Wl,--start-group -lmagma -lcuda -Wl,--end-group -L${MKLROOT}/lib/intel64 -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -lgomp -lpthread -lm"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -918,7 +918,7 @@ with_linalg_flavor="none"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="atompaw+bigdft+libxc+wannier90"
+with_dft_flavor="none"
 
                        # ------------------------------ #
 

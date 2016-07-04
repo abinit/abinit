@@ -320,7 +320,7 @@
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-#FCFLAGS="-O2"
+FCFLAGS="-O1 -g -ffree-line-length-none -ffree-form"
 
 # Fortran linker custom debug flags (when enable_debug=yes)
 #
@@ -515,7 +515,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/usr/local/openmpi"
+with_mpi_prefix="${MPI_HOME}"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -764,7 +764,7 @@ with_trio_flavor="netcdf+etsf_io"
 #   * By default, Abinit will use the internal Goedecker FFT library
 #   * This connector is highly experimental - USE AT YOUR OWN RISKS!
 #
-with_fft_flavor="fftw3"
+#with_fft_flavor="fftw3"
 
 # Include flags for the FFT library (default is unset)
 #
@@ -772,7 +772,7 @@ with_fft_flavor="fftw3"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L/opt/intel/composerxe/mkl/lib/intel64 -Wl,--start-group -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
+#with_fft_libs="-L/usr/local/lib/fftw -lfftw3"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -847,15 +847,15 @@ with_fft_libs="-L/opt/intel/composerxe/mkl/lib/intel64 -Wl,--start-group -lmkl_g
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="mkl"
+with_linalg_flavor="acml"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
-#with_linalg_incs="-I/usr/local/include"
+with_linalg_incs="-I/opt/acml6.1.0/include"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/opt/intel/composerxe/mkl/lib/intel64 -Wl,--start-group -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
+with_linalg_libs="-L/opt/acml6.1.0/lib -lacml"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -1031,11 +1031,11 @@ with_dft_flavor="atompaw+bigdft+libxc+wannier90"
 
 # Enable double precision for GW calculations (gmatteo)
 #
-#enable_gw_dpc="yes"
+enable_gw_dpc="yes"
 
 # Enable memory profiling (waroquiers)
 #
-enable_memory_profiling="no"
+enable_memory_profiling="yes"
 
 # Enable lotf (mancini)
 #

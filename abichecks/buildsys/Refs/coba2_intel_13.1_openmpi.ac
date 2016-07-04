@@ -315,7 +315,7 @@
 
 # Fortran compiler additional custom flags
 #
-FCFLAGS_EXTRA="-O2 -g -Wall -Wno-maybe-uninitialized -ffpe-trap=invalid,zero,overflow -fbacktrace -pedantic -fcheck=all"
+#FCFLAGS_EXTRA="-O2"
 
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -515,7 +515,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/usr/local/mpich3_gcc49"
+with_mpi_prefix="/usr/local/openmpi_intel13"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -690,37 +690,37 @@ with_mpi_prefix="/usr/local/mpich3_gcc49"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf+etsf_io+psml"
+with_trio_flavor="netcdf+etsf_io"
 
                        # ------------------------------ #
 
 # Include flags for the ETSF_IO library (default is unset)
 #
-with_etsf_io_incs="-I/usr/local/fallbacks_woxc_gcc49/include"
+with_etsf_io_incs="-I/usr/local/fallbacks/intel/13.1/mpi/include"
 
 # Link flags for the ETSF_IO library (default is unset)
 #
-with_etsf_io_libs="-L/usr/local/fallbacks_woxc_gcc49/lib -letsf_io_low_level -letsf_io_utils -letsf_io"
+with_etsf_io_libs="-L/usr/local/fallbacks/intel/13.1/mpi/lib -letsf_io_low_level -letsf_io_utils -letsf_io"
 
                        # ------------------------------ #
 
 # Include flags for the psml library (default is unset)
 #
-with_psml_incs="-I/usr/local/psml-0.8/include"
+#with_psml_incs="-I/usr/local/include/psml"
 
 # Link flags for the psml library (default is unset)
 #
-with_psml_libs="-L/usr/local/psml-0.8/lib -lpsml"
+#with_psml_libs="-L/usr/local/lib/psml -lpsml"
 
                        # ------------------------------ #
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I/usr/local/fallbacks_woxc_gcc49/include"
+with_netcdf_incs="-I/usr/local/fallbacks/intel/13.1/mpi/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L/usr/local/fallbacks_woxc_gcc49/lib -lnetcdf"
+with_netcdf_libs="-L/usr/local/fallbacks/intel/13.1/mpi/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -772,7 +772,7 @@ with_fft_flavor="fftw3"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L/opt/intel/composerxe_14/mkl/lib/intel64 -Wl,--start-group  -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
+with_fft_libs="-L/opt/intel/mkl/lib/intel64 -Wl,--start-group  -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -855,7 +855,7 @@ with_linalg_flavor="mkl"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/opt/intel/composerxe_14/mkl/lib/intel64 -Wl,--start-group  -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
+with_linalg_libs="-L/opt/intel/mkl/lib/intel64 -Wl,--start-group  -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -918,55 +918,55 @@ with_linalg_libs="-L/opt/intel/composerxe_14/mkl/lib/intel64 -Wl,--start-group  
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="atompaw+libxc+wannier90"
+with_dft_flavor="atompaw+libxc+wannier90+bigdft"
 
                        # ------------------------------ #
 
 # Full path to the AtomPAW executables (default is unset)
 #
-with_atompaw_bins="/usr/local/fallbacks_woxc_gcc49/bin"
+with_atompaw_bins="/usr/local/fallbacks/intel/13.1/mpi/bin"
 
 # Include flags for the AtomPAW library (default is unset)
 #
-with_atompaw_incs="-I/usr/local/fallbacks_woxc_gcc49/include"
+with_atompaw_incs="-I/usr/local/fallbacks/intel/13.1/mpi/include"
 
 # Link flags for the AtomPAW library (default is unset)
 #
-with_atompaw_libs="-L/usr/local/fallbacks_woxc_gcc49/lib -latompaw"
+with_atompaw_libs="-L/usr/local/fallbacks/intel/13.1/mpi/lib -latompaw"
 
                        # ------------------------------ #
 
 # Include flags for the BigDFT library (default is unset)
 #
-#with_bigdft_incs="-I/usr/local/include/bigdft"
+with_bigdft_incs="-I/usr/local/fallbacks/intel/13.1/mpi/include"
 
 # Link flags for the BigDFT library (default is unset)
 #
-#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft -lpoissonsolver -labinit"
+with_bigdft_libs="-L/usr/local/fallbacks/intel/13.1/mpi/lib -lbigdft-1 -labinit -lyaml -lrt"
 
                        # ------------------------------ #
 
 # Include flags for the LibXC library (default is unset)
 #
-with_libxc_incs="-I/usr/local/libxc-2.2.1/include"
+with_libxc_incs="-I/usr/local/fallbacks/intel/13.1/mpi/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L/usr/local/libxc-2.2.1/lib -lxcf90 -lxc"
+with_libxc_libs="-L/usr/local/fallbacks/intel/13.1/mpi/lib -lxcf90 -lxc"
 
                        # ------------------------------ #
 
 # Full path to the Wannier90 executables (default is unset)
 #
-with_wannier90_bins="/usr/local/fallbacks_woxc_gcc49/bin"
+with_wannier90_bins="/usr/local/fallbacks/intel/13.1/mpi/bin"
 
 # Include flags for the Wannier90 library (default is unset)
 #
-with_wannier90_incs="-I/usr/local/fallbacks_woxc_gcc49/include"
+with_wannier90_incs="-I/usr/local/fallbacks/intel/13.1/mpi/include"
 
 # Link flags for the Wannier90 library (default is unset)
 #
-with_wannier90_libs="-L/usr/local/fallbacks_woxc_gcc49/lib -lwannier90"
+with_wannier90_libs="-L/usr/local/fallbacks/intel/13.1/mpi/lib -lwannier90"
 
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
 #

@@ -106,7 +106,7 @@
 
 # C preprocessor (should not be set in most cases)
 #
-CPP="icc -E"
+#CPP="/usr/bin/cpp"
 
 # C preprocessor custom debug flags (when enable_debug=yes)
 #
@@ -129,7 +129,7 @@ CPP="icc -E"
 
 # C compiler
 #
-CC="icc"
+#CC="gcc"
 
 # C compiler custom debug flags (when enable_debug=yes)
 #
@@ -213,7 +213,7 @@ CC="icc"
 
 # C++ compiler
 #
-CXX="icpc"
+#CXX="g++"
 
 # C++ compiler custom debug flags (when enable_debug=yes)
 #
@@ -289,13 +289,13 @@ CXX="icpc"
 # Forced Fortran preprocessor flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-#FPPFLAGS="-P"
+FPPFLAGS="-P -traditional-cpp"
 
                        # ------------------------------ #
 
 # Fortran compiler
 #
-FC="ifort"
+#FC="gfortran"
 
 # Fortran 77 compiler (addition for the Windows/Cygwin environment)
 #
@@ -315,7 +315,7 @@ FC="ifort"
 
 # Fortran compiler additional custom flags
 #
-#FCFLAGS_EXTRA="-O2"
+FCFLAGS_EXTRA="-g -L/usr/local/nag/lib"
 
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -366,7 +366,7 @@ FC="ifort"
 # Combine this option with enable_debug="yes" to keep preprocessed source
 # files (they are removed by default, except if their build fails)
 #
-#enable_fc_wrapper="yes"
+enable_fc_wrapper="yes"
 
 # Choose whether to read file lists from standard input or "ab.files"
 # (default is yes = standard input)
@@ -452,7 +452,7 @@ FC="ifort"
 # it. If set to "yes", the configure script will stop if it does not find
 # a working MPI environment.
 #
-enable_mpi="no"
+enable_mpi="yes"
 
 # Activate the MPI_IN_PLACE option whenever possible (default is no)
 # WARNING: this feature requires MPI2, ignored if the MPI library
@@ -473,7 +473,7 @@ enable_mpi="no"
 # it. If set to "yes", the configure script will stop if it does not find
 # a working MPI I/O environment.
 #
-enable_mpi_io="no"
+enable_mpi_io="yes"
 
 # Enable MPI-IO mode in Abinit (use MPI-IO as default IO library,
 # change the default values of accesswff)   
@@ -515,7 +515,7 @@ enable_mpi_io="no"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-#with_mpi_prefix="/usr/local/openmpi-gcc"
+with_mpi_prefix="/usr/local/openmpi_nag"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -690,7 +690,7 @@ enable_mpi_io="no"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf"
+with_trio_flavor="netcdf+etsf_io"
 
                        # ------------------------------ #
 
@@ -764,7 +764,7 @@ with_trio_flavor="netcdf"
 #   * By default, Abinit will use the internal Goedecker FFT library
 #   * This connector is highly experimental - USE AT YOUR OWN RISKS!
 #
-with_fft_flavor="fftw3"
+#with_fft_flavor="fftw3"
 
 # Include flags for the FFT library (default is unset)
 #
@@ -772,7 +772,7 @@ with_fft_flavor="fftw3"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L/opt/intel/composer_xe_2015.0.090/mkl/lib/intel64 -Wl,--start-group  -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
+#with_fft_libs="-L/usr/local/lib/fftw -lfftw3"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -847,7 +847,7 @@ with_fft_libs="-L/opt/intel/composer_xe_2015.0.090/mkl/lib/intel64 -Wl,--start-g
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="mkl"
+with_linalg_flavor="none"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
@@ -855,7 +855,7 @@ with_linalg_flavor="mkl"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/opt/intel/composer_xe_2015.0.090/mkl/lib/intel64 -Wl,--start-group  -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
+#with_linalg_libs="-L/usr/local/lib -llapack -lblas"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #

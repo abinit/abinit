@@ -39,7 +39,7 @@
 #       the CPPFLAGS_64BITS, CFLAGS_64BITS, CXXFLAGS_64BITS, and
 #       FCFLAGS_64BITS variables manually.
 #
-enable_64bit_flags="yes"
+#enable_64bit_flags="yes"
 
 # Enable debug mode (default is basic)
 #
@@ -90,7 +90,7 @@ enable_64bit_flags="yes"
 #
 #     * this option is ignored when debugging is in profile mode
 #
-#enable_optim="aggressive"
+enable_optim="aggressive"
 
 # Disable vectorization with AVX-enable processor in problematic procedures
 #
@@ -106,7 +106,7 @@ enable_64bit_flags="yes"
 
 # C preprocessor (should not be set in most cases)
 #
-#CPP="/usr/bin/cpp"
+CPP="icc -E"
 
 # C preprocessor custom debug flags (when enable_debug=yes)
 #
@@ -129,7 +129,7 @@ enable_64bit_flags="yes"
 
 # C compiler
 #
-CC="mpiicc"
+#CC="gcc"
 
 # C compiler custom debug flags (when enable_debug=yes)
 #
@@ -213,7 +213,7 @@ CC="mpiicc"
 
 # C++ compiler
 #
-CXX="mpicxx"
+#CXX="g++"
 
 # C++ compiler custom debug flags (when enable_debug=yes)
 #
@@ -295,7 +295,7 @@ CXX="mpicxx"
 
 # Fortran compiler
 #
-FC="mpiifort"
+#FC="gfortran"
 
 # Fortran 77 compiler (addition for the Windows/Cygwin environment)
 #
@@ -484,7 +484,7 @@ enable_mpi_io="yes"
 
 # Include flags for the MPI library (default is unset)
 #
-with_mpi_incs="-I/opt/intel/impi/4.1.1.036/include64"
+#with_mpi_incs="-I/usr/local/include"
 
 # Set MPI standard level (default is auto-detected)
 # Note: usually 1 for MPICH or LAM, 2 for OpenMPI
@@ -498,7 +498,7 @@ with_mpi_incs="-I/opt/intel/impi/4.1.1.036/include64"
 
 # Link flags for the MPI library (default is unset)
 #
-with_mpi_libs="-L/opt/intel/impi/4.1.1.036/lib64 -lmpi"
+#with_mpi_libs="-L/usr/local/lib -lmpi"
 
 # Convenience option: try to set MPI parameters by looking into the
 # specified directory (default is unset)
@@ -515,7 +515,7 @@ with_mpi_libs="-L/opt/intel/impi/4.1.1.036/lib64 -lmpi"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-#with_mpi_prefix="/usr/local/openmpi-gcc"
+with_mpi_prefix="/usr/local/mpich3.1.2_ifort14"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -696,11 +696,11 @@ with_trio_flavor="netcdf+etsf_io"
 
 # Include flags for the ETSF_IO library (default is unset)
 #
-#with_etsf_io_incs="-I/opt/etsf/include"
+with_etsf_io_incs="-I/usr/local/fallbacks/intel/14.0/mpi/include"
 
 # Link flags for the ETSF_IO library (default is unset)
 #
-#with_etsf_io_libs="-L/opt/etsf/lib -letsf_io"
+with_etsf_io_libs="-L/usr/local/fallbacks/intel/14.0/mpi/lib -letsf_io_low_level -letsf_io_utils -letsf_io"
 
                        # ------------------------------ #
 
@@ -716,11 +716,11 @@ with_trio_flavor="netcdf+etsf_io"
 
 # Include flags for the NetCDF library (default is unset)
 #
-#with_netcdf_incs="-I/usr/local/include/netcdf"
+with_netcdf_incs="-I/usr/local/fallbacks/intel/14.0/mpi/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-#with_netcdf_libs="-L/usr/local/lib/netcdf -lnetcdff -lnetcdf"
+with_netcdf_libs="-L/usr/local/fallbacks/intel/14.0/mpi/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -772,7 +772,7 @@ with_fft_flavor="fftw3"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L/opt/intel/mkl/lib/intel64 -Wl,--start-group  -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread -lm"
+with_fft_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -855,7 +855,7 @@ with_linalg_flavor="mkl"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/opt/intel/mkl/lib/intel64 -Wl,--start-group  -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread -lm"
+with_linalg_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -918,7 +918,7 @@ with_linalg_libs="-L/opt/intel/mkl/lib/intel64 -Wl,--start-group  -lmkl_intel_lp
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="none"
+with_dft_flavor="libxc"
 
                        # ------------------------------ #
 
@@ -948,11 +948,11 @@ with_dft_flavor="none"
 
 # Include flags for the LibXC library (default is unset)
 #
-#with_libxc_incs="-I/opt/etsf/include"
+with_libxc_incs="-I/usr/local/fallbacks/intel/14.0/mpi/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-#with_libxc_libs="-L/opt/etsf/lib -lxc"
+with_libxc_libs="-L/usr/local/fallbacks/intel/14.0/mpi/lib -lxcf90 -lxc"
 
                        # ------------------------------ #
 
