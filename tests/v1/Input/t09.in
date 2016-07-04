@@ -41,15 +41,4 @@
 #%% description = 
 #%% O2 molecule, treated as a spin-polarized molecule, with fixed occupation
 #%% numbers (occopt=2), with nsppol=2 . Gives total energy of -32.09792 Hartree
-#%% 10.-20. Isolated Helium atom tests.
-#%% These tests exercise different xc functionals, in the spin-unpolarized case.
-#%% The helium atom is isolated in a box of size 5x5x5, with one
-#%% special point (1/4 1/4 1/4), 200 Ha cut-off, used with 
-#%% a potential close to the bare He potential 
-#%% (erfc with 0.001 bohr decay length). Errors due to the smallness
-#%% of the supercell size are on the order of 1 mHa, as well as those
-#%% due to the representation of the Coulomb potential by a erfc function.
-#%% The remaining is due to finiteness of the basis set.
-#%% The estimation of the latter errors is presented in the test_cases
-#%% 17 and 18. In all these tests, intxc=0.
 #%%<END TEST_INFO>
