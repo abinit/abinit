@@ -43,7 +43,7 @@ def lireNetcdf() :
 	ok_OUT=-1;ok_MOLDYN=-1
 	if len(OUT_list) > 0 :
 		OUT_list.sort() ; OUT_list.reverse()
-		fic_HIST=OUT_list[0][1].replace('_OUT.nc','_HIST')
+		fic_HIST=OUT_list[0][1].replace('_OUT.nc','_HIST.nc')
 		if os.path.exists(fic_HIST) :
 			fiche = fic_HIST
 			ok_OUT=0
@@ -74,13 +74,13 @@ def ConvNetCdf_Ascii(file) :
 		TypeFichier=1
 		fichier1=file
 		fichier2=''
-	elif file.find('_HIST') == len(file)-5 :
+	elif file.find('_HIST.nc') == len(file)-8 :
 		TypeFichier=2
 		fichier1=file
-		fichier2=file.replace('_HIST','_OUT.nc')
+		fichier2=file.replace('_HIST.nc','_OUT.nc')
 	elif file.find('_OUT.nc') == len(file)-7 :
 		TypeFichier=3
-		fichier1=file.replace('_OUT.nc','_HIST')
+		fichier1=file.replace('_OUT.nc','_HIST.nc')
 		fichier2=file
 	if TypeFichier ==0 :
 		print "Bug (formats des fichiers) !"
