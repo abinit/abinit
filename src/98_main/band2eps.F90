@@ -38,15 +38,28 @@
 program band2eps
 
  use defs_basis
- use m_errors
- use m_profiling_abi
- use m_io_tools, only : open_file
+ use defs_abitypes
+ use m_abimover
+ use m_build_info
  use m_xmpi
+ use m_profiling_abi
+ use m_errors
+ use m_effective_potential
+ use m_epigene_dataset
+ use m_effective_potential_file
+ use m_libxml
+
+ use m_io_tools,       only : open_file
+ use m_fstrings,       only : int2char4
+ use m_time ,          only : asctime
+ use m_band2eps_dataset
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'band2eps'
+ use interfaces_32_util
+ use interfaces_42_parser
 !End of the abilint section
 
  implicit none
@@ -58,12 +71,13 @@ program band2eps
  integer,parameter :: master=0
  character(len=fnlen) :: filnam(4)
  real(dp) :: E,Emax,Emin,deltaE
- integer :: EmaxN,EminN,gradRes,kmaxN,kminN,lastPos,pos,posk
- integer :: iatom,ii,imode,iqpt,jj,natom,nqpt
+ integer :: EmaxN,EminN,gradRes,kmaxN,kminN,lastPos,lenstr,pos,posk
+ integer :: iatom,ii,imode,io,iqpt,jj,natom,nqpt
  integer :: comm
  integer :: nproc,my_rank
  integer :: option
  logical :: iam_master
+!array
  real(dp),allocatable :: phfrq(:),phfrqqm1(:)
  real(dp),allocatable :: color(:,:)
  real(dp) :: facUnit,norm,renorm
@@ -72,7 +86,9 @@ program band2eps
  integer,allocatable :: nqptl(:)
  real(dp),allocatable :: colorAtom(:,:)
  real(dp),allocatable :: displ(:,:)
+ type(band2eps_dataset_type) :: inp
  character(len=500) :: message
+ character(len=strlen) :: string
   !scale : hold the scale for each line (dimension=nlines)
   !qname : hold the name (gamma,R,etc..) for each extremity of line (dimension=nlines+1)
   !nqptl : =nqpt by line (dimension=nlines)
@@ -113,129 +129,93 @@ program band2eps
 !(2) EPS graphic
 !(3) Input phonon energies (from sortph.f)
 !(4) Input displacements (from sortph.f)
- read(std_in, '(a)' ) filnam(1)
- if(len_trim(filnam(1))>132)then
-   write(std_out,*)' band2eps : WARNING -'
-   write(std_out,*)'  The length of this filename exceeds 132 characters. This might induce trouble later.'
- end if
- read(std_in, '(a)' ) filnam(2)
- if(len_trim(filnam(2))>132)then
-   write(std_out,*)' band2eps : WARNING -'
-   write(std_out,*)'  The length of this filename exceeds 132 characters. This might induce trouble later.'
- end if
- read(std_in, '(a)' ) filnam(3)
- if(len_trim(filnam(3))>132)then
-   write(std_out,*)' band2eps : WARNING -'
-   write(std_out,*)'  The length of this filename exceeds 132 characters. This might induce trouble later.'
- end if
- read(std_in, '(a)' ) filnam(4)
- if(len_trim(filnam(4))>132)then
-   write(std_out,*)' band2eps : WARNING -'
-   write(std_out,*)'  The length of this filename exceeds 132 characters. This might induce trouble later.'
- end if
-!open(18,FILE='band.eps',STATUS='replace',ACCESS='sequential',ACTION='write')
+ write(std_out,*)' Give name for formatted input file : '
+ read(std_in, '(a)',IOSTAT=io) filnam(1)
+ write(std_out,'(a,a)' )'-   ',trim(filnam(1))
+
+ write(std_out,*)' Give name for formatted output eps file : '
+ read(std_in, '(a)',IOSTAT=io) filnam(2)
+ write(std_out,'(a,a)' )'-   ',trim(filnam(2))
+
+ write(std_out,*)' Give name for formatted phonon frequency file : '
+ read(std_in, '(a)',IOSTAT=io) filnam(3)
+ write(std_out,'(a,a)' )'-   ',trim(filnam(3))
+
+ write(std_out,*)' Give name for formatted displacements file : '
+ read(std_in, '(a)',IOSTAT=io) filnam(4)
+ write(std_out,'(a,a)' )'-   ',trim(filnam(4))
+
+!Read the input file, and store the information in a long string of characters
+!strlen from defs_basis module
+ write(std_out,'(a,a)') 'Opening and reading input file: ', filnam(1)
+ option=1
+ call instrng (filnam(1),lenstr,option,strlen,string)
+ !To make case-insensitive, map characters to upper case:
+ call inupper(string(1:lenstr))
+
+!Read the input file
+ call invars11(inp,lenstr,string)
+ if(inp%prtout == 1) call outvars_band2eps(inp,std_out)
+ 
 !Open the '.eps' file for write
- write(std_out,'(a,a)') 'Opening file ', filnam(2)
+ write(std_out,'(a,a)') 'Creation of file ', filnam(2)
  if (open_file(filnam(2),message,unit=18,form="formatted",status="unknown",action="write") /= 0) then
    MSG_ERROR(message)
  end if 
 !Open the phonon energies file
- write(std_out,'(a,a)') 'Opening file ', filnam(3)
  if (open_file(filnam(3),message,unit=19,form="formatted") /= 0) then
    MSG_ERROR(message)
  end if 
  if(filnam(4)/='no') then
 !  Open the displacements file
-   write(std_out,'(a,a)') 'Opening file ', filnam(4)
    if (open_file(filnam(4),message,unit=20,form="formatted",status="old",action='read') /= 0) then
      MSG_ERROR(message)
    end if
  end if
-!Open the input file
- write(std_out,'(a,a)') 'Opening file ', filnam(1)
-   if (open_file(filnam(1),message,unit=21,form="formatted") /= 0) then
-     MSG_ERROR(message)
-   end if
+
+ 
 !Boundings of the plot (only the plot and not what is around)
  EminN=6900
  EmaxN=2400
  kminN=2400
  kmaxN=9600
 
-!Read the input file, and store the information in a long string of characters
-!strlen from defs_basis module
- option = 1
- if (iam_master) then
-!    call instrng (filnam(1),lenstr,option,strlen,string)
-
-!    !To make case-insensitive, map characters to upper case:
-!    call inupper(string(1:lenstr))
-!  end if
-
-!  call xmpi_bcast(string,master, comm, ierr)
-!  call xmpi_bcast(lenstr,master, comm, ierr)
-
-! !Read the input file
-!  call invars10(inp,lenstr,natom,string)
- end if
-!Read input file (input.band) to know how to format the graph
- read(21,*)
- read(21,*)
- read(21,*) natom
- read(21,*)
- read(21,*) Emin,Emax,gradRes
- read(21,*)
- read(21,*) cunits
- read(21,*)
- read(21,*) nlines
 !Allocate dynamique variables
- ABI_ALLOCATE(phfrqqm1,(3*natom))
- ABI_ALLOCATE(phfrq,(3*natom))
- ABI_ALLOCATE(color,(3,3*natom))
- ABI_ALLOCATE(qname,(nlines+1))
- ABI_ALLOCATE(scale,(nlines))
- ABI_ALLOCATE(nqptl,(nlines))
- ABI_ALLOCATE(colorAtom,(3,natom))
+ ABI_ALLOCATE(phfrqqm1,(3*inp%natom))
+ ABI_ALLOCATE(phfrq,(3*inp%natom))
+ ABI_ALLOCATE(color,(3,3*inp%natom))
+ ABI_ALLOCATE(colorAtom,(3,inp%natom))
 !colorAtom(1,1:5) : atoms contributing to red (ex : [1 0 0 0 0])
 !colorAtom(2,1:5) : atoms contributing to green (ex : [0 1 0 0 0])
 !colorAtom(3,1:5) : atoms contributing to blue (ex : [0 0 1 1 1])
- ABI_ALLOCATE(displ,(natom,3*natom))
+!tranfert color from input
+ colorAtom(1,:) = inp%red
+ colorAtom(2,:) = inp%green
+ colorAtom(3,:) = inp%blue
+ ABI_ALLOCATE(displ,(inp%natom,3*inp%natom))
 !Read end of input file
- read(21,*)
- read(21,*) (qname(ii),ii=1,nlines+1)
- read(21,*)
- read(21,*) (nqptl(ii),ii=1,nlines)
- read(21,*)
- read(21,*) (scale(ii),ii=1,nlines)
- read(21,*)
- read(21,*)
- read(21,*)
- read(21,*) (colorAtom(1,ii),ii=1,natom)
- read(21,*)
- read(21,*) (colorAtom(2,ii),ii=1,natom)
- read(21,*)
- read(21,*) (colorAtom(3,ii),ii=1,natom)
+
 !Multiplication factor for units (from Hartree to cm-1 or THz)
- if(cunits==1) then
+ if(inp%cunit==1) then
    facUnit=Ha_cmm1
- elseif(cunits==2) then
+ elseif(inp%cunit==2) then
    facUnit=Ha_THz
  else
  end if
 !calculate nqpt
  nqpt=0
- do ii=1,nlines
-   nqpt=nqpt+nqptl(ii)
+ do ii=1,inp%nlines
+   nqpt=nqpt+inp%nqline(ii)
  end do
 !compute normalisation factor
  renorm=0
- do ii=1,nlines
-   renorm=renorm+nqptl(ii)*scale(ii)
+ do ii=1,inp%nlines
+   renorm=renorm+inp%nqline(ii)*inp%scale(ii)
  end do
  renorm=renorm/nqpt
-!Calculate Emin and Emax
- Emin=Emin/FacUnit
- Emax=Emax/FacUnit
+!Calculate inp%min and inp%max
+ inp%min=inp%min/FacUnit
+ inp%max=inp%max/FacUnit
 
 !*******************************************************
 !Begin to write some comments in the eps file
@@ -313,9 +293,7 @@ program band2eps
 !Write unit on the middle left of the vertical axe
  write(18,'(a)') '%****Units****'
 
-
-
- if(cunits==1) then
+ if(inp%cunit==1) then
 !  1/lambda
    write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
    write(18,'(a)') '1425 5650 m'
@@ -340,15 +318,15 @@ program band2eps
 !*****************************************************************
 !Write graduation on the vertical axe
  write(18,'(a)') '%****Vertical graduation****'
- deltaE=(Emax-Emin)/gradRes
+ deltaE=(inp%max-inp%min)/inp%ngrad
 
 !Replacing do loop with real variables with standard g95 do loop
- E=Emin
+ E=inp%min
  do
-!  do E=Emin,(Emax-deltaE/2),deltaE
-   if (E >= (Emax-deltaE/2)-tol6) exit
+!  do E=inp%min,(inp%max-deltaE/2),deltaE
+   if (E >= (inp%max-deltaE/2)-tol6) exit
    pos=int(((EminN-EmaxN)*E &
-&   +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
+&   +EmaxN*inp%min -EminN*inp%max)/(inp%min-inp%max))
 
 !  write the value of energy(or frequence)
    write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
@@ -363,16 +341,16 @@ program band2eps
    E = E+deltaE
  end do
 
-!do the same thing for E=Emax (floating point error)
+!do the same thing for E=inp%max (floating point error)
  write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
  write(18,'(i4,a,i4,a)') kminN-800,' ',EmaxN+60,' m'        !-1300 must be changed as E
- write(18,'(a,i6,a)') 'gs 1 -1 sc (', nint(Emax*facUnit),') col0 sh gr'
+ write(18,'(a,i6,a)') 'gs 1 -1 sc (', nint(inp%max*facUnit),') col0 sh gr'
 
 
 !draw zero line
  E=0
  pos=int(((EminN-EmaxN)*E &
-& +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
+& +EmaxN*inp%min -EminN*inp%max)/(inp%min-inp%max))
  write(18,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ',pos ,' m ', kmaxN,' ', pos, ' l'
  write(18,'(a)') 'gs col0 s gr '
 
@@ -385,11 +363,11 @@ program band2eps
 
  lastPos=kminN
 
- do ii=0,nlines
+ do ii=0,inp%nlines
 
    if(ii/=0) then
-     posk=int(((kminN-kmaxN)*(nqptl(ii))) &
-&     *scale(ii)/renorm/(-nqpt))
+     posk=int(((kminN-kmaxN)*(inp%nqline(ii))) &
+&     *inp%scale(ii)/renorm/(-nqpt))
    else
      posk=0
    end if
@@ -397,30 +375,25 @@ program band2eps
    posk=posk+lastPos
    lastPos=posk
 
-   if(qname(ii+1)=='gamma') then             !GAMMA
+   if(inp%qpoint_name(ii+1)=='gamma') then             !GAMMA
      write(18,'(a)') '/Symbol ff 270.00 scf sf'
      write(18,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
      write(18,'(a)') 'gs 1 -1 sc (G) col0 sh gr'
-   elseif(qname(ii+1)=='lambda') then              !LAMBDA
+   elseif(inp%qpoint_name(ii+1)=='lambda') then              !LAMBDA
      write(18,'(a)') '/Symbol ff 270.00 scf sf'
      write(18,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
      write(18,'(a)') 'gs 1 -1 sc (L) col0 sh gr'
    else                                     !autre
      write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
      write(18,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
-     write(18,'(a,a1,a)') 'gs 1 -1 sc (',qname(ii+1),') col0 sh gr'
+     write(18,'(a,a1,a)') 'gs 1 -1 sc (',inp%qpoint_name(ii+1),') col0 sh gr'
    end if
-
 
 !  draw vertical line
    write(18,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', posk,' ',EminN ,' m ', posk,' ', EmaxN, ' l'
    write(18,'(a)') 'gs col0 s gr '
 
-
  end do
-
-
-
 
 !***********************************************************
 !Write the bands (the most important part actually)
@@ -428,35 +401,35 @@ program band2eps
  write(18,'(a)') '%****Write Bands****'
 
  lastPos=kminN
- do jj=1,nlines
-   do iqpt=1,nqptl(jj)
+ do jj=1,inp%nlines
+   do iqpt=1,inp%nqline(jj)
      if(iqpt==1.and.jj==1) then
-       read(19,*) (phfrqqm1(ii),ii=1,3*natom)
+       read(19,*) (phfrqqm1(ii),ii=1,3*inp%natom)
      end if
 
-     if(.not.(jj==nlines.and.iqpt==nqptl(jj))) then
-       read(19,*) (phfrq(ii),ii=1,3*natom)
+     if(.not.(jj==inp%nlines.and.iqpt==inp%nqline(jj))) then
+       read(19,*) (phfrq(ii),ii=1,3*inp%natom)
      end if
      
-     do imode=1,3*natom
+     do imode=1,3*inp%natom
 
        if(filnam(4)/='no') then       !calculate the color else in black and white
-         do iatom=1,natom
+         do iatom=1,inp%natom
            read(20,*) displ(iatom,imode)
          end do
 !        normalize displ
          norm=0
-         do iatom=1,natom
+         do iatom=1,inp%natom
            norm=norm+displ(iatom,imode)
          end do
 
-         do iatom=1,natom
+         do iatom=1,inp%natom
            displ(iatom,imode)=displ(iatom,imode)/norm
          end do
 
 !        Treat color
          color(:,imode)=0
-         do ii=1,natom
+         do ii=1,inp%natom
 !          Red
            color(1,imode)=color(1,imode)+displ(ii,imode)*colorAtom(1,ii)
 !          Green
@@ -468,20 +441,18 @@ program band2eps
        end if
 
        pos=int(((EminN-EmaxN)*phfrqqm1(imode) &
-&       +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
+&       +EmaxN*inp%min -EminN*inp%max)/(inp%min-inp%max))
 
        posk=int(((kminN-kmaxN)*(iqpt-1) &
-&       *scale(jj)/renorm/(-nqpt)))
+&       *inp%scale(jj)/renorm/(-nqpt)))
        posk=posk+lastPos
 
-
-       write(18,'(a,i4,a,i4,a)') 'n ',posk,' ',pos,' m'
-       
+       write(18,'(a,i4,a,i4,a)') 'n ',posk,' ',pos,' m'       
 
        pos=int(((EminN-EmaxN)*phfrq(imode) &
-&       +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
+&       +EmaxN*inp%min -EminN*inp%max)/(inp%min-inp%max))
        posk=int(((kminN-kmaxN)*(iqpt) &
-&       *scale(jj)/renorm/(-nqpt)))
+&       *inp%scale(jj)/renorm/(-nqpt)))
        posk=posk+lastPos
        write(18,'(i4,a,i4,a)') posk,' ',pos,' l gs'
 
@@ -497,7 +468,6 @@ program band2eps
 
      end do
 
-
      phfrqqm1=phfrq
 
    end do
@@ -512,6 +482,8 @@ program band2eps
  write(18,'(a)') 'rs'
 
  !call abinit_doctor("__band2eps")
+
+ call band2eps_dtset_free(inp)
 
  call xmpi_end()
 
