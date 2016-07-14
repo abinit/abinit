@@ -665,7 +665,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !Local variables -------------------------
 !scalars
- integer,parameter :: matom=1000,mr=10000
+ integer,parameter :: matom=10000,mr=10000
  integer :: i2,ia,ib,ig1,ig2,ig3,ii,ir,ir1,ir2,ir3,jj,mu,newg,newr,ng,nr,nu
  integer :: ng_expxq
  real(dp) :: arg1,arg2,arg3,arga,c123i,c123r,c23i,c23r,derfc_yy

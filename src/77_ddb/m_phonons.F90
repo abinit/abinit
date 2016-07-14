@@ -1060,7 +1060,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: comm
+ integer,optional,intent(in) :: comm
  real(dp),intent(in) :: tcpui,twalli
  character(len=*),intent(in) :: outfile_radix
  type(ifc_type),intent(in) :: Ifc
@@ -1095,7 +1095,9 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,
 ! *********************************************************************
 
  ! Only master works for the time being
- if (xmpi_comm_rank(comm) /= master) return
+ if(present(comm)) then
+   if (xmpi_comm_rank(comm) /= master) return
+ end if
 
  nsym = Crystal%nsym; natom = Crystal%natom
  mpert = ddb%mpert
@@ -1143,6 +1145,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,
 
    ! Initialisation of the phonon wavevector
    qphon(:)=fineqpath(:,iphl1)
+
    if (inp%nph1l /= 0) qphnrm(1) = inp%qnrml1(iphl1)
 
    save_qpoints(:,iphl1) = qphon / qphnrm(1)
@@ -1189,6 +1192,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,
    call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,Crystal%indsym,&
 &   mpert,Crystal%nsym,natom,nsym,Crystal%ntypat,phfrq,qphnrm(1),qphon,&
 &   crystal%rprimd,inp%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
+
 
    !call ifc_fourq(Ifc,Crystal,qphon,phfrq,displ,out_eigvec=eigvec)
 
@@ -1256,6 +1260,8 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,
 #endif
 
  call phonons_write(natom,nfineqpath,save_qpoints,(/(one, iphl1=1,nfineqpath)/),save_phfrq,save_phdispl_cart)
+
+! call phonons_writeEPS(natom,nfineqpath,Crystal%ntypat,save_qpoints,Crystal%typat,(/(one, iphl1=1,nfineqpath)/),save_phfrq,save_phdispl_cart)
 
  ABI_FREE(save_qpoints)
  ABI_FREE(save_phfrq)
@@ -1580,6 +1586,403 @@ end subroutine phonons_ncwrite
 
 
 end subroutine phonons_write
+!!***
+
+subroutine phonons_writeEPS(natom,nqpts,ntypat,qpoints,typat,weights,phfreq,phdispl_cart)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phonons_writeEPS'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,nqpts,ntypat
+!arrays
+ integer,intent(in) :: typat(natom)
+ real(dp),intent(in) :: qpoints(3,nqpts),weights(nqpts)
+ real(dp),intent(in) :: phfreq(3*natom,nqpts)
+ real(dp),intent(in) :: phdispl_cart(2,3*natom,3*natom,nqpts)
+
+!Local variables-------------------------------
+!no_abirules
+!scalars
+ integer :: cunits,EmaxN,EminN,gradRes,kmaxN,kminN,lastPos,pos,posk
+ integer :: iatom,ii,imode,iqpt,jj,nqpt
+ integer :: option
+ real(dp) :: E,Emax,Emin,deltaE
+ real(dp) :: facUnit,norm,renorm
+ character(len=500) :: msg
+ logical :: set_color = .true.
+!array
+ complex(dpc) :: displcpx(3*natom,3*natom,nqpts)
+ integer,allocatable :: nqptl(:)
+ real(dp),allocatable :: phfrq(:),phfrqqm1(:),scale(:)
+ real(dp),allocatable :: colorAtom(:,:),color(:,:)
+ real(dp),allocatable :: displ(:,:)
+ character(len=6),allocatable :: qname(:)
+
+! *********************************************************************
+
+ 
+ if (open_file("PHFRQ.eps", msg, unit=18, form="formatted", status="unknown", action="write") /= 0) then
+   MSG_ERROR(msg)
+ end if
+
+!Multiplication factor for units (from Hartree to cm-1 or THz)
+ if(cunits==1) then
+   facUnit=Ha_cmm1
+ elseif(cunits==2) then
+   facUnit=Ha_THz
+ else
+ end if
+
+!Boundings of the plot (only the plot and not what is around)
+ EminN=6900
+ EmaxN=2400
+ kminN=2400
+ kmaxN=9600
+
+!convert phdispl_cart in cpx array
+ displcpx = cmplx(phdispl_cart(1,:,:,:),phdispl_cart(2,:,:,:))
+
+!Read the input file, and store the information in a long string of characters
+!strlen from defs_basis module
+ option = 1
+
+!Allocate dynamique variables
+ ABI_ALLOCATE(phfrqqm1,(3*natom))
+ ABI_ALLOCATE(phfrq,(3*natom))
+ ABI_ALLOCATE(color,(3,3*natom))
+ ABI_ALLOCATE(qname,(nqpts+1))
+ ABI_ALLOCATE(scale,(nqpts))
+ ABI_ALLOCATE(nqptl,(nqpts))
+ ABI_ALLOCATE(colorAtom,(3,natom))
+!colorAtom(1,1:5) : atoms contributing to red (ex : [1 0 0 0 0])
+!colorAtom(2,1:5) : atoms contributing to green (ex : [0 1 0 0 0])
+!colorAtom(3,1:5) : atoms contributing to blue (ex : [0 0 1 1 1])
+ ABI_ALLOCATE(displ,(natom,3*natom))
+ 
+
+
+!TEST_AM TO DO
+!Set Values
+ if(ntypat /= 3) then
+   set_color = .false.
+ else
+   color = zero
+   do ii=1,natom
+     if(typat(ii)==1) colorAtom(1,ii) = one
+     if(typat(ii)==2) colorAtom(2,ii) = one
+     if(typat(ii)==3) colorAtom(3,ii) = one
+   end do
+ end if
+
+ Emin = -300.0
+ Emax =   800.0
+ gradRes = 8
+ cunits = 1
+ qname(:) = "T"
+!Read end of input file
+ ! read(21,*)
+ ! read(21,*) (qname(ii),ii=1,nqpts+1)
+ ! read(21,*)
+ ! read(21,*) (nqptl(ii),ii=1,nqpts)
+ ! read(21,*)
+ ! read(21,*) (scale(ii),ii=1,nqpts)
+ ! read(21,*)
+ ! read(21,*)
+ ! read(21,*)
+ ! read(21,*) (colorAtom(1,ii),ii=1,natom)
+ ! read(21,*)
+ ! read(21,*) (colorAtom(2,ii),ii=1,natom)
+ ! read(21,*)
+ ! read(21,*) (colorAtom(3,ii),ii=1,natom)
+!calculate nqpt
+ nqpt=0
+ do ii=1,nqpts
+   nqpt=nqpt+nqptl(ii)
+ end do
+!compute normalisation factor
+ renorm=0
+ do ii=1,nqpts
+   renorm=renorm+nqptl(ii)*scale(ii)
+ end do
+ renorm=renorm/nqpt
+!Calculate Emin and Emax
+ Emin=Emin/FacUnit
+ Emax=Emax/FacUnit
+
+!*******************************************************
+!Begin to write some comments in the eps file
+!This is based to 'xfig'
+
+ write(18,'(a)') '% !PS-Adobe-2.0 EPSF-2.0'
+ write(18,'(a)') '%%Title: band.ps'
+ write(18,'(a)') '%%BoundingBox: 0 0 581 310'
+ write(18,'(a)') '%%Magnification: 1.0000'
+
+ write(18,'(a)') '/$F2psDict 200 dict def'
+ write(18,'(a)') '$F2psDict begin'
+ write(18,'(a)') '$F2psDict /mtrx matrix put'
+ write(18,'(a)') '/col-1 {0 setgray} bind def'
+ write(18,'(a)') '/col0 {0.000 0.000 0.000 srgb} bind def'
+ write(18,'(a)') 'end'
+ write(18,'(a)') 'save'
+ write(18,'(a)') 'newpath 0 310 moveto 0 0 lineto 581 0 lineto 581 310 lineto closepath clip newpath'
+ write(18,'(a)') '-36.0 446.0 translate'
+ write(18,'(a)') '1 -1 scale'
+
+ write(18,'(a)') '/cp {closepath} bind def'
+ write(18,'(a)') '/ef {eofill} bind def'
+ write(18,'(a)') '/gr {grestore} bind def'
+ write(18,'(a)') '/gs {gsave} bind def'
+ write(18,'(a)') '/sa {save} bind def'
+ write(18,'(a)') '/rs {restore} bind def'
+ write(18,'(a)') '/l {lineto} bind def'
+ write(18,'(a)') '/m {moveto} bind def'
+ write(18,'(a)') '/rm {rmoveto} bind def'
+ write(18,'(a)') '/n {newpath} bind def'
+ write(18,'(a)') '/s {stroke} bind def'
+ write(18,'(a)') '/sh {show} bind def'
+ write(18,'(a)') '/slc {setlinecap} bind def'
+ write(18,'(a)') '/slj {setlinejoin} bind def'
+ write(18,'(a)') '/slw {setlinewidth} bind def'
+ write(18,'(a)') '/srgb {setrgbcolor} bind def'
+ write(18,'(a)') '/rot {rotate} bind def'
+ write(18,'(a)') '/sc {scale} bind def'
+ write(18,'(a)') '/sd {setdash} bind def'
+ write(18,'(a)') '/ff {findfont} bind def'
+ write(18,'(a)') '/sf {setfont} bind def'
+ write(18,'(a)') '/scf {scalefont} bind def'
+ write(18,'(a)') '/sw {stringwidth} bind def'
+ write(18,'(a)') '/tr {translate} bind def'
+ write(18,'(a)') '/tnt {dup dup currentrgbcolor'
+
+ write(18,'(a)') '4 -2 roll dup 1 exch sub 3 -1 roll mul add'
+ write(18,'(a)') '4 -2 roll dup 1 exch sub 3 -1 roll mul add'
+ write(18,'(a)') '4 -2 roll dup 1 exch sub 3 -1 roll mul add srgb}'
+ write(18,'(a)') 'bind def'
+ write(18,'(a)') '/shd {dup dup currentrgbcolor 4 -2 roll mul 4 -2 roll mul'
+ write(18,'(a)') ' 4 -2 roll mul srgb} bind def'
+ write(18,'(a)') '/$F2psBegin {$F2psDict begin /$F2psEnteredState save def} def'
+ write(18,'(a)') '/$F2psEnd {$F2psEnteredState restore end} def'
+ write(18,'(a)') '$F2psBegin'
+ write(18,'(a)') '%%Page: 1 1'
+ write(18,'(a)') '10 setmiterlimit'
+ write(18,'(a)') '0.06000 0.06000 sc'
+
+!****************************************************************
+!Begin of the intelligible part of the postcript document
+
+ write(18,'(a)') '%**************************************'
+!****************************************************************
+!Draw the box containing the plot
+ write(18,'(a)') '%****Big Box****'
+ write(18,'(a)') '16 slw'
+ write(18,'(a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ', EmaxN,&
+& ' m ', kmaxN,' ', EmaxN, ' l ', &
+& kmaxN,' ', EminN, ' l ', kminN,' ', EminN, ' l'
+ write(18,'(a)') 'cp gs col0 s gr'
+
+!****************************************************************
+!Write unit on the middle left of the vertical axe
+ write(18,'(a)') '%****Units****'
+ if(cunits==1) then
+!  1/lambda
+   write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
+   write(18,'(a)') '1425 5650 m'
+   write(18,'(3a)') 'gs 1 -1 sc  90.0 rot (Frequency ',achar(92),'(cm) col0 sh gr'
+!  cm-1
+   write(18,'(a)') '/Times-Roman ff 200.00 scf sf'
+   write(18,'(a)') '1325 4030 m'
+   write(18,'(a)') 'gs 1 -1 sc 90.0 rot  (-1) col0 sh gr'
+   write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
+   write(18,'(a)') '1425 3850 m'
+   write(18,'(3a)') 'gs 1 -1 sc  90.0 rot (',achar(92),')) col0 sh gr'
+ else
+!  Freq
+   write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
+   write(18,'(a)') '825 4850 m'
+   write(18,'(a)') 'gs 1 -1 sc  90.0 rot (Freq) col0 sh gr'
+!  THz
+   write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
+   write(18,'(a)') '825 4350 m'
+   write(18,'(a)') 'gs 1 -1 sc 90.0 rot  (THz) col0 sh gr'
+ end if
+!*****************************************************************
+!Write graduation on the vertical axe
+ write(18,'(a)') '%****Vertical graduation****'
+ deltaE=(Emax-Emin)/gradRes
+
+!Replacing do loop with real variables with standard g95 do loop
+ E=Emin
+ do
+!  do E=Emin,(Emax-deltaE/2),deltaE
+   if (E >= (Emax-deltaE/2)-tol6) exit
+   pos=int(((EminN-EmaxN)*E &
+&   +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
+
+!  write the value of energy(or frequence)
+   write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
+   write(18,'(i4,a,i4,a)') kminN-800,' ',pos+60,' m'        !-1300 must be CHANGED
+!  as a function of the width of E
+   write(18,'(a,i6,a)') 'gs 1 -1 sc (', nint(E*facUnit),') col0 sh gr'
+
+!  write a little bar
+   write(18,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ',pos ,' m ', kminN+100,' ', pos, ' l'
+   write(18,'(a)') 'gs col0 s gr '
+
+   E = E+deltaE
+ end do
+
+!do the same thing for E=Emax (floating point error)
+ write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
+ write(18,'(i4,a,i4,a)') kminN-800,' ',EmaxN+60,' m'        !-1300 must be changed as E
+ write(18,'(a,i6,a)') 'gs 1 -1 sc (', nint(Emax*facUnit),') col0 sh gr'
+
+
+!draw zero line
+ E=0
+ pos=int(((EminN-EmaxN)*E &
+& +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
+ write(18,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ',pos ,' m ', kmaxN,' ', pos, ' l'
+ write(18,'(a)') 'gs col0 s gr '
+
+
+!******************************************************
+!draw legend of horizontal axe
+!+vertical line
+
+ write(18,'(a)') '%****Horizontal graduation****'
+
+ lastPos=kminN
+
+ do ii=0,nqpts
+
+   if(ii/=0) then
+     posk=int(((kminN-kmaxN)*(nqptl(ii))) &
+&     *scale(ii)/renorm/(-nqpt))
+   else
+     posk=0
+   end if
+
+   posk=posk+lastPos
+   lastPos=posk
+
+   if(qname(ii+1)=='gamma') then             !GAMMA
+     write(18,'(a)') '/Symbol ff 270.00 scf sf'
+     write(18,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
+     write(18,'(a)') 'gs 1 -1 sc (G) col0 sh gr'
+   elseif(qname(ii+1)=='lambda') then              !LAMBDA
+     write(18,'(a)') '/Symbol ff 270.00 scf sf'
+     write(18,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
+     write(18,'(a)') 'gs 1 -1 sc (L) col0 sh gr'
+   else                                     !autre
+     write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
+     write(18,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
+     write(18,'(a,a1,a)') 'gs 1 -1 sc (',qname(ii+1),') col0 sh gr'
+   end if
+
+
+!  draw vertical line
+   write(18,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', posk,' ',EminN ,' m ', posk,' ', EmaxN, ' l'
+   write(18,'(a)') 'gs col0 s gr '
+
+
+ end do
+
+
+
+
+!***********************************************************
+!Write the bands (the most important part actually)
+
+ write(18,'(a)') '%****Write Bands****'
+
+
+! read(19,*) (phfrqqm1(ii),ii=1,3*natom)
+ jj = 1
+ lastPos=kminN
+ do iqpt=1,nqpts
+!  Copy frequency of the qpoint
+   phfrqqm1(:) = phfreq(:,iqpt)
+!  Set displacement 
+   do ii=1,3*natom
+     do iatom=1,natom
+       displ(iatom,ii) =  real(sqrt(displcpx(3*(iatom-1)+1,ii,iqpt)*   &
+           conjg(displcpx(3*(iatom-1)+1,ii,iqpt)) + &
+&                displcpx(3*(iatom-1)+2,ii,iqpt)*   &
+&          conjg(displcpx(3*(iatom-1)+2,ii,iqpt)) + &
+&               displcpx(3*(iatom-1)+3,ii,iqpt)*   &
+&          conjg(displcpx(3*(iatom-1)+3,ii,iqpt)) ))
+     end do
+   end do
+ 
+          
+   do imode=1,3*natom
+!    normalize displ
+     norm=0
+     do iatom=1,natom
+       norm=norm+displ(iatom,imode)
+     end do
+     
+     do iatom=1,natom
+       displ(iatom,imode)=displ(iatom,imode)/norm
+     end do
+
+!    Treat color
+     color(:,imode)=0
+     if(set_color)then
+       do ii=1,natom
+!        Red
+         color(1,imode)=color(1,imode)+displ(ii,imode)*colorAtom(1,ii)
+!        Green
+         color(2,imode)=color(2,imode)+displ(ii,imode)*colorAtom(2,ii)
+!        Blue
+         color(3,imode)=color(3,imode)+displ(ii,imode)*colorAtom(3,ii)
+       end do
+     end if
+     
+     pos=int(((EminN-EmaxN)*phfrqqm1(imode) &
+&     +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
+
+     posk=int(((kminN-kmaxN)*(iqpt-1) &
+&        *scale(jj)/renorm/(-nqpts)))
+     posk=posk+lastPos
+     write(18,'(a,i4,a,i4,a)') 'n ',posk,' ',pos,' m'
+     pos=int(((EminN-EmaxN)*phfrq(imode) &
+&       +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
+     posk=int(((kminN-kmaxN)*(iqpt) &
+&       *scale(jj)/renorm/(-nqpts)))
+     posk=posk+lastPos
+     write(18,'(i4,a,i4,a)') posk,' ',pos,' l gs'
+
+     if(set_color) then     !(in color)
+       write(18,'(f6.3,a,f6.3,a,f6.3,a)') color(1,imode),' ', &
+&        color(2,imode),' ',color(3,imode), ' srgb s gr'
+     else
+       write(18,'(f6.3,a,f6.3,a,f6.3,a)') 0.0,' ', &
+&        0.0,' ',0.0, ' srgb s gr'
+     end if
+   end do
+   lastPos=posk
+ end do
+
+
+!**********************************************************
+!Ending the poscript document
+ write(18,'(a)') '$F2psEnd'
+ write(18,'(a)') 'rs'
+
+! *************************************************************************
+ close(18)
+
+end subroutine phonons_writeEPS
 !!***
 
 !----------------------------------------------------------------------

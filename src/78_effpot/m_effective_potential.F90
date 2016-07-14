@@ -548,19 +548,16 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
  integer :: ia,i1,i2,i3,irpt,irpt2,irpt_ref,min1,min2,min3
  integer :: min1_cell,min2_cell,min3_cell,max1_cell,max2_cell,max3_cell
  integer :: max1,max2,max3,mu,my_rank,nu,nproc,second_coordinate,sumg0,nrpt
- real(dp) :: max,ncell_per_cpu,sum,ucvol
+ real(dp) :: sum,ucvol
  character(len=500) :: message
  logical :: short_range = .false.
  logical :: iam_master=.FALSE.
 !array
- integer  :: ngqpt(3)
- real(dp) :: acell(3),qphon(3)
+ real(dp) :: acell(3)
  real(dp) :: gmet(3,3),rmet(3,3)
- real(dp) :: gprimd(3,3),rprimd(3,3)
+ real(dp) :: gprimd(3,3)
  real(dp),allocatable :: dyew(:,:,:,:,:), dyewq0(:,:,:)
  real(dp),allocatable :: xred(:,:),xred_tmp(:,:),zeff_tmp(:,:,:)
- real(dp),allocatable :: rpt(:,:)
- integer,allocatable :: cell(:,:)
 
  type(supercell_type) :: super_cell
  type(ifc_type) :: ifc_tmp
@@ -738,16 +735,16 @@ if(.false.)then
      zeff_tmp(:,:,first_coordinate:second_coordinate) = eff_pot%zeff
    end do
    
-   print*,"enter in big ewald9"
+   write(std_out,*)"enter in big ewald9"
    call ewald9(acell,eff_pot%epsilon_inf,dyew,&
 &              gmet,gprimd,super_cell%natom_supercell,real((/0,0,0/),dp),rmet,&
 &              super_cell%rprimd_supercell,sumg0,ucvol,xred,&
 &              zeff_tmp)
-   print*,"enter in q0dy3_calc"
+   write(std_out,*)"enter in q0dy3_calc"
    call q0dy3_calc(super_cell%natom_supercell,dyewq0,dyew,2)
-   print*,"enter in q0dy3_apply"
+   write(std_out,*)"enter in q0dy3_apply"
    call q0dy3_apply(super_cell%natom_supercell,dyewq0,dyew)
-   print*,"done"
+   write(std_out,*)"done"
 
    first_coordinate  = ((irpt_ref-1)*eff_pot%natom) + 1
 
@@ -1334,7 +1331,7 @@ subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,n_cell,nph1l,optio
 !Local variables-------------------------------
 !scalar
   character(len=500) :: message
-  integer :: ii,irpt,irpt_ref,jj,msym
+  integer :: ii,irpt,jj,msym
   real(dp):: ucvol
 
 ! type(anaddb_dataset_type) :: inp
@@ -1348,8 +1345,6 @@ subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,n_cell,nph1l,optio
   real(dp),allocatable :: tnons(:,:)
 
 ! *************************************************************************
-
-  integer :: nblok
 
   ! Number of 2dte blocks in present object
 !  integer,allocatable :: flg(:,:) 
@@ -1450,16 +1445,17 @@ subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,n_cell,nph1l,optio
     ddb%acell  = one
     
    end if
-    print*,"natom ",ddb%natom
-    print*,"ntypat",ddb%ntypat
-    print*,"mpert",ddb%mpert
-    print*,"msize",ddb%msize
-    print*,"occopt",ddb%occopt
-    print*,"prtvol",ddb%prtvol
-    print*,"rprim",ddb%rprim
-    print*,"gprim",ddb%gprim
-    print*,"acell",ddb%acell
-  
+!TEST_AM
+    !print*,"natom ",ddb%natom
+    !print*,"ntypat",ddb%ntypat
+    !print*,"mpert",ddb%mpert
+    !print*,"msize",ddb%msize
+    !print*,"occopt",ddb%occopt
+    !print*,"prtvol",ddb%prtvol
+    !print*,"rprim",ddb%rprim
+    !print*,"gprim",ddb%gprim
+    !print*,"acell",ddb%acell
+!TEST_AM
 
  end subroutine effective_potential_effpot2ddb
 !!***
@@ -1510,7 +1506,7 @@ subroutine effective_potential_printPDOS(eff_pot,filename,n_cell,nph1l,option,qp
   character(len=fnlen),intent(in) :: filename
 !Local variables-------------------------------
 !scalar
- integer :: irpt,irpt_ref,lenstr
+ integer :: irpt,lenstr
  real(dp) :: tcpui,twalli
  character(len=strlen) :: string
 !array
@@ -2131,7 +2127,7 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
  integer :: six_id,two_id,xyz_id,znucl_id
  integer :: ncerr,ncid,npsp
  integer :: dimCids(2),dimEids(2),dimIids(6),dimPids(1),dimRids(2),dimXids(2)
- integer :: etotal_id,rprimd_id,xcart_id,xred_id
+ integer :: etotal_id,rprimd_id,xcart_id
  character(len=500) :: message
  character(len=fnlen) :: namefile
 !arrays
@@ -2522,9 +2518,11 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,c
   real(dp),intent(out) :: fcart(3,natom),fred(3,natom)
 !Local variables-------------------------------
 !scalar
+  integer,parameter :: master=0
   real(dp):: temp(3)
-  integer :: i1,i2,i3,ia,ii,jj,ib,ll
+  integer :: i1,i2,i3,ia,ii,jj,ib,ll,my_rank,nproc
   character(len=500) :: message
+  logical :: iam_master=.FALSE.
 !array
   real(dp):: disp_tmp1(3,natom)
   integer :: cell_number(3)
@@ -2532,6 +2530,10 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,c
   character(500) :: msg
 
 ! *************************************************************************
+
+!MPI variables
+  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+  iam_master = (my_rank == master)
 
   fred = zero
   fcart = zero
@@ -2850,14 +2852,15 @@ end function elastic_energy
 
 function harmonic_energy(eff_pot,disp) result(energy)
 
+!Arguments ------------------------------------
+! scalar
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'harmonic_energy'
 !End of the abilint section
 
-!Arguments ------------------------------------
-! scalar
   real(dp) energy
 ! array
   type(effective_potential_type), intent(in) :: eff_pot

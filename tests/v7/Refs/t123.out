@@ -1,0 +1,134 @@
+
+.Version 8.1.2 of EPIGENE 
+.(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
+
+.Copyright (C) 1998-2016 ABINIT group . 
+ EPIGENE comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : Tue 12 Jul 2016.
+- ( at 16h13 )
+  
+
+================================================================================
+
+ Read the information in the reference structure in 
+system.xml
+ to initialize the epigene input
+
+================================================================================
+
+ -outvars_epigene: echo values of input variables ----------------------
+
+ Flags :
+     ifcflag         1
+   ifcsuperc         0
+   prt_effpo         3
+ Miscellaneous information :
+         asr         2
+ Interatomic Force Constants Inputs :
+      dipdip         1
+      ifcana         0
+      ifcout   2000000
+      natifc         4
+       atifc         1   2   3   4
+ Description of grid 1 :
+        brav         1
+       ngqpt         1         1         1
+      nqshft         1
+      q1shft
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00
+ First list of wavevector (reduced coord.) :
+       nph1l         1
+       qph1l
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00    0.000E+00
+
+================================================================================
+
+ Opening the file system.xml
+ Reading the file system.xml with Fortran
+
+ This effective potential contains :
+  - Reference energy:        -17.1451766220
+  - Number of types of atoms:    2
+  - Number of atoms:     4
+  - Number of cells:     9
+  - Number of qpoints:    8
+  - Primitive vectors:
+    6.528935    3.769482    0.000000
+   -6.528935    3.769482    0.000000
+    0.000000    0.000000   12.277795
+  - acell:
+    1.000000    1.000000    1.000000
+  - Dielectric tensor:
+   25.944545   -0.000000   -0.000000
+   -0.000000   25.944545   -0.000000
+   -0.000000   -0.000000    8.373944
+  - Elastic tensor:
+    3.848992    0.851301    0.365742    0.000000    0.000000   -0.000000
+    0.851301    3.848992    0.365742    0.000000    0.000000    0.000000
+    0.365327    0.365327    3.410461    0.000000    0.000000    0.000000
+    0.000000   -0.000000    0.000000    0.710035    0.000000    0.000000
+    0.000000    0.000000    0.000000    0.000000    0.710023    0.000000
+    0.000000    0.000000    0.000000    0.000000    0.000000    1.498760
+  - Atoms   1
+    - atomic number:   13.0000
+    - atomic mass:   26.9815
+    - position:   -2.176312    3.769482    0.000000
+    - Effective charges:
+      3.762065    0.000000    0.000000
+      0.000000    3.762065   -0.000000
+      0.000000    0.000000    1.985280
+  - Atoms   2
+    - atomic number:   13.0000
+    - atomic mass:   26.9815
+    - position:    2.176312    3.769482    6.138898
+    - Effective charges:
+      3.762065    0.000000    0.000000
+      0.000000    3.762065   -0.000000
+     -0.000000    0.000000    1.985280
+  - Atoms   3
+    - atomic number:   33.0000
+    - atomic mass:   74.9216
+    - position:   -2.176312    3.769482    4.617506
+    - Effective charges:
+     -3.762065    0.000000    0.000000
+      0.000000   -3.762065    0.000000
+      0.000000   -0.000000   -1.985280
+  - Atoms   4
+    - atomic number:   33.0000
+    - atomic mass:   74.9216
+    - position:    2.176312    3.769482   10.756403
+    - Effective charges:
+     -3.762065   -0.000000   -0.000000
+     -0.000000   -3.762065   -0.000000
+     -0.000000   -0.000000   -1.985280
+
+ Impose acoustic sum rule on short range
+
+ Impose acoustic sum rule on long range
+
+ Impose acoustic sum rule on total ifc
+
+--------------------------------------------------------------------------------
+
+ Generation of the xml file for the reference structure in system.xml
+
+================================================================================
+
+-
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
+
+================================================================================
+
++Total cpu time      0.105  and wall time      0.106 sec
+
+ epigene : the run completed succesfully.

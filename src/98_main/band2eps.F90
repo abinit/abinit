@@ -38,7 +38,9 @@
 program band2eps
 
  use defs_basis
+ use m_errors
  use m_profiling_abi
+ use m_io_tools, only : open_file
  use m_xmpi
 
 !This section has been created automatically by the script Abilint (TD).
@@ -53,10 +55,15 @@ program band2eps
 
 !Local variables-------------------------------
 !no_abirules
+ integer,parameter :: master=0
  character(len=fnlen) :: filnam(4)
  real(dp) :: E,Emax,Emin,deltaE
  integer :: EmaxN,EminN,gradRes,kmaxN,kminN,lastPos,pos,posk
  integer :: iatom,ii,imode,iqpt,jj,natom,nqpt
+ integer :: comm
+ integer :: nproc,my_rank
+ integer :: option
+ logical :: iam_master
  real(dp),allocatable :: phfrq(:),phfrqqm1(:)
  real(dp),allocatable :: color(:,:)
  real(dp) :: facUnit,norm,renorm
@@ -65,6 +72,7 @@ program band2eps
  integer,allocatable :: nqptl(:)
  real(dp),allocatable :: colorAtom(:,:)
  real(dp),allocatable :: displ(:,:)
+ character(len=500) :: message
   !scale : hold the scale for each line (dimension=nlines)
   !qname : hold the name (gamma,R,etc..) for each extremity of line (dimension=nlines+1)
   !nqptl : =nqpt by line (dimension=nlines)
@@ -84,7 +92,13 @@ program band2eps
 !Change communicator for I/O (mandatory!)
  call abi_io_redirect(new_io_comm=xmpi_world)
 
+!Initialize MPI
  call xmpi_init()
+ comm = xmpi_world
+
+!MPI variables
+ nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ iam_master = (my_rank == master)
 
 !Initialize memory profiling if it is activated
 !if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
@@ -105,40 +119,65 @@ program band2eps
    write(std_out,*)'  The length of this filename exceeds 132 characters. This might induce trouble later.'
  end if
  read(std_in, '(a)' ) filnam(2)
- if(len_trim(filnam(1))>132)then
+ if(len_trim(filnam(2))>132)then
    write(std_out,*)' band2eps : WARNING -'
    write(std_out,*)'  The length of this filename exceeds 132 characters. This might induce trouble later.'
  end if
  read(std_in, '(a)' ) filnam(3)
- if(len_trim(filnam(1))>132)then
+ if(len_trim(filnam(3))>132)then
    write(std_out,*)' band2eps : WARNING -'
    write(std_out,*)'  The length of this filename exceeds 132 characters. This might induce trouble later.'
  end if
  read(std_in, '(a)' ) filnam(4)
- if(len_trim(filnam(1))>132)then
+ if(len_trim(filnam(4))>132)then
    write(std_out,*)' band2eps : WARNING -'
    write(std_out,*)'  The length of this filename exceeds 132 characters. This might induce trouble later.'
  end if
 !open(18,FILE='band.eps',STATUS='replace',ACCESS='sequential',ACTION='write')
 !Open the '.eps' file for write
  write(std_out,'(a,a)') 'Opening file ', filnam(2)
- open(18, file=filnam(2))
+ if (open_file(filnam(2),message,unit=18,form="formatted",status="unknown",action="write") /= 0) then
+   MSG_ERROR(message)
+ end if 
 !Open the phonon energies file
  write(std_out,'(a,a)') 'Opening file ', filnam(3)
- open(19, file=filnam(3))
+ if (open_file(filnam(3),message,unit=19,form="formatted") /= 0) then
+   MSG_ERROR(message)
+ end if 
  if(filnam(4)/='no') then
 !  Open the displacements file
    write(std_out,'(a,a)') 'Opening file ', filnam(4)
-   open(20, file=filnam(4))
+   if (open_file(filnam(4),message,unit=20,form="formatted",status="old",action='read') /= 0) then
+     MSG_ERROR(message)
+   end if
  end if
 !Open the input file
  write(std_out,'(a,a)') 'Opening file ', filnam(1)
- open(21, file=filnam(1))
+   if (open_file(filnam(1),message,unit=21,form="formatted") /= 0) then
+     MSG_ERROR(message)
+   end if
 !Boundings of the plot (only the plot and not what is around)
  EminN=6900
  EmaxN=2400
  kminN=2400
  kmaxN=9600
+
+!Read the input file, and store the information in a long string of characters
+!strlen from defs_basis module
+ option = 1
+ if (iam_master) then
+!    call instrng (filnam(1),lenstr,option,strlen,string)
+
+!    !To make case-insensitive, map characters to upper case:
+!    call inupper(string(1:lenstr))
+!  end if
+
+!  call xmpi_bcast(string,master, comm, ierr)
+!  call xmpi_bcast(lenstr,master, comm, ierr)
+
+! !Read the input file
+!  call invars10(inp,lenstr,natom,string)
+ end if
 !Read input file (input.band) to know how to format the graph
  read(21,*)
  read(21,*)
@@ -264,7 +303,7 @@ program band2eps
 !****************************************************************
 !Draw the box containing the plot
  write(18,'(a)') '%****Big Box****'
- write(18,'(a)') '7.500 slw'
+ write(18,'(a)') '16 slw'
  write(18,'(a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ', EmaxN,&
 & ' m ', kmaxN,' ', EmaxN, ' l ', &
 & kmaxN,' ', EminN, ' l ', kminN,' ', EminN, ' l'
@@ -344,8 +383,6 @@ program band2eps
 
  write(18,'(a)') '%****Horizontal graduation****'
 
-
-
  lastPos=kminN
 
  do ii=0,nlines
@@ -390,19 +427,23 @@ program band2eps
 
  write(18,'(a)') '%****Write Bands****'
 
- read(19,*) (phfrqqm1(ii),ii=1,3*natom)
-
  lastPos=kminN
  do jj=1,nlines
    do iqpt=1,nqptl(jj)
-     read(19,*) (phfrq(ii),ii=1,3*natom)
+     if(iqpt==1.and.jj==1) then
+       read(19,*) (phfrqqm1(ii),ii=1,3*natom)
+     end if
+
+     if(.not.(jj==nlines.and.iqpt==nqptl(jj))) then
+       read(19,*) (phfrq(ii),ii=1,3*natom)
+     end if
+     
      do imode=1,3*natom
 
-
        if(filnam(4)/='no') then       !calculate the color else in black and white
-         read(20,*) (displ(iatom,imode),iatom=1,natom)
-
-
+         do iatom=1,natom
+           read(20,*) displ(iatom,imode)
+         end do
 !        normalize displ
          norm=0
          do iatom=1,natom
@@ -435,7 +476,7 @@ program band2eps
 
 
        write(18,'(a,i4,a,i4,a)') 'n ',posk,' ',pos,' m'
-
+       
 
        pos=int(((EminN-EmaxN)*phfrq(imode) &
 &       +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
@@ -443,7 +484,6 @@ program band2eps
 &       *scale(jj)/renorm/(-nqpt)))
        posk=posk+lastPos
        write(18,'(i4,a,i4,a)') posk,' ',pos,' l gs'
-
 
 
        if(filnam(4)/='no') then     !(in color)

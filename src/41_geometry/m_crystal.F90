@@ -67,7 +67,7 @@ MODULE m_crystal
   integer :: natom     
   ! Number of atoms
 
-  integer :: nsym   
+  integer :: nsym
   ! Number of symmetry operations
 
   integer :: ntypat   
@@ -151,7 +151,7 @@ MODULE m_crystal
   ! spinor rotation matrices.
 
   ! Useful quantities that might be added in the future
-  !real(dp),allocatable :: amu(:)                
+  real(dp),allocatable :: amu(:)                
   !  amu(ntypat)
   !  mass of the atoms (atomic mass unit)
 
@@ -263,7 +263,7 @@ subroutine crystal_init(Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xr
  integer,optional,intent(in) :: symrel(3,3,nsym),symafm(nsym)
  real(dp),intent(in) :: xred(3,natom),rprimd(3,3),zion(ntypat),znucl(npsp)
  real(dp),optional,intent(in) :: tnons(3,nsym)
- character(len=*),intent(in) :: title(ntypat) 
+ character(len=*),intent(in) :: title(ntypat)
 
 !Local variables-------------------------------
 !scalars
@@ -302,6 +302,7 @@ subroutine crystal_init(Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xr
  ABI_MALLOC(Cryst%xcart,(3,natom))
  ABI_MALLOC(Cryst%zion,(ntypat))
  ABI_MALLOC(Cryst%znucl,(npsp))
+ ABI_MALLOC(Cryst%amu, (ntypat))
 
  Cryst%typat = typat 
  Cryst%xred  = xred 
@@ -489,6 +490,9 @@ subroutine crystal_free(Cryst)
  end if
  if (allocated(Cryst%znucl))  then
    ABI_FREE(Cryst%znucl)
+ end if
+ if (allocated(Cryst%amu))  then
+   ABI_FREE(Cryst%amu)
  end if
  if (allocated(Cryst%spinrot)) then
     ABI_FREE(Cryst%spinrot)

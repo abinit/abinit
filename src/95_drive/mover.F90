@@ -96,7 +96,7 @@
 !!      are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! PARENTS
-!!      gstate
+!!      gstate,mover_effpot
 !!
 !! CHILDREN
 !!      abiforstr_fin,abiforstr_ini,abihist_bcast,abihist_compare,abihist_fin
@@ -119,7 +119,7 @@
 #include "abi_common.h"
 
 subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
-& electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old)
+& electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,effective_potential)
 
  use defs_basis
  use defs_abitypes
@@ -143,6 +143,8 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
  use m_exit,             only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
  use m_electronpositron, only : electronpositron_type
  use m_scfcv,            only : scfcv_t, scfcv_run
+ use m_effective_potential
+ use m_monte_carlo
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -179,7 +181,7 @@ real(dp), intent(in),target :: amass(:) !(scfcv%dtset%natom) cause segfault of g
 real(dp), pointer :: rhog(:,:),rhor(:,:)
 real(dp), intent(inout) :: xred(3,scfcv_args%dtset%natom),xred_old(3,scfcv_args%dtset%natom)
 real(dp), intent(inout) :: vel(3,scfcv_args%dtset%natom),vel_cell(3,3),rprimd(3,3)
-
+type(effective_potential_type),optional,intent(in):: effective_potential
 !Local variables-------------------------------
 !scalars
 integer,parameter :: level=102,master=0
@@ -188,7 +190,7 @@ type(abimover) :: ab_mover
 type(abimover_specs) :: specs
 type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(mttk_type) :: mttk_vars
-integer :: itime,icycle,iexit,timelimit_exit,ncycle,kk,jj,me,nloop,ntime,option,comm
+integer :: itime,icycle,iexit=0,timelimit_exit,ncycle,kk,jj,me,nloop,ntime,option,comm
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
 integer ABI_ASYNC :: quitsum_async
 character(len=500) :: message
@@ -197,7 +199,8 @@ character(len=8) :: stat4xml
 character(len=35) :: fmt
 character(len=fnlen) :: filename
 real(dp) :: ucvol,favg
-logical :: DEBUG=.FALSE.
+logical :: DEBUG=.false.
+logical :: need_scfcv_cycle = .TRUE.
 logical :: change,useprtxfase
 logical :: skipcycle
 integer :: minIndex,ii,similar,conv_retcode
@@ -313,6 +316,11 @@ real(dp) :: rmet(3,3)
 & dtfil%fnameabi_hes,&
 & dtfil%filnam_ds)
 
+
+ if (ab_mover%ionmov==31.and..not.present(effective_potential)) then
+   MSG_BUG("effective_potential is not present.")
+ end if
+
  if (ab_mover%ionmov==13)then
    call mttk_ini(mttk_vars,ab_mover%nnos)
  end if
@@ -397,11 +405,22 @@ real(dp) :: rmet(3,3)
 !###########################################################
 !### 06. First output before any itime or icycle
 
- write(message,'(a,a,i2,a,a,a,80a)')&
-& ch10,'=== [ionmov=',ab_mover%ionmov,'] ',specs%method,&
-& ch10,('=',kk=1,80)
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ ! if effective potential is present,
+ ! forces will be compute with it
+ if (present(effective_potential)) then
+   need_scfcv_cycle = .FALSE.
+   write(message,'(a,a,i2,a,a,a,a,80a)')&
+     & ch10,'=== [ionmov=',ab_mover%ionmov,'] ',trim(specs%method),&
+     & ' with effective potential',ch10,('=',kk=1,80)
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+ else
+   write(message,'(a,a,i2,a,a,a,80a)')&
+&   ch10,'=== [ionmov=',ab_mover%ionmov,'] ',specs%method,&
+&   ch10,('=',kk=1,80)
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+ end if
 
 !Format for printing on each cycle
  write(fmt,'(a6,i2,a4,i2,a4,i2,a4,i2,a9)')&
@@ -416,7 +435,7 @@ real(dp) :: rmet(3,3)
 
 !write(std_out,*) 'mover 07'
 !###########################################################
-!### 07. Compute xcart and fill the history of the first SCFCV
+
 
 !Compute xcart from xred, and rprimd
  call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
@@ -510,7 +529,6 @@ real(dp) :: rmet(3,3)
 
      call symmetrize_xred(scfcv_args%indsym,ab_mover%natom,&
 &     scfcv_args%dtset%nsym,scfcv_args%dtset%symrel,scfcv_args%dtset%tnons,xred)
-
      do kk=1,ab_mover%natom
        do jj=1,3
          if (xred(jj,kk)/=xred_tmp(jj,kk)) change=.TRUE.
@@ -529,24 +547,25 @@ real(dp) :: rmet(3,3)
        end do
 
        xred_tmp(:,:)=xred(:,:)
+
      end if
 
 !    write(std_out,*) 'mover 12'
 !    ###########################################################
 !    ### 12. => Call to SCFCV routine and fill history with forces
      write(message,'(a,3a,33a,44a)')&
-&     ch10,('-',kk=1,3),&
-&     'SELF-CONSISTENT-FIELD CONVERGENCE',('-',kk=1,44)
+&      ch10,('-',kk=1,3),&
+&      'SELF-CONSISTENT-FIELD CONVERGENCE',('-',kk=1,44)
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
 
      if(hist_prev%mxhist>0.and.ab_mover%restartxf==-1.and.hist_prev%ihist<=hist_prev%mxhist)then
-
+       
        call abihist_compare(hist_prev,hist,ab_mover%natom,similar,tolerance)
        hist_prev%ihist=hist_prev%ihist+1
-
+       
      else
-
+         
        scfcv_args%ndtpawuj=0
        iapp=itime
        if(icycle>1.and.icycle/=ncycle) iapp=-1
@@ -556,19 +575,19 @@ real(dp) :: rmet(3,3)
 #if defined HAVE_LOTF
        if (ab_mover%ionmov/=23 .or.(lotf_extrapolation(itime).and.(icycle/=1.or.itime==1)))then
 #endif
-         !call scfcv_new2(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+       !call scfcv_new2(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
          !WVL - reformat the wavefunctions in the case of xred != xred_old
          if (scfcv_args%dtset%usewvl == 1 .and. maxval(xred_old - xred) > zero) then
-        !  WVL - Before running scfcv, on non-first geometry step iterations,
-        !  we need to reformat the wavefunctions, taking into acount the new
-        !  coordinates.
-        !  We prepare to change rhog (to be removed) and rhor.
+         !  WVL - Before running scfcv, on non-first geometry step iterations,
+         !  we need to reformat the wavefunctions, taking into acount the new
+         !  coordinates.
+         !  We prepare to change rhog (to be removed) and rhor.
            ABI_DEALLOCATE(rhog)
            ABI_DEALLOCATE(rhor)
            
            call wvl_wfsinp_reformat(scfcv_args%dtset, scfcv_args%mpi_enreg,&
-&           scfcv_args%psps, rprimd, scfcv_args%wvl, xred, xred_old)
+&          scfcv_args%psps, rprimd, scfcv_args%wvl, xred, xred_old)
            scfcv_args%nfftf = scfcv_args%dtset%nfft
            
            ABI_ALLOCATE(rhog,(2, scfcv_args%dtset%nfft))
@@ -576,17 +595,27 @@ real(dp) :: rmet(3,3)
            call wvl_mkrho(scfcv_args%dtset, scfcv_args%irrzon, scfcv_args%mpi_enreg,&
 &           scfcv_args%phnons, rhor,scfcv_args%wvl%wfs,scfcv_args%wvl%den)
          end if
-         call dtfil_init_time(dtfil,iapp)
-         call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+         if (need_scfcv_cycle) then
 
-         if (conv_retcode == -1) then
-           message = "Scf cycle returned conv_retcode == -1 (timelimit is approaching), this should not happen inside mover"
-           MSG_WARNING(message)
+           call dtfil_init_time(dtfil,iapp)
+           call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+             
+           if (conv_retcode == -1) then
+             message = "Scf cycle returned conv_retcode == -1 (timelimit is approaching), this should not happen inside mover"
+             MSG_WARNING(message)
+           end if
+!        For monte carlo don't need ton recompute energy here
+!        every is done in pred_montecarlo
+         else if(ab_mover%ionmov /= 31) then
+           call effective_potential_getEnergy(effective_potential,scfcv_args%results_gs%etotal,&
+&                                          ab_mover%natom,rprimd,xcart,comm)
+           call effective_potential_getForces(effective_potential,scfcv_args%results_gs%fcart,&
+&                                         scfcv_args%results_gs%fred,ab_mover%natom,rprimd,xcart,comm)
          end if
-
 #if defined HAVE_LOTF
        end if
 #endif
+
 !      ANOMALOUS SITUATION
 !      This is the only case where rprimd could change inside scfcv
 !      It generates an weird condition, we start with a certain
@@ -605,7 +634,7 @@ real(dp) :: rmet(3,3)
          hist%histA(:,hist%ihist)=acell(:)
          hist%histR(:,:,hist%ihist)=rprimd(:,:)
        end if
-
+         
 !      ANOMALOUS SITUATIONS
 !      * In ionmov 4 & 5 xred could change inside SCFCV
 !      So we need to take the values from the output
@@ -616,26 +645,26 @@ real(dp) :: rmet(3,3)
 !      store in the history
 
        if (ab_mover%ionmov<10)then
-
          change=.FALSE.
-
+         
          do kk=1,ab_mover%natom
            do jj=1,3
              if (xred(jj,kk)/=xred_tmp(jj,kk)) change=.TRUE.
            end do
          end do
 
+         
          if (change)then
            call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
            hist%histXF(:,:,1,hist%ihist)=xcart(:,:)
            hist%histXF(:,:,2,hist%ihist)=xred(:,:)
            write(std_out,*) 'WARNING: ATOMIC COORDINATES WERE SYMMETRIZED AFTER SCFCV'
            write(std_out,*) 'DIFFERENCES:'
-
+           
            do kk=1,ab_mover%natom
              write(std_out,*) xred(:,kk)-xred_tmp(:,kk)
            end do
-
+           
          end if !if (change)
 
 !        call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
@@ -643,7 +672,7 @@ real(dp) :: rmet(3,3)
 !        hist%histXF(:,:,2,hist%ihist)=xred(:,:)
        end if
 
-!      Fill velocities and ionic kinetic energy
+!        Fill velocities and ionic kinetic energy
        call vel2hist(ab_mover%amass,hist,ab_mover%natom,vel)
        hist%histE(hist%ihist)       =scfcv_args%results_gs%etotal
        hist%histEnt(hist%ihist)     =scfcv_args%results_gs%energies%entropy
@@ -656,7 +685,7 @@ real(dp) :: rmet(3,3)
 !      ! Test of convertion fcart and fred
 
        call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
+       
        call fred2fcart(favg2,fcart2,scfcv_args%results_gs%fred,gprimd,ab_mover%jellslab,ab_mover%natom)
        call fcart2fred(scfcv_args%results_gs%fcart,fred2,rprimd,ab_mover%natom)
 
@@ -840,8 +869,11 @@ real(dp) :: rmet(3,3)
        case (23)
          call pred_lotf(ab_mover,hist,itime,icycle,DEBUG,iexit)
 #endif
+       case (31)         
+         call monte_carlo_step(ab_mover,effective_potential,hist,itime,ntime,DEBUG,iexit)
+         write(std_out,*) "Developpement Monte carlo"
        case default
-         write(message,"(a,i0)")"Wrong value of ionmov: ",ab_mover%ionmov
+         write(message,"(a,i0)") "Wrong value of ionmov: ",ab_mover%ionmov
          MSG_ERROR(message)
        end select
 
@@ -883,7 +915,6 @@ real(dp) :: rmet(3,3)
          end if
        end if
      end if
-
 
 !    Write MOLDYN netcdf and POSABIN files (done every dtset%nctime time step)
      if(ab_mover%ionmov/=23 .or. icycle==1)then
@@ -930,8 +961,14 @@ real(dp) :: rmet(3,3)
 !    write(std_out,*) 'ACELL'
 !    write(std_out,*) acell(:)
 !    end if
+     write(777,*) "tata",itime,icycle
+     write(777,*) xred
+     write(777,*) xred_tmp
 
      call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,DEBUG)
+     write(777,*) "tata",itime,icycle
+     write(777,*) xred
+     write(777,*) xred_tmp
 
      if(ab_mover%optcell/=0)then
 
@@ -1055,7 +1092,6 @@ real(dp) :: rmet(3,3)
 !###     computed values (not the last predicted)
 
  call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,DEBUG)
-
  vel(:,:)=hist%histV(:,:,hist%ihist)
 
  if (DEBUG .and. ab_mover%ionmov==1)then

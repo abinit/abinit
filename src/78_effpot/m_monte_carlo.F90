@@ -234,8 +234,6 @@ end subroutine monte_carlo_run
 
 subroutine monte_carlo_step(ab_mover,eff_pot,hist,itime,ntime,zDEBUG,iexit)
 
- use m_profiling_abi
- use defs_basis
  use m_abimover
  use m_abihist
  use m_effective_potential
@@ -264,15 +262,14 @@ subroutine monte_carlo_step(ab_mover,eff_pot,hist,itime,ntime,zDEBUG,iexit)
  real(dp) ::  acc,delta,ucvol
  real(dp),parameter :: v2tol=tol8
  real(dp) :: de,etotal
- character(len=5000) :: message
 !arrays
  real(dp),allocatable,save :: displacement(:,:)
 
  real(dp) :: acell(3),rprim(3,3),rprimd(3,3)
  real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3),fcart(3,ab_mover%natom)
  real(dp) :: fred(3,ab_mover%natom)
- real(dp) :: xcart(3,ab_mover%natom),xcart_next(3,ab_mover%natom)
- real(dp) :: xred(3,ab_mover%natom),xred_next(3,ab_mover%natom)
+ real(dp) :: xcart(3,ab_mover%natom)
+ real(dp) :: xred(3,ab_mover%natom)
  real(dp) :: vel(3,ab_mover%natom)
  real(dp) :: strten(6)
 
@@ -296,6 +293,7 @@ subroutine monte_carlo_step(ab_mover,eff_pot,hist,itime,ntime,zDEBUG,iexit)
 &   'Debugging and Verbose for monte_carlo_step',('-',kk=1,37)
    write(std_out,*) 'ionmov: ',12
    write(std_out,*) 'itime:  ',itime
+   write(std_out,*) 'ntime:  ',ntime
  end if
 
 !write(std_out,*) 'monte carlo 02'

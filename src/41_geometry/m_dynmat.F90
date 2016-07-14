@@ -61,6 +61,7 @@ module m_dynmat
  public :: wings3               ! Suppress the wings of the cartesian 2DTE for which the diagonal element is not known
  public :: asrif9               ! Imposes the Acoustic Sum Rule to Interatomic Forces
  public :: make_bigbox          ! Generates a Big Box of R points for the Fourier Transforms the dynamical matrix
+ public :: bigbx9               ! Helper functions that faciliates the generation  of a Big Box containing
  public :: canat9               ! From reduced to canonical coordinates
  public :: canct9               ! Convert from canonical coordinates to cartesian coordinates
  public :: chkrp9               ! Check if the rprim used for the definition of the unit cell (in the
@@ -2391,6 +2392,7 @@ end subroutine asrif9
 !! rprim(3,3)= Normalized coordinates in real space  !!! IS THIS CORRECT?
 !!
 !! OUTPUT
+!! cell= (nrpt,3) Give the index of the the cell and irpt 
 !! nprt= Number of R points in the Big Box
 !! rpt(3,nrpt)= Canonical coordinates of the R points in the unit cell
 !!  These coordinates are normalized (=> * acell(3)!!)
@@ -2404,7 +2406,7 @@ end subroutine asrif9
 !!
 !! SOURCE
 
-subroutine make_bigbox(brav,ngqpt,nqshft,rprim,nrpt,rpt)
+subroutine make_bigbox(brav,cell,ngqpt,nqshft,rprim,nrpt,rpt)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2423,25 +2425,28 @@ subroutine make_bigbox(brav,ngqpt,nqshft,rprim,nrpt,rpt)
  integer,intent(in) :: ngqpt(3)
  real(dp),intent(in) :: rprim(3,3)
  real(dp),allocatable,intent(out) :: rpt(:,:)
+ integer,allocatable,intent(out) :: cell(:,:)
 
 !Local variables -------------------------
 !scalars
  integer :: choice,mrpt
 !arrays
  real(dp) :: dummy_rpt(3,1)
+ integer:: dummy_cell(1,3)
 
 ! *********************************************************************
 
  ! Compute the number of points (cells) in real space
  choice=0
- call bigbx9(brav,choice,1,ngqpt,nqshft,mrpt,rprim,dummy_rpt)
+ call bigbx9(brav,dummy_cell,choice,1,ngqpt,nqshft,mrpt,rprim,dummy_rpt)
 
  ! Now we can allocate and calculate the points and the weights.
  nrpt = mrpt
  ABI_ALLOCATE(rpt,(3,nrpt))
+ ABI_ALLOCATE(cell,(nrpt,3))
 
  choice=1
- call bigbx9(brav,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
+ call bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
 
 end subroutine make_bigbox
 !!***
@@ -2470,6 +2475,7 @@ end subroutine make_bigbox
 !! rprim(3,3)= Normalized coordinates in real space  !!! IS THIS CORRECT?
 !!
 !! OUTPUT
+!! cell= (nrpt,3) Give the index of the the cell and irpt 
 !! nprt= Number of R points in the Big Box
 !! rpt(3,mrpt)= Canonical coordinates of the R points in the unit cell
 !!  These coordinates are normalized (=> * acell(3)!!)
@@ -2482,7 +2488,7 @@ end subroutine make_bigbox
 !!
 !! SOURCE
 
-subroutine bigbx9(brav,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
+subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2501,6 +2507,7 @@ subroutine bigbx9(brav,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
  integer,intent(in) :: ngqpt(3)
  real(dp),intent(in) :: rprim(3,3)
  real(dp),intent(out) :: rpt(3,mrpt)
+ integer,intent(out) :: cell(mrpt,3)
 
 !Local variables -------------------------
 !In some cases, the atoms coordinates are not packed in the
@@ -2535,6 +2542,7 @@ subroutine bigbx9(brav,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
            rpt(1,irpt)=r1*rprim(1,1)+r2*rprim(1,2)+r3*rprim(1,3)
            rpt(2,irpt)=r1*rprim(2,1)+r2*rprim(2,2)+r3*rprim(2,3)
            rpt(3,irpt)=r1*rprim(3,1)+r2*rprim(3,2)+r3*rprim(3,3)
+           cell(irpt,1)=r1;cell(irpt,2)=r2;cell(irpt,3)=r3
          end do
        end do
      end do
@@ -2568,6 +2576,9 @@ subroutine bigbx9(brav,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
            rpt(1,irpt)=r1+0.5
            rpt(2,irpt)=r2+0.5
            rpt(3,irpt)=r3
+!TEST_AM
+!           cell(irpt-3,1)=r1;cell(irpt-3,2)=r2;cell(irpt-3,3)=r3
+           cell(irpt,1)=r1;cell(irpt,2)=r2;cell(irpt,3)=r3
          end do
        end do
      end do
@@ -2595,6 +2606,9 @@ subroutine bigbx9(brav,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
            rpt(1,irpt)=r1+0.5
            rpt(2,irpt)=r2+0.5
            rpt(3,irpt)=r3+0.5
+!TEST_AM
+!           cell(irpt-1,1)=r1;cell(irpt-1,2)=r2;cell(irpt-1,3)=r3
+           cell(irpt,1)=r1;cell(irpt,2)=r2;cell(irpt,3)=r3
          end do
        end do
      end do
@@ -2619,6 +2633,7 @@ subroutine bigbx9(brav,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
            rpt(1,irpt)=r1*rprim(1,1)+r2*rprim(1,2)+r3*rprim(1,3)
            rpt(2,irpt)=r1*rprim(2,1)+r2*rprim(2,2)+r3*rprim(2,3)
            rpt(3,irpt)=r1*rprim(3,1)+r2*rprim(3,2)+r3*rprim(3,3)
+           cell(irpt,1)=r1;cell(irpt,2)=r2;cell(irpt,3)=r3
          end do
        end do
      end do
@@ -4748,7 +4763,7 @@ end subroutine nanal9
 !! d2cart(2,3,mpert,3,mpert)=dynamical matrix obtained for the wavevector qpt (normalized using qphnrm)
 !!
 !! PARENTS
-!!      anaddb,m_ifc,m_phonons
+!!      anaddb,m_effective_potential,m_ifc,m_phonons
 !!
 !! CHILDREN
 !!

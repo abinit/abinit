@@ -65,7 +65,7 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
 
 !Local variables-------------------------------
 !scalar
- integer :: chneut,iblok,idir1,idir2,ia,ii,jj,ipert1,iphl1
+ integer :: chneut,iblok,idir1,idir2,ii,ipert1,iphl1
  integer :: ipert2,ivarA,ivarB,msize,mpert,natom,nblok,rftyp,selectz
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
