@@ -1,0 +1,21 @@
+!!****d* ABINIT/78_effpot
+!! NAME
+!! 78_effpot
+!!
+!! DESCRIPTION
+!! This directory contains routines used to treat the effective potential within EPIGENE,
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2015 ABINIT group (MG)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! ddb_to_effective_potential.F90
+!! strain_phonon_coupling.F90
+!! effpot2xml.F90
+!! init10.F90
+!!
+!!***
