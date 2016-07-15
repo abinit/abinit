@@ -466,7 +466,7 @@ end subroutine xml_getdims
 !Open the atomicdata XML file for reading
 #if HAVE_LIBXML
 
-  write(message,'(a,a,a,a)')' Reading the file ',trim(filename),&
+  write(message,'(a,a,a,a)')'-Reading the file ',trim(filename),&
  & ' with LibXML library'
   
   call wrtout(ab_out,message,'COLL')
@@ -497,7 +497,7 @@ end subroutine xml_getdims
 #else
 
 !Read by hand
- write(message,'(a,a,a,a)')' Reading the file ',trim(filename),&
+ write(message,'(a,a,a,a)')'-Reading the file ',trim(filename),&
 & ' with Fortran'
 
  call wrtout(ab_out,message,'COLL')

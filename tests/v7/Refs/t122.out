@@ -1,5 +1,5 @@
 
-.Version 8.1.2 of EPIGENE 
+.Version 8.1.4 of EPIGENE 
 .(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
 
 .Copyright (C) 1998-2016 ABINIT group . 
@@ -14,14 +14,14 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Tue 12 Jul 2016.
-- ( at 15h54 )
+.Starting date : Fri 15 Jul 2016.
+- ( at 14h55 )
   
 
 ================================================================================
 
  Read the information in the reference structure in 
-/home/alex/Desktop/dev/abinit/8.1.2/build/tests/Test_suite/v7_t120-t121-t122-t123/t121.ddb.out
+/home/alex/Desktop/dev/abinit/abinit_git_dev/build/tests/Test_suite/v7_t120-t121-t122-t123/t121.ddb.out
  to initialize the epigene input
 
 ================================================================================
@@ -30,14 +30,14 @@
 
  Flags :
      ifcflag         1
-   ifcsuperc         0
+   ifcsuperc         1
    prt_effpo        -1
  Miscellaneous information :
          asr         2
  Interatomic Force Constants Inputs :
       dipdip         1
       ifcana         0
-      ifcout       200
+      ifcout     20000
       natifc         4
        atifc         1   2   3   4
  Description of grid 1 :
@@ -1315,6 +1315,17 @@
   4  y    -0.0000004   0.0000003   0.0000001   0.5056548   0.0000000   1.6549313
   4  z     0.3528841   0.3528840  -0.9643323   0.0000002  -0.0000003   0.0000008
 
+================================================================================
+ Generation of new ifc
+
+ ifcsupercell is set to one or two, the dipole-dipole interation is recompute.
+
+ New bound for ifc (long+short):
+
+ x=[ -1  1], y=[ -1  1] and z=[ -1  1]
+
+ Computation of new dipole-dipole interaction.
+
  Impose acoustic sum rule on short range
 
  Impose acoustic sum rule on long range
@@ -1328,10 +1339,10 @@
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.4
+- Proc.   0 individual time (sec): cpu=          1.8  wall=          1.8
 
 ================================================================================
 
-+Total cpu time      0.432  and wall time      0.431 sec
++Total cpu time      1.810  and wall time      1.809 sec
 
  epigene : the run completed succesfully.

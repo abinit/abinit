@@ -1,5 +1,5 @@
 
-.Version 8.1.2 of EPIGENE 
+.Version 8.1.4 of EPIGENE 
 .(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
 
 .Copyright (C) 1998-2016 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Tue 12 Jul 2016.
-- ( at 16h13 )
+.Starting date : Fri 15 Jul 2016.
+- ( at 15h11 )
   
 
 ================================================================================
@@ -54,13 +54,13 @@ system.xml
 ================================================================================
 
  Opening the file system.xml
- Reading the file system.xml with Fortran
+-Reading the file system.xml with LibXML library
 
  This effective potential contains :
   - Reference energy:        -17.1451766220
   - Number of types of atoms:    2
   - Number of atoms:     4
-  - Number of cells:     9
+  - Number of cells:    27
   - Number of qpoints:    8
   - Primitive vectors:
     6.528935    3.769482    0.000000
@@ -125,10 +125,10 @@ system.xml
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
 
 ================================================================================
 
-+Total cpu time      0.105  and wall time      0.106 sec
++Total cpu time      0.017  and wall time      0.017 sec
 
  epigene : the run completed succesfully.

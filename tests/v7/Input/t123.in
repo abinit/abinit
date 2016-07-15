@@ -11,7 +11,7 @@ prt_effpot = 3
 #%% input_xml = system.xml
 #%% [files]
 #%% files_to_test = 
-#%%   t123.out, tolnlines = 2, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   t123.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
