@@ -201,8 +201,9 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
 !Dummy arguments for subroutine 'intagm' to parse input file
 !Set routine version number here:
 !scalars
- integer :: ii,jdtset,marr,natom,tread
+ integer :: ii,position,jdtset,marr,natom,tread
  character(len=500) :: message
+ character(len=fnlen) :: name_qpoint 
  character(len=fnlen) :: key_value
 !arrays
  integer,allocatable :: intarr(:)
@@ -326,21 +327,11 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
  
 !nline+1 dimension
  ABI_ALLOCATE(band2eps_dtset%qpoint_name,(band2eps_dtset%nlines+1))
- band2eps_dtset%qpoint_name(:) = ""
-  if(band2eps_dtset%nlines+1 > marr)then
-      marr = band2eps_dtset%nlines+1
-      ABI_DEALLOCATE(intarr)
-      ABI_DEALLOCATE(dprarr)
-      ABI_ALLOCATE(intarr,(marr))
-      ABI_ALLOCATE(dprarr,(marr))
-    end if
-    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"qpoint_name",tread,'KEY',&
- &              key_value=key_value)
-    if(tread==1) band2eps_dtset%qpoint_name(1) = key_value
-
-!TEST_AM
-    band2eps_dtset%qpoint_name(:) = "gamma"
-!TEST_AM
+ band2eps_dtset%qpoint_name(:) = ""    
+ position = index(string(1:lenstr),trim("QPOINT_NAME")) + 11
+ name_qpoint = trim(string(position:(position + &
+&          len(band2eps_dtset%qpoint_name(1))*band2eps_dtset%nlines+1)))
+ read(name_qpoint,*) (band2eps_dtset%qpoint_name(ii),ii=1,band2eps_dtset%nlines+1)
 
 end subroutine invars11
 !!***
@@ -416,19 +407,6 @@ subroutine outvars_band2eps (band2eps_dtset,nunit)
    write(nunit,'(3x,a9,8i10)')' nqline',(band2eps_dtset%nqline(ii),ii=1,band2eps_dtset%nlines)
    write(nunit,'(3x,a9,8a)')'    point',(band2eps_dtset%qpoint_name(ii),ii=1,band2eps_dtset%nlines+1)
  end if
-
-
- ! print*,"natom",inp%natom
- ! print*,"cunit",inp%cunit
- ! print*,"nlines",inp%nlines
- ! print*,"min",inp%min 
- ! print*,"mac",inp%max
- ! print*,"ntics",inp%ngrad
- ! print*,"nqlines",inp%nqline
- ! print*,"red",inp%red
- ! print*,"blue",inp%blue
- ! print*,"green",inp%green
- ! print*,"name",inp%qpoint_name
 
  write(nunit,'(a,80a,a)') ch10,('=',ii=1,80),ch10
 
