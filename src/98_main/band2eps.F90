@@ -49,8 +49,9 @@ program band2eps
  use m_effective_potential_file
  use m_libxml
 
+
  use m_io_tools,       only : open_file
- use m_fstrings,       only : int2char4
+ use m_fstrings,       only : int2char4,tolower
  use m_time ,          only : asctime
  use m_band2eps_dataset
 
@@ -58,6 +59,7 @@ program band2eps
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'band2eps'
+ use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_42_parser
 !End of the abilint section
@@ -283,7 +285,7 @@ program band2eps
 !****************************************************************
 !Draw the box containing the plot
  write(18,'(a)') '%****Big Box****'
- write(18,'(a)') '16 slw'
+ write(18,'(a)') '12 slw'
  write(18,'(a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ', EmaxN,&
 & ' m ', kmaxN,' ', EmaxN, ' l ', &
 & kmaxN,' ', EminN, ' l ', kminN,' ', EminN, ' l'
@@ -375,11 +377,11 @@ program band2eps
    posk=posk+lastPos
    lastPos=posk
 
-   if(inp%qpoint_name(ii+1)=='gamma') then             !GAMMA
+   if(tolower(inp%qpoint_name(ii+1))=='gamma') then             !GAMMA
      write(18,'(a)') '/Symbol ff 270.00 scf sf'
      write(18,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
      write(18,'(a)') 'gs 1 -1 sc (G) col0 sh gr'
-   elseif(inp%qpoint_name(ii+1)=='lambda') then              !LAMBDA
+   elseif(tolower(inp%qpoint_name(ii+1))=='lambda') then              !LAMBDA
      write(18,'(a)') '/Symbol ff 270.00 scf sf'
      write(18,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
      write(18,'(a)') 'gs 1 -1 sc (L) col0 sh gr'
@@ -406,11 +408,8 @@ program band2eps
      if(iqpt==1.and.jj==1) then
        read(19,*) (phfrqqm1(ii),ii=1,3*inp%natom)
      end if
-
-     if(.not.(jj==inp%nlines.and.iqpt==inp%nqline(jj))) then
-       read(19,*) (phfrq(ii),ii=1,3*inp%natom)
-     end if
-     
+     read(19,*) (phfrq(ii),ii=1,3*inp%natom)
+       
      do imode=1,3*inp%natom
 
        if(filnam(4)/='no') then       !calculate the color else in black and white
@@ -437,7 +436,6 @@ program band2eps
 !          Blue
            color(3,imode)=color(3,imode)+displ(ii,imode)*colorAtom(3,ii)
          end do
-
        end if
 
        pos=int(((EminN-EmaxN)*phfrqqm1(imode) &
