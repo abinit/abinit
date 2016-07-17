@@ -105,19 +105,17 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
  close (unit_ddk)
 
  bantot1 = 2*nband_in**2*nkpt_in*nsppol_in
- ABI_ALLOCATE(eigen11,(bantot1))
- ABI_ALLOCATE(eigen12,(bantot1))
- ABI_ALLOCATE(eigen13,(bantot1))
+print *, "bantot1 ", bantot1
 
- call inpgkk(bantot1,eigen11,filnam1,hdr1)
+ call inpgkk(eigen11,filnam1,hdr1)
  call hdr_free(hdr1)
 
- call inpgkk(bantot1,eigen12,filnam2,hdr1)
+ call inpgkk(eigen12,filnam2,hdr1)
  call hdr_free(hdr1)
 
 !we use the hdr1 from the last call - should add some consistency
 !testing here, we are trusting users not to mix different ddk files...
- call inpgkk(bantot1,eigen13,filnam3,hdr1)
+ call inpgkk(eigen13,filnam3,hdr1)
 
 !Extract info from the header
  if(hdr1%nsppol /= nsppol_in) then

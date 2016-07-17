@@ -798,6 +798,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%eph_fsmear = 0.01
    dtsets(idtset)%eph_fsewin = 0.04
    dtsets(idtset)%eph_ngqpt_fine = [0, 0, 0]
+   dtsets(idtset)%eph_transport  = 0
 
    dtsets(idtset)%ph_wstep = 0.1/Ha_meV
    dtsets(idtset)%ph_intmeth = 2

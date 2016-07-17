@@ -81,6 +81,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_crystal
  use m_crystal_io
  use m_ebands
+ use m_ddk
  use m_ddb
  use m_dvdb
  use m_ifc
@@ -141,12 +142,15 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: cpu,wall,gflops
  character(len=500) :: eph_task,msg
  character(len=fnlen) :: wfk0_path,ddb_path,dvdb_path,path
+ character(len=fnlen) :: ddk_path(3)
+ character(len=10) :: strddk 
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: cryst,cryst_ddb
  type(ebands_t) :: ebands
  type(edos_t) :: edos
  type(ddb_type) :: ddb
  type(dvdb_t) :: dvdb
+ type(ddk_t) :: ddk
  type(ifc_type) :: ifc
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
@@ -195,10 +199,22 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  wfk0_path = dtfil%fnamewffk
  ddb_path = dtfil%filddbsin
  dvdb_path = dtfil%filddbsin; ii=len_trim(dvdb_path); dvdb_path(ii-2:ii+1) = "DVDB"
-
+ ddk_path(1) = dtfil%fnamewffddk 
+ write (strddk,'(I10)') 3*dtset%natom+3
+ ddk_path(3) = trim(ddk_path(1)) // trim(adjustl(strddk))
+ write (strddk,'(I10)') 3*dtset%natom+2
+ ddk_path(2) = trim(ddk_path(1)) // trim(adjustl(strddk))
+ write (strddk,'(I10)') 3*dtset%natom+1
+ ddk_path(1) = trim(ddk_path(1)) // trim(adjustl(strddk))
+ 
  if (my_rank == master) then
    if (.not. file_exists(ddb_path)) MSG_ERROR(sjoin("Cannot find DDB file:", ddb_path))
    if (.not. file_exists(dvdb_path)) MSG_ERROR(sjoin("Cannot find DVDB file:", dvdb_path))
+   if (dtset%eph_transport > 0) then
+     if (.not. file_exists(ddk_path(1))) MSG_ERROR(sjoin("Cannot find x DDK file:", ddk_path(1)))
+     if (.not. file_exists(ddk_path(2))) MSG_ERROR(sjoin("Cannot find y DDK file:", ddk_path(2)))
+     if (.not. file_exists(ddk_path(3))) MSG_ERROR(sjoin("Cannot find z DDK file:", ddk_path(3)))
+   end if
    ! Accept WFK file in Fortran or netcdf format.
    if (.not. file_exists(wfk0_path)) then
      if (file_exists(nctk_ncify(wfk0_path))) then
@@ -211,8 +227,15 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
  call xmpi_bcast(wfk0_path,master,comm,ierr)
  call wrtout(ab_out, sjoin("- Reading GS states from WFK file:", wfk0_path) )
- call wrtout(ab_out, sjoin("- Reading DDB from file:",dvdb_path))
+ call wrtout(ab_out, sjoin("- Reading DDB from file:",ddb_path))
  call wrtout(ab_out, sjoin("- Reading DVDB from file:",dvdb_path))
+ if (dtset%eph_transport > 0) then
+   call wrtout(ab_out, sjoin("- Reading DDK x from file:",ddk_path(1)))
+   call wrtout(ab_out, sjoin("- Reading DDK y from file:",ddk_path(2)))
+   call wrtout(ab_out, sjoin("- Reading DDK z from file:",ddk_path(3)))
+   ! TODO: put this inside phgamma? - only check for file existence here.
+   call ddk_init(ddk, ddk_path, comm)
+ end if
 
  call cwtime(cpu,wall,gflops,"start")
 
@@ -256,6 +279,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  call ebands_update_occ(ebands, spinmagntarget)
  call ebands_print(ebands,header="Ground state energies",prtvol=dtset%prtvol)
+
  ABI_FREE(gs_eigen)
 
  call cwtime(cpu,wall,gflops,"stop")
@@ -385,12 +409,18 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,level40,&
  pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
 
+ ! ====================================================
+ ! === This is the real epc stuff once all is ready ===
+ ! ====================================================
  eph_task = "ph_linwid"
  if (eph_task == "ph_linwid") then
    ! Compute phonon linewidths in metals.
-   call eph_phgamma(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
-   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
+   call eph_phgamma(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
+&       pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
  end if
+! TODO: decide whether to make several driver functions. 
+!  before that, however, need to encapsulate most of the functionalities in eph_phgamma
+!  otherwise there will be tons of duplicated code
 
  !=====================
  !==== Free memory ====

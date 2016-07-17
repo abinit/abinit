@@ -5529,6 +5529,23 @@
     varname: eph_ngqpt_fine
     vartype: integer
 - !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 0
+    definition: 'Electron-PHonon: TRANSPORT flag'
+    dimensions: scalar
+    excludes: null
+    requires: null
+    section: vareph
+    text: |-
+        NB - this does not work yet.
+        This variable can be used to turn on the calculation of transport
+        quantities in the eph module of abinit. Value of 1 corresponds to
+        elastic LOVA as in the PRB by Savrasov and Savrasov 
+    varname: eph_transport
+    vartype: integer
+- !variable
     characteristics:
     - '[[DEVELOP]]'
     - '[[ENERGY]]'
