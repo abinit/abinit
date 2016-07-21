@@ -74,12 +74,12 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
  use m_pawcprj,     only : pawcprj_type
  use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type
+ use m_nonlop
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getgh2c'
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none

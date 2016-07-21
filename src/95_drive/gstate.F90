@@ -669,6 +669,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    wff1%unwff=dtfil%unwff1
    optorth=1   !if (psps%usepaw==1) optorth=0
    if(psps%usepaw==1 .and. dtfil%ireadwf==1)optorth=0
+   ! NEW LOBPCG : don't need to orthonormalize WF since it is done inside LOBPCG
+   if(dtset%wfoptalg == 14 .and. dtset%useric == 666999  ) optorth = 0
    call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen,&
 &   dtset%exchn2n3d,formeig,gmet,hdr,dtfil%ireadwf,dtset%istwfk,kg,&
 &   dtset%kptns,dtset%localrdwf,dtset%mband,mcg,dtset%mkmem,mpi_enreg,&

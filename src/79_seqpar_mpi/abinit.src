@@ -21,6 +21,7 @@ sources = [
  "dfptnl_mv.F90",
  "inwffil.F90",
  "lobpcgwf.F90",
+ "m_lobpcgwf.F90",
  "m_lobpcg.F90",
  "tddft.F90",
  "vtowfk.F90",

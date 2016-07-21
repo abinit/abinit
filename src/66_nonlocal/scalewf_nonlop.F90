@@ -97,31 +97,31 @@ subroutine scalewf_nonlop(istwf_k,mpi_enreg,npw,option,vect)
    if(istwf_k==2)then
      if (mpi_enreg%me_g0==1) then
        vect(2,1)=zero
-!$OMP PARALLEL DO 
+!!$OMP PARALLEL DO 
        do ipw=2,npw
          vect(1,ipw)=scale*vect(1,ipw)
          vect(2,ipw)=scale*vect(2,ipw)
        end do
-!$OMP END PARALLEL DO 
+!!$OMP END PARALLEL DO 
      else
-!$OMP PARALLEL DO 
+!!$OMP PARALLEL DO 
        do ipw=1,npw
          vect(1,ipw)=scale*vect(1,ipw)
          vect(2,ipw)=scale*vect(2,ipw)
        end do
-!$OMP END PARALLEL DO 
+!!$OMP END PARALLEL DO 
      end if
    end if
 
 !  Other storage modes, for k points with time-reversal symmetry.
 !  All components should be scaled.
    if(istwf_k>2)then
-!$OMP PARALLEL DO 
+!!$OMP PARALLEL DO 
      do ipw=1,npw
        vect(1,ipw)=scale*vect(1,ipw)
        vect(2,ipw)=scale*vect(2,ipw)
      end do
-!$OMP END PARALLEL DO 
+!!$OMP END PARALLEL DO 
    end if
 
  end if ! istwf_k/=1

@@ -74,7 +74,7 @@
 !scalars
  integer :: ilmn,ilmn1,iln,iln1,isel,isel1,itypat,jlmn,jlmn1,jln,jln1
  integer :: klm,klm1,klmn,klmn1,ll,lm0
- integer :: lmin,lmin1,lmax,lmn2_size,mesh_size,meshsz,mm
+ integer :: lmin,lmax,lmn2_size,mesh_size,meshsz,mm
  real(dp) :: norm,r_for_intg,rg,rg1,ubare,uint,uint_tmp
  character(len=800) :: message
 !arrays
@@ -145,7 +145,7 @@
            klm1=pawtab%indklmn(1,klmn1);iln1=pawtab%indlmn(5,ilmn1);jln1=pawtab%indlmn(5,jlmn1)
            phiphj1(1:meshsz)=pawtab%phi(1:meshsz,iln1)*pawtab%phi(1:meshsz,jln1)
            uint_tmp=zero
-           if ((ll==lmin1)) then
+           if ((ll==lmin)) then
              ff(1)=zero
              ff(2:meshsz)=phiphj1(2:meshsz)*gg(2:meshsz)*two/pawrad%rad(2:meshsz)
              call simp_gen(uint_tmp,ff,pawrad,r_for_intg=r_for_intg)

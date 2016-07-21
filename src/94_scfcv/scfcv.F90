@@ -283,7 +283,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  real(dp), intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp), intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  type(macro_uj_type),intent(inout) :: dtpawuj(0:ndtpawuj)
- type(pawrhoij_type), intent(inout) :: pawrhoij(my_natom*psps%usepaw)
+ type(pawrhoij_type), target, intent(inout) :: pawrhoij(my_natom*psps%usepaw) !  Trick for ifort -check all add target for fake electronpositron pawrhoij_ep
  type(pawrad_type), intent(in) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type), intent(in) :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_dmft_type), intent(inout) :: paw_dmft
@@ -683,8 +683,19 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    end if
 
 !  Other variables for PAW
-   nullify(pawrhoij_ep);if(associated(electronpositron))pawrhoij_ep=>electronpositron%pawrhoij_ep
-   nullify(lmselect_ep);if(associated(electronpositron))lmselect_ep=>electronpositron%lmselect_ep
+! Trick intel -check all to avoid passing not associated pointer to subroutine
+   nullify(pawrhoij_ep)
+   if(associated(electronpositron)) then
+     pawrhoij_ep=>electronpositron%pawrhoij_ep
+   else
+     pawrhoij_ep=>pawrhoij
+   end if
+   nullify(lmselect_ep)
+   if(associated(electronpositron)) then 
+     lmselect_ep=>electronpositron%lmselect_ep
+   else
+     ABI_ALLOCATE(lmselect_ep,(0,0))
+   end if
  else
    ABI_ALLOCATE(dimcprj,(0))
    ABI_ALLOCATE(dimcprj_srt,(0))
@@ -2042,6 +2053,10 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      ABI_DATATYPE_DEALLOCATE(wvl%descr%paw%cprj)
 #endif
      call paw2wvl_ij(2,paw_ij,wvl%descr)
+   end if
+   ! Deallocated fake lmselect_ep for ifort -check all
+   if ( ipositron /= 0 .and. associated(lmselect_ep) .and. size(lmselect_ep) == 0 ) then
+     ABI_DEALLOCATE(lmselect_ep)
    end if
  end if
  ABI_DATATYPE_DEALLOCATE(pawfgrtab)

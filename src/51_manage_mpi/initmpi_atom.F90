@@ -81,7 +81,12 @@ subroutine initmpi_atom(dtset,mpi_enreg)
  end if
  nullify(mpi_enreg%my_atmtab)
 
- if (xmpi_paral==0) return
+ if (xmpi_paral==0) then 
+   mpi_enreg%nproc_atom=0
+   ABI_ALLOCATE(mpi_enreg%my_atmtab,(0))
+   return
+ end if
+
 
 !Check compatibility
  if (dtset%paral_atom>0) then

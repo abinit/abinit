@@ -33,6 +33,7 @@ sources = [
  "getgsc.F90",
  "m_bandfft_kpt.F90",
  "m_esymm.F90",
+ "multithreaded_getghc.F90",
  "prep_bandfft_tabs.F90",
  "prep_fourwf.F90",
  "prep_getghc.F90",

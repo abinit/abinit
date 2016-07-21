@@ -90,6 +90,7 @@
  use m_errors
 
  use m_pawcprj, only : pawcprj_type
+ use m_opernl_ylm, only : opernla_ylm
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -106,7 +107,7 @@
  integer,intent(in) :: choice,cpopt,idir,istwf_k,lmnmax
  integer,intent(in) :: mgfft,natom,npw_k,nspinor,ntypat,useylm
  real(dp) :: ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),kg_k(3,npw_k),nattyp(ntypat)
  integer,intent(in) :: ngfft(18),nloalg(3)

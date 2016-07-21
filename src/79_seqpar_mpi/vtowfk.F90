@@ -124,6 +124,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_put,pawcprj_copy
  use m_paw_dmft,    only : paw_dmft_type
  use gwls_hamiltonian, only : build_H
+ use m_nonlop
+ use m_lobpcgwf,    only : lobpcgwf2
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -133,7 +135,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  use interfaces_18_timing
  use interfaces_53_ffts
  use interfaces_53_spacepar
- use interfaces_66_nonlocal
  use interfaces_66_wfs
  use interfaces_67_common
  use interfaces_79_seqpar_mpi, except_this_one => vtowfk
@@ -178,13 +179,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  integer :: nband_k_cprj,nblockbd,ncpgr,ndat,nkpt_max,nnlout,ortalgo
  integer :: paw_opt,quit,signs,spaceComm,tim_nonlop,wfoptalg,wfopta10
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
- real(dp) :: ar,ar_im,eshift,lambda_k,occblock
+ real(dp) :: ar,ar_im,eshift,occblock
  real(dp) :: res,residk,weight
  character(len=500) :: message
  real(dp) :: dummy(2,1),nonlop_dum(1,1),tsec(2)
  real(dp),allocatable :: cwavef(:,:),cwavef1(:,:),cwavef_x(:,:),cwavef_y(:,:),cwavefb(:,:,:)
  real(dp),allocatable :: eig_save(:),enlout(:),evec(:,:),evec_loc(:,:),gsc(:,:)
- real(dp),allocatable :: lambda_loc(:),mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:)
+ real(dp),allocatable :: mat_loc(:,:),mat1(:,:,:),matvnl(:,:,:)
  real(dp),allocatable :: subham(:),subovl(:),subvnl(:),totvnl(:,:),wfraug(:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
@@ -224,12 +225,12 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end if
 
 !Parallelism over FFT and/or bands: define sizes and tabs
- if (mpi_enreg%paral_kgb==1) then
+ !if (mpi_enreg%paral_kgb==1) then
    nblockbd=nband_k/(mpi_enreg%nproc_band*mpi_enreg%bandpp)
- else
-   nblockbd=nband_k/mpi_enreg%nproc_fft
-   if (nband_k/=nblockbd*mpi_enreg%nproc_fft) nblockbd=nblockbd+1
- end if
+ !else
+   !nblockbd=nband_k/mpi_enreg%nproc_fft
+   !if (nband_k/=nblockbd*mpi_enreg%nproc_fft) nblockbd=nblockbd+1
+ !end if
  blocksize=nband_k/nblockbd
 
 !Save eshift
@@ -310,7 +311,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    resid_k(:)=zero
 
 !  Filter the WFs when modified kinetic energy is too large (see routine mkkin.f)
-!  !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(igs,iwavef)
+!  !!$OMP PARALLEL DO COLLAPSE(2) PRIVATE(igs,iwavef)
    do ispinor=1,my_nspinor
      do iband=1,nband_k
        igs=(ispinor-1)*npw_k
@@ -341,6 +342,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    ============ MINIMIZATION OF BANDS: LOBPCG ==============================
 !    =========================================================================
        if (wfopta10==4) then
+if ( dtset%useric /= 666999 ) then
          call lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 &         nband_k,nblockbd,npw_k,prtvol,resid_k,subham,totvnl)
 !        In case of FFT parallelism, exchange subspace arrays
@@ -354,6 +356,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            end if
          end if
          if (use_subovl==1) call xmpi_sum(subovl,spaceComm,ierr)
+else
+         call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,gs_hamk,gsc(:,igsc+1:),kinpw,mpi_enreg,&
+&                      nband_k,npw_k,my_nspinor,prtvol,resid_k,totvnl)
+end if
+!        In case of FFT parallelism, exchange subspace arrays
 
 !    =========================================================================
 !    ============ MINIMIZATION OF BANDS: CHEBYSHEV FILTERING =================
@@ -396,11 +403,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  ========== DIAGONALIZATION OF HAMILTONIAN IN WFs SUBSPACE ===============
 !  =========================================================================
 
-   if(.not. wfopta10 == 1) then
+   if( .not. wfopta10 == 1) then
      call timab(585,1,tsec) !"vtowfk(subdiago)"
+if ( dtset%useric /= 666999 .or. wfopta10 /= 4 ) then
      call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 &     mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
 &     subham,subovl,use_subovl,gs_hamk%usepaw,mpi_enreg%me_g0)
+end if
      call timab(585,2,tsec)
    end if
 
@@ -488,7 +497,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  if (gs_hamk%usepaw==1.and.iscf>0) then
    iorder_cprj=0
    nband_k_cprj=nband_k*(mband_cprj/dtset%mband)
-   bandpp_cprj=1;if (mpi_enreg%paral_kgb==1) bandpp_cprj=mpi_enreg%bandpp
+   bandpp_cprj=mpi_enreg%bandpp
    ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,my_nspinor*bandpp_cprj))
    ncpgr=0
    if((dtset%usefock==1).and.(cpopt==1)) ncpgr=cprj(1,1)%ncpgr
@@ -726,16 +735,14 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            call pawcprj_copy(cprj(:,1+(iblock-1)*my_nspinor*blocksize+ibg:iblock*my_nspinor*blocksize+ibg),cwaveprj)
          end if
          if (mpi_enreg%paral_kgb==1) then
-           ABI_ALLOCATE(lambda_loc,(blocksize))
            call timab(572,1,tsec) ! 'prep_nonlop%vtowfk'
-           lambda_loc(1:blocksize)=eig_k(1+(iblock-1)*blocksize:iblock*blocksize)
-           call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda_loc,blocksize,&
+           call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir, &
+&           eig_k(1+(iblock-1)*blocksize:iblock*blocksize),blocksize,&
 &           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef)
            call timab(572,2,tsec)
-           ABI_DEALLOCATE(lambda_loc)
          else
-           lambda_k=eig_k(iblock)
-           call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,(/lambda_k/),mpi_enreg,1,nnlout,&
+           call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,eig_k(1+(iblock-1)*blocksize:iblock*blocksize),&
+&           mpi_enreg,blocksize,nnlout,&
 &           paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
          end if
 

@@ -427,6 +427,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !       if (dtsets(idtset)%nphf>1) mpi_enregs(idtset)%paral_hf=1
 !     end if
    else
+     mpi_enregs(idtset)%bandpp = dtsets(idtset)%bandpp
 !    Additional setting in case of a Fock exchange of PBE0 calculation
      if (dtsets(idtset)%usefock==1) then 
        if (dtsets(idtset)%nphf>1) mpi_enregs(idtset)%paral_hf=1
@@ -638,7 +639,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      if(optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS) then
        paral_fft=1           ! parallelisation over FFT
        if (mpi_enregs(idtset)%nproc_cell>0) then
-         if(mpi_enregs(idtset)%paral_kgb == 1) then
+         !if(mpi_enregs(idtset)%paral_kgb == 1) then
 
            if((dtsets(idtset)%use_gpu_cuda==1).and.(mpi_enregs(idtset)%nproc_fft/=1))then
              write(message,'(3a,i0)') &
@@ -699,7 +700,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
                MSG_WARNING(message)
              end if
            end if
-         end if
+         !end if
        end if
        nproc_fft=mpi_enregs(idtset)%nproc_fft
        me_fft=mpi_enregs(idtset)%me_fft

@@ -127,7 +127,7 @@
  integer,intent(in) :: natom,ncprj,nkpt,nspinor,nsppol,ntypat,paral_kgb
  integer,intent(in) :: uncp,useylmgr
  real(dp),intent(in) :: ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),target,intent(in) :: psps
 !arrays
  integer,intent(in) :: istwfk(nkpt),nband(nkpt*nsppol)
