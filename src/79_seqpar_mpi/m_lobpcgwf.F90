@@ -1,0 +1,379 @@
+!{\src2tex{textfont=tt}}
+!!****f* ABINIT/lobpcgwf
+!! NAME
+!! lobpcgwf
+!!
+!! FUNCTION
+!! this routine updates the whole wave functions at a given k-point,
+!! using the lobpcg method
+!! for a given spin-polarization, from a fixed hamiltonian
+!! but might also simply compute eigenvectors and eigenvalues at this k point.
+!! it will also update the matrix elements of the hamiltonian.
+!!
+!! COPYRIGHT
+!! Copyright (C) 1998-2016 ABINIT group (FBottin,GZ,AR,MT,FDahm)
+!! this file is distributed under the terms of the
+!! gnu general public license, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! for the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! INPUTS
+!!  dtset <type(dataset_type)>=all input variales for this dataset
+!!  gs_hamk <type(gs_hamiltonian_type)>=all data for the hamiltonian at k
+!!  kinpw(npw)=(modified) kinetic energy for each plane wave (hartree)
+!!  mpi_enreg=informations about MPI parallelization
+!!  nband=number of bands at this k point for that spin polarization
+!!  npw=number of plane waves at this k point
+!!  prtvol=control print volume and debugging output
+!!
+!! OUTPUT
+!!  resid(nband)=residuals for each states
+!!  subham(nband_k*(nband_k+1))=the matrix elements of h
+!!  If gs_hamk%usepaw==0:
+!!    gsc(2,mgsc)=<g|s|c> matrix elements (s=overlap)
+!!    totvnl(nband_k*(1-gs_hamk%usepaw),nband_k*(1-gs_hamk%usepaw))=the matrix elements of vnl
+!!
+!! SIDE EFFECTS
+!!  cg(2,mcg)=updated wavefunctions
+!!
+!! PARENTS
+!!      vtowfk
+!!
+!! CHILDREN
+!!      abi_xcopy,abi_xgemm,abi_xheev,abi_xhegv,abi_xorthonormalize,abi_xtrsm
+!!      alloc_on_gpu,copy_from_gpu,copy_on_gpu,dealloc_on_gpu,getghc,gpu_xgemm
+!!      gpu_xorthonormalize,gpu_xtrsm,prep_getghc,setwfparameter,timab,wfcopy
+!!      wrtout,xmpi_sum,xprecon
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+module m_lobpcgwf
+ use defs_abitypes
+ use defs_basis
+ use m_profiling_abi
+ use m_lobpcg
+ use m_xmpi
+ use m_errors
+ use m_time
+ use m_xomp
+ use m_fstrings
+
+ use m_hamiltonian, only : gs_hamiltonian_type
+ use m_pawcprj,     only : pawcprj_type
+
+ use m_xg, only : xg_t, xg_init, xg_free, xg_finalize, xg_set, xgBlock_get, &
+    xgBlock_set, xgBlock_getSize, xgBlock_t, SPACE_C, SPACE_R, SPACE_CR, xgBlock_print, &
+    xgBlock_colwiseMul, xgBlock_map, xgBlock_reverseMap
+ use m_lobpcg2
+
+ private
+
+ integer, parameter :: l_tim_getghc=5
+ double precision, parameter :: inv_sqrt2 = 1/sqrt2
+ ! Use in getghc_gsc
+ integer,save  :: l_cpopt
+ integer,save  :: l_icplx
+ integer,save  :: l_istwf
+ integer,save  :: l_npw
+ integer,save  :: l_nspinor
+ logical,save  :: l_paw
+ integer,save  :: l_prtvol
+ integer,save  :: l_sij_opt
+ real(dp), allocatable,save :: l_gvnlc(:,:)
+ real(dp), allocatable,save ::  l_pcon(:)
+ type(mpi_type),pointer,save :: l_mpi_enreg
+ type(gs_hamiltonian_type),pointer,save :: l_gs_hamk
+
+ public :: lobpcgwf2
+  contains
+
+subroutine lobpcgwf2(cg,dtset,eig,gs_hamk,gsc,kinpw,mpi_enreg,&
+&                   nband,npw,nspinor,prtvol,resid,totvnl)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'lobpcgwf2'
+ use interfaces_18_timing
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in) :: nband,npw,prtvol,nspinor
+ type(gs_hamiltonian_type),target,intent(inout) :: gs_hamk
+ type(dataset_type),intent(in) :: dtset
+ type(mpi_type),target,intent(inout) :: mpi_enreg
+ real(dp),target, intent(inout) :: cg(2,nspinor*nband*npw),gsc(2,nspinor*nband*npw)
+ real(dp),intent(in) :: kinpw(npw)
+ real(dp),intent(out) :: resid(nband)
+ real(dp),intent(inout) :: totvnl((3-gs_hamk%istwf_k)*nband*(1-gs_hamk%usepaw),nband*(1-gs_hamk%usepaw))
+ real(dp),intent(  out) :: eig(nband)
+
+!Local variables-------------------------------
+
+ type(xgBlock_t) :: xgx0
+ type(xg_t) :: xgeigen
+ type(xg_t) :: xgresidu
+ type(xgBlock_t) :: xgghc
+ type(xgBlock_t) :: xggsc
+ !type(xgBlock_t) :: residBlock
+ type(lobpcg_t) :: lobpcg
+
+ integer :: space, blockdim,  nline
+ integer :: ipw
+ integer :: nthreads
+ real(dp), allocatable :: resid_tmp(:,:)
+ double precision :: tsec(2)
+ integer, parameter :: tim_lobpcgwf2 = 1650
+ double precision :: lobpcgMem(2)
+ double precision :: localmem
+ double precision :: cputime, walltime
+
+! *********************************************************************
+
+ ABI_UNUSED(totvnl)
+
+!###########################################################################
+!################ INITIALISATION  ##########################################
+!###########################################################################
+
+ call timab(tim_lobpcgwf2,1,tsec)
+ cputime = abi_cpu_time()
+ walltime = abi_wtime()
+
+ ! Set module variables 
+ l_paw = (gs_hamk%usepaw==1)
+ l_cpopt=-1;l_sij_opt=0;if (l_paw) l_sij_opt=1
+ l_istwf=gs_hamk%istwf_k
+ l_npw = npw
+ l_nspinor = nspinor
+ l_prtvol = prtvol
+ l_mpi_enreg => mpi_enreg
+ l_gs_hamk => gs_hamk
+
+!Variables
+ nline=dtset%nline
+ blockdim=l_mpi_enreg%nproc_band*l_mpi_enreg%bandpp
+
+!Depends on istwfk
+ if ( l_istwf == 2 ) then ! Real only
+   ! SPACE_CR mean that we have complex numbers but no re*im terms only re*re
+   ! and im*im so that a vector of complex is consider as a long vector of real
+   ! therefore the number of data is (2*npw*nspinor)*nband
+   ! This space is completely equivalent to SPACE_R but will correctly set and
+   ! get the array data into the xgBlock
+   space = SPACE_CR
+   l_icplx = 2
+   ! Scale cg
+   cg = cg * sqrt2
+   if(l_mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * inv_sqrt2
+ else ! complex
+   space = SPACE_C
+   l_icplx = 1
+ end if
+
+ ! Memory info
+ lobpcgMem = lobpcg_memInfo(nband,l_icplx*l_npw*l_nspinor,blockdim,space)
+ localMem = (l_npw+2*l_npw*l_nspinor*blockdim+2*nband)*kind(1.d0)
+ write(std_out,'(1x,A,F10.6,1x,A)') "Each MPI process calling lobpcg should need around ", &
+ (localMem+sum(lobpcgMem))/1e9, &
+ "GB of peak memory as follow :"
+ write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in lobpcgwf : ", &
+ (localMem)/1e9, "GB"
+ write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in m_lobpcg : ", &
+ (lobpcgMem(1))/1e9, "GB"
+ write(std_out,'(4x,A,F10.6,1x,A)') "Temporary memory in m_lobpcg : ", &
+ (lobpcgMem(2))/1e9, "GB"
+
+
+!For preconditionning
+ ABI_MALLOC(l_pcon,(1:npw))
+ l_pcon = (27+kinpw*(18+kinpw*(12+8*kinpw))) / (27+kinpw*(18+kinpw*(12+8*kinpw)) + 16*kinpw**4)
+ ! For ecutsm to produce infinite preconditionning
+ do ipw=1,l_npw
+   if(kinpw(ipw)>huge(0.0_dp)*1.d-11) then
+     l_pcon(ipw)=0.d0
+   end if
+ end do
+
+ ! For getghc_gsc for one block -> size blockdim
+ ABI_MALLOC(l_gvnlc,(2,l_npw*l_nspinor*blockdim))
+
+ ! Local variables for lobpcg
+ !call xg_init(xgx0,space,icplx*npw*nspinor,nband)
+ call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband)
+
+ ! Those are really real vectors
+ call xg_init(xgeigen,SPACE_R,nband,1)
+ !call xgBlock_map(xgeigen,eig,SPACE_R,nband,1)
+
+ call xg_init(xgresidu,SPACE_R,nband,1)
+ !call xgBlock_map(xgresidu,resid,SPACE_R,nband,1)
+
+
+ call lobpcg_init(lobpcg,nband, l_icplx*l_npw*l_nspinor, blockdim,dtset%tolwfr,nline,space, l_mpi_enreg%comm_bandspinorfft)
+
+ ! Set x0
+ !call xg_set(xgx0,cg,0,npw*nspinor)
+
+!###########################################################################
+!################    RUUUUUUUN    ##########################################
+!###########################################################################
+ 
+ ! Run lobpcg
+ call lobpcg_run(lobpcg,xgx0,getghc_gsc,precond,xgeigen%self,xgresidu%self)
+
+
+ ! Free working ghc and gvnl
+ ABI_FREE(l_gvnlc)
+
+ ! Free preconditionning since not needed anymore
+ ABI_FREE(l_pcon)
+
+ ! Get back cg and destroy working objects
+ !call xgBlock_get(xgx0%self ,cg (:,1:npw*nspinor*nband),0,npw*nspinor)
+ !call xg_free(xgx0)
+
+
+ if(l_istwf == 2) then
+   cg = cg * inv_sqrt2
+   if(l_mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * sqrt2
+ end if
+
+
+!###########################################################################
+!################    SORRY IT'S ALREADY FINISHED : )  ######################
+!################   COMPUTE LAST RESIDU AND TOTVNL    ######################
+!###########################################################################
+
+ ! Get eigenvalues and residu
+ ABI_MALLOC(resid_tmp,(2,nband))
+ call xgBlock_get(xgeigen%self,resid_tmp,0,nband)
+ call xg_free(xgeigen) ! Destroy eigen value we don't use them
+ eig(:) = resid_tmp(1,:)
+ call xgBlock_get(xgresidu%self,resid_tmp,0,nband)
+ call xg_free(xgresidu)
+ resid(:) = resid_tmp(1,:)
+ ABI_FREE(resid_tmp)
+
+ call lobpcg_getAX_BX(lobpcg,xgghc,xggsc)
+ call xgBlock_get(xggsc,gsc(:,1:npw*nspinor*nband),0,l_npw*l_nspinor)
+
+ ! Free lobpcg
+ call lobpcg_free(lobpcg)
+
+ call timab(tim_lobpcgwf2,2,tsec)
+ cputime = abi_cpu_time() - cputime
+ walltime = abi_wtime() - walltime
+ write(std_out,'(a)',advance='no') sjoin(" Lobpcg took", sec2str(cputime), "of cpu time")
+ write(std_out,*) sjoin("for a wall time of", sec2str(walltime))
+ write(std_out,'(a,f6.2)') " -> Ratio of ", cputime/walltime
+ nthreads = xomp_get_num_threads(open_parallel = .true.)
+ if ( cputime/walltime/dble(nthreads) < 0.75 ) then
+   MSG_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
+ end if
+
+ DBG_EXIT("COLL")
+
+end subroutine lobpcgwf2
+
+
+ subroutine getghc_gsc(X,AX,BX)
+   use m_xg, only : xg_t, xgBlock_get, xgBlock_set, xgBlock_getSize, xgBlock_t
+#ifdef HAVE_OPENMP
+   use omp_lib
+#endif
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'getghc_gsc'
+ use interfaces_66_wfs
+!End of the abilint section
+
+  type(xgBlock_t), intent(inout) :: X
+  type(xgBlock_t), intent(inout) :: AX
+  type(xgBlock_t), intent(inout) :: BX
+  integer         :: blockdim
+  integer         :: spacedim
+  type(pawcprj_type) :: cprj_dum(l_gs_hamk%natom,0)
+  double precision :: dum
+  double precision, parameter :: inv_sqrt2 = 1/sqrt2
+  double precision, pointer :: cg(:,:)
+  double precision, pointer :: ghc(:,:)
+  double precision, pointer :: gsc(:,:)
+ 
+  call xgBlock_getSize(X,spacedim,blockdim)
+  spacedim = spacedim/l_icplx
+ 
+ 
+  !call xgBlock_get(X,cg(:,1:blockdim*spacedim),0,spacedim)
+  call xgBlock_reverseMap(X,cg,l_icplx,spacedim*blockdim)
+  call xgBlock_reverseMap(AX,ghc,l_icplx,spacedim*blockdim)
+  call xgBlock_reverseMap(BX,gsc,l_icplx,spacedim*blockdim)
+
+  ! scale back cg
+ if(l_istwf == 2) then
+   cg(:,1:spacedim*blockdim) = cg(:,1:spacedim*blockdim) * inv_sqrt2
+   if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:npw) = cg(:, 1:spacedim*blockdim:npw) * sqrt2
+ end if
+ 
+  if (l_mpi_enreg%paral_kgb==0) then
+
+    call multithreaded_getghc(l_cpopt,cg(:,1:blockdim*spacedim),cprj_dum,ghc,gsc(:,1:blockdim*spacedim),&
+      l_gs_hamk,l_gvnlc,dum, l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0)
+
+  else
+    call prep_getghc(cg(:,1:blockdim*spacedim),l_gs_hamk,l_gvnlc,ghc,gsc(:,1:blockdim*spacedim),dum,blockdim,l_mpi_enreg,&
+&                     l_prtvol,l_sij_opt,l_cpopt,cprj_dum,already_transposed=.false.)
+  end if
+
+  ! scale cg, ghc, gsc
+  if ( l_istwf == 2 ) then
+    cg(:,1:spacedim*blockdim) = cg(:,1:spacedim*blockdim) * sqrt2
+    if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:npw) = cg(:, 1:spacedim*blockdim:npw) * inv_sqrt2
+    ghc(:,1:spacedim*blockdim) = ghc(:,1:spacedim*blockdim) * sqrt2
+    if(l_mpi_enreg%me_g0 == 1) ghc(:, 1:spacedim*blockdim:npw) = ghc(:, 1:spacedim*blockdim:npw) / sqrt2
+    if(l_paw) then
+      gsc(:,1:spacedim*blockdim) = gsc(:,1:spacedim*blockdim) * sqrt2
+      if(l_mpi_enreg%me_g0 == 1) gsc(:, 1:spacedim*blockdim:npw) = gsc(:, 1:spacedim*blockdim:npw) / sqrt2
+    end if
+  end if
+
+  !call xgBlock_set(AX,ghc,0,spacedim)
+  !call xgBlock_set(BX,gsc(:,1:blockdim*spacedim),0,spacedim)
+ end subroutine getghc_gsc
+
+ subroutine precond(W)
+   use m_xg, only : xg_t, xgBlock_colwiseMul
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'precond'
+!End of the abilint section
+
+   type(xgBlock_t), intent(inout) :: W
+   integer :: ispinor
+   integer :: cplx
+
+   ! precondition resid_vec
+   do ispinor = 1,l_nspinor
+     do cplx = 1, l_icplx
+      call xgBlock_colwiseMul(W,l_pcon,l_icplx*l_npw*(ispinor-1)+(cplx-1)*l_npw)
+      end do
+   end do
+
+ end subroutine precond
+
+ end module m_lobpcgwf
+
+!!***
