@@ -699,7 +699,7 @@ module m_lobpcg2
     call xgBlock_potrf(buffer%self,'u',info)
 
     if ( info /= 0 ) then
-      MSG_COMMENT("An old style abi_xorthonormalize happend but now I'll try to continue ;-)")
+      MSG_COMMENT("An old style abi_xorthonormalize happened but now I'll try to continue ;-)")
       call xg_free(buffer)
       return
     end if
