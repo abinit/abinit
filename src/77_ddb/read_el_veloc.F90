@@ -105,7 +105,6 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
  close (unit_ddk)
 
  bantot1 = 2*nband_in**2*nkpt_in*nsppol_in
-print *, "bantot1 ", bantot1
 
  call inpgkk(eigen11,filnam1,hdr1)
  call hdr_free(hdr1)
