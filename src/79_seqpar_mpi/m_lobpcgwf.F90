@@ -323,7 +323,7 @@ end subroutine lobpcgwf2
   ! scale back cg
  if(l_istwf == 2) then
    cg(:,1:spacedim*blockdim) = cg(:,1:spacedim*blockdim) * inv_sqrt2
-   if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:npw) = cg(:, 1:spacedim*blockdim:npw) * sqrt2
+   if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
  end if
  
   if (l_mpi_enreg%paral_kgb==0) then
@@ -339,12 +339,12 @@ end subroutine lobpcgwf2
   ! scale cg, ghc, gsc
   if ( l_istwf == 2 ) then
     cg(:,1:spacedim*blockdim) = cg(:,1:spacedim*blockdim) * sqrt2
-    if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:npw) = cg(:, 1:spacedim*blockdim:npw) * inv_sqrt2
+    if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
     ghc(:,1:spacedim*blockdim) = ghc(:,1:spacedim*blockdim) * sqrt2
-    if(l_mpi_enreg%me_g0 == 1) ghc(:, 1:spacedim*blockdim:npw) = ghc(:, 1:spacedim*blockdim:npw) / sqrt2
+    if(l_mpi_enreg%me_g0 == 1) ghc(:, 1:spacedim*blockdim:l_npw) = ghc(:, 1:spacedim*blockdim:l_npw) / sqrt2
     if(l_paw) then
       gsc(:,1:spacedim*blockdim) = gsc(:,1:spacedim*blockdim) * sqrt2
-      if(l_mpi_enreg%me_g0 == 1) gsc(:, 1:spacedim*blockdim:npw) = gsc(:, 1:spacedim*blockdim:npw) / sqrt2
+      if(l_mpi_enreg%me_g0 == 1) gsc(:, 1:spacedim*blockdim:l_npw) = gsc(:, 1:spacedim*blockdim:l_npw) / sqrt2
     end if
   end if
 
