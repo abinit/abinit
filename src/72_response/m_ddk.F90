@@ -198,10 +198,10 @@ subroutine ddk_init(ddk, path, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,timrev2=2
- integer :: ierr,unt,fform
+ integer :: ierr,fform
  integer :: fform_ref
  integer :: my_rank
-integer :: restart, restartpaw
+ integer :: restart, restartpaw
  character(len=500) :: msg
  type(hdr_type) :: hdr1,hdr_ref
 !arrays 
@@ -211,7 +211,13 @@ integer :: restart, restartpaw
 
  my_rank = xmpi_comm_rank(comm) 
  ddk%path = path; ddk%comm = comm
- ddk%iomode = iomode_from_fname(path(1)) !IO_MODE_FORTRAN
+ ddk%iomode = iomode_from_fname(path(1))
+
+ if (ddk%iomode == IO_MODE_MPI) then
+   write (msg,'(a)') " MPI iomode found for ddk - not coded yet, will default to FORTRAN "
+   MSG_WARNING(msg)
+   ddk%iomode = IO_MODE_FORTRAN
+ end if
 
  ! Master reads the header and builds useful tables
  if (my_rank == master) then
