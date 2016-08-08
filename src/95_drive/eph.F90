@@ -210,10 +210,18 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (my_rank == master) then
    if (.not. file_exists(ddb_path)) MSG_ERROR(sjoin("Cannot find DDB file:", ddb_path))
    if (.not. file_exists(dvdb_path)) MSG_ERROR(sjoin("Cannot find DVDB file:", dvdb_path))
+
    if (dtset%eph_transport > 0) then
-     if (.not. file_exists(ddk_path(1))) MSG_ERROR(sjoin("Cannot find x DDK file:", ddk_path(1)))
-     if (.not. file_exists(ddk_path(2))) MSG_ERROR(sjoin("Cannot find y DDK file:", ddk_path(2)))
-     if (.not. file_exists(ddk_path(3))) MSG_ERROR(sjoin("Cannot find z DDK file:", ddk_path(3)))
+     do ii=1,3
+       if (.not. file_exists(ddk_path(ii))) then
+         if (file_exists(nctk_ncify(ddk_path(ii)))) then
+           write(std_out,"(3a)")"- File: ",trim(ddk_path(ii))," does not exist but found netcdf file with similar name."
+           ddk_path(ii) = nctk_ncify(ddk_path(ii))
+         else
+           MSG_ERROR(sjoin("Cannot find DDK file:", ddk_path(ii)))
+         end if
+       end if
+     end do
    end if
    ! Accept WFK file in Fortran or netcdf format.
    if (.not. file_exists(wfk0_path)) then
