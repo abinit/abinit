@@ -42,7 +42,7 @@ MODULE m_ddk
  use m_wfk
 
  use m_fstrings,      only : sjoin, itoa
- use m_io_tools,      only : open_file, file_exists
+ use m_io_tools,      only : open_file, file_exists, iomode_from_fname
 ! use m_numeric_tools, only : wrap2_pmhalf, vdiff_eval, vdiff_print
 ! use m_copy,          only : alloc_copy
  use defs_abitypes,   only : hdr_type, mpi_type
@@ -210,23 +210,16 @@ integer :: restart, restartpaw
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm) 
- ddk%path = path; ddk%comm = comm; ddk%iomode = IO_MODE_FORTRAN
+ ddk%path = path; ddk%comm = comm
+ ddk%iomode = iomode_from_fname(path(1)) !IO_MODE_FORTRAN
 
  ! Master reads the header and builds useful tables
  if (my_rank == master) then
 
    call wfk_read_h1mat(path(1), eigen1, hdr_ref, comm)
+   fform_ref = 2
    ABI_DEALLOCATE(eigen1)
 
-!! TODO: add netcdf reading here
-!   if (open_file(path(1), msg, newunit=unt, form="unformatted", status="old", action="read") /= 0) then
-!     MSG_ERROR(msg)
-!   end if
-!
-!   ! Get important dimensions from the first header and rewind the file.
-!   call hdr_fort_read(hdr_ref, unt, fform_ref)
-!   ABI_CHECK(fform_ref /= 0, sjoin("fform=0 while reading:", path(1)))
-!   close(unt)
    if (ddk%debug) call hdr_echo(hdr_ref,fform_ref,4,unit=std_out)
 
    ! The code below must be executed by the other procs if MPI.
@@ -237,25 +230,13 @@ integer :: restart, restartpaw
 
    ! check that the other 2 headers are compatible
    call wfk_read_h1mat(path(2), eigen1, hdr1, comm)
+   fform = 2
    ABI_DEALLOCATE(eigen1)
-
-!   if (open_file(path(2), msg, newunit=unt, form="unformatted", status="old", action="read") /= 0) then
-!     MSG_ERROR(msg)
-!   end if
-!   call hdr_fort_read(hdr1, unt, fform)
-!   ABI_CHECK(fform /= 0, "fform=0 while reading header of second ddk file")
-!   close(unt)
    call hdr_check(fform,fform_ref,hdr1,hdr_ref,'COLL',restart,restartpaw)
 
    call wfk_read_h1mat(path(2), eigen1, hdr1, comm)
+   fform = 2
    ABI_DEALLOCATE(eigen1)
-
-!   if (open_file(path(3), msg, newunit=unt, form="unformatted", status="old", action="read") /= 0) then
-!     MSG_ERROR(msg)
-!   end if
-!   call hdr_fort_read(hdr1, unt, fform)
-!   ABI_CHECK(fform /= 0, "fform=0 while reading header of third ddk file")
-!   close(unt)
    call hdr_check(fform,fform_ref,hdr1,hdr_ref,'COLL',restart,restartpaw)
  end if
 
@@ -363,6 +344,10 @@ subroutine ddk_read_from_file(comm, ddk, fstab)
      call wrtout(std_out,message,'COLL')
      call inpgkk(eigen1,ddk%path(idir),hdr1)
 #endif 
+   case (IO_MODE_ETSF)
+     write(message,'(a,i2)')' NEW DDK FILES, iomode = ',ddk%iomode
+     call wrtout(std_out,message,'COLL')
+     call wfk_read_h1mat (ddk%path(idir), eigen1, hdr1, comm)
    case (IO_MODE_MPI)
      MSG_ERROR("MPI not coded")
    case default
