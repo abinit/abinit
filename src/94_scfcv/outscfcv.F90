@@ -895,6 +895,15 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    if(pawfatbnd>0.and.fatbands_flag==1) then
      call prtfatbands(dos_fractions_m,dtset,dtfil%fnameabo_app_fatbands,fermie,eigen,&
 &     mbesslang,prtdosm,ndosfraction,pawfatbnd,pawtab)
+#ifdef HAVE_TRIO_NETCDF
+     if (me == master) then
+       fname = trim(dtfil%filnam_ds(4))//'_FATBANDS.nc'
+       NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
+       call fatbands_ncwrite(crystal, ebands, hdr, dos_fractions_m, dtset, &
+                             mbesslang, prtdosm, ndosfraction, pawfatbnd, pawtab, ncid)
+       NCF_CHECK(nf90_close(ncid))
+     end if
+#endif
    end if
 
 !  Here, computation and output of DOS and partial DOS  _DOS

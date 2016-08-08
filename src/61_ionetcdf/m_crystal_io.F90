@@ -166,7 +166,7 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(inout) :: ncid
+ integer,intent(in) :: ncid
  type(crystal_t),intent(in) :: cryst
 
 #ifdef HAVE_TRIO_NETCDF

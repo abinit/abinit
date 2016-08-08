@@ -264,5 +264,140 @@ subroutine prtfatbands(dos_fractions_m,dtset,fildata,fermie,eigen,&
  DBG_EXIT("COLL")
 
 end subroutine prtfatbands
+!!***
 
+!----------------------------------------------------------------------
+
+!!****f* m_crystal_io/fatbands_ncwrite
+!! NAME
+!! fatbands_ncwrite
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!  cryst<crystal_t>=Object defining the unit cell and its symmetries.
+!!  ncid=NC file handle.
+!!
+!! OUTPUT
+!!  Only writing
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine fatbands_ncwrite(crystal, ebands, hdr, dos_fractions_m, dtset, & 
+  mbesslang, m_dos_flag, ndosfraction, pawfatbnd, pawtab, ncid)
+
+ use defs_basis
+ use defs_abitypes
+ use defs_datatypes
+ use m_errors
+ use m_profiling_abi
+ use m_crystal
+ use m_crystal_io
+ use m_ebands
+ use m_nctk
+#ifdef HAVE_TRIO_NETCDF
+ use netcdf
+#endif
+ use m_hdr
+
+ use m_pawtab,    only : pawtab_type
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'prtfatbands'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: m_dos_flag,mbesslang,ndosfraction,pawfatbnd,ncid
+ type(crystal_t),intent(in) :: crystal
+ type(ebands_t),intent(in) :: ebands
+ type(hdr_type),intent(in) :: hdr
+ type(dataset_type),intent(in) :: dtset
+!arrays
+ real(dp),intent(in) :: dos_fractions_m(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*mbesslang)
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ncerr
+ integer,parameter :: fform=102 ! FIXME
+ !character(len=500) :: message
+!arrays
+ integer :: pawtab_l_size(crystal%ntypat)
+
+!*************************************************************************
+
+ ABI_CHECK(dtset%natsph > 0, "natsph <= 0!")
+
+ !if (pawfatbnd==1) then
+ !  !inbfatbands=mbesslang-1
+ !  write(message,'(3a)')"  (fatbands are in eV and are given for each value of L)",ch10
+ !else if(pawfatbnd==2) then
+ !  write(message,'(3a)')"  (fatbands are in eV and are given for each value of L and M)",ch10
+ !  !inbfatbands=(mbesslang-1)**2
+ !end if
+ !call wrtout(std_out,message,'COLL')
+
+ ! Write header, crystal structure and band energies.
+ NCF_CHECK(hdr_ncwrite(hdr, ncid, fform, nc_define=.True.))
+ NCF_CHECK(crystal_ncwrite(crystal, ncid))
+ NCF_CHECK(ebands_ncwrite(ebands, ncid))
+
+ ! Add fatband-specific quantities
+ ncerr = nctk_def_dims(ncid, [ &
+   nctkdim_t("mbesslang", mbesslang), nctkdim_t("ndosfraction", ndosfraction), & 
+   nctkdim_t("natsph", dtset%natsph), & 
+   nctkdim_t("dos_fraction_size", ndosfraction*mbesslang)], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "prtdos", "pawfatbnd", "pawprtdos", "prtdosm"])
+ NCF_CHECK(ncerr)
+ !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "foo", "smearing_width"])
+ !CF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(ncid, [&
+   nctkarr_t("pawtab_l_size", "int", "number_of_atom_species"), & 
+   nctkarr_t("iatsph", "int", "natsph"), & 
+   nctkarr_t("dos_fractions_m", "dp", "number_of_kpoints, max_number_of_states, number_of_spins, dos_fraction_size") & 
+ ])
+ NCF_CHECK(ncerr)
+
+ ! Write variables
+ NCF_CHECK(nctk_set_datamode(ncid))
+
+ ! scalars
+ NCF_CHECK(nf90_put_var(ncid, vid("prtdos"), dtset%prtdos))
+ NCF_CHECK(nf90_put_var(ncid, vid("pawfatbnd"), pawfatbnd))
+ NCF_CHECK(nf90_put_var(ncid, vid("pawprtdos"), dtset%pawprtdos))
+ NCF_CHECK(nf90_put_var(ncid, vid("prtdosm"), dtset%prtdosm))
+
+ ! arrays
+ pawtab_l_size = pawtab(:)%l_size
+ NCF_CHECK(nf90_put_var(ncid, vid("pawtab_l_size"), pawtab_l_size))
+ NCF_CHECK(nf90_put_var(ncid, vid("iatsph"), dtset%iatsph(1:dtset%natsph)))
+ NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions_m"), dos_fractions_m))
+
+contains
+ integer function vid(vname) 
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'vid'
+!End of the abilint section
+
+   character(len=*),intent(in) :: vname
+   vid = nctk_idname(ncid, vname)
+ end function vid
+
+end subroutine fatbands_ncwrite
 !!***
