@@ -141,8 +141,7 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
 
 !Refuse only 1 kpoint: the algorithms are no longer valid. DOH !
  if (dtset%nkpt == 1) then
-   message = 'you need at least 2 kpoints to use the tetrahedron method'
-   MSG_WARNING(message)
+   MSG_WARNING('You need at least 2 kpoints to use the tetrahedron method. DOS cannot be computed')
    return
  end if
 
@@ -152,11 +151,12 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
 !kptrlatt, and only 1 shift is needed (in particular for MP grids).
 
  if (dtset%nshiftk > 1) then
-   write(std_out,*) 'tetrahedron: problem with a composite k-point grid.'
-   write(std_out,*) '  Only simple lattices are supported Action : use nshiftk=1.'
-   write(std_out,*) ' tetrahedron: skip subroutine.'
-   write(std_out,*) '  dtset%nshiftk, dtset%shiftk = ', dtset%nshiftk, dtset%shiftk
-   write(std_out,*) '  dtset%kptrlatt= ', dtset%kptrlatt
+   write(std_out,*) 'tetrahedron: skip subroutine.'
+   write(std_out,*) 'Problem with a composite k-point grid.'
+   write(std_out,*) 'Only simple lattices are supported. Action: use nshiftk=1.'
+   write(std_out,*) 'dtset%nshiftk, dtset%shiftk = ', dtset%nshiftk, dtset%shiftk
+   write(std_out,*) 'dtset%kptrlatt= ', dtset%kptrlatt
+   MSG_WARNING('tetrahedron: skip subroutine. See message above')
    return
  end if
 
@@ -165,9 +165,10 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
  do isppol=1,dtset%nsppol
    do ikpt=1,dtset%nkpt
      if ( dtset%nband(dtset%nkpt*(isppol-1) + ikpt) /= dtset%nband(1) ) then
-       write(std_out,*) ' tetrahedron : Error nband must be the same for all kpoints'
-       write(std_out,*) '  nband = ', dtset%nband
-       write(std_out,*) ' tetrahedron: skip subroutine.'
+       write(std_out,*) 'tetrahedron: skip subroutine.'
+       write(std_out,*) 'nband must be the same for all kpoints'
+       write(std_out,*) 'nband=', dtset%nband
+       MSG_WARNING('tetrahedron: skip subroutine. See message above')
        return
      end if
    end do
@@ -183,10 +184,11 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
  nkpt_fullbz = nkpt_fullbz*dtset%nshiftk
 
  if (nkpt_fullbz==0) then
-   write(std_out,*) ' tetrahedron : no homogeneous grid  of k-points is defined ...'
-   write(std_out,*)'  in order to obtain the DOS using the tetrahedron method,'
-   write(std_out,*)'  you need to re-define ngkpt or kptrlatt.'
-   write(std_out,*) ' tetrahedron: skip subroutine.'
+   write(std_out,*)'tetrahedron: skip subroutine.'
+   write(std_out,*)'no homogeneous grid  of k-points is defined ...'
+   write(std_out,*)'in order to obtain the DOS using the tetrahedron method,'
+   write(std_out,*)'you need to re-define ngkpt or kptrlatt.'
+   MSG_WARNING('tetrahedron: skip subroutine. See message above')
    return
  end if
 

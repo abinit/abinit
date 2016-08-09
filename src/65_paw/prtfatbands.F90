@@ -288,7 +288,7 @@ end subroutine prtfatbands
 !! SOURCE
 
 subroutine fatbands_ncwrite(crystal, ebands, hdr, dos_fractions_m, dtset, & 
-  mbesslang, m_dos_flag, ndosfraction, pawfatbnd, pawtab, ncid)
+  mbesslang, m_dos_flag, ndosfraction, psps, pawfatbnd, pawtab, ncid)
 
  use defs_basis
  use defs_abitypes
@@ -322,30 +322,24 @@ subroutine fatbands_ncwrite(crystal, ebands, hdr, dos_fractions_m, dtset, &
  type(ebands_t),intent(in) :: ebands
  type(hdr_type),intent(in) :: hdr
  type(dataset_type),intent(in) :: dtset
+ type(pseudopotential_type),intent(in) :: psps
 !arrays
  real(dp),intent(in) :: dos_fractions_m(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*mbesslang)
- type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*dtset%usepaw)
 
 !Local variables-------------------------------
 !scalars
- integer :: ncerr
+ integer :: itype,ncerr
  integer,parameter :: fform=102 ! FIXME
- !character(len=500) :: message
+ !character(len=500) :: msg
 !arrays
- integer :: pawtab_l_size(crystal%ntypat)
+ integer :: lmax_type(crystal%ntypat)
 
 !*************************************************************************
 
  ABI_CHECK(dtset%natsph > 0, "natsph <= 0!")
 
- !if (pawfatbnd==1) then
- !  !inbfatbands=mbesslang-1
- !  write(message,'(3a)')"  (fatbands are in eV and are given for each value of L)",ch10
- !else if(pawfatbnd==2) then
- !  write(message,'(3a)')"  (fatbands are in eV and are given for each value of L and M)",ch10
- !  !inbfatbands=(mbesslang-1)**2
- !end if
- !call wrtout(std_out,message,'COLL')
+ !NCF_CHECK(nctk_open_create(ncid, filename, xmpi_comm_self))
 
  ! Write header, crystal structure and band energies.
  NCF_CHECK(hdr_ncwrite(hdr, ncid, fform, nc_define=.True.))
@@ -359,32 +353,59 @@ subroutine fatbands_ncwrite(crystal, ebands, hdr, dos_fractions_m, dtset, &
    nctkdim_t("dos_fraction_size", ndosfraction*mbesslang)], defmode=.True.)
  NCF_CHECK(ncerr)
 
- ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "prtdos", "pawfatbnd", "pawprtdos", "prtdosm"])
+ if (dtset%natsph_extra /= 0) then
+    NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("natsph_extra", dtset%natsph_extra)]))
+ end if
+
+ ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "prtdos", "pawprtdos", "prtdosm"]) !"pawfatbnd", 
  NCF_CHECK(ncerr)
- !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "foo", "smearing_width"])
- !CF_CHECK(ncerr)
+ ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "ratsph_extra"])
+ NCF_CHECK(ncerr)
 
  ncerr = nctk_def_arrays(ncid, [&
-   nctkarr_t("pawtab_l_size", "int", "number_of_atom_species"), & 
+   nctkarr_t("lmax_type", "int", "number_of_atom_species"), & 
    nctkarr_t("iatsph", "int", "natsph"), & 
+   nctkarr_t("ratsph", "dp", "number_of_atom_species"), &
    nctkarr_t("dos_fractions_m", "dp", "number_of_kpoints, max_number_of_states, number_of_spins, dos_fraction_size") & 
  ])
  NCF_CHECK(ncerr)
+
+ if (dtset%natsph_extra /= 0) then
+   ncerr = nctk_def_arrays(ncid, [&
+     nctkarr_t("ratsph_extra", "dp", "number_of_atom_species"), &
+     nctkarr_t("xredsph_extra", "dp", "number_of_reduced_dimensions, natsph_extra") &
+   ])
+   NCF_CHECK(ncerr)
+ end if
 
  ! Write variables
  NCF_CHECK(nctk_set_datamode(ncid))
 
  ! scalars
  NCF_CHECK(nf90_put_var(ncid, vid("prtdos"), dtset%prtdos))
- NCF_CHECK(nf90_put_var(ncid, vid("pawfatbnd"), pawfatbnd))
+ !NCF_CHECK(nf90_put_var(ncid, vid("pawfatbnd"), pawfatbnd))
  NCF_CHECK(nf90_put_var(ncid, vid("pawprtdos"), dtset%pawprtdos))
  NCF_CHECK(nf90_put_var(ncid, vid("prtdosm"), dtset%prtdosm))
 
  ! arrays
- pawtab_l_size = pawtab(:)%l_size
- NCF_CHECK(nf90_put_var(ncid, vid("pawtab_l_size"), pawtab_l_size))
+ if (dtset%usepaw == 1) then
+   lmax_type = (pawtab(:)%l_size - 1) / 2
+ else
+   do itype=1,crystal%ntypat
+     lmax_type(itype) = maxval(psps%indlmn(1, :, itype))
+   end do
+ end if
+ NCF_CHECK(nf90_put_var(ncid, vid("lmax_type"), lmax_type))
  NCF_CHECK(nf90_put_var(ncid, vid("iatsph"), dtset%iatsph(1:dtset%natsph)))
+ NCF_CHECK(nf90_put_var(ncid, vid("ratsph"), dtset%ratsph(1:dtset%ntypat)))
  NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions_m"), dos_fractions_m))
+
+ NCF_CHECK(nf90_put_var(ncid, vid("ratsph_extra"), dtset%ratsph_extra))
+ if (dtset%natsph_extra /= 0) then
+   NCF_CHECK(nf90_put_var(ncid, vid("xredsph_extra"), dtset%xredsph_extra(:, 1:dtset%natsph_extra)))
+ end if
+
+ !NCF_CHECK(nf90_close(ncid))
 
 contains
  integer function vid(vname) 
