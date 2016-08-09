@@ -100,7 +100,7 @@ MODULE m_ddk
   ! Method used to access the DDK file:
   !   IO_MODE_FORTRAN for usual Fortran IO routines
   !   IO_MODE_MPI if MPI/IO routines.
-  ! TODO: add netcdf?
+  !   IO_MODE_ETSF netcdf files in etsf format
 
   integer :: rw_mode = DDK_NOMODE
    ! (Read|Write) mode 
@@ -213,47 +213,39 @@ subroutine ddk_init(ddk, path, comm)
  ddk%path = path; ddk%comm = comm
  ddk%iomode = iomode_from_fname(path(1))
 
- if (ddk%iomode == IO_MODE_MPI) then
-   write (msg,'(a)') " MPI iomode found for ddk - not coded yet, will default to FORTRAN "
-   MSG_WARNING(msg)
-   ddk%iomode = IO_MODE_FORTRAN
- end if
+! if (ddk%iomode == IO_MODE_MPI) then
+!   write (msg,'(a)') " MPI iomode found for ddk - not coded yet, will default to FORTRAN "
+!   MSG_WARNING(msg)
+!   ddk%iomode = IO_MODE_FORTRAN
+! end if
 
- ! Master reads the header and builds useful tables
- if (my_rank == master) then
 
-   call wfk_read_h1mat(path(1), eigen1, hdr_ref, comm)
-   fform_ref = 2
-   ABI_DEALLOCATE(eigen1)
+! in this call everything is broadcast properly to the whole comm
+ call wfk_read_h1mat(path(1), eigen1, hdr_ref, comm)
+ fform_ref = 2
+ ABI_DEALLOCATE(eigen1)
 
-   if (ddk%debug) call hdr_echo(hdr_ref,fform_ref,4,unit=std_out)
+ if (ddk%debug) call hdr_echo(hdr_ref,fform_ref,4,unit=std_out)
 
-   ! The code below must be executed by the other procs if MPI.
-   ddk%nsppol = hdr_ref%nsppol
-   ddk%nspinor = hdr_ref%nspinor
-   ddk%usepaw = hdr_ref%usepaw
-   ABI_CHECK(ddk%usepaw == 0, "PAW not yet supported")
+ ! check that the other 2 headers are compatible
+ call wfk_read_h1mat(path(2), eigen1, hdr1, comm)
+ fform = 2
+ ABI_DEALLOCATE(eigen1)
+ call hdr_check(fform,fform_ref,hdr1,hdr_ref,'COLL',restart,restartpaw)
+ call hdr_free(hdr1)
 
-   ! check that the other 2 headers are compatible
-   call wfk_read_h1mat(path(2), eigen1, hdr1, comm)
-   fform = 2
-   ABI_DEALLOCATE(eigen1)
-   call hdr_check(fform,fform_ref,hdr1,hdr_ref,'COLL',restart,restartpaw)
 
-   call wfk_read_h1mat(path(2), eigen1, hdr1, comm)
-   fform = 2
-   ABI_DEALLOCATE(eigen1)
-   call hdr_check(fform,fform_ref,hdr1,hdr_ref,'COLL',restart,restartpaw)
- end if
+ call wfk_read_h1mat(path(3), eigen1, hdr1, comm)
+ fform = 2
+ ABI_DEALLOCATE(eigen1)
+ call hdr_check(fform,fform_ref,hdr1,hdr_ref,'COLL',restart,restartpaw)
+ call hdr_free(hdr1)
 
- ! Master broadcasts data.
- if (xmpi_comm_size(comm) > 1) then
-   call xmpi_bcast(ddk%version, master, comm, ierr)
-   call hdr_bcast(hdr_ref, master, my_rank, comm)
-   ddk%nsppol = hdr_ref%nsppol
-   ddk%nspinor = hdr_ref%nspinor
-   ddk%usepaw = hdr_ref%usepaw
- end if
+
+ ddk%nsppol = hdr_ref%nsppol
+ ddk%nspinor = hdr_ref%nspinor
+ ddk%usepaw = hdr_ref%usepaw
+ ABI_CHECK(ddk%usepaw == 0, "PAW not yet supported")
 
  ! Init crystal_t
  call crystal_from_hdr(ddk%cryst,hdr_ref,timrev2)
@@ -310,17 +302,22 @@ subroutine ddk_read_from_file(comm, ddk, fstab)
 
 !Local variables-------------------------------
 !scalars
- integer :: nprocs
+ integer :: nprocs, my_rank, master=0
  integer :: idir
+ integer :: ierr
  integer :: ikfs, ikpt, isppol, ik_ibz
  integer :: symrankkpt, ikpt_ddk
  integer :: iband, bd2tot_index
+ integer :: mband
  integer :: bstart_k, nband_k
  integer :: nband_in
+ integer :: vdim
  character(len=500) :: message
  real(dp) :: tmpveloc(3), tmpveloc2(3)
  type(hdr_type) :: hdr1
  real(dp), allocatable :: eigen1(:)
+ real(dp), allocatable :: velocityp(:,:)
+ real(dp), allocatable :: velocitypp(:,:)
  type(kptrank_type) :: kptrank_t
  type(fstab_t), pointer :: fs
 
@@ -332,34 +329,48 @@ subroutine ddk_read_from_file(comm, ddk, fstab)
  ddk%rw_mode = ddk_READMODE
 
  nprocs = xmpi_comm_size(comm)
+ my_rank = xmpi_comm_rank(comm)
 
  ddk%maxnb = maxval(fstab(:)%maxnb)
  ddk%nkfs = maxval(fstab(:)%nkfs)
  ABI_ALLOCATE(ddk%velocity, (3,ddk%maxnb,ddk%nkfs,ddk%nsppol))
+
+! TODO: make this parallel enabled - at least check for master, at best get distributed k
 
  do idir = 1,3
    ! Open the files
    select case (ddk%iomode)
    case (IO_MODE_FORTRAN)
 #ifdef DEV_MG_WFK
-     write(message,'(a,i2)')' NEW DDK FILES, iomode = ',ddk%iomode
-     call wrtout(std_out,message,'COLL')
-     call wfk_read_h1mat (ddk%path(idir), eigen1, hdr1, comm)
+   write(message,'(a,i2)')' NEW DDK FILES, iomode = ',ddk%iomode
+   call wrtout(std_out,message,'COLL')
+   call wfk_read_h1mat (ddk%path(idir), eigen1, hdr1, comm)
 #else 
-     write(message,'(a,i2)')' OLD DDK FILES, iomode = ',ddk%iomode
-     call wrtout(std_out,message,'COLL')
+   write(message,'(a,i2)')' OLD DDK FILES, iomode = ',ddk%iomode
+   call wrtout(std_out,message,'COLL')
+   if (my_rank == master) then
      call inpgkk(eigen1,ddk%path(idir),hdr1)
+   end if
+   if (xmpi_comm_size(comm) > 1) then
+       call hdr_bcast(hdr1, master, my_rank, comm)
+       if (my_rank /= master) then
+         mband = maxval(hdr1%nband)
+         ABI_ALLOCATE(eigen1, (2*hdr1%nsppol*hdr1%nkpt*mband**2))
+       end if
+       call xmpi_bcast(eigen1, master, comm, ierr)
+   end if
 #endif 
-   case (IO_MODE_ETSF)
+! TODO: later combine these case statements, which can call the same routine, and eliminate the old ddk file format
+   case (IO_MODE_ETSF, IO_MODE_MPI)
      write(message,'(a,i2)')' NEW DDK FILES, iomode = ',ddk%iomode
      call wrtout(std_out,message,'COLL')
      call wfk_read_h1mat (ddk%path(idir), eigen1, hdr1, comm)
-   case (IO_MODE_MPI)
-     MSG_ERROR("MPI not coded")
+!   case (IO_MODE_MPI)
+!     MSG_ERROR("MPI not coded")
    case default
      MSG_ERROR(sjoin("Unsupported iomode:", itoa(ddk%iomode)))
    end select
-
+  
    nband_in = maxval(hdr1%nband)
 
 !need correspondence hash between the DDK and the fs k-points
@@ -387,23 +398,38 @@ subroutine ddk_read_from_file(comm, ddk, fstab)
 
      end do
    end do
+   call destroy_kptrank (kptrank_t)
 
-   if (allocated(eigen1)) then
+
+! This should always be allocated (from within the read h1mat or inpgkk subroutines)
+!   if (allocated(eigen1)) then
      ABI_DEALLOCATE(eigen1)
-   end if
+!   end if
+   call hdr_free(hdr1)
  end do
 
  ! process the eigenvalues(1): rotate to cartesian and divide by 2 pi
- ! use DGEMM better here?
- do isppol = 1, ddk%nsppol
-   do ikpt = 1, ddk%nkfs
-     do iband = 1, ddk%maxnb
-       tmpveloc = ddk%velocity (:, iband, ikpt, isppol)
-       call dgemm('n','n',3,3,3,one,ddk%cryst%rprimd,3,tmpveloc,3,zero,tmpveloc2,3)
-       ddk%velocity (:, iband, ikpt, isppol) = tmpveloc2
-     end do
-   end do
- end do
+ ! use DGEMM better here on whole matrix and then reshape?
+ vdim = ddk%maxnb*ddk%nkfs*ddk%nsppol
+ ABI_ALLOCATE(velocityp, (3,vdim))
+ velocityp = reshape (ddk%velocity, (/3,vdim/))
+ ABI_ALLOCATE(velocitypp, (3,vdim))
+ velocitypp = zero
+ call dgemm('n','n',3,vdim,3,one,ddk%cryst%rprimd,3,velocityp,3,zero,velocitypp,3)
+ ABI_DEALLOCATE(velocityp)
+
+! do isppol = 1, ddk%nsppol
+!   do ikpt = 1, ddk%nkfs
+!     do iband = 1, ddk%maxnb
+!       tmpveloc = ddk%velocity (:, iband, ikpt, isppol)
+!       call dgemm('n','n',3,3,3,one,ddk%cryst%rprimd,3,tmpveloc,3,zero,tmpveloc2,3)
+!       ddk%velocity (:, iband, ikpt, isppol) = tmpveloc2
+!     end do
+!   end do
+! end do
+
+ ddk%velocity = reshape (velocitypp, (/3,ddk%maxnb,ddk%nkfs,ddk%nsppol/))
+ ABI_DEALLOCATE(velocitypp)
 
  call destroy_kptrank (kptrank_t)
 
@@ -452,18 +478,6 @@ subroutine ddk_free(ddk)
  ! types
  call crystal_free(ddk%cryst)
  call destroy_mpi_enreg(ddk%mpi_enreg)
-
- ! Close the file but only if we have performed IO.
- if (ddk%rw_mode == ddk_NOMODE) return
-
- select case (ddk%iomode)
- case (IO_MODE_FORTRAN)
-   close(ddk%fh(1))
-   close(ddk%fh(2))
-   close(ddk%fh(3))
- case default
-   MSG_ERROR(sjoin("Unsupported iomode:", itoa(ddk%iomode)))
- end select
 
 end subroutine ddk_free
 !!***
