@@ -2671,8 +2671,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ! now we can initialize the ddk velocities, on the FS grid only
  call ddk_read_from_file(comm, ddk, fstab)
 
-write (1010,*) ddk%velocity
-
  ! TODO: Support nsig in phgamma_init
  eph_scalprod = 0
  gamma_ngqpt = ifc%ngqpt
