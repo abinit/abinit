@@ -1,4 +1,4 @@
-e !variable
+- !variable
     characteristics:
     - '[[ENERGY]]'
     commentdefault: null
