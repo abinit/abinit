@@ -23432,7 +23432,7 @@ e !variable
     text: |-
         <p>
          For each type of atom (each pseudopotential), specify
-        the treatment of spin-orbit interaction (if [[nspinor]]==2 and Norm-conserving pseudopotentials [[usepaw]]==0)/
+        the treatment of spin-orbit interaction (if [[nspinor]]==2 and Norm-conserving pseudopotentials [[usepaw]]==0)
          <br />
          If 0 : no spin-orbit interaction, even if [[nspinor]]=2
          <br />
@@ -23445,10 +23445,10 @@ e !variable
         (actually, not implemented ...).
         </p>
         <p>
-        For typical usage, the default value is OK. If the spin-orbit needs to be turned off for one atom, 0 might be relevant. 
-        Note however, that the code will stop if [[nspinor]]=2 is used and one of the pseudopotential does not contain the information 
-        about the spin-orbit interaction (this is the case for some old pseudopotentials). Indeed, for spinorial calculations, 
-        turning off the spin-orbit interaction is unphysical, and also doe not save time ... It should only be done for test calculations.
+        For typical usage, the default value is OK. If the spin-orbit needs to be turned off for one atom, 0 might be relevant.
+        Note however, that the code will stop if [[nspinor]]=2 is used and one of the pseudopotential does not contain the information
+        about the spin-orbit interaction (this is the case for some old pseudopotentials). Indeed, for spinorial calculations,
+        turning off the spin-orbit interaction is unphysical, and also does not save CPU time ... It should only be done for test purposes
         </p>
         <p>
          Note that if [[nspinor]]==1, the spin-orbit cannot be treated
