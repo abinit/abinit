@@ -23453,6 +23453,7 @@
         <p>
          Note that if [[nspinor]]==1, the spin-orbit cannot be treated
         anyhow, so the value of [[so_psp]] is irrelevant.
+        In case [[usepaw]]=1, please refer to [[pawspnorb]].
         </p>
         <p>
          Prior to v5.4, the input variable
