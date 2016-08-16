@@ -2518,7 +2518,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !      If nspinor=2, the spin-orbit contribution should be present in the pseudopotentials, 
 !      unless the user explicitly allows not to treat it.
        if ( nspinor==2 .and. dt%so_psp(ipsp)/=0 .and. pspheads(ipsp)%pspso==0 ) then
-         write(message, '(a,i2,a,i3,a,a,a,a,a)' )&
+         write(message, '(a,i2,a,i3,9a)' )&
 &         'so_psp(',ipsp,') was input as',dt%so_psp(ipsp),', with nspinor=2 and usepaw=0.',ch10,&
 &         'This requires a treatment of the spin-orbit interaction. However, it has been detected ',ch10,&
 &         'that the pseudopotential that you want to use does not specify the spin-orbit coupling.',ch10,& 
