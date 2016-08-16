@@ -4,7 +4,7 @@ EXTRA_DIST += \
 	PACKAGING \
 	README.ChangeLog \
 	README.GPU \
-	README.xlf \
+	README_xlf.md \
 	RELNOTES \
 	autogen.sh \
 	mkrobodoc.sh \
