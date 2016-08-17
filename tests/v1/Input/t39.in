@@ -39,6 +39,7 @@
  nsym 1
  ntypat  1
  rprim 1 0 0  0 1 0  0 0 1
+ so_psp 0
  spinat 0.0 0.0 1.0
         0.0 0.0 -1.0
  symrel  1  0  0   0  1  0   0  0  1
