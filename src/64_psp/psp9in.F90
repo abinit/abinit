@@ -139,13 +139,13 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
 ! ***************************************************************************
 
- if(.false.)write(std_out,*)filpsp ! Just to keep filpsp when HAVE_TRIO_PSML is false
- if(.false.)write(std_out,*)lloc   ! Just to keep lloc when HAVE_TRIO_PSML is false
- if(.false.)write(std_out,*)lmax   ! Just to keep lmax when HAVE_TRIO_PSML is false
- if(.false.)write(std_out,*)qgrid  ! Just to keep qgrid when HAVE_TRIO_PSML is false
- if(.false.)write(std_out,*)useylm ! Just to keep useylm when HAVE_TRIO_PSML is false
- if(.false.)write(std_out,*)zion   ! Just to keep zion when HAVE_TRIO_PSML is false
- if(.false.)write(std_out,*)znucl  ! Just to keep znucl when HAVE_TRIO_PSML is false
+ if(.false.)write(std_out,*)filpsp ! Just to keep filpsp when HAVE_PSML is false
+ if(.false.)write(std_out,*)lloc   ! Just to keep lloc when HAVE_PSML is false
+ if(.false.)write(std_out,*)lmax   ! Just to keep lmax when HAVE_PSML is false
+ if(.false.)write(std_out,*)qgrid  ! Just to keep qgrid when HAVE_PSML is false
+ if(.false.)write(std_out,*)useylm ! Just to keep useylm when HAVE_PSML is false
+ if(.false.)write(std_out,*)zion   ! Just to keep zion when HAVE_PSML is false
+ if(.false.)write(std_out,*)znucl  ! Just to keep znucl when HAVE_PSML is false
 
 #if defined HAVE_PSML
 

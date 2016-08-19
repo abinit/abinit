@@ -47,7 +47,7 @@
 !!
 !! OUTPUT
 !!  ierr=Status error
-!!  Main output is written on file (TRIO_ETSF_IO file format).
+!!  Main output is written on file (ETSF_IO file format).
 !!
 !! NOTES
 !! In PAW calculations, the pseudized wavefunction us represented
@@ -300,7 +300,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  ABI_MALLOC(gbound,(2*mgfftf+8,2))
 
 #ifdef HAVE_NETCDF
-!=== Initialize TRIO_ETSF_IO files ===
+!=== Initialize ETSF_IO files ===
 ! FIXME: nspinor == 2 is buggy
 
  fname = trim(dtfil%filnam_ds(4))//'_PAWAVES.nc'

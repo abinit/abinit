@@ -153,19 +153,6 @@ AC_DEFUN([ABI_CONNECT_ALGO],[
 
   fi
 
-  dnl Transmit serial status to the source code
-  if test "${abi_algo_serial}" = "yes"; then
-    AC_DEFINE([HAVE_ALGO],1,[Define to 1 if you have an optimized algorithmic library.])
-    AC_DEFINE([HAVE_ALGO_SERIAL],1,[Define to 1 if you have an optimized serial algorithmic library.])
-  elif test "${with_algo_flavor}" != "none"; then
-    lib_algo_flavor="broken"
-  fi
-
-  dnl Transmit MPI status to the source code
-  if test "${abi_algo_mpi}" = "yes"; then
-    AC_DEFINE([HAVE_ALGO_MPI],1,[Define to 1 if you have an optimized MPI-parallel algorithmic library.])
-  fi
-
   dnl Restore build environment
   AC_LANG_POP([Fortran])
   LIBS="${abi_saved_LIBS}"
