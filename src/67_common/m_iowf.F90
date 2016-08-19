@@ -32,7 +32,7 @@ MODULE m_iowf
  use m_abi_etsf 
  use m_nctk
  use m_wfk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_hdr
@@ -299,7 +299,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
    if (dtset%iomode==IO_MODE_ETSF) iomode = IO_MODE_ETSF
 !  iomode=IO_MODE_MPI
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    if (dtset%iomode == IO_MODE_ETSF .and. dtset%usewvl == 0) then
      call cg_ncwrite(filnam,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,&
        dtset%nspinor,mcg,mkmem,eigen,occ,cg,npwarr,kg,mpi_enreg,done)
@@ -322,7 +322,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
    ! Create an ETSF file for the wavefunctions
    if (iomode == IO_MODE_ETSF) then
      ABI_CHECK(xmpi_comm_size(spaceComm) == 1, "Legacy etsf-io code does not support nprocs > 1")
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
      call abi_etsf_init(dtset, filnam, 2, .true., hdr%lmn_size, psps, wfs)
      !call crystal_from_hdr(crystal, hdr, 2)
      !NCF_CHECK(crystal_ncwrite_path(crystal, nctk_ncify(filnam)))
@@ -369,7 +369,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      call hdr_io(fform,hdr,rdwr,wff2)
      call WffKg(wff2,1)
    else if (wff2%iomode==IO_MODE_ETSF .and. iam_master) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      NCF_CHECK(hdr_ncwrite(hdr, wff2%unwff, fform, nc_define=.True.))
 #endif
    end if
@@ -638,7 +638,7 @@ end subroutine outwf
 !!
 !! SOURCE
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
 
 subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspinor,mcg,&
                       mkmem,eigen,occ,cg,npwarr,kg,mpi_enreg,done)
@@ -791,7 +791,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 
    if (.not. single_writer) then
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      ! master opens the file and write the metadata.
      if (xmpi_comm_rank(comm_cell) == master) then
        ncerr = nf90_einval
@@ -1066,7 +1066,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
  else ! not same_layout
 
    if (nctk_has_mpiio) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      call wrtout(std_out, &
        sjoin("scattered data. writing WFK file",trim(path),", with iomode",iomode2str(iomode)), 'PERS', do_flush=.True.)
 

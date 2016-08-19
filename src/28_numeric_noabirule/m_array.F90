@@ -31,7 +31,7 @@ MODULE m_array
  use m_profiling_abi
  use m_errors
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 

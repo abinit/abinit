@@ -128,7 +128,7 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
  use m_abihist
  use m_xmpi
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 #if defined HAVE_LOTF
@@ -338,7 +338,7 @@ real(dp) :: rmet(3,3)
  comm=scfcv_args%mpi_enreg%comm_cell
  me=xmpi_comm_rank(comm)
 
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
  filename=trim(ab_mover%filnam_ds(4))//'_HIST.nc'
 
  if (ab_mover%restartxf<=0)then
@@ -710,7 +710,7 @@ real(dp) :: rmet(3,3)
 !    ### 13. Write the history into the _HIST file
 !    ###
 
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
      if (me==master) then
        call write_md_hist(hist,ab_mover,filename,icycle,itime)
      end if
@@ -866,7 +866,7 @@ real(dp) :: rmet(3,3)
 &             [(-one, ii=1,ab_mover%ntypat)],ab_mover%znucl,2,.False.,.False.,"dilatmx_structure",&
 &             symrel=scfcv_args%dtset%symrel,tnons=scfcv_args%dtset%tnons,symafm=scfcv_args%dtset%symafm)
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
              ! Write netcdf file
              filename = strcat(dtfil%filnam_ds(4), "_DILATMX_STRUCT.nc")
              NCF_CHECK(crystal_ncwrite_path(crystal, filename))

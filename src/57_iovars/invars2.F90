@@ -74,7 +74,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  use m_errors
  use m_nctk
  use libxc_functionals
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -2580,7 +2580,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 !if prtkpt==-2, write the k-points in netcdf format and exit here so that AbiPy can read the data.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtkpt',tread,'INT')
  if (tread == 1 .and. intarr(1) == -2) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    ncerr= nctk_write_ibz("kpts.nc", dtset%kptns(:,1:nkpt), dtset%wtk(1:nkpt))
    NCF_CHECK(ncerr)
 #endif
