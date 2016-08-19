@@ -137,7 +137,7 @@ AC_DEFUN([ABI_CONNECT_ALGO],[
         abi_algo_serial="${abi_algo_levmar_serial}"
         abi_algo_mpi="${abi_algo_levmar_mpi}"
         if test "${abi_algo_serial}" = "yes"; then
-          AC_DEFINE([HAVE_ALGO_LEVMAR],1,[Define to 1 if you have the Levenberg-Marquardt algorithmic library.])
+          AC_DEFINE([HAVE_LEVMAR],1,[Define to 1 if you have the Levenberg-Marquardt algorithmic library.])
           lib_algo_fcflags="${abi_algo_levmar_fcflags}"
           lib_algo_ldflags="${abi_algo_levmar_ldflags}"
           lib_algo_incs="${abi_algo_levmar_incs}"

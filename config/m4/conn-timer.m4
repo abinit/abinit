@@ -121,7 +121,7 @@ AC_DEFUN([ABI_CONNECT_TIMER],[
         abi_timer_serial="${abi_timer_papi_serial}"
         abi_timer_mpi="${abi_timer_papi_mpi}"
         if test "${abi_timer_serial}" = "yes"; then
-          AC_DEFINE([HAVE_TIMER_PAPI],1,[Define to 1 if you have the PAPI library.])
+          AC_DEFINE([HAVE_PAPI],1,[Define to 1 if you have the PAPI library.])
           lib_timer_fcflags="${abi_timer_papi_fcflags}"
           lib_timer_ldflags="${abi_timer_papi_ldflags}"
           lib_timer_incs="${abi_timer_papi_incs}"

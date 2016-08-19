@@ -484,7 +484,7 @@ AC_DEFUN([ABI_CONNECT_DFT],[
           fi
           if test "${abi_dft_bigdft_serial}" = "yes" -o \
                   "${enable_fallbacks}" = "yes"; then
-            AC_DEFINE([HAVE_DFT_BIGDFT],1,
+            AC_DEFINE([HAVE_BIGDFT],1,
               [Define to 1 if you have the BigDFT library.])
             abi_test_bigdft="yes"
           fi
@@ -515,7 +515,7 @@ AC_DEFUN([ABI_CONNECT_DFT],[
           _ABI_DFT_CHECK_LIBXC(2,2,2)
           if test "${abi_dft_libxc_serial}" = "yes" -o \
                   "${enable_fallbacks}" = "yes"; then
-            AC_DEFINE([HAVE_DFT_LIBXC],1,
+            AC_DEFINE([HAVE_LIBXC],1,
               [Define to 1 if you have the LibXC library.])
             abi_test_libxc="yes"
           fi
@@ -542,7 +542,7 @@ AC_DEFUN([ABI_CONNECT_DFT],[
           fi
           if test "${abi_dft_wannier90_serial}" = "yes" -o \
                   "${enable_fallbacks}" = "yes"; then
-            AC_DEFINE([HAVE_DFT_WANNIER90],1,
+            AC_DEFINE([HAVE_WANNIER90],1,
               [Define to 1 if you have the Wannier90 library.])
             abi_test_wannier90="yes"
           fi

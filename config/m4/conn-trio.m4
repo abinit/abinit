@@ -417,7 +417,7 @@ AC_DEFUN([ABI_CONNECT_TRIO],[
           fi
           if test "${abi_trio_etsf_io_serial}" = "yes" -o \
                   "${enable_fallbacks}" = "yes"; then
-            AC_DEFINE([HAVE_TRIO_ETSF_IO],1,
+            AC_DEFINE([HAVE_ETSF_IO],1,
               [Define to 1 if you have the ETSF_IO library.])
             abi_test_etsf_io="yes"
           fi
@@ -441,7 +441,7 @@ AC_DEFUN([ABI_CONNECT_TRIO],[
           _ABI_TRIO_CHECK_PSML
           if test "${abi_trio_psml_serial}" = "yes" -o \
                   "${enable_fallbacks}" = "yes"; then
-            AC_DEFINE([HAVE_TRIO_PSML],1,
+            AC_DEFINE([HAVE_PSML],1,
               [Define to 1 if you have the PSML library.])
             abi_test_psml="yes"
           fi
@@ -458,7 +458,7 @@ AC_DEFUN([ABI_CONNECT_TRIO],[
           _ABI_TRIO_CHECK_NETCDF
           if test "${abi_trio_netcdf_serial}" = "yes" -o \
                   "${enable_fallbacks}" = "yes"; then
-            AC_DEFINE([HAVE_TRIO_NETCDF],1,
+            AC_DEFINE([HAVE_NETCDF],1,
               [Define to 1 if you have the NetCDF library.])
             abi_test_netcdf="yes"
           fi
