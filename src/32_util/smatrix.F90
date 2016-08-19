@@ -42,7 +42,7 @@
 !! minbd = used in case ddkflag = 1, defines the lowest band for
 !!         which the ddk will be computed
 !! mpw = maximum dimensioned size of npw
-!! nband_occ = number of (occupied) valence bands
+!! mband_occ = number of (occupied) valence bands
 !! npw_k1 = number of plane waves at k
 !! npw_k2 = number of plane waves at k + dk
 !! nspinor = number of spinorial components of the wavefunctions
@@ -73,7 +73,7 @@
 !! sflag_k(iband) = 1 if the elements smat_k(:,iband,:) are up to date
 !!                    -> they will not be recomputed
 !!                  0 the elements smat_k(:,iband,:) will be recomputed
-!!      at the end of the routine, sflag_k(1:nband_occ) = 1
+!!      at the end of the routine, sflag_k(1:mband_occ) = 1
 !!      (the whole overlap matrix is up to date)
 !! smat_k = overlap matrix between k, k + dk
 !!          only the lines for which sflag_k = 0 are computed
@@ -107,7 +107,7 @@
 #include "abi_common.h"
 
 subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
-&  mcg_k,mcg_q,mcg1_k,minbd,mpw,nband_occ,npw_k1,npw_k2,nspinor,&
+&  mcg_k,mcg_q,mcg1_k,minbd,mpw,mband_occ,nband_occ,npw_k1,npw_k2,nspinor,&
 &  pwind_k,pwnsfac_k,sflag_k,shiftbd,smat_inv,smat_k,smat_k_paw,usepaw)
 
  use defs_basis
@@ -127,16 +127,17 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ddkflag,icg,icg1,itrs,job,maxbd,mcg1_k,mcg_k,mcg_q
- integer,intent(in) :: minbd,mpw,nband_occ,npw_k1,npw_k2,nspinor,shiftbd
+ integer,intent(in) :: minbd,mpw,mband_occ,npw_k1,npw_k2,nspinor,shiftbd
+ integer,intent(in) :: nband_occ
  integer,intent(in) :: usepaw
 !arrays
  integer,intent(in) :: pwind_k(mpw)
- integer,intent(inout) :: sflag_k(nband_occ)
+ integer,intent(inout) :: sflag_k(mband_occ)
  real(dp),intent(in) :: cg(2,mcg_k),cgq(2,mcg_q),pwnsfac_k(4,mpw)
- real(dp),intent(in) :: smat_k_paw(2,usepaw*nband_occ,usepaw*nband_occ)
- real(dp),intent(inout) :: smat_k(2,nband_occ,nband_occ)
+ real(dp),intent(in) :: smat_k_paw(2,usepaw*mband_occ,usepaw*mband_occ)
+ real(dp),intent(inout) :: smat_k(2,mband_occ,mband_occ)
  real(dp),intent(out) :: cg1_k(2,mcg1_k),dtm_k(2)
- real(dp),intent(out) :: smat_inv(2,nband_occ,nband_occ)
+ real(dp),intent(out) :: smat_inv(2,mband_occ,mband_occ)
 
 !Local variables -------------------------
 !scalars
@@ -160,8 +161,8 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !stop
 !ENDDEBUG
 
- ABI_ALLOCATE(ipvt,(nband_occ))
- ABI_ALLOCATE(zgwork,(2,nband_occ))
+ ABI_ALLOCATE(ipvt,(mband_occ))
+ ABI_ALLOCATE(zgwork,(2,mband_occ))
  ABI_ALLOCATE(vect1,(2,0:mpw*nspinor))
  ABI_ALLOCATE(vect2,(2,0:mpw*nspinor))
  vect1(:,0) = zero ; vect2(:,0) = zero
@@ -185,7 +186,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
  end if
 
 !Check the values of sflag_k
- do iband=1,nband_occ
+ do iband=1,mband_occ
    if (sflag_k(iband)/=0 .and. sflag_k(iband)/=1)then
      write(message,'(3a,i4,a,i4)')&
 &     '  The content of sflag_k must be 0 or 1.',ch10,&
@@ -197,7 +198,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !Check if shiftbd is consistent with sflag_k
  if (shiftbd == 0) then
    count = 0
-   do iband = 1, nband_occ
+   do iband = 1, mband_occ
      if (sflag_k(iband) == 0) count = count + 1
    end do
    if (count > 1) then
@@ -220,7 +221,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !
 !ABI_ALLOCATE(my_pwind_k,(mpw))
 !!
-!do iband = 1, nband_occ
+!do iband = 1, mband_occ
 !!
 !pwmin = (iband-1)*npw_k1*nspinor*shiftbd
 !pwmax = pwmin + npw_k1*nspinor
@@ -251,7 +252,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !!    
 !if (npw_k1*nspinor < mpw*nspinor) vect1(:,npw_k1*nspinor+1:mpw*nspinor) = zero
 !
-!do jband = 1, nband_occ
+!do jband = 1, mband_occ
 !
 !pwmin = (jband-1)*npw_k1*nspinor
 !pwmax = pwmin + npw_k1*nspinor
@@ -303,7 +304,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !!
 !ABI_DEALLOCATE(my_pwind_k)
 !!
- do iband = 1, nband_occ
+ do iband = 1, mband_occ
 
    if (sflag_k(iband) == 0) then
 
@@ -340,7 +341,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !    
      if (npw_k1*nspinor < mpw*nspinor) vect1(:,npw_k1*nspinor+1:mpw*nspinor) = zero
 
-     do jband = 1, nband_occ
+     do jband = 1, mband_occ
 
        pwmin = (jband-1)*npw_k2*nspinor
        pwmax = pwmin + npw_k2*nspinor
@@ -404,8 +405,8 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
  end do   ! iband
 
 !DEBUG
-!do iband=1,nband_occ
-!do jband=1,nband_occ
+!do iband=1,mband_occ
+!do jband=1,mband_occ
 !write(std_out,'(a,2i4,2e20.10)') 'smat',iband,jband,smat_k(1,iband,jband),smat_k(2,iband,jband)
 !end do
 !end do
@@ -428,6 +429,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !  ENDDEBUG
 
    dzgedi_job=job; if(job==21) dzgedi_job=1
+! TODO: should this be over nband_occ(isppol)?
    call dzgefa(smat_inv,nband_occ,nband_occ,ipvt,info)
    call dzgedi(smat_inv,nband_occ,nband_occ,ipvt,det,zgwork,dzgedi_job)
 
@@ -456,7 +458,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 
        do jband = minbd, maxbd
          jband1 = jband1 + 1
-         do iband = 1, nband_occ
+         do iband = 1, mband_occ
 
            do ispinor = 1, nspinor
              spnshft_k1 = (ispinor-1)*npw_k1
@@ -492,7 +494,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 
        do jband = minbd, maxbd
          jband1 = jband1 + 1
-         do iband = 1, nband_occ
+         do iband = 1, mband_occ
 
            do ispinor = 1, nspinor
              spnshft_k1 = (ispinor-1)*npw_k1

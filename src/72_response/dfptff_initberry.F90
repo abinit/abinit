@@ -95,7 +95,7 @@ subroutine  dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
 ! arrays
 !scalars
  integer :: flag,iband,icg,idir,ifor,ikg,ikg1,ikpt,ikpt1,ikpt2,ikstr
- integer :: index,ipw,isppol,istr,iunmark,jpw,nband_k,nband_occ_k,nkstr,npw_k
+ integer :: index,ipw,isppol,istr,iunmark,jpw,nband_k,mband_occ_k,nkstr,npw_k
  integer :: npw_k1,orig
  real(dp) :: ecut_eff,occ_val
  character(len=500) :: message
@@ -121,7 +121,7 @@ subroutine  dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
  ABI_ALLOCATE(dtefield%kgindex,(nkpt))
  dtefield%ikpt_dk(:,:,:) = 0
  dtefield%cgindex(:,:) = 0
- dtefield%nband_occ = 0
+ dtefield%mband_occ = 0
  pwindall(:,:,:) = 0
 
 !Compute the number of occupied bands and check that--------
@@ -132,21 +132,21 @@ subroutine  dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
  index = 0
  do ikpt = 1, nkpt
 
-   nband_occ_k = 0
+   mband_occ_k = 0
    nband_k = dtset%nband(ikpt)
 
    do iband = 1, nband_k
      index = index + 1
-     if (abs(occ(index) - occ_val) < tol8) nband_occ_k = nband_occ_k + 1
+     if (abs(occ(index) - occ_val) < tol8) mband_occ_k = mband_occ_k + 1
    end do
 
    if (ikpt > 1) then
-     if (dtefield%nband_occ /= nband_occ_k) then
+     if (dtefield%mband_occ /= mband_occ_k) then
        message = ' The number of valence bands is not the same for every k-point'
        MSG_ERROR(message)
      end if
    else
-     dtefield%nband_occ = nband_occ_k
+     dtefield%mband_occ = mband_occ_k
    end if
 
  end do
