@@ -41,6 +41,10 @@
 !! pwindall(:,7,:) <- <u^(0)_i|u^(1)_i-n+1>
 !! pwindall(:,8,:) <- <u^(0)_i|u^(1)_i-n-1>
 !!
+!! NOTES
+!!      this duplicates in part initberry for the init of the dtefield - should be made
+!!      into a common constructor in m_dtefield or somethin
+!!
 !! PARENTS
 !!      dfpt_scfcv
 !!
@@ -122,6 +126,8 @@ subroutine  dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
  dtefield%ikpt_dk(:,:,:) = 0
  dtefield%cgindex(:,:) = 0
  dtefield%mband_occ = 0
+ ABI_ALLOCATE(dtefield%nband_occ,(nsppol))
+ dtefield%nband_occ = 0
  pwindall(:,:,:) = 0
 
 !Compute the number of occupied bands and check that--------
@@ -130,25 +136,28 @@ subroutine  dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
  occ_val = two/(dtset%nsppol*one)
 
  index = 0
- do ikpt = 1, nkpt
-
-   mband_occ_k = 0
-   nband_k = dtset%nband(ikpt)
-
-   do iband = 1, nband_k
-     index = index + 1
-     if (abs(occ(index) - occ_val) < tol8) mband_occ_k = mband_occ_k + 1
-   end do
-
-   if (ikpt > 1) then
-     if (dtefield%mband_occ /= mband_occ_k) then
-       message = ' The number of valence bands is not the same for every k-point'
-       MSG_ERROR(message)
+ do isppol = 1, nsppol
+   do ikpt = 1, nkpt
+  
+     mband_occ_k = 0
+     nband_k = dtset%nband(ikpt)
+  
+     do iband = 1, nband_k
+       index = index + 1
+       if (abs(occ(index) - occ_val) < tol8) mband_occ_k = mband_occ_k + 1
+     end do
+  
+     if (ikpt > 1) then
+       if (dtefield%nband_occ(isppol) /= mband_occ_k) then
+         message = ' The number of valence bands is not the same for every k-point for present spin'
+         MSG_ERROR(message)
+       end if
+     else
+       dtefield%mband_occ = max(dtefield%mband_occ,mband_occ_k)
+       dtefield%nband_occ(isppol) = mband_occ_k
      end if
-   else
-     dtefield%mband_occ = mband_occ_k
-   end if
-
+  
+   end do
  end do
 
 !DEBUG

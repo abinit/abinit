@@ -1199,13 +1199,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  ABI_DEALLOCATE(qmat)
  if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 & dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17) then
-   ABI_DEALLOCATE(dtefield%ikpt_dk)
-   ABI_DEALLOCATE(dtefield%cgindex)
-   ABI_DEALLOCATE(dtefield%idxkstr)
-   ABI_DEALLOCATE(dtefield%kgindex)
-   if(allocated(dtefield%fkgindex))  then
-     ABI_DEALLOCATE(dtefield%fkgindex)
-   end if
+   call destroy_efield(dtefield)
    if(allocated(mpi_enreg%kpt_loc2ibz_sp))  then
      ABI_DEALLOCATE(mpi_enreg%kpt_loc2ibz_sp)
    end if
