@@ -13206,7 +13206,9 @@
     characteristics: null
     commentdefault: null
     commentdims: null
-    defaultval: 1
+    defaultval: !valuewithconditions
+        '[[nspden]]==4': 4
+        defaultval: 1
     definition: KPoinTs OPTion
     dimensions: scalar
     excludes: null
@@ -13283,8 +13285,8 @@
         Take into account all the symmetries EXCEPT the time-reversal symmetry
         to generate the k points in the Irreducible Brillouin Zone, with the appropriate weights.
            <br />
-           This has to be used when performing PAW calculations including
-        spin-orbit coupling ([[pawspnorb]]/=0)
+           This has to be used when performing calculations with non-collinear magnetism allowed
+           ([[nspden]]=4)
           </li>
           <li>
            A negative value =&gt;
@@ -18749,7 +18751,9 @@
     characteristics: null
     commentdefault: null
     commentdims: null
-    defaultval: 0
+    defaultval: !valuewithconditions
+        '[[nspinor]]==2': 1
+        defaultval: 0
     definition: PAW - option for SPiN-ORBit coupling
     dimensions: scalar
     excludes: null
@@ -18762,11 +18766,13 @@
          <b>
           spin-orbit coupling
          </b>
-         can be added without the use
-        of specific PAW datasets (pseudopotentials).
+         can be added without the use of specific PAW datasets (pseudopotentials). 
          <br />
          If [[pawspnorb]]=1, spin-orbit will be added.
          <br />
+         If the wavefunction is spinorial (that is, if [[spinor]]=2),
+         there is no reason not to include the spin-orbit interaction, so that the default value of [[pawspnorb]]
+         becomes 1 when [[spinor]]=2.
          <br />
          Note that only the all-electron "on-site" contribution to the Hamiltonian is taken into account;
         this is a very good approximation but requires the
@@ -18790,7 +18796,7 @@
           <br />
          </div>
          <br />
-         Also note that, when spin-orbit coupling is activated, the time-reversal symmetry might be broken.
+         Also note that, when spin-orbit coupling is activated and there is some magnetization [[nspden]]=4, the time-reversal symmetry is broken.
          <br />
          The use of [[kptopt]]=1 or [[kptopt]]=2 is thus
         forbidden. It is advised to use [[kptopt]]=3 (no symmetry used to generate k-points)
