@@ -18770,9 +18770,9 @@
          <br />
          If [[pawspnorb]]=1, spin-orbit will be added.
          <br />
-         If the wavefunction is spinorial (that is, if [[spinor]]=2),
+         If the wavefunction is spinorial (that is, if [[nspinor]]=2),
          there is no reason not to include the spin-orbit interaction, so that the default value of [[pawspnorb]]
-         becomes 1 when [[spinor]]=2.
+         becomes 1 when [[nspinor]]=2.
          <br />
          Note that only the all-electron "on-site" contribution to the Hamiltonian is taken into account;
         this is a very good approximation but requires the
