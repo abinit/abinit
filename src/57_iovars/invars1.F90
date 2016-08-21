@@ -362,7 +362,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
 !Has to read pawspnorb now, in order to adjust nspinor
 !Also, if nspinor=1, turn on spin-orbit coupling by default, here for the PAW case. NC case is treated elsewhere.
- if ((dtset%usepaw>0)then
+ if (dtset%usepaw>0)then
 !  Change the default value
    if(dtset%nspinor==2)dtset%pawspnorb=1
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pawspnorb',tread,'INT')
