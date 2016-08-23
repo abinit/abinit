@@ -470,7 +470,7 @@ AC_DEFUN([ABI_CONNECT_TRIO],[
           fi
 
           if test "${abi_trio_netcdf_mpi}" = "yes"; then
-            AC_DEFINE([HAVE_NETCDF_MPI],1,
+            AC_DEFINE([HAVE_TRIO_NETCDF_MPI],1,
               [Define to 1 if you have MPI-IO support in the NetCDF library.])
           fi
           ;;
