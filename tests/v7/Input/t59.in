@@ -110,7 +110,7 @@
 #%% [setup]
 #%% executable = abinit
 #%% test_chain = t58.in, t59.in
-#%% need_cpp_vars = HAVE_NETCDF
+#%% need_cpp_vars = HAVE_TRIO_NETCDF
 #%% [shell] 
 #%% post_commands = 
 #%% [files]

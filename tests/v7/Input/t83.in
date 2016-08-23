@@ -76,7 +76,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_NETCDF
+#%% need_cpp_vars = HAVE_TRIO_NETCDF
 #%% [shell] 
 #%% post_commands = 
 #%% [files]

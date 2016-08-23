@@ -35,7 +35,7 @@ spinat  1.0 0.0 0.0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_LIBXC
+#%% need_cpp_vars = HAVE_DFT_LIBXC
 #%% [files]
 #%% psp_files= 83bi.psphgh
 #%% [paral_info]

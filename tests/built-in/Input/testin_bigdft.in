@@ -58,7 +58,7 @@ ecut   50           # This cut-off is too low for real calculations
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_BIGDFT
+#%% need_cpp_vars = HAVE_DFT_BIGDFT
 #%% [files]
 #%% psp_files= 01h.pspgth
 #%% [paral_info]

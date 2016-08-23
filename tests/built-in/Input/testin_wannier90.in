@@ -41,7 +41,7 @@ istwfk 8*1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_WANNIER90
+#%% need_cpp_vars = HAVE_DFT_WANNIER90
 #%% [files]
 #%% psp_files= 31ga.pspnc, 33as.pspnc
 #%% extra_inputs = testin_wannier90o_w90.win
