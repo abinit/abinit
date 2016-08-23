@@ -55,15 +55,15 @@
 #  define BOUNDS(LBND,UBND) LBND : UBND
 
 /* libXC support */
-#  if defined HAVE_LIBXC
-#    define LIBPAW_HAVE_LIBXC HAVE_LIBXC
+#  if defined HAVE_DFT_LIBXC
+#    define LIBPAW_HAVE_LIBXC HAVE_DFT_LIBXC
 #  else
 #    undef LIBPAW_HAVE_LIBXC
 #  endif
 
 /* Netcdf support */
-#  if defined HAVE_NETCDF
-#    define LIBPAW_HAVE_NETCDF HAVE_NETCDF
+#  if defined HAVE_TRIO_NETCDF
+#    define LIBPAW_HAVE_NETCDF HAVE_TRIO_NETCDF
 #  else
 #    undef LIBPAW_HAVE_NETCDF
 #  endif

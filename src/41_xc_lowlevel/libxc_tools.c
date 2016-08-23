@@ -25,7 +25,7 @@
 
 #include <stdlib.h>
 
-#if defined HAVE_LIBXC
+#if defined HAVE_DFT_LIBXC
 
 #include "xc.h"
 #include "xc_config.h"

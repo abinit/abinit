@@ -2,7 +2,7 @@
 
 #: List of CPP variables that should be defined in config.h in order to enable this suite.
 need_cpp_vars = [
-"HAVE_BIGDFT",
+"HAVE_DFT_BIGDFT",
 "HAVE_MPI",
 ]
 

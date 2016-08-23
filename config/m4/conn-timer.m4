@@ -137,6 +137,19 @@ AC_DEFUN([ABI_CONNECT_TIMER],[
 
   fi
 
+  dnl Transmit serial status to the source code
+  if test "${abi_timer_serial}" = "yes"; then
+    AC_DEFINE([HAVE_TIMER],1,[Define to 1 if you have an optimized timer library.])
+    AC_DEFINE([HAVE_TIMER_SERIAL],1,[Define to 1 if you have an optimized serial timer library.])
+  elif test "${with_timer_flavor}" != "none"; then
+    lib_timer_flavor="broken"
+  fi
+
+  dnl Transmit MPI status to the source code
+  if test "${abi_timer_mpi}" = "yes"; then
+    AC_DEFINE([HAVE_TIMER_MPI],1,[Define to 1 if you have an optimized MPI-parallel timer library.])
+  fi
+
   dnl Add rt support if available on the machine.
   AC_LANG_PUSH(C)
   AC_CHECK_HEADERS([time.h])

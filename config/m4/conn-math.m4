@@ -205,6 +205,19 @@ AC_DEFUN([ABI_CONNECT_MATH],[
 
   fi
 
+  dnl Transmit serial status to the source code
+  if test "${abi_math_serial}" = "yes"; then
+    AC_DEFINE([HAVE_MATH],1,[Define to 1 if you have an optimized math library.])
+    AC_DEFINE([HAVE_MATH_SERIAL],1,[Define to 1 if you have an optimized serial math library.])
+  elif test "${with_math_flavor}" != "none"; then
+    lib_math_flavor="broken"
+  fi
+
+  dnl Transmit MPI status to the source code
+  if test "${abi_math_mpi}" = "yes"; then
+    AC_DEFINE([HAVE_MATH_MPI],1,[Define to 1 if you have an optimized MPI-parallel math library.])
+  fi
+
   dnl Restore build environment
   AC_LANG_POP([Fortran])
   LIBS="${abi_saved_LIBS}"

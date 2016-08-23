@@ -433,7 +433,7 @@ AC_DEFUN([ABI_CONNECT_DFT],[
           fi
           if test "${abi_dft_atompaw_serial}" = "yes" -o \
                   "${enable_fallbacks}" = "yes"; then
-            AC_DEFINE([HAVE_ATOMPAW],1,
+            AC_DEFINE([HAVE_DFT_ATOMPAW],1,
               [Define to 1 if you have the AtomPAW library.])
             abi_test_atompaw="yes"
           fi
@@ -551,7 +551,7 @@ AC_DEFUN([ABI_CONNECT_DFT],[
             lib_wannier90_incs="${abi_dft_wannier90_incs}"
             lib_wannier90_libs="${abi_dft_wannier90_libs}"
             if test "${abi_dft_wannier90_v1}" = "yes"; then
-              AC_DEFINE([HAVE_WANNIER90_V1],1,
+              AC_DEFINE([HAVE_DFT_WANNIER90_V1],1,
                 [Define to 1 if you have the Wannier90 V1.x library.])
             fi
           fi
@@ -564,7 +564,7 @@ AC_DEFUN([ABI_CONNECT_DFT],[
             abi_dft_wannier90_prereqs="no"
             abi_dft_wannier90_serial="no"
             abi_dft_wannier90_mpi="no"
-            AC_DEFINE([HAVE_WANNIER90_V1],0,
+            AC_DEFINE([HAVE_DFT_WANNIER90_V1],0,
               [Define to 1 if you have the Wannier90 V1.x library.])
           fi
           ;;

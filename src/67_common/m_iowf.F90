@@ -969,7 +969,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      write(msg,'(2(a,f8.2))')" collective ncwrite, cpu: ",cpu,", wall: ",wall
      call wrtout(std_out,msg,"PERS")
 #endif 
-! HAVE_NETCDF
+! HAVE_TRIO_NETCDF
    else ! single_writer
      if (nproc_cell > 1) then
        MSG_WARNING("Slow version without MPI-IO support. Processors send data to master...")
@@ -1237,7 +1237,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      write(msg,'(2(a,f8.2))')"scattered ncwrite, cpu: ",cpu,", wall: ",wall
      call wrtout(std_out,msg,"PERS")
 #endif 
-! HAVE_NETCDF
+! HAVE_TRIO_NETCDF
    end if !nctk_has_mpiio
  end if
 
@@ -1349,7 +1349,7 @@ end subroutine ncwrite_eigen1_occ
 !!***
 
 #endif 
-! HAVE_NETCDF
+! HAVE_TRIO_NETCDF
 
 !----------------------------------------------------------------------
 
