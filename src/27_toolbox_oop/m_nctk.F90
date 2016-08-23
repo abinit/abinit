@@ -494,7 +494,7 @@ subroutine nctk_test_mpiio()
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_NETCDF_MPI
+#ifdef HAVE_TRIO_NETCDF_MPI
  integer,parameter :: master=0
  integer :: ierr,ncid,ncerr
  character(len=500) :: msg
@@ -505,7 +505,7 @@ subroutine nctk_test_mpiio()
 
  nctk_has_mpiio = .False.
 
-#ifdef HAVE_NETCDF_MPI
+#ifdef HAVE_TRIO_NETCDF_MPI
  if (xmpi_comm_rank(xmpi_world) == master) then
    ! Try to open a file with hdf5.
    apath = pick_aname()
@@ -690,7 +690,7 @@ integer function nctk_open_read(ncid, path, comm) result(ncerr)
 ! *********************************************************************
 
  if (nctk_has_mpiio) then
-#ifdef HAVE_NETCDF_MPI
+#ifdef HAVE_TRIO_NETCDF_MPI
    ncerr = nf90_open(path, mode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_nowrite),&
                      comm=comm, info=xmpio_info, ncid=ncid)
 #else
@@ -752,7 +752,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  ! Always use mpiio mode (i.e. hdf5) if available so that one perform parallel parallel IO
  if (nctk_has_mpiio) then
    ncerr = nf90_einval
-#ifdef HAVE_NETCDF_MPI
+#ifdef HAVE_TRIO_NETCDF_MPI
    call wrtout(std_out, sjoin("Creating HDf5 file: ", path), "COLL")
    ! Believe it or not, I have to use xmpi_comm_self even in sequential to avoid weird SIGSEV in the MPI layer!
    ncerr = nf90_create(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), ncid=ncid, &
@@ -826,7 +826,7 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
  end if
 
  if (xmpi_comm_size(comm) > 1) then
-#ifdef HAVE_NETCDF_MPI
+#ifdef HAVE_TRIO_NETCDF_MPI
    ncerr = nf90_open_par(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
      comm=comm, info=xmpio_info, ncid=ncid)
    NCF_CHECK_MSG(ncerr, sjoin("nf90_open_par: ", path))
@@ -1071,7 +1071,7 @@ integer function nctk_set_collective(ncid, varid) result(ncerr)
 ! *********************************************************************
 
   ncerr = nf90_einval
-#ifdef HAVE_NETCDF_MPI
+#ifdef HAVE_TRIO_NETCDF_MPI
   ncerr = nf90_var_par_access(ncid, varid, nf90_collective)
 #else
   MSG_ERROR("nctk_set_collective should not be called if NETCDF does not support MPI-IO")
@@ -2197,7 +2197,7 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
      call wrtout(std_out, strcat("nctk_write_datar: using MPI-IO to write ", varname, path), "COLL")
 
      ncerr = nf90_einval
-#ifdef HAVE_NETCDF_MPI
+#ifdef HAVE_TRIO_NETCDF_MPI
      select case(my_action)
      case ("open") 
        ncerr = nf90_open(path, mode=nf90_write, comm=comm_fft, info=xmpio_info, ncid=ncid)
@@ -2395,7 +2395,7 @@ integer function nctk_read_datar(path,varname,ngfft,cplex,nfft,nspden,&
      !ncerr = nf90_open_par(path, nf90_nowrite, 
      ! Don't know why but the format is not autodected!
      ncerr = nf90_einval
-#ifdef HAVE_NETCDF_MPI
+#ifdef HAVE_TRIO_NETCDF_MPI
      ncerr = nf90_open(path, mode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_nowrite),&
                        comm=comm_fft, info=xmpio_info, ncid=ncid)
 #endif

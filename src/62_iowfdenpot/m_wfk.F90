@@ -612,7 +612,7 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
    !NCF_CHECK(nctk_open_modify(wfk%fh, wfk%fname, wfk%comm))
 
    if (nctk_has_mpiio) then
-#ifdef HAVE_NETCDF_MPI
+#ifdef HAVE_TRIO_NETCDF_MPI
      ncerr = nf90_create(wfk%fname, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
          comm=wfk%comm, info=xmpio_info, ncid=wfk%fh)
 

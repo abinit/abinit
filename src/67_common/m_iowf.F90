@@ -795,7 +795,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      ! master opens the file and write the metadata.
      if (xmpi_comm_rank(comm_cell) == master) then
        ncerr = nf90_einval
-#ifdef HAVE_NETCDF_MPI
+#ifdef HAVE_TRIO_NETCDF_MPI
        ncerr = nf90_create(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
          comm=xmpi_comm_self, info=xmpio_info, ncid=ncid)
 #endif
@@ -887,7 +887,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      if (comm_mpiio == xmpi_comm_null) goto 100
 
      ncerr = nf90_einval
-#ifdef HAVE_NETCDF_MPI
+#ifdef HAVE_TRIO_NETCDF_MPI
      ncerr = nf90_open(path, mode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write),&
                        comm=comm_mpiio, info=xmpio_info, ncid=ncid)
 #endif
@@ -912,7 +912,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        call wrtout(std_out,"Using collective IO for the CGs","COLL")
        ! Use collective IO for the CGs
        ncerr = nf90_einval
-#ifdef HAVE_NETCDF_MPI
+#ifdef HAVE_TRIO_NETCDF_MPI
        ncerr = nf90_var_par_access(ncid, cg_varid, nf90_collective)
 #endif
        NCF_CHECK(ncerr)
@@ -1073,7 +1073,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      ! master write the metadata.
      if (xmpi_comm_rank(comm_cell) == master) then
        ncerr = nf90_einval
-#ifdef HAVE_NETCDF_MPI
+#ifdef HAVE_TRIO_NETCDF_MPI
        ncerr = nf90_create(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
          comm=xmpi_comm_self, info=xmpio_info, ncid=ncid)
 #endif
@@ -1095,7 +1095,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      ! Reopen the file inside comm_cell
      call xmpi_barrier(comm_cell)
      ncerr = nf90_einval
-#ifdef HAVE_NETCDF_MPI
+#ifdef HAVE_TRIO_NETCDF_MPI
      ncerr = nf90_open(path, mode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
        comm=comm_cell, info=xmpio_info, ncid=ncid)
 #endif
