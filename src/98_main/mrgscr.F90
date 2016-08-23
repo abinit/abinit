@@ -58,7 +58,7 @@ program mrgscr
  use m_build_info
  use m_errors
  use m_nctk
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  use netcdf 
 #endif
  use m_hdr

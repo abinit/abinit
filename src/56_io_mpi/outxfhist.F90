@@ -56,7 +56,7 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
  use m_xmpi
  use m_wffile
  use m_errors
-#if defined HAVE_NETCDF
+#if defined HAVE_TRIO_NETCDF
  use netcdf
 #endif
 
@@ -79,7 +79,7 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
  real(dp),allocatable :: xfhist_tmp(:)
  character(len=500) :: message
 !no_abirules
-#if defined HAVE_NETCDF
+#if defined HAVE_TRIO_NETCDF
  integer :: ncerr
  integer :: nxfh_id, mxfh_id, xfdim2_id, dim2inout_id, dimr3_id,xfhist_id
  integer :: nxfh_tmp,mxfh_tmp,xfdim2_tmp,dim2inout_tmp
@@ -135,7 +135,7 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
      end do
      ABI_DEALLOCATE(xfhist_tmp)
 
-#if defined HAVE_NETCDF
+#if defined HAVE_TRIO_NETCDF
    else if (wff2%iomode == IO_MODE_NETCDF) then
 !    check if nxfh and xfhist are defined
      ncerr = nf90_inq_dimid(ncid=ncid_hdr,name="nxfh",dimid=nxfh_id)
@@ -227,7 +227,7 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
      call xderiveRead(wff2,ab_xfh%nxfh,ierr)
      call xderiveRRecEnd(wff2,ierr)
 
-#if defined HAVE_NETCDF
+#if defined HAVE_TRIO_NETCDF
    else if (wff2%iomode == IO_MODE_NETCDF) then
      ncerr = nf90_inq_dimid(ncid=ncid_hdr,name="nxfh",dimid=nxfh_id)
      NCF_CHECK_MSG(ncerr," outxfhist : inquire nxfh")
@@ -269,7 +269,7 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 
 !  FIXME: should this be inside the if not mpi as above for options 1 and 2?
 !  it is placed here because the netcdf read is a single operation
-#if defined HAVE_NETCDF
+#if defined HAVE_TRIO_NETCDF
    if (wff2%iomode == IO_MODE_NETCDF) then
      ncerr = nf90_inq_dimid(ncid=ncid_hdr,name="nxfh",dimid=nxfh_id)
      NCF_CHECK_MSG(ncerr," outxfhist : inquire nxfh")

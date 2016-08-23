@@ -65,13 +65,13 @@ subroutine wvl_setngfft(me_wvl, mgfft, nfft, ngfft, nproc_wvl, n1i, n2i, n3i,n3d
 
 !Local variables-------------------------------
 !scalars
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  character(len=500) :: message
 #endif
 
 ! *************************************************************************
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  write(message, '(a,a,a,a)' ) ch10,&
 & ' wvl_setngfft : Changing the FFT grid definition.'
  call wrtout(std_out,message,'COLL')

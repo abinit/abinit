@@ -44,7 +44,7 @@ subroutine paw2wvl_ij(option,paw_ij,wvl)
  use m_errors
  use m_paw_ij, only : paw_ij_type
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  use BigDFT_API, only : nullify_paw_ij_objects
 #endif
 
@@ -61,7 +61,7 @@ subroutine paw2wvl_ij(option,paw_ij,wvl)
  type(wvl_internal_type), intent(inout)::wvl
  type(paw_ij_type),intent(in) :: paw_ij(:)
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  integer :: iatom,iaux,my_natom
  character(len=500) :: message
 #endif
@@ -70,7 +70,7 @@ subroutine paw2wvl_ij(option,paw_ij,wvl)
  
  DBG_ENTER("COLL")
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  my_natom=size(paw_ij)
 
 !Option==1: allocate and copy

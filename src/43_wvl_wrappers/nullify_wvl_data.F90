@@ -45,7 +45,7 @@ subroutine nullify_wvl_data(wvl)
  use m_errors
  use defs_basis
  use defs_wvltypes
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
   use BigDFT_API, only : &
 & nullify_gaussian_basis,nullify_local_zone_descriptors,&
 & nullify_orbitals_data,comms_cubic,comms_linear_null, &
@@ -71,7 +71,7 @@ subroutine nullify_wvl_data(wvl)
  
 ! *************************************************************************
  
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 
  DBG_ENTER("COLL")
 
@@ -132,7 +132,7 @@ subroutine nullify_wvl_data(wvl)
  ABI_UNUSED(wvl%den%symObj)
 #endif
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  contains
 !!***
 

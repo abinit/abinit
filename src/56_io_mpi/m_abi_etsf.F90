@@ -31,7 +31,7 @@ module m_abi_etsf
  use m_atomdata
  use m_nctk
  use iso_c_binding
-#ifdef HAVE_ETSF_IO
+#ifdef HAVE_TRIO_ETSF_IO
  use etsf_io
 #endif
  
@@ -41,7 +41,7 @@ module m_abi_etsf
 
  private
 
-#ifdef HAVE_ETSF_IO
+#ifdef HAVE_TRIO_ETSF_IO
  public :: abi_etsf_dims_init   
 #endif
  public :: abi_etsf_init
@@ -67,7 +67,7 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 
-#ifdef HAVE_ETSF_IO
+#ifdef HAVE_TRIO_ETSF_IO
 
 subroutine etsf_dims_nullify(Dims,dimlen)
 
@@ -170,7 +170,7 @@ end subroutine etsf_dims_nullify
 !!
 !! SOURCE
 
-#ifdef HAVE_ETSF_IO
+#ifdef HAVE_TRIO_ETSF_IO
 
 subroutine abi_etsf_dims_init(dims, dtset, itype, psps, wfs)
 
@@ -213,7 +213,7 @@ subroutine abi_etsf_dims_init(dims, dtset, itype, psps, wfs)
    dims%max_number_of_coefficients      = dtset%mpw
    dims%max_number_of_basis_grid_points = etsf_no_dimension
  else
-#ifdef HAVE_BIGDFT
+#ifdef HAVE_DFT_BIGDFT
    dims%max_number_of_coefficients      = wfs%ks%lzd%Glr%wfd%nvctr_c + 7 * wfs%ks%lzd%Glr%wfd%nvctr_f
    dims%max_number_of_basis_grid_points = wfs%ks%lzd%Glr%wfd%nvctr_c
 #else
@@ -227,7 +227,7 @@ subroutine abi_etsf_dims_init(dims, dtset, itype, psps, wfs)
    dims%number_of_grid_points_vector2  = dtset%ngfftdg(2)
    dims%number_of_grid_points_vector3  = dtset%ngfftdg(3)
  else if (dtset%usewvl==1) then
-#ifdef HAVE_BIGDFT
+#ifdef HAVE_DFT_BIGDFT
 !In the case of BigDFT, the grid size is not defined by ngfft.
    dims%number_of_grid_points_vector1  = wfs%ks%lzd%Glr%d%n1 * 2
    dims%number_of_grid_points_vector2  = wfs%ks%lzd%Glr%d%n2 * 2
@@ -332,7 +332,7 @@ subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
  integer,intent(in) :: lmn_size(psps%npsp)
 
 !Local variables-------------------------------
-#ifdef HAVE_ETSF_IO
+#ifdef HAVE_TRIO_ETSF_IO
 !scalars
  integer :: ncid,var_main,usewvl
  logical :: ok
@@ -470,7 +470,7 @@ subroutine ini_wf_etsf(ncid,usewvl,lmn_size,npsp,ntypat)
  integer,intent(in) :: lmn_size(npsp)
 
 !Local variables-------------------------------
-#ifdef HAVE_ETSF_IO
+#ifdef HAVE_TRIO_ETSF_IO
  integer :: ncerr
 
 ! *************************************************************************

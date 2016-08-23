@@ -34,7 +34,7 @@ MODULE m_haydock
  use m_haydock_io
  use m_linalg_interfaces
  use m_ebands
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  use netcdf
 #endif
 
@@ -471,7 +471,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 
    ! Write MDF file with the final results.
    ! FIXME: It won't work if prtdos == True
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
      NCF_CHECK(nctk_open_create(ncid, trim(BS_files%out_basename)//"_MDF.nc", xmpi_comm_self))
      NCF_CHECK(crystal_ncwrite(Cryst, ncid))
      NCF_CHECK(ebands_ncwrite(QP_bst, ncid))

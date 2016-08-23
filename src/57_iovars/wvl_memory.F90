@@ -61,7 +61,7 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
  use m_errors
  use m_xmpi
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  use BigDFT_API, only: MemoryEstimator, createWavefunctionsDescriptors, deallocate_lr, &
       & atomic_info, memory_estimation
 #endif
@@ -86,7 +86,7 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
   type(pspheader_type),intent(in) :: pspheads(npsp)
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
   !scalars
   integer :: ityp, i, mu, nstates, me, nproc, comm
   character(len=500) :: message
@@ -101,7 +101,7 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
 
 ! **************************************************************************
  
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 
  comm=mpi_enreg%comm_wvl
  me=xmpi_comm_rank(comm)

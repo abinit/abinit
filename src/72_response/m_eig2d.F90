@@ -33,7 +33,7 @@ MODULE m_eig2d
  use m_errors
  use m_profiling_abi
  use m_nctk
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  use netcdf
 #endif
 
@@ -253,7 +253,7 @@ subroutine eigr2d_ncwrite(eigr2d,iqpt,wtq,ncid)
  type(eigr2d_t),intent(in) :: eigr2d
 
 !Local variables-------------------------------
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  integer :: ncerr
  integer :: cplex,cart_dir,one_dim
 
@@ -529,7 +529,7 @@ subroutine fan_ncwrite(fan2d,iqpt,wtq,ncid)
  type(fan_t),intent(in) :: fan2d
 
 !Local variables-------------------------------
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  integer :: ncerr
  integer :: cplex,cart_dir,one_dim
 
@@ -628,7 +628,7 @@ subroutine gkk_ncwrite(gkk2d,iqpt,wtq,ncid)
  type(gkk_t),intent(in) :: gkk2d
 
 !Local variables-------------------------------
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  integer :: cplex,one_dim,ncerr,vid_
 
 ! *************************************************************************

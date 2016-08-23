@@ -32,7 +32,7 @@ module m_psps
  use m_errors
  use m_xmpi
  use m_nctk
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  use netcdf
 #endif
 
@@ -900,7 +900,7 @@ subroutine psps_ncwrite(psps, path)
 
 ! *************************************************************************
 
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
 
  ! Define dimensions

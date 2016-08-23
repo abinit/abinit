@@ -111,7 +111,7 @@ contains
 
 subroutine wvl_vtrial_abi2big(opt,vtrial,wvl_den)
     
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
   use BigDFT_API, only : KS_POTENTIAL
 #endif
 
@@ -129,7 +129,7 @@ subroutine wvl_vtrial_abi2big(opt,vtrial,wvl_den)
  type(wvl_denspot_type),intent(inout) :: wvl_den
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  integer :: shiftV
  character(len=100) :: message
 #endif
@@ -138,7 +138,7 @@ subroutine wvl_vtrial_abi2big(opt,vtrial,wvl_den)
  
  DBG_ENTER("COLL")
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 ! write(message,'(2a)') ch10,' wvl_vtrial_abi2big: but why are you copying me :..o('
 ! call wrtout(std_out,message,'COLL')
 
@@ -205,7 +205,7 @@ end subroutine wvl_vtrial_abi2big
 
 subroutine wvl_rho_abi2big(opt,rhor,wvl_den)
     
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
   use BigDFT_API, only : ELECTRONIC_DENSITY
 #endif
 
@@ -223,7 +223,7 @@ subroutine wvl_rho_abi2big(opt,rhor,wvl_den)
  type(wvl_denspot_type), intent(inout) :: wvl_den
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  character(len=100) :: message
 #endif
  
@@ -231,7 +231,7 @@ subroutine wvl_rho_abi2big(opt,rhor,wvl_den)
 
  DBG_ENTER("COLL")
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 ! write(message,'(2a)') ch10,'wvl_rho_abi2big: but why are you copying me :..o('
 ! call wrtout(std_out,message,'COLL')
 
@@ -294,7 +294,7 @@ end subroutine wvl_rho_abi2big
 
 subroutine wvl_vhartr_abi2big(opt,vhartr,wvl_den)
     
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
   use BigDFT_API, only : HARTREE_POTENTIAL
 #endif
 
@@ -312,7 +312,7 @@ subroutine wvl_vhartr_abi2big(opt,vhartr,wvl_den)
  type(wvl_denspot_type), intent(inout) :: wvl_den
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  integer :: shiftV
  character(len=100) :: message
 #endif
@@ -321,7 +321,7 @@ subroutine wvl_vhartr_abi2big(opt,vhartr,wvl_den)
  
  DBG_ENTER("COLL")
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 ! write(message,'(2a)') ch10, 'wvl_vhartr_abi2big: but why are you copying me :..o('
 ! call wrtout(std_out,message,'COLL')
 
@@ -401,7 +401,7 @@ subroutine wvl_vxc_abi2big(opt,vxc,wvl_den)
  type(wvl_denspot_type), intent(inout) :: wvl_den
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  integer :: shiftV
 #endif
  
@@ -409,7 +409,7 @@ subroutine wvl_vxc_abi2big(opt,vxc,wvl_den)
 
  DBG_ENTER("COLL")
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 ! write(message,'(2a)') ch10, 'wvl_vxc_abi2big: but why are you copying me :..o('
 ! call wrtout(std_out,message,'COLL')
 
@@ -469,7 +469,7 @@ subroutine wvl_occ_abi2big(mband,nkpt,nsppol,occ,opt,wvl_wfs)
  type(wvl_wf_type), intent(inout) :: wvl_wfs
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  integer :: norb,norbd,norbu,ii
  character(len=100) :: message
 #endif
@@ -478,7 +478,7 @@ subroutine wvl_occ_abi2big(mband,nkpt,nsppol,occ,opt,wvl_wfs)
  
  DBG_ENTER("COLL")
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 !PENDING: I am not sure this will work for nsppol==2
 !check also the parallel case.
 
@@ -561,7 +561,7 @@ subroutine wvl_eigen_abi2big(mband,nkpt,nsppol,eigen,opt,wvl_wfs)
  type(wvl_wf_type), intent(inout) :: wvl_wfs
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  integer :: ii,norb,norbd,norbu
  character(len=100) :: message
 #endif
@@ -570,7 +570,7 @@ subroutine wvl_eigen_abi2big(mband,nkpt,nsppol,eigen,opt,wvl_wfs)
  
  DBG_ENTER("COLL")
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 !PENDING: I am not sure this will work for nsppol==2
 !check also the parallel case.
 
@@ -638,7 +638,7 @@ end subroutine wvl_eigen_abi2big
 
 subroutine wvl_occopt_abi2big(occopt_abi,occopt_big,opt)
     
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  use BigDFT_API, only : &
 &  SMEARING_DIST_FERMI, SMEARING_DIST_COLD1, SMEARING_DIST_COLD2,&
 &  SMEARING_DIST_METPX
@@ -657,7 +657,7 @@ subroutine wvl_occopt_abi2big(occopt_abi,occopt_big,opt)
  integer , intent(in)     :: opt
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  character(len=500) :: message
 #endif
  
@@ -665,7 +665,7 @@ subroutine wvl_occopt_abi2big(occopt_abi,occopt_big,opt)
  
  DBG_ENTER("COLL")
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 
  if(opt==1) then !ABINIT -> BIGDFT
    if(occopt_abi==3) then
@@ -755,14 +755,14 @@ subroutine wvl_rhov_abi2big_2D_4D(opt,rhov_abi,rhov_big,shift)
  real(dp) :: rhov_abi(:,:),rhov_big(:,:,:,:)
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  integer :: nfft_abi,nfft_big,nspden,shift_
  character(len=100) :: message
 #endif
  
 ! *************************************************************************
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  nspden=size(rhov_abi,2)
  if (size(rhov_big,4)/=nspden) then
    message='wvl_rhov_abi2big: ABINIT and BigDFT objects do not have the same nspden'
@@ -821,14 +821,14 @@ subroutine wvl_rhov_abi2big_1D_4D(opt,rhov_abi,rhov_big,shift)
  real(dp) :: rhov_abi(:),rhov_big(:,:,:,:)
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  integer :: nfft_abi,nfft_big,shift_
  character(len=100) :: message
 #endif
  
 ! *************************************************************************
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  if (size(rhov_big,4)/=1) then
    message='wvl_rhov_abi2big: ABINIT and BigDFT objects do not have the same nspden'
    MSG_BUG(message)
@@ -886,14 +886,14 @@ subroutine wvl_rhov_abi2big_2D_2D(opt,rhov_abi,rhov_big,shift)
  real(dp) :: rhov_abi(:,:),rhov_big(:,:)
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  integer :: nfft_abi,nfft_big,nspden,shift_
  character(len=100) :: message
 #endif
  
 ! *************************************************************************
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  nspden=size(rhov_abi,2)
  if (size(rhov_big,2)/=nspden) then
    message='wvl_rhov_abi2big: ABINIT and BigDFT objects do not have the same nspden'
@@ -952,14 +952,14 @@ subroutine wvl_rhov_abi2big_1D_2D(opt,rhov_abi,rhov_big,shift)
  real(dp) :: rhov_abi(:),rhov_big(:,:)
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  integer :: nfft_abi,nfft_big,shift_
  character(len=100) :: message
 #endif
  
 ! *************************************************************************
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  if (size(rhov_big,2)/=1) then
    message='wvl_rhov_abi2big: ABINIT and BigDFT objects do not have the same nspden'
    MSG_BUG(message)
@@ -1017,13 +1017,13 @@ subroutine wvl_rhov_abi2big_2D_1D(opt,rhov_abi,rhov_big,shift)
  real(dp) :: rhov_abi(:,:),rhov_big(:)
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  integer :: nfft_abi,nfft_big,nspden,shift_
 #endif
  
 ! *************************************************************************
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  nspden=size(rhov_abi,2)
  nfft_abi=size(rhov_abi)/nspden ; nfft_big=size(rhov_big)/nspden
  shift_=0;if (present(shift)) shift_=shift
@@ -1078,13 +1078,13 @@ subroutine wvl_rhov_abi2big_1D_1D(opt,rhov_abi,rhov_big,shift)
  real(dp) :: rhov_abi(:),rhov_big(:)
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  integer :: nfft_abi,nfft_big,shift_
 #endif
  
 ! *************************************************************************
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  nfft_abi=size(rhov_abi) ; nfft_big=size(rhov_big)
  shift_=0;if (present(shift)) shift_=shift
  call wvl_rhov_abi2big_gen(nfft_abi,nfft_big,1,opt,rhov_abi,rhov_big,shift_)
@@ -1150,7 +1150,7 @@ subroutine wvl_rhov_abi2big_gen(nfft_abi,nfft_big,nspden,opt,rhov_abi,rhov_big,s
  real(dp) :: rhov_abi(nfft_abi,nspden),rhov_big(nfft_big,nspden)
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  integer :: ifft,jfft,nfft
  real(dp) :: tmpUp,tmpDown,tmpTot
  character(len=100) :: message
@@ -1161,7 +1161,7 @@ subroutine wvl_rhov_abi2big_gen(nfft_abi,nfft_big,nspden,opt,rhov_abi,rhov_big,s
 
  DBG_ENTER("COLL")
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 !No objects to copy; in BigDFT by default they have size of 1!
  if(size(rhov_big)==1.and.size(rhov_abi)==0) return
 

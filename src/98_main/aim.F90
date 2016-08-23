@@ -46,7 +46,7 @@ program aim
  use m_build_info
  use m_errors
  use m_nctk
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  use netcdf
 #endif
 
@@ -203,7 +203,7 @@ program aim
        write(std_out,"(3a)")"- File: ",trim(dnfile)," does not exist but found netcdf file with similar name."
        dnfile = nctk_ncify(dnfile)
        aim_iomode = IO_MODE_ETSF
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
        NCF_CHECK(nctk_open_read(untad, dnfile, xmpi_comm_self))
 #else
        MSG_ERROR("Cannot read netcdf file because netcdf support in Abinit is missing.")

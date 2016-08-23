@@ -46,7 +46,7 @@ subroutine wvl_psitohpsi(alphamix,eexctX, eexcu, ehart, ekin_sum, epot_sum, epro
  use m_profiling_abi
  use m_errors
  use m_abi2big, only: wvl_vxc_abi2big,wvl_vtrial_abi2big
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  use BigDFT_API, only: psitohpsi, KS_POTENTIAL, total_energies
 #endif
 
@@ -76,7 +76,7 @@ subroutine wvl_psitohpsi(alphamix,eexctX, eexcu, ehart, ekin_sum, epot_sum, epro
 
 !Local variables-------------------------------
 !scalars
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  character(len=500) :: message
  integer :: linflag = 0
  character(len=3), parameter :: unblock_comms = "OFF"
@@ -89,7 +89,7 @@ subroutine wvl_psitohpsi(alphamix,eexctX, eexcu, ehart, ekin_sum, epot_sum, epro
 
  DBG_ENTER("COLL")
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 
 !write(*,*)'wvl_psitohpsi l95,erase me'
 !ifile=me+40

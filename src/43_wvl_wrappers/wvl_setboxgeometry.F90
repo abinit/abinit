@@ -53,7 +53,7 @@ subroutine wvl_setBoxGeometry(prtvol, radii, rprimd, xred, wvl, wvl_crmult, wvl_
  use m_profiling_abi
  use m_errors
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  use BigDFT_API, only: system_size,nullify_locreg_descriptors
 #endif
 
@@ -77,7 +77,7 @@ subroutine wvl_setBoxGeometry(prtvol, radii, rprimd, xred, wvl, wvl_crmult, wvl_
  real(dp),intent(inout) :: rprimd(3,3),xred(:,:)
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 !scalars
  integer :: ii
  logical,parameter :: OCLconv=.false.
@@ -89,7 +89,7 @@ subroutine wvl_setBoxGeometry(prtvol, radii, rprimd, xred, wvl, wvl_crmult, wvl_
 
 ! *********************************************************************
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  if (prtvol == 0) then
    write(message, '(a,a,a,a)' ) ch10,&
 &   ' wvl_setBoxGeometry : Changing the box for wavelets computation.'

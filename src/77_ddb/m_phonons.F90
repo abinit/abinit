@@ -37,7 +37,7 @@ module m_phonons
  use m_atprj
  use m_sortph
  use m_ddb
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  use netcdf
 #endif
 
@@ -958,7 +958,7 @@ subroutine phdos_ncwrite(phdos,ncid)
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  integer :: ncerr
 
 ! *************************************************************************
@@ -1244,7 +1244,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,
    call atprj_destroy(atprj)
  end if
 
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  tmpfilename = trim(outfile_radix)//"_PHBST.nc"
  NCF_CHECK_MSG(nctk_open_create(ncid, tmpfilename, xmpi_comm_self), "Creating PHBST")
  NCF_CHECK(crystal_ncwrite(Crystal, ncid))
@@ -1422,7 +1422,7 @@ subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  integer :: nphmodes,ncerr
 
 ! *************************************************************************

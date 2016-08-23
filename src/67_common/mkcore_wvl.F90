@@ -58,7 +58,7 @@ subroutine mkcore_wvl(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
  use m_pawtab,  only : pawtab_type
  use m_xmpi,    only : xmpi_comm_size,xmpi_sum
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
   use BigDFT_API, only: ext_buffers,ind_positions
 #endif
 
@@ -94,7 +94,7 @@ subroutine mkcore_wvl(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
  type(pawrad_type),intent(in) :: pawrad(ntypat)
 
 !Local variables ------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 !scalars
 !buffer to be added at the end of the last dimension of an array to control bounds_check
  integer :: i1,i2,i3,iat,iatm,iatom,iatom_tot
@@ -127,7 +127,7 @@ subroutine mkcore_wvl(atindx1,corstr,dyfrx2,geocode,grxc,h,natom,&
 
  DBG_ENTER("COLL")
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 
  if(nspden >1) then
    write(message, '(a)')'mkcore_wvl: this is not yet generalized to npsden>1'

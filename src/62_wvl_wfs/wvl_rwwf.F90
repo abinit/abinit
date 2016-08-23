@@ -53,11 +53,11 @@ subroutine wvl_read(dtset, hdr0, hdr, mpi_enreg, option, rprimd, wff, wfs, wvl, 
  use m_profiling_abi
  use m_xmpi
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
   use BigDFT_API, only: readonewave, reformatonewave, readmywaves, &
 &                       WF_FORMAT_NONE
 #endif
-#if defined HAVE_ETSF_IO
+#if defined HAVE_TRIO_ETSF_IO
   use etsf_io
 #endif
 
@@ -86,7 +86,7 @@ subroutine wvl_read(dtset, hdr0, hdr, mpi_enreg, option, rprimd, wff, wfs, wvl, 
   real(dp), intent(in)                      :: xred(3, dtset%natom)
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
   character(len = 500)  :: message
   logical               :: reformat
   integer               :: i, iBand, iCoeff, iCoarse, iFine, bandSize
@@ -96,7 +96,7 @@ subroutine wvl_read(dtset, hdr0, hdr, mpi_enreg, option, rprimd, wff, wfs, wvl, 
   real(dp), allocatable :: xcart(:,:), psifscf(:,:,:), psigold(:,:,:,:,:,:)
   real(dp), allocatable :: xcart_old(:,:)
   real(dp)              :: hgrid_old(3), displ
-#if defined HAVE_ETSF_IO
+#if defined HAVE_TRIO_ETSF_IO
   type(etsf_basisdata) :: basis_folder
   type(etsf_main)      :: main_folder
   type(etsf_electrons) :: electrons_folder
@@ -107,7 +107,7 @@ subroutine wvl_read(dtset, hdr0, hdr, mpi_enreg, option, rprimd, wff, wfs, wvl, 
 
 ! *********************************************************************
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 
  if (abs(option) /= 1) then
    write(message,'(a,a,a,i0,a)')&
@@ -141,7 +141,7 @@ subroutine wvl_read(dtset, hdr0, hdr, mpi_enreg, option, rprimd, wff, wfs, wvl, 
 &       wfs%ks%orbs%eval(iBand), psifscf)
      end do
      ABI_DEALLOCATE(psifscf)
-#if defined HAVE_ETSF_IO
+#if defined HAVE_TRIO_ETSF_IO
    else if (wff%iomode == IO_MODE_ETSF) then
 !    Read a NetCDF file.
 !    coordinates_of_grid_points is used to store the geometric
@@ -329,10 +329,10 @@ subroutine wvl_write(dtset, eigen, mpi_enreg, option, rprimd, wff, wfs, wvl, xre
  use m_profiling_abi
  use m_xmpi
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
   use BigDFT_API, only : writeonewave,writemywaves,WF_FORMAT_NONE
 #endif
-#if defined HAVE_ETSF_IO
+#if defined HAVE_TRIO_ETSF_IO
   use etsf_io
 #endif
 
@@ -360,7 +360,7 @@ subroutine wvl_write(dtset, eigen, mpi_enreg, option, rprimd, wff, wfs, wvl, xre
   real(dp), intent(in)                      :: xred(3, dtset%natom)
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
   character(len = 500)  :: message
   integer               :: comm,me
   integer               :: iGrid, iCoeff, iCoarse, iFine
@@ -369,7 +369,7 @@ subroutine wvl_write(dtset, eigen, mpi_enreg, option, rprimd, wff, wfs, wvl, xre
   integer               :: iband
   real(dp), allocatable, target :: wvl_band(:)
   real(dp), allocatable :: xcart(:,:)
-#if defined HAVE_ETSF_IO
+#if defined HAVE_TRIO_ETSF_IO
   integer, allocatable  :: coeff_map(:,:,:)
   integer, allocatable, target :: wvl_coord(:,:), wvl_ncoeff(:)
   type(etsf_basisdata) :: basis_folder
@@ -382,7 +382,7 @@ subroutine wvl_write(dtset, eigen, mpi_enreg, option, rprimd, wff, wfs, wvl, xre
 
 ! *********************************************************************
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 
  if (abs(option) /= 2) then
    write(message,'(a,a,a,i0,a)')&
@@ -422,7 +422,7 @@ subroutine wvl_write(dtset, eigen, mpi_enreg, option, rprimd, wff, wfs, wvl, xre
 &       npsi * (iorb - me * wfs%ks%orbs%norbp - 1) + npsi), &
 &       wfs%ks%orbs%eval(iorb))
      end do
-#if defined HAVE_ETSF_IO
+#if defined HAVE_TRIO_ETSF_IO
    else if (wff%iomode == IO_MODE_ETSF) then
 !    Write a NetCDF file.
 !    coordinates_of_grid_points is used to store the geometric

@@ -56,7 +56,7 @@ subroutine outddbnc (dtfil, dtset, hdr0, psps, natom, mpert, rprimd, xred, qpt, 
  use m_profiling_abi
  use m_nctk
  use m_crystal
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  use netcdf
 #endif
 
@@ -99,7 +99,7 @@ subroutine outddbnc (dtfil, dtset, hdr0, psps, natom, mpert, rprimd, xred, qpt, 
 
 ! *********************************************************************
 
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
 
  ! Initialize NetCDF file.
  fname = strcat(dtfil%filnam_ds(4),"_DDB.nc")

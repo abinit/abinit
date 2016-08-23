@@ -33,7 +33,7 @@ MODULE m_interp
  use m_nctk
  use m_haydock_io
  use m_linalg_interfaces
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  use netcdf
 #endif
 

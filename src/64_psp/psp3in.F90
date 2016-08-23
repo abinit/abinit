@@ -80,7 +80,7 @@ subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, ps
  use m_profiling_abi
  use m_splines
  use m_errors
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
   use BigDFT_API, only: atomic_info
 #endif
 

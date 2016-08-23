@@ -124,7 +124,7 @@ program abinit
 #ifdef HAVE_GPU_CUDA
  use m_initcuda,     only: setdevice_cuda,unsetdevice_cuda
 #endif
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  use BigDFT_API,    only : bigdft_init_errors,bigdft_init_timing_categories
 #endif
 
@@ -299,7 +299,7 @@ program abinit
  ndtset_alloc = size(dtsets) - 1
  npsp = size(pspheads)
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  call f_lib_initialize()
  call bigdft_init_errors()
  call bigdft_init_timing_categories()
@@ -669,7 +669,7 @@ program abinit
  ! Here we deallocate dtsets. Do not access dtsets after this line!
  call ab7_invars_free(dtsetsId)
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  call f_lib_finalize()
 #endif
 

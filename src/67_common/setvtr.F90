@@ -143,7 +143,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
  use m_pawrad,            only : pawrad_type
  use m_pawtab,            only : pawtab_type
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  use BigDFT_API, only: denspot_set_history
 #endif
 
@@ -292,7 +292,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
  else
 !  We need to tune the volume when wavelets are used because, not all FFT points are used.
 !  ucvol_local = (half * dtset%wvl_hgrid) ** 3 * ngfft(1)*ngfft(2)*ngfft(3)
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
    ucvol_local = product(wvl%den%denspot%dpbox%hgrids) * real(product(wvl%den%denspot%dpbox%ndims), dp)
 #endif
  end if
@@ -349,7 +349,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
 &         xccc3d,xred)
        end if
      else if(psps%usewvl==1 .and. psps%usepaw==1) then
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
        call mkcore_wvl(atindx1,dummy6,dyfr_dum,wvl%descr%atoms%astruct%geocode,gr_dum,&
 &       wvl%descr%h,dtset%natom,&
 &       nattyp,nfft,wvl%den%denspot%dpbox%nscatterarr(mpi_enreg%me_wvl,:),&
@@ -540,7 +540,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
  else
 
 !  Compute with covering comms the different part of the potential.
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
    if(wvlbigdft) then
 !    Copy e_ewald.
      wvl%e%energs%eion = energies%e_ewald

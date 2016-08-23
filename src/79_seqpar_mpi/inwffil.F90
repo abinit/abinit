@@ -263,7 +263,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
    rdwr=1
    if ( ANY(wff1%iomode == (/IO_MODE_FORTRAN_MASTER, IO_MODE_FORTRAN, IO_MODE_MPI/) )) then
      call hdr_io(fform_dum,hdr0,rdwr,wff1)
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
    else if (wff1%iomode == IO_MODE_ETSF) then
      call hdr_ncread(hdr0, wff1%unwff, fform_dum)
 #endif

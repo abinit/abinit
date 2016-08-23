@@ -137,7 +137,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 &                       pawpsp_header_type, pawpsp_wvl, pawpsp_7in, pawpsp_17in
  use m_pawxmlps,  only : paw_setup, ipsp2xml
  use m_psxml2ab
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  use BigDFT_API, only : dictionary, atomic_info, dict_init, dict_free, UNINITIALIZED
 #endif
 
@@ -187,7 +187,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
  real(dp) :: tsec(2)
  real(dp),allocatable :: e990(:),e999(:),ekb1(:),ekb2(:),epspsp(:),rcpsp(:)
  real(dp),allocatable :: rms(:)
-#if defined HAVE_PSML
+#if defined HAVE_TRIO_PSML
 !!  usexml= 0 for non xml ps format ; =1 for xml ps format
  type(pspheader_type) :: psphead
 #endif
@@ -269,7 +269,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    else if (usexml == 1 .and. xmlpaw == 0) then
 
 ! the following is probably useless - already read in everything in inpspheads
-#if defined HAVE_PSML
+#if defined HAVE_TRIO_PSML
      write(message,'(a,a)') &
 &     '- pspatm: Reading pseudopotential header in XML form from ', trim(psps%filpsp(ipsp))
      call wrtout(ab_out,message,'COLL')
@@ -488,7 +488,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
    else if (pspcod==9)then
 
-#if defined HAVE_PSML
+#if defined HAVE_TRIO_PSML
      call psp9in(psps%filpsp(ipsp),ekb,epsatm,ffspl,indlmn,lloc,lmax,psps%lmnmax,psps%lnmax,mmax,&
 &     psps%mpsang,psps%mpssoang,psps%mqgrid_ff,nproj,psps%n1xccc, &
 &     psps%pspso(ipsp),qchrg,psps%qgrid_ff,psps%useylm,vlspl,&
@@ -531,7 +531,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      call wrtout(std_out,message,'COLL')
 !    The following lines are added to keep backward compatibilty
      maxrad=zero
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
      do ii=1,size(psps%gth_params%psppar,1)-1 ! psppar first dim begins at 0
        if (psps%gth_params%psppar(ii,0,ipsp)/=zero) maxrad=max(maxrad,psps%gth_params%psppar(ii,0,ipsp))
      end do
@@ -643,7 +643,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 !--------------------------------------------------------------------
 !WVL+PAW: 
  if (dtset%usepaw==1 .and. (dtset%icoulomb /= 0 .or. dtset%usewvl==1)) then
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
    psps%gth_params%psppar(:,:,ipsp) = UNINITIALIZED(1._dp)
    psps%gth_params%radii_cf(ipsp,:) = UNINITIALIZED(1._dp)
    call wvl_descr_psp_fill(psps%gth_params, ipsp, psps%pspxc(1), int(psps%zionpsp(ipsp)), int(psps%znuclpsp(ipsp)), 0)
@@ -651,7 +651,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
 !  The following lines are added to keep backward compatibilty
    maxrad=zero
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
    do ii=1,size(psps%gth_params%psppar,1)-1 ! psppar first dim begins at 0
      if (psps%gth_params%psppar(ii,0,ipsp)/=zero) maxrad=max(maxrad,psps%gth_params%psppar(ii,0,ipsp))
    end do

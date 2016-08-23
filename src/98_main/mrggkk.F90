@@ -59,7 +59,7 @@ program mrggkk
  use m_errors
  use m_wfk
  use m_nctk
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  use netcdf
 #endif
  use m_hdr

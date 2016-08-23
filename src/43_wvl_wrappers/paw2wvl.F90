@@ -57,7 +57,7 @@ subroutine paw2wvl(pawtab,proj,wvl)
  type(wvl_projectors_type),intent(inout)::proj
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  integer :: ib,ig
  integer :: itypat,jb,ll,lmnmax,lmnsz,nn,ntypat,ll_,nn_
  integer ::maxmsz,msz1,ptotgau,max_lmn2_size
@@ -79,7 +79,7 @@ subroutine paw2wvl(pawtab,proj,wvl)
 !write (std_out,*) ' paw2wvl : enter'
 !ENDDEBUG
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 
  ntypat=size(pawtab)
 

@@ -33,7 +33,7 @@ MODULE m_bse_io
 #if defined HAVE_MPI2
  use mpi
 #endif
-#if defined HAVE_NETCDF
+#if defined HAVE_TRIO_NETCDF
  use netcdf
 #endif
  use m_nctk
@@ -1578,7 +1578,7 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
  real(dp) :: complex2(2)
  ! *************************************************************************
 
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  ierr = 1
 
 !1. Create netCDF file
@@ -1695,7 +1695,7 @@ subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
  complex(dpc),target,intent(in) :: diag(hsize)
 
 !Local variables-------------------------------
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  integer :: ncerr
  integer :: max_nreh, sum_nreh
  real(dp), ABI_CONTIGUOUS pointer :: r2vals(:,:),r3vals(:,:,:)

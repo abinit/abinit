@@ -99,7 +99,7 @@ subroutine timab(nn,option,tottim)
 
  implicit none
 
-#ifdef HAVE_PAPI
+#ifdef HAVE_TIMER_PAPI
 #include "f90papi.h"
 #endif
 
@@ -113,7 +113,7 @@ subroutine timab(nn,option,tottim)
 !scalars
  real(dp),save :: cpu,wall
  character(len=500) :: message
-#ifdef HAVE_PAPI
+#ifdef HAVE_TIMER_PAPI
  integer(C_INT) :: check 
  integer(C_LONG_LONG),save :: flops1
  real(C_FLOAT),save :: real_time,proc_time
@@ -134,7 +134,7 @@ subroutine timab(nn,option,tottim)
      MSG_BUG(message)
    end if
 
-#ifdef HAVE_PAPI
+#ifdef HAVE_TIMER_PAPI
 !  for all active options for time if papi analysis has been selected.
    if (option/=3.and.time_get_papiopt()==1) then 
      call PAPIf_flops(real_time, proc_time, flops1, mflops1, check)
@@ -166,7 +166,7 @@ subroutine timab(nn,option,tottim)
      call timein(cpu,wall)
      tzero(1,nn)=cpu
      tzero(2,nn)=wall
-#ifdef HAVE_PAPI
+#ifdef HAVE_TIMER_PAPI
      papi_flops(nn)   = flops1       ! Initialize megaflops for nn
      papi_tzero(1,nn) = proc_time
      papi_tzero(2,nn) = real_time
@@ -178,7 +178,7 @@ subroutine timab(nn,option,tottim)
      acctim(1,nn)=acctim(1,nn)+cpu -tzero(1,nn)
      acctim(2,nn)=acctim(2,nn)+wall-tzero(2,nn)
      ncount(nn)=ncount(nn)+1
-#ifdef HAVE_PAPI
+#ifdef HAVE_TIMER_PAPI
 !      accumulate time and flops for nn Difference between 2 calls to Papif_flops 
      papi_acctim(1,nn)=papi_acctim(1,nn)+ proc_time - papi_tzero(1,nn)
      papi_acctim(2,nn)=papi_acctim(2,nn)+ real_time - papi_tzero(2,nn)
@@ -189,7 +189,7 @@ subroutine timab(nn,option,tottim)
        ! Use previously obtained values to initialize timab for nn
      tzero(1,nn)=cpu
      tzero(2,nn)=wall
-#ifdef HAVE_PAPI
+#ifdef HAVE_TIMER_PAPI
      papi_flops(nn)=flops1
      papi_tzero(1,nn) = proc_time
      papi_tzero(2,nn) = real_time
@@ -200,7 +200,7 @@ subroutine timab(nn,option,tottim)
      call timein(cpu,wall)
      tottim(1)=cpu-tzero(1,nn)
      tottim(2)=wall-tzero(2,nn)
-#ifdef HAVE_PAPI
+#ifdef HAVE_TIMER_PAPI
 !      return elapsed floating point operationfor nn (do not accumulate)
      papi_tottim(1,nn)= proc_time - papi_tzero(1,nn)
      papi_tottim(2,nn)= real_time - papi_tzero(2,nn)

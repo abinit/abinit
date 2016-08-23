@@ -50,10 +50,10 @@
 &                       paw_setup_copy, paw_setup_free, getecutfromxml
  use m_psxml2ab
 
-#if defined HAVE_PSML
+#if defined HAVE_TRIO_PSML
  use m_psml
 #endif
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
   use BigDFT_API, only: atomic_info,psp_from_data
 #endif
 
@@ -92,7 +92,7 @@
  integer :: nproj(0:3),nprojso(1:3)
  integer,allocatable :: orb(:)
  real(dp) :: hdum(3)
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  !new variables for wvl+paw
  character(len=2) :: symbol
  integer :: iasctype,nzatom, nelpsp, npspcode_,ixc_
@@ -192,7 +192,7 @@
      pspheads(ipsp)%pspso=0
 
    else if (usexml==1 .and. test_paw==0) then
-#if defined HAVE_PSML
+#if defined HAVE_TRIO_PSML
      write(message,'(a,a)')  &
 &     '- inpspheads : Reading pseudopotential header in XML form from ', trim(filnam(ipsp))
      call wrtout(ab_out,message,'COLL')
@@ -396,7 +396,7 @@
      ABI_DEALLOCATE(orb)
 
 !    WVL+PAW case, need to define GTHradii
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
      if(pspheads(ipsp)%usewvl==1) then
 !      Obtain the HGH parameters by default from BigDFT
 

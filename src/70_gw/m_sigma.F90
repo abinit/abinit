@@ -33,7 +33,7 @@ MODULE m_sigma
  use m_errors 
  use iso_c_binding
  use m_nctk
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  use netcdf
 #endif
 
@@ -1421,7 +1421,7 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
  type(sigma_t),target,intent(in) :: Sr
 
 !Local variables ---------------------------------------
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
 !scalars
  integer :: nbgw,ndim_sig,b1gw,b2gw,cplex
  !character(len=500) :: msg

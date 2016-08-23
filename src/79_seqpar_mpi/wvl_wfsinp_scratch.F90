@@ -64,7 +64,7 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
 
  use m_abi2big,          only : wvl_occ_abi2big,wvl_occopt_abi2big
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  use BigDFT_API, only : createIonicPotential, input_wf_diag, gaussian_basis, &
       & input_variables, calculate_rhocore, deallocate_Lzd_except_Glr, INPUT_IG_OFF,&
       & SMEARING_DIST_ERF, PSPCODE_PAW
@@ -92,7 +92,7 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
   real(dp), intent(in)                  :: xred(3, dtset%natom)
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
   character(len = 500)  :: message
   integer               :: comm,me,nproc
   integer               :: iscf_local
@@ -110,7 +110,7 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
 
 ! *********************************************************************
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 
  elecfield=zero
 

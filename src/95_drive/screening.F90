@@ -95,7 +95,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  use m_ab7_mixing
  use m_kxc
  use m_nctk
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  use netcdf
 #endif
  use libxc_functionals
@@ -109,7 +109,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_free, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg
  use m_crystal,       only : crystal_free, crystal_t
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  use m_crystal_io,    only : crystal_ncwrite
 #endif
  use m_ebands,        only : ebands_update_occ, ebands_copy, get_valence_idx, get_occupied, apply_scissor, &
@@ -1211,7 +1211,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        ikxc=0; test_type=0; tordering=1
        hchi0 = hscr_new("polarizability",dtset,ep,hdr_local,ikxc,test_type,tordering,title,Ep%npwe,Gsph_epsG0%gvec)
        if (dtset%iomode == IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
          NCF_CHECK(nctk_open_create(unt_susc, nctk_ncify(dtfil%fnameabo_sus), xmpi_comm_self))
          NCF_CHECK(crystal_ncwrite(cryst, unt_susc))
          NCF_CHECK(ebands_ncwrite(QP_BSt, unt_susc))
@@ -1432,7 +1432,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 &       Ep%npwe,Gsph_epsG0%gvec)
        fform_em1 = hem1%fform
        if (dtset%iomode == IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
          NCF_CHECK(nctk_open_create(unt_em1, nctk_ncify(dtfil%fnameabo_scr), xmpi_comm_self))
          NCF_CHECK(crystal_ncwrite(cryst, unt_em1))
          NCF_CHECK(ebands_ncwrite(QP_BSt, unt_em1))
@@ -1458,7 +1458,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! Close Files.
  if (my_rank==master) then
    if (dtset%iomode == IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
      NCF_CHECK(nf90_close(unt_em1))
      if (dtset%prtsuscep>0) then
        NCF_CHECK(nf90_close(unt_susc))

@@ -46,7 +46,7 @@ subroutine GAMMA_FUNCTION(X,GA)
 
   implicit none
 
-#ifdef HAVE_GSL
+#ifdef HAVE_MATH_GSL
 ! in case we have gsl, no need to use explicit function, just wrap the
 !  call to the GSL C function in 01_gsl_ext/
 

@@ -191,7 +191,7 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
                write(iout,full_format) &
 &               trim(keywd),appen,dprarr_images(1:narrm(idtset),iimage,idtset)
              end if        
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
              if (print_netcdf) then
                call write_var_netcdf(intarr_images(1:narrm(idtset),iimage,idtset),&
 &               dprarr_images(1:narrm(idtset),iimage,idtset),&
@@ -206,7 +206,7 @@ subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
                write(iout,full_format) &
 &               trim(keywd),dprarr_images(1:narrm(idtset),iimage,idtset)
              end if
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
              if (print_netcdf) then
                call write_var_netcdf(intarr_images(1:narrm(idtset),iimage,idtset),&
 &               dprarr_images(1:narrm(idtset),iimage,idtset),&

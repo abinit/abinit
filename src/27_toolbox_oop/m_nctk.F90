@@ -37,7 +37,7 @@ MODULE m_nctk
  use m_errors
  use iso_c_binding
  use m_xmpi
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  use netcdf
 #endif
 
@@ -63,7 +63,7 @@ MODULE m_nctk
  ! This is clearly wrong because one should use strings instad of floats that cannot be represented exactly 
  ! but, unfortunately, it's in the specifications and we have to live with it!
 
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  integer,public,parameter :: nctk_max_dims = NF90_MAX_DIMS
  ! Maximum number of dimensions
 
@@ -87,7 +87,7 @@ MODULE m_nctk
 !! SOURCE
 !!
  type,private :: nctkerr_t
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
    integer :: ncerr = nf90_noerr              
 #else
    integer :: ncerr = 0
@@ -183,7 +183,7 @@ MODULE m_nctk
  public :: nctk_try_fort_or_ncfile  ! Return fortran or netcdf filename depending on the existence of the file.
  public :: nctk_test_mpiio          ! Test at run-time whether the netcdf library supports parallel IO.
 
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  public :: ab_define_var            ! Helper function used to declare a netcdf variable.
 
  ! Helper functions
@@ -277,7 +277,7 @@ integer function nctk_idname(ncid, varname) result(varid)
 
 ! *********************************************************************
 
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  ! nctk_idname must be available outside CPP blocks due to a bug in abilint.
  ncerr = nf90_inq_varid(ncid, varname, varid)
 
@@ -543,7 +543,7 @@ subroutine nctk_test_mpiio()
 end subroutine nctk_test_mpiio
 !!***
 
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
 
 !!****f* m_nctk/str2xtype
 !! NAME
@@ -1376,7 +1376,7 @@ subroutine ab_define_var(ncid, var_dim_id, var_id, var_type, var_name, var_mnemo
 
 ! *************************************************************************
 
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  ncerr = nf90_def_var(ncid, trim(var_name), var_type, var_dim_id, var_id)
  NCF_CHECK_MSG(ncerr," define variable "//trim(var_name))
  

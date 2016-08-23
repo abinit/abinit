@@ -60,7 +60,7 @@ program macroave
  use m_profiling_abi
  use m_errors
  use m_nctk
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  use netcdf
 #endif
  use m_hdr
@@ -322,7 +322,7 @@ program macroave
      call hdr_fort_read(hdr, unit2, fform)
      ABI_CHECK(FFORM /= 0, "fform == 0")
    else
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
      NCF_CHECK(nctk_open_read(unit2, fnamerho, xmpi_comm_self))
      call hdr_ncread(hdr, unit2, fform)
 #else
@@ -353,7 +353,7 @@ program macroave
      end do
      close(UNIT2)
    else
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
      varname = varname_from_fname(fnamerho)
      NCF_CHECK(nf90_inq_varid(unit2, varname, varid))
      ! [cplex, n1, n2, n3, nspden]

@@ -57,7 +57,7 @@ subroutine wvl_paw_free(wvl)
  
 ! *************************************************************************
  
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 
 !PAW objects
  if( associated(wvl%paw%spsi)) then

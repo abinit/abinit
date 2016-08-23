@@ -2398,7 +2398,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtvolimg',dt%prtvolimg,3,(/0,1,2/),iout)
 
 !  prtwant
-#if !defined HAVE_WANNIER90
+#if !defined HAVE_DFT_WANNIER90
    if(dt%prtwant==2) then
      write(message, '(a,a,a)' )&
 &     ' prtwant==2 is only relevant if wannier90 library is linked',ch10,&

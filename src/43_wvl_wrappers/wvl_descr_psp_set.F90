@@ -43,7 +43,7 @@ subroutine wvl_descr_psp_set(filoccup, nsppol, psps, spinat, wvl)
  use defs_basis
  use defs_datatypes
  use defs_wvltypes
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  use BigDFT_API, only: aoig_set,UNINITIALIZED,dict_init,dict_free,dictionary, &
 &                      operator(//), bigdft_mpi, dict_set
  use BigDFT_API, only: psp_data_merge_to_dict, psp_dict_fill_all, atomic_info, &
@@ -68,7 +68,7 @@ subroutine wvl_descr_psp_set(filoccup, nsppol, psps, spinat, wvl)
   real(dp),intent(in) :: spinat(:,:)
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
   integer :: ityp,pspcod
   logical :: exists
   real(dp) :: radii_cf(3)
@@ -79,7 +79,7 @@ subroutine wvl_descr_psp_set(filoccup, nsppol, psps, spinat, wvl)
 
 ! *********************************************************************
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 
 !We create the atoms_data structure, the part that is dependent from psp.
  do ityp=1,size(psps%pspcod)
@@ -149,7 +149,7 @@ subroutine wvl_descr_psp_fill(gth_params, ipsp, ixc, nelpsp, nzatom, pspunit)
 
   use defs_datatypes
   use m_errors
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
   use BigDFT_API, only: atomic_info, UNINITIALIZED, psp_from_data
 #endif
 
@@ -166,7 +166,7 @@ subroutine wvl_descr_psp_fill(gth_params, ipsp, ixc, nelpsp, nzatom, pspunit)
   integer, intent(in) :: ipsp, pspunit, nzatom, nelpsp, ixc
   type(pseudopotential_gth_type), intent(inout) :: gth_params
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
   integer :: ios, ii, nzatom_, nelpsp_, npspcode_, ixc_
   real(dp) :: ehomo, radfine
   logical :: exists
@@ -177,7 +177,7 @@ subroutine wvl_descr_psp_fill(gth_params, ipsp, ixc, nelpsp, nzatom, pspunit)
 
 ! ***************************************************************************
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 
   ! check if gth_params%psppar have been set
  if (any(gth_params%psppar == UNINITIALIZED(1._dp))) then

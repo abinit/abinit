@@ -29,7 +29,7 @@ subroutine wvl_descr_free(wvl)
 
  use m_profiling_abi
  use defs_wvltypes
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  use BigDFT_API, only : deallocate_atoms_data
  use dynamic_memory
 #endif
@@ -52,7 +52,7 @@ subroutine wvl_descr_free(wvl)
 
 ! *********************************************************************
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 !These arrays are pointers on memory handled by ABINIT.
  nullify(wvl%atoms%astruct%sym%irrzon)
  nullify(wvl%atoms%astruct%sym%phnons)

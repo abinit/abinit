@@ -42,7 +42,7 @@ program ioprof
  use m_wfk
  use m_profiling_abi
  use m_hdr
-#ifdef HAVE_NETCDF
+#ifdef HAVE_TRIO_NETCDF
  use netcdf
 #endif
 

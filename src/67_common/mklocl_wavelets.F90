@@ -58,7 +58,7 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
  use m_profiling_abi
  use m_xmpi
  use m_errors
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  use BigDFT_API, only : createIonicPotential, local_forces
  use poisson_solver, only : H_potential
 #endif
@@ -85,7 +85,7 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
  real(dp),intent(inout) :: xcart(3,natom)
 
 !Local variables-------------------------------
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 !scalars
  integer :: i,i1,i2,i3,ia,ierr,igeo,me,nproc,shift,comm
  real(dp) :: charge
@@ -99,7 +99,7 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
 
 ! *********************************************************************
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 
  elecfield=zero !not used here
 

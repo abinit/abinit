@@ -53,7 +53,7 @@ subroutine wvl_projectors_set(me, natom, proj, psps, rprimd, wfs, wvl, wvl_frmul
  use m_errors
  use m_profiling_abi
  use m_atomdata
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  use BigDFT_API, only: createProjectorsArrays, wvl_timing => timing
 #endif
 
@@ -80,7 +80,7 @@ subroutine wvl_projectors_set(me, natom, proj, psps, rprimd, wfs, wvl, wvl_frmul
 
 !Local variables-------------------------------
 !scalars
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
  integer :: idata
  logical,parameter :: wvl_debug=.false.
  character(len=500) :: message
@@ -90,7 +90,7 @@ subroutine wvl_projectors_set(me, natom, proj, psps, rprimd, wfs, wvl, wvl_frmul
 
 ! *********************************************************************
 
-#if defined HAVE_BIGDFT
+#if defined HAVE_DFT_BIGDFT
 !Consistency checks, are all pseudo true GTH pseudo with geometric informations?
  do idata = 1, psps%npsp, 1
    if (.not. psps%gth_params%set(idata)) then
