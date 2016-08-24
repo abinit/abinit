@@ -406,6 +406,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%kptgw(:,:)=zero
    dtsets(idtset)%kptnrm=one
    dtsets(idtset)%kptopt=1
+   if(dtsets(idtset)%nspden==4)dtsets(idtset)%kptopt=4
    dtsets(idtset)%kptrlen=30.0_dp
    dtsets(idtset)%kssform=1
 !  L

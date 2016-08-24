@@ -1400,12 +1400,16 @@ value of <a href="../input_variables/html_automatically_generated/vargw.html#nba
   <p><b><a name="parallel_case"></a>6.9. Control of output in the parallel case.</b>
 
   <p>For massively parallel runs, one cannot afford to have some of the output files that are usually created. Explicitly,
-  the log file and also the status file become problematic. By default, with less than 100 processors, they are created, but beyond 100 processors, 
+  the log file and also the status file become problematic. By default, with less than N processors, they are created, but beyond N processors, 
   they are deactivated except for the main log file (master processor).
   <p>This default behaviour can be changed as follows. 
-If a file named "_NOLOG" exists in the current directory, then no log file and no status file will be created, even with less than 100 processors. 
-By contrast, if a file "_LOG" exists in the current directory, then a log file and the status files will be created, even with more than 100 processors.
-Alternatively, if a file named "_MAINLOG" exists and there are less than 100 processors, only the master processor writes the log and status files (this mimic the default behavior when using more than 100 processors but with less than 100 processors)
+If a file named "_NOLOG" exists in the current directory, then no log file and no status file will be created, even with less than N processors. 
+
+By contrast, if a file "_LOG" exists in the current directory, then a log file and the status files will be created, even with more than N processors.
+Alternatively, if a file named "_MAINLOG" exists and there are less than N processors, only the master processor writes the log and status files (this mimic the default behavior when using more than N processors but with less than N processors)
+  <p>In ABINITv7, N was set at N=100. However, with ABINITv8, N has been switched to 2. 
+It can be changed "by hand", though : modify NPROC_NO_EXTRA_LOG in src/10_defs/defs_basis.F90 and recompile. 
+See src/95_drive/iofn1.F90 for more explanation.
 
   <hr>
   <h3>&nbsp;</h3>
