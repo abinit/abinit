@@ -858,6 +858,7 @@ subroutine exc_write_phi_block(oeig_fname,use_mpio)
  real(dp) :: cputime,walltime,gflops
  character(len=500) :: msg,errmsg
 ! type(Hdr_type) :: hexc_Hdr
+ logical :: do_ep_lifetime
 !!arrays
  complex(dpc),allocatable :: buffer_dpc(:)
 #ifdef HAVE_MPI_IO
@@ -868,6 +869,8 @@ subroutine exc_write_phi_block(oeig_fname,use_mpio)
 #endif
 
 !************************************************************************
+ 
+ do_ep_lifetime = .FALSE.
 
  call cwtime(cputime, walltime, gflops, "start")
 

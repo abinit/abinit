@@ -104,7 +104,7 @@ contains
 !!
 !! SOURCE
 
-subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,Hur,drude_plsmf,comm)
+subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,Hur,drude_plsmf,comm,Epren)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -129,6 +129,7 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
  type(crystal_t),intent(in) :: Cryst
  type(ebands_t),intent(in) :: KS_BSt,QP_BSt
  type(wfd_t),intent(inout) :: Wfd
+ type(eprenorms_t),optional,intent(in) :: Epren
 !arrays
  type(pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*Wfd%usepaw)
  type(pawhur_t),intent(in) :: Hur(Cryst%natom*Wfd%usepaw)
@@ -139,6 +140,7 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
  real(dp) :: omegaev
  complex(dpc) :: ks_avg,gw_avg,exc_avg
  character(len=fnlen) :: path
+ character(len=fnlen) :: filbseig, ost_fname
  !character(len=500) :: msg
 !arrays
  real(dp),allocatable :: dos_exc(:),dos_gw(:),dos_ks(:)
@@ -253,6 +255,12 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
      ABI_UNUSED(ncid)
 #endif
 
+     !TODO
+     call ebands_free(EPBSt)
+     call ebands_free(EP_QPBSt)
+
+   end do
+
    ABI_FREE(eps_rpanlf)
    ABI_FREE(eps_gwnlf)
    ABI_FREE(eps_exc)
@@ -298,7 +306,7 @@ end subroutine build_spectra
 !!
 !! SOURCE
 
-subroutine exc_write_data(BSp,BS_files,what,eps,dos)
+subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -315,6 +323,7 @@ subroutine exc_write_data(BSp,BS_files,what,eps,dos)
  character(len=*),intent(in) :: what
  type(excparam),intent(in) :: BSp
  type(excfiles),intent(in) :: BS_files
+ character(len=*),optional,intent(in) :: prefix
 !arrays
  real(dp),optional,intent(in) :: dos(BSp%nomega)
  complex(dpc),intent(in) :: eps(BSp%nomega,BSp%nq)
@@ -332,7 +341,11 @@ subroutine exc_write_data(BSp,BS_files,what,eps,dos)
 
 !************************************************************************
 
- fname = strcat(BS_files%out_basename,'_',toupper(what))
+ if (PRESENT(prefix)) then
+   fname = strcat(BS_files%out_basename,prefix,'_',toupper(what))
+ else
+   fname = strcat(BS_files%out_basename,'_',toupper(what))
+ end if
 
  if (open_file(fname,msg,newunit=funt,form="formatted", action="write") /= 0) then
    MSG_ERROR(msg)
@@ -503,7 +516,9 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
 !scalars
  integer :: iw,ib_v,ib_c,ik_bz,ik_ibz,spin,iq
  real(dp) :: fact,arg,ediff
+ real(dp) :: lifetime
  complex(dpc) :: ctemp
+ logical :: do_lifetime
 
 !************************************************************************
 
@@ -513,6 +528,9 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
  if (nsppol==1) fact=two*fact ! two accounts for the occupation factors.
 
  eps_rpa=czero; dos=zero
+
+ do_lifetime = .FALSE.
+ do_lifetime = allocated(BSt%lifetime)
 
  !write(std_out,*)nsppol,Kmesh%nbz,lomo_min,homo,nbnds
  !
@@ -525,23 +543,44 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
          !
          ! TODO here energies are always assumed to be real.
          ediff = BSt%eig(ib_c,ik_ibz,spin) - BSt%eig(ib_v,ik_ibz,spin)
-         !
-         do iq=1,nq
-           ctemp = opt_cvk(ib_c,ib_v,ik_bz,spin,iq)
-           do iw=1,nomega
-             eps_rpa(iw,iq) = eps_rpa(iw,iq)  + ctemp * CONJG(ctemp) * (one/(ediff-omega(iw)) + one/(ediff+omega(iw)))
-           end do
-         end do
-         !
-         ! The JDOS at q=0
-         !if (ediff*Ha_eV < 0.3) then
-         !  write(std_out,*)"Small transition ",ik_ibz,ib_v,ib_c
-         !end if
 
-         do iw=1,nomega
-           arg = DBLE(omega(iw)) - ediff
-           dos(iw) = dos(iw) + dirac_delta(arg,broad)        
-         end do
+         !
+         if(do_lifetime) then
+           lifetime = BSt%lifetime(ib_c,ik_ibz,spin) + BSt%lifetime(ib_v,ik_ibz,spin)
+           do iq=1,nq
+             ctemp = opt_cvk(ib_c,ib_v,ik_bz,spin,iq)
+             do iw=1,nomega
+               eps_rpa(iw,iq) = eps_rpa(iw,iq)  + ctemp * CONJG(ctemp) * (one/(ediff-j_dpc*lifetime-omega(iw)) + one/(ediff+j_dpc*lifetime+omega(iw)))
+             end do
+           end do
+           !
+           ! The JDOS at q=0
+           !if (ediff*Ha_eV < 0.3) then
+           !  write(std_out,*)"Small transition ",ik_ibz,ib_v,ib_c
+           !end if
+
+           do iw=1,nomega
+             arg = DBLE(omega(iw)) - ediff
+             dos(iw) = dos(iw) + dirac_delta(arg,lifetime)        
+           end do
+         else
+           do iq=1,nq
+             ctemp = opt_cvk(ib_c,ib_v,ik_bz,spin,iq)
+             do iw=1,nomega
+               eps_rpa(iw,iq) = eps_rpa(iw,iq)  + ctemp * CONJG(ctemp) * (one/(ediff-omega(iw)) + one/(ediff+omega(iw)))
+             end do
+           end do
+           !
+           ! The JDOS at q=0
+           !if (ediff*Ha_eV < 0.3) then
+           !  write(std_out,*)"Small transition ",ik_ibz,ib_v,ib_c
+           !end if
+
+           do iw=1,nomega
+             arg = DBLE(omega(iw)) - ediff
+             dos(iw) = dos(iw) + dirac_delta(arg,broad)        
+           end do
+         end if
          !
        end do !ib_c
      end do !ib_v
@@ -586,7 +625,7 @@ end subroutine exc_eps_rpa
 !! SOURCE
 
 
-subroutine exc_eps_resonant(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,ucvol,nomega,omega,eps_exc,dos_exc)
+subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol,opt_cvk,ucvol,nomega,omega,eps_exc,dos_exc,elph_lifetime)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -602,8 +641,9 @@ subroutine exc_eps_resonant(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
 !scalars
  integer,intent(in) :: lomo_min,max_band,nkbz,nomega,nsppol
  real(dp),intent(in) :: ucvol
- type(excfiles),intent(in) :: BS_files
  type(excparam),intent(in) :: BSp
+ character(len=fnlen),intent(in) :: filbseig,ost_fname
+ logical,optional,intent(in) :: elph_lifetime
 !arrays
  real(dp),intent(out) :: dos_exc(nomega)
  complex(dpc),intent(in) :: opt_cvk(lomo_min:max_band,lomo_min:max_band,nkbz,nsppol,BSp%nq),omega(nomega)
@@ -633,6 +673,11 @@ subroutine exc_eps_resonant(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
  exc_size = SUM(BSp%nreh) 
  nstates  = BSp%nstates
 
+ do_ep_lifetime = .FALSE.
+ if(PRESENT(elph_lifetime)) then
+   do_ep_lifetime = elph_lifetime
+ end if
+
  if (ANY(Bsp%nreh/=Bsp%nreh(1))) then
    write(msg,'(a,2(i0,1x))')"BSE does not support different number of transitions for the two spin channels. nreh: ",Bsp%nreh
    MSG_WARNING(msg)
@@ -642,12 +687,6 @@ subroutine exc_eps_resonant(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
  ! four_pi comes from the bare Coulomb term hence the 
  ! present implementation is not compatible with the cutoff technique.
  fact=four_pi/(ucvol*nkbz); if (nsppol==1) fact=two*fact ! two to account for the occupation numbers.
-
- if (BS_files%in_eig /= BSE_NOFILE) then
-   filbseig = BS_files%in_eig
- else 
-   filbseig = BS_files%out_eig
- end if
 
  call wrtout(std_out," Reading excitonic eigenstates from file: "//TRIM(filbseig),"COLL")
  if (open_file(filbseig,msg,newunit=eig_unt,form="unformatted",status="old",action="read") /= 0) then
@@ -743,6 +782,7 @@ subroutine exc_eps_resonant(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
 
  ABI_FREE(ostrength)
  ABI_FREE(exc_ene)
+ ABI_FREE(exc_ene_cplx)
 
  !call exc_amplitude(Bsp,filbseig,1,(/(ll,ll=1,10)/),"TEST_AMPLITUDE")
  !call exc_amplitude(Bsp,filbseig,1,(/30/),"TEST_AMPLITUDE")

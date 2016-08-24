@@ -324,6 +324,7 @@ interface xmpi_bcast
   module procedure xmpi_bcast_dp2d
   module procedure xmpi_bcast_dp3d
   module procedure xmpi_bcast_dp4d
+  module procedure xmpi_bcast_dp5d
   module procedure xmpi_bcast_spv
   module procedure xmpi_bcast_sp1d
   module procedure xmpi_bcast_sp2d

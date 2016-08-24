@@ -32,8 +32,13 @@ MODULE m_optic_tools
  use m_profiling_abi
  use m_linalg_interfaces
 
+ use defs_datatypes, only : ebands_t
  use m_numeric_tools,   only : wrap2_pmhalf
  use m_io_tools,        only : open_file
+
+#ifdef HAVE_TRIO_ETSF_IO
+ use etsf_io
+#endif
 
  implicit none
 
@@ -47,6 +52,7 @@ MODULE m_optic_tools
  public :: nlinopt
  public :: linelop
  public :: nonlinopt
+ public :: read_ep_nc
 
 CONTAINS  !===========================================================
 !!***
@@ -444,7 +450,7 @@ end subroutine pmat_renorm
 
 #include "abi_common.h"
 
-subroutine linopt(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,occv,evalv,efermi,pmat, &
+subroutine linopt(nspin,omega,nkpt,wkpt,nsymcrys,symcrys,nstval,KSBSt,EPBSt,efermi,pmat, &
   v1,v2,nmesh,de,sc,brod,fnam,comm)
 
  use m_profiling_abi
@@ -469,8 +475,7 @@ real(dp), intent(in) :: wkpt(nkpt)
 integer, intent(in) :: nsymcrys
 real(dp), intent(in) :: symcrys(3,3,nsymcrys)
 integer, intent(in) :: nstval
-real(dp), intent(in) :: occv(nstval,nkpt,nspin)
-real(dp), intent(in) :: evalv(nstval,nkpt,nspin)
+type(ebands_t),intent(in) :: KSBSt,EPBSt
 real(dp), intent(in) :: efermi
 complex(dpc), intent(in) :: pmat(nstval,nstval,nkpt,3,nspin)
 integer, intent(in) :: v1
@@ -493,7 +498,10 @@ integer,parameter :: master=0
 integer :: my_k1, my_k2
 integer :: ierr
 integer :: fout1
-real(dp) :: e1,e2,e12,deltav1v2
+logical :: do_lifetime
+complex(dpc) :: e1,e2,e12
+complex(dpc) :: e1_ep,e2_ep,e12_ep
+real(dp) :: deltav1v2
 real(dp) :: ha2ev
 real(dp) :: renorm_factor,emin,emax
 real(dp) :: ene
@@ -572,6 +580,10 @@ complex(dpc), allocatable :: eps(:)
    end if
 !fool proof end
  end if
+
+ ABI_CHECK(KSBSt%mband==nstval, "The number of bands in the BSt should be equal to nstval !")
+
+ do_lifetime = allocated(EPBSt%lifetime)
 !
 !allocate local arrays
  ABI_ALLOCATE(chi,(nmesh))
@@ -597,8 +609,8 @@ complex(dpc), allocatable :: eps(:)
  do ik=1,nkpt
    do isp=1,nspin
      do ist1=1,nstval
-       emin=min(emin,evalv(ist1,ik,isp))
-       emax=max(emax,evalv(ist1,ik,isp))
+       emin=min(emin,EPBSt%eig(ist1,ik,isp))
+       emax=max(emax,EPBSt%eig(ist1,ik,isp))
      end do
    end do
  end do
@@ -613,18 +625,31 @@ complex(dpc), allocatable :: eps(:)
    write(std_out,*) "P-",my_rank,": ",ik,'of',nkpt
    do isp=1,nspin
      do ist1=1,nstval
-       e1=evalv(ist1,ik,isp)
+       e1=KSBSt%eig(ist1,ik,isp)
+       e1_ep=EPBSt%eig(ist1,ik,isp)
+       if(do_lifetime) then
+         e1_ep = e1_ep + EPBSt%lifetime(ist1,ik,isp)*(0.0_dp,1.0_dp)
+       end if
 !      if (e1.lt.efermi) then
 !      do ist2=ist1,nstval
        do ist2=1,nstval
-         e2=evalv(ist2,ik,isp)
+         e2=KSBSt%eig(ist2,ik,isp)
+         e2_ep=EPBSt%eig(ist2,ik,isp)
+         if(do_lifetime) then
+           e2_ep = e2_ep - EPBSt%lifetime(ist2,ik,isp)*(0.0_dp,1.0_dp)
+         end if
 !        if (e2.gt.efermi) then
          if (ist1.ne.ist2) then
 !          scissors correction of momentum matrix
-           if(e1 > e2) then
+           if(REAL(e1) > REAL(e2)) then
              e12 = e1-e2+sc
            else
              e12 = e1-e2-sc
+           end if
+           if(REAL(e1_ep) > REAL(e2_ep)) then
+             e12_ep = e1_ep-e2_ep+sc
+           else
+             e12_ep = e1_ep-e2_ep-sc
            end if
 !          e12=e1-e2-sc
            b11=0._dp
@@ -639,8 +664,8 @@ complex(dpc), allocatable :: eps(:)
 !          calculate on the desired energy grid
            do iw=2,nmesh
              w=(iw-1)*de+ieta
-             chi(iw)=chi(iw)+(wkpt(ik)*(occv(ist1,ik,isp)-occv(ist2,ik,isp))* &
-             (b12/(-e12-w)))
+             chi(iw)=chi(iw)+(wkpt(ik)*(KSBSt%occ(ist1,ik,isp)-KSBSt%occ(ist2,ik,isp))* &
+             (b12/(-e12_ep-w)))
            end do
 !          end loops over states
          end if
@@ -2739,6 +2764,112 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 
 end subroutine nonlinopt
 !!***
+
+
+!----------------------------------------------------------------------
+
+!!****f* m_optic_tools/read_ep_nc
+!! NAME
+!! read_ep_nc
+!!
+!! FUNCTION
+!! This routine reads data from _EP.nc data file
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      optic
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine read_ep_nc(fname,nkpt,mband,nsppol,ntemp,temps,eigens,occs,renorms,lifetimes)
+
+ use defs_basis
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'read_ep_nc'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer, intent(out) :: nkpt
+ integer, intent(out) :: mband
+ integer, intent(out) :: nsppol
+ integer, intent(out) :: ntemp
+ real(dp), allocatable, intent(out) :: temps(:)
+ real(dp), allocatable, intent(out) :: eigens(:,:,:)
+ real(dp), allocatable, intent(out) :: occs(:,:,:)
+ real(dp), allocatable, intent(out) :: renorms(:,:,:,:,:)
+ real(dp), allocatable, intent(out) :: lifetimes(:,:,:,:,:)
+ !real(dp), intent(out) :: eigens(mband, nkpt, nsppol)
+ !real(dp), intent(out) :: occs(mband, nkpt, nsppol)
+ !real(dp), intent(out) :: renorms(2, mband, nkpt, nsppol, ntemp)
+ character(len=*), intent(in) :: fname
+
+!Local variables -------------------------
+#ifdef HAVE_TRIO_ETSF_IO
+ integer :: ncid
+ logical :: lstat 
+ type(etsf_io_low_error) :: error_data
+#endif
+
+! *********************************************************************
+
+#ifdef HAVE_TRIO_ETSF_IO
+ call etsf_io_low_open_read(ncid, fname, lstat, error_data = error_data, with_etsf_header=.FALSE.) 
+ ETSF_CHECK_ERROR(lstat, error_data)
+
+ call etsf_io_low_read_dim(ncid, "number_of_kpoints", nkpt, lstat, error_data = error_data)
+ ETSF_CHECK_ERROR(lstat, error_data)
+
+ call etsf_io_low_read_dim(ncid, "number_of_spins", nsppol, lstat, error_data = error_data)
+ ETSF_CHECK_ERROR(lstat, error_data)
+
+ call etsf_io_low_read_dim(ncid, "max_number_of_states", mband, lstat, error_data = error_data)
+ ETSF_CHECK_ERROR(lstat, error_data)
+
+ call etsf_io_low_read_dim(ncid, "number_of_temperature", ntemp, lstat, error_data = error_data)
+ ETSF_CHECK_ERROR(lstat, error_data)
+
+ ABI_MALLOC(temps,(ntemp))
+
+ call etsf_io_low_read_var(ncid, "temperature", temps, lstat, error_data = error_data)
+ ETSF_CHECK_ERROR(lstat, error_data)
+
+ ABI_MALLOC(eigens,(mband,nkpt,nsppol))
+
+ call etsf_io_low_read_var(ncid, "eigenvalues", eigens, lstat, error_data = error_data)
+ ETSF_CHECK_ERROR(lstat, error_data)
+
+ ABI_MALLOC(occs,(mband, nkpt, nsppol))
+ 
+ call etsf_io_low_read_var(ncid, "occupations", occs, lstat, error_data = error_data)
+ ETSF_CHECK_ERROR(lstat, error_data)
+
+ ABI_MALLOC(renorms,(2,mband, nkpt, nsppol, ntemp))
+
+ call etsf_io_low_read_var(ncid, "zero_point_motion", renorms, lstat, error_data = error_data)
+ ETSF_CHECK_ERROR(lstat, error_data)
+ 
+ ABI_MALLOC(lifetimes,(2,mband, nkpt, nsppol, ntemp))
+
+ call etsf_io_low_read_var(ncid, "lifetime", lifetimes, lstat, error_data = error_data)
+ ETSF_CHECK_ERROR(lstat, error_data)
+
+#endif
+
+end subroutine read_ep_nc
+!! ***
+
 
 !----------------------------------------------------------------------
 

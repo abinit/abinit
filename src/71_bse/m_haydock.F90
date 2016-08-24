@@ -101,7 +101,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd,Psps,Pawtab,Hur,&
+subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd,Psps,Pawtab,Hur,Epren,&
 & Kmesh_dense, KS_BSt_dense, QP_BSt_dense, Wfd_dense, Vcp_dense, grid)
 
 
@@ -112,6 +112,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_28_numeric_noabirule
+ use interfaces_56_recipspace
  use interfaces_69_wfdesc
 !End of the abilint section
 
@@ -132,6 +133,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
  type(wfd_t),intent(inout),optional :: Wfd_dense
  type(ebands_t),intent(in),optional :: KS_BSt_dense, QP_Bst_dense
  type(vcoul_t),intent(in),optional :: Vcp_dense
+ type(eprenorms_t),intent(in) :: Epren
 !arrays
  type(pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*Wfd%usepaw)
  type(pawhur_t),intent(in) :: Hur(Cryst%natom*Wfd%usepaw)
@@ -156,6 +158,20 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
  complex(dpc),allocatable :: eps_rpanlf(:,:),eps_gwnlf(:,:)
  complex(dpc),allocatable :: tensor_cart(:,:),tensor_cart_rpanlf(:,:),tensor_cart_gwnlf(:,:)
  complex(dpc),allocatable :: tensor_red(:,:),tensor_red_rpanlf(:,:),tensor_red_gwnlf(:,:)
+
+ !Temperature
+ real(dp) :: dksqmax, en
+ integer,allocatable :: bs2eph(:,:)
+ integer :: sppoldbl, timrev
+ logical :: do_ep_renorm, do_ep_lifetime
+ integer :: ntemp
+ character(len=4) :: ts
+ character(len=fnlen) :: prefix
+ character(len=fnlen) :: path
+ complex(dpc),allocatable :: ep_renorms(:)
+ integer :: ep_ik, ik, ireh, isppol
+ integer :: itemp 
+ type(ebands_t) :: EPBSt, EP_QPBSt
 
 !************************************************************************
 
@@ -257,8 +273,6 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 
  end do
 
- call timab(692,2,tsec) ! exc_haydock_driver(prep)
- call timab(693,1,tsec) ! exc_haydock_driver(wo lf) - that is, without local field
  !
  ! ========================================================
  ! === Write the Optical Matrix Elements to NetCDF file ===
@@ -1810,6 +1824,724 @@ subroutine haydock_psherm_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,che
  end if
 
 end subroutine haydock_psherm_optalgo
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_haydock/haydock_bilanczos
+!! NAME
+!! haydock_bilanczos
+!!
+!! FUNCTION
+!!  Reads the excitonic Hamiltonian from file and construct the Lanczos set of vectors 
+!!  by iterative matrix-vector multiplications for any general matrix.
+!!
+!! INPUTS
+!!  BSp<type(excparam)>=Parameters defining the Bethe-Salpeter calculation.
+!!    omega(BSp%nomega)=Frequency mesh for the macroscopic dielectric function (broadening is already included).
+!! hize
+!! my_t1,my_t2
+!! hreso(hsize,my_t1:my_t2)
+!! hcoup(hsize,my_t1:my_t2)
+!! nkets
+!! kets(hsize,nkets)
+!! comm=MPI communicator.
+!!
+!! OUTPUT
+!!  green(BSp%nomega)=The imaginary part of the macroscopic dielectric function.
+!!
+!! PARENTS
+!!      m_haydock
+!!
+!! CHILDREN
+!!      continued_fract_general,hexc_matmul_full,wrtout
+!!
+!! SOURCE
+
+subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_t2,nkets,kets,ep_renorms,green,comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'haydock_bilanczos'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: hsize,my_t1,my_t2,nkets,comm
+ type(crystal_t),intent(in) :: Cryst
+ type(excparam),intent(in) :: BSp
+ type(excfiles),intent(in) :: BS_files
+ type(Hdr_type),intent(in) :: Hdr_bse
+!arrays
+ complex(dp),intent(out) :: green(BSp%nomega,BSp%nq)
+ complex(dpc),intent(in) :: kets(hsize,nkets)
+ complex(dpc),intent(in) :: ep_renorms(hsize)
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: master=0
+ integer :: inn,itt,out_unt,nproc,my_rank,ierr
+ integer :: niter_file,niter_max,niter_done,nsppol,iq,my_nt,term_type
+ real(dp) :: ket0_hbar_norm,nfact,norm
+ logical :: can_restart,is_converged
+ complex(dpc) :: factor
+ character(len=fnlen),parameter :: tag_file="_HAYDC_SAVE"
+ character(len=500) :: msg
+ character(len=fnlen) :: restart_file,out_file
+ type(hexc_t),intent(in) :: hexc
+ type(hexc_interp_t),intent(in) :: hexc_i
+!arrays
+ complex(dpc),allocatable :: aa_file(:),bb_file(:),cc_file(:)
+ complex(dpc),allocatable :: aa(:),bb(:),cc(:)
+ complex(dpc),allocatable :: phi_np1(:),phi_n(:),phi_nm1(:)
+ complex(dpc),allocatable :: phit_np1(:),phit_n(:),phit_nm1(:)
+ complex(dpc),allocatable :: cbuff(:), phi_n_file(:),phi_np1_file(:)
+ complex(dpc),allocatable :: ket0(:)
+ complex(dpc),allocatable :: hphi_n(:), hphit_n(:)
+ logical :: check(2)
+
+!************************************************************************
+
+ MSG_WARNING("Haydock with Bilanczos is still under development")
+
+ if(BSp%use_interp) then
+   MSG_ERROR("Bilanczos is not yet implemented with interpolation")
+ end if
+
+ nproc  = xmpi_comm_size(comm)
+ my_rank= xmpi_comm_rank(comm)
+ nsppol = Hdr_bse%nsppol
+
+ my_nt = my_t2-my_t1+1
+ ABI_CHECK(my_nt>0,"One of the processors has zero columns")
+
+ ! Multiplicative factor (k-point sampling and unit cell volume)  
+ ! TODO be careful with the spin here
+ ! TODO four_pi comes from the coulomb term 1/|q| is already included in the 
+ ! oscillators hence the present approach wont work if a cutoff interaction is used.
+ nfact = four_pi/(Cryst%ucvol*BSp%nkbz)
+ if (nsppol==1) nfact=two*nfact 
+
+ write(msg,'(a,i0)')' Bi-Lanczos algorithm with MAX number of iterations: ',BSp%niter
+ call wrtout(std_out,msg,"COLL")
+ !
+ ! Check for presence of the restart file.
+ can_restart=.FALSE.
+
+ if ( BS_files%in_haydock_basename /= BSE_NOFILE) then
+   restart_file = strcat(BS_files%in_haydock_basename,tag_file)
+   if (file_exists(restart_file) ) then
+     can_restart=.TRUE.
+     msg = strcat(" Restarting Haydock calculation from file: ",restart_file)
+     call wrtout(std_out,msg,"COLL")
+     call wrtout(ab_out,msg,"COLL")
+     MSG_ERROR("Restart is not implemented")
+   else 
+     can_restart=.FALSE.
+     MSG_WARNING(strcat("Cannot find restart file: ",restart_file))
+   end if
+ end if
+ !
+ ! Open the file and writes basic dimensions and info.
+ if (my_rank==master) then 
+   out_file = TRIM(BS_files%out_basename)//TRIM(tag_file)
+   if (open_file(out_file,msg,newunit=out_unt,form="unformatted") /= 0) then
+     MSG_ERROR(msg)
+   end if
+   ! write header TODO: standardize this part.
+   write(out_unt)hsize,Bsp%use_coupling,BSE_HAYD_IMEPS,nkets,Bsp%broad
+ end if
+ !
+ ! Select the terminator for the continued fraction.
+ term_type=0 !; if (Bsp%hayd_term>0) term_type=2
+ call wrtout(std_out,sjoin("Using terminator type: ",itoa(term_type)),"COLL")
+ !
+ ! Calculate green(w) for the different starting kets.
+ green=czero
+ do iq=1,nkets
+   ABI_MALLOC(ket0,(hexc%hsize))
+   ket0 = kets(:,iq)
+   !
+   niter_file=0
+
+   if (can_restart) then
+!     call haydock_restart(BSp,restart_file,BSE_HAYD_IMEPS,iq,hsize,&
+!&      niter_file,aa_file,bb_file,phi_np1_file,phi_n_file,comm)
+   end if 
+   !
+   ABI_MALLOC(phi_nm1,(my_nt))
+   ABI_MALLOC(phi_n,(my_nt))
+   ABI_MALLOC(phi_np1,(my_nt))
+   ABI_MALLOC(phit_nm1,(my_nt))
+   ABI_MALLOC(phit_n,(my_nt))
+   ABI_MALLOC(phit_np1,(my_nt))
+   ABI_MALLOC(hphi_n,(hexc%hsize))
+   ABI_MALLOC(hphit_n,(hexc%hsize))
+   !
+   ! TODO: Note the different convention used for the coefficients
+   ! Should use the same convention in the Hermitian case.
+   niter_max = niter_file + Bsp%niter
+   ABI_MALLOC(aa,(niter_max))
+   ABI_MALLOC(bb,(niter_max))
+   ABI_MALLOC(cc,(niter_max))
+   aa=czero; bb=czero; cc=czero
+
+   if (niter_file==0) then ! Calculation from scratch.
+     phi_nm1 = ket0(my_t1:my_t2)
+     phit_nm1 = ket0(my_t1:my_t2)
+     norm = DZNRM2(hexc%hsize,ket0,1)
+     phi_nm1=phi_nm1/norm
+     phit_nm1=phit_nm1/norm
+
+     call hexc_matmul_elphon(hexc,hexc_i,phi_nm1,hphi_n,'N',ep_renorms)
+     call hexc_matmul_elphon(hexc,hexc_i,phit_nm1,hphit_n,'C',ep_renorms)
+     
+     aa(1)=xdotc(my_nt,phit_nm1,1,hphi_n(my_t1:),1)
+     call xmpi_sum(aa(1:1),comm,ierr)
+
+     phi_n = hphi_n(my_t1:my_t2) - aa(1)*phi_nm1
+     phit_n = hphit_n(my_t1:my_t2) - CONJG(aa(1))*phit_nm1
+
+     bb(1)=xdotc(my_nt,phi_n,1,phi_n,1)
+     call xmpi_sum(bb(1:1),comm,ierr)
+     bb(1) = SQRT(bb(1)) 
+
+     cc(1)=xdotc(my_nt,phit_n,1,phi_n,1)
+     call xmpi_sum(cc(1:1),comm,ierr)
+     cc(1) = cc(1)/bb(1)
+
+     phi_n   = phi_n  /bb(1)
+     phit_n  = phit_n /CONJG(cc(1))
+     niter_done=1  ! TODO Be careful here
+
+   else ! Use the previously calculates a and b.
+     niter_done=niter_file
+     MSG_ERROR("Restart not coded")
+     !aa(1:niter_done) = aa_file
+     !bb(1:niter_done) = bb_file
+     !phi_np1=phi_np1_file(my_t1:my_t2)   ! Select the slice treated by this node.
+     !phi_n  =phi_n_file  (my_t1:my_t2)   
+   end if
+
+   if (can_restart) then
+     ABI_FREE(aa_file)
+     ABI_FREE(bb_file)
+     ABI_FREE(cc_file)
+     ABI_FREE(phi_np1_file)
+     ABI_FREE(phi_n_file)
+   end if
+
+   ! This factor gives the correct results
+   factor = -nfact*(DZNRM2(hexc%hsize,ket0,1)**2)
+
+   ! Which quantity should be checked for convergence?
+   check = (/.TRUE.,.TRUE./) 
+   if (ABS(Bsp%haydock_tol(2)-one)<tol6) check = (/.TRUE. ,.FALSE./) 
+   if (ABS(Bsp%haydock_tol(2)-two)<tol6) check = (/.FALSE.,.TRUE./) 
+
+   call haydock_bilanczos_optalgo(niter_done,niter_max,BSp%nomega,BSp%omega,BSp%haydock_tol(1),check,hexc,hexc_i,&
+&    hsize,my_t1,my_t2,factor,term_type,ep_renorms,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,&
+&    phit_nm1,phit_n,phit_np1,green(:,iq),inn,is_converged,comm)
+   !
+   ! Save the a"s and the b"s for possible restarting.
+   ! 1) Info on the Q.
+   ! 2) Number of iterations performed.
+   ! 3) do iter=1,niter_performed 
+   !      aa(iter),bb(iter)
+   !    end do
+   ! 4) |n-1>
+   !    |n>
+   !    |n+1>
+   !
+   if (my_rank==master) then ! Open the file and writes basic dimensions and info.
+     write(out_unt)Bsp%q(:,iq)
+     write(out_unt)MIN(inn,niter_max)  ! NB: if the previous loop completed inn=niter_max+1
+     do itt=1,MIN(inn,niter_max)        !     if we exited then inn is not incremented by one.
+       write(out_unt)itt,aa(itt),bb(itt)
+     end do
+   end if
+   !
+   ! cbuff is used as workspace to gather |n-1>, |n> and |n+1>.
+   ABI_MALLOC(cbuff,(hsize))
+   cbuff=czero; cbuff(my_t1:my_t2) = phi_nm1
+   call xmpi_sum_master(cbuff,master,comm,ierr)
+   if (my_rank==master) write(out_unt) cbuff ! |n-1>
+
+   cbuff=czero; cbuff(my_t1:my_t2) = phi_n
+   call xmpi_sum_master(cbuff,master,comm,ierr)
+   if (my_rank==master) write(out_unt) cbuff ! |n>
+
+   cbuff=czero; cbuff(my_t1:my_t2) = phi_np1
+   call xmpi_sum_master(cbuff,master,comm,ierr)
+   if (my_rank==master) write(out_unt) cbuff ! |n+1>
+
+   ABI_FREE(phi_nm1)
+   ABI_FREE(phi_n)
+   ABI_FREE(phi_np1)
+   ABI_FREE(phit_nm1)
+   ABI_FREE(phit_n)
+   ABI_FREE(phit_np1)
+   ABI_FREE(hphi_n)
+   ABI_FREE(hphit_n)
+   ABI_FREE(cbuff)
+   ABI_FREE(aa)
+   ABI_FREE(bb)
+   ABI_FREE(cc)
+   ABI_FREE(ket0)
+ end do ! iq
+
+ if (my_rank==master) close(out_unt)
+
+ call xmpi_barrier(comm)
+
+end subroutine haydock_bilanczos
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_haydock/haydock_bilanczos_optalgo
+!! NAME
+!! haydock_bilanczos_optalgo
+!!
+!! FUNCTION
+!!  Haydock algorithm for general matrix
+!!
+!! INPUTS
+!!  niter_done=Number of iterations already performed (0 if the run starts from scratch).
+!!  niter_tot=Max number of iterations. Always > niter_done
+!!  nomega=Number of Frequency points for the evaluation of the matrix element.
+!!  omega(nomega)=Frequency set (imaginary part is already included).
+!!  tol_iter=Tollerance used to stop the the algorithm.
+!!  check(2)=Logical flags to specify where both the real and the imaginary part of the 
+!!    matrix elements of the Green functions have to be checked for convergence. 
+!!  hsize=Size of the blocks.
+!!  my_t1,my_t2=Indeces of the first and last column stored treated by this done.
+!!  term_type=0 if no terminator is used, 1 otherwise.
+!!  hreso(hsize,my_t1:my_t2)=The columns of the resonant block.
+!!  hcoup(hsize,my_t1:my_t2)=The columns of the coupling block.
+!!  factor
+!!  comm=MPI communicator.
+!!
+!! OUTPUT
+!!  green(nomega)=Output matrix elements.
+!!  inn=Last iteration performed.
+!!  is_converged=.TRUE. of the algorithm converged.
+!!
+!! SIDE EFFECTS
+!!  phi_nm1(my_t2-my_t1+1), phi_n(my_t2-my_t1+1)
+!!    input: vectors used to initialize the iteration
+!!    output: the vectors obtained in the last iteration 
+!!  aa(niter_tot) and bb(niter_tot+1)
+!!    if niter_done>0: aa(1:niter_done), bb(1:niter_done) store the coefficients of the previous run.
+!!    when the routine returns aa(1:inn) and bb(1:inn) contain the matrix elements of the tridiagonal form.
+!!  cc(niter_tot+1)
+!!
+!! PARENTS
+!!      m_haydock
+!!
+!! CHILDREN
+!!      continued_fract,hexc_matmul_full,wrtout
+!!
+!! SOURCE
+
+subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,check,hexc,hexc_i,hsize,my_t1,my_t2,&
+&  factor,term_type,ep_renorms,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,phit_nm1,phit_n,phit_np1,&
+&  green,inn,is_converged,comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'haydock_bilanczos_optalgo'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: niter_tot,niter_done,nomega,comm,hsize,my_t1,my_t2,term_type
+ integer,intent(out) :: inn
+ logical,intent(out) :: is_converged
+ real(dp),intent(in) :: tol_iter,ket0_hbar_norm
+ complex(dpc),intent(in) :: factor
+ type(hexc_t),intent(in) :: hexc
+ type(hexc_interp_t),intent(in) :: hexc_i
+!arrays
+ complex(dpc),intent(inout) :: bb(niter_tot+1)
+ complex(dpc),intent(out) :: green(nomega)
+ complex(dpc),intent(in) :: omega(nomega) 
+ complex(dpc),intent(inout) :: aa(niter_tot),cc(niter_tot+1)
+ complex(dpc),intent(in) :: ket0(my_t2-my_t1+1)
+ complex(dpc),intent(in) :: ep_renorms(hsize)
+ complex(dpc),intent(inout) :: phi_nm1(my_t2-my_t1+1)
+ complex(dpc),intent(inout) :: phi_n  (my_t2-my_t1+1)
+ complex(dpc),intent(inout) :: phi_np1(my_t2-my_t1+1)
+ complex(dpc),intent(inout) :: phit_nm1(my_t2-my_t1+1)
+ complex(dpc),intent(inout) :: phit_n  (my_t2-my_t1+1)
+ complex(dpc),intent(inout) :: phit_np1(my_t2-my_t1+1)
+ logical,intent(in) :: check(2)
+
+!Local variables ------------------------------
+!scalars
+ integer :: my_nt,niter_min,nconv,parity,ii,jj,tdim !,ierr
+ integer :: row_max,col_max,nlev
+ character(len=500) :: msg
+ real(dp) :: max_err,mean_err,mean_err2,std_dev,err
+ logical :: keep_vectors=.TRUE.
+!arrays
+ real(dp) :: abs_err(nomega,2) !,ww_err(nomega,2)
+ complex(dpc) :: gn0(nomega,niter_tot)
+ complex(dpc),allocatable :: oldg(:),newg(:) 
+ complex(dpc),allocatable :: hphi_np1(:),hphit_np1(:),save_phi(:,:),save_phit(:,:)
+ complex(dpc),allocatable ::  alpha(:,:),beta(:,:),ovlp(:,:)
+ complex(dpc),allocatable :: phi_test(:),phi_test2(:),g00(:)
+ logical :: test(2)
+ integer :: ierr
+
+!************************************************************************
+
+ ABI_UNUSED(ket0_hbar_norm)
+
+ my_nt = my_t2-my_t1+1
+
+ ABI_MALLOC(oldg,(nomega))
+ ABI_MALLOC(newg,(nomega))
+ ABI_MALLOC(g00,(nomega))
+ oldg=czero; newg=czero; g00=czero 
+ nconv=0
+
+ keep_vectors = (keep_vectors.and.xmpi_comm_size(comm)==1)
+ if (keep_vectors) then 
+   ABI_MALLOC(save_phi,(my_t2-my_t1+1,niter_tot))
+   ABI_MALLOC(save_phit,(my_t2-my_t1+1,niter_tot))
+   ABI_CHECK_ALLOC("out of memory in save_phi")        
+   save_phi=czero
+   save_phit=czero
+ end if
+ 
+ ABI_MALLOC(hphi_np1,(hexc%hsize))
+ ABI_CHECK_ALLOC("out-of-memory hphi_np1")
+ ABI_MALLOC(hphit_np1,(hexc%hsize))
+ ABI_CHECK_ALLOC("out-of-memory hphit_np1")
+
+ do inn=niter_done+1,niter_tot
+   
+   !|n+1> = H |n> using all eh components.
+   call hexc_matmul_elphon(hexc, hexc_i, phi_n, hphi_np1, 'N', ep_renorms)
+   call hexc_matmul_elphon(hexc, hexc_i, phit_n, hphit_np1, 'C', ep_renorms)
+
+   ! a(n) = < phit_n | H  | phi_n >
+   aa(inn)=xdotc(my_nt,phit_n,1,hphi_np1(my_t1:),1)
+   call xmpi_sum(aa(inn),comm,ierr)
+
+   ! |n+1> = |n+1> - a(n)|Vn> - c(n)|n-1>
+   phi_np1 = hphi_np1(my_t1:my_t2) - aa(inn)*phi_n - cc(inn-1)*phi_nm1
+   phit_np1 = hphit_np1(my_t1:my_t2) - CONJG(aa(inn))*phit_n - CONJG(bb(inn-1))*phit_nm1
+
+   bb(inn) = xdotc(my_nt,phi_np1,1,phi_np1,1)
+   call xmpi_sum(bb(inn),comm,ierr)
+   bb(inn) = SQRT(bb(inn))
+
+   cc(inn) = xdotc(my_nt,phit_np1,1,phi_np1,1)
+   call xmpi_sum(cc(inn),comm,ierr)
+   cc(inn) = cc(inn)/bb(inn)
+
+   phi_np1 = phi_np1 / bb(inn)
+   phit_np1 = phit_np1 / CONJG(cc(inn))
+
+   !
+   ! |n-1> = |n> 
+   ! |n>   = |n+1> 
+   phi_nm1 = phi_n
+   phi_n   = phi_np1
+   phit_nm1 = phit_n
+   phit_n = phit_np1
+
+   if (keep_vectors) then
+     save_phi(:,inn) = phi_n
+     save_phit(:,inn) = phit_n
+   end if
+   write(msg,'(a,i0,a,3es12.4)')' Iteration number ',inn,', b_i RE(c_i) IM(c_i) ',REAL(bb(inn)),REAL(cc(inn)),AIMAG(cc(inn)) 
+   call wrtout(std_out,msg,"COLL")
+
+   call continued_fract_general(inn,term_type,aa,bb,cc,nomega,omega,g00)
+   newg = factor*g00
+   !
+   ! Avoid spurious convergence.
+   niter_min=4; if (niter_done>1) niter_min=niter_done+1
+   if (inn>niter_min) then
+     test=.TRUE.
+     abs_err(:,1) = ABS(DBLE (newg-oldg))
+     abs_err(:,2) = ABS(AIMAG(newg-oldg))
+     !
+     if (tol_iter>zero) then 
+       ! Test on the L1 norm.
+       if (check(1)) test(1) = SUM(abs_err(:,1)) < tol_iter*SUM(ABS(DBLE (newg)))
+       if (check(2)) test(2) = SUM(abs_err(:,2)) < tol_iter*SUM(ABS(AIMAG(newg)))
+     else
+       ! Stringent test for each point.
+       if (check(1)) test(1) = ALL( abs_err(:,1) < -tol_iter*ABS(DBLE (newg))) 
+       if (check(2)) test(2) = ALL( abs_err(:,2) < -tol_iter*ABS(AIMAG(newg)))
+     end if
+     !
+     if (ALL(test)) then 
+       nconv = nconv+1
+     else 
+       nconv = 0
+     end if
+     if (nconv==2) then 
+       write(msg,'(a,es10.2,a,i0,a)')&
+&        " >>> Haydock algorithm converged twice within haydock_tol= ",tol_iter," after ",inn," iterations." 
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out,msg,'COLL')
+       EXIT
+     end if
+   end if
+   !
+   oldg = newg
+ end do ! inn
+
+ green = newg
+ if (nconv/=2) then
+   write(msg,'(a,es10.2,a,i0,a)')&
+&    " WARNING: Haydock algorithm did not converge within ",tol_iter," after ",niter_tot," iterations."
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+ end if
+
+ is_converged = (nconv==2)
+
+ ABI_FREE(oldg)
+ ABI_FREE(newg)
+ ABI_FREE(g00)
+ ABI_FREE(hphi_np1)
+ ABI_FREE(hphit_np1)
+
+ !! if (keep_vectors) then
+ !!   tdim = MIN(inn,niter_tot)
+ !!   ABI_MALLOC(ovlp,(tdim,tdim))
+
+ !!   ABI_MALLOC(phi_test,(hsize))
+ !!   ABI_MALLOC(phi_test2,(hsize))
+
+ !!   max_err=smallest_real; mean_err=zero; mean_err2=zero; row_max=-1
+ !!   do ii=1,tdim
+ !!     parity = (-1)**(ii+1) 
+ !!     phi_test  = save_phi(:,ii)
+ !!     call hexc_matmul_full(hexc, hexc_i, phi_test, phi_test2, parity)
+ !!     !phi_test2 = MATMUL(hreso,phi_test) + parity * MATMUL(hcoup,CONJG(phi_test))
+ !!     ovlp(ii,ii) = DOT_PRODUCT(phi_test,phi_test2) + DOT_PRODUCT(phi_test2,phi_test) 
+ !!     err = ABS(ovlp(ii,ii)-cone)
+ !!     mean_err  = mean_err + err
+ !!     mean_err2 = mean_err2 + err**2
+ !!     if (err > max_err) then
+ !!       max_err = err 
+ !!       row_max = ii
+ !!     end if
+ !!   end do
+ !!   mean_err = mean_err/tdim
+ !!   std_dev = mean_err2/tdim -mean_err**2
+ !!   write(std_out,'(a,i0,1x,3es14.6)')&
+&!!    " Error in normalization (ii, max_err,mean,std_dev): ",row_max,max_err,mean_err,std_dev
+
+ !!   ABI_FREE(phi_test)
+ !!   ABI_FREE(phi_test2)
+ !!                                             
+ !!   ABI_MALLOC(alpha,(hsize,tdim))
+
+ !!   ! Less efficient but for sake of simplicity with hexc_matmul
+ !!   ! TODO possibility to call hreso * phi, and hcoup * phi separately
+ !!   do ii=1,tdim
+ !!     parity = (-1)**(ii+1) 
+ !!     call hexc_matmul_full(hexc, hexc_i, save_phi(:,ii), alpha(:,ii), parity)
+ !!   end do
+
+ !!   !alpha = MATMUL(hreso,save_phi(:,1:tdim))
+ !!   !
+ !!   !do ii=1,tdim
+ !!   !  parity = (-1)**(ii+1) 
+ !!   !  alpha(:,ii) =  alpha(:,ii) + parity*MATMUL(hcoup,CONJG(save_phi(:,ii))) 
+ !!   !end do
+
+ !!   ovlp = MATMUL(TRANSPOSE(CONJG(save_phi(:,1:tdim))),alpha)
+
+ !!   ABI_MALLOC(beta,(hsize,tdim))
+ !!   do ii=1,tdim
+ !!     parity = (-1)**(ii+1) 
+ !!     beta(:,ii)  =  parity*save_phi(:,ii)
+ !!     alpha(:,ii) = -parity*alpha(:,ii)
+ !!   end do
+
+ !!   ovlp = ovlp - MATMUL(TRANSPOSE(CONJG(beta)),alpha)
+
+ !!   max_err=smallest_real; row_max=-1; col_max=-1
+ !!   mean_err=zero; mean_err2=zero
+ !!   do jj=1,tdim
+ !!     do ii=1,jj
+ !!       err = ABS(ovlp(ii,jj))
+ !!       if (ii==jj) err = ABS(err - one)
+ !!       mean_err  = mean_err + err
+ !!       mean_err2 = mean_err2 + err**2
+ !!       if (err > max_err) then
+ !!         max_err = err
+ !!         row_max=ii
+ !!         col_max=jj
+ !!       end if
+ !!     end do
+ !!   end do
+
+ !!   mean_err = mean_err/(tdim*(tdim+1)/2)
+ !!   std_dev = mean_err2/(tdim*(tdim+1)/2) - mean_err**2
+ !!   write(std_out,'(a,2(i0,1x),3es14.6)')&
+ !!      " Error in Hbar-ortho (i,j), max_err, mean, std_dev ",row_max,col_max,max_err,mean_err,std_dev
+ !!   !call print_arr(ovlp,max_r=185,max_c=10,unit=std_out)
+
+ !!   ABI_FREE(alpha)
+ !!   ABI_FREE(beta)
+ !!   ABI_FREE(ovlp)
+ !!   ABI_FREE(save_phi)
+ !! end if
+
+end subroutine haydock_bilanczos_optalgo
+!!***
+
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/continued_fract_general
+!! NAME
+!!  continued_fract
+!!
+!! FUNCTION
+!!  This routine calculates the continued fraction:
+!!  
+!!                        1
+!! f(z) =  _______________________________
+!!           z - a1 -        b1^2
+!!                   _____________________
+!!                     z - a2 -    b2^2
+!!                             ___________
+!!                                z -a3 -    ........
+!!
+!! INPUTS
+!!  nlev=Number of "levels" in the continued fraction.
+!!  term_type=Type of the terminator.
+!!    0 --> No terminator.
+!!   -1 --> Assume constant coefficients for a_i and b_i for i>nlev with a_inf = a(nlev) and b_inf = b(nleb) 
+!!    1 --> Same as above but a_inf and b_inf are obtained by averaging over the nlev values.
+!!  aa(nlev)=Set of a_i coefficients.
+!!  bb(nlev)=Set of b_i coefficients.
+!!  nz=Number of points on the z-mesh.
+!!  zpts(nz)=z-mesh.
+!!
+!! OUTPUT
+!!  spectrum(nz)=Contains f(z) on the input mesh.
+!!
+!! PARENTS
+!!      bsepostproc,m_haydock
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine continued_fract_general(nlev,term_type,aa,bb,cc,nz,zpts,spectrum)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'continued_fract_general'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nlev,term_type,nz
+!arrays
+ complex(dpc),intent(in) :: bb(nlev)
+ complex(dpc),intent(in) :: cc(nlev)
+ complex(dpc),intent(in) :: aa(nlev)
+ complex(dpc),intent(in) :: zpts(nz)
+ complex(dpc),intent(out) :: spectrum(nz)
+
+!Local variables ------------------------------
+!scalars
+ integer :: it
+ complex(dpc) ::  bb_inf,bg,bu,swap
+ complex(dpc) :: aa_inf
+ character(len=500) :: msg
+!arrays
+ complex(dpc),allocatable :: div(:),den(:)
+
+!************************************************************************
+
+ ABI_MALLOC(div,(nz))
+ ABI_MALLOC(den,(nz))
+
+ select case (term_type)
+ case (0) ! No terminator.
+   div=czero
+ case (-1,1) 
+   MSG_ERROR("Not yet implemented")
+   if (term_type==-1) then
+     bb_inf=bb(nlev)
+     aa_inf=aa(nlev)
+   else
+     bb_inf=SUM(bb)/nlev
+     aa_inf=SUM(aa)/nlev
+   end if
+   ! Be careful with the sign of the SQRT.
+   div(:) = half*(bb(nlev)/(bb_inf))**2 * ( zpts-aa_inf - SQRT((zpts-aa_inf)**2 - four*bb_inf**2) )
+ case (2) 
+   MSG_ERROR("Not yet implemented")
+   div = zero
+   if (nlev>4) then
+     bg=zero; bu=zero
+     do it=1,nlev,2  
+       if (it+2<nlev) bg = bg + bb(it+2)
+       bu = bu + bb(it)
+     end do
+     bg = bg/(nlev/2+MOD(nlev,2))
+     bu = bg/((nlev+1)/2)
+     !if (iseven(nlev)) then
+     if (.not.iseven(nlev)) then
+       swap = bg
+       bg = bu 
+       bu = bg
+     end if
+     !write(std_out,*)nlev,bg,bu
+     !Here be careful with the sign of SQRT
+     do it=1,nz
+       div(it) = half/zpts(it) * (bb(nlev)/bu)**2 * &
+&        ( (zpts(it)**2 +bu**2 -bg**2) - SQRT( (zpts(it)**2+bu**2-bg**2)**2 -four*(zpts(it)*bu)**2) )
+     end do
+   end if
+
+ case default
+   write(msg,'(a,i0)')" Wrong value for term_type : ",term_type
+   MSG_ERROR(msg)
+ end select
+
+ do it=nlev,2,-1
+   den(:) = zpts(:) - aa(it) - div(:)
+   div(:) = (bb(it-1)*cc(it-1) )/ den(:)
+ end do
+                                                                  
+ den = zpts(:) - aa(1) - div(:)
+ div = one/den(:)
+
+ spectrum = div
+ ABI_FREE(div)
+ ABI_FREE(den)
+
+end subroutine continued_fract_general
 !!***
 
 !----------------------------------------------------------------------

@@ -105,6 +105,10 @@ module defs_datatypes
   ! eig(mband,nkpt,nsppol)
   ! Eigenvalues of each band.
 
+  real(dp),allocatable :: lifetime(:,:,:)
+  ! lifetime(mband,nkpt,nsppol)
+  ! Lifetime of each band
+
   real(dp),allocatable :: occ(:,:,:) 
   ! occ(mband,nkpt,nsppol)
   ! occupation of each band.

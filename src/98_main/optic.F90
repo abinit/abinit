@@ -142,11 +142,12 @@ program optic
  real(dp) :: gmet(3,3),gmet_inv(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),gprimd_trans(3,3)
  real(dp),allocatable :: kpt(:,:)
  real(dp),allocatable :: cond_kg(:),cond_nd(:),doccde(:)
- real(dp),allocatable :: eig0tmp(:),eigen0(:),eigen11(:)
- real(dp),allocatable :: eigen12(:),eigtmp(:)
+ real(dp),allocatable :: eig0tmp(:), eigen0(:)
+ complex(dpc),allocatable :: eigen0_c(:,:) ! states,temp
+ real(dp),allocatable :: eigen11(:),eigen12(:),eigtmp(:)
  real(dp),allocatable :: eigen13(:),occ(:),wtk(:)
  complex(dpc),allocatable :: pmat(:,:,:,:,:)
- character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out
+ character(len=fnlen) :: filnam,wfkfile,ddkfile_1,ddkfile_2,ddkfile_3,filnam_out, epfile
 !  for the moment this is imposed by the format in linopt.f and nlinopt.f
  character(len=256) :: fn_radix,tmp_radix
  character(len=10) :: s1,s2,s3
@@ -337,6 +338,13 @@ program optic
  call xmpi_bcast(nonlin2_comp,master,comm,ierr)
  call xmpi_bcast(do_antiresonant,master,comm,ierr)
 
+ call xmpi_bcast(do_ep_renorm,master,comm,ierr)
+ call xmpi_bcast(ep_ntemp,master,comm,ierr)
+
+ if(do_ep_renorm) then
+   call eprenorms_bcast(Epren, master, comm)
+ end if
+
 !Extract info from the header
  headform=hdr%headform
  bantot=hdr%bantot
@@ -374,6 +382,15 @@ program optic
    end if
  end do
 
+ ! Initializes crystal
+ remove_inv = .false.
+ if(hdr%nspden == 4) remove_inv = .true.
+ !space_group = 0
+ call crystal_init(Cryst, 0, hdr%natom, hdr%npsp, hdr%ntypat, &
+&  hdr%nsym, rprimd, hdr%typat, hdr%xred, hdr%zionpsp, hdr%znuclpsp, 1, &
+&  (hdr%nspden==2 .and. hdr%nsppol==1),remove_inv, hdr%title,&
+&  symrel, hdr%tnons, hdr%symafm)
+
  if(my_rank == master) then
    write(std_out,*)
    write(std_out,'(a,3f10.5,a)' )' rprimd(bohr)      =',rprimd(1:3,1)
@@ -386,6 +403,7 @@ program optic
 
 !Read the eigenvalues of ground-state and ddk files
  ABI_ALLOCATE(eigen0,(mband*nkpt*nsppol))
+ ABI_ALLOCATE(eigen0_c,(mband*nkpt*nsppol,ep_ntemp))
  ABI_ALLOCATE(eigen11,(2*mband*mband*nkpt*nsppol))
  ABI_ALLOCATE(eigen12,(2*mband*mband*nkpt*nsppol))
  ABI_ALLOCATE(eigen13,(2*mband*mband*nkpt*nsppol))
@@ -434,6 +452,7 @@ program optic
    
    ABI_DEALLOCATE(eigtmp)
    ABI_DEALLOCATE(eig0tmp)
+
  end if
 
  call xmpi_bcast(eigen0,master,comm,ierr)
@@ -473,7 +492,6 @@ program optic
  fermie = BSt%fermie
  ABI_DEALLOCATE(istwfk)
  ABI_DEALLOCATE(npwarr)
- call ebands_free(BSt)
 
 !---------------------------------------------------------------------------------
 !size of the frequency range
@@ -514,6 +532,44 @@ program optic
 
  call pmat_renorm(fermie, eigen0, mband, nkpt, nsppol, pmat, scissor)
 
+ !TODO implement renormalization in ebands
+ if(my_rank == master) then
+
+   if(do_ep_renorm) then
+     bdtot0_index=0 ; bdtot_index=0
+     do isppol=1,nsppol
+       do ikpt=1,nkpt
+         call flush(std_out)
+         nband1 = nband(ikpt+(isppol-1)*nkpt)
+         nband_tmp=MIN(nband1,Epren%mband)
+
+         !FIXME change check
+         if (ANY(ABS(eigen0(1+bdtot0_index:MIN(10,nband_tmp)+bdtot0_index) - Epren%eigens(1:MIN(10,nband_tmp),ikpt,isppol)) > tol3)) then
+           MSG_ERROR("Error in eigen !")
+         end if
+         if (ANY(ABS(occ(1+bdtot0_index:MIN(10,nband_tmp)+bdtot0_index) - Epren%occs(1:MIN(10,nband_tmp),ikpt,isppol)) > tol3)) then
+           MSG_ERROR("Error in occ!")
+         end if
+
+         ! Upgrade energies
+         do itemp = 1,Epren%ntemp
+           eigen0_c(1+bdtot0_index:nband_tmp+bdtot0_index,itemp) = eigen0(1+bdtot0_index:nband_tmp+bdtot0_index) + Epren%renorms(1,1:nband_tmp,ikpt,isppol,itemp) + (0.0_dp,1.0_dp)*Epren%lifetimes(1,1:nband_tmp,ikpt,isppol,itemp)
+         end do
+
+         bdtot0_index=bdtot0_index+nband1
+         bdtot_index=bdtot_index+2*nband1**2
+       end do
+     end do
+   else
+     ! Only 1 temperature (no temperature !)!
+     eigen0_c(:,1) = eigen0(:)
+
+   end if
+
+
+ end if
+ call xmpi_bcast(eigen0_c,master,comm,ierr)
+
 !IN CALLED ROUTINE
 !call linopt(nspin,,nkpt,wkpt,nsymcrys,symcrys,nstval,occv,evalv,efermi,pmat,v1,v2,nmesh,de,scissor,brod)
 !
@@ -525,19 +581,36 @@ program optic
 !
  call wrtout(std_out," optic : Call linopt","COLL")
 
- do ii=1,num_lin_comp
-   lin1 = int(lin_comp(ii)/10.0_dp)
-   lin2 = mod(lin_comp(ii),10)
-   write(msg,*) ' linopt ', lin1,lin2
-   call wrtout(std_out,msg,"COLL")
-   call int2char4(lin1,s1)
-   call int2char4(lin2,s2)
-   ABI_CHECK((s1(1:1)/='#'),'Bug: string length too short!')
-   ABI_CHECK((s2(1:1)/='#'),'Bug: string length too short!')
-   tmp_radix = trim(fn_radix)//"_"//trim(s1)//"_"//trim(s2)
-   call linopt(nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,occ,eigen0,fermie,pmat, &
-   lin1,lin2,nomega,domega,scissor,broadening,tmp_radix,comm)
+ do itemp=1,ep_ntemp
+   call ebands_copy(BSt, EPBst)
+   if(do_ep_renorm) then
+     call renorm_bst(Epren, EPBst, Cryst, itemp, do_lifetime=.True.,do_check=.True.)
+   end if
+   do ii=1,num_lin_comp
+     lin1 = int(lin_comp(ii)/10.0_dp)
+     lin2 = mod(lin_comp(ii),10)
+     write(msg,*) ' linopt ', lin1,lin2
+     call wrtout(std_out,msg,"COLL")
+     call int2char4(lin1,s1)
+     call int2char4(lin2,s2)
+     call int2char4(itemp,stemp)
+     ABI_CHECK((s1(1:1)/='#'),'Bug: string length too short!')
+     ABI_CHECK((s2(1:1)/='#'),'Bug: string length too short!')
+     ABI_CHECK((stemp(1:1)/='#'),'Bug: string length too short!')
+     if(do_ep_renorm) then
+       tmp_radix = trim(fn_radix)//"_"//trim(s1)//"_"//trim(s2)//"_T"//trim(stemp)
+     else
+       tmp_radix = trim(fn_radix)//"_"//trim(s1)//"_"//trim(s2)
+     end if
+     call linopt(nsppol,ucvol,nkpt,wtk,nsym,symcart,mband,BSt,EPBst,fermie,pmat, &
+     lin1,lin2,nomega,domega,scissor,broadening,tmp_radix,comm)
+   end do
+   call ebands_free(EPBst)
  end do
+ 
+ if(do_ep_renorm) then
+   call eprenorms_free(Epren)
+ end if
  
  call wrtout(std_out," optic : Call nlinopt","COLL")
  
@@ -607,7 +680,9 @@ program optic
  ABI_DEALLOCATE(symcart)
  ABI_DEALLOCATE(pmat)
 
+ call ebands_free(BSt)
  call hdr_free(hdr)
+ call crystal_free(Cryst)
 
  call timein(tcpu,twall)
 
