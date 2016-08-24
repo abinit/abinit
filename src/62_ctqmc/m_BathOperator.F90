@@ -1111,19 +1111,19 @@ SUBROUTINE BathOperator_setMRemove(this,particle)
 !  this%R%vec => this%R
 !  this%Q%vec => this%Q
 
-  row      = 1
+  !row      = 1
   !row_move = 1
-  col      = 1
+  !col      = 1
   !col_move = 1
   DO row_move = 1, new_tail
-    IF ( row .EQ. positionRow ) row = row + 1
-    IF ( col .EQ. positionCol ) col = col + 1
-    !col = row_move + (1+SIGN(1,row_move-positionCol))/2
-    !row = row_move + (1+SIGN(1,row_move-positionRow))/2
+    !IF ( row .EQ. positionRow ) row = row + 1
+    !IF ( col .EQ. positionCol ) col = col + 1
+    col = row_move + (1+SIGN(1,row_move-positionCol))/2
+    row = row_move + (1+SIGN(1,row_move-positionRow))/2
     this%R%vec(row_move) = this%M(aF)%mat(positionRow,col)
     this%Q%vec(row_move) = this%M(aF)%mat(row,positionCol)
-    row      = row + 1 
-    col      = col + 1
+    !row      = row + 1 
+    !col      = col + 1
   END DO
 !!    this%R%vec(1:positionCol-1) = this%M(aF)%mat(positionRow,1:positionCol-1)
 !!    this%R%vec(positionCol:new_tail) = this%M(aF)%mat(positionRow,positionCol+1:tail)
@@ -1135,21 +1135,21 @@ SUBROUTINE BathOperator_setMRemove(this,particle)
 !CALL Vector_print(this%Q)
 !CALL ListCdagC_print(this%ListCdagC)
 
-  col      = 1
+  !col      = 1
   DO col_move = 1, new_tail 
-    IF ( col_move .EQ. positionCol ) col = col + 1
-    !col = col_move + (1+SIGN(1,col_move-positionCol))/2
-    row      = 1
+    !IF ( col_move .EQ. positionCol ) col = col + 1
+    col = col_move + (1+SIGN(1,col_move-positionCol))/2
+    !row      = 1
     invStilde2 = invStilde * this%R%vec(col_move)
     DO row_move = 1, new_tail
-      IF ( row_move .EQ. positionRow ) row = row + 1
-      !row = row_move + (1+SIGN(1,row_move-positionRow))/2
+      !IF ( row_move .EQ. positionRow ) row = row + 1
+      row = row_move + (1+SIGN(1,row_move-positionRow))/2
       this%M(aF)%mat(row_move,col_move) = this%M(aF)%mat(row,col) &
                                       - this%Q%vec(row_move)*invStilde2
       this%M(aF)%mat_tau(row_move,col_move) = this%M(aF)%mat_tau(row,col)
-      row      = row      + 1
+      !row      = row      + 1
     END DO
-    col      = col      + 1 
+    !col      = col      + 1 
   END DO
   CALL MatrixHyb_setSize(this%M(aF),new_tail)
 
