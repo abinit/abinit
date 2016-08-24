@@ -136,7 +136,7 @@
  integer :: ikpt,index,iocc,iocc1,iocc2,iocc_l,iocc_n
  integer :: istwf_k,iunocc,iunocc1,iunocc2,iunocc_l,iunocc_n,istate,jexcit
  integer :: jexcit_cbase,master,mcg_disk,me_loc
- integer :: nband_k(nsppol), mband_occ(nsppol), nband_unocc(nsppol)
+ integer :: nband_k(nsppol), nband_occ(nsppol), nband_unocc(nsppol)
  integer :: nstate_k, nstate_occ, nstate_unocc, nexcit_pol(nsppol)
  integer :: nstate_win,ndiel,ndiel1,ndiel2,ndiel3,ndiel4
  integer :: ndiel5,ndiel6,nexcit,nexcit_max,nexcit_win,nfftdiel,nlargest,nnext
@@ -269,17 +269,17 @@
 !Note that if nsppol==1 nstate=nband_k
  do isppol=1,nsppol
    nband_k(isppol)=dtset%nband(isppol)
-   mband_occ(isppol)=0
+   nband_occ(isppol)=0
    do iband=1,nband_k(isppol)
      if(abs(occ(iband+(isppol-1)*nband_k(1))-two/nsppol)<tol6)  &
-&     mband_occ(isppol)=mband_occ(isppol)+1
+&     nband_occ(isppol)=nband_occ(isppol)+1
    end do
-   nband_unocc(isppol)=nband_k(isppol)-mband_occ(isppol)
+   nband_unocc(isppol)=nband_k(isppol)-nband_occ(isppol)
 !  next line make no sense if spin flip is taken into account
-   nexcit_pol(isppol)=mband_occ(isppol)*nband_unocc(isppol)
+   nexcit_pol(isppol)=nband_occ(isppol)*nband_unocc(isppol)
  end do
  nstate_k=nband_k(1)+(nsppol-1)*nband_k(nsppol)
- nstate_occ=mband_occ(1)+(nsppol-1)*mband_occ(nsppol)
+ nstate_occ=nband_occ(1)+(nsppol-1)*nband_occ(nsppol)
  nstate_unocc=nstate_k-nstate_occ
 !next line to be changed if spin fli is taken into account
  nexcit=nexcit_pol(1)+(nsppol-1)*nexcit_pol(nsppol)
@@ -295,15 +295,15 @@
  end if
 
 !DEBUG
-!write(std_out,*) mband_occ(1),nband_unocc(1)
-!write(std_out,*) mband_occ(nsppol),nband_unocc(nsppol)
+!write(std_out,*) nband_occ(1),nband_unocc(1)
+!write(std_out,*) nband_occ(nsppol),nband_unocc(nsppol)
 !END DEBUG
 
 
  if(nsppol==1)then
    write(message, '(a,a,a,a,i4,a,i4,a,a,i4,a,a,a,i6,a)' )ch10,&
 &   ' *** TDDFT : computation of excited states *** ',ch10,&
-&   ' Splitting of',dtset%nband(1),' states in',mband_occ(1),' occupied states,',&
+&   ' Splitting of',dtset%nband(1),' states in',nband_occ(1),' occupied states,',&
 &   ' and',nband_unocc(1),' unoccupied states,',ch10,&
 &   ' giving',nexcit,' excitations.'
    call wrtout(std_out,message,'COLL')
@@ -321,7 +321,7 @@
 
 !Allocate the matrices to be diagonalized.
 !Use a simple storage mode, to be improved in the future.
- ii=max(mband_occ(1),mband_occ(nsppol))
+ ii=max(nband_occ(1),nband_occ(nsppol))
  jj=max(nband_unocc(1),nband_unocc(nsppol))
  ABI_ALLOCATE(omega_tddft_casida,(ii,jj,nsppol,ii,jj,nsppol,2/nsppol))
  ABI_ALLOCATE(eexcit,(nexcit))
@@ -335,9 +335,9 @@
 !Also compute the square root of Kohn-Sham eigenvalue differences
  do isppol=1,nsppol
    do iunocc=1,nband_unocc(isppol)
-     eigunocc=eigen(iunocc+mband_occ(isppol)+(isppol-1)*nband_k(1))
-     do iocc=1,mband_occ(isppol)
-       iexcit=iocc+(isppol-1)*nexcit_pol(1)+mband_occ(isppol)*(iunocc-1)
+     eigunocc=eigen(iunocc+nband_occ(isppol)+(isppol-1)*nband_k(1))
+     do iocc=1,nband_occ(isppol)
+       iexcit=iocc+(isppol-1)*nexcit_pol(1)+nband_occ(isppol)*(iunocc-1)
        diffeig=eigunocc-eigen(iocc+(isppol-1)*nband_k(1))
        do sing_trip=1,2/nsppol
          omega_tddft_casida(iocc,iunocc,isppol,iocc,iunocc,isppol,sing_trip)=diffeig**2
@@ -382,17 +382,17 @@
  do iexcit = 1, nexcit_win
    iexcit1 = indarr(iexcit)
    isppol1 = min((iexcit1-1)/nexcit_pol(1) +1,2)
-   iunocc1 = (iexcit1-(isppol1-1)*nexcit_pol(1)-1)/mband_occ(isppol1)+1
-   iocc1   = iexcit1-(isppol1-1)*nexcit_pol(1)-(iunocc1-1)*mband_occ(isppol1)
-   if (flag_state_win(mband_occ(isppol1)+(isppol1-1)*nband_k(1)+iunocc1)==0) &
-&   flag_state_win(mband_occ(isppol1)+(isppol1-1)*nband_k(1)+iunocc1) =1
+   iunocc1 = (iexcit1-(isppol1-1)*nexcit_pol(1)-1)/nband_occ(isppol1)+1
+   iocc1   = iexcit1-(isppol1-1)*nexcit_pol(1)-(iunocc1-1)*nband_occ(isppol1)
+   if (flag_state_win(nband_occ(isppol1)+(isppol1-1)*nband_k(1)+iunocc1)==0) &
+&   flag_state_win(nband_occ(isppol1)+(isppol1-1)*nband_k(1)+iunocc1) =1
    if (flag_state_win(iocc1+(isppol1-1)*nband_k(1))==0) &
 &   flag_state_win(iocc1+(isppol1-1)*nband_k(1)) =1
 !  DEBUG
 !  write(message,'(a,i2,a,a,i2,i2,a,a,i2,a,a,i2)') 'isppol:', isppol1,ch10, &
 !  &                                       'iocc,iunocc:', iocc1,iunocc1,ch10,         &
 !  &                                       'flag_state_win:', flag_state_win(iocc1+(isppol1-1)*nband_k(1)),  &
-!  &                               ch10,   'flag_state_win:', flag_state_win(mband_occ(isppol1)+(isppol1-1)*nband_k(1)+iunocc1)
+!  &                               ch10,   'flag_state_win:', flag_state_win(nband_occ(isppol1)+(isppol1-1)*nband_k(1)+iunocc1)
 !  call wrtout(std_out,message,'COLL')
 !  END DEBUG
 
@@ -878,13 +878,13 @@
      do iexcit=1,nexcit_win
        iexcit2 = indarr(iexcit)
        isppol2 = min((iexcit2-1)/nexcit_pol(1) +1,2)
-       iunocc2 = (iexcit2-(isppol2-1)*nexcit_pol(1)-1)/mband_occ(isppol2)+1
-       iocc2   = iexcit2-(isppol2-1)*nexcit_pol(1)-(iunocc2-1)*mband_occ(isppol2)
+       iunocc2 = (iexcit2-(isppol2-1)*nexcit_pol(1)-1)/nband_occ(isppol2)+1
+       iocc2   = iexcit2-(isppol2-1)*nexcit_pol(1)-(iunocc2-1)*nband_occ(isppol2)
        do jexcit=1,nexcit_win
          iexcit1 = indarr(jexcit)
          isppol1 = min((iexcit1-1)/nexcit_pol(1) +1,2)
-         iunocc1 = (iexcit1-(isppol1-1)*nexcit_pol(1)-1)/mband_occ(isppol1)+1
-         iocc1   = iexcit1-(isppol1-1)*nexcit_pol(1)-(iunocc1-1)*mband_occ(isppol1)
+         iunocc1 = (iexcit1-(isppol1-1)*nexcit_pol(1)-1)/nband_occ(isppol1)+1
+         iocc1   = iexcit1-(isppol1-1)*nexcit_pol(1)-(iunocc1-1)*nband_occ(isppol1)
 
          rec=rec+1 ! record of the entry in the excitation file
          if(nsppol==1)then
@@ -997,13 +997,13 @@
 
      iexcit2 = indarr(iexcit)
      isppol2 = min((iexcit2-1)/nexcit_pol(1) +1,2)
-     iunocc2 = (iexcit2-(isppol2-1)*nexcit_pol(1)-1)/mband_occ(isppol2)+1
-     iocc2   = iexcit2-(isppol2-1)*nexcit_pol(1)-(iunocc2-1)*mband_occ(isppol2)
+     iunocc2 = (iexcit2-(isppol2-1)*nexcit_pol(1)-1)/nband_occ(isppol2)+1
+     iocc2   = iexcit2-(isppol2-1)*nexcit_pol(1)-(iunocc2-1)*nband_occ(isppol2)
 
      iexcit1 = indarr(jexcit)
      isppol1 = min((iexcit1-1)/nexcit_pol(1) +1,2)
-     iunocc1 = (iexcit1-(isppol1-1)*nexcit_pol(1)-1)/mband_occ(isppol1)+1
-     iocc1   = iexcit1-(isppol1-1)*nexcit_pol(1)-(iunocc1-1)*mband_occ(isppol1)
+     iunocc1 = (iexcit1-(isppol1-1)*nexcit_pol(1)-1)/nband_occ(isppol1)+1
+     iocc1   = iexcit1-(isppol1-1)*nexcit_pol(1)-(iunocc1-1)*nband_occ(isppol1)
 
      if (old_iexcit /= iexcit) then
 !      We start a new column of the matrix
@@ -1023,7 +1023,7 @@
          do i2=1,ndiel2
            do i1=1,ndiel1
              wfprod(i1,i2,i3)=wfrspa(i1,i2,i3,index_state(iocc2+(isppol2-1)*nband_k(1))) &
-&             *wfrspa(i1,i2,i3,index_state(iunocc2+mband_occ(isppol2)+(isppol2-1)*nband_k(1)))
+&             *wfrspa(i1,i2,i3,index_state(iunocc2+nband_occ(isppol2)+(isppol2-1)*nband_k(1)))
              work(ifft)=wfprod(i1,i2,i3)
              ifft=ifft+1
            end do
@@ -1081,7 +1081,7 @@
 !    write(std_out,*)'  treating  iexcit =  ',jexcit
 !    write(std_out,*)'   indarr(iexcit) =',iexcit1,iocc1,iunocc1
 !    write(std_out,*)'   index ',index_state(iocc1+(isppol1-1)*nband_k(1)), &
-!    &                       index_state(iunocc1+mband_occ(isppol1)+(isppol1-1)*nband_k(1))
+!    &                       index_state(iunocc1+nband_occ(isppol1)+(isppol1-1)*nband_k(1))
 !    ENDDEBUG
 
      if(pole_approx==0 .or. (iunocc1==iunocc2 .and. iocc1==iocc2 .and. isppol1==isppol2))then
@@ -1101,7 +1101,7 @@
          do i2=1,ndiel2
            do i1=1,ndiel1
              myproduct=wfrspa(i1,i2,i3,index_state(iocc1+(isppol1-1)*nband_k(1))) &
-&             *wfrspa(i1,i2,i3,index_state(iunocc1+mband_occ(isppol1)+(isppol1-1)*nband_k(1)))
+&             *wfrspa(i1,i2,i3,index_state(iunocc1+nband_occ(isppol1)+(isppol1-1)*nband_k(1)))
              do sing_trip=1,2/nsppol
                sum_kernel(sing_trip)=sum_kernel(sing_trip)+&
 &               myproduct*(f_sing_trip(sing_trip)*vhartr(ifft)+kxc_for_tddft(i1,i2,i3,isppol1,isppol2,sing_trip) &
@@ -1203,13 +1203,13 @@
 
        iexcit2 = indarr(iexcit)
        isppol2 = min((iexcit2-1)/nexcit_pol(1) +1,2)
-       iunocc2 = (iexcit2-(isppol2-1)*nexcit_pol(1)-1)/mband_occ(isppol2)+1
-       iocc2   = iexcit2-(isppol2-1)*nexcit_pol(1)-(iunocc2-1)*mband_occ(isppol2)
+       iunocc2 = (iexcit2-(isppol2-1)*nexcit_pol(1)-1)/nband_occ(isppol2)+1
+       iocc2   = iexcit2-(isppol2-1)*nexcit_pol(1)-(iunocc2-1)*nband_occ(isppol2)
 
        iexcit1 = indarr(jexcit)
        isppol1 = min((iexcit1-1)/nexcit_pol(1) +1,2)
-       iunocc1 = (iexcit1-(isppol1-1)*nexcit_pol(1)-1)/mband_occ(isppol1)+1
-       iocc1   = iexcit1-(isppol1-1)*nexcit_pol(1)-(iunocc1-1)*mband_occ(isppol1)
+       iunocc1 = (iexcit1-(isppol1-1)*nexcit_pol(1)-1)/nband_occ(isppol1)+1
+       iocc1   = iexcit1-(isppol1-1)*nexcit_pol(1)-(iunocc1-1)*nband_occ(isppol1)
 
        do sing_trip=1,2/nsppol
          omega_tddft_casida(iocc1,iunocc1,isppol1,iocc2,iunocc2,isppol2,sing_trip)= &
@@ -1273,13 +1273,13 @@
      if (.not.done_sexc(iexcit)) then
        iexcit2 = indarr(iexcit)
        isppol2 = min((iexcit2-1)/nexcit_pol(1) +1,2)
-       iunocc2 = (iexcit1-(isppol2-1)*nexcit_pol(1)-1)/mband_occ(isppol2)+1
-       iocc2   = iexcit2-(isppol2-1)*nexcit_pol(1)-(iunocc2-1)*mband_occ(isppol2)
+       iunocc2 = (iexcit1-(isppol2-1)*nexcit_pol(1)-1)/nband_occ(isppol2)+1
+       iocc2   = iexcit2-(isppol2-1)*nexcit_pol(1)-(iunocc2-1)*nband_occ(isppol2)
        do i3=1,ndiel3
          do i2=1,ndiel2
            do i1=1,ndiel1
              wfprod(i1,i2,i3)=wfrspa(i1,i2,i3,index_state(iocc2+(isppol2-1)*nband_k(1))) &
-&             *wfrspa(i1,i2,i3,index_state(iunocc2+mband_occ(isppol2)+ (isppol2-1)*nband_k(1)))
+&             *wfrspa(i1,i2,i3,index_state(iunocc2+nband_occ(isppol2)+ (isppol2-1)*nband_k(1)))
              do idir=1,3
                poscart(idir)=rprimd(idir,1)*pos(i1,1)+&
 &               rprimd(idir,2)*pos(i2,2)+&
@@ -1327,8 +1327,8 @@
    do iexcit=1,nexcit_win
      iexcit2 = indarr(iexcit)
      isppol = min((iexcit2-1)/nexcit_pol(1) +1,2)
-     iunocc = (iexcit2-(isppol-1)*nexcit_pol(1)-1)/mband_occ(isppol)+1
-     iocc   = iexcit2-(isppol-1)*nexcit_pol(1)-(iunocc-1)*mband_occ(isppol)
+     iunocc = (iexcit2-(isppol-1)*nexcit_pol(1)-1)/nband_occ(isppol)+1
+     iocc   = iexcit2-(isppol-1)*nexcit_pol(1)-(iunocc-1)*nband_occ(isppol)
 
      osc_str(1,iexcit)=zero
      do idir=1,3
@@ -1346,14 +1346,14 @@
 !    The array eexcit has been reordered previously, the others also
      if(nsppol==1)then
        write(message, '(i4,a,i3,2es12.5,es13.5,es11.4,3es9.2)' ) &
-&       iocc,'->',iunocc+mband_occ(isppol),            &
+&       iocc,'->',iunocc+nband_occ(isppol),            &
 &       eexcit(iexcit), eexcit(iexcit)*Ha_eV,eexcit(iexcit)+etotal, &
 !      XG 020209 : Jean-Yves, I assume that the printout of sexc is for debugging ?!
 !      &   osc_str(1:4,iexcit),sexc(1:3,iexcit)
 &       osc_str(1:4,iexcit)
      else
        write(message, '(i4,a,i3,a,i1,2es12.5,es13.5,es11.4,3es9.2)' ) &
-&       iocc,'->',iunocc+mband_occ(isppol),' s:',isppol,            &
+&       iocc,'->',iunocc+nband_occ(isppol),' s:',isppol,            &
 &       eexcit(iexcit), eexcit(iexcit)*Ha_eV,eexcit(iexcit)+etotal, &
 &       osc_str(1:4,iexcit)
      end if
@@ -1397,13 +1397,13 @@
        do iexcit=1,nexcit_win
          iexcit2 = indarr(iexcit)
          isppol2 = min((iexcit2-1)/nexcit_pol(1) +1,2)
-         iunocc2 = (iexcit2-(isppol2-1)*nexcit_pol(1)-1)/mband_occ(isppol2)+1
-         iocc2   = iexcit2-(isppol2-1)*nexcit_pol(1)-(iunocc2-1)*mband_occ(isppol2)
+         iunocc2 = (iexcit2-(isppol2-1)*nexcit_pol(1)-1)/nband_occ(isppol2)+1
+         iocc2   = iexcit2-(isppol2-1)*nexcit_pol(1)-(iunocc2-1)*nband_occ(isppol2)
          do jexcit=1,iexcit
            iexcit1 = indarr(jexcit)
            isppol1 = min((iexcit1-1)/nexcit_pol(1) +1,2)
-           iunocc1 = (iexcit1-(isppol1-1)*nexcit_pol(1)-1)/mband_occ(isppol1)+1
-           iocc1   = iexcit1-(isppol1-1)*nexcit_pol(1)-(iunocc1-1)*mband_occ(isppol1)
+           iunocc1 = (iexcit1-(isppol1-1)*nexcit_pol(1)-1)/nband_occ(isppol1)+1
+           iocc1   = iexcit1-(isppol1-1)*nexcit_pol(1)-(iunocc1-1)*nband_occ(isppol1)
 
            matr(index)=omega_tddft_casida(iocc1,iunocc1,isppol1,iocc2,iunocc2,isppol2,sing_trip)
            matr(index+1)=zero
@@ -1508,31 +1508,31 @@
        end do
 
        isppol_l = min((nlargest-1)/nexcit_pol(1) +1,nsppol)
-       iunocc_l = (nlargest-(isppol_l-1)*nexcit_pol(1)-1)/mband_occ(isppol_l)+1
-       iocc_l   = nlargest-(isppol_l-1)*nexcit_pol(1)-(iunocc_l-1)*mband_occ(isppol_l)
+       iunocc_l = (nlargest-(isppol_l-1)*nexcit_pol(1)-1)/nband_occ(isppol_l)+1
+       iocc_l   = nlargest-(isppol_l-1)*nexcit_pol(1)-(iunocc_l-1)*nband_occ(isppol_l)
        isppol_n = min((nnext-1)/nexcit_pol(1) +1,nsppol)
-       iunocc_n = (nnext-(isppol_n-1)*nexcit_pol(1)-1)/mband_occ(isppol_n)+1
-       iocc_n   = nnext-(isppol_n-1)*nexcit_pol(1)-(iunocc_n-1)*mband_occ(isppol_n)
+       iunocc_n = (nnext-(isppol_n-1)*nexcit_pol(1)-1)/nband_occ(isppol_n)+1
+       iocc_n   = nnext-(isppol_n-1)*nexcit_pol(1)-(iunocc_n-1)*nband_occ(isppol_n)
        if(nsppol==2)then
          isppol_n1 = min((nnext1-1)/nexcit_pol(1) +1,nsppol)
-         iunocc_n1 = (nnext1-(isppol_n1-1)*nexcit_pol(1)-1)/mband_occ(isppol_n1)+1
-         iocc_n1   = nnext1-(isppol_n1-1)*nexcit_pol(1)-(iunocc_n1-1)*mband_occ(isppol_n1)
+         iunocc_n1 = (nnext1-(isppol_n1-1)*nexcit_pol(1)-1)/nband_occ(isppol_n1)+1
+         iocc_n1   = nnext1-(isppol_n1-1)*nexcit_pol(1)-(iunocc_n1-1)*nband_occ(isppol_n1)
          isppol_n2 = min((nnext2-1)/nexcit_pol(1) +1,nsppol)
-         iunocc_n2 = (nnext2-(isppol_n2-1)*nexcit_pol(1)-1)/mband_occ(isppol_n2)+1
-         iocc_n2   = nnext2-(isppol_n2-1)*nexcit_pol(1)-(iunocc_n2-1)*mband_occ(isppol_n2)
+         iunocc_n2 = (nnext2-(isppol_n2-1)*nexcit_pol(1)-1)/nband_occ(isppol_n2)+1
+         iocc_n2   = nnext2-(isppol_n2-1)*nexcit_pol(1)-(iunocc_n2-1)*nband_occ(isppol_n2)
        end if
 
        if(nsppol==1)then
          write(message,'(i4,es15.5,es14.5,es16.6,f8.2,a,i3,a,i3,a,f6.2,a,i3,a,i3,a)') &
 &         iexcit,eexcit(iexcit),&
 &         eexcit(iexcit)*Ha_eV,eexcit(iexcit)+etotal,&
-&         flargest,'(',iocc_l,'->',iunocc_l+mband_occ(1),')',&
-&         fnext,   '(',iocc_n,'->',iunocc_n+mband_occ(1),')'
+&         flargest,'(',iocc_l,'->',iunocc_l+nband_occ(1),')',&
+&         fnext,   '(',iocc_n,'->',iunocc_n+nband_occ(1),')'
          call wrtout(ab_out,message,'COLL')
          call wrtout(std_out,message,'COLL')
        else
-         write(chain1,'(f8.2,a,i3,a,i3,a)')flargest,'(',iocc_l,'->',iunocc_l+mband_occ(isppol_l),')'
-         write(chain2,'(f8.2,a,i3,a,i3,a)')fnext,'(',iocc_n,'->',iunocc_n+mband_occ(isppol_n),')'
+         write(chain1,'(f8.2,a,i3,a,i3,a)')flargest,'(',iocc_l,'->',iunocc_l+nband_occ(isppol_l),')'
+         write(chain2,'(f8.2,a,i3,a,i3,a)')fnext,'(',iocc_n,'->',iunocc_n+nband_occ(isppol_n),')'
          if(trim(chain1)==trim(chain2))then
            write(message,'(i4,es15.5,es14.5,es16.6,a,a,a,a)') &
 &           iexcit,eexcit(iexcit),&
@@ -1545,8 +1545,8 @@
          end if
          call wrtout(ab_out,message,'COLL')
          call wrtout(std_out,message,'COLL')
-         write(chain1,'(f8.2,a,i3,a,i3,a)')fnext1,'(',iocc_n1,'->',iunocc_n1+mband_occ(isppol_n1),')'
-         write(chain2,'(f8.2,a,i3,a,i3,a)')fnext2,'(',iocc_n2,'->',iunocc_n2+mband_occ(isppol_n2),')'
+         write(chain1,'(f8.2,a,i3,a,i3,a)')fnext1,'(',iocc_n1,'->',iunocc_n1+nband_occ(isppol_n1),')'
+         write(chain2,'(f8.2,a,i3,a,i3,a)')fnext2,'(',iocc_n2,'->',iunocc_n2+nband_occ(isppol_n2),')'
          if(trim(chain1)==trim(chain2))then
            write(message,'(a,a,a,a,a)' ) &
 &           '                                                 ',&
