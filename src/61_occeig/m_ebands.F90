@@ -959,8 +959,8 @@ subroutine ebands_copy(ibands,obands)
  call alloc_copy(ibands%kptns , obands%kptns ) 
  call alloc_copy(ibands%eig   , obands%eig   )  
 
- if(allocated(Bands_in%lifetime)) then
-   call alloc_copy(Bands_in%lifetime, Bands_cp%lifetime   )  
+ if(allocated(ibands%lifetime)) then
+   call alloc_copy(ibands%lifetime, obands%lifetime   )  
  end if
   
 
