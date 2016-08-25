@@ -383,8 +383,8 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
    ABI_STAT_MALLOC(exc_mat,(exc_size,exc_size), ierr)
    ABI_CHECK(ierr==0, 'out of memory: excitonic hamiltonian')
 
-   ABI_MALLOC(exc_vl,(exc_size,exc_size))
-   ABI_CHECK_ALLOC('out of memory for left eigenvectors !')
+   ABI_STAT_MALLOC(exc_vl,(exc_size,exc_size),ierr)
+   ABI_CHECK(ierr==0,'out of memory for left eigenvectors !')
    !exc_mat = HUGE(zero)
    !
    ! Read data from file.

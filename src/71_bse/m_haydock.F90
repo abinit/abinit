@@ -58,7 +58,7 @@ MODULE m_haydock
  use m_hexc,              only : hexc_init, hexc_interp_init, hexc_free, hexc_interp_free, &
 &                                hexc_build_hinterp, hexc_matmul_tda, hexc_matmul_full, hexc_t, hexc_matmul_elphon, hexc_interp_t
  use m_exc_spectra,       only : exc_write_data, exc_eps_rpa, exc_write_tensor, mdfs_ncwrite
- use m_eprenorms,         only : ebands_copy, ebands_free
+ use m_eprenorms,         only : eprenorms_t, renorm_bst
 
  implicit none
 
@@ -362,7 +362,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
          ep_ik = bs2eph(ik,1)
          
          !TODO support multiple spins !
-         if(ABS(en - (Epren%eigens(ic,ep_ik,isppol)-Epren%eigens(iv,ep_ik,isppol)+BSp%soenergy)) > tol3) then
+         if(ABS(en - (Epren%eigens(ic,ep_ik,isppol)-Epren%eigens(iv,ep_ik,isppol)+BSp%mbpt_sciss)) > tol3) then
            MSG_ERROR("Eigen from the transition does not correspond to the EP file !")
          end if
          ep_renorms(ireh) = (Epren%renorms(1,ic,ik,isppol,itemp) - Epren%renorms(1,iv,ik,isppol,itemp))
@@ -2309,16 +2309,16 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  keep_vectors = (keep_vectors.and.xmpi_comm_size(comm)==1)
  if (keep_vectors) then 
    ABI_MALLOC(save_phi,(my_t2-my_t1+1,niter_tot))
-   ABI_MALLOC(save_phit,(my_t2-my_t1+1,niter_tot))
-   ABI_CHECK_ALLOC("out of memory in save_phi")        
+   ABI_STAT_MALLOC(save_phit,(my_t2-my_t1+1,niter_tot),ierr)
+   ABI_CHECK(ierr==0,"out of memory in save_phi")        
    save_phi=czero
    save_phit=czero
  end if
  
- ABI_MALLOC(hphi_np1,(hexc%hsize))
- ABI_CHECK_ALLOC("out-of-memory hphi_np1")
- ABI_MALLOC(hphit_np1,(hexc%hsize))
- ABI_CHECK_ALLOC("out-of-memory hphit_np1")
+ ABI_STAT_MALLOC(hphi_np1,(hexc%hsize),ierr)
+ ABI_CHECK(ierr==0,"out-of-memory hphi_np1")
+ ABI_STAT_MALLOC(hphit_np1,(hexc%hsize),ierr)
+ ABI_CHECK(ierr==0,"out-of-memory hphit_np1")
 
  do inn=niter_done+1,niter_tot
    
