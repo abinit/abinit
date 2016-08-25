@@ -704,6 +704,7 @@ program optic
  ABI_DEALLOCATE(eigen12)
  ABI_DEALLOCATE(eigen13)
  ABI_DEALLOCATE(eigen0)
+ ABI_DEALLOCATE(eigen0_c)
  ABI_DEALLOCATE(doccde)
  ABI_DEALLOCATE(wtk)
  ABI_DEALLOCATE(cond_nd)
