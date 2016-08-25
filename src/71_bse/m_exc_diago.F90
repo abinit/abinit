@@ -438,7 +438,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
      bseig_fname = BS_files%out_eig
 
      if (do_ep_renorm) then
-       write(std_out,'(a,i)') "Will perform elphon renormalization for itemp = ",itemp
+       write(std_out,'(a,i4)') "Will perform elphon renormalization for itemp = ",itemp
 
        call int2char4(itemp,ts)
 
@@ -456,7 +456,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
            ep_ik = bs2eph(ik,1)
            
            !TODO support multiple spins !
-           if(ABS(en - (Epren%eigens(ic,ep_ik,isppol)-Epren%eigens(iv,ep_ik,isppol)+BSp%soenergy)) > tol3) then
+           if(ABS(en - (Epren%eigens(ic,ep_ik,isppol)-Epren%eigens(iv,ep_ik,isppol)+BSp%mbpt_sciss)) > tol3) then
              MSG_ERROR("Eigen from the transition does not correspond to the EP file !")
            end if
            exc_mat(ireh,ireh) = exc_mat(ireh,ireh) + (Epren%renorms(1,ic,ik,isppol,itemp) - Epren%renorms(1,iv,ik,isppol,itemp))
@@ -486,8 +486,8 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
      else
        call wrtout(std_out," Partial diagonalization with XHEEVX... ","COLL")
        abstol=zero; il=1; iu=nstates
-       ABI_MALLOC(exc_vec,(exc_size,nstates))
-       ABI_CHECK_ALLOC("out of memory in exc_vec")
+       ABI_STAT_MALLOC(exc_vec,(exc_size,nstates),ierr)
+       ABI_CHECK(ierr==0,"out of memory in exc_vec")
        call xheevx("Vectors","Index","Upper",exc_size,exc_mat,vl,vu,il,iu,abstol,mene_found,exc_ene,exc_vec,exc_size)
        exc_mat(:,1:nstates) = exc_vec
        exc_ene_c(:) = exc_ene(:)
@@ -791,7 +791,7 @@ subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
 
  do ii=1,nstates_read
    if (ABS(DBLE(exc_cene(ii))) < DBLE(exc_gap)) then
-     exc_gap = CMPLX(ABS(DBLE(exc_cene(ii))),AIMAG(exc_cene(ii)))
+     exc_gap = DCMPLX(ABS(DBLE(exc_cene(ii))),AIMAG(exc_cene(ii)))
    end if
  end do
 
