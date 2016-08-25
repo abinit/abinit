@@ -882,6 +882,7 @@ subroutine exc_write_phi_block(oeig_fname,use_mpio)
      if (open_file(oeig_fname,msg, newunit=eig_unt, form='unformatted') /= 0) then
        MSG_ERROR(msg)
      end if
+     write(eig_unt, err=10, iomsg=errmsg) do_ep_lifetime
      write(eig_unt, err=10, iomsg=errmsg) hexc_size, nstates
      write(eig_unt, err=10, iomsg=errmsg) CMPLX(exc_energy(1:nstates),kind=dpc)
    end if

@@ -41,6 +41,7 @@ MODULE m_exc_diago
  use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : kmesh_t
  use m_ebands,          only : ebands_report_gap
+ use m_eprenorms,       only : eprenorms_t
  use m_wfd,             only : wfd_t
  use m_pawhr,           only : pawhur_t
  use m_pawtab,          only : pawtab_type
@@ -352,6 +353,20 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  ABI_STAT_MALLOC(exc_ene,(exc_size), ierr)
  ABI_CHECK(ierr==0, 'out of memory: excitonic eigenvalues')
 
+ ABI_STAT_MALLOC(exc_ene_c,(exc_size), ierr)
+ ABI_CHECK(ierr==0,'out of memory: excitonic complex eigenvalues')
+
+ do_ep_renorm = .FALSE.
+ ntemp = 1
+ do_ep_lifetime = .FALSE.
+ if(BSp%do_ep_renorm .and. present(Epren)) then
+   do_ep_renorm = .TRUE.
+   ntemp = Epren%ntemp
+   if(present(elph_lifetime)) then
+     do_ep_lifetime = elph_lifetime
+   end if
+ end if
+
  SELECT CASE (use_scalapack)
  CASE (.FALSE.)
 
@@ -388,39 +403,150 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 
    close(hreso_unt)
 
-   if (do_full_diago) then 
-     call wrtout(std_out," Full diagonalization with XHEEV... ","COLL")
-     call xheev("Vectors","Upper",exc_size,exc_mat,exc_ene)
-   else
-     call wrtout(std_out," Partial diagonalization with XHEEVX... ","COLL")
-     abstol=zero; il=1; iu=nstates
-     ABI_STAT_MALLOC(exc_vec,(exc_size,nstates), ierr)
-     ABI_CHECK(ierr==0, "out of memory in exc_vec")
-     call xheevx("Vectors","Index","Upper",exc_size,exc_mat,vl,vu,il,iu,abstol,mene_found,exc_ene,exc_vec,exc_size)
-     exc_mat(:,1:nstates) = exc_vec
-     ABI_FREE(exc_vec)
-   end if
-   !
-   ! ==============================================
-   ! === Now exc_mat contains the eigenvectors ====
-   ! ==============================================
-
-   ! * Write the final results.
-   call wrtout(std_out,' Writing eigenvalues and eigenvectors on file: '//TRIM(bseig_fname),"COLL")
-
-   if (open_file(bseig_fname,msg,newunit=eig_unt,form="unformatted",action="write") /= 0) then
-     MSG_ERROR(msg)
+ 
+   if (do_ep_renorm) then  
+     write(std_out,'(a)') "Mapping kpts from bse to eph"
+     sppoldbl = 1 !; if (any(Cryst%symafm == -1) .and. Epren%nsppol == 1) nsppoldbl=2
+     ABI_MALLOC(bs2eph, (Kmesh%nbz*sppoldbl, 6))
+     timrev = 1
+     call listkk(dksqmax, Cryst%gmet, bs2eph, Epren%kpts, Kmesh%bz, Epren%nkpt, Kmesh%nbz, Cryst%nsym, &
+&       sppoldbl, Cryst%symafm, Cryst%symrel, timrev, use_symrec=.False.)
    end if
 
-   write(eig_unt) exc_size, nstates
-   write(eig_unt) CMPLX(exc_ene(1:nstates),kind=dpc)
-   do mi=1,nstates
-     write(eig_unt) exc_mat(1:exc_size,mi)
+   do itemp = 1, ntemp
+
+     !TODO should find a way not to read again and again !
+     !  but without storing it twice !!!
+     !exc_mat = HUGE(zero)
+     !
+     ! Read data from file.
+     if (open_file(hreso_fname,msg,newunit=hreso_unt,form="unformatted",status="old",action="read") /= 0) then
+       MSG_ERROR(msg)
+     end if
+     !
+     ! Read the header and perform consistency checks.
+     call exc_read_bshdr(hreso_unt,Bsp,fform,ierr)
+     ABI_CHECK(ierr==0,"Fatal error, cannot continue")
+     !
+     ! Construct full resonant block using Hermiticity. 
+     diagonal_is_real = .not.Bsp%have_complex_ene
+     call exc_read_rblock_fio(hreso_unt,diagonal_is_real,nsppol,Bsp%nreh,exc_size,exc_mat,ierr)
+     ABI_CHECK(ierr==0,"Fatal error, cannot continue")
+
+     close(hreso_unt)
+
+     bseig_fname = BS_files%out_eig
+
+     if (do_ep_renorm) then
+       write(std_out,'(a,i)') "Will perform elphon renormalization for itemp = ",itemp
+
+       call int2char4(itemp,ts)
+
+       bseig_fname = TRIM(BS_files%out_eig) // TRIM("_T") // ts
+
+       ! Should patch the diagonal of exc_mat
+
+       do isppol = 1, BSp%nsppol
+         do ireh = 1, BSp%nreh(isppol)
+           ic = BSp%Trans(ireh,isppol)%c
+           iv = BSp%Trans(ireh,isppol)%v
+           ik = BSp%Trans(ireh,isppol)%k ! In the full bz
+           en = BSp%Trans(ireh,isppol)%en
+
+           ep_ik = bs2eph(ik,1)
+           
+           !TODO support multiple spins !
+           if(ABS(en - (Epren%eigens(ic,ep_ik,isppol)-Epren%eigens(iv,ep_ik,isppol)+BSp%soenergy)) > tol3) then
+             MSG_ERROR("Eigen from the transition does not correspond to the EP file !")
+           end if
+           exc_mat(ireh,ireh) = exc_mat(ireh,ireh) + (Epren%renorms(1,ic,ik,isppol,itemp) - Epren%renorms(1,iv,ik,isppol,itemp))
+
+           ! Add lifetime
+           if(do_ep_lifetime) then
+             exc_mat(ireh,ireh) = exc_mat(ireh,ireh) - j_dpc*(Epren%lifetimes(1,ic,ik,isppol,itemp) + Epren%lifetimes(1,iv,ik,isppol,itemp))
+           end if
+
+         end do
+       end do
+
+     end if
+
+     if (do_full_diago) then 
+       call wrtout(std_out," Full diagonalization with XHEEV... ","COLL")
+       !call xheev("Vectors","Upper",exc_size,exc_mat,exc_ene)
+
+       !exc_ene_c(:) = exc_ene(:)
+
+
+       ABI_MALLOC(exc_vec,(exc_size,exc_size))
+       ! Try complex !
+       call xgeev('V','V',exc_size,exc_mat,exc_size,exc_ene_c,exc_vl,exc_size,exc_vec,exc_size)
+       exc_mat(:,1:nstates) = exc_vec
+       ABI_FREE(exc_vec)
+     else
+       call wrtout(std_out," Partial diagonalization with XHEEVX... ","COLL")
+       abstol=zero; il=1; iu=nstates
+       ABI_MALLOC(exc_vec,(exc_size,nstates))
+       ABI_CHECK_ALLOC("out of memory in exc_vec")
+       call xheevx("Vectors","Index","Upper",exc_size,exc_mat,vl,vu,il,iu,abstol,mene_found,exc_ene,exc_vec,exc_size)
+       exc_mat(:,1:nstates) = exc_vec
+       exc_ene_c(:) = exc_ene(:)
+       ABI_FREE(exc_vec)
+     end if
+     !
+     ! ==============================================
+     ! === Now exc_mat contains the eigenvectors ====
+     ! ==============================================
+
+     ! * Write the final results.
+     call wrtout(std_out,' Writing eigenvalues and eigenvectors on file: '//TRIM(bseig_fname),"COLL")
+
+     if (open_file(bseig_fname,msg,newunit=eig_unt,form="unformatted",action="write") /= 0) then
+       MSG_ERROR(msg)
+     end if
+
+     !!! !DBYG
+     !!! !Compute overlap matrix
+     !!! ABI_MALLOC(ovlp,(exc_size,exc_size))
+     !!! do mi=1,nstates
+     !!!   do ireh=1,nstates
+     !!!     ovlp(mi,ireh) = xdotc(exc_size,exc_vl(:,mi),1,exc_mat(:,ireh),1)
+     !!!     if(mi==ireh) then
+     !!!       !if(ABS(ovlp(mi,ireh)) < 0.999) then
+     !!!       !  write(*,*) "it,itp = ",mi,ireh,"ovlp = ",ovlp(mi,ireh)
+     !!!       !end if
+     !!!     else
+     !!!       if(ABS(ovlp(mi,ireh)) > 0.001) then
+     !!!         write(*,*) "it,itp = ",mi,ireh,"ovlp = ",ovlp(mi,ireh)
+     !!!       end if
+     !!!     end if
+     !!!   end do
+     !!! end do
+     !!! !call xgemm("C","N",exc_size,nstates,nstates,cone,exc_vl,exc_size,exc_mat,exc_size,czero,ovlp,nstates)
+
+     !!! write(777,*) ovlp
+     !!! ABI_FREE(ovlp)
+     !!! !ENDDBYG
+
+     !% fform = 1002 ! FIXME
+     !% call hdr_io_int(fform,Hdr_bse,2,eig_unt)
+
+     write(eig_unt) do_ep_lifetime
+     write(eig_unt) exc_size, nstates
+     write(eig_unt) exc_ene_c(1:nstates)
+     do mi=1,nstates
+       write(eig_unt) exc_mat(1:exc_size,mi)
+       if(do_ep_lifetime) then
+         write(eig_unt) exc_vl(1:exc_size,mi)
+       end if
+     end do
+
+     close(eig_unt)
+
    end do
 
-   close(eig_unt)
-
    ABI_FREE(exc_mat)
+   ABI_FREE(exc_vl)
 
  CASE (.TRUE.)
 

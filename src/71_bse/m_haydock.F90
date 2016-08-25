@@ -38,13 +38,13 @@ MODULE m_haydock
  use netcdf
 #endif
 
- use m_fstrings,          only : indent, strcat, sjoin, itoa
+ use m_fstrings,          only : indent, strcat, sjoin, itoa, int2char4
  use m_io_tools,          only : file_exists, open_file
  use defs_abitypes,       only : Hdr_type
  use defs_datatypes,      only : ebands_t, pseudopotential_type
  use m_geometry,          only : normv
  use m_blas,              only : xdotc, xgemv
- use m_numeric_tools,     only : print_arr, symmetrize, hermitianize, continued_fract, wrap2_pmhalf
+ use m_numeric_tools,     only : print_arr, symmetrize, hermitianize, continued_fract, wrap2_pmhalf, iseven
  use m_fft_mesh,          only : calc_ceigr
  use m_crystal,           only : crystal_t 
  use m_crystal_io,        only : crystal_ncwrite
@@ -56,8 +56,9 @@ MODULE m_haydock
  use m_pawtab,            only : pawtab_type
  use m_vcoul,             only : vcoul_t
  use m_hexc,              only : hexc_init, hexc_interp_init, hexc_free, hexc_interp_free, &
-&                                hexc_build_hinterp, hexc_matmul_tda, hexc_matmul_full, hexc_t, hexc_interp_t
+&                                hexc_build_hinterp, hexc_matmul_tda, hexc_matmul_full, hexc_t, hexc_matmul_elphon, hexc_interp_t
  use m_exc_spectra,       only : exc_write_data, exc_eps_rpa, exc_write_tensor, mdfs_ncwrite
+ use m_eprenorms,         only : ebands_copy, ebands_free
 
  implicit none
 
@@ -296,211 +297,300 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
      call hexc_build_hinterp(hexc, hexc_i)
    end if
  end if
- 
- ! =======================================================
- ! === Make EPS RPA and GW without local-field effects ===
- ! =======================================================
- ABI_MALLOC(eps_rpanlf,(BSp%nomega,BSp%nq))
- ABI_MALLOC(dos_ks,(BSp%nomega))
- ABI_MALLOC(eps_gwnlf ,(BSp%nomega,BSp%nq))
- ABI_MALLOC(dos_gw,(BSp%nomega))
 
- call wrtout(std_out," Calculating RPA NLF and QP NLF epsilon","COLL")
+ call timab(692,2,tsec) ! exc_haydock_driver(prep)
+ call timab(693,1,tsec) ! exc_haydock_driver(wo lf) - that is, without local field
 
- call exc_eps_rpa(BSp%nbnds,BSp%lomo_spin,BSp%lomo_min,BSp%homo_spin,hexc%Kmesh,hexc%KS_BSt,BSp%nq,nsppol,&
-&  opt_cvk,Cryst%ucvol,BSp%broad,BSp%nomega,BSp%omega,eps_rpanlf,dos_ks)
+ do_ep_renorm = .FALSE.
+ ntemp = 1
+ do_ep_lifetime = .FALSE.
 
- call exc_eps_rpa(BSp%nbnds,BSp%lomo_spin,BSp%lomo_min,BSp%homo_spin,hexc%Kmesh,hexc%QP_BSt,BSp%nq,nsppol,&
-&  opt_cvk,Cryst%ucvol,Bsp%broad,BSp%nomega,BSp%omega,eps_gwnlf,dos_gw)
-
- if (my_rank==master) then ! Only master works.
-   !
-   ! Master node writes final results on file.
-   call exc_write_data(BSp,BS_files,"RPA_NLF_MDF",eps_rpanlf,dos=dos_ks)
-
-   call exc_write_data(BSp,BS_files,"GW_NLF_MDF",eps_gwnlf,dos=dos_gw)
-
-   ! Computing and writing tensor in files
-
-   ! RPA_NLF
-   ABI_MALLOC(tensor_cart_rpanlf,(BSp%nomega,6))
-   ABI_MALLOC(tensor_red_rpanlf,(BSp%nomega,6))
-
-   call wrtout(std_out," Calculating RPA NLF dielectric tensor","COLL")
-   call haydock_mdf_to_tensor(BSp,Cryst,eps_rpanlf,tensor_cart_rpanlf, tensor_red_rpanlf, ierr)
-
-   if(ierr == 0) then
-      ! Writing tensor
-      call exc_write_tensor(BSp,BS_files,"RPA_NLF_TSR_CART",tensor_cart_rpanlf)
-      call exc_write_tensor(BSp,BS_files,"RPA_NLF_TSR_RED",tensor_red_rpanlf)
-   else 
-      write(msg,'(3a)')&
-&       'The RPA_NLF dielectric complex tensor cannot be computed',ch10,&
-&       'There must be 6 different q-points in long wavelength limit (see gw_nqlwl)'
-      MSG_COMMENT(msg)
+ if(BSp%do_ep_renorm) then
+   if (BSp%nsppol == 2) then
+     MSG_ERROR('Elphon renorm with nsppol == 2 not yet coded !')
    end if
-
-   ABI_FREE(tensor_cart_rpanlf)
-   ABI_FREE(tensor_red_rpanlf)
-
-   ! GW_NLF
-   ABI_MALLOC(tensor_cart_gwnlf,(BSp%nomega,6))
-   ABI_MALLOC(tensor_red_gwnlf,(BSp%nomega,6))
-
-   call wrtout(std_out," Calculating GW NLF dielectric tensor","COLL")
-
-   call haydock_mdf_to_tensor(BSp,Cryst,eps_gwnlf,tensor_cart_gwnlf, tensor_red_gwnlf, ierr)
-
-   if(ierr == 0) then
-      ! Writing tensor
-      call exc_write_tensor(BSp,BS_files,"GW_NLF_TSR_CART",tensor_cart_gwnlf)
-      call exc_write_tensor(BSp,BS_files,"GW_NLF_TSR_RED",tensor_red_gwnlf)
-   else
-      write(msg,'(3a)')&
-&       'The GW_NLF dielectric complex tensor cannot be computed',ch10,&
-&       'There must be 6 different q-points in long wavelength limit (see gw_nqlwl)'
-      MSG_COMMENT(msg)
+   do_ep_renorm = .TRUE. 
+   ntemp = Epren%ntemp
+   if(BSp%do_lifetime) then
+     do_ep_lifetime = .TRUE.
    end if
+   
+   ! Force elphon lifetime  
+   do_ep_lifetime = .TRUE.
 
-   ABI_FREE(tensor_cart_gwnlf)
-   ABI_FREE(tensor_red_gwnlf)
- 
-   !call wrtout(std_out," Checking Kramers Kronig on Excitonic Macroscopic Epsilon","COLL")
-   !call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_exc(:,1))
+   ! Map points from BSE to elphon kpoints
+   sppoldbl = 1 !; if (any(Cryst%symafm == -1) .and. Epren%nsppol == 1) nsppoldbl=2
+   ABI_MALLOC(bs2eph, (Kmesh%nbz*sppoldbl, 6))
+   ABI_MALLOC(ep_renorms, (hsize))
+   timrev = 1
+   call listkk(dksqmax, Cryst%gmet, bs2eph, Epren%kpts, Kmesh%bz, Epren%nkpt, Kmesh%nbz, Cryst%nsym, &
+&     sppoldbl, Cryst%symafm, Cryst%symrel, timrev, use_symrec=.False.)
 
-   !call wrtout(std_out," Checking Kramers Kronig on RPA NLF Macroscopic Epsilon","COLL")
-   !call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_rpanlf(:,1))
-
-   !call wrtout(std_out," Checking Kramers Kronig on GW NLF Macroscopic Epsilon","COLL")
-   !call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_gwnlf(:,1))
-
-   !call wrtout(std_out," Checking f-sum rule on Excitonic Macroscopic Epsilon","COLL")
-
-   !if (BSp%exchange_term>0) then 
-   !  MSG_COMMENT(' f-sum rule should be checked without LF')
-   !end if
-   !call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_exc(:,1)),drude_plsmf)
-
-   !call wrtout(std_out," Checking f-sum rule on RPA NLF Macroscopic Epsilon","COLL")
-   !call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_rpanlf(:,1)),drude_plsmf)
-
-   !call wrtout(std_out," Checking f-sum rule on GW NLF Macroscopic Epsilon","COLL")
-   !call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_gwnlf(:,1)),drude_plsmf)
- end if ! my_rank==master
-
- ABI_FREE(opt_cvk)
- !call xmpi_barrier(comm)
- !
- ! The ket for the approximated DOS.
- if (prtdos) then 
-   MSG_WARNING("Calculating DOS with Haydock method")
-   ABI_CHECK(BSp%use_coupling==0,"DOS with coupling not coded")
-   iq = BSp%nq + 1
-   if (my_rank==master) then
-     !call random_seed()
-     do itt=1,SUM(Bsp%nreh)
-       call RANDOM_NUMBER(rand_phi)
-       rand_phi = two_pi*rand_phi
-       kets(itt,iq) = CMPLX( COS(rand_phi), SIN(rand_phi) )
-     end do
-     ! Normalize the vector.
-     !norm = SQRT( DOT_PRODUCT(kets(:,iq), kets(:,iq)) ) 
-     !kets(:,iq) = kets(:,iq)/norm
-   end if
-   call xmpi_bcast(kets(:,iq),master,comm,ierr)
  end if
-
+ 
  call timab(693,2,tsec) ! exc_haydock_driver(wo lf    - that is, without local field
  call timab(694,1,tsec) ! exc_haydock_driver(apply
 
- ABI_MALLOC(green,(BSp%nomega,nkets))
+ prefix = ""
+ do itemp = 1, ntemp
 
- if (BSp%use_coupling==0) then 
-   !YG2014
-   call haydock_herm(BSp,BS_files,Cryst,Hdr_bse,hexc%my_t1,hexc%my_t2,&
-&       nkets,kets,green,hexc,hexc_i,comm)
- else
-   if (BSp%use_interp) then
-     MSG_ERROR("BSE Interpolation with coupling is not supported")
-   else
-     call haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_t2,nkets,kets,green,comm)
+   call ebands_copy(hexc%KS_BSt, EPBSt)
+   call ebands_copy(hexc%QP_BSt, EP_QPBSt)
+
+   ! =================================================
+   ! == Calculate elphon vector in transition space ==
+   ! =================================================
+   if (do_ep_renorm) then
+       
+     write(*,*) "Will perform elphon renormalization for itemp = ",itemp
+
+     call int2char4(itemp,ts)
+     prefix = TRIM("_T") // ts
+
+     ! No scissor with KSBST
+     call renorm_bst(Epren, EPBSt, Cryst, itemp, do_lifetime=.TRUE.,do_check=.TRUE.)
+     
+     call renorm_bst(Epren, EP_QPBSt, Cryst, itemp, do_lifetime=.TRUE.,do_check=.FALSE.)
+
+     do isppol = 1, BSp%nsppol
+       do ireh = 1, BSp%nreh(isppol)
+         ic = BSp%Trans(ireh,isppol)%c
+         iv = BSp%Trans(ireh,isppol)%v
+         ik = BSp%Trans(ireh,isppol)%k ! In the full bz
+         en = BSp%Trans(ireh,isppol)%en
+
+         ep_ik = bs2eph(ik,1)
+         
+         !TODO support multiple spins !
+         if(ABS(en - (Epren%eigens(ic,ep_ik,isppol)-Epren%eigens(iv,ep_ik,isppol)+BSp%soenergy)) > tol3) then
+           MSG_ERROR("Eigen from the transition does not correspond to the EP file !")
+         end if
+         ep_renorms(ireh) = (Epren%renorms(1,ic,ik,isppol,itemp) - Epren%renorms(1,iv,ik,isppol,itemp))
+
+         ! Add lifetime
+         if(do_ep_lifetime) then
+           ep_renorms(ireh) = ep_renorms(ireh) - j_dpc*(Epren%lifetimes(1,ic,ik,isppol,itemp) + Epren%lifetimes(1,iv,ik,isppol,itemp))
+         end if
+
+       end do
+     end do
    end if
- end if
- !
- ! Add 1 to have the real part right.
- green = one + green
+
+   
+   ! =======================================================
+   ! === Make EPS RPA and GW without local-field effects ===
+   ! =======================================================
+   ABI_MALLOC(eps_rpanlf,(BSp%nomega,BSp%nq))
+   ABI_MALLOC(dos_ks,(BSp%nomega))
+   ABI_MALLOC(eps_gwnlf ,(BSp%nomega,BSp%nq))
+   ABI_MALLOC(dos_gw,(BSp%nomega))
+
+   call wrtout(std_out," Calculating RPA NLF and QP NLF epsilon","COLL")
+
+   call exc_eps_rpa(BSp%nbnds,BSp%lomo_spin,BSp%lomo_min,BSp%homo_spin,hexc%Kmesh,EPBSt,BSp%nq,nsppol,&
+&    opt_cvk,Cryst%ucvol,BSp%broad,BSp%nomega,BSp%omega,eps_rpanlf,dos_ks)
+
+   call exc_eps_rpa(BSp%nbnds,BSp%lomo_spin,BSp%lomo_min,BSp%homo_spin,hexc%Kmesh,EP_QPBSt,BSp%nq,nsppol,&
+&    opt_cvk,Cryst%ucvol,Bsp%broad,BSp%nomega,BSp%omega,eps_gwnlf,dos_gw)
+
+   if (my_rank==master) then ! Only master works.
+     !
+     ! Master node writes final results on file.
+     call exc_write_data(BSp,BS_files,"RPA_NLF_MDF",eps_rpanlf,prefix=prefix,dos=dos_ks)
+
+     call exc_write_data(BSp,BS_files,"GW_NLF_MDF",eps_gwnlf,prefix=prefix,dos=dos_gw)
+
+     ! Computing and writing tensor in files
+
+     ! RPA_NLF
+     ABI_MALLOC(tensor_cart_rpanlf,(BSp%nomega,6))
+     ABI_MALLOC(tensor_red_rpanlf,(BSp%nomega,6))
+
+     call wrtout(std_out," Calculating RPA NLF dielectric tensor","COLL")
+     call haydock_mdf_to_tensor(BSp,Cryst,eps_rpanlf,tensor_cart_rpanlf, tensor_red_rpanlf, ierr)
+
+     if(ierr == 0) then
+        ! Writing tensor
+        call exc_write_tensor(BSp,BS_files,"RPA_NLF_TSR_CART",tensor_cart_rpanlf)
+        call exc_write_tensor(BSp,BS_files,"RPA_NLF_TSR_RED",tensor_red_rpanlf)
+     else 
+        write(msg,'(3a)')&
+&         'The RPA_NLF dielectric complex tensor cannot be computed',ch10,&
+&         'There must be 6 different q-points in long wavelength limit (see gw_nqlwl)'
+        MSG_COMMENT(msg)
+     end if
+
+     ABI_FREE(tensor_cart_rpanlf)
+     ABI_FREE(tensor_red_rpanlf)
+
+     ! GW_NLF
+     ABI_MALLOC(tensor_cart_gwnlf,(BSp%nomega,6))
+     ABI_MALLOC(tensor_red_gwnlf,(BSp%nomega,6))
+
+     call wrtout(std_out," Calculating GW NLF dielectric tensor","COLL")
+
+     call haydock_mdf_to_tensor(BSp,Cryst,eps_gwnlf,tensor_cart_gwnlf, tensor_red_gwnlf, ierr)
+
+     if(ierr == 0) then
+        ! Writing tensor
+        call exc_write_tensor(BSp,BS_files,"GW_NLF_TSR_CART",tensor_cart_gwnlf)
+        call exc_write_tensor(BSp,BS_files,"GW_NLF_TSR_RED",tensor_red_gwnlf)
+     else
+        write(msg,'(3a)')&
+&         'The GW_NLF dielectric complex tensor cannot be computed',ch10,&
+&         'There must be 6 different q-points in long wavelength limit (see gw_nqlwl)'
+        MSG_COMMENT(msg)
+     end if
+
+     ABI_FREE(tensor_cart_gwnlf)
+     ABI_FREE(tensor_red_gwnlf)
+   
+     !call wrtout(std_out," Checking Kramers Kronig on Excitonic Macroscopic Epsilon","COLL")
+     !call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_exc(:,1))
+
+     !call wrtout(std_out," Checking Kramers Kronig on RPA NLF Macroscopic Epsilon","COLL")
+     !call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_rpanlf(:,1))
+
+     !call wrtout(std_out," Checking Kramers Kronig on GW NLF Macroscopic Epsilon","COLL")
+     !call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_gwnlf(:,1))
+
+     !call wrtout(std_out," Checking f-sum rule on Excitonic Macroscopic Epsilon","COLL")
+
+     !if (BSp%exchange_term>0) then 
+     !  MSG_COMMENT(' f-sum rule should be checked without LF')
+     !end if
+     !call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_exc(:,1)),drude_plsmf)
+
+     !call wrtout(std_out," Checking f-sum rule on RPA NLF Macroscopic Epsilon","COLL")
+     !call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_rpanlf(:,1)),drude_plsmf)
+
+     !call wrtout(std_out," Checking f-sum rule on GW NLF Macroscopic Epsilon","COLL")
+     !call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_gwnlf(:,1)),drude_plsmf)
+   end if ! my_rank==master
+
+   !call xmpi_barrier(comm)
+   !
+   ! The ket for the approximated DOS.
+   if (prtdos) then 
+     MSG_WARNING("Calculating DOS with Haydock method")
+     ABI_CHECK(BSp%use_coupling==0,"DOS with coupling not coded")
+     iq = BSp%nq + 1
+     if (my_rank==master) then
+       !call random_seed()
+       do itt=1,SUM(Bsp%nreh)
+         call RANDOM_NUMBER(rand_phi)
+         rand_phi = two_pi*rand_phi
+         kets(itt,iq) = CMPLX( COS(rand_phi), SIN(rand_phi) )
+       end do
+       ! Normalize the vector.
+       !norm = SQRT( DOT_PRODUCT(kets(:,iq), kets(:,iq)) ) 
+       !kets(:,iq) = kets(:,iq)/norm
+     end if
+     call xmpi_bcast(kets(:,iq),master,comm,ierr)
+   end if
+
+   ABI_MALLOC(green,(BSp%nomega,nkets))
+
+   if (BSp%use_coupling==0) then
+     if(do_ep_renorm) then
+       call haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,hexc%my_t1,hexc%my_t2,nkets,kets,ep_renorms,green,comm)
+     else 
+       !YG2014
+       call haydock_herm(BSp,BS_files,Cryst,Hdr_bse,hexc%my_t1,hexc%my_t2,&
+&         nkets,kets,green,hexc,hexc_i,comm)
+     end if
+   else
+     if (BSp%use_interp) then
+       MSG_ERROR("BSE Interpolation with coupling is not supported")
+     else
+       call haydock_psherm(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,my_t2,nkets,kets,green,comm)
+     end if
+   end if
+
+   !
+   ! Add 1 to have the real part right.
+   green = one + green
+
+   if (my_rank==master) then ! Master writes the final results.
+     !
+     if (prtdos) then
+       ABI_MALLOC(dos,(BSp%nomega))
+       dos = -AIMAG(green(:,BSp%nq+1))
+       call exc_write_data(BSp,BS_files,"EXC_MDF",green,prefix=prefix,dos=dos)
+       ABI_FREE(dos)
+     else 
+       call exc_write_data(BSp,BS_files,"EXC_MDF",green,prefix=prefix)
+     end if
+     !
+     ! =========================
+     ! === Write out Epsilon ===
+     ! =========================
+
+     ABI_MALLOC(tensor_cart,(BSp%nomega,6))
+     ABI_MALLOC(tensor_red,(BSp%nomega,6))
+
+     call wrtout(std_out," Calculating EXC dielectric tensor","COLL")
+     call haydock_mdf_to_tensor(BSp,Cryst,green,tensor_cart,tensor_red,ierr)
+
+     if (ierr == 0) then
+         ! Writing tensor
+         call exc_write_tensor(BSp,BS_files,"EXC_TSR_CART",tensor_cart)
+         call exc_write_tensor(BSp,BS_files,"EXC_TSR_RED",tensor_red)
+     else
+         write(msg,'(3a)')&
+&          'The EXC dielectric complex tensor cannot be computed',ch10,&
+&          'There must be 6 different q-points in long wavelength limit (see gw_nqlwl)'
+         MSG_COMMENT(msg)
+     end if
+
+     ABI_FREE(tensor_cart)
+     ABI_FREE(tensor_red)
+     !
+     ! This part will be removed when fldiff will be able to compare two mdf files.
+     write(ab_out,*)" "
+     write(ab_out,*)"Macroscopic dielectric function:"
+     write(ab_out,*)"omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> "
+     do io=1,MIN(BSp%nomega,10)
+       omegaev = REAL(BSp%omega(io))*Ha_eV
+       ks_avg  = SUM( eps_rpanlf(io,:)) / Bsp%nq
+       gw_avg  = SUM( eps_gwnlf (io,:)) / Bsp%nq
+       exc_avg = SUM( green     (io,:)) / BSp%nq
+       write(ab_out,'(7f9.4)')omegaev,ks_avg,gw_avg,exc_avg
+     end do
+     write(ab_out,*)" "
+
+     ! Write MDF file with the final results.
+     ! FIXME: It won't work if prtdos == True
+     ! TODO: Add ebands
+#ifdef HAVE_TRIO_ETSF_IO
+       path = strcat(BS_files%out_basename,strcat(prefix,"_MDF.nc"))
+       NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
+       NCF_CHECK(crystal_ncwrite(Cryst, ncid))
+       NCF_CHECK(ebands_ncwrite(QP_bst, ncid))
+       call mdfs_ncwrite(ncid, Bsp, green, eps_rpanlf, eps_gwnlf)
+       NCF_CHECK(nf90_close(ncid))
+#else
+       ABI_UNUSED(ncid)
+#endif
+   end if 
+
+   ABI_FREE(green)
+   ABI_FREE(eps_rpanlf)
+   ABI_FREE(eps_gwnlf)
+   ABI_FREE(dos_ks)
+   ABI_FREE(dos_gw)
+
+   call ebands_free(EPBSt)
+   call ebands_free(EP_QPBst)
+
+ end do ! itemp loop
+   
+ ABI_FREE(opt_cvk)
 
  ABI_FREE(kets)
 
  call timab(694,2,tsec) ! exc_haydock_driver(apply
  call timab(695,1,tsec) ! exc_haydock_driver(end)
-
- if (my_rank==master) then ! Master writes the final results.
-   !
-   if (prtdos) then
-     ABI_MALLOC(dos,(BSp%nomega))
-     dos = -AIMAG(green(:,BSp%nq+1))
-     call exc_write_data(BSp,BS_files,"EXC_MDF",green,dos=dos)
-     ABI_FREE(dos)
-   else 
-     call exc_write_data(BSp,BS_files,"EXC_MDF",green)
-   end if
-   !
-   ! =========================
-   ! === Write out Epsilon ===
-   ! =========================
-
-   ABI_MALLOC(tensor_cart,(BSp%nomega,6))
-   ABI_MALLOC(tensor_red,(BSp%nomega,6))
-
-   call wrtout(std_out," Calculating EXC dielectric tensor","COLL")
-   call haydock_mdf_to_tensor(BSp,Cryst,green,tensor_cart,tensor_red,ierr)
-
-   if (ierr == 0) then
-       ! Writing tensor
-       call exc_write_tensor(BSp,BS_files,"EXC_TSR_CART",tensor_cart)
-       call exc_write_tensor(BSp,BS_files,"EXC_TSR_RED",tensor_red)
-   else
-       write(msg,'(3a)')&
-&        'The EXC dielectric complex tensor cannot be computed',ch10,&
-&        'There must be 6 different q-points in long wavelength limit (see gw_nqlwl)'
-       MSG_COMMENT(msg)
-   end if
-
-   ABI_FREE(tensor_cart)
-   ABI_FREE(tensor_red)
-   !
-   ! This part will be removed when fldiff will be able to compare two mdf files.
-   write(ab_out,*)" "
-   write(ab_out,*)"Macroscopic dielectric function:"
-   write(ab_out,*)"omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> "
-   do io=1,MIN(BSp%nomega,10)
-     omegaev = REAL(BSp%omega(io))*Ha_eV
-     ks_avg  = SUM( eps_rpanlf(io,:)) / Bsp%nq
-     gw_avg  = SUM( eps_gwnlf (io,:)) / Bsp%nq
-     exc_avg = SUM( green     (io,:)) / BSp%nq
-     write(ab_out,'(7f9.4)')omegaev,ks_avg,gw_avg,exc_avg
-   end do
-   write(ab_out,*)" "
-
-   ! Write MDF file with the final results.
-   ! FIXME: It won't work if prtdos == True
-#ifdef HAVE_TRIO_NETCDF
-     NCF_CHECK(nctk_open_create(ncid, trim(BS_files%out_basename)//"_MDF.nc", xmpi_comm_self))
-     NCF_CHECK(crystal_ncwrite(Cryst, ncid))
-     NCF_CHECK(ebands_ncwrite(QP_bst, ncid))
-     call mdfs_ncwrite(ncid, Bsp, green, eps_rpanlf, eps_gwnlf)
-     NCF_CHECK(nf90_close(ncid))
-#else
-     ABI_UNUSED(ncid)
-#endif
- end if 
-
- ABI_FREE(green)
- ABI_FREE(eps_rpanlf)
- ABI_FREE(eps_gwnlf)
- ABI_FREE(dos_ks)
- ABI_FREE(dos_gw)
 
  !YG2014
  call hexc_free(hexc)

@@ -91,6 +91,8 @@ program optic
  use m_nctk
  use m_hdr
  use m_ebands
+ use m_eprenorms
+ use m_crystal
 
  use m_time ,     only : asctime
  use m_io_tools,  only : flush_unit, open_file, file_exists, num_opened_units, show_units
@@ -133,7 +135,7 @@ program optic
  real(dp),allocatable :: symcart(:,:,:)
  real(dp) :: domega,ecut,fermie!,maxocc,entropy
  real(dp):: eff
- logical :: do_antiresonant
+ logical :: do_antiresonant, do_temperature
  integer,allocatable :: istwfk(:), npwarr(:)
  real(dp) :: nelect
  real(dp) :: broadening,ucvol,maxomega,scissor,tolerance,tphysel
@@ -155,17 +157,29 @@ program optic
  character(len=24) :: start_datetime
  character(len=500) :: msg
  type(hdr_type) :: hdr
- type(ebands_t) :: BSt
+ type(ebands_t) :: BSt, EPBSt
  integer :: finunt
  namelist /FILES/ ddkfile_1, ddkfile_2, ddkfile_3, wfkfile
- namelist /PARAMETERS/ broadening, domega, maxomega, scissor, tolerance, do_antiresonant, &
+ namelist /PARAMETERS/ broadening, domega, maxomega, scissor, tolerance, do_antiresonant, do_temperature, &
                        autoparal, max_ncpus
  namelist /COMPUTATIONS/ num_lin_comp, lin_comp, num_nonlin_comp, nonlin_comp, &
 &        num_linel_comp, linel_comp, num_nonlin2_comp, nonlin2_comp
+ namelist /TEMPERATURE/ epfile
  !character(len=fnlen) :: test
  integer :: iomode
  integer :: comm,nproc,my_rank
  type(wfk_t) :: wfk0,wfk1,wfk2,wfk3
+
+ !_EP_NC reading !
+ type(eprenorms_t) :: Epren
+ character(len=fnlen) :: ep_nc_fname
+ integer :: ep_ntemp
+ logical :: do_ep_renorm
+ integer :: nband_tmp
+ integer :: itemp
+ character(len=10) :: stemp
+ type(crystal_t) :: Cryst
+ logical :: remove_inv
 
 ! *********************************************************************************
 
@@ -220,11 +234,17 @@ program optic
    scissor = 0.0_dp ! no scissor by default
    tolerance = 1e-3_dp ! Ha
    do_antiresonant = .TRUE. ! do use antiresonant approximation (only resonant transitions in the calculation)
+   do_temperature = .FALSE.
 
    ! Read input file
    read(finunt,nml=FILES)
    read(finunt,nml=PARAMETERS)
    read(finunt,nml=COMPUTATIONS)
+
+   if(do_temperature) then
+     read(finunt, nml=TEMPERATURE)
+   end if
+
    close(finunt)
 
    ! Validate input
@@ -284,6 +304,21 @@ program optic
 
    !  Read the header from the gs file
    call hdr_copy(wfk0%hdr, hdr)
+
+   ep_nc_fname = 'test_EP.nc'
+   if(do_temperature) then
+     ep_nc_fname = epfile
+   end if
+   do_ep_renorm = file_exists(ep_nc_fname)
+   if(do_ep_renorm) then
+     call eprenorms_from_epnc(Epren,ep_nc_fname)
+     ep_ntemp = Epren%ntemp
+   else if(do_temperature) then
+     MSG_ERROR("You have asked for temperature but the epfile is not present !")
+   else
+     ep_ntemp = 1
+   end if
+
 
    ! autoparal section
    if (autoparal /= 0 .and. max_ncpus /= 0) then

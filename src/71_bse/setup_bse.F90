@@ -88,6 +88,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  use m_bz_mesh,       only : kmesh_t, kmesh_init, get_ng0sh, kmesh_print, get_BZ_item, find_qmesh, make_mesh
  use m_ebands,        only : ebands_init, ebands_print, ebands_copy, ebands_free, &
 &                            ebands_update_occ, get_valence_idx, apply_scissor, ebands_report_gap
+ use m_eprenorms,     only : eprenorms_t, eprenorms_from_epnc, eprenorms_bcast
  use m_vcoul,         only : vcoul_t, vcoul_init
  use m_fftcore,       only : print_ngfft
  use m_fft_mesh,      only : setmesh

@@ -307,7 +307,8 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
    MSG_WARNING(msg)
  end if
 
- ABI_CHECK(hexc%my_t2-hexc%my_t1+1>0,"found processor with 0 rows")
+ hexc%my_nt = hexc%my_t2 - hexc%my_t1 + 1
+ ABI_CHECK(hexc%my_nt>0,"found processor with 0 rows")
 
  ABI_STAT_MALLOC(hexc%hreso,(hsize,hexc%my_t1:hexc%my_t2), ierr)
  ABI_CHECK(ierr==0, "out of memory in hreso")

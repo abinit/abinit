@@ -125,6 +125,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  use m_energies,        only : energies_type, energies_init
  use m_haydock,         only : exc_haydock_driver
  use m_exc_diago,       only : exc_diago_driver
+ use m_eprenorms,       only : eprenorms_t
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
  use m_pawtab,          only : pawtab_type, pawtab_print, pawtab_get_lsize
