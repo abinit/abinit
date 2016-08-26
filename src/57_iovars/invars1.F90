@@ -361,9 +361,23 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) dtset%nspinor=intarr(1)
 
 !Has to read pawspnorb now, in order to adjust nspinor
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pawspnorb',tread,'INT')
- if(tread==1) dtset%pawspnorb=intarr(1)
- if (dtset%usepaw>0.and.dtset%pawspnorb>0) dtset%nspinor=max(2,dtset%nspinor)
+!Also, if nspinor=1, turn on spin-orbit coupling by default, here for the PAW case. NC case is treated elsewhere.
+ if (dtset%usepaw>0)then
+!  Change the default value
+   if(dtset%nspinor==2)dtset%pawspnorb=1
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pawspnorb',tread,'INT')
+   if(tread==1)then
+     dtset%pawspnorb=intarr(1)
+     if(dtset%pawspnorb>0) dtset%nspinor=2
+   else
+     if(dtset%nspinor==2)then
+       write(message, '(4a)' ) ch10,&
+&       ' invars1: COMMENT -',ch10,&
+&       '  With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.'
+       call wrtout(iout,  message,'COLL')
+     endif
+   endif
+ endif
  nspinor=dtset%nspinor
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nspden',tread,'INT')
@@ -502,8 +516,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !Set up k point grid number
 !First, get additional information
  dtset%kptopt=1
+ if(dtset%nspden==4)dtset%kptopt=4
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'kptopt',tread,'INT')
  if(tread==1) dtset%kptopt=intarr(1)
+
  iscf=5
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iscf',tread,'INT')
  if(tread==1) iscf=intarr(1)
@@ -523,9 +539,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nconeq',tread,'INT')
  if(tread==1) dtset%nconeq=intarr(1)
 
-!For the time being (v4.3) keep the opportunity to use the old input variable name
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ngwpt',tread,'INT')
- if(tread==1) dtset%nkptgw=intarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nkptgw',tread,'INT')
  if(tread==1) dtset%nkptgw=intarr(1)
  if (dtset%nkptgw<0) then

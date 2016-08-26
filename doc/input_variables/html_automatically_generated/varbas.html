@@ -2121,7 +2121,9 @@ the need for many digits in representing numbers such as 1/3.
 <br><font id="definition">Mnemonics: KPoinTs OPTion</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 1</font>
+<br><font id="default">Default is 4 if <a href="vargs.html#nspden">nspden</a>==4,
+1 otherwise.
+</font>
 <br><font id="text">
 <p>
 <p>
@@ -2194,8 +2196,8 @@ RF calculation at non-zero q )
 Take into account all the symmetries EXCEPT the time-reversal symmetry
 to generate the k points in the Irreducible Brillouin Zone, with the appropriate weights.
    <br />
-   This has to be used when performing PAW calculations including
-spin-orbit coupling (<a href="varpaw.html#pawspnorb">pawspnorb</a>/=0)
+   This has to be used when performing calculations with non-collinear magnetism allowed
+   (<a href="vargs.html#nspden">nspden</a>=4)
   </li>
   <li>
    A negative value =&gt;

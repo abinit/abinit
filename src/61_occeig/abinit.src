@@ -27,6 +27,7 @@ sources = [
  "init_bess_spl.F90",
  "init_occ_ent.F90",
  "m_ebands.F90",
+ "m_fstab.F90",
  "newocc.F90",
  "occeig.F90",
  "pareigocc.F90",

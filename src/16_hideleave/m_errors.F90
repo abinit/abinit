@@ -1664,7 +1664,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
 &      '   There were ',nalloc,' allocations and ',ndealloc,' deallocations',ch10, &
 &      '   Remaining memory at the end of the calculation is ',memtot,ch10, &
 &      '   As a help for debugging, you might set call abimem_init(2) in the main program,', ch10,&
-&      '   then use tests/Scripts/memcheck.py to analyse the file abimem_rank[num].mocc that has been created.',ch10,&
+&      '   then use tests/Scripts/abimem.py to analyse the file abimem_rank[num].mocc that has been created.',ch10,&
        '   Note that abimem files can easily be multiple GB in size so do not use this option normally!'
      ! And this will make the code call mpi_abort if the leak occurs on my_rank != master
      ierr = ierr + 1

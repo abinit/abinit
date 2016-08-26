@@ -187,6 +187,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%eph_fsmear         = dtin%eph_fsmear
  dtout%eph_fsewin         = dtin%eph_fsewin
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
+ dtout%eph_transport      = dtin%eph_transport 
 
  dtout%ph_wstep          = dtin%ph_wstep
  dtout%ph_intmeth        = dtin%ph_intmeth

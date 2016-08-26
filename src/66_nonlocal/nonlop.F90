@@ -544,8 +544,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    end if
    ABI_ALLOCATE(enl_,(dimenl1,1,hamk%nspinor**2))
    do ispden=1,hamk%nspinor**2
-     if (dimenl2==hamk%natom) then
-       enl_(:,1,ispden)=enl_ptr(:,iatm,ispden)
+     if (dimenl2==hamk%natom .and. hamk%usepaw==1) then
+       enl_(:,1,ispden)=enl_ptr(:,iatom_only_,ispden)
      else if (dimenl2==hamk%ntypat) then
        enl_(:,1,ispden)=enl_ptr(:,itypat,ispden)
      else
