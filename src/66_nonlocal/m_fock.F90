@@ -724,7 +724,8 @@ subroutine fock_init(cplex,dtset,fock,gsqcut,indsym,kg,mpi_enreg,nattyp,npwarr,p
      ABI_ALLOCATE(dimcprj,(dtset%natom))
      call pawcprj_getdim(dimcprj,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
      ncpgr = 0
-     if (dtset%optforces/= 0 .and. dtset%optstress == 0) then
+ !    if (dtset%optforces/= 0 .and. dtset%optstress == 0) then
+     if (dtset%optforces/= 0) then
        ncpgr = 3 
  !    else if (dtset%optstress /= 0) then
  !      ncpgr = 9 

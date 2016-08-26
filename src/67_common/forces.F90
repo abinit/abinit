@@ -408,6 +408,8 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
  grtn(:,:)=grl(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
  if (usefock==1 .and. associated(fock).and.fock%optfor) then
    grtn(:,:)=grtn(:,:)+fock%forces(:,:)
+   write(81,*) fock%forces
+   flush(81)
  end if
  if (ngrvdw==dtset%natom) grtn(:,:)=grtn(:,:)+grvdw(:,:)
 ! note that fionred is subtracted, because it really is a force and we need to

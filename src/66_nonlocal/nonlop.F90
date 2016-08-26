@@ -542,7 +542,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
        end do
      end do
    end if
-   ABI_ALLOCATE(enl_,(dimenl1,1,hamk%nspinor**2))
+!   ABI_ALLOCATE(enl_,(dimenl1,1,hamk%nspinor**2))
+   ABI_ALLOCATE(enl_,(size(enl_ptr,1),1,hamk%nspinor**2))
    do ispden=1,hamk%nspinor**2
      if (dimenl2==hamk%natom) then
        enl_(:,1,ispden)=enl_ptr(:,iatm,ispden)
@@ -553,7 +554,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      end if
    end do
    if (allocated(hamk%sij)) then
-     ABI_ALLOCATE(sij_,(dimenl1,1))
+!     ABI_ALLOCATE(sij_,(dimenl1,1))
+     ABI_ALLOCATE(sij_,(size(hamk%sij,1),1))
      if (size(hamk%sij,2)==hamk%ntypat) then
        sij_(:,1)=hamk%sij(:,itypat)
      else if (size(hamk%sij)>0) then

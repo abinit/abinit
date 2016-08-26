@@ -2584,7 +2584,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
    if (choice>=0) then
      call xmpi_sum(gx,mpi_enreg%comm_fft,ierr)
    end if
-   if (choice>1) then
+   if (choice_>1) then
      if (ndgxdt>0) then
        call xmpi_sum(dgxdt,mpi_enreg%comm_fft,ierr)
      end if

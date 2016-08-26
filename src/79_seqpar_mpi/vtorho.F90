@@ -906,6 +906,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !        Calculate Fock contribution to the total energy if required
          if (usefock) then
            call fock_calc_ene(dtset,fock,energies%e_exactX,ikpt,nband_k,occ_k)
+!           if (fock%optfor) then
+!             call xmpi_sum(fock%forces,mpi_enreg%comm_kpt,ierr)
+!             write(82,*) "forces_ikpt",fock%forces_ikpt
+!              flush(82)
+!           end if
          end if
        end if
 
@@ -963,7 +968,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    end do ! End loop over spins
 
    call timab(988,1,tsec)
-
+   if (usefock) then
+     if(fock%optfor) then
+       call xmpi_sum(fock%forces,mpi_enreg%comm_kpt,ierr)
+!            write(82,*) "forces",fock%forces
+!            flush(82)
+     end if
+   end if
 !  Electric field: compute string-averaged change in Zak phase
 !  along each direction, store it in dphase(idir)
 !  ji: it is not convenient to do this anymore. Remove. Set dphase(idir)=0.0_dp.
