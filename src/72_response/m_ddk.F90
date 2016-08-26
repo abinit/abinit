@@ -33,7 +33,7 @@ MODULE m_ddk
  use m_xmpi
  use m_distribfft
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_hdr
