@@ -75,8 +75,8 @@
 !!  gvnl1(2,npw1*nspinor)=  part of <G|K1+Vnl1|C0 band,k> not depending on VHxc1           (NCPP)
 !!                       or part of <G|K1+Vnl1-eig0k.S1|C0 band,k> not depending on VHxc1 (PAW)
 !!  resid=wf residual for current band
-!!  gh1c_n= <G|H1|C0 band,k> (NCPP) or <G|H1-eig0k.S1|C0 band,k> (PAW). This vector is not projected
-!!     on the subspace orhtogonal to the cg.
+!!  gh1c_n= <G|H1|C0 band,k> (NCPP) or <G|H1-eig0k.S1|C0 band,k> (PAW).
+!!          This vector is not projected on the subspace orthogonal to the WF.
 !!  === if gs_hamkq%usepaw==1 ===
 !!  gsc(2,npw1*nspinor*usepaw)=<G|S0|C1 band,k>
 !!
@@ -336,11 +336,13 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
          gh1c (1:2,ipw)=gh1c (1:2,ipw)-eshift*gs1c(1:2,ipw)
        end do
 !$OMP END DO NOWAIT
+       if (opt_gvnl1/=1) then
 !$OMP DO
-       do ipw=1,npw1*nspinor
-         gvnl1(1:2,ipw)=gvnl1(1:2,ipw)-eshift*gs1c(1:2,ipw)
-       end do
+         do ipw=1,npw1*nspinor
+           gvnl1(1:2,ipw)=gvnl1(1:2,ipw)-eshift*gs1c(1:2,ipw)
+         end do
 !$OMP END DO NOWAIT
+       end if
 !$OMP END PARALLEL
      end if
 
@@ -465,10 +467,14 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
    cwavef=zero
    ghc   =zero
    gvnlc =zero
+   gh1c_n =zero
    if (gen_eigenpb) gsc=zero
+   if (opt_gvnl1/=1) gvnl1=zero
+   if (usedcwavef==2) dcwavef=zero
    if (usepaw==1) then
      call pawcprj_set_zero(cwaveprj)
    end if
+   if (usedcwavef==2) dcwavef=zero
 !  A small negative residual will be associated with these
    resid=-0.1_dp
 !  Number of one-way 3D ffts skipped
@@ -521,7 +527,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      if (berryopt== 4.or.berryopt== 6.or.berryopt== 7.or.&
 &     berryopt==14.or.berryopt==16.or.berryopt==17) then
        if (ipert==natom+2) then
-         gvnl1=zero
+         if (opt_gvnl1/=1) gvnl1=zero
 !$OMP PARALLEL DO
          do ipw=1,npw1*nspinor
            gresid(1:2,ipw)=-ghc(1:2,ipw)-gh1c(1:2,ipw)
