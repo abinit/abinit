@@ -1635,7 +1635,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  end if
 
 !Build complete d2ovl matrix
- if (usepaw==1) d2ovl=d2ovl+d2ovl_drho
+ if (usepaw==1) d2ovl(:,:,:,idir,ipert)=d2ovl(:,:,:,idir,ipert)+d2ovl_drho(:,:,:,idir,ipert)
 
  if (usepaw==1) then
    ABI_DEALLOCATE(d2ovl_drho)
