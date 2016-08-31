@@ -99,7 +99,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use m_ab7_mixing
  use m_nctk
  use m_kxc
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_hdr
@@ -2330,7 +2330,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! ==============================================
    if (wfd_iam_master(Wfd)) then
      fname = TRIM(Dtfil%filnam_ds(4))//'_SIGRES.nc'
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
      NCF_CHECK(nctk_defnwrite_ivars(ncid, ["sigres_version"], [1]))
      NCF_CHECK(crystal_ncwrite(Cryst, ncid))

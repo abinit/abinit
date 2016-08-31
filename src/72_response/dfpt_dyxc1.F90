@@ -180,7 +180,7 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
 &     nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,0,vxc10,xcccwk1)
 !FR EB Non-collinear magnetism
      if (nspden==4.and.present(rhor)) then
-       optnc=2
+       optnc=1
        optxc=1
 !FR EB the second nkxc in the list should be nkxc_cur (?), optnc=1 or 2 ?
        call dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,nkxc,&

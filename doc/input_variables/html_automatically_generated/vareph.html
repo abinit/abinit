@@ -39,6 +39,7 @@ to perform electron-phonon calculations.
  <a href="#eph_intmeth">eph_intmeth</a>&nbsp;&nbsp;
  <a href="#eph_mustar">eph_mustar</a>&nbsp;&nbsp;
  <a href="#eph_ngqpt_fine">eph_ngqpt_fine</a>&nbsp;&nbsp;
+ <a href="#eph_transport">eph_transport</a>&nbsp;&nbsp;
  <br>F.
  <br>G.
  <br>H.
@@ -224,6 +225,23 @@ q-mesh starting from the irreducible set of q-points read from
 the DDB file. This approach is similar to the one used
 to interpolate the interatomic force constants in q-space.
 If eph_ngqpt_fine is not given, the EPH code uses the list of irreducible q-points reported in the DDB file (default behavior).
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="eph_transport">eph_transport</a></font>
+<br><font id="definition">Mnemonics: Electron-PHonon: TRANSPORT flag</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+NB - this does not work yet.
+This variable can be used to turn on the calculation of transport
+quantities in the eph module of abinit. Value of 1 corresponds to
+elastic LOVA as in the PRB by Savrasov and Savrasov 
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
