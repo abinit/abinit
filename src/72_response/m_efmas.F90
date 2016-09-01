@@ -734,8 +734,8 @@ CONTAINS
 
   write(std_out,'(2a)') ch10,'CALCULATION OF EFFECTIVE MASSES'
   write(ab_out, '(2a)') ch10,'CALCULATION OF EFFECTIVE MASSES'
-  write(ab_out, '(a)' ) 'NOTE : Additional infos (eff. mass eigenvalues, eigenvectors and, if degenerate, average mass)&
-  & are available in stdout.'
+  write(ab_out, '(a)' ) &
+&   'NOTE : Additional infos (eff. mass eigenvalues, eigenvectors and, if degenerate, average mass) are available in stdout.'
  
   if(dtset%nsppol/=1)then
     write(message,'(a,i3,a)') 'nsppol=',dtset%nsppol,' is not yet treated in m_efmas.'
