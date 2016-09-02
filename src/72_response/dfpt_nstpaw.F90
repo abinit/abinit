@@ -505,7 +505,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  qne0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2>=tol14)
  is_metal=((dtset%occopt>=3.and.dtset%occopt<=8).or.(abs(arg)>tol8))
  is_metal_or_qne0=((is_metal).or.(qne0))
-print *,"METAL??=",is_metal,is_metal_or_qne0
  ABI_ALLOCATE(ch1c,(2,dtset%mband,dtset%mband,nkpt_me))
  ch1c(:,:,:,:)=zero
  nzlmopt_ipert=0;nzlmopt_ipert1=0
