@@ -87,10 +87,12 @@ subroutine initaim(aim_dtset,znucl_batom)
  integer,parameter :: master=0
  integer :: fform0,id,ierr,ii,info,jj,kk,kod,mm,ndtmax,nn,nsa,nsb,nsc,nsym,me,nproc,npsp
  integer :: unth,comm
+ integer :: nc, nv, ic, iv, ll
 #ifdef HAVE_TRIO_NETCDF
  integer :: den_id
 #endif
  real(dp) :: ss,ucvol,znucl_batom
+ real(dp) :: zz, zion
  type(hdr_type) :: hdr
 !arrays
  integer :: ipiv(3)
@@ -98,6 +100,8 @@ subroutine initaim(aim_dtset,znucl_batom)
  real(dp) :: aa(3),bb(3),gmet(3,3),gprimd(3,3),rmet(3,3),yy(3,3)
  real(dp),allocatable :: tnons(:,:),znucl(:),zionpsp(:)
  real(dp),pointer :: ptc(:),ptd(:),ptf(:),ptp(:),ptsd(:)
+
+ character(len=100) :: dummystring
 
 ! *********************************************************************
 
@@ -323,6 +327,23 @@ subroutine initaim(aim_dtset,znucl_batom)
  call xmpi_bcast(corlim,master,comm,ierr)
 
  write(std_out,*)ch10,' initaim : the core densities have been read' ,ch10
+
+ ! add check on zion wrt FHI .fc file
+ read(unth,*) dummystring, zz, nc, nv
+ do ic = 1, nc
+   read(unth,*)
+ end do 
+ do iv = 1, nv
+   read(unth,*) dummystring, nn, ll, zz
+   zion = zion + zz
+ end do 
+ ! compare zion to zionpsp(typat(aim_dtset%batom))
+ if (abs(zion - zionpsp(typat(aim_dtset%batom))) > tol8) then
+    write (*,*) 'error: your core charge does not correspond to the correct number of valence electrons'
+    write (*,*) ' you have probably used a pseudopotential which has more valence electrons than the'
+    write (*,*) ' original FHI ones. ACTION: make a .fc file with the correct core charge'
+    stop
+ end if
 
 !CORRECTION OF THE CORE DENSITY NORMALISATION
  crho(:,:)=1.0003*crho(:,:)

@@ -426,7 +426,8 @@ subroutine cut3d_hirsh(grid_den,natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion
 
 !Output
  write(std_out,*)
- write(std_out,*)'    Atom       Zion       Hirshfeld Charge       Net charge '
+ write(std_out,*)'    Hirshfeld analysis'
+ write(std_out,*)'    Atom       Zion       Electron  Charge       Net charge '
  write(std_out,*)
  do iatom=1,natom
    write(std_out,'(i9,3es17.6)' )&
