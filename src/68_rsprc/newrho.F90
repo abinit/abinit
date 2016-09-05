@@ -245,7 +245,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  if(dtset%usewvl==0) then
    ucvol_local=ucvol
  else
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
    ucvol_local = product(wvl_den%denspot%dpbox%hgrids) * real(nfftot, dp)
 #endif
  end if

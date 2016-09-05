@@ -60,7 +60,7 @@ subroutine wvl_hpsitopsi(cprj,dtset, energies, istep, mcprj,mpi_enreg, &
 
   use m_energies, only : energies_type
   use m_pawcprj, only : pawcprj_type, pawcprj_alloc
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
   use BigDFT_API, only : hpsitopsi, calculate_energy_and_gradient
 #endif
 
@@ -85,7 +85,7 @@ subroutine wvl_hpsitopsi(cprj,dtset, energies, istep, mcprj,mpi_enreg, &
   type(pawcprj_type),dimension(dtset%natom,mcprj),intent(inout)::cprj
 
 !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
   integer               :: iatom,icprj
   character(len = 500)  :: message
   logical               :: wvlbigdft=.false.
@@ -105,7 +105,7 @@ subroutine wvl_hpsitopsi(cprj,dtset, energies, istep, mcprj,mpi_enreg, &
 
  DBG_ENTER("COLL")
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
  if(dtset%wvl_bigdft_comp==1) wvlbigdft=.true.

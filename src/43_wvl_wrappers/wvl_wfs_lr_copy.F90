@@ -50,7 +50,7 @@ subroutine wvl_wfs_lr_copy(wfs, wvl)
 
 ! *********************************************************************
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 !Use global localization region for the moment.
  wfs%ks%lzd%Glr%geocode    = wvl%Glr%geocode
  wfs%ks%lzd%Glr%hybrid_on  = wvl%Glr%hybrid_on

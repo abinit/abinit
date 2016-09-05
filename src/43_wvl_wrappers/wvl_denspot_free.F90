@@ -43,7 +43,7 @@ subroutine wvl_denspot_free(den)
  use defs_wvltypes
  use m_profiling_abi
  use m_errors
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API, only: deallocate_rho_descriptors, &
       & deallocate_denspot_distribution, denspot_free_history
  use dynamic_memory
@@ -68,7 +68,7 @@ subroutine wvl_denspot_free(den)
 !write (std_out,*) ' wvl_denspot_free : enter'
 !ENDDEBUG
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  if(associated(den%denspot%rhov)) then
    call f_free_ptr(den%denspot%rhov)
  end if

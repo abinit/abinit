@@ -53,7 +53,7 @@ program anaddb
  use m_phonons        
  use iso_c_binding
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -120,7 +120,7 @@ program anaddb
  type(ifc_type) :: Ifc,Ifc_coarse
  type(ddb_type) :: ddb
  type(crystal_t) :: Crystal
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: phdos_ncid, ana_ncid, ec_ncid, ncerr
  integer :: na_dir_varid,na_phmodes_varid, na_phdispl_varid
 #endif
@@ -247,7 +247,7 @@ program anaddb
 
  ! Open the netcdf file that will contain the anaddb results
  if (iam_master) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    NCF_CHECK_MSG(nctk_open_create(ana_ncid, "anaddb.nc", xmpi_comm_self), "Creating anaddb.nc")
    NCF_CHECK(nctk_def_basedims(ana_ncid))
    NCF_CHECK(nctk_defnwrite_ivars(ana_ncid, ["anaddb_version"], [1]))
@@ -330,7 +330,7 @@ program anaddb
  iblok = ddb_get_dielt_zeff(ddb,crystal,inp%rfmeth,inp%chneut,inp%selectz,dielt,zeff)
 
  if (my_rank == master) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    ! TODO: Cartesian or reduced?
    ncerr = nctk_def_arrays(ana_ncid, [&
    nctkarr_t('emacro_cart', "dp", 'number_of_cartesian_directions, number_of_cartesian_directions'),&
@@ -473,7 +473,7 @@ program anaddb
 
    !Print analysis of the real-space interatomic force constants
    if(inp%ifcout/=0)then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      call ifc_print(Ifc,dielt,zeff,inp%ifcana,inp%atifc,inp%ifcout,inp%prt_ifc,ncid=ana_ncid)
 #else
      call ifc_print(Ifc,dielt,zeff,inp%ifcana,inp%atifc,inp%ifcout,inp%prt_ifc)
@@ -512,7 +512,7 @@ program anaddb
    call phdos_print_debye(Phdos, Crystal%ucvol)
 
    if (iam_master) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      ncerr = nctk_open_create(phdos_ncid, trim(phdos_fname)//".nc", xmpi_comm_self)
      NCF_CHECK_MSG(ncerr, "Creating PHDOS.nc file")
      NCF_CHECK(crystal_ncwrite(Crystal, phdos_ncid))
@@ -651,7 +651,7 @@ program anaddb
    if (nph2l/=0) then
 
      if (my_rank == master) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
        NCF_CHECK(nctk_def_basedims(ana_ncid, defmode=.True.))
 
        ncerr = nctk_def_dims(ana_ncid, [&
@@ -690,7 +690,7 @@ program anaddb
        call dfpt_prtph(displ,inp%eivec,inp%enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
 
        if (my_rank == master) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
          NCF_CHECK(nf90_inq_varid(ana_ncid, "non_analytical_phonon_modes", na_phmodes_varid))
          NCF_CHECK(nf90_put_var(ana_ncid,na_phmodes_varid,phfrq*Ha_eV,start=[1, iphl2], count=[3*natom, 1]))
          NCF_CHECK(nf90_inq_varid(ana_ncid, "non_analytical_phdispl_cart", na_phdispl_varid))
@@ -886,7 +886,7 @@ program anaddb
 &     elast,elast_clamped,elast_stress,iblok,iblok_stress,&
 &     instrain,ab_out,mpert,natom,ddb%nblok,Crystal%ucvol)
      ec_fname = TRIM(filnam(2))//"_EC.nc"
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      if (iam_master) then
        ncerr = nctk_open_create(ec_ncid, ec_fname, xmpi_comm_self) 
        NCF_CHECK_MSG(ncerr, "Creating EC.nc file")
@@ -954,7 +954,7 @@ program anaddb
 
  ! Close files
  if (iam_master) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    NCF_CHECK(nf90_close(ana_ncid))
 #endif
  end if

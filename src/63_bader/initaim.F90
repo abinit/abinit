@@ -62,7 +62,7 @@ subroutine initaim(aim_dtset,znucl_batom)
  use m_profiling_abi
  use m_errors
  use m_xmpi
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_hdr
@@ -87,7 +87,7 @@ subroutine initaim(aim_dtset,znucl_batom)
  integer,parameter :: master=0
  integer :: fform0,id,ierr,ii,info,jj,kk,kod,mm,ndtmax,nn,nsa,nsb,nsc,nsym,me,nproc,npsp
  integer :: unth,comm
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: den_id
 #endif
  real(dp) :: ss,ucvol,znucl_batom
@@ -162,7 +162,7 @@ subroutine initaim(aim_dtset,znucl_batom)
 
  if(me==master)then
    if (aim_iomode == IO_MODE_ETSF) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      ! netcdf array has shape [cplex, n1, n2, n3, nspden]), here we read only the total density.
      NCF_CHECK(nf90_inq_varid(untad, "density", den_id))
      NCF_CHECK(nf90_get_var(untad, den_id, dvl, start=[1,1,1,1], count=[1, ngfft(1), ngfft(2), ngfft(3), 1]))

@@ -67,7 +67,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  use m_profiling_abi
  use m_xmpi
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_hdr
@@ -293,7 +293,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ! This file is used by abipy to generate multiple input files.
  if (Dtset%nqptdm == -1) then
    if (my_rank==master) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
       ncerr = nctk_write_ibz(strcat(dtfil%filnam_ds(4), "_qptdms.nc"), qmesh%ibz, qmesh%wt)
       NCF_CHECK(ncerr)
 #endif

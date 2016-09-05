@@ -42,6 +42,7 @@ nstep5 10
 nstep6 16
 
 # === K-points and syms
+# The following kptopt values are actually default values for the different nspden cases.
 kptopt 1  kptopt4 4
 kptopt5 4
 kptopt6 4
@@ -49,7 +50,9 @@ kptrlatt 2 0 0 0 2 0 0 0 2
 chksymbreak 0
 
 # === Spin Orbit coupling
-pawspnorb6 1
+# pawspnorb is set to 1 by default in the nspinor 2 case. So, disactivate it to do non-collinear magnetism LDA(+U).
+pawspnorb4 0
+pawspnorb5 0
 
 # === LDA+U options
 usepawu 1 usepawu1 0

@@ -52,7 +52,7 @@ program cut3d
  use m_xmpi
  use m_nctk
  use m_profiling_abi
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 #if defined FC_NAG
