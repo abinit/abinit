@@ -467,9 +467,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
    cwavef=zero
    ghc   =zero
    gvnlc =zero
-   gh1c_n =zero
    if (gen_eigenpb) gsc=zero
-   if (opt_gvnl1/=1) gvnl1=zero
    if (usedcwavef==2) dcwavef=zero
    if (usepaw==1) then
      call pawcprj_set_zero(cwaveprj)
