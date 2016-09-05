@@ -1683,18 +1683,38 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !the symmetry-reduced kpt set will leave a non-zero imaginary part.
  if(ipert==dtset%natom+3.or.ipert==dtset%natom+4) then
    d2nl(2,:,:,idir,ipert)=zero
+   if (usepaw==1) d2ovl(2,:,:,idir,ipert)=zero
+ else
+   d2nl(2,:,dtset%natom+3:dtset%natom+4,idir,ipert)=zero
    if (usepaw==1) d2ovl(2,:,dtset%natom+3:dtset%natom+4,idir,ipert)=zero
  end if
 
-!Symmetrize the elastic tensor contributions, as was needed for the stresses in a GS calculation
- if (ipert==dtset%natom+3.or.ipert==dtset%natom+4)then
-   if (nsym1>1) then
-     ABI_ALLOCATE(work,(6,1,1))
+
+!Symmetrize the strain perturbation contributions, as was needed for the stresses in a GS calculation
+!if (ipert==dtset%natom+3.or.ipert==dtset%natom+4)then
+ if (nsym1>1) then
+   ABI_ALLOCATE(work,(6,1,1))
+   ii=0
+   do ipert1=dtset%natom+3,dtset%natom+4
+     do idir1=1,3
+       ii=ii+1
+       work(ii,1,1)=d2nl(1,idir1,ipert1,idir,ipert)
+     end do
+   end do
+   call stresssym(gprimd,nsym1,work(:,1,1),symrc1)
+   ii=0
+   do ipert1=dtset%natom+3,dtset%natom+4
+     do idir1=1,3
+       ii=ii+1
+       d2nl(1,idir1,ipert1,idir,ipert)=work(ii,1,1)
+     end do
+   end do
+   if (usepaw==1) then
      ii=0
      do ipert1=dtset%natom+3,dtset%natom+4
        do idir1=1,3
          ii=ii+1
-         work(ii,1,1)=d2nl(1,idir1,ipert1,idir,ipert)
+         work(ii,1,1)=d2ovl(1,idir1,ipert1,idir,ipert)
        end do
      end do
      call stresssym(gprimd,nsym1,work(:,1,1),symrc1)
@@ -1702,29 +1722,13 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      do ipert1=dtset%natom+3,dtset%natom+4
        do idir1=1,3
          ii=ii+1
-         d2nl(1,idir1,ipert1,idir,ipert)=work(ii,1,1)
+         d2ovl(1,idir1,ipert1,idir,ipert)=work(ii,1,1)
        end do
      end do
-     if (usepaw==1) then
-       ii=0
-       do ipert1=dtset%natom+3,dtset%natom+4
-         do idir1=1,3
-           ii=ii+1
-           work(ii,1,1)=d2ovl(1,idir1,ipert1,idir,ipert)
-         end do
-       end do
-       call stresssym(gprimd,nsym1,work(:,1,1),symrc1)
-       ii=0
-       do ipert1=dtset%natom+3,dtset%natom+4
-         do idir1=1,3
-           ii=ii+1
-           d2ovl(1,idir1,ipert1,idir,ipert)=work(ii,1,1)
-         end do
-       end do
-       ABI_DEALLOCATE(work)
-     end if
+     ABI_DEALLOCATE(work)
    end if
  end if
+!end if
 
 !Must also symmetrize the electric field perturbation response !
 !Note: d2ovl is not symetrized because it is zero for electric field perturbation
