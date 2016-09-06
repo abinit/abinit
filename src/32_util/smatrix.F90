@@ -42,7 +42,8 @@
 !! minbd = used in case ddkflag = 1, defines the lowest band for
 !!         which the ddk will be computed
 !! mpw = maximum dimensioned size of npw
-!! mband_occ = number of (occupied) valence bands
+!! mband_occ = max number of occupied valence bands for both spins
+!! nband_occ = number of (occupied) valence bands
 !! npw_k1 = number of plane waves at k
 !! npw_k2 = number of plane waves at k + dk
 !! nspinor = number of spinorial components of the wavefunctions
@@ -161,8 +162,8 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !stop
 !ENDDEBUG
 
- ABI_ALLOCATE(ipvt,(mband_occ))
- ABI_ALLOCATE(zgwork,(2,mband_occ))
+ ABI_ALLOCATE(ipvt,(nband_occ))
+ ABI_ALLOCATE(zgwork,(2,nband_occ))
  ABI_ALLOCATE(vect1,(2,0:mpw*nspinor))
  ABI_ALLOCATE(vect2,(2,0:mpw*nspinor))
  vect1(:,0) = zero ; vect2(:,0) = zero
@@ -186,7 +187,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
  end if
 
 !Check the values of sflag_k
- do iband=1,mband_occ
+ do iband=1,nband_occ
    if (sflag_k(iband)/=0 .and. sflag_k(iband)/=1)then
      write(message,'(3a,i4,a,i4)')&
 &     '  The content of sflag_k must be 0 or 1.',ch10,&
@@ -198,7 +199,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !Check if shiftbd is consistent with sflag_k
  if (shiftbd == 0) then
    count = 0
-   do iband = 1, mband_occ
+   do iband = 1, nband_occ
      if (sflag_k(iband) == 0) count = count + 1
    end do
    if (count > 1) then
@@ -221,7 +222,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !
 !ABI_ALLOCATE(my_pwind_k,(mpw))
 !!
-!do iband = 1, mband_occ
+!do iband = 1, nband_occ
 !!
 !pwmin = (iband-1)*npw_k1*nspinor*shiftbd
 !pwmax = pwmin + npw_k1*nspinor
@@ -252,7 +253,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !!    
 !if (npw_k1*nspinor < mpw*nspinor) vect1(:,npw_k1*nspinor+1:mpw*nspinor) = zero
 !
-!do jband = 1, mband_occ
+!do jband = 1, nband_occ
 !
 !pwmin = (jband-1)*npw_k1*nspinor
 !pwmax = pwmin + npw_k1*nspinor
@@ -304,7 +305,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !!
 !ABI_DEALLOCATE(my_pwind_k)
 !!
- do iband = 1, mband_occ
+ do iband = 1, nband_occ
 
    if (sflag_k(iband) == 0) then
 
@@ -341,7 +342,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 !    
      if (npw_k1*nspinor < mpw*nspinor) vect1(:,npw_k1*nspinor+1:mpw*nspinor) = zero
 
-     do jband = 1, mband_occ
+     do jband = 1, nband_occ
 
        pwmin = (jband-1)*npw_k2*nspinor
        pwmax = pwmin + npw_k2*nspinor
@@ -405,8 +406,8 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
  end do   ! iband
 
 !DEBUG
-!do iband=1,mband_occ
-!do jband=1,mband_occ
+!do iband=1,nband_occ
+!do jband=1,nband_occ
 !write(std_out,'(a,2i4,2e20.10)') 'smat',iband,jband,smat_k(1,iband,jband),smat_k(2,iband,jband)
 !end do
 !end do
@@ -430,8 +431,8 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 
    dzgedi_job=job; if(job==21) dzgedi_job=1
 ! TODO: should this be over nband_occ(isppol)?
-   call dzgefa(smat_inv,nband_occ,nband_occ,ipvt,info)
-   call dzgedi(smat_inv,nband_occ,nband_occ,ipvt,det,zgwork,dzgedi_job)
+   call dzgefa(smat_inv,mband_occ,nband_occ,ipvt,info)
+   call dzgedi(smat_inv,mband_occ,nband_occ,ipvt,det,zgwork,dzgedi_job)
 
 !  DEBUG
 !  write(std_out,*)' smatrix : det=',det
@@ -458,7 +459,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 
        do jband = minbd, maxbd
          jband1 = jband1 + 1
-         do iband = 1, mband_occ
+         do iband = 1, nband_occ
 
            do ispinor = 1, nspinor
              spnshft_k1 = (ispinor-1)*npw_k1
@@ -494,7 +495,7 @@ subroutine smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs,job,maxbd,&
 
        do jband = minbd, maxbd
          jband1 = jband1 + 1
-         do iband = 1, mband_occ
+         do iband = 1, nband_occ
 
            do ispinor = 1, nspinor
              spnshft_k1 = (ispinor-1)*npw_k1

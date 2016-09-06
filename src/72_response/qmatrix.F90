@@ -30,7 +30,7 @@
 !! pwindall(max(mpw,mpw1)*mkmem,8,3) = array used to compute the overlap matrices
 !!
 !! OUTPUT
-!! qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3) =
+!! qmat(2,dtefield%nband_occ,dtefield%nband_occ,nkpt,2,3) =
 !! inverse of the overlap matrix
 !!
 !! PARENTS
@@ -113,12 +113,12 @@ subroutine qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,mband,npwarr,nkpt,nspinor,nsp
          icg1 = dtefield%cgindex(ikpt2,1)
          pwind_k(1:npw_k1) = pwindall((ikpt-1)*max(mpw,mpw1)+1:(ikpt-1)*max(mpw,mpw1)+npw_k1,ifor,idir)
   
-         do jband = 1, dtefield%mband_occ
+         do jband = 1, dtefield%nband_occ(isppol)
            vect2(:,1:npw_k2) = &
 &           cg(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
            if (npw_k2 < mpw) vect2(:,npw_k2+1:mpw) = zero
   
-           do iband = 1, dtefield%mband_occ
+           do iband = 1, dtefield%nband_occ(isppol)
   
              pwmin = (iband-1)*npw_k1*nspinor
              pwmax = pwmin + npw_k1*nspinor
@@ -136,8 +136,8 @@ subroutine qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,mband,npwarr,nkpt,nspinor,nsp
   
          sinv(:,:,:) = smat_k(:,:,:)
   
-         call dzgefa(sinv,dtefield%nband_occ(isppol),dtefield%nband_occ(isppol),ipvt,info)
-         call dzgedi(sinv,dtefield%nband_occ(isppol),dtefield%nband_occ(isppol),ipvt,det,zgwork,job)
+         call dzgefa(sinv,dtefield%mband_occ,dtefield%nband_occ(isppol),ipvt,info)
+         call dzgedi(sinv,dtefield%mband_occ,dtefield%nband_occ(isppol),ipvt,det,zgwork,job)
   
          qmat(:,:,:,ikpt,ifor,idir) = sinv(:,:,:)
   
