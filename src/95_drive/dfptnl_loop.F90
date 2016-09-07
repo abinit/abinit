@@ -7,7 +7,7 @@
 !! Loop over the perturbations j1, j2 and j3
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2016 ABINIT group (MVeithen,MB)
+!! Copyright (C) 2016-2016 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,8 +33,8 @@
 !!  kptindex(2,nkpt3)= index of the k-points in the reduced BZ
 !!                     related to a k-point in the full BZ
 !!  kpt3(3,nkpt3) = reduced coordinates of k-points in the full BZ
-!!  kxc(nfft,nkxc)=exchange-correlation kernel
-!!  k3xc(nfft,nk3xc)=third-order exchange-correlation kernel
+!!  kxc(nfftf,nkxc)=exchange-correlation kernel
+!!  k3xc(nfftf,nk3xc)=third-order exchange-correlation kernel
 !!  mband = maximum number of bands
 !!  mgfft = maximum single fft dimension
 !!  mkmem = Number of k points treated by this node.
@@ -45,7 +45,7 @@
 !!  mpw   = maximum number of planewaves in basis sphere (large number)
 !!  mvwtk(30,nkpt) = weights to compute the finite difference ddk
 !!  natom = number of atoms in unit cell
-!!  nfft  = (effective) number of FFT grid points (for this processor)
+!!  nfftf  = (effective) number of FFT grid points (for this processor)
 !!  nkpt  = number of k points
 !!  nkpt3 = number of k-points in the full BZ
 !!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
@@ -69,7 +69,7 @@
 !! OUTPUT
 !!  blkflg(3,mpert,3,mpert) = flags for each element of the 3DTE
 !!                             (=1 if computed)
-!!  d3lo(2,3,mpert,3,mpert,3,mpert) = matrix of the 3DTEs
+!!  d3etot(2,3,mpert,3,mpert,3,mpert) = matrix of the 3DTEs
 !!
 !! SIDE EFFECTS
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
@@ -91,23 +91,31 @@
 #include "abi_common.h"
 
 
-subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
+subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,&
 & etotal,gmet,gprimd,gsqcut, &
 & hdr,kg,kneigh,kg_neigh,kptindex,kpt3,kxc,k3xc,mband,mgfft,mkmem,mkmem_max,mk1mem,&
-& mpert,mpi_enreg,mpw,mvwtk,natom,nfft,nkpt,nkpt3,nkxc,nk3xc,nneigh,nspinor,nsppol,&
-& npwarr,occ,psps,pwind,&
-& rfpert,rprimd,ucvol,xred)
+& mpert,mpi_enreg,mpw,mvwtk,natom,nfftf,nkpt,nkpt3,nkxc,nk3xc,nneigh,nspinor,nsppol,&
+& npwarr,occ,pawfgr,pawtab,psps,pwind,rfpert,rhog,rhor,rprimd,ucvol,usecprj,vtrial,xred)
 
  use defs_basis
  use defs_datatypes
  use defs_abitypes
  use defs_wvltypes
- use m_wffile
+
+ use m_errors
  use m_profiling_abi
  use m_hdr
+ use m_nctk
+ use m_wffile
+ use m_wfk
 
- use m_ioarr,    only : read_rhor
- use m_pawrhoij, only : pawrhoij_type
+ use m_io_tools,    only : file_exists
+ use m_ioarr,       only : read_rhor
+ use m_hamiltonian, only : destroy_hamiltonian,gs_hamiltonian_type,init_hamiltonian,&
+                           init_rf_hamiltonian,rf_hamiltonian_type
+ use m_pawfgr,      only : pawfgr_type
+ use m_pawrhoij,    only : pawrhoij_type
+ use m_pawtab,      only : pawtab_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -117,9 +125,7 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  use interfaces_18_timing
  use interfaces_32_util
  use interfaces_53_ffts
- use interfaces_53_spacepar
  use interfaces_56_recipspace
- use interfaces_56_xc
  use interfaces_72_response
  use interfaces_79_seqpar_mpi
 !End of the abilint section
@@ -128,15 +134,17 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mband,mgfft,mk1mem,mkmem,mkmem_max,mpert,mpw,natom,nfft
- integer,intent(in) :: nk3xc,nkpt,nkpt3,nkxc,nneigh,nspinor,nsppol
+ integer,intent(in) :: mband,mgfft,mk1mem,mkmem,mkmem_max,mpert,mpw,natom,nfftf
+ integer,intent(in) :: nk3xc,nkpt,nkpt3,nkxc,nneigh,nspinor,nsppol,usecprj
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(inout) :: etotal
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(inout) :: dtset
  type(hdr_type),intent(inout) :: hdr
+ type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type),intent(in) :: psps
+
 !arrays
  integer,intent(in) :: cgindex(nkpt,nsppol),kg(3,mk1mem*mpw),kneigh(30,nkpt)
  integer,intent(in) :: kg_neigh(30,nkpt,3)
@@ -144,32 +152,39 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  integer,intent(in) :: rfpert(3,mpert,3,mpert,3,mpert)
  integer,intent(inout) :: blkflg(3,mpert,3,mpert,3,mpert) !vz_i
  real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol),gmet(3,3)
- real(dp),intent(in) :: gprimd(3,3),k3xc(nfft,nk3xc),kpt3(3,nkpt3)
- real(dp),intent(in) :: kxc(nfft,nkxc),mvwtk(30,nkpt),rprimd(3,3)
- real(dp),intent(in) :: xred(3,natom)
+ real(dp),intent(in) :: gprimd(3,3),k3xc(nfftf,nk3xc),kpt3(3,nkpt3)
+ real(dp),intent(in) :: kxc(nfftf,nkxc),mvwtk(30,nkpt),rhog(2,nfftf),rhor(nfftf,dtset%nspden),rprimd(3,3)
+ real(dp),intent(in) :: vtrial(nfftf,dtset%nspden),xred(3,natom)
  real(dp),intent(inout) :: occ(mband*nkpt*nsppol)
- real(dp),intent(inout) :: d3lo(2,3,mpert,3,mpert,3,mpert) !vz_i
+ real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert) !vz_i
+ type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=51
- integer :: ask_accurate,counter,cplex,formeig,i1dir
- integer :: i1pert,i2dir,i2pert,i3dir,i3pert,iatom,ierr,iexit,ifft,index,ir
- integer :: ireadwf,itypat,mcg,mpsang,n1,n2,n3,n3xccc,nfftot,nspden,option,optorth
- integer :: pert1case,pert2case,pert3case,rdwrpaw,timrev,comm_cell
- real(dp) :: ecut_eff,exc3,valuei
+ integer :: ask_accurate,comm_cell,counter,cplex,formeig,i1dir
+ integer :: i1pert,i2dir,i2pert,i3dir,i3pert,iatom,idir_dkde,ierr,iexit,ifft,ii,index,ir
+ integer :: ireadwf,itypat,mcg,mpsang,n1,n2,n3,n3xccc,nfftotf,nhat1grdim,nspden,nwffile
+ integer :: option,optene,optorth,pert1case,pert2case,pert3case,rdwrpaw,timrev,usexcnhat
+ real(dp) :: dummy_real,ecut_eff,exc3,valuei
  character(len=500) :: message
- character(len=fnlen) :: fiden1i,fiwf1i,fiwf3i
- type(wffile_type) :: wff1,wff2,wfft1,wfft2
+ character(len=fnlen) :: fiden1i,fiwf1i,fiwf3i,fiwfddk,fnamewff(2)
+ type(gs_hamiltonian_type) :: gs_hamkq
+ type(rf_hamiltonian_type) :: rf_hamkq
+ type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3,wffddk(2)
+ type(wfk_t) :: ddk_f(2)
  type(wvl_data) :: wvl
  type(hdr_type) :: hdr_den
 !arrays
  integer,allocatable :: atindx(:),atindx1(:),nattyp(:)
- real(dp) :: d3_berry(2,3),rho_dum(1),tsec(2),ylmgr_dum(1)
- real(dp),allocatable :: cg1(:,:),cg3(:,:),eigen1(:),ph1d(:,:),rho1r1(:,:)
+ integer :: file_index(2)
+ real(dp) :: rho_dum(1),tsec(2)
+ real(dp),allocatable :: cg1(:,:),cg2(:,:),cg3(:,:),eigen1(:),eigen2(:),eigen3(:)
+ real(dp),allocatable :: nhat(:,:),nhat1(:,:),nhat1gr(:,:,:),vresid_dum(:,:)
+ real(dp),allocatable :: ph1d(:,:),rho1r1(:,:)
  real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:),rho3r1(:,:),vhartr1(:)
  real(dp),allocatable :: vpsp1(:),vtrial1(:,:),vxc1(:,:),work(:),xc_tmp(:,:)
- real(dp),allocatable :: xccc3d1(:),xccc3d2(:),xccc3d3(:),ylm(:,:,:)
+ real(dp),allocatable :: xccc3d1(:),xccc3d2(:),xccc3d3(:)
  type(pawrhoij_type),allocatable :: rhoij_dum(:)
 
 ! ***********************************************************************
@@ -187,17 +202,19 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  optorth=1;if (psps%usepaw==1) optorth=0
 
  ABI_ALLOCATE(cg1,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
+ ABI_ALLOCATE(cg2,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
  ABI_ALLOCATE(cg3,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
  ABI_ALLOCATE(eigen1,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
- ABI_ALLOCATE(rho1r1,(cplex*nfft,dtset%nspden))
- ABI_ALLOCATE(rho2r1,(cplex*nfft,dtset%nspden))
- ABI_ALLOCATE(rho2g1,(2,nfft))
- ABI_ALLOCATE(rho3r1,(cplex*nfft,dtset%nspden))
- ABI_ALLOCATE(ylm,(2,dtset%mpw*dtset%mkmem,mpsang*mpsang*psps%useylm))
+ ABI_ALLOCATE(eigen2,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
+ ABI_ALLOCATE(eigen3,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
+ ABI_ALLOCATE(rho1r1,(cplex*nfftf,dtset%nspden))
+ ABI_ALLOCATE(rho2r1,(cplex*nfftf,dtset%nspden))
+ ABI_ALLOCATE(rho2g1,(2,nfftf))
+ ABI_ALLOCATE(rho3r1,(cplex*nfftf,dtset%nspden))
 
  ask_accurate=1 ; formeig = 1 ; ireadwf = 1
  n1=dtset%ngfft(1) ; n2=dtset%ngfft(2) ; n3=dtset%ngfft(3)
- nfftot=n1*n2*n3
+ nfftotf=n1*n2*n3
 
 !Generate an index table of atoms, in order for them to be used
 !type after type.
@@ -221,25 +238,36 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  ABI_ALLOCATE(ph1d,(2,3*(2*mgfft+1)*natom))
  call getph(atindx,natom,n1,n2,n3,ph1d,xred)
 
-!Set up the Ylm for each k point
- if (psps%useylm==1) then
-   call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,psps%mpsang,&
-&   dtset%mpw,dtset%nband,dtset%nkpt,&
-&   npwarr,dtset%nsppol,0,rprimd,ylm,ylmgr_dum)
- end if
+!==== Initialize most of the Hamiltonian (and derivative) ====
+!1) Allocate all arrays and initialize quantities that do not depend on k and spin.
+!2) Perform the setup needed for the non-local factors:
+!* Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
+!* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
- ABI_ALLOCATE(vpsp1,(cplex*nfft))
- ABI_ALLOCATE(xccc3d1,(cplex*nfft))
- ABI_ALLOCATE(xccc3d2,(cplex*nfft))
- ABI_ALLOCATE(xccc3d3,(cplex*nfft))
- ABI_ALLOCATE(vhartr1,(cplex*nfft))
- ABI_ALLOCATE(vxc1,(cplex*nfft,dtset%nspden))
- ABI_ALLOCATE(vtrial1,(cplex*nfft,dtset%nspden))
+ call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,dtset%nspden,natom,&
+& dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
+& usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
+
+ ABI_ALLOCATE(vpsp1,(cplex*nfftf))
+ ABI_ALLOCATE(xccc3d1,(cplex*nfftf))
+ ABI_ALLOCATE(xccc3d2,(cplex*nfftf))
+ ABI_ALLOCATE(xccc3d3,(cplex*nfftf))
+ ABI_ALLOCATE(vhartr1,(cplex*nfftf))
+ ABI_ALLOCATE(vxc1,(cplex*nfftf,dtset%nspden))
+ ABI_ALLOCATE(vtrial1,(cplex*nfftf,dtset%nspden))
+
+ ABI_ALLOCATE(vresid_dum,(0,0))
+! PAW stuff
+ nhat1grdim = 0
+ usexcnhat = 0
+ ABI_ALLOCATE(nhat,(0,0))
+ ABI_ALLOCATE(nhat1,(0,0))
+ ABI_ALLOCATE(nhat1gr,(0,0,0))
+
+ mcg=mpw*nspinor*mband*mkmem*nsppol
 
 !Loop over the perturbations j1, j2, j3
-
  pert1case = 0 ; pert2case = 0 ; pert3case = 0
-
  do i1pert = 1, mpert
    do i1dir = 1, 3
 
@@ -251,7 +279,6 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 
        call status(counter,dtfil%filstat,iexit,level,'call inwffil  ')
 
-       mcg=mpw*nspinor*mband*mkmem*nsppol
        call inwffil(ask_accurate,cg1,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
 &       formeig,gmet,hdr,&
 &       ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
@@ -266,24 +293,24 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
          call WffClose (wff1,ierr)
        end if
 
-       rho1r1(:,:) = 0._dp
+       rho1r1(:,:) = zero
        if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
          rdwrpaw=0
          call appdig(pert1case,dtfil%fildens1in,fiden1i)
          call status(counter,dtfil%filstat,iexit,level,'call ioarr    ')
 
-         call read_rhor(fiden1i, cplex, dtset%nspden, nfft, dtset%ngfft, rdwrpaw, mpi_enreg, rho1r1, &
+         call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, dtset%ngfft, rdwrpaw, mpi_enreg, rho1r1, &
          hdr_den, rhoij_dum, comm_cell, check_hdr=hdr)
          etotal = hdr_den%etot; call hdr_free(hdr_den)
        end if
 
-       xccc3d1(:) = 0._dp
-       if ((psps%n1xccc/=0).and.(i1pert <= natom)) then
-         call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkcore   ')
-         call dfpt_mkcore(cplex,i1dir,i1pert,natom,psps%ntypat,n1,psps%n1xccc,&
-&         n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,&
-&         psps%xcccrc,psps%xccc1d,xccc3d1,xred)
-       end if ! psps%n1xccc/=0
+       xccc3d1(:) = zero
+!       if ((psps%n1xccc/=0).and.(i1pert <= natom)) then
+!         call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkcore   ')
+!         call dfpt_mkcore(cplex,i1dir,i1pert,natom,psps%ntypat,n1,psps%n1xccc,&
+!&         n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,&
+!&         psps%xcccrc,psps%xccc1d,xccc3d1,xred)
+!       end if ! psps%n1xccc/=0
 
        do i3pert = 1, mpert
          do i3dir = 1, 3
@@ -295,8 +322,7 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
              call appdig(pert3case,dtfil%fnamewff1,fiwf3i)
 
              call status(counter,dtfil%filstat,iexit,level,'call inwffil  ')
-             mcg=mpw*nspinor*mband*mkmem*nsppol
-             call inwffil(ask_accurate,cg3,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
+             call inwffil(ask_accurate,cg3,dtset,dtset%ecut,ecut_eff,eigen3,dtset%exchn2n3d,&
 &             formeig,gmet,hdr,&
 &             ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
 &             dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
@@ -304,30 +330,30 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 &             dtset%nsppol,dtset%nsym,&
 &             occ,optorth,rprimd,&
 &             dtset%symafm,dtset%symrel,dtset%tnons,&
-&             dtfil%unkg1,wff2,wfft2,dtfil%unwff2,&
+&             dtfil%unkg1,wff3,wfft3,dtfil%unwff3,&
 &             fiwf3i,wvl)
              if (ireadwf==1) then
-               call WffClose (wff2,ierr)
+               call WffClose (wff3,ierr)
              end if
 
-             rho3r1(:,:) = 0._dp
+             rho3r1(:,:) = zero
              if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
                rdwrpaw=0
                call appdig(pert3case,dtfil%fildens1in,fiden1i)
                call status(counter,dtfil%filstat,iexit,level,'call ioarr    ')
 
-               call read_rhor(fiden1i, cplex, dtset%nspden, nfft, dtset%ngfft, rdwrpaw, mpi_enreg, rho3r1, &
+               call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, dtset%ngfft, rdwrpaw, mpi_enreg, rho3r1, &
                hdr_den, rhoij_dum, comm_cell, check_hdr=hdr)
                etotal = hdr_den%etot; call hdr_free(hdr_den)
              end if
 
-             xccc3d3(:) = 0._dp
-             if ((psps%n1xccc/=0).and.(i3pert <= natom)) then
-               call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkcore   ')
-               call dfpt_mkcore(cplex,i3dir,i3pert,natom,psps%ntypat,n1,psps%n1xccc,&
-&               n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,&
-&               psps%xcccrc,psps%xccc1d,xccc3d3,xred)
-             end if ! psps%n1xccc/=0
+             xccc3d3(:) = zero
+!             if ((psps%n1xccc/=0).and.(i3pert <= natom)) then
+!               call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkcore   ')
+!               call dfpt_mkcore(cplex,i3dir,i3pert,natom,psps%ntypat,n1,psps%n1xccc,&
+!&               n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,&
+!&               psps%xcccrc,psps%xccc1d,xccc3d3,xred)
+!             end if ! psps%n1xccc/=0
 
              do i2pert = 1, mpert
 
@@ -335,20 +361,20 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 !              using the finite difference expression of
 !              Marzari and Vanderbilt PRB 56, 12847 (1997).
 
-               d3_berry(:,:) = 0._dp
+!               d3_berry(:,:) = zero
 
-               if ((i2pert==dtset%natom+2).and.&
-&               (maxval(rfpert(i1dir,i1pert,:,i2pert,i3dir,i3pert)) == 1)) then
+!               if ((i2pert==dtset%natom+2).and.&
+!&               (maxval(rfpert(i1dir,i1pert,:,i2pert,i3dir,i3pert)) == 1)) then
 
-                 call timab(511,1,tsec)
-                 call status(counter,dtfil%filstat,iexit,level,'call dfptnl_mv  ')
-                 call dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
-&                 i1pert,i3pert,i1dir,i3dir,&
-&                 kneigh,kg_neigh,kptindex,kpt3,mband,mkmem,mkmem_max,mk1mem,&
-&                 mpi_enreg,mpw,mvwtk,natom,nkpt,nkpt3,nneigh,npwarr,nspinor,nsppol,pwind)
-                 call timab(511,2,tsec)
+!                 call timab(511,1,tsec)
+!                 call status(counter,dtfil%filstat,iexit,level,'call dfptnl_mv  ')
+!                 call dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
+!&                 i1pert,i3pert,i1dir,i3dir,&
+!&                 kneigh,kg_neigh,kptindex,kpt3,mband,mkmem,mkmem_max,mk1mem,&
+!&                 mpi_enreg,mpw,mvwtk,natom,nkpt,nkpt3,nneigh,npwarr,nspinor,nsppol,pwind)
+!                 call timab(511,2,tsec)
 
-               end if
+!               end if
 
                if (mpi_enreg%me == 0) then
 
@@ -386,23 +412,38 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 
                    blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
 
+                 call status(counter,dtfil%filstat,iexit,level,'call inwffil  ')
+                 call inwffil(ask_accurate,cg2,dtset,dtset%ecut,ecut_eff,eigen2,dtset%exchn2n3d,&
+&                 formeig,gmet,hdr,&
+&                 ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
+&                 dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
+&                 dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
+&                 dtset%nsppol,dtset%nsym,&
+&                 occ,optorth,rprimd,&
+&                 dtset%symafm,dtset%symrel,dtset%tnons,&
+&                 dtfil%unkg1,wff2,wfft2,dtfil%unwff2,&
+&                 fiwf3i,wvl)
+                  if (ireadwf==1) then
+                    call WffClose (wff2,ierr)
+                  end if
+
 !                  Read the first-order densities from disk-files
-                   rho2r1(:,:) = 0._dp ; rho2g1(:,:) = 0._dp
+                   rho2r1(:,:) = zero ; rho2g1(:,:) = zero
 
                    if (dtset%get1den /= 0 .or. dtset%ird1den /= 0) then
                      rdwrpaw=0
                      call appdig(pert2case,dtfil%fildens1in,fiden1i)
                      call status(counter,dtfil%filstat,iexit,level,'call ioarr    ')
 
-                     call read_rhor(fiden1i, cplex, dtset%nspden, nfft, dtset%ngfft, rdwrpaw, mpi_enreg, rho2r1, &
+                     call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, dtset%ngfft, rdwrpaw, mpi_enreg, rho2r1, &
                      hdr_den, rhoij_dum, comm_cell, check_hdr=hdr)
                      etotal = hdr_den%etot; call hdr_free(hdr_den)
 
 !                    Compute up+down rho1(G) by fft
-                     ABI_ALLOCATE(work,(cplex*nfft))
+                     ABI_ALLOCATE(work,(cplex*nfftf))
                      work(:)=rho2r1(:,1)
                      call status(counter,dtfil%filstat,iexit,level,'call fourdp   ')
-                     call fourdp(cplex,rho2g1,work,-1,mpi_enreg,nfft,dtset%ngfft,dtset%paral_kgb,0)
+                     call fourdp(cplex,rho2g1,work,-1,mpi_enreg,nfftf,dtset%ngfft,dtset%paral_kgb,0)
                      ABI_DEALLOCATE(work)
 
                    end if
@@ -410,60 +451,38 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 !                  Compute first-order local potentials
 !                  (hartree, xc and pseudopotential)
 
-                   n3xccc=0; if(psps%n1xccc/=0)n3xccc=nfft
-                   xccc3d2(:)=0._dp ; vpsp1(:)=0._dp
+                   n3xccc=0; if(psps%n1xccc/=0)n3xccc=nfftf
+                   xccc3d2(:)=zero ; vpsp1(:)=zero
 
-                   if (i2pert <= natom) then
+!                   if (i2pert <= natom) then
 
-                     call status(counter,dtfil%filstat,iexit,level,'call dfpt_vlocal   ')
-                     call dfpt_vlocal(atindx,cplex,gmet,gsqcut,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,natom,&
-&                     nattyp,nfft,dtset%ngfft,psps%ntypat,n1,n2,n3,dtset%paral_kgb,ph1d,psps%qgrid_vl,&
-&                     dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
+!                     call status(counter,dtfil%filstat,iexit,level,'call dfpt_vlocal   ')
+!                     call dfpt_vlocal(atindx,cplex,gmet,gsqcut,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,natom,&
+!&                     nattyp,nfftf,dtset%ngfft,psps%ntypat,n1,n2,n3,dtset%paral_kgb,ph1d,psps%qgrid_vl,&
+!&                     dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
 
-                     if (psps%n1xccc/=0) then
-                       call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkcore   ')
-                       call dfpt_mkcore(cplex,i2dir,i2pert,natom,psps%ntypat,n1,psps%n1xccc,&
-&                       n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,&
-&                       psps%xcccrc,psps%xccc1d,xccc3d2,xred)
-                     end if ! psps%n1xccc/=0
+!                     if (psps%n1xccc/=0) then
+!                       call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkcore   ')
+!                       call dfpt_mkcore(cplex,i2dir,i2pert,natom,psps%ntypat,n1,psps%n1xccc,&
+!&                       n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,&
+!&                       psps%xcccrc,psps%xccc1d,xccc3d2,xred)
+!                     end if ! psps%n1xccc/=0
 
-                   end if  ! i2pert <= natom
+!                   end if  ! i2pert <= natom
 
-                   call status(counter,dtfil%filstat,iexit,level,'call hartre   ')
-                   call hartre(cplex,gmet,gsqcut,0,mpi_enreg,nfft,dtset%ngfft,dtset%paral_kgb,dtset%qptn,rho2g1,vhartr1)
-                   option=1
-                   call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkvxc   ')
-                   call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfft,dtset%ngfft,&
-&                   rho_dum,0,rho_dum,0,nkxc,dtset%nspden,n3xccc,option,&
-&                   dtset%paral_kgb,dtset%qptn,rho2r1,rprimd,0,vxc1,xccc3d2)
+                   call status(counter,dtfil%filstat,iexit,level,'get vtrial1   ')
+                   option=1;optene=0
+                   call dfpt_rhotov(cplex,dummy_real,dummy_real,dummy_real,dummy_real,gmet,gprimd,&
+&                   gsqcut,i2dir,i2pert,dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,dtset%ngfft,nhat,&
+&                   nhat1,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,optene,option,dtset%paral_kgb,&
+&                   dtset%qptn,rhog,rho2g1,rhor,rho2r1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,&
+&                   vpsp1,vresid_dum,dummy_real,vtrial1,vxc1,xccc3d2)
 
-                   if(dtset%nsppol==1)then
-                     if(cplex==1)then
-                       do ir=1,nfft
-                         vtrial1(ir,1)=vpsp1(ir)+vhartr1(ir)+vxc1(ir,1)
-                       end do
-                     else
-                       do ir=1,nfft
-                         vtrial1(2*ir-1,1)=vpsp1(2*ir-1)+vhartr1(2*ir-1)+vxc1(2*ir-1,1)
-                         vtrial1(2*ir  ,1)=vpsp1(2*ir  )+vhartr1(2*ir  )+vxc1(2*ir  ,1)
-                       end do
-                     end if
-                   else
-                     if(cplex==1)then
-                       do ir=1,nfft
-                         vtrial1(ir,1)=vpsp1(ir)+vhartr1(ir)+vxc1(ir,1)
-                         vtrial1(ir,2)=vpsp1(ir)+vhartr1(ir)+vxc1(ir,2)
-                       end do
-                     else
-!                      fab: I think there was an error in the definition of  vtrial1(2*ir-1,2); I have corrected it...
-                       do ir=1,nfft
-                         vtrial1(2*ir-1,1)=vpsp1(2*ir-1)+vhartr1(2*ir-1)+vxc1(2*ir-1,1)
-                         vtrial1(2*ir  ,1)=vpsp1(2*ir  )+vhartr1(2*ir  )+vxc1(2*ir  ,1)
-                         vtrial1(2*ir-1,2)=vpsp1(2*ir-1)+vhartr1(2*ir-1)+vxc1(2*ir-1  ,2)
-                         vtrial1(2*ir  ,2)=vpsp1(2*ir  )+vhartr1(2*ir  )+vxc1(2*ir  ,2)
-                       end do
-                     end if
-                   end if
+                   call init_rf_hamiltonian(cplex,gs_hamkq,i2pert,rf_hamkq,has_e1kbsc=1)
+
+! **********************************************************************************************
+!                  TO SIMPLIFY THE FOLLOWING AND PUT IN A ROUTINE
+! **********************************************************************************************
 
 !                  Compute the third-order xc energy
 !                  take into account the contribution of the term
@@ -476,123 +495,173 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 !                  the following are essentially the 4th and the 3rd terms of PRB 71,125107, but the
 !                  multiplication for rho1 will be done by dotprod_vn later
 
-!                  in the non spin polarized case xc_tmp has only 1 component
-                   if (nspden==1)then
+!               
+!!                  in the non spin polarized case xc_tmp has only 1 component
+!                   if (nspden==1)then
 
-                     ABI_ALLOCATE(xc_tmp,(cplex*nfft,1))
+!                     ABI_ALLOCATE(xc_tmp,(cplex*nfft,1))
 
-                     if (cplex==1) then
-!                      This, and the next lines, have to be changed in case cplex=2
-                       do ifft=1,nfft
-                         xc_tmp(ifft,1)= k3xc(ifft,1)*(rho2r1(ifft,1)+3*xccc3d2(ifft))*rho3r1(ifft,1)
-                       end do
-                     else
-                       do ifft=1,nfft   ! 2*ifft-1 denotes the real part, 2*ifft the imaginary part
-                         xc_tmp(2*ifft-1,1)= k3xc(ifft,1)*( (rho2r1(2*ifft-1,1)+3*xccc3d2(2*ifft-1))*rho3r1(2*ifft-1,1) &
-&                         -( rho2r1(2*ifft,1)+3*xccc3d2(2*ifft))*rho3r1(2*ifft,1))
+!                     if (cplex==1) then
+!!                      This, and the next lines, have to be changed in case cplex=2
+!                       do ifft=1,nfft
+!                         xc_tmp(ifft,1)= k3xc(ifft,1)*(rho2r1(ifft,1)+3*xccc3d2(ifft))*rho3r1(ifft,1)
+!                       end do
+!                     else
+!                       do ifft=1,nfft   ! 2*ifft-1 denotes the real part, 2*ifft the imaginary part
+!                         xc_tmp(2*ifft-1,1)= k3xc(ifft,1)*( (rho2r1(2*ifft-1,1)+3*xccc3d2(2*ifft-1))*rho3r1(2*ifft-1,1) &
+!&                         -( rho2r1(2*ifft,1)+3*xccc3d2(2*ifft))*rho3r1(2*ifft,1))
 
-                         xc_tmp(2*ifft,1)= k3xc(ifft,1)*( (rho2r1(2*ifft-1,1)+3*xccc3d2(2*ifft-1))*rho3r1(2*ifft,1) &
-&                         +( rho2r1(2*ifft,1)+3*xccc3d2(2*ifft))*rho3r1(2*ifft-1,1))
-                       end do
+!                         xc_tmp(2*ifft,1)= k3xc(ifft,1)*( (rho2r1(2*ifft-1,1)+3*xccc3d2(2*ifft-1))*rho3r1(2*ifft,1) &
+!&                         +( rho2r1(2*ifft,1)+3*xccc3d2(2*ifft))*rho3r1(2*ifft-1,1))
+!                       end do
 
+!                     end if
+
+!                   end if
+
+!!                  fab: modifications for the spin polarized raman part:
+!!                  in the spin polarized case xc_tmp has 2 components
+!!                  note that now the non linear core correction is divided by 2
+!                   if (nspden==2) then
+
+!                     ABI_ALLOCATE(xc_tmp,(cplex*nfft,2))
+
+!                     if (cplex==1) then
+!                       do ifft=1,nfft
+!                         xc_tmp(ifft,1)= k3xc(ifft,1)*(rho2r1(ifft,2)+(3._dp/2._dp)*xccc3d2(ifft))*rho3r1(ifft,2)+ &
+!&                         k3xc(ifft,2)*(rho2r1(ifft,2)+(3._dp/2._dp)*xccc3d2(ifft))*(rho3r1(ifft,1)-rho3r1(ifft,2))+ &
+!&                         k3xc(ifft,2)*((rho2r1(ifft,1)-rho2r1(ifft,2))+(3._dp/2._dp)*xccc3d2(ifft))*rho3r1(ifft,2)+ &
+!&                         k3xc(ifft,3)*((rho2r1(ifft,1)-rho2r1(ifft,2))+(3._dp/2._dp)*xccc3d2(ifft))*(rho3r1(ifft,1)-rho3r1(ifft,2))
+!                         xc_tmp(ifft,2)= k3xc(ifft,2)*(rho2r1(ifft,2)+(3._dp/2._dp)*xccc3d2(ifft))*rho3r1(ifft,2)+ &
+!&                         k3xc(ifft,3)*(rho2r1(ifft,2)+(3._dp/2._dp)*xccc3d2(ifft))*(rho3r1(ifft,1)-rho3r1(ifft,2))+ &
+!&                         k3xc(ifft,3)*((rho2r1(ifft,1)-rho2r1(ifft,2))+(3._dp/2._dp)*xccc3d2(ifft))*rho3r1(ifft,2)+ &
+!&                         k3xc(ifft,4)*((rho2r1(ifft,1)-rho2r1(ifft,2))+(3._dp/2._dp)*xccc3d2(ifft))*(rho3r1(ifft,1)-rho3r1(ifft,2))
+!                       end do
+
+!                     else
+!                       do ifft=1,nfft
+!!                        These sections should be rewritten, to be easier to read ... (defining intermediate scalars)
+!                         xc_tmp(2*ifft-1,1)= k3xc(ifft,1)*&
+!&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft-1,2)- &
+!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft,2))+   &
+!&                         k3xc(ifft,2)*&
+!&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*(rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2))- &
+!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*(rho3r1(2*ifft,1)-rho3r1(2*ifft,2)))+ &
+!&                         k3xc(ifft,2)*&
+!&                         ( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft-1,2)- &
+!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft,2))+ &
+!&                         k3xc(ifft,3)*&
+!&                         ( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
+!&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2))- &
+!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*&
+!&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2)))
+!                         xc_tmp(2*ifft,1)=k3xc(ifft,1)*&
+!&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft,2)+ &
+!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft-1,2))+   &
+!&                         k3xc(ifft,2)*&
+!&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*(rho3r1(2*ifft,1)-rho3r1(2*ifft,2))+ &
+!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*(rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2)))+ &
+!&                         k3xc(ifft,2)*&
+!&                         ( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft,2)+ &
+!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft-1,2))+ &
+!&                         k3xc(ifft,3)*&
+!&                         ( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
+!&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2))+ &
+!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*&
+!&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2)))
+!!                        fab: now the spin down component
+!                         xc_tmp(2*ifft-1,2)= k3xc(ifft,2)*&
+!&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft-1,2)- &
+!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft,2))+   &
+!&                         k3xc(ifft,3)*( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
+!&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2))- &
+!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*(rho3r1(2*ifft,1)-rho3r1(2*ifft,2)))+ &
+!&                         k3xc(ifft,3)*( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
+!&                         rho3r1(2*ifft-1,2)- &
+!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft,2))+ &
+!&                         k3xc(ifft,4)*( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
+!&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2))- &
+!                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*&
+!&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2)))
+!                         xc_tmp(2*ifft,2)=k3xc(ifft,1)*( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
+!&                         rho3r1(2*ifft,2)+ &
+!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft-1,2))+   &
+!&                         k3xc(ifft,3)*( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
+!&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2))+ &
+!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*(rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2)))+ &
+!&                         k3xc(ifft,3)*( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
+!&                         rho3r1(2*ifft,2)+ &
+!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft-1,2))+ &
+!&                         k3xc(ifft,4)*( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
+!&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2))+ &
+!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*&
+!&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2)))
+!                       end do
+
+!!                      fab: this is the end if over cplex
+!                     end if
+!!                    fab: this is the enf if over nspden
+!                   end if
+
+!                   call dotprod_vn(1,rho1r1,exc3,valuei,nfft,nfftot,nspden,1,xc_tmp,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
+!                   ABI_DEALLOCATE(xc_tmp)
+
+! **********************************************************************************************
+!                  END TO SIMPLIFY
+! **********************************************************************************************
+
+! **********************************************************************************************
+!                  LIRE ET CHARGER | u^(k_dir2) > (pour tests) et | u^(k_dir2 E_dir3) >
+! **********************************************************************************************
+                   if (i2pert==natom+2) then
+                     nwffile = 1 ! TO CHANGE
+                     file_index(1) = i2dir+natom*3
+                     idir_dkde = i2dir
+                     if (i3dir/=i2dir) then ! see m_rf2.F90 => getidirs
+                       if (i2dir==2.and.i3dir==3) idir_dkde = 4
+                       if (i2dir==1.and.i3dir==3) idir_dkde = 5
+                       if (i2dir==1.and.i3dir==2) idir_dkde = 6
+                       if (i2dir==3.and.i3dir==2) idir_dkde = 7
+                       if (i2dir==3.and.i3dir==1) idir_dkde = 8
+                       if (i2dir==2.and.i3dir==1) idir_dkde = 9
                      end if
-
+                     file_index(2) = idir_dkde+9+(dtset%natom+6)*3
+                     fnamewff(1) = dtfil%fnamewffddk
+                     fnamewff(2) = dtfil%fnamewffdkde
+                     do ii=1,nwffile
+                       call appdig(file_index(ii),fnamewff(ii),fiwfddk)
+                       ! Checking the existence of data file
+                       if (.not. file_exists(fiwfddk)) then
+                         ! Trick needed to run Abinit test suite in netcdf mode.
+                         if (file_exists(nctk_ncify(fiwfddk))) then
+                           write(message,"(3a)")"- File: ",trim(fiwfddk),&
+                           " does not exist but found netcdf file with similar name."
+                           call wrtout(std_out,message,'COLL')
+                           fiwfddk = nctk_ncify(fiwfddk)
+                         end if
+                         if (.not. file_exists(fiwfddk)) then
+                           MSG_ERROR('Missing file: '//TRIM(fiwfddk))
+                         end if
+                       end if
+                       write(message,'(2a)')'-dfpt_looppert : read the wavefunctions from file: ',trim(fiwfddk)
+                       call wrtout(std_out,message,'COLL')
+                       call wrtout(ab_out,message,'COLL')
+#ifdef DEV_MG_WFK
+!                      Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
+                       call wfk_open_read(ddk_f(ii),fiwfddk,1,dtset%iomode,dtfil%unddk+(ii-1),mpi_enreg%comm_cell)
+#else
+                       call WffOpen(dtset%iomode,mpi_enreg%comm_cell,fiwfddk,ierr,wffddk(ii),master,me,dtfil%unddk+(ii-1))
+#endif
+                     end do
                    end if
-
-!                  fab: modifications for the spin polarized raman part:
-!                  in the spin polarized case xc_tmp has 2 components
-!                  note that now the non linear core correction is divided by 2
-                   if (nspden==2) then
-
-                     ABI_ALLOCATE(xc_tmp,(cplex*nfft,2))
-
-                     if (cplex==1) then
-                       do ifft=1,nfft
-                         xc_tmp(ifft,1)= k3xc(ifft,1)*(rho2r1(ifft,2)+(3._dp/2._dp)*xccc3d2(ifft))*rho3r1(ifft,2)+ &
-&                         k3xc(ifft,2)*(rho2r1(ifft,2)+(3._dp/2._dp)*xccc3d2(ifft))*(rho3r1(ifft,1)-rho3r1(ifft,2))+ &
-&                         k3xc(ifft,2)*((rho2r1(ifft,1)-rho2r1(ifft,2))+(3._dp/2._dp)*xccc3d2(ifft))*rho3r1(ifft,2)+ &
-&                         k3xc(ifft,3)*((rho2r1(ifft,1)-rho2r1(ifft,2))+(3._dp/2._dp)*xccc3d2(ifft))*(rho3r1(ifft,1)-rho3r1(ifft,2))
-                         xc_tmp(ifft,2)= k3xc(ifft,2)*(rho2r1(ifft,2)+(3._dp/2._dp)*xccc3d2(ifft))*rho3r1(ifft,2)+ &
-&                         k3xc(ifft,3)*(rho2r1(ifft,2)+(3._dp/2._dp)*xccc3d2(ifft))*(rho3r1(ifft,1)-rho3r1(ifft,2))+ &
-&                         k3xc(ifft,3)*((rho2r1(ifft,1)-rho2r1(ifft,2))+(3._dp/2._dp)*xccc3d2(ifft))*rho3r1(ifft,2)+ &
-&                         k3xc(ifft,4)*((rho2r1(ifft,1)-rho2r1(ifft,2))+(3._dp/2._dp)*xccc3d2(ifft))*(rho3r1(ifft,1)-rho3r1(ifft,2))
-                       end do
-
-                     else
-                       do ifft=1,nfft
-!                        These sections should be rewritten, to be easier to read ... (defining intermediate scalars)
-                         xc_tmp(2*ifft-1,1)= k3xc(ifft,1)*&
-&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft-1,2)- &
-&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft,2))+   &
-&                         k3xc(ifft,2)*&
-&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*(rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2))- &
-&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*(rho3r1(2*ifft,1)-rho3r1(2*ifft,2)))+ &
-&                         k3xc(ifft,2)*&
-&                         ( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft-1,2)- &
-&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft,2))+ &
-&                         k3xc(ifft,3)*&
-&                         ( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2))- &
-&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*&
-&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2)))
-                         xc_tmp(2*ifft,1)=k3xc(ifft,1)*&
-&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft,2)+ &
-&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft-1,2))+   &
-&                         k3xc(ifft,2)*&
-&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*(rho3r1(2*ifft,1)-rho3r1(2*ifft,2))+ &
-&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*(rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2)))+ &
-&                         k3xc(ifft,2)*&
-&                         ( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft,2)+ &
-&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft-1,2))+ &
-&                         k3xc(ifft,3)*&
-&                         ( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2))+ &
-&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*&
-&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2)))
-!                        fab: now the spin down component
-                         xc_tmp(2*ifft-1,2)= k3xc(ifft,2)*&
-&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft-1,2)- &
-&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft,2))+   &
-&                         k3xc(ifft,3)*( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2))- &
-&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*(rho3r1(2*ifft,1)-rho3r1(2*ifft,2)))+ &
-&                         k3xc(ifft,3)*( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-&                         rho3r1(2*ifft-1,2)- &
-&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft,2))+ &
-&                         k3xc(ifft,4)*( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2))- &
-                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*&
-&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2)))
-                         xc_tmp(2*ifft,2)=k3xc(ifft,1)*( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-&                         rho3r1(2*ifft,2)+ &
-&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft-1,2))+   &
-&                         k3xc(ifft,3)*( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2))+ &
-&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*(rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2)))+ &
-&                         k3xc(ifft,3)*( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-&                         rho3r1(2*ifft,2)+ &
-&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft-1,2))+ &
-&                         k3xc(ifft,4)*( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2))+ &
-&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*&
-&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2)))
-                       end do
-
-!                      fab: this is the end if over cplex
-                     end if
-!                    fab: this is the enf if over nspden
-                   end if
-
-                   call dotprod_vn(1,rho1r1,exc3,valuei,nfft,nfftot,nspden,1,xc_tmp,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
-                   ABI_DEALLOCATE(xc_tmp)
 
 !                  Perform DFPT part of the 3dte calculation
-
                    call timab(512,1,tsec)
                    call status(counter,dtfil%filstat,iexit,level,'call dfptnl_resp ')
-                   call dfptnl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,&
-&                   kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nfft,nkpt,nspden,&
-&                   nspinor,nsppol,npwarr,occ,ph1d,psps,rprimd,vtrial1,xred,ylm)
+                   call dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen2,gs_hamkq,i1dir,&
+&                   i2dir,i3dir,i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
+&                   mpsang,mpw,natom,nfftf,nkpt,nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,&
+&                   rf_hamkq,rprimd,vtrial,vtrial1,wffddk,ddk_f,xred)
                    call timab(512,2,tsec)
 
                    call status(counter,dtfil%filstat,iexit,level,'after dfptnl_resp')
@@ -613,28 +682,33 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
                      call wrtout(ab_out,message,'COLL')
                      write(ab_out,'(20x,a,13x,a)')'real part','imaginary part'
                      write(ab_out,'(5x,a2,1x,f22.10,3x,f22.10)')'xc',exc3*sixth,zero
-                     if (i2pert == natom + 2) then
-                       write(ab_out,'(5x,a3,f22.10,3x,f22.10)')'ddk',&
-&                       d3_berry(1,i2dir),d3_berry(2,i2dir)
-                     end if
                      write(ab_out,'(5x,a3,f22.10,3x,f22.10)')'dft',&
-&                     d3lo(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert),&
-&                     d3lo(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+&                     d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert),&
+&                     d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
                      write(ab_out,*)
                      write(std_out,'(18x,a,11x,a)')'real part','imaginary part'
                      write(std_out,'(5x,a2,1x,f20.10,3x,f20.10)')'xc',exc3*sixth,zero
-                     write(std_out,'(5x,a3,f22.10,3x,f22.10)')'ddk',&
-&                     d3_berry(1,i2dir),d3_berry(2,i2dir)
                      write(std_out,'(5x,a3,f22.10,3x,f22.10)')'dft',&
-&                     d3lo(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert),&
-&                     d3lo(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+&                     d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert),&
+&                     d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
                      write(std_out,*)
                    end if  ! mpi_enreg%me == 0
 
-                   d3lo(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = &
-&                   d3lo(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) + exc3*sixth
-                   d3lo(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = &
-&                   d3lo(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) + d3_berry(:,i2dir)
+                   d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = &
+&                   d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) + exc3*sixth
+                   d3etot(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = &
+&                   d3etot(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+
+!                  Eventually close the dot file, before calling dfpt_nstdy
+                   if (i2pert==dtset%natom+2) then
+#ifdef DEV_MG_WFK
+                     call wfk_close(ddk_f(1))
+!                     call wfk_close(ddk_f(2)) ! TO CHANGE
+#else
+                     call WffClose(wffddk(1),ierr)
+!                     call WffClose(wffddk(2),ierr) ! TO CHANGE
+#endif
+                   end if
 
                  end if   !rfpert
                end do    !i2dir
@@ -650,9 +724,16 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 
  call status(0,dtfil%filstat,iexit,level,'exit          ')
 
+!More memory cleaning
+ call destroy_hamiltonian(gs_hamkq)
+ call destroy_rf_hamiltonian(rf_hamkq)
+ 
  ABI_DEALLOCATE(cg1)
+ ABI_DEALLOCATE(cg2)
  ABI_DEALLOCATE(cg3)
  ABI_DEALLOCATE(eigen1)
+ ABI_DEALLOCATE(eigen2)
+ ABI_DEALLOCATE(eigen3)
  ABI_DEALLOCATE(rho1r1)
  ABI_DEALLOCATE(rho2r1)
  ABI_DEALLOCATE(rho2g1)
@@ -660,8 +741,11 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  ABI_DEALLOCATE(atindx1)
  ABI_DEALLOCATE(atindx)
  ABI_DEALLOCATE(nattyp)
+ ABI_DEALLOCATE(nhat)
+ ABI_DEALLOCATE(nhat1)
+ ABI_DEALLOCATE(nhat1gr)
  ABI_DEALLOCATE(ph1d)
- ABI_DEALLOCATE(ylm)
+ ABI_DEALLOCATE(vresid_dum)
  ABI_DEALLOCATE(vtrial1)
  ABI_DEALLOCATE(vxc1)
  ABI_DEALLOCATE(vhartr1)
@@ -669,6 +753,7 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  ABI_DEALLOCATE(xccc3d1)
  ABI_DEALLOCATE(xccc3d2)
  ABI_DEALLOCATE(xccc3d3)
+
 
  call timab(502,2,tsec)
 

@@ -38,6 +38,7 @@ sources = [
  "nonlinear.F90",
 #"outscfcv.F90",
  "pawuj_drive.F90",
+ "pead_nl_loop.F90",
  "respfn.F90",
 #"scfcv.F90",
  "screening.F90",

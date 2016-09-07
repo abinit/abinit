@@ -1311,6 +1311,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  if ( (dtset%iscf>=0 .or. dtset%iscf==-3) .and. dtset%prtstm==0) then
    call prtene(dtset,results_gs%energies,ab_out,psps%usepaw)
+!LTEST
+   call prtene(dtset,results_gs%energies,std_out,psps%usepaw)
+!LTEST
  end if
 
 !write final electric field components HONG

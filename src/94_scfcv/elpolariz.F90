@@ -136,6 +136,10 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
 !Local variables-------------------------------
 !scalars
  integer :: my_nspinor,option,unit_out,iir,jjr,kkr
+!LTEST
+ integer :: idir
+ real(dp) :: pel_cart(3),pion_cart(3),ptot_cart(3)
+!LTEST
  real(dp) :: pdif_mod,eenth,ucvol_local
  character(len=500) :: message
 !arrays
@@ -222,6 +226,25 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
 &   pawtab,pel,pelev,pion,ptot,red_ptot,pwind,&                            !!REC
 &  pwind_alloc,pwnsfac,rprimd,dtset%typat,ucvol,&
 &   unit_out,usecprj,psps%usepaw,xred,psps%ziontypat)
+
+!LTEST
+!  Transform pel, pion and ptot to cartesian coordinates
+   pel_cart(:) = zero ; pion_cart(:) = zero ; ptot_cart(:) = zero
+   do idir = 1, 3
+     pel_cart(idir) =  rprimd(idir,1)*pel(1) + rprimd(idir,2)*pel(2) + &
+&     rprimd(idir,3)*pel(3)
+     pion_cart(idir) = rprimd(idir,1)*pion(1) + rprimd(idir,2)*pion(2) + &
+&     rprimd(idir,3)*pion(3)
+     ptot_cart(idir) = rprimd(idir,1)*ptot(1) + rprimd(idir,2)*ptot(2) + &
+&     rprimd(idir,3)*ptot(3)
+ end do
+! Print Polarization components (reduced coordinates) in the LOG file :
+   write(message,'(a,a,3(a,3(es22.13E3),a))') ' ** POL TESTS :',ch10,&
+   'Electronic berry phase:       ', (pel_cart(idir), idir = 1, 3),ch10,&
+   'Ionic      berry phase:       ', (pion_cart(idir), idir = 1, 3),ch10,&
+   'Total                 :       ', (ptot_cart(idir), idir = 1, 3),ch10
+   call wrtout(std_out,message,'COLL')
+!LTEST
 
    dtefield%red_ptot1(:)=red_ptot(:)
 
