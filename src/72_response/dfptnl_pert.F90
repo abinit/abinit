@@ -147,14 +147,6 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen2,gs_hamkq,i1dir
  type(pawcprj_type) :: cprj_dum(1,1)
  type(pawtab_type) :: pawtab_dum(0)
  type(rf_hamiltonian_type) :: rf_ham_dum
-!LTEST
- integer,parameter :: berryopt=0,optnl=2,tim_getgh1c=1
- integer :: optlocal,opt_gvnl1,usevnl,sij_opt
- real(dp) :: dum1(1,1)
- character(len=500) :: message
- real(dp),allocatable :: cgj(:,:),work2(:,:),iddk(:,:)
- type(pawcprj_type),allocatable :: cwaveprj(:,:)
-!LTEST
 !***********************************************************************
 
  me = mpi_enreg%me
@@ -324,10 +316,6 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen2,gs_hamkq,i1dir
 
        offset_cg    = size_wf      *(jband-1+nband_k*    (ikpt-1+nkpt*(isppol-1)))
        offset_eigen = 2*dtset%mband*(jband-1+dtset%mband*(ikpt-1+nkpt*(isppol-1)))
-
-!LTEST
-!       TO COMPUTE < u^(0) | H^(1) | u^(0) > and compare it to eigen1
-!LTEST
 
 !      Test if < u^(0) | ( H^(1) - eps^(0) S^(1) ) | u^(0) > = eig^(1)
        tol_test = tol8

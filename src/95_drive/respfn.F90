@@ -202,9 +202,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwr,rdwrpaw
  integer :: req_cplex_dij,rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde
  integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw,usexcnhat,use_sym
-!LTEST
- integer :: i1dir,i2dir
-!LTEST
  logical :: has_full_piezo,has_allddk,paral_atom,qeq0,use_nhat_gga,call_pawinit
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
  real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,enxc
@@ -1360,29 +1357,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   has_full_piezo,has_allddk,ab_out,dtset%mband,mpert,natom,ntypat,&
 &   outd2,pawbec,pawpiezo,piezofrnl,dtset%prtbbb,dtset%prtvol,qphon,qzero,&
 &   dtset%typat,rfdir,rfpert,rfphon,rfstrs,psps%usepaw,usevdw,psps%ziontypat)
-!LTEST
-   print '(a)',' ** POL TEST : Dielectric matrix (1) :'
-   do i2dir=1,3
-     do i1dir=1,3
-       print '(2(a,i1),2(a,es22.13E3))','  ',i1dir,'  ',i2dir,&
-       '    ',d2cart(1,i1dir,natom+2,i2dir,natom+2),',',d2cart(2,i1dir,natom+2,i2dir,natom+2)
-     end do
-   end do
-!   print '(a)',' ** POL TEST : Dielectric matrix (2) :'
-!   do i2dir=1,3
-!     do i1dir=1,3
-!       print '(2(a,i1),2(a,es22.13E3))','  ',i1dir,'  ',i2dir,&
-!       '    ',d2cart(1,i1dir,natom+2,i2dir,natom+2),',',d2cart(2,i1dir,natom+2,i2dir,natom+2)
-!     end do
-!   end do
-!   call dfpt_dyout(becfrnl,dtset%berryopt,blkflg,carflg,dtfil%unddb,ddkfil,dyew,dyfrlo,&
-!&   dyfrnl,dyfrx1,dyfrx2,dyfr_cplex,dyfr_nondiag,dyvdw,d2cart,d2cart_bbb,d2eig0,&
-!&   d2k0,d2lo,d2loc0,d2matr,d2nl,d2nl0,d2nl1,d2ovl,d2vn,&
-!&   eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
-!&   has_full_piezo,has_allddk,std_out,dtset%mband,mpert,natom,ntypat,&
-!&   outd2,pawbec,pawpiezo,piezofrnl,dtset%prtbbb,dtset%prtvol,qphon,qzero,&
-!&   dtset%typat,rfdir,rfpert,rfphon,rfstrs,psps%usepaw,usevdw,psps%ziontypat)
-!LTEST
    close(dtfil%unddb)
 
 #ifdef HAVE_NETCDF

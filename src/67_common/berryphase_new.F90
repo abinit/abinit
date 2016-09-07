@@ -1037,21 +1037,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
        polb_mult(:,:)=zero
        do istep = 1,berrystep
 
-!LTEST
-!         if(berrystep==1) then
-
-!           write(message,'(a,a)')ch10,&
-!&           ' Compute the electronic contribution to polarization'
-!           call wrtout(std_out,message,'COLL')
-
-!         else
-!           write(message,'(a,a,i4,a)')ch10,&
-!&           ' Compute the electronic contribution to polarization for a step of istep=',&
-!&           istep,'*dk'
-!           call wrtout(std_out,message,'COLL')
-!         end if
-!LTEST
-
          if(istep /= 1) then
 !          construct the strings for a step of istep*dk
 !          string length
@@ -1114,11 +1099,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 
          ABI_ALLOCATE(det_string,(2,nstr))
          ABI_ALLOCATE(polberry,(nstr))
-!LTEST
-!         write(message,'(a,10x,a,10x,a)')ch10,&
-!&         'istr','polberry(istr)'
-!         call wrtout(std_out,message,'COLL')
-!LTEST
 
          polbtot = zero
          do isppol = 1, nsppol
@@ -1285,11 +1265,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
              do jstep=1, istep
                polb(isppol)=polb(isppol)+coef(jstep,istep)*polb_mult(isppol,jstep)
              end do
-
-!LTEST
-!             write(message,'(10x,i6,7x,e16.9)')istr,polberry(istr)
-!             call wrtout(std_out,message,'COLL')
-!LTEST
 
            end do
 
