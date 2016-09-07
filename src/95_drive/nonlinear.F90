@@ -222,8 +222,8 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
    MSG_ERROR(message)
  end if
 
-!PEAD or DFPT computation :
-pead = 1
+!Computation of third order derivatives from PEAD (pead=1) or full DPFT formalism (pead=0):
+pead = 1 ! pead = 0 is under development...
 
 !Define the set of admitted perturbations taking into account
 !the possible permutations
