@@ -617,6 +617,7 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
  ABI_DEALLOCATE(ipvt)
  ABI_DEALLOCATE(s3mat)
  ABI_DEALLOCATE(zgwork)
+ ABI_DEALLOCATE(bd_index)
 
 
 !fab: I think that in the following we have to make a distinction:
