@@ -19,7 +19,7 @@ def main(home_dir=""):
 
   if home_dir!="":
     bdir = os.path.join(home_dir,"bindings")
-    cmd = "cd "+bdir+" && configure && make libpaw-bindings && cp libpaw/*tar.gz /tmp"
+    cmd = "cd "+bdir+" && ./configure && make libpaw-bindings && cp libpaw/*tar.gz /tmp"
   else:
     cmd = "cd bindings && ../../bindings/configure && make libpaw-bindings && cp libpaw/*tar.gz /tmp"
   ou = tempfile.TemporaryFile()

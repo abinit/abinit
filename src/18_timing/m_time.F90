@@ -517,7 +517,7 @@ subroutine cwtime(cpu,wall,gflops,start_or_stop)
  character(len=*),intent(in) :: start_or_stop
 
 !Local variables-------------------------------
-#ifndef HAVE_TIMER_PAPI
+#ifndef HAVE_PAPI
  logical,parameter :: use_papi=.FALSE.
 #else
  logical,parameter :: use_papi=.TRUE.

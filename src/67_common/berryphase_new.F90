@@ -82,6 +82,7 @@
 !!  - Use the analytical relation between the overlap matrices
 !!    S(k,k+dk) and S(k+dk,k) to avoid to recompute them
 !!    when ifor = 2.
+!!  - change name of option input variable to something more explicit
 !!
 !! NOTES
 !! - pel and pion do not take into account the factor 1/ucvol

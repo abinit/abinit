@@ -698,6 +698,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'eph_ngqpt_fine','INT',0)
 
+ intarr(1,:)=dtsets(:)%eph_transport
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_transport','INT',0)
+
  dprarr(1,:)=dtsets(:)%ph_wstep
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ph_wstep','ENE',0)
 

@@ -53,7 +53,7 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
  use defs_wvltypes
  use m_profiling_abi
  use m_errors
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API, only: createWavefunctionsDescriptors, orbitals_descriptors, &
        & orbitals_communicators, allocate_diis_objects, &
        & input_variables, check_linear_and_create_Lzd, check_communications, &
@@ -83,7 +83,7 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
  real(dp),intent(in) :: rprimd(3,3),xred(3,natom)
 
 !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 !scalars
  integer :: ii,idata, norb, norbu, norbd
  logical :: parallel
@@ -96,7 +96,7 @@ subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, n
 
 ! *********************************************************************
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
  parallel = (nproc > 1)
 

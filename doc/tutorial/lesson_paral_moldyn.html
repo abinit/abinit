@@ -144,7 +144,7 @@ maximum. Look at the output file. For each iteration you will see the
 coordinates, the forces, the velocities and the kinetic and the total
 energy.</p>
 <p style="text-align: justify;">In addition, ABINIT should have
-generated a <span style="font-weight: bold;">HIST file</span>, which contains the whole history of the
+generated a <span style="font-weight: bold;">HIST.nc file</span>, which contains the whole history of the
 molecular dynamics simulation : atomic positions, velocities, primitive
 translations,
 stress tensor, energies... at each time step. This file will be used to
@@ -158,7 +158,7 @@ over the total number of steps :</p>
 we already performed 50 steps of molecular dynamics, the total number
 of time steps are now 100. So the first 50 iterations are from the
 previous calculation. You can check that by comparing <span style="color: red;">tmoldyn_01.out <span style="color: black;">and</span> </span><span style="color: red;">tmoldyn_01.outA<span style="color: black;">.
-There is only one <span style="font-weight: bold;">HIST file</span> and it contains the history of the two
+There is only one <span style="font-weight: bold;">HIST.nc file</span> and it contains the history of the two
 calculations.</span></span></p>
 <p style="text-align: justify;"><span style="color: red;"><span style="color: black;">Now we can calculate and plot several quantities. We need
 for that the <span style="font-style: italic; font-weight: bold;">diag_moldyn.py</span> python script. You can find it in the </span></span><i><span style="color: rgb(0, 102, 0);">~abinit/doc/tutorial/lesson_paral_moldyn</span></i><span style="color: red;"><span style="color: black;"> directory (link <a href="./lesson_paral_moldyn/diag_moldyn.py">here</a>).<br>
