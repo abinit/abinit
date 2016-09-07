@@ -40,7 +40,7 @@ subroutine wvl_cprjreorder(wvl,atm_indx)
  use defs_wvltypes
  use m_profiling_abi
  use m_errors
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API,only : cprj_objects,cprj_paw_alloc,cprj_clean
  use dynamic_memory
 #endif
@@ -60,7 +60,7 @@ subroutine wvl_cprjreorder(wvl,atm_indx)
  type(wvl_internal_type),intent(inout),target :: wvl
 
 !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 !scalars
  integer :: iexit,ii,jj,kk,n1atindx,n1cprj,n2cprj,ncpgr
  character(len=100) :: msg
@@ -74,7 +74,7 @@ subroutine wvl_cprjreorder(wvl,atm_indx)
  
  DBG_ENTER("COLL")
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  cprj => wvl%paw%cprj
 
  n1cprj=size(cprj,dim=1);n2cprj=size(cprj,dim=2)

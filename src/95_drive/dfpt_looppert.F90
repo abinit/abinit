@@ -145,7 +145,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_abi_etsf
  use m_nctk
  use m_ddb
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_hdr
@@ -1621,7 +1621,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 ! NB: phasecg not actually used in outgkk for the moment (2013/08/15)
      call outgkk(bantot_rbz, nmatel,gkkfilnam,eigen0,eigen1,hdr0,hdr,mpi_enreg,phasecg)
      ABI_DEALLOCATE(phasecg)
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
 
      ! Reshape eigen1 into gkk for netCDF output
      ABI_STAT_ALLOCATE(gkk,(2*dtset%mband*dtset%nsppol,dtset%nkpt,1,1,dtset%mband), ierr)
@@ -1980,7 +1980,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 !        Second order derivative EIGR2D (real and Im)
          call eigr2d_init(eig2nkq,eigr2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
          NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EIGR2D file")
          NCF_CHECK(crystal_ncwrite(Crystal, ncid))
          NCF_CHECK(ebands_ncwrite(Bands, ncid))
@@ -1994,7 +1994,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
            fname = strcat(dtfil%filnam_ds(4),"_EIGI2D.nc")
 !          Broadening EIGI2D (real and Im)
            call eigr2d_init(eigbrd,eigi2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
            NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EIGI2D file")
            NCF_CHECK(crystal_ncwrite(Crystal, ncid))
            NCF_CHECK(ebands_ncwrite(Bands, ncid))

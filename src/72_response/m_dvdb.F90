@@ -33,7 +33,7 @@ MODULE m_dvdb
  use m_xmpi
  use m_distribfft
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_hdr
@@ -2737,7 +2737,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
    write(std_out,"(a,i0,2a)")"- Reading header of file [",ii,"]: ",trim(v1files(ii))
 
    if (endswith(v1files(ii), ".nc")) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
       NCF_CHECK(nctk_open_read(units(ii), v1files(ii), xmpi_comm_self))
       call hdr_ncread(hdr1_list(ii),units(ii),fform)
 #endif
@@ -2788,7 +2788,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
         write(ount) (v1(ifft), ifft=1,cplex*nfft)
       end do
    else
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
       ! Netcdf IO
       ! netcdf array has shape [cplex, n1, n2, n3, nspden] 
       NCF_CHECK(nf90_inq_varid(units(ii), "first_order_potential", v1_varid))
@@ -2809,7 +2809,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
    if (.not. endswith(v1files(ii), ".nc")) then
      close(units(ii))
    else
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(units(ii)))
 #endif
    endif

@@ -643,7 +643,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
            if (nspden==4) then
              option=0;optxc=1
              call dfpt_mkvxc_noncoll(cplex,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum2,0,dum3,0,nkxc,&
-&             nkxc,nspden,n3xccc,2,option,optxc,dtset%paral_kgb,dtset%qptn,rhor,dum1,rprimd,0,&
+&             nkxc,nspden,n3xccc,1,option,optxc,dtset%paral_kgb,dtset%qptn,rhor,dum1,rprimd,0,&
 &             vxc10,xccc3d1_idir1)
            else
              call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum2,0,dum3,0,nkxc,&

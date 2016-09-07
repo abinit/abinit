@@ -76,7 +76,7 @@ iomode 3  # ETSF IO access
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_TRIO_ETSF_IO
+#%% need_cpp_vars = HAVE_ETSF_IO
 #%% [files]
 #%% files_to_test = 
 #%%   t18.out, tolnlines = 0, tolabs = 1.320e-10, tolrel = 1.174e-13

@@ -176,7 +176,7 @@ AC_DEFUN([ABI_CONNECT_MATH],[
         abi_math_serial="${abi_math_gsl_serial}"
         abi_math_mpi="${abi_math_gsl_mpi}"
         if test "${abi_math_serial}" = "yes"; then
-          AC_DEFINE([HAVE_MATH_GSL],1,[Define to 1 if you have the GNU Scientific Library.])
+          AC_DEFINE([HAVE_GSL],1,[Define to 1 if you have the GNU Scientific Library.])
           lib_math_fcflags="${abi_math_gsl_fcflags}"
           lib_math_ldflags="${abi_math_gsl_ldflags}"
           lib_math_incs="${abi_math_gsl_incs}"
@@ -189,7 +189,7 @@ AC_DEFUN([ABI_CONNECT_MATH],[
         abi_math_serial="${abi_math_mlib_serial}"
         abi_math_mpi="${abi_math_mlib_mpi}"
         if test "${abi_math_serial}" = "yes"; then
-          AC_DEFINE([HAVE_MATH_MLIB],1,[Define to 1 if you have the HP MLib Library.])
+          AC_DEFINE([HAVE_LINALG_MLIB],1,[Define to 1 if you have the HP MLib Library.])
           lib_math_fcflags="${abi_math_mlib_fcflags}"
           lib_math_ldflags="${abi_math_mlib_ldflags}"
           lib_math_incs="${abi_math_mlib_incs}"
@@ -203,19 +203,6 @@ AC_DEFUN([ABI_CONNECT_MATH],[
 
     esac
 
-  fi
-
-  dnl Transmit serial status to the source code
-  if test "${abi_math_serial}" = "yes"; then
-    AC_DEFINE([HAVE_MATH],1,[Define to 1 if you have an optimized math library.])
-    AC_DEFINE([HAVE_MATH_SERIAL],1,[Define to 1 if you have an optimized serial math library.])
-  elif test "${with_math_flavor}" != "none"; then
-    lib_math_flavor="broken"
-  fi
-
-  dnl Transmit MPI status to the source code
-  if test "${abi_math_mpi}" = "yes"; then
-    AC_DEFINE([HAVE_MATH_MPI],1,[Define to 1 if you have an optimized MPI-parallel math library.])
   fi
 
   dnl Restore build environment

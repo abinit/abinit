@@ -378,14 +378,14 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
            rhoaug1(2*i1-1,i2,i3,1)=rhoaug1(2*i1-1,i2,i3,1)+weight*((re0_up*re1_up+im0_up*im1_up)+&
 &           (re0_down*re1_down+im0_down*im1_down)) ! trace
            rhoaug1(2*i1  ,i2,i3,1)=zero ! imag part of rho at k
-           rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(2*i1-1,i2,i3,2)+weight*((re0_up*re1_up+im0_up*im1_up)-&
-&           (re0_down*re1_down+im0_down*im1_down)) ! m_z
-           rhoaug1(2*i1  ,i2,i3,2)=zero ! imag part of rho at k
-           rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(2*i1-1,i2,i3,3)+weight*((re0_up*re1_down+im0_up*im1_down)+&
+           rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(2*i1-1,i2,i3,2)+weight*((re0_up*re1_down+im0_up*im1_down)+&
 &           re0_down*re1_up+im0_down*im1_up) ! m_x
-           rhoaug1(2*i1  ,i2,i3,3)=zero ! imag part of rho at k
-           rhoaug1(2*i1-1,i2,i3,4)=rhoaug1(2*i1-1,i2,i3,4)+weight*((-re1_up*im0_down+im1_up*re0_down)&
+           rhoaug1(2*i1  ,i2,i3,2)=zero ! imag part of rho at k
+           rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(2*i1-1,i2,i3,3)+weight*((-re1_up*im0_down+im1_up*re0_down)&
 &           -re0_up*im1_down+im0_up*re1_down) ! m_y
+           rhoaug1(2*i1  ,i2,i3,3)=zero ! imag part of rho at k
+           rhoaug1(2*i1-1,i2,i3,4)=rhoaug1(2*i1-1,i2,i3,4)+weight*((re0_up*re1_up+im0_up*im1_up)-&
+&           (re0_down*re1_down+im0_down*im1_down)) ! m_z
            rhoaug1(2*i1  ,i2,i3,4)=zero ! imag part of rho at k
          end do
        end do
@@ -402,12 +402,12 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
            re1_down=wfraug1_down(1,i1,i2,i3) ; im1_down=wfraug1_down(2,i1,i2,i3)
            rhoaug1(i1,i2,i3,1)=rhoaug1(i1,i2,i3,1)+weight*((re0_up*re1_up+im0_up*im1_up)+&
 &           (re0_down*re1_down+im0_down*im1_down)) ! n
-           rhoaug1(i1,i2,i3,2)=rhoaug1(i1,i2,i3,2)+weight*((re0_up*re1_up+im0_up*im1_up)-&
-&           (re0_down*re1_down+im0_down*im1_down)) ! m_z
-           rhoaug1(i1,i2,i3,3)=rhoaug1(i1,i2,i3,3)+weight*((re0_up*re1_down+im0_up*im1_down)+&
+           rhoaug1(i1,i2,i3,2)=rhoaug1(i1,i2,i3,2)+weight*((re0_up*re1_down+im0_up*im1_down)+&
 &           re0_up*re1_down+im0_down*im1_up)     ! m_x
-           rhoaug1(i1,i2,i3,4)=rhoaug1(i1,i2,i3,4)+weight*((-re1_up*im0_down+im1_up*re0_down)+&
+           rhoaug1(i1,i2,i3,3)=rhoaug1(i1,i2,i3,3)+weight*((-re1_up*im0_down+im1_up*re0_down)+&
 &           (-re0_up*im1_down+im0_up*re1_down)) ! m_y
+           rhoaug1(i1,i2,i3,4)=rhoaug1(i1,i2,i3,4)+weight*((re0_up*re1_up+im0_up*im1_up)-&
+&           (re0_down*re1_down+im0_down*im1_down)) ! m_z
          end do
        end do
      end do
