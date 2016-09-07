@@ -99,7 +99,7 @@ subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
 !Local variables-------------------------------
 !scalars
  integer :: flag,iband,icg,ierr,ikg,ikg1,ikpt,ikpt2,ikpt_loc,ikpt_rbz
- integer :: index,ineigh,ipw,isppol,jpw,nband_k,nband_occ,nband_occ_k,npw_k
+ integer :: index,ineigh,ipw,isppol,jpw,nband_k,mband_occ,mband_occ_k,npw_k
  integer :: npw_k1,orig,spaceComm
  real(dp) :: ecut_eff,sdeg
  character(len=500) :: message
@@ -164,15 +164,15 @@ subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
  do isppol = 1, nsppol
    do ikpt = 1, nkpt2
 
-     nband_occ_k = 0
+     mband_occ_k = 0
      nband_k = nband(ikpt + (isppol - 1)*nkpt2)
 
      do iband = 1, nband_k
        index = index + 1
-       if (abs(occ(index) - sdeg) < tol8) nband_occ_k = nband_occ_k + 1
+       if (abs(occ(index) - sdeg) < tol8) mband_occ_k = mband_occ_k + 1
      end do
 
-     if (nband_k /= nband_occ_k) then
+     if (nband_k /= mband_occ_k) then
        write(message,'(a,a,a)')&
 &       '  In a non-linear response calculation, nband must be equal ',ch10,&
 &       '  to the number of valence bands.'
@@ -181,12 +181,12 @@ subroutine initmv(cgindex,dtset,gmet,kg,kneigh,kg_neigh,kptindex,&
 
 !    Note that the number of bands can be different for spin up and spin down
      if (ikpt > 1) then
-       if (nband_occ /= nband_occ_k) then
+       if (mband_occ /= mband_occ_k) then
          message = 'The number of valence bands is not the same for every k-point'
          MSG_ERROR(message)
        end if
      else
-       nband_occ = nband_occ_k
+       mband_occ = mband_occ_k
      end if
 
    end do                ! close loop over ikpt

@@ -498,7 +498,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  !   They are used to dimension the wavefunctions and to calculate the matrix elements.
  !
  if (Dtset%nkptgw==0) then
-   ! Automatic selection of k-points and bands for the corrections.
+   call wrtout(std_out, "nkptgw == 0 ==> Automatic selection of k-points and bands for the corrections.")
    if (gap_err /=0 .and. Dtset%gw_qprange==0) then
      msg = "Problem while computing the fundamental and optical gap (likely metal). Will replace gw_qprange=0 with gw_qprange=1"
      MSG_WARNING(msg)
