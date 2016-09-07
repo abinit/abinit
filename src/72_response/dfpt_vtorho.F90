@@ -419,7 +419,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
  call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=1)
  if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
-   call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamk_dir2)
+   call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamk_dir2,has_e1kbsc=1)
  end if
 
 !PAW:allocate memory for non-symetrized 1st-order occupancies matrix (pawrhoij1)
@@ -463,7 +463,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
    if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
      call load_spin_rf_hamiltonian(rf_hamk_dir2,gs_hamkq,isppol,paw_ij1=paw_ij1,&
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-     if (ipert==natom+11) then
+     if (ipert==natom+11) then ! load vlocal1
        call load_spin_rf_hamiltonian(rf_hamk_dir2,gs_hamkq,isppol,vlocal1=vlocal1,&
        comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
      end if

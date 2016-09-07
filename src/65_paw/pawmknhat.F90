@@ -179,7 +179,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
  end if
 
 !nhat1 does not have to be computed for ddk or d2dk
- if (ipert==natom+1.or.ipert==natom+10.or.ipert==natom+11) return
+ if (ipert==natom+1.or.ipert==natom+10) return
 
 !Set up parallelism over atoms
  paral_atom=(present(comm_atom).and.(my_natom/=natom))
