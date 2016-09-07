@@ -21,14 +21,11 @@
 !! INPUTS
 !!  cwavef(2,npw*nspinor)=input wavefunction, in reciprocal space
 !!  cwaveprj(natom,nspinor*usecprj)=<p_lmn|C> coefficients for wavefunction |C>
-!!  ddkinpw(npw)=derivative of the (modified) kinetic energy for each plane wave at k (Hartree)
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian
 !!  idir=direction of the perturbation
 !!  ipert=type of the perturbation
 !!  lambda=real use to apply H^(2)-lambda.S^(2)
 !!  mpi_enreg=information about MPI parallelization
-!!  natom=number of atoms in unit cell.
-!!  npw,npw1=number of planewaves in basis sphere (should be identical as q=0)
 !!  optlocal=0: local part of H^(2) is not computed in gh2c=<G|H^(2)|C>
 !!           1: local part of H^(2) is computed in gh2c=<G|H^(2)|C>
 !!  optnl=0: non-local part of H^(2) is not computed in gh2c=<G|H^(2)|C>
@@ -42,13 +39,13 @@
 !!  usevnl=1 if gvnl2=(part of <G|K^(2)+Vnl^(2)-lambda.S^(2)|C> not depending on VHxc^(2)) has to be input/output
 !!
 !! OUTPUT
-!! gh2c(2,npw*nspinor)= <G|H^(2)|C> or  <G|H^(2)-lambda.S^(2)|C>
+!! gh2c(2,npw1*nspinor)= <G|H^(2)|C> or  <G|H^(2)-lambda.S^(2)|C>
 !!                     (only kinetic+non-local parts if optlocal=0)
 !! if (usevnl==1)
 !!  gvnl2(2,npw1*nspinor)=  part of <G|K^(2)+Vnl^(2)|C> not depending on VHxc^(2)              (sij_opt/=-1)
 !!                       or part of <G|K^(2)+Vnl^(2)-lambda.S^(2)|C> not depending on VHxc^(2) (sij_opt==-1)
 !! if (sij_opt=1)
-!!  gs2c(2,npw*nspinor)=<G|S^(2)|C> (S=overlap).
+!!  gs2c(2,npw1*nspinor)=<G|S^(2)|C> (S=overlap).
 !!
 !! PARENTS
 !!      m_rf2
@@ -245,7 +242,12 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
        gvnl2_(:,ipw)=zero
      end do
    end if
-   if (sij_opt/=0) gs2c=zero
+   if (sij_opt/=0) thew
+ !$OMP PARALLEL DO
+     do ipw=1,npw1*my_nspinor
+       gs2c(:,ipw)=zero
+     end do
+   end if
 
  end if
 
