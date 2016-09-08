@@ -453,6 +453,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !    At this stage, the 1st order function cwavef is orthogonal to cgq (unlike
 !    when it is input to dfpt_cgwf). Here, restore the "active space" content
 !    of the first-order wavefunction, to give cwave1.
+!    PAW: note that dcwavef (1st-order change of WF due to overlap change)
+!         remains in the subspace orthogonal to cgq
        call corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc_k,eig1_k,fermie1,gh0c1,&
 &       iband,ibgq,icgq,gs_hamkq%istwf_k,mcgq,mcprjq,mpi_enreg,natom,nband_k,npw1_k,nspinor,&
 &       occ_k,rocceig,0,gs_hamkq%usepaw,tocceig)

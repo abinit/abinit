@@ -151,7 +151,7 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc,eig1,fe
        facti= rocceig(ibandkq,iband)*invocc*eig1(index_eig1+1)
 
 !      Apply correction to 1st-order WF
-!$OMP PARALLEL DO PRIVATE(ii) SHARED(cgq,cwave1,cwavef,cwcorr,facti,factr,index_cgq,npw1,nspinor)
+!$OMP PARALLEL DO PRIVATE(ii) SHARED(cgq,cwave1,facti,factr,index_cgq,npw1,nspinor)
        do ii=1,npw1*nspinor
          cwave1(1,ii)=cwave1(1,ii)+(factr*cgq(1,ii+index_cgq)-facti*cgq(2,ii+index_cgq))
          cwave1(2,ii)=cwave1(2,ii)+(facti*cgq(1,ii+index_cgq)+factr*cgq(2,ii+index_cgq))
@@ -173,7 +173,9 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc,eig1,fe
 !In the PAW case, compute <Psi^(1)_ortho|H-Eig0_k.S|Psi^(1)_parallel> contribution to 2DTE
  if (usepaw==1.and.wf_corrected==1) then
    ABI_ALLOCATE(cwcorr,(2,npw1*nspinor))
-   cwcorr=cwave1-cwavef
+!$OMP WORKSHARE
+   cwcorr(:,:)=cwave1(:,:)-cwavef(:,:)
+!$OMP END WORKSHARE
    call dotprod_g(factr,facti,istwf_k,npw1*nspinor,1,cwcorr,ghc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
    edocc(iband)=edocc(iband)+four*factr
    ABI_DEALLOCATE(cwcorr)
