@@ -674,14 +674,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      occ_pert(:) = occ(:) - occ(1)
      maxocc = maxval(abs(occ_pert))
      if (maxocc>1.0d-6.and.abs(maxocc-occ(1))>1.0d-6) then ! True if non-zero occupation numbers are not equal
-       write(message, '(3a)' ),' ipert=natom+10 or 11 does not work for a metallic system.',ch10,&
+       write(message, '(3a)' ) ' ipert=natom+10 or 11 does not work for a metallic system.',ch10,&
        ' This perturbation will not be computed.'
        MSG_WARNING(message)
        ABI_DEALLOCATE(occ_pert)
        cycle
      end if
      if (ipert==dtset%natom+11.and.minval(occ)<1.0d-6) then
-       write(message, '(3a)' ),' ipert=natom+11 does not work with empty bands.',ch10,&
+       write(message, '(3a)' ) ' ipert=natom+11 does not work with empty bands.',ch10,&
        ' This perturbation will not be computed.'
        MSG_WARNING(message)
        ABI_DEALLOCATE(occ_pert)
