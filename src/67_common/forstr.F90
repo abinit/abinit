@@ -342,7 +342,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
      end do
    end if
    ucvol_=ucvol
-#  if defined HAVE_DFT_BIGDFT
+#  if defined HAVE_BIGDFT
    ucvol_=product(wvl%den%denspot%dpbox%hgrids)*real(product(wvl%den%denspot%dpbox%ndims),dp)
 #  endif
    optgr=optfor;optgr2=0;optstr=stress_needed;optstr2=0

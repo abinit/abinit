@@ -381,7 +381,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !  wvlbigdft indicates that the BigDFT workflow will be followed
    wvlbigdft=(dtset%wvl_bigdft_comp==1)
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 !  Transform to KS orbitals
 
 !  Need xcart
@@ -858,7 +858,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &         comm_fft=spaceComm_fft,distribfft=mpi_enreg%distribfft)
        else
          shft=0
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
          shft=wvl%descr%Glr%d%n1i*wvl%descr%Glr%d%n2i*wvl%den%denspot%dpbox%nscatterarr(mpi_enreg%me_wvl,4)
          call wvl_nhatgrid(atindx1,wvl%descr%atoms%astruct%geocode,&
 &         wvl%descr%h,wvl%den%denspot%dpbox%i3s,dtset%natom,dtset%natom,&

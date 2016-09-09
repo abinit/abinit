@@ -96,7 +96,7 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 
  use m_pawtab, only : pawtab_type
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API, only : ELECTRONIC_DENSITY
  use m_abi2big, only : wvl_rho_abi2big
 #endif

@@ -313,7 +313,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
 &           ucvol,vxc,psps%xcccrc,psps%xccc1d,xccc3d_dum,xred,pawrad,pawtab,psps%usepaw)
      else if (psps%usewvl==1.and.psps%usepaw==1) then
        ucvol_local=ucvol
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 !        ucvol_local=product(wvl_den%denspot%dpbox%hgrids)*real(product(wvl_den%denspot%dpbox%ndims),dp)
 !        call mkcore_wvl_old(atindx1,dummy6,dyfrx2_dum,wvl%atoms%astruct%geocode,grxc,wvl%h,dtset%natom,&
 ! &           nattyp,nfft,wvl_den%denspot%dpbox%nscatterarr(mpi_enreg%me_wvl,:),dtset%nspden,ntypat,&

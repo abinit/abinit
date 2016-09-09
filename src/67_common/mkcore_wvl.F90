@@ -84,7 +84,7 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
  use m_pawtab, only : pawtab_type
 
  use defs_wvltypes
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API, only : PSPCODE_PAW,ind_positions
 #endif
 
@@ -116,7 +116,7 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
  type(pawtab_type),intent(in) :: pawtab(:)
 
 !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 !scalars
  integer :: iat,iatm,iatom,iex,iey,iez,ind,ioffset,ipts,isx,isy,isz,itypat
  integer :: iwarn=0,i1,i2,i3,i3s,j1,j2,j3,jj,jpts,me_wvl,mu,nproc_wvl
@@ -137,7 +137,7 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
 
 !************************************************************************
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
  call timab(12,1,tsec)
 

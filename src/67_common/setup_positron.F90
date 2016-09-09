@@ -116,7 +116,6 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
  use defs_basis
  use defs_datatypes
  use defs_abitypes
- use defs_wvltypes
  use m_efield
  use m_errors
  use m_profiling_abi
@@ -135,6 +134,8 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
  use m_pawfgr,   only : pawfgr_type
  use m_fock,     only : fock_type
+
+ use defs_wvltypes, only : wvl_data
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -219,11 +220,15 @@ type(fock_type),pointer, intent(inout) :: fock
 
 !Compatibility tests
  if (dtset%positron==0) then
-   MSG_BUG('Not valid for dtset%positron=0 !')
+   MSG_BUG('Not valid for dtset%positron=0!')
  end if
 
  if (istep>1.and.nfft/=electronpositron%nfft) then
    MSG_BUG('Invalid value for nfft!')
+ end if
+
+ if (dtset%usewvl==1) then
+   MSG_BUG('Not valid for wavelets!')
  end if
 
  if (dtset%positron==1) then

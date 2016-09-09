@@ -447,7 +447,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !  ABI_ALLOCATE(energies_wvl,)
 !end if
  ucvol_local = ucvol
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  if (dtset%usewvl == 1) then
 !  We need to tune the volume when wavelets are used because, not
 !  all FFT points are used.

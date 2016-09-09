@@ -938,9 +938,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
        ! Read density
        rdwrpaw=psps%usepaw; if(dtfil%ireadwf/=0) rdwrpaw=0
-       call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
-       mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr)
-       results_gs%etotal = hdr_den%etot; call hdr_free(hdr_den)
+       if (dtset%usewvl==0) then
+         call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
+         mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr)
+         results_gs%etotal = hdr_den%etot; call hdr_free(hdr_den)
+       else
+         call ioarr(accessfil,rhor,dtset,results_gs%etotal,fformr,dtfil%fildensin,hdr,&
+&         mpi_enreg,ngfftf,cplex1,nfftf,pawrhoij,rdwr,rdwrpaw,wvl%den)
+       end if
 
        if (rdwrpaw/=0) then
          call hdr_update(hdr,bantot,etot,fermie,residm,&
