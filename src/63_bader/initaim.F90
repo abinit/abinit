@@ -325,10 +325,10 @@ subroutine initaim(aim_dtset,znucl_batom)
      ! add check on zion wrt FHI .fc file
      ! compare zion to zionpsp(typat(aim_dtset%batom))
      if (abs(znucl(ii) - zz - zionpsp(ii)) > 1.e-1_dp) then
-        write (*,*) 'error: your core charge ', zz, ' does not correspond to the correct number'
-        write (*,*) ' of valence electrons', zionpsp(ii), ' and the nuclear charge ', znucl(ii)
-        write (*,*) ' You have probably used a pseudopotential which has more valence electrons than the'
-        write (*,*) ' original FHI ones. ACTION: make a .fc file with the correct core charge'
+        write (std_out,*) 'error: your core charge ', zz, ' does not correspond to the correct number'
+        write (std_out,*) ' of valence electrons', zionpsp(ii), ' and the nuclear charge ', znucl(ii)
+        write (std_out,*) ' You have probably used a pseudopotential which has more valence electrons than the'
+        write (std_out,*) ' original FHI ones. ACTION: make a .fc file with the correct core charge'
         stop
      end if
 
