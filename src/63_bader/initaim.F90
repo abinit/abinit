@@ -62,7 +62,7 @@ subroutine initaim(aim_dtset,znucl_batom)
  use m_profiling_abi
  use m_errors
  use m_xmpi
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_hdr
@@ -87,10 +87,11 @@ subroutine initaim(aim_dtset,znucl_batom)
  integer,parameter :: master=0
  integer :: fform0,id,ierr,ii,info,jj,kk,kod,mm,ndtmax,nn,nsa,nsb,nsc,nsym,me,nproc,npsp
  integer :: unth,comm
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: den_id
 #endif
  real(dp) :: ss,ucvol,znucl_batom
+ real(dp) :: zz
  type(hdr_type) :: hdr
 !arrays
  integer :: ipiv(3)
@@ -162,7 +163,7 @@ subroutine initaim(aim_dtset,znucl_batom)
 
  if(me==master)then
    if (aim_iomode == IO_MODE_ETSF) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      ! netcdf array has shape [cplex, n1, n2, n3, nspden]), here we read only the total density.
      NCF_CHECK(nf90_inq_varid(untad, "density", den_id))
      NCF_CHECK(nf90_get_var(untad, den_id, dvl, start=[1,1,1,1], count=[1, ngfft(1), ngfft(2), ngfft(3), 1]))
@@ -304,15 +305,33 @@ subroutine initaim(aim_dtset,znucl_batom)
      unth=unt+ii
      do jj=1,ndat(ii)
        read(unth,*) rrad(jj,ii),crho(jj,ii),sp2(jj,ii),sp3(jj,ii)
-       crho(jj,ii)=crho(jj,ii)/4._dp/pi
-       if ((crho(jj,ii) < aim_rhocormin).and.(corlim(ii)==0)) corlim(ii)=jj
+       ! this is the integral of the core charge read in
+       crho(jj,ii) = crho(jj,ii)/4._dp/pi
+       if ((crho(jj,ii) < aim_rhocormin) .and. (corlim(ii)==0)) corlim(ii)=jj
        sp2(jj,ii)=sp2(jj,ii)/4._dp/pi
        sp3(jj,ii)=sp3(jj,ii)/4._dp/pi   ! ATENTION!!! in sp3 is just second derivation
      end do
      do jj=1,ndat(ii)-1
        sp4(jj,ii)=(sp3(jj+1,ii)-sp3(jj,ii))/(6._dp*(rrad(jj+1,ii)-rrad(jj,ii)))
      end do
+     !
+     zz = crho(1,ii) * rrad(1,ii)**2 * (rrad(2,ii)-rrad(1,ii))
+     do jj=2,ndat(ii)-1
+       zz = zz + crho(jj,ii) * rrad(jj,ii)**2 * (rrad(jj+1,ii)-rrad(jj-1,ii))
+     end do
+     zz = zz * half * 4._dp * pi
      if (corlim(ii)==0) corlim(ii)=ndat(ii)
+
+     ! add check on zion wrt FHI .fc file
+     ! compare zion to zionpsp(typat(aim_dtset%batom))
+     if (abs(znucl(ii) - zz - zionpsp(ii)) > 1.e-1_dp) then
+        write (std_out,*) 'error: your core charge ', zz, ' does not correspond to the correct number'
+        write (std_out,*) ' of valence electrons', zionpsp(ii), ' and the nuclear charge ', znucl(ii)
+        write (std_out,*) ' You have probably used a pseudopotential which has more valence electrons than the'
+        write (std_out,*) ' original FHI ones. ACTION: make a .fc file with the correct core charge'
+        stop
+     end if
+
    end do
  end if
  call xmpi_bcast(rrad,master,comm,ierr)
@@ -323,6 +342,7 @@ subroutine initaim(aim_dtset,znucl_batom)
  call xmpi_bcast(corlim,master,comm,ierr)
 
  write(std_out,*)ch10,' initaim : the core densities have been read' ,ch10
+
 
 !CORRECTION OF THE CORE DENSITY NORMALISATION
  crho(:,:)=1.0003*crho(:,:)

@@ -236,6 +236,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim
  use m_pawdij,   only : pawdij, pawdijfr, symdij
  use m_pawfgr,   only : pawfgr_type
+ use m_rf2,      only : rf2_getidirs
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -333,7 +334,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !scalars
  integer,parameter :: level=12,response=1
  integer :: afford,choice,cplex_rhoij,dbl_nnsclo
- integer :: has_dijfr,iatom,ider,ierr,iexit,errid,denpot
+ integer :: has_dijfr,iatom,ider,idir_dum,idir_paw1,ierr,iexit,errid,denpot
  integer :: iprcel,iscf10_mod,iscf_mod,ispden,ispmix
  integer :: istep,itypat,izero,lmn2_size,me,mgfftdiel,mvdum
  integer :: nfftdiel,nfftmix,nfftotf,nhat1grdim,npawmix,npwdiel,nspden_rhoij,nstep,nzlmopt
@@ -350,6 +351,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  character(len=fnlen) :: fi1o
  type(ab7_mixing_object) :: mix
  type(efield_type) :: dtefield
+
 !arrays
  integer :: ngfftmix(18)
  integer,allocatable :: dimcprj(:),pwindall(:,:,:)
@@ -464,7 +466,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    call paw_an_nullify(paw_an1)
    call paw_ij_nullify(paw_ij1)
 
-   has_dijfr=0;if (ipert/=dtset%natom+1.and.ipert/=dtset%natom+10.and.ipert/=dtset%natom+11) has_dijfr=1
+   has_dijfr=0;if (ipert/=dtset%natom+1.and.ipert/=dtset%natom+10) has_dijfr=1
    call paw_an_init(paw_an1,dtset%natom,dtset%ntypat,0,dtset%nspden,cplex,dtset%pawxcdev,&
 &   dtset%typat,pawang,pawtab,has_vxc=1,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
@@ -627,14 +629,18 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !    ----------------------------------------------------------------------
      if (psps%usepaw==1) then
        optfr=0
-       call pawdijfr(cplex,gprimd,idir,ipert,my_natom,dtset%natom,nfftf,ngfftf,nspden,&
+       idir_paw1 = idir
+       if (ipert==dtset%natom+11) then
+         call rf2_getidirs(idir,idir_dum,idir_paw1)
+       end if
+       call pawdijfr(cplex,gprimd,idir_paw1,ipert,my_natom,dtset%natom,nfftf,ngfftf,nspden,&
 &       psps%ntypat,optfr,paw_ij1,pawang,pawfgrtab,pawrad,pawtab,qphon,&
 &       rprimd,ucvol,vpsp1,vtrial,vxc,xred,&
 &       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
        if ((iscf_mod>=0.or.usexcnhat==0).and.(dtset%pawstgylm/=0)) then
          ider=0;if ((ipert<=dtset%natom).and.(use_nhat_gga)) ider=1
-         call pawnhatfr(ider,idir,ipert,my_natom,dtset%natom,nspden,psps%ntypat,&
+         call pawnhatfr(ider,idir_paw1,ipert,my_natom,dtset%natom,nspden,psps%ntypat,&
 &         pawang,pawfgrtab,pawrhoij,pawtab,rprimd,&
 &         mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
        end if
@@ -644,7 +650,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !    ----------------------------------------------------------------------
      nhat1grdim=0
      ABI_ALLOCATE(nhat1gr,(0,0,0))
-     if (psps%usepaw==1.and.ipert/=dtset%natom+1.and.ipert/=dtset%natom+10.and.ipert/=dtset%natom+11) then
+     if (psps%usepaw==1.and.ipert/=dtset%natom+1.and.ipert/=dtset%natom+10) then
        call timab(564,1,tsec)
        nhat1grdim=0;if (dtset%xclevel==2) nhat1grdim=usexcnhat*dtset%pawnhatxc
        ider=2*nhat1grdim;izero=0
@@ -652,7 +658,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
          ABI_DEALLOCATE(nhat1gr)
          ABI_ALLOCATE(nhat1gr,(cplex*nfftf,dtset%nspden,3*nhat1grdim))
        end if
-       call pawmknhat(dum,cplex,ider,idir,ipert,izero,gprimd,my_natom,dtset%natom,&
+       call pawmknhat(dum,cplex,ider,idir_paw1,ipert,izero,gprimd,my_natom,dtset%natom,&
 &       nfftf,ngfftf,nhat1grdim,nspden,psps%ntypat,pawang,pawfgrtab,nhat1gr,nhat1,&
 &       pawrhoij1,pawrhoij,pawtab,qphon,rprimd,ucvol,dtset%usewvl,xred,&
 &       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)

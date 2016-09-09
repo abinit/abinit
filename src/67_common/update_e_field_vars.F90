@@ -206,7 +206,7 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 &   dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,&
 &   mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,nattyp,dtset%nband,&
 &   dtset%natom,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
-&   dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,&
+&   dtset%nsppol,dtset%ntypat,3,dtset%paral_kgb,ph1d,psps,rmet,&
 &   dtset%typat,ucvol,dtfil%unpaw,useylmgr,xred,ylm,ylmgr)
    ABI_DEALLOCATE(ph1d)
  else 

@@ -3,6 +3,7 @@
 .directory
 .tox
 .idea
+.*.sw[op]
 __pycache__
 Makefile.am
 Makefile.in

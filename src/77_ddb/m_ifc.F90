@@ -40,7 +40,7 @@ MODULE m_ifc
 &                          make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, symdm9, nanal9, gtdyn9, dymfz9
  use m_ddb,         only : ddb_type
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -1121,7 +1121,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 &   '  NOTE: Open file ifcinfo.out, for the output of interatomic force constants. This is because prt_ifc==1. '
  end if
   
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  ! initialize netcdf variables
  ncerr = nctk_def_dims(ncid, [nctkdim_t("natifc", SUM(atifc)), nctkdim_t("number_of_r_points_big_box", Ifc%nrpt), &
    nctkdim_t("number_of_atoms_big_box", Ifc%natom*Ifc%nrpt), nctkdim_t("ifcout", ifcout1)], defmode=.True.)
@@ -1201,7 +1201,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
        end do
      end if
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_put_var(ncid, vid("ifc_atoms_indices"), ia, start=(/iatifc/)))
      NCF_CHECK(nf90_put_var(ncid, vid("ifc_neighbours_indices"), indngb, start=(/1,iatifc/), count=(/ifcout1,1/)))
      NCF_CHECK(nf90_put_var(ncid, vid("ifc_distances"), wkdist(:ifcout1), start=(/1,iatifc/),count=(/ifcout1,1/)))
@@ -1236,7 +1236,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
  ABI_FREE(list)
  ABI_FREE(wkdist)
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
 contains
  integer function vid(vname) 
 

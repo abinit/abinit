@@ -255,7 +255,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  ABI_ALLOCATE(cwavef,(2,npw1_k*nspinor))
  ABI_ALLOCATE(cwave1,(2,npw1_k*nspinor))
  ABI_ALLOCATE(gh1c_n,(2,npw1_k*nspinor))
- if (gs_hamkq%usepaw==1)  then
+ if (gs_hamkq%usepaw==1) then
    ABI_ALLOCATE(gsc,(2,npw1_k*nspinor))
  else
    ABI_ALLOCATE(gsc,(0,0))
@@ -331,7 +331,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
 !For rf2 perturbation :
  if(ipert==natom+10.or.ipert==natom+11) then
-   call rf2_init(cg,rf2,dtset,eig0_k,eig1_k,gs_hamkq,icg,idir,ikpt,ipert,isppol,mkmem,&
+   call rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,ikpt,ipert,isppol,mkmem,&
    mpi_enreg,mpw,nband_k,nsppol,rf_hamkq,rf_hamk_dir2,occ_k,rocceig,wffddk,ddk_f)
  end if
 
@@ -359,7 +359,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
    call cg_zcopy(npw_k*nspinor,cg(1,ptr),cwave0)
 
 !  Get PAW ground state projected WF (cprj)
-   if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1) then
+   if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1.and.ipert/=natom+10.and.ipert/=natom+11) then
      idir0 = idir
      if(ipert==natom+3.or.ipert==natom+4) idir0 =1
      call pawcprj_get(gs_hamkq%atindx1,cwaveprj0,cprj,natom,iband,ibg,ikpt,iorder_cprj,&
@@ -453,6 +453,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !    At this stage, the 1st order function cwavef is orthogonal to cgq (unlike
 !    when it is input to dfpt_cgwf). Here, restore the "active space" content
 !    of the first-order wavefunction, to give cwave1.
+!    PAW: note that dcwavef (1st-order change of WF due to overlap change)
+!         remains in the subspace orthogonal to cgq
        call corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc_k,eig1_k,fermie1,gh0c1,&
 &       iband,ibgq,icgq,gs_hamkq%istwf_k,mcgq,mcprjq,mpi_enreg,natom,nband_k,npw1_k,nspinor,&
 &       occ_k,rocceig,0,gs_hamkq%usepaw,tocceig)
@@ -565,11 +567,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !======================================================================
 
 !For rf2 perturbation
- if(ipert==natom+10.or.ipert==natom+11) then
-!   write(message,'(a)') ' m_rf2 : free'
-!   call wrtout(std_out,msg,'COLL')
-   call rf2_destroy(rf2)
- end if
+ if(ipert==natom+10.or.ipert==natom+11) call rf2_destroy(rf2)
 
 !Find largest resid over bands at this k point
  residk=maxval(resid_k(:))
