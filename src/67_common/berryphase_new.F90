@@ -248,7 +248,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 
 !allocate(pwind_k(mpw))
  ABI_ALLOCATE(pwnsfac_k,(4,mpw))
- ABI_ALLOCATE(sflag_k,(dtefield%nband_occ))
+ ABI_ALLOCATE(sflag_k,(dtefield%mband_occ))
 !pwind_k(:) = 0
  pwnsfac_k(1,:) = 1.0_dp ! bra real
  pwnsfac_k(2,:) = 0.0_dp ! bra imag
@@ -287,7 +287,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
  berrystep=dtset%berrystep
  ABI_ALLOCATE(ikpt3,(berrystep))
  ABI_ALLOCATE(ikpt3i,(berrystep))
- ABI_ALLOCATE(sflag_k_mult,(dtefield%nband_occ,berrystep))
+ ABI_ALLOCATE(sflag_k_mult,(dtefield%mband_occ,berrystep))
  ABI_ALLOCATE(npw_k3,(berrystep))
  ABI_ALLOCATE(pwind_k_mult,(mpw,berrystep))
  ABI_ALLOCATE(itrs_mult,(berrystep))
@@ -402,7 +402,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !ikpt = 3
 !npw_k = npwarr(ikpt)
 !isppol = 1
-!nband_k = dtefield%nband_occ
+!nband_k = dtefield%mband_occ
 !ABI_ALLOCATE(bra,(2,npw_k*my_nspinor))
 !ABI_ALLOCATE(ket,(2,npw_k*my_nspinor))
 !max_err_ovlp=0.0
@@ -468,7 +468,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 
  pel(:) = zero ; pelev(:)=zero ; pion(:) = zero ; ptot(:)=zero ; red_ptot(:)=zero
 
- minbd = 1   ;  maxbd = dtefield%nband_occ
+ minbd = 1   ;  maxbd = dtefield%mband_occ
 
  if(calc_epaw3_force) dtefield%epawf3(:,:,:) = zero
  if(calc_epaw3_stress) dtefield%epaws3(:,:,:) = zero
@@ -556,11 +556,11 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !      for each pair of k-points < u_nk | u_nk+dk >
 
        icg = 0 ; icg1 = 0
-       ABI_ALLOCATE(smat_k,(2,dtefield%nband_occ,dtefield%nband_occ))
-       ABI_ALLOCATE(smat_inv,(2,dtefield%nband_occ,dtefield%nband_occ))
-       ABI_ALLOCATE(smat_k_paw,(2,usepaw*dtefield%nband_occ,usepaw*dtefield%nband_occ))
+       ABI_ALLOCATE(smat_k,(2,dtefield%mband_occ,dtefield%mband_occ))
+       ABI_ALLOCATE(smat_inv,(2,dtefield%mband_occ,dtefield%mband_occ))
+       ABI_ALLOCATE(smat_k_paw,(2,usepaw*dtefield%mband_occ,usepaw*dtefield%mband_occ))
        if (calc_epaw3_force .or. calc_epaw3_stress) then ! dsdr needed for forces and stresses in electric field with PAW
-         ABI_ALLOCATE(dsdr,(2,natom,ncpgr,usepaw*dtefield%nband_occ,usepaw*dtefield%nband_occ))
+         ABI_ALLOCATE(dsdr,(2,natom,ncpgr,usepaw*dtefield%mband_occ,usepaw*dtefield%mband_occ))
          dsdr = zero
        end if
        
@@ -668,7 +668,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
            if (usepaw == 1) then
              icp1=dtefield%cprjindex(ikpt1i,isppol)
              call pawcprj_get(atindx1,cprj_k,cprj,natom,1,icp1,ikpt1i,0,isppol,&
-&             mband,mkmem,natom,dtefield%nband_occ,dtefield%nband_occ,&
+&             mband,mkmem,natom,dtefield%mband_occ,dtefield%mband_occ,&
 &             my_nspinor,nsppol,0,mpicomm=mpi_enreg%comm_kpt,&
 &             proc_distrb=mpi_enreg%proc_distrb)
 
@@ -677,7 +677,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
                call pawcprj_symkn(cprj_fkn,cprj_ikn,dtefield%atom_indsym,dimlmn,-1,indlmn,&
 &               dtefield%indkk_f2ibz(ikpt1,2),dtefield%indkk_f2ibz(ikpt1,6),&
 &               dtefield%fkptns(:,dtefield%i2fbz(ikpt1i)),&
-&               dtefield%lmax,dtefield%lmnmax,mband,natom,dtefield%nband_occ,my_nspinor,&
+&               dtefield%lmax,dtefield%lmnmax,mband,natom,dtefield%mband_occ,my_nspinor,&
 &               dtefield%nsym,ntypat,typat,dtefield%zarot)
                call pawcprj_copy(cprj_fkn,cprj_k)
              end if
@@ -751,7 +751,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
                  if (usepaw == 1) then
                    icp2=dtefield%cprjindex(ikpt3i(istep),isppol)
                    call pawcprj_get(atindx1,cprj_kb,cprj,natom,1,icp2,ikpt3i(istep),0,isppol,&
-&                   mband,mkmem,natom,dtefield%nband_occ,dtefield%nband_occ,my_nspinor,&
+&                   mband,mkmem,natom,dtefield%mband_occ,dtefield%mband_occ,my_nspinor,&
 &                   nsppol,0,mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
                  end if
 
@@ -823,7 +823,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
                    if (usepaw == 1) then
                      icp2=dtefield%cprjindex(jkpt2i,jsppol)
                      call pawcprj_get(atindx1,cprj_buf,cprj,natom,1,icp2,jkpt2i,0,jsppol,&
-&                     mband,mkmem,natom,dtefield%nband_occ,dtefield%nband_occ,&
+&                     mband,mkmem,natom,dtefield%mband_occ,dtefield%mband_occ,&
 &                     my_nspinor,nsppol,0,mpicomm=mpi_enreg%comm_kpt,&
 &                     proc_distrb=mpi_enreg%proc_distrb)
                    end if
@@ -857,7 +857,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 &                 dtefield%indkk_f2ibz(ikpt3(istep),2),dtefield%indkk_f2ibz(ikpt3(istep),6),&
 &                 dtefield%fkptns(:,dtefield%i2fbz(ikpt3i(istep))),&
 &                 dtefield%lmax,dtefield%lmnmax,mband,natom,&
-&                 dtefield%nband_occ,my_nspinor,dtefield%nsym,ntypat,typat,&
+&                 dtefield%mband_occ,my_nspinor,dtefield%nsym,ntypat,typat,&
 &                 dtefield%zarot)
                  call pawcprj_copy(cprj_fkn,cprj_kb)
                end if
@@ -883,7 +883,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 !            ENDDEBUG
              call smatrix(cg,cgq,cg1_k,ddkflag,dtm_k,icg,icg1,itrs_mult(istep),job,maxbd,&
 &             mcg,count,mcg1_k,minbd,&
-&             mpw,dtefield%nband_occ,&
+&             mpw,dtefield%mband_occ,dtefield%nband_occ(isppol),&
 &             npw_k1,npw_k3(istep),my_nspinor,pwind_k_mult(:,istep),pwnsfac_k,sflag_k_mult(:,istep),&
 &             shiftbd,smat_inv,smat_k,smat_k_paw,usepaw)
              
@@ -896,8 +896,8 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
                do iatom = 1, natom
                  do fdir = 1, 3
                    dsdr_sum(iatom,fdir,ikpt1+(isppol-1)*dtefield%fnkpt) = zero
-                   do iband = 1, dtefield%nband_occ
-                     do jband = 1, dtefield%nband_occ
+                   do iband = 1, dtefield%nband_occ(isppol)
+                     do jband = 1, dtefield%nband_occ(isppol)
 ! collect Im{Trace{S^{-1}.dS/dR}} for this k point
                        dsdr_sum(iatom,fdir,ikpt1+(isppol-1)*dtefield%fnkpt) = &
 &                       dsdr_sum(iatom,fdir,ikpt1+(isppol-1)*dtefield%fnkpt) + &
@@ -915,8 +915,8 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
                do iatom = 1, natom
                  do fdir = 1, 6
                    dsds_sum(iatom,fdir,ikpt1+(isppol-1)*dtefield%fnkpt) = zero
-                   do iband = 1, dtefield%nband_occ
-                     do jband = 1, dtefield%nband_occ
+                   do iband = 1, dtefield%nband_occ(isppol)
+                     do jband = 1, dtefield%nband_occ(isppol)
 ! collect Im{Trace{S^{-1}.dS/de}} for this k point
                        dsds_sum(iatom,fdir,ikpt1+(isppol-1)*dtefield%fnkpt) = &
 &                       dsds_sum(iatom,fdir,ikpt1+(isppol-1)*dtefield%fnkpt) + &

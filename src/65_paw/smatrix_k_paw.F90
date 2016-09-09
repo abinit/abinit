@@ -71,7 +71,7 @@
 
 !arrays
  integer,intent(in) :: typat(natom)
- real(dp),intent(out) :: smat_k_paw(2,dtefield%nband_occ,dtefield%nband_occ)
+ real(dp),intent(out) :: smat_k_paw(2,dtefield%mband_occ,dtefield%mband_occ)
 
 !Local variables---------------------------
 !scalars
@@ -95,8 +95,8 @@
        paw_onsite = cmplx(dtefield%qijb_kk(1,klmn,iatom,kdir),&
 &       dtefield%qijb_kk(2,klmn,iatom,kdir))
        if (kfor > 1) paw_onsite = conjg(paw_onsite)
-       do iband = 1, dtefield%nband_occ
-         do jband = 1, dtefield%nband_occ
+       do iband = 1, dtefield%mband_occ
+         do jband = 1, dtefield%mband_occ
            do ispinor = 1, nspinor
              ibs = nspinor*(iband-1) + ispinor
              jbs = nspinor*(jband-1) + ispinor
