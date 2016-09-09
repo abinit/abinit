@@ -1227,7 +1227,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
            opt_gvnl1=0;if (ipert1==dtset%natom+2) opt_gvnl1=2
            sij_opt=-1;if (has_dcwf) sij_opt=1
            if (usepaw==0) sij_opt=0
-           call getgh1c(berryopt,cwave0,cwaveprj0_idir1,gh1,dum1,gs1,gs_hamkq,gvnl1,idir1,ipert1,&
+           call getgh1c(berryopt,0,cwave0,cwaveprj0_idir1,gh1,dum1,gs1,gs_hamkq,gvnl1,idir1,ipert1,&
 &           lambda,mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
            if (sij_opt==1.and.optnl==1) gh1=gh1-lambda*gs1
            ABI_DEALLOCATE(gvnl1)
