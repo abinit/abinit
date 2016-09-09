@@ -3,6 +3,7 @@
 .directory
 .tox
 .idea
+.*.sw[op]
 __pycache__
 Makefile.am
 Makefile.in
@@ -24,6 +25,7 @@ robodoc.err
 robodoc.log
 tags
 testf.ac
+abiref.ac
 tmp
 tmp2
 auto-*.m4

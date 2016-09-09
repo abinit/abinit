@@ -1177,7 +1177,9 @@ ouput, but a single band and k-point index can be requested by using the variabl
 <br><font id="definition">Mnemonics: PAW - option for SPiN-ORBit coupling</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 0</font>
+<br><font id="default">Default is 1 if <a href="vargs.html#nspinor">nspinor</a>==2,
+0 otherwise.
+</font>
 <br><br><font id="requires">
 Only relevant if <a href="varint.html#usepaw">usepaw</a>==1
 </font>
@@ -1189,11 +1191,13 @@ Only relevant if <a href="varint.html#usepaw">usepaw</a>==1
  <b>
   spin-orbit coupling
  </b>
- can be added without the use
-of specific PAW datasets (pseudopotentials).
+ can be added without the use of specific PAW datasets (pseudopotentials). 
  <br />
  If <b>pawspnorb</b>=1, spin-orbit will be added.
  <br />
+ If the wavefunction is spinorial (that is, if <a href="vargs.html#nspinor">nspinor</a>=2),
+ there is no reason not to include the spin-orbit interaction, so that the default value of <b>pawspnorb</b>
+ becomes 1 when <a href="vargs.html#nspinor">nspinor</a>=2.
  <br />
  Note that only the all-electron "on-site" contribution to the Hamiltonian is taken into account;
 this is a very good approximation but requires the
@@ -1217,7 +1221,7 @@ contained in the PAW sphere
   <br />
  </div>
  <br />
- Also note that, when spin-orbit coupling is activated, the time-reversal symmetry might be broken.
+ Also note that, when spin-orbit coupling is activated and there is some magnetization <a href="vargs.html#nspden">nspden</a>=4, the time-reversal symmetry is broken.
  <br />
  The use of <a href="varbas.html#kptopt">kptopt</a>=1 or <a href="varbas.html#kptopt">kptopt</a>=2 is thus
 forbidden. It is advised to use <a href="varbas.html#kptopt">kptopt</a>=3 (no symmetry used to generate k-points)

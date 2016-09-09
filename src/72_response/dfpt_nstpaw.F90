@@ -11,7 +11,7 @@
 !! to non-stationnary 2nd-order total energy).
 !! Compared with NC-pseudopotentials, PAW contributions include:
 !!  - changes of the overlap between 0-order wave-functions,
-!!  - on-site contributions.
+!!  - on-site contributions.  
 !!
 !! COPYRIGHT
 !! Copyright (C) 2010-2016 ABINIT group (MT, AM)
@@ -573,6 +573,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      if (need_pawij10) then
        ABI_DATATYPE_ALLOCATE(paw_ij10,(my_natom,mdir1))
        ABI_ALLOCATE(e1kbfr,(rf_hamkq%dime1kb1,rf_hamkq%dime1kb2,nspinor**2,mdir1))
+     else
+       ABI_DATATYPE_ALLOCATE(paw_ij10,(0,0))
      end if
 
 !    LOOP OVER PERTURBATION DIRECTIONS
@@ -1225,7 +1227,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
            opt_gvnl1=0;if (ipert1==dtset%natom+2) opt_gvnl1=2
            sij_opt=-1;if (has_dcwf) sij_opt=1
            if (usepaw==0) sij_opt=0
-           call getgh1c(berryopt,cwave0,cwaveprj0_idir1,gh1,dum1,gs1,gs_hamkq,gvnl1,idir1,ipert1,&
+           call getgh1c(berryopt,0,cwave0,cwaveprj0_idir1,gh1,dum1,gs1,gs_hamkq,gvnl1,idir1,ipert1,&
 &           lambda,mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
            if (sij_opt==1.and.optnl==1) gh1=gh1-lambda*gs1
            ABI_DEALLOCATE(gvnl1)
@@ -1267,7 +1269,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !          If needed, compute here <delta_u^(j1)_k_i|H-Eps_k_i.S|u^(j2)_k_i>
 !          This is equal to <delta_u^(j1)_k_i|H-Eps_k_i.S|delta_u^(j2)_k_i>  (I)
-!          +<delta_u^(j1)_k_i|H-Eps_k_i.S|u^paral^(j2)_k_i>  (II)
+!                          +<delta_u^(j1)_k_i|H-Eps_k_i.S|u^paral^(j2)_k_i>  (II)
 !          (u^paral^(j2)_k_i is the part of u^(j2)_k_i parallel to active space : metals)
 !          (I) can be rewritten as:
 !          Sum_j{ 1/4.<u0_k_i|S^(j1)|u0_k+q_j>.<u0_k+q_j|S^(j2)|u0_k_i>.(Eps_k+q_j-Eps_k_i) }
@@ -1276,28 +1278,29 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !          where Eps1_k,q_ij=<u0_k+q_j|H^(j2)-1/2(Eps_k+q_j-Eps_k_i)S^(j2)|u0_k_i>
 !          At first call (when j1=j2), cs1c=<u0_k_i|S^(j1)|u0_k+q_j> is stored
 !          For the next calls, it is re-used.
-           if (has_dcwf.and.has_dcwf2.and.is_metal_or_qne0.and.usepaw==1) then
+           if (has_dcwf.and.is_metal_or_qne0) then
              ABI_ALLOCATE(gvnl1,(2,npw1_k*nspinor))
              dotr=zero;doti=zero
-             invocc=zero
-             if (abs(occ_k(iband))>tol8) invocc=two/occ_k(iband)
+             invocc=zero ; if (abs(occ_k(iband))>tol8) invocc=two/occ_k(iband)
              do jband=1,nband_k
 !              Computation of cs1c=<u0_k_i|S^(j1)|u0_k+q_j>
                if ((ipert==ipert1.and.idir==idir1).or.(abs(occ_k(iband))>tol8)) then
                  gvnl1(:,1:npw1_k*nspinor)=cgq(:,1+npw1_k*nspinor*(jband-1)+icgq:npw1_k*nspinor*jband+icgq)
                  call dotprod_g(dot1r,dot1i,istwf_k,npw1_k*nspinor,2,gs1,gvnl1,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-                 if (ipert==ipert1.and.idir==idir1) then
+                 if (ipert==ipert1.and.idir==idir1.and.has_dcwf2) then
                    cs1c(1,jband,iband,ikpt_me)=dot1r
                    cs1c(2,jband,iband,ikpt_me)=dot1i
                  end if
                end if
                if (abs(occ_k(iband))>tol8) then
 !                Computation of term (I)
-                 arg=eig_kq(jband)-eig_k(iband)
-                 dot2r=cs1c(1,jband,iband,ikpt_me)
-                 dot2i=cs1c(2,jband,iband,ikpt_me)
-                 dotr=dotr+(dot1r*dot2r+dot1i*dot2i)*arg
-                 doti=doti+(dot1i*dot2r-dot1r*dot2i)*arg
+                 if (has_dcwf2) then
+                   arg=eig_kq(jband)-eig_k(iband)
+                   dot2r=cs1c(1,jband,iband,ikpt_me)
+                   dot2i=cs1c(2,jband,iband,ikpt_me)
+                   dotr=dotr+(dot1r*dot2r+dot1i*dot2i)*arg
+                   doti=doti+(dot1i*dot2r-dot1r*dot2i)*arg
+                 end if
 !                Computation of term (II)
                  if (is_metal) then
                    if (abs(rocceig(jband,iband))>tol8) then
@@ -1635,7 +1638,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  end if
 
 !Build complete d2ovl matrix
- if (usepaw==1) d2ovl=d2ovl+d2ovl_drho
+ if (usepaw==1) d2ovl(:,:,:,idir,ipert)=d2ovl(:,:,:,idir,ipert)+d2ovl_drho(:,:,:,idir,ipert)
 
  if (usepaw==1) then
    ABI_DEALLOCATE(d2ovl_drho)
@@ -1680,18 +1683,38 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !the symmetry-reduced kpt set will leave a non-zero imaginary part.
  if(ipert==dtset%natom+3.or.ipert==dtset%natom+4) then
    d2nl(2,:,:,idir,ipert)=zero
+   if (usepaw==1) d2ovl(2,:,:,idir,ipert)=zero
+ else
+   d2nl(2,:,dtset%natom+3:dtset%natom+4,idir,ipert)=zero
    if (usepaw==1) d2ovl(2,:,dtset%natom+3:dtset%natom+4,idir,ipert)=zero
  end if
 
-!Symmetrize the elastic tensor contributions, as was needed for the stresses in a GS calculation
- if (ipert==dtset%natom+3.or.ipert==dtset%natom+4)then
-   if (nsym1>1) then
-     ABI_ALLOCATE(work,(6,1,1))
+
+!Symmetrize the strain perturbation contributions, as was needed for the stresses in a GS calculation
+!if (ipert==dtset%natom+3.or.ipert==dtset%natom+4)then
+ if (nsym1>1) then
+   ABI_ALLOCATE(work,(6,1,1))
+   ii=0
+   do ipert1=dtset%natom+3,dtset%natom+4
+     do idir1=1,3
+       ii=ii+1
+       work(ii,1,1)=d2nl(1,idir1,ipert1,idir,ipert)
+     end do
+   end do
+   call stresssym(gprimd,nsym1,work(:,1,1),symrc1)
+   ii=0
+   do ipert1=dtset%natom+3,dtset%natom+4
+     do idir1=1,3
+       ii=ii+1
+       d2nl(1,idir1,ipert1,idir,ipert)=work(ii,1,1)
+     end do
+   end do
+   if (usepaw==1) then
      ii=0
      do ipert1=dtset%natom+3,dtset%natom+4
        do idir1=1,3
          ii=ii+1
-         work(ii,1,1)=d2nl(1,idir1,ipert1,idir,ipert)
+         work(ii,1,1)=d2ovl(1,idir1,ipert1,idir,ipert)
        end do
      end do
      call stresssym(gprimd,nsym1,work(:,1,1),symrc1)
@@ -1699,29 +1722,13 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      do ipert1=dtset%natom+3,dtset%natom+4
        do idir1=1,3
          ii=ii+1
-         d2nl(1,idir1,ipert1,idir,ipert)=work(ii,1,1)
+         d2ovl(1,idir1,ipert1,idir,ipert)=work(ii,1,1)
        end do
      end do
-     if (usepaw==1) then
-       ii=0
-       do ipert1=dtset%natom+3,dtset%natom+4
-         do idir1=1,3
-           ii=ii+1
-           work(ii,1,1)=d2ovl(1,idir1,ipert1,idir,ipert)
-         end do
-       end do
-       call stresssym(gprimd,nsym1,work(:,1,1),symrc1)
-       ii=0
-       do ipert1=dtset%natom+3,dtset%natom+4
-         do idir1=1,3
-           ii=ii+1
-           d2ovl(1,idir1,ipert1,idir,ipert)=work(ii,1,1)
-         end do
-       end do
-       ABI_DEALLOCATE(work)
-     end if
+     ABI_DEALLOCATE(work)
    end if
  end if
+!end if
 
 !Must also symmetrize the electric field perturbation response !
 !Note: d2ovl is not symetrized because it is zero for electric field perturbation

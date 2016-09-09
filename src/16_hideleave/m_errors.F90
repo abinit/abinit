@@ -29,10 +29,10 @@ MODULE m_errors
  use defs_basis
  use m_profiling_abi
  use m_xmpi
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  use etsf_io_low_level
  use etsf_io
 #endif
@@ -75,7 +75,7 @@ include "fexcp.h"
  public :: check_mpi_ierr   ! Erro handler for MPI routines.
  public :: show_backtrace   ! Shows a backtrace at an arbitrary place in user code. (Gfortran extension)
  public :: unused_var       ! Helper function used to silence compiler warnings due to unused variables.
-#if defined HAVE_TRIO_ETSF_IO
+#if defined HAVE_ETSF_IO
  public :: abietsf_msg_hndl ! Error handler for ETSF-IO routines.
  public :: abietsf_warn     ! Write warnings reported by ETSF-IO routines.
 #endif
@@ -614,7 +614,7 @@ subroutine netcdf_check(ncerr,msg,file,line)
 
 ! *************************************************************************
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  if (ncerr /= NF90_NOERR) then
    if (PRESENT(line)) then
      f90line=line
@@ -1372,7 +1372,7 @@ end subroutine unused_ch
 !!
 !! SOURCE
 
-#if defined HAVE_TRIO_ETSF_IO
+#if defined HAVE_ETSF_IO
 
 subroutine abietsf_msg_hndl(lstat,Error_data,mode_paral,file,line)
 

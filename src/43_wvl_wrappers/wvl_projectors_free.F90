@@ -41,7 +41,7 @@ subroutine wvl_projectors_free(proj)
  use defs_wvltypes
  use m_profiling_abi
  use m_errors
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
   use BigDFT_API, only : free_DFT_PSP_projectors,deallocate_gwf
 #endif
 
@@ -58,13 +58,13 @@ subroutine wvl_projectors_free(proj)
  type(wvl_projectors_type),intent(inout) :: proj
 
 !Local variables -------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  integer :: ii
 #endif
 
   ! *********************************************************************
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
  call free_DFT_PSP_projectors(proj%nlpsp)
 
