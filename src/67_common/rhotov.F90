@@ -188,7 +188,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 & (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid()))
 
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
- if(dtset%usewvl==1 .and. dtset%wvl_bigdft_comp==1) wvlbigdft=.true.
+ wvlbigdft=(dtset%usewvl==1.and.dtset%wvl_bigdft_comp==1)
 
 !mpi communicator for spherical grid
  mpi_comm_sphgrid=mpi_enreg%comm_fft
@@ -280,7 +280,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 
  calc_xcdc=.false.
  if (optene==1.or.optene==2) calc_xcdc=.true.
- if (dtset%usewvl==1 .and. dtset%nnsclo>0) calc_xcdc=.true.
+ if (dtset%usewvl==1.and.dtset%nnsclo>0) calc_xcdc=.true.
  if (wvlbigdft) calc_xcdc=.false.
  if (dtset%usefock==1) calc_xcdc=.true.
 
@@ -372,14 +372,18 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
      end if
      offset   = 0
 
+     if (dtset%iscf==0) vtrial=vnew
+
 !    Pass vtrial to BigDFT object
      if(dtset%usewvl==1) then
-       call wvl_vtrial_abi2big(1,vtrial,wvl%den)
+     if(dtset%usewvl==1) then
+       call wvl_vtrial_abi2big(1,vnew,wvl%den)
+!      call wvl_vtrial_abi2big(1,vtrial,wvl%den)
      end if
 
    else
 !    Compute with covering comms the different part of the potential.
-!    only forwvlbigdft
+!    only for wvlbigdft
      ABI_ALLOCATE(xcart,(3, dtset%natom))
      call xred2xcart(dtset%natom, rprimd, xcart, xred)
      call wvl_psitohpsi(dtset%diemix,energies%e_exactX, energies%e_xc, energies%e_hartree, &
@@ -387,7 +391,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 &     istep + 1, istep, dtset%iscf, mpi_enreg%me_wvl, dtset%natom, dtset%nfft,&
 &     mpi_enreg%nproc_wvl, dtset%nspden, &
 &     vres2, .true., energies%e_xcdc, wvl,&
-&     wvlbigdft, xcart, strsxc,vnew, vxc)
+&     wvlbigdft, xcart, strsxc,vtrial=vnew,vxc=vxc)
      ABI_DEALLOCATE(xcart)
 
      vresidnew = vnew - vtrial

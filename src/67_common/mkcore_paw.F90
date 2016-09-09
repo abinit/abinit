@@ -37,12 +37,10 @@
 
 #include "abi_common.h"
 
-subroutine mkcore_paw(atindx1,corstr,dyfrx2,&
-& grxc,icoulomb,natom,mpi_enreg,&
-& nattyp,nfft,ngfft,nspden,ntypat,n3xccc,option,pawrad,pawtab,&
-& psppar,rprimd,&
+subroutine mkcore_paw(atindx1,corstr,dyfrx2,grxc,icoulomb,natom,mpi_enreg,&
+& nattyp,nfft,ngfft,nspden,ntypat,n3xccc,option,pawrad,pawtab,psppar,rprimd,&
 & ucvol,vxc,xccc3d,xred)
-    
+
  use defs_basis
  use defs_abitypes
  use m_profiling_abi
@@ -89,47 +87,37 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,&
  integer :: i1,i2,i3,i3loc
  integer :: j1,j2,j3,msz
  integer :: ncmax,nfgd,nfgd_r0
- integer :: me,me_fft,nproc,nproc_fft,nu
+ integer :: me,me_fft,nfftot,nproc,nproc_fft,nu
  integer :: n1,n2,n3,n3d
  real(dp) :: cutoff,factor,grxc1,grxc2,grxc3
  real(dp) :: rloc,rr2,rshp,rshpm1,rx,ry,rz
- real(dp) :: r2shp,strdia,t1,t2,t3
+ real(dp) :: r2shp,strdia
  character(len=500) :: message
  character(len=1) :: geocode
  logical :: perx,pery,perz,gox,goy,goz
  type(pawrad_type)::core_mesh
 !arrays
+ integer,allocatable :: ifftsph_tmp(:)
  real(dp) :: corfra(3,3)
- real(dp) :: hh(3) !fine grid spacing for wavelets
+ real(dp) :: hh(3) !fine grid spacing
  real(dp) :: rmet(3,3),tsec(2),xcart(3,natom)
+ real(dp),allocatable :: gridcart(:,:),rr(:),rred(:,:)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
 
-!allocatable arrays
- integer,allocatable :: ifftsph_tmp(:) !,iindex(:)
- real(dp),allocatable :: gridcart(:,:)
- real(dp),allocatable:: rr(:)
- real(dp),pointer :: rred(:,:)
-
-!debug
-! integer::ifft
-! real(dp)::arg
+! *************************************************************************
 
  DBG_ENTER("COLL")
- 
-! *************************************************************************
 
  if(nspden >1) then
    write(message, '(a)')'mkcore_paw: this is not yet generalized to npsden>1'
    MSG_ERROR(message)
  end if
 
+ geocode='P'
+ if (icoulomb==1) geocode='F'
+ if (icoulomb==2) geocode='S'
  if (icoulomb == 1) then
-   geocode='F'
- else if (icoulomb == 2) then
-   geocode='S'
- end if
-
 
 !Compute metric tensor in real space rmet
  do nu=1,3
@@ -137,7 +125,7 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,&
 &   rprimd(3,:)*rprimd(3,nu)
  end do
  
-!mpi
+!MPI
  nproc =xmpi_comm_size(mpi_enreg%comm_fft); nproc_fft= ngfft(10)
  me    =xmpi_comm_rank(mpi_enreg%comm_fft);    me_fft= ngfft(11)
 
@@ -156,8 +144,8 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,&
 
 !Store xcart for each atom
  call xred2xcart(natom, rprimd, xcart, xred)
-!Store cartesian coordinates for each grid points
 
+!Store cartesian coordinates for each grid points
  ABI_ALLOCATE(gridcart,(3, nfft))
  call mkgrid_fft(ffti3_local,fftn3_distrib,gridcart,nfft,ngfft,rprimd)
 
@@ -165,7 +153,6 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,&
  hh(1) = rprimd(1,1)/(ngfft(1))
  hh(2) = rprimd(2,2)/(ngfft(2))
  hh(3) = rprimd(3,3)/(ngfft(3))
-
 
  if(nfft .ne. n3xccc)then
    write(message,'(a,a,a,a,a,a,2i6)') ch10,&
@@ -218,29 +205,22 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,&
 
 !  allocate arrays
 !  ncmax=1+int(1.1_dp*nfft*four_pi/(three*ucvol)*rshp**3)
-!  ncmax=1+int(1.1_dp*nfft*four_pi/(three*ucvol)*rshp**3)
 !  1+int(1.1* factors are included just for cautioness
    ncmax=1+int(1.1d0*((rshp/hh(1))*(rshp/hh(2))*pi))
-!  
+
    ABI_ALLOCATE(ifftsph_tmp,(ncmax))
-!  ABI_ALLOCATE(iindex,(ncmax))
    ABI_ALLOCATE(rr,(ncmax))
-!  ABI_ALLOCATE(raux,(ncmax))
-!  nullify(raux2,raux3)
-   nullify(rred)
-   if(option>2) then
+   if(option>1) then
      ABI_ALLOCATE(rred,(3,ncmax))
-!    ABI_ALLOCATE(raux2,(ncmax))
+   else
+     ABI_ALLOCATE(rred,(0,0))
    end if
-!  if(option==4) then
-!  ABI_ALLOCATE(raux3,(ncmax))
-!  end if
 
 !  Create mesh_core object
 !  since core_mesh_size can be bigger than pawrad%mesh_size, 
    msz=pawtab(itypat)%core_mesh_size
    call pawrad_init(core_mesh,mesh_size=msz,mesh_type=pawrad(itypat)%mesh_type,&
-&   rstep=pawrad(itypat)%rstep,lstep=pawrad(itypat)%lstep)
+&                   rstep=pawrad(itypat)%rstep,lstep=pawrad(itypat)%lstep)
 
 !  Big loop on atoms  
    do iat=1,nattyp(itypat)
@@ -258,17 +238,14 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,&
      ry=xcart(2,iatom)
      rz=xcart(3,iatom)
 
-
      isx=floor((rx-cutoff)/hh(1))
      isy=floor((ry-cutoff)/hh(2))
      isz=floor((rz-cutoff)/hh(3))
-
      iex=ceiling((rx+cutoff)/hh(1))
      iey=ceiling((ry+cutoff)/hh(2))
      iez=ceiling((rz+cutoff)/hh(3))
 
      do i3=isz,iez
-!      zz=real(i3,kind=8)*hzh-rz
        call ind_positions_(perz,i3,n3,j3,goz)
 
        if(fftn3_distrib(j3)==me_fft) then
@@ -279,25 +256,23 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,&
          nfgd_r0=0
 
          do i2=isy,iey
-!          yy=real(i2,kind=8)*hyh-ry
            call ind_positions_(pery,i2,n2,j2,goy)
            do i1=isx,iex
-!            xx=real(i1,kind=8)*hxh-rx
              call ind_positions_(perx,i1,n1,j1,gox)
 !            r2=x**2+y**2+z**2
-             if (goz  .and. goy  .and. gox ) then
+             if (goz  .and. goy  .and. gox) then
                ind=j1+(j2-1)*n1+(i3loc-1)*n1*n2
                rr2=(gridcart(1,ind)-rx)**2+(gridcart(2,ind)-ry)**2+(gridcart(3,ind)-rz)**2
 
                if(rr2<=r2shp) then
                  if(rr2>tol5) then
                    nfgd=nfgd+1
-                   rr(nfgd)=rr2**0.5
+                   rr(nfgd)=sqrt(rr2)
                    ifftsph_tmp(nfgd)=ind
                    if(option>1) then 
                      call xcart2xred(1,rprimd,gridcart(:,ind),rred(:,nfgd))
                    end if
-                 elseif( option == 4) then
+                 elseif (option==4) then
 !                  We save r=0 vectors only for option==4:
 !                  for other options this is ignored
 
@@ -315,29 +290,20 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,&
 !        All of the following  could be done inside or outside the loops (i2,i1,i3)
 !        Outside the loops: the memory consuption increases.
 !        Inside the inner loop: the time of calculation increases.
-!        Here, I chose to do it here, somewhere in the middle.
-         if(option .ne.4 ) then
-           if(nfgd==0)      cycle
-         else
-           if(nfgd==0 .and. nfgd_r0==0) cycle
-         end if
+!        Here, I choose to do it here, somewhere in the middle.
+         if (option/=4.and.nfgd==0) cycle
+         if (option==4.and.nfgd==0.and.nfgd_r0==0) cycle
          call mkcore_inner(corfra,core_mesh,dyfrx2,&
 &         grxc1,grxc2,grxc3,ifftsph_tmp,msz,&
 &         natom,ncmax,nfft,nfgd,nfgd_r0,nspden,n3xccc,option,pawtab(itypat),&
-&         rmet,rprimd,rr,rred,rshpm1,strdia,ucvol,vxc,xccc3d)
-!        xccc3d(ifftsph_tmp(1:nfgd))=rr(1:nfgd)
-!        do nu=1,nfgd
-!        ifft=ifftsph_tmp(nu)
-!        arg=-2.20043*rr(nu)**2
-!        xccc3d(ifft)=xccc3d(ifft)+0.00469715*exp(arg)
-!        write(300,'(2f20.13)')rr(nu),xccc3d(ifftsph_tmp(nu))
-!        write(300,'(4(f20.13,x))')gridcart(:,ifftsph_tmp(nu)),xccc3d(ifftsph_tmp(nu))
-!        end do
+&         rmet,rprimd,rr,strdia,vxc,xccc3d,rred=rred)
+
        end if !parallel fftn3
      end do !i3
 
      if(option==2) then
-       factor=(ucvol/real(nfft,dp))/rshp
+       nfftot=product(ngfft(1:3))
+       factor=(ucvol/real(nfftot,dp)) !/rshp
        grxc(1,iatom)=grxc1*factor
        grxc(2,iatom)=grxc2*factor
        grxc(3,iatom)=grxc3*factor
@@ -356,32 +322,22 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,&
 !  Deallocate
    call pawrad_free(core_mesh)
    ABI_DEALLOCATE(ifftsph_tmp)
-!  ABI_DEALLOCATE(iindex)
    ABI_DEALLOCATE(rr)
-!  ABI_DEALLOCATE(raux)
-   if(option>2) then
-     if(associated(rred)) then
-       ABI_DEALLOCATE(rred)
-     end if
-!    if(associated(raux2)) ABI_DEALLOCATE(raux2)
-   end if
-!  if(option>4) then
-!  if(associated(raux3)) ABI_DEALLOCATE(raux3)
-!  end if
+   ABI_DEALLOCATE(rred)
+
  end do !itypat
-
-
 
  if (option==2) then
 !  Apply rmet as needed to get reduced coordinate gradients
-   do iatom=1,natom
-     t1=grxc(1,iatom)
-     t2=grxc(2,iatom)
-     t3=grxc(3,iatom)
-     grxc(:,iatom)=rmet(:,1)*t1+rmet(:,2)*t2+rmet(:,3)*t3
-   end do
+!   do iatom=1,natom
+!     t1=grxc(1,iatom)
+!     t2=grxc(2,iatom)
+!     t3=grxc(3,iatom)
+!     grxc(:,iatom)=rmet(:,1)*t1+rmet(:,2)*t2+rmet(:,3)*t3
+!!    grxc(:,iatom)=rprimd(1,:)*t1+rprimd(2,:)*t2+rprimd(3,:)*t3
+!   end do
 
- elseif( option==3) then
+ elseif (option==3) then
 
 !  Transform stress tensor from full storage mode to symmetric storage mode
    corstr(1)=corfra(1,1)
@@ -394,7 +350,6 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,&
 !  Transform stress tensor from reduced coordinates to cartesian coordinates
    call strconv(corstr,rprimd,corstr)
 
-
 !  Compute diagonal contribution to stress tensor (need input xccc3d)
 !  strdia = (1/N) Sum(r) [mu_xc_avg(r) * rho_core(r)]
    strdia=zero
@@ -403,12 +358,10 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,&
        do i1=1,n1
          ind=i1+(i2-1)*n1+(i3-1)*n1*n2
          strdia=strdia+vxc(ind,1)*xccc3d(ind)
-!        write(17,'(3(i6),i12,3(1x,1pe24.17))')i1,i2,i3,ind,potion_corr(ind),pot_ion(ind),maxdiff
        end do
      end do
    end do
    strdia=strdia/real(nfft,dp)
-
 !  Add diagonal term to stress tensor
    corstr(1)=corstr(1)+strdia
    corstr(2)=corstr(2)+strdia
@@ -427,7 +380,6 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,&
  end if
 
  DBG_EXIT("COLL")
-
 
 end subroutine mkcore_paw
 !!***

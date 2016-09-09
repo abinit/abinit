@@ -59,6 +59,7 @@
 !!  pawang <type(pawang_type)>=paw angular mesh and related data
 !!  pawfgr(my_natom*usepaw) <type(pawfgr_type)>=fine grid parameters and related data
 !!  pawfgrtab(my_natom*usepaw) <type(pawfgrtab_type)>=atomic data given on fine rectangular grid
+!!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  ph1d(2,3*(2*mgfftf+1)*natom)=one-dimensional structure factor information (fine FFT grid)
 !!  ph1dc(2,3*(2*mgfft+1)*natom)=1-dim structure factor phases (coarse FFT grid)
@@ -108,7 +109,7 @@
 subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eigen,etotal,electronpositron,&
 &          energies,fock,forces_needed,fred,gmet,gprimd,grewtn,grvdw,gsqcut,hdr,ifirst_gs,indsym,istep,istep_mix,kg,&
 &          kxc,maxfor,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc,nattyp,nfft,ngfft,ngrvdw,nhat,nkxc,npwarr,nvresid,occ,optres,&
-&          paw_ij,pawang,pawfgr,pawfgrtab,pawrhoij,pawtab,ph1d,ph1dc,psps,rhog,rhor,&
+&          paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1dc,psps,rhog,rhor,&
 &          rprimd,stress_needed,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,&
 &          xccc3d,xred,ylm,ylmgr)
 
@@ -126,6 +127,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 
  use m_ioarr,    only : ioarr, read_rhor
  use m_pawang,   only : pawang_type
+ use m_pawrad,   only : pawrad_type
  use m_pawtab,   only : pawtab_type
  use m_paw_ij,   only : paw_ij_type
  use m_pawfgrtab,only : pawfgrtab_type
@@ -184,6 +186,7 @@ type(fock_type),pointer, intent(inout) :: fock
  type(pawcprj_type),intent(inout) :: cprj(dtset%natom,mcprj*usecprj)
  type(paw_ij_type),intent(in) :: paw_ij(my_natom*dtset%usepaw)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*dtset%usepaw)
+ type(pawrad_type),intent(in)  :: pawrad(dtset%ntypat*dtset%usepaw)
  type(pawtab_type),intent(in)  :: pawtab(dtset%ntypat*dtset%usepaw)
  type(pawrhoij_type),intent(inout) :: pawrhoij(my_natom*dtset%usepaw)
 
@@ -199,8 +202,7 @@ type(fock_type),pointer, intent(inout) :: fock
  character(len=69) :: TypeCalcStrg
  character(len=500) :: message
  type(energies_type) :: energies_tmp
- type(wvl_internal_type) :: wvl
- type(wvl_denspot_type) :: wvl_den
+ type(wvl_data) :: wvl
  type(hdr_type) :: hdr_den
 !arrays
  integer,allocatable :: nlmn(:)
@@ -337,8 +339,8 @@ type(fock_type),pointer, intent(inout) :: fock
 &       favg_dum,fcart_dum,fock,forold_dum,fred_tmp,gresid_dum,grewtn,grhf_dum,grvdw,grxc_dum,gsqcut,&
 &       indsym,kg,kxc,maxfor_dum,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc0,nattyp,nfft,ngfft,&
 &       ngrvdw,nhat,nkxc,npwarr,dtset%ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
-&       pawfgrtab,pawrhoij,pawtab,ph1dc,ph1d,psps,rhog,rhor,rprimd,optstr,strsxc,str_tmp,symrec,&
-&       synlgr_dum,ucvol,usecprj,vhartr,vpsp,vxc,wvl,wvl_den,xccc3d,xred,ylm,ylmgr,0.0_dp)
+&       pawfgrtab,pawrad,pawrhoij,pawtab,ph1dc,ph1d,psps,rhog,rhor,rprimd,optstr,strsxc,str_tmp,symrec,&
+&       synlgr_dum,ucvol,usecprj,vhartr,vpsp,vxc,wvl,xccc3d,xred,ylm,ylmgr,0.0_dp)
        electronpositron%calctype=icalctype
        if (optfor>0) electronpositron%fred_ep(:,:)=fred_tmp(:,:)
        if (optstr>0) electronpositron%stress_ep(:)=str_tmp(:)
@@ -372,7 +374,6 @@ type(fock_type),pointer, intent(inout) :: fock
        call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfft, ngfft, rdwrpaw, mpi_enreg, electronpositron%rhor_ep, &
        hdr_den, electronpositron%pawrhoij_ep, comm_cell, check_hdr=hdr)
        etotal_read = hdr_den%etot; call hdr_free(hdr_den)
-
        call fourdp(1,rhog_ep,electronpositron%rhor_ep,-1,mpi_enreg,nfft,ngfft,dtset%paral_kgb,0)
        if (dtset%usepaw==1.and.allocated(electronpositron%nhat_ep)) then
          call pawmknhat(occtmp,1,0,0,0,0,gprimd,my_natom,dtset%natom,nfft,ngfft,0,&

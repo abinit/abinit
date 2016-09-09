@@ -47,8 +47,7 @@
 #include "abi_common.h"
 
 
-subroutine wvl_hpsitopsi(cprj,dtset, energies, istep, mcprj,mpi_enreg, &
-&  residm, wvl,xcart)
+subroutine wvl_hpsitopsi(cprj,dtset,energies,istep,mcprj,mpi_enreg,residm,wvl,xcart)
 
  use m_profiling_abi
 
@@ -88,16 +87,11 @@ subroutine wvl_hpsitopsi(cprj,dtset, energies, istep, mcprj,mpi_enreg, &
 #if defined HAVE_BIGDFT
   integer               :: iatom,icprj
   character(len = 500)  :: message
-  logical               :: wvlbigdft=.false.
   real(dp), save        :: etotal_local
   integer, save         :: ids
   real(dp)              :: gnrm_zero
   integer               :: comm,me,nproc
-  real(dp)              :: eproj_sum
   integer :: nlmn(dtset%natom)
- !debug
- ! integer::ierr,ii,jj,ifile
- !end debug
 #endif
 
 
@@ -107,29 +101,11 @@ subroutine wvl_hpsitopsi(cprj,dtset, energies, istep, mcprj,mpi_enreg, &
 
 #if defined HAVE_BIGDFT
 
-!If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
- if(dtset%wvl_bigdft_comp==1) wvlbigdft=.true.
-
  if(wvl%wfs%ks%orthpar%methOrtho .ne. 0) then
    write(message,'(2a)') ch10,&
 &   'wvl_hpsitopsi: the only orthogonalization method supported for PAW+WVL is Cholesky'
    MSG_ERROR(message)
  end if
-
-
-!Variables now grouped in BigDFT:
-!energies%e_exactX        =eexctX
-!energies%e_xc            =eexcu
-!energies%e_hartree       =ehart
-!energies%e_kinetic       =ekin_sum
-!energies%e_localpsp      =epot_sum
-!energies%e_sicdc         =eSIC_DC
-!energies%e_xcdc,          =vexcu
-!energies%e_localpsp = energies%e_localpsp - real(2, dp) * energies%e_hartree
-!if(NC) : energies%e_nonlocalpsp   =eproj_sum 
-!if(PAW): energies%e_paw           =eproj_sum 
- if(dtset%usepaw==1) eproj_sum=energies%e_paw
- if(dtset%usepaw==0) eproj_sum=energies%e_nonlocalpsp
 
  write(message, '(a,a)' ) ch10,&
 & ' wvl_hpsitopsi: compute the new wavefunction from the trial potential.'
@@ -139,20 +115,6 @@ subroutine wvl_hpsitopsi(cprj,dtset, energies, istep, mcprj,mpi_enreg, &
  me=xmpi_comm_rank(comm)
  nproc=xmpi_comm_size(comm)
 
-!write(*,*)'wvl_hpsitopsi l138,erase me'
-!ifile=me+40
-!jj=size(wvl%wfs%ks%hpsi)
-!ii=size(wvl%wfs%ks%psi)
-!write(ifile,*)"# ",jj,ii
-!do ii=1,jj
-!write(ifile,'(2f20.8)')wvl%wfs%ks%hpsi(ii),wvl%wfs%ks%psi(ii)
-!end do
-!call mpi_barrier(comm,ierr)
-!
-!write(*,*)'erase me wvl_hpsitopsi, stop'
-!stop
-
-
 !Initialisation of mixing parameter
  if (istep == 1) then
    etotal_local = real(1.d100, dp)
@@ -161,7 +123,6 @@ subroutine wvl_hpsitopsi(cprj,dtset, energies, istep, mcprj,mpi_enreg, &
 
 !WARNING! e_hartree is taken from the previous iteration as e_xc
 !Update physical values
- if(wvlbigdft) energies%e_corepsp = zero
 
 !Precondition, minimise (DIIS or steepest descent) and ortho.
 !Compute also the norm of the gradient.
@@ -177,14 +138,11 @@ subroutine wvl_hpsitopsi(cprj,dtset, energies, istep, mcprj,mpi_enreg, &
  if(dtset%usepaw==1) then
    call hpsitopsi(me, nproc, istep, ids, wvl%wfs%ks,&
 &   wvl%descr%atoms,wvl%projectors%nlpsp,&
-&   wvl%descr%paw,xcart,eproj_sum,wvl%projectors%G)
+&   wvl%descr%paw,xcart,energies%e_nonlocalpsp,wvl%projectors%G)
  else
    call hpsitopsi(me, nproc, istep, ids, wvl%wfs%ks,&
 &   wvl%descr%atoms,wvl%projectors%nlpsp)
  end if
-
- if(dtset%usepaw==1) energies%e_paw=eproj_sum
- if(dtset%usepaw==0) energies%e_nonlocalpsp=eproj_sum
 
  if(dtset%usepaw==1) then
 !  PENDING : cprj should not be copied'

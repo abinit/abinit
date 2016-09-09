@@ -1245,6 +1245,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iscf',tread,'INT')
  if(tread==1) then
    dtset%iscf=intarr(1)
+   if (dtset%usewvl==1) then
+     !wvl_bigdft_comp should be 1 for iscf=0, 0 for iscf>0, except if it is set by the user
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wvl_bigdft_comp',tread,'INT')
+     if (tread==0.and.dtset%iscf==0) dtset%wvl_bigdft_comp=1
+     if (tread==0.and.dtset%iscf >0) dtset%wvl_bigdft_comp=0
+   end if
  else if (dtset%optdriver==RUNL_RESPFN.and.dtset%iscf>=10) then
    dtset%iscf=dtset%iscf-10
  else if (dtset%optdriver==RUNL_GWLS) then

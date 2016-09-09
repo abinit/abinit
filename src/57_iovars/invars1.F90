@@ -181,11 +181,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 ! wvl_bigdft_comp, done here since default values of nline, nwfshist and iscf
 ! depend on its value (see indefo)
  if(dtset%usewvl==1) then
-   dtset%wvl_bigdft_comp=1  !Default
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wvl_bigdft_comp',tread,'INT')
    if(tread==1) dtset%wvl_bigdft_comp=intarr(1)
  end if
-
 
 !---------------------------------------------------------------------------
 

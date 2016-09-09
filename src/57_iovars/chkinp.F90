@@ -991,18 +991,20 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &     'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
    else
 !    If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
-     if(dt%usewvl==1 .and. dt%wvl_bigdft_comp==1) wvlbigdft=.true.
+     wvlbigdft=(dt%usewvl==1.and.dt%wvl_bigdft_comp==1)
+     cond_string(1)='wvl_bigdft_comp' ; cond_values(1)=dt%wvl_bigdft_comp
      if(wvlbigdft) then
-       call chkint_eq(0,0,cond_string,cond_values,ierr,&
+       call chkint_eq(1,1,cond_string,cond_values,ierr,&
 &       'iscf',dt%iscf,15,(/0,1,2,3,4,5,6,7,11,12,13,14,15,16,17/),iout)
      else
-       if(usepaw==1) then
-         call chkint_eq(0,0,cond_string,cond_values,ierr,&
-&         'iscf',dt%iscf,7,(/11,12,13,14,15,16,17/),iout)
-       else
-         call chkint_eq(0,0,cond_string,cond_values,ierr,&
-&         'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
-       end if
+       call chkint_eq(1,1,cond_string,cond_values,ierr,&
+&       'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
+     end if
+!    If wvl+metal, iscf cannot be 0
+     if (dt%occopt>2) then
+       cond_string(1)='occopt' ; cond_values(1)=dt%occopt
+       call chkint_eq(1,1,cond_string,cond_values,ierr,&
+&       'iscf',dt%iscf,18,(/-3,-2,-1,1,2,3,4,5,6,7,11,12,13,14,15,16,17,22/),iout)
      end if
    end if
 !  If ionmov==4, iscf must be 2, 12, 5 or 6.

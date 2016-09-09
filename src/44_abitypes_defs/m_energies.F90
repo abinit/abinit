@@ -498,7 +498,7 @@ end subroutine energies_to_array
 ! *************************************************************************
 
 !If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
- if(dtset%usewvl==1 .and. dtset%wvl_bigdft_comp==1) wvlbigdft=.true.
+ wvlbigdft=(dtset%usewvl==1.and.dtset%wvl_bigdft_comp==1)
 
  optdc=-1;ipositron=0
  if (dtset%positron==0) then

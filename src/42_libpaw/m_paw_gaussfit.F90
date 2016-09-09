@@ -2563,7 +2563,7 @@ subroutine gaussfit_projector(basis_size,mparam,nparam_array,nterm_bounds,orbita
      else
        call paw_splint(msz1,pawrad%rad,&
 &       tproj_tmp1(:),d2(:),&
-&       1,rr,raux,ierr)
+&       1,rr,raux,ierr=ierr)
      end if
      tproj_tmp2(ir)=raux(1)
    end do

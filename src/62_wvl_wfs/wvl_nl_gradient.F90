@@ -80,7 +80,7 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
 #if defined HAVE_BIGDFT
 
 !Compute forces
- write(message, '(a,a)' ) 'wvl_nl_gradient(): compute non-local part to gradient.'
+ write(message, '(a,a)' ) ' wvl_nl_gradient(): compute non-local part to gradient.'
  call wrtout(std_out,message,'COLL')
 
 !Nullify output arrays.
@@ -97,7 +97,8 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
  call nonlocal_forces(wvl%descr%Glr, &
 & wvl%descr%h(1), wvl%descr%h(2), wvl%descr%h(3), wvl%descr%atoms, &
 & xcart, wvl%wfs%ks%orbs, wvl%projectors%nlpsp, wvl%wfs%ks%Lzd%Glr%wfd, &
-& wvl%wfs%ks%psi, gxyz, .true.,strtens(1,2))
+& wvl%wfs%ks%psi, gxyz, .true.,strtens(1,2), &
+& proj_G=wvl%projectors%G,paw=wvl%descr%paw)
 
  if (nproc > 1) then
    call xmpi_sum(gxyz, spaceComm, ierr)
@@ -107,8 +108,8 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
  do ia = 1, natom, 1
    do igeo = 1, 3, 1
      grnl(igeo, ia) = - rprimd(1, igeo) * gxyz(1, ia) - &
-&     rprimd(2, igeo) * gxyz(2, ia) - &
-&     rprimd(3, igeo) * gxyz(3, ia)
+&                       rprimd(2, igeo) * gxyz(2, ia) - &
+&                       rprimd(3, igeo) * gxyz(3, ia)
    end do
  end do
  ABI_DEALLOCATE(gxyz)

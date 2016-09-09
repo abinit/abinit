@@ -300,10 +300,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (dtset%usewvl == 1) then
 
 !  If usewvl: wvlbigdft indicates that the BigDFT workflow will be followed
-   if(dtset%wvl_bigdft_comp==1) wvlbigdft=.true.
+   wvlbigdft=(dtset%wvl_bigdft_comp==1)
 
 !  Default value, to be set-up elsewhere.
-   wvl%descr%h(:)                 = dtset%wvl_hgrid
+   wvl%descr%h(:) = dtset%wvl_hgrid
 
 #if defined HAVE_BIGDFT
    wvl%descr%paw%usepaw=psps%usepaw

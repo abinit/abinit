@@ -689,15 +689,10 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 &           mpi_enreg,nnlout,paw_opt,signs,nonlop_out,tim_nonlop,cwavef,cwavef)
          end if
 
-         if (psps%usepaw==0) then
-           do iblocksize=1,blocksize
-             iband=(iblock-1)*blocksize+iblocksize
-             energies%e_nonlocalpsp=energies%e_nonlocalpsp+dtset%wtk(ikpt)*occ_k(iband)*enlout(iblocksize)
-           end do
-         end if
          do iblocksize=1,blocksize
            iband=(iblock-1)*blocksize+iblocksize
            energies%e_eigenvalues=energies%e_eigenvalues+dtset%wtk(ikpt)*occ_k(iband)*eig_k(iband)
+           energies%e_nonlocalpsp=energies%e_nonlocalpsp+dtset%wtk(ikpt)*occ_k(iband)*enlout(iblocksize)
          end do
 
 !        PAW: accumulate rhoij
@@ -780,21 +775,14 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 
 !Compute total (free) energy
  if (optene==0.or.optene==2) then
-   if (psps%usepaw==0) then
-     etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
-&     energies%e_localpsp + energies%e_corepsp + energies%e_nonlocalpsp
-   else
-     etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
-&     energies%e_localpsp + energies%e_corepsp + energies%e_paw
-   end if
+   etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
+&           energies%e_localpsp + energies%e_corepsp
+   if (psps%usepaw==0) etotal=etotal + energies%e_nonlocalpsp
+   if (psps%usepaw==1) etotal=etotal + energies%e_paw
  else if (optene==1.or.optene==3) then
-   if (psps%usepaw==0) then
-     etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
-&     energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc
-   else
-     etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
-&     energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc + energies%e_pawdc
-   end if
+   etotal = energies%e_eigenvalues - energies%e_hartree + energies%e_xc - &
+&           energies%e_xcdc + energies%e_corepsp - energies%e_corepspdc
+   if (psps%usepaw==1) etotal=etotal + energies%e_pawdc
  end if
  etotal = etotal + energies%e_ewald + energies%e_vdw_dftd
  if(dtset%occopt>=3 .and. dtset%occopt<=8) etotal=etotal-dtset%tsmear*energies%entropy
