@@ -899,13 +899,14 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 #ifdef HAVE_TRIO_NETCDF
    ! master writes fabands file here so that also NC pseudos are supported.
-   if ((prtdosm>=1.or.fatbands_flag==1) .and. me == master) then ! TODO: Recheck this.
-       fname = trim(dtfil%filnam_ds(4))//'_FATBANDS.nc'
-       NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
-       call fatbands_ncwrite(crystal, ebands, hdr, dos_fractions_m, dtset, &
-                             mbesslang, prtdosm, ndosfraction, psps, pawfatbnd, pawtab, ncid)
-       NCF_CHECK(nf90_close(ncid))
-     end if
+   !if ((prtdosm>=1.or.fatbands_flag==1) .and. me == master) then ! TODO: Recheck this.
+   if ((pawfatbnd>0.and.fatbands_flag==1) .and. me == master) then
+     fname = trim(dtfil%filnam_ds(4))//'_FATBANDS.nc'
+     NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
+     call fatbands_ncwrite(crystal, ebands, hdr, dos_fractions_m, dtset, &
+                           mbesslang, prtdosm, ndosfraction, psps, pawfatbnd, pawtab, ncid)
+     NCF_CHECK(nf90_close(ncid))
+   end if
 #endif
 
 !  Here, computation and output of DOS and partial DOS  _DOS

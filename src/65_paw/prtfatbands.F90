@@ -339,8 +339,6 @@ subroutine fatbands_ncwrite(crystal, ebands, hdr, dos_fractions_m, dtset, &
 
  ABI_CHECK(dtset%natsph > 0, "natsph <= 0!")
 
- !NCF_CHECK(nctk_open_create(ncid, filename, xmpi_comm_self))
-
  ! Write header, crystal structure and band energies.
  NCF_CHECK(hdr_ncwrite(hdr, ncid, fform, nc_define=.True.))
  NCF_CHECK(crystal_ncwrite(crystal, ncid))
@@ -404,8 +402,6 @@ subroutine fatbands_ncwrite(crystal, ebands, hdr, dos_fractions_m, dtset, &
  if (dtset%natsph_extra /= 0) then
    NCF_CHECK(nf90_put_var(ncid, vid("xredsph_extra"), dtset%xredsph_extra(:, 1:dtset%natsph_extra)))
  end if
-
- !NCF_CHECK(nf90_close(ncid))
 
 contains
  integer function vid(vname) 

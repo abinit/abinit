@@ -109,9 +109,7 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
  integer,parameter :: bcorr0=0
  integer :: iat,iband,iene,ifract,ikpt,ioffset_eig,isppol,natsph,natsph_extra
  integer :: nene,nkpt_fullbz,prtdos,unitdos,ierr
-! integer :: nfiner
  real(dp) :: buffer,deltaene,enemax,enemin,enex,integral_DOS,max_occ,rcvol
-! real(dp) :: tolfermi
  real(dp) :: ucvol
  logical :: bigDOS
  character(len=10) :: tag
@@ -343,16 +341,6 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
 &     max_occ,nene,dtset%nkpt,tetrahedra,bcorr0,&
 &     tweight,dtweightde,xmpi_comm_self)
 
-!
-!    determine fermi surface contribution from this band,
-!    interpolated in irred tetrahedra, on a finer subgrid of klatt
-!    NOT YET FUNCTIONAL
-!    if(dtset%prtfsurf==1)then
-!    tolfermi = dtset%userrc
-!    nfiner = dtset%userrb
-!    call get_fsurf_1band(dtset,tmp_eigen,fermie,klatt,kpt_fullbz,&
-!    &  mtetra,nfiner,nkpt_fullbz,ntetra,tetra_full,tetra_mult,tetra_wrap,tolfermi)
-!    end if
 !
 !    calculate DOS and integrated DOS projected with the input dos_fractions
 !
