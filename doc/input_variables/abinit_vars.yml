@@ -20026,8 +20026,10 @@
     text: |-
         <p>
          Print out geometry (_BLZTRP_GEOM) and eigenenergy (_BLZTRP_EIGEN) files for the
-         <a href="http://www.icams.de/content/departments/cmat/boltztrap/"> BoltzTraP code</a>
-         by Georg Madsen.
+         BoltzTraP code by Georg Madsen. 
+         This code was available at http://www.icams.de/content/departments/cmat/boltztrap,
+         but this service seems to be discontinued (September 10, 2016). Browse the Web to 
+         find the sources ...
         </p>
     varname: prtbltztrp
     vartype: integer
