@@ -108,7 +108,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  use m_dtset,        only : dtset_copy, dtset_free
  use m_mpinfo,       only : mpi_distrib_is_ok
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
 &                        mpi_environment_set,bigdft_mpi, f_malloc_set_status
 #endif
@@ -541,7 +541,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
 !  Set up mpi informations from the dataset
    if (dtset%usewvl == 1) then
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
      call f_malloc_set_status(iproc=mpi_enregs(idtset)%me_wvl)
      call mpi_environment_set(bigdft_mpi,mpi_enregs(idtset)%me_wvl,&
 &     mpi_enregs(idtset)%nproc_wvl,mpi_enregs(idtset)%comm_wvl,&
@@ -842,7 +842,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !Results_respfn deallocation
  call destroy_results_respfn(results_respfn)
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 !XG 121126 : NOTE that the next debugging section was quite problematic : indeed we are
 !outside the loop over datasets, so the value of dtset%usewvl, that is referring to the last
 !dtset, might not be initialized, if the dataset is NOT treated by the processor.

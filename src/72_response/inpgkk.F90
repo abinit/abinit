@@ -37,7 +37,7 @@
 #include "abi_common.h"
 
 
-subroutine inpgkk(bantot1,eigen1,filegkk,hdr1)
+subroutine inpgkk(eigen1,filegkk,hdr1)
 
  use defs_basis
  use defs_abitypes
@@ -58,14 +58,14 @@ subroutine inpgkk(bantot1,eigen1,filegkk,hdr1)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: bantot1
  character(len=fnlen),intent(in) :: filegkk
  type(hdr_type), intent(out) :: hdr1
 !arrays
- real(dp),intent(out) :: eigen1(bantot1)
+ real(dp),allocatable,intent(out) :: eigen1(:)
 
 !Local variables-------------------------------
 !scalars
+ integer :: bantot1
  integer :: isppol, ikpt, mband, ikb
  integer :: unitgkk, fform, ierr, n1wf, i1wf
  type(hdr_type) :: hdr0
@@ -77,6 +77,7 @@ subroutine inpgkk(bantot1,eigen1,filegkk,hdr1)
  if (open_file(filegkk,message,newunit=unitgkk,form='unformatted',status='old') /= 0) then
    MSG_ERROR(message)
  end if
+
 
 !read in header of GS file and eigenvalues
  call hdr_fort_read(hdr0, unitgkk, fform)
@@ -113,11 +114,9 @@ subroutine inpgkk(bantot1,eigen1,filegkk,hdr1)
    MSG_ERROR(message)
  end if
 
- if (bantot1 < 2*hdr1%nsppol*hdr1%nkpt*mband**2) then
-   write(message,'(a,2i0)')' input size for eigenvalue matrix is not large enough ',&
-&   bantot1, 2*hdr1%nsppol*hdr1%nkpt*mband**2
-   MSG_ERROR(message)
- end if
+ bantot1 = 2*hdr1%nsppol*hdr1%nkpt*mband**2
+ ABI_ALLOCATE(eigen1, (bantot1))
+
 
 !retrieve 1WF <psi_k+q | H | psi_k> from gkk file and echo to output
  ikb = 0

@@ -37,6 +37,7 @@
 #%% [setup]
 #%% executable = abinit
 #%% exclude_hosts = ibm@ibm6
+#%% exclude_builders = ubu_intel_16.0_mpich, ubu_intel_15.0_mpich
 #%% [files]
 #%% psp_files = 6c_lda.paw
 #%% [paral_info]

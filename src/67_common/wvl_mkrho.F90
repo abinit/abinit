@@ -52,7 +52,7 @@ subroutine wvl_mkrho(dtset, irrzon, mpi_enreg, phnons, rhor, wvl_wfs, wvl_den)
  use m_errors
  use m_abi2big
  use m_xmpi
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
   use BigDFT_API, only : sumrho, symmetry_data, ELECTRONIC_DENSITY, communicate_density
 #endif
 
@@ -79,7 +79,7 @@ subroutine wvl_mkrho(dtset, irrzon, mpi_enreg, phnons, rhor, wvl_wfs, wvl_den)
 &                                 (dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
 
 !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 !scalars
  character(len=500) :: message
  integer :: comm,me,nproc
@@ -92,7 +92,7 @@ subroutine wvl_mkrho(dtset, irrzon, mpi_enreg, phnons, rhor, wvl_wfs, wvl_den)
 
  DBG_ENTER("COLL")
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  comm=mpi_enreg%comm_wvl
  me=xmpi_comm_rank(comm)
  nproc=xmpi_comm_size(comm)

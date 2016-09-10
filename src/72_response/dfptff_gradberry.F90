@@ -29,7 +29,7 @@
 !! npwar1(nkpt) = number of planewaves in basis and boundary for response wfs
 !! nspinor = 1 for scalar wfs, 2 for spinor wfs
 !! nsppol = 1 for unpolarized, 2 for spin-polarized
-!! qmat(2,dtefield%nband_occ,dtefield%nband_occ,nkpt,2,3) = 
+!! qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3) = 
 !! inverse of the overlap matrix
 !! pwindall(max(mpw,mpw1)*mkmem,8,3) = array used to compute the overlap matrices
 !! pwindall(:,1,:) <- <u^(0)_i|u^(0)_i+1>
@@ -42,7 +42,7 @@
 !! pwindall(:,8,:) <- <u^(0)_i|u^(1)_i-n-1>  
 !!
 !! OUTPUT
-!! grad_berry(2,mpw1,dtefield%nband_occ) = the gradient of the Berry phase term
+!! grad_berry(2,mpw1,dtefield%mband_occ) = the gradient of the Berry phase term
 !!
 !! PARENTS
 !!      dfpt_vtorho
@@ -86,8 +86,8 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
  integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
  real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol)
  real(dp),intent(in) :: cg1(2,mpw1*nspinor*mband*mk1mem*nsppol)
- real(dp),intent(in) :: qmat(2,dtefield%nband_occ,dtefield%nband_occ,nkpt,2,3)
- real(dp),intent(out) :: grad_berry(2,mpw1,dtefield%nband_occ)
+ real(dp),intent(in) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3)
+ real(dp),intent(out) :: grad_berry(2,mpw1,dtefield%mband_occ)
 
 !Local variables -------------------------
 !scalars
@@ -106,10 +106,10 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
  mpw_tmp=max(mpw,mpw1)
  ABI_ALLOCATE(vect1,(2,0:mpw_tmp))
  ABI_ALLOCATE(vect2,(2,0:mpw_tmp))
- ABI_ALLOCATE(s1mat,(2,dtefield%nband_occ,dtefield%nband_occ))
+ ABI_ALLOCATE(s1mat,(2,dtefield%mband_occ,dtefield%mband_occ))
  ABI_ALLOCATE(pwind_tmp,(mpw_tmp))
- ABI_ALLOCATE(Amat,(2,dtefield%nband_occ,dtefield%nband_occ))
- ABI_ALLOCATE(Bmat,(2,dtefield%nband_occ,dtefield%nband_occ))
+ ABI_ALLOCATE(Amat,(2,dtefield%mband_occ,dtefield%mband_occ))
+ ABI_ALLOCATE(Bmat,(2,dtefield%mband_occ,dtefield%mband_occ))
  vect1(:,0) = zero ; vect2(:,0) = zero
  s1mat(:,:,:)=zero
  grad_berry(:,:,:) = zero
@@ -129,11 +129,11 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
      jpw = pwind_tmp(ipw)
 
      if (jpw > 0) then
-       do iband = 1, dtefield%nband_occ
+       do iband = 1, dtefield%mband_occ
          wfr = cg1(1,icg1 + (iband - 1)*npw_k2*nspinor + jpw)
          wfi = cg1(2,icg1 + (iband - 1)*npw_k2*nspinor + jpw)
 
-         do  jband = 1, dtefield%nband_occ
+         do  jband = 1, dtefield%mband_occ
 
            grad_berry(1,ipw,jband) = &
 &           grad_berry(1,ipw,jband) + &
@@ -162,12 +162,12 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
 
 
    vect1(:,0) = zero ; vect2(:,0) = zero
-   do jband = 1, dtefield%nband_occ
+   do jband = 1, dtefield%mband_occ
      vect2(:,1:npw_k2) = &
 &     cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
      if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
 
-     do iband = 1, dtefield%nband_occ
+     do iband = 1, dtefield%mband_occ
 
        pwmin = (iband-1)*npw_k1*nspinor
        pwmax = pwmin + npw_k1*nspinor
@@ -197,12 +197,12 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
    pwind_tmp(1:npw_k1) = pwindall((ikpt1m-1)*mpw_tmp+1:(ikpt1m-1)*mpw_tmp+npw_k1,7,idir)
 
    vect1(:,0) = zero ; vect2(:,0) = zero
-   do jband = 1, dtefield%nband_occ
+   do jband = 1, dtefield%mband_occ
      vect2(:,1:npw_k2) = &
 &     cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
      if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
 
-     do iband = 1, dtefield%nband_occ
+     do iband = 1, dtefield%mband_occ
 
        pwmin = (iband-1)*npw_k1*nspinor
        pwmax = pwmin + npw_k1*nspinor
@@ -221,9 +221,9 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
    Amat(:,:,:)=zero
 
 !  calculate Amat
-   do iband=1, dtefield%nband_occ
-     do jband=1, dtefield%nband_occ
-       do kband=1, dtefield%nband_occ
+   do iband=1, dtefield%mband_occ
+     do jband=1, dtefield%mband_occ
+       do kband=1, dtefield%mband_occ
          Amat(1,iband,jband) = Amat(1,iband,jband) + s1mat(1,iband,kband)*&
 &         qmat(1,kband,jband,ikpt,1,idir)&
 &         - s1mat(2,iband,kband)*qmat(2,kband,jband,ikpt,1,idir)
@@ -238,9 +238,9 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
 
 !  calculate Bmat
    ikptn = dtefield%ikpt_dk(ikpt,7,idir)
-   do iband=1, dtefield%nband_occ
-     do jband=1, dtefield%nband_occ
-       do kband=1, dtefield%nband_occ
+   do iband=1, dtefield%mband_occ
+     do jband=1, dtefield%mband_occ
+       do kband=1, dtefield%mband_occ
          Bmat(1,jband,kband) = Bmat(1,jband,kband) + Amat(1,iband,kband)*&
 &         qmat(1,jband,iband,ikptn,1,idir)&
 &         - Amat(2,iband,kband)*qmat(2,jband,iband,ikptn,1,idir)
@@ -270,11 +270,11 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
 
      if (jpw > 0) then
 
-       do iband = 1, dtefield%nband_occ
+       do iband = 1, dtefield%mband_occ
          wfr = cg(1,icg + (iband - 1)*npw_k2*nspinor + jpw)
          wfi = cg(2,icg + (iband - 1)*npw_k2*nspinor + jpw)
 
-         do jband=1, dtefield%nband_occ
+         do jband=1, dtefield%mband_occ
 
            grad_berry(1,ipw,jband) = grad_berry(1,ipw,jband) &
 &           - fac*(Bmat(1,iband,jband)*wfr - Bmat(2,iband,jband)*wfi)
@@ -305,11 +305,11 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
      jpw = pwind_tmp(ipw)
 
      if (jpw > 0) then
-       do iband = 1, dtefield%nband_occ
+       do iband = 1, dtefield%mband_occ
          wfr = cg1(1,icg1 + (iband - 1)*npw_k2*nspinor + jpw)
          wfi = cg1(2,icg1 + (iband - 1)*npw_k2*nspinor + jpw)
 
-         do  jband = 1, dtefield%nband_occ
+         do  jband = 1, dtefield%mband_occ
 
            grad_berry(1,ipw,jband) = &
 &           grad_berry(1,ipw,jband) - &
@@ -339,12 +339,12 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
    pwind_tmp(1:npw_k1) =pwindall((ikptn-1)*mpw_tmp+1:(ikptn-1)*mpw_tmp+npw_k1,8,idir)
 
    vect1(:,0) = zero ; vect2(:,0) = zero
-   do jband = 1, dtefield%nband_occ
+   do jband = 1, dtefield%mband_occ
      vect2(:,1:npw_k2) = &
 &     cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
      if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
 
-     do iband = 1, dtefield%nband_occ
+     do iband = 1, dtefield%mband_occ
 
        pwmin = (iband-1)*npw_k1*nspinor
        pwmax = pwmin + npw_k1*nspinor
@@ -375,11 +375,11 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
 
 
    vect1(:,0) = zero ; vect2(:,0) = zero
-   do jband = 1, dtefield%nband_occ
+   do jband = 1, dtefield%mband_occ
      vect2(:,1:npw_k2) = &
 &     cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
      if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
-     do iband = 1, dtefield%nband_occ
+     do iband = 1, dtefield%mband_occ
        pwmin = (iband-1)*npw_k1*nspinor
        pwmax = pwmin + npw_k1*nspinor
        vect1(:,1:npw_k1) = &
@@ -396,9 +396,9 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
    Amat(:,:,:)=zero
 
 !  calculate Amat
-   do iband=1, dtefield%nband_occ
-     do jband=1, dtefield%nband_occ
-       do kband=1, dtefield%nband_occ
+   do iband=1, dtefield%mband_occ
+     do jband=1, dtefield%mband_occ
+       do kband=1, dtefield%mband_occ
          Amat(1,iband,jband) = Amat(1,iband,jband) + s1mat(1,iband,kband)*&
 &         qmat(1,kband,jband,ikpt,2,idir)&
 &         - s1mat(2,iband,kband)*qmat(2,kband,jband,ikpt,2,idir)
@@ -413,9 +413,9 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
 
 !  calculate Bmat
    ikptn = dtefield%ikpt_dk(ikpt,7,idir)
-   do iband=1, dtefield%nband_occ
-     do jband=1, dtefield%nband_occ
-       do kband=1, dtefield%nband_occ
+   do iband=1, dtefield%mband_occ
+     do jband=1, dtefield%mband_occ
+       do kband=1, dtefield%mband_occ
          Bmat(1,jband,kband) = Bmat(1,jband,kband) + Amat(1,iband,kband)*&
 &         qmat(1,jband,iband,ikptn,2,idir)&
 &         - Amat(2,iband,kband)*qmat(2,jband,iband,ikptn,2,idir)
@@ -444,11 +444,11 @@ subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mpw,mpw
 
      if (jpw > 0) then
 
-       do iband = 1, dtefield%nband_occ
+       do iband = 1, dtefield%mband_occ
          wfr = cg(1,icg + (iband - 1)*npw_k2*nspinor + jpw)
          wfi = cg(2,icg + (iband - 1)*npw_k2*nspinor + jpw)
 
-         do jband=1, dtefield%nband_occ
+         do jband=1, dtefield%mband_occ
 
            grad_berry(1,ipw,jband) = grad_berry(1,ipw,jband) + fac*(Bmat(1,iband,jband)*wfr - Bmat(2,iband,jband)*wfi)
            grad_berry(2,ipw,jband) = grad_berry(2,ipw,jband) + fac*(Bmat(1,iband,jband)*wfi + Bmat(2,iband,jband)*wfr)

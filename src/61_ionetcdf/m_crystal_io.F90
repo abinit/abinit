@@ -34,7 +34,7 @@ MODULE m_crystal_io
  use m_atomdata
  use m_nctk
  use iso_c_binding
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -169,7 +169,7 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
  integer,intent(in) :: ncid
  type(crystal_t),intent(in) :: cryst
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
  integer :: itypat
@@ -317,7 +317,7 @@ integer function crystal_ncwrite_path(crystal, path) result(ncerr)
  character(len=*),intent(in) :: path
  type(crystal_t),intent(in) :: crystal
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
  integer :: ncid

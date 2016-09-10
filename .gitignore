@@ -3,6 +3,7 @@
 .directory
 .tox
 .idea
+.*.sw[op]
 __pycache__
 Makefile.am
 Makefile.in
@@ -24,6 +25,7 @@ robodoc.err
 robodoc.log
 tags
 testf.ac
+abiref.ac
 tmp
 tmp2
 auto-*.m4
@@ -291,6 +293,7 @@ tests/TestBot_MPI*/*
 /scripts/post_processing/appa/birch/fit.dat
 /scripts/post_processing/appa/birch/fit.res
 /src/.abilint
+/src/*/*~
 /src/abilint.log
 /src/abirules.log
 /src/error_make_abiauty
