@@ -1554,15 +1554,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      end if
    end do
 
-   if (maxval(nprojmax(0:3))>1) then
-     if (usepaw==0.and.optdriver==RUNL_SCREENING.and.dt%inclvkb/=0) then
-       write(message,'(3a)')&
-&       'inclvkb /= 0 not implemented for pseudos with more than one projector per l-channel ',ch10,&
-&       'Use inclvkb == 0 in the input file '
-       MSG_ERROR_NOSTOP(message, ierr)
-     end if
-   end if
-
 !  npspinor
 !  Must be equal to 1 or 2
    call chkint_eq(0,0,cond_string,cond_values,ierr,'npspinor',dt%npspinor,2,(/1,2/),iout)

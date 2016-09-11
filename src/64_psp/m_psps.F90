@@ -765,8 +765,8 @@ subroutine psps_print(psps,unit,prtvol,mode_paral)
  END SELECT
  call wrtout(unt,msg,mode)
 
- !write(msg,'(a,i3)')'  Max number of non-local projectors over l and type ',psps%mproj 
- !call wrtout(unt,msg,mode)
+ write(msg,'(a,i3)')'  Max number of non-local projectors over l and type ',psps%mproj 
+ call wrtout(unt,msg,mode)
 
  write(msg,'(a,i3,2a,i3,2a,i3)')&
 & '  Highest angular momentum +1 ....... ',psps%mpsang,ch10,&

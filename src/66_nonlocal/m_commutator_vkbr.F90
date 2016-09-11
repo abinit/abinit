@@ -76,11 +76,11 @@ MODULE m_commutator_vkbr
   real(dp) :: kpoint(3)
   ! The k-point in reduced coordinates.
 
-  complex(gwpc),allocatable :: fnl(:,:,:)
-  ! fnl(npw,mpsang*mpsang,natom)
+  complex(gwpc),allocatable :: fnl(:,:,:,:)
+  ! fnl(npw,mpsang**2,mproj,natom)
 
-  complex(gwpc),allocatable :: fnld(:,:,:,:) 
-  ! fnld(3,npw,mpsang*mpsang,natom)
+  complex(gwpc),allocatable :: fnld(:,:,:,:,:) 
+  ! fnld(3,npw,mpsang**2,mproj,natom)
 
  end type kb_potential
 
@@ -173,9 +173,6 @@ subroutine kb_potential_init(kbgrad_k,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
  ! accessed with the indices provided by indlmn.
  ! TODO: they should be calculated on-the-fly using calc_vkb
  !       For the moment, we opt for a quick an dirty implementation.
- !ABI_MALLOC(vkbsign,(psps%mpsang, cryst%ntypat))
- !ABI_MALLOC(vkb ,(npw, psps%mpsang, cryst%ntypat))
- !ABI_MALLOC(vkbd,(npw, psps%mpsang, cryst%ntypat))
 
  ABI_MALLOC(vkbsign,(psps%lnmax, cryst%ntypat))
  ABI_MALLOC(vkb ,(npw, psps%lnmax, cryst%ntypat))
@@ -185,12 +182,12 @@ subroutine kb_potential_init(kbgrad_k,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
  select case (inclvkb)
  case (2) 
    ! Complex spherical harmonics (CPU and mem \propto npw).
-   write(msg,'(a,f12.1)')'out-of-memory in fnl; Mb= ',one*npw*psps%mpsang**2*cryst%natom*2*gwpc*b2Mb
-   ABI_STAT_MALLOC(kbgrad_k%fnl,(npw,psps%mpsang**2,cryst%natom), ierr)
+   write(msg,'(a,f12.1)')'out-of-memory in fnl; Mb= ',one*npw*psps%mpsang**2*psps%mproj*cryst%natom*2*gwpc*b2Mb
+   ABI_STAT_MALLOC(kbgrad_k%fnl,(npw,psps%mpsang**2,psps%mproj,cryst%natom), ierr)
    ABI_CHECK(ierr==0, msg)
 
-   write(msg,'(a,f12.1)')'out-of-memory in fnld; Mb= ',three*npw*psps%mpsang**2*cryst%natom*2*gwpc*b2Mb
-   ABI_STAT_MALLOC(kbgrad_k%fnld,(3,npw,psps%mpsang**2,cryst%natom), ierr)
+   write(msg,'(a,f12.1)')'out-of-memory in fnld; Mb= ',three*npw*psps%mpsang**2*psps%mproj*cryst%natom*2*gwpc*b2Mb
+   ABI_STAT_MALLOC(kbgrad_k%fnld,(3,npw,psps%mpsang**2,psps%mproj,cryst%natom), ierr)
    ABI_CHECK(ierr==0, msg)
 
    call ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,kbgrad_k%fnl,kbgrad_k%fnld)
@@ -361,7 +358,7 @@ subroutine add_vnlr_commutator(kbgrad_k,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
 
 !Local variables ------------------------------
 !scalars
- integer :: ig1,ig2,iat,ig,ilm,itypat,nlmn,ilmn,iln0,iln,il,in !,im,
+ integer :: ig1,ig2,iat,ig,ilm,itypat,nlmn,ilmn,iln0,iln,il,in,im
  complex(gwpc) :: cta1,cta4,ct
 !arrays
  complex(gwpc) :: dum(3),cta2(3),cta3(3),gamma_term(3)
@@ -380,28 +377,32 @@ subroutine add_vnlr_commutator(kbgrad_k,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
     iln0 = 0
     do ilmn=1,nlmn
       il = 1 + psps%indlmn(1,ilmn,itypat)
-      !im = psps%indlmn(2,ilmn,itypat)
       in = psps%indlmn(3,ilmn,itypat)
       iln = psps%indlmn(5,ilmn,itypat)
       if (iln <= iln0) cycle
       iln0 = iln
       !if (indlmn(6,ilmn,itypat) /= 1 .or. vkbsign(iln,itypat) == zero) cycle
-    end do
+    !end do
+    !in = 1
+    do im=1,2*(il-1)+1
+      ! Index of im and il
+      ilm = im + (il-1)*(il-1)
 
-    do ilm=1,kbgrad_k%mpsang**2
+    !do ilm=1,kbgrad_k%mpsang**2
       cta1 = czero_gw; cta2(:) = czero_gw
       cta4 = czero_gw; cta3(:) = czero_gw
       do ig=1,npw 
         ! Here we take advantage of the property Y_(l-m)= (-i)^m Y_lm^*.
-        cta1   = cta1    + ug1(ig) * kbgrad_k%fnl (ig,ilm,iat)
-        cta2(:)= cta2(:) + ug2(ig) * kbgrad_k%fnld(:,ig,ilm,iat)
-        cta3(:)= cta3(:) + ug1(ig) * kbgrad_k%fnld(:,ig,ilm,iat)
-        cta4   = cta4    + ug2(ig) * kbgrad_k%fnl (ig,ilm,iat)
+        cta1   = cta1    + ug1(ig) * kbgrad_k%fnl (ig,ilm,in,iat)
+        cta2(:)= cta2(:) + ug2(ig) * kbgrad_k%fnld(:,ig,ilm,in,iat)
+        cta3(:)= cta3(:) + ug1(ig) * kbgrad_k%fnld(:,ig,ilm,in,iat)
+        cta4   = cta4    + ug2(ig) * kbgrad_k%fnl (ig,ilm,in,iat)
         if (ig==1) gamma_term = gamma_term + CONJG(cta1)*cta2(:) +CONJG(cta3(:))*cta4
       end do
       dum(:)= dum(:) + CONJG(cta1)*cta2(:) + CONJG(cta3(:))*cta4
     end do
 
+  end do
   end do
 
   if (kbgrad_k%istwfk>1) then
@@ -549,7 +550,7 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
      !if (vkbsign(iln,itypat) == zero) cycle
      if (ABS(psps%ekb(iln,itypat)) > 1.0d-10) then
        ABI_CHECK(iln == ilmn, "iln != ilmn")
-       ABI_CHECK(il == iln, "il != iln")
+       !ABI_CHECK(il == iln, "il != iln")
        if (il==1) then
          vkb (1:npw_k,iln,itypat) = ffnl(:,1,iln,itypat)
          vkbd(1:npw_k,iln,itypat) = ffnl(:,2,iln,itypat)*modkplusg(:)/two_pi
@@ -759,8 +760,8 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
  real(dp),intent(in) :: vkb(npw,psps%lnmax,cryst%ntypat)
  real(dp),intent(in) :: vkbd(npw,psps%lnmax,cryst%ntypat) 
  real(dp),intent(in) :: vkbsign(psps%lnmax,cryst%ntypat)
- complex(gwpc),intent(out) :: fnl(npw,psps%mpsang**2,cryst%natom)
- complex(gwpc),intent(out) :: fnld(3,npw,psps%mpsang**2,cryst%natom)
+ complex(gwpc),intent(out) :: fnl(npw,psps%mpsang**2,psps%mproj,cryst%natom)
+ complex(gwpc),intent(out) :: fnld(3,npw,psps%mpsang**2,psps%mproj,cryst%natom)
 
 !Local variables-------------------------------
 !scalars
@@ -833,15 +834,14 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
      nlmn = count(psps%indlmn(3,:,itypat) > 0)
      do ilmn=1,nlmn
        il = 1 + psps%indlmn(1,ilmn,itypat)
-       !im = psps%indlmn(2,ilmn,itypat)
        in = psps%indlmn(3,ilmn,itypat)
        iln = psps%indlmn(5,ilmn,itypat)
        if (iln <= iln0) cycle
        iln0 = iln
        if (vkbsign(iln,itypat) == zero) cycle
        !if (psps%indlmn(6,ilmn,itypat) /= 1 .or. vkbsign(iln,itypat) == zero) cycle
-     !end do
-     !do il=1,psps%mpsang
+       !end do
+       !do il=1,psps%mpsang
        factor = SQRT(four_pi/REAL(2*(il-1)+1))
        !iln = il
        do im=1,2*(il-1)+1
@@ -849,7 +849,7 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
          ilm = im + (il-1)*(il-1)
 
          ! Calculate the first KB factor, note that fnl is simple precision complex
-         fnl(ig,ilm,iat) = factor*sfac*ylmc(il-1,im-il,kcart) * vkb(ig,iln,itypat) * vkbsign(iln,itypat)
+         fnl(ig,ilm,in,iat) = factor*sfac*ylmc(il-1,im-il,kcart) * vkb(ig,iln,itypat) * vkbsign(iln,itypat)
 
          ! Calculate the second KB factor (involving first derivatives)
          ! dYlm/dK = dYlm/dth * grad_K th + dYlm/dphi + grad_K phi
@@ -869,7 +869,7 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
 
          ! Note that fnld is simple precision complex, it could be possible to use double precision
          do ii=1,3
-           fnld(ii,ig,ilm,iat) = factor*sfac* &
+           fnld(ii,ig,ilm,in,iat) = factor*sfac* &
             ( kg(ii)/mkg*ylmc(il-1,im-il,kcart)*vkbd(ig,iln,itypat) + dylmcrys(ii)*vkb(ig,iln,itypat) )
          end do 
 
