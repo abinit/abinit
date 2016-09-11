@@ -41,46 +41,6 @@ MODULE m_commutator_vkbr
  private
 !!***
 
-!!****t* m_commutator_vkbr/kb_form_factors
-!! NAME
-!! kb_form_factors
-!!
-!! FUNCTION
-!!  The kb_form_factors data type stores basic dimensions and quantities 
-!!  used in the GW part for the treatment of the non-analytic behavior of the 
-!!  heads and wings of the irreducible polarizability in the long wave-length limit (i.e. q-->0).
-!!
-!! SOURCE
-
- type,public :: kb_form_factors
-
-  integer :: npw       
-  ! Number of plane waves for this  k-point.
-
-  integer :: lnmax     
-  ! Max. number of (l,n) components over all type of pseudos.
-
-  integer :: ntypat    
-  ! Number of type of atoms.
-
-  integer,allocatable :: sign_dyad(:,:)
-  ! sign_dyad(lnmax,ntypat). 
-  ! sign of the KB dyadic product.
-
-  real(dp),allocatable :: ff(:,:,:) 
-  ! ff(npw,lnmax,ntypat) 
-  ! KB form factor.
-
-  real(dp),allocatable :: ffd(:,:,:)
-  ! ffd(npw,lnmax,ntypat) 
-  ! Derivative of ff wrt k+G.
-
- end type kb_form_factors
-
- !public :: correct_init_kb_ffactors
- !public :: kb_ffactors_free
-!!***
-
 !----------------------------------------------------------------------
 
 !!****t* m_commutator_vkbr/kb_potential
@@ -130,253 +90,12 @@ MODULE m_commutator_vkbr
 
  interface kb_potential_free
    module procedure kb_potential_free_0D
-   module procedure kp_potential_free_1D
+   module procedure kb_potential_free_1D
  end interface kb_potential_free
 
  public ::  nc_ihr_comm
 
 CONTAINS  !========================================================================================
-
-!----------------------------------------------------------------------
-
-!!****f* m_commutator_vkbr/correct_init_kb_ffactors
-!! NAME
-!!  correct_init_kb_ffactors
-!!
-!! FUNCTION
-!!  Calculate KB form factors and derivatives required to evalute
-!!  the matrix elements of the commutator [Vnl,r]-. 
-!!  This term enters the expression for the oscillator strengths in 
-!!  the optical limit q-->0. Pseudopotentials with more than one
-!!  projector per angular channel are supported.
-!!
-!! INPUTS
-!!  npw_k=Number of planewaves for this k-point.
-!!  kpoint(3)=The kpoint in reduced coordinates.
-!!  psps<pseudopotential_type>Structure gathering info on the pseudopotentials.
-!!  rprimd(3,3)=dimensional primitive translations for real space (bohr)
-!!  kg_k(3,npw_k)=Set of G-vectors for this k-point.
-!!
-!! OUTPUT
-!!  KBff_k<KB_form_factor>=Structure storing the Kleynmann-Bylander form factor and derivatives for a single k-point.
-!!
-!! TODO 
-!!  Replace old implementation with this new routine. Matrix elements
-!!  of the commutator should be calculated on-the-fly in screening only
-!!  if really needed. This is the first step toward the elimination
-!!  of the KSS file. Modifications in cchi0q0 are needed.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
-!!
-!! SOURCE
-
-subroutine correct_init_kb_ffactors(KBff_k,cryst,psps,kpoint,npw_k,kg_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'correct_init_kb_ffactors'
- use interfaces_41_geometry
- use interfaces_66_nonlocal
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: npw_k
- type(kb_form_factors),intent(inout) :: KBff_k
- type(crystal_t),intent(in) :: Cryst
- type(Pseudopotential_type),intent(in) :: psps
-!arrays
- integer,intent(in) :: kg_k(3,npw_k)
- real(dp),intent(in) :: kpoint(3)
-
-!Local variables ------------------------------
-!scalars
- integer :: dimffnl,ider,idir,itypat,nkpg
- integer :: il,ilmn,iln,iln0,nlmn,ig
- real(dp) :: fact
- !real(dp) :: ,effmass,ecutsm
- !character(len=500) :: msg
-!arrays
- real(dp) :: kpg(3) 
- real(dp),allocatable :: ffnl(:,:,:,:),kpg_dum(:,:),modkplusg(:)
- real(dp),allocatable :: ylm(:,:),ylm_gr(:,:,:),ylm_k(:,:)
-
-! *************************************************************************
-
- DBG_ENTER("COLL")
- ABI_CHECK(psps%usepaw==0,"You should not be here!")
-
- ! Save KB dyadic sign (integer-valued) ===
- ! * Notice how the ordering is chosen correctly unlike in outkss.
- ! * More than one projector per angular channel is allowed but changes in cchi0q0 are needed
- !  allocate(KBff_ksign(psps%mpsang,ntypat))  THIS THE OLD IMPLEMENTATION
- ABI_MALLOC(KBff_k%sign_dyad, (psps%lnmax,Psps%ntypat))
- KBff_k%sign_dyad(:,:) = 0
-
- do itypat=1,psps%ntypat
-   nlmn = count(psps%indlmn(3,:,itypat)>0)
-   iln0=0 
-   do ilmn=1,nlmn
-     iln=psps%indlmn(5,ilmn,itypat)
-     if (iln>iln0) then
-       iln0=iln
-       KBff_k%sign_dyad(iln,itypat)=NINT(DSIGN(one,psps%ekb(ilmn,itypat)))
-     end if
-   end do
- end do
-
- KBff_k%npw    = npw_k
- KBff_k%lnmax  = psps%lnmax
- KBff_k%ntypat = psps%ntypat
-
- ! === Allocate KB form factor and derivative wrt k+G ===
- ! * Also here we use correct ordering for dimensions
- ABI_MALLOC(KBff_k%ff ,(npw_k,psps%lnmax,Psps%ntypat))
- ABI_MALLOC(KBff_k%ffd,(npw_k,psps%lnmax,Psps%ntypat))
- KBff_k%ff(:,:,:)=zero ; KBff_k%ffd(:,:,:)=zero
- 
- ider=1 ; dimffnl=2 ! To retrieve the first derivative.
- idir=0 ; nkpg=0
- !
- ! Quantities used only if useylm==1
- ABI_MALLOC(ylm,(npw_k,psps%mpsang**2*Psps%useylm))
- ABI_MALLOC(ylm_gr,(npw_k,3+6*(ider/2),psps%mpsang**2*Psps%useylm))
- ABI_MALLOC(ylm_k,(npw_k,psps%mpsang**2*Psps%useylm))
- ABI_MALLOC(kpg_dum,(npw_k,nkpg))
-
- ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,Psps%ntypat))
-
- call mkffnl(psps%dimekb,dimffnl,Psps%ekb,ffnl,Psps%ffspl,cryst%gmet,cryst%gprimd,ider,idir,Psps%indlmn,&
-   kg_k,kpg_dum,kpoint,psps%lmnmax,Psps%lnmax,Psps%mpsang,Psps%mqgrid_ff,nkpg,npw_k,& 
-   psps%ntypat,Psps%pspso,Psps%qgrid_ff,cryst%rmet,Psps%usepaw,Psps%useylm,ylm_k,ylm_gr)
-
- ABI_FREE(kpg_dum)
- ABI_FREE(ylm)
- ABI_FREE(ylm_gr)
- ABI_FREE(ylm_k)
-
- ABI_MALLOC(modkplusg,(npw_k))
-
- !effmass=one; ecutsm=zero
- !call mkkin(ecut,ecutsm,effmass,cryst%gmet,kg_k,modkplusg,kpoint,npw_k, 0, 0)
- !modkplusg(:)=SQRT(half/pi**2*modkplusg(:))
- !modkplusg(:)=MAX(modkplusg(:),tol10)
-
- do ig=1,npw_k
-   kpg(:)= kpoint(:)+kg_k(:,ig)
-   modkplusg(ig) = normv(kpg,cryst%gmet,"G")
- end do
-
- do itypat=1,psps%ntypat
-   nlmn=COUNT(psps%indlmn(3,:,itypat)>0)
-   iln0=0 
-   do ilmn=1,nlmn
-     il= psps%indlmn(1,ilmn,itypat)+1
-     iln=psps%indlmn(5,ilmn,itypat)
-
-     if (iln>iln0) then
-       iln0=iln
-
-       if (ABS(psps%ekb(ilmn,itypat))>1.0d-10) then
-         SELECT CASE (il)
-         CASE (1)
-           KBff_k%ff (1:npw_k,iln,itypat) = ffnl(:,1,ilmn,itypat)
-           KBff_k%ffd(1:npw_k,iln,itypat) = ffnl(:,2,ilmn,itypat)*modkplusg(:)/two_pi
-
-         CASE (2)
-           KBff_k%ff (1:npw_k,iln,itypat) =   ffnl(:,1,ilmn,itypat)*modkplusg(:)
-           KBff_k%ffd(1:npw_k,iln,itypat) = ((ffnl(:,2,ilmn,itypat)*modkplusg(:)**2)+&
-                                              ffnl(:,1,ilmn,itypat))/two_pi
-         CASE (3)
-           KBff_k%ff (1:npw_k,iln,itypat) =  ffnl(:,1,ilmn,itypat)*modkplusg(:)**2
-           KBff_k%ffd(1:npw_k,iln,itypat) = (ffnl(:,2,ilmn,itypat)*modkplusg(:)**3+&
-                                           2*ffnl(:,1,ilmn,itypat)*modkplusg(:))/two_pi
-         CASE (4)
-           KBff_k%ff (1:npw_k,iln,itypat) =  ffnl(:,1,ilmn,itypat)*modkplusg(:)**3
-           KBff_k%ffd(1:npw_k,iln,itypat) = (ffnl(:,2,ilmn,itypat)*modkplusg(:)**4+&
-                                           3*ffnl(:,1,ilmn,itypat)*modkplusg(:)**2)/two_pi
-         CASE DEFAULT
-           MSG_ERROR('l greater than g not implemented.')
-         END SELECT
-
-         fact = SQRT(four_pi/cryst%ucvol*(2*il-1)*ABS(psps%ekb(ilmn,itypat)))
-         KBff_k%ff (:,iln,itypat) = fact * KBff_k%ff (:,iln,itypat)
-         KBff_k%ffd(:,iln,itypat) = fact * KBff_k%ffd(:,iln,itypat)
-
-       else ! ekb==0
-         KBff_k%ff (:,iln,itypat)=zero
-         KBff_k%ffd(:,iln,itypat)=zero
-       end if
-
-     end if
-   end do
- end do
-
- ABI_FREE(ffnl)
- ABI_FREE(modkplusg)
-
- DBG_EXIT("COLL")
-
-end subroutine correct_init_kb_ffactors
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_commutator_vkbr/kb_ffactors_free
-!! NAME
-!!  kb_ffactors_free
-!!
-!! FUNCTION
-!!  Free the memory allocated in a structure of type kb_form_factors
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
-!!
-!! SOURCE
-
-subroutine kb_ffactors_free(KBff_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'kb_ffactors_free'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- type(kb_form_factors),intent(inout) :: KBff_k
-
-!************************************************************************
-
- !@kb_form_factors
-
-!integer 
- if (allocated(KBff_k%sign_dyad)) then
-   ABI_FREE(KBff_k%sign_dyad)
- end if
-
-!real
- if (allocated(KBff_k%ff )) then
-   ABI_FREE(KBff_k%ff)
- end if
- if (allocated(KBff_k%ffd)) then
-   ABI_FREE(KBff_k%ffd)
- end if
-
-end subroutine kb_ffactors_free
-!!***
 
 !----------------------------------------------------------------------
 
@@ -461,7 +180,6 @@ subroutine kb_potential_init(kbgrad_k,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
  !ABI_MALLOC(vkbsign,(psps%lnmax, cryst%ntypat))
  !ABI_MALLOC(vkb ,(npw, psps%lnmax, cryst%ntypat))
  !ABI_MALLOC(vkbd,(npw, psps%lnmax, cryst%ntypat))
-
  call calc_vkb(cryst,psps,kpoint,npw,gvec,vkbsign,vkb,vkbd)
  
  select case (inclvkb)
@@ -522,8 +240,6 @@ subroutine kb_potential_free_0D(kbgrad_k)
 
 !************************************************************************
 
- !@kb_potential
-
 !complex
  if (allocated(kbgrad_k%fnl)) then
    ABI_FREE(kbgrad_k%fnl)
@@ -537,9 +253,9 @@ end subroutine kb_potential_free_0D
 
 !----------------------------------------------------------------------
 
-!!****f* m_commutator_vkbr/kp_potential_free_1D
+!!****f* m_commutator_vkbr/kb_potential_free_1D
 !! NAME
-!!  kp_potential_free_1D
+!!  kb_potential_free_1D
 !!
 !! FUNCTION
 !!  Free all memory allocated in a structure of type kb_potential
@@ -551,13 +267,13 @@ end subroutine kb_potential_free_0D
 !!
 !! SOURCE
 
-subroutine kp_potential_free_1D(kbgrad_k)
+subroutine kb_potential_free_1D(kbgrad_k)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'kp_potential_free_1D'
+#define ABI_FUNC 'kb_potential_free_1D'
 !End of the abilint section
 
  implicit none
@@ -576,7 +292,7 @@ subroutine kp_potential_free_1D(kbgrad_k)
    call kb_potential_free_0D(kbgrad_k(ii))
  end do
 
-end subroutine kp_potential_free_1D
+end subroutine kb_potential_free_1D
 !!***
 
 !----------------------------------------------------------------------
@@ -652,20 +368,18 @@ subroutine add_vnlr_commutator(kbgrad_k,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
 
 !************************************************************************
 
- ! === Adding term i <c,k|[Vnl,r]|v,k> === 
- ! * Two different algorithms are coded, the second one is much faster
-
+ ! Adding term i <c,k|[Vnl,r]|v,k> === 
  select case (kbgrad_k%inclvkb)
- case (2)  ! Complex spherical harmonics (much faster!).
-
+ case (2)  
+  ! Complex spherical harmonics (much faster!).
   dum=czero_gw; gamma_term=czero
+
 !TODO this section causes segmentation faults
   !!!!!!!!$OMP PARALLEL DO PRIVATE(cta1,cta2,cta3,cta4) COLLAPSE(2) REDUCTION(+:dum,gamma_term)
   do iat=1,kbgrad_k%natom
     itypat = cryst%typat(iat)
-    !psps%indlmn(6, lmnmax, itypat)
-    ! array giving l,m,n,lm,ln,spin for i=ln  (if useylm=0)
-
+    !nlmn = count(psps%indlmn(3,:,itypat) > 0)
+    !do ilmn=1,nlmn
     !il = 1 + psps%indlmn(1,ilmn,itypat)
     !im = psps%indlmn(2,ilmn,itypat)
     !in = psps%indlmn(3,ilmn,itypat)
@@ -770,7 +484,7 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
 
 !Local variables ------------------------------
 !scalars
- integer :: dimffnl,ider,idir,itypat,nkpg,il0,in,il,ilmn,ig,iln,iln0
+ integer :: dimffnl,ider,idir,itypat,nkpg,il0,in,il,ilmn,ig,iln,iln0,nlmn
  real(dp) :: effmass,ecutsm,ecut
 !arrays
  real(dp),allocatable :: ffnl(:,:,:,:),kpg_dum(:,:),modkplusg(:),ylm_gr(:,:,:),ylm_k(:,:)
@@ -786,6 +500,7 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
  do itypat=1,psps%ntypat
    il0 = 0 
    iln0 = 0 
+   !nlmn = count(psps%indlmn(3,:,itypat) > 0)
    do ilmn=1,psps%lmnmax
      il = 1 + psps%indlmn(1,ilmn,itypat)
      in = psps%indlmn(3,ilmn,itypat)
@@ -794,21 +509,18 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
      !iln0 = iln
      if (il/=il0 .and. in==1) then
        il0=il
-       vkbsign(il,itypat) = DSIGN(one,psps%ekb(ilmn,itypat))
-       !vkbsign(iln,itypat) = dsign(one, psps%ekb(ilmn,itypat))
+       vkbsign(iln,itypat) = dsign(one, psps%ekb(iln,itypat))
      end if
    end do
  end do
 
  ! Allocate KB form factor and derivative wrt k+G
  ! * Here we do not use correct ordering for dimensions
- 
- ider=1; dimffnl=2 ! To retrieve the first derivative.
- idir=0; nkpg=0
+ idir=0; nkpg=0; ider=1; dimffnl=2 ! To retrieve the first derivative.
 
  ! Quantities used only if useylm==1
  ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2*Psps%useylm))
- ABI_MALLOC(ylm_gr,(npw_k, 3+6*(ider/2),psps%mpsang**2*Psps%useylm))
+ ABI_MALLOC(ylm_gr, (npw_k, 3+6*(ider/2),psps%mpsang**2*Psps%useylm))
  ABI_MALLOC(kpg_dum, (npw_k, nkpg))
  ABI_MALLOC(ffnl, (npw_k,dimffnl, psps%lmnmax, psps%ntypat))
 
@@ -820,8 +532,8 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
  ABI_FREE(ylm_gr)
  ABI_FREE(kpg_dum)
 
- ABI_MALLOC(modkplusg,(npw_k))
- effmass=one; ecutsm=zero; ecut=HUGE(one)
+ ABI_MALLOC(modkplusg, (npw_k))
+ effmass = one; ecutsm = zero; ecut = huge(one)
  call mkkin(ecut,ecutsm,effmass,cryst%gmet,kg_k,modkplusg,kpoint,npw_k,0,0)
  modkplusg(:) = SQRT(half/pi**2*modkplusg(:))
  modkplusg(:) = MAX(modkplusg(:),tol10)
@@ -831,34 +543,39 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
 
  do itypat=1,psps%ntypat
    il0=0
+   iln0 = 0
+   !nlmn = count(psps%indlmn(3,:,itypat) > 0)
    do ilmn=1,psps%lmnmax
      il = 1 + psps%indlmn(1,ilmn,itypat)
      in = psps%indlmn(3,ilmn,itypat)
      iln = psps%indlmn(5,ilmn,itypat)
-     !if (ispinor/=indlmn(6,ilmn,itypat)) cycle
+     !write(*,*)ilmn, iln, il, in
+     !ABI_CHECK(iln == ilmn, "foo")
+     !if (iln <= iln0) cycle
+     !!iln0 = iln
      if ((il/=il0).and.(in==1)) then
        il0=il
-       if (ABS(psps%ekb(ilmn,itypat)) > 1.0d-10) then
+       if (ABS(psps%ekb(iln,itypat)) > 1.0d-10) then
          if (il==1) then
-           vkb (1:npw_k,il,itypat) = ffnl(:,1,ilmn,itypat)
-           vkbd(1:npw_k,il,itypat) = ffnl(:,2,ilmn,itypat)*modkplusg(:)/two_pi
+           vkb (1:npw_k,il,itypat) = ffnl(:,1,iln,itypat)
+           vkbd(1:npw_k,il,itypat) = ffnl(:,2,iln,itypat)*modkplusg(:)/two_pi
          else if (il==2) then
-           vkb(1:npw_k,il,itypat)  = ffnl(:,1,ilmn,itypat)*modkplusg(:)
+           vkb(1:npw_k,il,itypat)  = ffnl(:,1,iln,itypat)*modkplusg(:)
            do ig=1,npw_k
-             vkbd(ig,il,itypat) = ((ffnl(ig,2,ilmn,itypat)*modkplusg(ig)*modkplusg(ig))+&
-              ffnl(ig,1,ilmn,itypat) )/two_pi
+             vkbd(ig,il,itypat) = ((ffnl(ig,2,iln,itypat)*modkplusg(ig)*modkplusg(ig))+&
+              ffnl(ig,1,iln,itypat) )/two_pi
            end do
          else if (il==3) then
-           vkb (1:npw_k,il,itypat) =  ffnl(:,1,ilmn,itypat)*modkplusg(:)**2
-           vkbd(1:npw_k,il,itypat) = (ffnl(:,2,ilmn,itypat)*modkplusg(:)**3+&
-            2*ffnl(:,1,ilmn,itypat)*modkplusg(:) )/two_pi
+           vkb (1:npw_k,il,itypat) =  ffnl(:,1,iln,itypat)*modkplusg(:)**2
+           vkbd(1:npw_k,il,itypat) = (ffnl(:,2,iln,itypat)*modkplusg(:)**3+&
+            2*ffnl(:,1,iln,itypat)*modkplusg(:) )/two_pi
          else if (il==4) then
-           vkb (1:npw_k,il,itypat) =  ffnl(:,1,ilmn,itypat)*modkplusg(:)**3
-           vkbd(1:npw_k,il,itypat) = (ffnl(:,2,ilmn,itypat)*modkplusg(:)**4+&
-            3*ffnl(:,1,ilmn,itypat)*modkplusg(:)**2 )/two_pi
+           vkb (1:npw_k,il,itypat) =  ffnl(:,1,iln,itypat)*modkplusg(:)**3
+           vkbd(1:npw_k,il,itypat) = (ffnl(:,2,iln,itypat)*modkplusg(:)**4+&
+            3*ffnl(:,1,iln,itypat)*modkplusg(:)**2 )/two_pi
          end if
-         vkb (:,il,itypat) = SQRT(4*pi/cryst%ucvol*(2*il-1)*ABS(psps%ekb(ilmn,itypat)))*vkb (:,il,itypat)
-         vkbd(:,il,itypat) = SQRT(4*pi/cryst%ucvol*(2*il-1)*ABS(psps%ekb(ilmn,itypat)))*vkbd(:,il,itypat)
+         vkb (:,il,itypat) = SQRT(4*pi/cryst%ucvol*(2*il-1)*ABS(psps%ekb(iln,itypat)))*vkb (:,il,itypat)
+         vkbd(:,il,itypat) = SQRT(4*pi/cryst%ucvol*(2*il-1)*ABS(psps%ekb(iln,itypat)))*vkbd(:,il,itypat)
        else
          vkb (:,il,itypat)=zero
          vkbd(:,il,itypat)=zero
@@ -1058,7 +775,7 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,l_fnl,l_fnl
 !Local variables-------------------------------
 !scalars
  integer,parameter :: nlx=4
- integer :: i,iat,ig,il,im,iml,itypat,lmax
+ integer :: ii,iat,ig,il,im,ilm,itypat,lmax
  real(dp),parameter :: ppad=tol8
  real(dp) :: cosphi,costh,factor,mkg,mkg2,sinphi,sinth,sq,xdotg
  complex(dpc) :: dphi,dth,sfac
@@ -1137,10 +854,10 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,l_fnl,l_fnl
        factor = SQRT(four_pi/REAL(2*(il-1)+1))
        do im=1,2*(il-1)+1
          ! Index of im and il
-         iml= im + (il-1)*(il-1)
+         ilm = im + (il-1)*(il-1)
 
          ! Calculate the first KB factor, note that l_fnl is simple precision complex
-         l_fnl(ig,iml,iat) = factor*sfac*ylmc(il-1,im-il,kcart) * vkb(ig,il,itypat) * vkbsign(il,itypat)
+         l_fnl(ig,ilm,iat) = factor*sfac*ylmc(il-1,im-il,kcart) * vkb(ig,il,itypat) * vkbsign(il,itypat)
 
          ! Calculate the second KB factor (involving first derivatives)
          ! dYlm/dK = dYlm/dth * grad_K th + dYlm/dphi + grad_K phi
@@ -1159,9 +876,9 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,l_fnl,l_fnl
          dylmcrys(3) = (a3(1)*dylmcart(1)+a3(2)*dylmcart(2)+a3(3)*dylmcart(3))/(two_pi)
 
          ! Note that l_fnld is simple precision complex, it could be possible to use double precision
-         do i=1,3
-           l_fnld(i,ig,iml,iat) = factor*sfac* &
-            ( kg(i)/mkg*ylmc(il-1,im-il,kcart)*vkbd(ig,il,itypat) + dylmcrys(i)*vkb(ig,il,itypat) )
+         do ii=1,3
+           l_fnld(ii,ig,ilm,iat) = factor*sfac* &
+            ( kg(ii)/mkg*ylmc(il-1,im-il,kcart)*vkbd(ig,il,itypat) + dylmcrys(ii)*vkb(ig,il,itypat) )
          end do 
 
        end do !im
@@ -1178,4 +895,3 @@ end subroutine ccgradvnl_ylm
 
 END MODULE m_commutator_vkbr
 !!***
-
