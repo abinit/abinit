@@ -361,7 +361,7 @@ subroutine add_vnlr_commutator(kbgrad_k,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
 
 !Local variables ------------------------------
 !scalars
- integer :: ig1,ig2,iat,ig,ilm,itypat
+ integer :: ig1,ig2,iat,ig,ilm,itypat,nlmn,ilmn,iln0,iln !il,im,in
  complex(gwpc) :: cta1,cta4,ct
 !arrays
  complex(gwpc) :: dum(3),cta2(3),cta3(3),gamma_term(3)
@@ -374,19 +374,19 @@ subroutine add_vnlr_commutator(kbgrad_k,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
   ! Complex spherical harmonics (much faster!).
   dum=czero_gw; gamma_term=czero
 
-!TODO this section causes segmentation faults
-  !!!!!!!!$OMP PARALLEL DO PRIVATE(cta1,cta2,cta3,cta4) COLLAPSE(2) REDUCTION(+:dum,gamma_term)
   do iat=1,kbgrad_k%natom
     itypat = cryst%typat(iat)
-    !nlmn = count(psps%indlmn(3,:,itypat) > 0)
-    !do ilmn=1,nlmn
-    !il = 1 + psps%indlmn(1,ilmn,itypat)
-    !im = psps%indlmn(2,ilmn,itypat)
-    !in = psps%indlmn(3,ilmn,itypat)
-    !iln = psps%indlmn(5,ilmn,itypat)
-    !if (indlmn(6,ilmn,itypat) /= 1) cycle
-    !if (iln <= iln0) cycle
-    !iln0 = iln
+    nlmn = count(psps%indlmn(3,:,itypat) > 0)
+    iln0 = 0
+    do ilmn=1,nlmn
+      !il = 1 + psps%indlmn(1,ilmn,itypat)
+      !im = psps%indlmn(2,ilmn,itypat)
+      !in = psps%indlmn(3,ilmn,itypat)
+      iln = psps%indlmn(5,ilmn,itypat)
+      !if (iln <= iln0) cycle
+      !iln0 = iln
+      !if (indlmn(6,ilmn,itypat) /= 1 .or. vkbsign(iln,itypat) == zero) cycle
+    end do
 
     do ilm=1,kbgrad_k%mpsang**2
       cta1 = czero_gw; cta2(:) = czero_gw
@@ -401,6 +401,7 @@ subroutine add_vnlr_commutator(kbgrad_k,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
       end do
       dum(:)= dum(:) + CONJG(cta1)*cta2(:) + CONJG(cta3(:))*cta4
     end do
+
   end do
 
   if (kbgrad_k%istwfk>1) then
@@ -484,7 +485,7 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
 
 !Local variables ------------------------------
 !scalars
- integer :: dimffnl,ider,idir,itypat,nkpg,il0,in,il,ilmn,ig,iln,iln0,nlmn
+ integer :: dimffnl,ider,idir,itypat,nkpg,in,il,ilmn,ig,iln,iln0,nlmn
  real(dp) :: effmass,ecutsm,ecut
 !arrays
  real(dp),allocatable :: ffnl(:,:,:,:),kpg_dum(:,:),modkplusg(:),ylm_gr(:,:,:),ylm_k(:,:)
@@ -495,22 +496,16 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
  ABI_CHECK(psps%usepaw==0, "You should not be here!")
  ABI_CHECK(psps%useylm==0, "useylm/=0 not considered!")
 
- ! Save KB dyadic sign (integer-valued)
+ ! Compute KB dyadic sign.
  vkbsign=zero
  do itypat=1,psps%ntypat
-   il0 = 0 
    iln0 = 0 
-   !nlmn = count(psps%indlmn(3,:,itypat) > 0)
-   do ilmn=1,psps%lmnmax
-     il = 1 + psps%indlmn(1,ilmn,itypat)
-     in = psps%indlmn(3,ilmn,itypat)
+   nlmn = count(psps%indlmn(3,:,itypat) > 0)
+   do ilmn=1,nlmn 
      iln = psps%indlmn(5,ilmn,itypat)
-     !if (iln <= iln0) cycle
-     !iln0 = iln
-     if (il/=il0 .and. in==1) then
-       il0=il
-       vkbsign(iln,itypat) = dsign(one, psps%ekb(iln,itypat))
-     end if
+     if (iln <= iln0) cycle
+     iln0 = iln
+     if (abs(psps%ekb(iln,itypat)) > 1.0d-10) vkbsign(iln,itypat) = dsign(one, psps%ekb(iln,itypat))
    end do
  end do
 
@@ -542,44 +537,39 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
  vkb=zero; vkbd=zero
 
  do itypat=1,psps%ntypat
-   il0=0
    iln0 = 0
-   !nlmn = count(psps%indlmn(3,:,itypat) > 0)
-   do ilmn=1,psps%lmnmax
+   nlmn = count(psps%indlmn(3,:,itypat) > 0)
+   do ilmn=1,nlmn
      il = 1 + psps%indlmn(1,ilmn,itypat)
      in = psps%indlmn(3,ilmn,itypat)
      iln = psps%indlmn(5,ilmn,itypat)
      !write(*,*)ilmn, iln, il, in
-     !ABI_CHECK(iln == ilmn, "foo")
-     !if (iln <= iln0) cycle
-     !!iln0 = iln
-     if ((il/=il0).and.(in==1)) then
-       il0=il
-       if (ABS(psps%ekb(iln,itypat)) > 1.0d-10) then
-         if (il==1) then
-           vkb (1:npw_k,il,itypat) = ffnl(:,1,iln,itypat)
-           vkbd(1:npw_k,il,itypat) = ffnl(:,2,iln,itypat)*modkplusg(:)/two_pi
-         else if (il==2) then
-           vkb(1:npw_k,il,itypat)  = ffnl(:,1,iln,itypat)*modkplusg(:)
-           do ig=1,npw_k
-             vkbd(ig,il,itypat) = ((ffnl(ig,2,iln,itypat)*modkplusg(ig)*modkplusg(ig))+&
-              ffnl(ig,1,iln,itypat) )/two_pi
-           end do
-         else if (il==3) then
-           vkb (1:npw_k,il,itypat) =  ffnl(:,1,iln,itypat)*modkplusg(:)**2
-           vkbd(1:npw_k,il,itypat) = (ffnl(:,2,iln,itypat)*modkplusg(:)**3+&
-            2*ffnl(:,1,iln,itypat)*modkplusg(:) )/two_pi
-         else if (il==4) then
-           vkb (1:npw_k,il,itypat) =  ffnl(:,1,iln,itypat)*modkplusg(:)**3
-           vkbd(1:npw_k,il,itypat) = (ffnl(:,2,iln,itypat)*modkplusg(:)**4+&
-            3*ffnl(:,1,iln,itypat)*modkplusg(:)**2 )/two_pi
-         end if
-         vkb (:,il,itypat) = SQRT(4*pi/cryst%ucvol*(2*il-1)*ABS(psps%ekb(iln,itypat)))*vkb (:,il,itypat)
-         vkbd(:,il,itypat) = SQRT(4*pi/cryst%ucvol*(2*il-1)*ABS(psps%ekb(iln,itypat)))*vkbd(:,il,itypat)
-       else
-         vkb (:,il,itypat)=zero
-         vkbd(:,il,itypat)=zero
+     if (iln <= iln0) cycle
+     iln0 = iln
+     !if (vkbsign(iln,itypat) == zero) cycle
+     if (ABS(psps%ekb(iln,itypat)) > 1.0d-10) then
+       ABI_CHECK(iln == ilmn, "iln != ilmn")
+       ABI_CHECK(il == iln, "il != iln")
+       if (il==1) then
+         vkb (1:npw_k,iln,itypat) = ffnl(:,1,iln,itypat)
+         vkbd(1:npw_k,iln,itypat) = ffnl(:,2,iln,itypat)*modkplusg(:)/two_pi
+       else if (il==2) then
+         vkb(1:npw_k,iln,itypat)  = ffnl(:,1,iln,itypat)*modkplusg(:)
+         do ig=1,npw_k
+           vkbd(ig,iln,itypat) = ((ffnl(ig,2,iln,itypat)*modkplusg(ig)*modkplusg(ig))+&
+            ffnl(ig,1,iln,itypat) )/two_pi
+         end do
+       else if (il==3) then
+         vkb (1:npw_k,iln,itypat) =  ffnl(:,1,iln,itypat)*modkplusg(:)**2
+         vkbd(1:npw_k,iln,itypat) = (ffnl(:,2,iln,itypat)*modkplusg(:)**3+&
+          2*ffnl(:,1,iln,itypat)*modkplusg(:) )/two_pi
+       else if (il==4) then
+         vkb (1:npw_k,iln,itypat) =  ffnl(:,1,iln,itypat)*modkplusg(:)**3
+         vkbd(1:npw_k,iln,itypat) = (ffnl(:,2,iln,itypat)*modkplusg(:)**4+&
+          3*ffnl(:,1,iln,itypat)*modkplusg(:)**2 )/two_pi
        end if
+       vkb (:,iln,itypat) = SQRT(4*pi/cryst%ucvol*(2*il-1)*ABS(psps%ekb(iln,itypat)))*vkb (:,iln,itypat)
+       vkbd(:,iln,itypat) = SQRT(4*pi/cryst%ucvol*(2*il-1)*ABS(psps%ekb(iln,itypat)))*vkbd(:,iln,itypat)
      end if
    end do
  end do
@@ -728,12 +718,12 @@ end function nc_ihr_comm
 !!  vkbd(npw,mpsang,ntypat)=derivative of the KB projector function in reciprocal space
 !!
 !! OUTPUT
-!!  l_fnl(npw,mpsang*2,natom),
-!!  l_fnld(3,npw,mpsang*2,natom)
+!!  fnl(npw,mpsang*2,natom),
+!!  fnld(3,npw,mpsang*2,natom)
 !!
 !! NOTES
 !!  Subroutine taken from the EXC code  
-!!  All the calculations are done in double precision, but the output arrays l_fnl and l_fnld 
+!!  All the calculations are done in double precision, but the output arrays fnl and fnld 
 !!  are in single precision, should use double precision after modification of the other subroutines 
 !!
 !!  TODO
@@ -747,7 +737,7 @@ end function nc_ihr_comm
 !!
 !! SOURCE
 
-subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,l_fnl,l_fnld)
+subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -769,13 +759,13 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,l_fnl,l_fnl
  real(dp),intent(in) :: vkb(npw,psps%mpsang,cryst%ntypat)
  real(dp),intent(in) :: vkbd(npw,psps%mpsang,cryst%ntypat) 
  real(dp),intent(in) :: vkbsign(psps%mpsang,Cryst%ntypat)
- complex(gwpc),intent(out) :: l_fnl(npw,psps%mpsang**2,cryst%natom)
- complex(gwpc),intent(out) :: l_fnld(3,npw,psps%mpsang**2,cryst%natom)
+ complex(gwpc),intent(out) :: fnl(npw,psps%mpsang**2,cryst%natom)
+ complex(gwpc),intent(out) :: fnld(3,npw,psps%mpsang**2,cryst%natom)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: nlx=4
- integer :: ii,iat,ig,il,im,ilm,itypat,lmax
+ integer :: ii,iat,ig,il,im,ilm,itypat,lmax,nlmn,iln0,iln,ilmn
  real(dp),parameter :: ppad=tol8
  real(dp) :: cosphi,costh,factor,mkg,mkg2,sinphi,sinth,sq,xdotg
  complex(dpc) :: dphi,dth,sfac
@@ -802,7 +792,7 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,l_fnl,l_fnl
  a3=cryst%rprimd(:,3); b3=two_pi*Cryst%gprimd(:,3)
 
  ! Calculate Kleiman-Bylander factor and first derivative.
- l_fnl=czero_gw; l_fnld=czero_gw
+ fnl=czero_gw; fnld=czero_gw
 
  do ig=1,npw
    ! Get kcart = k+G in Cartesian coordinates.
@@ -842,22 +832,28 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,l_fnl,l_fnl
      ! are defined such as a_i*b_j = 2pi delta_ij, no need to introduce 2pi
      sfac=CMPLX(COS(xdotg), SIN(xdotg)) 
 
-     !il = 1 + psps%indlmn(1,ilmn,itypat)
-     !im = psps%indlmn(2,ilmn,itypat)
-     !in = psps%indlmn(3,ilmn,itypat)
-     !iln = psps%indlmn(5,ilmn,itypat)
-     !if (indlmn(6,ilmn,itypat) /= 1) cycle
-     !if (iln <= iln0) cycle
-     !iln0 = iln
+     iln0 = 0
+     nlmn = count(psps%indlmn(3,:,itypat) > 0)
+     do ilmn=1,nlmn
+       il = 1 + psps%indlmn(1,ilmn,itypat)
+       !im = psps%indlmn(2,ilmn,itypat)
+       !in = psps%indlmn(3,ilmn,itypat)
+       iln = psps%indlmn(5,ilmn,itypat)
+       if (iln <= iln0) cycle
+       iln0 = iln
+       !if (psps%indlmn(6,ilmn,itypat) /= 1 .or. vkbsign(iln,itypat) == zero) cycle
+     end do
 
      do il=1,lmax
        factor = SQRT(four_pi/REAL(2*(il-1)+1))
+       iln = il
        do im=1,2*(il-1)+1
          ! Index of im and il
          ilm = im + (il-1)*(il-1)
+         !if (vkbsign(iln,itypat) == zero) cycle
 
-         ! Calculate the first KB factor, note that l_fnl is simple precision complex
-         l_fnl(ig,ilm,iat) = factor*sfac*ylmc(il-1,im-il,kcart) * vkb(ig,il,itypat) * vkbsign(il,itypat)
+         ! Calculate the first KB factor, note that fnl is simple precision complex
+         fnl(ig,ilm,iat) = factor*sfac*ylmc(il-1,im-il,kcart) * vkb(ig,iln,itypat) * vkbsign(iln,itypat)
 
          ! Calculate the second KB factor (involving first derivatives)
          ! dYlm/dK = dYlm/dth * grad_K th + dYlm/dphi + grad_K phi
@@ -875,10 +871,10 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,l_fnl,l_fnl
          dylmcrys(2) = (a2(1)*dylmcart(1)+a2(2)*dylmcart(2)+a2(3)*dylmcart(3))/(two_pi)
          dylmcrys(3) = (a3(1)*dylmcart(1)+a3(2)*dylmcart(2)+a3(3)*dylmcart(3))/(two_pi)
 
-         ! Note that l_fnld is simple precision complex, it could be possible to use double precision
+         ! Note that fnld is simple precision complex, it could be possible to use double precision
          do ii=1,3
-           l_fnld(ii,ig,ilm,iat) = factor*sfac* &
-            ( kg(ii)/mkg*ylmc(il-1,im-il,kcart)*vkbd(ig,il,itypat) + dylmcrys(ii)*vkb(ig,il,itypat) )
+           fnld(ii,ig,ilm,iat) = factor*sfac* &
+            ( kg(ii)/mkg*ylmc(il-1,im-il,kcart)*vkbd(ig,iln,itypat) + dylmcrys(ii)*vkb(ig,iln,itypat) )
          end do 
 
        end do !im
