@@ -239,7 +239,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
        if (Wfd%usepaw==0) then  
          ! Matrix elements of i[H,r] for NC pseudopotentials.        
-         comm_kbbs = nc_ihr_comm(KBgrad_k,cryst,npw_k,nspinor,istwf_k,inclvkb,Kmesh%ibz(:,ik_ibz),ug,ug,kg_k) 
+         comm_kbbs = nc_ihr_comm(KBgrad_k,cryst,psps,npw_k,nspinor,istwf_k,inclvkb,Kmesh%ibz(:,ik_ibz),ug,ug,kg_k) 
        else                     
          ! Matrix elements of i[H,r] for PAW.
          call wfd_get_cprj(Wfd,band,ik_ibz,spin,Cryst,Cp_bks,sorted=.FALSE.)

@@ -171,7 +171,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
 
        if (usepaw==0) then  
          ! Calculate matrix elements of i[H,r] for NC pseudopotentials.        
-         ihrc = nc_ihr_comm(KBgrad_k,cryst,npw_k,nspinor,istwf_k,inclvkb,Kmesh%ibz(:,ik_ibz),ug_c,ug_v,kg_k) 
+         ihrc = nc_ihr_comm(KBgrad_k,cryst,psps,npw_k,nspinor,istwf_k,inclvkb,Kmesh%ibz(:,ik_ibz),ug_c,ug_v,kg_k) 
 
        else 
          ! Matrix elements of i[H,r] for PAW.

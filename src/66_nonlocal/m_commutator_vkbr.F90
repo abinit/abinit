@@ -592,6 +592,7 @@ end subroutine kp_potential_free_1D
 !! INPUTS
 !!  kbgrad_k<kb_potential>
 !!  cryst<crystal_t>=Datatype gathering info on the crystal structure.
+!!  psps<pseudopotential_type>Structure gathering info on the pseudopotentials.
 !!  npw=Number of G for wavefunctions.
 !!  nspinor=Number of spinorial components.
 !!  ug1(npw*nspinor)=Left wavefunction.
@@ -621,7 +622,7 @@ end subroutine kp_potential_free_1D
 !!
 !! SOURCE
 
-subroutine add_vnlr_commutator(kbgrad_k,cryst,npw,nspinor,ug1,ug2,rhotwx)
+subroutine add_vnlr_commutator(kbgrad_k,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -637,6 +638,7 @@ subroutine add_vnlr_commutator(kbgrad_k,cryst,npw,nspinor,ug1,ug2,rhotwx)
  integer,intent(in) :: npw,nspinor
  type(kb_potential),intent(in) :: kbgrad_k
  type(crystal_t),intent(in) :: cryst
+ type(pseudopotential_type),intent(in) :: psps
 !arrays
  complex(gwpc),target,intent(in) :: ug1(npw*nspinor),ug2(npw*nspinor)
  complex(gwpc),intent(inout) :: rhotwx(3,nspinor**2)
@@ -663,6 +665,15 @@ subroutine add_vnlr_commutator(kbgrad_k,cryst,npw,nspinor,ug1,ug2,rhotwx)
     itypat = cryst%typat(iat)
     !psps%indlmn(6, lmnmax, itypat)
     ! array giving l,m,n,lm,ln,spin for i=ln  (if useylm=0)
+
+    !il = 1 + psps%indlmn(1,ilmn,itypat)
+    !im = psps%indlmn(2,ilmn,itypat)
+    !in = psps%indlmn(3,ilmn,itypat)
+    !iln = psps%indlmn(5,ilmn,itypat)
+    !if (indlmn(6,ilmn,itypat) /= 1) cycle
+    !if (iln <= iln0) cycle
+    !iln0 = iln
+
     do ilm=1,kbgrad_k%mpsang**2
       cta1 = czero_gw; cta2(:) = czero_gw
       cta4 = czero_gw; cta3(:) = czero_gw
@@ -674,7 +685,7 @@ subroutine add_vnlr_commutator(kbgrad_k,cryst,npw,nspinor,ug1,ug2,rhotwx)
         cta4   = cta4    + ug2(ig) * kbgrad_k%fnl (ig,ilm,iat)
         if (ig==1) gamma_term = gamma_term + CONJG(cta1)*cta2(:) +CONJG(cta3(:))*cta4
       end do
-      dum(:)= dum(:) +CONJG(cta1)*cta2(:) +CONJG(cta3(:))*cta4
+      dum(:)= dum(:) + CONJG(cta1)*cta2(:) + CONJG(cta3(:))*cta4
     end do
   end do
 
@@ -724,7 +735,7 @@ end subroutine add_vnlr_commutator
 !!  *) Fix the above mentioned programming sins (KSS FORTRAN fileformat has to be modified though)
 !!
 !! PARENTS
-!!      m_commutator_vkbr,m_io_kss
+!!      m_commutator_vkbr
 !!
 !! CHILDREN
 !!      wrtout
@@ -749,7 +760,7 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
 !scalars
  integer,intent(in) :: npw_k
  type(crystal_t),intent(in) :: cryst
- type(Pseudopotential_type),intent(in) :: psps
+ type(pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: kg_k(3,npw_k)
  real(dp),intent(in) :: kpoint(3) 
@@ -789,12 +800,12 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
    end do
  end do
 
- ! === Allocate KB form factor and derivative wrt k+G ===
+ ! Allocate KB form factor and derivative wrt k+G
  ! * Here we do not use correct ordering for dimensions
  
  ider=1; dimffnl=2 ! To retrieve the first derivative.
  idir=0; nkpg=0
- !
+
  ! Quantities used only if useylm==1
  ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2*Psps%useylm))
  ABI_MALLOC(ylm_gr,(npw_k, 3+6*(ider/2),psps%mpsang**2*Psps%useylm))
@@ -877,6 +888,7 @@ end subroutine calc_vkb
 !! INPUTS
 !!  kbgrad_k<kb_potential>
 !!  cryst<crystal_t>=Unit cell and symmetries
+!!  psps<pseudopotential_type>Structure gathering info on the pseudopotentials.
 !!  nspinor=Number of spinorial components.
 !!  npw=Number of G for wavefunctions.
 !!  istwfk=Storage mode for wavefunctions.
@@ -903,7 +915,7 @@ end subroutine calc_vkb
 !!
 !! SOURCE
 
-function nc_ihr_comm(kbgrad_k,cryst,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,gvec) result(ihr_comm)
+function nc_ihr_comm(kbgrad_k,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,gvec) result(ihr_comm)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -917,7 +929,8 @@ function nc_ihr_comm(kbgrad_k,cryst,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,gv
 !scalars
  integer,intent(in) :: npw,nspinor,inclvkb,istwfk
  type(kb_potential),intent(in) :: kbgrad_k
- type(crystal_t),intent(in) :: Cryst
+ type(crystal_t),intent(in) :: cryst
+ type(Pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: gvec(3,npw)
  real(dp),intent(in) :: kpoint(3)
@@ -970,7 +983,7 @@ function nc_ihr_comm(kbgrad_k,cryst,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,gv
    ABI_CHECK(nspinor == 1, "nspinor/=1 not coded")
    ABI_CHECK(istwfk == kbgrad_k%istwfk, "input istwfk /= kbgrad_k%istwfk")
    !ABI_CHECK(istwfk == 1, "istwfk /=1 not coded")
-   call add_vnlr_commutator(kbgrad_k,cryst,npw,nspinor,ug1,ug2,ihr_comm)
+   call add_vnlr_commutator(kbgrad_k,cryst,psps,npw,nspinor,ug1,ug2,ihr_comm)
  end if
 
 end function nc_ihr_comm
