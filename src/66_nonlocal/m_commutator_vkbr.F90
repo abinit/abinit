@@ -116,10 +116,6 @@ MODULE m_commutator_vkbr
   real(dp) :: kpoint(3)
   ! The k-point in reduced coordinates.
 
-  complex(gwpc),allocatable :: gradvnl(:,:,:)
-  ! gradvnl(3,npw,npw)
-  ! (grad_K + grad_K') Vnl(K,K') in reciprocal lattice units. used if inclvkb==0 (OBSOLETE)
-
   complex(gwpc),allocatable :: fnl(:,:,:)
   ! fnl(npw,mpsang*mpsang,natom)
 
@@ -140,7 +136,6 @@ MODULE m_commutator_vkbr
  public ::  calc_vkb
  public ::  nc_ihr_comm
 
- private ::  ccgradvnl        ! Compute (grad_K+grad_K') Vnl(K,K') using Legendre polynomials.
  private ::  ccgradvnl_ylm    ! Compute (grad_K+grad_K') Vnl(K,K') using complex spherical harmonics.
 
 CONTAINS  !========================================================================================
@@ -401,10 +396,9 @@ end subroutine ks_ffactors_free
 !!  Cryst<crystal_t>=Datatype gathering info on the crystal structure.
 !!  Psps<pseudopotential_type>Structure gathering info on the pseudopotentials.
 !!  inclvkb=Option defining the algorithm used for the application of [Vnl,r].
-!!   == 1 for Legendre polynomials (obsolete, very memory demanding and slow)
-!!   == 2 for Spherical harmonics (much faster and less memort demanding).
+!!    2 for Spherical harmonics
+!!  istwfk=Storage mode for the wavefunctions at this k-point.
 !!  npw=Number of planewaves in <k+G1|[Vnl,r]|k+G2>
-!!  inclvkb=Storage mode for the wavefunctions at this k-point.
 !!  kpoint(3)=K-point of interest in reduced coordinates.
 !!  gvec(3,npw)=Reduced coordinates of the G-vectors.
 !!
@@ -472,16 +466,6 @@ subroutine kb_potential_init(KBgrad_k,Cryst,Psps,inclvkb,istwfk,npw,kpoint,gvec)
  call calc_vkb(Psps,kpoint,npw,gvec,Cryst%rprimd,vkbsign,vkb,vkbd)
  
  SELECT CASE (inclvkb)
-
- CASE (1) ! * Legendre polynomials (CPU and mem ~npw^2) ===
-
-   ! gradvnl = (grad_K+grad_Kp) Vnl(K,Kp) in reciprocal lattice units.
-   write(msg,'(a,f12.1)')'out-of-memory gradvnl; Mb= ',3*npw**2*2*gwpc*b2Mb
-   ABI_STAT_MALLOC(KBgrad_k%gradvnl,(3,npw,npw), ierr)
-   ABI_CHECK(ierr==0, msg)
-
-   call ccgradvnl(npw,gvec,kpoint,Cryst,Psps%mpsang,vkbsign,vkb,vkbd,Kbgrad_k%gradvnl)
-
  CASE (2) ! * Complex spherical harmonics (CPU and mem \propto npw).
 
    write(msg,'(a,f12.1)')'out-of-memory fnl; Mb= ',npw*Psps%mpsang**2*Cryst%natom*2*gwpc*b2Mb
@@ -542,9 +526,6 @@ subroutine kp_potential_free_0D(KBgrad_k)
  !@kb_potential
 
 !complex
- if (allocated(KBgrad_k%gradvnl)) then
-   ABI_FREE(KBgrad_k%gradvnl)
- end if
  if (allocated(KBgrad_k%fnl)) then
    ABI_FREE(KBgrad_k%fnl)
  end if
@@ -673,24 +654,6 @@ subroutine add_vnlr_commutator(KBgrad_k,npw,nspinor,ug1,ug2,rhotwx)
  ! * Two different algorithms are coded, the second one is much faster
 
  SELECT CASE (KBgrad_k%inclvkb)
-
- CASE (1) ! Legendre Polynomials. CPU and MEM ~ npw**2 ===
-          ! res(1:3)= sum_{G1,G2} c(G1)^\dagger c(G2) V^{nl}_{1:3,G1,G2}
-  dum(:)=czero_gw
-  do ig1=1,npw
-    do ig2=1,npw
-      ct=CONJG(ug1(ig1))*ug2(ig2)
-      dum(:)=dum(:)+ct*KBgrad_k%gradvnl(:,ig1,ig2)
-    end do
-  end do
-
-  if (KBgrad_k%istwfk>1) then
-    dum=two*j_dpc*AIMAG(dum)
-    if (KBgrad_k%istwfk==2) dum=dum - CONJG(ug1(1))*ug2(1) * KBgrad_k%gradvnl(:,1,1)
-  end if
-
-  rhotwx(:,1)=rhotwx(:,1)+dum(:)
-
  CASE (2)  ! Complex spherical harmonics (much faster!).
 
   dum=czero_gw; gamma_term=czero
@@ -1188,235 +1151,6 @@ subroutine ccgradvnl_ylm(npw,Cryst,gvec,kpoint,mpsang,vkbsign,vkb,vkbd,l_fnl,l_f
  DBG_EXIT("COLL")
 
 end subroutine ccgradvnl_ylm
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* ABINIT/ccgradvnl
-!! NAME
-!! ccgradvnl
-!!
-!! FUNCTION
-!! Compute the (grad_K+grad_K') Vnl(K,K') (three reciprocal lattice units components)
-!! Needed for chi0(q=0)
-!!
-!! INPUTS
-!!  gvec(3,npw)=integer coordinates of each plane wave in reciprocal space
-!!  kibz(3,nkibz)=coordinates of all k points in the irreducible Brillouin zone
-!!  mpsang=1+maximum angular momentum for nonlocal pseudopotentials
-!!  Cryst<crystal_t>=data type gathering information on unit cell and symmetries
-!!    %natom=number of atoms
-!!    %typat(natom)=type of each atom
-!!    %ntypat=number of types of atoms
-!!    %xcart(3,natom)=cartesian coordinates of nuclei
-!!  nkibz=number of k points in the irreducible Brillouin zone
-!!  npw=number of planewaves for wavefunctions
-!!  vkb(npw,ntypat,mpsang,nkibz)=KB projector function
-!!  vkbd(npw,ntypat,mpsang,nkibz)=derivative of the KB projector function in reciprocal space
-!!  vkbsign(mpsang,ntypat)=sign of each KB dyadic product
-!!
-!! OUTPUT
-!!  gradvnl =(grad_K + grad_K') Vnl(K,K') in reciprocal lattice units
-!!  
-!! PARENTS
-!!      m_commutator_vkbr
-!!
-!! CHILDREN
-!!      wrtout
-!!
-!! SOURCE
-
-subroutine ccgradvnl(npw,gvec,kpoint,Cryst,mpsang,vkbsign,vkb,vkbd,gradvnl)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ccgradvnl'
- use interfaces_14_hidewrite
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: mpsang,npw
- type(crystal_t),intent(in) :: Cryst
-!arrays
- integer,intent(in) :: gvec(3,npw)
- real(dp),intent(in) :: kpoint(3),vkb(npw,Cryst%ntypat,mpsang)
- real(dp),intent(in) :: vkbd(npw,Cryst%ntypat,mpsang) 
- real(dp),intent(in) :: vkbsign(mpsang,Cryst%ntypat)
- complex(gwpc),intent(out) :: gradvnl(3,npw,npw)
-
-!Local variables ------------------------------
-!scalars
- integer :: ii,ia,ig,igd1,igd2,igd3,igp,il,is,lmax
- real(dp) :: mkg,mkg2,mkgkgp,mkgp,mkgp2,rgdx,rgdy,rgdz,taugd,x,x2,x3,x4,x5,x6,x7,xcostheta
- complex(dpc) :: cs,ct
- character(len=500) :: msg
-!arrays
- complex(dpc) :: sfac(Cryst%ntypat)
- integer,parameter :: nlx=8
- real(dp) :: pl(nlx),pld(nlx)
- real(dp) :: kg(3),kgp(3)
- real(dp) :: b1(3),b2(3),b3(3)
-!************************************************************************
-
- call wrtout(std_out,' limit q->0, including term <n,k|[Vnl,iqr]|n"k>','COLL')
-
- b1=two_pi*Cryst%gprimd(:,1)
- b2=two_pi*Cryst%gprimd(:,2)
- b3=two_pi*Cryst%gprimd(:,3)
-
- lmax=mpsang
- if(mpsang>nlx) then
-   write(msg,'(3a)')&
-&    'Number of angular momentum components bigger than programmed! ',ch10,&
-&    'Taking into account only s p d f g h i j '
-   MSG_WARNING(msg)
-   lmax=nlx
- end if
- !
- ! Legendre polynomials and their first derivatives
- ! s p d f g h i j  so up to PL_7 = pl(8)
- !
- pl(1)  = one
- pld(1) = zero
- !pl(2) = costheta
- pld(2) = 1.0
- !pl(3) = 1/2 ( 3 costheta**2 - 1 )
- !pld(3)= 3 costheta
-
- gradvnl = czero_gw
-
- do ig=1,npw
-   kg(:)=kpoint(:) + real(gvec(:,ig))
-   mkg2=scpdt(kg,kg,b1,b2,b3)
-   mkg=sqrt(mkg2)
-   ! The next to solve the problem with k=Gamma.
-   if (mkg < 0.0001) cycle
-
-   do igp=1,npw
-     kgp(:)=kpoint(:) + real(gvec(:,igp))
-     mkgp2=scpdt(kgp,kgp,b1,b2,b3)
-     mkgp=sqrt(mkgp2)
-     ! The next to solve the problem with k=Gamma.
-     if (mkgp < 0.0001) cycle
-
-     mkgkgp = mkg*mkgp
-     xcostheta = scpdt(kg,kgp,b1,b2,b3) / mkgkgp
-     x = xcostheta
-     x2 = x * x
-     x3 = x2 * x
-     x4 = x3 * x
-     x5 = x4 * x
-     x6 = x5 * x
-     x7 = x6 * x
-     !
-     ! Calculate legendre polynomial PL_0 = pl(1)
-     pl(2) = x
-     pl(3) = (3.0/2.0) * x2 - (1.0/2.0)
-     pl(4) = (5.0/2.0) * x3 - (3.0/2.0) * x
-     pl(5) = (35.0/8.0) * x4 - (30.0/8.0) * x2 + (3.0/8.0)
-     pl(6) = (63.0/8.0) * x5 - (70.0/8.0) * x3 + (15.0/8.0) * x
-     pl(7) = (231.0/16.0) * x6 - (315.0/16.0) * x4 + (105.0/16.0) * x2 - (5.0/16.0)
-     pl(8) = (429.0/16.0) * x7 - (693.0/16.0) * x5 + (315.0/16.0) * x3 - (35.0/16.0) * x
-     !
-     ! Calculate legendre polynomial derivative
-     pld(3) = 3.0 * x
-     pld(4) = (15.0/2.0) * x2 - (3.0/2.0)
-     pld(5) = (35.0/2.0) * x3 - (15.0/2.0) * x
-     pld(6) = (315.0/8.0) * x4 - (210.0/8.0) * x2 + (15.0/8.0)
-     pld(7) = (693.0/8.0) * x5 - (315.0/4.0) * x3 + (105.0/8.0) * x
-     pld(8) = (3003.0/16.0) * x6 - (3465.0/16.0) * x4 + (945.0/16.0) * x2 - (35.0/16.0)
-
-     igd1 = gvec(1,ig)-gvec(1,igp)
-     igd2 = gvec(2,ig)-gvec(2,igp)
-     igd3 = gvec(3,ig)-gvec(3,igp)
-     rgdx = igd1*b1(1)+igd2*b2(1)+igd3*b3(1)
-     rgdy = igd1*b1(2)+igd2*b2(2)+igd3*b3(2)
-     rgdz = igd1*b1(3)+igd2*b2(3)+igd3*b3(3)
-
-     do is=1,Cryst%ntypat
-       sfac(is) = czero
-       do ia=1,Cryst%natom
-         if (Cryst%typat(ia)/=is) CYCLE
-         taugd = rgdx*Cryst%xcart(1,ia)+rgdy*Cryst%xcart(2,ia)+ rgdz*Cryst%xcart(3,ia)
-         sfac(is) = sfac(is) + cmplx(cos(taugd),-sin(taugd))
-       end do
-     end do
-
-     do ii = 1, 3
-       gradvnl(ii,ig,igp) = 0.0
-       do is=1,Cryst%ntypat
-         do il = 1, lmax
-           ct =( kg(ii)*(1/mkgkgp - xcostheta/mkg2 ) + &
-&           kgp(ii)*(1/mkgkgp - xcostheta/mkgp2 ) ) * &
-&           pld(il) * vkbsign(il,is) * vkb(ig,is,il) * vkb(igp,is,il)
-           
-           cs = pl(il) * vkbsign(il,is) * &
-&           ( kg(ii)/mkg * vkbd(ig,is,il) * vkb(igp,is,il) + &
-&           kgp(ii)/mkgp * vkb(ig,is,il) * vkbd(igp,is,il) )
-           
-           gradvnl(ii,ig,igp) = gradvnl(ii,ig,igp) + sfac(is) * (ct + cs)
-         end do !il
-       end do !is
-     end do !ii
-
-   end do !igp
- end do !ig
-
- contains
-!!***
-
-!!****f* ccgradvnl/scpdt
-!! NAME
-!! scpdt
-!!
-!! FUNCTION
-!! Compute scalar product of two vectors u and v in reciprocal space
-!!
-!! INPUTS
-!!  b1(3),b2(3),b3(3)=the three primitive vectors in reciprocal space
-!!  u(3),v(3)=the two vectors
-!!
-!! OUTPUT
-!!  function scpdt=scalar product of u and v in reciprocal space
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-pure function scpdt(u,v,b1,b2,b3)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'scpdt'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- real(dp) :: scpdt
-!arrays
- real(dp),intent(in) :: b1(3),b2(3),b3(3),u(3),v(3)
-
-! *************************************************************************
- scpdt=&
-& (u(1)*b1(1)+u(2)*b2(1)+u(3)*b3(1))*(v(1)*b1(1)+v(2)*b2(1)+v(3)*b3(1))+&
-& (u(1)*b1(2)+u(2)*b2(2)+u(3)*b3(2))*(v(1)*b1(2)+v(2)*b2(2)+v(3)*b3(2))+&
-& (u(1)*b1(3)+u(2)*b2(3)+u(3)*b3(3))*(v(1)*b1(3)+v(2)*b2(3)+v(3)*b3(3))
-
-end function scpdt
-!!***
-
-end subroutine ccgradvnl
 !!***
 
 !----------------------------------------------------------------------
