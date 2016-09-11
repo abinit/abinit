@@ -153,7 +153,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!  npw_k=Number of planewaves for this k-point.
 !!  kpoint(3)=The kpoint in reduced coordinates.
-!!  Psps<pseudopotential_type>Structure gathering info on the pseudopotentials.
+!!  psps<pseudopotential_type>Structure gathering info on the pseudopotentials.
 !!  rprimd(3,3)=dimensional primitive translations for real space (bohr)
 !!  kg_k(3,npw_k)=Set of G-vectors for this k-point.
 !!
@@ -173,7 +173,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine correct_init_kb_ffactors(KBff_k,cryst,kpoint,npw_k,kg_k,Psps)
+subroutine correct_init_kb_ffactors(KBff_k,cryst,psps,kpoint,npw_k,kg_k)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -191,7 +191,7 @@ subroutine correct_init_kb_ffactors(KBff_k,cryst,kpoint,npw_k,kg_k,Psps)
  integer,intent(in) :: npw_k
  type(kb_form_factors),intent(inout) :: KBff_k
  type(crystal_t),intent(in) :: Cryst
- type(Pseudopotential_type),intent(in) :: Psps
+ type(Pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: kg_k(3,npw_k)
  real(dp),intent(in) :: kpoint(3)
@@ -211,51 +211,51 @@ subroutine correct_init_kb_ffactors(KBff_k,cryst,kpoint,npw_k,kg_k,Psps)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
- ABI_CHECK(Psps%usepaw==0,"You should not be here!")
+ ABI_CHECK(psps%usepaw==0,"You should not be here!")
 
  ! === Save KB dyadic sign (integer-valued) ===
  ! * Notice how the ordering is chosen correctly unlike in outkss.
  ! * More than one projector per angular channel is allowed but changes in cchi0q0 are needed
- !  allocate(KBff_ksign(Psps%mpsang,ntypat))  THIS THE OLD IMPLEMENTATION
- ABI_MALLOC(KBff_k%sign_dyad,(Psps%lnmax,Psps%ntypat))
- KBff_k%sign_dyad(:,:)=0
+ !  allocate(KBff_ksign(psps%mpsang,ntypat))  THIS THE OLD IMPLEMENTATION
+ ABI_MALLOC(KBff_k%sign_dyad, (psps%lnmax,Psps%ntypat))
+ KBff_k%sign_dyad(:,:) = 0
 
- do itypat=1,Psps%ntypat
-   nlmn=COUNT(Psps%indlmn(3,:,itypat)>0)
+ do itypat=1,psps%ntypat
+   nlmn = count(psps%indlmn(3,:,itypat)>0)
    iln0=0 
    do ilmn=1,nlmn
-     iln=Psps%indlmn(5,ilmn,itypat)
+     iln=psps%indlmn(5,ilmn,itypat)
      if (iln>iln0) then
        iln0=iln
-       KBff_k%sign_dyad(iln,itypat)=NINT(DSIGN(one,Psps%ekb(ilmn,itypat)))
+       KBff_k%sign_dyad(iln,itypat)=NINT(DSIGN(one,psps%ekb(ilmn,itypat)))
      end if
    end do
  end do
 
  KBff_k%npw    = npw_k
- KBff_k%lnmax  = Psps%lnmax
- KBff_k%ntypat = Psps%ntypat
+ KBff_k%lnmax  = psps%lnmax
+ KBff_k%ntypat = psps%ntypat
 
  ! === Allocate KB form factor and derivative wrt k+G ===
  ! * Also here we use correct ordering for dimensions
- ABI_MALLOC(KBff_k%ff ,(npw_k,Psps%lnmax,Psps%ntypat))
- ABI_MALLOC(KBff_k%ffd,(npw_k,Psps%lnmax,Psps%ntypat))
+ ABI_MALLOC(KBff_k%ff ,(npw_k,psps%lnmax,Psps%ntypat))
+ ABI_MALLOC(KBff_k%ffd,(npw_k,psps%lnmax,Psps%ntypat))
  KBff_k%ff(:,:,:)=zero ; KBff_k%ffd(:,:,:)=zero
  
  ider=1 ; dimffnl=2 ! To retrieve the first derivative.
  idir=0 ; nkpg=0
  !
  ! Quantities used only if useylm==1
- ABI_MALLOC(ylm,(npw_k,Psps%mpsang**2*Psps%useylm))
- ABI_MALLOC(ylm_gr,(npw_k,3+6*(ider/2),Psps%mpsang**2*Psps%useylm))
- ABI_MALLOC(ylm_k,(npw_k,Psps%mpsang**2*Psps%useylm))
+ ABI_MALLOC(ylm,(npw_k,psps%mpsang**2*Psps%useylm))
+ ABI_MALLOC(ylm_gr,(npw_k,3+6*(ider/2),psps%mpsang**2*Psps%useylm))
+ ABI_MALLOC(ylm_k,(npw_k,psps%mpsang**2*Psps%useylm))
  ABI_MALLOC(kpg_dum,(npw_k,nkpg))
 
- ABI_MALLOC(ffnl,(npw_k,dimffnl,Psps%lmnmax,Psps%ntypat))
+ ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,Psps%ntypat))
 
- call mkffnl(Psps%dimekb,dimffnl,Psps%ekb,ffnl,Psps%ffspl,cryst%gmet,cryst%gprimd,ider,idir,Psps%indlmn,&
-   kg_k,kpg_dum,kpoint,Psps%lmnmax,Psps%lnmax,Psps%mpsang,Psps%mqgrid_ff,nkpg,npw_k,& 
-   Psps%ntypat,Psps%pspso,Psps%qgrid_ff,cryst%rmet,Psps%usepaw,Psps%useylm,ylm_k,ylm_gr)
+ call mkffnl(psps%dimekb,dimffnl,Psps%ekb,ffnl,Psps%ffspl,cryst%gmet,cryst%gprimd,ider,idir,Psps%indlmn,&
+   kg_k,kpg_dum,kpoint,psps%lmnmax,Psps%lnmax,Psps%mpsang,Psps%mqgrid_ff,nkpg,npw_k,& 
+   psps%ntypat,Psps%pspso,Psps%qgrid_ff,cryst%rmet,Psps%usepaw,Psps%useylm,ylm_k,ylm_gr)
 
  ABI_FREE(kpg_dum)
  ABI_FREE(ylm)
@@ -274,17 +274,17 @@ subroutine correct_init_kb_ffactors(KBff_k,cryst,kpoint,npw_k,kg_k,Psps)
    modkplusg(ig) = normv(kpg,cryst%gmet,"G")
  end do
 
- do itypat=1,Psps%ntypat
-   nlmn=COUNT(Psps%indlmn(3,:,itypat)>0)
+ do itypat=1,psps%ntypat
+   nlmn=COUNT(psps%indlmn(3,:,itypat)>0)
    iln0=0 
    do ilmn=1,nlmn
-     il= Psps%indlmn(1,ilmn,itypat)+1
-     iln=Psps%indlmn(5,ilmn,itypat)
+     il= psps%indlmn(1,ilmn,itypat)+1
+     iln=psps%indlmn(5,ilmn,itypat)
 
      if (iln>iln0) then
        iln0=iln
 
-       if (ABS(Psps%ekb(ilmn,itypat))>1.0d-10) then
+       if (ABS(psps%ekb(ilmn,itypat))>1.0d-10) then
          SELECT CASE (il)
          CASE (1)
            KBff_k%ff (1:npw_k,iln,itypat) = ffnl(:,1,ilmn,itypat)
@@ -306,7 +306,7 @@ subroutine correct_init_kb_ffactors(KBff_k,cryst,kpoint,npw_k,kg_k,Psps)
            MSG_ERROR('l greater than g not implemented.')
          END SELECT
 
-         fact = SQRT(four_pi/cryst%ucvol*(2*il-1)*ABS(Psps%ekb(ilmn,itypat)))
+         fact = SQRT(four_pi/cryst%ucvol*(2*il-1)*ABS(psps%ekb(ilmn,itypat)))
          KBff_k%ff (:,iln,itypat) = fact * KBff_k%ff (:,iln,itypat)
          KBff_k%ffd(:,iln,itypat) = fact * KBff_k%ffd(:,iln,itypat)
 
@@ -388,8 +388,8 @@ end subroutine ks_ffactors_free
 !!  Creation method the the kb_potential structures datatype.
 !!
 !! INPUTS
-!!  Cryst<crystal_t>=Datatype gathering info on the crystal structure.
-!!  Psps<pseudopotential_type>Structure gathering info on the pseudopotentials.
+!!  cryst<crystal_t>=Datatype gathering info on the crystal structure.
+!!  psps<pseudopotential_type>Structure gathering info on the pseudopotentials.
 !!  inclvkb=Option defining the algorithm used for the application of [Vnl,r].
 !!    2 for Spherical harmonics
 !!  istwfk=Storage mode for the wavefunctions at this k-point.
@@ -409,7 +409,7 @@ end subroutine ks_ffactors_free
 !!
 !! SOURCE
 
-subroutine kb_potential_init(KBgrad_k,Cryst,Psps,inclvkb,istwfk,npw,kpoint,gvec)
+subroutine kb_potential_init(KBgrad_k,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -425,7 +425,7 @@ subroutine kb_potential_init(KBgrad_k,Cryst,Psps,inclvkb,istwfk,npw,kpoint,gvec)
  integer,intent(in) :: npw,inclvkb,istwfk
  type(crystal_t),intent(in) :: Cryst
  type(kb_potential),intent(inout) :: KBgrad_k
- type(pseudopotential_type),intent(in) :: Psps
+ type(pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: gvec(3,npw)
  real(dp),intent(in) :: kpoint(3)
@@ -441,9 +441,9 @@ subroutine kb_potential_init(KBgrad_k,Cryst,Psps,inclvkb,istwfk,npw,kpoint,gvec)
 
  !@kb_potential
  KBgrad_k%istwfk  = istwfk
- KBgrad_k%ntypat  = Cryst%ntypat
- KBgrad_k%natom   = Cryst%natom
- KBgrad_k%mpsang  = Psps%mpsang
+ KBgrad_k%ntypat  = cryst%ntypat
+ KBgrad_k%natom   = cryst%natom
+ KBgrad_k%mpsang  = psps%mpsang
  KBgrad_k%npw  = npw
  KBgrad_k%inclvkb = inclvkb
  KBgrad_k%kpoint  = kpoint
@@ -454,24 +454,24 @@ subroutine kb_potential_init(KBgrad_k,Cryst,Psps,inclvkb,istwfk,npw,kpoint,gvec)
  ! in order to support pseudos with more than projector.
  ! Moreover they should be calculated on-the-fly using calc_vkb
  ! For the moment, we opt for a quick an dirty implementation.
- ABI_MALLOC(vkbsign,(Psps%mpsang,Cryst%ntypat))
- ABI_MALLOC(vkb ,(npw,Cryst%ntypat,Psps%mpsang))
- ABI_MALLOC(vkbd,(npw,Cryst%ntypat,Psps%mpsang))
+ ABI_MALLOC(vkbsign,(psps%mpsang,cryst%ntypat))
+ ABI_MALLOC(vkb ,(npw,cryst%ntypat,psps%mpsang))
+ ABI_MALLOC(vkbd,(npw,cryst%ntypat,psps%mpsang))
 
- call calc_vkb(cryst,Psps,kpoint,npw,gvec,vkbsign,vkb,vkbd)
+ call calc_vkb(cryst,psps,kpoint,npw,gvec,vkbsign,vkb,vkbd)
  
  SELECT CASE (inclvkb)
  CASE (2) ! * Complex spherical harmonics (CPU and mem \propto npw).
 
-   write(msg,'(a,f12.1)')'out-of-memory in fnl; Mb= ',one*npw*Psps%mpsang**2*Cryst%natom*2*gwpc*b2Mb
-   ABI_STAT_MALLOC(KBgrad_k%fnl,(npw,Psps%mpsang**2,Cryst%natom), ierr)
+   write(msg,'(a,f12.1)')'out-of-memory in fnl; Mb= ',one*npw*psps%mpsang**2*cryst%natom*2*gwpc*b2Mb
+   ABI_STAT_MALLOC(KBgrad_k%fnl,(npw,psps%mpsang**2,cryst%natom), ierr)
    ABI_CHECK(ierr==0, msg)
 
-   write(msg,'(a,f12.1)')'out-of-memory in fnld; Mb= ',three*npw*Psps%mpsang**2*Cryst%natom*2*gwpc*b2Mb
-   ABI_STAT_MALLOC(KBgrad_k%fnld,(3,npw,Psps%mpsang**2,Cryst%natom), ierr)
+   write(msg,'(a,f12.1)')'out-of-memory in fnld; Mb= ',three*npw*psps%mpsang**2*cryst%natom*2*gwpc*b2Mb
+   ABI_STAT_MALLOC(KBgrad_k%fnld,(3,npw,psps%mpsang**2,cryst%natom), ierr)
    ABI_CHECK(ierr==0, msg)
 
-   call ccgradvnl_ylm(npw,Cryst,gvec,kpoint,Psps%mpsang,vkbsign,vkb,vkbd,KBgrad_k%fnl,KBgrad_k%fnld)
+   call ccgradvnl_ylm(npw,cryst,gvec,kpoint,psps%mpsang,vkbsign,vkb,vkbd,KBgrad_k%fnl,KBgrad_k%fnld)
 
  CASE DEFAULT
    MSG_ERROR(sjoin("Wrong inclvkb= ",itoa(inclvkb)))
@@ -587,7 +587,7 @@ end subroutine kp_potential_free_1D
 !!
 !! INPUTS
 !!  KBgrad_k<kb_potential>
-!!  Cryst<crystal_t>=Datatype gathering info on the crystal structure.
+!!  cryst<crystal_t>=Datatype gathering info on the crystal structure.
 !!  npw=Number of G for wavefunctions.
 !!  nspinor=Number of spinorial components.
 !!  ug1(npw*nspinor)=Left wavefunction.
@@ -698,17 +698,17 @@ end subroutine add_vnlr_commutator
 !!  needed for the evaluation of the matrix elements of the dipole operator <phi1|r|phi2>.
 !!
 !! INPUTS
-!!  Cryst<crystal_t>=Crystalline structure
-!!  Psps<pseudopotential_type>=Structured datatype gathering information on the pseudopotentials.
+!!  cryst<crystal_t>=Crystalline structure
+!!  psps<pseudopotential_type>=Structured datatype gathering information on the pseudopotentials.
 !!  kpoint(3)=The k-point in reduced coordinates.
 !!  npw_k=Number of plane waves for this k-point.
 !!  kg_k(3,npw_k)=Reduced coordinates of the G-vectors.
 !!  rprimd(3,3)=dimensional primitive translations for real space (bohr)
 !!
 !! OUTPUT
-!!  vkb (npw_k,Psps%ntypat,Psps%mpsang)=KB form factors.
-!!  vkbd(npw_k,Psps%ntypat,Psps%mpsang)=KB form factor derivatives.
-!!  vkbsign(Psps%mpsang,Psps%ntypat)   =KS dyadic sign.
+!!  vkb (npw_k,psps%ntypat,Psps%mpsang)=KB form factors.
+!!  vkbd(npw_k,psps%ntypat,Psps%mpsang)=KB form factor derivatives.
+!!  vkbsign(psps%mpsang,Psps%ntypat)   =KS dyadic sign.
 !!
 !! NOTES
 !!  This piece of code has been extracted from outkss.F90. The implementation is consistent
@@ -729,7 +729,7 @@ end subroutine add_vnlr_commutator
 !!
 !! SOURCE
 
-subroutine calc_vkb(cryst,Psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
+subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -747,17 +747,17 @@ subroutine calc_vkb(cryst,Psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
 !scalars
  integer,intent(in) :: npw_k
  type(crystal_t),intent(in) :: Cryst
- type(Pseudopotential_type),intent(in) :: Psps
+ type(Pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: kg_k(3,npw_k)
- real(dp),intent(in) :: kpoint(3) !,rprimd(3,3)
- real(dp),intent(out) :: vkb (npw_k,Psps%ntypat,Psps%mpsang)
- real(dp),intent(out) :: vkbd(npw_k,Psps%ntypat,Psps%mpsang)
- real(dp),intent(out) :: vkbsign(Psps%mpsang,Psps%ntypat)
+ real(dp),intent(in) :: kpoint(3) 
+ real(dp),intent(out) :: vkb (npw_k,psps%ntypat,Psps%mpsang)
+ real(dp),intent(out) :: vkbd(npw_k,psps%ntypat,Psps%mpsang)
+ real(dp),intent(out) :: vkbsign(psps%mpsang,Psps%ntypat)
 
 !Local variables ------------------------------
 !scalars
- integer :: dimffnl,ider,idir,itypat,nkpg,il0,in,il,ilmn,ig,is
+ integer :: dimffnl,ider,idir,itypat,nkpg,il0,in,il,ilmn,ig
  real(dp) :: effmass,ecutsm,ecut
 !arrays
  real(dp),allocatable :: ffnl(:,:,:,:),kpg_dum(:,:),modkplusg(:)
@@ -766,19 +766,19 @@ subroutine calc_vkb(cryst,Psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
- ABI_CHECK(Psps%usepaw==0,"You should not be here!")
- ABI_CHECK(Psps%useylm==0,"useylm/=0 not considered!")
+ ABI_CHECK(psps%usepaw==0,"You should not be here!")
+ ABI_CHECK(psps%useylm==0,"useylm/=0 not considered!")
  !
  ! === Save KB dyadic sign (integer-valued) ===
  vkbsign=zero
- do itypat=1,Psps%ntypat
+ do itypat=1,psps%ntypat
    il0=0 
-   do ilmn=1,Psps%lmnmax
-     il=1+Psps%indlmn(1,ilmn,itypat)
-     in=Psps%indlmn(3,ilmn,itypat)
+   do ilmn=1,psps%lmnmax
+     il=1+psps%indlmn(1,ilmn,itypat)
+     in=psps%indlmn(3,ilmn,itypat)
      if (il/=il0 .and. in==1) then
        il0=il
-       vkbsign(il,itypat)=DSIGN(one,Psps%ekb(ilmn,itypat))
+       vkbsign(il,itypat)=DSIGN(one,psps%ekb(ilmn,itypat))
      end if
    end do
  end do
@@ -790,15 +790,15 @@ subroutine calc_vkb(cryst,Psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
  idir=0; nkpg=0
  !
  ! Quantities used only if useylm==1
- ABI_MALLOC(ylm,(npw_k,Psps%mpsang**2*Psps%useylm))
- ABI_MALLOC(ylm_gr,(npw_k,3+6*(ider/2),Psps%mpsang**2*Psps%useylm))
- ABI_MALLOC(ylm_k,(npw_k,Psps%mpsang**2*Psps%useylm))
+ ABI_MALLOC(ylm,(npw_k,psps%mpsang**2*Psps%useylm))
+ ABI_MALLOC(ylm_gr,(npw_k,3+6*(ider/2),psps%mpsang**2*Psps%useylm))
+ ABI_MALLOC(ylm_k,(npw_k,psps%mpsang**2*Psps%useylm))
  ABI_MALLOC(kpg_dum,(npw_k,nkpg))
- ABI_MALLOC(ffnl,(npw_k,dimffnl,Psps%lmnmax,Psps%ntypat))
+ ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,Psps%ntypat))
 
- call mkffnl(Psps%dimekb,dimffnl,Psps%ekb,ffnl,Psps%ffspl,cryst%gmet,cryst%gprimd,ider,idir,Psps%indlmn,&
-   kg_k,kpg_dum,kpoint,Psps%lmnmax,Psps%lnmax,Psps%mpsang,Psps%mqgrid_ff,nkpg,npw_k,& 
-   Psps%ntypat,Psps%pspso,Psps%qgrid_ff,cryst%rmet,Psps%usepaw,Psps%useylm,ylm_k,ylm_gr)
+ call mkffnl(psps%dimekb,dimffnl,Psps%ekb,ffnl,Psps%ffspl,cryst%gmet,cryst%gprimd,ider,idir,Psps%indlmn,&
+   kg_k,kpg_dum,kpoint,psps%lmnmax,Psps%lnmax,Psps%mpsang,Psps%mqgrid_ff,nkpg,npw_k,& 
+   psps%ntypat,Psps%pspso,Psps%qgrid_ff,cryst%rmet,Psps%usepaw,Psps%useylm,ylm_k,ylm_gr)
 
  ABI_FREE(kpg_dum)
  ABI_FREE(ylm)
@@ -819,37 +819,37 @@ subroutine calc_vkb(cryst,Psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
  ! Calculate matrix elements.
  vkb=zero; vkbd=zero
 
- do is=1,Psps%ntypat
+ do itypat=1,psps%ntypat
    il0=0
-   do ilmn=1,Psps%lmnmax
-     il=1+Psps%indlmn(1,ilmn,is)
-     in=Psps%indlmn(3,ilmn,is)
+   do ilmn=1,psps%lmnmax
+     il = 1+psps%indlmn(1,ilmn,itypat)
+     in = psps%indlmn(3,ilmn,itypat)
      if ((il/=il0).and.(in==1)) then
        il0=il
-       if (ABS(Psps%ekb(ilmn,is))>1.0d-10) then
+       if (ABS(psps%ekb(ilmn,itypat))>1.0d-10) then
          if (il==1) then
-           vkb (1:npw_k,is,il) = ffnl(:,1,ilmn,is)
-           vkbd(1:npw_k,is,il) = ffnl(:,2,ilmn,is)*modkplusg(:)/two_pi
+           vkb (1:npw_k,itypat,il) = ffnl(:,1,ilmn,itypat)
+           vkbd(1:npw_k,itypat,il) = ffnl(:,2,ilmn,itypat)*modkplusg(:)/two_pi
          else if (il==2) then
-           vkb(1:npw_k,is,il)  = ffnl(:,1,ilmn,is)*modkplusg(:)
+           vkb(1:npw_k,itypat,il)  = ffnl(:,1,ilmn,itypat)*modkplusg(:)
            do ig=1,npw_k
-             vkbd(ig,is,il) = ((ffnl(ig,2,ilmn,is)*modkplusg(ig)*modkplusg(ig))+&
-              ffnl(ig,1,ilmn,is) )/two_pi
+             vkbd(ig,itypat,il) = ((ffnl(ig,2,ilmn,itypat)*modkplusg(ig)*modkplusg(ig))+&
+              ffnl(ig,1,ilmn,itypat) )/two_pi
            end do
          else if (il==3) then
-           vkb (1:npw_k,is,il) =  ffnl(:,1,ilmn,is)*modkplusg(:)**2
-           vkbd(1:npw_k,is,il) = (ffnl(:,2,ilmn,is)*modkplusg(:)**3+&
-            2*ffnl(:,1,ilmn,is)*modkplusg(:) )/two_pi
+           vkb (1:npw_k,itypat,il) =  ffnl(:,1,ilmn,itypat)*modkplusg(:)**2
+           vkbd(1:npw_k,itypat,il) = (ffnl(:,2,ilmn,itypat)*modkplusg(:)**3+&
+            2*ffnl(:,1,ilmn,itypat)*modkplusg(:) )/two_pi
          else if (il==4) then
-           vkb (1:npw_k,is,il) =  ffnl(:,1,ilmn,is)*modkplusg(:)**3
-           vkbd(1:npw_k,is,il) = (ffnl(:,2,ilmn,is)*modkplusg(:)**4+&
-            3*ffnl(:,1,ilmn,is)*modkplusg(:)**2 )/two_pi
+           vkb (1:npw_k,itypat,il) =  ffnl(:,1,ilmn,itypat)*modkplusg(:)**3
+           vkbd(1:npw_k,itypat,il) = (ffnl(:,2,ilmn,itypat)*modkplusg(:)**4+&
+            3*ffnl(:,1,ilmn,itypat)*modkplusg(:)**2 )/two_pi
          end if
-         vkb (:,is,il) = SQRT(4*pi/cryst%ucvol*(2*il-1)*ABS(Psps%ekb(ilmn,is)))*vkb (:,is,il)
-         vkbd(:,is,il) = SQRT(4*pi/cryst%ucvol*(2*il-1)*ABS(Psps%ekb(ilmn,is)))*vkbd(:,is,il)
+         vkb (:,itypat,il) = SQRT(4*pi/cryst%ucvol*(2*il-1)*ABS(psps%ekb(ilmn,itypat)))*vkb (:,itypat,il)
+         vkbd(:,itypat,il) = SQRT(4*pi/cryst%ucvol*(2*il-1)*ABS(psps%ekb(ilmn,itypat)))*vkbd(:,itypat,il)
        else
-         vkb (:,is,il)=zero
-         vkbd(:,is,il)=zero
+         vkb (:,itypat,il)=zero
+         vkbd(:,itypat,il)=zero
        end if
      end if
    end do
@@ -875,7 +875,7 @@ end subroutine calc_vkb
 !!
 !! INPUTS
 !!  KBgrad_k<kb_potential>
-!!  Cryst<crystal_t>=Unit cell and symmetries
+!!  cryst<crystal_t>=Unit cell and symmetries
 !!  nspinor=Number of spinorial components.
 !!  npw=Number of G for wavefunctions.
 !!  istwfk=Storage mode for wavefunctions.
@@ -987,7 +987,7 @@ end function nc_ihr_comm
 !!
 !! INPUTS
 !!  npw=number of planewaves for wavefunctions
-!!  Cryst<crystal_t>=Unit cell and symmetries
+!!  cryst<crystal_t>=Unit cell and symmetries
 !!  gvec(3,npw)=integer coordinates of each plane wave in reciprocal space
 !!  kpoint(3)=K-point in reduced coordinates.
 !!  mpsang=1+maximum angular momentum for nonlocal pseudopotentials
@@ -1013,7 +1013,7 @@ end function nc_ihr_comm
 !!
 !! SOURCE
 
-subroutine ccgradvnl_ylm(npw,Cryst,gvec,kpoint,mpsang,vkbsign,vkb,vkbd,l_fnl,l_fnld)
+subroutine ccgradvnl_ylm(npw,cryst,gvec,kpoint,mpsang,vkbsign,vkb,vkbd,l_fnl,l_fnld)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1031,10 +1031,10 @@ subroutine ccgradvnl_ylm(npw,Cryst,gvec,kpoint,mpsang,vkbsign,vkb,vkbd,l_fnl,l_f
 !arrays
  integer,intent(in) :: gvec(3,npw)
  real(dp),intent(in) :: kpoint(3)
- real(dp),intent(in) :: vkb(npw,Cryst%ntypat,mpsang)
- real(dp),intent(in) :: vkbd(npw,Cryst%ntypat,mpsang),vkbsign(mpsang,Cryst%ntypat)
- complex(gwpc),intent(out) :: l_fnl(npw,mpsang**2,Cryst%natom)
- complex(gwpc),intent(out) :: l_fnld(3,npw,mpsang**2,Cryst%natom)
+ real(dp),intent(in) :: vkb(npw,cryst%ntypat,mpsang)
+ real(dp),intent(in) :: vkbd(npw,cryst%ntypat,mpsang),vkbsign(mpsang,Cryst%ntypat)
+ complex(gwpc),intent(out) :: l_fnl(npw,mpsang**2,cryst%natom)
+ complex(gwpc),intent(out) :: l_fnld(3,npw,mpsang**2,cryst%natom)
 
 !Local variables-------------------------------
 !scalars
@@ -1061,9 +1061,9 @@ subroutine ccgradvnl_ylm(npw,Cryst,gvec,kpoint,mpsang,vkbsign,vkb,vkbd,l_fnl,l_f
    lmax=nlx
  end if
 
- a1=Cryst%rprimd(:,1) ; b1=two_pi*Cryst%gprimd(:,1)
- a2=Cryst%rprimd(:,2) ; b2=two_pi*Cryst%gprimd(:,2)
- a3=Cryst%rprimd(:,3) ; b3=two_pi*Cryst%gprimd(:,3)
+ a1=cryst%rprimd(:,1) ; b1=two_pi*Cryst%gprimd(:,1)
+ a2=cryst%rprimd(:,2) ; b2=two_pi*Cryst%gprimd(:,2)
+ a3=cryst%rprimd(:,3) ; b3=two_pi*Cryst%gprimd(:,3)
  !
  !
  ! === Calculate Kleiman-Bylander factor and first derivative ===
@@ -1100,9 +1100,9 @@ subroutine ccgradvnl_ylm(npw,Cryst,gvec,kpoint,mpsang,vkbsign,vkb,vkbd,l_fnl,l_f
    gradphi(2) = kcart(2)*kcart(1)/sq**3/sinphi
    gradphi(3) = czero
    
-   do iat=1,Cryst%natom
-     ityp=Cryst%typat(iat)
-     xdotg=gcart(1)*Cryst%xcart(1,iat)+gcart(2)*Cryst%xcart(2,iat)+gcart(3)*Cryst%xcart(3,iat)
+   do iat=1,cryst%natom
+     ityp=cryst%typat(iat)
+     xdotg=gcart(1)*cryst%xcart(1,iat)+gcart(2)*Cryst%xcart(2,iat)+gcart(3)*Cryst%xcart(3,iat)
      ! Remember that in the GW code the reciprocal vectors 
      ! are defined such as a_i*b_j = 2pi delta_ij, no need to introduce 2pi
      sfac=CMPLX(COS(xdotg),SIN(xdotg)) 
