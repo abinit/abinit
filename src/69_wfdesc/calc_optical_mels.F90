@@ -169,10 +169,12 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
        if (bbp_distrb(ib_v,ib_c)/=my_rank) CYCLE
        ug_c => Wfd%Wave(ib_c,ik_ibz,spin)%ug
 
-       if (usepaw==0) then  ! Calculate matrix elements of i[H,r] for NC pseudopotentials.        
-         ihrc = nc_ihr_comm(nspinor,npw_k,istwf_k,inclvkb,Kmesh%ibz(:,ik_ibz),KBgrad_k,ug_c,ug_v,kg_k) 
+       if (usepaw==0) then  
+         ! Calculate matrix elements of i[H,r] for NC pseudopotentials.        
+         ihrc = nc_ihr_comm(KBgrad_k,cryst,npw_k,nspinor,istwf_k,inclvkb,Kmesh%ibz(:,ik_ibz),ug_c,ug_v,kg_k) 
 
-       else ! Matrix elements of i[H,r] for PAW.
+       else 
+         ! Matrix elements of i[H,r] for PAW.
          call wfd_get_cprj(Wfd,ib_c,ik_ibz,spin,Cryst,Cp_c,sorted=.FALSE.)
 
          ihrc = paw_ihr(spin,nspinor,npw_k,istwf_k,Kmesh%ibz(:,ik_ibz),Cryst,Pawtab,ug_c,ug_v,kg_k,Cp_c,Cp_v,HUr)

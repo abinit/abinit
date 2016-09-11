@@ -237,9 +237,11 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
        band=my_band_list(lbidx)
        ug => Wfd%Wave(band,ik_ibz,spin)%ug
 
-       if (Wfd%usepaw==0) then  ! Matrix elements of i[H,r] for NC pseudopotentials.        
-         comm_kbbs = nc_ihr_comm(nspinor,npw_k,istwf_k,inclvkb,Kmesh%ibz(:,ik_ibz),KBgrad_k,ug,ug,kg_k) 
-       else                     ! Matrix elements of i[H,r] for PAW.
+       if (Wfd%usepaw==0) then  
+         ! Matrix elements of i[H,r] for NC pseudopotentials.        
+         comm_kbbs = nc_ihr_comm(KBgrad_k,cryst,npw_k,nspinor,istwf_k,inclvkb,Kmesh%ibz(:,ik_ibz),ug,ug,kg_k) 
+       else                     
+         ! Matrix elements of i[H,r] for PAW.
          call wfd_get_cprj(Wfd,band,ik_ibz,spin,Cryst,Cp_bks,sorted=.FALSE.)
          comm_kbbs = paw_ihr(spin,nspinor,npw_k,istwf_k,Kmesh%ibz(:,ik_ibz),Cryst,Pawtab,ug,ug,kg_k,Cp_bks,Cp_bks,HUr)
        end if

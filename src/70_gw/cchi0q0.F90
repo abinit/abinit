@@ -723,7 +723,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 #endif
 
          if (Psps%usepaw==0) then  ! Matrix elements of i[H,r] for NC pseudopotentials.        
-           rhotwx = nc_ihr_comm(nspinor,npw_k,istwf_k,Ep%inclvkb,Kmesh%ibz(:,ik_ibz),KBgrad_k(ik_ibz),ug1,ug2,kg_k) 
+           rhotwx = nc_ihr_comm(KBgrad_k(ik_ibz),cryst,npw_k,nspinor,istwf_k,Ep%inclvkb,Kmesh%ibz(:,ik_ibz),ug1,ug2,kg_k) 
 
          else 
            ! 1) Add PAW onsite contribution, projectors are already in the BZ.

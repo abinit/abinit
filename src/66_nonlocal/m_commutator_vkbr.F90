@@ -133,10 +133,7 @@ MODULE m_commutator_vkbr
    module procedure kp_potential_free_1D
  end interface kb_potential_free
 
- public ::  calc_vkb
  public ::  nc_ihr_comm
-
- private ::  ccgradvnl_ylm    ! Compute (grad_K+grad_K') Vnl(K,K') using complex spherical harmonics.
 
 CONTAINS  !========================================================================================
 
@@ -176,7 +173,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine correct_init_kb_ffactors(KBff_k,kpoint,rprimd,npw_k,kg_k,Psps)
+subroutine correct_init_kb_ffactors(KBff_k,cryst,kpoint,npw_k,kg_k,Psps)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -192,32 +189,30 @@ subroutine correct_init_kb_ffactors(KBff_k,kpoint,rprimd,npw_k,kg_k,Psps)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k
- type(Pseudopotential_type),intent(in) :: Psps
  type(kb_form_factors),intent(inout) :: KBff_k
+ type(crystal_t),intent(in) :: Cryst
+ type(Pseudopotential_type),intent(in) :: Psps
 !arrays
  integer,intent(in) :: kg_k(3,npw_k)
- real(dp),intent(in) :: kpoint(3),rprimd(3,3)
+ real(dp),intent(in) :: kpoint(3)
 
 !Local variables ------------------------------
 !scalars
  integer :: dimffnl,ider,idir,itypat,nkpg
  integer :: il,ilmn,iln,iln0,nlmn,ig
- real(dp) :: fact,ucvol
+ real(dp) :: fact
  !real(dp) :: ,effmass,ecutsm
  !character(len=500) :: msg
 !arrays
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),kpg(3)
+ real(dp) :: kpg(3) 
  real(dp),allocatable :: ffnl(:,:,:,:),kpg_dum(:,:),modkplusg(:)
  real(dp),allocatable :: ylm(:,:),ylm_gr(:,:,:),ylm_k(:,:)
 
 ! *************************************************************************
 
  DBG_ENTER("COLL")
-
  ABI_CHECK(Psps%usepaw==0,"You should not be here!")
 
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
- !
  ! === Save KB dyadic sign (integer-valued) ===
  ! * Notice how the ordering is chosen correctly unlike in outkss.
  ! * More than one projector per angular channel is allowed but changes in cchi0q0 are needed
@@ -258,9 +253,9 @@ subroutine correct_init_kb_ffactors(KBff_k,kpoint,rprimd,npw_k,kg_k,Psps)
 
  ABI_MALLOC(ffnl,(npw_k,dimffnl,Psps%lmnmax,Psps%ntypat))
 
- call mkffnl(Psps%dimekb,dimffnl,Psps%ekb,ffnl,Psps%ffspl,gmet,gprimd,ider,idir,Psps%indlmn,&
+ call mkffnl(Psps%dimekb,dimffnl,Psps%ekb,ffnl,Psps%ffspl,cryst%gmet,cryst%gprimd,ider,idir,Psps%indlmn,&
    kg_k,kpg_dum,kpoint,Psps%lmnmax,Psps%lnmax,Psps%mpsang,Psps%mqgrid_ff,nkpg,npw_k,& 
-   Psps%ntypat,Psps%pspso,Psps%qgrid_ff,rmet,Psps%usepaw,Psps%useylm,ylm_k,ylm_gr)
+   Psps%ntypat,Psps%pspso,Psps%qgrid_ff,cryst%rmet,Psps%usepaw,Psps%useylm,ylm_k,ylm_gr)
 
  ABI_FREE(kpg_dum)
  ABI_FREE(ylm)
@@ -270,13 +265,13 @@ subroutine correct_init_kb_ffactors(KBff_k,kpoint,rprimd,npw_k,kg_k,Psps)
  ABI_MALLOC(modkplusg,(npw_k))
 
  !effmass=one; ecutsm=zero
- !call mkkin(ecut,ecutsm,effmass,gmet,kg_k,modkplusg,kpoint,npw_k)
+ !call mkkin(ecut,ecutsm,effmass,cryst%gmet,kg_k,modkplusg,kpoint,npw_k, 0, 0)
  !modkplusg(:)=SQRT(half/pi**2*modkplusg(:))
  !modkplusg(:)=MAX(modkplusg(:),tol10)
 
  do ig=1,npw_k
    kpg(:)= kpoint(:)+kg_k(:,ig)
-   modkplusg(ig) = normv(kpg,gmet,"G")
+   modkplusg(ig) = normv(kpg,cryst%gmet,"G")
  end do
 
  do itypat=1,Psps%ntypat
@@ -311,7 +306,7 @@ subroutine correct_init_kb_ffactors(KBff_k,kpoint,rprimd,npw_k,kg_k,Psps)
            MSG_ERROR('l greater than g not implemented.')
          END SELECT
 
-         fact = SQRT(four_pi/ucvol*(2*il-1)*ABS(Psps%ekb(ilmn,itypat)))
+         fact = SQRT(four_pi/cryst%ucvol*(2*il-1)*ABS(Psps%ekb(ilmn,itypat)))
          KBff_k%ff (:,iln,itypat) = fact * KBff_k%ff (:,iln,itypat)
          KBff_k%ffd(:,iln,itypat) = fact * KBff_k%ffd(:,iln,itypat)
 
@@ -463,16 +458,16 @@ subroutine kb_potential_init(KBgrad_k,Cryst,Psps,inclvkb,istwfk,npw,kpoint,gvec)
  ABI_MALLOC(vkb ,(npw,Cryst%ntypat,Psps%mpsang))
  ABI_MALLOC(vkbd,(npw,Cryst%ntypat,Psps%mpsang))
 
- call calc_vkb(Psps,kpoint,npw,gvec,Cryst%rprimd,vkbsign,vkb,vkbd)
+ call calc_vkb(cryst,Psps,kpoint,npw,gvec,vkbsign,vkb,vkbd)
  
  SELECT CASE (inclvkb)
  CASE (2) ! * Complex spherical harmonics (CPU and mem \propto npw).
 
-   write(msg,'(a,f12.1)')'out-of-memory fnl; Mb= ',npw*Psps%mpsang**2*Cryst%natom*2*gwpc*b2Mb
+   write(msg,'(a,f12.1)')'out-of-memory in fnl; Mb= ',one*npw*Psps%mpsang**2*Cryst%natom*2*gwpc*b2Mb
    ABI_STAT_MALLOC(KBgrad_k%fnl,(npw,Psps%mpsang**2,Cryst%natom), ierr)
    ABI_CHECK(ierr==0, msg)
 
-   write(msg,'(a,f12.1)')'out-of-memory fnld; Mb= ',3*npw*Psps%mpsang**2*Cryst%natom*2*gwpc*b2Mb
+   write(msg,'(a,f12.1)')'out-of-memory in fnld; Mb= ',three*npw*Psps%mpsang**2*Cryst%natom*2*gwpc*b2Mb
    ABI_STAT_MALLOC(KBgrad_k%fnld,(3,npw,Psps%mpsang**2,Cryst%natom), ierr)
    ABI_CHECK(ierr==0, msg)
 
@@ -592,6 +587,7 @@ end subroutine kp_potential_free_1D
 !!
 !! INPUTS
 !!  KBgrad_k<kb_potential>
+!!  Cryst<crystal_t>=Datatype gathering info on the crystal structure.
 !!  npw=Number of G for wavefunctions.
 !!  nspinor=Number of spinorial components.
 !!  ug1(npw*nspinor)=Left wavefunction.
@@ -621,7 +617,7 @@ end subroutine kp_potential_free_1D
 !!
 !! SOURCE
 
-subroutine add_vnlr_commutator(KBgrad_k,npw,nspinor,ug1,ug2,rhotwx)
+subroutine add_vnlr_commutator(KBgrad_k,cryst,npw,nspinor,ug1,ug2,rhotwx)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -636,15 +632,15 @@ subroutine add_vnlr_commutator(KBgrad_k,npw,nspinor,ug1,ug2,rhotwx)
 !scalars
  integer,intent(in) :: npw,nspinor
  type(kb_potential),intent(in) :: KBgrad_k
+ type(crystal_t),intent(in) :: cryst
 !arrays
  complex(gwpc),target,intent(in) :: ug1(npw*nspinor),ug2(npw*nspinor)
  complex(gwpc),intent(inout) :: rhotwx(3,nspinor**2)
 
 !Local variables ------------------------------
 !scalars
- integer :: ig1,ig2,iat,ig,ilm
+ integer :: ig1,ig2,iat,ig,ilm,itypat
  complex(gwpc) :: cta1,cta4,ct
- !character(len=500) :: msg
 !arrays
  complex(gwpc) :: dum(3),cta2(3),cta3(3),gamma_term(3)
 
@@ -660,10 +656,14 @@ subroutine add_vnlr_commutator(KBgrad_k,npw,nspinor,ug1,ug2,rhotwx)
 !TODO this section causes segmentation faults
   !!!!!!!!$OMP PARALLEL DO PRIVATE(cta1,cta2,cta3,cta4) COLLAPSE(2) REDUCTION(+:dum,gamma_term)
   do iat=1,KBgrad_k%natom
+    itypat = cryst%typat(iat)
+    !psps%indlmn(6, lmnmax, itypat)
+    ! array giving l,m,n,lm,ln,spin for i=ln  (if useylm=0)
     do ilm=1,KBgrad_k%mpsang**2
-      cta1=czero_gw; cta2(:)=czero_gw
-      cta4=czero_gw; cta3(:)=czero_gw
-      do ig=1,npw ! Here we take advantage of the property Y_(l-m)= (-i)^m Y_lm^*.
+      cta1 = czero_gw; cta2(:) = czero_gw
+      cta4 = czero_gw; cta3(:) = czero_gw
+      do ig=1,npw 
+        ! Here we take advantage of the property Y_(l-m)= (-i)^m Y_lm^*.
         cta1   = cta1    + ug1(ig) * KBgrad_k%fnl (ig,ilm,iat)
         cta2(:)= cta2(:) + ug2(ig) * KBgrad_k%fnld(:,ig,ilm,iat)
         cta3(:)= cta3(:) + ug1(ig) * KBgrad_k%fnld(:,ig,ilm,iat)
@@ -675,10 +675,10 @@ subroutine add_vnlr_commutator(KBgrad_k,npw,nspinor,ug1,ug2,rhotwx)
   end do
 
   if (KBgrad_k%istwfk>1) then
-    dum=two*j_dpc*AIMAG(dum); if (KBgrad_k%istwfk==2) dum=dum-j_dpc*AIMAG(gamma_term)
+    dum = two * j_dpc * AIMAG(dum); if (KBgrad_k%istwfk==2) dum = dum - j_dpc * AIMAG(gamma_term)
   end if
 
-  rhotwx(:,1)=rhotwx(:,1)+dum(:)
+  rhotwx(:,1) = rhotwx(:,1) + dum(:)
 
  CASE DEFAULT
    MSG_ERROR(sjoin("Wrong inclvkb:", itoa(KBgrad_k%inclvkb)))
@@ -698,10 +698,11 @@ end subroutine add_vnlr_commutator
 !!  needed for the evaluation of the matrix elements of the dipole operator <phi1|r|phi2>.
 !!
 !! INPUTS
-!!  npw_k=Number of plane waves for this k-point.
+!!  Cryst<crystal_t>=Crystalline structure
 !!  Psps<pseudopotential_type>=Structured datatype gathering information on the pseudopotentials.
-!!  kg_k(3,npw_k)=Reduced coordinates of the G-vectors.
 !!  kpoint(3)=The k-point in reduced coordinates.
+!!  npw_k=Number of plane waves for this k-point.
+!!  kg_k(3,npw_k)=Reduced coordinates of the G-vectors.
 !!  rprimd(3,3)=dimensional primitive translations for real space (bohr)
 !!
 !! OUTPUT
@@ -728,7 +729,7 @@ end subroutine add_vnlr_commutator
 !!
 !! SOURCE
 
-subroutine calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
+subroutine calc_vkb(cryst,Psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -745,32 +746,28 @@ subroutine calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k
+ type(crystal_t),intent(in) :: Cryst
  type(Pseudopotential_type),intent(in) :: Psps
 !arrays
  integer,intent(in) :: kg_k(3,npw_k)
- real(dp),intent(in) :: kpoint(3),rprimd(3,3)
+ real(dp),intent(in) :: kpoint(3) !,rprimd(3,3)
  real(dp),intent(out) :: vkb (npw_k,Psps%ntypat,Psps%mpsang)
  real(dp),intent(out) :: vkbd(npw_k,Psps%ntypat,Psps%mpsang)
  real(dp),intent(out) :: vkbsign(Psps%mpsang,Psps%ntypat)
 
 !Local variables ------------------------------
 !scalars
- integer :: dimffnl,ider,idir,itypat,nkpg,il0,in
- integer :: il,ilmn,ig,is
- real(dp) :: ucvol,effmass,ecutsm,ecut
+ integer :: dimffnl,ider,idir,itypat,nkpg,il0,in,il,ilmn,ig,is
+ real(dp) :: effmass,ecutsm,ecut
 !arrays
- real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: ffnl(:,:,:,:),kpg_dum(:,:),modkplusg(:)
  real(dp),allocatable :: ylm(:,:),ylm_gr(:,:,:),ylm_k(:,:)
 
 ! *************************************************************************
 
  DBG_ENTER("COLL")
-
  ABI_CHECK(Psps%usepaw==0,"You should not be here!")
  ABI_CHECK(Psps%useylm==0,"useylm/=0 not considered!")
-
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  !
  ! === Save KB dyadic sign (integer-valued) ===
  vkbsign=zero
@@ -799,9 +796,9 @@ subroutine calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
  ABI_MALLOC(kpg_dum,(npw_k,nkpg))
  ABI_MALLOC(ffnl,(npw_k,dimffnl,Psps%lmnmax,Psps%ntypat))
 
- call mkffnl(Psps%dimekb,dimffnl,Psps%ekb,ffnl,Psps%ffspl,gmet,gprimd,ider,idir,Psps%indlmn,&
+ call mkffnl(Psps%dimekb,dimffnl,Psps%ekb,ffnl,Psps%ffspl,cryst%gmet,cryst%gprimd,ider,idir,Psps%indlmn,&
    kg_k,kpg_dum,kpoint,Psps%lmnmax,Psps%lnmax,Psps%mpsang,Psps%mqgrid_ff,nkpg,npw_k,& 
-   Psps%ntypat,Psps%pspso,Psps%qgrid_ff,rmet,Psps%usepaw,Psps%useylm,ylm_k,ylm_gr)
+   Psps%ntypat,Psps%pspso,Psps%qgrid_ff,cryst%rmet,Psps%usepaw,Psps%useylm,ylm_k,ylm_gr)
 
  ABI_FREE(kpg_dum)
  ABI_FREE(ylm)
@@ -809,16 +806,14 @@ subroutine calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
  ABI_FREE(ylm_k)
 
  ABI_MALLOC(modkplusg,(npw_k))
-
  effmass=one; ecutsm=zero; ecut=HUGE(one)
-! call mkkin(ecut,ecutsm,effmass,gmet,kg_k,modkplusg,kpoint,npw_k)
- call mkkin(ecut,ecutsm,effmass,gmet,kg_k,modkplusg,kpoint,npw_k,0,0)
+ call mkkin(ecut,ecutsm,effmass,cryst%gmet,kg_k,modkplusg,kpoint,npw_k,0,0)
  modkplusg(:)=SQRT(half/pi**2*modkplusg(:))
  modkplusg(:)=MAX(modkplusg(:),tol10)
 
  !do ig=1,npw_k
  ! kpg(:)= kpoint(:)+kg_k(:,ig)
- ! modkplusg(ig) = normv(kpg,gmet,"G")
+ ! modkplusg(ig) = normv(kpg,cryst%gmet,"G")
  !end do
 
  ! Calculate matrix elements.
@@ -850,8 +845,8 @@ subroutine calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
            vkbd(1:npw_k,is,il) = (ffnl(:,2,ilmn,is)*modkplusg(:)**4+&
             3*ffnl(:,1,ilmn,is)*modkplusg(:)**2 )/two_pi
          end if
-         vkb (:,is,il) = SQRT(4*pi/ucvol*(2*il-1)*ABS(Psps%ekb(ilmn,is)))*vkb (:,is,il)
-         vkbd(:,is,il) = SQRT(4*pi/ucvol*(2*il-1)*ABS(Psps%ekb(ilmn,is)))*vkbd(:,is,il)
+         vkb (:,is,il) = SQRT(4*pi/cryst%ucvol*(2*il-1)*ABS(Psps%ekb(ilmn,is)))*vkb (:,is,il)
+         vkbd(:,is,il) = SQRT(4*pi/cryst%ucvol*(2*il-1)*ABS(Psps%ekb(ilmn,is)))*vkbd(:,is,il)
        else
          vkb (:,is,il)=zero
          vkbd(:,is,il)=zero
@@ -879,12 +874,13 @@ end subroutine calc_vkb
 !!  For norm conserving potentials the commutator i[Vnl,r] is included depending on inclvkb. 
 !!
 !! INPUTS
+!!  KBgrad_k<kb_potential>
+!!  Cryst<crystal_t>=Unit cell and symmetries
 !!  nspinor=Number of spinorial components.
 !!  npw=Number of G for wavefunctions.
 !!  istwfk=Storage mode for wavefunctions.
 !!  inclvkb=Option defining whether [Vnl,r] is added or not.
 !!  kpoint(3)=k-point in reduced coordinates.
-!!  KBgrad_k<kb_potential>
 !!  ug1(npw*nspinor)=Left wavefunction.
 !!  ug2(npw*nspinor)=Right wavefunction
 !!  gvec(3,npw)=Planes waves for wavefunctions.
@@ -906,8 +902,7 @@ end subroutine calc_vkb
 !!
 !! SOURCE
 
-function nc_ihr_comm(nspinor,npw,istwfk,inclvkb,kpoint,KBgrad_k,ug1,ug2,gvec) result(ihr_comm)
-
+function nc_ihr_comm(Kbgrad_k,cryst,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,gvec) result(ihr_comm)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -921,6 +916,7 @@ function nc_ihr_comm(nspinor,npw,istwfk,inclvkb,kpoint,KBgrad_k,ug1,ug2,gvec) re
 !scalars
  integer,intent(in) :: npw,nspinor,inclvkb,istwfk
  type(kb_potential),intent(in) :: KBgrad_k
+ type(crystal_t),intent(in) :: Cryst
 !arrays
  integer,intent(in) :: gvec(3,npw)
  real(dp),intent(in) :: kpoint(3)
@@ -930,7 +926,6 @@ function nc_ihr_comm(nspinor,npw,istwfk,inclvkb,kpoint,KBgrad_k,ug1,ug2,gvec) re
 !Local variables ------------------------------
 !scalars
  integer :: ig,iab,spad1,spad2
- !character(len=500) :: msg
  complex(dpc) :: c_tmp
 !arrays
  integer :: spinorwf_pad(2,4)
@@ -973,7 +968,7 @@ function nc_ihr_comm(nspinor,npw,istwfk,inclvkb,kpoint,KBgrad_k,ug1,ug2,gvec) re
    ABI_CHECK(nspinor == 1, "nspinor/=1 not coded")
    ABI_CHECK(istwfk == KBgrad_k%istwfk,"input istwfk /= KBgrad_k%istwfk")
    !ABI_CHECK(istwfk == 1, "istwfk /=1 not coded")
-   call add_vnlr_commutator(KBgrad_k,npw,nspinor,ug1,ug2,ihr_comm)
+   call add_vnlr_commutator(KBgrad_k,cryst,npw,nspinor,ug1,ug2,ihr_comm)
  end if
 
 end function nc_ihr_comm
@@ -981,7 +976,7 @@ end function nc_ihr_comm
 
 !----------------------------------------------------------------------
 
-!!****f* ABINIT/ccgradvnl_ylm
+!!****f* m_commutator_vkbr/ccgradvnl_ylm
 !! NAME
 !! ccgradvnl_ylm
 !!
