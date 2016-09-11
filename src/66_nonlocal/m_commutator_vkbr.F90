@@ -423,7 +423,7 @@ subroutine kb_potential_init(KBgrad_k,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw,inclvkb,istwfk
- type(crystal_t),intent(in) :: Cryst
+ type(crystal_t),intent(in) :: cryst
  type(kb_potential),intent(inout) :: KBgrad_k
  type(pseudopotential_type),intent(in) :: psps
 !arrays
@@ -471,7 +471,7 @@ subroutine kb_potential_init(KBgrad_k,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
    ABI_STAT_MALLOC(KBgrad_k%fnld,(3,npw,psps%mpsang**2,cryst%natom), ierr)
    ABI_CHECK(ierr==0, msg)
 
-   call ccgradvnl_ylm(npw,cryst,gvec,kpoint,psps%mpsang,vkbsign,vkb,vkbd,KBgrad_k%fnl,KBgrad_k%fnld)
+   call ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,KBgrad_k%fnl,KBgrad_k%fnld)
 
  CASE DEFAULT
    MSG_ERROR(sjoin("Wrong inclvkb= ",itoa(inclvkb)))
@@ -745,7 +745,7 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npw_k
- type(crystal_t),intent(in) :: Cryst
+ type(crystal_t),intent(in) :: cryst
  type(Pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: kg_k(3,npw_k)
@@ -760,7 +760,7 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
  real(dp) :: effmass,ecutsm,ecut
 !arrays
  real(dp),allocatable :: ffnl(:,:,:,:),kpg_dum(:,:),modkplusg(:)
- real(dp),allocatable :: ylm(:,:),ylm_gr(:,:,:),ylm_k(:,:)
+ real(dp),allocatable :: ylm_gr(:,:,:),ylm_k(:,:)
 
 ! *************************************************************************
 
@@ -789,26 +789,24 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
  idir=0; nkpg=0
  !
  ! Quantities used only if useylm==1
- ABI_MALLOC(ylm,(npw_k,psps%mpsang**2*Psps%useylm))
- ABI_MALLOC(ylm_gr,(npw_k,3+6*(ider/2),psps%mpsang**2*Psps%useylm))
- ABI_MALLOC(ylm_k,(npw_k,psps%mpsang**2*Psps%useylm))
- ABI_MALLOC(kpg_dum,(npw_k,nkpg))
- ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,Psps%ntypat))
+ ABI_MALLOC(ylm_k, (npw_k, psps%mpsang**2*Psps%useylm))
+ ABI_MALLOC(ylm_gr,(npw_k, 3+6*(ider/2),psps%mpsang**2*Psps%useylm))
+ ABI_MALLOC(kpg_dum, (npw_k, nkpg))
+ ABI_MALLOC(ffnl, (npw_k,dimffnl, psps%lmnmax, psps%ntypat))
 
  call mkffnl(psps%dimekb,dimffnl,Psps%ekb,ffnl,Psps%ffspl,cryst%gmet,cryst%gprimd,ider,idir,Psps%indlmn,&
    kg_k,kpg_dum,kpoint,psps%lmnmax,Psps%lnmax,Psps%mpsang,Psps%mqgrid_ff,nkpg,npw_k,& 
    psps%ntypat,Psps%pspso,Psps%qgrid_ff,cryst%rmet,Psps%usepaw,Psps%useylm,ylm_k,ylm_gr)
 
- ABI_FREE(kpg_dum)
- ABI_FREE(ylm)
- ABI_FREE(ylm_gr)
  ABI_FREE(ylm_k)
+ ABI_FREE(ylm_gr)
+ ABI_FREE(kpg_dum)
 
  ABI_MALLOC(modkplusg,(npw_k))
  effmass=one; ecutsm=zero; ecut=HUGE(one)
  call mkkin(ecut,ecutsm,effmass,cryst%gmet,kg_k,modkplusg,kpoint,npw_k,0,0)
- modkplusg(:)=SQRT(half/pi**2*modkplusg(:))
- modkplusg(:)=MAX(modkplusg(:),tol10)
+ modkplusg(:) = SQRT(half/pi**2*modkplusg(:))
+ modkplusg(:) = MAX(modkplusg(:),tol10)
 
  !do ig=1,npw_k
  ! kpg(:)= kpoint(:)+kg_k(:,ig)
@@ -945,6 +943,7 @@ function nc_ihr_comm(Kbgrad_k,cryst,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,gv
  ihr_comm = czero
 
  ! -i <c,k|\nabla_r|v,k> in reduced coordinates.
+ ! FIXME: This term is  spin diagonal!
  if (istwfk==1) then
    do iab=1,nspinor**2
      spad1 = spinorwf_pad(1,iab)
@@ -965,7 +964,7 @@ function nc_ihr_comm(Kbgrad_k,cryst,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,gv
  ! Add second term $i <c,k|[Vnl,r]|v,k> in$ reduced cordinates.
  if (inclvkb/=0) then 
    ABI_CHECK(nspinor == 1, "nspinor/=1 not coded")
-   ABI_CHECK(istwfk == KBgrad_k%istwfk,"input istwfk /= KBgrad_k%istwfk")
+   ABI_CHECK(istwfk == KBgrad_k%istwfk, "input istwfk /= KBgrad_k%istwfk")
    !ABI_CHECK(istwfk == 1, "istwfk /=1 not coded")
    call add_vnlr_commutator(KBgrad_k,cryst,npw,nspinor,ug1,ug2,ihr_comm)
  end if
@@ -985,11 +984,11 @@ end function nc_ihr_comm
 !!  Needed for chi0(q=0)
 !!
 !! INPUTS
-!!  npw=number of planewaves for wavefunctions
 !!  cryst<crystal_t>=Unit cell and symmetries
+!!  psps<pseudopotential_type>Structure gathering info on the pseudopotentials.
+!!  npw=number of planewaves for wavefunctions
 !!  gvec(3,npw)=integer coordinates of each plane wave in reciprocal space
 !!  kpoint(3)=K-point in reduced coordinates.
-!!  mpsang=1+maximum angular momentum for nonlocal pseudopotentials
 !!  vkbsign(mpsang,ntypat)=sign of each KB dyadic product
 !!  vkb(npw,mpsang,ntypat)=KB projector function
 !!  vkbd(npw,mpsang,ntypat)=derivative of the KB projector function in reciprocal space
@@ -1002,7 +1001,9 @@ end function nc_ihr_comm
 !!  Subroutine taken from the EXC code  
 !!  All the calculations are done in double precision, but the output arrays l_fnl and l_fnld 
 !!  are in single precision, should use double precision after modification of the other subroutines 
-!!  the subroutine does not work wity pseudo with more that one projector per angular state TODO
+!!
+!!  TODO
+!!  the subroutine does not work wity pseudo with more that one projector per angular state 
 !!
 !! PARENTS
 !!      m_commutator_vkbr
@@ -1012,7 +1013,7 @@ end function nc_ihr_comm
 !!
 !! SOURCE
 
-subroutine ccgradvnl_ylm(npw,cryst,gvec,kpoint,mpsang,vkbsign,vkb,vkbd,l_fnl,l_fnld)
+subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,l_fnl,l_fnld)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1025,15 +1026,17 @@ subroutine ccgradvnl_ylm(npw,cryst,gvec,kpoint,mpsang,vkbsign,vkb,vkbd,l_fnl,l_f
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mpsang,npw
- type(crystal_t),intent(in) :: Cryst
+ integer,intent(in) :: npw
+ type(crystal_t),intent(in) :: cryst
+ type(pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: gvec(3,npw)
  real(dp),intent(in) :: kpoint(3)
- real(dp),intent(in) :: vkb(npw,mpsang,cryst%ntypat)
- real(dp),intent(in) :: vkbd(npw,mpsang,cryst%ntypat),vkbsign(mpsang,Cryst%ntypat)
- complex(gwpc),intent(out) :: l_fnl(npw,mpsang**2,cryst%natom)
- complex(gwpc),intent(out) :: l_fnld(3,npw,mpsang**2,cryst%natom)
+ real(dp),intent(in) :: vkb(npw,psps%mpsang,cryst%ntypat)
+ real(dp),intent(in) :: vkbd(npw,psps%mpsang,cryst%ntypat) 
+ real(dp),intent(in) :: vkbsign(psps%mpsang,Cryst%ntypat)
+ complex(gwpc),intent(out) :: l_fnl(npw,psps%mpsang**2,cryst%natom)
+ complex(gwpc),intent(out) :: l_fnld(3,npw,psps%mpsang**2,cryst%natom)
 
 !Local variables-------------------------------
 !scalars
@@ -1051,32 +1054,31 @@ subroutine ccgradvnl_ylm(npw,cryst,gvec,kpoint,mpsang,vkbsign,vkb,vkbd,l_fnl,l_f
 
  DBG_ENTER("COLL")
 
- lmax=mpsang
- if (mpsang>nlx) then
+ lmax = psps%mpsang
+ if (psps%mpsang > nlx) then
    write(msg,'(3a)')&
     'Number of angular momentum components bigger than programmed.',ch10,&
     'Taking into account only s p d f ' 
    MSG_WARNING(msg)
-   lmax=nlx
+   lmax = nlx
  end if
 
- a1=cryst%rprimd(:,1) ; b1=two_pi*Cryst%gprimd(:,1)
- a2=cryst%rprimd(:,2) ; b2=two_pi*Cryst%gprimd(:,2)
- a3=cryst%rprimd(:,3) ; b3=two_pi*Cryst%gprimd(:,3)
- !
- !
- ! === Calculate Kleiman-Bylander factor and first derivative ===
- l_fnl=czero_gw; l_fnld=czero_gw
- do ig=1,npw
-   !  
-   ! === Get kcart =k+G in Cartesian coordinates ===
-   kg(:)= kpoint(:)+REAL(gvec(:,ig))
-   kcart(:)=kg(1)*b1(:)+kg(2)*b2(:)+kg(3)*b3(:)
-   ! * Solve the problem with sinth=0. or sinphi=0
-   if (ABS(kcart(2))<ppad) kcart(2)=kcart(2)+ppad
+ a1=cryst%rprimd(:,1); b1=two_pi*Cryst%gprimd(:,1)
+ a2=cryst%rprimd(:,2); b2=two_pi*Cryst%gprimd(:,2)
+ a3=cryst%rprimd(:,3); b3=two_pi*Cryst%gprimd(:,3)
 
-   mkg2=kcart(1)**2+kcart(2)**2+kcart(3)**2
-   mkg=SQRT(mkg2)
+ ! Calculate Kleiman-Bylander factor and first derivative.
+ l_fnl=czero_gw; l_fnld=czero_gw
+
+ do ig=1,npw
+   ! Get kcart = k+G in Cartesian coordinates.
+   kg(:)= kpoint(:) + REAL(gvec(:,ig))
+   kcart(:) = kg(1)*b1(:) + kg(2)*b2(:) + kg(3)*b3(:)
+   ! Solve the problem with sinth=0. or sinphi=0
+   if (ABS(kcart(2))<ppad) kcart(2) = kcart(2) + ppad
+
+   mkg2 = kcart(1)**2+kcart(2)**2+kcart(3)**2
+   mkg = SQRT(mkg2)
    ! The next to solve the problem with k=Gamma.
    !if (mkg < 0.0001) cycle
 
@@ -1100,43 +1102,43 @@ subroutine ccgradvnl_ylm(npw,cryst,gvec,kpoint,mpsang,vkbsign,vkb,vkbd,l_fnl,l_f
    gradphi(3) = czero
    
    do iat=1,cryst%natom
-     ityp=cryst%typat(iat)
-     xdotg=gcart(1)*cryst%xcart(1,iat)+gcart(2)*Cryst%xcart(2,iat)+gcart(3)*Cryst%xcart(3,iat)
+     ityp = cryst%typat(iat)
+     xdotg = gcart(1)*cryst%xcart(1,iat)+gcart(2)*Cryst%xcart(2,iat)+gcart(3)*Cryst%xcart(3,iat)
      ! Remember that in the GW code the reciprocal vectors 
      ! are defined such as a_i*b_j = 2pi delta_ij, no need to introduce 2pi
      sfac=CMPLX(COS(xdotg),SIN(xdotg)) 
 
      do il=1,lmax
-       factor=SQRT(four_pi/REAL(2*(il-1)+1))
+       factor = SQRT(four_pi/REAL(2*(il-1)+1))
        do im=1,2*(il-1)+1
          ! Index of im and il
          iml=im+(il-1)*(il-1)
-         !     
+
          ! Calculate the first KB factor, note that l_fnl is simple precision complex
          l_fnl(ig,iml,iat) = factor*sfac*ylmc(il-1,im-il,kcart) * vkb(ig,il,ityp) * vkbsign(il,ityp)
-         !     
+
          ! Calculate the second KB factor (involving first derivatives)
          ! dYlm/dK = dYlm/dth * grad_K th + dYlm/dphi + grad_K phi
          call ylmcd(il-1,im-il,kcart,dth,dphi)
          dylmcart(:) = dth*gradth(:) + dphi*gradphi(:)
-         !     
+
          ! Cartesian to crystallographic axis
          ! Notice: a bug was discovered by Marco Cazzaniga, december 2009
          ! the transformation matrix A=(a1,a2,a3) must act *on its left* on the
-         ! covariant vector dylmcart (a *row* vector), hence:
-         dylmcrys(1)=(a1(1)*dylmcart(1)+a1(2)*dylmcart(2)+a1(3)*dylmcart(3))/(two_pi)
-         dylmcrys(2)=(a2(1)*dylmcart(1)+a2(2)*dylmcart(2)+a2(3)*dylmcart(3))/(two_pi)
-         dylmcrys(3)=(a3(1)*dylmcart(1)+a3(2)*dylmcart(2)+a3(3)*dylmcart(3))/(two_pi)
-         ! the previous implementation assumed A acting on its right
-         ! on a column vector, yielding wrong results for the (small)
-         ! non local contributions to the spectra,
-         ! such as a spurious anisotropy in isotropic systems.
-         !
-         ! Note that l_fnld is simple precision complex, it could be possible use double precision
+         ! covariant vector dylmcart (a *row* vector). The previous implementation assumed A 
+         ! acting on its right on a column vector, yielding wrong results for the (small)
+         ! non local contributions to the spectra, such as a spurious anisotropy in isotropic systems.
+         ! This is the correct version:
+         dylmcrys(1) = (a1(1)*dylmcart(1)+a1(2)*dylmcart(2)+a1(3)*dylmcart(3))/(two_pi)
+         dylmcrys(2) = (a2(1)*dylmcart(1)+a2(2)*dylmcart(2)+a2(3)*dylmcart(3))/(two_pi)
+         dylmcrys(3) = (a3(1)*dylmcart(1)+a3(2)*dylmcart(2)+a3(3)*dylmcart(3))/(two_pi)
+
+         ! Note that l_fnld is simple precision complex, it could be possible to use double precision
          do i=1,3
            l_fnld(i,ig,iml,iat) = factor*sfac* &
             ( kg(i)/mkg*ylmc(il-1,im-il,kcart)*vkbd(ig,il,ityp) + dylmcrys(i)*vkb(ig,il,ityp) )
          end do 
+
        end do !im
      end do !il
    end do !iat
