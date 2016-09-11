@@ -53,7 +53,6 @@ MODULE m_io_kss
  use m_gsphere,          only : table_gbig2kg, merge_and_sort_kg
  use m_wfd,              only : wfd_t, wfd_ihave_ug, wfd_mybands, wfd_update_bkstab, &
 &                               WFD_STORED, WFD_ALLOCATED, wfd_set_mpicomm
- use m_commutator_vkbr,  only : calc_vkb
 
  implicit none
 
@@ -850,7 +849,7 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,trsl,rprimd,Psps,iomode)
  ABI_ALLOCATE(vkbd,(kss_npw,ntypat,mpsang))
  ABI_ALLOCATE(dum_vkbsign,(ntypat,mpsang))
 
- call calc_vkb(Psps,kpoint,kss_npw,gbig,rprimd,dum_vkbsign,vkb,vkbd)
+ call kss_calc_vkb(Psps,kpoint,kss_npw,gbig,rprimd,dum_vkbsign,vkb,vkbd)
  ABI_DEALLOCATE(dum_vkbsign)
 
  SELECT CASE (iomode)
@@ -1977,6 +1976,187 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
  DBG_EXIT("COLL")
 
 end subroutine gshgg_mkncwrite
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_io_kss/kss_calc_vkb
+!! NAME
+!!  kss_calc_vkb
+!!
+!! FUNCTION
+!!  This routine calculates the Kleynman-Bylander form factors and its derivatives 
+!!  needed for the evaluation of the matrix elements of the dipole operator <phi1|r|phi2>.
+!!
+!! INPUTS
+!!  npw_k=Number of plane waves for this k-point.
+!!  Psps<pseudopotential_type>=Structured datatype gathering information on the pseudopotentials.
+!!  kg_k(3,npw_k)=Reduced coordinates of the G-vectors.
+!!  kpoint(3)=The k-point in reduced coordinates.
+!!  rprimd(3,3)=dimensional primitive translations for real space (bohr)
+!!
+!! OUTPUT
+!!  vkb (npw_k,Psps%ntypat,Psps%mpsang)=KB form factors.
+!!  vkbd(npw_k,Psps%ntypat,Psps%mpsang)=KB form factor derivatives.
+!!  vkbsign(Psps%mpsang,Psps%ntypat)   =KS dyadic sign.
+!!
+!! NOTES
+!!  This piece of code has been extracted from outkss.F90. The implementation is consistent
+!!  with the KSS file formata (Fortran version) but it presents two design flaws.
+!!
+!!   1) Pseudo with more that one projector per l-channel are not supported.
+!!   2) Ordering of dimensions in vkb and vkbd is not optimal. We are not programming C!!!
+!!
+!! TODO
+!!  *) Spinorial case is not implemented.
+!!
+!! PARENTS
+!!      m_commutator_vkbr,m_io_kss
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine kss_calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'kss_calc_vkb'
+ use interfaces_41_geometry
+ use interfaces_56_recipspace
+ use interfaces_66_nonlocal
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: npw_k
+ type(Pseudopotential_type),intent(in) :: Psps
+!arrays
+ integer,intent(in) :: kg_k(3,npw_k)
+ real(dp),intent(in) :: kpoint(3),rprimd(3,3)
+ real(dp),intent(out) :: vkb (npw_k,Psps%ntypat,Psps%mpsang)
+ real(dp),intent(out) :: vkbd(npw_k,Psps%ntypat,Psps%mpsang)
+ real(dp),intent(out) :: vkbsign(Psps%mpsang,Psps%ntypat)
+
+!Local variables ------------------------------
+!scalars
+ integer :: dimffnl,ider,idir,itypat,nkpg,il0,in
+ integer :: il,ilmn,ig,is
+ real(dp) :: ucvol,effmass,ecutsm,ecut
+!arrays
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+ real(dp),allocatable :: ffnl(:,:,:,:),kpg_dum(:,:),modkplusg(:)
+ real(dp),allocatable :: ylm(:,:),ylm_gr(:,:,:),ylm_k(:,:)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+ ABI_CHECK(Psps%usepaw==0,"You should not be here!")
+ ABI_CHECK(Psps%useylm==0,"useylm/=0 not considered!")
+
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+ !
+ ! === Save KB dyadic sign (integer-valued) ===
+ vkbsign=zero
+ do itypat=1,Psps%ntypat
+   il0=0 
+   do ilmn=1,Psps%lmnmax
+     il=1+Psps%indlmn(1,ilmn,itypat)
+     in=Psps%indlmn(3,ilmn,itypat)
+     if (il/=il0 .and. in==1) then
+       il0=il
+       vkbsign(il,itypat)=DSIGN(one,Psps%ekb(ilmn,itypat))
+     end if
+   end do
+ end do
+
+ ! === Allocate KB form factor and derivative wrt k+G ===
+ ! * Here we do not use correct ordering for dimensions
+ 
+ ider=1; dimffnl=2 ! To retrieve the first derivative.
+ idir=0; nkpg=0
+ !
+ ! Quantities used only if useylm==1
+ ABI_MALLOC(ylm,(npw_k,Psps%mpsang**2*Psps%useylm))
+ ABI_MALLOC(ylm_gr,(npw_k,3+6*(ider/2),Psps%mpsang**2*Psps%useylm))
+ ABI_MALLOC(ylm_k,(npw_k,Psps%mpsang**2*Psps%useylm))
+ ABI_MALLOC(kpg_dum,(npw_k,nkpg))
+
+ ABI_MALLOC(ffnl,(npw_k,dimffnl,Psps%lmnmax,Psps%ntypat))
+
+ call mkffnl(Psps%dimekb,dimffnl,Psps%ekb,ffnl,Psps%ffspl,gmet,gprimd,ider,idir,Psps%indlmn,&
+   kg_k,kpg_dum,kpoint,Psps%lmnmax,Psps%lnmax,Psps%mpsang,Psps%mqgrid_ff,nkpg,npw_k,& 
+   Psps%ntypat,Psps%pspso,Psps%qgrid_ff,rmet,Psps%usepaw,Psps%useylm,ylm_k,ylm_gr)
+
+ ABI_FREE(kpg_dum)
+ ABI_FREE(ylm)
+ ABI_FREE(ylm_gr)
+ ABI_FREE(ylm_k)
+
+ ABI_MALLOC(modkplusg,(npw_k))
+
+ effmass=one; ecutsm=zero; ecut=HUGE(one)
+! call mkkin(ecut,ecutsm,effmass,gmet,kg_k,modkplusg,kpoint,npw_k)
+ call mkkin(ecut,ecutsm,effmass,gmet,kg_k,modkplusg,kpoint,npw_k,0,0)
+ modkplusg(:)=SQRT(half/pi**2*modkplusg(:))
+ modkplusg(:)=MAX(modkplusg(:),tol10)
+
+ !do ig=1,npw_k
+ ! kpg(:)= kpoint(:)+kg_k(:,ig)
+ ! modkplusg(ig) = normv(kpg,gmet,"G")
+ !end do
+
+ ! Calculate matrix elements.
+ vkb=zero; vkbd=zero
+
+ do is=1,Psps%ntypat
+   il0=0
+   do ilmn=1,Psps%lmnmax
+     il=1+Psps%indlmn(1,ilmn,is)
+     in=Psps%indlmn(3,ilmn,is)
+     if ((il/=il0).and.(in==1)) then
+       il0=il
+       if (ABS(Psps%ekb(ilmn,is))>1.0d-10) then
+         if (il==1) then
+           vkb (1:npw_k,is,il) = ffnl(:,1,ilmn,is)
+           vkbd(1:npw_k,is,il) = ffnl(:,2,ilmn,is)*modkplusg(:)/two_pi
+         else if (il==2) then
+           vkb(1:npw_k,is,il)  = ffnl(:,1,ilmn,is)*modkplusg(:)
+           do ig=1,npw_k
+             vkbd(ig,is,il) = ((ffnl(ig,2,ilmn,is)*modkplusg(ig)*modkplusg(ig))+&
+              ffnl(ig,1,ilmn,is) )/two_pi
+           end do
+         else if (il==3) then
+           vkb (1:npw_k,is,il) =  ffnl(:,1,ilmn,is)*modkplusg(:)**2
+           vkbd(1:npw_k,is,il) = (ffnl(:,2,ilmn,is)*modkplusg(:)**3+&
+            2*ffnl(:,1,ilmn,is)*modkplusg(:) )/two_pi
+         else if (il==4) then
+           vkb (1:npw_k,is,il) =  ffnl(:,1,ilmn,is)*modkplusg(:)**3
+           vkbd(1:npw_k,is,il) = (ffnl(:,2,ilmn,is)*modkplusg(:)**4+&
+            3*ffnl(:,1,ilmn,is)*modkplusg(:)**2 )/two_pi
+         end if
+         vkb (:,is,il) = SQRT(4*pi/ucvol*(2*il-1)*ABS(Psps%ekb(ilmn,is)))*vkb (:,is,il)
+         vkbd(:,is,il) = SQRT(4*pi/ucvol*(2*il-1)*ABS(Psps%ekb(ilmn,is)))*vkbd(:,is,il)
+       else
+         vkb (:,is,il)=zero
+         vkbd(:,is,il)=zero
+       end if
+     end if
+   end do
+ end do
+
+ ABI_FREE(ffnl)
+ ABI_FREE(modkplusg)
+
+ DBG_EXIT("COLL")
+
+end subroutine kss_calc_vkb
 !!***
 
 END MODULE m_io_kss

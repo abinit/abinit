@@ -100,9 +100,9 @@
 !! CHILDREN
 !!      accumulate_chi0_q0,accumulate_chi0sumrule,accumulate_sfchi0_q0
 !!      approxdelta,calc_wfwfg,chi0_bbp_mask,completechi0_deltapart,cwtime
-!!      destroy_kb_potential,flush_unit,get_bz_item,get_gftt,get_uug
+!!      kb_potential_free,flush_unit,get_bz_item,get_gftt,get_uug
 !!      gsph_fft_tabs,gsph_free,gsph_in_fftbox,hilbert_transform
-!!      hilbert_transform_headwings,init_kb_potential,littlegroup_print
+!!      hilbert_transform_headwings,kb_potential_init,littlegroup_print
 !!      make_transitions,paw_cross_ihr_comm,paw_cross_rho_tw_g,paw_rho_tw_g
 !!      paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawhur_free
 !!      pawhur_init,pawpwij_free,pawpwij_init,print_gsphere,read_plowannier
@@ -141,7 +141,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  use m_wfd,             only : wfd_get_ur, wfd_t, wfd_distribute_bbp, wfd_get_cprj, &
 &                              wfd_barrier, wfd_change_ngfft,wfd_paw_get_aeur, wfd_sym_ur
  use m_oscillators,     only : rho_tw_g, calc_wfwfg, get_uug
- use m_commutator_vkbr, only : kb_potential, destroy_kb_potential, init_kb_potential, nc_ihr_comm
+ use m_commutator_vkbr, only : kb_potential, kb_potential_free, kb_potential_init, nc_ihr_comm
  use m_chi0,            only : hilbert_transform, setup_spectral, symmetrize_afm_chi0, approxdelta,&
                                accumulate_chi0_q0, accumulate_sfchi0_q0, hilbert_transform_headwings
  use m_pawang,          only : pawang_type
@@ -572,7 +572,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      kg_k    => Wfd%Kdata(ik_ibz)%kg_k
 
      if (Psps%usepaw==0.and.Ep%inclvkb/=0.and.gradk_not_done(ik_ibz)) then ! Include term <n,k|[Vnl,iqr]|n"k>' for q->0.
-       call init_kb_potential(KBgrad_k(ik_ibz),Cryst,Psps,Ep%inclvkb,istwf_k,npw_k,Kmesh%ibz(:,ik_ibz),kg_k)
+       call kb_potential_init(KBgrad_k(ik_ibz),Cryst,Psps,Ep%inclvkb,istwf_k,npw_k,Kmesh%ibz(:,ik_ibz),kg_k)
        gradk_not_done(ik_ibz)=.FALSE.
      end if
 
@@ -863,14 +863,14 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      end do !band1
 
      if (Psps%usepaw==0.and.Ep%inclvkb/=0.and.Ep%symchi==1) then
-       call destroy_kb_potential(KBgrad_k(ik_ibz)) ! Not need anymore as we loop only over IBZ.
+       call kb_potential_free(KBgrad_k(ik_ibz)) ! Not need anymore as we loop only over IBZ.
      end if
    end do !ik_bz
  end do !spin
 
  ABI_FREE(igffteps0)
  
- call destroy_kb_potential(KBgrad_k)
+ call kb_potential_free(KBgrad_k)
  ABI_DT_FREE(KBgrad_k)
  !
  ! === After big fat loop over transitions, now MPI ===

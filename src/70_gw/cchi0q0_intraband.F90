@@ -62,8 +62,8 @@
 !!      screening
 !!
 !! CHILDREN
-!!      assemblychi0_sym,clib_progress_bar,destroy_kb_potential,get_bz_item
-!!      getnel,gsph_fft_tabs,init_kb_potential,kmesh_free,kmesh_init
+!!      assemblychi0_sym,clib_progress_bar,kb_potential_free,get_bz_item
+!!      getnel,gsph_fft_tabs,kb_potential_init,kmesh_free,kmesh_init
 !!      littlegroup_free,littlegroup_init,littlegroup_print,pack_eneocc
 !!      paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free
 !!      pawhur_free,pawhur_init,pawpwij_free,pawpwij_init,print_arr,rho_tw_g
@@ -100,7 +100,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  use m_gsphere,         only : gsphere_t, gsph_fft_tabs
  use m_oscillators,     only : rho_tw_g
  use m_pawhr,           only : pawhur_t, pawhur_free, pawhur_init, paw_ihr
- use m_commutator_vkbr, only : kb_potential, destroy_kb_potential, init_kb_potential, nc_ihr_comm
+ use m_commutator_vkbr, only : kb_potential, kb_potential_free, kb_potential_init, nc_ihr_comm
  use m_chi0,            only : assemblychi0_sym, symmetrize_afm_chi0
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
@@ -230,7 +230,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
      if (my_nband==0) CYCLE
      
      if (Wfd%usepaw==0.and.inclvkb/=0) then ! Include term <n,k|[Vnl,iqr]|n"k>' for q->0.
-       call init_kb_potential(KBgrad_k,Cryst,Psps,inclvkb,istwf_k,npw_k,kpt,kg_k)
+       call kb_potential_init(KBgrad_k,Cryst,Psps,inclvkb,istwf_k,npw_k,kpt,kg_k)
      end if
 
      do lbidx=1,my_nband
@@ -247,7 +247,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
        ihr_comm(:,:,band,ik_ibz,spin) = comm_kbbs
      end do
 
-     call destroy_kb_potential(KBgrad_k) ! Not need anymore as we loop only over IBZ.
+     call kb_potential_free(KBgrad_k) ! Not need anymore as we loop only over IBZ.
    end do
  end do
  !

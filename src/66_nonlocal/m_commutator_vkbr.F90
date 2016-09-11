@@ -78,7 +78,7 @@ MODULE m_commutator_vkbr
  end type kb_form_factors
 
  !public :: correct_init_kb_ffactors
- public :: destroy_kb_ffactors
+ !public :: ks_ffactors_free
 !!***
 
 !----------------------------------------------------------------------
@@ -128,23 +128,20 @@ MODULE m_commutator_vkbr
 
  end type kb_potential
 
- public :: init_kb_potential
- public :: destroy_kb_potential
- public :: add_vnlr_commutator
+ public :: kb_potential_init
+ public :: kb_potential_free
 !!***
 
- interface destroy_kb_potential
-   module procedure destroy_kb_potential_0D
-   module procedure destroy_kb_potential_1D
- end interface destroy_kb_potential
+ interface kb_potential_free
+   module procedure kp_potential_free_0D
+   module procedure kp_potential_free_1D
+ end interface kb_potential_free
 
  public ::  calc_vkb
  public ::  nc_ihr_comm
 
  private ::  ccgradvnl        ! Compute (grad_K+grad_K') Vnl(K,K') using Legendre polynomials.
  private ::  ccgradvnl_ylm    ! Compute (grad_K+grad_K') Vnl(K,K') using complex spherical harmonics.
-
-
 
 CONTAINS  !========================================================================================
 
@@ -342,16 +339,12 @@ end subroutine correct_init_kb_ffactors
 
 !----------------------------------------------------------------------
 
-!!****f* m_commutator_vkbr/destroy_kb_ffactors
+!!****f* m_commutator_vkbr/ks_ffactors_free
 !! NAME
-!!  destroy_kb_ffactors
+!!  ks_ffactors_free
 !!
 !! FUNCTION
 !!  Free the memory allocated in a structure of type kb_form_factors
-!!
-!! INPUTS
-!!
-!! OUTPUT
 !!
 !! PARENTS
 !!
@@ -360,13 +353,13 @@ end subroutine correct_init_kb_ffactors
 !!
 !! SOURCE
 
-subroutine destroy_kb_ffactors(KBff_k)
+subroutine ks_ffactors_free(KBff_k)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'destroy_kb_ffactors'
+#define ABI_FUNC 'ks_ffactors_free'
 !End of the abilint section
 
  implicit none
@@ -392,14 +385,14 @@ subroutine destroy_kb_ffactors(KBff_k)
    ABI_FREE(KBff_k%ffd)
  end if
 
-end subroutine destroy_kb_ffactors
+end subroutine ks_ffactors_free
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_commutator_vkbr/init_kb_potential
+!!****f* m_commutator_vkbr/kb_potential_init
 !! NAME
-!!  init_kb_potential
+!!  kb_potential_init
 !!
 !! FUNCTION
 !!  Creation method the the kb_potential structures datatype.
@@ -427,13 +420,13 @@ end subroutine destroy_kb_ffactors
 !!
 !! SOURCE
 
-subroutine init_kb_potential(KBgrad_k,Cryst,Psps,inclvkb,istwfk,npw,kpoint,gvec)
+subroutine kb_potential_init(KBgrad_k,Cryst,Psps,inclvkb,istwfk,npw,kpoint,gvec)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'init_kb_potential'
+#define ABI_FUNC 'kb_potential_init'
 !End of the abilint section
 
  implicit none
@@ -509,14 +502,14 @@ subroutine init_kb_potential(KBgrad_k,Cryst,Psps,inclvkb,istwfk,npw,kpoint,gvec)
  ABI_FREE(vkb)
  ABI_FREE(vkbd)
 
-end subroutine init_kb_potential 
+end subroutine kb_potential_init 
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_commutator_vkbr/destroy_kb_potential_0D
+!!****f* m_commutator_vkbr/kp_potential_free_0D
 !! NAME
-!!  destroy_kb_potential_0D
+!!  kp_potential_free_0D
 !!
 !! FUNCTION
 !!  Free all memory allocated in a structure of type kb_potential
@@ -529,13 +522,13 @@ end subroutine init_kb_potential
 !!
 !! SOURCE
 
-subroutine destroy_kb_potential_0D(KBgrad_k)
+subroutine kp_potential_free_0D(KBgrad_k)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'destroy_kb_potential_0D'
+#define ABI_FUNC 'kp_potential_free_0D'
 !End of the abilint section
 
  implicit none
@@ -559,14 +552,14 @@ subroutine destroy_kb_potential_0D(KBgrad_k)
    ABI_FREE(KBgrad_k%fnld)
  end if
 
-end subroutine destroy_kb_potential_0D
+end subroutine kp_potential_free_0D
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_commutator_vkbr/destroy_kb_potential_1D
+!!****f* m_commutator_vkbr/kp_potential_free_1D
 !! NAME
-!!  destroy_kb_potential_1D
+!!  kp_potential_free_1D
 !!
 !! FUNCTION
 !!  Free all memory allocated in a structure of type kb_potential
@@ -578,13 +571,13 @@ end subroutine destroy_kb_potential_0D
 !!
 !! SOURCE
 
-subroutine destroy_kb_potential_1D(KBgrad_k)
+subroutine kp_potential_free_1D(KBgrad_k)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'destroy_kb_potential_1D'
+#define ABI_FUNC 'kp_potential_free_1D'
 !End of the abilint section
 
  implicit none
@@ -600,10 +593,10 @@ subroutine destroy_kb_potential_1D(KBgrad_k)
 !************************************************************************
 
  do ii=1,SIZE(KBgrad_k)
-   call destroy_kb_potential_0D(KBgrad_k(ii))
+   call kp_potential_free_0D(KBgrad_k(ii))
  end do
 
-end subroutine destroy_kb_potential_1D
+end subroutine kp_potential_free_1D
 !!***
 
 !----------------------------------------------------------------------
@@ -841,7 +834,6 @@ subroutine calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
  ABI_MALLOC(ylm_gr,(npw_k,3+6*(ider/2),Psps%mpsang**2*Psps%useylm))
  ABI_MALLOC(ylm_k,(npw_k,Psps%mpsang**2*Psps%useylm))
  ABI_MALLOC(kpg_dum,(npw_k,nkpg))
-
  ABI_MALLOC(ffnl,(npw_k,dimffnl,Psps%lmnmax,Psps%ntypat))
 
  call mkffnl(Psps%dimekb,dimffnl,Psps%ekb,ffnl,Psps%ffspl,gmet,gprimd,ider,idir,Psps%indlmn,&
