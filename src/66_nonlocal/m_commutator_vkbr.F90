@@ -454,9 +454,9 @@ subroutine kb_potential_init(KBgrad_k,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
  ! in order to support pseudos with more than projector.
  ! Moreover they should be calculated on-the-fly using calc_vkb
  ! For the moment, we opt for a quick an dirty implementation.
- ABI_MALLOC(vkbsign,(psps%mpsang,cryst%ntypat))
- ABI_MALLOC(vkb ,(npw,cryst%ntypat,psps%mpsang))
- ABI_MALLOC(vkbd,(npw,cryst%ntypat,psps%mpsang))
+ ABI_MALLOC(vkbsign,(psps%mpsang, cryst%ntypat))
+ ABI_MALLOC(vkb ,(npw, psps%mpsang, cryst%ntypat))
+ ABI_MALLOC(vkbd,(npw, psps%mpsang, cryst%ntypat))
 
  call calc_vkb(cryst,psps,kpoint,npw,gvec,vkbsign,vkb,vkbd)
  
@@ -706,8 +706,8 @@ end subroutine add_vnlr_commutator
 !!  rprimd(3,3)=dimensional primitive translations for real space (bohr)
 !!
 !! OUTPUT
-!!  vkb (npw_k,psps%ntypat,Psps%mpsang)=KB form factors.
-!!  vkbd(npw_k,psps%ntypat,Psps%mpsang)=KB form factor derivatives.
+!!  vkb (npw_k,Psps%mpsang,psps%ntypat)=KB form factors.
+!!  vkbd(npw_k,Psps%mpsang,psps%ntypat)=KB form factor derivatives.
 !!  vkbsign(psps%mpsang,Psps%ntypat)   =KS dyadic sign.
 !!
 !! NOTES
@@ -715,7 +715,6 @@ end subroutine add_vnlr_commutator
 !!  with the KSS file formata (Fortran version) but it presents two design flaws.
 !!
 !!   1) Pseudo with more that one projector per l-channel are not supported.
-!!   2) Ordering of dimensions in vkb and vkbd is not optimal. We are not programming C!!!
 !!
 !! TODO
 !!  *) Spinorial case is not implemented.
@@ -751,8 +750,8 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
 !arrays
  integer,intent(in) :: kg_k(3,npw_k)
  real(dp),intent(in) :: kpoint(3) 
- real(dp),intent(out) :: vkb (npw_k,psps%ntypat,Psps%mpsang)
- real(dp),intent(out) :: vkbd(npw_k,psps%ntypat,Psps%mpsang)
+ real(dp),intent(out) :: vkb (npw_k,Psps%mpsang,psps%ntypat)
+ real(dp),intent(out) :: vkbd(npw_k,Psps%mpsang,psps%ntypat)
  real(dp),intent(out) :: vkbsign(psps%mpsang,Psps%ntypat)
 
 !Local variables ------------------------------
@@ -828,28 +827,28 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
        il0=il
        if (ABS(psps%ekb(ilmn,itypat))>1.0d-10) then
          if (il==1) then
-           vkb (1:npw_k,itypat,il) = ffnl(:,1,ilmn,itypat)
-           vkbd(1:npw_k,itypat,il) = ffnl(:,2,ilmn,itypat)*modkplusg(:)/two_pi
+           vkb (1:npw_k,il,itypat) = ffnl(:,1,ilmn,itypat)
+           vkbd(1:npw_k,il,itypat) = ffnl(:,2,ilmn,itypat)*modkplusg(:)/two_pi
          else if (il==2) then
-           vkb(1:npw_k,itypat,il)  = ffnl(:,1,ilmn,itypat)*modkplusg(:)
+           vkb(1:npw_k,il,itypat)  = ffnl(:,1,ilmn,itypat)*modkplusg(:)
            do ig=1,npw_k
-             vkbd(ig,itypat,il) = ((ffnl(ig,2,ilmn,itypat)*modkplusg(ig)*modkplusg(ig))+&
+             vkbd(ig,il,itypat) = ((ffnl(ig,2,ilmn,itypat)*modkplusg(ig)*modkplusg(ig))+&
               ffnl(ig,1,ilmn,itypat) )/two_pi
            end do
          else if (il==3) then
-           vkb (1:npw_k,itypat,il) =  ffnl(:,1,ilmn,itypat)*modkplusg(:)**2
-           vkbd(1:npw_k,itypat,il) = (ffnl(:,2,ilmn,itypat)*modkplusg(:)**3+&
+           vkb (1:npw_k,il,itypat) =  ffnl(:,1,ilmn,itypat)*modkplusg(:)**2
+           vkbd(1:npw_k,il,itypat) = (ffnl(:,2,ilmn,itypat)*modkplusg(:)**3+&
             2*ffnl(:,1,ilmn,itypat)*modkplusg(:) )/two_pi
          else if (il==4) then
-           vkb (1:npw_k,itypat,il) =  ffnl(:,1,ilmn,itypat)*modkplusg(:)**3
-           vkbd(1:npw_k,itypat,il) = (ffnl(:,2,ilmn,itypat)*modkplusg(:)**4+&
+           vkb (1:npw_k,il,itypat) =  ffnl(:,1,ilmn,itypat)*modkplusg(:)**3
+           vkbd(1:npw_k,il,itypat) = (ffnl(:,2,ilmn,itypat)*modkplusg(:)**4+&
             3*ffnl(:,1,ilmn,itypat)*modkplusg(:)**2 )/two_pi
          end if
-         vkb (:,itypat,il) = SQRT(4*pi/cryst%ucvol*(2*il-1)*ABS(psps%ekb(ilmn,itypat)))*vkb (:,itypat,il)
-         vkbd(:,itypat,il) = SQRT(4*pi/cryst%ucvol*(2*il-1)*ABS(psps%ekb(ilmn,itypat)))*vkbd(:,itypat,il)
+         vkb (:,il,itypat) = SQRT(4*pi/cryst%ucvol*(2*il-1)*ABS(psps%ekb(ilmn,itypat)))*vkb (:,il,itypat)
+         vkbd(:,il,itypat) = SQRT(4*pi/cryst%ucvol*(2*il-1)*ABS(psps%ekb(ilmn,itypat)))*vkbd(:,il,itypat)
        else
-         vkb (:,itypat,il)=zero
-         vkbd(:,itypat,il)=zero
+         vkb (:,il,itypat)=zero
+         vkbd(:,il,itypat)=zero
        end if
      end if
    end do
@@ -992,8 +991,8 @@ end function nc_ihr_comm
 !!  kpoint(3)=K-point in reduced coordinates.
 !!  mpsang=1+maximum angular momentum for nonlocal pseudopotentials
 !!  vkbsign(mpsang,ntypat)=sign of each KB dyadic product
-!!  vkb(npw,ntypat,mpsang)=KB projector function
-!!  vkbd(npw,ntypat,mpsang)=derivative of the KB projector function in reciprocal space
+!!  vkb(npw,mpsang,ntypat)=KB projector function
+!!  vkbd(npw,mpsang,ntypat)=derivative of the KB projector function in reciprocal space
 !!
 !! OUTPUT
 !!  l_fnl(npw,mpsang*2,natom),
@@ -1031,8 +1030,8 @@ subroutine ccgradvnl_ylm(npw,cryst,gvec,kpoint,mpsang,vkbsign,vkb,vkbd,l_fnl,l_f
 !arrays
  integer,intent(in) :: gvec(3,npw)
  real(dp),intent(in) :: kpoint(3)
- real(dp),intent(in) :: vkb(npw,cryst%ntypat,mpsang)
- real(dp),intent(in) :: vkbd(npw,cryst%ntypat,mpsang),vkbsign(mpsang,Cryst%ntypat)
+ real(dp),intent(in) :: vkb(npw,mpsang,cryst%ntypat)
+ real(dp),intent(in) :: vkbd(npw,mpsang,cryst%ntypat),vkbsign(mpsang,Cryst%ntypat)
  complex(gwpc),intent(out) :: l_fnl(npw,mpsang**2,cryst%natom)
  complex(gwpc),intent(out) :: l_fnld(3,npw,mpsang**2,cryst%natom)
 
@@ -1114,7 +1113,7 @@ subroutine ccgradvnl_ylm(npw,cryst,gvec,kpoint,mpsang,vkbsign,vkb,vkbd,l_fnl,l_f
          iml=im+(il-1)*(il-1)
          !     
          ! Calculate the first KB factor, note that l_fnl is simple precision complex
-         l_fnl(ig,iml,iat)=factor*sfac*ylmc(il-1,im-il,kcart)*vkb(ig,ityp,il)*vkbsign(il,ityp)
+         l_fnl(ig,iml,iat) = factor*sfac*ylmc(il-1,im-il,kcart) * vkb(ig,il,ityp) * vkbsign(il,ityp)
          !     
          ! Calculate the second KB factor (involving first derivatives)
          ! dYlm/dK = dYlm/dth * grad_K th + dYlm/dphi + grad_K phi
@@ -1136,7 +1135,7 @@ subroutine ccgradvnl_ylm(npw,cryst,gvec,kpoint,mpsang,vkbsign,vkb,vkbd,l_fnl,l_f
          ! Note that l_fnld is simple precision complex, it could be possible use double precision
          do i=1,3
            l_fnld(i,ig,iml,iat) = factor*sfac* &
-            ( kg(i)/mkg*ylmc(il-1,im-il,kcart)*vkbd(ig,ityp,il) + dylmcrys(i)*vkb(ig,ityp,il) )
+            ( kg(i)/mkg*ylmc(il-1,im-il,kcart)*vkbd(ig,il,ityp) + dylmcrys(i)*vkb(ig,il,ityp) )
          end do 
        end do !im
      end do !il
