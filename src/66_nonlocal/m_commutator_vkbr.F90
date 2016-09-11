@@ -165,7 +165,7 @@ subroutine kb_potential_init(kbgrad_k,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
  kbgrad_k%mpsang  = psps%mpsang
  kbgrad_k%npw = npw
  kbgrad_k%inclvkb = inclvkb
- kbgrad_k%kpoint  = kpoint
+ kbgrad_k%kpoint = kpoint
  !
  ! Calculate KB form factors and derivatives.
  !
@@ -177,6 +177,9 @@ subroutine kb_potential_init(kbgrad_k,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
  ABI_MALLOC(vkb ,(npw, psps%mpsang, cryst%ntypat))
  ABI_MALLOC(vkbd,(npw, psps%mpsang, cryst%ntypat))
 
+ !pspp%mproj * psps%mpsang
+ !write(*,*)psps%mpsang, psps%lnmax
+ !ABI_CHECK(psps%mpsang == psps%lnmax, "FOO")
  !ABI_MALLOC(vkbsign,(psps%lnmax, cryst%ntypat))
  !ABI_MALLOC(vkb ,(npw, psps%lnmax, cryst%ntypat))
  !ABI_MALLOC(vkbd,(npw, psps%lnmax, cryst%ntypat))
@@ -361,7 +364,7 @@ subroutine add_vnlr_commutator(kbgrad_k,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
 
 !Local variables ------------------------------
 !scalars
- integer :: ig1,ig2,iat,ig,ilm,itypat,nlmn,ilmn,iln0,iln !il,im,in
+ integer :: ig1,ig2,iat,ig,ilm,itypat,nlmn,ilmn,iln0,iln,il,in !,im,
  complex(gwpc) :: cta1,cta4,ct
 !arrays
  complex(gwpc) :: dum(3),cta2(3),cta3(3),gamma_term(3)
@@ -379,12 +382,12 @@ subroutine add_vnlr_commutator(kbgrad_k,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
     nlmn = count(psps%indlmn(3,:,itypat) > 0)
     iln0 = 0
     do ilmn=1,nlmn
-      !il = 1 + psps%indlmn(1,ilmn,itypat)
+      il = 1 + psps%indlmn(1,ilmn,itypat)
       !im = psps%indlmn(2,ilmn,itypat)
-      !in = psps%indlmn(3,ilmn,itypat)
+      in = psps%indlmn(3,ilmn,itypat)
       iln = psps%indlmn(5,ilmn,itypat)
-      !if (iln <= iln0) cycle
-      !iln0 = iln
+      if (iln <= iln0) cycle
+      iln0 = iln
       !if (indlmn(6,ilmn,itypat) /= 1 .or. vkbsign(iln,itypat) == zero) cycle
     end do
 
@@ -764,8 +767,7 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: nlx=4
- integer :: ii,iat,ig,il,im,ilm,itypat,lmax,nlmn,iln0,iln,ilmn
+ integer :: ii,iat,ig,il,im,ilm,itypat,nlmn,iln0,iln,ilmn,in
  real(dp),parameter :: ppad=tol8
  real(dp) :: cosphi,costh,factor,mkg,mkg2,sinphi,sinth,sq,xdotg
  complex(dpc) :: dphi,dth,sfac
@@ -778,13 +780,11 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
 
  DBG_ENTER("COLL")
 
- lmax = psps%mpsang
- if (psps%mpsang > nlx) then
+ if (psps%mpsang > 4) then
    write(msg,'(3a)')&
     'Number of angular momentum components bigger than programmed.',ch10,&
     'Taking into account only s p d f ' 
-   MSG_WARNING(msg)
-   lmax = nlx
+   MSG_ERROR(msg)
  end if
 
  a1=cryst%rprimd(:,1); b1=two_pi*Cryst%gprimd(:,1)
@@ -837,20 +837,19 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
      do ilmn=1,nlmn
        il = 1 + psps%indlmn(1,ilmn,itypat)
        !im = psps%indlmn(2,ilmn,itypat)
-       !in = psps%indlmn(3,ilmn,itypat)
+       in = psps%indlmn(3,ilmn,itypat)
        iln = psps%indlmn(5,ilmn,itypat)
        if (iln <= iln0) cycle
        iln0 = iln
+       if (vkbsign(iln,itypat) == zero) cycle
        !if (psps%indlmn(6,ilmn,itypat) /= 1 .or. vkbsign(iln,itypat) == zero) cycle
-     end do
-
-     do il=1,lmax
+     !end do
+     !do il=1,psps%mpsang
        factor = SQRT(four_pi/REAL(2*(il-1)+1))
-       iln = il
+       !iln = il
        do im=1,2*(il-1)+1
          ! Index of im and il
          ilm = im + (il-1)*(il-1)
-         !if (vkbsign(iln,itypat) == zero) cycle
 
          ! Calculate the first KB factor, note that fnl is simple precision complex
          fnl(ig,ilm,iat) = factor*sfac*ylmc(il-1,im-il,kcart) * vkb(ig,iln,itypat) * vkbsign(iln,itypat)

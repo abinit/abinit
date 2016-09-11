@@ -319,7 +319,7 @@ module defs_datatypes
    !  If mpspso is 2, lmnmax takes into account the spin-orbit projectors,
    !  so, it is equal to the max of lnprojso, see pspheader_type
 
-  integer :: mproj
+  integer :: mproj  
    ! Maximum number of non-local projectors over all angular momenta and type of psps
    ! 0 only if all psps are local
 
