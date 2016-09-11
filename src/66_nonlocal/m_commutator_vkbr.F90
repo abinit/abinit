@@ -166,23 +166,20 @@ subroutine kb_potential_init(kbgrad_k,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
  kbgrad_k%npw = npw
  kbgrad_k%inclvkb = inclvkb
  kbgrad_k%kpoint = kpoint
- !
- ! Calculate KB form factors and derivatives.
- !
- ! The following arrays should be allocated using lnmax instead of mpsang
- ! in order to support pseudos with more than projector.
- ! Moreover they should be calculated on-the-fly using calc_vkb
- ! For the moment, we opt for a quick an dirty implementation.
- ABI_MALLOC(vkbsign,(psps%mpsang, cryst%ntypat))
- ABI_MALLOC(vkb ,(npw, psps%mpsang, cryst%ntypat))
- ABI_MALLOC(vkbd,(npw, psps%mpsang, cryst%ntypat))
 
- !pspp%mproj * psps%mpsang
- !write(*,*)psps%mpsang, psps%lnmax
- !ABI_CHECK(psps%mpsang == psps%lnmax, "FOO")
- !ABI_MALLOC(vkbsign,(psps%lnmax, cryst%ntypat))
- !ABI_MALLOC(vkb ,(npw, psps%lnmax, cryst%ntypat))
- !ABI_MALLOC(vkbd,(npw, psps%lnmax, cryst%ntypat))
+ ! Calculate KB form factors and derivatives.
+ ! The arrays are allocated with lnmax to support pseudos with more than projector.
+ ! Note that lnmax takes into account lloc hence arrays are in packed form and one should be 
+ ! accessed with the indices provided by indlmn.
+ ! TODO: they should be calculated on-the-fly using calc_vkb
+ !       For the moment, we opt for a quick an dirty implementation.
+ !ABI_MALLOC(vkbsign,(psps%mpsang, cryst%ntypat))
+ !ABI_MALLOC(vkb ,(npw, psps%mpsang, cryst%ntypat))
+ !ABI_MALLOC(vkbd,(npw, psps%mpsang, cryst%ntypat))
+
+ ABI_MALLOC(vkbsign,(psps%lnmax, cryst%ntypat))
+ ABI_MALLOC(vkb ,(npw, psps%lnmax, cryst%ntypat))
+ ABI_MALLOC(vkbd,(npw, psps%lnmax, cryst%ntypat))
  call calc_vkb(cryst,psps,kpoint,npw,gvec,vkbsign,vkb,vkbd)
  
  select case (inclvkb)
@@ -438,9 +435,9 @@ end subroutine add_vnlr_commutator
 !!  rprimd(3,3)=dimensional primitive translations for real space (bohr)
 !!
 !! OUTPUT
-!!  vkb (npw_k,Psps%mpsang,psps%ntypat)=KB form factors.
-!!  vkbd(npw_k,Psps%mpsang,psps%ntypat)=KB form factor derivatives.
-!!  vkbsign(psps%mpsang,Psps%ntypat)   =KS dyadic sign.
+!!  vkb (npw_k, %lnmax, %ntypat)=KB form factors.
+!!  vkbd(npw_k, %lnmax, %ntypat)=KB form factor derivatives.
+!!  vkbsign(%lnmax, %ntypat)   =KS dyadic sign.
 !!
 !! NOTES
 !!  This piece of code has been extracted from outkss.F90. The implementation is consistent
@@ -482,9 +479,9 @@ subroutine calc_vkb(cryst,psps,kpoint,npw_k,kg_k,vkbsign,vkb,vkbd)
 !arrays
  integer,intent(in) :: kg_k(3,npw_k)
  real(dp),intent(in) :: kpoint(3) 
- real(dp),intent(out) :: vkb (npw_k,Psps%mpsang,psps%ntypat)
- real(dp),intent(out) :: vkbd(npw_k,Psps%mpsang,psps%ntypat)
- real(dp),intent(out) :: vkbsign(psps%mpsang,Psps%ntypat)
+ real(dp),intent(out) :: vkb (npw_k,psps%lnmax,psps%ntypat)
+ real(dp),intent(out) :: vkbd(npw_k,psps%lnmax,psps%ntypat)
+ real(dp),intent(out) :: vkbsign(psps%lnmax,psps%ntypat)
 
 !Local variables ------------------------------
 !scalars
@@ -716,9 +713,9 @@ end function nc_ihr_comm
 !!  npw=number of planewaves for wavefunctions
 !!  gvec(3,npw)=integer coordinates of each plane wave in reciprocal space
 !!  kpoint(3)=K-point in reduced coordinates.
-!!  vkbsign(mpsang,ntypat)=sign of each KB dyadic product
-!!  vkb(npw,mpsang,ntypat)=KB projector function
-!!  vkbd(npw,mpsang,ntypat)=derivative of the KB projector function in reciprocal space
+!!  vkbsign(lnmax,ntypat)=sign of each KB dyadic product
+!!  vkb(npw,lnmax,ntypat)=KB projector function
+!!  vkbd(npw,lnmax,ntypat)=derivative of the KB projector function in reciprocal space
 !!
 !! OUTPUT
 !!  fnl(npw,mpsang*2,natom),
@@ -759,9 +756,9 @@ subroutine ccgradvnl_ylm(cryst,psps,npw,gvec,kpoint,vkbsign,vkb,vkbd,fnl,fnld)
 !arrays
  integer,intent(in) :: gvec(3,npw)
  real(dp),intent(in) :: kpoint(3)
- real(dp),intent(in) :: vkb(npw,psps%mpsang,cryst%ntypat)
- real(dp),intent(in) :: vkbd(npw,psps%mpsang,cryst%ntypat) 
- real(dp),intent(in) :: vkbsign(psps%mpsang,Cryst%ntypat)
+ real(dp),intent(in) :: vkb(npw,psps%lnmax,cryst%ntypat)
+ real(dp),intent(in) :: vkbd(npw,psps%lnmax,cryst%ntypat) 
+ real(dp),intent(in) :: vkbsign(psps%lnmax,cryst%ntypat)
  complex(gwpc),intent(out) :: fnl(npw,psps%mpsang**2,cryst%natom)
  complex(gwpc),intent(out) :: fnld(3,npw,psps%mpsang**2,cryst%natom)
 
