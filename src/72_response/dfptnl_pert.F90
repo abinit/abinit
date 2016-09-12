@@ -317,35 +317,35 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen2,gs_hamkq,i1dir
        offset_cg    = size_wf      *(jband-1+nband_k*    (ikpt-1+nkpt*(isppol-1)))
        offset_eigen = 2*dtset%mband*(jband-1+dtset%mband*(ikpt-1+nkpt*(isppol-1)))
 
-!      Test if < u^(0) | ( H^(1) - eps^(0) S^(1) ) | u^(0) > = eig^(1)
-       tol_test = tol8
-       ABI_ALLOCATE(cgj,(2,size_wf))
-       ABI_ALLOCATE(work2,(2,size_wf))
-       ABI_ALLOCATE(iddk,(2,size_wf))
-       cgj(:,:) = cg(:,1+offset_cg:size_wf+offset_cg)
-       iddk(:,:) = zero
-       sij_opt = 0
-       optlocal = 1
-       opt_gvnl1 = 1
-       usevnl = 1
-       call getgh1c(berryopt,0,cgj,cwaveprj,work1,dum1,work2,gs_hamkq,iddk,i2dir,i2pert,zero,&
-                    mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
-       do iband=1,nband_k
-         offset_cg    = size_wf      *(iband-1+nband_k*    (ikpt-1+nkpt*(isppol-1)))
-         cgj(:,:) = cg(:,1+offset_cg:size_wf+offset_cg)
-         call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgj,work1,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
-         dotr = dotr - 0 ! TO CHANGE
-         doti = doti - 0 ! TO CHANGE
-         dotr = sqrt(dotr**2+doti**2)
-        if (dotr > tol_test) then
-           write(message,'(4(a,i2),a,es22.13E3)') 'RF2 TEST GETGH1 : ipert=',i2pert-natom,' idir=',i2dir,&
-                                              ' jband=',jband,' iband=',iband,' NOT PASSED dotr = ',dotr
-           call wrtout(std_out,message)
-        end if
-       end do ! end iband
-       ABI_DEALLOCATE(cgj)
-       ABI_DEALLOCATE(work1)
-       ABI_DEALLOCATE(work2)
+!!      Test if < u^(0) | ( H^(1) - eps^(0) S^(1) ) | u^(0) > = eig^(1)
+!       tol_test = tol8
+!       ABI_ALLOCATE(cgj,(2,size_wf))
+!       ABI_ALLOCATE(work2,(2,size_wf))
+!       ABI_ALLOCATE(iddk,(2,size_wf))
+!       cgj(:,:) = cg(:,1+offset_cg:size_wf+offset_cg)
+!       iddk(:,:) = zero
+!       sij_opt = 0
+!       optlocal = 1
+!       opt_gvnl1 = 1
+!       usevnl = 1
+!       call getgh1c(berryopt,0,cgj,cwaveprj,work1,dum1,work2,gs_hamkq,iddk,i2dir,i2pert,zero,&
+!                    mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+!       do iband=1,nband_k
+!         offset_cg    = size_wf      *(iband-1+nband_k*    (ikpt-1+nkpt*(isppol-1)))
+!         cgj(:,:) = cg(:,1+offset_cg:size_wf+offset_cg)
+!         call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgj,work1,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+!         dotr = dotr - 0 ! TO CHANGE
+!         doti = doti - 0 ! TO CHANGE
+!         dotr = sqrt(dotr**2+doti**2)
+!        if (dotr > tol_test) then
+!           write(message,'(4(a,i2),a,es22.13E3)') 'RF2 TEST GETGH1 : ipert=',i2pert-natom,' idir=',i2dir,&
+!                                              ' jband=',jband,' iband=',iband,' NOT PASSED dotr = ',dotr
+!           call wrtout(std_out,message)
+!        end if
+!       end do ! end iband
+!       ABI_DEALLOCATE(cgj)
+!       ABI_DEALLOCATE(work1)
+!       ABI_DEALLOCATE(work2)
 !       ABI_DEALLOCATE(iddk)
 
 !       cwave0(:,:)=cg(:,1+(iband - 1)*npw_k*dtset%nspinor+icg0:&

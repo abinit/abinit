@@ -531,15 +531,6 @@ pead = 1 ! pead = 0 is under development...
 !   doccde(:)=zero
 ! end if
 
-!!Recompute first large sphere cut-off gsqcut, without taking into account dilatmx
-! ecutf=dtset%ecut
-! if (psps%usepaw==1) then
-!   ecutf=dtset%pawecutdg
-!   call wrtout(std_out,ch10//' FFT (fine) grid used in SCF cycle:','COLL')
-! end if
-
-! call getcut(boxcut,ecutf,gmet,gsqcut,dtset%iboxcut,std_out,k0,ngfftf)
-
 qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
 
 !PAW: 1- Initialize values for several arrays depending only on atomic data
@@ -757,6 +748,18 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
 !!jmb 2012 write(std_out,'(a)')' ' ! needed to make ibm6_xlf12 pass tests. No idea why this works. JWZ 5 Sept 2011
 !!Will compute now the total potential
 
+!Recompute first large sphere cut-off gsqcut,
+!without taking into account dilatmx
+ k0(:)=0.0_dp
+ call status(0,dtfil%filstat,iexit,level,'call getcut   ')
+ call getcut(boxcut,dtset%ecut,gmet,gsqcut,dtset%iboxcut,std_out,k0,dtset%ngfft)
+
+!Open and read pseudopotential files
+ ecore = 0_dp
+ call status(0,dtfil%filstat,iexit,level,'call pspini   ')
+ call pspini(dtset,dtfil,ecore,gencond,gsqcut_eff,gsqcutdg_eff,level,&
+& pawrad,pawtab,psps,rprimd,comm_mpi=mpi_enreg%comm_cell)
+
 !Compute local ionic pseudopotential vpsp and core electron density xccc3d:
  n3xccc=0;if (psps%n1xccc/=0) n3xccc=nfftf
  ABI_ALLOCATE(xccc3d,(n3xccc))
@@ -865,18 +868,6 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
 ! call kpgio(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kg,&
 !& dtset%kptns,mkmem,dtset%nband,nkpt,'PERS',mpi_enreg,&
 !& mpw,npwarr,npwtot,nsppol)
-
-!Recompute first large sphere cut-off gsqcut,
-!without taking into account dilatmx
- k0(:)=0.0_dp
- call status(0,dtfil%filstat,iexit,level,'call getcut   ')
- call getcut(boxcut,dtset%ecut,gmet,gsqcut,dtset%iboxcut,std_out,k0,dtset%ngfft)
-
-!Open and read pseudopotential files
- ecore = 0_dp
- call status(0,dtfil%filstat,iexit,level,'call pspini   ')
- call pspini(dtset,dtfil,ecore,gencond,gsqcut_eff,gsqcutdg_eff,level,&
-& pawrad,pawtab,psps,rprimd,comm_mpi=mpi_enreg%comm_cell)
 
 ! OLD NONLINEAR
 !!Initialize band structure datatype
