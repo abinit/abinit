@@ -103,23 +103,23 @@ subroutine qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,mband,npwarr,nkpt,nspinor,nsp
    do ikpt = 1, nkpt
      npw_k1 = npwarr(ikpt)
      icg  = dtefield%cgindex(ikpt,1)
-  
+     
      do idir = 1, 3
        
        do ifor = 1, 2
-  
+         
          ikpt2 = dtefield%ikpt_dk(ikpt,ifor,idir)
          npw_k2 = npwarr(ikpt2)
          icg1 = dtefield%cgindex(ikpt2,1)
          pwind_k(1:npw_k1) = pwindall((ikpt-1)*max(mpw,mpw1)+1:(ikpt-1)*max(mpw,mpw1)+npw_k1,ifor,idir)
-  
+         
          do jband = 1, dtefield%nband_occ(isppol)
            vect2(:,1:npw_k2) = &
 &           cg(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
            if (npw_k2 < mpw) vect2(:,npw_k2+1:mpw) = zero
-  
+           
            do iband = 1, dtefield%nband_occ(isppol)
-  
+             
              pwmin = (iband-1)*npw_k1*nspinor
              pwmax = pwmin + npw_k1*nspinor
              vect1(:,1:npw_k1) = &
@@ -129,21 +129,21 @@ subroutine qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,mband,npwarr,nkpt,nspinor,nsp
 &             vect1,vect2)
              smat_k(1,iband,jband) = dotr
              smat_k(2,iband,jband) = doti
-  
+             
            end do    ! iband
-  
+           
          end do    !jband
-  
+         
          sinv(:,:,:) = smat_k(:,:,:)
-  
+         
          call dzgefa(sinv,dtefield%mband_occ,dtefield%nband_occ(isppol),ipvt,info)
          call dzgedi(sinv,dtefield%mband_occ,dtefield%nband_occ(isppol),ipvt,det,zgwork,job)
-  
+         
          qmat(:,:,:,ikpt,ifor,idir) = sinv(:,:,:)
-  
-  
+         
+         
        end do
-  
+       
      end do
 
    end do  !end loop over k 

@@ -2595,7 +2595,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    call intagm(dprarr,intarr,jdtset,marr,2*dtset%nkptgw*dtset%nsppol,string(1:lenstr),'bdgw',tread,'INT')
    if(tread==1) then
      dtset%bdgw(1:2,1:dtset%nkptgw,1:dtset%nsppol) =  &
-       reshape(intarr(1:2*dtset%nkptgw*dtset%nsppol),[2,dtset%nkptgw,dtset%nsppol])
+&    reshape(intarr(1:2*dtset%nkptgw*dtset%nsppol),[2,dtset%nkptgw,dtset%nsppol])
    end if
 
    ! Test bdgw values.
