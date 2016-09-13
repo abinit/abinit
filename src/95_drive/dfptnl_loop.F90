@@ -91,8 +91,7 @@
 #include "abi_common.h"
 
 
-subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,&
-& etotal,gmet,gprimd,gsqcut, &
+subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,gprimd,gsqcut, &
 & hdr,kg,kneigh,kg_neigh,kptindex,kpt3,kxc,k3xc,mband,mgfft,mkmem,mkmem_max,mk1mem,&
 & mpert,mpi_enreg,mpw,mvwtk,natom,nfftf,nkpt,nkpt3,nkxc,nk3xc,nneigh,nspinor,nsppol,&
 & npwarr,occ,pawfgr,pawtab,psps,pwind,rfpert,rhog,rhor,rprimd,ucvol,usecprj,vtrial,xred)
@@ -111,8 +110,8 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,&
 
  use m_io_tools,    only : file_exists
  use m_ioarr,       only : read_rhor
- use m_hamiltonian, only : destroy_hamiltonian,gs_hamiltonian_type,init_hamiltonian,&
-                           init_rf_hamiltonian,rf_hamiltonian_type
+ use m_hamiltonian, only : destroy_hamiltonian,destroy_rf_hamiltonian,gs_hamiltonian_type,&
+                           init_hamiltonian,init_rf_hamiltonian,rf_hamiltonian_type
  use m_pawfgr,      only : pawfgr_type
  use m_pawrhoij,    only : pawrhoij_type
  use m_pawtab,      only : pawtab_type
@@ -152,6 +151,7 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,&
  integer,intent(in) :: rfpert(3,mpert,3,mpert,3,mpert)
  integer,intent(inout) :: blkflg(3,mpert,3,mpert,3,mpert) !vz_i
  real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol),gmet(3,3)
+ real(dp),intent(in) :: eigen0(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: gprimd(3,3),k3xc(nfftf,nk3xc),kpt3(3,nkpt3)
  real(dp),intent(in) :: kxc(nfftf,nkxc),mvwtk(30,nkpt),rhog(2,nfftf),rhor(nfftf,dtset%nspden),rprimd(3,3)
  real(dp),intent(in) :: vtrial(nfftf,dtset%nspden),xred(3,natom)
@@ -165,19 +165,20 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,&
  integer :: ask_accurate,comm_cell,counter,cplex,formeig,i1dir
  integer :: i1pert,i2dir,i2pert,i3dir,i3pert,iatom,idir_dkde,ierr,iexit,ifft,ii,index,ir
  integer :: ireadwf,itypat,mcg,mpsang,n1,n2,n3,n3xccc,nfftotf,nhat1grdim,nspden,nwffile
- integer :: option,optene,optorth,pert1case,pert2case,pert3case,rdwrpaw,timrev,usexcnhat
+ integer :: option,optene,optorth,pert1case,pert2case,pert3case
+ integer :: rdwrpaw,timrev,usexcnhat
  real(dp) :: dummy_real,ecut_eff,exc3,valuei
  character(len=500) :: message
- character(len=fnlen) :: fiden1i,fiwf1i,fiwf3i,fiwfddk,fnamewff(2)
+ character(len=fnlen) :: fiden1i,fiwf1i,fiwf3i,fiwfddk,fnamewff(3)
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
- type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3,wffddk(2)
- type(wfk_t) :: ddk_f(2)
+ type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3,wffddk(3)
+ type(wfk_t) :: ddk_f(3)
  type(wvl_data) :: wvl
  type(hdr_type) :: hdr_den
 !arrays
  integer,allocatable :: atindx(:),atindx1(:),nattyp(:)
- integer :: file_index(2)
+ integer :: file_index(3)
  real(dp) :: rho_dum(1),tsec(2)
  real(dp),allocatable :: cg1(:,:),cg2(:,:),cg3(:,:),eigen1(:),eigen2(:),eigen3(:)
  real(dp),allocatable :: nhat(:,:),nhat1(:,:),nhat1gr(:,:,:),vresid_dum(:,:)
@@ -412,20 +413,20 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,&
 
                    blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
 
-                 call status(counter,dtfil%filstat,iexit,level,'call inwffil  ')
-                 call inwffil(ask_accurate,cg2,dtset,dtset%ecut,ecut_eff,eigen2,dtset%exchn2n3d,&
-&                 formeig,gmet,hdr,&
-&                 ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
-&                 dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
-&                 dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
-&                 dtset%nsppol,dtset%nsym,&
-&                 occ,optorth,rprimd,&
-&                 dtset%symafm,dtset%symrel,dtset%tnons,&
-&                 dtfil%unkg1,wff2,wfft2,dtfil%unwff2,&
-&                 fiwf3i,wvl)
-                  if (ireadwf==1) then
-                    call WffClose (wff2,ierr)
-                  end if
+                   call status(counter,dtfil%filstat,iexit,level,'call inwffil  ')
+                   call inwffil(ask_accurate,cg2,dtset,dtset%ecut,ecut_eff,eigen2,dtset%exchn2n3d,&
+&                   formeig,gmet,hdr,&
+&                   ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
+&                   dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
+&                   dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
+&                   dtset%nsppol,dtset%nsym,&
+&                   occ,optorth,rprimd,&
+&                   dtset%symafm,dtset%symrel,dtset%tnons,&
+&                   dtfil%unkg1,wff2,wfft2,dtfil%unwff2,&
+&                   fiwf3i,wvl)
+                   if (ireadwf==1) then
+                     call WffClose (wff2,ierr)
+                   end if
 
 !                  Read the first-order densities from disk-files
                    rho2r1(:,:) = zero ; rho2g1(:,:) = zero
@@ -613,9 +614,19 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,&
 ! **********************************************************************************************
 !                  LIRE ET CHARGER | u^(k_dir2) > (pour tests) et | u^(k_dir2 E_dir3) >
 ! **********************************************************************************************
+
+                   if (i2pert <= natom.or.i2pert>natom+2) then
+                     MSG_BUG('NONLINEAR with i2pert<=natom or i2pert>natom+2 is not implemented yet')
+                   end if
+                   file_index(1) = i2dir + 3*(i2pert-1)
+                   fnamewff(1) = dtfil%fnamewffdelfd
+                   nwffile = 1
+
                    if (i2pert==natom+2) then
-                     nwffile = 1 ! TO CHANGE
-                     file_index(1) = i2dir+natom*3
+!LTEST
+                     nwffile = 2 ! TO CHANGE
+!LTEST
+                     file_index(2) = i2dir+natom*3
                      idir_dkde = i2dir
                      if (i3dir/=i2dir) then ! see m_rf2.F90 => getidirs
                        if (i2dir==2.and.i3dir==3) idir_dkde = 4
@@ -625,40 +636,43 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,&
                        if (i2dir==3.and.i3dir==1) idir_dkde = 8
                        if (i2dir==2.and.i3dir==1) idir_dkde = 9
                      end if
-                     file_index(2) = idir_dkde+9+(dtset%natom+6)*3
-                     fnamewff(1) = dtfil%fnamewffddk
-                     fnamewff(2) = dtfil%fnamewffdkde
-                     do ii=1,nwffile
-                       call appdig(file_index(ii),fnamewff(ii),fiwfddk)
-                       ! Checking the existence of data file
-                       if (.not. file_exists(fiwfddk)) then
-                         ! Trick needed to run Abinit test suite in netcdf mode.
-                         if (file_exists(nctk_ncify(fiwfddk))) then
-                           write(message,"(3a)")"- File: ",trim(fiwfddk),&
-                           " does not exist but found netcdf file with similar name."
-                           call wrtout(std_out,message,'COLL')
-                           fiwfddk = nctk_ncify(fiwfddk)
-                         end if
-                         if (.not. file_exists(fiwfddk)) then
-                           MSG_ERROR('Missing file: '//TRIM(fiwfddk))
-                         end if
-                       end if
-                       write(message,'(2a)')'-dfpt_looppert : read the wavefunctions from file: ',trim(fiwfddk)
-                       call wrtout(std_out,message,'COLL')
-                       call wrtout(ab_out,message,'COLL')
-#ifdef DEV_MG_WFK
-!                      Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
-                       call wfk_open_read(ddk_f(ii),fiwfddk,1,dtset%iomode,dtfil%unddk+(ii-1),mpi_enreg%comm_cell)
-#else
-                       call WffOpen(dtset%iomode,mpi_enreg%comm_cell,fiwfddk,ierr,wffddk(ii),master,me,dtfil%unddk+(ii-1))
-#endif
-                     end do
+                     file_index(3) = idir_dkde+9+(dtset%natom+6)*3
+                     fnamewff(2) = dtfil%fnamewffddk
+                     fnamewff(3) = dtfil%fnamewffdkde
+
                    end if
+
+                   do ii=1,nwffile
+                     call appdig(file_index(ii),fnamewff(ii),fiwfddk)
+                     ! Checking the existence of data file
+                     if (.not. file_exists(fiwfddk)) then
+                       ! Trick needed to run Abinit test suite in netcdf mode.
+                       if (file_exists(nctk_ncify(fiwfddk))) then
+                         write(message,"(3a)")"- File: ",trim(fiwfddk),&
+                         " does not exist but found netcdf file with similar name."
+                         call wrtout(std_out,message,'COLL')
+                         fiwfddk = nctk_ncify(fiwfddk)
+                       end if
+                       if (.not. file_exists(fiwfddk)) then
+                         MSG_ERROR('Missing file: '//TRIM(fiwfddk))
+                       end if
+                     end if
+                     write(message,'(2a)')'-dfptnl_loop : read the wavefunctions from file: ',trim(fiwfddk)
+                     call wrtout(std_out,message,'COLL')
+                     call wrtout(ab_out,message,'COLL')
+#ifdef DEV_MG_WFK
+!                    Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
+                     call wfk_open_read(ddk_f(ii),fiwfddk,1,dtset%iomode,dtfil%unddk+(ii-1),mpi_enreg%comm_cell)
+#else
+                     call WffOpen(dtset%iomode,mpi_enreg%comm_cell,fiwfddk,ierr,wffddk(ii),master,me,dtfil%unddk+(ii-1))
+#endif
+                   end do
 
 !                  Perform DFPT part of the 3dte calculation
                    call timab(512,1,tsec)
                    call status(counter,dtfil%filstat,iexit,level,'call dfptnl_resp ')
-                   call dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen2,gs_hamkq,i1dir,&
+!                  NOTE : eigen2 equals zero here
+                   call dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,i1dir,&
 &                   i2dir,i3dir,i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
 &                   mpsang,mpw,natom,nfftf,nkpt,nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,&
 &                   rf_hamkq,rprimd,vtrial,vtrial1,wffddk,ddk_f,xred)
@@ -699,14 +713,19 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,&
                    d3etot(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = &
 &                   d3etot(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
 
-!                  Eventually close the dot file, before calling dfpt_nstdy
+!                  Eventually close the dot file
+#ifdef DEV_MG_WFK
+                   call wfk_close(ddk_f(1))
+#else
+                   call WffClose(wffddk(1),ierr)
+#endif
                    if (i2pert==dtset%natom+2) then
 #ifdef DEV_MG_WFK
-                     call wfk_close(ddk_f(1))
-!                     call wfk_close(ddk_f(2)) ! TO CHANGE
+                     call wfk_close(ddk_f(2))
+!                     call wfk_close(ddk_f(3)) ! TO CHANGE
 #else
-                     call WffClose(wffddk(1),ierr)
-!                     call WffClose(wffddk(2),ierr) ! TO CHANGE
+                     call WffClose(wffddk(2),ierr)
+!                     call WffClose(wffddk(3),ierr) ! TO CHANGE
 #endif
                    end if
 

@@ -223,7 +223,10 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  end if
 
 !Computation of third order derivatives from PEAD (pead=1) or full DPFT formalism (pead=0):
-pead = 1 ! pead = 0 is under development...
+! pead = 1 ! pead = 0 is under development...
+!LTEST
+ pead = 0
+!LTEST
 
 !Define the set of admitted perturbations taking into account
 !the possible permutations
@@ -1021,7 +1024,7 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
  else ! pead=0 in this case
 
    call status(0,dtfil%filstat,iexit,level,'call dfptnl_loop ')
-   call dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,etotal,gmet,gprimd,gsqcut,&
+   call dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,gprimd,gsqcut,&
 &   hdr,kg,kneigh,kg_neigh,kptindex,kpt3,kxc,k3xc,dtset%mband,mgfftf,&
 &   dtset%mkmem,mkmem_max,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,mvwtk,natom,nfftf,&
 &   dtset%nkpt,nkpt3,nkxc,nk3xc,nneigh,dtset%nspinor,dtset%nsppol,npwarr,occ,pawfgr,pawtab,psps,pwind,&
@@ -1161,13 +1164,23 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
  end if   ! mpi_enreg%me
 
 ! TO OPTIMIZE DEALLOCATION !
+ if (pead/=0) then
+   ABI_DEALLOCATE(cgindex)
+   ABI_DEALLOCATE(kg_neigh)
+   ABI_DEALLOCATE(kneigh)
+   ABI_DEALLOCATE(kptindex)
+   ABI_DEALLOCATE(kpt3)
+   ABI_DEALLOCATE(mpi_enreg%kpt_loc2ibz_sp)
+   ABI_DEALLOCATE(mpi_enreg%mkmem)
+   ABI_DEALLOCATE(mvwtk)
+   ABI_DEALLOCATE(pwind)
+ end if
  ABI_DEALLOCATE(amass)
  ABI_DEALLOCATE(atindx)
  ABI_DEALLOCATE(atindx1)
  ABI_DEALLOCATE(blkflg)
  ABI_DEALLOCATE(carflg)
  ABI_DEALLOCATE(cg)
- ABI_DEALLOCATE(cgindex)
  ABI_DEALLOCATE(d3cart)
  ABI_DEALLOCATE(d3etot)
  ABI_DEALLOCATE(d3e_pert1)
@@ -1176,14 +1189,8 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
  ABI_DEALLOCATE(eigen0)
  ABI_DEALLOCATE(rhog)
  ABI_DEALLOCATE(rhor)
- ABI_DEALLOCATE(kneigh)
- ABI_DEALLOCATE(kg_neigh)
- ABI_DEALLOCATE(kptindex)
- ABI_DEALLOCATE(kpt3)
- ABI_DEALLOCATE(mvwtk)
  ABI_DEALLOCATE(nhat)
  ABI_DEALLOCATE(nhatgr)
- ABI_DEALLOCATE(pwind)
  ABI_DEALLOCATE(rfpert)
 ! ABI_DEALLOCATE(grxc)
  ABI_DEALLOCATE(kg)
@@ -1197,8 +1204,6 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
 ! ABI_DEALLOCATE(phnons)
  ABI_DEALLOCATE(ph1d)
  ABI_DEALLOCATE(ph1df)
- ABI_DEALLOCATE(mpi_enreg%kpt_loc2ibz_sp)
- ABI_DEALLOCATE(mpi_enreg%mkmem)
  ABI_DEALLOCATE(vtrial)
  call pawfgr_destroy(pawfgr)
  if (psps%usepaw==1) then
