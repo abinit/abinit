@@ -137,7 +137,7 @@ CONTAINS  !=====================================================================
 !! NOTES
 !!
 !! PARENTS
-!!      dfpt_looppert,rf2_init
+!!      dfpt_looppert,dfpt_scfcv,rf2_init
 !!
 !! CHILDREN
 !!

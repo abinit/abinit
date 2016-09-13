@@ -3083,6 +3083,7 @@ end subroutine wfk_write_h1mat
 !!  Hdr_out<hdr_type>=The header of the file
 !!
 !! PARENTS
+!!      m_ddk
 !!
 !! CHILDREN
 !!      hdr_free,hdr_read_from_fname,wfk_close,wfk_open_read

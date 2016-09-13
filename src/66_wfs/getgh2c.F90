@@ -58,7 +58,7 @@
 !!      m_rf2
 !!
 !! CHILDREN
-!!      nonlop
+!!      nonlop,pawcprj_alloc,pawcprj_free
 !!
 !! SOURCE
 

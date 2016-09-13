@@ -107,8 +107,8 @@ contains
 !! deallocate tetrahedra pointers if needed
 !!
 !! PARENTS
-!!      ep_el_weights,ep_fs_weights,ep_ph_weights,gstate,m_ebands,m_phgamma
-!!      m_phonons,tetrahedron,thmeig,wfk_analyze
+!!      ep_el_weights,ep_fs_weights,ep_ph_weights,gstate,m_ebands,m_fstab
+!!      m_phgamma,m_phonons,tetrahedron,thmeig,wfk_analyze
 !!
 !! CHILDREN
 !!      mpi_comm_rank,mpi_comm_size
@@ -166,8 +166,8 @@ end subroutine destroy_tetra
 !!  tetrahedra%vv = tetrahedron volume divided by full BZ volume
 !!
 !! PARENTS
-!!      ep_el_weights,ep_fs_weights,ep_ph_weights,m_bz_mesh,m_ebands,m_phgamma
-!!      m_phonons,tetrahedron,thmeig
+!!      ep_el_weights,ep_fs_weights,ep_ph_weights,m_bz_mesh,m_ebands,m_fstab
+!!      m_phgamma,m_phonons,tetrahedron,thmeig
 !!
 !! CHILDREN
 !!      mpi_comm_rank,mpi_comm_size
@@ -654,7 +654,7 @@ end subroutine get_tetra_weight
 !! Same API as get_tetra_weight but weights here have shape (nene, nkpt)
 !!
 !! PARENTS
-!!      m_ebands,m_phgamma,m_tetrahedron
+!!      m_ebands,m_fstab,m_phgamma,m_tetrahedron
 !!
 !! CHILDREN
 !!      mpi_comm_rank,mpi_comm_size

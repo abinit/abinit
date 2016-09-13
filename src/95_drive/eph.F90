@@ -53,13 +53,13 @@
 !!
 !! CHILDREN
 !!      crystal_free,crystal_from_hdr,crystal_print,cwtime,ddb_free
-!!      ddb_from_file,destroy_mpi_enreg,dvdb_free,dvdb_init,dvdb_list_perts
-!!      dvdb_print,ebands_free,ebands_print,ebands_set_fermie,ebands_set_scheme
-!!      ebands_update_occ,edos_free,edos_init,edos_write,eph_phgamma,hdr_free
-!!      hdr_vs_dtset,ifc_free,ifc_init,ifc_outphbtrap,init_distribfft_seq
-!!      initmpi_seq,mkphdos,pawfgr_destroy,pawfgr_init,phdos_free,phdos_print
-!!      print_ngfft,prtbltztrp_out,pspini,wfk_read_eigenvalues,wrtout
-!!      xmpi_bcast
+!!      ddb_from_file,ddk_free,ddk_init,destroy_mpi_enreg,dvdb_free,dvdb_init
+!!      dvdb_list_perts,dvdb_print,ebands_free,ebands_print,ebands_set_fermie
+!!      ebands_set_scheme,ebands_update_occ,edos_free,edos_init,edos_write
+!!      eph_phgamma,hdr_free,hdr_vs_dtset,ifc_free,ifc_init,ifc_outphbtrap
+!!      init_distribfft_seq,initmpi_seq,mkphdos,pawfgr_destroy,pawfgr_init
+!!      phdos_free,phdos_print,print_ngfft,prtbltztrp_out,pspini
+!!      wfk_read_eigenvalues,wrtout,xmpi_bcast
 !!
 !! SOURCE
 
