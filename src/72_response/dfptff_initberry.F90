@@ -138,15 +138,15 @@ subroutine  dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
  index = 0
  do isppol = 1, nsppol
    do ikpt = 1, nkpt
-  
+     
      mband_occ_k = 0
      nband_k = dtset%nband(ikpt)
-  
+     
      do iband = 1, nband_k
        index = index + 1
        if (abs(occ(index) - occ_val) < tol8) mband_occ_k = mband_occ_k + 1
      end do
-  
+     
      if (ikpt > 1) then
        if (dtefield%nband_occ(isppol) /= mband_occ_k) then
          message = ' The number of valence bands is not the same for every k-point for present spin'
@@ -156,7 +156,7 @@ subroutine  dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
        dtefield%mband_occ = max(dtefield%mband_occ,mband_occ_k)
        dtefield%nband_occ(isppol) = mband_occ_k
      end if
-  
+     
    end do
  end do
 
