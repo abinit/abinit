@@ -153,8 +153,10 @@ contains  !=====================================================================
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_phgamma
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -229,19 +231,10 @@ end subroutine fstab_free
 !!  then k-points contributing to FS integral are selected according to some threshold.
 !!
 !! PARENTS
-!!      m_fstab
+!!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_solve_gap,a2fw_write,cg_rotate,cwtime
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
-!!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
-!!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
-!!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
-!!      ngfft_seq,pawcprj_free,phdispl_cart2red,phgamma_finalize,phgamma_free
-!!      phgamma_init,phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free
-!!      wfd_init,wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work
-!!      xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 
@@ -596,19 +589,10 @@ end function fstab_findkg0
 !!   wtk(fs%nsig,fs%maxnb)=Weights for FS integration.
 !!
 !! PARENTS
-!!      m_fstab
+!!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_solve_gap,a2fw_write,cg_rotate,cwtime
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
-!!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
-!!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
-!!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
-!!      ngfft_seq,pawcprj_free,phdispl_cart2red,phgamma_finalize,phgamma_free
-!!      phgamma_init,phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free
-!!      wfd_init,wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work
-!!      xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 
@@ -686,19 +670,10 @@ end subroutine fstab_weights_ibz
 !!  Only printing.
 !!
 !! PARENTS
-!!      m_fstab
+!!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_solve_gap,a2fw_write,cg_rotate,cwtime
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
-!!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
-!!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
-!!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
-!!      ngfft_seq,pawcprj_free,phdispl_cart2red,phgamma_finalize,phgamma_free
-!!      phgamma_init,phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free
-!!      wfd_init,wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work
-!!      xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 

@@ -58,7 +58,7 @@
 !!      m_rf2
 !!
 !! CHILDREN
-!!      nonlop
+!!      nonlop,pawcprj_alloc,pawcprj_free
 !!
 !! SOURCE
 
@@ -249,7 +249,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
        cpopt=-1+5*gs_hamkq%usecprj
        choice=8; signs=2; paw_opt=1; if (sij_opt/=0) paw_opt=sij_opt+3
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout_dum,gs_hamkq,idirc,(/lambda/),mpi_enreg,1,nnlout,&
-  &     paw_opt,signs,gs2c,tim_nonlop,cwavef,gvnl2_)
+&       paw_opt,signs,gs2c,tim_nonlop,cwavef,gvnl2_)
        if (gs_hamkq%usecprj==0) then
          call pawcprj_free(cwaveprj_tmp)
          ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
@@ -258,7 +258,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
      else
        choice=8; signs=2; cpopt=-1 ; paw_opt=0
        call nonlop(choice,cpopt,cwaveprj,enlout_dum,gs_hamkq,idirc,(/zero/),mpi_enreg,1,nnlout,&
-  &     paw_opt,signs,svectout_dum,tim_nonlop,cwavef,gvnl2_)
+&       paw_opt,signs,svectout_dum,tim_nonlop,cwavef,gvnl2_)
      end if
 
 ! d^2[H_nl]/dk1dE2 : Non-zero only in PAW
@@ -303,9 +303,9 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
      cpopt=-1+5*gs_hamkq%usecprj
      choice=81 ; paw_opt=3 ; signs=2
      call nonlop(choice,cpopt,cwaveprj_ptr,enlout_dum,gs_hamkq,idirc,(/lambda/),mpi_enreg,1,nnlout,&
-&    paw_opt,signs,nonlop_out,tim_nonlop,cwavef,vectout_dum)
+&     paw_opt,signs,nonlop_out,tim_nonlop,cwavef,vectout_dum)
 !$OMP PARALLEL DO
-     do ipw=1,npw1*my_nspinor! Note the multiplication by i
+     do ipw=1,npw1*my_nspinor ! Note the multiplication by i
        gvnl2_(1,ipw)=gvnl2_(1,ipw)-nonlop_out(2,ipw)
        gvnl2_(2,ipw)=gvnl2_(2,ipw)+nonlop_out(1,ipw)
      end do
