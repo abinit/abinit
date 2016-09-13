@@ -386,7 +386,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! TODO: ebands method
    nelect_per_spin = ebands_nelect_per_spin(ebands)
    call prtbltztrp_out(ebands%eig, ebands%fermie, dtfil%filnam_ds(4), ebands%kptns, cryst%natom, ebands%nband(1), &
-     nelect_per_spin, ebands%nkpt, ebands%nspinor, ebands%nsppol, cryst%nsym, cryst%rprimd, cryst%symrel)
+&   nelect_per_spin, ebands%nkpt, ebands%nspinor, ebands%nsppol, cryst%nsym, cryst%rprimd, cryst%symrel)
  end if
 
  call cwtime(cpu,wall,gflops,"stop")
@@ -415,7 +415,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! === Open and read pseudopotential files ===
  ! ===========================================
  call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,level40,&
-   pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
+&  pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
 
  ! ====================================================
  ! === This is the real epc stuff once all is ready ===
@@ -424,7 +424,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (eph_task == "ph_linwid") then
    ! Compute phonon linewidths in metals.
    call eph_phgamma(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
-&       pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
+&   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
  end if
 ! TODO: decide whether to make several driver functions. 
 !  before that, however, need to encapsulate most of the functionalities in eph_phgamma

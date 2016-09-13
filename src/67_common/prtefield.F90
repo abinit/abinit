@@ -130,18 +130,18 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
    
    write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10,&
 &   '    ebar:  ', (dtset%red_efieldbar(ii),ii=1,3), ch10, &   !!HONG need to change
-&   '    pbar:  ', (red_pbar(ii),ii=1,3)
+&  '    pbar:  ', (red_pbar(ii),ii=1,3)
    call wrtout(iunit,message,'COLL')
-      
+   
    write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10,&
 &   '       e:  ', (dtset%red_efield(ii),ii=1,3), ch10, &
 &   '       p:  ', (dtefield%red_ptot1(ii), ii=1,3)
    call wrtout(iunit,message,'COLL')
-      
+   
    write(message,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)') ch10,&
 &   ' (S.I.), that is V/m for E, and C/m^2 for P', ch10, &  
 &   '-      E:  ', (dtset%efield(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10, &    !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
-&   '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3),ch10
+&  '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3),ch10
    call wrtout(iunit,message,'COLL')
    
  end if ! berryopt ==4
@@ -178,10 +178,10 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
 &   '       d:  ', (dtset%red_dfield(ii),ii = 1, 3), ch10, &
 &   ' e  +  p:  ', (dtset%red_efield(ii)+dtefield%red_ptot1(ii),ii=1,3)
    call wrtout(iunit,message,'COLL')
-      
+   
    write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10,&
 &   '    ebar:  ', (dtset%red_efieldbar(ii),ii=1,3), ch10, &   !!HONG need to change
-&   '    pbar:  ', (red_pbar(ii),ii=1,3), ch10, &
+&  '    pbar:  ', (red_pbar(ii),ii=1,3), ch10, &
 &   '    dbar:  ', (red_dbar(ii),ii=1,3), ch10, &
 &   ' eba+pba:  ', (dtset%red_efieldbar(ii)+red_pbar(ii),ii=1,3)
    call wrtout(iunit,message,'COLL')
@@ -192,11 +192,11 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
 &   '       D:  ', (dtset%dfield(ii),ii = 1, 3), ch10, &
 &   'E+4*pi*P:  ', (dtset%efield(ii)+4.0d0*pi*ptot_cart(ii),ii=1,3)
    call wrtout(iunit,message,'COLL')
-      
+   
    write(message,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)') ch10,&
 &   ' (S.I.), that is V/m for E, and C/m^2 for P and D', ch10, &  
 &   '-      E:  ', (dtset%efield(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10, &    !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
-&   '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3), ch10, &
+&  '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3), ch10, &
 &   '       D:  ', ((1.0d0/(4*pi))*dtset%dfield(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii = 1, 3), ch10, &
 &   'eps0*E+P:  ', (dtset%efield(ii)*eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))+ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii=1,3),ch10  ! eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))=8.854187817620*5.14220652*1d-1
    call wrtout(iunit,message,'COLL')
@@ -239,8 +239,8 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
    call wrtout(iunit,message,'COLL')
    
    write(message,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)') ch10, &
-&  ' (S.I.), that is V/m for E, and C/m^2 for P', ch10, &  
-&  '-      E:  ', (dtefield%efield2(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10, &    !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
+&   ' (S.I.), that is V/m for E, and C/m^2 for P', ch10, &  
+&   '-      E:  ', (dtefield%efield2(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10, &    !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
 &  '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3),ch10 
    call wrtout(iunit,message,'COLL')
 
@@ -280,14 +280,14 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
 &   '       p:  ', (dtefield%red_ptot1(ii), ii=1,3), ch10, &
 &   '       d:  ', (dtset%red_dfield(ii),ii = 1, 3), ch10, &
 &   ' e  +  p:  ', (dtset%red_efield(ii)+dtefield%red_ptot1(ii),ii=1,3)  
-call wrtout(iunit,message,'COLL')
+    call wrtout(iunit,message,'COLL')
 
    write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
 &   '    ebar:  ', (dtset%red_efieldbar(ii),ii=1,3), ch10, &   
 &   '    pbar:  ', (red_pbar(ii),ii=1,3), ch10, &
 &   '    dbar:  ', (red_dfieldbar(ii),ii=1,3), ch10, &
 &   ' eba+pba:  ', (dtset%red_efieldbar(ii)+red_pbar(ii),ii=1,3)
-call wrtout(iunit,message,'COLL')
+    call wrtout(iunit,message,'COLL')
 
    write(message,'(a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x))') ch10, &
 &   '       E:  ', (dtset%efield(ii), ii=1,3), ch10, &
@@ -297,9 +297,9 @@ call wrtout(iunit,message,'COLL')
    call wrtout(iunit,message,'COLL')
    
    write(message,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)') ch10, &
-& ' (S.I.), that is V/m for E, and C/m^2 for P and D', ch10, &  
+&   ' (S.I.), that is V/m for E, and C/m^2 for P and D', ch10, &  
 &   '-      E:  ', (dtset%efield(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10, &    !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
-&   '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3), ch10, &
+&  '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3), ch10, &
 &   '       D:  ', ((1.0d0/(4*pi))*dtset%dfield(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii = 1, 3), ch10, &
 &   'eps0*E+P:  ', (dtset%efield(ii)*eps0*(Ha_J/(e_Cb*Bohr_Ang*1d-10))+ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii=1,3),ch10
    call wrtout(iunit,message,'COLL')
@@ -395,7 +395,7 @@ call wrtout(iunit,message,'COLL')
    call wrtout(iunit,message,'COLL')
 
    write(message,'(a,a,a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a,a,3(es16.9,2x),a)')  ch10, &
-& ' (S.I.), that is V/m for E, and C/m^2 for P and D', ch10, &  
+&   ' (S.I.), that is V/m for E, and C/m^2 for P and D', ch10, &  
 &   '       E:  ', (dtefield%efield2(ii)*(Ha_J/(e_Cb*Bohr_Ang*1d-10)), ii=1,3), ch10, &    !(Ha_J/(e_Cb*Bohr_Ang*1d-10))= 5.14220652*1d+11
 &  '       P:  ', (ptot_cart(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2, ii=1,3), ch10, &
 &   '       D:  ', ((1.0d0/(4*pi))*dtset%dfield(ii)*(e_Cb)/(Bohr_Ang*1d-10)**2,ii = 1, 3), ch10, &
