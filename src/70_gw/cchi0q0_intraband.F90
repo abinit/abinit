@@ -62,8 +62,8 @@
 !!      screening
 !!
 !! CHILDREN
-!!      assemblychi0_sym,clib_progress_bar,kb_potential_free,get_bz_item
-!!      getnel,gsph_fft_tabs,kb_potential_init,kmesh_free,kmesh_init
+!!      assemblychi0_sym,clib_progress_bar,vkbr_free,get_bz_item
+!!      getnel,gsph_fft_tabs,vkbr_init,kmesh_free,kmesh_init
 !!      littlegroup_free,littlegroup_init,littlegroup_print,pack_eneocc
 !!      paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free
 !!      pawhur_free,pawhur_init,pawpwij_free,pawpwij_init,print_arr,rho_tw_g
@@ -100,7 +100,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  use m_gsphere,         only : gsphere_t, gsph_fft_tabs
  use m_oscillators,     only : rho_tw_g
  use m_pawhr,           only : pawhur_t, pawhur_free, pawhur_init, paw_ihr
- use m_commutator_vkbr, only : kb_potential, kb_potential_free, kb_potential_init, nc_ihr_comm
+ use m_vkbr,            only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
  use m_chi0,            only : assemblychi0_sym, symmetrize_afm_chi0
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
@@ -160,7 +160,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
  character(len=500) :: msg,msg_tmp !,allup
  type(kmesh_t) :: Kmesh
  type(littlegroup_t) :: Ltg_q
- type(kb_potential) :: KBgrad_k
+ type(vkbr_t) :: vkbr
 !arrays
  integer :: my_band_list(Wfd%mband)
  integer,ABI_CONTIGUOUS pointer :: kg_k(:,:)
@@ -230,7 +230,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
      if (my_nband==0) CYCLE
      
      if (Wfd%usepaw==0.and.inclvkb/=0) then ! Include term <n,k|[Vnl,iqr]|n"k>' for q->0.
-       call kb_potential_init(KBgrad_k,Cryst,Psps,inclvkb,istwf_k,npw_k,kpt,kg_k)
+       call vkbr_init(vkbr,Cryst,Psps,inclvkb,istwf_k,npw_k,kpt,kg_k)
      end if
 
      do lbidx=1,my_nband
@@ -239,7 +239,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
        if (Wfd%usepaw==0) then  
          ! Matrix elements of i[H,r] for NC pseudopotentials.        
-         comm_kbbs = nc_ihr_comm(KBgrad_k,cryst,psps,npw_k,nspinor,istwf_k,inclvkb,Kmesh%ibz(:,ik_ibz),ug,ug,kg_k) 
+         comm_kbbs = nc_ihr_comm(vkbr,cryst,psps,npw_k,nspinor,istwf_k,inclvkb,Kmesh%ibz(:,ik_ibz),ug,ug,kg_k) 
        else                     
          ! Matrix elements of i[H,r] for PAW.
          call wfd_get_cprj(Wfd,band,ik_ibz,spin,Cryst,Cp_bks,sorted=.FALSE.)
@@ -249,7 +249,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
        ihr_comm(:,:,band,ik_ibz,spin) = comm_kbbs
      end do
 
-     call kb_potential_free(KBgrad_k) ! Not need anymore as we loop only over IBZ.
+     call vkbr_free(vkbr) ! Not need anymore as we loop only over IBZ.
    end do
  end do
  !

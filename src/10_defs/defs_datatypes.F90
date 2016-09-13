@@ -405,7 +405,7 @@ module defs_datatypes
    ! For each type of psp,
    ! array giving l,m,n,lm,ln,spin for i=ln  (if useylm=0)
    !                                or i=lmn (if useylm=1)
-   ! NB: spin is used if NC pseudos with SOC term: 1 if scalar term (spin diagonal), 2 if SOC term.
+   ! NB: spin is used for NC pseudos with SOC term: 1 if scalar term (spin diagonal), 2 if SOC term.
 
   integer, allocatable :: pspdat(:) 
    ! pspdat(ntypat)
