@@ -392,7 +392,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 #ifndef DEV_MG_WFK
    call clsopn(wffddk(1))
    call hdr_skip(wffddk(1),ierr)
-   if((ipert==natom+10 .and. ipert>3).or.ipert==natom+11) then
+   if((ipert==natom+10 .and. idir>3).or.ipert==natom+11) then
      call clsopn(wffddk(2))
      call hdr_skip(wffddk(2),ierr)
    end if
@@ -498,7 +498,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
          tim_rwwf=0
 #ifndef DEV_MG_WFK
          call WffReadSkipK(1,0,ikpt,isppol,mpi_enreg,wffddk(1))
-         if((ipert==natom+10 .and. ipert>3).or.ipert==natom+11) WffReadSkipK(1,0,ikpt,isppol,mpi_enreg,wffddk(2))
+         if((ipert==natom+10 .and. idir>3).or.ipert==natom+11) WffReadSkipK(1,0,ikpt,isppol,mpi_enreg,wffddk(2))
          if(ipert==natom+11) then
            call WffReadSkipK(1,0,ikpt,isppol,mpi_enreg,wffddk(3))
            if(idir>3) call WffReadSkipK(1,0,ikpt,isppol,mpi_enreg,wffddk(4))
