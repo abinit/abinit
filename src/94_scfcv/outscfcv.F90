@@ -897,7 +897,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &     mbesslang,prtdosm,ndosfraction,pawfatbnd,pawtab)
    end if
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    ! master writes fabands file here so that also NC pseudos are supported.
    !if ((prtdosm>=1.or.fatbands_flag==1) .and. me == master) then ! TODO: Recheck this.
    if ((pawfatbnd>0.and.fatbands_flag==1) .and. me == master) then

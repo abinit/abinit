@@ -299,7 +299,7 @@ subroutine fatbands_ncwrite(crystal, ebands, hdr, dos_fractions_m, dtset, &
  use m_crystal_io
  use m_ebands
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_hdr
@@ -309,8 +309,7 @@ subroutine fatbands_ncwrite(crystal, ebands, hdr, dos_fractions_m, dtset, &
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'prtfatbands'
- use interfaces_14_hidewrite
+#define ABI_FUNC 'fatbands_ncwrite'
 !End of the abilint section
 
  implicit none
