@@ -892,7 +892,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    end if
 
 !  Here, computation of fatbands for the k-point given. _FATBANDS
-   if(pawfatbnd>0.and.fatbands_flag==1) then
+   if (me == master .and. pawfatbnd>0 .and. fatbands_flag==1) then
      call prtfatbands(dos_fractions_m,dtset,dtfil%fnameabo_app_fatbands,fermie,eigen,&
 &     mbesslang,prtdosm,ndosfraction,pawfatbnd,pawtab)
    end if
@@ -910,8 +910,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 #endif
 
 !  Here, computation and output of DOS and partial DOS  _DOS
-   if(fatbands_flag==0) then
-     if(prtdos/=4) then
+   if (me == master .and. fatbands_flag==0) then
+     if (prtdos/=4) then
        call tetrahedron (dos_fractions,dos_fractions_average_m,dos_fractions_paw1,dos_fractions_pawt1,&
 &       dtset,fermie,eigen,dtfil%fnameabo_app_dos,mbesslang,prtdosm,ndosfraction,paw_dos_flag,rprimd)
      else

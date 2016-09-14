@@ -47,6 +47,9 @@
 !!  note: could have routine return DOS for other purposes, and separate printing
 !!  in another routine (MJV 8/2010)
 !!
+!! NOTES
+!!  This routine should be called by master only
+!!
 !! PARENTS
 !!      outscfcv
 !!

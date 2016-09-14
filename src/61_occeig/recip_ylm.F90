@@ -17,8 +17,8 @@
 !!  bess_fit(mpw,nradintmax,ll) = bessel functions for ll, splined
 !!   with arguments $2 \pi |k+G| \Delta r$, for all G vectors in sphere
 !!   and all points on radial grid.
-!!  cgcband(2,npw_k)=wavefunction in recip space
-!!  istwfk= storage mode of cgcband
+!!  cg_1band(2,npw_k)=wavefunction in recip space
+!!  istwfk= storage mode of cg_1band
 !!  nradint(natsph)=number of points on radial real-space grid for a given atom
 !!  nradintmax=dimension of rint array
 !!  mlang=maximum angular momentum
@@ -55,7 +55,7 @@
 
 #include "abi_common.h"
 
-subroutine recip_ylm (bess_fit,cgcband,istwfk,&
+subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
 & nradint,nradintmax,mlang,mpi_enreg,mpw,natsph,&
 & npw_k,ph3d,prtsphere,rint,rmax,sum_1ll_1atom,sum_1lm_1atom,ucvol,ylm,znucl_sph)
 
@@ -81,7 +81,7 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: nradint(natsph)
- real(dp),intent(in) :: bess_fit(mpw,nradintmax,mlang),cgcband(2,npw_k)
+ real(dp),intent(in) :: bess_fit(mpw,nradintmax,mlang),cg_1band(2,npw_k)
  real(dp),intent(in) :: ph3d(2,npw_k,natsph),rint(nradintmax)
  real(dp),intent(in) :: rmax(natsph),ylm(mpw,mlang*mlang)
  real(dp),intent(in) :: znucl_sph(natsph)
@@ -156,8 +156,8 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
 
 !  Temporary arrays for part of psi which depends only on iat
    do ipw=1,npw_k
-     tmppsia(1,ipw) = cgcband(1,ipw) * ph3d(1,ipw,iat) - cgcband(2,ipw) * ph3d(2,ipw,iat)
-     tmppsia(2,ipw) = cgcband(1,ipw) * ph3d(2,ipw,iat) + cgcband(2,ipw) * ph3d(1,ipw,iat)
+     tmppsia(1,ipw) = cg_1band(1,ipw) * ph3d(1,ipw,iat) - cg_1band(2,ipw) * ph3d(2,ipw,iat)
+     tmppsia(2,ipw) = cg_1band(1,ipw) * ph3d(2,ipw,iat) + cg_1band(2,ipw) * ph3d(1,ipw,iat)
    end do
 
    do illmm=1, mlang*mlang

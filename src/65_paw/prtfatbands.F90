@@ -29,6 +29,9 @@
 !! OUTPUT
 !! (only writing)
 !!
+!! NOTES
+!!  This routine should be called by master only
+!!
 !! PARENTS
 !!      outscfcv
 !!

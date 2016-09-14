@@ -114,7 +114,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
  real(dp) :: kpoint(3),spin(3)
  real(dp) :: xfit(dtset%mpw),yfit(dtset%mpw)
  real(dp) :: ylm_k(dtset%mpw,mbesslang*mbesslang),ylmgr_dum(1)
- real(dp),allocatable :: bess_fit(:,:,:),bess_spl(:,:),bess_spl_der(:,:),jlkpgr_int(:,:,:)
+ real(dp),allocatable :: bess_fit(:,:,:),bess_spl(:,:),bess_spl_der(:,:),jlkpgr_intr(:,:,:)
  real(dp),allocatable :: cg_1band(:,:),cg_1kpt(:,:),kpgnorm(:),ph1d(:,:)
  real(dp),allocatable :: ph3d(:,:,:),ratsph(:),rint(:),sum_1atom_1ll(:,:)
  real(dp),allocatable :: sum_1atom_1lm(:,:),x_bess(:),ylm(:,:)
@@ -322,17 +322,16 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
          end do
        end do ! ixint
 
-       ! TODO: This one depends on the type.
-       !ABI_MALLOC(jlkpgr_int, (npw_k, mbesslang, natsph_tot))
+       ! TODO: Can reduce method as it depends only on the atom type.
+       !ABI_MALLOC(jlkpgr_intr, (npw_k, mbesslang, natsph_tot))
        !do ia=1,natsph_tot
        !  dr = ratsph(ia) / (nradint(ia)-1)
        !  do ilang=1,mbesslang
        !    do ipw=1,npw_k
-       !     jlkpgr_int(ipw,ilang,ia) = simpson(dr, bess_fit(ipw,:,ilang))
+       !     jlkpgr_intr(ipw,ilang,ia) = simpson(dr, bess_fit(ipw,:,ilang))
        !    end do
        !  end do
        !end do
-       !ABI_FREE(jlkpgr_int)
 
        shift_b = 0
        do iband=1,dtset%mband
@@ -374,6 +373,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
        ioffkg = ioffkg + npw_k
        shift_sk = shift_sk + dtset%mband*my_nspinor*npw_k
 
+       !ABI_FREE(jlkpgr_intr)
        ABI_DEALLOCATE(ph3d)
      end do ! ikpt
    end do ! isppol
