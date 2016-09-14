@@ -186,14 +186,27 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
 !    part of tmppsia is needed here, depending on l being even or odd: only one of the coef is 1, the other 0
      do ipw=1,npw_k
 !      to get PDOS for real spherical harmonics, may be sufficient to multiply here by ylm instead of linear combination
-!      tmppsim(1,ipw) = tmppsia(1,ipw)*ylm(ipw,illmm)
-!      tmppsim(2,ipw) = tmppsia(2,ipw)*ylm(ipw,illmm)
+#if 1
+      if (istwfk == 1) then
+          tmppsim(1,ipw) = tmppsia(1,ipw)*ylm(ipw,illmm)
+          tmppsim(2,ipw) = tmppsia(2,ipw)*ylm(ipw,illmm)
+      else
+         if (mod(ilang(illmm) - 1, 2) == 0) then
+            tmppsim(1,ipw) = tmppsia(1,ipw)*ylm(ipw,illmm)
+            tmppsim(2,ipw) = zero
+         else
+            tmppsim(1,ipw) = tmppsia(2,ipw)*ylm(ipw,illmm)
+            tmppsim(2,ipw) = zero
+         end if
+      end if
+#else
 !      TODO: check the prefactor part for istwfk /= 1! Could also be incorrect if we go to real spherical harmonics
        tmppsim(1, ipw) =  coef1(illmm) * tmppsia(1, ipw) * ylm(ipw, reylmind(illmm)) &
 &       + mmsign(illmm) * coef2(illmm) * tmppsia(2, ipw) * ylm(ipw, imylmind(illmm))
 
        tmppsim(2, ipw) =  coef2(illmm) * tmppsia(2, ipw) * ylm(ipw, reylmind(illmm)) &
 &       - mmsign(illmm) * coef1(illmm) * tmppsia(1, ipw) * ylm(ipw, imylmind(illmm))
+#endif
      end do
 
      integ = zero
@@ -237,8 +250,13 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
 
 !MJV 5.5.2012: removed 1/sqrt(2) above in tmppsim and (4 pi)^2 in integrand - just multiply by 8 pi^2 here
 !Normalize with unit cell volume
+#if 0
  sum_1lm_1atom(:,:) = eight * pi**2 * sum_1lm_1atom(:,:) / ucvol
  sum_1ll_1atom(:,:) = eight * pi**2 * sum_1ll_1atom(:,:) / ucvol
+#else
+ sum_1lm_1atom(:,:) = 2 * eight * pi**2 * sum_1lm_1atom(:,:) / ucvol
+ sum_1ll_1atom(:,:) = 2 *eight * pi**2 * sum_1ll_1atom(:,:) / ucvol
+#endif
 
 !Output
  if(prtsphere==1)then
