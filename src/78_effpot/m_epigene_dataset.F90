@@ -69,7 +69,6 @@ module m_epigene_dataset
   integer :: enunit
   integer :: ifcana
   integer :: ifcflag
-  integer :: ifcsupercell
   integer :: ifcout
   integer :: monte_carlo
   integer :: natifc
@@ -302,7 +301,7 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
  epigene_dtset%dipdip=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip',tread,'INT')
  if(tread==1) epigene_dtset%dipdip=intarr(1)
- if(epigene_dtset%dipdip/=1)then
+ if(epigene_dtset%dipdip>1.or.epigene_dtset%dipdip<0)then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'dipdip is',epigene_dtset%dipdip,', but the only allowed values',ch10,&
 &   'is 1.',ch10,&
@@ -355,17 +354,6 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
 &   'ifcflag is',epigene_dtset%ifcflag,', but the only allowed values',ch10,&
 &   'are 0 or 1.',ch10,&
 &   'Action: correct ifcflag in your input file.'
-   MSG_ERROR(message)
- end if
-
- epigene_dtset%ifcsupercell = 0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ifcsupercell',tread,'INT')
- if(tread==1) epigene_dtset%ifcsupercell=intarr(1)
- if(epigene_dtset%ifcsupercell<0.or.epigene_dtset%ifcsupercell>3)then
-   write(message, '(a,i0,a,a,a,a,a)' )&
-&   'ifcsupercell is',epigene_dtset%ifcsupercell,', but the only allowed values',ch10,&
-&   'are 0 or 1.',ch10,&
-&   'Action: correct ifcsupercell in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -797,7 +785,7 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
 !=======================================================================
 !Check consistency of input variables:
 !=======================================================================
- 
+
  if(epigene_dtset%prtsrlr/=0 .and. epigene_dtset%ifcflag/=1) then
    write(message, '(3a)' )&
 &   'ifcflag must be 1 for the SR/LR decomposition of the phonon frequencies',ch10,&
@@ -808,13 +796,6 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
 !FIXME: add check that if freeze_displ /= 0 then you need to be doing ifc and phonon interpolation
 
  if (epigene_dtset%ifcflag > 0 .and. sum(abs(epigene_dtset%ngqpt)) == 0) then
-   write(message, '(3a)' )&
-&   'if you want interatomic force constant output, epigene needs ngqpt input variable ',ch10,&
-&   'Action: set ngqpt in your input file.'
-   MSG_ERROR(message)
- end if
-
- if (epigene_dtset%ifcsupercell > 0 .and. sum(abs(epigene_dtset%n_cell)) == 0) then
    write(message, '(3a)' )&
 &   'if you want interatomic force constant output, epigene needs ngqpt input variable ',ch10,&
 &   'Action: set ngqpt in your input file.'
@@ -893,7 +874,6 @@ subroutine outvars_epigene (epigene_dtset,nunit)
  if(epigene_dtset%ifcflag/=0)then
    write(nunit,'(a)')' Flags :'
    if(epigene_dtset%ifcflag/=0)write(nunit,'(3x,a9,3i10)')'  ifcflag',epigene_dtset%ifcflag
-   if(epigene_dtset%ifcflag>=0)write(nunit,'(3x,a9,3i10)')'ifcsupercell',epigene_dtset%ifcsupercell
    if(epigene_dtset%prt_effpot/=0)write(nunit,'(3x,a9,3i10)')'prt_effpot',epigene_dtset%prt_effpot
    if(epigene_dtset%prt_phfrq/=0)write(nunit,'(3x,a9,3i10)')'prt_phfrq',epigene_dtset%prt_phfrq
    if(epigene_dtset%prt_3rd/=0)write(nunit,'(3x,a9,3i10)')'  prt_3rd',epigene_dtset%prt_3rd

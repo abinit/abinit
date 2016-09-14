@@ -210,7 +210,6 @@ program epigene
 
 !*********************************************************************
 !TEST_AM SECTION
-
 ! Print the Phonon dos/spectrum
 !   if(inp%prt_phfrq > 0) then
 !     call effective_potential_printPDOS(reference_effective_potential,filnam(2),&

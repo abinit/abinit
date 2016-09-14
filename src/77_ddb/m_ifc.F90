@@ -36,7 +36,7 @@ MODULE m_ifc
  use m_ewald,       only : ewald9
  use m_crystal,     only : crystal_t
  use m_geometry,    only : phdispl_cart2red
- use m_dynmat,      only : canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, &
+ use m_dynmat,      only : cell9,canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, &
 &                          make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, symdm9, nanal9, gtdyn9, dymfz9
  use m_ddb,         only : ddb_type
  use m_nctk
@@ -563,10 +563,13 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ifc_tmp%atmfrc = zero
 
  call ftifc_q2r(ifc_tmp%atmfrc,Ifc%dynmat,gprim,natom,nqbz,ifc_tmp%nrpt,ifc_tmp%rpt,spqpt)
+
 ! Eventually impose Acoustic Sum Rule to the interatomic forces
  if (Ifc%asr>0) then
    call asrif9(Ifc%asr,ifc_tmp%atmfrc,natom,ifc_tmp%nrpt,ifc_tmp%rpt,ifc_tmp%wghatm)
  end if
+
+
 
 !*** The interatomic forces have been calculated ! ***
  write(message, '(2a)')ch10,' The interatomic forces have been obtained '
@@ -621,16 +624,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  Ifc%short_atmfrc = zero
  Ifc%ewald_atmfrc = zero
  Ifc%cell = zero
-
-!Select shift to get the correct cell in ifc_tmp%cell
-!TEST_AM
- select case(Ifc%brav)
-   case(1);  shift_irpt = 1
-   case(2);  shift_irpt = 4
-   case(3);  shift_irpt = 2
-   case(4);  shift_irpt = 1
- end select
-!TEST_AM
 
  irpt_new = 1
  do irpt = 1, ifc_tmp%nrpt
@@ -1561,11 +1554,16 @@ implicit none
        end do
      end do
 
+     if(irpt==14.or.irpt==15.or.irpt==13) then
+       if(ia==1.and.ib==2)then
+       write(900,*) ia,ib,irpt,dist1,Ifc%rpt(:,irpt),Ifc%atmfrc(1,:,ia,:,ib,irpt)* Ifc%wghatm(ia,ib,irpt)
+     end if
+   end if
      ! Get the short-range force constants and the
      ! "total" force constants (=real space FC)
      do mu=1,3
        do nu=1,3
-         sriaf(mu,nu,ii)=Ifc%atmfrc(1,mu,ia,nu,ib,irpt) * Ifc%wghatm(ia,ib,irpt)
+         sriaf(mu,nu,ii)=Ifc%atmfrc(1,mu,ia,nu,ib,irpt)* Ifc%wghatm(ia,ib,irpt)
          rsiaf(mu,nu,ii)=ewiaf1(mu,nu)+sriaf(mu,nu,ii)
        end do
      end do
@@ -1580,6 +1578,10 @@ implicit none
 
 !       transfer short range and long range       
          do mu=1,3
+           if(mu==1.and.nu==1) then
+             write(888,*),ia,ib,ii,irpt,"cell",Ifc%cell(irpt,:)
+           end if
+           if(ia==1.and.ib==2.and.(irpt==13.or.irpt==14.or.irpt==15)) write(777,*) irpt,sriaf(mu,nu,ii),Ifc%wghatm(ia,ib,irpt)
            Ifc%short_atmfrc(1,mu,ia,nu,ib,irpt) = sriaf(mu,nu,ii) + tol10
            Ifc%ewald_atmfrc(1,mu,ia,nu,ib,irpt) = ewiaf1(mu,nu) + tol10
          end do

@@ -111,9 +111,10 @@ implicit none
  integer :: option
  integer :: funit = 1,ii,kk
  real(dp):: energy_harmonic
+ real(dp):: ener1(inp%ntime,2),ener2(inp%ntime,2)
  character (len=500000) :: line,readline
  character(len=500) :: message
- character(len=fnlen) :: filename
+ character(len=fnlen) :: filename,filename2
  real(dp),allocatable :: disp(:,:,:),disp_tmp(:,:)
 !TEST_AM
 
@@ -148,6 +149,8 @@ implicit none
    ABI_ALLOCATE(disp,(inp%ntime,3,effective_potential%supercell%natom_supercell))
    ABI_ALLOCATE(disp_tmp,(inp%ntime,3*effective_potential%supercell%natom_supercell))
    ABI_ALLOCATE(energy,(inp%ntime))
+   ABI_ALLOCATE(fcart,(3,effective_potential%supercell%natom_supercell))
+   ABI_ALLOCATE(fred,(3,effective_potential%supercell%natom_supercell))
 !  Read displacement
    call effective_potential_file_readDisplacement(filnam(4),disp,inp%ntime,&
 &                              effective_potential%supercell%natom_supercell)
@@ -159,19 +162,22 @@ implicit none
      call wrtout(std_out,message,'COLL')
 
      write(111,*) disp(ii,:,:)
-     energy(ii) = harmonic_energy(effective_potential,disp(ii,:,:))
+     call ifc_contribution(effective_potential,disp(ii,:,:),energy(ii),fcart)
      write(112,'(I3,es23.14)') ii , energy(ii)
-     call effective_potential_getEnergy(effective_potential,energy_harmonic,&
-&                                        effective_potential%supercell%natom_supercell,&
-&                                        effective_potential%supercell%rprimd_supercell,&
-&                                        xred,1,disp(ii,:,:))
+
+     call effective_potential_getHarmonicContributions(effective_potential,energy_harmonic,fcart,fred,&
+&                                       effective_potential%supercell%natom_supercell,&
+&                                       effective_potential%supercell%rprimd_supercell,&
+&                                       effective_potential%supercell%xcart_supercell,1,disp(1,:,:))
      
    end do
-   
+
    ABI_DEALLOCATE(disp)
    ABI_DEALLOCATE(disp_tmp)
    ABI_DEALLOCATE(energy)
-
+   ABI_DEALLOCATE(fcart)
+   ABI_DEALLOCATE(fred)
+   
  else if(.false.) then
 
    ABI_ALLOCATE(disp,(inp%ntime,3,effective_potential%supercell%natom_supercell))
@@ -181,7 +187,7 @@ implicit none
 !    filename="/home/alex/Desktop/dev/test/CaTiO3/script/disp.dat"
    filename="/home/alex/Desktop/dev/test/CaTiO3/spld_output/result_112/fort.111"
 !   filename="/home/alex/Desktop/dev/test/CaTiO3/spld_output/result_112/xcart_9.dat"
-!   filename="/home/alex/Desktop/dev/test/CaTiO3/spld_output/fort.111"
+!   filename="/home/alex/Desktop/dev/test/CaTiO3/spld_output/result_112/fort.111"
 !   filename="/home/alex/Desktop/dev/test/CaTiO3/spld_output/result_222/fort.111"
 !    filename="/home/alex/Desktop/dev/test/CaTiO3/spld_output/CaTiO3_NC.disp"
 
@@ -189,7 +195,7 @@ implicit none
    option = 2
 
    do ii=1,inp%ntime
-     print*,"Step :", ii
+     write(std_out,*),"Step :", ii
      disp = zero;
 !  First version:
  ! end if
@@ -200,7 +206,7 @@ implicit none
 
 
       if(option ==1)then
-        print*,"read displacement "
+        write(std_out,*),"read displacement "
         do jj=1,(effective_potential%supercell%natom_supercell)
 !          do kk=1,3
             read(funit,'(a)',err=10,end=10) readline
@@ -209,23 +215,23 @@ implicit none
             write(667,*),disp(1,:,jj)
 !         end do
        end do
-       close(funit)
      else if (option ==2) then
 ! !second version: (fort.111)
-       print*,"read displacement 2"
+       write(std_out,*),"read displacement 2"
        read(funit,'(a)',err=10,end=10) readline
        line=adjustl(readline)  
        read(unit=line,fmt=*) (disp_tmp(1,jj),jj=1,3*effective_potential%supercell%natom_supercell)
        disp(1,:,:) = reshape(disp_tmp(1,:),(/3,effective_potential%supercell%natom_supercell/))
        
-       ! do jj=1,(effective_potential%supercell%natom_supercell)
-       !   do kk=1,3
-       !       disp(1,kk,jj) = disp(1,kk,jj) *  effective_potential%supercell%rprimd_supercell(kk,kk)
-       !   end do
-       ! end do
+        do jj=1,(effective_potential%supercell%natom_supercell)
+          do kk=1,3
+!              disp(1,kk,jj) = disp(1,kk,jj) *  effective_potential%supercell%rprimd_supercell(kk,kk)
+          end do
+        end do
+
      else if (option==3)then
 ! third verison
-       print*,"read displacement 3"
+       write(std_out,*),"read displacement 3"
        disp = zero
        do jj=1,(effective_potential%supercell%natom_supercell)
          do kk=1,3
@@ -235,57 +241,98 @@ implicit none
          end do
        end do
      else if(option==4)then
+       ABI_ALLOCATE(xred,(3,effective_potential%supercell%natom_supercell))
+       ABI_ALLOCATE(xcart,(3,effective_potential%supercell%natom_supercell))
+   
        !four version
-       print*,"read position" 
+       write(std_out,*),"read position" 
        do jj=1,(effective_potential%supercell%natom_supercell)
          read(funit,'(a)',err=10,end=10) readline
          line=adjustl(readline)
          read(unit=line,fmt=*)  (xcart(kk,jj),kk=1,3) 
-         print*,"tata",xcart(:,jj)
-         write(456,*) effective_potential%supercell%xcart_supercell(:,jj)
        end do
        close(funit)
        do jj = 1, effective_potential%supercell%natom_supercell
          do kk=1,3
-           disp(1,kk,jj) = (xcart(kk,jj) - effective_potential%supercell%xcart_supercell(kk,jj))! / &
-!&          effective_potential%supercell%rprimd_supercell(kk,kk) 
+           disp(1,kk,jj) =  (xcart(kk,jj) - effective_potential%supercell%xcart_supercell(kk,jj)) / &
+&          effective_potential%supercell%rprimd_supercell(kk,kk) 
          end do
        end do
+       ABI_DEALLOCATE(xred)
+       ABI_DEALLOCATE(xcart)
+
      end if
       
 !!!!!!!!!
 10   continue
 
+     ABI_ALLOCATE(energy,(inp%ntime))
+     ABI_ALLOCATE(fcart,(3,effective_potential%supercell%natom_supercell))
+     ABI_ALLOCATE(fred,(3,effective_potential%supercell%natom_supercell))
+     
      write(111,*) disp(1,:,:)
-     print*,"compute energy",ii
-     energy_harmonic = harmonic_energy(effective_potential,disp(1,:,:))
+     write(std_out,*),"compute energy",ii
+     call ifc_contribution(effective_potential,disp(1,:,:),energy_harmonic,fcart)
      write(112,*) ii , energy_harmonic
-     print*,"harmonic energy :",ii,energy_harmonic
-     call effective_potential_getEnergy(effective_potential,energy_harmonic,&
-&                                       effective_potential%supercell%natom_supercell,&
-&                                       effective_potential%supercell%rprimd_supercell,&
-&                                       effective_potential%supercell%xcart_supercell,1,disp(1,:,:))
+     write(std_out,*),"harmonic energy :",ii,energy_harmonic
+     call effective_potential_getHarmonicContributions(effective_potential,energy_harmonic,fcart,fred,&
+&                                                      effective_potential%supercell%natom_supercell,&
+&                                                      effective_potential%supercell%rprimd_supercell,&
+&                                                      effective_potential%supercell%xcart_supercell,&
+&                                                      1,disp(1,:,:))
 
-     call effective_potential_getForces(effective_potential,fcart,fred,&
-&                                       effective_potential%supercell%natom_supercell,&
-&                                       effective_potential%supercell%rprimd_supercell,&
-&                                       effective_potential%supercell%xcart_supercell,1,disp(1,:,:))
-     print*,"forces cart:",fcart(1,1)
-     print*,"forces red :",fred(1,1)
+     write(std_out,*),"forces cart:",fcart(1,1)
+     write(std_out,*),"forces red :",fred(1,1)
+
+     ABI_DEALLOCATE(energy)
+     ABI_DEALLOCATE(fcart)
+     ABI_DEALLOCATE(fred)
+     
 
 !xred_old is xcart!!
 !    xred_old = effective_potential%supercell%xcart_supercell + disp
 !    call xcart2xred(dtset%natom,rprimd,xred_old,xred)
 !call effective_potential_getEnergy(effective_potential,energy_harmonic,dtset%natom,rprimd,xred,comm)
-     print*,"done"
+     write(std_out,*),"done"
 !end version
 !  call effective_potential_getEnergy(effective_potential,energy_harmonic,dtset%natom,rprimd,xred,&
 !&                                   comm,displacement=disp)
 
    end do
    
-   close(funit)
+   close(112)
 
+
+   if(.false.)then
+!  check the calculation
+     write(std_out,*) "final check:"
+     filename="fort.112"
+     filename2="/home/alex/Desktop/dev/test/CaTiO3/spld_output/result_112/fort.112"
+     
+     if (open_file(filename,message,unit=1,form="formatted",&
+       status="old",action="read") /= 0) then
+       MSG_ERROR(message)
+     end if
+     
+     if (open_file(filename2,message,unit=2,form="formatted",&
+       status="old",action="read") /= 0) then
+       MSG_ERROR(message)
+     end if
+     
+     do ii=1,inp%ntime
+       read(1,'(a)',err=20,end=20) readline
+       line=adjustl(readline)
+       read(unit=line,fmt=*)  (ener1(ii,kk),kk=1,2) 
+       
+       read(2,'(a)',err=20,end=20) readline
+       line=adjustl(readline)
+       read(unit=line,fmt=*)  (ener2(ii,kk),kk=1,2) 
+       if(abs(100*(ener1(ii,2)-ener2(ii,2)) / ener1(ii,2)) > tol5)then
+         write(std_out,*) "step", ii,abs(100*(ener1(ii,2)-ener2(ii,2)) / ener1(ii,2))
+       end if
+     end do
+20   continue 
+   end if
  else 
 
 !*************************************************************
@@ -305,7 +352,7 @@ implicit none
    dtset%friction = 0.0001 ! internal FRICTION coefficient
    dtset%goprecon = 0   ! Geometry Optimization PREconditioner equations
    if(inp%monte_carlo==1)then
-     dtset%ionmov = 12    ! Number for the montecarlo
+     dtset%ionmov = 12  ! Number for the montecarlo
    end if
    dtset%jellslab = 0   ! include a JELLium SLAB in the cell
    dtset%mdwall = 10000 ! Molecular Dynamics WALL location
@@ -327,8 +374,8 @@ implicit none
  
 !array
    dtset%goprecprm(:) = zero !Geometry Optimization PREconditioner PaRaMeters equations
-   dtset%mdtemp(1) = 500   !Molecular Dynamics Temperatures 
-   dtset%mdtemp(2) = 500  !Molecular Dynamics Temperatures 
+   dtset%mdtemp(1) = 1000   !Molecular Dynamics Temperatures 
+   dtset%mdtemp(2) = 1000  !Molecular Dynamics Temperatures 
    dtset%ntypat = effective_potential%ntypat
    ABI_ALLOCATE(dtset%prtatlist,(dtset%natom)) !PRinT by ATom LIST of ATom
    dtset%prtatlist(:) = zero
@@ -345,7 +392,7 @@ implicit none
    dtset%znucl  = effective_potential%znucl
    
 !  set psps 
-   psps%useylm = 0
+   psps%useylm = dtset%useylm
    
 !  initialisation of results_gs
    call init_results_gs(dtset%natom,1,results_gs)
@@ -380,9 +427,19 @@ implicit none
    
    call matr3inv(effective_potential%supercell%rprimd_supercell,gprimd)
    call xcart2xred(dtset%natom,rprimd,effective_potential%supercell%xcart_supercell,xred)
-   
+
    xred_old = xred
    vel = zero
+   if(dtset%ionmov==9)then
+     do ii=1,dtset%natom
+       do jj=1,3
+         call random_number(vel(jj,ii))
+         vel(jj,ii) = vel(jj,ii) / 10000
+       end do
+     end do
+   else
+     vel = zero
+   end if
    vel_cell = zero
    
 !  Set the dffil structure
@@ -397,13 +454,15 @@ implicit none
 !  Initialize xf history (should be put in inwffil)
    ab_xfh%nxfh=0
    ab_xfh%mxfh=(ab_xfh%nxfh-dtset%restartxf+1)+dtset%ntime+5 
+
    ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
+
    ab_xfh%xfhist(:,:,:,:) = zero
    
 !*********************************************************
 !2   Call main routine for monte carlo / molecular dynamics
 !*********************************************************
-   write(message, '(2a,(80a),a)' ) &
+   write(message, '(3a,(80a),a)' ) ch10, &
 &    'Monte Carlo / Molecular Dynamics ',ch10,&
 &    ('-',ii=1,80),ch10
    call wrtout(ab_out,message,'COLL')

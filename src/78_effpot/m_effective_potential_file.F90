@@ -1320,7 +1320,7 @@ end subroutine effective_potential_file_getDim
 
 
 !  Generate long rage interation for the effective potential
-   call effective_potential_generateSupercell(eff_pot,inp%n_cell,inp%ifcsupercell,inp%asr,comm)
+   call effective_potential_generateSupercell(eff_pot,inp%n_cell,inp%dipdip,inp%asr,comm)
 
 !If needed, print the effective potential into XML file
    if (inp%prt_effpot>=3.or.inp%prt_effpot==-1) then
@@ -1341,7 +1341,7 @@ end subroutine effective_potential_file_getDim
    call effective_potential_print(eff_pot,inp%prt_effpot)
 
 !  Generate long rage interation for the effective potential
-   call effective_potential_generateSupercell(eff_pot,inp%n_cell,inp%ifcsupercell,inp%asr,comm)
+   call effective_potential_generateSupercell(eff_pot,inp%n_cell,inp%dipdip,inp%asr,comm)
 
  else
      write(message, '(a,a,a,a)' )&

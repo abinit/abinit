@@ -1516,7 +1516,7 @@ subroutine read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
    if(msize<(3*mpert*3*mpert))then
      write(message,'(a,a,a,i10,a,i10,a,a,a)')&
 &     'There is not enough space to read a second-derivative block.',ch10,&
-&     'The size provided is only ',msize,' although ',3*mpert*3*mpert,' is needed.',ch10,&
+
 &     'Action: increase msize and recompile.'
      MSG_ERROR(message)
    end if

@@ -49,7 +49,6 @@ program band2eps
  use m_effective_potential_file
  use m_libxml
 
-
  use m_io_tools,       only : open_file
  use m_fstrings,       only : int2char4,tolower
  use m_time ,          only : asctime
@@ -59,7 +58,6 @@ program band2eps
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'band2eps'
- use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_42_parser
 !End of the abilint section
@@ -403,13 +401,20 @@ program band2eps
  write(18,'(a)') '%****Write Bands****'
 
  lastPos=kminN
+
+ 
+ read(19,*) (phfrqqm1(ii),ii=1,3*inp%natom)
+
  do jj=1,inp%nlines
    do iqpt=1,inp%nqline(jj)
-     if(iqpt==1.and.jj==1) then
-       read(19,*) (phfrqqm1(ii),ii=1,3*inp%natom)
+     if (jj==inp%nlines .and. iqpt==inp%nqline(jj)) then
+       cycle
+!       read(19,*) (phfrq(ii),ii=1,3*inp%natom)
+!       phfrq(:) = phfrqqm1(:)
+     else
+       read(19,*) (phfrq(ii),ii=1,3*inp%natom)
      end if
-     read(19,*) (phfrq(ii),ii=1,3*inp%natom)
-       
+
      do imode=1,3*inp%natom
 
        if(filnam(4)/='no') then       !calculate the color else in black and white
@@ -445,14 +450,14 @@ program band2eps
 &       *inp%scale(jj)/renorm/(-nqpt)))
        posk=posk+lastPos
 
-       write(18,'(a,i4,a,i4,a)') 'n ',posk,' ',pos,' m'       
+       write(18,'(a,i5,a,i5,a)') 'n ',posk,' ',pos,' m'       
 
        pos=int(((EminN-EmaxN)*phfrq(imode) &
 &       +EmaxN*inp%min -EminN*inp%max)/(inp%min-inp%max))
        posk=int(((kminN-kmaxN)*(iqpt) &
 &       *inp%scale(jj)/renorm/(-nqpt)))
        posk=posk+lastPos
-       write(18,'(i4,a,i4,a)') posk,' ',pos,' l gs'
+       write(18,'(i5,a,i5,a)') posk,' ',pos,' l gs'
 
 
        if(filnam(4)/='no') then     !(in color)

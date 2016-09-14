@@ -42,14 +42,16 @@ module m_effective_potential
  implicit none
 
  public :: effective_potential_applySumRule
+ public :: effective_potential_distributeResidualForces
  public :: effective_potential_effpot2ddb
  public :: effective_potential_effpot2dynmat
  public :: effective_potential_free
  public :: effective_potential_generateSupercell
  public :: effective_potential_getDeltaEnergy
- public :: effective_potential_getEnergy
+ public :: effective_potential_getHarmonicContributions
  public :: effective_potential_getForces
  public :: effective_potential_init
+
  public :: effective_potential_print
  public :: effective_potential_printPDOS
  public :: effective_potential_printSupercell
@@ -545,17 +547,18 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
 !scalar
  integer,parameter :: master=0
  integer :: first_coordinate
- integer :: ia,i1,i2,i3,irpt,irpt2,irpt_ref,min1,min2,min3
+ integer :: ia,ib,ii,i1,i2,i3,irpt,irpt2,irpt_ref,jj,kk,ll,min1,min2,min3
  integer :: min1_cell,min2_cell,min3_cell,max1_cell,max2_cell,max3_cell
  integer :: max1,max2,max3,mu,my_rank,nu,nproc,second_coordinate,sumg0,nrpt
- real(dp) :: sum,ucvol
+ real(dp) :: d2asr,ucvol
  character(len=500) :: message
  logical :: short_range = .false.
  logical :: iam_master=.FALSE.
 !array
+ integer  :: cell(3),cell_atom1(3),cell_atom2(3),cell_number(3)
  real(dp) :: acell(3)
  real(dp) :: gmet(3,3),rmet(3,3)
- real(dp) :: gprimd(3,3)
+ real(dp) :: gprimd(3,3), rprim(3,3),gprim(3,3)
  real(dp),allocatable :: dyew(:,:,:,:,:), dyewq0(:,:,:)
  real(dp),allocatable :: xred(:,:),xred_tmp(:,:),zeff_tmp(:,:,:)
 
@@ -605,16 +608,16 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
    if(((max1-min1+1)/=n_cell(1).and.&
 &    (max2-min2+1)/=n_cell(2).and.(max3-min3+1)/=n_cell(3))) then
      write(message, '(5a,3I3,5a,3I3,2a)' )&
-&      'ifcsupercell is set to zero, the longe range interation might be wrong',ch10,&
+&      'dipdip is set to zero, the longe range interation might be wrong',ch10,&
 &      'because it is not recompute.',ch10,&
 &      'The previous harmonic part is build for ',(max1-min1+1),(max2-min2+1),(max3-min3+1)&
 &,     ' cell.',ch10,'Be sure than the dipole-dipole interation ',ch10,&
 &      'is correct for the supercell: ',n_cell(:),ch10,&
-&      'or set ifcsupercell to 1'
+&      'or set dipdip to 1'
      MSG_WARNING(message)
    else
      write(message,'(a)')&
-&    'ifcsupercell is set to zero, the longe range interation is not recompute'
+&    'dipdip is set to zero, the longe range interation is not recompute'
      MSG_WARNING(message)
    end if
 
@@ -624,7 +627,7 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
    write(message,'(a,(80a),3a)') ch10,('=',i1=1,80),ch10,' Generation of new ifc',ch10
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
-
+   
    irpt_ref = 0
    irpt     = 0
 
@@ -632,7 +635,7 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
    call find_bound(min2_cell,max2_cell,n_cell(2))
    call find_bound(min3_cell,max3_cell,n_cell(3))
    write(message, '(2a)' )&
-&        ' ifcsupercell is set to one or two, the dipole-dipole interation is recompute.'
+&        ' dipdip is set to one, the dipole-dipole interation is recompute.'
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
@@ -652,29 +655,7 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
        min1 = min1_cell ; min2 = min2_cell ; min3 = min3_cell
        max1 = max1_cell ; max2 = max2_cell ; max3 = max3_cell
      end if
-   else  if(option==2)then
-     if ((abs(min1) > abs(min1_cell)).or.(abs(max1) > abs(max1_cell)).or.&
-&        (abs(min2) > abs(min2_cell)).or.(abs(max2) > abs(max2_cell)).or.&
-&        (abs(min3) > abs(min3_cell)).or.(abs(max3) > abs(max3_cell))) then
-       write(message, '(5a)' )&
-&        'ifcsupercell is set to two or three, the dipole-dipole interation is recompute.',ch10,&
-&        'The previous harmonic part was build for bigger cell,',ch10,&
-&        'The accuracy might be reduced.'
-       MSG_WARNING(message)
-     end if
-     min1 = min1_cell ; min2 = min2_cell ; min3 = min3_cell
-     max1 = max1_cell ; max2 = max2_cell ; max3 = max3_cell
-   else if (option==3)then
-     if ((abs(min1) > abs(min1_cell)).or.(abs(max1) > abs(max1_cell)).or.&
-&        (abs(min2) > abs(min2_cell)).or.(abs(max2) > abs(max2_cell)).or.&
-&        (abs(min3) > abs(min3_cell)).or.(abs(max3) > abs(max3_cell))) then
-       write(message, '(5a)' )&
-&        'ifcsupercell is set to two or three, the dipole-dipole interation is recompute.',ch10,&
-&        'The previous harmonic part was build for bigger cell,',ch10,&
-&        'The accuracy might be reduced.'
-       MSG_WARNING(message)
-     end if
-   end if   
+   end if
 
 !  Print the new boundary
    write(message,'(5a,2I3,a,2I3,a,2I3,4a)') ch10,' New bound for ifc (long+short):',&
@@ -682,204 +663,6 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
 &    " Computation of new dipole-dipole interaction."
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
-
-
-!TEST_AM_NEW
-if(.false.)then
-!  Count the new number of ifc
-   do i1=min1,max1
-     do i2=min2,max2
-       do i3=min3,max3
-         irpt = irpt +1
-         if(i1==0.and.i2==0.and.i3==0) irpt_ref = irpt
-       end do
-     end do
-   end do
-   ifc_tmp%nrpt = irpt
-
-
-!  Initialisation of ifc temporary
-   ABI_MALLOC(ifc_tmp%cell,(ifc_tmp%nrpt,3))
-   ABI_MALLOC(ifc_tmp%short_atmfrc,(2,3,eff_pot%natom,3,eff_pot%natom,ifc_tmp%nrpt))
-   ABI_MALLOC(ifc_tmp%ewald_atmfrc,(2,3,eff_pot%natom,3,eff_pot%natom,ifc_tmp%nrpt))
-   ABI_MALLOC(ifc_tmp%atmfrc,(2,3,eff_pot%natom,3,eff_pot%natom,ifc_tmp%nrpt))
-   ifc_tmp%atmfrc(:,:,:,:,:,:) = zero
-   ifc_tmp%short_atmfrc(:,:,:,:,:,:) = zero
-   ifc_tmp%ewald_atmfrc(:,:,:,:,:,:) = zero
-   ifc_tmp%cell(:,:) = zero
-
-!  Allocate and initialize some array
-   !ABI_ALLOCATE(xred_tmp,(3,2*eff_pot%natom))
-   ABI_ALLOCATE(xred,(3,super_cell%natom_supercell))
-   ABI_ALLOCATE(zeff_tmp,(3,3,super_cell%natom_supercell))
-   ABI_ALLOCATE(dyew,(2,3,super_cell%natom_supercell,3,super_cell%natom_supercell))
-   ABI_ALLOCATE(dyewq0,(3,3,super_cell%natom_supercell))
- 
-   dyew            = zero
-   dyewq0          = zero
-   xred(:,:)       = zero
-   zeff_tmp(:,:,:) = zero
-   sumg0           = zero
-   acell           = one
-
-
-   call matr3inv(super_cell%rprimd_supercell,gprimd)
-   call xcart2xred(super_cell%natom_supercell,super_cell%rprimd_supercell,&
-&                    super_cell%xcart_supercell,xred)
-   call metric(gmet,gprimd,-1,rmet,super_cell%rprimd_supercell,ucvol)
-
-!  Fill fake zeff array for ewald9
-   do irpt=1,ifc_tmp%nrpt
-     first_coordinate  = ((irpt-1)*eff_pot%natom) + 1
-     second_coordinate = first_coordinate + eff_pot%natom-1
-     zeff_tmp(:,:,first_coordinate:second_coordinate) = eff_pot%zeff
-   end do
-   
-   write(std_out,*)"enter in big ewald9"
-   call ewald9(acell,eff_pot%epsilon_inf,dyew,&
-&              gmet,gprimd,super_cell%natom_supercell,real((/0,0,0/),dp),rmet,&
-&              super_cell%rprimd_supercell,sumg0,ucvol,xred,&
-&              zeff_tmp)
-   write(std_out,*)"enter in q0dy3_calc"
-   call q0dy3_calc(super_cell%natom_supercell,dyewq0,dyew,2)
-   write(std_out,*)"enter in q0dy3_apply"
-   call q0dy3_apply(super_cell%natom_supercell,dyewq0,dyew)
-   write(std_out,*)"done"
-
-   first_coordinate  = ((irpt_ref-1)*eff_pot%natom) + 1
-
-   irpt=0
-   do i1=min1,max1
-     do i2=min2,max2
-       do i3=min3,max3
-         irpt = irpt+1
-!        Fill the index of the cell
-         ifc_tmp%cell(irpt,1)=i1; ifc_tmp%cell(irpt,2)=i2; ifc_tmp%cell(irpt,3)=i3
-!        Fill the short range part (calculated previously)
-         second_coordinate = ((irpt-1)*eff_pot%natom) + 1
-         ifc_tmp%ewald_atmfrc(:,:,:,:,:,irpt) =&
-&          dyew(:,:,first_coordinate:first_coordinate+eff_pot%natom-1,&
-&                 :,second_coordinate:second_coordinate+eff_pot%natom-1) + tol10
-           do irpt2=1,eff_pot%ifcs%nrpt
-             if(eff_pot%ifcs%cell(irpt2,1)==i1.and.&
-&               eff_pot%ifcs%cell(irpt2,2)==i2.and.&
-&               eff_pot%ifcs%cell(irpt2,3)==i3.and.&
-&               any(eff_pot%ifcs%short_atmfrc(:,:,:,:,:,irpt2) > tol9)) then
-               ifc_tmp%short_atmfrc(:,:,:,:,:,irpt) = eff_pot%ifcs%short_atmfrc(:,:,:,:,:,irpt2)
-             end if
-           end do
-         end do
-       end do
-     end do
-
-
-   ABI_DEALLOCATE(xred)
-   ABI_DEALLOCATE(zeff_tmp)
-   ABI_DEALLOCATE(dyew)
-   ABI_DEALLOCATE(dyewq0)
-
-else if(.false.)then   
-  
-!  Count the new number of ifc
-   do i1=min1,max1
-     do i2=min2,max2
-       do i3=min3,max3
-         irpt = irpt +1
-         if(i1==0.and.i2==0.and.i3==0) irpt_ref = irpt
-       end do
-     end do
-   end do
-   ifc_tmp%nrpt = irpt
-
-!  Initialisation of ifc temporary
-   ABI_MALLOC(ifc_tmp%cell,(ifc_tmp%nrpt,3))
-   ABI_MALLOC(ifc_tmp%short_atmfrc,(2,3,eff_pot%natom,3,eff_pot%natom,ifc_tmp%nrpt))
-   ABI_MALLOC(ifc_tmp%ewald_atmfrc,(2,3,eff_pot%natom,3,eff_pot%natom,ifc_tmp%nrpt))
-   ABI_MALLOC(ifc_tmp%atmfrc,(2,3,eff_pot%natom,3,eff_pot%natom,ifc_tmp%nrpt))
-   ifc_tmp%atmfrc(:,:,:,:,:,:) = zero
-   ifc_tmp%short_atmfrc(:,:,:,:,:,:) = zero
-   ifc_tmp%ewald_atmfrc(:,:,:,:,:,:) = zero
-   ifc_tmp%cell(:,:) = zero
-
-!  Allocate and initialize some array
-   ABI_ALLOCATE(xred_tmp,(3,2*eff_pot%natom))
-   ABI_ALLOCATE(xred,(3,super_cell%natom_supercell))
-   ABI_ALLOCATE(zeff_tmp,(3,3,2*eff_pot%natom))
-   ABI_ALLOCATE(dyew,(2,3,2*eff_pot%natom,3,2*eff_pot%natom))
- 
-   dyew            = zero
-   xred(:,:)       = zero
-   xred_tmp(:,:)   = zero
-   zeff_tmp(:,:,:) = zero
-   sumg0           = zero
-   acell           = one
-
-
-   call matr3inv(super_cell%rprimd_supercell,gprimd)
-   call xcart2xred(super_cell%natom_supercell,super_cell%rprimd_supercell,&
-&                    super_cell%xcart_supercell,xred)
-   call metric(gmet,gprimd,-1,rmet,super_cell%rprimd_supercell,ucvol)
-
-!  Fill the atom position of the first cell (reference cell)
-   first_coordinate  = ((irpt_ref-1)*eff_pot%natom) + 1
-   second_coordinate = first_coordinate + eff_pot%natom-1
-   xred_tmp(:,1:eff_pot%natom) = xred(:,first_coordinate:second_coordinate)
-!  Fill fake zeff array for ewald9
-   zeff_tmp = zero
-   zeff_tmp(:,:,1:eff_pot%natom) = eff_pot%zeff
-   zeff_tmp(:,:,eff_pot%natom+1:2*eff_pot%natom) = eff_pot%zeff
-   irpt=0
-   do i1=min1,max1
-     do i2=min2,max2
-       do i3=min3,max3
-         irpt = irpt+1
-!        Fill the index of the cell
-         ifc_tmp%cell(irpt,1)=i1; ifc_tmp%cell(irpt,2)=i2; ifc_tmp%cell(irpt,3)=i3
-
-         if(option == 1 .or. option==2) then
-!          Compute new dipole-dipole interaction
-           dyew = zero
-           if (i1==0.and.i2==0.and.i3==0) then
-             call ewald9(acell,eff_pot%epsilon_inf,dyew(:,:,1:eff_pot%natom,:,1:eff_pot%natom),&
-&                        gmet,gprimd,eff_pot%natom,real((/0,0,0/),dp),rmet,&
-&                        super_cell%rprimd_supercell,sumg0,ucvol,xred_tmp(:,1:eff_pot%natom),&
-&                        eff_pot%zeff)
-             ifc_tmp%ewald_atmfrc(:,:,:,:,:,irpt) = dyew(:,:,1:eff_pot%natom,:,1:eff_pot%natom) + tol10
-            else
-              first_coordinate  = ((irpt-1)*eff_pot%natom) + 1
-              second_coordinate = first_coordinate + eff_pot%natom-1
-              xred_tmp(:,eff_pot%natom+1:2*eff_pot%natom)=&
-&                 xred(:,first_coordinate:second_coordinate)
-              call ewald9(acell,eff_pot%epsilon_inf,dyew,gmet,gprimd,&
-&                      int(2*eff_pot%natom),real((/0,0,0/),dp),&
-&                      rmet,super_cell%rprimd_supercell,&
-&                      sumg0,ucvol,xred_tmp,zeff_tmp)
-              ifc_tmp%ewald_atmfrc(:,:,:,:,:,irpt) = &
-&              dyew(:,:,1:eff_pot%natom,:,eff_pot%natom+1:2*eff_pot%natom) + tol10
-            end if
-         end if
-!        Fill the short range part (calculated previously)
-           do irpt2=1,eff_pot%ifcs%nrpt
-             if(eff_pot%ifcs%cell(irpt2,1)==i1.and.&
-&               eff_pot%ifcs%cell(irpt2,2)==i2.and.&
-&               eff_pot%ifcs%cell(irpt2,3)==i3.and.&
-&               any(eff_pot%ifcs%short_atmfrc(:,:,:,:,:,irpt2) > tol9)) then
-               ifc_tmp%short_atmfrc(:,:,:,:,:,irpt) = eff_pot%ifcs%short_atmfrc(:,:,:,:,:,irpt2)
-               if (option==3)then
-                 ifc_tmp%ewald_atmfrc(:,:,:,:,:,irpt) = eff_pot%ifcs%ewald_atmfrc(:,:,:,:,:,irpt2)
-               end if
-             end if
-           end do
-         end do
-       end do
-     end do
-   ABI_DEALLOCATE(xred_tmp)
-   ABI_DEALLOCATE(xred)
-   ABI_DEALLOCATE(zeff_tmp)
-   ABI_DEALLOCATE(dyew)
-
-!TEST_AM_OLD 
- else
 
 !  Count the new number of ifc
    do i1=min1,max1
@@ -974,8 +757,8 @@ else if(.false.)then
    ABI_DEALLOCATE(xred)
    ABI_DEALLOCATE(zeff_tmp)
    ABI_DEALLOCATE(dyew)
- end if
 
+   
 !  Compute total ifc
    ifc_tmp%atmfrc = ifc_tmp%short_atmfrc + ifc_tmp%ewald_atmfrc
 
@@ -987,17 +770,80 @@ else if(.false.)then
    ABI_FREE(ifc_tmp%ewald_atmfrc)
    ABI_FREE(ifc_tmp%atmfrc)
    
- end if! end if option   
+ end if
 
-   if(asr >= 0) then
- !Impose sum rule
-   call effective_potential_applySumRule(asr,eff_pot%ifcs,eff_pot%natom,1)
-   call effective_potential_applySumRule(asr,eff_pot%ifcs,eff_pot%natom,2)
+ if(asr >= 0) then
+! Impose sum rule
    call effective_potential_applySumRule(asr,eff_pot%ifcs,eff_pot%natom)
  end if
 
+
+!TEST_AM
+!VERSION WITH EWALD9 FOR SUPERCELL
+!if (.true.) then
+!!  Reallocate dynamical matrix for supercell
+!    if (allocated(eff_pot%dynmat_ewald))then
+!      ABI_DEALLOCATE(eff_pot%dynmat_ewald)
+!    end if
+   
+!    ABI_ALLOCATE(eff_pot%dynmat_ewald,(2,3,super_cell%natom_supercell,3,super_cell%natom_supercell))
+!    eff_pot%dynmat_ewald = zero
+
+! !  Set the number of cell
+!    cell_number(:) = int(eff_pot%supercell%qphon(:))
+
+! !  Allocate and initialize some array
+!    ABI_ALLOCATE(xred,(3,eff_pot%supercell%natom_supercell))
+!    ABI_ALLOCATE(zeff_tmp,(3,3,eff_pot%supercell%natom_supercell))
+!    ABI_ALLOCATE(dyew,(2,3,eff_pot%supercell%natom_supercell,3,eff_pot%supercell%natom_supercell))
+!    ABI_ALLOCATE(dyewq0,(3,3,eff_pot%supercell%natom_supercell))
+
+!    eff_pot%dynmat_ewald  = zero
+!    dyew            = zero
+!    dyewq0          = zero
+!    xred(:,:)       = zero
+!    zeff_tmp(:,:,:) = zero
+!    sumg0           = zero
+!    acell = one
+
+!    call matr3inv(eff_pot%supercell%rprimd_supercell,gprimd)
+!    call xcart2xred(eff_pot%supercell%natom_supercell,eff_pot%supercell%rprimd_supercell,&
+! &                    eff_pot%supercell%xcart_supercell,xred)
+!    call metric(gmet,gprimd,-1,rmet,eff_pot%supercell%rprimd_supercell,ucvol)
+
+! !  Fill fake zeff array for ewald9
+!    do ii=1,product(cell_number)
+!      first_coordinate  = ((ii-1)*eff_pot%natom) + 1
+!      second_coordinate = first_coordinate + eff_pot%natom-1
+!      zeff_tmp(:,:,first_coordinate:second_coordinate) = eff_pot%zeff
+!    end do
+
+!    write(std_out,'(a)')" Enter in ewald9, can take a while"
+!    call ewald9(acell,eff_pot%epsilon_inf,dyew,&
+! &              gmet,gprimd,eff_pot%supercell%natom_supercell,real((/0,0,0/),dp),rmet,&
+! &              eff_pot%supercell%rprimd_supercell,sumg0,ucvol,xred,&
+! &              zeff_tmp)
+!    write(std_out,'(a)') " Enter in q0dy3_calc"
+!    call q0dy3_calc(eff_pot%supercell%natom_supercell,dyewq0,dyew,2)
+!    write(std_out,'(a)') " Enter in q0dy3_apply"
+!    call q0dy3_apply(eff_pot%supercell%natom_supercell,dyewq0,dyew)
+!    write(std_out,'(a)') " Dipole-Dipole is recompute"
+
+! !  Fill dipdip interaction
+!    eff_pot%dynmat_ewald(:,:,:,:,:) = dyew + tol10
+
+!    ABI_DEALLOCATE(xred)
+!    ABI_DEALLOCATE(zeff_tmp)
+!    ABI_DEALLOCATE(dyew)
+!    ABI_DEALLOCATE(dyewq0)
+!else
+ !end if
+ 
+
+ 
 end subroutine effective_potential_generateSupercell
 !!***
+
 
 !****f* m_effective_potential/effective_potential_applySumRule
 !!
@@ -1099,7 +945,6 @@ subroutine effective_potential_applySumRule(asr,ifc,natom,option)
             end do
           end if
         end do
-
 !      Correct the self-interaction in order to fulfill the ASR
         atmfrc(1,mu,ia,nu,ia,irpt_ref)=&
 &       atmfrc(1,mu,ia,nu,ia,irpt_ref)-sum
@@ -1233,14 +1078,13 @@ subroutine effective_potential_effpot2dynmat(dynmat,delta,eff_pot,natom,n_cell,o
 
  dynmat = zero
 
- do ia=1,eff_pot%supercell%natom_supercell
+ do ia=1,eff_pot%supercell%natom_supercell   
    do mu=1,3
      diff = zero
      do ii=1,npt
        delt = (-(npt/2+1)+ii) * delta
        disp = zero
-       disp(mu,ia) = delt * eff_pot%supercell%rprimd_supercell(mu,mu)
-       
+       disp(mu,ia) = delt * eff_pot%supercell%rprimd_supercell(mu,mu) 
        call effective_potential_getForces(eff_pot,fcart,fred,&
 &                                         eff_pot%supercell%natom_supercell,&
 &                                         eff_pot%supercell%rprimd_supercell,&
@@ -1266,8 +1110,12 @@ subroutine effective_potential_effpot2dynmat(dynmat,delta,eff_pot,natom,n_cell,o
    do nu=1,3
      do ia=1,eff_pot%supercell%natom_supercell
        do mu=1,3
-         write(999,'(4i4,2d22.14)')nu,ib,mu,ia,&
-&             dynmat(1,nu,ib,mu,ia),dynmat(2,nu,ib,mu,ia)
+
+          write(999,'(4i4,2d22.14)')nu,ib,mu,ia,&
+ &             dynmat(1,mu,ia,nu,ib),dynmat(2,mu,ia,nu,ib)
+
+!          write(999,'(4i4,2d22.14)')nu,ib,mu,ia,&
+! &             dynmat(1,nu,ib,mu,ia),dynmat(2,nu,ib,mu,ia)
        end do
      end do
    end do
@@ -1984,7 +1832,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
       end do
       WRITE(unit_xml,'("    </data>")')
       WRITE(unit_xml,'("    <cell>")')
-      WRITE(unit_xml,'(3(I4))') (eff_pot%ifcs%cell(irpt,:))
+       WRITE(unit_xml,'(3(I4))') (eff_pot%ifcs%cell(irpt,:))
       WRITE(unit_xml,'("    </cell>")')
       WRITE(unit_xml,'("    </total_force_constant>")')
     end if
@@ -2472,6 +2320,7 @@ subroutine effective_potential_writeAbiInput(eff_pot,filename,strain)
 end subroutine effective_potential_writeAbiInput
 !!***
 
+
 !****f* m_effective_potential/effective_potential_getForces
 !!
 !! NAME
@@ -2524,7 +2373,8 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,c
   character(len=500) :: message
   logical :: iam_master=.FALSE.
 !array
-  real(dp):: disp_tmp1(3,natom)
+  real(dp):: disp_tmp1(3,natom),dummy
+  real(dp):: xred(3,natom),xred_supercell(3,natom)
   integer :: cell_number(3)
   integer :: cell_atom1(3),cell_atom2(3)
   character(500) :: msg
@@ -2560,58 +2410,31 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,c
     end do
   end if
 
-  ii = 1
-  do i1 = 1,cell_number(1)
-    do i2 = 1,cell_number(2)
-      do i3 = 1,cell_number(3)
-        do ia = 1, eff_pot%natom
-          temp = zero
-          do jj = 1,eff_pot%ifcs%nrpt
-!           get the cell of atom2  (0 0 0, 0 0 1...)
-            cell_atom2(1) =  (i1-1) + eff_pot%ifcs%cell(jj,1)
-            call index_periodic(cell_atom2(1),cell_number(1))
-            cell_atom2(2) =  (i2-1) + eff_pot%ifcs%cell(jj,2)
-            call index_periodic(cell_atom2(2),cell_number(2))
-            cell_atom2(3) =  (i3-1) + eff_pot%ifcs%cell(jj,3)
-            call index_periodic(cell_atom2(3),cell_number(3))
-            do ib = 1, eff_pot%natom
-!              index of the second atom in the displacement array
-               ll = cell_atom2(1)*cell_number(2)*cell_number(3)*eff_pot%natom+&
-&                   cell_atom2(2)*cell_number(3)*eff_pot%natom+&
-&                   cell_atom2(3)*eff_pot%natom+&
-&                   ib
+! ifc contribution of the forces
+  call ifc_contribution(eff_pot,disp_tmp1,dummy,fcart)
 
-               temp(:) = temp(:) + matmul(eff_pot%ifcs%atmfrc(1,:,ia,:,ib,jj), disp_tmp1(:,ll))
-
-             end do
-           end do
-          
-          fcart(:,ii) = -1 * temp(:)
-
-          ii = ii + 1
-        end do
-      end do
-    end do
-  end do
- 
   call fcart2fred(fcart,fred,rprimd,natom)
 
 end subroutine effective_potential_getForces
 !!***
 
-!****f* m_effective_potential/effective_potential_getEnergy
+
+!****f* m_effective_potential/effective_potential_getHarmonicContributions
 !!
 !! NAME
-!! effective_potential_getEnergy
+!! effective_potential_getHarmonicContributions
 !!
 !! FUNCTION
-!! Evaluate the effective_potential_getEnergy of effective potential
+!! Evaluate the harmonic part of the energy and the forces
+!! of a structure with the effective potential
 !!
 !! INPUTS
 !! eff_pot = effective potential structure
 !!
 !! OUTPUT
-!!
+!! energy =  energy of the structure
+!! fcart  =  forces in cartesian coordinates
+!! fred   =  forces in reduced coordinates
 !!
 !! PARENTS
 !!   mover
@@ -2620,16 +2443,17 @@ end subroutine effective_potential_getForces
 !!
 !! SOURCE
  
-subroutine effective_potential_getEnergy(eff_pot,energy,natom,rprimd,xcart,comm,&
-&                            displacement,strain1,strain2,external_stress)
+subroutine effective_potential_getHarmonicContributions(eff_pot,energy,fcart,fred,natom,rprimd,xcart,&
+&                                                   comm,displacement,strain1,strain2,external_stress)
 
   use m_strain
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_getEnergy'
+#define ABI_FUNC 'effective_potential_getHarmonicContributions'
  use interfaces_14_hidewrite
+ use interfaces_41_geometry
 !End of the abilint section
 
   implicit none
@@ -2645,6 +2469,7 @@ subroutine effective_potential_getEnergy(eff_pot,energy,natom,rprimd,xcart,comm,
   real(dp),intent(in),optional :: displacement(3,eff_pot%supercell%natom_supercell)
   real(dp),intent(in),optional :: external_stress(6)
   real(dp),intent(out) :: energy
+  real(dp),intent(out) :: fcart(3,natom),fred(3,natom)
 !Local variables-------------------------------
 !scalar
   integer :: ii,ncell
@@ -2658,7 +2483,10 @@ subroutine effective_potential_getEnergy(eff_pot,energy,natom,rprimd,xcart,comm,
   integer  :: supercell(3)
   real(dp) :: strain_tmp1(6),strain_tmp2(6)
   real(dp) :: external_stress_tmp(6)
+  real(dp) :: xred(3,eff_pot%supercell%natom_supercell)
+  real(dp) :: xred_supercell(3,eff_pot%supercell%natom_supercell)
   real(dp) :: disp_tmp1(3,eff_pot%supercell%natom_supercell)
+  real(dp) :: disp_tmp2(3,eff_pot%supercell%natom_supercell)
 ! *************************************************************************
 
 !MPI variables
@@ -2679,8 +2507,8 @@ subroutine effective_potential_getEnergy(eff_pot,energy,natom,rprimd,xcart,comm,
   end if
 
   do ii=1,3
-    if(eff_pot%supercell%qphon(ii)<0.or.eff_pot%supercell%qphon(ii)>10)then
-      write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
+    if(eff_pot%supercell%qphon(ii)<0.or.eff_pot%supercell%qphon(ii)>20)then
+      write(message, '(a,i0,a,i2,a,a,a,i0,a)' )&
 &     'eff_pot%supercell%qphon(',ii,') is ',eff_pot%supercell%qphon(ii),&
 &     ', which is lower than 0 of superior than 10.',ch10,'Action: correct n_cell(',ii,').'
       MSG_ERROR(message)
@@ -2696,8 +2524,9 @@ subroutine effective_potential_getEnergy(eff_pot,energy,natom,rprimd,xcart,comm,
 
   supercell(1:3) = eff_pot%supercell%qphon(1:3)
   ncell          = product(eff_pot%supercell%qphon)
+
 !------------------------------------
-! 1 - Transfert the reference energ
+! 1 - Transfert the reference energy
 !------------------------------------
   energy = eff_pot%energy * ncell
 
@@ -2706,24 +2535,30 @@ subroutine effective_potential_getEnergy(eff_pot,energy,natom,rprimd,xcart,comm,
   call wrtout(std_out,message,'COLL')
 
 !------------------------------------
-! 2 - Computation of the harmonic part (IFC) of the energy :
+! 2 - Computation of the IFC part :
 !------------------------------------
 
   disp_tmp1(:,:) = zero
   if (present(displacement)) then
     disp_tmp1(:,:) = displacement(:,:)
   else
-    !try to compute the displacement   
-    do ii = 1, eff_pot%supercell%natom_supercell
+    do ii = 1, natom
       disp_tmp1(:,ii) = xcart(:,ii) - eff_pot%supercell%xcart_supercell(:,ii)
     end do
   end if
 
-  ifc_part = harmonic_energy(eff_pot,disp_tmp1)
+  call ifc_contribution(eff_pot,disp_tmp1,ifc_part,fcart)
 
   write(message, '(a,1ES24.16,a)' ) ' Energy of the ifc part :',ifc_part,' Hartree'
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
+
+  if(ifc_part < zero)then
+    write(message, '(a)' )&
+&        'The harmonic part is negative, the structure is not stable.'
+       MSG_WARNING(message)
+!       if(abs(ifc_part) > tol10) stop
+  end if
 
   energy = energy + ifc_part
 
@@ -2758,7 +2593,7 @@ subroutine effective_potential_getEnergy(eff_pot,energy,natom,rprimd,xcart,comm,
     external_stress_tmp(:) = zero
   end if
 
-  elastic_part = elastic_energy(eff_pot,ncell,strain_tmp1,strain_tmp2,&
+  elastic_part = elastic_contribution(eff_pot,ncell,strain_tmp1,strain_tmp2,&
 &                               external_stress=external_stress_tmp)
 
   write(message, '(a,1ES24.16,a)' ) ' Energy of the elastic part :',elastic_part,' Hartree'
@@ -2772,16 +2607,20 @@ subroutine effective_potential_getEnergy(eff_pot,energy,natom,rprimd,xcart,comm,
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
 
-  write(message, '(a,a,a)' ) ch10,' end get_energy.F90',ch10
+
+! convert forces into reduced coordinates
+  call fcart2fred(fcart,fred,rprimd,natom)
+
+  write(message, '(a,a,a)' ) ch10,' end get_HarmonicContributions.F90',ch10
   call wrtout(std_out,message,'COLL')
 
 
-end subroutine effective_potential_getEnergy
+end subroutine effective_potential_getHarmonicContributions
 !!***
 
-!!****f* m_effective_potential/elastic_energy
+!!****f* m_effective_potential/elastic_contribution
 !! NAME
-!!  elastic_energy
+!!  elastic_contribution
 !!
 !! FUNCTION
 !! Compute the energy related to the application of strain
@@ -2797,7 +2636,8 @@ end subroutine effective_potential_getEnergy
 !! energy 
 !!
 !! SOURCE
-function elastic_energy(eff_pot,ncell,strain1,strain2,external_stress) result(energy)
+!!
+function elastic_contribution(eff_pot,ncell,strain1,strain2,external_stress) result(energy)
 
 !Arguments ------------------------------------
 ! scalar
@@ -2805,7 +2645,7 @@ function elastic_energy(eff_pot,ncell,strain1,strain2,external_stress) result(en
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'elastic_energy'
+#define ABI_FUNC 'elastic_contribution'
 !End of the abilint section
 
   real(dp) energy
@@ -2831,12 +2671,12 @@ function elastic_energy(eff_pot,ncell,strain1,strain2,external_stress) result(en
 
   energy = energy * ncell
 
-end function elastic_energy
+end function elastic_contribution
 !!***
 
-!!****f* m_effective_potential/harmonic_energy
+!!****f* m_effective_potential/ifc_contribution
 !! NAME
-!!  harmonic_energy
+!!  ifc_contribution
 !!
 !! FUNCTION
 !!  This fonction compute the harmonic part of the energy
@@ -2850,36 +2690,36 @@ end function elastic_energy
 !!
 !! SOURCE
 
-function harmonic_energy(eff_pot,disp) result(energy)
+subroutine ifc_contribution(eff_pot,disp,energy,fcart)
 
 !Arguments ------------------------------------
+! scalar
 ! scalar
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'harmonic_energy'
+#define ABI_FUNC 'ifc_contribution'
 !End of the abilint section
 
-  real(dp) energy
+  real(dp),intent(out) :: energy
 ! array
   type(effective_potential_type), intent(in) :: eff_pot
   real(dp),intent(in) :: disp(3,eff_pot%supercell%natom_supercell)
+  real(dp),intent(out) :: fcart(3,eff_pot%supercell%natom_supercell)
 !Local variables-------------------------------
 ! scalar
-  integer :: i1,i2,i3,ia,ib,ii,jj,kk,ll
+  integer :: i1,i2,i3,ia,ib,ii,irpt,jj,kk,ll,mu,nu
 ! array
-  real(dp) :: temp(3)
+  real(dp) :: tmp(3)
   integer :: cell_number(3)
   integer :: cell_atom1(3),cell_atom2(3)
   character(500) :: msg
-! *************************************************************************
+  real(dp) :: gmet(3,3),rmet(3,3),favg(3)
+  real(dp) :: gprimd(3,3),rprimd(3,3)
+  real(dp) :: acell(3),gprim(3,3),rprim(3,3)
 
-  if ((size(disp(1,:)) /= eff_pot%supercell%natom_supercell)) then
-    write(msg,'(a,I7,a,I7,a)')' The number of atoms is not correct :',size(disp(1,:)),&
-&   ' in displacement array instead of ',eff_pot%supercell%natom_supercell, ' in supercell'
-    MSG_ERROR(msg)
-  end if
+! *************************************************************************
 
   cell_number(:) = int(eff_pot%supercell%qphon(:))
 
@@ -2888,7 +2728,8 @@ function harmonic_energy(eff_pot,disp) result(energy)
     MSG_ERROR(msg)
   end if
 
-  energy = zero
+  energy   = zero
+  fcart(:,:) = zero
 
   ii = 1
   do i1 = 1,cell_number(1)
@@ -2899,37 +2740,30 @@ function harmonic_energy(eff_pot,disp) result(energy)
         call index_periodic(cell_atom1(1),cell_number(1))
         call index_periodic(cell_atom1(2),cell_number(2))
         call index_periodic(cell_atom1(3),cell_number(3))
-
         do ia = 1, eff_pot%natom
 !         index of the first atom in the displacement array
-          kk = cell_atom1(1)*cell_number(2)*cell_number(3)*eff_pot%natom+&
-&              cell_atom1(2)*cell_number(3)*eff_pot%natom+&
-&              cell_atom1(3)*eff_pot%natom+&
-&              ia
-
-          temp = zero
-          do jj = 1,eff_pot%ifcs%nrpt
-!           get the cell of atom2  (0 0 0, 0 0 1...)
-            cell_atom2(1) =  (i1-1) + eff_pot%ifcs%cell(jj,1)
-            call index_periodic(cell_atom2(1),cell_number(1))
-            cell_atom2(2) =  (i2-1) + eff_pot%ifcs%cell(jj,2)
-            call index_periodic(cell_atom2(2),cell_number(2))
-            cell_atom2(3) =  (i3-1) + eff_pot%ifcs%cell(jj,3)
-            call index_periodic(cell_atom2(3),cell_number(3))
-            do ib = 1, eff_pot%natom
+            tmp = zero
+            do irpt = 1,eff_pot%ifcs%nrpt
+!           get the cell of atom2  (0 0 0, 0 0 1...)              
+              cell_atom2(1) =  (i1-1) + eff_pot%ifcs%cell(irpt,1)
+              call index_periodic(cell_atom2(1),cell_number(1))
+              cell_atom2(2) =  (i2-1) + eff_pot%ifcs%cell(irpt,2)
+              call index_periodic(cell_atom2(2),cell_number(2))
+              cell_atom2(3) =  (i3-1) + eff_pot%ifcs%cell(irpt,3)
+              call index_periodic(cell_atom2(3),cell_number(3))
+              do ib = 1, eff_pot%natom
 !             index of the second atom in the displacement array              
-               ll = cell_atom2(1)*cell_number(2)*cell_number(3)*eff_pot%natom+&
-&                   cell_atom2(2)*cell_number(3)*eff_pot%natom+&
-&                   cell_atom2(3)*eff_pot%natom+&
-&                   ib
-
-               temp = temp + matmul(eff_pot%ifcs%atmfrc(1,:,ia,:,ib,jj),disp(:,ll))
-
+                ll = cell_atom2(1)*cell_number(2)*cell_number(3)*eff_pot%natom+&
+&                    cell_atom2(2)*cell_number(3)*eff_pot%natom+&
+&                    cell_atom2(3)*eff_pot%natom+&
+&                    ib
+                tmp = tmp + matmul(eff_pot%ifcs%atmfrc(1,:,ia,:,ib,irpt),disp(:,ll))
+              end do
             end do
-          end do
-
-          energy = energy + half * dot_product(temp,disp(:,kk))         
-!          energy = energy + half * dot_product(eff_pot%forces(:,ia),disp(:,kk))
+!         accumule energy
+          energy = energy + half * dot_product(tmp,disp(:,ii))
+!         acumule forces
+          fcart(:,ii) =  fcart(:,ii)  -   tmp(:)
 
           ii = ii + 1
         end do
@@ -2937,7 +2771,76 @@ function harmonic_energy(eff_pot,disp) result(energy)
     end do
   end do
 
-end function harmonic_energy
+! Redistribute the residuale of the forces
+  call effective_potential_distributeResidualForces(eff_pot,fcart,eff_pot%supercell%natom_supercell)
+
+end subroutine ifc_contribution
+!!***
+
+!****f* m_effective_potential/effective_potential_distributeResidualForces
+!!
+!! NAME
+!! effective_potential_distributeResidualForces
+!!
+!! FUNCTION
+!! Distribute the residual forces in a weighted manner
+!!
+!! INPUTS
+!! natom   = number of atoms
+!! eff_pot = effective potential structure
+!!
+!! OUTPUT
+!! fcart   = forces in cartesian coordinates 
+!!
+!! PARENTS
+!!   mover
+!!
+!! CHILDREN
+!!
+!! SOURCE
+ 
+subroutine effective_potential_distributeResidualForces(eff_pot,fcart,natom)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'effective_potential_distributeResidualForces'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  integer, intent(in) :: natom
+!array
+  type(effective_potential_type),intent(in) :: eff_pot  
+  real(dp),intent(inout) :: fcart(3,natom)
+!Local variables-------------------------------
+!scalar
+  real(dp):: mass_ia,sum_mass
+  integer :: ia
+!array
+  real(dp):: sum_f(3)
+
+! *************************************************************************
+
+  sum_f(1) = sum(fcart(1,:))
+  sum_f(2) = sum(fcart(2,:))
+  sum_f(3) = sum(fcart(3,:))
+  sum_mass = zero
+
+  do ia=1,natom
+    sum_mass = sum_mass + eff_pot%amu(eff_pot%supercell%typat_supercell(ia))
+  end do
+
+  do ia=1,natom
+    mass_ia = eff_pot%amu(eff_pot%supercell%typat_supercell(ia))
+    fcart(:,ia) = fcart(:,ia) - (mass_ia/sum_mass) * sum_f(:)
+  end do
+
+
+end subroutine effective_potential_distributeResidualForces
 !!***
 
 !****f* m_effective_potential/effective_potential_getDeltaEnergy
@@ -2982,7 +2885,7 @@ subroutine effective_potential_getDeltaEnergy(eff_pot,energy,iatom,idir,natom,rp
   real(dp),intent(out) :: energy
 !Local variables-------------------------------
 !scalar
-  real(dp) :: ifc_part
+  real(dp) :: ifc_contribution
   character(len=500) :: message
 !array
 ! *************************************************************************
@@ -2998,9 +2901,9 @@ subroutine effective_potential_getDeltaEnergy(eff_pot,energy,iatom,idir,natom,rp
 ! 2 - Computation of the harmonic part (IFC) of the energy :
 !------------------------------------
 
-  ifc_part =  0
+  ifc_contribution =  0
 
-  energy = energy + ifc_part
+  energy = energy + ifc_contribution
 
 
 end subroutine effective_potential_getDeltaEnergy
@@ -3008,7 +2911,7 @@ end subroutine effective_potential_getDeltaEnergy
 
 !!****f* m_effective_potential/index_periodic
 !! NAME
-!!  harmonic_energy
+!!  delta ernegy
 !!
 !! FUNCTION
 !!
@@ -3098,6 +3001,7 @@ end subroutine find_bound
 !! OUTPUT
 !!
 !! SOURCE
+
 pure function effective_potential_compare(e1,e2) result (res)
 !Arguments ------------------------------------
 

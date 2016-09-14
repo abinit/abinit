@@ -607,10 +607,9 @@ real(dp) :: rmet(3,3)
 !        For monte carlo don't need ton recompute energy here
 !        every is done in pred_montecarlo
          else if(ab_mover%ionmov /= 31) then
-           call effective_potential_getEnergy(effective_potential,scfcv_args%results_gs%etotal,&
-&                                          ab_mover%natom,rprimd,xcart,comm)
-           call effective_potential_getForces(effective_potential,scfcv_args%results_gs%fcart,&
-&                                         scfcv_args%results_gs%fred,ab_mover%natom,rprimd,xcart,comm)
+           call effective_potential_getHarmonicContributions(effective_potential,scfcv_args%results_gs%etotal,&
+&                                             scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
+&                                             ab_mover%natom,rprimd,xcart,comm)
          end if
 #if defined HAVE_LOTF
        end if
@@ -961,14 +960,8 @@ real(dp) :: rmet(3,3)
 !    write(std_out,*) 'ACELL'
 !    write(std_out,*) acell(:)
 !    end if
-     write(777,*) "tata",itime,icycle
-     write(777,*) xred
-     write(777,*) xred_tmp
 
      call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,DEBUG)
-     write(777,*) "tata",itime,icycle
-     write(777,*) xred
-     write(777,*) xred_tmp
 
      if(ab_mover%optcell/=0)then
 
