@@ -325,7 +325,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
        gvnl2_(:,ipw)=zero
      end do
    end if
-   if (sij_opt/=0) thew
+   if (sij_opt/=0) then
  !$OMP PARALLEL DO
      do ipw=1,npw1*my_nspinor
        gs2c(:,ipw)=zero
