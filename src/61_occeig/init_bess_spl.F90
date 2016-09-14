@@ -41,7 +41,6 @@
 
 subroutine init_bess_spl(mbess,bessint_delta,mlang,bess_spl,bess_spl_der,x_bess)
 
-
  use defs_basis
  use m_splines
  use m_profiling_abi

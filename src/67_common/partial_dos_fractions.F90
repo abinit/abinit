@@ -5,8 +5,8 @@
 !!
 !! FUNCTION
 !! calculate partial DOS fractions to feed to the tetrahedron method
-!!  1 : project states on angular momenta
-!!  2 : should be able to choose certain atoms or atom types, slabs of space...
+!!  1: project states on angular momenta
+!!  2: should be able to choose certain atoms or atom types, slabs of space...
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2016 ABINIT group (MVer,MB)
@@ -16,6 +16,8 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
+!!  npwarr(nkpt)=number of planewaves in basis at this k point
+!!  kg_(3,mpw*mkmem)=reduced planewave coordinates.
 !!  cg(2,mcg)=planewave coefficients of wavefunctions
 !!  dtset     structured datatype, from which one uses :
 !!   exchn2n3d=if 1, n2 and n3 are exchanged
@@ -35,7 +37,7 @@
 !!  hdr= header of the wavefunction file (contains many informations)
 !!  mbesslang=maximum angular momentum for Bessel function expansion
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  m_dos_flag=option for the m-contributions to the partial DOS
 !!  ndosfraction=natsph*mbesslang
 !!  partial_dos= option for this routine - only 1 is supported at present
@@ -62,7 +64,7 @@
 
 #include "abi_common.h"
 
-subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
+subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractions_m,&
 &           dtset,hdr,mbesslang,mcg,mpi_enreg,m_dos_flag,ndosfraction,partial_dos)
 
  use defs_basis
@@ -71,6 +73,7 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
  use m_errors
  use m_splines
  use m_xmpi
+ use m_crystal
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -89,9 +92,12 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
  integer,intent(in) :: m_dos_flag,mbesslang,mcg,ndosfraction,partial_dos
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
- type(hdr_type),intent(inout) :: hdr
+ type(hdr_type),intent(in) :: hdr
+ type(crystal_t),intent(in) :: crystal
 !arrays
- real(dp),intent(inout) :: cg(2,mcg)
+ integer,intent(in) :: kg_(3,dtset%mpw*dtset%mkmem)
+ integer,intent(in) :: npwarr(dtset%nkpt)
+ real(dp),intent(in) :: cg(2,mcg)
  real(dp),intent(out) :: dos_fractions(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction)
  real(dp),intent(out) :: dos_fractions_m(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*mbesslang*m_dos_flag)
 
@@ -100,8 +106,7 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
  integer :: cg1kptshft,cgshift,ia,iatom,iband,ierr,ikpt,ilang,ioffkg
  integer :: ioffylm,iout,ipw,ispinor,isppol,ixint,mbess,mcg_disk,me
  integer :: mgfft,my_nspinor,n1,n2,n3,natsph_tot,nfit,npw_k,nradintmax,prtsphere
- integer :: spaceComm
- integer :: nk_and_spin
+ integer :: spaceComm,nk_and_spin
  real(dp) :: arg,bessarg,bessargmax,bessint_delta,kpgmax,rmax,ucvol
  character(len=4) :: mode_paral
  character(len=500) :: msg
@@ -110,7 +115,6 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
  integer :: kg_k(3,dtset%mpw)
  integer,allocatable :: iatsph(:),kg(:,:),npwarr1(:),npwtot(:),nradint(:)
  integer,allocatable :: atindx(:)
-
  real(dp) :: gmet(3,3)
  real(dp) :: gprimd(3,3),kpoint(3)
  real(dp) :: rmet(3,3)
@@ -124,7 +128,6 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
  real(dp),allocatable :: znucl_sph(:)
  real(dp),allocatable :: phkxred(:,:)
  real(dp),allocatable :: cmax(:)
-
 ! new stuff for spinor projections
  integer :: is1, is2, isoff
  real(dp) :: spin(3)
@@ -230,23 +233,19 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
    ABI_ALLOCATE(rint,(nradintmax))
    ABI_ALLOCATE(bess_fit,(dtset%mpw,nradintmax,mbesslang))
 
-!  
 !  initialize general Bessel function array on uniform grid
 !  x_bess, from 0 to (2 \pi |k+G|_{max} |r_{max}|)
-!  
-!  call init_bess_spl(mbess,bessargmax,bessint_delta,mbesslang,
-   call init_bess_spl(mbess,bessint_delta,mbesslang,&
-&   bess_spl,bess_spl_der,x_bess)
+!  TODO: Replace with: use m_paw_numeric, only : paw_jbessel_4spline, paw_spline
+   call init_bess_spl(mbess,bessint_delta,mbesslang,bess_spl,bess_spl_der,x_bess)
 
-!  get recip space metric
-!  if iout<0, the output of metric will not be printed
+!  get recip space metric. if iout<0, the output of metric will not be printed
    iout=ab_out
    call metric(gmet,gprimd,iout,rmet,hdr%rprimd,ucvol)
 
 !  get kg matrix of the positions of G vectors in recip space
    mgfft=maxval(dtset%ngfft(1:3))
-!  write(std_out,*) 'DEBUG : about to allocate npwarr1 kg'
 
+!  TODO: Pass kg in input.
 !  kg contains G vectors only for kpoints used by this processor
    mode_paral='PERS'
    ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
@@ -260,28 +259,24 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
    ABI_DEALLOCATE(npwarr1)
    ABI_DEALLOCATE(npwtot)
 
-!  
 !  for each electronic state, get corresponding wavefunction and project on Ylm
 !  real(dp) :: cg(2,dtset%mpw*my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol)
-!  
    n1 = dtset%ngfft(1); n2 = dtset%ngfft(2); n3 = dtset%ngfft(3)
 
 !  TODO: send only xred for atoms we want to project on
    ABI_ALLOCATE(xred_sph, (3, natsph_tot))
-   do iatom = 1, dtset%natsph
+   do iatom=1,dtset%natsph
      xred_sph(:,iatom) = hdr%xred(:,iatsph(iatom))
    end do
-   do iatom = 1, dtset%natsph_extra
+   do iatom=1,dtset%natsph_extra
      xred_sph(:,dtset%natsph+iatom) = dtset%xredsph_extra(:, iatom)
    end do
 
    ABI_ALLOCATE(ph1d,(2,(2*n1+1 + 2*n2+1 + 2*n3+1)*natsph_tot))
    call getph(atindx,natsph_tot,n1,n2,n3,ph1d,xred_sph)
 
-!  
 !  Now get Ylm factors: returns "real Ylms", which are real (+m) and
 !  imaginary (-m) parts of actual complex Ylm. Yl-m = Ylm*
-!  
 !  Single call to initylmg for all kg (all mkmem are in memory)
    ABI_ALLOCATE(ylm,(dtset%mpw*dtset%mkmem,mbesslang*mbesslang))
    call initylmg(gprimd,kg,dtset%kpt,dtset%mkmem,mpi_enreg,mbesslang,&
@@ -290,8 +285,8 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
 
 !  kpgnorm contains norms only for kpoints used by this processor
    nk_and_spin = 0
-   do isppol = 1, dtset%nsppol
-     do ikpt = 1, dtset%nkpt
+   do isppol=1,dtset%nsppol
+     do ikpt=1,dtset%nkpt
        if (mpi_enreg%proc_distrb(ikpt,1,isppol)==me) nk_and_spin = nk_and_spin + 1
      end do
    end do
@@ -347,27 +342,18 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
 
 !      make phkred for all atoms
        do ia=1,natsph_tot
-         arg=two_pi*( kpoint(1)*xred_sph(1,ia) &
-&         + kpoint(2)*xred_sph(2,ia) &
-&         + kpoint(3)*xred_sph(3,ia) )
+         arg=two_pi*( kpoint(1)*xred_sph(1,ia) + kpoint(2)*xred_sph(2,ia) + kpoint(3)*xred_sph(3,ia) )
          phkxred(1,ia)=cos(arg)
          phkxred(2,ia)=sin(arg)
        end do
 
        ABI_ALLOCATE(ph3d,(2,npw_k,natsph_tot))
 
-!      !      need simple 3d phases for dens_in_sph
-!      call ph1d3d(1,natsph_tot,kg_k(:,1:npw_k),&
-!      &       natsph_tot,natsph_tot,npw_k,n1,n2,n3,&
-!      &       phkxred,ph1d,ph3d)
-!      !      phases exp (2 pi i G.x_tau) are now in ph3d
-
        cg_1kpt(:,:) = cg(:,cgshift+1:cgshift+mcg_disk)
 
 !      get full phases for the following
        ph3d = zero
-       call ph1d3d(1,natsph_tot,kg_k(:,1:npw_k),&
-&       natsph_tot,natsph_tot,npw_k,n1,n2,n3,&
+       call ph1d3d(1,natsph_tot,kg_k(:,1:npw_k),natsph_tot,natsph_tot,npw_k,n1,n2,n3,&
 &       phkxred,ph1d,ph3d)
 !      phases exp (2 pi i (k+G).x_tau) are now in ph3d
 
@@ -375,6 +361,8 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
 !      since we need many r distances and have a large number of different
 !      |k+G|, get j_l on uniform grid (above, in array gen_besj),
 !      and spline it for each kpt Gvector set.
+!      TODO: Precompute (k+G) integrals here and pass them to recip_ylm)
+!      
        nfit = npw_k
        do ixint=1,nradintmax
          rint(ixint) = (ixint-1)*rmax / (nradintmax-1)
@@ -385,8 +373,7 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
 
          call sort_dp(npw_k,xfit,iindex,tol14)
          do ilang=1,mbesslang
-           call splint(mbess,x_bess,bess_spl(:,ilang),bess_spl_der(:,ilang),&
-&           nfit,xfit,yfit)
+           call splint(mbess,x_bess,bess_spl(:,ilang),bess_spl_der(:,ilang),nfit,xfit,yfit)
 !          re-order results for different G vectors
            do ipw=1,npw_k
              bess_fit(iindex(ipw),ixint,ilang) = yfit(ipw)
@@ -428,8 +415,8 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
 
            cg1kptshft=cg1kptshft + npw_k
 
-         end do ! end spinor
-       end do ! end band
+         end do ! spinor
+       end do ! band
 !      cgshift=cgshift + cg1kptshft
        cgshift=cgshift + dtset%mband*my_nspinor*npw_k
 

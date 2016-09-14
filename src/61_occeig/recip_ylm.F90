@@ -19,12 +19,12 @@
 !!   and all points on radial grid.
 !!  cgcband(2,npw_k)=wavefunction in recip space
 !!  istwfk= storage mode of cgcband
-!!  mlang=maximum angular momentum
-!!  mpi_enreg=informations about MPI parallelization
-!!  natsph=number of atoms around which ang mom projection has to be done 
-!!  npw_k=number of plane waves for kpt
 !!  nradint(natsph)=number of points on radial real-space grid for a given atom
 !!  nradintmax=dimension of rint array
+!!  mlang=maximum angular momentum
+!!  mpi_enreg=information about MPI parallelization
+!!  natsph=number of atoms around which ang mom projection has to be done 
+!!  npw_k=number of plane waves for kpt
 !!  ph3d(2,npw_k,natsph)=3-dim structure factors, for each atom and plane wave.
 !!  prtsphere= if 1, print a complete analysis of the angular momenta in atomic spheres
 !!  rint(nradintmax) = points on radial real-space grid for integration
@@ -35,11 +35,11 @@
 !!
 !! OUTPUT
 !!  sum_1ll_1atom(mlang,natsph)= projected scalars for each atom and ang. mom.
+!!  sum_1lm_1atom(mlang*mlang,natsph)= projected scalars for each atom and LM component.
 !!
 !! NOTES
 !!  ph3d atoms are ordered with atindx -> by typat
 !!  The atoms have to be reordered !
-!!  factor monetom = (-1)**ll has been removed - was it missing in one of the equations?
 !!
 !! PARENTS
 !!      m_cut3d,partial_dos_fractions
@@ -78,7 +78,7 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
  integer,intent(in) :: istwfk,mlang,mpw,natsph,npw_k,nradintmax
  integer,intent(in) :: prtsphere
  real(dp),intent(in) :: ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: nradint(natsph)
  real(dp),intent(in) :: bess_fit(mpw,nradintmax,mlang),cgcband(2,npw_k)
@@ -90,34 +90,20 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: option2=2 !option for dotprod_g
  integer :: illmm, iat, ipw, ixint, ll, mm, option
- real(dp) :: doti, dotr
- real(dp) :: sum_all, integ
- real(dp) :: dr, llsign1, llsign2
+ real(dp) :: doti, dotr, sum_all, integ, dr, llsign1, llsign2
  type(atomdata_t) :: atom
 !arrays
  real(dp) :: sum_1atom(natsph),sum_1ll(mlang),sum_1lm(mlang*mlang)
  real(dp) :: tmppsia(2,npw_k),tmppsim(2,npw_k)
-
- integer, allocatable :: ilang(:)
- integer,  allocatable :: reylmind(:)
- integer,  allocatable :: imylmind(:)
-
- real(dp), allocatable :: coef1(:)
- real(dp), allocatable :: coef2(:)
- real(dp), allocatable :: vect(:,:)
- real(dp), allocatable :: mmsign(:)
- real(dp), allocatable :: rint2(:)
+ integer, allocatable :: ilang(:), reylmind(:), imylmind(:)
+ real(dp), allocatable :: coef1(:),coef2(:),vect(:,:),mmsign(:),rint2(:)
 
 ! *************************************************************************
 
-!metric has been called in calling routine.
-
  sum_1lm_1atom(:,:) = zero
  sum_1ll_1atom(:,:) = zero
-
-!option for dotprod_g
- option=2
 
  ABI_ALLOCATE(rint2, (nradintmax))
  do ixint = 1, nradintmax
@@ -171,14 +157,11 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
 
 !  Temporary arrays for part of psi which depends only on iat
    do ipw=1,npw_k
-     tmppsia(1,ipw) = cgcband(1,ipw) * ph3d(1,ipw,iat) &
-&     - cgcband(2,ipw) * ph3d(2,ipw,iat)
-     tmppsia(2,ipw) = cgcband(1,ipw) * ph3d(2,ipw,iat) &
-&     + cgcband(2,ipw) * ph3d(1,ipw,iat)
+     tmppsia(1,ipw) = cgcband(1,ipw) * ph3d(1,ipw,iat) - cgcband(2,ipw) * ph3d(2,ipw,iat)
+     tmppsia(2,ipw) = cgcband(1,ipw) * ph3d(2,ipw,iat) + cgcband(2,ipw) * ph3d(1,ipw,iat)
    end do
 
    do illmm=1, mlang*mlang
-
 !    tmppsim = temporary arrays for part of psi which doesnt depend on ixint
 !    Take into account the fact that ylm are REAL spherical harmonics, see initylmg.f
 !    
@@ -186,7 +169,7 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
 !    part of tmppsia is needed here, depending on l being even or odd: only one of the coef is 1, the other 0
      do ipw=1,npw_k
 !      to get PDOS for real spherical harmonics, may be sufficient to multiply here by ylm instead of linear combination
-#if 1
+#if 0
       if (istwfk == 1) then
           tmppsim(1,ipw) = tmppsia(1,ipw)*ylm(ipw,illmm)
           tmppsim(2,ipw) = tmppsia(2,ipw)*ylm(ipw,illmm)
@@ -212,7 +195,7 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
      integ = zero
      do ixint = 1, nradint(iat)
        vect(1, 1:npw_k) = bess_fit(1:npw_k, ixint, ilang(illmm))
-       call dotprod_g(dotr, doti, istwfk, npw_k, option, vect, tmppsim, mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+       call dotprod_g(dotr, doti, istwfk, npw_k, option2, vect, tmppsim, mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
 
 !      Multiply by r**2 and take norm, integrate
 !      MJV 5.5.2012 removed call to simpson_int - just need last value, no need to allocate full space for primitive and integrand
@@ -229,9 +212,6 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
      end do ! ixint
      integ = integ * dr
 
-!    NOTE : could exploit full r dependency of integ
-!    which is calculated in the call to simpson
-
      sum_1lm_1atom(illmm, iat)        = sum_1lm_1atom(illmm, iat)        + integ
      sum_1ll_1atom(ilang(illmm), iat) = sum_1ll_1atom(ilang(illmm), iat) + integ
 
@@ -244,13 +224,12 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
  ABI_DEALLOCATE(imylmind)
  ABI_DEALLOCATE(mmsign)
  ABI_DEALLOCATE(ilang)
-
  ABI_DEALLOCATE(vect)
  ABI_DEALLOCATE(rint2)
 
 !MJV 5.5.2012: removed 1/sqrt(2) above in tmppsim and (4 pi)^2 in integrand - just multiply by 8 pi^2 here
 !Normalize with unit cell volume
-#if 0
+#if 1
  sum_1lm_1atom(:,:) = eight * pi**2 * sum_1lm_1atom(:,:) / ucvol
  sum_1ll_1atom(:,:) = eight * pi**2 * sum_1ll_1atom(:,:) / ucvol
 #else
