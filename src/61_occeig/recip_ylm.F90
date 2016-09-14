@@ -90,27 +90,26 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: option2=2 !option for dotprod_g
+ integer,parameter :: option2=2 ! option for dotprod_g
  integer :: illmm, iat, ipw, ixint, ll, mm, option
  real(dp) :: doti, dotr, sum_all, integ, dr, llsign1, llsign2
  type(atomdata_t) :: atom
 !arrays
+ integer, allocatable :: ilang(:), reylmind(:), imylmind(:)
  real(dp) :: sum_1atom(natsph),sum_1ll(mlang),sum_1lm(mlang*mlang)
  real(dp) :: tmppsia(2,npw_k),tmppsim(2,npw_k)
- integer, allocatable :: ilang(:), reylmind(:), imylmind(:)
- real(dp), allocatable :: coef1(:),coef2(:),vect(:,:),mmsign(:),rint2(:)
+ real(dp) :: vect(2,npw_k),rint2(nradintmax)
+ real(dp), allocatable :: coef1(:),coef2(:),mmsign(:) 
 
 ! *************************************************************************
 
  sum_1lm_1atom(:,:) = zero
  sum_1ll_1atom(:,:) = zero
 
- ABI_ALLOCATE(rint2, (nradintmax))
  do ixint = 1, nradintmax
    rint2(ixint) = rint(ixint)**2
  end do
 
- ABI_ALLOCATE(vect,(2,npw_k))
  vect = zero
 
  ABI_ALLOCATE(ilang,    (mlang**2))
@@ -224,8 +223,6 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
  ABI_DEALLOCATE(imylmind)
  ABI_DEALLOCATE(mmsign)
  ABI_DEALLOCATE(ilang)
- ABI_DEALLOCATE(vect)
- ABI_DEALLOCATE(rint2)
 
 !MJV 5.5.2012: removed 1/sqrt(2) above in tmppsim and (4 pi)^2 in integrand - just multiply by 8 pi^2 here
 !Normalize with unit cell volume
@@ -238,7 +235,7 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
 #endif
 
 !Output
- if(prtsphere==1)then
+ if (prtsphere == 1) then
    sum_1ll = zero
    sum_1lm = zero
    sum_1atom = zero

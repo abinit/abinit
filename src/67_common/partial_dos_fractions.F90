@@ -362,18 +362,16 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
        shift_sk = shift_sk + dtset%mband*my_nspinor*npw_k
 
        ABI_DEALLOCATE(ph3d)
-     end do ! end kpt
-   end do ! end sppol
+     end do ! ikpt
+   end do ! isppol
 
 !  Gather all contributions from different processors
    call xmpi_sum(dos_fractions,comm,ierr)
-   if (m_dos_flag==1) then
-     call xmpi_sum(dos_fractions_m,comm,ierr)
-   end if
+   if (m_dos_flag==1) call xmpi_sum(dos_fractions_m,comm,ierr)
+
    if (mpi_enreg%paral_spinor == 1)then
      call xmpi_sum(dos_fractions,mpi_enreg%comm_spinor,ierr)
-     if (m_dos_flag==1) then
-       call xmpi_sum(dos_fractions_m,mpi_enreg%comm_spinor,ierr)
+     if (m_dos_flag==1) call xmpi_sum(dos_fractions_m,mpi_enreg%comm_spinor,ierr)
      end if
    end if
 
