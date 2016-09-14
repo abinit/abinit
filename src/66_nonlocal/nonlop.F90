@@ -30,30 +30,33 @@
 !!          =1 => non-local energy contribution
 !!          =2 => 1st derivative(s) with respect to atomic position(s)
 !!          =3 => 1st derivative(s) with respect to strain(s)
-!!          =23=> 1st derivative(s) with respect to at omic pos. and
+!!          =23=> 1st derivative(s) with respect to atomic pos. and
 !!                1st derivative(s) with respect to atomic pos. and strains
 !!          =4 => 2nd derivative(s) with respect to 2 atomic pos.
 !!          =24=> 1st derivative(s) with respect to atm. pos. and
 !!                2nd derivative(s) with respect to 2 atomic pos.
 !!          =5 => 1st derivative(s) with respect to k wavevector, typically
-!!                $\sum_{ij}|p_i\rangle D_{ij}\langle dp_j/dk| + |dp_i/dk\rangle D_{ij}\langle p_j|$
+!!                sum_ij [ |p_i> D_ij <dp_j/dk| + |dp_i/dk> D_ij < p_j| ]
 !!          =6 => 2nd derivative(s) with respect to 2 strains and
 !!                mixed 2nd derivative(s) with respect to strains & atomic pos.
 !!          =51 =>right 1st derivative(s) with respect to k wavevector, typically
-!!                $\sum_{ij}|p_i\rangle D_{ij}\langle dp_j/dk|$
+!!                sum_ij [ |p_i> D_ij <dp_j/dk| ]
 !!          =52 =>left 1st derivative(s) with respect to k wavevector, typically
-!!                $\sum_{ij}|dp_i/dk\rangle D_{ij}\langle p_j|$
+!!                sum_ij [ |dp_i/dk> D_ij < p_j| ]
 !!          =53 =>twist 1st derivative(s) with respect to k, typically
-!!                $\sum_{ij}|dp_i/dk_(idir+1)\rangle D_{ij}\langle dp_j/dk_(idir-1)| -
-!!                 |dp_i/dk_(idir-1)\rangle D_{ij}\langle dp_j/dk_(idir+1)|$
+!!                sum_ij [ |dp_i/dk_(idir+1)> D_ij <dp_j//dk_(idir-1)|
+!!                        -|dp_i/dk_(idir-1)> D_ij <dp_j//dk_(idir+1)|]
 !!          =54=> mixed 2nd derivative(s) with respect to atomic pos. and left k wavevector
 !!          =55=> mixed 2nd derivative(s) with respect to strain and right k wavevector
-!!          =7 => apply operator $\sum_{i}|p_i\rangle \langle p_i|$,
+!!          =7 => apply operator $\sum_i [ |p_i> <p_i| ],
 !!                same as overlap operator with s_ij=identity (paw_opt==3 only)
 !!          =8 => 2nd derivatives with respect to 2 k wavevectors
+!!          =81=> partial 2nd derivatives with respect to 2 k wavevectors,
+!!                full derivative with respect to k1, right derivative with respect to k2,
+!!                (derivative with respect to k of choice 51), typically
+!!                sum_ij [ |dp_i/dk1> D_ij <dp_j/dk2| + |p_i> D_ij < d2p_j/dk1dk2| ]
 !!    Only choices 1,2,3,23,4,5,6 are compatible with useylm=0.
-!!    Only choices 1,2,3,5,7,51,52 and 53 are compatible with signs=2
-!!    Choices 51,52 are not compatible with signs=1
+!!    Only choices 1,2,3,5,51,52,53,7,8,81 are compatible with signs=2
 !!  cpopt=flag defining the status of cprjin%cp(:)=<Proj_i|Cnk> scalars (see below, side effects)
 !!  [enl]=optional (if not present, use hamk%ekb); non-local coeffs connecting projectors
 !!        see hamk%ekb description
@@ -106,7 +109,7 @@
 !!  [iatom_only]=optional. If present (and >0), only projectors related to atom of index iatom_only
 !!          will be applied. (used fi to apply derivative of NL operator wrt an atomic displacement)
 !!  idir=direction of the - atom to be moved in the case (choice=2,signs=2),
-!!                        - k point direction in the case (choice=5,51,or 52 and signs=2)
+!!                        - k point direction in the case (choice=5,51,or 52)
 !!                          for choice 53 signs=2, cross derivatives are in idir-1 and idir+1 directions
 !!                        - strain component (1:6) in the case (choice=3,signs=2) or (choice=6,signs=1)
 !!  lambda=factor to be used when computing (Vln-lambda.S) - only for paw_opt=2
@@ -116,19 +119,26 @@
 !!  nnlout=dimension of enlout (when signs=1 and choice>0):
 !!         ==== if paw_opt=0, 1 or 2 ====
 !!         choice   nnlout     |  choice   nnlout
-!!              1   1          |       5   3
-!!              2   3*natom    |      53   3
-!!              3   6          |      54   9*natom
-!!              4   6*natom    |      55   36
-!!             23   6+3*natom  |       6   36+18*natom
-!!             24   9*natom    |       8   6
+!!              1   1          |      51   6 (complex)
+!!              2   3*natom    |      52   6 (complex)
+!!              3   6          |      53   6
+!!              4   6*natom    |      54   9*natom
+!!             23   6+3*natom  |      55   36 (complex)
+!!             24   9*natom    |       6   36+18*natom
+!!              5   3          |       8   6
+!!                             |      81   18 (complex)
 !!         ==== if paw_opt=3 ====
 !!         choice   nnlout
 !!              1   1
 !!              2   3*natom
+!!              5   3
+!!             51   3
+!!             52   3
 !!             54   9*natom
 !!             55   36
 !!              7   1
+!!              8   6
+!!             81   9
 !!         ==== if paw_opt=4 ====
 !!         not available
 !!  [only_SO]=optional, flag to calculate only the SO part in nonlop
@@ -163,52 +173,65 @@
 !!      if choice=24: enlout(9*natom)       -> 1st deriv. of energy wrt atm. pos (forces) and
 !!                                             2nd deriv. of energy wrt 2 atm. pos (dyn. mat.)
 !!      if choice=5 : enlout(3)             -> 1st deriv. of energy wrt k
+!!      if choice=51: enlout(3)             -> 1st deriv. (right) of energy wrt k
+!!      if choice=52: enlout(3)             -> 1st deriv. (left) of energy wrt k
 !!      if choice=53: enlout(3)             -> 1st deriv. (twist) of energy wrt k
 !!      if choice=54: enlout(18*natom)      -> 2nd deriv. of energy wrt atm. pos and right k (Born eff. charge)
 !!      if choice=55: enlout(36)            -> 2nd deriv. of energy wrt strain and right k (piezoelastic tensor)
 !!      if choice=6 : enlout(36+18*natom)   -> 2nd deriv. of energy wrt 2 strains (elast. tensor) and
 !!                                             2nd deriv. of energy wrt to atm. pos and strain (internal strain)
 !!      if choice=8 : enlout(6)             -> 2nd deriv. of energy wrt 2 k
+!!      if choice=81: enlout(9)             -> 2nd deriv.of E: full derivative w.r.t. k1, right derivative w.r.t k2
 !! --If (paw_opt==3)
 !!      if choice=1 : enlout(1)             -> contribution to <c|S|c> (note: not including <c|c>)
 !!      if choice=2 : enlout(3*natom)       -> contribution to <c|dS/d_atm.pos|c>
+!!      if choice=51: enlout(3)             -> contribution to <c|d(right)S/d_k|c>
+!!      if choice=52: enlout(3)             -> contribution to <c|d(left)S/d_k|c>
 !!      if choice=54: enlout(18*natom)      -> 2nd deriv. of energy wrt atm. pos and right k (Born eff. charge)
 !!      if choice=55: enlout(36)            -> 2nd deriv. of energy wrt strain and right k (piezoelastic tensor)
 !!      if choice=7 : enlout(1)             -> contribution to <c|sum_i[p_i><p_i]|c>
+!!      if choice=8 : enlout(6)             -> contribution to <c|d2S/d_k1d_k2|c>
+!!      if choice=81: enlout(9)             -> contribution to <c|dS/d_k1[d(right)d_k2]|c>
 !! --If (paw_opt==4)
 !!      not available
 !! ==== if (signs==2) ====
 !! --if (paw_opt=0, 1 or 4)
 !!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
 !!                or one of its derivatives to the input vect.:
-!!      if (choice=1) <G|V_nonlocal|vect_in>
-!!      if (choice=2) <G|dV_nonlocal/d(atm. pos)|vect_in>
-!!      if (choice=3) <G|dV_nonlocal/d(strain)|vect_in>
-!!      if (choice=5) <G|dV_nonlocal/d(k)|vect_in>
+!!      if (choice=1)  <G|V_nonlocal|vect_in>
+!!      if (choice=2)  <G|dV_nonlocal/d(atm. pos)|vect_in>
+!!      if (choice=3)  <G|dV_nonlocal/d(strain)|vect_in>
+!!      if (choice=5)  <G|dV_nonlocal/d(k)|vect_in>
 !!      if (choice=51) <G|d(right)V_nonlocal/d(k)|vect_in>
 !!      if (choice=52) <G|d(left)V_nonlocal/d(k)|vect_in>
 !!      if (choice=53) <G|d(twist)V_nonlocal/d(k)|vect_in>
-!!  if (paw_opt=2)
+!!      if (choice=8)  <G|d2V_nonlocal/d(k)d(k)|vect_in>
+!!      if (choice=81) <G|d[d(right)V_nonlocal/d(k)]/d(k)|vect_in>
+!! --if (paw_opt=2)
 !!    vectout(2,npwout*my_nspinor*ndat)=final vector in reciprocal space:
-!!      if (choice=1) <G|V_nonlocal-lamdba.(I+S)|vect_in> (note: not including <G|I|c>)
-!!      if (choice=2) <G|d[V_nonlocal-lamdba.(I+S)]/d(atm. pos)|vect_in>
-!!      if (choice=3) <G|d[V_nonlocal-lamdba.(I+S)]/d(strain)|vect_in>
-!!      if (choice=5) <G|d[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
+!!      if (choice=1)  <G|V_nonlocal-lamdba.(I+S)|vect_in>
+!!      if (choice=2)  <G|d[V_nonlocal-lamdba.(I+S)]/d(atm. pos)|vect_in>
+!!      if (choice=3)  <G|d[V_nonlocal-lamdba.(I+S)]/d(strain)|vect_in>
+!!      if (choice=5)  <G|d[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
 !!      if (choice=51) <G|d(right)[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
 !!      if (choice=52) <G|d(left)[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
 !!      if (choice=53) <G|d(twist)[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
+!!      if (choice=8)  <G|d2[V_nonlocal-lamdba.(I+S)]/d(k)d(k)|vect_in>
+!!      if (choice=81) <G|d[d(right[V_nonlocal-lamdba.(I+S)]/d(k)]/d(k)|vect_in>
 !! --if (paw_opt=3 or 4)
 !!    svectout(2,npwout*my_nspinor*ndat)=result of the aplication of Sij (overlap matrix)
 !!                  or one of its derivatives to the input vect.:
-!!      if (choice=1) <G|I+S|vect_in> (note: not including <G|I|c>)
-!!      if (choice=2) <G|dS/d(atm. pos)|vect_in>
-!!      if (choice=3) <G|dS/d(strain)|vect_in>
-!!      if (choice=5) <G|dS/d(k)|vect_in>
+!!      if (choice=1)  <G|I+S|vect_in>
+!!      if (choice=2)  <G|dS/d(atm. pos)|vect_in>
+!!      if (choice=3)  <G|dS/d(strain)|vect_in>
+!!      if (choice=5)  <G|dS/d(k)|vect_in>
 !!      if (choice=51) <G|d(right)S/d(k)|vect_in>
 !!      if (choice=52) <G|d(left)S/d(k)|vect_in>
 !!      if (choice=53) <G|d(twist)S/d(k)|vect_in>
-!!      if (choice=3) <G|d[V_nonlocal-lamdba.(I+S)]/d(strain)|vect_in>
-!!      if (choice=7) <G|sum_i[p_i><p_i]|vect_in>
+!!      if (choice=3)  <G|d[V_nonlocal-lamdba.(I+S)]/d(strain)|vect_in>
+!!      if (choice=7)  <G|sum_i[p_i><p_i]|vect_in>
+!!      if (choice=8)  <G|d2S/d(k)d(k)|vect_in>
+!!      if (choice=81) <G|d[d(right)S/d(k)]/d(k)|vect_in>
 !!
 !! SIDE EFFECTS
 !!  ==== ONLY IF useylm=1
@@ -294,7 +317,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
 !Local variables-------------------------------
 !scalars
- integer :: dimenl1,dimenl2,dimenl2_,dimffnlin,dimffnlout,iatm,iatom_only_,idat
+ integer :: dimenl1,dimenl2,dimenl2_,dimffnlin,dimffnlout,dimsij,iatm,iatom_only_,idat
  integer :: ispden,ispinor,istwf_k,itypat,jspinor,matblk_,my_nspinor,n1,n2,n3,natom_,ncpgr_atm
  integer :: nkpgin,nkpgout,npwin,npwout,ntypat_,only_SO_,select_k_,shift1,shift2,shift3
  logical :: atom_pert,force_recompute_ph3d,hermdij,kpgin_allocated,kpgout_allocated,use_gemm_nonlop
@@ -441,7 +464,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  if (kpgout_allocated) then
    ABI_ALLOCATE(kpgout,(npwout,0))
  end if
- 
+
 !Check some sizes for safety
 !if (paw_opt==0.or.cpopt<2.or.((cpopt==2.or.cpopt==3).and.choice>1)) then
  if (size(ffnlin,1)/=npwin.or.size(ffnlin,3)/=hamk%lmnmax) then
@@ -544,8 +567,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    end if
    ABI_ALLOCATE(enl_,(dimenl1,1,hamk%nspinor**2))
    do ispden=1,hamk%nspinor**2
-     if (dimenl2==hamk%natom) then
-       enl_(:,1,ispden)=enl_ptr(:,iatm,ispden)
+     if (dimenl2==hamk%natom .and. hamk%usepaw==1) then
+       enl_(:,1,ispden)=enl_ptr(:,iatom_only_,ispden)
      else if (dimenl2==hamk%ntypat) then
        enl_(:,1,ispden)=enl_ptr(:,itypat,ispden)
      else
@@ -553,7 +576,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      end if
    end do
    if (allocated(hamk%sij)) then
-     ABI_ALLOCATE(sij_,(dimenl1,1))
+     dimsij=size(hamk%sij,1)
+     ABI_ALLOCATE(sij_,(dimsij,1))
      if (size(hamk%sij,2)==hamk%ntypat) then
        sij_(:,1)=hamk%sij(:,itypat)
      else if (size(hamk%sij)>0) then

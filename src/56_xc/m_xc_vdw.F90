@@ -43,7 +43,7 @@ module m_xc_vdw
  use m_numeric_tools,only : simpson_int
 
  use m_io_tools,only : flush_unit, open_file
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -1659,7 +1659,7 @@ subroutine xc_vdw_read(filename)
 
   VDWXC_DBG_ENTER("COLL",ABI_FUNC)
 
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
   write(msg,'("Reading vdW-DF data from",1x,a)') trim(filename)
   call wrtout(std_out,msg,'COLL')
 
@@ -2161,7 +2161,7 @@ subroutine xc_vdw_write(filename)
 
   VDWXC_DBG_ENTER("COLL",ABI_FUNC)
 
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
   write(msg,'(a,1x,"Writing vdW-DF data to",1x,a)') ch10,trim(filename)
   call wrtout(std_out,msg,'COLL')
 
@@ -3486,7 +3486,7 @@ subroutine vdw_df_netcdf_ioerr(ncerr,file_name,file_line)
     my_file_line = file_line
   end if
 
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
   write(msg,'(a,a,3x,a)') &
 &  'NetCDF returned the error:',ch10,trim(nf90_strerror(ncerr))
   if ( ncerr /= NF90_NOERR ) then

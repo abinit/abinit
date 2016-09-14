@@ -233,7 +233,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  use m_pawfgr,           only : pawfgr_type
  use m_fock,             only : fock_type
 
-#ifdef HAVE_DFT_BIGDFT
+#ifdef HAVE_BIGDFT
  use BigDFT_API, only : last_orthon, &
       & kswfn_free_scf_data, denspot_free_history,&
       & write_energies, total_energies,&
@@ -328,7 +328,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp) :: dtaur,dtaurzero,c_fermi,ucvol
  character(len=500) :: message
  type(paw_dmft_type) :: paw_dmft
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  logical :: do_last_ortho
  real(dp) :: eproj,raux
 #endif
@@ -369,7 +369,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !  wvlbigdft indicates that the BigDFT workflow will be followed
    if(dtset%wvl_bigdft_comp==1) wvlbigdft=.true.
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 !  Transform to KS orbitals
    comm=mpi_enreg%comm_cell
    me=xmpi_comm_rank(comm)
@@ -970,7 +970,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  call timab(257,2,tsec)
  call timab(250,2,tsec)
 
-#if !defined HAVE_DFT_BIGDFT
+#if !defined HAVE_BIGDFT
  if (.false.) write(std_out,*) vtrial(1,1)
 #endif
 end subroutine afterscfloop

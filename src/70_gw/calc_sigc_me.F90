@@ -673,7 +673,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      end do
    end if
 
-   write(msg,'(2(a,i4),a,i3)')' csigme : ik_bz ',ik_bz,'/',Kmesh%nbz,' done by processor ',Wfd%my_rank
+   write(msg,'(3(a,i0),a,i0)')'Sigma_c: ik_bz ',ik_bz,'/',Kmesh%nbz,", spin:",spin,' done by rank: ',Wfd%my_rank
    call wrtout(std_out,msg,'PERS')
    !
    ! === Find the corresponding irred q-point ===

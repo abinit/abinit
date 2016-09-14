@@ -48,7 +48,7 @@ subroutine wvl_denspot_set(den,gth_params,ixc,natom,nsppol,rprimd,wvl,&
  use m_errors
  use m_xmpi
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API,only: initialize_DFT_local_fields,allocateRhoPot, &
 &                     input_variables,dpbox_set,density_descriptors
 #endif
@@ -73,7 +73,7 @@ subroutine wvl_denspot_set(den,gth_params,ixc,natom,nsppol,rprimd,wvl,&
   type(pseudopotential_gth_type),intent(in)::gth_params
 
 !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
   integer :: groupsize,me,nproc
   real(dp), allocatable :: xcart(:,:)
   character(len=3),parameter :: rho_commun='DBL'
@@ -88,7 +88,7 @@ subroutine wvl_denspot_set(den,gth_params,ixc,natom,nsppol,rprimd,wvl,&
 !write (std_out,*) ' wvl_denspot_set : enter'
 !ENDDEBUG
  
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
  write(message, '(a,a)' ) ch10,&
 & ' wvl_denspot_set: Create wavelet type denspot.'

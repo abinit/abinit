@@ -78,6 +78,7 @@ sources = [
  "inpgkk.F90",
  "kptfine_av.F90",
  "m_ddb.F90",
+ "m_ddk.F90",
  "m_dvdb.F90",
  "m_efmas.F90",
  "m_eig2d.F90",

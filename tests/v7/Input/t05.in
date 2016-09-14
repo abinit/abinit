@@ -9,6 +9,7 @@ ndtset 6
 magcon_lambda 0.05
 
 nspinor 2 nspden 4
+so_psp 0
 
 getwfk -1
 

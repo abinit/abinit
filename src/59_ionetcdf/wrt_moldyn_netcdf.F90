@@ -59,7 +59,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
  use m_results_gs
  use m_profiling_abi
  use m_errors
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
  use netcdf
 #endif
 
@@ -92,7 +92,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
  integer,save :: ipos=0
  integer :: iatom,ii
  character(len=500) :: message
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
  integer :: AtomNumDimid,AtomNumId,CelId,CellVolumeId,DimCoordid,DimScalarid,DimVectorid
  integer :: EkinDimid,EkinId,EpotDimid,EpotId,EntropyDimid,EntropyId,MassDimid,MassId,NbAtomsid
  integer :: ncerr,ncid,PosId,StressDimid,StressId,TensorSymDimid
@@ -103,7 +103,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
  character(len=16) :: chain
 #endif
 !arrays
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
  integer :: PrimVectId(3)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),pointer :: vcart(:,:),vred(:,:),vtmp(:,:)
@@ -115,7 +115,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
  if (mpi_enreg%me==0.and.dtset%nctime>0) then
 
 !  Netcdf file name
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
    ficname = trim(moldyn_file)//'.nc'
 #endif
 
@@ -126,7 +126,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 
      ipos=0
 
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
 !    Write message
      write(message,'(4a)')ch10,' Open file ',trim(ficname),' to store molecular dynamics information.'
      call wrtout(std_out,message,'COLL')
@@ -241,7 +241,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
 
      ipos=ipos+1
 
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
 !    Write message
      write(message,'(3a)')ch10,' Store molecular dynamics information in file ',trim(ficname)
      call wrtout(std_out,message,'COLL')
@@ -390,7 +390,7 @@ subroutine wrt_moldyn_netcdf(amass,dtset,itime,option,moldyn_file,mpi_enreg,&
  end if
 
 !Fake lines
-#if !defined HAVE_TRIO_NETCDF
+#if !defined HAVE_NETCDF
  if (.false.) write(std_out,*) moldyn_file,results_gs%etotal,rprimd(1,1),xcart(1,1)
 #endif
 

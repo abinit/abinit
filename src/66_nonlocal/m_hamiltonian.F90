@@ -1615,14 +1615,14 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
 
  rf_Ham%dime1kb1=0
  rf_Ham%dime1kb2=gs_Ham%dimekb2
- if (gs_Ham%usepaw==1.and.ipert/=gs_Ham%natom+1.and.ipert/=gs_Ham%natom+10.and.ipert/=gs_Ham%natom+11) then
+ if (gs_Ham%usepaw==1.and.ipert/=gs_Ham%natom+1.and.ipert/=gs_Ham%natom+10) then
    cplex_dij1=max(cplex,rf_Ham%nspinor)
    rf_Ham%dime1kb1=cplex_dij1*(gs_Ham%lmnmax*(gs_Ham%lmnmax+1))/2
  end if
 
 !Allocate the arrays of the 1st-order Hamiltonian
- if ((ipert>=1.and.ipert<=gs_Ham%natom).or.(ipert==gs_Ham%natom+2).or.&
-&    (ipert==gs_Ham%natom+3).or.(ipert==gs_Ham%natom+4)) then
+ if ((ipert>=1.and.ipert<=gs_Ham%natom).or.ipert==gs_Ham%natom+2.or.&
+&    ipert==gs_Ham%natom+3.or.ipert==gs_Ham%natom+4.or.ipert==gs_Ham%natom+11) then
    if (gs_Ham%usepaw==1.and.rf_Ham%dime1kb1>0) then
      ABI_ALLOCATE(rf_Ham%e1kbfr,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2))
      if (has_e1kbsc_==1) then
