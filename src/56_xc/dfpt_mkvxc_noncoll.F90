@@ -104,10 +104,10 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
 !Local variables-------------------------------
 !scalars
  integer :: ifft, ir
+ real(dp),parameter :: m_norm_min=1.d-8
+ real(dp) :: dum,dvdn,dvdz,fact,m_dot_m1
 !arrays
  real(dp) :: tsec(2)
- real(dp) :: dum,dvdn,dvdz,fact
- real(dp) :: m_dot_m1, m_norm_min
  real(dp),allocatable :: m_norm(:)
  real(dp),allocatable :: rhor1_diag(:,:)
  real(dp),allocatable :: vxc1_diag(:,:)
@@ -133,7 +133,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
 !Treat first LDA
  if(nkxc/=23)then
 
-   m_norm_min=EPSILON(0.0_dp)**2
+!  m_norm_min=EPSILON(0.0_dp)**2
 
 !FR EB If option=0 (i.e., for XC core-correction only) we apply the correction only on
 ! the diagonal elements of the potential which are vxc1(:,1:2) since XC core correction

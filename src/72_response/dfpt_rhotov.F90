@@ -126,7 +126,7 @@
  real(dp),target,intent(in) :: rhor(nfft,nspden),rhor1(cplex*nfft,nspden)
  real(dp),intent(in) :: rprimd(3,3),vpsp1(cplex*nfft)
  real(dp),intent(in) :: xccc3d1(cplex*n3xccc)
- real(dp),intent(inout) :: vtrial1(cplex*nfft,nspden),elpsp1,ehart1,exc1 !vz_d
+ real(dp),intent(inout) :: vtrial1(cplex*nfft,nspden),elpsp1,ehart1,exc1
  real(dp),intent(out) :: vresid1(cplex*nfft,nspden)
  real(dp),target,intent(out) :: vhartr1(:),vxc1(:,:)
 
