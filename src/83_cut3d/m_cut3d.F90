@@ -2429,8 +2429,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        write(std_out,'(3a)' ) ch10,' Atomic sphere analysis ',ch10
 
-!      Init bessel function integral for recip_ylm
-!      max ang mom + 1
+!      Init bessel function integral for recip_ylm: max ang mom + 1
        mlang = 5
        bessint_delta = 0.1_dp
        kpgmax = sqrt(ecut)
@@ -2450,7 +2449,6 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        ABI_ALLOCATE(x_bess,(nradintmax))
        ABI_ALLOCATE(rint,(nradintmax))
 
-!      call init_bess_spl(mbess,bessargmax,bessint_delta,mlang,
        call init_bess_spl(mbess,bessint_delta,mlang,bess_spl,bess_spl_der,x_bess)
 
        ABI_ALLOCATE(bess_fit,(mpw,nradintmax,mlang))
@@ -2476,9 +2474,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
          end do ! ipw
        end do ! ixint
 
-!      Construct phases ph3d for all G vectors in present sphere
-!      make phkred for all atoms
-
+!      Construct phases ph3d for all G vectors in present sphere make phkred for all atoms
        do ia=1,natom
          iatom=atindx(ia)
          arg=two_pi*( kpt(1,ckpt)*xred(1,ia) + kpt(2,ckpt)*xred(2,ia) + kpt(3,ckpt)*xred(3,ia))
@@ -2490,11 +2486,11 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !      Get full phases exp (2 pi i (k+G).x_tau) in ph3d
        call ph1d3d(1,natom,kg_k,natom,natom,npw_k,nr1,nr2,nr3,phkxred,ph1d,ph3d)
 
-
        ABI_ALLOCATE(sum_1atom_1ll,(mlang,natom))
        ABI_ALLOCATE(sum_1atom_1lm,(mlang**2,natom))
        prtsphere=1
        ratsph_arr(:)=ratsph
+
        call recip_ylm (bess_fit,cgcband,istwfk(ckpt),&
 &       nradint,nradintmax,mlang,mpi_enreg,mpw,natom,npw_k,ph3d,prtsphere,rint,&
 &       ratsph_arr,sum_1atom_1ll,sum_1atom_1lm,ucvol,ylm_k,znucl_atom)

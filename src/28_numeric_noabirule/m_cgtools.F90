@@ -1474,7 +1474,6 @@ end subroutine matrixelmt_g
 !!
 !! INPUTS
 !!  cplex=if 1, real space functions on FFT grid are REAL, if 2, COMPLEX
-!!  mpi_enreg=information about MPI parallelization
 !!  nfft= (effective) number of FFT grid points (for this processor)
 !!  nspden=number of spin-density components
 !!  opt_storage: 0, if potentials are stored as V^up-up, V^dn-dn, Re[V^up-dn], Im[V^up-dn]
@@ -1727,7 +1726,6 @@ subroutine mean_fftr(arraysp,meansp,nfft,nfftot,nspden,mpi_comm_sphgrid)
 
 !XG030514 : MPIWF The values of meansp(ispden) should
 !now be summed accross processors in the same WF group, and spread on all procs.
-!if(mpi_enreg%paral_kgb==1) spaceComm=mpi_enreg%comm_fft; reduce=.true.
  if(present(mpi_comm_sphgrid)) then
    nproc_sphgrid=xmpi_comm_size(mpi_comm_sphgrid)
    if(nproc_sphgrid>1) then
@@ -3904,7 +3902,6 @@ end subroutine cg_precon_block
 !!  $ghc(vectsize,blocksize)=<G|H|C_{n,k}> for a block of bands$.
 !!  iterationnumber=number of iterative minimizations in LOBPCG 
 !!  kinpw(npw)=(modified) kinetic energy for each plane wave (Hartree)
-!!  mpi_enreg=information about MPI parallelization
 !!  nspinor=number of spinorial components of the wavefunctions (on current proc)
 !!  $vect(vectsize,blocksize)=<G|H|C_{n,k}> for a block of bands$.
 !!  npw=number of planewaves at this k point.

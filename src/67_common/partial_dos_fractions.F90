@@ -372,7 +372,6 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
    if (mpi_enreg%paral_spinor == 1)then
      call xmpi_sum(dos_fractions,mpi_enreg%comm_spinor,ierr)
      if (m_dos_flag==1) call xmpi_sum(dos_fractions_m,mpi_enreg%comm_spinor,ierr)
-     end if
    end if
 
    ABI_DEALLOCATE(atindx)
@@ -459,3 +458,5 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
 
 end subroutine partial_dos_fractions
 !!***
+
+#include "my_projection.F90"

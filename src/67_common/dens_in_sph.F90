@@ -70,7 +70,7 @@ subroutine dens_in_sph(cmax,cg,gmet,istwfk,kg_k,natom,ngfft,mpi_enreg,npw_k,&
 !scalars
  integer,intent(in) :: istwfk,natom,npw_k,paral_kgb
  real(dp),intent(in) :: ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: kg_k(3,npw_k),ngfft(18)
  real(dp),intent(in) :: gmet(3,3)
