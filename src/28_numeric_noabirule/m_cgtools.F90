@@ -8,7 +8,7 @@
 !! using the "cg" convention, namely real array of shape cg(2,...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2016 ABINIT group (MG, MT, XG, DCA, GZ, FB)
+!! Copyright (C) 1992-2016 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -89,6 +89,7 @@ MODULE m_cgtools
  public :: dotprod_v                ! Dot product of two potentials (integral over FFT grid).
  public :: sqnorm_v                 ! Compute square of the norm of a potential (integral over FFT grid).
  public :: mean_fftr                ! Compute the mean of an arraysp(nfft,nspden), over the FFT grid.
+ public :: cg_getspin               ! Sandwich a single wave function on the Pauli matrices
  public :: cg_gsph2box              ! Transfer data from the G-sphere to the FFT box.
  public :: cg_box2gsph              ! Transfer data from the FFT box to the G-sphere
  public :: cg_addtorho              ! Add |ur|**2 to the ground-states density rho.
@@ -1734,6 +1735,77 @@ subroutine mean_fftr(arraysp,meansp,nfft,nfftot,nspden,mpi_comm_sphgrid)
  end if
 
 end subroutine mean_fftr
+!!***
+
+!!****f* m_cgtools/cg_getspin
+!! NAME
+!! cg_getspin
+!!
+!! FUNCTION
+!!  Sandwich a single wave function on the Pauli matrices
+!!
+!! INPUTS
+!!  npw_k = number of plane waves
+!!  cgcband = coefficients of spinorial wave function
+!!
+!! OUTPUT
+!!  spin = 3-vector of spin components for this state
+!!  cgcmat_ = outer spin product of spinorial wf with itself
+!!
+!! PARENTS
+!!      m_cut3d,partial_dos_fractions
+!!
+!! CHILDREN
+!!      cg_outer_spin_product
+!!
+!! SOURCE
+
+subroutine  cg_getspin(cgcband, npw_k, spin, cgcmat_)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'cg_getspin'
+ use interfaces_56_recipspace, except_this_one => cg_getspin
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: npw_k
+ real(dp), intent(in) :: cgcband(2,2*npw_k)
+ complex(dpc), intent(out),optional :: cgcmat_(2,2)
+ real(dp), intent(out) :: spin(3)
+
+!Local variables-------------------------------
+!scalars
+ complex(dpc) :: pauli_0(2,2) = reshape([cone,czero,czero,cone], [2,2])
+ complex(dpc) :: pauli_x(2,2) = reshape([czero,cone,cone,czero], [2,2])
+ complex(dpc) :: pauli_y(2,2) = reshape([czero,j_dpc,-j_dpc,czero], [2,2])
+ complex(dpc) :: pauli_z(2,2) = reshape([cone,czero,czero,-cone], [2,2])
+ complex(dpc) :: cspin(0:3), cgcmat(2,2)
+! ***********************************************************************
+
+! cgcmat = cgcband * cgcband^T*  i.e. 2x2 matrix of spin components (dpcomplex)
+ cgcmat = czero
+ call zgemm('n','c',2,2,npw_k,cone,cgcband,2,cgcband,2,czero,cgcmat,2)
+
+! spin(*)  = sum_{si sj pi} cgcband(si,pi)^* pauli_*(si,sj) cgcband(sj,pi)
+ cspin(0) = cgcmat(1,1)*pauli_0(1,1) + cgcmat(2,1)*pauli_0(2,1) &
+& + cgcmat(1,2)*pauli_0(1,2) + cgcmat(2,2)*pauli_0(2,2)
+ cspin(1) = cgcmat(1,1)*pauli_x(1,1) + cgcmat(2,1)*pauli_x(2,1) &
+& + cgcmat(1,2)*pauli_x(1,2) + cgcmat(2,2)*pauli_x(2,2)
+ cspin(2) = cgcmat(1,1)*pauli_y(1,1) + cgcmat(2,1)*pauli_y(2,1) &
+& + cgcmat(1,2)*pauli_y(1,2) + cgcmat(2,2)*pauli_y(2,2)
+ cspin(3) = cgcmat(1,1)*pauli_z(1,1) + cgcmat(2,1)*pauli_z(2,1) &
+& + cgcmat(1,2)*pauli_z(1,2) + cgcmat(2,2)*pauli_z(2,2)
+!print *, 'real(spin) ', real(cspin), 'aimag(spin) ', aimag(cspin)
+
+ spin = real(cspin(1:3))
+ if (present(cgcmat_)) cgcmat_ = cgcmat
+
+end subroutine cg_getspin
 !!***
 
 !----------------------------------------------------------------------

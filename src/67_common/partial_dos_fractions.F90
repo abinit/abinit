@@ -52,7 +52,7 @@
 !!      outscfcv
 !!
 !! CHILDREN
-!!      getkpgnorm,getph,getspin_1state,init_bess_spl,initylmg,kpgio,metric
+!!      getkpgnorm,getph,cg_getspin,init_bess_spl,initylmg,kpgio,metric
 !!      ph1d3d,recip_ylm,sort_dp,splint,xmpi_sum
 !!
 !! SOURCE
@@ -75,6 +75,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
  use m_crystal
 
  use m_numeric_tools, only : simpson
+ use m_cgtools,       only : cg_getspin
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -437,7 +438,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
        if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=mpi_enreg%me) cycle
 
        cg_1band(:,:) = cg_1kpt(:,shift_b+1:shift_b+2*npw_k)
-       call getspin_1state(cg_1band, npw_k, spin, cgcmat)
+       call cg_getspin(cg_1band, npw_k, spin, cgcmat)
 
        do is1 = 1, 2
          do is2 = 1, 2
