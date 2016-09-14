@@ -634,6 +634,7 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
    call find_bound(min1_cell,max1_cell,n_cell(1))
    call find_bound(min2_cell,max2_cell,n_cell(2))
    call find_bound(min3_cell,max3_cell,n_cell(3))
+
    write(message, '(2a)' )&
 &        ' dipdip is set to one, the dipole-dipole interation is recompute.'
    call wrtout(ab_out,message,'COLL')
@@ -648,6 +649,12 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
 &        ' The previous harmonic part was build for bigger cell',ch10,&
 &         'ifc is adjust on ',int((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),' cell'
        MSG_WARNING(message)
+       if (abs(min1) < abs(min1_cell)) min1 = min1_cell
+       if (abs(min2) < abs(min2_cell)) min2 = min2_cell
+       if (abs(min3) < abs(min3_cell)) min3 = min3_cell
+       if (abs(max1) < abs(max1_cell)) max1 = max1_cell
+       if (abs(max2) < abs(max2_cell)) max2 = max2_cell
+       if (abs(max3) < abs(max3_cell)) max3 = max3_cell
 !      If the cell is smaller, we redifine new cell to take into acount all atoms
        call init_supercell(eff_pot%natom, 0,real((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),&
 &          eff_pot%rprimd,eff_pot%typat,eff_pot%xcart,super_cell)
