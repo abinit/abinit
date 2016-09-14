@@ -94,7 +94,6 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
  type(crystal_t),intent(in) :: crystal
 !arrays
  integer,intent(in) :: kg_(3,dtset%mpw*dtset%mkmem),npwarr(dtset%nkpt)
- integer,intent(in) :: 
  real(dp),intent(in) :: cg(2,mcg)
  real(dp),intent(out) :: dos_fractions(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction)
  real(dp),intent(out) :: dos_fractions_m(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*mbesslang*m_dos_flag)
