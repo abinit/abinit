@@ -287,6 +287,8 @@ end subroutine prtfatbands
 !!
 !! SOURCE
 
+#ifdef HAVE_NETCDF
+
 subroutine fatbands_ncwrite(crystal, ebands, hdr, dos_fractions_m, dtset, & 
   mbesslang, m_dos_flag, ndosfraction, psps, pawfatbnd, pawtab, ncid)
 
@@ -417,3 +419,6 @@ contains
 
 end subroutine fatbands_ncwrite
 !!***
+
+#endif
+!ifdef HAVE_NETCDF
