@@ -107,10 +107,9 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
 !arrays
  real(dp) :: tsec(2)
  real(dp) :: dum,dvdn,dvdz,fact
- real(dp) :: m_dot_mres, m_norm_min
- real(dp),pointer :: rhor1_(:,:)
- real(dp),allocatable :: m_norm(:), dummy(:)
- real(dp),allocatable :: nresid_diag(:,:)
+ real(dp) :: m_dot_m1, m_norm_min
+ real(dp),allocatable :: m_norm(:)
+ real(dp),allocatable :: rhor1_diag(:,:)
  real(dp),allocatable :: vxc1_diag(:,:)
 
 ! *************************************************************************
@@ -119,7 +118,11 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
 
  call timab(181,1,tsec)
  
- if(nkxc==23) then
+ if(nspden/=4) then
+   MSG_BUG('only for nspden=4!')
+ end if
+
+ if(nkxc==23.or.nkxc==0) then
    MSG_BUG('nspden=4 works only with LDA.')
  end if
 
@@ -129,15 +132,6 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
 
 !Treat first LDA
  if(nkxc/=23)then
-!  PAW: eventually substract compensation density
-!   if (option/=0) then
-!     if (usexcnhat==0.and.nhat1dim==1) then
-!       ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
-!       rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
-!     else
-!       rhor1_ => rhor1
-!     end if
-!   else
 
    m_norm_min=EPSILON(0.0_dp)**2
 
@@ -148,7 +142,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
    if (option==0) then
      if (n3xccc==0) then
        vxc1(:,:)=zero
-     else !n3xccc/=0          
+     else !n3xccc/=0
        if(cplex==1)then
          do ir=1,nfft
            vxc1(ir,1)=(kxc(ir,1)+kxc(ir,2))*xccc3d1(ir)*half
@@ -164,41 +158,48 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
        end if ! cplex==1
        vxc1(:,3:4)=zero
      end if
+
    else ! (option=1 or 2)
-! Non-collinear magnetism
-! Has to locally "rotate" n^res(r) (according to magnetization),
-! compute V^res(r) and rotate it back
-!     ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
-!     print *, 'rhor1_ allocated!'
-!    rhor1_(:,1)=half*xccc3d1(:)
-!    rhor1_(:,2)=rhor1_(:,1)
-!    rhor1_(:,3:4)=zero
-     ABI_ALLOCATE(nresid_diag,(nfft,2))
+!  Non-collinear magnetism
+!  Has to locally "rotate" rho(r)^(1) (according to magnetization),
+!  compute Vxc(r)^(1) and rotate it back
+
+!    PAW: eventually substract compensation density
+!    if (usexcnhat==0.and.nhat1dim==1) then
+!      ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
+!      rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
+!    else
+!      rhor1_ => rhor1
+!    end if
+
+     ABI_ALLOCATE(rhor1_diag,(nfft,2))
      ABI_ALLOCATE(vxc1_diag,(nfft,2))
      ABI_ALLOCATE(m_norm,(nfft))
-     ABI_ALLOCATE(dummy,(cplex*n3xccc))
-!      -- Rotate n^res(r)
+
+!      -- Rotate rho(r)^(1)
      do ifft=1,nfft
-       nresid_diag(ifft,1)=rhor1(ifft,1)
+       rhor1_diag(ifft,1)=rhor1(ifft,1)
        m_norm(ifft)=sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2+rhor(ifft,4)**2)
-       m_dot_mres=rhor(ifft,2)*rhor1(ifft,2)+rhor(ifft,3)*rhor1(ifft,3) &
-&       +rhor(ifft,4)*rhor1(ifft,4)
-! FR check if Kxc is already calculated or not
+       m_dot_m1=rhor(ifft,2)*rhor1(ifft,2)+rhor(ifft,3)*rhor1(ifft,3) &
+&              +rhor(ifft,4)*rhor1(ifft,4)
+
        if (optxc /= -1) then 
          if(m_norm(ifft)>m_norm_min)then
-           nresid_diag(ifft,2)=half*(nresid_diag(ifft,1)+m_dot_mres/m_norm(ifft))
+           rhor1_diag(ifft,2)=half*(rhor1_diag(ifft,1)+m_dot_m1/m_norm(ifft))
          else
-           nresid_diag(ifft,2)=half*nresid_diag(ifft,1)
+           rhor1_diag(ifft,2)=half*rhor1_diag(ifft,1)
          end if
 !EB FR TODO: remove this else if?
        else if (nkxc/=nkxc_cur.and.optxc/=-1) then
-         nresid_diag(ifft,2)=half*(nresid_diag(ifft,1)+m_dot_mres/m_norm(ifft))  
+         rhor1_diag(ifft,2)=half*(rhor1_diag(ifft,1)+m_dot_m1/m_norm(ifft))  
        end if
      end do
+
 !      -- Compute Kxc(r).n^res(r)_rotated
      call dfpt_mkvxc(1,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,nhat1grdim,&
-&     nkxc,2,0,option,paral_kgb,qphon,nresid_diag,rprimd,1,vxc1_diag,dummy) !nspden=2, n3xccc=0, option=2
-!      -- Rotate back V^res(r)
+&     nkxc,2,n3xccc,option,paral_kgb,qphon,rhor1_diag,rprimd,1,vxc1_diag,xccc3d1)
+
+!    -- Rotate back Vxc(r)^(1)
 ! FR EB TODO: update the routine to cplex=2
 !!   cplex=1:
 !!     V is stored as : V^11, V^22, Re[V^12], Im[V^12] (complex, hermitian)
@@ -237,15 +238,18 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
        end do
      end if ! optnc==1
 
-     ABI_DEALLOCATE(nresid_diag)
+     ABI_DEALLOCATE(rhor1_diag)
      ABI_DEALLOCATE(vxc1_diag)
      ABI_DEALLOCATE(m_norm)
-     ABI_DEALLOCATE(dummy)
-     if (option==0.or.(usexcnhat==0.and.nhat1dim==1)) then
-       ABI_DEALLOCATE(rhor1_)
-     end if
-   end if ! option==2
+
+!    PAW
+!   if (option==0.or.(usexcnhat==0.and.nhat1dim==1)) then
+!      ABI_DEALLOCATE(rhor1_)
+!    end if
+
+   end if ! option==1 or 2
  end if ! nkxc=23
+
  call timab(181,2,tsec)
 
  DBG_EXIT("COLL")
