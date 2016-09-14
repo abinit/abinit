@@ -17,7 +17,7 @@
 !!
 !! INPUTS
 !!  npwarr(nkpt)=number of planewaves in basis at this k point
-!!  kg_(3,mpw*mkmem)=reduced planewave coordinates.
+!!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  cg(2,mcg)=planewave coefficients of wavefunctions
 !!  dtset     structured datatype, from which one uses :
 !!   exchn2n3d=if 1, n2 and n3 are exchanged
@@ -63,7 +63,7 @@
 
 #include "abi_common.h"
 
-subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractions_m,&
+subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fractions_m,&
 &           dtset,mbesslang,mcg,mpi_enreg,m_dos_flag,ndosfraction,partial_dos)
 
  use defs_basis
@@ -93,7 +93,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: crystal
 !arrays
- integer,intent(in) :: kg_(3,dtset%mpw*dtset%mkmem),npwarr(dtset%nkpt)
+ integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem),npwarr(dtset%nkpt)
  real(dp),intent(in) :: cg(2,mcg)
  real(dp),intent(out) :: dos_fractions(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction)
  real(dp),intent(out) :: dos_fractions_m(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*mbesslang*m_dos_flag)
@@ -103,14 +103,13 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
  integer :: cg1kptshft,cgshift,ia,iatom,iband,ierr,ikpt,ilang,ioffkg,is1, is2, isoff
  integer :: ioffylm,ipw,ispinor,isppol,ixint,mbess,mcg_disk,me
  integer :: mgfft,my_nspinor,n1,n2,n3,natsph_tot,nfit,npw_k,nradintmax,prtsphere
- integer :: spaceComm,nk_and_spin
+ integer :: spaceComm
  real(dp) :: arg,bessarg,bessargmax,bessint_delta,kpgmax,rmax 
- character(len=4) :: mode_paral
  character(len=500) :: msg
 !arrays
  integer :: iindex(dtset%mpw)
  integer :: kg_k(3,dtset%mpw)
- integer,allocatable :: iatsph(:),kg(:,:),npwarr1(:),npwtot(:),nradint(:),atindx(:)
+ integer,allocatable :: iatsph(:),nradint(:),atindx(:)
  real(dp) :: kpoint(3),spin(3)
  real(dp) :: xfit(dtset%mpw),yfit(dtset%mpw)
  real(dp) :: ylm_k(dtset%mpw,mbesslang*mbesslang),ylmgr_dum(1)
@@ -161,8 +160,11 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
  mcg_disk=dtset%mpw*my_nspinor*dtset%mband
 
+ n1 = dtset%ngfft(1); n2 = dtset%ngfft(2); n3 = dtset%ngfft(3)
+ mgfft = maxval(dtset%ngfft(1:3))
+
 !##############################################################
-!FIRST CASE : project on angular momenta to get dos parts
+!FIRST CASE: project on angular momenta to get dos parts
 !##############################################################
 
  if (partial_dos == 1) then
@@ -197,14 +199,13 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
      znucl_sph(iatom+dtset%natsph) = 0
    end do
 
-!  init bessel function integral for recip_ylm
-!  max ang mom + 1
+!  init bessel function integral for recip_ylm max ang mom + 1
    ABI_ALLOCATE(sum_1atom_1ll,(mbesslang,natsph_tot))
    ABI_ALLOCATE(sum_1atom_1lm,(mbesslang**2,natsph_tot))
 
    bessint_delta = 0.1_dp
    kpgmax = sqrt(dtset%ecut)
-   rmax = zero ; bessargmax = zero ; nradintmax = 0
+   rmax = zero; bessargmax = zero; nradintmax = 0
    do iatom=1,natsph_tot
      rmax=max(rmax,ratsph(iatom))
      bessarg=ratsph(iatom)*two_pi*kpgmax
@@ -212,9 +213,8 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
      nradint(iatom) = int (bessarg / bessint_delta) + 1
      nradintmax=max(nradintmax,nradint(iatom))
    end do
-   write(std_out,*) ' partial_dos_fractions :  rmax = ', rmax
-!  use same number of grid points to calculate Bessel function
-!  and to do the integration later on r
+   !write(std_out,*) ' partial_dos_fractions :  rmax = ', rmax
+!  use same number of grid points to calculate Bessel function and to do the integration later on r
    mbess = nradintmax
 !  make sure bessargmax is a multiple of bessint_delta
    bessargmax = bessint_delta*mbess
@@ -231,25 +231,8 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
    call init_bess_spl(mbess,bessint_delta,mbesslang,bess_spl,bess_spl_der,x_bess)
 
 !  get kg matrix of the positions of G vectors in recip space
-   mgfft=maxval(dtset%ngfft(1:3))
-
-!  TODO: Pass kg in input.
-!  kg contains G vectors only for kpoints used by this processor
-   mode_paral='PERS'
-   ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
-
-   ABI_ALLOCATE(npwarr1,(dtset%nkpt))
-   ABI_ALLOCATE(npwtot,(dtset%nkpt))
-   kg(:,:) = 0
-   call kpgio(dtset%ecut,dtset%exchn2n3d,crystal%gmet,dtset%istwfk,kg,dtset%kpt,&
-&   dtset%mkmem,dtset%nband,dtset%nkpt,&
-&   mode_paral,mpi_enreg,dtset%mpw,npwarr1,npwtot,dtset%nsppol)
-   ABI_DEALLOCATE(npwarr1)
-   ABI_DEALLOCATE(npwtot)
-
 !  for each electronic state, get corresponding wavefunction and project on Ylm
 !  real(dp) :: cg(2,dtset%mpw*my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol)
-   n1 = dtset%ngfft(1); n2 = dtset%ngfft(2); n3 = dtset%ngfft(3)
 
    ABI_ALLOCATE(xred_sph, (3, natsph_tot))
    do iatom=1,dtset%natsph
@@ -267,20 +250,10 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
 !  Single call to initylmg for all kg (all mkmem are in memory)
    ABI_ALLOCATE(ylm,(dtset%mpw*dtset%mkmem,mbesslang*mbesslang))
    call initylmg(crystal%gprimd,kg,dtset%kpt,dtset%mkmem,mpi_enreg,mbesslang,&
-&   dtset%mpw,dtset%nband,dtset%nkpt,&
-&   npwarr,dtset%nsppol,0,crystal%rprimd,ylm,ylmgr_dum)
+&   dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,0,crystal%rprimd,ylm,ylmgr_dum)
 
 !  kpgnorm contains norms only for kpoints used by this processor
-   nk_and_spin = 0
-   do isppol=1,dtset%nsppol
-     do ikpt=1,dtset%nkpt
-       if (mpi_enreg%proc_distrb(ikpt,1,isppol)==me) nk_and_spin = nk_and_spin + 1
-     end do
-   end do
-
    ABI_ALLOCATE(kpgnorm,(dtset%mpw*dtset%mkmem))
-   !ABI_ALLOCATE(kpgnorm,(dtset%mpw*nk_and_spin))
-!    ... or all the kpoints if mkmem==0
    kpgnorm (:) = zero
    ioffkg=0
    ioffylm=0
@@ -301,8 +274,8 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
    end do !ikpt
    !end do !isppol
 
+  ! FIXME: WHAT THE FUCK!
    ABI_ALLOCATE(cg_1kpt,(2,mcg_disk))
-
    cgshift = 0
 
    do isppol=1,dtset%nsppol
@@ -434,7 +407,6 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
    ABI_DEALLOCATE(bess_spl_der)
    ABI_DEALLOCATE(cmax)
    ABI_DEALLOCATE(iatsph)
-   ABI_DEALLOCATE(kg)
    ABI_DEALLOCATE(kpgnorm)
    ABI_DEALLOCATE(nradint)
    ABI_DEALLOCATE(ph1d)
@@ -464,8 +436,8 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
      return
    end if
 
+   ! FIXME: WHAT THE FUCK!
    ABI_ALLOCATE(cg_1kpt,(2,mcg_disk))
-
    cgshift = 0
    isppol = 1
 
