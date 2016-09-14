@@ -872,7 +872,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !    partial_dos 1,2,3,4  give different decompositions
      if ((psps%usepaw==0.or.dtset%pawprtdos/=2).and.partial_dos_flag>=1) then
        call partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fractions_m,&
-           dtset,hdr,mbesslang,mcg,mpi_enreg,prtdosm,ndosfraction,partial_dos_flag)
+           dtset,mbesslang,mcg,mpi_enreg,prtdosm,ndosfraction,partial_dos_flag)
      else
        dos_fractions=zero;if (prtdosm>=1.or.fatbands_flag==1) dos_fractions_m=zero
      end if

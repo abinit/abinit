@@ -34,7 +34,6 @@
 !!   nsym         =number of symmetries
 !!   shiftk(3,nshiftk)=kpoint shifts
 !!   symrel(3,3,nsym)=symmetry matrices in real space
-!!  hdr= header of the wavefunction file (contains many informations)
 !!  mbesslang=maximum angular momentum for Bessel function expansion
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mpi_enreg=information about MPI parallelization
@@ -65,7 +64,7 @@
 #include "abi_common.h"
 
 subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractions_m,&
-&           dtset,hdr,mbesslang,mcg,mpi_enreg,m_dos_flag,ndosfraction,partial_dos)
+&           dtset,mbesslang,mcg,mpi_enreg,m_dos_flag,ndosfraction,partial_dos)
 
  use defs_basis
  use defs_abitypes
@@ -92,32 +91,28 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
  integer,intent(in) :: m_dos_flag,mbesslang,mcg,ndosfraction,partial_dos
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
- type(hdr_type),intent(in) :: hdr
  type(crystal_t),intent(in) :: crystal
 !arrays
- integer,intent(in) :: kg_(3,dtset%mpw*dtset%mkmem)
- integer,intent(in) :: npwarr(dtset%nkpt)
+ integer,intent(in) :: kg_(3,dtset%mpw*dtset%mkmem),npwarr(dtset%nkpt)
+ integer,intent(in) :: 
  real(dp),intent(in) :: cg(2,mcg)
  real(dp),intent(out) :: dos_fractions(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction)
  real(dp),intent(out) :: dos_fractions_m(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*mbesslang*m_dos_flag)
 
 !Local variables-------------------------------
 !scalars
- integer :: cg1kptshft,cgshift,ia,iatom,iband,ierr,ikpt,ilang,ioffkg
- integer :: ioffylm,iout,ipw,ispinor,isppol,ixint,mbess,mcg_disk,me
+ integer :: cg1kptshft,cgshift,ia,iatom,iband,ierr,ikpt,ilang,ioffkg,is1, is2, isoff
+ integer :: ioffylm,ipw,ispinor,isppol,ixint,mbess,mcg_disk,me
  integer :: mgfft,my_nspinor,n1,n2,n3,natsph_tot,nfit,npw_k,nradintmax,prtsphere
  integer :: spaceComm,nk_and_spin
- real(dp) :: arg,bessarg,bessargmax,bessint_delta,kpgmax,rmax,ucvol
+ real(dp) :: arg,bessarg,bessargmax,bessint_delta,kpgmax,rmax 
  character(len=4) :: mode_paral
  character(len=500) :: msg
 !arrays
  integer :: iindex(dtset%mpw)
  integer :: kg_k(3,dtset%mpw)
- integer,allocatable :: iatsph(:),kg(:,:),npwarr1(:),npwtot(:),nradint(:)
- integer,allocatable :: atindx(:)
- real(dp) :: gmet(3,3)
- real(dp) :: gprimd(3,3),kpoint(3)
- real(dp) :: rmet(3,3)
+ integer,allocatable :: iatsph(:),kg(:,:),npwarr1(:),npwtot(:),nradint(:),atindx(:)
+ real(dp) :: kpoint(3),spin(3)
  real(dp) :: xfit(dtset%mpw),yfit(dtset%mpw)
  real(dp) :: ylm_k(dtset%mpw,mbesslang*mbesslang),ylmgr_dum(1)
  real(dp),allocatable :: bess_fit(:,:,:),bess_spl(:,:),bess_spl_der(:,:)
@@ -128,10 +123,8 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
  real(dp),allocatable :: znucl_sph(:)
  real(dp),allocatable :: phkxred(:,:)
  real(dp),allocatable :: cmax(:)
-! new stuff for spinor projections
- integer :: is1, is2, isoff
- real(dp) :: spin(3)
  complex(dpc) :: cgcmat(2,2)
+
 !*************************************************************************
 
 !for the moment, only support projection on angular momenta
@@ -238,10 +231,6 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
 !  TODO: Replace with: use m_paw_numeric, only : paw_jbessel_4spline, paw_spline
    call init_bess_spl(mbess,bessint_delta,mbesslang,bess_spl,bess_spl_der,x_bess)
 
-!  get recip space metric. if iout<0, the output of metric will not be printed
-   iout=ab_out
-   call metric(gmet,gprimd,iout,rmet,hdr%rprimd,ucvol)
-
 !  get kg matrix of the positions of G vectors in recip space
    mgfft=maxval(dtset%ngfft(1:3))
 
@@ -253,7 +242,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
    ABI_ALLOCATE(npwarr1,(dtset%nkpt))
    ABI_ALLOCATE(npwtot,(dtset%nkpt))
    kg(:,:) = 0
-   call kpgio(dtset%ecut,dtset%exchn2n3d,gmet,dtset%istwfk,kg,dtset%kpt,&
+   call kpgio(dtset%ecut,dtset%exchn2n3d,crystal%gmet,dtset%istwfk,kg,dtset%kpt,&
 &   dtset%mkmem,dtset%nband,dtset%nkpt,&
 &   mode_paral,mpi_enreg,dtset%mpw,npwarr1,npwtot,dtset%nsppol)
    ABI_DEALLOCATE(npwarr1)
@@ -263,10 +252,9 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
 !  real(dp) :: cg(2,dtset%mpw*my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol)
    n1 = dtset%ngfft(1); n2 = dtset%ngfft(2); n3 = dtset%ngfft(3)
 
-!  TODO: send only xred for atoms we want to project on
    ABI_ALLOCATE(xred_sph, (3, natsph_tot))
    do iatom=1,dtset%natsph
-     xred_sph(:,iatom) = hdr%xred(:,iatsph(iatom))
+     xred_sph(:,iatom) = crystal%xred(:,iatsph(iatom))
    end do
    do iatom=1,dtset%natsph_extra
      xred_sph(:,dtset%natsph+iatom) = dtset%xredsph_extra(:, iatom)
@@ -279,9 +267,9 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
 !  imaginary (-m) parts of actual complex Ylm. Yl-m = Ylm*
 !  Single call to initylmg for all kg (all mkmem are in memory)
    ABI_ALLOCATE(ylm,(dtset%mpw*dtset%mkmem,mbesslang*mbesslang))
-   call initylmg(gprimd,kg,dtset%kpt,dtset%mkmem,mpi_enreg,mbesslang,&
+   call initylmg(crystal%gprimd,kg,dtset%kpt,dtset%mkmem,mpi_enreg,mbesslang,&
 &   dtset%mpw,dtset%nband,dtset%nkpt,&
-&   hdr%npwarr,dtset%nsppol,0,hdr%rprimd,ylm,ylmgr_dum)
+&   npwarr,dtset%nsppol,0,crystal%rprimd,ylm,ylmgr_dum)
 
 !  kpgnorm contains norms only for kpoints used by this processor
    nk_and_spin = 0
@@ -303,14 +291,14 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
      !if (mpi_enreg%proc_distrb(ikpt,1,isppol)/=me) cycle
 
      kg_k(:,:) = 0
-     npw_k = hdr%npwarr(ikpt)
+     npw_k = npwarr(ikpt)
      kg_k(:,1:min(size(kg_k,2),(npw_k))) = kg(:,ioffkg+1:ioffkg+npw_k) ! check compatibility of dimensions (PMA)
 
-     call getkpgnorm(gprimd,dtset%kpt(:,ikpt),kg_k(:,1:npw_k),&
-&     kpgnorm(ioffylm+1:ioffylm+dtset%mpw),hdr%npwarr(ikpt))
+     call getkpgnorm(crystal%gprimd,dtset%kpt(:,ikpt),kg_k(:,1:npw_k),&
+&     kpgnorm(ioffylm+1:ioffylm+dtset%mpw),npwarr(ikpt))
 
-     ioffkg=ioffkg+hdr%npwarr(ikpt)
-     ioffylm=ioffylm+hdr%npwarr(ikpt)
+     ioffkg=ioffkg+npwarr(ikpt)
+     ioffylm=ioffylm+npwarr(ikpt)
    end do !ikpt
    !end do !isppol
 
@@ -326,12 +314,12 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
      do ikpt=1,dtset%nkpt
        if (all(mpi_enreg%proc_distrb(ikpt,:,isppol)/=mpi_enreg%me)) cycle
        
-       npw_k = hdr%npwarr(ikpt)
+       npw_k = npwarr(ikpt)
        ABI_ALLOCATE(cg_1band,(2,npw_k))
        kpoint(:) = dtset%kpt(:,ikpt)
 
 !      for each kpoint set up the phase factors, ylm factors
-       npw_k = hdr%npwarr(ikpt)
+       npw_k = npwarr(ikpt)
        kg_k(:,1:min(size(kg_k,2),(npw_k))) = kg(:,ioffkg+1:ioffkg+npw_k) !check dimensions compatibility
 
        do ilang=1,mbesslang*mbesslang
@@ -393,7 +381,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
 &           nradint, nradintmax,mbesslang, mpi_enreg, dtset%mpw,&
 &           natsph_tot, npw_k,&
 &           ph3d, prtsphere, rint, ratsph, sum_1atom_1ll, sum_1atom_1lm,&
-&           ucvol, ylm_k, znucl_sph)
+&           crystal%ucvol, ylm_k, znucl_sph)
 
            do iatom=1,natsph_tot
              do ilang=1,mbesslang
@@ -486,7 +474,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg_,cg,dos_fractions,dos_fractio
      if (all(mpi_enreg%proc_distrb(ikpt,:,isppol)/=mpi_enreg%me)) cycle
 
      cg_1kpt(:,:) = cg(:,cgshift+1:cgshift+mcg_disk)
-     npw_k = hdr%npwarr(ikpt)
+     npw_k = npwarr(ikpt)
      ABI_ALLOCATE(cg_1band,(2,2*npw_k))
      cg1kptshft=0
      do iband=1,dtset%mband
