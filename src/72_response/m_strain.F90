@@ -91,7 +91,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
  
- subroutine strain_init(strain,delta,direction,name)
+subroutine strain_init(strain,delta,direction,name)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -113,25 +113,25 @@ CONTAINS  !=====================================================================
 !scalar
 !arrays
 ! *************************************************************************
-  if (present(name)) then
-    strain%name = name
-  else
-    strain%name = ''
-  end if
-
-  if (present(delta)) then
-    strain%delta = delta
-  else
-    strain%delta = zero
-  end if
-
-  if (present(direction)) then
-    strain%direction = direction
-  else
-    strain%direction = zero
-  end if
-
-  call strain_strain2def(strain%strain,strain)
+ if (present(name)) then
+   strain%name = name
+ else
+   strain%name = ''
+ end if
+ 
+ if (present(delta)) then
+   strain%delta = delta
+ else
+   strain%delta = zero
+ end if
+ 
+ if (present(direction)) then
+   strain%direction = direction
+ else
+   strain%direction = zero
+ end if
+ 
+ call strain_strain2def(strain%strain,strain)
 
 end subroutine strain_init
 !!***
@@ -157,7 +157,7 @@ end subroutine strain_init
 !!
 !! SOURCE
  
- subroutine strain_free(strain)
+subroutine strain_free(strain)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -178,10 +178,10 @@ end subroutine strain_init
 !arrays
 ! *************************************************************************
 
-    strain%name = ''
-    strain%delta = zero
-    strain%direction = zero
-    strain%strain = zero
+ strain%name = ''
+ strain%delta = zero
+ strain%direction = zero
+ strain%strain = zero
 
 end subroutine strain_free
 !!***
@@ -209,7 +209,7 @@ end subroutine strain_free
 !!
 !! SOURCE
  
- subroutine strain_get(rprim,rprim_def,strain)
+subroutine strain_get(rprim,rprim_def,strain)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -228,33 +228,33 @@ end subroutine strain_free
  type(strain_type),intent(inout) :: strain
 !Local variables-------------------------------
 !scalar
-  integer :: i,j
+ integer :: i,j
 !arrays
-  real(dp) :: mat_delta(3,3),rprim_inv(3,3)
-  real(dp) :: identity(3,3)
+ real(dp) :: mat_delta(3,3),rprim_inv(3,3)
+ real(dp) :: identity(3,3)
 ! *************************************************************************
-  write(std_out,'(a,a)') ' strain_get: try to get the strain'
-
-  mat_delta = zero
+ write(std_out,'(a,a)') ' strain_get: try to get the strain'
+ 
+ mat_delta = zero
 ! Fill the identity matrix
-  identity = zero
-  forall(i=1:3)identity(i,i)=1
+ identity = zero
+ forall(i=1:3)identity(i,i)=1
 
-  call matr3inv(rprim,rprim_inv)
-  mat_delta =  matmul(rprim_inv,rprim_def)-identity
-
-  identity = zero
-  do i=1,3
-    do j=1,3
-      if (abs(mat_delta(i,j))>tol10) then 
-        identity(i,j) = ANINT(mat_delta(i,j)*1000)/1000
-      end if
-    end do
-  end do
+ call matr3inv(rprim,rprim_inv)
+ mat_delta =  matmul(rprim_inv,rprim_def)-identity
+ 
+ identity = zero
+ do i=1,3
+   do j=1,3
+     if (abs(mat_delta(i,j))>tol10) then 
+       identity(i,j) = ANINT(mat_delta(i,j)*1000)/1000
+     end if
+   end do
+ end do
   
-  mat_delta = identity
-  call strain_def2strain(mat_delta,strain)
-  write(std_out,'(a,a)') ' end strain_get'
+ mat_delta = identity
+ call strain_def2strain(mat_delta,strain)
+ write(std_out,'(a,a)') ' end strain_get'
 
 end subroutine strain_get
 !!***
@@ -281,7 +281,7 @@ end subroutine strain_get
 !!
 !! SOURCE
  
- subroutine strain_apply(rprim,rprim_def,strain)
+subroutine strain_apply(rprim,rprim_def,strain)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -300,19 +300,19 @@ end subroutine strain_get
  type(strain_type),intent(in) :: strain
 !Local variables-------------------------------
 !scalar
-  integer :: i
+ integer :: i
 !arrays
-  real(dp) :: identity(3,3)
+ real(dp) :: identity(3,3)
 ! *************************************************************************
-  write(std_out,'(a,a)') ' strain_apply: try to get the strain'
+ write(std_out,'(a,a)') ' strain_apply: try to get the strain'
 
 ! Fill the identity matrix
-  identity = zero
-  forall(i=1:3)identity(i,i)=1
-
-  rprim_def(:,:) = matmul(rprim(:,:),strain%strain(:,:))
-
-  write(std_out,'(a,a)') ' end strain_get'
+ identity = zero
+ forall(i=1:3)identity(i,i)=1
+ 
+ rprim_def(:,:) = matmul(rprim(:,:),strain%strain(:,:))
+ 
+ write(std_out,'(a,a)') ' end strain_get'
 
 end subroutine strain_apply
 !!***
@@ -338,7 +338,7 @@ end subroutine strain_apply
 !!
 !! SOURCE
  
- subroutine strain_def2strain(mat_strain,strain)
+subroutine strain_def2strain(mat_strain,strain)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -483,33 +483,34 @@ subroutine strain_strain2def(mat_strain,strain)
 !arrays
 ! *************************************************************************
 
-  mat_strain(:,:) = zero
-  forall(i=1:3)mat_strain(i,i)=1  
+ mat_strain(:,:) = zero
+ forall(i=1:3)mat_strain(i,i)=1  
  
-  if(strain%name == "uniaxial") then
-    select case(strain%direction)
-      case(1)
-        mat_strain(1,1) = mat_strain(1,1) + strain%delta
-      case(2)
-        mat_strain(2,2) = mat_strain(2,2) + strain%delta
-      case(3)
-        mat_strain(3,3) = mat_strain(3,3) + strain%delta
-    end select
-  else
-    if (strain%name == "shear") then
-    select case(strain%direction)
-      case(4)
-        mat_strain(3,2) =  strain%delta / 2
-        mat_strain(2,3) =  strain%delta / 2
-      case(5)
-        mat_strain(3,1) =  strain%delta / 2
-        mat_strain(1,3) =  strain%delta / 2
-      case(6)
-        mat_strain(2,1) =  strain%delta / 2
-        mat_strain(1,2) =  strain%delta / 2
-      end select
-    end if
-  end if
+ if(strain%name == "uniaxial") then
+   select case(strain%direction)
+   case(1)
+     mat_strain(1,1) = mat_strain(1,1) + strain%delta
+   case(2)
+     mat_strain(2,2) = mat_strain(2,2) + strain%delta
+   case(3)
+     mat_strain(3,3) = mat_strain(3,3) + strain%delta
+   end select
+ else
+   if (strain%name == "shear") then
+     select case(strain%direction)
+     case(4)
+       mat_strain(3,2) =  strain%delta / 2
+       mat_strain(2,3) =  strain%delta / 2
+     case(5)
+       mat_strain(3,1) =  strain%delta / 2
+       mat_strain(1,3) =  strain%delta / 2
+     case(6)
+       mat_strain(2,1) =  strain%delta / 2
+       mat_strain(1,2) =  strain%delta / 2
+     end select
+   end if
+ end if
+
 end subroutine strain_strain2def
 !!***
 
@@ -533,7 +534,7 @@ end subroutine strain_strain2def
 !!
 !! SOURCE
  
- subroutine strain_print(strain)
+subroutine strain_print(strain)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -569,8 +570,7 @@ end subroutine strain_strain2def
      write(ab_out,'(3(1x,es12.2))') strain%strain
 
    else
-
-     write(message,'(a,a,a)') ch10,' unable to find strain:'
+     write(message,'(a,a,a)') ch10,'  strain found:'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
      write(std_out,'(3(1x,es12.2))') strain%strain

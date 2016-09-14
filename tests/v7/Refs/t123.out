@@ -1,5 +1,5 @@
 
-.Version 8.1.4 of EPIGENE 
+.Version 8.1.5 of EPIGENE 
 .(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
 
 .Copyright (C) 1998-2016 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Fri 15 Jul 2016.
-- ( at 15h11 )
+.Starting date : Wed 14 Sep 2016.
+- ( at 14h30 )
   
 
 ================================================================================
@@ -30,7 +30,6 @@ system.xml
 
  Flags :
      ifcflag         1
-   ifcsuperc         0
    prt_effpo         3
  Miscellaneous information :
          asr         2
@@ -54,7 +53,7 @@ system.xml
 ================================================================================
 
  Opening the file system.xml
--Reading the file system.xml with LibXML library
+-Reading the file system.xml with Fortran
 
  This effective potential contains :
   - Reference energy:        -17.1451766220
@@ -84,37 +83,44 @@ system.xml
     - atomic mass:   26.9815
     - position:   -2.176312    3.769482    0.000000
     - Effective charges:
-      3.762065    0.000000    0.000000
-      0.000000    3.762065   -0.000000
-      0.000000    0.000000    1.985280
+      3.872159    0.000000    0.000000
+      0.000000    3.872159   -0.000000
+      0.000000    0.000000    2.012513
   - Atoms   2
     - atomic number:   13.0000
     - atomic mass:   26.9815
     - position:    2.176312    3.769482    6.138898
     - Effective charges:
-      3.762065    0.000000    0.000000
-      0.000000    3.762065   -0.000000
-     -0.000000    0.000000    1.985280
+      3.872159   -0.000000    0.000000
+     -0.000000    3.872159   -0.000000
+     -0.000000    0.000000    2.012513
   - Atoms   3
     - atomic number:   33.0000
     - atomic mass:   74.9216
     - position:   -2.176312    3.769482    4.617506
     - Effective charges:
-     -3.762065    0.000000    0.000000
-      0.000000   -3.762065    0.000000
-      0.000000   -0.000000   -1.985280
+     -3.872159   -0.000000    0.000000
+      0.000000   -3.872159    0.000000
+      0.000000   -0.000000   -2.012513
   - Atoms   4
     - atomic number:   33.0000
     - atomic mass:   74.9216
     - position:    2.176312    3.769482   10.756403
     - Effective charges:
-     -3.762065   -0.000000   -0.000000
-     -0.000000   -3.762065   -0.000000
-     -0.000000   -0.000000   -1.985280
+     -3.872159   -0.000000   -0.000000
+     -0.000000   -3.872159   -0.000000
+     -0.000000   -0.000000   -2.012513
 
- Impose acoustic sum rule on short range
+================================================================================
+ Generation of new ifc
 
- Impose acoustic sum rule on long range
+ dipdip is set to one, the dipole-dipole interation is recompute.
+
+ New bound for ifc (long+short):
+
+ x=[ -1  1], y=[ -1  1] and z=[ -1  1]
+
+ Computation of new dipole-dipole interaction.
 
  Impose acoustic sum rule on total ifc
 
@@ -124,11 +130,1158 @@ system.xml
 
 ================================================================================
 
--
-- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
+  Lattice vectors for supercell :
+
+ natom      32
+
+ znucl 
+   13   33
+
+ ntypat      2
+ typat 
+    1    1    2    2    1    1    2    2    1    1    2    2
+    1    1    2    2    1    1    2    2    1    1    2    2
+    1    1    2    2    1    1    2    2
+ acell 1.0 1.0 1.0
+ rprim
+   0.13057870095015E+02   0.75389648144000E+01   0.00000000000000E+00
+  -0.13057870095015E+02   0.75389648144000E+01   0.00000000000000E+00
+   0.00000000000000E+00   0.00000000000000E+00   0.24555590748000E+02
+
+ xcart
+  -0.21763116825025E+01   0.37694824072000E+01   0.00000000000000E+00
+   0.21763116825025E+01   0.37694824072000E+01   0.61388976870000E+01
+  -0.21763116825025E+01   0.37694824072000E+01   0.46175055234869E+01
+   0.21763116825025E+01   0.37694824072000E+01   0.10756403210487E+02
+  -0.21763116825025E+01   0.37694824072000E+01   0.12277795374000E+02
+   0.21763116825025E+01   0.37694824072000E+01   0.18416693061000E+02
+  -0.21763116825025E+01   0.37694824072000E+01   0.16895300897487E+02
+   0.21763116825025E+01   0.37694824072000E+01   0.23034198584487E+02
+  -0.87052467300099E+01   0.75389648144000E+01   0.00000000000000E+00
+  -0.43526233650049E+01   0.75389648144000E+01   0.61388976870000E+01
+  -0.87052467300099E+01   0.75389648144000E+01   0.46175055234869E+01
+  -0.43526233650049E+01   0.75389648144000E+01   0.10756403210487E+02
+  -0.87052467300099E+01   0.75389648144000E+01   0.12277795374000E+02
+  -0.43526233650049E+01   0.75389648144000E+01   0.18416693061000E+02
+  -0.87052467300099E+01   0.75389648144000E+01   0.16895300897487E+02
+  -0.43526233650049E+01   0.75389648144000E+01   0.23034198584487E+02
+   0.43526233650049E+01   0.75389648144000E+01   0.00000000000000E+00
+   0.87052467300099E+01   0.75389648144000E+01   0.61388976870000E+01
+   0.43526233650049E+01   0.75389648144000E+01   0.46175055234869E+01
+   0.87052467300099E+01   0.75389648144000E+01   0.10756403210487E+02
+   0.43526233650049E+01   0.75389648144000E+01   0.12277795374000E+02
+   0.87052467300099E+01   0.75389648144000E+01   0.18416693061000E+02
+   0.43526233650049E+01   0.75389648144000E+01   0.16895300897487E+02
+   0.87052467300099E+01   0.75389648144000E+01   0.23034198584487E+02
+  -0.21763116825025E+01   0.11308447221600E+02   0.00000000000000E+00
+   0.21763116825025E+01   0.11308447221600E+02   0.61388976870000E+01
+  -0.21763116825025E+01   0.11308447221600E+02   0.46175055234869E+01
+   0.21763116825025E+01   0.11308447221600E+02   0.10756403210487E+02
+  -0.21763116825025E+01   0.11308447221600E+02   0.12277795374000E+02
+   0.21763116825025E+01   0.11308447221600E+02   0.18416693061000E+02
+  -0.21763116825025E+01   0.11308447221600E+02   0.16895300897487E+02
+   0.21763116825025E+01   0.11308447221600E+02   0.23034198584487E+02
+ xred
+   0.16666666666667E+00   0.33333333333333E+00   0.00000000000000E+00
+   0.33333333333333E+00   0.16666666666667E+00   0.25000000000000E+00
+   0.16666666666667E+00   0.33333333333333E+00   0.18804294186500E+00
+   0.33333333333333E+00   0.16666666666667E+00   0.43804294186500E+00
+   0.16666666666667E+00   0.33333333333333E+00   0.50000000000000E+00
+   0.33333333333333E+00   0.16666666666667E+00   0.75000000000000E+00
+   0.16666666666667E+00   0.33333333333333E+00   0.68804294186500E+00
+   0.33333333333333E+00   0.16666666666667E+00   0.93804294186500E+00
+   0.16666666666667E+00   0.83333333333333E+00   0.00000000000000E+00
+   0.33333333333333E+00   0.66666666666667E+00   0.25000000000000E+00
+   0.16666666666667E+00   0.83333333333333E+00   0.18804294186500E+00
+   0.33333333333333E+00   0.66666666666667E+00   0.43804294186500E+00
+   0.16666666666667E+00   0.83333333333333E+00   0.50000000000000E+00
+   0.33333333333333E+00   0.66666666666667E+00   0.75000000000000E+00
+   0.16666666666667E+00   0.83333333333333E+00   0.68804294186500E+00
+   0.33333333333333E+00   0.66666666666667E+00   0.93804294186500E+00
+   0.66666666666667E+00   0.33333333333333E+00   0.00000000000000E+00
+   0.83333333333333E+00   0.16666666666667E+00   0.25000000000000E+00
+   0.66666666666667E+00   0.33333333333333E+00   0.18804294186500E+00
+   0.83333333333333E+00   0.16666666666667E+00   0.43804294186500E+00
+   0.66666666666667E+00   0.33333333333333E+00   0.50000000000000E+00
+   0.83333333333333E+00   0.16666666666667E+00   0.75000000000000E+00
+   0.66666666666667E+00   0.33333333333333E+00   0.68804294186500E+00
+   0.83333333333333E+00   0.16666666666667E+00   0.93804294186500E+00
+   0.66666666666667E+00   0.83333333333333E+00   0.00000000000000E+00
+   0.83333333333333E+00   0.66666666666667E+00   0.25000000000000E+00
+   0.66666666666667E+00   0.83333333333333E+00   0.18804294186500E+00
+   0.83333333333333E+00   0.66666666666667E+00   0.43804294186500E+00
+   0.66666666666667E+00   0.83333333333333E+00   0.50000000000000E+00
+   0.83333333333333E+00   0.66666666666667E+00   0.75000000000000E+00
+   0.66666666666667E+00   0.83333333333333E+00   0.68804294186500E+00
+   0.83333333333333E+00   0.66666666666667E+00   0.93804294186500E+00
+
+Monte Carlo / Molecular Dynamics 
+--------------------------------------------------------------------------------
+
+
+=== [ionmov=12] Isokinetic ensemble molecular dynamics with effective potential
+================================================================================
+
+--- Iteration: ( 1/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  5.4680292931006650E-30 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0322340028762198E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: ( 2/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  2.4480111174000722E-03 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0319892017644804E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: ( 3/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  9.6697358535898382E-03 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0312670292908621E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: ( 4/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  2.1289227381677583E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0301050801380512E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: ( 5/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  3.6651852580845613E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0285688176181367E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: ( 6/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  5.4790778738242084E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0267549250023961E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: ( 7/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  7.4402353350089573E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0247937675412118E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: ( 8/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  9.3862492320709548E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0228477536441488E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: ( 9/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.1132996939608276E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0211010059366117E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (10/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.2497701099233885E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0197363017769874E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (11/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.3333768917987834E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0189002339582316E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (12/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.3567197461161290E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0186668054150573E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (13/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.3217587635310946E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0190164152409096E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (14/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.2391823437201795E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0198421794390185E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (15/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.1254010987042859E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0209799918891775E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (16/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  9.9875051539280918E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0222464977222927E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (17/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  8.7640892580384502E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0234699136181803E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (18/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  7.7263054163880782E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0245076974598305E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (19/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  6.9810739946860378E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0252529288815339E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (20/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  6.5998777740696207E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0256341251021496E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (21/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  6.6213635513426378E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0256126393248763E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (22/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  7.0537973725047345E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0251802055037160E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (23/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  7.8761583078856431E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0243578445683340E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (24/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  9.0375711158531158E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0231964317603655E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (25/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.0455507423241489E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0217784954529776E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (26/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.2014058921304718E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0202199439549162E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (27/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.3564799211859599E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0186692036643592E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (28/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.4934033635226376E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0172999692409945E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (29/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.5940389344078879E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0162936135321416E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (30/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.6423670130691112E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0158103327455279E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (31/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.6278804594003091E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0159551982822165E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (32/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.5481365313639533E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0167526375625812E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (33/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.4091457625565518E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0181425452506545E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (34/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.2233755086527213E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0200002477896930E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (35/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.0064448411630011E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0221695544645911E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (36/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  7.7397744758543996E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0244942284003656E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (37/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  5.3949849799459763E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0268390178962733E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (38/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  3.1347326175571670E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0290992702586635E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (39/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.0315058594867230E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0312024970167329E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (40/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -8.7181868666774097E-03 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0331058215628872E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (41/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -2.5580544594802655E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0347920573356987E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (42/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -4.0318032770134342E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0362658061532329E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (43/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -5.3160011015947931E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0375500039778160E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (44/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -6.4487894426935199E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0386827923189145E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (45/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -7.4803288850878863E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0397143317613086E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (46/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -8.4691067518505275E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0407031096280690E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (47/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -9.4774009244046373E-02 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0417114038006247E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (48/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -1.0565854718331465E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0427998575945509E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (49/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -1.1787564810717616E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0440215676869371E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (50/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -1.3182555348135666E-01 Hartree
+
+  strain found:
+    -7.89E-01     1.37E+00     0.00E+00
+    -7.89E-01    -1.37E+00     0.00E+00
+     0.00E+00     0.00E+00     0.00E+00
+
+ Energy of the elastic part :  5.6839072947237810E+01 Hartree
+
+ Total energy : -8.0454165582243547E+01 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
 
 ================================================================================
 
-+Total cpu time      0.017  and wall time      0.017 sec
+
+================================================================================
+
+-
+- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.6
+
+================================================================================
+
++Total cpu time      1.555  and wall time      1.554 sec
 
  epigene : the run completed succesfully.

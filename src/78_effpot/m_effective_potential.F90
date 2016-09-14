@@ -2596,7 +2596,7 @@ subroutine effective_potential_getHarmonicContributions(eff_pot,energy,fcart,fre
   elastic_part = elastic_contribution(eff_pot,ncell,strain_tmp1,strain_tmp2,&
 &                               external_stress=external_stress_tmp)
 
-  write(message, '(a,1ES24.16,a)' ) ' Energy of the elastic part :',elastic_part,' Hartree'
+  write(message, '(2a,1ES24.16,a)' ) ch10,' Energy of the elastic part :',elastic_part,' Hartree'
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
 
