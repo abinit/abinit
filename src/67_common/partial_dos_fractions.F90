@@ -459,4 +459,4 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
 end subroutine partial_dos_fractions
 !!***
 
-#include "my_projection.F90"
+!#include "my_projection.F90"
