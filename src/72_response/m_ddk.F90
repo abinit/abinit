@@ -170,8 +170,10 @@ CONTAINS
 !!   comm=MPI communicator.
 !!
 !! PARENTS
+!!      eph
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -274,8 +276,10 @@ end subroutine ddk_init
 !!   comm=MPI communicator
 !!
 !! PARENTS
+!!      m_phgamma
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -446,8 +450,10 @@ end subroutine ddk_read_from_file
 !! Close the file and release the memory allocated.
 !!
 !! PARENTS
+!!      eph
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -502,6 +508,7 @@ end subroutine ddk_free
 !! PARENTS
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 

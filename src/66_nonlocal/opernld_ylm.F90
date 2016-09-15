@@ -248,6 +248,43 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
      enlout(1:3)=enlout(1:3)+two*enlj(1:3)
    end if
 
+!  ======== Accumulate the contributions of partial derivatives of E wrt to k ==========
+!  Choice 51: right derivative wrt to k ; Choice 52: left derivative wrt to k
+   if (choice==51.or.choice==52) then
+     enlj(1:6)=zero
+     do ispinor=1,nspinor
+       do ia=1,nincat
+         if(cplex==2)then
+           do ilmn=1,nlmn
+             do mu=1,3
+               enlj(2*mu-1)=enlj(2*mu-1)+gxfac(1,ilmn,ia,ispinor)*dgxdt(1,mu,ilmn,ia,ispinor) &
+&               +gxfac(2,ilmn,ia,ispinor)*dgxdt(2,mu,ilmn,ia,ispinor)
+               enlj(2*mu  )=enlj(2*mu  )+gxfac(1,ilmn,ia,ispinor)*dgxdt(2,mu,ilmn,ia,ispinor) &
+&               -gxfac(2,ilmn,ia,ispinor)*dgxdt(1,mu,ilmn,ia,ispinor)
+             end do
+           end do
+         else if (cplex_fac==2) then
+           do ilmn=1,nlmn
+             do mu=1,3
+               enlj(2*mu-1)=enlj(2*mu-1)+gxfac(2,ilmn,ia,ispinor)*dgxdt(1,mu,ilmn,ia,ispinor)
+               enlj(2*mu  )=enlj(2*mu  )+gxfac(1,ilmn,ia,ispinor)*dgxdt(1,mu,ilmn,ia,ispinor)
+             end do
+           end do
+         else if (cplex_fac==1) then
+           do ilmn=1,nlmn
+             do mu=1,3
+               enlj(2*mu  )=enlj(2*mu  )+gxfac(1,ilmn,ia,ispinor)*dgxdt(1,mu,ilmn,ia,ispinor)
+             end do
+           end do
+         end if
+       end do
+     end do
+     if (choice==52) then
+       enlj(2)=-enlj(2);enlj(4)=-enlj(4);enlj(6)=-enlj(6)
+     end if
+     enlout(1:6)=enlout(1:6)+enlj(1:6)
+   end if
+
 !  ======== Accumulate the contributions of twist derivatives of E wrt to k ==========
    if (choice==53) then
      enlj(1:3)=zero
@@ -531,6 +568,61 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
      ABI_DEALLOCATE(cfu)
    end if
 
+!  ======== Accumulate the contributions of partial 2nd-derivatives of E wrt to k ==========
+!  Full derivative wrt to k1, right derivative wrt to k2
+   if (choice==81) then
+     ABI_ALLOCATE(cft,(3,nlmn))
+     ABI_ALLOCATE(cfu,(6,nlmn))
+     ABI_ALLOCATE(enljj,(18))
+     do ispinor=1,nspinor
+       do ia=1,nincat
+         enljj(1:18)=zero
+         if(cplex_fac==2)then !If cplex_fac=1, gxfac is pure real
+           cft(1,1:nlmn)=cmplx(gxfac(1,1:nlmn,ia,ispinor),gxfac(2,1:nlmn,ia,ispinor))
+         else
+           cft(1,1:nlmn)=cmplx(gxfac(1,1:nlmn,ia,ispinor),zero)
+         end if
+         if(cplex==2)then !If cplex=1, d2gxdt is pure real
+           cfu(1:6,1:nlmn)=cmplx(d2gxdt(1,1:6,1:nlmn,ia,ispinor),d2gxdt(2,1:6,1:nlmn,ia,ispinor))
+         else
+           cfu(1:6,1:nlmn)=cmplx(d2gxdt(1,1:6,1:nlmn,ia,ispinor),zero)
+         end if
+         do ilmn=1,nlmn
+           do mu=1,3
+             do nu=1,3
+               muu=3*(mu-1)+nu ; mut=gamma(mu,nu)
+               enljj(2*muu-1)=enljj(2*muu-1)+ real(conjg(cft(1,ilmn))*cfu(mut,ilmn))
+               enljj(2*muu  )=enljj(2*muu  )+aimag(conjg(cft(1,ilmn))*cfu(mut,ilmn))
+             end do
+           end do
+         end do
+         if(cplex==2)then !If cplex=1, dgxdt is pure imaginary
+           cft(1:3,1:nlmn)=cmplx(dgxdt(1,1:3,1:nlmn,ia,ispinor),dgxdt(2,1:3,1:nlmn,ia,ispinor))
+         else
+           cft(1:3,1:nlmn)=cmplx(zero,dgxdt(1,1:3,1:nlmn,ia,ispinor))
+         end if
+         if(cplex_fac==2)then !If cplex_fac=1, dgxdtfac is pure imaginary
+           cfu(1:3,1:nlmn)=cmplx(dgxdtfac(1,1:3,1:nlmn,ia,ispinor),dgxdtfac(2,1:3,1:nlmn,ia,ispinor))
+         else
+           cfu(1:3,1:nlmn)=cmplx(zero,dgxdtfac(1,1:3,1:nlmn,ia,ispinor))
+         end if
+         do ilmn=1,nlmn
+           do mu=1,3
+             do nu=1,3
+               muu=3*(mu-1)+nu
+               enljj(2*muu-1)=enljj(2*muu-1)+ real(conjg(cft(mu,ilmn))*cfu(nu,ilmn))
+               enljj(2*muu  )=enljj(2*muu  )+aimag(conjg(cft(mu,ilmn))*cfu(nu,ilmn))
+             end do
+           end do
+         end do
+       end do
+     end do
+     enlout(1:18)=enlout(1:18)+enljj(1:18)
+     ABI_DEALLOCATE(cft)
+     ABI_DEALLOCATE(cfu)
+     ABI_DEALLOCATE(enljj)
+   end if
+
  end if
 
  if (paw_opt==3) then
@@ -588,7 +680,7 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
      enlout(1:6)=enlout(1:6)+two*enlj(1:6)
    end if
 
-!  ======== Accumulate the contributions of derivatives of <c|Sc> wrt to k ==========
+!  ======== Accumulate the contributions of derivatives of <c|S|c> wrt to k ==========
    if (choice==5) then
      enlj(1:3)=zero
 !    If cplex=1, gxfac is real and dgxdt is pure imaginary; thus there is no contribution
@@ -606,6 +698,43 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
        end do
      end if
      enlout(1:3)=enlout(1:3)+two*enlj(1:3)
+   end if
+
+!  ====== Accumulate the contributions of left or right derivatives of <c|S|c> wrt to k ==========
+!  Choice 51: right derivative wrt to k ; Choice 52: left derivative wrt to k
+   if (choice==51.or.choice==52) then
+     enlj(1:6)=zero
+     do ispinor=1,nspinor
+       do ia=1,nincat
+         if(cplex==2)then
+           do ilmn=1,nlmn
+             do mu=1,3
+               enlj(2*mu-1)=enlj(2*mu-1)+gxfac_sij(1,ilmn,ia,ispinor)*dgxdt(1,mu,ilmn,ia,ispinor) &
+&               +gxfac_sij(2,ilmn,ia,ispinor)*dgxdt(2,mu,ilmn,ia,ispinor)
+               enlj(2*mu  )=enlj(2*mu  )+gxfac_sij(1,ilmn,ia,ispinor)*dgxdt(2,mu,ilmn,ia,ispinor) &
+&               -gxfac_sij(2,ilmn,ia,ispinor)*dgxdt(1,mu,ilmn,ia,ispinor)
+             end do
+           end do
+         else if (cplex_fac==2) then
+           do ilmn=1,nlmn
+             do mu=1,3
+               enlj(2*mu-1)=enlj(2*mu-1)+gxfac_sij(2,ilmn,ia,ispinor)*dgxdt(1,mu,ilmn,ia,ispinor)
+               enlj(2*mu  )=enlj(2*mu  )+gxfac_sij(1,ilmn,ia,ispinor)*dgxdt(1,mu,ilmn,ia,ispinor)
+             end do
+           end do
+         else if (cplex_fac==1) then
+           do ilmn=1,nlmn
+             do mu=1,3
+               enlj(2*mu  )=enlj(2*mu  )+gxfac_sij(1,ilmn,ia,ispinor)*dgxdt(1,mu,ilmn,ia,ispinor)
+             end do
+           end do
+         end if
+       end do
+     end do
+     if (choice==52) then
+       enlj(2)=-enlj(2);enlj(4)=-enlj(4);enlj(6)=-enlj(6)
+     end if
+     enlout(1:6)=enlout(1:6)+enlj(1:6)
    end if
 
 !  ====== Accumulate contribution to <c|d2S/d_atm_pos d_left_k|c> =========
@@ -640,7 +769,7 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
          else
            do ilmn=1,nlmn
              mu=1;nu=1
-             do mua=1,3 ! atm. pos                           
+             do mua=1,3 ! atm. pos
                do mub=1,3 ! k
                  enljj(nu+1)=enljj(nu+1) &
 &                 +dgxdt(1,mua,ilmn,ia,ispinor)*dgxdtfac_sij(1,3+mub,ilmn,ia,ispinor) &
@@ -762,6 +891,61 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
      end do
      ABI_DEALLOCATE(cft)
      ABI_DEALLOCATE(cfu)
+   end if
+
+!  ======  Accumulate contribution to <c|d/d_k[d(right)S/d_k]|c> =========
+!  Full derivative wrt to k1, right derivative wrt to k2
+   if (choice==81) then
+     ABI_ALLOCATE(cft,(3,nlmn))
+     ABI_ALLOCATE(cfu,(6,nlmn))
+     ABI_ALLOCATE(enljj,(18))
+     do ispinor=1,nspinor
+       do ia=1,nincat
+         enljj(1:18)=zero
+         if(cplex_fac==2)then !If cplex_fac=1, gxfac is pure real
+           cft(1,1:nlmn)=cmplx(gxfac_sij(1,1:nlmn,ia,ispinor),gxfac_sij(2,1:nlmn,ia,ispinor))
+         else
+           cft(1,1:nlmn)=cmplx(gxfac_sij(1,1:nlmn,ia,ispinor),zero)
+         end if
+         if(cplex==2)then !If cplex=1, d2gxdt is pure real
+           cfu(1:6,1:nlmn)=cmplx(d2gxdt(1,1:6,1:nlmn,ia,ispinor),d2gxdt(2,1:6,1:nlmn,ia,ispinor))
+         else
+           cfu(1:6,1:nlmn)=cmplx(d2gxdt(1,1:6,1:nlmn,ia,ispinor),zero)
+         end if
+         do ilmn=1,nlmn
+           do mu=1,3
+             do nu=1,3
+               muu=3*(mu-1)+nu ; mut=gamma(mu,nu)
+               enljj(2*muu-1)=enljj(2*muu-1)+ real(conjg(cft(1,ilmn))*cfu(mut,ilmn))
+               enljj(2*muu  )=enljj(2*muu  )+aimag(conjg(cft(1,ilmn))*cfu(mut,ilmn))
+             end do
+           end do
+         end do
+         if(cplex==2)then !If cplex=1, dgxdt is pure imaginary
+           cft(1:3,1:nlmn)=cmplx(dgxdt(1,1:3,1:nlmn,ia,ispinor),dgxdt(2,1:3,1:nlmn,ia,ispinor))
+         else
+           cft(1:3,1:nlmn)=cmplx(zero,dgxdt(1,1:3,1:nlmn,ia,ispinor))
+         end if
+         if(cplex_fac==2)then !If cplex_fac=1, dgxdtfac is pure imaginary
+           cfu(1:3,1:nlmn)=cmplx(dgxdtfac_sij(1,1:3,1:nlmn,ia,ispinor),dgxdtfac_sij(2,1:3,1:nlmn,ia,ispinor))
+         else
+           cfu(1:3,1:nlmn)=cmplx(zero,dgxdtfac_sij(1,1:3,1:nlmn,ia,ispinor))
+         end if
+         do ilmn=1,nlmn
+           do mu=1,3
+             do nu=1,3
+               muu=3*(mu-1)+nu
+               enljj(2*muu-1)=enljj(2*muu-1)+ real(conjg(cft(mu,ilmn))*cfu(nu,ilmn))
+               enljj(2*muu  )=enljj(2*muu  )+aimag(conjg(cft(mu,ilmn))*cfu(nu,ilmn))
+             end do
+           end do
+         end do
+       end do
+     end do
+     enlout(1:18)=enlout(1:18)+enljj(1:18)
+     ABI_DEALLOCATE(cft)
+     ABI_DEALLOCATE(cfu)
+     ABI_DEALLOCATE(enljj)
    end if
 
  end if

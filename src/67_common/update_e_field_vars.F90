@@ -206,7 +206,7 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 &   dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,&
 &   mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,nattyp,dtset%nband,&
 &   dtset%natom,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
-&   dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,&
+&   dtset%nsppol,dtset%ntypat,3,dtset%paral_kgb,ph1d,psps,rmet,&
 &   dtset%typat,ucvol,dtfil%unpaw,useylmgr,xred,ylm,ylmgr)
    ABI_DEALLOCATE(ph1d)
  else 
@@ -231,6 +231,9 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 
    efield_old_cart(:)=dtset%efield(:)   !!HONG
    
+!  save this value in order to print the final value of real electric field, comparing with the desired red_fieldbar
+   dtefield%efield2(:)=dtset%efield(:)
+
    if ( dtset%berryopt ==16 .or. dtset%berryopt ==17) then   !!HONG
      do ii=1,3
        red_efield2(ii)=zero
@@ -247,9 +250,6 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 &       rprimd(ii,3)*red_ptot(3)
      end do
      ptot_cart(:)=ptot_cart(:)/ucvol
-
-!    save this value in order to print the final value of real electric field, comparing with the desired red_fieldbar
-     dtefield%efield2(:)=dtset%efield(:)
 
      do ii=1,3
        dtefield%efield_dot(ii) = dot_product(dtset%efield(:),rprimd(:,ii))

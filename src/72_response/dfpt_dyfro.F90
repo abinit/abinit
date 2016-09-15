@@ -169,34 +169,34 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
 !  -----------------------------------------------------------------------
    call timab(563,1,tsec)
    if (n3xccc>0) then
-    if (nspden==1) then
-     ABI_ALLOCATE(v_dum,(nfft,1))
-     ABI_ALLOCATE(vxctotg,(2,nfft,1))
-     v_dum(:,1)=vxc(:,1)
-     call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
-     call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
-&       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-     ABI_DEALLOCATE(v_dum)
-    else if (nspden==2) then
-     ABI_ALLOCATE(v_dum,(nfft,1))
-     ABI_ALLOCATE(vxctotg,(2,nfft,1))
-     v_dum(:,1)=0.5_dp*(v_dum(:,1)+vxc(:,2))
-     call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
-     call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
-&       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-     ABI_DEALLOCATE(v_dum)
-!EB FR non-collinear magnetism
-    else if (nspden==4) then
-     ABI_ALLOCATE(v_dum,(nfft,nspden))
-     ABI_ALLOCATE(vxctotg,(2,nfft,nspden))
-     v_dum(:,2:4)=vxc(:,2:4)
-     do ispden=1,nspden
-       call fourdp(1,vxctotg(:,:,ispden),v_dum(:,ispden),-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
-       call zerosym(vxctotg(:,:,ispden),2,ngfft(1),ngfft(2),ngfft(3),&
+     if (nspden==1) then
+       ABI_ALLOCATE(v_dum,(nfft,1))
+       ABI_ALLOCATE(vxctotg,(2,nfft,1))
+       v_dum(:,1)=vxc(:,1)
+       call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
 &       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
        ABI_DEALLOCATE(v_dum)
-     enddo
-    endif
+     else if (nspden==2) then
+       ABI_ALLOCATE(v_dum,(nfft,1))
+       ABI_ALLOCATE(vxctotg,(2,nfft,1))
+       v_dum(:,1)=0.5_dp*(v_dum(:,1)+vxc(:,2))
+       call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+       call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
+&       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+       ABI_DEALLOCATE(v_dum)
+!EB FR non-collinear magnetism
+     else if (nspden==4) then
+       ABI_ALLOCATE(v_dum,(nfft,nspden))
+       ABI_ALLOCATE(vxctotg,(2,nfft,nspden))
+       v_dum(:,2:4)=vxc(:,2:4)
+       do ispden=1,nspden
+         call fourdp(1,vxctotg(:,:,ispden),v_dum(:,ispden),-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
+         call zerosym(vxctotg(:,:,ispden),2,ngfft(1),ngfft(2),ngfft(3),&
+&         comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+         ABI_DEALLOCATE(v_dum)
+       end do
+     end if
    else
      ABI_ALLOCATE(vxctotg,(0,0,0))
    end if
