@@ -28,6 +28,7 @@
 !!  ph3d(2,npw_k,natsph)=3-dim structure factors, for each atom and plane wave.
 !!  prtsphere= if 1, print a complete analysis of the angular momenta in atomic spheres
 !!  rint(nradintmax) = points on radial real-space grid for integration
+!!  rc_ylm= 1 for real spherical harmonics. 2 for complex spherical harmonics, 
 !!  rmax(natsph)=maximum radius for real space integration sphere
 !!  ucvol=unit cell volume in bohr**3.
 !!  ylm(mpw,mlang*mlang)=real spherical harmonics for each G and k point
@@ -57,11 +58,12 @@
 
 subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
 & nradint,nradintmax,mlang,mpi_enreg,mpw,natsph,&
-& npw_k,ph3d,prtsphere,rint,rmax,sum_1ll_1atom,sum_1lm_1atom,ucvol,ylm,znucl_sph)
+& npw_k,ph3d,prtsphere,rint,rmax,rc_ylm,sum_1ll_1atom,sum_1lm_1atom,ucvol,ylm,znucl_sph)
 
  use defs_basis
  use defs_abitypes
  use m_profiling_abi
+ use m_errors
  use m_cgtools
  use m_atomdata
 
@@ -76,7 +78,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istwfk,mlang,mpw,natsph,npw_k,nradintmax
- integer,intent(in) :: prtsphere
+ integer,intent(in) :: prtsphere,rc_ylm
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -103,8 +105,8 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
 
 ! *************************************************************************
 
- sum_1lm_1atom(:,:) = zero
- sum_1ll_1atom(:,:) = zero
+ sum_1lm_1atom = zero
+ sum_1ll_1atom = zero
 
  do ixint = 1, nradintmax
    rint2(ixint) = rint(ixint)**2
@@ -112,6 +114,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
 
  vect = zero
 
+ !if (rc_ylm == 2)
  ABI_ALLOCATE(ilang,    (mlang**2))
  ABI_ALLOCATE(reylmind, (mlang**2))
  ABI_ALLOCATE(imylmind, (mlang**2))
@@ -160,36 +163,42 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
      tmppsia(2,ipw) = cg_1band(1,ipw) * ph3d(2,ipw,iat) + cg_1band(2,ipw) * ph3d(1,ipw,iat)
    end do
 
+   ! tmppsim = temporary arrays for part of psi which doesnt depend on ixint
+   ! Take into account the fact that ylm are REAL spherical harmonics, see initylmg.f
+   ! For time-reversal states, detailed treatment show that only the real or imaginary
+   ! part of tmppsia is needed here, depending on l being even or odd: only one of the coef is 1, the other 0
    do illmm=1, mlang*mlang
-!    tmppsim = temporary arrays for part of psi which doesnt depend on ixint
-!    Take into account the fact that ylm are REAL spherical harmonics, see initylmg.f
-!    
-!    For time-reversal states, detailed treatment show that only the real or imaginary
-!    part of tmppsia is needed here, depending on l being even or odd: only one of the coef is 1, the other 0
-     do ipw=1,npw_k
-!      to get PDOS for real spherical harmonics, may be sufficient to multiply here by ylm instead of linear combination
-#if 0
-      if (istwfk == 1) then
-          tmppsim(1,ipw) = tmppsia(1,ipw)*ylm(ipw,illmm)
-          tmppsim(2,ipw) = tmppsia(2,ipw)*ylm(ipw,illmm)
-      else
-         if (mod(ilang(illmm) - 1, 2) == 0) then
-            tmppsim(1,ipw) = tmppsia(1,ipw)*ylm(ipw,illmm)
-            tmppsim(2,ipw) = zero
-         else
-            tmppsim(1,ipw) = tmppsia(2,ipw)*ylm(ipw,illmm)
-            tmppsim(2,ipw) = zero
-         end if
-      end if
-#else
-!      TODO: check the prefactor part for istwfk /= 1! Could also be incorrect if we go to real spherical harmonics
-       tmppsim(1, ipw) =  coef1(illmm) * tmppsia(1, ipw) * ylm(ipw, reylmind(illmm)) &
-&       + mmsign(illmm) * coef2(illmm) * tmppsia(2, ipw) * ylm(ipw, imylmind(illmm))
 
-       tmppsim(2, ipw) =  coef2(illmm) * tmppsia(2, ipw) * ylm(ipw, reylmind(illmm)) &
-&       - mmsign(illmm) * coef1(illmm) * tmppsia(1, ipw) * ylm(ipw, imylmind(illmm))
-#endif
-     end do
+     if (rc_ylm == 2) then
+       do ipw=1,npw_k
+         ! to get PDOS for complex spherical harmonics, build linear combination of real ylm 
+         ! TODO: check the prefactor part for istwfk /= 1! Could also be incorrect if we go to real spherical harmonics
+         tmppsim(1, ipw) =  coef1(illmm) * tmppsia(1, ipw) * ylm(ipw, reylmind(illmm)) &
+&         + mmsign(illmm) * coef2(illmm) * tmppsia(2, ipw) * ylm(ipw, imylmind(illmm))
+
+         tmppsim(2, ipw) =  coef2(illmm) * tmppsia(2, ipw) * ylm(ipw, reylmind(illmm)) &
+&         - mmsign(illmm) * coef1(illmm) * tmppsia(1, ipw) * ylm(ipw, imylmind(illmm))
+       end do
+
+     else if (rc_ylm == 1) then
+       ! to get PDOS for real spherical harmonics, multiply here by ylm instead of linear combination
+       do ipw=1,npw_k
+         tmppsim(1,ipw) = tmppsia(1,ipw)*ylm(ipw,illmm)
+         tmppsim(2,ipw) = tmppsia(2,ipw)*ylm(ipw,illmm)
+       end do
+
+       if (istwfk /= 1) then
+         if (mod(ilang(illmm) - 1, 2) == 0) then
+            tmppsim(2,:) = zero
+         else
+            tmppsim(1,:) = tmppsim(2,:)
+            tmppsim(2,:) = zero
+         end if
+       end if
+
+     else 
+       MSG_ERROR("Wrong value for rc_ylm")
+     end if
 
      integ = zero
      do ixint = 1, nradint(iat)
@@ -197,8 +206,8 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
        call dotprod_g(dotr, doti, istwfk, npw_k, option2, vect, tmppsim, mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
 
 !      Multiply by r**2 and take norm, integrate
-!      MJV 5.5.2012 removed call to simpson_int - just need last value, no need to allocate full space for primitive and integrand
-
+!      MJV 5.5.2012 removed call to simpson_int - just need last value, 
+!      no need to allocate full space for primitive and integrand
        if (ixint ==1 .or. ixint == nradint(iat)) then
          integ = integ + 0.375_dp * rint2(ixint) * (dotr**2 + doti**2)
        else if (ixint ==2 .or. ixint == nradint(iat)-1) then
@@ -214,7 +223,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
      sum_1lm_1atom(illmm, iat)        = sum_1lm_1atom(illmm, iat)        + integ
      sum_1ll_1atom(ilang(illmm), iat) = sum_1ll_1atom(ilang(illmm), iat) + integ
 
-   end do !  illmm
+   end do ! illmm
  end do ! iat
 
  ABI_DEALLOCATE(coef1)
@@ -226,13 +235,13 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
 
 !MJV 5.5.2012: removed 1/sqrt(2) above in tmppsim and (4 pi)^2 in integrand - just multiply by 8 pi^2 here
 !Normalize with unit cell volume
-#if 1
- sum_1lm_1atom(:,:) = eight * pi**2 * sum_1lm_1atom(:,:) / ucvol
- sum_1ll_1atom(:,:) = eight * pi**2 * sum_1ll_1atom(:,:) / ucvol
-#else
- sum_1lm_1atom(:,:) = 2 * eight * pi**2 * sum_1lm_1atom(:,:) / ucvol
- sum_1ll_1atom(:,:) = 2 *eight * pi**2 * sum_1ll_1atom(:,:) / ucvol
-#endif
+ if (rc_ylm == 2) then
+   sum_1lm_1atom(:,:) = eight * pi**2 * sum_1lm_1atom(:,:) / ucvol
+   sum_1ll_1atom(:,:) = eight * pi**2 * sum_1ll_1atom(:,:) / ucvol
+ else
+   sum_1lm_1atom(:,:) = 2 * eight * pi**2 * sum_1lm_1atom(:,:) / ucvol
+   sum_1ll_1atom(:,:) = 2 *eight * pi**2 * sum_1ll_1atom(:,:) / ucvol
+ end if
 
 !Output
  if (prtsphere == 1) then

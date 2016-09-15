@@ -24,7 +24,8 @@
 !!  mbesslang=maximum angular momentum for Bessel function expansion
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mpi_enreg=information about MPI parallelization
-!!  prtdosm=option for the m-contributions to the partial DOS
+!!  prtdosm= option for the m-contributions to the partial DOS
+!!           1 for complex spherical harmonics, 2 for real spherical harmonics.
 !!  ndosfraction=natsph*mbesslang
 !!  partial_dos= option for this routine - only 1 is supported at present
 !!
@@ -85,7 +86,8 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
  integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem),npwarr(dtset%nkpt)
  real(dp),intent(in) :: cg(2,mcg)
  real(dp),intent(out) :: dos_fractions(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction)
- real(dp),intent(out) :: dos_fractions_m(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*mbesslang*prtdosm)
+ real(dp),intent(out) :: dos_fractions_m(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*mbesslang*min(prtdosm,1))
+!& *mbesslang*min(max(prtdosm,fatbands_flag),1))
 
 !Local variables-------------------------------
 !scalars
@@ -93,7 +95,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
  integer :: shift_b,shift_sk,ia,iatom,iband,ierr,ikpt,ilang,ioffkg,is1, is2, isoff
  integer :: ipw,ispinor,isppol,ixint,mbess,mcg_disk,me,shift_cg
  integer :: mgfft,my_nspinor,n1,n2,n3,natsph_tot,nfit,npw_k,nradintmax
- integer :: comm
+ integer :: comm,rc_ylm
  real(dp) :: arg,bessarg,bessargmax,bessint_delta,kpgmax,rmax,dr
  character(len=500) :: msg
 !arrays
@@ -134,8 +136,11 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
  end do
 
 !initialize dos_fractions
- dos_fractions(:,:,:,:) = zero
- if (prtdosm==1) dos_fractions_m(:,:,:,:) = zero
+ dos_fractions = zero
+ if (prtdosm /= 0) dos_fractions_m = zero
+
+ ! Complex spherical harmonics.
+ rc_ylm = 2; if (prtdosm == 1) rc_ylm = 1
 
  if(mpi_enreg%paral_kgb==1) then
    comm = mpi_enreg%comm_kpt
@@ -323,9 +328,9 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
            ! Select wavefunction in cg array
            shift_cg = shift_sk + shift_b
 
-           call recip_ylm (bess_fit, cg(:,shift_cg+1:shift_cg+npw_k), dtset%istwfk(ikpt),&
+           call recip_ylm(bess_fit, cg(:,shift_cg+1:shift_cg+npw_k), dtset%istwfk(ikpt),&
 &           nradint, nradintmax,mbesslang, mpi_enreg, dtset%mpw, natsph_tot, npw_k,&
-&           ph3d, prtsphere0, rint, ratsph, sum_1atom_1ll, sum_1atom_1lm,&
+&           ph3d, prtsphere0, rint, ratsph, rc_ylm, sum_1atom_1ll, sum_1atom_1lm,&
 &           crystal%ucvol, ylm_k, znucl_sph)
 
            do iatom=1,natsph_tot
@@ -336,7 +341,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
              end do
            end do
 
-           if (prtdosm==1) then
+           if (prtdosm /= 0) then
              do iatom=1,natsph_tot
                do ilang=1,mbesslang**2
                  dos_fractions_m(ikpt,iband,isppol,mbesslang**2*(iatom-1) + ilang) &
@@ -362,11 +367,11 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
 
 !  Gather all contributions from different processors
    call xmpi_sum(dos_fractions,comm,ierr)
-   if (prtdosm==1) call xmpi_sum(dos_fractions_m,comm,ierr)
+   if (prtdosm /= 0) call xmpi_sum(dos_fractions_m,comm,ierr)
 
    if (mpi_enreg%paral_spinor == 1)then
      call xmpi_sum(dos_fractions,mpi_enreg%comm_spinor,ierr)
-     if (prtdosm==1) call xmpi_sum(dos_fractions_m,mpi_enreg%comm_spinor,ierr)
+     if (prtdosm /= 0) call xmpi_sum(dos_fractions_m,mpi_enreg%comm_spinor,ierr)
    end if
 
    ABI_DEALLOCATE(atindx)

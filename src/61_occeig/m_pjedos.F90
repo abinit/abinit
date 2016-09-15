@@ -1,9 +1,10 @@
 !{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_epjdos
 !! NAME
+!!  m_epjdos
 !!
 !! FUNCTION
-!!  Tools for computng electronic PJDOS
+!!  Tools for the computiation of electronic PJDOSes
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2016 ABINIT group (MVer, XG, SM, MT)
@@ -1051,7 +1052,7 @@ subroutine gaus_dos(dos_fractions,&
 end subroutine gaus_dos
 !!***
 
-!!****f* ABINIT/get_dos_1band
+!!****f* m_pjedos/get_dos_1band
 !! NAME
 !! get_dos_1band
 !!
@@ -1132,7 +1133,7 @@ subroutine get_dos_1band (dos_fractions,enemin,enemax,&
 end subroutine get_dos_1band
 !!***
 
-!!****f* ABINIT/get_dos_1band_m
+!!****f* m_pjedos/get_dos_1band_m
 !! NAME
 !! get_dos_1band_m
 !!
