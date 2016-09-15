@@ -41,6 +41,7 @@ MODULE m_cut3d
  use m_pptools,          only : print_fofr_ri, print_fofr_xyzri , print_fofr_cube
  use m_mpinfo,           only : destroy_mpi_enreg
  use m_cgtools,          only : cg_getspin
+ !use m_pjedos,           only : recip_ylm
 
  implicit none
 

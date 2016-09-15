@@ -64,6 +64,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
 
  use m_numeric_tools, only : simpson
  use m_cgtools,       only : cg_getspin
+ use m_epjdos,        only : recip_ylm
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -127,7 +128,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
  do isppol=1,dtset%nsppol
    do ikpt=1,dtset%nkpt
      if (dtset%nband((isppol-1)*dtset%nkpt + ikpt) /= dtset%mband) then
-       write(std_out,*) 'Error : partial_dos_fractions wants same number of',' bands at each kpoint'
+       write(std_out,*) 'Error: partial_dos_fractions wants same number of bands at each kpoint'
        write(std_out,*) ' isppol, ikpt = ', isppol,ikpt, dtset%nband((isppol-1)*dtset%nkpt + ikpt), dtset%mband
        write(std_out,*) ' all nband = ', dtset%nband
        return
@@ -140,9 +141,9 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
  if (prtdosm /= 0) dos_fractions_m = zero
 
  ! Complex spherical harmonics.
- rc_ylm = 2; if (prtdosm == 1) rc_ylm = 1
+ rc_ylm = 2; if (prtdosm == 2) rc_ylm = 1
 
- if(mpi_enreg%paral_kgb==1) then
+ if (mpi_enreg%paral_kgb==1) then
    comm = mpi_enreg%comm_kpt
    me = mpi_enreg%me_kpt
  else
