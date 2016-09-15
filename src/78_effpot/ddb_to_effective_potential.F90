@@ -265,22 +265,14 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
     end do
     fact=HaBohr3_GPa/crystal%ucvol
     do ivarA=1,6
-      write(std_out,'(6f12.7)')elast_clamped(ivarA,1)*fact/100.00_dp,&
+      write(message,'(6f12.7)')elast_clamped(ivarA,1)*fact/100.00_dp,&
 &                              elast_clamped(ivarA,2)*fact/100.00_dp,&
 &                              elast_clamped(ivarA,3)*fact/100.00_dp,&
 &                              elast_clamped(ivarA,4)*fact/100.00_dp,&
 &                              elast_clamped(ivarA,5)*fact/100.00_dp,&
 &                              elast_clamped(ivarA,6)*fact/100.00_dp
     end do
-
-    do ivarA=1,6
-      write(ab_out,'(6f12.7)') elast_clamped(ivarA,1)*fact/100.00_dp,&
-&                              elast_clamped(ivarA,2)*fact/100.00_dp,&
-&                              elast_clamped(ivarA,3)*fact/100.00_dp,&
-&                              elast_clamped(ivarA,4)*fact/100.00_dp,&
-&                              elast_clamped(ivarA,5)*fact/100.00_dp,&
-&                              elast_clamped(ivarA,6)*fact/100.00_dp
-    end do
+    call wrtout(std_out,message,'COLL')
     
 !   Set the clamped tensor into the effective potentiel
     effective_potential%elastic_constants = elast_clamped

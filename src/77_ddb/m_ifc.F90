@@ -519,8 +519,10 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  if (Ifc%dipdip==1) then
    ! Take off the dipole-dipole part of the dynamical matrix
-   write(std_out, '(a)' )' mkifc9 : will extract the dipole-dipole part,'
-   write(std_out, '(a)' )' using ewald9, q0dy3 and nanal9 for every wavevector.'
+   write(message, '(3a)' )' mkifc9 : will extract the dipole-dipole part,',ch10,&
+&                         ' using ewald9, q0dy3 and nanal9 for every wavevector.'
+   call wrtout(std_out,message,"COLL")
+
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
 
    do iqpt=1,nqbz
@@ -610,7 +612,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      Ifc%nrpt = Ifc%nrpt+1
    end if
  end do
- write(std_out,"(2(a,i0))")"ifc%nrpt: ",ifc%nrpt,", nqbz: ",nqbz
+ write(message,"(2(a,i0))")"ifc%nrpt: ",ifc%nrpt,", nqbz: ",nqbz
+ call wrtout(std_out,message,"COLL")
 
  ABI_MALLOC(Ifc%atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
  ABI_MALLOC(Ifc%rpt,(3,Ifc%nrpt))
@@ -654,9 +657,9 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  do_prtfreq = .False.; if (present(prtfreq)) do_prtfreq = prtfreq
  if (do_prtfreq .or. prtsrlr == 1) then
    ! Check that the starting values are well reproduced.
-   write(std_out, '(a,a)' )' mkifc9 : now check that the starting values ',&
+   write(message, '(2a)' )' mkifc9 : now check that the starting values ',&
      ' are reproduced after the use of interatomic forces '
-
+   call wrtout(std_out,message,"COLL")
    do iqpt=1,nqbz
      qpt(:)=Ifc%qbz(:,iqpt)
      call ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,out_eigvec=eigvec)

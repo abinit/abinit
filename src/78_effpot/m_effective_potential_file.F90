@@ -1143,24 +1143,26 @@ subroutine effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,comm
  call effective_potential_file_getType(filename,filetype)
 
  if(filetype==1)then
-   write(message, '(a,a,a,a,a)' )ch10,' The file',trim(filename),&
+   write(message, '(6a)' )ch10,' The file ',trim(filename),ch10,&
 &                  ' is DDB file (extraction of the number of atoms)',ch10
    call wrtout(std_out,message,'COLL')
-   write(message, '(a,a,a,a,a)' )&
-&   trim(filename),' is ddb file, only numer of atoms is read',ch10,&
-&   'if you want to predic the number of cell (nrpt), use bigbx9 routines'
-   MSG_WARNING(message)
+
+   write(message, '(8a)' )&
+&   ' The file ',trim(filename),ch10,' is ddb file only numer of atoms is read,',&
+&    'if you want to predic the number of cell (nrpt)',ch10,' use bigbx9 routines',ch10
+   call wrtout(std_out,message,'COLL')
 
 ! The comunicator is set to 0 at the end of the call of ddb_getdims
    call ddb_getdims(dimekb,filename,lmnmax,mband,mtyp,msym,natom,nblok,&
 &                  nkpt,ntypat,ddbun,usepaw,DDB_VERSION,comm)
 
    write(message, '(a,a,a,a)' )&
-&   ' Unable to read the number of cell (nrpt) in ddb file, nrpt is set to 0',ch10
-   MSG_WARNING(message)
+&   ' WARNING: Unable to read the number of cell (nrpt) in ddb file, nrpt is set to 0',ch10
+   call wrtout(std_out,message,'COLL')
+
    write(message, '(a,a,a,a)' )&
-&   ' Unable to read the number of qpoint (nph1l) in ddb file (not implemented)',ch10
-   MSG_WARNING(message)
+&   ' WARNING: Unable to read the number of qpoint (nph1l) in ddb file (not implemented)',ch10
+   call wrtout(std_out,message,'COLL')
 
 !  Must read some value to initialze  array (nprt for ifc)
 !   call bigbx9(inp%brav,dummy_cell,0,1,inp%ngqpt,inp%nqshft,nrpt,ddb%rprim,dummy_rpt)
@@ -1277,14 +1279,14 @@ end subroutine effective_potential_file_getDim
 
   if (filetype==1) then 
     if (.not.(present(inp))) then
-      write(message, '(a,a,a,a)' )&
+      write(message, '(4a)' )&
 &      ' effective_potential_file_read: you need to give input file to compute ',&
 &      'the response fonction from DDB file ',ch10
       MSG_ERROR(message)
     end if
 
 !   Read the DDB information, also perform some checks, and symmetrize partially the DDB
-    write(message, '(a,a,a)' )' read the DDB information of the reference',&
+    write(message, '(3a)' )' Read the DDB information of the reference',&
  &    ' system and perform some checks',ch10
     call wrtout(std_out,message,'COLL')
     call wrtout(ab_out,message,'COLL')
@@ -1298,6 +1300,7 @@ end subroutine effective_potential_file_getDim
 !   To keep the intent(in) of the inp parameters, we need to use local variables:
     ABI_ALLOCATE(atifc,(inp%natom))
     atifc = inp%atifc
+
     call ddb_from_file(ddb,filename,inp%brav,natom,0,atifc,Crystal,comm)
 
 !   And finaly, we can check if the value of atifc is not change...
@@ -1317,7 +1320,6 @@ end subroutine effective_potential_file_getDim
 
 !  Transfert the ddb to the effective potential
    call ddb_to_effective_potential(Crystal,ddb, eff_pot,inp)
-
 
 !  Generate long rage interation for the effective potential
    call effective_potential_generateSupercell(eff_pot,inp%n_cell,inp%dipdip,inp%asr,comm)

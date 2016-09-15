@@ -538,7 +538,8 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
  end if
 
 !Open the input derivative database.
- write(std_out,'(a,a)') ' inprep8 : open file ',trim(filnam)
+ write(message,'(a,a)') ' inprep8 : open file ',trim(filnam)
+ call wrtout(std_out,message,'COLL')
  if (open_file(filnam,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
    MSG_ERROR(message)
  end if
@@ -738,10 +739,12 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
      read (unddb,*)
    end do
  else
-   write(std_out,*)' inprep8 : nband(1)=',nband(1)
+   write(message,*)' inprep8 : nband(1)=',nband(1)
+   call wrtout(std_out,message,'COLL')
    do iline=1,(nband(1)+2)/3
      read (unddb,'(a80)')rdstring
-     write(std_out,*)trim(rdstring)
+     write(message,*)trim(rdstring)
+     call wrtout(std_out,message,'COLL')
    end do
  end if
 !23. rprim
@@ -2204,7 +2207,8 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
  end if
 
 !Open the input derivative database.
- write(std_out,'(a,a)')' About to open file ',TRIM(filnam)
+ write(message,'(a,a)')' About to open file ',TRIM(filnam)
+ call wrtout(std_out,message,'COLL')
  if (open_file(filnam,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
    MSG_ERROR(message)
  end if
@@ -3748,6 +3752,7 @@ subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dtech9'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3762,6 +3767,7 @@ subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff)
 !Local variables -------------------------
 !scalars
  integer :: depl,elec,elec1,elec2,iatom
+ character(len=1000) :: message
 
 ! *********************************************************************
 
@@ -3783,18 +3789,23 @@ subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff)
    end do
  end do
 
- write(std_out,'(/,a,/,3es16.6,/,3es16.6,/,3es16.6)' )&
+ write(message,'(a,3es16.6,3es16.6,3es16.6)' )&
 & ' Dielectric Tensor ',&
 & dielt(1,1),dielt(1,2),dielt(1,3),&
 & dielt(2,1),dielt(2,2),dielt(2,3),&
 & dielt(3,1),dielt(3,2),dielt(3,3)
 
- write(std_out,'(/,a)' ) ' Effectives Charges '
+
+ call wrtout(std_out,message,'COLL')
+
+ write(message,'(a)' ) ' Effectives Charges '
+ call wrtout(std_out,message,'COLL')
  do iatom=1,natom
-   write(std_out,'(a,i4,3es16.6,/,3es16.6,/,3es16.6)' )' atom ',iatom,&
+   write(message,'(a,i4,3es16.6,3es16.6,3es16.6)' )' atom ',iatom,&
 &   zeff(1,1,iatom),zeff(1,2,iatom),zeff(1,3,iatom),&
 &   zeff(2,1,iatom),zeff(2,2,iatom),zeff(2,3,iatom),&
 &   zeff(3,1,iatom),zeff(3,2,iatom),zeff(3,3,iatom)
+    call wrtout(std_out,message,'COLL')
  end do
 
 end subroutine dtech9

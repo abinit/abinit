@@ -86,16 +86,24 @@ program epigene
 !TEST_AM
  real(dp),allocatable :: dynmat(:,:,:,:,:)
 !******************************************************************
+
 !Change communicator for I/O (mandatory!)
  call abi_io_redirect(new_io_comm=xmpi_world)
 
 !Initialize MPI
  call xmpi_init()
- comm = xmpi_world
 
 !MPI variables
+ comm = xmpi_world
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  iam_master = (my_rank == master)
+
+!Initialize memory profiling if it is activated !if a full abimem.mocc report is desired, 
+!set the argument of abimem_init to "2" instead of "0"
+!note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+#ifdef HAVE_MEM_PROFILING
+ call abimem_init(0)
+#endif
 
 !Initialisation of the timing
  call timein(tcpui,twalli)
@@ -112,15 +120,6 @@ program epigene
    call init10(filnam)
  end if
  call xmpi_bcast (filnam, master, comm, ierr)
-
-!make log file for non-master procs
-! if (.not. iam_master.and.prt_log) then
-!   std_out = get_unit()
-!   call int2char4(my_rank, procstr)
-!   ABI_CHECK((procstr(1:1)/='#'),'Bug: string length too short!')
-!   tmpfilename = trim(filnam(2)) // "_LOG_P" // trim(procstr)
-!   open (unit=std_out, file=tmpfilename)
-! end if
 
 !******************************************************************
 
@@ -150,13 +149,13 @@ program epigene
 !To automate a maximum calculation, epigine reads the number of atoms 
 !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
 !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
- write(message, '(5a)' )' Read the information in the reference structure in ',ch10,&
-&    trim(filnam(3)),ch10,' to initialize the epigene input'
+ write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
+&    ' ',trim(filnam(3)),ch10,' to initialize the epigene input'
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
  call effective_potential_file_getDim(filnam(3),natom,ntypat,nph1l,nrpt,comm)
-
+ 
 !Read the input file, and store the information in a long string of characters
 !strlen from defs_basis module
  option=1
@@ -178,8 +177,6 @@ program epigene
    call outvars_epigene(inp,ab_out)
  end if
 
- if (iam_master) then
-
 ! First step: Treat the reference structure 
 !**********************************************************************
    call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
@@ -193,8 +190,8 @@ program epigene
 !**********************************************************************
 
 !**********************************************************************
-!  Print the effective potential
-   if(inp%prt_effpot<=-1.or.inp%prt_effpot>=3) then
+!  Print the effective potential (only cpu 0)
+   if(iam_master.and.(inp%prt_effpot<=-1.or.inp%prt_effpot>=3)) then
      select case(inp%prt_effpot)
      case (-1)  
        name = "system.xml"
@@ -236,7 +233,6 @@ program epigene
 !TEST_AM
 !**********************************************************************
 
-
 !TEST_AM
    if(inp%monte_carlo>=1) then   
 !    Compute the monte carlo, molecular dynamics of compute specific energy 
@@ -253,8 +249,6 @@ program epigene
    write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
-   
- end if
 
  call timein(tcpu,twall)
  tsec(1)=tcpu-tcpui

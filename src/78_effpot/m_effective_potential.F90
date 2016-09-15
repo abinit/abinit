@@ -608,17 +608,17 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
    if(((max1-min1+1)/=n_cell(1).and.&
 &    (max2-min2+1)/=n_cell(2).and.(max3-min3+1)/=n_cell(3))) then
      write(message, '(5a,3I3,5a,3I3,2a)' )&
-&      'dipdip is set to zero, the longe range interation might be wrong',ch10,&
+&      'WARNING: dipdip is set to zero, the longe range interation might be wrong',ch10,&
 &      'because it is not recompute.',ch10,&
 &      'The previous harmonic part is build for ',(max1-min1+1),(max2-min2+1),(max3-min3+1)&
 &,     ' cell.',ch10,'Be sure than the dipole-dipole interation ',ch10,&
 &      'is correct for the supercell: ',n_cell(:),ch10,&
 &      'or set dipdip to 1'
-     MSG_WARNING(message)
+     call wrtout(std_out,message,"COLL")
    else
      write(message,'(a)')&
-&    'dipdip is set to zero, the longe range interation is not recompute'
-     MSG_WARNING(message)
+&    'WARNING: dipdip is set to zero, the longe range interation is not recompute'
+     call wrtout(std_out,message,"COLL")
    end if
 
 !3-Adapt harmonic part   
@@ -645,10 +645,12 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
      if ((abs(min1) > abs(min1_cell)).or.(abs(max1) > abs(max1_cell)).or.&
 &        (abs(min2) > abs(min2_cell)).or.(abs(max2) > abs(max2_cell)).or.&
 &        (abs(min3) > abs(min3_cell)).or.(abs(max3) > abs(max3_cell))) then
-       write(message, '(3a,3I3,a)' )&
-&        ' The previous harmonic part was build for bigger cell',ch10,&
-&         'ifc is adjust on ',int((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),' cell'
-       MSG_WARNING(message)
+       write(message, '(5a,3I3,3a)' )&
+&        ' --- !WARNING',ch10,&
+&        '     The previous harmonic part was build for bigger cell',ch10,&
+&        '     ifc is adjust on ',int((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),' cell',ch10,&
+&        ' ---'
+       call wrtout(std_out,message,"COLL")
        if (abs(min1) < abs(min1_cell)) min1 = min1_cell
        if (abs(min2) < abs(min2_cell)) min2 = min2_cell
        if (abs(min3) < abs(min3_cell)) min3 = min3_cell
@@ -1477,7 +1479,7 @@ subroutine effective_potential_print(eff_pot,option,filename)
 ! Write basics values 
 !**********************************************************************
 
-    write(message,'(a,F20.10,a,a,I3,a,a,I4,a,a,I4,a,a,I3,a,a)') &
+    write(message,'(a,F20.10,2a,I3,2a,I4,2a,I4,2a,I3,2a)') &
 &     '  - Reference energy:  ',eff_pot%energy ,ch10,&
 &     '  - Number of types of atoms:  ',eff_pot%ntypat ,ch10,&
 &     '  - Number of atoms:  ',eff_pot%natom ,ch10,&
@@ -1486,39 +1488,30 @@ subroutine effective_potential_print(eff_pot,option,filename)
 &     '  - Primitive vectors:  '
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
-    write(std_out,'(3(F12.6))') (eff_pot%rprimd) 
-    write(ab_out,'(3(F12.6))')  (eff_pot%rprimd)    
-    write(message,'(a,a,a)') '  - acell:  '
+    write(message,'(3(F12.6))') (eff_pot%rprimd) 
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
-    write(std_out,'(3(F12.6))') (eff_pot%acell)
-    write(ab_out,'(3(F12.6))')  (eff_pot%acell)
-    write(message,'(a,a,a)') '  - Dielectric tensor:  '
+    write(message,'(4a,3(F12.6))') '  - acell:  ',ch10,eff_pot%acell
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
-    write(std_out,'(3(F12.6))') (eff_pot%epsilon_inf)
-    write(ab_out,'(3(F12.6))')  (eff_pot%epsilon_inf)
-    write(message,'(a,a,a)') '  - Elastic tensor:  '
+    write(message,'(4a,3(F12.6))') '  - Dielectric tensor:  ',ch10,eff_pot%epsilon_inf
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
-    write(std_out,'(6(F12.6))') (eff_pot%elastic_constants)
-    write(ab_out,'(6(F12.6))')  (eff_pot%elastic_constants)
-
+    write(message,'(4a,6(F12.6))') '  - Elastic tensor:  ',ch10,eff_pot%elastic_constants
+    call wrtout(ab_out,message,'COLL')
+    call wrtout(std_out,message,'COLL')
     do ia=1,eff_pot%natom
-      write(message,'(a,I4)') '  - Atoms',ia
+      write(message,'(a,I4,2a,3(F10.4),2a,3(F10.4),2a,3(F10.4),2a,3(F12.4),2a)')'  - Atoms',ia,ch10,&
+&             "    - atomic number:",eff_pot%znucl(eff_pot%typat(ia)),ch10,&
+&             "    - atomic mass:",eff_pot%amu(eff_pot%typat(ia)),ch10,&
+&             "    - position:",eff_pot%xcart(:,ia),ch10,&
+&             "    - Effective charges:",ch10
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
-      write(std_out,'(a,3(F10.4))') "    - atomic number:",eff_pot%znucl(eff_pot%typat(ia))
-      write(ab_out,'(a,3(F10.4))')  "    - atomic number:",eff_pot%znucl(eff_pot%typat(ia))
-      write(std_out,'(a,3(F10.4))') "    - atomic mass:",eff_pot%amu(eff_pot%typat(ia))
-      write(ab_out,'(a,3(F10.4))')  "    - atomic mass:",eff_pot%amu(eff_pot%typat(ia))
-      write(std_out,'(a,3(F12.6))') "    - position:",eff_pot%xcart(:,ia)
-      write(ab_out,'(a,3(F12.6))')  "    - position:",eff_pot%xcart(:,ia)
-      write(std_out,'(a)') "    - Effective charges:"
-      write(ab_out,'(a)')  "    - Effective charges:"
       do ii = 1,3
-        write(std_out,'(a,3(F12.6))') "  ",eff_pot%zeff(:,ii,ia)
-        write(ab_out,'(a,3(F12.6))')  "  ",eff_pot%zeff(:,ii,ia)
+        write(message,'(a,3(F12.6))') "  ",eff_pot%zeff(:,ii,ia)
+        call wrtout(ab_out,message,'COLL')
+        call wrtout(std_out,message,'COLL')
       end do
     end do
   end if
