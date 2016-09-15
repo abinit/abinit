@@ -170,6 +170,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft
  use m_numeric_tools,    only : simpson_int
+ use m_epjdos,           only : tetrahedron, gaus_dos, dos_degeneratewfs
 
  !use m_skw
 
@@ -1146,7 +1147,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  end if
 
 !Optionally provide Xcrysden output for the Fermi surface (Only master writes)
- if (dtset%prtfsurf==1.and.me==0) then
+ if (dtset%prtfsurf==1.and.me==master) then
    if (ebands_write_bxsf(ebands,crystal,dtfil%fnameabo_app_bxsf) /= 0) then
      MSG_WARNING("Cannot produce file for Fermi surface, see log file for more info")
    end if
@@ -1173,7 +1174,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  end if ! prtmultipoles
 
  ! BoltzTraP output files in GENEric format
- if (dtset%prtbltztrp == 1 .and. me==0) then
+ if (dtset%prtbltztrp == 1 .and. me==master) then
    nelect_per_spin = ebands_nelect_per_spin(ebands)
 
    call prtbltztrp_out (eigen, fermie, dtfil%filnam_ds(4), hdr%kptns, natom, dtset%nband(1), &
