@@ -118,23 +118,23 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
 
 !Put the wavevector in nice format
  if(iout>=0)then
-   write(iout, '(a)' )' '
+   call wrtout(iout,' ','COLL')
    if(qphnrm/=0.0_dp)then
      write(message, '(a,3f9.5)' )&
 &     '  Phonon wavevector (reduced coordinates) :',(qphon(i)/qphnrm+tol10,i=1,3)
    else
-     write(message, '(a,/,a,3f9.5)' )&
-&     '  Phonon at Gamma, with non-analyticity in the',&
+     write(message, '(3a,3f9.5)' )&
+&     '  Phonon at Gamma, with non-analyticity in the',ch10,&
 &     '  direction (cartesian coordinates)',qphon(1:3)+tol10
    end if
    call wrtout(iout,message,'COLL')
-
+   
 !  Write it, in different units.
    if(enunit/=1)then
      write(iout, '(a)' )' Phonon energies in Hartree :'
      do jj=1,3*natom,5
        if (3*natom-jj<5) then
-         write(iout, '(1x,5es14.6)') (phfrq(ii),ii=jj,3*natom)
+         write(message, '(1x,5es14.6)') (phfrq(ii),ii=jj,3*natom)
        else
          write(message, '(1x,5es14.6)') (phfrq(ii),ii=jj,jj+4)
        end if

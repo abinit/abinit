@@ -62,6 +62,7 @@ subroutine status(counter,filstat,istat,level,routine)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'status'
+ use interfaces_14_hidewrite
  use interfaces_18_timing
 !End of the abilint section
 
@@ -303,13 +304,19 @@ subroutine status(counter,filstat,istat,level,routine)
  statnu=statnu+1
 
 !DEBUG
- write(std_out,*)' status : statnu, output_rate, shift_rate=',statnu,output_rate, shift_rate
- write(std_out,*)'level,routine=',level,routine
- write(std_out,*)'active(level)=',active(level)
- write(std_out,*)'counter,actual_counter(level,1:2)=',counter,actual_counter(level,1:2)
- write(std_out,*)'List of active levels :'
+ write(message,*)' status : statnu, output_rate, shift_rate=',statnu,output_rate, shift_rate
+ call wrtout(std_out,message,'COLL')
+ write(message,*)'level,routine=',level,routine
+ call wrtout(std_out,message,'COLL')
+ write(message,*)'active(level)=',active(level)
+ call wrtout(std_out,message,'COLL')
+ write(message,*)'counter,actual_counter(level,1:2)=',counter,actual_counter(level,1:2)
+ call wrtout(std_out,message,'COLL')
+ write(message,*)'List of active levels :'
+ call wrtout(std_out,message,'COLL')
  do ilevel=1,mlevel
-   if(active(ilevel)/=0)write(std_out,*)' Active level number=',ilevel
+   if(active(ilevel)/=0)write(message,*)' Active level number=',ilevel
+   call wrtout(std_out,message,'COLL')
  end do
 !ENDDEBUG
 

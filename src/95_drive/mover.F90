@@ -479,8 +479,8 @@ real(dp) :: rmet(3,3)
      now = abi_wtime()
      wtime_step = now - prev
      prev = now
-     write(std_out,*)sjoin("mover: previous time step took ",sec2str(wtime_step))
-     
+     write(message,*)sjoin("mover: previous time step took ",sec2str(wtime_step))
+     call wrtout(std_out, message, "COLL")
      if (have_timelimit_in(ABI_FUNC)) then
        if (itime > 2) then
          call xmpi_wait(quitsum_request,ierr)
@@ -657,8 +657,8 @@ real(dp) :: rmet(3,3)
            call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
            hist%histXF(:,:,1,hist%ihist)=xcart(:,:)
            hist%histXF(:,:,2,hist%ihist)=xred(:,:)
-           write(std_out,*) 'WARNING: ATOMIC COORDINATES WERE SYMMETRIZED AFTER SCFCV'
-           write(std_out,*) 'DIFFERENCES:'
+           call wrtout(std_out,'WARNING: ATOMIC COORDINATES WERE SYMMETRIZED AFTER SCFCV','COLL') 
+           call wrtout(std_out,'DIFFERENCES:','COLL') 
            
            do kk=1,ab_mover%natom
              write(std_out,*) xred(:,kk)-xred_tmp(:,kk)
@@ -820,7 +820,8 @@ real(dp) :: rmet(3,3)
 !    ###########################################################
 !    ### 16. => Precondition forces, stress and energy
 
-     write(std_out,*) 'Geometry Optimization Precondition:',ab_mover%goprecon
+     write(message,*) 'Geometry Optimization Precondition:',ab_mover%goprecon
+     call wrtout(std_out,message,'COLL')
      if (ab_mover%goprecon>0)then
        call prec_simple(ab_mover,preconforstr,hist,icycle,itime,0)
      end if
@@ -1036,9 +1037,10 @@ real(dp) :: rmet(3,3)
        exit
      end if
 
-     write(std_out,*) 'ICYCLE',icycle,skipcycle
-     write(std_out,*) 'NCYCLE',ncycle
-
+     write(message,*) 'ICYCLE',icycle,skipcycle
+     call wrtout(std_out,message,'COLL')
+     write(message,*) 'NCYCLE',ncycle
+     call wrtout(std_out,message,'COLL')
      if (skipcycle) exit
 
 !    write(std_out,*) 'mover 18'

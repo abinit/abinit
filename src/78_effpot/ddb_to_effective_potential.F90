@@ -271,8 +271,9 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
 &                              elast_clamped(ivarA,4)*fact/100.00_dp,&
 &                              elast_clamped(ivarA,5)*fact/100.00_dp,&
 &                              elast_clamped(ivarA,6)*fact/100.00_dp
-    end do
     call wrtout(std_out,message,'COLL')
+    call wrtout(ab_out,message,'COLL')
+    end do
     
 !   Set the clamped tensor into the effective potentiel
     effective_potential%elastic_constants = elast_clamped

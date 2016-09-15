@@ -607,17 +607,16 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
  if(option==0) then
    if(((max1-min1+1)/=n_cell(1).and.&
 &    (max2-min2+1)/=n_cell(2).and.(max3-min3+1)/=n_cell(3))) then
-     write(message, '(5a,3I3,5a,3I3,2a)' )&
-&      'WARNING: dipdip is set to zero, the longe range interation might be wrong',ch10,&
-&      'because it is not recompute.',ch10,&
-&      'The previous harmonic part is build for ',(max1-min1+1),(max2-min2+1),(max3-min3+1)&
-&,     ' cell.',ch10,'Be sure than the dipole-dipole interation ',ch10,&
-&      'is correct for the supercell: ',n_cell(:),ch10,&
-&      'or set dipdip to 1'
+     write(message, '(6a,3I3,5a,3I3,a)' ) ch10,&
+&      ' WARNING: dipdip is set to zero, the longe range interation might be wrong',ch10,&
+&      '          because it is not recompute.',ch10,&
+&      '          The previous harmonic part is build for ',(max1-min1+1),(max2-min2+1),(max3-min3+1)&
+&,     ' cell.',ch10,'          Be sure than the dipole-dipole interation ',ch10,&
+&      '          is correct for the supercell: ',n_cell(:),' or set dipdip to 1'
      call wrtout(std_out,message,"COLL")
    else
      write(message,'(a)')&
-&    'WARNING: dipdip is set to zero, the longe range interation is not recompute'
+&    ' WARNING: dipdip is set to zero, the longe range interation is not recompute'
      call wrtout(std_out,message,"COLL")
    end if
 
@@ -645,7 +644,7 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
      if ((abs(min1) > abs(min1_cell)).or.(abs(max1) > abs(max1_cell)).or.&
 &        (abs(min2) > abs(min2_cell)).or.(abs(max2) > abs(max2_cell)).or.&
 &        (abs(min3) > abs(min3_cell)).or.(abs(max3) > abs(max3_cell))) then
-       write(message, '(5a,3I3,3a)' )&
+       write(message, '(6a,3I3,3a)' )ch10,&
 &        ' --- !WARNING',ch10,&
 &        '     The previous harmonic part was build for bigger cell',ch10,&
 &        '     ifc is adjust on ',int((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),' cell',ch10,&
@@ -1488,24 +1487,40 @@ subroutine effective_potential_print(eff_pot,option,filename)
 &     '  - Primitive vectors:  '
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
-    write(message,'(3(F12.6))') (eff_pot%rprimd) 
+    do ii = 1,3
+      write(message,'(3F12.6)') eff_pot%rprimd(1,ii),eff_pot%rprimd(2,ii),eff_pot%rprimd(3,ii) 
+      call wrtout(ab_out,message,'COLL')
+      call wrtout(std_out,message,'COLL')
+    end do  
+    write(message,'(2a,3F12.6)') '  - acell:',ch10,eff_pot%acell(1),eff_pot%acell(2),eff_pot%acell(3)
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
-    write(message,'(4a,3(F12.6))') '  - acell:  ',ch10,eff_pot%acell
+    write(message,'(a)') '  - Dielectric tensor:  '
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
-    write(message,'(4a,3(F12.6))') '  - Dielectric tensor:  ',ch10,eff_pot%epsilon_inf
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')
-    write(message,'(4a,6(F12.6))') '  - Elastic tensor:  ',ch10,eff_pot%elastic_constants
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')
+    do ii=1,3
+      write(message,'(3F12.6)')eff_pot%epsilon_inf(1,ii),&
+&                              eff_pot%epsilon_inf(2,ii),&
+&                              eff_pot%epsilon_inf(3,ii)
+      call wrtout(ab_out,message,'COLL')
+      call wrtout(std_out,message,'COLL')
+    end do
+      write(message,'(a)') '  - Elastic tensor:  '
+      call wrtout(ab_out,message,'COLL')
+      call wrtout(std_out,message,'COLL')
+    do ii=1,6
+      write(message,'(6F12.6)')  eff_pot%elastic_constants(1,ii),eff_pot%elastic_constants(2,ii),&
+&                                eff_pot%elastic_constants(3,ii),eff_pot%elastic_constants(4,ii),&
+&                                eff_pot%elastic_constants(5,ii),eff_pot%elastic_constants(6,ii)
+      call wrtout(ab_out,message,'COLL')
+      call wrtout(std_out,message,'COLL')
+    end do
     do ia=1,eff_pot%natom
-      write(message,'(a,I4,2a,3(F10.4),2a,3(F10.4),2a,3(F10.4),2a,3(F12.4),2a)')'  - Atoms',ia,ch10,&
+      write(message,'(a,I4,2a,F10.4,2a,F10.4,2a,3F12.6,2a)')'  - Atoms',ia,ch10,&
 &             "    - atomic number:",eff_pot%znucl(eff_pot%typat(ia)),ch10,&
 &             "    - atomic mass:",eff_pot%amu(eff_pot%typat(ia)),ch10,&
 &             "    - position:",eff_pot%xcart(:,ia),ch10,&
-&             "    - Effective charges:",ch10
+&             "    - Effective charges:"
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
       do ii = 1,3
@@ -1551,6 +1566,7 @@ subroutine effective_potential_printSupercell(eff_pot)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'effective_potential_printSupercell'
+ use interfaces_14_hidewrite
  use interfaces_41_geometry
 !End of the abilint section
 
@@ -1562,54 +1578,91 @@ subroutine effective_potential_printSupercell(eff_pot)
   type(effective_potential_type),intent(inout) :: eff_pot
 !Local variables-------------------------------
 !scalar
-  integer :: iatom
+  integer :: iatom,ii
   character(len=500) :: message
 !array
   real(dp), allocatable :: xred(:,:)
+
 ! *************************************************************************
 
   ABI_ALLOCATE(xred,(3,eff_pot%supercell%natom_supercell))
+
 !**********************************************************************
 ! Write basics values 
 !**********************************************************************
 
- write (ab_out, '(2a)') '  Lattice vectors for supercell :',ch10
- write (ab_out, '(a,I7)') ' natom ', eff_pot%supercell%natom_supercell
- write (ab_out, *)
- write (ab_out, '(a)') ' znucl '
+ write (message, '(4a,I8,a)') ' Structure parameters of the supercell :',ch10,ch10,&
+                       '  natom ', eff_pot%supercell%natom_supercell,ch10
+ call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL')
+
+ write (message, '(a)') '  znucl '
+ call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL')
+ write(message,*) ''
  do iatom = 1, size(eff_pot%znucl)
-   write (ab_out, '(I5)', ADVANCE="NO") int(eff_pot%znucl(iatom))
-   if (mod(iatom,6) == 0) write (ab_out, *)
+   write (message, '(a,I5)') trim(message),int(eff_pot%znucl(iatom))
+   if (mod(iatom,6) == 0) then
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+     write(message,*) ''
+   end if
  end do
- write (ab_out, *)
- write (ab_out, *)
- write (ab_out, '(a,I7)') ' ntypat', size(eff_pot%znucl)
- write (ab_out, '(a)') ' typat '
+ write (message, '(2a)') trim(message),ch10
+ call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL')
+ write (message, '(a,I7,3a)') '  ntypat', size(eff_pot%znucl),ch10,ch10, '  typat '
+ call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL')
+
+ write(message,*) ''
  do iatom = 1, eff_pot%supercell%natom_supercell
-   write (ab_out, '(I5)', ADVANCE="NO")&
-&    eff_pot%supercell%typat_supercell(&
-&    eff_pot%supercell%atom_indexing_supercell(iatom))
-   if (mod(iatom,12) == 0) write (ab_out, *)
+   write (message, '(a,I5)') trim(message),&
+&         eff_pot%supercell%typat_supercell(eff_pot%supercell%atom_indexing_supercell(iatom))
+   if (mod(iatom,12) == 0)then
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+     write(message,*) ''
+   end if
  end do
- write (ab_out, *)
- write (ab_out, '(a)') ' acell 1.0 1.0 1.0'
- write (ab_out, '(a)') ' rprim'
- write (ab_out, '(3E23.14)') eff_pot%supercell%rprimd_supercell(:,1)
- write (ab_out, '(3E23.14)') eff_pot%supercell%rprimd_supercell(:,2)
- write (ab_out, '(3E23.14)') eff_pot%supercell%rprimd_supercell(:,3)
- write (ab_out, *)
- write (ab_out, '(a)') ' xcart'
- do iatom = 1, eff_pot%supercell%natom_supercell
-   write (ab_out, '(3E23.14)') eff_pot%supercell%xcart_supercell(:,iatom)
+ write (message, '(2a)') trim(message),ch10
+ call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL')
+ write (message, '(3a)') '  acell 1.0 1.0 1.0',ch10,ch10
+ write (message, '(2a)') trim(message),'  rprim'
+ call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL')
+  
+ do ii = 1,3 
+   write(message,'(3E23.14,3E23.14,3E23.14)') eff_pot%supercell%rprimd_supercell(1,ii),&
+&                                             eff_pot%supercell%rprimd_supercell(2,ii),&
+&                                             eff_pot%supercell%rprimd_supercell(3,ii)
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
  end do
- call xcart2xred(eff_pot%supercell%natom_supercell,eff_pot%supercell%rprimd_supercell,&
-&                eff_pot%supercell%xcart_supercell,xred)
- write (ab_out, '(a)') ' xred'
- do iatom = 1, eff_pot%supercell%natom_supercell
-   write (ab_out, '(3E23.14)') xred(:,iatom)
- end do
- 
- ABI_DEALLOCATE(xred)
+
+  write (message, '(2a)') ch10,'  xcart'
+  call wrtout(ab_out,message,'COLL')
+  call wrtout(std_out,message,'COLL')
+  do iatom = 1, eff_pot%supercell%natom_supercell
+    write (message, '(3E23.14)') eff_pot%supercell%xcart_supercell(1,iatom),&
+&                                eff_pot%supercell%xcart_supercell(2,iatom),&
+&                                eff_pot%supercell%xcart_supercell(3,iatom)
+    call wrtout(ab_out,message,'COLL')
+    call wrtout(std_out,message,'COLL')
+  end do
+  call xcart2xred(eff_pot%supercell%natom_supercell,eff_pot%supercell%rprimd_supercell,&
+ &                eff_pot%supercell%xcart_supercell,xred)
+  write (message, '(2a)') ch10,'  xred'
+  call wrtout(ab_out,message,'COLL')
+  call wrtout(std_out,message,'COLL')
+  do iatom = 1, eff_pot%supercell%natom_supercell
+    write (message, '(3E23.14)') xred(1,iatom),&
+&                                xred(2,iatom),&
+&                                xred(3,iatom)
+    call wrtout(ab_out,message,'COLL')
+    call wrtout(std_out,message,'COLL')
+  end do
 
 end subroutine effective_potential_printSupercell
 !!***

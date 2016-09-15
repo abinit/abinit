@@ -147,10 +147,14 @@ subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblo
 
 !print the force response internal strain constants into the output file
 
- write(message,'(4a,a5,a4,a11,a12,a12,a12,a12,a12)')ch10,&
-& ' Force-response internal strain tensor','(Unit:Hartree/bohr)',ch10,&
-& ' Atom',' dir','strainxx','strainyy','strainzz','strainyz','strainxz','strainxy'
+ write(message,'(a,a,a,a)')ch10,&
+& ' Force-response internal strain tensor','(Unit:Hartree/bohr)',ch10
  call wrtout(std_out,message,'COLL')
+ call wrtout(iout,message,'COLL')
+
+ write(message,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
+& 'strainyy','strainzz','strainyz','strainxz','strainxy'
+ call wrtout(std_out,message,'COLL') 
  do ii1=1,3*natom
    if(mod(ii1,3)==1)then
      direction='x'
@@ -166,7 +170,6 @@ subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblo
  end do
 
 !now write into the ddb output file
- call wrtout(iout,message,'COLL')
  write(message,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
 & 'strainyy','strainzz','strainyz','strainxz','strainxy'
  call wrtout(iout,message,'COLL')

@@ -14,14 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Wed 14 Sep 2016.
-- ( at 14h30 )
+.Starting date : Thu 15 Sep 2016.
+- ( at 16h11 )
   
+-  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
-system.xml
+ system.xml
  to initialize the epigene input
 
 ================================================================================
@@ -130,25 +131,28 @@ system.xml
 
 ================================================================================
 
-  Lattice vectors for supercell :
+ Structure parameters of the supercell :
 
- natom      32
+  natom       32
 
- znucl 
+  znucl
    13   33
 
- ntypat      2
- typat 
+  ntypat      2
+
+  typat
     1    1    2    2    1    1    2    2    1    1    2    2
     1    1    2    2    1    1    2    2    1    1    2    2
     1    1    2    2    1    1    2    2
- acell 1.0 1.0 1.0
- rprim
+
+  acell 1.0 1.0 1.0
+
+  rprim
    0.13057870095015E+02   0.75389648144000E+01   0.00000000000000E+00
   -0.13057870095015E+02   0.75389648144000E+01   0.00000000000000E+00
    0.00000000000000E+00   0.00000000000000E+00   0.24555590748000E+02
 
- xcart
+  xcart
   -0.21763116825025E+01   0.37694824072000E+01   0.00000000000000E+00
    0.21763116825025E+01   0.37694824072000E+01   0.61388976870000E+01
   -0.21763116825025E+01   0.37694824072000E+01   0.46175055234869E+01
@@ -181,7 +185,8 @@ system.xml
    0.21763116825025E+01   0.11308447221600E+02   0.18416693061000E+02
   -0.21763116825025E+01   0.11308447221600E+02   0.16895300897487E+02
    0.21763116825025E+01   0.11308447221600E+02   0.23034198584487E+02
- xred
+
+  xred
    0.16666666666667E+00   0.33333333333333E+00   0.00000000000000E+00
    0.33333333333333E+00   0.16666666666667E+00   0.25000000000000E+00
    0.16666666666667E+00   0.33333333333333E+00   0.18804294186500E+00
@@ -233,9 +238,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  5.4680292931006650E-30 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -254,9 +259,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  2.4480111174000722E-03 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -275,9 +280,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  9.6697358535898382E-03 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -296,9 +301,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  2.1289227381677583E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -317,9 +322,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  3.6651852580845613E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -338,9 +343,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  5.4790778738242084E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -359,9 +364,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  7.4402353350089573E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -380,9 +385,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  9.3862492320709548E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -401,9 +406,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  1.1132996939608276E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -422,9 +427,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  1.2497701099233885E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -443,9 +448,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  1.3333768917987834E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -464,9 +469,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  1.3567197461161290E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -485,9 +490,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  1.3217587635310946E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -506,9 +511,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  1.2391823437201795E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -527,9 +532,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  1.1254010987042859E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -548,9 +553,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  9.9875051539280918E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -569,9 +574,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  8.7640892580384502E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -590,9 +595,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  7.7263054163880782E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -611,9 +616,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  6.9810739946860378E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -632,9 +637,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  6.5998777740696207E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -653,9 +658,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  6.6213635513426378E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -674,9 +679,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  7.0537973725047345E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -695,9 +700,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  7.8761583078856431E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -716,9 +721,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  9.0375711158531158E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -737,9 +742,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  1.0455507423241489E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -758,9 +763,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  1.2014058921304718E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -779,9 +784,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  1.3564799211859599E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -800,9 +805,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  1.4934033635226376E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -821,9 +826,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  1.5940389344078879E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -842,9 +847,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  1.6423670130691112E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -863,9 +868,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  1.6278804594003091E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -884,9 +889,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  1.5481365313639533E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -905,9 +910,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  1.4091457625565518E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -926,9 +931,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  1.2233755086527213E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -947,9 +952,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  1.0064448411630011E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -968,9 +973,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  7.7397744758543996E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -989,9 +994,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  5.3949849799459763E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -1010,9 +1015,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  3.1347326175571670E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -1031,9 +1036,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part :  1.0315058594867230E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -1052,9 +1057,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part : -8.7181868666774097E-03 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -1073,9 +1078,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part : -2.5580544594802655E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -1094,9 +1099,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part : -4.0318032770134342E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -1115,9 +1120,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part : -5.3160011015947931E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -1136,9 +1141,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part : -6.4487894426935199E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -1157,9 +1162,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part : -7.4803288850878863E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -1178,9 +1183,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part : -8.4691067518505275E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -1199,9 +1204,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part : -9.4774009244046373E-02 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -1220,9 +1225,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part : -1.0565854718331465E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -1241,9 +1246,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part : -1.1787564810717616E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -1262,9 +1267,9 @@ Monte Carlo / Molecular Dynamics
  Energy of the ifc part : -1.3182555348135666E-01 Hartree
 
   strain found:
-    -7.89E-01     1.37E+00     0.00E+00
-    -7.89E-01    -1.37E+00     0.00E+00
-     0.00E+00     0.00E+00     0.00E+00
+   -7.89E-01    1.37E+00    0.00E+00
+   -7.89E-01   -1.37E+00    0.00E+00
+    0.00E+00    0.00E+00    0.00E+00
 
  Energy of the elastic part :  5.6839072947237810E+01 Hartree
 
@@ -1282,6 +1287,6 @@ Monte Carlo / Molecular Dynamics
 
 ================================================================================
 
-+Total cpu time      1.555  and wall time      1.554 sec
++Total cpu time      1.566  and wall time      1.564 sec
 
  epigene : the run completed succesfully.

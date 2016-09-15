@@ -115,6 +115,10 @@ program epigene
 
  start_datetime = asctime()
 
+!Print the number of cpus in log file
+ write(message,'(a,i5,a)') '-  nproc =',nproc,ch10
+ call wrtout(std_out,message,'COLL')
+
 !Initialise the code : write heading, and read names of files.
  if (iam_master) then
    call init10(filnam)
@@ -137,14 +141,18 @@ program epigene
    open (unit=ab_out,file=tmpfilename,form='formatted',status='new')
    rewind (unit=ab_out)
    call herald(codename,abinit_version,ab_out)
+!  Print the number of cpus in output
+   write(message,'(a,i5,a)') '-  nproc =',nproc
+   call wrtout(ab_out,message,'COLL')
  else
    ab_out = dev_null
  end if
 
- write(message, '(a,(80a),a,a)' ) ch10,&
+ write(message, '(a,(80a),a)' ) ch10,&
 &  ('=',ii=1,80),ch10
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
+
 
 !To automate a maximum calculation, epigine reads the number of atoms 
 !in the file (ddb or xml). If DDB file is present in input, the ifc calculation

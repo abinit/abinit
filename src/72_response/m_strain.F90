@@ -233,8 +233,7 @@ subroutine strain_get(rprim,rprim_def,strain)
  real(dp) :: mat_delta(3,3),rprim_inv(3,3)
  real(dp) :: identity(3,3)
 ! *************************************************************************
- write(std_out,'(a,a)') ' strain_get: try to get the strain'
- 
+
  mat_delta = zero
 ! Fill the identity matrix
  identity = zero
@@ -254,7 +253,6 @@ subroutine strain_get(rprim,rprim_def,strain)
   
  mat_delta = identity
  call strain_def2strain(mat_delta,strain)
- write(std_out,'(a,a)') ' end strain_get'
 
 end subroutine strain_get
 !!***
@@ -304,15 +302,12 @@ subroutine strain_apply(rprim,rprim_def,strain)
 !arrays
  real(dp) :: identity(3,3)
 ! *************************************************************************
- write(std_out,'(a,a)') ' strain_apply: try to get the strain'
 
 ! Fill the identity matrix
  identity = zero
  forall(i=1:3)identity(i,i)=1
  
  rprim_def(:,:) = matmul(rprim(:,:),strain%strain(:,:))
- 
- write(std_out,'(a,a)') ' end strain_get'
 
 end subroutine strain_apply
 !!***
@@ -552,6 +547,7 @@ subroutine strain_print(strain)
  type(strain_type),intent(in) :: strain 
 !Local variables-------------------------------
 !scalar
+ integer :: ii
  character(len=500) :: message
 !arrays
 ! *************************************************************************
@@ -565,17 +561,20 @@ subroutine strain_print(strain)
      write(message,'(a,a,a,a,a,a,I2,a,(ES10.2),a)') ch10,' strain found:',ch10,&
 &      ' The strain is ',trim(strain%name),' type in the direction ',&
 &      strain%direction,' with delta of ',strain%delta, ':'
-     call wrtout(std_out,message,'COLL')
-     write(std_out,'(3(1x,es12.2))') strain%strain
-     write(ab_out,'(3(1x,es12.2))') strain%strain
-
+     do ii = 1,3
+       write(message,'(3es12.2)') strain%strain(1,ii),strain%strain(2,ii),strain%strain(3,ii)
+       call wrtout(std_out,message,'COLL')
+       call wrtout(ab_out,message,'COLL')
+     end do
    else
      write(message,'(a,a,a)') ch10,'  strain found:'
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
-     write(std_out,'(3(1x,es12.2))') strain%strain
-     write(ab_out,'(3(1x,es12.2))') strain%strain
-
+     do ii = 1,3
+       write(message,'(3es12.2)') strain%strain(1,ii),strain%strain(2,ii),strain%strain(3,ii)
+       call wrtout(std_out,message,'COLL')
+       call wrtout(ab_out,message,'COLL')
+     end do
    end if
  end if
 end subroutine strain_print
