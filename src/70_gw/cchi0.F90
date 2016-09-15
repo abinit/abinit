@@ -105,7 +105,6 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
  use defs_abitypes
  use m_xmpi
  use m_blas
- use m_commutator_vkbr
  use m_errors
  use m_profiling_abi
  use m_time
