@@ -53,7 +53,7 @@
 !!      outscfcv
 !!
 !! CHILDREN
-!!      getkpgnorm,getph,cg_getspin,init_bess_spl,initylmg,kpgio,metric
+!!      getkpgnorm,getph,cg_getspin,initylmg,kpgio,metric
 !!      ph1d3d,recip_ylm,sort_dp,splint,xmpi_sum
 !!
 !! SOURCE
@@ -76,7 +76,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
  use m_crystal
 
  use m_numeric_tools, only : simpson
- use m_special_funcs, only : init_bess_spl
+ use m_special_funcs, only : jlspline_t, jlspline_new, jlspline_free, jlspline_integral
  use m_cgtools,       only : cg_getspin
  use m_epjdos,        only : recip_ylm
 
@@ -106,26 +106,28 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
 !Local variables-------------------------------
 !scalars
  integer,parameter :: prtsphere0=0 ! do not output all the band by band details for projections.
- integer :: shift_b,shift_sk,ia,iatom,iband,ierr,ikpt,ilang,ioffkg,is1, is2, isoff
+ integer :: shift_b,shift_sk,iat,iatom,iband,ierr,ikpt,ilang,ioffkg,is1, is2, isoff
  integer :: ipw,ispinor,isppol,ixint,mbess,mcg_disk,me,shift_cg
  integer :: mgfft,my_nspinor,n1,n2,n3,natsph_tot,nfit,npw_k,nradintmax
- integer :: comm,rc_ylm
- real(dp) :: arg,bessarg,bessargmax,bessint_delta,kpgmax,rmax,dr
+ integer :: comm,rc_ylm,itypat,ntypat_extra
+ real(dp) :: arg,bessarg,bessargmax,bessint_delta,kpgmax,rmax,dr,intg
  character(len=500) :: msg
+ type(jlspline_t) :: jlspl
 !arrays
  integer :: iindex(dtset%mpw)
  integer,allocatable :: iatsph(:),nradint(:),atindx(:)
  real(dp) :: kpoint(3),spin(3)
  real(dp) :: xfit(dtset%mpw),yfit(dtset%mpw)
  real(dp) :: ylm_k(dtset%mpw,mbesslang*mbesslang),ylmgr_dum(1)
- real(dp),allocatable :: bess_fit(:,:,:),bess_spl(:,:),bess_spl_der(:,:),jlkpgr_intr(:,:,:)
+ real(dp),allocatable :: bess_fit(:,:,:),jlkpgr_intr(:,:,:)
  real(dp),allocatable :: cg_1band(:,:),cg_1kpt(:,:),kpgnorm(:),ph1d(:,:)
  real(dp),allocatable :: ph3d(:,:,:),ratsph(:),rint(:),sum_1atom_1ll(:,:)
- real(dp),allocatable :: sum_1atom_1lm(:,:),x_bess(:),ylm(:,:)
+ real(dp),allocatable :: sum_1atom_1lm(:,:),ylm(:,:)
  real(dp),allocatable :: xred_sph(:,:)
  real(dp),allocatable :: znucl_sph(:)
  real(dp),allocatable :: phkxred(:,:)
  complex(dpc) :: cgcmat(2,2)
+ logical :: done(dtset%ntypat + dtset%natsph_extra)
 
 !*************************************************************************
 
@@ -177,6 +179,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
  if (partial_dos == 1) then
 
    natsph_tot = dtset%natsph + dtset%natsph_extra
+   ntypat_extra = dtset%ntypat + dtset%natsph_extra
    ABI_ALLOCATE(iatsph,(natsph_tot))
    ABI_ALLOCATE(ratsph,(natsph_tot))
    ABI_ALLOCATE(znucl_sph,(natsph_tot))
@@ -229,12 +232,8 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
    ABI_ALLOCATE(rint,(nradintmax))
    ABI_ALLOCATE(bess_fit,(dtset%mpw,nradintmax,mbesslang))
 
-   ! initialize general Bessel function array on uniform grid  x_bess, 
-   ! from 0 to (2 \pi |k+G|_{max} |r_{max}|)
-   ABI_ALLOCATE(bess_spl,(mbess,mbesslang))
-   ABI_ALLOCATE(bess_spl_der,(mbess,mbesslang))
-   ABI_ALLOCATE(x_bess,(nradintmax))
-   call init_bess_spl(mbess,bessint_delta,mbesslang,bess_spl,bess_spl_der,x_bess)
+   ! initialize general Bessel function array on uniform grid xx, from 0 to (2 \pi |k+G|_{max} |r_{max}|)
+   jlspl = jlspline_new(mbess, bessint_delta, mbesslang)
 
    ! get kg matrix of the positions of G vectors in recip space
    ! for each electronic state, get corresponding wavefunction and project on Ylm
@@ -288,10 +287,10 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
        end do
 
        ! make phkred for all atoms
-       do ia=1,natsph_tot
-         arg=two_pi*( kpoint(1)*xred_sph(1,ia) + kpoint(2)*xred_sph(2,ia) + kpoint(3)*xred_sph(3,ia) )
-         phkxred(1,ia)=cos(arg)
-         phkxred(2,ia)=sin(arg)
+       do iat=1,natsph_tot
+         arg=two_pi*( kpoint(1)*xred_sph(1,iat) + kpoint(2)*xred_sph(2,iat) + kpoint(3)*xred_sph(3,iat) )
+         phkxred(1,iat)=cos(arg)
+         phkxred(2,iat)=sin(arg)
        end do
 
        ! get phases exp (2 pi i (k+G).x_tau) in ph3d
@@ -313,7 +312,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
 
          call sort_dp(npw_k,xfit,iindex,tol14)
          do ilang=1,mbesslang
-           call splint(mbess,x_bess,bess_spl(:,ilang),bess_spl_der(:,ilang),npw_k,xfit,yfit)
+           call splint(mbess, jlspl%xx, jlspl%bess_spl(:,ilang), jlspl%bess_spl_der(:,ilang), npw_k, xfit, yfit)
            ! re-order results for different G vectors
            do ipw=1,npw_k
              bess_fit(iindex(ipw),ixint,ilang) = yfit(ipw)
@@ -321,16 +320,27 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
          end do
        end do ! ixint
 
-       ! TODO: Can reduce method as it depends only on the atom type.
-       !ABI_MALLOC(jlkpgr_intr, (npw_k, mbesslang, natsph_tot))
-       !do ia=1,natsph_tot
-       !  dr = ratsph(ia) / (nradint(ia)-1)
-       !  do ilang=1,mbesslang
-       !    do ipw=1,npw_k
-       !     jlkpgr_intr(ipw,ilang,ia) = simpson(dr, bess_fit(ipw,:,ilang))
-       !    end do
-       !  end do
-       !end do
+       ! Can reduce memory as it depends only on the atom type.
+       ! TODO: handle extra atom, use natom + 1, ntypat + 1 convention!
+       ABI_MALLOC(jlkpgr_intr, (npw_k, mbesslang, ntypat_extra))
+       done = .False.
+
+       do iat=1,natsph_tot
+         iatom = dtset%iatsph(iat)
+         itypat = dtset%typat(iatom)
+         if (done(itypat)) cycle
+         do ilang=1,mbesslang
+           do ipw=1,npw_k
+             intg = jlspline_integral(jlspl, ilang, two_pi*kpgnorm(ipw+ioffkg), 2, 1000, ratsph(iat))
+             jlkpgr_intr(ipw, ilang, itypat) = intg
+             !if (ilang == 1 .and. ipw == 1) then
+             !  write(std_out,*)intg, (ratsph(iat)**3)/3
+             !  MSG_ERROR("Check")
+             !end if
+           end do
+         end do
+         done(itypat) = .True.
+       end do
 
        shift_b = 0
        do iband=1,dtset%mband
@@ -341,8 +351,8 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
            shift_cg = shift_sk + shift_b
 
            call recip_ylm(bess_fit, cg(:,shift_cg+1:shift_cg+npw_k), dtset%istwfk(ikpt),&
-&           nradint, nradintmax,mbesslang, mpi_enreg, dtset%mpw, natsph_tot, npw_k,&
-&           ph3d, prtsphere0, rint, ratsph, rc_ylm, sum_1atom_1ll, sum_1atom_1lm,&
+&           nradint, nradintmax,mbesslang, mpi_enreg, dtset%mpw, natsph_tot, ntypat_extra, npw_k,&
+&           ph3d, jlkpgr_intr, prtsphere0, rint, ratsph, rc_ylm, sum_1atom_1ll, sum_1atom_1lm,&
 &           crystal%ucvol, ylm_k, znucl_sph)
 
            do iatom=1,natsph_tot
@@ -372,7 +382,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
        ioffkg = ioffkg + npw_k
        shift_sk = shift_sk + dtset%mband*my_nspinor*npw_k
 
-       !ABI_FREE(jlkpgr_intr)
+       ABI_FREE(jlkpgr_intr)
        ABI_DEALLOCATE(ph3d)
      end do ! ikpt
    end do ! isppol
@@ -388,8 +398,6 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
 
    ABI_DEALLOCATE(atindx)
    ABI_DEALLOCATE(bess_fit)
-   ABI_DEALLOCATE(bess_spl)
-   ABI_DEALLOCATE(bess_spl_der)
    ABI_DEALLOCATE(iatsph)
    ABI_DEALLOCATE(kpgnorm)
    ABI_DEALLOCATE(nradint)
@@ -399,10 +407,11 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
    ABI_DEALLOCATE(rint)
    ABI_DEALLOCATE(sum_1atom_1ll)
    ABI_DEALLOCATE(sum_1atom_1lm)
-   ABI_DEALLOCATE(x_bess)
    ABI_DEALLOCATE(xred_sph)
    ABI_DEALLOCATE(ylm)
    ABI_DEALLOCATE(znucl_sph)
+
+   call jlspline_free(jlspl)
 
  else if (partial_dos == 2) then
 

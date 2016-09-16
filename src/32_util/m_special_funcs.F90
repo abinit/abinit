@@ -28,6 +28,8 @@ MODULE m_special_funcs
  use m_errors
  use m_splines
 
+ use m_numeric_tools, only : arth, simpson
+
  implicit none
 
  private
@@ -42,9 +44,40 @@ MODULE m_special_funcs
  public :: abi_derf          ! Evaluates the error function in real(dp).
  public :: abi_derfc         ! Evaluates the complementary error function in real(dp).
  public :: besjm             ! Spherical bessel function of order nn. Handles nn=0,1,2,3,4, or 5 only.
- public :: init_bess_spl     
  public :: k_fermi           ! Fermi wave vector corresponding to the local value of the real space density rhor.
  public :: k_thfermi         ! Thomas-Fermi wave vector corresponding to the local value of the real space density rhor
+
+ type,public :: jlspline_t
+
+   integer :: nx
+   ! number of points on linear mesh used in spline.
+
+   integer :: mlang
+   ! mlang= max angular momentum + 1
+
+   real(dp) :: delta
+   ! Step of linear mesh.
+
+   real(dp) :: maxarg
+   ! max arg value.
+
+   real(dp),allocatable :: xx(:)
+   ! xx(nx) 
+   ! coordinates of points belonging to the grid
+
+   real(dp),allocatable :: bess_spl(:,:)
+   ! bess_spl(nx,mlang) 
+   ! bessel functions computed on the linear mesh
+
+   real(dp),allocatable :: bess_spl_der(:,:)
+   ! bess_spl_der(nx,mlang)
+   ! the second derivatives of the cubic spline.
+
+ end type jlspline_t
+
+ public :: jlspline_new         ! Create new object.
+ public :: jlspline_free        ! Free memory.
+ public :: jlspline_integral    ! Compute integral.
 
 CONTAINS  !===========================================================
 !!***
@@ -833,7 +866,7 @@ end function abi_derfc
 !! use a rational polynomial approximation.
 !!
 !! PARENTS
-!!      init_bess_spl,mlwfovlp_radial,psp1nl
+!!      jlspline_new,mlwfovlp_radial,psp1nl
 !!
 !! CHILDREN
 !!
@@ -1038,101 +1071,6 @@ subroutine besjm(arg,besjx,cosx,nn,nx,sinx,xx)
 end subroutine besjm
 !!***
 
-!!****f* m_special_funcs/init_bess_spl
-!! NAME
-!! init_bess_spl
-!!
-!! FUNCTION
-!! Pre-calculate the j_v(y) for recip_ylm on regular grid
-!!     NOTE: spherical Bessel function small j!
-!!
-!! INPUTS
-!!  nx = max number of points on grid for integral
-!!  (THIS VARIABLE WAS UNUSED AND REMOVED DURING PEAUTIFICATION. PMA. ) bessargmax= max point to which we will integrate
-!!  delta = space between integral arguments
-!!  mlang= max angular momentum
-!!
-!! OUTPUT
-!!  bess_spl=array of integrals
-!!  bess_spl_der=array of derivatives of integrals
-!!  xx=coordinates of points belonging to the grid
-!!
-!! PARENTS
-!!      m_cut3d,partial_dos_fractions
-!!
-!! CHILDREN
-!!      besjm,spline
-!!
-!! SOURCE
-
-subroutine init_bess_spl(nx,delta,mlang,bess_spl,bess_spl_der,xx)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_bess_spl'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: nx,mlang
- real(dp),intent(in) :: delta
-!arrays
- real(dp),intent(out) :: bess_spl(nx,mlang),bess_spl_der(nx,mlang)
- real(dp),intent(out) :: xx(nx)
-
-!Local variables -------------------------
-!scalars
- integer :: ix,ll
- character(len=500) :: msg
- real(dp) :: yp1,ypn
-!arrays
- real(dp),allocatable :: cosbessx(:),sinbessx(:)
-
-! *********************************************************************
-
- if (nx < 2) then
-   MSG_ERROR('need more than one point for the interpolation routines')
- end if
-
- !-----------------------------------------------------------------
- !Bessel function into array
- !-----------------------------------------------------------------
- ! integration grid is nfiner times finer than the interpolation grid
- ABI_ALLOCATE(sinbessx,(nx))
- ABI_ALLOCATE(cosbessx,(nx))
-
- ! could be done by chain rule for cos sin (is it worth it?) but
- ! precision problems as numerical errors are propagated.
- do ix=1,nx
-   xx(ix) = (ix-1) * delta
-   sinbessx(ix) = sin(xx(ix))
-   cosbessx(ix) = cos(xx(ix))
- end do
-
- ! fill bess_spl array
- do ll=0,mlang-1
-   call besjm(one,bess_spl(:,ll+1),cosbessx,ll,nx,sinbessx,xx)
-
-   ! call spline to get 2nd derivative (reuse in splint later)
-   yp1 = zero; ypn = zero
-   call spline(xx, bess_spl(:,ll+1), nx, yp1, ypn, bess_spl_der(:,ll+1))
- end do
-
-!write(std_out,*) ' bess funct  0   1   2   3   4'
-!do ix=1,nx
-!write(std_out,*) xx(ix), (bess_spl(ix,ll),ll=1,mlang)
-!end do
-
- ABI_DEALLOCATE(sinbessx)
- ABI_DEALLOCATE(cosbessx)
-
-end subroutine init_bess_spl
-!!***
-
 !----------------------------------------------------------------------
 
 !!****f* m_special_funcs/k_fermi
@@ -1219,7 +1157,196 @@ elemental function k_thfermi(rhor)
 end function k_thfermi
 !!***
 
+!!****f* m_special_funcs/jlspline_new
+!! NAME
+!! jlspline_new
+!!
+!! FUNCTION
+!! Pre-calculate the j_v(y) for recip_ylm on regular grid
+!!     NOTE: spherical Bessel function small j!
+!!
+!! INPUTS
+!!  nx = max number of points on grid for integral
+!!  delta = space between integral arguments
+!!  mlang= max angular momentum
+!!
+!! OUTPUT
+!!  bess_spl=array of integrals
+!!  bess_spl_der=array of derivatives of integrals
+!!  xx=coordinates of points belonging to the grid
+!!
+!! PARENTS
+!!      m_cut3d,partial_dos_fractions
+!!
+!! CHILDREN
+!!      besjm,spline
+!!
+!! SOURCE
+
+type(jlspline_t) function jlspline_new(nx, delta, mlang) result(new) 
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'jlspline_new'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nx,mlang
+ real(dp),intent(in) :: delta
+
+!Local variables -------------------------
+!scalars
+ integer :: ix,ll
+ character(len=500) :: msg
+ real(dp) :: yp1,ypn
+!arrays
+ real(dp),allocatable :: cosbessx(:),sinbessx(:)
+
+! *********************************************************************
+
+ if (nx < 2) then
+   MSG_ERROR('need more than one point for the interpolation routines')
+ end if
+
+ new%nx = nx; new%mlang = mlang; new%delta = delta; new%maxarg = (nx-1) * delta
+ ABI_MALLOC(new%xx, (nx))
+ ABI_MALLOC(new%bess_spl, (nx, mlang))
+ ABI_MALLOC(new%bess_spl_der, (nx, mlang))
+
+ !-----------------------------------------------------------------
+ !Bessel function into array
+ !-----------------------------------------------------------------
+ ! integration grid is nfiner times finer than the interpolation grid
+ ABI_MALLOC(sinbessx, (nx))
+ ABI_MALLOC(cosbessx, (nx))
+
+ ! could be done by chain rule for cos sin (is it worth it?) but
+ ! precision problems as numerical errors are propagated.
+ do ix=1,nx
+   new%xx(ix) = (ix-1) * delta
+   sinbessx(ix) = sin(new%xx(ix))
+   cosbessx(ix) = cos(new%xx(ix))
+ end do
+
+ ! fill bess_spl array
+ do ll=0,mlang-1
+   call besjm(one,new%bess_spl(:,ll+1),cosbessx,ll,nx,sinbessx,new%xx)
+
+   ! call spline to get 2nd derivative (reuse in splint later)
+   yp1 = zero; ypn = zero
+   call spline(new%xx, new%bess_spl(:,ll+1), nx, yp1, ypn, new%bess_spl_der(:,ll+1))
+ end do
+
+!write(std_out,*) ' bess funct  0   1   2   3   4'
+!do ix=1,nx
+!write(std_out,*) xx(ix), (new%bess_spl(ix,ll),ll=1,mlang)
+!end do
+
+ ABI_FREE(sinbessx)
+ ABI_FREE(cosbessx)
+
+end function jlspline_new
+!!***
+
 !----------------------------------------------------------------------
+
+!!****f* m_special_funcs/jlspline_free
+!! NAME
+!! jlspline_free
+!!
+!! FUNCTION
+!!  deallocate memory
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+subroutine jlspline_free(jlspl)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'jlspline_free'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(jlspline_t),intent(inout) :: jlspl
+
+! *********************************************************************
+
+ if (allocated(jlspl%xx)) then
+   ABI_FREE(jlspl%xx)
+ end if
+ if (allocated(jlspl%bess_spl)) then
+   ABI_FREE(jlspl%bess_spl)
+ end if
+ if (allocated(jlspl%bess_spl_der)) then
+   ABI_FREE(jlspl%bess_spl_der)
+ end if
+
+end subroutine jlspline_free
+
+!----------------------------------------------------------------------
+
+!!****f* m_special_funcs/jlspline_integral
+!! NAME
+!! jlspline_integral
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+real(dp) function jlspline_integral(jlspl, il, qq, powr, nr, rcut)  result(res)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'jlspline_free'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in) :: il,nr,powr
+ real(dp),intent(in) :: qq, rcut
+ type(jlspline_t),intent(in) :: jlspl
+
+!Local variables ---------------------------------------
+ integer :: ierr
+ real(dp) :: step
+!arrays
+ real(dp):: xfit(nr),yfit(nr),rr(nr)
+! *********************************************************************
+
+ step = rcut / (nr - 1)
+ rr = arth(zero, step, nr)
+ xfit = qq * rr
+ call splint(jlspl%nx, jlspl%xx, jlspl%bess_spl(:,il), jlspl%bess_spl_der(:,il), nr, xfit, yfit, ierr=ierr)
+
+ if (ierr /= 0) then
+   write(std_out,*)"qq, rcut, qq*rcut, maxarg", qq, rcut, qq*rcut, jlspl%maxarg
+   write(std_out,*)"x[0], x[-1]",jlspl%xx(1),jlspl%xx(jlspl%nx)
+   write(std_out,*)"minval xfit: ",minval(xfit)
+   write(std_out,*)"maxval xfit: ",maxval(xfit)
+   MSG_ERROR("splint returned ierr != 0")
+ end if 
+
+ if (powr /= 1) yfit = yfit * (rr ** powr)
+ res = simpson(step, yfit)
+
+end function jlspline_integral
 
 END MODULE m_special_funcs
 !!***
