@@ -76,6 +76,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
  use m_crystal
 
  use m_numeric_tools, only : simpson
+ use m_special_funcs, only : init_bess_spl
  use m_cgtools,       only : cg_getspin
  use m_epjdos,        only : recip_ylm
 
@@ -85,7 +86,6 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
 #define ABI_FUNC 'partial_dos_fractions'
  use interfaces_28_numeric_noabirule
  use interfaces_56_recipspace
- use interfaces_61_occeig
 !End of the abilint section
 
  implicit none
@@ -226,15 +226,14 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
 !  make sure bessargmax is a multiple of bessint_delta
    bessargmax = bessint_delta*mbess
 
-   ABI_ALLOCATE(bess_spl,(mbess,mbesslang))
-   ABI_ALLOCATE(bess_spl_der,(mbess,mbesslang))
-   ABI_ALLOCATE(x_bess,(nradintmax))
    ABI_ALLOCATE(rint,(nradintmax))
    ABI_ALLOCATE(bess_fit,(dtset%mpw,nradintmax,mbesslang))
 
-   !  initialize general Bessel function array on uniform grid  x_bess, 
-   !  from 0 to (2 \pi |k+G|_{max} |r_{max}|)
-   !  TODO: Replace with: use m_paw_numeric, only : paw_jbessel_4spline, paw_spline
+   ! initialize general Bessel function array on uniform grid  x_bess, 
+   ! from 0 to (2 \pi |k+G|_{max} |r_{max}|)
+   ABI_ALLOCATE(bess_spl,(mbess,mbesslang))
+   ABI_ALLOCATE(bess_spl_der,(mbess,mbesslang))
+   ABI_ALLOCATE(x_bess,(nradintmax))
    call init_bess_spl(mbess,bessint_delta,mbesslang,bess_spl,bess_spl_der,x_bess)
 
    ! get kg matrix of the positions of G vectors in recip space

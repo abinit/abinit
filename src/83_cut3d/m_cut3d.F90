@@ -38,6 +38,7 @@ MODULE m_cut3d
  use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists
  use m_numeric_tools,    only : interpol3d
  use m_fstrings,         only : int2char10, sjoin, itoa
+ use m_special_funcs,    only : init_bess_spl
  use m_pptools,          only : print_fofr_ri, print_fofr_xyzri , print_fofr_cube
  use m_mpinfo,           only : destroy_mpi_enreg
  use m_cgtools,          only : cg_getspin
@@ -2076,7 +2077,6 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_56_recipspace
- use interfaces_61_occeig
  use interfaces_67_common
 !End of the abilint section
 

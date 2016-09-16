@@ -20,7 +20,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
  "dos_hdr_write.F90",
  "getnel.F90",
- "init_bess_spl.F90",
  "init_occ_ent.F90",
  "m_ebands.F90",
  "m_epjdos.F90",
