@@ -1429,12 +1429,11 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
 
  sum_1lm_1atom = zero
  sum_1ll_1atom = zero
+ vect = zero
 
  do ixint=1,nradintmax
    rint2(ixint) = rint(ixint)**2
  end do
-
- vect = zero
 
  !if (rc_ylm == 2) then
    ABI_ALLOCATE(ilang,    (mlang**2))
@@ -1505,16 +1504,6 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
          tmppsim(2, ipw) =  coef2(illmm) * tmppsia(2, ipw) * ylm(ipw, reylmind(illmm)) &
 &         - mmsign(illmm) * coef1(illmm) * tmppsia(1, ipw) * ylm(ipw, imylmind(illmm))
        end do
-
-       ! Handle time-reversal
-       !if (istwfk /= 1) then
-       !  if (mod(ilang(illmm) - 1, 2) == 0) then
-       !     tmppsim(2,:) = zero
-       !  else
-       !     tmppsim(1,:) = tmppsim(2,:)
-       !     tmppsim(2,:) = zero
-       !  end if
-       !end if
 
      else if (rc_ylm == 1) then
        ! to get PDOS for real spherical harmonics, multiply here by ylm instead of linear combination

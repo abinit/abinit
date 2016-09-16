@@ -38,7 +38,7 @@ MODULE m_cut3d
  use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists
  use m_numeric_tools,    only : interpol3d
  use m_fstrings,         only : int2char10, sjoin, itoa
- use m_special_funcs,    only : jlspline_t, jlspline_new, jlspline_free
+ use m_special_funcs,    only : jlspline_t, jlspline_new, jlspline_free, jlspline_integral
  use m_pptools,          only : print_fofr_ri, print_fofr_xyzri , print_fofr_cube
  use m_mpinfo,           only : destroy_mpi_enreg
  use m_cgtools,          only : cg_getspin
@@ -2098,13 +2098,13 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  integer,parameter :: tim_fourwf0=0,tim_rwwf0=0,ndat1=1,formeig0=0
  integer :: cband,cgshift,ckpt,cplex,cspinor,csppol,gridshift1
  integer :: gridshift2,gridshift3,ia,iatom,iband,ichoice,ifile,iomode
- integer :: ii1,ii2,ii3,ikpt,ilang,ioffkg,iout,iprompt,ipw !,iomode,ierr,
+ integer :: ii1,ii2,ii3,ikpt,ilang,ioffkg,iout,iprompt,ipw,itypat
  integer :: ir1,ir2,ir3,ivect,ixint,mband,mbess,mcg,mgfft
  integer :: mkmem,mlang,mpw,n4,n5,n6,nfit,npw_k
  integer :: nradintmax,oldcband,oldckpt,oldcspinor,oldcsppol
  integer :: prtsphere,select_exit,unout,iunt,rc_ylm
  integer :: ikpt_qps,nkpt_qps,nband_qps,iscf_qps
- real(dp) :: arg,bessargmax,bessint_delta,kpgmax,ratsph,tmpi,tmpr,ucvol,weight,eig_k_qps
+ real(dp) :: arg,bessargmax,bessint_delta,kpgmax,ratsph,tmpi,tmpr,ucvol,weight,eig_k_qps,intg
  character(len=*), parameter :: INPUTfile='cut.in'
  character(len=1) :: outputchar
  character(len=10) :: string
@@ -2492,11 +2492,22 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        prtsphere=1
        ratsph_arr(:)=ratsph
 
+       ABI_MALLOC(jlkpgr_intr, (npw_k, mlang, ntypat))
+       do itypat=1,ntypat
+         do ilang=1,mlang
+           do ipw=1,npw_k
+             intg = jlspline_integral(jlspl, ilang, two_pi*kpgnorm(ipw), 2, 1000, ratsph)
+             jlkpgr_intr(ipw, ilang, itypat) = intg
+             !if (ilang == 1 .and. ipw == 1) then
+             !  write(std_out,*)intg, (ratsph(iat)**3)/3
+             !  MSG_ERROR("Check")
+             !end if
+           end do
+         end do
+       end do
+
        rc_ylm = 2 ! Real or Complex spherical harmonics.
        !rc_ylm = 1 
-
-       ABI_MALLOC(jlkpgr_intr, (npw_k, mlang, ntypat))
-
        call recip_ylm (bess_fit,cgcband,istwfk(ckpt),&
 &       nradint,nradintmax,mlang,mpi_enreg,mpw,natom,ntypat,npw_k,ph3d,jlkpgr_intr,prtsphere,rint,&
 &       ratsph_arr,rc_ylm,sum_1atom_1ll,sum_1atom_1lm,ucvol,ylm_k,znucl_atom)

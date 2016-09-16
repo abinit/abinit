@@ -324,7 +324,6 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
        ! TODO: handle extra atom, use natom + 1, ntypat + 1 convention!
        ABI_MALLOC(jlkpgr_intr, (npw_k, mbesslang, ntypat_extra))
        done = .False.
-
        do iat=1,natsph_tot
          iatom = dtset%iatsph(iat)
          itypat = dtset%typat(iatom)
