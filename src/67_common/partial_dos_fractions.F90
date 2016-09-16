@@ -232,14 +232,14 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
    ABI_ALLOCATE(rint,(nradintmax))
    ABI_ALLOCATE(bess_fit,(dtset%mpw,nradintmax,mbesslang))
 
-!  initialize general Bessel function array on uniform grid
-!  x_bess, from 0 to (2 \pi |k+G|_{max} |r_{max}|)
-!  TODO: Replace with: use m_paw_numeric, only : paw_jbessel_4spline, paw_spline
+   !  initialize general Bessel function array on uniform grid  x_bess, 
+   !  from 0 to (2 \pi |k+G|_{max} |r_{max}|)
+   !  TODO: Replace with: use m_paw_numeric, only : paw_jbessel_4spline, paw_spline
    call init_bess_spl(mbess,bessint_delta,mbesslang,bess_spl,bess_spl_der,x_bess)
 
-!  get kg matrix of the positions of G vectors in recip space
-!  for each electronic state, get corresponding wavefunction and project on Ylm
-!  remember: cg(2,dtset%mpw*my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol)
+   ! get kg matrix of the positions of G vectors in recip space
+   ! for each electronic state, get corresponding wavefunction and project on Ylm
+   ! remember: cg(2,dtset%mpw*my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol)
    ABI_ALLOCATE(xred_sph, (3, natsph_tot))
    do iatom=1,dtset%natsph
      xred_sph(:,iatom) = crystal%xred(:,iatsph(iatom))
@@ -251,14 +251,14 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
    ABI_ALLOCATE(ph1d,(2,(2*n1+1 + 2*n2+1 + 2*n3+1)*natsph_tot))
    call getph(atindx,natsph_tot,n1,n2,n3,ph1d,xred_sph)
 
-!  Now get Ylm factors: returns "real Ylms", which are real (+m) and
-!  imaginary (-m) parts of actual complex Ylm. Yl-m = Ylm*
-!  Single call to initylmg for all kg (all mkmem are in memory)
+   ! Now get Ylm factors: returns "real Ylms", which are real (+m) and
+   ! imaginary (-m) parts of actual complex Ylm. Yl-m = Ylm*
+   ! Single call to initylmg for all kg (all mkmem are in memory)
    ABI_ALLOCATE(ylm,(dtset%mpw*dtset%mkmem,mbesslang*mbesslang))
    call initylmg(crystal%gprimd,kg,dtset%kpt,dtset%mkmem,mpi_enreg,mbesslang,&
 &   dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,0,crystal%rprimd,ylm,ylmgr_dum)
 
-!  kpgnorm contains norms only for kpoints used by this processor
+   ! kpgnorm contains norms only for kpoints used by this processor
    ABI_ALLOCATE(kpgnorm,(dtset%mpw*dtset%mkmem))
    kpgnorm (:) = zero
    ioffkg = 0
@@ -273,7 +273,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
 
    shift_sk = 0
    do isppol=1,dtset%nsppol
-!    kg array is the same for both sppol ?????
+     ! kg array is the same for both sppol ?????
      ioffkg = 0
 
      do ikpt=1,dtset%nkpt
@@ -281,31 +281,30 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
        kpoint(:) = dtset%kpt(:,ikpt)
        npw_k = npwarr(ikpt)
 
-!      for each kpoint set up the phase factors, ylm factors
+       ! for each kpoint set up the phase factors, ylm factors
        do ilang=1,mbesslang*mbesslang
          do ipw=1,npw_k
            ylm_k(ipw,ilang) = ylm(ioffkg+ipw,ilang)
          end do
        end do
 
-!      make phkred for all atoms
+       ! make phkred for all atoms
        do ia=1,natsph_tot
          arg=two_pi*( kpoint(1)*xred_sph(1,ia) + kpoint(2)*xred_sph(2,ia) + kpoint(3)*xred_sph(3,ia) )
          phkxred(1,ia)=cos(arg)
          phkxred(2,ia)=sin(arg)
        end do
 
-!      get phases exp (2 pi i (k+G).x_tau) in ph3d
+       ! get phases exp (2 pi i (k+G).x_tau) in ph3d
        ABI_ALLOCATE(ph3d,(2,npw_k,natsph_tot))
        call ph1d3d(1,natsph_tot,kg(:,ioffkg+1:ioffkg+npw_k), &
         natsph_tot,natsph_tot,npw_k,n1,n2,n3,phkxred,ph1d,ph3d)
 
-!      get Bessel function factors on array of |k+G|*r distances
-!      since we need many r distances and have a large number of different
-!      |k+G|, get j_l on uniform grid (above, in array gen_besj),
-!      and spline it for each kpt Gvector set.
-!      TODO: Precompute (k+G) integrals here and pass them to recip_ylm)
-       nfit = npw_k
+       ! get Bessel function factors on array of |k+G|*r distances
+       ! since we need many r distances and have a large number of different
+       ! |k+G|, get j_l on uniform grid (above, in array gen_besj),
+       ! and spline it for each kpt Gvector set.
+       ! TODO: Precompute (k+G) integrals here and pass them to recip_ylm)
        do ixint=1,nradintmax
          rint(ixint) = (ixint-1)*rmax / (nradintmax-1)
          do ipw=1,npw_k
@@ -315,8 +314,8 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
 
          call sort_dp(npw_k,xfit,iindex,tol14)
          do ilang=1,mbesslang
-           call splint(mbess,x_bess,bess_spl(:,ilang),bess_spl_der(:,ilang),nfit,xfit,yfit)
-!          re-order results for different G vectors
+           call splint(mbess,x_bess,bess_spl(:,ilang),bess_spl_der(:,ilang),npw_k,xfit,yfit)
+           ! re-order results for different G vectors
            do ipw=1,npw_k
              bess_fit(iindex(ipw),ixint,ilang) = yfit(ipw)
            end do
@@ -379,7 +378,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
      end do ! ikpt
    end do ! isppol
 
-!  Gather all contributions from different processors
+   ! Gather all contributions from different processors
    call xmpi_sum(dos_fractions,comm,ierr)
    if (prtdosm /= 0) call xmpi_sum(dos_fractions_m,comm,ierr)
 
@@ -456,12 +455,12 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
    end do
    ABI_DEALLOCATE(cg_1kpt)
 
-!  Gather all contributions from different processors
+   ! Gather all contributions from different processors
    call xmpi_sum(dos_fractions,comm,ierr)
-! below for future use - spinors should not be parallelized for the moment
-!   if (mpi_enreg%paral_spinor == 1)then
-!     call xmpi_sum(dos_fractions,mpi_enreg%comm_spinor,ierr)
-!   end if
+   ! below for future use - spinors should not be parallelized for the moment
+   !   if (mpi_enreg%paral_spinor == 1)then
+   !     call xmpi_sum(dos_fractions,mpi_enreg%comm_spinor,ierr)
+   !   end if
 
  else
    MSG_WARNING('only partial_dos==1 is coded')

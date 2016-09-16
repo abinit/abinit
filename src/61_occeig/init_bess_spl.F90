@@ -15,15 +15,15 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
-!!  mbess=  max number of points on grid for integral
+!!  nx = max number of points on grid for integral
 !!  (THIS VARIABLE WAS UNUSED AND REMOVED DURING PEAUTIFICATION. PMA. ) bessargmax= max point to which we will integrate
-!!  bessint_delta = space between integral arguments
-!!  mlang=  max angular momentum
+!!  delta = space between integral arguments
+!!  mlang= max angular momentum
 !!
 !! OUTPUT
 !!  bess_spl=array of integrals
 !!  bess_spl_der=array of derivatives of integrals
-!!  x_bess=coordinates of points belonging to the grid
+!!  xx=coordinates of points belonging to the grid
 !!
 !! PARENTS
 !!      m_cut3d,partial_dos_fractions
@@ -39,99 +39,73 @@
 
 #include "abi_common.h"
 
-subroutine init_bess_spl(mbess,bessint_delta,mlang,bess_spl,bess_spl_der,x_bess)
+subroutine init_bess_spl(nx,delta,mlang,bess_spl,bess_spl_der,xx)
 
  use defs_basis
  use m_splines
  use m_profiling_abi
  use m_errors
 
+ use m_special_funcs,  only : besjm
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'init_bess_spl'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mbess,mlang
- real(dp),intent(in) :: bessint_delta
+ integer,intent(in) :: nx,mlang
+ real(dp),intent(in) :: delta
 !arrays
- real(dp),intent(out) :: bess_spl(mbess,mlang),bess_spl_der(mbess,mlang)
- real(dp),intent(out) :: x_bess(mbess)
+ real(dp),intent(out) :: bess_spl(nx,mlang),bess_spl_der(nx,mlang)
+ real(dp),intent(out) :: xx(nx)
 
 !Local variables -------------------------
-! function calls (NumRec)
 !scalars
- integer :: iintarg,ll
+ integer :: ix,ll
  character(len=500) :: msg
- real(dp) :: cosdelta_bess,sindelta_bess,yp1,ypn
+ real(dp) :: yp1,ypn
 !arrays
  real(dp),allocatable :: cosbessx(:),sinbessx(:)
 
 ! *********************************************************************
 
-!DEBUG
-!write(std_out,*) 'init_bess_spl enter '
-!ENDDEBUG
- if (mbess < 2) then
-   msg = 'init_bess_spl  Error: need more than one point for the interpolation routines'
-   MSG_ERROR(msg)
+ if (nx < 2) then
+   MSG_ERROR('need more than one point for the interpolation routines')
  end if
 
-!-----------------------------------------------------------------
-!Bessel function into array
-!-----------------------------------------------------------------
+ !-----------------------------------------------------------------
+ !Bessel function into array
+ !-----------------------------------------------------------------
+ ! integration grid is nfiner times finer than the interpolation grid
+ ABI_ALLOCATE(sinbessx,(nx))
+ ABI_ALLOCATE(cosbessx,(nx))
 
-!integration grid is nfiner times finer than the interpolation grid
- ABI_ALLOCATE(sinbessx,(mbess))
- ABI_ALLOCATE(cosbessx,(mbess))
-
- sindelta_bess = sin(bessint_delta)
- cosdelta_bess = cos(bessint_delta)
-!
-!could be done by chain rule for cos sin (is it worth it?) but
-!precision problems as numerical errors are propagated.
-!
- do iintarg=1,mbess
-   x_bess(iintarg) = (iintarg-1)*bessint_delta
-   sinbessx(iintarg) = sin(x_bess(iintarg))
-   cosbessx(iintarg) = cos(x_bess(iintarg))
-
-!  x_bess(iintarg) = x_bess(iintarg-1)+bessint_delta
-!  !  get sin and cos of x_bess arguments
-!  sinbessx(iintarg) = sinbessx(iintarg-1)*cosdelta_bess &
-!  &                     + cosbessx(iintarg-1)*sindelta_bess
-!  cosbessx(iintarg) = cosbessx(iintarg-1)*cosdelta_bess &
-!  &                     - sinbessx(iintarg-1)*sindelta_bess
+ ! could be done by chain rule for cos sin (is it worth it?) but
+ ! precision problems as numerical errors are propagated.
+ do ix=1,nx
+   xx(ix) = (ix-1) * delta
+   sinbessx(ix) = sin(xx(ix))
+   cosbessx(ix) = cos(xx(ix))
  end do
 
-!write(std_out,*) 'x_bess = ', x_bess
-!
-!fill bess_spl array
-!
+ ! fill bess_spl array
  do ll=0,mlang-1
+   call besjm(one,bess_spl(:,ll+1),cosbessx,ll,nx,sinbessx,xx)
 
-   call besjm(one,bess_spl(:,ll+1),cosbessx,   &
-&   ll,mbess,sinbessx,x_bess)
-!  
-!  call spline to get 2nd derivative (reuse in splint later)
-!  
-   yp1 = zero
-   ypn = zero
-   call spline (x_bess, bess_spl(:,ll+1), mbess, yp1, ypn, &
-&   bess_spl_der(:,ll+1))
+   ! call spline to get 2nd derivative (reuse in splint later)
+   yp1 = zero; ypn = zero
+   call spline(xx, bess_spl(:,ll+1), nx, yp1, ypn, bess_spl_der(:,ll+1))
  end do
 
-!DEBUG
 !write(std_out,*) ' bess funct  0   1   2   3   4'
-!do iintarg=1,mbess
-!write(std_out,*) x_bess(iintarg), (bess_spl(iintarg,ll),ll=1,mlang)
+!do ix=1,nx
+!write(std_out,*) xx(ix), (bess_spl(ix,ll),ll=1,mlang)
 !end do
-!ENDDEBUG
 
  ABI_DEALLOCATE(sinbessx)
  ABI_DEALLOCATE(cosbessx)
