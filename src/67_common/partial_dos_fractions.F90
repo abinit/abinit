@@ -110,12 +110,13 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
  integer :: ipw,ispinor,isppol,ixint,mbess,mcg_disk,me,shift_cg
  integer :: mgfft,my_nspinor,n1,n2,n3,natsph_tot,nfit,npw_k,nradintmax
  integer :: comm,rc_ylm,itypat,ntypat_extra
- real(dp) :: arg,bessarg,bessargmax,bessint_delta,kpgmax,rmax,dr,intg
+ real(dp),parameter :: bessint_delta = 0.1_dp
+ real(dp) :: arg,bessarg,bessargmax,kpgmax,rmax,dr,intg
  character(len=500) :: msg
  type(jlspline_t) :: jlspl
 !arrays
  integer :: iindex(dtset%mpw)
- integer,allocatable :: iatsph(:),nradint(:),atindx(:)
+ integer,allocatable :: iatsph(:),nradint(:),atindx(:),typat_extra(:)
  real(dp) :: kpoint(3),spin(3)
  real(dp) :: xfit(dtset%mpw),yfit(dtset%mpw)
  real(dp) :: ylm_k(dtset%mpw,mbesslang*mbesslang),ylmgr_dum(1)
@@ -127,7 +128,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
  real(dp),allocatable :: znucl_sph(:)
  real(dp),allocatable :: phkxred(:,:)
  complex(dpc) :: cgcmat(2,2)
- logical :: done(dtset%ntypat + dtset%natsph_extra)
+ logical :: done_type(dtset%ntypat + dtset%natsph_extra)
 
 !*************************************************************************
 
@@ -177,42 +178,45 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
 !##############################################################
 
  if (partial_dos == 1) then
-
-   natsph_tot = dtset%natsph + dtset%natsph_extra
    ntypat_extra = dtset%ntypat + dtset%natsph_extra
-   ABI_ALLOCATE(iatsph,(natsph_tot))
-   ABI_ALLOCATE(ratsph,(natsph_tot))
-   ABI_ALLOCATE(znucl_sph,(natsph_tot))
-   ABI_ALLOCATE(nradint,(natsph_tot))
-   ABI_ALLOCATE(atindx,(natsph_tot))
-   ABI_ALLOCATE(phkxred,(2,natsph_tot))
+   natsph_tot = dtset%natsph + dtset%natsph_extra
 
-!  initialize atindx
+   ABI_ALLOCATE(iatsph, (natsph_tot))
+   ABI_ALLOCATE(ratsph, (natsph_tot))
+   ABI_ALLOCATE(znucl_sph, (natsph_tot))
+   ABI_ALLOCATE(nradint, (natsph_tot))
+   ABI_ALLOCATE(atindx, (natsph_tot))
+   ABI_ALLOCATE(typat_extra, (natsph_tot))
+   ABI_ALLOCATE(phkxred, (2,natsph_tot))
+
+   ! initialize atindx
    do iatom=1,natsph_tot
      atindx(iatom) = iatom
    end do
 
-   iatsph(1:dtset%natsph)=dtset%iatsph(1:dtset%natsph)
-!  random choice to set index of type for fictitious atoms to atom 1. Will become input variable as:
-!  dtset%natsph_extra : int
-!  dtset%ratsph_extra : real
-!  dtset%xredsph_extra(3, dtset%natsph_extra) : real
-   iatsph(dtset%natsph+1:natsph_tot)=1
-
+   iatsph(1:dtset%natsph) = dtset%iatsph(1:dtset%natsph)
    do iatom=1,dtset%natsph
-     ratsph(iatom) = dtset%ratsph(dtset%typat(iatsph(iatom)))
-     znucl_sph(iatom) = dtset%znucl(dtset%typat(iatsph(iatom)))
+     itypat = dtset%typat(iatsph(iatom))
+     ratsph(iatom) = dtset%ratsph(itypat)
+     znucl_sph(iatom) = dtset%znucl(itypat)
+     typat_extra(iatom) = itypat
    end do
+   !write(std_out,*)"typat_extra",typat_extra
+   !MSG_ERROR("Hello")
+
+   ! fictitious atoms are declared with %natsph_extra, %ratsph_extra and %xredsph_extra(3, dtset%natsph_extra)
+   ! they have atom index natom + ii
    do iatom=1,dtset%natsph_extra
      ratsph(iatom+dtset%natsph) = dtset%ratsph_extra
      znucl_sph(iatom+dtset%natsph) = 0
+     iatsph(iatom+dtset%natsph) = dtset%natom + iatom
+     typat_extra(iatom+dtset%natsph) = dtset%ntypat + iatom
    end do
 
 !  init bessel function integral for recip_ylm max ang mom + 1
    ABI_ALLOCATE(sum_1atom_1ll,(mbesslang,natsph_tot))
    ABI_ALLOCATE(sum_1atom_1lm,(mbesslang**2,natsph_tot))
 
-   bessint_delta = 0.1_dp
    ! TODO: ecuteff instead of ecut?
    kpgmax = sqrt(dtset%ecut)
    rmax = zero; bessargmax = zero; nradintmax = 0
@@ -323,23 +327,30 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
        ! Can reduce memory as it depends only on the atom type.
        ! TODO: handle extra atom, use natom + 1, ntypat + 1 convention!
        ABI_MALLOC(jlkpgr_intr, (npw_k, mbesslang, ntypat_extra))
-       done = .False.
+       done_type = .False.
        do iat=1,natsph_tot
-         iatom = dtset%iatsph(iat)
-         itypat = dtset%typat(iatom)
-         if (done(itypat)) cycle
+         cycle
+         iatom = iatsph(iat)
+         itypat = typat_extra(iatom)
+         write(std_out, *)iatom, itypat, ntypat_extra
+         cycle
+         !write(std_out, *)itypat, ntypat_extra
+         if (done_type(itypat)) cycle
          do ilang=1,mbesslang
            do ipw=1,npw_k
-             intg = jlspline_integral(jlspl, ilang, two_pi*kpgnorm(ipw+ioffkg), 2, 1000, ratsph(iat))
-             jlkpgr_intr(ipw, ilang, itypat) = intg
+             !intg = jlspline_integral(jlspl, ilang, two_pi*kpgnorm(ipw+ioffkg), 2, 1000, ratsph(iat))
+             !write(std_out, *)itypat, ntypat_extra
+             !ABI_CHECK(itypat <= ntypat_extra, "FOO")
+             !jlkpgr_intr(ipw, ilang, itypat) = intg
              !if (ilang == 1 .and. ipw == 1) then
              !  write(std_out,*)intg, (ratsph(iat)**3)/3
              !  MSG_ERROR("Check")
              !end if
            end do
          end do
-         done(itypat) = .True.
+         done_type(itypat) = .True.
        end do
+       !MSG_ERROR("FOO")
 
        shift_b = 0
        do iband=1,dtset%mband
@@ -350,8 +361,8 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
            shift_cg = shift_sk + shift_b
 
            call recip_ylm(bess_fit, cg(:,shift_cg+1:shift_cg+npw_k), dtset%istwfk(ikpt),&
-&           nradint, nradintmax,mbesslang, mpi_enreg, dtset%mpw, natsph_tot, ntypat_extra, npw_k,&
-&           ph3d, jlkpgr_intr, prtsphere0, rint, ratsph, rc_ylm, sum_1atom_1ll, sum_1atom_1lm,&
+&           nradint, nradintmax,mbesslang, mpi_enreg, dtset%mpw, natsph_tot, ntypat_extra, typat_extra,&
+&           npw_k,ph3d, jlkpgr_intr, prtsphere0, rint, ratsph, rc_ylm, sum_1atom_1ll, sum_1atom_1lm,&
 &           crystal%ucvol, ylm_k, znucl_sph)
 
            do iatom=1,natsph_tot
@@ -396,6 +407,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
    end if
 
    ABI_DEALLOCATE(atindx)
+   ABI_DEALLOCATE(typat_extra)
    ABI_DEALLOCATE(bess_fit)
    ABI_DEALLOCATE(iatsph)
    ABI_DEALLOCATE(kpgnorm)

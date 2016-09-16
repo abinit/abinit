@@ -1383,9 +1383,9 @@ end subroutine dos_degeneratewfs
 !!
 !! SOURCE
 
-subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
-& nradint,nradintmax,mlang,mpi_enreg,mpw,natsph,ntypat_extra,&
-& npw_k,ph3d,jlkpgr_intr,prtsphere,rint,rmax,rc_ylm,sum_1ll_1atom,sum_1lm_1atom,ucvol,ylm,znucl_sph)
+subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enreg,&
+&  mpw,natsph,ntypat,typat,npw_k,ph3d,jlkpgr_intr,prtsphere,&
+&  rint,rmax,rc_ylm,sum_1ll_1atom,sum_1lm_1atom,ucvol,ylm,znucl_sph)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1399,14 +1399,14 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istwfk,mlang,mpw,natsph,npw_k,nradintmax
- integer,intent(in) :: prtsphere,rc_ylm,ntypat_extra
+ integer,intent(in) :: prtsphere,rc_ylm,ntypat
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
- integer,intent(in) :: nradint(natsph)
+ integer,intent(in) :: nradint(natsph),typat(natsph)
  real(dp),intent(in) :: bess_fit(mpw,nradintmax,mlang),cg_1band(2,npw_k)
  real(dp),intent(in) :: ph3d(2,npw_k,natsph),rint(nradintmax)
- real(dp),intent(in) :: jlkpgr_intr(npw_k, mlang, ntypat_extra)
+ real(dp),intent(in) :: jlkpgr_intr(npw_k, mlang, ntypat)
  real(dp),intent(in) :: rmax(natsph),ylm(mpw,mlang*mlang)
  real(dp),intent(in) :: znucl_sph(natsph)
  real(dp),intent(out) :: sum_1ll_1atom(mlang,natsph)
