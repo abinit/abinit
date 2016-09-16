@@ -693,6 +693,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%eph_mustar
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_mustar','DPR',0)
 
+ intarr(1,:)=dtsets(:)%eph_task
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_task','INT',0)
+
  do idtset=0,ndtset_alloc
    intarr(1:3,idtset)=dtsets(idtset)%eph_ngqpt_fine
  end do

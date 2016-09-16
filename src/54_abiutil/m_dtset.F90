@@ -187,6 +187,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%eph_fsmear         = dtin%eph_fsmear
  dtout%eph_fsewin         = dtin%eph_fsewin
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
+ dtout%eph_task           = dtin%eph_task
 
  dtout%ph_wstep          = dtin%ph_wstep
  dtout%ph_intmeth        = dtin%ph_intmeth
@@ -473,6 +474,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtlden            = dtin%prtlden
  dtout%prtnabla           = dtin%prtnabla
  dtout%prtnest            = dtin%prtnest
+ dtout%prtphdos           = dtin%prtphdos
  dtout%prtposcar          = dtin%prtposcar
  dtout%prtpot             = dtin%prtpot
  dtout%prtpsps            = dtin%prtpsps

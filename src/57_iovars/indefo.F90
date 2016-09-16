@@ -595,6 +595,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prtlden=0
    dtsets(idtset)%prtnabla=0
    dtsets(idtset)%prtnest=0
+   dtsets(idtset)%prtphdos=1
    dtsets(idtset)%prtposcar=0
    dtsets(idtset)%prtpot=0
    dtsets(idtset)%prtpsps=0
@@ -798,6 +799,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%eph_fsmear = 0.01
    dtsets(idtset)%eph_fsewin = 0.04
    dtsets(idtset)%eph_ngqpt_fine = [0, 0, 0]
+   dtsets(idtset)%eph_task = 1
 
    dtsets(idtset)%ph_wstep = 0.1/Ha_meV
    dtsets(idtset)%ph_intmeth = 2

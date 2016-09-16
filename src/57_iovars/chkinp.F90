@@ -708,6 +708,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'enable_mpi_io',xmpi_mpiio,1,(/1/),iout)
    end if
 
+!  eph variables
+   if (optdriver==RUNL_EPH) then
+     cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task,2,(/1,2/),iout)
+     if (dt%eph_task==2 .and. dt%irdwfq==0 .and. dt%getwfq==0) then
+       MSG_ERROR('Either getwfq or irdwfq must be non-zero in order to compute the gkk')
+     end if
+   end if
+
 !  exchmix
    call chkdpr(0,0,cond_string,cond_values,ierr,'exchmix',dt%exchmix,1,0.0_dp,iout)
 
