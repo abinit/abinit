@@ -41,7 +41,7 @@ MODULE m_cut3d
  use m_pptools,          only : print_fofr_ri, print_fofr_xyzri , print_fofr_cube
  use m_mpinfo,           only : destroy_mpi_enreg
  use m_cgtools,          only : cg_getspin
- !use m_pjedos,           only : recip_ylm
+ use m_epjdos,           only : recip_ylm
 
  implicit none
 
@@ -2493,7 +2493,8 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        prtsphere=1
        ratsph_arr(:)=ratsph
 
-       rc_ylm = 2 ! Complex spherical harmonics.
+       rc_ylm = 2 ! Real or Complex spherical harmonics.
+       !rc_ylm = 1 
        call recip_ylm (bess_fit,cgcband,istwfk(ckpt),&
 &       nradint,nradintmax,mlang,mpi_enreg,mpw,natom,npw_k,ph3d,prtsphere,rint,&
 &       ratsph_arr,rc_ylm,sum_1atom_1ll,sum_1atom_1lm,ucvol,ylm_k,znucl_atom)

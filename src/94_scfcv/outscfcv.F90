@@ -868,6 +868,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      ABI_ALLOCATE(dos_fractions_paw1,(0,0,0,0))
      ABI_ALLOCATE(dos_fractions_pawt1,(0,0,0,0))
    end if
+
    if( partial_dos_flag>=1.or.fatbands_flag==1)then
 !    Generate fractions for partial DOSs if needed
 !    partial_dos 1,2,3,4  give different decompositions
@@ -877,6 +878,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      else
        dos_fractions=zero;if (prtdosm>=1.or.fatbands_flag==1) dos_fractions_m=zero
      end if
+
      if (psps%usepaw==1 .and. partial_dos_flag /= 2) then
 !      TODO: update partial_dos_fractions_paw for extra atoms - no PAW contribution normally, but check bounds and so on.
        call partial_dos_fractions_paw(cprj,dimcprj,dos_fractions,dos_fractions_m,&
@@ -888,6 +890,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        call dos_degeneratewfs(dos_fractions_m,dos_fractions_average_m,&
 &       eigen,mband,dtset%nband,ndosfraction*mbesslang,dtset%nkpt,dtset%nsppol)
      end if
+
    else
      dos_fractions(:,:,:,1)=one
    end if

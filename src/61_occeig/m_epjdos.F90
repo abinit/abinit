@@ -1414,7 +1414,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: option2=2 ! option for dotprod_g
- integer :: illmm, iat, ipw, ixint, ll, mm, option
+ integer :: illmm, iat, ipw, ixint , ll , mm , il,im !, jlm
  real(dp) :: doti, dotr, sum_all, integ, dr, llsign1, llsign2
  type(atomdata_t) :: atom
 !arrays
@@ -1435,7 +1435,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
 
  vect = zero
 
- if (rc_ylm == 2) then
+ !if (rc_ylm == 2) then
    ABI_ALLOCATE(ilang,    (mlang**2))
    ABI_ALLOCATE(reylmind, (mlang**2))
    ABI_ALLOCATE(imylmind, (mlang**2))
@@ -1473,13 +1473,13 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
      coef1 = one
      coef2 = one
    end if
- end if
+ !end if
 
- ! Big loop  on all atoms
+ ! Big loop on all atoms
  do iat=1,natsph
    dr = rmax(iat)/(nradint(iat)-1)
 
-   ! Temporary arrays for part of psi which depends only on iat
+   ! Temporary array for part which depends only on iat
    do ipw=1,npw_k
      tmppsia(1,ipw) = cg_1band(1,ipw) * ph3d(1,ipw,iat) - cg_1band(2,ipw) * ph3d(2,ipw,iat)
      tmppsia(2,ipw) = cg_1band(1,ipw) * ph3d(2,ipw,iat) + cg_1band(2,ipw) * ph3d(1,ipw,iat)
@@ -1490,8 +1490,11 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
    ! For time-reversal states, detailed treatment show that only the real or imaginary
    ! part of tmppsia is needed here, depending on l being even or odd: only one of the coef is 1, the other 0
    do illmm=1, mlang*mlang
+     !ll = ilang(illmm) - 1
+     !mm = illmm - (ll+1)**2 + ll
 
      if (rc_ylm == 2) then
+
        do ipw=1,npw_k
          ! to get PDOS for complex spherical harmonics, build linear combination of real ylm 
          ! TODO: check the prefactor part for istwfk /= 1! Could also be incorrect if we go to real spherical harmonics
@@ -1502,25 +1505,35 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
 &         - mmsign(illmm) * coef1(illmm) * tmppsia(1, ipw) * ylm(ipw, imylmind(illmm))
        end do
 
+       ! Handle time-reversal
+       !if (istwfk /= 1) then
+       !  if (mod(ilang(illmm) - 1, 2) == 0) then
+       !     tmppsim(2,:) = zero
+       !  else
+       !     tmppsim(1,:) = tmppsim(2,:)
+       !     tmppsim(2,:) = zero
+       !  end if
+       !end if
+
      else if (rc_ylm == 1) then
        ! to get PDOS for real spherical harmonics, multiply here by ylm instead of linear combination
        do ipw=1,npw_k
-         tmppsim(1,ipw) = tmppsia(1,ipw)*ylm(ipw,illmm)
-         tmppsim(2,ipw) = tmppsia(2,ipw)*ylm(ipw,illmm)
+         tmppsim(1,ipw) = tmppsia(1,ipw) * ylm(ipw,illmm)
+         tmppsim(2,ipw) = tmppsia(2,ipw) * ylm(ipw,illmm)
        end do
+
+       ! Handle time-reversal
+       if (istwfk /= 1) then
+         if (mod(ilang(illmm) - 1, 2) == 0) then
+            tmppsim(2,:) = zero
+         else
+            tmppsim(1,:) = tmppsim(2,:)
+            tmppsim(2,:) = zero
+         end if
+       end if
 
      else 
        MSG_ERROR("Wrong value for rc_ylm")
-     end if
-
-     ! Handle time-reversal
-     if (istwfk /= 1) then
-       if (mod(ilang(illmm) - 1, 2) == 0) then
-          tmppsim(2,:) = zero
-       else
-          tmppsim(1,:) = tmppsim(2,:)
-          tmppsim(2,:) = zero
-       end if
      end if
 
      integ = zero
@@ -1548,14 +1561,14 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
    end do ! illmm
  end do ! iat
 
- if (rc_ylm == 2) then
+ !if (rc_ylm == 2) then
    ABI_DEALLOCATE(coef1)
    ABI_DEALLOCATE(coef2)
    ABI_DEALLOCATE(reylmind)
    ABI_DEALLOCATE(imylmind)
    ABI_DEALLOCATE(mmsign)
    ABI_DEALLOCATE(ilang)
- end if
+ !end if
 
 !MJV 5.5.2012: removed 1/sqrt(2) above in tmppsim and (4 pi)^2 in integrand - just multiply by 8 pi^2 here
 !Normalize with unit cell volume
@@ -1563,9 +1576,20 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,&
    sum_1lm_1atom(:,:) = eight * pi**2 * sum_1lm_1atom(:,:) / ucvol
    sum_1ll_1atom(:,:) = eight * pi**2 * sum_1ll_1atom(:,:) / ucvol
  else
-   sum_1lm_1atom(:,:) = 2 * eight * pi**2 * sum_1lm_1atom(:,:) / ucvol
-   sum_1ll_1atom(:,:) = 2 *eight * pi**2 * sum_1ll_1atom(:,:) / ucvol
+   sum_1lm_1atom(:,:) = four_pi**2 * sum_1lm_1atom(:,:) / ucvol
+   sum_1ll_1atom(:,:) = four_pi**2 * sum_1ll_1atom(:,:) / ucvol
  end if
+
+ !do iat=1,natsph
+ !  do il=0,mlang-1
+ !    do im=1,il
+ !      sum_1lm_1atom(il**2+il+1+im, iat) = half * &
+ !      (sum_1lm_1atom(il**2+il+1+im, iat) + sum_1lm_1atom(il**2+il+1-im, iat))
+
+ !      sum_1lm_1atom(il**2+il+1-im, iat) = sum_1lm_1atom(il**2+il+1+im, iat)
+ !    end do
+ !  end do
+ !end do ! iat
 
 !Output
  if (prtsphere == 1) then

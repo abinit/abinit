@@ -36,6 +36,19 @@
 !!  dos_fractions_m(ikpt,iband,isppol,ndosfraction*mbesslang) = percentage of s, p, d..
 !!    character on each atom for the wavefunction # ikpt,iband, isppol (m-resolved)
 !!
+!! NOTES
+!!   The contribution for a single state is given by:
+!!
+!!     P = (4pi i^L}/Omega \sum_G u_k(G) e^{i(k+G).R_atom} S_{LM}(k+G) \int_0^ratsph dr r^2 j_l(|k+G|r)
+!!
+!!   where S is a RSH.  When k = G0/2, we have u_{G0/2}(G) = u_{G0/2}(-G-G0)^* and P can be rewritten as
+!!
+!!     P = (4pi i^L}/Omega \sum^'_G w(G) S_{LM}(k+G) \int_0^ratsph dr r^2 j_l(|k+G|r) x
+!!                                  2 Re[u_k(G) e^{i(k+G).R_atom}]  if L = 2n
+!!                                  2 Im[u_k(G) e^{i(k+G).R_atom}]  if L = 2n + 1
+!!
+!!  where the sum over G is done on the reduced G-sphere and w(G) = 1/2 if G=G0 else 1.
+!!
 !! PARENTS
 !!      outscfcv
 !!
@@ -140,7 +153,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
  dos_fractions = zero
  if (prtdosm /= 0) dos_fractions_m = zero
 
- ! Complex spherical harmonics.
+ ! Real or complex spherical harmonics?
  rc_ylm = 2; if (prtdosm == 2) rc_ylm = 1
 
  if (mpi_enreg%paral_kgb==1) then

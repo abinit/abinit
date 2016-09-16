@@ -32,8 +32,11 @@
 !!   9 => use time-reversal symmetry for k=(1/2,1/2,1/2)
 !!
 !!  Useful relations:
+!!
 !!   u_k(G) = u_{k+G0}(G-G0); u_{-k}(G) = u_k(G)^*
+!!
 !!  and therefore:
+!!
 !!   u_{G0/2}(G) = u_{G0/2}(-G-G0)^*.
 !!
 !! PARENTS
