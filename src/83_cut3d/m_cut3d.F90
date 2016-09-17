@@ -42,7 +42,7 @@ MODULE m_cut3d
  use m_pptools,          only : print_fofr_ri, print_fofr_xyzri , print_fofr_cube
  use m_mpinfo,           only : destroy_mpi_enreg
  use m_cgtools,          only : cg_getspin
- use m_epjdos,           only : recip_ylm !, dens_in_sph
+ use m_epjdos,           only : recip_ylm, dens_in_sph
 
  implicit none
 
@@ -79,8 +79,6 @@ CONTAINS  !===========================================================
 !!
 !! OUTPUT
 !!  write the Hirshfeld charge decomposition
-!!
-!! SIDE EFFECTS
 !!
 !! PARENTS
 !!      cut3d
@@ -2077,7 +2075,6 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
  use interfaces_56_recipspace
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

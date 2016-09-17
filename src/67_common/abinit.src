@@ -30,7 +30,6 @@ sources = [
  "conducti_paw.F90",
  "conducti_paw_core.F90",
  "constrf.F90",
- "dens_in_sph.F90",
  "dielmt.F90",
  "dieltcel.F90",
  "emispec_paw.F90",

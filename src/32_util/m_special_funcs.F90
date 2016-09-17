@@ -1185,6 +1185,7 @@ end function k_thfermi
 
 type(jlspline_t) function jlspline_new(nx, delta, mlang) result(new) 
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1267,6 +1268,7 @@ end function jlspline_new
 
 subroutine jlspline_free(jlspl)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1310,10 +1312,11 @@ end subroutine jlspline_free
 
 real(dp) function jlspline_integral(jlspl, il, qq, powr, nr, rcut)  result(res)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'jlspline_free'
+#define ABI_FUNC 'jlspline_integral'
 !End of the abilint section
 
  implicit none
