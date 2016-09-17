@@ -46,6 +46,7 @@ module m_epjdos
  public :: gaus_dos            ! Calculate DOS by gauss method.
  public :: dos_degeneratewfs   ! Average the contribution to a generalised DOS.
  public :: recip_ylm           ! Project input wavefunctions (real space) on to Ylm
+ !public :: dens_in_sph         ! Calculate integrated density in sphere around each atom
 !!***
 
 !----------------------------------------------------------------------
@@ -1415,8 +1416,8 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
 !Local variables-------------------------------
 !scalars
  integer,parameter :: option2=2 ! option for dotprod_g
- integer :: illmm, iat, ipw, ixint , ll , mm , il,im !, jlm
- real(dp) :: doti, dotr, sum_all, integ, dr, llsign1, llsign2
+ integer :: illmm, iat, itypat, ipw, ixint , ll , mm , il,im !, jlm
+ real(dp) :: doti, dotr, sum_all, integ, dr, llsign1, llsign2, fact
  type(atomdata_t) :: atom
 !arrays
  integer, allocatable :: ilang(:), reylmind(:), imylmind(:)
@@ -1475,6 +1476,53 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
    end if
  !end if
 
+!#define NEW
+
+#ifdef NEW
+ do iat=1,natsph
+   itypat = typat(iat)
+
+   ! Temporary array for part which depends only on iat
+   !do ipw=1,npw_k
+   !  tmppsia(1,ipw) = cg_1band(1,ipw) * ph3d(1,ipw,iat) - cg_1band(2,ipw) * ph3d(2,ipw,iat)
+   !  tmppsia(2,ipw) = cg_1band(1,ipw) * ph3d(2,ipw,iat) + cg_1band(2,ipw) * ph3d(1,ipw,iat)
+   !end do
+
+   ! Loop over LM.
+   do illmm=1,mlang*mlang
+     il = ilang(illmm)
+
+     if (rc_ylm == 2) then
+       MSG_ERROR("Not coded")
+
+     else if (rc_ylm == 1) then
+       ! to get PDOS for real spherical harmonics, multiply here by ylm instead of linear combination
+       dotr = zero; doti = zero
+       do ipw=1,npw_k
+         fact = ylm(ipw, illmm) * jlkpgr_intr(ipw, il, itypat) 
+         tmppsim(1,ipw) = fact * (cg_1band(1, ipw) * ph3d(1, ipw, iat) - cg_1band(2, ipw) * ph3d(2, ipw, iat))
+         tmppsim(2,ipw) = fact * (cg_1band(1, ipw) * ph3d(2, ipw, iat) + cg_1band(2, ipw) * ph3d(1, ipw, iat))
+         dotr = dotr + tmppsim(1,ipw) 
+         doti = doti + tmppsim(2,ipw) 
+       end do
+
+       !call dotprod_g(dotr, doti, istwfk, npw_k, option2, tmppsim, tmppsim, mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+       !dotr = sum(tmppsim(1,:), dim=2); doti = sum(tmppsim(2,:), dim=2)
+       !dotr = sum(tmppsim(1,:)); doti = sum(tmppsim(2,:))
+
+     else 
+       MSG_ERROR("Wrong value for rc_ylm")
+     end if
+
+     sum_1lm_1atom(illmm, iat) = dotr**2 + doti**2
+     sum_1ll_1atom(il, iat) = sum_1ll_1atom(il, iat) + dotr**2 + doti**2
+   end do ! illmm
+ end do ! iat
+
+ sum_1lm_1atom = four_pi**2 * sum_1lm_1atom / ucvol
+ sum_1ll_1atom = four_pi**2 * sum_1ll_1atom / ucvol
+
+#else
  ! Big loop on all atoms
  do iat=1,natsph
    dr = rmax(iat)/(nradint(iat)-1)
@@ -1551,14 +1599,6 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
    end do ! illmm
  end do ! iat
 
- !if (rc_ylm == 2) then
-   ABI_DEALLOCATE(coef1)
-   ABI_DEALLOCATE(coef2)
-   ABI_DEALLOCATE(reylmind)
-   ABI_DEALLOCATE(imylmind)
-   ABI_DEALLOCATE(mmsign)
-   ABI_DEALLOCATE(ilang)
- !end if
 
 !MJV 5.5.2012: removed 1/sqrt(2) above in tmppsim and (4 pi)^2 in integrand - just multiply by 8 pi^2 here
 !Normalize with unit cell volume
@@ -1569,6 +1609,16 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
    sum_1lm_1atom(:,:) = four_pi**2 * sum_1lm_1atom(:,:) / ucvol
    sum_1ll_1atom(:,:) = four_pi**2 * sum_1ll_1atom(:,:) / ucvol
  end if
+#endif
+
+ !if (rc_ylm == 2) then
+   ABI_DEALLOCATE(coef1)
+   ABI_DEALLOCATE(coef2)
+   ABI_DEALLOCATE(reylmind)
+   ABI_DEALLOCATE(imylmind)
+   ABI_DEALLOCATE(mmsign)
+   ABI_DEALLOCATE(ilang)
+ !end if
 
  !do iat=1,natsph
  !  do il=0,mlang-1
@@ -1595,7 +1645,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
 
    write(std_out,'(a)' ) ' Angular analysis '
    do iat=1,natsph
-     call atomdata_from_znucl(atom, znucl_sph(iat) )
+     call atomdata_from_znucl(atom, znucl_sph(iat))
      write(std_out,'(a)' ) ' '
      write(std_out,'(a,i3,a,a,a,f10.6)' )&
 &     ' Atom # ',iat, ' is  ',  atom%symbol,', in-sphere charge =',sum_1atom(iat)

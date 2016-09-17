@@ -37,13 +37,18 @@
 !!    character on each atom for the wavefunction # ikpt,iband, isppol (m-resolved)
 !!
 !! NOTES
-!!   The contribution for a single state is given by:
+!!   Here we compute the projection P = <F_{LM}|psi> where F is a function centered on the atom
+!!   and localized inside a sphere of radius ratsph i.e.
 !!
-!!     P = (4pi i^L}/Omega \sum_G u_k(G) e^{i(k+G).R_atom} S_{LM}(k+G) \int_0^ratsph dr r^2 j_l(|k+G|r)
+!!      F_LM = \Theta_{ratpsh}(r-R_atom) S_{LM}(r-R_atom)
 !!
-!!   where S is a RSH.  When k = G0/2, we have u_{G0/2}(G) = u_{G0/2}(-G-G0)^* and P can be rewritten as
+!!   where S is a RSH. The final expression is:
 !!
-!!     P = (4pi i^L}/Omega \sum^'_G w(G) S_{LM}(k+G) \int_0^ratsph dr r^2 j_l(|k+G|r) x
+!!     P = (4pi i^L}/sqrt(Omega) \sum_G u_k(G) e^{i(k+G).R_atom} S_{LM}(k+G) \int_0^ratsph dr r^2 j_L(|k+G|r)
+!!
+!!   When k = G0/2, we have u_{G0/2}(G) = u_{G0/2}(-G-G0)^* and P can be rewritten as
+!!
+!!     P = (4pi i^L}/sqrt(Omega) \sum^'_G w(G) S_{LM}(k+G) \int_0^ratsph dr r^2 j_L(|k+G|r) x
 !!                                  2 Re[u_k(G) e^{i(k+G).R_atom}]  if L = 2n
 !!                                  2 Im[u_k(G) e^{i(k+G).R_atom}]  if L = 2n + 1
 !!
@@ -328,20 +333,18 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
        ! TODO: handle extra atom, use natom + 1, ntypat + 1 convention!
        ABI_MALLOC(jlkpgr_intr, (npw_k, mbesslang, ntypat_extra))
        done_type = .False.
-       do iat=1,natsph_tot
-         cycle
-         iatom = iatsph(iat)
+       do iatom=1,natsph_tot
          itypat = typat_extra(iatom)
-         write(std_out, *)iatom, itypat, ntypat_extra
-         cycle
-         !write(std_out, *)itypat, ntypat_extra
+         !write(std_out, *)iatom, itypat, ntypat_extra
          if (done_type(itypat)) cycle
          do ilang=1,mbesslang
            do ipw=1,npw_k
-             !intg = jlspline_integral(jlspl, ilang, two_pi*kpgnorm(ipw+ioffkg), 2, 1000, ratsph(iat))
+             intg = jlspline_integral(jlspl, ilang, two_pi*kpgnorm(ipw+ioffkg), 2, 1000, ratsph(iatom))
+             !intg = intg / sqrt(ratsph(iatom) ** 3 * four_pi / 3.0)
+             !intg = intg / (ratsph(iatom) ** 3 * four_pi / 3.0)
              !write(std_out, *)itypat, ntypat_extra
              !ABI_CHECK(itypat <= ntypat_extra, "FOO")
-             !jlkpgr_intr(ipw, ilang, itypat) = intg
+             jlkpgr_intr(ipw, ilang, itypat) = intg
              !if (ilang == 1 .and. ipw == 1) then
              !  write(std_out,*)intg, (ratsph(iat)**3)/3
              !  MSG_ERROR("Check")
@@ -350,7 +353,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
          end do
          done_type(itypat) = .True.
        end do
-       !MSG_ERROR("FOO")
+       !jlkpgr_intr = zero
 
        shift_b = 0
        do iband=1,dtset%mband

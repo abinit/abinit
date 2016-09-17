@@ -42,7 +42,7 @@ MODULE m_cut3d
  use m_pptools,          only : print_fofr_ri, print_fofr_xyzri , print_fofr_cube
  use m_mpinfo,           only : destroy_mpi_enreg
  use m_cgtools,          only : cg_getspin
- use m_epjdos,           only : recip_ylm
+ use m_epjdos,           only : recip_ylm !, dens_in_sph
 
  implicit none
 
@@ -2497,6 +2497,8 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
          do ilang=1,mlang
            do ipw=1,npw_k
              intg = jlspline_integral(jlspl, ilang, two_pi*kpgnorm(ipw), 2, 1000, ratsph)
+             !intg = intg / sqrt(ratsph**3 * four_pi / 3.0)
+             !intg = intg / (ratsph** 3 * four_pi / 3.0)
              jlkpgr_intr(ipw, ilang, itypat) = intg
              !if (ilang == 1 .and. ipw == 1) then
              !  write(std_out,*)intg, (ratsph(iat)**3)/3
