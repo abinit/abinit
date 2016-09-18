@@ -2127,7 +2127,6 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  real(dp),allocatable :: sum_1atom_1ll(:,:),sum_1atom_1lm(:,:)
  real(dp),allocatable :: xfit(:),yfit(:),ylm_k(:,:)
  real(dp),allocatable :: ylmgr_dum(:,:,:)
- real(dp),allocatable :: jlkpgr_intr(:,:,:)
  character(len=fnlen) :: fileqps
  character(len=fnlen),allocatable :: filename(:)
  complex(dp),allocatable :: ccoeff(:,:),wfg(:,:),wfg_qps(:)
@@ -2489,30 +2488,12 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        prtsphere=1
        ratsph_arr(:)=ratsph
 
-       ABI_MALLOC(jlkpgr_intr, (npw_k, mlang, ntypat))
-       do itypat=1,ntypat
-         do ilang=1,mlang
-           do ipw=1,npw_k
-             intg = jlspline_integral(jlspl, ilang, two_pi*kpgnorm(ipw), 2, 1000, ratsph)
-             !intg = intg / sqrt(ratsph**3 * four_pi / 3.0)
-             !intg = intg / (ratsph** 3 * four_pi / 3.0)
-             jlkpgr_intr(ipw, ilang, itypat) = intg
-             !if (ilang == 1 .and. ipw == 1) then
-             !  write(std_out,*)intg, (ratsph(iat)**3)/3
-             !  MSG_ERROR("Check")
-             !end if
-           end do
-         end do
-       end do
-
        rc_ylm = 2 ! Real or Complex spherical harmonics.
        !rc_ylm = 1 
        call recip_ylm (bess_fit,cgcband,istwfk(ckpt),&
 &       nradint,nradintmax,mlang,mpi_enreg,mpw,natom,ntypat,typat,&
-&       npw_k,ph3d,jlkpgr_intr,prtsphere,rint,&
+&       npw_k,ph3d,prtsphere,rint,&
 &       ratsph_arr,rc_ylm,sum_1atom_1ll,sum_1atom_1lm,ucvol,ylm_k,znucl_atom)
-
-       ABI_FREE(jlkpgr_intr)
 
        call dens_in_sph(cmax,cgcband,gmet,istwfk(ckpt),&
 &       kg_k,natom,ngfft,mpi_enreg,npw_k,paral_kgb,ph1d,ratsph_arr,ucvol)

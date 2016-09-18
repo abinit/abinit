@@ -1385,7 +1385,7 @@ end subroutine dos_degeneratewfs
 !! SOURCE
 
 subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enreg,&
-&  mpw,natsph,ntypat,typat,npw_k,ph3d,jlkpgr_intr,prtsphere,&
+&  mpw,natsph,ntypat,typat,npw_k,ph3d,prtsphere,&
 &  rint,rmax,rc_ylm,sum_1ll_1atom,sum_1lm_1atom,ucvol,ylm,znucl_sph)
 
 
@@ -1407,7 +1407,6 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
  integer,intent(in) :: nradint(natsph),typat(natsph)
  real(dp),intent(in) :: bess_fit(mpw,nradintmax,mlang),cg_1band(2,npw_k)
  real(dp),intent(in) :: ph3d(2,npw_k,natsph),rint(nradintmax)
- real(dp),intent(in) :: jlkpgr_intr(npw_k, mlang, ntypat)
  real(dp),intent(in) :: rmax(natsph),ylm(mpw,mlang*mlang)
  real(dp),intent(in) :: znucl_sph(natsph)
  real(dp),intent(out) :: sum_1ll_1atom(mlang,natsph)
@@ -1416,15 +1415,15 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
 !Local variables-------------------------------
 !scalars
  integer,parameter :: option2=2 ! option for dotprod_g
- integer :: illmm, iat, itypat, ipw, ixint , ll , mm , il,im !, jlm
+ integer :: ilm, iat, itypat, ipw, ixint , ll , mm , il,im !, jlm
  real(dp) :: doti, dotr, sum_all, integ, dr, llsign1, llsign2, fact
  type(atomdata_t) :: atom
 !arrays
- integer, allocatable :: ilang(:), reylmind(:), imylmind(:)
- real(dp) :: sum_1atom(natsph),sum_1ll(mlang),sum_1lm(mlang*mlang)
- real(dp) :: tmppsia(2,npw_k),tmppsim(2,npw_k)
- real(dp) :: vect(2,npw_k),rint2(nradintmax)
- real(dp), allocatable :: coef1(:),coef2(:),mmsign(:) 
+ integer :: ilang(mlang**2), reylmind(mlang**2), imylmind(mlang**2)
+ real(dp) :: sum_1atom(natsph),sum_1ll(mlang),sum_1lm(mlang**2)
+ real(dp) :: coef1(mlang**2),coef2(mlang**2),mmsign(mlang**2) 
+ real(dp) :: rint2(nradintmax)
+ real(dp) :: tmppsia(2,npw_k),tmppsim(2,npw_k),vect(2,npw_k) 
 
 ! *************************************************************************
 
@@ -1436,13 +1435,8 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
    rint2(ixint) = rint(ixint)**2
  end do
 
- !if (rc_ylm == 2) then
-   ABI_ALLOCATE(ilang,    (mlang**2))
-   ABI_ALLOCATE(reylmind, (mlang**2))
-   ABI_ALLOCATE(imylmind, (mlang**2))
-   ABI_ALLOCATE(mmsign,   (mlang**2))
-   ABI_ALLOCATE(coef1,   (mlang**2))
-   ABI_ALLOCATE(coef2,   (mlang**2))
+ if (rc_ylm == 2) then
+   ! Compute tables needed to recover complex SH.
    do ll=0,mlang-1
      llsign1 = one
      llsign2 = zero
@@ -1451,78 +1445,31 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
        llsign2 = one
      end if
      do mm = -ll, -1
-       illmm = (ll+1)**2-ll+mm
-       ilang(illmm) = ll+1
-       coef1(illmm) = llsign1 ! 1 for even ll channels
-       coef2(illmm) = llsign2 ! 1 for odd ll channels
-       reylmind(illmm) = (ll+1)**2-ll-mm
-       imylmind(illmm) = (ll+1)**2-ll+mm
-       mmsign(illmm) = -one
+       ilm = (ll+1)**2-ll+mm
+       ilang(ilm) = ll+1
+       coef1(ilm) = llsign1 ! 1 for even ll channels
+       coef2(ilm) = llsign2 ! 1 for odd ll channels
+       reylmind(ilm) = (ll+1)**2-ll-mm
+       imylmind(ilm) = (ll+1)**2-ll+mm
+       mmsign(ilm) = -one
      end do
 
      do mm = 0, ll
-       illmm = (ll+1)**2-ll+mm
-       ilang(illmm) = ll+1
-       coef1(illmm) = llsign1 ! 1 for even ll channels
-       coef2(illmm) = llsign2 ! 1 for odd ll channels
-       reylmind(illmm) = (ll+1)**2-ll+mm
-       imylmind(illmm) = (ll+1)**2-ll-mm
-       mmsign(illmm) = one
+       ilm = (ll+1)**2-ll+mm
+       ilang(ilm) = ll+1
+       coef1(ilm) = llsign1 ! 1 for even ll channels
+       coef2(ilm) = llsign2 ! 1 for odd ll channels
+       reylmind(ilm) = (ll+1)**2-ll+mm
+       imylmind(ilm) = (ll+1)**2-ll-mm
+       mmsign(ilm) = one
      end do
    end do
    if (istwfk == 1) then
      coef1 = one
      coef2 = one
    end if
- !end if
+ end if
 
-!#define NEW
-
-#ifdef NEW
- do iat=1,natsph
-   itypat = typat(iat)
-
-   ! Temporary array for part which depends only on iat
-   !do ipw=1,npw_k
-   !  tmppsia(1,ipw) = cg_1band(1,ipw) * ph3d(1,ipw,iat) - cg_1band(2,ipw) * ph3d(2,ipw,iat)
-   !  tmppsia(2,ipw) = cg_1band(1,ipw) * ph3d(2,ipw,iat) + cg_1band(2,ipw) * ph3d(1,ipw,iat)
-   !end do
-
-   ! Loop over LM.
-   do illmm=1,mlang*mlang
-     il = ilang(illmm)
-
-     if (rc_ylm == 2) then
-       MSG_ERROR("Not coded")
-
-     else if (rc_ylm == 1) then
-       ! to get PDOS for real spherical harmonics, multiply here by ylm instead of linear combination
-       dotr = zero; doti = zero
-       do ipw=1,npw_k
-         fact = ylm(ipw, illmm) * jlkpgr_intr(ipw, il, itypat) 
-         tmppsim(1,ipw) = fact * (cg_1band(1, ipw) * ph3d(1, ipw, iat) - cg_1band(2, ipw) * ph3d(2, ipw, iat))
-         tmppsim(2,ipw) = fact * (cg_1band(1, ipw) * ph3d(2, ipw, iat) + cg_1band(2, ipw) * ph3d(1, ipw, iat))
-         dotr = dotr + tmppsim(1,ipw) 
-         doti = doti + tmppsim(2,ipw) 
-       end do
-
-       !call dotprod_g(dotr, doti, istwfk, npw_k, option2, tmppsim, tmppsim, mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
-       !dotr = sum(tmppsim(1,:), dim=2); doti = sum(tmppsim(2,:), dim=2)
-       !dotr = sum(tmppsim(1,:)); doti = sum(tmppsim(2,:))
-
-     else 
-       MSG_ERROR("Wrong value for rc_ylm")
-     end if
-
-     sum_1lm_1atom(illmm, iat) = dotr**2 + doti**2
-     sum_1ll_1atom(il, iat) = sum_1ll_1atom(il, iat) + dotr**2 + doti**2
-   end do ! illmm
- end do ! iat
-
- sum_1lm_1atom = four_pi**2 * sum_1lm_1atom / ucvol
- sum_1ll_1atom = four_pi**2 * sum_1ll_1atom / ucvol
-
-#else
  ! Big loop on all atoms
  do iat=1,natsph
    dr = rmax(iat)/(nradint(iat)-1)
@@ -1537,32 +1484,32 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
    ! Take into account the fact that ylm are REAL spherical harmonics, see initylmg.f
    ! For time-reversal states, detailed treatment show that only the real or imaginary
    ! part of tmppsia is needed here, depending on l being even or odd: only one of the coef is 1, the other 0
-   do illmm=1, mlang*mlang
-     !ll = ilang(illmm) - 1
-     !mm = illmm - (ll+1)**2 + ll
+   do ilm=1, mlang*mlang
+     ll = ilang(ilm) - 1
+     !mm = ilm - (ll+1)**2 + ll
 
      if (rc_ylm == 2) then
+       ! to get PDOS for complex spherical harmonics, build linear combination of real ylm 
+       ! TODO: check the prefactor part for istwfk /= 1! Could also be incorrect if we go to real spherical harmonics
 
        do ipw=1,npw_k
-         ! to get PDOS for complex spherical harmonics, build linear combination of real ylm 
-         ! TODO: check the prefactor part for istwfk /= 1! Could also be incorrect if we go to real spherical harmonics
-         tmppsim(1, ipw) =  coef1(illmm) * tmppsia(1, ipw) * ylm(ipw, reylmind(illmm)) &
-&         + mmsign(illmm) * coef2(illmm) * tmppsia(2, ipw) * ylm(ipw, imylmind(illmm))
+         tmppsim(1, ipw) =  coef1(ilm) * tmppsia(1, ipw) * ylm(ipw, reylmind(ilm)) &
+&           + mmsign(ilm) * coef2(ilm) * tmppsia(2, ipw) * ylm(ipw, imylmind(ilm))
 
-         tmppsim(2, ipw) =  coef2(illmm) * tmppsia(2, ipw) * ylm(ipw, reylmind(illmm)) &
-&         - mmsign(illmm) * coef1(illmm) * tmppsia(1, ipw) * ylm(ipw, imylmind(illmm))
+         tmppsim(2, ipw) =  coef2(ilm) * tmppsia(2, ipw) * ylm(ipw, reylmind(ilm)) &
+&           - mmsign(ilm) * coef1(ilm) * tmppsia(1, ipw) * ylm(ipw, imylmind(ilm))
        end do
 
      else if (rc_ylm == 1) then
        ! to get PDOS for real spherical harmonics, multiply here by ylm instead of linear combination
        do ipw=1,npw_k
-         tmppsim(1,ipw) = tmppsia(1,ipw) * ylm(ipw,illmm)
-         tmppsim(2,ipw) = tmppsia(2,ipw) * ylm(ipw,illmm)
+         tmppsim(1,ipw) = tmppsia(1,ipw) * ylm(ipw,ilm)
+         tmppsim(2,ipw) = tmppsia(2,ipw) * ylm(ipw,ilm)
        end do
 
        ! Handle time-reversal
        if (istwfk /= 1) then
-         if (mod(ilang(illmm) - 1, 2) == 0) then
+         if (mod(ll, 2) == 0) then
             tmppsim(2,:) = zero
          else
             tmppsim(1,:) = tmppsim(2,:)
@@ -1576,7 +1523,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
 
      integ = zero
      do ixint = 1, nradint(iat)
-       vect(1, 1:npw_k) = bess_fit(1:npw_k, ixint, ilang(illmm))
+       vect(1, 1:npw_k) = bess_fit(1:npw_k, ixint, ilang(ilm))
        call dotprod_g(dotr, doti, istwfk, npw_k, option2, vect, tmppsim, mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
 
 !      Multiply by r**2 and take norm, integrate
@@ -1594,31 +1541,17 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
      end do ! ixint
      integ = integ * dr
 
-     sum_1lm_1atom(illmm, iat)        = sum_1lm_1atom(illmm, iat)        + integ
-     sum_1ll_1atom(ilang(illmm), iat) = sum_1ll_1atom(ilang(illmm), iat) + integ
-   end do ! illmm
+     sum_1lm_1atom(ilm, iat)        = sum_1lm_1atom(ilm, iat)        + integ
+     sum_1ll_1atom(ilang(ilm), iat) = sum_1ll_1atom(ilang(ilm), iat) + integ
+   end do ! ilm
  end do ! iat
 
-
-!MJV 5.5.2012: removed 1/sqrt(2) above in tmppsim and (4 pi)^2 in integrand - just multiply by 8 pi^2 here
-!Normalize with unit cell volume
- if (rc_ylm == 2) then
-   sum_1lm_1atom(:,:) = eight * pi**2 * sum_1lm_1atom(:,:) / ucvol
-   sum_1ll_1atom(:,:) = eight * pi**2 * sum_1ll_1atom(:,:) / ucvol
- else
-   sum_1lm_1atom(:,:) = four_pi**2 * sum_1lm_1atom(:,:) / ucvol
-   sum_1ll_1atom(:,:) = four_pi**2 * sum_1ll_1atom(:,:) / ucvol
- end if
-#endif
-
- !if (rc_ylm == 2) then
-   ABI_DEALLOCATE(coef1)
-   ABI_DEALLOCATE(coef2)
-   ABI_DEALLOCATE(reylmind)
-   ABI_DEALLOCATE(imylmind)
-   ABI_DEALLOCATE(mmsign)
-   ABI_DEALLOCATE(ilang)
- !end if
+ ! Normalize with unit cell volume and include 4pi term coming from rayleigh expansion.
+ ! If CSH, we have a factor 1/sqrt(2) 
+ fact = four_pi**2 / ucvol;
+ if (rc_ylm == 2) fact = eight * pi**2 / ucvol
+ sum_1lm_1atom(:,:) = fact * sum_1lm_1atom(:,:)
+ sum_1ll_1atom(:,:) = fact * sum_1ll_1atom(:,:)
 
  !do iat=1,natsph
  !  do il=0,mlang-1

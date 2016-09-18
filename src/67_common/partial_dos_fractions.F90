@@ -125,7 +125,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
  real(dp) :: kpoint(3),spin(3)
  real(dp) :: xfit(dtset%mpw),yfit(dtset%mpw)
  real(dp) :: ylm_k(dtset%mpw,mbesslang*mbesslang),ylmgr_dum(1)
- real(dp),allocatable :: bess_fit(:,:,:),jlkpgr_intr(:,:,:)
+ real(dp),allocatable :: bess_fit(:,:,:)
  real(dp),allocatable :: cg_1band(:,:),cg_1kpt(:,:),kpgnorm(:),ph1d(:,:)
  real(dp),allocatable :: ph3d(:,:,:),ratsph(:),rint(:),sum_1atom_1ll(:,:)
  real(dp),allocatable :: sum_1atom_1lm(:,:),ylm(:,:)
@@ -133,7 +133,6 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
  real(dp),allocatable :: znucl_sph(:)
  real(dp),allocatable :: phkxred(:,:)
  complex(dpc) :: cgcmat(2,2)
- logical :: done_type(dtset%ntypat + dtset%natsph_extra)
 
 !*************************************************************************
 
@@ -232,7 +231,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
      nradint(iatom) = int (bessarg / bessint_delta) + 1
      nradintmax = max(nradintmax,nradint(iatom))
    end do
-   !write(std_out,*) ' partial_dos_fractions :  rmax = ', rmax
+   !write(std_out,*)' partial_dos_fractions: rmax=', rmax,' nradintmax: ", nradintmax
 !  use same number of grid points to calculate Bessel function and to do the integration later on r
    mbess = nradintmax
 !  make sure bessargmax is a multiple of bessint_delta
@@ -269,7 +268,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
    ABI_ALLOCATE(kpgnorm,(dtset%mpw*dtset%mkmem))
    kpgnorm (:) = zero
    ioffkg = 0
-   do ikpt = 1, dtset%nkpt
+   do ikpt=1,dtset%nkpt
      if (all(mpi_enreg%proc_distrb(ikpt,1,1:dtset%nsppol)/=me)) cycle
      npw_k = npwarr(ikpt)
      call getkpgnorm(crystal%gprimd, dtset%kpt(:,ikpt), kg(:,ioffkg+1:ioffkg+npw_k),&
@@ -329,32 +328,6 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
          end do
        end do ! ixint
 
-       ! Can reduce memory as it depends only on the atom type.
-       ! TODO: handle extra atom, use natom + 1, ntypat + 1 convention!
-       ABI_MALLOC(jlkpgr_intr, (npw_k, mbesslang, ntypat_extra))
-       done_type = .False.
-       do iatom=1,natsph_tot
-         itypat = typat_extra(iatom)
-         !write(std_out, *)iatom, itypat, ntypat_extra
-         if (done_type(itypat)) cycle
-         do ilang=1,mbesslang
-           do ipw=1,npw_k
-             intg = jlspline_integral(jlspl, ilang, two_pi*kpgnorm(ipw+ioffkg), 2, 1000, ratsph(iatom))
-             !intg = intg / sqrt(ratsph(iatom) ** 3 * four_pi / 3.0)
-             !intg = intg / (ratsph(iatom) ** 3 * four_pi / 3.0)
-             !write(std_out, *)itypat, ntypat_extra
-             !ABI_CHECK(itypat <= ntypat_extra, "FOO")
-             jlkpgr_intr(ipw, ilang, itypat) = intg
-             !if (ilang == 1 .and. ipw == 1) then
-             !  write(std_out,*)intg, (ratsph(iat)**3)/3
-             !  MSG_ERROR("Check")
-             !end if
-           end do
-         end do
-         done_type(itypat) = .True.
-       end do
-       !jlkpgr_intr = zero
-
        shift_b = 0
        do iband=1,dtset%mband
          if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=mpi_enreg%me) cycle
@@ -365,7 +338,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
 
            call recip_ylm(bess_fit, cg(:,shift_cg+1:shift_cg+npw_k), dtset%istwfk(ikpt),&
 &           nradint, nradintmax,mbesslang, mpi_enreg, dtset%mpw, natsph_tot, ntypat_extra, typat_extra,&
-&           npw_k,ph3d, jlkpgr_intr, prtsphere0, rint, ratsph, rc_ylm, sum_1atom_1ll, sum_1atom_1lm,&
+&           npw_k,ph3d, prtsphere0, rint, ratsph, rc_ylm, sum_1atom_1ll, sum_1atom_1lm,&
 &           crystal%ucvol, ylm_k, znucl_sph)
 
            do iatom=1,natsph_tot
@@ -395,7 +368,6 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
        ioffkg = ioffkg + npw_k
        shift_sk = shift_sk + dtset%mband*my_nspinor*npw_k
 
-       ABI_FREE(jlkpgr_intr)
        ABI_DEALLOCATE(ph3d)
      end do ! ikpt
    end do ! isppol
