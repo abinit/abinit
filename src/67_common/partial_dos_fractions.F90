@@ -37,18 +37,20 @@
 !!    character on each atom for the wavefunction # ikpt,iband, isppol (m-resolved)
 !!
 !! NOTES
-!!   Here we compute the projection P = <F_{LM}|psi> where F is a function centered on the atom
-!!   and localized inside a sphere of radius ratsph i.e.
 !!
-!!      F_LM = \Theta_{ratpsh}(r-R_atom) S_{LM}(r-R_atom)
+!!   psi(r) = (4pi/sqrt(ucvol)) \sum_{LMG} i**l u(G) e^{i(k+G).Ra} x Y_{LM}^*(k+G) Y_{LM}(r-Ra) j_L(|k+G||r-Ra|)
+!!
+!!   int_(ratsph) |psi(r)|**2 = \sum_LM rho(LM)
+!!
+!!   where
+!!
+!!   rho_{LM} = 4pi \int_o^{rc} dr r**2 ||\sum_G u(G) Y_LM^*(k+G) e^{i(k+G).Ra} j_L(|k+G| r)||**2
 !!
 !!   where S is a RSH. The final expression is:
 !!
-!!     P = (4pi i^L}/sqrt(Omega) \sum_G u_k(G) e^{i(k+G).R_atom} S_{LM}(k+G) \int_0^ratsph dr r^2 j_L(|k+G|r)
-!!
 !!   When k = G0/2, we have u_{G0/2}(G) = u_{G0/2}(-G-G0)^* and P can be rewritten as
 !!
-!!     P = (4pi i^L}/sqrt(Omega) \sum^'_G w(G) S_{LM}(k+G) \int_0^ratsph dr r^2 j_L(|k+G|r) x
+!!     P = (4pi i^L}/sqrt(ucvol) \sum^'_G w(G) S_{LM}(k+G) \int_0^ratsph dr r^2 j_L(|k+G|r) x
 !!                                  2 Re[u_k(G) e^{i(k+G).R_atom}]  if L = 2n
 !!                                  2 Im[u_k(G) e^{i(k+G).R_atom}]  if L = 2n + 1
 !!
@@ -310,7 +312,8 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
        ! since we need many r distances and have a large number of different
        ! |k+G|, get j_l on uniform grid (above, in array gen_besj),
        ! and spline it for each kpt Gvector set.
-       ! TODO: Precompute (k+G) integrals here and pass them to recip_ylm)
+       ! Note that we use the same step based on rmax, this can lead to (hopefully small)
+       ! inaccuracies when we integrate from 0 up to rmax(iatom)
        do ixint=1,nradintmax
          rint(ixint) = (ixint-1)*rmax / (nradintmax-1)
          do ipw=1,npw_k
@@ -341,6 +344,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
 &           npw_k,ph3d, prtsphere0, rint, ratsph, rc_ylm, sum_1atom_1ll, sum_1atom_1lm,&
 &           crystal%ucvol, ylm_k, znucl_sph)
 
+           ! Accumulate
            do iatom=1,natsph_tot
              do ilang=1,mbesslang
                dos_fractions(ikpt,iband,isppol,mbesslang*(iatom-1) + ilang) &

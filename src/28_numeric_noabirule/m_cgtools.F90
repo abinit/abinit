@@ -1172,7 +1172,7 @@ subroutine sqnorm_g(dotr,istwf_k,npwsp,vect,me_g0,comm)
    if (istwf_k==2 .and. me_g0==1) then  
      ! Gamma k-point and I have G=0
      dotr=half*vect(1,1)**2
-    dotr = dotr + cg_real_zdotc(npwsp-1,vect(1,2),vect(1,2))
+     dotr = dotr + cg_real_zdotc(npwsp-1,vect(1,2),vect(1,2))
    else  
      ! Other TR k-points
      dotr = cg_real_zdotc(npwsp,vect,vect)

@@ -2138,6 +2138,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  mband=maxval(nband)
  ABI_ALLOCATE(mpi_enreg%proc_distrb,(nkpt,mband,nsppol))
  mpi_enreg%proc_distrb=0
+ mpi_enreg%me_g0 = 1
  oldckpt=0
  oldcband=0
  oldcsppol=0
@@ -2467,6 +2468,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !          Re-order results for different G vectors
            do ipw=1,npw_k
              bess_fit(iindex(ipw),ixint,ilang) = yfit(ipw)
+             !if (iindex(ipw) == 1 .and. ilang == 2) write(std_out, *) yfit(ipw)
            end do
          end do ! ipw
        end do ! ixint

@@ -1415,11 +1415,13 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
 !Local variables-------------------------------
 !scalars
  integer,parameter :: option2=2 ! option for dotprod_g
- integer :: ilm, iat, itypat, ipw, ixint , ll , mm , il,im !, jlm
+ integer :: ilm, iat, itypat, ipw, ixint , ll , mm , il,im , jlm
+ real(dp),parameter :: invsqrt2=one/sqrt2
  real(dp) :: doti, dotr, sum_all, integ, dr, llsign1, llsign2, fact
  type(atomdata_t) :: atom
 !arrays
  integer :: ilang(mlang**2), reylmind(mlang**2), imylmind(mlang**2)
+ real(dp) :: c1(2),c2(2)
  real(dp) :: sum_1atom(natsph),sum_1ll(mlang),sum_1lm(mlang**2)
  real(dp) :: coef1(mlang**2),coef2(mlang**2),mmsign(mlang**2) 
  real(dp) :: rint2(nradintmax)
@@ -1435,7 +1437,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
    rint2(ixint) = rint(ixint)**2
  end do
 
- if (rc_ylm == 2) then
+ !if (rc_ylm == 2) then
    ! Compute tables needed to recover complex SH.
    do ll=0,mlang-1
      llsign1 = one
@@ -1468,12 +1470,15 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
      coef1 = one
      coef2 = one
    end if
- end if
+ !end if
+
+!#define NEW
 
  ! Big loop on all atoms
  do iat=1,natsph
    dr = rmax(iat)/(nradint(iat)-1)
 
+   ! e^{i(k+G).Ra}
    ! Temporary array for part which depends only on iat
    do ipw=1,npw_k
      tmppsia(1,ipw) = cg_1band(1,ipw) * ph3d(1,ipw,iat) - cg_1band(2,ipw) * ph3d(2,ipw,iat)
@@ -1481,24 +1486,71 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
    end do
 
    ! tmppsim = temporary arrays for part of psi which doesnt depend on ixint
+   ! u(G) Y_LM^*(k+G) e^{i(k+G).Ra}
    ! Take into account the fact that ylm are REAL spherical harmonics, see initylmg.f
    ! For time-reversal states, detailed treatment show that only the real or imaginary
    ! part of tmppsia is needed here, depending on l being even or odd: only one of the coef is 1, the other 0
    do ilm=1, mlang*mlang
+     il = ilang(ilm)
      ll = ilang(ilm) - 1
-     !mm = ilm - (ll+1)**2 + ll
+     mm = ilm - (ll+1)**2 + ll
 
      if (rc_ylm == 2) then
        ! to get PDOS for complex spherical harmonics, build linear combination of real ylm 
        ! TODO: check the prefactor part for istwfk /= 1! Could also be incorrect if we go to real spherical harmonics
 
-       do ipw=1,npw_k
-         tmppsim(1, ipw) =  coef1(ilm) * tmppsia(1, ipw) * ylm(ipw, reylmind(ilm)) &
-&           + mmsign(ilm) * coef2(ilm) * tmppsia(2, ipw) * ylm(ipw, imylmind(ilm))
+#ifndef NEW
+         do ipw=1,npw_k
+           tmppsim(1, ipw) =  coef1(ilm) * tmppsia(1, ipw) * ylm(ipw, reylmind(ilm)) &
+              + mmsign(ilm) * coef2(ilm) * tmppsia(2, ipw) * ylm(ipw, imylmind(ilm))
 
-         tmppsim(2, ipw) =  coef2(ilm) * tmppsia(2, ipw) * ylm(ipw, reylmind(ilm)) &
-&           - mmsign(ilm) * coef1(ilm) * tmppsia(1, ipw) * ylm(ipw, imylmind(ilm))
-       end do
+           tmppsim(2, ipw) =  coef2(ilm) * tmppsia(2, ipw) * ylm(ipw, reylmind(ilm)) &
+              - mmsign(ilm) * coef1(ilm) * tmppsia(1, ipw) * ylm(ipw, imylmind(ilm))
+         end do
+#else
+         jlm = (ll+1)**2-ll-mm ! index of (l, -m)
+         if (mm == 0) then
+           vect(1,:) = ylm(1:npw_k,ilm)
+           vect(2,:) = zero
+         else if (mm > 0) then
+            !vect(1,:) =  invsqrt2 * ylm(1:npw_k,ilm) * (-1)**mm
+            !vect(2,:) = +invsqrt2 * ylm(1:npw_k,jlm) * (-1)**mm
+            c1 = sy(ll, mm, mm)
+            c2 = sy(ll,-mm, mm)
+            vect(1,:) = c1(1) * ylm(1:npw_k,ilm) + c2(1) * ylm(1:npw_k,jlm)
+            vect(2,:) = c1(2) * ylm(1:npw_k,ilm) + c2(2) * ylm(1:npw_k,jlm)
+
+         else if (mm < 0) then
+            !vect(1,:) =  invsqrt2 * ylm(1:npw_k,jlm) !* (-1)**mm 
+            !vect(2,:) = -invsqrt2 * ylm(1:npw_k,ilm) !* (-1)**mm 
+            c1 = sy(ll, mm,  mm)
+            c2 = sy(ll,-mm,  mm)
+            vect(1,:) = c1(1) * ylm(1:npw_k,ilm) + c2(1) * ylm(1:npw_k,jlm)
+            vect(2,:) = c1(2) * ylm(1:npw_k,ilm) + c2(2) * ylm(1:npw_k,jlm)
+
+         end if
+         vect(2,:) = -vect(2,:)
+
+         if (istwfk == 1) then
+           do ipw=1,npw_k
+             tmppsim(1, ipw) = tmppsia(1, ipw) * vect(1, ipw) - tmppsia(2, ipw) * vect(2, ipw) 
+             tmppsim(2, ipw) = tmppsia(1, ipw) * vect(2, ipw) + tmppsia(2, ipw) * vect(1, ipw) 
+           end do
+         else
+           ! Handle time-reversal
+           if (mod(ll, 2) == 0) then
+             do ipw=1,npw_k
+               tmppsim(1, ipw) = tmppsia(1, ipw) * vect(1, ipw) 
+               tmppsim(2, ipw) = tmppsia(1, ipw) * vect(2, ipw) 
+             end do
+           else
+             do ipw=1,npw_k
+               tmppsim(1, ipw) = tmppsia(2, ipw) * vect(1, ipw)  
+               tmppsim(2, ipw) = tmppsia(2, ipw) * vect(2, ipw) 
+             end do
+           end if
+         end if
+#endif
 
      else if (rc_ylm == 1) then
        ! to get PDOS for real spherical harmonics, multiply here by ylm instead of linear combination
@@ -1521,10 +1573,36 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
        MSG_ERROR("Wrong value for rc_ylm")
      end if
 
+     ! Compute integral $ \int_0^{rc} dr r**2 ||\sum_G u(G) Y_LM^*(k+G) e^{i(k+G).Ra} j_L(|k+G| r)||**2 $
      integ = zero
-     do ixint = 1, nradint(iat)
+     vect(2, 1:npw_k) = zero
+     do ixint=1,nradint(iat)
+#ifndef NEW
        vect(1, 1:npw_k) = bess_fit(1:npw_k, ixint, ilang(ilm))
        call dotprod_g(dotr, doti, istwfk, npw_k, option2, vect, tmppsim, mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+#else
+       dotr = zero; doti = zero
+       do ipw=1,npw_k
+         dotr = dotr + bess_fit(ipw, ixint, il) * tmppsim(1, ipw)
+         doti = doti + bess_fit(ipw, ixint, il) * tmppsim(2, ipw)
+       end do
+       if (istwfk /= 1) then
+         dotr = two * dotr; doti = two * doti
+         if (istwfk == 2 .and. mpi_enreg%me_g0 == 1) then
+           dotr = dotr - bess_fit(1, ixint, il) * tmppsim(1, 1)
+           doti = doti - bess_fit(1, ixint, il) * tmppsim(2, 1)
+         end if
+       end if
+
+       ! This is for MPI-FFT
+       !values(1, ixint) = dotr
+       !values(2, ixint) = dotr
+       !call xmpi_sum(values, comm_fft, ierr)
+       !do ixint=1,nradint(iat)
+       !   func(ixint) = rint2(ixint) * (values(1, ixint)**2 + values(2, ixint)**2)
+       !end do
+       !integ = simpson(dr, func(1:nradint(iat))
+#endif
 
 !      Multiply by r**2 and take norm, integrate
 !      MJV 5.5.2012 removed call to simpson_int - just need last value, 
@@ -1541,15 +1619,17 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
      end do ! ixint
      integ = integ * dr
 
-     sum_1lm_1atom(ilm, iat)        = sum_1lm_1atom(ilm, iat)        + integ
-     sum_1ll_1atom(ilang(ilm), iat) = sum_1ll_1atom(ilang(ilm), iat) + integ
+     sum_1lm_1atom(ilm, iat) = sum_1lm_1atom(ilm, iat) + integ
+     sum_1ll_1atom(il, iat) = sum_1ll_1atom(il, iat) + integ
    end do ! ilm
  end do ! iat
 
  ! Normalize with unit cell volume and include 4pi term coming from rayleigh expansion.
  ! If CSH, we have a factor 1/sqrt(2) 
- fact = four_pi**2 / ucvol;
+ fact = four_pi**2 / ucvol
+#ifndef NEW
  if (rc_ylm == 2) fact = eight * pi**2 / ucvol
+#endif
  sum_1lm_1atom(:,:) = fact * sum_1lm_1atom(:,:)
  sum_1ll_1atom(:,:) = fact * sum_1ll_1atom(:,:)
 
@@ -1558,7 +1638,6 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
  !    do im=1,il
  !      sum_1lm_1atom(il**2+il+1+im, iat) = half * &
  !      (sum_1lm_1atom(il**2+il+1+im, iat) + sum_1lm_1atom(il**2+il+1-im, iat))
-
  !      sum_1lm_1atom(il**2+il+1-im, iat) = sum_1lm_1atom(il**2+il+1+im, iat)
  !    end do
  !  end do
@@ -1596,6 +1675,24 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
    write(std_out,'(a,a,f10.6)' ) ch10,' Total over all atoms and l=0 to 4 :',sum_all
    write(std_out,'(a)' ) ' '
  end if
+
+contains 
+
+ function sy(ll, mm, mp)
+   use  m_paw_sphharm, only : ys
+   ! Computes the matrix element <Slm|Ylm'>
+   integer,intent(in) :: ll,mm, mp
+
+   real(dp) :: sy(2)
+   complex(dpc) :: ys_val
+
+   ! Computes the matrix element <Yl'm'|Slm>
+   call ys(ll,mp,ll,mm,ys_val)
+   !call ys(ll,mm,ll,mp,ys_val)
+   sy(1) = real(ys_val) 
+   sy(2) = -aimag(ys_val) 
+
+ end function sy
 
 end subroutine recip_ylm
 !!***
