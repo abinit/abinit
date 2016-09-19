@@ -2490,8 +2490,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        prtsphere=1
        ratsph_arr(:)=ratsph
 
-       rc_ylm = 2 ! Real or Complex spherical harmonics.
-       !rc_ylm = 1 
+       rc_ylm = 1 ! Real or Complex spherical harmonics.
        call recip_ylm (bess_fit,cgcband,istwfk(ckpt),&
 &       nradint,nradintmax,mlang,mpi_enreg,mpw,natom,ntypat,typat,&
 &       npw_k,ph3d,prtsphere,rint,&

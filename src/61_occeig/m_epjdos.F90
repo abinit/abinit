@@ -1655,7 +1655,8 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
    end do
    sum_all = sum(sum_1atom)
 
-   write(std_out,'(a)' ) ' Angular analysis '
+   if (rc_ylm == 1) write(std_out,'(a)' ) " Angular analysis (real spherical harmonics)"
+   if (rc_ylm == 2) write(std_out,'(a)' ) " Angular analysis (complex spherical harmonics)"
    do iat=1,natsph
      call atomdata_from_znucl(atom, znucl_sph(iat))
      write(std_out,'(a)' ) ' '
