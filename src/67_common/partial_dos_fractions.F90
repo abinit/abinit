@@ -333,7 +333,10 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
 
        shift_b = 0
        do iband=1,dtset%mband
-         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= me) cycle
+         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= me) then
+           !shift_b = shift_b + npw_k
+           cycle
+         end if
 
          do ispinor=1,my_nspinor
            ! Select wavefunction in cg array

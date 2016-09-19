@@ -46,7 +46,7 @@ xred 0 0 0
 #%% max_nprocs = 8
 #%% [extra_info]
 #%% authors = M. Verstraete
-#%% keywords = PARTIAL_DOS, FAILS_IFMPI
+#%% keywords = PARTIAL_DOS
 #%% description = test partial dos calculation with spinors (previously not enabled) and spin 
 #%%    polarization while we are at it
 #%%<END TEST_INFO>

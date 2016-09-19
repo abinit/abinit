@@ -1424,7 +1424,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
  integer :: ilang(mlang**2)
  real(dp) :: c1(2),c2(2)
  real(dp) :: sum_1atom(natsph),sum_1ll(mlang),sum_1lm(mlang**2)
- real(dp) :: rint2(nradintmax),values(2,nradintmax),func(nradintmax)
+ real(dp) :: values(2,nradintmax),func(nradintmax)
  real(dp) :: tmppsia(2,npw_k),tmppsim(2,npw_k),vect(2,npw_k) 
 
 ! *************************************************************************
@@ -1433,18 +1433,12 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
  sum_1ll_1atom = zero
  vect = zero
 
- do ixint=1,nradintmax
-   rint2(ixint) = rint(ixint)**2
- end do
-
  do ll=0,mlang-1
    do mm=-ll,ll
      ilm = (ll+1)**2-ll+mm
      ilang(ilm) = ll+1
    end do
  end do
-
-#define NEW 1
 
  ! Big loop on all atoms
  do iat=1,natsph
@@ -1554,36 +1548,17 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
          end if
        end if
 
-#if NEW
-       ! This is for MPI-FFT
+       ! Store results to reduce number of xmpi_sum if MPI-FFT
        values(1, ixint) = dotr
        values(2, ixint) = doti
-
-#else
-!      Multiply by r**2 and take norm, integrate
-!      MJV 5.5.2012 removed call to simpson_int - just need last value, 
-!      no need to allocate full space for primitive and integrand
-       if (ixint ==1 .or. ixint == nradint(iat)) then
-         integ = integ + 0.375_dp * rint2(ixint) * (dotr**2 + doti**2)
-       else if (ixint ==2 .or. ixint == nradint(iat)-1) then
-         integ = integ + 1.166666666666666666666666667_dp * rint2(ixint) * (dotr**2 + doti**2)
-       else if (ixint ==3 .or. ixint == nradint(iat)-2) then
-         integ = integ + 0.958333333333333333333333333_dp * rint2(ixint) * (dotr**2 + doti**2)
-       else
-         integ = integ + rint2(ixint) * (dotr**2 + doti**2)
-       end if
-#endif
      end do ! ixint
 
-#if NEW
+     ! Multiply by r**2 and take norm, integrate
      call xmpi_sum(values, mpi_enreg%comm_fft, ierr)
      do ixint=1,nradint(iat)
-        func(ixint) = rint2(ixint) * (values(1, ixint)**2 + values(2, ixint)**2)
+        func(ixint) = rint(ixint)**2 * (values(1, ixint)**2 + values(2, ixint)**2)
      end do
      integ = simpson(dr, func(1:nradint(iat)))
-#else
-     integ = integ * dr
-#endif
 
      sum_1lm_1atom(ilm, iat) = sum_1lm_1atom(ilm, iat) + integ
      sum_1ll_1atom(il, iat) = sum_1ll_1atom(il, iat) + integ
@@ -1595,16 +1570,6 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
  fact = four_pi**2 / ucvol
  sum_1lm_1atom(:,:) = fact * sum_1lm_1atom(:,:)
  sum_1ll_1atom(:,:) = fact * sum_1ll_1atom(:,:)
-
- !do iat=1,natsph
- !  do il=0,mlang-1
- !    do im=1,il
- !      sum_1lm_1atom(il**2+il+1+im, iat) = half * &
- !      (sum_1lm_1atom(il**2+il+1+im, iat) + sum_1lm_1atom(il**2+il+1-im, iat))
- !      sum_1lm_1atom(il**2+il+1-im, iat) = sum_1lm_1atom(il**2+il+1+im, iat)
- !    end do
- !  end do
- !end do ! iat
 
 !Output
  if (prtsphere == 1) then
