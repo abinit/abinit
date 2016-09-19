@@ -1472,13 +1472,12 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
    end if
  !end if
 
-!#define NEW
 
  ! Big loop on all atoms
  do iat=1,natsph
    dr = rmax(iat)/(nradint(iat)-1)
 
-   ! e^{i(k+G).Ra}
+   ! u(G) e^{i(k+G).Ra}
    ! Temporary array for part which depends only on iat
    do ipw=1,npw_k
      tmppsia(1,ipw) = cg_1band(1,ipw) * ph3d(1,ipw,iat) - cg_1band(2,ipw) * ph3d(2,ipw,iat)
@@ -1499,15 +1498,6 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
        ! to get PDOS for complex spherical harmonics, build linear combination of real ylm 
        ! TODO: check the prefactor part for istwfk /= 1! Could also be incorrect if we go to real spherical harmonics
 
-#ifndef NEW
-         do ipw=1,npw_k
-           tmppsim(1, ipw) =  coef1(ilm) * tmppsia(1, ipw) * ylm(ipw, reylmind(ilm)) &
-              + mmsign(ilm) * coef2(ilm) * tmppsia(2, ipw) * ylm(ipw, imylmind(ilm))
-
-           tmppsim(2, ipw) =  coef2(ilm) * tmppsia(2, ipw) * ylm(ipw, reylmind(ilm)) &
-              - mmsign(ilm) * coef1(ilm) * tmppsia(1, ipw) * ylm(ipw, imylmind(ilm))
-         end do
-#else
          jlm = (ll+1)**2-ll-mm ! index of (l, -m)
          if (mm == 0) then
            vect(1,:) = ylm(1:npw_k,ilm)
@@ -1550,7 +1540,6 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
              end do
            end if
          end if
-#endif
 
      else if (rc_ylm == 1) then
        ! to get PDOS for real spherical harmonics, multiply here by ylm instead of linear combination
@@ -1577,10 +1566,8 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
      integ = zero
      vect(2, 1:npw_k) = zero
      do ixint=1,nradint(iat)
-#ifndef NEW
-       vect(1, 1:npw_k) = bess_fit(1:npw_k, ixint, ilang(ilm))
-       call dotprod_g(dotr, doti, istwfk, npw_k, option2, vect, tmppsim, mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
-#else
+       !vect(1, 1:npw_k) = bess_fit(1:npw_k, ixint, ilang(ilm))
+       !call dotprod_g(dotr, doti, istwfk, npw_k, option2, vect, tmppsim, mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
        dotr = zero; doti = zero
        do ipw=1,npw_k
          dotr = dotr + bess_fit(ipw, ixint, il) * tmppsim(1, ipw)
@@ -1602,7 +1589,6 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
        !   func(ixint) = rint2(ixint) * (values(1, ixint)**2 + values(2, ixint)**2)
        !end do
        !integ = simpson(dr, func(1:nradint(iat))
-#endif
 
 !      Multiply by r**2 and take norm, integrate
 !      MJV 5.5.2012 removed call to simpson_int - just need last value, 
@@ -1627,9 +1613,6 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
  ! Normalize with unit cell volume and include 4pi term coming from rayleigh expansion.
  ! If CSH, we have a factor 1/sqrt(2) 
  fact = four_pi**2 / ucvol
-#ifndef NEW
- if (rc_ylm == 2) fact = eight * pi**2 / ucvol
-#endif
  sum_1lm_1atom(:,:) = fact * sum_1lm_1atom(:,:)
  sum_1ll_1atom(:,:) = fact * sum_1ll_1atom(:,:)
 
