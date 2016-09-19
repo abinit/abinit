@@ -2221,17 +2221,19 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  prtdos
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtdos',dt%prtdos,6,(/0,1,2,3,4,5/),iout)
 
+   if (dt%prtdos == 3 .and. (dt%npband > 1)) then
+     message = ' prtdos==3 and band parallelization are not compatible yet. Set npband = 1'
+     MSG_ERROR(message)
+   end if
 ! for the moment prtdos 3,4,5 are not compatible with fft or band parallelization
-   if (dt%prtdos > 2 .and. (dt%npfft > 1 .or. dt%npband > 1)) then
-     message = ' prtdos>2  and FFT or band parallelization are not compatible yet. Set prtdos <= 2  '
+   if (dt%prtdos > 3 .and. (dt%npfft > 1 .or. dt%npband > 1)) then
+     message = ' prtdos>3 and FFT or band parallelization are not compatible yet. Set prtdos <= 2  '
      MSG_ERROR(message)
    end if
 ! prtdos 5 only makes sense for nspinor == 2. Otherwise reset to prtdos 2
    if (dt%prtdos == 5 .and. dt%nspinor /= 2) then
      dt%prtdos = 2
-     write(message, '(3a)' )&
-&     ch10, ' prtdos == 5 is only useful for nspinor 2. Has been reset to 2', ch10
-     MSG_WARNING (message)
+     MSG_WARNING('prtdos==5 is only useful for nspinor 2. Has been reset to 2')
    end if
 
 

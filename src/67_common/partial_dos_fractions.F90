@@ -165,6 +165,8 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
  ! Real or complex spherical harmonics?
  rc_ylm = 2; if (prtdosm == 2) rc_ylm = 1
 
+ !MSG_ERROR("In partial dos fractions")
+
  if (mpi_enreg%paral_kgb==1) then
    comm = mpi_enreg%comm_kpt
    me = mpi_enreg%me_kpt
@@ -207,8 +209,6 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
      znucl_sph(iatom) = dtset%znucl(itypat)
      typat_extra(iatom) = itypat
    end do
-   !write(std_out,*)"typat_extra",typat_extra
-   !MSG_ERROR("Hello")
 
    ! fictitious atoms are declared with %natsph_extra, %ratsph_extra and %xredsph_extra(3, dtset%natsph_extra)
    ! they have atom index natom + ii
@@ -271,7 +271,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
    kpgnorm (:) = zero
    ioffkg = 0
    do ikpt=1,dtset%nkpt
-     if (all(mpi_enreg%proc_distrb(ikpt,1,1:dtset%nsppol)/=me)) cycle
+     if (all(mpi_enreg%proc_distrb(ikpt,1,1:dtset%nsppol) /= me)) cycle
      npw_k = npwarr(ikpt)
      call getkpgnorm(crystal%gprimd, dtset%kpt(:,ikpt), kg(:,ioffkg+1:ioffkg+npw_k),&
 &     kpgnorm(ioffkg+1:ioffkg+npw_k), npw_k)
@@ -285,7 +285,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
      ioffkg = 0
 
      do ikpt=1,dtset%nkpt
-       if (all(mpi_enreg%proc_distrb(ikpt,:,isppol) /= mpi_enreg%me)) cycle
+       if (all(mpi_enreg%proc_distrb(ikpt,:,isppol) /= me)) cycle
        kpoint(:) = dtset%kpt(:,ikpt)
        npw_k = npwarr(ikpt)
 
@@ -333,11 +333,14 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
 
        shift_b = 0
        do iband=1,dtset%mband
-         if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=mpi_enreg%me) cycle
+         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= me) cycle
 
          do ispinor=1,my_nspinor
            ! Select wavefunction in cg array
            shift_cg = shift_sk + shift_b
+
+           !call xmpi_barrier(comm)
+           !MSG_ERROR("Before recip_ylm")
 
            call recip_ylm(bess_fit, cg(:,shift_cg+1:shift_cg+npw_k), dtset%istwfk(ikpt),&
 &           nradint, nradintmax,mbesslang, mpi_enreg, dtset%mpw, natsph_tot, ntypat_extra, typat_extra,&
@@ -422,14 +425,14 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
    isppol = 1
 
    do ikpt=1,dtset%nkpt
-     if (all(mpi_enreg%proc_distrb(ikpt,:,isppol)/=mpi_enreg%me)) cycle
+     if (all(mpi_enreg%proc_distrb(ikpt,:,isppol) /= me)) cycle
 
      cg_1kpt(:,:) = cg(:,shift_sk+1:shift_sk+mcg_disk)
      npw_k = npwarr(ikpt)
      ABI_ALLOCATE(cg_1band,(2,2*npw_k))
      shift_b=0
      do iband=1,dtset%mband
-       if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=mpi_enreg%me) cycle
+       if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= me) cycle
 
        cg_1band(:,:) = cg_1kpt(:,shift_b+1:shift_b+2*npw_k)
        call cg_getspin(cg_1band, npw_k, spin, cgcmat=cgcmat)

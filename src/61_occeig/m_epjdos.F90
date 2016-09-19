@@ -34,8 +34,9 @@ module m_epjdos
  use m_cgtools
  use m_atomdata
 
- use m_io_tools,     only : open_file
- use m_fstrings,     only : int2char4
+ use m_io_tools,       only : open_file
+ use m_numeric_tools,  only : simpson
+ use m_fstrings,       only : int2char4
 
  implicit none
 
@@ -1415,16 +1416,15 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
 !Local variables-------------------------------
 !scalars
  integer,parameter :: option2=2 ! option for dotprod_g
- integer :: ilm, iat, itypat, ipw, ixint , ll , mm , il,im , jlm
+ integer :: ilm,iat,itypat,ipw,ixint,ll,mm,il,im,jlm, ierr
  real(dp),parameter :: invsqrt2=one/sqrt2
- real(dp) :: doti, dotr, sum_all, integ, dr, llsign1, llsign2, fact
+ real(dp) :: doti, dotr, sum_all, integ, dr, llsign2, fact
  type(atomdata_t) :: atom
 !arrays
- integer :: ilang(mlang**2), reylmind(mlang**2), imylmind(mlang**2)
+ integer :: ilang(mlang**2)
  real(dp) :: c1(2),c2(2)
  real(dp) :: sum_1atom(natsph),sum_1ll(mlang),sum_1lm(mlang**2)
- real(dp) :: coef1(mlang**2),coef2(mlang**2),mmsign(mlang**2) 
- real(dp) :: rint2(nradintmax)
+ real(dp) :: rint2(nradintmax),values(2,nradintmax),func(nradintmax)
  real(dp) :: tmppsia(2,npw_k),tmppsim(2,npw_k),vect(2,npw_k) 
 
 ! *************************************************************************
@@ -1437,41 +1437,14 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
    rint2(ixint) = rint(ixint)**2
  end do
 
- !if (rc_ylm == 2) then
-   ! Compute tables needed to recover complex SH.
-   do ll=0,mlang-1
-     llsign1 = one
-     llsign2 = zero
-     if (mod(ll,2) == 1) then
-       llsign1 = zero
-       llsign2 = one
-     end if
-     do mm = -ll, -1
-       ilm = (ll+1)**2-ll+mm
-       ilang(ilm) = ll+1
-       coef1(ilm) = llsign1 ! 1 for even ll channels
-       coef2(ilm) = llsign2 ! 1 for odd ll channels
-       reylmind(ilm) = (ll+1)**2-ll-mm
-       imylmind(ilm) = (ll+1)**2-ll+mm
-       mmsign(ilm) = -one
-     end do
-
-     do mm = 0, ll
-       ilm = (ll+1)**2-ll+mm
-       ilang(ilm) = ll+1
-       coef1(ilm) = llsign1 ! 1 for even ll channels
-       coef2(ilm) = llsign2 ! 1 for odd ll channels
-       reylmind(ilm) = (ll+1)**2-ll+mm
-       imylmind(ilm) = (ll+1)**2-ll-mm
-       mmsign(ilm) = one
-     end do
+ do ll=0,mlang-1
+   do mm=-ll,ll
+     ilm = (ll+1)**2-ll+mm
+     ilang(ilm) = ll+1
    end do
-   if (istwfk == 1) then
-     coef1 = one
-     coef2 = one
-   end if
- !end if
+ end do
 
+#define NEW 1
 
  ! Big loop on all atoms
  do iat=1,natsph
@@ -1517,7 +1490,6 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
             c2 = sy(ll,-mm,  mm)
             vect(1,:) = c1(1) * ylm(1:npw_k,ilm) + c2(1) * ylm(1:npw_k,jlm)
             vect(2,:) = c1(2) * ylm(1:npw_k,ilm) + c2(2) * ylm(1:npw_k,jlm)
-
          end if
          vect(2,:) = -vect(2,:)
 
@@ -1566,6 +1538,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
      integ = zero
      vect(2, 1:npw_k) = zero
      do ixint=1,nradint(iat)
+
        !vect(1, 1:npw_k) = bess_fit(1:npw_k, ixint, ilang(ilm))
        !call dotprod_g(dotr, doti, istwfk, npw_k, option2, vect, tmppsim, mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
        dotr = zero; doti = zero
@@ -1581,15 +1554,12 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
          end if
        end if
 
+#if NEW
        ! This is for MPI-FFT
-       !values(1, ixint) = dotr
-       !values(2, ixint) = dotr
-       !call xmpi_sum(values, comm_fft, ierr)
-       !do ixint=1,nradint(iat)
-       !   func(ixint) = rint2(ixint) * (values(1, ixint)**2 + values(2, ixint)**2)
-       !end do
-       !integ = simpson(dr, func(1:nradint(iat))
+       values(1, ixint) = dotr
+       values(2, ixint) = doti
 
+#else
 !      Multiply by r**2 and take norm, integrate
 !      MJV 5.5.2012 removed call to simpson_int - just need last value, 
 !      no need to allocate full space for primitive and integrand
@@ -1602,8 +1572,18 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
        else
          integ = integ + rint2(ixint) * (dotr**2 + doti**2)
        end if
+#endif
      end do ! ixint
+
+#if NEW
+     call xmpi_sum(values, mpi_enreg%comm_fft, ierr)
+     do ixint=1,nradint(iat)
+        func(ixint) = rint2(ixint) * (values(1, ixint)**2 + values(2, ixint)**2)
+     end do
+     integ = simpson(dr, func(1:nradint(iat)))
+#else
      integ = integ * dr
+#endif
 
      sum_1lm_1atom(ilm, iat) = sum_1lm_1atom(ilm, iat) + integ
      sum_1ll_1atom(il, iat) = sum_1ll_1atom(il, iat) + integ
