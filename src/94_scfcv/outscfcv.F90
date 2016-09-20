@@ -826,10 +826,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
      if (psps%usepaw==1 .and. dos%partial_dos_flag /= 2) then
 !      TODO: update partial_dos_fractions_paw for extra atoms - no PAW contribution normally, but check bounds and so on.
-       call partial_dos_fractions_paw(cprj,dimcprj,dos%fractions,dos%fractions_m,&
-&       dos%fractions_paw1,dos%fractions_pawt1,dtset,dos%fatbands_flag,&
-&       dos%mbesslang,mcprj,mkmem,mpi_enreg,dos%prtdosm,dos%ndosfraction,&
-&       dos%paw_dos_flag,pawrad,pawtab)
+       call partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enreg,pawrad,pawtab)
      end if
      if (dos%prtdosm>=1) then
        call dos_degeneratewfs(dos%fractions_m,dos%fractions_average_m,&
@@ -842,13 +839,13 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 !  Here, computation of fatbands for the k-point given. _FATBANDS
    if (me == master .and. dtset%pawfatbnd>0 .and. dos%fatbands_flag==1) then
-     call prtfatbands(dos%fractions_m,dtset,dtfil%fnameabo_app_fatbands,fermie,eigen,&
-&     dos%mbesslang,dos%prtdosm,dos%ndosfraction,dtset%pawfatbnd,pawtab)
+     call prtfatbands(dos,dtset,dtfil%fnameabo_app_fatbands,fermie,eigen,dtset%pawfatbnd,pawtab)
    end if
 
 #ifdef HAVE_NETCDF
    ! master writes fabands file here so that also NC pseudos are supported.
-   if (.False. .and. me == master) then
+   if (me == master) then
+   !if (.False.)
    !if ((prtdosm>=1.or.dos%fatbands_flag==1) .and. me == master) then ! TODO: Recheck this.
    !if ((dtset%pawfatbnd>0.and.dos%fatbands_flag==1) .and. me == master) then
      fname = trim(dtfil%filnam_ds(4))//'_FATBANDS.nc'

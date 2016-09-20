@@ -95,6 +95,7 @@ sources = [
  "odamix.F90",
  "optics_vloc.F90",
  "partial_dos_fractions.F90",
+ "partial_dos_fractions_paw.F90",
  "posdoppler.F90",
  "poslifetime.F90",
  "posratecore.F90",

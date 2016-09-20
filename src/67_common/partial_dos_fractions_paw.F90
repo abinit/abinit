@@ -66,10 +66,7 @@
 
 #include "abi_common.h"
 
-subroutine partial_dos_fractions_paw(cprj,dimcprj,dos_fractions,dos_fractions_m,&
-& dos_fractions_paw1,dos_fractions_pawt1,&
-& dtset,fatbands_flag,mbesslang,mcprj,mkmem,&
-& mpi_enreg,prtdosm,ndosfraction,paw_dos_flag,pawrad,pawtab)
+subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enreg,pawrad,pawtab)
 
  use defs_basis
  use defs_abitypes
@@ -80,6 +77,7 @@ subroutine partial_dos_fractions_paw(cprj,dimcprj,dos_fractions,dos_fractions_m,
  use m_pawrad,  only : pawrad_type, simp_gen
  use m_pawtab,  only : pawtab_type
  use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_free
+ use m_epjdos,  only : epjdos_t
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -93,17 +91,17 @@ subroutine partial_dos_fractions_paw(cprj,dimcprj,dos_fractions,dos_fractions_m,
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: fatbands_flag,mbesslang,mcprj,mkmem,prtdosm,ndosfraction
- integer,intent(in) :: paw_dos_flag
+ integer,intent(in) :: mcprj,mkmem
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
+ type(epjdos_t),intent(inout) :: dos
 !arrays
  integer,intent(in) :: dimcprj(dtset%natom)
- real(dp),intent(inout) :: dos_fractions(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction)
- real(dp),intent(inout) :: dos_fractions_m(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction&
-& *mbesslang*min(max(prtdosm,fatbands_flag),1))
- real(dp),intent(out) :: dos_fractions_paw1(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*paw_dos_flag)
- real(dp),intent(out) :: dos_fractions_pawt1(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*paw_dos_flag)
+ !real(dp),intent(inout) :: dos_fractions(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction)
+ !real(dp),intent(inout) :: dos_fractions_m(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction&
+!& *mbesslang*min(max(prtdosm,fatbands_flag),1))
+ !real(dp),intent(out) :: dos_fractions_paw1(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*paw_dos_flag)
+ !real(dp),intent(out) :: dos_fractions_pawt1(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*paw_dos_flag)
  type(pawcprj_type) :: cprj(dtset%natom,mcprj)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
  type(pawtab_type),target,intent(in) :: pawtab(dtset%ntypat)
@@ -112,6 +110,7 @@ subroutine partial_dos_fractions_paw(cprj,dimcprj,dos_fractions,dos_fractions_m,
 !scalars
  integer :: basis_size,cplex,iat,iatom,iband,ibg,ibsp,ierr,ikpt,il,ilang,ilmn,iln,im,iorder_cprj,ispinor,isppol
  integer :: itypat,j0lmn,j0ln,jl,jlmn,jln,jm,klmn,kln,lmn_size,me,my_nspinor,nband_k,spaceComm
+ integer :: fatbands_flag,mbesslang,prtdosm,ndosfraction,paw_dos_flag
  real(dp) :: cpij
  character(len=500) :: message
 !arrays
@@ -127,6 +126,12 @@ subroutine partial_dos_fractions_paw(cprj,dimcprj,dos_fractions,dos_fractions_m,
 
  ABI_CHECK(mkmem/=0,"mkmem==0 not supported anymore!")
 
+ fatbands_flag = dos%fatbands_flag 
+ mbesslang = dos%mbesslang 
+ prtdosm = dos%prtdosm
+ ndosfraction = dos%ndosfraction
+ paw_dos_flag = dos%paw_dos_flag
+
 !m-decomposed DOS not compatible with PAW-decomposed DOS
  if(prtdosm>=1.and.paw_dos_flag==1) then
    message = 'm-decomposed DOS not compatible with PAW-decomposed DOS !'
@@ -135,8 +140,8 @@ subroutine partial_dos_fractions_paw(cprj,dimcprj,dos_fractions,dos_fractions_m,
 
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
  if (paw_dos_flag==1.or.fatbands_flag==1) then
-   dos_fractions_paw1 =zero
-   dos_fractions_pawt1=zero
+   dos%fractions_paw1 =zero
+   dos%fractions_pawt1=zero
  end if
 
 !Prepare some useful integrals
@@ -243,25 +248,25 @@ subroutine partial_dos_fractions_paw(cprj,dimcprj,dos_fractions,dos_fractions_m,
                    if (cplex==2) cpij=cpij+cprj_k(iat,ibsp)%cp(2,ilmn)*cprj_k(iat,ibsp)%cp(2,jlmn)
                    cpij=pawtab(itypat)%dltij(klmn)*cpij
 
-                   dos_fractions(ikpt,iband,isppol,mbesslang*(iat-1)+ilang)=  &
-&                   dos_fractions(ikpt,iband,isppol,mbesslang*(iat-1)+ilang) + &
+                   dos%fractions(ikpt,iband,isppol,mbesslang*(iat-1)+ilang)=  &
+&                   dos%fractions(ikpt,iband,isppol,mbesslang*(iat-1)+ilang) + &
 &                   cpij*int1m2(kln,iat)
                    if (prtdosm==1) then
-                     dos_fractions_m(ikpt,iband,isppol,mbesslang**2*(iat-1)+il**2+il+1+im)= &
-&                     dos_fractions_m(ikpt,iband,isppol,mbesslang**2*(iat-1)+il**2+il+1+im) + &
+                     dos%fractions_m(ikpt,iband,isppol,mbesslang**2*(iat-1)+il**2+il+1+im)= &
+&                     dos%fractions_m(ikpt,iband,isppol,mbesslang**2*(iat-1)+il**2+il+1+im) + &
 &                     cpij*int1m2(kln,iat)
                    end if
                    if (fatbands_flag==1.or.prtdosm==2) then
-                     dos_fractions_m(ikpt,iband,isppol,mbesslang**2*(iat-1)+il**2+il+1+im)= &
-&                     dos_fractions_m(ikpt,iband,isppol,mbesslang**2*(iat-1)+il**2+il+1+im) + &
+                     dos%fractions_m(ikpt,iband,isppol,mbesslang**2*(iat-1)+il**2+il+1+im)= &
+&                     dos%fractions_m(ikpt,iband,isppol,mbesslang**2*(iat-1)+il**2+il+1+im) + &
 &                     cpij*int1(kln,iat)
                    end if
                    if (paw_dos_flag==1) then
-                     dos_fractions_paw1(ikpt,iband,isppol,mbesslang*(iat-1)+ilang)=  &
-&                     dos_fractions_paw1(ikpt,iband,isppol,mbesslang*(iat-1)+ilang) + &
+                     dos%fractions_paw1(ikpt,iband,isppol,mbesslang*(iat-1)+ilang)=  &
+&                     dos%fractions_paw1(ikpt,iband,isppol,mbesslang*(iat-1)+ilang) + &
 &                     cpij*int1(kln,iat)
-                     dos_fractions_pawt1(ikpt,iband,isppol,mbesslang*(iat-1)+ilang)=  &
-&                     dos_fractions_pawt1(ikpt,iband,isppol,mbesslang*(iat-1)+ilang) + &
+                     dos%fractions_pawt1(ikpt,iband,isppol,mbesslang*(iat-1)+ilang)=  &
+&                     dos%fractions_pawt1(ikpt,iband,isppol,mbesslang*(iat-1)+ilang) + &
 &                     cpij*int2(kln,iat)
                    end if
 
@@ -288,23 +293,23 @@ subroutine partial_dos_fractions_paw(cprj,dimcprj,dos_fractions,dos_fractions_m,
 
 !Reduce data in case of parallelism
  call timab(48,1,tsec)
- call xmpi_sum(dos_fractions,spaceComm,ierr)
+ call xmpi_sum(dos%fractions,spaceComm,ierr)
  if (prtdosm>=1.or.fatbands_flag==1) then
-   call xmpi_sum(dos_fractions_m,spaceComm,ierr)
+   call xmpi_sum(dos%fractions_m,spaceComm,ierr)
  end if
  if (paw_dos_flag==1) then
-   call xmpi_sum(dos_fractions_paw1,spaceComm,ierr)
-   call xmpi_sum(dos_fractions_pawt1,spaceComm,ierr)
+   call xmpi_sum(dos%fractions_paw1,spaceComm,ierr)
+   call xmpi_sum(dos%fractions_pawt1,spaceComm,ierr)
  end if
  call timab(48,2,tsec)
  if (mpi_enreg%paral_spinor==1) then
-   call xmpi_sum(dos_fractions,mpi_enreg%comm_spinor,ierr)
+   call xmpi_sum(dos%fractions,mpi_enreg%comm_spinor,ierr)
    if (prtdosm>=1.or.fatbands_flag==1) then
-     call xmpi_sum(dos_fractions_m,mpi_enreg%comm_spinor,ierr)
+     call xmpi_sum(dos%fractions_m,mpi_enreg%comm_spinor,ierr)
    end if
    if (paw_dos_flag==1) then
-     call xmpi_sum(dos_fractions_paw1, mpi_enreg%comm_spinor,ierr)
-     call xmpi_sum(dos_fractions_pawt1, mpi_enreg%comm_spinor,ierr)
+     call xmpi_sum(dos%fractions_paw1, mpi_enreg%comm_spinor,ierr)
+     call xmpi_sum(dos%fractions_pawt1, mpi_enreg%comm_spinor,ierr)
    end if
  end if
 
@@ -319,11 +324,11 @@ subroutine partial_dos_fractions_paw(cprj,dimcprj,dos_fractions,dos_fractions_m,
    do iat=1,dtset%natsph
      do il = 0, mbesslang-1
        do im = 1, il
-         dos_fractions_m(:,:,:,mbesslang**2*(iat-1)+il**2+il+1+im) = &
-&         (dos_fractions_m(:,:,:,mbesslang**2*(iat-1)+il**2+il+1+im) + &
-&         dos_fractions_m(:,:,:,mbesslang**2*(iat-1)+il**2+il+1-im))/2
-         dos_fractions_m(:,:,:,mbesslang**2*(iat-1)+il**2+il+1-im) = &
-&         dos_fractions_m(:,:,:,mbesslang**2*(iat-1)+il**2+il+1+im)
+         dos%fractions_m(:,:,:,mbesslang**2*(iat-1)+il**2+il+1+im) = &
+&         (dos%fractions_m(:,:,:,mbesslang**2*(iat-1)+il**2+il+1+im) + &
+&         dos%fractions_m(:,:,:,mbesslang**2*(iat-1)+il**2+il+1-im))/2
+         dos%fractions_m(:,:,:,mbesslang**2*(iat-1)+il**2+il+1-im) = &
+&         dos%fractions_m(:,:,:,mbesslang**2*(iat-1)+il**2+il+1+im)
        end do
      end do
    end do !iatom
