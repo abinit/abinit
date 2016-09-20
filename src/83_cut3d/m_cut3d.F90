@@ -35,7 +35,7 @@ MODULE m_cut3d
  use m_wfk
  use m_xmpi
 
- use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists
+ use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists, read_string
  use m_numeric_tools,    only : interpol3d
  use m_fstrings,         only : int2char10, sjoin, itoa
  use m_pptools,          only : print_fofr_ri, print_fofr_xyzri , print_fofr_cube
@@ -145,7 +145,9 @@ subroutine cut3d_hirsh(grid_den,natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion
  do itypat=1,ntypat
    write(std_out,'(a)' )' Please, give the filename of the all-electron density file'
    write(std_out,'(a,es16.6)' )' for the first type of atom, with atomic number=',znucl(itypat)
-   read(std_in, '(a)' )file_allelectron
+   if (read_string(file_allelectron, unit=std_in) /= 0) then
+     MSG_ERROR("Fatal error!")
+   end if
    write(std_out,*)' The name you entered is : ',trim(file_allelectron),ch10
    ierr = open_file(file_allelectron,msg,newunit=temp_unit,form='formatted',status='old')
    if (ierr/=0) then
@@ -2340,7 +2342,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
      if(ii1==1) then
        write(std_out,*) 'What is the name of the QPS file?'
-       read(std_in,*) fileqps
+       if (read_string(fileqps, unit=std_in) /= 0) then
+         MSG_ERROR("Fatal error!")
+       end if
 !      Checking the existence of data file
        if (.not. file_exists(fileqps)) then
          MSG_ERROR(sjoin('Missing data file:', fileqps))
@@ -2577,7 +2581,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
      if (ichoice>0 .and. ichoice<15)then
        write(std_out,*) ch10,'  Enter the root of an output file:'
-       read(std_in,*) output1
+       if (read_string(output1, unit=std_in) /= 0) then
+         MSG_ERROR("Fatal error!")
+       end if
        write(std_out,*) '  The root of your file is : ',trim(output1)
        output=trim(output1)
        call int2char10(ckpt,string)
@@ -2983,7 +2989,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'Do you want to shift the grid along the x,y or z axis (y/n)?'
        write(std_out,*)
        shift_tau(:) = 0.0
-       read (std_in,*) outputchar
+       if (read_string(outputchar, unit=std_in) /= 0) then
+         MSG_ERROR("Fatal error!")
+       end if
        if (outputchar == 'y' .or. outputchar == 'Y') then
          MSG_ERROR("Shift is buggy, don't use it")
          write(std_out,*) 'Give the three shifts (x,y,z < ',nr1,nr2,nr3,') :'
@@ -3145,7 +3153,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        write(std_out,*) 'Do you want to shift the grid along the x,y or z axis (y/n)?'
        write(std_out,*)
        shift_tau(:) = 0.0
-       read (std_in,*) outputchar
+       if (read_string(outputchar, unit=std_in) /= 0) then
+         MSG_ERROR("Fatal error!")
+       end if
        if (outputchar == 'y' .or. outputchar == 'Y') then
          MSG_ERROR("Shift is buggy, don't use it")
          write(std_out,*) 'Give the three shifts (x,y,z < ',nr1,nr2,nr3,') :'
