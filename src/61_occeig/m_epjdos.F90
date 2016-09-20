@@ -33,10 +33,19 @@ module m_epjdos
  use m_splines
  use m_cgtools
  use m_atomdata
+ use m_crystal
+ use m_crystal_io
+ use m_ebands
+ use m_nctk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
+ use m_hdr
 
  use m_io_tools,       only : open_file
  use m_numeric_tools,  only : simpson
  use m_fstrings,       only : int2char4
+ use m_pawtab,         only : pawtab_type
 
  implicit none
 
@@ -111,6 +120,10 @@ module m_epjdos
  public :: epjdos_from_dataset
  public :: epjdos_free
 
+#ifdef HAVE_NETCDF
+ public :: fatbands_ncwrite
+#endif
+
 !----------------------------------------------------------------------
 
 contains  !============================================================
@@ -182,17 +195,18 @@ type(epjdos_t) function epjdos_from_dataset(dtset) result(new)
    new%mbesslang = 0
  end if
 
- ABI_ALLOCATE(new%fractions, (dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
+ ABI_CALLOC(new%fractions, (dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
  if (new%prtdosm>=1 .or. new%fatbands_flag==1) then
-   ABI_ALLOCATE(new%fractions_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang))
-   ABI_ALLOCATE(new%fractions_average_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang))
+   ABI_CALLOC(new%fractions_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang))
+   ABI_CALLOC(new%fractions_average_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang))
  else
    ABI_ALLOCATE(new%fractions_m,(0,0,0,0))
    ABI_ALLOCATE(new%fractions_average_m,(0,0,0,0))
  end if
+
  if (dtset%usepaw==1 .and. new%partial_dos_flag==1) then
-   ABI_ALLOCATE(new%fractions_paw1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
-   ABI_ALLOCATE(new%fractions_pawt1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
+   ABI_CALLOC(new%fractions_paw1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
+   ABI_CALLOC(new%fractions_pawt1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
  else
    ABI_ALLOCATE(new%fractions_paw1,(0,0,0,0))
    ABI_ALLOCATE(new%fractions_pawt1,(0,0,0,0))
@@ -2097,6 +2111,146 @@ subroutine sphericaldens(fofg,gnorm,nfft,rmax,sphfofg)
 
 end subroutine sphericaldens
 !!***
+!----------------------------------------------------------------------
+
+!!****f* m_epjdos/fatbands_ncwrite
+!! NAME
+!! fatbands_ncwrite
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!  cryst<crystal_t>=Object defining the unit cell and its symmetries.
+!!  ncid=NC file handle.
+!!
+!! OUTPUT
+!!  Only writing
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#ifdef HAVE_NETCDF
+
+subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'fatbands_ncwrite'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid
+ type(epjdos_t),intent(in) :: dos
+ type(crystal_t),intent(in) :: crystal
+ type(ebands_t),intent(in) :: ebands
+ type(hdr_type),intent(in) :: hdr
+ type(dataset_type),intent(in) :: dtset
+ type(pseudopotential_type),intent(in) :: psps
+!arrays
+ !real(dp),intent(in) :: dos_fractions_m(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*mbesslang)
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*dtset%usepaw)
+
+!Local variables-------------------------------
+!scalars
+ integer :: itype,ncerr
+ integer,parameter :: fform=102 ! FIXME
+ !character(len=500) :: msg
+!arrays
+ integer :: lmax_type(crystal%ntypat)
+
+!*************************************************************************
+
+ ABI_CHECK(dtset%natsph > 0, "natsph <= 0!")
+
+ ! Write header, crystal structure and band energies.
+ NCF_CHECK(hdr_ncwrite(hdr, ncid, fform, nc_define=.True.))
+ NCF_CHECK(crystal_ncwrite(crystal, ncid))
+ NCF_CHECK(ebands_ncwrite(ebands, ncid))
+
+ ! Add fatband-specific quantities
+ ncerr = nctk_def_dims(ncid, [ &
+   nctkdim_t("mbesslang", dos%mbesslang), nctkdim_t("ndosfraction", dos%ndosfraction), & 
+   nctkdim_t("natsph", dtset%natsph), & 
+   nctkdim_t("dos_fraction_size", dos%ndosfraction*dos%mbesslang)], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ if (dtset%natsph_extra /= 0) then
+    NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("natsph_extra", dtset%natsph_extra)]))
+ end if
+
+ ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "prtdos", "pawprtdos", "prtdosm"]) !"dtset%pawfatbnd", 
+ NCF_CHECK(ncerr)
+ ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "ratsph_extra"])
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(ncid, [&
+   nctkarr_t("lmax_type", "int", "number_of_atom_species"), & 
+   nctkarr_t("iatsph", "int", "natsph"), & 
+   nctkarr_t("ratsph", "dp", "number_of_atom_species"), &
+   nctkarr_t("dos_fractions_m", "dp", "number_of_kpoints, max_number_of_states, number_of_spins, dos_fraction_size") & 
+ ])
+ NCF_CHECK(ncerr)
+
+ if (dtset%natsph_extra /= 0) then
+   ncerr = nctk_def_arrays(ncid, [&
+     nctkarr_t("ratsph_extra", "dp", "number_of_atom_species"), &
+     nctkarr_t("xredsph_extra", "dp", "number_of_reduced_dimensions, natsph_extra") &
+   ])
+   NCF_CHECK(ncerr)
+ end if
+
+ ! Write variables
+ NCF_CHECK(nctk_set_datamode(ncid))
+
+ ! scalars
+ NCF_CHECK(nf90_put_var(ncid, vid("prtdos"), dtset%prtdos))
+ !NCF_CHECK(nf90_put_var(ncid, vid("pawfatbnd"), dtset%pawfatbnd))
+ NCF_CHECK(nf90_put_var(ncid, vid("pawprtdos"), dtset%pawprtdos))
+ NCF_CHECK(nf90_put_var(ncid, vid("prtdosm"), dtset%prtdosm))
+
+ ! arrays
+ if (dtset%usepaw == 1) then
+   lmax_type = (pawtab(:)%l_size - 1) / 2
+ else
+   do itype=1,crystal%ntypat
+     lmax_type(itype) = maxval(psps%indlmn(1, :, itype))
+   end do
+ end if
+ NCF_CHECK(nf90_put_var(ncid, vid("lmax_type"), lmax_type))
+ NCF_CHECK(nf90_put_var(ncid, vid("iatsph"), dtset%iatsph(1:dtset%natsph)))
+ NCF_CHECK(nf90_put_var(ncid, vid("ratsph"), dtset%ratsph(1:dtset%ntypat)))
+ NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions_m"), dos%fractions_m))
+
+ NCF_CHECK(nf90_put_var(ncid, vid("ratsph_extra"), dtset%ratsph_extra))
+ if (dtset%natsph_extra /= 0) then
+   NCF_CHECK(nf90_put_var(ncid, vid("xredsph_extra"), dtset%xredsph_extra(:, 1:dtset%natsph_extra)))
+ end if
+
+contains
+ integer function vid(vname) 
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'vid'
+!End of the abilint section
+
+   character(len=*),intent(in) :: vname
+   vid = nctk_idname(ncid, vname)
+ end function vid
+
+end subroutine fatbands_ncwrite
+!!***
+
+#endif
+!ifdef HAVE_NETCDF
 
 end module m_epjdos
 !!***

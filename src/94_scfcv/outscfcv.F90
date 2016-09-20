@@ -170,7 +170,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft
  use m_numeric_tools,    only : simpson_int
- use m_epjdos,           only : tetrahedron, gaus_dos, dos_degeneratewfs, epjdos_t, epjdos_from_dataset, epjdos_free
+ !use m_epjdos,           only : tetrahedron, gaus_dos, dos_degeneratewfs, epjdos_t, epjdos_from_dataset, epjdos_free
+ use m_epjdos
 
  !use m_skw
 
@@ -815,68 +816,15 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 !Generate DOS using the tetrahedron method or using Gaussians
 !FIXME: Should centralize all calculations of DOS here in outscfcv
- !partial_dos_flag = 0
  if (dtset%prtdos>=2.or.dtset%pawfatbnd>0) then
-
-#if 1
    dos = epjdos_from_dataset(dtset)
-#else
-   if(prtdos==2) partial_dos_flag = 0 ! Standard DOS with tetra.
-   if(prtdos==3) partial_dos_flag = 1 ! L-DOS with tetra (prtdosm>0 if LM is wanted in Ylm/Slm basis).
-   if(prtdos==4) partial_dos_flag = 1 ! L-DOS with gaussian (prtdosm if LM is wanted in Ylm/Slm basis).
-   if(prtdos==5) partial_dos_flag = 2 ! Spin DOS 
-   prtdosm=0
-   if (partial_dos_flag==1) prtdosm=dtset%prtdosm
-!  paw_dos_flag= 1 if both PAW contributions are evaluated AND stored
-   paw_dos_flag=0
-   if (psps%usepaw==1.and.partial_dos_flag==1.and.dtset%pawprtdos==1) paw_dos_flag=1
-   fatbands_flag=0
-   if(pawfatbnd>0.and.prtdosm==0) fatbands_flag=1
-   if(prtdosm==1.and.pawfatbnd>0)then
-     message = 'pawfatbnd>0  and prtdosm=1 are not compatible '
-!    because they compute quantities in real and complex harmonics respectively
-     MSG_ERROR(message)
-   end if
-
-!  mjv : initialization is needed as mbesslang is used for allocation below
-!  NOTE: 10/5/2010 the whole of this could be looped over ndosfraction,
-!  to store much less in memory. The DOS is accumulated in an array
-!  and then printed to file at the end.
-   mbesslang = 1
-   if(partial_dos_flag==1.or.fatbands_flag==1)then
-     mbesslang = 5
-     ndosfraction=(dtset%natsph + dtset%natsph_extra)*mbesslang
-   else if (partial_dos_flag == 2) then
-     ndosfraction = 7
-   else
-     ndosfraction = 1
-     mbesslang = 0
-   end if
-
-   ABI_ALLOCATE(dos%fractions, (dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction))
-   if (prtdosm>=1.or.fatbands_flag==1) then
-     ABI_ALLOCATE(dos%fractions_m,(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*mbesslang))
-     ABI_ALLOCATE(dos%fractions_average_m,(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*mbesslang))
-   else
-     ABI_ALLOCATE(dos%fractions_m,(0,0,0,0))
-     ABI_ALLOCATE(dos%fractions_average_m,(0,0,0,0))
-   end if
-   if (psps%usepaw==1.and.(partial_dos_flag==1)) then
-     ABI_ALLOCATE(dos%fractions_paw1,(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction))
-     ABI_ALLOCATE(dos%fractions_pawt1,(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction))
-   else
-     ABI_ALLOCATE(dos%fractions_paw1,(0,0,0,0))
-     ABI_ALLOCATE(dos%fractions_pawt1,(0,0,0,0))
-   end if
-#endif
 
    if (dos%partial_dos_flag>=1 .or. dos%fatbands_flag==1)then
      ! Generate fractions for partial DOSs if needed partial_dos 1,2,3,4  give different decompositions
-     if ((psps%usepaw==0.or.dtset%pawprtdos/=2).and. dos%partial_dos_flag>=1) then
-       call partial_dos_fractions(crystal,npwarr,kg,cg,dos%fractions,dos%fractions_m,&
-           dtset,dos%mbesslang,mcg,mpi_enreg,dos%prtdosm,dos%ndosfraction,dos%partial_dos_flag)
+     if ((psps%usepaw==0.or.dtset%pawprtdos/=2) .and. dos%partial_dos_flag>=1) then
+       call partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,mpi_enreg)
      else
-       dos%fractions=zero;if (dos%prtdosm>=1.or.dos%fatbands_flag==1) dos%fractions_m=zero
+       !dos%fractions=zero;if (dos%prtdosm>=1.or.dos%fatbands_flag==1) dos%fractions_m=zero
      end if
 
      if (psps%usepaw==1 .and. dos%partial_dos_flag /= 2) then
@@ -886,7 +834,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &       dos%mbesslang,mcprj,mkmem,mpi_enreg,dos%prtdosm,dos%ndosfraction,&
 &       dos%paw_dos_flag,pawrad,pawtab)
      end if
-     if(dos%prtdosm>=1)then
+     if (dos%prtdosm>=1) then
        call dos_degeneratewfs(dos%fractions_m,dos%fractions_average_m,&
 &       eigen,mband,dtset%nband,dos%ndosfraction*dos%mbesslang,dtset%nkpt,dtset%nsppol)
      end if
@@ -907,8 +855,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    if ((dtset%pawfatbnd>0.and.dos%fatbands_flag==1) .and. me == master) then
      fname = trim(dtfil%filnam_ds(4))//'_FATBANDS.nc'
      NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
-     call fatbands_ncwrite(crystal, ebands, hdr, dos%fractions_m, dtset, &
-                           dos%mbesslang, dos%prtdosm, dos%ndosfraction, psps, dtset%pawfatbnd, pawtab, ncid)
+     call fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, dtset%pawfatbnd, pawtab, ncid)
      NCF_CHECK(nf90_close(ncid))
    end if
 #endif
