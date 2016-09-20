@@ -60,7 +60,7 @@ subroutine wvl_wfsinp_disk(dtset, hdr0, hdr, mpi_enreg, occ, option, rprimd, wff
 
  use m_abi2big,          only : wvl_occ_abi2big
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API, only : first_orthon,sumrho,communicate_density,plot_density
  use dynamic_memory
 #endif
@@ -92,7 +92,7 @@ subroutine wvl_wfsinp_disk(dtset, hdr0, hdr, mpi_enreg, occ, option, rprimd, wff
   real(dp), intent(in)                      :: xred(3, dtset%natom)
 
 !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  logical :: wvlbigdft=.false.
  integer :: comm,me,nproc
  character(len = 500)  :: message
@@ -107,7 +107,7 @@ subroutine wvl_wfsinp_disk(dtset, hdr0, hdr, mpi_enreg, occ, option, rprimd, wff
 
 ! *********************************************************************
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
  write(message, '(a,a)' ) ch10,' wvl_wfsinp_disk: wavefunction initialisation.'
  call wrtout(std_out,message,'COLL')

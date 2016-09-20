@@ -11,6 +11,7 @@ tolwfr  1.0d-14
 
 getwfk   20      # Read GS wavefunctions from DS20_WFK
 getddb   20      # Read DDB files from DS20_DDB
+getddk   20      # read DDK files from DS20_DDKxx where xx is natom+1 +2 +3
 ddb_ngqpt 4 4 4  # q-mesh used to produce the DDB file (must be consisten with DDB data)
 
 # These are the default values.
@@ -32,6 +33,7 @@ eph_fsewin  0.8 eV   # Energy window around Ef
 #eph_extrael 0.0
 #eph_fermie 0.0
 eph_mustar 0.12      # mustar parameter
+eph_transport 1
 
 # q-path for phonons and phonon linewidths.
 ph_ndivsm 20

@@ -313,12 +313,12 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 
    do ikpt=1,nkpt_rbz
 
-     nband_k=nband_rbz(ikpt+nkpt_rbz)
+     nband_k=nband_rbz(ikpt)
      istwf_k=istwfk_rbz(ikpt)
      npw_k=npwarr(ikpt)
      npw1_k=npwar1(ikpt)
 
-     if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,nspinor,me)) then
+     if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,1,me)) then
        bdtot_index=bdtot_index+nband_k
        cycle
      end if
@@ -337,7 +337,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 !    Loop over bands to fft and square for rho(r)
      do iband=1,nband_k
 
-       if (mpi_enreg%proc_distrb(ikpt,iband,nspinor)/=me) cycle
+       if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,1,me)) cycle
 
 !      Only treat occupied states
        if (abs(occ_rbz(iband+bdtot_index))>tol8) then
@@ -409,17 +409,17 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
                  re1_up=wfraug1_up(1,i1,i2,i3) ;     im1_up=wfraug1_up(2,i1,i2,i3)
                  re0_down=wfraug_down(1,i1,i2,i3)  ; im0_down=wfraug_down(2,i1,i2,i3)
                  re1_down=wfraug1_down(1,i1,i2,i3) ; im1_down=wfraug1_down(2,i1,i2,i3)
-                 rhoaug1(2*i1-1,i2,i3,1)=rhoaug1(2*i1-1,i2,i3,1)+two*weight*((re0_up*re1_up+im0_up*im1_up)+&
+                 rhoaug1(2*i1-1,i2,i3,1)=rhoaug1(2*i1-1,i2,i3,1)+weight*((re0_up*re1_up+im0_up*im1_up)+&
 &                 (re0_down*re1_down+im0_down*im1_down)) ! trace
                  rhoaug1(2*i1  ,i2,i3,1)=zero ! imag part of rho at k
-                 rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(2*i1-1,i2,i3,2)+two*weight*((re0_up*re1_up+im0_up*im1_up)-&
-&                 (re0_down*re1_down+im0_down*im1_down)) ! m_z
-                 rhoaug1(2*i1  ,i2,i3,2)=zero ! imag part of rho at k
-                 rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(2*i1-1,i2,i3,3)+two*weight*((re0_up*re1_down+im0_up*im1_down)+&
+                 rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(2*i1-1,i2,i3,2)+weight*((re0_up*re1_down+im0_up*im1_down)+&
 &                 re0_down*re1_up+im0_down*im1_up) ! m_x
+                 rhoaug1(2*i1  ,i2,i3,2)=zero ! imag part of rho at k
+                 rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(2*i1-1,i2,i3,3)+weight*((-re1_up*im0_down+im1_up*re0_down)&
+&                 -re0_up*im1_down+im0_up*re1_down) ! m_y
                  rhoaug1(2*i1  ,i2,i3,3)=zero ! imag part of rho at k
-                 rhoaug1(2*i1-1,i2,i3,4)=rhoaug1(2*i1-1,i2,i3,4)+two*weight*((re1_up*im0_down-im1_up*re0_down)+&
-&                 re0_up*im1_down-im0_up*re1_down) ! m_y
+                 rhoaug1(2*i1-1,i2,i3,4)=rhoaug1(2*i1-1,i2,i3,4)+weight*((re0_up*re1_up+im0_up*im1_up)-&
+&                 (re0_down*re1_down+im0_down*im1_down)) ! m_z
                  rhoaug1(2*i1  ,i2,i3,4)=zero ! imag part of rho at k
                end do
              end do
@@ -432,14 +432,14 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
                  re1_up=wfraug1_up(1,i1,i2,i3) ;     im1_up=wfraug1_up(2,i1,i2,i3)
                  re0_down=wfraug_down(1,i1,i2,i3)  ; im0_down=wfraug_down(2,i1,i2,i3)
                  re1_down=wfraug1_down(1,i1,i2,i3) ; im1_down=wfraug1_down(2,i1,i2,i3)
-                 rhoaug1(i1,i2,i3,1)=rhoaug1(i1,i2,i3,1)+two*weight*((re0_up*re1_up+im0_up*im1_up)+&
+                 rhoaug1(i1,i2,i3,1)=rhoaug1(i1,i2,i3,1)+weight*((re0_up*re1_up+im0_up*im1_up)+&
 &                 (re0_down*re1_down+im0_down*im1_down)) ! n
-                 rhoaug1(i1,i2,i3,2)=rhoaug1(i1,i2,i3,2)+two*weight*((re0_up*re1_up+im0_up*im1_up)-&
-&                 (re0_down*re1_down+im0_down*im1_down)) ! m_z
-                 rhoaug1(i1,i2,i3,3)=rhoaug1(i1,i2,i3,3)+two*weight*((re0_up*re1_down+im0_up*im1_down)+&
+                 rhoaug1(i1,i2,i3,2)=rhoaug1(i1,i2,i3,2)+weight*((re0_up*re1_down+im0_up*im1_down)+&
 &                 re0_up*re1_down+im0_down*im1_up)     ! m_x
-                 rhoaug1(i1,i2,i3,4)=rhoaug1(i1,i2,i3,4)+two*weight*((re1_up*im0_down-im1_up*re0_down)+&
-&                 (re0_up*im1_down-im0_up*re1_down)) ! m_y
+                 rhoaug1(i1,i2,i3,3)=rhoaug1(i1,i2,i3,3)+weight*((-re1_up*im0_down+im1_up*re0_down)+&
+&                 (-re0_up*im1_down+im0_up*re1_down)) ! m_y
+                 rhoaug1(i1,i2,i3,4)=rhoaug1(i1,i2,i3,4)+weight*((re0_up*re1_up+im0_up*im1_up)-&
+&                 (re0_down*re1_down+im0_down*im1_down)) ! m_z
                end do
              end do
            end do
@@ -447,7 +447,12 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
          ABI_DEALLOCATE(wfraug_up)
          ABI_DEALLOCATE(wfraug_down)
          ABI_DEALLOCATE(wfraug1_up)
-         ABI_DEALLOCATE(wfraug1_down) 
+         ABI_DEALLOCATE(wfraug1_down)
+         ABI_DEALLOCATE(cwave0_up)
+         ABI_DEALLOCATE(cwave0_down)
+         ABI_DEALLOCATE(cwave1_up)
+         ABI_DEALLOCATE(cwave1_down)
+
        end if ! occupied states
      end do ! End loop on iband
 
@@ -477,7 +482,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 !  Transfer density on augmented fft grid to normal fft grid in real space
 !  Take also into account the spin, to place it correctly in rhor1.
 !  Note the use of cplex
-   call fftpac(isppol,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,ngfft,rhor1,rhoaug1,1)
+   call fftpac(1,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,ngfft,rhor1,rhoaug1,1)
  end if ! nspden /= 4
 
 !if (xmpi_paral==1) then

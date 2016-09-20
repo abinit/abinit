@@ -52,7 +52,7 @@ vdw_supercell2 2 2 2  # Supercell composed of 64 unit cells
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_DFT_LIBXC
+#%% need_cpp_vars = HAVE_LIBXC
 #%% [files]
 #%% files_to_test = 
 #%%   t11.out, tolnlines = 9, tolabs = 7.0e-5, tolrel = 1.1, fld_options = -medium

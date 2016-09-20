@@ -78,7 +78,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  use m_errors
  use m_xomp
  use m_xmpi
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
  use netcdf
 #endif
 
@@ -164,7 +164,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !###########################################################
 !### 02. Open NetCDF file for export variables
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  ! Enable netcdf output only if the number of datasets is small.
  ! otherwise v6[34] crashes with errmess: 
  !    nf90_def_dim - NetCDF library returned:   NetCDF: NC_MAX_DIMS exceeded
@@ -353,7 +353,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  write(message,'(a,80a)')ch10,('=',mu=1,80)
  call wrtout(iout,message,'COLL')
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  if (ncid /= 0) then
    ncerr=nf90_close(abs(ncid))
    if (ncerr/=nf90_NoErr) then
