@@ -243,7 +243,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer :: me_fft,n1,n2,n3
  integer :: ifgd, iatom, nradint
  integer :: me,my_natom_tmp
- integer :: occopt,paw_dos_flag
+ integer :: occopt
  integer :: prtnabla
  integer :: pawprtden  
  integer :: iband,nocc,spacecomm,comm_fft,tmp_unt,nfft_tot
@@ -844,8 +844,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 #ifdef HAVE_NETCDF
    ! master writes fabands file here so that also NC pseudos are supported.
-   if (me == master) then
-   !if (.False.)
+   !if (me == master) then
+   if (.False.) then
    !if ((prtdosm>=1.or.dos%fatbands_flag==1) .and. me == master) then ! TODO: Recheck this.
    !if ((dtset%pawfatbnd>0.and.dos%fatbands_flag==1) .and. me == master) then
      fname = trim(dtfil%filnam_ds(4))//'_FATBANDS.nc'

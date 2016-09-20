@@ -43,6 +43,7 @@ module m_epjdos
  use m_hdr
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
+ use m_time,           only : cwtime
  use m_io_tools,       only : open_file
  use m_numeric_tools,  only : simpson
  use m_fstrings,       only : int2char4
@@ -202,17 +203,11 @@ type(epjdos_t) function epjdos_from_dataset(dtset) result(new)
  if (new%prtdosm>=1 .or. new%fatbands_flag==1) then
    ABI_CALLOC(new%fractions_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang))
    ABI_CALLOC(new%fractions_average_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang))
- else
-   ABI_ALLOCATE(new%fractions_m,(0,0,0,0))
-   ABI_ALLOCATE(new%fractions_average_m,(0,0,0,0))
  end if
 
  if (dtset%usepaw==1 .and. new%partial_dos_flag==1) then
    ABI_CALLOC(new%fractions_paw1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
    ABI_CALLOC(new%fractions_pawt1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
- else
-   ABI_ALLOCATE(new%fractions_paw1,(0,0,0,0))
-   ABI_ALLOCATE(new%fractions_pawt1,(0,0,0,0))
  end if
 
 end function epjdos_from_dataset
@@ -2178,7 +2173,7 @@ subroutine prtfatbands(dos, dtset,fildata,fermie,eigen,pawfatbnd,pawtab)
 !scalars
  integer :: iall,il,iat,natsph,inbfatbands,iband,mband,ixfat,isppol,nkpt,lmax,ll,mm
  integer :: band_index,ikpt,nband_k,ndosfraction,mbesslang
- real(dp) :: xfatband
+ real(dp) :: xfatband,cpu,wall,gflops
  character(len=1) :: tag_l,tag_1m,tag_is
  character(len=2) :: tag_2m
  character(len=10) :: tag_il,tag_at,tag_grace
@@ -2220,6 +2215,7 @@ subroutine prtfatbands(dos, dtset,fildata,fermie,eigen,pawfatbnd,pawtab)
  end if
 
 !--------------  PRINTING IN LOG
+ call cwtime(cpu, wall, gflops, "start")
  write(message,'(a,a,a,a,i5,a,a,1000i5)') ch10," ***** Print of fatbands activated ****** ",ch10,&
 & "  Number of atom: natsph = ",natsph,ch10, &
 & "  atoms  are             = ",(dtset%iatsph(iat),iat=1,natsph)
@@ -2357,6 +2353,10 @@ subroutine prtfatbands(dos, dtset,fildata,fermie,eigen,pawfatbnd,pawtab)
 
  ABI_DEALLOCATE(unitfatbands_arr)
 
+ call cwtime(cpu,wall,gflops,"stop")
+ write(message,'(2(a,f8.2),a)')" prtfatbands: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
+ call wrtout(std_out,message,"PERS")
+
  DBG_EXIT("COLL")
 
 end subroutine prtfatbands
@@ -2412,13 +2412,14 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
 !scalars
  integer :: itype,ncerr
  integer,parameter :: fform=102 ! FIXME
- !character(len=500) :: msg
+ real(dp) :: cpu,wall,gflops
+ character(len=500) :: msg
 !arrays
  integer :: lmax_type(crystal%ntypat)
 
 !*************************************************************************
 
- ABI_CHECK(dtset%natsph > 0, "natsph <= 0!")
+ call cwtime(cpu, wall, gflops, "start")
 
  ! Write header, crystal structure and band energies.
  NCF_CHECK(hdr_ncwrite(hdr, ncid, fform, nc_define=.True.))
@@ -2472,11 +2473,12 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
 
  if (dtset%natsph_extra /= 0) then
    ncerr = nctk_def_arrays(ncid, [&
-     nctkarr_t("ratsph_extra", "dp", "number_of_atom_species"), &
      nctkarr_t("xredsph_extra", "dp", "number_of_reduced_dimensions, natsph_extra") &
    ])
    NCF_CHECK(ncerr)
  end if
+ 
+ return
 
  ! Write variables
  NCF_CHECK(nctk_set_datamode(ncid))
@@ -2496,14 +2498,14 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
    end do
  end if
  NCF_CHECK(nf90_put_var(ncid, vid("lmax_type"), lmax_type))
- NCF_CHECK(nf90_put_var(ncid, vid("iatsph"), dtset%iatsph(1:dtset%natsph)))
- NCF_CHECK(nf90_put_var(ncid, vid("ratsph"), dtset%ratsph(1:dtset%ntypat)))
  NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions"), dos%fractions))
 
- NCF_CHECK(nf90_put_var(ncid, vid("ratsph_extra"), dtset%ratsph_extra))
- if (dtset%natsph_extra /= 0) then
-   NCF_CHECK(nf90_put_var(ncid, vid("xredsph_extra"), dtset%xredsph_extra(:, 1:dtset%natsph_extra)))
- end if
+ !NCF_CHECK(nf90_put_var(ncid, vid("iatsph"), dtset%iatsph(1:dtset%natsph)))
+ !NCF_CHECK(nf90_put_var(ncid, vid("ratsph"), dtset%ratsph(1:dtset%ntypat)))
+ !NCF_CHECK(nf90_put_var(ncid, vid("ratsph_extra"), dtset%ratsph_extra))
+ !if (dtset%natsph_extra /= 0) then
+ !  NCF_CHECK(nf90_put_var(ncid, vid("xredsph_extra"), dtset%xredsph_extra(:, 1:dtset%natsph_extra)))
+ !end if
 
  if (allocated(dos%fractions_m)) then
    NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions_m"), dos%fractions_m))
@@ -2512,6 +2514,10 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
    NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions_paw1"), dos%fractions_paw1))
    NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions_pawt1"), dos%fractions_pawt1))
  end if
+
+ call cwtime(cpu,wall,gflops,"stop")
+ write(msg,'(2(a,f8.2),a)')" fatbands_ncwrite: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
+ call wrtout(std_out,msg,"PERS")
 
 contains
  integer function vid(vname) 
