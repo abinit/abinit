@@ -42,6 +42,7 @@ module m_epjdos
 #endif
  use m_hdr
 
+ use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_io_tools,       only : open_file
  use m_numeric_tools,  only : simpson
  use m_fstrings,       only : int2char4
@@ -142,10 +143,11 @@ contains  !============================================================
 
 type(epjdos_t) function epjdos_from_dataset(dtset) result(new)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'jlspline_free'
+#define ABI_FUNC 'epjdos_from_dataset'
 !End of the abilint section
 
  implicit none
@@ -228,10 +230,11 @@ end function epjdos_from_dataset
 
 subroutine epjdos_free(self)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'jlspline_free'
+#define ABI_FUNC 'epjdos_free'
 !End of the abilint section
 
  implicit none
@@ -1808,6 +1811,13 @@ contains
  function sy(ll, mm, mp)
    use  m_paw_sphharm, only : ys
    ! Computes the matrix element <Slm|Ylm'>
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'sy'
+!End of the abilint section
+
    integer,intent(in) :: ll,mm, mp
 
    real(dp) :: sy(2)
@@ -2136,6 +2146,7 @@ end subroutine sphericaldens
 
 subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2198,6 +2209,12 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
  ])
  NCF_CHECK(ncerr)
 
+ if (allocated(dos%fractions_m)) then
+   ncerr = nctk_def_arrays(ncid, &
+     nctkarr_t("dos_fractions_m", "dp", "number_of_kpoints, max_number_of_states, number_of_spins, dos_fraction_size"))
+   NCF_CHECK(ncerr)
+ end if
+
  if (dtset%natsph_extra /= 0) then
    ncerr = nctk_def_arrays(ncid, [&
      nctkarr_t("ratsph_extra", "dp", "number_of_atom_species"), &
@@ -2226,7 +2243,9 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
  NCF_CHECK(nf90_put_var(ncid, vid("lmax_type"), lmax_type))
  NCF_CHECK(nf90_put_var(ncid, vid("iatsph"), dtset%iatsph(1:dtset%natsph)))
  NCF_CHECK(nf90_put_var(ncid, vid("ratsph"), dtset%ratsph(1:dtset%ntypat)))
- NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions_m"), dos%fractions_m))
+ if (allocated(dos%fractions_m)) then
+   NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions_m"), dos%fractions_m))
+ end if
 
  NCF_CHECK(nf90_put_var(ncid, vid("ratsph_extra"), dtset%ratsph_extra))
  if (dtset%natsph_extra /= 0) then

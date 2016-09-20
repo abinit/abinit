@@ -58,6 +58,7 @@ sources = [
  "jellium.F90",
  "ks_ddiago.F90",
  "linemin.F90",
+ "m_epjdos.F90",
  "mag_constr.F90",
  "mag_constr_e.F90",
  "make_efg_el.F90",

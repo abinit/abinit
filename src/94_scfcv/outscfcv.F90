@@ -171,7 +171,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_paw_dmft,         only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft
  use m_numeric_tools,    only : simpson_int
  !use m_epjdos,           only : tetrahedron, gaus_dos, dos_degeneratewfs, epjdos_t, epjdos_from_dataset, epjdos_free
- use m_epjdos
+ use m_epjdos           ! FIXME fatbands_ncwrite and CPP
 
  !use m_skw
 
@@ -851,11 +851,12 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 #ifdef HAVE_NETCDF
    ! master writes fabands file here so that also NC pseudos are supported.
+   if (me == master) then
    !if ((prtdosm>=1.or.dos%fatbands_flag==1) .and. me == master) then ! TODO: Recheck this.
-   if ((dtset%pawfatbnd>0.and.dos%fatbands_flag==1) .and. me == master) then
+   !if ((dtset%pawfatbnd>0.and.dos%fatbands_flag==1) .and. me == master) then
      fname = trim(dtfil%filnam_ds(4))//'_FATBANDS.nc'
      NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
-     call fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, dtset%pawfatbnd, pawtab, ncid)
+     call fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid)
      NCF_CHECK(nf90_close(ncid))
    end if
 #endif
