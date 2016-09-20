@@ -167,8 +167,7 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
 
 !m-decomposed DOS not compatible with PAW-decomposed DOS
  if(prtdosm>=1.and.paw_dos_flag==1) then
-   message = ' m-decomposed DOS (prtdosm>=1) not&
-&   compatible with PAW-decomposed DOS (pawprtdos=1) !'
+   message = ' m-decomposed DOS (prtdosm>=1) not compatible with PAW-decomposed DOS (pawprtdos=1) !'
    MSG_ERROR(message)
  end if
 
@@ -350,10 +349,10 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
      if(isppol==2) write(message,'(2a,16x,a)')  ch10,'#','Spin-dn DOS'
 ! NB: dtset%prtdos == 5 should not happen for nsppol==2
      if (dtset%prtdos == 2 .or. dtset%prtdos == 5) then
-       call wrtout(unitdos,message,'COLL')
+       write(unitdos, "(a)")trim(message)
      else if (dtset%prtdos == 3) then
        do iat=1,natsph+natsph_extra
-         call wrtout(unitdos_arr(iat),message,'COLL')
+         write(unitdos_arr(iat), "(a)")trim(message)
        end do
      end if
    end if
@@ -439,8 +438,7 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
    enex=enemin
    integral_DOS=zero
    if(prtdos==2)then
-     write(message, '(a)' )'# energy(Ha)     DOS  integrated DOS'
-     call wrtout(unitdos,message,'COLL')
+     write(unitdos, '(a)' )'# energy(Ha)     DOS  integrated DOS'
 
    else if(prtdos==3)then
      if (paw_dos_flag/=1.or.dtset%pawprtdos==2) then
@@ -449,11 +447,11 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
 &         '# Local DOS (columns 2-6) and integrated local DOS (columns 7-11),',ch10,&
 &         '# for atom number iat=',iat,'  iatom=',dtset%iatsph(iat),ch10,&
 &         '# inside sphere of radius ratsph=',dtset%ratsph(dtset%typat(dtset%iatsph(iat))),' Bohr.',ch10,"#"
-         call wrtout(unitdos_arr(iat),message,'COLL')
+         write(unitdos_arr(iat), "(a)")trim(message)
          if (dtset%usepaw==1.and.dtset%pawprtdos==2) then
            write(message, '(3a)' ) &
 &           '# PAW: note that only all-electron on-site part has been used to compute DOS !',ch10,"#"
-           call wrtout(unitdos_arr(iat),message,'COLL')
+           write(unitdos_arr(iat), "(a)")trim(message)
          end if
          if (bigDOS) then
            write(message, '(a,a)' ) &
@@ -472,18 +470,17 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
 &           '  lm=3-3  lm=3-2  lm=3-1  lm=3 0  lm=3 1  lm=3 2  lm=3 3',&
 &           '  lm=4-4  lm=4-3  lm=4-2  lm=4-1  lm=4 0  lm=4 1  lm=4 2  lm=4 3  lm=4 4'
          end if
-         call wrtout(unitdos_arr(iat),message,'COLL')
+         write(unitdos_arr(iat), "(a)")trim(message)
        end do
      else
        do iat=1,natsph
-         write(message, '(9a,i5,a,i5,a,a,es16.6,3a)' ) &
+         write(unitdos_arr(iat), '(9a,i5,a,i5,a,a,es16.6,3a)' ) &
 &         '# Local DOS (columns 2-6),',ch10,&
 &         '#  plane-waves contrib. to DOS (columns 7-11),',ch10,&
 &         '#  AE on-site  contrib. to DOS (columns 12-16),',ch10,&
 &         '# -PS on-site  contrib. to DOS (columns 17-21),',ch10,&
 &         '# for atom number iat=',iat,'  iatom=',dtset%iatsph(iat),ch10,&
 &         '# inside sphere of radius ratsph=',dtset%ratsph(dtset%typat(dtset%iatsph(iat))),' Bohr.',ch10,"#"
-         call wrtout(unitdos_arr(iat),message,'COLL')
          if (bigDOS) then
            write(message, '(4a)' ) &
 &           '#energy(Ha)   l=0       l=1       l=2       l=3       l=4',&
@@ -497,15 +494,14 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
 &           '      (Phi) l=0      l=1      l=2      l=3      l=4',&
 &           '     (tPhi) l=0      l=1      l=2      l=3      l=4'
          end if
-         call wrtout(unitdos_arr(iat),message,'COLL')
+         write(unitdos_arr(iat), "(a)")trim(message)
        end do
      end if
      do iat=1,natsph_extra
-       write(message, '(3a,i5,2a,es16.6,3a)' ) &
+       write(unitdos_arr(natsph+iat), '(3a,i5,2a,es16.6,3a)' ) &
 &       '# Local DOS (columns 2-6) and integrated local DOS (columns 7-11),',ch10,&
 &       '# for non-atomic sphere number iat=',iat,ch10,&
 &       '# of radius ratsph=',dtset%ratsph_extra,' Bohr.',ch10,"#"
-       call wrtout(unitdos_arr(natsph+iat),message,'COLL')
        if (bigDOS) then
          write(message, '(a,a)' ) &
 &         '# energy(Ha)   l=0       l=1       l=2       l=3       l=4',&
@@ -523,11 +519,11 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
 &         '  lm=3-3  lm=3-2  lm=3-1  lm=3 0  lm=3 1  lm=3 2  lm=3 3',&
 &         '  lm=4-4  lm=4-3  lm=4-2  lm=4-1  lm=4 0  lm=4 1  lm=4 2  lm=4 3  lm=4 4'
        end if
-       call wrtout(unitdos_arr(natsph+iat),message,'COLL')
+       write(unitdos_arr(natsph+iat), "(a)")trim(message)
      end do
    else if(prtdos==5)then
      write(message, '(a)' )'# energy(Ha)     DOS up,up  up,dn  dn,up  up,up  sigma_x sigma_y sigma_z  and integrated DOS components'
-     call wrtout(unitdos,message,'COLL')
+     write(unitdos, "(a)")trim(message)
 
    end if ! prtdos value
    !
@@ -542,10 +538,9 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
 !      consistent with the format. The use of "E" format is not adequate,
 !      for portability of the self-testing procedure.
 !      write(message, '(i5,f9.4,f14.6)' ) iene-1,enex,total_dos(iene,:)
-       write(message, '(f11.5,5f10.4,10x,5f8.2)') enex, &
+       write(unitdos, '(f11.5,5f10.4,10x,5f8.2)') enex, &
 &       min(total_dos(iene,:),9999.9999_dp),&
 &       total_integ_dos(iene,:)
-       call wrtout(unitdos,message,'COLL')
        enex=enex+deltaene
      end do
    else if(prtdos==3)then
@@ -573,7 +568,7 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
 &             min(total_dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2),9999.9999_dp)
            end if
 
-           call wrtout(unitdos_arr(iat),message,'COLL')
+           write(unitdos_arr(iat),"(a)")trim(message)
          end do
          do iat=natsph+1,natsph+natsph_extra
 !          Note the upper limit, to be
@@ -590,7 +585,7 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
 &             total_dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2)
            end if
 
-           call wrtout(unitdos_arr(iat),message,'COLL')
+           write(unitdos_arr(iat),"(a)")trim(message)
          end do
          enex=enex+deltaene
        end do
@@ -610,7 +605,7 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
 &           +total_dos_pawt1(iene,iat*5-4:iat*5),9999.9999_dp),&
 &           min(total_dos_paw1(iene,iat*5-4:iat*5),9999.9999_dp),&
 &           min(total_dos_pawt1(iene,iat*5-4:iat*5),9999.9999_dp)
-           call wrtout(unitdos_arr(iat),message,'COLL')
+           write(unitdos_arr(iat),"(a)")trim(message)
          end do
          do iat=natsph+1,natsph+natsph_extra
            write(message,fmt=frmt_extra) enex, &
@@ -619,7 +614,7 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
 &           +total_dos_pawt1(iene,iat*5-4:iat*5),9999.9999_dp),&
 &           min(total_dos_paw1(iene,iat*5-4:iat*5),9999.9999_dp),&
 &           min(total_dos_pawt1(iene,iat*5-4:iat*5),9999.9999_dp)
-           call wrtout(unitdos_arr(iat),message,'COLL')
+           write(unitdos_arr(iat),"(a)")trim(message)
          end do
          enex=enex+deltaene
        end do
@@ -635,7 +630,7 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
        write(message,fmt=frmt) enex, &
 &       min(total_dos(iene,1:7),9999.9999_dp),&
 &       total_integ_dos(iene,1:7)
-       call wrtout(unitdos,message,'COLL')
+       write(unitdos,"(a)")trim(message)
        enex=enex+deltaene
      end do
 
@@ -916,15 +911,13 @@ subroutine gaus_dos(dos_fractions,&
 !  bigDOS=(maxval(total_dos)>999._dp)
    if (paw_dos_flag/=1.or.dtset%pawprtdos==2) then
      do iat=1,natsph
-       write(message, '(3a,i5,a,i5,a,a,es16.6,3a)' ) &
+       write(unitdos_arr(iat), '(3a,i5,a,i5,a,a,es16.6,3a)' ) &
 &       '# Local DOS (columns 3-7) and integrated local DOS (columns 8-12),',ch10,&
 &       '# for atom number iat=',iat,'  iatom=',dtset%iatsph(iat),ch10,&
 &       '# inside sphere of radius ratsph=',dtset%ratsph(dtset%typat(dtset%iatsph(iat))),' Bohr.',ch10,"#"
-       call wrtout(unitdos_arr(iat),message,'COLL')
        if (dtset%usepaw==1.and.dtset%pawprtdos==2) then
-         write(message, '(3a)' ) &
+         write(unitdos_arr(iat), '(3a)' ) &
 &         '# PAW: note that only all-electron on-site part has been used to compute DOS !',ch10,"#"
-         call wrtout(unitdos_arr(iat),message,'COLL')
        end if
        if (bigDOS) then
          write(message, '(a,a)' ) &
@@ -936,25 +929,23 @@ subroutine gaus_dos(dos_fractions,&
 &         '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
        end if
        if (m_dos_flag>=1) then
-         write(message, '(7a)' ) trim(message),'          ',&
+         write(unitdos_arr(iat), '(7a)' ) trim(message),'          ',&
 &         '  lm=0 0',&
 &         '  lm=1-1  lm=1 0  lm=1 1',&
 &         '  lm=2-2  lm=2-1  lm=2 0  lm=2 1  lm=2 2',&
 &         '  lm=3-3  lm=3-2  lm=3-1  lm=3 0  lm=3 1  lm=3 2  lm=3 3',&
 &         '  lm=4-4  lm=4-3  lm=4-2  lm=4-1  lm=4 0  lm=4 1  lm=4 2  lm=4 3  lm=4 4'
        end if
-       call wrtout(unitdos_arr(iat),message,'COLL')
      end do
    else
      do iat=1,natsph
-       write(message, '(9a,i5,a,i5,a,a,es16.6,3a)' ) &
+       write(unitdos_arr(iat), '(9a,i5,a,i5,a,a,es16.6,3a)' ) &
 &       '# Local DOS (columns 3-7),',ch10,&
 &       '#  plane-waves contrib. to DOS (columns 8-12),',ch10,&
 &       '#  AE on-site  contrib. to DOS (columns 13-17),',ch10,&
 &       '# -PS on-site  contrib. to DOS (columns 18-22),',ch10,&
 &       '# for atom number iat=',iat,'  iatom=',dtset%iatsph(iat),ch10,&
 &       '# inside sphere of radius ratsph=',dtset%ratsph(dtset%typat(dtset%iatsph(iat))),' Bohr.',ch10,"#"
-       call wrtout(unitdos_arr(iat),message,'COLL')
        if (bigDOS) then
          write(message, '(4a)' ) &
 &         '#energy(Ha)   l=0       l=1       l=2       l=3       l=4',&
@@ -968,7 +959,7 @@ subroutine gaus_dos(dos_fractions,&
 &         '      (Phi) l=0      l=1      l=2      l=3      l=4',&
 &         '     (tPhi) l=0      l=1      l=2      l=3      l=4'
        end if
-       call wrtout(unitdos_arr(iat),message,'COLL')
+       write(unitdos_arr(iat), "(a)")trim(message)
      end do
    end if
 
@@ -998,7 +989,7 @@ subroutine gaus_dos(dos_fractions,&
 &           min(total_dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2),9999.9999_dp)
          end if
 
-         call wrtout(unitdos_arr(iat),message,'COLL')
+         write(unitdos_arr(iat),"(a)")trim(message)
        end do
        enex=enex+deltaene
      end do
@@ -1010,13 +1001,12 @@ subroutine gaus_dos(dos_fractions,&
      end if
      do iene=1,nene
        do iat=1,natsph
-         write(message,fmt=frmt) enex, &
+         write(unitdos_arr(iat), fmt=frmt) enex, &
 &         min(total_dos(iene,iat*5-4:iat*5),9999.9999_dp),&
 &         min(total_dos(iene,iat*5-4:iat*5)-total_dos_paw1(iene,iat*5-4:iat*5)&
 &         +total_dos_pawt1(iene,iat*5-4:iat*5),9999.9999_dp),&
 &         min(total_dos_paw1(iene,iat*5-4:iat*5),9999.9999_dp),&
 &         min(total_dos_pawt1(iene,iat*5-4:iat*5),9999.9999_dp)
-         call wrtout(unitdos_arr(iat),message,'COLL')
        end do
        enex=enex+deltaene
      end do
@@ -1035,7 +1025,6 @@ subroutine gaus_dos(dos_fractions,&
  end do
 
  ABI_DEALLOCATE(unitdos_arr)
-
  ABI_DEALLOCATE(partial_dos)
  ABI_DEALLOCATE(integ_dos)
  ABI_DEALLOCATE(total_dos)

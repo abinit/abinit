@@ -186,7 +186,7 @@ subroutine prtfatbands(dos_fractions_m,dtset,fildata,fermie,eigen,&
          write(message,'(9a)') "# ",ch10,"# ABINIT package : FATBAND file ", ch10,&
 &         "# It contains, for each band: the eigenvalues in eV (and the character of the band) as a function of the k-point",&
 &         ch10,"# This file can be read with xmgrace (http://plasma-gate.weizmann.ac.il/Grace/)  ",ch10,"#  "
-         call wrtout(unitfatbands_arr(iall,isppol),message,'COLL')
+         write(unitfatbands_arr(iall,isppol), "(a)")trim(message)
          do iband=1,mband
            call int2char4(iband-1,tag_grace)
            ABI_CHECK((tag_grace(1:1)/='#'),'Bug: string length too short!')
@@ -194,10 +194,9 @@ subroutine prtfatbands(dos_fractions_m,dtset,fildata,fermie,eigen,&
 &           ch10,"@    s",trim(tag_grace)," errorbar color 2",&
 &           ch10,"@    s",trim(tag_grace)," errorbar riser linewidth 5.0", &
 &           ch10,"@    s",trim(tag_grace)," errorbar linestyle 0"
-           call wrtout(unitfatbands_arr(iall,isppol),message,'COLL')
+           write(unitfatbands_arr(iall,isppol), "(a)")trim(message)
          end do  !iband
-         write(message,'(a,a)') ch10,'@type xydy'
-         call wrtout(unitfatbands_arr(iall,isppol),message,'COLL')
+         write(unitfatbands_arr(iall,isppol), '(a,a)') ch10,'@type xydy'
        end do   ! isppol
      end if ! ll=<lmax
    end do   ! il
@@ -231,8 +230,7 @@ subroutine prtfatbands(dos_fractions_m,dtset,fildata,fermie,eigen,&
        if(ll.le.lmax) then
          do isppol=1,dtset%nsppol
            do iband=1,mband
-             write(message,'(a,a,i8)') ch10,"# BAND number :",iband
-             call wrtout(unitfatbands_arr(iall,isppol),message,'COLL')
+             write(unitfatbands_arr(iall,isppol),'(a,a,i8)') ch10,"# BAND number :",iband
              do ikpt=1,nkpt
                if(pawfatbnd==1) then
                  xfatband=0.d0
@@ -242,12 +240,11 @@ subroutine prtfatbands(dos_fractions_m,dtset,fildata,fermie,eigen,&
                else if (pawfatbnd==2) then
                  xfatband=dos_fractions_m(ikpt,iband,isppol,(iat-1)*mbesslang**2+il)
                end if
-               write(message,'(i5,e20.5,e20.5)') ikpt-1,eigenvalues(ikpt,iband,isppol)*Ha_eV,xfatband
-               call wrtout(unitfatbands_arr(iall,isppol),message,'COLL')
+               write(unitfatbands_arr(iall,isppol),'(i5,e20.5,e20.5)')&
+                 ikpt-1,eigenvalues(ikpt,iband,isppol)*Ha_eV,xfatband
              end do ! ikpt
            end do  !iband
-           write(message,'(a)') '&'
-           call wrtout(unitfatbands_arr(iall,isppol),message,'COLL')
+           write(unitfatbands_arr(iall,isppol),'(a)') '&'
            !close(unitfatbands_arr(iall,isppol))
          end do  !isppol
        end if
