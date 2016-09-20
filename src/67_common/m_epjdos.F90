@@ -316,8 +316,7 @@ end subroutine epjdos_free
 !!
 !! SOURCE
 
-subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fractions_pawt1,&
-& dtset,fermie,eigen,fildata,mbesslang,prtdosm,ndosfraction,paw_dos_flag,rprimd)
+subroutine tetrahedron(dos,dtset,fermie,eigen,fildata,rprimd)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -335,23 +334,18 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: prtdosm,mbesslang,ndosfraction,paw_dos_flag
  real(dp),intent(in) :: fermie
  character(len=*),intent(in) :: fildata
  type(dataset_type),intent(in) :: dtset
+ type(epjdos_t),intent(inout) :: dos
 !arrays
- real(dp),intent(in) :: dos_fractions(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction)
- real(dp),intent(in) :: dos_fractions_m(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*mbesslang*&
-& max(min(prtdosm,1),0))
- real(dp),intent(in) :: dos_fractions_paw1(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*paw_dos_flag)
- real(dp),intent(in) :: dos_fractions_pawt1(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*paw_dos_flag)
  real(dp),intent(in) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol),rprimd(3,3)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: bcorr0=0
  integer :: iat,iband,iene,ifract,ikpt,ioffset_eig,isppol,natsph,natsph_extra
- integer :: nene,nkpt_fullbz,prtdos,unitdos,ierr
+ integer :: nene,nkpt_fullbz,prtdos,unitdos,ierr,prtdosm,paw_dos_flag,mbesslang,ndosfraction
  real(dp) :: buffer,deltaene,enemax,enemin,enex,integral_DOS,max_occ,rcvol
  real(dp) :: ucvol
  logical :: bigDOS
@@ -372,6 +366,9 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
  real(dp),allocatable :: work_ndos(:,:),work_ndosmbessl(:,:)
 
 ! *********************************************************************
+ ! NOTE: We use dos%fractions_average_m to be consistent with the previous implementation.
+ prtdosm = dos%prtdosm; paw_dos_flag = dos%paw_dos_flag
+ mbesslang = dos%mbesslang; ndosfraction = dos%ndosfraction
 
 !m-decomposed DOS not compatible with PAW-decomposed DOS
  if(prtdosm>=1.and.paw_dos_flag==1) then
@@ -587,7 +584,7 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
 !    calculate DOS and integrated DOS projected with the input dos_fractions
 !
      if (paw_dos_flag==1) then
-       work_ndos = dos_fractions_paw1(:,iband,isppol,:)
+       work_ndos = dos%fractions_paw1(:,iband,isppol,:)
 
        call get_dos_1band (work_ndos,enemin,enemax,integ_dos(:,:),nene,dtset%nkpt,ndosfraction,&
 &       partial_dos(:,:),tweight,dtweightde)
@@ -598,7 +595,7 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
          end do
        end do
 
-       work_ndos = dos_fractions_pawt1(:,iband,isppol,:)
+       work_ndos = dos%fractions_pawt1(:,iband,isppol,:)
        call get_dos_1band (work_ndos,enemin,enemax,integ_dos(:,:),nene,dtset%nkpt,ndosfraction,&
 &       partial_dos(:,:),tweight,dtweightde)
 
@@ -609,12 +606,12 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
        end do
      end if
 
-     work_ndos = dos_fractions(:,iband,isppol,:)
+     work_ndos = dos%fractions(:,iband,isppol,:)
      call get_dos_1band (work_ndos,enemin,enemax,integ_dos(:,:),nene,dtset%nkpt,ndosfraction,&
 &     partial_dos(:,:),tweight,dtweightde)
 
      if (prtdosm>=1) then
-       work_ndosmbessl = dos_fractions_m(:,iband,isppol,:)
+       work_ndosmbessl = dos%fractions_average_m(:,iband,isppol,:)
        call get_dos_1band_m (work_ndosmbessl,enemin,enemax,integ_dos_m(:,:),nene,dtset%nkpt,ndosfraction*mbesslang,&
 &       partial_dos_m(:,:),tweight,dtweightde)
      end if
@@ -919,7 +916,7 @@ end subroutine tetrahedron
 !!  fermie=Fermi energy
 !!  fildata=name of the DOS output file
 !!  mbesslang=maximum angular momentum for Bessel function expansion
-!!  m_dos_flag=option for the m-contributions to the partial DOS
+!!  prtdosm=option for the m-contributions to the partial DOS
 !!  ndosfraction= number of types of DOS we are calculating, e.g. the number
 !!    of l channels. Could be much more general, for other types of partial DOS
 !!  paw_dos_flag= option for partial dos in PAW
@@ -938,9 +935,7 @@ end subroutine tetrahedron
 !!
 !! SOURCE
 
-subroutine gaus_dos(dos_fractions,&
-& dos_fractions_paw1,dos_fractions_pawt1,dtset,fermie,eigen,&
-& fildata,mbesslang,m_dos_flag,ndosfraction,paw_dos_flag) 
+subroutine gaus_dos(dos, dtset,fermie,eigen,fildata) 
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -955,20 +950,21 @@ subroutine gaus_dos(dos_fractions,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mbesslang,m_dos_flag,ndosfraction,paw_dos_flag
  real(dp),intent(in) :: fermie
  character(len=fnlen),intent(in) :: fildata
  type(dataset_type),intent(in) :: dtset
+ type(epjdos_t),intent(inout) :: dos
 !arrays
- real(dp),intent(in) :: dos_fractions(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction)
- real(dp),intent(in) :: dos_fractions_paw1(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*paw_dos_flag)
- real(dp),intent(in) :: dos_fractions_pawt1(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*paw_dos_flag)
+ !real(dp),intent(in) :: dos_fractions(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction)
+ !real(dp),intent(in) :: dos_fractions_paw1(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*paw_dos_flag)
+ !real(dp),intent(in) :: dos_fractions_pawt1(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*paw_dos_flag)
  real(dp),intent(in) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: nptsdiv2=6000
  integer :: bantot,ii,iat,iband,iene,ifract,ikpt,index,isppol,natsph,nkpt,nsppol,nene,prtdos
+ integer :: mbesslang,ndosfraction
  real(dp) :: buffer,deltaene,enemax,enemin,integral_DOS,max_occ,enex,tsmearinv,tsmear,limit_occ,tratio
  real(dp) :: dblsmr,dsqrpi,increm,xx
  logical :: bigDOS
@@ -978,14 +974,12 @@ subroutine gaus_dos(dos_fractions,&
 !scalars
  integer,allocatable :: unitdos_arr(:)
  real(dp) :: xgrid(-nptsdiv2:nptsdiv2),smdfun(-nptsdiv2:nptsdiv2,2)
- real(dp),allocatable :: dos(:),arg(:),derfun(:),partial_dos(:,:,:),integ_dos(:,:,:),total_dos(:,:)
+ real(dp),allocatable :: vals(:),arg(:),derfun(:),partial_dos(:,:,:),integ_dos(:,:,:),total_dos(:,:)
  real(dp),allocatable :: total_integ_dos(:,:),total_dos_paw1(:,:),total_dos_pawt1(:,:)
  real(dp),allocatable :: integ_dos_m(:,:,:),partial_dos_m(:,:,:)
  real(dp),allocatable :: total_dos_m(:,:),total_integ_dos_m(:,:)
 
 ! *********************************************************************
-
-!Open the DOS file
 
  natsph=dtset%natsph
  nsppol=dtset%nsppol
@@ -994,7 +988,10 @@ subroutine gaus_dos(dos_fractions,&
  deltaene=dtset%dosdeltae
  tsmear=dtset%tsmear
  tsmearinv=one/tsmear
+ mbesslang = dos%mbesslang
+ ndosfraction = dos%ndosfraction
 
+!Open the DOS file
  ABI_ALLOCATE(unitdos_arr,(natsph))
  do iat=1,natsph
    call int2char4(dtset%iatsph(iat),tag)
@@ -1021,7 +1018,7 @@ subroutine gaus_dos(dos_fractions,&
  bantot=sum(dtset%nband(:))
  ABI_ALLOCATE(arg,(bantot))
  ABI_ALLOCATE(derfun,(bantot))
- ABI_ALLOCATE(dos,(bantot))
+ ABI_ALLOCATE(vals,(bantot))
  
 !DEBUG
 !write(std_out,*) ' ndosfraction,dtset%mband,dtset%nkpt,nene',&
@@ -1032,11 +1029,11 @@ subroutine gaus_dos(dos_fractions,&
  ABI_ALLOCATE(total_dos,(nene,ndosfraction))
  ABI_ALLOCATE(total_integ_dos,(nene,ndosfraction))
 
- if (paw_dos_flag==1) then
+ if (dos%paw_dos_flag==1) then
    ABI_ALLOCATE(total_dos_paw1,(nene,ndosfraction))
    ABI_ALLOCATE(total_dos_pawt1,(nene,ndosfraction))
  end if
- if (m_dos_flag>=1) then
+ if (dos%prtdosm>=1) then
    ABI_ALLOCATE(partial_dos_m,(nene,ndosfraction*mbesslang,dtset%mband))
    ABI_ALLOCATE(integ_dos_m,(nene,ndosfraction*mbesslang,dtset%mband))
    ABI_ALLOCATE(total_dos_m,(nene,ndosfraction*mbesslang))
@@ -1077,14 +1074,13 @@ subroutine gaus_dos(dos_fractions,&
  end do
 
 !calculate DOS and integrated DOS projected with the input dos_fractions
-!
  total_dos_paw1=0
  total_dos_pawt1=0
  total_dos=0
  enex=enemin
  do iene=1,nene
    arg(:)=(enex-eigen(1:bantot))*tsmearinv
-   call splfit(xgrid,derfun,smdfun,0,arg,dos,(2*nptsdiv2+1),bantot)
+   call splfit(xgrid,derfun,smdfun,0,arg,vals,(2*nptsdiv2+1),bantot)
    index=0
    do isppol=1,nsppol
      do ikpt=1,nkpt
@@ -1092,14 +1088,11 @@ subroutine gaus_dos(dos_fractions,&
          index=index+1        
          do ifract=1,ndosfraction
            total_dos_paw1(iene,ifract)=total_dos_paw1(iene,ifract)+&
-&           dos_fractions_paw1(ikpt,iband,isppol,ifract)*dtset%wtk(ikpt)* &
-&           max_occ*dos(index)*tsmearinv
+&           dos%fractions_paw1(ikpt,iband,isppol,ifract)*dtset%wtk(ikpt) * max_occ*vals(index)*tsmearinv
            total_dos_pawt1(iene,ifract)=total_dos_pawt1(iene,ifract)+&
-&           dos_fractions_pawt1(ikpt,iband,isppol,ifract)*dtset%wtk(ikpt)* &
-&           max_occ*dos(index)*tsmearinv
+&           dos%fractions_pawt1(ikpt,iband,isppol,ifract)*dtset%wtk(ikpt) * max_occ*vals(index)*tsmearinv
            total_dos(iene,ifract) = total_dos(iene,ifract) + &
-&           dos_fractions(ikpt,iband,isppol,ifract)*dtset%wtk(ikpt)*max_occ*& 
-&           dos(index)*tsmearinv   
+&           dos%fractions(ikpt,iband,isppol,ifract)*dtset%wtk(ikpt)*max_occ * vals(index)*tsmearinv
 !          write(99,*) iene,total_dos_paw1(iene,ifract),total_dos_pawt1(iene,ifract),total_dos(iene,ifract)
          end do
        end do ! iband
@@ -1117,7 +1110,7 @@ subroutine gaus_dos(dos_fractions,&
    integral_DOS=zero
    
 !  bigDOS=(maxval(total_dos)>999._dp)
-   if (paw_dos_flag/=1.or.dtset%pawprtdos==2) then
+   if (dos%paw_dos_flag/=1.or.dtset%pawprtdos==2) then
      do iat=1,natsph
        write(unitdos_arr(iat), '(3a,i5,a,i5,a,a,es16.6,3a)' ) &
 &       '# Local DOS (columns 3-7) and integrated local DOS (columns 8-12),',ch10,&
@@ -1136,7 +1129,7 @@ subroutine gaus_dos(dos_fractions,&
 &         '# energy(Ha)  l=0      l=1      l=2      l=3      l=4',&
 &         '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
        end if
-       if (m_dos_flag>=1) then
+       if (dos%prtdosm>=1) then
          write(unitdos_arr(iat), '(7a)' ) trim(message),'          ',&
 &         '  lm=0 0',&
 &         '  lm=1-1  lm=1 0  lm=1 1',&
@@ -1171,7 +1164,7 @@ subroutine gaus_dos(dos_fractions,&
      end do
    end if
 
-   if (paw_dos_flag/=1.or.dtset%pawprtdos==2) then
+   if (dos%paw_dos_flag/=1.or.dtset%pawprtdos==2) then
      if (bigDOS) then
        frmt='(f11.5,5f10.4,10x,5f8.2,10x,25f8.2)'
      else
@@ -1186,7 +1179,7 @@ subroutine gaus_dos(dos_fractions,&
 !        Note the upper limit, to be
 !        consistent with the format. The use of "E" format is not adequate,
 !        for portability of the self-testing procedure.
-         if (m_dos_flag==0) then
+         if (dos%prtdosm==0) then
            write(message,fmt=frmt) enex, &
 &           min(total_dos(iene,(iat-1)*mbesslang+1:iat*mbesslang),9999.9999_dp), &
 &           total_integ_dos(iene,(iat-1)*mbesslang+1:iat*mbesslang)
@@ -1238,13 +1231,13 @@ subroutine gaus_dos(dos_fractions,&
  ABI_DEALLOCATE(total_dos)
  ABI_DEALLOCATE(total_integ_dos)
 
- if (m_dos_flag>=1)  then
+ if (dos%prtdosm>=1)  then
    ABI_DEALLOCATE(partial_dos_m)
    ABI_DEALLOCATE(integ_dos_m)
    ABI_DEALLOCATE(total_dos_m)
    ABI_DEALLOCATE(total_integ_dos_m)
  end if
- if (paw_dos_flag==1)  then
+ if (dos%paw_dos_flag==1)  then
    ABI_DEALLOCATE(total_dos_paw1)
    ABI_DEALLOCATE(total_dos_pawt1)
  end if
@@ -2165,7 +2158,6 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
 !arrays
- !real(dp),intent(in) :: dos_fractions_m(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*mbesslang)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*dtset%usepaw)
 
 !Local variables-------------------------------
@@ -2187,13 +2179,19 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
 
  ! Add fatband-specific quantities
  ncerr = nctk_def_dims(ncid, [ &
-   nctkdim_t("mbesslang", dos%mbesslang), nctkdim_t("ndosfraction", dos%ndosfraction), & 
    nctkdim_t("natsph", dtset%natsph), & 
-   nctkdim_t("dos_fraction_size", dos%ndosfraction*dos%mbesslang)], defmode=.True.)
+   nctkdim_t("ndosfraction", dos%ndosfraction)], defmode=.True.)
  NCF_CHECK(ncerr)
 
+ if (dos%ndosfraction*dos%mbesslang > 0) then
+   ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t("mbesslang", dos%mbesslang), &
+     nctkdim_t("dos_fractions_m_lastsize", dos%ndosfraction*dos%mbesslang)])
+   NCF_CHECK(ncerr)
+ end if
+
  if (dtset%natsph_extra /= 0) then
-    NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("natsph_extra", dtset%natsph_extra)]))
+   NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("natsph_extra", dtset%natsph_extra)]))
  end if
 
  ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "prtdos", "pawprtdos", "prtdosm"]) !"dtset%pawfatbnd", 
@@ -2205,13 +2203,22 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
    nctkarr_t("lmax_type", "int", "number_of_atom_species"), & 
    nctkarr_t("iatsph", "int", "natsph"), & 
    nctkarr_t("ratsph", "dp", "number_of_atom_species"), &
-   nctkarr_t("dos_fractions_m", "dp", "number_of_kpoints, max_number_of_states, number_of_spins, dos_fraction_size") & 
+   nctkarr_t("dos_fractions", "dp", "number_of_kpoints, max_number_of_states, number_of_spins, ndosfraction") & 
  ])
  NCF_CHECK(ncerr)
 
  if (allocated(dos%fractions_m)) then
    ncerr = nctk_def_arrays(ncid, &
-     nctkarr_t("dos_fractions_m", "dp", "number_of_kpoints, max_number_of_states, number_of_spins, dos_fraction_size"))
+     nctkarr_t("dos_fractions_m", "dp", &
+&              "number_of_kpoints, max_number_of_states, number_of_spins, dos_fractions_m_lastsize"))
+   NCF_CHECK(ncerr)
+ end if
+
+ if (allocated(dos%fractions_paw1)) then
+   ncerr = nctk_def_arrays(ncid, [&
+     nctkarr_t("dos_fractions_paw1", "dp", "number_of_kpoints, max_number_of_states, number_of_spins, ndosfraction"), &
+     nctkarr_t("dos_fractions_pawt1", "dp", "number_of_kpoints, max_number_of_states, number_of_spins, ndosfraction") &
+   ])
    NCF_CHECK(ncerr)
  end if
 
@@ -2227,10 +2234,10 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
  NCF_CHECK(nctk_set_datamode(ncid))
 
  ! scalars
- NCF_CHECK(nf90_put_var(ncid, vid("prtdos"), dtset%prtdos))
- !NCF_CHECK(nf90_put_var(ncid, vid("pawfatbnd"), dtset%pawfatbnd))
  NCF_CHECK(nf90_put_var(ncid, vid("pawprtdos"), dtset%pawprtdos))
- NCF_CHECK(nf90_put_var(ncid, vid("prtdosm"), dtset%prtdosm))
+ NCF_CHECK(nf90_put_var(ncid, vid("prtdos"), dos%prtdos))
+ NCF_CHECK(nf90_put_var(ncid, vid("prtdosm"), dos%prtdosm))
+ !NCF_CHECK(nf90_put_var(ncid, vid("pawfatbnd"), dos%pawfatbnd))
 
  ! arrays
  if (dtset%usepaw == 1) then
@@ -2243,13 +2250,19 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
  NCF_CHECK(nf90_put_var(ncid, vid("lmax_type"), lmax_type))
  NCF_CHECK(nf90_put_var(ncid, vid("iatsph"), dtset%iatsph(1:dtset%natsph)))
  NCF_CHECK(nf90_put_var(ncid, vid("ratsph"), dtset%ratsph(1:dtset%ntypat)))
- if (allocated(dos%fractions_m)) then
-   NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions_m"), dos%fractions_m))
- end if
+ NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions"), dos%fractions))
 
  NCF_CHECK(nf90_put_var(ncid, vid("ratsph_extra"), dtset%ratsph_extra))
  if (dtset%natsph_extra /= 0) then
    NCF_CHECK(nf90_put_var(ncid, vid("xredsph_extra"), dtset%xredsph_extra(:, 1:dtset%natsph_extra)))
+ end if
+
+ if (allocated(dos%fractions_m)) then
+   NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions_m"), dos%fractions_m))
+ end if
+ if (allocated(dos%fractions_paw1)) then
+   NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions_paw1"), dos%fractions_paw1))
+   NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions_pawt1"), dos%fractions_pawt1))
  end if
 
 contains

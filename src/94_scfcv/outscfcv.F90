@@ -762,7 +762,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &           ' = ', vh1_integ(nradint)*four*pi
            call wrtout(std_out,message,'COLL')
 
-
            ABI_DEALLOCATE(vh1spl)
            ABI_DEALLOCATE(vh1_corrector)
            ABI_DEALLOCATE(vh1_interp)
@@ -823,8 +822,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      ! Generate fractions for partial DOSs if needed partial_dos 1,2,3,4  give different decompositions
      if ((psps%usepaw==0.or.dtset%pawprtdos/=2) .and. dos%partial_dos_flag>=1) then
        call partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,mpi_enreg)
-     else
-       !dos%fractions=zero;if (dos%prtdosm>=1.or.dos%fatbands_flag==1) dos%fractions_m=zero
      end if
 
      if (psps%usepaw==1 .and. dos%partial_dos_flag /= 2) then
@@ -851,7 +848,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 #ifdef HAVE_NETCDF
    ! master writes fabands file here so that also NC pseudos are supported.
-   if (me == master) then
+   if (.False. .and. me == master) then
    !if ((prtdosm>=1.or.dos%fatbands_flag==1) .and. me == master) then ! TODO: Recheck this.
    !if ((dtset%pawfatbnd>0.and.dos%fatbands_flag==1) .and. me == master) then
      fname = trim(dtfil%filnam_ds(4))//'_FATBANDS.nc'
@@ -864,12 +861,10 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !  Here, computation and output of DOS and partial DOS  _DOS
    if (me == master .and. dos%fatbands_flag==0) then
      if (dos%prtdos/=4) then
-       call tetrahedron (dos%fractions,dos%fractions_average_m,dos%fractions_paw1,dos%fractions_pawt1,&
-&       dtset,fermie,eigen,dtfil%fnameabo_app_dos,dos%mbesslang,dos%prtdosm,dos%ndosfraction,dos%paw_dos_flag,rprimd)
+       call tetrahedron(dos,dtset,fermie,eigen,dtfil%fnameabo_app_dos,rprimd)
      else
 !      this option is not documented in input variables: is it working?
-       call gaus_dos(dos%fractions,dos%fractions_paw1,dos%fractions_pawt1,dtset,&
-&       fermie,eigen,dtfil%fnameabo_app_dos,dos%mbesslang,dos%prtdosm,dos%ndosfraction,dos%paw_dos_flag)
+       call gaus_dos(dos, dtset, fermie, eigen, dtfil%fnameabo_app_dos)
      end if
    end if
 
