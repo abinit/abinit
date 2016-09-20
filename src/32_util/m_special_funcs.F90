@@ -1293,6 +1293,7 @@ subroutine jlspline_free(jlspl)
  end if
 
 end subroutine jlspline_free
+!!***
 
 !----------------------------------------------------------------------
 
@@ -1350,6 +1351,7 @@ real(dp) function jlspline_integral(jlspl, il, qq, powr, nr, rcut)  result(res)
  res = simpson(step, yfit)
 
 end function jlspline_integral
+!!***
 
 END MODULE m_special_funcs
 !!***

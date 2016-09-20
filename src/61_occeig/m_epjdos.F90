@@ -52,10 +52,201 @@ module m_epjdos
 
 !----------------------------------------------------------------------
 
+!!****t* m_epjdos/epjdos_t
+!! NAME
+!! epjdos_t
+!! 
+!! FUNCTION
+!! 
+!! SOURCE
+
+ type,public :: epjdos_t
+
+   integer :: mbesslang
+   ! Max L+1 used in LM-DOS
+
+   integer :: ndosfraction
+   ! Defines the last dimension of the dos arrays.
+   ! Actual value depends on the other variables.
+
+   integer :: prtdos 
+   ! 2 --> Standard DOS with tetra.
+   ! 3 --> L-DOS with tetra (prtdosm>0 if LM is wanted in Ylm/Slm basis).
+   ! 4 --> L-DOS with gaussian (prtdosm if LM is wanted in Ylm/Slm basis).
+   ! 5 --> Spin DOS 
+
+   integer :: prtdosm
+   ! Used if L-DOS. 
+   ! 1 if LM-projection is done on complex Ylm
+   ! 2 if LM-projection is done on real Slm
+
+   integer :: partial_dos_flag
+
+   integer :: paw_dos_flag
+   ! 1 if both PAW contributions are evaluated AND stored
+
+   !integer :: pawfatbnd
+   integer :: fatbands_flag
+
+   integer :: nkpt, mband, nsppol
+   ! Used to dimension arrays
+
+   real(dp),allocatable :: fractions(:,:,:,:)
+   ! fractions(nkpt,mband,nsppol,ndosfraction))
+
+   real(dp),allocatable :: fractions_m(:,:,:,:)
+   ! fractions_m(nkpt,mband,nsppol,ndosfraction*mbesslang)
+
+   real(dp),allocatable :: fractions_average_m(:,:,:,:)
+   ! fractions_average_m(nkpt,mband,nsppol,ndosfraction*mbesslang)
+
+   real(dp),allocatable :: fractions_paw1(:,:,:,:)
+   ! fractions_paw1(nkpt,mband,nsppol,ndosfraction)
+
+   real(dp),allocatable :: fractions_pawt1(:,:,:,:)
+   ! fractions_pawt1(nkpt,mband,nsppol,ndosfraction))
+
+ end type epjdos_t
+
+ public :: epjdos_from_dataset
+ public :: epjdos_free
+
+!----------------------------------------------------------------------
+
 contains  !============================================================
 !!***
 
-!!****f* m_pjedos/tetrahedron
+!!****f* m_epjdos/epjdos_from_dataset
+!! NAME
+!!  epjdos_from_dataset
+!!
+!! FUNCTION
+!!  Create new object from dataset input variables.
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+type(epjdos_t) function epjdos_from_dataset(dtset) result(new)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'jlspline_free'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(dataset_type),intent(in) :: dtset
+
+!Local variables-------------------------------
+!scalars
+
+! *********************************************************************
+
+ new%nkpt = dtset%nkpt; new%mband = dtset%mband; new%nsppol = dtset%nsppol
+
+ new%prtdos = dtset%prtdos
+ new%partial_dos_flag = 0
+ if (new%prtdos==2) new%partial_dos_flag = 0 ! Standard DOS with tetra.
+ if (new%prtdos==3) new%partial_dos_flag = 1 ! L-DOS with tetra (prtdosm>0 if LM is wanted in Ylm/Slm basis).
+ if (new%prtdos==4) new%partial_dos_flag = 1 ! L-DOS with gaussian (prtdosm if LM is wanted in Ylm/Slm basis).
+ if (new%prtdos==5) new%partial_dos_flag = 2 ! Spin DOS 
+
+ new%prtdosm=0
+ if (new%partial_dos_flag==1) new%prtdosm=dtset%prtdosm
+ ! paw_dos_flag= 1 if both PAW contributions are evaluated AND stored
+ new%paw_dos_flag=0
+ if (dtset%usepaw==1 .and. new%partial_dos_flag==1 .and. dtset%pawprtdos==1) new%paw_dos_flag=1
+
+ new%fatbands_flag=0
+ if (dtset%pawfatbnd>0 .and. new%prtdosm==0) new%fatbands_flag=1
+ if (new%prtdosm==1.and.dtset%pawfatbnd>0)then
+!  because they compute quantities in real and complex harmonics respectively
+   MSG_ERROR('pawfatbnd>0  and prtdosm=1 are not compatible')
+ end if
+
+ ! mjv : initialization is needed as mbesslang is used for allocation below
+ ! NOTE: 10/5/2010 the whole of this could be looped over ndosfraction,
+ ! to store much less in memory. The DOS is accumulated in an array
+ ! and then printed to file at the end.
+ new%mbesslang = 1
+ if (new%partial_dos_flag==1 .or. new%fatbands_flag==1)then
+   new%mbesslang = 5
+   new%ndosfraction = (dtset%natsph + dtset%natsph_extra) * new%mbesslang
+ else if (new%partial_dos_flag == 2) then
+   new%ndosfraction = 7
+ else
+   new%ndosfraction = 1
+   new%mbesslang = 0
+ end if
+
+ ABI_ALLOCATE(new%fractions, (dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
+ if (new%prtdosm>=1 .or. new%fatbands_flag==1) then
+   ABI_ALLOCATE(new%fractions_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang))
+   ABI_ALLOCATE(new%fractions_average_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang))
+ else
+   ABI_ALLOCATE(new%fractions_m,(0,0,0,0))
+   ABI_ALLOCATE(new%fractions_average_m,(0,0,0,0))
+ end if
+ if (dtset%usepaw==1 .and. new%partial_dos_flag==1) then
+   ABI_ALLOCATE(new%fractions_paw1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
+   ABI_ALLOCATE(new%fractions_pawt1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
+ else
+   ABI_ALLOCATE(new%fractions_paw1,(0,0,0,0))
+   ABI_ALLOCATE(new%fractions_pawt1,(0,0,0,0))
+ end if
+
+end function epjdos_from_dataset
+!!***
+
+!!****f* m_epjdos/epjdos_free
+!! NAME
+!!  epjdos_free
+!!
+!! FUNCTION
+!!  deallocate memory
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+subroutine epjdos_free(self)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'jlspline_free'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(epjdos_t),intent(inout) :: self
+
+! *********************************************************************
+
+ if (allocated(self%fractions)) then
+   ABI_FREE(self%fractions)
+ end if
+ if (allocated(self%fractions_m)) then
+   ABI_FREE(self%fractions_m)
+ end if
+ if (allocated(self%fractions_average_m)) then
+   ABI_FREE(self%fractions_average_m)
+ end if
+ if (allocated(self%fractions_paw1)) then
+   ABI_FREE(self%fractions_paw1)
+ end if
+ if (allocated(self%fractions_pawt1)) then
+   ABI_FREE(self%fractions_pawt1)
+ end if
+
+end subroutine epjdos_free
+!!***
+
+!!****f* m_epjdos/tetrahedron
 !! NAME
 !! tetrahedron
 !!
@@ -683,7 +874,7 @@ end subroutine tetrahedron
 
 !----------------------------------------------------------------------
 
-!!****f* m_pjedos/gaus_dos
+!!****f* m_epjdos/gaus_dos
 !! NAME
 !! gaus_dos
 !!
@@ -1048,7 +1239,7 @@ subroutine gaus_dos(dos_fractions,&
 end subroutine gaus_dos
 !!***
 
-!!****f* m_pjedos/get_dos_1band
+!!****f* m_epjdos/get_dos_1band
 !! NAME
 !! get_dos_1band
 !!
@@ -1130,7 +1321,7 @@ subroutine get_dos_1band (dos_fractions,enemin,enemax,&
 end subroutine get_dos_1band
 !!***
 
-!!****f* m_pjedos/get_dos_1band_m
+!!****f* m_epjdos/get_dos_1band_m
 !! NAME
 !! get_dos_1band_m
 !!
@@ -1213,7 +1404,7 @@ subroutine get_dos_1band_m (dos_fractions_m,enemin,enemax,&
 end subroutine get_dos_1band_m
 !!***
 
-!!****f* m_pjedos/dos_degeneratewfs
+!!****f* m_epjdos/dos_degeneratewfs
 !! NAME
 !! dos_degeneratewfs
 !!
@@ -1330,7 +1521,7 @@ subroutine dos_degeneratewfs(dos_fractions_in,dos_fractions_out,eigen,mband,nban
 end subroutine dos_degeneratewfs
 !!***
 
-!!****f* m_pjedos/recip_ylm
+!!****f* m_epjdos/recip_ylm
 !! NAME
 !! recip_ylm
 !!
