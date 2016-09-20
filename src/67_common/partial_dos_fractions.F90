@@ -138,7 +138,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
 
 !*************************************************************************
 
-!for the moment, only support projection on angular momenta
+ ! for the moment, only support projection on angular momenta
  if (partial_dos /= 1 .and. partial_dos /= 2) then
    write(std_out,*) 'Error : partial_dos_fractions only supports angular '
    write(std_out,*) ' momentum projection and spinor components for the moment. return to outscfcv'
@@ -146,7 +146,7 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
    return
  end if
 
-!impose all kpoints have same number of bands
+ ! impose all kpoints have same number of bands
  do isppol=1,dtset%nsppol
    do ikpt=1,dtset%nkpt
      if (dtset%nband((isppol-1)*dtset%nkpt + ikpt) /= dtset%mband) then
@@ -158,22 +158,16 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
    end do
  end do
 
-!initialize dos_fractions
+ ! initialize dos_fractions
  dos_fractions = zero
  if (prtdosm /= 0) dos_fractions_m = zero
 
  ! Real or complex spherical harmonics?
  rc_ylm = 2; if (prtdosm == 2) rc_ylm = 1
 
- !MSG_ERROR("In partial dos fractions")
-
- if (mpi_enreg%paral_kgb==1) then
-   comm = mpi_enreg%comm_kpt
-   me = mpi_enreg%me_kpt
- else
-   comm = mpi_enreg%comm_cell
-   me = xmpi_comm_rank(comm)
- end if
+ comm = mpi_enreg%comm_cell
+ if (mpi_enreg%paral_kgb==1) comm = mpi_enreg%comm_kpt
+ me = mpi_enreg%me_kpt
  
  my_nspinor = max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
  mcg_disk = dtset%mpw*my_nspinor*dtset%mband
@@ -333,17 +327,16 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
 
        shift_b = 0
        do iband=1,dtset%mband
+         !if (mod(iband, mpi_enreg%nproc_band) /= mpi_enreg%me_band) then
          if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= me) then
            !shift_b = shift_b + npw_k
            cycle
          end if
+         !write(std_out,*)"in band:",iband
 
          do ispinor=1,my_nspinor
            ! Select wavefunction in cg array
            shift_cg = shift_sk + shift_b
-
-           !call xmpi_barrier(comm)
-           !MSG_ERROR("Before recip_ylm")
 
            call recip_ylm(bess_fit, cg(:,shift_cg+1:shift_cg+npw_k), dtset%istwfk(ikpt),&
 &           nradint, nradintmax,mbesslang, mpi_enreg, dtset%mpw, natsph_tot, ntypat_extra, typat_extra,&
@@ -461,10 +454,10 @@ subroutine partial_dos_fractions(crystal,npwarr,kg,cg,dos_fractions,dos_fraction
 
    ! Gather all contributions from different processors
    call xmpi_sum(dos_fractions,comm,ierr)
-   ! below for future use - spinors should not be parallelized for the moment
-   !   if (mpi_enreg%paral_spinor == 1)then
-   !     call xmpi_sum(dos_fractions,mpi_enreg%comm_spinor,ierr)
-   !   end if
+   !below for future use - spinors should not be parallelized for the moment
+   !if (mpi_enreg%paral_spinor == 1)then
+   !  call xmpi_sum(dos_fractions,mpi_enreg%comm_spinor,ierr)
+   !end if
 
  else
    MSG_WARNING('only partial_dos==1 is coded')

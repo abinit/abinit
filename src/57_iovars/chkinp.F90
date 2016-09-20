@@ -971,14 +971,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      write(message,'(5a)')&
 &     'For spin-polarized metallic systems (occopt>3),',ch10,&
 &     'only RPA dielectric matrix can be evaluated) !',ch10,&
-&     'Action : change iprcel value in input file (mod(iprcel,100)<50) !'
+&     'Action: change iprcel value in input file (mod(iprcel,100)<50) !'
      MSG_ERROR_NOSTOP(message, ierr)
    end if
    if(dt%npspinor>1.and.dt%iprcel>0)then
      write(message,'(5a)')&
-&     '  When parallelization over spinorial components is activated (npspinor>1),',ch10,&
-&     '  only model dielectric function is allowed (iprcel=0) !',ch10,&
-&     '  Action : change iprcel value in input file !'
+&     'When parallelization over spinorial components is activated (npspinor>1),',ch10,&
+&     'only model dielectric function is allowed (iprcel=0) !',ch10,&
+&     'Action: change iprcel value in input file !'
      MSG_ERROR_NOSTOP(message, ierr)
    end if
 
@@ -2204,8 +2204,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtbbb',dt%prtbbb,1,(/0/),iout)
    end if
 
-
-
 !  prtden
    if (usepaw==1) then
      call chkint_le(0,0,cond_string,cond_values,ierr,'prtden',dt%prtden,7,iout)
@@ -2222,7 +2220,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtdos',dt%prtdos,6,(/0,1,2,3,4,5/),iout)
 
    if (dt%prtdos == 3 .and. (dt%npband > 1)) then
-     message = ' prtdos==3 and band parallelization are not compatible yet. Set npband = 1'
+     message = ' prtdos==3 and band parallelization are not compatible yet. Set npband=1 and use npfft'
      MSG_ERROR(message)
    end if
 ! for the moment prtdos 3,4,5 are not compatible with fft or band parallelization
@@ -2235,7 +2233,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      dt%prtdos = 2
      MSG_WARNING('prtdos==5 is only useful for nspinor 2. Has been reset to 2')
    end if
-
+   if (dt%prtdos == 5 .and. dt%npspinor /= 1) then
+     MSG_ERROR_NOSTOP('prtdos==5 not available with npspinor==2', ierr)
+   end if
 
 !  prtdosm
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtdosm',dt%prtdosm,3,(/0,1,2/),iout)
@@ -2263,54 +2263,44 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'prtelf',dt%prtelf,1,(/0/),iout)
    end if
 
-!  prtfsurf
-!  only one shift allowed (gamma)
+!  prtfsurf only one shift allowed (gamma)
    if (dt%prtfsurf == 1) then
 
      if (abs(dt%kptrlatt(1,2))+abs(dt%kptrlatt(1,3))+abs(dt%kptrlatt(2,3))+&
 &     abs(dt%kptrlatt(2,1))+abs(dt%kptrlatt(3,1))+abs(dt%kptrlatt(3,2)) /= 0 ) then
-       ierr=ierr+1
        write(message,'(4a)')ch10,&
-&       ' prtfsurf does not work with non-diagonal kptrlatt ', ch10,&
-&       ' Action: set nshift 1 and shiftk 0 0 0'
-       call wrtout(iout,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+&       'prtfsurf does not work with non-diagonal kptrlatt ', ch10,&
+&       'Action: set nshift 1 and shiftk 0 0 0'
+       MSG_ERROR_NOSTOP(message, ierr)
      end if
      if (dt%nshiftk > 1) then
-       ierr=ierr+1
        write(message,'(4a)') ch10,&
-&       ' prtfsurf does not work with multiple kpt shifts ', ch10, &
-&       ' Action: set nshift 1 and shiftk 0 0 0'
-       call wrtout(iout,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+&       'prtfsurf does not work with multiple kpt shifts ', ch10, &
+&       'Action: set nshift 1 and shiftk 0 0 0'
+       MSG_ERROR_NOSTOP(message, ierr)
      end if
      if (sum(abs(dt%shiftk(:,1:dt%nshiftk))) > tol8) then
-       ierr=ierr+1
        write(message,'(4a)')ch10,&
-&       ' prtfsurf does not work with non-zero kpt shift ',ch10,&
-&       ' Action: set nshift 1 and shiftk 0 0 0'
-       call wrtout(iout,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+&       'prtfsurf does not work with non-zero kpt shift ',ch10,&
+&       'Action: set nshift 1 and shiftk 0 0 0'
+       MSG_ERROR_NOSTOP(message, ierr)
      end if
 
 !    Occcupations, Fermi level and k weights have to be calculated correctly.
      if (.not.(dt%iscf>1.or.dt%iscf==-3)) then
-       ierr=ierr+1
        write(message,'(4a)')ch10,&
-&       ' prtfsurf==1 requires either iscf>1 or iscf==-3 ',ch10,&
-&       ' Action: change iscf in the input file. '
-       call wrtout(iout,message,'COLL')
-       call wrtout(std_out,message,'COLL')
+&       'prtfsurf==1 requires either iscf>1 or iscf==-3 ',ch10,&
+&       'Action: change iscf in the input file. '
+       MSG_ERROR_NOSTOP(message, ierr)
      end if
 
 !    Make sure all nband are equal (well it is always enforced for metals)
      if (any(dt%nband(1:nkpt*nsppol) /= maxval(dt%nband(1:nkpt*nsppol)) )) then
        write(message,'(3a)')&
-&       '  The number of bands has to be constant for the output of the Fermi surface.',ch10,&
-&       '  Action : set all the nbands to the same value in your input file'
+&       'The number of bands has to be constant for the output of the Fermi surface.',ch10,&
+&       'Action: set all the nbands to the same value in your input file'
        MSG_ERROR_NOSTOP(message,ierr)
      end if
-
    end if ! prtfsurf==1
 
 !  prtgden
@@ -2414,7 +2404,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 
 !  random_atpos
-
    call chkint_eq(0,0,cond_string,cond_values,ierr,'random_atpos',dt%random_atpos,5,(/0,1,2,3,4/),iout)
 
 !  ratsph

@@ -1424,14 +1424,14 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
  integer :: ilang(mlang**2)
  real(dp) :: c1(2),c2(2)
  real(dp) :: sum_1atom(natsph),sum_1ll(mlang),sum_1lm(mlang**2)
- real(dp) :: values(2,nradintmax),func(nradintmax)
+ real(dp) :: func(nradintmax)
  real(dp) :: tmppsia(2,npw_k),tmppsim(2,npw_k),vect(2,npw_k) 
+ real(dp),allocatable :: values(:,:,:)
 
 ! *************************************************************************
 
  sum_1lm_1atom = zero
- sum_1ll_1atom = zero
- vect = zero
+ ABI_CALLOC(values, (2,nradintmax,mlang**2))
 
  do ll=0,mlang-1
    do mm=-ll,ll
@@ -1456,7 +1456,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
    ! Take into account the fact that ylm are REAL spherical harmonics, see initylmg.f
    ! For time-reversal states, detailed treatment show that only the real or imaginary
    ! part of tmppsia is needed here, depending on l being even or odd: only one of the coef is 1, the other 0
-   do ilm=1, mlang*mlang
+   do ilm=1,mlang*mlang
      il = ilang(ilm)
      ll = ilang(ilm) - 1
      mm = ilm - (ll+1)**2 + ll
@@ -1529,11 +1529,9 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
      end if
 
      ! Compute integral $ \int_0^{rc} dr r**2 ||\sum_G u(G) Y_LM^*(k+G) e^{i(k+G).Ra} j_L(|k+G| r)||**2 $
-     integ = zero
-     vect(2, 1:npw_k) = zero
      do ixint=1,nradint(iat)
-
        !vect(1, 1:npw_k) = bess_fit(1:npw_k, ixint, ilang(ilm))
+       !vect(2, 1:npw_k) = zero
        !call dotprod_g(dotr, doti, istwfk, npw_k, option2, vect, tmppsim, mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
        dotr = zero; doti = zero
        do ipw=1,npw_k
@@ -1548,30 +1546,36 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
          end if
        end if
 
-       ! Store results to reduce number of xmpi_sum if MPI-FFT
-       values(1, ixint) = dotr
-       values(2, ixint) = doti
+       ! Store results to reduce number of xmpi_sum calls if MPI-FFT
+       values(1, ixint, ilm) = dotr
+       values(2, ixint, ilm) = doti
      end do ! ixint
-
-     ! Multiply by r**2 and take norm, integrate
-     call xmpi_sum(values, mpi_enreg%comm_fft, ierr)
-     do ixint=1,nradint(iat)
-        func(ixint) = rint(ixint)**2 * (values(1, ixint)**2 + values(2, ixint)**2)
-     end do
-     integ = simpson(dr, func(1:nradint(iat)))
-
-     sum_1lm_1atom(ilm, iat) = sum_1lm_1atom(ilm, iat) + integ
-     sum_1ll_1atom(il, iat) = sum_1ll_1atom(il, iat) + integ
    end do ! ilm
+
+   ! Multiply by r**2 and take norm, integrate
+   call xmpi_sum(values, mpi_enreg%comm_fft, ierr)
+   do ilm=1,mlang*mlang
+     do ixint=1,nradint(iat)
+        func(ixint) = rint(ixint)**2 * (values(1, ixint, ilm)**2 + values(2, ixint, ilm)**2)
+     end do
+     sum_1lm_1atom(ilm, iat) = simpson(dr, func(1:nradint(iat)))
+   end do
  end do ! iat
 
  ! Normalize with unit cell volume and include 4pi term coming from rayleigh expansion.
- ! If CSH, we have a factor 1/sqrt(2) 
  fact = four_pi**2 / ucvol
- sum_1lm_1atom(:,:) = fact * sum_1lm_1atom(:,:)
- sum_1ll_1atom(:,:) = fact * sum_1ll_1atom(:,:)
+ sum_1lm_1atom = fact * sum_1lm_1atom
+ sum_1ll_1atom = zero
+ do iat=1,natsph
+   do ilm=1,mlang*mlang
+     il = ilang(ilm)
+     sum_1ll_1atom(il, iat) = sum_1ll_1atom(il, iat) + sum_1lm_1atom(ilm, iat)
+   end do
+ end do
 
-!Output
+ ABI_FREE(values)
+
+ ! Output
  if (prtsphere == 1) then
    sum_1ll = zero
    sum_1lm = zero
