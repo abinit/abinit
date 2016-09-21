@@ -28,7 +28,7 @@
 !!  eig0_k(nband_k)=GS eigenvalues at k (hartree)
 !!  eig0_kq(nband_k)=GS eigenvalues at k+Q (hartree)
 !!  fermie1=derivative of fermi energy wrt (strain) perturbation
-!!  grad_berry(2,mpw1,dtefield%nband_occ) = the gradient of the Berry phase term
+!!  grad_berry(2,mpw1,dtefield%mband_occ) = the gradient of the Berry phase term
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
 !!  ibg=shift to be applied on the location of data in the array cprj
 !!  ibgq=shift to be applied on the location of data in the array cprjq

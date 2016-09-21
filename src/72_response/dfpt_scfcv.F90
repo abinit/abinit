@@ -174,15 +174,15 @@
 !!
 !! CHILDREN
 !!      ab7_mixing_deallocate,ab7_mixing_new,ab7_mixing_use_disk_cache,appdig
-!!      dfpt_etot,dfpt_newvtr,dfpt_nselt,dfpt_nstdy,dfpt_nstpaw,dfpt_rhofermi
-!!      dfpt_rhotov,dfpt_vtorho,dfptff_bec,dfptff_die,dfptff_ebp,dfptff_edie
-!!      dfptff_initberry,fftdatar_write_from_hdr,fourdp,getcut,metric
-!!      newfermie1,paw_an_free,paw_an_init,paw_an_nullify,paw_an_reset_flags
-!!      paw_ij_free,paw_ij_init,paw_ij_nullify,paw_ij_reset_flags,pawcprj_alloc
-!!      pawcprj_free,pawcprj_getdim,pawdenpot,pawdij,pawdijfr,pawmknhat
-!!      pawnhatfr,pawrhoij_alloc,pawrhoij_free,qmatrix,scprqt,status,symdij
-!!      timab,wffclose,wfk_close,wrtout,xmpi_barrier,xmpi_isum,xmpi_sum
-!!      xmpi_wait
+!!      destroy_efield,dfpt_etot,dfpt_newvtr,dfpt_nselt,dfpt_nstdy,dfpt_nstpaw
+!!      dfpt_rhofermi,dfpt_rhotov,dfpt_vtorho,dfptff_bec,dfptff_die,dfptff_ebp
+!!      dfptff_edie,dfptff_initberry,fftdatar_write_from_hdr,fourdp,getcut
+!!      metric,newfermie1,paw_an_free,paw_an_init,paw_an_nullify
+!!      paw_an_reset_flags,paw_ij_free,paw_ij_init,paw_ij_nullify
+!!      paw_ij_reset_flags,pawcprj_alloc,pawcprj_free,pawcprj_getdim,pawdenpot
+!!      pawdij,pawdijfr,pawmknhat,pawnhatfr,pawrhoij_alloc,pawrhoij_free
+!!      qmatrix,rf2_getidirs,scprqt,status,symdij,timab,wffclose,wfk_close
+!!      wrtout,xmpi_barrier,xmpi_isum,xmpi_sum,xmpi_wait
 !!
 !! SOURCE
 
@@ -569,7 +569,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    call dfptff_initberry(dtefield,dtset,gmet,kg,kg1,dtset%mband,mkmem,mpi_enreg,&
 &   mpw,mpw1,nkpt,npwarr,npwar1,dtset%nsppol,occ_rbz,pwindall,rprimd)
 !  calculate inverse of the overlap matrix
-   ABI_ALLOCATE(qmat,(2,dtefield%nband_occ,dtefield%nband_occ,nkpt,2,3))
+   ABI_ALLOCATE(qmat,(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3))
    call qmatrix(cg,dtefield,qmat,mpw,mpw1,mkmem,dtset%mband,npwarr,nkpt,dtset%nspinor,dtset%nsppol,pwindall)
  else
    ABI_ALLOCATE(pwindall,(0,0,0))
@@ -1205,13 +1205,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  ABI_DEALLOCATE(qmat)
  if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 & dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17) then
-   ABI_DEALLOCATE(dtefield%ikpt_dk)
-   ABI_DEALLOCATE(dtefield%cgindex)
-   ABI_DEALLOCATE(dtefield%idxkstr)
-   ABI_DEALLOCATE(dtefield%kgindex)
-   if(allocated(dtefield%fkgindex))  then
-     ABI_DEALLOCATE(dtefield%fkgindex)
-   end if
+   call destroy_efield(dtefield)
    if(allocated(mpi_enreg%kpt_loc2ibz_sp))  then
      ABI_DEALLOCATE(mpi_enreg%kpt_loc2ibz_sp)
    end if

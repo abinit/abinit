@@ -375,9 +375,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 &       ' invars1: COMMENT -',ch10,&
 &       '  With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.'
        call wrtout(iout,  message,'COLL')
-     endif
-   endif
- endif
+     end if
+   end if
+ end if
  nspinor=dtset%nspinor
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nspden',tread,'INT')

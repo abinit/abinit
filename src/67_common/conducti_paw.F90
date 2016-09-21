@@ -107,7 +107,7 @@
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iomode,bantot,bdtot_index,dosdeltae
+ integer :: iomode,bantot,bdtot_index
  integer :: fform1,headform,iband,ierr,ikpt
  integer :: iom,isppol,jband,l1,l2,mband,me,mom
  integer :: natom,nband_k,nkpt,nspinor,nsppol,ntypat
@@ -217,7 +217,6 @@
  else
    tphysel=zero
    maxocc=two/(nsppol*nspinor)
-   dosdeltae=zero
  end if
 !---------------------------------------------------------------------------------
 !size of the frequency range

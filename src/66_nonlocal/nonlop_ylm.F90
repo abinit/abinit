@@ -371,13 +371,13 @@
  if (signs==1) then
    if(paw_opt<3) then
      check=(choice==0 .or.choice==1 .or.choice==2 .or.choice==3 .or.choice==4 .or.&
-&           choice==23.or.choice==24.or.choice==5 .or.choice==51.or.choice==52.or.&
-            choice==53.or.choice==54.or.choice==55.or.&
-&           choice==6 .or.choice==8 .or.choice==81)
+&     choice==23.or.choice==24.or.choice==5 .or.choice==51.or.choice==52.or.&
+&     choice==53.or.choice==54.or.choice==55.or.&
+&     choice==6 .or.choice==8 .or.choice==81)
    else if (paw_opt==3) then
      check=(choice== 0.or.choice== 1.or.choice== 2.or.choice==3.or.choice==5.or.&
-&           choice==23.or.choice==51.or.choice==52.or.choice==54.or.choice==55.or.&
-&           choice== 8.or.choice==81)
+&     choice==23.or.choice==51.or.choice==52.or.choice==54.or.choice==55.or.&
+&     choice== 8.or.choice==81)
    else
      check = .false.
    end if
@@ -387,8 +387,8 @@
 !signs=2, less choices
  if (signs==2) then
    check=(choice==0.or.choice==1.or.choice==2.or.choice==3 .or.&
-&         choice==5.or.choice==51.or.choice==52.or.choice==53.or.&
-&         choice==7.or.choice==8.or.choice==81)
+&   choice==5.or.choice==51.or.choice==52.or.choice==53.or.&
+&   choice==7.or.choice==8.or.choice==81)
    ABI_CHECK(check,'BUG: choice not compatible (for signs=2)')
  end if
 !1<=idir<=6 is required when choice=3 and signs=2
@@ -681,7 +681,7 @@
        cplex_dgxdt(:) = 1 ; cplex_d2gxdt(:) = 1
        if(ndgxdt > 0) then
          if (choice==5.or.choice==51.or.choice==52.or.choice==53.or. &
-&            choice==8.or.choice==81) cplex_dgxdt(:) = 2
+&         choice==8.or.choice==81) cplex_dgxdt(:) = 2
          if (choice==54.and.signs==1) cplex_dgxdt(4:6) = 2
          if (choice==55.and.signs==1) cplex_dgxdt(7:9) = 2
        end if
@@ -932,8 +932,8 @@
 
 !Need sometimes gmet
  if ((signs==1.and.paw_opt<=3).and. &
-&    (choice==5 .or.choice==51.or.choice==52.or.choice==53.or.&
-&     choice==54.or.choice==55)) then
+& (choice==5 .or.choice==51.or.choice==52.or.choice==53.or.&
+& choice==54.or.choice==55)) then
    ABI_ALLOCATE(gmet,(3,3))
    gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
  end if
