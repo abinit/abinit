@@ -120,10 +120,7 @@ program epigene
  call wrtout(std_out,message,'COLL')
 
 !Initialise the code : write heading, and read names of files.
- if (iam_master) then
-   call init10(filnam)
- end if
- call xmpi_bcast (filnam, master, comm, ierr)
+ call init10(filnam,comm)
 
 !******************************************************************
 
@@ -186,34 +183,34 @@ program epigene
  end if
 
 ! First step: Treat the reference structure 
-!**********************************************************************
-   call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
-!**********************************************************************
+!****************************************************************************************
+ call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
+!****************************************************************************************
 
-!**********************************************************************
 !Second step: Compute the third order derivative with finite differences
-   if (inp%prt_3rd > 0) then 
-     call strain_phonon_coupling(reference_effective_potential,filnam,inp,comm)
-   end if
-!**********************************************************************
+!****************************************************************************************
+ if (inp%prt_3rd > 0) then 
+   call strain_phonon_coupling(reference_effective_potential,filnam,inp,comm)
+ end if
+!****************************************************************************************
 
-!**********************************************************************
-!  Print the effective potential (only cpu 0)
-   if(iam_master.and.(inp%prt_effpot<=-1.or.inp%prt_effpot>=3)) then
-     select case(inp%prt_effpot)
-     case (-1)  
-       name = "system.xml"
-       call effective_potential_writeXML(reference_effective_potential,1,filename=name)
-     case(-2)
-       name = "system.nc"
-       call effective_potential_writeNETCDF(reference_effective_potential,1,filename=name)
-     case (3)  
-       name = "system.xml"
-       call effective_potential_writeXML(reference_effective_potential,1,filename=name)
-     end select
-   end if
+!****************************************************************************************
+!Print the effective potential (only master CPU)
+ if(iam_master.and.(inp%prt_effpot<=-1.or.inp%prt_effpot>=3)) then
+   select case(inp%prt_effpot)
+   case (-1)  
+     name = "system.xml"
+     call effective_potential_writeXML(reference_effective_potential,1,filename=name)
+   case(-2)
+     name = "system.nc"
+     call effective_potential_writeNETCDF(reference_effective_potential,1,filename=name)
+   case (3)  
+     name = "system.xml"
+     call effective_potential_writeXML(reference_effective_potential,1,filename=name)
+   end select
+ end if
+!****************************************************************************************
 
-!*********************************************************************
 !TEST_AM SECTION
 ! Print the Phonon dos/spectrum
 !   if(inp%prt_phfrq > 0) then
@@ -227,36 +224,35 @@ program epigene
 !   name = "test.xml"
 !   call effective_potential_writeXML(reference_effective_potential,1,filename=name)
 ! just for TEST
+!   if(inp%prt_phfrq > 0) then
+!     ABI_ALLOCATE(dynmat,(2,3,reference_effective_potential%supercell%natom_supercell,
+!                            3,reference_effective_potential%supercell%natom_supercell))
 
+!     call effective_potential_effpot2dynmat(dynmat,inp%delta_df,reference_effective_potential,&
+!&                                           reference_effective_potential%supercell%natom_supercell,&
+!&                                           int(reference_effective_potential%supercell%qphon),3)
+
+!     ABI_DEALLOCATE(dynmat)
+!   end if
 !TEST_AM
-   if(inp%prt_phfrq > 0) then
-     ABI_ALLOCATE(dynmat,(2,3,reference_effective_potential%supercell%natom_supercell,3,reference_effective_potential%supercell%natom_supercell))
 
-     call effective_potential_effpot2dynmat(dynmat,inp%delta_df,reference_effective_potential,&
-&                                           reference_effective_potential%supercell%natom_supercell,&
-&                                           int(reference_effective_potential%supercell%qphon),3)
 
-     ABI_DEALLOCATE(dynmat)
-   end if
-!TEST_AM
-!**********************************************************************
-
-!TEST_AM
-   if(inp%monte_carlo>=1) then   
 !    Compute the monte carlo, molecular dynamics of compute specific energy 
-     call mover_effpot(inp,filnam,reference_effective_potential,comm)
-   end if
-!TEST_AM
+!****************************************************************************************
+ if(inp%dynamics>=1) then      
+   call mover_effpot(inp,filnam,reference_effective_potential,comm)
+ end if
+!****************************************************************************************    
 
 
-!********************************************************************** 
 !Free the effective_potential 
-   call effective_potential_free(reference_effective_potential)
-!**********************************************************************
+!**************************************************************************************** 
+ call effective_potential_free(reference_effective_potential)
+!****************************************************************************************
 
-   write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+ write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10
+ call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL')
 
  call timein(tcpu,twall)
  tsec(1)=tcpu-tcpui

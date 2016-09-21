@@ -34,7 +34,7 @@ module m_monte_carlo
  use m_ifc
  use m_effective_potential
  use m_epigene_dataset
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 

@@ -321,7 +321,9 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
 
  call intagm(dprarr,intarr,jdtset,marr,band2eps_dtset%nlines,string(1:lenstr),'nqline',tread,'INT')
  if(tread==1) band2eps_dtset%nqline(1:band2eps_dtset%nlines) = intarr(1:band2eps_dtset%nlines)
- 
+!REMOVE THE LAST LINE OF NQLINE
+  band2eps_dtset%nqline(band2eps_dtset%nlines) = band2eps_dtset%nqline(band2eps_dtset%nlines) - 1
+
  call intagm(dprarr,intarr,jdtset,marr,band2eps_dtset%nlines,string(1:lenstr),'scale',tread,'DPR')
  if(tread==1) band2eps_dtset%scale(1:band2eps_dtset%nlines) = dprarr(1:band2eps_dtset%nlines)
  

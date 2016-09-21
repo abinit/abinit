@@ -401,20 +401,12 @@ program band2eps
  write(18,'(a)') '%****Write Bands****'
 
  lastPos=kminN
-
  
  read(19,*) (phfrqqm1(ii),ii=1,3*inp%natom)
 
  do jj=1,inp%nlines
    do iqpt=1,inp%nqline(jj)
-     if (jj==inp%nlines .and. iqpt==inp%nqline(jj)) then
-       cycle
-!       read(19,*) (phfrq(ii),ii=1,3*inp%natom)
-!       phfrq(:) = phfrqqm1(:)
-     else
-       read(19,*) (phfrq(ii),ii=1,3*inp%natom)
-     end if
-
+     read(19,*) (phfrq(ii),ii=1,3*inp%natom)
      do imode=1,3*inp%natom
 
        if(filnam(4)/='no') then       !calculate the color else in black and white

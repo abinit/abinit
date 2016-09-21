@@ -151,7 +151,7 @@ subroutine strain_phonon_coupling(effective_potential,filenames,inp,comm)
      end if
 
      !Fill the eff_pots with the conresponding strain
-     call strain_get(effective_potential%rprimd,eff_pots(ii)%rprimd,eff_pots(ii)%strain)
+     call strain_get(eff_pots(ii)%strain,rprim=effective_potential%rprimd,rprim_def=eff_pots(ii)%rprimd)
    
      jj = jj + 1; ii = ii + 1
    

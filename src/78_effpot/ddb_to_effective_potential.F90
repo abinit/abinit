@@ -105,14 +105,14 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
 !**********************************************************************
 ! Transfert energy from input file
 !**********************************************************************
-  write(message, '(a,a,(80a),a,a,a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
+  write(message, '(2a,(80a),6a)') ch10,('=',ii=1,80),ch10,ch10,&
 &     ' Extraction of the energy of the structure (unit: Hartree)',ch10
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
   if(inp%energy_reference==zero)then
-   write(message,'(4a)')ch10,&
+   write(message,'(6a)')ch10,&
 &    ' Warning : Energy of the reference structure is not specify in',&
-&    ' the input file. Energy will set to zero):',ch10
+&    ' the input file.',ch10,' Energy will set to zero):',ch10
     call wrtout(std_out,message,'COLL')
     call wrtout(ab_out,message,'COLL')
 
@@ -260,10 +260,10 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
           idir2=ivarB
           ipert2=natom+3  !for the diagonal part
         end if
-        elast_clamped(ivarA,ivarB) = blkval(1,idir1,ipert1,idir2,ipert2,iblok)
+        elast_clamped(ivarA,ivarB) = blkval(1,idir1,ipert1,idir2,ipert2,iblok)/crystal%ucvol
       end do
     end do
-    fact=HaBohr3_GPa/crystal%ucvol
+    fact=HaBohr3_GPa
     do ivarA=1,6
       write(message,'(6f12.7)')elast_clamped(ivarA,1)*fact/100.00_dp,&
 &                              elast_clamped(ivarA,2)*fact/100.00_dp,&
@@ -442,6 +442,11 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
   ABI_DEALLOCATE(blkval)
   ABI_DEALLOCATE(zeff)
   ABI_DEALLOCATE(instrain)
+
+!-------------------------------------------------------------------------------------
+  write(message,'(a)')ch10
+  call wrtout(std_out,message,'COLL')
+  call wrtout(ab_out,message,'COLL')
 
 end subroutine ddb_to_effective_potential
 !!***

@@ -607,9 +607,11 @@ real(dp) :: rmet(3,3)
 !        For monte carlo don't need ton recompute energy here
 !        every is done in pred_montecarlo
          else if(ab_mover%ionmov /= 31) then
-           call effective_potential_getHarmonicContributions(effective_potential,scfcv_args%results_gs%etotal,&
+           call effective_potential_getHarmonicContributions(effective_potential,&
+&                                             scfcv_args%results_gs%etotal,&
 &                                             scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
-&                                             ab_mover%natom,rprimd,xcart,comm)
+&                                             scfcv_args%results_gs%strten,ab_mover%natom,rprimd,&
+&                                             xcart,comm)
          end if
 #if defined HAVE_LOTF
        end if

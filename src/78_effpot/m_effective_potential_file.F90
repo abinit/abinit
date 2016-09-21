@@ -1242,6 +1242,7 @@ end subroutine effective_potential_file_getDim
   use m_effective_potential
   use m_epigene_dataset
   use m_ddb
+  use m_strain
   use m_crystal, only : crystal_t, crystal_free
   use m_dynmat, only : bigbx9
 
@@ -1277,79 +1278,81 @@ end subroutine effective_potential_file_getDim
 
   call effective_potential_file_getType(filename,filetype)
 
-  if (filetype==1) then 
-    if (.not.(present(inp))) then
-      write(message, '(4a)' )&
-&      ' effective_potential_file_read: you need to give input file to compute ',&
-&      'the response fonction from DDB file ',ch10
-      MSG_ERROR(message)
+  if (filetype/=0) then 
+
+    if(filetype ==1) then
+      if (.not.(present(inp))) then
+        write(message, '(4a)' )&
+&        ' effective_potential_file_read: you need to give input file to compute ',&
+&        'the response fonction from DDB file ',ch10
+        MSG_ERROR(message)
+      end if
+
+!     Read the DDB information, also perform some checks, and symmetrize partially the DDB
+      write(message, '(3a)' )' Read the DDB information of the reference',&
+ &      ' system and perform some checks',ch10
+      call wrtout(std_out,message,'COLL')
+      call wrtout(ab_out,message,'COLL')
+
+      call effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,comm)!
+
+!     In anaddb, inp%atifc is set to 1 2 3 ... natom (see anaddb help).
+!     Then in the next routine inp%atifc is convert with 0 or 1 (inp%atifc is now 1 1 1 1 0).
+!     In epigene the conversion is done directly in m_epigene_dataset.
+!     So in the next routine, we set natifc to 0 to ignore the conversion.
+!     To keep the intent(in) of the inp parameters, we need to use local variables:
+      ABI_ALLOCATE(atifc,(inp%natom))
+      atifc = inp%atifc
+
+      call ddb_from_file(ddb,filename,inp%brav,natom,0,atifc,Crystal,comm)
+
+!     And finaly, we can check if the value of atifc is not change...
+      if (.not.all(atifc.EQ.inp%atifc)) then
+        write(message, '(3a)' )&
+&        ' effective_potential_file_read: problem with atifc input variables ',&
+&        'in ddb_from_file',ch10
+        MSG_BUG(message)
+      end if
+      ABI_DEALLOCATE(atifc)
+!     Must read some value to initialze  array (nprt for ifc)
+      call bigbx9(inp%brav,dummy_cell,0,1,inp%ngqpt,inp%nqshft,nrpt,ddb%rprim,dummy_rpt)
+
+      call effective_potential_free(eff_pot)
+
+      call effective_potential_init(natom,inp%nph1l,nrpt,ntypat,eff_pot)
+
+!     Transfert the ddb to the effective potential
+      call ddb_to_effective_potential(Crystal,ddb, eff_pot,inp)
+
+
+!     If needed, print the effective potential into XML file
+      if (inp%prt_effpot>=3.or.inp%prt_effpot==-1) then
+        call effective_potential_print(eff_pot,-1)
+      end if
+
+    else if (filetype==2) then
+      
+      call effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,comm)
+      
+      call effective_potential_free(eff_pot)
+      
+      call effective_potential_init(natom,nph1l,nrpt,ntypat,eff_pot)
+      
+      call xml2effpot(eff_pot,filename)
+
+!     If needed, print the effective potential
+      call effective_potential_print(eff_pot,inp%prt_effpot)
     end if
 
-!   Read the DDB information, also perform some checks, and symmetrize partially the DDB
-    write(message, '(3a)' )' Read the DDB information of the reference',&
- &    ' system and perform some checks',ch10
-    call wrtout(std_out,message,'COLL')
-    call wrtout(ab_out,message,'COLL')
+!   Common initilisations
+!   Generate long rage interation for the effective potential for both type and generate suppercell
+    call effective_potential_generateDipDip(eff_pot,inp%n_cell,inp%dipdip,inp%asr,comm)
 
-    call effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,comm)!
-
-!   In anaddb, inp%atifc is set to 1 2 3 ... natom (see anaddb help).
-!   Then in the next routine inp%atifc is convert with 0 or 1 (inp%atifc is now 1 1 1 1 0).
-!   In epigene the conversion is done directly in m_epigene_dataset.
-!   So in the next routine, we set natifc to 0 to ignore the conversion.
-!   To keep the intent(in) of the inp parameters, we need to use local variables:
-    ABI_ALLOCATE(atifc,(inp%natom))
-    atifc = inp%atifc
-
-    call ddb_from_file(ddb,filename,inp%brav,natom,0,atifc,Crystal,comm)
-
-!   And finaly, we can check if the value of atifc is not change...
-    if (.not.all(atifc.EQ.inp%atifc)) then
-     write(message, '(a,a,a,a)' )&
-&      ' effective_potential_file_read: problem with atifc input variables ',&
-&      'in ddb_from_file',ch10
-     MSG_BUG(message)
-   end if
-   ABI_DEALLOCATE(atifc)
-!  Must read some value to initialze  array (nprt for ifc)
-   call bigbx9(inp%brav,dummy_cell,0,1,inp%ngqpt,inp%nqshft,nrpt,ddb%rprim,dummy_rpt)
-
-   call effective_potential_free(eff_pot)
-
-   call effective_potential_init(natom,inp%nph1l,nrpt,ntypat,eff_pot)
-
-!  Transfert the ddb to the effective potential
-   call ddb_to_effective_potential(Crystal,ddb, eff_pot,inp)
-
-!  Generate long rage interation for the effective potential
-   call effective_potential_generateSupercell(eff_pot,inp%n_cell,inp%dipdip,inp%asr,comm)
-
-!If needed, print the effective potential into XML file
-   if (inp%prt_effpot>=3.or.inp%prt_effpot==-1) then
-     call effective_potential_print(eff_pot,-1)
-   end if
-
- else if (filetype==2) then
-
-   call effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,comm)
-   
-   call effective_potential_free(eff_pot)
-   
-   call effective_potential_init(natom,nph1l,nrpt,ntypat,eff_pot)
-   
-   call xml2effpot(eff_pot,filename)
-
-!If needed, print the effective potential
-   call effective_potential_print(eff_pot,inp%prt_effpot)
-
-!  Generate long rage interation for the effective potential
-   call effective_potential_generateSupercell(eff_pot,inp%n_cell,inp%dipdip,inp%asr,comm)
-
- else
-     write(message, '(a,a,a,a)' )&
+  else
+    write(message, '(a,a,a,a)' )&
 &      ' The file ',trim(filename),' is not readable'
-     MSG_BUG(message)
-   end if
+    MSG_BUG(message)
+  end if
 
 end subroutine effective_potential_file_read
 !!***

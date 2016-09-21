@@ -46,7 +46,7 @@ module m_effective_potential
  public :: effective_potential_effpot2ddb
  public :: effective_potential_effpot2dynmat
  public :: effective_potential_free
- public :: effective_potential_generateSupercell
+ public :: effective_potential_generateDipDip
  public :: effective_potential_getDeltaEnergy
  public :: effective_potential_getHarmonicContributions
  public :: effective_potential_getForces
@@ -109,7 +109,7 @@ module m_effective_potential
 
    real(dp) :: elastic_constants(6,6)
 !     elastic_constant(6,6)
-!     Elastic tensor (Hartree)
+!     Elastic tensor (Hartree/bohr^3)
 
    real(dp) :: internal_stress(6)
 !     internal_stress(6)
@@ -121,6 +121,9 @@ module m_effective_potential
 
    logical :: has_3rd
 !     True : the 3rd order derivative is computed 
+
+   logical :: has_strain
+!     True : strain is apply
 
    type(strain_type) :: strain
 !     strain type
@@ -205,7 +208,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine effective_potential_init(natom,nph1l,nrpt,ntypat, eff_pot,name)
+subroutine effective_potential_init(natom,nph1l,nrpt,ntypat,eff_pot,name)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -273,6 +276,7 @@ subroutine effective_potential_init(natom,nph1l,nrpt,ntypat, eff_pot,name)
  eff_pot%internal_stress = zero
  eff_pot%external_stress = zero
  eff_pot%has_3rd = .false.
+ eff_pot%has_strain = .false.
 
 !Allocation of mass of the atoms array (atomic mass unit)
  ABI_ALLOCATE(eff_pot%amu,(ntypat))
@@ -410,6 +414,7 @@ subroutine effective_potential_free(eff_pot)
   eff_pot%internal_stress = zero
   eff_pot%external_stress = zero
   eff_pot%has_3rd = .false.
+  eff_pot%has_strain = .false. 
 
   if(allocated(eff_pot%typat))then
     eff_pot%typat=zero
@@ -491,10 +496,10 @@ subroutine effective_potential_free(eff_pot)
 end subroutine effective_potential_free
 !!***
 
-!****f* m_effective_potential/effective_potential_generateSupercell
+!****f* m_effective_potential/effective_potential_generateDipDip
 !!
 !! NAME
-!! effective_potential_generateSupercell
+!! effective_potential_generateDipDip
 !!
 !! FUNCTION
 !! Generate the supercell of the structure inside of the effective
@@ -520,7 +525,7 @@ end subroutine effective_potential_free
 !!
 !! SOURCE
  
-subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
+subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 
  use m_phonon_supercell
  use m_ewald
@@ -528,7 +533,7 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_generateSupercell'
+#define ABI_FUNC 'effective_potential_generateDipDip'
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_41_geometry
@@ -547,9 +552,10 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
 !scalar
  integer,parameter :: master=0
  integer :: first_coordinate
- integer :: ia,ib,ii,i1,i2,i3,irpt,irpt2,irpt_ref,jj,kk,ll,min1,min2,min3
+ integer :: ia,ib,ii,i1,i2,i3,ierr,irpt,irpt2,irpt_ref,jj,kk,ll,min1,min2,min3
  integer :: min1_cell,min2_cell,min3_cell,max1_cell,max2_cell,max3_cell
- integer :: max1,max2,max3,mu,my_rank,nu,nproc,second_coordinate,sumg0,nrpt
+ integer :: max1,max2,max3
+ integer :: mu,my_rank,nu,nproc,second_coordinate,sumg0,nrpt
  real(dp) :: d2asr,ucvol
  character(len=500) :: message
  logical :: short_range = .false.
@@ -569,6 +575,7 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
 !MPI variables
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  iam_master = (my_rank == master)
+ ierr=0
 
 !Check the size of the cell
  do ia=1,3
@@ -668,7 +675,7 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
 !  Print the new boundary
    write(message,'(5a,2I3,a,2I3,a,2I3,4a)') ch10,' New bound for ifc (long+short):',&
 &    ch10,ch10, " x=[",min1,max1,"], y=[",min2,max2,"] and z=[",min3,max3,"]",ch10,ch10,&
-&    " Computation of new dipole-dipole interaction."
+&    " Computation of new dipole-dipole interaction, should be parallelised :'(."
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
@@ -748,16 +755,6 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
            ifc_tmp%ewald_atmfrc(:,:,:,:,:,irpt) = &
 &            dyew(:,:,1:eff_pot%natom,:,eff_pot%natom+1:2*eff_pot%natom) + tol10
          end if
-
-!        Fill the short range part (calculated previously)
-         do irpt2=1,eff_pot%ifcs%nrpt
-           if(eff_pot%ifcs%cell(irpt2,1)==i1.and.&
-&             eff_pot%ifcs%cell(irpt2,2)==i2.and.&
-&             eff_pot%ifcs%cell(irpt2,3)==i3.and.&
-&             any(eff_pot%ifcs%short_atmfrc(:,:,:,:,:,irpt2) > tol9)) then
-             ifc_tmp%short_atmfrc(:,:,:,:,:,irpt) = eff_pot%ifcs%short_atmfrc(:,:,:,:,:,irpt2)
-           end if
-         end do
        end do
      end do
    end do
@@ -766,18 +763,36 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
    ABI_DEALLOCATE(zeff_tmp)
    ABI_DEALLOCATE(dyew)
 
-   
+!  Fill the short range part (calculated previously) only master
+   if(iam_master)then
+     do irpt=1,ifc_tmp%nrpt
+       do irpt2=1,eff_pot%ifcs%nrpt
+         if(eff_pot%ifcs%cell(irpt2,1)==ifc_tmp%cell(irpt,1).and.&
+&           eff_pot%ifcs%cell(irpt2,2)==ifc_tmp%cell(irpt,2).and.&
+&           eff_pot%ifcs%cell(irpt2,3)==ifc_tmp%cell(irpt,3).and.&
+&           any(eff_pot%ifcs%short_atmfrc(:,:,:,:,:,irpt2) > tol9)) then
+           ifc_tmp%short_atmfrc(:,:,:,:,:,irpt) = eff_pot%ifcs%short_atmfrc(:,:,:,:,:,irpt2)
+         end if
+       end do
+     end do
 !  Compute total ifc
-   ifc_tmp%atmfrc = ifc_tmp%short_atmfrc + ifc_tmp%ewald_atmfrc
+     ifc_tmp%atmfrc = ifc_tmp%short_atmfrc + ifc_tmp%ewald_atmfrc
+   end if
 
-!  set new ifc into effective potential
+!  Broadcast ifc
+   call xmpi_bcast (ifc_tmp%atmfrc, master, comm, ierr)
+   call xmpi_bcast (ifc_tmp%cell,   master, comm, ierr)
+   call xmpi_bcast (ifc_tmp%nrpt,   master, comm, ierr)
+   
+!  Copy ifc iton effective potential
    eff_pot%ifcs = ifc_tmp
- 
+
+   
    ABI_FREE(ifc_tmp%cell)
    ABI_FREE(ifc_tmp%short_atmfrc)
    ABI_FREE(ifc_tmp%ewald_atmfrc)
    ABI_FREE(ifc_tmp%atmfrc)
-   
+
  end if
 
  if(asr >= 0) then
@@ -847,9 +862,7 @@ subroutine effective_potential_generateSupercell(eff_pot,n_cell,option,asr,comm)
 !else
  !end if
  
-
- 
-end subroutine effective_potential_generateSupercell
+end subroutine effective_potential_generateDipDip
 !!***
 
 
@@ -872,7 +885,7 @@ end subroutine effective_potential_generateSupercell
 !! eff_pot
 !!
 !! PARENTS
-!!   effective_potential_generateSupercell
+!!   effective_potential_generateDipDip
 !!
 !! CHILDREN
 !!   
@@ -1543,7 +1556,9 @@ end subroutine effective_potential_print
 !! effective_potential_printSupercell
 !!
 !! FUNCTION
-!! Print the supercell of the effetive_potential
+!! Print the supercell of the effective_potential,
+!! or if present the supercell as input
+!! WARNING: need to be consistent with eff_pot
 !!
 !! INPUTS
 !! eff_pot = effective potential structure
@@ -1559,7 +1574,7 @@ end subroutine effective_potential_print
 !!
 !! SOURCE
  
-subroutine effective_potential_printSupercell(eff_pot)
+subroutine effective_potential_printSupercell(eff_pot,supercell)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1570,29 +1585,44 @@ subroutine effective_potential_printSupercell(eff_pot)
  use interfaces_41_geometry
 !End of the abilint section
 
-  implicit none
+ implicit none
 
 !Arguments ------------------------------------
 !scalars
 !array
-  type(effective_potential_type),intent(inout) :: eff_pot
+ type(effective_potential_type),target,intent(inout) :: eff_pot
+ type(supercell_type),optional,target,intent(in) :: supercell
 !Local variables-------------------------------
 !scalar
-  integer :: iatom,ii
-  character(len=500) :: message
+ integer :: iatom,ii
+ character(len=500) :: message
 !array
-  real(dp), allocatable :: xred(:,:)
+ real(dp), allocatable :: xred(:,:)
+ type(supercell_type),pointer :: supercell_tmp
 
 ! *************************************************************************
 
-  ABI_ALLOCATE(xred,(3,eff_pot%supercell%natom_supercell))
+ if(present(supercell)) then
+   supercell_tmp => supercell
+ else
+   supercell_tmp => eff_pot%supercell
+ end if
+
+ if(supercell_tmp%natom_supercell /= eff_pot%supercell%natom_supercell) then
+   write(message, '(3a)' )&
+&  ' There is not the same numbers of atoms in the two supercell',ch10,&
+&   'Action: modify the code'
+   MSG_BUG(message)
+ end if
+
+ ABI_ALLOCATE(xred,(3,supercell_tmp%natom_supercell))
 
 !**********************************************************************
 ! Write basics values 
 !**********************************************************************
 
  write (message, '(4a,I8,a)') ' Structure parameters of the supercell :',ch10,ch10,&
-                       '  natom ', eff_pot%supercell%natom_supercell,ch10
+                       '  natom ', supercell_tmp%natom_supercell,ch10
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
@@ -1616,9 +1646,9 @@ subroutine effective_potential_printSupercell(eff_pot)
  call wrtout(std_out,message,'COLL')
 
  write(message,*) ''
- do iatom = 1, eff_pot%supercell%natom_supercell
+ do iatom = 1, supercell_tmp%natom_supercell
    write (message, '(a,I5)') trim(message),&
-&         eff_pot%supercell%typat_supercell(eff_pot%supercell%atom_indexing_supercell(iatom))
+&         supercell_tmp%typat_supercell(supercell_tmp%atom_indexing_supercell(iatom))
    if (mod(iatom,12) == 0)then
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
@@ -1634,9 +1664,9 @@ subroutine effective_potential_printSupercell(eff_pot)
  call wrtout(std_out,message,'COLL')
   
  do ii = 1,3 
-   write(message,'(3E23.14,3E23.14,3E23.14)') eff_pot%supercell%rprimd_supercell(1,ii),&
-&                                             eff_pot%supercell%rprimd_supercell(2,ii),&
-&                                             eff_pot%supercell%rprimd_supercell(3,ii)
+   write(message,'(3E23.14,3E23.14,3E23.14)') supercell_tmp%rprimd_supercell(1,ii),&
+&                                             supercell_tmp%rprimd_supercell(2,ii),&
+&                                             supercell_tmp%rprimd_supercell(3,ii)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
  end do
@@ -1644,19 +1674,19 @@ subroutine effective_potential_printSupercell(eff_pot)
   write (message, '(2a)') ch10,'  xcart'
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
-  do iatom = 1, eff_pot%supercell%natom_supercell
-    write (message, '(3E23.14)') eff_pot%supercell%xcart_supercell(1,iatom),&
-&                                eff_pot%supercell%xcart_supercell(2,iatom),&
-&                                eff_pot%supercell%xcart_supercell(3,iatom)
+  do iatom = 1, supercell_tmp%natom_supercell
+    write (message, '(3E23.14)') supercell_tmp%xcart_supercell(1,iatom),&
+&                                supercell_tmp%xcart_supercell(2,iatom),&
+&                                supercell_tmp%xcart_supercell(3,iatom)
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
   end do
-  call xcart2xred(eff_pot%supercell%natom_supercell,eff_pot%supercell%rprimd_supercell,&
- &                eff_pot%supercell%xcart_supercell,xred)
+  call xcart2xred(supercell_tmp%natom_supercell,supercell_tmp%rprimd_supercell,&
+ &                supercell_tmp%xcart_supercell,xred)
   write (message, '(2a)') ch10,'  xred'
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
-  do iatom = 1, eff_pot%supercell%natom_supercell
+  do iatom = 1, supercell_tmp%natom_supercell
     write (message, '(3E23.14)') xred(1,iatom),&
 &                                xred(2,iatom),&
 &                                xred(3,iatom)
@@ -1786,7 +1816,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
   WRITE(unit_xml,'("  </epsilon_inf>")')
   
   WRITE(unit_xml,'("  <elastic units=""hartree"">")')
-  WRITE(unit_xml,'(6(E23.14))') (eff_pot%elastic_constants)
+  WRITE(unit_xml,'(6(E23.14))') (eff_pot%elastic_constants*eff_pot%ucvol)
   WRITE(unit_xml,'("  </elastic>")')
   
   do ia=1,eff_pot%natom
@@ -2000,7 +2030,7 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
  use m_profiling_abi  
  use m_epigene_dataset, only : epigene_dataset_type
  use m_nctk
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
  use netcdf
 #endif
 
@@ -2036,7 +2066,7 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
 
 ! *************************************************************************
 
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
 
  strain(:,1) = (/1,0,0,0,0,0,0,0,0/)
  strain(:,2) = (/0,0,0,0,1,0,0,0,0/)
@@ -2496,8 +2526,8 @@ end subroutine effective_potential_getForces
 !!
 !! SOURCE
  
-subroutine effective_potential_getHarmonicContributions(eff_pot,energy,fcart,fred,natom,rprimd,xcart,&
-&                                                   comm,displacement,strain1,strain2,external_stress)
+subroutine effective_potential_getHarmonicContributions(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+&                                              xcart,comm,displacement,strain1,strain2,external_stress)
 
   use m_strain
 
@@ -2522,12 +2552,15 @@ subroutine effective_potential_getHarmonicContributions(eff_pot,energy,fcart,fre
   real(dp),intent(in),optional :: displacement(3,eff_pot%supercell%natom_supercell)
   real(dp),intent(in),optional :: external_stress(6)
   real(dp),intent(out) :: energy
-  real(dp),intent(out) :: fcart(3,natom),fred(3,natom)
+  real(dp),intent(out) :: fcart(3,eff_pot%supercell%natom_supercell)
+  real(dp),intent(out) :: fred(3,eff_pot%supercell%natom_supercell)
+  real(dp),intent(out) :: strten(6)
 !Local variables-------------------------------
 !scalar
-  integer :: ii,ncell
-  real(dp):: elastic_part,ifc_part
+  integer :: ii,ncell,ia,ib,nu,mu,irpt
+  real(dp):: energy_part,ucvol
   character(len=500) :: message
+  logical :: has_strain = .FALSE.
   integer :: nproc,my_rank
   logical :: iam_master
   integer, parameter:: master = 0
@@ -2535,7 +2568,9 @@ subroutine effective_potential_getHarmonicContributions(eff_pot,energy,fcart,fre
   type(strain_type) :: strain
   integer  :: supercell(3)
   real(dp) :: strain_tmp1(6),strain_tmp2(6)
+  real(dp) :: fcart_part(3,eff_pot%supercell%natom_supercell)
   real(dp) :: external_stress_tmp(6)
+  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
   real(dp) :: xred(3,eff_pot%supercell%natom_supercell)
   real(dp) :: xred_supercell(3,eff_pot%supercell%natom_supercell)
   real(dp) :: disp_tmp1(3,eff_pot%supercell%natom_supercell)
@@ -2575,8 +2610,14 @@ subroutine effective_potential_getHarmonicContributions(eff_pot,energy,fcart,fre
     call wrtout(ab_out,message,'COLL')
   end if
 
+  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
   supercell(1:3) = eff_pot%supercell%qphon(1:3)
   ncell          = product(eff_pot%supercell%qphon)
+  fcart          = zero
+  energy         = zero
+  strten         = zero
+  strten         = zero
 
 !------------------------------------
 ! 1 - Transfert the reference energy
@@ -2591,7 +2632,9 @@ subroutine effective_potential_getHarmonicContributions(eff_pot,energy,fcart,fre
 ! 2 - Computation of the IFC part :
 !------------------------------------
 
+  energy_part = zero; fcart_part=zero
   disp_tmp1(:,:) = zero
+
   if (present(displacement)) then
     disp_tmp1(:,:) = displacement(:,:)
   else
@@ -2600,68 +2643,95 @@ subroutine effective_potential_getHarmonicContributions(eff_pot,energy,fcart,fre
     end do
   end if
 
-  call ifc_contribution(eff_pot,disp_tmp1,ifc_part,fcart)
+  call ifc_contribution(eff_pot,disp_tmp1,energy_part,fcart_part)
 
-  write(message, '(a,1ES24.16,a)' ) ' Energy of the ifc part :',ifc_part,' Hartree'
+  write(message, '(a,1ES24.16,a)' ) ' Energy of the ifc part :',energy_part,' Hartree'
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
 
-  if(ifc_part < zero)then
+  if(energy_part < zero)then
     write(message, '(a)' )&
 &        'The harmonic part is negative, the structure is not stable.'
        MSG_WARNING(message)
 !       if(abs(ifc_part) > tol10) stop
   end if
 
-  energy = energy + ifc_part
+  energy = energy + energy_part
+  fcart  = fcart  + fcart_part
+
 
 !------------------------------------
 ! 3 - Computation of the elastic part of the energy :
 !------------------------------------
+  energy_part = zero; fcart_part=zero
   strain_tmp1(:) = zero
   strain_tmp2(:) = zero
-  ! Try to find the strain from argument
-  if (present(strain1).and.(present(strain2))) then
+!  Try to find the strain into the input file
+  if (eff_pot%has_strain) then
+    do ii=1,3
+      strain_tmp1(ii) = eff_pot%strain%strain(ii,ii)
+    end do
+    strain_tmp1(4) = eff_pot%strain%strain(2,3) * 2
+    strain_tmp1(5) = eff_pot%strain%strain(3,1) * 2
+    strain_tmp1(6) = eff_pot%strain%strain(2,1) * 2
+    
+    strain_tmp2(:) = strain_tmp1(:)
+    has_strain = .TRUE.
+! Try to find the strain from argument 
+  else  if (present(strain1).and.(present(strain2))) then
     strain_tmp1(:) = strain1(:)
     strain_tmp2(:) = strain2(:)
+    has_strain = .TRUE.
   else if (present(strain1).and.(.not.present(strain2))) then
     strain_tmp1(:) = strain1(:)
     strain_tmp2(:) = strain1(:)
+    has_strain = .TRUE.
   else
     ! else => calculation of the strain 
-    call strain_get(rprimd,eff_pot%supercell%rprimd_supercell,strain)
+    call strain_get(strain,rprim=eff_pot%supercell%rprimd_supercell,rprim_def=rprimd)
+    call strain_print(strain)
     do ii=1,3
       strain_tmp1(ii) = strain%strain(ii,ii)
     end do
-      strain_tmp1(4) = strain%strain(2,3)
-      strain_tmp1(5) = strain%strain(3,1)
-      strain_tmp1(6) = strain%strain(2,1)
+      strain_tmp1(4) = strain%strain(2,3) * 2
+      strain_tmp1(5) = strain%strain(3,1) * 2
+      strain_tmp1(6) = strain%strain(2,1) * 2
 
       strain_tmp2(:) = strain_tmp1(:)
+      has_strain = .TRUE.
   end if
 
+! if external stress is present
   if (present(external_stress)) then
     external_stress_tmp(:) = external_stress(:)
+    has_strain = .TRUE.
   else
     external_stress_tmp(:) = zero
   end if
 
-  elastic_part = elastic_contribution(eff_pot,ncell,strain_tmp1,strain_tmp2,&
-&                               external_stress=external_stress_tmp)
+  if(has_strain)  then 
+   call elastic_contribution(eff_pot,disp_tmp1,energy_part,fcart_part,&
+&                             ncell,strten,strain_tmp1,strain_tmp2,&
+&                             external_stress=external_stress_tmp)
+  end if
 
-  write(message, '(2a,1ES24.16,a)' ) ch10,' Energy of the elastic part :',elastic_part,' Hartree'
+  write(message, '(2a,1ES24.16,a)' ) ch10,' Energy of the elastic part :',energy_part,' Hartree'
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
 
-  energy = energy + elastic_part
+  energy = energy + energy_part
+  fcart  = fcart  + fcart_part
 
 ! 4 - Print the total energy
   write(message, '(a,a,1ES24.16,a)' ) ch10,' Total energy :',energy,' Hartree'
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
 
+! divide stess tensor by ucvol
+  strten = strten / ucvol
 
-! convert forces into reduced coordinates
+! convert forces into reduced coordinates and multiply by -1
+  fcart = -1 * fcart
   call fcart2fred(fcart,fred,rprimd,natom)
 
   write(message, '(a,a,a)' ) ch10,' end get_HarmonicContributions.F90',ch10
@@ -2690,7 +2760,8 @@ end subroutine effective_potential_getHarmonicContributions
 !!
 !! SOURCE
 !!
-function elastic_contribution(eff_pot,ncell,strain1,strain2,external_stress) result(energy)
+subroutine elastic_contribution(eff_pot,disp,energy,forces,ncell,strten,strain1,strain2,&
+&                                             external_stress)
 
 !Arguments ------------------------------------
 ! scalar
@@ -2701,30 +2772,64 @@ function elastic_contribution(eff_pot,ncell,strain1,strain2,external_stress) res
 #define ABI_FUNC 'elastic_contribution'
 !End of the abilint section
 
-  real(dp) energy
+  real(dp),intent(out):: energy
   integer, intent(in) :: ncell
 ! array
   type(effective_potential_type), intent(in) :: eff_pot
+  real(dp),intent(out):: strten(6)
+  real(dp),intent(out):: forces(3,eff_pot%supercell%natom_supercell)
+  real(dp),intent(in) :: disp(3,eff_pot%supercell%natom_supercell)
   real(dp),intent(in) :: strain1(6),strain2(6)
   real(dp),optional,intent(in) :: external_stress(6)
+
 !Local variables-------------------------------
 ! scalar
+  integer :: ia,ii,jj,mu
 ! array
+  real(dp) :: temp(3)
 ! *************************************************************************
 
   energy = zero
+  forces = zero
+  strten = zero
 
+!1- Part due to elastic constants
   energy = half*dot_product(matmul(strain1,eff_pot%elastic_constants),strain2)
 
-  energy = energy + dot_product(eff_pot%internal_stress, strain1)
+!2- Part due to extenal stress
+!  if(present(external_stress)) then
+!    energy = energy - dot_product(external_stress, strain1)
+!  end if
 
-  if(present(external_stress)) then
-    energy = energy - dot_product(external_stress, strain1)
-  end if
-
+!3- Multiplicatin by the number of cell
   energy = energy * ncell
 
-end function elastic_contribution
+!4-Part due to the internat strain
+  ii = 1
+  do ia = 1,eff_pot%supercell%natom_supercell
+    do mu = 1,3
+      temp(mu) = dot_product(strain1,eff_pot%internal_strain(:,ii,mu))
+    end do
+    forces(:,ia) = forces(:,ia) + temp(:)
+    energy = energy +  half*dot_product(temp,disp(:,ia))
+    ii = ii +1 
+!   Reset to 1 if the number of atoms is superior than in the initial cell
+    if(ii==eff_pot%natom+1) ii = 1
+  end do
+
+ strten = strten + matmul(eff_pot%elastic_constants(:,:),strain1(:))
+
+  jj = 1
+  do ii = 1,6
+    do  ia =1,eff_pot%supercell%natom_supercell
+        strten(ii) = strten(ii) + dot_product(eff_pot%internal_strain(ii,jj,:),disp(:,ia))
+      jj = jj +1
+      if(jj==eff_pot%natom+1) jj = 1
+    end do
+  end do
+ 
+
+end subroutine  elastic_contribution
 !!***
 
 !!****f* m_effective_potential/ifc_contribution
@@ -2746,7 +2851,6 @@ end function elastic_contribution
 subroutine ifc_contribution(eff_pot,disp,energy,fcart)
 
 !Arguments ------------------------------------
-! scalar
 ! scalar
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2816,7 +2920,7 @@ subroutine ifc_contribution(eff_pot,disp,energy,fcart)
 !         accumule energy
           energy = energy + half * dot_product(tmp,disp(:,ii))
 !         acumule forces
-          fcart(:,ii) =  fcart(:,ii)  -   tmp(:)
+          fcart(:,ii) =  fcart(:,ii)  +   tmp(:)
 
           ii = ii + 1
         end do

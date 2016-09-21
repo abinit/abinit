@@ -70,7 +70,7 @@ module m_epigene_dataset
   integer :: ifcana
   integer :: ifcflag
   integer :: ifcout
-  integer :: monte_carlo
+  integer :: dynamics
   integer :: natifc
   integer :: natom
   integer :: ntime
@@ -94,12 +94,15 @@ module m_epigene_dataset
   integer :: kptrlatt_fine(3,3)
 
 ! Real(dp)
+  real(dp) :: temperature
   real(dp) :: delta_df
   real(dp) :: energy_reference
   real(dp) :: rifcsph
 
+  real(dp) :: acell(3)
+  real(dp) :: strain(6)
+  real(dp) :: rprim(3,3)
   real(dp) :: q1shft(3,4)
-  real(dp) :: q2shft(3)
 
 ! Integer arrays
   integer, allocatable :: atifc(:)
@@ -389,14 +392,14 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
  end if
 
 
- epigene_dtset%monte_carlo=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'monte_carlo',tread,'INT')
- if(tread==1) epigene_dtset%monte_carlo=intarr(1)
- if(epigene_dtset%monte_carlo<0.or.epigene_dtset%monte_carlo>2)then
+ epigene_dtset%dynamics=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dynamics',tread,'INT')
+ if(tread==1) epigene_dtset%dynamics=intarr(1)
+ if(epigene_dtset%dynamics<0.or.epigene_dtset%dynamics>2)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'monte_carlo is',epigene_dtset%monte_carlo,', but the only allowed values',ch10,&
+&   'dynamics is',epigene_dtset%dynamics,', but the only allowed values',ch10,&
 &   'are 0 or  1.',ch10,&
-&   'Action: correct monte_carlo in your input file.'
+&   'Action: correct dynamics in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -547,6 +550,17 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+!Q
+ epigene_dtset%qrefine=1 ! default is no refinement
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'qrefine',tread,'INT')
+ if(tread==1) epigene_dtset%qrefine = intarr(1)
+ if(epigene_dtset%qrefine < 1) then
+   write(message, '(a,i0,a,a,a,a,a)' )&
+&   'qrefine is',epigene_dtset%qrefine,' The only allowed values',ch10,&
+&   'are integers >= 1 giving the refinement of the ngqpt grid',ch10,&
+&   'Action: correct qrefine in your input file.'
+   MSG_ERROR(message)
+ end if
 
 !R
  epigene_dtset%rfmeth=1
@@ -583,6 +597,16 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
  end if
 
 !T
+ epigene_dtset%temperature=325
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'temperature',tread,'DPR')
+ if(tread==1) epigene_dtset%temperature=dprarr(1)
+ if(epigene_dtset%temperature<=0)then
+   write(message, '(a,f10.1,a,a,a,a,a)' )&
+&   'Temperature is ',epigene_dtset%temperature,'. The only allowed values',ch10,&
+&   'are positives values.',ch10,&
+&   'Action: correct Temperature in your input file.'
+   MSG_ERROR(message)
+ end if
 
 !U
 
@@ -605,6 +629,22 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
 !=======================================================================
 
 !A
+ epigene_dtset%acell= one
+ if(3>marr)then
+   marr=3
+   ABI_DEALLOCATE(intarr)
+   ABI_DEALLOCATE(dprarr)
+   ABI_ALLOCATE(intarr,(marr))
+   ABI_ALLOCATE(dprarr,(marr))
+ end if
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'acell',tread,'DPR')
+ if(tread==1) epigene_dtset%acell(1:3)= dprarr(1:3)
+ if(any(epigene_dtset%acell<=tol10))then
+    write(message, '(3a)' )&
+&       'There is negative on zero value for cell ',ch10,&
+&       'Action: change acell in your input file.'
+      MSG_ERROR(message) 
+ end if
 
  ABI_ALLOCATE(epigene_dtset%atifc,(natom))
  epigene_dtset%atifc(:)=zero
@@ -758,8 +798,38 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
  end if
 
 !R
-
+ if(9>marr)then
+   marr=9
+   ABI_DEALLOCATE(intarr)
+   ABI_DEALLOCATE(dprarr)
+   ABI_ALLOCATE(intarr,(marr))
+   ABI_ALLOCATE(dprarr,(marr))
+ end if
+ epigene_dtset%rprim(:,:)= zero
+ call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),'rprim',tread,'DPR')
+ if(tread==1) then
+   epigene_dtset%rprim(1:3,1:3)= reshape(dprarr(1:9),(/3,3/))
+! check new rprimd
+   if(all(epigene_dtset%rprim(1,:)==zero).or.&
+&    all(epigene_dtset%rprim(2,:)==zero).or.all(epigene_dtset%rprim(3,:)==zero)) then
+     write(message, '(3a)' )&
+&  ' There is a problem with rprim',ch10,&
+&   'Action: correct rprim'
+     MSG_BUG(message)
+   end if
+ end if
 !S
+
+ if(6>marr)then
+   marr=6
+   ABI_DEALLOCATE(intarr)
+   ABI_DEALLOCATE(dprarr)
+   ABI_ALLOCATE(intarr,(marr))
+   ABI_ALLOCATE(dprarr,(marr))
+ end if
+ epigene_dtset%strain(:)= zero
+ call intagm(dprarr,intarr,jdtset,marr,6,string(1:lenstr),'strain',tread,'DPR')
+ if(tread==1) epigene_dtset%strain(1:6)= dprarr(1:6)
 
 !T
 
@@ -810,6 +880,15 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
 &   'Action: correct qrefine in your input file.'
    MSG_ERROR(message)
  end if
+
+! check new rprimd
+ if(all(epigene_dtset%acell(:) > one).and.all(epigene_dtset%rprim(:,:)==zero))then
+   write(message, '(3a)' )&
+&         ' acell is defined but there is no rprim',ch10,&
+&         'Action: add rprim input'
+   MSG_BUG(message)
+ end if
+
 
 end subroutine invars10
 !!***
@@ -878,6 +957,12 @@ subroutine outvars_epigene (epigene_dtset,nunit)
    if(epigene_dtset%prt_phfrq/=0)write(nunit,'(3x,a9,3i10)')'prt_phfrq',epigene_dtset%prt_phfrq
    if(epigene_dtset%prt_3rd/=0)write(nunit,'(3x,a9,3i10)')'  prt_3rd',epigene_dtset%prt_3rd
    if(epigene_dtset%prt_3rd==2)write(nunit,'(3x,a9,3es8.2)')'delta_df',epigene_dtset%delta_df
+ end if
+
+ if(epigene_dtset%dynamics/=0)then
+   write(nunit,'(a)')' Molecular Dynamics :'
+   if(epigene_dtset%ifcflag/=0)write(nunit,'(3x,a9,3F10.1)')'     temp',epigene_dtset%temperature
+   if(epigene_dtset%ifcflag/=0)write(nunit,'(3x,a9,3i10)')'    ncell',epigene_dtset%n_cell
  end if
 
 !Write the general information

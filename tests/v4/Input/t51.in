@@ -10,7 +10,7 @@ nlines 4
     #Description of the points in q space :
 qpoint_name gamma X M gamma R
     #Number of q points for each line :
-nqline 10 10 10 10 10
+nqline 10 10 10 11
     #Scale factor for each line :
 scale 1.0 1.0 1.41 1.73
     #COLOR DEFINITION :
