@@ -434,7 +434,7 @@ if (gs_hamkq%usecprj==1.and.copt==0) use_GS_cwaveprj=1
      if (sij_opt==1) then
 !$OMP PARALLEL DO
        do ipw=1,npw1*my_nspinor
-         gh1c(:,ipw)=zero
+         gs1c(:,ipw)=zero
        end do
      end if
    end if
@@ -533,7 +533,7 @@ if (gs_hamkq%usecprj==1.and.copt==0) use_GS_cwaveprj=1
      if (sij_opt==1) then
 !$OMP PARALLEL DO
        do ipw=1,npw1*my_nspinor
-         gh1c(:,ipw)=zero
+         gs1c(:,ipw)=zero
        end do
      end if
      if (use_GS_cwaveprj==0) then
@@ -558,7 +558,7 @@ if (gs_hamkq%usecprj==1.and.copt==0) use_GS_cwaveprj=1
    if (sij_opt==1) then
 !$OMP PARALLEL DO
      do ipw=1,npw1*my_nspinor
-       gh1c(:,ipw)=zero
+       gs1c(:,ipw)=zero
      end do
    end if
 
@@ -625,7 +625,7 @@ if (gs_hamkq%usecprj==1.and.copt==0) use_GS_cwaveprj=1
      if (sij_opt==1) then
 !$OMP PARALLEL DO
        do ipw=1,npw1*my_nspinor
-         gh1c(:,ipw)=zero
+         gs1c(:,ipw)=zero
        end do
      end if
    end if
@@ -643,7 +643,7 @@ if (gs_hamkq%usecprj==1.and.copt==0) use_GS_cwaveprj=1
    if (sij_opt/=0) then
 !$OMP PARALLEL DO
      do ipw=1,npw1*my_nspinor
-       gh1c(:,ipw)=zero
+       gs1c(:,ipw)=zero
      end do
    end if
 
