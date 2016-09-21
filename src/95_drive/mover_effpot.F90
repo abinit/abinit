@@ -261,6 +261,8 @@ implicit none
 !  Set the pointers of scfcv_args
    zero_integer = 0
    scfcv_args%dtset     => dtset
+   ABI_ALLOCATE(indsym,(4,dtset%nsym,dtset%natom))
+   indsym = zero
    scfcv_args%indsym => indsym
    scfcv_args%mpi_enreg => mpi_enreg
    scfcv_args%ndtpawuj  => zero_integer

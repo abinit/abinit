@@ -84,6 +84,7 @@ program epigene
  type(epigene_dataset_type) :: inp
  type(effective_potential_type),target :: reference_effective_potential
 !TEST_AM
+ integer :: natom_sp
  real(dp),allocatable :: dynmat(:,:,:,:,:)
 !******************************************************************
 
@@ -225,8 +226,8 @@ program epigene
 !   call effective_potential_writeXML(reference_effective_potential,1,filename=name)
 ! just for TEST
 !   if(inp%prt_phfrq > 0) then
-!     ABI_ALLOCATE(dynmat,(2,3,reference_effective_potential%supercell%natom_supercell,3,reference_effective_potential%supercell%natom_supercell))
-
+!     natom_sp = reference_effective_potential%supercell%natom_supercell
+!     ABI_ALLOCATE(dynmat,(2,3,natom_sp,3,natom_sp))
 !     call effective_potential_effpot2dynmat(dynmat,inp%delta_df,reference_effective_potential,&
 !&                                           reference_effective_potential%supercell%natom_supercell,&
 !&                                           int(reference_effective_potential%supercell%qphon),3)
