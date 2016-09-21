@@ -532,11 +532,13 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
    ! Write the netCDF file.
    call appdig(ipc,dtfil%fnameabo_gkk,gkkfilnam)
    fname = strcat(gkkfilnam,".nc")
+#ifdef HAVE_TRIO_NETCDF
    NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
    NCF_CHECK(crystal_ncwrite(cryst, ncid))
    NCF_CHECK(ebands_ncwrite(ebands_k, ncid))
    call gkk_ncwrite(gkk2d,qpt,1.0_dp, ncid)
    NCF_CHECK(nf90_close(ncid))
+#endif
 
    ! Free memory
    call gkk_free(gkk2d)

@@ -806,6 +806,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%ph_nqshift = 1
    dtsets(idtset)%ph_smear = 0.00002_dp
    dtsets(idtset)%ddb_ngqpt = [0, 0, 0]
+   dtsets(idtset)%ddb_shiftq(:) = zero
 
 ! JB:UNINITIALIZED VALUES (not found in this file neither indefo1)
 ! They might be initialized somewhereelse, I don't know.

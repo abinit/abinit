@@ -896,6 +896,7 @@ type dataset_type
  real(dp) :: ph_wstep
  real(dp) :: ph_smear
  integer :: ddb_ngqpt(3)
+ real(dp) :: ddb_shiftq(3)
 !END EPH
 
  end type dataset_type

@@ -196,6 +196,7 @@ subroutine dtset_copy(dtout, dtin)
  if (allocated(dtin%ph_qshift)) call alloc_copy(dtin%ph_qshift, dtout%ph_qshift)
  dtout%ph_smear          = dtin%ph_smear
  dtout%ddb_ngqpt         = dtin%ddb_ngqpt
+ dtout%ddb_shiftq        = dtin%ddb_shiftq
 
  dtout%ph_ndivsm          = dtin%ph_ndivsm
  dtout%ph_nqpath          = dtin%ph_nqpath
