@@ -194,21 +194,18 @@ type(epjdos_t) function epjdos_from_dataset(dtset) result(new)
    new%mbesslang = 0
  end if
 
- ABI_CALLOC(new%fractions, (dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
+ ABI_MALLOC(new%fractions, (dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
+ new%fractions = zero
  if (new%prtdosm>=1 .or. new%fatbands_flag==1) then
-   ABI_CALLOC(new%fractions_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang))
-   ABI_CALLOC(new%fractions_average_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang))
- !else
- !  ABI_MALLOC(new%fractions_m, (0,0,0,0))
- !  ABI_MALLOC(new%fractions_average_m, (0,0,0,0))
+   ABI_MALLOC(new%fractions_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang))
+   ABI_MALLOC(new%fractions_average_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang))
+   new%fractions_m = zero; new%fractions_average_m = zero
  end if
 
  if (dtset%usepaw==1 .and. new%partial_dos_flag==1) then
-   ABI_CALLOC(new%fractions_paw1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
-   ABI_CALLOC(new%fractions_pawt1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
- !else
- !  ABI_MALLOC(new%fractions_paw1,(0,0,0,0))
- !  ABI_MALLOC(new%fractions_pawt1,(0,0,0,0))
+   ABI_MALLOC(new%fractions_paw1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
+   ABI_MALLOC(new%fractions_pawt1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
+   new%fractions_pawt1 = zero; new%fractions_pawt1 = zero
  end if
 
 end function epjdos_from_dataset
@@ -2516,7 +2513,6 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
      NCF_CHECK(nf90_put_var(ncid, vid("xredsph_extra"), dtset%xredsph_extra(:, 1:dtset%natsph_extra)))
    end if
  end if
- !return
 
  if (allocated(dos%fractions_m)) then
    NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions_m"), dos%fractions_m))

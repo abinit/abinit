@@ -851,11 +851,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    end if
 
 #ifdef HAVE_NETCDF
-   ! master writes fabands file here so that also NC pseudos are supported.
-   !if (me == master) then
-   if (.False.) then
-   !if ((prtdosm>=1.or.dos%fatbands_flag==1) .and. me == master) then ! TODO: Recheck this.
-   !if ((dtset%pawfatbnd>0.and.dos%fatbands_flag==1) .and. me == master) then
+   !if (.False.) then
+   if (me == master) then
      fname = trim(dtfil%filnam_ds(4))//'_FATBANDS.nc'
      NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
      call fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid)
