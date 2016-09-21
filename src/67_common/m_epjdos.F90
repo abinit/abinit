@@ -1579,7 +1579,7 @@ end subroutine dos_degeneratewfs
 !! SOURCE
 
 subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enreg,&
-&  mpw,natsph,ntypat,typat,npw_k,ph3d,prtsphere,&
+&  mpw,natsph,npw_k,ph3d,prtsphere,&
 &  rint,rmax,rc_ylm,sum_1ll_1atom,sum_1lm_1atom,ucvol,ylm,znucl_sph)
 
 
@@ -1594,11 +1594,11 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istwfk,mlang,mpw,natsph,npw_k,nradintmax
- integer,intent(in) :: prtsphere,rc_ylm,ntypat
+ integer,intent(in) :: prtsphere,rc_ylm
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
- integer,intent(in) :: nradint(natsph),typat(natsph)
+ integer,intent(in) :: nradint(natsph)
  real(dp),intent(in) :: bess_fit(mpw,nradintmax,mlang),cg_1band(2,npw_k)
  real(dp),intent(in) :: ph3d(2,npw_k,natsph),rint(nradintmax)
  real(dp),intent(in) :: rmax(natsph),ylm(mpw,mlang*mlang)
@@ -1609,9 +1609,9 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
 !Local variables-------------------------------
 !scalars
  integer,parameter :: option2=2 ! option for dotprod_g
- integer :: ilm,iat,itypat,ipw,ixint,ll,mm,il,im,jlm, ierr
+ integer :: ilm,iat,ipw,ixint,ll,mm,il,jlm, ierr
  real(dp),parameter :: invsqrt2=one/sqrt2
- real(dp) :: doti, dotr, sum_all, integ, dr, llsign2, fact
+ real(dp) :: doti, dotr, sum_all, dr, fact
  type(atomdata_t) :: atom
 !arrays
  integer :: ilang(mlang**2)
@@ -2311,7 +2311,7 @@ subroutine prtfatbands(dos, dtset,fildata,fermie,eigen,pawfatbnd,pawtab)
 !--------------  WRITE FATBANDS IN FILES
  if (pawfatbnd>0) then
    ABI_ALLOCATE(eigenvalues,(nkpt,mband,dtset%nsppol))
-   band_index=0.d0
+   band_index=0
    do isppol=1,dtset%nsppol
      do ikpt=1,nkpt
        nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
