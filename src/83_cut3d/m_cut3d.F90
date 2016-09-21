@@ -156,7 +156,7 @@ subroutine cut3d_hirsh(grid_den,natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion
      read(temp_unit, *) param1, param2
      do ipoint=1,mpoint
 !      Either the file is finished
-       read(temp_unit, *, end = 888) xx,yy
+       read(temp_unit, *, end=888) xx,yy
        radii(ipoint,itypat)=xx
        aeden(ipoint,itypat)=yy
 !      Or the density is lower than the minimal significant value
@@ -528,7 +528,7 @@ end subroutine cut3d_hirsh
    write(std_out,*) '   or 2) for a line between two crystallographic-defined points '
    write(std_out,*) '   or 3) for a line defined by its direction in cartesion coordinates'
    write(std_out,*) '   or 4) for a line defined by its direction in crystallographic coordinates'
-   read(*,*) inpopt
+   read(std_in,*) inpopt
    write(std_out,*) ' You typed ',inpopt,ch10
    if (inpopt==1 .or. inpopt ==2 .or. inpopt==3 .or. inpopt==4) okline=1
  end do
@@ -537,13 +537,13 @@ end subroutine cut3d_hirsh
  if (inpopt==1) then
    write(std_out,*) ' Type the first point coordinates (Bohrs):'
    write(std_out,*) '    -> X-dir   Y-dir   Z-dir:'
-   read(*,*) x1
+   read(std_in,*) x1
    write(std_out,'(a,3es16.6,a)') ' You typed ',x1,ch10
    call reduce(r1,x1,rprimd)
 
    write(std_out,*) ' Type the second point coordinates (Bohrs):'
    write(std_out,*) '    -> X-dir   Y-dir   Z-dir:'
-   read(*,*) x2
+   read(std_in,*) x2
    write(std_out,'(a,3es16.6,a)') ' You typed ',x2,ch10
    call reduce(r2,x2,rprimd)
  end if
@@ -551,12 +551,12 @@ end subroutine cut3d_hirsh
  if (inpopt==2) then
    write(std_out,*) ' Type the first point coordinates (fractional):'
    write(std_out,*) '    -> X-dir   Y-dir   Z-dir:'
-   read(*,*) r1
+   read(std_in,*) r1
    write(std_out,'(a,3es16.6,a)') ' You typed ',r1,ch10
 
    write(std_out,*) ' Type the second point coordinates (fractional):'
    write(std_out,*) '    -> X-dir   Y-dir   Z-dir:'
-   read(*,*) r2
+   read(std_in,*) r2
    write(std_out,'(a,3es16.6,a)') ' You typed ',r2,ch10
  end if
 
@@ -564,7 +564,7 @@ end subroutine cut3d_hirsh
 
    write(std_out,*) 'Please enter now the line direction:'
    write(std_out,*) '    -> X-dir   Y-dir   Z-dir:'
-   read(*,*) x2
+   read(std_in,*) x2
    write(std_out,'(a,3es16.6,a)') 'The line direction is:',x2(1),x2(2),x2(3),ch10
 
    if (inpopt == 4) then
@@ -578,11 +578,11 @@ end subroutine cut3d_hirsh
    write(std_out,*) 'Enter now the central point of line:'
    write(std_out,*) 'Type 1) for cartesian coordinates'
    write(std_out,*) '  or 2) for crystallographic coordinates'
-   read(*,*) inpopt2
+   read(std_in,*) inpopt2
    if (inpopt2==1 .or. inpopt2==2) then
      write(std_out,*) 'Type the point coordinates:'
      write(std_out,*) '    -> X-Coord   Y-Coord   Z-Coord:'
-     read(*,*) cent
+     read(std_in,*) cent
      write(std_out,'(a,3es16.6,a)') 'Central point coordinates:', cent(1),cent(2),cent(3),ch10
      if (inpopt2==2) then
        rcart=matmul(cent,rprimd)
@@ -590,7 +590,7 @@ end subroutine cut3d_hirsh
        write(std_out,'(a,3es16.6,a)') 'Expressed in cartesian coordinates:',cent(1),cent(2),cent(3),ch10
      end if
      write(std_out,*) 'Enter line length (in cartesian coordinates, in Bohr):'
-     read(*,*) length
+     read(std_in,*) length
 
 !    Compute the extremal points in cartesian coordinates
      x1(:)=cent(:)-length*x2(:)*half
@@ -610,7 +610,7 @@ end subroutine cut3d_hirsh
  write(std_out,*)
 
  write(std_out,*) '  Enter line resolution:   (integer, number of points on the line)'
- read(*,*) nresol
+ read(std_in,*) nresol
  write(std_out,*) ' You typed',nresol,ch10
 
 !At this moment the code knows everything about the geometric input, the data and
@@ -618,7 +618,9 @@ end subroutine cut3d_hirsh
 !an interpolation
 
  write(std_out,*) ch10,'  Enter the name of an output file:'
- read(*,*) filnam
+ if (read_string(filnam, unit=std_in) /= 0) then
+   MSG_ERROR("Fatal error!")
+ end if
  write(std_out,*) '  The name of your file is : ',trim(filnam),ch10
 
  if (open_file(filnam,msg,newunit=unt,status='unknown') /= 0) then
@@ -820,7 +822,7 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
    write(std_out,*) '    or 5) for a plane orthogonal to a cartesian direction'
    write(std_out,*) '    or 6) for a plane orthogonal to a crystallographic direction'
    write(std_out,*) '    or 0) to stop'
-   read(*,*) itypat
+   read(std_in,*) itypat
    select case (itypat)
 
    case (0)
@@ -831,21 +833,21 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
      write(std_out,*) '  The X axis will be through atms: 1,2 '
      write(std_out,*) '  Define each atom by its species and its number:'
      write(std_out,*) '    -> atom 1 (iat):'
-     read(*,*) iat
+     read(std_in,*) iat
      x1(1)=tau(1,iat)
      x1(2)=tau(2,iat)
      x1(3)=tau(3,iat)
      write(std_out,'(a,3f10.6)') '        position: ',x1
      write(std_out,*)
      write(std_out,*) '    -> atom 2 (iat):'
-     read(*,*) iat
+     read(std_in,*) iat
      x2(1)=tau(1,iat)
      x2(2)=tau(2,iat)
      x2(3)=tau(3,iat)
      write(std_out,'(a,3f10.6)') '        position: ',x2
      write(std_out,*)
      write(std_out,*) '    -> atom 3 (iat):'
-     read(*,*) iat
+     read(std_in,*) iat
      x3(1)=tau(1,iat)
      x3(2)=tau(2,iat)
      x3(3)=tau(3,iat)
@@ -869,17 +871,17 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
      write(std_out,*) '  The X axis will be through points: 1,2 '
      write(std_out,*) '  Define each :point coordinates'
      write(std_out,*) '    -> point 1:    X-coord  Y-coord  Z-coord:'
-     read(*,*) xcart
+     read(std_in,*) xcart
      x1(:)=xcart(:)
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',x1
      write(std_out,*)
      write(std_out,*) '    -> point 2:    X-coord  Y-coord  Z-coord:'
-     read(*,*) xcart
+     read(std_in,*) xcart
      x2(:)=xcart(:)
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',x2
      write(std_out,*)
      write(std_out,*) '    -> point 3:    X-coord  Y-coord  Z-coord:'
-     read(*,*) xcart
+     read(std_in,*) xcart
      x3(:)=xcart(:)
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',x3
      write(std_out,*)
@@ -901,15 +903,15 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
      write(std_out,*) '  The X axis will be through points: 1,2 '
      write(std_out,*) '  Define each :point coordinates'
      write(std_out,*) '    -> point 1:    X-coord  Y-coord  Z-coord:'
-     read(*,*) r1
+     read(std_in,*) r1
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',r1
      write(std_out,*)
      write(std_out,*) '    -> point 2:    X-coord  Y-coord  Z-coord:'
-     read(*,*) r2
+     read(std_in,*) r2
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',r2
      write(std_out,*)
      write(std_out,*) '    -> point 3:    X-coord  Y-coord  Z-coord:'
-     read(*,*) r3
+     read(std_in,*) r3
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',r3
      write(std_out,*)
 
@@ -943,7 +945,7 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
      do while (okhkl==0)
        write(std_out,*) '  Enter plane coordinates:'
        write(std_out,*) '    -> H  K  L '
-       read(*,*) hkl
+       read(std_in,*) hkl
        if (.not. (hkl(1)==0 .and. hkl(2)==0 .and. hkl(3)==0)) okhkl=1
      end do
      write(std_out,*) ' Miller indices are:',hkl
@@ -972,7 +974,7 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
    case (5)
      write(std_out,*) '  Enter the cartesian coordinates of the vector orthogonal to plane:'
      write(std_out,*) '    -> X-dir   Y-dir   Z-dir (Angstroms or Bohrs):'
-     read(*,*) x1
+     read(std_in,*) x1
      call normalize(x1)
      if((x1(1).ne.0).or.(x1(2).ne.0)) then
        x2(1)=-x1(2)
@@ -992,7 +994,7 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
    case (6)
      write(std_out,*) '  Enter crystallographic vector orthogonal to plane:'
      write(std_out,*) '    -> X-dir   Y-dir   Z-dir (Fractional coordinates):'
-     read(*,*) r1
+     read(std_in,*) r1
      okinp=1
      do mu=1,3
        x1(mu)=rprimd(mu,1)*r1(1)+rprimd(mu,2)*r1(2)+rprimd(mu,3)*r1(3)
@@ -1034,9 +1036,9 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
  write(std_out,*) '  Enter central point of plane (Bohrs):'
  write(std_out,*) '  Type 1) for Cartesian coordinates.'
  write(std_out,*) '    or 2) for Crystallographic coordinates.'
- read(*,*) inpopt
+ read(std_in,*) inpopt
  write(std_out,*) '    -> X-Coord   Y-Coord   Z-Coord:'
- read(*,*) cent
+ read(std_in,*) cent
 
  if (inpopt==2) then
 
@@ -1053,16 +1055,18 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
  do while(okparam==0)
    write(std_out,*)
    write(std_out,*) '  Enter plane width:'
-   read(*,*) width
+   read(std_in,*) width
    write(std_out,*) '  Enter plane length:'
-   read(*,*) length
+   read(std_in,*) length
    write(std_out,*)
    write(std_out,*) '  Enter plane resolution in width:'
-   read(*,*) nresolw
+   read(std_in,*) nresolw
    write(std_out,*) '  Enter plane resolution in lenth:'
-   read(*,*) nresoll
+   read(std_in,*) nresoll
    write(std_out,*) ch10,'  Enter the name of an output file:'
-   read(*,*) filnam
+   if (read_string(filnam, unit=std_in) /= 0) then
+     MSG_ERROR("Fatal error!")
+   end if
    write(std_out,*) '  The name of your file is : ',trim(filnam)
    write(std_out,*)
    write(std_out,*) '  You asked for a plane of ',length,' x ',width
@@ -1070,7 +1074,7 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
    write(std_out,*) '  The result will be redirected to the file:  ',trim(filnam)
    write(std_out,*) '  These parameters may still be changed.'
    write(std_out,*) '  Are you sure you want to keep them? (1=default=yes,2=no) '
-   read(*,*) oksure
+   read(std_in,*) oksure
    if (oksure/=2) okparam=1
  end do
 
@@ -1173,21 +1177,21 @@ subroutine cut3d_pointint(gridt,gridu,gridd,gridm,nr1,nr2,nr3,nspden,rprimd)
    write(std_out,*) ' Select the coordinate system:'
    write(std_out,*) ' Type 1) for cartesian coordinates'
    write(std_out,*) '  or 2) for crystallographic coordinates'
-   read(*,*) inpopt
+   read(std_in,*) inpopt
    if (inpopt==1 .or. inpopt==2) okinp=1
  end do
 
  if (inpopt==1) then
 
    write(std_out,*) ' Input point Cartesian Coord:  X  Y  Z'
-   read(*,*) rcart(1),rcart(2),rcart(3)
+   read(std_in,*) rcart(1),rcart(2),rcart(3)
    call reduce(rr,rcart,rprimd)
    write(std_out,'(a,3es16.6)' ) ' Crystallographic coordinates: ',rr(1:3)
 
  else
 
    write(std_out,*) ' Input point Crystallographic Coord:  X  Y  Z'
-   read(*,*) rr(1),rr(2),rr(3)
+   read(std_in,*) rr(1),rr(2),rr(3)
 
    do mu=1,3
      rcart(mu)=rprimd(mu,1)*rr(1)+rprimd(mu,2)*rr(2)+rprimd(mu,3)*rr(3)
@@ -1541,7 +1545,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
    write(std_out,*) '    or 5) for a plane orthogonal to a cartesian direction'
    write(std_out,*) '    or 6) for a plane orthogonal to a crystallographic direction'
    write(std_out,*) '    or 0) to stop'
-   read(*,*) itypat
+   read(std_in,*) itypat
 
    select case (itypat)
 
@@ -1553,21 +1557,21 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
      write(std_out,*) '  The X axis will be through atoms: 1,2 '
      write(std_out,*) '  Define each atom by its species and its number:'
      write(std_out,*) '    -> atom 1 (iat):'
-     read(*,*) iat
+     read(std_in,*) iat
      x1(1)=tau(1,iat)
      x1(2)=tau(2,iat)
      x1(3)=tau(3,iat)
      write(std_out,'(a,3f10.6)') '        position: ',x1
      write(std_out,*)
      write(std_out,*) '    -> atom 2 (iat):'
-     read(*,*) iat
+     read(std_in,*) iat
      x2(1)=tau(1,iat)
      x2(2)=tau(2,iat)
      x2(3)=tau(3,iat)
      write(std_out,'(a,3f10.6)') '        position: ',x2
      write(std_out,*)
      write(std_out,*) '    -> atom 3 (iat):'
-     read(*,*) iat
+     read(std_in,*) iat
      x3(1)=tau(1,iat)
      x3(2)=tau(2,iat)
      x3(3)=tau(3,iat)
@@ -1591,17 +1595,17 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
      write(std_out,*) '  The X axis will be through points: 1,2 '
      write(std_out,*) '  Define each :point coordinates'
      write(std_out,*) '    -> point 1:    X-coord  Y-coord  Z-coord:'
-     read(*,*) xcart
+     read(std_in,*) xcart
      x1(:)=xcart(:)
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',x1
      write(std_out,*)
      write(std_out,*) '    -> point 2:    X-coord  Y-coord  Z-coord:'
-     read(*,*) xcart
+     read(std_in,*) xcart
      x2(:)=xcart(:)
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',x2
      write(std_out,*)
      write(std_out,*) '    -> point 3:    X-coord  Y-coord  Z-coord:'
-     read(*,*) xcart
+     read(std_in,*) xcart
      x3(:)=xcart(:)
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',x3
      write(std_out,*)
@@ -1623,15 +1627,15 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
      write(std_out,*) '  The X axis will be through points: 1,2 '
      write(std_out,*) '  Define each :point coordinates'
      write(std_out,*) '    -> point 1:    X-coord  Y-coord  Z-coord:'
-     read(*,*) r1
+     read(std_in,*) r1
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',r1
      write(std_out,*)
      write(std_out,*) '    -> point 2:    X-coord  Y-coord  Z-coord:'
-     read(*,*) r2
+     read(std_in,*) r2
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',r2
      write(std_out,*)
      write(std_out,*) '    -> point 3:    X-coord  Y-coord  Z-coord:'
-     read(*,*) r3
+     read(std_in,*) r3
      write(std_out,'(a,3f10.6)') ' crystallographic position: ',r3
      write(std_out,*)
 
@@ -1665,7 +1669,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
      do while (okhkl==0)
        write(std_out,*) '  Enter plane coordinates:'
        write(std_out,*) '    ->H  K  L '
-       read(*,*) hkl
+       read(std_in,*) hkl
        if (.not. (hkl(1)==0 .and. hkl(2)==0 .and. hkl(3)==0)) okhkl=1
      end do
      write(std_out,*) ' Miller indices are:',hkl
@@ -1694,7 +1698,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
    case (5)
      write(std_out,*) '  Enter cartesian vector orthogonal to plane:'
      write(std_out,*) '    -> X-dir   Y-dir   Z-dir (Angstroms or Bohrs):'
-     read(*,*) x1
+     read(std_in,*) x1
      call normalize(x1)
      if((x1(1).ne.0).or.(x1(2).ne.0)) then
        x2(1)=-x1(2)
@@ -1714,7 +1718,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
    case (6)
      write(std_out,*) '  Enter crystallographic vector orthogonal to plane:'
      write(std_out,*) '    -> X-dir   Y-dir   Z-dir (Fractional coordinates):'
-     read(*,*) r1
+     read(std_in,*) r1
      do mu=1,3
        x1(mu)=rprimd(mu,1)*r1(1)+rprimd(mu,2)*r1(2)+rprimd(mu,3)*r1(3)
      end do
@@ -1756,17 +1760,17 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
    write(std_out,*) '  Enter reference point of plane (Bohr):'
    write(std_out,*) '  Type 1) for Cartesian coordinates.'
    write(std_out,*) '    or 2) for Crystallographic coordinates.'
-   read(*,*) inpopt
+   read(std_in,*) inpopt
 
    select case (inpopt)
 
    case(1)
      write(std_out,*) '    -> X-Coord   Y-Coord   Z-Coord:'
-     read(*,*) cent
+     read(std_in,*) cent
      exit
    case(2)
      write(std_out,*) '    -> X-Coord   Y-Coord   Z-Coord:'
-     read(*,*) cent
+     read(std_in,*) cent
      do mu=1,3
        rcart(mu)=rprimd(mu,1)*cent(1)+rprimd(mu,2)*cent(2)+rprimd(mu,3)*cent(3)
      end do
@@ -1790,11 +1794,11 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
  do
    write(std_out,*)
    write(std_out,*) '  Enter in-plane width:'
-   read(*,*) width
+   read(std_in,*) width
    write(std_out,*) '  Enter in-plane length:'
-   read(*,*) length
+   read(std_in,*) length
    write(std_out,*) '  Enter box height:'
-   read(*,*) height
+   read(std_in,*) height
    write(std_out,*)
    write(std_out,*) ' Enter the position of the basal plane in the box:'
    do
@@ -1802,7 +1806,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
      write(std_out,*) ' Type 1) for DOWN'
      write(std_out,*) ' Type 2) for MIDDLE'
      write(std_out,*) ' Type 3) for UP'
-     read(*,*) planetype
+     read(std_in,*) planetype
 
      select case(planetype)
 
@@ -1824,7 +1828,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
      write(std_out,*)
      write(std_out,*) ' Type 1) for CENTRAL position '
      write(std_out,*) ' Type 2) for CORNER(0,0) position '
-     read(*,*) referenceposition
+     read(std_in,*) referenceposition
 
      select case(referenceposition)
 
@@ -1841,21 +1845,23 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
    write(std_out,*)
    write(std_out,*) ' Enter the box grid values:'
    write(std_out,*) '  Enter plane resolution in width:'
-   read(*,*) nresolw
+   read(std_in,*) nresolw
    write(std_out,*) '  Enter plane resolution in lenth:'
-   read(*,*) nresoll
+   read(std_in,*) nresoll
    write(std_out,*) '  Enter height resolution:'
-   read(*,*) nresolh
+   read(std_in,*) nresolh
    write(std_out,*)
    write(std_out,*) ch10,'  Enter the name of an output file:'
-   read(*,*) filnam
+   if (read_string(filnam, unit=std_in) /= 0) then
+     MSG_ERROR("Fatal error!")
+   end if
    write(std_out,*) '  The name of your file is : ',trim(filnam)
 
    do
      write(std_out,*) '  Enter the format of the output file:'
      write(std_out,*) '   Type 1=> ASCII formatted'
      write(std_out,*) '   Type 2=> Molekel formatted'
-     read(*,*) fileformattype
+     read(std_in,*) fileformattype
      if (fileformattype==1 .or. fileformattype==2) then
        exit
      else
@@ -1875,7 +1881,7 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
    end if
    write(std_out,*) ' These parameters may still be changed.'
    write(std_out,*) ' Are you sure you want to keep them? (1=default=yes,2=no) '
-   read(*,*) okparam
+   read(std_in,*) okparam
    if (okparam==2) then
      cycle
    else
