@@ -560,14 +560,17 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
        do iband = 1, nband_k
 
          offset_cgi = (iband-1)*size_wf+icg0
-         cwavef1(:,:) = cg1(:,1+offset_cgi:size_wf+offset_cgi)
+         cwavef3(:,:) = cg3(:,1+offset_cgi:size_wf+offset_cgi)
 
-         call dotprod_g(dot1r,dot1i,gs_hamkq%istwf_k,size_wf,2,cwavef1,cwavef3,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+!        Get Lambda_ij^(1) = < u_i^(0) | H^(1) | u_j^(0) > (NC) (see dfpt_cgwf.F90)
+         dot1r = eig1_k_tmp(2*iband-1)
+         dot1i = eig1_k_tmp(2*iband  )
 
-         dot2r = eig1_k_tmp(2*iband-1)
-         dot2i = eig1_k_tmp(2*iband  )
-         lagr = lagr + dot2r*dot1r - dot2i*dot1i
-         lagi = lagi + dot2r*dot1i + dot2i*dot1r
+!        Compute < u_j^(1) | u_i^(1) >
+         call dotprod_g(dot2r,dot2i,gs_hamkq%istwf_k,size_wf,2,cwavef1,cwavef3,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+
+         lagr = lagr + dot1r*dot2r - dot1i*dot2i
+         lagi = lagi + dot1r*dot2i + dot1i*dot2r
 
        end do    ! iband
 
