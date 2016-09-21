@@ -167,7 +167,7 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,g
  integer :: ireadwf,itypat,mcg,mpsang,n1,n2,n3,n3xccc,nfftotf,nhat1grdim,nspden,nwffile
  integer :: option,optene,optorth,pert1case,pert2case,pert3case
  integer :: rdwrpaw,timrev,usexcnhat
- real(dp) :: dummy_real,ecut_eff,exc3,valuei
+ real(dp) :: dummy_real,ecut_eff
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf3i,fiwfddk,fnamewff(3)
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -482,136 +482,6 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,g
                    call init_rf_hamiltonian(cplex,gs_hamkq,i2pert,rf_hamkq,has_e1kbsc=1)
 
 ! **********************************************************************************************
-!                  TO SIMPLIFY THE FOLLOWING AND PUT IN A ROUTINE
-! **********************************************************************************************
-
-!                  Compute the third-order xc energy
-!                  take into account the contribution of the term
-!$
-!                  \frac{d}{d \lambda}
-!                  \frac{\delta^2 E_{Hxc}}{\delta n(r) \delta n(r\prim)}
-!$
-!                  (seventh term of Eq. (110) of X. Gonze, PRA 52, 1096 (1995)).
-
-!                  the following are essentially the 4th and the 3rd terms of PRB 71,125107, but the
-!                  multiplication for rho1 will be done by dotprod_vn later
-
-!               
-!!                  in the non spin polarized case xc_tmp has only 1 component
-!                   if (nspden==1)then
-
-!                     ABI_ALLOCATE(xc_tmp,(cplex*nfft,1))
-
-!                     if (cplex==1) then
-!!                      This, and the next lines, have to be changed in case cplex=2
-!                       do ifft=1,nfft
-!                         xc_tmp(ifft,1)= k3xc(ifft,1)*(rho2r1(ifft,1)+3*xccc3d2(ifft))*rho3r1(ifft,1)
-!                       end do
-!                     else
-!                       do ifft=1,nfft   ! 2*ifft-1 denotes the real part, 2*ifft the imaginary part
-!                         xc_tmp(2*ifft-1,1)= k3xc(ifft,1)*( (rho2r1(2*ifft-1,1)+3*xccc3d2(2*ifft-1))*rho3r1(2*ifft-1,1) &
-!&                         -( rho2r1(2*ifft,1)+3*xccc3d2(2*ifft))*rho3r1(2*ifft,1))
-
-!                         xc_tmp(2*ifft,1)= k3xc(ifft,1)*( (rho2r1(2*ifft-1,1)+3*xccc3d2(2*ifft-1))*rho3r1(2*ifft,1) &
-!&                         +( rho2r1(2*ifft,1)+3*xccc3d2(2*ifft))*rho3r1(2*ifft-1,1))
-!                       end do
-
-!                     end if
-
-!                   end if
-
-!!                  fab: modifications for the spin polarized raman part:
-!!                  in the spin polarized case xc_tmp has 2 components
-!!                  note that now the non linear core correction is divided by 2
-!                   if (nspden==2) then
-
-!                     ABI_ALLOCATE(xc_tmp,(cplex*nfft,2))
-
-!                     if (cplex==1) then
-!                       do ifft=1,nfft
-!                         xc_tmp(ifft,1)= k3xc(ifft,1)*(rho2r1(ifft,2)+(3._dp/2._dp)*xccc3d2(ifft))*rho3r1(ifft,2)+ &
-!&                         k3xc(ifft,2)*(rho2r1(ifft,2)+(3._dp/2._dp)*xccc3d2(ifft))*(rho3r1(ifft,1)-rho3r1(ifft,2))+ &
-!&                         k3xc(ifft,2)*((rho2r1(ifft,1)-rho2r1(ifft,2))+(3._dp/2._dp)*xccc3d2(ifft))*rho3r1(ifft,2)+ &
-!&                         k3xc(ifft,3)*((rho2r1(ifft,1)-rho2r1(ifft,2))+(3._dp/2._dp)*xccc3d2(ifft))*(rho3r1(ifft,1)-rho3r1(ifft,2))
-!                         xc_tmp(ifft,2)= k3xc(ifft,2)*(rho2r1(ifft,2)+(3._dp/2._dp)*xccc3d2(ifft))*rho3r1(ifft,2)+ &
-!&                         k3xc(ifft,3)*(rho2r1(ifft,2)+(3._dp/2._dp)*xccc3d2(ifft))*(rho3r1(ifft,1)-rho3r1(ifft,2))+ &
-!&                         k3xc(ifft,3)*((rho2r1(ifft,1)-rho2r1(ifft,2))+(3._dp/2._dp)*xccc3d2(ifft))*rho3r1(ifft,2)+ &
-!&                         k3xc(ifft,4)*((rho2r1(ifft,1)-rho2r1(ifft,2))+(3._dp/2._dp)*xccc3d2(ifft))*(rho3r1(ifft,1)-rho3r1(ifft,2))
-!                       end do
-
-!                     else
-!                       do ifft=1,nfft
-!!                        These sections should be rewritten, to be easier to read ... (defining intermediate scalars)
-!                         xc_tmp(2*ifft-1,1)= k3xc(ifft,1)*&
-!&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft-1,2)- &
-!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft,2))+   &
-!&                         k3xc(ifft,2)*&
-!&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*(rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2))- &
-!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*(rho3r1(2*ifft,1)-rho3r1(2*ifft,2)))+ &
-!&                         k3xc(ifft,2)*&
-!&                         ( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft-1,2)- &
-!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft,2))+ &
-!&                         k3xc(ifft,3)*&
-!&                         ( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-!&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2))- &
-!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*&
-!&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2)))
-!                         xc_tmp(2*ifft,1)=k3xc(ifft,1)*&
-!&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft,2)+ &
-!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft-1,2))+   &
-!&                         k3xc(ifft,2)*&
-!&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*(rho3r1(2*ifft,1)-rho3r1(2*ifft,2))+ &
-!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*(rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2)))+ &
-!&                         k3xc(ifft,2)*&
-!&                         ( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft,2)+ &
-!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft-1,2))+ &
-!&                         k3xc(ifft,3)*&
-!&                         ( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-!&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2))+ &
-!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*&
-!&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2)))
-!!                        fab: now the spin down component
-!                         xc_tmp(2*ifft-1,2)= k3xc(ifft,2)*&
-!&                         ( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*rho3r1(2*ifft-1,2)- &
-!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft,2))+   &
-!&                         k3xc(ifft,3)*( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-!&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2))- &
-!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*(rho3r1(2*ifft,1)-rho3r1(2*ifft,2)))+ &
-!&                         k3xc(ifft,3)*( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-!&                         rho3r1(2*ifft-1,2)- &
-!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft,2))+ &
-!&                         k3xc(ifft,4)*( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-!&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2))- &
-!                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*&
-!&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2)))
-!                         xc_tmp(2*ifft,2)=k3xc(ifft,1)*( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-!&                         rho3r1(2*ifft,2)+ &
-!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft-1,2))+   &
-!&                         k3xc(ifft,3)*( (rho2r1(2*ifft-1,2)+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-!&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2))+ &
-!&                         (rho2r1(2*ifft,2)+(3._dp/2._dp)*xccc3d2(2*ifft))*(rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2)))+ &
-!&                         k3xc(ifft,3)*( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-!&                         rho3r1(2*ifft,2)+ &
-!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*rho3r1(2*ifft-1,2))+ &
-!&                         k3xc(ifft,4)*( ((rho2r1(2*ifft-1,1)-rho2r1(2*ifft-1,2))+(3._dp/2._dp)*xccc3d2(2*ifft-1))*&
-!&                         (rho3r1(2*ifft,1)-rho3r1(2*ifft,2))+ &
-!&                         ((rho2r1(2*ifft,1)-rho2r1(2*ifft,2))+(3._dp/2._dp)*xccc3d2(2*ifft))*&
-!&                         (rho3r1(2*ifft-1,1)-rho3r1(2*ifft-1,2)))
-!                       end do
-
-!!                      fab: this is the end if over cplex
-!                     end if
-!!                    fab: this is the enf if over nspden
-!                   end if
-
-!                   call dotprod_vn(1,rho1r1,exc3,valuei,nfft,nfftot,nspden,1,xc_tmp,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
-!                   ABI_DEALLOCATE(xc_tmp)
-
-! **********************************************************************************************
-!                  END TO SIMPLIFY
-! **********************************************************************************************
-
-! **********************************************************************************************
 !                  LIRE ET CHARGER | u^(k_dir2) > (pour tests) et | u^(k_dir2 E_dir3) >
 ! **********************************************************************************************
 
@@ -623,9 +493,8 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,g
                    nwffile = 1
 
                    if (i2pert==natom+2) then
-!LTEST
-                     nwffile = 2 ! TO CHANGE
-!LTEST
+
+                     nwffile = 3
                      file_index(2) = i2dir+natom*3
                      idir_dkde = i2dir
                      if (i3dir/=i2dir) then ! see m_rf2.F90 => getidirs
@@ -672,46 +541,46 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,g
                    call timab(512,1,tsec)
                    call status(counter,dtfil%filstat,iexit,level,'call dfptnl_resp ')
 !                  NOTE : eigen2 equals zero here
-                   call dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,i1dir,&
+                   call dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,i1dir,&
 &                   i2dir,i3dir,i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
-&                   mpsang,mpw,natom,nfftf,nkpt,nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,&
-&                   rf_hamkq,rprimd,vtrial,vtrial1,wffddk,ddk_f,xred)
+&                   mpsang,mpw,natom,nfftf,nfftotf,nkpt,nk3xc,nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,&
+&                   rf_hamkq,rho1r1,rho2r1,rho3r1,rprimd,ucvol,vtrial,vtrial1,wffddk,ddk_f,xred)
                    call timab(512,2,tsec)
 
                    call status(counter,dtfil%filstat,iexit,level,'after dfptnl_resp')
 
-!                  Describe the perturbation and write out the result
-                   if (mpi_enreg%me == 0) then
-                     if (i2pert < natom + 1) then
-                       write(message,'(a,i3,a,i3)') &
-&                       ' j2 : displacement of atom ',i2pert,&
-&                       ' along direction ', i2dir
-                     end if
-                     if (i2pert == dtset%natom + 2) then
-                       write(message,'(a,i4)') &
-&                       ' j2 : homogeneous electric field along direction ',&
-&                       i2dir
-                     end if
-                     call wrtout(std_out,message,'COLL')
-                     call wrtout(ab_out,message,'COLL')
-                     write(ab_out,'(20x,a,13x,a)')'real part','imaginary part'
-                     write(ab_out,'(5x,a2,1x,f22.10,3x,f22.10)')'xc',exc3*sixth,zero
-                     write(ab_out,'(5x,a3,f22.10,3x,f22.10)')'dft',&
-&                     d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert),&
-&                     d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
-                     write(ab_out,*)
-                     write(std_out,'(18x,a,11x,a)')'real part','imaginary part'
-                     write(std_out,'(5x,a2,1x,f20.10,3x,f20.10)')'xc',exc3*sixth,zero
-                     write(std_out,'(5x,a3,f22.10,3x,f22.10)')'dft',&
-&                     d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert),&
-&                     d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
-                     write(std_out,*)
-                   end if  ! mpi_enreg%me == 0
+!!                  Describe the perturbation and write out the result
+!                   if (mpi_enreg%me == 0) then
+!                     if (i2pert < natom + 1) then
+!                       write(message,'(a,i3,a,i3)') &
+!&                       ' j2 : displacement of atom ',i2pert,&
+!&                       ' along direction ', i2dir
+!                     end if
+!                     if (i2pert == dtset%natom + 2) then
+!                       write(message,'(a,i4)') &
+!&                       ' j2 : homogeneous electric field along direction ',&
+!&                       i2dir
+!                     end if
+!                     call wrtout(std_out,message,'COLL')
+!                     call wrtout(ab_out,message,'COLL')
+!                     write(ab_out,'(20x,a,13x,a)')'real part','imaginary part'
+!                     write(ab_out,'(5x,a2,1x,f22.10,3x,f22.10)')'xc',exc3*sixth,zero
+!                     write(ab_out,'(5x,a3,f22.10,3x,f22.10)')'dft',&
+!&                     d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert),&
+!&                     d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+!                     write(ab_out,*)
+!                     write(std_out,'(18x,a,11x,a)')'real part','imaginary part'
+!                     write(std_out,'(5x,a2,1x,f20.10,3x,f20.10)')'xc',exc3*sixth,zero
+!                     write(std_out,'(5x,a3,f22.10,3x,f22.10)')'dft',&
+!&                     d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert),&
+!&                     d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+!                     write(std_out,*)
+!                   end if  ! mpi_enreg%me == 0
 
-                   d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = &
-&                   d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) + exc3*sixth
-                   d3etot(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = &
-&                   d3etot(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+!                   d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = &
+!&                   d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) + exc3*sixth
+!                   d3etot(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = &
+!&                   d3etot(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
 
 !                  Eventually close the dot file
 #ifdef DEV_MG_WFK
@@ -722,10 +591,10 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,g
                    if (i2pert==dtset%natom+2) then
 #ifdef DEV_MG_WFK
                      call wfk_close(ddk_f(2))
-!                     call wfk_close(ddk_f(3)) ! TO CHANGE
+                     call wfk_close(ddk_f(3)) ! TO CHANGE
 #else
                      call WffClose(wffddk(2),ierr)
-!                     call WffClose(wffddk(3),ierr) ! TO CHANGE
+                     call WffClose(wffddk(3),ierr) ! TO CHANGE
 #endif
                    end if
 
