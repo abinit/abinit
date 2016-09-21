@@ -10,6 +10,8 @@ nspinor3 1 nsppol3 2
 spinat3 0 0 0
 nband3  6
 
+so_psp 0
+
 ecut 6
 
 occopt 7

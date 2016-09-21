@@ -420,8 +420,8 @@ end subroutine crystal_init
 !!
 !! PARENTS
 !!      anaddb,bethe_salpeter,dfpt_looppert,eig2tot,eph,gstate,gwls_hamiltonian
-!!      m_dvdb,m_ioarr,m_iowf,m_wfd,m_wfk,mlwfovlp_qp,mover,mrgscr,outddbnc
-!!      outscfcv,screening,sigma,vtorho,wfk_analyze
+!!      m_ddk,m_dvdb,m_ioarr,m_iowf,m_wfd,m_wfk,mlwfovlp_qp,mover,mrgscr
+!!      outddbnc,outscfcv,screening,sigma,vtorho,wfk_analyze
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,wrtout

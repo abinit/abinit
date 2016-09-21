@@ -36,7 +36,7 @@ MODULE m_shirley
  use m_profiling_abi
  use m_fft
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -2008,7 +2008,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
 !Local variables ------------------------------
 !scalars
  integer,parameter :: istwf1=1,k1=1
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer,parameter :: dummy_nshiftk1=1,dummy_nshiftk_orig1=1
 #endif
  integer :: ii,ib,jj,ierr,nband_k,ikpt,natom,nefound,band
@@ -2026,7 +2026,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
  type(gs_hamiltonian_type) :: Ham_k
  type(stats_t) :: Stats
 !arrays
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer,parameter :: dummy_ngkpt(3)=0,dummy_kptrlatt(3,3)=0
  real(dp),parameter :: dummy_shiftk(3,dummy_nshiftk1)=zero,dummy_shiftk_orig(3,dummy_nshiftk_orig1)=zero
 #endif
@@ -2047,7 +2047,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
  logical,allocatable :: keep_ur(:,:,:),bks_mask(:,:,:) 
  complex(gwpc),allocatable :: ug(:)
 !END For the output wfd.
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: ncid
 #endif
 
@@ -2422,7 +2422,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
  ! Write netcdf file with results.
  ! FIXME: k-point info are wrong. This trick is needed so that 
  ! abipy will detect a path instead of a BZ mesh.
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  if (Wsh%my_rank == 0 .and. len_trim(sh_fname)>0) then
    NCF_CHECK_MSG(nctk_open_create(ncid, sh_fname, xmpi_comm_self), "Creating Shirley file")
    NCF_CHECK(crystal_ncwrite(Cryst, ncid))

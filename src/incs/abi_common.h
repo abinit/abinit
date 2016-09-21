@@ -257,7 +257,7 @@
 /* Dummy use of unused arguments to silence compiler warnings */
 #define ABI_UNUSED(var) if (.FALSE.) call unused_var(var)
 
-#ifdef HAVE_TIMER_PAPI
+#ifdef HAVE_PAPI
 #  define XPAPI_CHECK(check,msg) if (check/=PAPI_OK) call xpapi_handle_error(check, msg _FILE_LINE_ARGS_)
 #else
 #  define XPAPI_CHECK(check,msg)

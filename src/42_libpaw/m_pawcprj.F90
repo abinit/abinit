@@ -123,12 +123,12 @@ CONTAINS
 !!      cohsex_me,ctocprj,d2frnl,datafordmft,debug_tools,dfpt_accrho,dfpt_cgwf
 !!      dfpt_looppert,dfpt_nstpaw,dfpt_scfcv,dfpt_vtowfk,dfpt_wfkfermi,energy
 !!      exc_build_block,exc_build_ham,exc_plot,extrapwf,forstrnps,getgh1c
-!!      getghc,getgsc,initberry,ks_ddiago,m_electronpositron,m_fock,m_invovl
-!!      m_io_kss,m_pawcprj,m_plowannier,m_shirley,m_wfd,make_grad_berry,nonlop
-!!      optics_paw,optics_paw_core,outkss,partial_dos_fractions_paw,paw_symcprj
-!!      pawmkaewf,pawmkrhoij,posdoppler,prep_calc_ucrpa,scfcv,setup_positron
-!!      sigma,smatrix_pawinit,suscep_stat,update_e_field_vars,vtorho,vtowfk
-!!      wfd_pawrhoij,wfd_vnlpsi,wvl_hpsitopsi
+!!      getgh2c,getghc,getgsc,initberry,ks_ddiago,m_electronpositron,m_fock
+!!      m_invovl,m_io_kss,m_pawcprj,m_plowannier,m_rf2,m_shirley,m_wfd
+!!      make_grad_berry,nonlop,optics_paw,optics_paw_core,outkss
+!!      partial_dos_fractions_paw,paw_symcprj,pawmkaewf,pawmkrhoij,posdoppler
+!!      prep_calc_ucrpa,scfcv,setup_positron,sigma,smatrix_pawinit,suscep_stat
+!!      update_e_field_vars,vtorho,vtowfk,wfd_pawrhoij,wfd_vnlpsi,wvl_hpsitopsi
 !!
 !! CHILDREN
 !!      xmpi_sum
@@ -207,12 +207,12 @@ end subroutine pawcprj_alloc
 !!      cohsex_me,ctocprj,d2frnl,datafordmft,debug_tools,dfpt_accrho,dfpt_cgwf
 !!      dfpt_looppert,dfpt_nstpaw,dfpt_scfcv,dfpt_vtowfk,dfpt_wfkfermi,energy
 !!      exc_build_block,exc_build_ham,exc_plot,extrapwf,forstrnps,getgh1c
-!!      getghc,getgsc,ks_ddiago,m_efield,m_electronpositron,m_fock,m_invovl
-!!      m_io_kss,m_pawcprj,m_phgamma,m_plowannier,m_scf_history,m_shirley,m_wfd
-!!      make_grad_berry,nonlop,optics_paw,optics_paw_core,outkss
-!!      partial_dos_fractions_paw,paw_symcprj,pawmkaewf,pawmkrhoij,posdoppler
-!!      prep_calc_ucrpa,scfcv,setup_positron,sigma,smatrix_pawinit,suscep_stat
-!!      update_e_field_vars,vtorho,vtowfk,wfd_pawrhoij,wfd_vnlpsi
+!!      getgh2c,getghc,getgsc,ks_ddiago,m_efield,m_electronpositron,m_fock
+!!      m_invovl,m_io_kss,m_pawcprj,m_phgamma,m_plowannier,m_rf2,m_scf_history
+!!      m_shirley,m_wfd,make_grad_berry,nonlop,optics_paw,optics_paw_core
+!!      outkss,partial_dos_fractions_paw,paw_symcprj,pawmkaewf,pawmkrhoij
+!!      posdoppler,prep_calc_ucrpa,scfcv,setup_positron,sigma,smatrix_pawinit
+!!      suscep_stat,update_e_field_vars,vtorho,vtowfk,wfd_pawrhoij,wfd_vnlpsi
 !!
 !! CHILDREN
 !!      xmpi_sum
@@ -271,7 +271,7 @@ end subroutine pawcprj_free
 !!  cprj(:,:) <type(pawcprj_type)>= cprj datastructure
 !!
 !! PARENTS
-!!      ctocprj,dfpt_cgwf,m_fock,m_rf2
+!!      ctocprj,dfpt_cgwf,m_fock
 !!
 !! CHILDREN
 !!      xmpi_sum
@@ -1175,7 +1175,7 @@ end subroutine pawcprj_output
 !!
 !! PARENTS
 !!      berryphase_new,cgwf,datafordmft,dfpt_nstpaw,dfpt_vtowfk,dfpt_wfkfermi
-!!      extrapwf,forstrnps,m_plowannier,make_grad_berry,optics_paw
+!!      extrapwf,forstrnps,m_plowannier,m_rf2,make_grad_berry,optics_paw
 !!      optics_paw_core,pawmkrhoij,posdoppler,smatrix_pawinit,suscep_stat
 !!
 !! CHILDREN

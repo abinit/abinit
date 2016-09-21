@@ -96,7 +96,7 @@
  subroutine ctocprj(atindx,cg,choice,cprj,gmet,gprimd,iatom,idir,&
 & iorder_cprj,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 & mpw,natom,nattyp,nband,ncprj,ngfft,nkpt,nloalg,npwarr,nspinor,&
-& nsppol,ntypat,paral_kgb,ph1d,psps,rmet,typat,ucvol,uncp,&
+& nsppol,ntypat,nylmgr,paral_kgb,ph1d,psps,rmet,typat,ucvol,uncp,&
 & useylmgr,xred,ylm,ylmgr)
 
  use defs_basis
@@ -124,7 +124,7 @@
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: choice,iatom,idir,iorder_cprj,mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw
- integer,intent(in) :: natom,ncprj,nkpt,nspinor,nsppol,ntypat,paral_kgb
+ integer,intent(in) :: natom,ncprj,nkpt,nspinor,nsppol,ntypat,nylmgr,paral_kgb
  integer,intent(in) :: uncp,useylmgr
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -136,7 +136,7 @@
  real(dp),intent(in) :: cg(2,mcg)
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),kpt(3,nkpt),rmet(3,3)
  real(dp),intent(in) :: xred(3,natom),ylm(mpw*mkmem,mpsang*mpsang)
- real(dp),intent(in) :: ylmgr(mpw*mkmem,3,mpsang*mpsang*useylmgr)
+ real(dp),intent(in) :: ylmgr(mpw*mkmem,nylmgr,mpsang*mpsang*useylmgr)
  real(dp),intent(in),target :: ph1d(2,3*(2*mgfft+1)*natom)
  type(pawcprj_type),intent(inout) :: cprj(ncprj,mcprj) !vz_i
 
