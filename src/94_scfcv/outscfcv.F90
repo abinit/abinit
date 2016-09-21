@@ -170,10 +170,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft
  use m_numeric_tools,    only : simpson_int
- !use m_epjdos,           only : tetrahedron, gaus_dos, dos_degeneratewfs, epjdos_t, epjdos_from_dataset, epjdos_free
- use m_epjdos           ! FIXME fatbands_ncwrite and CPP
-
- !use m_skw
+ use m_epjdos,           only : tetrahedron, gaus_dos, dos_degeneratewfs, &
+                                epjdos_t, epjdos_from_dataset, epjdos_free, prtfatbands, fatbands_ncwrite
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -842,6 +840,16 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      call prtfatbands(dos,dtset,dtfil%fnameabo_app_fatbands,fermie,eigen,dtset%pawfatbnd,pawtab)
    end if
 
+!  Here, computation and output of DOS and partial DOS  _DOS
+   if (me == master .and. dos%fatbands_flag==0) then
+     if (dos%prtdos/=4) then
+       call tetrahedron(dos,dtset,fermie,eigen,dtfil%fnameabo_app_dos,rprimd)
+     else
+!      this option is not documented in input variables: is it working?
+       call gaus_dos(dos, dtset, fermie, eigen, dtfil%fnameabo_app_dos)
+     end if
+   end if
+
 #ifdef HAVE_NETCDF
    ! master writes fabands file here so that also NC pseudos are supported.
    !if (me == master) then
@@ -854,16 +862,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      NCF_CHECK(nf90_close(ncid))
    end if
 #endif
-
-!  Here, computation and output of DOS and partial DOS  _DOS
-   if (me == master .and. dos%fatbands_flag==0) then
-     if (dos%prtdos/=4) then
-       call tetrahedron(dos,dtset,fermie,eigen,dtfil%fnameabo_app_dos,rprimd)
-     else
-!      this option is not documented in input variables: is it working?
-       call gaus_dos(dos, dtset, fermie, eigen, dtfil%fnameabo_app_dos)
-     end if
-   end if
 
    call epjdos_free(dos)
  end if ! prtdos > 1

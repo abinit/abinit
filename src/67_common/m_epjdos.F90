@@ -123,9 +123,7 @@ module m_epjdos
  public :: epjdos_free
 
  public :: prtfatbands
-#ifdef HAVE_NETCDF
  public :: fatbands_ncwrite
-#endif
 
 !----------------------------------------------------------------------
 
@@ -156,9 +154,6 @@ type(epjdos_t) function epjdos_from_dataset(dtset) result(new)
 
 !Arguments ------------------------------------
  type(dataset_type),intent(in) :: dtset
-
-!Local variables-------------------------------
-!scalars
 
 ! *********************************************************************
 
@@ -203,6 +198,9 @@ type(epjdos_t) function epjdos_from_dataset(dtset) result(new)
  if (new%prtdosm>=1 .or. new%fatbands_flag==1) then
    ABI_CALLOC(new%fractions_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang))
    ABI_CALLOC(new%fractions_average_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang))
+ else
+   ABI_MALLOC(new%fractions_m, (0,0,0,0))
+   ABI_MALLOC(new%fractions_average_m, (0,0,0,0))
  end if
 
  if (dtset%usepaw==1 .and. new%partial_dos_flag==1) then
@@ -343,7 +341,7 @@ subroutine tetrahedron(dos,dtset,fermie,eigen,fildata,rprimd)
  integer :: iat,iband,iene,ifract,ikpt,ioffset_eig,isppol,natsph,natsph_extra
  integer :: nene,nkpt_fullbz,prtdos,unitdos,ierr,prtdosm,paw_dos_flag,mbesslang,ndosfraction
  real(dp) :: buffer,deltaene,enemax,enemin,enex,integral_DOS,max_occ,rcvol
- real(dp) :: ucvol
+ real(dp) :: ucvol,cpu,wall,gflops
  logical :: bigDOS
  character(len=10) :: tag
  character(len=500) :: frmt,frmt_extra,message
@@ -406,6 +404,8 @@ subroutine tetrahedron(dos,dtset,fermie,eigen,fildata,rprimd)
      end if
    end do
  end do
+
+ call cwtime(cpu, wall, gflops, "start")
 
 ! Calculate nkpt_fullbz
  nkpt_fullbz= dtset%kptrlatt(1,1)*dtset%kptrlatt(2,2)*dtset%kptrlatt(3,3) &
@@ -878,6 +878,10 @@ subroutine tetrahedron(dos,dtset,fermie,eigen,fildata,rprimd)
  end if
 
  call destroy_tetra(tetrahedra)
+
+ call cwtime(cpu,wall,gflops,"stop")
+ write(message,'(2(a,f8.2),a)')" tetrahedron: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
+ call wrtout(std_out,message,"PERS")
 
 end subroutine tetrahedron
 !!***
@@ -2199,9 +2203,10 @@ subroutine prtfatbands(dos, dtset,fildata,fermie,eigen,pawfatbnd,pawtab)
  end if
 
  if(dtset%nspinor==2) then
-   message = "Fatbands are not yet available in the case nspinor==2 !"
-   MSG_WARNING(message)
+   MSG_WARNING("Fatbands are not yet available in the case nspinor==2!")
  end if
+
+ ABI_CHECK(allocated(dos%fractions_m), "dos%fractions_m is not allocated!")
 
  natsph=dtset%natsph
  nkpt=dtset%nkpt
@@ -2383,7 +2388,7 @@ end subroutine prtfatbands
 !!
 !! SOURCE
 
-#ifdef HAVE_NETCDF
+
 
 subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid)
 
@@ -2392,6 +2397,7 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fatbands_ncwrite'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2408,6 +2414,7 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
 !arrays
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*dtset%usepaw)
 
+#ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
  integer :: itype,ncerr
@@ -2419,6 +2426,7 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
 
 !*************************************************************************
 
+ ABI_CHECK(dtset%natsph > 0, "natsph <=0")
  call cwtime(cpu, wall, gflops, "start")
 
  ! Write header, crystal structure and band energies.
@@ -2438,7 +2446,6 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
      nctkdim_t("dos_fractions_m_lastsize", dos%ndosfraction*dos%mbesslang)])
    NCF_CHECK(ncerr)
  end if
-
  if (dtset%natsph_extra /= 0) then
    NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("natsph_extra", dtset%natsph_extra)]))
  end if
@@ -2459,7 +2466,7 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
  if (allocated(dos%fractions_m)) then
    ncerr = nctk_def_arrays(ncid, &
      nctkarr_t("dos_fractions_m", "dp", &
-&              "number_of_kpoints, max_number_of_states, number_of_spins, dos_fractions_m_lastsize"))
+               "number_of_kpoints, max_number_of_states, number_of_spins, dos_fractions_m_lastsize"))
    NCF_CHECK(ncerr)
  end if
 
@@ -2477,8 +2484,6 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
    ])
    NCF_CHECK(ncerr)
  end if
- 
- return
 
  ! Write variables
  NCF_CHECK(nctk_set_datamode(ncid))
@@ -2500,12 +2505,15 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
  NCF_CHECK(nf90_put_var(ncid, vid("lmax_type"), lmax_type))
  NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions"), dos%fractions))
 
- !NCF_CHECK(nf90_put_var(ncid, vid("iatsph"), dtset%iatsph(1:dtset%natsph)))
- !NCF_CHECK(nf90_put_var(ncid, vid("ratsph"), dtset%ratsph(1:dtset%ntypat)))
- !NCF_CHECK(nf90_put_var(ncid, vid("ratsph_extra"), dtset%ratsph_extra))
- !if (dtset%natsph_extra /= 0) then
- !  NCF_CHECK(nf90_put_var(ncid, vid("xredsph_extra"), dtset%xredsph_extra(:, 1:dtset%natsph_extra)))
- !end if
+ if (dos%prtdos == 3) then
+   NCF_CHECK(nf90_put_var(ncid, vid("iatsph"), dtset%iatsph(1:dtset%natsph)))
+   NCF_CHECK(nf90_put_var(ncid, vid("ratsph"), dtset%ratsph(1:dtset%ntypat)))
+   NCF_CHECK(nf90_put_var(ncid, vid("ratsph_extra"), dtset%ratsph_extra))
+   if (dtset%natsph_extra /= 0) then
+     NCF_CHECK(nf90_put_var(ncid, vid("xredsph_extra"), dtset%xredsph_extra(:, 1:dtset%natsph_extra)))
+   end if
+ end if
+ !return
 
  if (allocated(dos%fractions_m)) then
    NCF_CHECK(nf90_put_var(ncid, vid("dos_fractions_m"), dos%fractions_m))
@@ -2518,6 +2526,7 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2),a)')" fatbands_ncwrite: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
  call wrtout(std_out,msg,"PERS")
+#endif
 
 contains
  integer function vid(vname) 
@@ -2534,9 +2543,6 @@ contains
 
 end subroutine fatbands_ncwrite
 !!***
-
-#endif
-!ifdef HAVE_NETCDF
 
 end module m_epjdos
 !!***
