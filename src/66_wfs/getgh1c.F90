@@ -434,7 +434,7 @@ subroutine getgh1c(berryopt,copt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      if (sij_opt==1) then
 !$OMP PARALLEL DO
        do ipw=1,npw1*my_nspinor
-         gh1c(:,ipw)=zero
+         gs1c(:,ipw)=zero
        end do
      end if
    end if
@@ -533,7 +533,7 @@ subroutine getgh1c(berryopt,copt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      if (sij_opt==1) then
 !$OMP PARALLEL DO
        do ipw=1,npw1*my_nspinor
-         gh1c(:,ipw)=zero
+         gs1c(:,ipw)=zero
        end do
      end if
      if (use_GS_cwaveprj==0) then
@@ -558,7 +558,7 @@ subroutine getgh1c(berryopt,copt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    if (sij_opt==1) then
 !$OMP PARALLEL DO
      do ipw=1,npw1*my_nspinor
-       gh1c(:,ipw)=zero
+       gs1c(:,ipw)=zero
      end do
    end if
 
@@ -625,7 +625,7 @@ subroutine getgh1c(berryopt,copt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      if (sij_opt==1) then
 !$OMP PARALLEL DO
        do ipw=1,npw1*my_nspinor
-         gh1c(:,ipw)=zero
+         gs1c(:,ipw)=zero
        end do
      end if
    end if
@@ -643,7 +643,7 @@ subroutine getgh1c(berryopt,copt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    if (sij_opt/=0) then
 !$OMP PARALLEL DO
      do ipw=1,npw1*my_nspinor
-       gh1c(:,ipw)=zero
+       gs1c(:,ipw)=zero
      end do
    end if
 
