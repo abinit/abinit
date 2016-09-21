@@ -373,8 +373,8 @@ subroutine getgh1c(berryopt,copt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 & ((ipert>0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4)).or.(ipert==natom+2)))
 
 !Use of cwaveprj depends on gs_hamkq%usecprj and copt :
-use_GS_cwaveprj = 0
-if (gs_hamkq%usecprj==1.and.copt==0) use_GS_cwaveprj=1
+  use_GS_cwaveprj = 0
+  if (gs_hamkq%usecprj==1.and.copt==0) use_GS_cwaveprj=1
 
 !Phonon perturbation
 !-------------------------------------------

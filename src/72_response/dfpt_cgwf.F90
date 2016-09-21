@@ -29,7 +29,7 @@
 !!  cwaveprj0(natom,nspinor*usecprj)=GS wave function at k projected with nl projectors
 !!  eig0nk=0-order eigenvalue for the present wavefunction at k
 !!  eig0_kq(nband)=GS eigenvalues at k+Q (hartree)
-!!  grad_berry(2,mpw1,dtefield%nband_occ) = the gradient of the Berry phase term
+!!  grad_berry(2,mpw1,dtefield%mband_occ) = the gradient of the Berry phase term
 !!  gscq(2,mgscq)=<g|S|Cnk+q> coefficients for ALL bands (PAW) at k+Q
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+Q
 !!  icgq=shift to be applied on the location of data in the array cgq
