@@ -183,8 +183,7 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
  end do
  mcells=maxval(ncells(:))
 
-!Compute, for each atom, the set of image atoms
-!in the whole supercell
+!Compute, for each atom, the set of image atoms in the whole supercell
  ABI_ALLOCATE(xcartcells,(3,mcells,natom))
  do iatom=1,natom
    itypat=typat(iatom)
@@ -207,10 +206,6 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
    end do
  end do
 
-!DEBUG
-!write(std_out,*)' before all-electron pro-atom density'
-!ENDDEBUG
-
 !Compute, for each atom, the all-electron pro-atom density
 !at each point in the primitive cell
  ABI_ALLOCATE(local_den,(nrx,nry,nrz,natom))
@@ -226,11 +221,9 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
    itypat=typat(iatom)
    npt=npoint(itypat)
    maxrad=radii(npt,itypat)
-   write(std_out,*)
-   write(std_out,'(a,i4)' )' hirsh : accumulating density for atom ',iatom
-!  DEBUG
+!   write(std_out,*)
+!   write(std_out,'(a,i4)' )' hirsh : accumulating density for atom ',iatom
 !  write(std_out,*)' ncells(iatom)=',ncells(iatom)
-!  ENDDEBUG
    do istep=1,npt-1
      step(1,istep)=radii(istep+1,itypat) - radii(istep,itypat)
      step(2,istep)=one/step(1,istep)
@@ -244,10 +237,7 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
 
 !  Big loop on the cells
    do icell=1,ncells(iatom)
-!    DEBUG
 !    write(std_out,*)' icell=',icell
-!    ENDDEBUG
-
      coordat(:)=xcartcells(:,icell,iatom)
 
 !    Big loop on the grid points
@@ -288,9 +278,7 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
                  end if
                end do
                igrid=inmin
-!              DEBUG
 !              write(std_out,*)' igrid',igrid
-!              ENDDEBUG
 
                hh=step(1,igrid)
                h_inv=step(2,igrid)
@@ -302,7 +290,6 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
              end if ! Select small radius or spline
 
              local_den(k1,k2,k3,iatom)=local_den(k1,k2,k3,iatom)+den
-
            end if ! dist2<maxrad
 
          end do ! k1
@@ -310,11 +297,9 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
      end do ! k3
 
    end do ! icell
-
  end do ! iatom
 
-!Compute, the total all-electron density
-!at each point in the primitive cell
+!Compute, the total all-electron density at each point in the primitive cell
  ABI_ALLOCATE(sum_den,(nrx,nry,nrz))
  sum_den(:,:,:)=zero
  do iatom=1,natom
@@ -335,7 +320,6 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
 
 !Accumulate the integral of the density, to get Hirshfeld charges
 !There is a minus sign because the electron has a negative charge
- !ABI_ALLOCATE(hcharge,(natom))
  ngoodpoints = 0
  hcharge(:)=zero
  hweight(:)=zero
@@ -365,7 +349,6 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
  hcharge(:)=hcharge(:)*ucvol/dble(nfftot)
  hweight(:)=hweight(:)/dble(nfftot)
 
-
 !Check on the total charge
  total_zion=sum(zion(typat(1:natom)))
  total_charge=sum(hcharge(1:natom))
@@ -388,7 +371,6 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
 &       iatom,zion(typat(iatom)),hcharge(iatom),hcharge(iatom)+zion(typat(iatom))
      end do
      write(std_out,*)
-!    write(std_out,*)'    Total ',total_zion,total_charge,total_charge+total_zion
      write(std_out,'(a,3es17.6)')'    Total',total_zion,total_charge,total_charge+total_zion
      write(std_out,*)
  end if
