@@ -205,7 +205,7 @@ type(epjdos_t) function epjdos_from_dataset(dtset) result(new)
  if (dtset%usepaw==1 .and. new%partial_dos_flag==1) then
    ABI_MALLOC(new%fractions_paw1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
    ABI_MALLOC(new%fractions_pawt1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
-   new%fractions_pawt1 = zero; new%fractions_pawt1 = zero
+   new%fractions_paw1 = zero; new%fractions_pawt1 = zero
  end if
 
 end function epjdos_from_dataset

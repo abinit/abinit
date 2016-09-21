@@ -38,18 +38,18 @@
 !!
 !! OUTPUT
 !!  === If paw_dos_flag==1:
-!!   dos_fractions_paw1(ikpt,iband,isppol,natom*mbesslang) = contribution to
+!!   dos%fractions_paw1(ikpt,iband,isppol,natom*mbesslang) = contribution to
 !!       dos fractions from the PAW partial waves (phi)
-!!   dos_fractions_pawt1(ikpt,iband,isppol,natom*mbesslang) = contribution to
+!!   dos%fractions_pawt1(ikpt,iband,isppol,natom*mbesslang) = contribution to
 !!       dos fractions from the PAW pseudo partial waves (phi_tild)
 !!
 !! SIDE EFFECTS
-!!  dos_fractions(ikpt,iband,isppol,ndosfraction) = percentage of s, p, d..
+!!  dos%fractions(ikpt,iband,isppol,ndosfraction) = percentage of s, p, d..
 !!    character on each atom for the wavefunction # ikpt,iband, isppol
 !!    As input: contains only the pseudo contribution
 !!    As output: contains pseudo contribution + PAW corrections
 !!  == if prtdosm==1
-!!  dos_fractions_m(ikpt,iband,isppol,ndosfraction*mbesslang*prtdosm) =
+!!  dos%fractions_m(ikpt,iband,isppol,ndosfraction*mbesslang*prtdosm) =
 !!              m discretization of partial DOS fractions
 !!
 !! PARENTS
@@ -92,17 +92,12 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mcprj,mkmem
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(epjdos_t),intent(inout) :: dos
 !arrays
  integer,intent(in) :: dimcprj(dtset%natom)
- !real(dp),intent(inout) :: dos_fractions(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction)
- !real(dp),intent(inout) :: dos_fractions_m(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction&
-!& *mbesslang*min(max(prtdosm,fatbands_flag),1))
- !real(dp),intent(out) :: dos_fractions_paw1(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*paw_dos_flag)
- !real(dp),intent(out) :: dos_fractions_pawt1(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*paw_dos_flag)
- type(pawcprj_type) :: cprj(dtset%natom,mcprj)
+ type(pawcprj_type),intent(in) :: cprj(dtset%natom,mcprj)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
  type(pawtab_type),target,intent(in) :: pawtab(dtset%ntypat)
 
@@ -123,6 +118,7 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 !******************************************************************************************
 
  DBG_ENTER("COLL")
+ !return
 
  ABI_CHECK(mkmem/=0,"mkmem==0 not supported anymore!")
 
@@ -201,6 +197,7 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
      ABI_DEALLOCATE(dimcprj_atsph)
 
 !    Extract cprj for this k-point.
+! FIXME: Parallelism over atoms is buggy
      ibsp=0
      do iband=1,nband_k
        do ispinor=1,my_nspinor
@@ -222,6 +219,8 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 !      LOOP OVER BANDS
        do iband=1,nband_k
          if(abs(mpi_enreg%proc_distrb(ikpt,iband,isppol)-me)/=0) cycle
+         ! FIXME: MPI-FFT parallelism is buggy
+         !if (mod(iband, mpi_enreg%nproc_fft) /= mpi_enreg%me_fft) cycle
          ibsp=(iband-1)*my_nspinor
          do ispinor=1,my_nspinor
            ibsp=ibsp+1
