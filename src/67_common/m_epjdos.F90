@@ -198,14 +198,17 @@ type(epjdos_t) function epjdos_from_dataset(dtset) result(new)
  if (new%prtdosm>=1 .or. new%fatbands_flag==1) then
    ABI_CALLOC(new%fractions_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang))
    ABI_CALLOC(new%fractions_average_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang))
- else
-   ABI_MALLOC(new%fractions_m, (0,0,0,0))
-   ABI_MALLOC(new%fractions_average_m, (0,0,0,0))
+ !else
+ !  ABI_MALLOC(new%fractions_m, (0,0,0,0))
+ !  ABI_MALLOC(new%fractions_average_m, (0,0,0,0))
  end if
 
  if (dtset%usepaw==1 .and. new%partial_dos_flag==1) then
    ABI_CALLOC(new%fractions_paw1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
    ABI_CALLOC(new%fractions_pawt1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
+ !else
+ !  ABI_MALLOC(new%fractions_paw1,(0,0,0,0))
+ !  ABI_MALLOC(new%fractions_pawt1,(0,0,0,0))
  end if
 
 end function epjdos_from_dataset

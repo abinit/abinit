@@ -139,10 +139,6 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
  end if
 
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
- if (paw_dos_flag==1.or.fatbands_flag==1) then
-   dos%fractions_paw1 =zero
-   dos%fractions_pawt1=zero
- end if
 
 !Prepare some useful integrals
  basis_size=pawtab(1)%basis_size
