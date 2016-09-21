@@ -430,6 +430,7 @@ end subroutine xml_getdims
 #undef ABI_FUNC
 #define ABI_FUNC 'xml2effpot'
  use interfaces_14_hidewrite
+ use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -452,6 +453,7 @@ end subroutine xml_getdims
  character (len=XML_RECL) :: line,readline
  character (len=XML_RECL) :: strg,strg1
  !arrays
+ real(dp)  :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: work2(:,:)
  type(atomdata_t) :: atom
  ! *************************************************************************
@@ -996,6 +998,11 @@ end subroutine xml_getdims
  close(unit=funit)
 
 #endif
+
+!Fill somes others variables
+ call metric(gmet,gprimd,-1,rmet,eff_pot%rprimd,eff_pot%ucvol)
+!Convert the elastic constants (Hatree in XML but Hatree/bohr^3 in effective potential)
+ eff_pot%elastic_constants =  eff_pot%elastic_constants / eff_pot%ucvol
 
 end subroutine xml2effpot
 !!***

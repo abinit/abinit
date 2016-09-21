@@ -565,7 +565,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
  real(dp) :: acell(3)
  real(dp) :: gmet(3,3),rmet(3,3)
  real(dp) :: gprimd(3,3), rprim(3,3),gprim(3,3)
- real(dp),allocatable :: dyew(:,:,:,:,:), dyewq0(:,:,:)
+ real(dp),allocatable :: dyew(:,:,:,:,:), dyewq0(:,:,:,:,:)
  real(dp),allocatable :: xred(:,:),xred_tmp(:,:),zeff_tmp(:,:,:)
 
  type(supercell_type) :: super_cell
@@ -705,8 +705,10 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    ABI_ALLOCATE(xred,(3,super_cell%natom_supercell))
    ABI_ALLOCATE(zeff_tmp,(3,3,2*eff_pot%natom))
    ABI_ALLOCATE(dyew,(2,3,2*eff_pot%natom,3,2*eff_pot%natom))
+   ABI_ALLOCATE(dyewq0,(2,3,eff_pot%natom,3,eff_pot%natom))
  
    dyew            = zero
+   dyewq0          = zero
    xred(:,:)       = zero
    xred_tmp(:,:)   = zero
    zeff_tmp(:,:,:) = zero
@@ -738,11 +740,11 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 !        Compute new dipole-dipole interaction
          dyew = zero
          if (i1==0.and.i2==0.and.i3==0) then
-           call ewald9(acell,eff_pot%epsilon_inf,dyew(:,:,1:eff_pot%natom,:,1:eff_pot%natom),&
+           call ewald9(acell,eff_pot%epsilon_inf,dyewq0,&
 &                      gmet,gprimd,eff_pot%natom,real((/0,0,0/),dp),rmet,&
 &                      super_cell%rprimd_supercell,sumg0,ucvol,xred_tmp(:,1:eff_pot%natom),&
 &                      eff_pot%zeff)
-           ifc_tmp%ewald_atmfrc(:,:,:,:,:,irpt) = dyew(:,:,1:eff_pot%natom,:,1:eff_pot%natom) + tol10
+           ifc_tmp%ewald_atmfrc(:,:,:,:,:,irpt) = dyewq0 + tol10
          else
            first_coordinate  = ((irpt-1)*eff_pot%natom) + 1
            second_coordinate = first_coordinate + eff_pot%natom-1
@@ -762,6 +764,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    ABI_DEALLOCATE(xred)
    ABI_DEALLOCATE(zeff_tmp)
    ABI_DEALLOCATE(dyew)
+   ABI_DEALLOCATE(dyewq0)
 
 !  Fill the short range part (calculated previously) only master
    if(iam_master)then

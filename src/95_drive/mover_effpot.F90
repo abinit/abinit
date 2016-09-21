@@ -68,7 +68,6 @@ subroutine mover_effpot(inp,filnam,effective_potential,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'mover_effpot'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_95_drive, except_this_one => mover_effpot
 !End of the abilint section
@@ -84,10 +83,11 @@ implicit none
  character(len=fnlen),intent(in) :: filnam(15)
 !Local variables-------------------------------
 !scalar
- integer :: jj,nproc,my_rank
+ integer :: ii,jj,nproc,my_rank
  logical :: iam_master
  integer, parameter:: master = 0
 ! Set array dimensions
+ character(len=500) :: message
  type(MPI_type),target :: mpi_enreg
  type(dataset_type),target :: dtset
  type(scfcv_t) :: scfcv_args
@@ -101,9 +101,11 @@ implicit none
 !arrays
 !no_abirules
  real(dp) :: acell(3)
- real(dp),allocatable :: energy(:)
  real(dp),allocatable :: amass(:) 
  real(dp),pointer :: rhog(:,:),rhor(:,:)
+ integer,pointer :: indsym(:,:,:)
+ integer,allocatable :: symrel(:,:,:)
+ real(dp),allocatable :: tnons(:,:)
  real(dp),allocatable :: xred(:,:),xred_old(:,:),xcart(:,:)
  real(dp),allocatable :: fred(:,:),fcart(:,:)
  real(dp),allocatable :: vel(:,:)
@@ -111,14 +113,15 @@ implicit none
  real(dp) :: mat_strain(3,3)
  type(supercell_type) :: super_cell
 !TEST_AM
- integer :: option
- integer :: funit = 1,ii,kk
- real(dp):: energy_harmonic
- real(dp):: ener1(inp%ntime,2),ener2(inp%ntime,2)
- character (len=500000) :: line,readline
- character(len=500) :: message
- character(len=fnlen) :: filename,filename2
- real(dp),allocatable :: disp(:,:,:),disp_tmp(:,:)
+ !real(dp),allocatable :: energy(:)
+ !integer :: option
+ !integer :: funit = 1,ii,kk
+ !real(dp):: energy_harmonic
+ !real(dp):: ener1(inp%ntime,2),ener2(inp%ntime,2)
+ !character (len=500000) :: line,readline
+ !character(len=500) :: message
+ !character(len=fnlen) :: filename,filename2
+! real(dp),allocatable :: disp(:,:,:),disp_tmp(:,:)
 !TEST_AM
 
 !******************************************************************
@@ -131,7 +134,7 @@ implicit none
 ! 1 Generate supercell and print information
 !*******************************************************************
 
- write(message, '(a,(80a),a)'),ch10,&
+ write(message, '(a,(80a),a)') ch10,&
 &    ('=',ii=1,80),ch10
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
@@ -238,8 +241,13 @@ implicit none
      ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
      dtset%qmass = dtset%nnos * 10 
    end if
+   ABI_ALLOCATE(tnons,(3,dtset%nsym))
+   tnons = zero
+   dtset%tnons = tnons
    dtset%strtarget = zero ! STRess TARGET
-   !      dtset%symrel ! SYMmetry in REaL space
+   ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
+   symrel = one
+   dtset%symrel = symrel! SYMmetry in REaL space
    dtset%typat  = super_cell%typat_supercell
    dtset%useylm = 0
    dtset%znucl  = effective_potential%znucl
@@ -253,6 +261,7 @@ implicit none
 !  Set the pointers of scfcv_args
    zero_integer = 0
    scfcv_args%dtset     => dtset
+   scfcv_args%indsym => indsym
    scfcv_args%mpi_enreg => mpi_enreg
    scfcv_args%ndtpawuj  => zero_integer
    scfcv_args%results_gs => results_gs

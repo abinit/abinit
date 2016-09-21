@@ -225,8 +225,7 @@ program epigene
 !   call effective_potential_writeXML(reference_effective_potential,1,filename=name)
 ! just for TEST
 !   if(inp%prt_phfrq > 0) then
-!     ABI_ALLOCATE(dynmat,(2,3,reference_effective_potential%supercell%natom_supercell,
-!                            3,reference_effective_potential%supercell%natom_supercell))
+!     ABI_ALLOCATE(dynmat,(2,3,reference_effective_potential%supercell%natom_supercell,3,reference_effective_potential%supercell%natom_supercell))
 
 !     call effective_potential_effpot2dynmat(dynmat,inp%delta_df,reference_effective_potential,&
 !&                                           reference_effective_potential%supercell%natom_supercell,&
