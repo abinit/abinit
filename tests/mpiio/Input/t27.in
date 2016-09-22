@@ -58,7 +58,7 @@ paral_kgb5 0
 iomode5 0  # CG with MPI-IO is buggy!
 
 # SCF parameters
-ecut 15. 
+ecut 25. 
 nband 12 
 diemac 12.0d0  
 
