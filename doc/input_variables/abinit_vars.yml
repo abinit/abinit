@@ -3218,13 +3218,34 @@
     - 3
     excludes: null
     requires: null
-    section: varrf
+    section: vareph
     text: |-
         This variable is mandatory when [[optdriver]]==7.
         It defines the number of divisions in the (homogeneous) q-mesh
         used to generate the DDB file. See also the description of the [[getddb]] input variable.
     varname: ddb_ngqpt
     vartype: integer
+- !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval:
+    - 0.0
+    - 0.0
+    - 0.0
+    definition: 'Derivative DatabBase: SHIFT of the Q-points '
+    dimensions:
+    - 3
+    excludes: null
+    requires: null
+    section: vareph
+    text: |-
+        Only relevant when [[optdriver]]==7.
+        It defines the shift in the q-mesh used to generate the DDB file,
+        which is defined by the [[ddb_ngqpt]] input variable.
+        See [[shiftk]] for more information on the definition.
+    varname: ddb_shiftq
+    vartype: real
 - !variable
     characteristics: null
     commentdefault: null
@@ -5527,6 +5548,28 @@
         to interpolate the interatomic force constants in q-space.
         If eph_ngqpt_fine is not given, the EPH code uses the list of irreducible q-points reported in the DDB file (default behavior).
     varname: eph_ngqpt_fine
+    vartype: integer
+- !variable
+    characteristics:
+    - '[[DEVELOP]]'
+    commentdefault: null
+    commentdims: null
+    defaultval: 1
+    definition: 'Electron-PHonon: Task'
+    dimensions: scalar
+    excludes: null
+    requires: null
+    section: varrf
+    text: |-
+        <p>
+        When [[optdriver]]==7, select the task to be performed.
+         The choice is among :
+         <br />
+         [[eph_task]]=1 : phonon linewidth
+         <br />
+         [[eph_task]]=2 : electron-phonon coupling elements
+        </p>
+    varname: eph_task
     vartype: integer
 - !variable
     characteristics:
@@ -20761,6 +20804,24 @@
          If set to 1, the nesting function for the k-point grid is printed. For the moment the path in q space for the nesting function is fixed, but will become an input as well.
         </p>
     varname: prtnest
+    vartype: integer
+- !variable
+    characteristics:
+    - '[[DEVELOP]]'
+    commentdefault: null
+    commentdims: null
+    defaultval: 1
+    definition: PRinT the PHonon Density Of States
+    dimensions: scalar
+    excludes: null
+    requires: null
+    section: vareph
+    text: |-
+        <p>
+        Print the phonon density of states.
+        It is activated by default when [[optdriver]]==7.
+        </p>
+    varname: prtphdos
     vartype: integer
 - !variable
     characteristics:
