@@ -368,7 +368,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
 
  end if  ! PAW or NC
 
-
 !Adds the jellium potential to the local part of ionic potential
  if (dtset%jellslab/=0) then
    ABI_ALLOCATE(vjell,(nfft))

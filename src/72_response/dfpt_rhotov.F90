@@ -126,7 +126,7 @@
  real(dp),target,intent(in) :: rhor(nfft,nspden),rhor1(cplex*nfft,nspden)
  real(dp),intent(in) :: rprimd(3,3),vpsp1(cplex*nfft)
  real(dp),intent(in) :: xccc3d1(cplex*n3xccc)
- real(dp),intent(inout) :: vtrial1(cplex*nfft,nspden),elpsp1,ehart1,exc1 !vz_d
+ real(dp),intent(inout) :: vtrial1(cplex*nfft,nspden),elpsp1,ehart1,exc1
  real(dp),intent(out) :: vresid1(cplex*nfft,nspden)
  real(dp),target,intent(out) :: vhartr1(:),vxc1(:,:)
 
@@ -291,11 +291,19 @@
 
  if (optres==0) then
 !$OMP PARALLEL DO COLLAPSE(2)
-   do ispden=1,nspden
+   do ispden=1,min(nspden,2)
      do ifft=1,cplex*nfft
        vresid1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)-vtrial1(ifft,ispden)
      end do
    end do
+   if(nspden==4)then
+!$OMP PARALLEL DO COLLAPSE(2)
+     do ispden=3,4
+       do ifft=1,cplex*nfft
+         vresid1(ifft,ispden)=vxc1_(ifft,ispden)
+       end do
+     end do
+   end if
 
 !  Compute square norm vres2 of potential residual vresid
    call sqnorm_v(cplex,nfft,vres2,nspden,optres,vresid1)
@@ -306,11 +314,19 @@
 !  (only if requested ; if optres==1)
 
 !$OMP PARALLEL DO COLLAPSE(2)
-   do ispden=1,nspden
+   do ispden=1,min(nspden,2)
      do ifft=1,cplex*nfft
        vtrial1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)
      end do
    end do
+   if(nspden==4)then
+!$OMP PARALLEL DO COLLAPSE(2)
+   do ispden=3,4
+     do ifft=1,cplex*nfft
+       vtrial1(ifft,ispden)=vxc1_(ifft,ispden)
+     end do
+   end do
+   end if
 
  end if
 
