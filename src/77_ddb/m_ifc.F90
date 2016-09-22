@@ -1581,10 +1581,6 @@ implicit none
 
 !       transfer short range and long range       
          do mu=1,3
-           if(mu==1.and.nu==1) then
-             write(888,*),ia,ib,ii,irpt,"cell",Ifc%cell(irpt,:)
-           end if
-           if(ia==1.and.ib==2.and.(irpt==13.or.irpt==14.or.irpt==15)) write(777,*) irpt,sriaf(mu,nu,ii),Ifc%wghatm(ia,ib,irpt)
            Ifc%short_atmfrc(1,mu,ia,nu,ib,irpt) = sriaf(mu,nu,ii) + tol10
            Ifc%ewald_atmfrc(1,mu,ia,nu,ib,irpt) = ewiaf1(mu,nu) + tol10
          end do
