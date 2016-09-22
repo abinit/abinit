@@ -422,12 +422,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    ABI_ALLOCATE(eknk_nd,(dtset%nsppol,dtset%nkpt,2,dtset%mband,dtset%mband*paw_dmft%use_dmft))
    ABI_ALLOCATE(EigMin,(2,dtset%mband))
    ABI_ALLOCATE(grnlnk,(3*natom,mbdkpsp*optforces))
-   if (psps%usepaw==0)  then
-     ABI_ALLOCATE(enlnk,(mbdkpsp))
-   end if
+   ABI_ALLOCATE(enlnk,(mbdkpsp))
+   eknk(:)=zero;enlnk(:)=zero
+   if (optforces>0) grnlnk(:,:)=zero
    if(paw_dmft%use_dmft==1) eknk_nd=zero
-   eknk(:)=zero;if (optforces>0) grnlnk(:,:)=zero
-   if (psps%usepaw==0) enlnk(:)=zero
  end if !usewvl==0
 
 !Initialize rhor if needed; store old rhor
@@ -876,7 +874,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if(paw_dmft%use_dmft==1) eknk_nd(isppol,ikpt,:,:,:) = ek_k_nd(:,:,:)
        resid(1+bdtot_index : nband_k+bdtot_index) = resid_k(:)
        if (optforces>0) grnlnk(:,1+bdtot_index : nband_k+bdtot_index) = grnl_k(:,:)
-       if (psps%usepaw==0) enlnk(1+bdtot_index : nband_k+bdtot_index) = enl_k(:)
+       enlnk(1+bdtot_index : nband_k+bdtot_index) = enl_k(:)
 
        if(iscf>0 .or. iscf==-3)then
 !        Accumulate sum over k points for band, nonlocal and kinetic energies,
@@ -980,7 +978,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(989,1,tsec)
 
 !      If needed, exchange the values of eigen,resid,eknk,enlnk,grnlnk
-       ABI_ALLOCATE(buffer1,((4+3*natom*optforces-psps%usepaw)*mbdkpsp))
+       ABI_ALLOCATE(buffer1,((4+3*natom*optforces)*mbdkpsp))
        if(paw_dmft%use_dmft==1) then
          ABI_ALLOCATE(buffer2,(mb2dkpsp*paw_dmft%use_dmft))
        end if
@@ -988,6 +986,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        buffer1(1          :  mbdkpsp)=eigen(:)
        buffer1(1+  mbdkpsp:2*mbdkpsp)=resid(:)
        buffer1(1+2*mbdkpsp:3*mbdkpsp)=eknk(:)
+       buffer1(1+3*mbdkpsp:4*mbdkpsp)=enlnk(:)
+       index1=4*mbdkpsp
+       if (optforces>0) then
+         buffer1(index1+1:index1+3*natom*mbdkpsp)=reshape(grnlnk,(/(3*natom)*mbdkpsp/) )
+       end if
        if(paw_dmft%use_dmft==1) then
          nnn=0
          do ikpt=1,dtset%nkpt
@@ -1007,14 +1010,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            MSG_BUG(message)
          end if
        end if
-       index1=3*mbdkpsp
-       if (psps%usepaw==0) then
-         buffer1(index1+1:index1+mbdkpsp)=enlnk(:)
-         index1=index1+mbdkpsp
-       end if
-       if (optforces>0) then
-         buffer1(index1+1:index1+3*natom*mbdkpsp)=reshape(grnlnk, (/(3*natom)*mbdkpsp/) )
-       end if
 
 !      Build sum of everything
        call timab(48,1,tsec)
@@ -1028,6 +1023,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        eigen(:) =buffer1(1          :  mbdkpsp)
        resid(:) =buffer1(1+  mbdkpsp:2*mbdkpsp)
        eknk(:)  =buffer1(1+2*mbdkpsp:3*mbdkpsp)
+       enlnk(:) =buffer1(1+3*mbdkpsp:4*mbdkpsp)
+       index1=4*mbdkpsp
+       if (optforces>0) then
+         grnlnk(:,:)=reshape(buffer1(index1+1:index1+3*natom*mbdkpsp),(/3*natom,mbdkpsp/) )
+       end if
        if(paw_dmft%use_dmft==1) then
          nnn=0
          do ikpt=1,dtset%nkpt
@@ -1042,14 +1042,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              end do
            end do
          end do
-       end if
-       index1=3*mbdkpsp
-       if (psps%usepaw==0) then
-         enlnk(:) =buffer1(index1+1:index1+mbdkpsp)
-         index1=index1+mbdkpsp
-       end if
-       if (optforces>0) then
-         grnlnk(:,:)=reshape(buffer1(index1+1:index1+3*natom*mbdkpsp),(/ 3*natom , mbdkpsp /) )
        end if
        if(allocated(buffer2))  then
          ABI_DEALLOCATE(buffer2)
@@ -1438,9 +1430,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    ABI_DEALLOCATE(eknk)
    ABI_DEALLOCATE(eknk_nd)
    ABI_DEALLOCATE(grnlnk)
-   if (psps%usepaw==0)  then
-     ABI_DEALLOCATE(enlnk)
-   end if
+   ABI_DEALLOCATE(enlnk)
 
 !  In the non-self-consistent case, print eigenvalues and residuals
    if(iscf<=0)then

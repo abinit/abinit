@@ -376,7 +376,6 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
 
 !    Pass vtrial to BigDFT object
      if(dtset%usewvl==1) then
-     if(dtset%usewvl==1) then
        call wvl_vtrial_abi2big(1,vnew,wvl%den)
 !      call wvl_vtrial_abi2big(1,vtrial,wvl%den)
      end if

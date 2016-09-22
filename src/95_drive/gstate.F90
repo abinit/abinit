@@ -159,7 +159,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &                               electronpositron_calctype
  use m_scfcv,            only : scfcv_t,scfcv_init, scfcv_destroy, scfcv_run
  use m_iowf,             only : outwf
- use m_ioarr,            only : read_rhor
+ use m_ioarr,            only : ioarr,read_rhor
  use defs_wvltypes,      only : wvl_data,coulomb_operator,wvl_wf_type
 #if defined HAVE_BIGDFT
  use BigDFT_API,         only : wvl_timing => timing,xc_init,xc_end,XC_MIXED,XC_ABINIT,&
@@ -234,7 +234,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #if defined HAVE_BIGDFT
  integer :: icoulomb
 #endif
- integer :: ask_accurate,bantot,choice,comm_psp,fullinit
+ integer :: accessfil,ask_accurate,bantot,choice,comm_psp,fform,fullinit
  integer :: gnt_option,gscase,iatom,idir,ierr,ii,indx,jj,kk,ios,itypat
  integer :: ixfh,izero,mcg,me,mgfftf,mpert,msize,mu,my_natom,my_nspinor
  integer :: nblok,nfftf,nfftot,npwmin
@@ -943,8 +943,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
          mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr)
          results_gs%etotal = hdr_den%etot; call hdr_free(hdr_den)
        else
-         call ioarr(accessfil,rhor,dtset,results_gs%etotal,fformr,dtfil%fildensin,hdr,&
-&         mpi_enreg,ngfftf,cplex1,nfftf,pawrhoij,rdwr,rdwrpaw,wvl%den)
+         fform=52 ; accessfil=0
+         if (dtset%iomode == IO_MODE_MPI ) accessfil=4
+         if (dtset%iomode == IO_MODE_ETSF) accessfil=3
+         call ioarr(accessfil,rhor,dtset,results_gs%etotal,fform,dtfil%fildensin,hdr,&
+&         mpi_enreg,ngfftf,cplex1,nfftf,pawrhoij,1,rdwrpaw,wvl%den)
        end if
 
        if (rdwrpaw/=0) then

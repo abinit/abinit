@@ -220,8 +220,12 @@
     NL   psp  energy=  1.14090416887351E+00
     >>>>>>>>> Etotal= -1.71834781533207E+01
 
- Other information on the energy :
-    Total energy(eV)= -4.67586220079933E+02 ; Band energy (Ha)=  -3.9928317897E+00
+ "Double-counting" decomposition of free energy:
+    Band energy     = -3.99283178967364E+00
+    Ewald energy    = -1.52158903200519E+01
+    PspCore energy  =  0.00000000000000E+00
+    Dble-C XC-energy=  2.02538627751619E+00
+    >>>> Etotal (DC)= -1.71833358322094E+01
 --------------------------------------------------------------------------------
 
 == END DATASET(S) ==============================================================

@@ -150,11 +150,11 @@
 
 subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &  elast,electronpositron,energies,&
-&  etotal,favg,fcart,fock,forold,fred,gmat,gresid,grewtn,grhf,grnl,grvdw,&
+&  etotal,favg,fcart,fock,forold,fred,gmet,gresid,grewtn,grhf,grnl,grvdw,&
 &  grxc,gsqcut,indsym,kxc,maxfor,mgfft,mpi_enreg,my_natom,nattyp,&
 &  nfft,ngfft,ngrvdw,nhat,nkxc,ntypat,nvresid,n1xccc,n3xccc,optene,optforces,optres,&
 &  pawang,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,red_ptot,psps,rhog,rhor,rmet,rprimd,&
-&  symrec,synlgr,usepaw,vhartr,vpsp,vxc,wvl,wvl_den,xccc3d,xred)
+&  symrec,synlgr,ucvol,usepaw,vhartr,vpsp,vxc,wvl,wvl_den,xccc3d,xred)
 
  use defs_basis
  use defs_datatypes
@@ -223,12 +223,12 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 
 !Local variables-------------------------------
 !scalars
- integer :: comm_grid,dimnhat,ifft,ipositron,ispden,optgr,optgr2,option,optnc,optstr,optstr2,iir,jjr,kkr  !!HONG
+ integer :: comm_grid,dimnhat,ifft,ipositron,ispden,optgr,optgr2,option,optnc,optstr,optstr2,iir,jjr,kkr
  logical :: apply_residual
- real(dp) :: eenth
+ real(dp) :: eenth,ucvol_
 !arrays
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
- real(dp) :: tsec(2),,A(3,3),A1(3,3),A_new(3,3),efield_new(3)
+ real(dp) :: tsec(2),A(3,3),A1(3,3),A_new(3,3),efield_new(3)
  real(dp) :: dummy(0),nhat_dum(0,0)
  real(dp),allocatable :: vlocal(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: resid(:,:)
@@ -387,11 +387,15 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
          end do
        end do
      end if
+     ucvol_=ucvol
+#    if defined HAVE_BIGDFT
+     if (dtset%usewvl==1) ucvol_=product(wvl_den%denspot%dpbox%hgrids)*real(product(wvl_den%denspot%dpbox%ndims),dp)
+#    endif
      dimnhat=0;optgr=1;optgr2=0;optstr=0;optstr2=0
      comm_grid=mpi_enreg%comm_fft;if(dtset%usewvl==1) comm_grid=mpi_enreg%comm_wvl
      call pawgrnl(atindx1,dimnhat,dummy,1,dummy,grnl,gsqcut,mgfft,my_natom, &
 &     dtset%natom, nattyp,nfft,ngfft,nhat_dum,dummy,dtset%nspden,dtset%nsym,ntypat,optgr,optgr2,optstr,optstr2,&
-&     pawang,pawfgrtab,pawrhoij,pawtab,ph1d,psps,k0,rprimd,symrec,dtset%typat,ucvol,vlocal,vxc,xred, &
+&     pawang,pawfgrtab,pawrhoij,pawtab,ph1d,psps,k0,rprimd,symrec,dtset%typat,ucvol_,vlocal,vxc,xred, &
 &     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,mpi_comm_grid=comm_grid)
      ABI_DEALLOCATE(vlocal)
    end if
@@ -404,21 +408,18 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    if (apply_residual) then
      ABI_ALLOCATE(resid,(nfft,dtset%nspden))
      option=0; if (dtset%densfor_pred<0) option=1
-     ABI_ALLOCATE(vlocal,(nfft,dtset%nspden))
      optnc=1;if (dtset%nspden==4.and.(abs(dtset%densfor_pred)==4.or.abs(dtset%densfor_pred)==6)) optnc=2
      call nres2vres(dtset,gsqcut,usepaw,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 &     nkxc,nvresid,n3xccc,optnc,option,pawang,pawfgrtab,pawrhoij,pawtab,&
-&     rhor,rprimd,usepaw,vlocal,xccc3d,xred)
+&     rhor,rprimd,usepaw,resid,xccc3d,xred)
    else
      resid => nvresid
    end if
-
-   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,forold,fred,gresid,grewtn,&
+   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gresid,grewtn,&
 &     grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfft,mpi_enreg,&
 &     n1xccc,n3xccc,nattyp,nfft,ngfft,ngrvdw,ntypat,&
-&     pawrad,pawtab,ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,resid,vxc,wvl,wvl_den,xred,&
+&     pawrad,pawtab,ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,dtset%usefock,resid,vxc,wvl,wvl_den,xred,&
 &     electronpositron=electronpositron)
-
    if (apply_residual) then
      ABI_DEALLOCATE(resid)
    end if

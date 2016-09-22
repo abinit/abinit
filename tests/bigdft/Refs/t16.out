@@ -208,15 +208,19 @@
     NL   psp  energy=  1.76101790761324E+00
     >>>>>>>>> Etotal= -2.13781027399576E+01
 
- Other information on the energy :
-    Total energy(eV)= -5.81727759855504E+02 ; Band energy (Ha)=  -5.8304812305E+00
+ "Double-counting" decomposition of free energy:
+    Band energy     = -5.83048123049166E+00
+    Ion-ion energy  =  1.20000000000000E+01
+    PspCore energy  =  0.00000000000000E+00
+    Dble-C XC-energy= -2.75314657116515E+01
+    >>>> Etotal (DC)= -2.13619469421432E+01
 --------------------------------------------------------------------------------
 
 == END DATASET(S) ==============================================================
 ================================================================================
   
  -outvars: echo values of variables after computation  --------
--       accesswff           3
+-          iomode           3
             acell      1.3300000000E+01  1.3300000000E+01  1.3300000000E+01 Bohr
               amu      1.20110000E+01  1.59994000E+01
              ecut      5.00000000E+00 Hartree

@@ -307,11 +307,11 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  if (dtset%usewvl == 0) then
    ucvol_local = ucvol
+#if defined HAVE_BIGDFT
  else
 !  We need to tune the volume when wavelets are used because, not
 !  all FFT points are used.
 !  ucvol_local = (half * dtset%wvl_hgrid) ** 3 * ngfft(1)*ngfft(2)*ngfft(3)
-#if defined HAVE_BIGDFT
    ucvol_local = product(wvl_den%denspot%dpbox%hgrids) * real(product(wvl_den%denspot%dpbox%ndims), dp)
 #endif
  end if

@@ -171,10 +171,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     485.000     485.000
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1 -0.47740465898146    -4.774E-01 7.859E-04 1.239E-01
- ETOT  2 -0.47644077535439     9.639E-04 9.792E-13 1.871E-02
- ETOT  3 -0.47631524943673     1.255E-04 2.603E-07 1.347E-03
- ETOT  4 -0.47642345601119    -1.082E-04 4.818E-09 5.749E-05
+ ETOT  1 -0.47740469933141    -4.774E-01 7.859E-04 1.239E-01
+ ETOT  2 -0.47644081834309     9.639E-04 9.792E-13 1.871E-02
+ ETOT  3 -0.47631529277864     1.255E-04 2.603E-07 1.347E-03
+ ETOT  4 -0.47642349936285    -1.082E-04 4.818E-09 5.749E-05
 
  At SCF step    4       nres2   =  5.75E-05 < tolvrs=  1.00E-04 =>converged.
  Integrated electronic density in atomic spheres:
@@ -185,8 +185,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     485.000     485.000
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.013033565761995
- Compensation charge over fine fft grid    =      0.012871915504830
+ Compensation charge over spherical meshes =      0.013033570635560
+ Compensation charge over fine fft grid    =      0.012871919640987
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -220,25 +220,25 @@ _setup2: Arith. and geom. avg. npw (full set) are     485.000     485.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  2.66501994118338E-01
-    Hartree energy  =  2.44646383541819E-01
-    XC energy       = -2.06001055456127E-01
+    Kinetic energy  =  2.66502100932014E-01
+    Hartree energy  =  2.44646403429572E-01
+    XC energy       = -2.06001076844602E-01
     Ion-ion energy  =  0.00000000000000E+00
     PspCore energy  =  0.00000000000000E+00
-    Loc. psp. energy= -7.71731198824572E-01
-    Spherical terms = -1.08749090347466E-02
-    >>>>>>>>> Etotal= -4.77458785655288E-01
+    Loc. psp. energy= -7.71731331210922E-01
+    Spherical terms = -1.08749130919955E-02
+    >>>>>>>>> Etotal= -4.77458816785934E-01
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -2.94017544976162E-01
+    Band energy     = -2.94017575135620E-01
     Ion-ion energy  =  0.00000000000000E+00
     PspCore energy  =  0.00000000000000E+00
-    Dble-C XC-energy= -1.82381460954661E-01
-    Spherical terms = -2.44500803660147E-05
-    >>>> Etotal (DC)= -4.76423456011189E-01
+    Dble-C XC-energy= -1.82381474121495E-01
+    Spherical terms = -2.44501057352353E-05
+    >>>> Etotal (DC)= -4.76423499362851E-01
 
-  >Total energy in eV           = -1.29923142937955E+01
-  >Total DC energy in eV        = -1.29641415414283E+01
+  >Total energy in eV           = -1.29923151409035E+01
+  >Total DC energy in eV        = -1.29641427210870E+01
 --------------------------------------------------------------------------------
 
 == END DATASET(S) ==============================================================
@@ -248,7 +248,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     485.000     485.000
             acell      7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
               amu      1.00000000E+00
              ecut      1.00000000E+01 Hartree
-           etotal     -4.7642345601E-01
+           etotal     -4.7642349936E-01
             fcart      9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
 -          fftalg         312
          icoulomb           1

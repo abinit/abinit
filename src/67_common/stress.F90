@@ -275,6 +275,7 @@
  if (coredens_method==2) then
    if (n1xccc/=0) then
      call timab(55,1,tsec)
+     option=3
      ABI_ALLOCATE(dyfr_dum,(3,3,natom))
      ABI_ALLOCATE(gr_dum,(3,natom))
      ABI_ALLOCATE(v_dum,(nfft))

@@ -953,7 +953,6 @@ function vloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vloc_zero_mklocl'
- use interfaces_67_common
 !End of the abilint section
 
  implicit none
@@ -1304,7 +1303,6 @@ function dvloc_zero_mklocl(charge,rloc,msz,rad,vloc,d2vloc)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvloc_zero_mklocl'
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

@@ -313,7 +313,6 @@ subroutine local_forces_wvl(iproc,natom,rxyz,hxh,hyh,hzh,n1,n2,n3,n3pi,i3s,n1i,n
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'local_forces_wvl'
- use interfaces_67_common, except_this_one => local_forces_wvl
 !End of the abilint section
 
  implicit none
@@ -589,7 +588,6 @@ function dvloc_zero_wvl(charge,rloc,msz,rad,vloc,d2vloc)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvloc_zero_wvl'
- use interfaces_67_common
 !End of the abilint section
 
  implicit none

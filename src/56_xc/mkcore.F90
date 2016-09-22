@@ -635,7 +635,6 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
  use interfaces_18_timing
  use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
- use interfaces_56_xc, except_this_one => mkcore_alt
 !End of the abilint section
 
  implicit none

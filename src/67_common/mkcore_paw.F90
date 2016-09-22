@@ -117,7 +117,6 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,grxc,icoulomb,natom,mpi_enreg,&
  geocode='P'
  if (icoulomb==1) geocode='F'
  if (icoulomb==2) geocode='S'
- if (icoulomb == 1) then
 
 !Compute metric tensor in real space rmet
  do nu=1,3
@@ -337,7 +336,7 @@ subroutine mkcore_paw(atindx1,corstr,dyfrx2,grxc,icoulomb,natom,mpi_enreg,&
 !!    grxc(:,iatom)=rprimd(1,:)*t1+rprimd(2,:)*t2+rprimd(3,:)*t3
 !   end do
 
- elseif (option==3) then
+ else if (option==3) then
 
 !  Transform stress tensor from full storage mode to symmetric storage mode
    corstr(1)=corfra(1,1)

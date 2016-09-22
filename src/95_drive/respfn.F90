@@ -804,7 +804,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    option=1
    ABI_ALLOCATE(dyfrlo_indx,(3,3,natom))
    ABI_ALLOCATE(grtn_indx,(3,natom))
-
+   call mklocl(dtset,dyfrlo_indx,eei,gmet,gprimd,&
+&   grtn_indx,gsqcut,dummy6,mgfftf,mpi_enreg,natom,nattyp,&
+&   nfftf,ngfftf,dtset%nspden,ntypat,option,pawtab,ph1df,psps,&
 &   dtset%qprtrb,rhog,rhor,rprimd,ucvol,dtset%vprtrb,vpsp,wvl%descr,wvl%den,xred)
    ABI_DEALLOCATE(dyfrlo_indx)
    ABI_DEALLOCATE(grtn_indx)
@@ -812,6 +814,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Pseudo core electron density by method 2
  if (coredens_method==2.and.psps%n1xccc/=0) then
+   option=1
    ABI_ALLOCATE(dyfrx2,(3,3,natom))
    ABI_ALLOCATE(vxc,(0,0)) ! dummy
    call mkcore(dummy6,dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&

@@ -566,7 +566,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 
 !    Local ionic potential by method 2
      if (vloc_method==2) then
-       option = 1
+       option=1
        ABI_ALLOCATE(dyfrlo_indx,(3,3,dtset%natom))
        ABI_ALLOCATE(grtn_indx,(3,dtset%natom))
        call mklocl(dtset,dyfrlo_indx,eei,gmet,gprimd,grtn_indx,gsqcut,dummy6,&
@@ -579,6 +579,7 @@ subroutine prcref(atindx,dielar,dielinv,&
 
 !    Pseudo core electron density by method 2
      if (coredens_method==2.and.n1xccc/=0) then
+       option=1
        ABI_ALLOCATE(dyfrx2,(3,3,dtset%natom))
        ABI_ALLOCATE(grxc_indx,(3,dtset%natom))
        call mkcore(dummy6,dyfrx2,grxc_indx,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,&

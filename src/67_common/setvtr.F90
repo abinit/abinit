@@ -289,10 +289,10 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
 !--------------------------------------------------------------
  if (dtset%usewvl == 0) then
    ucvol_local = ucvol
+#if defined HAVE_BIGDFT
  else
 !  We need to tune the volume when wavelets are used because, not all FFT points are used.
 !  ucvol_local = (half * dtset%wvl_hgrid) ** 3 * ngfft(1)*ngfft(2)*ngfft(3)
-#if defined HAVE_BIGDFT
    ucvol_local = product(wvl%den%denspot%dpbox%hgrids) * real(product(wvl%den%denspot%dpbox%ndims), dp)
 #endif
  end if
@@ -347,6 +347,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
  if (coredens_method==2.and.n1xccc/=0) then
    call timab(91,2,tsec)
    call timab(92,1,tsec)
+   option=1
    ABI_ALLOCATE(gr_dum,(3,dtset%natom))
    ABI_ALLOCATE(dyfr_dum,(3,3,dtset%natom))
    if (psps%usewvl==0.and.psps%usepaw==0.and.dtset%icoulomb==0) then
