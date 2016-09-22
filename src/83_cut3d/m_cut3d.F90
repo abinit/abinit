@@ -28,7 +28,7 @@ MODULE m_cut3d
  use m_errors
  use m_splines
  use m_hdr
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_nctk
@@ -426,7 +426,8 @@ subroutine cut3d_hirsh(grid_den,natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion
 
 !Output
  write(std_out,*)
- write(std_out,*)'    Atom       Zion       Hirshfeld Charge       Net charge '
+ write(std_out,*)'    Hirshfeld analysis'
+ write(std_out,*)'    Atom       Zion       Electron  Charge       Net charge '
  write(std_out,*)
  do iatom=1,natom
    write(std_out,'(i9,3es17.6)' )&
@@ -1346,7 +1347,7 @@ subroutine cut3d_rrho(path,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
 !Local variables--------------------------------------------------------
 !scalars
  integer :: ispden,unt,fform
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: varid
 #endif
  character(len=500) :: msg
@@ -1372,7 +1373,7 @@ subroutine cut3d_rrho(path,varname,iomode,grid_full,nr1,nr2,nr3,nspden)
 
  case (IO_MODE_ETSF)
    ! ETSF case
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(unt, path, xmpi_comm_self))
    NCF_CHECK(nf90_inq_varid(unt, varname, varid))
    ! [cplex, n1, n2, n3, nspden]

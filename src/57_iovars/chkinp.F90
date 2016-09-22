@@ -1563,15 +1563,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      end if
    end do
 
-   if (maxval(nprojmax(0:3))>1) then
-     if (usepaw==0.and.optdriver==RUNL_SCREENING.and.dt%inclvkb/=0) then
-       write(message,'(3a)')&
-&       'inclvkb /= 0 not implemented for pseudos with more than one projector per l-channel ',ch10,&
-&       'Use inclvkb == 0 in the input file '
-       MSG_ERROR_NOSTOP(message, ierr)
-     end if
-   end if
-
 !  npspinor
 !  Must be equal to 1 or 2
    call chkint_eq(0,0,cond_string,cond_values,ierr,'npspinor',dt%npspinor,2,(/1,2/),iout)
@@ -2407,7 +2398,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtvolimg',dt%prtvolimg,3,(/0,1,2/),iout)
 
 !  prtwant
-#if !defined HAVE_DFT_WANNIER90
+#if !defined HAVE_WANNIER90
    if(dt%prtwant==2) then
      write(message, '(a,a,a)' )&
 &     ' prtwant==2 is only relevant if wannier90 library is linked',ch10,&
@@ -2506,38 +2497,37 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
 !  so_psp
-   do ipsp=1,npsp
-!    Check that so_psp is between 0 and 3
-     if ( dt%so_psp(ipsp)<0 .or. dt%so_psp(ipsp)>3 ) then
-       write(message, '(a,i3,a,i3,a,a,a,a,a)' )&
-&       'so_psp(',ipsp,' ) was input as',dt%so_psp(ipsp),' .',ch10,&
-&       'Input value must be 0, 1, 2, or 3.',ch10,&
-&       'Action: modify value of so_psp (old name : so_typat) in input file.'
-       MSG_ERROR_NOSTOP(message, ierr)
-     end if
-!    If nspinor=1, the spin-orbit contribution cannot be taken into account
-     if ( nspinor==1 .and. (dt%so_psp(ipsp)==2 .or. dt%so_psp(ipsp)==3) ) then
-       write(message, '(a,i2,a,i3,a,a,a,a,a)' )&
-&       'so_psp(',ipsp,') was input as',dt%so_psp(ipsp),', with nspinor=1.',ch10,&
-&       'When nspinor=1, so_psp cannot be required to be 2 or 3.',ch10,&
-&       'Action: modify value of so_psp (old name : so_typat) or nspinor in input file.'
-       MSG_ERROR_NOSTOP(message, ierr)
-     end if
-     
-!    If nspden=4, so_psp must be 1
-!    if ( dt%so_psp(ipsp)/=1 .and. nspden==4 ) then
-!    write(message, '(a,a,a,a,i2,a,i3,7a)' ) ch10,&
-!    &    ' chkinp: ERROR -',ch10,&
-!    &    '  so_psp(',ipsp,') was input as',&
-!    &     dt%so_psp(ipsp),', with nspden=4.',ch10,&
-!    &    '  However, non-collinear magnetism is not yet implemented with spin-orbit.',ch10,&
-!    &    '  so_psp must be 1 for each pseudopotential type.',ch10,&
-!    &    '  Action : modify value of so_psp or nspden in input file.'
-!    call wrtout(iout,message,'COLL')
-!    call wrtout(std_out,  message,'COLL')
-!    ierr=ierr+1
-!    end if
-   end do
+   if(usepaw==0)then
+     do ipsp=1,npsp
+!      Check that so_psp is between 0 and 3
+       if ( dt%so_psp(ipsp)<0 .or. dt%so_psp(ipsp)>3 ) then
+         write(message, '(a,i3,a,i3,a,a,a,a,a)' )&
+&         'so_psp(',ipsp,' ) was input as',dt%so_psp(ipsp),' .',ch10,&
+&         'Input value must be 0, 1, 2, or 3.',ch10,&
+&         'Action: modify value of so_psp (old name : so_typat) in input file.'
+         MSG_ERROR_NOSTOP(message, ierr)
+       end if
+!      If nspinor=1, the spin-orbit contribution cannot be taken into account
+       if ( nspinor==1 .and. (dt%so_psp(ipsp)==2 .or. dt%so_psp(ipsp)==3) ) then
+         write(message, '(a,i2,a,i3,a,a,a,a,a)' )&
+&         'so_psp(',ipsp,') was input as',dt%so_psp(ipsp),', with nspinor=1 and usepaw=0.',ch10,&
+&         'When nspinor=1, so_psp cannot be required to be 2 or 3.',ch10,&
+&         'Action: modify value of so_psp (old name : so_typat) or nspinor in input file.'
+         MSG_ERROR_NOSTOP(message, ierr)
+       end if
+!      If nspinor=2, the spin-orbit contribution should be present in the pseudopotentials, 
+!      unless the user explicitly allows not to treat it.
+       if ( nspinor==2 .and. dt%so_psp(ipsp)/=0 .and. pspheads(ipsp)%pspso==0 ) then
+         write(message, '(a,i2,a,i3,9a)' )&
+&         'so_psp(',ipsp,') was input as',dt%so_psp(ipsp),', with nspinor=2 and usepaw=0.',ch10,&
+&         'This requires a treatment of the spin-orbit interaction. However, it has been detected ',ch10,&
+&         'that the pseudopotential that you want to use does not specify the spin-orbit coupling.',ch10,& 
+&         'Action: choose a pseudopotential that contains information about the spin-orbit interaction,',ch10,&
+&         ' or deliberately switch off the spin-orbit interaction by setting so_psp=0 for that pseudopotential in the input file.'
+         MSG_ERROR_NOSTOP(message, ierr)
+       end if
+     end do ! ipsp
+   end if ! usepaw==0
 
 !  spinmagntarget
    if(abs(dt%spinmagntarget+99.99d0)>tol8 .and. abs(dt%spinmagntarget)>tol8)then

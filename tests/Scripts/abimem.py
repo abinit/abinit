@@ -104,12 +104,11 @@ def main():
     def str_examples():
         return """\
 usage example:
-    abimem.py summary [FILES]     => Find possible memory leaks in FILE(s)
     abimem.py leaks [FILES]       => Find possible memory leaks in FILE(s)
-    abimem.py small [FILES]       => Find possible memory leaks in FILE(s)
-    abimem.py intens [FILES]      => Find possible memory leaks in FILE(s)
-    abimem.py peaks [FILES]       => Find possible memory leaks in FILE(s)
-    abimem.py plot [FILES]        => Find possible memory leaks in FILE(s)
+    abimem.py small [FILES]       => Find small memory allocations in FILE(s)
+    abimem.py intens [FILES]      => Find periods of intense memory allocation in FILE(s)
+    abimem.py peaks [FILES]       => Find peaks in memory allocation in FILE(s)
+    abimem.py plot [FILES]        => Plot memory allocations in FILE(s) using gnuplot
 
     FILES could be either a list of files or a single directory.
  

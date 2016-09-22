@@ -53,13 +53,13 @@
 !!
 !! CHILDREN
 !!      crystal_free,crystal_from_hdr,crystal_print,cwtime,ddb_free
-!!      ddb_from_file,destroy_mpi_enreg,dvdb_free,dvdb_init,dvdb_list_perts
-!!      dvdb_print,ebands_free,ebands_print,ebands_set_fermie,ebands_set_scheme
-!!      ebands_update_occ,edos_free,edos_init,edos_write,eph_phgamma,hdr_free
-!!      hdr_vs_dtset,ifc_free,ifc_init,ifc_outphbtrap,init_distribfft_seq
-!!      initmpi_seq,mkphdos,pawfgr_destroy,pawfgr_init,phdos_free,phdos_print
-!!      print_ngfft,prtbltztrp_out,pspini,wfk_read_eigenvalues,wrtout
-!!      xmpi_bcast
+!!      ddb_from_file,ddk_free,ddk_init,destroy_mpi_enreg,dvdb_free,dvdb_init
+!!      dvdb_list_perts,dvdb_print,ebands_free,ebands_print,ebands_set_fermie
+!!      ebands_set_scheme,ebands_update_occ,edos_free,edos_init,edos_write
+!!      eph_phgamma,hdr_free,hdr_vs_dtset,ifc_free,ifc_init,ifc_outphbtrap
+!!      init_distribfft_seq,initmpi_seq,mkphdos,pawfgr_destroy,pawfgr_init
+!!      phdos_free,phdos_print,print_ngfft,prtbltztrp_out,pspini
+!!      wfk_read_eigenvalues,wrtout,xmpi_bcast
 !!
 !! SOURCE
 
@@ -81,6 +81,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_crystal
  use m_crystal_io
  use m_ebands
+ use m_ddk
  use m_ddb
  use m_dvdb
  use m_ifc
@@ -142,12 +143,15 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: cpu,wall,gflops
  character(len=500) :: msg
  character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,path
+ character(len=fnlen) :: ddk_path(3)
+ character(len=10) :: strddk 
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
  type(ebands_t) :: ebands, ebands_kq
  type(edos_t) :: edos
  type(ddb_type) :: ddb
  type(dvdb_t) :: dvdb
+ type(ddk_t) :: ddk
  type(ifc_type) :: ifc
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
@@ -200,9 +204,30 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  dvdb_path = dtfil%filddbsin; ii=len_trim(dvdb_path); dvdb_path(ii-2:ii+1) = "DVDB"
  usewfq = (dtset%irdwfq/=0 .or. dtset%getwfq/=0)
 
+ ddk_path(1) = dtfil%fnamewffddk 
+ write (strddk,'(I10)') 3*dtset%natom+3
+ ddk_path(3) = trim(ddk_path(1)) // trim(adjustl(strddk))
+ write (strddk,'(I10)') 3*dtset%natom+2
+ ddk_path(2) = trim(ddk_path(1)) // trim(adjustl(strddk))
+ write (strddk,'(I10)') 3*dtset%natom+1
+ ddk_path(1) = trim(ddk_path(1)) // trim(adjustl(strddk))
+ 
  if (my_rank == master) then
    if (.not. file_exists(ddb_path)) MSG_ERROR(sjoin("Cannot find DDB file:", ddb_path))
    if (.not. file_exists(dvdb_path)) MSG_ERROR(sjoin("Cannot find DVDB file:", dvdb_path))
+
+   if (dtset%eph_transport > 0) then
+     do ii=1,3
+       if (.not. file_exists(ddk_path(ii))) then
+         if (file_exists(nctk_ncify(ddk_path(ii)))) then
+           write(std_out,"(3a)")"- File: ",trim(ddk_path(ii))," does not exist but found netcdf file with similar name."
+           ddk_path(ii) = nctk_ncify(ddk_path(ii))
+         else
+           MSG_ERROR(sjoin("Cannot find DDK file:", ddk_path(ii)))
+         end if
+       end if
+     end do
+   end if
    ! Accept WFK file in Fortran or netcdf format.
    if (.not. file_exists(wfk0_path)) then
      if (file_exists(nctk_ncify(wfk0_path))) then
@@ -232,6 +257,13 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
  call wrtout(ab_out, sjoin("- Reading DDB from file:",ddb_path))
  call wrtout(ab_out, sjoin("- Reading DVDB from file:",dvdb_path))
+ if (dtset%eph_transport > 0) then
+   call wrtout(ab_out, sjoin("- Reading DDK x from file:",ddk_path(1)))
+   call wrtout(ab_out, sjoin("- Reading DDK y from file:",ddk_path(2)))
+   call wrtout(ab_out, sjoin("- Reading DDK z from file:",ddk_path(3)))
+   ! TODO: put this inside phgamma? - only check for file existence here.
+   call ddk_init(ddk, ddk_path, comm)
+ end if
 
  call cwtime(cpu,wall,gflops,"start")
 
@@ -293,6 +325,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call ebands_update_occ(ebands_kq, spinmagntarget)
  end if
  call ebands_print(ebands,header="Ground state energies",prtvol=dtset%prtvol)
+
  ABI_FREE(gs_eigen)
 
  call cwtime(cpu,wall,gflops,"stop")
@@ -399,7 +432,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! TODO: ebands method
    nelect_per_spin = ebands_nelect_per_spin(ebands)
    call prtbltztrp_out(ebands%eig, ebands%fermie, dtfil%filnam_ds(4), ebands%kptns, cryst%natom, ebands%nband(1), &
-   nelect_per_spin, ebands%nkpt, ebands%nspinor, ebands%nsppol, cryst%nsym, cryst%rprimd, cryst%symrel)
+&   nelect_per_spin, ebands%nkpt, ebands%nspinor, ebands%nsppol, cryst%nsym, cryst%rprimd, cryst%symrel)
  end if
 
  call cwtime(cpu,wall,gflops,"stop")
@@ -428,13 +461,19 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! === Open and read pseudopotential files ===
  ! ===========================================
  call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,level40,&
- pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
+&  pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
  
+ ! ====================================================
+ ! === This is the real epc stuff once all is ready ===
+ ! ====================================================
  if (dtset%eph_task == 1) then
    ! Compute phonon linewidths in metals.
-   call eph_phgamma(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
-   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
+   call eph_phgamma(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
+&   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
  end if
+! TODO: decide whether to make several driver functions. 
+!  before that, however, need to encapsulate most of the functionalities in eph_phgamma
+!  otherwise there will be tons of duplicated code
 
  if (dtset%eph_task == 2) then
    ! Compute electron-phonon matrix elements
@@ -448,6 +487,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call crystal_free(cryst)
  call dvdb_free(dvdb)
  call ddb_free(ddb)
+ call ddk_free(ddk)
  call ifc_free(ifc)
  call ebands_free(ebands)
  call pawfgr_destroy(pawfgr)

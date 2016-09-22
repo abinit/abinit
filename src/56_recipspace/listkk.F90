@@ -57,7 +57,7 @@
 !!  of the separate vectors.
 !!
 !! PARENTS
-!!      initberry,inwffil,m_bz_mesh,m_dvdb,m_ebands,m_fock,m_phgamma
+!!      initberry,inwffil,m_bz_mesh,m_dvdb,m_ebands,m_fock,m_fstab,m_phgamma
 !!      mlwfovlp_qp
 !!
 !! CHILDREN

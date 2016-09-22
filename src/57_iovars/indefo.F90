@@ -406,6 +406,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%kptgw(:,:)=zero
    dtsets(idtset)%kptnrm=one
    dtsets(idtset)%kptopt=1
+   if(dtsets(idtset)%nspden==4)dtsets(idtset)%kptopt=4
    dtsets(idtset)%kptrlen=30.0_dp
    dtsets(idtset)%kssform=1
 !  L
@@ -800,6 +801,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%eph_fsewin = 0.04
    dtsets(idtset)%eph_ngqpt_fine = [0, 0, 0]
    dtsets(idtset)%eph_task = 1
+   dtsets(idtset)%eph_transport  = 0
 
    dtsets(idtset)%ph_wstep = 0.1/Ha_meV
    dtsets(idtset)%ph_intmeth = 2

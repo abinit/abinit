@@ -133,7 +133,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
  use m_cgtools
  use m_wffile
  use m_nctk
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  use etsf_io
 #endif
  use m_linalg_interfaces
@@ -278,7 +278,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
    write(msg,'(3a)')&
 &   'when iomode==3 in outkss, support for the ETSF I/O library ',ch10,&
 &   'must be compiled. Use --enable-etsf-io when configuring '
-#ifndef HAVE_TRIO_ETSF_IO
+#ifndef HAVE_ETSF_IO
    MSG_WARNING(msg)
    ierr = ierr + 1
 #endif
@@ -946,7 +946,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
 !* Close file
  if (my_rank==master) then
    if (iomode==IO_MODE_FORTRAN) close(unit=untkss)
-#if defined HAVE_TRIO_ETSF_IO
+#if defined HAVE_ETSF_IO
    if (iomode==IO_MODE_ETSF) then
      NCF_CHECK(nf90_close(untkss))
    end if

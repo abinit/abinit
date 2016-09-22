@@ -201,7 +201,7 @@
    write(message, '(a,a)' )ch10,&
 &   '** mlwfovlp_setup:  call wannier90 library subroutine wannier_setup'
    call wrtout(std_out,message,'COLL')
-#if defined HAVE_DFT_WANNIER90
+#if defined HAVE_WANNIER90
    nwan(:)=0
    num_bands(:)=0
    do isppol=1,nsppol

@@ -157,7 +157,7 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 &     iatom,0,iorder_cprj,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,scf_history%mcprj,&
 &     dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
 &     dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft,dtset%nkpt,&
-&     dtset%nloalg,npwarr,dtset%nspinor,dtset%nsppol,dtset%ntypat,&
+&     dtset%nloalg,npwarr,dtset%nspinor,dtset%nsppol,dtset%ntypat,3,&
 &     dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,0,0,&
 &     xred_old,ylm,ylmgr_k)
      ABI_DEALLOCATE(ylmgr_k)
@@ -205,7 +205,7 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 &     dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,scf_history%mcprj,dtset%mgfft,&
 &     dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,&
 &     nattyp,dtset%nband,dtset%natom,ngfft,dtset%nkpt,dtset%nloalg,&
-&     npwarr,dtset%nspinor,dtset%nsppol,dtset%ntypat,dtset%paral_kgb,&
+&     npwarr,dtset%nspinor,dtset%nsppol,dtset%ntypat,3,dtset%paral_kgb,&
 &     ph1d,psps,rmet,dtset%typat,ucvol,0,0,xred_old,&
 &     ylm,ylmgr_k)
      ABI_DEALLOCATE(ylmgr_k)

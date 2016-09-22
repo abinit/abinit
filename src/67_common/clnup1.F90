@@ -95,7 +95,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
 #define ABI_FUNC 'clnup1'
  use interfaces_14_hidewrite
  use interfaces_41_geometry
- use interfaces_61_ionetcdf
+ use interfaces_59_ionetcdf
  use interfaces_61_occeig
  use interfaces_67_common, except_this_one => clnup1
 !End of the abilint section
@@ -211,7 +211,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
 &   dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
 &   vxcavg,dtset%wtk)
 
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
    if (dtset%prteig==1 .and. me == master) then
      filename=trim(fnameabo_eig)//'.nc'
      call write_eig(eigen,filename,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol)

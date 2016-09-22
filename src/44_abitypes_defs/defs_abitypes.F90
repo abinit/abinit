@@ -891,6 +891,7 @@ type dataset_type
  real(dp) :: eph_fsmear != 0.01
  real(dp) :: eph_fsewin != 0.04
  integer :: eph_ngqpt_fine(3)
+ integer :: eph_transport 
 
  integer :: ph_intmeth
  real(dp) :: ph_wstep

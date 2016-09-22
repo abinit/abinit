@@ -1,6 +1,6 @@
-!!****d* ABINIT/61_ionetcdf
+!!****d* ABINIT/59_ionetcdf
 !! NAME
-!! 61_ionetcdf
+!! 59_ionetcdf
 !!
 !! DESCRIPTION
 !!
@@ -12,7 +12,7 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! interfaces_61_ionetcdf.F90
+!! interfaces_59_ionetcdf.F90
 !! m_crystal_io.F90
 !! m_dfpt_io.F90
 !! write_eig.F90

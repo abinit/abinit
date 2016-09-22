@@ -75,7 +75,7 @@ subroutine wvl_prcref(dielar,iprcel,my_natom,nfftprc,npawmix,nspden,pawrhoij,&
 !check prcref.F90 and moddiel.F90
 
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 #endif
 
  if(iprcel .ne. 0) then
