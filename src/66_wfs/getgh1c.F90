@@ -431,7 +431,12 @@ subroutine getgh1c(berryopt,copt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      cpopt=-1 ; choice=2 ; signs=2 ; paw_opt=0
      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl1_,iatom_only=ipert)
-     if (sij_opt==1) gs1c=zero
+     if (sij_opt==1) then
+!$OMP PARALLEL DO
+       do ipw=1,npw1*my_nspinor
+         gs1c(:,ipw)=zero
+       end do
+     end if
    end if
 
 !  k-point perturbation
@@ -525,7 +530,12 @@ subroutine getgh1c(berryopt,copt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,0,(/lambda/),mpi_enreg,1,nnlout,&
 &       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl2,enl=rf_hamkq%e1kbsc)
      end if
-     if (sij_opt==1) gs1c=zero
+     if (sij_opt==1) then
+!$OMP PARALLEL DO
+       do ipw=1,npw1*my_nspinor
+         gs1c(:,ipw)=zero
+       end do
+     end if
      if (use_GS_cwaveprj==0) then
        call pawcprj_free(cwaveprj_tmp)
        ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
@@ -545,7 +555,12 @@ subroutine getgh1c(berryopt,copt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        gvnl1_(2,ipw)= grad_berry(1,ipw)
      end do
    end if
-   if (sij_opt==1) gs1c=zero
+   if (sij_opt==1) then
+!$OMP PARALLEL DO
+     do ipw=1,npw1*my_nspinor
+       gs1c(:,ipw)=zero
+     end do
+   end if
 
 !  Strain perturbation
 !  -------------------------------------------
@@ -607,7 +622,12 @@ subroutine getgh1c(berryopt,copt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      choice=3 ; cpopt=-1 ; paw_opt=0
      call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamkq,istr,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl1_)
-     if (sij_opt==1) gs1c=zero
+     if (sij_opt==1) then
+!$OMP PARALLEL DO
+       do ipw=1,npw1*my_nspinor
+         gs1c(:,ipw)=zero
+       end do
+     end if
    end if
 
 !  No non-local part
@@ -620,7 +640,12 @@ subroutine getgh1c(berryopt,copt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        gvnl1_(:,ipw)=zero
      end do
    end if
-   if (sij_opt/=0) gs1c=zero
+   if (sij_opt/=0) then
+!$OMP PARALLEL DO
+     do ipw=1,npw1*my_nspinor
+       gs1c(:,ipw)=zero
+     end do
+   end if
 
  end if
 
