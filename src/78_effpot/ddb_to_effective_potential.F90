@@ -64,16 +64,14 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
 
 !Local variables-------------------------------
 !scalar
- integer :: chneut,ia,ib,iblok,idir1,idir2,ii,ipert1,iphl1
+ integer :: chneut,ia,ib,iblok,idir1,idir2,ii,ipert1
  integer :: ipert2,irpt,ivarA,ivarB,msize,mpert,natom,nblok,rftyp,selectz
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp):: dielt(3,3),elast_clamped(6,6),fact
  real(dp):: qphnrm(3),qphon(3,3)
  real(dp),allocatable :: blkval(:,:,:,:,:,:),d2asr(:,:,:,:,:)
- real(dp),allocatable :: d2cart(:,:,:,:,:),displ(:)
- real(dp),allocatable :: eigval(:,:),eigvec(:,:,:,:,:),instrain(:,:)
- real(dp),allocatable :: phfrq(:),zeff(:,:,:)
+ real(dp),allocatable :: instrain(:,:),zeff(:,:,:)
  character(len=500) :: message
  type(ifc_type) :: ifc
 
@@ -342,17 +340,16 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
     end do
   end do
 
-  effective_potential%ifcs%atmfrc = ifc%atmfrc    !depend of dipdip (see help)
-
   if (inp%dipdip == 1) then
-    effective_potential%ifcs%short_atmfrc = ifc%atmfrc ! if dipdip==1 atmfrc = short range
+    ifc%short_atmfrc = ifc%atmfrc ! if dipdip==1 atmfrc = short range
+    ifc%ewald_atmfrc = zero       ! fill with 0
   else
-    effective_potential%ifcs%short_atmfrc = zero
+    ifc%short_atmfrc = zero
+    ifc%ewald_atmfrc = zero       ! fill with 0
   end if
-  effective_potential%ifcs%ewald_atmfrc = zero       ! fill with 0
-  effective_potential%ifcs%cell   = ifc%cell         ! indexation of cells
-  effective_potential%ifcs%nrpt   = ifc%nrpt         ! new number of cell
-  effective_potential%ifcs%wghatm = ifc%wghatm       ! weight of r point
+
+  call ifc_free(effective_potential%ifcs)
+  effective_potential%ifcs = ifc  ! Fill the effective potential
 
 !**********************************************************************
 ! Dynamical matrix calculation for each qpoint

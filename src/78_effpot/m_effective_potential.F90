@@ -552,19 +552,15 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 !scalar
  integer,parameter :: master=0
  integer :: first_coordinate
- integer :: ia,ib,ii,i1,i2,i3,ierr,irpt,irpt2,irpt_ref,jj,kk,ll,min1,min2,min3
+ integer :: ia,i1,i2,i3,ierr,irpt,irpt2,irpt_ref,min1,min2,min3
  integer :: min1_cell,min2_cell,min3_cell,max1_cell,max2_cell,max3_cell
- integer :: max1,max2,max3
- integer :: mu,my_rank,nu,nproc,second_coordinate,sumg0,nrpt
- real(dp) :: d2asr,ucvol
+ integer :: max1,max2,max3,my_rank,nproc,second_coordinate,sumg0
+ real(dp) :: ucvol
  character(len=500) :: message
- logical :: short_range = .false.
  logical :: iam_master=.FALSE.
 !array
- integer  :: cell(3),cell_atom1(3),cell_atom2(3),cell_number(3)
  real(dp) :: acell(3)
- real(dp) :: gmet(3,3),rmet(3,3)
- real(dp) :: gprimd(3,3), rprim(3,3),gprim(3,3)
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: dyew(:,:,:,:,:), dyewq0(:,:,:,:,:)
  real(dp),allocatable :: xred(:,:),xred_tmp(:,:),zeff_tmp(:,:,:)
 
@@ -595,14 +591,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 &   super_cell)
 
 !1-Store the information of the supercell of the reference structure into effective potential
- eff_pot%supercell%natom  = eff_pot%natom
- eff_pot%supercell%natom_supercell  = super_cell%natom_supercell
- eff_pot%supercell%typat_supercell  = super_cell%typat_supercell
- eff_pot%supercell%qphon  = super_cell%qphon
- eff_pot%supercell%rprimd_supercell = super_cell%rprimd_supercell
- eff_pot%supercell%xcart_supercell  = super_cell%xcart_supercell
- eff_pot%supercell%uc_indexing_supercell = super_cell%uc_indexing_supercell
- eff_pot%supercell%atom_indexing_supercell = super_cell%atom_indexing_supercell
+ eff_pot%supercell = super_cell
 
 !2 Check if the bound of new cell correspond to the effective potential 
 !only for option=zero
@@ -663,6 +652,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
        if (abs(max1) < abs(max1_cell)) max1 = max1_cell
        if (abs(max2) < abs(max2_cell)) max2 = max2_cell
        if (abs(max3) < abs(max3_cell)) max3 = max3_cell
+
 !      If the cell is smaller, we redifine new cell to take into acount all atoms
        call init_supercell(eff_pot%natom, 0,real((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),&
 &          eff_pot%rprimd,eff_pot%typat,eff_pot%xcart,super_cell)
@@ -1202,15 +1192,13 @@ subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,n_cell,nph1l,optio
   type(crystal_t),intent(out) :: crystal
 !Local variables-------------------------------
 !scalar
-  character(len=500) :: message
-  integer :: ii,irpt,jj,msym
+  integer :: ii,jj,msym
   real(dp):: ucvol
 
 ! type(anaddb_dataset_type) :: inp
 !array
   real(dp) :: gmet(3,3),rmet(3,3)
-  real(dp) :: gprimd(3,3),rprimd(3,3)
-  real(dp) :: acell(3),gprim(3,3),rprim(3,3)
+  real(dp) :: gprim(3,3),gprimd(3,3),rprim(3,3)
   real(dp),allocatable :: xred(:,:)
   character :: title(eff_pot%ntypat) 
   integer,allocatable :: symrel(:,:,:),symafm(:)
@@ -1378,7 +1366,7 @@ subroutine effective_potential_printPDOS(eff_pot,filename,n_cell,nph1l,option,qp
   character(len=fnlen),intent(in) :: filename
 !Local variables-------------------------------
 !scalar
- integer :: irpt,lenstr
+ integer :: lenstr
  real(dp) :: tcpui,twalli
  character(len=strlen) :: string
 !array
@@ -2056,7 +2044,7 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
 
 !Local variables-------------------------------
 !scalar
- integer :: amu_id,bec_id,ifcscell_id,ifccell_id,epsinf_id,elastic_id
+ integer :: amu_id,bec_id,ifccell_id,epsinf_id,elastic_id
  integer :: ifc_id,ifcs_id,natom_id,ntypat_id,nrpt_id,npsp_id,typat_id
  integer :: six_id,two_id,xyz_id,znucl_id
  integer :: ncerr,ncid,npsp
@@ -2454,15 +2442,11 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,c
 !Local variables-------------------------------
 !scalar
   integer,parameter :: master=0
-  real(dp):: temp(3)
-  integer :: i1,i2,i3,ia,ii,jj,ib,ll,my_rank,nproc
-  character(len=500) :: message
+  integer :: ii,my_rank,nproc
   logical :: iam_master=.FALSE.
 !array
   real(dp):: disp_tmp1(3,natom),dummy
-  real(dp):: xred(3,natom),xred_supercell(3,natom)
   integer :: cell_number(3)
-  integer :: cell_atom1(3),cell_atom2(3)
   character(500) :: msg
 
 ! *************************************************************************
@@ -2560,7 +2544,7 @@ subroutine effective_potential_getHarmonicContributions(eff_pot,energy,fcart,fre
   real(dp),intent(out) :: strten(6)
 !Local variables-------------------------------
 !scalar
-  integer :: ii,ncell,ia,ib,nu,mu,irpt
+  integer :: ii,ncell
   real(dp):: energy_part,ucvol
   character(len=500) :: message
   logical :: has_strain = .FALSE.
@@ -2574,10 +2558,8 @@ subroutine effective_potential_getHarmonicContributions(eff_pot,energy,fcart,fre
   real(dp) :: fcart_part(3,eff_pot%supercell%natom_supercell)
   real(dp) :: external_stress_tmp(6)
   real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
-  real(dp) :: xred(3,eff_pot%supercell%natom_supercell)
-  real(dp) :: xred_supercell(3,eff_pot%supercell%natom_supercell)
   real(dp) :: disp_tmp1(3,eff_pot%supercell%natom_supercell)
-  real(dp) :: disp_tmp2(3,eff_pot%supercell%natom_supercell)
+
 ! *************************************************************************
 
 !MPI variables
@@ -2764,7 +2746,7 @@ end subroutine effective_potential_getHarmonicContributions
 !! SOURCE
 !!
 subroutine elastic_contribution(eff_pot,disp,energy,forces,ncell,strten,strain1,strain2,&
-&                                             external_stress)
+&                               external_stress)
 
 !Arguments ------------------------------------
 ! scalar
@@ -2787,6 +2769,7 @@ subroutine elastic_contribution(eff_pot,disp,energy,forces,ncell,strten,strain1,
 
 !Local variables-------------------------------
 ! scalar
+  real(dp):: fact
   integer :: ia,ii,jj,mu
 ! array
   real(dp) :: temp(3)
@@ -2795,9 +2778,12 @@ subroutine elastic_contribution(eff_pot,disp,energy,forces,ncell,strten,strain1,
   energy = zero
   forces = zero
   strten = zero
+  
+! Precompute factor
+  fact = half * eff_pot%supercell%natom_supercell
 
 !1- Part due to elastic constants
-  energy = half*dot_product(matmul(strain1,eff_pot%elastic_constants),strain2)
+  energy = fact * dot_product(matmul(strain1,eff_pot%elastic_constants),strain2)
 
 !2- Part due to extenal stress
 !  if(present(external_stress)) then
@@ -2869,15 +2855,12 @@ subroutine ifc_contribution(eff_pot,disp,energy,fcart)
   real(dp),intent(out) :: fcart(3,eff_pot%supercell%natom_supercell)
 !Local variables-------------------------------
 ! scalar
-  integer :: i1,i2,i3,ia,ib,ii,irpt,jj,kk,ll,mu,nu
+  integer :: i1,i2,i3,ia,ib,ii,irpt,ll
 ! array
   real(dp) :: tmp(3)
   integer :: cell_number(3)
   integer :: cell_atom1(3),cell_atom2(3)
   character(500) :: msg
-  real(dp) :: gmet(3,3),rmet(3,3),favg(3)
-  real(dp) :: gprimd(3,3),rprimd(3,3)
-  real(dp) :: acell(3),gprim(3,3),rprim(3,3)
 
 ! *************************************************************************
 

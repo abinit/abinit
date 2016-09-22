@@ -70,9 +70,6 @@ subroutine init10(filnam,comm)
  integer,parameter :: master=0
  integer :: me,nproc,ierr
  integer :: ii,io
- character(len=fnlen) :: fillog,tmpfil
- character(len=10) :: tag
- character(len=500) :: message,errmsg
 !arrays
 ! *********************************************************************
  

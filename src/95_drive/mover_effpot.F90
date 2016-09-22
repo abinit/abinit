@@ -213,6 +213,7 @@ implicit none
    dtset%jellslab = 0   ! include a JELLium SLAB in the cell
    dtset%mdwall = 10000 ! Molecular Dynamics WALL location
    dtset%natom = super_cell%natom_supercell
+   dtset%ntypat = effective_potential%ntypat
    dtset%nconeq = 0     ! Number of CONstraint EQuations
    dtset%noseinert = 1.d-5 ! NOSE INERTia factor
    dtset%nnos = 5       ! Number of nose masses Characteristic
@@ -225,31 +226,31 @@ implicit none
    dtset%tolmxf = 2.0d-5
    dtset%tsmear = 0.009500446 !
    dtset%vis = 100      ! VIScosity
- 
    dtset%usewvl = 0     !
- 
+   dtset%useylm = 0     !
+
 !array
+   ABI_ALLOCATE(dtset%iatfix,(3,dtset%natom)) ! Indices of AToms that are FIXed
+   dtset%iatfix = zero
    dtset%goprecprm(:) = zero !Geometry Optimization PREconditioner PaRaMeters equations
    dtset%mdtemp(1) = inp%temperature   !Molecular Dynamics Temperatures 
    dtset%mdtemp(2) = inp%temperature   !Molecular Dynamics Temperatures 
-   dtset%ntypat = effective_potential%ntypat
    ABI_ALLOCATE(dtset%prtatlist,(dtset%natom)) !PRinT by ATom LIST of ATom
    dtset%prtatlist(:) = zero
-   ABI_ALLOCATE(dtset%iatfix,(3,dtset%natom)) ! Indices of AToms that are FIXed
-   dtset%iatfix = zero
    if(dtset%nnos>0) then
      ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
      dtset%qmass = dtset%nnos * 10 
    end if
-   ABI_ALLOCATE(tnons,(3,dtset%nsym))
-   tnons = zero
-   dtset%tnons = tnons
    dtset%strtarget = zero ! STRess TARGET
    ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
    symrel = one
    dtset%symrel = symrel! SYMmetry in REaL space
+   ABI_ALLOCATE(tnons,(3,dtset%nsym))
+   tnons = zero
+   dtset%tnons = tnons
+   ABI_ALLOCATE(dtset%typat,(dtset%ntypat))
    dtset%typat  = super_cell%typat_supercell
-   dtset%useylm = 0
+   ABI_ALLOCATE(dtset%znucl,(dtset%ntypat))
    dtset%znucl  = effective_potential%znucl
    
 !  set psps 

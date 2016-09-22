@@ -84,8 +84,9 @@ program epigene
  type(epigene_dataset_type) :: inp
  type(effective_potential_type),target :: reference_effective_potential
 !TEST_AM
- integer :: natom_sp
- real(dp),allocatable :: dynmat(:,:,:,:,:)
+! integer :: natom_sp
+! real(dp),allocatable :: dynmat(:,:,:,:,:)
+!TEST_AM
 !******************************************************************
 
 !Change communicator for I/O (mandatory!)
@@ -231,7 +232,7 @@ program epigene
 !     call effective_potential_effpot2dynmat(dynmat,inp%delta_df,reference_effective_potential,&
 !&                                           reference_effective_potential%supercell%natom_supercell,&
 !&                                           int(reference_effective_potential%supercell%qphon),3)
-
+!
 !     ABI_DEALLOCATE(dynmat)
 !   end if
 !TEST_AM
@@ -239,7 +240,7 @@ program epigene
 
 !    Compute the monte carlo, molecular dynamics of compute specific energy 
 !****************************************************************************************
- if(inp%dynamics>=1) then      
+ if(inp%dynamics>=1) then
    call mover_effpot(inp,filnam,reference_effective_potential,comm)
  end if
 !****************************************************************************************    
