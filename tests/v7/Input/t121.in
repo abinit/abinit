@@ -11,7 +11,7 @@ t120o_DS3_DDB
 #%% test_chain = t120.in,t121.in,t122.in,t123.in
 #%% [files]
 #%% files_to_test = 
-#%%   t121.ddb.out, tolnlines=   0,   tolabs=  1.64e-08,      tolrel= 2.75e-08, fld_options = -medium
+#%%   t121.ddb.out, tolnlines=   8,   tolabs=  6e-08,      tolrel= 8e-08, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

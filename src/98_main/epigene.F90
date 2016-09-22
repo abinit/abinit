@@ -40,6 +40,7 @@ program epigene
  use m_abimover
  use m_build_info
  use m_xmpi
+ use m_xomp
  use m_profiling_abi
  use m_errors
  use m_effective_potential
@@ -277,6 +278,27 @@ program epigene
 & ' epigene : the run completed succesfully.'
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
+
+ if (iam_master) then
+   ! Write YAML document with the final summary.
+   ! we use this doc to test whether the calculation is completed.
+   write(std_out,"(a)")"--- !FinalSummary"
+   write(std_out,"(a)")"program: epigene"
+   write(std_out,"(2a)")"version: ",trim(abinit_version)
+   write(std_out,"(2a)")"start_datetime: ",start_datetime
+   write(std_out,"(2a)")"end_datetime: ",asctime()
+   write(std_out,"(a,f13.1)")"overall_cpu_time: ",tsec(1)
+   write(std_out,"(a,f13.1)")"overall_wall_time: ",tsec(2)
+   write(std_out,"(a,i0)")"mpi_procs: ",xmpi_comm_size(xmpi_world)
+   write(std_out,"(a,i0)")"omp_threads: ",xomp_get_num_threads(open_parallel=.True.)
+   !write(std_out,"(a,i0)")"num_warnings: ",nwarning
+   !write(std_out,"(a,i0)")"num_comments: ",ncomment
+   write(std_out,"(a)")"..."
+   call flush_unit(std_out)
+ end if
+
+!Write information on file about the memory before ending mpi module, if memory profiling is enabled
+ call abinit_doctor("__epigene")
   
  call flush_unit(ab_out)
  call flush_unit(std_out)

@@ -379,7 +379,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 !Local variables -------------------------
 !scalars
  integer :: mpert,iout,iqpt,mqpt,nsym,ntypat,iq_bz,ii,natom
- integer :: nqbz,option,plus,sumg0,irpt,irpt_new,shift_irpt
+ integer :: nqbz,option,plus,sumg0,irpt,irpt_new
  real(dp),parameter :: qphnrm=one
  character(len=500) :: message
  logical :: do_prtfreq
@@ -1556,12 +1556,6 @@ implicit none
          ewiaf1(mu,nu)=ew1
        end do
      end do
-
-     if(irpt==14.or.irpt==15.or.irpt==13) then
-       if(ia==1.and.ib==2)then
-       write(900,*) ia,ib,irpt,dist1,Ifc%rpt(:,irpt),Ifc%atmfrc(1,:,ia,:,ib,irpt)* Ifc%wghatm(ia,ib,irpt)
-     end if
-   end if
      ! Get the short-range force constants and the
      ! "total" force constants (=real space FC)
      do mu=1,3

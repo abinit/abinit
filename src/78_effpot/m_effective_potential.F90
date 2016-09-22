@@ -640,10 +640,11 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
      if ((abs(min1) > abs(min1_cell)).or.(abs(max1) > abs(max1_cell)).or.&
 &        (abs(min2) > abs(min2_cell)).or.(abs(max2) > abs(max2_cell)).or.&
 &        (abs(min3) > abs(min3_cell)).or.(abs(max3) > abs(max3_cell))) then
-       write(message, '(6a,3I3,3a)' )ch10,&
+       write(message, '(6a,3I3,4a)' )ch10,&
 &        ' --- !WARNING',ch10,&
-&        '     The previous harmonic part was build for bigger cell',ch10,&
+&        '     The previous harmonic part was build for bigger cell,',ch10,&
 &        '     ifc is adjust on ',int((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),' cell',ch10,&
+&        '     The simulation might be completely wong',ch10,&
 &        ' ---'
        call wrtout(std_out,message,"COLL")
        if (abs(min1) < abs(min1_cell)) min1 = min1_cell
@@ -792,68 +793,6 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 ! Impose sum rule
    call effective_potential_applySumRule(asr,eff_pot%ifcs,eff_pot%natom)
  end if
-
-
-!TEST_AM
-!VERSION WITH EWALD9 FOR SUPERCELL
-!if (.true.) then
-!!  Reallocate dynamical matrix for supercell
-!    if (allocated(eff_pot%dynmat_ewald))then
-!      ABI_DEALLOCATE(eff_pot%dynmat_ewald)
-!    end if
-   
-!    ABI_ALLOCATE(eff_pot%dynmat_ewald,(2,3,super_cell%natom_supercell,3,super_cell%natom_supercell))
-!    eff_pot%dynmat_ewald = zero
-
-! !  Set the number of cell
-!    cell_number(:) = int(eff_pot%supercell%qphon(:))
-
-! !  Allocate and initialize some array
-!    ABI_ALLOCATE(xred,(3,eff_pot%supercell%natom_supercell))
-!    ABI_ALLOCATE(zeff_tmp,(3,3,eff_pot%supercell%natom_supercell))
-!    ABI_ALLOCATE(dyew,(2,3,eff_pot%supercell%natom_supercell,3,eff_pot%supercell%natom_supercell))
-!    ABI_ALLOCATE(dyewq0,(3,3,eff_pot%supercell%natom_supercell))
-
-!    eff_pot%dynmat_ewald  = zero
-!    dyew            = zero
-!    dyewq0          = zero
-!    xred(:,:)       = zero
-!    zeff_tmp(:,:,:) = zero
-!    sumg0           = zero
-!    acell = one
-
-!    call matr3inv(eff_pot%supercell%rprimd_supercell,gprimd)
-!    call xcart2xred(eff_pot%supercell%natom_supercell,eff_pot%supercell%rprimd_supercell,&
-! &                    eff_pot%supercell%xcart_supercell,xred)
-!    call metric(gmet,gprimd,-1,rmet,eff_pot%supercell%rprimd_supercell,ucvol)
-
-! !  Fill fake zeff array for ewald9
-!    do ii=1,product(cell_number)
-!      first_coordinate  = ((ii-1)*eff_pot%natom) + 1
-!      second_coordinate = first_coordinate + eff_pot%natom-1
-!      zeff_tmp(:,:,first_coordinate:second_coordinate) = eff_pot%zeff
-!    end do
-
-!    write(std_out,'(a)')" Enter in ewald9, can take a while"
-!    call ewald9(acell,eff_pot%epsilon_inf,dyew,&
-! &              gmet,gprimd,eff_pot%supercell%natom_supercell,real((/0,0,0/),dp),rmet,&
-! &              eff_pot%supercell%rprimd_supercell,sumg0,ucvol,xred,&
-! &              zeff_tmp)
-!    write(std_out,'(a)') " Enter in q0dy3_calc"
-!    call q0dy3_calc(eff_pot%supercell%natom_supercell,dyewq0,dyew,2)
-!    write(std_out,'(a)') " Enter in q0dy3_apply"
-!    call q0dy3_apply(eff_pot%supercell%natom_supercell,dyewq0,dyew)
-!    write(std_out,'(a)') " Dipole-Dipole is recompute"
-
-! !  Fill dipdip interaction
-!    eff_pot%dynmat_ewald(:,:,:,:,:) = dyew + tol10
-
-!    ABI_DEALLOCATE(xred)
-!    ABI_DEALLOCATE(zeff_tmp)
-!    ABI_DEALLOCATE(dyew)
-!    ABI_DEALLOCATE(dyewq0)
-!else
- !end if
  
 end subroutine effective_potential_generateDipDip
 !!***
@@ -2638,7 +2577,6 @@ subroutine effective_potential_getHarmonicContributions(eff_pot,energy,fcart,fre
     write(message, '(a)' )&
 &        'The harmonic part is negative, the structure is not stable.'
        MSG_WARNING(message)
-!       if(abs(ifc_part) > tol10) stop
   end if
 
   energy = energy + energy_part
@@ -2658,8 +2596,7 @@ subroutine effective_potential_getHarmonicContributions(eff_pot,energy,fcart,fre
     end do
     strain_tmp1(4) = eff_pot%strain%strain(2,3) * 2
     strain_tmp1(5) = eff_pot%strain%strain(3,1) * 2
-    strain_tmp1(6) = eff_pot%strain%strain(2,1) * 2
-    
+    strain_tmp1(6) = eff_pot%strain%strain(2,1) * 2    
     strain_tmp2(:) = strain_tmp1(:)
     has_strain = .TRUE.
 ! Try to find the strain from argument 
@@ -2681,7 +2618,6 @@ subroutine effective_potential_getHarmonicContributions(eff_pot,energy,fcart,fre
       strain_tmp1(4) = strain%strain(2,3) * 2
       strain_tmp1(5) = strain%strain(3,1) * 2
       strain_tmp1(6) = strain%strain(2,1) * 2
-
       strain_tmp2(:) = strain_tmp1(:)
       has_strain = .TRUE.
   end if
@@ -2718,10 +2654,6 @@ subroutine effective_potential_getHarmonicContributions(eff_pot,energy,fcart,fre
 ! convert forces into reduced coordinates and multiply by -1
   fcart = -1 * fcart
   call fcart2fred(fcart,fred,rprimd,natom)
-
-  write(message, '(a,a,a)' ) ch10,' end get_HarmonicContributions.F90',ch10
-  call wrtout(std_out,message,'COLL')
-
 
 end subroutine effective_potential_getHarmonicContributions
 !!***
@@ -2769,7 +2701,6 @@ subroutine elastic_contribution(eff_pot,disp,energy,forces,ncell,strten,strain1,
 
 !Local variables-------------------------------
 ! scalar
-  real(dp):: fact
   integer :: ia,ii,jj,mu
 ! array
   real(dp) :: temp(3)
@@ -2779,11 +2710,8 @@ subroutine elastic_contribution(eff_pot,disp,energy,forces,ncell,strten,strain1,
   forces = zero
   strten = zero
   
-! Precompute factor
-  fact = half * eff_pot%supercell%natom_supercell
-
 !1- Part due to elastic constants
-  energy = fact * dot_product(matmul(strain1,eff_pot%elastic_constants),strain2)
+  energy = half * dot_product(matmul(strain1,eff_pot%elastic_constants),strain2)
 
 !2- Part due to extenal stress
 !  if(present(external_stress)) then

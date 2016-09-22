@@ -201,10 +201,9 @@ subroutine invars11 (band2eps_dtset,lenstr,string)
 !Dummy arguments for subroutine 'intagm' to parse input file
 !Set routine version number here:
 !scalars
- integer :: ii,position,jdtset,marr,natom,tread
+ integer :: ii,position,jdtset,marr,tread
  character(len=500) :: message
  character(len=fnlen) :: name_qpoint 
- character(len=fnlen) :: key_value
 !arrays
  integer,allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:)
