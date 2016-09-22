@@ -100,7 +100,7 @@ natom 2
 #%% keywords = NC, PSP8
 #%% authors = M. Giantomassi
 #%% description = 
-#%%   C-diamond, Bulk, 2 atoms, with NC pseudos.
+#%%   C-diamond, Bulk, 2 atoms, with NC pseudo generated with oncvps-3.2.3.
 #%%   Test the IO routines with paral_kgb in [1, 0] and different combinations
 #%%   of parameters (npfft, npband, npkpt).
 #%%   Test also prtdos (PJDOS) in parallel with MPI-FFT.
