@@ -4265,10 +4265,8 @@
            <a href="http://dx.doi.org/10.1016/j.cpc.2015.10.023">
             Comp. Phys. Comm. 200, 274 (2016)
            </a>. Before using it, it has to be installed following
-            instructions at https://triqs.ipht.cnrs.fr/1.4/applications/cthyb/install.html.
-         <br />
-         <br />
-         WARNING: CT-QMC should be used for correlated metals. Even for correlated (Mott) insulators, QMC is expected to be much more precise: Indeed, the Hubbard one neglects the hybridization function.
+            instructions at https://triqs.ipht.cnrs.fr/1.3/applications/cthyb/install.html.
+            The current interface is valid for TRIQS 1.3 and TRIQS/CTHYB 1.3.
          <br />
          See the usefull variables for CT-QMC solver :
         [[dmftctqmc_basis]],
