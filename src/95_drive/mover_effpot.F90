@@ -342,9 +342,8 @@ implicit none
 !*********************************************************
 !3   Call main routine for monte carlo / molecular dynamics
 !*********************************************************
-   write(message, '(3a,(80a),a)' ) ch10, &
-&    ' Monte Carlo / Molecular Dynamics ',ch10,&
-&    ('-',ii=1,80),ch10
+   write(message, '(a,(80a),3a)' ) ch10,('-',ii=1,80),ch10,&
+&    '-Monte Carlo / Molecular Dynamics ',ch10
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 

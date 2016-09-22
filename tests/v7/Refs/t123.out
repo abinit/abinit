@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Tue 20 Sep 2016.
-- ( at 13h43 )
+.Starting date : Thu 22 Sep 2016.
+- ( at 10h44 )
   
 -  nproc =    1
 
@@ -223,8 +223,8 @@
    0.66666666666667E+00   0.83333333333333E+00   0.68804294186500E+00
    0.83333333333333E+00   0.66666666666667E+00   0.93804294186500E+00
 
-Monte Carlo / Molecular Dynamics 
 --------------------------------------------------------------------------------
+-Monte Carlo / Molecular Dynamics 
 
 
 === [ionmov=12] Isokinetic ensemble molecular dynamics with effective potential
@@ -238,7 +238,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  5.4680292931006650E-30 Hartree
+ Energy of the ifc part :  6.4166160732505346E-30 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -254,7 +254,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  2.4480111174000722E-03 Hartree
+ Energy of the ifc part :  2.4480111174001264E-03 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -270,7 +270,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  9.6697358535898382E-03 Hartree
+ Energy of the ifc part :  9.6697358535899735E-03 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -286,7 +286,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  2.1289227381677583E-02 Hartree
+ Energy of the ifc part :  2.1289227381677770E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -302,7 +302,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  3.6651852580845613E-02 Hartree
+ Energy of the ifc part :  3.6651852580845780E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -318,7 +318,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  5.4790778738242084E-02 Hartree
+ Energy of the ifc part :  5.4790778738242125E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -334,7 +334,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  7.4402353350089573E-02 Hartree
+ Energy of the ifc part :  7.4402353350089559E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -350,7 +350,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  9.3862492320709548E-02 Hartree
+ Energy of the ifc part :  9.3862492320709381E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -366,7 +366,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.1132996939608276E-01 Hartree
+ Energy of the ifc part :  1.1132996939608243E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -382,7 +382,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.2497701099233885E-01 Hartree
+ Energy of the ifc part :  1.2497701099233843E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -398,7 +398,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.3333768917987834E-01 Hartree
+ Energy of the ifc part :  1.3333768917987754E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -414,7 +414,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.3567197461161290E-01 Hartree
+ Energy of the ifc part :  1.3567197461161215E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -430,7 +430,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.3217587635310946E-01 Hartree
+ Energy of the ifc part :  1.3217587635310860E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -446,7 +446,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.2391823437201795E-01 Hartree
+ Energy of the ifc part :  1.2391823437201710E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -462,7 +462,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.1254010987042859E-01 Hartree
+ Energy of the ifc part :  1.1254010987042773E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -478,7 +478,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  9.9875051539280918E-02 Hartree
+ Energy of the ifc part :  9.9875051539280238E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -494,7 +494,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  8.7640892580384502E-02 Hartree
+ Energy of the ifc part :  8.7640892580384031E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -510,7 +510,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  7.7263054163880782E-02 Hartree
+ Energy of the ifc part :  7.7263054163880365E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -526,7 +526,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  6.9810739946860378E-02 Hartree
+ Energy of the ifc part :  6.9810739946860309E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -542,7 +542,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  6.5998777740696207E-02 Hartree
+ Energy of the ifc part :  6.5998777740696291E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -558,7 +558,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  6.6213635513426378E-02 Hartree
+ Energy of the ifc part :  6.6213635513426558E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -574,7 +574,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  7.0537973725047345E-02 Hartree
+ Energy of the ifc part :  7.0537973725047720E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -590,7 +590,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  7.8761583078856431E-02 Hartree
+ Energy of the ifc part :  7.8761583078857056E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -606,7 +606,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  9.0375711158531158E-02 Hartree
+ Energy of the ifc part :  9.0375711158531796E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -622,7 +622,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.0455507423241489E-01 Hartree
+ Energy of the ifc part :  1.0455507423241560E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -638,7 +638,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.2014058921304718E-01 Hartree
+ Energy of the ifc part :  1.2014058921304781E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -654,7 +654,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.3564799211859599E-01 Hartree
+ Energy of the ifc part :  1.3564799211859668E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -670,7 +670,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.4934033635226376E-01 Hartree
+ Energy of the ifc part :  1.4934033635226429E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -686,7 +686,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.5940389344078879E-01 Hartree
+ Energy of the ifc part :  1.5940389344078906E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -702,7 +702,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.6423670130691112E-01 Hartree
+ Energy of the ifc part :  1.6423670130691151E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -718,7 +718,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.6278804594003091E-01 Hartree
+ Energy of the ifc part :  1.6278804594003096E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -734,7 +734,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.5481365313639533E-01 Hartree
+ Energy of the ifc part :  1.5481365313639564E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -750,7 +750,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.4091457625565518E-01 Hartree
+ Energy of the ifc part :  1.4091457625565543E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -766,7 +766,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.2233755086527213E-01 Hartree
+ Energy of the ifc part :  1.2233755086527248E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -782,7 +782,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.0064448411630011E-01 Hartree
+ Energy of the ifc part :  1.0064448411630081E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -798,7 +798,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  7.7397744758543996E-02 Hartree
+ Energy of the ifc part :  7.7397744758544829E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -814,7 +814,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  5.3949849799459763E-02 Hartree
+ Energy of the ifc part :  5.3949849799460374E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -830,7 +830,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  3.1347326175571670E-02 Hartree
+ Energy of the ifc part :  3.1347326175572343E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -846,7 +846,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.0315058594867230E-02 Hartree
+ Energy of the ifc part :  1.0315058594867761E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -862,7 +862,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -8.7181868666774097E-03 Hartree
+ Energy of the ifc part : -8.7181868666766135E-03 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -878,7 +878,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -2.5580544594802655E-02 Hartree
+ Energy of the ifc part : -2.5580544594801732E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -894,7 +894,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -4.0318032770134342E-02 Hartree
+ Energy of the ifc part : -4.0318032770133419E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -910,11 +910,11 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -5.3160011015947931E-02 Hartree
+ Energy of the ifc part : -5.3160011015946827E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3721457298701597E+02 Hartree
+ Total energy : -1.3721457298701594E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -926,7 +926,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -6.4487894426935199E-02 Hartree
+ Energy of the ifc part : -6.4487894426933964E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -942,7 +942,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -7.4803288850878863E-02 Hartree
+ Energy of the ifc part : -7.4803288850877642E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -958,7 +958,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -8.4691067518505275E-02 Hartree
+ Energy of the ifc part : -8.4691067518504096E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -974,7 +974,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -9.4774009244046373E-02 Hartree
+ Energy of the ifc part : -9.4774009244045193E-02 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -990,7 +990,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -1.0565854718331465E-01 Hartree
+ Energy of the ifc part : -1.0565854718331344E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -1006,7 +1006,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -1.1787564810717616E-01 Hartree
+ Energy of the ifc part : -1.1787564810717516E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -1022,7 +1022,7 @@ Monte Carlo / Molecular Dynamics
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -1.3182555348135666E-01 Hartree
+ Energy of the ifc part : -1.3182555348135566E-01 Hartree
 
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
@@ -1040,6 +1040,6 @@ Monte Carlo / Molecular Dynamics
 
 ================================================================================
 
-+Total cpu time      1.629  and wall time      1.628 sec
++Total cpu time      1.564  and wall time      1.564 sec
 
  epigene : the run completed succesfully.
