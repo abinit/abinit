@@ -432,7 +432,25 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !    Copy occupations from BigDFT objects to ABINIT
      call wvl_occ_abi2big(dtset%mband,dtset%nkpt,dtset%nsppol,occ,2,wvl%wfs)
 
-!    Change the density according to the KS projection.
+   end if
+
+!  Tail corrections, pending for wvlbigdft==.false.
+!  TODO put it at the end of gstate.
+!  WVL - maybe compute the tail corrections to energy
+   compute_wvl_tail=(dtset%tl_radius>tol12.and.wvlbigdft)
+   if (compute_wvl_tail) then
+!    Use the tails to improve energy precision.
+     call wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, xcart)
+   end if
+
+!  Clean KSwfn parts only needed in the SCF loop.
+   call kswfn_free_scf_data(wvl%wfs%ks, (mpi_enreg%nproc_wvl > 1))
+!  Clean denspot parts only needed in the SCF loop.
+   call denspot_free_history(wvl%den%denspot)
+
+!  If WF have been modified, change the density according to the KS projection.
+   if ( do_last_ortho ) then
+
 !    Density from new orthogonalized WFs
      call wvl_mkrho(dtset, irrzon, mpi_enreg, phnons, rhor, wvl%wfs, wvl%den)
 
@@ -468,20 +486,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
        call wvl_rho_abi2big(1,rhor,wvl%den)
      end if
    end if
-
-!  Tail corrections, pending for wvlbigdft==.false.
-!  TODO put it at the end of gstate.
-!  WVL - maybe compute the tail corrections to energy
-   compute_wvl_tail=(dtset%tl_radius>tol12.and.wvlbigdft)
-   if (compute_wvl_tail) then
-!    Use the tails to improve energy precision.
-     call wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, xcart)
-   end if
-
-!  Clean KSwfn parts only needed in the SCF loop.
-   call kswfn_free_scf_data(wvl%wfs%ks, (mpi_enreg%nproc_wvl > 1))
-!  Clean denspot parts only needed in the SCF loop.
-   call denspot_free_history(wvl%den%denspot)
 
    ABI_DEALLOCATE(xcart)
 

@@ -1853,31 +1853,20 @@ subroutine wvl_nscf_loop_bigdft()
 
    DBG_ENTER("COLL")
 
-   call wvl_hpsitopsi(cprj,dtset, energies, istep, mcprj_local,mpi_enreg, &
+   call wvl_hpsitopsi(cprj,dtset, energies, 1, mcprj_local,mpi_enreg, &
 &                     residm, wvl,xcart)
-   if (nnsclo_now>0) then
-     do inonsc = 1, nnsclo_now
+   if (nnsclo_now>1) then
+     do inonsc = 2, nnsclo_now
        call wvl_psitohpsi(dtset%diemix,eexctx,exc,eh,ekin,eloc,enl,esicdc,&
-&                         istep,inonsc-1,dtset%iscf,mpi_enreg%me_wvl,dtset%natom,&
+&                         istep,inonsc,dtset%iscf,mpi_enreg%me_wvl,dtset%natom,&
 &                         nfftf,mpi_enreg%nproc_wvl,dtset%nspden,nres2,do_scf,evxc,&
 &                         wvl,wvlbigdft,xcart,strsxc)
-       call wvl_hpsitopsi(cprj, dtset,energies, inonsc, mcprj_local,mpi_enreg,&
-&                         residm, wvl,xcart)
+       if (inonsc<nnsclo_now) then
+         call wvl_hpsitopsi(cprj, dtset,energies, inonsc, mcprj_local,mpi_enreg,&
+&                           residm, wvl,xcart)
+       end if
      end do
   end if
-
-!    do inonsc = 1, nnsclo_now-1
-!      call wvl_hpsitopsi(cprj, dtset,energies, inonsc, mcprj_local,mpi_enreg,&
-! &     residm, wvl,xcart)
-!      call wvl_psitohpsi(dtset%diemix,eexctx,exc,eh,ekin,eloc,enl,esicdc,&
-! &                       istep,inonsc,dtset%iscf,mpi_enreg%me_wvl,dtset%natom,&
-! &                       nfftf,mpi_enreg%nproc_wvl,dtset%nspden,nres2,do_scf,evxc,&
-! &                       wvl,wvlbigdft,xcart,strsxc)
-!    end do
-!    if(nnsclo_now<=1) then
-!      call wvl_hpsitopsi(cprj,dtset, energies, istep, mcprj_local,mpi_enreg, &
-! &     residm, wvl,xcart)
-!    end if
 
    DBG_EXIT("COLL")
 
