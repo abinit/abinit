@@ -35,7 +35,7 @@ module m_gkk
  use m_ebands
  use iso_c_binding
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -238,6 +238,10 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  mband = ebands_k%mband
  nkpt_kq = ebands_kq%nkpt
  mband_kq = ebands_kq%mband
+ ecut = dtset%ecut
+
+! GKA TODO: Make sure there is a single q-point present.
+ qpt = dtset%qptn(:)
 
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
  nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
@@ -256,21 +260,32 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ABI_MALLOC(nband, (nkpt, nsppol))
  ABI_MALLOC(bks_mask,(mband, nkpt, nsppol))
  ABI_MALLOC(keep_ur,(mband, nkpt ,nsppol))
- nband=mband; bks_mask=.True.; keep_ur=.False. ! GKA : FIXME I guest the mask could be optimized
-                                               !       to read only the k-point of this processor.
+ nband=mband; bks_mask=.False.; keep_ur=.False.
 
- ecut = dtset%ecut ! dtset%dilatmx
+ ABI_MALLOC(nband_kq, (nkpt_kq, nsppol))
+ ABI_MALLOC(bks_mask_kq,(mband_kq, nkpt_kq, nsppol))
+ ABI_MALLOC(keep_ur_kq,(mband_kq, nkpt_kq ,nsppol))
+ nband_kq=mband_kq; bks_mask_kq=.False.; keep_ur_kq=.False.
+
+ ! Distribute the k-points over the processors
+ call xmpi_split_work(nkpt,comm,my_kstart,my_kstop,msg,ierr)
+ do ik=1,nkpt
+ if (.not. ((ik .ge. my_kstart) .and. (ik .le. my_kstop))) cycle
+
+   kk = ebands_k%kptns(:,ik)
+   kq = kk + qpt
+   call findqg0(ikq,g0_k,kq,nkpt_kq,ebands_kq%kptns(:,:),(/1,1,1/))  ! Find the index of the k+q point
+
+   bks_mask(:,ik,:) = .True.
+   bks_mask_kq(:,ikq,:) = .True.
+ end do
+
+ ! Initialize the wavefunction descriptors
  call wfd_init(wfd_k,cryst,pawtab,psps,keep_ur,dtset%paral_kgb,dummy_npw,mband,nband,nkpt,nsppol,bks_mask,&
    nspden,nspinor,dtset%ecutsm,dtset%dilatmx,ebands_k%istwfk,ebands_k%kptns,ngfft,&
    dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
 
  call wfd_print(wfd_k,header="Wavefunctions on the k-points grid",mode_paral='PERS')
-
-
- ABI_MALLOC(nband_kq, (nkpt_kq, nsppol))
- ABI_MALLOC(bks_mask_kq,(mband_kq, nkpt_kq, nsppol))
- ABI_MALLOC(keep_ur_kq,(mband_kq, nkpt_kq ,nsppol))
- nband_kq=mband_kq; bks_mask_kq=.True.; keep_ur_kq=.False.
 
  call wfd_init(wfd_kq,cryst,pawtab,psps,keep_ur_kq,dtset%paral_kgb,dummy_npw,mband_kq,nband_kq,nkpt_kq,nsppol,bks_mask_kq,&
    nspden,nspinor,dtset%ecutsm,dtset%dilatmx,ebands_kq%istwfk,ebands_kq%kptns,ngfft,&
@@ -293,9 +308,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  iomode = iomode_from_fname(wfq_path)
  call wfd_read_wfk(wfd_kq,wfq_path,iomode)
  if (.False.) call wfd_test_ortho(wfd_kq,cryst,pawtab,unit=std_out,mode_paral="PERS")
-
-! GKA TODO: Make sure there is a single q-point present.
- qpt = dtset%qptn(:)
 
  ! ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information on the coarse grid.
  ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*natom))
@@ -420,9 +432,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      ABI_MALLOC(h1_kets, (2, mpw*nspinor, mband))
 
 
-     ! Split k-point loop
-     call xmpi_split_work(nkpt,comm,my_kstart,my_kstop,msg,ierr)
-
      ! GKA : This little block used to be right after the perturbation loop
      ! Prepare application of the NL part.
      call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=1)
@@ -439,7 +448,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
        kk = ebands_k%kptns(:,ik)
 
-       ! GKA: Assuming that all k-points in the q-shifted list of k-point are in the BZ.
        kq = kk + qpt
        call findqg0(ikq,g0_k,kq,nkpt_kq,ebands_kq%kptns(:,:),(/1,1,1/))  ! Find the index of the k+q point
 
@@ -532,7 +540,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
    ! Write the netCDF file.
    call appdig(ipc,dtfil%fnameabo_gkk,gkkfilnam)
    fname = strcat(gkkfilnam,".nc")
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
    NCF_CHECK(crystal_ncwrite(cryst, ncid))
    NCF_CHECK(ebands_ncwrite(ebands_k, ncid))
