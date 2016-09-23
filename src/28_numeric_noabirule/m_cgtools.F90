@@ -1800,7 +1800,9 @@ subroutine  cg_getspin(cgcband, npw_k, spin, cgcmat)
 & + cgcmat_(1,2)*pauli_y(1,2) + cgcmat_(2,2)*pauli_y(2,2)
  cspin(3) = cgcmat_(1,1)*pauli_z(1,1) + cgcmat_(2,1)*pauli_z(2,1) &
 & + cgcmat_(1,2)*pauli_z(1,2) + cgcmat_(2,2)*pauli_z(2,2)
-!print *, 'real(spin) ', real(cspin), 'aimag(spin) ', aimag(cspin)
+!write(std_out,*) 'cgmat: ', cgcmat_
+!write(std_out,*) 'real(spin): ', real(cspin)
+!write(std_out,*) 'aimag(spin): ', aimag(cspin)
 
  spin = real(cspin(1:3))
  if (present(cgcmat)) cgcmat = cgcmat_

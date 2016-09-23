@@ -68,6 +68,14 @@ module m_epjdos
 !! epjdos_t
 !! 
 !! FUNCTION
+!!  Stores different contributions to the electronic DOS.
+!!
+!! NOTES
+!!  Please contact gmatteo if you plan to change the internal implementation
+!!  or add new DOSes. These results are saved in a netcdf file (see fatbands_ncwrite)
+!!  so that one can read it with python and plot fatbands and PJDOSEs.
+!!  The python version is able to handle the different cases (L, LM, Spin ...) but
+!!  any change in the internal Abinit implementation is likely to break the python interface.
 !! 
 !! SOURCE
 
@@ -84,7 +92,7 @@ module m_epjdos
    ! 2 --> Standard DOS with tetra.
    ! 3 --> L-DOS with tetra (prtdosm>0 if LM is wanted in Ylm/Slm basis).
    ! 4 --> L-DOS with gaussian (prtdosm if LM is wanted in Ylm/Slm basis).
-   ! 5 --> Spin DOS 
+   ! 5 --> Spin-DOS 
 
    integer :: prtdosm
    ! Used if L-DOS. 
@@ -155,6 +163,10 @@ type(epjdos_t) function epjdos_from_dataset(dtset) result(new)
 !Arguments ------------------------------------
  type(dataset_type),intent(in) :: dtset
 
+!Local variables-------------------------------
+!scalars
+ integer :: ierr
+
 ! *********************************************************************
 
  new%nkpt = dtset%nkpt; new%mband = dtset%mband; new%nsppol = dtset%nsppol
@@ -194,17 +206,24 @@ type(epjdos_t) function epjdos_from_dataset(dtset) result(new)
    new%mbesslang = 0
  end if
 
- ABI_MALLOC(new%fractions, (dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
+ ! Check allocations status as these arrays are not distributed and the wavefunctions are still in memory.
+ ABI_STAT_MALLOC(new%fractions, (dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
+ ABI_CHECK(ierr==0, "out of memory in new%fractions")
  new%fractions = zero
+
  if (new%prtdosm>=1 .or. new%fatbands_flag==1) then
-   ABI_MALLOC(new%fractions_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang))
-   ABI_MALLOC(new%fractions_average_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang))
+   ABI_STAT_MALLOC(new%fractions_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang), ierr)
+   ABI_CHECK(ierr==0, "out of memory in new%fractions_m")
+   ABI_STAT_MALLOC(new%fractions_average_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang), ierr)
+   ABI_CHECK(ierr==0, "out of memory in new%fractions_average_m")
    new%fractions_m = zero; new%fractions_average_m = zero
  end if
 
  if (dtset%usepaw==1 .and. new%partial_dos_flag==1) then
-   ABI_MALLOC(new%fractions_paw1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
-   ABI_MALLOC(new%fractions_pawt1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction))
+   ABI_STAT_MALLOC(new%fractions_paw1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
+   ABI_CHECK(ierr==0, "out of memory in new%fraction_paw1")
+   ABI_STAT_MALLOC(new%fractions_pawt1,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction), ierr)
+   ABI_CHECK(ierr==0, "out of memory in new%fraction_pawt1")
    new%fractions_paw1 = zero; new%fractions_pawt1 = zero
  end if
 
@@ -955,9 +974,6 @@ subroutine gaus_dos(dos, dtset,fermie,eigen,fildata)
  type(dataset_type),intent(in) :: dtset
  type(epjdos_t),intent(inout) :: dos
 !arrays
- !real(dp),intent(in) :: dos_fractions(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction)
- !real(dp),intent(in) :: dos_fractions_paw1(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*paw_dos_flag)
- !real(dp),intent(in) :: dos_fractions_pawt1(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*paw_dos_flag)
  real(dp),intent(in) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
 
 !Local variables-------------------------------
@@ -2169,7 +2185,6 @@ subroutine prtfatbands(dos, dtset,fildata,fermie,eigen,pawfatbnd,pawtab)
  real(dp),intent(in) :: fermie
  character(len=fnlen),intent(in) :: fildata
 !arrays
- !real(dp),intent(in) :: dos_fractions_m(dtset%nkpt,dtset%mband,dtset%nsppol,ndosfraction*mbesslang)
  real(dp),intent(in) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 

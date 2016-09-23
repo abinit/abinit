@@ -134,6 +134,10 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
    MSG_ERROR(message)
  end if
 
+ if (mpi_enreg%nproc_atom /= 1) then
+   MSG_ERROR("partial_dos_fractions does not support atom parallelism")
+ end if
+
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
 
 !Prepare some useful integrals
@@ -219,8 +223,6 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 !      LOOP OVER BANDS
        do iband=1,nband_k
          if(abs(mpi_enreg%proc_distrb(ikpt,iband,isppol)-me)/=0) cycle
-         ! FIXME: MPI-FFT parallelism is buggy
-         !if (mod(iband, mpi_enreg%nproc_fft) /= mpi_enreg%me_fft) cycle
          ibsp=(iband-1)*my_nspinor
          do ispinor=1,my_nspinor
            ibsp=ibsp+1

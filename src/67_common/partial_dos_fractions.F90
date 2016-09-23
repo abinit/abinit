@@ -164,9 +164,13 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,mpi_enreg)
  comm = mpi_enreg%comm_cell
  if (mpi_enreg%paral_kgb==1) comm = mpi_enreg%comm_kpt
  me = mpi_enreg%me_kpt
+
+ if (mpi_enreg%nproc_band /= 1) then
+   MSG_ERROR("partial_dos_fractions does not support band parallelism")
+ end if
  
  my_nspinor = max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
- mcg_disk = dtset%mpw*my_nspinor*dtset%mband
+
 
  n1 = dtset%ngfft(1); n2 = dtset%ngfft(2); n3 = dtset%ngfft(3)
  mgfft = maxval(dtset%ngfft(1:3))
@@ -407,20 +411,23 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,mpi_enreg)
    end if
 
    ! FIXME: WHAT THE FUCK!
+   mcg_disk = dtset%mpw*my_nspinor*dtset%mband
    ABI_ALLOCATE(cg_1kpt,(2,mcg_disk))
    shift_sk = 0
    isppol = 1
 
    do ikpt=1,dtset%nkpt
      if (all(mpi_enreg%proc_distrb(ikpt,:,isppol) /= me)) cycle
+     npw_k = npwarr(ikpt)
 
      cg_1kpt(:,:) = cg(:,shift_sk+1:shift_sk+mcg_disk)
-     npw_k = npwarr(ikpt)
      ABI_ALLOCATE(cg_1band,(2,2*npw_k))
      shift_b=0
      do iband=1,dtset%mband
        if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= me) cycle
 
+       ! Select wavefunction in cg array
+       !shift_cg = shift_sk + shift_b
        cg_1band(:,:) = cg_1kpt(:,shift_b+1:shift_b+2*npw_k)
        call cg_getspin(cg_1band, npw_k, spin, cgcmat=cgcmat)
 

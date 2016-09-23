@@ -851,7 +851,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    end if
 
 #ifdef HAVE_NETCDF
-   !if (.False.) then
+   ! Write netcdf file with dos% results.
    if (me == master) then
      fname = trim(dtfil%filnam_ds(4))//'_FATBANDS.nc'
      NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
