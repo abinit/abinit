@@ -23,6 +23,7 @@
 !!  dtset<type(dataset_type)>=all input variables for this dataset
 !!  mbesslang=maximum angular momentum for Bessel function expansion
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
+!!  collect=1 if fractions should be MPI collected at the end, 0 otherwise.
 !!  mpi_enreg=information about MPI parallelization
 !!  prtdosm= option for the m-contributions to the partial DOS
 !!           1 for complex spherical harmonics, 2 for real spherical harmonics.
@@ -71,7 +72,7 @@
 
 #include "abi_common.h"
 
-subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,mpi_enreg)
+subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_enreg)
 
  use defs_basis
  use defs_abitypes
@@ -98,7 +99,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,mpi_enreg)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mcg
+ integer,intent(in) :: mcg,collect
  type(epjdos_t),intent(inout) :: dos
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
@@ -372,12 +373,14 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,mpi_enreg)
    end do ! isppol
 
    ! Gather all contributions from different processors
-   call xmpi_sum(dos%fractions,comm,ierr)
-   if (dos%prtdosm /= 0) call xmpi_sum(dos%fractions_m,comm,ierr)
+   if (collect == 1) then
+     call xmpi_sum(dos%fractions,comm,ierr)
+     if (dos%prtdosm /= 0) call xmpi_sum(dos%fractions_m,comm,ierr)
 
-   if (mpi_enreg%paral_spinor == 1)then
-     call xmpi_sum(dos%fractions,mpi_enreg%comm_spinor,ierr)
-     if (dos%prtdosm /= 0) call xmpi_sum(dos%fractions_m,mpi_enreg%comm_spinor,ierr)
+     if (mpi_enreg%paral_spinor == 1)then
+       call xmpi_sum(dos%fractions,mpi_enreg%comm_spinor,ierr)
+       if (dos%prtdosm /= 0) call xmpi_sum(dos%fractions_m,mpi_enreg%comm_spinor,ierr)
+     end if
    end if
 
    ABI_DEALLOCATE(atindx)
@@ -451,11 +454,13 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,mpi_enreg)
    ABI_DEALLOCATE(cg_1kpt)
 
    ! Gather all contributions from different processors
-   call xmpi_sum(dos%fractions,comm,ierr)
-   !below for future use - spinors should not be parallelized for the moment
-   !if (mpi_enreg%paral_spinor == 1)then
-   !  call xmpi_sum(dos%fractions,mpi_enreg%comm_spinor,ierr)
-   !end if
+   if (collect == 1) then
+     call xmpi_sum(dos%fractions,comm,ierr)
+     !below for future use - spinors should not be parallelized for the moment
+     !if (mpi_enreg%paral_spinor == 1)then
+     !  call xmpi_sum(dos%fractions,mpi_enreg%comm_spinor,ierr)
+     !end if
+   end if
 
  else
    MSG_WARNING('only partial_dos==1 is coded')

@@ -235,7 +235,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,cplex1=1,fform_den=52,rdwr2=2,rdwrpaw0=0
- integer :: bantot,fform
+ integer :: bantot,fform,collect
  integer :: accessfil,coordn
  integer :: ii,ierr,ifft,ikpt,ispden,isppol
  integer :: me_fft,n1,n2,n3
@@ -818,8 +818,10 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
    if (dos%partial_dos_flag>=1 .or. dos%fatbands_flag==1)then
      ! Generate fractions for partial DOSs if needed partial_dos 1,2,3,4  give different decompositions
+     collect = 1 
+     if (psps%usepaw==1 .and. dos%partial_dos_flag /= 2) collect = 0
      if ((psps%usepaw==0.or.dtset%pawprtdos/=2) .and. dos%partial_dos_flag>=1) then
-       call partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,mpi_enreg)
+       call partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_enreg)
      end if
 
      if (psps%usepaw==1 .and. dos%partial_dos_flag /= 2) then
