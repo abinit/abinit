@@ -2394,6 +2394,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtstm',dt%prtstm,1,(/0/),iout)
    end if
 
+!  prtvclmb - needs prtvha as well
+   if(dt%prtvclmb > 0)then
+     cond_string(1)='prtvclmb' ; cond_values(1)=dt%prtvclmb
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'prtvha',dt%prtvha,1,(/1/),iout)
+   end if
+
 !  prtvolimg
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtvolimg',dt%prtvolimg,3,(/0,1,2/),iout)
 
