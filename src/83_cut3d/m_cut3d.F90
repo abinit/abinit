@@ -99,7 +99,6 @@ subroutine cut3d_hirsh(grid_den,natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d_hirsh'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
