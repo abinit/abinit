@@ -692,6 +692,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%ucrpa_bands(:)=-1
    dtsets(idtset)%ucrpa_window(:)=-1.0_dp
    dtsets(idtset)%upawu(:,:)=zero
+   dtsets(idtset)%usepead=1
    dtsets(idtset)%usefock=0
    dtsets(idtset)%usekden=0
    dtsets(idtset)%use_gemm_nonlop=0

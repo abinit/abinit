@@ -557,6 +557,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 &     'Action: change to the d3e_pertx_*** input parameters!'
      MSG_WARNING(message)
    end if
+   
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepead',tread,'INT')
+   if(tread==1) dtset%usepead=intarr(1)
+
  end if
 
  response=0

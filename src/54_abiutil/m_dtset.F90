@@ -539,6 +539,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%use_nonscf_gkk     = dtin%use_nonscf_gkk
  dtout%usepaw             = dtin%usepaw
  dtout%usepawu            = dtin%usepawu
+ dtout%usepead            = dtin%usepead
  dtout%usepotzero         = dtin%usepotzero
  dtout%userec             = dtin%userec
  dtout%useria             = dtin%useria

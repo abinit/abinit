@@ -552,6 +552,7 @@ type dataset_type
  integer :: use_nonscf_gkk
  integer :: usepaw
  integer :: usepawu
+ integer :: usepead
  integer :: usepotzero
  integer :: userec
  integer :: useria

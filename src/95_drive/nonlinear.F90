@@ -223,10 +223,16 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  end if
 
 !Computation of third order derivatives from PEAD (pead=1) or full DPFT formalism (pead=0):
-! pead = 1 ! pead = 0 is under development...
-!LTEST
- pead = 0
-!LTEST
+ pead = dtset%usepead
+ if (pead==0) then
+   write(message, '(a)' ) 'NONLINEAR : PEAD=0, full DFPT computation of third order derivatives'
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+ else
+   write(message, '(a)' ) 'NONLINEAR : PEAD/=0, PEAD computation  of third order derivatives'
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+ end if
 
 !Define the set of admitted perturbations taking into account
 !the possible permutations
@@ -1212,6 +1218,11 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
    call paw_ij_free(paw_ij)
    call pawfgrtab_free(pawfgrtab)
  end if
+ ABI_DATATYPE_DEALLOCATE(pawrhoij)
+ ABI_DATATYPE_DEALLOCATE(paw_an)
+ ABI_DATATYPE_DEALLOCATE(paw_ij)
+ ABI_DATATYPE_DEALLOCATE(pawfgrtab)
+
 !Clean the header
  call hdr_free(hdr)
 
