@@ -39,8 +39,9 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
 
  use m_ddb
  use m_ifc
- use m_crystal,  only : crystal_t
- use m_dynmat,  only  : asrif9,gtdyn9,cell9,canat9
+ use m_copy,            only : alloc_copy
+ use m_crystal,         only : crystal_t
+ use m_dynmat,          only : asrif9,gtdyn9,cell9,canat9
  use m_epigene_dataset, only : epigene_dataset_type
  use m_effective_potential, only : effective_potential_type
 
@@ -291,7 +292,7 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
 !   Acoustic Sum Rule
 !***************************************************************************
 ! ASR-correction (d2asr) has to be determined here from the Dynamical matrix at Gamma.
-  ABI_CALLOC(d2asr,(2,3,natom,3,natom))
+  ABI_ALLOCATE(d2asr,(2,3,natom,3,natom))
 
   write(message, '(a,a,(80a),a,a,a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
 &   ' Calculation of acoustic sum rule',ch10
@@ -342,14 +343,27 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
 
   if (inp%dipdip == 1) then
     ifc%short_atmfrc = ifc%atmfrc ! if dipdip==1 atmfrc = short range
-    ifc%ewald_atmfrc = zero       ! fill with 0
+    ifc%ewald_atmfrc = zero       ! fill with 0 (fill later in effective_potential_generateDipDip)
   else
     ifc%short_atmfrc = zero
-    ifc%ewald_atmfrc = zero       ! fill with 0
+    ifc%ewald_atmfrc = zero       ! fill with 0 (fill later in effective_potential_generateDipDip)
   end if
 
+! Free ifc before copy
   call ifc_free(effective_potential%ifcs)
-  effective_potential%ifcs = ifc  ! Fill the effective potential
+! Fill the effective potential
+! Copy ifc into effective potential
+! !!Warning eff_pot%ifcs only contains atmfrc,short_atmfrc,ewald_atmfrc,,nrpt and cell!!
+! rcan,ifc%rpt,wghatm and other quantities 
+! are not needed for effective potential!!!
+  effective_potential%ifcs%nrpt = ifc%nrpt
+  call alloc_copy(ifc%atmfrc      ,effective_potential%ifcs%atmfrc)
+  call alloc_copy(ifc%short_atmfrc,effective_potential%ifcs%short_atmfrc)
+  call alloc_copy(ifc%ewald_atmfrc,effective_potential%ifcs%ewald_atmfrc)
+  call alloc_copy(ifc%cell        ,effective_potential%ifcs%cell)
+
+! Deallocate temporary ifc
+  call ifc_free(ifc)
 
 !**********************************************************************
 ! Dynamical matrix calculation for each qpoint
@@ -435,12 +449,13 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
     call wrtout(std_out,message,'COLL')
     call wrtout(ab_out,message,'COLL')
   end if
-!   DEALLOCATION OF ARRAYS
+!-------------------------------------------------------------------------------------
+! DEALLOCATION OF ARRAYS
   ABI_DEALLOCATE(blkval)
   ABI_DEALLOCATE(zeff)
   ABI_DEALLOCATE(instrain)
+  ABI_DEALLOCATE(d2asr)
 
-!-------------------------------------------------------------------------------------
   write(message,'(a)')ch10
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')

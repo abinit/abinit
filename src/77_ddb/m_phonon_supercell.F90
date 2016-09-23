@@ -30,6 +30,7 @@ module m_phonon_supercell
  use m_errors
  use m_profiling_abi
 
+ use m_copy,     only : alloc_copy
  use m_io_tools, only : open_file
  use m_fstrings, only : int2char4, write_num
 
@@ -65,6 +66,7 @@ module m_phonon_supercell
  public :: init_supercell
  public :: freeze_displ_supercell
  public :: prt_supercell
+ public :: copy_supercell
  public :: destroy_supercell
 !!***
 
@@ -376,6 +378,61 @@ subroutine prt_supercell (freq, jmode, outfile_radix, scell, typat, znucl)
 
 end subroutine prt_supercell
 !!***
+
+!****f* m_phonon_supercell/copy_supercell
+!!
+!! NAME
+!! copy_supercell
+!!
+!! FUNCTION
+!! copy supercell structure
+!!
+!! INPUTS
+!! scell_in = supercell structure with data to copy
+!!
+!! OUTPUT
+!! scell = supercell structure with data to be output
+!!
+!! PARENTS
+!!      freeze_displ_allmodes
+!!
+!! CHILDREN
+!!
+!! SOURCE
+ 
+subroutine copy_supercell (scell_in,scell_copy)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'copy_supercell'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  type(supercell_type), intent(in) :: scell_in 
+  type(supercell_type), intent(inout) :: scell_copy
+
+! *************************************************************************
+
+  call destroy_supercell(scell_copy)
+  scell_copy%natom = scell_in%natom
+  scell_copy%natom_supercell = scell_in%natom_supercell
+  scell_copy%rprimd_supercell = scell_in%rprimd_supercell
+  scell_copy%qphon = scell_in%qphon
+  call alloc_copy(scell_in%xcart_supercell        , scell_copy%xcart_supercell)
+  call alloc_copy(scell_in%xcart_supercell_ref    , scell_copy%xcart_supercell_ref)
+  call alloc_copy(scell_in%atom_indexing_supercell, scell_copy%atom_indexing_supercell)
+  call alloc_copy(scell_in%uc_indexing_supercell  , scell_copy%uc_indexing_supercell)
+  call alloc_copy(scell_in%typat_supercell        , scell_copy%typat_supercell)
+
+end subroutine copy_supercell
+!!***
+
+
 
 !****f* m_phonon_supercell/destroy_supercell
 !!

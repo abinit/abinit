@@ -49,19 +49,18 @@ subroutine mover_effpot(inp,filnam,effective_potential,comm)
  use m_xmpi
  use m_abimover
  use m_phonons
+ use m_dtset,  only : dtset_free
  use m_strain
  use m_effective_potential
  use m_effective_potential_file
  use m_epigene_dataset
  use m_phonon_supercell
-
-!TEST
  use m_ifc
  use m_ewald
-
+ use m_copy            , only : alloc_copy 
  use m_electronpositron, only : electronpositron_type
- use m_scfcv,            only : scfcv_t, scfcv_run
- use m_results_gs,       only : results_gs_type,init_results_gs
+ use m_scfcv,            only : scfcv_t, scfcv_run,scfcv_destroy
+ use m_results_gs,       only : results_gs_type,init_results_gs,destroy_results_gs
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -244,15 +243,14 @@ implicit none
    dtset%strtarget = zero ! STRess TARGET
    ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
    symrel = one
-   dtset%symrel = symrel! SYMmetry in REaL space
+   call alloc_copy(symrel,dtset%symrel)
    ABI_ALLOCATE(tnons,(3,dtset%nsym))
    tnons = zero
    dtset%tnons = tnons
-   ABI_ALLOCATE(dtset%typat,(dtset%ntypat))
-   dtset%typat  = super_cell%typat_supercell
-   ABI_ALLOCATE(dtset%znucl,(dtset%ntypat))
-   dtset%znucl  = effective_potential%znucl
-   
+   call alloc_copy(tnons,dtset%tnons)
+   call alloc_copy(super_cell%typat_supercell,dtset%typat)
+   call alloc_copy(effective_potential%znucl,dtset%znucl)   
+
 !  set psps 
    psps%useylm = dtset%useylm
    
@@ -356,19 +354,21 @@ implicit none
 !***************************************************************
 
    ABI_DEALLOCATE(amass)
-   ABI_DEALLOCATE(dtset%prtatlist)
-   ABI_DEALLOCATE(dtset%iatfix)
-   ABI_DEALLOCATE(dtset%rprimd_orig)
-   if(dtset%nnos>0) then
-     ABI_DEALLOCATE(dtset%qmass)
-   end if
+   ABI_DEALLOCATE(fred)
+   ABI_DEALLOCATE(fcart)
+   ABI_DEALLOCATE(indsym)
    ABI_DEALLOCATE(rhog)
    ABI_DEALLOCATE(rhor)
+   ABI_DEALLOCATE(symrel)
+   ABI_DEALLOCATE(tnons)
    ABI_DEALLOCATE(vel)
    ABI_DEALLOCATE(xred)
    ABI_DEALLOCATE(xred_old)
    ABI_DEALLOCATE(ab_xfh%xfhist)
-
+   call destroy_supercell(super_cell)
+   call dtset_free(dtset)
+   call destroy_results_gs(results_gs)
+   call scfcv_destroy(scfcv_args)
  end if
 
  write(message, '(a,(80a),a,a)' ) ch10,&

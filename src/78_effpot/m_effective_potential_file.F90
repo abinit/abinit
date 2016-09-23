@@ -1248,7 +1248,7 @@ end subroutine effective_potential_file_getDim
 
   use m_effective_potential
   use m_epigene_dataset
-  use m_ddb
+  use m_ddb, only : ddb_from_file,ddb_free
   use m_strain
   use m_crystal, only : crystal_t, crystal_free
   use m_dynmat, only : bigbx9
@@ -1360,6 +1360,10 @@ end subroutine effective_potential_file_getDim
 &      ' The file ',trim(filename),' is not readable'
     MSG_BUG(message)
   end if
+
+! Deallocation of array
+  call crystal_free(Crystal)
+  call ddb_free(ddb)
 
 end subroutine effective_potential_file_read
 !!***

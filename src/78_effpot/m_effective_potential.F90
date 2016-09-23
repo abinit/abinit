@@ -35,6 +35,7 @@ module m_effective_potential
  use m_phonon_supercell
  use m_phonons
  use m_ddb
+ use m_copy,           only : alloc_copy
  use m_crystal,        only : crystal_t, crystal_init, crystal_free, crystal_t,crystal_print
  use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_dynmat,         only : make_bigbox,q0dy3_apply, q0dy3_calc
@@ -328,7 +329,6 @@ subroutine effective_potential_init(natom,nph1l,nrpt,ntypat,eff_pot,name)
  ABI_ALLOCATE(eff_pot%forces,(3,natom))
  eff_pot%forces = zero
 
-
 !Allocation of list of nph1l wavevectors
  ABI_ALLOCATE(eff_pot%qph1l,(3,nph1l))
  eff_pot%qph1l  = zero
@@ -404,7 +404,6 @@ subroutine effective_potential_free(eff_pot)
   eff_pot%ucvol  = zero
   eff_pot%rprimd = zero
   eff_pot%acell  = zero
-  eff_pot%ifcs%nrpt   = zero
   eff_pot%epsilon_inf = zero
   eff_pot%elastic_constants = zero
   eff_pot%strain%name = ""
@@ -466,31 +465,14 @@ subroutine effective_potential_free(eff_pot)
     ABI_DEALLOCATE(eff_pot%phfrq)
   end if
 
-  if(allocated(eff_pot%ifcs%short_atmfrc))then
-    eff_pot%ifcs%short_atmfrc=zero
-    ABI_DEALLOCATE(eff_pot%ifcs%short_atmfrc)
-  end if
-
   if(allocated(eff_pot%phonon_strain_coupling))then
     do ii = 1,12
-      eff_pot%phonon_strain_coupling(ii)%atmfrc = zero
-      eff_pot%phonon_strain_coupling(ii)%cell   = zero
-      ABI_DEALLOCATE(eff_pot%phonon_strain_coupling(ii)%atmfrc)
-      ABI_DEALLOCATE(eff_pot%phonon_strain_coupling(ii)%cell)
+       call ifc_free(eff_pot%phonon_strain_coupling(ii))
     end do
     ABI_DATATYPE_DEALLOCATE(eff_pot%phonon_strain_coupling)
   end if
 
-  if(allocated(eff_pot%ifcs%ewald_atmfrc))then
-    eff_pot%ifcs%ewald_atmfrc=zero
-    ABI_DEALLOCATE(eff_pot%ifcs%ewald_atmfrc)
-  end if
-
-  if(allocated(eff_pot%ifcs%atmfrc))then
-    eff_pot%ifcs%atmfrc=zero
-    ABI_DEALLOCATE(eff_pot%ifcs%atmfrc)
-  end if
-
+  call ifc_free(eff_pot%ifcs)
   call destroy_supercell(eff_pot%supercell)
   
 end subroutine effective_potential_free
@@ -563,7 +545,6 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: dyew(:,:,:,:,:), dyewq0(:,:,:,:,:)
  real(dp),allocatable :: xred(:,:),xred_tmp(:,:),zeff_tmp(:,:,:)
-
  type(supercell_type) :: super_cell
  type(ifc_type) :: ifc_tmp
 ! *************************************************************************
@@ -591,7 +572,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 &   super_cell)
 
 !1-Store the information of the supercell of the reference structure into effective potential
- eff_pot%supercell = super_cell
+ call copy_supercell(super_cell,eff_pot%supercell)
 
 !2 Check if the bound of new cell correspond to the effective potential 
 !only for option=zero
@@ -682,10 +663,10 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    ifc_tmp%nrpt = irpt
 
 !  Initialisation of ifc temporary
-   ABI_MALLOC(ifc_tmp%cell,(ifc_tmp%nrpt,3))
-   ABI_MALLOC(ifc_tmp%short_atmfrc,(2,3,eff_pot%natom,3,eff_pot%natom,ifc_tmp%nrpt))
-   ABI_MALLOC(ifc_tmp%ewald_atmfrc,(2,3,eff_pot%natom,3,eff_pot%natom,ifc_tmp%nrpt))
-   ABI_MALLOC(ifc_tmp%atmfrc,(2,3,eff_pot%natom,3,eff_pot%natom,ifc_tmp%nrpt))
+   ABI_ALLOCATE(ifc_tmp%cell,(ifc_tmp%nrpt,3))
+   ABI_ALLOCATE(ifc_tmp%short_atmfrc,(2,3,eff_pot%natom,3,eff_pot%natom,ifc_tmp%nrpt))
+   ABI_ALLOCATE(ifc_tmp%ewald_atmfrc,(2,3,eff_pot%natom,3,eff_pot%natom,ifc_tmp%nrpt))
+   ABI_ALLOCATE(ifc_tmp%atmfrc,(2,3,eff_pot%natom,3,eff_pot%natom,ifc_tmp%nrpt))
    ifc_tmp%atmfrc(:,:,:,:,:,:) = zero
    ifc_tmp%short_atmfrc(:,:,:,:,:,:) = zero
    ifc_tmp%ewald_atmfrc(:,:,:,:,:,:) = zero
@@ -705,7 +686,6 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    zeff_tmp(:,:,:) = zero
    sumg0           = zero
    acell           = one
-
 
    call matr3inv(super_cell%rprimd_supercell,gprimd)
    call xcart2xred(super_cell%natom_supercell,super_cell%rprimd_supercell,&
@@ -774,18 +754,25 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    end if
 
 !  Broadcast ifc
-   call xmpi_bcast (ifc_tmp%atmfrc, master, comm, ierr)
-   call xmpi_bcast (ifc_tmp%cell,   master, comm, ierr)
-   call xmpi_bcast (ifc_tmp%nrpt,   master, comm, ierr)
+   call xmpi_bcast (ifc_tmp%atmfrc,       master, comm, ierr)
+   call xmpi_bcast (ifc_tmp%short_atmfrc, master, comm, ierr)
+   call xmpi_bcast (ifc_tmp%ewald_atmfrc, master, comm, ierr)
+   call xmpi_bcast (ifc_tmp%cell,         master, comm, ierr)
+   call xmpi_bcast (ifc_tmp%nrpt,         master, comm, ierr)
    
-!  Copy ifc iton effective potential
-   eff_pot%ifcs = ifc_tmp
-
-   
-   ABI_FREE(ifc_tmp%cell)
-   ABI_FREE(ifc_tmp%short_atmfrc)
-   ABI_FREE(ifc_tmp%ewald_atmfrc)
-   ABI_FREE(ifc_tmp%atmfrc)
+!  Copy ifc into effective potential
+!  !!!Warning eff_pot%ifcs only contains atmfrc,short_atmfrc,ewald_atmfrc,,nrpt and cell!!
+!   rcan,ifc%rpt,wghatm and other quantities 
+!   are not needed for effective potential!!!
+!  Free ifc before copy
+   call ifc_free(eff_pot%ifcs)
+!  Fill the effective potential with new atmfr
+   eff_pot%ifcs%nrpt = ifc_tmp%nrpt
+   call alloc_copy(ifc_tmp%atmfrc      ,eff_pot%ifcs%atmfrc)
+   call alloc_copy(ifc_tmp%short_atmfrc,eff_pot%ifcs%short_atmfrc)
+   call alloc_copy(ifc_tmp%ewald_atmfrc,eff_pot%ifcs%ewald_atmfrc)
+   call alloc_copy(ifc_tmp%cell        ,eff_pot%ifcs%cell)
+   call ifc_free(ifc_tmp)
 
  end if
 
@@ -793,7 +780,10 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 ! Impose sum rule
    call effective_potential_applySumRule(asr,eff_pot%ifcs,eff_pot%natom)
  end if
- 
+
+! Free suppercell
+ call destroy_supercell(super_cell)
+
 end subroutine effective_potential_generateDipDip
 !!***
 
@@ -1063,12 +1053,8 @@ subroutine effective_potential_effpot2dynmat(dynmat,delta,eff_pot,natom,n_cell,o
    do nu=1,3
      do ia=1,eff_pot%supercell%natom_supercell
        do mu=1,3
-
           write(999,'(4i4,2d22.14)')nu,ib,mu,ia,&
  &             dynmat(1,mu,ia,nu,ib),dynmat(2,mu,ia,nu,ib)
-
-!          write(999,'(4i4,2d22.14)')nu,ib,mu,ia,&
-! &             dynmat(1,nu,ib,mu,ia),dynmat(2,nu,ib,mu,ia)
        end do
      end do
    end do
@@ -1083,274 +1069,6 @@ subroutine effective_potential_effpot2dynmat(dynmat,delta,eff_pot,natom,n_cell,o
 
  end subroutine effective_potential_effpot2dynmat
 !!***
-
-
-!****f* m_effective_potential/effective_potential_effpot2ddb
-!!
-!! NAME
-!! effective_potential_effpot2ddb
-!!
-!! FUNCTION
-!! Convert eff_pot into ddb structure
-!!
-!! INPUTS
-!! eff_pot = effective potential structure
-!!
-!! OUTPUT
-!! ddb   = ddb with all information
-!!
-!! PARENTS
-!!   epigene
-!!
-!! CHILDREN
-!!   
-!!
-!! SOURCE
- 
-subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,n_cell,nph1l,option,qph1l)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_effpot2ddb'
- use interfaces_32_util
- use interfaces_41_geometry
-!End of the abilint section
-
-  implicit none
-
-!Arguments ------------------------------------
-!scalars
-  integer,intent(in) :: nph1l,option
-!array
-  integer,intent(in) :: n_cell(3)
-  real(dp),intent(in):: qph1l(3,nph1l)
-  type(effective_potential_type),intent(inout) :: eff_pot
-  type(ddb_type),intent(out) :: ddb
-  type(crystal_t),intent(out) :: crystal
-!Local variables-------------------------------
-!scalar
-  integer :: ii,jj,msym
-  real(dp):: ucvol
-
-! type(anaddb_dataset_type) :: inp
-!array
-  real(dp) :: gmet(3,3),rmet(3,3)
-  real(dp) :: gprim(3,3),gprimd(3,3),rprim(3,3)
-  real(dp),allocatable :: xred(:,:)
-  character :: title(eff_pot%ntypat) 
-  integer,allocatable :: symrel(:,:,:),symafm(:)
-  real(dp),allocatable :: tnons(:,:)
-
-! *************************************************************************
-
-  ! Number of 2dte blocks in present object
-!  integer,allocatable :: flg(:,:) 
-  ! flg(msize,nblok)
-  ! flag to indicate presence of a given block
-!  integer,allocatable :: typ(:) 
-  ! typ(nblok)
-  ! type of each block - ddk, dde, phonon etc...
-!  real(dp),allocatable :: amu(:)
-  ! amu(ntypat)
-  ! mass of the atoms (atomic mass unit)
-!  real(dp),allocatable :: nrm(:,:) 
-  ! nrm(3,nblok)
-  ! norm of the q-points for each block - can be 0 to indicate a direction of approach to gamma
-!  real(dp),allocatable :: qpt(:,:) 
-  ! qpt(9,nblok)
-  ! q-point vector in reciprocal space (reduced lattice coordinates) for each block
-!  real(dp),allocatable :: val(:,:,:) 
-  ! val(2,msize,nblok)
-  ! values of the second energy derivatives in each block
-
-! Useless value
-   ddb%nblok = -1
-
-  !option = 1 just print ddb for 1 1 1 cell
-  if(option==1) then
-!   Compute different matrices in real and reciprocal space, also
-!   checks whether ucvol is positive.
-    call metric(gmet,gprimd,-1,rmet,eff_pot%rprimd,ucvol)
-
-!   Convert to rprim (dimensionless)
-    do ii=1,3
-      do jj=1,3
-        rprim(ii,jj)=eff_pot%rprimd(ii,jj)/eff_pot%acell(jj)
-      end do
-    end do
-    
-!   Obtain reciprocal space primitive transl g from inverse trans of r
-!   (Unlike in abinit, gprim is used throughout ifc; should be changed, later)
-    call matr3inv(rprim,gprim)
-
-!   transfert basic values
-    ddb%natom  = eff_pot%natom 
-    ddb%mpert  = ddb%natom+6
-    ddb%msize  = 3*ddb%mpert*3*ddb%mpert;
-    ddb%ntypat = eff_pot%ntypat
-    ddb%occopt = 3 ! default value
-    ddb%prtvol = 0 ! default value
-    ddb%rprim  = rprim ! dimensioless real space primitive vectors
-    ddb%gprim  = gprim ! dimensioless reciprocal space primitive vectors
-    ddb%acell  = eff_pot%acell 
-        msym   = 1
-!  Setup crystal type
-    ABI_ALLOCATE(xred,(3,ddb%natom))
-!    call xcar2xred(ddb%natom,eff_pot%rprimd,eff_pot%xcart,xred)
-!Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
-    ABI_MALLOC(symrel,(3,3,msym))
-    ABI_MALLOC(symafm,(msym))
-    ABI_MALLOC(tnons,(3,msym))
-
-    call crystal_init(crystal,1,ddb%natom,size(eff_pot%znucl),eff_pot%ntypat,1,eff_pot%rprimd,&
-&       eff_pot%typat,xred,eff_pot%znucl,eff_pot%znucl,0,.FALSE.,.FALSE.,title)!,&
-!&       symrel=symrel,tnons=tnons,symafm=symafm)
-    call crystal_print(crystal)
-    stop
-!TEST_AM
-    ABI_DEALLOCATE(symrel)
-    ABI_DEALLOCATE(symafm)
-    ABI_DEALLOCATE(tnons)
-
-    ABI_DEALLOCATE(xred)
-
-   else  if (option==2) then
-!   Compute different matrices in real and reciprocal space, also
-!   checks whether ucvol is positive.
-    call metric(gmet,gprimd,-1,rmet,eff_pot%supercell%rprimd_supercell,ucvol)
-
-!   Convert to rprim (dimensionless)
-    do ii=1,3
-      do jj=1,3
-        rprim(ii,jj)=eff_pot%supercell%rprimd_supercell(ii,jj)/eff_pot%acell(jj)
-      end do
-    end do
-    
-!   Obtain reciprocal space primitive transl g from inverse trans of r
-!   (Unlike in abinit, gprim is used throughout ifc; should be changed, later)
-    call matr3inv(rprim,gprim)
-
-!   transfert basic values
-    ddb%natom  = eff_pot%supercell%natom_supercell 
-    ddb%ntypat = eff_pot%ntypat
-    ddb%mpert  = ddb%natom+6
-    ddb%msize  = 3*ddb%mpert*3*ddb%mpert;
-    ddb%occopt = 3 ! default value
-    ddb%prtvol = 0 ! default value
-    ddb%rprim  = rprim ! dimensioless real space primitive vectors
-    ddb%gprim  = gprim ! dimensioless reciprocal space primitive vectors
-    ddb%acell  = one
-    
-   end if
-!TEST_AM
-    !print*,"natom ",ddb%natom
-    !print*,"ntypat",ddb%ntypat
-    !print*,"mpert",ddb%mpert
-    !print*,"msize",ddb%msize
-    !print*,"occopt",ddb%occopt
-    !print*,"prtvol",ddb%prtvol
-    !print*,"rprim",ddb%rprim
-    !print*,"gprim",ddb%gprim
-    !print*,"acell",ddb%acell
-!TEST_AM
-
- end subroutine effective_potential_effpot2ddb
-!!***
-
-
-!****f* m_effective_potential/effective_potential_printPDOS
-!!
-!! NAME
-!! effective_potential_printPDOS
-!!
-!! FUNCTION
-!! Apply the acoustic sum rule on the effective potential
-!!
-!! INPUTS
-!! eff_pot = effective potential structure
-!! option  = 0 (default) do nothing
-!!         = 1 print PHFRQ for specific qgrid (need nph1l and qph1l)
-!!         = 2 print PHFRQ for supercell (q=gamma) (need nph1l and qph1l and ncell)
-!! OUTPUT
-!! eff_pot
-!!
-!! PARENTS
-!!   epigene
-!!
-!! CHILDREN
-!!   
-!!
-!! SOURCE
- 
-subroutine effective_potential_printPDOS(eff_pot,filename,n_cell,nph1l,option,qph1l)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_printPDOS'
-!End of the abilint section
-
-  implicit none
-
-!Arguments ------------------------------------
-!scalars
-  integer,intent(in) :: nph1l,option
-!array
-  integer,intent(in) :: n_cell(3)
-  real(dp),intent(in):: qph1l(3,nph1l)
-  type(effective_potential_type),intent(inout) :: eff_pot
-  character(len=fnlen),intent(in) :: filename
-!Local variables-------------------------------
-!scalar
- integer :: lenstr
- real(dp) :: tcpui,twalli
- character(len=strlen) :: string
-!array
- type(crystal_t) :: Crystal
- type(anaddb_dataset_type) :: inp
- type(ddb_type) :: ddb
- real(dp),allocatable  :: d2asr(:,:,:,:,:),singular(:),uinvers(:,:),vtinvers(:,:)
-
-! *************************************************************************
-
- if (option > 0) then
-
-!  First: transfer into ddb structure:
-   call effective_potential_effpot2ddb(ddb,Crystal,eff_pot,n_cell,nph1l,option,qph1l)
-   
-!  Setup fake anaddb_dataset
-   string = ''
-   lenstr = 0
-   call invars9(inp,lenstr,ddb%natom,string)
-!  fill it with epigene_dataset values
-   inp%prt_ifc = 1
-   inp%ifcflag = 1
-   inp%qph1l   = qph1l
-   inp%nph1l   = nph1l
-
-   ABI_ALLOCATE(d2asr,(2,3,ddb%natom,3,ddb%natom))
- ! Pre allocate array used if asr in [3,4]
-!  ABI_ALLOCATE(singular,(1:3*ddb%natom*(3*ddb%natom-1)/2))
-!  ABI_CALLOC(uinvers,(1:3*ddb%natom*(3*ddb%natom-1)/2,1:3*ddb%natom*(3*ddb%natom-1)/2))
-!  ABI_CALLOC(vtinvers,(1:3*ddb%natom*(3*ddb%natom-1)/2,1:3*ddb%natom*(3*ddb%natom-1)/2))
-
-  call mkphbs(eff_pot%ifcs,Crystal,inp,ddb,d2asr,filename,&
-&  singular,tcpui,twalli,uinvers,vtinvers,eff_pot%zeff)
-
-   ABI_DEALLOCATE(d2asr)
-!  ABI_DEALLOCATE(singular)
-!  ABI_DEALLOCATE(vtinvers)
-!  ABI_DEALLOCATE(uinvers)
-
- end if
-
- end subroutine effective_potential_printPDOS
-!!***
-
-
 
 !****f* m_effective_potential/effective_potential_print
 !!
@@ -1623,6 +1341,9 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
   end do
+
+! Deallocation array
+  ABI_DEALLOCATE(xred)
 
 end subroutine effective_potential_printSupercell
 !!***
@@ -2512,12 +2233,13 @@ subroutine effective_potential_getHarmonicContributions(eff_pot,energy,fcart,fre
     MSG_ERROR(message)
   end if
 
-  if (present(displacement).and.(size(displacement(1,:)) /= eff_pot%supercell%natom_supercell)) then
-    write(message,'(a,I7,a,I7,a)')' The number of atoms is not correct :',size(displacement(1,:)),&
-&   ' in displacement array instead of ',eff_pot%supercell%natom_supercell, ' in supercell'
-    MSG_ERROR(message)
+  if (present(displacement))then
+    if(size(displacement(1,:)) /= eff_pot%supercell%natom_supercell) then
+      write(message,'(a,I7,a,I7,a)')' The number of atoms is not correct :',size(displacement(1,:)),&
+&      ' in displacement array instead of ',eff_pot%supercell%natom_supercell, ' in supercell'
+      MSG_ERROR(message)
+    end if
   end if
-
   do ii=1,3
     if(eff_pot%supercell%qphon(ii)<0.or.eff_pot%supercell%qphon(ii)>20)then
       write(message, '(a,i0,a,i2,a,a,a,i0,a)' )&
@@ -3099,5 +2821,273 @@ pure function effective_potential_compare(e1,e2) result (res)
   end if
 end function effective_potential_compare
 !!***
+
+
+!TEST_AM_EXPERIMENTAL SECTION
+!****f* m_effective_potential/effective_potential_effpot2ddb
+!!
+!! NAME
+!! effective_potential_effpot2ddb
+!!
+!! FUNCTION
+!! Convert eff_pot into ddb structure
+!!
+!! INPUTS
+!! eff_pot = effective potential structure
+!!
+!! OUTPUT
+!! ddb   = ddb with all information
+!!
+!! PARENTS
+!!   epigene
+!!
+!! CHILDREN
+!!   
+!!
+!! SOURCE
+ 
+subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,n_cell,nph1l,option,qph1l)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'effective_potential_effpot2ddb'
+ use interfaces_32_util
+ use interfaces_41_geometry
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  integer,intent(in) :: nph1l,option
+!array
+  integer,intent(in) :: n_cell(3)
+  real(dp),intent(in):: qph1l(3,nph1l)
+  type(effective_potential_type),intent(inout) :: eff_pot
+  type(ddb_type),intent(out) :: ddb
+  type(crystal_t),intent(out) :: crystal
+!Local variables-------------------------------
+!scalar
+  integer :: ii,jj,msym
+  real(dp):: ucvol
+
+! type(anaddb_dataset_type) :: inp
+!array
+  real(dp) :: gmet(3,3),rmet(3,3)
+  real(dp) :: gprim(3,3),gprimd(3,3),rprim(3,3)
+  real(dp),allocatable :: xred(:,:)
+  character :: title(eff_pot%ntypat) 
+  integer,allocatable :: symrel(:,:,:),symafm(:)
+  real(dp),allocatable :: tnons(:,:)
+
+! *************************************************************************
+
+  ! Number of 2dte blocks in present object
+!  integer,allocatable :: flg(:,:) 
+  ! flg(msize,nblok)
+  ! flag to indicate presence of a given block
+!  integer,allocatable :: typ(:) 
+  ! typ(nblok)
+  ! type of each block - ddk, dde, phonon etc...
+!  real(dp),allocatable :: amu(:)
+  ! amu(ntypat)
+  ! mass of the atoms (atomic mass unit)
+!  real(dp),allocatable :: nrm(:,:) 
+  ! nrm(3,nblok)
+  ! norm of the q-points for each block - can be 0 to indicate a direction of approach to gamma
+!  real(dp),allocatable :: qpt(:,:) 
+  ! qpt(9,nblok)
+  ! q-point vector in reciprocal space (reduced lattice coordinates) for each block
+!  real(dp),allocatable :: val(:,:,:) 
+  ! val(2,msize,nblok)
+  ! values of the second energy derivatives in each block
+
+! Useless value
+   ddb%nblok = -1
+
+  !option = 1 just print ddb for 1 1 1 cell
+  if(option==1) then
+!   Compute different matrices in real and reciprocal space, also
+!   checks whether ucvol is positive.
+    call metric(gmet,gprimd,-1,rmet,eff_pot%rprimd,ucvol)
+
+!   Convert to rprim (dimensionless)
+    do ii=1,3
+      do jj=1,3
+        rprim(ii,jj)=eff_pot%rprimd(ii,jj)/eff_pot%acell(jj)
+      end do
+    end do
+    
+!   Obtain reciprocal space primitive transl g from inverse trans of r
+!   (Unlike in abinit, gprim is used throughout ifc; should be changed, later)
+    call matr3inv(rprim,gprim)
+
+!   transfert basic values
+    ddb%natom  = eff_pot%natom 
+    ddb%mpert  = ddb%natom+6
+    ddb%msize  = 3*ddb%mpert*3*ddb%mpert;
+    ddb%ntypat = eff_pot%ntypat
+    ddb%occopt = 3 ! default value
+    ddb%prtvol = 0 ! default value
+    ddb%rprim  = rprim ! dimensioless real space primitive vectors
+    ddb%gprim  = gprim ! dimensioless reciprocal space primitive vectors
+    ddb%acell  = eff_pot%acell 
+        msym   = 1
+!  Setup crystal type
+    ABI_ALLOCATE(xred,(3,ddb%natom))
+!    call xcar2xred(ddb%natom,eff_pot%rprimd,eff_pot%xcart,xred)
+!Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
+    ABI_ALLOCATE(symrel,(3,3,msym))
+    ABI_ALLOCATE(symafm,(msym))
+    ABI_ALLOCATE(tnons,(3,msym))
+
+    call crystal_init(crystal,1,ddb%natom,size(eff_pot%znucl),eff_pot%ntypat,1,eff_pot%rprimd,&
+&       eff_pot%typat,xred,eff_pot%znucl,eff_pot%znucl,0,.FALSE.,.FALSE.,title)!,&
+!&       symrel=symrel,tnons=tnons,symafm=symafm)
+    call crystal_print(crystal)
+    stop
+!TEST_AM
+    ABI_DEALLOCATE(symrel)
+    ABI_DEALLOCATE(symafm)
+    ABI_DEALLOCATE(tnons)
+
+    ABI_DEALLOCATE(xred)
+
+   else  if (option==2) then
+!   Compute different matrices in real and reciprocal space, also
+!   checks whether ucvol is positive.
+    call metric(gmet,gprimd,-1,rmet,eff_pot%supercell%rprimd_supercell,ucvol)
+
+!   Convert to rprim (dimensionless)
+    do ii=1,3
+      do jj=1,3
+        rprim(ii,jj)=eff_pot%supercell%rprimd_supercell(ii,jj)/eff_pot%acell(jj)
+      end do
+    end do
+    
+!   Obtain reciprocal space primitive transl g from inverse trans of r
+!   (Unlike in abinit, gprim is used throughout ifc; should be changed, later)
+    call matr3inv(rprim,gprim)
+
+!   transfert basic values
+    ddb%natom  = eff_pot%supercell%natom_supercell 
+    ddb%ntypat = eff_pot%ntypat
+    ddb%mpert  = ddb%natom+6
+    ddb%msize  = 3*ddb%mpert*3*ddb%mpert;
+    ddb%occopt = 3 ! default value
+    ddb%prtvol = 0 ! default value
+    ddb%rprim  = rprim ! dimensioless real space primitive vectors
+    ddb%gprim  = gprim ! dimensioless reciprocal space primitive vectors
+    ddb%acell  = one
+    
+   end if
+!TEST_AM
+    !print*,"natom ",ddb%natom
+    !print*,"ntypat",ddb%ntypat
+    !print*,"mpert",ddb%mpert
+    !print*,"msize",ddb%msize
+    !print*,"occopt",ddb%occopt
+    !print*,"prtvol",ddb%prtvol
+    !print*,"rprim",ddb%rprim
+    !print*,"gprim",ddb%gprim
+    !print*,"acell",ddb%acell
+!TEST_AM
+
+ end subroutine effective_potential_effpot2ddb
+!!***
+
+
+!****f* m_effective_potential/effective_potential_printPDOS
+!!
+!! NAME
+!! effective_potential_printPDOS
+!!
+!! FUNCTION
+!! Apply the acoustic sum rule on the effective potential
+!!
+!! INPUTS
+!! eff_pot = effective potential structure
+!! option  = 0 (default) do nothing
+!!         = 1 print PHFRQ for specific qgrid (need nph1l and qph1l)
+!!         = 2 print PHFRQ for supercell (q=gamma) (need nph1l and qph1l and ncell)
+!! OUTPUT
+!! eff_pot
+!!
+!! PARENTS
+!!   epigene
+!!
+!! CHILDREN
+!!   
+!!
+!! SOURCE
+ 
+subroutine effective_potential_printPDOS(eff_pot,filename,n_cell,nph1l,option,qph1l)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'effective_potential_printPDOS'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  integer,intent(in) :: nph1l,option
+!array
+  integer,intent(in) :: n_cell(3)
+  real(dp),intent(in):: qph1l(3,nph1l)
+  type(effective_potential_type),intent(inout) :: eff_pot
+  character(len=fnlen),intent(in) :: filename
+!Local variables-------------------------------
+!scalar
+ integer :: lenstr
+ real(dp) :: tcpui,twalli
+ character(len=strlen) :: string
+!array
+ type(crystal_t) :: Crystal
+ type(anaddb_dataset_type) :: inp
+ type(ddb_type) :: ddb
+ real(dp),allocatable  :: d2asr(:,:,:,:,:),singular(:),uinvers(:,:),vtinvers(:,:)
+
+! *************************************************************************
+
+ if (option > 0) then
+
+!  First: transfer into ddb structure:
+   call effective_potential_effpot2ddb(ddb,Crystal,eff_pot,n_cell,nph1l,option,qph1l)
+   
+!  Setup fake anaddb_dataset
+   string = ''
+   lenstr = 0
+   call invars9(inp,lenstr,ddb%natom,string)
+!  fill it with epigene_dataset values
+   inp%prt_ifc = 1
+   inp%ifcflag = 1
+   inp%qph1l   = qph1l
+   inp%nph1l   = nph1l
+
+   ABI_ALLOCATE(d2asr,(2,3,ddb%natom,3,ddb%natom))
+ ! Pre allocate array used if asr in [3,4]
+!  ABI_ALLOCATE(singular,(1:3*ddb%natom*(3*ddb%natom-1)/2))
+!  ABI_CALLOC(uinvers,(1:3*ddb%natom*(3*ddb%natom-1)/2,1:3*ddb%natom*(3*ddb%natom-1)/2))
+!  ABI_CALLOC(vtinvers,(1:3*ddb%natom*(3*ddb%natom-1)/2,1:3*ddb%natom*(3*ddb%natom-1)/2))
+
+  call mkphbs(eff_pot%ifcs,Crystal,inp,ddb,d2asr,filename,&
+&  singular,tcpui,twalli,uinvers,vtinvers,eff_pot%zeff)
+
+   ABI_DEALLOCATE(d2asr)
+!  ABI_DEALLOCATE(singular)
+!  ABI_DEALLOCATE(vtinvers)
+!  ABI_DEALLOCATE(uinvers)
+
+ end if
+
+ end subroutine effective_potential_printPDOS
+!!***
+!TEST_AM_END_EXPERIMENTAL SECTION
 
 end module m_effective_potential

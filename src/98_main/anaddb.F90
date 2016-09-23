@@ -142,7 +142,7 @@ program anaddb
 !set the argument of abimem_init to "2" instead of "0"
 !note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
+ call abimem_init(2)
 #endif
 
  ! Initialisation of the timing
