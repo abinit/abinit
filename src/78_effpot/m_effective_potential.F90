@@ -640,7 +640,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
      if ((abs(min1) > abs(min1_cell)).or.(abs(max1) > abs(max1_cell)).or.&
 &        (abs(min2) > abs(min2_cell)).or.(abs(max2) > abs(max2_cell)).or.&
 &        (abs(min3) > abs(min3_cell)).or.(abs(max3) > abs(max3_cell))) then
-       write(message, '(6a,3I3,4a)' )ch10,&
+       write(message, '(6a,3I3,5a)' )ch10,&
 &        ' --- !WARNING',ch10,&
 &        '     The previous harmonic part was build for bigger cell,',ch10,&
 &        '     ifc is adjust on ',int((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),' cell',ch10,&
