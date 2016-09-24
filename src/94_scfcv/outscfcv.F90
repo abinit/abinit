@@ -828,10 +828,12 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !      TODO: update partial_dos_fractions_paw for extra atoms - no PAW contribution normally, but check bounds and so on.
        call partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enreg,pawrad,pawtab)
      end if
-     if (dos%prtdosm>=1) then
-       call dos_degeneratewfs(dos%fractions_m,dos%fractions_average_m,&
-&       eigen,mband,dtset%nband,dos%ndosfraction*dos%mbesslang,dtset%nkpt,dtset%nsppol)
-     end if
+     ! MG: fractions_average_m has been removed because dos_degeneratewfs was already deactivated.
+     ! Note that fractions_m could be large hence dos_degeneratewfs should perform the average in-place.
+     !if (dos%prtdosm>=1) then
+     !  call dos_degeneratewfs(dos%fractions_m,dos%fractions_average_m,&
+     !    eigen,mband,dtset%nband,dos%ndosfraction*dos%mbesslang,dtset%nkpt,dtset%nsppol)
+     !end if
 
    else
      dos%fractions(:,:,:,1)=one

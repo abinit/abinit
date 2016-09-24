@@ -116,7 +116,7 @@ module m_epjdos
    real(dp),allocatable :: fractions_m(:,:,:,:)
    ! fractions_m(nkpt,mband,nsppol,ndosfraction*mbesslang)
 
-   real(dp),allocatable :: fractions_average_m(:,:,:,:)
+   !real(dp),allocatable :: fractions_average_m(:,:,:,:)
    ! fractions_average_m(nkpt,mband,nsppol,ndosfraction*mbesslang)
 
    real(dp),allocatable :: fractions_paw1(:,:,:,:)
@@ -245,9 +245,7 @@ type(epjdos_t) function epjdos_new(dtset, psps, pawtab) result(new)
  if (new%prtdosm>=1 .or. new%fatbands_flag==1) then
    ABI_STAT_MALLOC(new%fractions_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang), ierr)
    ABI_CHECK(ierr==0, "out of memory in new%fractions_m")
-   ABI_STAT_MALLOC(new%fractions_average_m,(dtset%nkpt,dtset%mband,dtset%nsppol,new%ndosfraction*new%mbesslang), ierr)
-   ABI_CHECK(ierr==0, "out of memory in new%fractions_average_m")
-   new%fractions_m = zero; new%fractions_average_m = zero
+   new%fractions_m = zero
  end if
 
  if (dtset%usepaw==1 .and. new%partial_dos_flag==1) then
@@ -293,9 +291,6 @@ subroutine epjdos_free(self)
  end if
  if (allocated(self%fractions_m)) then
    ABI_FREE(self%fractions_m)
- end if
- if (allocated(self%fractions_average_m)) then
-   ABI_FREE(self%fractions_average_m)
  end if
  if (allocated(self%fractions_paw1)) then
    ABI_FREE(self%fractions_paw1)
@@ -410,7 +405,6 @@ subroutine tetrahedron(dos,dtset,fermie,eigen,fildata,rprimd)
  real(dp),allocatable :: work_ndos(:,:),work_ndosmbessl(:,:)
 
 ! *********************************************************************
- ! NOTE: We use dos%fractions_average_m to be consistent with the previous implementation.
  prtdosm = dos%prtdosm; paw_dos_flag = dos%paw_dos_flag
  mbesslang = dos%mbesslang; ndosfraction = dos%ndosfraction
 
@@ -657,7 +651,7 @@ subroutine tetrahedron(dos,dtset,fermie,eigen,fildata,rprimd)
 &     partial_dos(:,:),tweight,dtweightde)
 
      if (prtdosm>=1) then
-       work_ndosmbessl = dos%fractions_average_m(:,iband,isppol,:)
+       work_ndosmbessl = dos%fractions_m(:,iband,isppol,:)
        call get_dos_1band_m (work_ndosmbessl,enemin,enemax,integ_dos_m(:,:),nene,dtset%nkpt,ndosfraction*mbesslang,&
 &       partial_dos_m(:,:),tweight,dtweightde)
      end if
