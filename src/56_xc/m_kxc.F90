@@ -375,7 +375,7 @@ end subroutine kxc_local
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!  ixc = choice of exchange-correlation functional.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft = number of fft grid points.
 !!  ngfft(1:3) = integer fft box dimensions, see getng for ngfft(4:8).
 !!  nspden = number of spin-density components.
@@ -423,7 +423,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
 !scalars
  integer,intent(in) :: ixc,nfft,nspden,option
  real(dp),intent(in) :: rhocut
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -873,7 +873,7 @@ end subroutine kxc_pgg
 !! INPUTS
 !!  ixceok = 1 linear energy optimized kernel.
 !!         = 2 non-linear energy optimized kernel.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft = number of fft grid points.
 !!  ngfft(1:3) = integer fft box dimensions, see getng for ngfft(4:8).
 !!  nspden = number of spin-density components.
@@ -912,7 +912,7 @@ subroutine kxc_eok(ixceok,kxcg,mpi_enreg,nfft,ngfft,nspden,paral_kgb,rhor,rhocut
 !scalars
  integer,intent(in) :: ixceok,nfft,nspden,paral_kgb
  real(dp),intent(in) :: rhocut
- type(MPI_type) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: rhor(nfft,2*nspden-1)

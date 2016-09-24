@@ -79,6 +79,7 @@ contains
 subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, & 
   natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion,znucl,prtcharge,hcharge,hden,hweight)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

@@ -68,15 +68,16 @@
 subroutine predict_string(itimimage,list_dynimage,mep_param,mpi_enreg,natom,&
 &                         ndynimage,nimage,nimage_tot,ntimimage,results_img)
 
- use m_profiling_abi
 
  use defs_basis
  use defs_abitypes
- use m_results_img, only : results_img_type,gather_array_img,get_geometry_img
+ use m_profiling_abi
  use m_splines
  use m_mep
  use m_errors
- use m_xmpi, only : xmpi_bcast
+ use m_xmpi
+
+ use m_results_img, only : results_img_type,gather_array_img,get_geometry_img
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -90,7 +91,7 @@ subroutine predict_string(itimimage,list_dynimage,mep_param,mpi_enreg,natom,&
 !scalars
  integer,intent(in) :: itimimage,natom,ndynimage,nimage,nimage_tot,ntimimage
  type(mep_type),intent(inout) :: mep_param
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in)     :: list_dynimage(ndynimage)
  type(results_img_type) :: results_img(nimage,ntimimage)

@@ -148,7 +148,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  integer,intent(in) :: quit
  real(dp),intent(in) :: cpus,tolrde,tolwfr
  character(len=*),intent(in) :: filnam_ds1
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(efield_type),intent(inout) :: dtefield
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
 !arrays

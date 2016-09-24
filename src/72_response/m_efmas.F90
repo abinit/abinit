@@ -646,7 +646,7 @@ CONTAINS
  !scalars
   integer,            intent(in)    :: dim_eig2rf,mpert,nkpt_rbz
   type(dataset_type), intent(in)    :: dtset
-  type(MPI_type),     intent(inout) :: mpi_enreg
+  type(MPI_type),     intent(in) :: mpi_enreg
  !arrays
   integer,  intent(in) :: istwfk_pert(nkpt_rbz,3,mpert)
   integer,  intent(in) :: npwarr(nkpt_rbz,mpert)
