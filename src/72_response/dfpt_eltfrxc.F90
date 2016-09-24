@@ -27,7 +27,7 @@
 !!  gsqcut=Fourier cutoff on G^2 for "large sphere" of radius double that of the basis sphere
 !!  kxc(nfft,nkxc)=exchange and correlation kernel
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  ngfft(18)=contain all needed information about 3D FFT,
 !!     see ~abinit/doc/input_variables/vargs.htm#ngfft
 !!  ngfftf(18)= -PAW ONLY- contain all needed information about 3D FFT for the fine grid
@@ -114,7 +114,7 @@ subroutine dfpt_eltfrxc(atindx,dtset,eltfrxc,enxc,gsqcut,kxc,mpi_enreg,mgfft,&
 !scalars
  integer,intent(in) :: mgfft,n3xccc,nfft,nkxc,usexcnhat
  real(dp),intent(in) :: enxc,gsqcut
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(inout) :: psps
 !arrays

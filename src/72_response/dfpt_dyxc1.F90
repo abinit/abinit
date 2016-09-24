@@ -28,7 +28,7 @@
 !!   if(nkxc=23): GGA case, see rhohxc_coll.f
 !!  mgfft=maximum size of 1D FFTs
 !!  mpert=maximum number of ipert
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mqgrid=number of grid pts in q array for f(q) spline.
 !!  natom=number of atoms in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
@@ -106,7 +106,7 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
  integer,intent(in) :: paral_kgb,timrev,usepaw
  real(dp),intent(in) :: gsqcut,ucvol
  type(pseudopotential_type),intent(in) :: psps
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: atindx(natom),ngfft(18),rfdir(3),rfpert(mpert),typat(natom)
  real(dp),intent(in) :: gmet(3,3),kxc(nfft,nkxc)

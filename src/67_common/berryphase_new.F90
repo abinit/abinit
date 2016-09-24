@@ -34,7 +34,7 @@
 !! mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !! mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !! mkmem=number of k points treated by this node
-!! mpi_enreg=informations about MPI parallelization
+!! mpi_enreg=information about MPI parallelization
 !! mpw=maximum dimensioned size of npw
 !! my_natom=number of atoms treated by current processor
 !! natom=number of atoms in cell
@@ -150,7 +150,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
  integer, intent(in) :: nsppol,ntypat,option
  integer, intent(in) :: pwind_alloc,unit_out,usecprj,usepaw
  real(dp), intent(in) :: ucvol
- type(MPI_type), intent(inout) :: mpi_enreg
+ type(MPI_type), intent(in) :: mpi_enreg
  type(datafiles_type), intent(in) :: dtfil
  type(dataset_type), intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
