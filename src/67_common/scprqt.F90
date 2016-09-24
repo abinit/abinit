@@ -197,6 +197,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
  case (1)
 !  Examine tolerance criteria
+! NB: The tests on tolwfr and the presence of tolerances in the SCF case are 
+! also done at the level of the parser in chkinp.
    tolwfr=tollist(2)
    toldff=tollist(3)
    toldfe=tollist(4)
@@ -204,13 +206,12 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    tolrff=tollist(7)
    vdw_df_threshold=tollist(8)
    ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0;
-   if(abs(tolwfr)>tiny(0.0_dp))ttolwfr=1
-   if(abs(toldff)>tiny(0.0_dp))ttoldff=1
-   if(abs(tolrff)>tiny(0.0_dp))ttolrff=1
-   if(abs(toldfe)>tiny(0.0_dp))ttoldfe=1
-   if(abs(tolvrs)>tiny(0.0_dp))ttolvrs=1
+   if(abs(tolwfr)>tiny(zero))ttolwfr=1
+   if(abs(toldff)>tiny(zero))ttoldff=1
+   if(abs(tolrff)>tiny(zero))ttolrff=1
+   if(abs(toldfe)>tiny(zero))ttoldfe=1
+   if(abs(tolvrs)>tiny(zero))ttolvrs=1
 !  If non-scf calculations, tolwfr must be defined
-!  FIXME: MJV 26/3/2010: this should be just after initialization, not here.
    if(ttolwfr /= 1 .and. (iscf<0 .and. iscf/=-3) )then
      write(message,'(a,a,a,es14.6,a,a)')&
 &     'when iscf <0 and /= -3, tolwfr must be strictly',ch10,&
@@ -221,11 +222,9 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 !  toldff only allowed when prtfor==1
 !  FIXME: this test should be done on input, not during calculation
    if((ttoldff == 1 .or. ttolrff == 1) .and. prtfor==0 )then
-     write (message, '(a)') 'toldff only allowed when prtfor=1 !'
-     MSG_ERROR(message)
+     MSG_ERROR('toldff only allowed when prtfor=1!')
    end if
 !  If SCF calculations, one and only one of these can differ from zero
-!  FIXME: this test should be done on input, not during calculation
    if(ttolwfr+ttoldff+ttoldfe+ttolvrs+ttolrff /= 1 .and. (iscf>0 .or. iscf==-3))then
      write(message,'(6a,es14.6,a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,a,a)' )&
 &     'For the SCF case, one and only one of the input tolerance criteria ',ch10,&

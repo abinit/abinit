@@ -359,7 +359,7 @@ P           mkmem           8
 
  Writing KS-RPA macroscopic dielectric function without local fields to file: t32o_DS1_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t32o_DS1_GW_NLF_MDF
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 178 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 170 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 172 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 180 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 172 iterations.

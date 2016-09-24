@@ -242,7 +242,7 @@ void ctqmc_triqs_run( bool rot_inv, bool leg_measure, bool hist, bool wrt_files,
   paramCTQMC.verbosity=verbo;
   paramCTQMC.measure_g_l = leg_measure;
   //paramCTQMC.move_double = true; 
-  paramCTQMC.make_histograms=hist;
+ //  paramCTQMC.make_histograms=hist;
   
   if(rank==0 && verbo>0) std::cout <<"   == Starting Solver [node "<< rank <<"] ==	"<< endl << endl;
   // Solve!
