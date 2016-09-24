@@ -183,7 +183,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  real(dp) :: cpu,wall,gflops
  real(dp) :: ecut,eshift,eig0nk,dotr,doti,dksqmax
  logical,parameter :: have_ktimerev=.True.
- logical :: isirr_k,isirr_kq,gen_eigenpb
+ logical :: i_am_master, isirr_k,isirr_kq,gen_eigenpb
  type(wfd_t) :: wfd_k, wfd_kq
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
@@ -227,6 +227,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  end if
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
+ i_am_master = (my_rank == master)
 
  ! Copy important dimensions
  natom = cryst%natom
@@ -532,7 +533,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
    end do ! spin
 
    ! Gather the k-points computed by all processes
-   call xmpi_sum(gkk,comm,ierr)
+   call xmpi_sum_master(gkk,master,comm,ierr)
 
    ! Init a gkk_t object
    call gkk_init(gkk,gkk2d,mband,nsppol,nkpt,1,1)
@@ -541,11 +542,13 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
    call appdig(ipc,dtfil%fnameabo_gkk,gkkfilnam)
    fname = strcat(gkkfilnam,".nc")
 #ifdef HAVE_NETCDF
-   NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
-   NCF_CHECK(crystal_ncwrite(cryst, ncid))
-   NCF_CHECK(ebands_ncwrite(ebands_k, ncid))
-   call gkk_ncwrite(gkk2d,qpt,1.0_dp, ncid)
-   NCF_CHECK(nf90_close(ncid))
+   if (i_am_master) then
+     NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
+     NCF_CHECK(crystal_ncwrite(cryst, ncid))
+     NCF_CHECK(ebands_ncwrite(ebands_k, ncid))
+     call gkk_ncwrite(gkk2d,qpt,1.0_dp, ncid)
+     NCF_CHECK(nf90_close(ncid))
+   end if
 #endif
 
    ! Free memory

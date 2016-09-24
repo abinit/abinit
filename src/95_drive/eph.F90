@@ -394,9 +394,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ddb_nqshift = 1
  ABI_CALLOC(ddb_qshifts, (3,ddb_nqshift))
 
- if (dtset%eph_task == 2) then
-   ddb_qshifts(:,1) = dtset%ddb_shiftq(:)
- end if
+ ! Set the q-shift for the DDB
+ ddb_qshifts(:,1) = dtset%ddb_shiftq(:)
 
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
