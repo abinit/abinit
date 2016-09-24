@@ -127,7 +127,7 @@ module m_epjdos
 
  end type epjdos_t
 
- public :: epjdos_from_dataset
+ public :: epjdos_new
  public :: epjdos_free
 
  public :: prtfatbands
@@ -138,34 +138,43 @@ module m_epjdos
 contains  !============================================================
 !!***
 
-!!****f* m_epjdos/epjdos_from_dataset
+!!****f* m_epjdos/epjdos_new
 !! NAME
-!!  epjdos_from_dataset
+!!  epjdos_new
 !!
 !! FUNCTION
 !!  Create new object from dataset input variables.
+!!
+!! INPUTS
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!
 !! PARENTS
 !!
 !! SOURCE
 
-type(epjdos_t) function epjdos_from_dataset(dtset) result(new)
+type(epjdos_t) function epjdos_new(dtset, psps, pawtab) result(new)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'epjdos_from_dataset'
+#define ABI_FUNC 'epjdos_new'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
  type(dataset_type),intent(in) :: dtset
+ type(pseudopotential_type),intent(in) :: psps
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
 
 !Local variables-------------------------------
 !scalars
- integer :: ierr
+ integer :: ierr !,itypat
+!arrays
+ !integer :: lmax_type(dtset%ntypat)
 
 ! *********************************************************************
 
@@ -196,8 +205,30 @@ type(epjdos_t) function epjdos_from_dataset(dtset) result(new)
  ! to store much less in memory. The DOS is accumulated in an array
  ! and then printed to file at the end.
  new%mbesslang = 1
- if (new%partial_dos_flag==1 .or. new%fatbands_flag==1)then
-   new%mbesslang = 5
+ if (new%partial_dos_flag==1 .or. new%fatbands_flag==1) then
+   new%mbesslang = 5   
+   ! TODO: Could use mbesslang = 4 or compute it from psps/pawtab
+#if 0
+   if (dtset%usepaw == 0) then
+     do itypat=1,dtset%ntypat
+       lmax_type(itypat) = maxval(psps%indlmn(1, :, itypat))
+     end do
+   else 
+      lmax_type = (pawtab(:)%l_size - 1) / 2
+   end if
+   lmax = 0
+   do iat=1,dtset%natsph
+     itypat= dtset%typat(dtset%iatsph(iat))
+     lmax = max(lmax, lmax_type(itypat))
+   end do
+   ! Increment by one (could underestimate if vloc = vlmax)
+   lmax = lmax + 2
+   lmax = min(lmax, 5) 
+   ! Up to l=g if we have natsph_extra.
+   if (dtset%natsph_extra > 0) lmax = 5
+   new%mbesslang = lmax
+#endif
+
    new%ndosfraction = (dtset%natsph + dtset%natsph_extra) * new%mbesslang
  else if (new%partial_dos_flag == 2) then
    new%ndosfraction = 7
@@ -227,7 +258,7 @@ type(epjdos_t) function epjdos_from_dataset(dtset) result(new)
    new%fractions_paw1 = zero; new%fractions_pawt1 = zero
  end if
 
-end function epjdos_from_dataset
+end function epjdos_new
 !!***
 
 !!****f* m_epjdos/epjdos_free

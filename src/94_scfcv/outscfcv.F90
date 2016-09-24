@@ -171,7 +171,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_paw_dmft,         only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft
  use m_numeric_tools,    only : simpson_int
  use m_epjdos,           only : tetrahedron, gaus_dos, dos_degeneratewfs, &
-                                epjdos_t, epjdos_from_dataset, epjdos_free, prtfatbands, fatbands_ncwrite
+                                epjdos_t, epjdos_new, epjdos_free, prtfatbands, fatbands_ncwrite
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -814,7 +814,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Generate DOS using the tetrahedron method or using Gaussians
 !FIXME: Should centralize all calculations of DOS here in outscfcv
  if (dtset%prtdos>=2.or.dtset%pawfatbnd>0) then
-   dos = epjdos_from_dataset(dtset)
+   dos = epjdos_new(dtset, psps, pawtab)
 
    if (dos%partial_dos_flag>=1 .or. dos%fatbands_flag==1)then
      ! Generate fractions for partial DOSs if needed partial_dos 1,2,3,4  give different decompositions
