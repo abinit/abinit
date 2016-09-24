@@ -70,7 +70,7 @@ subroutine initmpi_seq(mpi_enreg)
  mpi_enreg%me_band=0
  mpi_enreg%me_cell=0
  mpi_enreg%me_fft=0
- mpi_enreg%me_g0=0
+ mpi_enreg%me_g0=1
  mpi_enreg%me_img=0
  mpi_enreg%me_hf=0
  mpi_enreg%me_kpt=0
