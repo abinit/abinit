@@ -1617,8 +1617,7 @@ end subroutine dos_degeneratewfs
 !! SOURCE
 
 subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enreg,&
-&  mpw,natsph,npw_k,ph3d,prtsphere,&
-&  rint,rmax,rc_ylm,sum_1ll_1atom,sum_1lm_1atom,ucvol,ylm,znucl_sph)
+&  mpw,natsph,npw_k,ph3d,prtsphere,rint,rmax,rc_ylm,sum_1ll_1atom,sum_1lm_1atom,ucvol,ylm,znucl_sph)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1639,7 +1638,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
  integer,intent(in) :: nradint(natsph)
  real(dp),intent(in) :: bess_fit(mpw,nradintmax,mlang),cg_1band(2,npw_k)
  real(dp),intent(in) :: ph3d(2,npw_k,natsph),rint(nradintmax)
- real(dp),intent(in) :: rmax(natsph),ylm(mpw,mlang*mlang)
+ real(dp),intent(in) :: rmax(natsph),ylm(npw_k,mlang*mlang)
  real(dp),intent(in) :: znucl_sph(natsph)
  real(dp),intent(out) :: sum_1ll_1atom(mlang,natsph)
  real(dp),intent(out) :: sum_1lm_1atom(mlang*mlang,natsph)

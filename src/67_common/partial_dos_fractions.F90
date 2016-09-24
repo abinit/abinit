@@ -80,6 +80,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
  use m_errors
  use m_splines
  use m_xmpi
+ use m_mpinfo
  use m_crystal
 
  use m_numeric_tools, only : simpson
@@ -92,6 +93,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
 #undef ABI_FUNC
 #define ABI_FUNC 'partial_dos_fractions'
  use interfaces_28_numeric_noabirule
+ use interfaces_51_manage_mpi
  use interfaces_56_recipspace
 !End of the abilint section
 
@@ -114,24 +116,23 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
  integer :: shift_b,shift_sk,iat,iatom,iband,ierr,ikpt,ilang,ioffkg,is1, is2, isoff
  integer :: ipw,ispinor,isppol,ixint,mbess,mcg_disk,me,shift_cg
  integer :: mgfft,my_nspinor,n1,n2,n3,natsph_tot,npw_k,nradintmax
- integer :: comm,rc_ylm,itypat
+ integer :: comm,rc_ylm,itypat,nband_k
  real(dp),parameter :: bessint_delta = 0.1_dp
  real(dp) :: arg,bessarg,bessargmax,kpgmax,rmax
  !character(len=500) :: msg
  type(jlspline_t) :: jlspl
+ type(MPI_type) :: mpi_enreg_seq
 !arrays
- integer :: iindex(dtset%mpw)
- integer,allocatable :: iatsph(:),nradint(:),atindx(:)
- real(dp) :: kpoint(3),spin(3)
+ integer :: iindex(dtset%mpw),nband_tmp(1),npwarr_tmp(1)
+ integer,allocatable :: iatsph(:),nradint(:),atindx(:),kg_k(:,:)
+ real(dp) :: kpoint(3),spin(3),ylmgr_dum(1)
  real(dp) :: xfit(dtset%mpw),yfit(dtset%mpw)
- real(dp) :: ylm_k(dtset%mpw,dos%mbesslang**2),ylmgr_dum(1)
+ real(dp),allocatable :: ylm_k(:,:)
  real(dp),allocatable :: bess_fit(:,:,:)
  real(dp),allocatable :: cg_1band(:,:),cg_1kpt(:,:),kpgnorm(:),ph1d(:,:)
  real(dp),allocatable :: ph3d(:,:,:),ratsph(:),rint(:),sum_1atom_1ll(:,:)
- real(dp),allocatable :: sum_1atom_1lm(:,:),ylm(:,:)
- real(dp),allocatable :: xred_sph(:,:)
- real(dp),allocatable :: znucl_sph(:)
- real(dp),allocatable :: phkxred(:,:)
+ real(dp),allocatable :: sum_1atom_1lm(:,:)
+ real(dp),allocatable :: xred_sph(:,:),znucl_sph(:),phkxred(:,:)
  complex(dpc) :: cgcmat(2,2)
 
 !*************************************************************************
@@ -156,9 +157,6 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
    end do
  end do
 
- dos%fractions = zero
- if (dos%prtdosm /= 0) dos%fractions_m = zero
-
  ! Real or complex spherical harmonics?
  rc_ylm = 2; if (dos%prtdosm == 2) rc_ylm = 1
 
@@ -171,7 +169,6 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
  end if
  
  my_nspinor = max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
-
 
  n1 = dtset%ngfft(1); n2 = dtset%ngfft(2); n3 = dtset%ngfft(3)
  mgfft = maxval(dtset%ngfft(1:3))
@@ -226,8 +223,8 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
    end do
    !write(std_out,*)' partial_dos_fractions: rmax=', rmax,' nradintmax: ", nradintmax
 !  use same number of grid points to calculate Bessel function and to do the integration later on r
+!  and make sure bessargmax is a multiple of bessint_delta
    mbess = nradintmax
-!  make sure bessargmax is a multiple of bessint_delta
    bessargmax = bessint_delta*mbess
 
    ABI_ALLOCATE(rint,(nradintmax))
@@ -236,9 +233,6 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
    ! initialize general Bessel function array on uniform grid xx, from 0 to (2 \pi |k+G|_{max} |r_{max}|)
    jlspl = jlspline_new(mbess, bessint_delta, dos%mbesslang)
 
-   ! get kg matrix of the positions of G vectors in recip space
-   ! for each electronic state, get corresponding wavefunction and project on Ylm
-   ! remember: cg(2,dtset%mpw*my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol)
    ABI_ALLOCATE(xred_sph, (3, natsph_tot))
    do iatom=1,dtset%natsph
      xred_sph(:,iatom) = crystal%xred(:,iatsph(iatom))
@@ -250,42 +244,20 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
    ABI_ALLOCATE(ph1d,(2,(2*n1+1 + 2*n2+1 + 2*n3+1)*natsph_tot))
    call getph(atindx,natsph_tot,n1,n2,n3,ph1d,xred_sph)
 
-   ! Now get Ylm factors: returns "real Ylms", which are real (+m) and
-   ! imaginary (-m) parts of actual complex Ylm. Yl-m = Ylm*
-   ! Single call to initylmg for all kg (all mkmem are in memory)
-   ABI_ALLOCATE(ylm,(dtset%mpw*dtset%mkmem,dos%mbesslang**2))
-   call initylmg(crystal%gprimd,kg,dtset%kpt,dtset%mkmem,mpi_enreg,dos%mbesslang,&
-&   dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,0,crystal%rprimd,ylm,ylmgr_dum)
-
-   ! kpgnorm contains norms only for kpoints used by this processor
-   ABI_ALLOCATE(kpgnorm,(dtset%mpw*dtset%mkmem))
-   kpgnorm (:) = zero
-   ioffkg = 0
-   do ikpt=1,dtset%nkpt
-     if (all(mpi_enreg%proc_distrb(ikpt,1,1:dtset%nsppol) /= me)) cycle
-     npw_k = npwarr(ikpt)
-     call getkpgnorm(crystal%gprimd, dtset%kpt(:,ikpt), kg(:,ioffkg+1:ioffkg+npw_k),&
-&     kpgnorm(ioffkg+1:ioffkg+npw_k), npw_k)
-
-     ioffkg = ioffkg + npw_k
-   end do !ikpt
+   ! Fake MPI data to be used for sequential call to initylmg.
+   call initmpi_seq(mpi_enreg_seq)
+   mpi_enreg_seq%my_natom = dtset%natom
 
    shift_sk = 0
    do isppol=1,dtset%nsppol
      ! kg array is the same for both sppol ?????
      ioffkg = 0
-
      do ikpt=1,dtset%nkpt
        if (all(mpi_enreg%proc_distrb(ikpt,:,isppol) /= me)) cycle
        kpoint(:) = dtset%kpt(:,ikpt)
-       npw_k = npwarr(ikpt)
 
-       ! for each kpoint set up the phase factors, ylm factors
-       do ilang=1,dos%mbesslang**2
-         do ipw=1,npw_k
-           ylm_k(ipw,ilang) = ylm(ioffkg+ipw,ilang)
-         end do
-       end do
+       nband_k = dtset%nband((isppol-1)*dtset%nkpt + ikpt)
+       npw_k = npwarr(ikpt)
 
        ! make phkred for all atoms
        do iat=1,natsph_tot
@@ -294,10 +266,24 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
          phkxred(2,iat)=sin(arg)
        end do
 
+       ABI_MALLOC(kg_k, (3, npw_k))
+       kg_k = kg(:,ioffkg+1:ioffkg+npw_k)
+
+       ! kpgnorm contains norms only for kpoints used by this processor
+       ABI_ALLOCATE(kpgnorm, (npw_k))
+       call getkpgnorm(crystal%gprimd, kpoint, kg_k, kpgnorm, npw_k)
+
+       ! Now get Ylm(k, G) factors: returns "real Ylms", which are real (+m) and
+       ! imaginary (-m) parts of actual complex Ylm. Yl-m = Ylm*
+       ! Call initylmg for a single k-point (mind mpi_enreg_seq).
+       ABI_MALLOC(ylm_k, (npw_k, dos%mbesslang**2))
+       npwarr_tmp(1) = npw_k; nband_tmp(1) = nband_k
+       call initylmg(crystal%gprimd,kg_k,kpoint,1,mpi_enreg_seq,dos%mbesslang,&
+        npw_k,nband_tmp,1,npwarr_tmp,1,0,crystal%rprimd,ylm_k,ylmgr_dum)
+
        ! get phases exp (2 pi i (k+G).x_tau) in ph3d
        ABI_ALLOCATE(ph3d,(2,npw_k,natsph_tot))
-       call ph1d3d(1,natsph_tot,kg(:,ioffkg+1:ioffkg+npw_k), &
-        natsph_tot,natsph_tot,npw_k,n1,n2,n3,phkxred,ph1d,ph3d)
+       call ph1d3d(1,natsph_tot,kg_k,natsph_tot,natsph_tot,npw_k,n1,n2,n3,phkxred,ph1d,ph3d)
 
        ! get Bessel function factors on array of |k+G|*r distances
        ! since we need many r distances and have a large number of different
@@ -308,7 +294,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
        do ixint=1,nradintmax
          rint(ixint) = (ixint-1)*rmax / (nradintmax-1)
          do ipw=1,npw_k
-           xfit(ipw) = two_pi * kpgnorm(ipw+ioffkg) * rint(ixint)
+           xfit(ipw) = two_pi * kpgnorm(ipw) * rint(ixint)
            iindex(ipw) = ipw
          end do
 
@@ -324,11 +310,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
 
        shift_b = 0
        do iband=1,dtset%mband
-         !if (mod(iband, mpi_enreg%nproc_band) /= mpi_enreg%me_band) then
-         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= me) then
-           !shift_b = shift_b + npw_k
-           cycle
-         end if
+         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= me) cycle
          !write(std_out,*)"in band:",iband
 
          do ispinor=1,my_nspinor
@@ -368,6 +350,9 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
        ioffkg = ioffkg + npw_k
        shift_sk = shift_sk + dtset%mband*my_nspinor*npw_k
 
+       ABI_FREE(kg_k)
+       ABI_FREE(kpgnorm)
+       ABI_FREE(ylm_k)
        ABI_DEALLOCATE(ph3d)
      end do ! ikpt
    end do ! isppol
@@ -386,7 +371,6 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
    ABI_DEALLOCATE(atindx)
    ABI_DEALLOCATE(bess_fit)
    ABI_DEALLOCATE(iatsph)
-   ABI_DEALLOCATE(kpgnorm)
    ABI_DEALLOCATE(nradint)
    ABI_DEALLOCATE(ph1d)
    ABI_DEALLOCATE(phkxred)
@@ -395,21 +379,19 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
    ABI_DEALLOCATE(sum_1atom_1ll)
    ABI_DEALLOCATE(sum_1atom_1lm)
    ABI_DEALLOCATE(xred_sph)
-   ABI_DEALLOCATE(ylm)
    ABI_DEALLOCATE(znucl_sph)
 
    call jlspline_free(jlspl)
+   call destroy_mpi_enreg(mpi_enreg_seq)
 
  else if (dos%partial_dos_flag == 2) then
 
    if (dtset%nsppol /= 1 .or. dtset%nspinor /= 2) then
      MSG_WARNING("spinor projection is meaningless if nsppol==2 or nspinor/=2. Not calculating projections.")
-     dos%fractions = zero
      return
    end if
    if (my_nspinor /= 2) then
      MSG_WARNING("spinor projection with spinor parallelization is not coded. Not calculating projections.")
-     dos%fractions = zero
      return
    end if
 

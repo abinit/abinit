@@ -2036,15 +2036,15 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
      ABI_ALLOCATE(kg_k,(3,npw_k))
      kg_k(:,1:npw_k)=kg(:,1+ioffkg:npw_k+ioffkg)
 
-     ABI_ALLOCATE(ylm_k,(mpw,mlang*mlang))
-     ABI_ALLOCATE(ylmgr_dum,(mpw,3,mlang*mlang))
+     ABI_ALLOCATE(ylm_k,(npw_k,mlang*mlang))
+     ABI_ALLOCATE(ylmgr_dum,(npw_k,3,mlang*mlang))
 
 !    call for only the kpoint we are interested in !
      ABI_ALLOCATE(k1,(3,1))
      k1(:,1)=kpt(:,ckpt)
      ABI_ALLOCATE(npwarrk1,(1))
      npwarrk1 = (/npw_k/)
-     call initylmg(gprimd,kg_k,k1,1,mpi_enreg,mlang,mpw,nband,1,&
+     call initylmg(gprimd,kg_k,k1,1,mpi_enreg,mlang,npw_k,nband,1,&
 &     npwarrk1,nsppol,0,rprimd,ylm_k,ylmgr_dum)
      ABI_DEALLOCATE(ylmgr_dum)
      ABI_DEALLOCATE(k1)
@@ -2200,7 +2200,6 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !          Re-order results for different G vectors
            do ipw=1,npw_k
              bess_fit(iindex(ipw),ixint,ilang) = yfit(ipw)
-             !if (iindex(ipw) == 1 .and. ilang == 2) write(std_out, *) yfit(ipw)
            end do
          end do ! ipw
        end do ! ixint
