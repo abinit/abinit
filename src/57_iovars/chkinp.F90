@@ -163,12 +163,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  iomode
 !  Must be one of 0, 1, 3
    call chkint_eq(0,0,cond_string,cond_values,ierr,'iomode',dt%iomode,3,&
-&   (/IO_MODE_FORTRAN,IO_MODE_MPI,IO_MODE_ETSF/),iout)
+&   [IO_MODE_FORTRAN,IO_MODE_MPI,IO_MODE_ETSF],iout)
 !  However, if mpi_io is not enabled, must be one of 0, 3.
    if(xmpi_mpiio==0)then
      cond_string(1)='enable_mpi_io' ;  cond_values(1)=0
 !    Make sure that iomode is 0 or 3
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'iomode',dt%iomode,2,(/IO_MODE_FORTRAN,IO_MODE_ETSF/),iout)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'iomode',dt%iomode,2,[IO_MODE_FORTRAN,IO_MODE_ETSF],iout)
+   end if
+   if (dt%iomode == IO_MODE_NETCDF .and. dt%npspinor == 2) then
+     MSG_ERROR_NOSTOP("npspinor == 2 not compatible with netcdf", ierr)
    end if
 
 !  accuracy

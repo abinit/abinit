@@ -1,6 +1,8 @@
 ndtset 2
 nspden 4  nspinor 2  pawspnorb 1 # spin-orbit, non-collinear magnetism
 paral_kgb 1 
+iomode 1  # enforce MPI-IO for the time being because netcdf with MPI-IO
+          # does not support npspinor = 2.
 
 prtdos   3  # Compute PJDOS
 prtpot   1
