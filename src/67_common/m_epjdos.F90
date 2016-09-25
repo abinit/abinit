@@ -1787,7 +1787,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
 
    ! Multiply by r**2 and take norm, integrate
    ! TODO: non-blocking or values, (2, nradintmax, mlang**2, natsph) ?
-   call xmpi_sum(values, mpi_enreg%comm_fft, ierr)
+   if (mpi_enreg%nproc_fft > 1) call xmpi_sum(values, mpi_enreg%comm_fft, ierr)
    do ilm=1,mlang*mlang
      do ixint=1,nradint(iat)
         func(ixint) = rint(ixint)**2 * (values(1, ixint, ilm)**2 + values(2, ixint, ilm)**2)
