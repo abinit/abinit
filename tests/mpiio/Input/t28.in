@@ -48,7 +48,7 @@ ngkpt 2 2 2
 #%% max_nprocs = 4
 #%% [NCPU_4]
 #%% files_to_test = 
-#%%   t28_MPI4.out, tolnlines=42, tolabs=2.5e-5, tolrel=2.5e-2
+#%%   t28_MPI4.out, tolnlines=42, tolabs=2.5e-5, tolrel=2.5e-2;
 #%%   t28_MPI4o_DS1_DOS_AT0001, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
 #%%   t28_MPI4o_DS2_DOS_AT0001, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
 #%% [extra_info]

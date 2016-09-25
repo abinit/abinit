@@ -78,6 +78,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
  use m_mpinfo
  use m_crystal
 
+ use m_time,          only : cwtime
  use m_numeric_tools, only : simpson
  use m_special_funcs, only : jlspline_t, jlspline_new, jlspline_free, jlspline_integral
  use m_cgtools,       only : cg_getspin
@@ -448,8 +449,8 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
  end if
 
  call cwtime(cpu,wall,gflops,"stop")
- write(message,'(2(a,f8.2),a)')" partial_dos_fractions: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
- call wrtout(std_out,message,"PERS")
+ write(msg,'(2(a,f8.2),a)')" partial_dos_fractions: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
+ call wrtout(std_out,msg,"PERS")
 
 end subroutine partial_dos_fractions
 !!***
