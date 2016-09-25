@@ -1,0 +1,63 @@
+ndtset 2
+nspden 4  nspinor 2  pawspnorb 1 # spin-orbit, non-collinear magnetism
+paral_kgb 1 
+
+prtdos   3  # Compute PJDOS
+prtpot   1
+prtvha   1
+prtvpsp  1
+#prtvclmb 1
+prtvhxc  1
+prtvxc   1
+
+# === Dataset 1
+npkpt1 2 npfft1 2 npspinor1 1 # npband 2
+
+# === Dataset 2
+npkpt2 1 npfft2 2 npspinor2 2 # npband 2
+getwfk2 -1
+
+
+# === Structure and cell
+natom 2 ntypat 1 typat 2*1
+znucl  83.
+spinat 0 0 1.2   0 1.1 0
+xred   3*0.231d0
+       3*-0.231d0
+acell  3*9.
+angdeg 3*57.25
+nband 32
+
+# === SCF cycle options
+nstep 20  tolvrs 1.d-7
+ecut 5. pawecutdg 10.
+
+# === K-points and syms
+kptopt 4
+ngkpt 2 2 2
+
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% psp_files = 83bi.paw
+#%% [paral_info]
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test = 
+#%%   t28_MPI4.out, tolnlines=42, tolabs=2.5e-5, tolrel=2.5e-2
+#%%   t28_MPI4o_DS1_DOS_AT0001, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
+#%%   t28_MPI4o_DS2_DOS_AT0001, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
+#%% [extra_info]
+#%% keywords = PAW 
+#%% authors = M. Giantomassi
+#%% description = 
+#%%  Rhombohedral Bi treated as a semiconductor within LDA and spin-orbit coupling
+#%%  2x2x2 K grid ; low cut-off for test; similar to paral[28]
+#%%  Test paral_kgb==1 with MPI-FFT/spinor parallelization, the IO of the WFK file,
+#%%  the output of potential files and the calculation of PJDOS in parallel 
+#%%  (PW term + on-site contributions)
+#%%<END TEST_INFO>

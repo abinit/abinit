@@ -9,7 +9,7 @@
 !!  2: should be able to choose certain atoms or atom types, slabs of space...
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (MVer,MB)
+!! Copyright (C) 1998-2016 ABINIT group (MVer,MB,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -17,23 +17,18 @@
 !!
 !! INPUTS
 !!  crystal<crystal_t>= data type gathering info on symmetries and unit cell
+!!  dtset<type(dataset_type)>=all input variables for this dataset
 !!  npwarr(nkpt)=number of planewaves in basis at this k point
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  cg(2,mcg)=planewave coefficients of wavefunctions
-!!  dtset<type(dataset_type)>=all input variables for this dataset
-!!  mbesslang=maximum angular momentum for Bessel function expansion
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  collect=1 if fractions should be MPI collected at the end, 0 otherwise.
 !!  mpi_enreg=information about MPI parallelization
-!!  prtdosm= option for the m-contributions to the partial DOS
-!!           1 for complex spherical harmonics, 2 for real spherical harmonics.
-!!  ndosfraction=natsph*mbesslang
-!!  partial_dos= option for this routine - only 1 is supported at present
 !!
 !! SIDE EFFECTS
 !!  dos%fractions(ikpt,iband,isppol,ndosfraction) = percentage of s, p, d..
 !!    character on each atom for the wavefunction # ikpt,iband, isppol
-!!  == if prtdosm==1
+!!  == if prtdosm /= 0
 !!  dos%fractions_m(ikpt,iband,isppol,ndosfraction*mbesslang) = percentage of s, p, d..
 !!    character on each atom for the wavefunction # ikpt,iband, isppol (m-resolved)
 !!
@@ -92,6 +87,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'partial_dos_fractions'
+ use interfaces_14_hidewrite
  use interfaces_28_numeric_noabirule
  use interfaces_51_manage_mpi
  use interfaces_56_recipspace
@@ -119,7 +115,8 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
  integer :: comm,rc_ylm,itypat,nband_k
  real(dp),parameter :: bessint_delta = 0.1_dp
  real(dp) :: arg,bessarg,bessargmax,kpgmax,rmax
- !character(len=500) :: msg
+ real(dp) :: cpu,wall,gflops
+ character(len=500) :: msg
  type(jlspline_t) :: jlspl
  type(MPI_type) :: mpi_enreg_seq
 !arrays
@@ -172,6 +169,8 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
 
  n1 = dtset%ngfft(1); n2 = dtset%ngfft(2); n3 = dtset%ngfft(3)
  mgfft = maxval(dtset%ngfft(1:3))
+
+ call cwtime(cpu, wall, gflops, "start")
 
 !##############################################################
 !FIRST CASE: project on angular momenta to get dos parts
@@ -447,6 +446,10 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
  else
    MSG_WARNING('only partial_dos==1 is coded')
  end if
+
+ call cwtime(cpu,wall,gflops,"stop")
+ write(message,'(2(a,f8.2),a)')" partial_dos_fractions: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
+ call wrtout(std_out,message,"PERS")
 
 end subroutine partial_dos_fractions
 !!***

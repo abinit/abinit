@@ -82,7 +82,7 @@ module m_epjdos
  type,public :: epjdos_t
 
    integer :: mbesslang
-   ! Max L+1 used in LM-DOS
+   ! Max L+1 used in LM-DOS  (Bessel function expansion)
 
    integer :: ndosfraction
    ! Defines the last dimension of the dos arrays.
@@ -95,9 +95,9 @@ module m_epjdos
    ! 5 --> Spin-DOS 
 
    integer :: prtdosm
-   ! Used if L-DOS. 
-   ! 1 if LM-projection is done on complex Ylm
-   ! 2 if LM-projection is done on real Slm
+   ! Option for the m-contributions to the partial DOS
+   ! 1 if LM-projection is done onto complex Ylm
+   ! 2 if LM-projection is done onto real Slm
 
    integer :: partial_dos_flag
 
@@ -1577,27 +1577,29 @@ end subroutine dos_degeneratewfs
 !! recip_ylm
 !!
 !! FUNCTION
-!! Project input wavefunctions (real space) on to Ylm
+!! Project input wavefunctions in reciprocal space on to Ylm 
+!! (real or complex harmonics depending on rc_ylm).
 !!
 !! INPUTS
-!!  bess_fit(mpw,nradintmax,ll) = bessel functions for ll, splined
+!!  bess_fit(mpw,nradintmax,ll) = Bessel functions for L, splined
 !!   with arguments $2 \pi |k+G| \Delta r$, for all G vectors in sphere
 !!   and all points on radial grid.
-!!  cg_1band(2,npw_k)=wavefunction in recip space
+!!  cg_1band(2,npw_k)=wavefunction in recip space (note that nspinor is missing, see Notes).
 !!  istwfk= storage mode of cg_1band
-!!  nradint(natsph)=number of points on radial real-space grid for a given atom
-!!  nradintmax=dimension of rint array
-!!  mlang=maximum angular momentum
+!!  nradint(natsph)=number of points on radial real-space grid for a given atom.
+!!  nradintmax=dimension of rint array.
+!!  mlang=maximum angular momentum in Bessel functions.
 !!  mpi_enreg=information about MPI parallelization
+!!  mpw=Maximum number of planewaves. Used to dimension bess_fit
 !!  natsph=number of atoms around which ang mom projection has to be done 
-!!  npw_k=number of plane waves for kpt
+!!  npw_k=number of plane waves for this kpt
 !!  ph3d(2,npw_k,natsph)=3-dim structure factors, for each atom and plane wave.
 !!  prtsphere= if 1, print a complete analysis of the angular momenta in atomic spheres
 !!  rint(nradintmax) = points on radial real-space grid for integration
-!!  rc_ylm= 1 for real spherical harmonics. 2 for complex spherical harmonics, 
 !!  rmax(natsph)=maximum radius for real space integration sphere
+!!  rc_ylm= 1 for real spherical harmonics. 2 for complex spherical harmonics, 
 !!  ucvol=unit cell volume in bohr**3.
-!!  ylm(mpw,mlang*mlang)=real spherical harmonics for each G and k point
+!!  ylm_k(npw_k,mlang**2)=real spherical harmonics for each G and LM.
 !!  znucl_sph(natsph)=gives the nuclear number for each type of atom
 !!
 !! OUTPUT
@@ -1605,8 +1607,11 @@ end subroutine dos_degeneratewfs
 !!  sum_1lm_1atom(mlang*mlang,natsph)= projected scalars for each atom and LM component.
 !!
 !! NOTES
-!!  ph3d atoms are ordered with atindx -> by typat
-!!  The atoms have to be reordered !
+!!  * ph3d atoms are ordered with natsph and must be provided by the caller in the correct order!
+!!
+!!  * spinor components are not treated here. This facilitates the implementation of spinor parallelism
+!!    because the caller can easily call the routine inside a loop over spinors and then sum the
+!!    different contributions outside the loop thus reducing the number of MPI calls.
 !!
 !! PARENTS
 !!      m_cut3d,partial_dos_fractions
@@ -1617,13 +1622,14 @@ end subroutine dos_degeneratewfs
 !! SOURCE
 
 subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enreg,&
-&  mpw,natsph,npw_k,ph3d,prtsphere,rint,rmax,rc_ylm,sum_1ll_1atom,sum_1lm_1atom,ucvol,ylm,znucl_sph)
+&  mpw,natsph,npw_k,ph3d,prtsphere,rint,rmax,rc_ylm,sum_1ll_1atom,sum_1lm_1atom,ucvol,ylm_k,znucl_sph)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'recip_ylm'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1638,18 +1644,18 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
  integer,intent(in) :: nradint(natsph)
  real(dp),intent(in) :: bess_fit(mpw,nradintmax,mlang),cg_1band(2,npw_k)
  real(dp),intent(in) :: ph3d(2,npw_k,natsph),rint(nradintmax)
- real(dp),intent(in) :: rmax(natsph),ylm(npw_k,mlang*mlang)
+ real(dp),intent(in) :: rmax(natsph),ylm_k(npw_k,mlang*mlang)
  real(dp),intent(in) :: znucl_sph(natsph)
  real(dp),intent(out) :: sum_1ll_1atom(mlang,natsph)
  real(dp),intent(out) :: sum_1lm_1atom(mlang*mlang,natsph)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: option2=2 ! option for dotprod_g
  integer :: ilm,iat,ipw,ixint,ll,mm,il,jlm, ierr
  real(dp),parameter :: invsqrt2=one/sqrt2
  real(dp) :: doti, dotr, sum_all, dr, fact
  type(atomdata_t) :: atom
+ character(len=500) :: msg
 !arrays
  integer :: ilang(mlang**2)
  real(dp) :: c1(2),c2(2)
@@ -1683,7 +1689,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
 
    ! tmppsim = temporary arrays for part of psi which doesnt depend on ixint
    ! u(G) Y_LM^*(k+G) e^{i(k+G).Ra}
-   ! Take into account the fact that ylm are REAL spherical harmonics, see initylmg.f
+   ! Take into account the fact that ylm_k are REAL spherical harmonics, see initylmg.f
    ! For time-reversal states, detailed treatment show that only the real or imaginary
    ! part of tmppsia is needed here, depending on l being even or odd: only one of the coef is 1, the other 0
    do ilm=1,mlang*mlang
@@ -1691,57 +1697,12 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
      ll = ilang(ilm) - 1
      mm = ilm - (ll+1)**2 + ll
 
-     if (rc_ylm == 2) then
-       ! to get PDOS for complex spherical harmonics, build linear combination of real ylm 
-       ! TODO: check the prefactor part for istwfk /= 1! Could also be incorrect if we go to real spherical harmonics
-
-         jlm = (ll+1)**2-ll-mm ! index of (l, -m)
-         if (mm == 0) then
-           vect(1,:) = ylm(1:npw_k,ilm)
-           vect(2,:) = zero
-         else if (mm > 0) then
-            !vect(1,:) =  invsqrt2 * ylm(1:npw_k,ilm) * (-1)**mm
-            !vect(2,:) = +invsqrt2 * ylm(1:npw_k,jlm) * (-1)**mm
-            c1 = sy(ll, mm, mm)
-            c2 = sy(ll,-mm, mm)
-            vect(1,:) = c1(1) * ylm(1:npw_k,ilm) + c2(1) * ylm(1:npw_k,jlm)
-            vect(2,:) = c1(2) * ylm(1:npw_k,ilm) + c2(2) * ylm(1:npw_k,jlm)
-
-         else if (mm < 0) then
-            !vect(1,:) =  invsqrt2 * ylm(1:npw_k,jlm) !* (-1)**mm 
-            !vect(2,:) = -invsqrt2 * ylm(1:npw_k,ilm) !* (-1)**mm 
-            c1 = sy(ll, mm,  mm)
-            c2 = sy(ll,-mm,  mm)
-            vect(1,:) = c1(1) * ylm(1:npw_k,ilm) + c2(1) * ylm(1:npw_k,jlm)
-            vect(2,:) = c1(2) * ylm(1:npw_k,ilm) + c2(2) * ylm(1:npw_k,jlm)
-         end if
-         vect(2,:) = -vect(2,:)
-
-         if (istwfk == 1) then
-           do ipw=1,npw_k
-             tmppsim(1, ipw) = tmppsia(1, ipw) * vect(1, ipw) - tmppsia(2, ipw) * vect(2, ipw) 
-             tmppsim(2, ipw) = tmppsia(1, ipw) * vect(2, ipw) + tmppsia(2, ipw) * vect(1, ipw) 
-           end do
-         else
-           ! Handle time-reversal
-           if (mod(ll, 2) == 0) then
-             do ipw=1,npw_k
-               tmppsim(1, ipw) = tmppsia(1, ipw) * vect(1, ipw) 
-               tmppsim(2, ipw) = tmppsia(1, ipw) * vect(2, ipw) 
-             end do
-           else
-             do ipw=1,npw_k
-               tmppsim(1, ipw) = tmppsia(2, ipw) * vect(1, ipw)  
-               tmppsim(2, ipw) = tmppsia(2, ipw) * vect(2, ipw) 
-             end do
-           end if
-         end if
-
-     else if (rc_ylm == 1) then
-       ! to get PDOS for real spherical harmonics, multiply here by ylm instead of linear combination
+     select case (rc_ylm)
+     case (1)
+       ! to get PDOS for real spherical harmonics, multiply here by ylm_k instead of linear combination
        do ipw=1,npw_k
-         tmppsim(1,ipw) = tmppsia(1,ipw) * ylm(ipw,ilm)
-         tmppsim(2,ipw) = tmppsia(2,ipw) * ylm(ipw,ilm)
+         tmppsim(1,ipw) = tmppsia(1,ipw) * ylm_k(ipw,ilm)
+         tmppsim(2,ipw) = tmppsia(2,ipw) * ylm_k(ipw,ilm)
        end do
 
        ! Handle time-reversal
@@ -1754,15 +1715,56 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
          end if
        end if
 
-     else 
+     case (2)
+       ! to get PDOS for complex spherical harmonics, build linear combination of real ylm_k
+       jlm = (ll+1)**2-ll-mm ! index of (l, -m)
+       if (mm == 0) then
+         vect(1,:) = ylm_k(1:npw_k,ilm)
+         vect(2,:) = zero
+       else if (mm > 0) then
+          !vect(1,:) =  invsqrt2 * ylm_k(1:npw_k,ilm) * (-1)**mm
+          !vect(2,:) = +invsqrt2 * ylm_k(1:npw_k,jlm) * (-1)**mm
+          c1 = sy(ll, mm, mm)
+          c2 = sy(ll,-mm, mm)
+          vect(1,:) = c1(1) * ylm_k(1:npw_k,ilm) + c2(1) * ylm_k(1:npw_k,jlm)
+          vect(2,:) = c1(2) * ylm_k(1:npw_k,ilm) + c2(2) * ylm_k(1:npw_k,jlm)
+
+       else if (mm < 0) then
+          !vect(1,:) =  invsqrt2 * ylm_k(1:npw_k,jlm) !* (-1)**mm 
+          !vect(2,:) = -invsqrt2 * ylm_k(1:npw_k,ilm) !* (-1)**mm 
+          c1 = sy(ll, mm,  mm)
+          c2 = sy(ll,-mm,  mm)
+          vect(1,:) = c1(1) * ylm_k(1:npw_k,ilm) + c2(1) * ylm_k(1:npw_k,jlm)
+          vect(2,:) = c1(2) * ylm_k(1:npw_k,ilm) + c2(2) * ylm_k(1:npw_k,jlm)
+       end if
+       vect(2,:) = -vect(2,:)
+
+       if (istwfk == 1) then
+         do ipw=1,npw_k
+           tmppsim(1, ipw) = tmppsia(1, ipw) * vect(1, ipw) - tmppsia(2, ipw) * vect(2, ipw) 
+           tmppsim(2, ipw) = tmppsia(1, ipw) * vect(2, ipw) + tmppsia(2, ipw) * vect(1, ipw) 
+         end do
+       else
+         ! Handle time-reversal
+         if (mod(ll, 2) == 0) then
+           do ipw=1,npw_k
+             tmppsim(1, ipw) = tmppsia(1, ipw) * vect(1, ipw) 
+             tmppsim(2, ipw) = tmppsia(1, ipw) * vect(2, ipw) 
+           end do
+         else
+           do ipw=1,npw_k
+             tmppsim(1, ipw) = tmppsia(2, ipw) * vect(1, ipw)  
+             tmppsim(2, ipw) = tmppsia(2, ipw) * vect(2, ipw) 
+           end do
+         end if
+       end if
+
+     case default 
        MSG_ERROR("Wrong value for rc_ylm")
-     end if
+     end select
 
      ! Compute integral $ \int_0^{rc} dr r**2 ||\sum_G u(G) Y_LM^*(k+G) e^{i(k+G).Ra} j_L(|k+G| r)||**2 $
      do ixint=1,nradint(iat)
-       !vect(1, 1:npw_k) = bess_fit(1:npw_k, ixint, ilang(ilm))
-       !vect(2, 1:npw_k) = zero
-       !call dotprod_g(dotr, doti, istwfk, npw_k, option2, vect, tmppsim, mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
        dotr = zero; doti = zero
        do ipw=1,npw_k
          dotr = dotr + bess_fit(ipw, ixint, il) * tmppsim(1, ipw)
@@ -1780,9 +1782,11 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
        values(1, ixint, ilm) = dotr
        values(2, ixint, ilm) = doti
      end do ! ixint
+
    end do ! ilm
 
    ! Multiply by r**2 and take norm, integrate
+   ! TODO: non-blocking or values, (2, nradintmax, mlang**2, natsph) ?
    call xmpi_sum(values, mpi_enreg%comm_fft, ierr)
    do ilm=1,mlang*mlang
      do ixint=1,nradint(iat)
@@ -1792,7 +1796,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
    end do
  end do ! iat
 
- ! Normalize with unit cell volume and include 4pi term coming from rayleigh expansion.
+ ! Normalize with unit cell volume and include 4pi term coming from Rayleigh expansion.
  fact = four_pi**2 / ucvol
  sum_1lm_1atom = fact * sum_1lm_1atom
  sum_1ll_1atom = zero
@@ -1817,26 +1821,31 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
    end do
    sum_all = sum(sum_1atom)
 
-   if (rc_ylm == 1) write(std_out,'(a)' ) " Angular analysis (real spherical harmonics)"
-   if (rc_ylm == 2) write(std_out,'(a)' ) " Angular analysis (complex spherical harmonics)"
+   if (rc_ylm == 1) msg = " Angular analysis (real spherical harmonics)"
+   if (rc_ylm == 2) msg =" Angular analysis (complex spherical harmonics)"
+   call wrtout(std_out, msg)
    do iat=1,natsph
      call atomdata_from_znucl(atom, znucl_sph(iat))
-     write(std_out,'(a)' ) ' '
-     write(std_out,'(a,i3,a,a,a,f10.6)' )&
-&     ' Atom # ',iat, ' is  ',  atom%symbol,', in-sphere charge =',sum_1atom(iat)
+     call wrtout(std_out, " ")
+     write(msg,'(a,i3,a,a,a,f10.6)' )' Atom # ',iat, ' is  ',  atom%symbol,', in-sphere charge =',sum_1atom(iat)
+     call wrtout(std_out, msg)
      do ll=0,mlang-1
-       write(std_out,'(a,i1,a,f9.6,a,9f6.3)' )&
+       write(msg,'(a,i1,a,f9.6,a,9f6.3)' )&
 &       ' l=',ll,', charge=',sum_1ll_1atom(ll+1,iat),&
 &       ', m=-l,l splitting:',sum_1lm_1atom(1+ll**2:(ll+1)**2,iat)
+       call wrtout(std_out, msg)
      end do ! ll
    end do ! iat
-   write(std_out,'(a,a)') ch10,' Sum of angular contributions for all atomic spheres '
+   write(msg,'(a,a)') ch10,' Sum of angular contributions for all atomic spheres '
+   call wrtout(std_out, msg)
    do ll=0,mlang-1
-     write(std_out,'(a,i1,a,f9.6,a,f9.6)' )&
+     write(msg,'(a,i1,a,f9.6,a,f9.6)' )&
 &     ' l=',ll,', charge =',sum_1ll(ll+1),' proportion =',sum_1ll(ll+1)/sum_all
+     call wrtout(std_out, msg)
    end do
-   write(std_out,'(a,a,f10.6)' ) ch10,' Total over all atoms and l=0 to 4 :',sum_all
-   write(std_out,'(a)' ) ' '
+   write(msg,'(a,a,f10.6)' ) ch10,' Total over all atoms and l=0 to 4 :',sum_all
+   call wrtout(std_out, msg)
+   call wrtout(std_out, " ")
  end if
 
 contains 
