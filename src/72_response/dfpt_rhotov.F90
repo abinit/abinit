@@ -291,11 +291,19 @@
 
  if (optres==0) then
 !$OMP PARALLEL DO COLLAPSE(2)
-   do ispden=1,nspden
+   do ispden=1,min(nspden,2)
      do ifft=1,cplex*nfft
        vresid1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)-vtrial1(ifft,ispden)
      end do
    end do
+   if(nspden==4)then
+!$OMP PARALLEL DO COLLAPSE(2)
+     do ispden=3,4
+       do ifft=1,cplex*nfft
+         vresid1(ifft,ispden)=vxc1_(ifft,ispden)
+       end do
+     end do
+   end if
 
 !  Compute square norm vres2 of potential residual vresid
    call sqnorm_v(cplex,nfft,vres2,nspden,optres,vresid1)
@@ -306,11 +314,19 @@
 !  (only if requested ; if optres==1)
 
 !$OMP PARALLEL DO COLLAPSE(2)
-   do ispden=1,nspden
+   do ispden=1,min(nspden,2)
      do ifft=1,cplex*nfft
        vtrial1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)
      end do
    end do
+   if(nspden==4)then
+!$OMP PARALLEL DO COLLAPSE(2)
+   do ispden=3,4
+     do ifft=1,cplex*nfft
+       vtrial1(ifft,ispden)=vxc1_(ifft,ispden)
+     end do
+   end do
+   end if
 
  end if
 

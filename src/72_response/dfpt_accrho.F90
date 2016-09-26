@@ -312,24 +312,25 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
          do i1=1,n1
            diag=vlocal(i1,i2,i3,1)*(wfraug1_up(1,i1,i2,i3)**2+wfraug1_up(2,i1,i2,i3)**2)&
 &           +vlocal(i1,i2,i3,2)*(wfraug1_down(1,i1,i2,i3)**2+wfraug1_down(2,i1,i2,i3)**2)
-           offdiag=(2*vlocal(i1,i2,i3,3)*((wfraug1_up(1,i1,i2,i3)*wfraug1_down(1,i1,i2,i3))+&
-&           (wfraug1_up(2,i1,i2,i3)*wfraug1_down(2,i1,i2,i3))))+&
-&           (2*vlocal(i1,i2,i3,4)*((-wfraug1_down(2,i1,i2,i3)*wfraug1_up(1,i1,i2,i3))+&
-&           (wfraug1_down(1,i1,i2,i3)*wfraug1_up(2,i1,i2,i3))))
+           offdiag=zero !(2*vlocal(i1,i2,i3,3)*((wfraug1_up(1,i1,i2,i3)*wfraug1_down(1,i1,i2,i3))+&
+!&           (wfraug1_up(2,i1,i2,i3)*wfraug1_down(2,i1,i2,i3))))+&
+!&           (2*vlocal(i1,i2,i3,4)*((-wfraug1_down(2,i1,i2,i3)*wfraug1_up(1,i1,i2,i3))+&
+!&           (wfraug1_down(1,i1,i2,i3)*wfraug1_up(2,i1,i2,i3))))
            valuer=valuer+diag+offdiag
          end do
        end do
      end do
-     ABI_DEALLOCATE(wfraug1_up)
-     ABI_DEALLOCATE(wfraug1_down)
-     
+
 !    Local potential energy of this band
      eloc0_k=eloc0_k+two*valuer/dble(gs_hamkq%nfft)
    end if ! option
+
 !  Part devoted to the accumulation of the 1st-order density
 !  ---------------------------------------------------------
+
    if (option==1.or.option==3) then
-!        Build the four components of rho. We use only norm quantities and, so fourwf.
+
+!    Build the four components of rho. We use only norm quantities and, so fourwf.
      ABI_ALLOCATE(wfraug_up,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
      ABI_ALLOCATE(wfraug_down,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))    
      ABI_ALLOCATE(wfraug1_up,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
@@ -341,79 +342,81 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 ! first order
      cwave1_up => cwave1(:,1:npw_k)
      cwave1_down => cwave1(:,1+npw_k:2*npw_k)
+
+!    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997))
+     weight=two*occ_k(iband)*wtk_k/gs_hamkq%ucvol
+     !density components
+     !GS wfk Fourrier Tranform
+     ! EB FR in the fourwf calls rhoaug(:,:,:,2) is a dummy argument
+     call fourwf(1,rhoaug(:,:,:,2),cwave0_up,dummy,wfraug_up,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
+  &   gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+  &   gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
+  &   weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+     call fourwf(1,rhoaug(:,:,:,2),cwave0_down,dummy,wfraug_down,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
+  &   gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+  &   gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
+  &   weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+     !1st order wfk Fourrier Transform
+     call fourwf(1,rhoaug1(:,:,:,2),cwave1_up,dummy,wfraug1_up,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
+  &   gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+  &   gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
+  &   weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+     call fourwf(1,rhoaug1(:,:,:,2),cwave1_down,dummy,wfraug1_down,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
+  &   gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+  &   gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
+  &   weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+!    Accumulate 1st-order density (x component)
+     if (cplex==2) then
+       re0_up=zero;im0_up=zero;re1_up=zero;im1_up=zero;re0_down=zero;im0_down=zero
+       re1_down=zero;im1_down=zero
+       do i3=1,n3
+         do i2=1,n2
+           do i1=1,n1
+             re0_up=wfraug_up(1,i1,i2,i3)  ;     im0_up=wfraug_up(2,i1,i2,i3)
+             re1_up=wfraug1_up(1,i1,i2,i3) ;     im1_up=wfraug1_up(2,i1,i2,i3)
+             re0_down=wfraug_down(1,i1,i2,i3)  ; im0_down=wfraug_down(2,i1,i2,i3)
+             re1_down=wfraug1_down(1,i1,i2,i3) ; im1_down=wfraug1_down(2,i1,i2,i3)
+             rhoaug1(2*i1-1,i2,i3,1)=rhoaug1(2*i1-1,i2,i3,1)+weight*((re0_up*re1_up+im0_up*im1_up)+&
+&             (re0_down*re1_down+im0_down*im1_down)) ! trace
+             rhoaug1(2*i1  ,i2,i3,1)=zero ! imag part of rho at k
+             rhoaug1(2*i1-1,i2,i3,2)=zero !rhoaug1(2*i1-1,i2,i3,2)+weight*((re0_up*re1_down+im0_up*im1_down)+&
+!&             re0_down*re1_up+im0_down*im1_up) ! m_x
+             rhoaug1(2*i1  ,i2,i3,2)=zero ! imag part of rho at k
+             rhoaug1(2*i1-1,i2,i3,3)=zero !rhoaug1(2*i1-1,i2,i3,3)+weight*((-re1_up*im0_down+im1_up*re0_down)&
+!&             -re0_up*im1_down+im0_up*re1_down) ! m_y
+             rhoaug1(2*i1  ,i2,i3,3)=zero ! imag part of rho at k
+             rhoaug1(2*i1-1,i2,i3,4)=rhoaug1(2*i1-1,i2,i3,4)+weight*((re0_up*re1_up+im0_up*im1_up)-&
+&             (re0_down*re1_down+im0_down*im1_down)) ! m_z
+             rhoaug1(2*i1  ,i2,i3,4)=zero ! imag part of rho at k
+           end do
+         end do
+       end do
+     else !cplex
+       re0_up=zero;im0_up=zero;re1_up=zero;im1_up=zero;re0_down=zero;im0_down=zero
+       re1_down=zero;im1_down=zero
+       do i3=1,n3
+         do i2=1,n2
+           do i1=1,n1
+             re0_up=wfraug_up(1,i1,i2,i3)  ;     im0_up=wfraug_up(2,i1,i2,i3)
+             re1_up=wfraug1_up(1,i1,i2,i3) ;     im1_up=wfraug1_up(2,i1,i2,i3)
+             re0_down=wfraug_down(1,i1,i2,i3)  ; im0_down=wfraug_down(2,i1,i2,i3)
+             re1_down=wfraug1_down(1,i1,i2,i3) ; im1_down=wfraug1_down(2,i1,i2,i3)
+             rhoaug1(i1,i2,i3,1)=rhoaug1(i1,i2,i3,1)+weight*((re0_up*re1_up+im0_up*im1_up)+&
+&             (re0_down*re1_down+im0_down*im1_down)) ! n
+             rhoaug1(i1,i2,i3,2)=zero !rhoaug1(i1,i2,i3,2)+weight*((re0_up*re1_down+im0_up*im1_down)+&
+!&             re0_up*re1_down+im0_down*im1_up)     ! m_x
+             rhoaug1(i1,i2,i3,3)=zero !rhoaug1(i1,i2,i3,3)+weight*((-re1_up*im0_down+im1_up*re0_down)+&
+!&             (-re0_up*im1_down+im0_up*re1_down)) ! m_y
+             rhoaug1(i1,i2,i3,4)=rhoaug1(i1,i2,i3,4)+weight*((re0_up*re1_up+im0_up*im1_up)-&
+&             (re0_down*re1_down+im0_down*im1_down)) ! m_z
+           end do
+         end do
+       end do
+     end if !cplex
+     ABI_DEALLOCATE(wfraug_up)
+     ABI_DEALLOCATE(wfraug_down)
    end if ! option
-! The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997))
-   weight=two*occ_k(iband)*wtk_k/gs_hamkq%ucvol
-!density components
-!GS wfk Fourrier Tranform
-! EB FR in the fourwf calls rhoaug(:,:,:,2) is a dummy argument
-   call fourwf(1,rhoaug(:,:,:,2),cwave0_up,dummy,wfraug_up,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
-&   gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&   gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
-&   weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
-   call fourwf(1,rhoaug(:,:,:,2),cwave0_down,dummy,wfraug_down,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
-&   gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&   gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
-&   weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
-!1st order wfk Fourrier Transform
-   call fourwf(1,rhoaug1(:,:,:,2),cwave1_up,dummy,wfraug1_up,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
-&   gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&   gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
-&   weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
-   call fourwf(1,rhoaug1(:,:,:,2),cwave1_down,dummy,wfraug1_down,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
-&   gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-&   gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
-&   weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
-! Accumulate 1st-order density (x component)
-   if (cplex==2) then
-     re0_up=zero;im0_up=zero;re1_up=zero;im1_up=zero;re0_down=zero;im0_down=zero
-     re1_down=zero;im1_down=zero
-     do i3=1,n3
-       do i2=1,n2
-         do i1=1,n1
-           re0_up=wfraug_up(1,i1,i2,i3)  ;     im0_up=wfraug_up(2,i1,i2,i3)
-           re1_up=wfraug1_up(1,i1,i2,i3) ;     im1_up=wfraug1_up(2,i1,i2,i3)
-           re0_down=wfraug_down(1,i1,i2,i3)  ; im0_down=wfraug_down(2,i1,i2,i3)
-           re1_down=wfraug1_down(1,i1,i2,i3) ; im1_down=wfraug1_down(2,i1,i2,i3)
-           rhoaug1(2*i1-1,i2,i3,1)=rhoaug1(2*i1-1,i2,i3,1)+weight*((re0_up*re1_up+im0_up*im1_up)+&
-&           (re0_down*re1_down+im0_down*im1_down)) ! trace
-           rhoaug1(2*i1  ,i2,i3,1)=zero ! imag part of rho at k
-           rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(2*i1-1,i2,i3,2)+weight*((re0_up*re1_down+im0_up*im1_down)+&
-&           re0_down*re1_up+im0_down*im1_up) ! m_x
-           rhoaug1(2*i1  ,i2,i3,2)=zero ! imag part of rho at k
-           rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(2*i1-1,i2,i3,3)+weight*((-re1_up*im0_down+im1_up*re0_down)&
-&           -re0_up*im1_down+im0_up*re1_down) ! m_y
-           rhoaug1(2*i1  ,i2,i3,3)=zero ! imag part of rho at k
-           rhoaug1(2*i1-1,i2,i3,4)=rhoaug1(2*i1-1,i2,i3,4)+weight*((re0_up*re1_up+im0_up*im1_up)-&
-&           (re0_down*re1_down+im0_down*im1_down)) ! m_z
-           rhoaug1(2*i1  ,i2,i3,4)=zero ! imag part of rho at k
-         end do
-       end do
-     end do
-   else !cplex
-     re0_up=zero;im0_up=zero;re1_up=zero;im1_up=zero;re0_down=zero;im0_down=zero
-     re1_down=zero;im1_down=zero
-     do i3=1,n3
-       do i2=1,n2
-         do i1=1,n1
-           re0_up=wfraug_up(1,i1,i2,i3)  ;     im0_up=wfraug_up(2,i1,i2,i3)
-           re1_up=wfraug1_up(1,i1,i2,i3) ;     im1_up=wfraug1_up(2,i1,i2,i3)
-           re0_down=wfraug_down(1,i1,i2,i3)  ; im0_down=wfraug_down(2,i1,i2,i3)
-           re1_down=wfraug1_down(1,i1,i2,i3) ; im1_down=wfraug1_down(2,i1,i2,i3)
-           rhoaug1(i1,i2,i3,1)=rhoaug1(i1,i2,i3,1)+weight*((re0_up*re1_up+im0_up*im1_up)+&
-&           (re0_down*re1_down+im0_down*im1_down)) ! n
-           rhoaug1(i1,i2,i3,2)=rhoaug1(i1,i2,i3,2)+weight*((re0_up*re1_down+im0_up*im1_down)+&
-&           re0_up*re1_down+im0_down*im1_up)     ! m_x
-           rhoaug1(i1,i2,i3,3)=rhoaug1(i1,i2,i3,3)+weight*((-re1_up*im0_down+im1_up*re0_down)+&
-&           (-re0_up*im1_down+im0_up*re1_down)) ! m_y
-           rhoaug1(i1,i2,i3,4)=rhoaug1(i1,i2,i3,4)+weight*((re0_up*re1_up+im0_up*im1_up)-&
-&           (re0_down*re1_down+im0_down*im1_down)) ! m_z
-         end do
-       end do
-     end do
-   end if !cplex
-   ABI_DEALLOCATE(wfraug_up)
-   ABI_DEALLOCATE(wfraug_down)
+
    ABI_DEALLOCATE(wfraug1_up)
    ABI_DEALLOCATE(wfraug1_down)
 
