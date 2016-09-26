@@ -78,7 +78,7 @@ _ WF disk file :      2.291 Mbytes ; DEN or POT disk file :      0.222 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -107,9 +107,6 @@ _ WF disk file :      2.291 Mbytes ; DEN or POT disk file :      0.222 Mbytes.
            getwfk1          0
            getwfk2         -1
            getwfk3         -2
-          inclvkb1          2
-          inclvkb2          0
-          inclvkb3          2
            istwfk        2    3    4    5
               ixc          11
            jdtset        1    2    3
@@ -550,27 +547,27 @@ extension_switch     1
         0.000   0.000   0.002  -0.883   0.398   0.000   0.000   0.881  -0.399
 
  For q-point:  0.000010 0.000020 0.000030
-  dielectric constant =   3.2615
-  dielectric constant without local fields =   3.3940
+  dielectric constant =   2.8854
+  dielectric constant without local fields =   2.9987
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     27.36  [%]
   Heads and wings of the symmetrical epsilon^-1(G,G') 
 
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
-      0.307  -0.013   0.013   0.008   0.002  -0.021   0.021  -0.002  -0.008
-     -0.000  -0.004  -0.004  -0.000   0.000  -0.000  -0.000   0.000  -0.000
+      0.347  -0.013   0.013   0.008   0.002  -0.021   0.021  -0.002  -0.008
+      0.000  -0.004  -0.004  -0.000   0.000  -0.000  -0.000   0.000  -0.000
        1       2       3       4       5       6       7       8       9
-      0.307  -0.013   0.013   0.008   0.002  -0.021   0.021  -0.002  -0.008
-     -0.000   0.004   0.004   0.000  -0.000   0.000   0.000  -0.000   0.000
+      0.347  -0.013   0.013   0.008   0.002  -0.021   0.021  -0.002  -0.008
+      0.000   0.004   0.004   0.000  -0.000   0.000   0.000  -0.000   0.000
 
 
    Upper and lower wings at the    2 th omega   0.0000  24.2021 [eV]
        1       2       3       4       5       6       7       8       9
-      0.688  -0.008   0.008   0.008   0.000  -0.017   0.017  -0.000  -0.008
+      0.720  -0.008   0.008   0.007   0.001  -0.016   0.016  -0.001  -0.007
      -0.000  -0.003  -0.003   0.000  -0.000   0.000   0.000  -0.000   0.000
        1       2       3       4       5       6       7       8       9
-      0.688  -0.008   0.008   0.008   0.000  -0.017   0.017  -0.000  -0.008
+      0.720  -0.008   0.008   0.007   0.001  -0.016   0.016  -0.001  -0.007
      -0.000   0.003   0.003  -0.000   0.000  -0.000  -0.000   0.000  -0.000
 
 
@@ -743,22 +740,22 @@ extension_switch     1
 
  k =    0.000   0.000   0.000
  Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-   24   0.607 -18.410 -23.311   3.526   0.845  -0.184 -19.571  -1.161  -0.554
-   25   5.398 -10.696  -6.175  -2.666   0.878  -0.139  -9.067   1.629   7.028
+   24   0.607 -18.410 -23.311   3.454   0.845  -0.183 -19.633  -1.223  -0.616
+   25   5.398 -10.696  -6.175  -2.593   0.879  -0.138  -9.002   1.694   7.092
 
  E^0_gap          4.791
- E^GW_gap         7.582
- DeltaE^GW_gap    2.790
+ E^GW_gap         7.708
+ DeltaE^GW_gap    2.917
 
 
  k =    0.500   0.000   0.000
  Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-   24   0.831 -19.026 -23.766   3.549   0.845  -0.183 -20.032  -1.006  -0.175
-   25   8.172 -12.239  -7.002  -2.706   0.871  -0.148 -10.034   2.205  10.377
+   24   0.831 -19.026 -23.766   3.477   0.846  -0.182 -20.094  -1.068  -0.236
+   25   8.172 -12.239  -7.002  -2.633   0.872  -0.147  -9.969   2.270  10.442
 
  E^0_gap          7.341
- E^GW_gap        10.552
- DeltaE^GW_gap    3.211
+ E^GW_gap        10.678
+ DeltaE^GW_gap    3.338
 
 
 == END DATASET(S) ==============================================================
@@ -818,9 +815,6 @@ extension_switch     1
            getwfk1          0
            getwfk2         -1
            getwfk3         -2
-          inclvkb1          2
-          inclvkb2          0
-          inclvkb3          2
            istwfk        2    3    4    5
               ixc          11
            jdtset        1    2    3

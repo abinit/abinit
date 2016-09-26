@@ -85,6 +85,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !scalars
  logical :: twvl,allow
  logical :: wvlbigdft=.false.
+ integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
  integer :: bantot,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,ilang,intimage,ierrgrp
  integer :: ipsp,isppol,isym,itypat,jdtset,jj,kk,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
  integer :: mband,mgga,miniatsph,minidyn,mod10,mpierr
@@ -105,11 +106,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
-
-!Print machine precision (other machine parameters are computed
-!in the dlamch function, see Lapack library)
-! write(message,'(a,a,1p,e24.16)' ) ch10,' chkinp: machine precision is ',epsilon(0.0_dp)
-! call wrtout(std_out,  message,'COLL')
 
 !Some initialisations
  cond_string(1:4)='#####'
@@ -1553,15 +1549,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        end do
      end if
    end do
-
-   if (maxval(nprojmax(0:3))>1) then
-     if (usepaw==0.and.optdriver==RUNL_SCREENING.and.dt%inclvkb/=0) then
-       write(message,'(3a)')&
-&       'inclvkb /= 0 not implemented for pseudos with more than one projector per l-channel ',ch10,&
-&       'Use inclvkb == 0 in the input file '
-       MSG_ERROR_NOSTOP(message, ierr)
-     end if
-   end if
 
 !  npspinor
 !  Must be equal to 1 or 2
@@ -3170,6 +3157,41 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        MSG_ERROR_NOSTOP(message,ierr)
      end if
    end if
+
+   ! Test on tolerances (similar tests are performed in scprqt, so keep the two versions in synch)
+   if (any(optdriver == [RUNL_GSTATE, RUNL_RESPFN])) then
+     ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0
+     if(abs(dt%tolwfr)>tiny(zero))ttolwfr=1
+     if(abs(dt%toldff)>tiny(zero))ttoldff=1
+     if(abs(dt%tolrff)>tiny(zero))ttolrff=1
+     if(abs(dt%toldfe)>tiny(zero))ttoldfe=1
+     if(abs(dt%tolvrs)>tiny(zero))ttolvrs=1
+
+     ! If non-scf calculations, tolwfr must be defined
+     if(ttolwfr /= 1 .and. (dt%iscf<0 .and. dt%iscf/=-3) )then
+       write(message,'(a,a,a,es14.6,a,a)')&
+&       'when iscf <0 and /= -3, tolwfr must be strictly',ch10,&
+&       'positive, while it is ',dt%tolwfr,ch10,&
+&       'Action: change tolwfr in your input file and resubmit the job.'
+       MSG_ERROR_NOSTOP(message, ierr)
+     end if
+     !  toldff only allowed when prtfor==1
+     !if((ttoldff == 1 .or. ttolrff == 1) .and. dt%prtfor==0 )then
+     !  MSG_ERROR_NOSTOP('toldff only allowed when prtfor=1!', ierr)
+     !end if
+
+     ! If SCF calculations, one and only one of these can differ from zero
+     ! FIXME: this test should be done on input, not during calculation
+     if(ttolwfr+ttoldff+ttoldfe+ttolvrs+ttolrff /= 1 .and. (dt%iscf>0 .or. dt%iscf==-3))then
+       write(message,'(6a,es14.6,a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,a,a)' )&
+&       'For the SCF case, one and only one of the input tolerance criteria ',ch10,&
+&       'tolwfr, toldff, tolrff, toldfe or tolvrs ','must differ from zero, while they are',ch10,&
+&       'tolwfr=',dt%tolwfr,', toldff=',dt%toldff,', tolrff=',dt%tolrff,', toldfe=',dt%toldfe,ch10,&
+&       'and tolvrs=',dt%tolvrs,' .',ch10,&
+&       'Action: change your input file and resubmit the job.'
+       MSG_ERROR_NOSTOP(message, ierr)
+     end if
+  end if
 
 
 !  If molecular dynamics or structural optimization is being done

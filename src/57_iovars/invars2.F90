@@ -748,6 +748,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'inclvkb',tread,'INT')
  if(tread==1) dtset%inclvkb=intarr(1)
+ if (dtset%inclvkb == 1) then
+   MSG_ERROR("inclvkb == 1 is not allowed anymore. Choose between 0 and 1.")
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nomegasf',tread,'INT')
  if(tread==1) dtset%nomegasf=intarr(1)
