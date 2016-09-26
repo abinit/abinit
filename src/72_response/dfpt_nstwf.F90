@@ -338,7 +338,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
              if( ipert1<=dtset%natom )then
                lambda=eig_k((isppol-1)*nband_k+iband)
                berryopt=1;optlocal=0;optnl=1;usevnl=0;opt_gvnl1=0;sij_opt=0
-               call getgh1c(berryopt,cwave0,dum_cwaveprj,gvnl1,dum_grad_berry,&
+               call getgh1c(berryopt,0,cwave0,dum_cwaveprj,gvnl1,dum_grad_berry,&
 &               dum_gs1,gs_hamkq,dum_gvnl1,idir1,ipert1,lambda,mpi_enreg,optlocal,&
 &               optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 

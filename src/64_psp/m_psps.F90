@@ -32,7 +32,7 @@ module m_psps
  use m_errors
  use m_xmpi
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -765,12 +765,9 @@ subroutine psps_print(psps,unit,prtvol,mode_paral)
  END SELECT
  call wrtout(unt,msg,mode)
 
- !FIXME this does not work, it seems it is always 0 , except for HGH
- !write(msg,'(a,i3)')' Max number of non-local projectors over l and type ',psps%mproj 
- !if (psps%mproj==0) then 
- ! write(msg,'(a)')TRIM(msg)//' (All local) '
- !end if
- !call wrtout(unt,msg,mode)
+ write(msg,'(a,i3)')'  Max number of non-local projectors over l and type ',psps%mproj 
+ call wrtout(unt,msg,mode)
+
  write(msg,'(a,i3,2a,i3,2a,i3)')&
 & '  Highest angular momentum +1 ....... ',psps%mpsang,ch10,&
 & '  Max number of (l,n)   components .. ',psps%lnmax, ch10,&
@@ -900,7 +897,7 @@ subroutine psps_ncwrite(psps, path)
 
 ! *************************************************************************
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
 
  ! Define dimensions

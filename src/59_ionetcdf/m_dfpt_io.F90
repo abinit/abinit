@@ -30,7 +30,7 @@ MODULE m_dfpt_io
  use m_profiling_abi
  use m_errors
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -100,7 +100,7 @@ subroutine elast_ncwrite(compl,compl_clamped,compl_stress,elast,elast_clamped,el
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: ncerr
 
 ! *************************************************************************

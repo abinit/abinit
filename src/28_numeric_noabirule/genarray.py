@@ -71,7 +71,7 @@ subroutine %(function)s(farray, varname, ncid)
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: dimval,ii,varid
  character(len=nctk_slen) :: dimname,shape_str   
 

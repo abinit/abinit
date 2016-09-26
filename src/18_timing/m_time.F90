@@ -492,7 +492,7 @@ end function abi_wtime
 !! PARENTS
 !!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,eph,exc_build_block
 !!      exc_build_ham,lapackprof,m_abilasi,m_bse_io,m_exc_itdiago,m_fft
-!!      m_fft_prof,m_ioarr,m_iowf,m_phgamma,m_shirley,m_wfd,m_wfk
+!!      m_fft_prof,m_fstab,m_ioarr,m_iowf,m_phgamma,m_shirley,m_wfd,m_wfk
 !!
 !! CHILDREN
 !!      xpapi_flops
@@ -517,7 +517,7 @@ subroutine cwtime(cpu,wall,gflops,start_or_stop)
  character(len=*),intent(in) :: start_or_stop
 
 !Local variables-------------------------------
-#ifndef HAVE_TIMER_PAPI
+#ifndef HAVE_PAPI
  logical,parameter :: use_papi=.FALSE.
 #else
  logical,parameter :: use_papi=.TRUE.

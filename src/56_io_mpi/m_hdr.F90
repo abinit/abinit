@@ -46,7 +46,7 @@ MODULE m_hdr
 #ifdef HAVE_MPI2
  use mpi
 #endif
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_nctk
@@ -845,9 +845,9 @@ end subroutine hdr_init
 !! PARENTS
 !!      bethe_salpeter,conducti_nc,conducti_paw,conducti_paw_core,cut3d
 !!      dfpt_looppert,elphon,emispec_paw,eph,finddistrproc,gstate,initaim
-!!      inpgkk,inwffil,ioprof,linear_optics_paw,m_bse_io,m_cut3d,m_dvdb,m_hdr
-!!      m_io_kss,m_io_screening,m_ioarr,m_wfd,m_wfk,macroave,mrggkk,mrgscr
-!!      nonlinear,optic,read_el_veloc,read_gkk,respfn,screening,sigma
+!!      inpgkk,inwffil,ioprof,linear_optics_paw,m_bse_io,m_cut3d,m_ddk,m_dvdb
+!!      m_hdr,m_io_kss,m_io_screening,m_ioarr,m_wfd,m_wfk,macroave,mrggkk
+!!      mrgscr,nonlinear,optic,read_el_veloc,read_gkk,respfn,screening,sigma
 !!      wfk_analyze
 !!
 !! CHILDREN
@@ -1359,7 +1359,7 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
  if (psps%usepaw==1 .and. usewvl ==0 ) then
    hdr%ngfft(:) =ngfftdg(1:3)
  else if (usewvl==1) then
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
    hdr%ngfft(:) = (/ wvl%Glr%d%n1i, wvl%Glr%d%n2i, wvl%Glr%d%n3i /)
 #else
  BIGDFT_NOTENABLED_ERROR()
@@ -1465,7 +1465,7 @@ subroutine hdr_read_from_fname(Hdr,fname,fform,comm)
 
    else
      ! Use Netcdf to open the file and read the header.
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_read(fh, my_fname, xmpi_comm_self))
      call hdr_ncread(Hdr,fh, fform)
      ABI_CHECK(fform /= 0, sjoin("Error while reading:", my_fname))
@@ -1543,7 +1543,7 @@ subroutine hdr_write_to_fname(Hdr,fname,fform)
 
  else
    ! Use Netcdf to open the file and write the header.
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    if (file_exists(fname)) then
      NCF_CHECK(nctk_open_modify(fh,fname, xmpi_comm_self))
    else
@@ -2025,7 +2025,7 @@ end subroutine hdr_io_int
 !!  Only writing 
 !!
 !! PARENTS
-!!      cut3d,initaim,ioprof,m_dvdb,m_hdr,m_io_kss,m_wfd,m_wfk,mrggkk
+!!      cut3d,initaim,ioprof,m_ddk,m_dvdb,m_hdr,m_io_kss,m_wfd,m_wfk,mrggkk
 !!      rchkgsheader
 !!
 !! CHILDREN
@@ -2516,8 +2516,8 @@ end subroutine hdr_update
 !! This routine is called only in the case of MPI version of the code.
 !!
 !! PARENTS
-!!      elphon,initaim,m_dvdb,m_hdr,m_io_kss,m_io_screening,m_ioarr,m_wfk,optic
-!!      read_gkk
+!!      elphon,initaim,m_ddk,m_dvdb,m_hdr,m_io_kss,m_io_screening,m_ioarr,m_wfk
+!!      optic,read_gkk
 !!
 !! CHILDREN
 !!
@@ -3000,7 +3000,7 @@ subroutine hdr_ncread(Hdr,ncid,fform)
  integer,intent(out) :: fform
  type(hdr_type),target,intent(out) :: hdr
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
  integer :: nresolution,itypat
@@ -3319,7 +3319,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
  logical,optional,intent(in) :: nc_define
  type(hdr_type),target,intent(in) :: hdr
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
  logical :: my_define
@@ -3806,7 +3806,7 @@ end subroutine hdr_get_occ3d
 !!   (I) the energy cutoff for the double (fine) grid     (tdg)
 !!
 !! PARENTS
-!!      inwffil,m_io_screening,m_ioarr,m_wfk
+!!      inwffil,m_ddk,m_io_screening,m_ioarr,m_wfk
 !!
 !! CHILDREN
 !!

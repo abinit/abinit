@@ -33,7 +33,7 @@ module defs_wvltypes
  use defs_basis
  use m_profiling_abi
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API, only : atoms_data, locreg_descriptors, local_zone_descriptors, &
       & DFT_PSP_projectors, GPU_pointers, rho_descriptors, &
       & DFT_local_fields, DFT_wavefunction, energy_terms, &
@@ -54,7 +54,7 @@ module defs_wvltypes
  !! SOURCE
  type wvl_projectors_type
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
     type(DFT_PSP_projectors) :: nlpsp
     !object containing the projectors as a sum of Gaussian functions
     type(gaussian_basis),dimension(:),allocatable :: G
@@ -75,7 +75,7 @@ module defs_wvltypes
  !!
  !! SOURCE
  type wvl_wf_type
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
     type(DFT_wavefunction) :: ks
 
     ! Some GPU internals.
@@ -110,7 +110,7 @@ type wvl_internal_type
   ! This is for the initial guess in PAW pseudos, this 
   ! is only relevant for ABINIT and PAW
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
   type(locreg_descriptors) :: Glr
   ! Contains the description of the global localisation region.
 
@@ -144,7 +144,7 @@ end type wvl_internal_type
 !!
 !! SOURCE
 type wvl_denspot_type
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
    ! Densities and potentials, and related metadata, needed for their creation/application
    type(DFT_local_fields) :: denspot
 #endif
@@ -163,7 +163,7 @@ end type wvl_denspot_type
 !!
 !! SOURCE
 type wvl_energy_terms
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
    !object for energies
    type(energy_terms) :: energs
 #else
@@ -172,7 +172,7 @@ type wvl_energy_terms
 end type wvl_energy_terms
 !!***
 
-#ifndef HAVE_DFT_BIGDFT
+#ifndef HAVE_BIGDFT
 !!****t* defs_wvltypes/coulomb_operator
 !! NAME
 !! coulomb_operator

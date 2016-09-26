@@ -2,28 +2,22 @@ ABINIT users scripts
 ====================
 
 A collection of scripts contributed by various users.
-
--------
-CONTENT
--------
-
 The scripts are organized as follow:
 
-o configure
+- configure
     To ease configuration/compilation of ABINIT.
 
-o post_processing
+- post_processing
     To plot, extract or modify output data.
 
-o pre_processing
+- pre_processing
     To check, visualize or manipulate input data.
 
-o deprecated
+- deprecated
     Scripts that are not documented or suspected to be broken.
     Will eventually be removed. If you think a deprecated script
     should not be kept, contact the developers via the forum.
 
------------------
 HOW TO CONTRIBUTE
 -----------------
 
