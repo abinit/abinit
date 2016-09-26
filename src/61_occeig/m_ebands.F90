@@ -4317,6 +4317,7 @@ end subroutine ebands_jdos
 
 subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -4541,6 +4542,7 @@ end subroutine ebands_prtbltztrp
 subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, fermie, fname_radix, kpt, &
 &       natom, nband, nelec, nkpt, nspinor, nsppol, nsym, &
 &       rprimd, symrel, tau_k)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
