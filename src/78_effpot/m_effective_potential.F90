@@ -636,6 +636,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
        if (abs(max3) < abs(max3_cell)) max3 = max3_cell
 
 !      If the cell is smaller, we redifine new cell to take into acount all atoms
+       call destroy_supercell(super_cell)
        call init_supercell(eff_pot%natom, 0,real((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),&
 &          eff_pot%rprimd,eff_pot%typat,eff_pot%xcart,super_cell)
      else
@@ -692,53 +693,53 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 &                    super_cell%xcart_supercell,xred)
    call metric(gmet,gprimd,-1,rmet,super_cell%rprimd_supercell,ucvol)
 
-!  Fill the atom position of the first cell (reference cell)
-   first_coordinate  = ((irpt_ref-1)*eff_pot%natom) + 1
-   second_coordinate = first_coordinate + eff_pot%natom-1
-   xred_tmp(:,1:eff_pot%natom) = xred(:,first_coordinate:second_coordinate)
+   if(iam_master)then
+!    Fill the atom position of the first cell (reference cell)
+     first_coordinate  = ((irpt_ref-1)*eff_pot%natom) + 1
+     second_coordinate = first_coordinate + eff_pot%natom-1
+     xred_tmp(:,1:eff_pot%natom) = xred(:,first_coordinate:second_coordinate)
 !  Fill fake zeff array for ewald9
-   zeff_tmp(:,:,1:eff_pot%natom) = eff_pot%zeff
-   zeff_tmp(:,:,eff_pot%natom+1:2*eff_pot%natom) = eff_pot%zeff
+     zeff_tmp(:,:,1:eff_pot%natom) = eff_pot%zeff
+     zeff_tmp(:,:,eff_pot%natom+1:2*eff_pot%natom) = eff_pot%zeff
 
-   irpt=0
-   do i1=min1,max1
-     do i2=min2,max2
-       do i3=min3,max3
-         irpt = irpt+1
-!        Fill the index of the cell
-         ifc_tmp%cell(irpt,1)=i1; ifc_tmp%cell(irpt,2)=i2; ifc_tmp%cell(irpt,3)=i3
+     irpt=0
+     do i1=min1,max1
+       do i2=min2,max2
+         do i3=min3,max3
+           irpt = irpt+1
+!          Fill the index of the cell
+           ifc_tmp%cell(irpt,1)=i1; ifc_tmp%cell(irpt,2)=i2; ifc_tmp%cell(irpt,3)=i3
 
-!        Compute new dipole-dipole interaction
-         dyew = zero
-         if (i1==0.and.i2==0.and.i3==0) then
-           call ewald9(acell,eff_pot%epsilon_inf,dyewq0,&
-&                      gmet,gprimd,eff_pot%natom,real((/0,0,0/),dp),rmet,&
-&                      super_cell%rprimd_supercell,sumg0,ucvol,xred_tmp(:,1:eff_pot%natom),&
-&                      eff_pot%zeff)
-           ifc_tmp%ewald_atmfrc(:,:,:,:,:,irpt) = dyewq0 + tol10
-         else
-           first_coordinate  = ((irpt-1)*eff_pot%natom) + 1
-           second_coordinate = first_coordinate + eff_pot%natom-1
-           xred_tmp(:,eff_pot%natom+1:2*eff_pot%natom)=&
-&              xred(:,first_coordinate:second_coordinate)
-           call ewald9(acell,eff_pot%epsilon_inf,dyew,gmet,gprimd,&
-&                    int(2*eff_pot%natom),real((/0,0,0/),dp),&
-&                    rmet,super_cell%rprimd_supercell,&
-&                    sumg0,ucvol,xred_tmp,zeff_tmp)
-           ifc_tmp%ewald_atmfrc(:,:,:,:,:,irpt) = &
-&            dyew(:,:,1:eff_pot%natom,:,eff_pot%natom+1:2*eff_pot%natom) + tol10
-         end if
+!          Compute new dipole-dipole interaction
+           dyew = zero
+           if (i1==0.and.i2==0.and.i3==0) then
+             call ewald9(acell,eff_pot%epsilon_inf,dyewq0,&
+&                        gmet,gprimd,eff_pot%natom,real((/0,0,0/),dp),rmet,&
+&                        super_cell%rprimd_supercell,sumg0,ucvol,xred_tmp(:,1:eff_pot%natom),&
+&                        eff_pot%zeff)
+             ifc_tmp%ewald_atmfrc(:,:,:,:,:,irpt) = dyewq0 + tol10
+           else
+             first_coordinate  = ((irpt-1)*eff_pot%natom) + 1
+             second_coordinate = first_coordinate + eff_pot%natom-1
+             xred_tmp(:,eff_pot%natom+1:2*eff_pot%natom)=&
+&                xred(:,first_coordinate:second_coordinate)
+             call ewald9(acell,eff_pot%epsilon_inf,dyew,gmet,gprimd,&
+&                      int(2*eff_pot%natom),real((/0,0,0/),dp),&
+&                      rmet,super_cell%rprimd_supercell,&
+&                      sumg0,ucvol,xred_tmp,zeff_tmp)
+             ifc_tmp%ewald_atmfrc(:,:,:,:,:,irpt) = &
+&              dyew(:,:,1:eff_pot%natom,:,eff_pot%natom+1:2*eff_pot%natom) + tol10
+           end if
+         end do
        end do
      end do
-   end do
-   ABI_DEALLOCATE(xred_tmp)
-   ABI_DEALLOCATE(xred)
-   ABI_DEALLOCATE(zeff_tmp)
-   ABI_DEALLOCATE(dyew)
-   ABI_DEALLOCATE(dyewq0)
+     ABI_DEALLOCATE(xred_tmp)
+     ABI_DEALLOCATE(xred)
+     ABI_DEALLOCATE(zeff_tmp)
+     ABI_DEALLOCATE(dyew)
+     ABI_DEALLOCATE(dyewq0)
 
 !  Fill the short range part (calculated previously) only master
-   if(iam_master)then
      do irpt=1,ifc_tmp%nrpt
        do irpt2=1,eff_pot%ifcs%nrpt
          if(eff_pot%ifcs%cell(irpt2,1)==ifc_tmp%cell(irpt,1).and.&
@@ -772,6 +773,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    call alloc_copy(ifc_tmp%short_atmfrc,eff_pot%ifcs%short_atmfrc)
    call alloc_copy(ifc_tmp%ewald_atmfrc,eff_pot%ifcs%ewald_atmfrc)
    call alloc_copy(ifc_tmp%cell        ,eff_pot%ifcs%cell)
+!  Free temporary ifc
    call ifc_free(ifc_tmp)
 
  end if
