@@ -132,15 +132,6 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
 
 !Treat first LDA
  if(nkxc/=23)then
-!  PAW: eventually substract compensation density
-!   if (option/=0) then
-!     if (usexcnhat==0.and.nhat1dim==1) then
-!       ABI_ALLOCATE(rhor1_,(cplex*nfft,nspden))
-!       rhor1_(:,:)=rhor1(:,:)-nhat1(:,:)
-!     else
-!       rhor1_ => rhor1
-!     end if
-!   else
 
 !  m_norm_min=EPSILON(0.0_dp)**2
 

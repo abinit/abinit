@@ -319,9 +319,8 @@ module defs_datatypes
    !  If mpspso is 2, lmnmax takes into account the spin-orbit projectors,
    !  so, it is equal to the max of lnprojso, see pspheader_type
 
-  integer :: mproj    ! TO BE SUPPRESSED
-   ! Maximum number of non-local projectors over all angular momenta
-   !  and type of psps
+  integer :: mproj  
+   ! Maximum number of non-local projectors over all angular momenta and type of psps
    ! 0 only if all psps are local
 
   integer :: mpsang
@@ -406,6 +405,7 @@ module defs_datatypes
    ! For each type of psp,
    ! array giving l,m,n,lm,ln,spin for i=ln  (if useylm=0)
    !                                or i=lmn (if useylm=1)
+   ! NB: spin is used for NC pseudos with SOC term: 1 if scalar term (spin diagonal), 2 if SOC term.
 
   integer, allocatable :: pspdat(:) 
    ! pspdat(ntypat)

@@ -174,11 +174,8 @@
   The name you entered is : 0.17-Cl.8.density.AE
 
 
- hirsh : accumulating density for atom    1
-
- hirsh : accumulating density for atom    2
-
-     Atom       Zion       Hirshfeld Charge       Net charge 
+     Hirshfeld analysis
+     Atom       Zion       Electron  Charge       Net charge 
 
         1     1.000000E+00    -8.922569E-01     1.077431E-01
         2     7.000000E+00    -7.107726E+00    -1.077259E-01

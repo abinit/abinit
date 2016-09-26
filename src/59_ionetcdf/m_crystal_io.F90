@@ -34,7 +34,7 @@ MODULE m_crystal_io
  use m_atomdata
  use m_nctk
  use iso_c_binding
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -76,7 +76,7 @@ CONTAINS
 !!  Add information on the use of time-reversal in the Abinit header.
 !!
 !! PARENTS
-!!      eph,gstate,m_dvdb,m_ioarr,m_iowf,m_wfd,m_wfk,mlwfovlp_qp,mrgscr
+!!      eph,gstate,m_ddk,m_dvdb,m_ioarr,m_iowf,m_wfd,m_wfk,mlwfovlp_qp,mrgscr
 !!      setup_bse,setup_screening,setup_sigma,wfk_analyze
 !!
 !! CHILDREN
@@ -169,7 +169,7 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
  integer,intent(inout) :: ncid
  type(crystal_t),intent(in) :: cryst
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
  integer :: itypat
@@ -317,7 +317,7 @@ integer function crystal_ncwrite_path(crystal, path) result(ncerr)
  character(len=*),intent(in) :: path
  type(crystal_t),intent(in) :: crystal
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
  integer :: ncid

@@ -32,7 +32,7 @@ MODULE m_energies
  use m_profiling_abi
  use m_errors
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -582,7 +582,7 @@ subroutine energies_ncwrite(enes,ncid)
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: ncerr
 
 ! *************************************************************************

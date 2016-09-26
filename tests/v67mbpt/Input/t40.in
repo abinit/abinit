@@ -18,8 +18,8 @@ optdriver2  3
 getwfk2    -1
 ecuteps2    1.1
 nband2      50
-inclvkb2    0
-#inclvkb2   2  # TODO
+#inclvkb2    0
+inclvkb2   2  # TODO
 
 # DATASET 3: sigma calculation
 optdriver3 4

@@ -37,7 +37,7 @@ MODULE m_io_kss
  use m_errors
  use m_abi_etsf
  use m_nctk
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  use etsf_io
 #endif
  use m_hdr
@@ -53,7 +53,6 @@ MODULE m_io_kss
  use m_gsphere,          only : table_gbig2kg, merge_and_sort_kg
  use m_wfd,              only : wfd_t, wfd_ihave_ug, wfd_mybands, wfd_update_bkstab, &
 &                               WFD_STORED, WFD_ALLOCATED, wfd_set_mpicomm
- use m_commutator_vkbr,  only : calc_vkb
 
  implicit none
 
@@ -134,7 +133,7 @@ subroutine testkss(filkss,iomode,nsym_out,nbnds_kss,ng_kss,mpsang,gvec_p,energie
  real(dp),pointer :: energies_p(:,:,:)
 
 !Local variables-------------------------------
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  type(ETSF_io_low_error) :: error
  type(ETSF_electrons),target :: Electrons_folder
  logical :: ok
@@ -157,7 +156,7 @@ subroutine testkss(filkss,iomode,nsym_out,nbnds_kss,ng_kss,mpsang,gvec_p,energie
    write(msg,'(3a)')&
 &   ' when iomode==3, support for the ETSF I/O library ',ch10,&
 &   ' must be compiled. Use --enable-etsf-io when configuring '
-#if !defined HAVE_TRIO_ETSF_IO
+#if !defined HAVE_ETSF_IO
    MSG_ERROR(msg)
 #endif
  end if
@@ -227,7 +226,7 @@ subroutine testkss(filkss,iomode,nsym_out,nbnds_kss,ng_kss,mpsang,gvec_p,energie
        end do !ikpt
      end do !isppol
 
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
    else if (iomode==IO_MODE_ETSF) then
      ABI_ALLOCATE(eigen,(nbnds_kss))
      eigen(:)=zero
@@ -256,7 +255,7 @@ subroutine testkss(filkss,iomode,nsym_out,nbnds_kss,ng_kss,mpsang,gvec_p,energie
 
    if (iomode==IO_MODE_FORTRAN) close(kss_unt)
    if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
      NCF_CHECK(nf90_close(kss_unt))
 #endif
    end if
@@ -367,7 +366,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
  character(len=500) :: msg
  type(hdr_type) :: my_Hdr
  type(dataset_type) :: Dtset_cpy
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  logical :: ok
  type(etsf_gwdata) :: GW_data
  type(wvl_wf_type) :: Dummy_wfs
@@ -482,7 +481,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
      ABI_DEALLOCATE(vkbsign)
    end if
 
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  CASE (IO_MODE_ETSF)
 !  We currently use the dataset symmetries, as defined in the Hdr structure instead of the symmetries recomputed in outkss.
    call abi_etsf_init(Dtset_cpy, filekss, 4, .false., my_Hdr%lmn_size, Psps, Dummy_wfs)
@@ -597,7 +596,7 @@ subroutine read_kss_header(kss_unt,filkss,iomode,prtvol,nsym_out,nbnds_kss,ng_ks
  character(len=80) :: title(2)
  character(len=500) :: msg
  logical :: ltest
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  logical :: ok
  type(etsf_io_low_error) :: error
  type(ETSF_dims) :: Dims
@@ -610,7 +609,7 @@ subroutine read_kss_header(kss_unt,filkss,iomode,prtvol,nsym_out,nbnds_kss,ng_ks
 
  DBG_ENTER("COLL")
 
-#if !defined HAVE_TRIO_ETSF_IO
+#if !defined HAVE_ETSF_IO
  if (iomode==IO_MODE_ETSF) then
    write(msg,'(3a)')&
 &   ' When iomode==3, support for the ETSF I/O library ',ch10,&
@@ -637,7 +636,7 @@ subroutine read_kss_header(kss_unt,filkss,iomode,prtvol,nsym_out,nbnds_kss,ng_ks
 
  CASE (IO_MODE_ETSF) ! * NETCDF-ETSF file format
 
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
    write(msg,'(2a)')' read_kss_header : reading NETCDF-ETSF Kohn-Sham structure file ',TRIM(filkss)
    call wrtout(std_out,msg,'COLL')
 
@@ -717,7 +716,7 @@ subroutine read_kss_header(kss_unt,filkss,iomode,prtvol,nsym_out,nbnds_kss,ng_ks
    if (Hdr%usepaw==0) read(kss_unt)   !((vkbsignd(il,is),il=1,mpsang),is=1,Hdr%ntypat)
 
  CASE (IO_MODE_ETSF) ! TODO spin-orbit not treated, number of projectors not treated
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
    call etsf_io_dims_get(kss_unt,Dims,ok,error)
    nsym_kss =Dims%number_of_symmetry_operations
    nbnds_kss=Dims%max_number_of_states
@@ -834,7 +833,7 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,trsl,rprimd,Psps,iomode)
 !array
  real(dp),allocatable :: vkb(:,:,:),vkbd(:,:,:)
  real(dp),allocatable :: dum_vkbsign(:,:)
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  logical :: ok
  real(dp),allocatable,target :: vkb_tgt(:,:,:), vkbd_tgt(:,:,:)
  type(etsf_io_low_error) :: error
@@ -850,7 +849,7 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,trsl,rprimd,Psps,iomode)
  ABI_ALLOCATE(vkbd,(kss_npw,ntypat,mpsang))
  ABI_ALLOCATE(dum_vkbsign,(ntypat,mpsang))
 
- call calc_vkb(Psps,kpoint,kss_npw,gbig,rprimd,dum_vkbsign,vkb,vkbd)
+ call kss_calc_vkb(Psps,kpoint,kss_npw,gbig,rprimd,dum_vkbsign,vkb,vkbd)
  ABI_DEALLOCATE(dum_vkbsign)
 
  SELECT CASE (iomode)
@@ -865,7 +864,7 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,trsl,rprimd,Psps,iomode)
     end do
   end do
 
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  CASE (IO_MODE_ETSF)
    ABI_ALLOCATE(vkb_tgt ,(kss_npw,mpsang,ntypat))
    ABI_ALLOCATE(vkbd_tgt,(kss_npw,mpsang,ntypat))
@@ -980,7 +979,7 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,npw_k,kg_k,
  integer :: ib,ibsp,ig,ispinor,iatom,ii,master,my_rank,ierr
  type(MPI_type) :: MPI_enreg_seq
  character(len=500) :: msg
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  type(wffile_type) :: Wff
 #endif
 !arrays
@@ -1026,7 +1025,7 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,npw_k,kg_k,
      end if
    end do
 
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  CASE (IO_MODE_ETSF) ! When ETSF, use the rwwf routine (should always be done like that)
    if (Psps%usepaw==1) then
      MSG_WARNING("PAW output with ETSF-IO: cprj won't be written")
@@ -1559,7 +1558,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
  use m_hamiltonian
  use m_nctk
  use m_wfk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_electronpositron
@@ -1654,7 +1653,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
  end if
 
  path = strcat(dtfil%filnam_ds(4), "_HGG.nc")
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  if (istep == 1) then
    ! Open netcdf file, define dims and variables.
    NCF_CHECK(nctk_open_create(ncid, path, comm))
@@ -1919,7 +1918,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
          end do
        end if
 
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
        ncerr = nf90_put_var(ncid, eigdiago_varid, eig_ene, start=[1,ikpt,isppol,istep], count=[nband_k,1,1,1])
        NCF_CHECK(ncerr)
 #endif
@@ -1928,7 +1927,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
        ABI_FREE(eig_vec)
      end if
 
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
      !write(std_out,*)"Writing H_GG slice for ikpt",ikpt
      if (isppol == 1) then
        ncerr = nf90_put_var(ncid, kg_varid, kg_k, start=[1,1,ikpt], count=[3,npw_k,1])
@@ -1970,13 +1969,194 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
 
  call destroy_hamiltonian(gs_hamk)
 
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  NCF_CHECK(nf90_close(ncid))
 #endif
 
  DBG_EXIT("COLL")
 
 end subroutine gshgg_mkncwrite
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_io_kss/kss_calc_vkb
+!! NAME
+!!  kss_calc_vkb
+!!
+!! FUNCTION
+!!  This routine calculates the Kleynman-Bylander form factors and its derivatives 
+!!  needed for the evaluation of the matrix elements of the dipole operator <phi1|r|phi2>.
+!!
+!! INPUTS
+!!  npw_k=Number of plane waves for this k-point.
+!!  Psps<pseudopotential_type>=Structured datatype gathering information on the pseudopotentials.
+!!  kg_k(3,npw_k)=Reduced coordinates of the G-vectors.
+!!  kpoint(3)=The k-point in reduced coordinates.
+!!  rprimd(3,3)=dimensional primitive translations for real space (bohr)
+!!
+!! OUTPUT
+!!  vkb (npw_k,Psps%ntypat,Psps%mpsang)=KB form factors.
+!!  vkbd(npw_k,Psps%ntypat,Psps%mpsang)=KB form factor derivatives.
+!!  vkbsign(Psps%mpsang,Psps%ntypat)   =KS dyadic sign.
+!!
+!! NOTES
+!!  This piece of code has been extracted from outkss.F90. The implementation is consistent
+!!  with the KSS file formata (Fortran version) but it presents two design flaws.
+!!
+!!   1) Pseudo with more that one projector per l-channel are not supported.
+!!   2) Ordering of dimensions in vkb and vkbd is not optimal. We are not programming C!!!
+!!
+!! TODO
+!!  *) Spinorial case is not implemented.
+!!
+!! PARENTS
+!!      m_commutator_vkbr,m_io_kss
+!!
+!! CHILDREN
+!!      wrtout
+!!
+!! SOURCE
+
+subroutine kss_calc_vkb(Psps,kpoint,npw_k,kg_k,rprimd,vkbsign,vkb,vkbd)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'kss_calc_vkb'
+ use interfaces_41_geometry
+ use interfaces_56_recipspace
+ use interfaces_66_nonlocal
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: npw_k
+ type(Pseudopotential_type),intent(in) :: Psps
+!arrays
+ integer,intent(in) :: kg_k(3,npw_k)
+ real(dp),intent(in) :: kpoint(3),rprimd(3,3)
+ real(dp),intent(out) :: vkb (npw_k,Psps%ntypat,Psps%mpsang)
+ real(dp),intent(out) :: vkbd(npw_k,Psps%ntypat,Psps%mpsang)
+ real(dp),intent(out) :: vkbsign(Psps%mpsang,Psps%ntypat)
+
+!Local variables ------------------------------
+!scalars
+ integer :: dimffnl,ider,idir,itypat,nkpg,il0,in
+ integer :: il,ilmn,ig,is
+ real(dp) :: ucvol,effmass,ecutsm,ecut
+!arrays
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+ real(dp),allocatable :: ffnl(:,:,:,:),kpg_dum(:,:),modkplusg(:)
+ real(dp),allocatable :: ylm(:,:),ylm_gr(:,:,:),ylm_k(:,:)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+ ABI_CHECK(Psps%usepaw==0,"You should not be here!")
+ ABI_CHECK(Psps%useylm==0,"useylm/=0 not considered!")
+
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+ !
+ ! === Save KB dyadic sign (integer-valued) ===
+ vkbsign=zero
+ do itypat=1,Psps%ntypat
+   il0=0 
+   do ilmn=1,Psps%lmnmax
+     il=1+Psps%indlmn(1,ilmn,itypat)
+     in=Psps%indlmn(3,ilmn,itypat)
+     if (il/=il0 .and. in==1) then
+       il0=il
+       vkbsign(il,itypat)=DSIGN(one,Psps%ekb(ilmn,itypat))
+     end if
+   end do
+ end do
+
+ ! === Allocate KB form factor and derivative wrt k+G ===
+ ! * Here we do not use correct ordering for dimensions
+ 
+ ider=1; dimffnl=2 ! To retrieve the first derivative.
+ idir=0; nkpg=0
+ !
+ ! Quantities used only if useylm==1
+ ABI_MALLOC(ylm,(npw_k,Psps%mpsang**2*Psps%useylm))
+ ABI_MALLOC(ylm_gr,(npw_k,3+6*(ider/2),Psps%mpsang**2*Psps%useylm))
+ ABI_MALLOC(ylm_k,(npw_k,Psps%mpsang**2*Psps%useylm))
+ ABI_MALLOC(kpg_dum,(npw_k,nkpg))
+
+ ABI_MALLOC(ffnl,(npw_k,dimffnl,Psps%lmnmax,Psps%ntypat))
+
+ call mkffnl(Psps%dimekb,dimffnl,Psps%ekb,ffnl,Psps%ffspl,gmet,gprimd,ider,idir,Psps%indlmn,&
+   kg_k,kpg_dum,kpoint,Psps%lmnmax,Psps%lnmax,Psps%mpsang,Psps%mqgrid_ff,nkpg,npw_k,& 
+   Psps%ntypat,Psps%pspso,Psps%qgrid_ff,rmet,Psps%usepaw,Psps%useylm,ylm_k,ylm_gr)
+
+ ABI_FREE(kpg_dum)
+ ABI_FREE(ylm)
+ ABI_FREE(ylm_gr)
+ ABI_FREE(ylm_k)
+
+ ABI_MALLOC(modkplusg,(npw_k))
+
+ effmass=one; ecutsm=zero; ecut=HUGE(one)
+! call mkkin(ecut,ecutsm,effmass,gmet,kg_k,modkplusg,kpoint,npw_k)
+ call mkkin(ecut,ecutsm,effmass,gmet,kg_k,modkplusg,kpoint,npw_k,0,0)
+ modkplusg(:)=SQRT(half/pi**2*modkplusg(:))
+ modkplusg(:)=MAX(modkplusg(:),tol10)
+
+ !do ig=1,npw_k
+ ! kpg(:)= kpoint(:)+kg_k(:,ig)
+ ! modkplusg(ig) = normv(kpg,gmet,"G")
+ !end do
+
+ ! Calculate matrix elements.
+ vkb=zero; vkbd=zero
+
+ do is=1,Psps%ntypat
+   il0=0
+   do ilmn=1,Psps%lmnmax
+     il=1+Psps%indlmn(1,ilmn,is)
+     in=Psps%indlmn(3,ilmn,is)
+     if ((il/=il0).and.(in==1)) then
+       il0=il
+       if (ABS(Psps%ekb(ilmn,is))>1.0d-10) then
+         if (il==1) then
+           vkb (1:npw_k,is,il) = ffnl(:,1,ilmn,is)
+           vkbd(1:npw_k,is,il) = ffnl(:,2,ilmn,is)*modkplusg(:)/two_pi
+         else if (il==2) then
+           vkb(1:npw_k,is,il)  = ffnl(:,1,ilmn,is)*modkplusg(:)
+           do ig=1,npw_k
+             vkbd(ig,is,il) = ((ffnl(ig,2,ilmn,is)*modkplusg(ig)*modkplusg(ig))+&
+              ffnl(ig,1,ilmn,is) )/two_pi
+           end do
+         else if (il==3) then
+           vkb (1:npw_k,is,il) =  ffnl(:,1,ilmn,is)*modkplusg(:)**2
+           vkbd(1:npw_k,is,il) = (ffnl(:,2,ilmn,is)*modkplusg(:)**3+&
+            2*ffnl(:,1,ilmn,is)*modkplusg(:) )/two_pi
+         else if (il==4) then
+           vkb (1:npw_k,is,il) =  ffnl(:,1,ilmn,is)*modkplusg(:)**3
+           vkbd(1:npw_k,is,il) = (ffnl(:,2,ilmn,is)*modkplusg(:)**4+&
+            3*ffnl(:,1,ilmn,is)*modkplusg(:)**2 )/two_pi
+         end if
+         vkb (:,is,il) = SQRT(4*pi/ucvol*(2*il-1)*ABS(Psps%ekb(ilmn,is)))*vkb (:,is,il)
+         vkbd(:,is,il) = SQRT(4*pi/ucvol*(2*il-1)*ABS(Psps%ekb(ilmn,is)))*vkbd(:,is,il)
+       else
+         vkb (:,is,il)=zero
+         vkbd(:,is,il)=zero
+       end if
+     end if
+   end do
+ end do
+
+ ABI_FREE(ffnl)
+ ABI_FREE(modkplusg)
+
+ DBG_EXIT("COLL")
+
+end subroutine kss_calc_vkb
 !!***
 
 END MODULE m_io_kss

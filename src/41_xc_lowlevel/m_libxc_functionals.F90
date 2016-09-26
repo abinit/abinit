@@ -336,13 +336,13 @@ contains
  implicit none
 
 !Local variables-------------------------------
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  integer(C_INT) :: i1,i2,i3,i4,i5,i6,i7,i8
 #endif
 
 ! *************************************************************************
 
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
   call xc_get_singleprecision_constant(i1)
   XC_SINGLE_PRECISION     = int(i1)
   call xc_get_family_constants(i1,i2,i3,i4,i5,i6,i7,i8)
@@ -410,7 +410,7 @@ contains
 
  libxc_functionals_check=.true. ; msg=""
 
-#if defined HAVE_DFT_LIBXC
+#if defined HAVE_LIBXC
 #if defined FC_G95
  libxc_functionals_check=.false.
  msg='LibXC cannot be used with G95 Fortran compiler!'
@@ -487,7 +487,7 @@ contains
  integer :: ii,nspden_eff
  character(len=500) :: msg
  type(libxc_functional_type),pointer :: xc_func
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  integer :: flags
  integer(C_INT) :: func_id_c,nspin_c,success_c
  real(C_DOUBLE) :: alpha_c,beta_c,omega_c
@@ -549,7 +549,7 @@ contains
      MSG_ERROR(msg)
    end if
 
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
 
 !  Allocate functional
    func_ptr_c=xc_func_type_malloc()
@@ -668,7 +668,7 @@ end subroutine libxc_functionals_init
    xc_func%hyb_mixing_sr=zero
    xc_func%hyb_range=zero
    if (associated(xc_func%conf)) then
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
      call xc_func_end(xc_func%conf)
      call xc_func_type_free(c_loc(xc_func%conf))
 #endif
@@ -716,7 +716,7 @@ end subroutine libxc_functionals_init
  type(libxc_functional_type),intent(in),optional,target :: xc_functionals(2)
 !Local variables-------------------------------
  type(libxc_functional_type),pointer :: xc_funcs(:)
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  character(len=100) :: xcname
  character(kind=C_CHAR,len=1),pointer :: strg_c
 #endif
@@ -731,7 +731,7 @@ end subroutine libxc_functionals_init
    xc_funcs => xc_global
  end if
 
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  if (xc_funcs(1)%id == 0) then
    if (xc_funcs(2)%id /= 0) then
      call c_f_pointer(xc_functional_get_name(xc_funcs(2)%id),strg_c)
@@ -788,13 +788,13 @@ end function libxc_functionals_fullname
  integer :: libxc_functionals_family_from_id
  integer,intent(in) :: xcid
 !Local variables-------------------------------
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  integer(C_INT) :: xcid_c
 #endif
 
 ! *************************************************************************
 
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  xcid_c=int(xcid,kind=C_INT)
  libxc_functionals_family_from_id=int(xc_family_from_id(xcid_c,C_NULL_PTR,C_NULL_PTR))
 #else
@@ -839,7 +839,7 @@ end function libxc_functionals_family_from_id
  integer :: libxc_functionals_getid
  character(len=*),intent(in) :: xcname
 !Local variables-------------------------------
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  character(len=256) :: str
  character(kind=C_CHAR,len=1),target :: name_c(len_trim(xcname)+1)
  character(kind=C_CHAR,len=1),target :: name_c_xc(len_trim(xcname)-2)
@@ -848,7 +848,7 @@ end function libxc_functionals_family_from_id
 
 ! *************************************************************************
 
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  str=trim(xcname)
  if (xcname(1:3)=="XC_".or.xcname(1:3)=="xc_") then
    str=xcname(4:);name_c_xc=xc_char_to_c(str)
@@ -1235,7 +1235,7 @@ end function libxc_functionals_nspin
  integer  :: ii,ipts
  logical :: is_gga,is_mgga
  real(dp) :: xc_tb09_c_
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  type(C_PTR) :: rho_c,sigma_c,lrho_c,tau_c
 #endif
 !arrays
@@ -1243,7 +1243,7 @@ end function libxc_functionals_nspin
  real(dp),target :: v2rho2(3),v2rhosigma(6),v2sigma2(6),v3rho3(4)
  real(dp),target :: lrhotmp(nspden),tautmp(nspden),vlrho(nspden),vtau(nspden)
  type(libxc_functional_type),pointer :: xc_funcs(:)
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  type(C_PTR) :: exc_c(2),vxc_c(2),vsigma_c(2)
  type(C_PTR) :: v2rho2_c(2),v2rhosigma_c(2),v2sigma2_c(2)
  type(C_PTR) :: v3rho3_c(2),vlrho_c(2),vtau_c(2)
@@ -1272,7 +1272,7 @@ end function libxc_functionals_nspin
  if (is_mgga.and.present(vxctau)) vxctau=zero
 
 !Determine which XC outputs can be computed
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  do ii = 1,2
    if (xc_funcs(ii)%has_exc) then
      exc_c(ii)=c_loc(exctmp)
@@ -1308,7 +1308,7 @@ end function libxc_functionals_nspin
 #endif
 
 !Initialize temporary arrays
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  rhotmp=zero ; rho_c=c_loc(rhotmp)
  if (is_gga.or.is_mgga) then
    sigma=zero ; sigma_c=c_loc(sigma)
@@ -1364,7 +1364,7 @@ end function libxc_functionals_nspin
      if (xc_funcs(ii)%id==0) cycle
 
 !    Get the potential (and possibly the energy)
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
      exctmp=zero ; vxctmp=zero
 !    ===== LDA =====
      if (xc_funcs(ii)%family==XC_FAMILY_LDA) then
@@ -1633,7 +1633,7 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
 !scalars
  integer :: family,ii
  character(len=100) :: c_name,x_name,msg
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  character(len=100) :: xc_name
  character(kind=C_CHAR,len=1),pointer :: strg_c
 #endif
@@ -1668,7 +1668,7 @@ function libxc_functionals_gga_from_hybrid(gga_id,hybrid_id,xc_functionals)
      MSG_ERROR(msg)
    end if
 
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
 
    call c_f_pointer(xc_functional_get_name(trial_id(ii)),strg_c)
    call xc_char_to_f(strg_c,xc_name)
@@ -1808,7 +1808,7 @@ end function libxc_functionals_gga_from_hybrid
 !  Set c in XC data structure
    do ii=1,2
      if (xc_funcs(ii)%id==libxc_functionals_getid('XC_MGGA_X_TB09')) then
-#if defined HAVE_DFT_LIBXC && defined HAVE_FC_ISO_C_BINDING
+#if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
        call xc_mgga_x_tb09_set_params(xc_funcs(ii)%conf,cc)
 #endif
      end if

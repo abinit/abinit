@@ -29,7 +29,7 @@
 !!  cwaveprj0(natom,nspinor*usecprj)=GS wave function at k projected with nl projectors
 !!  eig0nk=0-order eigenvalue for the present wavefunction at k
 !!  eig0_kq(nband)=GS eigenvalues at k+Q (hartree)
-!!  grad_berry(2,mpw1,dtefield%nband_occ) = the gradient of the Berry phase term
+!!  grad_berry(2,mpw1,dtefield%mband_occ) = the gradient of the Berry phase term
 !!  gscq(2,mgscq)=<g|S|Cnk+q> coefficients for ALL bands (PAW) at k+Q
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+Q
 !!  icgq=shift to be applied on the location of data in the array cgq
@@ -75,8 +75,8 @@
 !!  gvnl1(2,npw1*nspinor)=  part of <G|K1+Vnl1|C0 band,k> not depending on VHxc1           (NCPP)
 !!                       or part of <G|K1+Vnl1-eig0k.S1|C0 band,k> not depending on VHxc1 (PAW)
 !!  resid=wf residual for current band
-!!  gh1c_n= <G|H1|C0 band,k> (NCPP) or <G|H1-eig0k.S1|C0 band,k> (PAW). This vector is not projected
-!!     on the subspace orhtogonal to the cg.
+!!  gh1c_n= <G|H1|C0 band,k> (NCPP) or <G|H1-eig0k.S1|C0 band,k> (PAW).
+!!          This vector is not projected on the subspace orthogonal to the WF.
 !!  === if gs_hamkq%usepaw==1 ===
 !!  gsc(2,npw1*nspinor*usepaw)=<G|S0|C1 band,k>
 !!
@@ -325,7 +325,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      sij_opt=0
    end if
    usevnl=1; optlocal=1; optnl=2
-   call getgh1c(berryopt,cwave0,cwaveprj0,gh1c,gberry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,&
+   call getgh1c(berryopt,0,cwave0,cwaveprj0,gh1c,gberry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,&
 &   mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 
    if (gen_eigenpb) then
@@ -336,11 +336,13 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
          gh1c (1:2,ipw)=gh1c (1:2,ipw)-eshift*gs1c(1:2,ipw)
        end do
 !$OMP END DO NOWAIT
+       if (opt_gvnl1/=1) then
 !$OMP DO
-       do ipw=1,npw1*nspinor
-         gvnl1(1:2,ipw)=gvnl1(1:2,ipw)-eshift*gs1c(1:2,ipw)
-       end do
+         do ipw=1,npw1*nspinor
+           gvnl1(1:2,ipw)=gvnl1(1:2,ipw)-eshift*gs1c(1:2,ipw)
+         end do
 !$OMP END DO NOWAIT
+       end if
 !$OMP END PARALLEL
      end if
 
@@ -466,9 +468,11 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
    ghc   =zero
    gvnlc =zero
    if (gen_eigenpb) gsc=zero
+   if (usedcwavef==2) dcwavef=zero
    if (usepaw==1) then
      call pawcprj_set_zero(cwaveprj)
    end if
+   if (usedcwavef==2) dcwavef=zero
 !  A small negative residual will be associated with these
    resid=-0.1_dp
 !  Number of one-way 3D ffts skipped
@@ -521,7 +525,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      if (berryopt== 4.or.berryopt== 6.or.berryopt== 7.or.&
 &     berryopt==14.or.berryopt==16.or.berryopt==17) then
        if (ipert==natom+2) then
-         gvnl1=zero
+         if (opt_gvnl1/=1) gvnl1=zero
 !$OMP PARALLEL DO
          do ipw=1,npw1*nspinor
            gresid(1:2,ipw)=-ghc(1:2,ipw)-gh1c(1:2,ipw)
@@ -880,7 +884,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
        if (ipert/=natom+10.and.ipert/=natom+11) then
          if (gen_eigenpb) then
-           call getgh1c(berryopt,cwave0,cwaveprj0,work1,gberry,work2,gs_hamkq,dummy,idir,ipert,eshift,&
+           call getgh1c(berryopt,0,cwave0,cwaveprj0,work1,gberry,work2,gs_hamkq,dummy,idir,ipert,eshift,&
 &           mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
            work(:,:)=cgq(:,1+npw1*nspinor*(iband-1)+icgq:npw1*nspinor*iband+icgq)
            call dotprod_g(dotr,doti,istwf_k,npw1*nspinor,2,work,work2,me_g0,mpi_enreg%comm_spinorfft)
@@ -957,7 +961,6 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !    - Apply H^(0)-E.S^(0)
      sij_opt=0;if (gen_eigenpb) sij_opt=1
      cpopt=-1
-     if (.not.allocated(conjgrprj)) ABI_DATATYPE_ALLOCATE(conjgrprj,(natom,0))
      ABI_ALLOCATE(work,(2,npw1*nspinor))
      ABI_ALLOCATE(work1,(2,npw1*nspinor*((sij_opt+1)/2)))
      ABI_ALLOCATE(work2,(2,npw1*nspinor))
@@ -971,9 +974,6 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      ABI_DEALLOCATE(work)
      ABI_DEALLOCATE(work1)
      ABI_DEALLOCATE(work2)
-     if (usepaw==0)  then
-       ABI_DATATYPE_DEALLOCATE(conjgrprj)
-     end if
 !  The following is not mandatory, as Pc has been already applied to Psi^(1)
 !  and Pc^* H^(0) Pc = Pc^* H^(0) = H^(0) Pc (same for S^(0)).
 !  However, in PAW, to apply Pc^* here seems to reduce the numerical error
@@ -1002,7 +1002,6 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !    - Apply H^(0)-E.S^(0)
      sij_opt=0;if (gen_eigenpb) sij_opt=1
      cpopt=-1
-     ABI_DATATYPE_ALLOCATE(conjgrprj,(natom,0))
      ABI_ALLOCATE(work,(2,npw1*nspinor))
      ABI_ALLOCATE(work1,(2,npw1*nspinor*((sij_opt+1)/2)))
      ABI_ALLOCATE(work2,(2,npw1*nspinor))
@@ -1015,9 +1014,6 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      end if
      ABI_DEALLOCATE(work1)
      ABI_DEALLOCATE(work2)
-     if (usepaw==0)  then
-       ABI_DATATYPE_DEALLOCATE(conjgrprj)
-     end if
      cwwork=cwwork+gh1c_n
      jband=(band-1)*2*nband
      do iband=1,nband
@@ -1051,8 +1047,8 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
    ABI_DEALLOCATE(gresid)
    if (usepaw==1) then
      call pawcprj_free(conjgrprj)
-     ABI_DATATYPE_DEALLOCATE(conjgrprj)
    end if
+   ABI_DATATYPE_DEALLOCATE(conjgrprj)
 
  end if  ! End condition of not being a buffer band
 

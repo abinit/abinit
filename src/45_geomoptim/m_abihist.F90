@@ -42,7 +42,7 @@ module m_abihist
  use m_errors
  use m_xmpi
  use m_nctk
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
  use netcdf
 #endif
 
@@ -982,7 +982,7 @@ subroutine write_md_hist(hist,mover,filename,icycle,itime)
  write(std_out,*) 'ihist @ write_md_hist',hist%ihist
  write(std_out,*) 'mxhist @ write_md_hist',hist%mxhist
 
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
 
 !#####################################################################
 !### Creation of NetCDF file
@@ -1322,7 +1322,7 @@ implicit none
 
 ! *************************************************************************
 
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
 
 !#####################################################################
 !### Reading of NetCDF file

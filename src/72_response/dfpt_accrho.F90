@@ -280,6 +280,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
    if (prtvol>=10) then
      call status(counter,filstat,iexit,level,'density update')
    end if
+
    ABI_ALLOCATE(wfraug1_up,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
    ABI_ALLOCATE(wfraug1_down,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
 
@@ -333,8 +334,6 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 !    Build the four components of rho. We use only norm quantities and, so fourwf.
      ABI_ALLOCATE(wfraug_up,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
      ABI_ALLOCATE(wfraug_down,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))    
-     ABI_ALLOCATE(wfraug1_up,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
-     ABI_ALLOCATE(wfraug1_down,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
 ! EB FR build spinorial wavefunctions
 ! zero order
      cwave0_up => cwave0(:,1:npw_k)
@@ -379,11 +378,11 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
              rhoaug1(2*i1-1,i2,i3,1)=rhoaug1(2*i1-1,i2,i3,1)+weight*((re0_up*re1_up+im0_up*im1_up)+&
 &             (re0_down*re1_down+im0_down*im1_down)) ! trace
              rhoaug1(2*i1  ,i2,i3,1)=zero ! imag part of rho at k
-             rhoaug1(2*i1-1,i2,i3,2)=zero !rhoaug1(2*i1-1,i2,i3,2)+weight*((re0_up*re1_down+im0_up*im1_down)+&
-!&             re0_down*re1_up+im0_down*im1_up) ! m_x
+             rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(2*i1-1,i2,i3,2)+weight*((re0_up*re1_down+im0_up*im1_down)+&
+&             re0_down*re1_up+im0_down*im1_up) ! m_x
              rhoaug1(2*i1  ,i2,i3,2)=zero ! imag part of rho at k
-             rhoaug1(2*i1-1,i2,i3,3)=zero !rhoaug1(2*i1-1,i2,i3,3)+weight*((-re1_up*im0_down+im1_up*re0_down)&
-!&             -re0_up*im1_down+im0_up*re1_down) ! m_y
+             rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(2*i1-1,i2,i3,3)+weight*((-re1_up*im0_down+im1_up*re0_down)&
+&             -re0_up*im1_down+im0_up*re1_down) ! m_y
              rhoaug1(2*i1  ,i2,i3,3)=zero ! imag part of rho at k
              rhoaug1(2*i1-1,i2,i3,4)=rhoaug1(2*i1-1,i2,i3,4)+weight*((re0_up*re1_up+im0_up*im1_up)-&
 &             (re0_down*re1_down+im0_down*im1_down)) ! m_z
@@ -403,10 +402,10 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
              re1_down=wfraug1_down(1,i1,i2,i3) ; im1_down=wfraug1_down(2,i1,i2,i3)
              rhoaug1(i1,i2,i3,1)=rhoaug1(i1,i2,i3,1)+weight*((re0_up*re1_up+im0_up*im1_up)+&
 &             (re0_down*re1_down+im0_down*im1_down)) ! n
-             rhoaug1(i1,i2,i3,2)=zero !rhoaug1(i1,i2,i3,2)+weight*((re0_up*re1_down+im0_up*im1_down)+&
-!&             re0_up*re1_down+im0_down*im1_up)     ! m_x
-             rhoaug1(i1,i2,i3,3)=zero !rhoaug1(i1,i2,i3,3)+weight*((-re1_up*im0_down+im1_up*re0_down)+&
-!&             (-re0_up*im1_down+im0_up*re1_down)) ! m_y
+             rhoaug1(i1,i2,i3,2)=rhoaug1(i1,i2,i3,2)+weight*((re0_up*re1_down+im0_up*im1_down)+&
+&             re0_up*re1_down+im0_down*im1_up)     ! m_x
+             rhoaug1(i1,i2,i3,3)=rhoaug1(i1,i2,i3,3)+weight*((-re1_up*im0_down+im1_up*re0_down)+&
+&             (-re0_up*im1_down+im0_up*re1_down)) ! m_y
              rhoaug1(i1,i2,i3,4)=rhoaug1(i1,i2,i3,4)+weight*((re0_up*re1_up+im0_up*im1_up)-&
 &             (re0_down*re1_down+im0_down*im1_down)) ! m_z
            end do

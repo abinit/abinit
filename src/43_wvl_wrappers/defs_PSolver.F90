@@ -23,7 +23,7 @@ module defs_PSolver
  implicit none
 !!***
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  interface
 !!****m* defs_PSolver/PSolver
 !! NAME
