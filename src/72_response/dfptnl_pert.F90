@@ -71,7 +71,7 @@
 subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,i1dir,i2dir,i3dir,&
 & i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nfftf,nfftotf,nkpt,nk3xc,&
 & nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,rf_hamkq,rho1r1,rho2r1,rho3r1,rprimd,&
-& ucvol,vtrial,vtrial1,wffddk,ddk_f,xred)
+& ucvol,vtrial,vtrial1,wffddk,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred)
 
  use defs_basis
  use defs_datatypes
@@ -127,8 +127,8 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
  real(dp),intent(in) :: k3xc(nfftf,nk3xc)
  real(dp),intent(in) :: occ(mband*nkpt*nsppol),ph1d(2,3*(2*mgfft+1)*natom)
  real(dp),intent(in) :: rho1r1(cplex*nfftf,dtset%nspden),rho2r1(cplex*nfftf,dtset%nspden)
- real(dp),intent(in) :: rho3r1(cplex*nfftf,dtset%nspden),rprimd(3,3)
- real(dp),intent(in) :: xred(3,natom),vtrial(cplex*nfftf,nspden)
+ real(dp),intent(in) :: rho3r1(cplex*nfftf,dtset%nspden),rprimd(3,3),vtrial(cplex*nfftf,nspden)
+ real(dp),intent(in) :: xccc3d1(cplex*nfftf),xccc3d2(cplex*nfftf),xccc3d3(cplex*nfftf),xred(3,natom)
  real(dp),intent(inout) :: vtrial1(cplex*nfftf,nspden),d3etot(2,3,mpert,3,mpert,3,mpert)
 
 !Local variables-------------------------------
@@ -152,7 +152,7 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
  real(dp),allocatable :: vlocal(:,:,:,:),vlocal1(:,:,:,:),wfraug(:,:,:,:),work1(:,:)
  real(dp),allocatable :: ylm(:,:),ylm1(:,:),ylmgr1(:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylm1_k(:,:),ylmgr1_k(:,:,:)
- real(dp),allocatable :: xc_tmp(:,:),xccc3d1(:),xccc3d2(:),xccc3d3(:)
+ real(dp),allocatable :: xc_tmp(:,:)
  type(pawcprj_type) :: cprj_dum(1,1)
  type(pawtab_type) :: pawtab_dum(0)
  type(rf_hamiltonian_type) :: rf_ham_dum
@@ -350,36 +350,6 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
 ! **************************************************************************************************
 
      do iband = 1,nband_k
-!      Read dudk file
-#ifndef DEV_MG_WFK
-       call WffReadDataRec(eig1_k_tmp,ierr,2*nband_k,wffddk(file_index(2)))
-       call WffReadDataRec(work1,ierr,2,size_wf,wffddk(file_index(2)))
-#else
-       call wfk_read_bks(ddk_f(2), iband, ikpt, isppol, xmpio_single, cg_bks=work1,eig1_bks=eig1_k_tmp)
-#endif
-!      Filter the wavefunctions for large modified kinetic energy
-!      The GS wavefunctions should already be non-zero
-!       do ispinor=1,gs_hamkq%nspinor
-!         igs=(ispinor-1)*npw_k
-!         do ipw=1+igs,npw_k+igs
-!           if(gs_hamkq%kinpw_kp(ipw-igs)>huge(zero)*1.d-11)then
-!             work1(1,ipw)=zero
-!             work1(2,ipw)=zero
-!           end if
-!         end do
-!       end do
-       offset_cgi = (iband-1)*size_wf+icg0
-       cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
-       call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgi,cgi,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
-       if (abs(dotr-1)>tol12.or.abs(doti)>tol12) then
-         print '(2(a,es22.13E3))','       |cgi|^2 = ',dotr,',',doti
-       end if
-       call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgi,work1,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
-       if (abs(dotr)>tol12.or.abs(doti)>tol12) then
-         print '(2(a,es22.13E3))',' < cgi | ddk > = ',dotr,',',doti
-       end if
-!      Copy work1 in "dudk"
-       dudk(:,1+(iband-1)*size_wf:iband*size_wf)=work1(:,:)
 
 !      Read dude file
 #ifndef DEV_MG_WFK
@@ -391,30 +361,54 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
 !      Copy eig1_k_tmp in "eig1_k_stored"
        eig1_k_stored(1+(iband-1)*2*nband_k:2*nband_k+(iband-1)*2*nband_k)=eig1_k_tmp(:)
 
+       if (i2pert==natom+2) then
+!        Read dudk file
+#ifndef DEV_MG_WFK
+         call WffReadDataRec(eig1_k_tmp,ierr,2*nband_k,wffddk(file_index(2)))
+         call WffReadDataRec(work1,ierr,2,size_wf,wffddk(file_index(2)))
+#else
+         call wfk_read_bks(ddk_f(2), iband, ikpt, isppol, xmpio_single, cg_bks=work1,eig1_bks=eig1_k_tmp)
+#endif
+         offset_cgi = (iband-1)*size_wf+icg0
+         cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
+         call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgi,cgi,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+         if (abs(dotr-1)>tol12.or.abs(doti)>tol12) then
+           print '(2(a,es22.13E3))','       |cgi|^2 = ',dotr,',',doti
+         end if
+         call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgi,work1,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+         if (abs(dotr)>tol12.or.abs(doti)>tol12) then
+           print '(2(a,es22.13E3))',' < cgi | ddk > = ',dotr,',',doti
+         end if
+!        Copy work1 in "dudk"
+         dudk(:,1+(iband-1)*size_wf:iband*size_wf)=work1(:,:)
+
 !      Read dudkde file
 #ifndef DEV_MG_WFK
-       call WffReadDataRec(eig1_k_tmp,ierr,2*nband_k,wffddk(file_index(3)))
-       call WffReadDataRec(work1,ierr,2,size_wf,wffddk(file_index(3)))
+         call WffReadDataRec(eig1_k_tmp,ierr,2*nband_k,wffddk(file_index(3)))
+         call WffReadDataRec(work1,ierr,2,size_wf,wffddk(file_index(3)))
 #else
-       call wfk_read_bks(ddk_f(3), iband, ikpt, isppol, xmpio_single, cg_bks=work1,eig1_bks=eig1_k_tmp)
+         call wfk_read_bks(ddk_f(3), iband, ikpt, isppol, xmpio_single, cg_bks=work1,eig1_bks=eig1_k_tmp)
 #endif
-       offset_cgi = (iband-1)*size_wf+icg0
-       cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
-       call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgi,cgi,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
-       if (abs(dotr-1)>tol12.or.abs(doti)>tol12) then
-         print '(2(a,es22.13E3))','       |cgi|^2 = ',dotr,',',doti
-       end if
+         offset_cgi = (iband-1)*size_wf+icg0
+         cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
+         call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgi,cgi,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+         if (abs(dotr-1)>tol12.or.abs(doti)>tol12) then
+           print '(2(a,es22.13E3))','       |cgi|^2 = ',dotr,',',doti
+         end if
 !       call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgi,work1,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
 !       if (abs(dotr)>tol12.or.abs(doti)>tol12) then
 !         print '(2(a,es22.13E3))',' < cgi | ddk > = ',dotr,',',doti
 !       end if
 !      Copy work1 in "dudkde"
-       dudkde(:,1+(iband-1)*size_wf:iband*size_wf)=work1(:,:)
+         dudkde(:,1+(iband-1)*size_wf:iband*size_wf)=work1(:,:)
+       end if
+
      end do
 
      ABI_ALLOCATE(cgj,(2,size_wf))
      ABI_ALLOCATE(work2,(2,size_wf))
      ABI_ALLOCATE(iddk,(2,size_wf))
+     iddk = zero
 
      offset_eig0 = mband*(ikpt-1+nkpt*(isppol-1))
 !     print *,"offset_eig0 = ",offset_eig0,'/',mband*nkpt*nsppol
@@ -442,7 +436,7 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
        opt_gvnl1 = 1
        usevnl = 1
        optnl = 2
-       tim_getghc = 0
+       tim_getghc = 0 ! ??
        tim_getgh1c = 0 ! ??
        cpopt = -1
        ABI_ALLOCATE(gvnlc,(2,size_wf))
@@ -484,8 +478,11 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
 ! **************************************************************************************************
 
        eig1_k_tmp(:) = eig1_k_stored(1+(jband-1)*2*nband_k:jband*2*nband_k)
-       iddk(1,:) = -dudk(2,1+(jband-1)*size_wf:jband*size_wf)
-       iddk(2,:) =  dudk(1,1+(jband-1)*size_wf:jband*size_wf)
+       if (i2pert==natom+2) then
+         iddk(1,:) = -dudk(2,1+(jband-1)*size_wf:jband*size_wf)
+         iddk(2,:) =  dudk(1,1+(jband-1)*size_wf:jband*size_wf)
+       end if
+
        call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgj,iddk,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
 !LTEST
        if (abs(dotr)>tol12.or.abs(doti)>tol12) then
@@ -517,7 +514,7 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
          doti = doti - eig1_k_tmp(2*iband  )
          dotr = sqrt(dotr**2+doti**2)
          if (dotr > tol_test) then
-           write(message,'(4(a,i2),a,es22.13E3)') 'NONLINEAR TEST GETGH1 : ipert=',i2pert-natom,' idir=',i2dir,&
+           write(message,'(4(a,i2),a,es22.13E3)') 'NONLINEAR TEST GETGH1 : ipert=',i2pert,' idir=',i2dir,&
                                               ' jband=',jband,' iband=',iband,' NOT PASSED dotr = ',dotr
            call wrtout(std_out,message)
          end if
@@ -638,14 +635,16 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
    ABI_ALLOCATE(xc_tmp,(cplex*nfftf,1))
 
    if (cplex==1) then
-!  This, and the next lines, have to be changed in case cplex=2
+!    This, and the next lines, have to be changed in case cplex=2
      do ifft=1,nfftf
-       xc_tmp(ifft,1)= k3xc(ifft,1)*rho2r1(ifft,1)*rho3r1(ifft,1)
+       xc_tmp(ifft,1)= k3xc(ifft,1)*(rho2r1(ifft,1)+3*xccc3d2(ifft))*rho3r1(ifft,1)
      end do
    else
      do ifft=1,nfftf   ! 2*ifft-1 denotes the real part, 2*ifft the imaginary part
-       xc_tmp(2*ifft-1,1)= k3xc(ifft,1)*rho2r1(2*ifft-1,1)*rho3r1(2*ifft-1,1)-rho2r1(2*ifft,1)*rho3r1(2*ifft  ,1)
-       xc_tmp(2*ifft  ,1)= k3xc(ifft,1)*rho2r1(2*ifft-1,1)*rho3r1(2*ifft  ,1)+rho2r1(2*ifft,1)*rho3r1(2*ifft-1,1)
+       xc_tmp(2*ifft-1,1)= k3xc(ifft,1)*( (rho2r1(2*ifft-1,1)+3*xccc3d2(2*ifft-1))*rho3r1(2*ifft-1,1) &
+&      -( rho2r1(2*ifft,1)+3*xccc3d2(2*ifft))*rho3r1(2*ifft,1))
+       xc_tmp(2*ifft,1)= k3xc(ifft,1)*( (rho2r1(2*ifft-1,1)+3*xccc3d2(2*ifft-1))*rho3r1(2*ifft,1) &
+&      +( rho2r1(2*ifft,1)+3*xccc3d2(2*ifft))*rho3r1(2*ifft-1,1))
      end do
    end if
 

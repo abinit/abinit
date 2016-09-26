@@ -306,12 +306,12 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,g
        end if
 
        xccc3d1(:) = zero
-!       if ((psps%n1xccc/=0).and.(i1pert <= natom)) then
-!         call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkcore   ')
-!         call dfpt_mkcore(cplex,i1dir,i1pert,natom,psps%ntypat,n1,psps%n1xccc,&
-!&         n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,&
-!&         psps%xcccrc,psps%xccc1d,xccc3d1,xred)
-!       end if ! psps%n1xccc/=0
+       if ((psps%n1xccc/=0).and.(i1pert <= natom)) then
+         call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkcore   ')
+         call dfpt_mkcore(cplex,i1dir,i1pert,natom,psps%ntypat,n1,psps%n1xccc,&
+&         n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,&
+&         psps%xcccrc,psps%xccc1d,xccc3d1,xred)
+       end if ! psps%n1xccc/=0
 
        do i3pert = 1, mpert
          do i3dir = 1, 3
@@ -349,12 +349,12 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,g
              end if
 
              xccc3d3(:) = zero
-!             if ((psps%n1xccc/=0).and.(i3pert <= natom)) then
-!               call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkcore   ')
-!               call dfpt_mkcore(cplex,i3dir,i3pert,natom,psps%ntypat,n1,psps%n1xccc,&
-!&               n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,&
-!&               psps%xcccrc,psps%xccc1d,xccc3d3,xred)
-!             end if ! psps%n1xccc/=0
+             if ((psps%n1xccc/=0).and.(i3pert <= natom)) then
+               call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkcore   ')
+               call dfpt_mkcore(cplex,i3dir,i3pert,natom,psps%ntypat,n1,psps%n1xccc,&
+&               n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,&
+&               psps%xcccrc,psps%xccc1d,xccc3d3,xred)
+             end if ! psps%n1xccc/=0
 
              do i2pert = 1, mpert
 
@@ -455,21 +455,21 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,g
                    n3xccc=0; if(psps%n1xccc/=0)n3xccc=nfftf
                    xccc3d2(:)=zero ; vpsp1(:)=zero
 
-!                   if (i2pert <= natom) then
+                   if (i2pert <= natom) then
 
-!                     call status(counter,dtfil%filstat,iexit,level,'call dfpt_vlocal   ')
-!                     call dfpt_vlocal(atindx,cplex,gmet,gsqcut,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,natom,&
-!&                     nattyp,nfftf,dtset%ngfft,psps%ntypat,n1,n2,n3,dtset%paral_kgb,ph1d,psps%qgrid_vl,&
-!&                     dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
+                     call status(counter,dtfil%filstat,iexit,level,'call dfpt_vlocal   ')
+                     call dfpt_vlocal(atindx,cplex,gmet,gsqcut,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,natom,&
+&                     nattyp,nfftf,dtset%ngfft,psps%ntypat,n1,n2,n3,dtset%paral_kgb,ph1d,psps%qgrid_vl,&
+&                     dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
 
-!                     if (psps%n1xccc/=0) then
-!                       call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkcore   ')
-!                       call dfpt_mkcore(cplex,i2dir,i2pert,natom,psps%ntypat,n1,psps%n1xccc,&
-!&                       n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,&
-!&                       psps%xcccrc,psps%xccc1d,xccc3d2,xred)
-!                     end if ! psps%n1xccc/=0
+                     if (psps%n1xccc/=0) then
+                       call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkcore   ')
+                       call dfpt_mkcore(cplex,i2dir,i2pert,natom,psps%ntypat,n1,psps%n1xccc,&
+&                       n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,&
+&                       psps%xcccrc,psps%xccc1d,xccc3d2,xred)
+                     end if ! psps%n1xccc/=0
 
-!                   end if  ! i2pert <= natom
+                   end if  ! i2pert <= natom
 
                    call status(counter,dtfil%filstat,iexit,level,'get vtrial1   ')
                    option=1;optene=0
@@ -481,16 +481,9 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,g
 
                    call init_rf_hamiltonian(cplex,gs_hamkq,i2pert,rf_hamkq,has_e1kbsc=1)
 
-! **********************************************************************************************
-!                  LIRE ET CHARGER | u^(k_dir2) > (pour tests) et | u^(k_dir2 E_dir3) >
-! **********************************************************************************************
-
-                   if (i2pert <= natom.or.i2pert>natom+2) then
-                     MSG_BUG('NONLINEAR with i2pert<=natom or i2pert>natom+2 is not implemented yet')
-                   end if
-                   file_index(1) = i2dir + 3*(i2pert-1)
-                   fnamewff(1) = dtfil%fnamewffdelfd
                    nwffile = 1
+                   file_index(1) = i2dir + 3*(i2pert-1)
+                   fnamewff(1) = dtfil%fnamewff1
 
                    if (i2pert==natom+2) then
 
@@ -544,7 +537,8 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,g
                    call dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,i1dir,&
 &                   i2dir,i3dir,i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
 &                   mpsang,mpw,natom,nfftf,nfftotf,nkpt,nk3xc,nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,&
-&                   rf_hamkq,rho1r1,rho2r1,rho3r1,rprimd,ucvol,vtrial,vtrial1,wffddk,ddk_f,xred)
+&                   rf_hamkq,rho1r1,rho2r1,rho3r1,rprimd,ucvol,vtrial,vtrial1,wffddk,ddk_f,&
+&                   xccc3d1,xccc3d2,xccc3d3,xred)
                    call timab(512,2,tsec)
 
                    call status(counter,dtfil%filstat,iexit,level,'after dfptnl_resp')
