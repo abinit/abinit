@@ -89,11 +89,6 @@ subroutine dos_hdr_write(buffer,deltaene,dosdeltae,&
 
 ! *************************************************************************
 
-!DEBUG
-!write(std_out,*) ' dos_hdr_write : enter '
-!stop
-!ENDDEBUG
-
  bantot=sum(nband(:))
 
 !Choose the lower and upper energies
@@ -123,23 +118,19 @@ subroutine dos_hdr_write(buffer,deltaene,dosdeltae,&
    write(message, '(a,i2,a,f6.3,a,f6.3,a)' )  &
 &   '# Smearing technique, occopt =',occopt,', tsmear=',tsmear,' Hartree, tphysel=',tphysel,' Hartree'
  else
-   write(message, '(a)' ) &
-&   '# Tetrahedron method '
+   write(message, '(a)' ) '# Tetrahedron method '
  end if
  call wrtout(unitdos,message,'COLL')
 
  if(mband*nkpt*nsppol>=3) then
-   write(message, '(a,3f8.3,2a)' ) &
-&   '# For identification : eigen(1:3)=',eigen(1:3),ch10,"#"
+   write(message, '(a,3f8.3,2a)' )'# For identification : eigen(1:3)=',eigen(1:3),ch10,"#"
  else
-   write(message, '(a,3f8.3)' ) &
-&   '# For identification : eigen=',eigen
+   write(message, '(a,3f8.3)' ) '# For identification : eigen=',eigen
    write(message, '(3a)')trim(message),ch10,"#"
  end if
  call wrtout(unitdos,message,'COLL')
 
- write(message, '(a,f16.8)' ) &
-& '# Fermi energy : ', fermie
+ write(message, '(a,f16.8)' ) '# Fermi energy : ', fermie
  call wrtout(unitdos,message,'COLL')
 
  if(prtdos==1)then
@@ -180,10 +171,6 @@ subroutine dos_hdr_write(buffer,deltaene,dosdeltae,&
  else
    write(message, '(a)' ) '#       energy        DOS '
  end if
-
-!DEBUG
-!write(std_out,*) ' dos_hdr_write : exit '
-!ENDDEBUG
 
 end subroutine dos_hdr_write
 !!***

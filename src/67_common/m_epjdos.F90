@@ -327,7 +327,8 @@ end subroutine epjdos_free
 !!   symrel(3,3,nsym)=symmetry matrices in real space
 !!   typat(ntypat)=types of atoms
 !!   usepaw       =option for PAW
-!!  eigen(mband*nkpt*nsppol)=eigenvalues at irred kpoints
+!!  crystal<crystal_t>=Object defining the unit cell and its symmetries.
+!!  ebands<ebands_t>=Band structure data.
 !!  fermie=Fermi energy
 !!  fildata=name of the DOS output file
 !!  mbesslang=maximum angular momentum for Bessel function expansion
@@ -335,7 +336,6 @@ end subroutine epjdos_free
 !!  ndosfraction= number of types of DOS we are calculating, e.g. the number
 !!    of l channels. Could be much more general, for other types of partial DOS
 !!  paw_dos_flag= option for partial dos in PAW
-!!  rprimd(3,3)  =real space unit cell vectors
 !!
 !! OUTPUT
 !!  (no explicit output)
@@ -355,7 +355,7 @@ end subroutine epjdos_free
 !!
 !! SOURCE
 
-subroutine tetrahedron(dos,dtset,fermie,eigen,fildata,rprimd)
+subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -373,20 +373,19 @@ subroutine tetrahedron(dos,dtset,fermie,eigen,fildata,rprimd)
 
 !Arguments ------------------------------------
 !scalars
- real(dp),intent(in) :: fermie
  character(len=*),intent(in) :: fildata
  type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: crystal
+ type(ebands_t),intent(in) :: ebands
  type(epjdos_t),intent(inout) :: dos
-!arrays
- real(dp),intent(in) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol),rprimd(3,3)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: bcorr0=0
- integer :: iat,iband,iene,ifract,ikpt,ioffset_eig,isppol,natsph,natsph_extra
+ integer :: iat,iband,iene,ifract,ikpt,isppol,natsph,natsph_extra
  integer :: nene,nkpt_fullbz,prtdos,unitdos,ierr,prtdosm,paw_dos_flag,mbesslang,ndosfraction
  real(dp) :: buffer,deltaene,enemax,enemin,enex,integral_DOS,max_occ,rcvol
- real(dp) :: ucvol,cpu,wall,gflops
+ real(dp) :: cpu,wall,gflops
  logical :: bigDOS
  character(len=10) :: tag
  character(len=500) :: frmt,frmt_extra,message
@@ -395,7 +394,7 @@ subroutine tetrahedron(dos,dtset,fermie,eigen,fildata,rprimd)
  type(t_tetrahedron) :: tetrahedra
 !arrays
  integer,allocatable :: indkpt(:),unitdos_arr(:)
- real(dp) :: gmet(3,3),gprimd(3,3),klatt(3,3),rlatt(3,3),rmet(3,3)
+ real(dp) :: gprimd(3,3),klatt(3,3),rlatt(3,3)
  real(dp),allocatable :: dtweightde(:,:),integ_dos(:,:),integ_dos_m(:,:)
  real(dp),allocatable :: kpt_fullbz(:,:),partial_dos(:,:)
  real(dp),allocatable :: partial_dos_m(:,:),tmp_eigen(:),total_dos(:,:)
@@ -436,6 +435,7 @@ subroutine tetrahedron(dos,dtset,fermie,eigen,fildata,rprimd)
  end if
 
 !Refuse nband different for different kpoints
+!Note: This means we can pass ebands%eig(:,:,:) instead of eigen(mband*nkpt*nsppol) in packed form
 
  do isppol=1,dtset%nsppol
    do ikpt=1,dtset%nkpt
@@ -474,7 +474,7 @@ subroutine tetrahedron(dos,dtset,fermie,eigen,fildata,rprimd)
  call matr3inv(rlatt,klatt)
 
 !Get metric tensors
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+ gprimd = crystal%gprimd
  rcvol = abs (gprimd(1,1)*(gprimd(2,2)*gprimd(3,3)-gprimd(3,2)*gprimd(2,3)) &
 & -gprimd(2,1)*(gprimd(1,2)*gprimd(3,3)-gprimd(3,2)*gprimd(1,3)) &
 & +gprimd(3,1)*(gprimd(1,2)*gprimd(2,3)-gprimd(2,2)*gprimd(1,3)))
@@ -532,12 +532,12 @@ subroutine tetrahedron(dos,dtset,fermie,eigen,fildata,rprimd)
  prtdos=dtset%prtdos
  buffer=0.01_dp ! Size of the buffer around the min and max ranges
  if (dtset%prtdos == 2 .or. dtset%prtdos == 5) then
-   call dos_hdr_write(buffer,deltaene,dtset%dosdeltae,eigen,enemax,enemin,fermie,dtset%mband,&
+   call dos_hdr_write(buffer,deltaene,dtset%dosdeltae,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
 &   dtset%nband,nene,dtset%nkpt,dtset%nsppol,dtset%occopt,prtdos,&
 &   dtset%tphysel,dtset%tsmear,unitdos)
  else if (dtset%prtdos == 3) then
    do iat=1,natsph+natsph_extra
-     call dos_hdr_write(buffer,deltaene,dtset%dosdeltae,eigen,enemax,enemin,fermie,dtset%mband,&
+     call dos_hdr_write(buffer,deltaene,dtset%dosdeltae,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
 &     dtset%nband,nene,dtset%nkpt,dtset%nsppol,dtset%occopt,prtdos,&
 &     dtset%tphysel,dtset%tsmear,unitdos_arr(iat))
    end do
@@ -603,26 +603,17 @@ subroutine tetrahedron(dos,dtset,fermie,eigen,fildata,rprimd)
    end if
 
    ABI_ALLOCATE(tmp_eigen,(dtset%nkpt))
-   do iband = 1, dtset%nband(1)
+   do iband=1,dtset%nband(1)
 
-     ioffset_eig = dtset%mband*dtset%nkpt*(isppol-1)
-
-     tmp_eigen(:) = zero
 !    For each band get its contribution
-     do ikpt=1,dtset%nkpt
-       tmp_eigen(ikpt) = eigen(ioffset_eig + dtset%mband*(ikpt-1) + iband)
-     end do
-!
-!    calculate general integration weights at each irred kpoint as in Blochl et al
-!    PRB 49 16223
-!
+     tmp_eigen(:) = ebands%eig(iband, :, isppol)
+
+!    calculate general integration weights at each irred kpoint as in Blochl et al PRB 49 16223
      call get_tetra_weight(tmp_eigen,enemin,enemax,&
 &     max_occ,nene,dtset%nkpt,tetrahedra,bcorr0,&
 &     tweight,dtweightde,xmpi_comm_self)
 
-!
 !    calculate DOS and integrated DOS projected with the input dos_fractions
-!
      if (paw_dos_flag==1) then
        work_ndos = dos%fractions_paw1(:,iband,isppol,:)
 
@@ -774,7 +765,6 @@ subroutine tetrahedron(dos,dtset,fermie,eigen,fildata,rprimd)
    !
    !  finished with header printing
    !
-
 
 !  Write the DOS value in the DOS file
    if(prtdos==2)then
@@ -979,7 +969,7 @@ end subroutine tetrahedron
 !!
 !! SOURCE
 
-subroutine gaus_dos(dos, dtset,fermie,eigen,fildata) 
+subroutine gaus_dos(dos, dtset, ebands, eigen,fildata) 
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -994,10 +984,10 @@ subroutine gaus_dos(dos, dtset,fermie,eigen,fildata)
 
 !Arguments ------------------------------------
 !scalars
- real(dp),intent(in) :: fermie
  character(len=fnlen),intent(in) :: fildata
  type(dataset_type),intent(in) :: dtset
  type(epjdos_t),intent(inout) :: dos
+ type(ebands_t),intent(in) :: ebands
 !arrays
  real(dp),intent(in) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
 
@@ -1051,7 +1041,7 @@ subroutine gaus_dos(dos, dtset,fermie,eigen,fildata)
  buffer=0.01_dp ! Size of the buffer around the min and max ranges
  
  do iat=1,natsph
-   call dos_hdr_write(buffer,deltaene,dtset%dosdeltae,eigen,enemax,enemin,fermie,dtset%mband,&
+   call dos_hdr_write(buffer,deltaene,dtset%dosdeltae,eigen,enemax,enemin,ebands%fermie,dtset%mband,&
 &   dtset%nband,nene,dtset%nkpt,dtset%nsppol,dtset%occopt,prtdos,&
 &   dtset%tphysel,dtset%tsmear,unitdos_arr(iat))
  end do
@@ -1257,7 +1247,7 @@ subroutine gaus_dos(dos, dtset,fermie,eigen,fildata)
 
 !  integral_DOS=integral_DOS+deltaene*sum(total_dos(iene,:))
    integral_DOS=sum(total_integ_dos(nene,:))
-   write(message, '(a,es16.8)' ) ' tetrahedron : integrate to',integral_DOS
+   write(message, '(a,es16.8)' ) ' gaus_dos: integrate to',integral_DOS
    call wrtout(std_out,message,'COLL')
 
  end do ! isppol
@@ -2184,10 +2174,9 @@ end subroutine sphericaldens
 !! INPUTS
 !!  dos_fractions_m(nkpt,mband,nsppol,ndosfraction*mbesslang*m_dos_flag)
 !!               = m-resolved projected dos inside PAW sphere.
-!!  dtset
+!!  dtset        = Input variables
+!!  ebands<ebands_t>=Band structure data.
 !!  pawfatbnd    = keyword for fatbands
-!!  fermie       = Fermi energy
-!!  eigen        = eigenvalues
 !!  mbesslang    =maximum angular momentum for Bessel function expansion
 !!  m_dos_flag   =option for the m-contributions to the partial DOS
 !!  ndosfraction =natsph*mbesslang
@@ -2206,7 +2195,7 @@ end subroutine sphericaldens
 !!
 !! SOURCE
 
-subroutine prtfatbands(dos, dtset,fildata,fermie,eigen,pawfatbnd,pawtab)
+subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2222,17 +2211,16 @@ subroutine prtfatbands(dos, dtset,fildata,fermie,eigen,pawfatbnd,pawtab)
 !scalars
  integer,intent(in) :: pawfatbnd
  type(epjdos_t),intent(in) :: dos
+ type(ebands_t),intent(in) :: ebands
  type(dataset_type),intent(in) :: dtset
- real(dp),intent(in) :: fermie
  character(len=fnlen),intent(in) :: fildata
 !arrays
- real(dp),intent(in) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
 !Local variables-------------------------------
 !scalars
  integer :: iall,il,iat,natsph,inbfatbands,iband,mband,ixfat,isppol,nkpt,lmax,ll,mm
- integer :: band_index,ikpt,nband_k,ndosfraction,mbesslang
+ integer :: ikpt,nband_k,ndosfraction,mbesslang
  real(dp) :: xfatband,cpu,wall,gflops
  character(len=1) :: tag_l,tag_1m,tag_is
  character(len=2) :: tag_2m
@@ -2294,7 +2282,7 @@ subroutine prtfatbands(dos, dtset,fildata,fermie,eigen,pawfatbnd,pawtab)
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
 
- write(message,'(a,e12.5,a,e12.5,a)') "  Fermi energy is ",fermie*Ha_eV," eV = ",fermie," Ha"
+ write(message,'(a,e12.5,a,e12.5,a)') "  Fermi energy is ",ebands%fermie*Ha_eV," eV = ",ebands%fermie," Ha"
  call wrtout(std_out,message,'COLL')
 
 !--------------  OPEN AND NAME FILES FOR FATBANDS
@@ -2363,15 +2351,14 @@ subroutine prtfatbands(dos, dtset,fildata,fermie,eigen,pawfatbnd,pawtab)
  
 !--------------  WRITE FATBANDS IN FILES
  if (pawfatbnd>0) then
+   ! Store eigenvalues with nkpt as first dimension for efficiency reasons
    ABI_ALLOCATE(eigenvalues,(nkpt,mband,dtset%nsppol))
-   band_index=0
    do isppol=1,dtset%nsppol
      do ikpt=1,nkpt
        nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
        do iband=1,mband
-         eigenvalues(ikpt,iband,isppol)= eigen(iband+band_index)-fermie
+         eigenvalues(ikpt,iband,isppol)= ebands%eig(iband, ikpt, isppol) - ebands%fermie
        end do
-       band_index=band_index+nband_k
      end do
    end do
    iall=0
@@ -2432,7 +2419,7 @@ end subroutine prtfatbands
 !! FUNCTION
 !!
 !! INPUTS
-!!  cryst<crystal_t>=Object defining the unit cell and its symmetries.
+!!  crystal<crystal_t>=Object defining the unit cell and its symmetries.
 !!  ncid=NC file handle.
 !!
 !! OUTPUT

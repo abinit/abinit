@@ -841,16 +841,16 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 !  Here, computation of fatbands for the k-point given. _FATBANDS
    if (me == master .and. dtset%pawfatbnd>0 .and. dos%fatbands_flag==1) then
-     call prtfatbands(dos,dtset,dtfil%fnameabo_app_fatbands,fermie,eigen,dtset%pawfatbnd,pawtab)
+     call prtfatbands(dos,dtset,ebands,dtfil%fnameabo_app_fatbands,dtset%pawfatbnd,pawtab)
    end if
 
 !  Here, computation and output of DOS and partial DOS  _DOS
    if (me == master .and. dos%fatbands_flag==0) then
      if (dos%prtdos/=4) then
-       call tetrahedron(dos,dtset,fermie,eigen,dtfil%fnameabo_app_dos,rprimd)
+       call tetrahedron(dos,dtset,crystal,ebands,dtfil%fnameabo_app_dos)
      else
 !      this option is not documented in input variables: is it working?
-       call gaus_dos(dos, dtset, fermie, eigen, dtfil%fnameabo_app_dos)
+       call gaus_dos(dos, dtset, ebands, eigen, dtfil%fnameabo_app_dos)
      end if
    end if
 
