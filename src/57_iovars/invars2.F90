@@ -74,7 +74,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  use m_errors
  use m_nctk
  use libxc_functionals
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -748,6 +748,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'inclvkb',tread,'INT')
  if(tread==1) dtset%inclvkb=intarr(1)
+ if (dtset%inclvkb == 1) then
+   MSG_ERROR("inclvkb == 1 is not allowed anymore. Choose between 0 and 1.")
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nomegasf',tread,'INT')
  if(tread==1) dtset%nomegasf=intarr(1)
@@ -1066,6 +1069,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'eph_ngqpt_fine',tread,'INT')
  if(tread==1) dtset%eph_ngqpt_fine=intarr(1:3)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_transport',tread,'INT')
+ if(tread==1) dtset%eph_transport=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_wstep',tread,'ENE')
  if(tread==1) dtset%ph_wstep=dprarr(1)
@@ -2580,7 +2586,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 !if prtkpt==-2, write the k-points in netcdf format and exit here so that AbiPy can read the data.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtkpt',tread,'INT')
  if (tread == 1 .and. intarr(1) == -2) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    ncerr= nctk_write_ibz("kpts.nc", dtset%kptns(:,1:nkpt), dtset%wtk(1:nkpt))
    NCF_CHECK(ncerr)
 #endif
@@ -2591,7 +2597,18 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    ! Read nkptgw and bdgw.
    call intagm(dprarr,intarr,jdtset,marr,2*dtset%nkptgw*dtset%nsppol,string(1:lenstr),'bdgw',tread,'INT')
    if(tread==1) then
-     dtset%bdgw(1:2,1:dtset%nkptgw,1:dtset%nsppol)=reshape(intarr(1:2*dtset%nkptgw*dtset%nsppol),(/2,dtset%nkptgw,dtset%nsppol/))
+     dtset%bdgw(1:2,1:dtset%nkptgw,1:dtset%nsppol) =  &
+&    reshape(intarr(1:2*dtset%nkptgw*dtset%nsppol),[2,dtset%nkptgw,dtset%nsppol])
+   end if
+
+   ! Test bdgw values.
+   if (dtset%optdriver == RUNL_SIGMA) then
+     if (any(dtset%bdgw(1:2,1:dtset%nkptgw,1:dtset%nsppol) <= 0)) then
+       MSG_ERROR("bdgw entries cannot be <= 0. Check input file")
+     end if
+     if (any(dtset%bdgw(1,1:dtset%nkptgw,1:dtset%nsppol) > dtset%bdgw(2,1:dtset%nkptgw,1:dtset%nsppol))) then
+       MSG_ERROR("First band index in bdgw cannot be greater than the second index")
+     end if
    end if
 
    call intagm(dprarr,intarr,jdtset,marr,3*dtset%nkptgw,string(1:lenstr),'kptgw',tread,'DPR')

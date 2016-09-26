@@ -98,7 +98,7 @@ subroutine wvl_nhatgrid(atindx1,geocode,h,i3s,natom,natom_tot,&
 
  DBG_ENTER("COLL")
 
-#if !defined HAVE_DFT_BIGDFT
+#if !defined HAVE_BIGDFT
  BIGDFT_NOTENABLED_ERROR()
 #endif
 

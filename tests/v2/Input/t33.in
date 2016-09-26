@@ -51,7 +51,7 @@
          1  0  0   0 -1  0   0  0 -1
  tnons 12*0
  nstep 12
- tolvrs 5.0d-20
+ tolvrs 7.0d-20
  typat  2*1
  wtk  1
  znucl  1.0

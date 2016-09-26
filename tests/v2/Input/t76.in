@@ -73,6 +73,7 @@
  nstep 10
  ntypat  1
  rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ so_psp 0
  tolwfr 1.0d-14
  typat  1 1
  xred 3*0.00d0 3*0.25d0

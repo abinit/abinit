@@ -21,8 +21,7 @@ nomegasf2   50       # No. of real frequencies sampled for the spectral function
 nband2      15       # Bands to be used in the chi0 calculation
 ecuteps2    0.8      # Cut-off energy of the planewave set to represent the dielectric matrix
 nfreqim2    10       # No. of points along the imaginary axis for chi0
-inclvkb2    2        # Treat the non-analytic behaviour of heads and wings of chi0 for q->0 using real spherical harmonics.
-                     # much faster than inclvkb=1
+inclvkb2    2        # Treat the non-analytic behaviour of heads and wings of chi0 for q->0
 
 # Calculation of the Self-Energy matrix elements (GW corrections)
 optdriver3  4        # Self-Energy calculation

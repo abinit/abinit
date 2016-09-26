@@ -362,7 +362,7 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
  paw_dmft%nproc=nproc
 
  ! Do not comment these lines: it guarantees the parallelism in DMFT/HI or QMC will work.
- if (xmpi_comm_size(xmpi_world) /= xmpi_comm_size(mpi_enreg%comm_world)) then
+ if ((use_dmft/=0).and.(xmpi_comm_size(xmpi_world) /= xmpi_comm_size(mpi_enreg%comm_world))) then
    MSG_ERROR("Someone changed the k-point parallelism again")
  end if
 

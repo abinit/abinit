@@ -176,23 +176,27 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: kpoint(3),nonlop_dum(1,1),rmet(3,3),tsec(2)
- real(dp),allocatable :: cwavef(:,:),enlout(:),ffnl(:,:,:,:),ffnl_sav(:,:,:,:)
+ real(dp),allocatable :: cwavef(:,:),enlout(:),ffnl_sav(:,:,:,:)
  real(dp),allocatable :: ghc_dum(:,:),gprimd(:,:),kpg_k(:,:),kpg_k_sav(:,:)
  real(dp),allocatable :: kstr1(:),kstr2(:),kstr3(:),kstr4(:),kstr5(:),kstr6(:)
  real(dp),allocatable :: lambda(:),occblock(:),ph3d(:,:,:),ph3d_sav(:,:,:)
  real(dp),allocatable :: weight(:),ylm_k(:,:),ylmgr_k(:,:,:)
+ real(dp),allocatable,target :: ffnl(:,:,:,:)
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(pawcprj_type),target,allocatable :: cwaveprj(:,:)
  type(pawcprj_type),pointer :: cwaveprj_idat(:,:)
 !TESTDFPT
-!  integer,parameter :: ndtset=4
-!  integer,save :: itest=1
-!  integer :: choice_test,cpopt_test,dimffnl_test,iatom_test,ider_test
-!  integer :: idir_test,i1_test,i2_test,nnlout_test,paw_opt_test,signs_test,unkg,unylm
+!  integer,parameter :: ndtset_test=4
+!  integer,save :: idtset_test=1
+!  integer :: choice_test,cplex_test,cpopt_test,dimffnl_test,iatom_test,iatom_only_test
+!  integer :: iband_test,ider_ffnl_test,idir_test,idir_ffnl_test,idir_nonlop_test,inlout_test
+!  integer :: nnlout_test,paw_opt_test,signs_test,unkg,unylm
 !  logical :: ex,testdfpt = .true.
 !  character(len=100) :: strg
-!  real(dp),allocatable :: cwavef_test(:,:),enlout_test(:),ffnl_test(:,:,:,:)
+!  real(dp) :: argr,argi
+!  real(dp),allocatable :: enl_test(:,:,:),cwavef_test(:,:),scwavef_test(:,:),enlout_test(:)
 !  real(dp),allocatable :: ylm_test(:,:),ylmgr_test(:,:,:),ylm_k_test(:,:),ylmgr_k_test(:,:,:)
+!  real(dp),allocatable,target :: ffnl_test(:,:,:,:)
 !  type(pawcprj_type) :: cprj_test(1,1)
 !TESTDFPT
 
@@ -293,6 +297,120 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
 
 !TESTDFPT
 !  if (testdfpt) then
+!    choice_test=1 ; idir_test=0 ; signs_test=1
+!    if(idtset_test<ndtset_test)then
+!      inquire(file='config/signs1',exist=ex) ; if(ex) signs_test=1
+!      inquire(file='config/signs2',exist=ex) ; if(ex) signs_test=2
+!      do ii=1,100
+!        if (ii< 10) write(unit=strg,fmt='(a13,i1)') "config/choice",ii
+!        if (ii>=10) write(unit=strg,fmt='(a13,i2)') "config/choice",ii
+!        inquire(file=trim(strg),exist=ex)  ; if(ex) choice_test=ii
+!      end do
+!      do ii=1,9
+!        write(unit=strg,fmt='(a11,i1)') "config/idir",ii
+!        inquire(file=trim(strg),exist=ex)  ; if(ex) idir_test=ii
+!      end do
+!    else
+!      inquire(file='config/signsdfpt1',exist=ex)  ; if(ex)signs_test=1
+!      inquire(file='config/signsdfpt2',exist=ex)  ; if(ex)signs_test=2
+!      do ii=1,100
+!        if (ii< 10) write(unit=strg,fmt='(a17,i1)') "config/choicedfpt",ii
+!        if (ii>=10) write(unit=strg,fmt='(a17,i2)') "config/choicedfpt",ii
+!        inquire(file=trim(strg),exist=ex)  ; if(ex) choice_test=ii
+!      end do
+!      do ii=1,36
+!        if (ii< 10) write(unit=strg,fmt='(a15,i1)') "config/idirdfpt",ii
+!        if (ii>=10) write(unit=strg,fmt='(a15,i2)') "config/idirdfpt",ii
+!        inquire(file=trim(strg),exist=ex) ; if(ex) idir_test=ii
+!      end do
+!    end if
+!    iatom_test=1 ; iband_test=-1
+!    do ii=1,50
+!      if (ii< 10) write(unit=strg,fmt='(a12,i1)') "config/iatom",ii
+!      if (ii>=10) write(unit=strg,fmt='(a12,i2)') "config/iatom",ii
+!      inquire(file=trim(strg),exist=ex)  ; if(ex) iatom_test=ii
+!      if (ii< 10) write(unit=strg,fmt='(a12,i1)') "config/iband",ii
+!      if (ii>=10) write(unit=strg,fmt='(a12,i2)') "config/iband",ii
+!      inquire(file=trim(strg),exist=ex)  ; if(ex) iband_test=ii
+!    end do
+!    cpopt_test=-1 ; paw_opt_test=3*psps%usepaw
+!    inquire(file='config/dij',exist=ex);if(ex) paw_opt_test=1*psps%usepaw
+!    if(signs_test==1)then
+!      iatom_only_test=-1 ; idir_ffnl_test=0
+!      idir_nonlop_test=0 ; cplex_test=1
+!      if(choice_test==1)then
+!        ider_ffnl_test=0
+!        nnlout_test=1 ; inlout_test=1
+!      end if
+!      if(choice_test==2)then
+!        ider_ffnl_test=0
+!        nnlout_test=3*natom ; inlout_test=3*(iatom_test-1)+idir_test
+!      end if
+!      if(choice_test==3)then
+!        ider_ffnl_test=1
+!        nnlout_test=6 ; inlout_test=idir_test
+!      end if
+!      if(choice_test==5)then
+!        ider_ffnl_test=1
+!        nnlout_test=3 ; inlout_test=idir_test
+!      end if
+!      if(choice_test==51.or.choice_test==52)then
+!        ider_ffnl_test=1 ; cplex_test=2
+!        nnlout_test=6 ; inlout_test=2*idir_test-1
+!      end if
+!      if(choice_test==54)then
+!        ider_ffnl_test=2 ; cplex_test=2
+!        nnlout_test=18*natom ; inlout_test=2*idir_test-1
+!      end if
+!      if(choice_test==55)then
+!        ider_ffnl_test=2 ; cplex_test=2
+!        nnlout_test=36 ; inlout_test=2*idir_test-1
+!      end if
+!      if(choice_test==8)then
+!        ider_ffnl_test=2
+!        nnlout_test=6 ; inlout_test=idir_test
+!      end if
+!      if(choice_test==81)then
+!        ider_ffnl_test=2 ; cplex_test=2
+!        nnlout_test=18 ; inlout_test=2*idir_test-1
+!      end if
+!    else if(signs_test==2)then
+!      nnlout_test=1 ; inlout_test =1 ; cplex_test=1
+!      idir_nonlop_test=idir_test ; iatom_only_test=-1
+!      if(choice_test==1)then
+!        ider_ffnl_test=0 ; idir_ffnl_test=0
+!      end if
+!      if(choice_test==2)then
+!        iatom_only_test=iatom_test
+!        ider_ffnl_test=0 ; idir_ffnl_test=0
+!      end if
+!      if(choice_test==3)then
+!        ider_ffnl_test=1 ; idir_ffnl_test=-7
+!      end if
+!      if(choice_test==5)then
+!        ider_ffnl_test=1 ; idir_ffnl_test=4
+!      end if
+!      if(choice_test==51.or.choice_test==52)then
+!        ider_ffnl_test=1 ; idir_ffnl_test=4 ; cplex_test=2
+!      end if
+!      if(choice_test==8)then
+!        ider_ffnl_test=2 ; idir_ffnl_test=4
+!      end if
+!      if(choice_test==81)then
+!        ider_ffnl_test=2 ; idir_ffnl_test=4 ; cplex_test=2
+!      end if
+!    end if
+!    dimffnl_test=1+ider_ffnl_test
+!    if (ider_ffnl_test==1.and.(idir_ffnl_test==0.or.idir_ffnl_test==4)) dimffnl_test=2+2*psps%useylm
+!    if (ider_ffnl_test==2.and.(idir_ffnl_test==0.or.idir_ffnl_test==4)) dimffnl_test=3+7*psps%useylm
+!    if (ider_ffnl_test==1.and.idir_ffnl_test==-7) dimffnl_test=2+5*psps%useylm
+!    if (idir_ffnl_test>-7.and.idir_ffnl_test<0) dimffnl_test=2
+!    write(std_out,'(2(a,i2),(a,i1),2(a,i2),(a,i1),(a,i2),(a,i1),2(a,i2))') &
+! &   "TESTDFPT: choice=",choice_test,", idir(mkffnl)=",idir_ffnl_test,&
+! &   ", ider(mkffnl)=",ider_ffnl_test,", dimffnl=",dimffnl_test,&
+! &   ", idir(nonlop)=",idir_nonlop_test,", signs=",signs_test,&
+! &   ", iatom=",iatom_only_test,", paw_opt=",paw_opt_test,&
+! &   ", nnlout=",nnlout_test,", inlout=",inlout_test
 !    ABI_ALLOCATE(ylm_test,(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm))
 !    ABI_ALLOCATE(ylmgr_test,(mpw*mkmem,9,psps%mpsang*psps%mpsang*psps%useylm))
 !    if (psps%useylm==1) then
@@ -446,118 +564,41 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
      end if
 
 !TESTDFPT
-!      if (ikpt==1.and.testdfpt) then
+!      if (ikpt==1.and.isppol==1.and.testdfpt) then
+!        ABI_ALLOCATE(ylm_k_test,(npw_k,mpsang*mpsang*psps%useylm))
+!        ABI_ALLOCATE(ylmgr_k_test,(npw_k,9,mpsang*mpsang*psps%useylm))
 !        ABI_ALLOCATE(cwavef_test,(2,npw_k))
-!        iatom_test=2
-!        signs_test  = 1 ;
-!        choice_test = 1 ;
-!        idir_test=0 ;
-!         paw_opt_test=3*psps%usepaw
-!         inquire(file='config/dij',exist=ex);if(ex)paw_opt_test=1*psps%usepaw
-!         cpopt_test=-1
-!         if(itest<ndtset)then
-!           inquire(file='config/signs1',exist=ex) ; if(ex)signs_test=1
-!           inquire(file='config/signs2',exist=ex) ; if(ex)signs_test=2
-!           do ii=1,60
-!             if (ii< 10) write(unit=strg,fmt='(a13,i1)') "config/choice",ii
-!             if (ii>=10) write(unit=strg,fmt='(a13,i2)') "config/choice",ii
-!             inquire(file=trim(strg),exist=ex)  ; if(ex)choice_test=ii
-!           end do
-!           do ii=1,6
-!             write(unit=strg,fmt='(a11,i1)') "config/idir",ii
-!             inquire(file=trim(strg),exist=ex)  ; if(ex)idir_test=ii
-!           end do
-!         else
-!           inquire(file='config/signsdfpt1',exist=ex)  ; if(ex)signs_test=1
-!           inquire(file='config/signsdfpt2',exist=ex)  ; if(ex)signs_test=2
-!           do ii=1,60
-!             if (ii< 10) write(unit=strg,fmt='(a17,i1)') "config/choicedfpt",ii
-!             if (ii>=10) write(unit=strg,fmt='(a17,i2)') "config/choicedfpt",ii
-!             inquire(file=trim(strg),exist=ex)  ; if(ex)choice_test=ii
-!           end do
-!           do ii=1,36
-!             if (ii< 10) write(unit=strg,fmt='(a15,i1)') "config/idirdfpt",ii
-!             if (ii>=10) write(unit=strg,fmt='(a15,i2)') "config/idirdfpt",ii
-!             inquire(file=trim(strg),exist=ex) ; if(ex)idir_test=ii
-!           end do
-!           if((choice_test==54.or.choice_test==55.or.choice_test==8).and.signs_test==2)signs_test=1
-!         end if
-!         do ii=1,10
-!           if (ii< 10) write(unit=strg,fmt='(a13,i1)') "config/iatom",ii
-!           if (ii>=10) write(unit=strg,fmt='(a13,i2)') "config/iatom",ii
-!           inquire(file=trim(strg),exist=ex)  ; if(ex)iatom_test=ii
-!         end do
-!         if(signs_test==1)then
-!           if(choice_test==1)then
-!             nnlout_test=1 ; i1_test =1 ; i2_test=1
-!             idir_test=0 ; ider_test=0 ; dimffnl_test=1
-!           end if
-!           if(choice_test==2)then
-!             nnlout_test=3*natom ; i1_test = 3*(iatom_test-1) + idir_test
-!             idir_test=0 ; ider_test=0 ; dimffnl_test=1
-!           end if
-!           if(choice_test==3)then
-!             nnlout_test=6 ; i1_test = idir_test
-!             idir_test=0 ; ider_test=1 ; dimffnl_test=2+2*psps%useylm
-!           end if
-!           if(choice_test==5)then
-!             nnlout_test=3 ; i1_test =idir_test
-!             idir_test=0 ; ider_test=1 ; dimffnl_test=2+2*psps%useylm
-!           end if
-!           if(choice_test==54)then
-!             nnlout_test=18*natom ; i1_test =18*(iatom_test-1)+idir_test
-!             idir_test=0 ; ider_test=2 ; dimffnl_test=3+7*psps%useylm
-!           end if
-!           if(choice_test==55)then
-!             nnlout_test=36 ; i1_test =idir_test
-!             idir_test=0 ; ider_test=2 ; dimffnl_test=3+7*psps%useylm
-!           end if
-!           if(choice_test==8)then
-!             nnlout_test=6 ; i1_test =idir_test
-!             idir_test=0 ; ider_test=2 ; dimffnl_test=3+7*psps%useylm
-!           end if
-!         else
-!           if(choice_test==1)then
-!             nnlout_test=1 ; i1_test =1
-!             idir_test=0 ; ider_test=0 ; dimffnl_test=1
-!           end if
-!           if(choice_test==2)then
-!             nnlout_test=1 ; i1_test=1
-!             idir_test=idir_test ; ider_test=0 ; dimffnl_test=1
-!           end if
-!           if(choice_test==5)then
-!             nnlout_test=1 ; i1_test =1
-!             idir_test=idir_test ; ider_test=1 ; dimffnl_test=2
-!           end if
-!         end if
-! !
-!         write(std_out,*) "ddk_df","  choice=",choice_test,"idir=",idir_test,"signs=",signs_test,&
-! &                         "ider=",ider_test,"nnlout=",nnlout_test,"inlout=",i1_test
-!         ABI_ALLOCATE(ylm_k_test,(npw_k,mpsang*mpsang*psps%useylm))
-!         ABI_ALLOCATE(ylmgr_k_test,(npw_k,9,mpsang*mpsang*psps%useylm))
-!         if (psps%useylm==1) then
-!           do ilm=1,mpsang*mpsang
-!             do ipw=1,npw_k
-!               ylm_k_test(ipw,ilm)=ylm_test(ipw+ikg,ilm)
-!             end do
-!           end do
-!           if (ider_test>=1) then
-!             do ilm=1,mpsang*mpsang
-!               do ii=1,3+6*(ider_test/2)
-!                 do ipw=1,npw_k
-!                   ylmgr_k_test(ipw,ii,ilm)=ylmgr_test(ipw+ikg,ii,ilm)
-!                 end do
-!               end do
-!             end do
-!           end if
-!         end if
-!         ABI_ALLOCATE(ffnl_test,(npw_k,dimffnl_test,psps%lmnmax,ntypat))
-!         call mkffnl(psps%dimekb,dimffnl_test,psps%ekb,ffnl_test,psps%ffspl,&
-! &       gs_hamk%gmet,gs_hamk%gprimd,ider_test,idir_test,psps%indlmn,kg_k,kpg_k,&
+!        if (paw_opt_test>=3) then
+!          ABI_ALLOCATE(scwavef_test,(2,npw_k))
+!          ABI_ALLOCATE(enl_test,(0,0,0))
+!        else
+!          ABI_ALLOCATE(scwavef_test,(0,0))
+!          ABI_ALLOCATE(enl_test,(gs_hamk%dimekb1,gs_hamk%dimekb2,gs_hamk%nspinor**2))
+!          enl_test(:,:,:)=one
+!        end if
+!        if (psps%useylm==1) then
+!          do ilm=1,mpsang*mpsang
+!            do ipw=1,npw_k
+!              ylm_k_test(ipw,ilm)=ylm_test(ipw+ikg,ilm)
+!            end do
+!          end do
+!          if (ider_ffnl_test>=1) then
+!            do ilm=1,mpsang*mpsang
+!              do ii=1,3+6*(ider_ffnl_test/2)
+!                do ipw=1,npw_k
+!                  ylmgr_k_test(ipw,ii,ilm)=ylmgr_test(ipw+ikg,ii,ilm)
+!                end do
+!              end do
+!            end do
+!          end if
+!        end if
+!        ABI_ALLOCATE(ffnl_test,(npw_k,dimffnl_test,psps%lmnmax,ntypat))
+!        call mkffnl(psps%dimekb,dimffnl_test,psps%ekb,ffnl_test,psps%ffspl,&
+! &       gs_hamk%gmet,gs_hamk%gprimd,ider_ffnl_test,idir_ffnl_test,psps%indlmn,kg_k,kpg_k,&
 ! &       gs_hamk%kpt_k,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,&
 ! &       npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
 ! &       psps%usepaw,psps%useylm,ylm_k_test,ylmgr_k_test)
-!       end if
+!      end if
 !TESTDFPT
 
 !    Compute nonlocal form factors ffnl at all (k+G)
@@ -635,22 +676,43 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
 
          if (mpi_enreg%paral_kgb/=1) then
 !TESTDFPT
-!             if (ikpt==1.and.testdfpt) then
-!               gs_hamk%ffnl_k => ffnl_test
-!               ABI_ALLOCATE(enlout_test,(nnlout_test*blocksize))
-!               call nonlop(choice_test,cpopt_test,cprj_test,enlout_test,gs_hamk,idir_test,lambda,&
-! &              mpi_enreg,1,nnlout_test,paw_opt_test,signs_test,tim_nonlop,cwavef,cwavef_test)
-!               if (signs_test==2) then
-!                 call dotprod_g(enlout_test(i1_test),arg,istwf_k,npw_k,1,cwavef,cwavef_test,&
-! &               mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-!               end if
-!               if (itest<ndtset) then
-!                 write(std_out,*) "ddk_df",iband,enlout_test(i1_test)
-!               else
-!                 write(std_out,*) "ddk_dfpt",iband,enlout_test(i1_test)
-!               end if
-!               ABI_DEALLOCATE(enlout_test)
-!             end if
+!            if (ikpt==1.and.isppol==1.and.testdfpt.and.(iband==iband_test.or.iband_test==-1)) then
+!              ABI_ALLOCATE(enlout_test,(nnlout_test*blocksize))
+!              nullify(gs_hamk%ffnl_k,gs_hamk%ffnl_kp)
+!              gs_hamk%ffnl_k => ffnl_test;gs_hamk%ffnl_kp => gs_hamk%ffnl_k
+!              if (paw_opt_test<3) then
+!                call nonlop(choice_test,cpopt_test,cprj_test,enlout_test,gs_hamk,idir_nonlop_test,lambda,&
+! &                mpi_enreg,1,nnlout_test,paw_opt_test,signs_test,scwavef_test,tim_nonlop,cwavef,cwavef_test,&
+! &                iatom_only=iatom_only_test,enl=enl_test)
+!              else
+!                call nonlop(choice_test,cpopt_test,cprj_test,enlout_test,gs_hamk,idir_nonlop_test,lambda,&
+! &                mpi_enreg,1,nnlout_test,paw_opt_test,signs_test,scwavef_test,tim_nonlop,cwavef,cwavef_test,&
+! &                iatom_only=iatom_only_test)
+!              end if
+!              nullify(gs_hamk%ffnl_k,gs_hamk%ffnl_kp)
+!              gs_hamk%ffnl_k => ffnl;gs_hamk%ffnl_kp => gs_hamk%ffnl_k
+!              if (signs_test==2) then
+!                if (paw_opt_test<3) then
+!                  call dotprod_g(argr,argi,istwf_k,npw_k,cplex_test,cwavef,cwavef_test,&
+! &                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+!                else
+!                  call dotprod_g(argr,argi,istwf_k,npw_k,cplex_test,cwavef,scwavef_test,&
+! &                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+!                end if
+!                enlout_test(inlout_test)=argr
+!              end if
+!              if (signs_test==1.and.choice_test==1) then
+!                call dotprod_g(argr,argi,istwf_k,npw_k,1,cwavef,cwavef,&
+! &                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+!                   enlout_test(:)=enlout_test(:)+argr
+!              end if
+!              if (idtset_test<ndtset_test) then
+!                write(std_out,'(a,i3,es24.16)') "TESTDFPT_df:  ",iband,enlout_test(inlout_test)
+!              else
+!                write(std_out,'(a,i3,es24.16)') "TESTDFPT_dfpt:",iband,enlout_test(inlout_test)
+!              end if
+!              ABI_DEALLOCATE(enlout_test)
+!            end if
 !TESTDFPT
            lambda(1)=eigen(iblock+bdtot_index)
            call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,1,nnlout,&
@@ -784,9 +846,11 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
      end if
 
 !TESTDFPT
-!      if (ikpt==1.and.testdfpt) then
+!      if (ikpt==1.and.isppol==1.and.testdfpt) then
 !        ABI_DEALLOCATE(ffnl_test)
+!        ABI_DEALLOCATE(enl_test)
 !        ABI_DEALLOCATE(cwavef_test)
+!        ABI_DEALLOCATE(scwavef_test)
 !        ABI_DEALLOCATE(ylm_k_test)
 !        ABI_DEALLOCATE(ylmgr_k_test)
 !      end if
@@ -799,6 +863,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
 !  if (testdfpt) then
 !    ABI_DEALLOCATE(ylm_test)
 !    ABI_DEALLOCATE(ylmgr_test)
+!    idtset_test=idtset_test+1
 !  end if
 !TESTDFPT
 

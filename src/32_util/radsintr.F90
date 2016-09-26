@@ -139,6 +139,7 @@ subroutine radsintr(funr,funq,mqgrid,mrgrid,qgrid,rgrid,yq1,yqn)
 &   *(sin(arg*rgrid(1))/arg-rgrid(1)*cos(arg*rgrid(1)))
 
 !  Integral from r1 to rmax
+   rzf=zero
    do ir=1,irmax
      if (abs(ff(ir))>1.e-20_dp) rzf(ir)=sin(arg*rgrid(ir))*ff(ir)
    end do

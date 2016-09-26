@@ -229,7 +229,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  use m_fock,               only : fock_type,fock_updateikpt,fock_calc_ene
  use m_invovl,             only : make_invovl
  use m_gemm_nonlop
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon,evaltoocc,write_energies
 #endif
 
@@ -349,7 +349,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: idum1(0),idum3(0,0,0)
  real(dp) :: rdum2(0,0),rdum4(0,0,0,0)
 !Variables for BigDFT
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  integer :: occopt_bigdft
 #endif
 
@@ -508,7 +508,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !===================================================================
 
  if (dtset%usewvl == 1) then
-#ifndef HAVE_DFT_BIGDFT
+#ifndef HAVE_BIGDFT
    BIGDFT_NOTENABLED_ERROR()
 #else
 
@@ -1574,7 +1574,7 @@ write(80,*) "vtorho efock ",energies%e_fock,fock%eigen_ikpt(iband),occ(iband),dt
        call ctocprj(atindx,cg,1,cprj_tmp,gmet,gprimd,0,0,0,dtset%istwfk,kg,dtset%kptns,&
 &       dtset%mband,mcg,mcprj_tmp,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
 &       dtset%natom,nattyp,dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,dtset%nloalg,&
-&       npwarr,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
+&       npwarr,dtset%nspinor,dtset%nsppol,ntypat,0,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
 &       ucvol,dtfil%unpaw,0,xred,ylm,ylmgr_dum)
        call pawmkrhoij(atindx,atindx1,cprj_tmp,gs_hamk%dimcprj,dtset%istwfk,dtset%kptopt,&
 &       dtset%mband,mband_cprj,mcprj_tmp,dtset%mkmem,mpi_enreg,natom,dtset%nband,dtset%nkpt,&
@@ -2079,7 +2079,7 @@ subroutine wvl_occ()
 ! Copy occupations and efermi to BigDFT variables
    call wvl_occ_abi2big(dtset%mband,dtset%nkpt,dtset%nsppol,occ,1,wvl%wfs)
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 !  Copy Fermi level to BigDFT variable:
    wvl%wfs%ks%orbs%efermi=energies%e_fermie
 #endif
@@ -2138,7 +2138,7 @@ subroutine wvl_occ_bigdft()
    DBG_ENTER("COLL")
 
 ! Transfer occopt from ABINIT to BigDFT
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
    occopt_bigdft=dtset%occopt
    call wvl_occopt_abi2big(occopt_bigdft,occopt_bigdft,1)
 
@@ -2195,7 +2195,7 @@ subroutine wvl_comm_eigen()
  use m_errors
 
  use m_abi2big, only : wvl_eigen_abi2big
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API, only: eigensystem_info
 #endif
 
@@ -2210,7 +2210,7 @@ subroutine wvl_comm_eigen()
 !Arguments ------------------------------------
 
 !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  integer:: ikpt,norb,shift
 #endif
 
@@ -2218,7 +2218,7 @@ subroutine wvl_comm_eigen()
 
    DBG_ENTER("COLL")
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
    if(wvlbigdft) then
 !  Communicates eigenvalues to all procs.
 !  This will print out the eigenvalues and Fermi level.

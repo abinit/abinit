@@ -59,7 +59,7 @@ that specifies the list of input files associated to the tests and (optional) gl
 
     # CPP variables 
     need_cpp_vars = [
-      "HAVE_DFT_LIBXC",
+      "HAVE_LIBXC",
     ]
 
     # List of input files
@@ -78,7 +78,7 @@ that this test has been disabled and it should not be executed on the test farm.
 
 The variable need_cpp_vars is a list with the CPP variables that must be defined 
 in the include file config.h in order to enable the tests in this directory.
-In this case, for example, the libxc tests are executed only if HAVE_DFT_LIBXC is defined in config.h
+In this case, for example, the libxc tests are executed only if HAVE_LIBXC is defined in config.h
 Note that one can prepend the character ! to the name of the variable to specify that the tests 
 should not be executed if the variable is not defined in the build.
 

@@ -37,7 +37,7 @@ subroutine create_nc_file (filename,ncid)
  use defs_basis
  use m_profiling_abi
  use m_errors
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
  use netcdf
 #endif
 
@@ -58,7 +58,7 @@ implicit none
 character(len=*),intent(in) :: filename
 
 !Local variables-------------------------------
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
 integer :: one_id
 integer :: ncerr
 #endif
@@ -66,7 +66,7 @@ integer :: ncerr
 ! *************************************************************************
 
  ncid = 0
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
 !Create the NetCDF file
  ncerr=nf90_create(path=filename,cmode=NF90_CLOBBER,ncid=ncid)
  NCF_CHECK_MSG(ncerr, sjoin('Error while creating:', filename))
