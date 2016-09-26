@@ -445,6 +445,9 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range,lcutdens,lmix,mpsang,nphi,nsy
 &     pawtab(itypat)%qijl(1,klmn)*sqrt(four_pi)
    end do
 
+pawtab(itypat)%sij=zero
+
+
 !  ==================================================
 !  6- COMPUTE Eijkl TERMS (Hartree)
 !     Compute eventually short-range screened version of Eijkl (Fock)

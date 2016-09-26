@@ -671,7 +671,7 @@
        end if
        if (cpopt==4.and.ndgxdt>0) then
          ishift=0
-         if ((choice==2).and.(cprjin(1,1)%ncpgr>ndgxdt)) ishift=cprjin(1,1)%ncpgr-ndgxdt
+         if ((choice==2).and.(cprjin(1,1)%ncpgr>ndgxdt)) ishift=idir-ndgxdt
          if(cplex == 2) then
            do ispinor=1,nspinor
              do ia=1,nincat

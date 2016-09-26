@@ -852,6 +852,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
        paw_ij(iatom)%dijfock(:,:)=dijfock_vv(:,:)+dijfock_cv(:,:)
 
 !      Fock contribution to energy
+
        if (option/=1) then
          if ((cplex==1).or.(ipert==0)) then
            do ispden=1,pawrhoij(iatom)%nspden

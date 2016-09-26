@@ -248,8 +248,8 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
  if ((usefock_loc).and.(psps%usepaw==1)) then
 !   usecprj_local=usecprj
    if(optfor==1)then 
-     fock%optfor=.true.
-!     fock%optfor=.false.
+!     fock%optfor=.true.
+     fock%optfor=.false.
      if (.not.allocated(fock%forces_ikpt)) then
        ABI_ALLOCATE(fock%forces_ikpt,(3,natom,mband))
      end if
@@ -257,7 +257,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
        ABI_ALLOCATE(fock%forces,(3,natom))
      end if
      fock%forces=zero
-     fock%ieigen=1
      compute_gbound=.true.
    end if
  end if
@@ -725,10 +724,10 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
                call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
 &               ghc_dum,gs_hamk,mpi_enreg)
                if (fock%optstr) then
-                 fock%stress(:)=fock%stress(:)+weight(iblocksize)*fock%stress_ikpt(:,1)
+                 fock%stress(:)=fock%stress(:)+weight(iblocksize)*fock%stress_ikpt(:,fock%ieigen)
                end if
                if (fock%optfor) then
-                 fock%forces(:,:)=fock%forces(:,:)+weight(iblocksize)*fock%forces_ikpt(:,:,1)
+                 fock%forces(:,:)=fock%forces(:,:)+weight(iblocksize)*fock%forces_ikpt(:,:,fock%ieigen)
                end if
              end do 
              ABI_DEALLOCATE(ghc_dum)

@@ -928,7 +928,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !Pass through the first routines even when nstep==0
 
  quitsum_request = xmpi_request_null; timelimit_exit = 0
-
+write(81,*) "COUCOU"
+write(80,*) "COUCOU"
 ! start SCF loop
  do istep=1,max(1,nstep)
    call status(istep,dtfil%filstat,iexit,level,'loop istep    ')
@@ -1069,6 +1070,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &         useylmgr,xred,ylm,ylmgr)
        end if
      end if
+     rewind(83)
+ 
      if (fock%optfor) then
        fock%forces=zero
      end if
@@ -1380,6 +1383,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &     susmat,symrec,taug,taur,ucvol_local,usecprj,wffnew,vtrial,vxctau,wvl,xred,&
 &     ylm,ylmgr,ylmdiel)
 
+write(80,*) "efock ",energies%e_fock
+write(80,*) "forces_fock ",fock%forces
    else if (dtset%tfkinfunc==1.or.dtset%tfkinfunc==11.or.dtset%tfkinfunc==12) then
      MSG_WARNING('THOMAS FERMI')
      call vtorhotf(dtfil,dtset,energies%e_kinetic,energies%e_nonlocalpsp,&
@@ -1439,7 +1444,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
 !    Add the Fock contribution to E_xc and E_xcdc if required
      if (usefock==1) then
-       call fock_update_exc(energies%e_exactX,energies%e_fock,energies%e_fockdc)
+       energies%e_fockdc=two*energies%e_fock
      end if
 
 !    if the mixing is the ODA mixing, compute energy and new density here
@@ -1645,14 +1650,14 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &       psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,&
 &       paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
 &       pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp,&
-&       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+&       hyb_mixing=hybrid_mixing,hyb_mixing_sr=hybrid_mixing_sr,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 &       electronpositron=electronpositron)
 
      end if
 
 !    Add the Fock contribution to E_xc and E_xcdc if required
      if (usefock==1) then
-       call fock_update_exc(energies%e_exactX,energies%e_fock,energies%e_fockdc)
+       energies%e_fockdc=two*energies%e_fock
      end if
 
      call etotfor(atindx1,deltae,diffor,dtefield,dtset,&

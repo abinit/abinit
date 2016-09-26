@@ -408,8 +408,8 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
  grtn(:,:)=grl(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
  if (usefock==1 .and. associated(fock).and.fock%optfor) then
    grtn(:,:)=grtn(:,:)+fock%forces(:,:)
-   write(81,*) fock%forces
-   flush(81)
+write(81,*) fock%forces(:,:)
+write(81,*)grtn(:,:)
  end if
  if (ngrvdw==dtset%natom) grtn(:,:)=grtn(:,:)+grvdw(:,:)
 ! note that fionred is subtracted, because it really is a force and we need to
@@ -421,7 +421,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
 
 !Symmetrize explicitly for given space group and store in grhf :
  call sygrad(grhf,dtset%natom,grtn,dtset%nsym,symrec,indsym)
-
+write(81,*)grhf(:,:)
 !If residual forces are too large, there must be a problem: cancel them !
  if (dtset%usewvl==0.and.abs(dtset%densfor_pred)>0.and.abs(dtset%densfor_pred)/=5) then
    do iatom=1,dtset%natom
@@ -459,7 +459,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
  else
    fred = grtn
  end if
-
+write(81,*) fred
 !Conversion to cartesian coordinates (bohr) AND
 !Subtract off average force from each force component
 !to avoid spurious drifting of atoms across cell.
@@ -467,7 +467,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
 ! from a gradient (input) to a force (output)
 
  call fred2fcart(favg,fcart,fred,gprimd,dtset%jellslab,dtset%natom)
-
+write(81,*) fcart
 !Compute maximal force and maximal difference
  maxfor=zero;diffor=zero
  do iatom=1,dtset%natom
