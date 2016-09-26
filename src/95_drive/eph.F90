@@ -158,7 +158,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer :: ngfftc(18),ngfftf(18)
  integer,allocatable :: dummy_atifc(:)
  real(dp),parameter :: k0(3)=zero
- real(dp) :: nelect_per_spin(dtset%nsppol)
  real(dp) :: dielt(3,3),zeff(3,3,dtset%natom),n0(dtset%nsppol)
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
@@ -382,11 +381,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call ifc_outphbtrap(ifc,cryst,dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,dtfil%filnam_ds(4))
 
    ! BoltzTraP output files in GENEric format
-   ! TODO: ebands method
-   nelect_per_spin = ebands_nelect_per_spin(ebands)
-   call ebands_prtbltztrp(ebands, cryst, &
-&   ebands%eig, ebands%fermie, dtfil%filnam_ds(4), ebands%kptns, cryst%natom, ebands%nband(1), &
-&   nelect_per_spin, ebands%nkpt, ebands%nspinor, ebands%nsppol, cryst%nsym, cryst%rprimd, cryst%symrel)
+   call ebands_prtbltztrp(ebands, cryst, dtfil%filnam_ds(4))
  end if
 
  call cwtime(cpu,wall,gflops,"stop")

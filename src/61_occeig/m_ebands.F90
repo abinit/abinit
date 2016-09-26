@@ -4303,17 +4303,7 @@ end subroutine ebands_jdos
 !! INPUTS
 !!  ebands<ebands_t>=Band structure object.
 !!  cryst<cryst_t>=Info on the crystalline structure.
-!!  eigen(mband*nkpt*nsppol) = array for holding eigenvalues (hartree)
-!!  fermie = Fermi level
 !!  fname_radix = radix of file names for output
-!!  natom = number of atoms in cell.
-!!  nband = number of bands
-!!  nkpt = number of k points.
-!!  nsppol = 1 for unpolarized, 2 for spin-polarized
-!!  nsym = number of symmetries in space group
-!!  rprimd(3,3) = dimensional primitive translations for real space (bohr)
-!!  symrel = symmetry operations in reduced coordinates, real space
-!!  to be used in future  xred(3,natom) = reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
 !!  (only writing, printing)
@@ -4325,9 +4315,7 @@ end subroutine ebands_jdos
 !!
 !! SOURCE
 
-subroutine ebands_prtbltztrp(ebands, crystal, eigen, fermie, fname_radix, kpt, &
-&       natom, nband, nelec, nkpt, nspinor, nsppol, nsym, &
-&       rprimd, symrel, tau_k)
+subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -4341,33 +4329,26 @@ subroutine ebands_prtbltztrp(ebands, crystal, eigen, fermie, fname_radix, kpt, &
 !scalars
  type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: crystal
- integer, intent(in) :: natom, nsym, nband, nkpt, nsppol, nspinor
- real(dp), intent(in) :: fermie
  character(len=fnlen), intent(in) :: fname_radix
 !arrays
- real(dp), intent(in) :: nelec(ebands%nsppol)
- integer, intent(in) :: symrel(3,3,nsym)
- real(dp), intent(in) :: kpt(3,nkpt)
- real(dp), intent(in) :: eigen(nband, nkpt, nsppol)
- real(dp), intent(in) :: rprimd(3,3)
  real(dp), intent(in), optional :: tau_k(ebands%nsppol,ebands%nkpt,ebands%mband)
 
 !Local variables-------------------------------
 !scalars
- integer :: iout, isym, iband, isppol, ikpt
+ integer :: iout, isym, iband, isppol, ikpt, nsppol, nband
  real(dp),parameter :: ha2ryd=two
  character(len=fnlen) :: filename
  character(len=2) :: so_suffix
  character(len=500) :: msg
 !arrays
+ real(dp) :: nelec(ebands%nsppol)
  character(len=3) :: spinsuffix(ebands%nsppol)
 
 ! *************************************************************************
 
-#if 0
  nelec = ebands_nelect_per_spin(ebands)
  nsppol = ebands%nsppol
-#endif
+ nband = ebands%nband(1)
 
  so_suffix=""
  if (nsppol > 1 .or. ebands%nspinor > 1) so_suffix="so"
