@@ -2209,13 +2209,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  prtdos
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtdos',dt%prtdos,6,(/0,1,2,3,4,5/),iout)
 
-   if (dt%prtdos == 3 .and. (dt%npband > 1)) then
-     message = 'prtdos==3 and band parallelization are not compatible yet. Set npband=1 and use npfft'
-     MSG_ERROR_NOSTOP(message, ierr)
+   if (dt%prtdos == 3 .and. dt%npband > 1) then
+     if (dt%usepaw == 0) then
+       MSG_ERROR_NOSTOP("prtdos 3 and npband > 1 are not compatible. Use npfft.", ierr)
+     else if (dt%usepaw == 1 .and. dt%pawprtdos /= 2) then
+       MSG_ERROR_NOSTOP("prtdos 3 and npband > 1 are not compatible if pawprtdos/=2. Use npfft.", ierr)
+      end if
    end if
 ! for the moment prtdos 3,4,5 are not compatible with fft or band parallelization
    if (dt%prtdos > 3 .and. (dt%npfft > 1 .or. dt%npband > 1)) then
-     message = ' prtdos>3 and FFT or band parallelization are not compatible yet. Set prtdos <= 2  '
+     message = 'prtdos>3 and FFT or band parallelization are not compatible yet. Set prtdos <= 2'
      MSG_ERROR_NOSTOP(message, ierr)
    end if
 

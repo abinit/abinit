@@ -1651,7 +1651,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
 
 !Local variables-------------------------------
 !scalars
- integer :: ilm,iat,ipw,ixint,ll,mm,il,jlm, ierr
+ integer :: ilm,iat,ipw,ixint,ll,mm,il,jlm,ierr
  real(dp),parameter :: invsqrt2=one/sqrt2
  real(dp) :: doti, dotr, sum_all, dr, fact
  type(atomdata_t) :: atom
@@ -1662,12 +1662,17 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
  real(dp) :: sum_1atom(natsph),sum_1ll(mlang),sum_1lm(mlang**2)
  real(dp) :: func(nradintmax)
  real(dp) :: tmppsia(2,npw_k),tmppsim(2,npw_k),vect(2,npw_k) 
- real(dp),allocatable :: values(:,:,:)
+ real(dp),allocatable :: values(:,:,:,:)
 
 ! *************************************************************************
 
+ ! Workspace array (used to reduce the number of MPI communications if MPI-FFT)
+ ! One could reduce a bit the memory requirement by using non-blocking operations ...
+ ABI_STAT_MALLOC(values, (2, nradintmax, mlang**2, natsph), ierr)
+ ABI_CHECK(ierr==0, "oom in values")
+ values = zero
+
  sum_1lm_1atom = zero
- ABI_CALLOC(values, (2,nradintmax,mlang**2))
 
  do ll=0,mlang-1
    do mm=-ll,ll
@@ -1779,22 +1784,25 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
        end if
 
        ! Store results to reduce number of xmpi_sum calls if MPI-FFT
-       values(1, ixint, ilm) = dotr
-       values(2, ixint, ilm) = doti
+       values(1, ixint, ilm, iat) = dotr
+       values(2, ixint, ilm, iat) = doti
      end do ! ixint
 
    end do ! ilm
-
-   ! Multiply by r**2 and take norm, integrate
-   ! TODO: non-blocking or values, (2, nradintmax, mlang**2, natsph) ?
-   if (mpi_enreg%nproc_fft > 1) call xmpi_sum(values, mpi_enreg%comm_fft, ierr)
-   do ilm=1,mlang*mlang
-     do ixint=1,nradint(iat)
-        func(ixint) = rint(ixint)**2 * (values(1, ixint, ilm)**2 + values(2, ixint, ilm)**2)
-     end do
-     sum_1lm_1atom(ilm, iat) = simpson(dr, func(1:nradint(iat)))
-   end do
  end do ! iat
+
+ if (mpi_enreg%nproc_fft > 1) call xmpi_sum(values, mpi_enreg%comm_fft, ierr)
+
+ ! Multiply by r**2 and take norm, integrate
+ do iat=1,natsph
+    do ilm=1,mlang*mlang
+      do ixint=1,nradint(iat)
+        func(ixint) = rint(ixint)**2 * (values(1, ixint, ilm, iat)**2 + values(2, ixint, ilm, iat)**2)
+      end do
+      ! Here I should treat the case in which the last point /= rcut
+      sum_1lm_1atom(ilm, iat) = simpson(dr, func(1:nradint(iat)))
+    end do
+ end do
 
  ! Normalize with unit cell volume and include 4pi term coming from Rayleigh expansion.
  fact = four_pi**2 / ucvol
