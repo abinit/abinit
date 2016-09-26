@@ -408,7 +408,6 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
      ABI_ALLOCATE(cgj,(2,size_wf))
      ABI_ALLOCATE(work2,(2,size_wf))
      ABI_ALLOCATE(iddk,(2,size_wf))
-     iddk = zero
 
      offset_eig0 = mband*(ikpt-1+nkpt*(isppol-1))
 !     print *,"offset_eig0 = ",offset_eig0,'/',mband*nkpt*nsppol
@@ -478,6 +477,7 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
 ! **************************************************************************************************
 
        eig1_k_tmp(:) = eig1_k_stored(1+(jband-1)*2*nband_k:jband*2*nband_k)
+       iddk = zero
        if (i2pert==natom+2) then
          iddk(1,:) = -dudk(2,1+(jband-1)*size_wf:jband*size_wf)
          iddk(2,:) =  dudk(1,1+(jband-1)*size_wf:jband*size_wf)
