@@ -382,7 +382,7 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
 !        Copy work1 in "dudk"
          dudk(:,1+(iband-1)*size_wf:iband*size_wf)=work1(:,:)
 
-!      Read dudkde file
+!        Read dudkde file
 #ifndef DEV_MG_WFK
          call WffReadDataRec(eig1_k_tmp,ierr,2*nband_k,wffddk(file_index(3)))
          call WffReadDataRec(work1,ierr,2,size_wf,wffddk(file_index(3)))
@@ -544,10 +544,20 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
 
        iddk(1,:) = -dudkde(2,1+(jband-1)*size_wf:jband*size_wf)
        iddk(2,:) =  dudkde(1,1+(jband-1)*size_wf:jband*size_wf)
-       call getgh1c(berryopt,0,cwavef3,cwaveprj,work1,dum_grad_berry,work2,gs_hamkq,iddk,i2dir,i2pert,zero,&
-                    mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
-
-       call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cwavef1,work1,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+       if (i3pert==natom+2) then
+!        NOTE : Compute < u^(ip1) | ( H^(ip2) - eps^(0) S^(ip2) ) | u^(ip3) >
+         call getgh1c(berryopt,0,cwavef3,cwaveprj,work1,dum_grad_berry,work2,gs_hamkq,iddk,i2dir,i2pert,zero,&
+                      mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+         call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cwavef1,work1,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+       else if (i1pert==natom+2) then
+!        NOTE : Compute < u^(ip3) | ( H^(ip2) - eps^(0) S^(ip2) ) | u^(ip1) > and take the complex congujate
+         call getgh1c(berryopt,0,cwavef1,cwaveprj,work1,dum_grad_berry,work2,gs_hamkq,iddk,i2dir,i2pert,zero,&
+                      mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+         call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cwavef3,work1,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+         doti = -doti ! We want the conjugate
+       else
+         MSG_ERROR("dfptnl_pert with two phonon perturbations is not available yet. Change your input!")
+       end if
 
 ! **************************************************************************************************
 !      Compute sum_i Lambda_ij^(1) < u_i^(1) | u_j^(1)>

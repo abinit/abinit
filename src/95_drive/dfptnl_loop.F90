@@ -166,7 +166,7 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,g
  integer :: i1pert,i2dir,i2pert,i3dir,i3pert,iatom,idir_dkde,ierr,iexit,ifft,ii,index,ir
  integer :: ireadwf,itypat,mcg,mpsang,n1,n2,n3,n3xccc,nfftotf,nhat1grdim,nspden,nwffile
  integer :: option,optene,optorth,pert1case,pert2case,pert3case
- integer :: rdwrpaw,timrev,usexcnhat
+ integer :: rdwrpaw,second_idir,timrev,usexcnhat
  real(dp) :: dummy_real,ecut_eff
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf3i,fiwfddk,fnamewff(3)
@@ -490,13 +490,20 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,g
                      nwffile = 3
                      file_index(2) = i2dir+natom*3
                      idir_dkde = i2dir
-                     if (i3dir/=i2dir) then ! see m_rf2.F90 => getidirs
-                       if (i2dir==2.and.i3dir==3) idir_dkde = 4
-                       if (i2dir==1.and.i3dir==3) idir_dkde = 5
-                       if (i2dir==1.and.i3dir==2) idir_dkde = 6
-                       if (i2dir==3.and.i3dir==2) idir_dkde = 7
-                       if (i2dir==3.and.i3dir==1) idir_dkde = 8
-                       if (i2dir==2.and.i3dir==1) idir_dkde = 9
+                     if (i3pert==natom+2) then
+                       second_idir = i3dir
+                     else if (i1pert==natom+2) then
+                       second_idir = i1dir
+                     else
+                       MSG_ERROR("dfptnl_loop with two phonon perturbations is not available yet. Change your input!")
+                     end if
+                     if (second_idir/=i2dir) then ! see m_rf2.F90 => getidirs
+                       if (i2dir==2.and.second_idir==3) idir_dkde = 4
+                       if (i2dir==1.and.second_idir==3) idir_dkde = 5
+                       if (i2dir==1.and.second_idir==2) idir_dkde = 6
+                       if (i2dir==3.and.second_idir==2) idir_dkde = 7
+                       if (i2dir==3.and.second_idir==1) idir_dkde = 8
+                       if (i2dir==2.and.second_idir==1) idir_dkde = 9
                      end if
                      file_index(3) = idir_dkde+9+(dtset%natom+6)*3
                      fnamewff(2) = dtfil%fnamewffddk
