@@ -544,16 +544,6 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,level,pawrad,pawtab,
 & '--------------------------------------------------------------------------------',ch10
  call wrtout(ab_out,message,'COLL')
 
- if (gencond == 1) call psps_print(psps,std_out,dtset%prtvol)
-
- ! Write the PSPS.nc file and exit here if requested by the user.
- if (abs(dtset%prtpsps) == 1) then
-   if (xmpi_comm_rank(xmpi_world) == 0) call psps_ncwrite(psps, trim(dtfil%filnam_ds(4))//"_PSPS.nc")
-   if (dtset%prtpsps == -1) then
-     MSG_ERROR_NODUMP("prtpsps == -1 ==> aborting now")
-   end if
- end if
-
 !-------------------------------------------------------------
 ! Keep track of this call to the routine
 !-------------------------------------------------------------
@@ -583,6 +573,17 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,level,pawrad,pawtab,
    pspso_old(ipsp)=psps%pspso(ipsp)
    if(pspso_zero(ipsp)==0)pspso_zero(ipsp)=psps%pspso(ipsp)
  end do
+ psps%mproj = maxval(psps%indlmn(3,:,:))
+
+ if (gencond == 1) call psps_print(psps,std_out,dtset%prtvol)
+
+ ! Write the PSPS.nc file and exit here if requested by the user.
+ if (abs(dtset%prtpsps) == 1) then
+   if (xmpi_comm_rank(xmpi_world) == 0) call psps_ncwrite(psps, trim(dtfil%filnam_ds(4))//"_PSPS.nc")
+   if (dtset%prtpsps == -1) then
+     MSG_ERROR_NODUMP("prtpsps == -1 ==> aborting now")
+   end if
+ end if
 
  call timab(15,2,tsec)
 

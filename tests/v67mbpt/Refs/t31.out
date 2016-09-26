@@ -112,7 +112,7 @@ _ WF disk file :      1.197 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -1175,7 +1175,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     183.125     183.024
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 180 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 186 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 179 iterations.
- >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 187 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 183 iterations.
  >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 184 iterations.
  Writing EXC Macroscopic dielectric function to file: t31o_DS5_EXC_MDF
   
