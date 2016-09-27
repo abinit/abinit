@@ -768,7 +768,7 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
        write(unitdos_arr(natsph+iat), "(a)")trim(message)
      end do
    else if(prtdos==5)then
-     write(message, '(a)' )'# energy(Ha)     DOS up,up  up,dn  dn,up  up,up  sigma_x sigma_y sigma_z  and integrated DOS components'
+     write(message, '(a)' )'# energy(Ha)     DOS up,up  up,dn  dn,up  dn,dn  sigma_x sigma_y sigma_z  and integrated DOS components'
      write(unitdos, "(a)")trim(message)
 
    end if ! prtdos value
@@ -1076,6 +1076,8 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
  if (dos%paw_dos_flag==1) then
    ABI_ALLOCATE(total_dos_paw1,(nene,ndosfraction))
    ABI_ALLOCATE(total_dos_pawt1,(nene,ndosfraction))
+   total_dos_paw1=zero
+   total_dos_pawt1=zero
  end if
  if (dos%prtdosm>=1) then
    ABI_ALLOCATE(partial_dos_m,(nene,ndosfraction*mbesslang,dtset%mband))
@@ -1118,9 +1120,8 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
  end do
 
 !calculate DOS and integrated DOS projected with the input dos_fractions
- total_dos_paw1=0
- total_dos_pawt1=0
- total_dos=0
+
+ total_dos=zero
  enex=enemin
  do iene=1,nene
    arg(:)=(enex-eigen(1:bantot))*tsmearinv
@@ -1131,10 +1132,12 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
        do iband=1,dtset%nband(ikpt)
          index=index+1        
          do ifract=1,ndosfraction
-           total_dos_paw1(iene,ifract)=total_dos_paw1(iene,ifract)+&
-&           dos%fractions_paw1(ikpt,iband,isppol,ifract)*dtset%wtk(ikpt) * max_occ*vals(index)*tsmearinv
-           total_dos_pawt1(iene,ifract)=total_dos_pawt1(iene,ifract)+&
-&           dos%fractions_pawt1(ikpt,iband,isppol,ifract)*dtset%wtk(ikpt) * max_occ*vals(index)*tsmearinv
+           if (dos%paw_dos_flag==1) then
+             total_dos_paw1(iene,ifract)=total_dos_paw1(iene,ifract)+&
+&             dos%fractions_paw1(ikpt,iband,isppol,ifract)*dtset%wtk(ikpt) * max_occ*vals(index)*tsmearinv
+             total_dos_pawt1(iene,ifract)=total_dos_pawt1(iene,ifract)+&
+&             dos%fractions_pawt1(ikpt,iband,isppol,ifract)*dtset%wtk(ikpt) * max_occ*vals(index)*tsmearinv
+           end if
            total_dos(iene,ifract) = total_dos(iene,ifract) + &
 &           dos%fractions(ikpt,iband,isppol,ifract)*dtset%wtk(ikpt)*max_occ * vals(index)*tsmearinv
 !          write(99,*) iene,total_dos_paw1(iene,ifract),total_dos_pawt1(iene,ifract),total_dos(iene,ifract)
@@ -1147,7 +1150,7 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
  end do   ! iene
  
 
- write(std_out,*) 'about to write to the DOS file '
+ !write(std_out,*) 'about to write to the DOS file '
 !Write the DOS value in the DOS file
  do isppol=1,nsppol
    enex=enemin
