@@ -602,6 +602,9 @@ end subroutine tetra_write
 !!
 !! SOURCE
 
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! THIS FUNCTION IS DEPRECATED, USE tetra_blochl_weights
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 subroutine get_tetra_weight(eigen_in,enemin,enemax,max_occ,nene,nkpt,tetrahedra,&
   bcorr,tweight,dtweightde,comm)
 
