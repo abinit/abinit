@@ -5,9 +5,8 @@
 !! dos_hdr_write
 !!
 !! FUNCTION
-!! Write the header of the DOS files, for both
-!! smearing and tetrahedron methods. Also compute the
-!! minimum, maximum energies, the energy increment
+!! Write the header of the DOS files, for both smearing and tetrahedron methods. 
+!! Also compute the minimum, maximum energies, the energy increment
 !! and the number of points for the DOS.
 !!
 !! COPYRIGHT
@@ -38,8 +37,6 @@
 !! enemax=maximal value of the DOS energy argument
 !! enemin=minimal value of the DOS energy argument
 !! nene=number of DOS energy argument
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      gaus_dos,getnel,tetrahedron
