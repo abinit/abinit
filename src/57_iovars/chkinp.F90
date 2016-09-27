@@ -2235,6 +2235,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    if (dt%prtdos == 5 .and. dt%npspinor /= 1) then
      MSG_ERROR_NOSTOP('prtdos==5 not available with npspinor==2', ierr)
    end if
+   ! Consistency check for prtdos 5 with PAW
+   if (dt%prtdos == 5 .and. dt%usepaw == 1) then
+     if (dt%pawprtdos == 2) then
+       MSG_ERROR_NOSTOP('prtdos==5 is not compatible with pawprtdos 2', ierr)
+     end if
+     MSG_ERROR_NOSTOP('prtdos==5 is not available with PAW', ierr)
+   end if
 
 !  prtdosm
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtdosm',dt%prtdosm,3,(/0,1,2/),iout)

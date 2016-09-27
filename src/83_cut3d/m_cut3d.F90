@@ -1842,7 +1842,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  type(wfk_t) :: Wfk
  type(jlspline_t) :: jlspl
 !arrays
- integer :: atindx(natom),iatsph(natom),ngfft(18),nradint(natom)
+ integer :: atindx(natom),iatsph(natom),ngfft(18),nradint(natom),mlang_type(ntypat)
  integer,allocatable :: gbound(:,:),iindex(:),kg(:,:),kg_dum(:,:),kg_k(:,:)
  integer,allocatable :: npwarr1(:),npwarrk1(:),npwtot1(:)
  real(dp) :: cmax(natom),gmet(3,3),gprimd(3,3)
@@ -2222,8 +2222,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        ratsph_arr(:)=ratsph
 
        rc_ylm = 1 ! Real or Complex spherical harmonics.
+       mlang_type = 5
        call recip_ylm (bess_fit,cgcband,istwfk(ckpt),&
-&       nradint,nradintmax,mlang,mpi_enreg,mpw,natom,npw_k,ph3d,prtsphere,rint,&
+&       nradint,nradintmax,mlang,mpi_enreg,mpw,natom,typat,mlang_type,npw_k,ph3d,prtsphere,rint,&
 &       ratsph_arr,rc_ylm,sum_1atom_1ll,sum_1atom_1lm,ucvol,ylm_k,znucl_atom)
 
        call dens_in_sph(cmax,cgcband,gmet,istwfk(ckpt),&

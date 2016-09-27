@@ -213,7 +213,7 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
        end do
      end do
 
-!    LOOP OVER ATOMS
+!    LOOP OVER ATOMS (natsph_extra is not included on purpose)
      do iat=1,dtset%natsph
        iatom=dtset%iatsph(iat)
        itypat= dtset%typat(iatom)

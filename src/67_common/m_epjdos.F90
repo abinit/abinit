@@ -109,6 +109,10 @@ module m_epjdos
 
    integer :: nkpt, mband, nsppol
    ! Used to dimension arrays
+  
+   integer,allocatable :: mlang_type(:)
+   ! mlang_type(ntypat + natsph_extra)
+   ! Max L+1 used in LM-DOS for each atom type 
 
    real(dp),allocatable :: fractions(:,:,:,:)
    ! fractions(nkpt,mband,nsppol,ndosfraction))
@@ -172,9 +176,7 @@ type(epjdos_t) function epjdos_new(dtset, psps, pawtab) result(new)
 
 !Local variables-------------------------------
 !scalars
- integer :: ierr !,itypat
-!arrays
- !integer :: lmax_type(dtset%ntypat)
+ integer :: ierr,itypat,iat
 
 ! *********************************************************************
 
@@ -206,32 +208,34 @@ type(epjdos_t) function epjdos_new(dtset, psps, pawtab) result(new)
  ! and then printed to file at the end.
  new%mbesslang = 1
  if (new%partial_dos_flag==1 .or. new%fatbands_flag==1) then
-   new%mbesslang = 5   
+
+   ABI_MALLOC(new%mlang_type, (dtset%ntypat + dtset%natsph_extra))
+   new%mlang_type = 0
+
    ! TODO: Could use mbesslang = 4 or compute it from psps/pawtab
-#if 0
+   ! Increment by one (could underestimate if vloc = vlmax)
    if (dtset%usepaw == 0) then
-     do itypat=1,dtset%ntypat
-       lmax_type(itypat) = maxval(psps%indlmn(1, :, itypat))
+     do iat=1,dtset%natsph
+       itypat = dtset%typat(dtset%iatsph(iat))
+       new%mlang_type(itypat) = 1 + maxval(psps%indlmn(1, :, itypat))
      end do
    else 
-      lmax_type = (pawtab(:)%l_size - 1) / 2
+     do iat=1,dtset%natsph
+       itypat= dtset%typat(dtset%iatsph(iat))
+       new%mlang_type(itypat) = 1 + (pawtab(itypat)%l_size - 1) / 2
+     end do
    end if
-   lmax = 0
-   do iat=1,dtset%natsph
-     itypat= dtset%typat(dtset%iatsph(iat))
-     lmax = max(lmax, lmax_type(itypat))
-   end do
-   ! Increment by one (could underestimate if vloc = vlmax)
-   lmax = lmax + 2
-   lmax = min(lmax, 5) 
-   ! Up to l=g if we have natsph_extra.
-   if (dtset%natsph_extra > 0) lmax = 5
-   new%mbesslang = lmax
-#endif
 
+   ! Up to l=g if we have natsph_extra.
+   if (dtset%natsph_extra > 0) new%mlang_type(dtset%ntypat+1:) = 5
+
+   new%mlang_type = 5  ! This is to preserve the old implementation
+   new%mbesslang = maxval(new%mlang_type)
    new%ndosfraction = (dtset%natsph + dtset%natsph_extra) * new%mbesslang
+
  else if (new%partial_dos_flag == 2) then
    new%ndosfraction = 7
+
  else
    new%ndosfraction = 1
    new%mbesslang = 0
@@ -286,6 +290,12 @@ subroutine epjdos_free(self)
 
 ! *********************************************************************
 
+ ! integer
+ if (allocated(self%mlang_type)) then
+   ABI_FREE(self%mlang_type)
+ end if
+
+ ! real
  if (allocated(self%fractions)) then
    ABI_FREE(self%fractions)
  end if
@@ -1582,6 +1592,8 @@ end subroutine dos_degeneratewfs
 !!  mpi_enreg=information about MPI parallelization
 !!  mpw=Maximum number of planewaves. Used to dimension bess_fit
 !!  natsph=number of atoms around which ang mom projection has to be done 
+!!  typat_extra(natsph)=Type of each atom. ntypat + 1 if empty sphere
+!!  mlang_type(ntypat + natsph_extra)=Max L+1 for each atom type
 !!  npw_k=number of plane waves for this kpt
 !!  ph3d(2,npw_k,natsph)=3-dim structure factors, for each atom and plane wave.
 !!  prtsphere= if 1, print a complete analysis of the angular momenta in atomic spheres
@@ -1612,7 +1624,8 @@ end subroutine dos_degeneratewfs
 !! SOURCE
 
 subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enreg,&
-&  mpw,natsph,npw_k,ph3d,prtsphere,rint,rmax,rc_ylm,sum_1ll_1atom,sum_1lm_1atom,ucvol,ylm_k,znucl_sph)
+&  mpw,natsph, typat_extra, mlang_type, npw_k,ph3d,prtsphere,rint,rmax,&
+&  rc_ylm,sum_1ll_1atom,sum_1lm_1atom,ucvol,ylm_k,znucl_sph)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1631,7 +1644,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
- integer,intent(in) :: nradint(natsph)
+ integer,intent(in) :: nradint(natsph),typat_extra(natsph),mlang_type(:)
  real(dp),intent(in) :: bess_fit(mpw,nradintmax,mlang),cg_1band(2,npw_k)
  real(dp),intent(in) :: ph3d(2,npw_k,natsph),rint(nradintmax)
  real(dp),intent(in) :: rmax(natsph),ylm_k(npw_k,mlang*mlang)
@@ -1641,7 +1654,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
 
 !Local variables-------------------------------
 !scalars
- integer :: ilm,iat,ipw,ixint,ll,mm,il,jlm,ierr
+ integer :: ilm,iat,ipw,ixint,ll,mm,il,jlm,ierr,lm_size,itypat
  real(dp),parameter :: invsqrt2=one/sqrt2
  real(dp) :: doti, dotr, sum_all, dr, fact
  type(atomdata_t) :: atom
@@ -1673,7 +1686,9 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
 
  ! Big loop on all atoms
  do iat=1,natsph
-   dr = rmax(iat)/(nradint(iat)-1)
+   itypat = typat_extra(iat)
+   lm_size = mlang_type(itypat) ** 2
+   dr = rmax(iat) / (nradint(iat)-1)
 
    ! u(G) e^{i(k+G).Ra}
    ! Temporary array for part which depends only on iat
@@ -1687,7 +1702,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
    ! Take into account the fact that ylm_k are REAL spherical harmonics, see initylmg.f
    ! For time-reversal states, detailed treatment show that only the real or imaginary
    ! part of tmppsia is needed here, depending on l being even or odd: only one of the coef is 1, the other 0
-   do ilm=1,mlang*mlang
+   do ilm=1,lm_size
      il = ilang(ilm)
      ll = ilang(ilm) - 1
      mm = ilm - (ll+1)**2 + ll
@@ -1785,13 +1800,15 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
 
  ! Multiply by r**2 and take norm, integrate
  do iat=1,natsph
-    do ilm=1,mlang*mlang
-      do ixint=1,nradint(iat)
-        func(ixint) = rint(ixint)**2 * (values(1, ixint, ilm, iat)**2 + values(2, ixint, ilm, iat)**2)
-      end do
-      ! Here I should treat the case in which the last point /= rcut
-      sum_1lm_1atom(ilm, iat) = simpson(dr, func(1:nradint(iat)))
-    end do
+   itypat = typat_extra(iat)
+   lm_size = mlang_type(itypat) ** 2
+   do ilm=1,lm_size
+     do ixint=1,nradint(iat)
+       func(ixint) = rint(ixint)**2 * (values(1, ixint, ilm, iat)**2 + values(2, ixint, ilm, iat)**2)
+     end do
+     ! Here I should treat the case in which the last point /= rcut
+     sum_1lm_1atom(ilm, iat) = simpson(dr, func(1:nradint(iat)))
+   end do
  end do
 
  ! Normalize with unit cell volume and include 4pi term coming from Rayleigh expansion.
@@ -1799,7 +1816,9 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
  sum_1lm_1atom = fact * sum_1lm_1atom
  sum_1ll_1atom = zero
  do iat=1,natsph
-   do ilm=1,mlang*mlang
+   itypat = typat_extra(iat)
+   lm_size = mlang_type(itypat) ** 2
+   do ilm=1,lm_size
      il = ilang(ilm)
      sum_1ll_1atom(il, iat) = sum_1ll_1atom(il, iat) + sum_1lm_1atom(ilm, iat)
    end do

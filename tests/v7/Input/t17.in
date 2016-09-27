@@ -49,7 +49,6 @@ nshiftk   4
 #%% description = 
 #%%   Test of the extension of the pspcod=8 input format to include
 #%%   spin-orbit coupling with multiple non-local projectors and pseudized valence charge density
-#%%   band structure of fcc Pt is computed at Gamma, X, and L.  
 #%%   The relativistic extension is documented in the code package.
 #%%   The Pt 5s and 5p semi-cores are treated as valence.
 #%%   A complete description of the input format is avaiable in  doc/psp_infos/psp8_info.txt.

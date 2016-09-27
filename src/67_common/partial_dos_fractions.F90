@@ -122,7 +122,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
  type(MPI_type) :: mpi_enreg_seq
 !arrays
  integer :: iindex(dtset%mpw),nband_tmp(1),npwarr_tmp(1)
- integer,allocatable :: iatsph(:),nradint(:),atindx(:),kg_k(:,:)
+ integer,allocatable :: iatsph(:),nradint(:),atindx(:),typat_extra(:),kg_k(:,:)
  real(dp) :: kpoint(3),spin(3),ylmgr_dum(1)
  real(dp) :: xfit(dtset%mpw),yfit(dtset%mpw)
  real(dp),allocatable :: ylm_k(:,:)
@@ -137,7 +137,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
 
  ! for the moment, only support projection on angular momenta
  if (dos%partial_dos_flag /= 1 .and. dos%partial_dos_flag /= 2) then
-   write(std_out,*) 'Error : partial_dos_fractions only supports angular '
+   write(std_out,*) 'Error: partial_dos_fractions only supports angular '
    write(std_out,*) ' momentum projection and spinor components for the moment. return to outscfcv'
    write(std_out,*) ' partial_dos = ', dos%partial_dos_flag
    return
@@ -181,6 +181,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
    natsph_tot = dtset%natsph + dtset%natsph_extra
 
    ABI_ALLOCATE(iatsph, (natsph_tot))
+   ABI_ALLOCATE(typat_extra, (natsph_tot))
    ABI_ALLOCATE(ratsph, (natsph_tot))
    ABI_ALLOCATE(znucl_sph, (natsph_tot))
    ABI_ALLOCATE(nradint, (natsph_tot))
@@ -195,29 +196,32 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
    iatsph(1:dtset%natsph) = dtset%iatsph(1:dtset%natsph)
    do iatom=1,dtset%natsph
      itypat = dtset%typat(iatsph(iatom))
+     typat_extra(iatom) = itypat
      ratsph(iatom) = dtset%ratsph(itypat)
      znucl_sph(iatom) = dtset%znucl(itypat)
    end do
 
-   ! fictitious atoms are declared with %natsph_extra, %ratsph_extra and %xredsph_extra(3, dtset%natsph_extra)
-   ! they have atom index natom + ii
+   ! fictitious atoms are declared with 
+   ! %natsph_extra, %ratsph_extra and %xredsph_extra(3, dtset%natsph_extra)
+   ! they have atom index (natom + ii) and itype = ntypat + 1
    do iatom=1,dtset%natsph_extra
+     typat_extra(iatom+dtset%natsph) = dtset%ntypat + 1
      ratsph(iatom+dtset%natsph) = dtset%ratsph_extra
-     znucl_sph(iatom+dtset%natsph) = 0
+     znucl_sph(iatom+dtset%natsph) = zero
      iatsph(iatom+dtset%natsph) = dtset%natom + iatom
    end do
 
-!  init bessel function integral for recip_ylm max ang mom + 1
+   ! init bessel function integral for recip_ylm max ang mom + 1
    ABI_ALLOCATE(sum_1atom_1ll,(dos%mbesslang,natsph_tot))
    ABI_ALLOCATE(sum_1atom_1lm,(dos%mbesslang**2,natsph_tot))
 
-   ! TODO: ecuteff instead of ecut?
-   kpgmax = sqrt(dtset%ecut)
+   ! Note ecuteff instead of ecut.
+   kpgmax = sqrt(dtset%ecut * dtset%dilatmx**2)
    rmax = zero; bessargmax = zero; nradintmax = 0
    do iatom=1,natsph_tot
-     rmax = max(rmax,ratsph(iatom))
+     rmax = max(rmax, ratsph(iatom))
      bessarg = ratsph(iatom)*two_pi*kpgmax
-     bessargmax = max(bessargmax,bessarg)
+     bessargmax = max(bessargmax, bessarg)
      nradint(iatom) = int (bessarg / bessint_delta) + 1
      nradintmax = max(nradintmax,nradint(iatom))
    end do
@@ -318,7 +322,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
            shift_cg = shift_sk + shift_b
 
            call recip_ylm(bess_fit, cg(:,shift_cg+1:shift_cg+npw_k), dtset%istwfk(ikpt),&
-&           nradint, nradintmax,dos%mbesslang, mpi_enreg, dtset%mpw, natsph_tot, &
+&           nradint, nradintmax,dos%mbesslang, mpi_enreg, dtset%mpw, natsph_tot, typat_extra, dos%mlang_type,&
 &           npw_k,ph3d, prtsphere0, rint, ratsph, rc_ylm, sum_1atom_1ll, sum_1atom_1lm,&
 &           crystal%ucvol, ylm_k, znucl_sph)
 
@@ -371,6 +375,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
    ABI_DEALLOCATE(atindx)
    ABI_DEALLOCATE(bess_fit)
    ABI_DEALLOCATE(iatsph)
+   ABI_DEALLOCATE(typat_extra)
    ABI_DEALLOCATE(nradint)
    ABI_DEALLOCATE(ph1d)
    ABI_DEALLOCATE(phkxred)
@@ -394,6 +399,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
      MSG_WARNING("spinor projection with spinor parallelization is not coded. Not calculating projections.")
      return
    end if
+   ABI_CHECK(mpi_enreg%paral_spinor == 0, "prtdos 5 does not support spinor parallelism")
 
    ! FIXME: WHAT THE FUCK!
    mcg_disk = dtset%mpw*my_nspinor*dtset%mband
