@@ -1008,6 +1008,7 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
  integer :: mbesslang,ndosfraction
  real(dp) :: buffer,deltaene,enemax,enemin,integral_DOS,max_occ,enex,tsmearinv,tsmear,limit_occ,tratio
  real(dp) :: dblsmr,dsqrpi,increm,xx
+ real(dp) :: cpu,wall,gflops
  logical :: bigDOS
  character(len=10) :: tag
  character(len=500) :: frmt,message
@@ -1031,6 +1032,8 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
  tsmearinv=one/tsmear
  mbesslang = dos%mbesslang
  ndosfraction = dos%ndosfraction
+
+ call cwtime(cpu, wall, gflops, "start")
 
 !Open the DOS file
  ABI_ALLOCATE(unitdos_arr,(natsph))
@@ -1265,6 +1268,10 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
  do iat=1,natsph
    close(unitdos_arr(iat))
  end do
+
+ call cwtime(cpu,wall,gflops,"stop")
+ write(msg,'(2(a,f8.2),a)')" gaus_dos: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
+ call wrtout(std_out,message,"PERS")
 
  ABI_DEALLOCATE(unitdos_arr)
  ABI_DEALLOCATE(partial_dos)
