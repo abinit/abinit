@@ -45,7 +45,7 @@ module m_epjdos
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_time,           only : cwtime
  use m_io_tools,       only : open_file
- use m_numeric_tools,  only : simpson
+ use m_numeric_tools,  only : simpson, simpson_int
  use m_fstrings,       only : int2char4
  use m_pawtab,         only : pawtab_type
 
@@ -509,7 +509,6 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
    if (open_file(fildata,message,newunit=unitdos,status='unknown',form='formatted') /= 0) then
      MSG_ERROR(message)
    end if
-   rewind(unitdos)
 
  else if (dtset%prtdos == 3) then
    ABI_ALLOCATE(unitdos_arr,(natsph+natsph_extra))
@@ -520,7 +519,6 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
      if (open_file(tmpfil, message, newunit=unitdos_arr(iat), status='unknown',form='formatted') /= 0) then
        MSG_ERROR(message)
      end if 
-     rewind(unitdos_arr(iat))
      write(std_out,*) 'opened file : ', trim(tmpfil), '  unit', unitdos_arr(iat)
    end do
 !  do extra spheres in vacuum too
@@ -533,7 +531,6 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
      if (open_file(tmpfil, message, newunit=unitdos_arr(natsph+iat), status='unknown',form='formatted') /= 0) then
        MSG_ERROR(message)
      end if
-     rewind(unitdos_arr(natsph+iat))
      write(std_out,*) 'opened file : ', trim(tmpfil), '  unit', unitdos_arr(natsph+iat)
    end do
  end if
@@ -1016,7 +1013,7 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
 !scalars
  integer,allocatable :: unitdos_arr(:)
  real(dp) :: xgrid(-nptsdiv2:nptsdiv2),smdfun(-nptsdiv2:nptsdiv2,2)
- real(dp),allocatable :: vals(:),arg(:),derfun(:),partial_dos(:,:,:),integ_dos(:,:,:),total_dos(:,:)
+ real(dp),allocatable :: vals(:),arg(:),derfun(:),partial_dos(:,:,:),total_dos(:,:) !integ_dos(:,:,:),
  real(dp),allocatable :: total_integ_dos(:,:),total_dos_paw1(:,:),total_dos_pawt1(:,:)
  real(dp),allocatable :: integ_dos_m(:,:,:),partial_dos_m(:,:,:)
  real(dp),allocatable :: total_dos_m(:,:),total_integ_dos_m(:,:)
@@ -1044,13 +1041,10 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
    if (open_file(tmpfil, message, newunit=unitdos_arr(iat), status='unknown',form='formatted') /= 0) then
      MSG_ERROR(message)
    end if
-   rewind(unitdos_arr(iat))
-   write(std_out,*) 'opened file : ', tmpfil, 'unit', unitdos_arr(iat)
  end do
 
 
 !Write the header of the DOS file, and determine the energy range and spacing
-
  buffer=0.01_dp ! Size of the buffer around the min and max ranges
  
  do iat=1,natsph
@@ -1064,12 +1058,9 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
  ABI_ALLOCATE(derfun,(bantot))
  ABI_ALLOCATE(vals,(bantot))
  
-!DEBUG
-!write(std_out,*) ' ndosfraction,dtset%mband,dtset%nkpt,nene',&
-!&              ndosfraction,dtset%mband,dtset%nkpt,nene
-!ENDDEBUG
+!write(std_out,*) ' ndosfraction,dtset%mband,dtset%nkpt,nene'ndosfraction,dtset%mband,dtset%nkpt,nene
  ABI_ALLOCATE(partial_dos,(nene,ndosfraction,dtset%mband))
- ABI_ALLOCATE(integ_dos,(nene,ndosfraction,dtset%mband))
+ !ABI_ALLOCATE(integ_dos,(nene,ndosfraction,dtset%mband))
  ABI_ALLOCATE(total_dos,(nene,ndosfraction))
  ABI_ALLOCATE(total_integ_dos,(nene,ndosfraction))
 
@@ -1087,11 +1078,8 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
  end if
  
 !Get maximum occupation value (2 or 1)
- if (dtset%nspinor == 1 .and. dtset%nsppol == 1) then
-   max_occ = two
- else
-   max_occ = one
- end if
+ max_occ = one
+ if (dtset%nspinor == 1 .and. dtset%nsppol == 1) max_occ = two
 
 !Define xgrid and gaussian on smdfun following getnel
  limit_occ=6.0_dp
@@ -1112,7 +1100,7 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
  do ii=-nptsdiv2,nptsdiv2
    xgrid(ii)=ii*increm
  end do
- dsqrpi=1.0_dp/sqrt(pi)
+ dsqrpi=one/sqrt(pi)
  do ii=0,nptsdiv2
    xx=xgrid(ii)
    smdfun( ii,1)=dsqrpi*exp(-xx**2)
@@ -1120,7 +1108,6 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
  end do
 
 !calculate DOS and integrated DOS projected with the input dos_fractions
-
  total_dos=zero
  enex=enemin
  do iene=1,nene
@@ -1148,7 +1135,10 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
 !  write(99,*) iene,total_dos_paw1(iene,1),total_dos_pawt1(iene,1),total_dos(iene,1)
    enex=enex+deltaene
  end do   ! iene
- 
+
+ do ifract=1,ndosfraction
+   call simpson_int(nene,deltaene,total_dos(:,ifract), total_integ_dos(:, ifract))
+ end do
 
  !write(std_out,*) 'about to write to the DOS file '
 !Write the DOS value in the DOS file
@@ -1219,12 +1209,8 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
      end if
      do iene=1,nene
        do iat=1,natsph
-!        DEBUG
-!        write(message, '(i6,5f9.4,10x,5f7.2))') iene-1, &
-!        &     total_dos(iene,iat*5-2)
-!        ENDDEBUG
-!        Note the upper limit, to be
-!        consistent with the format. The use of "E" format is not adequate,
+!        write(message, '(i6,5f9.4,10x,5f7.2))') iene-1, total_dos(iene,iat*5-2)
+!        Note the upper limit, to be consistent with the format. The use of "E" format is not adequate,
 !        for portability of the self-testing procedure.
          if (dos%prtdosm==0) then
            write(message,fmt=frmt) enex, &
@@ -1273,12 +1259,12 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
  end do
 
  call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2),a)')" gaus_dos: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
+ write(message,'(2(a,f8.2),a)')" gaus_dos: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
  call wrtout(std_out,message,"PERS")
 
  ABI_DEALLOCATE(unitdos_arr)
  ABI_DEALLOCATE(partial_dos)
- ABI_DEALLOCATE(integ_dos)
+ !ABI_DEALLOCATE(integ_dos)
  ABI_DEALLOCATE(total_dos)
  ABI_DEALLOCATE(total_integ_dos)
 
@@ -1292,10 +1278,6 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
    ABI_DEALLOCATE(total_dos_paw1)
    ABI_DEALLOCATE(total_dos_pawt1)
  end if
-
-!DEBUG
-!write(std_out,*)' gaus_dos : exit '
-!ENDDEBUG
 
 end subroutine gaus_dos
 !!***
