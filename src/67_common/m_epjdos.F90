@@ -392,7 +392,7 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: bcorr0=0
- integer :: iat,iband,iene,ifract,ikpt,isppol,natsph,natsph_extra,nkpt,nsppol
+ integer :: iat,iband,iene,ifract,ikpt,isppol,natsph,natsph_extra,nkpt,nsppol,i1,i2
  integer :: nene,nkpt_fullbz,prtdos,unitdos,ierr,prtdosm,paw_dos_flag,mbesslang,ndosfraction
  real(dp),parameter :: dos_max=9999.9999_dp
  real(dp) :: buffer,deltaene,enemax,enemin,enex,integral_DOS,max_occ,rcvol
@@ -462,6 +462,10 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
 
  call cwtime(cpu, wall, gflops, "start")
 
+ ! TODO
+ !call tetra_from_kptrlatt(tetra, crystal, dtset%kptopt, dtset%kptrlatt, &
+ !                         dtset%nshiftk, dtset%shiftk, dtset%nkpt, dtset%kpt)
+
 ! Calculate nkpt_fullbz
  nkpt_fullbz= dtset%kptrlatt(1,1)*dtset%kptrlatt(2,2)*dtset%kptrlatt(3,3) &
 & +dtset%kptrlatt(1,2)*dtset%kptrlatt(2,3)*dtset%kptrlatt(3,1) &
@@ -503,7 +507,7 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
 
  natsph=dtset%natsph; natsph_extra=dtset%natsph_extra
 
-!Open the DOS file
+ ! Open the DOS file
  if (dtset%prtdos == 2 .or. dtset%prtdos == 5) then
    if (open_file(fildata,message,newunit=unitdos,status='unknown',form='formatted') /= 0) then
      MSG_ERROR(message)
@@ -738,41 +742,48 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
 !  Write the DOS value in the DOS file
 !  Print the data for this energy. Note the upper limit (dos_max), to be consistent with the format. 
 !  The use of "E" format is not adequate, for portability of the self-testing procedure.
-   if(prtdos==2)then
+   if (prtdos==2) then
+     ! E, DOS, IDOS
      do iene=1,nene
-       write(unitdos, '(f11.5,5f10.4,10x,5f8.2)') enex, min(total_dos(iene,:), dos_max), total_integ_dos(iene,:)
+       write(unitdos, '(f11.5,1x,2(f10.4,1x))') &
+&        enex, min(total_dos(iene,:), dos_max), total_integ_dos(iene,:)
        enex=enex+deltaene
      end do
-   else if(prtdos==3)then
+   else if (prtdos==3) then
+     ! E, DOS(L=1,LMAX), IDOS(L=1,LMAX)
+     ! Here we assume mpsang = 5 in the format.
      if (paw_dos_flag/=1.or.dtset%pawprtdos==2) then
-       frmt='(f11.5,5f9.4,10x,5f8.2,10x,25f8.2)'
-       if (bigDOS) frmt='(f11.5,5f10.4,10x,5f8.2,10x,25f8.2)'
-!      for extra atoms in vacuum need more precision
-       frmt_extra='(f11.5,5f20.16,10x,5f20.16,10x,25f20.16)'
+       frmt = '(f11.5,1x,5(f9.4,1x),10x,5(f8.2,1x),10x,25(f8.2,1x))'
+       if (bigDOS) frmt = '(f11.5,1x,5(f10.4,1x),10x,5(f8.2,1x),10x,25(f8.2,1x))'
+       ! for extra atoms in vacuum need more precision
+       frmt_extra = '(f11.5,1x,5(f20.16,1x),10x,5(f20.16,1x),10x,25(f20.16,1x))'
 
        do iene=1,nene
          do iat=1,natsph
            if (prtdosm==0) then
+             i1 = (iat-1)*mbesslang+1; i2 = iat*mbesslang 
              write(unitdos_arr(iat), fmt=frmt) enex, &
-&             min(total_dos(iene,(iat-1)*mbesslang+1:iat*mbesslang), dos_max), &
-&             total_integ_dos(iene,(iat-1)*mbesslang+1:iat*mbesslang)
+&             min(total_dos(iene, i1:i2), dos_max), total_integ_dos(iene, i1:i2)
            else
+             i1 = (iat-1)*mbesslang+1; i2 = iat*mbesslang
              write(unitdos_arr(iat), fmt=frmt) enex, &
-&             min(total_dos(iene,(iat-1)*mbesslang+1:iat*mbesslang), dos_max),&
-&             total_integ_dos(iene,(iat-1)*mbesslang+1:iat*mbesslang),&
+&             min(total_dos(iene, i1:i2), dos_max),&
+&             total_integ_dos(iene, i1:i2),&
 &             min(total_dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2), dos_max)
            end if
          end do
 
          do iat=natsph+1,natsph+natsph_extra
            if (prtdosm==0) then
+             i1 = (iat-1)*mbesslang+1; i2 = iat*mbesslang
              write(unitdos_arr(iat), fmt=frmt_extra) enex, &
-&             total_dos(iene,(iat-1)*mbesslang+1:iat*mbesslang), &
-&             total_integ_dos(iene,(iat-1)*mbesslang+1:iat*mbesslang)
+&             total_dos(iene, i1:i2), &
+&             total_integ_dos(iene, i1:i2)
            else
+             i1 = (iat-1)*mbesslang+1; i2 = iat*mbesslang
              write(unitdos_arr(iat), fmt=frmt_extra) enex, &
-&             total_dos(iene,(iat-1)*mbesslang+1:iat*mbesslang),&
-&             total_integ_dos(iene,(iat-1)*mbesslang+1:iat*mbesslang),&
+&             total_dos(iene, i1:i2),&
+&             total_integ_dos(iene, i1:i2),&
 &             total_dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2)
            end if
          end do
@@ -781,42 +792,42 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
        end do
 
      else
-       frmt = '(f11.5,5f9.4,3(6x,5f9.4 ))'
-       if (bigDOS) frmt = '(f11.5,5f10.4,3(6x,5f10.4))'
+       frmt = '(f11.5,1x,5(f9.4,1x),3(6x,5f9.4))'
+       if (bigDOS) frmt = '(f11.5,1x,5(f10.4,1x),3(6x,5f10.4))'
+       ! for extra atom spheres in vacuum need more precision
+       frmt_extra = '(f11.5,1x,5(f20.16,1x),3(6x,5f20.16))'
 
-!      for extra atom spheres in vacuum need more precision
-       frmt_extra = '(f11.5,5f20.16,3(6x,5f20.16))'
        do iene=1,nene
          do iat=1,natsph
+           i1 = iat*5-4; i2 = iat*5
            write(unitdos_arr(iat), fmt=frmt) enex, &
-&           min(total_dos(iene,iat*5-4:iat*5), dos_max),&
-&           min(total_dos(iene,iat*5-4:iat*5)-total_dos_paw1(iene,iat*5-4:iat*5)&
-&           +total_dos_pawt1(iene,iat*5-4:iat*5), dos_max),&
-&           min(total_dos_paw1(iene,iat*5-4:iat*5), dos_max),&
-&           min(total_dos_pawt1(iene,iat*5-4:iat*5), dos_max)
+&           min(total_dos(iene, i1:i2), dos_max),&
+&           min(total_dos(iene,i1:i2) - total_dos_paw1(iene,i1:i2) + total_dos_pawt1(iene,i1:i2), dos_max),&
+&           min(total_dos_paw1(iene,i1:i2), dos_max),&
+&           min(total_dos_pawt1(iene,i1:i2), dos_max)
          end do
          do iat=natsph+1,natsph+natsph_extra
+           i1 = iat*5-4; i2 = iat*5
            write(unitdos_arr(iat), fmt=frmt_extra) enex, &
-&           min(total_dos(iene,iat*5-4:iat*5), dos_max),&
-&           min(total_dos(iene,iat*5-4:iat*5)-total_dos_paw1(iene,iat*5-4:iat*5)&
-&           +total_dos_pawt1(iene,iat*5-4:iat*5), dos_max),&
-&           min(total_dos_paw1(iene,iat*5-4:iat*5), dos_max),&
-&           min(total_dos_pawt1(iene,iat*5-4:iat*5), dos_max)
+&           min(total_dos(iene,i1:i2), dos_max),&
+&           min(total_dos(iene,i1:i2) - total_dos_paw1(iene,i1:i2) + total_dos_pawt1(iene,i1:i2), dos_max),&
+&           min(total_dos_paw1(iene,i1:i2), dos_max),&
+&           min(total_dos_pawt1(iene,i1:i2), dos_max)
          end do
          enex=enex+deltaene
        end do
      end if
 
    else if(prtdos==5)then
-     frmt = '(f11.5,7f9.4 ,10x,7f8.2)'
-     if (bigDOS) frmt = '(f11.5,7f10.4,10x,7f8.2)'
+     ! E, SPIN-DOS
+     frmt = '(f11.5,1x,7(f9.4,1x),10x,7(f8.2,1x))'
+     if (bigDOS) frmt = '(f11.5,1x,7(f10.4,1x),10x,7(f8.2,1x))'
      do iene=1,nene
        write(unitdos, fmt=frmt) enex, min(total_dos(iene,1:7), dos_max), total_integ_dos(iene,1:7)
        enex=enex+deltaene
      end do
    end if
 
-!  integral_DOS=integral_DOS+deltaene*sum(total_dos(iene,:))
    integral_DOS=sum(total_integ_dos(nene,:))
    write(message, '(a,es16.8)' ) ' tetrahedron : integrate to',integral_DOS
    call wrtout(std_out,message,'COLL')
