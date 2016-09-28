@@ -521,12 +521,12 @@ subroutine tetra_write(tetra, nkibz, kibz, path)
  double precision,intent(in) :: kibz(3,nkibz)
 
 !Local variables-------------------------------
- integer,parameter :: version=1,unt=95
- integer :: ik,it
+ integer,parameter :: version=1
+ integer :: ik,it,unt
 
 ! *********************************************************************
 
- open(file=trim(path), unit=unt, form="formatted", status="unknown", action="write")
+ open(file=trim(path), newunit=unt, form="formatted", status="unknown", action="write")
 
  write(unt,*)version, " # version number"
 

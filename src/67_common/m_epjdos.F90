@@ -392,7 +392,7 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: bcorr0=0
- integer :: iat,iband,iene,ifract,ikpt,isppol,natsph,natsph_extra
+ integer :: iat,iband,iene,ifract,ikpt,isppol,natsph,natsph_extra,nkpt,nsppol
  integer :: nene,nkpt_fullbz,prtdos,unitdos,ierr,prtdosm,paw_dos_flag,mbesslang,ndosfraction
  real(dp),parameter :: dos_max=9999.9999_dp
  real(dp) :: buffer,deltaene,enemax,enemin,enex,integral_DOS,max_occ,rcvol
@@ -418,6 +418,8 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
  prtdosm = dos%prtdosm; paw_dos_flag = dos%paw_dos_flag
  mbesslang = dos%mbesslang; ndosfraction = dos%ndosfraction
 
+ nkpt = dtset%nkpt; nsppol = dtset%nsppol
+
 !m-decomposed DOS not compatible with PAW-decomposed DOS
  if(prtdosm>=1.and.paw_dos_flag==1) then
    message = 'm-decomposed DOS (prtdosm>=1) not compatible with PAW-decomposed DOS (pawprtdos=1) !'
@@ -425,7 +427,7 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
  end if
 
 !Refuse only 1 kpoint: the algorithms are no longer valid. DOH !
- if (dtset%nkpt == 1) then
+ if (nkpt == 1) then
    MSG_WARNING('You need at least 2 kpoints to use the tetrahedron method. DOS cannot be computed')
    return
  end if
@@ -446,9 +448,9 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
 
 !Refuse nband different for different kpoints
 !Note: This means we can pass ebands%eig(:,:,:) instead of eigen(mband*nkpt*nsppol) in packed form
- do isppol=1,dtset%nsppol
-   do ikpt=1,dtset%nkpt
-     if ( dtset%nband(dtset%nkpt*(isppol-1) + ikpt) /= dtset%nband(1) ) then
+ do isppol=1,nsppol
+   do ikpt=1,nkpt
+     if ( dtset%nband(nkpt*(isppol-1) + ikpt) /= dtset%nband(1) ) then
        write(std_out,*) 'tetrahedron: skip subroutine.'
        write(std_out,*) 'nband must be the same for all kpoints'
        write(std_out,*) 'nband=', dtset%nband
@@ -493,7 +495,7 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
 
 !Make full kpoint grid and get equivalence to irred kpoints
  call get_full_kgrid(indkpt,dtset%kpt,kpt_fullbz,dtset%kptrlatt,&
-& dtset%nkpt,nkpt_fullbz,dtset%nshiftk,dtset%nsym,dtset%shiftk,dtset%symrel)
+& nkpt,nkpt_fullbz,dtset%nshiftk,dtset%nsym,dtset%shiftk,dtset%symrel)
 
 !Get tetrahedra, ie indexes of the full kpoints at their summits
  call init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetrahedra, ierr, errstr)
@@ -516,7 +518,7 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
      if (open_file(tmpfil, message, newunit=unitdos_arr(iat), status='unknown',form='formatted') /= 0) then
        MSG_ERROR(message)
      end if 
-     write(std_out,*) 'opened file : ', trim(tmpfil), '  unit', unitdos_arr(iat)
+     !write(std_out,*) 'opened file : ', trim(tmpfil), '  unit', unitdos_arr(iat)
    end do
 !  do extra spheres in vacuum too
    do iat=1,natsph_extra
@@ -537,12 +539,12 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
  buffer=0.01_dp ! Size of the buffer around the min and max ranges
  if (dtset%prtdos == 2 .or. dtset%prtdos == 5) then
    call dos_hdr_write(buffer,deltaene,dtset%dosdeltae,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
-&   dtset%nband,nene,dtset%nkpt,dtset%nsppol,dtset%occopt,prtdos,&
+&   dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
 &   dtset%tphysel,dtset%tsmear,unitdos)
  else if (dtset%prtdos == 3) then
    do iat=1,natsph+natsph_extra
      call dos_hdr_write(buffer,deltaene,dtset%dosdeltae,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
-&     dtset%nband,nene,dtset%nkpt,dtset%nsppol,dtset%occopt,prtdos,&
+&     dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
 &     dtset%tphysel,dtset%tsmear,unitdos_arr(iat))
    end do
  end if
@@ -551,8 +553,8 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
  ABI_ALLOCATE(integ_dos,(nene,ndosfraction))
  ABI_ALLOCATE(total_dos,(nene,ndosfraction))
  ABI_ALLOCATE(total_integ_dos,(nene,ndosfraction))
- ABI_ALLOCATE(tweight,(nene, dtset%nkpt))
- ABI_ALLOCATE(dtweightde,(nene, dtset%nkpt))
+ ABI_ALLOCATE(tweight,(nene, nkpt))
+ ABI_ALLOCATE(dtweightde,(nene, nkpt))
 
  if (paw_dos_flag==1) then
    ABI_ALLOCATE(total_dos_paw1,(nene,ndosfraction))
@@ -567,7 +569,7 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
 
 !Get maximum occupation value (2 or 1)
  max_occ = one
- if (dtset%nspinor == 1 .and. dtset%nsppol == 1) max_occ = two
+ if (dtset%nspinor == 1 .and. nsppol == 1) max_occ = two
 
 !-------------------------------------------------------------------
 !For each spin polarisation and band, interpolate band over kpoints
@@ -575,18 +577,18 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
 !-------------------------------------------------------------------
 
  ! Workspace arrays.
- ABI_MALLOC(work_ndos, (dtset%nkpt, ndosfraction))
- ABI_MALLOC(work_ndosmbessl, (dtset%nkpt, ndosfraction*mbesslang))
- ABI_ALLOCATE(tmp_eigen,(dtset%nkpt))
+ ABI_MALLOC(work_ndos, (nkpt, ndosfraction))
+ ABI_MALLOC(work_ndosmbessl, (nkpt, ndosfraction*mbesslang))
+ ABI_ALLOCATE(tmp_eigen,(nkpt))
 
- do isppol=1,dtset%nsppol
+ do isppol=1,nsppol
    total_dos = zero; total_integ_dos = zero
    if (prtdosm>=1) total_dos_m = zero
    if (paw_dos_flag==1) then
      total_dos_paw1(:,:)=zero;total_dos_pawt1(:,:)=zero
    end if
 
-   if (dtset%nsppol==2) then
+   if (nsppol==2) then
      if(isppol==1) write(message,'(a,16x,a)')  '#','Spin-up DOS'
      if(isppol==2) write(message,'(2a,16x,a)')  ch10,'#','Spin-dn DOS'
      ! NB: dtset%prtdos == 5 should not happen for nsppol==2
@@ -604,24 +606,24 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
      tmp_eigen(:) = ebands%eig(iband, :, isppol)
 
      ! calculate general integration weights at each irred kpoint as in Blochl et al PRB 49 16223
-     call tetra_blochl_weights(tetrahedra,tmp_eigen,enemin,enemax,max_occ,nene,dtset%nkpt,&
+     call tetra_blochl_weights(tetrahedra,tmp_eigen,enemin,enemax,max_occ,nene,nkpt,&
        bcorr0,tweight,dtweightde,xmpi_comm_self)
 
      ! calculate DOS and integrated DOS projected with the input dos_fractions
      if (paw_dos_flag==1) then
        work_ndos = dos%fractions_paw1(:,iband,isppol,:)
-       call get_dos_1band(work_ndos,integ_dos,nene,dtset%nkpt,ndosfraction,partial_dos,tweight,dtweightde)
+       call get_dos_1band(work_ndos,integ_dos,nene,nkpt,ndosfraction,partial_dos,tweight,dtweightde)
 
        total_dos_paw1 = total_dos_paw1 + partial_dos
 
        work_ndos = dos%fractions_pawt1(:,iband,isppol,:)
-       call get_dos_1band(work_ndos,integ_dos,nene,dtset%nkpt,ndosfraction,partial_dos,tweight,dtweightde)
+       call get_dos_1band(work_ndos,integ_dos,nene,nkpt,ndosfraction,partial_dos,tweight,dtweightde)
 
        total_dos_pawt1 = total_dos_pawt1 + partial_dos
      end if
 
      work_ndos = dos%fractions(:,iband,isppol,:)
-     call get_dos_1band(work_ndos,integ_dos,nene,dtset%nkpt,ndosfraction,partial_dos,tweight,dtweightde)
+     call get_dos_1band(work_ndos,integ_dos,nene,nkpt,ndosfraction,partial_dos,tweight,dtweightde)
 
      ! Add to total dos
      total_dos = total_dos + partial_dos
@@ -629,7 +631,7 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
 
      if (prtdosm>=1) then
        work_ndosmbessl = dos%fractions_m(:,iband,isppol,:)
-       call get_dos_1band_m(work_ndosmbessl,integ_dos_m,nene,dtset%nkpt,ndosfraction*mbesslang,&
+       call get_dos_1band_m(work_ndosmbessl,integ_dos_m,nene,nkpt,ndosfraction*mbesslang,&
 &       partial_dos_m,tweight,dtweightde)
 
         total_dos_m = total_dos_m + partial_dos_m
@@ -743,7 +745,7 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
      end do
    else if(prtdos==3)then
      if (paw_dos_flag/=1.or.dtset%pawprtdos==2) then
-       frmt='(f11.5,5f9.4 ,10x,5f8.2,10x,25f8.2)'
+       frmt='(f11.5,5f9.4,10x,5f8.2,10x,25f8.2)'
        if (bigDOS) frmt='(f11.5,5f10.4,10x,5f8.2,10x,25f8.2)'
 !      for extra atoms in vacuum need more precision
        frmt_extra='(f11.5,5f20.16,10x,5f20.16,10x,25f20.16)'
@@ -2347,8 +2349,7 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
 #ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
- integer :: itype,ncerr
- integer,parameter :: fform=102 ! FIXME
+ integer :: itype,ncerr,fform
  real(dp) :: cpu,wall,gflops
  character(len=500) :: msg
 !arrays
@@ -2358,6 +2359,9 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
 
  ABI_CHECK(dtset%natsph > 0, "natsph <=0")
  call cwtime(cpu, wall, gflops, "start")
+
+ fform = fform_from_ext("FATBANDS.nc")
+ ABI_CHECK(fform /= 0, "Cannot find fform associated to FATBANDS.nc")
 
  ! Write header, crystal structure and band energies.
  NCF_CHECK(hdr_ncwrite(hdr, ncid, fform, nc_define=.True.))
@@ -2380,7 +2384,7 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
    NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("natsph_extra", dtset%natsph_extra)]))
  end if
 
- ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "prtdos", "pawprtdos", "prtdosm"]) !"dtset%pawfatbnd", 
+ ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "prtdos", "pawprtdos", "prtdosm"])
  NCF_CHECK(ncerr)
  ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "ratsph_extra"])
  NCF_CHECK(ncerr)
@@ -2422,7 +2426,6 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
  NCF_CHECK(nf90_put_var(ncid, vid("pawprtdos"), dtset%pawprtdos))
  NCF_CHECK(nf90_put_var(ncid, vid("prtdos"), dos%prtdos))
  NCF_CHECK(nf90_put_var(ncid, vid("prtdosm"), dos%prtdosm))
- !NCF_CHECK(nf90_put_var(ncid, vid("pawfatbnd"), dos%pawfatbnd))
 
  ! arrays
  if (dtset%usepaw == 1) then

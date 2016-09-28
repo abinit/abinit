@@ -170,7 +170,7 @@ MODULE m_hdr
  !    Moreover the files produced by the DFPT code do not have a well-defined extension and, as a consequence,
  !    they require a special treatment. In python I would use regexp but Fortran is not python! 
 
- type(abifile_t),private,parameter :: all_abifiles(39) = [ &
+ type(abifile_t),private,parameter :: all_abifiles(40) = [ &
 
     ! Files with wavefunctions:
     abifile_t(varname="coefficients_of_wavefunctions", fform=2, ext="WFK", class="wf_planewave"), &
@@ -226,12 +226,15 @@ MODULE m_hdr
    !character(len=nctk_slen),public,parameter :: e_ncname="dielectric_function" 
    ! FIXME This one should be rewritten
    abifile_t(varname="polarizability", fform=1003, ext="SUS", class="polariz"),  &   
-   abifile_t(varname="inverse_dielectric_function", fform=1004, ext="SCR", class="epsm1") &
+   abifile_t(varname="inverse_dielectric_function", fform=1004, ext="SCR", class="epsm1"), &
    !abifile_t(varname="dielectric_function", fform=1002, ext="EPS", class="eps"), &
    !
    ! BSE: TODO. see m_bse_io
    !abifile_t(varname="bse_uresonant_q0", fform=1002, ext="BSR", class="bsreso"), &
    !abifile_t(varname="bse_ucoupling_q0", fform=1002, ext="BSC", class="bscoup"), &
+
+   ! Miscellaneous  
+   abifile_t(varname="dos_fractions", fform=3000, ext="FATBANDS", class="None") &
   ]
 
  type(abifile_t),public,parameter :: abifile_none = abifile_t(varname="None", fform=0, ext="None", class="None")
