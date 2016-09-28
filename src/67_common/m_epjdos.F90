@@ -374,7 +374,6 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
 #define ABI_FUNC 'tetrahedron'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_56_recipspace
  use interfaces_61_occeig
 !End of the abilint section
@@ -524,13 +523,11 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
      end if 
      !write(std_out,*) 'opened file : ', trim(tmpfil), '  unit', unitdos_arr(iat)
    end do
-!  do extra spheres in vacuum too
+!  do extra spheres in vacuum too. Use _ATEXTRA[NUM] suffix
    do iat=1,natsph_extra
-!    FIXME: added random offset of 1000 to atom index in file name for extra spheres.
-!    Someday we will have more than 1000 atoms...
-     call int2char4(1000+iat,tag)
+     call int2char4(iat,tag)
      ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
-     tmpfil = trim(fildata)//'_AT'//trim(tag)
+     tmpfil = trim(fildata)//'_ATEXTRA'//trim(tag)
      if (open_file(tmpfil, message, newunit=unitdos_arr(natsph+iat), status='unknown',form='formatted') /= 0) then
        MSG_ERROR(message)
      end if
