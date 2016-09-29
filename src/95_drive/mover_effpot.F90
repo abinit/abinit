@@ -207,7 +207,7 @@ implicit none
    dtset%friction = 0.0001 ! internal FRICTION coefficient
    dtset%goprecon = 0   ! Geometry Optimization PREconditioner equations
    if(inp%dynamics==1)then
-     dtset%ionmov = 12  ! Number for the montecarlo
+     dtset%ionmov = 12  ! Number for the dynamics
    end if
    dtset%jellslab = 0   ! include a JELLium SLAB in the cell
    dtset%mdwall = 10000 ! Molecular Dynamics WALL location

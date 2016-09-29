@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Thu 22 Sep 2016.
-- ( at 10h44 )
+.Starting date : Thu 29 Sep 2016.
+- ( at 13h28 )
   
 -  nproc =    1
 
@@ -318,7 +318,7 @@
 --- Iteration: ( 1/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -334,7 +334,7 @@
 --- Iteration: ( 2/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -350,7 +350,7 @@
 --- Iteration: ( 3/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -366,7 +366,7 @@
 --- Iteration: ( 4/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -382,7 +382,7 @@
 --- Iteration: ( 5/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -398,7 +398,7 @@
 --- Iteration: ( 6/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -414,7 +414,7 @@
 --- Iteration: ( 7/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -430,7 +430,7 @@
 --- Iteration: ( 8/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -446,7 +446,7 @@
 --- Iteration: ( 9/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -462,7 +462,7 @@
 --- Iteration: (10/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -478,7 +478,7 @@
 --- Iteration: (11/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -494,7 +494,7 @@
 --- Iteration: (12/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -510,7 +510,7 @@
 --- Iteration: (13/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -526,7 +526,7 @@
 --- Iteration: (14/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -542,7 +542,7 @@
 --- Iteration: (15/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -558,7 +558,7 @@
 --- Iteration: (16/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -574,7 +574,7 @@
 --- Iteration: (17/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -590,7 +590,7 @@
 --- Iteration: (18/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -606,7 +606,7 @@
 --- Iteration: (19/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -622,7 +622,7 @@
 --- Iteration: (20/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -638,7 +638,7 @@
 --- Iteration: (21/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -654,7 +654,7 @@
 --- Iteration: (22/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -670,7 +670,7 @@
 --- Iteration: (23/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -686,7 +686,7 @@
 --- Iteration: (24/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -702,7 +702,7 @@
 --- Iteration: (25/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -718,7 +718,7 @@
 --- Iteration: (26/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -734,7 +734,7 @@
 --- Iteration: (27/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -750,7 +750,7 @@
 --- Iteration: (28/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -766,7 +766,7 @@
 --- Iteration: (29/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -782,7 +782,7 @@
 --- Iteration: (30/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -798,7 +798,7 @@
 --- Iteration: (31/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -814,7 +814,7 @@
 --- Iteration: (32/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -830,7 +830,7 @@
 --- Iteration: (33/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -846,7 +846,7 @@
 --- Iteration: (34/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -862,7 +862,7 @@
 --- Iteration: (35/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -878,7 +878,7 @@
 --- Iteration: (36/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -894,7 +894,7 @@
 --- Iteration: (37/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -910,7 +910,7 @@
 --- Iteration: (38/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -926,7 +926,7 @@
 --- Iteration: (39/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -942,7 +942,7 @@
 --- Iteration: (40/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -958,7 +958,7 @@
 --- Iteration: (41/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -974,7 +974,7 @@
 --- Iteration: (42/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -990,7 +990,7 @@
 --- Iteration: (43/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -1006,7 +1006,7 @@
 --- Iteration: (44/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -1022,7 +1022,7 @@
 --- Iteration: (45/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -1038,7 +1038,7 @@
 --- Iteration: (46/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -1054,7 +1054,7 @@
 --- Iteration: (47/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -1070,7 +1070,7 @@
 --- Iteration: (48/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -1086,7 +1086,7 @@
 --- Iteration: (49/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -1102,7 +1102,7 @@
 --- Iteration: (50/50) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
 
----SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
 
  Calculation of the energy with effective potential
 
@@ -1121,10 +1121,10 @@
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.5
+- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.6
 
 ================================================================================
 
-+Total cpu time      1.545  and wall time      1.544 sec
++Total cpu time      1.583  and wall time      1.583 sec
 
  epigene : the run completed succesfully.

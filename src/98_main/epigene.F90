@@ -45,6 +45,7 @@ program epigene
  use m_errors
  use m_effective_potential
  use m_epigene_dataset
+ use m_anharmonics_terms
  use m_effective_potential_file
  use m_libxml
 
@@ -193,7 +194,7 @@ program epigene
 !Second step: Compute the third order derivative with finite differences
 !****************************************************************************************
  if (inp%prt_3rd > 0) then 
-   call strain_phonon_coupling(reference_effective_potential,filnam,inp,comm)
+   call compute_anharmonics(reference_effective_potential,filnam,inp,comm)
  end if
 !****************************************************************************************
 

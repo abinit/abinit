@@ -85,7 +85,7 @@ CONTAINS  !=====================================================================
 !!  strain = structure with all information of strain
 !!
 !! PARENTS
-!!   strain_phonon_coupling
+!!   anharmonic_terms_compute
 !!
 !! CHILDREN
 !!
@@ -151,7 +151,7 @@ end subroutine strain_init
 !! OUTPUT
 !!
 !! PARENTS
-!!   strain_phonon_coupling
+!!   anharmonic_terms_compute
 !!
 !! CHILDREN
 !!
@@ -203,7 +203,7 @@ end subroutine strain_free
 !!  strain = structure with all information of strain
 !!
 !! PARENTS
-!!   strain_phonon_coupling
+!!   anharmonic_terms_compute
 !!
 !! CHILDREN
 !!
@@ -293,7 +293,7 @@ end subroutine strain_get
 !!  strain = structure with all information of strain
 !!
 !! PARENTS
-!!   strain_phonon_coupling
+!!   anharmonic_terms_compute,
 !!
 !! CHILDREN
 !!

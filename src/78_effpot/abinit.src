@@ -18,15 +18,17 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
-    "libxml.c",
+    "compute_anharmonics.F90",
     "ddb_to_effective_potential.F90",
     "init10.F90",
+    "libxml.c",
+    "m_anharmonics_terms.F90",
     "m_effective_potential.F90",
     "m_effective_potential_file.F90",
     "m_epigene_dataset.F90",
+    "m_harmonics_terms.F90",
     "m_libxml.F90",
     "m_monte_carlo.F90",
-    "strain_phonon_coupling.F90",
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

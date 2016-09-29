@@ -132,13 +132,13 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
   selectz = 0 ! No selection of some parts of the effective charge tensor
   iblok = ddb_get_dielt_zeff(ddb,crystal,rftyp,chneut,selectz,dielt,zeff)
   if (iblok /=0) then
-    effective_potential%epsilon_inf = dielt
-    effective_potential%zeff = zeff
+    effective_potential%harmonics_terms%epsilon_inf = dielt
+    effective_potential%harmonics_terms%zeff = zeff
   else
-    effective_potential%epsilon_inf(1,1) = one 
-    effective_potential%epsilon_inf(2,2) = one 
-    effective_potential%epsilon_inf(3,3) = one 
-    effective_potential%zeff = zero
+    effective_potential%harmonics_terms%epsilon_inf(1,1) = one 
+    effective_potential%harmonics_terms%epsilon_inf(2,2) = one 
+    effective_potential%harmonics_terms%epsilon_inf(3,3) = one 
+    effective_potential%harmonics_terms%zeff = zero
   end if
 
 !**********************************************************************
@@ -259,10 +259,10 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
           idir2=ivarB
           ipert2=natom+3  !for the diagonal part
         end if
-        elast_clamped(ivarA,ivarB) = blkval(1,idir1,ipert1,idir2,ipert2,iblok)/crystal%ucvol
+        elast_clamped(ivarA,ivarB) = blkval(1,idir1,ipert1,idir2,ipert2,iblok)
       end do
     end do
-    fact=HaBohr3_GPa
+    fact=HaBohr3_GPa / crystal%ucvol
     do ivarA=1,6
       write(message,'(6f12.7)')elast_clamped(ivarA,1)*fact/100.00_dp,&
 &                              elast_clamped(ivarA,2)*fact/100.00_dp,&
@@ -275,7 +275,7 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
     end do
     
 !   Set the clamped tensor into the effective potentiel
-    effective_potential%elastic_constants = elast_clamped
+    effective_potential%harmonics_terms%elastic_constants = elast_clamped
 
   else
     
@@ -285,7 +285,7 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
     call wrtout(ab_out,message,'COLL')
 
 !   Set the clamped tensor to zero into the effective potentiel (not available in the DDB)
-    effective_potential%elastic_constants = zero
+    effective_potential%harmonics_terms%elastic_constants = zero
   end if
 
 !**********************************************************************
@@ -325,7 +325,7 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
   call wrtout(ab_out,message,'COLL')
 
   call ifc_init(ifc,crystal,ddb,inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,&
-&   inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,effective_potential%zeff,inp%nsphere,inp%rifcsph,&
+&   inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,effective_potential%harmonics_terms%zeff,inp%nsphere,inp%rifcsph,&
 &   inp%prtsrlr,inp%enunit,prtfreq=.True.)
 
 !Reorder cell from canonical coordinates to reduced coordinates (for epigene)
@@ -350,17 +350,17 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
   end if
 
 ! Free ifc before copy
-  call ifc_free(effective_potential%ifcs)
+  call ifc_free(effective_potential%harmonics_terms%ifcs)
 ! Fill the effective potential
 ! Copy ifc into effective potential
 ! !!Warning eff_pot%ifcs only contains atmfrc,short_atmfrc,ewald_atmfrc,,nrpt and cell!!
 ! rcan,ifc%rpt,wghatm and other quantities 
 ! are not needed for effective potential!!!
-  effective_potential%ifcs%nrpt = ifc%nrpt
-  call alloc_copy(ifc%atmfrc      ,effective_potential%ifcs%atmfrc)
-  call alloc_copy(ifc%short_atmfrc,effective_potential%ifcs%short_atmfrc)
-  call alloc_copy(ifc%ewald_atmfrc,effective_potential%ifcs%ewald_atmfrc)
-  call alloc_copy(ifc%cell        ,effective_potential%ifcs%cell)
+  effective_potential%harmonics_terms%ifcs%nrpt = ifc%nrpt
+  call alloc_copy(ifc%atmfrc      ,effective_potential%harmonics_terms%ifcs%atmfrc)
+  call alloc_copy(ifc%short_atmfrc,effective_potential%harmonics_terms%ifcs%short_atmfrc)
+  call alloc_copy(ifc%ewald_atmfrc,effective_potential%harmonics_terms%ifcs%ewald_atmfrc)
+  call alloc_copy(ifc%cell        ,effective_potential%harmonics_terms%ifcs%cell)
 
 ! Deallocate temporary ifc
   call ifc_free(ifc)
@@ -439,7 +439,7 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
       do ipert2=1,natom
         do idir2=1,3
           ii=3*(ipert2-1)+idir2
-          effective_potential%internal_strain(ipert1,ipert2,idir2) = instrain(ii,ipert1)
+          effective_potential%harmonics_terms%internal_strain(ipert1,ipert2,idir2) = instrain(ii,ipert1)
         end do
       end do
     end do

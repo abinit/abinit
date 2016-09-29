@@ -553,9 +553,15 @@ real(dp) :: rmet(3,3)
 !    write(std_out,*) 'mover 12'
 !    ###########################################################
 !    ### 12. => Call to SCFCV routine and fill history with forces
-     write(message,'(a,3a,33a,44a)')&
-&      ch10,('-',kk=1,3),&
-&      'SELF-CONSISTENT-FIELD CONVERGENCE',('-',kk=1,44)
+     if (need_scfcv_cycle) then
+       write(message,'(a,3a,33a,44a)')&
+&        ch10,('-',kk=1,3),&
+&        'SELF-CONSISTENT-FIELD CONVERGENCE',('-',kk=1,44)
+     else
+       write(message,'(a,3a,33a,44a)')&
+&        ch10,('-',kk=1,3),&
+&        'EFFECTIVE POTENTIAL CALCULATION',('-',kk=1,44)
+     end if
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
 
