@@ -485,7 +485,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
          call matrixelmt_g(ai,ar,rf_hamkq%dkinpw_k,gs_hamkq%istwf_k,0,npw_k,nspinor,cwave1,cwave0,&
 &         mpi_enreg%me_g0, mpi_enreg%comm_fft)
 !        There is an additional factor of 4 with respect to the bare matrix element
-         ek1_k(iband)=four*ar
+         ek1_k(iband)=two*energy_factor*ar
        end if
 
 !      Compute eigenvalue part of total energy (with cwavef)
@@ -508,7 +508,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !        <G|Vnl1|Cnk> is contained in gvnl1 (with cwave1)
          call dotprod_g(scprod,ai,gs_hamkq%istwf_k,npw1_k*nspinor,1,cwave1,gvnl1,mpi_enreg%me_g0,&
 &         mpi_enreg%comm_spinorfft)
-         enl1_k(iband)=four*scprod
+         enl1_k(iband)=two*energy_factor*scprod
        end if
 
 !      Removal of the 1st-order kinetic energy from the 1st-order non-local part.
@@ -530,7 +530,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
          shift_band=(iband-1)*npw1_k*nspinor
          call dotprod_g(scprod,ai,gs_hamkq%istwf_k,npw1_k*nspinor,1,cwave1,&
 &         rf2%RHS_Stern(:,1+shift_band:npw1_k*nspinor+shift_band),mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
-         ek1_k(iband)=two*six*scprod
+         ek1_k(iband)=two*energy_factor*scprod
        end if
 
      end if ! End of non-zero occupation
