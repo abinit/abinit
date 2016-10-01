@@ -729,7 +729,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! * Stop if a nonzero umklapp is needed to reconstruct the BZ. In this case, indeed,
  !   epsilon^-1(Sq) should be symmetrized in csigme using a different expression (G-G_o is needed)
  !
- if (sigma_needs_w(Sigp)) then
+ if (sigma_needs_w(Sigp) .or. mod10==5) then !@WC
    if (.not. file_exists(fname)) then
      fname = nctk_ncify(fname)
      MSG_COMMENT(sjoin("File not found. Will try netcdf file:", fname))
