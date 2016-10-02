@@ -58,7 +58,7 @@
 !!      ebands_set_scheme,ebands_update_occ,edos_free,edos_init,edos_write
 !!      eph_phgamma,hdr_free,hdr_vs_dtset,ifc_free,ifc_init,ifc_outphbtrap
 !!      init_distribfft_seq,initmpi_seq,mkphdos,pawfgr_destroy,pawfgr_init
-!!      phdos_free,phdos_print,print_ngfft,prtbltztrp_out,pspini
+!!      phdos_free,phdos_print,print_ngfft,ebands_prtbltztrp,pspini
 !!      wfk_read_eigenvalues,wrtout,xmpi_bcast
 !!
 !! SOURCE
@@ -112,7 +112,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
  use interfaces_56_io_mpi
- use interfaces_61_occeig
  use interfaces_64_psp
 !End of the abilint section
 
@@ -159,7 +158,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer :: ngfftc(18),ngfftf(18)
  integer,allocatable :: dummy_atifc(:)
  real(dp),parameter :: k0(3)=zero
- real(dp) :: nelect_per_spin(dtset%nsppol)
  real(dp) :: dielt(3,3),zeff(3,3,dtset%natom),n0(dtset%nsppol)
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
@@ -383,10 +381,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call ifc_outphbtrap(ifc,cryst,dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,dtfil%filnam_ds(4))
 
    ! BoltzTraP output files in GENEric format
-   ! TODO: ebands method
-   nelect_per_spin = ebands_nelect_per_spin(ebands)
-   call prtbltztrp_out(ebands%eig, ebands%fermie, dtfil%filnam_ds(4), ebands%kptns, cryst%natom, ebands%nband(1), &
-&   nelect_per_spin, ebands%nkpt, ebands%nspinor, ebands%nsppol, cryst%nsym, cryst%rprimd, cryst%symrel)
+   call ebands_prtbltztrp(ebands, cryst, dtfil%filnam_ds(4))
  end if
 
  call cwtime(cpu,wall,gflops,"stop")

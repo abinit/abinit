@@ -1,0 +1,23 @@
+5, 't11o_DS2_ns_BLZTRP.intrans',      'old',    'formatted',0
+6, 't11o_DS2_BLZTRP.outputtrans',      'unknown',    'formatted',0
+20,'t11o_DS2_BLZTRP.struct',         'old',    'formatted',0
+10,'t11o_DS2_BLZTRP.ns_energy',         'old',    'formatted',0
+48,'t11o_DS2_BLZTRP.engre',         'unknown',    'unformatted',0
+49,'t11o_DS2_BLZTRP.transdos',        'unknown',    'formatted',0
+50,'t11o_DS2_BLZTRP.sigxx',        'unknown',    'formatted',0
+51,'t11o_DS2_BLZTRP.sigxxx',        'unknown',    'formatted',0
+21,'t11o_DS2_BLZTRP.trace',           'unknown',    'formatted',0
+22,'t11o_DS2_BLZTRP.condtens',           'unknown',    'formatted',0
+24,'t11o_DS2_BLZTRP.halltens',           'unknown',    'formatted',0
+25,'t11o_DS2_BLZTRP.trace_fixdoping',     'unknown',    'formatted',0
+26,'t11o_DS2_BLZTRP.condtens_fixdoping',           'unknown',    'formatted',0
+27,'t11o_DS2_BLZTRP.halltens_fixdoping',           'unknown',    'formatted',0
+30,'t11o_DS2_BLZTRP_BZ.dx',           'unknown',    'formatted',0
+31,'t11o_DS2_BLZTRP_fermi.dx',           'unknown',    'formatted',0
+32,'t11o_DS2_BLZTRP_sigxx.dx',           'unknown',    'formatted',0
+33,'t11o_DS2_BLZTRP_sigyy.dx',           'unknown',    'formatted',0
+34,'t11o_DS2_BLZTRP_sigzz.dx',           'unknown',    'formatted',0
+35,'t11o_DS2_BLZTRP_band.dat',           'unknown',    'formatted',0
+36,'t11o_DS2_BLZTRP_band.gpl',           'unknown',    'formatted',0
+37,'t11o_DS2_BLZTRP_deriv.dat',           'unknown',    'formatted',0
+38,'t11o_DS2_BLZTRP_mass.dat',           'unknown',    'formatted',0
