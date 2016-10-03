@@ -131,7 +131,6 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
  real(dp) :: tsec(2),gprimd_dummy(3,3)
  real(dp) :: dum_nhat(0)
  real(dp),allocatable :: rhor1(:,:),vxc10(:,:),xcccwk1(:),xcccwk2(:)
-
 ! *********************************************************************
 
  call timab(182,1,tsec)
@@ -176,15 +175,15 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
 !    Compute the corresponding potential
      option=0
      ABI_ALLOCATE(rhor1,(cplex*nfft,nspden))
-     call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,nkxc,&
-&     nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,0,vxc10,xcccwk1)
 !FR EB Non-collinear magnetism
      if (nspden==4.and.present(rhor)) then
-       optnc=1
-       optxc=1
-!FR EB the second nkxc in the list should be nkxc_cur (?), optnc=1 or 2 ?
-       call dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,nkxc,&
+      optnc=1
+      optxc=1
+       call dfpt_mkvxc_noncoll(1,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,nkxc,&
 &       nkxc,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,0,vxc10,xcccwk1) 
+     else
+       call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,nkxc,&
+&     nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,0,vxc10,xcccwk1)
      end if
      ABI_DEALLOCATE(rhor1)
      ABI_DEALLOCATE(xcccwk1)

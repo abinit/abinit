@@ -113,7 +113,7 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
  call timab(181,1,tsec)
 
  if(nspden/=1 .and. nspden/=2) then
-   MSG_WARNING('nspden==4 under development!!')
+   MSG_BUG('For nspden==4 please use dfpt_mkvxc_noncoll!')
  end if
 
 !Special case: no XC applied

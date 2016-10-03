@@ -382,7 +382,6 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 
 !    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997)??)
          weight=two*occ_rbz(iband+bdtot_index)*wtk_rbz(ikpt)/ucvol
-
 !density components 
 !GS wfk Fourrier Tranform 
 ! EB FR in the fourwf calls rhoaug(:,:,:,2) is a dummy argument

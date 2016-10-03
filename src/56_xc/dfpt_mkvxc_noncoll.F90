@@ -187,19 +187,19 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
 
        if (optxc /= -1) then 
          if(m_norm(ifft)>m_norm_min)then
-           rhor1_diag(ifft,2)=half*(rhor1_diag(ifft,1)+m_dot_m1/m_norm(ifft))
+           rhor1_diag(ifft,2)=half*(rhor1(ifft,1)+rhor1(ifft,4)) ! half*(rhor1_diag(ifft,1)+m_dot_m1/m_norm(ifft))
          else
-           rhor1_diag(ifft,2)=half*rhor1_diag(ifft,1)
+           rhor1_diag(ifft,2)=half*(rhor1(ifft,1)+rhor1(ifft,4)) ! half*rhor1_diag(ifft,1)
          end if
 !EB FR TODO: remove this else if?
        else if (nkxc/=nkxc_cur.and.optxc/=-1) then
-         rhor1_diag(ifft,2)=half*(rhor1_diag(ifft,1)+m_dot_m1/m_norm(ifft))  
+         rhor1_diag(ifft,2)=half*(rhor1(ifft,1)+rhor1(ifft,4)) ! half*(rhor1_diag(ifft,1)+m_dot_m1/m_norm(ifft))  
        end if
      end do
 
 !      -- Compute Kxc(r).n^res(r)_rotated
-     call dfpt_mkvxc(1,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,nhat1grdim,&
-&     nkxc,2,n3xccc,option,paral_kgb,qphon,rhor1_diag,rprimd,1,vxc1_diag,xccc3d1)
+     call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,nhat1grdim,&
+&     nkxc,2,n3xccc,option,paral_kgb,qphon,rhor1_diag,rprimd,usexcnhat,vxc1_diag,xccc3d1)
 
 !    -- Rotate back Vxc(r)^(1)
 ! FR EB TODO: update the routine to cplex=2
@@ -216,12 +216,12 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
          if(m_norm(ifft)>m_norm_min)then
            fact=dvdz/m_norm(ifft)
            dum=rhor(ifft,4)*fact
-           vxc1(ifft,1)=dvdn+dum
-           vxc1(ifft,2)=dvdn-dum
-           vxc1(ifft,3)= rhor(ifft,2)*fact
-           vxc1(ifft,4)=-rhor(ifft,3)*fact
+           vxc1(ifft,1)=vxc1_diag(ifft,1) !dvdn+dum
+           vxc1(ifft,2)=vxc1_diag(ifft,2) !dvdn-dum
+           vxc1(ifft,3)=zero ! rhor(ifft,2)*fact
+           vxc1(ifft,4)=zero !-rhor(ifft,3)*fact
          else
-           vxc1(ifft,1:2)=dvdn
+           vxc1(ifft,1:2)=vxc1_diag(ifft,1:2) !dvdn
            vxc1(ifft,3:4)=zero
          end if
        end do
@@ -231,8 +231,8 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
          dvdz=(vxc1_diag(ifft,1)-vxc1_diag(ifft,2))*half
          if(m_norm(ifft)>m_norm_min)then
            dum=dvdz*rhor(ifft,4)/m_norm(ifft)
-           vxc1(ifft,1)=dvdn+dum
-           vxc1(ifft,2)=dvdn-dum
+           vxc1(ifft,1)=vxc1_diag(ifft,1) !dvdn+dum
+           vxc1(ifft,2)=vxc1_diag(ifft,2) !dvdn-dum
          else
            vxc1(ifft,1:2)=dvdn
          end if
