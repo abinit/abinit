@@ -1877,7 +1877,7 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
  end if
 
  write (unit_btrap,'(a)') '#'
- write (unit_btrap,'(a)') '# ABINIT package : Boltztrap phonon file. Remove this header before feeding to BT'
+ write (unit_btrap,'(a)') '# ABINIT package : Boltztrap phonon file. With old BT versions remove this header before feeding to BT'
  write (unit_btrap,'(a)') '#    for compatibility with PHON output the freq are in Ry (before the square)'
  write (unit_btrap,'(a)') '#'
  write (unit_btrap,'(a)') '#    nq, nband  '
