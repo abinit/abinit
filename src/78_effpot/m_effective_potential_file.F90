@@ -461,7 +461,7 @@ end subroutine xml_getdims
  integer :: nph1l,npsp,nsym,space_group,timrev
  real(dp):: energy,ucvol
  character(len=500) :: message
- logical :: has_3rd = .FALSE.
+ logical :: has_3rd = .FALSE.,has_straincoupling= .FALSE.
 #ifndef HAVE_LIBXML
  integer :: funit = 1
  integer :: iatom,iamu,iph1l,irpt,mu,nu,voigt
@@ -606,7 +606,7 @@ end subroutine xml_getdims
    10 line="";endfile=.true.
    20 continue
 
-   if (.not.has_3rd) then
+   if (.not.has_straincoupling) then
 
      if ((line(1:7)=='<energy')) then
        call rdfromline_value('energy',line,strg)
@@ -942,7 +942,7 @@ end subroutine xml_getdims
        call rdfromline("voigt",line,strg)
        strg1=trim(strg)
        read(strg1,*) voigt 
-       has_3rd = .true.
+       has_straincoupling = .true.
        irpt = 1 
      end if
      
@@ -1025,6 +1025,7 @@ end subroutine xml_getdims
 &            reshape(work2,(/3,natom,3,natom/))
          ABI_DEALLOCATE(work2)
        end if
+       has_3rd = .true.
        cycle
      end if
 

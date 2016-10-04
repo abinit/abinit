@@ -440,3 +440,4 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   call wrtout(std_out,message,'COLL')
 
 end subroutine compute_anharmonics
+!!***

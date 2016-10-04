@@ -50,6 +50,7 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
 #undef ABI_FUNC
 #define ABI_FUNC 'ddb_to_effective_potential'
  use interfaces_14_hidewrite
+ use interfaces_72_response
  use interfaces_77_ddb
 !End of the abilint section
 
