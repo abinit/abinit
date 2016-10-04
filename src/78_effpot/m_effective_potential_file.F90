@@ -1267,9 +1267,6 @@ subroutine effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,comm
 
 !Local variables-------------------------------
  !scalar
- integer :: nproc,my_rank
- logical :: iam_master
- integer, parameter:: master = 0
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
  integer :: dimekb,filetype,lmnmax,mband,mtyp,msym,nblok,nkpt,usepaw
  integer :: ddbun = 666
@@ -1277,10 +1274,6 @@ subroutine effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,comm
 !arrays
 ! *************************************************************************
 
-!MPI variables
- nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
- iam_master = (my_rank == master)
- 
  natom = 0
  ntypat= 0
  nph1l = 0
@@ -1298,7 +1291,6 @@ subroutine effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,comm
 &    'if you want to predic the number of cell (nrpt)',ch10,' use bigbx9 routines',ch10
    call wrtout(std_out,message,'COLL')
 
-! The comunicator is set to 0 at the end of the call of ddb_getdims
    call ddb_getdims(dimekb,filename,lmnmax,mband,mtyp,msym,natom,nblok,&
 &                  nkpt,ntypat,ddbun,usepaw,DDB_VERSION,comm)
 
