@@ -23,7 +23,7 @@
 !!   idtset are already initalized
 !!  filnam(5)=character strings giving file names
 !!  idtset=number of the current dataset
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mband=maximum number of bands.
 !!  ndtset_alloc=number of datasets, corrected for allocation of at least one data set
 !!  tread(11)=flags indicating wether parallel input parameters were read from input file

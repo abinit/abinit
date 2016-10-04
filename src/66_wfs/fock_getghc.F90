@@ -73,7 +73,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
 !Arguments ------------------------------------
 ! Scalars
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),target,intent(inout) :: gs_ham
 ! Arrays
  type(pawcprj_type),intent(in) :: cwaveprj(:,:)

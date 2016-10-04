@@ -16,7 +16,7 @@
 !!
 !! INPUTS
 !!  cplex=1 if rhor[f] is real, 2 if rhor[f] is complex
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nspden=number of spin-density components
 !!  optgrid=+1 to go from the coarse grid towards the fine grid
 !!          -1 to go from the fine grid towards the coarse grid
@@ -90,7 +90,7 @@ subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfg
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex,nspden,optgrid,optin,optout,paral_kgb
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(pawfgr_type),intent(in) :: pawfgr
 !arrays
  real(dp),intent(inout) :: rhog(2,pawfgr%nfftc),rhogf(2,pawfgr%nfft)

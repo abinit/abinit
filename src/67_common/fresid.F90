@@ -24,7 +24,7 @@
 !!  | typat(natom)=integer type for each atom in cell
 !!  | usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  | xclevel= level of the XC functional
-!! mpi_enreg=informations about MPI parallelization
+!! mpi_enreg=information about MPI parallelization
 !! nfft=(effective) number of FFT grid points (for this processor)
 !! ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
 !! ntypat=number of types of atoms in cell.
@@ -91,7 +91,7 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
 !scalars
  integer,intent(in) :: nfft,ntypat,option
  real(dp),intent(in) :: ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
 !arrays
  integer,intent(in) :: ngfft(18)

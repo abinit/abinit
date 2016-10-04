@@ -33,7 +33,7 @@
 !!  mcgq=second dimension of the cgq array
 !!  mkgq = second dimension of pwnsfacq
 !!  nkpt=number of k points
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  npw=number of planewaves in basis sphere at given k.
 !!  nspinor=number of spinorial components of the wavefunctions (on current proc)
 !!  nsppol=number of spin polarizations
@@ -100,7 +100,7 @@ subroutine make_grad_berry(cg,cgq,cprj_k,detovc,dimlmn,dimlmn_srt,direc,dtefield
  integer,intent(in) :: mkgq,mpw,natom,nkpt,npw,nspinor,nsppol,pwind_alloc
  type(gs_hamiltonian_type),intent(in) :: gs_hamk
  type(efield_type),intent(inout) :: dtefield
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 
 !arrays
  integer,intent(in) :: dimlmn(natom),dimlmn_srt(natom)

@@ -29,7 +29,7 @@
 !!  mband=maximum number of bands
 !!  mgfftdiel=maximum size of 1D FFTs, for the computation of the dielectric matrix
 !!  mkmem=number of k-points treated by this node.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum allowed value for npw
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!       WARNING about parallelization: see below
@@ -122,7 +122,7 @@
  real(dp), intent(in) :: etotal,gsqcut,ucvol
  type(datafiles_type), intent(in) :: dtfil
  type(dataset_type), intent(in) :: dtset
- type(MPI_type), intent(inout) :: mpi_enreg
+ type(MPI_type), intent(in) :: mpi_enreg
  type(wffile_type), intent(inout) :: wffnew
  integer, intent(in) :: kg(3,mpw*mkmem),ngfftdiel(18),npwarr(nkpt)
  real(dp), intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol),eigen(mband*nkpt*nsppol)

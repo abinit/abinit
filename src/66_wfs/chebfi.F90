@@ -18,7 +18,7 @@
 !!  dtset <type(dataset_type)>=all input variales for this dataset
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the hamiltonian at k
 !!  kinpw(npw)=(modified) kinetic energy for each plane wave (hartree)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands at this k point for that spin polarization
 !!  npw=number of plane waves at this k point
 !!  nspinor=number of plane waves at this k point

@@ -98,7 +98,7 @@ subroutine recursion(exppot,coordx,coordy,coordz,an,bn2,rho_out, &
  integer,intent(in) :: tim_fourdp,natom,dim_trott
  real(dp),intent(in) :: fermie,tol,tsmear,rtrotter
  real(dp), intent(out) :: rho_out
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(nlpsprec_type),intent(in) :: nlrec
  type(metricrec_type),intent(in) :: metrec
 !arrays

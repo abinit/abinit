@@ -13,7 +13,7 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!! mpi_enreg=informations about MPI parallelization
+!! mpi_enreg=information about MPI parallelization
 !! natom, number of atoms in unit cell
 !! nfft,ngfft(18), number of FFT points and details of FFT
 !! nspden, number of spin components
@@ -79,7 +79,7 @@ subroutine make_efg_el(efg,mpi_enreg,natom,nfft,ngfft,nspden,nsym,paral_kgb,rhor
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nfft,nspden,nsym,paral_kgb
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18),symrel(3,3,nsym)
  real(dp),intent(in) :: rhor(nfft,nspden),rprimd(3,3),tnons(3,nsym),xred(3,natom)

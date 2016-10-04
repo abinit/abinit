@@ -59,7 +59,7 @@ subroutine outgkk(bantot0,bantot1,outfile,eigen0,eigen1,hdr0,hdr1,mpi_enreg,phas
 !scalars
  integer,intent(in) :: bantot0,bantot1
  character(len=fnlen),intent(in) :: outfile
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(hdr_type),intent(inout) :: hdr0,hdr1
 !arrays
  real(dp),intent(in) :: eigen0(bantot0),eigen1(2*bantot1)

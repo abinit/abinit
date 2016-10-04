@@ -369,7 +369,7 @@ contains
   integer,intent(in) :: paw_opt,signs,tim_nonlop,useylm
   integer,optional,intent(in) :: use_gpu_cuda
   real(dp),intent(in) :: lambda(ndat),ucvol
-  type(MPI_type),intent(inout) :: mpi_enreg
+  type(MPI_type),intent(in) :: mpi_enreg
   !arrays
   integer,intent(in) :: atindx1(natom),indlmn(6,lmnmax,ntypat),kgin(3,npwin)
   integer,intent(in) :: kgout(3,npwout),nattyp(ntypat),ngfft(18),nloalg(3)
