@@ -60,7 +60,7 @@
 !!  kpt(3,nkpt)=reduced coordinates of k points.
 !!  maxfor=maximum absolute value of fcart
 !!  moved_atm_inside: if==1, the atoms are allowed to move.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nband(nkpt*nsppol)=number of bands at each k point, for each polarization
 !!  nkpt=number of k points
 !!  nstep=number of steps expected in iterations.
@@ -142,7 +142,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  real(dp),intent(in) :: vxcavg
  character(len=fnlen),intent(in) :: fname_eig,filnam1
  type(electronpositron_type),pointer,optional :: electronpositron
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
 !arrays
  integer,intent(in) :: nband(nkpt*dtset%nsppol)

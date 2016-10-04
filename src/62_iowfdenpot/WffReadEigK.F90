@@ -27,7 +27,7 @@
 !!  ikpt=index of current k point (only needed for error message)
 !!  isppol=spin polarization currently treated (only needed for error message)
 !!  mband=maximum number of bands (governs the dimension of eigen)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands actually in eigen
 !!    can be equal, larger or smaller than nband_disk, but
 !!    eigen will not be completely filled if nband>nband_disk)
@@ -53,11 +53,10 @@
 
 subroutine WffReadEigK(eigen,formeig,headform,ikpt,isppol,mband,mpi_enreg,nband,tim_rwwf,wff)
 
- use m_profiling_abi
-
  use defs_basis
  use defs_abitypes
  use m_wffile
+ use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -71,7 +70,7 @@ subroutine WffReadEigK(eigen,formeig,headform,ikpt,isppol,mband,mpi_enreg,nband,
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: formeig,headform,ikpt,isppol,mband,nband,tim_rwwf
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(wffile_type),intent(inout) :: wff
 !arrays
  real(dp),intent(out) :: eigen((2*mband)**formeig*mband)

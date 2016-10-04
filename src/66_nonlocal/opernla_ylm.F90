@@ -50,7 +50,7 @@
 !!  kpg(npw,nkpg)=(k+G) components          for ikpg=1...3   (if nkpg=3 or 9)
 !!       [(k+G)_a].[(k+G)_b] quantities for ikpg=4...9   (if nkpg=9)
 !!  matblk=dimension of the array ph3d
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  ndgxdt=second dimension of dgxdt
 !!  nd2gxdt=second dimension of d2gxdt
 !!  nincat=number of atoms in the subset here treated
@@ -135,7 +135,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
  integer,intent(in) :: choice,cplex,dimffnl,ia3,idir,istwf_k,matblk,nd2gxdt
  integer,intent(in) :: ndgxdt,nincat,nkpg,nlmn,npw,nspinor,signs
  real(dp),intent(in) :: ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: indlmn(6,nlmn),nloalg(3)
  integer,intent(out) :: cplex_dgxdt(ndgxdt),cplex_d2gxdt(nd2gxdt)

@@ -115,7 +115,7 @@
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(inout) :: ehart01 !vz_i
  real(dp),intent(out) :: vres2
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),kxc(nfft,nkxc)
  real(dp),intent(in) :: nhat(nfft,nspden)

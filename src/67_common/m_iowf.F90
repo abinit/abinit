@@ -82,7 +82,7 @@ CONTAINS  !=====================================================================
 !!  mband=maximum number of bands
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mkmem=Number of k-points treated by this node.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum number of plane waves
 !!  natom=number of atoms in unit cell
 !!  nband=number of bands
@@ -135,7 +135,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  integer,intent(in) :: mband,mcg,mkmem,mpw,natom,nkpt,nsppol,response,unwff2
 !integer,intent(in) :: nstep
  character(len=*),intent(in) :: filnam
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(hdr_type), intent(inout) :: hdr

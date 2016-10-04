@@ -135,7 +135,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  integer,intent(in),optional :: comm_atom,set_k,set_band
  integer,intent(out) :: ierr
  type(Datafiles_type),intent(in) :: Dtfil
- type(MPI_type),intent(inout) :: MPI_enreg
+ type(MPI_type),intent(in) :: MPI_enreg
  type(hdr_type),intent(inout) :: Hdr
  type(dataset_type),intent(in) :: Dtset
  type(crystal_t),intent(in) :: crystal

@@ -20,7 +20,7 @@
 !!  cgcband(2,npw_k)=wavefunction in recip space
 !!  istwfk= storage mode of cgcband
 !!  mlang=maximum angular momentum
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natsph=number of atoms around which ang mom projection has to be done 
 !!  npw_k=number of plane waves for kpt
 !!  nradint(natsph)=number of points on radial real-space grid for a given atom
@@ -78,7 +78,7 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
  integer,intent(in) :: istwfk,mlang,mpw,natsph,npw_k,nradintmax
  integer,intent(in) :: prtsphere
  real(dp),intent(in) :: ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: nradint(natsph)
  real(dp),intent(in) :: bess_fit(mpw,nradintmax,mlang),cgcband(2,npw_k)

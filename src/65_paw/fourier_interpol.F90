@@ -74,7 +74,7 @@ subroutine fourier_interpol(cplex,nspden,optin,optout,nfft_in,ngfft_in,nfft_out,
 !scalars
  integer,intent(in) :: cplex,nspden,optin,optout
  integer,intent(in) :: nfft_in,nfft_out,paral_kgb
- type(MPI_type),intent(inout) :: MPI_enreg
+ type(MPI_type),intent(in) :: MPI_enreg
 !arrays
  integer,intent(in) :: ngfft_in(18),ngfft_out(18)
  real(dp),intent(inout) :: rhor_in(cplex*nfft_in,nspden)
