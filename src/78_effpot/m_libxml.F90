@@ -34,7 +34,7 @@ module m_libxml
  implicit none
  private
 
-#if HAVE_LIBXML
+#if defined HAVE_LIBXML
  public :: libxml_checkXML
  public :: libxml_readEffPot
  public :: libxml_getValue
@@ -45,7 +45,7 @@ module m_libxml
  public :: char_f2c
  public :: char_c2f
 
-#if HAVE_LIBXML
+#if defined HAVE_LIBXML
  interface
    subroutine libxml_readEffPot(filename,natom,&
 &     ntypat,nrpt,nph1l,amu,atmfrc,cell,dynmat,elastic_constants,energy,&

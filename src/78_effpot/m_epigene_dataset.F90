@@ -961,8 +961,9 @@ subroutine outvars_epigene (epigene_dtset,nunit)
 
  if(epigene_dtset%dynamics/=0)then
    write(nunit,'(a)')' Molecular Dynamics :'
-   if(epigene_dtset%ifcflag/=0)write(nunit,'(3x,a9,3F10.1)')'     temp',epigene_dtset%temperature
-   if(epigene_dtset%ifcflag/=0)write(nunit,'(3x,a9,3i10)')'    ncell',epigene_dtset%n_cell
+   write(nunit,'(3x,a9,3F10.1)')'     temp',epigene_dtset%temperature
+   write(nunit,'(3x,a9,3I10.1)')'    ntime',epigene_dtset%ntime
+   write(nunit,'(3x,a9,3i10)')  '    ncell',epigene_dtset%n_cell
  end if
 
 !Write the general information

@@ -51,10 +51,9 @@ module m_effective_potential
  public :: effective_potential_free
  public :: effective_potential_generateDipDip
  public :: effective_potential_getDeltaEnergy
- public :: effective_potential_getHarmonicContributions
+ public :: effective_potential_evaluate
  public :: effective_potential_getForces
  public :: effective_potential_init
-
  public :: effective_potential_print
  public :: effective_potential_printPDOS
  public :: effective_potential_printSupercell
@@ -92,6 +91,7 @@ module m_effective_potential
 
    real(dp):: energy                            
 !     Energy of the system (Hatree)
+
    real(dp):: ucvol                                 
 !     Unit cell volume
 
@@ -100,10 +100,6 @@ module m_effective_potential
 
    real(dp) :: rprimd(3,3)           
 !     Lattice vectors for supercell (Bohr)
-
-   type(supercell_type) :: supercell                 
-!     super cell type
-!     Store all the information of the suppercell
 
    real(dp) :: internal_stress(6)
 !     internal_stress(6)
@@ -151,15 +147,23 @@ module m_effective_potential
 !    phfrq(3*natom,nph1l)
 !    array with all phonons frequencies for each q points in Hartree/cm
 
+   type(crystal_t) :: crystal
+!    crystal type
+!    contains all information of the crystal
+
    type(strain_type) :: strain
 !     strain type
 !     Type wich containt strain information (related to reference structure)
 
+   type(supercell_type) :: supercell                 
+!     super cell type
+!     Store all the information of the suppercell
+
    type(harmonics_terms_type) :: harmonics_terms
-!   type with all information for anharmonics terms
+!     type with all information for anharmonics terms
 
    type(anharmonics_terms_type) :: anharmonics_terms
-!   type with all information for anharmonics terms
+!     type with all information for anharmonics terms
 
  end type effective_potential_type
 !!***
@@ -194,7 +198,12 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine effective_potential_init(natom,nph1l,nrpt,ntypat,eff_pot,name)
+subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
+&                                   epsilon_inf,elastic_constants,has_3rd,ifcs,&
+&                                   internal_strain,phfrq,qph1l,nqpt,zeff,&
+&                                   anharmonics_terms,external_stress,&
+&                                   forces,internal_stress,phonon_strain,strain,supercell,&
+&                                   name)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -207,102 +216,151 @@ subroutine effective_potential_init(natom,nph1l,nrpt,ntypat,eff_pot,name)
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: natom,nph1l,nrpt,ntypat
+ real(dp),intent(in):: energy
+ integer,intent(in) :: nqpt
  character(len=fnlen), optional,intent(in) :: name
- type(effective_potential_type), intent(out) :: eff_pot
+ logical,intent(in) :: has_3rd
 !arrays
+ real(dp),intent(in) :: epsilon_inf(3,3)
+ real(dp),intent(in) :: elastic_constants(6,6)
+ real(dp),intent(in) :: dynmat(:,:,:,:,:,:)
+ real(dp),intent(in) :: phfrq(:,:),qph1l(:,:)
+
+ real(dp),intent(in) :: internal_strain(:,:,:),zeff(:,:,:)
+ type(crystal_t),intent(in) :: crystal
+ type(effective_potential_type), intent(out) :: eff_pot
+ type(ifc_type),intent(in) :: ifcs
+ type(anharmonics_terms_type),optional,intent(in) :: anharmonics_terms
+ type(supercell_type),optional,intent(in) :: supercell
+ type(strain_type),optional,intent(in) :: strain
+ type(ifc_type),optional,intent(in) :: phonon_strain(6)
+ real(dp),optional,intent(in) :: external_stress(6),internal_stress(6)
+ real(dp),optional,intent(in) :: forces(3,crystal%natom)
 !Local variables-------------------------------
 !scalar
  character(len=500) :: msg
 !arrays
 
-
 ! *************************************************************************
 
-! free the effective potential in input
-  call effective_potential_free(eff_pot)
+!1-Free the effective potential before filling it
+ call effective_potential_free(eff_pot)
 
-  eff_pot%natom     = natom  ! Set the number of atoms
-  eff_pot%ntypat    = ntypat ! Set the number of type of atoms 
-  eff_pot%harmonics_terms%ifcs%nrpt = nrpt   ! Set the number of real space points 
-                             ! used to integrate IFC 
-  eff_pot%nph1l     = nph1l  ! Set the list of nph1l wavevector for phonon
+ if (present(name)) then
+   eff_pot%name = name
+ else
+   eff_pot%name = ''
+ end if
 
-  if (present(name)) then
-    eff_pot%name = name
-  else
-    eff_pot%name = ''
-  end if
-
-! Check the number of atoms
- if (natom < 1) then
+!2-Perform some checks
+ if (crystal%natom < 1) then
    write(msg, '(a,a,a,i10,a)' )&
 &   'The cell must have at least one atom.',ch10,&
-&   'The number of atom is  ',natom,'.'
+&   'The number of atom is  ',crystal%natom,'.'
    MSG_BUG(msg)
  end if
 
- if (ntypat < 1) then
+ if (crystal%ntypat < 1) then
    write(msg, '(a,a,a,i10,a)' )&
 &   'The cell must have at least one type of atom.',ch10,&
-&   'The number of type of atom is  ',ntypat,'.'
+&   'The number of type of atom is  ',crystal%ntypat,'.'
    MSG_BUG(msg)
  end if
 
- eff_pot%energy = zero
- eff_pot%ucvol  = zero
- eff_pot%rprimd = zero
- eff_pot%acell = zero
- eff_pot%strain%name = ""
- eff_pot%strain%delta = zero
- eff_pot%strain%direction = zero
- eff_pot%strain%strain = zero
- eff_pot%internal_stress = zero
- eff_pot%external_stress = zero
- eff_pot%has_3rd = .false.
- eff_pot%has_strain = .false.
+!3-Fill energy of the crystal (hartree)
+ eff_pot%energy = energy
 
-!Allocation of mass of the atoms array (atomic mass unit)
- ABI_ALLOCATE(eff_pot%amu,(ntypat))
- eff_pot%amu = zero 
+!1-Fill the crystal
+ eff_pot%natom  = crystal%natom
+ eff_pot%ntypat = crystal%ntypat
+ eff_pot%ucvol  = crystal%ucvol
+ eff_pot%rprimd = crystal%rprimd
+! Set acell (always equal to 1 because rprimd is store crystal structure)
+ eff_pot%acell  = one
 
-!Allocation of Effective charges array 
- ABI_ALLOCATE(eff_pot%typat,(natom))
- eff_pot%typat = zero 
+ ABI_ALLOCATE(eff_pot%xcart,(3,eff_pot%natom))
+ eff_pot%xcart = crystal%xcart
 
-!Allocation of znucl
- ABI_ALLOCATE(eff_pot%znucl,(ntypat))
- eff_pot%znucl = zero
+ ABI_ALLOCATE(eff_pot%amu,(crystal%ntypat))
+ eff_pot%amu = crystal%amu
+
+ ABI_ALLOCATE(eff_pot%dynmat,(2,3,eff_pot%natom,3,eff_pot%natom,nqpt))
+ eff_pot%dynmat(:,:,:,:,:,:) = zero
+ eff_pot%nph1l = nqpt
+
+ ABI_ALLOCATE(eff_pot%qph1l,(3,nqpt))
+ eff_pot%qph1l(:,:) = zero
  
-!Allocation of forces
- ABI_ALLOCATE(eff_pot%forces,(3,natom))
+
+ ABI_ALLOCATE(eff_pot%phfrq,(3*eff_pot%natom,nqpt))
+ eff_pot%phfrq(:,:) = zero
+
+ if(eff_pot%nph1l > zero) then
+   eff_pot%dynmat(:,:,:,:,:,:) = dynmat(:,:,:,:,:,:)
+   eff_pot%qph1l(:,:)  = qph1l(:,:)
+   eff_pot%phfrq(:,:)  = phfrq(:,:)
+end if
+
+ ABI_ALLOCATE(eff_pot%typat,(crystal%natom))
+ eff_pot%typat = crystal%typat
+
+ ABI_ALLOCATE(eff_pot%znucl,(crystal%ntypat))
+ eff_pot%znucl = crystal%znucl
+
+
+!4-Fill harmonic part
+ call harmonics_terms_init(eff_pot%harmonics_terms,ifcs,crystal%natom,&
+&                  ifcs%nrpt,epsilon_inf=epsilon_inf,&
+&                  elastic_constants=elastic_constants,&
+&                  internal_strain=internal_strain,zeff=zeff)
+
+!5-Fill optional inputs
+ ABI_ALLOCATE(eff_pot%forces,(3,eff_pot%natom))
  eff_pot%forces = zero
+ if(present(forces))then
+   eff_pot%forces = forces
+ end if
 
-!Allocation of list of nph1l wavevectors
- ABI_ALLOCATE(eff_pot%qph1l,(3,nph1l))
- eff_pot%qph1l  = zero
+ eff_pot%has_strain = .FALSE.
+ if(present(strain)) then
+   eff_pot%has_strain = .TRUE.
+   eff_pot%strain%delta = strain%delta
+   eff_pot%strain%direction = strain%direction
+   eff_pot%strain%strain = strain%strain
+  end if
 
-!Allocation of dynamical matrix 
- ABI_ALLOCATE(eff_pot%dynmat,(2,3,natom,3,natom,nph1l))
- eff_pot%dynmat = zero
+ eff_pot%internal_stress = zero
+ if(present(internal_stress))then
+   eff_pot%internal_stress = internal_stress
+ end if
 
-!Allocation of frequecies arrays
- ABI_ALLOCATE(eff_pot%phfrq,(3*natom,nph1l))
- eff_pot%phfrq = zero
+ eff_pot%external_stress = zero
+ if(present(external_stress))then
+   eff_pot%external_stress = external_stress
+ end if
 
-!Allocation of internal strain tensor 
- ABI_ALLOCATE(eff_pot%xcart,(3,natom))
- eff_pot%xcart = zero
+  eff_pot%has_3rd = .FALSE.
 
+ if(has_3rd)then 
+   if (present(phonon_strain)) then
+     eff_pot%has_3rd = .TRUE.
 !Allocation of anharmonics part (3rd order) 
- call anharmonics_terms_init(eff_pot%anharmonics_terms,natom,nrpt)
+     call anharmonics_terms_init(eff_pot%anharmonics_terms,crystal%natom,ifcs%nrpt,&
+&                              phonon_strain=phonon_strain)
+   else
+     write(msg, '(3a)' )&
+&        ' has_3rd is set to true but there is no 3rd order, ',&
+&        ' please set it in the initialisation of effective_potential_init',ch10
+     MSG_BUG(msg)
+   end if
+ end if
 
-!Allocation of harmonics part (2th order) 
- call harmonics_terms_init(eff_pot%harmonics_terms,natom,nrpt)
-
-!Initialisation of the supercell
- call init_supercell(eff_pot%natom, 0, real((/0,0,0/),dp), eff_pot%rprimd, eff_pot%typat,&
+ if(present(supercell))then
+   eff_pot%supercell = supercell
+ else
+   call init_supercell(eff_pot%natom, 0, real((/0,0,0/),dp), eff_pot%rprimd, eff_pot%typat,&
 &                    eff_pot%xcart, eff_pot%supercell)
+ end if
 
 end subroutine effective_potential_init 
 !!***
@@ -411,6 +469,7 @@ subroutine effective_potential_free(eff_pot)
   call anharmonics_terms_free(eff_pot%anharmonics_terms)
   call harmonics_terms_free(eff_pot%harmonics_terms)
   call destroy_supercell(eff_pot%supercell)
+  call crystal_free(eff_pot%crystal)
 
 end subroutine effective_potential_free
 !!***
@@ -589,7 +648,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 !  Print the new boundary
    write(message,'(5a,2I3,a,2I3,a,2I3,4a)') ch10,' New bound for ifc (long+short):',&
 &    ch10,ch10, " x=[",min1,max1,"], y=[",min2,max2,"] and z=[",min3,max3,"]",ch10,ch10,&
-&    " Computation of new dipole-dipole interaction, should be parallelised :'(."
+&    " Computation of new dipole-dipole interaction, should be parallelized :'(."
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
@@ -675,11 +734,6 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
          end do
        end do
      end do
-     ABI_DEALLOCATE(xred_tmp)
-     ABI_DEALLOCATE(xred)
-     ABI_DEALLOCATE(zeff_tmp)
-     ABI_DEALLOCATE(dyew)
-     ABI_DEALLOCATE(dyewq0)
 
 !    Fill the short range part (calculated previously) only master
      do irpt=1,ifc_tmp%nrpt
@@ -688,7 +742,8 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 &           eff_pot%harmonics_terms%ifcs%cell(irpt2,2)==ifc_tmp%cell(irpt,2).and.&
 &           eff_pot%harmonics_terms%ifcs%cell(irpt2,3)==ifc_tmp%cell(irpt,3).and.&
 &           any(eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2) > tol9)) then
-           ifc_tmp%short_atmfrc(:,:,:,:,:,irpt) = eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2)
+           ifc_tmp%short_atmfrc(:,:,:,:,:,irpt) = &
+&                               eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2)
          end if
        end do
      end do
@@ -698,6 +753,13 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 
    end if ! End if master (should be parallelised in the futur)
 
+!  DEALLOCATION OF ARRAYS
+   ABI_DEALLOCATE(xred_tmp)
+   ABI_DEALLOCATE(xred)
+   ABI_DEALLOCATE(zeff_tmp)
+   ABI_DEALLOCATE(dyew)
+   ABI_DEALLOCATE(dyewq0)
+
 !  Broadcast ifc
    call xmpi_bcast (ifc_tmp%atmfrc,       master, comm, ierr)
    call xmpi_bcast (ifc_tmp%short_atmfrc, master, comm, ierr)
@@ -706,7 +768,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    call xmpi_bcast (ifc_tmp%nrpt,         master, comm, ierr)
    
 !  Copy ifc into effective potential
-!  !!!Warning eff_pot%harmonics_terms%ifcs only contains atmfrc,short_atmfrc,ewald_atmfrc,,nrpt and cell!!
+!  !!!Warning eff_pot%harmonics_terms%ifcs only contains atmfrc,short_atmfrc,ewald_atmfrc,,nrpt and cell!
 !   rcan,ifc%rpt,wghatm and other quantities 
 !   are not needed for effective potential!!!
 !  Free ifc before copy
@@ -1454,7 +1516,8 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
          do mu=1,3
            do ib=1,eff_pot%natom
              do  nu=1,3
-               WRITE(unit_xml,'(e22.14)', advance="no")(eff_pot%harmonics_terms%ifcs%short_atmfrc(1,mu,ia,nu,ib,irpt))
+               WRITE(unit_xml,'(e22.14)', advance="no")&
+&                         (eff_pot%harmonics_terms%ifcs%short_atmfrc(1,mu,ia,nu,ib,irpt))
              end do
            end do
            WRITE(unit_xml,'(a)')''
@@ -1993,7 +2056,7 @@ end subroutine effective_potential_writeAbiInput
 !! effective_potential_getForces
 !!
 !! FUNCTION
-!! Evaluate the gradient of  of effective potential
+!! evaluate the gradient of  of effective potential
 !! to calculates the forces in reduced coordinates
 !!
 !! INPUTS
@@ -2081,13 +2144,13 @@ end subroutine effective_potential_getForces
 !!***
 
 
-!****f* m_effective_potential/effective_potential_getHarmonicContributions
+!****f* m_effective_potential/effective_potential_evaluate
 !!
 !! NAME
-!! effective_potential_getHarmonicContributions
+!! effective_potential_evaluate
 !!
 !! FUNCTION
-!! Evaluate the harmonic part of the energy and the forces
+!! evaluate the harmonic part of the energy and the forces
 !! of a structure with the effective potential
 !!
 !! INPUTS
@@ -2105,7 +2168,7 @@ end subroutine effective_potential_getForces
 !!
 !! SOURCE
  
-subroutine effective_potential_getHarmonicContributions(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
+subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
 &                                              xcart,comm,displacement,strain1,strain2,external_stress)
 
   use m_strain
@@ -2113,7 +2176,7 @@ subroutine effective_potential_getHarmonicContributions(eff_pot,energy,fcart,fre
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_getHarmonicContributions'
+#define ABI_FUNC 'effective_potential_evaluate'
  use interfaces_14_hidewrite
  use interfaces_41_geometry
 !End of the abilint section
@@ -2326,7 +2389,7 @@ subroutine effective_potential_getHarmonicContributions(eff_pot,energy,fcart,fre
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
 
-end subroutine effective_potential_getHarmonicContributions
+end subroutine effective_potential_evaluate
 !!***
 
 !!****f* m_effective_potential/elastic_contribution
@@ -2584,7 +2647,7 @@ end subroutine effective_potential_distributeResidualForces
 !! effective_potential_getDeltaEnergy
 !!
 !! FUNCTION
-!! Evaluate the energy due to 1 atomic displacement
+!! evaluate the energy due to 1 atomic displacement
 !!
 !! INPUTS
 !! eff_pot = effective potential structure

@@ -90,7 +90,8 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine anharmonics_terms_init(anharmonics_terms,natom,nrpt)
+subroutine anharmonics_terms_init(anharmonics_terms,natom,nrpt,&
+&                                 elastics,internal_strain,phonon_strain)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -105,6 +106,9 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,nrpt)
 !scalars
  integer, intent(in) :: natom,nrpt
  type(anharmonics_terms_type), intent(out) :: anharmonics_terms
+ real(dp),optional,intent(in) :: internal_strain(6,6,natom,3)
+ real(dp),optional,intent(in) :: elastics(6,6,6)
+ type(ifc_type) :: phonon_strain(6)
 !arrays
 !Local variables-------------------------------
 !scalar
@@ -129,6 +133,11 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,nrpt)
 &   'The cell must have at least one rpt point.',ch10,&
 &   'The number of rpt points is  ',nrpt,'.'
    MSG_BUG(msg)
+ end if
+
+ anharmonics_terms%elastics = zero
+ if(present(elastics))then
+   anharmonics_terms%elastics = elastics
  end if
  
 !Allocation of phonon strain coupling array (3rd order)
@@ -155,12 +164,12 @@ end subroutine anharmonics_terms_init
 !! anharmonics_terms_free
 !!
 !! FUNCTION
-!! deallocate all dynamic memory for this effective potential structure
+!! deallocate all dynamic memory for this anharmonics_terms structure
 !!
 !! INPUTS
 !!
 !! OUTPUT
-!! anharmonics_terms = supercell structure with data to be output
+!! anharmonics_terms = structure with anharmonics terms
 !!
 !! PARENTS
 !!   anharmonics_terms_init

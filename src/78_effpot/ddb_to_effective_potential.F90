@@ -40,10 +40,10 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
  use m_ddb
  use m_ifc
  use m_copy,            only : alloc_copy
- use m_crystal,         only : crystal_t
+ use m_crystal,         only : crystal_t,crystal_print
  use m_dynmat,          only : asrif9,gtdyn9,cell9,canat9
  use m_epigene_dataset, only : epigene_dataset_type
- use m_effective_potential, only : effective_potential_type
+ use m_effective_potential, only : effective_potential_type, effective_potential_free
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -65,7 +65,7 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
 
 !Local variables-------------------------------
 !scalar
- integer :: chneut,ia,ib,iblok,idir1,idir2,ii,ipert1
+ integer :: chneut,ia,ib,iblok,idir1,idir2,ii,ipert1,iphl1
  integer :: ipert2,irpt,ivarA,ivarB,msize,mpert,natom,nblok,rftyp,selectz
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
@@ -75,8 +75,12 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
  real(dp),allocatable :: instrain(:,:),zeff(:,:,:)
  character(len=500) :: message
  type(ifc_type) :: ifc
-
+ real(dp),allocatable :: d2cart(:,:,:,:,:),displ(:)
+ real(dp),allocatable :: eigval(:,:),eigvec(:,:,:,:,:),phfrq(:)
 ! *************************************************************************
+
+!Free the eff_pot before filling
+ call effective_potential_free(effective_potential)
 
 !Initialisation of usefull values  
   natom = ddb%natom
@@ -92,14 +96,23 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
 !**********************************************************************
 ! Transfert basics values 
 !**********************************************************************
-  effective_potential%natom  = crystal%natom
-  effective_potential%ucvol  = crystal%ucvol
-  effective_potential%rprimd = crystal%rprimd
   effective_potential%acell  = ddb%acell
-  effective_potential%amu    = ddb%amu
-  effective_potential%typat  = crystal%typat
-  effective_potential%xcart  = crystal%xcart
-  effective_potential%znucl  = crystal%znucl
+  effective_potential%natom  = crystal%natom
+  effective_potential%ntypat = crystal%ntypat
+  effective_potential%rprimd = crystal%rprimd
+  effective_potential%ucvol  = crystal%ucvol
+
+  ABI_ALLOCATE(effective_potential%amu,(crystal%ntypat))
+  effective_potential%amu(:)    = ddb%amu(:)
+
+  ABI_ALLOCATE(effective_potential%typat,(crystal%natom))
+  effective_potential%typat(:)  = crystal%typat(:)
+
+  ABI_ALLOCATE(effective_potential%xcart,(3,crystal%natom))
+  effective_potential%xcart(:,:)  = crystal%xcart(:,:)
+
+  ABI_ALLOCATE(effective_potential%znucl,(crystal%ntypat))
+  effective_potential%znucl(:)  = crystal%znucl(:)
 
 !**********************************************************************
 ! Transfert energy from input file
@@ -127,6 +140,8 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
 ! Dielectric Tensor and Effective Charges
 !**********************************************************************
   ABI_ALLOCATE(zeff,(3,3,natom))
+  ABI_ALLOCATE(effective_potential%harmonics_terms%zeff,(3,3,natom))
+ 
   rftyp   = 1 ! Blocks obtained by a non-stationary formulation.
   chneut  = 1 ! The ASR for effective charges is imposed
   selectz = 0 ! No selection of some parts of the effective charge tensor
@@ -149,8 +164,9 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
 
-  effective_potential%internal_stress = zero
+  ABI_ALLOCATE(effective_potential%forces,(3,natom))
   effective_potential%forces = zero
+  effective_potential%internal_stress = zero
 
   qphon(:,1)=zero
   qphnrm(1)=zero
@@ -180,12 +196,11 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
    do ii = 1, natom
-   write(message, '(I4,a,3(e16.8))' ) &
-&   ii,'   ',effective_potential%forces(:,ii)
+     write(message, '(I4,a,3(e16.8))' ) &
+&     ii,'   ',effective_potential%forces(:,ii)
 
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,  message,'COLL')
-     
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,  message,'COLL')
    end do
 
    write(message, '(a,a)' )ch10,&
@@ -325,8 +340,66 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
   call wrtout(ab_out,message,'COLL')
 
   call ifc_init(ifc,crystal,ddb,inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,&
-&   inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,effective_potential%harmonics_terms%zeff,inp%nsphere,inp%rifcsph,&
-&   inp%prtsrlr,inp%enunit,prtfreq=.True.)
+&   inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,effective_potential%harmonics_terms%zeff,&
+&   inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,prtfreq=.True.)
+
+!***************************************************************************
+! Dynamical matrix calculation for each qpoint give in input (default:gamma)
+!***************************************************************************
+
+  ABI_ALLOCATE(d2cart,(2,3,mpert,3,mpert))
+  ABI_ALLOCATE(displ,(2*3*natom*3*natom))
+  ABI_ALLOCATE(eigval,(3,natom))
+  ABI_ALLOCATE(eigvec,(2,3,natom,3,natom))
+  ABI_ALLOCATE(phfrq,(3*natom))
+
+  ABI_ALLOCATE(effective_potential%dynmat,(2,3,natom,3,natom,inp%nph1l))
+  ABI_ALLOCATE(effective_potential%phfrq,(3*natom,inp%nph1l))
+  ABI_ALLOCATE(effective_potential%qph1l,(3,inp%nph1l))
+
+  write(message,'(a,(80a),3a)')ch10,('=',ii=1,80),ch10,ch10,&
+&     ' Calculation of dynamical matrix for each ph1l points '
+  call wrtout(ab_out,message,'COLL')
+  call wrtout(std_out,message,'COLL')
+  
+!Transfer value in effective_potential structure
+  effective_potential%nph1l      = inp%nph1l
+  effective_potential%qph1l(:,:) = inp%qph1l(:,:)
+  
+  do iphl1=1,inp%nph1l
+
+   ! Initialisation of the phonon wavevector
+    qphon(:,1)=inp%qph1l(:,iphl1)
+    if (inp%nph1l /= 0) qphnrm(1) = inp%qnrml1(iphl1)
+
+    ! Get d2cart using the interatomic forces and the
+    ! long-range coulomb interaction through Ewald summation
+    call gtdyn9(ddb%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip,ifc%dyewq0,d2cart,crystal%gmet,&
+&     ddb%gprim,mpert,natom,ifc%nrpt,qphnrm(1),qphon(:,1),crystal%rmet,ddb%rprim,ifc%rpt,&
+&     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,zeff)
+
+    ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
+    call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,crystal%indsym,&
+&     mpert,crystal%nsym,natom,crystal%nsym,crystal%ntypat,phfrq,qphnrm(1),qphon,&
+&     crystal%rprimd,inp%symdynmat,crystal%symrel,crystal%symafm,crystal%typat,crystal%ucvol)
+
+    ! Write the phonon frequencies
+    call dfpt_prtph(displ,inp%eivec,inp%enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
+    
+    effective_potential%dynmat(:,:,:,:,:,iphl1) = d2cart(:,:,:natom,:,:natom)
+    effective_potential%phfrq(:,iphl1) = phfrq(:) * Ha_cmm1
+    
+  end do
+  
+  ABI_DEALLOCATE(d2cart)
+  ABI_DEALLOCATE(displ)
+  ABI_DEALLOCATE(eigval)
+  ABI_DEALLOCATE(eigvec)
+  ABI_DEALLOCATE(phfrq)
+
+!**********************************************************************
+! Transfert inter-atomic forces constants
+!**********************************************************************
 
 !Reorder cell from canonical coordinates to reduced coordinates (for epigene)
  call cell9(ifc%atmfrc,inp%brav,ifc%cell,ddb%gprim,effective_potential%natom,ifc%nrpt,&
@@ -349,9 +422,6 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
     ifc%ewald_atmfrc = zero       ! fill with 0 (fill later in effective_potential_generateDipDip)
   end if
 
-! Free ifc before copy
-  call ifc_free(effective_potential%harmonics_terms%ifcs)
-! Fill the effective potential
 ! Copy ifc into effective potential
 ! !!Warning eff_pot%ifcs only contains atmfrc,short_atmfrc,ewald_atmfrc,,nrpt and cell!!
 ! rcan,ifc%rpt,wghatm and other quantities 
@@ -364,55 +434,6 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
 
 ! Deallocate temporary ifc
   call ifc_free(ifc)
-
-!**********************************************************************
-! Dynamical matrix calculation for each qpoint
-!**********************************************************************
-
- !  ABI_ALLOCATE(d2cart,(2,3,mpert,3,mpert))
- !  ABI_ALLOCATE(displ,(2*3*natom*3*natom))
- !  ABI_ALLOCATE(eigval,(3,natom))
- !  ABI_ALLOCATE(eigvec,(2,3,natom,3,natom))
- !  ABI_ALLOCATE(phfrq,(3*natom))
-
- !  write(message,'(a,(80a),3a)')ch10,('=',ii=1,80),ch10,ch10,&
- ! &   ' Calculation of dynamical matrix '
- !  call wrtout(ab_out,message,'COLL')
- !  call wrtout(std_out,message,'COLL')
-
-! Transfer value in effective_potential structure
-!  effective_potential%qph1l = inp%qph1l
-
-!  do iphl1=1,inp%nph1l
-
-!    ! Initialisation of the phonon wavevector
-!     qphon(:,1)=inp%qph1l(:,iphl1)
-!     if (inp%nph1l /= 0) qphnrm(1) = inp%qnrml1(iphl1)
-
-!     ! Get d2cart using the interatomic forces and the
-!     ! long-range coulomb interaction through Ewald summation
-!     call gtdyn9(ddb%acell,ifc%atmfrc,ifc%dielt,ifc%dipdip,ifc%dyewq0,d2cart,crystal%gmet,&
-! &     ddb%gprim,mpert,natom,ifc%nrpt,qphnrm(1),qphon(:,1),crystal%rmet,ddb%rprim,ifc%rpt,&
-! &     ifc%trans,crystal%ucvol,ifc%wghatm,crystal%xred,zeff)
-
-!     ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
-!     call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,crystal%indsym,&
-! &     mpert,crystal%nsym,natom,crystal%nsym,crystal%ntypat,phfrq,qphnrm(1),qphon,&
-! &     crystal%rprimd,inp%symdynmat,crystal%symrel,crystal%symafm,crystal%typat,crystal%ucvol)
-
-!     ! Write the phonon frequencies
-!     call dfpt_prtph(displ,inp%eivec,inp%enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
-
-!     effective_potential%dynmat(:,:,:,:,:,iphl1) = d2cart(:,:,:natom,:,:natom)
-!     effective_potential%phfrq(:,iphl1) = phfrq(:) * Ha_cmm1
-    
-!   end do
-
-!   ABI_DEALLOCATE(d2cart)
-!   ABI_DEALLOCATE(displ)
-!   ABI_DEALLOCATE(eigval)
-!   ABI_DEALLOCATE(eigvec)
-!   ABI_DEALLOCATE(phfrq)
 
 !**********************************************************************
 ! Internal strain tensors at Gamma point
@@ -430,6 +451,10 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
   rfstrs(1:2)=3
   rftyp=1
   call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+  
+  ABI_ALLOCATE(effective_potential%harmonics_terms%internal_strain,(6,natom,3))
+  effective_potential%harmonics_terms%internal_strain = zero
+
   if (iblok /=0) then
 
 !    then print the internal stain tensor

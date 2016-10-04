@@ -34,6 +34,11 @@ module m_effective_potential_file
  use m_libxml
 #endif
 
+ use m_harmonics_terms
+ use m_anharmonics_terms
+ use m_effective_potential
+ use m_crystal,        only : crystal_t, crystal_init, crystal_free
+ use m_ifc
  use m_io_tools, only : open_file
 
  implicit none
@@ -45,10 +50,14 @@ module m_effective_potential_file
  public :: effective_potential_file_readStrain
 
  private :: xml_getdims
+ private :: xml2effpot
+
+#ifndef HAVE_LIBXML
  private :: rdfromline
  private :: rmtabfromline
  private :: rdfromline_value
- private :: xml2effpot
+#endif
+
  
  integer,parameter :: XML_RECL = 50000
 !!***
@@ -260,6 +269,7 @@ subroutine xml_getdims(filename,natom,ntypat,nph1l,nrpt)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'xml_getdims'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -271,22 +281,29 @@ subroutine xml_getdims(filename,natom,ntypat,nph1l,nrpt)
  !arrays
  !Local variables-------------------------------
  !scalar
-  integer :: funit = 1
-  integer :: nrpt2,iatom
+  integer :: nrpt2
   real :: itypat
-  logical :: endfile,found
   character(len=500) :: message
+#ifndef HAVE_LIBXML
+  integer :: funit = 1
+  integer :: iatom
+  logical :: endfile,found
   character (len=XML_RECL) :: line,readline
   character (len=XML_RECL) :: strg,strg1
+#endif
   !arrays
+#ifndef HAVE_LIBXML
   real,allocatable :: typat(:)
+#endif
 
  ! *************************************************************************
 
 !Open the atomicdata XML file for reading
- write(std_out,'(a,a,a,a,a)') ' xml_getdims :',&
+ write(message,'(a,a,a,a,a)') ' xml_getdims :',&
 &    ' Opening the file ',trim(filename),' to read dimensions',&
 &    ' (before initialisation)'
+
+ call wrtout(std_out,message,'COLL')
 
  natom = zero
  ntypat= zero
@@ -297,10 +314,9 @@ subroutine xml_getdims(filename,natom,ntypat,nph1l,nrpt)
 
 !Open the atomicdata XML file for reading
 
-#if HAVE_LIBXML
+#if defined HAVE_LIBXML
 !Read with libxml
  call libxml_getDimsEffPot(char_f2c(trim(filename)),natom,ntypat,nph1l,nrpt)
-
 #else
 !Read by hand
 
@@ -345,11 +361,11 @@ subroutine xml_getdims(filename,natom,ntypat,nph1l,nrpt)
  end do
  
  if (nrpt2/=nrpt) then
-   write(message, '(a,I5,a,a,a,I5,a,a,a,a,a)' )&
-&   'the number of total IFC  (',nrpt,') is not equal to the  ',ch10,&
-&   'the number of short range IFC (',nrpt2,') in',filename,ch10,&
-&   'the missing ifc will be set to zero',ch10
-   MSG_WARNING(message)
+   write(message, '(2a,I5,3a,I5,5a)' )ch10,&
+&   ' WARNING: the number of total IFC  (',nrpt,') is not equal to the  ',ch10,&
+&   '          the number of short range IFC (',nrpt2,') in ',filename,ch10,&
+&   '          the missing ifc will be set to zero',ch10
+   call wrtout(std_out,message,'COLL')
    nrpt = max(nrpt2,nrpt)
  end if
 
@@ -392,8 +408,6 @@ subroutine xml_getdims(filename,natom,ntypat,nph1l,nrpt)
  ABI_DEALLOCATE(typat)
 
 #endif
-
- write(std_out,'(a,a,a)') ' xml_getdims : close file ',trim(filename),ch10
 
 end subroutine xml_getdims
 !!***
@@ -443,20 +457,39 @@ end subroutine xml_getdims
 
  !Local variables-------------------------------
  !scalar
- integer :: funit = 1
- integer :: iatom,iamu,ii
- integer :: iph1l,irpt,itypat,mu,nu
- integer :: voigt
- real :: amu
- logical :: endfile,found,short_range,total_range
+ integer :: ii,itypat,msym,natom,nrpt,ntypat
+ integer :: nph1l,npsp,nsym,space_group,timrev
+ real(dp):: energy,ucvol
  character(len=500) :: message
+ logical :: has_3rd = .FALSE.
+#ifndef HAVE_LIBXML
+ integer :: funit = 1
+ integer :: iatom,iamu,iph1l,irpt,mu,nu,voigt
+ real(dp):: amu
+ logical :: endfile,found,short_range,total_range
  character (len=XML_RECL) :: line,readline
  character (len=XML_RECL) :: strg,strg1
+#endif
  !arrays
- real(dp)  :: gmet(3,3),gprimd(3,3),rmet(3,3)
- real(dp),allocatable :: work2(:,:)
+ integer,allocatable :: typat(:)
+ integer,allocatable  :: symrel(:,:,:),symafm(:)
+ real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
+ real(dp) :: elastic_constants(6,6),epsilon_inf(3,3)
+ real(dp),allocatable :: all_amu(:),dynmat(:,:,:,:,:,:)
+ real(dp),allocatable :: internal_strain(:,:,:),phfrq(:,:),qph1l(:,:),tnons(:,:)
+ real(dp),allocatable :: xcart(:,:),xred(:,:),zeff(:,:,:),znucl(:),zion(:)
+ character(len=132),allocatable :: title(:)  
+ type(ifc_type) :: ifcs
+ type(ifc_type),dimension(:),allocatable :: phonon_strain
+ type(harmonics_terms_type)   :: harmonics_terms
+ type(anharmonics_terms_type) :: anharmonics_terms
+ type(crystal_t)  :: crystal
  type(atomdata_t) :: atom
- ! *************************************************************************
+#ifndef HAVE_LIBXML
+ real(dp),allocatable :: work2(:,:)
+#endif
+
+! *************************************************************************
 
 
  !Open the atomicdata XML file for reading
@@ -465,8 +498,51 @@ end subroutine xml_getdims
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
+!Get Dimention of system and allocation/initialisation of array
+ call effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,0)
+ gmet= zero; gprimd = zero; rmet = zero; rprimd = zero
+ elastic_constants = zero; epsilon_inf = zero
+ ABI_ALLOCATE(all_amu,(ntypat))
+ ABI_ALLOCATE(ifcs%atmfrc,(2,3,natom,3,natom,nrpt))
+ ABI_ALLOCATE(ifcs%cell,(nrpt,3))
+ ABI_ALLOCATE(ifcs%short_atmfrc,(2,3,natom,3,natom,nrpt))
+ ABI_ALLOCATE(ifcs%ewald_atmfrc,(2,3,natom,3,natom,nrpt))
+ ABI_ALLOCATE(internal_strain,(6,natom,3))
+ ABI_ALLOCATE(dynmat,(2,3,natom,3,natom,nph1l))
+ ABI_ALLOCATE(typat,(natom))
+ ABI_ALLOCATE(phfrq,(3*natom,nph1l))
+ ABI_ALLOCATE(qph1l,(3,nph1l))
+ ABI_ALLOCATE(xcart,(3,natom))
+ ABI_ALLOCATE(xred,(3,natom))
+ ABI_ALLOCATE(zeff,(3,3,natom))
+ ABI_ALLOCATE(zion,(ntypat))
+ ABI_ALLOCATE(znucl,(ntypat))
+
+ ABI_DATATYPE_ALLOCATE(phonon_strain,(6))
+ do ii = 1,6
+   ABI_ALLOCATE(phonon_strain(ii)%atmfrc,(2,3,natom,3,natom,nrpt))
+   ABI_ALLOCATE(phonon_strain(ii)%cell,(nrpt,3))
+   phonon_strain(ii)%nrpt   = nrpt
+   phonon_strain(ii)%atmfrc = zero
+   phonon_strain(ii)%cell   = zero
+ end do
+
+ all_amu(:) = zero
+ dynmat(:,:,:,:,:,:)  = zero
+ ifcs%nrpt = nrpt
+ ifcs%atmfrc(:,:,:,:,:,:)  = zero
+ ifcs%cell(:,:)  = zero
+ ifcs%ewald_atmfrc(:,:,:,:,:,:) = zero
+ ifcs%short_atmfrc(:,:,:,:,:,:) = zero
+ internal_strain(:,:,:) = zero
+ phfrq = zero
+ qph1l = zero
+ xcart = zero
+ zeff  = zero
+ znucl = zero
+
 !Open the atomicdata XML file for reading
-#if HAVE_LIBXML
+#if defined HAVE_LIBXML
 
   write(message,'(a,a,a,a)')'-Reading the file ',trim(filename),&
  & ' with LibXML library'
@@ -474,25 +550,21 @@ end subroutine xml_getdims
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
   !Read with libxml librarie
-  call libxml_readEffPot(char_f2c(trim(filename)),eff_pot%natom,eff_pot%ntypat,& 
-                        eff_pot%harmonics_terms%ifcs%nrpt,eff_pot%nph1l,eff_pot%amu,&
-&                       eff_pot%harmonics_terms%ifcs%atmfrc,eff_pot%harmonics_terms%ifcs%cell,&
-&                       eff_pot%dynmat,eff_pot%harmonics_terms%elastic_constants,eff_pot%energy,&
-&                       eff_potharmonics_terms%epsilon_inf,eff_pot%harmonics_terms%ifcs%ewald_atmfrc,&
-&                       eff_pot%harmonics_terms%internal_strain,eff_pot%phfrq,eff_pot%rprimd,&
-&                       eff_pot%qph1l,eff_pot%harmonics_terms%ifcs%short_atmfrc,eff_pot%typat,&
-&                       eff_pot%xcart,eff_potharmonics_terms%zeff)
-
-! Set acell (always equal to 1 because rprimd is store in xml file)
-  eff_pot%acell = one
+  call libxml_readEffPot(char_f2c(trim(filename)),natom,ntypat,nrpt,nph1l,all_amu,&
+&                       ifcs%atmfrc,ifcs%cell,&
+&                       dynmat,elastic_constants,energy,&
+&                       epsilon_inf,ifcs%ewald_atmfrc,&
+&                       internal_strain,phfrq,rprimd,&
+&                       qph1l,ifcs%short_atmfrc,typat,&
+&                       xcart,zeff)
 
 ! convert atomic mass unit to znucl
-  do itypat=1,eff_pot%ntypat
+  do itypat=1,ntypat
     do ii=1,103
       call atomdata_from_znucl(atom,real(ii,dp))
-      if (abs((real(atom%amu,sp)-real(eff_pot%amu(itypat),sp))&
-&         /real(eff_pot%amu(itypat),sp)*100)<0.1) then
-        eff_pot%znucl(itypat) = atom%znucl
+      if (abs((real(atom%amu,sp)-real(all_amu(itypat),sp))&
+&         /real(all_amu(itypat),sp)*100)<0.1) then
+        znucl(itypat) = atom%znucl
         exit
       end if
     end do
@@ -512,12 +584,9 @@ end subroutine xml_getdims
    MSG_ERROR(message)
  end if
 
-! Set acell (always equal to 1 because rprimd is store in xml file)
-  eff_pot%acell = one
-
 !Start a reading loop in fortran
  rewind(unit=funit)
-
+ 
  endfile=.false.
  found=.false.
 
@@ -527,7 +596,7 @@ end subroutine xml_getdims
  irpt   = 1
  iph1l  = 1
  amu    = zero
- short_range = .false.
+ short_range  = .false.
  total_range  = .false.
 
  do while ((.not.endfile).and.(.not.found))
@@ -537,13 +606,13 @@ end subroutine xml_getdims
    10 line="";endfile=.true.
    20 continue
 
-   if (.not.eff_pot%has_3rd) then
+   if (.not.has_3rd) then
 
      if ((line(1:7)=='<energy')) then
        call rdfromline_value('energy',line,strg)
        if (strg/="") then 
          strg1=trim(strg)
-         read(strg1,*) eff_pot%energy
+         read(strg1,*) energy
        else
          read(funit,'(a)',err=10,end=10) readline
          call rmtabfromline(readline)
@@ -551,10 +620,10 @@ end subroutine xml_getdims
          call rdfromline_value('energy',line,strg)
          if (strg/="") then 
            strg1=trim(strg)
-           read(strg1,*) eff_pot%energy
+           read(strg1,*) energy
          else
            strg1=trim(line)
-           read(strg1,*) eff_pot%energy
+           read(strg1,*) energy
          end if
        end if
        cycle
@@ -564,11 +633,11 @@ end subroutine xml_getdims
        call rdfromline_value('unit_cell',line,strg)
        if (strg/="") then 
          strg1=trim(strg)
-         read(strg1,*) (eff_pot%rprimd(mu,1),mu=1,3)
-         read(funit,*) (eff_pot%rprimd(mu,2),mu=1,3)
+         read(strg1,*) (rprimd(mu,1),mu=1,3)
+         read(funit,*) (rprimd(mu,2),mu=1,3)
        else
          do nu=1,2
-           read(funit,*) (eff_pot%rprimd(mu,nu),mu=1,3)
+           read(funit,*) (rprimd(mu,nu),mu=1,3)
          end do
        end if
        read(funit,'(a)',err=10,end=10) readline
@@ -577,10 +646,10 @@ end subroutine xml_getdims
        call rdfromline_value('unit_cell',line,strg)
        if (strg/="") then 
          strg1=trim(strg)
-         read(strg1,*) (eff_pot%rprimd(mu,3),mu=1,3)
+         read(strg1,*) (rprimd(mu,3),mu=1,3)
        else
          strg1=trim(line)
-         read(strg1,*) (eff_pot%rprimd(mu,3),mu=1,3)
+         read(strg1,*) (rprimd(mu,3),mu=1,3)
        end if
        cycle
      end if
@@ -589,11 +658,11 @@ end subroutine xml_getdims
        call rdfromline_value('epsilon_inf',line,strg)
        if (strg/="") then 
          strg1=trim(strg)
-         read(strg1,*) (eff_pot%harmonics_terms%epsilon_inf(mu,1),mu=1,3)
-         read(funit,*) (eff_pot%harmonics_terms%epsilon_inf(mu,2),mu=1,3)
+         read(strg1,*) (epsilon_inf(mu,1),mu=1,3)
+         read(funit,*) (epsilon_inf(mu,2),mu=1,3)
        else
          do nu=1,2
-           read(funit,*) (eff_pot%harmonics_terms%epsilon_inf(mu,nu),mu=1,3)
+           read(funit,*) (epsilon_inf(mu,nu),mu=1,3)
          end do
        end if
        read(funit,'(a)',err=10,end=10) readline
@@ -602,10 +671,10 @@ end subroutine xml_getdims
        call rdfromline_value('epsilon_inf',line,strg)
        if (strg/="") then 
          strg1=trim(strg)
-         read(strg1,*) (eff_pot%harmonics_terms%epsilon_inf(mu,3),mu=1,3)
+         read(strg1,*) (epsilon_inf(mu,3),mu=1,3)
        else
          strg1=trim(line)
-         read(strg1,*) (eff_pot%harmonics_terms%epsilon_inf(mu,3),mu=1,3)
+         read(strg1,*) (epsilon_inf(mu,3),mu=1,3)
        end if
        cycle
      end  if
@@ -614,13 +683,13 @@ end subroutine xml_getdims
        call rdfromline_value('elastic',line,strg)
        if (strg/="") then 
          strg1=trim(strg)
-         read(strg1,*) (eff_pot%harmonics_terms%elastic_constants(mu,1),mu=1,6)
+         read(strg1,*) (elastic_constants(mu,1),mu=1,6)
          do nu=2,5
-           read(funit,*) (eff_pot%harmonics_terms%elastic_constants(mu,nu),mu=1,6)
+           read(funit,*) (elastic_constants(mu,nu),mu=1,6)
          end do
        else
          do nu=1,5
-           read(funit,*) (eff_pot%harmonics_terms%elastic_constants(mu,nu),mu=1,6)
+           read(funit,*) (elastic_constants(mu,nu),mu=1,6)
          end do
        end if
        read(funit,'(a)',err=10,end=10) readline
@@ -629,10 +698,10 @@ end subroutine xml_getdims
        call rdfromline_value('elastic',line,strg)
        if (strg/="") then 
          strg1=trim(strg)
-         read(strg1,*) (eff_pot%harmonics_terms%elastic_constants(mu,6),mu=1,6)
+         read(strg1,*) (elastic_constants(mu,6),mu=1,6)
        else
          strg1=trim(line)
-         read(strg1,*) (eff_pot%harmonics_terms%elastic_constants(mu,6),mu=1,6)
+         read(strg1,*) (elastic_constants(mu,6),mu=1,6)
        end if
        cycle
      end if
@@ -641,23 +710,23 @@ end subroutine xml_getdims
        call rdfromline("mass",line,strg)
        strg1=trim(strg)
        read(strg1,*) amu
-       if (.not.any(eff_pot%amu==amu)) then
-         eff_pot%amu(iamu) = amu
-         eff_pot%typat(iatom) = amu
+       if (.not.any(all_amu==amu)) then
+         all_amu(iamu) = amu
+         typat(iatom) = amu
          !convert atomic mass unit to znucl
          do ii=1,103
            call atomdata_from_znucl(atom,real(ii,dp))
            if (abs((real(atom%amu,sp)-real(amu,sp))&
 &           /real(amu,sp)*100)<0.1) then
-             eff_pot%znucl(iamu) = atom%znucl
+             znucl(iamu) = atom%znucl
              exit
            end if
          end do
          iamu = iamu +1
        end if
-       do itypat=1,eff_pot%ntypat
-         if(amu==eff_pot%amu(itypat)) then
-           eff_pot%typat(iatom) = itypat
+       do itypat=1,ntypat
+         if(amu==all_amu(itypat)) then
+           typat(iatom) = itypat
          end if
        end do
        cycle
@@ -667,7 +736,7 @@ end subroutine xml_getdims
        call rdfromline_value('position',line,strg)
        if (strg/="") then 
          strg1=trim(strg)
-         read(strg1,*)(eff_pot%xcart(mu,iatom),mu=1,3)
+         read(strg1,*)(xcart(mu,iatom),mu=1,3)
        else
          read(funit,'(a)',err=10,end=10) readline
          call rmtabfromline(readline)
@@ -675,10 +744,10 @@ end subroutine xml_getdims
          call rdfromline_value('position',line,strg)
          if (strg/="") then 
            strg1=trim(strg)
-           read(strg1,*)(eff_pot%xcart(mu,iatom),mu=1,3)
+           read(strg1,*)(xcart(mu,iatom),mu=1,3)
          else
            strg1=trim(line)
-           read(strg1,*)(eff_pot%xcart(mu,iatom),mu=1,3)
+           read(strg1,*)(xcart(mu,iatom),mu=1,3)
          end if
        end if
        cycle
@@ -688,11 +757,11 @@ end subroutine xml_getdims
        call rdfromline_value('borncharge',line,strg)
        if (strg/="") then 
          strg1=trim(strg)
-         read(strg1,*) (eff_pot%harmonics_terms%zeff(mu,1,iatom),mu=1,3)
-         read(funit,*) (eff_pot%harmonics_terms%zeff(mu,2,iatom),mu=1,3)
+         read(strg1,*) (zeff(mu,1,iatom),mu=1,3)
+         read(funit,*) (zeff(mu,2,iatom),mu=1,3)
        else
          do nu=1,2
-           read(funit,*) (eff_pot%harmonics_terms%zeff(mu,nu,iatom),mu=1,3)
+           read(funit,*) (zeff(mu,nu,iatom),mu=1,3)
          end do
        end if
        read(funit,'(a)',err=10,end=10) readline
@@ -700,10 +769,10 @@ end subroutine xml_getdims
        call rdfromline_value('borncharge',line,strg)
        if (strg/="") then 
          strg1=trim(strg)
-         read(strg1,*) (eff_pot%harmonics_terms%zeff(mu,3,iatom),mu=1,3)
+         read(strg1,*) (zeff(mu,3,iatom),mu=1,3)
        else
          strg1=trim(line)
-         read(strg1,*) (eff_pot%harmonics_terms%zeff(mu,3,iatom),mu=1,3)
+         read(strg1,*) (zeff(mu,3,iatom),mu=1,3)
        end if
        cycle
      end if
@@ -719,11 +788,11 @@ end subroutine xml_getdims
        line=adjustl(readline)
        call rdfromline_value('data',line,strg)
        if (strg/="") then 
-         ABI_ALLOCATE(work2,(3*eff_pot%natom,3*eff_pot%natom))
+         ABI_ALLOCATE(work2,(3*natom,3*natom))
          strg1=trim(strg)
-         read(strg1,*) (work2(1,nu),nu=1,3*eff_pot%natom)
-         do mu=2,3*eff_pot%natom-1
-           read(funit,*)(work2(mu,nu),nu=1,3*eff_pot%natom)
+         read(strg1,*) (work2(1,nu),nu=1,3*natom)
+         do mu=2,3*natom-1
+           read(funit,*)(work2(mu,nu),nu=1,3*natom)
          end do
          read(funit,'(a)',err=10,end=10) readline
          call rmtabfromline(readline)
@@ -731,21 +800,21 @@ end subroutine xml_getdims
          call rdfromline_value('data',line,strg)
          if (strg/="") then 
            strg1=trim(strg)
-           read(strg1,*) (work2(3*eff_pot%natom,nu),nu=1,3*eff_pot%natom)
+           read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
          else
            strg1=trim(line)
-           read(strg1,*) (work2(3*eff_pot%natom,nu),nu=1,3*eff_pot%natom)
+           read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
          end if
-         eff_pot%harmonics_terms%ifcs%short_atmfrc(1,:,:,:,:,irpt) =&
-&                       reshape(work2,(/3,eff_pot%natom,3,eff_pot%natom/))
+         ifcs%short_atmfrc(1,:,:,:,:,irpt) =&
+&                       reshape(work2,(/3,natom,3,natom/))
          ABI_DEALLOCATE(work2)
        else
-         ABI_ALLOCATE(work2,(3*eff_pot%natom,3*eff_pot%natom))
-         do mu=1,3*eff_pot%natom
-           read(funit,*)(work2(mu,nu),nu=1,3*eff_pot%natom)
+         ABI_ALLOCATE(work2,(3*natom,3*natom))
+         do mu=1,3*natom
+           read(funit,*)(work2(mu,nu),nu=1,3*natom)
          end do
-         eff_pot%harmonics_terms%ifcs%short_atmfrc(1,:,:,:,:,irpt) = &
-&                       reshape(work2,(/3,eff_pot%natom,3,eff_pot%natom/))
+         ifcs%short_atmfrc(1,:,:,:,:,irpt) = &
+&                       reshape(work2,(/3,natom,3,natom/))
          ABI_DEALLOCATE(work2)
        end if
        short_range = .true.
@@ -757,11 +826,11 @@ end subroutine xml_getdims
        line=adjustl(readline)
        call rdfromline_value('data',line,strg)
        if (strg/="") then 
-         ABI_ALLOCATE(work2,(3*eff_pot%natom,3*eff_pot%natom))
+         ABI_ALLOCATE(work2,(3*natom,3*natom))
          strg1=trim(strg)
-         read(strg1,*) (work2(1,nu),nu=1,3*eff_pot%natom)
-         do mu=2,3*eff_pot%natom-1
-           read(funit,*)(work2(mu,nu),nu=1,3*eff_pot%natom)
+         read(strg1,*) (work2(1,nu),nu=1,3*natom)
+         do mu=2,3*natom-1
+           read(funit,*)(work2(mu,nu),nu=1,3*natom)
          end do
          read(funit,'(a)',err=10,end=10) readline
          call rmtabfromline(readline)
@@ -769,21 +838,19 @@ end subroutine xml_getdims
          call rdfromline_value('data',line,strg)
          if (strg/="") then 
            strg1=trim(strg)
-           read(strg1,*) (work2(3*eff_pot%natom,nu),nu=1,3*eff_pot%natom)
+           read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
          else
            strg1=trim(line)
-           read(strg1,*) (work2(3*eff_pot%natom,nu),nu=1,3*eff_pot%natom)
+           read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
          end if
-         eff_pot%harmonics_terms%ifcs%atmfrc(1,:,:,:,:,irpt) =&
-&                                   reshape(work2,(/3,eff_pot%natom,3,eff_pot%natom/))
+         ifcs%atmfrc(1,:,:,:,:,irpt) = reshape(work2,(/3,natom,3,natom/))
          ABI_DEALLOCATE(work2)
        else
-         ABI_ALLOCATE(work2,(3*eff_pot%natom,3*eff_pot%natom))
-         do mu=1,3*eff_pot%natom
-           read(funit,*)(work2(mu,nu),nu=1,3*eff_pot%natom)
+         ABI_ALLOCATE(work2,(3*natom,3*natom))
+         do mu=1,3*natom
+           read(funit,*)(work2(mu,nu),nu=1,3*natom)
          end do
-         eff_pot%harmonics_terms%ifcs%atmfrc(1,:,:,:,:,irpt) =&
-&                                   reshape(work2,(/3,eff_pot%natom,3,eff_pot%natom/))
+         ifcs%atmfrc(1,:,:,:,:,irpt) = reshape(work2,(/3,natom,3,natom/))
          ABI_DEALLOCATE(work2)
        end if
        total_range = .true.
@@ -793,20 +860,18 @@ end subroutine xml_getdims
        call rdfromline_value('cell',line,strg)
        if (strg/="") then 
          strg1=trim(strg)
-         read(strg1,*)(eff_pot%harmonics_terms%ifcs%cell(irpt,mu),mu=1,3)
+         read(strg1,*)(ifcs%cell(irpt,mu),mu=1,3)
        else
-         read(funit,*)(eff_pot%harmonics_terms%ifcs%cell(irpt,mu),mu=1,3)
+         read(funit,*)(ifcs%cell(irpt,mu),mu=1,3)
        end if
        if (total_range)then
          if(short_range)then
 !          retrive short range part
-           eff_pot%harmonics_terms%ifcs%ewald_atmfrc(1,:,:,:,:,irpt) = &
-&                               eff_pot%harmonics_terms%ifcs%atmfrc(1,:,:,:,:,irpt) -&
-&                               eff_pot%harmonics_terms%ifcs%short_atmfrc(1,:,:,:,:,irpt)  
+           ifcs%ewald_atmfrc(1,:,:,:,:,irpt) = ifcs%atmfrc(1,:,:,:,:,irpt) &
+&                                            - ifcs%short_atmfrc(1,:,:,:,:,irpt)  
          else
-           eff_pot%harmonics_terms%ifcs%ewald_atmfrc(1,:,:,:,:,irpt) =&
-&                               eff_pot%harmonics_terms%ifcs%atmfrc(1,:,:,:,:,irpt)
-           eff_pot%harmonics_terms%ifcs%short_atmfrc(1,:,:,:,:,irpt) = zero
+           ifcs%ewald_atmfrc(1,:,:,:,:,irpt) = ifcs%atmfrc(1,:,:,:,:,irpt)
+           ifcs%short_atmfrc(1,:,:,:,:,irpt) = zero
          end if
          irpt = irpt + 1
          total_range = .false.
@@ -818,9 +883,9 @@ end subroutine xml_getdims
        call rdfromline_value('qpoint',line,strg)
        if (strg/="") then 
          strg1=trim(strg)
-         read(strg1,*)(eff_pot%qph1l(mu,iph1l),mu=1,3)
+         read(strg1,*)(qph1l(mu,iph1l),mu=1,3)
        else        
-         read(funit,*) (eff_pot%qph1l(mu,iph1l),mu=1,3)
+         read(funit,*) (qph1l(mu,iph1l),mu=1,3)
        end if
      end if
      
@@ -828,10 +893,10 @@ end subroutine xml_getdims
        call rdfromline_value('frequencies',line,strg)
        if (strg/="") then 
          strg1=trim(strg)
-         read(strg1,*)(eff_pot%phfrq(mu,iph1l),mu=1,3*eff_pot%natom)
+         read(strg1,*)(phfrq(mu,iph1l),mu=1,3*natom)
        else
-         do nu=1,eff_pot%natom
-           read(funit,*) (eff_pot%phfrq(((nu-1)*3)+mu,iph1l),mu=1,3)
+         do nu=1,natom
+           read(funit,*) (phfrq(((nu-1)*3)+mu,iph1l),mu=1,3)
          end do
        end if
      end if
@@ -839,11 +904,11 @@ end subroutine xml_getdims
      if ((line(1:17)=='<dynamical_matrix')) then
        call rdfromline_value('dynamical_matrix',line,strg)
        if (strg/="") then 
-         ABI_ALLOCATE(work2,(3*eff_pot%natom,3*eff_pot%natom))
+         ABI_ALLOCATE(work2,(3*natom,3*natom))
          strg1=trim(strg)
-         read(strg1,*) (work2(nu,1),nu=1,3*eff_pot%natom)
-         do mu=2,3*eff_pot%natom-1
-           read(funit,*)(work2(nu,mu),nu=1,3*eff_pot%natom)
+         read(strg1,*) (work2(nu,1),nu=1,3*natom)
+         do mu=2,3*natom-1
+           read(funit,*)(work2(nu,mu),nu=1,3*natom)
          end do
          read(funit,'(a)',err=10,end=10) readline
          call rmtabfromline(readline)
@@ -851,19 +916,19 @@ end subroutine xml_getdims
          call rdfromline_value('dynamical_matrix',line,strg)
          if (strg/="") then 
            strg1=trim(strg)
-           read(strg1,*) (work2(3*eff_pot%natom,nu),nu=1,3*eff_pot%natom)
+           read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
          else
            strg1=trim(line)
-           read(strg1,*) (work2(3*eff_pot%natom,nu),nu=1,3*eff_pot%natom)
+           read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
          end if
-         eff_pot%dynmat(1,:,:,:,:,iph1l) = reshape(work2,(/3,eff_pot%natom,3,eff_pot%natom/))
+         dynmat(1,:,:,:,:,iph1l) = reshape(work2,(/3,natom,3,natom/))
          ABI_DEALLOCATE(work2)
        else
-         ABI_ALLOCATE(work2,(3*eff_pot%natom,3*eff_pot%natom))
-         do mu=1,3*eff_pot%natom
-           read(funit,*)(work2(nu,mu),nu=1,3*eff_pot%natom)
+         ABI_ALLOCATE(work2,(3*natom,3*natom))
+         do mu=1,3*natom
+           read(funit,*)(work2(nu,mu),nu=1,3*natom)
          end do
-         eff_pot%dynmat(1,:,:,:,:,iph1l) = reshape(work2,(/3,eff_pot%natom,3,eff_pot%natom/))
+         dynmat(1,:,:,:,:,iph1l) = reshape(work2,(/3,natom,3,natom/))
          ABI_DEALLOCATE(work2)
        end if
      end if
@@ -877,7 +942,7 @@ end subroutine xml_getdims
        call rdfromline("voigt",line,strg)
        strg1=trim(strg)
        read(strg1,*) voigt 
-       eff_pot%has_3rd = .true.
+       has_3rd = .true.
        irpt = 1 
      end if
      
@@ -895,10 +960,10 @@ end subroutine xml_getdims
      if ((line(1:22)=='<correction_force unit')) then
        call rdfromline_value('correction_force',line,strg)
        if (strg/="") then 
-         ABI_ALLOCATE(work2,(eff_pot%natom,3))
+         ABI_ALLOCATE(work2,(natom,3))
          strg1=trim(strg)
          read(strg1,*) (work2(1,nu),nu=1,3)
-         do mu=2,eff_pot%natom-1
+         do mu=2,natom-1
            read(funit,*)(work2(mu,nu),nu=1,3)
          end do
          read(funit,'(a)',err=10,end=10) readline
@@ -907,19 +972,19 @@ end subroutine xml_getdims
          call rdfromline_value('correction_force',line,strg)
          if (strg/="") then 
            strg1=trim(strg)
-           read(strg1,*) (work2(eff_pot%natom,nu),nu=1,3)
+           read(strg1,*) (work2(natom,nu),nu=1,3)
          else
            strg1=trim(line)
-           read(strg1,*) (work2(eff_pot%natom,nu),nu=1,3)
+           read(strg1,*) (work2(natom,nu),nu=1,3)
          end if
-         eff_pot%harmonics_terms%internal_strain(voigt+1,:,:) = work2(:,:)
+         internal_strain(voigt+1,:,:) = work2(:,:)
          ABI_DEALLOCATE(work2)
        else
-         ABI_ALLOCATE(work2,(eff_pot%natom,3))
-         do mu=1,eff_pot%natom
+         ABI_ALLOCATE(work2,(natom,3))
+         do mu=1,natom
            read(funit,*)(work2(mu,nu),nu=1,3)
          end do
-         eff_pot%harmonics_terms%internal_strain(voigt+1,:,:) = work2(:,:)
+         internal_strain(voigt+1,:,:) = work2(:,:)
          ABI_DEALLOCATE(work2)
        end if
      end if
@@ -931,11 +996,11 @@ end subroutine xml_getdims
        line=adjustl(readline)
        call rdfromline_value('data',line,strg)
        if (strg/="") then 
-         ABI_ALLOCATE(work2,(3*eff_pot%natom,3*eff_pot%natom))
+         ABI_ALLOCATE(work2,(3*natom,3*natom))
          strg1=trim(strg)
-         read(strg1,*) (work2(1,nu),nu=1,3*eff_pot%natom)
-         do mu=2,3*eff_pot%natom-1
-           read(funit,*)(work2(mu,nu),nu=1,3*eff_pot%natom)
+         read(strg1,*) (work2(1,nu),nu=1,3*natom)
+         do mu=2,3*natom-1
+           read(funit,*)(work2(mu,nu),nu=1,3*natom)
          end do
          read(funit,'(a)',err=10,end=10) readline
          call rmtabfromline(readline)
@@ -943,21 +1008,21 @@ end subroutine xml_getdims
          call rdfromline_value('data',line,strg)
          if (strg/="") then 
            strg1=trim(strg)
-           read(strg1,*) (work2(3*eff_pot%natom,nu),nu=1,3*eff_pot%natom)
+           read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
          else
            strg1=trim(line)
-           read(strg1,*) (work2(3*eff_pot%natom,nu),nu=1,3*eff_pot%natom)
+           read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
          end if
-         eff_pot%anharmonics_terms%phonon_strain(voigt+1)%atmfrc(1,:,:,:,:,irpt) = &
-&                        reshape(work2,(/3,eff_pot%natom,3,eff_pot%natom/))
+         phonon_strain(voigt+1)%atmfrc(1,:,:,:,:,irpt) = &
+&                        reshape(work2,(/3,natom,3,natom/))
          ABI_DEALLOCATE(work2)
        else
-         ABI_ALLOCATE(work2,(3*eff_pot%natom,3*eff_pot%natom))
-         do mu=1,3*eff_pot%natom
-           read(funit,*)(work2(mu,nu),nu=1,3*eff_pot%natom)
+         ABI_ALLOCATE(work2,(3*natom,3*natom))
+         do mu=1,3*natom
+           read(funit,*)(work2(mu,nu),nu=1,3*natom)
          end do
-         eff_pot%anharmonics_terms%phonon_strain(voigt+1)%atmfrc(1,:,:,:,:,irpt) =&
-&            reshape(work2,(/3,eff_pot%natom,3,eff_pot%natom/))
+         phonon_strain(voigt+1)%atmfrc(1,:,:,:,:,irpt) =&
+&            reshape(work2,(/3,natom,3,natom/))
          ABI_DEALLOCATE(work2)
        end if
        cycle
@@ -967,9 +1032,9 @@ end subroutine xml_getdims
        call rdfromline_value('cell',line,strg)
        if (strg/="") then 
          strg1=trim(strg)
-         read(strg1,*)(eff_pot%anharmonics_terms%phonon_strain(voigt+1)%cell(irpt,mu),mu=1,3)
+         read(strg1,*)(phonon_strain(voigt+1)%cell(irpt,mu),mu=1,3)
        else
-         read(funit,*)(eff_pot%anharmonics_terms%phonon_strain(voigt+1)%cell(irpt,mu),mu=1,3)
+         read(funit,*)(phonon_strain(voigt+1)%cell(irpt,mu),mu=1,3)
        end if
        irpt = irpt + 1
        cycle
@@ -977,7 +1042,7 @@ end subroutine xml_getdims
 
      if ((line(1:17)==char(60)//char(47)//'strain_coupling')) then
 !      set nrpt for the previous value of strain
-       eff_pot%anharmonics_terms%phonon_strain(voigt+1)%nrpt = irpt - 1
+       phonon_strain(voigt+1)%nrpt = irpt - 1
 !      restart the calculation of nrpt
      end if
 
@@ -985,19 +1050,19 @@ end subroutine xml_getdims
  end do
 
 ! Do some checks
- if (any(eff_pot%typat==zero)) then
+ if (any(typat==zero)) then
    write(message, '(a,a,a)' )&
 &     ' Unable to read the type of atoms ',trim(filename),ch10
    MSG_ERROR(message)
  end if
  
- if (any(eff_pot%znucl==zero)) then
+ if (any(znucl==zero)) then
    write(message, '(a,a,a)' )&
 &     ' Unable to read the atomic number ',trim(filename),ch10
    MSG_ERROR(message)
  end if
  
- if (any(eff_pot%amu==zero)) then
+ if (any(all_amu==zero)) then
    write(message, '(a,a,a)' )&
 &     ' Unable to read the atomic mass ',trim(filename),ch10
    MSG_ERROR(message)
@@ -1008,7 +1073,74 @@ end subroutine xml_getdims
 #endif
 
 !Fill somes others variables
- call metric(gmet,gprimd,-1,rmet,eff_pot%rprimd,eff_pot%ucvol)
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+ call xcart2xred(natom,rprimd,xcart,xred)
+
+!Initialisation of crystal 
+ msym = 1; npsp = ntypat; space_group = 0; timrev = 2
+ nsym = 1
+ ABI_ALLOCATE(symrel,(3,3,msym))
+ ABI_ALLOCATE(symafm,(msym))
+ ABI_ALLOCATE(tnons,(3,msym))
+ symrel = zero; 
+ symafm = zero;
+ tnons = zero;
+ do ii=1,3
+   symrel(ii,ii,1)=one
+ end do
+ ABI_ALLOCATE(title, (ntypat))
+ do ii=1,ntypat
+   write(title(ii),'(a,i0)')"No title for typat ",ii
+ end do
+
+!Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
+ call crystal_init(Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
+&  zion,znucl,timrev,.FALSE.,.FALSE.,title,&
+&  symrel=symrel,tnons=tnons,symafm=symafm) 
+
+!amu is not fill in crystal_init...
+ Crystal%amu(:) = all_amu(:)
+
+ ABI_DEALLOCATE(symrel)
+ ABI_DEALLOCATE(symafm)
+ ABI_DEALLOCATE(tnons)
+
+!Initialisation of eff_pot
+ call effective_potential_init(crystal,dynmat,energy,eff_pot,epsilon_inf,&
+&                              elastic_constants,has_3rd,ifcs,internal_strain,phfrq,qph1l,&
+&                              nph1l,zeff,phonon_strain=phonon_strain)
+
+!DEALLOCATION OF ARRAYS
+ ABI_DEALLOCATE(all_amu)
+ ABI_DEALLOCATE(ifcs%atmfrc)
+ ABI_DEALLOCATE(ifcs%cell)
+ ABI_DEALLOCATE(ifcs%short_atmfrc)
+ ABI_DEALLOCATE(ifcs%ewald_atmfrc)
+ ABI_DEALLOCATE(dynmat)
+ ABI_DEALLOCATE(internal_strain)
+ ABI_DEALLOCATE(phfrq)
+ ABI_DEALLOCATE(qph1l)
+ ABI_DEALLOCATE(title)
+ ABI_DEALLOCATE(typat)
+ ABI_DEALLOCATE(xcart)
+ ABI_DEALLOCATE(xred)
+ ABI_DEALLOCATE(zeff)
+ ABI_DEALLOCATE(zion)
+ ABI_DEALLOCATE(znucl)
+ do ii = 1,6
+   phonon_strain(ii)%nrpt   = nrpt
+   phonon_strain(ii)%atmfrc = zero
+   phonon_strain(ii)%cell   = zero
+   ABI_DEALLOCATE(phonon_strain(ii)%atmfrc)
+   ABI_DEALLOCATE(phonon_strain(ii)%cell)
+ end do
+ ABI_FREE(phonon_strain)
+
+!DEALLOCATION OF TYPES
+ call ifc_free(ifcs)
+ call anharmonics_terms_free(anharmonics_terms)
+ call harmonics_terms_free(harmonics_terms)
+ call crystal_free(crystal)
 
 end subroutine xml2effpot
 !!***
@@ -1128,7 +1260,7 @@ subroutine effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,comm
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in) :: filename
- integer,intent(inout) :: comm
+ integer,intent(in) :: comm
  integer,intent(out) :: natom,ntypat,nph1l,nrpt
 !arrays
 
@@ -1330,13 +1462,8 @@ end subroutine effective_potential_file_getDim
 !     Must read some value to initialze  array (nprt for ifc)
       call bigbx9(inp%brav,dummy_cell,0,1,inp%ngqpt,inp%nqshft,nrpt,ddb%rprim,dummy_rpt)
 
-      call effective_potential_free(eff_pot)
-
-      call effective_potential_init(natom,inp%nph1l,nrpt,ntypat,eff_pot)
-
 !     Transfert the ddb to the effective potential
       call ddb_to_effective_potential(Crystal,ddb, eff_pot,inp)
-
 
 !     If needed, print the effective potential into XML file
       if (inp%prt_effpot>=3.or.inp%prt_effpot==-1) then
@@ -1344,17 +1471,15 @@ end subroutine effective_potential_file_getDim
       end if
 
     else if (filetype==2) then
-      
-      call effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,comm)
-      
+
+!     Free the effective potential before 
       call effective_potential_free(eff_pot)
-      
-      call effective_potential_init(natom,nph1l,nrpt,ntypat,eff_pot)
       
       call xml2effpot(eff_pot,filename)
 
 !     If needed, print the effective potential
       call effective_potential_print(eff_pot,inp%prt_effpot)
+
     end if
 
 !   Common initilisations

@@ -406,7 +406,6 @@ subroutine crystal_init(Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xr
  do isym=1,Cryst%nsym
    call getspinrot(Cryst%rprimd,Cryst%spinrot(:,isym),Cryst%symrel(:,:,isym))
  end do
-
 end subroutine crystal_init
 !!***
 

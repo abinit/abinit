@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Thu 29 Sep 2016.
-- ( at 13h28 )
+.Starting date : Tue  4 Oct 2016.
+- ( at 10h16 )
   
 -  nproc =    1
 
@@ -34,6 +34,7 @@
    prt_effpo        -1
  Molecular Dynamics :
         temp    1000.0
+       ntime        50
        ncell         2         2         2
  Miscellaneous information :
          asr         2
@@ -164,6 +165,90 @@
 
 ================================================================================
 
+ Calculation of dynamical matrix for each ph1l points
+
+  Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
+ Phonon energies in Hartree :
+   0.000000E+00  0.000000E+00  0.000000E+00  2.747757E-04  2.747757E-04
+   8.897209E-04  1.567048E-03  1.606060E-03  1.639399E-03  1.639399E-03
+   1.685452E-03  1.685452E-03
+ Phonon frequencies in cm-1    :
+-  0.000000E+00  0.000000E+00  0.000000E+00  6.030631E+01  6.030631E+01
+-  1.952712E+02  3.439272E+02  3.524894E+02  3.598064E+02  3.598064E+02
+-  3.699139E+02  3.699139E+02
+
+  Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.50000
+ Phonon energies in Hartree :
+   1.911955E-04  1.911955E-04  1.911955E-04  1.911955E-04  5.998299E-04
+   5.998299E-04  1.662944E-03  1.662944E-03  1.662944E-03  1.662944E-03
+   1.682754E-03  1.682754E-03
+ Phonon frequencies in cm-1    :
+-  4.196255E+01  4.196255E+01  4.196255E+01  4.196255E+01  1.316474E+02
+-  1.316474E+02  3.649740E+02  3.649740E+02  3.649740E+02  3.649740E+02
+-  3.693219E+02  3.693219E+02
+
+  Phonon wavevector (reduced coordinates) :  0.00000  0.50000  0.00000
+ Phonon energies in Hartree :
+  -4.518077E-04 -1.888636E-04  3.250558E-04  4.259609E-04  4.686001E-04
+   7.232678E-04  1.471602E-03  1.530291E-03  1.635909E-03  1.681460E-03
+   1.851372E-03  1.907323E-03
+ Phonon frequencies in cm-1    :
+- -9.916034E+01 -4.145076E+01  7.134150E+01  9.348760E+01  1.028458E+02
+-  1.587389E+02  3.229793E+02  3.358601E+02  3.590406E+02  3.690378E+02
+-  4.063292E+02  4.186089E+02
+
+  Phonon wavevector (reduced coordinates) :  0.00000  0.50000  0.50000
+ Phonon energies in Hartree :
+  -2.314669E-04 -2.314669E-04  3.772571E-04  3.772571E-04  5.348383E-04
+   5.348383E-04  1.506580E-03  1.506580E-03  1.659211E-03  1.659211E-03
+   1.880307E-03  1.880307E-03
+ Phonon frequencies in cm-1    :
+- -5.080111E+01 -5.080111E+01  8.279836E+01  8.279836E+01  1.173834E+02
+-  1.173834E+02  3.306561E+02  3.306561E+02  3.641548E+02  3.641548E+02
+-  4.126798E+02  4.126798E+02
+
+  Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
+ Phonon energies in Hartree :
+  -4.518077E-04 -1.888636E-04  3.250558E-04  4.259609E-04  4.686001E-04
+   7.232678E-04  1.471602E-03  1.530291E-03  1.635909E-03  1.681460E-03
+   1.851372E-03  1.907323E-03
+ Phonon frequencies in cm-1    :
+- -9.916034E+01 -4.145076E+01  7.134150E+01  9.348760E+01  1.028458E+02
+-  1.587389E+02  3.229793E+02  3.358601E+02  3.590406E+02  3.690378E+02
+-  4.063292E+02  4.186089E+02
+
+  Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.50000
+ Phonon energies in Hartree :
+  -2.314669E-04 -2.314669E-04  3.772571E-04  3.772571E-04  5.348383E-04
+   5.348383E-04  1.506580E-03  1.506580E-03  1.659211E-03  1.659211E-03
+   1.880307E-03  1.880307E-03
+ Phonon frequencies in cm-1    :
+- -5.080111E+01 -5.080111E+01  8.279836E+01  8.279836E+01  1.173834E+02
+-  1.173834E+02  3.306561E+02  3.306561E+02  3.641548E+02  3.641548E+02
+-  4.126798E+02  4.126798E+02
+
+  Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
+ Phonon energies in Hartree :
+  -4.955057E-04 -4.057182E-04 -3.747288E-04  5.387203E-04  7.083434E-04
+   7.216881E-04  1.464456E-03  1.536551E-03  1.737621E-03  1.769229E-03
+   1.783652E-03  1.807649E-03
+ Phonon frequencies in cm-1    :
+- -1.087509E+02 -8.904486E+01 -8.224346E+01  1.182354E+02  1.554634E+02
+-  1.583922E+02  3.214109E+02  3.372339E+02  3.813638E+02  3.883008E+02
+-  3.914664E+02  3.967330E+02
+
+  Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
+ Phonon energies in Hartree :
+  -4.540679E-04 -4.540679E-04  3.372263E-04  3.372263E-04  6.722213E-04
+   6.722213E-04  1.506578E-03  1.506578E-03  1.761103E-03  1.761103E-03
+   1.789534E-03  1.789534E-03
+ Phonon frequencies in cm-1    :
+- -9.965638E+01 -9.965638E+01  7.401262E+01  7.401262E+01  1.475355E+02
+-  1.475355E+02  3.306557E+02  3.306557E+02  3.865173E+02  3.865173E+02
+-  3.927574E+02  3.927574E+02
+
+================================================================================
+
  Calculation of the internal-strain  tensor
 
  Force-response internal strain tensor(Unit:Hartree/bohr)
@@ -209,7 +294,7 @@
 
  x=[ -1  1], y=[ -1  1] and z=[ -1  1]
 
- Computation of new dipole-dipole interaction, should be parallelised :'(.
+ Computation of new dipole-dipole interaction, should be parallelized :'(.
 
  Impose acoustic sum rule on total ifc
 
@@ -1121,10 +1206,13 @@
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.6
+- Proc.   0 individual time (sec): cpu=          1.9  wall=          1.9
 
 ================================================================================
 
-+Total cpu time      1.583  and wall time      1.583 sec
++Total cpu time      1.906  and wall time      1.905 sec
 
  epigene : the run completed succesfully.
+- MEMORY CONSUMPTION REPORT:
+-   There were 449 allocations and 449 deallocations
+-   Remaining memory at the end of the calculation is 0

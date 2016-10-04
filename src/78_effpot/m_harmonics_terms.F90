@@ -98,7 +98,8 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine harmonics_terms_init(harmonics_terms,natom,nrpt)
+subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
+&                               epsilon_inf,elastic_constants,internal_strain,zeff)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -112,8 +113,12 @@ subroutine harmonics_terms_init(harmonics_terms,natom,nrpt)
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom,nrpt
- type(harmonics_terms_type), intent(out) :: harmonics_terms
 !arrays
+ type(ifc_type) :: ifcs
+ type(harmonics_terms_type), intent(out) :: harmonics_terms
+ real(dp),optional,intent(in) :: epsilon_inf(3,3)
+ real(dp),optional,intent(in) :: elastic_constants(6,6)
+ real(dp),optional,intent(in) :: internal_strain(:,:,:),zeff(:,:,:)
 !Local variables-------------------------------
 !scalar
 !arrays
@@ -138,32 +143,55 @@ subroutine harmonics_terms_init(harmonics_terms,natom,nrpt)
    MSG_BUG(msg)
  end if
 
+ if (nrpt /= ifcs%nrpt) then
+   write(msg, '(3a,i5,a,i5,a)' )&
+&   'nrpt must have the same dimension as ifcs.',ch10,&
+&   'The number of cell is  ',nrpt,' instead of ',ifcs%nrpt,'.'
+   MSG_BUG(msg)
+ end if
+
  harmonics_terms%elastic_constants = zero
+ if (present(elastic_constants)) then
+   harmonics_terms%elastic_constants = elastic_constants
+ end if
+
  harmonics_terms%epsilon_inf = zero
+ if (present(epsilon_inf)) then
+   harmonics_terms%epsilon_inf = epsilon_inf
+ end if
 
 !Allocation of Effective charges array 
  ABI_ALLOCATE(harmonics_terms%zeff,(3,3,natom))
  harmonics_terms%zeff = zero 
+ if (present(zeff)) then
+   harmonics_terms%zeff = zeff
+ end if
 
 !Allocation of internal strain tensor 
  ABI_ALLOCATE(harmonics_terms%internal_strain,(6,natom,3))
  harmonics_terms%internal_strain = zero
+ if (present(internal_strain)) then
+   harmonics_terms%internal_strain(:,:,:) = internal_strain(:,:,:)
+ end if
+
+!Set number of cell
+ harmonics_terms%ifcs%nrpt = nrpt
 
 !Allocation of total ifc
  ABI_ALLOCATE(harmonics_terms%ifcs%atmfrc,(2,3,natom,3,natom,nrpt))
- harmonics_terms%ifcs%atmfrc = zero 
+ harmonics_terms%ifcs%atmfrc = zero
 
 !Allocation of ewald part of ifc
  ABI_ALLOCATE(harmonics_terms%ifcs%ewald_atmfrc,(2,3,natom,3,natom,nrpt))
- harmonics_terms%ifcs%ewald_atmfrc = zero 
+ harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,:,:) = ifcs%ewald_atmfrc(:,:,:,:,:,:)
 
 !Allocation of short range part of ifc
  ABI_ALLOCATE(harmonics_terms%ifcs%short_atmfrc,(2,3,natom,3,natom,nrpt))
- harmonics_terms%ifcs%short_atmfrc = zero 
+ harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,:) = ifcs%short_atmfrc(:,:,:,:,:,:)
 
 !Allocation of cell of ifc
  ABI_ALLOCATE(harmonics_terms%ifcs%cell,(nrpt,3))
- harmonics_terms%ifcs%short_atmfrc = zero 
+ harmonics_terms%ifcs%cell(:,:) = ifcs%cell(:,:)
 
 end subroutine harmonics_terms_init 
 !!***
