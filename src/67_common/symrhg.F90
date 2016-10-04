@@ -148,7 +148,8 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !Special treatment for non-collinear magnetism case
  if(nspden==4) then
    call timab(17,1,tsec)
-   rhor(:,1)=rhor(:,1)+rhor(:,4)     !nup+ndown !FR missing half??
+!FR the half factors missing are recovered in dfpt_mkvxc_noncoll and dfpt_accrho
+   rhor(:,1)=rhor(:,1)+rhor(:,4)     !nup+ndown
    rhor(:,2)=rhor(:,2)-rhor(:,1)     !mx (n+mx-n)
    rhor(:,3)=rhor(:,3)-rhor(:,1)     !my (n+my-n)
    rhor(:,4)=rhor(:,1)-two*rhor(:,4) !mz=n-2ndown

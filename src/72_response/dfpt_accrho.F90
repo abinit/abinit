@@ -313,10 +313,10 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
          do i1=1,n1
            diag=vlocal(i1,i2,i3,1)*(wfraug1_up(1,i1,i2,i3)**2+wfraug1_up(2,i1,i2,i3)**2)&
 &           +vlocal(i1,i2,i3,2)*(wfraug1_down(1,i1,i2,i3)**2+wfraug1_down(2,i1,i2,i3)**2)
-           offdiag=zero !(2*vlocal(i1,i2,i3,3)*((wfraug1_up(1,i1,i2,i3)*wfraug1_down(1,i1,i2,i3))+&
-!&           (wfraug1_up(2,i1,i2,i3)*wfraug1_down(2,i1,i2,i3))))+&
-!&           (2*vlocal(i1,i2,i3,4)*((-wfraug1_down(2,i1,i2,i3)*wfraug1_up(1,i1,i2,i3))+&
-!&           (wfraug1_down(1,i1,i2,i3)*wfraug1_up(2,i1,i2,i3))))
+           offdiag=(2*vlocal(i1,i2,i3,3)*((wfraug1_up(1,i1,i2,i3)*wfraug1_down(1,i1,i2,i3))+&
+&           (wfraug1_up(2,i1,i2,i3)*wfraug1_down(2,i1,i2,i3))))+&
+&           (2*vlocal(i1,i2,i3,4)*((-wfraug1_down(2,i1,i2,i3)*wfraug1_up(1,i1,i2,i3))+&
+&           (wfraug1_down(1,i1,i2,i3)*wfraug1_up(2,i1,i2,i3))))
            valuer=valuer+diag+offdiag
          end do
        end do
@@ -365,9 +365,9 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
   &   gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
   &   weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
 !    Accumulate 1st-order density (x component)
+     re0_up=zero;im0_up=zero;re1_up=zero;im1_up=zero;re0_down=zero;im0_down=zero
+     re1_down=zero;im1_down=zero
      if (cplex==2) then
-       re0_up=zero;im0_up=zero;re1_up=zero;im1_up=zero;re0_down=zero;im0_down=zero
-       re1_down=zero;im1_down=zero
        do i3=1,n3
          do i2=1,n2
            do i1=1,n1
@@ -375,16 +375,18 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
              re1_up=wfraug1_up(1,i1,i2,i3) ;     im1_up=wfraug1_up(2,i1,i2,i3)
              re0_down=wfraug_down(1,i1,i2,i3)  ; im0_down=wfraug_down(2,i1,i2,i3)
              re1_down=wfraug1_down(1,i1,i2,i3) ; im1_down=wfraug1_down(2,i1,i2,i3)
-! FR the half factor of the density matrix is missing in symrhg.F90 and I put it here
-             rhoaug1(2*i1-1,i2,i3,1)=rhoaug1(2*i1-1,i2,i3,1)+weight*(re0_up*re1_up+im0_up*im1_up)
-             rhoaug1(2*i1  ,i2,i3,1)=zero ! imag part of rho at k
-             rhoaug1(2*i1-1,i2,i3,4)=rhoaug1(2*i1-1,i2,i3,4)+weight*(re0_down*re1_down+im0_down*im1_down) ! m_z
-             rhoaug1(2*i1  ,i2,i3,4)=zero ! imag part of rho at k
-             rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(2*i1-1,i2,i3,1)+rhoaug1(2*i1-1,i2,i3,4) ! n+mx see symrhg.F90 for mx=0
-             rhoaug1(2*i1  ,i2,i3,2)=zero ! imag part of rho at k
-             rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(2*i1-1,i2,i3,1)+rhoaug1(2*i1-1,i2,i3,4) ! n+mx see symrhg.F90 for my=0
-             rhoaug1(2*i1  ,i2,i3,3)=zero ! imag part of rho at k
-
+             rhoaug1(2*i1-1,i2,i3,1)=rhoaug1(2*i1-1,i2,i3,1)+weight*(re0_up*re1_up+im0_up*im1_up) !n_upup
+             rhoaug1(2*i1  ,i2,i3,1)=zero ! imag part of n_upup at k
+             rhoaug1(2*i1-1,i2,i3,4)=rhoaug1(2*i1-1,i2,i3,4)+weight*(re0_down*re1_down+im0_down*im1_down) ! n_dndn
+             rhoaug1(2*i1  ,i2,i3,4)=zero ! imag part of n_dndn at k
+             rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(i1,i2,i3,2)+weight*(re1_up*re0_down+re0_up*re1_down &
+&                             +im0_up*im1_down+im0_down*im1_up) &
+&                             +(rhoaug1(i1,i2,i3,1)+rhoaug1(i1,i2,i3,4)) ! mx+tr[rhoaug1] see symrhg.F90 for mx
+             rhoaug1(2*i1  ,i2,i3,2)=zero ! imag part of mx+tr[rhoaug1] at k
+             rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(i1,i2,i3,1)+rhoaug1(i1,i2,i3,3)+weight*(-re1_up*im0_down+im1_up*re0_down &
+&                             -re0_up*im1_down+im0_up*re1_down) &
+&                             +(rhoaug1(i1,i2,i3,1)+rhoaug1(i1,i2,i3,4))! my+tr[rhoaug1] see symrhg.F90 for my
+             rhoaug1(2*i1  ,i2,i3,3)=zero ! imag part of mx+tr[rhoaug1] at k
            end do
          end do
        end do
@@ -400,8 +402,12 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
              re1_down=wfraug1_down(1,i1,i2,i3) ; im1_down=wfraug1_down(2,i1,i2,i3)
              rhoaug1(i1,i2,i3,1)=rhoaug1(i1,i2,i3,1)+weight*(re0_up*re1_up+im0_up*im1_up) ! n_upup
              rhoaug1(i1,i2,i3,4)=rhoaug1(i1,i2,i3,4)+weight*(re0_down*re1_down+im0_down*im1_down) ! n_dndn
-             rhoaug1(i1,i2,i3,2)=rhoaug1(i1,i2,i3,1)+rhoaug1(i1,i2,i3,4) !n+mx see symrhg.F90 for mx=0
-             rhoaug1(i1,i2,i3,3)=rhoaug1(i1,i2,i3,1)+rhoaug1(i1,i2,i3,4) !n+my see symrhg.F90 for my=0
+             rhoaug1(i1,i2,i3,2)=rhoaug1(i1,i2,i3,2)+weight*(re1_up*re0_down+re0_up*re1_down &
+&                             +im0_up*im1_down+im0_down*im1_up) &
+&                             +(rhoaug1(i1,i2,i3,1)+rhoaug1(i1,i2,i3,4)) !mx+tr[rhoaug1] see symrhg.F90 for mx
+             rhoaug1(i1,i2,i3,3)=rhoaug1(i1,i2,i3,3)+weight*(-re1_up*im0_down+im1_up*re0_down &
+&                             -re0_up*im1_down+im0_up*re1_down) &
+&                             +(rhoaug1(i1,i2,i3,1)+rhoaug1(i1,i2,i3,4)) !my+tr[rhoaug1] see symrhg.F90 for my
            end do
          end do
        end do
