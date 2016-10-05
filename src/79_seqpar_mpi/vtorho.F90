@@ -325,9 +325,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: spaceComm_distrb,usecprj_local,usetimerev
  logical :: berryflag,computesusmat,fixed_occ
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
- logical :: wvlbigdft=.false.
+ logical :: do_last_ortho,wvlbigdft=.false.
  real(dp) :: dmft_ldaocc
- real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda,eproj
+ real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
  real(dp) :: min_occ,vxcavg_dum,strsxc(6)
  character(len=500) :: message
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
@@ -491,13 +491,17 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  call timab(981,2,tsec)
 
 !===================================================================
-! WAVELETS - Branching with a separate VTORHO procedure 
+! WAVELETS - Branching with a separate VTORHO procedure
 !===================================================================
 
  if (dtset%usewvl == 1) then
 #ifndef HAVE_BIGDFT
    BIGDFT_NOTENABLED_ERROR()
 #else
+
+!  do_last_ortho in case of diagonalization scheme
+   if (     wvlbigdft) do_last_ortho=(dtset%iscf/=0)
+   if (.not.wvlbigdft) do_last_ortho=(.true.)
 
    ABI_ALLOCATE(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
@@ -510,14 +514,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      call wvl_nscf_loop()
    end if
 
-!  Diagonalization scheme:
-   if (.not. wvlbigdft.or.dtset%iscf>0) then
-     eproj=wvl%e%energs%eproj ; if (dtset%usepaw==1) wvl%e%energs%eproj=energies%e_paw
+!  Eventually orthogonalize WFs now
+   if (do_last_ortho) then
      call write_energies(ii,0,wvl%e%energs,0.d0,0.d0,"final")
-     wvl%e%energs%eproj=eproj
      call last_orthon(me_distrb, nproc_distrb, ii, wvl%wfs%ks, wvl%e%energs%evsum, .true.)
      if(wvlbigdft) energies%e_xcdc = wvl%e%energs%evxc
-
 !    If occupation numbers are not changed...
      if (fixed_occ .or. (iscf<0 .and. iscf/=-3)) then
        call wvl_comm_eigen()
@@ -536,7 +537,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !    This might accelerate convergence:
      wvl%wfs%ks%diis%energy_min=one
      wvl%wfs%ks%diis%alpha=two
-   end if !nnsclo_now>0
+   end if !do_last_ortho
 
 !  Compute eigenvalues energy
    if(.not. wvlbigdft .and. nnsclo_now>0) then
@@ -544,9 +545,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &     dtset%nsppol,occ,dtset%wtk)
    else
      energies%e_eigenvalues = energies%e_kinetic + energies%e_localpsp &
-&                           + wvl%e%energs%evxc  + two*wvl%e%energs%eh
-     if (psps%usepaw==0) energies%e_eigenvalues=energies%e_eigenvalues+energies%e_nonlocalpsp
-     if (psps%usepaw==1) energies%e_eigenvalues=energies%e_eigenvalues+energies%e_paw-energies%e_pawdc
+&            + energies%e_xcdc  + two*energies%e_hartree +energies%e_nonlocalpsp
    end if
 
    if (optforces == 1) then ! not compatible with iscf=0 and wvlbigdftcomp=1 + PAW
@@ -566,7 +565,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  else
 
 !===================================================================
-! PLANE WAVES - Standard VTORHO procedure 
+! PLANE WAVES - Standard VTORHO procedure
 !===================================================================
 
 !  Electric fields: set flag to turn on various behaviors
@@ -1712,9 +1711,10 @@ subroutine wvl_nscf_loop()
 
 !Local variables-------------------------------
  integer :: inonsc,ii
- logical,parameter :: wvlbigdft=.false.
+ integer,parameter :: iscf_=-1       !do not do a SCF cycle
  logical,parameter :: do_scf=.false. !do not do a SCF cycle
- real(dp) :: dum,eexctx,eh,ekin,eloc,enl,eproj,esicdc,evxc,exc
+ logical,parameter :: wvlbigdft=.false.
+ real(dp) :: dum,eexctx,eh,ekin,eloc,enl,esicdc,evxc,exc
 
 ! *************************************************************************
 
@@ -1723,48 +1723,50 @@ subroutine wvl_nscf_loop()
    if(nnsclo_now>0) then
      do inonsc=1,nnsclo_now
        call wvl_psitohpsi(dtset%diemix,eexctx,exc,eh,ekin,eloc,enl,esicdc,&
-&                         istep,inonsc,dtset%iscf,mpi_enreg%me_wvl,dtset%natom,&
+&                         istep,inonsc,iscf_,mpi_enreg%me_wvl,dtset%natom,&
 &                         nfftf,mpi_enreg%nproc_wvl,dtset%nspden,&
 &                         dum,do_scf,evxc,wvl,wvlbigdft,xcart,strsxc)
-
-       call wvl_hpsitopsi(cprj,dtset, energies, inonsc,mcprj_local, mpi_enreg, &
-&       residm,wvl,xcart)
-
+       call wvl_hpsitopsi(cprj,dtset,energies,inonsc,mcprj_local,mpi_enreg, &
+&                         residm,wvl,xcart)
        if(residm<dtset%tolwfr) exit !Exit loop if converged
      end do
-
-!    PENDING: optimize this:
-!    (note that wvl_hpsitopsi should be called at least once,
-!    since cprj are copied there to ABINIT, and some energy terms as well.
-!    hpsi is lost in hpsitopsi,
-!    so we recalculate this here, because last_orthon will be called afterwards.
-     call wvl_psitohpsi(dtset%diemix,eexctx,exc,eh,ekin,eloc,enl,esicdc,&
-&                       istep,nnsclo_now+1,dtset%iscf,mpi_enreg%me_wvl,dtset%natom,&
-&                       nfftf,mpi_enreg%nproc_wvl,dtset%nspden,&
-&                       dum,do_scf,evxc,wvl,wvlbigdft,xcart,strsxc)
 
    else
      do ii=1, dtset%nline
 !      Direct minimization technique: no diagonalization
        call wvl_psitohpsi(dtset%diemix,eexctx,exc,eh,ekin,eloc,enl,esicdc,&
-&                         istep,ii,dtset%iscf,mpi_enreg%me_wvl,dtset%natom,&
+&                         istep,ii,iscf_,mpi_enreg%me_wvl,dtset%natom,&
 &                         nfftf,mpi_enreg%nproc_wvl,dtset%nspden,&
 &                         dum,do_scf,evxc,wvl,wvlbigdft,xcart,strsxc)
-
-       call wvl_hpsitopsi(cprj,dtset,energies,ii,mcprj_local,mpi_enreg,residm,wvl,xcart)
-
+       call wvl_hpsitopsi(cprj,dtset,energies,ii,mcprj_local,mpi_enreg, &
+&                         residm,wvl,xcart)
        if(residm<dtset%tolwfr) exit !Exit loop if converged
-
      end do
    end if
 
+!  Update energies depending on new WF
    energies%e_kinetic=ekin
    energies%e_nonlocalpsp=enl
    energies%e_exactX=eexctx
    energies%e_sicdc=esicdc
+
+!  Eventually update energies depending on density
    if (dtset%iscf<10) then
-     energies%e_hartree=eh ; energies%e_localpsp=eloc
-     energies%e_xc=exc     ; energies%e_xcdc=evxc
+     energies%e_localpsp=eloc
+      energies%e_hartree=eh
+      energies%e_xc=exc ; energies%e_xcdc=evxc
+   else if (nnsclo_now==0) then
+     energies%e_localpsp=eloc
+   end if
+
+!  End of nscf iterations
+   if (do_last_ortho) then
+!    !Don't update energies (nscf cycle has been done); just recompute potential
+     inonsc=nnsclo_now;if (nnsclo_now==0) inonsc=dtset%nline
+     call wvl_psitohpsi(dtset%diemix,eexctx,exc,eh,ekin,eloc,enl,esicdc,&
+&                       istep,inonsc,iscf_,mpi_enreg%me_wvl,dtset%natom,&
+&                       nfftf,mpi_enreg%nproc_wvl,dtset%nspden,&
+&                       dum,do_scf,evxc,wvl,wvlbigdft,xcart,strsxc)
    end if
 
    DBG_EXIT("COLL")
@@ -1845,28 +1847,47 @@ subroutine wvl_nscf_loop_bigdft()
 
 !Local variables-------------------------------
  integer :: inonsc
- logical,parameter :: wvlbigdft=.true.
+ integer,parameter :: iscf_=-1       !do not do a SCF cycle
  logical,parameter :: do_scf=.false. !do not do a SCF cycle
- real(dp) :: eexctx,eh,ekin,eloc,enl,eproj,esicdc,evxc,exc
+ logical,parameter :: wvlbigdft=.true.
+ real(dp) :: dum,eexctx,eh,ekin,eloc,enl,esicdc,evxc,exc
 
 ! *************************************************************************
 
    DBG_ENTER("COLL")
 
-   call wvl_hpsitopsi(cprj,dtset, energies, 1, mcprj_local,mpi_enreg, &
+   call wvl_hpsitopsi(cprj,dtset, energies, istep, mcprj_local,mpi_enreg, &
 &                     residm, wvl,xcart)
-   if (nnsclo_now>1) then
-     do inonsc = 2, nnsclo_now
-       call wvl_psitohpsi(dtset%diemix,eexctx,exc,eh,ekin,eloc,enl,esicdc,&
-&                         istep,inonsc,dtset%iscf,mpi_enreg%me_wvl,dtset%natom,&
-&                         nfftf,mpi_enreg%nproc_wvl,dtset%nspden,nres2,do_scf,evxc,&
-&                         wvl,wvlbigdft,xcart,strsxc)
-       if (inonsc<nnsclo_now) then
-         call wvl_hpsitopsi(cprj, dtset,energies, inonsc, mcprj_local,mpi_enreg,&
-&                           residm, wvl,xcart)
-       end if
+
+   if (nnsclo_now>2) then
+     do inonsc = 2, nnsclo_now-1
+       call wvl_psitohpsi(dtset%diemix, energies%e_exactX, energies%e_xc, &
+&            energies%e_hartree, energies%e_kinetic, energies%e_localpsp, &
+&            energies%e_nonlocalpsp, energies%e_sicdc, istep, inonsc, iscf_, &
+&           mpi_enreg%me_wvl, dtset%natom, nfftf, mpi_enreg%nproc_wvl,&
+&            dtset%nspden, nres2, do_scf,energies%e_xcdc, &
+&            wvl, wvlbigdft, xcart, strsxc)
+       call wvl_hpsitopsi(cprj,dtset, energies, inonsc, mcprj_local,mpi_enreg, &
+&                         residm, wvl,xcart)
      end do
-  end if
+   end if
+
+!  End of nscf iterations
+   if (do_last_ortho.and.nnsclo_now<=1) then
+!    !Don't update energies (nscf cycle has been done); just recompute potential
+     call wvl_psitohpsi(dtset%diemix,eexctx,exc,eh,ekin,eloc,enl,esicdc, &
+&          istep, 1, iscf_, mpi_enreg%me_wvl, dtset%natom, nfftf, &
+&          mpi_enreg%nproc_wvl,dtset%nspden, nres2, do_scf,evxc, &
+&          wvl, wvlbigdft, xcart, strsxc)
+   else if (do_last_ortho.and.nnsclo_now>1) then
+!    !Update energies and potential (nscf cycles are not finished)
+     call wvl_psitohpsi(dtset%diemix, energies%e_exactX, energies%e_xc, &
+&          energies%e_hartree,energies%e_kinetic, energies%e_localpsp, &
+&          energies%e_nonlocalpsp, energies%e_sicdc, istep, nnsclo_now, iscf_, &
+&          mpi_enreg%me_wvl, dtset%natom, nfftf, mpi_enreg%nproc_wvl,&
+&          dtset%nspden, nres2, do_scf,energies%e_xcdc, &
+&          wvl, wvlbigdft, xcart, strsxc)
+   end if
 
    DBG_EXIT("COLL")
 

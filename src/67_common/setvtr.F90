@@ -608,7 +608,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
        vtrial(ifft,2) = vtrial(ifft,2) + Vmagconstr(ifft,2)
      end do !ifft
    end if
-   ABI_DEALLOCATE(Vmagconstr) 
+   ABI_DEALLOCATE(Vmagconstr)
  end if
 
 !Compute parts of total energy depending on potentials

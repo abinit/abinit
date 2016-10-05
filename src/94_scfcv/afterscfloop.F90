@@ -390,21 +390,19 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    ucvol_local=product(wvl%den%denspot%dpbox%hgrids)*real(product(wvl%den%denspot%dpbox%ndims),dp)
 
 !  do_last_ortho in case of direct minimization, since
-!  we never diagonalized the hamiltonian and the eigenvalues are unknown.
+!  We never diagonalized the hamiltonian and the eigenvalues are unknown.
    if (     wvlbigdft) do_last_ortho=(dtset%iscf==0)
-   if (.not.wvlbigdft) do_last_ortho=(dtset%nnsclo==1)
-   if ( do_last_ortho ) then
-     eproj=wvl%e%energs%eproj ; if (dtset%usepaw==1) wvl%e%energs%eproj=energies%e_paw
+   if (.not.wvlbigdft) do_last_ortho=(.false.)
+   if (do_last_ortho) then
      call total_energies(wvl%e%energs, istep, mpi_enreg%me_wvl)
      call write_energies(istep,0,wvl%e%energs,zero,zero,"FINAL")
-     wvl%e%energs%eproj=eproj
      if(.not.wvlbigdft) then
 !      If ISCF>10, we exit scfcv at a place where bigdft objects
 !      do not contain the KS potential. Hence, we copy vtrial to wvl%den
        if(dtset%iscf>=10) call wvl_vtrial_abi2big(1,vtrial,wvl%den)
-!      hpsi is lost in hpsitopsi, so we recalculate hpsi, last_orthon will be called afterwards.
+!      hpsi is lost in hpsitopsi, so we recalculate it (needed for last_orthon).
        call wvl_psitohpsi(dtset%diemix,eexctx,exc,eh,ekin,eloc,enl,esicdc,&
-&                         istep,1,dtset%iscf,mpi_enreg%me_wvl,dtset%natom,&
+&                         istep,1,-1,mpi_enreg%me_wvl,dtset%natom,&
 &                         nfftf,mpi_enreg%nproc_wvl,dtset%nspden,&
 &                         dum,.false.,evxc,wvl,wvlbigdft,xcart,strsxc)
        if (dtset%iscf==0) then
@@ -412,27 +410,20 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
          energies%e_xc=exc          ; energies%e_localpsp=eloc
          energies%e_nonlocalpsp=enl ; energies%e_exactX=eexctx
          energies%e_sicdc=esicdc    ; energies%e_xcdc=evxc
-!        Update of Epaw and EpawDC ???
          energies%e_eigenvalues = energies%e_kinetic + energies%e_localpsp &
-&                               + wvl%e%energs%evxc  + two*wvl%e%energs%eh
-         if (psps%usepaw==0) energies%e_eigenvalues=energies%e_eigenvalues+energies%e_nonlocalpsp
-         if (psps%usepaw==1) energies%e_eigenvalues=energies%e_eigenvalues+energies%e_paw-energies%e_pawdc
+&             + energies%e_xcdc  + two*energies%e_hartree +energies%e_nonlocalpsp
        end if
      end if
-
      call last_orthon(mpi_enreg%me_wvl,mpi_enreg%nproc_wvl,istep,wvl%wfs%ks,wvl%e%energs%evsum,.true.)
      if (mpi_enreg%nproc_wvl == 1) nullify(wvl%wfs%ks%psit)
-
      call eigensystem_info(mpi_enreg%me_wvl,mpi_enreg%nproc_wvl,0.d0,&
           wvl%wfs%ks%Lzd%Glr%wfd%nvctr_c+7*wvl%wfs%ks%Lzd%Glr%wfd%nvctr_f,&
           wvl%wfs%ks%orbs,wvl%wfs%ks%psi)
-
 !    Copy eigenvalues from BigDFT object to "eigen"
      call wvl_eigen_abi2big(dtset%mband,dtset%nkpt,dtset%nsppol,eigen,2,wvl%wfs)
 !    Copy occupations from BigDFT objects to ABINIT
      call wvl_occ_abi2big(dtset%mband,dtset%nkpt,dtset%nsppol,occ,2,wvl%wfs)
-
-   end if
+  end if
 
 !  Tail corrections, pending for wvlbigdft==.false.
 !  TODO put it at the end of gstate.

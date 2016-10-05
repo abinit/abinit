@@ -549,8 +549,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    write(ab_xml_out, "(A)") '      </initialConditions>'
  end if
 
-
-
 !Examine tolerance criteria, and eventually  print a line to the output
 !file (with choice=1, the only non-dummy arguments of scprqt are
 !nstep, tollist and iscf - still, diffor and res2 are here initialized to 0)
@@ -737,6 +735,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
      else
        ispmix=AB7_MIXING_REAL_SPACE;nfftmix=nfftf;ngfftmix(:)=ngfftf(:)
      end if
+     !TRangel: added to avoid segfaults with Wavelets
+     nfftmix_per_nfft=0;if(nfftf>0) nfftmix_per_nfft=(1-nfftmix/nfftf)
      call ab7_mixing_new(mix, iscf10, denpot, ispmix, nfftmix, dtset%nspden, npawmix, errid, message, dtset%npulayit)
      if (errid /= AB7_NO_ERROR) then
        MSG_ERROR(message)
@@ -1465,7 +1465,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !  ######################################################################
 !  In case of density mixing, check the exit criterion
 !  ----------------------------------------------------------------------
-   if (dtset%iscf>=10) then
+   if (dtset%iscf>=10.or.(wvlbigdft.and.dtset%iscf>0)) then
 !    Check exit criteria
      call timab(52,1,tsec)
      choice=2
@@ -1502,6 +1502,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    call timab(68,1,tsec)
 
    if (dtset%iscf>=10 .and.dtset%iscf/=22.and. .not. wvlbigdft ) then
+
 !    If LDA dielectric matrix is used for preconditionning, has to update here Kxc
      if (nkxc>0.and.modulo(dtset%iprcel,100)>=61.and.(dtset%iprcel<71.or.dtset%iprcel>79) &
 &     .and.((istep==1.or.istep==dielstrt).or.(dtset%iprcel>=100))) then
@@ -1524,13 +1525,6 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &         wvl%descr,wvl%den,&
 &         wvl%e,xccc3d,dtset%xclevel,dtset%xc_denpos)
        end if
-     end if
-
-!    T. Rangel: added to avoid segfaults with Wavelets
-     if(nfftf>0) then
-       nfftmix_per_nfft=(1-nfftmix/nfftf)
-     else
-       nfftmix_per_nfft=0
      end if
 
      call newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,&
@@ -1669,7 +1663,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !  ######################################################################
 !  Check exit criteria in case of potential mixing or direct minimization
 !  ----------------------------------------------------------------------
-   if (dtset%iscf<10 .or. dtset%iscf == 0) then
+   if ((dtset%iscf<10.and.(.not.wvlbigdft)) .or. dtset%iscf == 0) then
 !    Check exit criteria
      call timab(52,1,tsec)
      choice=2
