@@ -112,7 +112,7 @@
 !!      multipoles_out,optics_paw,optics_paw_core,optics_vloc,out1dm,outkss
 !!      outwant,partial_dos_fractions,partial_dos_fractions_paw,pawmkaewf
 !!      pawprt,pawrhoij_copy,pawrhoij_nullify,posdoppler,poslifetime,print_dmft
-!!      prt_cif,prtbltztrp_out,prtfatbands,read_atomden,simpson_int,skw_free
+!!      prt_cif,ebands_prtbltztrp,prtfatbands,read_atomden,simpson_int,skw_free
 !!      skw_init,sort_dp,spline,splint,tetrahedron,timab,wrtout
 !!
 !! SOURCE
@@ -255,7 +255,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  character(len=fnlen) :: fname
 !arrays
  integer, allocatable :: isort(:)
- real(dp) :: tsec(2),nt_ntone_norm(nspden),nelect_per_spin(nsppol)
+ real(dp) :: tsec(2),nt_ntone_norm(nspden)
  real(dp),allocatable :: eigen2(:)
  real(dp),allocatable :: elfr_down(:,:),elfr_up(:,:)
  real(dp),allocatable :: rhor_paw(:,:),rhor_paw_core(:,:),rhor_paw_val(:,:),vwork(:,:)
@@ -1113,11 +1113,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  ! BoltzTraP output files in GENEric format
  if (dtset%prtbltztrp == 1 .and. me==master) then
-   nelect_per_spin = ebands_nelect_per_spin(ebands)
-
-   call prtbltztrp_out (eigen, fermie, dtfil%filnam_ds(4), hdr%kptns, natom, dtset%nband(1), &
-&   nelect_per_spin, dtset%nkpt, dtset%nspinor, dtset%nsppol, nsym, rprimd, dtset%symrel)
- end if !prtbltztrp
+   call ebands_prtbltztrp(ebands, crystal, dtfil%filnam_ds(4))
+ end if 
 
 #if 0
  ! Gaussian

@@ -38,7 +38,7 @@
 !!  mkmem =number of k points treated by this node
 !!  mk1mem =number of k points treated by this node (RF data)
 !!  mpert =maximum number of ipert
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw or wfs at k
 !!  mpw1=maximum dimensioned size of npw for wfs at k+q (also for 1-order wfs).
 !!  nband_k=number of bands at this k point for that spin polarization
@@ -117,7 +117,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  integer,intent(in) :: mkmem,mk1mem,mpert,mpw,mpw1,nsppol
  integer,intent(inout) :: nband_k,npw1_k,npw_k
  real(dp),intent(in) :: wtk_k
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(pseudopotential_type),intent(in) :: psps

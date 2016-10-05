@@ -46,10 +46,9 @@
 
 subroutine moddiel_csrb(dielar,dtset,gprimd,mpi_enreg,rdiemac,rhor_in)
 
- use m_profiling_abi
-
  use defs_basis
  use defs_abitypes
+ use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -63,7 +62,7 @@ subroutine moddiel_csrb(dielar,dtset,gprimd,mpi_enreg,rdiemac,rhor_in)
 
 !Arguments -------------------------------
 !scalars
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
 !arrays
  real(dp),intent(in) :: dielar(7),gprimd(3,3),rhor_in(dtset%nfft,dtset%nspden)

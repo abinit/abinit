@@ -91,7 +91,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
 !scalars
  integer,intent(in) :: cplex,ixc,n3xccc,nfft,nhat1dim,nhat1grdim,optnc,optxc
  integer,intent(in) :: nkxc,nspden,option,paral_kgb,usexcnhat,nkxc_cur
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: nhat1gr(cplex*nfft,nspden,3*nhat1grdim)
