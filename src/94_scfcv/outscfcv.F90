@@ -183,7 +183,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use interfaces_41_geometry
  use interfaces_53_spacepar
  use interfaces_54_abiutil
- use interfaces_61_occeig
  use interfaces_62_iowfdenpot
  use interfaces_65_paw
  use interfaces_67_common
