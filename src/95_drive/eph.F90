@@ -475,6 +475,13 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
  end if
 
+ ! GKA FIXME
+ !if (dtset%eph_task == 3) then
+ !  ! Compute phonon self-energy
+ !  call eph_phpi(wfk0_path,wfq_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,ebands_kq,dvdb,ifc,&
+ !  pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
+ !end if
+
  !=====================
  !==== Free memory ====
  !=====================

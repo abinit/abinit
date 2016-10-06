@@ -1,9 +1,9 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_gkk
+!!****m* ABINIT/m_phpi
 !! NAME
 !!
 !! FUNCTION
-!!  Tools for the computation of electron-phonon coupling matrix elements (gkk)
+!!  Tools for the computation of phonon self-energy.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2016 ABINIT group (GKA)
@@ -22,7 +22,7 @@
 #include "abi_common.h"
 
 
-module m_gkk
+module m_phpi
 
  use defs_basis
  use defs_abitypes
@@ -58,18 +58,18 @@ module m_gkk
  private
 !!***
 
- public :: eph_gkk
+ public :: eph_phpi
 
 
 contains  !=========================================================================================================================
 !!***
 
-!!****f* m_gkk/eph_gkk
+!!****f* m_gkk/eph_phpi
 !! NAME
-!!  eph_gkk
+!!  eph_phpi
 !!
 !! FUNCTION
-!!  Compute electron-phonon coupling matrix elements.
+!!  Compute phonon self-energy.
 !!
 !! INPUTS
 !! wk0_path=String with the path to the GS unperturbed WFK file.
@@ -97,7 +97,7 @@ contains  !=====================================================================
 !!
 !! SOURCE
 
-subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,ebands_kq,dvdb,ifc,&
+subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,ebands_kq,dvdb,ifc,&
                        pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
 
  use defs_basis
@@ -138,7 +138,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'eph_gkk'
+#define ABI_FUNC 'eph_phpi'
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_56_recipspace
@@ -181,7 +181,8 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
  integer :: nfft,nfftf,mgfft,mgfftf,kqcount,nkpg,nkpg1
  real(dp) :: cpu,wall,gflops
- real(dp) :: ecut,eshift,eig0nk,dotr,doti,dksqmax
+ real(dp) :: ecut,eshift,eig0nk,eig0mkq,dotr,doti,dksqmax
+ real(dp) :: eta,f_nk,f_mkq,omega,wtk,gkk2, term1, term2
  logical,parameter :: have_ktimerev=.True.
  logical :: i_am_master, isirr_k,isirr_kq,gen_eigenpb
  type(wfd_t) :: wfd_k, wfd_kq
@@ -197,10 +198,11 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),lf(2),rg(2),res(2)
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
  real(dp) :: temp_tgam(2,3*cryst%natom,3*cryst%natom)
+ real(dp) :: Pi_ph(3*cryst%natom)
  real(dp) :: sigmas(2),wminmax(2)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
- real(dp),allocatable :: v1scf(:,:,:,:),gkk(:,:,:,:,:)
+ real(dp),allocatable :: v1scf(:,:,:,:),gkk(:,:,:,:,:), gkk_m(:,:,:,:)
  real(dp),allocatable :: bras(:,:,:),kets(:,:,:),h1_kets(:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
@@ -208,7 +210,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  real(dp),allocatable ::  gs1c(:,:) !,gvnl_direc(:,:),pcon(:),sconjgr(:,:)
  logical,allocatable :: bks_mask(:,:,:),bks_mask_kq(:,:,:),keep_ur(:,:,:),keep_ur_kq(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:) !natom,nspinor*usecprj)
- type(gkk_t)     :: gkk2d
 
  ! for the Eliashberg solver
  integer :: ntemp
@@ -217,7 +218,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
 !************************************************************************
 
- write(msg, '(2a)') "Computation of electron-phonon coupling matrix elements (gkk)", ch10
+ write(msg, '(2a)') "Computation of the real part of the phonon self-energy", ch10
  call wrtout(ab_out, msg, "COLL", do_flush=.True.)
  call wrtout(std_out, msg, "COLL", do_flush=.True.)
 
@@ -396,90 +397,119 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
    call dvdb_ftinterp_qpt(dvdb, qpt, nfftf, ngfftf, v1scf, comm)
  end if
 
- ! Examine the symmetries of the q wavevector
- call littlegroup_q(cryst%nsym,qpt,symq,cryst%symrec,cryst%symafm,timerev_q,prtvol=dtset%prtvol)
-
  ! Allocate vlocal1 with correct cplex. Note nvloc
  ABI_STAT_MALLOC(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc,natom3), ierr)
  ABI_CHECK(ierr==0, "oom vlocal1")
 
- ABI_MALLOC(gkk, (2*mband*nsppol,nkpt,1,1,mband_kq))
-
- ! Loop over all 3*natom perturbations.
- do ipc=1,natom3
-   idir = mod(ipc-1, 3) + 1
-   ipert = (ipc - idir) / 3 + 1
-
-   write(msg, '(a,2i4)')  "Treating ipert, idir = ", ipert, idir
-   call wrtout(std_out, msg, "COLL", do_flush=.True.)
-
-   gkk = zero
-
-   do spin=1,nsppol
-
-     ! Set up local potential vlocal1 with proper dimensioning, from vtrial1 taking into account the spin.
-     !do ipc=1,natom3
-     call rf_transgrid_and_pack(spin,nspden,psps%usepaw,cplex,nfftf,nfft,ngfft,gs_hamkq%nvloc,&
-               pawfgr,mpi_enreg,dummy_vtrial,v1scf(:,:,:,ipc),vlocal,vlocal1(:,:,:,:,ipc))
-     !end do
-
-     ! Continue to initialize the Hamiltonian
-     call load_spin_hamiltonian(gs_hamkq,spin,vlocal=vlocal, &
-&            comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-
-     ! Allocate workspace for wavefunctions. Make npw larger than expected.
-     ABI_MALLOC(bras, (2, mpw*nspinor, mband))
-     ABI_MALLOC(kets, (2, mpw*nspinor, mband))
-     ABI_MALLOC(h1_kets, (2, mpw*nspinor, mband))
+ ! Allocate el-ph coupling matrix elements
+ ABI_MALLOC(gkk, (2, mband_kq, mband, natom, 3))
+ ABI_MALLOC(gkk_m, (2, mband_kq, mband, 3*natom))
 
 
-     ! GKA : This little block used to be right after the perturbation loop
-     ! Prepare application of the NL part.
-     call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=1)
-     call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc), &
-          comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-!    call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,spin,paw_ij1=paw_ij1,vlocal1=vlocal1(:,:,:,:,ipc), &
-!         comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+
+ ! Compute displacement vectors and phonon frequencies
+ call ifc_fourq(ifc,cryst,qpt,phfrq,displ_cart) ! out_d2cart,out_eigvec)
+ 
+ ! Transform phonon displacement vector from cartesian to reduced coordinates
+ call phdispl_cart2red(cryst%natom,cryst%gprimd,displ_cart,displ_red)
+
+ ! Broadening parameter
+ eta = dtset%elph2_imagden
+
+ ! Kpoints weights (not using symmetries at the moment)
+ wtk = 1.0 / nkpt
+
+ ! Initialize phonon self-energy
+ Pi_ph = zero
 
 
-     do ik=1,nkpt
+ ! Examine the symmetries of the q wavevector
+ ! call littlegroup_q(cryst%nsym,qpt,symq,cryst%symrec,cryst%symafm,timerev_q,prtvol=dtset%prtvol)
 
-       ! Only do a subset a k-points
-       if (.not. ((ik .ge. my_kstart) .and. (ik .le. my_kstop))) cycle
+ ! ----------------------------------------------------------------------------------------------- !
+ ! Begin loop over states
+ ! ----------------------------------------------------------------------------------------------- !
+ do spin=1,nsppol
 
-       kk = ebands_k%kptns(:,ik)
+   do ik=1,nkpt
 
-       kq = kk + qpt
-       call findqg0(ikq,g0_k,kq,nkpt_kq,ebands_kq%kptns(:,:),(/1,1,1/))  ! Find the index of the k+q point
+     ! Only do a subset a k-points
+     if (.not. ((ik .ge. my_kstart) .and. (ik .le. my_kstop))) cycle
 
-       ! Copy u_k(G)
-       istwf_k = wfd_k%istwfk(ik); npw_k = wfd_k%npwarr(ik)
-       ABI_CHECK(mpw >= npw_k, "mpw < npw_k")
-       kg_k(:,1:npw_k) = wfd_k%kdata(ik)%kg_k
-       do ib2=1,mband
-         call wfd_copy_cg(wfd_k, ib2, ik, spin, kets(1,1,ib2))
-       end do
+     kk = ebands_k%kptns(:,ik)
 
-       ! Copy u_kq(G)
-       istwf_kq = wfd_kq%istwfk(ikq); npw_kq = wfd_kq%npwarr(ikq)
-       ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
-       kg_kq(:,1:npw_kq) = wfd_kq%kdata(ikq)%kg_k
-       do ib1=1,mband_kq
-         call wfd_copy_cg(wfd_kq, ib1, ikq, spin, bras(1,1,ib1))
-       end do
+     kq = kk + qpt
+     call findqg0(ikq,g0_k,kq,nkpt_kq,ebands_kq%kptns(:,:),(/1,1,1/))  ! Find the index of the k+q point
 
-       ! if PAW, one has to solve a generalized eigenproblem
-       ! BE careful here because I will need sij_opt==-1
-       gen_eigenpb = (psps%usepaw==1)
-       sij_opt = 0; if (gen_eigenpb) sij_opt = 1
-       ABI_MALLOC(gs1c, (2,npw_kq*nspinor*((sij_opt+1)/2)))
+     ! Copy u_k(G)
+     istwf_k = wfd_k%istwfk(ik); npw_k = wfd_k%npwarr(ik)
+     ABI_CHECK(mpw >= npw_k, "mpw < npw_k")
+     kg_k(:,1:npw_k) = wfd_k%kdata(ik)%kg_k
+     do ib2=1,mband
+       call wfd_copy_cg(wfd_k, ib2, ik, spin, kets(1,1,ib2))
+     end do
 
+     ! Copy u_kq(G)
+     istwf_kq = wfd_kq%istwfk(ikq); npw_kq = wfd_kq%npwarr(ikq)
+     ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
+     kg_kq(:,1:npw_kq) = wfd_kq%kdata(ikq)%kg_k
+     do ib1=1,mband_kq
+       call wfd_copy_cg(wfd_kq, ib1, ikq, spin, bras(1,1,ib1))
+     end do
+
+     ! if PAW, one has to solve a generalized eigenproblem
+     ! BE careful here because I will need sij_opt==-1
+     gen_eigenpb = (psps%usepaw==1)
+     sij_opt = 0; if (gen_eigenpb) sij_opt = 1
+     ABI_MALLOC(gs1c, (2,npw_kq*nspinor*((sij_opt+1)/2)))
+
+     ! Loop over all 3*natom perturbations.
+     do ipc=1,natom3
+       idir = mod(ipc-1, 3) + 1
+       ipert = (ipc - idir) / 3 + 1
+
+       write(msg, '(a,2i4)')  "Treating ipert, idir = ", ipert, idir
+       call wrtout(std_out, msg, "COLL", do_flush=.True.)
+
+       ! Set up local potential vlocal1 with proper dimensioning, from vtrial1 taking into account the spin.
+       !do ipc=1,natom3
+       call rf_transgrid_and_pack(spin,nspden,psps%usepaw,cplex,nfftf,nfft,ngfft,gs_hamkq%nvloc,&
+                 pawfgr,mpi_enreg,dummy_vtrial,v1scf(:,:,:,ipc),vlocal,vlocal1(:,:,:,:,ipc))
+       !end do
+
+       ! Continue to initialize the Hamiltonian
+       call load_spin_hamiltonian(gs_hamkq,spin,vlocal=vlocal, &
+&              comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+
+       ! Allocate workspace for wavefunctions. Make npw larger than expected.
+       ABI_MALLOC(bras, (2, mpw*nspinor, mband))
+       ABI_MALLOC(kets, (2, mpw*nspinor, mband))
+       ABI_MALLOC(h1_kets, (2, mpw*nspinor, mband))
+
+       ! Prepare application of the NL part.
+       call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=1)
+       call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc), &
+            comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+!      call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,spin,paw_ij1=paw_ij1,vlocal1=vlocal1(:,:,:,:,ipc), &
+!           comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+
+
+       gkk = zero
 
        ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
        call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kk,kq,idir,ipert,&                   ! In
          cryst%natom,cryst%rmet,cryst%gprimd,cryst%gmet,istwf_k,&                           ! In
          npw_k,npw_kq,useylmgr1,kg_k,ylm_k,kg_kq,ylm_kq,ylmgr_kq,&                          ! In
          dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                      ! Out
+
+       ABI_FREE(kinpw1)
+       ABI_FREE(kpg1_k)
+       ABI_FREE(kpg_k)
+       ABI_FREE(dkinpw)
+       ABI_FREE(ffnlk)
+       ABI_FREE(ffnl1)
+       ABI_FREE(ph3d)
+
 
        ! Calculate dvscf * psi_k, results stored in h1_kets on the k+q sphere.
        ! Compute H(1) applied to GS wavefunction Psi(0)
@@ -493,13 +523,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 &                     optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
        end do
 
-       ABI_FREE(kinpw1)
-       ABI_FREE(kpg1_k)
-       ABI_FREE(kpg_k)
-       ABI_FREE(dkinpw)
-       ABI_FREE(ffnlk)
-       ABI_FREE(ffnl1)
-       ABI_FREE(ph3d)
        ABI_FREE(gs1c)
 
        if (allocated(ph3d1)) then
@@ -515,54 +538,79 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
          do ib1=1,mband_kq
            call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bras(1,1,ib1),h1_kets(1,1,ib2),&
              mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-           band = 2*ib2-1 + (spin-1) * 2 * mband
-           gkk(band,ik,1,1,ib1) = dotr
-           gkk(band+1,ik,1,1,ib1) = doti
+
+           gkk(0,ib1,ib2,ipert,idir) = dotr
+           gkk(1,ib1,ib2,ipert,idir) = doti
          end do
        end do
 
-     end do ! ikfs
 
-     call destroy_rf_hamiltonian(rf_hamkq)
+     ! Loop over 3*natom phonon branches.
+     gkk_m = zero
+     do imode=1,natom3
 
-     ABI_FREE(bras)
-     ABI_FREE(kets)
-     ABI_FREE(h1_kets)
+       ! Transform the gkk from atom,cart basis to mode basis
+       do idir=1,3
+         do ipert=1,natom
+            gkk_m(0,:,:,imode) = gkk_m(0,:,:,imode) &
+&                              + gkk(0,:,:,ipert,idir) * displ_red(0,idir,ipert,imode) &
+&                              - gkk(1,:,:,ipert,idir) * displ_red(1,idir,ipert,imode)
+            gkk_m(1,:,:,imode) = gkk_m(1,:,:,imode) &
+&                              + gkk(0,:,:,ipert,idir) * displ_red(1,idir,ipert,imode) &
+&                              + gkk(1,:,:,ipert,idir) * displ_red(0,idir,ipert,imode)
+         end do
+       end do
 
-   end do ! spin
+       ! sum contribution to phonon self-energy
+       do ib2=1,mband
+         do ib1=1,mband_kq
 
-   ! Gather the k-points computed by all processes
-   call xmpi_sum_master(gkk,master,comm,ierr)
+           f_nk = ebands_k%occ(ib2,ik,spin)
+           f_mkq = ebands_kq%occ(ib1,ikq,spin)
 
-   ! Init a gkk_t object
-   call gkk_init(gkk,gkk2d,mband,nsppol,nkpt,1,1)
+           if (abs(f_mkq - f_nk) .le. tol12) cycle
 
-   ! Write the netCDF file.
-   call appdig(ipc,dtfil%fnameabo_gkk,gkkfilnam)
-   fname = strcat(gkkfilnam,".nc")
-#ifdef HAVE_NETCDF
-   if (i_am_master) then
-     NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
-     NCF_CHECK(crystal_ncwrite(cryst, ncid))
-     NCF_CHECK(ebands_ncwrite(ebands_k, ncid))
-     call gkk_ncwrite(gkk2d,qpt,1.0_dp, ncid)
-     NCF_CHECK(nf90_close(ncid))
-   end if
-#endif
+           eig0nk = ebands_k%eig(ib2,ik,spin)
+           eig0mkq = ebands_kq%eig(ib1,ikq,spin)
 
-   ! Free memory
-   call gkk_free(gkk2d)
+           omega = phfrq(imode)
 
- end do ! ipc (loop over 3*natom atomic perturbations)
+           gkk2 = gkk_m(0,ib1,ib2,imode) ** 2 + gkk_m(1,ib1,ib2,imode) ** 2
+
+           term1 = (f_mkq - f_nk) * eta / ((eig0mkq - eig0nk - omega) ** 2 + eta ** 2)
+           term2 = (f_mkq - f_nk) * eta / ((eig0mkq - eig0nk        ) ** 2 + eta ** 2)
+
+           Pi_ph(imode) = Pi_ph(imode) + wtk * gkk2 * (term1 - term2)
+
+         end do
+       end do
+
+     end do  ! imode
+
+   end do ! ikfs
+
+   call destroy_rf_hamiltonian(rf_hamkq)
+
+   ABI_FREE(bras)
+   ABI_FREE(kets)
+   ABI_FREE(h1_kets)
+
+ end do ! spin
+
+ ! Gather the k-points computed by all processes
+ call xmpi_sum_master(Pi_ph,master,comm,ierr)
+
+ ! Free memory
 
  call cwtime(cpu,wall,gflops,"stop")
 
- write(msg, '(2a)') "Computation of electron-phonon coupling matrix elements (gkk) completed", ch10
+ write(msg, '(2a)') "Computation of the real part of the phonon self-energy completed", ch10
  call wrtout(ab_out, msg, "COLL", do_flush=.True.)
  call wrtout(std_out, msg, "COLL", do_flush=.True.)
 
  ! Free memory
  ABI_FREE(gkk)
+ ABI_FREE(gkk_m)
  ABI_FREE(v1scf)
  ABI_FREE(vlocal1)
  ABI_FREE(gvnl1)
@@ -584,10 +632,10 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  call pawcprj_free(cwaveprj0)
  ABI_DT_FREE(cwaveprj0)
 
-end subroutine eph_gkk
+end subroutine eph_phpi
 !!***
 
 !----------------------------------------------------------------------
 
-end module m_gkk
+end module m_phpi
 !!***
