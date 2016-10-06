@@ -169,51 +169,40 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: dummy_npw=1,nsig=1,tim_getgh1c=1,berryopt0=0,timrev1=1
- integer,parameter :: useylmgr=0,useylmgr1=0,master=0
- integer :: my_rank,nproc,iomode,mband,mband_kq,my_minb,my_maxb,nsppol,nkpt,nkpt_kq,idir,ipert,iq_ibz
- integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor,onpw
- integer :: bstart_k,bstart_kq,ib1,ib2,band !band1,band2,
- integer :: ik,ikq,ik_ibz,ik_bz,ikq_bz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq,timerev_q
- integer :: spin,istwf_k,istwf_kq,istwf_kirr,npw_k,npw_kq,npw_kirr
- integer :: ii,ipw,mpw,my_mpw,ierr,my_kstart,my_kstop,cnt,ncid
- integer :: isig,n1,n2,n3,n4,n5,n6,nspden,eph_scalprod,do_ftv1q
+ integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0
+ integer,parameter :: useylmgr1=0,master=0
+ integer :: my_rank,nproc,iomode,mband,mband_kq,my_minb,my_maxb,nsppol,nkpt,nkpt_kq,idir,ipert
+ integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,onpw
+ integer :: ib1,ib2,band
+ integer :: ik,ikq,timerev_q
+ integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq
+ integer :: mpw,my_mpw,ierr,my_kstart,my_kstop,cnt,ncid
+ integer :: n1,n2,n3,n4,n5,n6,nspden
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
- integer :: nfft,nfftf,mgfft,mgfftf,kqcount,nkpg,nkpg1
+ integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1
  real(dp) :: cpu,wall,gflops
- real(dp) :: ecut,eshift,eig0nk,dotr,doti,dksqmax
- logical,parameter :: have_ktimerev=.True.
- logical :: i_am_master, isirr_k,isirr_kq,gen_eigenpb
+ real(dp) :: ecut,eshift,eig0nk,dotr,doti
+ logical :: i_am_master, gen_eigenpb
  type(wfd_t) :: wfd_k, wfd_kq
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
  character(len=500) :: msg
  character(len=fnlen) :: fname, gkkfilnam
 !arrays
- integer :: g0_k(3),g0bz_kq(3),g0_kq(3),symq(4,2,cryst%nsym),dummy_gvec(3,dummy_npw)
- integer :: work_ngfft(18),gmax(3),my_gmax(3),gamma_ngqpt(3) !g0ibz_kq(3),
+ integer :: g0_k(3),symq(4,2,cryst%nsym),dummy_gvec(3,dummy_npw)
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:),nband_kq(:,:),blkflg(:,:)
- integer :: indkk_kq(1,6)
- real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),lf(2),rg(2),res(2)
- real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
- real(dp) :: temp_tgam(2,3*cryst%natom,3*cryst%natom)
- real(dp) :: sigmas(2),wminmax(2)
+ real(dp) :: kk(3),kq(3),qpt(3)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:),gkk(:,:,:,:,:)
  real(dp),allocatable :: bras(:,:,:),kets(:,:,:),h1_kets(:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
- real(dp),allocatable :: dummy_vtrial(:,:),gvnl1(:,:),work(:,:,:,:)
- real(dp),allocatable ::  gs1c(:,:) !,gvnl_direc(:,:),pcon(:),sconjgr(:,:)
+ real(dp),allocatable :: dummy_vtrial(:,:),gvnl1(:,:)
+ real(dp),allocatable ::  gs1c(:,:)
  logical,allocatable :: bks_mask(:,:,:),bks_mask_kq(:,:,:),keep_ur(:,:,:),keep_ur_kq(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:) !natom,nspinor*usecprj)
  type(gkk_t)     :: gkk2d
-
- ! for the Eliashberg solver
- integer :: ntemp
- real(dp) :: reltol,wcut
- real(dp) :: temp_range(2)
 
 !************************************************************************
 

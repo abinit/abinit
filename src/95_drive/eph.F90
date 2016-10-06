@@ -274,6 +274,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ebands = ebands_from_hdr(wfk0_hdr,maxval(wfk0_hdr%nband),gs_eigen)
  call hdr_free(wfk0_hdr)
+ ABI_FREE(gs_eigen)
+
  ! TODO: 
  ! Make sure everything is OK if WFK comes from a NSCF run since occ are set to zero
  ! fermie is set to 0 if nscf!
@@ -285,6 +287,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
                                       !           then compare against file.
    ebands_kq = ebands_from_hdr(wfq_hdr,maxval(wfq_hdr%nband),gs_eigen)
    call hdr_free(wfq_hdr)
+   ABI_FREE(gs_eigen)
  end if
 
  ! Here we change the GS bands (fermi level, scissors operator ...)
@@ -323,8 +326,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call ebands_update_occ(ebands_kq, spinmagntarget)
  end if
  call ebands_print(ebands,header="Ground state energies",prtvol=dtset%prtvol)
-
- ABI_FREE(gs_eigen)
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')"eph%init: cpu: ",cpu,", wall: ",wall
@@ -484,6 +485,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call ddk_free(ddk)
  call ifc_free(ifc)
  call ebands_free(ebands)
+ if (usewfq) then
+   call ebands_free(ebands_kq)
+ end if
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
 

@@ -23,12 +23,13 @@ tolwfr  1.0d-14
 istwfk *1       # Limitation of wfd_t
 
 # Files
-getden1   20      # Read density from DS20_DEN
-getden2   20      # Read density from DS20_DEN
-getwfk3    1      # Read GS wavefunctions from DS1_WFK
-getwfq3    2      # Read GS wavefunctions from DS2_WFQ
-getddb3   20      # Read DDB files from DS20_DDB
-ddb_ngqpt3 4 4 4  # q-mesh used to produce the DDB file (must be consisten with DDB data)
+getden1   20         # Read density from DS20_DEN
+getden2   20         # Read density from DS20_DEN
+getwfk3    1         # Read GS wavefunctions from DS1_WFK
+getwfq3    2         # Read GS wavefunctions from DS2_WFQ
+getddb3   20         # Read DDB files from DS20_DDB
+ddb_ngqpt3 4 4 4     # q-mesh used to produce the DDB file (must be consisten with DDB data)
+ddb_shiftq3 3*0.0d0  # q-shift of the DDB
 
 # K-point sampling 
 ngkpt   2 2 2
