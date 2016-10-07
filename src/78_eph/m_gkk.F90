@@ -310,6 +310,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
      kk = ebands_k%kptns(:,ik)
      call get_kg(kk,1,ecut,cryst%gmet,onpw,gtmp)
+     ABI_FREE(gtmp)
      mpw = max(mpw, onpw)
    end do
  end do
@@ -319,10 +320,10 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
      kq = ebands_kq%kptns(:,ikq)
      call get_kg(kq,1,ecut,cryst%gmet,onpw,gtmp)
+     ABI_FREE(gtmp)
      mpw = max(mpw, onpw)
    end do
  end do
- ABI_FREE(gtmp)
  my_mpw = mpw; call xmpi_max(my_mpw, mpw, comm, ierr)
 
 
