@@ -46,7 +46,6 @@ sources = [
  "matr3eigval.F90",
  "matr3inv.F90",
  "mknormpath.F90",
- "nderiv.F90",
  "overlap_g.F90",
  "proc_distrb_cycle.F90",
  "radsintr.F90",
