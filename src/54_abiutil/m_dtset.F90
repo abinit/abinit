@@ -93,10 +93,11 @@ CONTAINS  !=====================================================================
 
 subroutine dtset_chkneu(charge,dtset,occopt)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'chkneu'
+#define ABI_FUNC 'dtset_chkneu'
  use interfaces_14_hidewrite
 !End of the abilint section
 
