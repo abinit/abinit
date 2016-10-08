@@ -862,7 +862,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 &   +two*(dble(i1*i2)*gmet(1,2)+dble(i2*i3)*gmet(2,3)+dble(i3*i1)*gmet(3,1))
  end function gsq_atm
 
- real(dp) pure function dgsqds_atm(i1,i2,i3,is)
+ function dgsqds_atm(i1,i2,i3,is)
 !Define dG^2/ds based on G space metric derivative
 
 !This section has been created automatically by the script Abilint (TD).
@@ -871,6 +871,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 #define ABI_FUNC 'dgsqds_atm'
 !End of the abilint section
 
+   real(dp) :: dgsqds_atm
    integer,intent(in) :: i1,i2,i3,is
    dgsqds_atm=dble(i1*i1)*dgm(1,1,is)+dble(i2*i2)*dgm(2,2,is)+&
 &   dble(i3*i3)*dgm(3,3,is)+&
@@ -879,7 +880,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 &   dble(i2*i3)*(dgm(2,3,is)+dgm(3,2,is))
  end function dgsqds_atm
 
- real(dp) pure function d2gsqds_atm(i1,i2,i3,is1,is2)
+ function d2gsqds_atm(i1,i2,i3,is1,is2)
 !  Define 2dG^2/ds1ds2  based on G space metric derivative
 
 !This section has been created automatically by the script Abilint (TD).
@@ -888,6 +889,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 #define ABI_FUNC 'd2gsqds_atm'
 !End of the abilint section
 
+   real(dp) :: d2gsqds_atm
    integer,intent(in) :: i1,i2,i3,is1,is2
    d2gsqds_atm=dble(i1*i1)*d2gm(1,1,is1,is2)+&
 &   dble(i2*i2)*d2gm(2,2,is1,is2)+dble(i3*i3)*d2gm(3,3,is1,is2)+&
