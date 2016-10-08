@@ -268,7 +268,7 @@ subroutine metcon_so(rank,gmet,amet,aa,bb)
 !This function defines the l=3 contraction in
 !terms of the free indices of the contracted tensor (re and im)
 
-   real(dp) pure function cona_metso(ii,i1,i2,i3)
+   function cona_metso(ii,i1,i2,i3)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -276,6 +276,7 @@ subroutine metcon_so(rank,gmet,amet,aa,bb)
 #define ABI_FUNC 'cona_metso'
 !End of the abilint section
 
+   real(dp) :: cona_metso
    integer,intent(in) :: ii,i1,i2,i3
    real(dp) :: coniii, conijk
 
@@ -311,8 +312,7 @@ subroutine metcon_so(rank,gmet,amet,aa,bb)
  end function cona_metso
 
 
- real(dp) pure function con_metso(ii,i1,i2,i3)
-
+ function con_metso(ii,i1,i2,i3)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -320,6 +320,7 @@ subroutine metcon_so(rank,gmet,amet,aa,bb)
 #define ABI_FUNC 'con_metso'
 !End of the abilint section
 
+   real(dp) :: con_metso
    integer,intent(in) :: ii,i1,i2,i3
 
    con_metso=(cona_metso(ii,i3,i1,i2)+cona_metso(ii,i2,i3,i1)+cona_metso(ii,i1,i2,i3))/3.d0

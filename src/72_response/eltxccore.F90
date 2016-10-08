@@ -370,7 +370,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 
  contains
 
-   real(dp) pure function cross_elt(xx,yy,zz,aa,bb,cc)
+   function cross_elt(xx,yy,zz,aa,bb,cc)
 !Define magnitude of cross product of two vectors
 
 !This section has been created automatically by the script Abilint (TD).
@@ -379,6 +379,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 #define ABI_FUNC 'cross_elt'
 !End of the abilint section
 
+   real(dp) :: cross_elt
    real(dp),intent(in) :: xx,yy,zz,aa,bb,cc
    cross_elt=sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
  end function cross_elt

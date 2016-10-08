@@ -348,8 +348,7 @@ subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
 
  contains
 
-   real(dp) pure function cross_mk(xx,yy,zz,aa,bb,cc)
-
+   function cross_mk(xx,yy,zz,aa,bb,cc)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -357,6 +356,7 @@ subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
 #define ABI_FUNC 'cross_mk'
 !End of the abilint section
 
+   real(dp) :: cross_mk
    real(dp),intent(in) :: xx,yy,zz,aa,bb,cc
    cross_mk=sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
  end function cross_mk

@@ -519,7 +519,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 
  contains
 
-   real(dp) pure function cross_mkcore(xx,yy,zz,aa,bb,cc)
+   function cross_mkcore(xx,yy,zz,aa,bb,cc)
 !    Define magnitude of cross product of two vectors
 
 !This section has been created automatically by the script Abilint (TD).
@@ -528,6 +528,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 #define ABI_FUNC 'cross_mkcore'
 !End of the abilint section
 
+   real(dp) :: cross_mkcore
    real(dp),intent(in) :: xx,yy,zz,aa,bb,cc
    cross_mkcore=sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
  end function cross_mkcore

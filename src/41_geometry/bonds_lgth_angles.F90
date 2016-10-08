@@ -351,8 +351,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 
  contains
 
-   real(dp) pure function rsdot(u1,u2,u3,v1,v2,v3,rmet)
-
+   function rsdot(u1,u2,u3,v1,v2,v3,rmet)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -360,6 +359,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 #define ABI_FUNC 'rsdot'
 !End of the abilint section
 
+   real(dp) :: rsdot
    real(dp),intent(in) :: u1,u2,u3,v1,v2,v3
    real(dp),intent(in) :: rmet(3,3)
    rsdot=rmet(1,1)*u1*v1+rmet(2,1)*u2*v1+&

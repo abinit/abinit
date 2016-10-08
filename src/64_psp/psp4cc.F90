@@ -175,7 +175,7 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 
  contains
  
-   real(dp) pure function gg_psp4(x)
+   function gg_psp4(x)
 !Expression of 7 May 1992
 
 
@@ -185,13 +185,14 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 #define ABI_FUNC 'gg_psp4'
 !End of the abilint section
 
+   real(dp) :: gg_psp4
    real(dp),intent(in) :: x
    gg_psp4=(1.d0+x**2*(a2 +x**2*(a4 +x**2*(a6 +x**2*(a8 + &
 &   x**2*(a10+x**2*(a12+x**2*(a14+x**2*(a16+ &
 &   x**2*(a18+x**2*(a20)))))))))))          *(1.0d0-x**2)**2
  end function gg_psp4
 
- real(dp) pure function gp_psp4(x)
+ function gp_psp4(x)
 !gp(x) is the derivative of gg(x) wrt x
 
 
@@ -201,6 +202,7 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 #define ABI_FUNC 'gp_psp4'
 !End of the abilint section
 
+   real(dp) :: gp_psp4
    real(dp),intent(in) :: x
    gp_psp4=2.d0*x*((a2+x**2*(2.d0*a4+x**2*(3.d0*a6+x**2*(              &
 &   4.d0*a8+x**2*(5.d0*a10+x**2*(6.d0*a12+x**2*(                     &
@@ -211,7 +213,7 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 &   x**2*(a18+x**2*a20))))))))))        *(1.0d0-x**2) )
  end function gp_psp4
 
-   real(dp) pure function gpp_1_psp4(x)
+   function gpp_1_psp4(x)
 !gpp(x) is the second derivative of gg(x) wrt x
 
 
@@ -221,6 +223,7 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 #define ABI_FUNC 'gpp_1_psp4'
 !End of the abilint section
 
+   real(dp) :: gpp_1_psp4
    real(dp),intent(in) :: x
    gpp_1_psp4= ( 2.d0*a4+ x**2*(3.d0*2.d0*a6 +x**2*(               &
 &   4.d0*3.d0*a8+ x**2*(5.d0*4.d0*a10+x**2*(               &
@@ -230,7 +233,7 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 &   ))))))))*(2.d0*x*(1.d0-x**2))**2
  end function gpp_1_psp4
 
- real(dp) pure function gpp_2_psp4(x)
+ function gpp_2_psp4(x)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -239,6 +242,7 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 #define ABI_FUNC 'gpp_2_psp4'
 !End of the abilint section
 
+   real(dp) :: gpp_2_psp4
    real(dp),intent(in) :: x
    gpp_2_psp4=(a2+x**2*(2.d0*a4+x**2*(3.d0*a6+x**2*(                 &
 &   4.d0*a8 +x**2*(5.d0*a10+x**2*(6.d0*a12+x**2*(          &
@@ -247,8 +251,7 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 &   )))))))))*(1.d0-x**2)*2*(1.d0-9.d0*x**2)
  end function gpp_2_psp4
 
- real(dp) pure function gpp_3_psp4(x)
-
+ function gpp_3_psp4(x)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -256,6 +259,7 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 #define ABI_FUNC 'gpp_3_psp4'
 !End of the abilint section
 
+   real(dp) :: gpp_3_psp4
    real(dp),intent(in) :: x
    gpp_3_psp4=(1.d0+x**2*(a2 +x**2*(a4 +x**2*(a6 +x**2*(a8 +         &
 &   x**2*(a10+x**2*(a12+x**2*(a14+x**2*(a16+         &

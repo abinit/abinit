@@ -316,7 +316,7 @@ real(dp) :: inf_rmet(3,3)
 
  contains
 
-   real(dp) pure function dsq_rec(ii,jj,kk,inf_rmet)
+   function dsq_rec(ii,jj,kk,inf_rmet)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -325,6 +325,7 @@ real(dp) :: inf_rmet(3,3)
 #define ABI_FUNC 'dsq_rec'
 !End of the abilint section
 
+   real(dp) :: dsq_rec
    integer,intent(in) :: ii,jj,kk
    real(dp),intent(in) :: inf_rmet(3,3)
    dsq_rec=sqrt(&

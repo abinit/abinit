@@ -455,7 +455,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 
  contains
 
-   integer pure function map_symrhg(j1,n1)
+   function map_symrhg(j1,n1)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -464,6 +464,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 #define ABI_FUNC 'map_symrhg'
 !End of the abilint section
 
+   integer :: map_symrhg
    integer,intent(in) :: j1,n1
    map_symrhg=mod(n1+mod(j1,n1),n1)
  end function map_symrhg

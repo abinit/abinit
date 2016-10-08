@@ -151,7 +151,7 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 
  contains
 
-   real(dp) pure function dsq_green(ii,jj,kk,inf_rmet)
+   function dsq_green(ii,jj,kk,inf_rmet)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -160,6 +160,7 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 #define ABI_FUNC 'dsq_green'
 !End of the abilint section
 
+   real(dp) :: dsq_green
    integer,intent(in) :: ii,jj,kk
    real(dp),intent(in) :: inf_rmet(3,3)
    dsq_green= inf_rmet(1,1)*dble(ii**2)&

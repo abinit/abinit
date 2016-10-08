@@ -655,7 +655,7 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
 
  contains
 
-   real(dp) pure function cross_fr(xx,yy,zz,aa,bb,cc)
+   function cross_fr(xx,yy,zz,aa,bb,cc)
 !Define magnitude of cross product of two vectors
 
 
@@ -665,6 +665,7 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
 #define ABI_FUNC 'cross_fr'
 !End of the abilint section
 
+   real(dp) :: cross_fr
    real(dp),intent(in) :: xx,yy,zz,aa,bb,cc
    cross_fr=sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
  end function cross_fr

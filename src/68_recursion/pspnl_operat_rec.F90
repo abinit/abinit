@@ -234,7 +234,7 @@ subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
 
  contains
 
-   real(dp) pure function project_prec(raggio,iproj,iangol,rloc) 
+   function project_prec(raggio,iproj,iangol,rloc) 
 !--Analytical expression of the projectors in hgh-pspeudopotential
 !--The gamma function at denominator is missing
 
@@ -244,6 +244,7 @@ subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
 #define ABI_FUNC 'project_prec'
 !End of the abilint section
 
+   real(dp) :: project_prec 
    integer,intent(in) :: iproj,iangol
    real(dp),intent(in) :: raggio,rloc
 

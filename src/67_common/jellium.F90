@@ -203,8 +203,7 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
 
  contains
 
-   real(dp) pure function gsq_jel(i1,i2,i3)
-
+   function gsq_jel(i1,i2,i3)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -212,6 +211,7 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
 #define ABI_FUNC 'gsq_jel'
 !End of the abilint section
 
+   real(dp) :: gsq_jel
    integer,intent(in) :: i1,i2,i3
    gsq_jel=dble(i1*i1)*gmet(1,1)+dble(i2*i2)*gmet(2,2)+&
 &   dble(i3*i3)*gmet(3,3)+dble(2*i1*i2)*gmet(1,2)+&

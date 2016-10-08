@@ -905,7 +905,7 @@
 
  contains
 
-   real(dp) pure function speedup_fdp(nn,mm)
+   function speedup_fdp(nn,mm)
    !Expected linear speedup for a nn-sized problem and mm processes
 
 !This section has been created automatically by the script Abilint (TD).
@@ -914,6 +914,7 @@
 #define ABI_FUNC 'speedup_fdp'
 !End of the abilint section
 
+   real(dp) :: speedup_fdp
    integer,intent(in) :: nn,mm
    speedup_fdp=(one*nn)/(one*((nn/mm)+merge(0,1,mod(nn,mm)==0)))
  end function speedup_fdp

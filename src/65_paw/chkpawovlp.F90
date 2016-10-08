@@ -207,7 +207,7 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 
  contains
 
-   real(dp) pure function sqnrm_pawovlp(u1,u2,u3)
+    function sqnrm_pawovlp(u1,u2,u3)
 !squared norm of a vector
 
 !This section has been created automatically by the script Abilint (TD).
@@ -216,6 +216,7 @@ subroutine chkpawovlp(natom,ntypat,pawovlp,pawtab,rmet,typat,xred)
 #define ABI_FUNC 'sqnrm_pawovlp'
 !End of the abilint section
 
+   real(dp) :: sqnrm_pawovlp
    real(dp),intent(in) :: u1,u2,u3
    
    sqnrm_pawovlp=rmet(1,1)*u1*u1+rmet(2,1)*u2*u1+rmet(3,1)*u3*u1&

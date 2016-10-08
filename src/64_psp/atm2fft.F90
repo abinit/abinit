@@ -848,8 +848,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
  contains
 
-   real(dp) pure function gsq_atm(i1,i2,i3)
-
+   function gsq_atm(i1,i2,i3)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -857,6 +856,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 #define ABI_FUNC 'gsq_atm'
 !End of the abilint section
 
+   real(dp) :: gsq_atm
    integer,intent(in) :: i1,i2,i3
    gsq_atm=dble(i1*i1)*gmet(1,1)+dble(i2*i2)*gmet(2,2)+dble(i3*i3)*gmet(3,3) &
 &   +two*(dble(i1*i2)*gmet(1,2)+dble(i2*i3)*gmet(2,3)+dble(i3*i1)*gmet(3,1))
