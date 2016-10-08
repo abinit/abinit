@@ -1070,6 +1070,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'eph_ngqpt_fine',tread,'INT')
  if(tread==1) dtset%eph_ngqpt_fine=intarr(1:3)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_task',tread,'INT')
+ if(tread==1) dtset%eph_task=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_transport',tread,'INT')
  if(tread==1) dtset%eph_transport=intarr(1)
 
@@ -1084,6 +1087,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ddb_ngqpt',tread,'INT')
  if(tread==1) dtset%ddb_ngqpt=intarr(1:3)
+
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ddb_shiftq',tread,'DPR')
+ if(tread==1) dtset%ddb_shiftq=dprarr(1:3)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_ndivsm',tread,'INT')
  if(tread==1) dtset%ph_ndivsm=intarr(1)
@@ -1990,6 +1996,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtnest',tread,'INT')
  if(tread==1) dtset%prtnest=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtphdos',tread,'INT')
+ if(tread==1) dtset%prtphdos=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtposcar',tread,'INT')
  if(tread==1) dtset%prtposcar=intarr(1)

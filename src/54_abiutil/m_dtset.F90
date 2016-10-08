@@ -187,6 +187,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%eph_fsmear         = dtin%eph_fsmear
  dtout%eph_fsewin         = dtin%eph_fsewin
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
+ dtout%eph_task           = dtin%eph_task
  dtout%eph_transport      = dtin%eph_transport 
 
  dtout%ph_wstep          = dtin%ph_wstep
@@ -196,6 +197,7 @@ subroutine dtset_copy(dtout, dtin)
  if (allocated(dtin%ph_qshift)) call alloc_copy(dtin%ph_qshift, dtout%ph_qshift)
  dtout%ph_smear          = dtin%ph_smear
  dtout%ddb_ngqpt         = dtin%ddb_ngqpt
+ dtout%ddb_shiftq        = dtin%ddb_shiftq
 
  dtout%ph_ndivsm          = dtin%ph_ndivsm
  dtout%ph_nqpath          = dtin%ph_nqpath
@@ -474,6 +476,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtlden            = dtin%prtlden
  dtout%prtnabla           = dtin%prtnabla
  dtout%prtnest            = dtin%prtnest
+ dtout%prtphdos           = dtin%prtphdos
  dtout%prtposcar          = dtin%prtposcar
  dtout%prtpot             = dtin%prtpot
  dtout%prtpsps            = dtin%prtpsps

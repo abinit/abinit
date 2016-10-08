@@ -2698,7 +2698,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      write(std_out,"((a,i0,2a,a,i0))")"For spin: ",spin,", qpt: ",trim(ktoa(qpt)),", number of (k,q) pairs: ",kqcount
    end do
  end do
- call wrtout(std_out, "", do_flush=.True.)
+ call wrtout(std_out, " ", do_flush=.True.)
 
  ! Activate Fourier interpolation if irred q-points are not in the DVDB file.
  if (do_ftv1q /= 0) then

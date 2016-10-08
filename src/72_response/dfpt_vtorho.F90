@@ -712,9 +712,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
            call fftpac(ispden,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rho1wfr,rhoaug1(:,:,:,ispden),1)
          end do
        end if
-
      end if
-
    end if
 
  end do !  End loop over spins
