@@ -8,7 +8,7 @@
 !! evaluate special functions frequently needed in Abinit.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MG,MT,FB,XG)
+!! Copyright (C) 2008-2016 ABINIT group (MG,MT,FB,XG,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,6 +32,7 @@ MODULE m_special_funcs
  private
 
  public :: factorial         ! Calculates N! returning a real.
+ public :: permutations      ! Returns N!/(N-k) if N>=0 and N-k>0 else 0.
  public :: binomcoeff        ! Binominal coefficient n!/(n-k)!
  public :: laguerre          ! Laguerre Polynomial(x,n,a). 
  public :: RadFnH            ! Atomic radial function(r,n,l,Z).
@@ -97,6 +98,65 @@ elemental function factorial(nn)
  factorial=ff
 
 end function factorial
+!!***
+
+!!****f* m_special_funcs/permutations
+!! NAME
+!! permutations
+!!
+!! FUNCTION
+!! Returns N!/(N-k)!  if N>=0 and N-k>0
+!!                    otherwise 0 is returned
+!! Output is real
+!!
+!! INPUTS
+!!   kk=number k to use
+!!   nn=number N to use
+!!
+!! OUTPUT
+!!   permutations= n!/(n-k)! (real)
+!!
+!! PARENTS
+!!      green_atomic_hubbard
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure function permutations(nn,kk)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'permutations'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: kk,nn
+ real(dp) :: permutations
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: ii
+ real(dp) :: pp
+
+! *********************************************************************
+
+ if ((nn>=0).and.((nn-kk)>=0)) then
+   pp=one
+   do ii=nn-kk+1,nn
+     pp=pp*ii
+   end do
+ else
+   pp=zero
+ end if
+
+ permutations=pp
+
+end function permutations
 !!***
 
 !----------------------------------------------------------------------
