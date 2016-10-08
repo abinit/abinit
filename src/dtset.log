@@ -1,22 +1,10 @@
-67_common/rhotov.F90: type(dataset_type),intent(inout) :: dtset
-67_common/setvtr.F90: type(dataset_type),intent(inout) :: dtset
-68_rsprc/newvtr.F90: type(dataset_type),intent(inout) :: dtset
-68_rsprc/prcref_PMA.F90: type(dataset_type),intent(inout) :: dtset
-71_bse/setup_bse.F90: type(dataset_type),intent(inout) :: Dtset
-77_ddb/elphon.F90: type(anaddb_dataset_type),intent(inout) :: anaddb_dtset
 79_seqpar_mpi/vtorho.F90: type(dataset_type), intent(inout) :: dtset
 79_seqpar_mpi/wvl_wfsinp_reformat.F90:  type(dataset_type), intent(inout)      :: dtset
 94_scfcv/afterscfloop.F90: type(dataset_type),intent(inout) :: dtset
+
 94_scfcv/elpolariz.F90: type(dataset_type),intent(inout) :: dtset
 94_scfcv/scfcv.F90: type(dataset_type),intent(inout) :: dtset
-95_drive/bethe_salpeter.F90: type(dataset_type),intent(inout) :: Dtset
-95_drive/dfptnl_loop.F90: type(dataset_type),intent(inout) :: dtset
 95_drive/driver.F90: type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc)
-95_drive/eph.F90: type(dataset_type),intent(inout) :: dtset
 95_drive/gstate.F90: type(dataset_type),intent(inout) :: dtset
 95_drive/gstateimg.F90: type(dataset_type),target,intent(inout) :: dtset
-95_drive/gwls_sternheimer.F90:type(dataset_type),target,intent(inout) :: dtset
 95_drive/mover.F90:!type(dataset_type),intent(inout),target :: dtset
-95_drive/nonlinear.F90: type(dataset_type),intent(inout) :: dtset
-95_drive/pawuj_drive.F90: type(dataset_type),intent(inout) :: dtset
-95_drive/wfk_analyze.F90: type(dataset_type),intent(inout) :: dtset

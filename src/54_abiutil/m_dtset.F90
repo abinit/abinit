@@ -33,13 +33,12 @@ MODULE m_dtset
 
  private
 
- public :: dtset_chneu
+ public :: dtset_chkneu
  public :: dtset_copy
  public :: dtset_free
 
 CONTAINS  !==============================================================================
 !!***
-
 
 !!****f* m_dtset/dtset_chkneu
 !! NAME

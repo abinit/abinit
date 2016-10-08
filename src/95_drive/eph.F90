@@ -122,7 +122,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !scalars
  character(len=6),intent(in) :: codvsn
  type(datafiles_type),intent(in) :: dtfil
- type(dataset_type),intent(inout) :: dtset
+ type(dataset_type),intent(in) :: dtset
  type(pawang_type),intent(inout) :: pawang
  type(pseudopotential_type),intent(inout) :: psps
 !arrays
