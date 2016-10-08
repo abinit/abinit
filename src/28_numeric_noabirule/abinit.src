@@ -29,7 +29,6 @@ sources = [
  "jacobi.F90",
  "k0.F90",
  "k1.F90",
- "lebedev_laikov.F90",
  "lib_four.F90",
  "ludcmp.F90",
  "m_abilasi.F90",
