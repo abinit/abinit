@@ -8,7 +8,7 @@
 !! evaluate special functions frequently needed in Abinit.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MG,MT,FB,XG,FJ,NH)
+!! Copyright (C) 2008-2016 ABINIT group (MG,MT,FB,XG,FJ,NH,GZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,6 +31,7 @@ MODULE m_special_funcs
 
  private
 
+ public :: clp               ! x-1, if x>1/2, x+1, if x<-1/2
  public :: factorial         ! Calculates N! returning a real.
  public :: permutations      ! Returns N!/(N-k) if N>=0 and N-k>0 else 0.
  public :: binomcoeff        ! Binominal coefficient n!/(n-k)!
@@ -48,6 +49,54 @@ MODULE m_special_funcs
  public :: k_thfermi         ! Thomas-Fermi wave vector corresponding to the local value of the real space density rhor
 
 CONTAINS  !===========================================================
+!!***
+
+
+!!****f* m_special_funcs/clp
+!! NAME
+!! clp
+!!
+!! FUNCTION
+!! clp(x)= x-1, if x>1/2
+!!         x+1, if x<-1/2
+!!
+!! INPUTS
+!!  x= input variable
+!!
+!! OUTPUT
+!!  clp= resulting function
+!!
+!! PARENTS
+!!      nhatgrid
+!!
+!! SOURCE
+
+pure function clp(x)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'clp'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ real(dp) :: clp
+ real(dp),intent(in) :: x
+
+! **********************************************************************
+
+ if(x > half) then
+   clp=x-one
+ elseif(x < -half) then
+   clp=x+one
+ else
+   clp=x
+ end if
+
+end function clp
 !!***
 
 !!****f* m_special_funcs/factorial

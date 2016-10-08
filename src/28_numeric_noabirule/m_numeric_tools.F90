@@ -3242,7 +3242,7 @@ end subroutine hermitianize_dpc
 
 !----------------------------------------------------------------------
 
-!!****f* ABINIT/mkherm
+!!****f* m_numeric_tools/mkherm
 !! NAME
 !! mkherm
 !!

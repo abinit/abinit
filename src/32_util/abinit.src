@@ -22,7 +22,6 @@ sources = [
  "appdig.F90",
  "besjm.F90",
  "blow_pawuj.F90",
- "clp.F90",
  "create_mlms2jmj.F90",
  "create_slm2ylm.F90",
  "ctrap.F90",
