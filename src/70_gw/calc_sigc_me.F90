@@ -136,7 +136,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  use m_time
 
  use m_blas,          only : xdotc, xgemv
- use m_numeric_tools, only : hermitianize, imin_loc
+ use m_numeric_tools, only : hermitianize, imin_loc, coeffs_gausslegint
  use m_fstrings,      only : sjoin, itoa
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t

@@ -51,6 +51,7 @@ subroutine calc_rpa_functional(gwrpacorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,gmet,chi0,
 
  use m_gwdefs,        only : GW_TOLQ0, em1params_t
  use m_io_tools,      only : open_file
+ use m_numeric_tools, only : coeffs_gausslegint
  use m_abilasi,       only : xginv, xheev
  use m_geometry,      only : normv
  use m_bz_mesh,       only : kmesh_t
