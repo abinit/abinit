@@ -51,6 +51,7 @@ MODULE m_ebands
                               isdiagmat
  use m_special_funcs,  only : dirac_delta
  use m_geometry,       only : normv
+ use m_cgtools,        only : set_istwfk
  use m_nesting,        only : mknesting
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, isamek

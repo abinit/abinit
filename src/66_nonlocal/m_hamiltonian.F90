@@ -42,10 +42,10 @@ module m_hamiltonian
  use m_fstrings,          only : toupper
  use m_pawtab,            only : pawtab_type
  use m_fftcore,           only : kpgsph
+ use m_cgtools,           only : set_istwfk
  use m_pawcprj,           only : pawcprj_getdim
  use m_paw_ij,            only : paw_ij_type
  use m_paral_atom,        only : get_my_atmtab, free_my_atmtab
-
  use m_electronpositron,  only : electronpositron_type, electronpositron_calctype
  use m_mpinfo,            only : destroy_mpi_enreg
  use m_fock,              only : fock_type

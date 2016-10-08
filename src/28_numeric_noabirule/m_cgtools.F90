@@ -83,6 +83,7 @@ MODULE m_cgtools
  public :: cg_zgemm
 
  ! Helper functions for DFT calculations.
+ public :: set_istwfk               ! Returns the value of istwfk associated to the input k-point.
  public :: sqnorm_g                 ! Square of the norm in reciprocal space.
  public :: dotprod_g                ! Scalar product <vec1|vect2> of complex vectors vect1 and vect2 (can be the same)
  public :: matrixelmt_g             ! matrix element <wf1|O|wf2> of two wavefunctions, in reciprocal space, for an operator diagonal in G-space.
@@ -1110,6 +1111,85 @@ subroutine cg_zgemm(transa,transb,npws,ncola,ncolb,cg_a,cg_b,cg_c,alpha,beta)
  call ZGEMM(transa,transb,mm,nn,kk,my_alpha,cg_a,lda,cg_b,ldb,my_beta,cg_c,ldc)
 
 end subroutine cg_zgemm
+!!***
+
+
+!!****f* m_cgtools/set_istwfk
+!! NAME
+!!  set_istwfk
+!!
+!! FUNCTION
+!!  Returns the value of istwfk associated to the input k-point.
+!!
+!! INPUTS 
+!!  kpoint(3)=The k-point in reduced coordinates.
+!!
+!! OUTPUT
+!!  istwfk= Integer flag internally used in the code to define the storage mode of the wavefunctions.
+!!  It also define the algorithm used to apply an operator in reciprocal space as well as the FFT 
+!!  algorithm used to go from G- to r-space and vice versa.
+!!
+!!   1 => time-reversal cannot be used
+!!   2 => use time-reversal at the Gamma point.
+!!   3 => use time-reversal symmetry for k=(1/2, 0 , 0 )
+!!   4 => use time-reversal symmetry for k=( 0 , 0 ,1/2)
+!!   5 => use time-reversal symmetry for k=(1/2, 0 ,1/2)
+!!   6 => use time-reversal symmetry for k=( 0 ,1/2, 0 )
+!!   7 => use time-reversal symmetry for k=(1/2,1/2, 0 )
+!!   8 => use time-reversal symmetry for k=( 0 ,1/2,1/2)
+!!   9 => use time-reversal symmetry for k=(1/2,1/2,1/2)
+!!
+!!  Useful relations:
+!!   u_k(G) = u_{k+G0}(G-G0); u_{-k}(G) = u_k(G)^*
+!!  and therefore:
+!!   u_{G0/2}(G) = u_{G0/2}(-G-G0)^*.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer pure function set_istwfk(kpoint) result(istwfk)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'set_istwfk'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ real(dp),intent(in) :: kpoint(3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: bit0,ii
+!arrays
+ integer :: bit(3)
+
+! *************************************************************************
+
+ bit0=1
+ 
+ do ii=1,3
+   if (DABS(kpoint(ii))<tol10) then
+     bit(ii)=0
+   else if (DABS(kpoint(ii)-half)<tol10 ) then
+     bit(ii)=1
+   else
+     bit0=0
+   end if
+ end do
+
+ if (bit0==0) then
+   istwfk=1
+ else
+   istwfk=2+bit(1)+4*bit(2)+2*bit(3) ! Note the inversion between bit(2) and bit(3)
+ end if
+
+end function set_istwfk
 !!***
 
 !!****f* m_cgtools/sqnorm_g
