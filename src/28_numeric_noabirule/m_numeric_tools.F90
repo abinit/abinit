@@ -79,6 +79,7 @@ MODULE m_numeric_tools
  public :: simpson_int           ! Simpson integral of a tabulated function. Returns arrays with integrated values
  public :: simpson               ! Simpson integral of a tabulated function. Returns scalar with the integral on the full mesh.
  public :: rhophi                ! Compute the phase and the module of a complex number.
+ public :: smooth                ! Smooth data.
 
  interface arth
    module procedure arth_int 
@@ -5365,6 +5366,77 @@ subroutine vdiff_print(vd,unit)
                            ", Mean{|f1-f2|}=",vd%mean_adiff,", stdev{|f1-f2|}=",vd%stdev_adiff
 
 end subroutine vdiff_print
+!!***
+
+!!****f* m_numeric_tools/smooth
+!! NAME
+!!  smooth data.
+!!
+!! FUNCTION
+!!  smooth  
+!!
+!! INPUTS
+!!  mesh=Number of points.
+!!  it=Number of iterations.
+!!
+!! SIDE EFFECTS
+!!  a(mesh)=Input values, smoothed in output
+!!
+!! PARENTS
+!!      psp6cc,upf2abinit
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine smooth(a,mesh,it)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'smooth'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: it,mesh
+ real(dp), intent(inout) :: a(mesh)
+!Local variables-------------------------------
+ integer :: i,k
+ real(dp) :: asm(mesh)
+! *********************************************************************
+
+ do k=1,it
+   asm(1)=1.0d0/3.0d0*(a(1)+a(2)+a(3))
+   asm(2)=0.25d0*(a(1)+a(2)+a(3)+a(4))
+   asm(3)=0.2d0*(a(1)+a(2)+a(3)+a(4)+a(5))
+   asm(4)=0.2d0*(a(2)+a(3)+a(4)+a(5)+a(6))
+   asm(5)=0.2d0*(a(3)+a(4)+a(5)+a(6)+a(7))
+   asm(mesh-4)=0.2d0*(a(mesh-2)+a(mesh-3)+a(mesh-4)+&
+&                   a(mesh-5)+a(mesh-6))
+   asm(mesh-3)=0.2d0*(a(mesh-1)+a(mesh-2)+a(mesh-3)+&
+&                   a(mesh-4)+a(mesh-5))
+   asm(mesh-2)=0.2d0*(a(mesh)+a(mesh-1)+a(mesh-2)+&
+&                   a(mesh-3)+a(mesh-4))
+   asm(mesh-1)=0.25d0*(a(mesh)+a(mesh-1)+a(mesh-2)+a(mesh-3))
+   asm(mesh)=1.0d0/3.0d0*(a(mesh)+a(mesh-1)+a(mesh-2))
+
+   do i=6,mesh-5
+     asm(i)=0.1d0*a(i)+0.1d0*(a(i+1)+a(i-1))+&
+&             0.1d0*(a(i+2)+a(i-2))+&
+&             0.1d0*(a(i+3)+a(i-3))+&
+&             0.1d0*(a(i+4)+a(i-4))+&
+&             0.05d0*(a(i+5)+a(i-5))
+   end do
+
+   do i=1,mesh
+     a(i)=asm(i)
+   end do
+ end do
+
+end subroutine smooth
 !!***
 
 !----------------------------------------------------------------------

@@ -49,7 +49,6 @@ sources = [
  "m_random_zbq.F90",
  "m_slk.F90",
  "m_splines.F90",
- "smooth.F90",
  "sort_int.F90",
  "sort_dp.F90",
  "uniformrandom.F90",
