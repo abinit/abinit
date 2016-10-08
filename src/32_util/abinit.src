@@ -50,7 +50,6 @@ sources = [
  "mknormpath.F90",
  "nderiv.F90",
  "overlap_g.F90",
- "phim.F90",
  "proc_distrb_cycle.F90",
  "radsintr.F90",
  "radsmear.F90",
