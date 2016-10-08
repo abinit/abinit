@@ -3443,7 +3443,6 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_expandk'
- use interfaces_32_util
  use interfaces_56_recipspace
 !End of the abilint section
 

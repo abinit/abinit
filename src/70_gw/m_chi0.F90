@@ -30,6 +30,7 @@ MODULE m_chi0
  use m_profiling_abi
  use m_errors
  use m_xomp
+ use m_sort
 
  use m_gwdefs,   only : GW_TOL_DOCC, czero_gw, cone_gw, em1params_t, j_gw
  use m_blas,     only : xgerc, xgemm
@@ -2412,7 +2413,6 @@ subroutine setup_spectral(nomega,omega,nomegasf,omegasf,max_rest,min_rest,my_max
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_spectral'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

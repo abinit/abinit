@@ -138,6 +138,13 @@ CONTAINS  !===========================================================
 
 subroutine init_lebedev_grid(Lgrid,seq_idx)
 
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'init_lebedev_grid'
+!End of the abilint section
+
  implicit none
 
 !This section has been created automatically by the script Abilint (TD).
@@ -204,6 +211,13 @@ end subroutine init_lebedev_grid
 
 subroutine destroy_lebedev_grid(Lgrid)
 
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'destroy_lebedev_grid'
+!End of the abilint section
+
  implicit none
 
 !This section has been created automatically by the script Abilint (TD).
@@ -254,6 +268,13 @@ end subroutine destroy_lebedev_grid
 
 subroutine init_lebedev_gridset()
 
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'init_lebedev_gridset'
+!End of the abilint section
+
  implicit none
 
 !This section has been created automatically by the script Abilint (TD).
@@ -298,6 +319,13 @@ end subroutine init_lebedev_gridset
 
 subroutine destroy_lebedev_gridset()
 
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'destroy_lebedev_gridset'
+!End of the abilint section
+
  implicit none
 
 !This section has been created automatically by the script Abilint (TD).
@@ -332,6 +360,13 @@ end subroutine destroy_lebedev_gridset
 !! SOURCE
 
 function m_lebedev_is_init() result(ans)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'm_lebedev_is_init'
+!End of the abilint section
 
  implicit none
 
@@ -383,6 +418,13 @@ end function m_lebedev_is_init
 !! SOURCE
 
 subroutine build_lebedev_grid(seq_idx,xx,yy,zz,ww)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'build_lebedev_grid'
+!End of the abilint section
 
  implicit none
 
@@ -609,6 +651,7 @@ end subroutine build_lebedev_grid
 !! SOURCE
 
 subroutine gen_oh(code, num, x, y, z, w, a, b, v)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

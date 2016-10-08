@@ -2012,7 +2012,6 @@ subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
 #undef ABI_FUNC
 #define ABI_FUNC 'init_ddiago_ctl'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_51_manage_mpi
 !End of the abilint section
 

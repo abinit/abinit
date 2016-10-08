@@ -1152,6 +1152,7 @@ end subroutine cg_zgemm
 
 integer pure function set_istwfk(kpoint) result(istwfk)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

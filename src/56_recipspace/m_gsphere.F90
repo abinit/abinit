@@ -33,6 +33,7 @@ MODULE m_gsphere
  use m_profiling_abi
  use m_errors
  use m_distribfft
+ use m_sort
 
  use defs_abitypes,   only : MPI_type
  use m_numeric_tools, only : bisect
@@ -1204,7 +1205,6 @@ subroutine merge_and_sort_kg(nkpt,kptns,ecut,nsym2,pinv,symrel2,gprimd,gbig,prtv
 #undef ABI_FUNC
 #define ABI_FUNC 'merge_and_sort_kg'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_51_manage_mpi
 !End of the abilint section
 
@@ -1490,7 +1490,6 @@ subroutine getfullg(nbase,nsym,pinv,sizepw,gbase,symrec,cnorm,maxpw,gbig,shlim,i
 #undef ABI_FUNC
 #define ABI_FUNC 'getfullg'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -1868,7 +1867,6 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
 #undef ABI_FUNC
 #define ABI_FUNC 'setshells'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_51_manage_mpi
 !End of the abilint section
 

@@ -46,16 +46,15 @@
 
 subroutine getngrec(ngfft,rmet,ngfftrec,nfftrec,recrcut,delta,tronc)
 
-use m_profiling_abi
-
-use defs_basis
+ use defs_basis
+ use m_profiling_abi
+ use m_sort
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getngrec'
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
 implicit none

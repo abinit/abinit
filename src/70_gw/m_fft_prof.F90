@@ -189,7 +189,6 @@ subroutine fft_test_init(Ftest,fft_setup,kpoint,ecut,boxcutmin,rprimd,nsym,symre
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fft_test_init'
- use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
@@ -1957,7 +1956,6 @@ subroutine prof_fourwf(fft_setups,cplex,option,kpoint,necut,ecut_arth,boxcutmin,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prof_fourwf'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

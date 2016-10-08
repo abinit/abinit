@@ -54,6 +54,7 @@ subroutine cpdrv(aim_dtset)
  use defs_abitypes
  use m_xmpi
  use m_errors
+ use m_sort
  use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
@@ -61,7 +62,6 @@ subroutine cpdrv(aim_dtset)
 #undef ABI_FUNC
 #define ABI_FUNC 'cpdrv'
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
  use interfaces_63_bader, except_this_one => cpdrv
 !End of the abilint section
 

@@ -48,18 +48,17 @@
 
 subroutine  critics(aim_dtset,inxat,stwo,sthree,sfour,dstmax)
 
- use m_profiling_abi
-
  use defs_basis
  use defs_aimprom
  use defs_parameters
  use defs_abitypes
+ use m_sort
+ use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'critics'
- use interfaces_28_numeric_noabirule
  use interfaces_63_bader, except_this_one => critics
 !End of the abilint section
 
