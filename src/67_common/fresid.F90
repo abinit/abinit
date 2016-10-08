@@ -131,11 +131,6 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
 
 ! *************************************************************************
 
-!Statement functions are obsolete
-!Define magnitude of cross product of two vectors
-! cross(xx,yy,zz,aa,bb,cc)=&
-!& sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
-
 !Compute lengths of cross products for pairs of primitive
 !translation vectors (used in setting index search range below)
  lencp(1)=cross_fr(rprimd(1,2),rprimd(2,2),rprimd(3,2),&
@@ -660,7 +655,8 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
 
  contains
 
-   function cross_fr(xx,yy,zz,aa,bb,cc)
+   real(dp) pure function cross_fr(xx,yy,zz,aa,bb,cc)
+!Define magnitude of cross product of two vectors
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -669,11 +665,9 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
 #define ABI_FUNC 'cross_fr'
 !End of the abilint section
 
-   real(dp)::cross_fr
-   real(dp) :: xx,yy,zz,aa,bb,cc
+   real(dp),intent(in) :: xx,yy,zz,aa,bb,cc
    cross_fr=sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
  end function cross_fr
 
 end subroutine fresid
-
 !!***

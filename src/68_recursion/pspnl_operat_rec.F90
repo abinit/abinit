@@ -53,10 +53,10 @@
 
 subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
 
- use m_profiling_abi
-    
  use defs_basis
  use defs_rectypes
+ use m_profiling_abi
+
  use m_paw_sphharm, only : initylmr
 
 !This section has been created automatically by the script Abilint (TD).
@@ -92,13 +92,6 @@ subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
 
 ! *************************************************************************
 
-!Statement functions are obsolete
-!--Analytical expression of the projectors in hgh-pspeudopotential
-!--The gamma function at denominator is missing
-! project(raggio,iproj,iangol,rloc) =&
-!& sqrt2*(raggio/rloc)**real((iangol+2*(iproj-1)),dp)*&
-!& exp(-((raggio/rloc)**two)*half)/rloc**onehalf
- 
  if(debug)then
    write(msg,'(80a,a,a)') ('=',ii=1,80),ch10,' pspnl_operat_rec : enter '
    call wrtout(std_out,msg,'PERS')
@@ -241,8 +234,9 @@ subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
 
  contains
 
-   function project_prec(raggio,iproj,iangol,rloc) 
-
+   real(dp) pure function project_prec(raggio,iproj,iangol,rloc) 
+!--Analytical expression of the projectors in hgh-pspeudopotential
+!--The gamma function at denominator is missing
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -250,8 +244,9 @@ subroutine pspnl_operat_rec(nlrec,metrec,ngfftrec,debug)
 #define ABI_FUNC 'project_prec'
 !End of the abilint section
 
-   real(dp) :: project_prec,raggio,rloc
-   integer :: iproj,iangol
+   integer,intent(in) :: iproj,iangol
+   real(dp),intent(in) :: raggio,rloc
+
    project_prec=sqrt2*(raggio/rloc)**real((iangol+2*(iproj-1)),dp)*&
 &   exp(-((raggio/rloc)**two)*half)/rloc**onehalf
  end function project_prec

@@ -109,44 +109,6 @@ subroutine metcon_so(rank,gmet,amet,aa,bb)
 
 ! *************************************************************************
 
-!Statement functions are obsolete
-!This statement function defines the l=3 contraction in
-!terms of the free indices of the contracted tensor (re and im)
-! coniii(ii,i1,i2,i3)=gmet(i1,1)*gmet(i2,1)*amet(i3,1)*aa(ii,1)+&
-!& gmet(i1,2)*gmet(i2,2)*amet(i3,2)*aa(ii,7)+&
-!& gmet(i1,3)*gmet(i2,3)*amet(i3,3)*aa(ii,10)
-! conijk(ii,i1,i2,i3)=aa(ii,4)*&
-!& (gmet(i1,1)*gmet(i2,2)*amet(i3,3)+&
-!& gmet(i1,2)*gmet(i2,3)*amet(i3,1)+&
-!& gmet(i1,3)*gmet(i2,1)*amet(i3,2)+&
-!& gmet(i1,3)*gmet(i2,2)*amet(i3,1)+&
-!& gmet(i1,1)*gmet(i2,3)*amet(i3,2)+&
-!& gmet(i1,2)*gmet(i2,1)*amet(i3,3))
-! cona(ii,i1,i2,i3)=coniii(ii,i1,i2,i3)+conijk(ii,i1,i2,i3)+&
-!& (gmet(i1,1)*gmet(i2,2)*amet(i3,1)+&
-!& gmet(i1,2)*gmet(i2,1)*amet(i3,1)+&
-!& gmet(i1,1)*gmet(i2,1)*amet(i3,2))*aa(ii,6)+&
-!& (gmet(i1,1)*gmet(i2,2)*amet(i3,2)+&
-!& gmet(i1,2)*gmet(i2,1)*amet(i3,2)+&
-!& gmet(i1,2)*gmet(i2,2)*amet(i3,1))*aa(ii,2)+&
-!& (gmet(i1,1)*gmet(i2,3)*amet(i3,1)+&
-!& gmet(i1,3)*gmet(i2,1)*amet(i3,1)+&
-!& gmet(i1,1)*gmet(i2,1)*amet(i3,3))*aa(ii,5)+&
-!& (gmet(i1,1)*gmet(i2,3)*amet(i3,3)+&
-!& gmet(i1,3)*gmet(i2,1)*amet(i3,3)+&
-!& gmet(i1,3)*gmet(i2,3)*amet(i3,1))*aa(ii,3)+&
-!& (gmet(i1,2)*gmet(i2,2)*amet(i3,3)+&
-!& gmet(i1,2)*gmet(i2,3)*amet(i3,2)+&
-!& gmet(i1,3)*gmet(i2,2)*amet(i3,2))*aa(ii,9)+&
-!& (gmet(i1,2)*gmet(i2,3)*amet(i3,3)+&
-!& gmet(i1,3)*gmet(i2,2)*amet(i3,3)+&
-!& gmet(i1,3)*gmet(i2,3)*amet(i3,2))*aa(ii,8)
-!con(ii,i1,i2,i3)=(cona(ii,i3,i1,i2)+cona(ii,i2,i3,i1)+cona(ii,i1,i2,i3))/3.d0
-
-!DEBUG
-!write(std_out,*)' metcon : enter '
-!stop
-!ENDDEBUG
  if (rank==0) then
 !  Simply copy scalar, re and im
    bb(1,1)=0.d0
@@ -303,8 +265,10 @@ subroutine metcon_so(rank,gmet,amet,aa,bb)
 
  contains
 
-   function cona_metso(ii,i1,i2,i3)
+!This function defines the l=3 contraction in
+!terms of the free indices of the contracted tensor (re and im)
 
+   real(dp) pure function cona_metso(ii,i1,i2,i3)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -312,8 +276,7 @@ subroutine metcon_so(rank,gmet,amet,aa,bb)
 #define ABI_FUNC 'cona_metso'
 !End of the abilint section
 
-   real(dp) :: cona_metso
-   integer :: ii,i1,i2,i3
+   integer,intent(in) :: ii,i1,i2,i3
    real(dp) :: coniii, conijk
 
    coniii=gmet(i1,1)*gmet(i2,1)*amet(i3,1)*aa(ii,1)+&
@@ -348,7 +311,7 @@ subroutine metcon_so(rank,gmet,amet,aa,bb)
  end function cona_metso
 
 
-   function con_metso(ii,i1,i2,i3)
+ real(dp) pure function con_metso(ii,i1,i2,i3)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -357,13 +320,11 @@ subroutine metcon_so(rank,gmet,amet,aa,bb)
 #define ABI_FUNC 'con_metso'
 !End of the abilint section
 
-   real(dp) :: con_metso
-   integer :: ii,i1,i2,i3
+   integer,intent(in) :: ii,i1,i2,i3
 
    con_metso=(cona_metso(ii,i3,i1,i2)+cona_metso(ii,i2,i3,i1)+cona_metso(ii,i1,i2,i3))/3.d0
 
  end function con_metso
-
 
 end subroutine metcon_so
 !!***
