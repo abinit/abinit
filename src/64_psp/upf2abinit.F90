@@ -80,7 +80,6 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
 #undef ABI_FUNC
 #define ABI_FUNC 'upf2abinit'
  use interfaces_11_qespresso_ext
- use interfaces_28_numeric_noabirule
  use interfaces_32_util
  use interfaces_57_iopsp_parser
  use interfaces_64_psp, except_this_one => upf2abinit

@@ -64,7 +64,6 @@ subroutine surf(aim_dtset)
 #undef ABI_FUNC
 #define ABI_FUNC 'surf'
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
  use interfaces_63_bader, except_this_one => surf
 !End of the abilint section
 

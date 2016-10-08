@@ -366,7 +366,6 @@ subroutine hubbard_one(cryst_struc,green,hu,paw_dmft,pawang,pawprtvol,hdc,weiss)
 subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft,udens_atoms)
 
 
-
  use defs_basis
  use m_errors
  use m_profiling_abi
@@ -381,7 +380,6 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 #undef ABI_FUNC
 #define ABI_FUNC 'green_atomic_hubbard'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

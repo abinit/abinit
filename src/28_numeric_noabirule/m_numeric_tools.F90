@@ -2991,6 +2991,7 @@ end subroutine quadrature
 
 subroutine coeffs_gausslegint(xmin,xmax,x,weights,n)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -3009,8 +3010,8 @@ subroutine coeffs_gausslegint(xmin,xmax,x,weights,n)
 !scalars
  integer :: i,j 
  real(dp),parameter :: tol=1.d-13
- real(dp),parameter :: 4.d0*atan(1.d0)
- real(dp) :: z,z1,pi,xmean,p1,p2,p3,pp,xl
+ real(dp),parameter :: pi=4.d0*atan(1.d0)
+ real(dp) :: z,z1,xmean,p1,p2,p3,pp,xl
 
 !************************************************************************
 
@@ -5473,6 +5474,7 @@ end subroutine vdiff_print
 !! SOURCE
 
 subroutine smooth(a,mesh,it)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

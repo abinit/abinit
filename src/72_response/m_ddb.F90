@@ -498,7 +498,6 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
 #undef ABI_FUNC
 #define ABI_FUNC 'inprep8'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -2165,7 +2164,6 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
 #undef ABI_FUNC
 #define ABI_FUNC 'ioddb8_in'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -4447,6 +4445,7 @@ end subroutine asrq0corr_free
 !! SOURCE
 
 subroutine ddb_chkname(nmfond,nmxpct,nmxpct2)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

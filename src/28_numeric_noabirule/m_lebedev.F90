@@ -138,10 +138,7 @@ CONTAINS  !===========================================================
 
 subroutine init_lebedev_grid(Lgrid,seq_idx)
 
- use defs_basis
-
-!Arguments ------------------------------------
-!scalars
+ implicit none
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -149,6 +146,8 @@ subroutine init_lebedev_grid(Lgrid,seq_idx)
 #define ABI_FUNC 'init_lebedev_grid'
 !End of the abilint section
 
+!Arguments ------------------------------------
+!scalars
  integer,intent(in) :: seq_idx
  type(lebedev_grid_t),intent(out) :: Lgrid
 
@@ -205,10 +204,7 @@ end subroutine init_lebedev_grid
 
 subroutine destroy_lebedev_grid(Lgrid)
 
- use defs_basis
-
-!Arguments ------------------------------------
-!scalars
+ implicit none
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -216,6 +212,8 @@ subroutine destroy_lebedev_grid(Lgrid)
 #define ABI_FUNC 'destroy_lebedev_grid'
 !End of the abilint section
 
+!Arguments ------------------------------------
+!scalars
  type(lebedev_grid_t),intent(inout) :: Lgrid
 
 ! *********************************************************************
@@ -256,9 +254,7 @@ end subroutine destroy_lebedev_grid
 
 subroutine init_lebedev_gridset()
 
- use defs_basis
-
-!Local variables-------------------------------
+ implicit none
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -266,6 +262,7 @@ subroutine init_lebedev_gridset()
 #define ABI_FUNC 'init_lebedev_gridset'
 !End of the abilint section
 
+!Local variables-------------------------------
  integer :: igr
 ! *********************************************************************
 
@@ -301,9 +298,7 @@ end subroutine init_lebedev_gridset
 
 subroutine destroy_lebedev_gridset()
 
- use defs_basis
-
-!Local variables-------------------------------
+ implicit none
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -311,6 +306,7 @@ subroutine destroy_lebedev_gridset()
 #define ABI_FUNC 'destroy_lebedev_gridset'
 !End of the abilint section
 
+!Local variables-------------------------------
  integer :: igr
 ! *********************************************************************
 
@@ -337,9 +333,7 @@ end subroutine destroy_lebedev_gridset
 
 function m_lebedev_is_init() result(ans)
 
- use defs_basis
-
-!Local variables-------------------------------
+ implicit none
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -347,6 +341,7 @@ function m_lebedev_is_init() result(ans)
 #define ABI_FUNC 'm_lebedev_is_init'
 !End of the abilint section
 
+!Local variables-------------------------------
  logical :: ans
 
 !This section has been created automatically by the script Abilint (TD).
@@ -389,18 +384,16 @@ end function m_lebedev_is_init
 
 subroutine build_lebedev_grid(seq_idx,xx,yy,zz,ww)
 
- use defs_basis
-
-!Arguments ------------------------------------
-!scalars
+ implicit none
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'build_lebedev_grid'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
+!Arguments ------------------------------------
+!scalars
  integer,intent(in) :: seq_idx
  real(dp) :: xx(:),yy(:),zz(:),ww(:)
 
@@ -616,8 +609,6 @@ end subroutine build_lebedev_grid
 !! SOURCE
 
 subroutine gen_oh(code, num, x, y, z, w, a, b, v)
-
- use m_errors
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1216,7 +1207,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD0006'
- use interfaces_28_numeric_noabirule, except_this_one => LD0006
 !End of the abilint section
 
        implicit none 
@@ -1288,7 +1278,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD0014'
- use interfaces_28_numeric_noabirule, except_this_one => LD0014
 !End of the abilint section
 
        implicit none 
@@ -1362,7 +1351,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD0026'
- use interfaces_28_numeric_noabirule, except_this_one => LD0026
 !End of the abilint section
 
        implicit none 
@@ -1438,7 +1426,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD0038'
- use interfaces_28_numeric_noabirule, except_this_one => LD0038
 !End of the abilint section
 
        implicit none 
@@ -1515,7 +1502,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD0050'
- use interfaces_28_numeric_noabirule, except_this_one => LD0050
 !End of the abilint section
 
        implicit none 
@@ -1594,7 +1580,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD0074'
- use interfaces_28_numeric_noabirule, except_this_one => LD0074
 !End of the abilint section
 
        implicit none 
@@ -1676,7 +1661,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD0086'
- use interfaces_28_numeric_noabirule, except_this_one => LD0086
 !End of the abilint section
 
        implicit none 
@@ -1759,7 +1743,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD0110'
- use interfaces_28_numeric_noabirule, except_this_one => LD0110
 !End of the abilint section
 
        implicit none 
@@ -1845,7 +1828,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD0146'
- use interfaces_28_numeric_noabirule, except_this_one => LD0146
 !End of the abilint section
 
        implicit none 
@@ -1934,7 +1916,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD0170'
- use interfaces_28_numeric_noabirule, except_this_one => LD0170
 !End of the abilint section
 
        implicit none 
@@ -2026,7 +2007,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD0194'
- use interfaces_28_numeric_noabirule, except_this_one => LD0194
 !End of the abilint section
 
        implicit none 
@@ -2121,7 +2101,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD0230'
- use interfaces_28_numeric_noabirule, except_this_one => LD0230
 !End of the abilint section
 
        implicit none 
@@ -2220,7 +2199,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD0266'
- use interfaces_28_numeric_noabirule, except_this_one => LD0266
 !End of the abilint section
 
        implicit none 
@@ -2322,7 +2300,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD0302'
- use interfaces_28_numeric_noabirule, except_this_one => LD0302
 !End of the abilint section
 
        implicit none 
@@ -2428,7 +2405,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD0350'
- use interfaces_28_numeric_noabirule, except_this_one => LD0350
 !End of the abilint section
 
        implicit none 
@@ -2538,7 +2514,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD0434'
- use interfaces_28_numeric_noabirule, except_this_one => LD0434
 !End of the abilint section
 
        implicit none 
@@ -2657,7 +2632,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD0590'
- use interfaces_28_numeric_noabirule, except_this_one => LD0590
 !End of the abilint section
 
        implicit none 
@@ -2791,7 +2765,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD0770'
- use interfaces_28_numeric_noabirule, except_this_one => LD0770
 !End of the abilint section
 
        implicit none 
@@ -2942,7 +2915,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD0974'
- use interfaces_28_numeric_noabirule, except_this_one => LD0974
 !End of the abilint section
 
        implicit none 
@@ -3112,7 +3084,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD1202'
- use interfaces_28_numeric_noabirule, except_this_one => LD1202
 !End of the abilint section
 
        implicit none 
@@ -3303,7 +3274,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD1454'
- use interfaces_28_numeric_noabirule, except_this_one => LD1454
 !End of the abilint section
 
        implicit none 
@@ -3517,7 +3487,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD1730'
- use interfaces_28_numeric_noabirule, except_this_one => LD1730
 !End of the abilint section
 
        implicit none 
@@ -3756,7 +3725,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD2030'
- use interfaces_28_numeric_noabirule, except_this_one => LD2030
 !End of the abilint section
 
        implicit none 
@@ -4022,7 +3990,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD2354'
- use interfaces_28_numeric_noabirule, except_this_one => LD2354
 !End of the abilint section
 
        implicit none 
@@ -4317,7 +4284,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD2702'
- use interfaces_28_numeric_noabirule, except_this_one => LD2702
 !End of the abilint section
 
        implicit none 
@@ -4643,7 +4609,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD3074'
- use interfaces_28_numeric_noabirule, except_this_one => LD3074
 !End of the abilint section
 
        implicit none 
@@ -5002,7 +4967,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD3470'
- use interfaces_28_numeric_noabirule, except_this_one => LD3470
 !End of the abilint section
 
        implicit none 
@@ -5396,7 +5360,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD3890'
- use interfaces_28_numeric_noabirule, except_this_one => LD3890
 !End of the abilint section
 
        implicit none 
@@ -5827,7 +5790,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD4334'
- use interfaces_28_numeric_noabirule, except_this_one => LD4334
 !End of the abilint section
 
        implicit none 
@@ -6297,7 +6259,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD4802'
- use interfaces_28_numeric_noabirule, except_this_one => LD4802
 !End of the abilint section
 
        implicit none 
@@ -6808,7 +6769,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD5294'
- use interfaces_28_numeric_noabirule, except_this_one => LD5294
 !End of the abilint section
 
        implicit none 
@@ -7362,7 +7322,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'LD5810'
- use interfaces_28_numeric_noabirule, except_this_one => LD5810
 !End of the abilint section
 
        implicit none 

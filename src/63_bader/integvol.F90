@@ -54,7 +54,6 @@ subroutine integvol()
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'integvol'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

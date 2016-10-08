@@ -73,6 +73,7 @@ CONTAINS  !===========================================================
 
 pure function clp(x)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -176,6 +177,7 @@ end function factorial
 !! SOURCE
 
 pure function permutations(nn,kk)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -942,6 +944,7 @@ end function abi_derfc
 !! SOURCE
 
 pure function phim(costheta,sintheta,mm)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

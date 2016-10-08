@@ -60,7 +60,6 @@ subroutine integrho(aim_dtset,znucl_batom)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'integrho'
- use interfaces_28_numeric_noabirule
  use interfaces_63_bader, except_this_one => integrho
 !End of the abilint section
 
