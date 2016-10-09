@@ -526,35 +526,35 @@ end subroutine build_lebedev_grid
 
 !----------------------------------------------------------------------
 
-!!****f* m_lebedev/lebedev_quadrature 
-!! NAME
-!!  lebedev_quadrature
-!!
-!! FUNCTION
-!!  Perform the integration of the complex function cplx_func on the sphere
-!!  using lebedev-laikov angular grid in Cartesian coordinates.
-!!  The routine improves the resolution of the grid until the required accuracy is reached
-!!
-!! INPUTS
-!!  cplx_func(external)=Tthe function to be integrated
-!!  int_pars(:)=integer parameter passed to cplx_func.
-!!  real_pars(:)=real parameter passed to cplx_func.
-!!  cplx_pars(:)=complex parameter passed to cplx_func.
-!!  [accuracy]=fractional accuracy required. tol12 if not specified.
-!!
-!! OUTPUT
-!!  quad=The integral 1/(4\pi) \int_\Omega func(\Omega) d\Omega
-!!  ierr=0 if the quadrature converged. 
-!!
-!! NOTES
-!!   commented because it causes problems to the new version of abilint
-!!   Should work 
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
+!!!!****f* m_lebedev/lebedev_quadrature 
+!!!! NAME
+!!!!  lebedev_quadrature
+!!!!
+!!!! FUNCTION
+!!!!  Perform the integration of the complex function cplx_func on the sphere
+!!!!  using lebedev-laikov angular grid in Cartesian coordinates.
+!!!!  The routine improves the resolution of the grid until the required accuracy is reached
+!!!!
+!!!! INPUTS
+!!!!  cplx_func(external)=Tthe function to be integrated
+!!!!  int_pars(:)=integer parameter passed to cplx_func.
+!!!!  real_pars(:)=real parameter passed to cplx_func.
+!!!!  cplx_pars(:)=complex parameter passed to cplx_func.
+!!!!  [accuracy]=fractional accuracy required. tol12 if not specified.
+!!!!
+!!!! OUTPUT
+!!!!  quad=The integral 1/(4\pi) \int_\Omega func(\Omega) d\Omega
+!!!!  ierr=0 if the quadrature converged. 
+!!!!
+!!!! NOTES
+!!!!   commented because it causes problems to the new version of abilint
+!!!!   Should work 
+!!!!
+!!!! PARENTS
+!!!!
+!!!! CHILDREN
+!!!!
+!!!! SOURCE
 
 !!!!    subroutine lebedev_quadrature_cplx(cplx_func,int_pars,real_pars,cplx_pars,quad,ierr,accuracy)
 !!!!    
@@ -628,7 +628,7 @@ end subroutine build_lebedev_grid
 !!!!    !----------------------------------------------------------------------
 
 
-!!****f* ABINIT/gen_oh
+!!****f* m_lebedev/gen_oh
 !! NAME
 !!  gen_oh
 !!
@@ -637,10 +637,6 @@ end subroutine build_lebedev_grid
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! PARENTS
 !!      lebedev_laikov
@@ -1242,10 +1238,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        stop
        end select
  end subroutine gen_oh
+!!***
 
  SUBROUTINE LD0006(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1314,10 +1309,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD0014(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1388,10 +1382,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD0026(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1464,10 +1457,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD0038(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1541,10 +1533,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD0050(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1620,10 +1611,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD0074(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1702,10 +1692,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD0086(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1785,10 +1774,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD0110(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1871,10 +1859,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD0146(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1960,10 +1947,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD0170(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2052,10 +2038,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD0194(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2147,10 +2132,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD0230(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2246,10 +2230,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD0266(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2348,10 +2331,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD0302(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2454,10 +2436,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD0350(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2564,10 +2545,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD0434(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2683,10 +2663,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD0590(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2817,10 +2796,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD0770(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2968,10 +2946,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD0974(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -3138,10 +3115,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD1202(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -3329,10 +3305,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD1454(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -3543,10 +3518,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD1730(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -3782,10 +3756,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD2030(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -4048,10 +4021,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD2354(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -4343,10 +4315,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD2702(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -4669,10 +4640,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD3074(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -5028,10 +4998,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD3470(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -5422,10 +5391,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD3890(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -5853,10 +5821,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD4334(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -6323,10 +6290,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD4802(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -6834,10 +6800,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD5294(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -7388,10 +7353,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        N=N-1
        RETURN
  end subroutine
+!!***
 
  SUBROUTINE LD5810(X,Y,Z,W,N)
-
- use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -7986,7 +7950,7 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-END
+end subroutine
 !!***
 
 END MODULE m_lebedev
