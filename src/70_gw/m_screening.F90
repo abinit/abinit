@@ -2515,7 +2515,7 @@ subroutine lebedev_laikov_int()
  ABI_MALLOC(vz,(npts))
  ABI_MALLOC(ww,(npts))
 
- call LD0026(vx,vy,vz,ww,on)
+ !call LD0026(vx,vy,vz,ww,on)
 
  ang_int=czero
  do ii=1,npts

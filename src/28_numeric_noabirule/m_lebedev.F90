@@ -1241,8 +1241,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        MSG_ERROR('Gen_Oh: Invalid Code')
        stop
        end select
-       end
-       SUBROUTINE LD0006(X,Y,Z,W,N)
+ end subroutine gen_oh
+
+ SUBROUTINE LD0006(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -1312,8 +1313,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 1, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD0014(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD0014(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -1385,8 +1387,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 3, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD0026(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD0026(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -1460,8 +1463,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 3, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD0038(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD0038(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -1536,8 +1540,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 5, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD0050(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD0050(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -1614,8 +1619,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 4, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD0074(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD0074(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -1695,8 +1701,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 5, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD0086(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD0086(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -1777,8 +1784,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 5, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD0110(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD0110(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -1862,8 +1870,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 5, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD0146(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD0146(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -1950,8 +1959,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD0170(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD0170(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -2041,8 +2051,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD0194(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD0194(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -2135,8 +2146,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD0230(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD0230(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -2233,8 +2245,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD0266(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD0266(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -2334,8 +2347,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD0302(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD0302(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -2439,8 +2453,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD0350(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD0350(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -2548,8 +2563,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD0434(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD0434(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -2666,8 +2682,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD0590(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD0590(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -2799,8 +2816,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD0770(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD0770(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -2949,8 +2967,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD0974(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD0974(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -3118,8 +3137,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD1202(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD1202(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -3308,8 +3328,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD1454(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD1454(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -3521,8 +3542,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD1730(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD1730(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -3759,8 +3781,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD2030(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD2030(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -4024,8 +4047,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD2354(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD2354(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -4318,8 +4342,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD2702(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD2702(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -4643,8 +4668,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD3074(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD3074(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -5001,8 +5027,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD3470(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD3470(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -5394,8 +5421,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD3890(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD3890(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -5824,8 +5852,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD4334(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD4334(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -6293,8 +6322,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD4802(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD4802(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -6803,8 +6833,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD5294(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD5294(X,Y,Z,W,N)
 
  use m_profiling_abi
 
@@ -7356,8 +7387,9 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
        RETURN
-       END
-       SUBROUTINE LD5810(X,Y,Z,W,N)
+ end subroutine
+
+ SUBROUTINE LD5810(X,Y,Z,W,N)
 
  use m_profiling_abi
 
