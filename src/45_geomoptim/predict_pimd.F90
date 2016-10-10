@@ -72,10 +72,9 @@
 subroutine predict_pimd(imgmov,itimimage,mpi_enreg,natom,nimage,nimage_tot,&
 &                       ntimimage,pimd_param,prtvolimg,results_img)
 
- use m_profiling_abi
-
  use defs_basis
  use defs_abitypes
+ use m_profiling_abi
  use m_pimd
  use m_xmpi
  use m_results_img
@@ -93,7 +92,7 @@ subroutine predict_pimd(imgmov,itimimage,mpi_enreg,natom,nimage,nimage_tot,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: imgmov,itimimage,natom,nimage,nimage_tot,ntimimage,prtvolimg
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(pimd_type),intent(inout) :: pimd_param
 !arrays
  type(results_img_type) :: results_img(nimage,ntimimage)

@@ -164,7 +164,7 @@ CONTAINS
 !!                  (use mxnimage=max(dtset%nimage))
 !!              1: allocate results_out with a number of images per processor
 !!                  (use mxnimage=max(mpi_enreg%my_nimage))
-!!  mpi_enregs=informations about MPI parallelization
+!!  mpi_enregs=information about MPI parallelization
 !!  mxnimage=-optional- maximal value of nimage over datasets
 !!            if this argument is present, it is used for allocations
 !!            if it is not present, allocations are automatic
@@ -204,7 +204,7 @@ subroutine init_results_out(dtsets,option_alloc,option_size,mpi_enregs,&
 !arrays
  type(dataset_type),intent(in) :: dtsets(:)
  type(results_out_type),intent(inout) :: results_out(:)
- type(MPI_type), intent(inout) :: mpi_enregs(:)
+ type(MPI_type), intent(in) :: mpi_enregs(:)
 !Local variables-------------------------------
 !scalars
  integer :: dtsets_size,idt1,idt2,idt3,ii,jj,kk

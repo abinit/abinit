@@ -20,7 +20,7 @@
 !! INPUTS
 !!  gmet(3,3)=metric tensor for G vecs (in bohr**-2)
 !!  gsqcut=cutoff on (k+G)^2 (bohr^-2) (sphere for density and potential)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
 !!  nspden=number of spin-density components
@@ -73,7 +73,7 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
 !scalars
  integer,intent(in) :: nfft,nspden,option,paral_kgb
  real(dp),intent(in) :: gsqcut,slabwsrad,slabzend,slabzstart
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: gmet(3,3),rprimd(3,3)

@@ -32,7 +32,7 @@
 !!  kptopt=option for the generation of k points
 !!  kptns(3,nkpt)=k points in terms of recip primitive translations
 !!  mband=maximum number of bands
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in unit cell
 !!  nband(nkpt*nsppol)=number of bands
 !!  nfft=(effective) number of FFT grid points (for this processor)
@@ -110,7 +110,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,&
  real(dp),intent(in) :: vxcavg
  character(len=*),intent(in) :: fnameabo_dos,fnameabo_eig
  type(dataset_type),intent(in) :: dtset
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in)  :: ngfft(18)
  real(dp),intent(in) :: acell(3)

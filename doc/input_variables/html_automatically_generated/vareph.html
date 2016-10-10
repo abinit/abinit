@@ -30,6 +30,8 @@ to perform electron-phonon calculations.
  <br>C.
  <a href="#chneut">chneut</a>&nbsp;&nbsp;
  <br>D.
+ <a href="#ddb_ngqpt">ddb_ngqpt</a>&nbsp;&nbsp;
+ <a href="#ddb_shiftq">ddb_shiftq</a>&nbsp;&nbsp;
  <a href="#dipdip">dipdip</a>&nbsp;&nbsp;
  <br>E.
  <a href="#eph_extrael">eph_extrael</a>&nbsp;&nbsp;
@@ -58,6 +60,7 @@ to perform electron-phonon calculations.
  <a href="#ph_qshift">ph_qshift</a>&nbsp;&nbsp;
  <a href="#ph_smear">ph_smear</a>&nbsp;&nbsp;
  <a href="#ph_wstep">ph_wstep</a>&nbsp;&nbsp;
+ <a href="#prtphdos">prtphdos</a>&nbsp;&nbsp;
  <br>Q.
  <br>R.
  <br>S.
@@ -87,6 +90,39 @@ Govern the imposition of the Acoustic Sum Rule (ASR) in phonon calculations. Sam
 <p>
 Set the treatment of the Charge Neutrality requirement for the effective charges.
 Same meaning as the corresponding anaddb variable.
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ddb_ngqpt">ddb_ngqpt</a></font>
+<br><font id="definition">Mnemonics: Derivative DatabBase: Number of Grid points for Q-PoinTs</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer(3)</font>
+<br><font id="default">Default is [0, 0, 0]</font>
+<br><font id="text">
+<p>
+This variable is mandatory when <a href="vargs.html#optdriver">optdriver</a>==7.
+It defines the number of divisions in the (homogeneous) q-mesh
+used to generate the DDB file. See also the description of the <a href="varfil.html#getddb">getddb</a> input variable.
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="ddb_shiftq">ddb_shiftq</a></font>
+<br><font id="definition">Mnemonics: Derivative DatabBase: SHIFT of the Q-points </font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: real(3)</font>
+<br><font id="default">Default is [0.0, 0.0, 0.0]</font>
+<br><font id="text">
+<p>
+Only relevant when <a href="vargs.html#optdriver">optdriver</a>==7.
+It defines the shift in the q-mesh used to generate the DDB file,
+which is defined by the <a href="vareph.html#ddb_ngqpt">ddb_ngqpt</a> input variable.
+See <a href="varbas.html#shiftk">shiftk</a> for more information on the definition.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -360,6 +396,23 @@ DOS and the Eliashberg function. See also <a href="vareph.html#ph_intmeth">ph_in
 <p>
 The step used to generate the (linear) frequency mesh for the phonon DOS and the Eliashberg function.
 The extrema of the mesh are automatically computed by the code.
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtphdos">prtphdos</a></font>
+<br><font id="definition">Mnemonics: PRinT the PHonon Density Of States</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+<p>
+Print the phonon density of states.
+It is activated by default when <a href="vargs.html#optdriver">optdriver</a>==7.
+</p>
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
