@@ -55,7 +55,7 @@ module m_libxml
      use iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT
      integer(C_INT) :: natom,ntypat,nrpt,nph1l
      integer(C_INT) :: typat(natom)
-     integer(C_INT) :: cell(nrpt,3)
+     integer(C_INT) :: cell(3,nrpt)
      real(C_DOUBLE) :: energy
      real(C_DOUBLE) :: dynmat(2,3,natom,3,natom,nph1l)
      real(C_DOUBLE) :: internal_strain(6,natom,3)

@@ -166,7 +166,6 @@ implicit none
 !Arguments ------------------------------------
 !scalars
 type(scfcv_t),intent(inout) :: scfcv_args
-!type(MPI_type),intent(inout) :: mpi_enreg
 type(datafiles_type),intent(inout),target :: dtfil
 !type(dataset_type),intent(inout),target :: dtset
 type(electronpositron_type),pointer :: electronpositron
@@ -617,7 +616,7 @@ real(dp) :: rmet(3,3)
 &                                             scfcv_args%results_gs%etotal,&
 &                                             scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
 &                                             scfcv_args%results_gs%strten,ab_mover%natom,rprimd,&
-&                                             xcart,comm)
+&                                             xcart,scfcv_args%mpi_enreg)
          end if
 #if defined HAVE_LOTF
        end if

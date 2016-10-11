@@ -28,6 +28,7 @@ sources = [
  "initmpi_img.F90",
  "initmpi_pert.F90",
  "initmpi_seq.F90",
+ "initmpi_supercell.F90",
  "initmpi_world.F90",
  "m_io_redirect.F90",
  "m_mpinfo.F90",

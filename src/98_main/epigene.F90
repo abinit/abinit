@@ -49,9 +49,9 @@ program epigene
  use m_effective_potential_file
  use m_libxml
 
- use m_io_tools,       only : get_unit, flush_unit
- use m_fstrings,       only : int2char4
- use m_time ,          only : asctime
+ use m_io_tools,   only : get_unit, flush_unit
+ use m_fstrings,   only : int2char4
+ use m_time ,      only : asctime
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

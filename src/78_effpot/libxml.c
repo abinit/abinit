@@ -145,7 +145,7 @@ void libxml_getDimsEffPot(char *filename,int *natom,int *ntypat, int *nph1l, int
 
 void libxml_readEffPot(char *filename,int *natom,int *ntypat,int *nrpt,int *nph1l,
                        double amu[*ntypat],double atmfrc[*nrpt][*natom][3][*natom][3][2],
-                       int cell[3][*nrpt],double dynmat[*nph1l][*natom][3][*natom][3][2],
+                       int cell[*nrpt][3],double dynmat[*nph1l][*natom][3][*natom][3][2],
                        double elastic_constants[6][6],
                        double *energy,double epsilon_inf[3][3],
                        double ewald_atmfrc[*nrpt][*natom][3][*natom][3][2],
@@ -345,7 +345,7 @@ void libxml_readEffPot(char *filename,int *natom,int *ntypat,int *nrpt,int *nph1
             key = xmlNodeListGetString(doc, cur2->xmlChildrenNode, 1);
             pch = strtok(key,"\t \n");
             for(i=0;i<3;i++){
-              cell[i][irpt]=atoi(pch);
+              cell[irpt][i]=atoi(pch);
               pch = strtok(NULL,"\t \n");
             }
           }

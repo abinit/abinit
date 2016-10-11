@@ -26,9 +26,10 @@
 module m_effective_potential
 
  use defs_basis
+ use defs_datatypes
+ use defs_abitypes
  use m_errors
  use m_profiling_abi
- use m_xmpi
  use m_strain
  use m_ifc
  use m_io_tools, only : open_file
@@ -37,6 +38,7 @@ module m_effective_potential
  use m_ddb
  use m_anharmonics_terms
  use m_harmonics_terms
+ use m_xmpi,           only : xmpi_sum_master,xmpi_allgather,xmpi_allgatherv
  use m_copy,           only : alloc_copy
  use m_crystal,        only : crystal_t, crystal_init, crystal_free, crystal_t,crystal_print
  use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
@@ -307,7 +309,6 @@ end if
  ABI_ALLOCATE(eff_pot%znucl,(crystal%ntypat))
  eff_pot%znucl = crystal%znucl
 
-
 !4-Fill harmonic part
  call harmonics_terms_init(eff_pot%harmonics_terms,ifcs,crystal%natom,&
 &                  ifcs%nrpt,epsilon_inf=epsilon_inf,&
@@ -531,19 +532,24 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 !scalar
  integer,parameter :: master=0
  integer :: first_coordinate
- integer :: ia,i1,i2,i3,ierr,irpt,irpt2,irpt_ref,min1,min2,min3
+ integer :: ia,i1,i2,i3,ii,ierr,irpt,irpt2,irpt_ref,min1,min2,min3
  integer :: min1_cell,min2_cell,min3_cell,max1_cell,max2_cell,max3_cell
- integer :: max1,max2,max3,my_rank,nproc,second_coordinate,sumg0
+ integer :: max1,max2,max3,my_rank,ncell,nproc,second_coordinate,size,sumg0
+ integer :: my_nrpt,nrpt_alone
  real(dp) :: ucvol
  character(len=500) :: message
  logical :: iam_master=.FALSE.
 !array
+ integer,allocatable :: my_index_rpt(:,:)
+ integer,allocatable :: bufsize(:),bufdisp(:)
+ integer,allocatable :: my_irpt(:)
  real(dp) :: acell(3)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
- real(dp),allocatable :: dyew(:,:,:,:,:), dyewq0(:,:,:,:,:)
+ real(dp),allocatable :: buff_ewald(:,:,:,:,:,:),dyew(:,:,:,:,:), dyewq0(:,:,:,:,:)
  real(dp),allocatable :: xred(:,:),xred_tmp(:,:),zeff_tmp(:,:,:)
  type(supercell_type) :: super_cell
  type(ifc_type) :: ifc_tmp
+
 ! *************************************************************************
 
 !MPI variables
@@ -568,18 +574,20 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 &   eff_pot%xcart,&
 &   super_cell)
 
+ ncell = product(n_cell(:))
+ 
 !1-Store the information of the supercell of the reference structure into effective potential
  call copy_supercell(super_cell,eff_pot%supercell)
 
 !2 Check if the bound of new cell correspond to the effective potential 
 !only for option=zero
 !set min and max
- min1 = minval(eff_pot%harmonics_terms%ifcs%cell(:,1)) 
- min2 = minval(eff_pot%harmonics_terms%ifcs%cell(:,2)) 
- min3 = minval(eff_pot%harmonics_terms%ifcs%cell(:,3)) 
- max1 = maxval(eff_pot%harmonics_terms%ifcs%cell(:,1))
- max2 = maxval(eff_pot%harmonics_terms%ifcs%cell(:,2))
- max3 = maxval(eff_pot%harmonics_terms%ifcs%cell(:,3))
+ min1 = minval(eff_pot%harmonics_terms%ifcs%cell(1,:)) 
+ min2 = minval(eff_pot%harmonics_terms%ifcs%cell(2,:)) 
+ min3 = minval(eff_pot%harmonics_terms%ifcs%cell(3,:)) 
+ max1 = maxval(eff_pot%harmonics_terms%ifcs%cell(1,:))
+ max2 = maxval(eff_pot%harmonics_terms%ifcs%cell(2,:))
+ max3 = maxval(eff_pot%harmonics_terms%ifcs%cell(3,:))
 
  if(option==0) then
    if(((max1-min1+1)/=n_cell(1).and.&
@@ -606,6 +614,9 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    
    irpt_ref = 0
    irpt     = 0
+   min1_cell = zero; max1_cell = zero
+   min2_cell = zero; max2_cell = zero
+   min3_cell = zero; max3_cell = zero
 
    call find_bound(min1_cell,max1_cell,n_cell(1))
    call find_bound(min2_cell,max2_cell,n_cell(2))
@@ -634,7 +645,6 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
        if (abs(max1) < abs(max1_cell)) max1 = max1_cell
        if (abs(max2) < abs(max2_cell)) max2 = max2_cell
        if (abs(max3) < abs(max3_cell)) max3 = max3_cell
-
 !      If the cell is smaller, we redifine new cell to take into acount all atoms
        call destroy_supercell(super_cell)
        call init_supercell(eff_pot%natom, 0,real((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),&
@@ -648,7 +658,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 !  Print the new boundary
    write(message,'(5a,2I3,a,2I3,a,2I3,4a)') ch10,' New bound for ifc (long+short):',&
 &    ch10,ch10, " x=[",min1,max1,"], y=[",min2,max2,"] and z=[",min3,max3,"]",ch10,ch10,&
-&    " Computation of new dipole-dipole interaction, should be parallelized :'(."
+&    " Computation of new dipole-dipole interaction."
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
@@ -661,17 +671,64 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
        end do
      end do
    end do
+
    ifc_tmp%nrpt = irpt
+   ABI_ALLOCATE(ifc_tmp%cell,(3,ifc_tmp%nrpt))
+   ifc_tmp%cell(:,:) = zero
+
+!  Set MPI here and not at the begining because the number of cell is adjust just before
+!  Here we store in my_irpt a list with the number of each cell to be treat by this CPU
+!  Determine the number of cell for each CPU
+   ABI_ALLOCATE(bufsize,(nproc))
+   ABI_ALLOCATE(bufdisp,(nproc))
+
+   nrpt_alone = mod(ifc_tmp%nrpt,nproc)
+   my_nrpt = aint(real(ifc_tmp%nrpt,sp)/nproc)  
+   if(my_rank >= (nproc-nrpt_alone)) then
+     my_nrpt = my_nrpt  + 1
+   end if
 
 !  Initialisation of ifc temporary
-   ABI_ALLOCATE(ifc_tmp%cell,(ifc_tmp%nrpt,3))
+   ABI_ALLOCATE(buff_ewald,(2,3,eff_pot%natom,3,eff_pot%natom,my_nrpt))
    ABI_ALLOCATE(ifc_tmp%short_atmfrc,(2,3,eff_pot%natom,3,eff_pot%natom,ifc_tmp%nrpt))
    ABI_ALLOCATE(ifc_tmp%ewald_atmfrc,(2,3,eff_pot%natom,3,eff_pot%natom,ifc_tmp%nrpt))
    ABI_ALLOCATE(ifc_tmp%atmfrc,(2,3,eff_pot%natom,3,eff_pot%natom,ifc_tmp%nrpt))
+   ABI_ALLOCATE(my_irpt,(my_nrpt))
+   ABI_ALLOCATE(my_index_rpt,(3,my_nrpt))
+
+   my_irpt = zero
+   my_index_rpt(:,:) = zero
    ifc_tmp%atmfrc(:,:,:,:,:,:) = zero
    ifc_tmp%short_atmfrc(:,:,:,:,:,:) = zero
    ifc_tmp%ewald_atmfrc(:,:,:,:,:,:) = zero
-   ifc_tmp%cell(:,:) = zero
+   buff_ewald(:,:,:,:,:,:) = zero
+
+!  Allocation of array   
+   do irpt = 1,my_nrpt
+     if(my_rank >= (nproc-nrpt_alone))then
+       my_irpt(irpt)=(aint(real(ifc_tmp%nrpt,sp)/nproc))*(my_rank)+&
+&                       (my_rank - (nproc-nrpt_alone)) + irpt
+     else
+       my_irpt(irpt)=(my_nrpt)*(my_rank) + irpt
+     end if
+   end do
+  
+   irpt = 0
+   ii = 0
+   do i1=min1,max1
+     do i2=min2,max2
+       do i3=min3,max3
+         ii = ii +1
+         ifc_tmp%cell(1,ii) = i1; ifc_tmp%cell(2,ii) = i2; ifc_tmp%cell(3,ii) = i3; 
+         if(any(my_irpt==ii))then
+           irpt=irpt+1
+           my_index_rpt(1,irpt) = i1; 
+           my_index_rpt(2,irpt) = i2; 
+           my_index_rpt(3,irpt) = i3;
+         end if
+       end do
+     end do
+   end do
 
 !  Allocate and initialize some array
    ABI_ALLOCATE(xred_tmp,(3,2*eff_pot%natom))
@@ -693,72 +750,84 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 &                    super_cell%xcart_supercell,xred)
    call metric(gmet,gprimd,-1,rmet,super_cell%rprimd_supercell,ucvol)
 
-   if(iam_master)then ! (should be parallelised in the futur)
+!  Fill the atom position of the first cell (reference cell)
+   first_coordinate  = ((irpt_ref-1)*eff_pot%natom) + 1
+   second_coordinate = first_coordinate + eff_pot%natom-1
+   xred_tmp(:,1:eff_pot%natom) = xred(:,first_coordinate:second_coordinate)
+!  Fill fake zeff array for ewald9
+   zeff_tmp(:,:,1:eff_pot%natom) = eff_pot%harmonics_terms%zeff
+   zeff_tmp(:,:,eff_pot%natom+1:2*eff_pot%natom) = eff_pot%harmonics_terms%zeff
 
-!    Fill the atom position of the first cell (reference cell)
-     first_coordinate  = ((irpt_ref-1)*eff_pot%natom) + 1
-     second_coordinate = first_coordinate + eff_pot%natom-1
-     xred_tmp(:,1:eff_pot%natom) = xred(:,first_coordinate:second_coordinate)
-!    Fill fake zeff array for ewald9
-     zeff_tmp(:,:,1:eff_pot%natom) = eff_pot%harmonics_terms%zeff
-     zeff_tmp(:,:,eff_pot%natom+1:2*eff_pot%natom) = eff_pot%harmonics_terms%zeff
+   do irpt=1,my_nrpt
+     i1=my_index_rpt(1,irpt); i2=my_index_rpt(2,irpt); i3=my_index_rpt(3,irpt)
+!    Compute new dipole-dipole interaction
+     dyew = zero
+     if (i1==0.and.i2==0.and.i3==0) then
+       call ewald9(acell,eff_pot%harmonics_terms%epsilon_inf,dyewq0,&
+&                  gmet,gprimd,eff_pot%natom,real((/0,0,0/),dp),rmet,&
+&                  super_cell%rprimd_supercell,sumg0,ucvol,xred_tmp(:,1:eff_pot%natom),&
+&                  eff_pot%harmonics_terms%zeff)
+       buff_ewald(:,:,:,:,:,irpt) = dyewq0 + tol10
+     else
+       first_coordinate  = ((my_irpt(irpt)-1)*eff_pot%natom) + 1
+       second_coordinate = first_coordinate + eff_pot%natom  - 1
+       xred_tmp(:,eff_pot%natom+1:2*eff_pot%natom)=&
+&              xred(:,first_coordinate:second_coordinate)
+       call ewald9(acell,eff_pot%harmonics_terms%epsilon_inf,dyew,gmet,gprimd,&
+&                  int(2*eff_pot%natom),real((/0,0,0/),dp),&
+&                  rmet,super_cell%rprimd_supercell,&
+&                  sumg0,ucvol,xred_tmp,zeff_tmp)
+       buff_ewald(:,:,:,:,:,irpt) = &
+&           dyew(:,:,1:eff_pot%natom,:,eff_pot%natom+1:2*eff_pot%natom) + tol10
+     end if
+   end do
 
-     irpt=0
-     do i1=min1,max1
-       do i2=min2,max2
-         do i3=min3,max3
-           irpt = irpt+1
-!          Fill the index of the cell
-           ifc_tmp%cell(irpt,1)=i1; ifc_tmp%cell(irpt,2)=i2; ifc_tmp%cell(irpt,3)=i3
+!  Set the bufsize for mpi allgather
+   do ii = 1,nproc
+     bufsize(ii) = aint(real(ifc_tmp%nrpt,sp)/nproc)*2*3*eff_pot%natom*3*eff_pot%natom
+     if(ii > (nproc-nrpt_alone)) then
+       bufsize(ii) = bufsize(ii) + 2*3*eff_pot%natom*3*eff_pot%natom
+     end if
+   end do
 
-!          Compute new dipole-dipole interaction
-           dyew = zero
-           if (i1==0.and.i2==0.and.i3==0) then
-             call ewald9(acell,eff_pot%harmonics_terms%epsilon_inf,dyewq0,&
-&                        gmet,gprimd,eff_pot%natom,real((/0,0,0/),dp),rmet,&
-&                        super_cell%rprimd_supercell,sumg0,ucvol,xred_tmp(:,1:eff_pot%natom),&
-&                        eff_pot%harmonics_terms%zeff)
-             ifc_tmp%ewald_atmfrc(:,:,:,:,:,irpt) = dyewq0 + tol10
-           else
-             first_coordinate  = ((irpt-1)*eff_pot%natom) + 1
-             second_coordinate = first_coordinate + eff_pot%natom-1
-             xred_tmp(:,eff_pot%natom+1:2*eff_pot%natom)=&
-&                xred(:,first_coordinate:second_coordinate)
-             call ewald9(acell,eff_pot%harmonics_terms%epsilon_inf,dyew,gmet,gprimd,&
-&                      int(2*eff_pot%natom),real((/0,0,0/),dp),&
-&                      rmet,super_cell%rprimd_supercell,&
-&                      sumg0,ucvol,xred_tmp,zeff_tmp)
-             ifc_tmp%ewald_atmfrc(:,:,:,:,:,irpt) = &
-&              dyew(:,:,1:eff_pot%natom,:,eff_pot%natom+1:2*eff_pot%natom) + tol10
-           end if
-         end do
-       end do
+   bufdisp(1) = 0
+   do ii = 2,nproc
+     bufdisp(ii) = bufdisp(ii-1) + bufsize(ii-1) 
+   end do
+
+   size = 2*3*eff_pot%natom*3*eff_pot%natom*my_nrpt
+   call xmpi_allgatherv(buff_ewald,size,ifc_tmp%ewald_atmfrc,bufsize,bufdisp, comm, ierr)
+
+   ABI_DEALLOCATE(bufsize)
+   ABI_DEALLOCATE(bufdisp)
+   ABI_DEALLOCATE(buff_ewald)
+
+!  Fill the short range part (calculated previously) only master
+   do irpt=1,ifc_tmp%nrpt
+     do irpt2=1,eff_pot%harmonics_terms%ifcs%nrpt
+       if(eff_pot%harmonics_terms%ifcs%cell(1,irpt2)==ifc_tmp%cell(1,irpt).and.&
+&         eff_pot%harmonics_terms%ifcs%cell(2,irpt2)==ifc_tmp%cell(2,irpt).and.&
+&         eff_pot%harmonics_terms%ifcs%cell(3,irpt2)==ifc_tmp%cell(3,irpt).and.&
+&         any(eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2) > tol9)) then
+         ifc_tmp%short_atmfrc(:,:,:,:,:,irpt) = &
+&                             eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2)
+       end if
      end do
-
-!    Fill the short range part (calculated previously) only master
-     do irpt=1,ifc_tmp%nrpt
-       do irpt2=1,eff_pot%harmonics_terms%ifcs%nrpt
-         if(eff_pot%harmonics_terms%ifcs%cell(irpt2,1)==ifc_tmp%cell(irpt,1).and.&
-&           eff_pot%harmonics_terms%ifcs%cell(irpt2,2)==ifc_tmp%cell(irpt,2).and.&
-&           eff_pot%harmonics_terms%ifcs%cell(irpt2,3)==ifc_tmp%cell(irpt,3).and.&
-&           any(eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2) > tol9)) then
-           ifc_tmp%short_atmfrc(:,:,:,:,:,irpt) = &
-&                               eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2)
-         end if
-       end do
-     end do
-
-!    Compute total ifc
-     ifc_tmp%atmfrc = ifc_tmp%short_atmfrc + ifc_tmp%ewald_atmfrc
-
-   end if ! End if master (should be parallelised in the futur)
+   end do
+    
+!  Compute total ifc
+   ifc_tmp%atmfrc = ifc_tmp%short_atmfrc + ifc_tmp%ewald_atmfrc
 
 !  DEALLOCATION OF ARRAYS
+   ABI_DEALLOCATE(my_index_rpt)
+   ABI_DEALLOCATE(my_irpt)
    ABI_DEALLOCATE(xred_tmp)
    ABI_DEALLOCATE(xred)
    ABI_DEALLOCATE(zeff_tmp)
    ABI_DEALLOCATE(dyew)
    ABI_DEALLOCATE(dyewq0)
+
+
 
 !  Broadcast ifc
    call xmpi_bcast (ifc_tmp%atmfrc,       master, comm, ierr)
@@ -851,15 +920,21 @@ subroutine effective_potential_applySumRule(asr,ifc,natom,option)
  real(dp),pointer :: atmfrc(:,:,:,:,:,:)
 ! *************************************************************************
 
+ irpt_ref = 0 
 ! Found the cell of reference
  do irpt = 1,ifc%nrpt   
-   if(ifc%cell(irpt,1)==0.and.&
-&     ifc%cell(irpt,2)==0.and.&
-&     ifc%cell(irpt,3)==0) then
+   if(ifc%cell(1,irpt)==0.and.&
+&     ifc%cell(2,irpt)==0.and.&
+&     ifc%cell(3,irpt)==0) then
      irpt_ref = irpt
      cycle
    end if
  end do
+
+ if (irpt_ref<=0) then
+   write(message,'(a,a)')' Unable to find the cell of reference in IFC'
+   MSG_ERROR(message)
+ end if
 
  if (present(option)) then
    if (option == 1) then
@@ -1507,7 +1582,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
 ! Warning : The IFC are print in other order 1,mu,ia,nu,ib which is not fortran way
 !           We do like that to because the previous script was in python
 !           When you read ifc from XML file with fotran, you have to tranpose the matrix
-! 
+!
    do irpt=1,eff_pot%harmonics_terms%ifcs%nrpt
      if(any(abs(eff_pot%harmonics_terms%ifcs%short_atmfrc(1,:,:,:,:,irpt))>tol9)) then 
        WRITE(unit_xml,'("  <local_force_constant units=""hartree/bohrradius**2"">")')
@@ -1525,7 +1600,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
        end do
        WRITE(unit_xml,'("    </data>")')
        WRITE(unit_xml,'("    <cell>")')
-       WRITE(unit_xml,'(3(I4))') (eff_pot%harmonics_terms%ifcs%cell(irpt,:))
+       WRITE(unit_xml,'(3(I4))') (eff_pot%harmonics_terms%ifcs%cell(:,irpt))
        WRITE(unit_xml,'("    </cell>")')
        WRITE(unit_xml,'("  </local_force_constant>")')
      end if
@@ -1559,7 +1634,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
        end do
        WRITE(unit_xml,'("    </data>")')
        WRITE(unit_xml,'("    <cell>")')
-       WRITE(unit_xml,'(3(I4))') (eff_pot%harmonics_terms%ifcs%cell(irpt,:))
+       WRITE(unit_xml,'(3(I4))') (eff_pot%harmonics_terms%ifcs%cell(:,irpt))
        WRITE(unit_xml,'("    </cell>")')
        WRITE(unit_xml,'("    </total_force_constant>")')
      end if
@@ -1621,7 +1696,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
          end do
          WRITE(unit_xml,'("      </data>")')
          WRITE(unit_xml,'("      <cell>")')
-         WRITE(unit_xml,'(3(I4))') (eff_pot%anharmonics_terms%phonon_strain(ii)%cell(irpt,:))
+         WRITE(unit_xml,'(3(I4))') (eff_pot%anharmonics_terms%phonon_strain(ii)%cell(:,irpt))
          WRITE(unit_xml,'("      </cell>")')
          WRITE(unit_xml,'("    </correction_force_constant>")')
        end do
@@ -2097,7 +2172,8 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,c
 !Local variables-------------------------------
 !scalar
   integer,parameter :: master=0
-  integer :: ii,my_rank,nproc
+  integer :: i1,i2,i3,icell,ierr,ii,irpt,my_rank,nproc,ncell,ncell_alone,my_ncell
+  integer,allocatable :: my_cell(:),my_index_cells(:,:)
   logical :: iam_master=.FALSE.
 !array
   real(dp):: disp_tmp1(3,natom),dummy
@@ -2106,19 +2182,14 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,c
 
 ! *************************************************************************
 
-!MPI variables
-  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
-  iam_master = (my_rank == master)
-
-  fred = zero
-  fcart = zero
-
+! Do some checks
   if (natom /= eff_pot%supercell%natom_supercell) then
     write(msg,'(a,I7,a,I7,a)')' The number of atoms is not correct :',natom,&
 &   ' in argument istead of ',eff_pot%supercell%natom_supercell, ' in supercell'
     MSG_ERROR(msg)
   end if
   
+! Set the number of cell in the supercell
   cell_number(:) = int(eff_pot%supercell%qphon(:))
 
   if (any(cell_number <= 0)) then
@@ -2126,7 +2197,46 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,c
     MSG_ERROR(msg)
   end if
 
+!MPI variables
+  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+  iam_master = (my_rank == master)
+! Here we store in my_cell a list with the number of each cell to be treat by this CPU
+  ncell = product(eff_pot%supercell%qphon)
+  ncell_alone = mod(ncell,nproc)
+  my_ncell = aint(real(ncell,sp)/nproc) 
+  if(my_rank >= (nproc-ncell_alone)) then
+    my_ncell = my_ncell  + 1
+  end if
+  ABI_ALLOCATE(my_cell,(my_ncell))
+  my_cell = zero
+  do irpt = 1,my_ncell
+    if(my_rank >= (nproc-ncell_alone))then
+      my_cell(irpt) = (aint(real(ncell,sp)/nproc))*(my_rank)+ (my_rank - (nproc-ncell_alone)) + irpt
+    else
+      my_cell(irpt) = (my_ncell)*(my_rank)  + irpt
+    end if
+  end do
+
+  icell = 0
+  ii = 0
+  do i1 = 1,cell_number(1)
+    do i2 = 1,cell_number(2)
+      do i3 = 1,cell_number(3)
+        ii = ii +1
+        if(any(my_cell==ii))then
+          icell=icell+1
+          my_index_cells(icell,1) = i1; my_index_cells(icell,2) = i2; my_index_cells(icell,3) = i3;
+        end if
+      end do
+    end do
+  end do
+
+! Set to zero 
+  fred = zero
+  fcart = zero
+
   disp_tmp1(:,:) = zero
+! Try to compute the displacement
   if (present(displacement)) then
     disp_tmp1(:,:) = displacement(:,:)
   else
@@ -2136,8 +2246,15 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,c
   end if
 
 ! ifc contribution of the forces
-  call ifc_contribution(eff_pot,disp_tmp1,dummy,fcart)
+  call ifc_contribution(eff_pot,disp_tmp1,dummy,fcart,my_cell,my_ncell,my_index_cells)
+! MPI_SUM
+  call xmpi_sum(fcart, comm, ierr)
 
+! Redistribute the residuale of the forces
+  call effective_potential_distributeResidualForces(eff_pot,fcart,eff_pot%supercell%natom_supercell)
+
+! convert forces into reduced coordinates and multiply by -1
+  fcart = -1 * fcart
   call fcart2fred(fcart,fred,rprimd,natom)
 
 end subroutine effective_potential_getForces
@@ -2169,7 +2286,8 @@ end subroutine effective_potential_getForces
 !! SOURCE
  
 subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
-&                                              xcart,comm,displacement,strain1,strain2,external_stress)
+&                                       xcart,mpi_enreg,displacement,strain1,&
+&                                       strain2,external_stress)
 
   use m_strain
 
@@ -2185,9 +2303,9 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 
 !Arguments ------------------------------------
 !scalars
-  integer, intent(in) :: comm
   integer, intent(in) :: natom
 !array
+  type(MPI_type),intent(in) :: mpi_enreg
   type(effective_potential_type),intent(in) :: eff_pot
   real(dp),intent(in) :: rprimd(3,3),xcart(3,natom)
   real(dp),intent(in),optional :: strain1(6),strain2(6)
@@ -2199,11 +2317,11 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   real(dp),intent(out) :: strten(6)
 !Local variables-------------------------------
 !scalar
-  integer :: ii,ncell
+  integer :: ii,ierr,ncell
   real(dp):: energy_part,ucvol
   character(len=500) :: message
   logical :: has_strain = .FALSE.
-  integer :: nproc,my_rank
+
   logical :: iam_master
   integer, parameter:: master = 0
 !array
@@ -2217,9 +2335,12 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 
 ! *************************************************************************
 
-!MPI variables
- nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
- iam_master = (my_rank == master)
+! Set MPI local varibaless
+  iam_master = (mpi_enreg%me == master)
+
+! Set variables
+  supercell(1:3) = eff_pot%supercell%qphon(1:3)
+  ncell          = product(eff_pot%supercell%qphon)
 
 !Check some variables
   if (natom /= eff_pot%supercell%natom_supercell) then
@@ -2253,8 +2374,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 
   call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
-  supercell(1:3) = eff_pot%supercell%qphon(1:3)
-  ncell          = product(eff_pot%supercell%qphon)
   fcart          = zero
   energy         = zero
   strten         = zero
@@ -2284,21 +2403,27 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     end do
   end if
 
-  call ifc_contribution(eff_pot,disp_tmp1,energy_part,fcart_part)
+  call ifc_contribution(eff_pot,disp_tmp1,energy_part,fcart_part,&
+&                       mpi_enreg%my_cells,mpi_enreg%my_ncell,mpi_enreg%my_index_cells)
+
+! MPI_SUM
+  call xmpi_sum(energy_part, mpi_enreg%comm_cell, ierr)
+  call xmpi_sum(fcart_part , mpi_enreg%comm_cell, ierr)
 
   write(message, '(a,1ES24.16,a)' ) ' Energy of the ifc part :',energy_part,' Hartree'
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
 
   if(energy_part < zero)then
-    write(message, '(a)' )&
-&        'The harmonic part is negative, the structure is not stable.'
-       MSG_WARNING(message)
+    write(message, '(6a)' )ch10,&
+&        ' --- !WARNING!',ch10,&
+&        '        The harmonic part is negative, the structure is not stable.',ch10,&
+&        ' ---'
+    call wrtout(std_out,message,"COLL")
   end if
 
   energy = energy + energy_part
   fcart  = fcart  + fcart_part
-
 
 !------------------------------------
 ! 3 - Computation of the elastic part of the energy :
@@ -2359,7 +2484,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 
   energy = energy + energy_part
   fcart  = fcart  + fcart_part
-
+   
 !------------------------------------
 ! 4 - Treat 3rd order:
 !------------------------------------
@@ -2378,6 +2503,9 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   strten = strten / ucvol
 
 ! convert forces into reduced coordinates and multiply by -1
+! Redistribute the residuale of the forces
+  call effective_potential_distributeResidualForces(eff_pot,fcart,eff_pot%supercell%natom_supercell)
+
   fcart = -1 * fcart
   call fcart2fred(fcart,fred,rprimd,natom)
 
@@ -2433,7 +2561,7 @@ subroutine elastic_contribution(eff_pot,disp,energy,forces,ncell,strten,strain1,
  real(dp),intent(in) :: strain1(6),strain2(6)
  real(dp),optional,intent(in) :: external_stress(6)
 
-!Local variables-------------------------------
+ !Local variables-------------------------------
 ! scalar
  integer :: ia,ii,jj,mu
 ! array
@@ -2447,7 +2575,6 @@ subroutine elastic_contribution(eff_pot,disp,energy,forces,ncell,strten,strain1,
 !1- Part due to elastic constants
  energy = ncell * half * dot_product(matmul(strain1,eff_pot%harmonics_terms%elastic_constants),strain2) 
  strten = ncell * matmul(eff_pot%harmonics_terms%elastic_constants(:,:),strain1(:)) 
-
 
 !2-Part due to the internat strain
  ii = 1
@@ -2467,10 +2594,10 @@ subroutine elastic_contribution(eff_pot,disp,energy,forces,ncell,strten,strain1,
  end do
 
 !2- Part due to extenal stress
-!  if(present(external_stress)) then
-!    energy = energy - dot_product(external_stress, strain1)
-!    strten(:) = strten(:) - external_stress(:)
-!  end if
+  if(present(external_stress)) then
+    energy = energy - dot_product(external_stress, strain1)
+    strten(:) = strten(:) - external_stress(:)
+  end if
 
 
 end subroutine  elastic_contribution
@@ -2492,7 +2619,7 @@ end subroutine  elastic_contribution
 !!
 !! SOURCE
 
-subroutine ifc_contribution(eff_pot,disp,energy,fcart)
+subroutine ifc_contribution(eff_pot,disp,energy,fcart,cells,ncell,index_cells)
 
 !Arguments ------------------------------------
 ! scalar
@@ -2504,13 +2631,15 @@ subroutine ifc_contribution(eff_pot,disp,energy,fcart)
 !End of the abilint section
 
   real(dp),intent(out) :: energy
+  integer,intent(in) :: ncell
 ! array
+  integer,intent(in) ::   cells(ncell),index_cells(ncell,3)
   type(effective_potential_type), intent(in) :: eff_pot
   real(dp),intent(in) :: disp(3,eff_pot%supercell%natom_supercell)
   real(dp),intent(out) :: fcart(3,eff_pot%supercell%natom_supercell)
 !Local variables-------------------------------
 ! scalar
-  integer :: i1,i2,i3,ia,ib,ii,irpt,ll
+  integer :: i1,i2,i3,ia,ib,icell,ii,irpt,ll
 ! array
   real(dp) :: tmp(3)
   integer :: cell_number(3)
@@ -2520,57 +2649,52 @@ subroutine ifc_contribution(eff_pot,disp,energy,fcart)
 ! *************************************************************************
 
   cell_number(:) = int(eff_pot%supercell%qphon(:))
-
   if (any(cell_number <= 0)) then
     write(msg,'(a,a)')' No supercell found for getEnergy'
     MSG_ERROR(msg)
   end if
 
+! Initialisation of variables
   energy   = zero
   fcart(:,:) = zero
-
   ii = 1
-  do i1 = 1,cell_number(1)
-    do i2 = 1,cell_number(2)
-      do i3 = 1,cell_number(3)
-!       get the cell of atom 1 (0 0 0, 0 0 1...)
-        cell_atom1 = eff_pot%supercell%uc_indexing_supercell(:,ii)
-        call index_periodic(cell_atom1(1),cell_number(1))
-        call index_periodic(cell_atom1(2),cell_number(2))
-        call index_periodic(cell_atom1(3),cell_number(3))
-        do ia = 1, eff_pot%natom
-!         index of the first atom in the displacement array
-            tmp = zero
-            do irpt = 1,eff_pot%harmonics_terms%ifcs%nrpt
-!           get the cell of atom2  (0 0 0, 0 0 1...)              
-              cell_atom2(1) =  (i1-1) + eff_pot%harmonics_terms%ifcs%cell(irpt,1)
-              call index_periodic(cell_atom2(1),cell_number(1))
-              cell_atom2(2) =  (i2-1) + eff_pot%harmonics_terms%ifcs%cell(irpt,2)
-              call index_periodic(cell_atom2(2),cell_number(2))
-              cell_atom2(3) =  (i3-1) + eff_pot%harmonics_terms%ifcs%cell(irpt,3)
-              call index_periodic(cell_atom2(3),cell_number(3))
-              do ib = 1, eff_pot%natom
-!             index of the second atom in the displacement array              
-                ll = cell_atom2(1)*cell_number(2)*cell_number(3)*eff_pot%natom+&
-&                    cell_atom2(2)*cell_number(3)*eff_pot%natom+&
-&                    cell_atom2(3)*eff_pot%natom+&
-&                    ib
-                tmp = tmp + matmul(eff_pot%harmonics_terms%ifcs%atmfrc(1,:,ia,:,ib,irpt),disp(:,ll))
-              end do
-            end do
-!         accumule energy
-          energy = energy + half * dot_product(tmp,disp(:,ii))
-!         acumule forces
-          fcart(:,ii) =  fcart(:,ii)  +   tmp(:)
+  icell = 0
 
-          ii = ii + 1
+  do icell = 1,ncell
+    ii = (cells(icell)-1)*eff_pot%natom + 1
+    i1=index_cells(icell,1); i2=index_cells(icell,2); i3=index_cells(icell,3)
+!  get the cell of atom 1 (0 0 0, 0 0 1...)
+    cell_atom1 = eff_pot%supercell%uc_indexing_supercell(:,ii)
+    call index_periodic(cell_atom1(1),cell_number(1))
+    call index_periodic(cell_atom1(2),cell_number(2))
+    call index_periodic(cell_atom1(3),cell_number(3))
+    do ia = 1, eff_pot%natom
+!   index of the first atom in the displacement array
+      tmp = zero
+      do irpt = 1,eff_pot%harmonics_terms%ifcs%nrpt
+!     get the cell of atom2  (0 0 0, 0 0 1...)              
+        cell_atom2(1) =  (i1-1) + eff_pot%harmonics_terms%ifcs%cell(1,irpt)
+        call index_periodic(cell_atom2(1),cell_number(1))
+        cell_atom2(2) =  (i2-1) + eff_pot%harmonics_terms%ifcs%cell(2,irpt)
+        call index_periodic(cell_atom2(2),cell_number(2))
+        cell_atom2(3) =  (i3-1) + eff_pot%harmonics_terms%ifcs%cell(3,irpt)
+        call index_periodic(cell_atom2(3),cell_number(3))
+        do ib = 1, eff_pot%natom
+!       index of the second atom in the displacement array              
+          ll = cell_atom2(1)*cell_number(2)*cell_number(3)*eff_pot%natom+&
+&              cell_atom2(2)*cell_number(3)*eff_pot%natom+&
+&              cell_atom2(3)*eff_pot%natom+&
+&              ib
+          tmp = tmp + matmul(eff_pot%harmonics_terms%ifcs%atmfrc(1,:,ia,:,ib,irpt),disp(:,ll))
         end do
       end do
+!     accumule energy
+      energy = energy + half * dot_product(tmp,disp(:,ii))
+!     acumule forces
+      fcart(:,ii) =  fcart(:,ii)  +   tmp(:)
+      ii = ii + 1
     end do
   end do
-
-! Redistribute the residuale of the forces
-  call effective_potential_distributeResidualForces(eff_pot,fcart,eff_pot%supercell%natom_supercell)
 
 end subroutine ifc_contribution
 !!***
@@ -2776,7 +2900,6 @@ subroutine find_bound(min,max,n_cell)
   integer, intent(inout) :: min,max 
   integer, intent(in) :: n_cell 
 !Local variables ---------------------------------------
-
   if(abs(max)>abs(min)) then
     max=(n_cell)/2; min=-max; if(mod(n_cell,2)==0) min= min + 1
   else

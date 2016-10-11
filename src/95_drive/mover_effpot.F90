@@ -42,8 +42,8 @@ subroutine mover_effpot(inp,filnam,effective_potential,comm)
  use defs_basis
  use defs_abitypes
  use m_profiling_abi
- use m_errors
  use defs_datatypes
+ use m_errors
  use m_abimover
  use m_build_info
  use m_xmpi
@@ -57,6 +57,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,comm)
  use m_phonon_supercell
  use m_ifc
  use m_ewald
+ use m_mpinfo,           only : init_mpi_enreg,destroy_mpi_enreg
  use m_copy            , only : alloc_copy 
  use m_electronpositron, only : electronpositron_type
  use m_scfcv,            only : scfcv_t, scfcv_run,scfcv_destroy
@@ -68,6 +69,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,comm)
 #define ABI_FUNC 'mover_effpot'
  use interfaces_14_hidewrite
  use interfaces_41_geometry
+ use interfaces_51_manage_mpi
  use interfaces_95_drive, except_this_one => mover_effpot
 !End of the abilint section
 
@@ -99,11 +101,11 @@ implicit none
  type(strain_type) :: strain
 !arrays
 !no_abirules
+ integer,pointer :: indsym(:,:,:)
+ integer,allocatable :: symrel(:,:,:)
  real(dp) :: acell(3)
  real(dp),allocatable :: amass(:) 
  real(dp),pointer :: rhog(:,:),rhor(:,:)
- integer,pointer :: indsym(:,:,:)
- integer,allocatable :: symrel(:,:,:)
  real(dp),allocatable :: tnons(:,:)
  real(dp),allocatable :: xred(:,:),xred_old(:,:),xcart(:,:)
  real(dp),allocatable :: fred(:,:),fcart(:,:)
@@ -194,7 +196,9 @@ implicit none
 !***************************************************************
 
 !Set mpi_eng
-   mpi_enreg%comm_cell = comm
+   call init_mpi_enreg(mpi_enreg)
+   call initmpi_supercell(int(super_cell%qphon(1:3)),mpi_enreg)
+   mpi_enreg%comm_cell  = comm
 
 !Set the fake abinit dataset 
 !Scalar
@@ -218,8 +222,9 @@ implicit none
    dtset%nnos = 5       ! Number of nose masses Characteristic
    dtset%ntime = inp%ntime  ! Number of TIME steps 
    dtset%nsym = 1       ! Number of SYMmetry operations
+   dtset%prtxml = 0     ! print the xml
    dtset%optcell = 0    ! OPTimize the CELL shape and dimensions Characteristic
-   dtset%restartxf = 0  ! RESTART from (X,F) history
+   dtset%restartxf = -1  ! RESTART from (X,F) history
    dtset%signperm = 1   ! SIGN of PERMutation potential      
    dtset%strprecon = 1  ! STRess PRECONditioner
    dtset%tolmxf = 2.0d-5
@@ -230,12 +235,15 @@ implicit none
 
 !array
    ABI_ALLOCATE(dtset%iatfix,(3,dtset%natom)) ! Indices of AToms that are FIXed
+!   ABI_ALLOCATE(dtset%iatfix,(3,1)) ! Indices of AToms that are FIXed
    dtset%iatfix = zero
    dtset%goprecprm(:) = zero !Geometry Optimization PREconditioner PaRaMeters equations
    dtset%mdtemp(1) = inp%temperature   !Molecular Dynamics Temperatures 
    dtset%mdtemp(2) = inp%temperature   !Molecular Dynamics Temperatures 
    ABI_ALLOCATE(dtset%prtatlist,(dtset%natom)) !PRinT by ATom LIST of ATom
+!   ABI_ALLOCATE(dtset%prtatlist,(1)) !PRinT by ATom LIST of ATom
    dtset%prtatlist(:) = zero
+
    if(dtset%nnos>0) then
      ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
      dtset%qmass = dtset%nnos * 10 
@@ -288,8 +296,8 @@ implicit none
 !  Initialize xf history (should be put in inwffil)
    ab_xfh%nxfh=0
    ab_xfh%mxfh=(ab_xfh%nxfh-dtset%restartxf+1)+dtset%ntime+5 
-   ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
-   ab_xfh%xfhist(:,:,:,:) = zero
+!   ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
+!   ab_xfh%xfhist(:,:,:,:) = zero
 
 !***************************************************************
 !2  initialization of the structure for the dynamics
@@ -336,7 +344,9 @@ implicit none
      vel = zero
    end if
    vel_cell = zero
-   
+
+!  Deallocation of useless array
+   call destroy_supercell(super_cell)   
    
 !*********************************************************
 !3   Call main routine for monte carlo / molecular dynamics
@@ -347,7 +357,7 @@ implicit none
    call wrtout(std_out,message,'COLL')
 
    call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
-&    rhog,rhor,super_cell%rprimd_supercell,vel,vel_cell,xred,xred_old,effective_potential)
+&    rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,effective_potential)
  
 !***************************************************************
 ! 4   Deallocation of array   
@@ -364,11 +374,12 @@ implicit none
    ABI_DEALLOCATE(vel)
    ABI_DEALLOCATE(xred)
    ABI_DEALLOCATE(xred_old)
-   ABI_DEALLOCATE(ab_xfh%xfhist)
-   call destroy_supercell(super_cell)
+!   ABI_DEALLOCATE(ab_xfh%xfhist)
+
    call dtset_free(dtset)
    call destroy_results_gs(results_gs)
    call scfcv_destroy(scfcv_args)
+   call destroy_mpi_enreg(mpi_enreg)
  end if
 
  write(message, '(a,(80a),a,a)' ) ch10,&

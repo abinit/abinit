@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Tue  4 Oct 2016.
-- ( at 10h16 )
+.Starting date : Wed  5 Oct 2016.
+- ( at 12h12 )
   
 -  nproc =    1
 
@@ -294,7 +294,7 @@
 
  x=[ -1  1], y=[ -1  1] and z=[ -1  1]
 
- Computation of new dipole-dipole interaction, should be parallelized :'(.
+ Computation of new dipole-dipole interaction.
 
  Impose acoustic sum rule on total ifc
 
@@ -1210,9 +1210,6 @@
 
 ================================================================================
 
-+Total cpu time      1.906  and wall time      1.905 sec
++Total cpu time      1.918  and wall time      1.916 sec
 
  epigene : the run completed succesfully.
-- MEMORY CONSUMPTION REPORT:
--   There were 449 allocations and 449 deallocations
--   Remaining memory at the end of the calculation is 0

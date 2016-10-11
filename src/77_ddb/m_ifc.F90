@@ -617,7 +617,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  ABI_MALLOC(Ifc%atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
  ABI_MALLOC(Ifc%rpt,(3,Ifc%nrpt))
- ABI_MALLOC(Ifc%cell,(Ifc%nrpt,3))
+ ABI_MALLOC(Ifc%cell,(3,Ifc%nrpt))
  ABI_MALLOC(Ifc%wghatm,(natom,natom,Ifc%nrpt))
  ABI_MALLOC(Ifc%short_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
  ABI_MALLOC(Ifc%ewald_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
@@ -634,7 +634,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      Ifc%atmfrc(:,:,:,:,:,irpt_new) = ifc_tmp%atmfrc(:,:,:,:,:,irpt)
      Ifc%rpt(:,irpt_new) = ifc_tmp%rpt(:,irpt)
      Ifc%wghatm(:,:,irpt_new) = ifc_tmp%wghatm(:,:,irpt)
-     Ifc%cell(irpt_new,:) = ifc_tmp%cell(irpt,:)
+     Ifc%cell(:,irpt_new) = ifc_tmp%cell(:,irpt)
      irpt_new = irpt_new + 1
    end if
  end do

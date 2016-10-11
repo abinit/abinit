@@ -461,7 +461,7 @@ end subroutine xml_getdims
  integer :: nph1l,npsp,nsym,space_group,timrev
  real(dp):: energy,ucvol
  character(len=500) :: message
- logical :: has_3rd = .FALSE.,has_straincoupling= .FALSE.
+ logical :: has_3rd = .FALSE.
 #ifndef HAVE_LIBXML
  integer :: funit = 1
  integer :: iatom,iamu,iph1l,irpt,mu,nu,voigt
@@ -469,6 +469,7 @@ end subroutine xml_getdims
  logical :: endfile,found,short_range,total_range
  character (len=XML_RECL) :: line,readline
  character (len=XML_RECL) :: strg,strg1
+ logical :: has_straincoupling= .FALSE.
 #endif
  !arrays
  integer,allocatable :: typat(:)
@@ -504,7 +505,7 @@ end subroutine xml_getdims
  elastic_constants = zero; epsilon_inf = zero
  ABI_ALLOCATE(all_amu,(ntypat))
  ABI_ALLOCATE(ifcs%atmfrc,(2,3,natom,3,natom,nrpt))
- ABI_ALLOCATE(ifcs%cell,(nrpt,3))
+ ABI_ALLOCATE(ifcs%cell,(3,nrpt))
  ABI_ALLOCATE(ifcs%short_atmfrc,(2,3,natom,3,natom,nrpt))
  ABI_ALLOCATE(ifcs%ewald_atmfrc,(2,3,natom,3,natom,nrpt))
  ABI_ALLOCATE(internal_strain,(6,natom,3))
@@ -521,7 +522,7 @@ end subroutine xml_getdims
  ABI_DATATYPE_ALLOCATE(phonon_strain,(6))
  do ii = 1,6
    ABI_ALLOCATE(phonon_strain(ii)%atmfrc,(2,3,natom,3,natom,nrpt))
-   ABI_ALLOCATE(phonon_strain(ii)%cell,(nrpt,3))
+   ABI_ALLOCATE(phonon_strain(ii)%cell,(3,nrpt))
    phonon_strain(ii)%nrpt   = nrpt
    phonon_strain(ii)%atmfrc = zero
    phonon_strain(ii)%cell   = zero
@@ -860,9 +861,9 @@ end subroutine xml_getdims
        call rdfromline_value('cell',line,strg)
        if (strg/="") then 
          strg1=trim(strg)
-         read(strg1,*)(ifcs%cell(irpt,mu),mu=1,3)
+         read(strg1,*)(ifcs%cell(mu,irpt),mu=1,3)
        else
-         read(funit,*)(ifcs%cell(irpt,mu),mu=1,3)
+         read(funit,*)(ifcs%cell(mu,irpt),mu=1,3)
        end if
        if (total_range)then
          if(short_range)then
@@ -1033,9 +1034,9 @@ end subroutine xml_getdims
        call rdfromline_value('cell',line,strg)
        if (strg/="") then 
          strg1=trim(strg)
-         read(strg1,*)(phonon_strain(voigt+1)%cell(irpt,mu),mu=1,3)
+         read(strg1,*)(phonon_strain(voigt+1)%cell(mu,irpt),mu=1,3)
        else
-         read(funit,*)(phonon_strain(voigt+1)%cell(irpt,mu),mu=1,3)
+         read(funit,*)(phonon_strain(voigt+1)%cell(mu,irpt),mu=1,3)
        end if
        irpt = irpt + 1
        cycle
@@ -1627,4 +1628,3 @@ end subroutine effective_potential_file_readStrain
 !!***
 
 end module m_effective_potential_file
-

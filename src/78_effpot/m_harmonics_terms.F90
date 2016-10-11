@@ -190,7 +190,7 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
  harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,:) = ifcs%short_atmfrc(:,:,:,:,:,:)
 
 !Allocation of cell of ifc
- ABI_ALLOCATE(harmonics_terms%ifcs%cell,(nrpt,3))
+ ABI_ALLOCATE(harmonics_terms%ifcs%cell,(3,nrpt))
  harmonics_terms%ifcs%cell(:,:) = ifcs%cell(:,:)
 
 end subroutine harmonics_terms_init 

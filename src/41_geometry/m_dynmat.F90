@@ -2444,7 +2444,7 @@ subroutine make_bigbox(brav,cell,ngqpt,nqshft,rprim,nrpt,rpt)
  ! Now we can allocate and calculate the points and the weights.
  nrpt = mrpt
  ABI_ALLOCATE(rpt,(3,nrpt))
- ABI_ALLOCATE(cell,(nrpt,3))
+ ABI_ALLOCATE(cell,(3,nrpt))
 
  choice=1
  call bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
@@ -2508,7 +2508,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
  integer,intent(in) :: ngqpt(3)
  real(dp),intent(in) :: rprim(3,3)
  real(dp),intent(out) :: rpt(3,mrpt)
- integer,intent(out) :: cell(mrpt,3)
+ integer,intent(out) :: cell(3,mrpt)
 
 !Local variables -------------------------
 !In some cases, the atoms coordinates are not packed in the
@@ -2523,6 +2523,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
 
  lqshft=1
  if(nqshft/=1)lqshft=2
+
 
 !Simple Cubic Lattice
  if (brav==1) then
@@ -2543,7 +2544,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
            rpt(1,irpt)=r1*rprim(1,1)+r2*rprim(1,2)+r3*rprim(1,3)
            rpt(2,irpt)=r1*rprim(2,1)+r2*rprim(2,2)+r3*rprim(2,3)
            rpt(3,irpt)=r1*rprim(3,1)+r2*rprim(3,2)+r3*rprim(3,3)
-           cell(irpt,1)=r1;cell(irpt,2)=r2;cell(irpt,3)=r3
+           cell(1,irpt)=r1;cell(2,irpt)=r2;cell(3,irpt)=r3
          end do
        end do
      end do
@@ -2579,7 +2580,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
            rpt(3,irpt)=r3
 !TEST_AM
 !           cell(irpt-3,1)=r1;cell(irpt-3,2)=r2;cell(irpt-3,3)=r3
-           cell(irpt,1)=r1;cell(irpt,2)=r2;cell(irpt,3)=r3
+           cell(1,irpt)=r1;cell(2,irpt)=r2;cell(3,irpt)=r3
          end do
        end do
      end do
@@ -2609,7 +2610,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
            rpt(3,irpt)=r3+0.5
 !TEST_AM
 !           cell(irpt-1,1)=r1;cell(irpt-1,2)=r2;cell(irpt-1,3)=r3
-           cell(irpt,1)=r1;cell(irpt,2)=r2;cell(irpt,3)=r3
+           cell(1,irpt)=r1;cell(2,irpt)=r2;cell(3,irpt)=r3
          end do
        end do
      end do
@@ -2634,7 +2635,7 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
            rpt(1,irpt)=r1*rprim(1,1)+r2*rprim(1,2)+r3*rprim(1,3)
            rpt(2,irpt)=r1*rprim(2,1)+r2*rprim(2,2)+r3*rprim(2,3)
            rpt(3,irpt)=r1*rprim(3,1)+r2*rprim(3,2)+r3*rprim(3,3)
-           cell(irpt,1)=r1;cell(irpt,2)=r2;cell(irpt,3)=r3
+           cell(1,irpt)=r1;cell(2,irpt)=r2;cell(3,irpt)=r3
          end do
        end do
      end do
@@ -3915,16 +3916,14 @@ subroutine cell9(atmfrc,brav,cell,gprim,natom,nrpt,rcan,rpt,wghatm,xred)
  integer,intent(in) :: brav,natom,nrpt
 !arrays
  real(dp),intent(in) :: gprim(3,3),rcan(3,natom),rpt(3,nrpt),xred(3,natom)
- real(dp),intent(inout) :: atmfrc(2,3,natom,3,natom,nrpt ),wghatm(natom,natom,nrpt)
- integer, intent(in) :: cell(nrpt,3)
+ real(dp),intent(inout) :: atmfrc(2,3,natom,3,natom,nrpt),wghatm(natom,natom,nrpt)
+ integer, intent(in) :: cell(3,nrpt)
 !Local variables -------------------------
 !scalars
  integer :: ia,ib,ii,irpt,irpt2
- character(len=500) :: message
 !arrays
  integer  :: shift(3)
- real(dp) :: cell2(3)
- real(dp) :: rdiff(3),red(3,3)
+ real(dp) :: cell2(3),red(3,3)
  real(dp) :: atmfrc_tmp(2,3,natom,3,natom,nrpt),wghatm_tmp(natom,natom,nrpt)
 
 ! *********************************************************************
@@ -3956,9 +3955,9 @@ subroutine cell9(atmfrc,brav,cell,gprim,natom,nrpt,rcan,rpt,wghatm,xred)
          cell2(:)= red(3,:) + shift(:)
 
          do irpt2=1,nrpt
-           if (cell(irpt2,1) == cell2(1)  .and.&
-               cell(irpt2,2) == cell2(2)  .and.&
-               cell(irpt2,3) == cell2(3)) then
+           if (cell(1,irpt2) == cell2(1)  .and.&
+               cell(2,irpt2) == cell2(2)  .and.&
+               cell(3,irpt2) == cell2(3)) then
              wghatm_tmp(ia,ib,irpt2) =  wghatm(ia,ib,irpt)
              atmfrc_tmp(:,:,ia,:,ib,irpt2) = atmfrc(:,:,ia,:,ib,irpt)
            end if

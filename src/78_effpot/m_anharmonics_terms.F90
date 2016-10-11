@@ -144,7 +144,7 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,nrpt,&
  ABI_DATATYPE_ALLOCATE(anharmonics_terms%phonon_strain,(6))
  do ii = 1,6
    ABI_ALLOCATE(anharmonics_terms%phonon_strain(ii)%atmfrc,(2,3,natom,3,natom,nrpt))
-   ABI_ALLOCATE(anharmonics_terms%phonon_strain(ii)%cell,(nrpt,3))
+   ABI_ALLOCATE(anharmonics_terms%phonon_strain(ii)%cell,(3,nrpt))
    anharmonics_terms%phonon_strain(ii)%nrpt   = nrpt
    anharmonics_terms%phonon_strain(ii)%atmfrc = zero
    anharmonics_terms%phonon_strain(ii)%cell   = zero

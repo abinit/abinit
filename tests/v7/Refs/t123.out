@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Tue  4 Oct 2016.
-- ( at 11h55 )
+.Starting date : Wed  5 Oct 2016.
+- ( at 12h12 )
   
 -  nproc =    1
 
@@ -58,7 +58,7 @@
 ================================================================================
 
  Opening the file system.xml
--Reading the file system.xml with LibXML library
+-Reading the file system.xml with Fortran
 
  This effective potential contains :
   - Reference energy:        -17.1451766220
@@ -125,7 +125,7 @@
 
  x=[ -1  1], y=[ -1  1] and z=[ -1  1]
 
- Computation of new dipole-dipole interaction, should be parallelized :'(.
+ Computation of new dipole-dipole interaction.
 
  Impose acoustic sum rule on total ifc
 
@@ -1037,10 +1037,10 @@
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.5
+- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.6
 
 ================================================================================
 
-+Total cpu time      1.511  and wall time      1.511 sec
++Total cpu time      1.632  and wall time      1.631 sec
 
  epigene : the run completed succesfully.

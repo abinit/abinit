@@ -244,6 +244,7 @@ interface xmpi_allgather
   module procedure xmpi_allgather_int
   module procedure xmpi_allgather_char
   module procedure xmpi_allgather_int1d
+  module procedure xmpi_allgather_int2d
   module procedure xmpi_allgather_dp1d
   module procedure xmpi_allgather_dp2d
   module procedure xmpi_allgather_dp3d
@@ -260,6 +261,7 @@ interface xmpi_allgatherv
   module procedure xmpi_allgatherv_dp2d
   module procedure xmpi_allgatherv_dp3d
   module procedure xmpi_allgatherv_dp4d
+  module procedure xmpi_allgatherv_dp6d
   module procedure xmpi_allgatherv_coeff2d
   module procedure xmpi_allgatherv_coeff2d_indx
 end interface xmpi_allgatherv
@@ -463,6 +465,7 @@ interface xmpi_sum_master
   module procedure xmpi_sum_master_int
   module procedure xmpi_sum_master_int2d
   module procedure xmpi_sum_master_int4d
+  module procedure xmpi_sum_master_dp
   module procedure xmpi_sum_master_dp1d
   module procedure xmpi_sum_master_dp2d
   module procedure xmpi_sum_master_dp3d
