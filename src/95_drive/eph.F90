@@ -105,6 +105,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_phgamma,         only : eph_phgamma
  use m_gkk,             only : eph_gkk
+ use m_phpi,            only : eph_phpi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -473,6 +474,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (dtset%eph_task == 2) then
    ! Compute electron-phonon matrix elements
    call eph_gkk(wfk0_path,wfq_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,ebands_kq,dvdb,ifc,&
+   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
+ end if
+
+ if (dtset%eph_task == 3) then
+   ! Compute electron-phonon matrix elements
+   call eph_phpi(wfk0_path,wfq_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,ebands_kq,dvdb,ifc,&
    pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
  end if
 
