@@ -28,11 +28,12 @@ istwfk 1               #This is mandatory for WVLs
 # Self-consistent run to get the density
 
 #Variables to control convergency:
-diemix   0.4
-nstep    10
+diemix   0.7
+nstep    20
+nnsclo   3
 
 # Self-consistent run to get the density
-tolvrs     1.00d-0     #too low
+tolvrs     1.00d-06
 
 #semiconducting case:
 nband 8             #important give only occupied bands
