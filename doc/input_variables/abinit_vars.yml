@@ -15837,10 +15837,14 @@
         the number of non-self-consistent loops is determined
         by [[nstep]].
          <br />
-         The Default value of 0 correspond to make
+         The Default value of 0 -- for standard plane-wave calculations -- corresponds to make
         the two first fixed potential determinations
         of wavefunctions have 2 non-self consistent loops,
         and the next ones to have only 1 non-self consistent loop.
+         <br />
+         The Default value of 0 -- for wavelets calculations ([[usewvl]]=1) -- corresponds to make
+        2 steps with 3 non-self consistent loops , 2 steps with 2 non-self consistent loops,
+        then the next ones with 1 non-self consistent loop.
         </p>
     varname: nnsclo
     vartype: integer

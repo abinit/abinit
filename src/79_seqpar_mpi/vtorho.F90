@@ -444,14 +444,31 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !Set max number of non-self-consistent loops nnsclo_now for use in vtowfk
  if(iscf<0)then
+   ! ===== Non self-consistent =====
    nnsclo_now=dtset%nstep
- else ! iscf>=0
+ else
+   ! ===== Self-consistent =====
    if(dtset%nnsclo>0) then
+   ! ===== Self-consistent + imposed =====
      nnsclo_now=dtset%nnsclo
-   else ! nnsclo<=0
-     nnsclo_now=1;if (iscf==0) nnsclo_now=0
-     if (istep<=2.and.iscf/=0) nnsclo_now=2
+   else
+   ! ===== Self-consistent + default =====
+     nnsclo_now=1
+     if (dtset%usewvl==0) then
+     ! ----- Plane waves -----
+       if (istep<=2.and.iscf/=0) nnsclo_now=2
+     else
+     ! ----- Wavelets -----
+       if (iscf==0) then
+         nnsclo_now=0
+       else if (istep<=2) then
+         nnsclo_now=3
+       else if (istep<=4) then
+         nnsclo_now=2
+       end if
+     end if
    end if
+   ! ===== Double is required =====
    if(dbl_nnsclo==1)then
      nnsclo_now=nnsclo_now*2
    end if

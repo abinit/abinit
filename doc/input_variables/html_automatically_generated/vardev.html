@@ -2260,10 +2260,14 @@ in the SCF case (when <a href="varbas.html#iscf">iscf</a> &gt;0).  In the case <
 the number of non-self-consistent loops is determined
 by <a href="varbas.html#nstep">nstep</a>.
  <br />
- The Default value of 0 correspond to make
+ The Default value of 0 -- for standard plane-wave calculations -- corresponds to make
 the two first fixed potential determinations
 of wavefunctions have 2 non-self consistent loops,
 and the next ones to have only 1 non-self consistent loop.
+ <br />
+ The Default value of 0 -- for wavelets calculations (<a href="varbas.html#usewvl">usewvl</a>=1) -- corresponds to make
+2 steps with 3 non-self consistent loops , 2 steps with 2 non-self consistent loops,
+then the next ones with 1 non-self consistent loop.
 </p>
 </font>
 
