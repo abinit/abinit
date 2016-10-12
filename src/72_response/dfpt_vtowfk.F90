@@ -45,7 +45,7 @@
 !!  mcprjq=second dimension of the cprjq array
 !!  mkmem =number of k points trated by this node (GS data).
 !!  mk1mem =number of k points treated by this node (RF data)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw or wfs at k
 !!  mpw1=maximum dimensioned size of npw for wfs at k+q (also for 1-order wfs).
 !!  natom=number of atoms in cell.
@@ -174,7 +174,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  integer,intent(in) :: nband_k,npw1_k,npw_k
  integer,intent(inout) :: nlines_done
  real(dp),intent(in) :: fermie1,wtk_k
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq

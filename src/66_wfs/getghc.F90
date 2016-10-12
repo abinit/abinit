@@ -31,7 +31,7 @@
 !! gs_ham <type(gs_hamiltonian_type)>=all data for the Hamiltonian to be applied
 !! lambda=factor to be used when computing <G|H-lambda.S|C> - only for sij_opt=-1
 !!        Typically lambda is the eigenvalue (or its guess)
-!! mpi_enreg=informations about MPI parallelization
+!! mpi_enreg=information about MPI parallelization
 !! ndat=number of FFT to do in parallel
 !! prtvol=control print volume and debugging output
 !! sij_opt= -PAW ONLY-  if  0, only matrix elements <G|H|C> have to be computed

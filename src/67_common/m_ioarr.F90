@@ -698,7 +698,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
  type(hdr_type),intent(inout) :: hdr
  type(crystal_t),intent(in) :: crystal
  type(ebands_t),optional,intent(in) :: ebands
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(inout) :: datar(cplex*nfft,nspden)
@@ -916,7 +916,7 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
  integer,intent(in) :: iomode,cplex,nfft,nspden
  character(len=*),intent(in) :: varname,path
  type(hdr_type),intent(inout) :: hdr
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(inout) :: datar(cplex*nfft,nspden)
@@ -1026,7 +1026,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 !scalars
  integer,intent(in) :: cplex,nfft,nspden,pawread,comm
  character(len=*),intent(in) :: fname
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(hdr_type),intent(out) :: ohdr
  type(hdr_type),optional,intent(in) :: check_hdr
 !arrays

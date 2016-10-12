@@ -18,7 +18,7 @@
 !!  inf_rmet=define the  infinitesimal metric : rprimd*(transpose(rprimd)) divided by the number of discretisation point
 !!  inf_ucvol=volume of infinitesimal cell
 !!  mult=variance of the Gaussian (=rtrotter/beta)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  ngfft=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
 !!  nfft=total number of fft grid points
 !!  debug_rec=debugging variable
@@ -45,11 +45,10 @@
 #include "abi_common.h"
 
 subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
-
- use m_profiling_abi
  
  use defs_basis
  use defs_abitypes
+ use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -66,7 +65,7 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 !scalars
  integer,intent(in) :: nfft
  real(dp),intent(in) :: inf_ucvol,mult
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: inf_rmet(3,3)

@@ -87,7 +87,7 @@ subroutine cgq_builder(berryflag,cg,cgq,dtefield,dtset,ikpt,ikpt_loc,isppol,mcg,
  logical,intent(in) :: berryflag
  type(dataset_type), intent(in) :: dtset
  type(efield_type), intent(inout) :: dtefield
- type(MPI_type), intent(inout) :: mpi_enreg
+ type(MPI_type), intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: npwarr(dtset%nkpt) 
  real(dp),intent(in) :: cg(2,mcg),pwnsfac(2,pwind_alloc)

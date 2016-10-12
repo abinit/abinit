@@ -32,7 +32,7 @@
 !!  istwf_k=option parameter that describes the storage of wfs
 !!  mcgq=second dimension of the cgq array
 !!  mcprjq=second dimension of the cprjq array
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell
 !!  nband=number of bands
 !!  npw1=number of plane waves at this k+q point
@@ -93,7 +93,7 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc,eig1,fe
  integer,intent(in) :: iband,ibgq,icgq,istwf_k,mcgq,mcprjq,natom,nband,npw1,nspinor,timcount,usepaw
  integer,intent(out) :: wf_corrected
  real(dp),intent(in) :: fermie1
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  real(dp),intent(in) :: cgq(2,mcgq),cwavef(2,npw1*nspinor)
  real(dp),intent(in) :: eig1(2*nband**2),ghc(2,npw1*nspinor),occ(nband),rocceig(nband,nband)

@@ -26,7 +26,7 @@
 !!    (set to 1 if usual complex vectors)
 !!  mcg=size of second dimension of cg
 !!  mgsc=size of second dimension of gsc
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nband_k=number of bands
 !!  npw_k=number of planewaves
 !!  useoverlap=describe the overlap of wavefunctions:
@@ -76,7 +76,7 @@ subroutine fxphas(cg,gsc,icg,igsc,istwfk,mcg,mgsc,mpi_enreg,nband_k,npw_k,useove
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: icg,igsc,istwfk,mcg,mgsc,nband_k,npw_k,useoverlap
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  real(dp),intent(inout) :: cg(2,mcg),gsc(2,mgsc*useoverlap)
 

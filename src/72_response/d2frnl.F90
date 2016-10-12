@@ -27,7 +27,7 @@
 !!  kg(3,mpw*mkmem)=work array for coordinates of G vectors in basis
 !!   primitive translations
 !!  mgfftf=maximum size of 1D FFTs for the fine FFT grid (PAW)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpsang= 1+maximum angular momentum for nonlocal pseudopotentials
 !!  my_natom=number of atoms treated by current processor
 !!  natom=number of atoms in unit cell
@@ -154,7 +154,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  integer,intent(in) :: dyfr_cplex,dyfr_nondiag,mgfftf,mpsang,my_natom,natom
  integer,intent(in) :: nfftf,pawbec,pawpiezo,rfphon,rfstrs
  real(dp),intent(in) :: gsqcut
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(pawang_type),intent(in) :: pawang

@@ -52,7 +52,7 @@
 !!  mkqmem =number of k+q points treated by this node (GS data).
 !!  mk1mem =number of k points treated by this node (RF data)
 !!  mpert =maximum number of ipert
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw or wfs at k
 !!  mpw1=maximum dimensioned size of npw for wfs at k+q (also for 1-order wfs).
 !!  nattyp(ntypat)= # atoms of each type.
@@ -225,7 +225,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),intent(out) :: eovl1
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(pawang_type),intent(in) :: pawang,pawang1
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type),intent(in) :: psps
@@ -644,8 +644,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !          Non-collinear magnetism (should the second nkxc be nkxc_cur ?)
            if (nspden==4) then
              option=0;optxc=1
-             call dfpt_mkvxc_noncoll(cplex,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum2,0,dum3,0,nkxc,&
-&             nkxc,nspden,n3xccc,1,option,optxc,dtset%paral_kgb,dtset%qptn,rhor,dum1,rprimd,0,&
+             call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum2,0,dum3,0,nkxc,&
+&             nkxc,nspden,n3xccc,1,option,optxc,dtset%paral_kgb,dtset%qptn,dum1,dum1,rprimd,0,&
 &             vxc10,xccc3d1_idir1)
            else
              call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum2,0,dum3,0,nkxc,&
