@@ -979,7 +979,7 @@ end subroutine sphere
 !! n1,n2,n3=physical dimension of the box (cfft)
 !! n4,n5,n6=memory dimension of cfft
 !! kg_k(3,npw)=integer coordinates of G vectors in basis sphere
-!! mpi_enreg=informations about MPI parallelization
+!! mpi_enreg=information about MPI parallelization
 !! tab_fftwf2_local(n2)=local i2 indices in fourwf
 !! nd2proc TO BE DESCRIBED SB 090831
 !! iflag=option parameter. Possible values: -1, -2, 1, 2 ; this is used only in debug option
@@ -3354,7 +3354,7 @@ end subroutine indfftrisc
 !!  istwf_k=option parameter that describes the storage of wfs
 !!  kpt(3)=reduced coords of k point (in terms of recip latt vecs)
 !!  mkmem =maximum number of k points which can fit in core memory
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum number of planewaves as dimensioned in calling routine
 !!
 !! OUTPUT

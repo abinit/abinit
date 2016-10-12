@@ -22,7 +22,7 @@
 !!   | usepaw=flag for PAW
 !!  iatom= index of the current atom in posdoppler
 !!  mesh_sizej= size of the radial mesh for the current atom in posdoppler
-!!  mpi_enreg= informations about MPI parallelization
+!!  mpi_enreg= information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  option= if 1, use gamma
 !!          if 2, use IPM (gamma=1)
@@ -86,7 +86,7 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
  real(dp),intent(out) :: rate
  type(dataset_type), intent(in) :: dtset
  type(electronpositron_type),pointer :: electronpositron
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(pawang_type), intent(in) :: pawang
 !arrays
  real(dp),intent(in) :: rhocorej(mesh_sizej)

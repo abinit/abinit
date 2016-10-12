@@ -88,7 +88,7 @@ subroutine calc_smeared_density(rhor,kappa_strategy,rhotilder,nfftf,ngfftf,npw,&
  real(dp), intent(inout) :: rhor(nfftf)
  real(dp), intent(out) :: rhotilder(nfftf)
 ! types
- type(MPI_type), intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 
 !Local variables ------------------------------
 !scalars

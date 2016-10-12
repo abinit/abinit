@@ -139,7 +139,7 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
  real(dp), intent(out) :: d3_berry(2,3)
 !
 !---  Arguments : structured datatypes
- type(MPI_type), intent(inout) :: mpi_enreg
+ type(MPI_type), intent(in) :: mpi_enreg
  type(datafiles_type), intent(in) :: dtfil
  type(dataset_type), intent(in) :: dtset
 

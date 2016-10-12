@@ -25,7 +25,7 @@
 !!  idir=direction of atomic displacement (=1,2 or 3 : displacement of
 !!    atom ipert along the 1st, 2nd or 3rd axis).
 !!  ipert=number of the atom being displaced in the frozen-phonon
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mqgrid=dimension of q grid for pseudopotentials
 !!  natom=number of atoms in cell.
 !!  nattyp(ntypat)=number of atoms of each type in cell.
@@ -84,7 +84,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
  integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
  integer,intent(in) :: paral_kgb
  real(dp),intent(in) :: gsqcut,ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: atindx(natom),nattyp(ntypat),ngfft(18)
  real(dp),intent(in) :: gmet(3,3),ph1d(2,(2*n1+1+2*n2+1+2*n3+1)*natom)

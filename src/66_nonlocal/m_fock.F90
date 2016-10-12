@@ -1707,7 +1707,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
  real(dp), intent(inout) :: fock_energy
  type(dataset_type),intent(in) :: dtset
  type(fock_type),intent(inout),pointer :: fock
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer, intent(in) :: indsym(4,dtset%nsym,dtset%natom),npwarr(dtset%nkpt)
  real(dp),intent(in) :: cg(2,mcg),occ(dtset%mband*dtset%nkpt*dtset%nsppol)

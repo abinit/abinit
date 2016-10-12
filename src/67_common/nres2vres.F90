@@ -26,7 +26,7 @@
 !! gsqcut=cutoff value on G**2 for sphere inside fft box
 !! izero=if 1, unbalanced components of Vhartree(g) are set to zero
 !! kxc(nfft,nkxc)=exchange-correlation kernel, needed only if nkxc>0
-!! mpi_enreg=informations about MPI parallelization
+!! mpi_enreg=information about MPI parallelization
 !! my_natom=number of atoms treated by current processor
 !! nfft=(effective) number of FFT grid points (for this processor)
 !! ngfft(18)=contain all needed information about 3D FFT
@@ -100,7 +100,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 !scalars
  integer,intent(in) :: izero,my_natom,n3xccc,nfft,nkxc,optnc,optxc,usepaw
  real(dp),intent(in) :: gsqcut
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(pawang_type),intent(in) :: pawang
 !arrays

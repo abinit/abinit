@@ -91,7 +91,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
 !scalars
  integer,intent(in) :: cplex,ixc,n3xccc,nfft,nhat1dim,nhat1grdim,optnc,optxc
  integer,intent(in) :: nkxc,nspden,option,paral_kgb,usexcnhat,nkxc_cur
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: nhat1gr(cplex*nfft,nspden,3*nhat1grdim)
@@ -133,12 +133,12 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
 !Treat first LDA
  if(nkxc/=23)then
 
-!  m_norm_min=EPSILON(0.0_dp)**2
-
 !FR EB If option=0 (i.e., for XC core-correction only) we apply the correction only on
 ! the diagonal elements of the potential which are vxc1(:,1:2) since XC core correction
 ! acts only on the electronic density (i.e., NOT on the magnetization density).
 ! Then, the corrections on vxc1(:,3:4) are ZERO.
+
+   dvdn=zero; dvdz=zero; dum=zero; fact=zero
    if (option==0) then
      if (n3xccc==0) then
        vxc1(:,:)=zero
@@ -163,6 +163,8 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
 !  Non-collinear magnetism
 !  Has to locally "rotate" rho(r)^(1) (according to magnetization),
 !  compute Vxc(r)^(1) and rotate it back
+!FR  The collinear routine dfpt_mkvxc wants a general density built as (tr[rho],rho_upup)
+!    and the notation has to be consistent with dfpt_accrho and symrhg.
 
 !    PAW: eventually substract compensation density
 !    if (usexcnhat==0.and.nhat1dim==1) then
@@ -178,26 +180,25 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
 
 !      -- Rotate rho(r)^(1)
      do ifft=1,nfft
-       rhor1_diag(ifft,1)=rhor1(ifft,1)
+       rhor1_diag(ifft,1)=rhor1(ifft,1) !FR it is already the tr[rhor1] see symrhg.F90
        m_norm(ifft)=sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2+rhor(ifft,4)**2)
        m_dot_m1=rhor(ifft,2)*rhor1(ifft,2)+rhor(ifft,3)*rhor1(ifft,3) &
 &              +rhor(ifft,4)*rhor1(ifft,4)
 
        if (optxc /= -1) then 
          if(m_norm(ifft)>m_norm_min)then
-           rhor1_diag(ifft,2)=half*(rhor1_diag(ifft,1)+m_dot_m1/m_norm(ifft))
+           rhor1_diag(ifft,2)=half*(rhor1_diag(ifft,1)+m_dot_m1/m_norm(ifft)) !rhor1_upup
          else
            rhor1_diag(ifft,2)=half*rhor1_diag(ifft,1)
          end if
-!EB FR TODO: remove this else if?
        else if (nkxc/=nkxc_cur.and.optxc/=-1) then
-         rhor1_diag(ifft,2)=half*(rhor1_diag(ifft,1)+m_dot_m1/m_norm(ifft))  
+         rhor1_diag(ifft,2)=half*(rhor1_diag(ifft,1)+m_dot_m1/m_norm(ifft))
        end if
      end do
 
 !      -- Compute Kxc(r).n^res(r)_rotated
-     call dfpt_mkvxc(1,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,nhat1grdim,&
-&     nkxc,2,n3xccc,option,paral_kgb,qphon,rhor1_diag,rprimd,1,vxc1_diag,xccc3d1)
+     call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,nhat1grdim,&
+&     nkxc,2,n3xccc,option,paral_kgb,qphon,rhor1_diag,rprimd,usexcnhat,vxc1_diag,xccc3d1)
 
 !    -- Rotate back Vxc(r)^(1)
 ! FR EB TODO: update the routine to cplex=2
