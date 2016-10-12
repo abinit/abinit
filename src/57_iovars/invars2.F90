@@ -80,6 +80,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  use m_fstrings,  only : sjoin, itoa, tolower, rmquotes
  use m_ingeo_img, only : ingeo_img
+ use m_dtset,     only : dtset_chkneu
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2672,7 +2673,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 !If iscf>0, check the charge of the system, and compute nelect.
  occopt_tmp=occopt
  if(getocc/=0)occopt_tmp=1
- call chkneu(charge,dtset,occopt_tmp)
+ call dtset_chkneu(charge,dtset,occopt_tmp)
 
 !Initialize Berry phase vectors
 !Should check that nberry is smaller than 20
