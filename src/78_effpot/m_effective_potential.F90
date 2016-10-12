@@ -38,7 +38,7 @@ module m_effective_potential
  use m_ddb
  use m_anharmonics_terms
  use m_harmonics_terms
- use m_xmpi,           only : xmpi_sum_master,xmpi_allgather,xmpi_allgatherv
+ use m_xmpi,           only : xmpi_sum_master,xmpi_allgather,xmpi_gatherv
  use m_copy,           only : alloc_copy
  use m_crystal,        only : crystal_t, crystal_init, crystal_free, crystal_t,crystal_print
  use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
@@ -796,27 +796,28 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    end do
 
    size = 2*3*eff_pot%natom*3*eff_pot%natom*my_nrpt
-   call xmpi_allgatherv(buff_ewald,size,ifc_tmp%ewald_atmfrc,bufsize,bufdisp, comm, ierr)
+   call xmpi_gatherv(buff_ewald,size,ifc_tmp%ewald_atmfrc,bufsize,bufdisp,master, comm, ierr)
 
    ABI_DEALLOCATE(bufsize)
    ABI_DEALLOCATE(bufdisp)
    ABI_DEALLOCATE(buff_ewald)
 
 !  Fill the short range part (calculated previously) only master
-   do irpt=1,ifc_tmp%nrpt
-     do irpt2=1,eff_pot%harmonics_terms%ifcs%nrpt
-       if(eff_pot%harmonics_terms%ifcs%cell(1,irpt2)==ifc_tmp%cell(1,irpt).and.&
-&         eff_pot%harmonics_terms%ifcs%cell(2,irpt2)==ifc_tmp%cell(2,irpt).and.&
-&         eff_pot%harmonics_terms%ifcs%cell(3,irpt2)==ifc_tmp%cell(3,irpt).and.&
-&         any(eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2) > tol9)) then
-         ifc_tmp%short_atmfrc(:,:,:,:,:,irpt) = &
-&                             eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2)
-       end if
+   if(iam_master)then
+     do irpt=1,ifc_tmp%nrpt
+       do irpt2=1,eff_pot%harmonics_terms%ifcs%nrpt
+         if(eff_pot%harmonics_terms%ifcs%cell(1,irpt2)==ifc_tmp%cell(1,irpt).and.&
+&           eff_pot%harmonics_terms%ifcs%cell(2,irpt2)==ifc_tmp%cell(2,irpt).and.&
+&           eff_pot%harmonics_terms%ifcs%cell(3,irpt2)==ifc_tmp%cell(3,irpt).and.&
+&           any(eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2) > tol9)) then
+           ifc_tmp%short_atmfrc(:,:,:,:,:,irpt) = &
+&                               eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2)
+         end if
+       end do
      end do
-   end do
-    
-!  Compute total ifc
-   ifc_tmp%atmfrc = ifc_tmp%short_atmfrc + ifc_tmp%ewald_atmfrc
+!    Compute total ifc
+     ifc_tmp%atmfrc = ifc_tmp%short_atmfrc + ifc_tmp%ewald_atmfrc
+   end if
 
 !  DEALLOCATION OF ARRAYS
    ABI_DEALLOCATE(my_index_rpt)
@@ -826,8 +827,6 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    ABI_DEALLOCATE(zeff_tmp)
    ABI_DEALLOCATE(dyew)
    ABI_DEALLOCATE(dyewq0)
-
-
 
 !  Broadcast ifc
    call xmpi_bcast (ifc_tmp%atmfrc,       master, comm, ierr)
@@ -1142,8 +1141,6 @@ subroutine effective_potential_effpot2dynmat(dynmat,delta,eff_pot,natom,n_cell,o
      end do
    end do
  end do
-
-
 
 ! Deallocation of arrays
  ABI_DEALLOCATE(fred)
@@ -2512,7 +2509,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !------------------------------------
 ! 6 - Print the total energy:
 !------------------------------------
-
   write(message, '(a,a,1ES24.16,a)' ) ch10,' Total energy :',energy,' Hartree'
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
@@ -2573,7 +2569,7 @@ subroutine elastic_contribution(eff_pot,disp,energy,forces,ncell,strten,strain1,
  strten = zero
   
 !1- Part due to elastic constants
- energy = ncell * half * dot_product(matmul(strain1,eff_pot%harmonics_terms%elastic_constants),strain2) 
+ energy = ncell * half * dot_product(matmul(strain1,eff_pot%harmonics_terms%elastic_constants),strain2)
  strten = ncell * matmul(eff_pot%harmonics_terms%elastic_constants(:,:),strain1(:)) 
 
 !2-Part due to the internat strain
