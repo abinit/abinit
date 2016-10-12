@@ -4,7 +4,7 @@
 !! multibinit
 !!
 !! FUNCTION
-!! Main routine the Effective PotentIel GENErator.
+!! Main routine MULTIBINIT.
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2015 ABINIT group (AM)
@@ -37,7 +37,6 @@ program multibinit
 
  use defs_basis
  use defs_abitypes
- use m_abimover
  use m_build_info
  use m_xmpi
  use m_xomp
@@ -45,9 +44,7 @@ program multibinit
  use m_errors
  use m_effective_potential
  use m_multibinit_dataset
- use m_anharmonics_terms
  use m_effective_potential_file
- use m_libxml
 
  use m_io_tools,   only : get_unit, flush_unit
  use m_fstrings,   only : int2char4
@@ -222,7 +219,6 @@ program multibinit
 !&           inp%n_cell,inp%nph1l,inp%prt_phfrq,inp%qph1l)
 !   end if
 
-! Just for TEST 
 !Intialisation of the effective potential type
 !   call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
 !   name = "test.xml"
@@ -237,7 +233,7 @@ program multibinit
 !
 !     ABI_DEALLOCATE(dynmat)
 !   end if
-!TEST_AM
+!TEST_AM SECTION
 
 
 !    Compute the monte carlo, molecular dynamics of compute specific energy 

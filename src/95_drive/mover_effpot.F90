@@ -111,7 +111,7 @@ implicit none
  real(dp),allocatable :: vel(:,:)
  real(dp) :: vel_cell(3,3),rprimd(3,3)
  real(dp) :: mat_strain(3,3)
- type(supercell_type) :: super_cell
+ type(supercell_type) :: supercell
 !TEST_AM
  !real(dp),allocatable :: energy(:)
  !integer :: option
@@ -142,7 +142,7 @@ implicit none
 !if special structure is specified in the input,
 !a new supercell is compute
  acell = one
- rprimd = effective_potential%rprimd
+ rprimd = effective_potential%crystal%rprimd
  
  if(all(inp%acell > one))then   
    acell = inp%acell
@@ -163,32 +163,33 @@ implicit none
  end if
 
 !if rprim is different from initial structure, we print warning
- if(any(rprimd-effective_potential%rprimd>tol10))then
+ if(any(rprimd-effective_potential%crystal%rprimd>tol10))then
    write(message,'(a)')&
 &    ' WARNING: the structure for the dynamics is different than initiale structure'
    call wrtout(std_out,message,"COLL")
    call wrtout(ab_out,message,"COLL")
  end if
 
- ABI_ALLOCATE(xred,(3,effective_potential%natom))
- ABI_ALLOCATE(xcart,(3,effective_potential%natom))
+ ABI_ALLOCATE(xred,(3,effective_potential%crystal%natom))
+ ABI_ALLOCATE(xcart,(3,effective_potential%crystal%natom))
 
 !convert new xcart
- call xcart2xred(effective_potential%natom,effective_potential%rprimd,effective_potential%xcart,xred)
- call xred2xcart(effective_potential%natom, rprimd, xcart, xred)
+ call xcart2xred(effective_potential%crystal%natom,effective_potential%crystal%rprimd,&
+&                effective_potential%crystal%xcart,xred)
+ call xred2xcart(effective_potential%crystal%natom, rprimd, xcart, xred)
 
- call init_supercell(effective_potential%natom, 0,&
+ call init_supercell(effective_potential%crystal%natom, 0,&
 &     real(inp%n_cell,dp),&
 &     rprimd,&
-&     effective_potential%typat,&
+&     effective_potential%crystal%typat,&
 &     xcart,&
-&     super_cell)
+&     supercell)
 !Store the information of the supercell of the reference structure into effective potential
- call copy_supercell(super_cell,effective_potential%supercell)
+ call copy_supercell(supercell,effective_potential%supercell)
 !Set new MPI for the new supercell 
  call effective_potential_initmpi_supercell(effective_potential,comm)
 !Deallocation of useless array
- call destroy_supercell(super_cell)   
+ call destroy_supercell(supercell)   
 
  ABI_DEALLOCATE(xred)
  ABI_DEALLOCATE(xcart)
@@ -220,7 +221,7 @@ implicit none
    dtset%jellslab = 0   ! include a JELLium SLAB in the cell
    dtset%mdwall = 10000 ! Molecular Dynamics WALL location
    dtset%natom = effective_potential%supercell%natom_supercell
-   dtset%ntypat = effective_potential%ntypat
+   dtset%ntypat = effective_potential%crystal%ntypat
    dtset%nconeq = 0     ! Number of CONstraint EQuations
    dtset%noseinert = 1.d-5 ! NOSE INERTia factor
    dtset%nnos = 5       ! Number of nose masses Characteristic
@@ -239,13 +240,11 @@ implicit none
 
 !array
    ABI_ALLOCATE(dtset%iatfix,(3,dtset%natom)) ! Indices of AToms that are FIXed
-!   ABI_ALLOCATE(dtset%iatfix,(3,1)) ! Indices of AToms that are FIXed
    dtset%iatfix = zero
    dtset%goprecprm(:) = zero !Geometry Optimization PREconditioner PaRaMeters equations
    dtset%mdtemp(1) = inp%temperature   !Molecular Dynamics Temperatures 
    dtset%mdtemp(2) = inp%temperature   !Molecular Dynamics Temperatures 
    ABI_ALLOCATE(dtset%prtatlist,(dtset%natom)) !PRinT by ATom LIST of ATom
-!   ABI_ALLOCATE(dtset%prtatlist,(1)) !PRinT by ATom LIST of ATom
    dtset%prtatlist(:) = zero
 
    if(dtset%nnos>0) then
@@ -261,7 +260,7 @@ implicit none
    dtset%tnons = tnons
    call alloc_copy(tnons,dtset%tnons)
    call alloc_copy(effective_potential%supercell%typat_supercell,dtset%typat)
-   call alloc_copy(effective_potential%znucl,dtset%znucl)   
+   call alloc_copy(effective_potential%crystal%znucl,dtset%znucl)   
 
 !  set psps 
    psps%useylm = dtset%useylm
@@ -285,7 +284,7 @@ implicit none
 !  Assign masses to each atom (for MD)
    do jj = 1,dtset%natom
      amass(jj)=amu_emass*&
-&      effective_potential%amu(effective_potential%supercell%typat_supercell(jj))
+&      effective_potential%crystal%amu(effective_potential%supercell%typat_supercell(jj))
    end do
 
 !  Set the dffil structure
@@ -300,8 +299,6 @@ implicit none
 !  Initialize xf history (should be put in inwffil)
    ab_xfh%nxfh=0
    ab_xfh%mxfh=(ab_xfh%nxfh-dtset%restartxf+1)+dtset%ntime+5 
-!   ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
-!   ab_xfh%xfhist(:,:,:,:) = zero
 
 !***************************************************************
 !2  initialization of the structure for the dynamics
@@ -349,7 +346,7 @@ implicit none
      vel = zero
    end if
    vel_cell = zero
-   
+
 !*********************************************************
 !3   Call main routine for monte carlo / molecular dynamics
 !*********************************************************
@@ -402,14 +399,14 @@ implicit none
 !    call wrtout(ab_out,message,'COLL')
 !    call wrtout(std_out,message,'COLL')
 
-!    ABI_ALLOCATE(disp,(inp%ntime,3,super_cell%natom_supercell))
-!    ABI_ALLOCATE(disp_tmp,(inp%ntime,3*super_cell%natom_supercell))
+!    ABI_ALLOCATE(disp,(inp%ntime,3,supercell%natom_supercell))
+!    ABI_ALLOCATE(disp_tmp,(inp%ntime,3*supercell%natom_supercell))
 !    ABI_ALLOCATE(energy,(inp%ntime))
-!    ABI_ALLOCATE(fcart,(3,super_cell%natom_supercell))
-!    ABI_ALLOCATE(fred,(3,super_cell%natom_supercell))
+!    ABI_ALLOCATE(fcart,(3,supercell%natom_supercell))
+!    ABI_ALLOCATE(fred,(3,supercell%natom_supercell))
 ! !  Read displacement
 !    call effective_potential_file_readDisplacement(filnam(4),disp,inp%ntime,&
-! &                              super_cell%natom_supercell)
+! &                              supercell%natom_supercell)
 
 !    do ii=1,inp%ntime
 !      write(message, '(a,(80a),2a,I3)' ) ch10,&
@@ -422,9 +419,9 @@ implicit none
 !      write(112,'(I3,es23.14)') ii , energy(ii)
 ! !SHOULD ADD STRTEN
 ! !     call effective_potential_getHarmonicContributions(effective_potential,energy_harmonic,fcart,fred,&
-! !&                                       super_cell%natom_supercell,&
-! !&                                       super_cell%rprimd_supercell,&
-! !&                                       super_cell%xcart_supercell,1,disp(1,:,:))
+! !&                                       supercell%natom_supercell,&
+! !&                                       supercell%rprimd_supercell,&
+! !&                                       supercell%xcart_supercell,1,disp(1,:,:))
      
 !    end do
 

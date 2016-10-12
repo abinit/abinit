@@ -154,8 +154,8 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
       end if
 
       !Fill the eff_pots with the conresponding strain
-      call strain_get(eff_pots(ii)%strain,rprim=eff_pot%rprimd,&
-&                     rprim_def=eff_pots(ii)%rprimd)
+      call strain_get(eff_pots(ii)%strain,rprim=eff_pot%crystal%rprimd,&
+&                     rprim_def=eff_pots(ii)%crystal%rprimd)
 
       jj = jj + 1; ii = ii + 1
 
@@ -177,19 +177,19 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
       MSG_WARNING(message)
       file_usable(ii) = .False.
     end if
-    if (eff_pots(ii)%natom/=eff_pots(1)%natom) then
+    if (eff_pots(ii)%crystal%natom/=eff_pots(1)%crystal%natom) then
       write(message, '(a,I5,a,a,a,a,a,I5,a,a,a,a)' )&
-&    'the number of atoms in reference  (',eff_pots(1)%natom,') is not equal to the  ',ch10,&
-&    'the number of atoms  in',trim(filenames(ii+2)),' (',eff_pots(ii)%natom,')',ch10,&
+&    'the number of atoms in reference  (',eff_pots(1)%crystal%natom,') is not equal to the  ',ch10,&
+&    'the number of atoms  in',trim(filenames(ii+2)),' (',eff_pots(ii)%crystal%natom,')',ch10,&
 &    'this files cannot be used',ch10
       MSG_WARNING(message)
       file_usable(ii) = .False.
     end if
-    if (eff_pots(ii)%ntypat/=eff_pots(1)%ntypat) then
+    if (eff_pots(ii)%crystal%ntypat/=eff_pots(1)%crystal%ntypat) then
       write(message, '(a,I5,a,a,a,a,a,I5,a,a,a,a)' )&
-&    'the number of type of atoms in reference  (',eff_pots(1)%ntypat,') is not equal to the  ',ch10,&
-&    'the number of type of atoms  in',trim(filenames(ii+2)),' (',eff_pots(ii)%ntypat,')',ch10,&
-&    'this files can not be used',ch10
+&    'the number of type of atoms in reference  (',eff_pots(1)%crystal%ntypat,') is not equal to the  ',&
+&     ch10,'the number of type of atoms  in',trim(filenames(ii+2)),' (',eff_pots(ii)%crystal%ntypat,')',&
+&     ch10,'this files can not be used',ch10
       MSG_WARNING(message)
       file_usable(ii) = .False.
     end if
@@ -266,7 +266,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
               delta = inp%delta_df
               if (kk==1) delta = -1 * delta 
               call strain_init(strain,name=name,direction=ii,delta=delta)
-              rprimd_def = matmul(eff_pot%rprimd,strain%strain)
+              rprimd_def = matmul(eff_pot%crystal%rprimd,strain%strain)
               if(kk==1) then
                 write(message, '(a,a,a,a,a,I1,a,a,a,a)' )& 
 &                 ' if you want to get the correct structure, please run dfpt calculation with',ch10,&

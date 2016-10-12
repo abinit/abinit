@@ -97,23 +97,23 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
 !**********************************************************************
 ! Transfert basics values 
 !**********************************************************************
-  effective_potential%acell  = ddb%acell
-  effective_potential%natom  = crystal%natom
-  effective_potential%ntypat = crystal%ntypat
-  effective_potential%rprimd = crystal%rprimd
-  effective_potential%ucvol  = crystal%ucvol
 
-  ABI_ALLOCATE(effective_potential%amu,(crystal%ntypat))
-  effective_potential%amu(:)    = ddb%amu(:)
+  effective_potential%crystal%natom  = crystal%natom
+  effective_potential%crystal%ntypat = crystal%ntypat
+  effective_potential%crystal%rprimd = crystal%rprimd
+  effective_potential%crystal%ucvol  = crystal%ucvol
 
-  ABI_ALLOCATE(effective_potential%typat,(crystal%natom))
-  effective_potential%typat(:)  = crystal%typat(:)
+  ABI_ALLOCATE(effective_potential%crystal%amu,(crystal%ntypat))
+  effective_potential%crystal%amu(:)    = ddb%amu(:)
 
-  ABI_ALLOCATE(effective_potential%xcart,(3,crystal%natom))
-  effective_potential%xcart(:,:)  = crystal%xcart(:,:)
+  ABI_ALLOCATE(effective_potential%crystal%typat,(crystal%natom))
+  effective_potential%crystal%typat(:)  = crystal%typat(:)
 
-  ABI_ALLOCATE(effective_potential%znucl,(crystal%ntypat))
-  effective_potential%znucl(:)  = crystal%znucl(:)
+  ABI_ALLOCATE(effective_potential%crystal%xcart,(3,crystal%natom))
+  effective_potential%crystal%xcart(:,:)  = crystal%xcart(:,:)
+
+  ABI_ALLOCATE(effective_potential%crystal%znucl,(crystal%ntypat))
+  effective_potential%crystal%znucl(:)  = crystal%znucl(:)
 
 !**********************************************************************
 ! Transfert energy from input file
@@ -403,13 +403,13 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
 !**********************************************************************
 
 !Reorder cell from canonical coordinates to reduced coordinates (for multibinit)
- call cell9(ifc%atmfrc,inp%brav,ifc%cell,ddb%gprim,effective_potential%natom,ifc%nrpt,&
+ call cell9(ifc%atmfrc,inp%brav,ifc%cell,ddb%gprim,effective_potential%crystal%natom,ifc%nrpt,&
 &           ifc%rcan,ifc%rpt,ifc%wghatm,crystal%xred)
 
 ! Apply weight on each R point
   do irpt=1,ifc%nrpt
-    do ia=1,effective_potential%natom 
-      do ib=1,effective_potential%natom 
+    do ia=1,effective_potential%crystal%natom 
+      do ib=1,effective_potential%crystal%natom 
         ifc%atmfrc(:,:,ia,:,ib,irpt) = ifc%atmfrc(:,:,ia,:,ib,irpt)*ifc%wghatm(ia,ib,irpt) 
       end do
     end do
