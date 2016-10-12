@@ -421,6 +421,8 @@ end subroutine xml_getdims
 !! and store them in effective potentential type
 !!
 !! INPUTS
+!! eff_pot = effective potential type
+!! comm=MPI communicator
 !! character(len=*) filnam: name of input or output file
 !!
 !! OUTPUT
@@ -433,7 +435,7 @@ end subroutine xml_getdims
 !!
 !! SOURCE
 
- subroutine xml2effpot(eff_pot,filename)
+ subroutine xml2effpot(eff_pot,filename,comm)
 
  use m_atomdata
  use m_effective_potential, only : effective_potential_type
@@ -452,6 +454,7 @@ end subroutine xml_getdims
  !Arguments ------------------------------------
  !scalars
  character(len=*),intent(in) :: filename
+ integer, intent(inout) :: comm
  !arrays
  type(effective_potential_type), intent(inout) :: eff_pot
 
@@ -1110,7 +1113,7 @@ end subroutine xml_getdims
 !Initialisation of eff_pot
  call effective_potential_init(crystal,dynmat,energy,eff_pot,epsilon_inf,&
 &                              elastic_constants,has_3rd,ifcs,internal_strain,phfrq,qph1l,&
-&                              nph1l,zeff,phonon_strain=phonon_strain)
+&                              nph1l,zeff,comm,phonon_strain=phonon_strain)
 
 !DEALLOCATION OF ARRAYS
  ABI_DEALLOCATE(all_amu)
@@ -1469,7 +1472,7 @@ end subroutine effective_potential_file_getDim
 !     Free the effective potential before 
       call effective_potential_free(eff_pot)
       
-      call xml2effpot(eff_pot,filename)
+      call xml2effpot(eff_pot,filename,comm)
 
 !     If needed, print the effective potential
       call effective_potential_print(eff_pot,inp%prt_effpot)

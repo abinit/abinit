@@ -259,15 +259,6 @@ subroutine destroy_mpi_enreg(MPI_enreg)
    ABI_DEALLOCATE(mpi_enreg%distrb_hf)
  end if
 
- if(allocated(mpi_enreg%my_cells))then
-   ABI_DEALLOCATE(mpi_enreg%my_cells)
- end if
-
- if(allocated(mpi_enreg%my_index_cells))then
-   ABI_DEALLOCATE(mpi_enreg%my_index_cells)
- end if
-
-
 !Do not deallocate wavelet denspot distribution arrays,
 !they are handled by BigDFT.
 

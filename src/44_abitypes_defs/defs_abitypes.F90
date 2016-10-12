@@ -1017,25 +1017,6 @@ type dataset_type
    ! Size of the communicator over one cell
 
 ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-! This is for the parallelisation over the supercell
-   integer :: comm_supercell
-   ! local Communicator over all processors treating the same cell
-
-   integer :: me_supercell
-   ! Index of my processor in the comm. over one cell
-
-   integer my_ncell
-   ! Number of cell treated by current proc
-
-   integer,allocatable :: my_cells(:)
-   ! my_cells(my_ncell)
-   ! Number of each cells in the supercell treat by this CPU
-
-   integer,allocatable :: my_index_cells(:,:)   
-   ! my_cells(my_ncell,3)
-   ! indexes of the cells in the supercell treat by this CPU
-
-! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! This is for the parallelisation over fft
    integer :: comm_fft
    ! Communicator over fft

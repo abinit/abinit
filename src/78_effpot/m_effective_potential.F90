@@ -46,16 +46,19 @@ module m_effective_potential
 
  implicit none
 
+
  public :: effective_potential_applySumRule
  public :: effective_potential_distributeResidualForces
  public :: effective_potential_effpot2ddb
  public :: effective_potential_effpot2dynmat
  public :: effective_potential_free
+ public :: effective_potential_freempi_supercell
  public :: effective_potential_generateDipDip
  public :: effective_potential_getDeltaEnergy
  public :: effective_potential_evaluate
  public :: effective_potential_getForces
  public :: effective_potential_init
+ public :: effective_potential_initmpi_supercell 
  public :: effective_potential_print
  public :: effective_potential_printPDOS
  public :: effective_potential_printSupercell
@@ -167,6 +170,25 @@ module m_effective_potential
    type(anharmonics_terms_type) :: anharmonics_terms
 !     type with all information for anharmonics terms
 
+! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+! This is for the parallelisation over the supercell
+   integer :: comm_supercell
+   ! local Communicator over all processors treating the same cell
+
+   integer :: me_supercell
+   ! Index of my processor in the comm. over one cell
+
+   integer my_ncell
+   ! Number of cell treated by current proc
+
+   integer,allocatable :: my_cells(:)
+   ! my_cells(my_ncell)
+   ! Number of each cells in the supercell treat by this CPU
+
+   integer,allocatable :: my_index_cells(:,:)   
+   ! my_cells(my_ncell,3)
+   ! indexes of the cells in the supercell treat by this CPU
+
  end type effective_potential_type
 !!***
 
@@ -202,7 +224,7 @@ CONTAINS  !=====================================================================
 
 subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
 &                                   epsilon_inf,elastic_constants,has_3rd,ifcs,&
-&                                   internal_strain,phfrq,qph1l,nqpt,zeff,&
+&                                   internal_strain,phfrq,qph1l,nqpt,zeff,comm,&
 &                                   anharmonics_terms,external_stress,&
 &                                   forces,internal_stress,phonon_strain,strain,supercell,&
 &                                   name)
@@ -220,6 +242,7 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
 !scalars
  real(dp),intent(in):: energy
  integer,intent(in) :: nqpt
+ integer, intent(in) :: comm
  character(len=fnlen), optional,intent(in) :: name
  logical,intent(in) :: has_3rd
 !arrays
@@ -357,13 +380,140 @@ end if
  end if
 
  if(present(supercell))then
-   eff_pot%supercell = supercell
+   call copy_supercell(supercell,eff_pot%supercell)
  else
-   call init_supercell(eff_pot%natom, 0, real((/0,0,0/),dp), eff_pot%rprimd, eff_pot%typat,&
+   call init_supercell(eff_pot%natom, 0, real((/1,1,1/),dp), eff_pot%rprimd, eff_pot%typat,&
 &                    eff_pot%xcart, eff_pot%supercell)
  end if
+ 
+ call effective_potential_initmpi_supercell(eff_pot,comm)
 
 end subroutine effective_potential_init 
+!!***
+
+!!****f* m_phonon_effective_potential/effective_potential_initmpi_supercell
+!! NAME
+!!  effective_potential_initmpi_supercell
+!!
+!! FUNCTION
+!!  Initializes the mpi informations for parallelism over supercell.
+!!
+!! INPUTS
+!!   eff_pot= effective_potential_type
+!!   comm = communicator
+!!
+!! OUTPUT
+!! This is for the parallelisation over the supercell
+!! 
+!!  eff_pot%me_supercell =  Index of my processor in the comm. over one cell
+!!  eff_pot%my_ncell     =  Number of cell treated by current proc
+!!  eff_pot%my_cells(:)  = Number of the cells in the supercell treat by this CPU
+!!  eff_pot%my_index_cells(:,:) = indexes of the cells in the supercell treat by this CPU
+!!
+!! PARENTS
+!!     
+!!
+!! CHILDREN
+!!
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+subroutine effective_potential_initmpi_supercell(eff_pot,comm)
+
+ use defs_basis
+ use defs_abitypes
+ use m_errors
+ use m_profiling_abi
+ use m_xmpi
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'effective_potential_initmpi_supercell'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(effective_potential_type),intent(inout)  :: eff_pot
+ integer,intent(in) :: comm
+!arrays
+
+!Local variables-------------------------------
+!scalars
+ integer :: i1,i2,i3,icell,ii
+ integer :: my_rank,ncell_alone,ncell,nproc
+ integer :: master = zero
+ logical :: iam_master = .false.
+ character(len=500) :: msg
+!array
+ integer :: cell_number(3)
+! ***********************************************************************
+
+!Set the number of cell in the supercell
+ cell_number(:) = int(eff_pot%supercell%qphon(:))
+ ncell = product(cell_number(:))
+
+!Do some checks
+ if (any(cell_number <= 0).or.ncell<=0) then
+   write(msg,'(a,a)')' No supercell found for setting'
+   MSG_ERROR(msg)
+ end if
+ 
+ eff_pot%comm_supercell = comm
+
+!MPI variables
+ nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ iam_master = (my_rank == master)
+
+ call effective_potential_freempi_supercell(eff_pot)
+
+!Determine the number of cell for each CPU
+ ncell_alone = mod(ncell,nproc)
+ eff_pot%my_ncell = aint(real(ncell,sp)/nproc)  
+ if(my_rank >= (nproc-ncell_alone)) then
+   eff_pot%my_ncell = eff_pot%my_ncell  + 1
+ end if
+
+!Allocation of array
+ ABI_ALLOCATE(eff_pot%my_cells,(eff_pot%my_ncell))
+ ABI_ALLOCATE(eff_pot%my_index_cells,(eff_pot%my_ncell,3))
+ eff_pot%my_cells = zero
+ eff_pot%my_index_cells = zero
+
+ do icell = 1,eff_pot%my_ncell
+   if(my_rank >= (nproc-ncell_alone))then
+     eff_pot%my_cells(icell)=(aint(real(ncell,sp)/nproc))*(my_rank)+&
+&                              (my_rank - (nproc-ncell_alone)) + icell
+   else
+     eff_pot%my_cells(icell)=(eff_pot%my_ncell)*(my_rank)  + icell
+   end if
+ end do
+ 
+ icell = 0
+ ii = 0
+ do i1 = 1,cell_number(1)
+   do i2 = 1,cell_number(2)
+     do i3 = 1,cell_number(3)
+       ii = ii +1
+       if(any(eff_pot%my_cells==ii))then
+         icell=icell+1
+         eff_pot%my_index_cells(icell,1) = i1; 
+         eff_pot%my_index_cells(icell,2) = i2; 
+         eff_pot%my_index_cells(icell,3) = i3;
+       end if
+     end do
+   end do
+ end do
+
+end subroutine effective_potential_initmpi_supercell
 !!***
 
 
@@ -471,8 +621,67 @@ subroutine effective_potential_free(eff_pot)
   call harmonics_terms_free(eff_pot%harmonics_terms)
   call destroy_supercell(eff_pot%supercell)
   call crystal_free(eff_pot%crystal)
+  call effective_potential_freempi_supercell(eff_pot)
 
 end subroutine effective_potential_free
+!!***
+
+!****f* m_effective_potential/effective_potential_freempi_supercell
+!!
+!! NAME
+!! effective_potential_freempi_supercell
+!!
+!! FUNCTION
+!! deallocate all dynamic memory for mpi of supercell
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!! eff_pot = supercell structure with data to be output
+!!
+!! PARENTS
+!!   multibinit
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine effective_potential_freempi_supercell(eff_pot)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'effective_potential_freempi_supercell'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+!array
+ type(effective_potential_type), intent(inout) :: eff_pot
+
+!Local variables-------------------------------
+!scalars
+!array
+
+! *************************************************************************
+
+ eff_pot%me_supercell = 0
+ eff_pot%my_ncell     = 0
+   
+ if (allocated(eff_pot%my_cells)) then
+   eff_pot%my_cells(:) = zero
+   ABI_DEALLOCATE(eff_pot%my_cells)
+ end if
+ 
+ if (allocated(eff_pot%my_index_cells)) then
+   eff_pot%my_index_cells(:,:) = zero
+   ABI_DEALLOCATE(eff_pot%my_index_cells)
+ end if
+
+end subroutine effective_potential_freempi_supercell
 !!***
 
 
@@ -547,17 +756,17 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
  real(dp),allocatable :: buff_ewald(:,:,:,:,:,:),dyew(:,:,:,:,:), dyewq0(:,:,:,:,:)
  real(dp),allocatable :: xred(:,:),xred_tmp(:,:),zeff_tmp(:,:,:)
- type(supercell_type) :: super_cell
+ type(supercell_type) :: supercell
  type(ifc_type) :: ifc_tmp
 
 ! *************************************************************************
 
-!MPI variables
+!0 MPI variables
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  iam_master = (my_rank == master)
  ierr=0
 
-!Check the size of the cell
+!0 Check the size of the cell
  do ia=1,3
    if(n_cell(ia)<0.or.n_cell(ia)>20)then
      write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
@@ -572,14 +781,16 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 &   eff_pot%rprimd,&
 &   eff_pot%typat,&
 &   eff_pot%xcart,&
-&   super_cell)
+&   supercell)
 
  ncell = product(n_cell(:))
- 
-!1-Store the information of the supercell of the reference structure into effective potential
- call copy_supercell(super_cell,eff_pot%supercell)
 
-!2 Check if the bound of new cell correspond to the effective potential 
+!1 Store the information of the supercell of the reference structure into effective potential
+ call copy_supercell(supercell,eff_pot%supercell)
+!2 Initialisation of new mpi over supercell
+ call effective_potential_initmpi_supercell(eff_pot,comm)
+ 
+!3 Check if the bound of new cell correspond to the effective potential 
 !only for option=zero
 !set min and max
  min1 = minval(eff_pot%harmonics_terms%ifcs%cell(1,:)) 
@@ -605,7 +816,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
      call wrtout(std_out,message,"COLL")
    end if
 
-!3-Adapt harmonic part   
+!4-Adapt harmonic part   
  else if (option>=1.and.all(n_cell(:)>0)) then
 
    write(message,'(a,(80a),3a)') ch10,('=',i1=1,80),ch10,' Generation of new ifc',ch10
@@ -646,9 +857,13 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
        if (abs(max2) < abs(max2_cell)) max2 = max2_cell
        if (abs(max3) < abs(max3_cell)) max3 = max3_cell
 !      If the cell is smaller, we redifine new cell to take into acount all atoms
-       call destroy_supercell(super_cell)
+       call destroy_supercell(supercell)
        call init_supercell(eff_pot%natom, 0,real((/(max1-min1+1),(max2-min2+1),(max3-min3+1)/),dp),&
-&          eff_pot%rprimd,eff_pot%typat,eff_pot%xcart,super_cell)
+&          eff_pot%rprimd,eff_pot%typat,eff_pot%xcart,supercell)
+!      Store the information of the supercell of the reference structure into effective potential
+       call copy_supercell(supercell,eff_pot%supercell)
+!      Initialisation of new mpi over supercell
+       call effective_potential_initmpi_supercell(eff_pot,comm)
      else
        min1 = min1_cell ; min2 = min2_cell ; min3 = min3_cell
        max1 = max1_cell ; max2 = max2_cell ; max3 = max3_cell
@@ -732,7 +947,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 
 !  Allocate and initialize some array
    ABI_ALLOCATE(xred_tmp,(3,2*eff_pot%natom))
-   ABI_ALLOCATE(xred,(3,super_cell%natom_supercell))
+   ABI_ALLOCATE(xred,(3,supercell%natom_supercell))
    ABI_ALLOCATE(zeff_tmp,(3,3,2*eff_pot%natom))
    ABI_ALLOCATE(dyew,(2,3,2*eff_pot%natom,3,2*eff_pot%natom))
    ABI_ALLOCATE(dyewq0,(2,3,eff_pot%natom,3,eff_pot%natom))
@@ -745,10 +960,10 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    sumg0           = zero
    acell           = one
 
-   call matr3inv(super_cell%rprimd_supercell,gprimd)
-   call xcart2xred(super_cell%natom_supercell,super_cell%rprimd_supercell,&
-&                    super_cell%xcart_supercell,xred)
-   call metric(gmet,gprimd,-1,rmet,super_cell%rprimd_supercell,ucvol)
+   call matr3inv(supercell%rprimd_supercell,gprimd)
+   call xcart2xred(supercell%natom_supercell,supercell%rprimd_supercell,&
+&                    supercell%xcart_supercell,xred)
+   call metric(gmet,gprimd,-1,rmet,supercell%rprimd_supercell,ucvol)
 
 !  Fill the atom position of the first cell (reference cell)
    first_coordinate  = ((irpt_ref-1)*eff_pot%natom) + 1
@@ -765,7 +980,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
      if (i1==0.and.i2==0.and.i3==0) then
        call ewald9(acell,eff_pot%harmonics_terms%epsilon_inf,dyewq0,&
 &                  gmet,gprimd,eff_pot%natom,real((/0,0,0/),dp),rmet,&
-&                  super_cell%rprimd_supercell,sumg0,ucvol,xred_tmp(:,1:eff_pot%natom),&
+&                  supercell%rprimd_supercell,sumg0,ucvol,xred_tmp(:,1:eff_pot%natom),&
 &                  eff_pot%harmonics_terms%zeff)
        buff_ewald(:,:,:,:,:,irpt) = dyewq0 + tol10
      else
@@ -775,7 +990,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 &              xred(:,first_coordinate:second_coordinate)
        call ewald9(acell,eff_pot%harmonics_terms%epsilon_inf,dyew,gmet,gprimd,&
 &                  int(2*eff_pot%natom),real((/0,0,0/),dp),&
-&                  rmet,super_cell%rprimd_supercell,&
+&                  rmet,supercell%rprimd_supercell,&
 &                  sumg0,ucvol,xred_tmp,zeff_tmp)
        buff_ewald(:,:,:,:,:,irpt) = &
 &           dyew(:,:,1:eff_pot%natom,:,eff_pot%natom+1:2*eff_pot%natom) + tol10
@@ -849,7 +1064,6 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    call alloc_copy(ifc_tmp%cell        ,eff_pot%harmonics_terms%ifcs%cell)
 !  Free temporary ifc
    call ifc_free(ifc_tmp)
-
  end if
 
  if(asr >= 0) then
@@ -858,7 +1072,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
  end if
 
 ! Free suppercell
- call destroy_supercell(super_cell)
+ call destroy_supercell(supercell)
 
 end subroutine effective_potential_generateDipDip
 !!***
@@ -1113,7 +1327,7 @@ subroutine effective_potential_effpot2dynmat(dynmat,delta,eff_pot,natom,n_cell,o
        call effective_potential_getForces(eff_pot,fcart,fred,&
 &                                         eff_pot%supercell%natom_supercell,&
 &                                         eff_pot%supercell%rprimd_supercell,&
-&                                         eff_pot%supercell%xcart_supercell,1,displacement=disp)
+&                                         eff_pot%supercell%xcart_supercell,displacement=disp)
        diff(ii,:,:) = fred(:,:)
      end do
      select case (option)
@@ -2144,8 +2358,7 @@ end subroutine effective_potential_writeAbiInput
 !!
 !! SOURCE
  
-subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,comm,&
-&                   displacement)
+subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,displacement)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2159,7 +2372,6 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,c
 
 !Arguments ------------------------------------
 !scalars
-  integer, intent(in) :: comm
   integer, intent(in) :: natom
 !array
   type(effective_potential_type),intent(in) :: eff_pot
@@ -2169,9 +2381,7 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,c
 !Local variables-------------------------------
 !scalar
   integer,parameter :: master=0
-  integer :: i1,i2,i3,icell,ierr,ii,irpt,my_rank,nproc,ncell,ncell_alone,my_ncell
-  integer,allocatable :: my_cell(:),my_index_cells(:,:)
-  logical :: iam_master=.FALSE.
+  integer :: ierr,ii
 !array
   real(dp):: disp_tmp1(3,natom),dummy
   integer :: cell_number(3)
@@ -2194,40 +2404,6 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,c
     MSG_ERROR(msg)
   end if
 
-!MPI variables
-  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
-  iam_master = (my_rank == master)
-! Here we store in my_cell a list with the number of each cell to be treat by this CPU
-  ncell = product(eff_pot%supercell%qphon)
-  ncell_alone = mod(ncell,nproc)
-  my_ncell = aint(real(ncell,sp)/nproc) 
-  if(my_rank >= (nproc-ncell_alone)) then
-    my_ncell = my_ncell  + 1
-  end if
-  ABI_ALLOCATE(my_cell,(my_ncell))
-  my_cell = zero
-  do irpt = 1,my_ncell
-    if(my_rank >= (nproc-ncell_alone))then
-      my_cell(irpt) = (aint(real(ncell,sp)/nproc))*(my_rank)+ (my_rank - (nproc-ncell_alone)) + irpt
-    else
-      my_cell(irpt) = (my_ncell)*(my_rank)  + irpt
-    end if
-  end do
-
-  icell = 0
-  ii = 0
-  do i1 = 1,cell_number(1)
-    do i2 = 1,cell_number(2)
-      do i3 = 1,cell_number(3)
-        ii = ii +1
-        if(any(my_cell==ii))then
-          icell=icell+1
-          my_index_cells(icell,1) = i1; my_index_cells(icell,2) = i2; my_index_cells(icell,3) = i3;
-        end if
-      end do
-    end do
-  end do
-
 ! Set to zero 
   fred = zero
   fcart = zero
@@ -2243,9 +2419,10 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,c
   end if
 
 ! ifc contribution of the forces
-  call ifc_contribution(eff_pot,disp_tmp1,dummy,fcart,my_cell,my_ncell,my_index_cells)
+  call ifc_contribution(eff_pot,disp_tmp1,dummy,fcart,eff_pot%my_cells,&
+&                       eff_pot%my_ncell,eff_pot%my_index_cells)
 ! MPI_SUM
-  call xmpi_sum(fcart, comm, ierr)
+  call xmpi_sum(fcart, eff_pot%comm_supercell, ierr)
 
 ! Redistribute the residuale of the forces
   call effective_potential_distributeResidualForces(eff_pot,fcart,eff_pot%supercell%natom_supercell)
@@ -2283,7 +2460,7 @@ end subroutine effective_potential_getForces
 !! SOURCE
  
 subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,rprimd,&
-&                                       xcart,mpi_enreg,displacement,strain1,&
+&                                       xcart,displacement,strain1,&
 &                                       strain2,external_stress)
 
   use m_strain
@@ -2302,7 +2479,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !scalars
   integer, intent(in) :: natom
 !array
-  type(MPI_type),intent(in) :: mpi_enreg
   type(effective_potential_type),intent(in) :: eff_pot
   real(dp),intent(in) :: rprimd(3,3),xcart(3,natom)
   real(dp),intent(in),optional :: strain1(6),strain2(6)
@@ -2333,7 +2509,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 ! *************************************************************************
 
 ! Set MPI local varibaless
-  iam_master = (mpi_enreg%me == master)
+  iam_master = (eff_pot%me_supercell == master)
 
 ! Set variables
   supercell(1:3) = eff_pot%supercell%qphon(1:3)
@@ -2401,11 +2577,11 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   end if
 
   call ifc_contribution(eff_pot,disp_tmp1,energy_part,fcart_part,&
-&                       mpi_enreg%my_cells,mpi_enreg%my_ncell,mpi_enreg%my_index_cells)
+&                       eff_pot%my_cells,eff_pot%my_ncell,eff_pot%my_index_cells)
 
 ! MPI_SUM
-  call xmpi_sum(energy_part, mpi_enreg%comm_cell, ierr)
-  call xmpi_sum(fcart_part , mpi_enreg%comm_cell, ierr)
+  call xmpi_sum(energy_part, eff_pot%comm_supercell, ierr)
+  call xmpi_sum(fcart_part , eff_pot%comm_supercell, ierr)
 
   write(message, '(a,1ES24.16,a)' ) ' Energy of the ifc part :',energy_part,' Hartree'
   call wrtout(ab_out,message,'COLL')

@@ -69,7 +69,6 @@ subroutine mover_effpot(inp,filnam,effective_potential,comm)
 #define ABI_FUNC 'mover_effpot'
  use interfaces_14_hidewrite
  use interfaces_41_geometry
- use interfaces_51_manage_mpi
  use interfaces_95_drive, except_this_one => mover_effpot
 !End of the abilint section
 
@@ -179,16 +178,22 @@ implicit none
  call xred2xcart(effective_potential%natom, rprimd, xcart, xred)
 
  call init_supercell(effective_potential%natom, 0,&
-&  real(inp%n_cell,dp),&
-&   rprimd,&
-&   effective_potential%typat,&
-&   xcart,&
-&   super_cell)
+&     real(inp%n_cell,dp),&
+&     rprimd,&
+&     effective_potential%typat,&
+&     xcart,&
+&     super_cell)
+!Store the information of the supercell of the reference structure into effective potential
+ call copy_supercell(super_cell,effective_potential%supercell)
+!Set new MPI for the new supercell 
+ call effective_potential_initmpi_supercell(effective_potential,comm)
+!Deallocation of useless array
+ call destroy_supercell(super_cell)   
 
  ABI_DEALLOCATE(xred)
  ABI_DEALLOCATE(xcart)
 
- call effective_potential_printSupercell(effective_potential,supercell=super_cell)
+ call effective_potential_printSupercell(effective_potential)
 
  if(inp%dynamics==1) then
 !***************************************************************
@@ -196,9 +201,8 @@ implicit none
 !***************************************************************
 
 !Set mpi_eng
-   call init_mpi_enreg(mpi_enreg)
-   call initmpi_supercell(int(super_cell%qphon(1:3)),mpi_enreg)
    mpi_enreg%comm_cell  = comm
+   mpi_enreg%me = my_rank
 
 !Set the fake abinit dataset 
 !Scalar
@@ -215,7 +219,7 @@ implicit none
    end if
    dtset%jellslab = 0   ! include a JELLium SLAB in the cell
    dtset%mdwall = 10000 ! Molecular Dynamics WALL location
-   dtset%natom = super_cell%natom_supercell
+   dtset%natom = effective_potential%supercell%natom_supercell
    dtset%ntypat = effective_potential%ntypat
    dtset%nconeq = 0     ! Number of CONstraint EQuations
    dtset%noseinert = 1.d-5 ! NOSE INERTia factor
@@ -256,7 +260,7 @@ implicit none
    tnons = zero
    dtset%tnons = tnons
    call alloc_copy(tnons,dtset%tnons)
-   call alloc_copy(super_cell%typat_supercell,dtset%typat)
+   call alloc_copy(effective_potential%supercell%typat_supercell,dtset%typat)
    call alloc_copy(effective_potential%znucl,dtset%znucl)   
 
 !  set psps 
@@ -281,7 +285,7 @@ implicit none
 !  Assign masses to each atom (for MD)
    do jj = 1,dtset%natom
      amass(jj)=amu_emass*&
-&      effective_potential%amu(super_cell%typat_supercell(jj))
+&      effective_potential%amu(effective_potential%supercell%typat_supercell(jj))
    end do
 
 !  Set the dffil structure
@@ -321,7 +325,7 @@ implicit none
    end if
  
    ABI_ALLOCATE(dtset%rprimd_orig,(3,3,1))
-   dtset%rprimd_orig(:,:,1) = super_cell%rprimd_supercell
+   dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd_supercell
  
    ABI_ALLOCATE(xred,(3,dtset%natom))
    ABI_ALLOCATE(xred_old,(3,dtset%natom))
@@ -329,7 +333,8 @@ implicit none
    ABI_ALLOCATE(fred,(3,dtset%natom))
    ABI_ALLOCATE(fcart,(3,dtset%natom))
    
-   call xcart2xred(dtset%natom,super_cell%rprimd_supercell,super_cell%xcart_supercell,xred)
+   call xcart2xred(dtset%natom,effective_potential%supercell%rprimd_supercell,&
+&                  effective_potential%supercell%xcart_supercell,xred)
 
    xred_old = xred
    vel = zero
@@ -344,9 +349,6 @@ implicit none
      vel = zero
    end if
    vel_cell = zero
-
-!  Deallocation of useless array
-   call destroy_supercell(super_cell)   
    
 !*********************************************************
 !3   Call main routine for monte carlo / molecular dynamics

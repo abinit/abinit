@@ -616,7 +616,7 @@ real(dp) :: rmet(3,3)
 &                                             scfcv_args%results_gs%etotal,&
 &                                             scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
 &                                             scfcv_args%results_gs%strten,ab_mover%natom,rprimd,&
-&                                             xcart,scfcv_args%mpi_enreg)
+&                                             xcart)
          end if
 #if defined HAVE_LOTF
        end if
