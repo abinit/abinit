@@ -2,7 +2,7 @@
 #Tests: 
 # wvl_bigdft_comp = 0
 #
-ndtset 1
+ndtset 2
 #for the moment only one-dataset calculations work
 
 iscf1 17  # Density mixing
@@ -30,9 +30,9 @@ istwfk 1               #This is mandatory for WVLs
 # Self-consistent run to get the density
 
 #The next variables are too low (only for testing purposes):
-tolvrs     1.00d-8     #
-nline 2                #NSCF cycles at each step (~ 15 is usually required)
-nstep 10                #
+tolvrs     1.00d-10    #
+nnsclo 4               #NSCF cycles at each step (~ 15 is usually required)
+nstep 20               #
 
 amu 1.00
 nband 1

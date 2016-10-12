@@ -1,5 +1,5 @@
 
-.Version 8.1.4 of ABINIT 
+.Version 8.1.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
 
 .Copyright (C) 1998-2016 ABINIT group . 
@@ -70,8 +70,9 @@
             ngfft           2       2       2
              nkpt           1
             nline           2
+           nnsclo           4
         nscforder          14
-            nstep          10
+            nstep          20
              nsym           1
            ntypat           1
          nwfshist           2
@@ -84,7 +85,7 @@
            prteig           0
             prtwf           0
           spgroup           1
-           tolvrs      1.00000000E-03
+           tolvrs      1.00000000E-08
             typat      1  1
            usewvl           1
   wvl_bigdft_comp           0
@@ -156,21 +157,18 @@
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  grdnorm    nres2
- ETOT  1  -31.306938020582    -3.131E+01 1.976E-01 5.631E+00
- ETOT  2  -31.275278238154     3.166E-02 2.452E-02 2.740E+00
- ETOT  3  -31.261346227491     1.393E-02 2.991E-02 2.257E-01
- ETOT  4  -31.262168860334    -8.226E-04 2.035E-02 6.922E-02
- ETOT  5  -31.261955014116     2.138E-04 8.770E-03 1.610E-02
- ETOT  6  -31.262446907479    -4.919E-04 7.712E-03 4.988E-02
- ETOT  7  -31.261945520808     5.014E-04 5.253E-03 1.891E-03
- ETOT  8  -31.261980154443    -3.463E-05 3.288E-03 3.460E-03
- ETOT  9  -31.262019930203    -3.978E-05 2.904E-03 5.527E-03
- ETOT 10  -31.262021611688    -1.681E-06 2.160E-03 4.968E-03
+ ETOT  1  -31.318782597567    -3.132E+01 2.365E-02 8.846E+00
+ ETOT  2  -31.269945616288     4.884E-02 2.737E-03 1.900E+00
+ ETOT  3  -31.262573351317     7.372E-03 5.391E-03 2.261E-01
+ ETOT  4  -31.262130610164     4.427E-04 1.672E-03 6.019E-02
+ ETOT  5  -31.261992494077     1.381E-04 3.776E-04 4.050E-03
+ ETOT  6  -31.261990141630     2.352E-06 9.272E-05 1.283E-04
+ ETOT  7  -31.261989939752     2.019E-07 2.590E-05 5.255E-06
+ ETOT  8  -31.261990003838    -6.409E-08 9.934E-06 8.509E-07
+ ETOT  9  -31.261990000419     3.419E-09 3.008E-06 1.318E-08
+ ETOT 10  -31.261990000451    -3.195E-11 8.195E-07 4.766E-09
 
- scprqt:  WARNING -
-  nstep=   10 was not enough SCF cycles to converge;
-  density residual=  4.968E-03 exceeds tolvrs=  1.000E-03
-
+ At SCF step   10       nres2   =  4.77E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -191,26 +189,26 @@
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=  -0.02638
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  7, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -1.10410   -0.62593   -0.40093   -0.40091   -0.36349   -0.14286   -0.14279
+  -1.10797   -0.62651   -0.40309   -0.40307   -0.36404   -0.14443   -0.14436
 
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  2.36982693367669E+01
-    Hartree energy  =  4.30200026438108E+01
-    XC energy       = -6.71068120398548E+00
+    Kinetic energy  =  2.37092624579667E+01
+    Hartree energy  =  4.29975093429274E+01
+    XC energy       = -6.70851043467628E+00
     Ion-ion energy  =  1.57441152968349E+01
     PspCore energy  =  0.00000000000000E+00
-    Loc. psp. energy= -1.09858434173245E+02
-    NL   psp  energy=  2.82022471807441E+00
-    >>>>>>>>> Etotal= -3.12865033817437E+01
+    Loc. psp. energy= -1.09824379796716E+02
+    NL   psp  energy=  2.82002520102030E+00
+    >>>>>>>>> Etotal= -3.12619779326431E+01
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -6.07638887082374E+00
+    Band energy     = -6.09815173180241E+00
     Ion-ion energy  =  1.57441152968349E+01
     PspCore energy  =  0.00000000000000E+00
-    Dble-C XC-energy= -4.09297480376988E+01
-    >>>> Etotal (DC)= -3.12620216116876E+01
+    Dble-C XC-energy= -4.09079535654837E+01
+    >>>> Etotal (DC)= -3.12619900004512E+01
 --------------------------------------------------------------------------------
 
 ================================================================================
@@ -235,21 +233,19 @@
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  grdnorm    vres2
- ETOT  1  -31.244335454839    -3.124E+01 1.976E-01 1.708E+02
- ETOT  2  -31.256023990820    -1.169E-02 2.447E-02 3.967E+01
- ETOT  3  -31.259716586449    -3.693E-03 2.975E-02 4.621E+00
- ETOT  4  -31.261746903532    -2.030E-03 1.921E-02 6.617E-01
- ETOT  5  -31.261803236937    -5.633E-05 9.253E-03 3.246E-01
- ETOT  6  -31.261851501821    -4.826E-05 6.411E-03 4.749E-01
- ETOT  7  -31.261969003447    -1.175E-04 3.977E-03 9.090E-03
- ETOT  8  -31.261962493326     6.510E-06 2.790E-03 1.624E-02
- ETOT  9  -31.261971101841    -8.609E-06 2.219E-03 1.339E-02
- ETOT 10  -31.261978030001    -6.928E-06 1.885E-03 2.170E-02
+ ETOT  1  -31.189302896327    -3.119E+01 2.365E-02 1.973E+02
+ ETOT  2  -31.252153924524    -6.285E-02 2.750E-03 3.336E+01
+ ETOT  3  -31.259905803135    -7.752E-03 5.015E-03 7.281E+00
+ ETOT  4  -31.262298568507    -2.393E-03 1.367E-03 8.379E-01
+ ETOT  5  -31.262720821855    -4.223E-04 2.527E-04 5.894E-02
+ ETOT  6  -31.261637278206     1.084E-03 1.150E-04 2.809E-03
+ ETOT  7  -31.261913698215    -2.764E-04 5.996E-05 3.476E-04
+ ETOT  8  -31.261995729267    -8.203E-05 7.276E-06 1.423E-05
+ ETOT  9  -31.261993057899     2.671E-06 4.980E-06 1.602E-07
+ ETOT 10  -31.261989500721     3.557E-06 1.167E-06 1.929E-08
+ ETOT 11  -31.261989913143    -4.124E-07 2.190E-07 1.539E-09
 
- scprqt:  WARNING -
-  nstep=   10 was not enough SCF cycles to converge;
-  potential residual=  2.170E-02 exceeds tolvrs=  1.000E-03
-
+ At SCF step   11       vres2   =  1.54E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -267,25 +263,29 @@
     2      2.93337971779822     1.79920250920600     1.79920250920600
  length scales=  8.800000000000  6.800000000000  6.800000000000 bohr
               =  4.656759435592  3.598405018412  3.598405018412 angstroms
- Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=  -0.02639
+ Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=  -0.02638
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  7, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -1.10576   -0.62637   -0.40193   -0.40191   -0.36395   -0.14365   -0.14358
+  -1.10797   -0.62651   -0.40309   -0.40307   -0.36404   -0.14443   -0.14436
 
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  2.37080031719017E+01
-    Hartree energy  =  4.29958135695954E+01
-    XC energy       = -6.70844013418491E+00
+    Kinetic energy  =  2.37092658623761E+01
+    Hartree energy  =  4.29975049065271E+01
+    XC energy       = -6.70851054596861E+00
     Ion-ion energy  =  1.57441152968349E+01
     PspCore energy  =  0.00000000000000E+00
-    Loc. psp. energy= -1.09823113616222E+02
-    NL   psp  energy=  2.82164368207361E+00
-    >>>>>>>>> Etotal= -3.12619780300014E+01
+    Loc. psp. energy= -1.09824390553804E+02
+    NL   psp  energy=  2.82002512089173E+00
+    >>>>>>>>> Etotal= -3.12619899131428E+01
 
- Other information on the energy :
-    Total energy(eV)= -8.50681684397255E+02 ; Band energy (Ha)=  -6.0870612926E+00
+ "Double-counting" decomposition of free energy:
+    Band energy     = -6.09815838632590E+00
+    Ion-ion energy  =  1.57441152968349E+01
+    PspCore energy  =  0.00000000000000E+00
+    Dble-C XC-energy= -4.09079490973683E+01
+    >>>> Etotal (DC)= -3.12619921868593E+01
 --------------------------------------------------------------------------------
 
 == END DATASET(S) ==============================================================
@@ -296,8 +296,8 @@
               amu      1.00000000E+00
       chksymbreak           0
            diemix      4.00000000E-01
-           etotal1    -3.1262021612E+01
-           etotal2    -3.1261978030E+01
+           etotal1    -3.1261990000E+01
+           etotal2    -3.1261989913E+01
             fcart1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
             fcart2     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
@@ -315,8 +315,9 @@
             ngfft           2       2       2
              nkpt           1
             nline           2
+           nnsclo           4
         nscforder          14
-            nstep          10
+            nstep          20
              nsym           1
            ntypat           1
          nwfshist           2
@@ -333,7 +334,7 @@
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
            strten2     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-           tolvrs      1.00000000E-03
+           tolvrs      1.00000000E-08
             typat      1  1
            usewvl           1
   wvl_bigdft_comp           0
@@ -430,5 +431,5 @@
 ================================================================================
 
  Calculation completed.
-.Delivered  14 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.5  wall=          4.5
+.Delivered  10 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=          8.6  wall=          9.8

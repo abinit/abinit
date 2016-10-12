@@ -31,7 +31,7 @@ nstep    20
 iscf 12
 
 # Self-consistent run to get the density
-tolvrs     1.00d-05     #too low
+tolvrs     1.00d-08
 
 #semiconducting case:
 nband 8             #important give only occupied bands

@@ -24,6 +24,8 @@
 
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
+
+ DATASET    2 : space group P1 (#  1); Bravais aP (primitive triclinic)
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -39,19 +41,21 @@
               amu      1.00000000E+00
 -          fftalg         312
          icoulomb           1
+             iscf1         17
+             iscf2          7
            istwfk        1
-           jdtset        1
+           jdtset        1    2
            kptopt           0
 P           mkmem           1
             natom           1
             nband           1
-           ndtset           1
+           ndtset           2
             ngfft           2       2       2
           ngfftdg           2       2       2
              nkpt           1
-            nline           2
+           nnsclo           4
         nscforder          14
-            nstep          10
+            nstep          20
              nsym           1
            ntypat           1
          nwfshist           4
@@ -63,7 +67,7 @@ P           mkmem           1
            prteig           0
             prtwf           0
           spgroup           1
-           tolvrs      1.00000000E-08
+           tolvrs      1.00000000E-10
             typat      1
            usewvl           1
   wvl_bigdft_comp           0
@@ -79,6 +83,8 @@ P           mkmem           1
 ================================================================================
 
  chkinp: Checking input parameters for consistency, jdtset=   1.
+
+ chkinp: Checking input parameters for consistency, jdtset=   2.
 
 ================================================================================
 == DATASET  1 ==================================================================
@@ -133,20 +139,21 @@ P           mkmem           1
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  grdnorm    nres2
- ETOT  1 -0.43839138069898    -4.384E-01 6.036E-02 2.565E+00
- ETOT  2 -0.43123626103711     7.155E-03 5.961E-03 1.587E-01
- ETOT  3 -0.43069581401692     5.404E-04 4.947E-03 1.736E-04
- ETOT  4 -0.43069530697600     5.070E-07 1.462E-04 1.630E-06
- ETOT  5 -0.43069536218639    -5.521E-08 1.133E-04 9.770E-08
- ETOT  6 -0.43069536207710     1.093E-10 2.921E-05 2.937E-09
+ ETOT  1 -0.43842311931679    -4.384E-01 1.614E-02 2.610E+00
+ ETOT  2 -0.43120881438132     7.214E-03 5.626E-04 1.502E-01
+ ETOT  3 -0.43069534986832     5.135E-04 1.943E-04 8.240E-05
+ ETOT  4 -0.43069531697853     3.289E-08 1.035E-05 2.219E-06
+ ETOT  5 -0.43069536209012    -4.511E-08 8.320E-07 8.042E-10
+ ETOT  6 -0.43069536211340    -2.328E-11 2.877E-08 4.224E-10
+ ETOT  7 -0.43069536211165     1.745E-12 5.619E-09 4.005E-12
 
- At SCF step    6       nres2   =  2.94E-09 < tolvrs=  1.00E-08 =>converged.
+ At SCF step    7       nres2   =  4.01E-12 < tolvrs=  1.00E-10 =>converged.
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.005530395077487
- Compensation charge over fft grid         =      0.005527982236958
+ Compensation charge over spherical meshes =      0.005529951069971
+ Compensation charge over fft grid         =      0.005527883359874
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -155,7 +162,7 @@ P           mkmem           1
 
 
  Augmentation waves occupancies Rhoij:
-   1.09237
+   1.09235
 
 
 ================================================================================
@@ -180,25 +187,146 @@ P           mkmem           1
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  4.72135537922014E-01
-    Hartree energy  =  3.10086427702910E-01
-    XC energy       = -2.48855363061159E-01
+    Kinetic energy  =  4.72121261178503E-01
+    Hartree energy  =  3.10081243348734E-01
+    XC energy       = -2.48851775920147E-01
     Ion-ion energy  =  0.00000000000000E+00
     PspCore energy  =  0.00000000000000E+00
-    Loc. psp. energy= -9.31700291607945E-01
-    Spherical terms = -3.23650574128466E-02
-    >>>>>>>>> Etotal= -4.30698746457027E-01
+    Loc. psp. energy= -9.31683235644905E-01
+    Spherical terms = -3.23623955568036E-02
+    >>>>>>>>> Etotal= -4.30694902594619E-01
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -1.96935956006416E-01
+    Band energy     = -1.96939938064332E-01
     Ion-ion energy  =  0.00000000000000E+00
     PspCore energy  =  0.00000000000000E+00
-    Dble-C XC-energy= -2.34549488384463E-01
-    Spherical terms =  7.90082313774074E-04
-    >>>> Etotal (DC)= -4.30695362077105E-01
+    Dble-C XC-energy= -2.34545435749967E-01
+    Spherical terms =  7.90011702644366E-04
+    >>>> Etotal (DC)= -4.30695362111654E-01
 
-  >Total energy in eV           = -1.17199089178630E+01
-  >Total DC energy in eV        = -1.17198168242018E+01
+  >Total energy in eV           = -1.17198043210475E+01
+  >Total DC energy in eV        = -1.17198168251419E+01
+--------------------------------------------------------------------------------
+
+================================================================================
+== DATASET  2 ==================================================================
+-   nproc =    1
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)= 17.4000000  0.0000000  0.0000000  G(1)=  0.0574713  0.0000000  0.0000000
+ R(2)=  0.0000000 17.4000000  0.0000000  G(2)=  0.0000000  0.0574713  0.0000000
+ R(3)=  0.0000000  0.0000000 17.4000000  G(3)=  0.0000000  0.0000000  0.0574713
+ Unit cell volume ucvol=  5.2680240E+03 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+
+ Coarse grid specifications (used for wave-functions):
+
+ Fine grid specifications (used for densities):
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/BZR/TORRENT/ABINIT-GIT/wvl-paw-forces/tests/Psps_for_tests/1h.atompaw.wvl
+- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/BZR/TORRENT/ABINIT-GIT/wvl-paw-forces/tests/Psps_for_tests/1h.atompaw.wvl
+- Paw atomic data for element H - Generated by atompaw v3.0.1.5 & AtomPAW2Abinit v3.3.1
+-  1.00000   1.00000  20120829                znucl, zion, pspdat
+    7    7    0    0      5992   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+ Pseudopotential format is: paw5
+ basis_size (lnmax)=  1 (lmn_size=  1), orbitals=   0
+ Spheres core radius: rc_sph= 0.89923524
+ 4 radial meshes are used:
+  - mesh 1: r(i)=AA*[exp(BB*(i-1))-1], size=5992 , AA= 0.11178E-02 BB= 0.11178E-02
+  - mesh 2: r(i)=AA*[exp(BB*(i-1))-1], size=5987 , AA= 0.11178E-02 BB= 0.11178E-02
+  - mesh 3: r(i)=AA*[exp(BB*(i-1))-1], size=8140 , AA= 0.11178E-02 BB= 0.11178E-02
+  - mesh 4: r(i)=AA*[exp(BB*(i-1))-1], size=8438 , AA= 0.11178E-02 BB= 0.11178E-02
+ Shapefunction is SIN type: shapef(r)=[sin(pi*r/rshp)/(pi*r/rshp)]**2
+ Radius for shape functions = sphere core radius
+ Radial grid used for partial waves is grid 1
+ Radial grid used for projectors is grid  2
+ Radial grid used for (t)core density is grid 1
+ Radial grid used for Vloc is grid 3
+ Radial grid used for pseudo valence density is grid 4
+ Compensation charge density is not taken into account in XC energy/potential
+ pspatm: atomic psp has been read  and splines computed
+
+  radii_cf(1)=   1.4634185; radii_cf(2)=   0.2000000; rad_cov=   0.2000000
+--------------------------------------------------------------------------------
+
+ setup2: nwvl coarse and fine are    5520       8
+
+================================================================================
+
+     iter   Etot(hartree)      deltaE(h)  grdnorm    vres2
+ ETOT  1 -0.42723221289397    -4.272E-01 1.614E-02 1.598E+02
+ ETOT  2 -0.43058521075960    -3.353E-03 2.721E-04 1.043E+01
+ ETOT  3 -0.43067436280400    -8.915E-05 1.724E-04 3.039E-03
+ ETOT  4 -0.43069133961249    -1.698E-05 2.286E-05 2.935E-06
+ ETOT  5 -0.43069550947669    -4.170E-06 4.298E-07 3.741E-08
+ ETOT  6 -0.43069536840065     1.411E-07 7.724E-08 1.757E-10
+ ETOT  7 -0.43069536209525     6.305E-09 1.361E-09 2.539E-12
+
+ At SCF step    7       vres2   =  2.54E-12 < tolvrs=  1.00E-10 =>converged.
+
+ PAW TEST:
+ ==== Compensation charge inside spheres ============
+ The following values must be close to each other ...
+ Compensation charge over spherical meshes =      0.005529955971859
+ Compensation charge over fft grid         =      0.005527882487966
+
+ ==== Results concerning PAW augmentation regions ====
+
+ Total pseudopotential strength Dij (hartree):
+  -0.03741
+
+
+ Augmentation waves occupancies Rhoij:
+   1.09235
+
+
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
+ reduced coordinates (array xred) for    1 atoms
+       0.500000000000      0.500000000000      0.500000000000
+ rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+
+ cartesian coordinates (angstrom) at end:
+    1      2.22254427607800     2.22254427607800     2.22254427607800
+ length scales=  8.400000000000  8.400000000000  8.400000000000 bohr
+              =  4.445088552156  4.445088552156  4.445088552156 angstroms
+ Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=  -0.01286
+ Eigenvalues (hartree) for nkpt=   1  k points:
+ kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -0.19694
+
+--------------------------------------------------------------------------------
+ Components of total free energy (in Hartree) :
+
+    Kinetic energy  =  4.72121203776644E-01
+    Hartree energy  =  3.10081410768893E-01
+    XC energy       = -2.48851894331226E-01
+    Ion-ion energy  =  0.00000000000000E+00
+    PspCore energy  =  0.00000000000000E+00
+    Loc. psp. energy= -9.31683657365633E-01
+    Spherical terms = -3.23624249439286E-02
+    >>>>>>>>> Etotal= -4.30695362095251E-01
+
+ "Double-counting" decomposition of free energy:
+    Band energy     = -1.96939803604706E-01
+    Ion-ion energy  =  0.00000000000000E+00
+    PspCore energy  =  0.00000000000000E+00
+    Dble-C XC-energy= -2.34545566231703E-01
+    Spherical terms =  7.90012482199662E-04
+    >>>> Etotal (DC)= -4.30695357354210E-01
+
+  >Total energy in eV           = -1.17198168246956E+01
+  >Total DC energy in eV        = -1.17198166956853E+01
 --------------------------------------------------------------------------------
 
 == END DATASET(S) ==============================================================
@@ -207,23 +335,27 @@ P           mkmem           1
  -outvars: echo values of variables after computation  --------
             acell      8.4000000000E+00  8.4000000000E+00  8.4000000000E+00 Bohr
               amu      1.00000000E+00
-           etotal1    -4.3069536208E-01
+           etotal1    -4.3069536211E-01
+           etotal2    -4.3069536210E-01
             fcart1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+            fcart2     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
 -          fftalg         312
          icoulomb           1
+             iscf1         17
+             iscf2          7
            istwfk        1
-           jdtset        1
+           jdtset        1    2
            kptopt           0
 P           mkmem           1
             natom           1
             nband           1
-           ndtset           1
+           ndtset           2
             ngfft           2       2       2
           ngfftdg           2       2       2
              nkpt           1
-            nline           2
+           nnsclo           4
         nscforder          14
-            nstep          10
+            nstep          20
              nsym           1
            ntypat           1
          nwfshist           4
@@ -237,7 +369,9 @@ P           mkmem           1
           spgroup           1
            strten1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-           tolvrs      1.00000000E-08
+           strten2     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+           tolvrs      1.00000000E-10
             typat      1
            usewvl           1
   wvl_bigdft_comp           0
@@ -329,5 +463,5 @@ P           mkmem           1
 ================================================================================
 
  Calculation completed.
-.Delivered  11 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.7  wall=          2.9
+.Delivered  14 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.8  wall=          6.4

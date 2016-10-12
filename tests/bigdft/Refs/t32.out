@@ -47,9 +47,9 @@ P           mkmem           1
             ngfft           2       2       2
           ngfftdg           2       2       2
              nkpt           1
-            nline           2
+           nnsclo           4
         nscforder          14
-            nstep          10
+            nstep          20
              nsym           1
            ntypat           1
          nwfshist           4
@@ -61,7 +61,7 @@ P           mkmem           1
            prteig           0
             prtwf           0
           spgroup           1
-           tolvrs      1.00000000E-08
+           tolvrs      1.00000000E-10
             typat      1
            usewvl           1
   wvl_bigdft_comp           0
@@ -131,21 +131,21 @@ P           mkmem           1
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  grdnorm    nres2
- ETOT  1 -0.43683237360396    -4.368E-01 6.360E-02 2.588E+00
- ETOT  2 -0.42953017156749     7.302E-03 6.271E-03 1.584E-01
- ETOT  3 -0.42898322871734     5.469E-04 4.943E-03 1.421E-04
- ETOT  4 -0.42898287827359     3.504E-07 9.672E-05 4.315E-06
- ETOT  5 -0.42898292893989    -5.067E-08 1.182E-04 1.243E-07
- ETOT  6 -0.42898292985201    -9.121E-10 4.824E-05 2.358E-08
- ETOT  7 -0.42898292991323    -6.123E-11 1.826E-05 7.855E-10
+ ETOT  1 -0.43686186911483    -4.369E-01 1.550E-02 2.622E+00
+ ETOT  2 -0.42951194862638     7.350E-03 5.347E-04 1.520E-01
+ ETOT  3 -0.42898298860528     5.290E-04 2.940E-04 8.170E-05
+ ETOT  4 -0.42898285797254     1.306E-07 9.153E-06 2.797E-06
+ ETOT  5 -0.42898292992648    -7.195E-08 7.818E-06 1.716E-09
+ ETOT  6 -0.42898292995196    -2.548E-11 9.935E-08 1.069E-09
+ ETOT  7 -0.42898292994788     4.080E-12 1.512E-08 4.294E-12
 
- At SCF step    7       nres2   =  7.86E-10 < tolvrs=  1.00E-08 =>converged.
+ At SCF step    7       nres2   =  4.29E-12 < tolvrs=  1.00E-10 =>converged.
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.005256809691275
- Compensation charge over fft grid         =      0.005254841698304
+ Compensation charge over spherical meshes =      0.005256715162303
+ Compensation charge over fft grid         =      0.005254750329960
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -154,7 +154,7 @@ P           mkmem           1
 
 
  Augmentation waves occupancies Rhoij:
-   1.03840
+   1.03838
 
 
 ================================================================================
@@ -179,25 +179,25 @@ P           mkmem           1
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  4.69959495243835E-01
-    Hartree energy  =  3.09306365639667E-01
-    XC energy       = -2.48423130633311E-01
+    Kinetic energy  =  4.69946216163200E-01
+    Hartree energy  =  3.09306109932808E-01
+    XC energy       = -2.48422996209330E-01
     Ion-ion energy  =  0.00000000000000E+00
     PspCore energy  =  0.00000000000000E+00
-    Loc. psp. energy= -9.29087023160480E-01
-    Spherical terms = -3.07259874008000E-02
-    >>>>>>>>> Etotal= -4.28970280311088E-01
+    Loc. psp. energy= -9.29086374208739E-01
+    Spherical terms = -3.07254214561072E-02
+    >>>>>>>>> Etotal= -4.28982465778167E-01
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -1.95823446666707E-01
+    Band energy     = -1.95823645521253E-01
     Ion-ion energy  =  0.00000000000000E+00
     PspCore energy  =  0.00000000000000E+00
-    Dble-C XC-energy= -2.33906008450340E-01
-    Spherical terms =  7.46525203812812E-04
-    >>>> Etotal (DC)= -4.28982929913234E-01
+    Dble-C XC-energy= -2.33905794566019E-01
+    Spherical terms =  7.46510139390463E-04
+    >>>> Etotal (DC)= -4.28982929947881E-01
 
-  >Total energy in eV           = -1.16728749620768E+01
-  >Total DC energy in eV        = -1.16732191752565E+01
+  >Total energy in eV           = -1.16732065454990E+01
+  >Total DC energy in eV        = -1.16732191761993E+01
 --------------------------------------------------------------------------------
 
 == END DATASET(S) ==============================================================
@@ -206,7 +206,7 @@ P           mkmem           1
  -outvars: echo values of variables after computation  --------
             acell      8.4000000000E+00  8.4000000000E+00  8.4000000000E+00 Bohr
               amu      1.00000000E+00
-           etotal     -4.2898292991E-01
+           etotal     -4.2898292995E-01
             fcart      9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
 -          fftalg         312
          icoulomb           1
@@ -218,9 +218,9 @@ P           mkmem           1
             ngfft           2       2       2
           ngfftdg           2       2       2
              nkpt           1
-            nline           2
+           nnsclo           4
         nscforder          14
-            nstep          10
+            nstep          20
              nsym           1
            ntypat           1
          nwfshist           4
@@ -234,7 +234,7 @@ P           mkmem           1
           spgroup           1
            strten      9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-           tolvrs      1.00000000E-08
+           tolvrs      1.00000000E-10
             typat      1
            usewvl           1
   wvl_bigdft_comp           0
@@ -335,4 +335,4 @@ P           mkmem           1
 
  Calculation completed.
 .Delivered  11 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.4  wall=          5.0
++Overall time at end (sec) : cpu=          4.5  wall=          5.0

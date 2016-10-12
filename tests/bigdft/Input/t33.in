@@ -34,10 +34,11 @@ istwfk 1               #This is mandatory for WVLs
 iscf1     17  # Density mixing
 iscf2     7   # Potential mixing
 diemix   0.4
-nstep    10
+nstep    20
+nnsclo    4
 
 # Self-consistent run to get the density
-tolvrs     1.00d-3     #too low
+tolvrs     1.00d-8
 amu 1.00
 
 #semiconducting case:
