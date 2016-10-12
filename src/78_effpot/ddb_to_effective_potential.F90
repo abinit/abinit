@@ -11,12 +11,12 @@
 !! INPUTS
 !! crystal  = number of atoms in primitive cell
 !! ddb  = number of type of atoms
-!! inp  = input of epigene
+!! inp  = input of multibinit
 !! OUTPUT
 !! effective_potantial = effective_potential structure to be initialized
 !!
 !! PARENTS
-!!    epigene
+!!    multibinit
 !!
 !! CHILDREN
 !!    asria_calc,gtdyn9,ifc_init,ddb_internalstr,gtblk9,dfpt_phfrq,wrtout
@@ -42,7 +42,7 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
  use m_copy,            only : alloc_copy
  use m_crystal,         only : crystal_t,crystal_print
  use m_dynmat,          only : asrif9,gtdyn9,cell9,canat9
- use m_epigene_dataset, only : epigene_dataset_type
+ use m_multibinit_dataset, only : multibinit_dataset_type
  use m_effective_potential, only : effective_potential_type, effective_potential_free
 
 !This section has been created automatically by the script Abilint (TD).
@@ -61,7 +61,7 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
  type(ddb_type),intent(inout) :: ddb
  type(effective_potential_type), intent(inout) :: effective_potential
  type(crystal_t),intent(in) :: crystal
- type(epigene_dataset_type),intent(in) :: inp
+ type(multibinit_dataset_type),intent(in) :: inp
 !arrays
 
 !Local variables-------------------------------
@@ -402,7 +402,7 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
 ! Transfert inter-atomic forces constants
 !**********************************************************************
 
-!Reorder cell from canonical coordinates to reduced coordinates (for epigene)
+!Reorder cell from canonical coordinates to reduced coordinates (for multibinit)
  call cell9(ifc%atmfrc,inp%brav,ifc%cell,ddb%gprim,effective_potential%natom,ifc%nrpt,&
 &           ifc%rcan,ifc%rpt,ifc%wghatm,crystal%xred)
 

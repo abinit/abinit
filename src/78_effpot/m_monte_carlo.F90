@@ -33,7 +33,7 @@ module m_monte_carlo
  use m_OurRng
  use m_ifc
  use m_effective_potential
- use m_epigene_dataset
+ use m_multibinit_dataset
 #ifdef HAVE_NETCDF
  use netcdf
 #endif

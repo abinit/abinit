@@ -10,14 +10,14 @@
 !!
 !! INPUTS
 !! filenames = input with all name files
-!! inp  = input of epigene
+!! inp  = input of multibinit
 !! comm=MPI communicator
 !!
 !! OUTPUT
 !! effective_potantial = effective_potential structure with 3rd orders
 !!
 !! PARENTS
-!!    epigene
+!!    multibinit
 !!
 !! CHILDREN
 !!    check_effpot,effective_potential_check_strain,file_to_effective_potential,get_strain
@@ -43,7 +43,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
  use m_anharmonics_terms
  use m_effective_potential
  use m_effective_potential_file
- use m_epigene_dataset, only : epigene_dataset_type
+ use m_multibinit_dataset, only : multibinit_dataset_type
  use m_strain
  use m_fstrings, only : itoa,int2char4,ftoa
 
@@ -62,7 +62,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   integer, intent(inout) :: comm
   character(len=fnlen),intent(in) :: filenames(15)
   type(effective_potential_type), intent(inout) :: eff_pot
-  type(epigene_dataset_type),intent(in) :: inp
+  type(multibinit_dataset_type),intent(in) :: inp
  !arrays
 
  !Local variables-------------------------------

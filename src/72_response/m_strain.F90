@@ -347,7 +347,7 @@ end subroutine strain_apply
 !!
 !!
 !! PARENTS
-!!   epigene
+!!   multibinit
 !!
 !! CHILDREN
 !!
@@ -468,7 +468,7 @@ end subroutine strain_def2strain
 !!
 !!
 !! PARENTS
-!!   epigene
+!!   multibinit
 !!
 !! CHILDREN
 !!
@@ -541,7 +541,7 @@ end subroutine strain_strain2def
 !! eff_pot = supercell structure with data to be output
 !!
 !! PARENTS
-!!   epigene
+!!   multibinit
 !!
 !! CHILDREN
 !!

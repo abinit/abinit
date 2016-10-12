@@ -91,7 +91,7 @@ CONTAINS  !=====================================================================
 !! eff_pot = effective_potential structure to be initialized
 !!
 !! PARENTS
-!!    epigene
+!!    multibinit
 !!
 !! CHILDREN
 !!    effective_potential_free

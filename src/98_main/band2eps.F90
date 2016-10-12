@@ -45,7 +45,7 @@ program band2eps
  use m_profiling_abi
  use m_errors
  use m_effective_potential
- use m_epigene_dataset
+ use m_multibinit_dataset
  use m_effective_potential_file
  use m_libxml
 

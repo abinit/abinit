@@ -1,9 +1,9 @@
 
-.Version 8.1.5 of EPIGENE 
+.Version 8.1.5 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
 
 .Copyright (C) 1998-2016 ABINIT group . 
- EPIGENE comes with ABSOLUTELY NO WARRANTY.
+ MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
  see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
@@ -23,11 +23,11 @@
 
  Read the information in the reference structure in 
 -system.xml
- to initialize the epigene input
+ to initialize the multibinit input
 
 ================================================================================
 
- -outvars_epigene: echo values of input variables ----------------------
+ -outvars_multibinit: echo values of input variables ----------------------
 
  Flags :
      ifcflag         1
@@ -1043,4 +1043,4 @@
 
 +Total cpu time      1.632  and wall time      1.631 sec
 
- epigene : the run completed succesfully.
+ multibinit : the run completed succesfully.

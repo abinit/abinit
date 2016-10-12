@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_epigene_dataset
+!!****m* ABINIT/m_multibinit_dataset
 !! NAME
-!!  m_epigene_dataset
+!!  m_multibinit_dataset
 !!
 !! FUNCTION
 !!
@@ -23,7 +23,7 @@
 
 #include "abi_common.h"
 
-module m_epigene_dataset
+module m_multibinit_dataset
     
  use defs_basis
  use m_profiling_abi
@@ -35,28 +35,28 @@ module m_epigene_dataset
 
  private
 
- public :: epigene_dataset_type
- public :: epigene_dtset_free
- public :: outvars_epigene
+ public :: multibinit_dataset_type
+ public :: multibinit_dtset_free
+ public :: outvars_multibinit
  public :: invars10
 !!***
 
 !----------------------------------------------------------------------
 
-!!****t* m_epigene_dataset/epigene_dataset_type
+!!****t* m_multibinit_dataset/multibinit_dataset_type
 !! NAME
-!! epigene_dataset_type
+!! multibinit_dataset_type
 !!
 !! FUNCTION
-!! The epigene_dataset_type structured datatype
-!! gather all the input variables for the epigene code.
+!! The multibinit_dataset_type structured datatype
+!! gather all the input variables for the multibinit code.
 !!
 !! SOURCE
 
- type epigene_dataset_type
+ type multibinit_dataset_type
 
 ! Variables should be declared on separated lines in order to reduce the occurence of bzr conflicts.
-! Since all these input variables are described in the epigene_help.html
+! Since all these input variables are described in the multibinit_help.html
 ! file, they are not described in length here ...
 ! Integer
 
@@ -121,25 +121,25 @@ module m_epigene_dataset
   real(dp), allocatable :: qph2l(:,:)
   ! qph2l(3,nph2l)
 
- end type epigene_dataset_type
+ end type multibinit_dataset_type
 !!***
 
 contains 
 !!***
 
-!!****f* m_epigene_dataset/epigene_dtset_free
+!!****f* m_multibinit_dataset/multibinit_dtset_free
 !!
 !! NAME
-!!   epigene_dtset_free
+!!   multibinit_dtset_free
 !!
 !! FUNCTION
-!!   deallocate remaining arrays in the epigene_dtset datastructure
+!!   deallocate remaining arrays in the multibinit_dtset datastructure
 !!
 !! INPUTS
-!!  epigene_dtset = epigene datastructure
+!!  multibinit_dtset = multibinit datastructure
 !!
 !! PARENTS
-!!      epigene
+!!      multibinit
 !!
 !! CHILDREN
 !!
@@ -147,51 +147,51 @@ contains
 !!
 !! SOURCE
 
-subroutine epigene_dtset_free(epigene_dtset)
+subroutine multibinit_dtset_free(multibinit_dtset)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'epigene_dtset_free'
+#define ABI_FUNC 'multibinit_dtset_free'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- type(epigene_dataset_type), intent(inout) :: epigene_dtset
+ type(multibinit_dataset_type), intent(inout) :: multibinit_dtset
 
 ! *************************************************************************
  
- if (allocated(epigene_dtset%atifc))  then
-   ABI_DEALLOCATE(epigene_dtset%atifc)
+ if (allocated(multibinit_dtset%atifc))  then
+   ABI_DEALLOCATE(multibinit_dtset%atifc)
  end if
- if (allocated(epigene_dtset%qnrml1))  then
-   ABI_DEALLOCATE(epigene_dtset%qnrml1)
+ if (allocated(multibinit_dtset%qnrml1))  then
+   ABI_DEALLOCATE(multibinit_dtset%qnrml1)
  end if
- if (allocated(epigene_dtset%qnrml2))  then
-   ABI_DEALLOCATE(epigene_dtset%qnrml2)
+ if (allocated(multibinit_dtset%qnrml2))  then
+   ABI_DEALLOCATE(multibinit_dtset%qnrml2)
  end if
- if (allocated(epigene_dtset%qph1l))  then
-   ABI_DEALLOCATE(epigene_dtset%qph1l)
+ if (allocated(multibinit_dtset%qph1l))  then
+   ABI_DEALLOCATE(multibinit_dtset%qph1l)
  end if
- if (allocated(epigene_dtset%qph2l))  then
-   ABI_DEALLOCATE(epigene_dtset%qph2l)
+ if (allocated(multibinit_dtset%qph2l))  then
+   ABI_DEALLOCATE(multibinit_dtset%qph2l)
  end if
 
-end subroutine epigene_dtset_free
+end subroutine multibinit_dtset_free
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_epigene_dataset/invars10
+!!****f* m_multibinit_dataset/invars10
 !!
 !! NAME
 !! invars9
 !!
 !! FUNCTION
-!! Open input file for the epigene code, then reads or echoes the input information.
+!! Open input file for the multibinit code, then reads or echoes the input information.
 !!
 !! INPUTS
 !! lenstr=actual length of string
@@ -199,7 +199,7 @@ end subroutine epigene_dtset_free
 !! string*(*)=string of characters containing all input variables and data
 !!
 !! OUTPUT
-!! epigene_dtset= (derived datatype) contains all the input variables
+!! multibinit_dtset= (derived datatype) contains all the input variables
 !!
 !! NOTES
 !! Should be executed by one processor only.
@@ -211,13 +211,13 @@ end subroutine epigene_dtset_free
 !!    FIXME: move checks to chkin9?
 !!
 !! PARENTS
-!!      epigene
+!!      multibinit
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine invars10(epigene_dtset,lenstr,natom,string)
+subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -233,7 +233,7 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
 !scalars
  integer,intent(in) :: lenstr,natom
  character(len=*),intent(in) :: string
- type(epigene_dataset_type),intent(inout) :: epigene_dtset 
+ type(multibinit_dataset_type),intent(inout) :: multibinit_dtset 
 
 !Local variables -------------------------
 !Dummy arguments for subroutine 'intagm' to parse input file
@@ -253,20 +253,20 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
 
  jdtset=1
 
-!copy natom to epigene_dtset
- epigene_dtset%natom=natom
+!copy natom to multibinit_dtset
+ multibinit_dtset%natom=natom
 
 !=====================================================================
 !start reading in dimensions and non-dependent variables
 !=====================================================================
 
 !A
- epigene_dtset%asr=2
+ multibinit_dtset%asr=2
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'asr',tread,'INT')
- if(tread==1) epigene_dtset%asr=intarr(1)
- if(epigene_dtset%asr<-2.or.epigene_dtset%asr>5)then
+ if(tread==1) multibinit_dtset%asr=intarr(1)
+ if(multibinit_dtset%asr<-2.or.multibinit_dtset%asr>5)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'asr is',epigene_dtset%asr,', but the only allowed values',ch10,&
+&   'asr is',multibinit_dtset%asr,', but the only allowed values',ch10,&
 &   'are 0, 1, 2, 3, 4, 5, -1 or -2 .',ch10,&
 &   'Action: correct asr in your input file.'
 !  Note : negative values are allowed when the acoustic sum rule
@@ -277,225 +277,225 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
  end if
 
 !B
- epigene_dtset%brav=1
+ multibinit_dtset%brav=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'brav',tread,'INT')
- if(tread==1) epigene_dtset%brav=intarr(1)
- if(epigene_dtset%brav/=1)then
+ if(tread==1) multibinit_dtset%brav=intarr(1)
+ if(multibinit_dtset%brav/=1)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'brav is',epigene_dtset%brav,', but the only allowed values',ch10,&
-&   'are 1 for epigene (not implemented) .',ch10,&
+&   'brav is',multibinit_dtset%brav,', but the only allowed values',ch10,&
+&   'are 1 for multibinit (not implemented) .',ch10,&
 &   'Action: correct brav in your input file.'
    MSG_ERROR(message)
  end if
 
 !C
- epigene_dtset%chneut=0
+ multibinit_dtset%chneut=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chneut',tread,'INT')
- if(tread==1) epigene_dtset%chneut=intarr(1)
- if(epigene_dtset%chneut<0.or.epigene_dtset%chneut>2)then
+ if(tread==1) multibinit_dtset%chneut=intarr(1)
+ if(multibinit_dtset%chneut<0.or.multibinit_dtset%chneut>2)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'chneut is',epigene_dtset%chneut,', but the only allowed values',ch10,&
+&   'chneut is',multibinit_dtset%chneut,', but the only allowed values',ch10,&
 &   'are 0, 1 or 2 .',ch10,&
 &   'Action: correct chneut in your input file.'
    MSG_ERROR(message)
  end if
 
 !D
- epigene_dtset%dipdip=1
+ multibinit_dtset%dipdip=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip',tread,'INT')
- if(tread==1) epigene_dtset%dipdip=intarr(1)
- if(epigene_dtset%dipdip>1.or.epigene_dtset%dipdip<0)then
+ if(tread==1) multibinit_dtset%dipdip=intarr(1)
+ if(multibinit_dtset%dipdip>1.or.multibinit_dtset%dipdip<0)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'dipdip is',epigene_dtset%dipdip,', but the only allowed values',ch10,&
+&   'dipdip is',multibinit_dtset%dipdip,', but the only allowed values',ch10,&
 &   'is 1.',ch10,&
 &   'Action: correct dipdip in your input file.'
    MSG_ERROR(message)
  end if
 
- epigene_dtset%delta_df= 1d-02
+ multibinit_dtset%delta_df= 1d-02
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'delta_df',tread,'DPR')
- if(tread==1) epigene_dtset%delta_df=dprarr(1)
- if(epigene_dtset%delta_df<0)then
+ if(tread==1) multibinit_dtset%delta_df=dprarr(1)
+ if(multibinit_dtset%delta_df<0)then
    write(message, '(a,es10.2,a,a,a,a,a)' )&
-&   'delta_df is',epigene_dtset%delta_df,', but the only allowed values',ch10,&
+&   'delta_df is',multibinit_dtset%delta_df,', but the only allowed values',ch10,&
 &   'are superior to 0  .',ch10,&
 &   'Action: correct delta_df in your input file.'
    MSG_ERROR(message)
  end if
 
- epigene_dtset%energy_reference= zero
+ multibinit_dtset%energy_reference= zero
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'energy_reference',tread,'DPR')
- if(tread==1) epigene_dtset%energy_reference=dprarr(1)
+ if(tread==1) multibinit_dtset%energy_reference=dprarr(1)
 
- epigene_dtset%enunit=0
+ multibinit_dtset%enunit=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'enunit',tread,'INT')
- if(tread==1) epigene_dtset%enunit=intarr(1)
- if(epigene_dtset%enunit<0.or.epigene_dtset%enunit>2)then
+ if(tread==1) multibinit_dtset%enunit=intarr(1)
+ if(multibinit_dtset%enunit<0.or.multibinit_dtset%enunit>2)then
    write(message, '(a,i0,a,a,a,a,a)' )&
-&   'enunit is',epigene_dtset%enunit,', but the only allowed values',ch10,&
+&   'enunit is',multibinit_dtset%enunit,', but the only allowed values',ch10,&
 &   'are 0, 1 or 2.',ch10,&
 &   'Action: correct enunit in your input file.'
    MSG_ERROR(message)
  end if
 
- epigene_dtset%ifcana=0
+ multibinit_dtset%ifcana=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ifcana',tread,'INT')
- if(tread==1) epigene_dtset%ifcana=intarr(1)
- if(epigene_dtset%ifcana<0.or.epigene_dtset%ifcana>1)then
+ if(tread==1) multibinit_dtset%ifcana=intarr(1)
+ if(multibinit_dtset%ifcana<0.or.multibinit_dtset%ifcana>1)then
    write(message, '(a,i0,a,a,a,a,a)' )&
-&   'ifcana is',epigene_dtset%ifcana,', but the only allowed values',ch10,&
+&   'ifcana is',multibinit_dtset%ifcana,', but the only allowed values',ch10,&
 &   'are 0 or 1.',ch10,&
 &   'Action: correct ifcana in your input file.'
    MSG_ERROR(message)
  end if
 
- epigene_dtset%ifcflag=1
+ multibinit_dtset%ifcflag=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ifcflag',tread,'INT')
- if(tread==1) epigene_dtset%ifcflag=intarr(1)
- if(epigene_dtset%ifcflag<0.or.epigene_dtset%ifcflag>1)then
+ if(tread==1) multibinit_dtset%ifcflag=intarr(1)
+ if(multibinit_dtset%ifcflag<0.or.multibinit_dtset%ifcflag>1)then
    write(message, '(a,i0,a,a,a,a,a)' )&
-&   'ifcflag is',epigene_dtset%ifcflag,', but the only allowed values',ch10,&
+&   'ifcflag is',multibinit_dtset%ifcflag,', but the only allowed values',ch10,&
 &   'are 0 or 1.',ch10,&
 &   'Action: correct ifcflag in your input file.'
    MSG_ERROR(message)
  end if
 
- epigene_dtset%prtsrlr=0
+ multibinit_dtset%prtsrlr=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtsrlr',tread,'INT')
- if(tread==1) epigene_dtset%prtsrlr=intarr(1)
- if(epigene_dtset%prtsrlr<0.or.epigene_dtset%prtsrlr>1)then
+ if(tread==1) multibinit_dtset%prtsrlr=intarr(1)
+ if(multibinit_dtset%prtsrlr<0.or.multibinit_dtset%prtsrlr>1)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'prtsrlr is',epigene_dtset%prtsrlr,', but the only allowed values',ch10,&
+&   'prtsrlr is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
 &   'are 0 or 1.',ch10,&
 &   'Action: correct prtsrlr in your input file.'
    MSG_ERROR(message)
  end if
 
- epigene_dtset%ifcout=2000000
+ multibinit_dtset%ifcout=2000000
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ifcout',tread,'INT')
- if(tread==1) epigene_dtset%ifcout=intarr(1)
- if(epigene_dtset%ifcout<0)then
+ if(tread==1) multibinit_dtset%ifcout=intarr(1)
+ if(multibinit_dtset%ifcout<0)then
    write(message, '(a,i0,a,a,a)' )&
-&   'ifcout is',epigene_dtset%ifcout,', which is lower than 0 .',ch10,&
+&   'ifcout is',multibinit_dtset%ifcout,', which is lower than 0 .',ch10,&
 &   'Action: correct ifcout in your input file.'
    MSG_ERROR(message)
  end if
 
- epigene_dtset%ntime=200
+ multibinit_dtset%ntime=200
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntime',tread,'INT')
- if(tread==1) epigene_dtset%ntime=intarr(1)
- if(epigene_dtset%ntime<0)then
+ if(tread==1) multibinit_dtset%ntime=intarr(1)
+ if(multibinit_dtset%ntime<0)then
    write(message, '(a,i0,a,a,a)' )&
-&   'ntime is',epigene_dtset%ntime,', which is lower than 0 .',ch10,&
+&   'ntime is',multibinit_dtset%ntime,', which is lower than 0 .',ch10,&
 &   'Action: correct ntime in your input file.'
    MSG_ERROR(message)
  end if
 
 
- epigene_dtset%dynamics=0
+ multibinit_dtset%dynamics=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dynamics',tread,'INT')
- if(tread==1) epigene_dtset%dynamics=intarr(1)
- if(epigene_dtset%dynamics<0.or.epigene_dtset%dynamics>2)then
+ if(tread==1) multibinit_dtset%dynamics=intarr(1)
+ if(multibinit_dtset%dynamics<0.or.multibinit_dtset%dynamics>2)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'dynamics is',epigene_dtset%dynamics,', but the only allowed values',ch10,&
+&   'dynamics is',multibinit_dtset%dynamics,', but the only allowed values',ch10,&
 &   'are 0 or  1.',ch10,&
 &   'Action: correct dynamics in your input file.'
    MSG_ERROR(message)
  end if
 
 !N
- epigene_dtset%natifc=natom
+ multibinit_dtset%natifc=natom
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natifc',tread,'INT')
- if(tread==1) epigene_dtset%natifc=intarr(1)
- if(epigene_dtset%natifc<0)then
+ if(tread==1) multibinit_dtset%natifc=intarr(1)
+ if(multibinit_dtset%natifc<0)then
    write(message, '(a,i0,a,a,a)' )&
-&   'natifc is',epigene_dtset%natifc,', which is lower than 0 .',ch10,&
+&   'natifc is',multibinit_dtset%natifc,', which is lower than 0 .',ch10,&
 &   'Action: correct natifc in your input file.'
    MSG_ERROR(message)
  end if
 
- if(epigene_dtset%natifc>natom)then
+ if(multibinit_dtset%natifc>natom)then
    write(message, '(a,i0,a,a,a,i0,a,a,a)' )&
-&   'The number of atom ifc in the input files',epigene_dtset%natifc,',',ch10,&
+&   'The number of atom ifc in the input files',multibinit_dtset%natifc,',',ch10,&
 &   'is larger than the number of atoms',natom,'.',ch10,&
 &   'Action: change natifc in the input file.'
    MSG_ERROR(message)
  end if
 
- epigene_dtset%ng2qpt(:)=0
+ multibinit_dtset%ng2qpt(:)=0
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ng2qpt',tread,'INT')
- if(tread==1) epigene_dtset%ng2qpt(:)=intarr(1:3)
+ if(tread==1) multibinit_dtset%ng2qpt(:)=intarr(1:3)
  do ii=1,3
-   if(epigene_dtset%ng2qpt(ii)<0)then
+   if(multibinit_dtset%ng2qpt(ii)<0)then
      write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
-&     'ng2qpt(',ii,') is',epigene_dtset%ng2qpt(ii),', which is lower than 0 .',ch10,&
+&     'ng2qpt(',ii,') is',multibinit_dtset%ng2qpt(ii),', which is lower than 0 .',ch10,&
 &     'Action: correct ng2qpt(',ii,') in your input file.'
      MSG_ERROR(message)
    end if
  end do
 
- epigene_dtset%n_cell(:)= one
+ multibinit_dtset%n_cell(:)= one
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'n_cell',tread,'INT')
- if(tread==1) epigene_dtset%n_cell(1:3)=intarr(1:3)
+ if(tread==1) multibinit_dtset%n_cell(1:3)=intarr(1:3)
  do ii=1,3
-   if(epigene_dtset%n_cell(ii)<0.or.epigene_dtset%n_cell(ii)>20)then
+   if(multibinit_dtset%n_cell(ii)<0.or.multibinit_dtset%n_cell(ii)>20)then
      write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
-&     'n_cell(',ii,') is ',epigene_dtset%n_cell(ii),', which is lower than 0 of superior than 10.',&
+&     'n_cell(',ii,') is ',multibinit_dtset%n_cell(ii),', which is lower than 0 of superior than 10.',&
 &     ch10,'Action: correct n_cell(',ii,') in your input file.'
      MSG_ERROR(message)
    end if
  end do
 
- epigene_dtset%ngqpt(:)= one
+ multibinit_dtset%ngqpt(:)= one
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ngqpt',tread,'INT')
- if(tread==1) epigene_dtset%ngqpt(1:3)=intarr(1:3)
+ if(tread==1) multibinit_dtset%ngqpt(1:3)=intarr(1:3)
  do ii=1,3
-   if(epigene_dtset%ngqpt(ii)<0)then
+   if(multibinit_dtset%ngqpt(ii)<0)then
      write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
-&     'ngqpt(',ii,') is',epigene_dtset%ngqpt(ii),', which is lower than 0 .',ch10,&
+&     'ngqpt(',ii,') is',multibinit_dtset%ngqpt(ii),', which is lower than 0 .',ch10,&
 &     'Action: correct ngqpt(',ii,') in your input file.'
      MSG_ERROR(message)
    end if
  end do
 
- epigene_dtset%nph1l=1
+ multibinit_dtset%nph1l=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nph1l',tread,'INT')
- if(tread==1) epigene_dtset%nph1l=intarr(1)
- if(epigene_dtset%nph1l<0)then
+ if(tread==1) multibinit_dtset%nph1l=intarr(1)
+ if(multibinit_dtset%nph1l<0)then
    write(message, '(a,i0,a,a,a)' )&
-&   'nph1l is',epigene_dtset%nph1l,', which is lower than 0 .',ch10,&
+&   'nph1l is',multibinit_dtset%nph1l,', which is lower than 0 .',ch10,&
 &   'Action: correct nph1l in your input file.'
    MSG_ERROR(message)
  end if
  
- epigene_dtset%nph2l=0
+ multibinit_dtset%nph2l=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nph2l',tread,'INT')
- if(tread==1) epigene_dtset%nph2l=intarr(1)
- if(epigene_dtset%nph2l<0)then
+ if(tread==1) multibinit_dtset%nph2l=intarr(1)
+ if(multibinit_dtset%nph2l<0)then
    write(message, '(a,i0,a,a,a)' )&
-&   'nph2l is',epigene_dtset%nph2l,', which is lower than 0 .',ch10,&
+&   'nph2l is',multibinit_dtset%nph2l,', which is lower than 0 .',ch10,&
 &   'Action: correct nph2l in your input file.'
    MSG_ERROR(message)
  end if
  
- epigene_dtset%nqshft=1
+ multibinit_dtset%nqshft=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nqshft',tread,'INT')
- if(tread==1) epigene_dtset%nqshft=intarr(1)
- if(epigene_dtset%nqshft<0 .or. epigene_dtset%nqshft==3 .or.&
-& epigene_dtset%nqshft>=5 )then
+ if(tread==1) multibinit_dtset%nqshft=intarr(1)
+ if(multibinit_dtset%nqshft<0 .or. multibinit_dtset%nqshft==3 .or.&
+& multibinit_dtset%nqshft>=5 )then
    write(message, '(a,i0,a,a,a,a,a)' )&
-&   'nqshft is',epigene_dtset%nqshft,', but the only allowed values',ch10,&
+&   'nqshft is',multibinit_dtset%nqshft,', but the only allowed values',ch10,&
 &   'are 1, 2 or 4 .',ch10,&
 &   'Action: correct nqshft in your input file.'
    MSG_ERROR(message)
  end if
 
- epigene_dtset%nsphere=0
+ multibinit_dtset%nsphere=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nsphere',tread,'INT')
- if(tread==1) epigene_dtset%nsphere=intarr(1)
- if(epigene_dtset%nsphere<0)then
+ if(tread==1) multibinit_dtset%nsphere=intarr(1)
+ if(multibinit_dtset%nsphere<0)then
    write(message, '(a,i0,a,a,a)' )&
-&   'nsphere is',epigene_dtset%nsphere,', which is lower than 0',ch10,&
+&   'nsphere is',multibinit_dtset%nsphere,', which is lower than 0',ch10,&
 &   'Action: correct nsphere in your input file.'
    MSG_ERROR(message)
  end if
@@ -503,47 +503,47 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
 !O
 
 !P
- epigene_dtset%prt_effpot=1
+ multibinit_dtset%prt_effpot=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_effpot',tread,'INT')
- if(tread==1) epigene_dtset%prt_effpot=intarr(1)
- if(epigene_dtset%prt_effpot<-2.or.epigene_dtset%prt_effpot>3)then
+ if(tread==1) multibinit_dtset%prt_effpot=intarr(1)
+ if(multibinit_dtset%prt_effpot<-2.or.multibinit_dtset%prt_effpot>3)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'prt_effpot is',epigene_dtset%prtsrlr,', but the only allowed values',ch10,&
+&   'prt_effpot is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
 &   'are 0, 1 or 2.',ch10,&
 &   'Action: correct prt_effpot in your input file.'
    MSG_ERROR(message)
  end if
 
- epigene_dtset%prt_phfrq=0
+ multibinit_dtset%prt_phfrq=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_phfrq',tread,'INT')
- if(tread==1) epigene_dtset%prt_phfrq=intarr(1)
- if(epigene_dtset%prt_phfrq<0.or.epigene_dtset%prt_phfrq>2)then
+ if(tread==1) multibinit_dtset%prt_phfrq=intarr(1)
+ if(multibinit_dtset%prt_phfrq<0.or.multibinit_dtset%prt_phfrq>2)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'prt_phfrq is',epigene_dtset%prtsrlr,', but the only allowed values',ch10,&
+&   'prt_phfrq is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
 &   'are 0, 1 or 2.',ch10,&
 &   'Action: correct prt_phfrq in your input file.'
    MSG_ERROR(message)
  end if
 
 !Default is no output of the real space IFC to file
- epigene_dtset%prt_ifc = 0
+ multibinit_dtset%prt_ifc = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_ifc',tread,'INT')
- if(tread==1) epigene_dtset%prt_ifc = intarr(1)
- if(epigene_dtset%prt_ifc < 0 .or. epigene_dtset%prt_ifc > 1) then
+ if(tread==1) multibinit_dtset%prt_ifc = intarr(1)
+ if(multibinit_dtset%prt_ifc < 0 .or. multibinit_dtset%prt_ifc > 1) then
    write(message, '(a,i0,a,a,a,a,a)' )&
-&   'prtf_ifc is',epigene_dtset%prt_ifc,'. The only allowed values',ch10,&
+&   'prtf_ifc is',multibinit_dtset%prt_ifc,'. The only allowed values',ch10,&
 &   'are 0 (no output) or 1 (AI2PS format)',ch10,  &
 &   'Action: correct prt_ifc in your input file.'
    MSG_ERROR(message)
  end if
 
 !Default is no output of the 3rd derivative
- epigene_dtset%prt_3rd = 0
+ multibinit_dtset%prt_3rd = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_3rd',tread,'INT')
- if(tread==1) epigene_dtset%prt_3rd = intarr(1)
- if(epigene_dtset%prt_3rd < 0 .or. epigene_dtset%prt_3rd > 2) then
+ if(tread==1) multibinit_dtset%prt_3rd = intarr(1)
+ if(multibinit_dtset%prt_3rd < 0 .or. multibinit_dtset%prt_3rd > 2) then
    write(message, '(a,i0,a,a,a,a,a,a,a)' )&
-&   'prtf_3rd is ',epigene_dtset%prt_3rd,'. The only allowed values',ch10,&
+&   'prtf_3rd is ',multibinit_dtset%prt_3rd,'. The only allowed values',ch10,&
 &   'are 0 (no computation), 1 (only computation)',ch10,&
 &   'or 2 (computation and print in xml file)',ch10,  &
 &   'Action: correct prt_3rd in your input file.'
@@ -551,58 +551,58 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
  end if
 
 !Q
- epigene_dtset%qrefine=1 ! default is no refinement
+ multibinit_dtset%qrefine=1 ! default is no refinement
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'qrefine',tread,'INT')
- if(tread==1) epigene_dtset%qrefine = intarr(1)
- if(epigene_dtset%qrefine < 1) then
+ if(tread==1) multibinit_dtset%qrefine = intarr(1)
+ if(multibinit_dtset%qrefine < 1) then
    write(message, '(a,i0,a,a,a,a,a)' )&
-&   'qrefine is',epigene_dtset%qrefine,' The only allowed values',ch10,&
+&   'qrefine is',multibinit_dtset%qrefine,' The only allowed values',ch10,&
 &   'are integers >= 1 giving the refinement of the ngqpt grid',ch10,&
 &   'Action: correct qrefine in your input file.'
    MSG_ERROR(message)
  end if
 
 !R
- epigene_dtset%rfmeth=1
+ multibinit_dtset%rfmeth=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfmeth',tread,'INT')
- if(tread==1) epigene_dtset%rfmeth=intarr(1)
- if(epigene_dtset%rfmeth<1.or.epigene_dtset%rfmeth>2)then
+ if(tread==1) multibinit_dtset%rfmeth=intarr(1)
+ if(multibinit_dtset%rfmeth<1.or.multibinit_dtset%rfmeth>2)then
    write(message, '(a,i0,a,a,a,a,a)' )&
-&   'rfmeth is',epigene_dtset%rfmeth,', but the only allowed values',ch10,&
+&   'rfmeth is',multibinit_dtset%rfmeth,', but the only allowed values',ch10,&
 &   'are 1 or 2 . ',ch10,&
 &   'Action: correct rfmeth in your input file.'
    MSG_ERROR(message)
  end if
 
- epigene_dtset%rifcsph=zero
+ multibinit_dtset%rifcsph=zero
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rifcsph',tread,'DPR')
- if(tread==1) epigene_dtset%rifcsph=dprarr(1)
- if(epigene_dtset%rifcsph<-tol12)then
+ if(tread==1) multibinit_dtset%rifcsph=dprarr(1)
+ if(multibinit_dtset%rifcsph<-tol12)then
    write(message, '(a,f10.3,a,a,a)' )&
-&   'rifcsph is',epigene_dtset%rifcsph,', which is lower than zero.',ch10,&
+&   'rifcsph is',multibinit_dtset%rifcsph,', which is lower than zero.',ch10,&
 &   'Action: correct rifcsph in your input file.'
    MSG_ERROR(message)
  end if
 
 !S
- epigene_dtset%symdynmat=1
+ multibinit_dtset%symdynmat=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'symdynmat',tread,'INT')
- if(tread==1) epigene_dtset%symdynmat=intarr(1)
- if(epigene_dtset%symdynmat/=0.and.epigene_dtset%symdynmat/=1)then
+ if(tread==1) multibinit_dtset%symdynmat=intarr(1)
+ if(multibinit_dtset%symdynmat/=0.and.multibinit_dtset%symdynmat/=1)then
    write(message, '(a,i0,a,a,a,a,a)' )&
-&   'symdynmat is',epigene_dtset%symdynmat,'. The only allowed values',ch10,&
+&   'symdynmat is',multibinit_dtset%symdynmat,'. The only allowed values',ch10,&
 &   'are 0, or 1.',ch10,&
 &   'Action: correct symdynmat in your input file.'
    MSG_ERROR(message)
  end if
 
 !T
- epigene_dtset%temperature=325
+ multibinit_dtset%temperature=325
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'temperature',tread,'DPR')
- if(tread==1) epigene_dtset%temperature=dprarr(1)
- if(epigene_dtset%temperature<=0)then
+ if(tread==1) multibinit_dtset%temperature=dprarr(1)
+ if(multibinit_dtset%temperature<=0)then
    write(message, '(a,f10.1,a,a,a,a,a)' )&
-&   'Temperature is ',epigene_dtset%temperature,'. The only allowed values',ch10,&
+&   'Temperature is ',multibinit_dtset%temperature,'. The only allowed values',ch10,&
 &   'are positives values.',ch10,&
 &   'Action: correct Temperature in your input file.'
    MSG_ERROR(message)
@@ -629,7 +629,7 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
 !=======================================================================
 
 !A
- epigene_dtset%acell= one
+ multibinit_dtset%acell= one
  if(3>marr)then
    marr=3
    ABI_DEALLOCATE(intarr)
@@ -638,37 +638,37 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
    ABI_ALLOCATE(dprarr,(marr))
  end if
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'acell',tread,'DPR')
- if(tread==1) epigene_dtset%acell(1:3)= dprarr(1:3)
- if(any(epigene_dtset%acell<=tol10))then
+ if(tread==1) multibinit_dtset%acell(1:3)= dprarr(1:3)
+ if(any(multibinit_dtset%acell<=tol10))then
     write(message, '(3a)' )&
 &       'There is negative on zero value for cell ',ch10,&
 &       'Action: change acell in your input file.'
       MSG_ERROR(message) 
  end if
 
- ABI_ALLOCATE(epigene_dtset%atifc,(natom))
- epigene_dtset%atifc(:)=zero
- if(epigene_dtset%natifc>=1)then
-   if(epigene_dtset%natifc>marr)then
-     marr=epigene_dtset%natifc
+ ABI_ALLOCATE(multibinit_dtset%atifc,(natom))
+ multibinit_dtset%atifc(:)=zero
+ if(multibinit_dtset%natifc>=1)then
+   if(multibinit_dtset%natifc>marr)then
+     marr=multibinit_dtset%natifc
      ABI_DEALLOCATE(intarr)
      ABI_DEALLOCATE(dprarr)
      ABI_ALLOCATE(intarr,(marr))
      ABI_ALLOCATE(dprarr,(marr))
    end if
-   call intagm(dprarr,intarr,jdtset,marr,epigene_dtset%natifc,string(1:lenstr),'atifc',tread,'INT')
+   call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%natifc,string(1:lenstr),'atifc',tread,'INT')
    if(tread==1) then 
-     epigene_dtset%atifc(1:epigene_dtset%natifc)= intarr(1:epigene_dtset%natifc)
+     multibinit_dtset%atifc(1:multibinit_dtset%natifc)= intarr(1:multibinit_dtset%natifc)
    else ! set to the maximum
-     do iatifc=1,epigene_dtset%natifc
-       epigene_dtset%atifc(iatifc) =  iatifc
+     do iatifc=1,multibinit_dtset%natifc
+       multibinit_dtset%atifc(iatifc) =  iatifc
      end do
    end if
    ABI_MALLOC(work,(natom))
    work(:)=0
 
-   do iatifc=1,epigene_dtset%natifc
-     if(epigene_dtset%atifc(iatifc)<=0.or.epigene_dtset%atifc(iatifc)>natom)then
+   do iatifc=1,multibinit_dtset%natifc
+     if(multibinit_dtset%atifc(iatifc)<=0.or.multibinit_dtset%atifc(iatifc)>natom)then
        write(message, '(a,i0,a,a,a,a,a,i0,a,a,a)' )&
 &       'For iatifc=',iatifc,', the number of the atom ifc to be ',ch10,&
 &       'analysed is not valid : either negative, ',ch10,&
@@ -676,9 +676,9 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
 &       'Action: change atifc in your input file.'
        MSG_ERROR(message)
      end if
-     work(epigene_dtset%atifc(iatifc))=1
+     work(multibinit_dtset%atifc(iatifc))=1
    end do
-   epigene_dtset%atifc(1:natom)=work(:)
+   multibinit_dtset%atifc(1:natom)=work(:)
    ABI_FREE(work)
  end if
 
@@ -689,12 +689,12 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
 !D
 
 !E
- epigene_dtset%eivec=0
+ multibinit_dtset%eivec=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eivec',tread,'INT')
- if(tread==1) epigene_dtset%eivec=intarr(1)
- if(epigene_dtset%eivec<0.or.epigene_dtset%eivec>4)then
+ if(tread==1) multibinit_dtset%eivec=intarr(1)
+ if(multibinit_dtset%eivec<0.or.multibinit_dtset%eivec>4)then
    write(message, '(a,i0,a,a,a,a,a)' )&
-&   'eivec is',epigene_dtset%eivec,', but the only allowed values',ch10,&
+&   'eivec is',multibinit_dtset%eivec,', but the only allowed values',ch10,&
 &   'are 0, 1, 2, 3 or 4.',ch10,&
 &   'Action: correct eivec in your input file.'
    MSG_ERROR(message)
@@ -725,40 +725,40 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
 
 !Q
 
- if (epigene_dtset%nqshft/=0)then
-   if(3*epigene_dtset%nqshft>marr)then
-     marr=3*epigene_dtset%nqshft
+ if (multibinit_dtset%nqshft/=0)then
+   if(3*multibinit_dtset%nqshft>marr)then
+     marr=3*multibinit_dtset%nqshft
      ABI_DEALLOCATE(intarr)
      ABI_DEALLOCATE(dprarr)
      ABI_ALLOCATE(intarr,(marr))
      ABI_ALLOCATE(dprarr,(marr))
    end if
-   epigene_dtset%q1shft(:,:)=zero
-   call intagm(dprarr,intarr,jdtset,marr,3*epigene_dtset%nqshft, string(1:lenstr),'q1shft',tread,'DPR')
-   if(tread==1) epigene_dtset%q1shft(1:3,1:epigene_dtset%nqshft)=&
-&   reshape(dprarr(1:3*epigene_dtset%nqshft),(/3,epigene_dtset%nqshft/))
+   multibinit_dtset%q1shft(:,:)=zero
+   call intagm(dprarr,intarr,jdtset,marr,3*multibinit_dtset%nqshft, string(1:lenstr),'q1shft',tread,'DPR')
+   if(tread==1) multibinit_dtset%q1shft(1:3,1:multibinit_dtset%nqshft)=&
+&   reshape(dprarr(1:3*multibinit_dtset%nqshft),(/3,multibinit_dtset%nqshft/))
  end if
 
- ABI_ALLOCATE(epigene_dtset%qph1l,(3,epigene_dtset%nph1l))
- ABI_ALLOCATE(epigene_dtset%qnrml1,(epigene_dtset%nph1l))
- if (epigene_dtset%nph1l/=0)then
-   if(4*epigene_dtset%nph1l>marr)then
-     marr=4*epigene_dtset%nph1l
+ ABI_ALLOCATE(multibinit_dtset%qph1l,(3,multibinit_dtset%nph1l))
+ ABI_ALLOCATE(multibinit_dtset%qnrml1,(multibinit_dtset%nph1l))
+ if (multibinit_dtset%nph1l/=0)then
+   if(4*multibinit_dtset%nph1l>marr)then
+     marr=4*multibinit_dtset%nph1l
      ABI_DEALLOCATE(intarr)
      ABI_DEALLOCATE(dprarr)
      ABI_ALLOCATE(intarr,(marr))
      ABI_ALLOCATE(dprarr,(marr))
    end if
-   epigene_dtset%qph1l(:,:)=zero
-   epigene_dtset%qnrml1(:)=zero
-   call intagm(dprarr,intarr,jdtset,marr,4*epigene_dtset%nph1l,string(1:lenstr),'qph1l',tread,'DPR')
+   multibinit_dtset%qph1l(:,:)=zero
+   multibinit_dtset%qnrml1(:)=zero
+   call intagm(dprarr,intarr,jdtset,marr,4*multibinit_dtset%nph1l,string(1:lenstr),'qph1l',tread,'DPR')
    if(tread==1)then
-     do iph1=1,epigene_dtset%nph1l
+     do iph1=1,multibinit_dtset%nph1l
        do ii=1,3
-         epigene_dtset%qph1l(ii,iph1)=dprarr(ii+(iph1-1)*4)
+         multibinit_dtset%qph1l(ii,iph1)=dprarr(ii+(iph1-1)*4)
        end do
-       epigene_dtset%qnrml1(iph1)=dprarr(4+(iph1-1)*4)
-       if(abs(epigene_dtset%qnrml1(iph1))<DDB_QTOL)then
+       multibinit_dtset%qnrml1(iph1)=dprarr(4+(iph1-1)*4)
+       if(abs(multibinit_dtset%qnrml1(iph1))<DDB_QTOL)then
          write(message, '(a,a,a,a,a)' )&
 &         'The first list of wavevectors ','should not have non-analytical data.',ch10,&
 &         'Action: correct the first list',' of wavevectors in the input file.'
@@ -768,26 +768,26 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
    end if
  end if
 
- ABI_ALLOCATE(epigene_dtset%qph2l,(3,epigene_dtset%nph2l))
- ABI_ALLOCATE(epigene_dtset%qnrml2,(epigene_dtset%nph2l))
- if (epigene_dtset%nph2l/=0)then
-   if(4*epigene_dtset%nph2l>marr)then
-     marr=4*epigene_dtset%nph2l
+ ABI_ALLOCATE(multibinit_dtset%qph2l,(3,multibinit_dtset%nph2l))
+ ABI_ALLOCATE(multibinit_dtset%qnrml2,(multibinit_dtset%nph2l))
+ if (multibinit_dtset%nph2l/=0)then
+   if(4*multibinit_dtset%nph2l>marr)then
+     marr=4*multibinit_dtset%nph2l
      ABI_DEALLOCATE(intarr)
      ABI_DEALLOCATE(dprarr)
      ABI_ALLOCATE(intarr,(marr))
      ABI_ALLOCATE(dprarr,(marr))
    end if
-   epigene_dtset%qph2l(:,:)=zero
-   epigene_dtset%qnrml2(:)=zero
-   call intagm(dprarr,intarr,jdtset,marr,4*epigene_dtset%nph2l,string(1:lenstr),'qph2l',tread,'DPR')
+   multibinit_dtset%qph2l(:,:)=zero
+   multibinit_dtset%qnrml2(:)=zero
+   call intagm(dprarr,intarr,jdtset,marr,4*multibinit_dtset%nph2l,string(1:lenstr),'qph2l',tread,'DPR')
    if(tread==1)then
-     do iph2=1,epigene_dtset%nph2l
+     do iph2=1,multibinit_dtset%nph2l
        do ii=1,3
-         epigene_dtset%qph2l(ii,iph2)=dprarr(ii+(iph2-1)*4)
+         multibinit_dtset%qph2l(ii,iph2)=dprarr(ii+(iph2-1)*4)
        end do
-       epigene_dtset%qnrml2(iph2)=dprarr(4+(iph2-1)*4)
-       if(abs(epigene_dtset%qnrml2(iph2))>DDB_QTOL)then
+       multibinit_dtset%qnrml2(iph2)=dprarr(4+(iph2-1)*4)
+       if(abs(multibinit_dtset%qnrml2(iph2))>DDB_QTOL)then
          write(message, '(a,a,a,a,a)' )&
 &         'The second list of wavevectors',' should have only non-analytical data.',ch10,&
 &         'Action: correct the second list','of wavevectors in the input file.'
@@ -805,13 +805,13 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
    ABI_ALLOCATE(intarr,(marr))
    ABI_ALLOCATE(dprarr,(marr))
  end if
- epigene_dtset%rprim(:,:)= zero
+ multibinit_dtset%rprim(:,:)= zero
  call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),'rprim',tread,'DPR')
  if(tread==1) then
-   epigene_dtset%rprim(1:3,1:3)= reshape(dprarr(1:9),(/3,3/))
+   multibinit_dtset%rprim(1:3,1:3)= reshape(dprarr(1:9),(/3,3/))
 ! check new rprimd
-   if(all(epigene_dtset%rprim(1,:)==zero).or.&
-&    all(epigene_dtset%rprim(2,:)==zero).or.all(epigene_dtset%rprim(3,:)==zero)) then
+   if(all(multibinit_dtset%rprim(1,:)==zero).or.&
+&    all(multibinit_dtset%rprim(2,:)==zero).or.all(multibinit_dtset%rprim(3,:)==zero)) then
      write(message, '(3a)' )&
 &  ' There is a problem with rprim',ch10,&
 &   'Action: correct rprim'
@@ -827,9 +827,9 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
    ABI_ALLOCATE(intarr,(marr))
    ABI_ALLOCATE(dprarr,(marr))
  end if
- epigene_dtset%strain(:)= zero
+ multibinit_dtset%strain(:)= zero
  call intagm(dprarr,intarr,jdtset,marr,6,string(1:lenstr),'strain',tread,'DPR')
- if(tread==1) epigene_dtset%strain(1:6)= dprarr(1:6)
+ if(tread==1) multibinit_dtset%strain(1:6)= dprarr(1:6)
 
 !T
 
@@ -856,7 +856,7 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
 !Check consistency of input variables:
 !=======================================================================
 
- if(epigene_dtset%prtsrlr/=0 .and. epigene_dtset%ifcflag/=1) then
+ if(multibinit_dtset%prtsrlr/=0 .and. multibinit_dtset%ifcflag/=1) then
    write(message, '(3a)' )&
 &   'ifcflag must be 1 for the SR/LR decomposition of the phonon frequencies',ch10,&
 &   'Action: correct ifcflag in your input file.'
@@ -865,24 +865,24 @@ subroutine invars10(epigene_dtset,lenstr,natom,string)
 
 !FIXME: add check that if freeze_displ /= 0 then you need to be doing ifc and phonon interpolation
 
- if (epigene_dtset%ifcflag > 0 .and. sum(abs(epigene_dtset%ngqpt)) == 0) then
+ if (multibinit_dtset%ifcflag > 0 .and. sum(abs(multibinit_dtset%ngqpt)) == 0) then
    write(message, '(3a)' )&
-&   'if you want interatomic force constant output, epigene needs ngqpt input variable ',ch10,&
+&   'if you want interatomic force constant output, multibinit needs ngqpt input variable ',ch10,&
 &   'Action: set ngqpt in your input file.'
    MSG_ERROR(message)
  end if
 
 !check that q-grid refinement is a divisor of ngqpt in each direction
- if(epigene_dtset%qrefine > 1 .and. sum(abs(dmod(epigene_dtset%ngqpt/dble(epigene_dtset%qrefine),one))) > tol10) then
+ if(multibinit_dtset%qrefine > 1 .and. sum(abs(dmod(multibinit_dtset%ngqpt/dble(multibinit_dtset%qrefine),one))) > tol10) then
    write(message, '(a,i0,a,a,a,3i8,a,a)' )&
-&   'qrefine is',epigene_dtset%qrefine,' The only allowed values',ch10,&
-&   'are integers which are divisors of the ngqpt grid', epigene_dtset%ngqpt,ch10,&
+&   'qrefine is',multibinit_dtset%qrefine,' The only allowed values',ch10,&
+&   'are integers which are divisors of the ngqpt grid', multibinit_dtset%ngqpt,ch10,&
 &   'Action: correct qrefine in your input file.'
    MSG_ERROR(message)
  end if
 
 ! check new rprimd
- if(all(epigene_dtset%acell(:) > one).and.all(epigene_dtset%rprim(:,:)==zero))then
+ if(all(multibinit_dtset%acell(:) > one).and.all(multibinit_dtset%rprim(:,:)==zero))then
    write(message, '(3a)' )&
 &         ' acell is defined but there is no rprim',ch10,&
 &         'Action: add rprim input'
@@ -895,17 +895,17 @@ end subroutine invars10
 
 !----------------------------------------------------------------------
 
-!!****f* m_epigene_dataset/outvars_epigene
+!!****f* m_multibinit_dataset/outvars_multibinit
 !!
 !! NAME
-!! outvars_epigene
+!! outvars_multibinit
 !!
 !! FUNCTION
-!! Open input file for the epigene code, then
+!! Open input file for the multibinit code, then
 !! echoes the input information.
 !!
 !! INPUTS
-!! epigene_dtset= (derived datatype) contains all the input variables
+!! multibinit_dtset= (derived datatype) contains all the input variables
 !! nunit=unit number for input or output
 !!
 !! OUTPUT
@@ -915,19 +915,19 @@ end subroutine invars10
 !! Should be executed by one processor only.
 !!
 !! PARENTS
-!!      epigene
+!!      multibinit
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
-subroutine outvars_epigene (epigene_dtset,nunit)
+subroutine outvars_multibinit (multibinit_dtset,nunit)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'outvars_epigene'
+#define ABI_FUNC 'outvars_multibinit'
 !End of the abilint section
 
  implicit none
@@ -935,7 +935,7 @@ subroutine outvars_epigene (epigene_dtset,nunit)
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: nunit
- type(epigene_dataset_type),intent(in) :: epigene_dtset
+ type(multibinit_dataset_type),intent(in) :: multibinit_dtset
 
 !Local variables -------------------------
 !Set routine version number here:
@@ -947,98 +947,98 @@ subroutine outvars_epigene (epigene_dtset,nunit)
 !Write the heading
  write(nunit,'(a,80a,a)') ch10,('=',ii=1,80),ch10
  write(nunit, '(a,a)' )&
-& ' -outvars_epigene: echo values of input variables ----------------------',ch10
+& ' -outvars_multibinit: echo values of input variables ----------------------',ch10
 
 !The flags
- if(epigene_dtset%ifcflag/=0)then
+ if(multibinit_dtset%ifcflag/=0)then
    write(nunit,'(a)')' Flags :'
-   if(epigene_dtset%ifcflag/=0)write(nunit,'(3x,a9,3i10)')'  ifcflag',epigene_dtset%ifcflag
-   if(epigene_dtset%prt_effpot/=0)write(nunit,'(3x,a9,3i10)')'prt_effpot',epigene_dtset%prt_effpot
-   if(epigene_dtset%prt_phfrq/=0)write(nunit,'(3x,a9,3i10)')'prt_phfrq',epigene_dtset%prt_phfrq
-   if(epigene_dtset%prt_3rd/=0)write(nunit,'(3x,a9,3i10)')'  prt_3rd',epigene_dtset%prt_3rd
-   if(epigene_dtset%prt_3rd==2)write(nunit,'(3x,a9,3es8.2)')'delta_df',epigene_dtset%delta_df
+   if(multibinit_dtset%ifcflag/=0)write(nunit,'(3x,a9,3i10)')'  ifcflag',multibinit_dtset%ifcflag
+   if(multibinit_dtset%prt_effpot/=0)write(nunit,'(3x,a9,3i10)')'prt_effpot',multibinit_dtset%prt_effpot
+   if(multibinit_dtset%prt_phfrq/=0)write(nunit,'(3x,a9,3i10)')'prt_phfrq',multibinit_dtset%prt_phfrq
+   if(multibinit_dtset%prt_3rd/=0)write(nunit,'(3x,a9,3i10)')'  prt_3rd',multibinit_dtset%prt_3rd
+   if(multibinit_dtset%prt_3rd==2)write(nunit,'(3x,a9,3es8.2)')'delta_df',multibinit_dtset%delta_df
  end if
 
- if(epigene_dtset%dynamics/=0)then
+ if(multibinit_dtset%dynamics/=0)then
    write(nunit,'(a)')' Molecular Dynamics :'
-   write(nunit,'(3x,a9,3F10.1)')'     temp',epigene_dtset%temperature
-   write(nunit,'(3x,a9,3I10.1)')'    ntime',epigene_dtset%ntime
-   write(nunit,'(3x,a9,3i10)')  '    ncell',epigene_dtset%n_cell
+   write(nunit,'(3x,a9,3F10.1)')'     temp',multibinit_dtset%temperature
+   write(nunit,'(3x,a9,3I10.1)')'    ntime',multibinit_dtset%ntime
+   write(nunit,'(3x,a9,3i10)')  '    ncell',multibinit_dtset%n_cell
  end if
 
 !Write the general information
- if( epigene_dtset%rfmeth/=1 .or. &
-& epigene_dtset%enunit/=0 .or. &
-& epigene_dtset%eivec/=0 .or. &
-& epigene_dtset%asr/=0 .or. &
-& epigene_dtset%chneut/=0)then
+ if( multibinit_dtset%rfmeth/=1 .or. &
+& multibinit_dtset%enunit/=0 .or. &
+& multibinit_dtset%eivec/=0 .or. &
+& multibinit_dtset%asr/=0 .or. &
+& multibinit_dtset%chneut/=0)then
    write(nunit,'(a)')' Miscellaneous information :'
-   if(epigene_dtset%rfmeth/=1)write(nunit,'(3x,a9,3i10)')'   rfmeth',epigene_dtset%rfmeth
-   if(epigene_dtset%enunit/=0)write(nunit,'(3x,a9,3i10)')'   enunit',epigene_dtset%enunit
-   if(epigene_dtset%eivec/=0) write(nunit,'(3x,a9,3i10)')'    eivec',epigene_dtset%eivec
-   if(epigene_dtset%asr/=0)   write(nunit,'(3x,a9,3i10)')'      asr',epigene_dtset%asr
-   if(epigene_dtset%chneut/=0)write(nunit,'(3x,a9,3i10)')'   chneut',epigene_dtset%chneut
+   if(multibinit_dtset%rfmeth/=1)write(nunit,'(3x,a9,3i10)')'   rfmeth',multibinit_dtset%rfmeth
+   if(multibinit_dtset%enunit/=0)write(nunit,'(3x,a9,3i10)')'   enunit',multibinit_dtset%enunit
+   if(multibinit_dtset%eivec/=0) write(nunit,'(3x,a9,3i10)')'    eivec',multibinit_dtset%eivec
+   if(multibinit_dtset%asr/=0)   write(nunit,'(3x,a9,3i10)')'      asr',multibinit_dtset%asr
+   if(multibinit_dtset%chneut/=0)write(nunit,'(3x,a9,3i10)')'   chneut',multibinit_dtset%chneut
  end if
 
 
 !For interatomic force constant information
- if(epigene_dtset%ifcflag/=0)then
+ if(multibinit_dtset%ifcflag/=0)then
    write(nunit,'(a)')' Interatomic Force Constants Inputs :'
-   write(nunit,'(3x,a9,3i10)')'   dipdip',epigene_dtset%dipdip
-   if(epigene_dtset%nsphere/=0)write(nunit,'(3x,a9,3i10)')'  nsphere',epigene_dtset%nsphere
-   if(abs(epigene_dtset%rifcsph)>tol10)write(nunit,'(3x,a9,E16.6)')'  nsphere',epigene_dtset%rifcsph
-   write(nunit,'(3x,a9,3i10)')'   ifcana',epigene_dtset%ifcana
-   write(nunit,'(3x,a9,3i10)')'   ifcout',epigene_dtset%ifcout
-   if(epigene_dtset%natifc>=1)then
-     write(nunit,'(3x,a9,3i10)')'   natifc',epigene_dtset%natifc
+   write(nunit,'(3x,a9,3i10)')'   dipdip',multibinit_dtset%dipdip
+   if(multibinit_dtset%nsphere/=0)write(nunit,'(3x,a9,3i10)')'  nsphere',multibinit_dtset%nsphere
+   if(abs(multibinit_dtset%rifcsph)>tol10)write(nunit,'(3x,a9,E16.6)')'  nsphere',multibinit_dtset%rifcsph
+   write(nunit,'(3x,a9,3i10)')'   ifcana',multibinit_dtset%ifcana
+   write(nunit,'(3x,a9,3i10)')'   ifcout',multibinit_dtset%ifcout
+   if(multibinit_dtset%natifc>=1)then
+     write(nunit,'(3x,a9,3i10)')'   natifc',multibinit_dtset%natifc
      write(nunit,'(3x,a12)',advance='no')'    atifc   '
-     write(nunit,'(3x,15i4)') (epigene_dtset%atifc(ii)*ii,ii=1,epigene_dtset%natifc)
+     write(nunit,'(3x,15i4)') (multibinit_dtset%atifc(ii)*ii,ii=1,multibinit_dtset%natifc)
 
    end if
    write(nunit,'(a)')' Description of grid 1 :'
-   write(nunit,'(3x,a9,3i10)')'     brav',epigene_dtset%brav
-   write(nunit,'(3x,a9,3i10)')'    ngqpt',epigene_dtset%ngqpt(1:3)
-   write(nunit,'(3x,a9,3i10)')'   nqshft',epigene_dtset%nqshft
-   if (epigene_dtset%nqshft/=0)then
+   write(nunit,'(3x,a9,3i10)')'     brav',multibinit_dtset%brav
+   write(nunit,'(3x,a9,3i10)')'    ngqpt',multibinit_dtset%ngqpt(1:3)
+   write(nunit,'(3x,a9,3i10)')'   nqshft',multibinit_dtset%nqshft
+   if (multibinit_dtset%nqshft/=0)then
      write(nunit,'(3x,a9)')'   q1shft'
-     do iqshft=1,epigene_dtset%nqshft
-       write(nunit,'(19x,4es16.8)') (epigene_dtset%q1shft(ii,iqshft),ii=1,3)
+     do iqshft=1,multibinit_dtset%nqshft
+       write(nunit,'(19x,4es16.8)') (multibinit_dtset%q1shft(ii,iqshft),ii=1,3)
      end do
    end if
-   if (epigene_dtset%qrefine > 1) then
-     write(nunit,'(3x,a9,i10)')'  qrefine', epigene_dtset%qrefine
+   if (multibinit_dtset%qrefine > 1) then
+     write(nunit,'(3x,a9,i10)')'  qrefine', multibinit_dtset%qrefine
    end if
  end if
 
 
 !List of vector 1  (reduced coordinates)
- if(epigene_dtset%nph1l/=0)then
+ if(multibinit_dtset%nph1l/=0)then
    write(nunit,'(a)')' First list of wavevector (reduced coord.) :'
-   write(nunit,'(3x,a9,3i10)')'    nph1l',epigene_dtset%nph1l
+   write(nunit,'(3x,a9,3i10)')'    nph1l',multibinit_dtset%nph1l
    write(nunit,'(3x,a9)')'    qph1l'
-   do iph1=1,epigene_dtset%nph1l
+   do iph1=1,multibinit_dtset%nph1l
      write(nunit,'(19x,3es16.8,2x,es11.3)') &
-&     (epigene_dtset%qph1l(ii,iph1),ii=1,3),epigene_dtset%qnrml1(iph1)
+&     (multibinit_dtset%qph1l(ii,iph1),ii=1,3),multibinit_dtset%qnrml1(iph1)
    end do
  end if
 
 !List of vector 2  (cartesian coordinates)
- if(epigene_dtset%nph2l/=0)then
+ if(multibinit_dtset%nph2l/=0)then
    write(nunit,'(a)')' Second list of wavevector (cart. coord.) :'
-   write(nunit,'(3x,a9,3i10)')'    nph2l',epigene_dtset%nph2l
+   write(nunit,'(3x,a9,3i10)')'    nph2l',multibinit_dtset%nph2l
    write(nunit,'(3x,a9)')'    qph2l'
-   do iph2=1,epigene_dtset%nph2l
+   do iph2=1,multibinit_dtset%nph2l
      write(nunit,'(19x,3es16.8,2x,es11.3)') &
-&     (epigene_dtset%qph2l(ii,iph2),ii=1,3),epigene_dtset%qnrml2(iph2)
+&     (multibinit_dtset%qph2l(ii,iph2),ii=1,3),multibinit_dtset%qnrml2(iph2)
    end do
  end if
 
  write(nunit,'(a,80a,a)') ch10,('=',ii=1,80),ch10
 
-end subroutine outvars_epigene
+end subroutine outvars_multibinit
 !!***
 
 !----------------------------------------------------------------------
 
-end module m_epigene_dataset
+end module m_multibinit_dataset
 !!***

@@ -3,7 +3,7 @@
 !! 78_effpot
 !!
 !! DESCRIPTION
-!! This directory contains routines used to treat the effective potential within EPIGENE,
+!! This directory contains routines used to treat the effective potential within MULTIBINIT,
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2015 ABINIT group (MG)

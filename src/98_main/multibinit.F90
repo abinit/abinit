@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****p* ABINIT/epigene
+!!****p* ABINIT/multibinit
 !! NAME
-!! epigene
+!! multibinit
 !!
 !! FUNCTION
 !! Main routine the Effective PotentIel GENErator.
@@ -33,7 +33,7 @@
 
 #include "abi_common.h"
 
-program epigene
+program multibinit
 
  use defs_basis
  use defs_abitypes
@@ -44,7 +44,7 @@ program epigene
  use m_profiling_abi
  use m_errors
  use m_effective_potential
- use m_epigene_dataset
+ use m_multibinit_dataset
  use m_anharmonics_terms
  use m_effective_potential_file
  use m_libxml
@@ -56,7 +56,7 @@ program epigene
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'epigene'
+#define ABI_FUNC 'multibinit'
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_32_util
@@ -83,7 +83,7 @@ program epigene
  character(len=strlen) :: string
  character(len=fnlen) :: filnam(15),tmpfilename,name
  character(len=500) :: message
- type(epigene_dataset_type) :: inp
+ type(multibinit_dataset_type) :: inp
  type(effective_potential_type),target :: reference_effective_potential
 !TEST_AM
 ! integer :: natom_sp
@@ -113,7 +113,7 @@ program epigene
  call timein(tcpui,twalli)
 
  if (iam_master) then
-   codename='EPIGENE'//repeat(' ',17)
+   codename='MULTIBINIT'//repeat(' ',17)
    call herald(codename,abinit_version,std_out)
  end if
 
@@ -159,7 +159,7 @@ program epigene
 !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
 !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
  write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
-&    '-',trim(filnam(3)),ch10,' to initialize the epigene input'
+&    '-',trim(filnam(3)),ch10,' to initialize the multibinit input'
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
@@ -182,8 +182,8 @@ program epigene
 
  if (iam_master) then
 !  Echo the inputs to console and main output file
-   call outvars_epigene(inp,std_out)
-   call outvars_epigene(inp,ab_out)
+   call outvars_multibinit(inp,std_out)
+   call outvars_multibinit(inp,ab_out)
  end if
 
 ! First step: Treat the reference structure 
@@ -251,7 +251,7 @@ program epigene
 !Free the effective_potential and dataset
 !**************************************************************************************** 
  call effective_potential_free(reference_effective_potential)
- call epigene_dtset_free(inp)
+ call multibinit_dtset_free(inp)
 !****************************************************************************************
 
  write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10
@@ -277,7 +277,7 @@ program epigene
 & ('=',ii=1,80),ch10,ch10,&
 & '+Total cpu time',tsec(1),&
 & '  and wall time',tsec(2),' sec',ch10,ch10,&
-& ' epigene : the run completed succesfully.'
+& ' multibinit : the run completed succesfully.'
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
 
@@ -285,7 +285,7 @@ program epigene
    ! Write YAML document with the final summary.
    ! we use this doc to test whether the calculation is completed.
    write(std_out,"(a)")"--- !FinalSummary"
-   write(std_out,"(a)")"program: epigene"
+   write(std_out,"(a)")"program: multibinit"
    write(std_out,"(2a)")"version: ",trim(abinit_version)
    write(std_out,"(2a)")"start_datetime: ",start_datetime
    write(std_out,"(2a)")"end_datetime: ",asctime()
@@ -300,7 +300,7 @@ program epigene
  end if
 
 !Write information on file about the memory before ending mpi module, if memory profiling is enabled
- call abinit_doctor("__epigene")
+ call abinit_doctor("__multibinit")
   
  call flush_unit(ab_out)
  call flush_unit(std_out)
@@ -309,5 +309,5 @@ program epigene
 
  call xmpi_end()
  
-end program epigene
+end program multibinit
 !!***

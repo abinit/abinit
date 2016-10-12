@@ -256,7 +256,7 @@ end subroutine rdfromline_value
 !  nph1l =number of wavevectors for phonon 
 !!
 !! PARENTS
-!!      epigene
+!!      multibinit
 !!
 !! CHILDREN
 !!
@@ -427,7 +427,7 @@ end subroutine xml_getdims
 !! eff_pot = effective potential type 
 !!
 !! PARENTS
-!!      epigene
+!!      multibinit
 !!
 !! CHILDREN
 !!
@@ -437,7 +437,7 @@ end subroutine xml_getdims
 
  use m_atomdata
  use m_effective_potential, only : effective_potential_type
- use m_epigene_dataset, only : epigene_dataset_type
+ use m_multibinit_dataset, only : multibinit_dataset_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1164,7 +1164,7 @@ end subroutine xml2effpot
 !!              2 XML file
 !!
 !! PARENTS
-!!   epigene
+!!   multibinit
 !!
 !! CHILDREN
 !!   
@@ -1239,7 +1239,7 @@ end subroutine effective_potential_file_getType
 !! natom = number of atoms
 !!
 !! PARENTS
-!!   epigene
+!!   multibinit
 !!
 !! CHILDREN
 !!   ddb_getdims,xml_getdims,effective_potential_file_getType
@@ -1315,7 +1315,7 @@ subroutine effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,comm
 
  else
    write(message, '(a,a,a,a)' )&
-&   ' The file ',trim(filename),' is not compatible with epigene',ch10
+&   ' The file ',trim(filename),' is not compatible with multibinit',ch10
    MSG_ERROR(message)
  end if
 
@@ -1323,7 +1323,7 @@ subroutine effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,comm
  if (natom < 1) then
    write(message, '(a,a,a,a,a)' )&
 &   ' Unable to read the number of atom from ',trim(filename),ch10,&
-&   'This file  is not compatible with epigene',ch10
+&   'This file  is not compatible with multibinit',ch10
    MSG_ERROR(message)
  end if
  
@@ -1368,7 +1368,7 @@ end subroutine effective_potential_file_getDim
 !! eff_pot = supercell structure with data to be output
 !!
 !! PARENTS
-!!   epigene
+!!   multibinit
 !!
 !! CHILDREN
 !!  bigbx9,ddb_from_file,effective_potential_file_getType,effective_potential_file_getDim,
@@ -1379,7 +1379,7 @@ end subroutine effective_potential_file_getDim
  subroutine effective_potential_file_read(filename,eff_pot,inp,comm)
 
   use m_effective_potential
-  use m_epigene_dataset
+  use m_multibinit_dataset
   use m_ddb, only : ddb_from_file,ddb_free
   use m_strain
   use m_crystal, only : crystal_t, crystal_free
@@ -1401,7 +1401,7 @@ end subroutine effective_potential_file_getDim
   character(len=fnlen),intent(in) :: filename
 !array
   type(effective_potential_type), intent(inout)  :: eff_pot
-  type(epigene_dataset_type),optional,intent(in) :: inp
+  type(multibinit_dataset_type),optional,intent(in) :: inp
   type(ddb_type) :: ddb
   type(crystal_t) :: Crystal
 !Local variables------------------------------
@@ -1437,7 +1437,7 @@ end subroutine effective_potential_file_getDim
 
 !     In anaddb, inp%atifc is set to 1 2 3 ... natom (see anaddb help).
 !     Then in the next routine inp%atifc is convert with 0 or 1 (inp%atifc is now 1 1 1 1 0).
-!     In epigene the conversion is done directly in m_epigene_dataset.
+!     In multibinit the conversion is done directly in m_multibinit_dataset.
 !     So in the next routine, we set natifc to 0 to ignore the conversion.
 !     To keep the intent(in) of the inp parameters, we need to use local variables:
       ABI_ALLOCATE(atifc,(inp%natom))
@@ -1510,7 +1510,7 @@ end subroutine effective_potential_file_read
 !! disp = array with all the strain
 !!
 !! PARENTS
-!!   epigene
+!!   multibinit
 !!
 !! CHILDREN
 !!
@@ -1587,7 +1587,7 @@ end subroutine effective_potential_file_readDisplacement
 !! disp = array with all the strain
 !!
 !! PARENTS
-!!   epigene
+!!   multibinit
 !!
 !! CHILDREN
 !!

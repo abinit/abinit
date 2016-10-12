@@ -5,7 +5,7 @@
 !! init10
 !!
 !! FUNCTION
-!! Initialize the code epigene: write heading and make the first i/os
+!! Initialize the code multibinit: write heading and make the first i/os
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2015 ABINIT group (XG)

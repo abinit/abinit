@@ -193,7 +193,7 @@ CONTAINS  !=====================================================================
 !! eff_pot = effective_potential structure to be initialized
 !!
 !! PARENTS
-!!    epigene
+!!    multibinit
 !!
 !! CHILDREN
 !!    effective_potential_free
@@ -381,7 +381,7 @@ end subroutine effective_potential_init
 !! eff_pot = supercell structure with data to be output
 !!
 !! PARENTS
-!!   epigene
+!!   multibinit
 !!
 !! CHILDREN
 !!
@@ -1011,7 +1011,7 @@ subroutine effective_potential_applySumRule(asr,ifc,natom,option)
 !! dynmat   = ddb with all information
 !!
 !! PARENTS
-!!   epigene
+!!   multibinit
 !!
 !! CHILDREN
 !!   
@@ -1171,7 +1171,7 @@ subroutine effective_potential_effpot2dynmat(dynmat,delta,eff_pot,natom,n_cell,o
 !!
 !!
 !! PARENTS
-!!   epigene
+!!   multibinit
 !!
 !! CHILDREN
 !!   wrtout
@@ -1459,7 +1459,7 @@ end subroutine effective_potential_printSupercell
 !! OUTPUT
 !!
 !! PARENTS
-!!      epigene
+!!      multibinit
 !!
 !! CHILDREN
 !!
@@ -1470,7 +1470,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
  use defs_basis
  use m_errors
  use m_profiling_abi  
- use m_epigene_dataset, only : epigene_dataset_type
+ use m_multibinit_dataset, only : multibinit_dataset_type
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1735,7 +1735,7 @@ end subroutine effective_potential_writeXML
 !! OUTPUT
 !!
 !! PARENTS
-!!      epigene
+!!      multibinit
 !!
 !! CHILDREN
 !!
@@ -1746,7 +1746,7 @@ subroutine effective_potential_writeNETCDF(eff_pot,option,filename)
  use defs_basis
  use m_errors
  use m_profiling_abi  
- use m_epigene_dataset, only : epigene_dataset_type
+ use m_multibinit_dataset, only : multibinit_dataset_type
  use m_nctk
 #if defined HAVE_NETCDF
  use netcdf
@@ -1956,7 +1956,7 @@ end subroutine effective_potential_writeNETCDF
 !! OUTPUT
 !!
 !! PARENTS
-!!      epigene
+!!      multibinit
 !!
 !! CHILDREN
 !!
@@ -1967,7 +1967,7 @@ subroutine effective_potential_writeAbiInput(eff_pot,filename,strain)
  use defs_basis
  use m_errors
  use m_profiling_abi  
- use m_epigene_dataset, only : epigene_dataset_type
+ use m_multibinit_dataset, only : multibinit_dataset_type
  use m_fstrings, only : ftoa,itoa,int2char4
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2963,7 +2963,7 @@ end function effective_potential_compare
 !! ddb   = ddb with all information
 !!
 !! PARENTS
-!!   epigene
+!!   multibinit
 !!
 !! CHILDREN
 !!   
@@ -3140,7 +3140,7 @@ subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,n_cell,nph1l,optio
 !! eff_pot
 !!
 !! PARENTS
-!!   epigene
+!!   multibinit
 !!
 !! CHILDREN
 !!   
@@ -3188,7 +3188,7 @@ subroutine effective_potential_printPDOS(eff_pot,filename,n_cell,nph1l,option,qp
    string = ''
    lenstr = 0
    call invars9(inp,lenstr,ddb%natom,string)
-!  fill it with epigene_dataset values
+!  fill it with multibinit_dataset values
    inp%prt_ifc = 1
    inp%ifcflag = 1
    inp%qph1l   = qph1l

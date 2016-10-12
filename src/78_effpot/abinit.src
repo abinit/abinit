@@ -25,7 +25,7 @@ sources = [
     "m_anharmonics_terms.F90",
     "m_effective_potential.F90",
     "m_effective_potential_file.F90",
-    "m_epigene_dataset.F90",
+    "m_multibinit_dataset.F90",
     "m_harmonics_terms.F90",
     "m_libxml.F90",
     "m_monte_carlo.F90",

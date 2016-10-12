@@ -2606,9 +2606,9 @@ class AnaddbTest(BaseTest):
 
         return t_stdin.getvalue()
 
-class EpigeneTest(BaseTest):
+class MultibinitTest(BaseTest):
     """
-    Class for Epigene tests. Redefine the make_stdin method of BaseTest
+    Class for Multibinit tests. Redefine the make_stdin method of BaseTest
     """
     def make_stdin(self):
         t_stdin = StringIO()
@@ -2733,7 +2733,7 @@ def exec2class(exec_name):
         "atompaw": AtompawTest,
         "band2eps": Band2epsTest,
         "optic": OpticTest,
-        "epigene": EpigeneTest,
+        "multibinit": MultibinitTest,
     }.get(exec_name, BaseTest)
 
 

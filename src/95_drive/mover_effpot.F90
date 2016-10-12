@@ -13,7 +13,7 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  inp = input of epigene
+!!  inp = input of multibinit
 !!  effective_potential =  effective potential of the reference structure
 !! OUTPUT
 !!
@@ -53,7 +53,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,comm)
  use m_strain
  use m_effective_potential
  use m_effective_potential_file
- use m_epigene_dataset
+ use m_multibinit_dataset
  use m_phonon_supercell
  use m_ifc
  use m_ewald
@@ -79,7 +79,7 @@ implicit none
 !scalar
  integer, intent(inout) :: comm
 !array
- type(epigene_dataset_type),intent(in) :: inp
+ type(multibinit_dataset_type),intent(in) :: inp
  type(effective_potential_type),intent(inout)  :: effective_potential
  character(len=fnlen),intent(in) :: filnam(15)
 !Local variables-------------------------------
