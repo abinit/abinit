@@ -189,10 +189,10 @@ subroutine nullify_mpi_enreg(MPI_enreg)
 !! PARENTS
 !!      abinit,bethe_salpeter,bsepostproc,calc_vhxc_me,conducti,cut3d
 !!      debug_tools,dfpt_nstpaw,dieltcel,eph,fftprof,gwls_hamiltonian,inwffil
-!!      ks_ddiago,lapackprof,linear_optics_paw,m_cut3d,m_dvdb,m_fft,m_fft_prof
-!!      m_fftcore,m_gsphere,m_hamiltonian,m_io_kss,m_ioarr,m_kxc,m_pawpwij
-!!      m_ppmodel,m_screening,m_wfd,m_wfk,mlwfovlp_qp,mrgddb,mrggkk,mrgscr
-!!      posdoppler,scfcv,screening,sigma,suscep_stat,susk,suskmm,ujdet
+!!      ks_ddiago,lapackprof,linear_optics_paw,m_cut3d,m_ddk,m_dvdb,m_fft
+!!      m_fft_prof,m_fftcore,m_gsphere,m_hamiltonian,m_io_kss,m_ioarr,m_kxc
+!!      m_pawpwij,m_ppmodel,m_screening,m_wfd,m_wfk,mlwfovlp_qp,mrgddb,mrggkk
+!!      mrgscr,posdoppler,scfcv,screening,sigma,suscep_stat,susk,suskmm,ujdet
 !!      vdw_kernelgen,wfk_analyze
 !!
 !! CHILDREN
@@ -301,7 +301,8 @@ subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
 
 !Arguments ------------------------------------
 !scalars
- type(MPI_type),intent(inout) :: mpi_enreg1,MPI_enreg2
+ type(MPI_type),intent(in) :: mpi_enreg1
+ type(MPI_type),intent(out) :: MPI_enreg2
 
 !Local variables-------------------------------
 !scalars

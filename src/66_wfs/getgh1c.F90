@@ -103,7 +103,7 @@ subroutine getgh1c(berryopt,copt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !scalars
  integer,intent(in) :: berryopt,copt,idir,ipert,optlocal,optnl,opt_gvnl1,sij_opt,tim_getgh1c,usevnl
  real(dp),intent(in) :: lambda
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(inout),target :: gs_hamkq
  type(rf_hamiltonian_type),intent(inout),target :: rf_hamkq
 !arrays
@@ -278,7 +278,6 @@ subroutine getgh1c(berryopt,copt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        ABI_ALLOCATE(gh1c3,(2,npw1))
        ABI_ALLOCATE(gh1c4,(2,npw1))
        gh1c1(:,:)=zero; gh1c2(:,:)=zero; gh1c3(:,:)=zero ;  gh1c4(:,:)=zero
-       cplex1=2
        ABI_ALLOCATE(vlocal_tmp,(gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
        ABI_ALLOCATE(cwavef1,(2,npw))
        ABI_ALLOCATE(cwavef2,(2,npw))
@@ -288,17 +287,18 @@ subroutine getgh1c(berryopt,copt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        end do
 !      gh1c1=v11*phi1
        vlocal_tmp(:,:,:)=rf_hamkq%vlocal1(:,:,:,1)
-       call fourwf(1,vlocal_tmp,cwavef1,gh1c1,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
+       call fourwf(rf_hamkq%cplex,vlocal_tmp,cwavef1,gh1c1,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
 !      gh1c2=v22*phi2
        vlocal_tmp(:,:,:)=rf_hamkq%vlocal1(:,:,:,2)
-       call fourwf(1,vlocal_tmp,cwavef2,gh1c2,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
+       call fourwf(rf_hamkq%cplex,vlocal_tmp,cwavef2,gh1c2,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
        ABI_DEALLOCATE(vlocal_tmp)
+       cplex1=2
        ABI_ALLOCATE(vlocal_tmp,(cplex1*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
 !      gh1c3=(re(v12)-im(v12))*phi1
        do i3=1,gs_hamkq%n6
@@ -309,7 +309,7 @@ subroutine getgh1c(berryopt,copt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
            end do
          end do
        end do
-       call fourwf(rf_hamkq%cplex,vlocal_tmp,cwavef1,gh1c3,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
+       call fourwf(cplex1,vlocal_tmp,cwavef1,gh1c3,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
@@ -321,7 +321,7 @@ subroutine getgh1c(berryopt,copt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
            end do
          end do
        end do
-       call fourwf(rf_hamkq%cplex,vlocal_tmp,cwavef2,gh1c4,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
+       call fourwf(cplex1,vlocal_tmp,cwavef2,gh1c4,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,mpi_enreg%paral_kgb,tim_fourwf,weight,weight,&
 &       use_gpu_cuda=gs_hamkq%use_gpu_cuda)
@@ -373,8 +373,8 @@ subroutine getgh1c(berryopt,copt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 & ((ipert>0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4)).or.(ipert==natom+2)))
 
 !Use of cwaveprj depends on gs_hamkq%usecprj and copt :
-use_GS_cwaveprj = 0
-if (gs_hamkq%usecprj==1.and.copt==0) use_GS_cwaveprj=1
+  use_GS_cwaveprj = 0
+  if (gs_hamkq%usecprj==1.and.copt==0) use_GS_cwaveprj=1
 
 !Phonon perturbation
 !-------------------------------------------
@@ -800,7 +800,7 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
 !scalars
  integer,intent(in) :: isppol,nspden,usepaw,cplex,nfftf,nfft,nvloc
  type(pawfgr_type),intent(in) :: pawfgr
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in),target :: vtrial(nfftf,nspden)

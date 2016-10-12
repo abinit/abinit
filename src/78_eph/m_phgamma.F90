@@ -254,15 +254,15 @@ contains  !=====================================================================
 !!
 !! CHILDREN
 !!      a2fw_free,a2fw_init,a2fw_solve_gap,a2fw_write,cg_rotate,cwtime
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
-!!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
-!!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
-!!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
-!!      ngfft_seq,pawcprj_free,phdispl_cart2red,phgamma_finalize,phgamma_free
-!!      phgamma_init,phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free
-!!      wfd_init,wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work
-!!      xmpi_sum
+!!      ddk_read_from_file,destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g
+!!      dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1
+!!      fstab_free,fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ
+!!      get_kg,getgh1c,getgh1c_setup,getph,ifc_fourq,init_hamiltonian
+!!      init_rf_hamiltonian,listkk,littlegroup_q,load_spin_hamiltonian
+!!      load_spin_rf_hamiltonian,ngfft_seq,pawcprj_free,phdispl_cart2red
+!!      phgamma_finalize,phgamma_free,phgamma_init,phgamma_linwid
+!!      rf_transgrid_and_pack,wfd_copy_cg,wfd_free,wfd_init,wfd_print
+!!      wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
@@ -349,15 +349,15 @@ end subroutine phgamma_free
 !!
 !! CHILDREN
 !!      a2fw_free,a2fw_init,a2fw_solve_gap,a2fw_write,cg_rotate,cwtime
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
-!!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
-!!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
-!!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
-!!      ngfft_seq,pawcprj_free,phdispl_cart2red,phgamma_finalize,phgamma_free
-!!      phgamma_init,phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free
-!!      wfd_init,wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work
-!!      xmpi_sum
+!!      ddk_read_from_file,destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g
+!!      dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1
+!!      fstab_free,fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ
+!!      get_kg,getgh1c,getgh1c_setup,getph,ifc_fourq,init_hamiltonian
+!!      init_rf_hamiltonian,listkk,littlegroup_q,load_spin_hamiltonian
+!!      load_spin_rf_hamiltonian,ngfft_seq,pawcprj_free,phdispl_cart2red
+!!      phgamma_finalize,phgamma_free,phgamma_init,phgamma_linwid
+!!      rf_transgrid_and_pack,wfd_copy_cg,wfd_free,wfd_init,wfd_print
+!!      wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
@@ -485,15 +485,15 @@ end subroutine phgamma_init
 !!
 !! CHILDREN
 !!      a2fw_free,a2fw_init,a2fw_solve_gap,a2fw_write,cg_rotate,cwtime
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
-!!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
-!!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
-!!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
-!!      ngfft_seq,pawcprj_free,phdispl_cart2red,phgamma_finalize,phgamma_free
-!!      phgamma_init,phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free
-!!      wfd_init,wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work
-!!      xmpi_sum
+!!      ddk_read_from_file,destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g
+!!      dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1
+!!      fstab_free,fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ
+!!      get_kg,getgh1c,getgh1c_setup,getph,ifc_fourq,init_hamiltonian
+!!      init_rf_hamiltonian,listkk,littlegroup_q,load_spin_hamiltonian
+!!      load_spin_rf_hamiltonian,ngfft_seq,pawcprj_free,phdispl_cart2red
+!!      phgamma_finalize,phgamma_free,phgamma_init,phgamma_linwid
+!!      rf_transgrid_and_pack,wfd_copy_cg,wfd_free,wfd_init,wfd_print
+!!      wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
@@ -598,15 +598,15 @@ end subroutine phgamma_finalize
 !!
 !! CHILDREN
 !!      a2fw_free,a2fw_init,a2fw_solve_gap,a2fw_write,cg_rotate,cwtime
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
-!!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
-!!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
-!!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
-!!      ngfft_seq,pawcprj_free,phdispl_cart2red,phgamma_finalize,phgamma_free
-!!      phgamma_init,phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free
-!!      wfd_init,wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work
-!!      xmpi_sum
+!!      ddk_read_from_file,destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g
+!!      dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1
+!!      fstab_free,fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ
+!!      get_kg,getgh1c,getgh1c_setup,getph,ifc_fourq,init_hamiltonian
+!!      init_rf_hamiltonian,listkk,littlegroup_q,load_spin_hamiltonian
+!!      load_spin_rf_hamiltonian,ngfft_seq,pawcprj_free,phdispl_cart2red
+!!      phgamma_finalize,phgamma_free,phgamma_init,phgamma_linwid
+!!      rf_transgrid_and_pack,wfd_copy_cg,wfd_free,wfd_init,wfd_print
+!!      wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
@@ -696,15 +696,15 @@ end subroutine tgamma_symm
 !!
 !! CHILDREN
 !!      a2fw_free,a2fw_init,a2fw_solve_gap,a2fw_write,cg_rotate,cwtime
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
-!!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
-!!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
-!!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
-!!      ngfft_seq,pawcprj_free,phdispl_cart2red,phgamma_finalize,phgamma_free
-!!      phgamma_init,phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free
-!!      wfd_init,wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work
-!!      xmpi_sum
+!!      ddk_read_from_file,destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g
+!!      dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1
+!!      fstab_free,fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ
+!!      get_kg,getgh1c,getgh1c_setup,getph,ifc_fourq,init_hamiltonian
+!!      init_rf_hamiltonian,listkk,littlegroup_q,load_spin_hamiltonian
+!!      load_spin_rf_hamiltonian,ngfft_seq,pawcprj_free,phdispl_cart2red
+!!      phgamma_finalize,phgamma_free,phgamma_init,phgamma_linwid
+!!      rf_transgrid_and_pack,wfd_copy_cg,wfd_free,wfd_init,wfd_print
+!!      wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
@@ -842,15 +842,15 @@ end subroutine phgamma_eval_qibz
 !!
 !! CHILDREN
 !!      a2fw_free,a2fw_init,a2fw_solve_gap,a2fw_write,cg_rotate,cwtime
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
-!!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
-!!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
-!!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
-!!      ngfft_seq,pawcprj_free,phdispl_cart2red,phgamma_finalize,phgamma_free
-!!      phgamma_init,phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free
-!!      wfd_init,wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work
-!!      xmpi_sum
+!!      ddk_read_from_file,destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g
+!!      dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1
+!!      fstab_free,fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ
+!!      get_kg,getgh1c,getgh1c_setup,getph,ifc_fourq,init_hamiltonian
+!!      init_rf_hamiltonian,listkk,littlegroup_q,load_spin_hamiltonian
+!!      load_spin_rf_hamiltonian,ngfft_seq,pawcprj_free,phdispl_cart2red
+!!      phgamma_finalize,phgamma_free,phgamma_init,phgamma_linwid
+!!      rf_transgrid_and_pack,wfd_copy_cg,wfd_free,wfd_init,wfd_print
+!!      wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
@@ -1003,15 +1003,15 @@ end subroutine phgamma_interp
 !!
 !! CHILDREN
 !!      a2fw_free,a2fw_init,a2fw_solve_gap,a2fw_write,cg_rotate,cwtime
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
-!!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
-!!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
-!!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
-!!      ngfft_seq,pawcprj_free,phdispl_cart2red,phgamma_finalize,phgamma_free
-!!      phgamma_init,phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free
-!!      wfd_init,wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work
-!!      xmpi_sum
+!!      ddk_read_from_file,destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g
+!!      dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1
+!!      fstab_free,fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ
+!!      get_kg,getgh1c,getgh1c_setup,getph,ifc_fourq,init_hamiltonian
+!!      init_rf_hamiltonian,listkk,littlegroup_q,load_spin_hamiltonian
+!!      load_spin_rf_hamiltonian,ngfft_seq,pawcprj_free,phdispl_cart2red
+!!      phgamma_finalize,phgamma_free,phgamma_init,phgamma_linwid
+!!      rf_transgrid_and_pack,wfd_copy_cg,wfd_free,wfd_init,wfd_print
+!!      wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
@@ -1184,15 +1184,15 @@ end subroutine phgamma_interp_setup
 !!
 !! CHILDREN
 !!      a2fw_free,a2fw_init,a2fw_solve_gap,a2fw_write,cg_rotate,cwtime
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
-!!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
-!!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
-!!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
-!!      ngfft_seq,pawcprj_free,phdispl_cart2red,phgamma_finalize,phgamma_free
-!!      phgamma_init,phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free
-!!      wfd_init,wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work
-!!      xmpi_sum
+!!      ddk_read_from_file,destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g
+!!      dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1
+!!      fstab_free,fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ
+!!      get_kg,getgh1c,getgh1c_setup,getph,ifc_fourq,init_hamiltonian
+!!      init_rf_hamiltonian,listkk,littlegroup_q,load_spin_hamiltonian
+!!      load_spin_rf_hamiltonian,ngfft_seq,pawcprj_free,phdispl_cart2red
+!!      phgamma_finalize,phgamma_free,phgamma_init,phgamma_linwid
+!!      rf_transgrid_and_pack,wfd_copy_cg,wfd_free,wfd_init,wfd_print
+!!      wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
@@ -1418,15 +1418,15 @@ end subroutine phgamma_linwid
 !!
 !! CHILDREN
 !!      a2fw_free,a2fw_init,a2fw_solve_gap,a2fw_write,cg_rotate,cwtime
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
-!!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
-!!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
-!!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
-!!      ngfft_seq,pawcprj_free,phdispl_cart2red,phgamma_finalize,phgamma_free
-!!      phgamma_init,phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free
-!!      wfd_init,wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work
-!!      xmpi_sum
+!!      ddk_read_from_file,destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g
+!!      dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1
+!!      fstab_free,fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ
+!!      get_kg,getgh1c,getgh1c_setup,getph,ifc_fourq,init_hamiltonian
+!!      init_rf_hamiltonian,listkk,littlegroup_q,load_spin_hamiltonian
+!!      load_spin_rf_hamiltonian,ngfft_seq,pawcprj_free,phdispl_cart2red
+!!      phgamma_finalize,phgamma_free,phgamma_init,phgamma_linwid
+!!      rf_transgrid_and_pack,wfd_copy_cg,wfd_free,wfd_init,wfd_print
+!!      wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
@@ -1505,15 +1505,15 @@ end subroutine a2fw_free
 !!
 !! CHILDREN
 !!      a2fw_free,a2fw_init,a2fw_solve_gap,a2fw_write,cg_rotate,cwtime
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
-!!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
-!!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
-!!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
-!!      ngfft_seq,pawcprj_free,phdispl_cart2red,phgamma_finalize,phgamma_free
-!!      phgamma_init,phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free
-!!      wfd_init,wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work
-!!      xmpi_sum
+!!      ddk_read_from_file,destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g
+!!      dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1
+!!      fstab_free,fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ
+!!      get_kg,getgh1c,getgh1c_setup,getph,ifc_fourq,init_hamiltonian
+!!      init_rf_hamiltonian,listkk,littlegroup_q,load_spin_hamiltonian
+!!      load_spin_rf_hamiltonian,ngfft_seq,pawcprj_free,phdispl_cart2red
+!!      phgamma_finalize,phgamma_free,phgamma_init,phgamma_linwid
+!!      rf_transgrid_and_pack,wfd_copy_cg,wfd_free,wfd_init,wfd_print
+!!      wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
@@ -2091,15 +2091,15 @@ end function a2fw_lambda_wij
 !!
 !! CHILDREN
 !!      a2fw_free,a2fw_init,a2fw_solve_gap,a2fw_write,cg_rotate,cwtime
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
-!!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
-!!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
-!!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
-!!      ngfft_seq,pawcprj_free,phdispl_cart2red,phgamma_finalize,phgamma_free
-!!      phgamma_init,phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free
-!!      wfd_init,wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work
-!!      xmpi_sum
+!!      ddk_read_from_file,destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g
+!!      dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1
+!!      fstab_free,fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ
+!!      get_kg,getgh1c,getgh1c_setup,getph,ifc_fourq,init_hamiltonian
+!!      init_rf_hamiltonian,listkk,littlegroup_q,load_spin_hamiltonian
+!!      load_spin_rf_hamiltonian,ngfft_seq,pawcprj_free,phdispl_cart2red
+!!      phgamma_finalize,phgamma_free,phgamma_init,phgamma_linwid
+!!      rf_transgrid_and_pack,wfd_copy_cg,wfd_free,wfd_init,wfd_print
+!!      wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
@@ -2241,15 +2241,15 @@ end subroutine a2fw_write
 !!
 !! CHILDREN
 !!      a2fw_free,a2fw_init,a2fw_solve_gap,a2fw_write,cg_rotate,cwtime
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
-!!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
-!!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
-!!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
-!!      ngfft_seq,pawcprj_free,phdispl_cart2red,phgamma_finalize,phgamma_free
-!!      phgamma_init,phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free
-!!      wfd_init,wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work
-!!      xmpi_sum
+!!      ddk_read_from_file,destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g
+!!      dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1
+!!      fstab_free,fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ
+!!      get_kg,getgh1c,getgh1c_setup,getph,ifc_fourq,init_hamiltonian
+!!      init_rf_hamiltonian,listkk,littlegroup_q,load_spin_hamiltonian
+!!      load_spin_rf_hamiltonian,ngfft_seq,pawcprj_free,phdispl_cart2red
+!!      phgamma_finalize,phgamma_free,phgamma_init,phgamma_linwid
+!!      rf_transgrid_and_pack,wfd_copy_cg,wfd_free,wfd_init,wfd_print
+!!      wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
@@ -2506,15 +2506,15 @@ end subroutine a2fw_solve_gap
 !!
 !! CHILDREN
 !!      a2fw_free,a2fw_init,a2fw_solve_gap,a2fw_write,cg_rotate,cwtime
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
-!!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
-!!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
-!!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
-!!      ngfft_seq,pawcprj_free,phdispl_cart2red,phgamma_finalize,phgamma_free
-!!      phgamma_init,phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free
-!!      wfd_init,wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work
-!!      xmpi_sum
+!!      ddk_read_from_file,destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g
+!!      dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1
+!!      fstab_free,fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ
+!!      get_kg,getgh1c,getgh1c_setup,getph,ifc_fourq,init_hamiltonian
+!!      init_rf_hamiltonian,listkk,littlegroup_q,load_spin_hamiltonian
+!!      load_spin_rf_hamiltonian,ngfft_seq,pawcprj_free,phdispl_cart2red
+!!      phgamma_finalize,phgamma_free,phgamma_init,phgamma_linwid
+!!      rf_transgrid_and_pack,wfd_copy_cg,wfd_free,wfd_init,wfd_print
+!!      wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
@@ -2582,7 +2582,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  type(pseudopotential_type),intent(in) :: psps
  type(pawfgr_type),intent(in) :: pawfgr
  type(ifc_type),intent(in) :: ifc
- type(mpi_type),intent(inout) :: mpi_enreg
+ type(mpi_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18),ngfftf(18)
  real(dp),intent(in) :: n0(ebands%nsppol)
@@ -2698,7 +2698,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      write(std_out,"((a,i0,2a,a,i0))")"For spin: ",spin,", qpt: ",trim(ktoa(qpt)),", number of (k,q) pairs: ",kqcount
    end do
  end do
- call wrtout(std_out, "", do_flush=.True.)
+ call wrtout(std_out, " ", do_flush=.True.)
 
  ! Activate Fourier interpolation if irred q-points are not in the DVDB file.
  if (do_ftv1q /= 0) then

@@ -63,7 +63,7 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(out) :: etotal
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(energies_type),intent(inout) :: energies
  type(pseudopotential_type),intent(in) :: psps

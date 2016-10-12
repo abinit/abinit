@@ -76,7 +76,7 @@ CONTAINS
 !!  Add information on the use of time-reversal in the Abinit header.
 !!
 !! PARENTS
-!!      eph,gstate,m_dvdb,m_ioarr,m_iowf,m_wfd,m_wfk,mlwfovlp_qp,mrgscr
+!!      eph,gstate,m_ddk,m_dvdb,m_ioarr,m_iowf,m_wfd,m_wfk,mlwfovlp_qp,mrgscr
 !!      setup_bse,setup_screening,setup_sigma,wfk_analyze
 !!
 !! CHILDREN

@@ -27,7 +27,7 @@
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  gsqcut=cutoff on $|G|^2$: see setup1 for definition (doubled sphere).
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in unit cell.
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
@@ -115,7 +115,7 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
 !scalars
  integer,intent(in) :: mgfft,natom,nfft,nspden,ntypat,option
  real(dp),intent(in) :: eei,gsqcut,ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_internal_type), intent(in) :: wvl

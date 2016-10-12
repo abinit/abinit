@@ -44,11 +44,9 @@ MODULE m_exc_spectra
  use m_numeric_tools,   only : simpson_int
  use m_blas,            only : xdotu
  use m_special_funcs,   only : dirac_delta
-
  use m_crystal,         only : crystal_t 
  use m_crystal_io,      only : crystal_ncwrite
  use m_bz_mesh,         only : kmesh_t
- !use m_commutator_vkbr, only : kb_potential
  use m_pawtab,          only : pawtab_type
  use m_pawhr,           only : pawhur_t
  use m_wfd,             only : wfd_t

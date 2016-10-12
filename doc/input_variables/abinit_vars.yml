@@ -3218,13 +3218,34 @@
     - 3
     excludes: null
     requires: null
-    section: varrf
+    section: vareph
     text: |-
         This variable is mandatory when [[optdriver]]==7.
         It defines the number of divisions in the (homogeneous) q-mesh
         used to generate the DDB file. See also the description of the [[getddb]] input variable.
     varname: ddb_ngqpt
     vartype: integer
+- !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval:
+    - 0.0
+    - 0.0
+    - 0.0
+    definition: 'Derivative DatabBase: SHIFT of the Q-points '
+    dimensions:
+    - 3
+    excludes: null
+    requires: null
+    section: vareph
+    text: |-
+        Only relevant when [[optdriver]]==7.
+        It defines the shift in the q-mesh used to generate the DDB file,
+        which is defined by the [[ddb_ngqpt]] input variable.
+        See [[shiftk]] for more information on the definition.
+    varname: ddb_shiftq
+    vartype: real
 - !variable
     characteristics: null
     commentdefault: null
@@ -4265,10 +4286,8 @@
            <a href="http://dx.doi.org/10.1016/j.cpc.2015.10.023">
             Comp. Phys. Comm. 200, 274 (2016)
            </a>. Before using it, it has to be installed following
-            instructions at https://triqs.ipht.cnrs.fr/1.4/applications/cthyb/install.html.
-         <br />
-         <br />
-         WARNING: CT-QMC should be used for correlated metals. Even for correlated (Mott) insulators, QMC is expected to be much more precise: Indeed, the Hubbard one neglects the hybridization function.
+            instructions at https://triqs.ipht.cnrs.fr/1.3/applications/cthyb/install.html.
+            The current interface is valid for TRIQS 1.3 and TRIQS/CTHYB 1.3.
          <br />
          See the usefull variables for CT-QMC solver :
         [[dmftctqmc_basis]],
@@ -5544,6 +5563,28 @@
         quantities in the eph module of abinit. Value of 1 corresponds to
         elastic LOVA as in the PRB by Savrasov and Savrasov 
     varname: eph_transport
+    vartype: integer
+- !variable
+    characteristics:
+    - '[[DEVELOP]]'
+    commentdefault: null
+    commentdims: null
+    defaultval: 1
+    definition: 'Electron-PHonon: Task'
+    dimensions: scalar
+    excludes: null
+    requires: null
+    section: varrf
+    text: |-
+        <p>
+        When [[optdriver]]==7, select the task to be performed.
+         The choice is among :
+         <br />
+         [[eph_task]]=1 : phonon linewidth
+         <br />
+         [[eph_task]]=2 : electron-phonon coupling elements
+        </p>
+    varname: eph_task
     vartype: integer
 - !variable
     characteristics:
@@ -20028,7 +20069,7 @@
     text: |-
         <p>
          Print out geometry (_BLZTRP_GEOM) and eigenenergy (_BLZTRP_EIGEN) files for the
-         <a href="http://www.icams.de/content/departments/cmat/boltztrap/"> BoltzTraP code</a>
+         <a href="http://www.icams.de/content/research/software-development/boltztrap/"> BoltzTraP code</a>
          by Georg Madsen.
         </p>
     varname: prtbltztrp
@@ -20786,6 +20827,24 @@
          If set to 1, the nesting function for the k-point grid is printed. For the moment the path in q space for the nesting function is fixed, but will become an input as well.
         </p>
     varname: prtnest
+    vartype: integer
+- !variable
+    characteristics:
+    - '[[DEVELOP]]'
+    commentdefault: null
+    commentdims: null
+    defaultval: 1
+    definition: PRinT the PHonon Density Of States
+    dimensions: scalar
+    excludes: null
+    requires: null
+    section: vareph
+    text: |-
+        <p>
+        Print the phonon density of states.
+        It is activated by default when [[optdriver]]==7.
+        </p>
+    varname: prtphdos
     vartype: integer
 - !variable
     characteristics:
@@ -27298,7 +27357,7 @@
             performance guide
            </a>
            and the
-           <a href="http://arxiv.org/abs/1406.4350">
+           <a href="https://arxiv.org/abs/1406.4350">
             paper
            </a>
            by A. Levitt and M. Torrent. Status: experimental but usable. Questions and bug reports should be sent to antoine (dot) levitt (at) gmail.com.

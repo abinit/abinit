@@ -137,7 +137,7 @@ CONTAINS  !=====================================================================
 !! NOTES
 !!
 !! PARENTS
-!!      dfpt_looppert,rf2_init
+!!      dfpt_looppert,dfpt_scfcv,rf2_init
 !!
 !! CHILDREN
 !!
@@ -211,7 +211,7 @@ end subroutine rf2_getidirs
 !!  rf2 : rf2_t object containing all rf2 data
 !!  choice : 4 possible values, see "select case (choice)" below
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  iband : band index for vi
 !!  idir1  (used only if print_info/=0)  : direction of the 1st perturbation
 !!  idir2  (used only if print_info/=0)  : direction of the 2nd perturbation
@@ -362,7 +362,7 @@ end subroutine rf2_accumulate_bands
 !!  isppol=1 index of current spin component
 !!  mband=maximum number of bands
 !!  mkmem =number of k points trated by this node (GS data).
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
 !!  print_info : if /=0 : some tests are done (see NOTES below). Wrong results are printed in std_out
 !!  prtvol=control print volume and debugging output (for getghc)
@@ -425,7 +425,7 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj,copt,dtfil,eig0,eig1_k_jband,
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(rf2_t),intent(in) :: rf2
  type(rf_hamiltonian_type),intent(inout),target :: rf_hamk_idir
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 
 !arrays
  real(dp),intent(in) :: cg_jband(2,rf2%size_wf*print_info*rf2%nband_k,2)

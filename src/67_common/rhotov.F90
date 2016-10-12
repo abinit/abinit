@@ -145,7 +145,7 @@ subroutine rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfft,ngfft,&
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(out) :: vres2,vxcavg
  type(MPI_type),intent(inout) :: mpi_enreg
- type(dataset_type),intent(inout) :: dtset
+ type(dataset_type),intent(in) :: dtset
  type(electronpositron_type),pointer,optional :: electronpositron
  type(energies_type),intent(inout) :: energies
  type(wvl_data), intent(inout) :: wvl

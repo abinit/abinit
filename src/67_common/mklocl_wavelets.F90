@@ -83,7 +83,7 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: option, natom, nfft, nspden
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(wvl_denspot_type), intent(inout) :: wvl_den
  type(wvl_internal_type), intent(in) :: wvl_descr
 !arrays

@@ -69,7 +69,7 @@
 !!  moved_atm_inside= if 1, then the preconditioned forces
 !!    as well as the preconditioned potential residual must be computed;
 !!    otherwise, compute only the preconditioned potential residual.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nfft=number of fft grid points
@@ -172,7 +172,7 @@ subroutine prcref(atindx,dielar,dielinv,&
  integer,intent(in) :: dielstrt,istep,my_natom,mgfft,moved_atm_inside,n1xccc
  integer,intent(in) :: nfft,nfftprc,nkxc,npawmix,npwdiel,ntypat,optreal,optres
  real(dp),intent(in) :: etotal,gsqcut
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_internal_type), intent(in) :: wvl

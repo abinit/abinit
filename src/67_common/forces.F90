@@ -45,7 +45,7 @@
 !!                       gsqcut=(boxcut**2)*ecut/(2._dp*(Pi**2)
 !!  indsym(4,nsym,natom)=indirect indexing array for atom labels
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  n1xccc=dimension of xccc1d ; 0 if no XC core correction is used
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
 !!  nattyp(ntypat)=number of atoms of each type
@@ -155,7 +155,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
  integer,intent(in) :: mgfft,n1xccc,n3xccc,nfft,ngrvdw,ntypat,usefock
  real(dp),intent(in) :: gsqcut
  real(dp),intent(out) :: diffor,maxfor
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(efield_type),intent(in) :: dtefield
  type(dataset_type),intent(in) :: dtset
  type(electronpositron_type),pointer,optional :: electronpositron

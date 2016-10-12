@@ -97,7 +97,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
   real(dp),intent(in)           :: rprimd(3,3)
   real(dp), intent(in)          :: xc_denpos
   real(dp), intent(out)         :: enxc, envxc, enhartr, vxcavg
-  type(mpi_type), intent(inout) :: mpi_enreg
+  type(mpi_type), intent(in) :: mpi_enreg
   type(wvl_internal_type), intent(in) :: wvl
   type(wvl_denspot_type), intent(inout) :: wvl_den
   type(wvl_energy_terms), intent(inout) :: wvl_e

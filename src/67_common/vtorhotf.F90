@@ -19,7 +19,7 @@
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell.
 !!  nfft=number of fft grid points
 !!  nspden=number of spin-density components
@@ -80,7 +80,7 @@ subroutine vtorhotf(dtfil,dtset,ek,enl,entropy,fermie,gprimd,grnl,&
  integer,intent(in) :: natom,nfft,nspden,nsppol,nsym
  real(dp),intent(in) :: ucvol
  real(dp),intent(out) :: ek,enl,entropy,fermie
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
 !arrays

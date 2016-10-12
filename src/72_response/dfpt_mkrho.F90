@@ -28,7 +28,7 @@
 !!  mgfft=maximum size of 1D FFTs
 !!  mkmem=Number of k points treated by this node (GS data)
 !!  mk1mem=Number of k points treated by this node (RF data)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum allowed value for npw (GS wfs)
 !!  mpw1=maximum allowed value for npw1 (RF data)
 !!  nband_rbz(nkpt_rbz*nsppol)=number of bands to be included in summation
@@ -106,7 +106,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  integer,intent(in) :: cplex,mband,mgfft,mk1mem,mkmem,mpw,mpw1,nfft,nkpt_rbz
  integer,intent(in) :: nspden,nspinor,nsppol,nsym,paral_kgb
  real(dp),intent(in) :: ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))
  integer,intent(in) :: istwfk_rbz(nkpt_rbz),kg(3,mpw*mkmem),kg1(3,mpw1*mk1mem)
@@ -382,7 +382,6 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 
 !    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997)??)
          weight=two*occ_rbz(iband+bdtot_index)*wtk_rbz(ikpt)/ucvol
-
 !density components 
 !GS wfk Fourrier Tranform 
 ! EB FR in the fourwf calls rhoaug(:,:,:,2) is a dummy argument
@@ -409,19 +408,19 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
                  re1_up=wfraug1_up(1,i1,i2,i3) ;     im1_up=wfraug1_up(2,i1,i2,i3)
                  re0_down=wfraug_down(1,i1,i2,i3)  ; im0_down=wfraug_down(2,i1,i2,i3)
                  re1_down=wfraug1_down(1,i1,i2,i3) ; im1_down=wfraug1_down(2,i1,i2,i3)
-           rhoaug1(2*i1-1,i2,i3,1)=rhoaug1(2*i1-1,i2,i3,1)+weight*((re0_up*re1_up+im0_up*im1_up)+&
-&           (re0_down*re1_down+im0_down*im1_down)) ! trace
-           rhoaug1(2*i1  ,i2,i3,1)=zero ! imag part of rho at k
-           rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(2*i1-1,i2,i3,2)+weight*((re0_up*re1_down+im0_up*im1_down)+&
-&           re0_down*re1_up+im0_down*im1_up) ! m_x
-           rhoaug1(2*i1  ,i2,i3,2)=zero ! imag part of rho at k
-           rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(2*i1-1,i2,i3,3)+weight*((-re1_up*im0_down+im1_up*re0_down)&
-&           -re0_up*im1_down+im0_up*re1_down) ! m_y
-           rhoaug1(2*i1  ,i2,i3,3)=zero ! imag part of rho at k
-           rhoaug1(2*i1-1,i2,i3,4)=rhoaug1(2*i1-1,i2,i3,4)+weight*((re0_up*re1_up+im0_up*im1_up)-&
-&           (re0_down*re1_down+im0_down*im1_down)) ! m_z
-           rhoaug1(2*i1  ,i2,i3,4)=zero ! imag part of rho at k
-              end do
+             rhoaug1(2*i1-1,i2,i3,1)=rhoaug1(2*i1-1,i2,i3,1)+weight*(re0_up*re1_up+im0_up*im1_up) !n_upup
+             rhoaug1(2*i1  ,i2,i3,1)=zero ! imag part of n_upup at k
+             rhoaug1(2*i1-1,i2,i3,4)=rhoaug1(2*i1-1,i2,i3,4)+weight*(re0_down*re1_down+im0_down*im1_down) ! n_dndn
+             rhoaug1(2*i1  ,i2,i3,4)=zero ! imag part of n_dndn at k
+             rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(i1,i2,i3,2)+weight*(re1_up*re0_down+re0_up*re1_down &
+&                             +im0_up*im1_down+im0_down*im1_up) &
+&                             +(rhoaug1(i1,i2,i3,1)+rhoaug1(i1,i2,i3,4)) ! mx+tr[rhoaug1] see symrhg.F90 for mx
+             rhoaug1(2*i1  ,i2,i3,2)=zero ! imag part of mx+tr[rhoaug1] at k
+             rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(i1,i2,i3,1)+rhoaug1(i1,i2,i3,3)+weight*(-re1_up*im0_down+im1_up*re0_down &
+&                             -re0_up*im1_down+im0_up*re1_down) &
+&                             +(rhoaug1(i1,i2,i3,1)+rhoaug1(i1,i2,i3,4))! my+tr[rhoaug1] see symrhg.F90 for my
+             rhoaug1(2*i1  ,i2,i3,3)=zero ! imag part of mx+tr[rhoaug1] at k
+               end do
              end do
            end do
          else
@@ -432,14 +431,14 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
                  re1_up=wfraug1_up(1,i1,i2,i3) ;     im1_up=wfraug1_up(2,i1,i2,i3)
                  re0_down=wfraug_down(1,i1,i2,i3)  ; im0_down=wfraug_down(2,i1,i2,i3)
                  re1_down=wfraug1_down(1,i1,i2,i3) ; im1_down=wfraug1_down(2,i1,i2,i3)
-           rhoaug1(i1,i2,i3,1)=rhoaug1(i1,i2,i3,1)+weight*((re0_up*re1_up+im0_up*im1_up)+&
-&           (re0_down*re1_down+im0_down*im1_down)) ! n
-           rhoaug1(i1,i2,i3,2)=rhoaug1(i1,i2,i3,2)+weight*((re0_up*re1_down+im0_up*im1_down)+&
-&           re0_up*re1_down+im0_down*im1_up)     ! m_x
-           rhoaug1(i1,i2,i3,3)=rhoaug1(i1,i2,i3,3)+weight*((-re1_up*im0_down+im1_up*re0_down)+&
-&           (-re0_up*im1_down+im0_up*re1_down)) ! m_y
-           rhoaug1(i1,i2,i3,4)=rhoaug1(i1,i2,i3,4)+weight*((re0_up*re1_up+im0_up*im1_up)-&
-&           (re0_down*re1_down+im0_down*im1_down)) ! m_z
+             rhoaug1(i1,i2,i3,1)=rhoaug1(i1,i2,i3,1)+weight*(re0_up*re1_up+im0_up*im1_up) ! n_upup
+             rhoaug1(i1,i2,i3,4)=rhoaug1(i1,i2,i3,4)+weight*(re0_down*re1_down+im0_down*im1_down) ! n_dndn
+             rhoaug1(i1,i2,i3,2)=rhoaug1(i1,i2,i3,2)+weight*(re1_up*re0_down+re0_up*re1_down &
+&                             +im0_up*im1_down+im0_down*im1_up) &
+&                             +(rhoaug1(i1,i2,i3,1)+rhoaug1(i1,i2,i3,4)) !mx+tr[rhoaug1] see symrhg.F90 for mx
+             rhoaug1(i1,i2,i3,3)=rhoaug1(i1,i2,i3,3)+weight*(-re1_up*im0_down+im1_up*re0_down &
+&                             -re0_up*im1_down+im0_up*re1_down) &
+&                             +(rhoaug1(i1,i2,i3,1)+rhoaug1(i1,i2,i3,4)) !my+tr[rhoaug1] see symrhg.F90 for my
                end do
              end do
            end do

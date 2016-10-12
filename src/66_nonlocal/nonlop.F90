@@ -305,7 +305,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 !scalars
  integer,intent(in) :: choice,cpopt,idir,ndat,nnlout,paw_opt,signs,tim_nonlop
  integer,intent(in),optional :: iatom_only,only_SO,select_k
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(in),target :: hamk
 !arrays
  real(dp),intent(in) :: lambda(ndat)

@@ -29,7 +29,7 @@
 !!  cwaveprj0(natom,nspinor*usecprj)=GS wave function at k projected with nl projectors
 !!  eig0nk=0-order eigenvalue for the present wavefunction at k
 !!  eig0_kq(nband)=GS eigenvalues at k+Q (hartree)
-!!  grad_berry(2,mpw1,dtefield%nband_occ) = the gradient of the Berry phase term
+!!  grad_berry(2,mpw1,dtefield%mband_occ) = the gradient of the Berry phase term
 !!  gscq(2,mgscq)=<g|S|Cnk+q> coefficients for ALL bands (PAW) at k+Q
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+Q
 !!  icgq=shift to be applied on the location of data in the array cgq
@@ -38,7 +38,7 @@
 !!  ipert=type of the perturbation
 !!  mcgq=second dimension of the cgq array
 !!  mgscq=second dimension of gscq
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw1=maximum number of planewave for first-order wavefunctions
 !!  natom=number of atoms in cell.
 !!  nband=number of bands.
@@ -145,7 +145,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
  integer,intent(inout) :: nlines_done
  real(dp),intent(in) :: eig0nk,dfpt_sciss,tolrde,tolwfr
  real(dp),intent(out) :: resid
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(rf2_t), intent(in) :: rf2
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(rf_hamiltonian_type),intent(inout) :: rf_hamkq

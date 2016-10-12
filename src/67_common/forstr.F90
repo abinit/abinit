@@ -71,7 +71,7 @@
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mgfftf= -PAW ONLY- maximum size of 1D FFTs for the fine grid
 !!         (mgfftf=mgfft for norm-conserving potential runs)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  n3xccc=dimension of the xccc3d array (0 or nfftf).
 !!  nattyp(ntypat)=number of atoms of each type

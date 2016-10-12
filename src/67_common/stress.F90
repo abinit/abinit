@@ -166,7 +166,7 @@
  type(efield_type),intent(in) :: dtefield
  type(pseudopotential_type),intent(in) :: psps
  type(electronpositron_type),pointer,optional :: electronpositron
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(fock_type),pointer, intent(inout) :: fock
 !arrays
  integer,intent(in) :: atindx1(natom),nattyp(ntypat),ngfft(18),symrec(3,3,nsym)

@@ -26,7 +26,7 @@
 !!  indsym(4,nsym,natom)=index showing transformation of atom labels
 !!   under symmetry operations (computed in symatm)
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mqgrid=dimensioned number of q grid points for local psp spline
 !!  natom=number of atoms in unit cell
 !!  nattyp(ntypat)=number of atoms of each type
@@ -127,7 +127,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
  integer,intent(in) :: nsym,ntypat,paral_kgb,usepaw
  real(dp),intent(in) :: gsqcut,ucvol
  type(pseudopotential_type),intent(in) :: psps
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: atindx1(natom),indsym(4,nsym,natom),nattyp(ntypat)
  integer,intent(in) :: ngfft(18),symq(4,2,nsym),symrec(3,3,nsym),typat(natom)
@@ -144,7 +144,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
 !scalars
  logical, parameter :: do_final_sym=.true.
  integer :: iatom,jatom,n1,n2,n3,optatm,optdyfr,opteltfr,optgr,option
- integer :: optn,optn2,optstr,optv,ispden
+ integer :: optn,optn2,optstr,optv
  real(dp) :: eei
 !arrays
  integer  :: qprtrb(3)
@@ -152,7 +152,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
  real(dp) :: tsec(2),vprtrb(2)
  real(dp) :: dum_atmrho(0),dum_atmvloc(0),dum_gauss(0),dum_grn(0),dum_grv(0),dum_eltfrxc(0)
  real(dp),allocatable :: dyfrlo_tmp1(:,:,:),dyfrlo_tmp2(:,:,:,:,:),dyfrsym_tmp(:,:,:,:,:)
- real(dp),allocatable :: gr_dum(:,:),v_dum(:,:),vxctotg(:,:,:)
+ real(dp),allocatable :: gr_dum(:,:),v_dum(:),vxctotg(:,:)
 
 ! *************************************************************************
 
@@ -169,36 +169,15 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
 !  -----------------------------------------------------------------------
    call timab(563,1,tsec)
    if (n3xccc>0) then
-    if (nspden==1) then
-     ABI_ALLOCATE(v_dum,(nfft,1))
-     ABI_ALLOCATE(vxctotg,(2,nfft,1))
-     v_dum(:,1)=vxc(:,1)
+     ABI_ALLOCATE(v_dum,(nfft))
+     ABI_ALLOCATE(vxctotg,(2,nfft))
+     v_dum(:)=vxc(:,1);if (nspden>=2) v_dum(:)=0.5_dp*(v_dum(:)+vxc(:,2))
      call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
      call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
-&       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+&     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      ABI_DEALLOCATE(v_dum)
-    else if (nspden==2) then
-     ABI_ALLOCATE(v_dum,(nfft,1))
-     ABI_ALLOCATE(vxctotg,(2,nfft,1))
-     v_dum(:,1)=0.5_dp*(v_dum(:,1)+vxc(:,2))
-     call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
-     call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
-&       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-     ABI_DEALLOCATE(v_dum)
-!EB FR non-collinear magnetism
-    else if (nspden==4) then
-     ABI_ALLOCATE(v_dum,(nfft,nspden))
-     ABI_ALLOCATE(vxctotg,(2,nfft,nspden))
-     v_dum(:,2:4)=vxc(:,2:4)
-     do ispden=1,nspden
-       call fourdp(1,vxctotg(:,:,ispden),v_dum(:,ispden),-1,mpi_enreg,nfft,ngfft,paral_kgb,0)
-       call zerosym(vxctotg(:,:,ispden),2,ngfft(1),ngfft(2),ngfft(3),&
-&       comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-       ABI_DEALLOCATE(v_dum)
-     enddo
-    endif
    else
-     ABI_ALLOCATE(vxctotg,(0,0,0))
+     ABI_ALLOCATE(vxctotg,(0,0))
    end if
    optatm=0;optdyfr=1;optgr=0;optstr=0;optv=1;optn=n3xccc/nfft;optn2=1;opteltfr=0
    call atm2fft(atindx1,dum_atmrho,dum_atmvloc,dyfrxc,dyfrlo,dum_eltfrxc,&
@@ -215,7 +194,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
    option=4
    ABI_ALLOCATE(dyfrlo_tmp1,(3,3,natom))
    ABI_ALLOCATE(gr_dum,(3,natom))
-   ABI_ALLOCATE(v_dum,(nfft,1))
+   ABI_ALLOCATE(v_dum,(nfft))
    call mklocl_recipspace(dyfrlo_tmp1,eei,gmet,gprimd,&
 &   gr_dum,gsqcut,dummy6,mgfft,mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
 &   ntypat,option,paral_kgb,ph1d,qgrid,qprtrb,rhog,ucvol,vlspl,vprtrb,v_dum)

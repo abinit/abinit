@@ -26,7 +26,7 @@
 !!  mband=maximum number of bands
 !!  mkmem =number of k points treated by this node.
 !!  npwarr(nkpt)=number of planewaves in basis at this k point
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw.
 !!  natom=number of atoms in cell.
 !!  nattyp(ntypat)= # atoms of each type.
@@ -103,7 +103,7 @@
  complex(dpc),parameter :: c1=(1._dp,0._dp)
  integer,intent(in) :: lproj,max_num_bands,mband,mkmem,mpw,mwan,natom,nkpt,nspinor,nsppol
  integer,intent(in) :: ntypat,spin
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
 !arrays
