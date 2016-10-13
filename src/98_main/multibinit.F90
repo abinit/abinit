@@ -22,6 +22,11 @@
 !! PARENTS
 !!
 !! CHILDREN
+!!      abi_io_redirect,abimem_init,abinit_doctor,compute_anharmonics,
+!!      effective_potential_free,effective_potential_file_getDim,effective_potential_file_read,
+!!      effective_potential_writeNETCDF,effective_potential_writeXML,flush_unit,herald
+!!      init10,instrng,invars10,inupper, isfile,mover_effpot,multibinit_dtset_fre
+!!      outvars_multibinit,timein,xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum,wrtout
 !!      abi_io_redirec,flush_unit,herald,int2char4,
 !!      init10,timein,xmpi_bcast,wrtout,xmpi_init
 !!
@@ -183,7 +188,7 @@ program multibinit
    call outvars_multibinit(inp,ab_out)
  end if
 
-! First step: Treat the reference structure 
+! First step: Read and treat the reference structure 
 !****************************************************************************************
  call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
 !****************************************************************************************
@@ -236,7 +241,7 @@ program multibinit
 !TEST_AM SECTION
 
 
-!    Compute the monte carlo, molecular dynamics of compute specific energy 
+! Compute the monte carlo, molecular dynamics of compute specific energy 
 !****************************************************************************************
  if(inp%dynamics>=1) then
    call mover_effpot(inp,filnam,reference_effective_potential,comm)

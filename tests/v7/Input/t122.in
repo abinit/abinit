@@ -29,7 +29,7 @@ ntime  = 50
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% test_chain = t120.in,t121.in,t122.in,t123.in
+#%% test_chain = t120.in,t121.in,t122.in,t123.in,t124.in
 #%% input_ddb = t121.ddb.out
 #%% [files]
 #%% files_to_test = 

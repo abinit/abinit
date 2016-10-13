@@ -179,7 +179,7 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
 
 !Allocation of total ifc
  ABI_ALLOCATE(harmonics_terms%ifcs%atmfrc,(2,3,natom,3,natom,nrpt))
- harmonics_terms%ifcs%atmfrc = zero
+ harmonics_terms%ifcs%atmfrc(:,:,:,:,:,:) = ifcs%atmfrc(:,:,:,:,:,:) 
 
 !Allocation of ewald part of ifc
  ABI_ALLOCATE(harmonics_terms%ifcs%ewald_atmfrc,(2,3,natom,3,natom,nrpt))

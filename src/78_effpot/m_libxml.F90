@@ -194,5 +194,3 @@ end subroutine char_c2f
 !!***
 
 end module m_libxml
-
-

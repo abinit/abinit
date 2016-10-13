@@ -583,7 +583,7 @@ real(dp) :: rmet(3,3)
        !call scfcv_new2(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
          !WVL - reformat the wavefunctions in the case of xred != xred_old
-         if (scfcv_args%dtset%usewvl == 1 .and. maxval(xred_old - xred) > zero) then
+         if (need_scfcv_cycle.and.scfcv_args%dtset%usewvl == 1 .and. maxval(xred_old - xred) > zero) then
          !  WVL - Before running scfcv, on non-first geometry step iterations,
          !  we need to reformat the wavefunctions, taking into acount the new
          !  coordinates.
@@ -635,7 +635,7 @@ real(dp) :: rmet(3,3)
 !      the values entering in scfcv
 !      
 !      One test case with these condition is bigdft/t10
-       if (scfcv_args%dtset%usewvl == 1) then
+       if (need_scfcv_cycle.and.scfcv_args%dtset%usewvl == 1) then
          call mkradim(acell,rprim,rprimd)
          hist%histA(:,hist%ihist)=acell(:)
          hist%histR(:,:,hist%ihist)=rprimd(:,:)
@@ -887,7 +887,7 @@ real(dp) :: rmet(3,3)
      end do
 
      ! check dilatmx here and correct if necessary
-     if (scfcv_args%dtset%usewvl == 0) then
+     if (need_scfcv_cycle.and.scfcv_args%dtset%usewvl == 0) then
        call chkdilatmx(scfcv_args%dtset%dilatmx,rprimd,scfcv_args%dtset%rprimd_orig(1:3,1:3,1), dilatmx_errmsg)
        _IBM6("dilatxm_errmsg: "//TRIM(dilatmx_errmsg))
 

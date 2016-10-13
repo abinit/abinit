@@ -177,9 +177,26 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !! crytal = structure with all the information for the crystal
-!! dynmat = dynamical matrix
+!! epsilon_inf(3,3) = dielectric tensor
+!! elastic_constants(6,6) = elastic constants tensor
 !! energy = energy of the reference structure
-!! nph1l  = number of wavevectors in phonon
+!! dynmat(2,3,natom,3,natom,nqpt) = dynamical matrix for each qpoints
+!! has_3rd = true if the anharmonic par is present
+!! ifcs = ifc type with cell,ewald short and total range of the ifcs
+!! internal_strain(6,natom,3) = internal strain tensor 
+!! phfrq(3,nqpt) = frequencies for each q points
+!! qph1l(3,nqpt) = list of each qpoints
+!! nqpt = number of qpoints
+!! zeff(3,natom) = effective charges
+!! comm  = mpi comunicator
+!! anharmonics_terms = optional,struture with anharmonics terms
+!! external_stress(6) = optional,extrenal strain
+!! forces(3,natom) = optional,initial forces in the structure
+!! internal_stress(6) = optional,initial strain in the structure
+!! phonon_strain(6) = optional,ifc type for the phonon-strain coupling (should be in anharmonics_terms)
+!! strain = optional, strain type
+!! supercell = optional, supercell type to define
+!! name = optional, name of the structure
 !!
 !! OUTPUT
 !! eff_pot = effective_potential structure to be initialized
@@ -210,9 +227,9 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
 
 !Arguments ------------------------------------
 !scalars
- real(dp),intent(in):: energy
  integer,intent(in) :: nqpt
  integer, intent(in) :: comm
+ real(dp),intent(in):: energy
  character(len=fnlen), optional,intent(in) :: name
  logical,intent(in) :: has_3rd
 !arrays
@@ -220,7 +237,6 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
  real(dp),intent(in) :: elastic_constants(6,6)
  real(dp),intent(in) :: dynmat(:,:,:,:,:,:)
  real(dp),intent(in) :: phfrq(:,:),qph1l(:,:)
-
  real(dp),intent(in) :: internal_strain(:,:,:),zeff(:,:,:)
  type(crystal_t),intent(in) :: crystal
  type(effective_potential_type), intent(out) :: eff_pot
@@ -496,6 +512,7 @@ end subroutine effective_potential_initmpi_supercell
 !! deallocate all dynamic memory for this effective potential structure
 !!
 !! INPUTS
+!! eff_pot = supercell structure with data to be output
 !!
 !! OUTPUT
 !! eff_pot = supercell structure with data to be output
@@ -582,6 +599,7 @@ end subroutine effective_potential_free
 !! deallocate all dynamic memory for mpi of supercell
 !!
 !! INPUTS
+!! eff_pot = supercell structure with data to be output
 !!
 !! OUTPUT
 !! eff_pot = supercell structure with data to be output
@@ -763,6 +781,10 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 &    ' WARNING: dipdip is set to zero, the longe range interation is not recompute'
      call wrtout(std_out,message,"COLL")
    end if
+
+   write(message,'(a,(80a),a)') ch10,('=',i1=1,80),ch10
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
 
 !4-Adapt harmonic part   
  else if (option>=1.and.all(n_cell(:)>0)) then
@@ -2970,7 +2992,11 @@ subroutine effective_potential_getDeltaEnergy(eff_pot,energy,iatom,idir,natom,rp
   ifc_contribution =  0
 
   energy = energy + ifc_contribution
-
+!TEST_AM
+!------------------------------------
+! 2 - To be continued
+!------------------------------------
+!TEST_AM
 
 end subroutine effective_potential_getDeltaEnergy
 !!***
@@ -2982,6 +3008,8 @@ end subroutine effective_potential_getDeltaEnergy
 !! FUNCTION
 !!
 !! INPUTS 
+!! index  = index of the cell into the supercell  
+!! n_cell = number of total cell
 !!
 !! OUTPUT
 !!

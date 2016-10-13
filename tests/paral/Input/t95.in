@@ -86,7 +86,7 @@ ndtset 3 jdtset 1 2 3
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t95.in,t96.in,t97.in
+#%% test_chain = t95.in,t96.in,t97.in,t98.in
 #%% [files]
 #%% psp_files = al_ps.abinit.paw, as_ps.paw
 #%% [paral_info]
