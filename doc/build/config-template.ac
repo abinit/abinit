@@ -978,9 +978,6 @@
 
 # Flag to enable LIBXML library
 #
-#CFLAGS_EXTRA="-I/usr/include/libxml2"
-#FC_LIBS_EXTRA=`xml2-config --libs`
-#
 #enable_xml=no
 
 # ---------------------------------------------------------------------------- #

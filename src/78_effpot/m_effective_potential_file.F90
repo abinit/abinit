@@ -1520,7 +1520,7 @@ end subroutine effective_potential_file_read
 !!
 !! SOURCE
  
- subroutine effective_potential_file_readDisplacement(filename,disp,nstep,natom)
+subroutine effective_potential_file_readDisplacement(filename,disp,nstep,natom)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1568,7 +1568,6 @@ end subroutine effective_potential_file_read
 
 10   continue
  close(funit)
-
 
 end subroutine effective_potential_file_readDisplacement
 !!***

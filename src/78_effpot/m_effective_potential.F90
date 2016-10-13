@@ -913,7 +913,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 
    call matr3inv(supercell%rprimd_supercell,gprimd)
    call xcart2xred(supercell%natom_supercell,supercell%rprimd_supercell,&
-&                    supercell%xcart_supercell,xred)
+&                  supercell%xcart_supercell,xred)
    call metric(gmet,gprimd,-1,rmet,supercell%rprimd_supercell,ucvol)
 
 !  Fill the atom position of the first cell (reference cell)
