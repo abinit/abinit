@@ -79,7 +79,6 @@
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  1.000000
                        1.000000
            occopt           0
-        optforces           0
         optstress           0
            prtden           0
            prteig           0
@@ -175,13 +174,23 @@
  reduced coordinates (array xred) for    2 atoms
        0.370081328364      0.500000000000      0.500000000000
        0.629918671636      0.500000000000      0.500000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  3.5818E-01; max dE/dt=  3.2873E-01; dE/dt below (all hartree)
+    1       0.173993970457      0.307059445008      0.307059440494
+    2      -0.578620573896      0.328728818140      0.328728821028
 
  cartesian coordinates (angstrom) at end:
     1      1.72337971779379     1.79920250920600     1.79920250920600
     2      2.93337971779822     1.79920250920600     1.79920250920600
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.04276219002004     0.00159333625971     0.00159333680398
+    2      0.04276219002004    -0.00159333625971    -0.00159333680398
+ frms,max,avg= 2.4723015E-02 4.2762190E-02   2.299E-02 -4.675E-02 -4.675E-02 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -2.19892003744851     0.08193263783336     0.08193266582087
+    2      2.19892003744851    -0.08193263783336    -0.08193266582087
+ frms,max,avg= 1.2713084E+00 2.1989200E+00   1.182E+00 -2.404E+00 -2.404E+00 e/A
  length scales=  8.800000000000  6.800000000000  6.800000000000 bohr
               =  4.656759435592  3.598405018412  3.598405018412 angstroms
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=  -0.02638
@@ -253,13 +262,23 @@
  reduced coordinates (array xred) for    2 atoms
        0.370081328364      0.500000000000      0.500000000000
        0.629918671636      0.500000000000      0.500000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  3.5836E-01; max dE/dt=  3.2886E-01; dE/dt below (all hartree)
+    1       0.174513030597      0.306988876798      0.307140717831
+    2      -0.579081868630      0.328657369544      0.328860576231
 
  cartesian coordinates (angstrom) at end:
     1      1.72337971779379     1.79920250920600     1.79920250920600
     2      2.93337971779822     1.79920250920600     1.79920250920600
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.04281789200150     0.00159327152541     0.00159704841177
+    2      0.04281789200150    -0.00159327152541    -0.00159704841177
+ frms,max,avg= 2.4755208E-02 4.2817892E-02   2.299E-02 -4.674E-02 -4.676E-02 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -2.20178434825907     0.08192930906225     0.08212352435118
+    2      2.20178434825907    -0.08192930906225    -0.08212352435117
+ frms,max,avg= 1.2729639E+00 2.2017843E+00   1.182E+00 -2.403E+00 -2.405E+00 e/A
  length scales=  8.800000000000  6.800000000000  6.800000000000 bohr
               =  4.656759435592  3.598405018412  3.598405018412 angstroms
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=  -0.02638
@@ -297,10 +316,10 @@
            diemix      7.00000000E-01
            etotal1    -3.1261989997E+01
            etotal2    -3.1261989915E+01
-            fcart1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-            fcart2     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+            fcart1    -4.2762190020E-02  1.5933362597E-03  1.5933368040E-03
+                       4.2762190020E-02 -1.5933362597E-03 -1.5933368040E-03
+            fcart2    -4.2817892002E-02  1.5932715254E-03  1.5970484118E-03
+                       4.2817892002E-02 -1.5932715254E-03 -1.5970484118E-03
 -          fftalg         312
          icoulomb           1
              iscf1         17
@@ -323,7 +342,6 @@
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  1.000000
                        1.000000
            occopt           0
-        optforces           0
         optstress           0
            prtden           0
            prteig           0
@@ -333,9 +351,10 @@
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
            strten2     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-           tolvrs      1.00000000E-03
+           tolvrs      1.00000000E-06
             typat      1  1
            usewvl           1
+  wvl_bigdft_comp           0
        wvl_crmult      3.00000000E+00
        wvl_frmult      1.00000000E+00
         wvl_hgrid      4.00000000E-01
@@ -399,7 +418,6 @@
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
@@ -410,7 +428,6 @@
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
@@ -426,11 +443,7 @@
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- [5] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=         19.3  wall=          3.0
+- Proc.   0 individual time (sec): cpu=          2.8  wall=          3.3
 
 ================================================================================
 

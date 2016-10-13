@@ -54,7 +54,6 @@ P           mkmem           1
            ntypat           1
          nwfshist           4
               occ      1.000000
-        optforces           0
         optstress           0
          pawmixdg           1
            prtden           0
@@ -164,11 +163,19 @@ P           mkmem           1
  Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
  reduced coordinates (array xred) for    1 atoms
        0.500000000000      0.500000000000      0.500000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  6.3853E-02; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+    1      -0.063853204291     -0.063853204291     -0.063853204291
 
  cartesian coordinates (angstrom) at end:
     1      2.22254427607800     2.22254427607800     2.22254427607800
+
+ cartesian forces (hartree/bohr) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   7.602E-03  7.602E-03  7.602E-03 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   3.909E-01  3.909E-01  3.909E-01 e/A
  length scales=  8.400000000000  8.400000000000  8.400000000000 bohr
               =  4.445088552156  4.445088552156  4.445088552156 angstroms
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=  -0.01288
@@ -207,7 +214,7 @@ P           mkmem           1
             acell      8.4000000000E+00  8.4000000000E+00  8.4000000000E+00 Bohr
               amu      1.00000000E+00
            etotal     -4.2898292995E-01
-            fcart      9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+            fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
          icoulomb           1
            istwfk        1
@@ -225,7 +232,6 @@ P           mkmem           1
            ntypat           1
          nwfshist           4
               occ      1.000000
-        optforces           0
         optstress           0
          pawmixdg           1
            prtden           0
@@ -302,7 +308,6 @@ P           mkmem           1
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
@@ -313,7 +318,6 @@ P           mkmem           1
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
@@ -321,15 +325,7 @@ P           mkmem           1
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- And optionally:
--
-- [5] First-principles computation of material properties : the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
--
-- Proc.   0 individual time (sec): cpu=         56.7  wall=         22.8
+- Proc.   0 individual time (sec): cpu=          5.1  wall=          5.7
 
 ================================================================================
 

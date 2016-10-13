@@ -47,7 +47,7 @@ typat      1
 znucl     1.00
 
 #Minimal test: do not print WFK files etc..
-optforces  0 
+#optforces  0 
 optstress 0
 kptopt 0
 prtden 0

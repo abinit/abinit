@@ -60,7 +60,6 @@ P           mkmem           1
            ntypat           1
          nwfshist           4
               occ      1.000000
-        optforces           0
         optstress           0
          pawmixdg           1
            prtden           0
@@ -172,11 +171,19 @@ P           mkmem           1
  Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
  reduced coordinates (array xred) for    1 atoms
        0.500000000000      0.500000000000      0.500000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  4.2871E-03; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+    1      -0.004287076414     -0.004287076414     -0.004287076414
 
  cartesian coordinates (angstrom) at end:
     1      2.22254427607800     2.22254427607800     2.22254427607800
+
+ cartesian forces (hartree/bohr) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   5.104E-04  5.104E-04  5.104E-04 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   2.624E-02  2.624E-02  2.624E-02 e/A
  length scales=  8.400000000000  8.400000000000  8.400000000000 bohr
               =  4.445088552156  4.445088552156  4.445088552156 angstroms
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=  -0.01286
@@ -293,11 +300,19 @@ P           mkmem           1
  Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
  reduced coordinates (array xred) for    1 atoms
        0.500000000000      0.500000000000      0.500000000000
- rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
-    1       0.000000000000      0.000000000000      0.000000000000
+ rms dE/dt=  4.2871E-03; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+    1      -0.004287110139     -0.004287110139     -0.004287110139
 
  cartesian coordinates (angstrom) at end:
     1      2.22254427607800     2.22254427607800     2.22254427607800
+
+ cartesian forces (hartree/bohr) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   5.104E-04  5.104E-04  5.104E-04 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   2.624E-02  2.624E-02  2.624E-02 e/A
  length scales=  8.400000000000  8.400000000000  8.400000000000 bohr
               =  4.445088552156  4.445088552156  4.445088552156 angstroms
  Fermi (or HOMO) energy (hartree) =   0.00000   Average Vxc (hartree)=  -0.01286
@@ -337,8 +352,8 @@ P           mkmem           1
               amu      1.00000000E+00
            etotal1    -4.3069536211E-01
            etotal2    -4.3069536210E-01
-            fcart1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
-            fcart2     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+            fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
          icoulomb           1
              iscf1         17
@@ -360,7 +375,6 @@ P           mkmem           1
            ntypat           1
          nwfshist           4
               occ      1.000000
-        optforces           0
         optstress           0
          pawmixdg           1
            prtden           0
@@ -439,7 +453,6 @@ P           mkmem           1
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
@@ -450,7 +463,6 @@ P           mkmem           1
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
