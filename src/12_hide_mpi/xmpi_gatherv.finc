@@ -625,6 +625,7 @@ subroutine xmpi_gatherv_dp4d(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm
 #endif
 
 end subroutine xmpi_gatherv_dp4d
+!!***
 
 !!****f* ABINIT/xmpi_gatherv_dp5d
 !! NAME
@@ -687,6 +688,7 @@ subroutine xmpi_gatherv_dp5d(xval,nelem,recvbuf,recvcounts,displs,root,spaceComm
 #if defined HAVE_MPI
  end if
 #endif
+!!***
 
 end subroutine xmpi_gatherv_dp5d
 

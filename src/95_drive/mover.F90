@@ -716,8 +716,8 @@ real(dp) :: rmet(3,3)
 
      end if ! if(hist_prev%mxhist>0.and.ab_mover%restartxf==-1.and.hist_prev%ihist<=hist_prev%mxhist)then
 
-     if(ab_xfh%nxfh==0.or.itime/=1) then
-
+     if(need_scfcv_cycle.and.(ab_xfh%nxfh==0.or.itime/=1)) then
+       !Not yet needing for effective potential
        call mkradim(acell,rprim,rprimd)
 !      Get rid of mean force on whole unit cell, but only if no
 !      generalized constraints are in effect

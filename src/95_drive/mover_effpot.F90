@@ -229,7 +229,7 @@ implicit none
    dtset%nsym = 1       ! Number of SYMmetry operations
    dtset%prtxml = 0     ! print the xml
    dtset%optcell = 0    ! OPTimize the CELL shape and dimensions Characteristic
-   dtset%restartxf = -1  ! RESTART from (X,F) history
+   dtset%restartxf = 0  ! RESTART from (X,F) history
    dtset%signperm = 1   ! SIGN of PERMutation potential      
    dtset%strprecon = 1  ! STRess PRECONditioner
    dtset%tolmxf = 2.0d-5
