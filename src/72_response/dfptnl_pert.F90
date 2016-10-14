@@ -333,11 +333,6 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
      dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&                 ! Out
      dummy_array,dummy_array,rf_ham_dum)                                            ! Out
 
-!LTEST
-!     write(message,'(2(a,i2))') 'NONLINEAR TESTS : ikpt = ',ikpt,' isppol = ',isppol
-!     call wrtout(std_out,message)
-!LTEST
-
      ABI_STAT_ALLOCATE(dudk,  (2,nband_k*size_wf), ierr)
      ABI_STAT_ALLOCATE(dudkde,(2,nband_k*size_wf), ierr)
      ABI_STAT_ALLOCATE(eig1_k_tmp,(2*nband_k), ierr)
@@ -468,10 +463,6 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
 
        end do ! end iband
 
-!LTEST
-!       print '(a,i2)','** jband = ',jband
-!LTEST
-
 ! **************************************************************************************************
 !      Test if < u^(0) | ( H^(1) - eps^(0) S^(1) ) | u^(0) > = eig^(1)
 ! **************************************************************************************************
@@ -563,6 +554,7 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
 !      Compute sum_i Lambda_ij^(1) < u_i^(1) | u_j^(1)>
 ! **************************************************************************************************
 
+       eig1_k_tmp(:) = eig1_k_stored(1+(jband-1)*2*nband_k:jband*2*nband_k)
        lagr = zero ; lagi = zero
        do iband = 1, nband_k
 
@@ -585,8 +577,8 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
 !      Sum all band_by_band contributions
 ! **************************************************************************************************
 
-       sumr = sumr + dtset%wtk(ikpt)*occ(bantot+iband)*(dotr-lagr) + exc3*sixth
-       sumi = sumi + dtset%wtk(ikpt)*occ(bantot+iband)*(doti-lagi)
+       sumr = sumr + dtset%wtk(ikpt)*occ(bantot+jband)*(dotr-lagr)
+       sumi = sumi + dtset%wtk(ikpt)*occ(bantot+jband)*(doti-lagi)
 
      end do   ! end loop over bands
 
@@ -752,7 +744,7 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
 ! **************************************************************************************************
 !    GATHER BAND-BY-BAND AND XC CONTRIBUTIONS
 ! **************************************************************************************************
- 
+
  sumr = sumr + sixth*exc3
 
 ! **************************************************************************************************
