@@ -77,6 +77,10 @@ class QptAnalyzer(object):
         return self.ddb.natom
 
     @property
+    def nmode(self):
+        return self.ddb.nmode
+
+    @property
     def is_gamma(self):
         return self.ddb.is_gamma
 
