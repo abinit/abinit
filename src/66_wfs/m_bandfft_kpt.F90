@@ -220,6 +220,7 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
 !scalars
  integer :: comm_band,comm_fft,idatarecv,idatarecv0,ierr,ikg,ikpt,ikpt_this_proc,iproc,isppol,istwf_k,itest,jsendloc
  integer :: me_fft,me_kpt,n2,nband_k,ndatarecv,ndatarecv_tot,ndatasend_sym,nproc_band,nproc_fft,npw_fft,npw_k,npw_tot
+ logical :: reequilibrate_allocated
  character(len=500)  :: message
 !arrays
  integer,allocatable :: buff_kg(:,:),gbound(:,:),indices_pw_fft(:),kg_k(:,:),kg_k_fft(:,:),kg_k_gather(:,:)
@@ -293,6 +294,7 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
      end if
 
 !    Initialize various quantities for the reequilibration step
+     reequilibrate_allocated=(isppol==2.and.bandfft_kpt_in(ikpt_this_proc)%have_to_reequilibrate)
      bandfft_kpt_in(ikpt_this_proc)%have_to_reequilibrate = .false.
      bandfft_kpt_in(ikpt_this_proc)%npw_fft = 0
 
@@ -515,6 +517,8 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
 !    ============================================================================
 !    End of gbound
 !    ============================================================================
+
+!    Check if there is FFT unbalance
      itest=0
      n2 = mpi_enreg%distribfft%n2_coarse
      do idatarecv=1,ndatarecv
@@ -522,7 +526,16 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
       if (iproc/=me_fft) itest=itest+1
      end do
      call xmpi_sum(itest,mpi_enreg%comm_fft,ierr)
-     bandfft_kpt_in(ikpt_this_proc)%have_to_reequilibrate=(itest>0)
+
+!    Deactivate this feature because it is not extensively tested and not really efficient
+     if (itest>0) then
+       write(message, '(a,i0,a)' )'There is a load unbalancing for the FFT parallelization!'
+       MSG_COMMENT(message)
+     else
+       bandfft_kpt_in(ikpt_this_proc)%have_to_reequilibrate=(itest>0)
+     end if
+
+!    If yes, store relevant data
      if(bandfft_kpt_in(ikpt_this_proc)%have_to_reequilibrate) then
        n2 = mpi_enreg%distribfft%n2_coarse
        sendcounts_fft(:) = 0
@@ -554,13 +567,15 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
        call xmpi_alltoallv(buff_kg, 3*sendcounts_fft, 3*senddisp_fft, &
 &            kg_k_fft,3*recvcounts_fft, 3*recvdisp_fft, mpi_enreg%comm_fft,ierr)
 
-       ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%kg_k_fft, (3,npw_fft) )
-       ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%indices_pw_fft, (ndatarecv))
-       ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%sendcount_fft, (nproc_fft))
-       ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%senddisp_fft, (nproc_fft))
-       ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%recvcount_fft, (nproc_fft))
-       ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%recvdisp_fft, (nproc_fft))
-       bandfft_kpt_in(ikpt_this_proc)%npw_fft                 = npw_fft
+       if (.not.reequilibrate_allocated) then
+         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%kg_k_fft, (3,npw_fft) )
+         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%indices_pw_fft, (ndatarecv))
+         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%sendcount_fft, (nproc_fft))
+         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%senddisp_fft, (nproc_fft))
+         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%recvcount_fft, (nproc_fft))
+         ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%recvdisp_fft, (nproc_fft))
+       end if
+       bandfft_kpt_in(ikpt_this_proc)%npw_fft           = npw_fft
        bandfft_kpt_in(ikpt_this_proc)%indices_pw_fft(:) = indices_pw_fft(:)
        bandfft_kpt_in(ikpt_this_proc)%sendcount_fft (:) = sendcounts_fft (:)
        bandfft_kpt_in(ikpt_this_proc)%senddisp_fft(:)   = senddisp_fft(:)
@@ -571,6 +586,7 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
        ABI_DEALLOCATE(kg_k_fft)
        ABI_DEALLOCATE(indices_pw_fft)
      end if
+
 !    Tabs which are common to istwf_k=1 and 2
      if (.not. allocated(bandfft_kpt_in(ikpt_this_proc)%kg_k_gather)) then
        ABI_ALLOCATE(bandfft_kpt_in(ikpt_this_proc)%kg_k_gather,(3,ndatarecv))
