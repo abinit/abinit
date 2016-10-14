@@ -57,7 +57,7 @@ subroutine initmpi_pert(dtset,mpi_enreg)
 !Arguments ------------------------------------
 !scalars
  type(MPI_type),intent(inout) :: mpi_enreg
- type(dataset_type),intent(inout) :: dtset
+ type(dataset_type),intent(in) :: dtset
 
 !Local variables-------------------------------
 !scalars
@@ -133,7 +133,6 @@ subroutine initmpi_pert(dtset,mpi_enreg)
 
  ABI_DEALLOCATE(nband_rbz)
  ABI_DEALLOCATE(nkpt_rbz)
-
 
 end subroutine initmpi_pert
 !!***
