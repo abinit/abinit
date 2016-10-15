@@ -26,6 +26,7 @@ robodoc.log
 tags
 testf.ac
 abiref.ac
+rafael.ac
 tmp
 tmp2
 auto-*.m4
@@ -412,3 +413,4 @@ tests/testbot.cfg
 tests/testbot_summary.json
 tests/testbot_summary.shelve
 !.gitkeep
+src/98_main/*dSYM/

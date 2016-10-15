@@ -1210,6 +1210,6 @@ fi
 ABI_MSG_FC_BUGGY(${abi_fc_vendor})
 tmp_etsf_io_in_use=`echo "${lib_trio_flavor}" | grep 'etsf_io'`
 if test "${tmp_etsf_io_in_use}" != ""; then
-  ABI_MSG_NOTICE([etsf_io-deprecated],[Upcoming removal of ETSF_IO])
+  ABI_MSG_NOTICE([etsf_io-deprecated],[Upcoming end of ETSF_IO library support])
 fi
 ABI_MSG_END
