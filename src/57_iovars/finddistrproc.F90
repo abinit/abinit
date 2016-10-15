@@ -131,11 +131,6 @@
  real(dp),allocatable :: weight(:)
  real(dp),pointer :: nband_rbz(:,:)
  type(dataset_type),pointer :: dtset
-
-!no abirules
-!Statement functions are obsolete
-!Expected linear speedup for a nn-sized problem and mm processes
-! speedup(nn,mm)=(one*nn)/(one*((nn/mm)+merge(0,1,mod(nn,mm)==0)))
 !Cut-off function for npfft
 ! cutoff(nn)= &
 !&    0.2_dp+(one-0.2_dp)*(sin((pi*(nn-NPF_CUTOFF))/(one*(NPFMAX-NPF_CUTOFF))) &
@@ -919,8 +914,8 @@
 #define ABI_FUNC 'speedup_fdp'
 !End of the abilint section
 
-   real(dp)::speedup_fdp
-   integer :: nn,mm
+   real(dp) :: speedup_fdp
+   integer,intent(in) :: nn,mm
    speedup_fdp=(one*nn)/(one*((nn/mm)+merge(0,1,mod(nn,mm)==0)))
  end function speedup_fdp
 

@@ -93,22 +93,16 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
 
 ! *********************************************************************
 
-!Statement functions are obsolete
-! gsq(i1,i2,i3)=dble(i1*i1)*gmet(1,1)+dble(i2*i2)*gmet(2,2)+&
-!& dble(i3*i3)*gmet(3,3)+dble(2*i1*i2)*gmet(1,2)+&
-!& dble(2*i2*i3)*gmet(2,3)+dble(2*i3*i1)*gmet(3,1)
-
 !Enforce that nspden<=2
  if(nspden>2) then
-   message = ' Jellium possible only with nspden <= 2.'
-   MSG_ERROR(message)
+   MSG_ERROR('Jellium possible only with nspden <= 2.')
  end if
 
 !Make sure option is acceptable
  if (option/=1 .and. option/=2) then
    write(message, '(a,i0,3a)' )&
-&   ' option=',option,' is not allowed.',ch10,&
-&   ' Must be 1 or 2.'
+&   'option=',option,' is not allowed.',ch10,&
+&   'Must be 1 or 2.'
    MSG_BUG(message)
  end if
 
@@ -211,7 +205,6 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
 
    function gsq_jel(i1,i2,i3)
 
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -219,7 +212,7 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
 !End of the abilint section
 
    real(dp) :: gsq_jel
-   integer :: i1,i2,i3
+   integer,intent(in) :: i1,i2,i3
    gsq_jel=dble(i1*i1)*gmet(1,1)+dble(i2*i2)*gmet(2,2)+&
 &   dble(i3*i3)*gmet(3,3)+dble(2*i1*i2)*gmet(1,2)+&
 &   dble(2*i2*i3)*gmet(2,3)+dble(2*i3*i1)*gmet(3,1)

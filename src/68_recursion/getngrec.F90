@@ -81,16 +81,6 @@ real(dp) :: tsec(2)
 real(dp) :: inf_rmet(3,3)
 ! *************************************************************************
 
-!Statement functions are obsolete
-!dsq(ii,jj,kk)=sqrt(&
-!& inf_rmet(1,1)*dble(ii**2)&
-!& +inf_rmet(2,2)*dble(jj**2)&
-!& +inf_rmet(3,3)*dble(kk**2)&
-!& +two*(inf_rmet(1,2)*dble(ii*jj)&
-!& +inf_rmet(2,3)*dble(jj*kk)&
-!& +inf_rmet(3,1)*dble(kk*ii)))
-
-
  call timab(602,1,tsec)
 
  ngfftrec(:) = ngfft(:) 
@@ -335,9 +325,9 @@ real(dp) :: inf_rmet(3,3)
 #define ABI_FUNC 'dsq_rec'
 !End of the abilint section
 
-   integer :: ii,jj,kk
    real(dp) :: dsq_rec
-   real(dp) :: inf_rmet(3,3)
+   integer,intent(in) :: ii,jj,kk
+   real(dp),intent(in) :: inf_rmet(3,3)
    dsq_rec=sqrt(&
 &   inf_rmet(1,1)*dble(ii**2)&
 &   +inf_rmet(2,2)*dble(jj**2)&
