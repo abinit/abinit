@@ -439,6 +439,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 
  function phi_ini(x1,y1,x2,y2,x3,y3)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -480,6 +481,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 
  function ph3_ini(nri,ig3,ia)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -492,6 +494,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
  end function ph3_ini
 
  function phre_ini(ig1,ig2,ig3,ia)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -506,6 +509,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
  end function phre_ini
 
  function phimag_ini(ig1,ig2,ig3,ia)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

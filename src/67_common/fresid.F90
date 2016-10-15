@@ -658,7 +658,6 @@ subroutine fresid(dtset,gresid,mpi_enreg,nfft,ngfft,ntypat,option,&
    function cross_fr(xx,yy,zz,aa,bb,cc)
 !Define magnitude of cross product of two vectors
 
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
