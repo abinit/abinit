@@ -8,7 +8,7 @@
 !! evaluate special functions frequently needed in Abinit.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MG,MT,FB,XG,MVer)
+!! Copyright (C) 2008-2016 ABINIT group (MG,MT,FB,XG,MVer,FJ,NH,GZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,7 +34,9 @@ MODULE m_special_funcs
 
  private
 
+ public :: clp               ! x-1, if x>1/2, x+1, if x<-1/2
  public :: factorial         ! Calculates N! returning a real.
+ public :: permutations      ! Returns N!/(N-k) if N>=0 and N-k>0 else 0.
  public :: binomcoeff        ! Binominal coefficient n!/(n-k)!
  public :: laguerre          ! Laguerre Polynomial(x,n,a). 
  public :: RadFnH            ! Atomic radial function(r,n,l,Z).
@@ -44,6 +46,9 @@ MODULE m_special_funcs
  public :: abi_derf          ! Evaluates the error function in real(dp).
  public :: abi_derfc         ! Evaluates the complementary error function in real(dp).
  public :: besjm             ! Spherical bessel function of order nn. Handles nn=0,1,2,3,4, or 5 only.
+ public :: phim              ! Computes Phi_m[theta]=Sqrt[2] cos[m theta],      if m>0
+                             !                       Sqrt[2] sin[Abs(m) theta], if m<0
+                             !                       1                        , if m=0
  public :: k_fermi           ! Fermi wave vector corresponding to the local value of the real space density rhor.
  public :: k_thfermi         ! Thomas-Fermi wave vector corresponding to the local value of the real space density rhor
 
@@ -80,6 +85,55 @@ MODULE m_special_funcs
  public :: jlspline_integral    ! Compute integral.
 
 CONTAINS  !===========================================================
+!!***
+
+
+!!****f* m_special_funcs/clp
+!! NAME
+!! clp
+!!
+!! FUNCTION
+!! clp(x)= x-1, if x>1/2
+!!         x+1, if x<-1/2
+!!
+!! INPUTS
+!!  x= input variable
+!!
+!! OUTPUT
+!!  clp= resulting function
+!!
+!! PARENTS
+!!      nhatgrid
+!!
+!! SOURCE
+
+pure function clp(x)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'clp'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ real(dp) :: clp
+ real(dp),intent(in) :: x
+
+! **********************************************************************
+
+ if(x > half) then
+   clp=x-one
+ elseif(x < -half) then
+   clp=x+one
+ else
+   clp=x
+ end if
+
+end function clp
 !!***
 
 !!****f* m_special_funcs/factorial
@@ -133,6 +187,66 @@ elemental function factorial(nn)
  factorial=ff
 
 end function factorial
+!!***
+
+!!****f* m_special_funcs/permutations
+!! NAME
+!! permutations
+!!
+!! FUNCTION
+!! Returns N!/(N-k)!  if N>=0 and N-k>0
+!!                    otherwise 0 is returned
+!! Output is real
+!!
+!! INPUTS
+!!   kk=number k to use
+!!   nn=number N to use
+!!
+!! OUTPUT
+!!   permutations= n!/(n-k)! (real)
+!!
+!! PARENTS
+!!      green_atomic_hubbard
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure function permutations(nn,kk)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'permutations'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: kk,nn
+ real(dp) :: permutations
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: ii
+ real(dp) :: pp
+
+! *********************************************************************
+
+ if ((nn>=0).and.((nn-kk)>=0)) then
+   pp=one
+   do ii=nn-kk+1,nn
+     pp=pp*ii
+   end do
+ else
+   pp=zero
+ end if
+
+ permutations=pp
+
+end function permutations
 !!***
 
 !----------------------------------------------------------------------
@@ -867,13 +981,12 @@ end function abi_derfc
 !!
 !! PARENTS
 !!      jlspline_new,mlwfovlp_radial,psp1nl
-!!
-!! CHILDREN
-!!
-!! SOURCE
+
 
 subroutine besjm(arg,besjx,cosx,nn,nx,sinx,xx)
 
+!Arguments ------------------------------------
+!scalars
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -881,10 +994,6 @@ subroutine besjm(arg,besjx,cosx,nn,nx,sinx,xx)
 #define ABI_FUNC 'besjm'
 !End of the abilint section
 
- implicit none
-
-!Arguments ------------------------------------
-!scalars
  integer,intent(in) :: nn,nx
  real(dp),intent(in) :: arg
 !arrays
@@ -1069,6 +1178,67 @@ subroutine besjm(arg,besjx,cosx,nn,nx,sinx,xx)
  end if
 
 end subroutine besjm
+
+!!****f* ABINIT/phim
+!! NAME
+!! phim
+!!
+!! FUNCTION
+!! Computes Phi_m[theta]=Sqrt[2] cos[m theta],      if m>0
+!!                       Sqrt[2] sin[Abs(m) theta], if m<0
+!!                       1                        , if m=0
+!!
+!! INPUTS
+!!  costeta= cos(theta)  (theta= input angle)
+!!  mm = index m
+!!  sinteta= sin(theta)  (theta= input angle)
+!!
+!! OUTPUT
+!!  phim= Phi_m(theta) (see above)
+!!
+!! NOTES
+!!  - This file comes from the file crystal_symmetry.f
+!!    by N.A.W. Holzwarth and A. Tackett for the code pwpaw
+!!
+!! PARENTS
+!!     setsymrhoij
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure function phim(costheta,sintheta,mm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phim'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: mm
+ real(dp) :: phim
+ real(dp),intent(in) :: costheta,sintheta
+
+! *********************************************************************
+
+ if (mm==0)  phim=one
+ if (mm==1)  phim=sqrt2*costheta
+ if (mm==-1) phim=sqrt2*sintheta
+ if (mm==2)  phim=sqrt2*(costheta*costheta-sintheta*sintheta)
+ if (mm==-2) phim=sqrt2*two*sintheta*costheta
+ if (mm==3)  phim=sqrt2*&
+& (costheta*(costheta*costheta-sintheta*sintheta)&
+& -sintheta*two*sintheta*costheta)
+ if (mm==-3) phim=sqrt2*&
+& (sintheta*(costheta*costheta-sintheta*sintheta)&
+& +costheta*two*sintheta*costheta)
+
+ end function phim
 !!***
 
 !----------------------------------------------------------------------

@@ -83,14 +83,6 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 
 ! *************************************************************************
  
-!Statement functions are obsolete
-! dsq(ii,jj,kk)=inf_rmet(1,1)*(dble(ii))**2&
-!& +inf_rmet(2,2)*(dble(jj**2))&
-!& +inf_rmet(3,3)*(dble(kk**2))&
-!& +two*(inf_rmet(1,2)*dble(ii*jj)&
-!& +inf_rmet(2,3)*dble(jj*kk)&
-!& +inf_rmet(3,1)*dble(kk*ii))
- 
  call timab(603,1,tsec)
  
  norme = (mult/pi)**(onehalf)
@@ -168,9 +160,9 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 #define ABI_FUNC 'dsq_green'
 !End of the abilint section
 
-   integer :: ii,jj,kk
    real(dp) :: dsq_green
-   real(dp) :: inf_rmet(3,3)
+   integer,intent(in) :: ii,jj,kk
+   real(dp),intent(in) :: inf_rmet(3,3)
    dsq_green= inf_rmet(1,1)*dble(ii**2)&
 &   +inf_rmet(2,2)*dble(jj**2)&
 &   +inf_rmet(3,3)*dble(kk**2)&

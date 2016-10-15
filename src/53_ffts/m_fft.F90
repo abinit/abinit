@@ -1538,7 +1538,6 @@ function fftu_utests(ecut,ngfft,rprimd,ndat,nthreads,unit) result(nfailed)
 #undef ABI_FUNC
 #define ABI_FUNC 'fftu_utests'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_52_fft_mpi_noabirule
@@ -1981,7 +1980,6 @@ function fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm_fft,paral_kgb,uni
 #undef ABI_FUNC
 #define ABI_FUNC 'fftu_mpi_utests'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_52_fft_mpi_noabirule
 !End of the abilint section

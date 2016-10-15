@@ -48,6 +48,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  use m_errors
  use m_ddb
  use m_xmpi
+ use m_sort
 
  use m_io_tools,       only : open_file
  use m_dynmat,         only : asria_corr
@@ -59,7 +60,6 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 #undef ABI_FUNC
 #define ABI_FUNC 'thmeig'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_56_recipspace

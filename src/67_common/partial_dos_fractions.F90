@@ -77,6 +77,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
  use m_xmpi
  use m_mpinfo
  use m_crystal
+ use m_sort
 
  use m_time,          only : cwtime
  use m_numeric_tools, only : simpson
@@ -89,7 +90,6 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
 #undef ABI_FUNC
 #define ABI_FUNC 'partial_dos_fractions'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_51_manage_mpi
  use interfaces_56_recipspace
 !End of the abilint section

@@ -43,6 +43,7 @@ MODULE m_hdr
  use m_profiling_abi
  use m_errors
  use m_wffile
+ use m_sort
 #ifdef HAVE_MPI2
  use mpi
 #endif
@@ -611,7 +612,6 @@ subroutine test_abifiles()
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'test_abifiles'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
