@@ -55,6 +55,7 @@ getddk3?     21
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_hosts = gfortran@tikal
 #%% [files]
 #%% files_to_test = 
 #%%   t82.out, tolnlines = 56, tolabs = 1.0001e-03, tolrel = 1.1e-02, fld_options = -easy
