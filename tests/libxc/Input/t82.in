@@ -55,6 +55,8 @@ getddk3?     21
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+## XG 20161015 : For the time being, tikal is excluded because there is a bug in libxc v2.2.1 that causes problem. 
+## This bug is fixed in libxc v2.2.2, that should soon be installed inte machines of the test farm.
 #%% exclude_hosts = gfortran@tikal
 #%% [files]
 #%% files_to_test = 
