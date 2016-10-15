@@ -30,6 +30,7 @@ MODULE m_ifc
  use defs_basis
  use m_errors
  use m_profiling_abi
+ use m_sort
 
  use m_io_tools,    only : open_file
  use m_copy,        only : alloc_copy
@@ -912,7 +913,6 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,wghatm
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'corsifc9'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -1028,7 +1028,6 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_print'
- use interfaces_28_numeric_noabirule
  use interfaces_32_util
 !End of the abilint section
 

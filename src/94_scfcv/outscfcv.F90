@@ -137,6 +137,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use defs_abitypes
  use defs_parameters
  use m_profiling_abi
+ use m_sort
  use m_efield
  use m_errors
  use m_xmpi

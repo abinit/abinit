@@ -74,6 +74,7 @@
  use m_xmpi
  use m_xomp
  use m_hdr
+ use m_sort
 
  use m_fftcore, only : kpgcount
 
@@ -82,7 +83,6 @@
 #undef ABI_FUNC
 #define ABI_FUNC 'finddistrproc'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_54_abiutil
