@@ -178,7 +178,6 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
    function gg_psp4(x)
 !Expression of 7 May 1992
 
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -194,7 +193,6 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 
  function gp_psp4(x)
 !gp(x) is the derivative of gg(x) wrt x
-
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -215,7 +213,6 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
 
    function gpp_1_psp4(x)
 !gpp(x) is the second derivative of gg(x) wrt x
-
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -252,6 +249,7 @@ subroutine psp4cc(fchrg,n1xccc,xccc1d)
  end function gpp_2_psp4
 
  function gpp_3_psp4(x)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

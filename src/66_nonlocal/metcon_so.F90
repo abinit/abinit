@@ -270,6 +270,7 @@ subroutine metcon_so(rank,gmet,amet,aa,bb)
 
    function cona_metso(ii,i1,i2,i3)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -313,6 +314,7 @@ subroutine metcon_so(rank,gmet,amet,aa,bb)
 
 
  function con_metso(ii,i1,i2,i3)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
