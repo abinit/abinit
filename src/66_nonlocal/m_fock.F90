@@ -36,15 +36,16 @@ module m_fock
  use m_profiling_abi
  use m_errors
  use m_xmpi
- use m_mpinfo,     only : ptabs_fourdp
- use m_fstrings,        only : itoa, ftoa, sjoin
  use libxc_functionals
-
  use m_pawang
  use m_pawtab
  use m_pawfgr
  use m_pawfgrtab
  use m_pawcprj
+
+ use m_mpinfo,          only : ptabs_fourdp
+ use m_fstrings,        only : itoa, ftoa, sjoin
+ use m_cgtools,         only : set_istwfk
 
  implicit none
 

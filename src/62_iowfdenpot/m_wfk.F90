@@ -62,6 +62,7 @@ MODULE m_wfk
  use m_xmpi
  use m_mpiotk
  use m_hdr
+ use m_sort
  use m_crystal
  use m_crystal_io
  use m_pawtab
@@ -4054,7 +4055,6 @@ subroutine wfk_tofullbz(in_path, dtset, psps, pawtab, out_path)
 #undef ABI_FUNC
 #define ABI_FUNC 'wfk_tofullbz'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_56_recipspace
 !End of the abilint section
 

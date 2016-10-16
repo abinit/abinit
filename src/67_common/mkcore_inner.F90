@@ -44,6 +44,8 @@ subroutine mkcore_inner(corfra,core_mesh,dyfrx2,&
  use m_profiling_abi
  use m_errors
  use m_splines
+ use m_sort
+
  use m_pawrad, only : pawrad_type
  use m_pawtab, only : pawtab_type
 
@@ -51,7 +53,6 @@ subroutine mkcore_inner(corfra,core_mesh,dyfrx2,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkcore_inner'
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
 !End of the abilint section
 

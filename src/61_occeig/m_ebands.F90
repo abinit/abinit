@@ -51,6 +51,7 @@ MODULE m_ebands
                               isdiagmat
  use m_special_funcs,  only : dirac_delta
  use m_geometry,       only : normv
+ use m_cgtools,        only : set_istwfk
  use m_nesting,        only : mknesting
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, isamek
@@ -3442,7 +3443,6 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_expandk'
- use interfaces_32_util
  use interfaces_56_recipspace
 !End of the abilint section
 

@@ -34,6 +34,7 @@ MODULE m_cut3d
  use m_nctk
  use m_wfk
  use m_xmpi
+ use m_sort
 
  use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists, read_string
  use m_numeric_tools,    only : interpol3d
@@ -1798,7 +1799,6 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'cut3d_wffile'
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_52_fft_mpi_noabirule
