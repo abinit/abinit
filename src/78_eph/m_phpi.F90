@@ -701,10 +701,10 @@ subroutine out_phpi(iout, Pi_ph, phfrq, qpt, natom3)
  write(iout,'(a)')' '
  write(iout,'(a,3f14.8)')' qpt =',qpt
  write(iout,'(a)')' '
- write(iout,'(x,a,10x,a)')'omega','Pi(omega)'
+ write(iout,'(1x,a,10x,a)')'omega','Pi(omega)'
 
  do imode=1,natom3
-    write(iout,'(x,f12.8,x,es14.6)') phfrq(imode), Pi_ph(imode)
+    write(iout,'(1x,f12.8,1x,es14.6)') phfrq(imode), Pi_ph(imode)
  end do
 
  write(iout,'(a)')' '
