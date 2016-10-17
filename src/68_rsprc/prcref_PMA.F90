@@ -177,7 +177,7 @@
  integer,intent(in) :: optreal,optres
  real(dp),intent(in) :: etotal,gsqcut
  type(MPI_type),intent(in) :: mpi_enreg
- type(dataset_type),intent(inout) :: dtset
+ type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_data), intent(inout) :: wvl
 !arrays

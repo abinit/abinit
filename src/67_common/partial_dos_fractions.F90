@@ -71,12 +71,12 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
  use m_errors
  use m_splines
  use m_xmpi
+ use m_sort
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'partial_dos_fractions'
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
  use interfaces_56_recipspace
  use interfaces_61_occeig

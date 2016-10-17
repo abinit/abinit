@@ -116,24 +116,6 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 
 ! *************************************************************************
 
-!Statement functions are obsolete
-!Real and imaginary parts of phase--statment functions:
-! phr(x1,y1,x2,y2,x3,y3)=(x1*x2-y1*y2)*x3-(y1*x2+x1*y2)*y3
-! phi(x1,y1,x2,y2,x3,y3)=(x1*x2-y1*y2)*y3+(y1*x2+x1*y2)*x3
-! ph1(nri,ig1,ia)=ph1d(nri,ig1+1+n1+(ia-1)*(2*n1+1))
-! ph2(nri,ig2,ia)=ph1d(nri,ig2+1+n2+(ia-1)*(2*n2+1)+&
-!& natom*(2*n1+1))
-! ph3(nri,ig3,ia)=ph1d(nri,ig3+1+n3+(ia-1)*(2*n3+1)+&
-!& natom*(2*n1+1+2*n2+1))
-! phre(ig1,ig2,ig3,ia)=phr(ph1(re,ig1,ia),ph1(im,ig1,ia),&
-!& ph2(re,ig2,ia),ph2(im,ig2,ia),ph3(re,ig3,ia),ph3(im,ig3,ia))
-! phimag(ig1,ig2,ig3,ia)=phi(ph1(re,ig1,ia),ph1(im,ig1,ia),&
-!& ph2(re,ig2,ia),ph2(im,ig2,ia),ph3(re,ig3,ia),ph3(im,ig3,ia))
-
-! gsq(i1,i2,i3)=dble(i1*i1)*gmet(1,1)+dble(i2*i2)*gmet(2,2)+&
-!& dble(i3*i3)*gmet(3,3)+dble(2*i1*i2)*gmet(1,2)+&
-!& dble(2*i2*i3)*gmet(2,3)+dble(2*i3*i1)*gmet(3,1)
-
  if(nspden==4)then
    write(std_out,*)' initro : might work yet for nspden=4 (not checked)'
    write(std_out,*)' spinat',spinat(1:3,1:natom)
@@ -450,11 +432,12 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 #define ABI_FUNC 'phr_ini'
 !End of the abilint section
 
-   real(dp) :: phr_ini,x1,x2,x3,y1,y2,y3
+   real(dp) :: phr_ini
+   real(dp),intent(in) :: x1,x2,x3,y1,y2,y3
    phr_ini=(x1*x2-y1*y2)*x3-(y1*x2+x1*y2)*y3
  end function phr_ini
 
-   function phi_ini(x1,y1,x2,y2,x3,y3)
+ function phi_ini(x1,y1,x2,y2,x3,y3)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -463,11 +446,12 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 #define ABI_FUNC 'phi_ini'
 !End of the abilint section
 
-   real(dp):: phi_ini,x1,x2,x3,y1,y2,y3
+   real(dp) :: phi_ini
+   real(dp),intent(in) :: x1,x2,x3,y1,y2,y3
    phi_ini=(x1*x2-y1*y2)*y3+(y1*x2+x1*y2)*x3
  end function phi_ini
 
-   function ph1_ini(nri,ig1,ia)
+ function ph1_ini(nri,ig1,ia)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -476,12 +460,12 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 #define ABI_FUNC 'ph1_ini'
 !End of the abilint section
 
-   real(dp):: ph1_ini
-   integer :: nri,ig1,ia
+   real(dp) :: ph1_ini
+   integer,intent(in) :: nri,ig1,ia
    ph1_ini=ph1d(nri,ig1+1+n1+(ia-1)*(2*n1+1))
  end function ph1_ini
 
-   function ph2_ini(nri,ig2,ia)
+ function ph2_ini(nri,ig2,ia)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -490,12 +474,12 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 #define ABI_FUNC 'ph2_ini'
 !End of the abilint section
 
-   real(dp):: ph2_ini
-   integer :: nri,ig2,ia
+   real(dp) :: ph2_ini
+   integer,intent(in) :: nri,ig2,ia
    ph2_ini=ph1d(nri,ig2+1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1))
  end function ph2_ini
 
-   function ph3_ini(nri,ig3,ia)
+ function ph3_ini(nri,ig3,ia)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -504,12 +488,12 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 #define ABI_FUNC 'ph3_ini'
 !End of the abilint section
 
-   real(dp):: ph3_ini
-   integer :: nri,ig3,ia
+   real(dp) :: ph3_ini
+   integer,intent(in) :: nri,ig3,ia
    ph3_ini=ph1d(nri,ig3+1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1))
  end function ph3_ini
 
-   function phre_ini(ig1,ig2,ig3,ia)
+ function phre_ini(ig1,ig2,ig3,ia)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -518,13 +502,13 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 #define ABI_FUNC 'phre_ini'
 !End of the abilint section
 
-   real(dp):: phre_ini
-   integer :: ig1,ig2,ig3,ia
+   real(dp) :: phre_ini
+   integer,intent(in) :: ig1,ig2,ig3,ia
    phre_ini=phr_ini(ph1_ini(re,ig1,ia),ph1_ini(im,ig1,ia),&
 &   ph2_ini(re,ig2,ia),ph2_ini(im,ig2,ia),ph3_ini(re,ig3,ia),ph3_ini(im,ig3,ia))
  end function phre_ini
 
-   function phimag_ini(ig1,ig2,ig3,ia)
+ function phimag_ini(ig1,ig2,ig3,ia)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -534,7 +518,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 !End of the abilint section
 
    real(dp) :: phimag_ini
-   integer :: ig1,ig2,ig3,ia
+   integer,intent(in) :: ig1,ig2,ig3,ia
    phimag_ini=phi_ini(ph1_ini(re,ig1,ia),ph1_ini(im,ig1,ia),&
 &   ph2_ini(re,ig2,ia),ph2_ini(im,ig2,ia),ph3_ini(re,ig3,ia),ph3_ini(im,ig3,ia))
  end function phimag_ini

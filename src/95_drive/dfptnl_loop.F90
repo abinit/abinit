@@ -134,7 +134,7 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
  real(dp),intent(inout) :: etotal
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
- type(dataset_type),intent(inout) :: dtset
+ type(dataset_type),intent(in) :: dtset
  type(hdr_type),intent(inout) :: hdr
  type(pseudopotential_type),intent(in) :: psps
 !arrays

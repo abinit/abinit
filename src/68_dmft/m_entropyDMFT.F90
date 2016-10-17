@@ -701,7 +701,7 @@ subroutine entropyDMFT_init(e_t,dt,pawtab,spacecomm,ifilename,ofilename)
 !End of the abilint section
 
     type(entropyDMFT_t) , intent(inout) :: e_t
-    type(dataset_type)  , intent(inout) :: dt
+    type(dataset_type)  , intent(in) :: dt
     type(pawtab_type)   , intent(inout) :: pawtab(:)
     type(pawang_type)   , intent(in   ) :: pawang
     type(pawrad_type)   , intent(inout) :: pawrad(:)

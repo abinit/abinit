@@ -104,6 +104,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  !use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_phgamma,         only : eph_phgamma
+ use m_gkk,             only : eph_gkk
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -121,7 +122,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !scalars
  character(len=6),intent(in) :: codvsn
  type(datafiles_type),intent(in) :: dtfil
- type(dataset_type),intent(inout) :: dtset
+ type(dataset_type),intent(in) :: dtset
  type(pawang_type),intent(inout) :: pawang
  type(pseudopotential_type),intent(inout) :: psps
 !arrays
@@ -139,13 +140,13 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: edos_step,edos_broad
  real(dp) :: cpu,wall,gflops
- character(len=500) :: eph_task,msg
- character(len=fnlen) :: wfk0_path,ddb_path,dvdb_path,path
+ character(len=500) :: msg
+ character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,path
  character(len=fnlen) :: ddk_path(3)
  character(len=10) :: strddk 
- type(hdr_type) :: wfk0_hdr
+ type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
- type(ebands_t) :: ebands
+ type(ebands_t) :: ebands, ebands_kq
  type(edos_t) :: edos
  type(ddb_type) :: ddb
  type(dvdb_t) :: dvdb
@@ -161,6 +162,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: dielt(3,3),zeff(3,3,dtset%natom),n0(dtset%nsppol)
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
+ logical :: usewfq
  !real(dp) :: tsec(2)
  !type(pawfgrtab_type),allocatable :: pawfgrtab(:)
  !type(paw_ij_type),allocatable :: paw_ij(:)
@@ -195,8 +197,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  comm = xmpi_world; nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  wfk0_path = dtfil%fnamewffk
+ wfq_path = dtfil%fnamewffq
  ddb_path = dtfil%filddbsin
  dvdb_path = dtfil%filddbsin; ii=len_trim(dvdb_path); dvdb_path(ii-2:ii+1) = "DVDB"
+ usewfq = (dtset%irdwfq/=0 .or. dtset%getwfq/=0)
+
  ddk_path(1) = dtfil%fnamewffddk 
  write (strddk,'(I10)') 3*dtset%natom+3
  ddk_path(3) = trim(ddk_path(1)) // trim(adjustl(strddk))
@@ -230,9 +235,24 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
        MSG_ERROR(sjoin("Cannot find GS WFK file:", wfk0_path))
      end if
    end if
+   ! WFQ file
+   if (usewfq) then
+     if (.not. file_exists(wfq_path)) then
+       if (file_exists(nctk_ncify(wfq_path))) then
+         write(std_out,"(3a)")"- File: ",trim(wfq_path)," does not exist but found netcdf file with similar name."
+         wfq_path = nctk_ncify(wfq_path)
+       else
+         MSG_ERROR(sjoin("Cannot find GS WFQ file:", wfq_path))
+       end if
+     end if
+   end if
  end if
  call xmpi_bcast(wfk0_path,master,comm,ierr)
  call wrtout(ab_out, sjoin("- Reading GS states from WFK file:", wfk0_path) )
+ if (usewfq) then
+   call xmpi_bcast(wfq_path,master,comm,ierr)
+   call wrtout(ab_out, sjoin("- Reading GS states from WFQ file:", wfq_path) )
+ end if
  call wrtout(ab_out, sjoin("- Reading DDB from file:",ddb_path))
  call wrtout(ab_out, sjoin("- Reading DVDB from file:",dvdb_path))
  if (dtset%eph_transport > 0) then
@@ -245,7 +265,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  call cwtime(cpu,wall,gflops,"start")
 
- ! Costruct crystal and ebands from the GS WFK file.
+ ! Construct crystal and ebands from the GS WFK file.
  call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm) !,gs_occ)
  call hdr_vs_dtset(wfk0_hdr,dtset)
 
@@ -254,9 +274,21 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ebands = ebands_from_hdr(wfk0_hdr,maxval(wfk0_hdr%nband),gs_eigen)
  call hdr_free(wfk0_hdr)
+ ABI_FREE(gs_eigen)
+
  ! TODO: 
  ! Make sure everything is OK if WFK comes from a NSCF run since occ are set to zero
  ! fermie is set to 0 if nscf!
+
+ ! Read WFQ and construct ebands on the shifted grid.
+ if (usewfq) then
+   call wfk_read_eigenvalues(wfq_path,gs_eigen,wfq_hdr,comm) !,gs_occ)
+   !call hdr_vs_dtset(wfq_hdr,dtset)  ! GKA TODO: Have to construct a header with the proper set of q-shifted k-points
+                                      !           then compare against file.
+   ebands_kq = ebands_from_hdr(wfq_hdr,maxval(wfq_hdr%nband),gs_eigen)
+   call hdr_free(wfq_hdr)
+   ABI_FREE(gs_eigen)
+ end if
 
  ! Here we change the GS bands (fermi level, scissors operator ...)
  ! All the modifications to ebands should be done here.
@@ -268,12 +300,18 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
    call wrtout(ab_out,msg)
    call ebands_set_scheme(ebands,dtset%occopt,dtset%tsmear,spinmagntarget,dtset%prtvol)
+   if (usewfq) then
+     call ebands_set_scheme(ebands_kq,dtset%occopt,dtset%tsmear,spinmagntarget,dtset%prtvol)
+   end if
  end if
  
  if (dtset%eph_fermie /= zero) then ! default value of eph_fermie is zero hence no tolerance is used!
    ABI_CHECK(abs(dtset%eph_extrael) <= tol12, "eph_fermie and eph_extrael are mutually exclusive")
    call wrtout(ab_out, sjoin(" Fermi level set by the user at:",ftoa(dtset%eph_fermie)))
    call ebands_set_fermie(ebands, dtset%eph_fermie, msg)
+   if (usewfq) then
+     call ebands_set_fermie(ebands_kq, dtset%eph_fermie, msg)
+   end if
    call wrtout(ab_out,msg)
 
  else if (abs(dtset%eph_extrael) > tol12) then
@@ -284,14 +322,16 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
 
  call ebands_update_occ(ebands, spinmagntarget)
+ if (usewfq) then
+   call ebands_update_occ(ebands_kq, spinmagntarget)
+ end if
  call ebands_print(ebands,header="Ground state energies",prtvol=dtset%prtvol)
-
- ABI_FREE(gs_eigen)
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')"eph%init: cpu: ",cpu,", wall: ",wall
  call wrtout(std_out,msg,"COLL",do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
+
 
  ! Compute electron DOS.
  ! TODO: Optimize this part. Really slow if tetra and lots of points
@@ -353,6 +393,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ddb_nqshift = 1
  ABI_CALLOC(ddb_qshifts, (3,ddb_nqshift))
 
+ ! Set the q-shift for the DDB
+ ddb_qshifts(:,1) = dtset%ddb_shiftq(:)
+
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
  iblock = ddb_get_dielt_zeff(ddb,cryst,dtset%rfmeth,dtset%chneut,selectz0,dielt,zeff)
@@ -366,16 +409,19 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  nsphere0,rifcsph0,prtsrlr0,dtset%enunit)
  ABI_FREE(ddb_qshifts)
 
- ! Phonon Density of States.
- ! FIXME: mkphdos expects qshift(3) instead of qshift(3, nqshift)
- call mkphdos(phdos,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,dtset%ph_smear,dtset%ph_ngqpt,dtset%ph_qshift)
+ if (dtset%prtphdos == 1) then
+   ! Phonon Density of States.
 
- !call phdos_print_debye(phdos, cryst%ucvol)
- if (my_rank == master) then
-   call phdos_print(phdos, strcat(dtfil%filnam_ds(4), "_PHDOS"))
-   !call phdos_ncwrite(phdos, ncid) 
+   ! FIXME: mkphdos expects qshift(3) instead of qshift(3, nqshift)
+   call mkphdos(phdos,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,dtset%ph_smear,dtset%ph_ngqpt,dtset%ph_qshift)
+  
+   !call phdos_print_debye(phdos, cryst%ucvol)
+   if (my_rank == master) then
+     call phdos_print(phdos, strcat(dtfil%filnam_ds(4), "_PHDOS"))
+     !call phdos_ncwrite(phdos, ncid) 
+   end if
+   call phdos_free(phdos)
  end if
- call phdos_free(phdos)
 
  if (dtset%prtbltztrp == 1 .and. my_rank == master) then
    call ifc_outphbtrap(ifc,cryst,dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,dtfil%filnam_ds(4))
@@ -411,12 +457,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! ===========================================
  call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,level40,&
 &  pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
-
+ 
  ! ====================================================
  ! === This is the real epc stuff once all is ready ===
  ! ====================================================
- eph_task = "ph_linwid"
- if (eph_task == "ph_linwid") then
+ if (dtset%eph_task == 1) then
    ! Compute phonon linewidths in metals.
    call eph_phgamma(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
 &   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
@@ -424,6 +469,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 ! TODO: decide whether to make several driver functions. 
 !  before that, however, need to encapsulate most of the functionalities in eph_phgamma
 !  otherwise there will be tons of duplicated code
+
+ if (dtset%eph_task == 2) then
+   ! Compute electron-phonon matrix elements
+   call eph_gkk(wfk0_path,wfq_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,ebands_kq,dvdb,ifc,&
+   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
+ end if
 
  !=====================
  !==== Free memory ====
@@ -434,6 +485,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call ddk_free(ddk)
  call ifc_free(ifc)
  call ebands_free(ebands)
+ if (usewfq) then
+   call ebands_free(ebands_kq)
+ end if
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
 

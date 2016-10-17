@@ -73,14 +73,13 @@ subroutine upf2abinit (filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
  use pseudo_pwscf ! pwscf module with all data explicit!
 
  use m_io_tools,  only : open_file
+ use m_numeric_tools, only : smooth, nderiv
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'upf2abinit'
  use interfaces_11_qespresso_ext
- use interfaces_28_numeric_noabirule
- use interfaces_32_util
  use interfaces_57_iopsp_parser
  use interfaces_64_psp, except_this_one => upf2abinit
 !End of the abilint section
