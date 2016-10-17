@@ -199,7 +199,7 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
      integ = zero
      do ixint = 1, nradint(iat)
        vect(1, 1:npw_k) = bess_fit(1:npw_k, ixint, ilang(illmm))
-       call dotprod_g(dotr, doti, istwfk, npw_k, option, vect, tmppsim, mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+       call dotprod_g(dotr, doti, istwfk, npw_k, option, vect, tmppsim, mpi_enreg%me_g0, mpi_enreg%comm_fft)
 
 !      Multiply by r**2 and take norm, integrate
 !      MJV 5.5.2012 removed call to simpson_int - just need last value, no need to allocate full space for primitive and integrand

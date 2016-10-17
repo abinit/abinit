@@ -77,6 +77,7 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
 #undef ABI_FUNC
 #define ABI_FUNC 'partial_dos_fractions'
  use interfaces_28_numeric_noabirule
+ use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_56_recipspace
  use interfaces_61_occeig
@@ -99,7 +100,7 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
 !scalars
  integer :: cg1kptshft,cgshift,ia,iatom,iband,ierr,ikpt,ilang,ioffkg
  integer :: ioffylm,iout,ipw,ispinor,isppol,ixint,mbess,mcg_1kpt,me_kpt
- integer :: mgfft,my_nspinor,n1,n2,n3,natsph_tot,nfit,npw_k,nradintmax,prtsphere
+ integer :: mgfft,my_nspinor,n1,n2,n3,natsph_tot,nband_k,nfit,npw_k,nradintmax,prtsphere
  integer :: spaceComm_kpt
  real(dp) :: arg,bessarg,bessargmax,bessint_delta,kpgmax,rmax,ucvol
  character(len=4) :: mode_paral
@@ -306,7 +307,7 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
        nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
        npw_k = npwarr(ikpt)
 
-       if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isspol,me_kpt)) cycle
+       if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_kpt)) cycle
 
        cg1kptshft=0
        cg_1kpt(:,:) = cg(:,cgshift+1:cgshift+mcg_1kpt)
@@ -360,7 +361,7 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
 
        do iband=1,nband_k
 
-         if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isspol,me_kpt)) cycle
+         if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me_kpt)) cycle
 
          do ispinor=1,my_nspinor
 
@@ -409,9 +410,9 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
    ABI_DEALLOCATE(cg_1kpt)
 
 !  Gather all contributions from different processors
-   call xmpi_sum(dos_fractions,spaceComm,ierr)
+   call xmpi_sum(dos_fractions,spaceComm_kpt,ierr)
    if (m_dos_flag==1) then
-     call xmpi_sum(dos_fractions_m,spaceComm,ierr)
+     call xmpi_sum(dos_fractions_m,spaceComm_kpt,ierr)
    end if
    if (mpi_enreg%paral_spinor == 1)then
      call xmpi_sum(dos_fractions,mpi_enreg%comm_spinor,ierr)
@@ -476,7 +477,7 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
      nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
      npw_k = npwarr(ikpt)
 
-     if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isspol,me_kpt)) cycle
+     if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_kpt)) cycle
 
      cg1kptshft=0
      cg_1kpt(:,:) = cg(:,cgshift+1:cgshift+mcg_1kpt)
@@ -484,7 +485,7 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
 
      do iband=1,dtset%mband
 
-       if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isspol,me_kpt)) cycle
+       if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me_kpt)) cycle
 
        cg_1band(:,:) = cg_1kpt(:,cg1kptshft+1:cg1kptshft+2*npw_k)
 
@@ -517,7 +518,7 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
    ABI_DEALLOCATE(kg)
 
 !  Gather all contributions from different processors
-   call xmpi_sum(dos_fractions,spaceComm,ierr)
+   call xmpi_sum(dos_fractions,spaceComm_kpt,ierr)
 ! below for future use - spinors should not be parallelized for the moment
 !   if (mpi_enreg%paral_spinor == 1)then
 !     call xmpi_sum(dos_fractions,mpi_enreg%comm_spinor,ierr)
