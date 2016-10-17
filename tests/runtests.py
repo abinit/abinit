@@ -20,7 +20,7 @@ else:
     import pickle
 
 # We don't install with setup.py hence we have to add the directory [...]/abinit/tests to $PYTHONPATH
-# TODO: Use Absolute imports and rename tests --> abitests to 
+# TODO: Use Absolute imports and rename tests --> abitests to
 # avoid possible conflicts with the packages in PYTHONPATH
 # monty installs the subpackage paths and this breaks the import below
 pack_dir, x = os.path.split(os.path.abspath(__file__))
@@ -75,11 +75,11 @@ Usage example (assuming the script is executed within a build tree):
 
 Debugging mode:
     runtests.py v3[30] --gdb         ==> Run test v3[30] under the control of the GNU debugger gdb
-    runtests.py paral[1] -n 2 --gdb  ==> Run test paral[1] with 2 MPI nodes under gdb 
+    runtests.py paral[1] -n 2 --gdb  ==> Run test paral[1] with 2 MPI nodes under gdb
                                          (will open 2 xterminal sessions, it may not work!)
     runtests.py v3[30] -V "memcheck" ==> Run test v3[30] with valgrind memcheck
     runtests.py v3[30] --pedantic    ==> Mark test as failed if stderr is not empty
-    
+
     To profile the script, use `prof` as first argument, e.g. `runtests.py prof v3[30]`
     """
     return examples
@@ -133,7 +133,7 @@ def find_and_touch_srcfiles(patterns):
     top = os.path.join(abenv.home_dir, "src")
     print("Walking through directory:", top)
     print("Touching all files containing:", str(patterns))
-    
+
     for root, dirs, files in os.walk(top):
         for path in files:
             path = os.path.join(root, path)
@@ -209,6 +209,9 @@ def main():
     parser.add_option("--use-mpiexec", default=False, action="store_true",
                       help="Replace mpirun with mpiexec (ignored if -c is provided)")
 
+    parser.add_option("--use-srun", default=False, action="store_true",
+                      help="Use Slurm srun to run parallel jobs (ignored if -c is provided)")
+
     parser.add_option("-n", "--num-mpi-processors", dest="mpi_nprocs", type="int", default=1,
                       help="Maximum number of MPI processes.")
 
@@ -242,20 +245,20 @@ def main():
     parser.add_option("-d", "--dry-run", default=False, action="store_true",
                       help="Print list of tests and exit")
 
-    parser.add_option("--gdb", action="store_true", 
-                      help="Run the test(s) under the control of the GNU gdb debugger. " + 
-                           "Support both sequential and MPI executions. In the case of MPI runs, " + 
+    parser.add_option("--gdb", action="store_true",
+                      help="Run the test(s) under the control of the GNU gdb debugger. " +
+                           "Support both sequential and MPI executions. In the case of MPI runs, " +
                            "the script will open multiple instances of xterm (it may not work depending of your architecture).")
 
     parser.add_option("--nag", action="store_true", help="Option for developers")
 
     parser.add_option("--perf", default="", help="Use perf command to profile the test")
-    parser.add_option("--abimem", action="store_true", default=False, 
+    parser.add_option("--abimem", action="store_true", default=False,
                        help="Inspect abimem.mocc files produced by the tests. Requires HAVE_MEM_PROFILE and call abimem_init(2) in main")
-    parser.add_option("--etsf", action="store_true", default=False, 
+    parser.add_option("--etsf", action="store_true", default=False,
                        help="Validate netcdf files produced by the tests. Requires netcdf4")
 
-    parser.add_option("--touch", default="", help="Used in conjunction with `-m`.\n" + 
+    parser.add_option("--touch", default="", help="Used in conjunction with `-m`.\n" +
                       "Touch all the Abinit source files containing the given expression(s) before recompiling the code\n" +
                       "Use comma-separated strings *without* empty spaces to specify more than one pattern.")
 
@@ -277,8 +280,8 @@ def main():
 
     parser.add_option("-p", "--patch", dest="patch", type="str", default="",
                       help="Patch the reference files of the tests with the status specified by -p.\n" +
-                           "Diff tool can be specified via $PATCHER e.g. export PATCHER=kdiff3. default: vimdiff\n" +  
-                           "Examples: `-p failed` to patch the reference files of the failed tests. `-p all` to patch all files\n" + 
+                           "Diff tool can be specified via $PATCHER e.g. export PATCHER=kdiff3. default: vimdiff\n" +
+                           "Examples: `-p failed` to patch the reference files of the failed tests. `-p all` to patch all files\n" +
                            "`-p failed+passed` to patch both failed and passed tests or, equivalently, `-p not_succeed`\n"
                            )
 
@@ -286,7 +289,7 @@ def main():
                       help="Rerun previous tests. Example: `--rerun failed`. Same syntax as patch options.")
 
     parser.add_option("-e", "--edit", dest="edit", type="str", default="",
-                      help="Edit the input files of the tests with the specified status. Use $EDITOR as editor.\n" +  
+                      help="Edit the input files of the tests with the specified status. Use $EDITOR as editor.\n" +
                            "Examples: -i failed will edit the input files of the the failed tests. Status can be concatenated by '+' e.g. failed+passed")
 
     parser.add_option("--stderr", type="str", default="",
@@ -296,15 +299,15 @@ def main():
     parser.add_option("-v", "--verbose", dest="verbose", action="count", default=0, # -vv --> verbose=2
                       help='Verbose, can be supplied multiple times to increase verbosity')
 
-    parser.add_option("-V", "--valgrind_cmdline", type="str", default="", 
+    parser.add_option("-V", "--valgrind_cmdline", type="str", default="",
                       help="Run test(s) under the control of valgrind.\n" +
                            "Examples: runtests.py -V memcheck or runtests.py -V 'memcheck -v' to pass options to valgrind")
 
-    parser.add_option("--Vmem", action="store_true", 
+    parser.add_option("--Vmem", action="store_true",
                       help="Shortcut to run test(s) under the control of valgrind memcheck:\n"+
                            "Use --leak-check=full --show-reachable=yes --track-origins=yes")
 
-    parser.add_option("--pedantic", action="store_true", help="Mark test(s) as failed if stderr is not empty.") 
+    parser.add_option("--pedantic", action="store_true", help="Mark test(s) as failed if stderr is not empty.")
 
     parser.add_option("--erase-files", dest="erase_files", type="int", default=2,
                       help=("0 => Keep all files produced by the test\n" +
@@ -321,7 +324,7 @@ def main():
     parser.add_option("--sub-timeout", dest="sub_timeout", type="int", default=30,
                       help="Timeout (s) for small subprocesses (fldiff.pl, python functions)")
 
-    parser.add_option("--with-pickle", type="int",  default=1, 
+    parser.add_option("--with-pickle", type="int",  default=1,
                       help="Save test database in pickle format (default: True).")
 
     parser.add_option('--loglevel', default="ERROR", type="str",
@@ -329,12 +332,12 @@ def main():
 
     # Parse command line.
     options, suite_args = parser.parse_args()
-                                              
+
     if options.show_info:
         abitests.show_info()
         return 0
 
-    # loglevel is bound to the string value obtained from the command line argument. 
+    # loglevel is bound to the string value obtained from the command line argument.
     # Convert to upper case to allow the user to specify --loglevel=DEBUG or --loglevel=debug
     import logging
     numeric_level = getattr(logging, options.loglevel.upper(), None)
@@ -396,7 +399,7 @@ def main():
         runner = JobRunner.fromfile(cfg_fname, timebomb=timebomb)
 
     else:
-        if mpi_nprocs == 1 and not options.force_mpirun:
+        if mpi_nprocs == 1 and not (options.force_mpirun or options.use_srun):
             logger.info("Initalizing JobRunner for sequential runs.")
             runner = JobRunner.sequential(timebomb=timebomb)
         else:
@@ -406,18 +409,31 @@ def main():
             # else test for the presence of (mpirun, mpiexec) in $PATH, in this order
             # mpiexec is a MPI standard but we continue to prefer mpirun to
             # maintain the previous behavior.
-            if options.use_mpiexec:
-                use_mpiexec = options.use_mpiexec
+            if options.use_srun:
+                print("initializing srun jobrunner")
+                if options.use_mpiexec:
+                    raise ValueError("use_srun and use_mpiexec are mutually exclusive")
+
+                if which("srun") is None:
+                    raise RuntimeError("Cannot locate srun in $PATH\n" +
+                                       "Please check your environment")
+
+                runner = JobRunner.srun(timebomb=timebomb)
+
             else:
-                use_mpiexec = True
-                if which("mpirun") is not None:
-                    use_mpiexec = False
-                elif which("mpiexec") is None: 
+                if options.use_mpiexec:
+                    use_mpiexec = options.use_mpiexec
+                else:
+                    # Use which to select mpirun/mpiexec.
+                    use_mpiexec = True
+                    if which("mpirun") is not None:
+                        use_mpiexec = False
+                    elif which("mpiexec") is None:
                         raise RuntimeError(
                             "Cannot locate neither mpirun nor mpiexec in $PATH\n" +
                             "Please check your environment")
 
-            runner = JobRunner.generic_mpi(use_mpiexec=use_mpiexec, timebomb=timebomb)
+                runner = JobRunner.generic_mpi(use_mpiexec=use_mpiexec, timebomb=timebomb)
 
         if omp_nthreads > 0:
             omp_env = OMPEnvironment(OMP_NUM_THREADS = omp_nthreads)
@@ -431,7 +447,7 @@ def main():
     if options.Vmem:
         runner.set_valgrind_cmdline("memcheck --leak-check=full --show-reachable=yes --track-origins=yes")
 
-    if runner.has_valgrind: 
+    if runner.has_valgrind:
         cmd = "valgrind --tool=%s " % runner.valgrind_cmdline
         cprint("Will invoke valgrind with cmd:\n %s" % cmd, "yellow")
 
@@ -474,7 +490,7 @@ def main():
 
         test_list = [t for t in test_suite if t.status in status_list]
         test_suite = AbinitTestSuite(test_suite.abenv, test_list=test_list)
-        
+
     else:
         try:
             test_suite = abitests.select_tests(suite_args, regenerate=options.regenerate,
@@ -500,23 +516,23 @@ def main():
 
     # Run the tested selected by the user.
     if omp_nthreads == 0:
-        ncpus_used = mpi_nprocs * py_nthreads 
+        ncpus_used = mpi_nprocs * py_nthreads
         msg = ("Running %s test(s) with MPI_procs=%s, py_threads=%s..."
                % (test_suite.full_length, mpi_nprocs, py_nthreads))
     else:
-        ncpus_used = mpi_nprocs * omp_nthreads * py_nthreads 
+        ncpus_used = mpi_nprocs * omp_nthreads * py_nthreads
         msg = ("Running %s test(s) with MPI_nprocs=%s, OMP_nthreads=%s, py_nthreads=%s..."
                % (test_suite.full_length, mpi_nprocs, omp_nthreads, py_nthreads))
     cprint(msg, "yellow")
 
     if ncpus_used < 0.3 * ncpus_detected:
-        msg = ("[TIP] runtests.py is using %s CPUs but your architecture has %s CPUs\n" 
-              "You may want to use python threads to speed up the execution\n" 
+        msg = ("[TIP] runtests.py is using %s CPUs but your architecture has %s CPUs\n"
+              "You may want to use python threads to speed up the execution\n"
               "Use `runtests -jNUM` to run with NUM threads" % (ncpus_used, ncpus_detected))
         cprint(msg, "blue")
 
     elif ncpus_used > 1.5 * ncpus_detected:
-        msg = ("[OVERLOAD] runtests.py is using %s CPUs but your architecture has only %s CPUs!!\n" 
+        msg = ("[OVERLOAD] runtests.py is using %s CPUs but your architecture has only %s CPUs!!\n"
                % (ncpus_used, ncpus_detected))
         cprint(msg, "magenta")
 
@@ -539,8 +555,8 @@ def main():
     if mpi_nprocs > 1: runmode = "dynamic"
 
     #try:
-    results = test_suite.run_tests(build_env, workdir, runner, 
-                                   nprocs=mpi_nprocs, 
+    results = test_suite.run_tests(build_env, workdir, runner,
+                                   nprocs=mpi_nprocs,
                                    nthreads=py_nthreads,
                                    runmode=runmode,
                                    erase_files=options.erase_files,
@@ -588,7 +604,7 @@ def main():
                 cprint(trace, "red")
                 trace.edit_source()
 
-    # Save test_suite after execution so that we can reread it. 
+    # Save test_suite after execution so that we can reread it.
     with open(".prev_run.pickle", "wb") as fh:
         pickle.dump(test_suite, fh)
 
@@ -608,7 +624,7 @@ if __name__ == "__main__":
     try:
         do_prof = sys.argv[1] == "prof"
         if do_prof: sys.argv.pop(1)
-    except: 
+    except:
         do_prof = False
 
     if not do_prof:
