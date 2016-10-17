@@ -31,7 +31,7 @@ module m_effective_potential_file
  use m_xmpi
 
 #if HAVE_LIBXML
- use m_libxml
+ use m_effpot_xml
 #endif
 
  use m_harmonics_terms
@@ -316,7 +316,7 @@ subroutine xml_getdims(filename,natom,ntypat,nph1l,nrpt)
 
 #if defined HAVE_LIBXML
 !Read with libxml
- call libxml_getDimsEffPot(char_f2c(trim(filename)),natom,ntypat,nph1l,nrpt)
+ call effpot_xml_getDims(char_f2c(trim(filename)),natom,ntypat,nph1l,nrpt)
 #else
 !Read by hand
 
@@ -454,7 +454,7 @@ end subroutine xml_getdims
  !Arguments ------------------------------------
  !scalars
  character(len=*),intent(in) :: filename
- integer, intent(inout) :: comm
+ integer, intent(in) :: comm
  !arrays
  type(effective_potential_type), intent(inout) :: eff_pot
 
@@ -464,7 +464,7 @@ end subroutine xml_getdims
  integer :: nph1l,npsp,nsym,space_group,timrev
  real(dp):: energy,ucvol
  character(len=500) :: message
- logical :: has_3rd = .FALSE.
+ logical :: has_anharmonics = .FALSE.
 #ifndef HAVE_LIBXML
  integer :: funit = 1
  integer :: iatom,iamu,iph1l,irpt,mu,nu,voigt
@@ -485,8 +485,6 @@ end subroutine xml_getdims
  character(len=132),allocatable :: title(:)  
  type(ifc_type) :: ifcs
  type(ifc_type),dimension(:),allocatable :: phonon_strain
- type(harmonics_terms_type)   :: harmonics_terms
- type(anharmonics_terms_type) :: anharmonics_terms
  type(crystal_t)  :: crystal
  type(atomdata_t) :: atom
 #ifndef HAVE_LIBXML
@@ -554,7 +552,7 @@ end subroutine xml_getdims
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
   !Read with libxml librarie
-  call libxml_readEffPot(char_f2c(trim(filename)),natom,ntypat,nrpt,nph1l,all_amu,&
+  call effpot_xml_read(char_f2c(trim(filename)),natom,ntypat,nrpt,nph1l,all_amu,&
 &                       ifcs%atmfrc,ifcs%cell,&
 &                       dynmat,elastic_constants,energy,&
 &                       epsilon_inf,ifcs%ewald_atmfrc,&
@@ -1029,7 +1027,7 @@ end subroutine xml_getdims
 &            reshape(work2,(/3,natom,3,natom/))
          ABI_DEALLOCATE(work2)
        end if
-       has_3rd = .true.
+       has_anharmonics = .true.
        cycle
      end if
 
@@ -1099,7 +1097,7 @@ end subroutine xml_getdims
  end do
 
 !Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
- call crystal_init(Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
+ call crystal_init(all_amu,Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
 &  zion,znucl,timrev,.FALSE.,.FALSE.,title,&
 &  symrel=symrel,tnons=tnons,symafm=symafm) 
 
@@ -1112,7 +1110,7 @@ end subroutine xml_getdims
 
 !Initialisation of eff_pot
  call effective_potential_init(crystal,dynmat,energy,eff_pot,epsilon_inf,&
-&                              elastic_constants,has_3rd,ifcs,internal_strain,phfrq,qph1l,&
+&                              elastic_constants,has_anharmonics,ifcs,internal_strain,phfrq,qph1l,&
 &                              nph1l,zeff,comm,phonon_strain=phonon_strain)
 
 !DEALLOCATION OF ARRAYS
@@ -1143,8 +1141,6 @@ end subroutine xml_getdims
 
 !DEALLOCATION OF TYPES
  call ifc_free(ifcs)
- call anharmonics_terms_free(anharmonics_terms)
- call harmonics_terms_free(harmonics_terms)
  call crystal_free(crystal)
 
 end subroutine xml2effpot
@@ -1231,7 +1227,7 @@ end subroutine effective_potential_file_getType
 !! FUNCTION
 !! This routine test the xml or ddb file
 !! Return the number of atoms/ntypat in the unit cell from ddb and xml
-!! Return nph1l ans nrpt if the file is XML file 
+!! Return nqpt ans nrpt if the file is XML file 
 !! In case of DDB file, you have to run bigbx9 to get nrpt
 !!
 !! INPUTS
@@ -1249,7 +1245,7 @@ end subroutine effective_potential_file_getType
 !!
 !! SOURCE
 
-subroutine effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,comm)
+subroutine effective_potential_file_getDim(filename,natom,ntypat,nqpt,nrpt,comm)
 
  use m_ddb
 
@@ -1266,7 +1262,7 @@ subroutine effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,comm
 !scalars
  character(len=fnlen),intent(in) :: filename
  integer,intent(in) :: comm
- integer,intent(out) :: natom,ntypat,nph1l,nrpt
+ integer,intent(out) :: natom,ntypat,nqpt,nrpt
 !arrays
 
 !Local variables-------------------------------
@@ -1280,7 +1276,7 @@ subroutine effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,comm
 
  natom = 0
  ntypat= 0
- nph1l = 0
+ nqpt = 0
  nrpt  = 0
 
  call effective_potential_file_getType(filename,filetype)
@@ -1303,7 +1299,7 @@ subroutine effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,comm
    call wrtout(std_out,message,'COLL')
 
    write(message, '(a,a,a,a)' )&
-&   ' WARNING: Unable to read the number of qpoint (nph1l) in ddb file (not implemented)',ch10
+&   ' WARNING: Unable to read the number of qpoint (nqpt) in ddb file (not implemented)',ch10
    call wrtout(std_out,message,'COLL')
 
 !  Must read some value to initialze  array (nprt for ifc)
@@ -1314,7 +1310,7 @@ subroutine effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,comm
 &                ' is XML file (extraction of all informations)',ch10
    call wrtout(std_out,message,'COLL')
    
-   call xml_getdims(filename,natom,ntypat,nph1l,nrpt)
+   call xml_getdims(filename,natom,ntypat,nqpt,nrpt)
 
  else
    write(message, '(a,a,a,a)' )&
@@ -1379,7 +1375,7 @@ end subroutine effective_potential_file_getDim
 !!  effective_potential_print,xml2effpot,wrtout
 !! SOURCE
  
- subroutine effective_potential_file_read(filename,eff_pot,inp,comm)
+subroutine effective_potential_file_read(filename,eff_pot,inp,comm)
 
   use m_effective_potential
   use m_multibinit_dataset
@@ -1400,7 +1396,7 @@ end subroutine effective_potential_file_getDim
 
 !Arguments ------------------------------------
 !scalars
-  integer,intent(inout) :: comm
+  integer,intent(in) :: comm
   character(len=fnlen),intent(in) :: filename
 !array
   type(effective_potential_type), intent(inout)  :: eff_pot
@@ -1409,7 +1405,7 @@ end subroutine effective_potential_file_getDim
   type(crystal_t) :: Crystal
 !Local variables------------------------------
 !scalars
-  integer :: filetype,natom,ntypat,nph1l,nrpt
+  integer :: filetype,natom,ntypat,nqpt,nrpt
   character(500) :: message
 !array
   integer,allocatable :: atifc(:)
@@ -1436,7 +1432,7 @@ end subroutine effective_potential_file_getDim
       call wrtout(std_out,message,'COLL')
       call wrtout(ab_out,message,'COLL')
 
-      call effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,comm)!
+      call effective_potential_file_getDim(filename,natom,ntypat,nqpt,nrpt,comm)!
 
 !     In anaddb, inp%atifc is set to 1 2 3 ... natom (see anaddb help).
 !     Then in the next routine inp%atifc is convert with 0 or 1 (inp%atifc is now 1 1 1 1 0).

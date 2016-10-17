@@ -1613,7 +1613,7 @@ subroutine phonons_writeEPS(natom,nqpts,ntypat,qpoints,typat,weights,phfreq,phdi
 !scalars
  integer :: cunits,EmaxN,EminN,gradRes,kmaxN,kminN,lastPos,pos,posk
  integer :: iatom,ii,imode,iqpt,jj,nqpt
- integer :: option
+ integer :: option,unt
  real(dp) :: E,Emax,Emin,deltaE
  real(dp) :: facUnit,norm,renorm
  character(len=500) :: msg
@@ -1629,7 +1629,7 @@ subroutine phonons_writeEPS(natom,nqpts,ntypat,qpoints,typat,weights,phfreq,phdi
 ! *********************************************************************
 
  
- if (open_file("PHFRQ.eps", msg, unit=18, form="formatted", status="unknown", action="write") /= 0) then
+ if (open_file("PHFRQ.eps", msg, unit=unt, form="formatted", status="unknown", action="write") /= 0) then
    MSG_ERROR(msg)
  end if
 
@@ -1721,102 +1721,102 @@ subroutine phonons_writeEPS(natom,nqpts,ntypat,qpoints,typat,weights,phfreq,phdi
 !Begin to write some comments in the eps file
 !This is based to 'xfig'
 
- write(18,'(a)') '% !PS-Adobe-2.0 EPSF-2.0'
- write(18,'(a)') '%%Title: band.ps'
- write(18,'(a)') '%%BoundingBox: 0 0 581 310'
- write(18,'(a)') '%%Magnification: 1.0000'
+ write(unt,'(a)') '% !PS-Adobe-2.0 EPSF-2.0'
+ write(unt,'(a)') '%%Title: band.ps'
+ write(unt,'(a)') '%%BoundingBox: 0 0 581 310'
+ write(unt,'(a)') '%%Magnification: 1.0000'
 
- write(18,'(a)') '/$F2psDict 200 dict def'
- write(18,'(a)') '$F2psDict begin'
- write(18,'(a)') '$F2psDict /mtrx matrix put'
- write(18,'(a)') '/col-1 {0 setgray} bind def'
- write(18,'(a)') '/col0 {0.000 0.000 0.000 srgb} bind def'
- write(18,'(a)') 'end'
- write(18,'(a)') 'save'
- write(18,'(a)') 'newpath 0 310 moveto 0 0 lineto 581 0 lineto 581 310 lineto closepath clip newpath'
- write(18,'(a)') '-36.0 446.0 translate'
- write(18,'(a)') '1 -1 scale'
+ write(unt,'(a)') '/$F2psDict 200 dict def'
+ write(unt,'(a)') '$F2psDict begin'
+ write(unt,'(a)') '$F2psDict /mtrx matrix put'
+ write(unt,'(a)') '/col-1 {0 setgray} bind def'
+ write(unt,'(a)') '/col0 {0.000 0.000 0.000 srgb} bind def'
+ write(unt,'(a)') 'end'
+ write(unt,'(a)') 'save'
+ write(unt,'(a)') 'newpath 0 310 moveto 0 0 lineto 581 0 lineto 581 310 lineto closepath clip newpath'
+ write(unt,'(a)') '-36.0 446.0 translate'
+ write(unt,'(a)') '1 -1 scale'
 
- write(18,'(a)') '/cp {closepath} bind def'
- write(18,'(a)') '/ef {eofill} bind def'
- write(18,'(a)') '/gr {grestore} bind def'
- write(18,'(a)') '/gs {gsave} bind def'
- write(18,'(a)') '/sa {save} bind def'
- write(18,'(a)') '/rs {restore} bind def'
- write(18,'(a)') '/l {lineto} bind def'
- write(18,'(a)') '/m {moveto} bind def'
- write(18,'(a)') '/rm {rmoveto} bind def'
- write(18,'(a)') '/n {newpath} bind def'
- write(18,'(a)') '/s {stroke} bind def'
- write(18,'(a)') '/sh {show} bind def'
- write(18,'(a)') '/slc {setlinecap} bind def'
- write(18,'(a)') '/slj {setlinejoin} bind def'
- write(18,'(a)') '/slw {setlinewidth} bind def'
- write(18,'(a)') '/srgb {setrgbcolor} bind def'
- write(18,'(a)') '/rot {rotate} bind def'
- write(18,'(a)') '/sc {scale} bind def'
- write(18,'(a)') '/sd {setdash} bind def'
- write(18,'(a)') '/ff {findfont} bind def'
- write(18,'(a)') '/sf {setfont} bind def'
- write(18,'(a)') '/scf {scalefont} bind def'
- write(18,'(a)') '/sw {stringwidth} bind def'
- write(18,'(a)') '/tr {translate} bind def'
- write(18,'(a)') '/tnt {dup dup currentrgbcolor'
+ write(unt,'(a)') '/cp {closepath} bind def'
+ write(unt,'(a)') '/ef {eofill} bind def'
+ write(unt,'(a)') '/gr {grestore} bind def'
+ write(unt,'(a)') '/gs {gsave} bind def'
+ write(unt,'(a)') '/sa {save} bind def'
+ write(unt,'(a)') '/rs {restore} bind def'
+ write(unt,'(a)') '/l {lineto} bind def'
+ write(unt,'(a)') '/m {moveto} bind def'
+ write(unt,'(a)') '/rm {rmoveto} bind def'
+ write(unt,'(a)') '/n {newpath} bind def'
+ write(unt,'(a)') '/s {stroke} bind def'
+ write(unt,'(a)') '/sh {show} bind def'
+ write(unt,'(a)') '/slc {setlinecap} bind def'
+ write(unt,'(a)') '/slj {setlinejoin} bind def'
+ write(unt,'(a)') '/slw {setlinewidth} bind def'
+ write(unt,'(a)') '/srgb {setrgbcolor} bind def'
+ write(unt,'(a)') '/rot {rotate} bind def'
+ write(unt,'(a)') '/sc {scale} bind def'
+ write(unt,'(a)') '/sd {setdash} bind def'
+ write(unt,'(a)') '/ff {findfont} bind def'
+ write(unt,'(a)') '/sf {setfont} bind def'
+ write(unt,'(a)') '/scf {scalefont} bind def'
+ write(unt,'(a)') '/sw {stringwidth} bind def'
+ write(unt,'(a)') '/tr {translate} bind def'
+ write(unt,'(a)') '/tnt {dup dup currentrgbcolor'
 
- write(18,'(a)') '4 -2 roll dup 1 exch sub 3 -1 roll mul add'
- write(18,'(a)') '4 -2 roll dup 1 exch sub 3 -1 roll mul add'
- write(18,'(a)') '4 -2 roll dup 1 exch sub 3 -1 roll mul add srgb}'
- write(18,'(a)') 'bind def'
- write(18,'(a)') '/shd {dup dup currentrgbcolor 4 -2 roll mul 4 -2 roll mul'
- write(18,'(a)') ' 4 -2 roll mul srgb} bind def'
- write(18,'(a)') '/$F2psBegin {$F2psDict begin /$F2psEnteredState save def} def'
- write(18,'(a)') '/$F2psEnd {$F2psEnteredState restore end} def'
- write(18,'(a)') '$F2psBegin'
- write(18,'(a)') '%%Page: 1 1'
- write(18,'(a)') '10 setmiterlimit'
- write(18,'(a)') '0.06000 0.06000 sc'
+ write(unt,'(a)') '4 -2 roll dup 1 exch sub 3 -1 roll mul add'
+ write(unt,'(a)') '4 -2 roll dup 1 exch sub 3 -1 roll mul add'
+ write(unt,'(a)') '4 -2 roll dup 1 exch sub 3 -1 roll mul add srgb}'
+ write(unt,'(a)') 'bind def'
+ write(unt,'(a)') '/shd {dup dup currentrgbcolor 4 -2 roll mul 4 -2 roll mul'
+ write(unt,'(a)') ' 4 -2 roll mul srgb} bind def'
+ write(unt,'(a)') '/$F2psBegin {$F2psDict begin /$F2psEnteredState save def} def'
+ write(unt,'(a)') '/$F2psEnd {$F2psEnteredState restore end} def'
+ write(unt,'(a)') '$F2psBegin'
+ write(unt,'(a)') '%%Page: 1 1'
+ write(unt,'(a)') '10 setmiterlimit'
+ write(unt,'(a)') '0.06000 0.06000 sc'
 
 !****************************************************************
 !Begin of the intelligible part of the postcript document
 
- write(18,'(a)') '%**************************************'
+ write(unt,'(a)') '%**************************************'
 !****************************************************************
 !Draw the box containing the plot
- write(18,'(a)') '%****Big Box****'
- write(18,'(a)') '16 slw'
- write(18,'(a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ', EmaxN,&
+ write(unt,'(a)') '%****Big Box****'
+ write(unt,'(a)') '16 slw'
+ write(unt,'(a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ', EmaxN,&
 & ' m ', kmaxN,' ', EmaxN, ' l ', &
 & kmaxN,' ', EminN, ' l ', kminN,' ', EminN, ' l'
- write(18,'(a)') 'cp gs col0 s gr'
+ write(unt,'(a)') 'cp gs col0 s gr'
 
 !****************************************************************
 !Write unit on the middle left of the vertical axe
- write(18,'(a)') '%****Units****'
+ write(unt,'(a)') '%****Units****'
  if(cunits==1) then
 !  1/lambda
-   write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
-   write(18,'(a)') '1425 5650 m'
-   write(18,'(3a)') 'gs 1 -1 sc  90.0 rot (Frequency ',achar(92),'(cm) col0 sh gr'
+   write(unt,'(a)') '/Times-Roman ff 270.00 scf sf'
+   write(unt,'(a)') '1425 5650 m'
+   write(unt,'(3a)') 'gs 1 -1 sc  90.0 rot (Frequency ',achar(92),'(cm) col0 sh gr'
 !  cm-1
-   write(18,'(a)') '/Times-Roman ff 200.00 scf sf'
-   write(18,'(a)') '1325 4030 m'
-   write(18,'(a)') 'gs 1 -1 sc 90.0 rot  (-1) col0 sh gr'
-   write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
-   write(18,'(a)') '1425 3850 m'
-   write(18,'(3a)') 'gs 1 -1 sc  90.0 rot (',achar(92),')) col0 sh gr'
+   write(unt,'(a)') '/Times-Roman ff 200.00 scf sf'
+   write(unt,'(a)') '1325 4030 m'
+   write(unt,'(a)') 'gs 1 -1 sc 90.0 rot  (-1) col0 sh gr'
+   write(unt,'(a)') '/Times-Roman ff 270.00 scf sf'
+   write(unt,'(a)') '1425 3850 m'
+   write(unt,'(3a)') 'gs 1 -1 sc  90.0 rot (',achar(92),')) col0 sh gr'
  else
 !  Freq
-   write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
-   write(18,'(a)') '825 4850 m'
-   write(18,'(a)') 'gs 1 -1 sc  90.0 rot (Freq) col0 sh gr'
+   write(unt,'(a)') '/Times-Roman ff 270.00 scf sf'
+   write(unt,'(a)') '825 4850 m'
+   write(unt,'(a)') 'gs 1 -1 sc  90.0 rot (Freq) col0 sh gr'
 !  THz
-   write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
-   write(18,'(a)') '825 4350 m'
-   write(18,'(a)') 'gs 1 -1 sc 90.0 rot  (THz) col0 sh gr'
+   write(unt,'(a)') '/Times-Roman ff 270.00 scf sf'
+   write(unt,'(a)') '825 4350 m'
+   write(unt,'(a)') 'gs 1 -1 sc 90.0 rot  (THz) col0 sh gr'
  end if
 !*****************************************************************
 !Write graduation on the vertical axe
- write(18,'(a)') '%****Vertical graduation****'
+ write(unt,'(a)') '%****Vertical graduation****'
  deltaE=(Emax-Emin)/gradRes
 
 !Replacing do loop with real variables with standard g95 do loop
@@ -1828,37 +1828,37 @@ subroutine phonons_writeEPS(natom,nqpts,ntypat,qpoints,typat,weights,phfreq,phdi
 &   +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
 
 !  write the value of energy(or frequence)
-   write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
-   write(18,'(i4,a,i4,a)') kminN-800,' ',pos+60,' m'        !-1300 must be CHANGED
+   write(unt,'(a)') '/Times-Roman ff 270.00 scf sf'
+   write(unt,'(i4,a,i4,a)') kminN-800,' ',pos+60,' m'        !-1300 must be CHANGED
 !  as a function of the width of E
-   write(18,'(a,i6,a)') 'gs 1 -1 sc (', nint(E*facUnit),') col0 sh gr'
+   write(unt,'(a,i6,a)') 'gs 1 -1 sc (', nint(E*facUnit),') col0 sh gr'
 
 !  write a little bar
-   write(18,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ',pos ,' m ', kminN+100,' ', pos, ' l'
-   write(18,'(a)') 'gs col0 s gr '
+   write(unt,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ',pos ,' m ', kminN+100,' ', pos, ' l'
+   write(unt,'(a)') 'gs col0 s gr '
 
    E = E+deltaE
  end do
 
 !do the same thing for E=Emax (floating point error)
- write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
- write(18,'(i4,a,i4,a)') kminN-800,' ',EmaxN+60,' m'        !-1300 must be changed as E
- write(18,'(a,i6,a)') 'gs 1 -1 sc (', nint(Emax*facUnit),') col0 sh gr'
+ write(unt,'(a)') '/Times-Roman ff 270.00 scf sf'
+ write(unt,'(i4,a,i4,a)') kminN-800,' ',EmaxN+60,' m'        !-1300 must be changed as E
+ write(unt,'(a,i6,a)') 'gs 1 -1 sc (', nint(Emax*facUnit),') col0 sh gr'
 
 
 !draw zero line
  E=0
  pos=int(((EminN-EmaxN)*E &
 & +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
- write(18,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ',pos ,' m ', kmaxN,' ', pos, ' l'
- write(18,'(a)') 'gs col0 s gr '
+ write(unt,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ',pos ,' m ', kmaxN,' ', pos, ' l'
+ write(unt,'(a)') 'gs col0 s gr '
 
 
 !******************************************************
 !draw legend of horizontal axe
 !+vertical line
 
- write(18,'(a)') '%****Horizontal graduation****'
+ write(unt,'(a)') '%****Horizontal graduation****'
 
  lastPos=kminN
 
@@ -1875,23 +1875,23 @@ subroutine phonons_writeEPS(natom,nqpts,ntypat,qpoints,typat,weights,phfreq,phdi
    lastPos=posk
 
    if(qname(ii+1)=='gamma') then             !GAMMA
-     write(18,'(a)') '/Symbol ff 270.00 scf sf'
-     write(18,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
-     write(18,'(a)') 'gs 1 -1 sc (G) col0 sh gr'
+     write(unt,'(a)') '/Symbol ff 270.00 scf sf'
+     write(unt,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
+     write(unt,'(a)') 'gs 1 -1 sc (G) col0 sh gr'
    elseif(qname(ii+1)=='lambda') then              !LAMBDA
-     write(18,'(a)') '/Symbol ff 270.00 scf sf'
-     write(18,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
-     write(18,'(a)') 'gs 1 -1 sc (L) col0 sh gr'
+     write(unt,'(a)') '/Symbol ff 270.00 scf sf'
+     write(unt,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
+     write(unt,'(a)') 'gs 1 -1 sc (L) col0 sh gr'
    else                                     !autre
-     write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
-     write(18,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
-     write(18,'(a,a1,a)') 'gs 1 -1 sc (',qname(ii+1),') col0 sh gr'
+     write(unt,'(a)') '/Times-Roman ff 270.00 scf sf'
+     write(unt,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
+     write(unt,'(a,a1,a)') 'gs 1 -1 sc (',qname(ii+1),') col0 sh gr'
    end if
 
 
 !  draw vertical line
-   write(18,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', posk,' ',EminN ,' m ', posk,' ', EmaxN, ' l'
-   write(18,'(a)') 'gs col0 s gr '
+   write(unt,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', posk,' ',EminN ,' m ', posk,' ', EmaxN, ' l'
+   write(unt,'(a)') 'gs col0 s gr '
 
 
  end do
@@ -1902,7 +1902,7 @@ subroutine phonons_writeEPS(natom,nqpts,ntypat,qpoints,typat,weights,phfreq,phdi
 !***********************************************************
 !Write the bands (the most important part actually)
 
- write(18,'(a)') '%****Write Bands****'
+ write(unt,'(a)') '%****Write Bands****'
 
 
 ! read(19,*) (phfrqqm1(ii),ii=1,3*natom)
@@ -1954,19 +1954,19 @@ subroutine phonons_writeEPS(natom,nqpts,ntypat,qpoints,typat,weights,phfreq,phdi
      posk=int(((kminN-kmaxN)*(iqpt-1) &
 &        *scale(jj)/renorm/(-nqpts)))
      posk=posk+lastPos
-     write(18,'(a,i4,a,i4,a)') 'n ',posk,' ',pos,' m'
+     write(unt,'(a,i4,a,i4,a)') 'n ',posk,' ',pos,' m'
      pos=int(((EminN-EmaxN)*phfrq(imode) &
 &       +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
      posk=int(((kminN-kmaxN)*(iqpt) &
 &       *scale(jj)/renorm/(-nqpts)))
      posk=posk+lastPos
-     write(18,'(i4,a,i4,a)') posk,' ',pos,' l gs'
+     write(unt,'(i4,a,i4,a)') posk,' ',pos,' l gs'
 
      if(set_color) then     !(in color)
-       write(18,'(f6.3,a,f6.3,a,f6.3,a)') color(1,imode),' ', &
+       write(unt,'(f6.3,a,f6.3,a,f6.3,a)') color(1,imode),' ', &
 &        color(2,imode),' ',color(3,imode), ' srgb s gr'
      else
-       write(18,'(f6.3,a,f6.3,a,f6.3,a)') 0.0,' ', &
+       write(unt,'(f6.3,a,f6.3,a,f6.3,a)') 0.0,' ', &
 &        0.0,' ',0.0, ' srgb s gr'
      end if
    end do
@@ -1976,11 +1976,11 @@ subroutine phonons_writeEPS(natom,nqpts,ntypat,qpoints,typat,weights,phfreq,phdi
 
 !**********************************************************
 !Ending the poscript document
- write(18,'(a)') '$F2psEnd'
- write(18,'(a)') 'rs'
+ write(unt,'(a)') '$F2psEnd'
+ write(unt,'(a)') 'rs'
 
 ! *************************************************************************
- close(18)
+ close(unt)
 
 end subroutine phonons_writeEPS
 !!***

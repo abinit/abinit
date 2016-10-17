@@ -76,7 +76,7 @@ implicit none
 
 !Arguments --------------------------------
 !scalar
- integer, intent(inout) :: comm
+ integer, intent(in) :: comm
 !array
  type(multibinit_dataset_type),intent(in) :: inp
  type(effective_potential_type),intent(inout)  :: effective_potential

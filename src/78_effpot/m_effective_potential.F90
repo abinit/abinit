@@ -85,9 +85,6 @@ module m_effective_potential
    character(len=fnlen) :: name
 !     Name of the molecule (CaTiO3,...)
 
-   integer :: nph1l
-!     Number of wavevectors for phonon 
-
    real(dp):: energy                            
 !     Energy of the system (Hatree)
 
@@ -99,27 +96,15 @@ module m_effective_potential
 !     internal_stress(6)
 !     stress tensor of the structure
 
-   logical :: has_3rd
+   logical :: has_anharmonics
 !     True : the 3rd order derivative is computed 
 
    logical :: has_strain
 !     True : strain is apply
 
    real(dp), allocatable :: forces(:,:)    
-!    forces(6,natom,3)
-!    forces in the system 
-
-   real(dp), allocatable :: qph1l(:,:) 
-!     qph1l(3,nph1l)
-!     List of nph1l wavevectors
-
-   real(dp), allocatable :: dynmat(:,:,:,:,:,:)
-!    dynmat(2,3,natom,3,natom,nph1l) 
-!    dynamical matrix for each q points
-
-   real(dp), allocatable :: phfrq(:,:)
-!    phfrq(3*natom,nph1l)
-!    array with all phonons frequencies for each q points in Hartree/cm
+!    forces(3,natom)
+!    initial forces in the system 
 
    type(crystal_t) :: crystal
 !    crystal type
@@ -129,15 +114,15 @@ module m_effective_potential
 !     strain type
 !     Type wich containt strain information (related to reference structure)
 
-   type(supercell_type) :: supercell                 
-!     super cell type
-!     Store all the information of the suppercell
-
    type(harmonics_terms_type) :: harmonics_terms
 !     type with all information for anharmonics terms
 
    type(anharmonics_terms_type) :: anharmonics_terms
 !     type with all information for anharmonics terms
+
+   type(supercell_type) :: supercell                 
+!     super cell type
+!     Store all the information of the suppercell
 
 ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! This is for the parallelisation over the supercell
@@ -181,11 +166,9 @@ CONTAINS  !=====================================================================
 !! elastic_constants(6,6) = elastic constants tensor
 !! energy = energy of the reference structure
 !! dynmat(2,3,natom,3,natom,nqpt) = dynamical matrix for each qpoints
-!! has_3rd = true if the anharmonic par is present
+!! has_anharmonics = true if the anharmonic par is present
 !! ifcs = ifc type with cell,ewald short and total range of the ifcs
 !! internal_strain(6,natom,3) = internal strain tensor 
-!! phfrq(3,nqpt) = frequencies for each q points
-!! qph1l(3,nqpt) = list of each qpoints
 !! nqpt = number of qpoints
 !! zeff(3,natom) = effective charges
 !! comm  = mpi comunicator
@@ -210,8 +193,8 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
-&                                   epsilon_inf,elastic_constants,has_3rd,ifcs,&
-&                                   internal_strain,phfrq,qph1l,nqpt,zeff,comm,&
+&                                   epsilon_inf,elastic_constants,has_anharmonics,ifcs,&
+&                                   internal_strain,phfrq,qpoints,nqpt,zeff,comm,&
 &                                   anharmonics_terms,external_stress,&
 &                                   forces,internal_stress,phonon_strain,strain,supercell,&
 &                                   name)
@@ -231,12 +214,11 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
  integer, intent(in) :: comm
  real(dp),intent(in):: energy
  character(len=fnlen), optional,intent(in) :: name
- logical,intent(in) :: has_3rd
+ logical,intent(in) :: has_anharmonics
 !arrays
  real(dp),intent(in) :: epsilon_inf(3,3)
  real(dp),intent(in) :: elastic_constants(6,6)
- real(dp),intent(in) :: dynmat(:,:,:,:,:,:)
- real(dp),intent(in) :: phfrq(:,:),qph1l(:,:)
+ real(dp),intent(in) :: dynmat(:,:,:,:,:,:),qpoints(:,:),phfrq(:,:)
  real(dp),intent(in) :: internal_strain(:,:,:),zeff(:,:,:)
  type(crystal_t),intent(in) :: crystal
  type(effective_potential_type), intent(out) :: eff_pot
@@ -294,23 +276,6 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
  ABI_ALLOCATE(eff_pot%crystal%amu,(crystal%ntypat))
  eff_pot%crystal%amu = crystal%amu
 
- ABI_ALLOCATE(eff_pot%dynmat,(2,3,eff_pot%crystal%natom,3,eff_pot%crystal%natom,nqpt))
- eff_pot%dynmat(:,:,:,:,:,:) = zero
- eff_pot%nph1l = nqpt
-
- ABI_ALLOCATE(eff_pot%qph1l,(3,nqpt))
- eff_pot%qph1l(:,:) = zero
- 
-
- ABI_ALLOCATE(eff_pot%phfrq,(3*eff_pot%crystal%natom,nqpt))
- eff_pot%phfrq(:,:) = zero
-
- if(eff_pot%nph1l > zero) then
-   eff_pot%dynmat(:,:,:,:,:,:) = dynmat(:,:,:,:,:,:)
-   eff_pot%qph1l(:,:)  = qph1l(:,:)
-   eff_pot%phfrq(:,:)  = phfrq(:,:)
- end if
-
  ABI_ALLOCATE(eff_pot%crystal%typat,(crystal%natom))
  eff_pot%crystal%typat = crystal%typat
 
@@ -319,9 +284,12 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
 
 !4-Fill harmonic part
  call harmonics_terms_init(eff_pot%harmonics_terms,ifcs,crystal%natom,&
-&                  ifcs%nrpt,epsilon_inf=epsilon_inf,&
+&                  ifcs%nrpt,dynmat=dynmat,&
+&                  epsilon_inf=epsilon_inf,&
 &                  elastic_constants=elastic_constants,&
-&                  internal_strain=internal_strain,zeff=zeff)
+&                  internal_strain=internal_strain,&
+&                  nqpt=nqpt,phfrq=phfrq,qpoints=qpoints,zeff=zeff)
+
 
 !5-Fill optional inputs
  ABI_ALLOCATE(eff_pot%forces,(3,eff_pot%crystal%natom))
@@ -348,17 +316,17 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
    eff_pot%external_stress = external_stress
  end if
 
-  eff_pot%has_3rd = .FALSE.
+  eff_pot%has_anharmonics = .FALSE.
 
- if(has_3rd)then 
+ if(has_anharmonics)then 
    if (present(phonon_strain)) then
-     eff_pot%has_3rd = .TRUE.
+     eff_pot%has_anharmonics = .TRUE.
 !    Allocation of anharmonics part (3rd order) 
      call anharmonics_terms_init(eff_pot%anharmonics_terms,crystal%natom,ifcs%nrpt,&
 &                              phonon_strain=phonon_strain)
    else
      write(msg, '(3a)' )&
-&        ' has_3rd is set to true but there is no 3rd order, ',&
+&        ' has_anharmonics is set to true but there is no 3rd order, ',&
 &        ' please set it in the initialisation of effective_potential_init',ch10
      MSG_BUG(msg)
    end if
@@ -550,35 +518,20 @@ subroutine effective_potential_free(eff_pot)
 
   eff_pot%name   = ''
   eff_pot%energy = zero
-  eff_pot%nph1l  = zero
   eff_pot%strain%name = ""
   eff_pot%strain%delta = zero
   eff_pot%strain%direction = zero
   eff_pot%strain%strain = zero
   eff_pot%internal_stress = zero
   eff_pot%external_stress = zero
-  eff_pot%has_3rd = .false.
+  eff_pot%has_anharmonics = .false.
   eff_pot%has_strain = .false. 
-
-  if(allocated(eff_pot%qph1l))then
-    eff_pot%qph1l=zero
-    ABI_DEALLOCATE(eff_pot%qph1l)
-  end if
 
   if(allocated(eff_pot%forces)) then
     eff_pot%forces=zero
     ABI_DEALLOCATE(eff_pot%forces)
   end if
 
-  if(allocated(eff_pot%dynmat))then
-    eff_pot%dynmat=zero
-    ABI_DEALLOCATE(eff_pot%dynmat)
-  end if
-
-  if(allocated(eff_pot%phfrq))then
-    eff_pot%phfrq=zero
-    ABI_DEALLOCATE(eff_pot%phfrq)
-  end if
 
 ! Free others structures 
   call anharmonics_terms_free(eff_pot%anharmonics_terms)
@@ -699,7 +652,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: option,asr
- integer,intent(inout) :: comm
+ integer,intent(in) :: comm
 !array
  integer,intent(in) :: n_cell(3)
  type(effective_potential_type),intent(inout) :: eff_pot
@@ -1412,7 +1365,7 @@ subroutine effective_potential_print(eff_pot,option,filename)
 &     '  - Number of types of atoms:  ',eff_pot%crystal%ntypat ,ch10,&
 &     '  - Number of atoms:  ',eff_pot%crystal%natom ,ch10,&
 &     '  - Number of cells:  ',eff_pot%harmonics_terms%ifcs%nrpt ,ch10,&
-&     '  - Number of qpoints:  ',eff_pot%nph1l ,ch10,&
+&     '  - Number of qpoints:  ',eff_pot%harmonics_terms%nqpt ,ch10,&
 &     '  - Primitive vectors (unit:Bohr):  '
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
@@ -1681,7 +1634,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
 !Local variables-------------------------------
 !scalar
  integer :: ii,ia,ib,jj
- integer :: iph1l,irpt,mu,nu
+ integer :: iqpt,irpt,mu,nu
  integer :: unit_xml=22
  character(len=500) :: message
  character(len=fnlen) :: namefile
@@ -1812,7 +1765,8 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
          do mu=1,3
            do ib=1,eff_pot%crystal%natom
              do nu=1,3
-               WRITE(unit_xml,'(e22.14)', advance="no")(eff_pot%harmonics_terms%ifcs%atmfrc(1,mu,ia,nu,ib,irpt))
+               WRITE(unit_xml,'(e22.14)', advance="no")&
+&                   (eff_pot%harmonics_terms%ifcs%atmfrc(1,mu,ia,nu,ib,irpt))
              end do
            end do
            WRITE(unit_xml,'(a)')''
@@ -1826,20 +1780,20 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
      end if
    end do
    
-   do iph1l=1,eff_pot%nph1l
+   do iqpt=1,eff_pot%harmonics_terms%nqpt
      WRITE(unit_xml,'("  <phonon>")')
      WRITE(unit_xml,'("    <qpoint units=""2pi*G0"">")')
-     WRITE(unit_xml,'(3(E23.14))') (eff_pot%qph1l(:,iph1l))
+     WRITE(unit_xml,'(3(E23.14))') (eff_pot%harmonics_terms%qpoints(:,iqpt))
      WRITE(unit_xml,'("    </qpoint>")')
      WRITE(unit_xml,'("    <frequencies units=""reciprocal cm"">")')
-     WRITE(unit_xml,'(3(e22.14))') (eff_pot%phfrq(:,iph1l))
+     WRITE(unit_xml,'(3(e22.14))') (eff_pot%harmonics_terms%phfrq(:,iqpt))
      WRITE(unit_xml,'("    </frequencies>")')
      WRITE(unit_xml,'("    <dynamical_matrix units=""hartree/bohrradius**2"">")')
      do ia=1,eff_pot%crystal%natom
        do mu=1,3
          do ib = 1,eff_pot%crystal%natom
            do nu=1,3
-             WRITE(unit_xml,'(e22.14)',advance='no') (eff_pot%dynmat(1,nu,ib,mu,ia,iph1l))
+             WRITE(unit_xml,'(e22.14)',advance='no')(eff_pot%harmonics_terms%dynmat(1,nu,ib,mu,ia,iqpt))
            end do
          end do
          WRITE(unit_xml,'(a)')''
@@ -1865,7 +1819,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
        WRITE(unit_xml,'(a)')''
      end do
      WRITE(unit_xml,'("    </correction_force>")')
-     if (eff_pot%has_3rd) then
+     if (eff_pot%has_anharmonics) then
        do irpt=1,eff_pot%anharmonics_terms%phonon_strain(ii)%nrpt
          WRITE(unit_xml,'("    <correction_force_constant units=""hartree/bohrradius**2"">")')
          WRITE(unit_xml,'("      <data>")')
@@ -2640,7 +2594,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 ! 4 - Treat 3rd order:
 !------------------------------------
 
-  if (eff_pot%has_3rd) then
+  if (eff_pot%has_anharmonics) then
     ! TO DO
     write(message, '(2a)' ) ch10,' Third order is not yet implemented'
     call wrtout(std_out,message,'COLL')
@@ -3114,7 +3068,7 @@ pure function effective_potential_compare(e1,e2) result (res)
   if(e1%crystal%natom==e2%crystal%natom.and.&
 &     e1%harmonics_terms%ifcs%nrpt==e2%harmonics_terms%ifcs%nrpt.and.&
 &     e1%crystal%ntypat==e2%crystal%ntypat.and.&
-&     e1%nph1l==e2%nph1l.and.&
+&     e1%harmonics_terms%nqpt==e2%harmonics_terms%nqpt.and.&
 &     e1%energy==e2%energy.and.&
 &     e1%crystal%ucvol==e2%crystal%ucvol) then
     res = .true.
@@ -3243,7 +3197,7 @@ subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,n_cell,nph1l,optio
     ABI_ALLOCATE(symafm,(msym))
     ABI_ALLOCATE(tnons,(3,msym))
 
-    call crystal_init(crystal,1,ddb%natom,size(eff_pot%crystal%znucl),eff_pot%crystal%ntypat,1,&
+    call crystal_init(ddb%amu,crystal,1,ddb%natom,size(eff_pot%crystal%znucl),eff_pot%crystal%ntypat,1,&
 &       eff_pot%crystal%rprimd,eff_pot%crystal%typat,xred,eff_pot%crystal%znucl,&
 &       eff_pot%crystal%znucl,0,.FALSE.,.FALSE.,title)!,&
 !&       symrel=symrel,tnons=tnons,symafm=symafm)

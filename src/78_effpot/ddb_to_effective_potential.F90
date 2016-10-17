@@ -354,9 +354,9 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
   ABI_ALLOCATE(eigvec,(2,3,natom,3,natom))
   ABI_ALLOCATE(phfrq,(3*natom))
 
-  ABI_ALLOCATE(effective_potential%dynmat,(2,3,natom,3,natom,inp%nph1l))
-  ABI_ALLOCATE(effective_potential%phfrq,(3*natom,inp%nph1l))
-  ABI_ALLOCATE(effective_potential%qph1l,(3,inp%nph1l))
+  ABI_ALLOCATE(effective_potential%harmonics_terms%dynmat,(2,3,natom,3,natom,inp%nph1l))
+  ABI_ALLOCATE(effective_potential%harmonics_terms%phfrq,(3*natom,inp%nph1l))
+  ABI_ALLOCATE(effective_potential%harmonics_terms%qpoints,(3,inp%nph1l))
 
   write(message,'(a,(80a),3a)')ch10,('=',ii=1,80),ch10,ch10,&
 &     ' Calculation of dynamical matrix for each ph1l points '
@@ -364,8 +364,8 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
   call wrtout(std_out,message,'COLL')
   
 !Transfer value in effective_potential structure
-  effective_potential%nph1l      = inp%nph1l
-  effective_potential%qph1l(:,:) = inp%qph1l(:,:)
+  effective_potential%harmonics_terms%nqpt      = inp%nph1l
+  effective_potential%harmonics_terms%qpoints(:,:) = inp%qph1l(:,:)
   
   do iphl1=1,inp%nph1l
 
@@ -387,8 +387,8 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
     ! Write the phonon frequencies
     call dfpt_prtph(displ,inp%eivec,inp%enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
     
-    effective_potential%dynmat(:,:,:,:,:,iphl1) = d2cart(:,:,:natom,:,:natom)
-    effective_potential%phfrq(:,iphl1) = phfrq(:) * Ha_cmm1
+    effective_potential%harmonics_terms%dynmat(:,:,:,:,:,iphl1) = d2cart(:,:,:natom,:,:natom)
+    effective_potential%harmonics_terms%phfrq(:,iphl1) = phfrq(:) * Ha_cmm1
     
   end do
   

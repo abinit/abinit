@@ -59,7 +59,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 
  !Arguments ------------------------------------
  !scalars
-  integer, intent(inout) :: comm
+  integer, intent(in) :: comm
   character(len=fnlen),intent(in) :: filenames(15)
   type(effective_potential_type), intent(inout) :: eff_pot
   type(multibinit_dataset_type),intent(in) :: inp
@@ -422,7 +422,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
         cycle
       end if
     end do
-    eff_pot%has_3rd = .True.
+    eff_pot%has_anharmonics = .True.
   end if
 
  !===============================================

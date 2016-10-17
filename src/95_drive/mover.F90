@@ -900,8 +900,8 @@ real(dp) :: rmet(3,3)
            ! zion is not available, but it's not useful here.
            if (me == master) then
              ! Init crystal
-             call crystal_init(crystal,0,ab_mover%natom,scfcv_args%dtset%npsp,ab_mover%ntypat,&
-&             scfcv_args%dtset%nsym,rprimd,ab_mover%typat,xred,&
+             call crystal_init(scfcv_args%dtset%amu_orig(:,1),crystal,0,ab_mover%natom,&
+&             scfcv_args%dtset%npsp,ab_mover%ntypat,scfcv_args%dtset%nsym,rprimd,ab_mover%typat,xred,&
 &             [(-one, ii=1,ab_mover%ntypat)],ab_mover%znucl,2,.False.,.False.,"dilatmx_structure",&
 &             symrel=scfcv_args%dtset%symrel,tnons=scfcv_args%dtset%tnons,symafm=scfcv_args%dtset%symafm)
 

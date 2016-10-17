@@ -51,7 +51,7 @@ program multibinit
  use m_multibinit_dataset
  use m_effective_potential_file
 
- use m_io_tools,   only : get_unit, flush_unit
+ use m_io_tools,   only : get_unit, flush_unit,open_file
  use m_fstrings,   only : int2char4
  use m_time ,      only : asctime
 
@@ -108,7 +108,7 @@ program multibinit
 !set the argument of abimem_init to "2" instead of "0"
 !note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(2)
+ call abimem_init(0)
 #endif
 
 !Initialisation of the timing
@@ -141,7 +141,11 @@ program multibinit
  if (iam_master) then
    tmpfilename = filnam(2)
    call isfile(tmpfilename,'new')
-   open (unit=ab_out,file=tmpfilename,form='formatted',status='new')
+   if (open_file(tmpfilename,message,unit=ab_out,form="formatted",status="new",&
+     &              action="write") /= 0) then
+     MSG_ERROR(message)
+   end if
+!   call open_file(unit=ab_out,file=tmpfilename,form='formatted',status='new')
    rewind (unit=ab_out)
    call herald(codename,abinit_version,ab_out)
 !  Print the number of cpus in output

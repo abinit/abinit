@@ -238,7 +238,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine crystal_init(Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
+subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
 & zion,znucl,timrev,use_antiferro,remove_inv,title,&
 & symrel,tnons,symafm) ! Optional
 
@@ -261,7 +261,7 @@ subroutine crystal_init(Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xr
 !arrays
  integer,intent(in) :: typat(natom)
  integer,optional,intent(in) :: symrel(3,3,nsym),symafm(nsym)
- real(dp),intent(in) :: xred(3,natom),rprimd(3,3),zion(ntypat),znucl(npsp)
+ real(dp),intent(in) :: amu(ntypat),xred(3,natom),rprimd(3,3),zion(ntypat),znucl(npsp)
  real(dp),optional,intent(in) :: tnons(3,nsym)
  character(len=*),intent(in) :: title(ntypat)
 
@@ -304,6 +304,7 @@ subroutine crystal_init(Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xr
  ABI_MALLOC(Cryst%znucl,(npsp))
  ABI_MALLOC(Cryst%amu, (ntypat))
 
+ Cryst%amu   = amu
  Cryst%typat = typat 
  Cryst%xred  = xred 
  Cryst%zion  = zion

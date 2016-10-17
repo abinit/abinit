@@ -108,7 +108,7 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,nrpt,&
  type(anharmonics_terms_type), intent(out) :: anharmonics_terms
  real(dp),optional,intent(in) :: internal_strain(6,6,natom,3)
  real(dp),optional,intent(in) :: elastics(6,6,6)
- type(ifc_type) :: phonon_strain(6)
+ type(ifc_type),intent(in) :: phonon_strain(6)
 !arrays
 !Local variables-------------------------------
 !scalar

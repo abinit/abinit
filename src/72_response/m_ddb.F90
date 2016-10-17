@@ -3458,7 +3458,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,Crystal,comm,prtvo
  end do
 
 !Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
- call crystal_init(Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
+ call crystal_init(ddb%amu,Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
 &  zion,znucl,timrev,use_antiferro,.FALSE.,title,&
 &  symrel=symrel,tnons=tnons,symafm=symafm) 
 
