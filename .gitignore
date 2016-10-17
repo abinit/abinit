@@ -413,4 +413,7 @@ tests/testbot.cfg
 tests/testbot_summary.json
 tests/testbot_summary.shelve
 !.gitkeep
-src/98_main/*dSYM/
+src/*/*dSYM/
+src/*/*log
+src/*/test_*
+!tests_*F90
