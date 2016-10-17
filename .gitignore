@@ -400,7 +400,6 @@ m_paw_atom.F90_OK
 42_libpaw/m_paw_finegrid.F90_OK
 m_paw_finegrid.F90_O
 m_paw_finegrid.F90_OK
-build1
 src/tags
 build2-debug-s
 .prev_run.pickle
@@ -417,3 +416,5 @@ src/*/*dSYM/
 src/*/*log
 src/*/test_*
 !tests_*F90
+build1
+build2
