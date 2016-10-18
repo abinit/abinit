@@ -96,8 +96,8 @@
 !!   The string passed to fftdatar_write (first argument) gives the name used to store the data in the netcdf file
 !!   The function  varname_from_fname defined in the module m_hdr.F90 gives the mapping between the Abinit
 !!   file extension and the netcdf name e.g. foo_VHXC.nc --> vxc
-!!   This function is used in cut3d so that we can immediately select the data to analyze without having 
-!!   to prompt the user. Remember to update varname_from_fname if you add a new file or if you change the 
+!!   This function is used in cut3d so that we can immediately select the data to analyze without having
+!!   to prompt the user. Remember to update varname_from_fname if you add a new file or if you change the
 !!   name of the variable.
 !!
 !! PARENTS
@@ -243,10 +243,10 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer :: prtdosm,mbesslang,me,my_natom_tmp,ndosfraction
  integer :: occopt,partial_dos_flag,paw_dos_flag,pawfatbnd
  integer :: prtdos,prtnabla
- integer :: pawprtden  
+ integer :: pawprtden
  integer :: iband,nocc,spacecomm,comm_fft,tmp_unt,nfft_tot
 #ifdef HAVE_NETCDF
- integer :: ncid 
+ integer :: ncid
 #endif
  real(dp) :: norm,occ_norm,unocc_norm
  real(dp) :: rate_dum,rate_dum2
@@ -1163,7 +1163,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  ! BoltzTraP output files in GENEric format
  if (dtset%prtbltztrp == 1 .and. me==0) then
    call ebands_prtbltztrp(ebands, crystal, dtfil%filnam_ds(4))
- end if 
+ end if
 
 #if 0
  ! Gaussian
@@ -1177,7 +1177,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  call skw_init(skw, crystal, 1, bands%mband, bands%nkpt, bands%nsppol, bands%kptns, bands%eig)
  call skw_free(skw)
-#endif 
+#endif
 
  call crystal_free(crystal)
  call ebands_free(ebands)

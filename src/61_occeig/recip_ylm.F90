@@ -21,7 +21,7 @@
 !!  istwfk= storage mode of cgcband
 !!  mlang=maximum angular momentum
 !!  mpi_enreg=information about MPI parallelization
-!!  natsph=number of atoms around which ang mom projection has to be done 
+!!  natsph=number of atoms around which ang mom projection has to be done
 !!  npw_k=number of plane waves for kpt
 !!  nradint(natsph)=number of points on radial real-space grid for a given atom
 !!  nradintmax=dimension of rint array
@@ -90,7 +90,7 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
 
 !Local variables-------------------------------
 !scalars
- integer :: illmm, iat, ipw, ixint, ll, mm, option
+ integer :: illmm, iat, ipw, ixint, ll, mm, option, spaceComm
  real(dp) :: doti, dotr
  real(dp) :: sum_all, integ
  real(dp) :: dr, llsign1, llsign2
@@ -118,6 +118,7 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
 
 !option for dotprod_g
  option=2
+ spaceComm=mpi_enreg%comm_bandfft
 
  ABI_ALLOCATE(rint2, (nradintmax))
  do ixint = 1, nradintmax
@@ -181,7 +182,7 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
 
 !    tmppsim = temporary arrays for part of psi which doesnt depend on ixint
 !    Take into account the fact that ylm are REAL spherical harmonics, see initylmg.f
-!    
+!
 !    For time-reversal states, detailed treatment show that only the real or imaginary
 !    part of tmppsia is needed here, depending on l being even or odd: only one of the coef is 1, the other 0
      do ipw=1,npw_k
@@ -199,7 +200,7 @@ subroutine recip_ylm (bess_fit,cgcband,istwfk,&
      integ = zero
      do ixint = 1, nradint(iat)
        vect(1, 1:npw_k) = bess_fit(1:npw_k, ixint, ilang(illmm))
-       call dotprod_g(dotr, doti, istwfk, npw_k, option, vect, tmppsim, mpi_enreg%me_g0, mpi_enreg%comm_fft)
+       call dotprod_g(dotr, doti, istwfk, npw_k, option, vect, tmppsim, mpi_enreg%me_g0, spaceComm)
 
 !      Multiply by r**2 and take norm, integrate
 !      MJV 5.5.2012 removed call to simpson_int - just need last value, no need to allocate full space for primitive and integrand

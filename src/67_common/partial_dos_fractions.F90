@@ -157,10 +157,9 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
 
 !initialize parallelism
  spaceComm_kpt=mpi_enreg%comm_kpt
- me_kpt=mpi_enreg%me_kpt
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+ me_kpt=mpi_enreg%me_kpt
 
- mcg_1kpt=dtset%mpw*my_nspinor*dtset%mband
 
 !##############################################################
 !FIRST CASE : project on angular momenta to get dos parts
@@ -286,7 +285,7 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
    kpgnorm (:) = zero
    ioffkg=0 ; ioffylm=0
    do ikpt = 1, dtset%nkpt
-     if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,1,-1,me_kpt)) cycle
+     if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,dtset%nband(ikpt),-1,me_kpt)) cycle
      npw_k = npwarr(ikpt)
      kg_k(:,1:npw_k) = kg(:,ioffkg+1:ioffkg+npw_k)
      call getkpgnorm(gprimd,dtset%kpt(:,ikpt),kg_k(:,1:npw_k),kpgnorm(ioffylm+1:ioffylm+dtset%mpw),npw_k)
@@ -294,6 +293,7 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
      ioffylm=ioffylm+npw_k
    end do !ikpt
 
+   mcg_1kpt=dtset%mpw*my_nspinor*dtset%mband
    ABI_ALLOCATE(cg_1kpt,(2,mcg_1kpt))
    cgshift = 0
 
@@ -444,6 +444,10 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
    ABI_DEALLOCATE(znucl_sph)
 
 
+!##############################################################
+!2ND CASE : project on spinors
+!##############################################################
+
  else if (partial_dos == 2) then
 
    if (dtset%nsppol /= 1 .or. dtset%nspinor /= 2) then
@@ -467,6 +471,7 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
 &   dtset%mkmem,dtset%nband,dtset%nkpt,&
 &   mode_paral,mpi_enreg,dtset%mpw,npwarr,npwtot,dtset%nsppol)
 
+   mcg_1kpt=dtset%mpw*my_nspinor*dtset%mband
    ABI_ALLOCATE(cg_1kpt,(2,mcg_1kpt))
 
    cgshift = 0
