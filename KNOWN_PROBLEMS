@@ -6,7 +6,7 @@ at the time a version of ABINIT is released.
 Note that bugs discovered later than the
 release are NOT described here...
 
-The present release 8.1.5 is a development version.
+The present release 8.1.6 is a development version.
 
 0. List of platforms
 1. Batteries of tests
@@ -15,7 +15,7 @@ The present release 8.1.5 is a development version.
 ================================================================
 0. Platforms
 
-For version 8.1.5, list closed on 2016 10 10
+For version 8.1.6, list closed on 2016 11 XX
 (Here, file modified to examine working mode on gonze/develop branch)
 after installation and successful tests for the standard set of platforms,
 as mentioned on 
