@@ -923,6 +923,15 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
      end if
    end do
 
+!  DEALLOCATION OF ARRAYS
+   ABI_DEALLOCATE(my_index_rpt)
+   ABI_DEALLOCATE(my_irpt)
+   ABI_DEALLOCATE(xred_tmp)
+   ABI_DEALLOCATE(xred)
+   ABI_DEALLOCATE(zeff_tmp)
+   ABI_DEALLOCATE(dyew)
+   ABI_DEALLOCATE(dyewq0)
+
 !  Set the bufsize for mpi allgather
    do ii = 1,nproc
      bufsize(ii) = aint(real(ifc_tmp%nrpt,sp)/nproc)*2*3*eff_pot%crystal%natom*3*eff_pot%crystal%natom
@@ -937,7 +946,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    end do
 
    size = 2*3*eff_pot%crystal%natom*3*eff_pot%crystal%natom*my_nrpt
-   call xmpi_gatherv(buff_ewald,size,ifc_tmp%ewald_atmfrc,bufsize,bufdisp,master, comm, ierr)
+   call xmpi_allgatherv(buff_ewald,size,ifc_tmp%ewald_atmfrc,bufsize,bufdisp, comm, ierr)
 
    ABI_DEALLOCATE(bufsize)
    ABI_DEALLOCATE(bufdisp)
@@ -956,30 +965,18 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
          end if
        end do
      end do
-!    Compute total ifc
-     ifc_tmp%atmfrc = ifc_tmp%short_atmfrc + ifc_tmp%ewald_atmfrc
    end if
 
-!  DEALLOCATION OF ARRAYS
-   ABI_DEALLOCATE(my_index_rpt)
-   ABI_DEALLOCATE(my_irpt)
-   ABI_DEALLOCATE(xred_tmp)
-   ABI_DEALLOCATE(xred)
-   ABI_DEALLOCATE(zeff_tmp)
-   ABI_DEALLOCATE(dyew)
-   ABI_DEALLOCATE(dyewq0)
-
-!  Broadcast ifc
-   call xmpi_bcast (ifc_tmp%atmfrc,       master, comm, ierr)
    call xmpi_bcast (ifc_tmp%short_atmfrc, master, comm, ierr)
-   call xmpi_bcast (ifc_tmp%ewald_atmfrc, master, comm, ierr)
-   call xmpi_bcast (ifc_tmp%cell,         master, comm, ierr)
-   call xmpi_bcast (ifc_tmp%nrpt,         master, comm, ierr)
-   
+
+!  Compute total ifc
+   ifc_tmp%atmfrc = ifc_tmp%short_atmfrc + ifc_tmp%ewald_atmfrc
+
 !  Copy ifc into effective potential
-!  !!!Warning eff_pot%harmonics_terms%ifcs only contains atmfrc,short_atmfrc,ewald_atmfrc,,nrpt and cell!
-!   rcan,ifc%rpt,wghatm and other quantities 
-!   are not needed for effective potential!!!
+!  !!!Warning eff_pot%harmonics_terms%ifcs only contains atmfrc,short_atmfrc,ewald_atmfrc,,nrpt 
+!    and cell!
+!    rcan,ifc%rpt,wghatm and other quantities 
+!    are not needed for effective potential!!!
 !  Free ifc before copy
    call ifc_free(eff_pot%harmonics_terms%ifcs)
 !  Fill the effective potential with new atmfr

@@ -12,6 +12,7 @@
 !! crystal  = number of atoms in primitive cell
 !! ddb  = number of type of atoms
 !! inp  = input of multibinit
+!! comm=MPI communicator
 !! OUTPUT
 !! effective_potantial = effective_potential structure to be initialized
 !!
@@ -29,7 +30,7 @@
 
 #include "abi_common.h"
 
-subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
+subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
 
  use defs_basis
  use m_errors
@@ -58,16 +59,20 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
 
 !Arguments ------------------------------------
 !scalars
+ integer,intent(in) :: comm
+!arrays
  type(ddb_type),intent(inout) :: ddb
  type(effective_potential_type), intent(inout) :: effective_potential
  type(crystal_t),intent(in) :: crystal
  type(multibinit_dataset_type),intent(in) :: inp
-!arrays
 
 !Local variables-------------------------------
 !scalar
  integer :: chneut,ia,ib,iblok,idir1,idir2,ii,ipert1,iphl1
  integer :: ipert2,irpt,ivarA,ivarB,msize,mpert,natom,nblok,rftyp,selectz
+ integer :: my_rank,nproc
+ logical :: iam_master=.FALSE.
+ integer,parameter :: master=0
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp):: dielt(3,3),elast_clamped(6,6),fact
@@ -79,6 +84,10 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp)
  real(dp),allocatable :: d2cart(:,:,:,:,:),displ(:)
  real(dp),allocatable :: eigval(:,:),eigvec(:,:,:,:,:),phfrq(:)
 ! *************************************************************************
+
+!0 MPI variables
+ nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ iam_master = (my_rank == master)
 
 !Free the eff_pot before filling
  call effective_potential_free(effective_potential)

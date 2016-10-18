@@ -1456,7 +1456,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm)
       call bigbx9(inp%brav,dummy_cell,0,1,inp%ngqpt,inp%nqshft,nrpt,ddb%rprim,dummy_rpt)
 
 !     Transfert the ddb to the effective potential
-      call ddb_to_effective_potential(Crystal,ddb, eff_pot,inp)
+      call ddb_to_effective_potential(Crystal,ddb, eff_pot,inp,comm)
 
 !     If needed, print the effective potential into XML file
       if (inp%prt_effpot>=3.or.inp%prt_effpot==-1) then

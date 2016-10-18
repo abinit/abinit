@@ -3924,11 +3924,15 @@ subroutine cell9(atmfrc,brav,cell,gprim,natom,nrpt,rcan,rpt,wghatm,xred)
 !arrays
  integer  :: shift(3)
  real(dp) :: cell2(3),red(3,3)
- real(dp) :: atmfrc_tmp(2,3,natom,3,natom,nrpt),wghatm_tmp(natom,natom,nrpt)
+ real(dp),allocatable :: atmfrc_tmp(:,:,:,:,:,:),wghatm_tmp(:,:,:)
 
 ! *********************************************************************
 
- atmfrc_tmp = zero
+ ABI_ALLOCATE(atmfrc_tmp,(2,3,natom,3,natom,nrpt))
+ ABI_ALLOCATE(wghatm_tmp,(natom,natom,nrpt))
+
+ wghatm_tmp(:,:,:) = zero
+ atmfrc_tmp(:,:,:,:,:,:) = zero
 
 !Begin the big loop on ia and ib
  do ia=1,natom
@@ -3967,8 +3971,14 @@ subroutine cell9(atmfrc,brav,cell,gprim,natom,nrpt,rcan,rpt,wghatm,xred)
    end do
  end do
 
- atmfrc = atmfrc_tmp
- wghatm = wghatm_tmp
+ atmfrc(:,:,:,:,:,:) = zero
+ wghatm(:,:,:)       = zero
+
+ atmfrc(:,:,:,:,:,:) = atmfrc_tmp(:,:,:,:,:,:)
+ wghatm(:,:,:) = wghatm_tmp(:,:,:)
+
+ ABI_DEALLOCATE(atmfrc_tmp)
+ ABI_DEALLOCATE(wghatm_tmp)
 
 end subroutine cell9
 !!***
