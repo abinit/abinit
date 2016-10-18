@@ -1,5 +1,5 @@
 
-.Version 8.1.5 of ABINIT 
+.Version 8.1.6 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
 
 .Copyright (C) 1998-2016 ABINIT group . 
@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Thu 13 Oct 2016.
-- ( at 13h54 )
+.Starting date : Tue 18 Oct 2016.
+- ( at 17h02 )
   
 - input  file    -> t95.in
-- output file    -> t95_MPI1.out
-- root for input  files -> t95_MPI1i
-- root for output files -> t95_MPI1o
+- output file    -> t95_MPI4.out
+- root for input  files -> t95_MPI4i
+- root for output files -> t95_MPI4o
 
 
  DATASET    1 : space group P6_3 m c (#186); Bravais hP (primitive hexag.)
@@ -949,7 +949,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     425.000     424.823
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.16976
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t95_MPI1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t95_MPI4o_DS1_WFK
 - newkpt: read input wf with ikpt,npw=   1     404, make ikpt,npw=   1     404
 - newkpt: read input wf with ikpt,npw=   2     432, make ikpt,npw=   2     432
 
@@ -970,7 +970,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     425.000     424.823
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t95_MPI1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t95_MPI4o_DS1_WFK
 - newkpt: read input wf with ikpt,npw=   1     404, make ikpt,npw=   1     404
 - newkpt: read input wf with ikpt,npw=   2     432, make ikpt,npw=   2     432
 --------------------------------------------------------------------------------
@@ -1087,7 +1087,7 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   8 by node    3
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t95_MPI1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t95_MPI4o_DS1_WFK
 - newkpt: read input wf with ikpt,npw=   1     404, make ikpt,npw=   1     404
 - newkpt: read input wf with ikpt,npw=   2     432, make ikpt,npw=   2     432
 --------------------------------------------------------------------------------
@@ -1204,7 +1204,7 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   8 by node    3
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t95_MPI1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t95_MPI4o_DS1_WFK
 - newkpt: read input wf with ikpt,npw=   1     404, make ikpt,npw=   1     404
 - newkpt: read input wf with ikpt,npw=   2     432, make ikpt,npw=   2     432
 --------------------------------------------------------------------------------
@@ -1351,12 +1351,12 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   8 by node    3
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.16976
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t95_MPI1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t95_MPI4o_DS1_WFK
 - newkpt: read input wf with ikpt,npw=   1     404, make ikpt,npw=   1     404
 - newkpt: read input wf with ikpt,npw=   2     432, make ikpt,npw=   2     432
--open ddk wf file :t95_MPI1o_DS2_1WF13
--open ddk wf file :t95_MPI1o_DS2_1WF14
--open ddk wf file :t95_MPI1o_DS2_1WF15
+-open ddk wf file :t95_MPI4o_DS2_1WF13
+-open ddk wf file :t95_MPI4o_DS2_1WF14
+-open ddk wf file :t95_MPI4o_DS2_1WF15
  symkchk : k-point set has full space-group symmetry.
 
  ==>  initialize data related to q vector <== 
@@ -1431,7 +1431,7 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   8 by node    3
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t95_MPI1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t95_MPI4o_DS1_WFK
 - newkpt: read input wf with ikpt,npw=   1     404, make ikpt,npw=   1     404
 --------------------------------------------------------------------------------
 
@@ -1467,9 +1467,9 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   4 by node    3
  ETOT 10   5.9174601697470     -2.062E-12 7.440E-16 2.108E-11
 
  At SCF step   10       vres2   =  2.11E-11 < tolvrs=  1.00E-10 =>converged.
--open ddk wf file :t95_MPI1o_DS2_1WF13
--open ddk wf file :t95_MPI1o_DS2_1WF14
--open ddk wf file :t95_MPI1o_DS2_1WF15
+-open ddk wf file :t95_MPI4o_DS2_1WF13
+-open ddk wf file :t95_MPI4o_DS2_1WF14
+-open ddk wf file :t95_MPI4o_DS2_1WF15
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1520,7 +1520,7 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   4 by node    3
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t95_MPI1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t95_MPI4o_DS1_WFK
 P newkpt: treating      5 bands with npw=     404 for ikpt=   1 by node    1
 P newkpt: treating      5 bands with npw=     432 for ikpt=   2 by node    3
 --------------------------------------------------------------------------------
@@ -1563,9 +1563,9 @@ P newkpt: treating      5 bands with npw=     432 for ikpt=   2 by node    3
  ETOT 14   16.275642993597      1.767E-11 1.631E-16 4.861E-11
 
  At SCF step   14       vres2   =  4.86E-11 < tolvrs=  1.00E-10 =>converged.
--open ddk wf file :t95_MPI1o_DS2_1WF15
--open ddk wf file :t95_MPI1o_DS2_1WF14
--open ddk wf file :t95_MPI1o_DS2_1WF13
+-open ddk wf file :t95_MPI4o_DS2_1WF15
+-open ddk wf file :t95_MPI4o_DS2_1WF14
+-open ddk wf file :t95_MPI4o_DS2_1WF13
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1610,7 +1610,7 @@ P newkpt: treating      5 bands with npw=     432 for ikpt=   2 by node    3
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t95_MPI1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t95_MPI4o_DS1_WFK
 - newkpt: read input wf with ikpt,npw=   1     404, make ikpt,npw=   1     404
 --------------------------------------------------------------------------------
 
@@ -1648,9 +1648,9 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   4 by node    3
  ETOT 11   5.0137161436077     -1.364E-12 1.381E-16 4.342E-12
 
  At SCF step   11       vres2   =  4.34E-12 < tolvrs=  1.00E-10 =>converged.
--open ddk wf file :t95_MPI1o_DS2_1WF13
--open ddk wf file :t95_MPI1o_DS2_1WF14
--open ddk wf file :t95_MPI1o_DS2_1WF15
+-open ddk wf file :t95_MPI4o_DS2_1WF13
+-open ddk wf file :t95_MPI4o_DS2_1WF14
+-open ddk wf file :t95_MPI4o_DS2_1WF15
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1701,7 +1701,7 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   4 by node    3
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t95_MPI1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t95_MPI4o_DS1_WFK
 P newkpt: treating      5 bands with npw=     404 for ikpt=   1 by node    1
 P newkpt: treating      5 bands with npw=     432 for ikpt=   2 by node    3
 --------------------------------------------------------------------------------
@@ -1746,9 +1746,9 @@ P newkpt: treating      5 bands with npw=     432 for ikpt=   2 by node    3
  ETOT 15   14.950408315937      1.086E-11 5.726E-17 3.288E-11
 
  At SCF step   15       vres2   =  3.29E-11 < tolvrs=  1.00E-10 =>converged.
--open ddk wf file :t95_MPI1o_DS2_1WF15
--open ddk wf file :t95_MPI1o_DS2_1WF14
--open ddk wf file :t95_MPI1o_DS2_1WF13
+-open ddk wf file :t95_MPI4o_DS2_1WF15
+-open ddk wf file :t95_MPI4o_DS2_1WF14
+-open ddk wf file :t95_MPI4o_DS2_1WF13
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1792,7 +1792,7 @@ P newkpt: treating      5 bands with npw=     432 for ikpt=   2 by node    3
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t95_MPI1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t95_MPI4o_DS1_WFK
 - newkpt: read input wf with ikpt,npw=   1     404, make ikpt,npw=   1     404
 - newkpt: read input wf with ikpt,npw=   2     432, make ikpt,npw=   2     432
 --------------------------------------------------------------------------------
@@ -1809,7 +1809,7 @@ P newkpt: treating     10 bands with npw=     404 for ikpt=   5 by node    2
 P newkpt: treating     10 bands with npw=     432 for ikpt=   6 by node    2
 P newkpt: treating     10 bands with npw=     432 for ikpt=   7 by node    3
 P newkpt: treating     10 bands with npw=     432 for ikpt=   8 by node    3
--dfpt_looppert : read the wavefunctions from file: t95_MPI1o_DS2_1WF13
+-dfpt_looppert : read the wavefunctions from file: t95_MPI4o_DS2_1WF13
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
@@ -1838,9 +1838,9 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   8 by node    3
  ETOT 12  -1110.9911414545      2.296E-11 2.849E-16 5.920E-11
 
  At SCF step   12       vres2   =  5.92E-11 < tolvrs=  1.00E-10 =>converged.
--open ddk wf file :t95_MPI1o_DS2_1WF13
--open ddk wf file :t95_MPI1o_DS2_1WF14
--open ddk wf file :t95_MPI1o_DS2_1WF15
+-open ddk wf file :t95_MPI4o_DS2_1WF13
+-open ddk wf file :t95_MPI4o_DS2_1WF14
+-open ddk wf file :t95_MPI4o_DS2_1WF15
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1893,7 +1893,7 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   8 by node    3
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t95_MPI1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t95_MPI4o_DS1_WFK
 - newkpt: read input wf with ikpt,npw=   1     404, make ikpt,npw=   1     404
 - newkpt: read input wf with ikpt,npw=   2     432, make ikpt,npw=   2     432
 --------------------------------------------------------------------------------
@@ -1910,7 +1910,7 @@ P newkpt: treating     10 bands with npw=     404 for ikpt=   5 by node    2
 P newkpt: treating     10 bands with npw=     432 for ikpt=   6 by node    2
 P newkpt: treating     10 bands with npw=     432 for ikpt=   7 by node    3
 P newkpt: treating     10 bands with npw=     432 for ikpt=   8 by node    3
--dfpt_looppert : read the wavefunctions from file: t95_MPI1o_DS2_1WF15
+-dfpt_looppert : read the wavefunctions from file: t95_MPI4o_DS2_1WF15
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
@@ -1937,9 +1937,9 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   8 by node    3
  ETOT 11  -92.871696317723      5.349E-11 2.700E-16 4.261E-11
 
  At SCF step   11       vres2   =  4.26E-11 < tolvrs=  1.00E-10 =>converged.
--open ddk wf file :t95_MPI1o_DS2_1WF15
--open ddk wf file :t95_MPI1o_DS2_1WF14
--open ddk wf file :t95_MPI1o_DS2_1WF13
+-open ddk wf file :t95_MPI4o_DS2_1WF15
+-open ddk wf file :t95_MPI4o_DS2_1WF14
+-open ddk wf file :t95_MPI4o_DS2_1WF13
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1992,7 +1992,7 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   8 by node    3
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t95_MPI1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t95_MPI4o_DS1_WFK
 - newkpt: read input wf with ikpt,npw=   1     404, make ikpt,npw=   1     404
 --------------------------------------------------------------------------------
 
@@ -2031,9 +2031,9 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   3 by node    2
  ETOT 12   3.8489920804319     -1.013E-13 2.568E-16 8.001E-12
 
  At SCF step   12       vres2   =  8.00E-12 < tolvrs=  1.00E-10 =>converged.
--open ddk wf file :t95_MPI1o_DS2_1WF13
--open ddk wf file :t95_MPI1o_DS2_1WF14
--open ddk wf file :t95_MPI1o_DS2_1WF15
+-open ddk wf file :t95_MPI4o_DS2_1WF13
+-open ddk wf file :t95_MPI4o_DS2_1WF14
+-open ddk wf file :t95_MPI4o_DS2_1WF15
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -2082,7 +2082,7 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   3 by node    2
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t95_MPI1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t95_MPI4o_DS1_WFK
 - newkpt: read input wf with ikpt,npw=   1     404, make ikpt,npw=   1     404
 --------------------------------------------------------------------------------
 
@@ -2121,9 +2121,9 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   3 by node    2
  ETOT 12   3.8489920779108      7.105E-15 3.077E-16 7.840E-12
 
  At SCF step   12       vres2   =  7.84E-12 < tolvrs=  1.00E-10 =>converged.
--open ddk wf file :t95_MPI1o_DS2_1WF14
--open ddk wf file :t95_MPI1o_DS2_1WF13
--open ddk wf file :t95_MPI1o_DS2_1WF15
+-open ddk wf file :t95_MPI4o_DS2_1WF14
+-open ddk wf file :t95_MPI4o_DS2_1WF13
+-open ddk wf file :t95_MPI4o_DS2_1WF15
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -2172,7 +2172,7 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   3 by node    2
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t95_MPI1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t95_MPI4o_DS1_WFK
 P newkpt: treating      5 bands with npw=     404 for ikpt=   1 by node    1
 P newkpt: treating      5 bands with npw=     432 for ikpt=   2 by node    3
 --------------------------------------------------------------------------------
@@ -2211,9 +2211,9 @@ P newkpt: treating      5 bands with npw=     432 for ikpt=   2 by node    3
  ETOT 12   3.4104608427580      4.629E-12 6.410E-17 2.900E-12
 
  At SCF step   12       vres2   =  2.90E-12 < tolvrs=  1.00E-10 =>converged.
--open ddk wf file :t95_MPI1o_DS2_1WF15
--open ddk wf file :t95_MPI1o_DS2_1WF14
--open ddk wf file :t95_MPI1o_DS2_1WF13
+-open ddk wf file :t95_MPI4o_DS2_1WF15
+-open ddk wf file :t95_MPI4o_DS2_1WF14
+-open ddk wf file :t95_MPI4o_DS2_1WF13
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -2259,7 +2259,7 @@ P newkpt: treating      5 bands with npw=     432 for ikpt=   2 by node    3
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t95_MPI1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t95_MPI4o_DS1_WFK
 - newkpt: read input wf with ikpt,npw=   1     404, make ikpt,npw=   1     404
 --------------------------------------------------------------------------------
 
@@ -2294,9 +2294,9 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   3 by node    2
  ETOT 10  0.71003506756185     -3.411E-13 2.046E-16 4.369E-12
 
  At SCF step   10       vres2   =  4.37E-12 < tolvrs=  1.00E-10 =>converged.
--open ddk wf file :t95_MPI1o_DS2_1WF13
--open ddk wf file :t95_MPI1o_DS2_1WF14
--open ddk wf file :t95_MPI1o_DS2_1WF15
+-open ddk wf file :t95_MPI4o_DS2_1WF13
+-open ddk wf file :t95_MPI4o_DS2_1WF14
+-open ddk wf file :t95_MPI4o_DS2_1WF15
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -2345,7 +2345,7 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   3 by node    2
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t95_MPI1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t95_MPI4o_DS1_WFK
 - newkpt: read input wf with ikpt,npw=   1     404, make ikpt,npw=   1     404
 --------------------------------------------------------------------------------
 
@@ -2380,9 +2380,9 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   3 by node    2
  ETOT 10  0.71002297889878     -6.990E-13 3.333E-16 2.415E-11
 
  At SCF step   10       vres2   =  2.42E-11 < tolvrs=  1.00E-10 =>converged.
--open ddk wf file :t95_MPI1o_DS2_1WF14
--open ddk wf file :t95_MPI1o_DS2_1WF13
--open ddk wf file :t95_MPI1o_DS2_1WF15
+-open ddk wf file :t95_MPI4o_DS2_1WF14
+-open ddk wf file :t95_MPI4o_DS2_1WF13
+-open ddk wf file :t95_MPI4o_DS2_1WF15
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -2431,7 +2431,7 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   3 by node    2
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t95_MPI1o_DS1_WFK
+-inwffil : will read wavefunctions from disk file t95_MPI4o_DS1_WFK
 - newkpt: read input wf with ikpt,npw=   1     404, make ikpt,npw=   1     404
 --------------------------------------------------------------------------------
 
@@ -2467,9 +2467,9 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   4 by node    3
  ETOT 10   1.4987596876200     -2.249E-11 8.137E-15 7.182E-11
 
  At SCF step   10       vres2   =  7.18E-11 < tolvrs=  1.00E-10 =>converged.
--open ddk wf file :t95_MPI1o_DS2_1WF15
--open ddk wf file :t95_MPI1o_DS2_1WF14
--open ddk wf file :t95_MPI1o_DS2_1WF13
+-open ddk wf file :t95_MPI4o_DS2_1WF15
+-open ddk wf file :t95_MPI4o_DS2_1WF14
+-open ddk wf file :t95_MPI4o_DS2_1WF13
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -6635,10 +6635,10 @@ P          mk1mem3          2
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=         14.1  wall=         14.2
+- Proc.   0 individual time (sec): cpu=         12.4  wall=         12.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         56.6  wall=         56.6
++Overall time at end (sec) : cpu=         49.7  wall=         49.7

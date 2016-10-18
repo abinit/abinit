@@ -1,5 +1,5 @@
 
-.Version 8.1.5 of ABINIT 
+.Version 8.1.6 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
 
 .Copyright (C) 1998-2016 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Thu 13 Oct 2016.
-- ( at 13h44 )
+.Starting date : Tue 18 Oct 2016.
+- ( at 16h56 )
   
 - input  file    -> t95.in
 - output file    -> t95_MPI1.out
@@ -6691,10 +6691,10 @@ P          mk1mem3          8
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=         31.0  wall=         31.1
+- Proc.   0 individual time (sec): cpu=         29.4  wall=         29.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  47 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         31.0  wall=         31.1
++Overall time at end (sec) : cpu=         29.4  wall=         29.4

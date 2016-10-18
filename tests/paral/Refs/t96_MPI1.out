@@ -1,5 +1,5 @@
 
-.Version 8.1.5 of MULTIBINIT 
+.Version 8.1.6 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
 
 .Copyright (C) 1998-2016 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Thu 13 Oct 2016.
-- ( at 14h13 )
+.Starting date : Tue 18 Oct 2016.
+- ( at 16h57 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/alex/Desktop/dev/abinit/abinit_git_dev/build/tests/Test_suite/paral_t95_MPI1-t96_MPI1-t97_MPI1/t95_MPI1o_DS3_DDB
+-/home/alex/Desktop/dev/abinit/abinit_git_dev/build/tests/Test_suite/paral_t95_MPI1-t96_MPI1-t97_MPI1-t98_MPI1/t95_MPI1o_DS3_DDB
  to initialize the multibinit input
 
 ================================================================================
@@ -1199,6 +1199,6 @@
 
 ================================================================================
 
-+Total cpu time      1.904  and wall time      1.905 sec
++Total cpu time      1.896  and wall time      1.894 sec
 
  multibinit : the run completed succesfully.

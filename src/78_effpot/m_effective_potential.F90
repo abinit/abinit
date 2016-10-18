@@ -628,7 +628,8 @@ end subroutine effective_potential_freempi_supercell
 !!   effective_potential_file_read
 !!
 !! CHILDREN
-!!   alloc_copy,copy_supercell,destroy_supercell,ewald9,effective_potential_initmpi_supercell,find_bound
+!!   alloc_copy,copy_supercell,destroy_supercell,ewald9,
+!!   effective_potential_initmpi_supercell,find_bound,
 !!   find_bound  init_supercell,matr3inv,metric,xcart2xred,xmpi_gatherv,wrtout
 !!
 !! SOURCE
@@ -973,9 +974,8 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    ifc_tmp%atmfrc = ifc_tmp%short_atmfrc + ifc_tmp%ewald_atmfrc
 
 !  Copy ifc into effective potential
-!  !!!Warning eff_pot%harmonics_terms%ifcs only contains atmfrc,short_atmfrc,ewald_atmfrc,,nrpt 
-!    and cell!
-!    rcan,ifc%rpt,wghatm and other quantities 
+!  !!!Warning eff_pot%harmonics_terms%ifcs only contains atmfrc,short_atmfrc,ewald_atmfrc,nrpt 
+!    and cell!!  rcan,ifc%rpt,wghatm and other quantities 
 !    are not needed for effective potential!!!
 !  Free ifc before copy
    call ifc_free(eff_pot%harmonics_terms%ifcs)
@@ -2981,6 +2981,7 @@ recursive subroutine index_periodic(index,n_cell)
   integer, intent(inout)  :: index
   integer, intent(inout) :: n_cell 
 !Local variables ---------------------------------------
+! *********************************************************************
 
   if (index < 0) then
     index = index + n_cell
@@ -2992,7 +2993,7 @@ recursive subroutine index_periodic(index,n_cell)
     end if
   end if
 
-! *********************************************************************
+
 end subroutine index_periodic
 !!***
 

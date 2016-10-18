@@ -3876,7 +3876,7 @@ end subroutine wght9
 !! FUNCTION
 !! ifc_init use canonical coordinates and cell(irpt,:) is not 
 !! more usable with reduced coordinates. This routine reordone
-!! the cell and the Weight  associated to the couple of atoms and the R vector
+!! the cell and the Weight associated to the couple of atoms and the R vector
 !! for reduced coordinates
 !!
 !! INPUTS
@@ -3920,11 +3920,14 @@ subroutine cell9(atmfrc,brav,cell,gprim,natom,nrpt,rcan,rpt,wghatm,xred)
  integer, intent(in) :: cell(3,nrpt)
 !Local variables -------------------------
 !scalars
- integer :: ia,ib,ii,irpt,irpt2
+ integer :: ia,ib,ii,irpt,irpt2,icount
+ integer :: min1,min2,min3,max1,max2,max3
 !arrays
+ integer :: cell_number(3),cell2(3)
  integer  :: shift(3)
- real(dp) :: cell2(3),red(3,3)
+ real(dp) :: red(3,3)
  real(dp),allocatable :: atmfrc_tmp(:,:,:,:,:,:),wghatm_tmp(:,:,:)
+ character(500) :: msg
 
 ! *********************************************************************
 
@@ -3932,7 +3935,15 @@ subroutine cell9(atmfrc,brav,cell,gprim,natom,nrpt,rcan,rpt,wghatm,xred)
  ABI_ALLOCATE(wghatm_tmp,(natom,natom,nrpt))
 
  wghatm_tmp(:,:,:) = zero
- atmfrc_tmp(:,:,:,:,:,:) = zero
+ atmfrc_tmp(:,:,:,:,:,:) =  zero
+
+!Set the maximum and the miminum for the bound of the cell
+ max1 = maxval(cell(1,:));  min1 = minval(cell(1,:))
+ max2 = maxval(cell(2,:));  min2 = minval(cell(2,:))
+ max3 = maxval(cell(3,:));  min3 = minval(cell(3,:))
+ cell_number(1) = max1 - min1 +1
+ cell_number(2) = max2 - min2 +1
+ cell_number(3) = max3 - min3 +1
 
 !Begin the big loop on ia and ib
  do ia=1,natom
@@ -3943,20 +3954,40 @@ subroutine cell9(atmfrc,brav,cell,gprim,natom,nrpt,rcan,rpt,wghatm,xred)
 !      In this case, it is better to work in reduced coordinates
 !      As rcan is in canonical coordinates, => multiplication by gprim
        do ii=1,3
-       red(1,ii)=  rcan(1,ia)*gprim(1,ii) +rcan(2,ia)*gprim(2,ii) +rcan(3,ia)*gprim(3,ii)
-       red(2,ii)=  rcan(1,ib)*gprim(1,ii) +rcan(2,ib)*gprim(2,ii) +rcan(3,ib)*gprim(3,ii)
+         red(1,ii)=  rcan(1,ia)*gprim(1,ii) +rcan(2,ia)*gprim(2,ii) +rcan(3,ia)*gprim(3,ii)
+         red(2,ii)=  rcan(1,ib)*gprim(1,ii) +rcan(2,ib)*gprim(2,ii) +rcan(3,ib)*gprim(3,ii)
        end do
      end if
 
      shift(:) = anint(red(2,:) - xred(:,ib)) - anint(red(1,:) - xred(:,ia))
-
+ 
+     icount = 0
      do irpt=1,nrpt
 !      Compute the difference vector
        if (brav==1) then
          do ii=1,3 
            red(3,ii)=  rpt(1,irpt)*gprim(1,ii) +rpt(2,irpt)*gprim(2,ii) +rpt(3,irpt)*gprim(3,ii)
          end do
-         cell2(:)= red(3,:) + shift(:)
+         cell2(:)= int(red(3,:) + shift(:))
+
+!         Use boundary condition to get the right cell
+          if (cell2(1) < min1 .and. cell2(1) < max1) then
+            cell2(1) = cell2(1) + cell_number(1)
+          else if (cell2(1) > min1 .and. cell2(1) > max1) then
+            cell2(1) = cell2(1) - cell_number(1)
+          end if
+
+          if (cell2(2) < min2 .and. cell2(2) < max2) then
+            cell2(2) = cell2(2) + cell_number(2)
+          else if (cell2(2) > min2 .and. cell2(2) > max2) then
+            cell2(2) = cell2(2) - cell_number(2)
+          end if
+
+          if (cell2(3) < min3 .and. cell2(3) < max3) then
+            cell2(3) = cell2(3) + cell_number(3)
+          else if (cell2(3) > min3 .and. cell2(3) > max3) then
+            cell2(3) = cell2(3) - cell_number(3)
+          end if
 
          do irpt2=1,nrpt
            if (cell(1,irpt2) == cell2(1)  .and.&
@@ -3964,10 +3995,16 @@ subroutine cell9(atmfrc,brav,cell,gprim,natom,nrpt,rcan,rpt,wghatm,xred)
                cell(3,irpt2) == cell2(3)) then
              wghatm_tmp(ia,ib,irpt2) =  wghatm(ia,ib,irpt)
              atmfrc_tmp(:,:,ia,:,ib,irpt2) = atmfrc(:,:,ia,:,ib,irpt)
+             icount = icount + 1
            end if
          end do
        end if
      end do
+!    Check if everything is fill
+     if (icount /= nrpt) then
+       write(msg,'(a,a)')' cell is missing in short range'
+       MSG_BUG(msg)
+     end if
    end do
  end do
 
