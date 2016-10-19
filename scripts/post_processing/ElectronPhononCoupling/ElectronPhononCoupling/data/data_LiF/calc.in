@@ -17,8 +17,10 @@
 # This means that the EIGR2D.nc files contain only the Sternheimer
 # contributions, while the active space contribution is contained
 # in the GKK.nc files.
+#
 # You can do a purely static calculation by setting ieig2rf=1,
-# in which case the EIGR2D.nc files contain the full contribution
+# then use calc_type=1 in the post processing scripts.
+# In this case, the EIGR2D.nc files contain the full contribution
 # to the eigenvalues renormalization, and the EIGI2D.nc files will be printed.
 # It is however less flexible than ieig2rf=5 and there is no advantage
 # to this approach.
@@ -152,6 +154,7 @@
  rfphon5    1
  iscf5      7
  tolvrs5    1e-10
+ nsym5      1
 
  # K-point grid without symmetries
  kptopt5    3
@@ -202,8 +205,9 @@
  # Procedure
  rfphon7    1
  ieig2rf7   5
- iscf7      7
- tolvrs7    1e-10
+#ieig2rf7   1      # Use this for a purely static calculation
+ iscf7     -2
+ tolwfr7    1e-10
 
  # K-point set without symmetries (does not need to be a grid)
  kptopt7    3
@@ -255,6 +259,7 @@
  rfphon9    1
  iscf9      7
  tolvrs9    1e-10
+ nsym9      1
 
  # K-point grid without symmetries
  kptopt9    3
@@ -305,8 +310,9 @@
  # Procedure
  rfphon11   1
  ieig2rf11  5
- iscf11     7
- tolvrs11   1e-10
+#ieig2rf11  1      # Use this for a purely static calculation
+ iscf11    -2
+ tolwfr11   1e-10
 
  # K-point set without symmetries (does not need to be a grid)
  kptopt11   3
@@ -358,6 +364,7 @@
  rfphon13   1
  iscf13     7
  tolvrs13   1e-10
+ nsym13     1
 
  # K-point grid without symmetries
  kptopt13   3
@@ -408,8 +415,9 @@
  # Procedure
  rfphon15   1
  ieig2rf15  5
- iscf15     7
- tolvrs15   1e-10
+#ieig2rf15  1      # Use this for a purely static calculation
+ iscf15    -2
+ tolwfr15   1e-10
 
  # K-point set without symmetries (does not need to be a grid)
  kptopt15   3
