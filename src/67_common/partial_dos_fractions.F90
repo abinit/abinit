@@ -90,6 +90,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
 #undef ABI_FUNC
 #define ABI_FUNC 'partial_dos_fractions'
  use interfaces_14_hidewrite
+ use interfaces_32_util
  use interfaces_51_manage_mpi
  use interfaces_56_recipspace
 !End of the abilint section
@@ -111,9 +112,9 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
 !scalars
  integer,parameter :: prtsphere0=0 ! do not output all the band by band details for projections.
  integer :: shift_b,shift_sk,iat,iatom,iband,ierr,ikpt,ilang,ioffkg,is1, is2, isoff
- integer :: ipw,ispinor,isppol,ixint,mbess,mcg_disk,me,shift_cg
+ integer :: ipw,ispinor,isppol,ixint,mbess,mcg_disk,me_kpt,shift_cg
  integer :: mgfft,my_nspinor,n1,n2,n3,natsph_tot,npw_k,nradintmax
- integer :: comm,rc_ylm,itypat,nband_k
+ integer :: comm_kpt,rc_ylm,itypat,nband_k
  real(dp),parameter :: bessint_delta = 0.1_dp
  real(dp) :: arg,bessarg,bessargmax,kpgmax,rmax
  real(dp) :: cpu,wall,gflops
@@ -158,15 +159,13 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
  ! Real or complex spherical harmonics?
  rc_ylm = 2; if (dos%prtdosm == 2) rc_ylm = 1
 
- comm = mpi_enreg%comm_cell
- if (mpi_enreg%paral_kgb==1) comm = mpi_enreg%comm_kpt
- me = mpi_enreg%me_kpt
+ comm_kpt = mpi_enreg%comm_kpt
+ me_kpt = mpi_enreg%me_kpt
+ my_nspinor = max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
 
  if (mpi_enreg%nproc_band /= 1) then
    MSG_ERROR("partial_dos_fractions does not support band parallelism")
  end if
- 
- my_nspinor = max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
 
  n1 = dtset%ngfft(1); n2 = dtset%ngfft(2); n3 = dtset%ngfft(3)
  mgfft = maxval(dtset%ngfft(1:3))
@@ -256,11 +255,10 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
    do isppol=1,dtset%nsppol
      ioffkg = 0
      do ikpt=1,dtset%nkpt
-       if (all(mpi_enreg%proc_distrb(ikpt,:,isppol) /= me)) cycle
-       kpoint(:) = dtset%kpt(:,ikpt)
-
        nband_k = dtset%nband((isppol-1)*dtset%nkpt + ikpt)
+       if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_kpt)) cycle
        npw_k = npwarr(ikpt)
+       kpoint(:) = dtset%kpt(:,ikpt)
 
        ! make phkred for all atoms
        do iat=1,natsph_tot
@@ -313,7 +311,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
 
        shift_b = 0
        do iband=1,nband_k
-         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= me) cycle
+         if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me_kpt)) cycle
          !write(std_out,*)"in band:",iband
 
          do ispinor=1,my_nspinor
@@ -351,7 +349,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
 
        ! Increment kpt and (spin, kpt) shifts
        ioffkg = ioffkg + npw_k
-       shift_sk = shift_sk + dtset%mband*my_nspinor*npw_k
+       shift_sk = shift_sk + nband_k*my_nspinor*npw_k
 
        ABI_FREE(kg_k)
        ABI_FREE(kpgnorm)
@@ -362,8 +360,8 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
 
    ! collect = 1 ==> gather all contributions from different processors
    if (collect == 1) then
-     call xmpi_sum(dos%fractions,comm,ierr)
-     if (dos%prtdosm /= 0) call xmpi_sum(dos%fractions_m,comm,ierr)
+     call xmpi_sum(dos%fractions,comm_kpt,ierr)
+     if (dos%prtdosm /= 0) call xmpi_sum(dos%fractions_m,comm_kpt,ierr)
 
      if (mpi_enreg%paral_spinor == 1)then
        call xmpi_sum(dos%fractions,mpi_enreg%comm_spinor,ierr)
@@ -388,6 +386,10 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
    call jlspline_free(jlspl)
    call destroy_mpi_enreg(mpi_enreg_seq)
 
+ !##############################################################
+ !2ND CASE: project on spinors
+ !##############################################################
+
  else if (dos%partial_dos_flag == 2) then
 
    if (dtset%nsppol /= 1 .or. dtset%nspinor /= 2) then
@@ -400,27 +402,30 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
    end if
    ABI_CHECK(mpi_enreg%paral_spinor == 0, "prtdos 5 does not support spinor parallelism")
 
-   ! FIXME: We should not allocate such a big chunk of memory!
+   ! FIXME: We should not allocate such a large chunk of memory!
    mcg_disk = dtset%mpw*my_nspinor*dtset%mband
    ABI_ALLOCATE(cg_1kpt,(2,mcg_disk))
    shift_sk = 0
    isppol = 1
 
    do ikpt=1,dtset%nkpt
-     if (all(mpi_enreg%proc_distrb(ikpt,:,isppol) /= me)) cycle
+     nband_k = dtset%nband((isppol-1)*dtset%nkpt + ikpt)
+     if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_kpt)) cycle
      npw_k = npwarr(ikpt)
 
      cg_1kpt(:,:) = cg(:,shift_sk+1:shift_sk+mcg_disk)
      ABI_ALLOCATE(cg_1band,(2,2*npw_k))
      shift_b=0
-     do iband=1,dtset%mband
-       if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= me) cycle
+     do iband=1,nband_k
+       if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me_kpt)) cycle
 
        ! Select wavefunction in cg array
        !shift_cg = shift_sk + shift_b
        cg_1band(:,:) = cg_1kpt(:,shift_b+1:shift_b+2*npw_k)
        call cg_getspin(cg_1band, npw_k, spin, cgcmat=cgcmat)
 
+       ! MG: TODO: imag part of off-diagonal terms is missing.
+       ! I will add them later on.
        do is1=1,2
          do is2=1,2
            isoff = is2 + (is1-1)*2
@@ -442,7 +447,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
 
    ! Gather all contributions from different processors
    if (collect == 1) then
-     call xmpi_sum(dos%fractions,comm,ierr)
+     call xmpi_sum(dos%fractions,comm_kpt,ierr)
      !below for future use - spinors should not be parallelized for the moment
      !if (mpi_enreg%paral_spinor == 1)then
      !  call xmpi_sum(dos%fractions,mpi_enreg%comm_spinor,ierr)
@@ -450,7 +455,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
    end if
 
  else
-   MSG_WARNING('only partial_dos==1 is coded')
+   MSG_WARNING('only partial_dos==1 or 2 is coded')
  end if
 
  call cwtime(cpu,wall,gflops,"stop")

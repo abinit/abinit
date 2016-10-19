@@ -104,7 +104,7 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 !Local variables-------------------------------
 !scalars
  integer :: basis_size,cplex,iat,iatom,iband,ibg,ibsp,ierr,ikpt,il,ilang,ilmn,iln,im,iorder_cprj,ispinor,isppol
- integer :: itypat,j0lmn,j0ln,jl,jlmn,jln,jm,klmn,kln,lmn_size,me,my_nspinor,nband_k,spaceComm
+ integer :: itypat,j0lmn,j0ln,jl,jlmn,jln,jm,klmn,kln,lmn_size,me_kpt,my_nspinor,nband_k,comm_kpt
  integer :: fatbands_flag,mbesslang,prtdosm,ndosfraction,paw_dos_flag
  real(dp) :: cpij
  character(len=500) :: message
@@ -137,8 +137,6 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
  if (mpi_enreg%nproc_atom /= 1) then
    MSG_ERROR("partial_dos_fractions does not support atom parallelism")
  end if
-
- my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
 
 !Prepare some useful integrals
  basis_size=pawtab(1)%basis_size
@@ -178,9 +176,9 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
  end if
 
 !Init parallelism
- spaceComm=mpi_enreg%comm_cell
- if(mpi_enreg%paral_kgb==1) spaceComm=mpi_enreg%comm_kpt
- me=mpi_enreg%me_kpt
+ comm_kpt=mpi_enreg%comm_kpt
+ me_kpt=mpi_enreg%me_kpt
+ my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
 
  iorder_cprj=0
 
@@ -190,7 +188,7 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
    do ikpt=1,dtset%nkpt
 
      nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-     if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) cycle
+     if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_kpt)) cycle
      cplex=2;if (dtset%istwfk(ikpt)>1) cplex=1
      ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natsph,my_nspinor*nband_k))
      ABI_ALLOCATE(dimcprj_atsph,(dtset%natsph))
@@ -222,7 +220,7 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 
 !      LOOP OVER BANDS
        do iband=1,nband_k
-         if(abs(mpi_enreg%proc_distrb(ikpt,iband,isppol)-me)/=0) cycle
+         if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me_kpt)) cycle
          ibsp=(iband-1)*my_nspinor
          do ispinor=1,my_nspinor
            ibsp=ibsp+1
@@ -290,13 +288,13 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 
 !Reduce data in case of parallelism
  call timab(48,1,tsec)
- call xmpi_sum(dos%fractions,spaceComm,ierr)
+ call xmpi_sum(dos%fractions,comm_kpt,ierr)
  if (prtdosm>=1.or.fatbands_flag==1) then
-   call xmpi_sum(dos%fractions_m,spaceComm,ierr)
+   call xmpi_sum(dos%fractions_m,comm_kpt,ierr)
  end if
  if (paw_dos_flag==1) then
-   call xmpi_sum(dos%fractions_paw1,spaceComm,ierr)
-   call xmpi_sum(dos%fractions_pawt1,spaceComm,ierr)
+   call xmpi_sum(dos%fractions_paw1,comm_kpt,ierr)
+   call xmpi_sum(dos%fractions_pawt1,comm_kpt,ierr)
  end if
  call timab(48,2,tsec)
  if (mpi_enreg%paral_spinor==1) then
