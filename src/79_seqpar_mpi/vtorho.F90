@@ -419,10 +419,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
  if(dtset%usewvl==0) then
    ABI_ALLOCATE(eknk,(mbdkpsp))
+   ABI_ALLOCATE(enlnk,(mbdkpsp))
    ABI_ALLOCATE(eknk_nd,(dtset%nsppol,dtset%nkpt,2,dtset%mband,dtset%mband*paw_dmft%use_dmft))
    ABI_ALLOCATE(EigMin,(2,dtset%mband))
    ABI_ALLOCATE(grnlnk,(3*natom,mbdkpsp*optforces))
-   ABI_ALLOCATE(enlnk,(mbdkpsp))
    eknk(:)=zero;enlnk(:)=zero
    if (optforces>0) grnlnk(:,:)=zero
    if(paw_dmft%use_dmft==1) eknk_nd=zero
@@ -736,22 +736,18 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        ABI_ALLOCATE(eig_k,(nband_k))
        ABI_ALLOCATE(ek_k,(nband_k))
+       ABI_ALLOCATE(enl_k,(nband_k))
        ABI_ALLOCATE(ek_k_nd,(2,nband_k,nband_k*paw_dmft%use_dmft))
        ABI_ALLOCATE(occ_k,(nband_k))
        ABI_ALLOCATE(resid_k,(nband_k))
        ABI_ALLOCATE(zshift,(nband_k))
        ABI_ALLOCATE(grnl_k,(3*natom,nband_k*optforces))
-       if (psps%usepaw==0)  then
-         ABI_ALLOCATE(enl_k,(nband_k))
-       else
-         ABI_ALLOCATE(enl_k,(0))
-       end if
 
        eig_k(:)=zero
        ek_k(:)=zero
+       enl_k(:)=zero
        if(paw_dmft%use_dmft==1) ek_k_nd(:,:,:)=zero
        if (optforces>0) grnl_k(:,:)=zero
-       if (psps%usepaw==0) enl_k(:)=zero
        kpoint(:)=dtset%kptns(:,ikpt)
        occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
        resid_k(:)=zero

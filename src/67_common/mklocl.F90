@@ -176,10 +176,12 @@ subroutine mklocl(dtset, dyfrlo,eei,gmet,gprimd,grtn,gsqcut,lpsstr,mgfft,&
    ABI_ALLOCATE(xcart,(3, dtset%natom))
    call xred2xcart(dtset%natom, rprimd, xcart, xred)
 !  Eventually retrieve density
+#if defined HAVE_BIGDFT
    if (option>1.and.wvl_den%denspot%rhov_is/=ELECTRONIC_DENSITY) then
      rhor_ptr => rhor ! Just to bypass intent(inout)
      call wvl_rho_abi2big(1,rhor_ptr,wvl_den)
    end if
+#endif
 !  Wavelets case
    call mklocl_wavelets(dtset%efield, grtn, mpi_enreg, dtset%natom, &
 &   nfft, nspden, option, rprimd, vpsp, &
