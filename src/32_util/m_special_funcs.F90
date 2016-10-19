@@ -87,7 +87,6 @@ MODULE m_special_funcs
 CONTAINS  !===========================================================
 !!***
 
-
 !!****f* m_special_funcs/clp
 !! NAME
 !! clp
@@ -981,7 +980,10 @@ end function abi_derfc
 !!
 !! PARENTS
 !!      jlspline_new,mlwfovlp_radial,psp1nl
-
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine besjm(arg,besjx,cosx,nn,nx,sinx,xx)
 
@@ -1004,7 +1006,6 @@ subroutine besjm(arg,besjx,cosx,nn,nx,sinx,xx)
 !Local variables-------------------------------
 !scalars
  integer :: ix,switchx
-!no_abirules
 !Series or rational polynomial coefficients
  real(dp),parameter :: b01=1.d0/6.d0,b02=1.d0/120.d0,b03=1.d0/5040.d0
  real(dp),parameter :: b04=1.d0/362880.d0,b11=0.8331251468724171d-1
