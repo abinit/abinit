@@ -51,11 +51,13 @@ npband3 4 npkpt3 1 npfft3 1
 getwfk4 0
 getden4 -1
 npband4 2 npkpt4 1 npfft4 2
+nstep4 11
 
 # Dataset 5
 # Read previous WFK file with the simple band-by-band CG solver.
 paral_kgb5 0 
 iomode5 0  # CG with MPI-IO is buggy!
+nstep5 1   # Only one step, as WFK are read from previous dataset.
 
 # SCF parameters
 ecut 25. 
