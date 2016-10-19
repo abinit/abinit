@@ -103,11 +103,6 @@ subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
 
 ! *************************************************************************
 
-!Statement functions are obsolete
-!Define magnitude of cross product of two vectors
-! cross(xx,yy,zz,aa,bb,cc)=&
-!& sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
-
 ! if( ipert<1 .or. ipert> natom+7) then
 !   write(message,'(a,i0,a,a,a,i0,a)')&
 !&   ' The argument ipert must be between 1 and natom+7=',natom+7,',',ch10,&
@@ -117,8 +112,8 @@ subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
 
  if( (ipert==natom+3 .or. ipert==natom+4) .and. cplex/=1) then
    write(message,'(3a,i4,a)')&
-&   '  The argument cplex must be 1 for strain perturbationh',ch10,&
-&   '  while it is cplex=',cplex,'.'
+&   'The argument cplex must be 1 for strain perturbationh',ch10,&
+&   'while it is cplex=',cplex,'.'
    MSG_BUG(message)
  end if
 
@@ -130,8 +125,8 @@ subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
 
    if( idir<1 .or. idir> 3) then
      write(message,'(a,a,a,i4,a)')&
-&     '  The argument idir must be between 1 and 3,',ch10,&
-&     '  while it is idir=',idir,'.'
+&     'The argument idir must be between 1 and 3,',ch10,&
+&     'while it is idir=',idir,'.'
      MSG_BUG(message)
    end if
 
@@ -362,8 +357,8 @@ subroutine dfpt_mkcore(cplex,idir,ipert,natom,ntypat,n1,n1xccc,&
 #define ABI_FUNC 'cross_mk'
 !End of the abilint section
 
-   real(dp)::cross_mk
-   real(dp) :: xx,yy,zz,aa,bb,cc
+   real(dp) :: cross_mk
+   real(dp),intent(in) :: xx,yy,zz,aa,bb,cc
    cross_mk=sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
  end function cross_mk
 

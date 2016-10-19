@@ -117,7 +117,7 @@ subroutine crystal_from_hdr(cryst,hdr,timrev,remove_inv)
 
  space_group=0 !FIXME not known
 
- call crystal_init(cryst,space_group,hdr%natom,hdr%npsp,hdr%ntypat,hdr%nsym,hdr%rprimd,hdr%typat,hdr%xred,&
+ call crystal_init(hdr%amu,cryst,space_group,hdr%natom,hdr%npsp,hdr%ntypat,hdr%nsym,hdr%rprimd,hdr%typat,hdr%xred,&
 & hdr%zionpsp,hdr%znuclpsp,timrev,use_antiferro,rinv,hdr%title,&
 & symrel=hdr%symrel,tnons=hdr%tnons,symafm=hdr%symafm) ! Optional
 
@@ -166,7 +166,7 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(inout) :: ncid
+ integer,intent(in) :: ncid
  type(crystal_t),intent(in) :: cryst
 
 #ifdef HAVE_NETCDF

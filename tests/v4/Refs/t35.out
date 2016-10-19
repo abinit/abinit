@@ -412,12 +412,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     738.000     738.000
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
- Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  5.0000000  0.0000000  0.0000000  G(1)=  0.2000000  0.0000000  0.0000000
- R(2)=  0.0000000  5.0000000  0.0000000  G(2)=  0.0000000  0.2000000  0.0000000
- R(3)=  0.0000000  0.0000000  5.0000000  G(3)=  0.0000000  0.0000000  0.2000000
- Unit cell volume ucvol=  1.2500000E+02 bohr^3
- Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density

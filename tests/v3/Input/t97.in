@@ -35,7 +35,7 @@ toldfe 1.0d-8
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t97.out, tolnlines = 1, tolabs = 1.010e-09, tolrel = 6.000e-05
+#%%   t97.out, tolnlines = 1, tolabs = 1.010e-09, tolrel = 6.000e-04
 #%% psp_files = 42mo.pspnc, 14si.pspnc, 8o.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2

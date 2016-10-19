@@ -73,6 +73,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  use m_profiling_abi
  use m_errors
  use m_nctk
+ use m_sort
  use libxc_functionals
 #ifdef HAVE_NETCDF
  use netcdf
@@ -88,7 +89,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 #define ABI_FUNC 'invars2'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
  use interfaces_32_util
  use interfaces_42_parser
  use interfaces_56_recipspace

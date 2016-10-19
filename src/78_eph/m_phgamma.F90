@@ -33,6 +33,7 @@ module m_phgamma
  use m_tetrahedron
  use m_ifc
  use m_ebands
+ use m_fstab
  use iso_c_binding
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -47,13 +48,12 @@ module m_phgamma
  use m_geometry,       only : phdispl_cart2red
  use m_fftcore,        only : ngfft_seq
  use m_fft_mesh,       only : rotate_fft_mesh
+ !use m_cgtools,        only : set_istwfk
  use m_dynmat,         only : d2sym3, symdyma, ftgam_init, ftgam
  use defs_datatypes,   only : ebands_t
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
  use m_bz_mesh,        only : isamek, make_path
- 
- use m_fstab
 
  implicit none
 

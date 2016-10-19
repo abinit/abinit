@@ -126,17 +126,17 @@ _ WF disk file :      0.449 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 = 10
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
--       accesswff1          1
--       accesswff2          1
--       accesswff3          1
--       accesswff4          1
--       accesswff5          0
+-          iomode1          1
+-          iomode2          1
+-          iomode3          1
+-          iomode4          1
+-          iomode5          0
             acell      7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
               amu      1.20110000E+01
            diemac      1.20000000E+01
@@ -152,6 +152,9 @@ _ WF disk file :      0.449 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
            getwfk3         -1
            getwfk4          0
            getwfk5         -1
+           iatsph1       2
+           iatsph2       2
+           iatsph5       2
      densfor_pred1          6
      densfor_pred2          6
      densfor_pred3          6
@@ -177,6 +180,9 @@ P           mkmem3         10
 P           mkmem4         10
 P           mkmem5          3
             natom           2
+           natsph1       1
+           natsph2       1
+           natsph5       1
             nband          12
            ndtset           5
             ngfft          24      24      24
@@ -220,6 +226,11 @@ P           mkmem5          3
                        2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
            occopt           7
+-      paral_atom1          0
+-      paral_atom2          0
+-      paral_atom3          1
+-      paral_atom4          1
+-      paral_atom5          0
         paral_kgb1          1
         paral_kgb2          1
         paral_kgb3          1
@@ -231,6 +242,11 @@ P           mkmem5          3
          pawmixdg3          0
          pawmixdg4          1
          pawmixdg5          0
+           prtdos1          3
+           prtdos2          3
+           prtdos3          0
+           prtdos4          0
+           prtdos5          3
             prtfc           1
            prtgeo           1
          prtnabla           1
@@ -1395,11 +1411,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     238.094     238.088
 ================================================================================
   
  -outvars: echo values of variables after computation  --------
--       accesswff1          1
--       accesswff2          1
--       accesswff3          1
--       accesswff4          1
--       accesswff5          0
+-          iomode1          1
+-          iomode2          1
+-          iomode3          1
+-          iomode4          1
+-          iomode5          0
             acell      7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
               amu      1.20110000E+01
            diemac      1.20000000E+01
@@ -1430,6 +1446,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     238.094     238.088
            getwfk3         -1
            getwfk4          0
            getwfk5         -1
+           iatsph1       2
+           iatsph2       2
+           iatsph5       2
      densfor_pred1          6
      densfor_pred2          6
      densfor_pred3          6
@@ -1455,6 +1474,9 @@ P           mkmem3         10
 P           mkmem4         10
 P           mkmem5          3
             natom           2
+           natsph1       1
+           natsph2       1
+           natsph5       1
             nband          12
            ndtset           5
             ngfft          24      24      24
@@ -1498,6 +1520,11 @@ P           mkmem5          3
                        2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
            occopt           7
+-      paral_atom1          0
+-      paral_atom2          0
+-      paral_atom3          1
+-      paral_atom4          1
+-      paral_atom5          0
         paral_kgb1          1
         paral_kgb2          1
         paral_kgb3          1
@@ -1509,6 +1536,11 @@ P           mkmem5          3
          pawmixdg3          0
          pawmixdg4          1
          pawmixdg5          0
+           prtdos1          3
+           prtdos2          3
+           prtdos3          0
+           prtdos4          0
+           prtdos5          3
             prtfc           1
            prtgeo           1
          prtnabla           1
@@ -1641,7 +1673,25 @@ P           mkmem5          3
 - Strong suggestion to cite this paper in your publications.
 - This paper is also available at http://www.arxiv.org/abs/0707.3405
 -
-- [5] ABINIT : First-principles approach of materials and nanosystem properties.
+- [5] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xue, A.Zhou, J.W.Zwanziger.
+- Comment : the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+-
+- [6] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
@@ -1653,7 +1703,8 @@ P           mkmem5          3
 - is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
-- [6] A brief introduction to the ABINIT software package.
+- [7] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
