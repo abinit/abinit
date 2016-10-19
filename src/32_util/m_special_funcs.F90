@@ -985,8 +985,7 @@ end function abi_derfc
 
 subroutine besjm(arg,besjx,cosx,nn,nx,sinx,xx)
 
-!Arguments ------------------------------------
-!scalars
+ implicit none
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -994,6 +993,8 @@ subroutine besjm(arg,besjx,cosx,nn,nx,sinx,xx)
 #define ABI_FUNC 'besjm'
 !End of the abilint section
 
+!Arguments ------------------------------------
+!scalars
  integer,intent(in) :: nn,nx
  real(dp),intent(in) :: arg
 !arrays
@@ -1178,8 +1179,9 @@ subroutine besjm(arg,besjx,cosx,nn,nx,sinx,xx)
  end if
 
 end subroutine besjm
+!!***
 
-!!****f* ABINIT/phim
+!!****f* m_special_funcs/phim
 !! NAME
 !! phim
 !!

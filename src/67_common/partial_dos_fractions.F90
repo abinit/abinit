@@ -254,7 +254,6 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
 
    shift_sk = 0
    do isppol=1,dtset%nsppol
-     ! kg array is the same for both sppol ?????
      ioffkg = 0
      do ikpt=1,dtset%nkpt
        if (all(mpi_enreg%proc_distrb(ikpt,:,isppol) /= me)) cycle
@@ -313,7 +312,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
        end do ! ixint
 
        shift_b = 0
-       do iband=1,dtset%mband
+       do iband=1,nband_k
          if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= me) cycle
          !write(std_out,*)"in band:",iband
 
@@ -361,7 +360,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
      end do ! ikpt
    end do ! isppol
 
-   ! Gather all contributions from different processors
+   ! collect = 1 ==> gather all contributions from different processors
    if (collect == 1) then
      call xmpi_sum(dos%fractions,comm,ierr)
      if (dos%prtdosm /= 0) call xmpi_sum(dos%fractions_m,comm,ierr)
@@ -401,7 +400,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
    end if
    ABI_CHECK(mpi_enreg%paral_spinor == 0, "prtdos 5 does not support spinor parallelism")
 
-   ! FIXME: WHAT THE FUCK!
+   ! FIXME: We should not allocate such a big chunk of memory!
    mcg_disk = dtset%mpw*my_nspinor*dtset%mband
    ABI_ALLOCATE(cg_1kpt,(2,mcg_disk))
    shift_sk = 0
