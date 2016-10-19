@@ -618,8 +618,8 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
  use m_errors
  use m_linalg_interfaces
 
- use m_mpinfo,     only : ptabs_fourdp
-
+ use m_mpinfo,      only : ptabs_fourdp
+ use m_sort,        only : sort_dp
  use m_pawrad,      only : pawrad_type,pawrad_init,pawrad_free
  use m_pawtab,      only : pawtab_type
  use m_paw_numeric, only : paw_splint

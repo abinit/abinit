@@ -79,6 +79,7 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
  use m_errors
  use m_xmpi
 
+ use m_sort, only : sort_dp
  use m_paw_numeric, only : paw_splint
  use m_pawrad, only : pawrad_type,pawrad_init,pawrad_free
  use m_pawtab, only : pawtab_type

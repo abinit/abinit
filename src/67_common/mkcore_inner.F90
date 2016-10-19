@@ -43,7 +43,7 @@ subroutine mkcore_inner(corfra,core_mesh,dyfrx2,grxc1,grxc2,grxc3,ifftsph,msz,na
  use defs_basis
  use m_profiling_abi
  use m_errors
- use m_sort
+ use m_sort,   only : sort_dp
  use m_pawrad, only : pawrad_type
  use m_pawtab, only : pawtab_type
  use m_paw_numeric, only : paw_splint,paw_splint_der
