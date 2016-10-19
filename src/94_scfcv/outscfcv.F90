@@ -300,7 +300,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  remove_inv=.false.
  if(dtset%nspden==4 .and. dtset%usedmft==1) remove_inv=.true. ! MG: why this?
 
- call crystal_init(crystal,dtset%spgroup,natom,dtset%npsp,ntypat, &
+ call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,natom,dtset%npsp,ntypat, &
 & dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
 & dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
 & dtset%symrel,dtset%tnons,dtset%symafm)

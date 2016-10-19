@@ -66,12 +66,14 @@ class MolecularDynamicFile:
               self.namefile2 = str(pnamefile)
               self.namefile1 = str(pnamefile).replace('_OUT.nc','_HIST')
               self.type_of_file = 'netcdf'
-
+          elif str(pnamefile).find('HIST.nc') != -1 :
+              self.namefile2 = str(pnamefile)
+              self.namefile1 = str(pnamefile)
+              self.type_of_file = 'netcdf'
           elif str(pnamefile).find('HIST') != -1 :
               self.namefile2 = str(pnamefile).replace('_HIST','_OUT.nc')
               self.namefile1 = str(pnamefile)
               self.type_of_file = 'netcdf'
-
           else:
               self.type_of_file = 'ASCII_output'
               self.namefile2 = str(pnamefile)

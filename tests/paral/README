@@ -8,4 +8,4 @@ Tests 01 to 20 are related to ground-state (and TDDFT) parallel computations, ba
 Tests 21 to 50 are related to ground-state parallel band-FFT computations, possibly compbined with the other levels of parallelisation.
 Tests 51 to 70 are related to response-function parallel computations
 Tests 71 to 90 are related to GW calculations
-Tests 91 to 99 are other types of calculations (DMFT at present and BigDFT).
+Tests 91 to 99 are other types of calculations (DMFT at present, multibinit and BigDFT).

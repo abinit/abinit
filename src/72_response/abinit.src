@@ -84,6 +84,7 @@ sources = [
  "m_eig2d.F90",
  "m_rf2.F90",
  "m_paral_pert.F90",
+ "m_strain.F90",
  "newfermie1.F90",
  "outbsd.F90",
  "outddbnc.F90",

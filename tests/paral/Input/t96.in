@@ -1,0 +1,62 @@
+##############################################################################
+#Test for multibinit, reed DDB and generate the effective potential into XML file
+##############################################################################
+prt_effpot = -1
+energy_reference = -1.7145176622E+01
+
+ifcsupercell = 1
+ifcout = 20000
+
+brav  =  1         ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
+ngqpt =  1  1  1   ! Monkhorst-Pack indices
+
+nph1l  =       8 
+qph1l  =      0.00000000E+00  0.00000000E+00  0.00000000E+00    1.000E+00
+              0.00000000E+00  0.00000000E+00  0.50000000E+00    1.000E+00
+              0.00000000E+00  0.50000000E+00  0.00000000E+00    1.000E+00
+              0.00000000E+00  0.50000000E+00  0.50000000E+00    1.000E+00
+              0.50000000E+00  0.00000000E+00  0.00000000E+00    1.000E+00
+              0.50000000E+00  0.00000000E+00  0.50000000E+00    1.000E+00
+              0.50000000E+00  0.50000000E+00  0.00000000E+00    1.000E+00
+              0.50000000E+00  0.50000000E+00  0.50000000E+00    1.000E+00
+
+n_cell =   2 2 2
+dynamics =  1
+temperature = 1000
+ntime  = 50
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = multibinit
+#%% test_chain = t95.in,t96.in,t97.in,t98.in
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 1, 2, 4, 10
+#%% max_nprocs = 10
+#%% [NCPU_1]
+#%% input_ddb  = t95_MPI1o_DS3_DDB 
+#%% files_to_test = 
+#%%   t96_MPI1.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
+#%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%% [NCPU_2]
+#%% input_ddb  = t95_MPI2o_DS3_DDB 
+#%% files_to_test = 
+#%%   t96_MPI2.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
+#%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%% [NCPU_4]
+#%% input_ddb  = t95_MPI4o_DS3_DDB 
+#%% files_to_test = 
+#%%   t96_MPI4.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
+#%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%% [NCPU_10]
+#%% input_ddb  = t95_MPI10o_DS3_DDB 
+#%% files_to_test = 
+#%%   t95_MPI10.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
+#%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%% [extra_info]
+#%% authors = A. MARTIN
+#%% keywords = Effective potential, multibinit
+#%% description = 
+#%%   reed ddb and generate effective potential in XML file
+#%%<END TEST_INFO>

@@ -37,7 +37,7 @@ MODULE m_ifc
  use m_ewald,       only : ewald9
  use m_crystal,     only : crystal_t
  use m_geometry,    only : phdispl_cart2red
- use m_dynmat,      only : canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, &
+ use m_dynmat,      only : cell9,canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, &
 &                          make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, symdm9, nanal9, gtdyn9, dymfz9
  use m_ddb,         only : ddb_type
  use m_nctk
@@ -110,6 +110,18 @@ MODULE m_ifc
    real(dp),allocatable :: atmfrc(:,:,:,:,:,:)
      ! atmfrc(2,3,natom,3,natom,nrpt)
      ! Inter atomic forces in real space
+
+   integer,allocatable :: cell(:,:)
+     ! cell(nrpt,3)
+     ! Give the index of the the cell and irpt 
+
+   real(dp),allocatable :: ewald_atmfrc(:,:,:,:,:,:)
+     ! Ewald_atmfrc(2,3,natom,3,natom,nrpt)
+     ! Ewald Inter atomic forces in real space
+
+   real(dp),allocatable :: short_atmfrc(:,:,:,:,:,:)
+     ! short_atmfrc(2,3,natom,3,natom,nrpt)
+     ! Short range part of Inter atomic forces in real space
 
    real(dp),allocatable :: qshft(:,:)
     ! qshft(3,nqshft)
@@ -209,6 +221,18 @@ subroutine ifc_free(ifc)
    ABI_FREE(ifc%atmfrc)
  end if
 
+ if (allocated(ifc%cell)) then
+   ABI_FREE(ifc%cell)
+ end if
+
+ if (allocated(ifc%ewald_atmfrc)) then
+   ABI_FREE(ifc%ewald_atmfrc)
+ end if
+
+ if (allocated(ifc%short_atmfrc)) then
+   ABI_FREE(ifc%short_atmfrc)
+ end if
+
  if (allocated(ifc%qshft)) then
    ABI_FREE(ifc%qshft)
  end if
@@ -305,6 +329,8 @@ end subroutine ifc_free
 !!   trans(3,natom) = Atomic translations : xred = rcan + trans
 !!   Ifc%nrpt = number of vectors of the lattice in real space
 !!   Ifc%atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space
+!!   Ifc%short_atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space
+!!   Ifc%ewlad_atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space
 !!   Ifc%rpt(3,nprt) = Canonical coordinates of the R points in the unit cell
 !!   Ifc%wghatm(natom,natom,nrpt)= Weight associated to the couple of atoms and the R vector
 !!
@@ -340,6 +366,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  type(crystal_t),intent(in) :: Crystal
  type(ddb_type),intent(in) :: ddb
  type(ifc_type),optional,intent(in) :: Ifc_coarse
+
 !arrays
  integer,intent(in) :: ngqpt_in(3)
  real(dp),intent(in) :: q1shft(3,nqshft)
@@ -480,6 +507,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      ! TODO: check dipdip option and phase, but I think this is correct!
      call ifc_fourq(Ifc_coarse,Crystal,qpt,phfrq,displ_cart,out_d2cart=out_d2cart)
      Ifc%dynmat(:,:,:,:,:,iq_bz) = out_d2cart
+
    end do
 
    ABI_FREE(qmissing)
@@ -492,8 +520,10 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  if (Ifc%dipdip==1) then
    ! Take off the dipole-dipole part of the dynamical matrix
-   write(std_out, '(a)' )' mkifc9 : will extract the dipole-dipole part,'
-   write(std_out, '(a)' )' using ewald9, q0dy3 and nanal9 for every wavevector.'
+   write(message, '(3a)' )' mkifc9 : will extract the dipole-dipole part,',ch10,&
+&                         ' using ewald9, q0dy3 and nanal9 for every wavevector.'
+   call wrtout(std_out,message,"COLL")
+
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
 
    do iqpt=1,nqbz
@@ -501,7 +531,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      sumg0=0
      call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,Crystal%xred,zeff)
      call q0dy3_apply(natom,dyewq0,dyew)
-
      plus=0
      call nanal9(dyew,Ifc%dynmat,iqpt,natom,nqbz,plus)
    end do
@@ -524,7 +553,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  call dymfz9(Ifc%dynmat,natom,nqbz,gprim,option,spqpt,trans)
 
 ! Create the Big Box of R vectors in real space and compute the number of points (cells) in real space
- call make_bigbox(Ifc%brav,ngqpt,nqshft,rprim,ifc_tmp%nrpt,ifc_tmp%rpt)
+ call make_bigbox(Ifc%brav,ifc_tmp%cell,ngqpt,nqshft,rprim,ifc_tmp%nrpt,ifc_tmp%rpt)
 
 ! Weights associated to these R points and to atomic pairs
 ! MG FIXME: Why ngqpt is intent(inout)?
@@ -534,12 +563,16 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 ! Fourier transformation of the dynamical matrices
  ABI_MALLOC(ifc_tmp%atmfrc,(2,3,natom,3,natom,ifc_tmp%nrpt))
 
+ ifc_tmp%atmfrc = zero
+
  call ftifc_q2r(ifc_tmp%atmfrc,Ifc%dynmat,gprim,natom,nqbz,ifc_tmp%nrpt,ifc_tmp%rpt,spqpt)
 
 ! Eventually impose Acoustic Sum Rule to the interatomic forces
  if (Ifc%asr>0) then
    call asrif9(Ifc%asr,ifc_tmp%atmfrc,natom,ifc_tmp%nrpt,ifc_tmp%rpt,ifc_tmp%wghatm)
  end if
+
+
 
 !*** The interatomic forces have been calculated ! ***
  write(message, '(2a)')ch10,' The interatomic forces have been obtained '
@@ -573,17 +606,28 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  end if
 
  ! Only conserve the necessary points in rpt: in the FT algorithm the order of the points is unimportant
+ ! In the case of effective potential, we need to keep all the points
  Ifc%nrpt = 0
  do irpt=1,ifc_tmp%nrpt
    if (sum(ifc_tmp%wghatm(:,:,irpt)) /= 0) then
      Ifc%nrpt = Ifc%nrpt+1
    end if
  end do
- write(std_out,"(2(a,i0))")"ifc%nrpt: ",ifc%nrpt,", nqbz: ",nqbz
+ write(message,"(2(a,i0))")"ifc%nrpt: ",ifc%nrpt,", nqbz: ",nqbz
+ call wrtout(std_out,message,"COLL")
 
  ABI_MALLOC(Ifc%atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
  ABI_MALLOC(Ifc%rpt,(3,Ifc%nrpt))
+ ABI_MALLOC(Ifc%cell,(3,Ifc%nrpt))
  ABI_MALLOC(Ifc%wghatm,(natom,natom,Ifc%nrpt))
+ ABI_MALLOC(Ifc%short_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
+ ABI_MALLOC(Ifc%ewald_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
+ 
+ Ifc%short_atmfrc = zero
+ Ifc%ewald_atmfrc = zero 
+ Ifc%short_atmfrc = zero
+ Ifc%ewald_atmfrc = zero
+ Ifc%cell = zero
 
  irpt_new = 1
  do irpt = 1, ifc_tmp%nrpt
@@ -591,10 +635,11 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      Ifc%atmfrc(:,:,:,:,:,irpt_new) = ifc_tmp%atmfrc(:,:,:,:,:,irpt)
      Ifc%rpt(:,irpt_new) = ifc_tmp%rpt(:,irpt)
      Ifc%wghatm(:,:,irpt_new) = ifc_tmp%wghatm(:,:,irpt)
+     Ifc%cell(:,irpt_new) = ifc_tmp%cell(:,irpt)
      irpt_new = irpt_new + 1
    end if
  end do
-
+ 
  ! Copy other useful arrays.
  Ifc%dielt = dielt
  Ifc%nqbz = nqbz
@@ -613,9 +658,9 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  do_prtfreq = .False.; if (present(prtfreq)) do_prtfreq = prtfreq
  if (do_prtfreq .or. prtsrlr == 1) then
    ! Check that the starting values are well reproduced.
-   write(std_out, '(a,a)' )' mkifc9 : now check that the starting values ',&
+   write(message, '(2a)' )' mkifc9 : now check that the starting values ',&
      ' are reproduced after the use of interatomic forces '
-
+   call wrtout(std_out,message,"COLL")
    do iqpt=1,nqbz
      qpt(:)=Ifc%qbz(:,iqpt)
      call ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,out_eigvec=eigvec)
@@ -1017,7 +1062,7 @@ end subroutine corsifc9
 !!      anaddb
 !!
 !! CHILDREN
-!!      appdig,ifc_fourq,smpbz,symkpt,wrtout
+!!      appdig,ifc_fourq,matr3inv,mkrdim,smpbz,symkpt,wrtout
 !!
 !! SOURCE
 
@@ -1029,6 +1074,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_print'
  use interfaces_32_util
+ use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -1038,12 +1084,11 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
  integer,intent(in) :: ifcout,ifcana
  integer,intent(in) :: prt_ifc
  integer,optional,intent(in) :: ncid
- type(ifc_type),intent(in) :: Ifc
+ type(ifc_type),intent(inout) :: Ifc
 !arrays
  integer,intent(in) :: atifc(Ifc%natom)
  real(dp),intent(in) :: dielt(3,3)
  real(dp),intent(in) :: zeff(3,3,Ifc%natom)
-
 !Local variables -------------------------
 !scalars
  integer :: ia,ii,ncerr,iatifc,ifcout1,mu,nu,iout
@@ -1055,6 +1100,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
  integer,allocatable :: list(:)
  real(dp) :: invdlt(3,3),ra(3),xred(3)
  real(dp),allocatable :: dist(:,:,:),wkdist(:),rsiaf(:,:,:),sriaf(:,:,:),vect(:,:,:)
+ real(dp) :: gprimd(3,3),rprimd(3,3)
  real(dp),allocatable :: indngb(:),posngb(:,:)
 
 ! *********************************************************************
@@ -1079,6 +1125,9 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 & dielt(1,2)*dielt(2,1)*dielt(3,3)
 
  write(std_out,'(a)' )' ifc_print : analysis of interatomic force constants '
+ call mkrdim(Ifc%acell,Ifc%rprim,rprimd)
+ call matr3inv(rprimd,gprimd)
+
  if (iout > 0) then
    write(iout, '(/,a,/)' )' Analysis of interatomic force constants '
    if(Ifc%dipdip==1)then
@@ -1110,7 +1159,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
  else
    ifcout1=ifcout
  end if
-  
+
  ! set up file for real space ifc output, if required
  if (prt_ifc == 1) then
    if (open_file('ifcinfo.out', message, newunit=unit_ifc, status="replace") /= 0) then
@@ -1118,37 +1167,37 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
    end if
    write(iout, '(a,a)' )ch10,&
 &   '  NOTE: Open file ifcinfo.out, for the output of interatomic force constants. This is because prt_ifc==1. '
- end if
   
 #ifdef HAVE_NETCDF
- ! initialize netcdf variables
- ncerr = nctk_def_dims(ncid, [nctkdim_t("natifc", SUM(atifc)), nctkdim_t("number_of_r_points_big_box", Ifc%nrpt), &
-   nctkdim_t("number_of_atoms_big_box", Ifc%natom*Ifc%nrpt), nctkdim_t("ifcout", ifcout1)], defmode=.True.)
- NCF_CHECK(ncerr)   
+  ! initialize netcdf variables
+   ncerr = nctk_def_dims(ncid, [nctkdim_t("natifc", SUM(atifc)), nctkdim_t("number_of_r_points_big_box", Ifc%nrpt), &
+     nctkdim_t("number_of_atoms_big_box", Ifc%natom*Ifc%nrpt), nctkdim_t("ifcout", ifcout1)], defmode=.True.)
+   NCF_CHECK(ncerr)   
   
- ncerr = nctk_def_arrays(ncid, [&
-   nctkarr_t('ifc_atoms_indices', "i", "natifc"),&
-   nctkarr_t('ifc_neighbours_indices', "i", "ifcout, natifc"),&
-   nctkarr_t('ifc_distances', "dp", "ifcout, natifc "),&
-   nctkarr_t('ifc_matrix_cart_coord', "dp", "number_of_cartesian_directions,number_of_cartesian_directions, ifcout, natifc")])
- NCF_CHECK(ncerr)
-
- if (Ifc%dipdip==1) then
    ncerr = nctk_def_arrays(ncid, [&
-     nctkarr_t('ifc_matrix_cart_coord_short_range', "dp", &
-               "number_of_cartesian_directions, number_of_cartesian_directions, ifcout, natifc")])
+     nctkarr_t('ifc_atoms_indices', "i", "natifc"),&
+     nctkarr_t('ifc_neighbours_indices', "i", "ifcout, natifc"),&
+     nctkarr_t('ifc_distances', "dp", "ifcout, natifc "),&
+     nctkarr_t('ifc_matrix_cart_coord', "dp", "number_of_cartesian_directions,number_of_cartesian_directions, ifcout, natifc")])
    NCF_CHECK(ncerr)
- end if
 
- if (ifcana==1) then
-   ncerr = nctk_def_arrays(ncid, [&
-     nctkarr_t('ifc_local_vectors', "dp", "number_of_cartesian_directions, number_of_cartesian_directions, ifcout, natifc")])
-   NCF_CHECK(ncerr)
- end if
+   if (Ifc%dipdip==1) then
+     ncerr = nctk_def_arrays(ncid, [&
+       nctkarr_t('ifc_matrix_cart_coord_short_range', "dp", &
+       "number_of_cartesian_directions, number_of_cartesian_directions, ifcout, natifc")])
+     NCF_CHECK(ncerr)
+   end if
+   
+   if (ifcana==1) then
+     ncerr = nctk_def_arrays(ncid, [&
+       nctkarr_t('ifc_local_vectors', "dp", "number_of_cartesian_directions, number_of_cartesian_directions, ifcout, natifc")])
+     NCF_CHECK(ncerr)
+   end if
 
- NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nctk_set_datamode(ncid))
 #endif
 
+ end if
  ABI_MALLOC(rsiaf,(3,3,ifcout1))
  ABI_MALLOC(sriaf,(3,3,ifcout1))
  ABI_MALLOC(vect,(3,3,ifcout1))
@@ -1188,7 +1237,9 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
        write(iout, '(a)' )
      end if
 
-     call ifc_getiaf(Ifc,ifcana,ifcout1,iout,zeff,ia,ra,list,dist,invdlt,detdlt,rsiaf,sriaf,vect,indngb,posngb)
+     call ifc_getiaf(Ifc,ifcana,ifcout1,iout,zeff,ia,ra,list,dist,invdlt,&
+&                    detdlt,rsiaf,sriaf,vect,indngb,posngb)
+
 
      if (prt_ifc == 1) then
        do ii=1,ifcout1
@@ -1198,27 +1249,26 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
            write(unit_ifc,   '(3f28.16)'  )(rsiaf(nu,mu,ii),mu=1,3)
          end do     
        end do
-     end if
 
 #ifdef HAVE_NETCDF
-     NCF_CHECK(nf90_put_var(ncid, vid("ifc_atoms_indices"), ia, start=(/iatifc/)))
-     NCF_CHECK(nf90_put_var(ncid, vid("ifc_neighbours_indices"), indngb, start=(/1,iatifc/), count=(/ifcout1,1/)))
-     NCF_CHECK(nf90_put_var(ncid, vid("ifc_distances"), wkdist(:ifcout1), start=(/1,iatifc/),count=(/ifcout1,1/)))
-     ncerr = nf90_put_var(ncid, vid("ifc_matrix_cart_coord"), rsiaf, &
-       start=(/1,1,1,iatifc/), count=(/3,3,ifcout1,1/))
-     NCF_CHECK(ncerr)
-     if (Ifc%dipdip==1) then
-       ncerr = nf90_put_var(ncid, vid("ifc_matrix_cart_coord_short_range"), sriaf, &
+       NCF_CHECK(nf90_put_var(ncid, vid("ifc_atoms_indices"), ia, start=(/iatifc/)))
+       NCF_CHECK(nf90_put_var(ncid, vid("ifc_neighbours_indices"), indngb, start=(/1,iatifc/), count=(/ifcout1,1/)))
+       NCF_CHECK(nf90_put_var(ncid, vid("ifc_distances"), wkdist(:ifcout1), start=(/1,iatifc/),count=(/ifcout1,1/)))
+       ncerr = nf90_put_var(ncid, vid("ifc_matrix_cart_coord"), rsiaf, &
          start=(/1,1,1,iatifc/), count=(/3,3,ifcout1,1/))
        NCF_CHECK(ncerr)
-     end if
-     if (ifcana==1) then
-       ncerr = nf90_put_var(ncid, vid("ifc_local_vectors"), vect, &
-         start=(/1,1,1,iatifc/), count=(/3,3,ifcout1,1/))
-       NCF_CHECK(ncerr)
-     end if
+       if (Ifc%dipdip==1) then
+         ncerr = nf90_put_var(ncid, vid("ifc_matrix_cart_coord_short_range"), sriaf, &
+           start=(/1,1,1,iatifc/), count=(/3,3,ifcout1,1/))
+         NCF_CHECK(ncerr)
+       end if
+       if (ifcana==1) then
+         ncerr = nf90_put_var(ncid, vid("ifc_local_vectors"), vect, &
+           start=(/1,1,1,iatifc/), count=(/3,3,ifcout1,1/))
+         NCF_CHECK(ncerr)
+       end if
 #endif
-  
+     end if
    end if ! End the condition on atifc
   
  end do ! End Big loop on atoms in the unit cell, and corresponding test .
@@ -1309,7 +1359,7 @@ implicit none
 !scalars
  integer,intent(in) :: ia,ifcana,ifcout,iout
  real(dp), intent(in) :: detdlt
- type(ifc_type),intent(in) :: Ifc
+ type(ifc_type),intent(inout) :: Ifc
 !arrays
  real(dp),intent(in) :: invdlt(3,3),ra(3)
  real(dp),intent(in) :: dist(Ifc%natom,Ifc%natom,Ifc%nrpt)
@@ -1404,7 +1454,6 @@ implicit none
    end if
      
    if(Ifc%dipdip==0)then
-
      ! Get the "total" force constants (=real space FC)
      ! without taking into account the dipole-dipole interaction
      do mu=1,3
@@ -1412,14 +1461,19 @@ implicit none
          rsiaf(mu,nu,ii)=Ifc%atmfrc(1,mu,ia,nu,ib,irpt) * Ifc%wghatm(ia,ib,irpt)
        end do
      end do
-
      ! Output of the ifcs in cartesian coordinates
      if (iout > 0) then
        do nu=1,3
          write(iout, '(1x,3f9.5)' )(rsiaf(mu,nu,ii)+tol10,mu=1,3)
+!       transfer short range and long range       
+         do mu=1,3
+           Ifc%short_atmfrc(1,mu,ia,nu,ib,irpt) = rsiaf(mu,nu,ii) + tol10
+           Ifc%ewald_atmfrc(1,mu,ia,nu,ib,irpt) = zero
+         end do
+
        end do
      end if
-  
+
      if(ifcana==1)then
        ! Further analysis
        trace1=rsiaf(1,1,ii)+rsiaf(2,2,ii)+rsiaf(3,3,ii)
@@ -1455,7 +1509,6 @@ implicit none
 !    write(iout,'(a)')' Enter dipdip section, for debugging'
 !    write(iout,'(a)')
 !ENDDEBUG
-
      ! Get the Coulomb part
      do jj=1,3
        rdiff(jj)=ra(jj)-posngb(jj,ii)
@@ -1502,12 +1555,11 @@ implicit none
          ewiaf1(mu,nu)=ew1
        end do
      end do
-
      ! Get the short-range force constants and the
      ! "total" force constants (=real space FC)
      do mu=1,3
        do nu=1,3
-         sriaf(mu,nu,ii)=Ifc%atmfrc(1,mu,ia,nu,ib,irpt) * Ifc%wghatm(ia,ib,irpt)
+         sriaf(mu,nu,ii)=Ifc%atmfrc(1,mu,ia,nu,ib,irpt)* Ifc%wghatm(ia,ib,irpt)
          rsiaf(mu,nu,ii)=ewiaf1(mu,nu)+sriaf(mu,nu,ii)
        end do
      end do
@@ -1519,6 +1571,12 @@ implicit none
 &         (rsiaf(mu,nu,ii) +tol10,mu=1,3),&
 &         (ewiaf1(mu,nu)+tol10,mu=1,3),&
 &         (sriaf(mu,nu,ii) +tol10,mu=1,3)
+
+!       transfer short range and long range       
+         do mu=1,3
+           Ifc%short_atmfrc(1,mu,ia,nu,ib,irpt) = sriaf(mu,nu,ii) + tol10
+           Ifc%ewald_atmfrc(1,mu,ia,nu,ib,irpt) = ewiaf1(mu,nu) + tol10
+         end do
        end do
      end if
 
@@ -1532,7 +1590,7 @@ implicit none
        trace3=sriaf(1,1,ii)+sriaf(2,2,ii)+sriaf(3,3,ii)
        if (iout > 0) then
          write(iout,'(3(f9.5,17x))')trace1+tol10,trace2+tol10,trace3+tol10
-         write(iout,'(3(f9.5,17x))')1.0,trace2/trace1+tol10,trace3/trace1+tol10
+         write(iout,'(3(f9.5,17x))')1.0,trace2/trace1+tol10,trace3/trace1+tol10 !
        end if
 
        if(ii/=1)then
@@ -1574,7 +1632,6 @@ implicit none
      end if ! Further analysis finished
    end if ! End the condition on dipdip
  end do ! End loop over all atoms in BigBox:
-
  end subroutine ifc_getiaf
 
 !!***
