@@ -42,9 +42,10 @@ MODULE m_paw_finegrid
  public :: pawrfgd_wvl  ! r-R
 
 !declarations for the whole module (were needed to replace the statement functions)
-integer :: lambda
-real(dp) :: pi_over_rshp,sigma
-real(dp), allocatable :: alpha(:,:),qq(:,:)
+!MG: Why this? Global variables are powerful but extremely DANGEROUS
+integer,private,save :: lambda
+real(dp),private,save :: pi_over_rshp,sigma
+real(dp),private,save,allocatable :: alpha(:,:),qq(:,:)
 !!***
 
 CONTAINS
@@ -127,8 +128,6 @@ subroutine pawgylm(gylm,gylmgr,gylmgr2,lm_size,nfgd,optgr0,optgr1,optgr2,pawtab,
  real(dp),allocatable :: dshpfuncnum(:,:),gfact(:,:)
  real(dp),allocatable :: rnrm(:),rnrm_inv(:),rnrm_sort(:)
  real(dp),allocatable :: shpfuncnum(:,:),work(:),ylmr(:,:),ylmrgr(:,:,:)
-!no_abirules
-!Statement functions are obsolete, and have been replaced by internal functions
 
 ! *************************************************************************
 
@@ -750,7 +749,7 @@ end subroutine pawgylm
 !End of the abilint section
 
      real(dp) :: shapefunc1
-     real(dp) :: arg
+     real(dp),intent(in) :: arg
      shapefunc1=exp(-(arg/sigma)**lambda)
    end function shapefunc1
 
@@ -770,7 +769,7 @@ end subroutine pawgylm
 !End of the abilint section
 
      real(dp) :: shapefunc1_0
-     real(dp) :: arg
+     real(dp),intent(in) :: arg
      shapefunc1_0=one-(arg/sigma)**lambda+half*(arg/sigma)**(2*lambda)-(arg/sigma)**(3*lambda)/6._dp
    end function shapefunc1_0
 !!***
@@ -789,7 +788,7 @@ end subroutine pawgylm
 !End of the abilint section
 
      real(dp) :: shapefunc2
-     real(dp) :: arg
+     real(dp),intent(in) :: arg
      shapefunc2=(sin(pi_over_rshp*arg)/(pi_over_rshp*arg))**2
    end function shapefunc2
 
@@ -809,7 +808,7 @@ end subroutine pawgylm
 !End of the abilint section
 
      real(dp) :: shapefunc2_0
-     real(dp) :: arg
+     real(dp),intent(in) :: arg
      shapefunc2_0=one-(pi_over_rshp*arg)**2/three+two*(pi_over_rshp*arg)**4/45._dp
    end function shapefunc2_0
 
@@ -828,8 +827,9 @@ end subroutine pawgylm
 #define ABI_FUNC 'shapefunc3'
 !End of the abilint section
 
-     integer :: argl
-     real(dp) :: shapefunc3,jbes1,jbes2
+     integer,intent(in) :: argl
+     real(dp) :: shapefunc3
+     real(dp),intent(in) :: jbes1,jbes2
      shapefunc3= alpha(1,1+argl)*jbes1+alpha(2,1+argl)*jbes2
    end function shapefunc3
 
@@ -849,7 +849,7 @@ end subroutine pawgylm
 !End of the abilint section
 
      real(dp) :: dshpfunc1
-     real(dp) :: arg
+     real(dp),intent(in) :: arg
      dshpfunc1=-lambda/sigma*(arg/sigma)**(lambda-1)*exp(-(arg/sigma)**lambda)
    end function dshpfunc1
 
@@ -869,7 +869,7 @@ end subroutine pawgylm
 !End of the abilint section
 
      real(dp) :: dshpfunc1_ovr_0
-     real(dp) :: arg
+     real(dp),intent(in) :: arg
      dshpfunc1_ovr_0=-lambda/sigma**2*((arg/sigma)**(lambda-2)-(arg/sigma)**(2*lambda-2))
    end function dshpfunc1_ovr_0
 
@@ -889,7 +889,7 @@ end subroutine pawgylm
 !End of the abilint section
 
      real(dp) :: dshpfunc1_ovr_0_2
-     real(dp) :: arg
+     real(dp),intent(in) :: arg
      dshpfunc1_ovr_0_2=-two/sigma**2*(one-(arg/sigma)**2+half*(arg/sigma)**4)
    end function dshpfunc1_ovr_0_2
 
@@ -909,7 +909,7 @@ end subroutine pawgylm
 !End of the abilint section
 
      real(dp) :: dshpfunc2
-     real(dp) :: arg
+     real(dp),intent(in) :: arg
      dshpfunc2=two*pi_over_rshp*sin(pi_over_rshp*arg)/(pi_over_rshp*arg)**3&
 &              *(pi_over_rshp*arg*cos(pi_over_rshp*arg)-sin(pi_over_rshp*arg))
    end function dshpfunc2
@@ -930,7 +930,7 @@ end subroutine pawgylm
 !End of the abilint section
 
      real(dp) :: dshpfunc2_ovr_0
-     real(dp) :: arg
+     real(dp),intent(in) :: arg
      dshpfunc2_ovr_0=-two*pi_over_rshp**2/3._dp+8._dp*pi_over_rshp**4*arg**2/45._dp
    end function dshpfunc2_ovr_0
 
@@ -950,7 +950,8 @@ end subroutine pawgylm
 !End of the abilint section
 
      integer :: argl
-     real(dp) :: dshpfunc3,jbesp1,jbesp2
+     real(dp) :: dshpfunc3
+     real(dp),intent(in) :: jbesp1,jbesp2
      dshpfunc3= alpha(1,1+argl)*qq(1,1+argl)*jbesp1 &
 &                              +alpha(2,1+argl)*qq(2,1+argl)*jbesp2
    end function dshpfunc3
@@ -971,7 +972,7 @@ end subroutine pawgylm
 !End of the abilint section
 
      real(dp) :: d2shpfunc1
-     real(dp) :: arg
+     real(dp),intent(in) :: arg
      d2shpfunc1=lambda/(sigma**2)*(lambda*(arg/sigma)**(2*lambda-2) &
 &               -(lambda-1)*(arg/sigma)**(lambda-2))*exp(-(arg/sigma)**lambda)
    end function d2shpfunc1
@@ -992,7 +993,7 @@ end subroutine pawgylm
 !End of the abilint section
 
      real(dp) :: d2shpfunc1_ovr2_0
-     real(dp) :: arg
+     real(dp),intent(in) :: arg
      d2shpfunc1_ovr2_0=-lambda/(sigma**4)*((lambda-2)*(arg/sigma)**(lambda-4) &
 &                                          -(lambda-1)*two*(arg/sigma)**(2*lambda-4))
    end function d2shpfunc1_ovr2_0
@@ -1013,7 +1014,7 @@ end subroutine pawgylm
 !End of the abilint section
 
      real(dp) :: d2shpfunc1_ovr2_0_2
-     real(dp) :: arg
+     real(dp),intent(in) :: arg
      d2shpfunc1_ovr2_0_2=four/(sigma**4)*(one-(arg/sigma)**2)
    end function d2shpfunc1_ovr2_0_2
 
@@ -1033,7 +1034,7 @@ end subroutine pawgylm
 !End of the abilint section
 
      real(dp) :: d2shpfunc1_ovr2_0_3
-     real(dp) :: arg
+     real(dp),intent(in) :: arg
      d2shpfunc1_ovr2_0_3=-three/arg/sigma**3+12._dp*arg**2/sigma**6-half*21._dp*arg**5/sigma**9
    end function d2shpfunc1_ovr2_0_3
 
@@ -1053,7 +1054,7 @@ end subroutine pawgylm
 !End of the abilint section
 
      real(dp) :: d2shpfunc1_ovr2_0_4
-     real(dp) :: arg
+     real(dp),intent(in) :: arg
      d2shpfunc1_ovr2_0_4=-8._dp/(sigma**4)*(one-three*(arg/sigma)**4)
    end function d2shpfunc1_ovr2_0_4
 
@@ -1073,7 +1074,7 @@ end subroutine pawgylm
 !End of the abilint section
 
      real(dp) :: d2shpfunc2
-     real(dp) :: arg
+     real(dp),intent(in) :: arg
      d2shpfunc2=two/(pi_over_rshp**2*arg**4)* &
 &               (pi_over_rshp**2*arg**2*(cos(pi_over_rshp*arg))**2 &
 &               +(three-pi_over_rshp**2*arg**2)*(sin(pi_over_rshp*arg))**2 &
@@ -1096,7 +1097,7 @@ end subroutine pawgylm
 !End of the abilint section
 
      real(dp) :: d2shpfunc2_ovr2_0
-     real(dp) :: arg
+     real(dp),intent(in) :: arg
      d2shpfunc2_ovr2_0=16._dp/45._dp*pi_over_rshp**4-8._dp/105._dp*pi_over_rshp**6*arg**2 &
 &                      +41._dp/6300._dp*pi_over_rshp**8*arg**4
    end function d2shpfunc2_ovr2_0
@@ -1116,8 +1117,9 @@ end subroutine pawgylm
 #define ABI_FUNC 'd2shpfunc3'
 !End of the abilint section
 
-     integer argl
-     real(dp) :: d2shpfunc3,jbespp1,jbespp2
+     integer,intent(in) :: argl
+     real(dp) :: d2shpfunc3 
+     real(dp),intent(in) :: jbespp1,jbespp2
      d2shpfunc3= alpha(1,1+argl)*(qq(1,1+argl)**2)*jbespp1 &
 &                                 +alpha(2,1+argl)*(qq(2,1+argl)**2)*jbespp2
    end function d2shpfunc3

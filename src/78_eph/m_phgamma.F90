@@ -33,6 +33,7 @@ module m_phgamma
  use m_tetrahedron
  use m_ifc
  use m_ebands
+ use m_fstab
  use iso_c_binding
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -47,13 +48,12 @@ module m_phgamma
  use m_geometry,       only : phdispl_cart2red
  use m_fftcore,        only : ngfft_seq
  use m_fft_mesh,       only : rotate_fft_mesh
+ !use m_cgtools,        only : set_istwfk
  use m_dynmat,         only : d2sym3, symdyma, ftgam_init, ftgam
  use defs_datatypes,   only : ebands_t
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
  use m_bz_mesh,        only : isamek, make_path
- 
- use m_fstab
 
  implicit none
 
@@ -2582,7 +2582,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  type(pseudopotential_type),intent(in) :: psps
  type(pawfgr_type),intent(in) :: pawfgr
  type(ifc_type),intent(in) :: ifc
- type(mpi_type),intent(inout) :: mpi_enreg
+ type(mpi_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18),ngfftf(18)
  real(dp),intent(in) :: n0(ebands%nsppol)
@@ -2698,7 +2698,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      write(std_out,"((a,i0,2a,a,i0))")"For spin: ",spin,", qpt: ",trim(ktoa(qpt)),", number of (k,q) pairs: ",kqcount
    end do
  end do
- call wrtout(std_out, "", do_flush=.True.)
+ call wrtout(std_out, " ", do_flush=.True.)
 
  ! Activate Fourier interpolation if irred q-points are not in the DVDB file.
  if (do_ftv1q /= 0) then

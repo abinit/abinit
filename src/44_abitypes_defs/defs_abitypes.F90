@@ -228,6 +228,7 @@ type dataset_type
  integer :: efmas_n_dirs
  integer :: efmas_ntheta
  integer :: enunit
+ integer :: eph_task
  integer :: exchn2n3d
  integer :: extrapwf
  integer :: fftgw
@@ -492,6 +493,7 @@ type dataset_type
  integer :: prtnest
  integer :: prtpmp
  integer :: prtposcar
+ integer :: prtphdos
  integer :: prtpot
  integer :: prtpsps=0
  integer :: prtspcur
@@ -895,6 +897,7 @@ type dataset_type
  real(dp) :: ph_wstep
  real(dp) :: ph_smear
  integer :: ddb_ngqpt(3)
+ real(dp) :: ddb_shiftq(3)
 !END EPH
 
  end type dataset_type

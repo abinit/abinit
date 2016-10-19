@@ -54,6 +54,7 @@ write_manifest()
 install_requires = [
     'numpy >=1.8',
     'mpi4py >=2.0',
+    'netCDF4 >=1.2',
     ]
 
 my_package_data = {

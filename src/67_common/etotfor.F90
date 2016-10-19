@@ -42,7 +42,7 @@
 !!  indsym(4,nsym,natom)=indirect indexing array for atom labels
 !!  kxc(nfft,nkxc)=exchange-correlation kernel, needed only if nkxc>0
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  nattyp(ntypat)=number of atoms of each type
 !!  nfft=(effective) number of FFT grid points (for this processor)
@@ -186,7 +186,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
  real(dp),intent(in) :: gsqcut
  real(dp),intent(inout) :: elast
  real(dp),intent(out) :: deltae,diffor,etotal,maxfor
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(efield_type),intent(in) :: dtefield
  type(dataset_type),intent(in) :: dtset
  type(electronpositron_type),pointer :: electronpositron

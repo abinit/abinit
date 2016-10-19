@@ -301,7 +301,8 @@ subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
 
 !Arguments ------------------------------------
 !scalars
- type(MPI_type),intent(inout) :: mpi_enreg1,MPI_enreg2
+ type(MPI_type),intent(in) :: mpi_enreg1
+ type(MPI_type),intent(out) :: MPI_enreg2
 
 !Local variables-------------------------------
 !scalars

@@ -101,7 +101,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,list_dynimage,&
  type(mep_type),intent(inout) :: mep_param
  type(ga_type),intent(inout) :: ga_param
  type(pimd_type),intent(inout) :: pimd_param
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: list_dynimage(ndynimage)
  type(results_img_type) :: results_img(nimage,ntimimage)

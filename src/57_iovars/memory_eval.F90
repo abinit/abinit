@@ -18,7 +18,7 @@
 !! INPUTS
 !!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables
 !!  iout=unit number of output file
-!!  mpi_enregs=informations about MPI parallelization
+!!  mpi_enregs=information about MPI parallelization
 !!  ndtset= number of datasets to be read; if 0, no multi-dataset mode
 !!  ndtset_alloc=number of datasets, corrected for allocation of at least
 !!      one data set.

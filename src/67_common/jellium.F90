@@ -20,7 +20,7 @@
 !! INPUTS
 !!  gmet(3,3)=metric tensor for G vecs (in bohr**-2)
 !!  gsqcut=cutoff on (k+G)^2 (bohr^-2) (sphere for density and potential)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
 !!  nspden=number of spin-density components
@@ -73,7 +73,7 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
 !scalars
  integer,intent(in) :: nfft,nspden,option,paral_kgb
  real(dp),intent(in) :: gsqcut,slabwsrad,slabzend,slabzstart
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: gmet(3,3),rprimd(3,3)
@@ -93,22 +93,16 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
 
 ! *********************************************************************
 
-!Statement functions are obsolete
-! gsq(i1,i2,i3)=dble(i1*i1)*gmet(1,1)+dble(i2*i2)*gmet(2,2)+&
-!& dble(i3*i3)*gmet(3,3)+dble(2*i1*i2)*gmet(1,2)+&
-!& dble(2*i2*i3)*gmet(2,3)+dble(2*i3*i1)*gmet(3,1)
-
 !Enforce that nspden<=2
  if(nspden>2) then
-   message = ' Jellium possible only with nspden <= 2.'
-   MSG_ERROR(message)
+   MSG_ERROR('Jellium possible only with nspden <= 2.')
  end if
 
 !Make sure option is acceptable
  if (option/=1 .and. option/=2) then
    write(message, '(a,i0,3a)' )&
-&   ' option=',option,' is not allowed.',ch10,&
-&   ' Must be 1 or 2.'
+&   'option=',option,' is not allowed.',ch10,&
+&   'Must be 1 or 2.'
    MSG_BUG(message)
  end if
 
@@ -219,7 +213,7 @@ subroutine jellium(gmet,gsqcut,mpi_enreg,nfft,ngfft,nspden,&
 !End of the abilint section
 
    real(dp) :: gsq_jel
-   integer :: i1,i2,i3
+   integer,intent(in) :: i1,i2,i3
    gsq_jel=dble(i1*i1)*gmet(1,1)+dble(i2*i2)*gmet(2,2)+&
 &   dble(i3*i3)*gmet(3,3)+dble(2*i1*i2)*gmet(1,2)+&
 &   dble(2*i2*i3)*gmet(2,3)+dble(2*i3*i1)*gmet(3,1)

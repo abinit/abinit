@@ -30,7 +30,7 @@
 !! gprimd(3,3)=reciprocal space dimensional primitive translations
 !! gsqcut=cutoff value on G**2 for sphere inside fft box
 !! mgfft=maximum size of 1D FFTs
-!! mpi_enreg=informations about MPI parallelization
+!! mpi_enreg=information about MPI parallelization
 !! mqgrid=number of grid pts in q array for atomic density spline n^AT(q)
 !! nattyp(ntypat)=number of atoms of each type in cell
 !! nfft=(effective) number of FFT grid points (for this processor)
@@ -90,7 +90,7 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
  integer,intent(in) :: mgfft,mqgrid,nfft,ntypat,usepaw
  real(dp),intent(in) :: gsqcut,ucvol
  type(pseudopotential_type),intent(in) :: psps
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
 !arrays
  integer,intent(in) :: atindx1(dtset%natom),nattyp(ntypat),ngfft(18)

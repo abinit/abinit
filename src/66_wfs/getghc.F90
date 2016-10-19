@@ -31,7 +31,7 @@
 !! gs_ham <type(gs_hamiltonian_type)>=all data for the Hamiltonian to be applied
 !! lambda=factor to be used when computing <G|H-lambda.S|C> - only for sij_opt=-1
 !!        Typically lambda is the eigenvalue (or its guess)
-!! mpi_enreg=informations about MPI parallelization
+!! mpi_enreg=information about MPI parallelization
 !! ndat=number of FFT to do in parallel
 !! prtvol=control print volume and debugging output
 !! sij_opt= -PAW ONLY-  if  0, only matrix elements <G|H|C> have to be computed
@@ -116,7 +116,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
  integer,intent(in) :: sij_opt,tim_getghc,type_calc
  integer,intent(in),optional :: select_k
  real(dp),intent(in) :: lambda
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(inout),target :: gs_ham
 !arrays
  integer,intent(in),optional,target :: kg_fft_k(:,:),kg_fft_kp(:,:)
@@ -779,7 +779,7 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istwf_k,mgfft,my_nspinor,ndat,npw_k,nvloc,n4,n5,n6,use_gpu_cuda
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: gbound_k(2*mgfft+4),kg_k(3,npw_k),ngfft(18)
  real(dp),intent(in) :: gprimd(3,3),kpt(3)

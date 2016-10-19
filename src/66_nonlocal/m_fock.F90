@@ -36,15 +36,16 @@ module m_fock
  use m_profiling_abi
  use m_errors
  use m_xmpi
- use m_mpinfo,     only : ptabs_fourdp
- use m_fstrings,        only : itoa, ftoa, sjoin
  use libxc_functionals
-
  use m_pawang
  use m_pawtab
  use m_pawfgr
  use m_pawfgrtab
  use m_pawcprj
+
+ use m_mpinfo,          only : ptabs_fourdp
+ use m_fstrings,        only : itoa, ftoa, sjoin
+ use m_cgtools,         only : set_istwfk
 
  implicit none
 
@@ -1717,7 +1718,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
  real(dp), intent(inout) :: fock_energy
  type(dataset_type),intent(in) :: dtset
  type(fock_type),intent(inout),pointer :: fock
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer, intent(in) :: indsym(4,dtset%nsym,dtset%natom),npwarr(dtset%nkpt)
  real(dp),intent(in) :: cg(2,mcg),occ(dtset%mband*dtset%nkpt*dtset%nsppol)

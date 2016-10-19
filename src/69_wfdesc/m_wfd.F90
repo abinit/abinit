@@ -468,7 +468,7 @@ subroutine kdata_init(Kdata,Cryst,Psps,kpoint,istwfk,ngfft,MPI_enreg,ecut,kg_k)
  type(crystal_t),intent(in) :: Cryst
  type(pseudopotential_type),intent(in) :: Psps
  type(kdata_t),intent(inout) :: Kdata
- type(MPI_type),intent(inout) :: MPI_enreg
+ type(MPI_type),intent(in) :: MPI_enreg
 !arrays
  integer,optional,target,intent(in) :: kg_k(:,:)
  integer,intent(in) :: ngfft(18)

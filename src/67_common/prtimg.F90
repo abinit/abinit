@@ -54,12 +54,11 @@
 subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot,&
 &                 prt_all_images,prtvolimg,resimg)
 
- use m_profiling_abi
-
  use defs_basis
  use defs_abitypes
  use m_results_img
  use m_errors
+ use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -77,7 +76,7 @@ subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot
  integer,intent(in) :: nimage_tot,dynimage(nimage_tot),imgmov,iout,nimage,prtvolimg !vz_d
  logical,intent(in) :: prt_all_images
  character(len=60),intent(in) :: imagealgo_str
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  type(results_img_type),target,intent(inout) :: resimg(nimage)
 
