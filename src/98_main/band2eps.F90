@@ -38,13 +38,27 @@
 program band2eps
 
  use defs_basis
- use m_profiling_abi
+ use defs_abitypes
+ use m_abimover
+ use m_build_info
  use m_xmpi
+ use m_profiling_abi
+ use m_errors
+ use m_effective_potential
+ use m_multibinit_dataset
+ use m_effective_potential_file
+
+ use m_io_tools,       only : open_file
+ use m_fstrings,       only : int2char4,tolower
+ use m_time ,          only : asctime
+ use m_band2eps_dataset
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'band2eps'
+ use interfaces_32_util
+ use interfaces_42_parser
 !End of the abilint section
 
  implicit none
@@ -53,22 +67,26 @@ program band2eps
 
 !Local variables-------------------------------
 !no_abirules
+ integer,parameter :: master=0
  character(len=fnlen) :: filnam(4)
- real(dp) :: E,Emax,Emin,deltaE
- integer :: EmaxN,EminN,gradRes,kmaxN,kminN,lastPos,pos,posk
- integer :: iatom,ii,imode,iqpt,jj,natom,nqpt
+ real(dp) :: E,deltaE
+ integer :: comm,EmaxN,EminN,kmaxN,kminN,lastPos,lenstr,pos,posk
+ integer :: iatom,ii,imode,io,iqpt,jj,nqpt
+ integer :: nproc,my_rank
+ integer :: option,unt1,unt2,unt3
+ logical :: iam_master
+!array
  real(dp),allocatable :: phfrq(:),phfrqqm1(:)
  real(dp),allocatable :: color(:,:)
  real(dp) :: facUnit,norm,renorm
- real(dp),allocatable :: scale(:)
- character(len=6),allocatable :: qname(:)
- integer,allocatable :: nqptl(:)
  real(dp),allocatable :: colorAtom(:,:)
  real(dp),allocatable :: displ(:,:)
+ type(band2eps_dataset_type) :: inp
+ character(len=500) :: message
+ character(len=strlen) :: string
   !scale : hold the scale for each line (dimension=nlines)
   !qname : hold the name (gamma,R,etc..) for each extremity of line (dimension=nlines+1)
   !nqptl : =nqpt by line (dimension=nlines)
- integer :: cunits,nlines
   !nlines : number of lines
   !Emin is the minimum energy of the vertical axe
   !Emax is the maximum energy of the vertical axe
@@ -84,7 +102,13 @@ program band2eps
 !Change communicator for I/O (mandatory!)
  call abi_io_redirect(new_io_comm=xmpi_world)
 
+!Initialize MPI
  call xmpi_init()
+ comm = xmpi_world
+
+!MPI variables
+ nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ iam_master = (my_rank == master)
 
 !Initialize memory profiling if it is activated
 !if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
@@ -99,260 +123,245 @@ program band2eps
 !(2) EPS graphic
 !(3) Input phonon energies (from sortph.f)
 !(4) Input displacements (from sortph.f)
- read(std_in, '(a)' ) filnam(1)
- if(len_trim(filnam(1))>132)then
-   write(std_out,*)' band2eps : WARNING -'
-   write(std_out,*)'  The length of this filename exceeds 132 characters. This might induce trouble later.'
- end if
- read(std_in, '(a)' ) filnam(2)
- if(len_trim(filnam(1))>132)then
-   write(std_out,*)' band2eps : WARNING -'
-   write(std_out,*)'  The length of this filename exceeds 132 characters. This might induce trouble later.'
- end if
- read(std_in, '(a)' ) filnam(3)
- if(len_trim(filnam(1))>132)then
-   write(std_out,*)' band2eps : WARNING -'
-   write(std_out,*)'  The length of this filename exceeds 132 characters. This might induce trouble later.'
- end if
- read(std_in, '(a)' ) filnam(4)
- if(len_trim(filnam(1))>132)then
-   write(std_out,*)' band2eps : WARNING -'
-   write(std_out,*)'  The length of this filename exceeds 132 characters. This might induce trouble later.'
- end if
-!open(18,FILE='band.eps',STATUS='replace',ACCESS='sequential',ACTION='write')
+ write(std_out,*)' Give name for formatted input file : '
+ read(std_in, '(a)',IOSTAT=io) filnam(1)
+ write(std_out,'(a,a)' )'-   ',trim(filnam(1))
+
+ write(std_out,*)' Give name for formatted output eps file : '
+ read(std_in, '(a)',IOSTAT=io) filnam(2)
+ write(std_out,'(a,a)' )'-   ',trim(filnam(2))
+
+ write(std_out,*)' Give name for formatted phonon frequency file : '
+ read(std_in, '(a)',IOSTAT=io) filnam(3)
+ write(std_out,'(a,a)' )'-   ',trim(filnam(3))
+
+ write(std_out,*)' Give name for formatted displacements file : '
+ read(std_in, '(a)',IOSTAT=io) filnam(4)
+ write(std_out,'(a,a)' )'-   ',trim(filnam(4))
+
+!Read the input file, and store the information in a long string of characters
+!strlen from defs_basis module
+ write(std_out,'(a,a)') 'Opening and reading input file: ', filnam(1)
+ option=1
+ call instrng (filnam(1),lenstr,option,strlen,string)
+ !To make case-insensitive, map characters to upper case:
+ call inupper(string(1:lenstr))
+
+!Read the input file
+ call invars11(inp,lenstr,string)
+ if(inp%prtout == 1) call outvars_band2eps(inp,std_out)
+ 
 !Open the '.eps' file for write
- write(std_out,'(a,a)') 'Opening file ', filnam(2)
- open(18, file=filnam(2))
+ write(std_out,'(a,a)') 'Creation of file ', filnam(2)
+ if (open_file(filnam(2),message,newunit=unt1,form="formatted",status="unknown",action="write") /= 0) then
+   MSG_ERROR(message)
+ end if 
 !Open the phonon energies file
- write(std_out,'(a,a)') 'Opening file ', filnam(3)
- open(19, file=filnam(3))
+ if (open_file(filnam(3),message,newunit=unt2,form="formatted") /= 0) then
+   MSG_ERROR(message)
+ end if 
  if(filnam(4)/='no') then
 !  Open the displacements file
-   write(std_out,'(a,a)') 'Opening file ', filnam(4)
-   open(20, file=filnam(4))
+   if (open_file(filnam(4),message,newunit=unt3,form="formatted",status="old",action='read') /= 0) then
+     MSG_ERROR(message)
+   end if
  end if
-!Open the input file
- write(std_out,'(a,a)') 'Opening file ', filnam(1)
- open(21, file=filnam(1))
+
+ 
 !Boundings of the plot (only the plot and not what is around)
  EminN=6900
  EmaxN=2400
  kminN=2400
  kmaxN=9600
-!Read input file (input.band) to know how to format the graph
- read(21,*)
- read(21,*)
- read(21,*) natom
- read(21,*)
- read(21,*) Emin,Emax,gradRes
- read(21,*)
- read(21,*) cunits
- read(21,*)
- read(21,*) nlines
+
 !Allocate dynamique variables
- ABI_ALLOCATE(phfrqqm1,(3*natom))
- ABI_ALLOCATE(phfrq,(3*natom))
- ABI_ALLOCATE(color,(3,3*natom))
- ABI_ALLOCATE(qname,(nlines+1))
- ABI_ALLOCATE(scale,(nlines))
- ABI_ALLOCATE(nqptl,(nlines))
- ABI_ALLOCATE(colorAtom,(3,natom))
+ ABI_ALLOCATE(phfrqqm1,(3*inp%natom))
+ ABI_ALLOCATE(phfrq,(3*inp%natom))
+ ABI_ALLOCATE(color,(3,3*inp%natom))
+ ABI_ALLOCATE(colorAtom,(3,inp%natom))
 !colorAtom(1,1:5) : atoms contributing to red (ex : [1 0 0 0 0])
 !colorAtom(2,1:5) : atoms contributing to green (ex : [0 1 0 0 0])
 !colorAtom(3,1:5) : atoms contributing to blue (ex : [0 0 1 1 1])
- ABI_ALLOCATE(displ,(natom,3*natom))
+!tranfert color from input
+ colorAtom(1,:) = inp%red
+ colorAtom(2,:) = inp%green
+ colorAtom(3,:) = inp%blue
+ ABI_ALLOCATE(displ,(inp%natom,3*inp%natom))
 !Read end of input file
- read(21,*)
- read(21,*) (qname(ii),ii=1,nlines+1)
- read(21,*)
- read(21,*) (nqptl(ii),ii=1,nlines)
- read(21,*)
- read(21,*) (scale(ii),ii=1,nlines)
- read(21,*)
- read(21,*)
- read(21,*)
- read(21,*) (colorAtom(1,ii),ii=1,natom)
- read(21,*)
- read(21,*) (colorAtom(2,ii),ii=1,natom)
- read(21,*)
- read(21,*) (colorAtom(3,ii),ii=1,natom)
+
 !Multiplication factor for units (from Hartree to cm-1 or THz)
- if(cunits==1) then
+ if(inp%cunit==1) then
    facUnit=Ha_cmm1
- elseif(cunits==2) then
+ elseif(inp%cunit==2) then
    facUnit=Ha_THz
  else
  end if
 !calculate nqpt
  nqpt=0
- do ii=1,nlines
-   nqpt=nqpt+nqptl(ii)
+ do ii=1,inp%nlines
+   nqpt=nqpt+inp%nqline(ii)
  end do
 !compute normalisation factor
  renorm=0
- do ii=1,nlines
-   renorm=renorm+nqptl(ii)*scale(ii)
+ do ii=1,inp%nlines
+   renorm=renorm+inp%nqline(ii)*inp%scale(ii)
  end do
  renorm=renorm/nqpt
-!Calculate Emin and Emax
- Emin=Emin/FacUnit
- Emax=Emax/FacUnit
+!Calculate inp%min and inp%max
+ inp%min=inp%min/FacUnit
+ inp%max=inp%max/FacUnit
 
 !*******************************************************
 !Begin to write some comments in the eps file
 !This is based to 'xfig'
 
- write(18,'(a)') '% !PS-Adobe-2.0 EPSF-2.0'
- write(18,'(a)') '%%Title: band.ps'
- write(18,'(a)') '%%BoundingBox: 0 0 581 310'
- write(18,'(a)') '%%Magnification: 1.0000'
+ write(unt1,'(a)') '% !PS-Adobe-2.0 EPSF-2.0'
+ write(unt1,'(a)') '%%Title: band.ps'
+ write(unt1,'(a)') '%%BoundingBox: 0 0 581 310'
+ write(unt1,'(a)') '%%Magnification: 1.0000'
 
- write(18,'(a)') '/$F2psDict 200 dict def'
- write(18,'(a)') '$F2psDict begin'
- write(18,'(a)') '$F2psDict /mtrx matrix put'
- write(18,'(a)') '/col-1 {0 setgray} bind def'
- write(18,'(a)') '/col0 {0.000 0.000 0.000 srgb} bind def'
- write(18,'(a)') 'end'
- write(18,'(a)') 'save'
- write(18,'(a)') 'newpath 0 310 moveto 0 0 lineto 581 0 lineto 581 310 lineto closepath clip newpath'
- write(18,'(a)') '-36.0 446.0 translate'
- write(18,'(a)') '1 -1 scale'
+ write(unt1,'(a)') '/$F2psDict 200 dict def'
+ write(unt1,'(a)') '$F2psDict begin'
+ write(unt1,'(a)') '$F2psDict /mtrx matrix put'
+ write(unt1,'(a)') '/col-1 {0 setgray} bind def'
+ write(unt1,'(a)') '/col0 {0.000 0.000 0.000 srgb} bind def'
+ write(unt1,'(a)') 'end'
+ write(unt1,'(a)') 'save'
+ write(unt1,'(a)') 'newpath 0 310 moveto 0 0 lineto 581 0 lineto 581 310 lineto closepath clip newpath'
+ write(unt1,'(a)') '-36.0 446.0 translate'
+ write(unt1,'(a)') '1 -1 scale'
 
- write(18,'(a)') '/cp {closepath} bind def'
- write(18,'(a)') '/ef {eofill} bind def'
- write(18,'(a)') '/gr {grestore} bind def'
- write(18,'(a)') '/gs {gsave} bind def'
- write(18,'(a)') '/sa {save} bind def'
- write(18,'(a)') '/rs {restore} bind def'
- write(18,'(a)') '/l {lineto} bind def'
- write(18,'(a)') '/m {moveto} bind def'
- write(18,'(a)') '/rm {rmoveto} bind def'
- write(18,'(a)') '/n {newpath} bind def'
- write(18,'(a)') '/s {stroke} bind def'
- write(18,'(a)') '/sh {show} bind def'
- write(18,'(a)') '/slc {setlinecap} bind def'
- write(18,'(a)') '/slj {setlinejoin} bind def'
- write(18,'(a)') '/slw {setlinewidth} bind def'
- write(18,'(a)') '/srgb {setrgbcolor} bind def'
- write(18,'(a)') '/rot {rotate} bind def'
- write(18,'(a)') '/sc {scale} bind def'
- write(18,'(a)') '/sd {setdash} bind def'
- write(18,'(a)') '/ff {findfont} bind def'
- write(18,'(a)') '/sf {setfont} bind def'
- write(18,'(a)') '/scf {scalefont} bind def'
- write(18,'(a)') '/sw {stringwidth} bind def'
- write(18,'(a)') '/tr {translate} bind def'
- write(18,'(a)') '/tnt {dup dup currentrgbcolor'
+ write(unt1,'(a)') '/cp {closepath} bind def'
+ write(unt1,'(a)') '/ef {eofill} bind def'
+ write(unt1,'(a)') '/gr {grestore} bind def'
+ write(unt1,'(a)') '/gs {gsave} bind def'
+ write(unt1,'(a)') '/sa {save} bind def'
+ write(unt1,'(a)') '/rs {restore} bind def'
+ write(unt1,'(a)') '/l {lineto} bind def'
+ write(unt1,'(a)') '/m {moveto} bind def'
+ write(unt1,'(a)') '/rm {rmoveto} bind def'
+ write(unt1,'(a)') '/n {newpath} bind def'
+ write(unt1,'(a)') '/s {stroke} bind def'
+ write(unt1,'(a)') '/sh {show} bind def'
+ write(unt1,'(a)') '/slc {setlinecap} bind def'
+ write(unt1,'(a)') '/slj {setlinejoin} bind def'
+ write(unt1,'(a)') '/slw {setlinewidth} bind def'
+ write(unt1,'(a)') '/srgb {setrgbcolor} bind def'
+ write(unt1,'(a)') '/rot {rotate} bind def'
+ write(unt1,'(a)') '/sc {scale} bind def'
+ write(unt1,'(a)') '/sd {setdash} bind def'
+ write(unt1,'(a)') '/ff {findfont} bind def'
+ write(unt1,'(a)') '/sf {setfont} bind def'
+ write(unt1,'(a)') '/scf {scalefont} bind def'
+ write(unt1,'(a)') '/sw {stringwidth} bind def'
+ write(unt1,'(a)') '/tr {translate} bind def'
+ write(unt1,'(a)') '/tnt {dup dup currentrgbcolor'
 
- write(18,'(a)') '4 -2 roll dup 1 exch sub 3 -1 roll mul add'
- write(18,'(a)') '4 -2 roll dup 1 exch sub 3 -1 roll mul add'
- write(18,'(a)') '4 -2 roll dup 1 exch sub 3 -1 roll mul add srgb}'
- write(18,'(a)') 'bind def'
- write(18,'(a)') '/shd {dup dup currentrgbcolor 4 -2 roll mul 4 -2 roll mul'
- write(18,'(a)') ' 4 -2 roll mul srgb} bind def'
- write(18,'(a)') '/$F2psBegin {$F2psDict begin /$F2psEnteredState save def} def'
- write(18,'(a)') '/$F2psEnd {$F2psEnteredState restore end} def'
- write(18,'(a)') '$F2psBegin'
- write(18,'(a)') '%%Page: 1 1'
- write(18,'(a)') '10 setmiterlimit'
- write(18,'(a)') '0.06000 0.06000 sc'
+ write(unt1,'(a)') '4 -2 roll dup 1 exch sub 3 -1 roll mul add'
+ write(unt1,'(a)') '4 -2 roll dup 1 exch sub 3 -1 roll mul add'
+ write(unt1,'(a)') '4 -2 roll dup 1 exch sub 3 -1 roll mul add srgb}'
+ write(unt1,'(a)') 'bind def'
+ write(unt1,'(a)') '/shd {dup dup currentrgbcolor 4 -2 roll mul 4 -2 roll mul'
+ write(unt1,'(a)') ' 4 -2 roll mul srgb} bind def'
+ write(unt1,'(a)') '/$F2psBegin {$F2psDict begin /$F2psEnteredState save def} def'
+ write(unt1,'(a)') '/$F2psEnd {$F2psEnteredState restore end} def'
+ write(unt1,'(a)') '$F2psBegin'
+ write(unt1,'(a)') '%%Page: 1 1'
+ write(unt1,'(a)') '10 setmiterlimit'
+ write(unt1,'(a)') '0.06000 0.06000 sc'
 
 !****************************************************************
 !Begin of the intelligible part of the postcript document
 
- write(18,'(a)') '%**************************************'
+ write(unt1,'(a)') '%**************************************'
 !****************************************************************
 !Draw the box containing the plot
- write(18,'(a)') '%****Big Box****'
- write(18,'(a)') '7.500 slw'
- write(18,'(a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ', EmaxN,&
+ write(unt1,'(a)') '%****Big Box****'
+ write(unt1,'(a)') '12 slw'
+ write(unt1,'(a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ', EmaxN,&
 & ' m ', kmaxN,' ', EmaxN, ' l ', &
 & kmaxN,' ', EminN, ' l ', kminN,' ', EminN, ' l'
- write(18,'(a)') 'cp gs col0 s gr'
+ write(unt1,'(a)') 'cp gs col0 s gr'
 
 !****************************************************************
 !Write unit on the middle left of the vertical axe
- write(18,'(a)') '%****Units****'
+ write(unt1,'(a)') '%****Units****'
 
-
-
- if(cunits==1) then
+ if(inp%cunit==1) then
 !  1/lambda
-   write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
-   write(18,'(a)') '1425 5650 m'
-   write(18,'(3a)') 'gs 1 -1 sc  90.0 rot (Frequency ',achar(92),'(cm) col0 sh gr'
+   write(unt1,'(a)') '/Times-Roman ff 270.00 scf sf'
+   write(unt1,'(a)') '1425 5650 m'
+   write(unt1,'(3a)') 'gs 1 -1 sc  90.0 rot (Frequency ',achar(92),'(cm) col0 sh gr'
 !  cm-1
-   write(18,'(a)') '/Times-Roman ff 200.00 scf sf'
-   write(18,'(a)') '1325 4030 m'
-   write(18,'(a)') 'gs 1 -1 sc 90.0 rot  (-1) col0 sh gr'
-   write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
-   write(18,'(a)') '1425 3850 m'
-   write(18,'(3a)') 'gs 1 -1 sc  90.0 rot (',achar(92),')) col0 sh gr'
+   write(unt1,'(a)') '/Times-Roman ff 200.00 scf sf'
+   write(unt1,'(a)') '1325 4030 m'
+   write(unt1,'(a)') 'gs 1 -1 sc 90.0 rot  (-1) col0 sh gr'
+   write(unt1,'(a)') '/Times-Roman ff 270.00 scf sf'
+   write(unt1,'(a)') '1425 3850 m'
+   write(unt1,'(3a)') 'gs 1 -1 sc  90.0 rot (',achar(92),')) col0 sh gr'
  else
 !  Freq
-   write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
-   write(18,'(a)') '825 4850 m'
-   write(18,'(a)') 'gs 1 -1 sc  90.0 rot (Freq) col0 sh gr'
+   write(unt1,'(a)') '/Times-Roman ff 270.00 scf sf'
+   write(unt1,'(a)') '825 4850 m'
+   write(unt1,'(a)') 'gs 1 -1 sc  90.0 rot (Freq) col0 sh gr'
 !  THz
-   write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
-   write(18,'(a)') '825 4350 m'
-   write(18,'(a)') 'gs 1 -1 sc 90.0 rot  (THz) col0 sh gr'
+   write(unt1,'(a)') '/Times-Roman ff 270.00 scf sf'
+   write(unt1,'(a)') '825 4350 m'
+   write(unt1,'(a)') 'gs 1 -1 sc 90.0 rot  (THz) col0 sh gr'
  end if
 !*****************************************************************
 !Write graduation on the vertical axe
- write(18,'(a)') '%****Vertical graduation****'
- deltaE=(Emax-Emin)/gradRes
+ write(unt1,'(a)') '%****Vertical graduation****'
+ deltaE=(inp%max-inp%min)/inp%ngrad
 
 !Replacing do loop with real variables with standard g95 do loop
- E=Emin
+ E=inp%min
  do
-!  do E=Emin,(Emax-deltaE/2),deltaE
-   if (E >= (Emax-deltaE/2)-tol6) exit
+!  do E=inp%min,(inp%max-deltaE/2),deltaE
+   if (E >= (inp%max-deltaE/2)-tol6) exit
    pos=int(((EminN-EmaxN)*E &
-&   +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
+&   +EmaxN*inp%min -EminN*inp%max)/(inp%min-inp%max))
 
 !  write the value of energy(or frequence)
-   write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
-   write(18,'(i4,a,i4,a)') kminN-800,' ',pos+60,' m'        !-1300 must be CHANGED
+   write(unt1,'(a)') '/Times-Roman ff 270.00 scf sf'
+   write(unt1,'(i4,a,i4,a)') kminN-800,' ',pos+60,' m'        !-1300 must be CHANGED
 !  as a function of the width of E
-   write(18,'(a,i6,a)') 'gs 1 -1 sc (', nint(E*facUnit),') col0 sh gr'
+   write(unt1,'(a,i6,a)') 'gs 1 -1 sc (', nint(E*facUnit),') col0 sh gr'
 
 !  write a little bar
-   write(18,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ',pos ,' m ', kminN+100,' ', pos, ' l'
-   write(18,'(a)') 'gs col0 s gr '
+   write(unt1,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ',pos ,' m ', kminN+100,' ', pos, ' l'
+   write(unt1,'(a)') 'gs col0 s gr '
 
    E = E+deltaE
  end do
 
-!do the same thing for E=Emax (floating point error)
- write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
- write(18,'(i4,a,i4,a)') kminN-800,' ',EmaxN+60,' m'        !-1300 must be changed as E
- write(18,'(a,i6,a)') 'gs 1 -1 sc (', nint(Emax*facUnit),') col0 sh gr'
+!do the same thing for E=inp%max (floating point error)
+ write(unt1,'(a)') '/Times-Roman ff 270.00 scf sf'
+ write(unt1,'(i4,a,i4,a)') kminN-800,' ',EmaxN+60,' m'        !-1300 must be changed as E
+ write(unt1,'(a,i6,a)') 'gs 1 -1 sc (', nint(inp%max*facUnit),') col0 sh gr'
 
 
 !draw zero line
  E=0
  pos=int(((EminN-EmaxN)*E &
-& +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
- write(18,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ',pos ,' m ', kmaxN,' ', pos, ' l'
- write(18,'(a)') 'gs col0 s gr '
+& +EmaxN*inp%min -EminN*inp%max)/(inp%min-inp%max))
+ write(unt1,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', kminN,' ',pos ,' m ', kmaxN,' ', pos, ' l'
+ write(unt1,'(a)') 'gs col0 s gr '
 
 
 !******************************************************
 !draw legend of horizontal axe
 !+vertical line
 
- write(18,'(a)') '%****Horizontal graduation****'
-
-
+ write(unt1,'(a)') '%****Horizontal graduation****'
 
  lastPos=kminN
 
- do ii=0,nlines
+ do ii=0,inp%nlines
 
    if(ii/=0) then
-     posk=int(((kminN-kmaxN)*(nqptl(ii))) &
-&     *scale(ii)/renorm/(-nqpt))
+     posk=int(((kminN-kmaxN)*(inp%nqline(ii))) &
+&     *inp%scale(ii)/renorm/(-nqpt))
    else
      posk=0
    end if
@@ -360,62 +369,57 @@ program band2eps
    posk=posk+lastPos
    lastPos=posk
 
-   if(qname(ii+1)=='gamma') then             !GAMMA
-     write(18,'(a)') '/Symbol ff 270.00 scf sf'
-     write(18,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
-     write(18,'(a)') 'gs 1 -1 sc (G) col0 sh gr'
-   elseif(qname(ii+1)=='lambda') then              !LAMBDA
-     write(18,'(a)') '/Symbol ff 270.00 scf sf'
-     write(18,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
-     write(18,'(a)') 'gs 1 -1 sc (L) col0 sh gr'
+   if(tolower(inp%qpoint_name(ii+1))=='gamma') then             !GAMMA
+     write(unt1,'(a)') '/Symbol ff 270.00 scf sf'
+     write(unt1,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
+     write(unt1,'(a)') 'gs 1 -1 sc (G) col0 sh gr'
+   elseif(tolower(inp%qpoint_name(ii+1))=='lambda') then              !LAMBDA
+     write(unt1,'(a)') '/Symbol ff 270.00 scf sf'
+     write(unt1,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
+     write(unt1,'(a)') 'gs 1 -1 sc (L) col0 sh gr'
    else                                     !autre
-     write(18,'(a)') '/Times-Roman ff 270.00 scf sf'
-     write(18,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
-     write(18,'(a,a1,a)') 'gs 1 -1 sc (',qname(ii+1),') col0 sh gr'
+     write(unt1,'(a)') '/Times-Roman ff 270.00 scf sf'
+     write(unt1,'(i4,a,i4,a)') posk-100,' ', 7150, ' m'
+     write(unt1,'(a,a1,a)') 'gs 1 -1 sc (',inp%qpoint_name(ii+1),') col0 sh gr'
    end if
 
-
 !  draw vertical line
-   write(18,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', posk,' ',EminN ,' m ', posk,' ', EmaxN, ' l'
-   write(18,'(a)') 'gs col0 s gr '
-
+   write(unt1,'(a,i4,a,i4,a,i4,a,i4,a)') 'n ', posk,' ',EminN ,' m ', posk,' ', EmaxN, ' l'
+   write(unt1,'(a)') 'gs col0 s gr '
 
  end do
-
-
-
 
 !***********************************************************
 !Write the bands (the most important part actually)
 
- write(18,'(a)') '%****Write Bands****'
-
- read(19,*) (phfrqqm1(ii),ii=1,3*natom)
+ write(unt1,'(a)') '%****Write Bands****'
 
  lastPos=kminN
- do jj=1,nlines
-   do iqpt=1,nqptl(jj)
-     read(19,*) (phfrq(ii),ii=1,3*natom)
-     do imode=1,3*natom
+ 
+ read(unt2,*) (phfrqqm1(ii),ii=1,3*inp%natom)
 
+ do jj=1,inp%nlines
+   do iqpt=1,inp%nqline(jj)
+     read(unt2,*) (phfrq(ii),ii=1,3*inp%natom)
+     do imode=1,3*inp%natom
 
        if(filnam(4)/='no') then       !calculate the color else in black and white
-         read(20,*) (displ(iatom,imode),iatom=1,natom)
-
-
+         do iatom=1,inp%natom
+           read(unt3,*) displ(iatom,imode)
+         end do
 !        normalize displ
          norm=0
-         do iatom=1,natom
+         do iatom=1,inp%natom
            norm=norm+displ(iatom,imode)
          end do
 
-         do iatom=1,natom
+         do iatom=1,inp%natom
            displ(iatom,imode)=displ(iatom,imode)/norm
          end do
 
 !        Treat color
          color(:,imode)=0
-         do ii=1,natom
+         do ii=1,inp%natom
 !          Red
            color(1,imode)=color(1,imode)+displ(ii,imode)*colorAtom(1,ii)
 !          Green
@@ -423,40 +427,35 @@ program band2eps
 !          Blue
            color(3,imode)=color(3,imode)+displ(ii,imode)*colorAtom(3,ii)
          end do
-
        end if
 
        pos=int(((EminN-EmaxN)*phfrqqm1(imode) &
-&       +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
+&       +EmaxN*inp%min -EminN*inp%max)/(inp%min-inp%max))
 
        posk=int(((kminN-kmaxN)*(iqpt-1) &
-&       *scale(jj)/renorm/(-nqpt)))
+&       *inp%scale(jj)/renorm/(-nqpt)))
        posk=posk+lastPos
 
-
-       write(18,'(a,i4,a,i4,a)') 'n ',posk,' ',pos,' m'
-
+       write(unt1,'(a,i5,a,i5,a)') 'n ',posk,' ',pos,' m'       
 
        pos=int(((EminN-EmaxN)*phfrq(imode) &
-&       +EmaxN*Emin -EminN*Emax)/(Emin-Emax))
+&       +EmaxN*inp%min -EminN*inp%max)/(inp%min-inp%max))
        posk=int(((kminN-kmaxN)*(iqpt) &
-&       *scale(jj)/renorm/(-nqpt)))
+&       *inp%scale(jj)/renorm/(-nqpt)))
        posk=posk+lastPos
-       write(18,'(i4,a,i4,a)') posk,' ',pos,' l gs'
-
+       write(unt1,'(i5,a,i5,a)') posk,' ',pos,' l gs'
 
 
        if(filnam(4)/='no') then     !(in color)
-         write(18,'(f6.3,a,f6.3,a,f6.3,a)') color(1,imode),' ', &
+         write(unt1,'(f6.3,a,f6.3,a,f6.3,a)') color(1,imode),' ', &
 &         color(2,imode),' ',color(3,imode), ' srgb s gr'
        else
-         write(18,'(f6.3,a,f6.3,a,f6.3,a)') 0.0,' ', &
+         write(unt1,'(f6.3,a,f6.3,a,f6.3,a)') 0.0,' ', &
 &         0.0,' ',0.0, ' srgb s gr'
        end if
 
 
      end do
-
 
      phfrqqm1=phfrq
 
@@ -468,10 +467,12 @@ program band2eps
 
 !**********************************************************
 !Ending the poscript document
- write(18,'(a)') '$F2psEnd'
- write(18,'(a)') 'rs'
+ write(unt1,'(a)') '$F2psEnd'
+ write(unt1,'(a)') 'rs'
 
  !call abinit_doctor("__band2eps")
+
+ call band2eps_dtset_free(inp)
 
  call xmpi_end()
 

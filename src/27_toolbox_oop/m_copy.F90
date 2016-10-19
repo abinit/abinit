@@ -94,6 +94,7 @@ MODULE m_copy
   module procedure alloc_copy_rdp3d
   module procedure alloc_copy_rdp4d
   module procedure alloc_copy_rdp5d
+  module procedure alloc_copy_rdp6d
   module procedure alloc_copy_csp1d
   module procedure alloc_copy_csp2d
   module procedure alloc_copy_csp3d
@@ -1624,6 +1625,51 @@ subroutine alloc_copy_rdp5d(xval,copy)
  copy(:,:,:,:,:)=xval(:,:,:,:,:)
 
 end subroutine alloc_copy_rdp5d
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_copy/alloc_copy_rdp6d
+!! NAME
+!! alloc_copy_rdp6d
+!!
+!! FUNCTION
+!!  Performs a copy of an array.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      c_f_pointer
+!!
+!! SOURCE
+
+subroutine alloc_copy_rdp6d(xval,copy)
+
+!Arguments ------------------------------------
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'alloc_copy_rdp6d'
+!End of the abilint section
+
+ real(dp),intent(in) :: xval(:,:,:,:,:,:)
+ real(dp),allocatable,intent(out) :: copy(:,:,:,:,:,:)
+
+!Local variables-------------------------------
+ integer :: il1,iu1,il2,iu2,il3,iu3,il4,iu4,il5,iu5,il6,iu6
+! *********************************************************************
+
+ il1=lbound(xval,DIM=1); iu1=ubound(xval,DIM=1)
+ il2=lbound(xval,DIM=2); iu2=ubound(xval,DIM=2)
+ il3=lbound(xval,DIM=3); iu3=ubound(xval,DIM=3)
+ il4=lbound(xval,DIM=4); iu4=ubound(xval,DIM=4)
+ il5=lbound(xval,DIM=5); iu5=ubound(xval,DIM=5)
+ il6=lbound(xval,DIM=6); iu6=ubound(xval,DIM=6)
+ ABI_MALLOC(copy,(il1:iu1,il2:iu2,il3:iu3,il4:iu4,il5:iu5,il6:iu6))
+ copy(:,:,:,:,:,:)=xval(:,:,:,:,:,:)
+
+end subroutine alloc_copy_rdp6d
 !!***
 
 !----------------------------------------------------------------------

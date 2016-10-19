@@ -61,6 +61,8 @@ module m_dynmat
  public :: wings3               ! Suppress the wings of the cartesian 2DTE for which the diagonal element is not known
  public :: asrif9               ! Imposes the Acoustic Sum Rule to Interatomic Forces
  public :: make_bigbox          ! Generates a Big Box of R points for the Fourier Transforms the dynamical matrix
+ public :: bigbx9               ! Helper functions that faciliates the generation  of a Big Box containing
+ public :: cell9                ! reorder cell of rpt point 
  public :: canat9               ! From reduced to canonical coordinates
  public :: canct9               ! Convert from canonical coordinates to cartesian coordinates
  public :: chkrp9               ! Check if the rprim used for the definition of the unit cell (in the
@@ -2391,6 +2393,7 @@ end subroutine asrif9
 !! rprim(3,3)= Normalized coordinates in real space  !!! IS THIS CORRECT?
 !!
 !! OUTPUT
+!! cell= (nrpt,3) Give the index of the the cell and irpt 
 !! nprt= Number of R points in the Big Box
 !! rpt(3,nrpt)= Canonical coordinates of the R points in the unit cell
 !!  These coordinates are normalized (=> * acell(3)!!)
@@ -2404,7 +2407,7 @@ end subroutine asrif9
 !!
 !! SOURCE
 
-subroutine make_bigbox(brav,ngqpt,nqshft,rprim,nrpt,rpt)
+subroutine make_bigbox(brav,cell,ngqpt,nqshft,rprim,nrpt,rpt)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2423,25 +2426,28 @@ subroutine make_bigbox(brav,ngqpt,nqshft,rprim,nrpt,rpt)
  integer,intent(in) :: ngqpt(3)
  real(dp),intent(in) :: rprim(3,3)
  real(dp),allocatable,intent(out) :: rpt(:,:)
+ integer,allocatable,intent(out) :: cell(:,:)
 
 !Local variables -------------------------
 !scalars
  integer :: choice,mrpt
 !arrays
  real(dp) :: dummy_rpt(3,1)
+ integer:: dummy_cell(1,3)
 
 ! *********************************************************************
 
  ! Compute the number of points (cells) in real space
  choice=0
- call bigbx9(brav,choice,1,ngqpt,nqshft,mrpt,rprim,dummy_rpt)
+ call bigbx9(brav,dummy_cell,choice,1,ngqpt,nqshft,mrpt,rprim,dummy_rpt)
 
  ! Now we can allocate and calculate the points and the weights.
  nrpt = mrpt
  ABI_ALLOCATE(rpt,(3,nrpt))
+ ABI_ALLOCATE(cell,(3,nrpt))
 
  choice=1
- call bigbx9(brav,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
+ call bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
 
 end subroutine make_bigbox
 !!***
@@ -2470,6 +2476,7 @@ end subroutine make_bigbox
 !! rprim(3,3)= Normalized coordinates in real space  !!! IS THIS CORRECT?
 !!
 !! OUTPUT
+!! cell= (nrpt,3) Give the index of the the cell and irpt 
 !! nprt= Number of R points in the Big Box
 !! rpt(3,mrpt)= Canonical coordinates of the R points in the unit cell
 !!  These coordinates are normalized (=> * acell(3)!!)
@@ -2482,7 +2489,7 @@ end subroutine make_bigbox
 !!
 !! SOURCE
 
-subroutine bigbx9(brav,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
+subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2501,6 +2508,7 @@ subroutine bigbx9(brav,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
  integer,intent(in) :: ngqpt(3)
  real(dp),intent(in) :: rprim(3,3)
  real(dp),intent(out) :: rpt(3,mrpt)
+ integer,intent(out) :: cell(3,mrpt)
 
 !Local variables -------------------------
 !In some cases, the atoms coordinates are not packed in the
@@ -2515,6 +2523,7 @@ subroutine bigbx9(brav,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
 
  lqshft=1
  if(nqshft/=1)lqshft=2
+
 
 !Simple Cubic Lattice
  if (brav==1) then
@@ -2535,6 +2544,7 @@ subroutine bigbx9(brav,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
            rpt(1,irpt)=r1*rprim(1,1)+r2*rprim(1,2)+r3*rprim(1,3)
            rpt(2,irpt)=r1*rprim(2,1)+r2*rprim(2,2)+r3*rprim(2,3)
            rpt(3,irpt)=r1*rprim(3,1)+r2*rprim(3,2)+r3*rprim(3,3)
+           cell(1,irpt)=r1;cell(2,irpt)=r2;cell(3,irpt)=r3
          end do
        end do
      end do
@@ -2568,6 +2578,9 @@ subroutine bigbx9(brav,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
            rpt(1,irpt)=r1+0.5
            rpt(2,irpt)=r2+0.5
            rpt(3,irpt)=r3
+!TEST_AM
+!           cell(irpt-3,1)=r1;cell(irpt-3,2)=r2;cell(irpt-3,3)=r3
+           cell(1,irpt)=r1;cell(2,irpt)=r2;cell(3,irpt)=r3
          end do
        end do
      end do
@@ -2595,6 +2608,9 @@ subroutine bigbx9(brav,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
            rpt(1,irpt)=r1+0.5
            rpt(2,irpt)=r2+0.5
            rpt(3,irpt)=r3+0.5
+!TEST_AM
+!           cell(irpt-1,1)=r1;cell(irpt-1,2)=r2;cell(irpt-1,3)=r3
+           cell(1,irpt)=r1;cell(2,irpt)=r2;cell(3,irpt)=r3
          end do
        end do
      end do
@@ -2619,6 +2635,7 @@ subroutine bigbx9(brav,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
            rpt(1,irpt)=r1*rprim(1,1)+r2*rprim(1,2)+r3*rprim(1,3)
            rpt(2,irpt)=r1*rprim(2,1)+r2*rprim(2,2)+r3*rprim(2,3)
            rpt(3,irpt)=r1*rprim(3,1)+r2*rprim(3,2)+r3*rprim(3,3)
+           cell(1,irpt)=r1;cell(2,irpt)=r2;cell(3,irpt)=r3
          end do
        end do
      end do
@@ -3138,11 +3155,9 @@ subroutine dist9(acell,dist,gprim,natom,nrpt,rcan,rprim,rpt)
      xred(ii)=gprim(1,ii)*rcan(1,ia)+gprim(2,ii)*rcan(2,ia)&
 &     +gprim(3,ii)*rcan(3,ia)
    end do
-
 !  Then to cartesian coordinates
    ra(:)=xred(1)*acell(1)*rprim(:,1)+xred(2)*acell(2)*rprim(:,2)+&
 &   xred(3)*acell(3)*rprim(:,3)
-
    do ib=1,natom
      do ii=1,3
        xred(ii)=gprim(1,ii)*rcan(1,ib)+gprim(2,ii)*rcan(2,ib)&
@@ -3153,7 +3168,6 @@ subroutine dist9(acell,dist,gprim,natom,nrpt,rcan,rprim,rpt)
 &       xred(2)*acell(2)*rprim(ii,2)+&
 &       xred(3)*acell(3)*rprim(ii,3)
      end do
-
      do irpt=1,nrpt
 !      First transform it to reduced coordinates
        do ii=1,3
@@ -3259,6 +3273,7 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt)
      im=sin(two_pi*kr)
 
 !    Now, big inner loops on atoms and directions
+
 !    The indices are ordered to give better speed
      do ib=1,natom
        do nu=1,3
@@ -3352,6 +3367,7 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
 ! *********************************************************************
 
  dynmat(:,:,:,:,:,:)=zero
+
  do iqpt=1,nqpt
    do irpt=1,nrpt
 
@@ -3658,9 +3674,8 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,wghatm)
          do ii=1,3
 !          If the rpt vector is greater than
 !          the allowed space => weight = 0.0
-           if (abs(rdiff(ii))-1.0d-10>factor*ngqpt(ii)) then
+           if (abs(rdiff(ii))-tol10>factor*ngqpt(ii)) then
              wghatm(ia,ib,irpt)=zero
-!            If the point is in a boundary position => weight/2
            else if (abs(abs(rdiff(ii))-factor*ngqpt(ii)) <=1.0d-10) then
 !            If the point is in a boundary position => weight/2
              wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/2
@@ -3668,7 +3683,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,wghatm)
          end do
 
 !        DEBUG
-!        if(ia==1 .and. ib==10)&
+!        if(ia==1 .and. ib==2)&
 !        &     write(std_out,*)' wghatm(ia,ib,irpt)=',wghatm(ia,ib,irpt)
 !        ENDDEBUG
 
@@ -3853,6 +3868,158 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,wghatm)
 
 end subroutine wght9
 !!***
+
+!!****f* m_dynmat/cell9
+!! NAME
+!! wght9
+!!
+!! FUNCTION
+!! ifc_init use canonical coordinates and cell(irpt,:) is not 
+!! more usable with reduced coordinates. This routine reordone
+!! the cell and the Weight associated to the couple of atoms and the R vector
+!! for reduced coordinates
+!!
+!! INPUTS
+!! brav = Bravais lattice (1=S.C.;2=F.C.C.;4=Hex.)
+!! gprim(3,3)= Normalized coordinates in reciprocal space
+!! natom= Number of atoms in the unit cell
+!! nrpt=Number of R points in the Big Box
+!! rcan(3,natom)= Reduced coordinates of atomic position
+!! rpt(3,nprt)=Canonical coordinates of the R points in the unit cell
+!!  These coordinates are normalized (=> * acell(3))
+!!
+!! OUTPUT
+!! cell= (nrpt,3) Give the index of the the cell and irpt
+!! wghatm(natom,natom,nrpt)= Weight associated to the couple of atoms and the R vector
+!!  The vector r(atom2)-r(atom1)+rpt should be inside the moving box
+!!
+!! PARENTS
+!!      ddb_to_effective_potential
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine cell9(atmfrc,brav,cell,gprim,natom,nrpt,rcan,rpt,wghatm,xred)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'cell9'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: brav,natom,nrpt
+!arrays
+ real(dp),intent(in) :: gprim(3,3),rcan(3,natom),rpt(3,nrpt),xred(3,natom)
+ real(dp),intent(inout) :: atmfrc(2,3,natom,3,natom,nrpt),wghatm(natom,natom,nrpt)
+ integer, intent(in) :: cell(3,nrpt)
+!Local variables -------------------------
+!scalars
+ integer :: ia,ib,ii,irpt,irpt2,icount
+ integer :: min1,min2,min3,max1,max2,max3
+!arrays
+ integer :: cell_number(3),cell2(3)
+ integer  :: shift(3)
+ real(dp) :: red(3,3)
+ real(dp),allocatable :: atmfrc_tmp(:,:,:,:,:,:),wghatm_tmp(:,:,:)
+ character(500) :: msg
+
+! *********************************************************************
+
+ ABI_ALLOCATE(atmfrc_tmp,(2,3,natom,3,natom,nrpt))
+ ABI_ALLOCATE(wghatm_tmp,(natom,natom,nrpt))
+
+ wghatm_tmp(:,:,:) = zero
+ atmfrc_tmp(:,:,:,:,:,:) =  zero
+
+!Set the maximum and the miminum for the bound of the cell
+ max1 = maxval(cell(1,:));  min1 = minval(cell(1,:))
+ max2 = maxval(cell(2,:));  min2 = minval(cell(2,:))
+ max3 = maxval(cell(3,:));  min3 = minval(cell(3,:))
+ cell_number(1) = max1 - min1 +1
+ cell_number(2) = max2 - min2 +1
+ cell_number(3) = max3 - min3 +1
+
+!Begin the big loop on ia and ib
+ do ia=1,natom
+   do ib=1,natom
+
+!    Simple Lattice
+     if (brav==1) then
+!      In this case, it is better to work in reduced coordinates
+!      As rcan is in canonical coordinates, => multiplication by gprim
+       do ii=1,3
+         red(1,ii)=  rcan(1,ia)*gprim(1,ii) +rcan(2,ia)*gprim(2,ii) +rcan(3,ia)*gprim(3,ii)
+         red(2,ii)=  rcan(1,ib)*gprim(1,ii) +rcan(2,ib)*gprim(2,ii) +rcan(3,ib)*gprim(3,ii)
+       end do
+     end if
+
+     shift(:) = anint(red(2,:) - xred(:,ib)) - anint(red(1,:) - xred(:,ia))
+ 
+     icount = 0
+     do irpt=1,nrpt
+!      Compute the difference vector
+       if (brav==1) then
+         do ii=1,3 
+           red(3,ii)=  rpt(1,irpt)*gprim(1,ii) +rpt(2,irpt)*gprim(2,ii) +rpt(3,irpt)*gprim(3,ii)
+         end do
+         cell2(:)= int(red(3,:) + shift(:))
+
+!         Use boundary condition to get the right cell
+          if (cell2(1) < min1 .and. cell2(1) < max1) then
+            cell2(1) = cell2(1) + cell_number(1)
+          else if (cell2(1) > min1 .and. cell2(1) > max1) then
+            cell2(1) = cell2(1) - cell_number(1)
+          end if
+
+          if (cell2(2) < min2 .and. cell2(2) < max2) then
+            cell2(2) = cell2(2) + cell_number(2)
+          else if (cell2(2) > min2 .and. cell2(2) > max2) then
+            cell2(2) = cell2(2) - cell_number(2)
+          end if
+
+          if (cell2(3) < min3 .and. cell2(3) < max3) then
+            cell2(3) = cell2(3) + cell_number(3)
+          else if (cell2(3) > min3 .and. cell2(3) > max3) then
+            cell2(3) = cell2(3) - cell_number(3)
+          end if
+
+         do irpt2=1,nrpt
+           if (cell(1,irpt2) == cell2(1)  .and.&
+               cell(2,irpt2) == cell2(2)  .and.&
+               cell(3,irpt2) == cell2(3)) then
+             wghatm_tmp(ia,ib,irpt2) =  wghatm(ia,ib,irpt)
+             atmfrc_tmp(:,:,ia,:,ib,irpt2) = atmfrc(:,:,ia,:,ib,irpt)
+             icount = icount + 1
+           end if
+         end do
+       end if
+     end do
+!    Check if everything is fill
+     if (icount /= nrpt) then
+       write(msg,'(a,a)')' cell is missing in short range'
+       MSG_BUG(msg)
+     end if
+   end do
+ end do
+
+ atmfrc(:,:,:,:,:,:) = zero
+ wghatm(:,:,:)       = zero
+
+ atmfrc(:,:,:,:,:,:) = atmfrc_tmp(:,:,:,:,:,:)
+ wghatm(:,:,:) = wghatm_tmp(:,:,:)
+
+ ABI_DEALLOCATE(atmfrc_tmp)
+ ABI_DEALLOCATE(wghatm_tmp)
+
+end subroutine cell9
+!!***
+
 
 !----------------------------------------------------------------------
 
@@ -4585,7 +4752,6 @@ subroutine dymfz9(dynmat,natom,nqpt,gprim,option,spqpt,trans)
 !      Product of q with the differences between the two atomic translations
        ktrans=kk(1)*(trans(1,ia)-trans(1,ib))+kk(2)*(trans(2,ia)-&
 &       trans(2,ib))+kk(3)*(trans(3,ia)-trans(3,ib))
-
        do mu=1,3
          do nu=1,3
            re=dynmat(1,mu,ia,nu,ib,iqpt)
@@ -4748,7 +4914,7 @@ end subroutine nanal9
 !! d2cart(2,3,mpert,3,mpert)=dynamical matrix obtained for the wavevector qpt (normalized using qphnrm)
 !!
 !! PARENTS
-!!      anaddb,m_ifc,m_phonons
+!!      anaddb,m_effective_potential,m_ifc,m_phonons
 !!
 !! CHILDREN
 !!

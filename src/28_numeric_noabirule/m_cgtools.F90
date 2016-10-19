@@ -8,7 +8,7 @@
 !! using the "cg" convention, namely real array of shape cg(2,...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2016 ABINIT group (MG, MT, XG, DCA, GZ, FB)
+!! Copyright (C) 1992-2016 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -83,12 +83,14 @@ MODULE m_cgtools
  public :: cg_zgemm
 
  ! Helper functions for DFT calculations.
+ public :: set_istwfk               ! Returns the value of istwfk associated to the input k-point.
  public :: sqnorm_g                 ! Square of the norm in reciprocal space.
  public :: dotprod_g                ! Scalar product <vec1|vect2> of complex vectors vect1 and vect2 (can be the same)
  public :: matrixelmt_g             ! matrix element <wf1|O|wf2> of two wavefunctions, in reciprocal space, for an operator diagonal in G-space.
  public :: dotprod_v                ! Dot product of two potentials (integral over FFT grid).
  public :: sqnorm_v                 ! Compute square of the norm of a potential (integral over FFT grid).
  public :: mean_fftr                ! Compute the mean of an arraysp(nfft,nspden), over the FFT grid.
+ public :: cg_getspin               ! Sandwich a single wave function on the Pauli matrices
  public :: cg_gsph2box              ! Transfer data from the G-sphere to the FFT box.
  public :: cg_box2gsph              ! Transfer data from the FFT box to the G-sphere
  public :: cg_addtorho              ! Add |ur|**2 to the ground-states density rho.
@@ -1112,6 +1114,86 @@ subroutine cg_zgemm(transa,transb,npws,ncola,ncolb,cg_a,cg_b,cg_c,alpha,beta)
 end subroutine cg_zgemm
 !!***
 
+
+!!****f* m_cgtools/set_istwfk
+!! NAME
+!!  set_istwfk
+!!
+!! FUNCTION
+!!  Returns the value of istwfk associated to the input k-point.
+!!
+!! INPUTS 
+!!  kpoint(3)=The k-point in reduced coordinates.
+!!
+!! OUTPUT
+!!  istwfk= Integer flag internally used in the code to define the storage mode of the wavefunctions.
+!!  It also define the algorithm used to apply an operator in reciprocal space as well as the FFT 
+!!  algorithm used to go from G- to r-space and vice versa.
+!!
+!!   1 => time-reversal cannot be used
+!!   2 => use time-reversal at the Gamma point.
+!!   3 => use time-reversal symmetry for k=(1/2, 0 , 0 )
+!!   4 => use time-reversal symmetry for k=( 0 , 0 ,1/2)
+!!   5 => use time-reversal symmetry for k=(1/2, 0 ,1/2)
+!!   6 => use time-reversal symmetry for k=( 0 ,1/2, 0 )
+!!   7 => use time-reversal symmetry for k=(1/2,1/2, 0 )
+!!   8 => use time-reversal symmetry for k=( 0 ,1/2,1/2)
+!!   9 => use time-reversal symmetry for k=(1/2,1/2,1/2)
+!!
+!!  Useful relations:
+!!   u_k(G) = u_{k+G0}(G-G0); u_{-k}(G) = u_k(G)^*
+!!  and therefore:
+!!   u_{G0/2}(G) = u_{G0/2}(-G-G0)^*.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer pure function set_istwfk(kpoint) result(istwfk)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'set_istwfk'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ real(dp),intent(in) :: kpoint(3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: bit0,ii
+!arrays
+ integer :: bit(3)
+
+! *************************************************************************
+
+ bit0=1
+ 
+ do ii=1,3
+   if (DABS(kpoint(ii))<tol10) then
+     bit(ii)=0
+   else if (DABS(kpoint(ii)-half)<tol10 ) then
+     bit(ii)=1
+   else
+     bit0=0
+   end if
+ end do
+
+ if (bit0==0) then
+   istwfk=1
+ else
+   istwfk=2+bit(1)+4*bit(2)+2*bit(3) ! Note the inversion between bit(2) and bit(3)
+ end if
+
+end function set_istwfk
+!!***
+
 !!****f* m_cgtools/sqnorm_g
 !! NAME
 !! sqnorm_g
@@ -1171,7 +1253,7 @@ subroutine sqnorm_g(dotr,istwf_k,npwsp,vect,me_g0,comm)
    if (istwf_k==2 .and. me_g0==1) then  
      ! Gamma k-point and I have G=0
      dotr=half*vect(1,1)**2
-    dotr = dotr + cg_real_zdotc(npwsp-1,vect(1,2),vect(1,2))
+     dotr = dotr + cg_real_zdotc(npwsp-1,vect(1,2),vect(1,2))
    else  
      ! Other TR k-points
      dotr = cg_real_zdotc(npwsp,vect,vect)
@@ -1474,7 +1556,6 @@ end subroutine matrixelmt_g
 !!
 !! INPUTS
 !!  cplex=if 1, real space functions on FFT grid are REAL, if 2, COMPLEX
-!!  mpi_enreg=information about MPI parallelization
 !!  nfft= (effective) number of FFT grid points (for this processor)
 !!  nspden=number of spin-density components
 !!  opt_storage: 0, if potentials are stored as V^up-up, V^dn-dn, Re[V^up-dn], Im[V^up-dn]
@@ -1727,7 +1808,6 @@ subroutine mean_fftr(arraysp,meansp,nfft,nfftot,nspden,mpi_comm_sphgrid)
 
 !XG030514 : MPIWF The values of meansp(ispden) should
 !now be summed accross processors in the same WF group, and spread on all procs.
-!if(mpi_enreg%paral_kgb==1) spaceComm=mpi_enreg%comm_fft; reduce=.true.
  if(present(mpi_comm_sphgrid)) then
    nproc_sphgrid=xmpi_comm_size(mpi_comm_sphgrid)
    if(nproc_sphgrid>1) then
@@ -1736,6 +1816,79 @@ subroutine mean_fftr(arraysp,meansp,nfft,nfftot,nspden,mpi_comm_sphgrid)
  end if
 
 end subroutine mean_fftr
+!!***
+
+!!****f* m_cgtools/cg_getspin
+!! NAME
+!! cg_getspin
+!!
+!! FUNCTION
+!!  Sandwich a single wave function on the Pauli matrices
+!!
+!! INPUTS
+!!  npw_k = number of plane waves
+!!  cgcband = coefficients of spinorial wave function
+!!
+!! OUTPUT
+!!  spin = 3-vector of spin components for this state
+!!  cgcmat = outer spin product of spinorial wf with itself
+!!
+!! PARENTS
+!!      m_cut3d,partial_dos_fractions
+!!
+!! CHILDREN
+!!      cg_outer_spin_product
+!!
+!! SOURCE
+
+subroutine  cg_getspin(cgcband, npw_k, spin, cgcmat)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'cg_getspin'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: npw_k
+ real(dp), intent(in) :: cgcband(2,2*npw_k)
+ complex(dpc), intent(out),optional :: cgcmat(2,2)
+ real(dp), intent(out) :: spin(3)
+
+!Local variables-------------------------------
+!scalars
+ complex(dpc) :: pauli_0(2,2) = reshape([cone,czero,czero,cone], [2,2])
+ complex(dpc) :: pauli_x(2,2) = reshape([czero,cone,cone,czero], [2,2])
+ complex(dpc) :: pauli_y(2,2) = reshape([czero,j_dpc,-j_dpc,czero], [2,2])
+ complex(dpc) :: pauli_z(2,2) = reshape([cone,czero,czero,-cone], [2,2])
+ complex(dpc) :: cspin(0:3), cgcmat_(2,2)
+! ***********************************************************************
+
+! cgcmat_ = cgcband * cgcband^T*  i.e. 2x2 matrix of spin components (dpcomplex)
+ cgcmat_ = czero
+ call zgemm('n','c',2,2,npw_k,cone,cgcband,2,cgcband,2,czero,cgcmat_,2)
+
+! spin(*)  = sum_{si sj pi} cgcband(si,pi)^* pauli_*(si,sj) cgcband(sj,pi)
+ cspin(0) = cgcmat_(1,1)*pauli_0(1,1) + cgcmat_(2,1)*pauli_0(2,1) &
+& + cgcmat_(1,2)*pauli_0(1,2) + cgcmat_(2,2)*pauli_0(2,2)
+ cspin(1) = cgcmat_(1,1)*pauli_x(1,1) + cgcmat_(2,1)*pauli_x(2,1) &
+& + cgcmat_(1,2)*pauli_x(1,2) + cgcmat_(2,2)*pauli_x(2,2)
+ cspin(2) = cgcmat_(1,1)*pauli_y(1,1) + cgcmat_(2,1)*pauli_y(2,1) &
+& + cgcmat_(1,2)*pauli_y(1,2) + cgcmat_(2,2)*pauli_y(2,2)
+ cspin(3) = cgcmat_(1,1)*pauli_z(1,1) + cgcmat_(2,1)*pauli_z(2,1) &
+& + cgcmat_(1,2)*pauli_z(1,2) + cgcmat_(2,2)*pauli_z(2,2)
+!write(std_out,*) 'cgmat: ', cgcmat_
+!write(std_out,*) 'real(spin): ', real(cspin)
+!write(std_out,*) 'aimag(spin): ', aimag(cspin)
+
+ spin = real(cspin(1:3))
+ if (present(cgcmat)) cgcmat = cgcmat_
+
+end subroutine cg_getspin
 !!***
 
 !----------------------------------------------------------------------
@@ -3904,7 +4057,6 @@ end subroutine cg_precon_block
 !!  $ghc(vectsize,blocksize)=<G|H|C_{n,k}> for a block of bands$.
 !!  iterationnumber=number of iterative minimizations in LOBPCG 
 !!  kinpw(npw)=(modified) kinetic energy for each plane wave (Hartree)
-!!  mpi_enreg=information about MPI parallelization
 !!  nspinor=number of spinorial components of the wavefunctions (on current proc)
 !!  $vect(vectsize,blocksize)=<G|H|C_{n,k}> for a block of bands$.
 !!  npw=number of planewaves at this k point.

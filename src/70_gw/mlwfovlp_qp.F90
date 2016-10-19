@@ -89,7 +89,6 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_qp'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_56_recipspace

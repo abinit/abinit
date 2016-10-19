@@ -82,6 +82,7 @@
  use m_errors
  use m_profiling_abi
  use m_xmpi
+ use m_sort
 
  use m_pawtab,  only : pawtab_type
  use m_pawcprj, only : pawcprj_type
