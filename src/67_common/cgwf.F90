@@ -556,6 +556,8 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          if (wfopta10<=1) then
            eval=chc
            if (gen_eigenpb) then
+
+
 !$OMP PARALLEL DO
              do ipw=1,npw*nspinor
                vresid(1,ipw)=ghc(1,ipw)-chc*scwavef(1,ipw)
@@ -571,6 +573,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          else
            call dotprod_g(eval,doti,istwf_k,npw*nspinor,1,cwavef,ghcws,me_g0,mpi_enreg%comm_spinorfft)
            if (gen_eigenpb) then
+
 !$OMP PARALLEL DO
              do ipw=1,npw*nspinor
                vresid(1,ipw)=ghcws(1,ipw)-eval*scwavef(1,ipw)
@@ -798,6 +801,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          ! MG: TODO: this is an hot spot that could be rewritten with BLAS! provided
          ! that direc --> conjgr
          if(istwf_k==1)then
+
 !$OMP PARALLEL DO
            do ipw=1,npw*nspinor
              direc(1,ipw)=conjgr(1,ipw)-(dotr*cwavef(1,ipw)-doti*cwavef(2,ipw))
@@ -1043,6 +1047,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            cwavef(1,ipw)=cwavef(1,ipw)*costh+direc(1,ipw)*sintn
            cwavef(2,ipw)=cwavef(2,ipw)*costh+direc(2,ipw)*sintn
          end do
+
 !        call cg_zaxpby(npw*nspinor,(/sintn,zero/),direc,(/costh,zero/),cwavef)
          call cg_zcopy(npw*nspinor,cwavef,cg(1,1+icg_shift))
 

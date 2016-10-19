@@ -928,8 +928,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !Pass through the first routines even when nstep==0
 
  quitsum_request = xmpi_request_null; timelimit_exit = 0
-write(81,*) "COUCOU"
-write(80,*) "COUCOU"
+
 ! start SCF loop
  do istep=1,max(1,nstep)
    call status(istep,dtfil%filstat,iexit,level,'loop istep    ')
@@ -1383,8 +1382,6 @@ write(80,*) "COUCOU"
 &     susmat,symrec,taug,taur,ucvol_local,usecprj,wffnew,vtrial,vxctau,wvl,xred,&
 &     ylm,ylmgr,ylmdiel)
 
-write(80,*) "efock ",energies%e_fock
-write(80,*) "forces_fock ",fock%forces
    else if (dtset%tfkinfunc==1.or.dtset%tfkinfunc==11.or.dtset%tfkinfunc==12) then
      MSG_WARNING('THOMAS FERMI')
      call vtorhotf(dtfil,dtset,energies%e_kinetic,energies%e_nonlocalpsp,&
@@ -1618,12 +1615,15 @@ write(80,*) "forces_fock ",fock%forces
      end if
 
 !    Compute new potential from the trial density
+
      optene=2*optres;if(psps%usepaw==1) optene=2
+
      call rhotov(dtset,energies,gprimd,gsqcut,istep,kxc,mpi_enreg,nfftf,ngfftf, &
 &     nhat,nhatgr,nhatgrdim,nkxc,nvresid,n3xccc,optene,optres,optxc,&
 &     rhog,rhor,rprimd,strsxc,ucvol_local,psps%usepaw,usexcnhat,&
 &     vhartr,vnew_mean,vpsp,vres_mean,res2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
 &     electronpositron=electronpositron,taug=taug,taur=taur,vxctau=vxctau,add_tfw=tfw_activated)
+
    end if
 
    call timab(243,2,tsec)
@@ -1668,6 +1668,7 @@ write(80,*) "forces_fock ",fock%forces
 &     n3xccc,0,computed_forces,optres,pawang,pawfgrtab,pawrhoij,&
 &     pawtab,ph1df,red_ptot,psps,rhog,rhor,rprimd,symrec,synlgr,&
 &     psps%usepaw,vhartr,vpsp,vxc,wvl%descr,wvl%den,xccc3d,xred)
+
    end if
    call timab(60,2,tsec)
 
@@ -1733,6 +1734,7 @@ write(80,*) "forces_fock ",fock%forces
 &     vhartr,vnew_mean,vpsp,nvresid,vtrial,vxc,xred,&
 &     nfftf,&
 &     pawtab,rhog,wvl)
+
    end if   ! iscf<10
 
 !  ######################################################################

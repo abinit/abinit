@@ -335,7 +335,6 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 
    end if   ! berryopt==17
 
-
 !  Compute total (free)- energy by direct scheme
    if (optene==0) then
      etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
@@ -393,6 +392,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
          work(ifft,ispden)=vhartr(ifft)+vpsp(ifft)+vxc(ifft,ispden)
        end do
      end do
+
      if(dtset%nspden==4)then
        do ispden=3,4
 !$OMP PARALLEL DO PRIVATE(ifft) SHARED(ispden,nfft,work,vxc)
@@ -408,6 +408,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,mpi_comm_grid=mpi_enreg%comm_fft,&
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,paral_kgb=mpi_enreg%paral_kgb)
      ABI_DEALLOCATE(work)
+
    end if
 
 !  If residual is a density residual (and forces from residual asked),

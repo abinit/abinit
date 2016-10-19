@@ -270,10 +270,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
              end if
            end do
          end do
-
-
        end if ! compute_nhat
-
        if (compute_grad) then
          do ils=lmin,lmax,2  ! Sum over (L,M)
            do mm=-ils,ils
@@ -316,7 +313,6 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
            end do
          end do
        end if ! compute_grad1
-
      end do  ! klmn (ij channels)
 !    If needed, multiply eventually by exp(-i.q.r) phase
      if (compute_nhat) then

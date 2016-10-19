@@ -522,7 +522,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
        end do
      end if
    end if
-   
+
 !  Adds the local part of the potential
    if ((moved_atm_inside==0).or.(dtset%densfor_pred/=3)) then
      do ispden=1,min(2,dtset%nspden)

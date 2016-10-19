@@ -676,7 +676,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
      end if
    end if
 
-
 !  ----------- Add Dij_Hartree to Dij
 !  ------------------------------------------------------------------------
 

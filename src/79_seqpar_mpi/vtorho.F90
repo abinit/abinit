@@ -911,7 +911,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
                energies%e_nonlocalpsp = energies%e_nonlocalpsp + dtset%wtk(ikpt)*occ_k(iband)*enl_k(iband)
              end if
              if (usefock) energies%e_fock=energies%e_fock + half*fock%eigen_ikpt(iband)*occ(iband)*dtset%wtk(ikpt)
-write(80,*) "vtorho efock ",energies%e_fock,fock%eigen_ikpt(iband),occ(iband),dtset%wtk(ikpt)
            end if
          end do
 !        Calculate Fock contribution to the total energy if required

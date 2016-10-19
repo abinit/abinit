@@ -571,7 +571,6 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
 
      call nonlop(choice,cpopt_here,cwaveprj_nonlop,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
 &     nnlout,paw_opt,signs,gsc_ptr,tim_nonlop,cwavef,gvnlc,select_k=select_k_)
-
    end if ! end type_calc 0 or 2 for nonlop application
 
 
@@ -601,6 +600,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlc,lambda,mpi_enreg,nd
              end if
            end do ! ig
          end do ! ispinor
+
        else
 !      !$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
          do ispinor=1,my_nspinor

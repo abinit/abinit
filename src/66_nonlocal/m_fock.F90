@@ -2320,7 +2320,6 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hybrid_mixing,hybrid_mixing_sr,hybri
 !For the time being, only Spencer-Alavi scheme...
  rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
  divgq0= two_pi*rcut**two
-
 !Initialize a few quantities
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  cutoff=gsqcut*tolfix

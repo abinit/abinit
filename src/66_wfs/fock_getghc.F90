@@ -92,7 +92,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  integer :: jkpt,my_jsppol,jstwfk,lmn2_size,mgfftf,mpw,n1,n2,n3,n4,n5,n6
  integer :: n1f,n2f,n3f,n4f,n5f,n6f,natom,nband_k,ndij,nfft,nfftf,nfftotf,nhat12_grdim,nnlout
  integer :: npw,npwj,nspden_fock,nspinor,paw_opt,signs,tim_nonlop
- logical :: need_ghc,test
+ logical :: need_ghc
  real(dp),parameter :: weight1=one
  real(dp) :: doti,efock,eigen,imcwf,imcwocc,imvloc,invucvol,recwf,recwocc,revloc,occ,wtk
  type(fock_type),pointer :: fock
@@ -116,36 +116,21 @@ type(pseudopotential_type) :: psps
  logical :: testtrue
 ! *************************************************************************
 
-
-
-!write(81,*) "coucou",cwaveprj(1,1)%ncpgr,cwaveprj(2,1)%ncpgr
-!flush(81)
-
  call timab(1504,1,tsec)
  call timab(1505,1,tsec)
 
  ABI_CHECK(associated(gs_ham%fock),"fock must be associated!")
  fock => gs_ham%fock
-testtrue=.true.
-if(testtrue)then
-!  write(79,*) "coucou4"
-! flush(79)
-ABI_DATATYPE_ALLOCATE(pawrhoij,(fock%natom))
-!  write(79,*) "coucou5"
-! flush(79)
-call pawrhoij_alloc(pawrhoij,2,1,gs_ham%nspinor,1,gs_ham%typat,pawtab=fock%pawtab,use_rhoijp=1)
-!  write(79,*) "coucou6"
-! flush(79)
-do iatom=1,fock%natom
-  pawrhoij(iatom)%nrhoijsel=1
-  pawrhoij(iatom)%rhoijselect(1)=1
-!write(79,*)  "cp= ",cwaveprj(iatom,1)%cp
-  pawrhoij(iatom)%rhoijp (1,1)=((cwaveprj(iatom,1)%cp(1,1))**2+(cwaveprj(iatom,1)%cp(2,1))**2)!*two
-!write(79,*)pawrhoij(iatom)%rhoijp
-end do
-!  write(79,*) "coucou7"
-! flush(79)
-end if
+ testtrue=.false.
+ if(testtrue)then
+   ABI_DATATYPE_ALLOCATE(pawrhoij,(fock%natom))
+   call pawrhoij_alloc(pawrhoij,2,1,gs_ham%nspinor,1,gs_ham%typat,pawtab=fock%pawtab,use_rhoijp=1)
+   do iatom=1,fock%natom
+     pawrhoij(iatom)%nrhoijsel=1
+     pawrhoij(iatom)%rhoijselect(1)=1
+     pawrhoij(iatom)%rhoijp (1,1)=((cwaveprj(iatom,1)%cp(1,1))**2+(cwaveprj(iatom,1)%cp(2,1))**2)!*two
+   end do
+ end if
  ABI_CHECK(gs_ham%nspinor==1,"only allowed for nspinor=1!")
  ABI_CHECK(gs_ham%npw_k==gs_ham%npw_kp,"only allowed for npw_k=npw_kp (ground state)!")
  if (fock%usepaw==1) then
@@ -268,8 +253,7 @@ end if
  if (associated(gs_ham%ph3d_kp)) then
    nullify (gs_ham%ph3d_kp)
  end if
-!write(82,*) "COUCOU"
-! rewind(83)
+
  do jkpt=1,fock%mkpt
 !* nband_k = number of bands at point k_j
    nband_k=fock%nbandocc_bz(jkpt,my_jsppol)
@@ -307,7 +291,6 @@ end if
 !* the vector qvec is expressed in reduced coordinates.
 !     qvec(:)=kpoint_i(:)-kpoint_j(:)
    qvec_j(:)=gs_ham%kpt_k(:)-fock%kptns_bz(:,jkpt)
-!fock%divgq0=zero
    call bare_vqg(qvec_j,fock%gsqcut,gs_ham%gmet,fock%usepaw,fock%hybrid_mixing,&
 &   fock%hybrid_mixing_sr,fock%hybrid_range,nfftf,fock%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
    !call fock_vqg_fftbox(qvec_j, nfft, vqg)
@@ -328,10 +311,8 @@ end if
        call fourwf(0,rhodum0,fock%cgocc(:,1+jcg+npwj*(jband-1):jcg+jband*npwj,my_jsppol),rhodum,cwaveocc_r, &
 &       gbound_kp,gbound_kp,gs_ham%istwf_k,kg_occ,kg_occ,mgfftf,mpi_enreg,ndat1,ngfftf,&
 &       npwj,1,n4f,n5f,n6f,tim_fourwf0,mpi_enreg%paral_kgb,0,weight1,weight1,use_gpu_cuda=gs_ham%use_gpu_cuda)
-!write(94,*) jkpt, jband,cwaveocc_r(:,1:10,1,1)
        cwaveocc_r=cwaveocc_r*invucvol
      end if
-
 
 !*   occ = occupancy of jband at this k point
      occ=fock%occ_bz(jband+bdtot_jindex,my_jsppol)
@@ -366,14 +347,12 @@ end if
        ABI_ALLOCATE(rho12,(2,nfftf,nspinor**2))
        iband_cprj=(my_jsppol-1)*fock%mkptband+jbg+jband
        cwaveocc_prj=>fock%cwaveocc_prj(:,iband_cprj:iband_cprj+nspinor-1)
-!write(79,*) "cproj ",cwaveocc_prj(1,1)%cp,cwaveprj(1,1)%cp
        call pawmknhat_psipsi(cwaveocc_prj,cwaveprj,ider,izero,natom,natom,nfftf,ngfftf,&
 &       nhat12_grdim,nspinor,fock%ntypat,fock%pawang,fock%pawfgrtab,grnhat12,rho12,&
 &       fock%pawtab,gprimd=gs_ham%gprimd,grnhat_12=grnhat_12,qphon=qvec_j,xred=gs_ham%xred)
        rhor_munu(:,:)=rhor_munu(:,:)+rho12(:,:,nspinor)
        ABI_DEALLOCATE(rho12)
      end if
-
 
     !Perform an FFT using fourwf to get rhog_munu = FFT^-1(rhor_munu)
      call fourdp(cplex_fock,rhog_munu,rhor_munu,-1,mpi_enreg,nfftf,ngfftf,mpi_enreg%paral_kgb,tim_fourdp0)
@@ -406,6 +385,7 @@ end if
      end do
 
      call fourdp(cplex_fock,rhog_munu,vfock,+1,mpi_enreg,nfftf,ngfftf,mpi_enreg%paral_kgb,tim_fourdp0)
+
 #endif
      call timab(1510,2,tsec)
 
@@ -413,21 +393,12 @@ end if
 !===============================================================
 !======== Calculate Dij_Fock_hat contribution in case of PAW ===
 !===============================================================
- 
+
      if (fock%usepaw==1) then
        qphon=qvec_j;nfftotf=product(ngfftf(1:3))
        cplex_dij=cplex_fock;ndij=nspden_fock
        ABI_ALLOCATE(dijhat,(cplex_dij*gs_ham%dimekb1,natom,ndij))
        dijhat=zero
-
-!         do i1=1,gs_ham%dimekb1
-!           dijhat(2*(i1-1)+1,:,:)=0.01d0
-!         end do
-! rewind(83)
-!read(83,*) dijhat
-!dijhat=one
-  test=.true.
-    if(test) then
        do iatom=1,natom
          ipert=iatom
          itypat=gs_ham%typat(iatom)
@@ -439,8 +410,7 @@ end if
 &         fock%pawtab(itypat),vfock,qphon,gs_ham%ucvol,gs_ham%xred)
          dijhat(1:cplex_dij*lmn2_size,iatom,:)=dijhat_tmp(1:cplex_dij*lmn2_size,:)
          ABI_DEALLOCATE(dijhat_tmp)
-        end do
-   end if ! test
+       end do
        signs=2; cpopt=2;idir=0; paw_opt=1;nnlout=1;tim_nonlop=1
        if(need_ghc) then
          choice=1
@@ -449,41 +419,31 @@ end if
 &         select_k=K_H_KPRIME)
           ghc2=ghc2-gvnlc*occ*wtk
        end if
-!write(82,*) "COUCOU"
-!write(82,*) dijhat
-!write(77,*)cwaveocc_prj(1,1)%cp
-!write(77,*)cwaveocc_prj(1,1)%dcp
-
+! Forces calculation
        if (fock%optfor.and.(fock%ieigen/=0)) then
-       call matr3inv(gs_ham%gprimd,rprimd)
- !write(79,*) "rprimd ",rprimd
-!         ABI_ALLOCATE(dijhat_tmp1,(gs_ham%dimekb1,natom,ndij))
-!         do i1=1,gs_ham%dimekb1
-!           dijhat_tmp1(i1,:,:)=dijhat(2*(i1-1)+1,:,:)
-!         end do
+         call matr3inv(gs_ham%gprimd,rprimd)
          choice=2; dotr=zero;doti=zero;cpopt=4
-!  write(79,*) "coucou0"
-! flush(79)
-       optgr=1;optgr2=0;optstr=0;optstr2=0
-if (testtrue) then
-       ABI_ALLOCATE(grnl,(3*natom))
-       ABI_ALLOCATE(vxc,(nfftf,nspden_fock))
-       ABI_ALLOCATE(vtrial,(nfftf,nspden_fock))
-       vxc=zero
-       do ifft=1,nfftf
-         vtrial(ifft,1)=vfock(2*ifft-1)
-       end do
-       grnl=zero
-       call pawgrnl(gs_ham%atindx1,0,dummy,1,dummy,grnl,fock%gsqcut,mgfftf,natom,natom,&
-&          gs_ham%nattyp,nfftf,ngfftf,nhat_dum,dummy,nspden_fock,0,fock%ntypat,optgr,optgr2,optstr,optstr2,&
-&          fock%pawang,fock%pawfgrtab,pawrhoij,fock%pawtab,gs_ham%ph1d,psps,qphon,rprimd,dumint,&
-&          gs_ham%typat,vtrial,vxc,gs_ham%xred)
+         optgr=1;optgr2=0;optstr=0;optstr2=0
 
-       write(79,*)grnl
+         if (testtrue) then
+           ABI_ALLOCATE(grnl,(3*natom))
+           ABI_ALLOCATE(vxc,(nfftf,nspden_fock))
+           ABI_ALLOCATE(vtrial,(nfftf,nspden_fock))
+           vxc=zero
+           do ifft=1,nfftf
+             vtrial(ifft,1)=vfock(2*ifft-1)
+           end do
+           grnl=zero
+           call pawgrnl(gs_ham%atindx1,0,dummy,1,dummy,grnl,fock%gsqcut,mgfftf,natom,natom,&
+&            gs_ham%nattyp,nfftf,ngfftf,nhat_dum,dummy,nspden_fock,0,fock%ntypat,optgr,optgr2,optstr,optstr2,&
+&            fock%pawang,fock%pawfgrtab,pawrhoij,fock%pawtab,gs_ham%ph1d,psps,qphon,rprimd,dumint,&
+&            gs_ham%typat,vtrial,vxc,gs_ham%xred)
+!       write(79,*)grnl
+           ABI_DEALLOCATE(vxc)
+           ABI_DEALLOCATE(vtrial)
+           ABI_DEALLOCATE(grnl)
+         end if
 
-       ABI_DEALLOCATE(vxc)
-       ABI_DEALLOCATE(vtrial)
-end if
          do iatom=1,natom
            do idir=1,3
              call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
@@ -498,18 +458,14 @@ end if
 &               vfock(2*ind)*grnhat_12(2,ind,1,idir,iatom)
              end do
            end do
+
            do idir=1,3
              for12(idir)=rprimd(1,idir)*for1(1)+rprimd(2,idir)*for1(2)+rprimd(3,idir)*for1(3)
-!             for12(idir)=zero
-write(79,*) "for12 ",for12(idir)*gs_ham%ucvol/nfftf,grnl(3*(iatom-1)+idir)
-             forikpt(idir,iatom)=forikpt(idir,iatom)+(for12(idir)*gs_ham%ucvol/nfftf+dotr(idir))*occ*wtk
+             forikpt(idir,iatom)=forikpt(idir,iatom)-(for12(idir)*gs_ham%ucvol/nfftf+dotr(idir))*occ*wtk
            end do
          end do
-!         ABI_DEALLOCATE(dijhat_tmp1)
-if(testtrue) then
-       ABI_DEALLOCATE(grnl)
-end if
        end if
+! Stresses calculation
        if (fock%optstr) then
          choice=3;cpopt=4
          do idir=1,6
@@ -567,16 +523,8 @@ end if
 
  if (fock%usepaw==1) then
    if ((fock%optfor).and.(fock%ieigen/=0)) then
-!write(100+mpi_enreg%me,*)fock%ikpt, fock%ieigen
-!     write(100+mpi_enreg%me,*) forikpt
-!     flush(100+mpi_enreg%me)
      call xmpi_sum(forikpt,mpi_enreg%comm_hf,ier)
      fock%forces_ikpt(:,:,fock%ieigen)=forikpt(:,:)
-!     fock%forces_ikpt(:,:,fock%ieigen)=zero
-write(81,*) "force= ", forikpt(:,:)
-!write(90+mpi_enreg%me,*)fock%ikpt, fock%ieigen
-!     write(90+mpi_enreg%me,*) fock%forces_ikpt
-!     flush(90+mpi_enreg%me)
    end if
  end if
  if(fock%optstr) then
@@ -641,10 +589,11 @@ write(81,*) "force= ", forikpt(:,:)
 & use_gpu_cuda=gs_ham%use_gpu_cuda)
  ABI_DEALLOCATE(psilocal)
 
-! Normalisation of wavefunctions
  ghc1=ghc1*sqrt(gs_ham%ucvol)+ghc2
+
 !* If the calculation is parallelized, perform an MPI_allreduce to sum all the contributions in the array ghc
  ghc(:,:)=ghc(:,:)/mpi_enreg%nproc_hf + ghc1(:,:)
+
 
  call xmpi_sum(ghc,mpi_enreg%comm_hf,ier)
 
@@ -654,16 +603,6 @@ write(81,*) "force= ", forikpt(:,:)
 ! ===============================
 ! === Deallocate local PAW arrays ===
 ! ===============================
- if (fock%ieigen/=0) then
-  eigen=zero;eigen1=zero
-   do ipw=1,npw
-     eigen=eigen+cwavef(1,ipw)*ghc2(1,ipw)+cwavef(2,ipw)*ghc2(2,ipw)
-     eigen1=eigen1+cwavef(1,ipw)*ghc1(1,ipw)+cwavef(2,ipw)*ghc1(2,ipw)
-   end do
-    eigen=eigen*occ*wtk
-    eigen1=eigen1*occ*wtk
-write(81,*)"etotal ", eigen,eigen1
-end if
 
  if (fock%usepaw==1) then
    ABI_DEALLOCATE(gvnlc)
