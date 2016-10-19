@@ -111,8 +111,8 @@ subroutine partial_dos_fractions_paw(cprj,dimcprj,dos_fractions,dos_fractions_m,
 !Local variables-------------------------------
 !scalars
  integer :: basis_size,cplex,iat,iatom,iband,ibg,ibsp,ierr,ikpt,il,ilang,ilmn,iln,im,iorder_cprj,ispinor,isppol
- integer :: itypat,j0lmn,j0ln,jl,jlmn,jln,jm,klmn,kln,lmn_size,me_kpt,my_nspinor,nband_k,nproc_kpt,spaceComm_kpt
- real(dp) :: cpij,one_over_nproc
+ integer :: itypat,j0lmn,j0ln,jl,jlmn,jln,jm,klmn,kln,lmn_size,me,my_nspinor,nband_k,spaceComm
+ real(dp) :: cpij
  character(len=500) :: message
 !arrays
  integer ,allocatable :: dimcprj_atsph(:)
@@ -133,6 +133,7 @@ subroutine partial_dos_fractions_paw(cprj,dimcprj,dos_fractions,dos_fractions_m,
    MSG_ERROR(message)
  end if
 
+ my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
  if (paw_dos_flag==1.or.fatbands_flag==1) then
    dos_fractions_paw1 =zero
    dos_fractions_pawt1=zero
@@ -176,47 +177,11 @@ subroutine partial_dos_fractions_paw(cprj,dimcprj,dos_fractions,dos_fractions_m,
  end if
 
 !Init parallelism
- spaceComm_kpt=mpi_enreg%comm_kpt
- nproc_kpt=mpi_enreg%nproc_kpt
- me_kpt=mpi_enreg%me_kpt
- my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+ spaceComm=mpi_enreg%comm_cell
+ if(mpi_enreg%paral_kgb==1) spaceComm=mpi_enreg%comm_kpt
+ me=mpi_enreg%me_kpt
 
  iorder_cprj=0
-
-!Quick hack: in case of parallelism, dos_fractions have already
-!  been reduced over MPI processes; they have to be prepared before
-!  the next reduction (at the end of the following loop).
- if (nproc_kpt>1) then
-   one_over_nproc=one/real(nproc_kpt,kind=dp)
-!$OMP  PARALLEL DO COLLAPSE(4) &
-!$OMP& DEFAULT(SHARED) PRIVATE(ilang,isppol,iband,ikpt)
-   do ilang=1,ndosfraction
-     do isppol=1,dtset%nsppol
-       do iband=1,dtset%mband
-         do ikpt=1,dtset%nkpt
-           dos_fractions(ikpt,iband,isppol,ilang)= &
-&            one_over_nproc*dos_fractions(ikpt,iband,isppol,ilang)
-         enddo
-       end do
-     end do
-   end do
-!$OMP END PARALLEL DO
-   if (fatbands_flag==1.or.prtdosm==1.or.prtdosm==2) then
-!$OMP  PARALLEL DO COLLAPSE(4) &
-!$OMP& DEFAULT(SHARED) PRIVATE(ilang,isppol,iband,ikpt)
-     do ilang=1,ndosfraction*mbesslang
-       do isppol=1,dtset%nsppol
-         do iband=1,dtset%mband
-           do ikpt=1,dtset%nkpt
-             dos_fractions_m(ikpt,iband,isppol,ilang)= &
-  &            one_over_nproc*dos_fractions_m(ikpt,iband,isppol,ilang)
-           enddo
-         end do
-       end do
-     end do
-!$OMP END PARALLEL DO
-   end if
- end if
 
 !LOOPS OVER SPINS,KPTS
  ibg=0
@@ -224,7 +189,7 @@ subroutine partial_dos_fractions_paw(cprj,dimcprj,dos_fractions,dos_fractions_m,
    do ikpt=1,dtset%nkpt
 
      nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-     if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_kpt)) cycle
+     if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) cycle
      cplex=2;if (dtset%istwfk(ikpt)>1) cplex=1
      ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natsph,my_nspinor*nband_k))
      ABI_ALLOCATE(dimcprj_atsph,(dtset%natsph))
@@ -255,7 +220,7 @@ subroutine partial_dos_fractions_paw(cprj,dimcprj,dos_fractions,dos_fractions_m,
 
 !      LOOP OVER BANDS
        do iband=1,nband_k
-         if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me_kpt)) cycle
+         if(abs(mpi_enreg%proc_distrb(ikpt,iband,isppol)-me)/=0) cycle
          ibsp=(iband-1)*my_nspinor
          do ispinor=1,my_nspinor
            ibsp=ibsp+1
@@ -323,13 +288,13 @@ subroutine partial_dos_fractions_paw(cprj,dimcprj,dos_fractions,dos_fractions_m,
 
 !Reduce data in case of parallelism
  call timab(48,1,tsec)
- call xmpi_sum(dos_fractions,spaceComm_kpt,ierr)
+ call xmpi_sum(dos_fractions,spaceComm,ierr)
  if (prtdosm>=1.or.fatbands_flag==1) then
-   call xmpi_sum(dos_fractions_m,spaceComm_kpt,ierr)
+   call xmpi_sum(dos_fractions_m,spaceComm,ierr)
  end if
  if (paw_dos_flag==1) then
-   call xmpi_sum(dos_fractions_paw1,spaceComm_kpt,ierr)
-   call xmpi_sum(dos_fractions_pawt1,spaceComm_kpt,ierr)
+   call xmpi_sum(dos_fractions_paw1,spaceComm,ierr)
+   call xmpi_sum(dos_fractions_pawt1,spaceComm,ierr)
  end if
  call timab(48,2,tsec)
  if (mpi_enreg%paral_spinor==1) then

@@ -77,7 +77,6 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
 #undef ABI_FUNC
 #define ABI_FUNC 'partial_dos_fractions'
  use interfaces_28_numeric_noabirule
- use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_56_recipspace
  use interfaces_61_occeig
@@ -99,16 +98,17 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
 !Local variables-------------------------------
 !scalars
  integer :: cg1kptshft,cgshift,ia,iatom,iband,ierr,ikpt,ilang,ioffkg
- integer :: ioffylm,iout,ipw,ispinor,isppol,ixint,mbess,mcg_1kpt,me_kpt
- integer :: mgfft,my_nspinor,n1,n2,n3,natsph_tot,nband_k,nfit,npw_k,nradintmax,prtsphere
- integer :: spaceComm_kpt
+ integer :: ioffylm,iout,ipw,ispinor,isppol,ixint,mbess,mcg_disk,me
+ integer :: mgfft,my_nspinor,n1,n2,n3,natsph_tot,nfit,npw_k,nradintmax,prtsphere
+ integer :: spaceComm
+ integer :: nk_and_spin
  real(dp) :: arg,bessarg,bessargmax,bessint_delta,kpgmax,rmax,ucvol
  character(len=4) :: mode_paral
  character(len=500) :: msg
 !arrays
  integer :: iindex(dtset%mpw)
  integer :: kg_k(3,dtset%mpw)
- integer,allocatable :: iatsph(:),kg(:,:),npwarr(:),npwtot(:),nradint(:)
+ integer,allocatable :: iatsph(:),kg(:,:),npwarr1(:),npwtot(:),nradint(:)
  integer,allocatable :: atindx(:)
 
  real(dp) :: gmet(3,3)
@@ -155,11 +155,16 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
  dos_fractions(:,:,:,:) = zero
  if (m_dos_flag==1) dos_fractions_m(:,:,:,:) = zero
 
-!initialize parallelism
- spaceComm_kpt=mpi_enreg%comm_kpt
+ if(mpi_enreg%paral_kgb==1) then
+   spaceComm=mpi_enreg%comm_kpt
+   me=mpi_enreg%me_kpt
+ else
+   spaceComm=mpi_enreg%comm_cell
+   me=xmpi_comm_rank(spaceComm)
+ end if
+ 
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
- me_kpt=mpi_enreg%me_kpt
-
+ mcg_disk=dtset%mpw*my_nspinor*dtset%mband
 
 !##############################################################
 !FIRST CASE : project on angular momenta to get dos parts
@@ -225,10 +230,10 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
    ABI_ALLOCATE(rint,(nradintmax))
    ABI_ALLOCATE(bess_fit,(dtset%mpw,nradintmax,mbesslang))
 
-!
+!  
 !  initialize general Bessel function array on uniform grid
 !  x_bess, from 0 to (2 \pi |k+G|_{max} |r_{max}|)
-!
+!  
 !  call init_bess_spl(mbess,bessargmax,bessint_delta,mbesslang,
    call init_bess_spl(mbess,bessint_delta,mbesslang,&
 &   bess_spl,bess_spl_der,x_bess)
@@ -240,22 +245,25 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
 
 !  get kg matrix of the positions of G vectors in recip space
    mgfft=maxval(dtset%ngfft(1:3))
+!  write(std_out,*) 'DEBUG : about to allocate npwarr1 kg'
 
 !  kg contains G vectors only for kpoints used by this processor
    mode_paral='PERS'
    ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
 
-   ABI_ALLOCATE(npwarr,(dtset%nkpt))
+   ABI_ALLOCATE(npwarr1,(dtset%nkpt))
    ABI_ALLOCATE(npwtot,(dtset%nkpt))
    kg(:,:) = 0
-   call kpgio(dtset%ecut,dtset%exchn2n3d,gmet,dtset%istwfk,kg,dtset%kptns,&
+   call kpgio(dtset%ecut,dtset%exchn2n3d,gmet,dtset%istwfk,kg,dtset%kpt,&
 &   dtset%mkmem,dtset%nband,dtset%nkpt,&
-&   mode_paral,mpi_enreg,dtset%mpw,npwarr,npwtot,dtset%nsppol)
+&   mode_paral,mpi_enreg,dtset%mpw,npwarr1,npwtot,dtset%nsppol)
+   ABI_DEALLOCATE(npwarr1)
+   ABI_DEALLOCATE(npwtot)
 
-!
+!  
 !  for each electronic state, get corresponding wavefunction and project on Ylm
 !  real(dp) :: cg(2,dtset%mpw*my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol)
-!
+!  
    n1 = dtset%ngfft(1); n2 = dtset%ngfft(2); n3 = dtset%ngfft(3)
 
 !  TODO: send only xred for atoms we want to project on
@@ -270,51 +278,67 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
    ABI_ALLOCATE(ph1d,(2,(2*n1+1 + 2*n2+1 + 2*n3+1)*natsph_tot))
    call getph(atindx,natsph_tot,n1,n2,n3,ph1d,xred_sph)
 
-!
+!  
 !  Now get Ylm factors: returns "real Ylms", which are real (+m) and
 !  imaginary (-m) parts of actual complex Ylm. Yl-m = Ylm*
-!
+!  
 !  Single call to initylmg for all kg (all mkmem are in memory)
    ABI_ALLOCATE(ylm,(dtset%mpw*dtset%mkmem,mbesslang*mbesslang))
-   call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,mbesslang,&
+   call initylmg(gprimd,kg,dtset%kpt,dtset%mkmem,mpi_enreg,mbesslang,&
 &   dtset%mpw,dtset%nband,dtset%nkpt,&
-&   npwarr,dtset%nsppol,0,hdr%rprimd,ylm,ylmgr_dum)
+&   hdr%npwarr,dtset%nsppol,0,hdr%rprimd,ylm,ylmgr_dum)
 
 !  kpgnorm contains norms only for kpoints used by this processor
-   ABI_ALLOCATE(kpgnorm,(dtset%mpw*dtset%mkmem))
-   kpgnorm (:) = zero
-   ioffkg=0 ; ioffylm=0
-   do ikpt = 1, dtset%nkpt
-     if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,dtset%nband(ikpt),-1,me_kpt)) cycle
-     npw_k = npwarr(ikpt)
-     kg_k(:,1:npw_k) = kg(:,ioffkg+1:ioffkg+npw_k)
-     call getkpgnorm(gprimd,dtset%kpt(:,ikpt),kg_k(:,1:npw_k),kpgnorm(ioffylm+1:ioffylm+dtset%mpw),npw_k)
-     ioffkg=ioffkg+npw_k
-     ioffylm=ioffylm+npw_k
-   end do !ikpt
+   nk_and_spin = 0
+   do isppol = 1, dtset%nsppol
+     do ikpt = 1, dtset%nkpt
+       if (mpi_enreg%proc_distrb(ikpt,1,isppol)==me) nk_and_spin = nk_and_spin + 1
+     end do
+   end do
 
-   mcg_1kpt=dtset%mpw*my_nspinor*dtset%mband
-   ABI_ALLOCATE(cg_1kpt,(2,mcg_1kpt))
+   ABI_ALLOCATE(kpgnorm,(dtset%mpw*dtset%mkmem))
+   !ABI_ALLOCATE(kpgnorm,(dtset%mpw*nk_and_spin))
+!    ... or all the kpoints if mkmem==0
+   kpgnorm (:) = zero
+   ioffkg=0
+   ioffylm=0
+   !do isppol = 1, dtset%nsppol
+   do ikpt = 1, dtset%nkpt
+     if (all(mpi_enreg%proc_distrb(ikpt,1,1:dtset%nsppol)/=me)) cycle
+     !if (mpi_enreg%proc_distrb(ikpt,1,isppol)/=me) cycle
+
+     kg_k(:,:) = 0
+     npw_k = hdr%npwarr(ikpt)
+     kg_k(:,1:min(size(kg_k,2),(npw_k))) = kg(:,ioffkg+1:ioffkg+npw_k) ! check compatibility of dimensions (PMA)
+
+     call getkpgnorm(gprimd,dtset%kpt(:,ikpt),kg_k(:,1:npw_k),&
+&     kpgnorm(ioffylm+1:ioffylm+dtset%mpw),hdr%npwarr(ikpt))
+
+     ioffkg=ioffkg+hdr%npwarr(ikpt)
+     ioffylm=ioffylm+hdr%npwarr(ikpt)
+   end do !ikpt
+   !end do !isppol
+
+   ABI_ALLOCATE(cg_1kpt,(2,mcg_disk))
+
    cgshift = 0
 
    do isppol=1,dtset%nsppol
-
-     ioffkg = 0 ; ioffylm = 0
+!    kg array is the same for both sppol ?????
+     ioffkg = 0
+     ioffylm = 0
 
      do ikpt=1,dtset%nkpt
-
-       kpoint(:) = dtset%kpt(:,ikpt)
-       nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-       npw_k = npwarr(ikpt)
-
-       if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_kpt)) cycle
-
-       cg1kptshft=0
-       cg_1kpt(:,:) = cg(:,cgshift+1:cgshift+mcg_1kpt)
+       if (all(mpi_enreg%proc_distrb(ikpt,:,isppol)/=mpi_enreg%me)) cycle
+       
+       npw_k = hdr%npwarr(ikpt)
        ABI_ALLOCATE(cg_1band,(2,npw_k))
+       kpoint(:) = dtset%kpt(:,ikpt)
 
 !      for each kpoint set up the phase factors, ylm factors
-       kg_k(:,1:npw_k) = kg(:,ioffkg+1:ioffkg+npw_k)
+       npw_k = hdr%npwarr(ikpt)
+       kg_k(:,1:min(size(kg_k,2),(npw_k))) = kg(:,ioffkg+1:ioffkg+npw_k) !check dimensions compatibility
+
        do ilang=1,mbesslang*mbesslang
          do ipw=1,npw_k
            ylm_k(ipw,ilang) = ylm(ioffylm+ipw,ilang)
@@ -323,18 +347,28 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
 
 !      make phkred for all atoms
        do ia=1,natsph_tot
-         arg=two_pi*(kpoint(1)*xred_sph(1,ia) &
-&                   +kpoint(2)*xred_sph(2,ia) &
-&                   +kpoint(3)*xred_sph(3,ia) )
-         phkxred(1,ia)=cos(arg) ; phkxred(2,ia)=sin(arg)
+         arg=two_pi*( kpoint(1)*xred_sph(1,ia) &
+&         + kpoint(2)*xred_sph(2,ia) &
+&         + kpoint(3)*xred_sph(3,ia) )
+         phkxred(1,ia)=cos(arg)
+         phkxred(2,ia)=sin(arg)
        end do
 
-!      get full phases for the following
        ABI_ALLOCATE(ph3d,(2,npw_k,natsph_tot))
+
+!      !      need simple 3d phases for dens_in_sph
+!      call ph1d3d(1,natsph_tot,kg_k(:,1:npw_k),&
+!      &       natsph_tot,natsph_tot,npw_k,n1,n2,n3,&
+!      &       phkxred,ph1d,ph3d)
+!      !      phases exp (2 pi i G.x_tau) are now in ph3d
+
+       cg_1kpt(:,:) = cg(:,cgshift+1:cgshift+mcg_disk)
+
+!      get full phases for the following
        ph3d = zero
        call ph1d3d(1,natsph_tot,kg_k(:,1:npw_k),&
-&                  natsph_tot,natsph_tot,npw_k,n1,n2,n3,&
-&                  phkxred,ph1d,ph3d)
+&       natsph_tot,natsph_tot,npw_k,n1,n2,n3,&
+&       phkxred,ph1d,ph3d)
 !      phases exp (2 pi i (k+G).x_tau) are now in ph3d
 
 !      get Bessel function factors on array of |k+G|*r distances
@@ -348,6 +382,7 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
            xfit(ipw) = two_pi * kpgnorm(ipw+ioffylm) * rint(ixint)
            iindex(ipw) = ipw
          end do
+
          call sort_dp(npw_k,xfit,iindex,tol14)
          do ilang=1,mbesslang
            call splint(mbess,x_bess,bess_spl(:,ilang),bess_spl_der(:,ilang),&
@@ -359,10 +394,9 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
          end do
        end do
 
-       do iband=1,nband_k
-
-         if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me_kpt)) cycle
-
+       cg1kptshft=0
+       do iband=1,dtset%mband
+         if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=mpi_enreg%me) cycle
          do ispinor=1,my_nspinor
 
            cg_1band(:,:) = cg_1kpt(:,cg1kptshft+1:cg1kptshft+npw_k)
@@ -396,23 +430,22 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
 
          end do ! end spinor
        end do ! end band
+!      cgshift=cgshift + cg1kptshft
+       cgshift=cgshift + dtset%mband*my_nspinor*npw_k
 
-       cgshift=cgshift + nband_k*my_nspinor*npw_k
+       ABI_DEALLOCATE(ph3d)
        ioffkg = ioffkg + npw_k
        ioffylm = ioffylm + npw_k
 
-       ABI_DEALLOCATE(ph3d)
        ABI_DEALLOCATE(cg_1band)
-
      end do ! end kpt
    end do ! end sppol
-
    ABI_DEALLOCATE(cg_1kpt)
 
 !  Gather all contributions from different processors
-   call xmpi_sum(dos_fractions,spaceComm_kpt,ierr)
+   call xmpi_sum(dos_fractions,spaceComm,ierr)
    if (m_dos_flag==1) then
-     call xmpi_sum(dos_fractions_m,spaceComm_kpt,ierr)
+     call xmpi_sum(dos_fractions_m,spaceComm,ierr)
    end if
    if (mpi_enreg%paral_spinor == 1)then
      call xmpi_sum(dos_fractions,mpi_enreg%comm_spinor,ierr)
@@ -429,8 +462,6 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
    ABI_DEALLOCATE(iatsph)
    ABI_DEALLOCATE(kg)
    ABI_DEALLOCATE(kpgnorm)
-   ABI_DEALLOCATE(npwarr)
-   ABI_DEALLOCATE(npwtot)
    ABI_DEALLOCATE(nradint)
    ABI_DEALLOCATE(ph1d)
    ABI_DEALLOCATE(phkxred)
@@ -443,10 +474,6 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
    ABI_DEALLOCATE(ylm)
    ABI_DEALLOCATE(znucl_sph)
 
-
-!##############################################################
-!2ND CASE : project on spinors
-!##############################################################
 
  else if (partial_dos == 2) then
 
@@ -463,34 +490,20 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
      return
    end if
 
-   ABI_ALLOCATE(npwarr,(dtset%nkpt))
-   ABI_ALLOCATE(npwtot,(dtset%nkpt))
-   ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
-   kg(:,:) = 0
-   call kpgio(dtset%ecut,dtset%exchn2n3d,gmet,dtset%istwfk,kg,dtset%kptns,&
-&   dtset%mkmem,dtset%nband,dtset%nkpt,&
-&   mode_paral,mpi_enreg,dtset%mpw,npwarr,npwtot,dtset%nsppol)
-
-   mcg_1kpt=dtset%mpw*my_nspinor*dtset%mband
-   ABI_ALLOCATE(cg_1kpt,(2,mcg_1kpt))
+   ABI_ALLOCATE(cg_1kpt,(2,mcg_disk))
 
    cgshift = 0
    isppol = 1
 
    do ikpt=1,dtset%nkpt
+     if (all(mpi_enreg%proc_distrb(ikpt,:,isppol)/=mpi_enreg%me)) cycle
 
-     nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-     npw_k = npwarr(ikpt)
-
-     if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_kpt)) cycle
-
-     cg1kptshft=0
-     cg_1kpt(:,:) = cg(:,cgshift+1:cgshift+mcg_1kpt)
+     cg_1kpt(:,:) = cg(:,cgshift+1:cgshift+mcg_disk)
+     npw_k = hdr%npwarr(ikpt)
      ABI_ALLOCATE(cg_1band,(2,2*npw_k))
-
+     cg1kptshft=0
      do iband=1,dtset%mband
-
-       if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me_kpt)) cycle
+       if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=mpi_enreg%me) cycle
 
        cg_1band(:,:) = cg_1kpt(:,cg1kptshft+1:cg1kptshft+2*npw_k)
 
@@ -500,7 +513,7 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
          do is2 = 1, 2
            isoff = is2 + (is1-1)*2
            dos_fractions(ikpt,iband,isppol,isoff) = dos_fractions(ikpt,iband,isppol,isoff) &
-&                                                 + real(cgcmat(is1,is2))
+&           + real(cgcmat(is1,is2))
          end do
        end do
 
@@ -509,28 +522,21 @@ subroutine partial_dos_fractions(cg,dos_fractions,dos_fractions_m,&
        dos_fractions(ikpt,iband,isppol,7) = dos_fractions(ikpt,iband,isppol,7) + spin(3)
 
        cg1kptshft=cg1kptshft + 2*npw_k
-
-
      end do
      ABI_DEALLOCATE(cg_1band)
      cgshift=cgshift + dtset%mband*2*npw_k
-
    end do
-
    ABI_DEALLOCATE(cg_1kpt)
-   ABI_DEALLOCATE(npwarr)
-   ABI_DEALLOCATE(npwtot)
-   ABI_DEALLOCATE(kg)
 
 !  Gather all contributions from different processors
-   call xmpi_sum(dos_fractions,spaceComm_kpt,ierr)
+   call xmpi_sum(dos_fractions,spaceComm,ierr)
 ! below for future use - spinors should not be parallelized for the moment
 !   if (mpi_enreg%paral_spinor == 1)then
 !     call xmpi_sum(dos_fractions,mpi_enreg%comm_spinor,ierr)
 !   end if
 
  else
-   MSG_WARNING('only partial_dos==1 or 2 is coded')
+   MSG_WARNING('only partial_dos==1 is coded')
  end if
 
 end subroutine partial_dos_fractions

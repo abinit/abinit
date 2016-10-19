@@ -230,7 +230,7 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
      tmpfil = trim(fildata)//'_AT'//trim(tag)
      if (open_file(tmpfil, message, newunit=unitdos_arr(iat), status='unknown',form='formatted') /= 0) then
        MSG_ERROR(message)
-     end if
+     end if 
      rewind(unitdos_arr(iat))
      write(std_out,*) 'opened file : ', trim(tmpfil), '  unit', unitdos_arr(iat)
    end do
@@ -355,10 +355,11 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
 !    calculate DOS and integrated DOS projected with the input dos_fractions
 !
      if (paw_dos_flag==1) then
-
        work_ndos = dos_fractions_paw1(:,iband,isppol,:)
+
        call get_dos_1band (work_ndos,enemin,enemax,integ_dos(:,:),nene,dtset%nkpt,ndosfraction,&
 &       partial_dos(:,:),tweight,dtweightde)
+
        do ifract=1,ndosfraction
          do iene=1,nene
            total_dos_paw1(iene,ifract)=total_dos_paw1(iene,ifract)+partial_dos(iene,ifract)
@@ -368,17 +369,25 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
        work_ndos = dos_fractions_pawt1(:,iband,isppol,:)
        call get_dos_1band (work_ndos,enemin,enemax,integ_dos(:,:),nene,dtset%nkpt,ndosfraction,&
 &       partial_dos(:,:),tweight,dtweightde)
+
        do ifract=1,ndosfraction
          do iene=1,nene
            total_dos_pawt1(iene,ifract)=total_dos_pawt1(iene,ifract)+partial_dos(iene,ifract)
          end do
        end do
-
      end if
 
      work_ndos = dos_fractions(:,iband,isppol,:)
      call get_dos_1band (work_ndos,enemin,enemax,integ_dos(:,:),nene,dtset%nkpt,ndosfraction,&
 &     partial_dos(:,:),tweight,dtweightde)
+
+     if (prtdosm>=1) then
+       work_ndosmbessl = dos_fractions_m(:,iband,isppol,:)
+       call get_dos_1band_m (work_ndosmbessl,enemin,enemax,integ_dos_m(:,:),nene,dtset%nkpt,ndosfraction*mbesslang,&
+&       partial_dos_m(:,:),tweight,dtweightde)
+     end if
+
+!    Add to total dos
      do ifract=1,ndosfraction
        do iene=1,nene
          total_dos(iene,ifract) = total_dos(iene,ifract) + partial_dos(iene,ifract)
@@ -387,9 +396,6 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
      end do
 
      if (prtdosm>=1) then
-       work_ndosmbessl = dos_fractions_m(:,iband,isppol,:)
-       call get_dos_1band_m (work_ndosmbessl,enemin,enemax,integ_dos_m(:,:),nene,dtset%nkpt,ndosfraction*mbesslang,&
-&       partial_dos_m(:,:),tweight,dtweightde)
        do ifract=1,ndosfraction*mbesslang
          do iene=1,nene
            total_dos_m(iene,ifract) = total_dos_m(iene,ifract) + partial_dos_m(iene,ifract)
@@ -502,6 +508,7 @@ subroutine tetrahedron (dos_fractions,dos_fractions_m,dos_fractions_paw1,dos_fra
    !
    !  finished with header printing
    !
+
 
 !  Write the DOS value in the DOS file
    if(prtdos==2)then
