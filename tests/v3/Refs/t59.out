@@ -27,7 +27,7 @@
  ECHO of the ABINIT file header 
  
  First record :
-.codvsn,headform,fform = 8.0.3    80    2
+.codvsn,headform,fform = 8.1.5    80    2
  
  Second record :
  bantot,intxc,ixc,natom  =    32     0     1     2
@@ -123,18 +123,18 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     2.408319E+00    1.520000E+01   152
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Si, in-sphere charge =  0.014871
  l=0, charge= 0.002199, m=-l,l splitting: 0.002
- l=1, charge= 0.012261, m=-l,l splitting: 0.002 0.004 0.006
+ l=1, charge= 0.012261, m=-l,l splitting: 0.007 0.004 0.001
  l=2, charge= 0.000401, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
  l=3, charge= 0.000009, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000
  l=4, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
  
  Atom #   2 is  Si, in-sphere charge =  0.014871
  l=0, charge= 0.002199, m=-l,l splitting: 0.002
- l=1, charge= 0.012261, m=-l,l splitting: 0.006 0.004 0.002
+ l=1, charge= 0.012261, m=-l,l splitting: 0.007 0.004 0.001
  l=2, charge= 0.000401, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
  l=3, charge= 0.000009, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000
  l=4, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000

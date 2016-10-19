@@ -8,7 +8,7 @@
 !! evaluate special functions frequently needed in Abinit.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MG,MT,FB,XG,FJ,NH,GZ)
+!! Copyright (C) 2008-2016 ABINIT group (MG,MT,FB,XG,MVer,FJ,NH,GZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,6 +26,9 @@ MODULE m_special_funcs
  use defs_basis
  use m_profiling_abi
  use m_errors
+ use m_splines
+
+ use m_numeric_tools, only : arth, simpson
 
  implicit none
 
@@ -42,15 +45,47 @@ MODULE m_special_funcs
  public :: gaussian          ! Normalized Gaussian distribution.
  public :: abi_derf          ! Evaluates the error function in real(dp).
  public :: abi_derfc         ! Evaluates the complementary error function in real(dp).
+ public :: besjm             ! Spherical bessel function of order nn. Handles nn=0,1,2,3,4, or 5 only.
  public :: phim              ! Computes Phi_m[theta]=Sqrt[2] cos[m theta],      if m>0
                              !                       Sqrt[2] sin[Abs(m) theta], if m<0
                              !                       1                        , if m=0
  public :: k_fermi           ! Fermi wave vector corresponding to the local value of the real space density rhor.
  public :: k_thfermi         ! Thomas-Fermi wave vector corresponding to the local value of the real space density rhor
 
+ type,public :: jlspline_t
+
+   integer :: nx
+   ! number of points on linear mesh used in spline.
+
+   integer :: mlang
+   ! mlang= max angular momentum + 1
+
+   real(dp) :: delta
+   ! Step of linear mesh.
+
+   real(dp) :: maxarg
+   ! max arg value.
+
+   real(dp),allocatable :: xx(:)
+   ! xx(nx) 
+   ! coordinates of points belonging to the grid
+
+   real(dp),allocatable :: bess_spl(:,:)
+   ! bess_spl(nx,mlang) 
+   ! bessel functions computed on the linear mesh
+
+   real(dp),allocatable :: bess_spl_der(:,:)
+   ! bess_spl_der(nx,mlang)
+   ! the second derivatives of the cubic spline.
+
+ end type jlspline_t
+
+ public :: jlspline_new         ! Create new object.
+ public :: jlspline_free        ! Free memory.
+ public :: jlspline_integral    ! Compute integral.
+
 CONTAINS  !===========================================================
 !!***
-
 
 !!****f* m_special_funcs/clp
 !! NAME
@@ -915,7 +950,239 @@ elemental function abi_derfc(yy) result(derfc_yy)
 end function abi_derfc
 !!***
 
-!!****f* ABINIT/phim
+!!****f* m_special_funcs/besjm
+!! NAME
+!! besjm
+!!
+!! FUNCTION
+!! Spherical bessel function of order nn. Handles nn=0,1,2,3,4, or 5 only.
+!!
+!! INPUTS
+!!  arg= scaling to be applied to xx(nx)
+!!  nn=order of spherical bessel function (only 0 through 5 allowed)
+!!  cosx(1:nx)=cosines of arg*xx(1:nx)
+!!  xx(1:nx)=set of dimensionless arguments of function
+!!  nx=number of arguments
+!!  sinx(1:nx)=sines of arg*xx(1:nx)
+!!
+!! OUTPUT
+!!  besjx(1:nx)=returned values
+!!
+!! NOTES
+!! besj(nn,y)=$ j_{nn}(y) =(\frac{\pi}{2y})^{\frac{1}{2}}J(nn+\frac{1}{2},y)$
+!! where J=Bessel function of the first kind.
+!! besjm compute multiple values, and relies on precomputed values of sin and cos of y.
+!! The argument y is arg*xx(ix), for ix from 1 to nx
+!! The values of xx must be positive, and ordered by increasing order
+!! At small arg, the higher orders have so much cancellation that the
+!! analytic expression is very poor computationally.  In that case we
+!! use a rational polynomial approximation.
+!!
+!! PARENTS
+!!      jlspline_new,mlwfovlp_radial,psp1nl
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine besjm(arg,besjx,cosx,nn,nx,sinx,xx)
+
+ implicit none
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'besjm'
+!End of the abilint section
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nn,nx
+ real(dp),intent(in) :: arg
+!arrays
+ real(dp),intent(in) :: cosx(nx),sinx(nx),xx(nx)
+ real(dp),intent(out) :: besjx(nx)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ix,switchx
+!Series or rational polynomial coefficients
+ real(dp),parameter :: b01=1.d0/6.d0,b02=1.d0/120.d0,b03=1.d0/5040.d0
+ real(dp),parameter :: b04=1.d0/362880.d0,b11=0.8331251468724171d-1
+ real(dp),parameter :: b12=0.2036961284395412d-2,b13=0.1932970379901801d-4
+ real(dp),parameter :: b14=0.6526053169009489d-7,b21=0.5867824627555163d-1
+ real(dp),parameter :: b22=0.1152501878595934d-2,b23=0.1011071389414764d-4
+ real(dp),parameter :: b24=0.4172322111421287d-7,b25=0.6790616688656543d-10
+ real(dp),parameter :: b31=0.439131885807176d-1,b32=0.6813139609887099d-3
+ real(dp),parameter :: b33=0.4899103784264755d-5,b34=0.17025590795625d-7
+ real(dp),parameter :: b35=0.2382642910613347d-10,b41=0.3587477991030971d-1
+ real(dp),parameter :: b42=0.4833719855268907d-3,b43=0.3238388977796242d-5
+ real(dp),parameter :: b44=0.1171802513125112d-7,b45=0.223261650431992d-10
+ real(dp),parameter :: b46=.1800045587335951d-13,b51=0.295232406376567d-1
+ real(dp),parameter :: b52=0.3359864457080573d-3,b53=0.19394750603618d-5
+ real(dp),parameter :: b54=0.6143166228216219d-8,b55=0.10378501636108d-10
+ real(dp),parameter :: b56=.749975122872713d-14
+ real(dp),parameter :: c11=0.1668748531275829d-1,c12=0.1342812442426702d-3
+ real(dp),parameter :: c13=0.6378249315355233d-6,c14=0.1573564527360138d-8
+ real(dp),parameter :: c21=0.127503251530198d-1,c22=0.7911240539893565d-4
+ real(dp),parameter :: c23=0.3044380758068054d-6,c24=0.7439837832363479d-9
+ real(dp),parameter :: c25=0.9515065658793124d-12,c31=0.1164236697483795d-1
+ real(dp),parameter :: c32=0.654858636312224d-4,c33=0.2265576367562734d-6
+ real(dp),parameter :: c34=0.4929905563217352d-9,c35=0.555120465710914d-12
+ real(dp),parameter :: c41=0.9579765544235745d-2,c42=0.4468999977536864d-4
+ real(dp),parameter :: c43=0.1315634305905896d-6,c44=0.2615492488301639d-9
+ real(dp),parameter :: c45=0.3387473312408129d-12,c46=.2280866204624012d-15
+ real(dp),parameter :: c51=0.8938297823881763d-2,c52=0.3874149021633025d-4
+ real(dp),parameter :: c53=0.1054692715135225d-6,c54=0.192879620987602d-9
+ real(dp),parameter :: c55=0.2284469423833734d-12,c56=0.139729234332572d-15
+ real(dp),parameter :: ffnth=1.d0/15.d0,o10395=1.d0/10395d0,oo105=1.d0/105.d0
+ real(dp),parameter :: oo945=1.d0/945.d0
+ real(dp) :: bot,rr,rsq,top
+ character(len=500) :: message
+
+! *************************************************************************
+
+ if (nn==0) then
+
+   switchx=nx+1
+   do ix=1,nx
+     rr=arg*xx(ix)
+     if (rr<=1.d-1) then
+       rsq=rr*rr
+       besjx(ix)=1.d0-rsq*(b01-rsq*(b02-rsq*(b03-rsq*b04)))
+     else
+       switchx=ix
+       exit
+     end if
+   end do
+
+   do ix=switchx,nx
+     rr=arg*xx(ix)
+     besjx(ix)=sinx(ix)/rr
+   end do
+
+ else if (nn==1) then
+
+   switchx=nx+1
+   do ix=1,nx
+     rr=arg*xx(ix)
+     if (rr<=1.d0) then
+       rsq=rr*rr
+       top=1.d0-rsq*(b11-rsq*(b12-rsq*(b13-rsq*b14)))
+       bot=1.d0+rsq*(c11+rsq*(c12+rsq*(c13+rsq*c14)))
+       besjx(ix)=third*rr*top/bot
+     else
+       switchx=ix
+       exit
+     end if
+   end do
+
+   do ix=switchx,nx
+     rr=arg*xx(ix)
+     rsq=rr*rr
+     besjx(ix)=(sinx(ix)-rr*cosx(ix))/rsq
+   end do
+
+ else if (nn==2) then
+
+   switchx=nx+1
+   do ix=1,nx
+     rr=arg*xx(ix)
+     if (rr<=2.d0) then
+       rsq=rr*rr
+       top=1.d0-rsq*(b21-rsq*(b22-rsq*(b23-rsq*(b24-rsq*b25))))
+       bot=1.d0+rsq*(c21+rsq*(c22+rsq*(c23+rsq*(c24+rsq*c25))))
+       besjx(ix)=ffnth*rsq*top/bot
+     else
+       switchx=ix
+       exit
+     end if
+   end do
+
+   do ix=switchx,nx
+     rr=arg*xx(ix)
+     rsq=rr*rr
+     besjx(ix)=((3.d0-rsq)*sinx(ix)-3.d0*rr*cosx(ix))/(rr*rsq)
+   end do
+
+ else if (nn==3) then
+
+   switchx=nx+1
+   do ix=1,nx
+     rr=arg*xx(ix)
+     if (rr<=2.d0) then
+       rsq=rr*rr
+       top=1.d0-rsq*(b31-rsq*(b32-rsq*(b33-rsq*(b34-rsq*b35))))
+       bot=1.d0+rsq*(c31+rsq*(c32+rsq*(c33+rsq*(c34+rsq*c35))))
+       besjx(ix)=rr*rsq*oo105*top/bot
+     else
+       switchx=ix
+       exit
+     end if
+   end do
+
+   do ix=switchx,nx
+     rr=arg*xx(ix)
+     rsq=rr*rr
+     besjx(ix)=( (15.d0-6.d0*rsq)*sinx(ix)&
+&     + rr*(rsq-15.d0)  *cosx(ix) ) /(rsq*rsq)
+   end do
+
+ else if (nn==4) then
+
+   switchx=nx+1
+   do ix=1,nx
+     rr=arg*xx(ix)
+     if (rr<=4.d0) then
+       rsq=rr*rr
+       top=1.d0-rsq*(b41-rsq*(b42-rsq*(b43-rsq*(b44-rsq*(b45-rsq*b46)))))
+       bot=1.d0+rsq*(c41+rsq*(c42+rsq*(c43+rsq*(c44+rsq*(c45+rsq*c46)))))
+       besjx(ix)=rsq*rsq*oo945*top/bot
+     else
+       switchx=ix
+       exit
+     end if
+   end do
+
+   do ix=switchx,nx
+     rr=arg*xx(ix)
+     rsq=rr*rr
+     besjx(ix)=( (105.d0-rsq*(45.d0-rsq)) *sinx(ix)&
+&     + rr * (10.d0*rsq-105.d0)  *cosx(ix) ) /(rsq*rsq*rr)
+   end do
+
+ else if (nn==5) then
+
+   switchx=nx+1
+   do ix=1,nx
+     rr=arg*xx(ix)
+     if (rr<=4.d0) then
+       rsq=rr*rr
+       top=1.d0-rsq*(b51-rsq*(b52-rsq*(b53-rsq*(b54-rsq*(b55-rsq*b56)))))
+       bot=1.d0+rsq*(c51+rsq*(c52+rsq*(c53+rsq*(c54+rsq*(c55+rsq*c56)))))
+       besjx(ix)=rsq*rsq*rr*o10395*top/bot
+     else
+       switchx=ix
+       exit
+     end if
+   end do
+
+   do ix=switchx,nx
+     rr=arg*xx(ix)
+     rsq=rr*rr
+     besjx(ix)=( (945.d0-rsq*(420.d0-rsq*15.d0)) *sinx(ix)&
+&     + rr * (945.d0-rsq*(105.d0-rsq))  *cosx(ix) ) /(rsq*rsq*rr)
+   end do
+
+ else
+   write(message, '(a,i0,a)' )' besjm only defined for nn in [0,5]; input was nn=',nn,'.'
+   MSG_BUG(message)
+ end if
+
+end subroutine besjm
+!!***
+
+!!****f* m_special_funcs/phim
 !! NAME
 !! phim
 !!
@@ -1063,7 +1330,201 @@ elemental function k_thfermi(rhor)
 end function k_thfermi
 !!***
 
+!!****f* m_special_funcs/jlspline_new
+!! NAME
+!! jlspline_new
+!!
+!! FUNCTION
+!! Pre-calculate the j_v(y) for recip_ylm on regular grid
+!!     NOTE: spherical Bessel function small j!
+!!
+!! INPUTS
+!!  nx = max number of points on grid for integral
+!!  delta = space between integral arguments
+!!  mlang= max angular momentum
+!!
+!! OUTPUT
+!!  bess_spl=array of integrals
+!!  bess_spl_der=array of derivatives of integrals
+!!  xx=coordinates of points belonging to the grid
+!!
+!! PARENTS
+!!      m_cut3d,partial_dos_fractions
+!!
+!! CHILDREN
+!!      besjm,spline
+!!
+!! SOURCE
+
+type(jlspline_t) function jlspline_new(nx, delta, mlang) result(new) 
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'jlspline_new'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nx,mlang
+ real(dp),intent(in) :: delta
+
+!Local variables -------------------------
+!scalars
+ integer :: ix,ll
+ character(len=500) :: msg
+ real(dp) :: yp1,ypn
+!arrays
+ real(dp),allocatable :: cosbessx(:),sinbessx(:)
+
+! *********************************************************************
+
+ if (nx < 2) then
+   MSG_ERROR('need more than one point for the interpolation routines')
+ end if
+
+ new%nx = nx; new%mlang = mlang; new%delta = delta; new%maxarg = (nx-1) * delta
+ ABI_MALLOC(new%xx, (nx))
+ ABI_MALLOC(new%bess_spl, (nx, mlang))
+ ABI_MALLOC(new%bess_spl_der, (nx, mlang))
+
+ !-----------------------------------------------------------------
+ !Bessel function into array
+ !-----------------------------------------------------------------
+ ! integration grid is nfiner times finer than the interpolation grid
+ ABI_MALLOC(sinbessx, (nx))
+ ABI_MALLOC(cosbessx, (nx))
+
+ ! could be done by chain rule for cos sin (is it worth it?) but
+ ! precision problems as numerical errors are propagated.
+ do ix=1,nx
+   new%xx(ix) = (ix-1) * delta
+   sinbessx(ix) = sin(new%xx(ix))
+   cosbessx(ix) = cos(new%xx(ix))
+ end do
+
+ ! fill bess_spl array
+ do ll=0,mlang-1
+   call besjm(one,new%bess_spl(:,ll+1),cosbessx,ll,nx,sinbessx,new%xx)
+
+   ! call spline to get 2nd derivative (reuse in splint later)
+   yp1 = zero; ypn = zero
+   call spline(new%xx, new%bess_spl(:,ll+1), nx, yp1, ypn, new%bess_spl_der(:,ll+1))
+ end do
+
+!write(std_out,*) ' bess funct  0   1   2   3   4'
+!do ix=1,nx
+!write(std_out,*) xx(ix), (new%bess_spl(ix,ll),ll=1,mlang)
+!end do
+
+ ABI_FREE(sinbessx)
+ ABI_FREE(cosbessx)
+
+end function jlspline_new
+!!***
+
 !----------------------------------------------------------------------
+
+!!****f* m_special_funcs/jlspline_free
+!! NAME
+!! jlspline_free
+!!
+!! FUNCTION
+!!  deallocate memory
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+subroutine jlspline_free(jlspl)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'jlspline_free'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(jlspline_t),intent(inout) :: jlspl
+
+! *********************************************************************
+
+ if (allocated(jlspl%xx)) then
+   ABI_FREE(jlspl%xx)
+ end if
+ if (allocated(jlspl%bess_spl)) then
+   ABI_FREE(jlspl%bess_spl)
+ end if
+ if (allocated(jlspl%bess_spl_der)) then
+   ABI_FREE(jlspl%bess_spl_der)
+ end if
+
+end subroutine jlspline_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_special_funcs/jlspline_integral
+!! NAME
+!! jlspline_integral
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+real(dp) function jlspline_integral(jlspl, il, qq, powr, nr, rcut)  result(res)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'jlspline_integral'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in) :: il,nr,powr
+ real(dp),intent(in) :: qq, rcut
+ type(jlspline_t),intent(in) :: jlspl
+
+!Local variables ---------------------------------------
+ integer :: ierr
+ real(dp) :: step
+!arrays
+ real(dp):: xfit(nr),yfit(nr),rr(nr)
+! *********************************************************************
+
+ step = rcut / (nr - 1)
+ rr = arth(zero, step, nr)
+ xfit = qq * rr
+ call splint(jlspl%nx, jlspl%xx, jlspl%bess_spl(:,il), jlspl%bess_spl_der(:,il), nr, xfit, yfit, ierr=ierr)
+
+ if (ierr /= 0) then
+   write(std_out,*)"qq, rcut, qq*rcut, maxarg", qq, rcut, qq*rcut, jlspl%maxarg
+   write(std_out,*)"x[0], x[-1]",jlspl%xx(1),jlspl%xx(jlspl%nx)
+   write(std_out,*)"minval xfit: ",minval(xfit)
+   write(std_out,*)"maxval xfit: ",maxval(xfit)
+   MSG_ERROR("splint returned ierr != 0")
+ end if 
+
+ if (powr /= 1) yfit = yfit * (rr ** powr)
+ res = simpson(step, yfit)
+
+end function jlspline_integral
+!!***
 
 END MODULE m_special_funcs
 !!***

@@ -72,8 +72,9 @@ include "fexcp.h"
  public :: die              ! Stop execution in case of unexpected events.
  public :: msg_hndl         ! Basic Error handlers.
  public :: netcdf_check     ! Stop execution after a NetCDF I/O error
- public :: check_mpi_ierr   ! Erro handler for MPI routines.
- public :: show_backtrace   ! Shows a backtrace at an arbitrary place in user code. (Gfortran extension)
+ public :: check_mpi_ierr   ! Error handler for MPI routines.
+ public :: set_backtrace_onerr ! Activate show_backtrace call in msg_hndl. 0 to disable it.
+ !public :: show_backtrace   ! Shows a backtrace at an arbitrary place in user code. (Gfortran/Ifort extension)
  public :: unused_var       ! Helper function used to silence compiler warnings due to unused variables.
 #if defined HAVE_ETSF_IO
  public :: abietsf_msg_hndl ! Error handler for ETSF-IO routines.
@@ -83,6 +84,11 @@ include "fexcp.h"
  public :: xlf_set_sighandler
  public :: abinit_doctor         ! Perform checks on memory leaks and leaking file descriptors
                                  ! at the end of the run.
+
+ ! This flag activate the output of the backtrace in msg_hndl
+ ! Unfortunately, gcc4.9 seems to crash inside this routine
+ ! hence, for the time being, this optional feature has been disabled
+ integer, save, private :: m_errors_show_backtrace = 0
 
  interface assert_eq  
    module procedure assert_eq2
@@ -905,7 +911,7 @@ subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP)
      call xmpi_show_info()
      call dump_config(std_out)
      ! Dump the backtrace if the compiler supports it.
-     call show_backtrace()
+     if (m_errors_show_backtrace == 1) call show_backtrace()
    end if
 
    write(sbuf,'(8a,i0,2a,i0,7a)')ch10,&
@@ -930,6 +936,40 @@ subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP)
  end select
 
 end subroutine msg_hndl
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_errors/set_backtrace_onerr
+!! NAME
+!! set_backtrace_onerr
+!!
+!! FUNCTION
+!!  1 to activate show_backtrace call in msg_hndl. 0 to disable it
+!!  
+!! PARENTS
+!!      m_errors
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine set_backtrace_onerr(iflag)
+
+!Arguments ------------------------------------
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'set_backtrace_onerr'
+!End of the abilint section
+
+ integer,intent(in) :: iflag
+! *********************************************************************
+
+  m_errors_show_backtrace = iflag
+
+end subroutine set_backtrace_onerr
 !!***
 
 !----------------------------------------------------------------------

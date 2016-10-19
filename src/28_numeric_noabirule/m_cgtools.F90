@@ -8,7 +8,7 @@
 !! using the "cg" convention, namely real array of shape cg(2,...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2016 ABINIT group (MG, MT, XG, DCA, GZ, FB)
+!! Copyright (C) 1992-2016 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -90,6 +90,7 @@ MODULE m_cgtools
  public :: dotprod_v                ! Dot product of two potentials (integral over FFT grid).
  public :: sqnorm_v                 ! Compute square of the norm of a potential (integral over FFT grid).
  public :: mean_fftr                ! Compute the mean of an arraysp(nfft,nspden), over the FFT grid.
+ public :: cg_getspin               ! Sandwich a single wave function on the Pauli matrices
  public :: cg_gsph2box              ! Transfer data from the G-sphere to the FFT box.
  public :: cg_box2gsph              ! Transfer data from the FFT box to the G-sphere
  public :: cg_addtorho              ! Add |ur|**2 to the ground-states density rho.
@@ -1252,7 +1253,7 @@ subroutine sqnorm_g(dotr,istwf_k,npwsp,vect,me_g0,comm)
    if (istwf_k==2 .and. me_g0==1) then  
      ! Gamma k-point and I have G=0
      dotr=half*vect(1,1)**2
-    dotr = dotr + cg_real_zdotc(npwsp-1,vect(1,2),vect(1,2))
+     dotr = dotr + cg_real_zdotc(npwsp-1,vect(1,2),vect(1,2))
    else  
      ! Other TR k-points
      dotr = cg_real_zdotc(npwsp,vect,vect)
@@ -1555,7 +1556,6 @@ end subroutine matrixelmt_g
 !!
 !! INPUTS
 !!  cplex=if 1, real space functions on FFT grid are REAL, if 2, COMPLEX
-!!  mpi_enreg=information about MPI parallelization
 !!  nfft= (effective) number of FFT grid points (for this processor)
 !!  nspden=number of spin-density components
 !!  opt_storage: 0, if potentials are stored as V^up-up, V^dn-dn, Re[V^up-dn], Im[V^up-dn]
@@ -1808,7 +1808,6 @@ subroutine mean_fftr(arraysp,meansp,nfft,nfftot,nspden,mpi_comm_sphgrid)
 
 !XG030514 : MPIWF The values of meansp(ispden) should
 !now be summed accross processors in the same WF group, and spread on all procs.
-!if(mpi_enreg%paral_kgb==1) spaceComm=mpi_enreg%comm_fft; reduce=.true.
  if(present(mpi_comm_sphgrid)) then
    nproc_sphgrid=xmpi_comm_size(mpi_comm_sphgrid)
    if(nproc_sphgrid>1) then
@@ -1817,6 +1816,79 @@ subroutine mean_fftr(arraysp,meansp,nfft,nfftot,nspden,mpi_comm_sphgrid)
  end if
 
 end subroutine mean_fftr
+!!***
+
+!!****f* m_cgtools/cg_getspin
+!! NAME
+!! cg_getspin
+!!
+!! FUNCTION
+!!  Sandwich a single wave function on the Pauli matrices
+!!
+!! INPUTS
+!!  npw_k = number of plane waves
+!!  cgcband = coefficients of spinorial wave function
+!!
+!! OUTPUT
+!!  spin = 3-vector of spin components for this state
+!!  cgcmat = outer spin product of spinorial wf with itself
+!!
+!! PARENTS
+!!      m_cut3d,partial_dos_fractions
+!!
+!! CHILDREN
+!!      cg_outer_spin_product
+!!
+!! SOURCE
+
+subroutine  cg_getspin(cgcband, npw_k, spin, cgcmat)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'cg_getspin'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: npw_k
+ real(dp), intent(in) :: cgcband(2,2*npw_k)
+ complex(dpc), intent(out),optional :: cgcmat(2,2)
+ real(dp), intent(out) :: spin(3)
+
+!Local variables-------------------------------
+!scalars
+ complex(dpc) :: pauli_0(2,2) = reshape([cone,czero,czero,cone], [2,2])
+ complex(dpc) :: pauli_x(2,2) = reshape([czero,cone,cone,czero], [2,2])
+ complex(dpc) :: pauli_y(2,2) = reshape([czero,j_dpc,-j_dpc,czero], [2,2])
+ complex(dpc) :: pauli_z(2,2) = reshape([cone,czero,czero,-cone], [2,2])
+ complex(dpc) :: cspin(0:3), cgcmat_(2,2)
+! ***********************************************************************
+
+! cgcmat_ = cgcband * cgcband^T*  i.e. 2x2 matrix of spin components (dpcomplex)
+ cgcmat_ = czero
+ call zgemm('n','c',2,2,npw_k,cone,cgcband,2,cgcband,2,czero,cgcmat_,2)
+
+! spin(*)  = sum_{si sj pi} cgcband(si,pi)^* pauli_*(si,sj) cgcband(sj,pi)
+ cspin(0) = cgcmat_(1,1)*pauli_0(1,1) + cgcmat_(2,1)*pauli_0(2,1) &
+& + cgcmat_(1,2)*pauli_0(1,2) + cgcmat_(2,2)*pauli_0(2,2)
+ cspin(1) = cgcmat_(1,1)*pauli_x(1,1) + cgcmat_(2,1)*pauli_x(2,1) &
+& + cgcmat_(1,2)*pauli_x(1,2) + cgcmat_(2,2)*pauli_x(2,2)
+ cspin(2) = cgcmat_(1,1)*pauli_y(1,1) + cgcmat_(2,1)*pauli_y(2,1) &
+& + cgcmat_(1,2)*pauli_y(1,2) + cgcmat_(2,2)*pauli_y(2,2)
+ cspin(3) = cgcmat_(1,1)*pauli_z(1,1) + cgcmat_(2,1)*pauli_z(2,1) &
+& + cgcmat_(1,2)*pauli_z(1,2) + cgcmat_(2,2)*pauli_z(2,2)
+!write(std_out,*) 'cgmat: ', cgcmat_
+!write(std_out,*) 'real(spin): ', real(cspin)
+!write(std_out,*) 'aimag(spin): ', aimag(cspin)
+
+ spin = real(cspin(1:3))
+ if (present(cgcmat)) cgcmat = cgcmat_
+
+end subroutine cg_getspin
 !!***
 
 !----------------------------------------------------------------------
@@ -3985,7 +4057,6 @@ end subroutine cg_precon_block
 !!  $ghc(vectsize,blocksize)=<G|H|C_{n,k}> for a block of bands$.
 !!  iterationnumber=number of iterative minimizations in LOBPCG 
 !!  kinpw(npw)=(modified) kinetic energy for each plane wave (Hartree)
-!!  mpi_enreg=information about MPI parallelization
 !!  nspinor=number of spinorial components of the wavefunctions (on current proc)
 !!  $vect(vectsize,blocksize)=<G|H|C_{n,k}> for a block of bands$.
 !!  npw=number of planewaves at this k point.

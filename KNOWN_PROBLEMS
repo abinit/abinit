@@ -477,6 +477,7 @@ a large arbitrariness of the result.
 In ABINITv6.0.0, tried to average over the local DOS contributions of degenerate wavefunctions,
 writing a new routine dos_degeneratewfs.F90 . Unfortunately, the portability was not improved ?!
 See Tv5#40 .
+(MG160823) dos_fractions_average_m has been removed to reduce memory requirements.
  
 P59.11 (XG090907)
 See mail of BBertrand 
