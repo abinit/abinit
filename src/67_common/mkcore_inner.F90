@@ -52,7 +52,6 @@ subroutine mkcore_inner(corfra,core_mesh,dyfrx2,grxc1,grxc2,grxc3,ifftsph,msz,na
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkcore_inner'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

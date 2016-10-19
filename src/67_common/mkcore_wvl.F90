@@ -94,7 +94,6 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
 #undef ABI_FUNC
 #define ABI_FUNC 'mkcore_wvl'
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
 !End of the abilint section

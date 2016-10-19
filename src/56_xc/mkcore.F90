@@ -629,7 +629,6 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 #undef ABI_FUNC
 #define ABI_FUNC 'mkcore_alt'
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
 !End of the abilint section
 
