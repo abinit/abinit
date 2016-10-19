@@ -987,6 +987,13 @@ end function abi_derfc
 
 subroutine besjm(arg,besjx,cosx,nn,nx,sinx,xx)
 
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'besjm'
+!End of the abilint section
+
  implicit none
 
 !This section has been created automatically by the script Abilint (TD).

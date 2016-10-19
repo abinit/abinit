@@ -743,6 +743,13 @@ subroutine out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
 
 !Arguments ------------------------------------
 !scalars
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'out_phpi_nc'
+!End of the abilint section
+
  integer,intent(in) :: natom3
  type(datafiles_type), intent(in) :: dtfil
  type(crystal_t),intent(in) :: cryst
