@@ -66,7 +66,7 @@ module m_epjdos
 !!****t* m_epjdos/epjdos_t
 !! NAME
 !! epjdos_t
-!! 
+!!
 !! FUNCTION
 !!  Stores different contributions to the electronic DOS.
 !!
@@ -76,7 +76,7 @@ module m_epjdos
 !!  so that one can read it with python and plot fatbands and PJDOSEs.
 !!  The python version is able to handle the different cases (L, LM, Spin ...) but
 !!  any change in the internal Abinit implementation is likely to break the python interface.
-!! 
+!!
 !! SOURCE
 
  type,public :: epjdos_t
@@ -88,11 +88,11 @@ module m_epjdos
    ! Defines the last dimension of the dos arrays.
    ! Actual value depends on the other variables.
 
-   integer :: prtdos 
+   integer :: prtdos
    ! 2 --> Standard DOS with tetra.
    ! 3 --> L-DOS with tetra (prtdosm>0 if LM is wanted in Ylm/Slm basis).
    ! 4 --> L-DOS with gaussian (prtdosm if LM is wanted in Ylm/Slm basis).
-   ! 5 --> Spin-DOS 
+   ! 5 --> Spin-DOS
 
    integer :: prtdosm
    ! Option for the m-contributions to the partial DOS
@@ -109,10 +109,10 @@ module m_epjdos
 
    integer :: nkpt, mband, nsppol
    ! Used to dimension arrays
-  
+
    integer,allocatable :: mlang_type(:)
    ! mlang_type(ntypat + natsph_extra)
-   ! Max L+1 used in LM-DOS for each atom type 
+   ! Max L+1 used in LM-DOS for each atom type
 
    real(dp),allocatable :: fractions(:,:,:,:)
    ! fractions(nkpt,mband,nsppol,ndosfraction))
@@ -187,7 +187,7 @@ type(epjdos_t) function epjdos_new(dtset, psps, pawtab) result(new)
  if (new%prtdos==2) new%partial_dos_flag = 0 ! Standard DOS with tetra.
  if (new%prtdos==3) new%partial_dos_flag = 1 ! L-DOS with tetra (prtdosm>0 if LM is wanted in Ylm/Slm basis).
  if (new%prtdos==4) new%partial_dos_flag = 1 ! L-DOS with gaussian (prtdosm if LM is wanted in Ylm/Slm basis).
- if (new%prtdos==5) new%partial_dos_flag = 2 ! Spin DOS 
+ if (new%prtdos==5) new%partial_dos_flag = 2 ! Spin DOS
 
  new%prtdosm=0
  if (new%partial_dos_flag==1) new%prtdosm=dtset%prtdosm
@@ -219,7 +219,7 @@ type(epjdos_t) function epjdos_new(dtset, psps, pawtab) result(new)
        itypat = dtset%typat(dtset%iatsph(iat))
        new%mlang_type(itypat) = 1 + maxval(psps%indlmn(1, :, itypat))
      end do
-   else 
+   else
      do iat=1,dtset%natsph
        itypat= dtset%typat(dtset%iatsph(iat))
        new%mlang_type(itypat) = 1 + (pawtab(itypat)%l_size - 1) / 2
@@ -520,7 +520,7 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
      tmpfil = trim(fildata)//'_AT'//trim(tag)
      if (open_file(tmpfil, message, newunit=unitdos_arr(iat), status='unknown',form='formatted') /= 0) then
        MSG_ERROR(message)
-     end if 
+     end if
      !write(std_out,*) 'opened file : ', trim(tmpfil), '  unit', unitdos_arr(iat)
    end do
 !  do extra spheres in vacuum too. Use _ATEXTRA[NUM] suffix
@@ -737,7 +737,7 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
    !  finished with header printing
 
 !  Write the DOS value in the DOS file
-!  Print the data for this energy. Note the upper limit (dos_max), to be consistent with the format. 
+!  Print the data for this energy. Note the upper limit (dos_max), to be consistent with the format.
 !  The use of "E" format is not adequate, for portability of the self-testing procedure.
    if (prtdos==2) then
      ! E, DOS, IDOS
@@ -758,7 +758,7 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
        do iene=1,nene
          do iat=1,natsph
            if (prtdosm==0) then
-             i1 = (iat-1)*mbesslang+1; i2 = iat*mbesslang 
+             i1 = (iat-1)*mbesslang+1; i2 = iat*mbesslang
              write(unitdos_arr(iat), fmt=frmt) enex, &
 &             min(total_dos(iene, i1:i2), dos_max), total_integ_dos(iene, i1:i2)
            else
@@ -922,7 +922,7 @@ end subroutine tetrahedron
 !!
 !! SOURCE
 
-subroutine gaus_dos(dos, dtset, ebands, eigen,fildata) 
+subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -959,7 +959,7 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
 !scalars
  integer,allocatable :: unitdos_arr(:)
  real(dp) :: xgrid(-nptsdiv2:nptsdiv2),smdfun(-nptsdiv2:nptsdiv2,2)
- real(dp),allocatable :: vals(:),arg(:),derfun(:),total_dos(:,:) 
+ real(dp),allocatable :: vals(:),arg(:),derfun(:),total_dos(:,:)
  real(dp),allocatable :: total_integ_dos(:,:),total_dos_paw1(:,:),total_dos_pawt1(:,:)
  !real(dp),allocatable :: integ_dos_m(:,:,:),partial_dos_m(:,:,:),partial_dos(:,:,:),
  real(dp),allocatable :: total_dos_m(:,:) !,total_integ_dos_m(:,:)
@@ -991,7 +991,7 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
 
  ! Write the header of the DOS file, and determine the energy range and spacing
  buffer=0.01_dp ! Size of the buffer around the min and max ranges
- 
+
  do iat=1,natsph
    call dos_hdr_write(buffer,deltaene,dtset%dosdeltae,eigen,enemax,enemin,ebands%fermie,dtset%mband,&
 &   dtset%nband,nene,dtset%nkpt,dtset%nsppol,dtset%occopt,prtdos,&
@@ -1002,7 +1002,7 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
  ABI_ALLOCATE(arg,(bantot))
  ABI_ALLOCATE(derfun,(bantot))
  ABI_ALLOCATE(vals,(bantot))
- 
+
  !write(std_out,*) ' ndosfraction,dtset%mband,dtset%nkpt,nene'ndosfraction,dtset%mband,dtset%nkpt,nene
  !ABI_ALLOCATE(partial_dos,(nene,ndosfraction,dtset%mband))
  ABI_ALLOCATE(total_dos,(nene,ndosfraction))
@@ -1021,7 +1021,7 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
     ABI_ALLOCATE(total_dos_m,(nene,ndosfraction*mbesslang))
  !  ABI_ALLOCATE(total_integ_dos_m,(nene,ndosfraction*mbesslang))
  end if
- 
+
 !Get maximum occupation value (2 or 1)
  max_occ = one
  if (dtset%nspinor == 1 .and. dtset%nsppol == 1) max_occ = two
@@ -1057,7 +1057,7 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
    do isppol=1,nsppol
      do ikpt=1,nkpt
        do iband=1,dtset%nband(ikpt)
-         index=index+1        
+         index=index+1
          do ifract=1,ndosfraction
            if (dos%paw_dos_flag==1) then
              total_dos_paw1(iene,ifract)=total_dos_paw1(iene,ifract)+&
@@ -1082,7 +1082,7 @@ subroutine gaus_dos(dos, dtset, ebands, eigen,fildata)
  do isppol=1,nsppol
    enex=enemin
    integral_DOS=zero
-   
+
    bigDOS=(maxval(total_dos)>999._dp)
    if (dos%paw_dos_flag/=1.or.dtset%pawprtdos==2) then
      do iat=1,natsph
@@ -1432,7 +1432,7 @@ subroutine dos_degeneratewfs(dos_fractions_in,dos_fractions_out,eigen,mband,nban
 &             /real(degeneracy_index+1)
              dos_fractions_out(ikpt,degeneracy_min:degeneracy_min+degeneracy_index,isppol,idos)=average
            end do
-!          DEBUG     
+!          DEBUG
 !          test_done=test_done+1
 !          write(std_out,*)' dos_degeneratewfs '
 !          write(std_out,*)' ikpt,isppol,iband,degeneracy_min,degeneracy_max=',&
@@ -1440,13 +1440,13 @@ subroutine dos_degeneratewfs(dos_fractions_in,dos_fractions_out,eigen,mband,nban
 !          write(std_out,*)' eigen(1+index_eig:nband_ksp+index_eig)=',eigen(1+index_eig:nband_ksp+index_eig)
 !          write(std_out,*)' dos_fractions_in(ikpt,:,isppol,idos)=',dos_fractions_in(ikpt,:,isppol,idos)
 !          write(std_out,*)' dos_fractions_out(ikpt,:,isppol,idos)=',dos_fractions_out(ikpt,:,isppol,idos)
-!          ENDDEBUG   
+!          ENDDEBUG
 
 !          Reset degeneracy_index and degeneracy_min
            degeneracy_index=0 ; degeneracy_min=0
          end if
        end do ! iband
-       
+
      end if
    end do ! ikpt
  end do ! isppol
@@ -1459,7 +1459,7 @@ end subroutine dos_degeneratewfs
 !! recip_ylm
 !!
 !! FUNCTION
-!! Project input wavefunctions in reciprocal space on to Ylm 
+!! Project input wavefunctions in reciprocal space on to Ylm
 !! (real or complex harmonics depending on rc_ylm).
 !!
 !! INPUTS
@@ -1467,13 +1467,14 @@ end subroutine dos_degeneratewfs
 !!   with arguments $2 \pi |k+G| \Delta r$, for all G vectors in sphere
 !!   and all points on radial grid.
 !!  cg_1band(2,npw_k)=wavefunction in recip space (note that nspinor is missing, see Notes).
+!!  comm_pw=MPI communicator over plane waves (all npw-dependent data are distributed)
 !!  istwfk= storage mode of cg_1band
 !!  nradint(natsph)=number of points on radial real-space grid for a given atom.
 !!  nradintmax=dimension of rint array.
+!!  me_g0=1 if this processor has G=0, 0 otherwise
 !!  mlang=maximum angular momentum in Bessel functions.
-!!  mpi_enreg=information about MPI parallelization
 !!  mpw=Maximum number of planewaves. Used to dimension bess_fit
-!!  natsph=number of atoms around which ang mom projection has to be done 
+!!  natsph=number of atoms around which ang mom projection has to be done
 !!  typat_extra(natsph)=Type of each atom. ntypat + 1 if empty sphere
 !!  mlang_type(ntypat + natsph_extra)=Max L+1 for each atom type
 !!  npw_k=number of plane waves for this kpt
@@ -1481,7 +1482,7 @@ end subroutine dos_degeneratewfs
 !!  prtsphere= if 1, print a complete analysis of the angular momenta in atomic spheres
 !!  rint(nradintmax) = points on radial real-space grid for integration
 !!  rmax(natsph)=maximum radius for real space integration sphere
-!!  rc_ylm= 1 for real spherical harmonics. 2 for complex spherical harmonics, 
+!!  rc_ylm= 1 for real spherical harmonics. 2 for complex spherical harmonics,
 !!  ucvol=unit cell volume in bohr**3.
 !!  ylm_k(npw_k,mlang**2)=real spherical harmonics for each G and LM.
 !!  znucl_sph(natsph)=gives the nuclear number for each type of atom
@@ -1505,7 +1506,7 @@ end subroutine dos_degeneratewfs
 !!
 !! SOURCE
 
-subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enreg,&
+subroutine recip_ylm (bess_fit,cg_1band,comm_pw,istwfk,nradint,nradintmax,me_g0,mlang,&
 &  mpw,natsph, typat_extra, mlang_type, npw_k,ph3d,prtsphere,rint,rmax,&
 &  rc_ylm,sum_1ll_1atom,sum_1lm_1atom,ucvol,ylm_k,znucl_sph)
 
@@ -1521,10 +1522,9 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: istwfk,mlang,mpw,natsph,npw_k,nradintmax
+ integer,intent(in) :: comm_pw,istwfk,me_g0,mlang,mpw,natsph,npw_k,nradintmax
  integer,intent(in) :: prtsphere,rc_ylm
  real(dp),intent(in) :: ucvol
- type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: nradint(natsph),typat_extra(natsph),mlang_type(:)
  real(dp),intent(in) :: bess_fit(mpw,nradintmax,mlang),cg_1band(2,npw_k)
@@ -1546,12 +1546,12 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
  real(dp) :: c1(2),c2(2)
  real(dp) :: sum_1atom(natsph),sum_1ll(mlang),sum_1lm(mlang**2)
  real(dp) :: func(nradintmax)
- real(dp) :: tmppsia(2,npw_k),tmppsim(2,npw_k),vect(2,npw_k) 
+ real(dp) :: tmppsia(2,npw_k),tmppsim(2,npw_k),vect(2,npw_k)
  real(dp),allocatable :: values(:,:,:,:)
 
 ! *************************************************************************
 
- ! Workspace array (used to reduce the number of MPI communications if MPI-FFT)
+ ! Workspace array (used to reduce the number of MPI communications)
  ! One could reduce a bit the memory requirement by using non-blocking operations ...
  ABI_STAT_MALLOC(values, (2, nradintmax, mlang**2, natsph), ierr)
  ABI_CHECK(ierr==0, "oom in values")
@@ -1622,8 +1622,8 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
           vect(2,:) = c1(2) * ylm_k(1:npw_k,ilm) + c2(2) * ylm_k(1:npw_k,jlm)
 
        else if (mm < 0) then
-          !vect(1,:) =  invsqrt2 * ylm_k(1:npw_k,jlm) !* (-1)**mm 
-          !vect(2,:) = -invsqrt2 * ylm_k(1:npw_k,ilm) !* (-1)**mm 
+          !vect(1,:) =  invsqrt2 * ylm_k(1:npw_k,jlm) !* (-1)**mm
+          !vect(2,:) = -invsqrt2 * ylm_k(1:npw_k,ilm) !* (-1)**mm
           c1 = sy(ll, mm,  mm)
           c2 = sy(ll,-mm,  mm)
           vect(1,:) = c1(1) * ylm_k(1:npw_k,ilm) + c2(1) * ylm_k(1:npw_k,jlm)
@@ -1633,25 +1633,25 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
 
        if (istwfk == 1) then
          do ipw=1,npw_k
-           tmppsim(1, ipw) = tmppsia(1, ipw) * vect(1, ipw) - tmppsia(2, ipw) * vect(2, ipw) 
-           tmppsim(2, ipw) = tmppsia(1, ipw) * vect(2, ipw) + tmppsia(2, ipw) * vect(1, ipw) 
+           tmppsim(1, ipw) = tmppsia(1, ipw) * vect(1, ipw) - tmppsia(2, ipw) * vect(2, ipw)
+           tmppsim(2, ipw) = tmppsia(1, ipw) * vect(2, ipw) + tmppsia(2, ipw) * vect(1, ipw)
          end do
        else
          ! Handle time-reversal
          if (mod(ll, 2) == 0) then
            do ipw=1,npw_k
-             tmppsim(1, ipw) = tmppsia(1, ipw) * vect(1, ipw) 
-             tmppsim(2, ipw) = tmppsia(1, ipw) * vect(2, ipw) 
+             tmppsim(1, ipw) = tmppsia(1, ipw) * vect(1, ipw)
+             tmppsim(2, ipw) = tmppsia(1, ipw) * vect(2, ipw)
            end do
          else
            do ipw=1,npw_k
-             tmppsim(1, ipw) = tmppsia(2, ipw) * vect(1, ipw)  
-             tmppsim(2, ipw) = tmppsia(2, ipw) * vect(2, ipw) 
+             tmppsim(1, ipw) = tmppsia(2, ipw) * vect(1, ipw)
+             tmppsim(2, ipw) = tmppsia(2, ipw) * vect(2, ipw)
            end do
          end if
        end if
 
-     case default 
+     case default
        MSG_ERROR("Wrong value for rc_ylm")
      end select
 
@@ -1664,13 +1664,13 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
        end do
        if (istwfk /= 1) then
          dotr = two * dotr; doti = two * doti
-         if (istwfk == 2 .and. mpi_enreg%me_g0 == 1) then
+         if (istwfk == 2 .and. me_g0 == 1) then
            dotr = dotr - bess_fit(1, ixint, il) * tmppsim(1, 1)
            doti = doti - bess_fit(1, ixint, il) * tmppsim(2, 1)
          end if
        end if
 
-       ! Store results to reduce number of xmpi_sum calls if MPI-FFT
+       ! Store results to reduce number of xmpi_sum calls if MPI
        values(1, ixint, ilm, iat) = dotr
        values(2, ixint, ilm, iat) = doti
      end do ! ixint
@@ -1678,11 +1678,8 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
    end do ! ilm
  end do ! iat
 
- ! Collect results in comm_bandfft.
- ! If FFT parallelism : comm_bandfft distributes data over plane waves
- ! If Band-FFT parallelism : comm_bandfft distributes data over bands and plane-waves
- !                           in the "dot product" representation
- if (mpi_enreg%nproc_fft*mpi_enreg%nproc_band > 1) call xmpi_sum(values, mpi_enreg%comm_bandfft, ierr)
+ ! Collect results in comm_pw (data are distributed over plane waves)
+ call xmpi_sum(values, comm_pw, ierr)
 
  ! Multiply by r**2 and take norm, integrate
  do iat=1,natsph
@@ -1751,7 +1748,7 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
    call wrtout(std_out, " ")
  end if
 
-contains 
+contains
 
  function sy(ll, mm, mp)
    use  m_paw_sphharm, only : ys
@@ -1771,8 +1768,8 @@ contains
    ! Computes the matrix element <Yl'm'|Slm>
    call ys(ll,mp,ll,mm,ys_val)
    !call ys(ll,mm,ll,mp,ys_val)
-   sy(1) = real(ys_val) 
-   sy(2) = -aimag(ys_val) 
+   sy(1) = real(ys_val)
+   sy(2) = -aimag(ys_val)
 
  end function sy
 
@@ -1993,7 +1990,7 @@ end subroutine dens_in_sph
 !! sphericaldens
 !!
 !! FUNCTION
-!! Compute the convolution of a function with 
+!! Compute the convolution of a function with
 !! the unity constant function over a sphere of radius rmax .
 !! The function is to be given in reciprocal space,
 !! the resulting function is also given in reciprocal space.
@@ -2139,7 +2136,7 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  DBG_ENTER("COLL")
 
  ndosfraction = dos%ndosfraction; mbesslang = dos%mbesslang
- 
+
  if(dos%prtdosm.ne.0) then
    write(message,'(3a)')&
 &   'm decomposed dos is activated',ch10, &
@@ -2249,7 +2246,7 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  end if
 
 
- 
+
 !--------------  WRITE FATBANDS IN FILES
  if (pawfatbnd>0) then
    ! Store eigenvalues with nkpt as first dimension for efficiency reasons
@@ -2297,7 +2294,7 @@ subroutine prtfatbands(dos,dtset,ebands,fildata,pawfatbnd,pawtab)
  do isppol=1,size(unitfatbands_arr, dim=2)
    do iat=1,size(unitfatbands_arr, dim=1)
      if (unitfatbands_arr(iat, isppol) /= -3) close (unitfatbands_arr(iat, isppol))
-   end do 
+   end do
  end do
 
  ABI_DEALLOCATE(unitfatbands_arr)
@@ -2382,7 +2379,7 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
 
  ! Add fatband-specific quantities
  ncerr = nctk_def_dims(ncid, [ &
-   nctkdim_t("natsph", dtset%natsph), & 
+   nctkdim_t("natsph", dtset%natsph), &
    nctkdim_t("ndosfraction", dos%ndosfraction)], defmode=.True.)
  NCF_CHECK(ncerr)
 
@@ -2402,10 +2399,10 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
  NCF_CHECK(ncerr)
 
  ncerr = nctk_def_arrays(ncid, [&
-   nctkarr_t("lmax_type", "int", "number_of_atom_species"), & 
-   nctkarr_t("iatsph", "int", "natsph"), & 
+   nctkarr_t("lmax_type", "int", "number_of_atom_species"), &
+   nctkarr_t("iatsph", "int", "natsph"), &
    nctkarr_t("ratsph", "dp", "number_of_atom_species"), &
-   nctkarr_t("dos_fractions", "dp", "number_of_kpoints, max_number_of_states, number_of_spins, ndosfraction") & 
+   nctkarr_t("dos_fractions", "dp", "number_of_kpoints, max_number_of_states, number_of_spins, ndosfraction") &
  ])
  NCF_CHECK(ncerr)
 
@@ -2473,7 +2470,7 @@ subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid
 #endif
 
 contains
- integer function vid(vname) 
+ integer function vid(vname)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
