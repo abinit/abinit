@@ -151,7 +151,7 @@
 !Check if cprj is distributed over bands
  nprocband=(mband/mband_cprj)
  if (paral_kgb==1.and.nprocband/=mpi_enreg%nproc_band) then
-   msg=' mband/mband_cprj must be equal to mband !'
+   msg=' mband/mband_cprj must be equal to nproc_band!'
    MSG_BUG(msg)
  end if
  if (paw_dmft%use_sc_dmft/=0.and.nprocband/=1) then

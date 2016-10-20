@@ -103,9 +103,10 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 
 !Local variables-------------------------------
 !scalars
- integer :: basis_size,cplex,iat,iatom,iband,ibg,ibsp,ierr,ikpt,il,ilang,ilmn,iln,im,iorder_cprj,ispinor,isppol
- integer :: itypat,j0lmn,j0ln,jl,jlmn,jln,jm,klmn,kln,lmn_size,me_kpt,my_nspinor,nband_k,comm_kpt
- integer :: fatbands_flag,mbesslang,prtdosm,ndosfraction,paw_dos_flag
+ integer :: bandpp,basis_size,comm_kptband,cplex,fatbands_flag,iat,iatom,iband,ibg,ibsp
+ integer :: ierr,ikpt,il,ilang,ilmn,iln,im,iorder_cprj,ispinor,isppol,itypat,j0lmn,j0ln
+ integer :: jl,jlmn,jln,jm,klmn,kln,lmn_size,mbesslang,me_band,me_kpt,my_nspinor
+ integer :: nband_cprj_k,nband_k,ndosfraction,nprocband,paw_dos_flag,prtdosm
  real(dp) :: cpij
  character(len=500) :: message
 !arrays
@@ -122,8 +123,8 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 
  ABI_CHECK(mkmem/=0,"mkmem==0 not supported anymore!")
 
- fatbands_flag = dos%fatbands_flag 
- mbesslang = dos%mbesslang 
+ fatbands_flag = dos%fatbands_flag
+ mbesslang = dos%mbesslang
  prtdosm = dos%prtdosm
  ndosfraction = dos%ndosfraction
  paw_dos_flag = dos%paw_dos_flag
@@ -132,10 +133,6 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
  if(prtdosm>=1.and.paw_dos_flag==1) then
    message = 'm-decomposed DOS not compatible with PAW-decomposed DOS !'
    MSG_ERROR(message)
- end if
-
- if (mpi_enreg%nproc_atom /= 1) then
-   MSG_ERROR("partial_dos_fractions does not support atom parallelism")
  end if
 
 !Prepare some useful integrals
@@ -176,9 +173,16 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
  end if
 
 !Init parallelism
- comm_kpt=mpi_enreg%comm_kpt
- me_kpt=mpi_enreg%me_kpt
+ comm_kptband=mpi_enreg%comm_kptband
+ me_kpt=mpi_enreg%me_kpt ; me_band=mpi_enreg%me_band
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+ bandpp=1;if (mpi_enreg%paral_kgb==1) bandpp=mpi_enreg%bandpp
+!Check if cprj is distributed over bands
+ nprocband=my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol/mcprj
+ if (nprocband/=mpi_enreg%nproc_band) then
+   message='wrong mcprj/nproc_band!'
+   MSG_BUG(message)
+ end if
 
  iorder_cprj=0
 
@@ -189,8 +193,10 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 
      nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
      if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me_kpt)) cycle
+
      cplex=2;if (dtset%istwfk(ikpt)>1) cplex=1
-     ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natsph,my_nspinor*nband_k))
+     nband_cprj_k=nband_k/nprocband
+     ABI_DATATYPE_ALLOCATE(cprj_k,(dtset%natsph,my_nspinor*nband_cprj_k))
      ABI_ALLOCATE(dimcprj_atsph,(dtset%natsph))
      do iat=1,dtset%natsph
        dimcprj_atsph(iat)=dimcprj(dtset%iatsph(iat))
@@ -199,9 +205,8 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
      ABI_DEALLOCATE(dimcprj_atsph)
 
 !    Extract cprj for this k-point.
-! FIXME: Parallelism over atoms is buggy
      ibsp=0
-     do iband=1,nband_k
+     do iband=1,nband_cprj_k
        do ispinor=1,my_nspinor
          ibsp=ibsp+1
          do iat=1,dtset%natsph
@@ -219,9 +224,14 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
        indlmn => pawtab(itypat)%indlmn
 
 !      LOOP OVER BANDS
+       ibsp=0
        do iband=1,nband_k
-         if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me_kpt)) cycle
-         ibsp=(iband-1)*my_nspinor
+
+         if (mod((iband-1)/bandpp,nprocband)/=me_band) cycle
+         if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me_kpt)) then
+           ibsp=ibsp+my_nspinor;cycle
+         end if
+
          do ispinor=1,my_nspinor
            ibsp=ibsp+1
 
@@ -276,7 +286,7 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 
      end do !iatom
 
-     if (mkmem/=0) ibg = ibg + my_nspinor*nband_k
+     if (mkmem/=0) ibg = ibg + my_nspinor*nband_cprj_k
      call pawcprj_free(cprj_k)
      ABI_DATATYPE_DEALLOCATE(cprj_k)
    end do ! ikpt
@@ -288,13 +298,13 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 
 !Reduce data in case of parallelism
  call timab(48,1,tsec)
- call xmpi_sum(dos%fractions,comm_kpt,ierr)
+ call xmpi_sum(dos%fractions,comm_kptband,ierr)
  if (prtdosm>=1.or.fatbands_flag==1) then
-   call xmpi_sum(dos%fractions_m,comm_kpt,ierr)
+   call xmpi_sum(dos%fractions_m,comm_kptband,ierr)
  end if
  if (paw_dos_flag==1) then
-   call xmpi_sum(dos%fractions_paw1,comm_kpt,ierr)
-   call xmpi_sum(dos%fractions_pawt1,comm_kpt,ierr)
+   call xmpi_sum(dos%fractions_paw1,comm_kptband,ierr)
+   call xmpi_sum(dos%fractions_pawt1,comm_kptband,ierr)
  end if
  call timab(48,2,tsec)
  if (mpi_enreg%paral_spinor==1) then

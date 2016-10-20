@@ -484,7 +484,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  case(2)
      ! No need to include the PspCore energy since it is already included in the
      ! local pseudopotential  (vpsp)
-   energies%e_corepsp   = zero 
+   energies%e_corepsp   = zero
    energies%e_corepspdc = zero
  end select
 
@@ -664,7 +664,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        ABI_DATATYPE_DEALLOCATE(cprj)
      end if
      ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj))
-     ncpgr=0 
+     ncpgr=0
      if (usefock==1) then
        ctocprj_choice = 1 ; useylmgr = 0
        if (dtset%optforces /= 0 .and. dtset%optstress == 0) then
@@ -1876,7 +1876,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
  if (recompute_cprj) then
    usecprj=1
-   mband_cprj=dtset%mband
+   mband_cprj=dtset%mband/mpi_enreg%nproc_band
    mcprj=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
    call pawcprj_free(cprj)
    ABI_DATATYPE_DEALLOCATE(cprj) ! Was previously allocated (event if size = 0,0)
