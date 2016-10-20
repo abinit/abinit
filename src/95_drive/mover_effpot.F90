@@ -184,6 +184,7 @@ implicit none
 &     effective_potential%crystal%typat,&
 &     xcart,&
 &     supercell)
+
 !Store the information of the supercell of the reference structure into effective potential
  call copy_supercell(supercell,effective_potential%supercell)
 !Set new MPI for the new supercell 

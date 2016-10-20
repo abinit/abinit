@@ -484,7 +484,8 @@ real(dp) :: rmet(3,3)
        if (itime > 2) then
          call xmpi_wait(quitsum_request,ierr)
          if (quitsum_async > 0) then 
-           write(message,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),". Will exit itime loop in mover."
+           write(message,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),&
+&                               ". Will exit itime loop in mover."
            MSG_COMMENT(message)
            call wrtout(ab_out, message, "COLL")
            timelimit_exit = 1
@@ -522,31 +523,31 @@ real(dp) :: rmet(3,3)
 !    write(std_out,*) 'mover 11'
 !    ###########################################################
 !    ### 11. Symmetrize atomic coordinates over space group elements
-
-     change=.FALSE.
-     xred_tmp(:,:)=xred(:,:)
-
-     call symmetrize_xred(scfcv_args%indsym,ab_mover%natom,&
-&     scfcv_args%dtset%nsym,scfcv_args%dtset%symrel,scfcv_args%dtset%tnons,xred)
-     do kk=1,ab_mover%natom
-       do jj=1,3
-         if (xred(jj,kk)/=xred_tmp(jj,kk)) change=.TRUE.
-       end do
-     end do
-
-     if (change)then
-       call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
-       hist%histXF(:,:,1,hist%ihist)=xcart(:,:)
-       hist%histXF(:,:,2,hist%ihist)=xred(:,:)
-       write(std_out,*) 'WARNING: ATOMIC COORDINATES WERE SYMMETRIZED'
-       write(std_out,*) 'DIFFERENCES:'
-
-       do kk=1,ab_mover%natom
-         write(std_out,*) xred(:,kk)-xred_tmp(:,kk)
-       end do
-
+     if (need_scfcv_cycle) then
+       change=.FALSE.
        xred_tmp(:,:)=xred(:,:)
 
+       call symmetrize_xred(scfcv_args%indsym,ab_mover%natom,&
+&       scfcv_args%dtset%nsym,scfcv_args%dtset%symrel,scfcv_args%dtset%tnons,xred)
+       do kk=1,ab_mover%natom
+         do jj=1,3
+           if (xred(jj,kk)/=xred_tmp(jj,kk)) change=.TRUE.
+         end do
+       end do
+       
+       if (change)then
+         call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
+         hist%histXF(:,:,1,hist%ihist)=xcart(:,:)
+         hist%histXF(:,:,2,hist%ihist)=xred(:,:)
+         write(std_out,*) 'WARNING: ATOMIC COORDINATES WERE SYMMETRIZED'
+         write(std_out,*) 'DIFFERENCES:'
+
+         do kk=1,ab_mover%natom
+           write(std_out,*) xred(:,kk)-xred_tmp(:,kk)
+         end do
+         
+         xred_tmp(:,:)=xred(:,:)
+       end if
      end if
 
 !    write(std_out,*) 'mover 12'
@@ -888,7 +889,8 @@ real(dp) :: rmet(3,3)
 
      ! check dilatmx here and correct if necessary
      if (need_scfcv_cycle.and.scfcv_args%dtset%usewvl == 0) then
-       call chkdilatmx(scfcv_args%dtset%dilatmx,rprimd,scfcv_args%dtset%rprimd_orig(1:3,1:3,1), dilatmx_errmsg)
+       call chkdilatmx(scfcv_args%dtset%dilatmx,rprimd,scfcv_args%dtset%rprimd_orig(1:3,1:3,1),&
+&                      dilatmx_errmsg)
        _IBM6("dilatxm_errmsg: "//TRIM(dilatmx_errmsg))
 
        if (LEN_TRIM(dilatmx_errmsg) /= 0) then
