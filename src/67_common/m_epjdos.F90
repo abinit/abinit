@@ -1678,10 +1678,11 @@ subroutine recip_ylm (bess_fit,cg_1band,istwfk,nradint,nradintmax,mlang,mpi_enre
    end do ! ilm
  end do ! iat
 
- ! Collect results in comm_fft.
- ! If band-parallelism: I assume the caller distributes the loop over bands
- ! so that only one FFT group enters here
- if (mpi_enreg%nproc_fft > 1) call xmpi_sum(values, mpi_enreg%comm_bandfft, ierr)
+ ! Collect results in comm_bandfft.
+ ! If FFT parallelism : comm_bandfft distributes data over plane waves
+ ! If Band-FFT parallelism : comm_bandfft distributes data over bands and plane-waves
+ !                           in the "dot product" representation
+ if (mpi_enreg%nproc_fft*mpi_enreg%nproc_band > 1) call xmpi_sum(values, mpi_enreg%comm_bandfft, ierr)
 
  ! Multiply by r**2 and take norm, integrate
  do iat=1,natsph
