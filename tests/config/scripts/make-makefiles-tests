@@ -49,7 +49,7 @@ endif
 
 # minimun test for checking testsuite machinery
 check-local:
-	[ -f "runtests.py" ] && ./runtests.py -r fast --no-colors --no-logo || ../../tests/runtests.py -r fast --no-colors --no-logo
+	[ -f "runtests.py" ] && ./runtests.py fast -o1 --no-colors --no-logo || ../../tests/runtests.py fast -o1 --no-colors --no-logo
 	@rm -rf Test_suite .prev_run.pickle
 
 # Display help by default

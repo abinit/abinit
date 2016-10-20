@@ -334,8 +334,8 @@ class AbinitTestsDatabase(dict):
                         inp2test[ius] += 1
 
             def remove_file(fname):
-                # XG130810 : When the report.in files in abirules/Input/report.in  buildsys/Input/report.in 
-                # will have been suppressed, one might replace the next line by the simpler :    
+                # XG130810 : When the report.in files in abirules/Input/report.in  buildsys/Input/report.in
+                # will have been suppressed, one might replace the next line by the simpler :
                 # return fname.endswith(".files")
                 return fname.endswith(".files") or os.path.basename(fname) in ["report.in"]
 
@@ -382,7 +382,7 @@ class AbinitTestsDatabase(dict):
 
                 for o in files_to_test:
                     # FIXME due to out --> stdout replacement
-                    if o.endswith(".stdout"): o = o[:-7] + ".out" 
+                    if o.endswith(".stdout"): o = o[:-7] + ".out"
                     if o not in ref2test:
                         err.write("files_to_test %s does not appear in Refs!\n" % o)
                     else:
@@ -445,7 +445,7 @@ def path2str(path):
     head, fname = os.path.split(path)
     head, x = os.path.split(head)
     _, dirname = os.path.split(head)
-                                                         
+
     return "["+dirname+"]["+fname+"]"
 
 
@@ -500,7 +500,7 @@ class AbinitTests(object):
             all_subnames.extend(suite.subsuites.keys())
 
         if len(all_subnames) != len(set(all_subnames)):
-            raise RuntimeError("The suite/subsuite name must be unique\n" + 
+            raise RuntimeError("The suite/subsuite name must be unique\n" +
                 "Please change the name of the suite/subsuite")
 
         return all_subnames
@@ -544,7 +544,7 @@ class AbinitTests(object):
         Return an instance of TestsDatabase initialized from an external pickle file.
 
         Args:
-            regenerate: 
+            regenerate:
                 True to force the regeneration of the database
                 and the writing of a new pickle file.
             with_pickle:
@@ -568,7 +568,7 @@ class AbinitTests(object):
                 lock.release()
 
         else:
-            logger.info("Loading database from file: %s" % database_path)
+            cprint("Loading database from: %s" % database_path, "yellow")
 
             # Read the database from the cpickle file.
             # Use file locking mechanism to prevent IO from other processes.
@@ -660,14 +660,15 @@ class AbinitTests(object):
 
         return d
 
-    def select_tests(self, suite_args, regenerate=False, keys=None, 
+    def select_tests(self, suite_args, regenerate=False, keys=None,
                      authors=None, ivars=None, with_pickle=True):
         """
         Main entry point for client code.
         Return an instance of AbinitTestSuite
 
-        with_pickle:
-            Save the generated database in pickle format.
+        Args:
+            with_pickle:
+                Save the generated database in pickle format.
         """
         try:
             tests_todo = self._suite_args_parser(suite_args)
@@ -803,7 +804,7 @@ KNOWN_KEYWORDS = {
     "mrgscr": "Test mrgscr code",
     "mrggkk": "Test mrggkk code",
     "mrgddb": "Test mrgddb code",
-    'mrgdv': "Test mrgdv code", 
+    'mrgdv': "Test mrgdv code",
     "optic": "Test optic code",
     "ujdet": "Test ujdet code",
     "aim": "Test aim code",
@@ -854,8 +855,8 @@ KNOWN_KEYWORDS = {
     'DFT-D3': "DFT-D3 dispersion correction",
     '3-BODY_TERM': "DFT-D3 dispersion correction",
     'GWLS': "GW with the Sternheimer approach",
-    'Projected_Wannier': "Projected Wannier functions", 
-    'VDW': "van der Wall interaction", 
+    'Projected_Wannier': "Projected Wannier functions",
+    'VDW': "van der Wall interaction",
     'LOBSTER': "Interface with LOBSTER code",
     'RELAXATION': "Structural relaxations",
     'magnetic_constraint': "Tests employing magnetic constraints",
