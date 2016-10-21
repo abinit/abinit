@@ -493,7 +493,7 @@
          call xmpi_alltoallv(cwavef_tmp,bufsize_wf,bufdisp_wf,cwavef,bufsize,bufdisp,spaceComm_band,ierr)
          ABI_DEALLOCATE(cwavef_tmp)
        else
-         do ig=1,npw_k*my_nspinor
+         do ig=1,npw_k*my_nspinor*cg_bandpp
            cwavef(1,ig)=cg(1,ig+icgb)
            cwavef(2,ig)=cg(2,ig+icgb)
          end do
