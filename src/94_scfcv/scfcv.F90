@@ -508,6 +508,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    if (dtset%prtnabla>0) usecprj=1
    if (dtset%extrapwf>0) usecprj=1
    if (dtset%usewvl==1)  usecprj=1
+!TEST
+!   if (dtset%pawfatbnd>0)usecprj=1
    if (dtset%prtdos==3)  usecprj=1
    if (nstep==0) usecprj=0
    if (usefock==1)  usecprj=1

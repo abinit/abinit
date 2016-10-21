@@ -1983,11 +1983,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      message = 'pawfatbnd>0  and prtdosm=1 are not compatible '
      MSG_ERROR_NOSTOP(message,ierr)
    end if
-! for the moment pawfatbnd is not compatible with fft or band parallelization
-   if (dt%pawfatbnd > 0 .and. (dt%npfft > 1 .or. dt%npband > 1)) then
-     message = 'pawfatbnd and FFT or band parallelization are not compatible yet. Set pawfatbnd to 0  '
-     MSG_ERROR_NOSTOP(message,ierr)
-   end if
+!  for the moment pawfatbnd is not compatible with fft or band parallelization
+   !if (dt%pawfatbnd > 0 .and. (dt%npfft > 1 .or. dt%npband > 1)) then
+   !  message = 'pawfatbnd and FFT or band parallelization are not compatible yet. Set pawfatbnd to 0  '
+   !  MSG_ERROR_NOSTOP(message,ierr)
+   !end if
 
 !  pawlcutd
    if (usepaw==1) then

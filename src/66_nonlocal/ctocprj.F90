@@ -501,7 +501,7 @@
 
 !      Compute scalar product of wavefunction with all NL projectors
        do ibp=1,cg_bandpp   ! Note: we suppose cp_bandpp=cprj_bandpp
-         iwf1=1+(ibp-1)*npw_nk*my_nspinor;iwf2=ibp*npw_nk*my_nspinor
+         iwf1=1+(ibp-1)*npw_k*my_nspinor;iwf2=ibp*npw_k*my_nspinor
          icp1=1+(ibp-1)*my_nspinor;icp2=ibp*my_nspinor
          call getcprj(choice,cpopt,cwavef(:,iwf1:iwf2),cwaveprj(:,icp1:icp2),&
 &         ffnl,idir,indlmn_atm,istwf_k,kg_k,kpg_k,kpoint,psps%lmnmax,&
