@@ -824,10 +824,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if (dtsets(idtset)%usedmft==1) dtsets(idtset)%paral_atom=0
    if (optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_RESPFN.and.optdriver/=RUNL_GWLS) dtsets(idtset)%paral_atom=0
    if (dtsets(idtset)%macro_uj/=0) dtsets(idtset)%paral_atom=0
-   if ( (dtsets(idtset)%prtdos>=2.or.dtsets(idtset)%pawfatbnd>0) .and. dtsets(idtset)%paral_atom /= 0) then
-      MSG_WARNING("setting paral_atom to 0 because prtdos >= 2 or pawfatbnd > 0")
-      dtsets(idtset)%paral_atom = 0
-   end if
 
    call initmpi_atom(dtsets(idtset),mpi_enregs(idtset))
 

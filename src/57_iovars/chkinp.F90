@@ -2224,11 +2224,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      MSG_ERROR_NOSTOP(message, ierr)
    end if
 
-   if ( (dt%prtdos>=2.or.dt%pawfatbnd>0) .and. dt%paral_atom /= 0) then
-     message = 'prtdos>=2 or pawfatbnd>0 are not compatible with paral_atom /= 0'
-     MSG_ERROR_NOSTOP(message, ierr)
-  end if
-
 ! prtdos 5 only makes sense for nspinor == 2. Otherwise reset to prtdos 2
    if (dt%prtdos == 5 .and. dt%nspinor /= 2) then
      dt%prtdos = 2
