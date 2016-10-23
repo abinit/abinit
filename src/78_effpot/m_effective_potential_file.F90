@@ -460,11 +460,13 @@ end subroutine xml_getdims
 
  !Local variables-------------------------------
  !scalar
- integer :: ii,itypat,msym,natom,nrpt,ntypat
- integer :: nph1l,npsp,nsym,space_group,timrev
+ integer :: ierr,ii,itypat,my_rank,msym,natom,nrpt,ntypat
+ integer :: nph1l,npsp,nproc,nsym,space_group,timrev
  real(dp):: energy,ucvol
  character(len=500) :: message
+ integer,parameter :: master=0
  logical :: has_anharmonics = .FALSE.
+ logical :: iam_master
 #ifndef HAVE_LIBXML
  integer :: funit = 1
  integer :: iatom,iamu,iph1l,irpt,mu,nu,voigt
@@ -499,6 +501,9 @@ end subroutine xml_getdims
 
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
+
+ nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ iam_master = (my_rank == master)
 
 !Get Dimention of system and allocation/initialisation of array
  call effective_potential_file_getDim(filename,natom,ntypat,nph1l,nrpt,0)
@@ -543,16 +548,17 @@ end subroutine xml_getdims
  zeff  = zero
  znucl = zero
 
+ if(iam_master)then
 !Open the atomicdata XML file for reading
 #if defined HAVE_LIBXML
 
-  write(message,'(a,a,a,a)')'-Reading the file ',trim(filename),&
- & ' with LibXML library'
+   write(message,'(a,a,a,a)')'-Reading the file ',trim(filename),&
+&   ' with LibXML library'
   
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
   !Read with libxml librarie
-  call effpot_xml_read(char_f2c(trim(filename)),natom,ntypat,nrpt,nph1l,all_amu,&
+   call effpot_xml_read(char_f2c(trim(filename)),natom,ntypat,nrpt,nph1l,all_amu,&
 &                       ifcs%atmfrc,ifcs%cell,&
 &                       dynmat,elastic_constants,energy,&
 &                       epsilon_inf,ifcs%ewald_atmfrc,&
@@ -560,520 +566,540 @@ end subroutine xml_getdims
 &                       qph1l,ifcs%short_atmfrc,typat,&
 &                       xcart,zeff)
 
-! convert atomic mass unit to znucl
-  do itypat=1,ntypat
-    do ii=1,103
-      call atomdata_from_znucl(atom,real(ii,dp))
-      if (abs((real(atom%amu,sp)-real(all_amu(itypat),sp))&
+!  convert atomic mass unit to znucl
+   do itypat=1,ntypat
+     do ii=1,103
+       call atomdata_from_znucl(atom,real(ii,dp))
+       if (abs((real(atom%amu,sp)-real(all_amu(itypat),sp))&
 &         /real(all_amu(itypat),sp)*100)<0.1) then
-        znucl(itypat) = atom%znucl
-        exit
-      end if
-    end do
-  end do
+         znucl(itypat) = atom%znucl
+         exit
+       end if
+     end do
+   end do
 
 #else
 
-!Read by hand
- write(message,'(a,a,a,a)')'-Reading the file ',trim(filename),&
+! Read by hand
+   write(message,'(a,a,a,a)')'-Reading the file ',trim(filename),&
 & ' with Fortran'
 
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
 
- if (open_file(filename,message,unit=funit,form="formatted",&
-&              status="old",action="read") /= 0) then
-   MSG_ERROR(message)
- end if
+   if (open_file(filename,message,unit=funit,form="formatted",&
+&               status="old",action="read") /= 0) then
+     MSG_ERROR(message)
+   end if
 
 !Start a reading loop in fortran
- rewind(unit=funit)
+   rewind(unit=funit)
  
- endfile=.false.
- found=.false.
+   endfile=.false.
+   found=.false.
 
- iatom  = 1 
- iamu   = 1
- itypat = 1
- irpt   = 1
- iph1l  = 1
- amu    = zero
- short_range  = .false.
- total_range  = .false.
+   iatom  = 1 
+   iamu   = 1
+   itypat = 1
+   irpt   = 1
+   iph1l  = 1
+   amu    = zero
+   short_range  = .false.
+   total_range  = .false.
 
- do while ((.not.endfile).and.(.not.found))
-   read(funit,'(a)',err=10,end=10) readline
-   call rmtabfromline(readline)
-   line=adjustl(readline);goto 20
-   10 line="";endfile=.true.
-   20 continue
+   do while ((.not.endfile).and.(.not.found))
+     read(funit,'(a)',err=10,end=10) readline
+     call rmtabfromline(readline)
+     line=adjustl(readline);goto 20
+10   line="";endfile=.true.
+20   continue
 
-   if (.not.has_straincoupling) then
-
-     if ((line(1:7)=='<energy')) then
-       call rdfromline_value('energy',line,strg)
-       if (strg/="") then 
-         strg1=trim(strg)
-         read(strg1,*) energy
-       else
-         read(funit,'(a)',err=10,end=10) readline
-         call rmtabfromline(readline)
-         line=adjustl(readline)
+     if (.not.has_straincoupling) then
+       
+       if ((line(1:7)=='<energy')) then
          call rdfromline_value('energy',line,strg)
          if (strg/="") then 
            strg1=trim(strg)
            read(strg1,*) energy
          else
-           strg1=trim(line)
-           read(strg1,*) energy
-         end if
-       end if
-       cycle
-     end if
-     
-     if ((line(1:10)=='<unit_cell')) then
-       call rdfromline_value('unit_cell',line,strg)
-       if (strg/="") then 
-         strg1=trim(strg)
-         read(strg1,*) (rprimd(mu,1),mu=1,3)
-         read(funit,*) (rprimd(mu,2),mu=1,3)
-       else
-         do nu=1,2
-           read(funit,*) (rprimd(mu,nu),mu=1,3)
-         end do
-       end if
-       read(funit,'(a)',err=10,end=10) readline
-       call rmtabfromline(readline)
-       line=adjustl(readline)
-       call rdfromline_value('unit_cell',line,strg)
-       if (strg/="") then 
-         strg1=trim(strg)
-         read(strg1,*) (rprimd(mu,3),mu=1,3)
-       else
-         strg1=trim(line)
-         read(strg1,*) (rprimd(mu,3),mu=1,3)
-       end if
-       cycle
-     end if
-     
-     if ((line(1:12)=='<epsilon_inf')) then
-       call rdfromline_value('epsilon_inf',line,strg)
-       if (strg/="") then 
-         strg1=trim(strg)
-         read(strg1,*) (epsilon_inf(mu,1),mu=1,3)
-         read(funit,*) (epsilon_inf(mu,2),mu=1,3)
-       else
-         do nu=1,2
-           read(funit,*) (epsilon_inf(mu,nu),mu=1,3)
-         end do
-       end if
-       read(funit,'(a)',err=10,end=10) readline
-       call rmtabfromline(readline)
-       line=adjustl(readline)
-       call rdfromline_value('epsilon_inf',line,strg)
-       if (strg/="") then 
-         strg1=trim(strg)
-         read(strg1,*) (epsilon_inf(mu,3),mu=1,3)
-       else
-         strg1=trim(line)
-         read(strg1,*) (epsilon_inf(mu,3),mu=1,3)
-       end if
-       cycle
-     end  if
-     
-     if ((line(1:8)=='<elastic')) then
-       call rdfromline_value('elastic',line,strg)
-       if (strg/="") then 
-         strg1=trim(strg)
-         read(strg1,*) (elastic_constants(mu,1),mu=1,6)
-         do nu=2,5
-           read(funit,*) (elastic_constants(mu,nu),mu=1,6)
-         end do
-       else
-         do nu=1,5
-           read(funit,*) (elastic_constants(mu,nu),mu=1,6)
-         end do
-       end if
-       read(funit,'(a)',err=10,end=10) readline
-       call rmtabfromline(readline)
-       line=adjustl(readline)
-       call rdfromline_value('elastic',line,strg)
-       if (strg/="") then 
-         strg1=trim(strg)
-         read(strg1,*) (elastic_constants(mu,6),mu=1,6)
-       else
-         strg1=trim(line)
-         read(strg1,*) (elastic_constants(mu,6),mu=1,6)
-       end if
-       cycle
-     end if
-     
-     if ((line(1:5)=='<atom')) then
-       call rdfromline("mass",line,strg)
-       strg1=trim(strg)
-       read(strg1,*) amu
-       if (.not.any(all_amu==amu)) then
-         all_amu(iamu) = amu
-         typat(iatom) = amu
-         !convert atomic mass unit to znucl
-         do ii=1,103
-           call atomdata_from_znucl(atom,real(ii,dp))
-           if (abs((real(atom%amu,sp)-real(amu,sp))&
-&           /real(amu,sp)*100)<0.1) then
-             znucl(iamu) = atom%znucl
-             exit
+           read(funit,'(a)',err=10,end=10) readline
+           call rmtabfromline(readline)
+           line=adjustl(readline)
+           call rdfromline_value('energy',line,strg)
+           if (strg/="") then 
+             strg1=trim(strg)
+             read(strg1,*) energy
+           else
+             strg1=trim(line)
+             read(strg1,*) energy
            end if
-         end do
-         iamu = iamu +1
-       end if
-       do itypat=1,ntypat
-         if(amu==all_amu(itypat)) then
-           typat(iatom) = itypat
          end if
-       end do
-       cycle
-     end if
-     
-     if ((line(1:9)=='<position')) then
-       call rdfromline_value('position',line,strg)
-       if (strg/="") then 
-         strg1=trim(strg)
-         read(strg1,*)(xcart(mu,iatom),mu=1,3)
-       else
+         cycle
+       end if
+       
+       if ((line(1:10)=='<unit_cell')) then
+         call rdfromline_value('unit_cell',line,strg)
+         if (strg/="") then 
+           strg1=trim(strg)
+           read(strg1,*) (rprimd(mu,1),mu=1,3)
+           read(funit,*) (rprimd(mu,2),mu=1,3)
+         else
+           do nu=1,2
+             read(funit,*) (rprimd(mu,nu),mu=1,3)
+           end do
+         end if
          read(funit,'(a)',err=10,end=10) readline
          call rmtabfromline(readline)
          line=adjustl(readline)
+         call rdfromline_value('unit_cell',line,strg)
+         if (strg/="") then 
+           strg1=trim(strg)
+           read(strg1,*) (rprimd(mu,3),mu=1,3)
+         else
+           strg1=trim(line)
+           read(strg1,*) (rprimd(mu,3),mu=1,3)
+         end if
+         cycle
+       end if
+     
+       if ((line(1:12)=='<epsilon_inf')) then
+         call rdfromline_value('epsilon_inf',line,strg)
+         if (strg/="") then 
+           strg1=trim(strg)
+           read(strg1,*) (epsilon_inf(mu,1),mu=1,3)
+           read(funit,*) (epsilon_inf(mu,2),mu=1,3)
+         else
+           do nu=1,2
+             read(funit,*) (epsilon_inf(mu,nu),mu=1,3)
+           end do
+         end if
+         read(funit,'(a)',err=10,end=10) readline
+         call rmtabfromline(readline)
+         line=adjustl(readline)
+         call rdfromline_value('epsilon_inf',line,strg)
+         if (strg/="") then 
+           strg1=trim(strg)
+           read(strg1,*) (epsilon_inf(mu,3),mu=1,3)
+         else
+           strg1=trim(line)
+           read(strg1,*) (epsilon_inf(mu,3),mu=1,3)
+         end if
+         cycle
+       end  if
+       
+       if ((line(1:8)=='<elastic')) then
+         call rdfromline_value('elastic',line,strg)
+         if (strg/="") then 
+           strg1=trim(strg)
+           read(strg1,*) (elastic_constants(mu,1),mu=1,6)
+           do nu=2,5
+             read(funit,*) (elastic_constants(mu,nu),mu=1,6)
+           end do
+         else
+           do nu=1,5
+             read(funit,*) (elastic_constants(mu,nu),mu=1,6)
+           end do
+         end if
+         read(funit,'(a)',err=10,end=10) readline
+         call rmtabfromline(readline)
+         line=adjustl(readline)
+         call rdfromline_value('elastic',line,strg)
+         if (strg/="") then 
+           strg1=trim(strg)
+           read(strg1,*) (elastic_constants(mu,6),mu=1,6)
+         else
+           strg1=trim(line)
+           read(strg1,*) (elastic_constants(mu,6),mu=1,6)
+         end if
+         cycle
+       end if
+       
+       if ((line(1:5)=='<atom')) then
+         call rdfromline("mass",line,strg)
+         strg1=trim(strg)
+         read(strg1,*) amu
+         if (.not.any(all_amu==amu)) then
+           all_amu(iamu) = amu
+           typat(iatom) = amu
+           !convert atomic mass unit to znucl
+           do ii=1,103
+             call atomdata_from_znucl(atom,real(ii,dp))
+             if (abs((real(atom%amu,sp)-real(amu,sp))&
+               &           /real(amu,sp)*100)<0.1) then
+               znucl(iamu) = atom%znucl
+               exit
+             end if
+           end do
+           iamu = iamu +1
+         end if
+         do itypat=1,ntypat
+           if(amu==all_amu(itypat)) then
+             typat(iatom) = itypat
+           end if
+         end do
+         cycle
+       end if
+       
+       if ((line(1:9)=='<position')) then
          call rdfromline_value('position',line,strg)
          if (strg/="") then 
            strg1=trim(strg)
            read(strg1,*)(xcart(mu,iatom),mu=1,3)
          else
-           strg1=trim(line)
-           read(strg1,*)(xcart(mu,iatom),mu=1,3)
+           read(funit,'(a)',err=10,end=10) readline
+           call rmtabfromline(readline)
+           line=adjustl(readline)
+           call rdfromline_value('position',line,strg)
+           if (strg/="") then 
+             strg1=trim(strg)
+             read(strg1,*)(xcart(mu,iatom),mu=1,3)
+           else
+             strg1=trim(line)
+             read(strg1,*)(xcart(mu,iatom),mu=1,3)
+           end if
          end if
+         cycle
        end if
-       cycle
-     end if
-     
-     if ((line(1:11)=='<borncharge')) then
-       call rdfromline_value('borncharge',line,strg)
-       if (strg/="") then 
-         strg1=trim(strg)
-         read(strg1,*) (zeff(mu,1,iatom),mu=1,3)
-         read(funit,*) (zeff(mu,2,iatom),mu=1,3)
-       else
-         do nu=1,2
-           read(funit,*) (zeff(mu,nu,iatom),mu=1,3)
-         end do
+       
+       if ((line(1:11)=='<borncharge')) then
+         call rdfromline_value('borncharge',line,strg)
+         if (strg/="") then 
+           strg1=trim(strg)
+           read(strg1,*) (zeff(mu,1,iatom),mu=1,3)
+           read(funit,*) (zeff(mu,2,iatom),mu=1,3)
+         else
+           do nu=1,2
+             read(funit,*) (zeff(mu,nu,iatom),mu=1,3)
+           end do
+         end if
+         read(funit,'(a)',err=10,end=10) readline
+         line=adjustl(readline)
+         call rdfromline_value('borncharge',line,strg)
+         if (strg/="") then 
+           strg1=trim(strg)
+           read(strg1,*) (zeff(mu,3,iatom),mu=1,3)
+         else
+           strg1=trim(line)
+           read(strg1,*) (zeff(mu,3,iatom),mu=1,3)
+         end if
+         cycle
        end if
-       read(funit,'(a)',err=10,end=10) readline
-       line=adjustl(readline)
-       call rdfromline_value('borncharge',line,strg)
-       if (strg/="") then 
-         strg1=trim(strg)
-         read(strg1,*) (zeff(mu,3,iatom),mu=1,3)
-       else
-         strg1=trim(line)
-         read(strg1,*) (zeff(mu,3,iatom),mu=1,3)
+       
+       if ((line(1:7)==char(60)//char(47)//'atom'//char(62))) then
+         iatom=iatom+1
+         cycle
        end if
-       cycle
-     end if
-     
-     if ((line(1:7)==char(60)//char(47)//'atom'//char(62))) then
-       iatom=iatom+1
-       cycle
-     end if
-     
-     if ((line(1:12)=='<local_force')) then
-       read(funit,'(a)',err=10,end=10) readline
-       call rmtabfromline(readline)
-       line=adjustl(readline)
-       call rdfromline_value('data',line,strg)
-       if (strg/="") then 
-         ABI_ALLOCATE(work2,(3*natom,3*natom))
-         strg1=trim(strg)
-         read(strg1,*) (work2(1,nu),nu=1,3*natom)
-         do mu=2,3*natom-1
-           read(funit,*)(work2(mu,nu),nu=1,3*natom)
-         end do
+       
+       if ((line(1:12)=='<local_force')) then
          read(funit,'(a)',err=10,end=10) readline
          call rmtabfromline(readline)
          line=adjustl(readline)
          call rdfromline_value('data',line,strg)
          if (strg/="") then 
+           ABI_ALLOCATE(work2,(3*natom,3*natom))
            strg1=trim(strg)
-           read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
+           read(strg1,*) (work2(1,nu),nu=1,3*natom)
+           do mu=2,3*natom-1
+             read(funit,*)(work2(mu,nu),nu=1,3*natom)
+           end do
+           read(funit,'(a)',err=10,end=10) readline
+           call rmtabfromline(readline)
+           line=adjustl(readline)
+           call rdfromline_value('data',line,strg)
+           if (strg/="") then 
+             strg1=trim(strg)
+             read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
+           else
+             strg1=trim(line)
+             read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
+           end if
+           ifcs%short_atmfrc(1,:,:,:,:,irpt) =&
+&                           reshape(work2,(/3,natom,3,natom/))
+           ABI_DEALLOCATE(work2)
          else
-           strg1=trim(line)
-           read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
+           ABI_ALLOCATE(work2,(3*natom,3*natom))
+           do mu=1,3*natom
+             read(funit,*)(work2(mu,nu),nu=1,3*natom)
+           end do
+           ifcs%short_atmfrc(1,:,:,:,:,irpt) = &
+&                         reshape(work2,(/3,natom,3,natom/))
+           ABI_DEALLOCATE(work2)
          end if
-         ifcs%short_atmfrc(1,:,:,:,:,irpt) =&
-&                       reshape(work2,(/3,natom,3,natom/))
-         ABI_DEALLOCATE(work2)
-       else
-         ABI_ALLOCATE(work2,(3*natom,3*natom))
-         do mu=1,3*natom
-           read(funit,*)(work2(mu,nu),nu=1,3*natom)
-         end do
-         ifcs%short_atmfrc(1,:,:,:,:,irpt) = &
-&                       reshape(work2,(/3,natom,3,natom/))
-         ABI_DEALLOCATE(work2)
+         short_range = .true.
        end if
-       short_range = .true.
-     end if
-     
-     if ((line(1:12)=='<total_force')) then
-       read(funit,'(a)',err=10,end=10) readline
-       call rmtabfromline(readline) 
-       line=adjustl(readline)
-       call rdfromline_value('data',line,strg)
-       if (strg/="") then 
-         ABI_ALLOCATE(work2,(3*natom,3*natom))
-         strg1=trim(strg)
-         read(strg1,*) (work2(1,nu),nu=1,3*natom)
-         do mu=2,3*natom-1
-           read(funit,*)(work2(mu,nu),nu=1,3*natom)
-         end do
+       
+       if ((line(1:12)=='<total_force')) then
          read(funit,'(a)',err=10,end=10) readline
-         call rmtabfromline(readline)
+         call rmtabfromline(readline) 
          line=adjustl(readline)
          call rdfromline_value('data',line,strg)
          if (strg/="") then 
+           ABI_ALLOCATE(work2,(3*natom,3*natom))
            strg1=trim(strg)
-           read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
+           read(strg1,*) (work2(1,nu),nu=1,3*natom)
+           do mu=2,3*natom-1
+             read(funit,*)(work2(mu,nu),nu=1,3*natom)
+           end do
+           read(funit,'(a)',err=10,end=10) readline
+           call rmtabfromline(readline)
+           line=adjustl(readline)
+           call rdfromline_value('data',line,strg)
+           if (strg/="") then 
+             strg1=trim(strg)
+             read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
+           else
+             strg1=trim(line)
+             read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
+           end if
+           ifcs%atmfrc(1,:,:,:,:,irpt) = reshape(work2,(/3,natom,3,natom/))
+           ABI_DEALLOCATE(work2)
          else
-           strg1=trim(line)
-           read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
+           ABI_ALLOCATE(work2,(3*natom,3*natom))
+           do mu=1,3*natom
+             read(funit,*)(work2(mu,nu),nu=1,3*natom)
+           end do
+           ifcs%atmfrc(1,:,:,:,:,irpt) = reshape(work2,(/3,natom,3,natom/))
+           ABI_DEALLOCATE(work2)
          end if
-         ifcs%atmfrc(1,:,:,:,:,irpt) = reshape(work2,(/3,natom,3,natom/))
-         ABI_DEALLOCATE(work2)
-       else
-         ABI_ALLOCATE(work2,(3*natom,3*natom))
-         do mu=1,3*natom
-           read(funit,*)(work2(mu,nu),nu=1,3*natom)
-         end do
-         ifcs%atmfrc(1,:,:,:,:,irpt) = reshape(work2,(/3,natom,3,natom/))
-         ABI_DEALLOCATE(work2)
+         total_range = .true.
        end if
-       total_range = .true.
-     end if
-     
-     if ((line(1:5)=='<cell')) then
-       call rdfromline_value('cell',line,strg)
-       if (strg/="") then 
-         strg1=trim(strg)
-         read(strg1,*)(ifcs%cell(mu,irpt),mu=1,3)
-       else
-         read(funit,*)(ifcs%cell(mu,irpt),mu=1,3)
-       end if
-       if (total_range)then
-         if(short_range)then
-!          retrive short range part
-           ifcs%ewald_atmfrc(1,:,:,:,:,irpt) = ifcs%atmfrc(1,:,:,:,:,irpt) &
-&                                            - ifcs%short_atmfrc(1,:,:,:,:,irpt)  
+       
+       if ((line(1:5)=='<cell')) then
+         call rdfromline_value('cell',line,strg)
+         if (strg/="") then 
+           strg1=trim(strg)
+           read(strg1,*)(ifcs%cell(mu,irpt),mu=1,3)
          else
-           ifcs%ewald_atmfrc(1,:,:,:,:,irpt) = ifcs%atmfrc(1,:,:,:,:,irpt)
-           ifcs%short_atmfrc(1,:,:,:,:,irpt) = zero
+           read(funit,*)(ifcs%cell(mu,irpt),mu=1,3)
          end if
-         irpt = irpt + 1
-         total_range = .false.
-         short_range  = .false.
+         if (total_range)then
+           if(short_range)then
+!            retrive short range part
+             ifcs%ewald_atmfrc(1,:,:,:,:,irpt) = ifcs%atmfrc(1,:,:,:,:,irpt) &
+&                                              - ifcs%short_atmfrc(1,:,:,:,:,irpt)  
+           else
+             ifcs%ewald_atmfrc(1,:,:,:,:,irpt) = ifcs%atmfrc(1,:,:,:,:,irpt)
+             ifcs%short_atmfrc(1,:,:,:,:,irpt) = zero
+           end if
+           irpt = irpt + 1
+           total_range = .false.
+           short_range  = .false.
+         end if
        end if
-     end if
-     
-     if ((line(1:7)=='<qpoint')) then
-       call rdfromline_value('qpoint',line,strg)
-       if (strg/="") then 
-         strg1=trim(strg)
-         read(strg1,*)(qph1l(mu,iph1l),mu=1,3)
-       else        
-         read(funit,*) (qph1l(mu,iph1l),mu=1,3)
+       
+       if ((line(1:7)=='<qpoint')) then
+         call rdfromline_value('qpoint',line,strg)
+         if (strg/="") then 
+           strg1=trim(strg)
+           read(strg1,*)(qph1l(mu,iph1l),mu=1,3)
+         else        
+           read(funit,*) (qph1l(mu,iph1l),mu=1,3)
+         end if
        end if
-     end if
-     
-     if ((line(1:12)=='<frequencies')) then
-       call rdfromline_value('frequencies',line,strg)
-       if (strg/="") then 
-         strg1=trim(strg)
-         read(strg1,*)(phfrq(mu,iph1l),mu=1,3*natom)
-       else
-         do nu=1,natom
-           read(funit,*) (phfrq(((nu-1)*3)+mu,iph1l),mu=1,3)
-         end do
+       
+       if ((line(1:12)=='<frequencies')) then
+         call rdfromline_value('frequencies',line,strg)
+         if (strg/="") then 
+           strg1=trim(strg)
+           read(strg1,*)(phfrq(mu,iph1l),mu=1,3*natom)
+         else
+           do nu=1,natom
+             read(funit,*) (phfrq(((nu-1)*3)+mu,iph1l),mu=1,3)
+           end do
+         end if
        end if
-     end if
-
-     if ((line(1:17)=='<dynamical_matrix')) then
-       call rdfromline_value('dynamical_matrix',line,strg)
-       if (strg/="") then 
-         ABI_ALLOCATE(work2,(3*natom,3*natom))
-         strg1=trim(strg)
-         read(strg1,*) (work2(nu,1),nu=1,3*natom)
-         do mu=2,3*natom-1
-           read(funit,*)(work2(nu,mu),nu=1,3*natom)
-         end do
-         read(funit,'(a)',err=10,end=10) readline
-         call rmtabfromline(readline)
-         line=adjustl(readline)
+       
+       if ((line(1:17)=='<dynamical_matrix')) then
          call rdfromline_value('dynamical_matrix',line,strg)
          if (strg/="") then 
+           ABI_ALLOCATE(work2,(3*natom,3*natom))
            strg1=trim(strg)
-           read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
+           read(strg1,*) (work2(nu,1),nu=1,3*natom)
+           do mu=2,3*natom-1
+             read(funit,*)(work2(nu,mu),nu=1,3*natom)
+           end do
+           read(funit,'(a)',err=10,end=10) readline
+           call rmtabfromline(readline)
+           line=adjustl(readline)
+           call rdfromline_value('dynamical_matrix',line,strg)
+           if (strg/="") then 
+             strg1=trim(strg)
+             read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
+           else
+             strg1=trim(line)
+             read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
+           end if
+           dynmat(1,:,:,:,:,iph1l) = reshape(work2,(/3,natom,3,natom/))
+           ABI_DEALLOCATE(work2)
          else
-           strg1=trim(line)
-           read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
+           ABI_ALLOCATE(work2,(3*natom,3*natom))
+           do mu=1,3*natom
+             read(funit,*)(work2(nu,mu),nu=1,3*natom)
+           end do
+           dynmat(1,:,:,:,:,iph1l) = reshape(work2,(/3,natom,3,natom/))
+           ABI_DEALLOCATE(work2)
          end if
-         dynmat(1,:,:,:,:,iph1l) = reshape(work2,(/3,natom,3,natom/))
-         ABI_DEALLOCATE(work2)
-       else
-         ABI_ALLOCATE(work2,(3*natom,3*natom))
-         do mu=1,3*natom
-           read(funit,*)(work2(nu,mu),nu=1,3*natom)
-         end do
-         dynmat(1,:,:,:,:,iph1l) = reshape(work2,(/3,natom,3,natom/))
-         ABI_DEALLOCATE(work2)
        end if
-     end if
-
-     if ((line(1:8)==char(60)//char(47)//'phonon')) then
-       iph1l = iph1l +1
-     end if
-
-     if ((line(1:16)=='<strain_coupling')) then
-       read(funit,'(a)',err=10,end=10) readline
-       call rdfromline("voigt",line,strg)
-       strg1=trim(strg)
-       read(strg1,*) voigt 
-       has_straincoupling = .true.
-       irpt = 1 
-     end if
-     
-   else
-!    Now treat the strain phonon coupling part 
-     if ((line(1:16)=='<strain_coupling')) then
-       read(funit,'(a)',err=10,end=10) readline
-       call rdfromline("voigt",line,strg)
-       strg1=trim(strg)
-       read(strg1,*) voigt
-       irpt = 1 
-       cycle
-     end if
-
-     if ((line(1:22)=='<correction_force unit')) then
-       call rdfromline_value('correction_force',line,strg)
-       if (strg/="") then 
-         ABI_ALLOCATE(work2,(natom,3))
-         strg1=trim(strg)
-         read(strg1,*) (work2(1,nu),nu=1,3)
-         do mu=2,natom-1
-           read(funit,*)(work2(mu,nu),nu=1,3)
-         end do
+       
+       if ((line(1:8)==char(60)//char(47)//'phonon')) then
+         iph1l = iph1l +1
+       end if
+       
+       if ((line(1:16)=='<strain_coupling')) then
          read(funit,'(a)',err=10,end=10) readline
-         call rmtabfromline(readline)
-         line=adjustl(readline)
+         call rdfromline("voigt",line,strg)
+         strg1=trim(strg)
+         read(strg1,*) voigt 
+         has_straincoupling = .true.
+         irpt = 1 
+       end if
+       
+     else
+!    Now treat the strain phonon coupling part 
+       if ((line(1:16)=='<strain_coupling')) then
+         read(funit,'(a)',err=10,end=10) readline
+         call rdfromline("voigt",line,strg)
+         strg1=trim(strg)
+         read(strg1,*) voigt
+         irpt = 1 
+         cycle
+       end if
+       
+       if ((line(1:22)=='<correction_force unit')) then
          call rdfromline_value('correction_force',line,strg)
          if (strg/="") then 
+           ABI_ALLOCATE(work2,(natom,3))
            strg1=trim(strg)
-           read(strg1,*) (work2(natom,nu),nu=1,3)
+           read(strg1,*) (work2(1,nu),nu=1,3)
+           do mu=2,natom-1
+             read(funit,*)(work2(mu,nu),nu=1,3)
+           end do
+           read(funit,'(a)',err=10,end=10) readline
+           call rmtabfromline(readline)
+           line=adjustl(readline)
+           call rdfromline_value('correction_force',line,strg)
+           if (strg/="") then 
+             strg1=trim(strg)
+             read(strg1,*) (work2(natom,nu),nu=1,3)
+           else
+             strg1=trim(line)
+             read(strg1,*) (work2(natom,nu),nu=1,3)
+           end if
+           internal_strain(voigt+1,:,:) = work2(:,:)
+           ABI_DEALLOCATE(work2)
          else
-           strg1=trim(line)
-           read(strg1,*) (work2(natom,nu),nu=1,3)
+           ABI_ALLOCATE(work2,(natom,3))
+           do mu=1,natom
+             read(funit,*)(work2(mu,nu),nu=1,3)
+           end do
+           internal_strain(voigt+1,:,:) = work2(:,:)
+           ABI_DEALLOCATE(work2)
          end if
-         internal_strain(voigt+1,:,:) = work2(:,:)
-         ABI_DEALLOCATE(work2)
-       else
-         ABI_ALLOCATE(work2,(natom,3))
-         do mu=1,natom
-           read(funit,*)(work2(mu,nu),nu=1,3)
-         end do
-         internal_strain(voigt+1,:,:) = work2(:,:)
-         ABI_DEALLOCATE(work2)
        end if
-     end if
-
-     
-     if ((line(1:26)=='<correction_force_constant')) then
-       read(funit,'(a)',err=10,end=10) readline
-       call rmtabfromline(readline)
-       line=adjustl(readline)
-       call rdfromline_value('data',line,strg)
-       if (strg/="") then 
-         ABI_ALLOCATE(work2,(3*natom,3*natom))
-         strg1=trim(strg)
-         read(strg1,*) (work2(1,nu),nu=1,3*natom)
-         do mu=2,3*natom-1
-           read(funit,*)(work2(mu,nu),nu=1,3*natom)
-         end do
+       
+       if ((line(1:26)=='<correction_force_constant')) then
          read(funit,'(a)',err=10,end=10) readline
          call rmtabfromline(readline)
          line=adjustl(readline)
          call rdfromline_value('data',line,strg)
          if (strg/="") then 
+           ABI_ALLOCATE(work2,(3*natom,3*natom))
            strg1=trim(strg)
-           read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
+           read(strg1,*) (work2(1,nu),nu=1,3*natom)
+           do mu=2,3*natom-1
+             read(funit,*)(work2(mu,nu),nu=1,3*natom)
+           end do
+           read(funit,'(a)',err=10,end=10) readline
+           call rmtabfromline(readline)
+           line=adjustl(readline)
+           call rdfromline_value('data',line,strg)
+           if (strg/="") then 
+             strg1=trim(strg)
+             read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
+           else
+             strg1=trim(line)
+             read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
+           end if
+           phonon_strain(voigt+1)%atmfrc(1,:,:,:,:,irpt) = &
+&                          reshape(work2,(/3,natom,3,natom/))
+           ABI_DEALLOCATE(work2)
          else
-           strg1=trim(line)
-           read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
+           ABI_ALLOCATE(work2,(3*natom,3*natom))
+           do mu=1,3*natom
+             read(funit,*)(work2(mu,nu),nu=1,3*natom)
+           end do
+           phonon_strain(voigt+1)%atmfrc(1,:,:,:,:,irpt) =&
+&              reshape(work2,(/3,natom,3,natom/))
+           ABI_DEALLOCATE(work2)
          end if
-         phonon_strain(voigt+1)%atmfrc(1,:,:,:,:,irpt) = &
-&                        reshape(work2,(/3,natom,3,natom/))
-         ABI_DEALLOCATE(work2)
-       else
-         ABI_ALLOCATE(work2,(3*natom,3*natom))
-         do mu=1,3*natom
-           read(funit,*)(work2(mu,nu),nu=1,3*natom)
-         end do
-         phonon_strain(voigt+1)%atmfrc(1,:,:,:,:,irpt) =&
-&            reshape(work2,(/3,natom,3,natom/))
-         ABI_DEALLOCATE(work2)
+         has_anharmonics = .true.
+         cycle
        end if
-       has_anharmonics = .true.
-       cycle
-     end if
-
-     if ((line(1:5)=='<cell')) then
-       call rdfromline_value('cell',line,strg)
-       if (strg/="") then 
-         strg1=trim(strg)
-         read(strg1,*)(phonon_strain(voigt+1)%cell(mu,irpt),mu=1,3)
-       else
-         read(funit,*)(phonon_strain(voigt+1)%cell(mu,irpt),mu=1,3)
+       
+       if ((line(1:5)=='<cell')) then
+         call rdfromline_value('cell',line,strg)
+         if (strg/="") then 
+           strg1=trim(strg)
+           read(strg1,*)(phonon_strain(voigt+1)%cell(mu,irpt),mu=1,3)
+         else
+           read(funit,*)(phonon_strain(voigt+1)%cell(mu,irpt),mu=1,3)
+         end if
+         irpt = irpt + 1
+         cycle
        end if
-       irpt = irpt + 1
-       cycle
-     end if
-
-     if ((line(1:17)==char(60)//char(47)//'strain_coupling')) then
+       
+       if ((line(1:17)==char(60)//char(47)//'strain_coupling')) then
 !      set nrpt for the previous value of strain
-       phonon_strain(voigt+1)%nrpt = irpt - 1
+         phonon_strain(voigt+1)%nrpt = irpt - 1
 !      restart the calculation of nrpt
+       end if
+
      end if
-
+   end do
+   
+!  Do some checks
+   if (any(typat==zero)) then
+     write(message, '(a,a,a)' )&
+&       ' Unable to read the type of atoms ',trim(filename),ch10
+     MSG_ERROR(message)
    end if
- end do
-
-! Do some checks
- if (any(typat==zero)) then
-   write(message, '(a,a,a)' )&
-&     ' Unable to read the type of atoms ',trim(filename),ch10
-   MSG_ERROR(message)
- end if
  
- if (any(znucl==zero)) then
-   write(message, '(a,a,a)' )&
-&     ' Unable to read the atomic number ',trim(filename),ch10
-   MSG_ERROR(message)
- end if
+   if (any(znucl==zero)) then
+     write(message, '(a,a,a)' )&
+&       ' Unable to read the atomic number ',trim(filename),ch10
+     MSG_ERROR(message)
+   end if
  
- if (any(all_amu==zero)) then
-   write(message, '(a,a,a)' )&
+   if (any(all_amu==zero)) then
+     write(message, '(a,a,a)' )&
 &     ' Unable to read the atomic mass ',trim(filename),ch10
-   MSG_ERROR(message)
- end if
-
- close(unit=funit)
+     MSG_ERROR(message)
+   end if
+  
+   close(unit=funit)
 
 #endif
+
+ end if !End if master
+
+!MPI BROADCAST
+ call xmpi_bcast(all_amu,master, comm, ierr)
+ call xmpi_bcast(dynmat,master, comm, ierr)
+ call xmpi_bcast(elastic_constants,master, comm, ierr)
+ call xmpi_bcast(epsilon_inf,master, comm, ierr)
+ call xmpi_bcast(ifcs%nrpt,master, comm, ierr)
+ call xmpi_bcast(ifcs%atmfrc,master, comm, ierr)
+ call xmpi_bcast(ifcs%cell,master, comm, ierr)
+ call xmpi_bcast(ifcs%ewald_atmfrc,master, comm, ierr)
+ call xmpi_bcast(ifcs%short_atmfrc,master, comm, ierr)
+ call xmpi_bcast(internal_strain,master, comm, ierr)
+ call xmpi_bcast(phfrq,master, comm, ierr)
+ call xmpi_bcast(qph1l,master, comm, ierr)
+ call xmpi_bcast(typat,master, comm, ierr)
+ call xmpi_bcast(rprimd,master, comm, ierr)
+ call xmpi_bcast(xcart,master, comm, ierr)
+ call xmpi_bcast(zeff,master, comm, ierr)
+ call xmpi_bcast(znucl,master, comm, ierr)
 
 !Fill somes others variables
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -1287,7 +1313,7 @@ subroutine effective_potential_file_getDim(filename,natom,ntypat,nqpt,nrpt,comm)
    call wrtout(std_out,message,'COLL')
 
    write(message, '(8a)' )&
-&   ' The file ',trim(filename),ch10,' is ddb file only numer of atoms is read,',&
+&   ' The file ',trim(filename),ch10,' is ddb file only the number of atoms is read,',&
 &    'if you want to predic the number of cell (nrpt)',ch10,' use bigbx9 routines',ch10
    call wrtout(std_out,message,'COLL')
 
