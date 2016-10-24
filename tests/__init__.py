@@ -104,8 +104,11 @@ class AbinitEnvironment(object):
 
     def start_watching_sources(self):
         def is_source(fname):
+            # NB: `.finc` include files are ignored on purpose because
+            # make is not tracking them. one should change the Fortran file
+            # that includes .finc to force recompilation.
             _, ext = os.path.splitext(fname)
-            return ext.lower() in {".f", "f90", ".finc", ".c"}
+            return ext.lower() in {".f", "f90", ".c"} # ".finc"
 
         self.srcpath_stat = {}
         for root, dirs, files in os.walk(self.src_dir):
@@ -118,13 +121,12 @@ class AbinitEnvironment(object):
 
     def changed_sources(self):
         """Return list of files that have been modified."""
-        import time
-        now = time.time()
         changed = []
-        for path, stat in self.srcpath_stat.items():
-             if now - stat.st_mtime > 0.0:
-                changed.append(path)
-                self.srcpath_stat[path] = os.stat(path)
+        for path, old_stat in self.srcpath_stat.items():
+            now_stat = os.stat(path)
+            if now_stat.st_mtime != old_stat.st_mtime:
+               changed.append(path)
+               self.srcpath_stat[path] = now_stat
         return changed
 
 

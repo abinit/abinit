@@ -591,7 +591,10 @@ unexpected behaviour if the pickle database is not up-to-date with the tests ava
                     print("Invoking `make` because the following files have been changed:")
                     for i, path in enumerate(changed):
                         print("[%d] %s" % (i, os.path.relpath(path)))
-                    make_abinit(ncpus_detected)
+                    rc = make_abinit(ncpus_detected)
+                    if rc != 0:
+                        cprint("make_abinit returned %s, tests are postponed" % rc, "red")
+                        continue
 
                     test_suite = AbinitTestSuite(test_suite.abenv, test_list=test_list)
                     results = test_suite.run_tests(build_env, workdir, runner,
