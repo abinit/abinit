@@ -4,7 +4,6 @@ from __future__ import print_function, division, absolute_import #, unicode_lite
 import sys
 import os
 import platform
-import shelve
 
 from os.path import join as pj, abspath as absp, basename
 from socket import gethostname
@@ -364,7 +363,6 @@ class TestBot(object):
         pprint_table(table)
 
         self.summary.json_dump("testbot_summary.json")
-        self.summary.shelve_dump("testbot_summary.shelve")
 
         # Empty list of tests (usually due to the use of with, without options)
         # Create file to signal this condition and return 0
@@ -481,33 +479,6 @@ class TestBotSummary(object):
             raise RuntimeError("Wrong list of status values!")
 
         return suite_status, stats
-
-    def shelve_dump(self, fname, protocol=0):
-        """
-        Save self.res_table, self.failed, self.passed in a shelve file
-        that will be transferred from the slave to the buildbot master.
-        Use protocol=0 to avoid portability problems.
-        """
-        def as_ascii(s):
-            #return str(s.encode("ascii", "ignore"))
-            return str(s)
-
-        d = shelve.open(fname, protocol=protocol, flag="c")
-
-        # list of strings with the name of the tests that (failed|passed)
-        d[as_ascii("failed")] = self.failed
-        d[as_ascii("passed")] = self.passed
-        d[as_ascii("summary_table")] = self.totable()
-
-        for suite_name in self:
-            suite_name = as_ascii(suite_name)
-            print("---", suite_name, self.res_table[suite_name])
-            if suite_name in d:
-                #raise KeyError("Cannot overwrite key %s" % suite_name)
-                print("Warning: About to overwrite key %s" % suite_name)
-            d[suite_name] = self.res_table[suite_name]
-
-        d.close()
 
     def json_dump(self, fname):
         """
