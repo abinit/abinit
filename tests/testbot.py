@@ -18,9 +18,6 @@ try:
 except ImportError: # The ConfigParser module has been renamed to configparser in Python 3
     from configparser import SafeConfigParser, NoOptionError
 
-#try:
-#    import tests
-#except ImportError:
 # Add the directory [...]/abinit/tests to $PYTHONPATH
 pack_dir, x = os.path.split(absp(__file__))
 pack_dir, x = os.path.split(pack_dir)
@@ -60,7 +57,7 @@ def _yesno2bool(string):
         raise ValueError("Cannot interpret string: %s" % string)
 
 
-def _str2list(string): 
+def _str2list(string):
     return [s.strip() for s in string.split(",") if s]
 
 
@@ -150,7 +147,7 @@ class TestBot(object):
                gethostname(), self.slavename, system, self.ncpus, platform.python_version(), _my_name))
 
         # Set the logger level.
-        # loglevel is bound to the string value obtained from the command line argument. 
+        # loglevel is bound to the string value obtained from the command line argument.
         # Convert to upper case to allow the user to specify --loglevel=DEBUG or --loglevel=debug
         #numeric_level = getattr(logging, options.loglevel.upper(), None)
         numeric_level = getattr(logging, "ERROR", None)
@@ -273,7 +270,7 @@ class TestBot(object):
             nprocs=mpi_nprocs, nthreads=py_nthreads, runmode=self.runmode)
             # Cannot use this option on the test farm because hdf5 is not thread-safe.
             # See https://www.hdfgroup.org/hdf5-quest.html#tsafe
-            #etsf_check=self.etsf_check) 
+            #etsf_check=self.etsf_check)
 
         if results is None:
             print("Test suite is empty, returning 0 0 0 ")
@@ -319,12 +316,12 @@ class TestBot(object):
         #nexecuted = 0
 
         if self.runmode == "static":
-            # Old mode: run all available tests with 1 MPI node here, 
+            # Old mode: run all available tests with 1 MPI node here,
             # then use MPI mode in mp_suites (paral/mpiio)
             np_list = [2, 4, 10, 24]
             nfailed, npassed, nexecuted = self.run_tests_with_np(1, suite_args=suite_args, runmode=self.runmode)
         else:
-            # New mode: run all available tests with 2 MPI procs here, 
+            # New mode: run all available tests with 2 MPI procs here,
             # then enter the mp_suites with [4, 10, 24] CPUs
             np_list = [4, 10, 24]
             nfailed, npassed, nexecuted = self.run_tests_with_np(2, suite_args=suite_args, runmode=self.runmode)
@@ -370,7 +367,7 @@ class TestBot(object):
         self.summary.shelve_dump("testbot_summary.shelve")
 
         # Empty list of tests (usually due to the use of with, without options)
-        # Create file to signal this condition and return 0 
+        # Create file to signal this condition and return 0
         if nexecuted == 0:
             print("No file found")
             with open("__emptylist__", "w") as fh:

@@ -112,36 +112,6 @@ def vararg_callback(option, opt_str, value, parser):
     setattr(parser.values, option.dest, value)
 
 
-def find_and_touch_srcfiles(patterns):
-    """
-    Touch all Abinit source files containing the specified list of `patterns`.
-    """
-    def touch(fname):
-        """
-        Python touch
-        See also http://stackoverflow.com/questions/1158076/implement-touch-using-python
-        for a race-condition free version based on py3k
-        """
-        try:
-            os.utime(fname, None)
-        except:
-            open(fname, 'a').close()
-
-    top = os.path.join(abenv.home_dir, "src")
-    print("Walking through directory:", top)
-    print("Touching all files containing:", str(patterns))
-
-    for root, dirs, files in os.walk(top):
-        for path in files:
-            path = os.path.join(root, path)
-            with open(path, "rt") as fh:
-                for line in fh:
-                    if any(p in line for p in patterns):
-                        print("Touching %s" % path)
-                        touch(path)
-                        break
-
-
 def make_abinit(num_threads, touch_patterns):
     """
     Find the top-level directory of the build tree and issue `make -j num_threads`.
@@ -152,8 +122,7 @@ def make_abinit(num_threads, touch_patterns):
     top = find_top_build_tree(".", with_abinit=False)
 
     if touch_patterns:
-        touch_patterns = [s.strip() for s in touch_patterns.split(",") if s]
-        find_and_touch_srcfiles(touch_patterns)
+        abenv.touch_srcfiles([s.strip() for s in touch_patterns.split(",") if s])
 
     return os.system("cd %s && make -j%d" % (top, num_threads))
 
@@ -579,7 +548,6 @@ unexpected behaviour if the pickle database is not up-to-date with the tests ava
     runmode = "static"
     if mpi_nprocs > 1: runmode = "dynamic"
 
-    #try:
     results = test_suite.run_tests(build_env, workdir, runner,
                                    nprocs=mpi_nprocs,
                                    nthreads=py_nthreads,

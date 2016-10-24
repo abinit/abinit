@@ -69,7 +69,7 @@ _status2htmlcolor = {
 
 
 def status2html(status):
-    """Convert test status in a colored HTML string.""" 
+    """Convert test status in a colored HTML string."""
     return _status2htmlcolor[status](status)
 
 
@@ -86,7 +86,7 @@ def str2html(string, end="<br>"):
 
 def args2htmltr(*args):
     string = ""
-    for arg in args: 
+    for arg in args:
         string += "<td>" + str(arg) + "</td>"
     return string
 
@@ -168,7 +168,7 @@ def rmrf(top, exclude_paths=None):
     Recursively remove all files and directories contained in directory top.
 
     Args:
-        exclude_paths: 
+        exclude_paths:
             list with the absolute paths that should be preserved
 
     Returns the list of files and the directories that have been removed.
@@ -205,7 +205,7 @@ def find_abortfile(workdir):
         workdir: Working directory of the test.
 
     .. Note::
-        
+
         __LIBPAW_MPIABORFILE__ is produced if abinit uses libpaw and when we die inside libpaw.
     """
     for s in ("__ABI_MPIABORTFILE__", "__LIBPAW_MPIABORFILE__"):
@@ -303,7 +303,7 @@ class FileToTest(object):
 
     def compare(self, fldiff_path, ref_dir, workdir, timebomb=None, outf=sys.stdout):
         """
-        Use fldiff_path to compare the reference file located in ref_dir with 
+        Use fldiff_path to compare the reference file located in ref_dir with
         the output file located in workdir. Results are written to stream outf.
         """
         ref_fname = os.path.abspath(os.path.join(ref_dir, self.name))
@@ -530,9 +530,9 @@ class AbinitTestInfoParser(object):
     def __init__(self, inp_fname, defaults=None):
         """
         Args:
-            inp_fname: 
+            inp_fname:
                 test input file
-            defaults: 
+            defaults:
                 default values passed to the INI parser.
         """
         logger.info("Parsing TEST_INFO section from input file : " + str(inp_fname))
@@ -589,7 +589,7 @@ class AbinitTestInfoParser(object):
                         return SafeConfigParser.get(self, section, option, raw, vars)
                     else:
                         return SafeConfigParser.get(self, section, option, raw=raw, vars=vars, fallback=None)
-        
+
         # Old version. ok with py2 but not with py3k
         if py2:
             self.parser = MySafeConfigParser(defaults) # Wrap the parser.
@@ -759,7 +759,7 @@ def find_top_build_tree(start_path, with_abinit=True, ntrials=10):
     Returns the absolute path of the ABINIT build tree.
     Assume start_path is within the build tree.
 
-    Raises: 
+    Raises:
         `RuntimeError` if build tree is not found after ntrials attempts.
     """
     abs_path = os.path.abspath(start_path)
@@ -794,17 +794,17 @@ class Compiler(object):
 
     def __str__(self):
         return "%s: %s %s" % (self.__class__.__name__, self.name, self.version)
-                                            
+
     @classmethod
     def from_defined_cpp_vars(cls, defined_cpp_vars):
-        for var in defined_cpp_vars: 
+        for var in defined_cpp_vars:
             # TODO: version may be useful but it's not reported in config.h
-            if var in cls._KNOWN_CPP_VARS: 
+            if var in cls._KNOWN_CPP_VARS:
                 # Build the name of the compiler.
                 name = var.lower().split("_")[1]
                 if name == "gnu": name = "gfortran"
                 if name == "pathscale": name = "psc"
-                return cls(name=name, version=None) 
+                return cls(name=name, version=None)
         else:
             err_msg = "Cannot detect the name of the %s\n. Defined CPP vars: %s " % (cls.__name__, str(defined_cpp_vars))
             raise RuntimeError(err_msg)
@@ -842,17 +842,17 @@ class CPreProcessor(object):
 
     def __init__(self, includes=None, opts=None, bin="cpp", verbose=0):
         self.includes = ["."]
-        if includes is not None: self.includes = includes 
+        if includes is not None: self.includes = includes
         self.opts = ["-DHAVE_CONFIG_H"]
-        if opts is not None: self.opts = opts 
+        if opts is not None: self.opts = opts
         self.bin, self.verbose = bin, verbose
 
     def process_file(self, filepath, remove_lhash=True):
         """
         Read source from filepath, call CPP wit the includes and the
-        options passed to the constructor. 
-        
-        Returns: 
+        options passed to the constructor.
+
+        Returns:
             preprocessed text.
         """
         if self.bin is None:
@@ -947,9 +947,9 @@ class BuildEnvironment(object):
     def __init__(self, build_dir, cygwin_instdir=None):
         """
         Args:
-            build_dir: 
+            build_dir:
                 Path to the top level directory of the build.
-            cygwin_instdir: 
+            cygwin_instdir:
                 Installation directory of cygwin. Defaults to '/cygwin'
         """
         # Try to figure out the top level directory of the build tree.
@@ -1059,7 +1059,7 @@ class BuildEnvironment(object):
 
     def set_buildbot_builder(self, builder):
         """
-        Set the name of the buildbot builder. 
+        Set the name of the buildbot builder.
         Used to skip tests defining `exclude_builders` in the TEST_INFO_SECTION
         """
         self.buildbot_builder = builder
@@ -1109,9 +1109,9 @@ def input_file_has_vars(fname, ivars, comment="#", mode="any"):
     Primitive parser that searches for the occurrence of input variables in the input file fname
 
     Args:
-        fname: 
+        fname:
             Input file
-        ivars: 
+        ivars:
             dictionary whose keys are strings with the input variables to search.
             ivar[varname] can be either None or an integer
             if ivar[varname] is None, we have a match if varname is present
@@ -1119,7 +1119,7 @@ def input_file_has_vars(fname, ivars, comment="#", mode="any"):
 
         mode: "all" or "any"
 
-        return: 
+        return:
             (bool, d)
             bool is True is the input file contains the specified variables
             d is a dictionary with the matching lines (empty dict if no occurence).
@@ -1228,7 +1228,7 @@ class FldiffResult(object):
         """
         Check if the test passed withing the specified tolerances.
 
-        Returns: 
+        Returns:
             (isok, status, msg)
         """
         status = "succeeded"; msg = ""
@@ -1324,7 +1324,7 @@ def wrap_fldiff(fldiff_path, fname1, fname2, opts=None, label=None, timebomb=Non
     # Parse the last line.
     # NOTE:
     # on woopy fldiff returns to the parent process without producing
-    # any output. In this case, we set got_summary to False so that 
+    # any output. In this case, we set got_summary to False so that
     # the caller can make another attempt.
     got_summary = True
 
@@ -1578,7 +1578,7 @@ class BaseTest(object):
                 err_msg += "Cannot overwrite key %s\n" % k
                 #print(test_info.__dict__[k],  self.__dict__[k])
 
-        if err_msg: 
+        if err_msg:
             raise self.Error(err_msg)
 
         self.__dict__.update(test_info.__dict__)
@@ -1704,7 +1704,7 @@ class BaseTest(object):
 
     def listoftests(self, width=100, html=True, abslink=True):
         string = self.description.lstrip()
-        if self.references: 
+        if self.references:
             string += "References:\n" + "\n".join(self.references)
         string = textwrap.dedent(string)
         string = textwrap.fill(string, width=width)
@@ -1862,7 +1862,7 @@ class BaseTest(object):
 
         for s in self.exclude_hosts:
             compiler, host = None, s
-            if "@" in s: 
+            if "@" in s:
                 compiler, host = s.split("@")
             else:
                 # TODO: validate TEST_INFO at the level of the parser.
@@ -1903,14 +1903,14 @@ class BaseTest(object):
                            default=2
         make_html_diff     True to produce diff in HTML format. Default: False.
         sub_timeout        Timeout for subprocesses.
-        abimem_check       True if abimem.mocc files should be analyzes for possible errors. 
+        abimem_check       True if abimem.mocc files should be analyzes for possible errors.
                            Requires HAVE_MEM_PROFILE and `call abimem_init(2)` in main.
                            Default: False
-        etsf_check         True if netcdf files should be validated. Requires netcdf4. 
+        etsf_check         True if netcdf files should be validated. Requires netcdf4.
                            Default: False
         ================  ====================================================================
 
-        .. warning: 
+        .. warning:
             This method must be thread-safe, DO NOT change build_env or runner.
         """
         import copy
@@ -1931,7 +1931,7 @@ class BaseTest(object):
         self.erase_files = kwargs.get("erase_files", self.erase_files)
         self.make_html_diff = kwargs.get("make_html_diff", self.make_html_diff)
         self.sub_timeout = kwargs.get("sub_timeout", self.sub_timeout)
-        
+
 
         timeout = self.sub_timeout
         if self.build_env.has_bin("timeout") and timeout > 0.0:
@@ -1970,7 +1970,7 @@ class BaseTest(object):
 
         if self.skip_msg:
             self._status = "skipped"
-            msg = self.full_id + ": Skipped." 
+            msg = self.full_id + ": Skipped."
             cprint(msg, status2txtcolor[self._status])
             for l in self.skip_msg.splitlines():
                 cprint("\t" + l, status2txtcolor[self._status])
@@ -2023,7 +2023,7 @@ class BaseTest(object):
             else:
                 bin_path = self.bin_path
 
-            self.run_etime = runner.run(self.nprocs, bin_path, 
+            self.run_etime = runner.run(self.nprocs, bin_path,
                                         self.stdin_fname, self.stdout_fname, self.stderr_fname,
                                         cwd=workdir)
 
@@ -2091,7 +2091,7 @@ class BaseTest(object):
                         cprint(msg, status2txtcolor["failed"])
 
                 except Exception as exc:
-                    # Py threads do not like exceptions. 
+                    # Py threads do not like exceptions.
                     # Store the exception and continue.
                     self.exceptions.append(exc)
 
@@ -2195,7 +2195,7 @@ class BaseTest(object):
         save_files = self._files_to_keep[:]
         if other_test_files is not None: save_files += other_test_files
 
-        # Add harcoded list of files 
+        # Add harcoded list of files
         hard_files = ["perf.data", "__ABI_MPIABORTFILE__"]
         save_files += [os.path.join(self.workdir, f) for f in hard_files]
 
@@ -2260,7 +2260,7 @@ class BaseTest(object):
             safe_hdiff = ext in [".out", ".stdout"] # Create HTML diff file only for these files
 
             if ref_exists and out_exists and safe_hdiff:
-                out_opt = "-u"    
+                out_opt = "-u"
                 #out_opt = "-t"   # For simple HTML table. (can get stuck)
                 #args = ["python", diffpy, out_opt, "-f " + hdiff_fname, out_fname, ref_fname ]
                 args = [diffpy, out_opt, "-f " + hdiff_fname, out_fname, ref_fname ]
@@ -2312,9 +2312,9 @@ class BaseTest(object):
             if ref_exists and out_exists:
                 # n is for ndiff format, c for context, u for unified
                 #for out_opt in ["-n", "-c"]:
-                #out_opt = "-n"    
-                #out_opt = "-c"    
-                out_opt = "-u"    
+                #out_opt = "-n"
+                #out_opt = "-c"
+                out_opt = "-u"
                 args = [diffpy, out_opt, "-f " + diff_fname, out_fname, ref_fname]
                 cmd = " ".join(args)
 
@@ -3162,8 +3162,8 @@ class AbinitTestSuite(object):
         ofname = os.path.join(self.workdir,"results.tar.gz")
 
         # The most delicate part here is the treatment of the exceptions
-        # since the test might not have produced the reference files 
-        # we want to copy to the server. If something goes wrong, we simply 
+        # since the test might not have produced the reference files
+        # we want to copy to the server. If something goes wrong, we simply
         # register the exception and we continue the execution.
         try:
             targz = tarfile.open(ofname, "w:gz")
@@ -3230,7 +3230,7 @@ class AbinitTestSuite(object):
         Execute the list of tests (main entry point for client code)
 
         Args:
-            build_env: 
+            build_env:
                 `BuildEnv` instance with info on the build environment.
             workdir:
                 Working directory (string)
@@ -3258,7 +3258,7 @@ class AbinitTestSuite(object):
         try:
             self.lock.acquire()
         except self.lock.Error:
-            msg = ("Timeout occured while trying to acquire lock in:\n\t%s\n" 
+            msg = ("Timeout occured while trying to acquire lock in:\n\t%s\n"
                    "Perhaps a previous run did not exit cleanly or another process is running in the same directory.\n"
                    "If you are sure no other process is in execution, remove the directory with `rm -rf` and rerun.\n" % self.workdir)
             cprint(msg, "red")
@@ -3274,7 +3274,6 @@ class AbinitTestSuite(object):
             """Helper function to execute the test. Must be thread-safe."""
 
             testdir = os.path.abspath(os.path.join(self.workdir, test.suite_name + "_" + test.id))
-            #print(" testsuite.py (line 2445) run_and_check_test : %s Running in %s" % (test.full_id, testdir))
 
             # Run the test
             test.run(build_env, runner, testdir, nprocs=nprocs, runmode=runmode, **kwargs)
@@ -3295,7 +3294,7 @@ class AbinitTestSuite(object):
 
         if nthreads == 1:
             logger.info("Sequential version")
-            for test in self: 
+            for test in self:
                 run_and_check_test(test)
 
         elif nthreads > 1:
@@ -3371,7 +3370,7 @@ class AbinitTestSuite(object):
         if executed:
             mean_etime = sum([test.run_etime for test in executed]) / len(executed)
             dev_etime = (sum([(test.run_etime - mean_etime)**2 for test in executed]) / len(executed))**0.5
-                                                                                                            
+
             cprint("Completed in %.2f [s]. Average time for test=%.2f [s], stdev=%.2f [s]" % (
                   self.tot_etime, mean_etime, dev_etime), "yellow")
 
@@ -3382,7 +3381,7 @@ class AbinitTestSuite(object):
               cprint(msg, "red", attrs=['underline'])
             else:
               cprint(msg, "green")
-                                                                                                            
+
             # Print outliers
             if False and dev_etime > 0.0:
                 for test in self:
@@ -3581,7 +3580,7 @@ class Results(object):
     def tests_with_status(self, status):
         return {
             "succeeded": self.succeeded_tests,
-            "passed": self.passed_tests,   
+            "passed": self.passed_tests,
             "failed": self.failed_tests,
             "disabled": self.disabled_tests,
             "skipped": self.skipped_tests,
@@ -3603,17 +3602,17 @@ class Results(object):
         """Number of tests executed."""
         n = 0
         for test in self.test_suite:
-            if isinstance(test, ChainOfTests): 
+            if isinstance(test, ChainOfTests):
                 n += len([t for t in test if t.executed])
             else:
-                if test.executed: 
+                if test.executed:
                     n += 1
         return n
 
     def outref_files(self, status):
         """
         Return (out_files, ref_files)
-        where out and ref are list with the output files and the reference 
+        where out and ref are list with the output files and the reference
         files of the tests with the given status.
         """
         out_files, ref_files = [], []
@@ -3651,9 +3650,9 @@ class Results(object):
     def edit_inputs(self, status="failed"):
         """Edit the input files of the tests with the specified status."""
         in_files = self.in_files(status=status)
-        #for r, o in zip(out_files, ref_files): 
+        #for r, o in zip(out_files, ref_files):
         #    print("reference: %s, output %s" % (r, o))
-                                                                
+
         return Editor().edit_files(in_files)
 
     #def inspect_stdouts(self):
@@ -3667,7 +3666,7 @@ class Results(object):
 
     def stderr_files(self, status="failed"):
         """List of non-empty error files of the tests with the specified status."""
-        # Loop over the tests, open the stderr to see if it's empty ot not 
+        # Loop over the tests, open the stderr to see if it's empty ot not
         # and add it to the list.
         err_files = []
         for test in self.tests_with_status(status):
