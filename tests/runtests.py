@@ -569,27 +569,45 @@ unexpected behaviour if the pickle database is not up-to-date with the tests ava
     if results is None: return 99
 
     if options.looponfail:
-        while True:
+        count, max_iterations = 0, 100
+        cprint("\n\nEntering looponfail loop with max_iterations %d" % max_iterations, "yellow")
+        abenv.start_watching_sources()
+
+        while count < max_iterations:
+            count += 1
             test_list = [t for t in test_suite if t.status == "failed"]
             if not test_list:
-                cprint("All tests ok. exiting", "green")
+                cprint("All tests ok. Exiting looponfail", "green")
                 break
             else:
-                cprint("%d tests are still failing" % len(test_list), "red")
-                time.sleep(5)
-                make_abinit(ncpus_detected)
-                test_suite = AbinitTestSuite(test_suite.abenv, test_list=test_list)
-                results = test_suite.run_tests(build_env, workdir, runner,
-                                               nprocs=mpi_nprocs,
-                                               nthreads=py_nthreads,
-                                               runmode=runmode,
-                                               erase_files=options.erase_files,
-                                               make_html_diff=options.make_html_diff,
-                                               sub_timeout=options.sub_timeout,
-                                               pedantic=options.pedantic,
-                                               abimem_check=options.abimem,
-                                               etsf_check=options.etsf)
-                if results is None: return 99
+                cprint("%d test(s) are still failing" % len(test_list), "red")
+                changed = abenv.changed_sources()
+                if not changed:
+                    sleep_time = 10
+                    cprint("No change in source files detected. Will sleep for %s seconds..." % sleep_time, "yellow")
+                    time.sleep(sleep_time)
+                    continue
+                else:
+                    print("Invoking `make` because the following files have been changed:")
+                    for i, path in enumerate(changed):
+                        print("[%d] %s" % (i, os.path.relpath(path)))
+                    make_abinit(ncpus_detected)
+
+                    test_suite = AbinitTestSuite(test_suite.abenv, test_list=test_list)
+                    results = test_suite.run_tests(build_env, workdir, runner,
+                                                   nprocs=mpi_nprocs,
+                                                   nthreads=py_nthreads,
+                                                   runmode=runmode,
+                                                   erase_files=options.erase_files,
+                                                   make_html_diff=options.make_html_diff,
+                                                   sub_timeout=options.sub_timeout,
+                                                   pedantic=options.pedantic,
+                                                   abimem_check=options.abimem,
+                                                   etsf_check=options.etsf)
+                    if results is None: return 99
+
+        if count == max_iterations:
+            cprint("Reached max_iterations", "red")
 
     # Threads do not play well with KeyBoardInterrupt
     #except KeyboardInterrupt:
