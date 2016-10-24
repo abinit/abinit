@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 py2 = sys.version_info[0] <= 2
 if py2:
     import cPickle as pickle
+    #import pickle as pickle
 else:
     import pickle
 

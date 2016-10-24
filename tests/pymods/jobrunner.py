@@ -80,8 +80,13 @@ def mpicfg_parser(fname, defaults=None):
 
     return d
 
+#NB: Pickle fail if JobRunnerError inherits from Exception
+# so we inherit from object. This should represents a serious problem 
+# because we never catch JobRunner Exceptions. This object is mainly
+# used to store info about the exception in JobRunner exceptions (see run method)
 
-class JobRunnerError(Exception):
+class JobRunnerError(object):
+#class JobRunnerError(Exception):
     """Exceptions raised by `Jobrunner`."""
 
     def __init__(self, return_code, cmd, run_etime, prev_errmsg=None):
@@ -93,7 +98,7 @@ class JobRunnerError(Exception):
             prev_errmsg: Previous error message.
         """
         # This is needed for pickle
-        super(JobRunnerError, self).__init__()
+        #super(JobRunnerError, self).__init__("jobrunner error")
         self.return_code = return_code
         self.cmd = cmd
         self.run_etime = run_etime
@@ -106,17 +111,24 @@ class JobRunnerError(Exception):
 
         return string
 
-    def __getstate__(self):
-        """
-        Return state is pickled as the contents for the instance.
-        """
-        return {k: getattr(self, k) for k in ("return_code", "cmd", "run_etime", "prev_errmsg")}
+    #def __getstate__(self):
+    #    """
+    #    Return state is pickled as the contents for the instance.
+    #    """
+    #    print("in getstate")
+    #    return {k: getattr(self, k) for k in ("return_code", "cmd", "run_etime", "prev_errmsg")}
 
+    #def __setstate__(self, state):
+    #    print("in setstate")
+    #    self.return_code = state["return_code"]
+    #    self.cmd = state["cmd"]
+    #    self.run_etime = state["run_etime"]
+    #    self.prev_errmsg = state["prev_errmsg"]
 
 
 class JobRunner(object):
     """Base Class used to manage the execution of jobs in an MPI environment."""
-    Error = JobRunnerError
+    #Error = JobRunnerError
 
     @classmethod
     def fromdict(cls, kwargs, ompenv=None, timebomb=None):
@@ -354,7 +366,7 @@ class JobRunner(object):
         except:
             run_etime = time.time() - start_time
             prev_errmsg = str(sys.exc_info()[1])
-            exc = JobRunnerError(self.retcode, " ".join(args), run_etime, prev_errmsg)
+            exc = JobRunnerError(self.retcode, " ".join(args), run_etime, prev_errmsg=prev_errmsg)
             self.exceptions.append(exc)
 
         return run_etime
