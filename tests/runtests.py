@@ -40,12 +40,8 @@ from tests.pymods.devtools import number_of_cpus
 from tests.pymods.tools import which, ascii_abinit, prompt
 from tests.pymods import termcolor
 from tests.pymods.termcolor import get_terminal_size, cprint
-from tests.pymods.testsuite import find_top_build_tree, AbinitTestSuite
-
-JobRunner = tests.pymods.jobrunner.JobRunner
-OMPEnvironment = tests.pymods.jobrunner.OMPEnvironment
-TimeBomb = tests.pymods.jobrunner.TimeBomb
-BuildEnvironment = tests.pymods.testsuite.BuildEnvironment
+from tests.pymods.testsuite import find_top_build_tree, AbinitTestSuite, BuildEnvironment
+from tests.pymods.jobrunner import JobRunner, OMPEnvironment, TimeBomb
 
 __version__ = "0.5.4"
 __author__ = "Matteo Giantomassi"
@@ -73,14 +69,19 @@ Usage example (assuming the script is executed within a build tree):
     runtests  v1 -t0 --force-mpirun  ==> Disable the timeout tool, use mpirun also for sequential runs.
 
 Debugging mode:
+
     runtests.py v3[30] --gdb         ==> Run test v3[30] under the control of the GNU debugger gdb
     runtests.py paral[1] -n 2 --gdb  ==> Run test paral[1] with 2 MPI nodes under gdb
                                          (will open 2 xterminal sessions, it may not work!)
     runtests.py v3[30] -V "memcheck" ==> Run test v3[30] with valgrind memcheck
     runtests.py v3[30] --pedantic    ==> Mark test as failed if stderr is not empty
+    runtests.py --rerun=failed       ==> Rerun only the tests that failed in a previous run.
+    runtests.py -k GW --looponfail   ==> Excecute e.g. the GW tests and enter a busy loop that will
+                                         recompile the code upon change in the source files and rerun
+                                         the failing tests. Exit when all tests are OK.
 
     To profile the script, use `prof` as first argument, e.g. `runtests.py prof v3[30]`
-    """
+"""
 
 
 def show_examples_and_exit(err_msg=None, error_code=1):
@@ -280,7 +281,9 @@ def main():
                       help="Rerun previous tests. Example: `--rerun failed`. Same syntax as patch option.")
 
     parser.add_option("--looponfail", default=False, action="store_true",
-                      help="TODO")
+                      help=("Excecute the tests and enter a busy loop that will "
+                            "recompile the code upon change in the source files and rerun "
+                            "the failing tests. Exit when all tests are OK."))
 
     parser.add_option("-e", "--edit", dest="edit", type="str", default="",
                       help=("Edit the input files of the tests with the specified status. Use $EDITOR as editor."
@@ -643,8 +646,7 @@ unexpected behaviour if the pickle database is not up-to-date with the tests ava
 
     if options.nag:
         for test in results.failed_tests:
-            traces = test.get_backtraces()
-            for trace in traces:
+            for trace in test.get_backtraces():
                 cprint(trace, "red")
                 trace.edit_source()
 
