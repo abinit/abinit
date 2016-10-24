@@ -1123,8 +1123,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    qp_rhor=ks_rhor
    if(Dtset%usekden==1)qp_taur=ks_taur
    QP_sym => KS_sym
- else                         ! Self-consistent GW.
-
+ else
+   ! Self-consistent GW.
    !  * Read the unitary matrix and the QP energies of the previous step from the QPS file.
    call energies_init(QP_energies)
    QP_energies%e_corepsp=ecore/Cryst%ucvol
@@ -2320,8 +2320,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    !  * Note that in the first iteration qp_rhor contains KS rhor, then the mixed rhor.
    if (mod100>=10) then
 
+     ! Calculate the new m_lda_to_qp
+     call updt_m_lda_to_qp(Sigp,Kmesh,nscf,Sr,m_lda_to_qp) 
+
      if (wfd_iam_master(Wfd)) then
-       call updt_m_lda_to_qp(Sigp,Kmesh,nscf,Sr,m_lda_to_qp) ! Calculate the new m_lda_to_qp
        call wrqps(Dtfil%fnameabo_qps,Sigp,Cryst,Kmesh,Psps,Pawtab,QP_Pawrhoij,&
 &       Dtset%nspden,nscf,nfftf,ngfftf,Sr,QP_BSt,m_lda_to_qp,qp_rhor)
      end if

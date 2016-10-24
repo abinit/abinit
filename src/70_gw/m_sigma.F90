@@ -154,7 +154,7 @@ MODULE m_sigma
 
   complex(dpc),allocatable :: eigvec_qp(:,:,:,:)  
   ! eigvec_qp(nbnds,nbnds,nkibz,nsppol))
-  ! Expansion of the QP amplitude in the KS basis set.
+  ! Expansion of the QP amplitudes in the QP basis set of the previous iteration.
 
   complex(dpc),allocatable :: hhartree(:,:,:,:)  
   ! hhartree(b1gw:b2gw,b1gw:b2gw,nkibz,nsppol*nsig_ab)
