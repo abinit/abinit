@@ -106,6 +106,13 @@ class JobRunnerError(Exception):
 
         return string
 
+    def __getstate__(self):
+        """
+        Return state is pickled as the contents for the instance.
+        """
+        return {k: getattr(self, k) for k in ("return_code", "cmd", "run_etime", "prev_errmsg")}
+
+
 
 class JobRunner(object):
     """Base Class used to manage the execution of jobs in an MPI environment."""

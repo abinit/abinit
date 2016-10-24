@@ -462,7 +462,7 @@ def main():
                 raise ValueError("Don't know how to interpret string: %s" % tok)
 
     if options.rerun:
-        print("Reading previous tests from pickle file")
+        cprint("Reading previous tests from pickle file", "yellow")
         with open(".prev_run.pickle", "rb") as fh:
             test_suite = pickle.load(fh)
 
