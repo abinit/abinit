@@ -108,7 +108,7 @@ class AbinitEnvironment(object):
             # make is not tracking them. one should change the Fortran file
             # that includes .finc to force recompilation.
             _, ext = os.path.splitext(fname)
-            return ext.lower() in (".f", "f90", ".c") # ".finc"
+            return ext.lower() in (".f", ".f90", ".c") # ".finc"
 
         self.srcpath_stat = {}
         for root, dirs, files in os.walk(self.src_dir):
