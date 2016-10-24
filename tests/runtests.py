@@ -5,6 +5,7 @@ from __future__ import print_function, division, absolute_import #, unicode_lite
 import sys
 import os
 import platform
+import time
 
 from warnings import warn
 from optparse import OptionParser
@@ -113,7 +114,7 @@ def vararg_callback(option, opt_str, value, parser):
     setattr(parser.values, option.dest, value)
 
 
-def make_abinit(num_threads, touch_patterns):
+def make_abinit(num_threads, touch_patterns=None):
     """
     Find the top-level directory of the build tree and issue `make -j num_threads`.
 
@@ -149,6 +150,16 @@ def parse_stats(stats):
             raise ValueError("%s is not a valid status" % s)
 
     return stats
+
+
+def reload_test_suite(status_list):
+    cprint("Reading previous tests from pickle file", "yellow")
+    with open(".prev_run.pickle", "rb") as fh:
+        test_suite = pickle.load(fh)
+
+    print("Selecting tests with status in %s" % str(status_list))
+    test_list = [t for t in test_suite if t.status in status_list]
+    return AbinitTestSuite(test_suite.abenv, test_list=test_list)
 
 
 def main():
@@ -268,6 +279,9 @@ def main():
     parser.add_option("--rerun", dest="rerun", type="str", default="",
                       help="Rerun previous tests. Example: `--rerun failed`. Same syntax as patch option.")
 
+    parser.add_option("--looponfail", default=False, action="store_true",
+                      help="TODO")
+
     parser.add_option("-e", "--edit", dest="edit", type="str", default="",
                       help=("Edit the input files of the tests with the specified status. Use $EDITOR as editor."
                             "Examples: -i failed to edit the input files of the the failed tests. "
@@ -349,7 +363,7 @@ def main():
 
     # Compile the code before running the tests.
     if options.make:
-        retcode = make_abinit(options.make, options.touch)
+        retcode = make_abinit(options.make, touch_patterns=options.touch)
         if retcode: return retcode
 
     # Initialize info on the build. User's option has the precedence.
@@ -418,7 +432,7 @@ def main():
                 runner = JobRunner.generic_mpi(use_mpiexec=use_mpiexec, timebomb=timebomb)
 
         if omp_nthreads > 0:
-            omp_env = OMPEnvironment(OMP_NUM_THREADS = omp_nthreads)
+            omp_env = OMPEnvironment(OMP_NUM_THREADS=omp_nthreads)
             runner.set_ompenv(omp_env)
 
     # Valgrind support.
@@ -463,15 +477,8 @@ def main():
                 raise ValueError("Don't know how to interpret string: %s" % tok)
 
     if options.rerun:
-        cprint("Reading previous tests from pickle file", "yellow")
-        with open(".prev_run.pickle", "rb") as fh:
-            test_suite = pickle.load(fh)
-
-        status_list = parse_stats(options.rerun)
-        print("Select tests with status in %s" % status_list)
-
-        test_list = [t for t in test_suite if t.status in status_list]
-        test_suite = AbinitTestSuite(test_suite.abenv, test_list=test_list)
+        # Rerun tests with status given by rerun.
+        test_suite = reload_test_suite(status_list=parse_stats(options.rerun))
 
     else:
         if options.regenerate:
@@ -559,8 +566,30 @@ unexpected behaviour if the pickle database is not up-to-date with the tests ava
                                    pedantic=options.pedantic,
                                    abimem_check=options.abimem,
                                    etsf_check=options.etsf)
-
     if results is None: return 99
+
+    if options.looponfail:
+        while True:
+            test_list = [t for t in test_suite if t.status == "failed"]
+            if not test_list:
+                cprint("All tests ok. exiting", "green")
+                break
+            else:
+                cprint("%d tests are still failing" % len(test_list), "red")
+                time.sleep(5)
+                make_abinit(ncpus_detected)
+                test_suite = AbinitTestSuite(test_suite.abenv, test_list=test_list)
+                results = test_suite.run_tests(build_env, workdir, runner,
+                                               nprocs=mpi_nprocs,
+                                               nthreads=py_nthreads,
+                                               runmode=runmode,
+                                               erase_files=options.erase_files,
+                                               make_html_diff=options.make_html_diff,
+                                               sub_timeout=options.sub_timeout,
+                                               pedantic=options.pedantic,
+                                               abimem_check=options.abimem,
+                                               etsf_check=options.etsf)
+                if results is None: return 99
 
     # Threads do not play well with KeyBoardInterrupt
     #except KeyboardInterrupt:
