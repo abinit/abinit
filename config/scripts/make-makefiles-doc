@@ -17,7 +17,6 @@
 from ConfigParser import ConfigParser
 from time import gmtime,strftime
 
-import commands
 import os
 import re
 import sys
