@@ -123,7 +123,7 @@ class AbinitEnvironment(object):
         changed = []
         for path, stat in self.srcpath_stat.items():
              if now - stat.st_mtime > 0.0:
-                changed.append(path])
+                changed.append(path)
                 self.srcpath_stat[path] = os.stat(path)
         return changed
 
