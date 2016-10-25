@@ -6,8 +6,12 @@
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
 from time import gmtime, strftime
 
 import os
@@ -563,7 +567,7 @@ else:
 
 # Display warnings
 if ( m4_version < 10415 ):
-  print """
+  print("""
      ****************************************************************
      ***                        WARNING!                          ***
      ****************************************************************
@@ -578,10 +582,10 @@ if ( m4_version < 10415 ):
      *** Thanks a lot in advance for your understanding.          ***
      ***                                                          ***
      ****************************************************************
-"""
+""")
 
 if ( ac_version < 26800 ):
-  print """
+  print("""
      ****************************************************************
      ***                        WARNING!                          ***
      ****************************************************************
@@ -604,10 +608,10 @@ if ( ac_version < 26800 ):
      *** Thanks a lot in advance for your understanding.          ***
      ***                                                          ***
      ****************************************************************
-"""
+""")
 
 if ( am_version < 11202 ):
-  print """
+  print("""
      ****************************************************************
      ***                        WARNING!                          ***
      ****************************************************************
@@ -628,10 +632,10 @@ if ( am_version < 11202 ):
      *** Thanks a lot in advance for your understanding.          ***
      ***                                                          ***
      ****************************************************************
-"""
+""")
 
 if ( lt_version < 20402 ):
-  print """
+  print("""
      ****************************************************************
      ***                        WARNING!                          ***
      ****************************************************************
@@ -645,7 +649,7 @@ if ( lt_version < 20402 ):
      *** one is 2.4.6.                                            ***
      ***                                                          ***
      ****************************************************************
-"""
+""")
 
 # Footer
 now = strftime("%Y/%m/%d %H:%M:%S +0000", gmtime())

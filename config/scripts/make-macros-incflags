@@ -6,8 +6,12 @@
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser
+try:
+    from ConfigParser import ConfigParser
+except ImportError: 
+    from configparser import ConfigParser
 from time import gmtime,strftime
 
 import os

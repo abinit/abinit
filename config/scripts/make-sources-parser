@@ -6,6 +6,7 @@
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
 import sys, os, re
 import cPickle
@@ -119,7 +120,7 @@ for (key, descr) in dtset.iteritems():
     shp_arr += "      ndim = size(shape(token%%dtsets(idtset)%%%s))\n" % key
     shp_arr += "      dims(1:ndim) = shape(token%%dtsets(idtset)%%%s)\n" % key
     #if ("pointer" in descr[0]):
-    #  print "nullify(dtset%%%s)" % key
+    #  print("nullify(dtset%%%s)" % key)
 
 subs = open(os.path.join(iovarsdir, "ab7_invars_f90_get.f90"), "w")
 subs.write("! %s\n" % comment)
