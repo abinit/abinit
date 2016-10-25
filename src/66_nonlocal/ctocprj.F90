@@ -146,7 +146,7 @@
  integer :: iband_max,iband_min,iband_start,ibg,iblockbd,ibp,icg,icgb,icp1,icp2
  integer :: ider,idir0,ierr,ig,ii,ikg,ikpt,ilm,ipw,isize,isppol,istwf_k,itypat,iwf1,iwf2
  integer :: matblk,mband_cprj,me_distrb,my_nspinor,n1,n1_2p1,n2,n2_2p1,n3,n3_2p1
- integer :: nband_k,nband_cprj_k,nblockbd,ncpgr,nkpg,npband_bandfft,npw_k,npw_nk,ntypat0
+ integer :: nband_k,nband_cprj_k,nblockbd,ncpgr,nkpg,npband_bandfft,npws,npw_k,npw_nk,ntypat0
  integer :: shift1,shift1b,shift2,shift2b,shift3,shift3b
  integer :: spaceComm,spaceComm_band,spaceComm_fft
  logical :: cprj_band_parallel,cprj_distributed,one_atom
@@ -483,8 +483,9 @@
        end if
 
 !      Extract wavefunction information
+!      Special treatment for band-fft parallelism
        if (npband_bandfft>1) then
-!        Special treatment for band-fft //
+         !Transpose WF to get them in "FFT" representation
          ABI_ALLOCATE(cwavef_tmp,(2,npw_k*my_nspinor*blocksz))
          do ig=1,npw_k*my_nspinor*blocksz
            cwavef_tmp(1,ig)=cg(1,ig+icgb)
@@ -492,6 +493,26 @@
          end do
          call xmpi_alltoallv(cwavef_tmp,bufsize_wf,bufdisp_wf,cwavef,bufsize,bufdisp,spaceComm_band,ierr)
          ABI_DEALLOCATE(cwavef_tmp)
+         !Reorder WF according to cg_bandpp and/or spinor
+         if (cg_bandpp>1.or.my_nspinor>1) then
+           ABI_ALLOCATE(cwavef_tmp,(2,npw_nk*my_nspinor*blocksz))
+           do ig=1,npw_nk*my_nspinor*blocksz
+             cwavef_tmp(:,ig)=cwavef(:,ig)
+           end do
+           shift1=0
+           do iwf2=1,cg_bandpp
+             do ig=1,my_nspinor
+               shift2=0
+               do iwf1=1,npband_bandfft
+                 npws=npw_block(iwf1)
+                 ipw=shift2+(iwf2-1)*my_nspinor*npws+(ig-1)*npws
+                 cwavef(:,shift1+1:shift1+npws)=cwavef_tmp(:,ipw+1:ipw+npws)
+                 shift1=shift1+npws ; shift2=shift2+cg_bandpp*my_nspinor*npws
+               end do
+             end do
+           end do
+           ABI_DEALLOCATE(cwavef_tmp)
+         end if
        else
          do ig=1,npw_k*my_nspinor*cg_bandpp
            cwavef(1,ig)=cg(1,ig+icgb)
@@ -501,7 +522,7 @@
 
 !      Compute scalar product of wavefunction with all NL projectors
        do ibp=1,cg_bandpp   ! Note: we suppose cp_bandpp=cprj_bandpp
-         iwf1=1+(ibp-1)*npw_k*my_nspinor;iwf2=ibp*npw_k*my_nspinor
+         iwf1=1+(ibp-1)*npw_nk*my_nspinor;iwf2=ibp*npw_nk*my_nspinor
          icp1=1+(ibp-1)*my_nspinor;icp2=ibp*my_nspinor
          call getcprj(choice,cpopt,cwavef(:,iwf1:iwf2),cwaveprj(:,icp1:icp2),&
 &         ffnl,idir,indlmn_atm,istwf_k,kg_k,kpg_k,kpoint,psps%lmnmax,&
