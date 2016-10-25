@@ -745,18 +745,17 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
 !    GATHER BAND-BY-BAND AND XC CONTRIBUTIONS
 ! **************************************************************************************************
 
- sumr = sumr + sixth*exc3
-
-! **************************************************************************************************
-!    ALL TERMS HAVE BEEN COMPUTED
-! **************************************************************************************************
-
  if (xmpi_paral == 1) then
    buffer(1) = sumr ; buffer(2) = sumi
    call xmpi_sum(buffer,spaceComm,ierr)
    sumr = buffer(1) ; sumi = buffer(2)
  end if
 
+ sumr = sumr + sixth*exc3
+
+! **************************************************************************************************
+!    ALL TERMS HAVE BEEN COMPUTED
+! **************************************************************************************************
 
  d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sumr
 !d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sumi
