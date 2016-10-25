@@ -500,7 +500,7 @@ module m_lobpcg2
           end if
         end if
         RR_eig = eigenvalues3N%self 
-        call lobpcg_rayleighRitz(lobpcg,RR_var,RR_eig,ierr,2*dlamch('S'))
+        call lobpcg_rayleighRitz(lobpcg,RR_var,RR_eig,ierr,2*dlamch('E'))
         if ( ierr /= 0 ) then
           write(std_out,*) "I'm so so sorry I could not make it, I did my best but I failed. Sorry. I'm gonna suicide"
           exit
@@ -549,7 +549,7 @@ module m_lobpcg2
       lobpcg%BX = lobpcg%AllBX0%self
       lobpcg%blockdim = blockdim*nblock
       call lobpcg_Borthonormalize(lobpcg,VAR_X,.true.,ierr) ! Do rotate AX
-      call lobpcg_rayleighRitz(lobpcg,VAR_X,eigen,ierr,2*dlamch('S'))
+      call lobpcg_rayleighRitz(lobpcg,VAR_X,eigen,ierr,2*dlamch('E'))
     end if
 
     call timab(tim_run,2,tsec)
@@ -919,7 +919,7 @@ module m_lobpcg2
       ! Solve Hermitian general eigen problem only for first blockdim eigenvalues
       select case (eigenSolver)
       case (EIGENVX)
-        write(std_out,'(A,1x)',advance="no") "Using hegx"
+        write(std_out,'(A,1x)',advance="no") "Using hegvx"
         call xgBlock_hegvx(1,'v','i','u',subA%self,subB%self,0.d0,0.d0,1,blockdim,abstol,&
           eigenvalues,vec%self,info) 
       case (EIGENVD)

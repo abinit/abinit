@@ -325,6 +325,11 @@ end subroutine lobpcgwf2
    cg(:,1:spacedim*blockdim) = cg(:,1:spacedim*blockdim) * inv_sqrt2
    if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
  end if
+
+ if ( size(l_gvnlc,dim=2) < blockdim*spacedim ) then
+   ABI_FREE(l_gvnlc)
+   ABI_MALLOC(l_gvnlc,(2,blockdim*spacedim))
+ end if
  
   if (l_mpi_enreg%paral_kgb==0) then
 
