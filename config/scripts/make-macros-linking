@@ -71,7 +71,7 @@ AC_DEFUN([ABI_FALLBACKS_PARAMS],[
 
   # Set include specs
   macro += "\n  dnl Include flags\n"
-  pkg_names = incs.keys()
+  pkg_names = list(incs.keys())
   pkg_names.sort()
   for pkg in pkg_names:
     macro += "  if test \"${enable_%s}\" = \"yes\"; then\n" % (pkg)
@@ -80,7 +80,7 @@ AC_DEFUN([ABI_FALLBACKS_PARAMS],[
 
   # Set library specs
   macro += "\n  dnl Library flags\n"
-  pkg_names = libs.keys()
+  pkg_names = list(libs.keys())
   pkg_names.sort()
   for pkg in pkg_names:
     macro += "  if test \"${enable_%s}\" = \"yes\"; then\n" % (pkg)
@@ -93,7 +93,7 @@ AC_DEFUN([ABI_FALLBACKS_PARAMS],[
 
   # Set binary specs
   macro += "\n  dnl Binary command lines"
-  pkg_names = bins.keys()
+  pkg_names = list(bins.keys())
   pkg_names.sort()
   for pkg in pkg_names:
     macro += "\n  if test \"${enable_%s}\" = \"yes\"; then\n" % (pkg)

@@ -121,11 +121,11 @@ for blk in cnf.sections():
       abinit_subdirs["data"][urgency] += sub_list
 
 # Sort subdirs
-abinit_priorities = abinit_subdirs["data"].keys()
+abinit_priorities = list(abinit_subdirs["data"].keys())
 abinit_priorities.sort()
 for urgency in abinit_priorities:
   abinit_other_dirs += abinit_subdirs["data"][urgency]
-abinit_priorities = abinit_subdirs["subsystem"].keys()
+abinit_priorities = list(abinit_subdirs["subsystem"].keys())
 abinit_priorities.sort()
 for urgency in abinit_priorities:
   abinit_top_dirs += abinit_subdirs["subsystem"][urgency]

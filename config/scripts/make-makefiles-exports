@@ -101,7 +101,7 @@ for exp in abinit_exports:
     # Get library contents
     src_desc = "src/%s/abinit.src" % (lib)
     if ( os.path.exists(src_desc) ):
-      execfile(src_desc)
+      exec(compile(open(src_desc).read(), src_desc, 'exec'))
     else:
       print("%s: Could not find config file (%s)." % (my_name,src_desc))
       print("%s: Aborting now." % my_name)

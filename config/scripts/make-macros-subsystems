@@ -118,7 +118,7 @@ for subsys in sub_list:
 
 # Build config command
 m4_subdirs = ""
-priorities = mf_subdirs.keys()
+priorities = list(mf_subdirs.keys())
 priorities.sort()
 for prty in priorities:
   m4_subdirs += " " + " ".join(mf_subdirs[prty])

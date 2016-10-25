@@ -39,7 +39,7 @@ def indent_snippet(level,text):
 def sh_cases(case_data,case_indent=0,case_item=True):
 
   if ( isinstance(case_data,dict) ):
-    if ( len(case_data.keys()) > 2 ):
+    if ( len(list(case_data.keys())) > 2 ):
       ret = indent_snippet(case_indent,"case \"${%s}\" in\n" % \
         (case_data["case"]))
       case_indent += 1
@@ -60,13 +60,13 @@ def sh_cases(case_data,case_indent=0,case_item=True):
           (case_data["case"],case_indent,case_item))
       if ( (case_indent > 0) and case_item ):
         ret += indent_snippet(case_indent,";;\n")
-    elif ( len(case_data.keys()) == 2 ):
+    elif ( len(list(case_data.keys())) == 2 ):
       if ( "default" in case_data ):
         ret = indent_snippet(case_indent,"%s_dbg=\"default\"\n" % \
           (case_data["case"])) + \
           sh_cases(case_data["default"],case_indent,case_item)
       else:
-        test_value = case_data.keys()
+        test_value = list(case_data.keys())
         test_value.remove("case")
         test_value = test_value[0]
         ret = indent_snippet(case_indent,"if test \"${%s}\" = \"%s\"; then\n" % \
@@ -78,7 +78,7 @@ def sh_cases(case_data,case_indent=0,case_item=True):
         case_indent -= 1
         ret += indent_snippet(case_indent,"fi\n")
     else:
-      raise ValueError, "case_data must contain at least 2 items"
+      raise ValueError("case_data must contain at least 2 items")
       
   else:
     return indent_snippet(case_indent,"%s\n;;\n" % (case_data.strip()))
@@ -94,10 +94,10 @@ def make_flags(config,build_mode,dbgflags_names,debug_test,debug_levels):
   for i in range(len(debug_levels)):
     lvl_index[debug_levels[i]] = i
 
-  for (key,val) in config.iteritems():
+  for (key,val) in config.items():
     (level,stage) = key.split("_")
     if ( not level in debug_levels ):
-      raise ValueError, "unknown debug level '%s'" % (level)
+      raise ValueError("unknown debug level '%s'" % (level))
     if ( not stage in flags ):
       flags[stage] = [ "" for i in range(len(debug_levels)) ]
     flags[stage][lvl_index[level]] = val
@@ -119,7 +119,7 @@ def make_flags(config,build_mode,dbgflags_names,debug_test,debug_levels):
           elif ( build_mode == "append" ):
             dbgflags += " " + flags[stage][lvl_index[lvl]]
           else:
-            raise ValueError, "unknown build mode '%s'" % (build_mode)
+            raise ValueError("unknown build mode '%s'" % (build_mode))
           if ( lvl == level ):
             break
 
@@ -242,7 +242,7 @@ for compilo in compilers:
   dbg_macro += "\n  dnl Look for debug flags\n"
   dbg_macro += "  AC_MSG_CHECKING([which %s debug flags to apply])\n\n" % \
     (compilo)
-  if ( len(dbg_config.keys()) > 1 ):
+  if ( len(list(dbg_config.keys())) > 1 ):
     dbg_macro += "  dnl Case built from config/debug/%s_*.conf\n" % (compilo)
     dbg_macro += indent_snippet(1,sh_cases(dbg_config))
   else:

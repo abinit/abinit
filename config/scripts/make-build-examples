@@ -81,7 +81,7 @@ for my_config in my_configs:
 
   for sec in cnf.sections():
     cnf_vars = dict(cnf.items(sec))
-    cnf_keys = cnf_vars.keys()
+    cnf_keys = list(cnf_vars.keys())
     cnf_keys.sort()
     out_data = ""
 

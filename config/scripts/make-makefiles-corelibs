@@ -68,7 +68,7 @@ if ( not os.path.exists("configure.ac") or
 for cnf_file in my_configs:
   if ( os.path.exists(cnf_file) ):
     if ( re.search("\.cf$",cnf_file) ):
-      execfile(cnf_file)
+      exec(compile(open(cnf_file).read(), cnf_file, 'exec'))
   else:
     print("%s: Could not find config file (%s)." % (my_name,cnf_file))
     print("%s: Aborting now." % my_name)
@@ -123,7 +123,7 @@ for lib in abinit_corelibs:
   # Import source configuration
   src_cnf = "src/%s/abinit.src" % (lib)
   if ( os.path.exists(src_cnf) ):
-    execfile(src_cnf)
+    exec(compile(open(src_cnf).read(), src_cnf, 'exec'))
   else:
     print("%s: Could not find config file (%s)." % (my_name,src_cnf))
     print("%s: Aborting now." % my_name)
@@ -132,7 +132,7 @@ for lib in abinit_corelibs:
   # Import inter-directory dependency configuration
   dir_cnf = "src/%s/abinit.dir" % (lib)
   if ( os.path.exists(dir_cnf) ):
-    execfile(dir_cnf)
+    exec(compile(open(dir_cnf).read(), dir_cnf, 'exec'))
   else:
     include_dirs = []
 
@@ -197,7 +197,7 @@ for lib in abinit_corelibs:
         sys.exit(4)
 
     # Check whether to clean the preprocessed source file
-    for (ext,reg) in re_src.iteritems():
+    for (ext,reg) in re_src.items():
       if ( reg.search(src) ):
         cleans += " \\\n\t%s" % (re.sub("\.%s" % (ext), \
           "_cpp.%s" % (ext.lower()),src))
