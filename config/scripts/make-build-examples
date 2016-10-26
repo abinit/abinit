@@ -65,7 +65,7 @@ for my_config in my_configs:
 
 # Check if we have a template
 if ( os.path.exists(my_template) ):
-  inp_data = file(my_template,"r").readlines()
+  inp_data = open(my_template,"rt").readlines()
 else:
   print("%s: Could not find template file (%s)." % (my_name,my_template))
   print("%s: Aborting now." % my_name)
@@ -103,4 +103,4 @@ for my_config in my_configs:
       my_subdir = "uncertified/"
 
     # Write data
-    file("%s/%s%s.ac" % (my_outdir,my_subdir,sec),"w").write(out_data)
+    open("%s/%s%s.ac" % (my_outdir,my_subdir,sec), "wt").write(out_data)

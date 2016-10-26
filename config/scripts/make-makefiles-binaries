@@ -274,8 +274,8 @@ if ( ext_print == 1 ):
 
 # Write additional hand-made information
 if ( os.path.exists(add) ):
-  makefile += "\n"+file(add,"r").read()
+  makefile += "\n" + open(add, "rt").read()
 
-mf = file(my_output,"w")
+mf = open(my_output, "wt")
 mf.write(makefile)
 mf.close()

@@ -90,7 +90,7 @@ AC_DEFUN([ABI_SUBSYSTEMS_INIT],[
 # Check whether some subsystem modes have been customized
 sub_custom = {}
 if ( os.path.exists(my_custom) ):
-  for line in file(my_custom,"r").readlines():
+  for line in open(my_custom, "rt").readlines():
     (key,val) = line.strip().split()
     sub_custom[key] = val
 
@@ -127,4 +127,4 @@ m4_conf = "  AC_CONFIG_SUBDIRS([%s])\n" % m4_subdirs[1:]
 # Write down subsystems data
 m4_macro = re.sub("@SUBSYS_PARAMS@",m4_prms,m4_macro)
 m4_macro = re.sub("@SUBSYS_CONFIG@",m4_conf,m4_macro)
-file(my_macro,"w").write(m4_macro)
+open(my_macro, "wt").write(m4_macro)

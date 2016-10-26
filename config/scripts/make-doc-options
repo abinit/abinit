@@ -14,7 +14,10 @@ except ImportError:
     from configparser import ConfigParser
 from time import gmtime,strftime
 
-import commands
+try:
+    from commands import getoutput
+except:
+    from subprocess import getoutput
 import os
 import re
 import sys
@@ -247,12 +250,12 @@ m4.write(re.sub("@MACRO@",parse,macro_parse_template()))
 # Finish
 m4.close()
 
-tmp = commands.getoutput("./config/scripts/add-header-typed Autoconf %s" % (my_output))
+tmp = getoutput("./config/scripts/add-header-typed Autoconf %s" % (my_output))
 if ( tmp != "" ):
   print(tmp)
 
 # Write option dumper (for debugging)
-dumper = file("config.dump.in","a")
+dumper = open("config.dump.in","a")
 dumper.write("# Command-line options\n")
 for arg in all_args:
   arg_stat = cnf.get(arg,"status")

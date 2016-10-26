@@ -44,7 +44,7 @@ now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
 re_st1 = re.compile("^status.*(removed)")
 re_st2 = re.compile("^status.*(changed|new|renamed)")
 re_sec = re.compile("^\\[.*\\]$")
-opt_inp = file(my_config,"r").readlines()
+opt_inp = open(my_config, "rt").readlines()
 opt_out = ""
 
 # Process config file
@@ -56,4 +56,4 @@ for line in opt_inp:
     opt_out += line
 
 # Rewrite config file
-file(my_config,"w").write(opt_out)
+open(my_config, "wt").write(opt_out)

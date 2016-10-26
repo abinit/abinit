@@ -10,7 +10,10 @@ from __future__ import print_function, division, absolute_import #, unicode_lite
 
 from time import gmtime,strftime
 
-import commands
+try:
+    from commands import getoutput
+except:
+    from subprocess import getoutput
 import os
 import re
 import sys
@@ -130,7 +133,7 @@ now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
 # Get Autotools versions
 at_file = "./config/local/autotools.sh"
 if ( os.path.exists(at_file) ):
-  at_versions = file(at_file, "r").read()
+  at_versions = open(at_file, "rt").read()
   exec(at_versions)
   m4_version = int(abi_m4_version)
   ac_version = int(abi_ac_version)
@@ -146,12 +149,12 @@ else:
       (my_name))
 
 # Write macros
-m4 = file(my_output,"w")
+m4 = open(my_output,"wt")
 m4.write(macro_header(my_name,now))
 m4.write(macro_info(m4_version,ac_version,am_version,lt_version))
 m4.write(macro_init_dirs(ac_version))
 m4.close()
 
-tmp = commands.getoutput("./config/scripts/add-header-typed Autoconf %s" % (my_output))
+tmp = getoutput("./config/scripts/add-header-typed Autoconf %s" % (my_output))
 if ( tmp != "" ):
   print(tmp)

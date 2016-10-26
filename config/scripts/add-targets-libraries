@@ -101,6 +101,6 @@ tgt_lib += """
 """
 
 # Write targets
-mf = file("Makefile.am","a")
+mf = open("Makefile.am","a")
 mf.write(makefile_header()+tgt_lib)
 mf.close()

@@ -83,7 +83,7 @@ main_bins = bin_cnf.sections()
 main_bins.sort()
 
 # Start writing to Makefile.am
-mf = file(my_output,"a")
+mf = open(my_output,"a")
 mf.write(makefile_header())
 
 # Process each binary

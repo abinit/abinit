@@ -156,12 +156,12 @@ cpp_buildsys = list()
 for root,dirs,files in os.walk("config/m4"):
   for src in files:
     if ( re_m4file.search(src) ):
-      for line in file(os.path.join(root,src),"r").readlines():
+      for line in open(os.path.join(root,src), "rt").readlines():
         if ( re_acdef.search(line) ):
           tmp_def = re.sub(".*AC_DEFINE\\([\\[]?([^\\],]*).*","\\1",line).strip()
           if ( not tmp_def in cpp_buildsys ):
             cpp_buildsys.append(tmp_def)
-for line in file("configure.ac","r").readlines():
+for line in open("configure.ac","rt").readlines():
   if ( re_acdef.search(line) ):
     tmp_def = re.sub(".*AC_DEFINE\\([\\[]?([^\\],]*).*","\\1",line).strip()
     if ( not tmp_def in cpp_buildsys ):
@@ -191,4 +191,4 @@ for opt in cpp_buildsys:
 cppopts_dumper_module = re.sub("@CPP_OPTIONS@",cppopts_dumper_src, \
   cppopts_dumper_module)
 
-file(my_output,"w").write(cppopts_dumper_module)
+open(my_output,"wt").write(cppopts_dumper_module)

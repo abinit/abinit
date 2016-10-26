@@ -14,7 +14,10 @@ except ImportError:
     from configparser import ConfigParser
 from time import gmtime,strftime
 
-import commands
+try:
+    from commands import getoutput
+except:
+    from subprocess import getoutput
 import os
 import re
 import sys
@@ -102,7 +105,7 @@ for cnf in my_configs:
 now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
 
 # Start writing macro
-m4 = file(my_output,"w")
+m4 = open(my_output, "wt")
 m4.write(macro_header(my_name,now))
 
 # Start writing dump macro
@@ -143,6 +146,6 @@ m4.write(macro_dump_footer())
 
 m4.close()
 
-tmp = commands.getoutput("./config/scripts/add-header-typed Autoconf %s" % (my_output))
+tmp = getoutput("./config/scripts/add-header-typed Autoconf %s" % (my_output))
 if ( tmp != "" ):
   print(tmp)

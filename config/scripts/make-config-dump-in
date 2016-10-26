@@ -60,7 +60,7 @@ abinit_int_vars = cnf.sections()
 abinit_int_vars.sort()
 
 # Write configuration dumper (for debugging)
-dumper = file("config.dump.in","w")
+dumper = open("config.dump.in","wt")
 dumper.write("""\
 #
 # Configuration dumper

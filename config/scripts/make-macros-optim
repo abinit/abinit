@@ -250,4 +250,4 @@ for compilo in compilers:
   opt_macro += "]) #ABI_%s_OPTFLAGS\n" % (compilo.upper())
 
 # Write data
-file(my_output,"w").write(opt_macro)
+open(my_output, "wt").write(opt_macro)

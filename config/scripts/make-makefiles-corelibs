@@ -249,7 +249,7 @@ for lib in abinit_corelibs:
   dep = "src/%s/abinit.dep" % (lib)
   if ( os.path.exists(dep) ):
     makefile += "\nEXTRA_DIST += abinit.dep\n"
-    makefile += "\n"+file(dep,"r").read()
+    makefile += "\n"+ open(dep,"rt").read()
 
   # Write targets for checkers
   try:
@@ -288,7 +288,7 @@ for lib in abinit_corelibs:
   add = "src/%s/abinit.amf" % (lib)
   if ( os.path.exists(add) ):
     makefile += "\nEXTRA_DIST += abinit.amf\n"
-    makefile += "\n"+file(add,"r").read()
+    makefile += "\n" + open(add, "rt").read()
 
   # Include RoboDOC header
   hdr = "src/%s/_%s_" % (lib,lib)
@@ -296,6 +296,6 @@ for lib in abinit_corelibs:
     makefile += "\nEXTRA_DIST += _%s_\n" % (lib)
 
   # Output to Makefile.am
-  mf = file("src/%s/Makefile.am" % (lib),"w")
+  mf = open("src/%s/Makefile.am" % (lib), "wt")
   mf.write(makefile)
   mf.close()

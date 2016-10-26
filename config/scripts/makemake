@@ -19,12 +19,16 @@ import re
 import stat
 import sys
 
+py2 = sys.version_info[0] <= 2
+
 from subprocess import Popen, PIPE
 import shlex
 
 def getstatusoutput(command):
-#   process = Popen(shlex.split(command), stdout=PIPE , stderr=PIPE)
-    process = Popen(command, shell= True, stdout=PIPE , stderr=PIPE)
+    if py2:
+        process = Popen(command, shell=True, stdout=PIPE, stderr=PIPE)
+    else:
+        process = Popen(command, shell=True, stdout=PIPE, stderr=PIPE, universal_newlines=True)
     out, _ = process.communicate()
     return (process.returncode, out)
 
@@ -61,6 +65,7 @@ def run_script(name, title, cmdline, stop_on_error=True,
       indent_output=True):
 
   print("[%s]   %s" % (name, title))
+  #print(cmdline)
   (ret, msg) = getstatusoutput(cmdline)
   if ( msg != "" ):
     if ( indent_output ):
@@ -393,7 +398,7 @@ if ( am_version < 11000 ):
   sys.exit(30)
 
 # Make version information available to other scripts
-at_info = file("config/local/autotools.sh", "w")
+at_info = open("config/local/autotools.sh", "wt")
 at_info.write("""# Autotools version information
 abi_m4_version="%6.6d"
 abi_ac_version="%6.6d"
@@ -496,7 +501,7 @@ if ( opts.run_subsystems ):
 
   if ( opts.toggle ):
     sub_togls = opts.toggle.split(",")
-    sub_mlist = file("config/dist/custom-modes.lst", "w")
+    sub_mlist = open("config/dist/custom-modes.lst", "wt")
 
   for subsys in bcnf.sections():
     if ( bcnf.get(subsys, "type") == "subsystem" ):

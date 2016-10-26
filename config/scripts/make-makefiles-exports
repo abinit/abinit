@@ -122,7 +122,7 @@ for exp in abinit_exports:
 exp_libs += "\n\n"
 
 # Output to makefile
-mf = file("src/libs/Makefile.am","w")
+mf = open("src/libs/Makefile.am", "wt")
 mf.write(makefile_header(my_name,now)+exp_libs+exp_dscs)
 mf.write("clean-local:\n\trm -f *.a *.la *.so*\n")
 mf.close()

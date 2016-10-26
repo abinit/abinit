@@ -156,7 +156,7 @@ incs = dict()
 libs = dict()
 
 # Start writing macro
-m4 = file(my_output,"w")
+m4 = open(my_output, "wt")
 m4.write(macro_header(my_name,now))
 
 # Process fallbacks

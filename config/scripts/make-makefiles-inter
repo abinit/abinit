@@ -52,7 +52,7 @@ def makefile_subdirs(filename,prefix):
   ret       = ""
   re_begin  = re.compile("^## BEGIN BUILD$")
   re_end    = re.compile("^## END BUILD$")
-  tmp       = file(filename,"r").readlines()
+  tmp       = open(filename, "rt").readlines()
   save_line = False
 
   for line in tmp:
@@ -168,29 +168,29 @@ for root,dirs,files in os.walk("src/incs"):
   for dat in files:
     makefile += " \\\n\t%s" % (dat)
 makefile += "\n"
-mf = file("src/incs/Makefile.am","w")
+mf = open("src/incs/Makefile.am", "wt")
 mf.write(makefile_header(my_name,now))
 mf.write(makefile)
 add = "config/makefiles/incs.am"
 if ( os.path.exists(add) ):
-  mf.write(sep+file(add,"r").read())
+  mf.write(sep + open(add,"rt").read())
 mf.close()
 
 # Write Makefile.am for modules
-mf = file("src/mods/Makefile.am","w")
+mf = open("src/mods/Makefile.am", "wt")
 mf.write(makefile_header(my_name,now))
 mf.write("all-local:\n\t@echo \"There is no buildable file here\"\n\n")
 add = "config/makefiles/mods.am"
 if ( os.path.exists(add) ):
-  mf.write(sep+file(add,"r").read())
+  mf.write(sep + open(add, "rt").read())
 mf.close()
 
 # Write intermediate Makefile.am for core source
-mf = file("src/Makefile.am","w")
+mf = open("src/Makefile.am", "wt")
 mf.write(makefile_header(my_name,now))
 mf.write(opt_list+src_list)
 mf.write(sep+tgt_abirules)
 add = "config/makefiles/src.am"
 if ( os.path.exists(add) ):
-  mf.write(sep+file(add,"r").read())
+  mf.write(sep + open(add, "rt").read())
 mf.close()

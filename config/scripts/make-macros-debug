@@ -254,4 +254,4 @@ for compilo in compilers:
   dbg_macro += "]) #ABI_%s_DBGFLAGS\n" % (compilo.upper())
 
 # Write data
-file(my_output,"w").write(dbg_macro)
+open(my_output,"wt").write(dbg_macro)

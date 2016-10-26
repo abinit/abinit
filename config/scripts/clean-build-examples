@@ -52,7 +52,7 @@ for (root,dirs,files) in os.walk("./config/build-examples"):
           (key,val) = re.sub("\t+","\t",line).split("\t")
           cf_chk[key] = val
 
-      file(os.path.join(root,src),"w").write("".join(cf_out))
+      open(os.path.join(root,src),"wt").write("".join(cf_out))
 
       if ( "filename" not in cf_chk ):
         sys.stderr.write("%s: Error: %s has no 'filename' field\n" % \

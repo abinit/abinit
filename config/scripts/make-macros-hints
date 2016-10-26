@@ -232,4 +232,4 @@ for compilo in compilers:
   hnt_macro += "]) #ABI_%s_HINTS\n" % (compilo.upper())
 
 # Write data
-file(my_output,"w").write(hnt_macro)
+open(my_output,"wt").write(hnt_macro)

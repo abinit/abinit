@@ -14,7 +14,10 @@ except ImportError:
     from configparser import ConfigParser,NoOptionError
 from time import gmtime,strftime
 
-import commands
+try:
+    from commands import getoutput
+except:
+    from subprocess import getoutput
 import os
 import re
 import sys
@@ -157,7 +160,7 @@ for lib in ext_libs + abinit_corelibs + ["98_main"]:
   mac += macro_optflags(lib)
 
 # Write configuration dumper (for debugging)
-dumper = file("config.dump.in","a")
+dumper = open("config.dump.in","a")
 dumper.write("# Fallbacks variables (script: %s)\n" % (my_name))
 for fbk in ext_libs:
   dumper.write("FCFLAGS_%s_EXT=\"@FCFLAGS@ @fcflags_opt_%s@\"\n" % \
@@ -167,10 +170,10 @@ dumper.close()
 
 # The end
 mac = re.sub("@OPTFLAGS@",mac,macro_header(my_name,now))
-m4 = file(my_output,"w")
+m4 = open(my_output, "wt")
 m4.write(mac)
 m4.close()
 
-tmp = commands.getoutput("./config/scripts/add-header-typed Autoconf %s" % (my_output))
+tmp = getoutput("./config/scripts/add-header-typed Autoconf %s" % (my_output))
 if ( tmp != "" ):
   print(tmp)

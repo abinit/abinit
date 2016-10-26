@@ -14,7 +14,10 @@ except ImportError:
     from configparser import ConfigParser,NoOptionError
 from time import gmtime,strftime
 
-import commands
+try:
+    from commands import getoutput
+except:
+    from subprocess import getoutput
 import os
 import re
 import sys
@@ -205,7 +208,7 @@ abinit_env_vars = cnf.sections()
 abinit_env_vars.sort()
 
 # Start writing macro
-m4 = file(my_output,"w")
+m4 = open(my_output, "wt")
 m4.write(macro_header(my_name,now))
 
 # Write Autoconf macro
@@ -263,12 +266,12 @@ m4.write(re.sub("@MACRO@",src,abi_macro_restore()))
 
 # Finish
 m4.close()
-tmp = commands.getoutput("./config/scripts/add-header-typed Autoconf %s" % (my_output))
+tmp = getoutput("./config/scripts/add-header-typed Autoconf %s" % (my_output))
 if ( tmp != "" ):
   print(tmp)
 
 # Write environment dumper (for debugging)
-dumper = file("config.dump.in","a")
+dumper = open("config.dump.in","a")
 dumper.write("# Environment variables (script: %s)\n" % (my_name))
 for var in abinit_env_vars:
   dumper.write("%s=\"@%s@\"\n" % (var,var))

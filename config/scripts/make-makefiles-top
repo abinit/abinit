@@ -94,7 +94,7 @@ cnf.read(my_configs[0])
 # Check whether some subsystem modes have been customized
 blk_custom = {}
 if ( os.path.exists(my_custom) ):
-  for line in file(my_custom,"r").readlines():
+  for line in open(my_custom, "rt").readlines():
     (key,val) = line.strip().split()
     blk_custom[key] = val
 
@@ -138,17 +138,17 @@ clean += "DISTCLEANFILES = .abilint abilint.out abilint.log\n\n"
 ext = "EXTRA_DIST =\n"
 for subdir in abinit_other_dirs:
   sub_files = "config/dist/%s.lst" % subdir
-  ext += file(sub_files,"r").read()
+  ext += open(sub_files, "rt").read()
 ext = re.sub("\n"," \\\n\t",ext[:-1])
 ext += "\n\n"
 
 # Write Makefile.am
-mf = file("Makefile.am","w")
+mf = open("Makefile.am", "wt")
 mf.write(makefile_header(my_name,now))
 mf.write("SUBDIRS = %s\n\n" % (" ".join(abinit_top_dirs)))
 mf.write(clean)
 mf.write(ext)
 add = "config/makefiles/top.am"
 if ( os.path.exists(add) ):
-  mf.write(sep+file(add,"r").read())
+  mf.write(sep + open(add,"rt").read())
 mf.close()

@@ -125,4 +125,4 @@ for dep in deps:
   fi\n""" % (dep,dep)
 
 # Write M4 macro
-file(my_output,"w").write(re.sub("@INCS@",m4_incs,m4_template(my_name,now)))
+open(my_output, "wt").write(re.sub("@INCS@",m4_incs,m4_template(my_name,now)))
