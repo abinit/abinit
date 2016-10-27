@@ -21,7 +21,7 @@
 !!   | pawxcdev=Choice of XC development (0=no dev. (use of angular mesh) ; 1 or 2=dev. on moments)
 !!   | usepaw=flag for PAW
 !!  gprimd(3,3)= dimensional reciprocal space primitive translations
-!!  mpi_enreg= informations about MPI parallelization
+!!  mpi_enreg= information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  n3xccc= dimension of the xccc3d array (0 or nfft).
 !!  nfft= number of FFT grid points
@@ -103,7 +103,7 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
  real(dp),intent(out) :: rate,rate_paw
  type(dataset_type), intent(in) :: dtset
  type(electronpositron_type),pointer :: electronpositron
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(pawang_type), intent(in) :: pawang
 !arrays
  integer,intent(in) :: ngfft(18)

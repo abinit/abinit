@@ -693,6 +693,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%eph_mustar
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_mustar','DPR',0)
 
+ intarr(1,:)=dtsets(:)%eph_task
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_task','INT',0)
+
  do idtset=0,ndtset_alloc
    intarr(1:3,idtset)=dtsets(idtset)%eph_ngqpt_fine
  end do
@@ -717,6 +720,11 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    intarr(1:3,idtset)=dtsets(idtset)%ddb_ngqpt
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ddb_ngqpt','INT',0)
+
+ dprarr(1,:)=dtsets(:)%ddb_shiftq(1)
+ dprarr(2,:)=dtsets(:)%ddb_shiftq(2)
+ dprarr(3,:)=dtsets(:)%ddb_shiftq(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ddb_shiftq','DPR',0)
 
  intarr(1,:)=dtsets(:)%ph_ndivsm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ph_ndivsm','INT',0)

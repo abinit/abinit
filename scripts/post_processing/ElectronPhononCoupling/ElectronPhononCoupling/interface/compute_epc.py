@@ -60,6 +60,9 @@ def compute_epc(
     temp_range: [0,0,1]
         Minimum, maximum and step temperature for eigenvalues dependance.
 
+    omega_range: [0,0,1]
+        Minimum, maximum and step frequency for the self-energy.
+
     lifetime: (False)
         Compute broadening
 

@@ -2540,7 +2540,6 @@ subroutine lebedev_laikov_int()
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'lebedev_laikov_int'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -2572,7 +2571,7 @@ subroutine lebedev_laikov_int()
  ABI_MALLOC(vz,(npts))
  ABI_MALLOC(ww,(npts))
 
- call LD0026(vx,vy,vz,ww,on)
+ !call LD0026(vx,vy,vz,ww,on)
 
  ang_int=czero
  do ii=1,npts

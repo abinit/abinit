@@ -44,7 +44,7 @@
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
 !!  kg(3,mpw*mkmem)=work array for coordinates of G vectors in basis
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  nfftf= -PAW ONLY- number of FFT grid points for the fine grid
 !!         (nfftf=nfft for norm-conserving potential runs)

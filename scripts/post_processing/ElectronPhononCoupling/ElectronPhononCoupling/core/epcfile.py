@@ -1,5 +1,6 @@
 
 from __future__ import print_function
+import os
 
 __author__ = "Gabriel Antonius"
 
@@ -17,4 +18,5 @@ class EpcFile(object):
             self.read_nc()
     
     def read_nc(self, fname=None):
-        pass
+        if not os.path.exists(fname):
+            raise OSError('File not found: {}'.format(fname))

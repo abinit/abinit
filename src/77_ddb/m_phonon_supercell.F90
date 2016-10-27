@@ -30,6 +30,7 @@ module m_phonon_supercell
  use m_errors
  use m_profiling_abi
 
+ use m_copy,     only : alloc_copy
  use m_io_tools, only : open_file
  use m_fstrings, only : int2char4, write_num
 
@@ -59,11 +60,13 @@ module m_phonon_supercell
    real(dp), allocatable :: xcart_supercell_ref(:,:)    ! (3, natom_supercell) equilibrium positions of atoms
    integer, allocatable :: atom_indexing_supercell(:)   ! (natom_supercell) indexes original atom: 1..natom 
    integer, allocatable :: uc_indexing_supercell(:,:)   ! (3, natom_supercell) indexes unit cell atom is in:
+   integer, allocatable :: typat_supercell(:)        ! (3, natom_supercell) positions of atoms
  end type supercell_type
 
  public :: init_supercell
  public :: freeze_displ_supercell
  public :: prt_supercell
+ public :: copy_supercell
  public :: destroy_supercell
 !!***
 
@@ -80,6 +83,8 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !! natom = number of atoms in primitive cell
 !! qphon(3) = phonon wavevector
+!! option = 0 Just generate the supercell qphon = (2,2,2) or (4,4,4)...
+!!          1 find smallest supercell which will accomodate phonon qphon = (1/2,1/2,1/2) or ...
 !! rprimd(3,3) = real space lattice vectors (bohr)
 !! xcart(3,natom) = cartesian positions of atoms in primitive cell
 !!
@@ -93,7 +98,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine init_supercell(natom, qphon, rprimd, xcart, scell)
+subroutine init_supercell(natom, option, qphon, rprimd, typat, xcart, scell)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -103,12 +108,12 @@ subroutine init_supercell(natom, qphon, rprimd, xcart, scell)
 !End of the abilint section
 
  implicit none
-
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: natom
+ integer, intent(in) :: natom, option
  type(supercell_type), intent(out) :: scell
 !arrays
+ integer , intent(in) :: typat(natom)
  real(dp), intent(in) :: qphon(3)
  real(dp), intent(in) :: rprimd(3,3)
  real(dp), intent(in) :: xcart(3,natom)
@@ -130,22 +135,27 @@ subroutine init_supercell(natom, qphon, rprimd, xcart, scell)
 ! find smallest supercell which will accomodate phonon.
 ! FIXME: for the moment, just get smallest multiple along each direction, with an upper bound
  supercell = -1
- do ii=1,3
-   do iscmult=1,maxsc
-     qbymult = qphon(ii)*iscmult
-     if (abs(qbymult - int(qbymult)) < tol10) then
-       supercell(ii) = iscmult
-       exit
-     end if
-   end do
-   if (supercell(ii) == -1) then
-     write(msg,'(a,I4,a,I7,2a,3E20.10)')' No supercell found with less than ', &
+ if(option == 1 ) then 
+   do ii=1,3
+     do iscmult=1,maxsc
+       qbymult = qphon(ii)*iscmult
+       if (abs(qbymult - int(qbymult)) < tol10) then
+         supercell(ii) = iscmult
+         exit
+       end if
+     end do
+     if (supercell(ii) == -1) then
+       write(msg,'(a,I4,a,I7,2a,3E20.10)')' No supercell found with less than ', &
 &             maxsc,' unit cells in direction ', &
 &             ii, ch10, ' qphon = ', qphon
-     MSG_ERROR(msg)
-   end if
- end do
- 
+       MSG_ERROR(msg)
+     end if
+   end do
+ else
+   supercell = qphon
+ end if
+
+
  scell%natom = natom
  scell%qphon = qphon
  scell%rprimd_supercell(:,1) = rprimd(:,1) * supercell(1) 
@@ -156,6 +166,7 @@ subroutine init_supercell(natom, qphon, rprimd, xcart, scell)
  scell%natom_supercell = natom*supercell(1)*supercell(2)*supercell(3)
  ABI_ALLOCATE(scell%xcart_supercell,(3,scell%natom_supercell))
  ABI_ALLOCATE(scell%xcart_supercell_ref,(3,scell%natom_supercell))
+ ABI_ALLOCATE(scell%typat_supercell,(scell%natom_supercell))
  ABI_ALLOCATE(scell%atom_indexing_supercell,(scell%natom_supercell))
  ABI_ALLOCATE(scell%uc_indexing_supercell,(3,scell%natom_supercell))
 
@@ -169,6 +180,7 @@ subroutine init_supercell(natom, qphon, rprimd, xcart, scell)
          scell%xcart_supercell_ref(:,iatom_supercell) = xcart(:,iatom) + matmul(rprimd,r_cell)
          scell%atom_indexing_supercell(iatom_supercell) = iatom
          scell%uc_indexing_supercell(:,iatom_supercell) = r_cell
+         scell%typat_supercell(iatom_supercell) = typat(iatom)
        end do
      end do
    end do
@@ -367,6 +379,61 @@ subroutine prt_supercell (freq, jmode, outfile_radix, scell, typat, znucl)
 end subroutine prt_supercell
 !!***
 
+!****f* m_phonon_supercell/copy_supercell
+!!
+!! NAME
+!! copy_supercell
+!!
+!! FUNCTION
+!! copy supercell structure
+!!
+!! INPUTS
+!! scell_in = supercell structure with data to copy
+!!
+!! OUTPUT
+!! scell = supercell structure with data to be output
+!!
+!! PARENTS
+!!      freeze_displ_allmodes
+!!
+!! CHILDREN
+!!
+!! SOURCE
+ 
+subroutine copy_supercell (scell_in,scell_copy)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'copy_supercell'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  type(supercell_type), intent(in) :: scell_in 
+  type(supercell_type), intent(inout) :: scell_copy
+
+! *************************************************************************
+
+  call destroy_supercell(scell_copy)
+  scell_copy%natom = scell_in%natom
+  scell_copy%natom_supercell = scell_in%natom_supercell
+  scell_copy%rprimd_supercell = scell_in%rprimd_supercell
+  scell_copy%qphon = scell_in%qphon
+  call alloc_copy(scell_in%xcart_supercell        , scell_copy%xcart_supercell)
+  call alloc_copy(scell_in%xcart_supercell_ref    , scell_copy%xcart_supercell_ref)
+  call alloc_copy(scell_in%atom_indexing_supercell, scell_copy%atom_indexing_supercell)
+  call alloc_copy(scell_in%uc_indexing_supercell  , scell_copy%uc_indexing_supercell)
+  call alloc_copy(scell_in%typat_supercell        , scell_copy%typat_supercell)
+
+end subroutine copy_supercell
+!!***
+
+
+
 !****f* m_phonon_supercell/destroy_supercell
 !!
 !! NAME
@@ -409,6 +476,9 @@ subroutine destroy_supercell (scell)
   end if
   if(allocated(scell%xcart_supercell_ref))  then
     ABI_DEALLOCATE(scell%xcart_supercell_ref)
+  end if
+  if(allocated(scell%typat_supercell))  then
+    ABI_DEALLOCATE(scell%typat_supercell)
   end if
   if(allocated(scell%atom_indexing_supercell))  then
     ABI_DEALLOCATE(scell%atom_indexing_supercell)

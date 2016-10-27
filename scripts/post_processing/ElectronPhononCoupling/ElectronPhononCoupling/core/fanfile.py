@@ -22,6 +22,8 @@ class FanFile(EpcFile):
         """Open the EIG2D.nc file and read it."""
         fname = fname if fname else self.fname
 
+        super(FanFile, self).read_nc(fname)
+
         with nc.Dataset(fname, 'r') as root:
 
             self.natom = len(root.dimensions['number_of_atoms'])

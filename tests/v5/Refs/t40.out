@@ -46,7 +46,7 @@ _ WF disk file :      0.545 Mbytes ; DEN or POT disk file :      0.213 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 = 10
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -341,12 +341,6 @@ P           mkmem           4
   nstep=   10 was not enough SCF cycles to converge;
   maximum residual=  5.464E-10 exceeds tolwfr=  1.000E-11
 
- Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  5.4200000  0.0000000  0.0000000  G(1)=  0.1845018  0.0000000  0.0000000
- R(2)=  0.0000000  5.4200000  0.0000000  G(2)=  0.0000000  0.1845018  0.0000000
- R(3)=  0.0000000  0.0000000  5.4200000  G(3)=  0.0000000  0.0000000  0.1845018
- Unit cell volume ucvol=  1.5922009E+02 bohr^3
- Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Note: Diff(up-dn) is a rough approximation of local magnetic moment

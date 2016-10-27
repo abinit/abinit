@@ -79,7 +79,7 @@ subroutine mag_constr(natom,spinat,nspden,magconon,magcon_lambda,rprimd, &
  integer,intent(in) :: ntypat
  real(dp),intent(in) :: magcon_lambda
  real(dp),intent(out) :: Vmagconstr(nfft,nspden)
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in)  :: typat(natom)
  integer,intent(in)  :: ngfft(18)

@@ -2606,6 +2606,31 @@ class AnaddbTest(BaseTest):
 
         return t_stdin.getvalue()
 
+class MultibinitTest(BaseTest):
+    """
+    Class for Multibinit tests. Redefine the make_stdin method of BaseTest
+    """
+    def make_stdin(self):
+        t_stdin = StringIO()
+
+        inp_fname = self.cygwin_path(self.inp_fname)  # cygwin
+        t_stdin.write( inp_fname + "\n")              # 1) formatted input file
+        t_stdin.write( self.id + ".out" + "\n")       # 2) formatted output file e.g. t13.out
+
+        if self.input_ddb:
+            iddb_fname = os.path.join(self.workdir, self.input_ddb)  # Use output DDB of a previous run.
+
+            if not os.path.isfile(iddb_fname):
+                self.exceptions.append(self.Error("%s no such DDB file: " % iddb_fname))
+
+            iddb_fname = self.cygwin_path(iddb_fname)   # cygwin
+        else:
+            iddb_fname =  "system.xml" # Use xml file of a previous run
+
+        t_stdin.write( iddb_fname + "\n")         # 3) input derivative database e.g. ddb.in / XML
+
+        return t_stdin.getvalue()
+
 
 class AimTest(BaseTest):
     """
@@ -2708,6 +2733,7 @@ def exec2class(exec_name):
         "atompaw": AtompawTest,
         "band2eps": Band2epsTest,
         "optic": OpticTest,
+        "multibinit": MultibinitTest,
     }.get(exec_name, BaseTest)
 
 

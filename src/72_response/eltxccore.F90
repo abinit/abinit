@@ -118,11 +118,6 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 
 ! *************************************************************************
 
-!Statement functions are obsolete
-!Define magnitude of cross product of two vectors
-! cross(xx,yy,zz,aa,bb,cc)=&
-!& sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
-
 !Compute lengths of cross products for pairs of primitive
 !translation vectors (used in setting index search range below)
  lencp(1)=cross_elt(rprimd(1,2),rprimd(2,2),rprimd(3,2),&
@@ -376,8 +371,7 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
  contains
 
    function cross_elt(xx,yy,zz,aa,bb,cc)
-! cross(xx,yy,zz,aa,bb,cc)=&
-!& sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
+!Define magnitude of cross product of two vectors
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -385,8 +379,8 @@ subroutine eltxccore(eltfrxc,is2_in,my_natom,natom,nfft,ntypat,&
 #define ABI_FUNC 'cross_elt'
 !End of the abilint section
 
-   real(dp)::cross_elt
-   real(dp) :: xx,yy,zz,aa,bb,cc
+   real(dp) :: cross_elt
+   real(dp),intent(in) :: xx,yy,zz,aa,bb,cc
    cross_elt=sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
  end function cross_elt
 
