@@ -357,8 +357,8 @@ if ( dtset%useric /= 666999 ) then
          end if
          if (use_subovl==1) call xmpi_sum(subovl,spaceComm,ierr)
 else
-         call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,gs_hamk,gsc(:,igsc+1:),kinpw,mpi_enreg,&
-&                      nband_k,npw_k,my_nspinor,prtvol,resid_k,totvnl)
+         call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,enl_k,gs_hamk,gsc(:,igsc+1:),kinpw,mpi_enreg,&
+&                      nband_k,npw_k,my_nspinor,prtvol,resid_k)
 end if
 !        In case of FFT parallelism, exchange subspace arrays
 
@@ -790,7 +790,8 @@ end if
  end if
 
 !Norm-conserving only: Compute nonlocal part of total energy : rotate subvnl
- if (gs_hamk%usepaw==0 .and. wfopta10 /= 1) then
+ if (gs_hamk%usepaw==0 .and. (wfopta10 /= 1 .or. (wfoptalg /= 14 .or. dtset%useric /= 666999 ) ) ) then
+   write(std_out,*) "Computing ENL_K !!!!"
    call timab(586,1,tsec)   ! 'vtowfk(nonlocalpart)'
    ABI_ALLOCATE(matvnl,(2,nband_k,nband_k))
    ABI_ALLOCATE(mat1,(2,nband_k,nband_k))
