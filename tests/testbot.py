@@ -4,7 +4,6 @@ from __future__ import print_function, division, absolute_import #, unicode_lite
 import sys
 import os
 import platform
-import shelve
 
 from os.path import join as pj, abspath as absp, basename
 from socket import gethostname
@@ -18,9 +17,6 @@ try:
 except ImportError: # The ConfigParser module has been renamed to configparser in Python 3
     from configparser import SafeConfigParser, NoOptionError
 
-#try:
-#    import tests
-#except ImportError:
 # Add the directory [...]/abinit/tests to $PYTHONPATH
 pack_dir, x = os.path.split(absp(__file__))
 pack_dir, x = os.path.split(pack_dir)
@@ -60,7 +56,7 @@ def _yesno2bool(string):
         raise ValueError("Cannot interpret string: %s" % string)
 
 
-def _str2list(string): 
+def _str2list(string):
     return [s.strip() for s in string.split(",") if s]
 
 
@@ -150,7 +146,7 @@ class TestBot(object):
                gethostname(), self.slavename, system, self.ncpus, platform.python_version(), _my_name))
 
         # Set the logger level.
-        # loglevel is bound to the string value obtained from the command line argument. 
+        # loglevel is bound to the string value obtained from the command line argument.
         # Convert to upper case to allow the user to specify --loglevel=DEBUG or --loglevel=debug
         #numeric_level = getattr(logging, options.loglevel.upper(), None)
         numeric_level = getattr(logging, "ERROR", None)
@@ -273,7 +269,7 @@ class TestBot(object):
             nprocs=mpi_nprocs, nthreads=py_nthreads, runmode=self.runmode)
             # Cannot use this option on the test farm because hdf5 is not thread-safe.
             # See https://www.hdfgroup.org/hdf5-quest.html#tsafe
-            #etsf_check=self.etsf_check) 
+            #etsf_check=self.etsf_check)
 
         if results is None:
             print("Test suite is empty, returning 0 0 0 ")
@@ -319,12 +315,12 @@ class TestBot(object):
         #nexecuted = 0
 
         if self.runmode == "static":
-            # Old mode: run all available tests with 1 MPI node here, 
+            # Old mode: run all available tests with 1 MPI node here,
             # then use MPI mode in mp_suites (paral/mpiio)
             np_list = [2, 4, 10, 24]
             nfailed, npassed, nexecuted = self.run_tests_with_np(1, suite_args=suite_args, runmode=self.runmode)
         else:
-            # New mode: run all available tests with 2 MPI procs here, 
+            # New mode: run all available tests with 2 MPI procs here,
             # then enter the mp_suites with [4, 10, 24] CPUs
             np_list = [4, 10, 24]
             nfailed, npassed, nexecuted = self.run_tests_with_np(2, suite_args=suite_args, runmode=self.runmode)
@@ -367,10 +363,9 @@ class TestBot(object):
         pprint_table(table)
 
         self.summary.json_dump("testbot_summary.json")
-        self.summary.shelve_dump("testbot_summary.shelve")
 
         # Empty list of tests (usually due to the use of with, without options)
-        # Create file to signal this condition and return 0 
+        # Create file to signal this condition and return 0
         if nexecuted == 0:
             print("No file found")
             with open("__emptylist__", "w") as fh:
@@ -484,33 +479,6 @@ class TestBotSummary(object):
             raise RuntimeError("Wrong list of status values!")
 
         return suite_status, stats
-
-    def shelve_dump(self, fname, protocol=0):
-        """
-        Save self.res_table, self.failed, self.passed in a shelve file
-        that will be transferred from the slave to the buildbot master.
-        Use protocol=0 to avoid portability problems.
-        """
-        def as_ascii(s):
-            #return str(s.encode("ascii", "ignore"))
-            return str(s)
-
-        d = shelve.open(fname, protocol=protocol, flag="c")
-
-        # list of strings with the name of the tests that (failed|passed)
-        d[as_ascii("failed")] = self.failed
-        d[as_ascii("passed")] = self.passed
-        d[as_ascii("summary_table")] = self.totable()
-
-        for suite_name in self:
-            suite_name = as_ascii(suite_name)
-            print("---", suite_name, self.res_table[suite_name])
-            if suite_name in d:
-                #raise KeyError("Cannot overwrite key %s" % suite_name)
-                print("Warning: About to overwrite key %s" % suite_name)
-            d[suite_name] = self.res_table[suite_name]
-
-        d.close()
 
     def json_dump(self, fname):
         """

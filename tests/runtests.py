@@ -5,6 +5,7 @@ from __future__ import print_function, division, absolute_import #, unicode_lite
 import sys
 import os
 import platform
+import time
 
 from warnings import warn
 from optparse import OptionParser
@@ -16,6 +17,7 @@ logger = logging.getLogger(__name__)
 py2 = sys.version_info[0] <= 2
 if py2:
     import cPickle as pickle
+    #import pickle as pickle
 else:
     import pickle
 
@@ -38,12 +40,8 @@ from tests.pymods.devtools import number_of_cpus
 from tests.pymods.tools import which, ascii_abinit, prompt
 from tests.pymods import termcolor
 from tests.pymods.termcolor import get_terminal_size, cprint
-from tests.pymods.testsuite import find_top_build_tree, AbinitTestSuite
-
-JobRunner = tests.pymods.jobrunner.JobRunner
-OMPEnvironment = tests.pymods.jobrunner.OMPEnvironment
-TimeBomb = tests.pymods.jobrunner.TimeBomb
-BuildEnvironment = tests.pymods.testsuite.BuildEnvironment
+from tests.pymods.testsuite import find_top_build_tree, AbinitTestSuite, BuildEnvironment
+from tests.pymods.jobrunner import JobRunner, OMPEnvironment, TimeBomb
 
 __version__ = "0.5.4"
 __author__ = "Matteo Giantomassi"
@@ -71,14 +69,19 @@ Usage example (assuming the script is executed within a build tree):
     runtests  v1 -t0 --force-mpirun  ==> Disable the timeout tool, use mpirun also for sequential runs.
 
 Debugging mode:
+
     runtests.py v3[30] --gdb         ==> Run test v3[30] under the control of the GNU debugger gdb
     runtests.py paral[1] -n 2 --gdb  ==> Run test paral[1] with 2 MPI nodes under gdb
                                          (will open 2 xterminal sessions, it may not work!)
     runtests.py v3[30] -V "memcheck" ==> Run test v3[30] with valgrind memcheck
     runtests.py v3[30] --pedantic    ==> Mark test as failed if stderr is not empty
+    runtests.py --rerun=failed       ==> Rerun only the tests that failed in a previous run.
+    runtests.py -k GW --looponfail   ==> Excecute e.g. the GW tests and enter a busy loop that will
+                                         recompile the code upon change in the source files and rerun
+                                         the failing tests. Exit when all tests are OK.
 
     To profile the script, use `prof` as first argument, e.g. `runtests.py prof v3[30]`
-    """
+"""
 
 
 def show_examples_and_exit(err_msg=None, error_code=1):
@@ -112,37 +115,7 @@ def vararg_callback(option, opt_str, value, parser):
     setattr(parser.values, option.dest, value)
 
 
-def find_and_touch_srcfiles(patterns):
-    """
-    Touch all Abinit source files containing the specified list of `patterns`.
-    """
-    def touch(fname):
-        """
-        Python touch
-        See also http://stackoverflow.com/questions/1158076/implement-touch-using-python
-        for a race-condition free version based on py3k
-        """
-        try:
-            os.utime(fname, None)
-        except:
-            open(fname, 'a').close()
-
-    top = os.path.join(abenv.home_dir, "src")
-    print("Walking through directory:", top)
-    print("Touching all files containing:", str(patterns))
-
-    for root, dirs, files in os.walk(top):
-        for path in files:
-            path = os.path.join(root, path)
-            with open(path, "rt") as fh:
-                for line in fh:
-                    if any(p in line for p in patterns):
-                        print("Touching %s" % path)
-                        touch(path)
-                        break
-
-
-def make_abinit(num_threads, touch_patterns):
+def make_abinit(num_threads, touch_patterns=None):
     """
     Find the top-level directory of the build tree and issue `make -j num_threads`.
 
@@ -152,8 +125,7 @@ def make_abinit(num_threads, touch_patterns):
     top = find_top_build_tree(".", with_abinit=False)
 
     if touch_patterns:
-        touch_patterns = [s.strip() for s in touch_patterns.split(",") if s]
-        find_and_touch_srcfiles(touch_patterns)
+        abenv.touch_srcfiles([s.strip() for s in touch_patterns.split(",") if s])
 
     return os.system("cd %s && make -j%d" % (top, num_threads))
 
@@ -179,6 +151,16 @@ def parse_stats(stats):
             raise ValueError("%s is not a valid status" % s)
 
     return stats
+
+
+def reload_test_suite(status_list):
+    cprint("Reading previous tests from pickle file", "yellow")
+    with open(".prev_run.pickle", "rb") as fh:
+        test_suite = pickle.load(fh)
+
+    print("Selecting tests with status in %s" % str(status_list))
+    test_list = [t for t in test_suite if t.status in status_list]
+    return AbinitTestSuite(test_suite.abenv, test_list=test_list)
 
 
 def main():
@@ -298,6 +280,11 @@ def main():
     parser.add_option("--rerun", dest="rerun", type="str", default="",
                       help="Rerun previous tests. Example: `--rerun failed`. Same syntax as patch option.")
 
+    parser.add_option("--looponfail", default=False, action="store_true",
+                      help=("Excecute the tests and enter a busy loop that will "
+                            "recompile the code upon change in the source files and rerun "
+                            "the failing tests. Exit when all tests are OK."))
+
     parser.add_option("-e", "--edit", dest="edit", type="str", default="",
                       help=("Edit the input files of the tests with the specified status. Use $EDITOR as editor."
                             "Examples: -i failed to edit the input files of the the failed tests. "
@@ -379,7 +366,7 @@ def main():
 
     # Compile the code before running the tests.
     if options.make:
-        retcode = make_abinit(options.make, options.touch)
+        retcode = make_abinit(options.make, touch_patterns=options.touch)
         if retcode: return retcode
 
     # Initialize info on the build. User's option has the precedence.
@@ -448,7 +435,7 @@ def main():
                 runner = JobRunner.generic_mpi(use_mpiexec=use_mpiexec, timebomb=timebomb)
 
         if omp_nthreads > 0:
-            omp_env = OMPEnvironment(OMP_NUM_THREADS = omp_nthreads)
+            omp_env = OMPEnvironment(OMP_NUM_THREADS=omp_nthreads)
             runner.set_ompenv(omp_env)
 
     # Valgrind support.
@@ -493,15 +480,8 @@ def main():
                 raise ValueError("Don't know how to interpret string: %s" % tok)
 
     if options.rerun:
-        print("Reading previous tests from pickle file")
-        with open(".prev_run.pickle", "rb") as fh:
-            test_suite = pickle.load(fh)
-
-        status_list = parse_stats(options.rerun)
-        print("Select tests with status in %s" % status_list)
-
-        test_list = [t for t in test_suite if t.status in status_list]
-        test_suite = AbinitTestSuite(test_suite.abenv, test_list=test_list)
+        # Rerun tests with status given by rerun.
+        test_suite = reload_test_suite(status_list=parse_stats(options.rerun))
 
     else:
         if options.regenerate:
@@ -579,7 +559,6 @@ unexpected behaviour if the pickle database is not up-to-date with the tests ava
     runmode = "static"
     if mpi_nprocs > 1: runmode = "dynamic"
 
-    #try:
     results = test_suite.run_tests(build_env, workdir, runner,
                                    nprocs=mpi_nprocs,
                                    nthreads=py_nthreads,
@@ -590,8 +569,51 @@ unexpected behaviour if the pickle database is not up-to-date with the tests ava
                                    pedantic=options.pedantic,
                                    abimem_check=options.abimem,
                                    etsf_check=options.etsf)
-
     if results is None: return 99
+
+    if options.looponfail:
+        count, max_iterations = 0, 100
+        cprint("\n\nEntering looponfail loop with max_iterations %d" % max_iterations, "yellow")
+        abenv.start_watching_sources()
+
+        while count < max_iterations:
+            count += 1
+            test_list = [t for t in test_suite if t.status == "failed"]
+            if not test_list:
+                cprint("All tests ok. Exiting looponfail", "green")
+                break
+            else:
+                cprint("%d test(s) are still failing" % len(test_list), "red")
+                changed = abenv.changed_sources()
+                if not changed:
+                    sleep_time = 10
+                    cprint("No change in source files detected. Will sleep for %s seconds..." % sleep_time, "yellow")
+                    time.sleep(sleep_time)
+                    continue
+                else:
+                    print("Invoking `make` because the following files have been changed:")
+                    for i, path in enumerate(changed):
+                        print("[%d] %s" % (i, os.path.relpath(path)))
+                    rc = make_abinit(ncpus_detected)
+                    if rc != 0:
+                        cprint("make_abinit returned %s, tests are postponed" % rc, "red")
+                        continue
+
+                    test_suite = AbinitTestSuite(test_suite.abenv, test_list=test_list)
+                    results = test_suite.run_tests(build_env, workdir, runner,
+                                                   nprocs=mpi_nprocs,
+                                                   nthreads=py_nthreads,
+                                                   runmode=runmode,
+                                                   erase_files=options.erase_files,
+                                                   make_html_diff=options.make_html_diff,
+                                                   sub_timeout=options.sub_timeout,
+                                                   pedantic=options.pedantic,
+                                                   abimem_check=options.abimem,
+                                                   etsf_check=options.etsf)
+                    if results is None: return 99
+
+        if count == max_iterations:
+            cprint("Reached max_iterations", "red")
 
     # Threads do not play well with KeyBoardInterrupt
     #except KeyboardInterrupt:
@@ -624,8 +646,7 @@ unexpected behaviour if the pickle database is not up-to-date with the tests ava
 
     if options.nag:
         for test in results.failed_tests:
-            traces = test.get_backtraces()
-            for trace in traces:
+            for trace in test.get_backtraces():
                 cprint(trace, "red")
                 trace.edit_source()
 
