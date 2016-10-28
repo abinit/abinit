@@ -103,6 +103,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,gsc,kinpw,mpi_enreg,&
 #undef ABI_FUNC
 #define ABI_FUNC 'lobpcgwf2'
  use interfaces_18_timing
+ use interfaces_66_wfs
 !End of the abilint section
 
  implicit none
@@ -287,7 +288,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,gsc,kinpw,mpi_enreg,&
  
    else
      call prep_nonlop(choice,l_cpopt,cprj_dum,enl_out,l_gs_hamk,0,eig,nband,mpi_enreg,1,paw_opt,signs,gsc,l_tim_getghc, &
- &                   cg,l_gvnlc,.false.)
+ &                   cg,l_gvnlc,already_transposed=.false.)
    end if
    !Compute enlout
    do iband=1,nband

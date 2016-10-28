@@ -167,6 +167,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  type(pawcprj_type),intent(inout) :: cprj(natom,mcprj*gs_hamk%usecprj)
 
 !Local variables-------------------------------
+ logical :: newlobpcg
  integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11
  integer,save :: nskip=0
 !     Flag use_subovl: 1 if "subovl" array is computed (see below)
@@ -209,6 +210,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  nkpt_max=50; if(xmpi_paral==1)nkpt_max=-1
 
  wfoptalg=dtset%wfoptalg; wfopta10=mod(wfoptalg,10)
+ newlobpcg = (wfoptalg == 14 .and. dtset%useric == 666999 )
  istwf_k=gs_hamk%istwf_k
  quit=0
 
@@ -342,24 +344,24 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    ============ MINIMIZATION OF BANDS: LOBPCG ==============================
 !    =========================================================================
        if (wfopta10==4) then
-if ( dtset%useric /= 666999 ) then
-         call lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
-&         nband_k,nblockbd,npw_k,prtvol,resid_k,subham,totvnl)
-!        In case of FFT parallelism, exchange subspace arrays
-         spaceComm=mpi_enreg%comm_bandspinorfft
-         call xmpi_sum(subham,spaceComm,ierr)
-         if (gs_hamk%usepaw==0) then
-           if (wfopta10==4) then
-             call xmpi_sum(totvnl,spaceComm,ierr)
-           else
-             call xmpi_sum(subvnl,spaceComm,ierr)
+         if ( .not. newlobpcg ) then
+           call lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
+&           nband_k,nblockbd,npw_k,prtvol,resid_k,subham,totvnl)
+!          In case of FFT parallelism, exchange subspace arrays
+           spaceComm=mpi_enreg%comm_bandspinorfft
+           call xmpi_sum(subham,spaceComm,ierr)
+           if (gs_hamk%usepaw==0) then
+             if (wfopta10==4) then
+               call xmpi_sum(totvnl,spaceComm,ierr)
+             else
+               call xmpi_sum(subvnl,spaceComm,ierr)
+             end if
            end if
+           if (use_subovl==1) call xmpi_sum(subovl,spaceComm,ierr)
+         else
+           call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,enl_k,gs_hamk,gsc(:,igsc+1:),kinpw,mpi_enreg,&
+&                        nband_k,npw_k,my_nspinor,prtvol,resid_k)
          end if
-         if (use_subovl==1) call xmpi_sum(subovl,spaceComm,ierr)
-else
-         call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,enl_k,gs_hamk,gsc(:,igsc+1:),kinpw,mpi_enreg,&
-&                      nband_k,npw_k,my_nspinor,prtvol,resid_k)
-end if
 !        In case of FFT parallelism, exchange subspace arrays
 
 !    =========================================================================
@@ -403,13 +405,11 @@ end if
 !  ========== DIAGONALIZATION OF HAMILTONIAN IN WFs SUBSPACE ===============
 !  =========================================================================
 
-   if( .not. wfopta10 == 1) then
+   if( .not. wfopta10 == 1 .or. .not. newlobpcg ) then
      call timab(585,1,tsec) !"vtowfk(subdiago)"
-if ( dtset%useric /= 666999 .or. wfopta10 /= 4 ) then
      call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 &     mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
 &     subham,subovl,use_subovl,gs_hamk%usepaw,mpi_enreg%me_g0)
-end if
      call timab(585,2,tsec)
    end if
 
@@ -790,7 +790,7 @@ end if
  end if
 
 !Norm-conserving only: Compute nonlocal part of total energy : rotate subvnl
- if (gs_hamk%usepaw==0 .and. wfopta10 /= 1 .and. (wfoptalg /= 14 .or. dtset%useric /= 666999 ) ) then
+ if (gs_hamk%usepaw==0 .and. wfopta10 /= 1 .and. .not. newlobpcg ) then
    call timab(586,1,tsec)   ! 'vtowfk(nonlocalpart)'
    ABI_ALLOCATE(matvnl,(2,nband_k,nband_k))
    ABI_ALLOCATE(mat1,(2,nband_k,nband_k))
@@ -894,6 +894,7 @@ end if
      end do
    end if
  end if
+ write(std_out,*) enl_k
 
  !Hamiltonian constructor for gwls_sternheimer
  if(dtset%optdriver==RUNL_GWLS) then
