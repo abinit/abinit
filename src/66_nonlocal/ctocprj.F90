@@ -143,13 +143,13 @@
 !Local variables-------------------------------
 !scalars
  integer :: blocksz,cg_bandpp,counter,cpopt,cprj_bandpp,dimffnl,ia,iatm,iatom1,iatom2
- integer :: iband_max,iband_min,iband_start,ibg,iblockbd,ibp,icg,icgb,icp1,icp2
+ integer :: iband_max,iband_min,iband_start,ibg,ibgb,iblockbd,ibp,icg,icgb,icp1,icp2
  integer :: ider,idir0,ierr,ig,ii,ikg,ikpt,ilm,ipw,isize,isppol,istwf_k,itypat,iwf1,iwf2
  integer :: matblk,mband_cprj,me_distrb,my_nspinor,n1,n1_2p1,n2,n2_2p1,n3,n3_2p1
  integer :: nband_k,nband_cprj_k,nblockbd,ncpgr,nkpg,npband_bandfft,npws,npw_k,npw_nk,ntypat0
  integer :: shift1,shift1b,shift2,shift2b,shift3,shift3b
  integer :: spaceComm,spaceComm_band,spaceComm_fft
- logical :: cprj_band_parallel,cprj_distributed,one_atom
+ logical :: cg_band_distributed,cprj_band_distributed,one_atom
  real(dp) :: arg
  character(len=500) :: msg
 !arrays
@@ -186,6 +186,9 @@
    MSG_BUG(msg)
  end if
 
+!Nothing to do if current MPI process does treat kpoints
+ if (mcg==0.or.mcprj==0) return
+
 !Init parallelism
  if (paral_kgb==1) then
    me_distrb=mpi_enreg%me_kpt
@@ -195,20 +198,20 @@
    cg_bandpp=mpi_enreg%bandpp
    cprj_bandpp=mpi_enreg%bandpp
    spaceComm_band=mpi_enreg%comm_band
-   cprj_band_parallel=.true.
-   cprj_distributed=(mcprj/=mcg/mpw)
+   cg_band_distributed=.true.
+   cprj_band_distributed=(mcprj/=mcg/mpw)
  else
    me_distrb=mpi_enreg%me_kpt
    spaceComm=mpi_enreg%comm_cell
    spaceComm_fft=xmpi_comm_self
    npband_bandfft=1
    cg_bandpp=1;cprj_bandpp=1
-   cprj_band_parallel=.false.
-   cprj_distributed=.false.
+   cg_band_distributed=.false.
+   cprj_band_distributed=.false.
    if (mpi_enreg%paralbd==1) then
      spaceComm_band=mpi_enreg%comm_band
    else
-     spaceComm_band=xmpi_comm_self;npband_bandfft=1
+     spaceComm_band=xmpi_comm_self
    end if
  end if
  if (cg_bandpp/=cprj_bandpp) then
@@ -469,16 +472,17 @@
      end if
 
 !    Loop over bands or blocks of bands
-     icgb=icg ; iband_start=1
+     icgb=icg ; ibgb=ibg ; iband_start=1
      blocksz=npband_bandfft*cg_bandpp
      nblockbd=nband_k/blocksz
-     nband_cprj_k=merge(nband_k/npband_bandfft,nband_k,cprj_distributed)
+     nband_cprj_k=merge(nband_k/npband_bandfft,nband_k,cprj_band_distributed)
      do iblockbd=1,nblockbd
        iband_min=1+(iblockbd-1)*blocksz
        iband_max=iblockbd*blocksz
 
        if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband_min,iband_max,isppol,me_distrb)) then
-         if (.not.cprj_band_parallel) icgb=icgb+npw_k*my_nspinor*blocksz
+         if (.not.cg_band_distributed) icgb=icgb+npw_k*my_nspinor*blocksz
+         if (.not.cprj_band_distributed) ibgb=ibgb+my_nspinor*blocksz
          cycle
        end if
 
@@ -531,10 +535,11 @@
        end do
 
 !      Export cwaveprj to big array cprj
-       call pawcprj_put(atindx_atm,cwaveprj,cprj,ncprj,iband_start,ibg,ikpt,iorder_cprj,isppol,&
+       call pawcprj_put(atindx_atm,cwaveprj,cprj,ncprj,iband_start,ibgb,ikpt,iorder_cprj,isppol,&
 &       mband_cprj,mkmem,natom,cprj_bandpp,nband_cprj_k,dimlmn,my_nspinor,nsppol,uncp,&
-&       mpicomm=mpi_enreg%comm_kpt,mpi_comm_band=spaceComm_band,to_be_gathered=(.not.cprj_distributed))
-       iband_start=iband_start+merge(cg_bandpp,blocksz,cprj_distributed)
+&       mpi_comm_band=spaceComm_band,to_be_gathered=(cg_band_distributed.and.(.not.cprj_band_distributed)))
+
+       iband_start=iband_start+merge(cg_bandpp,blocksz,cprj_band_distributed)
 
 !      End loop over bands
        icgb=icgb+npw_k*my_nspinor*blocksz
@@ -561,7 +566,7 @@
  end do
 
 !If needed, gather computed scalars
- if (.not.cprj_band_parallel) then
+ if (.not.cg_band_distributed) then
    call pawcprj_mpi_sum(cprj,spaceComm_band,ierr)
  end if
 

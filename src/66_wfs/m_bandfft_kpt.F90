@@ -518,22 +518,22 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
 !    End of gbound
 !    ============================================================================
 
-!    Check if there is FFT unbalance
-     itest=0
-     n2 = mpi_enreg%distribfft%n2_coarse
+!    Check if there is k_G vectors have been redistributed (after unbalancing dectecion)
+!    Note that FFT load balancing is directly related to unbalancing detection
+!    made in kpgsph routine.
+     itest=0 ; n2 = mpi_enreg%distribfft%n2_coarse
      do idatarecv=1,ndatarecv
       iproc=mpi_enreg%distribfft%tab_fftwf2_distrib(modulo(kg_k_gather(2,idatarecv),n2)+1)
       if (iproc/=me_fft) itest=itest+1
      end do
      call xmpi_sum(itest,mpi_enreg%comm_fft,ierr)
-
-!    Deactivate this feature because it is not extensively tested and not really efficient
      if (itest>0) then
-       write(message, '(a,i0,a)' )'There is a load unbalancing for the FFT parallelization!'
+       write(message, '(a,i4,3a)' ) &
+&        'There is a load unbalancing for the FFT parallelization (kpt',ikpt,').',ch10,&
+&        'Plane-wave components will be redistributed before each FFT!'
        MSG_COMMENT(message)
-     else
-       bandfft_kpt_in(ikpt_this_proc)%have_to_reequilibrate=(itest>0)
      end if
+     bandfft_kpt_in(ikpt_this_proc)%have_to_reequilibrate=(itest>0)
 
 !    If yes, store relevant data
      if(bandfft_kpt_in(ikpt_this_proc)%have_to_reequilibrate) then
