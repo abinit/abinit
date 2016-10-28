@@ -850,9 +850,9 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
    do iw=1,nomega
      arg = ( DBLE(omega(iw)) - exc_ene(ll))
      if(do_ep_lifetime) then
-       dos_exc(iw) = dos_exc(iw) + dirac_delta(arg,Bsp%broad)
-     else
        dos_exc(iw) = dos_exc(iw) + dirac_delta(arg,AIMAG(exc_ene_cplx(ll)))
+     else
+       dos_exc(iw) = dos_exc(iw) + dirac_delta(arg,Bsp%broad)
      end if
    end do
  end do

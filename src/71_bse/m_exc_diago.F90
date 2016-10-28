@@ -262,7 +262,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ii,it,mi,hreso_unt,eig_unt,exc_size,neh1,neh2
+ integer :: ii,it,mi,hreso_unt,eig_unt,exc_size,neh1,neh2,j
  integer :: nsppol,il,iu,mene_found,nstates
  integer :: nprocs,my_rank,fform,nene_printed,ierr
  real(dp) :: exc_gap,exc_maxene,abstol
@@ -295,6 +295,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  integer :: ntemp
  character(len=4) :: ts
  complex(dpc),allocatable :: exc_vl(:,:),exc_ene_c(:)
+ complex(dpc) :: ctemp
 !! complex(dpc),allocatable :: ovlp(:,:)
 
 !************************************************************************
@@ -652,6 +653,18 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 #endif
 
  END SELECT
+
+ ! Order the eigenvalues
+ do ii=nstates,2,-1
+   do j=1,ii-1
+     if (DBLE(exc_ene_c(j)) > DBLE(exc_ene_c(j+1))) then
+       ctemp = exc_ene_c(j)
+       exc_ene_c(j) = exc_ene_c(j+1)
+       exc_ene_c(j+1) = ctemp
+     end if
+   end do
+ end do
+ 
 
  write(msg,'(a,i4)')' Excitonic eigenvalues in eV up to n= ',nene_printed 
  call wrtout(std_out,msg,"PERS")
