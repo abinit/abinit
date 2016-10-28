@@ -1,0 +1,1321 @@
+
+.Version 8.1.6 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
+
+.Copyright (C) 1998-2016 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : Fri 28 Oct 2016.
+- ( at 21h23 )
+  
+- input  file    -> t51.in
+- output file    -> t51.out
+- root for input  files -> t51i
+- root for output files -> t51o
+
+
+ DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  1.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
+     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =          10        mffmem =           1         mkmem =          10
+       mpw =         295          nfft =        8000          nkpt =          10
+================================================================================
+P This job should need less than                       3.357 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.452 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+================================================================================
+
+
+ DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  2.
+     intxc =       0    ionmov =       0      iscf =      -2    lmnmax =       2
+     lnmax =       2     mgfft =      20  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =          14        mffmem =           1         mkmem =           3
+       mpw =         302          nfft =        8000          nkpt =           3
+================================================================================
+P This job should need less than                       2.096 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.196 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
+================================================================================
+
+
+ DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  3.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
+     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =          15        mffmem =           1         mkmem =           3
+       mpw =         266          nfft =        5832          nkpt =           3
+================================================================================
+P This job should need less than                       2.450 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+================================================================================
+
+
+ DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET  4.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       2
+     lnmax =       2     mgfft =      18  mpssoang =       3    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       1
+    occopt =       1   xclevel =       1
+-    mband =           8        mffmem =           1         mkmem =           3
+       mpw =         266          nfft =        5832          nkpt =           3
+================================================================================
+P This job should need less than                       2.357 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      0.099 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
+================================================================================
+
+--------------------------------------------------------------------------------
+------------- Echo of variables that govern the present computation ------------
+--------------------------------------------------------------------------------
+-
+- outvars: echo of selected default values                                      
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-
+- outvars: echo of global parameters not present in the input file              
+-  max_nthreads =    0
+-
+ -outvars: echo values of preprocessed input variables --------
+            acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
+              amu      2.80855000E+01
+     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
+     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
+     bs_freq_mesh3     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
+     bs_freq_mesh4     0.00000000E+00  3.67493254E-01  3.67493254E-04 Hartree
+ bs_haydock_niter1        100
+ bs_haydock_niter2        100
+ bs_haydock_niter3        100
+ bs_haydock_niter4       1000
+   bs_haydock_tol1     2.00000000E-02  2.00000000E-02
+   bs_haydock_tol2     2.00000000E-02  2.00000000E-02
+   bs_haydock_tol3     2.00000000E-02  2.00000000E-02
+   bs_haydock_tol4    -1.00000000E-03  0.00000000E+00
+        bs_loband1          0
+        bs_loband2          0
+        bs_loband3          0
+        bs_loband4          2
+           diemac      1.20000000E+01
+             ecut1     8.00000000E+00 Hartree
+             ecut2     8.00000000E+00 Hartree
+             ecut3     7.56385066E+00 Hartree
+             ecut4     7.56385066E+00 Hartree
+          ecuteps1     4.00000000E+00 Hartree
+          ecuteps2     4.00000000E+00 Hartree
+          ecuteps3     3.78192533E+00 Hartree
+          ecuteps4     3.78192533E+00 Hartree
+          ecutwfn1     8.00000000E+00 Hartree
+          ecutwfn2     8.00000000E+00 Hartree
+          ecutwfn3     7.56385066E+00 Hartree
+          ecutwfn4     7.56385066E+00 Hartree
+-          fftalg         312
+        getbsreso1          0
+        getbsreso2          0
+        getbsreso3          0
+        getbsreso4          4
+           getden1          0
+           getden2         -1
+           getden3          0
+           getden4          0
+           getscr1          0
+           getscr2          0
+           getscr3          0
+           getscr4          3
+           getwfk1          0
+           getwfk2          0
+           getwfk3          2
+           getwfk4          2
+             iscf1          7
+             iscf2         -2
+             iscf3          7
+             iscf4          7
+           istwfk2       1    1    1
+           istwfk3       1    1    1
+           istwfk4       1    1    1
+              ixc           7
+           jdtset        1    2    3    4
+              kpt1    -1.25000000E-01 -2.50000000E-01  0.00000000E+00
+                      -1.25000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01 -3.75000000E-01  0.00000000E+00
+                      -1.25000000E-01 -3.75000000E-01  1.25000000E-01
+                      -1.25000000E-01  2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01  3.75000000E-01  0.00000000E+00
+                      -3.75000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  5.00000000E-01  1.25000000E-01
+                      -1.25000000E-01  0.00000000E+00  0.00000000E+00
+                      -3.75000000E-01  0.00000000E+00  0.00000000E+00
+              kpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+              kpt3     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+              kpt4     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+         kptrlatt1       4   -4    4     -4    4    4     -4   -4    4
+         kptrlatt2       2    0    0      0    2    0      0    0    2
+         kptrlatt3       2    0    0      0    2    0      0    0    2
+         kptrlatt4       2    0    0      0    2    0      0    0    2
+          kptrlen1     4.08680000E+01
+          kptrlen2     1.44490200E+01
+          kptrlen3     1.44490200E+01
+          kptrlen4     1.44490200E+01
+       mbpt_sciss1     0.00000000E+00 Hartree
+       mbpt_sciss2     0.00000000E+00 Hartree
+       mbpt_sciss3     0.00000000E+00 Hartree
+       mbpt_sciss4     2.93994603E-02 Hartree
+P           mkmem1         10
+P           mkmem2          3
+P           mkmem3          3
+P           mkmem4          3
+            natom           2
+            nband1         10
+            nband2         14
+            nband3         15
+            nband4          8
+           nbdbuf1          4
+           nbdbuf2          2
+           nbdbuf3          2
+           nbdbuf4          2
+           ndtset           4
+          nfreqim1         -1
+          nfreqim2         -1
+          nfreqim3          0
+          nfreqim4         -1
+          nfreqre1         -1
+          nfreqre2         -1
+          nfreqre3          1
+          nfreqre4         -1
+            ngfft1         20      20      20
+            ngfft2         20      20      20
+            ngfft3         18      18      18
+            ngfft4         18      18      18
+             nkpt1         10
+             nkpt2          3
+             nkpt3          3
+             nkpt4          3
+           npweps1          0
+           npweps2          0
+           npweps3        113
+           npweps4        113
+           npwwfn1          0
+           npwwfn2          0
+           npwwfn3        283
+           npwwfn4        283
+            nstep         500
+             nsym          48
+           ntypat           1
+              occ1     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ3     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000
+              occ4     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+        optdriver1          0
+        optdriver2          0
+        optdriver3          3
+        optdriver4         99
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+           shiftk1     5.00000000E-01  5.00000000E-01  5.00000000E-01
+           shiftk2     0.00000000E+00  0.00000000E+00  0.00000000E+00
+           shiftk3     0.00000000E+00  0.00000000E+00  0.00000000E+00
+           shiftk4     0.00000000E+00  0.00000000E+00  0.00000000E+00
+          spgroup         227
+           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
+                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
+                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1
+                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1
+                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0
+                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
+                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1
+                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0
+                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1
+                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1
+                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
+                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1
+                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0
+                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1
+                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
+                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1
+                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
+                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
+                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
+                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
+            tnons      0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+           tolvrs1     1.00000000E-16
+           tolvrs2     0.00000000E+00
+           tolvrs3     0.00000000E+00
+           tolvrs4     0.00000000E+00
+           tolwfr1     0.00000000E+00
+           tolwfr2     1.00000000E-28
+           tolwfr3     0.00000000E+00
+           tolwfr4     0.00000000E+00
+            typat      1  1
+              wtk1       0.09375    0.09375    0.09375    0.18750    0.09375    0.09375
+                         0.09375    0.18750    0.03125    0.03125
+              wtk2       0.12500    0.50000    0.37500
+              wtk3       0.12500    0.50000    0.37500
+              wtk4       0.12500    0.50000    0.37500
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
+             zcut      3.67493254E-06 Hartree
+            znucl       14.00000
+
+================================================================================
+
+ chkinp: Checking input parameters for consistency, jdtset=   1.
+
+ chkinp: Checking input parameters for consistency, jdtset=   2.
+
+ chkinp: Checking input parameters for consistency, jdtset=   3.
+
+ chkinp: Checking input parameters for consistency, jdtset=   4.
+
+================================================================================
+== DATASET  1 ==================================================================
+-   nproc =    1
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
+ Citation for XC functional:
+  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
+ R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
+ R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
+ Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  20  20  20
+         ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/yannick/git-repos/tdepoptic/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/yannick/git-repos/tdepoptic/tests/Psps_for_tests/14si.pspnc
+-  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
+- 14.00000   4.00000    940714                znucl, zion, pspdat
+    1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    0   5.907  14.692    1   2.0872718        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    1   2.617   4.181    1   2.0872718        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
+ pspatm: epsatm=    1.43386982
+         --- l  ekb(1:nproj) -->
+             0    3.287949
+             1    1.849886
+ pspatm: atomic psp has been read  and splines computed
+
+   2.29419171E+01                                ecore*ucvol(ha*bohr**3)
+--------------------------------------------------------------------------------
+
+_setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
+
+================================================================================
+
+     iter   Etot(hartree)      deltaE(h)  residm     vres2
+ ETOT  1  -8.8692010622503    -8.869E+00 2.063E-03 5.715E+00
+ ETOT  2  -8.8755792189403    -6.378E-03 7.276E-08 1.576E-01
+ ETOT  3  -8.8756561419833    -7.692E-05 3.172E-06 2.990E-03
+ ETOT  4  -8.8756570364741    -8.945E-07 4.220E-08 1.086E-05
+ ETOT  5  -8.8756570414108    -4.937E-09 1.945E-10 2.424E-08
+ ETOT  6  -8.8756570414258    -1.503E-11 6.332E-13 1.671E-10
+ ETOT  7  -8.8756570414260    -1.421E-13 2.197E-15 6.961E-13
+ ETOT  8  -8.8756570414259     6.040E-14 1.502E-17 1.007E-15
+ ETOT  9  -8.8756570414260    -1.208E-13 1.287E-20 1.653E-18
+
+ At SCF step    9       vres2   =  1.65E-18 < tolvrs=  1.00E-16 =>converged.
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  3.38568146E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.38568146E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.38568146E-05  sigma(2 1)=  0.00000000E+00
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          1.71610915
+    2        2.00000          1.71610915
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   4.1259E-12; max=  3.6808E-10
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.250000000000      0.250000000000      0.250000000000
+ rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
+    1       0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000      0.000000000000      0.000000000000
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      1.35165088504101     1.35165088504101     1.35165088504101
+
+ cartesian forces (hartree/bohr) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
+
+ cartesian forces (eV/Angstrom) at end:
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
+ length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
+              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+ prteigrs : about to open file t51o_DS1_EIG
+ Fermi (or HOMO) energy (hartree) =   0.20600   Average Vxc (hartree)=  -0.35482
+ Eigenvalues (hartree) for nkpt=  10  k points:
+ kpt#   1, nband= 10, wtk=  0.09375, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
+  -0.19947    0.09707    0.16730    0.17015    0.29358    0.35163    0.38109    0.39021
+   0.49086    0.52279
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+--------------------------------------------------------------------------------
+ Components of total free energy (in Hartree) :
+
+    Kinetic energy  =  3.02587579971565E+00
+    Hartree energy  =  5.38306610799666E-01
+    XC energy       = -3.54190168818188E+00
+    Ewald energy    = -8.43581958561899E+00
+    PspCore energy  =  8.60437873148613E-02
+    Loc. psp. energy= -2.43141062809014E+00
+    NL   psp  energy=  1.88324866263482E+00
+    >>>>>>>>> Etotal= -8.87565704142602E+00
+
+ Other information on the energy :
+    Total energy(eV)= -2.41518910763955E+02 ; Band energy (Ha)=   2.2814322551E-01
+--------------------------------------------------------------------------------
+
+ Cartesian components of stress tensor (hartree/bohr^3)
+  sigma(1 1)=  3.38568146E-05  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.38568146E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.38568146E-05  sigma(2 1)=  0.00000000E+00
+
+-Cartesian components of stress tensor (GPa)         [Pressure= -9.9610E-01 GPa]
+- sigma(1 1)=  9.96101709E-01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  9.96101709E-01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  9.96101709E-01  sigma(2 1)=  0.00000000E+00
+
+================================================================================
+== DATASET  2 ==================================================================
+-   nproc =    1
+
+ mkfilename : getden/=0, take file _DEN from output of DATASET   1.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
+ Citation for XC functional:
+  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
+ R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
+ R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
+ Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+ getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  20  20  20
+         ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
+--------------------------------------------------------------------------------
+
+
+================================================================================
+ prteigrs : about to open file t51o_DS2_EIG
+ Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
+  6.85E-30  5.66E-29  1.85E-29  7.35E-29  1.05E-29  6.05E-29  6.55E-29  2.66E-29
+  6.97E-29  1.78E-29  4.33E-29  3.10E-29  7.85E-29  3.06E-29
+ -2.2715E-01  2.1698E-01  2.1698E-01  2.1698E-01  3.0999E-01  3.0999E-01
+  3.0999E-01  3.3664E-01  4.9922E-01  5.0740E-01  5.0740E-01  6.2852E-01
+  6.2852E-01  6.2852E-01
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+  prteigrs : nnsclo,ikpt=  500    2 max resid (incl. the buffer)=  1.82505E-28
+
+ Integrated electronic density in atomic spheres:
+ ------------------------------------------------
+ Atom  Sphere_radius  Integrated_density
+    1        2.00000          1.71610915
+    2        2.00000          1.71610915
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   4.2646E-29; max=  1.8250E-28
+ reduced coordinates (array xred) for    2 atoms
+       0.000000000000      0.000000000000      0.000000000000
+       0.250000000000      0.250000000000      0.250000000000
+
+ cartesian coordinates (angstrom) at end:
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      1.35165088504101     1.35165088504101     1.35165088504101
+ length scales= 10.217000000000 10.217000000000 10.217000000000 bohr
+              =  5.406603540164  5.406603540164  5.406603540164 angstroms
+ prteigrs : about to open file t51o_DS2_EIG
+ Eigenvalues (hartree) for nkpt=   3  k points:
+ kpt#   1, nband= 14, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
+  -0.22715    0.21698    0.21698    0.21698    0.30999    0.30999    0.30999    0.33664
+   0.49922    0.50740    0.50740    0.62852    0.62852    0.62852
+ prteigrs : prtvol=0 or 1, do not print more k-points.
+
+
+================================================================================
+== DATASET  3 ==================================================================
+-   nproc =    1
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
+ Citation for XC functional:
+  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+ SCREENING: Calculation of the susceptibility and dielectric matrices 
+
+ Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
+ Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
+.Using double precision arithmetic ; gwpc =  8
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
+ R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
+ R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
+ Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+
+--- Pseudopotential description ------------------------------------------------
+- pspini: atom type   1  psp file is /home/yannick/git-repos/tdepoptic/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/yannick/git-repos/tdepoptic/tests/Psps_for_tests/14si.pspnc
+-  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
+- 14.00000   4.00000    940714                znucl, zion, pspdat
+    1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
+    0   5.907  14.692    1   2.0872718        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    1   2.617   4.181    1   2.0872718        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
+   0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
+    1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
+ pspatm: epsatm=    1.43386982
+         --- l  ekb(1:nproj) -->
+             0    3.287949
+             1    1.849886
+ pspatm: atomic psp has been read  and splines computed
+
+--------------------------------------------------------------------------------
+
+ ==== K-mesh for the wavefunctions ====
+ Number of points in the irreducible wedge :     3
+ Reduced coordinates and weights : 
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
+
+ Together with 48 symmetry operations and time-reversal symmetry 
+ yields     8 points in the full Brillouin Zone.
+
+
+ ==== Q-mesh for the screening function ====
+ Number of points in the irreducible wedge :     3
+ Reduced coordinates and weights : 
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
+
+ Together with 48 symmetry operations and time-reversal symmetry 
+ yields     8 points in the full Brillouin Zone.
+
+
+ setmesh: FFT mesh size selected  =  20x 20x 20
+          total number of points  =     8000
+
+
+ The inverse dielectric matrix will be calculated on zero frequency only
+ please note that the calculated epsilon^-1 cannot be used 
+ to calculate QP corrections using plasmonpole model 1
+
+
+- screening: taking advantage of time-reversal symmetry 
+- Maximum band index for partially occupied states nbvw = 4
+- Remaining bands to be divided among processors   nbcw = 10
+- Number of bands treated by each node ~10
+
+ Number of electrons calculated from density =    7.9999; Expected =    8.0000
+ average of density, n =  0.030004
+ r_s =    1.9964
+ omega_plasma =   16.7087 [eV]
+
+
+ calculating chi0 at frequencies [eV] :
+  1    0.000000E+00    0.000000E+00
+
+
+--------------------------------------------------------------------------------
+  q-point number  1        q = ( 0.000000, 0.000000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+
+    2   0.000 -15.822  -0.000   0.036   0.000   0.036   0.000   0.036   0.000
+       -0.000   0.000  -7.860   0.000  -0.254   0.000  -0.254  -0.000  -0.254
+
+ For q-point:  0.000010 0.000020 0.000030
+  dielectric constant =  50.4453
+  dielectric constant without local fields =  58.9556
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    1 :     28.20  [%]
+  Heads and wings of the symmetrical epsilon^-1(G,G') 
+
+   Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+      0.020   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
+      0.000   0.002   0.002  -0.007  -0.007   0.007   0.007  -0.002  -0.002
+       1       2       3       4       5       6       7       8       9
+      0.020   0.002  -0.002  -0.007   0.007   0.007  -0.007  -0.002   0.002
+      0.000  -0.002  -0.002   0.007   0.007  -0.007  -0.007   0.002   0.002
+
+
+
+
+--------------------------------------------------------------------------------
+  q-point number  2        q = ( 0.500000, 0.000000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -15.044  -2.218   4.391  -2.058  -3.587  -2.058  -3.587  -2.058  -3.587
+       -0.000  -2.218  -4.391  -2.058   3.587  -2.058   3.587  -2.058   3.587
+
+    2  -2.218 -12.123  -0.000   0.100   0.000   0.100   0.000   0.100   0.000
+        2.218   0.000  -6.848   0.000   0.446   0.000   0.446   0.000   0.446
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     53.67  [%]
+
+
+--------------------------------------------------------------------------------
+  q-point number  3        q = ( 0.500000, 0.500000, 0.000000) [r.l.u.]
+--------------------------------------------------------------------------------
+  chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
+       1       2       3       4       5       6       7       8       9
+    1 -19.733  -4.427  -0.402  -0.402  -4.427  -0.402  -4.427  -4.427  -0.402
+       -0.000  -4.427   0.402  -0.402   4.427  -0.402   4.427  -4.427   0.402
+
+    2  -4.427 -14.156   0.000   0.260   0.000   0.260   0.000  -1.040  -0.000
+        4.427   0.000  -4.842   0.000   1.478  -0.000   1.478   0.000  -0.988
+
+  Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     49.10  [%]
+
+================================================================================
+== DATASET  4 ==================================================================
+-   nproc =    1
+
+ mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
+
+ mkfilename : getscr/=0, take file _SCR from output of DATASET   3.
+
+ mkfilename : getbsreso/=0, take file _BSR from output of DATASET   4.
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
+ Citation for XC functional:
+  J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+ Exciton: Calculation of dielectric properties by solving the Bethe-Salpeter equation 
+ in frequency domain and reciprocal space on a transitions basis set. 
+ Based on a program developed by L. Reining, V. Olevano, F. Sottile, 
+ S. Albrecht, and G. Onida. Incorporated in ABINIT by M. Giantomassi. 
+
+.Using double precision arithmetic ; gwpc =  8
+
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
+ R(2)=  5.1085000  0.0000000  5.1085000  G(2)=  0.0978761 -0.0978761  0.0978761
+ R(3)=  5.1085000  5.1085000  0.0000000  G(3)=  0.0978761  0.0978761 -0.0978761
+ Unit cell volume ucvol=  2.6663072E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+--------------------------------------------------------------------------------
+
+ ==== K-mesh for the wavefunctions ====
+ Number of points in the irreducible wedge :     3
+ Reduced coordinates and weights : 
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
+
+ Together with 48 symmetry operations and time-reversal symmetry 
+ yields     8 points in the full Brillouin Zone.
+
+
+ ==== Q-mesh for the screening function ====
+ Number of points in the irreducible wedge :     3
+ Reduced coordinates and weights : 
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.12500
+     2)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.50000
+     3)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.37500
+
+ Together with 48 symmetry operations and time-reversal symmetry 
+ yields     8 points in the full Brillouin Zone.
+
+
+ setmesh: FFT mesh size selected  =  20x 20x 20
+          total number of points  =     8000
+
+ ==== Fundamental parameters for the solution of the Bethe-Salpeter equation: ====
+ Algorithm: Haydock technique.
+ Dimension of the v, W matrices,  npweps  = 113
+ Cutoff for the wavefunctions,    npwwfn  = 259
+ Number of k-points in the IBZ,   nkibz   = 3
+ Highest empty band included,     nband   = 8
+ === Spin UP ===
+ Number of resonant transitions          96
+ Lowest occupied state                   2
+ Highest occupied state                  4
+ Lowest unoccupied state                 5
+ Highest unoccupied state                8
+ Minimum frequency [eV]           Emin    =   0.00
+ Maximum frequency [eV]           Emax    =  10.00
+ Frequency step [eV]              dE      =   0.01
+ Lorentzian broadening [eV]       eta     =   0.00
+ RPA L0 with KS energies and KS wavefunctions
+ Scissors operator energy [eV] =          0.80
+ Local fields effects (v term) included
+ Excitonic effects (W term) included
+ Full W_GG' included
+ W is read from an external SCR file
+ Resonant-only calculation (Hermitian case)
+
+
+ Calculating epsilon_Macro(q-->0,w), along the following directions:
+ q = (  0.938821  0.000000  0.000000) [r.l.u.]
+ q = (  0.000000  0.938821  0.000000) [r.l.u.]
+ q = (  0.000000  0.000000  0.938821) [r.l.u.]
+ q = (  0.000000  0.813043  0.813043) [r.l.u.]
+ q = (  0.813043  0.000000  0.813043) [r.l.u.]
+ q = (  0.813043  0.813043  0.000000) [r.l.u.]
+ Number of electrons calculated from density =    7.9999; Expected =    8.0000
+ average of density, n =  0.030004
+ r_s =    1.9964
+ omega_plasma =   16.7087 [eV]
+
+. Writing resonant excitonic Hamiltonian on file t51o_DS4_BSR; file size=   0.00 [Gb].
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0001_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0001_GW_NLF_MDF
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 61 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 73 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 70 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
+ Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0001_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  59.5509   0.0000  46.9450   0.0000  27.8935   0.2778
+   0.0100  59.5516   0.0043  46.9453   0.0021  27.9779   0.2795
+   0.0200  59.5537   0.0087  46.9464   0.0042  28.0628   0.2812
+   0.0300  59.5573   0.0130  46.9480   0.0063  28.1483   0.2830
+   0.0400  59.5624   0.0173  46.9504   0.0084  28.2344   0.2847
+   0.0500  59.5688   0.0217  46.9534   0.0105  28.3209   0.2865
+   0.0600  59.5767   0.0260  46.9571   0.0126  28.4081   0.2883
+   0.0700  59.5861   0.0304  46.9615   0.0147  28.4958   0.2901
+   0.0800  59.5969   0.0347  46.9665   0.0168  28.5841   0.2919
+   0.0900  59.6091   0.0391  46.9722   0.0189  28.6730   0.2938
+  
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0002_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0002_GW_NLF_MDF
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 61 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 69 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 66 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
+ Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0002_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  59.6365   0.0000  46.9975   0.0000  27.9278   0.3081
+   0.0100  59.6372   0.0048  46.9979   0.0023  28.0124   0.3100
+   0.0200  59.6394   0.0096  46.9989   0.0046  28.0976   0.3119
+   0.0300  59.6430   0.0143  47.0006   0.0070  28.1833   0.3139
+   0.0400  59.6480   0.0191  47.0029   0.0093  28.2696   0.3158
+   0.0500  59.6545   0.0239  47.0060   0.0116  28.3564   0.3178
+   0.0600  59.6625   0.0287  47.0097   0.0139  28.4437   0.3198
+   0.0700  59.6719   0.0335  47.0141   0.0162  28.5317   0.3218
+   0.0800  59.6827   0.0383  47.0191   0.0186  28.6202   0.3238
+   0.0900  59.6950   0.0431  47.0249   0.0209  28.7093   0.3259
+  
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0003_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0003_GW_NLF_MDF
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 59 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 56 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 65 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
+ Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0003_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  59.9319   0.0000  47.1782   0.0000  28.0451   0.4144
+   0.0100  59.9327   0.0064  47.1786   0.0031  28.1304   0.4169
+   0.0200  59.9349   0.0127  47.1796   0.0061  28.2163   0.4195
+   0.0300  59.9385   0.0191  47.1813   0.0092  28.3028   0.4221
+   0.0400  59.9437   0.0254  47.1837   0.0123  28.3898   0.4248
+   0.0500  59.9503   0.0318  47.1868   0.0154  28.4774   0.4275
+   0.0600  59.9583   0.0381  47.1905   0.0184  28.5656   0.4302
+   0.0700  59.9678   0.0445  47.1950   0.0215  28.6543   0.4329
+   0.0800  59.9788   0.0509  47.2001   0.0246  28.7436   0.4356
+   0.0900  59.9913   0.0573  47.2059   0.0277  28.8335   0.4384
+  
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0004_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0004_GW_NLF_MDF
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 53 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 45 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 45 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 61 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 60 iterations.
+ Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0004_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  60.3251   0.0000  47.4179   0.0000  28.1998   0.5609
+   0.0100  60.3258   0.0086  47.4183   0.0041  28.2862   0.5644
+   0.0200  60.3281   0.0171  47.4193   0.0083  28.3731   0.5679
+   0.0300  60.3318   0.0257  47.4210   0.0124  28.4605   0.5715
+   0.0400  60.3370   0.0343  47.4235   0.0165  28.5485   0.5751
+   0.0500  60.3438   0.0429  47.4266   0.0207  28.6372   0.5787
+   0.0600  60.3520   0.0515  47.4304   0.0248  28.7263   0.5824
+   0.0700  60.3617   0.0601  47.4349   0.0289  28.8161   0.5861
+   0.0800  60.3729   0.0687  47.4401   0.0331  28.9065   0.5898
+   0.0900  60.3857   0.0773  47.4460   0.0372  28.9974   0.5936
+  
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0005_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0005_GW_NLF_MDF
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 45 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 58 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 48 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
+ Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0005_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  60.7624   0.0000  47.6840   0.0000  28.3709   0.7287
+   0.0100  60.7632   0.0112  47.6843   0.0054  28.4584   0.7333
+   0.0200  60.7654   0.0224  47.6854   0.0107  28.5464   0.7379
+   0.0300  60.7693   0.0335  47.6871   0.0161  28.6349   0.7426
+   0.0400  60.7746   0.0447  47.6896   0.0214  28.7241   0.7473
+   0.0500  60.7815   0.0559  47.6928   0.0268  28.8138   0.7520
+   0.0600  60.7899   0.0671  47.6967   0.0322  28.9041   0.7568
+   0.0700  60.7999   0.0784  47.7013   0.0375  28.9951   0.7617
+   0.0800  60.8113   0.0896  47.7066   0.0429  29.0866   0.7666
+   0.0900  60.8243   0.1008  47.7126   0.0483  29.1787   0.7716
+  
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0006_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0006_GW_NLF_MDF
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 53 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0006_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  61.2220   0.0000  47.9632   0.0000  28.5499   0.9101
+   0.0100  61.2228   0.0141  47.9635   0.0067  28.6384   0.9159
+   0.0200  61.2251   0.0282  47.9646   0.0134  28.7276   0.9217
+   0.0300  61.2290   0.0422  47.9664   0.0201  28.8173   0.9276
+   0.0400  61.2345   0.0563  47.9689   0.0268  28.9076   0.9335
+   0.0500  61.2415   0.0704  47.9721   0.0335  28.9986   0.9395
+   0.0600  61.2501   0.0845  47.9761   0.0403  29.0901   0.9456
+   0.0700  61.2603   0.0986  47.9808   0.0470  29.1822   0.9517
+   0.0800  61.2721   0.1128  47.9862   0.0537  29.2749   0.9579
+   0.0900  61.2854   0.1269  47.9923   0.0604  29.3683   0.9641
+  
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0007_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0007_GW_NLF_MDF
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 41 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
+ Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0007_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  61.6941   0.0000  48.2497   0.0000  28.7328   1.1020
+   0.0100  61.6949   0.0172  48.2500   0.0081  28.8225   1.1090
+   0.0200  61.6973   0.0344  48.2511   0.0163  28.9129   1.1161
+   0.0300  61.7013   0.0516  48.2530   0.0245  29.0038   1.1233
+   0.0400  61.7069   0.0689  48.2555   0.0326  29.0953   1.1305
+   0.0500  61.7141   0.0861  48.2588   0.0408  29.1874   1.1379
+   0.0600  61.7229   0.1034  48.2628   0.0489  29.2801   1.1453
+   0.0700  61.7333   0.1206  48.2676   0.0571  29.3735   1.1527
+   0.0800  61.7453   0.1379  48.2731   0.0653  29.4675   1.1603
+   0.0900  61.7590   0.1552  48.2793   0.0734  29.5621   1.1679
+  
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0008_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0008_GW_NLF_MDF
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
+ Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0008_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  62.1736   0.0000  48.5406   0.0000  28.9178   1.3028
+   0.0100  62.1744   0.0206  48.5410   0.0097  29.0087   1.3111
+   0.0200  62.1769   0.0412  48.5421   0.0194  29.1002   1.3196
+   0.0300  62.1810   0.0617  48.5439   0.0290  29.1923   1.3282
+   0.0400  62.1867   0.0823  48.5465   0.0387  29.2850   1.3368
+   0.0500  62.1941   0.1029  48.5499   0.0484  29.3783   1.3455
+   0.0600  62.2031   0.1236  48.5540   0.0581  29.4723   1.3543
+   0.0700  62.2138   0.1442  48.5588   0.0678  29.5669   1.3632
+   0.0800  62.2261   0.1649  48.5644   0.0775  29.6621   1.3722
+   0.0900  62.2400   0.1856  48.5708   0.0872  29.7580   1.3813
+  
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0009_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0009_GW_NLF_MDF
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 51 iterations.
+ Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0009_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  62.6576   0.0000  48.8342   0.0000  29.1036   1.5117
+   0.0100  62.6584   0.0242  48.8346   0.0113  29.1957   1.5215
+   0.0200  62.6610   0.0483  48.8357   0.0226  29.2884   1.5314
+   0.0300  62.6651   0.0725  48.8376   0.0339  29.3817   1.5414
+   0.0400  62.6710   0.0967  48.8403   0.0452  29.4756   1.5515
+   0.0500  62.6786   0.1209  48.8437   0.0565  29.5701   1.5618
+   0.0600  62.6878   0.1451  48.8479   0.0678  29.6653   1.5721
+   0.0700  62.6987   0.1694  48.8528   0.0791  29.7612   1.5825
+   0.0800  62.7113   0.1936  48.8585   0.0904  29.8577   1.5930
+   0.0900  62.7255   0.2180  48.8649   0.1017  29.9548   1.6036
+  
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0010_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t51o_DS4_T0010_GW_NLF_MDF
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 50 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 49 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 44 iterations.
+ >>> Haydock algorithm converged twice within haydock_tol=  -1.00E-03 after 54 iterations.
+ Writing EXC Macroscopic dielectric function to file: t51o_DS4_T0010_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  63.1440   0.0000  49.1295   0.0000  29.2896   1.7285
+   0.0100  63.1449   0.0280  49.1299   0.0130  29.3828   1.7398
+   0.0200  63.1475   0.0560  49.1310   0.0260  29.4766   1.7513
+   0.0300  63.1518   0.0839  49.1330   0.0390  29.5711   1.7628
+   0.0400  63.1578   0.1119  49.1357   0.0519  29.6663   1.7744
+   0.0500  63.1655   0.1400  49.1391   0.0649  29.7620   1.7862
+   0.0600  63.1749   0.1680  49.1434   0.0779  29.8584   1.7981
+   0.0700  63.1860   0.1961  49.1484   0.0909  29.9555   1.8101
+   0.0800  63.1989   0.2242  49.1542   0.1040  30.0532   1.8222
+   0.0900  63.2135   0.2523  49.1608   0.1170  30.1516   1.8345
+  
+
+== END DATASET(S) ==============================================================
+================================================================================
+  
+ -outvars: echo values of variables after computation  --------
+            acell      1.0217000000E+01  1.0217000000E+01  1.0217000000E+01 Bohr
+              amu      2.80855000E+01
+     bs_freq_mesh1     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
+     bs_freq_mesh2     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
+     bs_freq_mesh3     0.00000000E+00  0.00000000E+00  3.67493254E-04 Hartree
+     bs_freq_mesh4     0.00000000E+00  3.67493254E-01  3.67493254E-04 Hartree
+ bs_haydock_niter1        100
+ bs_haydock_niter2        100
+ bs_haydock_niter3        100
+ bs_haydock_niter4       1000
+   bs_haydock_tol1     2.00000000E-02  2.00000000E-02
+   bs_haydock_tol2     2.00000000E-02  2.00000000E-02
+   bs_haydock_tol3     2.00000000E-02  2.00000000E-02
+   bs_haydock_tol4    -1.00000000E-03  0.00000000E+00
+        bs_loband1          0
+        bs_loband2          0
+        bs_loband3          0
+        bs_loband4          2
+           diemac      1.20000000E+01
+             ecut1     8.00000000E+00 Hartree
+             ecut2     8.00000000E+00 Hartree
+             ecut3     7.56385066E+00 Hartree
+             ecut4     7.56385066E+00 Hartree
+          ecuteps1     4.00000000E+00 Hartree
+          ecuteps2     4.00000000E+00 Hartree
+          ecuteps3     3.78192533E+00 Hartree
+          ecuteps4     3.78192533E+00 Hartree
+          ecutwfn1     8.00000000E+00 Hartree
+          ecutwfn2     8.00000000E+00 Hartree
+          ecutwfn3     7.56385066E+00 Hartree
+          ecutwfn4     7.56385066E+00 Hartree
+           etotal1    -8.8756570414E+00
+           etotal3     0.0000000000E+00
+           etotal4     0.0000000000E+00
+            fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+-          fftalg         312
+        getbsreso1          0
+        getbsreso2          0
+        getbsreso3          0
+        getbsreso4          4
+           getden1          0
+           getden2         -1
+           getden3          0
+           getden4          0
+           getscr1          0
+           getscr2          0
+           getscr3          0
+           getscr4          3
+           getwfk1          0
+           getwfk2          0
+           getwfk3          2
+           getwfk4          2
+             iscf1          7
+             iscf2         -2
+             iscf3          7
+             iscf4          7
+           istwfk2       1    1    1
+           istwfk3       1    1    1
+           istwfk4       1    1    1
+              ixc           7
+           jdtset        1    2    3    4
+              kpt1    -1.25000000E-01 -2.50000000E-01  0.00000000E+00
+                      -1.25000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01 -3.75000000E-01  0.00000000E+00
+                      -1.25000000E-01 -3.75000000E-01  1.25000000E-01
+                      -1.25000000E-01  2.50000000E-01  0.00000000E+00
+                      -2.50000000E-01  3.75000000E-01  0.00000000E+00
+                      -3.75000000E-01  5.00000000E-01  0.00000000E+00
+                      -2.50000000E-01  5.00000000E-01  1.25000000E-01
+                      -1.25000000E-01  0.00000000E+00  0.00000000E+00
+                      -3.75000000E-01  0.00000000E+00  0.00000000E+00
+              kpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+              kpt3     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+              kpt4     0.00000000E+00  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  0.00000000E+00  0.00000000E+00
+                       5.00000000E-01  5.00000000E-01  0.00000000E+00
+         kptrlatt1       4   -4    4     -4    4    4     -4   -4    4
+         kptrlatt2       2    0    0      0    2    0      0    0    2
+         kptrlatt3       2    0    0      0    2    0      0    0    2
+         kptrlatt4       2    0    0      0    2    0      0    0    2
+          kptrlen1     4.08680000E+01
+          kptrlen2     1.44490200E+01
+          kptrlen3     1.44490200E+01
+          kptrlen4     1.44490200E+01
+       mbpt_sciss1     0.00000000E+00 Hartree
+       mbpt_sciss2     0.00000000E+00 Hartree
+       mbpt_sciss3     0.00000000E+00 Hartree
+       mbpt_sciss4     2.93994603E-02 Hartree
+P           mkmem1         10
+P           mkmem2          3
+P           mkmem3          3
+P           mkmem4          3
+            natom           2
+            nband1         10
+            nband2         14
+            nband3         15
+            nband4          8
+           nbdbuf1          4
+           nbdbuf2          2
+           nbdbuf3          2
+           nbdbuf4          2
+           ndtset           4
+          nfreqim1         -1
+          nfreqim2         -1
+          nfreqim3          0
+          nfreqim4         -1
+          nfreqre1         -1
+          nfreqre2         -1
+          nfreqre3          1
+          nfreqre4         -1
+            ngfft1         20      20      20
+            ngfft2         20      20      20
+            ngfft3         18      18      18
+            ngfft4         18      18      18
+             nkpt1         10
+             nkpt2          3
+             nkpt3          3
+             nkpt4          3
+           npweps1          0
+           npweps2          0
+           npweps3        113
+           npweps4        113
+           npwwfn1          0
+           npwwfn2          0
+           npwwfn3        283
+           npwwfn4        283
+            nstep         500
+             nsym          48
+           ntypat           1
+              occ1     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000
+              occ3     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000
+              occ4     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000
+        optdriver1          0
+        optdriver2          0
+        optdriver3          3
+        optdriver4         99
+            rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
+                       5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
+                       5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
+           shiftk1     5.00000000E-01  5.00000000E-01  5.00000000E-01
+           shiftk2     0.00000000E+00  0.00000000E+00  0.00000000E+00
+           shiftk3     0.00000000E+00  0.00000000E+00  0.00000000E+00
+           shiftk4     0.00000000E+00  0.00000000E+00  0.00000000E+00
+          spgroup         227
+           strten1     3.3856814641E-05  3.3856814641E-05  3.3856814641E-05
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+                       0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
+                      -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
+                       0  1 -1   1  0 -1   0  0 -1       0 -1  1  -1  0  1   0  0  1
+                      -1  0  0  -1  1  0  -1  0  1       1  0  0   1 -1  0   1  0 -1
+                       0 -1  1   1 -1  0   0 -1  0       0  1 -1  -1  1  0   0  1  0
+                       1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
+                       0  1 -1   0  0 -1   1  0 -1       0 -1  1   0  0  1  -1  0  1
+                      -1  0  1  -1  1  0  -1  0  0       1  0 -1   1 -1  0   1  0  0
+                       0 -1  0   1 -1  0   0 -1  1       0  1  0  -1  1  0   0  1 -1
+                       1  0 -1   0  0 -1   0  1 -1      -1  0  1   0  0  1   0 -1  1
+                       0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
+                       1  0 -1   0  1 -1   0  0 -1      -1  0  1   0 -1  1   0  0  1
+                       0 -1  0   0 -1  1   1 -1  0       0  1  0   0  1 -1  -1  1  0
+                      -1  0  1  -1  0  0  -1  1  0       1  0 -1   1  0  0   1 -1  0
+                       0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+                       0  0 -1   0  1 -1   1  0 -1       0  0  1   0 -1  1  -1  0  1
+                       1 -1  0   0 -1  1   0 -1  0      -1  1  0   0  1 -1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
+                      -1  1  0  -1  0  0  -1  0  1       1 -1  0   1  0  0   1  0 -1
+                       0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
+                       1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
+                       0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
+                      -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
+            tnons      0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+                       0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
+           tolvrs1     1.00000000E-16
+           tolvrs2     0.00000000E+00
+           tolvrs3     0.00000000E+00
+           tolvrs4     0.00000000E+00
+           tolwfr1     0.00000000E+00
+           tolwfr2     1.00000000E-28
+           tolwfr3     0.00000000E+00
+           tolwfr4     0.00000000E+00
+            typat      1  1
+              wtk1       0.09375    0.09375    0.09375    0.18750    0.09375    0.09375
+                         0.09375    0.18750    0.03125    0.03125
+              wtk2       0.12500    0.50000    0.37500
+              wtk3       0.12500    0.50000    0.37500
+              wtk4       0.12500    0.50000    0.37500
+           xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       1.3516508850E+00  1.3516508850E+00  1.3516508850E+00
+            xcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.5542500000E+00  2.5542500000E+00  2.5542500000E+00
+             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
+             zcut      3.67493254E-06 Hartree
+            znucl       14.00000
+
+================================================================================
+
+
+- Timing analysis has been suppressed with timopt=0
+
+
+
+================================================================================
+
+ Suggested references for the acknowledgment of ABINIT usage.
+
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
+-
+- [1] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xue, A.Zhou, J.W.Zwanziger.
+- Comment : the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+-
+- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
+- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
+- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
+- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
+- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
+- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
+- Comment : the third generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- The licence allows the authors to put it on the Web.
+-
+- [3] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
+- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
+- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
+- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
+- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- should be cited especially if you are using the GW part of ABINIT, as several authors
+- of this part are not in the list of authors of the first or third paper.
+- The .pdf of the latter paper is available at http://www.abinit.org/about/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- the licence allows the authors to put it on the Web).
+-
+- And optionally:
+-
+- [4] First-principles computation of material properties : the ABINIT software project. 
+- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
+- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
+- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
+- Comment : the original paper describing the ABINIT project.
+-
+- Proc.   0 individual time (sec): cpu=          6.2  wall=          6.2
+
+================================================================================
+
+ Calculation completed.
+.Delivered  24 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=          6.2  wall=          6.2
+MEMORY CONSUMPTION REPORT :
+   There were 219166 allocations and 219018 deallocations
+   Remaining memory at the end of the calculation is 184361072
+   As a help for debugging, you might set call abimem_init(2) in the main program,
+   then use tests/Scripts/abimem.py to analyse the file abimem_rank[num].mocc that has been created.
+   Note that abimem files can easily be multiple GB in size so do not use this option normally!
