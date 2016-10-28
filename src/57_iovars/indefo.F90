@@ -620,7 +620,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    end do
    dtsets(idtset)%prt1dm=0
    dtsets(idtset)%pvelmax(:)=one
-   dtsets(idtset)%pw_unbal_threshold=40.
+   dtsets(idtset)%pw_unbal_thresh=40.
 !  Q
    dtsets(idtset)%qmass(:)=ten
    dtsets(idtset)%qprtrb(1:3)=0

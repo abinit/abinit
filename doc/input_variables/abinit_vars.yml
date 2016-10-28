@@ -21750,18 +21750,18 @@
     commentdefault: null
     commentdims: null
     defaultval: 40%
-    definition: 'Plane Wave UNBALancing: THRESHOLD for balancing procedure'
+    definition: 'Plane Wave UNBALancing: THRESHold for balancing procedure'
     dimensions: scalar
     excludes: null
     requires: '[[paral_kgb]]==1'
     section: varpar
     text: |-
         <p>
-         This parameter (in %)activates a load balancing procedure when plane wave component distribution
-         over MPI processes is not optimal. The balancing procedure is activated when ratio beween the
-         number of plane waves treated processor and the iedal one is higher than <i>pw_unbal_threshold</i> %.
+         This parameter (in %) activates a load balancing procedure when the distribution of plane wave components
+         over MPI processes is not optimal. The balancing procedure is activated when the ratio between the
+         number of plane waves treated by a processor and the ideal one is higher than <i>pw_unbal_thresh</i> %.
         </p>
-    varname: pw_unbal_threshold
+    varname: pw_unbal_thresh
     vartype: real
 - !variable
     characteristics: null

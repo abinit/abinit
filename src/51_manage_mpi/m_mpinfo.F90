@@ -356,7 +356,7 @@ subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
  mpi_enreg2%nproc_hf   =mpi_enreg1%nproc_hf
  mpi_enreg2%comm_hf    =mpi_enreg1%comm_hf
  mpi_enreg2%paral_hf=mpi_enreg1%paral_hf
- mpi_enreg2%pw_unbal_threshold=mpi_enreg1%pw_unbal_threshold
+ mpi_enreg2%pw_unbal_thresh=mpi_enreg1%pw_unbal_thresh
 
 !pointers
  if (associated(mpi_enreg1%distribfft)) then

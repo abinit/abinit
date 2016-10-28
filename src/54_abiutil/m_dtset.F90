@@ -971,7 +971,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%postoldfe          = dtin%postoldfe
  dtout%postoldff          = dtin%postoldff
  dtout%ppmfrq             = dtin%ppmfrq
- dtout%pw_unbal_threshold = dtin%pw_unbal_threshold
+ dtout%pw_unbal_thresh    = dtin%pw_unbal_thresh
  dtout%ratsph_extra       = dtin%ratsph_extra
  dtout%recrcut            = dtin%recrcut
  dtout%recefermi          = dtin%recefermi

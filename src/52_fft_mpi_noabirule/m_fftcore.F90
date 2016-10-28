@@ -3644,7 +3644,7 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
 
 !BandFFT: plane-wave load balancing
  if (mpi_enreg%paral_kgb==1.and.mpi_enreg%nproc_fft>1.and. &
-&    mpi_enreg%pw_unbal_threshold>zero.and. &
+&    mpi_enreg%pw_unbal_thresh>zero.and. &
 &    istwf_k==1) then
 !  Check for reequilibration
    np_fft=max(1,mpi_enreg%nproc_fft)
@@ -3653,10 +3653,10 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
    gap_pw = 100._dp*(maxval(npw_gather(:))-minval(npw_gather))/(1.*sum(npw_gather(:))/np_fft)
    write(message,'(a,f5.2)' ) ' Relative gap for number of plane waves between process (%): ',gap_pw
    call wrtout(std_out,message,'COLL')
-   if(gap_pw > mpi_enreg%pw_unbal_threshold) then ! Effective reequilibration
+   if(gap_pw > mpi_enreg%pw_unbal_thresh) then ! Effective reequilibration
      write(message,'(a,f5.2,a,i4,a,f5.2,a)') &
 &        'Plane-wave unbalancing (',gap_pw,'%) for kpt ',ikpt,' is higher than threshold (',&
-&        mpi_enreg%pw_unbal_threshold,'%); a plane-wave balancing procedure is activated!'
+&        mpi_enreg%pw_unbal_thresh,'%); a plane-wave balancing procedure is activated!'
      call wrtout(std_out,message,'COLL')
      !Get optimal number
      npw_split=sum(npw_gather(:))

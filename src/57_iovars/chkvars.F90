@@ -189,7 +189,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' prtnabla prtnest prtphdos prtposcar prtpot prtpsps'
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc'
  list_vars=trim(list_vars)//' prtvol prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm ptcharge'
- list_vars=trim(list_vars)//' pvelmax pw_unbal_threshold'
+ list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q
  list_vars=trim(list_vars)//' qmass qprtrb qpt qptdm qptnrm '
  list_vars=trim(list_vars)//' qptopt qptrlatt quadmom'

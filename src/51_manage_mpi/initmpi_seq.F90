@@ -98,7 +98,7 @@ subroutine initmpi_seq(mpi_enreg)
  mpi_enreg%paral_kgb=0
  mpi_enreg%paral_pert=0
  mpi_enreg%paral_spinor=0
- mpi_enreg%pw_unbal_threshold=-1._dp
+ mpi_enreg%pw_unbal_thresh=-1._dp
 
 !Set default seq values for communicators
  mpi_enreg%comm_world          = xmpi_world
