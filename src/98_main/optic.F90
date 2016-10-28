@@ -421,7 +421,7 @@ program optic
  remove_inv = .false.
  if(hdr%nspden == 4) remove_inv = .true.
  !space_group = 0
- call crystal_init(Cryst, 0, hdr%natom, hdr%npsp, hdr%ntypat, &
+ call crystal_init(hdr%amu, Cryst, 0, hdr%natom, hdr%npsp, hdr%ntypat, &
 &  hdr%nsym, rprimd, hdr%typat, hdr%xred, hdr%zionpsp, hdr%znuclpsp, 1, &
 &  (hdr%nspden==2 .and. hdr%nsppol==1),remove_inv, hdr%title,&
 &  symrel, hdr%tnons, hdr%symafm)
