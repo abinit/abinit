@@ -42,7 +42,7 @@ MODULE m_ioarr
 #ifdef HAVE_MPI2 
  use mpi
 #endif
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -162,11 +162,11 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
  type(pawrhoij_type),intent(inout) :: pawrhoij(:) 
 
 !Local variables-------------------------------
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: ncid,ncerr
  character(len=fnlen) :: file_etsf
 #endif
-#ifdef HAVE_DFT_BIGDFT
+#ifdef HAVE_BIGDFT
  integer :: i,i1,i2,i3,ia,ind,n1,n2,n3
  integer :: zindex,zstart,zstop
 #endif
@@ -221,7 +221,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 
  call wrtout(std_out,ABI_FUNC//': file name is '//TRIM(fildata),'COLL')
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  if (accessfil == IO_MODE_ETSF) then ! Initialize filename in case of ETSF file.
    file_etsf = nctk_ncify(fildata)
    call wrtout(std_out,sjoin('file name for ETSF access: ', file_etsf),'COLL')
@@ -415,7 +415,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
        close (unit=unt, err=10, iomsg=errmsg)
      end if
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    else if (accessfil == 3) then
 
      ! Read the header and broadcast it in comm_cell
@@ -480,7 +480,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 !  In the wavelet case (isolated boundary counditions), the
 !  arr array has a buffer that we need to remove.
    if (usewvl == 1) then
-#ifdef HAVE_DFT_BIGDFT
+#ifdef HAVE_BIGDFT
      zindex = wvl_den%denspot%dpbox%nscatterarr(me, 3)
      if (wvl_den%denspot%rhod%geocode == 'F') then
        n1 = (wvl_den%denspot%dpbox%ndims(1) - 31) / 2
@@ -562,7 +562,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
        close(unt, err=10, iomsg=errmsg)
      end if
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    else if ( accessfil == 3 ) then
 
      ! Master in comm_fft creates the file and writes the header.
@@ -698,7 +698,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
  type(hdr_type),intent(inout) :: hdr
  type(crystal_t),intent(in) :: crystal
  type(ebands_t),optional,intent(in) :: ebands
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(inout) :: datar(cplex*nfft,nspden)
@@ -710,7 +710,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
  integer :: n1,n2,n3,comm_fft,nproc_fft,me_fft,iarr,ierr,ispden,unt,mpierr,fform
  integer :: i3_glob,my_iomode 
  integer(kind=XMPI_OFFSET_KIND) :: hdr_offset,my_offset,nfft_tot
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: ncid,ncerr
  character(len=fnlen) :: file_etsf
 #endif
@@ -826,7 +826,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
    !end if
 #endif
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  case (IO_MODE_ETSF)
    file_etsf = nctk_ncify(path)
 
@@ -916,7 +916,7 @@ subroutine fftdatar_write_from_hdr(varname,path,iomode,hdr,ngfft,cplex,nfft,nspd
  integer,intent(in) :: iomode,cplex,nfft,nspden
  character(len=*),intent(in) :: varname,path
  type(hdr_type),intent(inout) :: hdr
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(inout) :: datar(cplex*nfft,nspden)
@@ -1026,7 +1026,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 !scalars
  integer,intent(in) :: cplex,nfft,nspden,pawread,comm
  character(len=*),intent(in) :: fname
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(hdr_type),intent(out) :: ohdr
  type(hdr_type),optional,intent(in) :: check_hdr
 !arrays
@@ -1099,7 +1099,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
      close(unt)
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    case (IO_MODE_ETSF)
      NCF_CHECK(nctk_open_read(unt, my_fname, xmpi_comm_self))
 

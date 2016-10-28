@@ -72,14 +72,14 @@ subroutine sincos(iq,irmax,mmax,pspwk,rad,tpiq)
  integer :: ir,nstep
  real(dp) :: prevcos,prevsin
  logical :: testmipspro
-#if defined HAVE_MATH_MLIB
+#if defined HAVE_LINALG_MLIB
  real(dp) :: halfpi
 #endif
 
 
 ! *************************************************************************
 
-#if defined HAVE_MATH_MLIB
+#if defined HAVE_LINALG_MLIB
  halfpi=asin(1.0d0)
 #endif
 
@@ -112,7 +112,7 @@ subroutine sincos(iq,irmax,mmax,pspwk,rad,tpiq)
 
 !    Every nstep steps, uses the hard way
      do ir=2,irmax
-#if defined HAVE_MATH_MLIB
+#if defined HAVE_LINALG_MLIB
 !      There is a bug in the hp library !! Sine is slightly inaccurate !
        pspwk(ir,1,2)=cos(tpiq*rad(ir)-halfpi)
 #else

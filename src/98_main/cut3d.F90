@@ -52,7 +52,7 @@ program cut3d
  use m_xmpi
  use m_nctk
  use m_profiling_abi
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 #if defined FC_NAG
@@ -63,7 +63,7 @@ program cut3d
 
  use m_fstrings,        only : endswith, sjoin, itoa
  use m_mpinfo,          only : destroy_mpi_enreg
- use m_io_tools,        only : flush_unit, file_exists, open_file, is_open, get_unit
+ use m_io_tools,        only : flush_unit, file_exists, open_file, is_open, get_unit, read_string
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -139,7 +139,9 @@ program cut3d
 !  Get name of density file
    write(std_out,*)
    write(std_out,*) ' What is the name of the 3D function (density, potential or wavef) file ?'
-   read(std_in,'(a)')filrho
+   if (read_string(filrho, unit=std_in) /= 0) then
+     MSG_ERROR("Fatal error!")
+   end if
    filrho_tmp=adjustl(filrho)
    do ii=1,len_trim(filrho_tmp)
      if(filrho_tmp(ii:ii)==blank)then
@@ -367,7 +369,9 @@ program cut3d
 
          if( 5<=itask .and. itask<=9 .or. itask==14 )then
            write(std_out,*) ch10,'  Enter the name of an output file:'
-           read(std_in,*) filnam
+           if (read_string(filnam, unit=std_in) /= 0) then
+             MSG_ERROR("Fatal error!")
+           end if
            write(std_out,*) '  The name of your file is: ',trim(filnam)
          end if
 
@@ -517,11 +521,11 @@ program cut3d
            write(std_out,*) 'Do you want to shift the grid along the x,y or z axis (y/n)?'
            write(std_out,*)
            shift_tau(:) = zero
-           read (std_in,*) outputchar
+           read(std_in,"(a)") outputchar
            if (outputchar == 'y' .or. outputchar == 'Y') then
              write(std_out,*) 'Give the three shifts (x,y,z < ',nr1,nr2,nr3,'):'
              write(std_out,*)
-             read (std_in,*) gridshift1, gridshift2, gridshift3
+             read(std_in,*) gridshift1, gridshift2, gridshift3
              shift_tau(:) = gridshift1*rprimd(:,1)/(nr1+1) + gridshift2*rprimd(:,2)/(nr2+1) + gridshift3*rprimd(:,3)/(nr3+1)
            end if
 !            

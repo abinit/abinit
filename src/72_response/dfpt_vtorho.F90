@@ -84,7 +84,7 @@
 !!  prtvol=control print volume and debugging output
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  pwindall(max(mpw,mpw1)*mkmem,8,3) = array used to compute the overlap matrices
-!!  qmat(2,dtefield%nband_occ,dtefield%nband_occ,nkpt,2,3) =
+!!  qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3) =
 !!  inverse of the overlap matrix
 !!  rmet(3,3)=real space metric (bohr**2)
 !!  rprimd(3,3)=dimensional real space primitive translations
@@ -136,7 +136,6 @@
 !!    nhat1(cplex*nfftf,nspden*psps%usepaw)=1st-order compensation charge density
 !!
 !! SIDE EFFECTS
-!!  mpi_enreg=information about MPI parallelization
 !!  pawrhoij1(natom) <type(pawrhoij_type)>= 1st-order paw rhoij occupancies and related data
 !!  rhor1(cplex*nfftf,nspden)=RF electron density in electrons/bohr**3.
 !!
@@ -219,7 +218,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer,optional,intent(in) :: cg1_out
  real(dp),intent(in) :: fermie1,ucvol
  real(dp),intent(out) :: edocc,eeig0,ek0,ek1,eloc0,enl0,enl1,nres2,residm
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(efield_type),intent(in) :: dtefield
@@ -260,7 +259,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  real(dp),intent(in) :: ylm1(mpw1*mk1mem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr1(mpw1*mk1mem,3+6*((ipert-natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
  integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
- real(dp),intent(in) :: qmat(2,dtefield%nband_occ,dtefield%nband_occ,nkpt_rbz,2,3)
+ real(dp),intent(in) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt_rbz,2,3)
  type(pawcprj_type),intent(in) :: cprj (natom,dtset%nspinor*mband*mkmem *nsppol*usecprj)
  type(pawcprj_type),intent(in) :: cprjq(natom,dtset%nspinor*mband*mkqmem*nsppol*usecprj)
  type(pawcprj_type),intent(inout) :: cprj1(natom,dtset%nspinor*mband*mk1mem*nsppol*usecprj)
@@ -320,7 +319,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
  if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 & dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17) then
-   ABI_ALLOCATE(grad_berry,(2,mpw1,dtefield%nband_occ))
+   ABI_ALLOCATE(grad_berry,(2,mpw1,dtefield%mband_occ))
  else
    ABI_ALLOCATE(grad_berry,(0,0,0))
  end if
@@ -419,7 +418,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
  call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=1)
  if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
-   call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamk_dir2)
+   call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamk_dir2,has_e1kbsc=1)
  end if
 
 !PAW:allocate memory for non-symetrized 1st-order occupancies matrix (pawrhoij1)
@@ -463,7 +462,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
    if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
      call load_spin_rf_hamiltonian(rf_hamk_dir2,gs_hamkq,isppol,paw_ij1=paw_ij1,&
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-     if (ipert==natom+11) then
+     if (ipert==natom+11) then ! load vlocal1
        call load_spin_rf_hamiltonian(rf_hamk_dir2,gs_hamkq,isppol,vlocal1=vlocal1,&
        comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
      end if
@@ -713,9 +712,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
            call fftpac(ispden,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rho1wfr,rhoaug1(:,:,:,ispden),1)
          end do
        end if
-
      end if
-
    end if
 
  end do !  End loop over spins

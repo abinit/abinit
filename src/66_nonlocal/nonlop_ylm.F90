@@ -39,26 +39,30 @@
 !!          =23=> 1st derivative(s) with respect to atomic pos. and
 !!                1st derivative(s) with respect to atomic pos. and strains
 !!          =4 => 2nd derivative(s) with respect to 2 atomic pos.
-!!          =5 => 1st derivative(s) with respect to k wavevector, typically
-!!                $\sum_{ij}|p_i\rangle D_{ij}\langle dp_j/dk| + |dp_i/dk\rangle D_{ij}\langle p_j|$
-!!          =6 => 2nd derivative(s) with respect to 2 strains and
-!!                mixed 2nd derivative(s) with respect to strains & atomic pos.
-!!          =7 => apply operator $\sum_{i}|p_i\rangle \langle p_i|$,
-!!                same as overlap operator with s_ij=identity (paw_opt==3 only)
-!!          =8 => 2nd derivatives with respect to 2 k wavevectors
 !!          =24=> 1st derivative(s) with respect to atm. pos. and
 !!                2nd derivative(s) with respect to 2 atomic pos.
-!!          =51 => right 1st derivative(s) with respect to k wavevector, typically
-!!                $\sum_{ij}|p_i\rangle D_{ij}\langle dp_j/dk|$
-!!          =52 => left 1st derivative(s) with respect to k wavevector, typically
-!!                $\sum_{ij}|dp_i/dk\rangle D_{ij}\langle p_j|$
-!!          =53 => twist 1st derivative(s) with respect to k, typically
-!!                $\sum_{ij}|dp_i/dk_(idir+1)\rangle D_{ij}\langle dp_j/dk_(idir-1)| -
-!!                 |dp_i/dk_(idir-1)\rangle D_{ij}\langle dp_j/dk_(idir+1)|$
-!!          =54=> mixed 2nd derivative(s) with respect to atomic pos. and right k wavevector
+!!          =5 => 1st derivative(s) with respect to k wavevector, typically
+!!                sum_ij [ |p_i> D_ij <dp_j/dk| + |dp_i/dk> D_ij < p_j| ]
+!!          =6 => 2nd derivative(s) with respect to 2 strains and
+!!                mixed 2nd derivative(s) with respect to strains & atomic pos.
+!!          =51 =>right 1st derivative(s) with respect to k wavevector, typically
+!!                sum_ij [ |p_i> D_ij <dp_j/dk| ]
+!!          =52 =>left 1st derivative(s) with respect to k wavevector, typically
+!!                sum_ij [ |dp_i/dk> D_ij < p_j| ]
+!!          =53 =>twist 1st derivative(s) with respect to k, typically
+!!                sum_ij [ |dp_i/dk_(idir+1)> D_ij <dp_j//dk_(idir-1)|
+!!                        -|dp_i/dk_(idir-1)> D_ij <dp_j//dk_(idir+1)|]
+!!          =54=> mixed 2nd derivative(s) with respect to atomic pos. and left k wavevector
 !!          =55=> mixed 2nd derivative(s) with respect to strain and right k wavevector
-!!    Only choices 0,1,2,3,4,6,8,23,24,51,52,53,54,55 are compatible with signs=1 (not choices==7)
-!!    Only choices 0,1,2,3,5,7,51,52 and 53 are compatible with signs=2
+!!          =7 => apply operator $\sum_i [ |p_i> <p_i| ],
+!!                same as overlap operator with s_ij=identity (paw_opt==3 only)
+!!          =8 => 2nd derivatives with respect to 2 k wavevectors
+!!          =81=> partial 2nd derivatives with respect to 2 k wavevectors,
+!!                full derivative with respect to k1, right derivative with respect to k2,
+!!                (derivative with respect to k of choice 51), typically
+!!                sum_ij [ |dp_i/dk1> D_ij <dp_j/dk2| + |p_i> D_ij < d2p_j/dk1dk2| ]
+!!    Only choices 1,2,3,23,4,5,6 are compatible with useylm=0.
+!!    Only choices 1,2,3,5,51,52,53,7,8,81 are compatible with signs=2
 !!  cpopt=flag defining the status of cprjin%cp(:)=<Proj_i|Cnk> scalars (see below, side effects)
 !!  dimenl1,dimenl2=dimensions of enl (see enl)
 !!  dimffnlin=second dimension of ffnlin (1+number of derivatives)
@@ -99,7 +103,7 @@
 !!  lmnmax=max. number of (l,m,n) components over all types of atoms
 !!  matblk=dimension of the arrays ph3din and ph3dout
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell
 !!  nattyp(ntypat)=number of atoms of each type
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
@@ -108,19 +112,26 @@
 !!  nnlout=dimension of enlout (when signs=1 and choice>0):
 !!         ==== if paw_opt=0, 1 or 2 ====
 !!         choice   nnlout     |  choice   nnlout
-!!              1   1          |       5   3
-!!              2   3*natom    |      53   3
-!!              3   6          |      54   18*natom
-!!              4   6*natom    |      55   36
-!!             23   6+3*natom  |       6   36+18*natom
-!!             24   9*natom    |       8   6
+!!              1   1          |      51   6 (complex)
+!!              2   3*natom    |      52   6 (complex)
+!!              3   6          |      53   6
+!!              4   6*natom    |      54   9*natom
+!!             23   6+3*natom  |      55   36 (complex)
+!!             24   9*natom    |       6   36+18*natom
+!!              5   3          |       8   6
+!!                             |      81   18 (complex)
 !!         ==== if paw_opt=3 ====
 !!         choice   nnlout
 !!              1   1
 !!              2   3*natom
+!!              5   3
+!!             51   3
+!!             52   3
 !!             54   9*natom
 !!             55   36
 !!              7   1
+!!              8   6
+!!             81   9
 !!         ==== if paw_opt=4 ====
 !!         not available
 !!  npwin=number of planewaves for given k point, for the |in> vector
@@ -160,51 +171,65 @@
 !!      if choice=24: enlout(9*natom)       -> 1st deriv. of energy wrt atm. pos (forces) and
 !!                                             2nd deriv. of energy wrt 2 atm. pos (dyn. mat.)
 !!      if choice=5 : enlout(3)             -> 1st deriv. of energy wrt k
+!!      if choice=51: enlout(3)             -> 1st deriv. (right) of energy wrt k
+!!      if choice=52: enlout(3)             -> 1st deriv. (left) of energy wrt k
 !!      if choice=53: enlout(3)             -> 1st deriv. (twist) of energy wrt k
 !!      if choice=54: enlout(18*natom)      -> 2nd deriv. of energy wrt atm. pos and right k (Born eff. charge)
 !!      if choice=55: enlout(36)            -> 2nd deriv. of energy wrt strain and right k (piezoelastic tensor)
 !!      if choice=6 : enlout(36+18*natom)   -> 2nd deriv. of energy wrt 2 strains (elast. tensor) and
 !!                                             2nd deriv. of energy wrt to atm. pos and strain (internal strain)
 !!      if choice=8 : enlout(6)             -> 2nd deriv. of energy wrt 2 k
+!!      if choice=81: enlout(9)             -> 2nd deriv.of E: full derivative w.r.t. k1, right derivative w.r.t k2
 !! --If (paw_opt==3)
 !!      if choice=1 : enlout(1)             -> contribution to <c|S|c> (note: not including <c|c>)
 !!      if choice=2 : enlout(3*natom)       -> contribution to <c|dS/d_atm.pos|c>
+!!      if choice=51: enlout(3)             -> contribution to <c|d(right)S/d_k|c>
+!!      if choice=52: enlout(3)             -> contribution to <c|d(left)S/d_k|c>
 !!      if choice=54: enlout(18*natom)      -> 2nd deriv. of energy wrt atm. pos and right k (Born eff. charge)
 !!      if choice=55: enlout(36)            -> 2nd deriv. of energy wrt strain and right k (piezoelastic tensor)
 !!      if choice=7 : enlout(1)             -> contribution to <c|sum_i[p_i><p_i]|c>
+!!      if choice=8 : enlout(6)             -> contribution to <c|d2S/d_k1d_k2|c>
+!!      if choice=81: enlout(9)             -> contribution to <c|dS/d_k1[d(right)d_k2]|c>
 !! --If (paw_opt==4)
 !!      not available
 !! ==== if (signs==2) ====
 !! --if (paw_opt=0, 1 or 4)
-!!    vectout(2,npwout*nspinor)=result of the aplication of the concerned operator
+!!    vectout(2,npwout*my_nspinor*ndat)=result of the aplication of the concerned operator
 !!                or one of its derivatives to the input vect.:
-!!      if (choice=1) <G|V_nonlocal|vect_in>
-!!      if (choice=2) <G|dV_nonlocal/d(atm. pos)|vect_in>
-!!      if (choice=3) <G|dV_nonlocal/d(strain)|vect_in>
-!!      if (choice=5) <G|dV_nonlocal/d(k)|vect_in>
+!!      if (choice=1)  <G|V_nonlocal|vect_in>
+!!      if (choice=2)  <G|dV_nonlocal/d(atm. pos)|vect_in>
+!!      if (choice=3)  <G|dV_nonlocal/d(strain)|vect_in>
+!!      if (choice=5)  <G|dV_nonlocal/d(k)|vect_in>
 !!      if (choice=51) <G|d(right)V_nonlocal/d(k)|vect_in>
 !!      if (choice=52) <G|d(left)V_nonlocal/d(k)|vect_in>
 !!      if (choice=53) <G|d(twist)V_nonlocal/d(k)|vect_in>
-!!  if (paw_opt=2)
-!!    vectout(2,npwout*nspinor)=final vector in reciprocal space:
-!!      if (choice=1) <G|V_nonlocal-lamdba.(I+S)|vect_in> (note: not including <G|I|c>)
-!!      if (choice=2) <G|d[V_nonlocal-lamdba.(I+S)]/d(atm. pos)|vect_in>
-!!      if (choice=3) <G|d[V_nonlocal-lamdba.(I+S)]/d(strain)|vect_in>
-!!      if (choice=5) <G|d[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
+!!      if (choice=8)  <G|d2V_nonlocal/d(k)d(k)|vect_in>
+!!      if (choice=81) <G|d[d(right)V_nonlocal/d(k)]/d(k)|vect_in>
+!! --if (paw_opt=2)
+!!    vectout(2,npwout*my_nspinor*ndat)=final vector in reciprocal space:
+!!      if (choice=1)  <G|V_nonlocal-lamdba.(I+S)|vect_in>
+!!      if (choice=2)  <G|d[V_nonlocal-lamdba.(I+S)]/d(atm. pos)|vect_in>
+!!      if (choice=3)  <G|d[V_nonlocal-lamdba.(I+S)]/d(strain)|vect_in>
+!!      if (choice=5)  <G|d[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
 !!      if (choice=51) <G|d(right)[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
 !!      if (choice=52) <G|d(left)[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
 !!      if (choice=53) <G|d(twist)[V_nonlocal-lamdba.(I+S)]/d(k)|vect_in>
+!!      if (choice=8)  <G|d2[V_nonlocal-lamdba.(I+S)]/d(k)d(k)|vect_in>
+!!      if (choice=81) <G|d[d(right[V_nonlocal-lamdba.(I+S)]/d(k)]/d(k)|vect_in>
 !! --if (paw_opt=3 or 4)
-!!    svectout(2,npwout*nspinor)=result of the aplication of Sij (overlap matrix)
+!!    svectout(2,npwout*my_nspinor*ndat)=result of the aplication of Sij (overlap matrix)
 !!                  or one of its derivatives to the input vect.:
-!!      if (choice=1) <G|I+S|vect_in> (note: not including <G|I|c>)
-!!      if (choice=2) <G|dS/d(atm. pos)|vect_in>
-!!      if (choice=3) <G|dS/d(strain)|vect_in>
-!!      if (choice=5) <G|dS/d(k)|vect_in>
+!!      if (choice=1)  <G|I+S|vect_in>
+!!      if (choice=2)  <G|dS/d(atm. pos)|vect_in>
+!!      if (choice=3)  <G|dS/d(strain)|vect_in>
+!!      if (choice=5)  <G|dS/d(k)|vect_in>
 !!      if (choice=51) <G|d(right)S/d(k)|vect_in>
 !!      if (choice=52) <G|d(left)S/d(k)|vect_in>
 !!      if (choice=53) <G|d(twist)S/d(k)|vect_in>
-!!      if (choice=7) <G|sum_i[p_i><p_i]|vect_in>
+!!      if (choice=3)  <G|d[V_nonlocal-lamdba.(I+S)]/d(strain)|vect_in>
+!!      if (choice=7)  <G|sum_i[p_i><p_i]|vect_in>
+!!      if (choice=8)  <G|d2S/d(k)d(k)|vect_in>
+!!      if (choice=81) <G|d[d(right)S/d(k)]/d(k)|vect_in>
 !!
 !! SIDE EFFECTS
 !!  cprjin(natom,nspinor) <type(pawcprj_type)>=projected input wave function |in> on non-local projectors
@@ -222,7 +247,7 @@
 !!                                  first derivatives are computed here and saved
 !!                                  other derivatives are eventually computed but not saved
 !!                     if cpopt= 4  <p_lmn|in> and first derivatives are already in memory;
-!!                                  other derivatives are not computed
+!!                                  other derivatives are not computed (except when choice=8 or 81)
 !!                                  This option is not compatible with choice=4,24 or 6
 !!                     Warning: for cpopt= 1 or 3, derivatives wrt strains do not contain
 !!                              the contribution due to the volume change;
@@ -290,7 +315,7 @@
  integer,intent(in) :: npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,signs
  real(dp),intent(in) :: lambda,ucvol
  logical,optional,intent(in) :: hermdij
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: atindx1(natom),kgin(3,npwin)
  integer,intent(in),target :: indlmn(6,lmnmax,ntypat)
@@ -307,15 +332,15 @@
  real(dp),intent(inout) :: vectin(2,npwin*nspinor)
  real(dp),intent(out) :: enlout(nnlout)
  real(dp),intent(out) :: svectout(2,npwout*nspinor*(paw_opt/3))
- real(dp),intent(inout) :: vectout (2,npwout*nspinor) !vz_i
+ real(dp),intent(inout) :: vectout (2,npwout*nspinor)
  type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5))
  type(pawcprj_type),optional,intent(in) :: cprjin_left(natom,nspinor)
 
 !Local variables-------------------------------
 !scalars
  integer :: choice_a,choice_b,cplex,cplex_enl,cplex_fac,ia,ia1,ia2,ia3,ia4,ia5
- integer :: iatm,ic,ii,ierr,ilmn,iln,ishift,ispinor,itypat,jc,mincat,mu,mua,mub,mu0
- integer :: n1,n2,n3,nd2gxdt,ndgxdt,nd2gxdtfac,ndgxdtfac
+ integer :: iatm,ic,idir1,idir2,ii,ierr,ilmn,iln,ishift,ispinor,itypat,jc,mincat,mu,mua,mub,mu0
+ integer :: n1,n2,n3,nd2gxdt,ndgxdt,ndgxdt_stored,nd2gxdtfac,ndgxdtfac
  integer :: nincat,nkpgin_,nkpgout_,nlmn,nu,nua1,nua2,nub1,nub2,optder
  real(dp) :: enlk
  logical :: check,hermdij_,testnl
@@ -345,37 +370,35 @@
 !signs=1, almost all choices
  if (signs==1) then
    if(paw_opt<3) then
-     check=(choice==0.or.choice==1.or.choice==2.or.choice==3.or.choice==4.or.&
-&     choice==23.or.choice==24.or.choice==5.or.choice==51.or.choice==52.or.&
-     choice==53.or.choice==54.or.choice==55.or.&
-&     choice==6.or.choice==7.or.choice==8)
+     check=(choice==0 .or.choice==1 .or.choice==2 .or.choice==3 .or.choice==4 .or.&
+&     choice==23.or.choice==24.or.choice==5 .or.choice==51.or.choice==52.or.&
+&     choice==53.or.choice==54.or.choice==55.or.&
+&     choice==6 .or.choice==8 .or.choice==81)
    else if (paw_opt==3) then
-     check=(choice==0.or.choice==1.or.choice==2.or.choice==3.or.choice==5.or.&
-&     choice==23.or.choice==54.or.choice==55.or.choice==8)
+     check=(choice== 0.or.choice== 1.or.choice== 2.or.choice==3.or.choice==5.or.&
+&     choice==23.or.choice==51.or.choice==52.or.choice==54.or.choice==55.or.&
+&     choice== 8.or.choice==81)
    else
      check = .false.
    end if
    ABI_CHECK(check,'BUG: choice not compatible (for signs=1)')
  end if
 
-!signs=2, only "single derivative" choices
+!signs=2, less choices
  if (signs==2) then
-   check=(choice==0.or.choice==1.or.choice==2.or.choice==3.or.&
-&   choice==5.or.choice==7.or.choice==8.or.choice==51.or.choice==52.or.choice==53)
-   ABI_CHECK(check,'BUG: signs=2 not compatible with this choice')
+   check=(choice==0.or.choice==1.or.choice==2.or.choice==3 .or.&
+&   choice==5.or.choice==51.or.choice==52.or.choice==53.or.&
+&   choice==7.or.choice==8.or.choice==81)
+   ABI_CHECK(check,'BUG: choice not compatible (for signs=2)')
  end if
-!1<=idir<=6 is  required when choice=3 and signs=2
+!1<=idir<=6 is required when choice=3 and signs=2
  if (choice==3.and.signs==2) then
    check=(idir>=1.and.idir<=6)
    ABI_CHECK(check,'BUG: choice=3 and signs=2 requires 1<=idir<=6')
-!1<=idir<=9 is required when choice==8 and signs=2
- else if (choice==8.and.signs==2) then
+!1<=idir<=9 is required when choice==8/81 and signs=2
+ else if ((choice==8.or.choice==81).and.signs==2) then
    check=(idir>=1.and.idir<=9)
-   ABI_CHECK(check,'BUG: choice=8 and signs=2 requires 1<=idir<=9')
-!idir=0 is required when choice=3 and signs=2
- else if (choice==6.and.signs==1) then
-   check=(idir==0)
-   ABI_CHECK(check,'BUG: choice=6 and signs=1 requires idir = 0')
+   ABI_CHECK(check,'BUG: choice=8/81 and signs=2 requires 1<=idir<=9')
  else
 !  signs=2 requires 1<=idir<=3 when choice>1
    check=(signs/=2.or.choice<=1.or.choice==7.or.(idir>=1.and.idir<=3))
@@ -384,8 +407,10 @@
 !check allowed values for cpopt
  check=(cpopt>=-1.and.cpopt<=4)
  ABI_CHECK(check,'bad value for cpopt')
- check=(cpopt/=4.or.(choice/=4.and.choice/=24.and.choice/=6.and.choice/=8))
+ check=(cpopt/=4.or.(choice/=4.and.choice/=24.and.choice/=6))
  ABI_CHECK(check,'BUG: cpopt=4 not allowed for 2nd derivatives')
+ check=(cpopt/=2.or.(choice/=8.and.choice/=81))
+ ABI_CHECK(check,'BUG: cpopt=2 not allowed for choice=8,81, use cpopt=4 instead')
 !check conditions for optional arguments
  check=((.not.present(cprjin_left)).or.(signs==1.and.choice==1))
  ABI_CHECK(check,'BUG: when cprjin_left is present, must have choice=1,signs=1')
@@ -447,10 +472,12 @@
    if(signs==2) ndgxdtfac=1
  end if
  if (choice==51) then
+   if(signs==1) ndgxdt=3
    if(signs==2) ndgxdt=1
    if(signs==2) ndgxdtfac=1
  end if
  if (choice==52) then
+   if(signs==1) ndgxdt=3
    if(signs==2) ndgxdt=1
    if(signs==2) ndgxdtfac=1
  end if
@@ -484,6 +511,15 @@
    if(signs==2) nd2gxdt=1
    if(signs==2) nd2gxdtfac=1
  end if
+ if (choice==81) then
+   if(signs==1) ndgxdt=3
+   if(signs==1) ndgxdtfac=3
+   if(signs==1) nd2gxdt=6
+   if(signs==2) ndgxdt=1
+   if(signs==2) ndgxdtfac=1
+   if(signs==2) nd2gxdt=1
+   if(signs==2) nd2gxdtfac=1
+ end if
  ABI_CHECK(ndgxdtfac<=ndgxdt,"BUG: ndgxdtfac>ndgxdt!")
  optder=0;if (ndgxdtfac>0) optder=1
  if (nd2gxdtfac>0) optder=2
@@ -501,7 +537,7 @@
      MSG_BUG(message)
    end if
  end if
- 
+
 !Additional steps before calculation
 !==============================================================
 
@@ -522,7 +558,7 @@
      if (choice> 1) svectout(:,:)=zero
    end if
  end if
- 
+
 !Eventually re-compute (k+G) vectors (and related data)
  nkpgin_=0
  if (choice==2) nkpgin_=3
@@ -644,17 +680,14 @@
        ABI_ALLOCATE(cplex_d2gxdt,(nd2gxdt))
        cplex_dgxdt(:) = 1 ; cplex_d2gxdt(:) = 1
        if(ndgxdt > 0) then
-         if ((choice==5.or.choice==53).and.signs==1) cplex_dgxdt(1:3) = 2
-         if ((choice==5.or.choice==51.or.choice==52).and.signs==2) cplex_dgxdt(1) = 2
-         if (choice==53.and.signs==2) cplex_dgxdt(1:2) = 2
+         if (choice==5.or.choice==51.or.choice==52.or.choice==53.or. &
+&         choice==8.or.choice==81) cplex_dgxdt(:) = 2
          if (choice==54.and.signs==1) cplex_dgxdt(4:6) = 2
          if (choice==55.and.signs==1) cplex_dgxdt(7:9) = 2
-         if (choice== 8.and.signs==2) cplex_dgxdt(1:2) = 2
        end if
        if(nd2gxdt > 0) then
          if (choice==54.and.signs==1) cplex_d2gxdt(1:9) = 2
          if (choice==55.and.signs==1) cplex_d2gxdt(1:18)= 2
-         if (choice== 8.and.signs==2) cplex_d2gxdt(1)   = 2
        end if
 
 !      Compute projection of current wave function |c> on each
@@ -670,24 +703,49 @@
          end do
        end if
        if (cpopt==4.and.ndgxdt>0) then
+         ndgxdt_stored = cprjin(1,1)%ncpgr
          ishift=0
-         if ((choice==2).and.(cprjin(1,1)%ncpgr>ndgxdt)) ishift=cprjin(1,1)%ncpgr-ndgxdt
+         if (choice==2.and.ndgxdt_stored>ndgxdt) ishift=ndgxdt_stored-ndgxdt
          if(cplex == 2) then
            do ispinor=1,nspinor
              do ia=1,nincat
-               dgxdt(1:2,1:ndgxdt,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,1+ishift:ndgxdt+ishift,1:nlmn)
-!               dgxdt(1:2,1:ndgxdt,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,1:ndgxdt,1:nlmn)
+               if (ndgxdt_stored==ndgxdt.or.(ndgxdt_stored>ndgxdt.and.choice==2)) then
+                 dgxdt(1:2,1:ndgxdt,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,1+ishift:ndgxdt+ishift,1:nlmn)
+               else if (signs==2.and.ndgxdt_stored==3) then
+                 if (choice==5) then ! ndgxdt=1
+                   dgxdt(1:2,1,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,idir,1:nlmn)
+                 else if (choice==8) then ! ndgxdt=2
+                   idir1=(idir-1)/3+1; idir2=mod((idir-1),3)+1
+                   dgxdt(1:2,1,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,idir1,1:nlmn)
+                   dgxdt(1:2,2,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,idir2,1:nlmn)
+                 else if (choice==81) then ! ndgxdt=1
+                   idir1=(idir-1)/3+1; idir2=mod((idir-1),3)+1
+                   dgxdt(1:2,1,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,idir2,1:nlmn)
+                 end if
+               end if
              end do
            end do
          else
            do ispinor=1,nspinor
              do ia=1,nincat
                do ilmn=1,nlmn
-                 do ii=1,ndgxdt
-                   ic = cplex_dgxdt(ii)
-                   dgxdt(1,ii,ilmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(ic,ii+ishift,ilmn)
-!                   dgxdt(1,ii,ilmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(ic,ii,ilmn)
-                 end do
+                 if (ndgxdt_stored==ndgxdt.or.(ndgxdt_stored>ndgxdt.and.choice==2)) then
+                   do ii=1,ndgxdt
+                     ic = cplex_dgxdt(ii)
+                     dgxdt(1,ii,ilmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(ic,ii+ishift,ilmn)
+                   end do
+                 else if (signs==2.and.ndgxdt_stored==3) then
+                   if (choice==5) then ! ndgxdt=1
+                     dgxdt(1,1,ilmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(cplex_dgxdt(1),idir,ilmn)
+                   else if (choice==8) then ! ndgxdt=2
+                     idir1=(idir-1)/3+1; idir2=mod((idir-1),3)+1
+                     dgxdt(1,1,ilmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(cplex_dgxdt(1),idir1,ilmn)
+                     dgxdt(1,2,ilmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(cplex_dgxdt(2),idir2,ilmn)
+                   else if (choice==81) then ! ndgxdt=1
+                     idir1=(idir-1)/3+1; idir2=mod((idir-1),3)+1
+                     dgxdt(1,1,ilmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(cplex_dgxdt(1),idir2,ilmn)
+                   end if
+                 end if
                end do
              end do
            end do
@@ -695,7 +753,7 @@
        end if
 
 !      Computation or <p_lmn|c> (and derivatives) for this block of atoms
-       if (cpopt<4.and.choice_a/=-1) then
+       if ((cpopt<4.and.choice_a/=-1).or.choice==8.or.choice==81) then
          call opernla_ylm(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
 &         ia3,idir,indlmn_typ,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpgin_,nlmn,&
 &         nloalg,npwin,nspinor,ph3din,signs,ucvol,vectin)
@@ -874,7 +932,8 @@
 
 !Need sometimes gmet
  if ((signs==1.and.paw_opt<=3).and. &
-& (choice==5.or.choice==53.or.choice==54.or.choice==55)) then
+& (choice==5 .or.choice==51.or.choice==52.or.choice==53.or.&
+& choice==54.or.choice==55)) then
    ABI_ALLOCATE(gmet,(3,3))
    gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
  end if
@@ -899,6 +958,18 @@
    ABI_ALLOCATE(work1,(3))
    work1(:)=enlout(mu0+1:mu0+3)
    enlout(mu0+1:mu0+3)=gmet(:,1)*work1(1)+gmet(:,2)*work1(2)+gmet(:,3)*work1(3)
+   ABI_DEALLOCATE(work1)
+ end if
+ if ((choice==51.or.choice==52).and.signs==1.and.paw_opt<=3) then
+   mu0=0 ! Shift to be applied in enlout array
+   ABI_ALLOCATE(work1,(3))
+   do mu=1,2 ! Loop for Re,Im
+     work1(1:3)=(/enlout(mu0+1),enlout(mu0+3),enlout(mu0+5)/)
+     enlout(mu0+1)=gmet(1,1)*work1(1)+gmet(1,2)*work1(2)+gmet(1,3)*work1(3)
+     enlout(mu0+3)=gmet(2,1)*work1(1)+gmet(2,2)*work1(2)+gmet(2,3)*work1(3)
+     enlout(mu0+5)=gmet(3,1)*work1(1)+gmet(3,2)*work1(2)+gmet(3,3)*work1(3)
+     mu0=mu0+1
+   end do
    ABI_DEALLOCATE(work1)
  end if
 
@@ -1000,27 +1071,43 @@
 
 !2nd derivative wrt to 2 k wave vectors (effective mass):
 ! - convert from cartesian to reduced coordinates
- if (choice==8.and.signs==1.and.paw_opt<=3) then
+ if ((choice==8.or.choice==81).and.signs==1.and.paw_opt<=3) then
    mu0=0 ! Shift to be applied in enlout array
    ABI_ALLOCATE(work3,(3,3))
    ABI_ALLOCATE(work4,(3,3))
-   work3(1,1)=enlout(mu0+1) ; work3(1,2)=enlout(mu0+6) ; work3(1,3)=enlout(mu0+5)
-   work3(2,1)=enlout(mu0+6) ; work3(2,2)=enlout(mu0+2) ; work3(2,3)=enlout(mu0+4)
-   work3(3,1)=enlout(mu0+5) ; work3(3,2)=enlout(mu0+4) ; work3(3,3)=enlout(mu0+3)
-   do mu=1,3
-     work4(:,mu)=gprimd(:,1)*work3(mu,1)+gprimd(:,2)*work3(mu,2)+gprimd(:,3)*work3(mu,3)
+   mua=1;if (choice==81) mua=2
+   do ii=1,mua ! Loop Re,Im
+     if (choice==8) then ! enlout is real in Voigt notation
+       work3(1,1)=enlout(mu0+1) ; work3(1,2)=enlout(mu0+6) ; work3(1,3)=enlout(mu0+5)
+       work3(2,1)=enlout(mu0+6) ; work3(2,2)=enlout(mu0+2) ; work3(2,3)=enlout(mu0+4)
+       work3(3,1)=enlout(mu0+5) ; work3(3,2)=enlout(mu0+4) ; work3(3,3)=enlout(mu0+3)
+     else                ! enlout is complex in matrix notation
+       work3(1,1)=enlout(mu0+1 ) ; work3(1,2)=enlout(mu0+3 ) ; work3(1,3)=enlout(mu0+5 )
+       work3(2,1)=enlout(mu0+7 ) ; work3(2,2)=enlout(mu0+9 ) ; work3(2,3)=enlout(mu0+11)
+       work3(3,1)=enlout(mu0+13) ; work3(3,2)=enlout(mu0+15) ; work3(3,3)=enlout(mu0+17)
+     end if
+     do mu=1,3
+       work4(:,mu)=gprimd(:,1)*work3(mu,1)+gprimd(:,2)*work3(mu,2)+gprimd(:,3)*work3(mu,3)
+     end do
+     do mu=1,3
+       work3(:,mu)=gprimd(:,1)*work4(mu,1)+gprimd(:,2)*work4(mu,2)+gprimd(:,3)*work4(mu,3)
+     end do
+     do mu=1,3
+       work4(:,mu)=gprimd(1,:)*work3(mu,1)+gprimd(2,:)*work3(mu,2)+gprimd(3,:)*work3(mu,3)
+     end do
+     do mu=1,3
+       work3(:,mu)=gprimd(1,:)*work4(mu,1)+gprimd(2,:)*work4(mu,2)+gprimd(3,:)*work4(mu,3)
+     end do
+     if (choice==8) then ! enlout is real in Voigt notation
+       enlout(mu0+1) = work3(1,1) ; enlout(mu0+2) = work3(2,2) ; enlout(mu0+3) = work3(3,3)
+       enlout(mu0+4) = work3(3,2) ; enlout(mu0+5) = work3(1,3) ; enlout(mu0+6) = work3(2,1)
+     else                ! enlout is complex in matrix notation
+       enlout(mu0+1 )=work3(1,1) ; enlout(mu0+3 )=work3(1,2) ; enlout(mu0+5 )=work3(1,3)
+       enlout(mu0+7 )=work3(2,1) ; enlout(mu0+9 )=work3(2,2) ; enlout(mu0+11)=work3(2,3)
+       enlout(mu0+13)=work3(3,1) ; enlout(mu0+15)=work3(3,2) ; enlout(mu0+17)=work3(3,3)
+     end if
+     mu0=mu0+1
    end do
-   do mu=1,3
-     work3(:,mu)=gprimd(:,1)*work4(mu,1)+gprimd(:,2)*work4(mu,2)+gprimd(:,3)*work4(mu,3)
-   end do
-   do mu=1,3
-     work4(:,mu)=gprimd(1,:)*work3(mu,1)+gprimd(2,:)*work3(mu,2)+gprimd(3,:)*work3(mu,3)
-   end do
-   do mu=1,3
-     work3(:,mu)=gprimd(1,:)*work4(mu,1)+gprimd(2,:)*work4(mu,2)+gprimd(3,:)*work4(mu,3)
-   end do
-   enlout(mu0+1) = work3(1,1) ; enlout(mu0+2) = work3(2,2) ; enlout(mu0+3) = work3(3,3)
-   enlout(mu0+4) = work3(3,2) ; enlout(mu0+5) = work3(1,3) ; enlout(mu0+6) = work3(2,1)
    ABI_DEALLOCATE(work3)
    ABI_DEALLOCATE(work4)
  end if
@@ -1082,7 +1169,7 @@
    ABI_DEALLOCATE(strnlk)
  end if
  if (nkpgin<nkpgin_) then
-   ABI_DEALLOCATE(kpgin_) 
+   ABI_DEALLOCATE(kpgin_)
  end if
  if (nkpgout<nkpgout_) then
    ABI_DEALLOCATE(kpgout_)

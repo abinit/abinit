@@ -24,7 +24,7 @@
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  npwarr(nkpt)=number of planewaves in basis at this k point
@@ -93,7 +93,7 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istep,mcg,mgfft,ntypat,usepaw
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(scf_history_type),intent(inout) :: scf_history
  type(pseudopotential_type),intent(in) :: psps
@@ -157,7 +157,7 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 &     iatom,0,iorder_cprj,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,scf_history%mcprj,&
 &     dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
 &     dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft,dtset%nkpt,&
-&     dtset%nloalg,npwarr,dtset%nspinor,dtset%nsppol,dtset%ntypat,&
+&     dtset%nloalg,npwarr,dtset%nspinor,dtset%nsppol,dtset%ntypat,3,&
 &     dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,0,0,&
 &     xred_old,ylm,ylmgr_k)
      ABI_DEALLOCATE(ylmgr_k)
@@ -205,7 +205,7 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 &     dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,scf_history%mcprj,dtset%mgfft,&
 &     dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,&
 &     nattyp,dtset%nband,dtset%natom,ngfft,dtset%nkpt,dtset%nloalg,&
-&     npwarr,dtset%nspinor,dtset%nsppol,dtset%ntypat,dtset%paral_kgb,&
+&     npwarr,dtset%nspinor,dtset%nsppol,dtset%ntypat,3,dtset%paral_kgb,&
 &     ph1d,psps,rmet,dtset%typat,ucvol,0,0,xred_old,&
 &     ylm,ylmgr_k)
      ABI_DEALLOCATE(ylmgr_k)

@@ -52,7 +52,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t09.out, tolnlines = 6, tolabs = 5.0e-08, tolrel = 2.0e-02, fld_options = -medium
+#%%   t09.out, tolnlines = 10, tolabs = 6.0e-08, tolrel = 3.0e-02, fld_options = -medium
 #%% psp_files = si_ps.736.lda
 #%% [paral_info]
 #%% max_nprocs = 2

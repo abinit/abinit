@@ -145,7 +145,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_abi_etsf
  use m_nctk
  use m_ddb
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_hdr
@@ -262,7 +262,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer :: iscf_mod,iscf_mod_save,isppol,istr,isym,mcg,mcgq,mcg1,mcprj,mcprjq,mband
  integer :: maxidir,me,mgfftf,mkmem_rbz,mk1mem_rbz,mkqmem_rbz,mpw,mpw1,my_nkpt_rbz
  integer :: n3xccc,nband_k,nblok,ncpgr,ndir,nkpt_eff,nkpt_max,nline_save,nmatel,npert_io,npert_me,nspden_rhoij
- integer :: nstep_save,nsym1,ntypat,nwffile,old_comm_atom,openexit,option,optorth,optthm,pertcase,rdwr,ncid
+ integer :: nstep_save,nsym1,ntypat,nwffile,nylmgr,old_comm_atom,openexit,option,optorth,optthm,pertcase,rdwr,ncid
  integer :: rdwrpaw,spaceComm,smdelta,timrev_pert,to_compute_this_pert
  integer :: unitout,useylmgr,useylmgr1,vrsddb,dfpt_scfcv_retcode,optn2
  real(dp) :: boxcut,dosdeltae,eberry,ecore,ecut_eff,ecutf,edocc,eei,eeig0,eew,efrhar,efrkin,efrloc
@@ -631,13 +631,25 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        call wrtout(std_out,message,'COLL')
        call wrtout(ab_out,message,'COLL')
      end if
+   else if(ipert==dtset%natom+2)then
+     write(message, '(a,i4)' )' Perturbation : homogeneous electric field along direction',idir
+     call wrtout(std_out,message,'COLL')
+     call wrtout(ab_out,message,'COLL')
+     if( iscf_mod == -3 )then
+       write(message, '(a,a,a,a,a,a)' )ch10,&
+&       ' dfpt_looppert : COMMENT -',ch10,&
+&       '  The first-order density is imposed to be zero (iscf=-3).',ch10,&
+&       '  This corresponds to a calculation without local fields.'
+       call wrtout(std_out,message,'COLL')
+       call wrtout(ab_out,message,'COLL')
+     end if
    else if(ipert==dtset%natom+10.or.ipert==dtset%natom+11)then
      call rf2_getidirs(idir,idir1,idir2)
      if(ipert==dtset%natom+10)then
-       write(message,'(2(a,i1))') ' Perturbation : 2nd derivative vs k, idir1 = ',idir1,&
+       write(message,'(2(a,i1))') ' Perturbation : 2nd derivative wrt k, idir1 = ',idir1,&
 &       ' idir2 = ',idir2
      else
-       write(message,'(2(a,i1),a)') ' Perturbation : 2nd derivative vs k (idir1 =',idir1,&
+       write(message,'(2(a,i1),a)') ' Perturbation : 2nd derivative wrt k (idir1 =',idir1,&
 &       ') and Efield (idir2 =',idir2,')'
      end if
      call wrtout(std_out,message,'COLL')
@@ -658,18 +670,24 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        call wrtout(std_out,message,'COLL')
        call wrtout(ab_out,message,'COLL')
      end if
-   else if(ipert==dtset%natom+2)then
-     write(message, '(a,i4)' )' Perturbation : homogeneous electric field along direction',idir
-     call wrtout(std_out,message,'COLL')
-     call wrtout(ab_out,message,'COLL')
-     if( iscf_mod == -3 )then
-       write(message, '(a,a,a,a,a,a)' )ch10,&
-&       ' dfpt_looppert : COMMENT -',ch10,&
-&       '  The first-order density is imposed to be zero (iscf=-3).',ch10,&
-&       '  This corresponds to a calculation without local fields.'
-       call wrtout(std_out,message,'COLL')
-       call wrtout(ab_out,message,'COLL')
+     ABI_ALLOCATE(occ_pert,(dtset%mband*nkpt*dtset%nsppol))
+     occ_pert(:) = occ(:) - occ(1)
+     maxocc = maxval(abs(occ_pert))
+     if (maxocc>1.0d-6.and.abs(maxocc-occ(1))>1.0d-6) then ! True if non-zero occupation numbers are not equal
+       write(message, '(3a)' ) ' ipert=natom+10 or 11 does not work for a metallic system.',ch10,&
+       ' This perturbation will not be computed.'
+       MSG_WARNING(message)
+       ABI_DEALLOCATE(occ_pert)
+       cycle
      end if
+     if (ipert==dtset%natom+11.and.minval(occ)<1.0d-6) then
+       write(message, '(3a)' ) ' ipert=natom+11 does not work with empty bands.',ch10,&
+       ' This perturbation will not be computed.'
+       MSG_WARNING(message)
+       ABI_DEALLOCATE(occ_pert)
+       cycle
+     end if
+     ABI_DEALLOCATE(occ_pert)
    else if(ipert>dtset%natom+11 .or. ipert<=0 )then
      write(message, '(a,i4,a,a,a)' ) &
 &     '  ipert=',ipert,' is outside the [1,dtset%natom+11] interval.',ch10,&
@@ -850,16 +868,16 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    call timab(143,2,tsec)
 
 !  Set up the spherical harmonics (Ylm) at k
-   useylmgr=0; option=0
+   useylmgr=0; option=0 ; nylmgr=0
    if (psps%useylm==1.and. &
 &   (ipert==dtset%natom+1.or.ipert==dtset%natom+3.or.ipert==dtset%natom+4.or. &
 &   (psps%usepaw==1.and.ipert==dtset%natom+2))) then
-     useylmgr=1; option=1
+     useylmgr=1; option=1 ; nylmgr=3
    else if (psps%useylm==1.and.(ipert==dtset%natom+10.or.ipert==dtset%natom+11)) then
-     useylmgr=1; option=2
+     useylmgr=1; option=2 ; nylmgr=9
    end if
    ABI_ALLOCATE(ylm,(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm))
-   ABI_ALLOCATE(ylmgr,(mpw*mkmem_rbz,3+6*(option/2),psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+   ABI_ALLOCATE(ylmgr,(mpw*mkmem_rbz,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
    if (psps%useylm==1) then
      call initylmg(gprimd,kg,kpt_rbz,mkmem_rbz,mpi_enreg,psps%mpsang,mpw,nband_rbz,nkpt_rbz,&
 &     npwarr,dtset%nsppol,option,rprimd,ylm,ylmgr)
@@ -937,8 +955,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  PAW: compute on-site projections of GS wavefunctions (cprj) (and derivatives) at k
    ncpgr=0
    ABI_DATATYPE_ALLOCATE(cprj,(0,0))
-   if (psps%usepaw==1.and.ipert/=dtset%natom+10.and.ipert/=dtset%natom+11) then
+   if (psps%usepaw==1) then
      ncpgr=3 ! Valid for ipert<=natom (phonons), ipert=natom+2 (elec. field)
+             ! or for ipert==natom+10,11
      if (ipert==dtset%natom+1) ncpgr=1
      if (ipert==dtset%natom+3.or.ipert==dtset%natom+4) ncpgr=1
      if (usecprj==1) then
@@ -954,13 +973,15 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          choice=5; iorder_cprj=0; idir0=0
        else if (ipert==dtset%natom+3.or.ipert==dtset%natom+4) then
          choice=3; iorder_cprj=0; idir0=istr
+       else if (ipert==dtset%natom+10.or.ipert==dtset%natom+11) then
+         choice=5; iorder_cprj=0; idir0=0 ! Compute all first derivatives
        else
-         choice=1; iorder_cprj=0; idir0=idir
+         choice=1; iorder_cprj=0; idir0=0
        end if
        call ctocprj(atindx,cg,choice,cprj,gmet,gprimd,-1,idir0,iorder_cprj,istwfk_rbz,&
 &       kg,kpt_rbz,dtset%mband,mcg,mcprj,dtset%mgfft,mkmem_rbz,mpi_enreg,psps%mpsang,mpw,&
 &       dtset%natom,nattyp,nband_rbz,dtset%natom,dtset%ngfft,nkpt_rbz,dtset%nloalg,&
-&       npwarr,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,psps,&
+&       npwarr,dtset%nspinor,dtset%nsppol,ntypat,nylmgr,dtset%paral_kgb,ph1d,psps,&
 &       rmet,dtset%typat,ucvol,dtfil%unpaw,useylmgr,xred,ylm,ylmgr)
      end if
    end if
@@ -994,7 +1015,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      useylmgr1=1; option=2
    end if
    ABI_ALLOCATE(ylm1,(mpw1*mk1mem_rbz,psps%mpsang*psps%mpsang*psps%useylm))
-   ABI_ALLOCATE(ylmgr1,(mpw1*mk1mem_rbz,3+6*(option/2),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+   ABI_ALLOCATE(ylmgr1,(mpw1*mk1mem_rbz,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
    if (psps%useylm==1) then
      call initylmg(gprimd,kg1,kpq_rbz,mk1mem_rbz,mpi_enreg,psps%mpsang,mpw1,nband_rbz,nkpt_rbz,&
 &     npwar1,dtset%nsppol,option,rprimd,ylm1,ylmgr1)
@@ -1052,7 +1073,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 !  PAW: compute on-site projections of GS wavefunctions (cprjq) (and derivatives) at k+q
    ABI_DATATYPE_ALLOCATE(cprjq,(0,0))
-   if (psps%usepaw==1.and.ipert/=dtset%natom+10.and.ipert/=dtset%natom+11) then
+   if (psps%usepaw==1) then
      if (usecprj==1) then
        call status(0,dtfil%filstat,iexit,level,'call ctocprjq')
        mcprjq=dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
@@ -1064,7 +1085,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          call ctocprj(atindx,cgq,choice,cprjq,gmet,gprimd,-1,idir0,0,istwfk_rbz,&
 &         kg1,kpq_rbz,dtset%mband,mcgq,mcprjq,dtset%mgfft,mkqmem_rbz,mpi_enreg,psps%mpsang,mpw1,&
 &         dtset%natom,nattyp,nband_rbz,dtset%natom,dtset%ngfft,nkpt_rbz,dtset%nloalg,&
-&         npwar1,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,&
+&         npwar1,dtset%nspinor,dtset%nsppol,ntypat,nylmgr,dtset%paral_kgb,ph1d,&
 &         psps,rmet,dtset%typat,ucvol,dtfil%unpawq,useylmgr1,xred,ylm1,ylmgr1)
        else if (mcprjq>0) then
          call pawcprj_copy(cprj,cprjq)
@@ -1200,7 +1221,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     mpi_atmtab=mpi_enreg%my_atmtab)
    end if
 
-!  In case of electric field, or 2nd order perturbation wrt k : open the ddk (or dE) wf file(s)
+!  In case of electric field, or 2nd order perturbation : open the ddk (or dE) wf file(s)
    if ((ipert==dtset%natom+2.and.sum((dtset%qptn(1:3))**2)<1.0d-7.and. &
 &   (dtset%berryopt/= 4.and.dtset%berryopt/= 6.and. &
 &   dtset%berryopt/= 7.and.dtset%berryopt/=14.and. &
@@ -1234,7 +1255,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        fnamewff(2)=dtfil%fnamewffdelfd
        fnamewff(3)=dtfil%fnamewffddk
        if (idir>3) then
-         nwffile=4 !
+         nwffile=4
          file_index(4)=idir2+dtset%natom*3   ! ddk file (dir2)
          fnamewff(4)=dtfil%fnamewffddk
        end if
@@ -1257,7 +1278,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        call wrtout(std_out,message,'COLL')
        call wrtout(ab_out,message,'COLL')
 #ifdef DEV_MG_WFK
-!      Note that the unit number for ddk files is 50 or 51 (dtfil%unddk=50)
+!      Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
        call wfk_open_read(ddk_f(ii),fiwfddk,formeig1,dtset%iomode,dtfil%unddk+(ii-1),spaceComm)
 #else
        call WffOpen(dtset%iomode,spaceComm,fiwfddk,ierr,wffddk(ii),master,me,dtfil%unddk+(ii-1))
@@ -1382,7 +1403,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if ! found an equiv perturbation for the gkk
 
    if ( (dtfil%ireadwf==0 .and. iscf_mod/=-4 .and. dtset%get1den==0 .and. dtset%ird1den==0) &
-   .or. (iscf_mod== -3 .and. ipert/=dtset%natom+11) ) then ! For ipert==natom+11, we want to read the 1st order density from a previous calculation
+   .or. (iscf_mod== -3 .and. ipert/=dtset%natom+11) ) then
+!    NOTE : For ipert==natom+11, we want to read the 1st order density from a previous calculation
      rhor1(:,:)=zero ; rhog1(:,:)=zero
 !    PAW: rhoij have been set to zero in call to pawrhoij_alloc above
 
@@ -1427,7 +1449,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      end if
 
    else  ! rhor1 not being forced to 0.0
-     if(iscf_mod>0 .and. ipert/=dtset%natom+11) then ! For ipert==natom+11, we want to read the 1st order density from a previous calculation
+     if(iscf_mod>0 .and. ipert/=dtset%natom+11) then
+!      For ipert==natom+11, we want to read the 1st order density from a previous calculation
 !      cplex=2 gets the complex density, =1 only real part
        if (psps%usepaw==1) then
 !        Be careful: in PAW, rho does not include the 1st-order compensation
@@ -1463,7 +1486,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor1, &
        hdr_den, pawrhoij1, spaceComm, check_hdr=hdr)
        etotal = hdr_den%etot; call hdr_free(hdr_den)
-       !WORK TO DO HERE FOR IPERT = NATOM + 11
 
 !      Compute up+down rho1(G) by fft
        ABI_ALLOCATE(work,(cplex*nfftf))
@@ -1485,7 +1507,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      _IBM6("before dfpt_scfcv")
 
 !    Main calculation: get 1st-order wavefunctions from Sternheimer equation (SCF cycle)
-!    if ipert==natom+10 or natom+11 : get 2nd-order wavefunctions (wrt k perturbation)
+!    if ipert==natom+10 or natom+11 : get 2nd-order wavefunctions
      call dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,&
 &     dielt,dim_eig2rf,doccde_rbz,docckqde,dtfil,dtset_tmp,&
 &     d2bbb,d2lo,d2nl,d2ovl,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
@@ -1599,7 +1621,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 ! NB: phasecg not actually used in outgkk for the moment (2013/08/15)
      call outgkk(bantot_rbz, nmatel,gkkfilnam,eigen0,eigen1,hdr0,hdr,mpi_enreg,phasecg)
      ABI_DEALLOCATE(phasecg)
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
 
      ! Reshape eigen1 into gkk for netCDF output
      ABI_STAT_ALLOCATE(gkk,(2*dtset%mband*dtset%nsppol,dtset%nkpt,1,1,dtset%mband), ierr)
@@ -1626,7 +1648,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      end do !isppol
 
      ! Initialize Crystal to write in the GKK.nc file
-     call crystal_init(Crystal,dtset%spgroup,dtset%natom,dtset%npsp,psps%ntypat, &
+     call crystal_init(dtset%amu_orig(:,1),Crystal,dtset%spgroup,dtset%natom,dtset%npsp,psps%ntypat, &
 &     dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
 &     dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr0%title,&
 &     dtset%symrel,dtset%tnons,dtset%symafm)
@@ -1943,8 +1965,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          remove_inv=.false.
          if(dtset%nspden==4 .and. dtset%usedmft==1) remove_inv=.true.
 
-         call crystal_init(Crystal,dtset%spgroup,dtset%natom,dtset%npsp,psps%ntypat, &
-&         dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
+         call crystal_init(dtset%amu_orig(:,1),Crystal,dtset%spgroup,dtset%natom,dtset%npsp,&
+&         psps%ntypat, dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
 &         dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr0%title,&
 &         dtset%symrel,dtset%tnons,dtset%symafm)
 
@@ -1958,7 +1980,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 !        Second order derivative EIGR2D (real and Im)
          call eigr2d_init(eig2nkq,eigr2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
          NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EIGR2D file")
          NCF_CHECK(crystal_ncwrite(Crystal, ncid))
          NCF_CHECK(ebands_ncwrite(Bands, ncid))
@@ -1972,7 +1994,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
            fname = strcat(dtfil%filnam_ds(4),"_EIGI2D.nc")
 !          Broadening EIGI2D (real and Im)
            call eigr2d_init(eigbrd,eigi2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
            NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EIGI2D file")
            NCF_CHECK(crystal_ncwrite(Crystal, ncid))
            NCF_CHECK(ebands_ncwrite(Bands, ncid))

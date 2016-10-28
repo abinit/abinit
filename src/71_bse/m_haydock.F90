@@ -34,7 +34,7 @@ MODULE m_haydock
  use m_haydock_io
  use m_linalg_interfaces
  use m_ebands
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -561,16 +561,15 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 
      ! Write MDF file with the final results.
      ! FIXME: It won't work if prtdos == True
-     ! TODO: Add ebands
-#ifdef HAVE_TRIO_ETSF_IO
-       path = strcat(BS_files%out_basename,strcat(prefix,"_MDF.nc"))
-       NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
-       NCF_CHECK(crystal_ncwrite(Cryst, ncid))
-       NCF_CHECK(ebands_ncwrite(QP_bst, ncid))
-       call mdfs_ncwrite(ncid, Bsp, green, eps_rpanlf, eps_gwnlf)
-       NCF_CHECK(nf90_close(ncid))
+#ifdef HAVE_NETCDF
+     path = strcat(BS_files%out_basename,strcat(prefix,"_MDF.nc"))
+     NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
+     NCF_CHECK(crystal_ncwrite(Cryst, ncid))
+     NCF_CHECK(ebands_ncwrite(QP_bst, ncid))
+     call mdfs_ncwrite(ncid, Bsp, green, eps_rpanlf, eps_gwnlf)
+     NCF_CHECK(nf90_close(ncid))
 #else
-       ABI_UNUSED(ncid)
+     ABI_UNUSED(ncid)
 #endif
    end if 
 

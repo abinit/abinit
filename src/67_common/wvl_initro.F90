@@ -50,10 +50,11 @@ subroutine wvl_initro(&
  use m_splines
  use m_errors
  use defs_wvltypes
+ use m_sort
+
  use m_pawrad,  only : pawrad_type, pawrad_init, pawrad_free
  use m_pawtab, only : pawtab_type
-
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
   use BigDFT_API, only : ELECTRONIC_DENSITY, ext_buffers, ind_positions
 #endif
 
@@ -62,7 +63,6 @@ subroutine wvl_initro(&
 #undef ABI_FUNC
 #define ABI_FUNC 'wvl_initro'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
  use interfaces_41_xc_lowlevel
 !End of the abilint section
@@ -86,7 +86,7 @@ subroutine wvl_initro(&
  real(dp),intent(inout)::xred(3,natom)
 
 !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  integer  :: ia1,ia2
  integer  :: iat,iatm,iatom,iatom_tot,iex,iey,iez,ii,ind
  integer  :: ifft,ispden
@@ -114,7 +114,7 @@ subroutine wvl_initro(&
 
  DBG_ENTER("COLL")
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
 !PENDING: PARALLELIZATION OVER ATOMS
 

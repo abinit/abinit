@@ -465,7 +465,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 
 !  Non-collinear magnetism: store norm of magnetization
 !   m_norm_min= EPSILON(0.0_dp)**2 ! EB: TOO SMALL!!!
-   m_norm_min=tol14 ! EB: it is still too small, tests are underway
+   m_norm_min=tol8  ! EB: tol14 is still too small, tests are underway
    if (nspden==4) then
      ABI_ALLOCATE(m_norm,(nfft))
      m_norm(:)=sqrt(rhor_(:,2)**2+rhor_(:,3)**2+rhor_(:,4)**2)

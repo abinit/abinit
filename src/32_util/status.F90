@@ -303,14 +303,14 @@ subroutine status(counter,filstat,istat,level,routine)
  statnu=statnu+1
 
 !DEBUG
- write(std_out,*)' status : statnu, output_rate, shift_rate=',statnu,output_rate, shift_rate
- write(std_out,*)'level,routine=',level,routine
- write(std_out,*)'active(level)=',active(level)
- write(std_out,*)'counter,actual_counter(level,1:2)=',counter,actual_counter(level,1:2)
- write(std_out,*)'List of active levels :'
- do ilevel=1,mlevel
-   if(active(ilevel)/=0)write(std_out,*)' Active level number=',ilevel
- end do
+! write(std_out,*)' status : statnu, output_rate, shift_rate=',statnu,output_rate, shift_rate
+! write(std_out,*)'level,routine=',level,routine
+! write(std_out,*)'active(level)=',active(level)
+! write(std_out,*)'counter,actual_counter(level,1:2)=',counter,actual_counter(level,1:2)
+! write(std_out,*)'List of active levels :'
+! do ilevel=1,mlevel
+!   if(active(ilevel)/=0)write(std_out,*)' Active level number=',ilevel
+! end do
 !ENDDEBUG
 
  if(statnu > 2 )then

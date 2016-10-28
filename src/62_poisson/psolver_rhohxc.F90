@@ -72,7 +72,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 
  use m_xmpi, only: xmpi_comm_rank,xmpi_comm_size,xmpi_sum
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API,     only : CHARGE_DENSITY,HARTREE_POTENTIAL,xc_potential,&
 &                           ELECTRONIC_DENSITY,deallocate_coulomb_operator,&
 &                           copy_coulomb_operator,coulomb_operator
@@ -99,7 +99,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
   real(dp),intent(in)           :: rprimd(3,3)
   real(dp), intent(in)          :: xc_denpos
   real(dp), intent(out)         :: enxc, envxc, enhartr, vxcavg
-  type(mpi_type), intent(inout) :: mpi_enreg
+  type(mpi_type), intent(in) :: mpi_enreg
   type(wvl_internal_type), intent(in) :: wvl
   type(wvl_denspot_type), intent(inout) :: wvl_den
   type(wvl_energy_terms), intent(inout) :: wvl_e
@@ -112,7 +112,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
   real(dp),intent(out)   :: vxc(nfft, nspden)
 
   !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 ! n_c and \hat{n} can be added/rested inside bigdft by passing 
 ! them as pointers (rhocore and rhohat):
   logical, parameter :: add_n_c_here=.true.  !Add n_c here or inside bigdft
@@ -143,7 +143,7 @@ subroutine psolver_rhohxc(enhartr, enxc, envxc, icoulomb, ixc, &
 
  DBG_ENTER("COLL")
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
  nfftot=PRODUCT(ngfft(1:3))
  comm=mpi_enreg%comm_fft

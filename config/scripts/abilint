@@ -806,7 +806,7 @@ class Project:
         "Dump with pickle a Fortran type in a file"
         if name in self.ftypes:
             self.message.section("Write the fortran type '%s' into the file '%s'..." % (name,filename))
-            pickle.dump(self.ftypes[name].dict_vars,open(filename,"w"))
+            pickle.dump(self.ftypes[name].dict_vars,open(filename,"wb"))
             self.message.done()
         else:
             self.message.fatal("The Fortran type '%s' is not inside the project!\n" % name)

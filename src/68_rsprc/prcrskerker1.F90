@@ -54,12 +54,12 @@
 
 subroutine prcrskerker1(dtset,mpi_enreg,nfft,nspden,ngfft,dielar,etotal,gprimd,vresid,vrespc,base)
 
- use m_profiling_abi
 
  use defs_basis
  use defs_abitypes
  use frskerker1
  use mod_prc_memory
+ use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -75,7 +75,7 @@ subroutine prcrskerker1(dtset,mpi_enreg,nfft,nspden,ngfft,dielar,etotal,gprimd,v
 !scalars
  integer,intent(in) :: nfft,nspden
  real(dp) :: etotal
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
 !arrays
  integer,intent(in) :: ngfft(18)

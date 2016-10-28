@@ -47,7 +47,7 @@
 !!
 !! OUTPUT
 !!  ierr=Status error
-!!  Main output is written on file (TRIO_ETSF_IO file format).
+!!  Main output is written on file (ETSF_IO file format).
 !!
 !! NOTES
 !! In PAW calculations, the pseudized wavefunction us represented
@@ -98,7 +98,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  use m_errors
  use m_nctk
  use m_hdr
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -135,7 +135,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  integer,intent(in),optional :: comm_atom,set_k,set_band
  integer,intent(out) :: ierr
  type(Datafiles_type),intent(in) :: Dtfil
- type(MPI_type),intent(inout) :: MPI_enreg
+ type(MPI_type),intent(in) :: MPI_enreg
  type(hdr_type),intent(inout) :: Hdr
  type(dataset_type),intent(in) :: Dtset
  type(crystal_t),intent(in) :: crystal
@@ -181,7 +181,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  type(pawcprj_type),allocatable :: Cprj_k(:,:)
  type(pawfgrtab_type) :: local_pawfgrtab(my_natom)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: fform,ncerr,ncid,ae_ncid,pw_ncid,aeons_ncid,psons_ncid
  character(len=fnlen) :: fname
 #endif
@@ -274,7 +274,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  end if
 
  ierr=0
-#ifndef HAVE_TRIO_NETCDF
+#ifndef HAVE_NETCDF
  ierr = -1
  write(msg,'(3a)')&
 & "netcdf support must be enabled in order to output AE PAW wavefunction. ",ch10,&
@@ -299,8 +299,8 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  ABI_MALLOC(phkr,(2,nfftot))
  ABI_MALLOC(gbound,(2*mgfftf+8,2))
 
-#ifdef HAVE_TRIO_NETCDF
-!=== Initialize TRIO_ETSF_IO files ===
+#ifdef HAVE_NETCDF
+!=== Initialize ETSF_IO files ===
 ! FIXME: nspinor == 2 is buggy
 
  fname = trim(dtfil%filnam_ds(4))//'_PAWAVES.nc'
@@ -642,7 +642,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
          MSG_WARNING(msg)
        end if ! Check if serial run
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
        ncerr = nf90_put_var(ncid, ae_ncid, ur_ae, &
 &       start=[1,1,1,1,1,iband,ikpt,isppol], count=[2,n1,n2,n3,1,1,1,1])
        NCF_CHECK(ncerr)

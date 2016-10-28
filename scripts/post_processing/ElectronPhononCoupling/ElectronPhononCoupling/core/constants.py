@@ -1,6 +1,7 @@
 """Constants"""
 
 # Tolerance criterions
+tol5 = 1E-5
 tol6 = 1E-6
 tol8 = 1E-8
 tol12 = 1E-12

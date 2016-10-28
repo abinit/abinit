@@ -28,7 +28,7 @@
 !!  eig0_k(nband_k)=GS eigenvalues at k (hartree)
 !!  eig0_kq(nband_k)=GS eigenvalues at k+Q (hartree)
 !!  fermie1=derivative of fermi energy wrt (strain) perturbation
-!!  grad_berry(2,mpw1,dtefield%nband_occ) = the gradient of the Berry phase term
+!!  grad_berry(2,mpw1,dtefield%mband_occ) = the gradient of the Berry phase term
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
 !!  ibg=shift to be applied on the location of data in the array cprj
 !!  ibgq=shift to be applied on the location of data in the array cprjq
@@ -45,7 +45,7 @@
 !!  mcprjq=second dimension of the cprjq array
 !!  mkmem =number of k points trated by this node (GS data).
 !!  mk1mem =number of k points treated by this node (RF data)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw or wfs at k
 !!  mpw1=maximum dimensioned size of npw for wfs at k+q (also for 1-order wfs).
 !!  natom=number of atoms in cell.
@@ -174,7 +174,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  integer,intent(in) :: nband_k,npw1_k,npw_k
  integer,intent(inout) :: nlines_done
  real(dp),intent(in) :: fermie1,wtk_k
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
@@ -255,7 +255,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  ABI_ALLOCATE(cwavef,(2,npw1_k*nspinor))
  ABI_ALLOCATE(cwave1,(2,npw1_k*nspinor))
  ABI_ALLOCATE(gh1c_n,(2,npw1_k*nspinor))
- if (gs_hamkq%usepaw==1)  then
+ if (gs_hamkq%usepaw==1) then
    ABI_ALLOCATE(gsc,(2,npw1_k*nspinor))
  else
    ABI_ALLOCATE(gsc,(0,0))
@@ -331,7 +331,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
 !For rf2 perturbation :
  if(ipert==natom+10.or.ipert==natom+11) then
-   call rf2_init(cg,rf2,dtset,eig0_k,eig1_k,gs_hamkq,icg,idir,ikpt,ipert,isppol,mkmem,&
+   call rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,ikpt,ipert,isppol,mkmem,&
    mpi_enreg,mpw,nband_k,nsppol,rf_hamkq,rf_hamk_dir2,occ_k,rocceig,wffddk,ddk_f)
  end if
 
@@ -359,7 +359,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
    call cg_zcopy(npw_k*nspinor,cg(1,ptr),cwave0)
 
 !  Get PAW ground state projected WF (cprj)
-   if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1) then
+   if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1.and.ipert/=natom+10.and.ipert/=natom+11) then
      idir0 = idir
      if(ipert==natom+3.or.ipert==natom+4) idir0 =1
      call pawcprj_get(gs_hamkq%atindx1,cwaveprj0,cprj,natom,iband,ibg,ikpt,iorder_cprj,&
@@ -453,6 +453,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !    At this stage, the 1st order function cwavef is orthogonal to cgq (unlike
 !    when it is input to dfpt_cgwf). Here, restore the "active space" content
 !    of the first-order wavefunction, to give cwave1.
+!    PAW: note that dcwavef (1st-order change of WF due to overlap change)
+!         remains in the subspace orthogonal to cgq
        call corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc_k,eig1_k,fermie1,gh0c1,&
 &       iband,ibgq,icgq,gs_hamkq%istwf_k,mcgq,mcprjq,mpi_enreg,natom,nband_k,npw1_k,nspinor,&
 &       occ_k,rocceig,0,gs_hamkq%usepaw,tocceig)
@@ -483,7 +485,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
          call matrixelmt_g(ai,ar,rf_hamkq%dkinpw_k,gs_hamkq%istwf_k,0,npw_k,nspinor,cwave1,cwave0,&
 &         mpi_enreg%me_g0, mpi_enreg%comm_fft)
 !        There is an additional factor of 4 with respect to the bare matrix element
-         ek1_k(iband)=four*ar
+         ek1_k(iband)=two*energy_factor*ar
        end if
 
 !      Compute eigenvalue part of total energy (with cwavef)
@@ -506,7 +508,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !        <G|Vnl1|Cnk> is contained in gvnl1 (with cwave1)
          call dotprod_g(scprod,ai,gs_hamkq%istwf_k,npw1_k*nspinor,1,cwave1,gvnl1,mpi_enreg%me_g0,&
 &         mpi_enreg%comm_spinorfft)
-         enl1_k(iband)=four*scprod
+         enl1_k(iband)=two*energy_factor*scprod
        end if
 
 !      Removal of the 1st-order kinetic energy from the 1st-order non-local part.
@@ -528,7 +530,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
          shift_band=(iband-1)*npw1_k*nspinor
          call dotprod_g(scprod,ai,gs_hamkq%istwf_k,npw1_k*nspinor,1,cwave1,&
 &         rf2%RHS_Stern(:,1+shift_band:npw1_k*nspinor+shift_band),mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
-         ek1_k(iband)=two*six*scprod
+         ek1_k(iband)=two*energy_factor*scprod
        end if
 
      end if ! End of non-zero occupation
@@ -565,11 +567,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !======================================================================
 
 !For rf2 perturbation
- if(ipert==natom+10.or.ipert==natom+11) then
-!   write(message,'(a)') ' m_rf2 : free'
-!   call wrtout(std_out,msg,'COLL')
-   call rf2_destroy(rf2)
- end if
+ if(ipert==natom+10.or.ipert==natom+11) call rf2_destroy(rf2)
 
 !Find largest resid over bands at this k point
  residk=maxval(resid_k(:))

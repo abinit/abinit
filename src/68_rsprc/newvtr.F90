@@ -65,7 +65,7 @@
 !!  moved_atm_inside= if 1, then the preconditioned forces
 !!    as well as the preconditioned potential residual must be computed;
 !!    otherwise, compute only the preconditioned potential residual.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
@@ -198,8 +198,8 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  integer,intent(in) :: ntypat,usepaw
  integer,intent(inout) :: dbl_nnsclo
  real(dp),intent(in) :: etotal,gsqcut
- type(MPI_type),intent(inout) :: mpi_enreg
- type(dataset_type),intent(inout) :: dtset
+ type(MPI_type),intent(in) :: mpi_enreg
+ type(dataset_type),intent(in) :: dtset
  type(ab7_mixing_object),intent(inout) :: mix
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_data), intent(inout) :: wvl
@@ -304,7 +304,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  if(dtset%usewvl==0) then
    ucvol_local=ucvol
  else
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
    ucvol_local = product(wvl%den%denspot%dpbox%hgrids) * real(nfftot, dp)
 #endif
  end if

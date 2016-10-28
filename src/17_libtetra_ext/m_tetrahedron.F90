@@ -107,8 +107,8 @@ contains
 !! deallocate tetrahedra pointers if needed
 !!
 !! PARENTS
-!!      ep_el_weights,ep_fs_weights,ep_ph_weights,gstate,m_ebands,m_phgamma
-!!      m_phonons,tetrahedron,thmeig,wfk_analyze
+!!      ep_el_weights,ep_fs_weights,ep_ph_weights,gstate,m_ebands,m_fstab
+!!      m_phgamma,m_phonons,tetrahedron,thmeig,wfk_analyze
 !!
 !! CHILDREN
 !!      mpi_comm_rank,mpi_comm_size
@@ -166,8 +166,8 @@ end subroutine destroy_tetra
 !!  tetrahedra%vv = tetrahedron volume divided by full BZ volume
 !!
 !! PARENTS
-!!      ep_el_weights,ep_fs_weights,ep_ph_weights,m_bz_mesh,m_ebands,m_phgamma
-!!      m_phonons,tetrahedron,thmeig
+!!      ep_el_weights,ep_fs_weights,ep_ph_weights,m_bz_mesh,m_ebands,m_fstab
+!!      m_phgamma,m_phonons,tetrahedron,thmeig
 !!
 !! CHILDREN
 !!      mpi_comm_rank,mpi_comm_size
@@ -521,12 +521,12 @@ subroutine tetra_write(tetra, nkibz, kibz, path)
  double precision,intent(in) :: kibz(3,nkibz)
 
 !Local variables-------------------------------
- integer,parameter :: version=1,unt=95
- integer :: ik,it
+ integer,parameter :: version=1
+ integer :: ik,it,unt
 
 ! *********************************************************************
 
- open(file=trim(path), unit=unt, form="formatted", status="unknown", action="write")
+ open(file=trim(path), newunit=unt, form="formatted", status="unknown", action="write")
 
  write(unt,*)version, " # version number"
 
@@ -602,6 +602,9 @@ end subroutine tetra_write
 !!
 !! SOURCE
 
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! THIS FUNCTION IS DEPRECATED, USE tetra_blochl_weights
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 subroutine get_tetra_weight(eigen_in,enemin,enemax,max_occ,nene,nkpt,tetrahedra,&
   bcorr,tweight,dtweightde,comm)
 
@@ -654,7 +657,7 @@ end subroutine get_tetra_weight
 !! Same API as get_tetra_weight but weights here have shape (nene, nkpt)
 !!
 !! PARENTS
-!!      m_ebands,m_phgamma,m_tetrahedron
+!!      m_ebands,m_fstab,m_phgamma,m_tetrahedron
 !!
 !! CHILDREN
 !!      mpi_comm_rank,mpi_comm_size

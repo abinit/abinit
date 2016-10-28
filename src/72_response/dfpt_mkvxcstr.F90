@@ -21,7 +21,7 @@
 !!  idir=direction of the current perturbation
 !!  ipert=type of the perturbation
 !!  kxc(nfft,nkxc)=exchange and correlation kernel (see rhohxc.f)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,
@@ -85,7 +85,7 @@ subroutine dfpt_mkvxcstr(cplex,idir,ipert,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nh
 !scalars
  integer,intent(in) :: cplex,idir,ipert,n3xccc,natom,nfft,nkxc,nspden,option
  integer,intent(in) :: paral_kgb,usepaw,usexcnhat
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),target,intent(in) :: nhat(nfft,nspden)

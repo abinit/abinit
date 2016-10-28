@@ -11,7 +11,6 @@ Most of them are ran through the runtests.py utility. Type
 
     $ runtests.py --help
 
-
 to get help.
 
 There is a small README file in the subdirectories that contain the input and reference files.
@@ -20,7 +19,7 @@ and can also be accessed through `runtests.py`  (aka `runtests.py -l`).
 
 Also, typing
 
-    make help
+    $ make help
 
 will give information on the use of the make command in the present directory. 
 `make` mostly relies on `runtests.py`,

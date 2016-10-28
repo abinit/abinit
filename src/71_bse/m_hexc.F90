@@ -35,7 +35,7 @@ MODULE m_hexc
  use m_nctk
  use m_haydock_io
  use m_linalg_interfaces
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -402,7 +402,7 @@ subroutine hexc_init(hexc, BSp, BS_files, Cryst, Kmesh_coarse, Wfd_coarse, KS_BS
    end do
   
    if (BSp%prt_ncham) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      ncerr = nctk_open_create(ncid, trim(hexc%BS_files%out_basename)//"_HEXC.nc", xmpi_comm_self) 
      NCF_CHECK_MSG(ncerr, "Creating HEXC file")
      call exc_ham_ncwrite(ncid, hexc%Kmesh_coarse, hexc%BSp, hexc%hsize_coarse, hexc%BSp%nreh, &
@@ -665,7 +665,7 @@ subroutine hexc_build_hinterp(hexc,hexc_i)
 
 
  if (hexc%BSp%prt_ncham) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    MSG_COMMENT("Printing HEXC_I.nc file")
    ncerr = nctk_open_create(ncid, trim(hexc%BS_files%out_basename)//"_HEXC_I.nc", xmpi_comm_self) 
    NCF_CHECK_MSG(ncerr, "Creating HEXC_I file")

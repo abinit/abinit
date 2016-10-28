@@ -34,6 +34,7 @@ MODULE m_exc_diago
  use mpi
 #endif
  use m_hdr
+ use m_sort
 
  use defs_abitypes,     only : hdr_type
  use m_io_tools,        only : open_file
@@ -719,7 +720,6 @@ subroutine exc_print_eig(BSp,bseig_fname,gw_gap,exc_gap)
 #undef ABI_FUNC
 #define ABI_FUNC 'exc_print_eig'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
