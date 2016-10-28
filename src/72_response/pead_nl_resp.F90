@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/dfptnl_resp
+!!****f* ABINIT/pead_nl_resp
 !! NAME
-!! dfptnl_resp
+!! pead_nl_resp
 !!
 !! FUNCTION
 !! Compute the linear response part to the 3dte
@@ -54,7 +54,7 @@
 !!  d3lo(2,3,mpert,3,mpert,3,mpert) = matrix of the 3DTEs
 !!
 !! PARENTS
-!!      dfptnl_loop
+!!      pead_nl_loop
 !!
 !! CHILDREN
 !!      destroy_hamiltonian,dotprod_g,fftpac,fourwf,init_hamiltonian
@@ -69,7 +69,7 @@
 #include "abi_common.h"
 
 
-subroutine dfptnl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
+subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 & i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,&
 & kg,mband,mgfft,mkmem,mk1mem,&
 & mpert,mpi_enreg,mpsang,mpw,natom,nfft,nkpt,nspden,nspinor,nsppol,&
@@ -90,7 +90,7 @@ subroutine dfptnl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'dfptnl_resp'
+#define ABI_FUNC 'pead_nl_resp'
  use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_66_nonlocal
@@ -347,5 +347,5 @@ subroutine dfptnl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 
  call status(0,dtfil%filstat,iexit,level,'exit          ')
 
-end subroutine dfptnl_resp
+end subroutine pead_nl_resp
 !!***

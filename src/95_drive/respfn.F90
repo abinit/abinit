@@ -1357,7 +1357,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   has_full_piezo,has_allddk,ab_out,dtset%mband,mpert,natom,ntypat,&
 &   outd2,pawbec,pawpiezo,piezofrnl,dtset%prtbbb,dtset%prtvol,qphon,qzero,&
 &   dtset%typat,rfdir,rfpert,rfphon,rfstrs,psps%usepaw,usevdw,psps%ziontypat)
-
    close(dtfil%unddb)
 
 #ifdef HAVE_NETCDF

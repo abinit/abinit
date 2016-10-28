@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/dfptnl_mv
+!!****f* ABINIT/pead_nl_mv
 !! NAME
-!! dfptnl_mv
+!! pead_nl_mv
 !!
 !! FUNCTION
 !! Compute the finite difference expression of the k-point derivative
@@ -71,7 +71,7 @@
 !! TODO
 !!
 !! PARENTS
-!!      dfptnl_loop
+!!      pead_nl_loop
 !!
 !! CHILDREN
 !!      dzgedi,dzgefa,mpi_recv,mpi_send,status,wrtout,xmpi_sum
@@ -85,7 +85,7 @@
 #include "abi_common.h"
 
 
-subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
+subroutine pead_nl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 &                   i1pert,i3pert,i1dir,i3dir,kneigh,kg_neigh,kptindex,&
 &                   kpt3,mband,mkmem,mkmem_max,mk1mem,mpi_enreg,&
 &                   mpw,mvwtk,natom,nkpt2,nkpt3,nneigh,npwarr,nspinor,&
@@ -104,7 +104,7 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'dfptnl_mv'
+#define ABI_FUNC 'pead_nl_mv'
  use interfaces_14_hidewrite
  use interfaces_28_numeric_noabirule
  use interfaces_32_util
@@ -183,7 +183,7 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 ! ***********************************************************************
 
 !DEBUG
-!write(std_out,*)' dfptnl_mv : enter '
+!write(std_out,*)' pead_nl_mv : enter '
 !flush(6)
 !stop
 !ENDDEBUG
@@ -192,7 +192,7 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
  call status(0,dtfil%filstat,iexit,level,'enter         ')
 
  write(message,'(8a)') ch10,&
-& ' dfptnl_mv : finite difference expression of the k-point derivative',ch10,&
+& ' pead_nl_mv : finite difference expression of the k-point derivative',ch10,&
 & '           is performed using the PEAD formulation of ',&
 & 'the third-order energy',ch10,&
 & '           (see Nunes and Gonze PRB 63, 155107 (2001) Eq. 102)',ch10
@@ -638,7 +638,7 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
 
 
 !DEBUG
-!write(100,*)'dfptnl_mv.f : d3_berry'
+!write(100,*)'pead_nl_mv.f : d3_berry'
 !write(100,*)'Perturbation',i1dir,i3dir
 !write(100,*)
 !write(100,*)'before transformation'
@@ -725,8 +725,8 @@ subroutine dfptnl_mv(cg,cgindex,cg1,cg3,dtset,dtfil,d3_berry,gmet,&
  call status(0,dtfil%filstat,iexit,level,'exit          ')
 
 !DEBUG
-!write(std_out,*)' dfptnl_mv : exit '
+!write(std_out,*)' pead_nl_mv : exit '
 !ENDDEBUG
 
-end subroutine dfptnl_mv
+end subroutine pead_nl_mv
 !!***

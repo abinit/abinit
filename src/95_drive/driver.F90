@@ -669,9 +669,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    case(RUNL_NONLINEAR)
 
      call status(jdtset_status,filstat,iexit,level,'call nonlinear')
-     call nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
-&     dtset%mband,dtset%mgfft,dtset%mkmem,mpi_enregs(idtset),dtset%mpw,dtset%natom,dtset%nfft,dtset%nkpt,npwtot,dtset%nspden,&
-&     dtset%nspinor,dtset%nsppol,dtset%nsym,occ,pawrad,pawtab,psps,xred)
+     call nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enregs(idtset),npwtot,occ,&
+&     pawang,pawrad,pawtab,psps,xred)
 
    case(6)
 

@@ -18,10 +18,10 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "dfptnl_mv.F90",
  "inwffil.F90",
  "lobpcgwf.F90",
  "m_lobpcg.F90",
+ "pead_nl_mv.F90",
  "tddft.F90",
  "vtowfk.F90",
  "vtorho.F90",
