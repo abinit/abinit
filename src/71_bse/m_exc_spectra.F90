@@ -958,6 +958,7 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
  complex(dpc) :: eps,fam,famp
  character(len=500) :: msg,errmsg
  character(len=fnlen) :: filbseig
+ logical :: do_lifetime
  !type(Hdr_type) :: tmp_Hdr
 !arrays
  complex(dpc),allocatable :: Ami(:),exc_ene(:),Sm1mi(:)
@@ -989,6 +990,12 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
  call wrtout(std_out," Reading excitonic eigenstates from file: "//trim(filbseig),"COLL")
  if (open_file(filbseig,msg,newunit=eig_unt,form="unformatted", status="old", action="read") /= 0) then
    MSG_ERROR(msg)
+ end if
+ 
+ read(eig_unt, err=10, iomsg=errmsg) do_lifetime
+
+ if (do_lifetime) then
+   ABI_CHECK(.not. do_lifetime, "Finite lifetime with coupling is not supported yet !")
  end if
 
  read(eig_unt, err=10, iomsg=errmsg) exc_size_read, nstates_read
