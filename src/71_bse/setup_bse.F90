@@ -922,9 +922,6 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
      call eprenorms_from_epnc(Epren,ep_nc_fname)
    end if
    call eprenorms_bcast(Epren,master,comm)
-   write(*,*) "WILL_DO_ELPHON !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
- else
-   write(*,*) "NOT DOING ELPHON !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
  end if 
 
 

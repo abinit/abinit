@@ -30,9 +30,10 @@ module m_eprenorms
  
  use m_crystal, only :       crystal_t
 
-#ifdef HAVE_TRIO_ETSF_IO
- use etsf_io
+#ifdef HAVE_NETCDF
+ use netcdf
 #endif
+ use m_nctk
 
  implicit none
  private 
@@ -257,49 +258,29 @@ subroutine eprenorms_from_epnc(Epren,filename)
 
 !Local variables------------------------------
  integer :: nkpt, mband, nsppol, ntemp
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_NETCDF
  integer :: ncid
- logical :: lstat
- type(etsf_io_low_error) :: error_data
 #endif
 
 ! ************************************************************************
 
-#ifdef HAVE_TRIO_ETSF_IO
- call etsf_io_low_open_read(ncid, filename, lstat, error_data = error_data, with_etsf_header=.FALSE.) 
- ETSF_CHECK_ERROR(lstat, error_data)
+#ifdef HAVE_NETCDF
+ NCF_CHECK(nctk_open_read(ncid, filename, xmpi_comm_self))
+ NCF_CHECK(nctk_set_datamode(ncid))
 
- call etsf_io_low_read_dim(ncid, "number_of_kpoints", nkpt, lstat, error_data = error_data)
- ETSF_CHECK_ERROR(lstat, error_data)
-
- call etsf_io_low_read_dim(ncid, "number_of_spins", nsppol, lstat, error_data = error_data)
- ETSF_CHECK_ERROR(lstat, error_data)
-
- call etsf_io_low_read_dim(ncid, "max_number_of_states", mband, lstat, error_data = error_data)
- ETSF_CHECK_ERROR(lstat, error_data)
-
- call etsf_io_low_read_dim(ncid, "number_of_temperature", ntemp, lstat, error_data = error_data)
- ETSF_CHECK_ERROR(lstat, error_data)
+ NCF_CHECK(nctk_get_dim(ncid, "number_of_kpoints", nkpt))
+ NCF_CHECK(nctk_get_dim(ncid, "number_of_spins",nsppol))
+ NCF_CHECK(nctk_get_dim(ncid, "max_number_of_states",mband))
+ NCF_CHECK(nctk_get_dim(ncid, "number_of_temperature",ntemp))
 
  call eprenorms_init(Epren, nkpt, nsppol, mband, ntemp)
 
- call etsf_io_low_read_var(ncid, "reduced_coordinates_of_kpoints", Epren%kpts, lstat, error_data = error_data)
- ETSF_CHECK_ERROR(lstat, error_data)
-
- call etsf_io_low_read_var(ncid, "temperature", Epren%temps, lstat, error_data = error_data)
- ETSF_CHECK_ERROR(lstat, error_data)
-
- call etsf_io_low_read_var(ncid, "eigenvalues", Epren%eigens, lstat, error_data = error_data)
- ETSF_CHECK_ERROR(lstat, error_data)
-
- call etsf_io_low_read_var(ncid, "occupations", Epren%occs, lstat, error_data = error_data)
- ETSF_CHECK_ERROR(lstat, error_data)
-
- call etsf_io_low_read_var(ncid, "zero_point_motion", Epren%renorms, lstat, error_data = error_data)
- ETSF_CHECK_ERROR(lstat, error_data)
- 
- call etsf_io_low_read_var(ncid, "lifetime", Epren%lifetimes, lstat, error_data = error_data)
- ETSF_CHECK_ERROR(lstat, error_data)
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"reduced_coordinates_of_kpoints"), Epren%kpts))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"temperature"), Epren%temps))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"eigenvalues"), Epren%eigens))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"occupations"), Epren%occs))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"zero_point_motion"), Epren%renorms))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid,"lifetime"), Epren%lifetimes))
 
 #endif
 
