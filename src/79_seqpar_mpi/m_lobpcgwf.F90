@@ -216,7 +216,6 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,gsc,kinpw,mpi_enreg,&
 
 
 
- ! For getghc_gsc for one block -> size blockdim
  ABI_MALLOC(l_gvnlc,(2,l_npw*l_nspinor*blockdim))
 
  ! Local variables for lobpcg
@@ -246,8 +245,10 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,gsc,kinpw,mpi_enreg,&
  ABI_FREE(l_pcon)
 
  ! Get GSC
- call lobpcg_getAX_BX(lobpcg,xgghc,xggsc)
- call xgBlock_get(xggsc,gsc(:,1:npw*nspinor*nband),0,l_npw*l_nspinor)
+ if ( l_paw ) then
+   call lobpcg_getAX_BX(lobpcg,xgghc,xggsc)
+   call xgBlock_get(xggsc,gsc(:,1:npw*nspinor*nband),0,l_npw*l_nspinor)
+ end if
 
  if(l_istwf == 2) then
    cg = cg * inv_sqrt2
@@ -396,6 +397,8 @@ end subroutine lobpcgwf2
       if(l_mpi_enreg%me_g0 == 1) gsc(:, 1:spacedim*blockdim:l_npw) = gsc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
     end if
   end if
+
+  if ( .not. l_paw ) call xgBlock_copy(X,BX)
 
   !call xgBlock_set(AX,ghc,0,spacedim)
   !call xgBlock_set(BX,gsc(:,1:blockdim*spacedim),0,spacedim)

@@ -790,8 +790,7 @@ end if
  end if
 
 !Norm-conserving only: Compute nonlocal part of total energy : rotate subvnl
- if (gs_hamk%usepaw==0 .and. (wfopta10 /= 1 .or. (wfoptalg /= 14 .or. dtset%useric /= 666999 ) ) ) then
-   write(std_out,*) "Computing ENL_K !!!!"
+ if (gs_hamk%usepaw==0 .and. wfopta10 /= 1 .and. (wfoptalg /= 14 .or. dtset%useric /= 666999 ) ) then
    call timab(586,1,tsec)   ! 'vtowfk(nonlocalpart)'
    ABI_ALLOCATE(matvnl,(2,nband_k,nband_k))
    ABI_ALLOCATE(mat1,(2,nband_k,nband_k))
