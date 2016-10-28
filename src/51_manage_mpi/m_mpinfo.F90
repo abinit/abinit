@@ -320,7 +320,6 @@ subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
  mpi_enreg2%nproc_fft=mpi_enreg1%nproc_fft
  mpi_enreg2%paral_kgb=mpi_enreg1%paral_kgb
  mpi_enreg2%me_g0=mpi_enreg1%me_g0
-!mpi_enreg2%flag_ind_kg_mpi_to_seq=mpi_enreg1%flag_ind_kg_mpi_to_seq
  mpi_enreg2%paral_pert=mpi_enreg1%paral_pert
  mpi_enreg2%me_pert=mpi_enreg1%me_pert
  mpi_enreg2%nproc_pert=mpi_enreg1%nproc_pert
@@ -357,6 +356,7 @@ subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
  mpi_enreg2%nproc_hf   =mpi_enreg1%nproc_hf
  mpi_enreg2%comm_hf    =mpi_enreg1%comm_hf
  mpi_enreg2%paral_hf=mpi_enreg1%paral_hf
+ mpi_enreg2%pw_unbal_threshold=mpi_enreg1%pw_unbal_threshold
 
 !pointers
  if (associated(mpi_enreg1%distribfft)) then
