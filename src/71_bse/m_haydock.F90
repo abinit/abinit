@@ -594,6 +594,11 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
  !YG2014
  call hexc_free(hexc)
  call hexc_interp_free(hexc_i)
+
+ if (do_ep_renorm) then
+   ABI_FREE(ep_renorms)
+   ABI_FREE(bs2eph)
+ end if
  
  call timab(695,2,tsec) ! exc_haydock_driver(end)
  call timab(690,2,tsec) ! exc_haydock_driver
@@ -1975,7 +1980,7 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
 !scalars
  integer,parameter :: master=0
  integer :: inn,itt,out_unt,nproc,my_rank,ierr
- integer :: niter_file,niter_max,niter_done,nsppol,iq,my_nt,term_type
+ integer :: niter_file,niter_max,niter_done,nsppol,iq,my_nt,term_type,n_all_omegas
  real(dp) :: ket0_hbar_norm,nfact,norm
  logical :: can_restart,is_converged
  complex(dpc) :: factor
@@ -1992,6 +1997,7 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
  complex(dpc),allocatable :: cbuff(:), phi_n_file(:),phi_np1_file(:)
  complex(dpc),allocatable :: ket0(:)
  complex(dpc),allocatable :: hphi_n(:), hphit_n(:)
+ complex(dpc),allocatable :: all_omegas(:),green_temp(:,:)
  logical :: check(2)
 
 !************************************************************************
@@ -2132,10 +2138,35 @@ subroutine haydock_bilanczos(BSp,BS_files,Cryst,Hdr_bse,hexc,hexc_i,hsize,my_t1,
    check = (/.TRUE.,.TRUE./) 
    if (ABS(Bsp%haydock_tol(2)-one)<tol6) check = (/.TRUE. ,.FALSE./) 
    if (ABS(Bsp%haydock_tol(2)-two)<tol6) check = (/.FALSE.,.TRUE./) 
+   ! Create new frequencies "mirror" in negative range to add 
+   ! their contributions. Can be improved by computing only once
+   ! zero frequency, but loosing clearness
+   n_all_omegas = 2*BSp%nomega
 
-   call haydock_bilanczos_optalgo(niter_done,niter_max,BSp%nomega,BSp%omega,BSp%haydock_tol(1),check,hexc,hexc_i,&
+   ABI_MALLOC(all_omegas,(n_all_omegas))
+   ! Put all omegas with frequency > 0 in table
+   all_omegas(BSp%nomega+1:n_all_omegas) = BSp%omega
+   ! Put all omegas with frequency < 0
+   ! Warning, the broadening must be kept positive
+   all_omegas(1:BSp%nomega) = -DBLE(BSp%omega(BSp%nomega:1:-1)) + j_dpc*AIMAG(BSp%omega(BSp%nomega:1:-1))
+
+   ABI_MALLOC(green_temp,(n_all_omegas,nkets))
+ 
+
+
+   call haydock_bilanczos_optalgo(niter_done,niter_max,n_all_omegas,all_omegas,BSp%haydock_tol(1),check,hexc,hexc_i,&
 &    hsize,my_t1,my_t2,factor,term_type,ep_renorms,aa,bb,cc,ket0,ket0_hbar_norm,phi_nm1,phi_n,phi_np1,&
-&    phit_nm1,phit_n,phit_np1,green(:,iq),inn,is_converged,comm)
+&    phit_nm1,phit_n,phit_np1,green_temp(:,iq),inn,is_converged,comm)
+
+
+   ! Computing result from two ranges of frequencies
+   ! The real part is added, the imaginary part is substracted
+   green(:,iq) = green_temp(BSp%nomega+1:n_all_omegas,iq)+CONJG(green_temp(BSp%nomega:1:-1,iq))
+
+   ABI_FREE(all_omegas)
+   ABI_FREE(green_temp)
+
+
    !
    ! Save the a"s and the b"s for possible restarting.
    ! 1) Info on the Q.
@@ -2411,6 +2442,11 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  ABI_FREE(g00)
  ABI_FREE(hphi_np1)
  ABI_FREE(hphit_np1)
+
+ if (keep_vectors) then
+   ABI_FREE(save_phi)
+   ABI_FREE(save_phit)
+ end if
 
  !! if (keep_vectors) then
  !!   tdim = MIN(inn,niter_tot)

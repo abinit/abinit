@@ -455,6 +455,8 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
    end do
  end do
 
+ ABI_FREE(bs2eph)
+
 end subroutine renorm_bst
 !!***
 

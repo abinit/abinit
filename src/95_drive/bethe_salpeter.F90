@@ -125,7 +125,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  use m_energies,        only : energies_type, energies_init
  use m_haydock,         only : exc_haydock_driver
  use m_exc_diago,       only : exc_diago_driver
- use m_eprenorms,       only : eprenorms_t
+ use m_eprenorms,       only : eprenorms_t, eprenorms_free
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
  use m_pawtab,          only : pawtab_type, pawtab_print, pawtab_get_lsize
@@ -987,6 +987,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call bs_parameters_free(BSp)
  call wfd_free(Wfd)
  call pawfgr_destroy(Pawfgr)
+ call eprenorms_free(Epren)
 
  ! Free memory used for interpolation.
  if (BSp%use_interp) then 

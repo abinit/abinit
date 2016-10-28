@@ -796,6 +796,7 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
      end do
      ostrength(ll,:) = ctemp(:)*CONJG(dtemp(:))
    end do ! ll
+   ABI_FREE(exc_state2)
  else
    do ll=1,neig_read ! Loop over excitonic eigenstates reported on file.
      read(eig_unt, err=10, iomsg=errmsg) exc_state(:)
@@ -827,7 +828,7 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
      do iq=1,BSp%nq
         do iw=1,nomega
           eps_exc(iw,iq) = eps_exc(iw,iq) +  &
-  &         fact * ostrength(ll,iq) * (one/(exc_ene_cplx(ll) - omega(iw)) - one/(-exc_ene_cplx(ll) - omega(iw)))
+  &         fact * ostrength(ll,iq) * (one/(exc_ene_cplx(ll) - omega(iw)) - one/(-DCONJG(exc_ene_cplx(ll)) - omega(iw)))
         end do
      end do !ll
    end do !iw
