@@ -369,6 +369,10 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
    end if
  end if
 
+ if (do_ep_renorm) then
+   ABI_CHECK(nsppol == 1, "Nsppol == 2 not supported with elphon renormalizations")
+ end if
+
  SELECT CASE (use_scalapack)
  CASE (.FALSE.)
 
@@ -474,17 +478,17 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
      end if
 
      if (do_full_diago) then 
-       call wrtout(std_out," Full diagonalization with XHEEV... ","COLL")
-       !call xheev("Vectors","Upper",exc_size,exc_mat,exc_ene)
-
-       !exc_ene_c(:) = exc_ene(:)
-
-
-       ABI_MALLOC(exc_vec,(exc_size,exc_size))
-       ! Try complex !
-       call xgeev('V','V',exc_size,exc_mat,exc_size,exc_ene_c,exc_vl,exc_size,exc_vec,exc_size)
-       exc_mat(:,1:nstates) = exc_vec
-       ABI_FREE(exc_vec)
+       if(do_ep_renorm) then
+         call wrtout(std_out," Full diagonalization with XGEEV... ","COLL")
+         ABI_MALLOC(exc_vec,(exc_size,exc_size))
+         call xgeev('V','V',exc_size,exc_mat,exc_size,exc_ene_c,exc_vl,exc_size,exc_vec,exc_size)
+         exc_mat(:,1:nstates) = exc_vec
+         ABI_FREE(exc_vec)
+       else
+         call wrtout(std_out," Full diagonalization with XHEEV... ","COLL")
+         call xheev("Vectors","Upper",exc_size,exc_mat,exc_ene)
+         exc_ene_c(:) = exc_ene(:)
+       end if
      else
        call wrtout(std_out," Partial diagonalization with XHEEVX... ","COLL")
        abstol=zero; il=1; iu=nstates
