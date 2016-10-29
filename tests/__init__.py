@@ -165,6 +165,7 @@ _tsuite_dirs = [
     "v6",
     "v67mbpt",
     "v7",
+    "v8",
     "vdwxc",
     "wannier90",
 ]
@@ -397,10 +398,14 @@ class AbinitTestsDatabase(dict):
                 # return fname.endswith(".files")
                 return fname.endswith(".files") or os.path.basename(fname) in ["report.in"]
 
+            keys = []
             for fname, ntimes in inp2test.items():
-                if remove_file(fname):
-                    ntest = inp2test.pop(fname)
+                if not remove_file(fname):
+                    keys.append(fname)
+                else:
+                    ntest = inp2test[fname]
                     assert ntest == 0
+            inp2test = {k: inp2test[k] for k in keys}
 
             # At this point inp2test should be >= 1.
             for fname, ntimes in inp2test.items():
