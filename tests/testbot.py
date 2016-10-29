@@ -454,7 +454,7 @@ class TestBotSummary(object):
 
     def suite_names(self):
         """List of suite names in alphabetical order."""
-        return sorted(self.res_table.keys())
+        return sorted(list(self.res_table.keys()))
 
     def status_of_suite(self, suite_name):
         """
@@ -476,7 +476,11 @@ class TestBotSummary(object):
                 suite_status = status
                 break
         else:
-            raise RuntimeError("Wrong list of status values!")
+            # Ignore error if suite is empty else raise.
+            if not self.res_table[suite_name]:
+                suite_status = "succeeded"
+            else:
+                raise RuntimeError("[%s] Wrong list of status values!" % suite_name)
 
         return suite_status, stats
 
