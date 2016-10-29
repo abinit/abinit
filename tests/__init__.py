@@ -405,7 +405,8 @@ class AbinitTestsDatabase(dict):
                 else:
                     ntest = inp2test[fname]
                     assert ntest == 0
-            inp2test = {k: inp2test[k] for k in keys}
+            #inp2test = {k: inp2test[k] for k in keys} # requires py2.7
+            inp2test = dict([(k, inp2test[k]) for k in keys])
 
             # At this point inp2test should be >= 1.
             for fname, ntimes in inp2test.items():
