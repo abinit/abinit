@@ -106,7 +106,7 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
  integer :: bandpp,basis_size,comm_kptband,cplex,fatbands_flag,iat,iatom,iband,ibg,ibsp
  integer :: ierr,ikpt,il,ilang,ilmn,iln,im,iorder_cprj,ispinor,isppol,itypat,j0lmn,j0ln
  integer :: jl,jlmn,jln,jm,klmn,kln,lmn_size,mbesslang,me_band,me_kpt,my_nspinor
- integer :: nband_cprj_k,nband_k,ndosfraction,nprocband,nproc_kptband,paw_dos_flag,prtdosm
+ integer :: nband_cprj_k,nband_k,ndosfraction,nprocband,nproc_spkptband,paw_dos_flag,prtdosm
  real(dp) :: cpij,one_over_nproc
  character(len=500) :: message
 !arrays
@@ -174,7 +174,7 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 
 !Init parallelism
  comm_kptband=mpi_enreg%comm_kptband
- nproc_kptband=xmpi_comm_size(comm_kptband)
+ nproc_spkptband=xmpi_comm_size(comm_kptband)*mpi_enreg%nproc_spinor
  me_kpt=mpi_enreg%me_kpt ; me_band=mpi_enreg%me_band
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
  bandpp=1;if (mpi_enreg%paral_kgb==1) bandpp=mpi_enreg%bandpp
@@ -188,8 +188,8 @@ subroutine partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enre
 !Quick hack: in case of parallelism, dos_fractions have already
 !  been reduced over MPI processes; they have to be prepared before
 !  the next reduction (at the end of the following loop).
- if (nproc_kptband>1) then
-   one_over_nproc=one/real(nproc_kptband,kind=dp)
+ if (nproc_spkptband>1) then
+   one_over_nproc=one/real(nproc_spkptband,kind=dp)
 !$OMP  PARALLEL DO COLLAPSE(4) &
 !$OMP& DEFAULT(SHARED) PRIVATE(ilang,isppol,iband,ikpt)
    do ilang=1,ndosfraction
