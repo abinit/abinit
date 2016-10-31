@@ -220,9 +220,11 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
 
 
      if (BSp%use_coupling==0) then
-       call exc_eps_resonant(BSp,filbseig,ost_fname,lomo_min,max_band,BSp%nkbz,nsppol,opt_cvk,Cryst%ucvol,BSp%nomega,BSp%omega,eps_exc,dos_exc,elph_lifetime=do_ep_renorm)
+       call exc_eps_resonant(BSp,filbseig,ost_fname,lomo_min,max_band,BSp%nkbz,nsppol,opt_cvk,&
+&        Cryst%ucvol,BSp%nomega,BSp%omega,eps_exc,dos_exc,elph_lifetime=do_ep_renorm)
      else
-       call exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,BSp%nkbz,nsppol,opt_cvk,Cryst%ucvol,BSp%nomega,BSp%omega,eps_exc,dos_exc)
+       call exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,BSp%nkbz,nsppol,opt_cvk,&
+&        Cryst%ucvol,BSp%nomega,BSp%omega,eps_exc,dos_exc)
      end if
      !
      ! =======================================================
@@ -253,7 +255,6 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
      end do
      write(ab_out,*)" "
 
-     write(*,*) "prefix = ",prefix
      !
      ! Master node writes final results on file.
      call exc_write_data(BSp,BS_files,"RPA_NLF_MDF",eps_rpanlf,prefix=prefix,dos=dos_ks)
@@ -593,7 +594,8 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
            do iq=1,nq
              ctemp = opt_cvk(ib_c,ib_v,ik_bz,spin,iq)
              do iw=1,nomega
-               eps_rpa(iw,iq) = eps_rpa(iw,iq)  + ctemp * CONJG(ctemp) * (one/(ediff-j_dpc*lifetime-omega(iw)) + one/(ediff+j_dpc*lifetime+omega(iw)))
+               eps_rpa(iw,iq) = eps_rpa(iw,iq)  + ctemp * CONJG(ctemp) *&
+&             (one/(ediff-j_dpc*lifetime-omega(iw)) + one/(ediff+j_dpc*lifetime+omega(iw)))
              end do
            end do
            !
@@ -610,7 +612,8 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
            do iq=1,nq
              ctemp = opt_cvk(ib_c,ib_v,ik_bz,spin,iq)
              do iw=1,nomega
-               eps_rpa(iw,iq) = eps_rpa(iw,iq)  + ctemp * CONJG(ctemp) * (one/(ediff-omega(iw)) + one/(ediff+omega(iw)))
+               eps_rpa(iw,iq) = eps_rpa(iw,iq)  + ctemp * CONJG(ctemp) *&
+&             (one/(ediff-omega(iw)) + one/(ediff+omega(iw)))
              end do
            end do
            !
@@ -668,7 +671,8 @@ end subroutine exc_eps_rpa
 !! SOURCE
 
 
-subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol,opt_cvk,ucvol,nomega,omega,eps_exc,dos_exc,elph_lifetime)
+subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol,opt_cvk,&
+&    ucvol,nomega,omega,eps_exc,dos_exc,elph_lifetime)
 
 
 !This section has been created automatically by the script Abilint (TD).

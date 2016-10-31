@@ -36,10 +36,6 @@ MODULE m_optic_tools
  use m_numeric_tools,   only : wrap2_pmhalf
  use m_io_tools,        only : open_file
 
-#ifdef HAVE_TRIO_ETSF_IO
- use etsf_io
-#endif
-
  implicit none
 
  private
@@ -52,7 +48,6 @@ MODULE m_optic_tools
  public :: nlinopt
  public :: linelop
  public :: nonlinopt
- public :: read_ep_nc
 
 CONTAINS  !===========================================================
 !!***
@@ -2764,112 +2759,6 @@ character(256) :: fnam1,fnam2,fnam3,fnam4,fnam5,fnam6,fnam7
 
 end subroutine nonlinopt
 !!***
-
-
-!----------------------------------------------------------------------
-
-!!****f* m_optic_tools/read_ep_nc
-!! NAME
-!! read_ep_nc
-!!
-!! FUNCTION
-!! This routine reads data from _EP.nc data file
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! PARENTS
-!!      optic
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine read_ep_nc(fname,nkpt,mband,nsppol,ntemp,temps,eigens,occs,renorms,lifetimes)
-
- use defs_basis
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'read_ep_nc'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
- integer, intent(out) :: nkpt
- integer, intent(out) :: mband
- integer, intent(out) :: nsppol
- integer, intent(out) :: ntemp
- real(dp), allocatable, intent(out) :: temps(:)
- real(dp), allocatable, intent(out) :: eigens(:,:,:)
- real(dp), allocatable, intent(out) :: occs(:,:,:)
- real(dp), allocatable, intent(out) :: renorms(:,:,:,:,:)
- real(dp), allocatable, intent(out) :: lifetimes(:,:,:,:,:)
- !real(dp), intent(out) :: eigens(mband, nkpt, nsppol)
- !real(dp), intent(out) :: occs(mband, nkpt, nsppol)
- !real(dp), intent(out) :: renorms(2, mband, nkpt, nsppol, ntemp)
- character(len=*), intent(in) :: fname
-
-!Local variables -------------------------
-#ifdef HAVE_TRIO_ETSF_IO
- integer :: ncid
- logical :: lstat 
- type(etsf_io_low_error) :: error_data
-#endif
-
-! *********************************************************************
-
-#ifdef HAVE_TRIO_ETSF_IO
- call etsf_io_low_open_read(ncid, fname, lstat, error_data = error_data, with_etsf_header=.FALSE.) 
- ETSF_CHECK_ERROR(lstat, error_data)
-
- call etsf_io_low_read_dim(ncid, "number_of_kpoints", nkpt, lstat, error_data = error_data)
- ETSF_CHECK_ERROR(lstat, error_data)
-
- call etsf_io_low_read_dim(ncid, "number_of_spins", nsppol, lstat, error_data = error_data)
- ETSF_CHECK_ERROR(lstat, error_data)
-
- call etsf_io_low_read_dim(ncid, "max_number_of_states", mband, lstat, error_data = error_data)
- ETSF_CHECK_ERROR(lstat, error_data)
-
- call etsf_io_low_read_dim(ncid, "number_of_temperature", ntemp, lstat, error_data = error_data)
- ETSF_CHECK_ERROR(lstat, error_data)
-
- ABI_MALLOC(temps,(ntemp))
-
- call etsf_io_low_read_var(ncid, "temperature", temps, lstat, error_data = error_data)
- ETSF_CHECK_ERROR(lstat, error_data)
-
- ABI_MALLOC(eigens,(mband,nkpt,nsppol))
-
- call etsf_io_low_read_var(ncid, "eigenvalues", eigens, lstat, error_data = error_data)
- ETSF_CHECK_ERROR(lstat, error_data)
-
- ABI_MALLOC(occs,(mband, nkpt, nsppol))
- 
- call etsf_io_low_read_var(ncid, "occupations", occs, lstat, error_data = error_data)
- ETSF_CHECK_ERROR(lstat, error_data)
-
- ABI_MALLOC(renorms,(2,mband, nkpt, nsppol, ntemp))
-
- call etsf_io_low_read_var(ncid, "zero_point_motion", renorms, lstat, error_data = error_data)
- ETSF_CHECK_ERROR(lstat, error_data)
- 
- ABI_MALLOC(lifetimes,(2,mband, nkpt, nsppol, ntemp))
-
- call etsf_io_low_read_var(ncid, "lifetime", lifetimes, lstat, error_data = error_data)
- ETSF_CHECK_ERROR(lstat, error_data)
-
-#endif
-
-end subroutine read_ep_nc
-!! ***
-
 
 !----------------------------------------------------------------------
 

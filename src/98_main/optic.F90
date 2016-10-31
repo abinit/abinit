@@ -579,10 +579,12 @@ program optic
          nband_tmp=MIN(nband1,Epren%mband)
 
          !FIXME change check
-         if (ANY(ABS(eigen0(1+bdtot0_index:MIN(10,nband_tmp)+bdtot0_index) - Epren%eigens(1:MIN(10,nband_tmp),ikpt,isppol)) > tol3)) then
+         if (ANY(ABS(eigen0(1+bdtot0_index:MIN(10,nband_tmp)+bdtot0_index) - &
+&             Epren%eigens(1:MIN(10,nband_tmp),ikpt,isppol)) > tol3)) then
            MSG_ERROR("Error in eigen !")
          end if
-         if (ANY(ABS(occ(1+bdtot0_index:MIN(10,nband_tmp)+bdtot0_index) - Epren%occs(1:MIN(10,nband_tmp),ikpt,isppol)) > tol3)) then
+         if (ANY(ABS(occ(1+bdtot0_index:MIN(10,nband_tmp)+bdtot0_index) - &
+&             Epren%occs(1:MIN(10,nband_tmp),ikpt,isppol)) > tol3)) then
            MSG_ERROR("Error in occ!")
          end if
 

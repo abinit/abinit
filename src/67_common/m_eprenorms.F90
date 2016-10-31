@@ -437,12 +437,12 @@ subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
      !FIXME change check
      if (check) then
        if (ANY(ABS(Bst%eig(1:MIN(10,nband_tmp),ikpt,isppol) - Epren%eigens(1:MIN(10,nband_tmp),ik_eph,isppol)) > tol3)) then
-         write(*,*) "eig : ",BSt%eig(1:MIN(10,nband_tmp),ikpt,isppol)
-         write(*,*) "eigens : ",Epren%eigens(1:MIN(10,nband_tmp),ikpt,isppol)
-         MSG_ERROR("Error in eigen !")
+         !write(stdout,*) "eig : ",BSt%eig(1:MIN(10,nband_tmp),ikpt,isppol)
+         !write(stdout,*) "eigens : ",Epren%eigens(1:MIN(10,nband_tmp),ikpt,isppol)
+         MSG_ERROR("Error in eigenvalues, check the _EP.nc file with respect to your input file !")
        end if
        if (ANY(ABS(Bst%occ(1:MIN(10,nband_tmp),ikpt,isppol) - Epren%occs(1:MIN(10,nband_tmp),ik_eph,isppol)) > tol3)) then
-         MSG_ERROR("Error in occ!")
+         MSG_ERROR("Error in occupations, check the _EP.nc file with respect to your input file !")
        end if
      end if
 

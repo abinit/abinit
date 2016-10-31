@@ -469,7 +469,8 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 
            ! Add lifetime
            if(do_ep_lifetime) then
-             exc_mat(ireh,ireh) = exc_mat(ireh,ireh) - j_dpc*(Epren%lifetimes(1,ic,ik,isppol,itemp) + Epren%lifetimes(1,iv,ik,isppol,itemp))
+             exc_mat(ireh,ireh) = exc_mat(ireh,ireh) - j_dpc*(Epren%lifetimes(1,ic,ik,isppol,itemp) &
+&                + Epren%lifetimes(1,iv,ik,isppol,itemp))
            end if
 
          end do

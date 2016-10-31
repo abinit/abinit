@@ -342,7 +342,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
    ! =================================================
    if (do_ep_renorm) then
        
-     write(*,*) "Will perform elphon renormalization for itemp = ",itemp
+     ! Will perform elphon renormalization for itemp
 
      call int2char4(itemp,ts)
      prefix = TRIM("_T") // ts
@@ -369,7 +369,8 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 
          ! Add lifetime
          if(do_ep_lifetime) then
-           ep_renorms(ireh) = ep_renorms(ireh) - j_dpc*(Epren%lifetimes(1,ic,ik,isppol,itemp) + Epren%lifetimes(1,iv,ik,isppol,itemp))
+           ep_renorms(ireh) = ep_renorms(ireh) - j_dpc*(Epren%lifetimes(1,ic,ik,isppol,itemp) +&
+&                                                       Epren%lifetimes(1,iv,ik,isppol,itemp))
          end if
 
        end do
@@ -2473,7 +2474,7 @@ subroutine haydock_bilanczos_optalgo(niter_done,niter_tot,nomega,omega,tol_iter,
  !!   mean_err = mean_err/tdim
  !!   std_dev = mean_err2/tdim -mean_err**2
  !!   write(std_out,'(a,i0,1x,3es14.6)')&
-&!!    " Error in normalization (ii, max_err,mean,std_dev): ",row_max,max_err,mean_err,std_dev
+ !!&    " Error in normalization (ii, max_err,mean,std_dev): ",row_max,max_err,mean_err,std_dev
 
  !!   ABI_FREE(phi_test)
  !!   ABI_FREE(phi_test2)
