@@ -556,6 +556,10 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
   effective_potential%harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,:,:) = zero
 
 
+ ABI_DEALLOCATE(atmfrc_red)
+ ABI_DEALLOCATE(wghatm_red)
+ ABI_DEALLOCATE(cell_red)
+
 !**********************************************************************
 ! Internal strain tensors at Gamma point
 !**********************************************************************
