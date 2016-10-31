@@ -554,6 +554,10 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
    ABI_FREE(exc_mat)
    ABI_FREE(exc_vl)
 
+   if (do_ep_renorm) then
+     ABI_FREE(bs2eph)
+   end if
+
  CASE (.TRUE.)
 
 #if defined HAVE_LINALG_SCALAPACK && defined HAVE_MPI_IO
