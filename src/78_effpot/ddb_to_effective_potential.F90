@@ -42,7 +42,7 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
  use m_ifc
  use m_copy,            only : alloc_copy
  use m_crystal,         only : crystal_t,crystal_print
- use m_dynmat,          only : asrif9,gtdyn9,cell9,canat9
+ use m_dynmat,          only : asrif9,gtdyn9,canat9
  use m_multibinit_dataset, only : multibinit_dataset_type
  use m_effective_potential, only : effective_potential_type, effective_potential_free
 
@@ -68,17 +68,21 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
 
 !Local variables-------------------------------
 !scalar
- integer :: chneut,ia,ib,iblok,idir1,idir2,ii,ipert1,iphl1
- integer :: ipert2,irpt,ivarA,ivarB,msize,mpert,natom,nblok,rftyp,selectz
+ real(dp):: icount1,icount2
+ integer :: chneut,i1,i2,i3,ia,ib,iblok,idir1,idir2,ii,ipert1,iphl1
+ integer :: ipert2,irpt,irpt2,ivarA,ivarB,max1,max2,max3,min1,min2,min3
+ integer :: msize,mpert,natom,nblok,nrpt_new,rftyp,selectz
  integer :: my_rank,nproc
  logical :: iam_master=.FALSE.
  integer,parameter :: master=0
 !arrays
- integer :: rfelfd(4),rfphon(4),rfstrs(4)
+ integer :: cell_number(3),cell2(3),rfelfd(4),rfphon(4),rfstrs(4)
+ integer :: shift(3)
  real(dp):: dielt(3,3),elast_clamped(6,6),fact
- real(dp):: qphnrm(3),qphon(3,3)
+ real(dp):: red(3,3),qphnrm(3),qphon(3,3)
  real(dp),allocatable :: blkval(:,:,:,:,:,:),d2asr(:,:,:,:,:)
  real(dp),allocatable :: instrain(:,:),zeff(:,:,:)
+ real(dp),pointer :: atmfrc_red(:,:,:,:,:,:),cell_red(:,:),wghatm_red(:,:,:)
  character(len=500) :: message
  type(ifc_type) :: ifc
  real(dp),allocatable :: d2cart(:,:,:,:,:),displ(:)
@@ -408,42 +412,149 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
   ABI_DEALLOCATE(phfrq)
 
 !**********************************************************************
-! Transfert inter-atomic forces constants
+! Transfert inter-atomic forces constants in reduced coordinates
 !**********************************************************************
 
 !Reorder cell from canonical coordinates to reduced coordinates (for multibinit)
- call cell9(ifc%atmfrc,inp%brav,ifc%cell,ddb%gprim,effective_potential%crystal%natom,ifc%nrpt,&
-&           ifc%rcan,ifc%rpt,ifc%wghatm,crystal%xred)
+!store the number of ifc before rearrangement  
+ icount1 = 0
+ do irpt=1,ifc%nrpt
+   icount1 = icount1 + sum(ifc%wghatm(:,:,irpt))
+ end do
+
+!Set the maximum and the miminum for the bound of the cell
+ max1 = maxval(ifc%cell(1,:));  min1 = minval(ifc%cell(1,:))
+ max2 = maxval(ifc%cell(2,:));  min2 = minval(ifc%cell(2,:))
+ max3 = maxval(ifc%cell(3,:));  min3 = minval(ifc%cell(3,:))
+ cell_number(1) = max1 - min1 +1
+ cell_number(2) = max2 - min2 +1
+ cell_number(3) = max3 - min3 +1
+!set the new number of cell, sometimes, in canonical coordinates,
+!somme cell are delete but they exist in reduced coordinates.
+ nrpt_new = product(cell_number(:))
+
+!Allocate temporary array
+ ABI_ALLOCATE(atmfrc_red,(2,3,natom,3,natom,nrpt_new))
+ ABI_ALLOCATE(wghatm_red,(natom,natom,nrpt_new))
+ ABI_ALLOCATE(cell_red,(3,nrpt_new))
+
+ wghatm_red(:,:,:) = zero
+ atmfrc_red(:,:,:,:,:,:) =  zero
+
+
+ do ia=1,natom
+   do ib=1,natom
+
+!    Simple Lattice
+     if (inp%brav==1) then
+!    In this case, it is better to work in reduced coordinates
+!    As rcan is in canonical coordinates, => multiplication by gprim
+       do ii=1,3
+         red(1,ii)=  ifc%rcan(1,ia)*ddb%gprim(1,ii) + &
+&                    ifc%rcan(2,ia)*ddb%gprim(2,ii) + &
+&                    ifc%rcan(3,ia)*ddb%gprim(3,ii)
+         red(2,ii)=  ifc%rcan(1,ib)*ddb%gprim(1,ii) + &
+                     ifc%rcan(2,ib)*ddb%gprim(2,ii) + &
+&                    ifc%rcan(3,ib)*ddb%gprim(3,ii)
+       end do
+     end if
+
+!    Get the shift of cell
+     shift(:) = anint(red(2,:) - crystal%xred(:,ib)) - anint(red(1,:) - crystal%xred(:,ia))
+
+     do irpt=1,ifc%nrpt
+       
+       cell2(:)= int(ifc%cell(:,irpt) + shift(:))
+       
+!      Use boundary condition to get the right cell
+       if (cell2(1) < min1 .and. cell2(1) < max1) then
+         cell2(1) = cell2(1) + cell_number(1)
+       else if (cell2(1) > min1 .and. cell2(1) > max1) then
+         cell2(1) = cell2(1) - cell_number(1)
+       end if
+
+       if (cell2(2) < min2 .and. cell2(2) < max2) then
+         cell2(2) = cell2(2) + cell_number(2)
+       else if (cell2(2) > min2 .and. cell2(2) > max2) then
+         cell2(2) = cell2(2) - cell_number(2)
+       end if
+
+       if (cell2(3) < min3 .and. cell2(3) < max3) then
+         cell2(3) = cell2(3) + cell_number(3)
+       else if (cell2(3) > min3 .and. cell2(3) > max3) then
+         cell2(3) = cell2(3) - cell_number(3)
+       end if
+
+       irpt2=1
+       do i1=min1,max1
+         do i2=min2,max2
+           do i3=min3,max3
+             if (i1  ==  cell2(1)  .and.&
+               i2  ==  cell2(2)  .and.&
+               i3  ==  cell2(3)) then
+               wghatm_red(ia,ib,irpt2) =  ifc%wghatm(ia,ib,irpt)
+               atmfrc_red(:,:,ia,:,ib,irpt2) = ifc%atmfrc(:,:,ia,:,ib,irpt)
+               cell_red(1,irpt2) = i1
+               cell_red(2,irpt2) = i2
+               cell_red(3,irpt2) = i3
+             end if
+             irpt2 = irpt2 + 1
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+ irpt2 = 0
+ icount2 = 0
+ do irpt = 1, nrpt_new
+   icount2 = icount2 + sum(wghatm_red(:,:,irpt))
+   if (sum(wghatm_red(:,:,irpt)) /= 0) then
+     irpt2 = irpt2 + 1
+   end if
+ end do
+ 
+ if (icount1 /= icount2) then
+   write(message,'(2a,I7,a,I7,a)')'The total wghatm is no more the same',ch10,&
+&                      icount1,' before and ', icount2, ' now.'
+   MSG_BUG(message)
+ end if
+ 
+! Deallocate temporary ifc
+  call ifc_free(ifc)
 
 ! Apply weight on each R point
-  do irpt=1,ifc%nrpt
+  do irpt=1,nrpt_new
     do ia=1,effective_potential%crystal%natom 
       do ib=1,effective_potential%crystal%natom 
-        ifc%atmfrc(:,:,ia,:,ib,irpt) = ifc%atmfrc(:,:,ia,:,ib,irpt)*ifc%wghatm(ia,ib,irpt) 
+        atmfrc_red(:,:,ia,:,ib,irpt) = atmfrc_red(:,:,ia,:,ib,irpt)*wghatm_red(ia,ib,irpt) 
       end do
     end do
   end do
-
-  if (inp%dipdip == 1) then
-    ifc%short_atmfrc = ifc%atmfrc ! if dipdip==1 atmfrc = short range
-    ifc%ewald_atmfrc = zero       ! fill with 0 (fill later in effective_potential_generateDipDip)
-  else
-    ifc%short_atmfrc = zero
-    ifc%ewald_atmfrc = zero       ! fill with 0 (fill later in effective_potential_generateDipDip)
-  end if
 
 ! Copy ifc into effective potential
 ! !!Warning eff_pot%ifcs only contains atmfrc,short_atmfrc,ewald_atmfrc,,nrpt and cell!!
 ! rcan,ifc%rpt,wghatm and other quantities 
 ! are not needed for effective potential!!!
-  effective_potential%harmonics_terms%ifcs%nrpt = ifc%nrpt
-  call alloc_copy(ifc%atmfrc      ,effective_potential%harmonics_terms%ifcs%atmfrc)
-  call alloc_copy(ifc%short_atmfrc,effective_potential%harmonics_terms%ifcs%short_atmfrc)
-  call alloc_copy(ifc%ewald_atmfrc,effective_potential%harmonics_terms%ifcs%ewald_atmfrc)
-  call alloc_copy(ifc%cell        ,effective_potential%harmonics_terms%ifcs%cell)
+  call ifc_free(effective_potential%harmonics_terms%ifcs)
+  effective_potential%harmonics_terms%ifcs%nrpt = nrpt_new
+  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%atmfrc,(2,3,natom,3,natom,nrpt_new))
+  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%short_atmfrc,(2,3,natom,3,natom,nrpt_new))
+  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%ewald_atmfrc,(2,3,natom,3,natom,nrpt_new))
+  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%cell,(3,nrpt_new))
 
-! Deallocate temporary ifc
-  call ifc_free(ifc)
+  effective_potential%harmonics_terms%ifcs%nrpt = nrpt_new
+  effective_potential%harmonics_terms%ifcs%cell(:,:) = cell_red
+  effective_potential%harmonics_terms%ifcs%atmfrc(:,:,:,:,:,:) = atmfrc_red(:,:,:,:,:,:)
+  if (inp%dipdip == 1) then
+    effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,:) = atmfrc_red(:,:,:,:,:,:)
+  else
+    effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,:) = zero
+  end if
+  effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,:) = atmfrc_red(:,:,:,:,:,:)
+  effective_potential%harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,:,:) = zero
+
 
 !**********************************************************************
 ! Internal strain tensors at Gamma point
@@ -474,7 +585,7 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
       do ipert2=1,natom
         do idir2=1,3
           ii=3*(ipert2-1)+idir2
-          effective_potential%harmonics_terms%internal_strain(ipert1,ipert2,idir2) = instrain(ii,ipert1)
+          effective_potential%harmonics_terms%internal_strain(ipert1,ipert2,idir2)=instrain(ii,ipert1)
         end do
       end do
     end do
