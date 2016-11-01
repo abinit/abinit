@@ -42,9 +42,7 @@ MODULE m_ddk
  use m_wfk
 
  use m_fstrings,      only : sjoin, itoa
- use m_io_tools,      only : open_file, file_exists, iomode_from_fname
-! use m_numeric_tools, only : wrap2_pmhalf, vdiff_eval, vdiff_print
-! use m_copy,          only : alloc_copy
+ use m_io_tools,      only : iomode_from_fname
  use defs_abitypes,   only : hdr_type, mpi_type
  use m_mpinfo,        only : destroy_mpi_enreg
  use m_crystal,       only : crystal_t, crystal_free
@@ -103,7 +101,7 @@ MODULE m_ddk
   !   IO_MODE_ETSF netcdf files in etsf format
 
   integer :: rw_mode = DDK_NOMODE
-   ! (Read|Write) mode 
+   ! (Read|Write) mode
 
   integer :: current_fpos
   ! The current position of the file pointer used for sequential access with Fortran-IO
@@ -131,13 +129,13 @@ MODULE m_ddk
    ! Debug flag
 
   character(len=fnlen) :: path(3) = ABI_NOFILE
-   ! File name 
+   ! File name
 
   real(dp) :: acell(3),rprim(3,3),gprim(3,3)
 
   real(dp), allocatable :: velocity (:,:,:,:)
    ! dims (3,maxnb,nkfs,nsppol)
- 
+
    ! Used for slow FT.
   type(crystal_t) :: cryst
 
@@ -162,7 +160,7 @@ CONTAINS
 !!  ddk_init
 !!
 !! FUNCTION
-!!  Initialize the object from file. This is a COLLECTIVE procedure that must be called 
+!!  Initialize the object from file. This is a COLLECTIVE procedure that must be called
 !!  by each process in the MPI communicator comm.
 !!
 !! INPUTS
@@ -206,12 +204,12 @@ subroutine ddk_init(ddk, path, comm)
  integer :: restart, restartpaw
  character(len=500) :: msg
  type(hdr_type) :: hdr1,hdr_ref
-!arrays 
+!arrays
  real(dp), allocatable :: eigen1(:)
 
 !************************************************************************
 
- my_rank = xmpi_comm_rank(comm) 
+ my_rank = xmpi_comm_rank(comm)
  ddk%path = path; ddk%comm = comm
  ddk%iomode = iomode_from_fname(path(1))
 
@@ -302,8 +300,6 @@ subroutine ddk_read_from_file(comm, ddk, fstab)
  type(ddk_t),intent(inout) :: ddk
  type(fstab_t),target,intent(in) :: fstab(ddk%nsppol)
 
-!arrays 
-
 !Local variables-------------------------------
 !scalars
  integer :: nprocs, my_rank, master=0
@@ -349,7 +345,7 @@ subroutine ddk_read_from_file(comm, ddk, fstab)
    write(message,'(a,i2)')' NEW DDK FILES, iomode = ',ddk%iomode
    call wrtout(std_out,message,'COLL')
    call wfk_read_h1mat (ddk%path(idir), eigen1, hdr1, comm)
-#else 
+#else
    write(message,'(a,i2)')' OLD DDK FILES, iomode = ',ddk%iomode
    call wrtout(std_out,message,'COLL')
    if (my_rank == master) then
@@ -363,7 +359,7 @@ subroutine ddk_read_from_file(comm, ddk, fstab)
        end if
        call xmpi_bcast(eigen1, master, comm, ierr)
    end if
-#endif 
+#endif
 ! TODO: later combine these case statements, which can call the same routine, and eliminate the old ddk file format
    case (IO_MODE_ETSF, IO_MODE_MPI)
      write(message,'(a,i2)')' NEW DDK FILES, iomode = ',ddk%iomode
@@ -374,7 +370,7 @@ subroutine ddk_read_from_file(comm, ddk, fstab)
    case default
      MSG_ERROR(sjoin("Unsupported iomode:", itoa(ddk%iomode)))
    end select
-  
+
    nband_in = maxval(hdr1%nband)
 
 !need correspondence hash between the DDK and the fs k-points
@@ -480,7 +476,7 @@ subroutine ddk_free(ddk)
  if (allocated(ddk%velocity)) then
    ABI_FREE(ddk%velocity)
  end if
- 
+
  ! types
  call crystal_free(ddk%cryst)
  call destroy_mpi_enreg(ddk%mpi_enreg)
@@ -498,7 +494,7 @@ end subroutine ddk_free
 !!  Print info on the object.
 !!
 !! INPUTS
-!! [unit]=the unit number for output 
+!! [unit]=the unit number for output
 !! [prtvol]=verbosity level
 !! [mode_paral]=either "COLL" or "PERS"
 !!
@@ -542,7 +538,7 @@ subroutine ddk_print(ddk, header, unit, prtvol, mode_paral)
  my_unt =std_out; if (PRESENT(unit)) my_unt   =unit
  my_prtvol=0    ; if (PRESENT(prtvol)) my_prtvol=prtvol
  my_mode='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
-                                                                    
+
  msg=' ==== Info on the ddk% object ==== '
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
  call wrtout(my_unt,msg,my_mode)
@@ -557,6 +553,5 @@ subroutine ddk_print(ddk, header, unit, prtvol, mode_paral)
 
 end subroutine ddk_print
 !!***
-
 
 END MODULE m_ddk

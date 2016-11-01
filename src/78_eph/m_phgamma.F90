@@ -237,7 +237,7 @@ module m_phgamma
    ! Lambda coefficients are set to zero when abs(w) < EPH_WTOL
    ! This tolerance is also used in the integrals of a2F(w).
 
-contains  !=========================================================================================================================
+contains  !=====================================================
 !!***
 
 !----------------------------------------------------------------------
@@ -330,10 +330,6 @@ end subroutine phgamma_free
 !! INPUTS
 !! cryst<crystal_t>
 !! ifc<ifc_type>=Interatomic force constants.
-!!    nrpt
-!!    gprim(3,3)
-!!    rpt(3,nrpt)
-!!    wghatm(natom,natom, nrpt)
 !! symdynmat=1 to activa symmetrization of gamma matrices.
 !! eph_scalprod
 !! ngqpt(3)=Q-mesh divisions
@@ -470,7 +466,7 @@ end subroutine phgamma_init
 !! phgamma_finalize
 !!
 !! FUNCTION
-!!  Creation method for the phgamma_t datatype.
+!!  Finalize the phgamma_t datatype.
 !!
 !! INPUTS
 !! cryst<crystal_t>=Crystalline structure.
@@ -586,12 +582,11 @@ end subroutine phgamma_finalize
 !! tgamma_symm
 !!
 !! FUNCTION
+!!  Symmetrize the tgamma matrix
 !!
 !! INPUTS
 !! qpt(3)=phonon wavevector in reduced coordinates.
 !! cryst<crystal_t>=Crystalline structure.
-!!
-!! SIDE EFFECTS
 !!
 !! PARENTS
 !!      m_phgamma
@@ -1384,7 +1379,7 @@ subroutine phgamma_linwid(gams,cryst,ifc,ndivsm,nvert,qverts,basename,ncid,wminm
  DBG_EXIT("COLL")
 
 contains
- integer function vid(vname) 
+ integer function vid(vname)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1949,8 +1944,6 @@ end function a2fw_moment
 !! OUTPUT
 !!  a2fw_logmoment =
 !!
-!! NOTES
-!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -2457,7 +2450,7 @@ subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,pr
 
 
 contains
- integer function vid(vname) 
+ integer function vid(vname)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2665,7 +2658,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  sigmas = [dtset%eph_fsmear, 2*dtset%eph_fsmear] !* eV_Ha
  ABI_DT_MALLOC(fstab, (nsppol))
  ! FIXME: kptopt, change setup of k-points if tetra: fist tetra weights then k-points on the Fermi surface.!
- call fstab_init(fstab, ebands, cryst, dtset%eph_fsewin, dtset%eph_intmeth, dtset%kptrlatt, dtset%nshiftk, dtset%shiftk, comm)
+ call fstab_init(fstab, ebands, cryst, dtset%eph_fsewin, dtset%eph_intmeth, dtset%kptrlatt, &
+   dtset%nshiftk, dtset%shiftk, comm)
  call fstab_print(fstab)
 
  ! now we can initialize the ddk velocities, on the FS grid only

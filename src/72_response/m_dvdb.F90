@@ -765,7 +765,7 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
 
  ! Read v1 from file.
  nfftot = product(db%ngfft3_v1(:, iv1))
- if (all(ngfft(:3) == db%ngfft3_v1(1:3, iv1)) then
+ if (all(ngfft(:3) == db%ngfft3_v1(1:3, iv1))) then
    do ispden=1,db%nspden
      read(db%fh) (v1scf(ifft, ispden), ifft=1,cplex*nfftot)
    end do
@@ -953,7 +953,7 @@ subroutine v1phq_complete(cryst,qpt,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,sym
  integer :: pcase,trev_q,idir_eq,pcase_eq,ispden,cnt!,trial
  integer :: i1,i2,i3,id1,id2,id3,n1,n2,n3,ind1,ind2,j1,j2,j3,l1,l2,l3,k1,k2,k3,nfftot
  real(dp) :: arg
- logica,parameter :: debug=.False.
+ logical,parameter :: debug=.False.
  logical :: has_phase
  character(len=500) :: msg
 !arrays
