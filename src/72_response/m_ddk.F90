@@ -170,7 +170,6 @@ subroutine ddk_init(ddk, path, comm)
 #define ABI_FUNC 'ddk_init'
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -264,7 +263,6 @@ subroutine ddk_read_fsvelocities(ddk, fstab, comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'ddk_read_fsvelocities'
  use interfaces_14_hidewrite
- use interfaces_72_response
 !End of the abilint section
 
  implicit none
