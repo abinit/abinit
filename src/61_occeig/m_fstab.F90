@@ -73,6 +73,7 @@ module m_fstab
 
    integer :: maxnb
    ! Max number of bands on the FS.
+   ! TODO: Maybe maxnbfs
 
    ! real(dp) :: fermie
    ! Fermi energy

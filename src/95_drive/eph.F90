@@ -247,7 +247,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call wrtout(ab_out, sjoin("- Reading DDK x from file:", ddk_path(1)))
    call wrtout(ab_out, sjoin("- Reading DDK y from file:", ddk_path(2)))
    call wrtout(ab_out, sjoin("- Reading DDK z from file:", ddk_path(3)))
-   ! TODO: put this inside phgamma? - only check for file existence here.
+   ! Read header in DDK files and init basic dimensions.
+   ! subdrivers will use ddk to get the matrix elements from file.
+   ! TODO: Should perform consistency check
    call ddk_init(ddk, ddk_path, comm)
  end if
 
@@ -334,38 +336,40 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Store DOS per spin channels
  n0(:) = edos%gef(1:edos%nsppol)
  if (my_rank == master) then
+   call edos_print(edos, unit=ab_out)
    path = strcat(dtfil%filnam_ds(4), "_EDOS")
+   call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
    call edos_write(edos, path)
-   !call edos_print(edos)
-   write(ab_out,"(a)")sjoin("- Writing electron DOS to file:", path)
-   write(ab_out,'(a,es16.8,a)')' Fermi level: ',edos%mesh(edos%ief)*Ha_eV," [eV]"
-   write(ab_out,"(a,es16.8)")" Total electron DOS in states/eV : ",edos%gef(0) / Ha_eV
-   if (ebands%nsppol == 2) then
-     write(ab_out,"(a,es16.8)")"   Spin up:  ",edos%gef(1) / Ha_eV
-     write(ab_out,"(a,es16.8)")"   Spin down:",edos%gef(2) / Ha_eV
-   end if
  end if
 
  call edos_free(edos)
 
- ! Output useful info on the electronic bands.
- ! Fermi Surface
- if (dtset%prtfsurf /= 0  .and. my_rank == master) then
-   path = strcat(dtfil%filnam_ds(4), "_BXSF")
-   if (ebands_write_bxsf(ebands,cryst,path) /= 0) then
-     MSG_WARNING("Cannot produce file for Fermi surface, check log file for more info")
+ ! =======================================
+ ! Output useful info on electronic bands
+ ! =======================================
+ if (my_rank == master) then
+   ! Fermi Surface
+   if (dtset%prtfsurf /= 0) then
+     path = strcat(dtfil%filnam_ds(4), "_BXSF")
+     call wrtout(ab_out, sjoin("- Writing Fermi surface to file:", path))
+     if (ebands_write_bxsf(ebands,cryst,path) /= 0) then
+       msg = "Cannot produce file for Fermi surface, check log file for more info"
+       MSG_WARNING(msg)
+       call wrtout(ab_out,msg,'COLL')
+     end if
    end if
- end if
 
- ! Nesting factor (requires qpath)
- if (dtset%prtnest /= 0 .and. dtset%ph_nqpath > 0 .and. my_rank == master) then
-   path = strcat(dtfil%filnam_ds(4), "_NEST")
-   if (ebands_write_nesting(ebands,cryst,path,dtset%prtnest,&
-   dtset%tsmear,dtset%fermie_nest,dtset%ph_qpath(:,1:dtset%ph_nqpath),msg) /= 0) then
-     MSG_WARNING(msg)
-     call wrtout(ab_out,msg,'COLL')
+   ! Nesting factor (requires qpath)
+   if (dtset%prtnest /= 0 .and. dtset%ph_nqpath > 0) then
+     path = strcat(dtfil%filnam_ds(4), "_NEST")
+     call wrtout(ab_out, sjoin("- Writing nesting factor to file:", path))
+     if (ebands_write_nesting(ebands,cryst,path,dtset%prtnest,&
+     dtset%tsmear,dtset%fermie_nest,dtset%ph_qpath(:,1:dtset%ph_nqpath),msg) /= 0) then
+       MSG_WARNING(msg)
+       call wrtout(ab_out,msg,'COLL')
+     end if
    end if
- end if
+ end if ! master
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')"eph%edos: cpu:",cpu,", wall: ",wall
@@ -406,7 +410,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    !call phdos_print_debye(phdos, cryst%ucvol)
    if (my_rank == master) then
-     call phdos_print(phdos, strcat(dtfil%filnam_ds(4), "_PHDOS"))
+     path = strcat(dtfil%filnam_ds(4), "_PHDOS")
+     call wrtout(ab_out, sjoin("- Writing phonon dos to file:", path))
+     call phdos_print(phdos, path)
      !call phdos_ncwrite(phdos, ncid)
    end if
    call phdos_free(phdos)
