@@ -88,6 +88,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_phonons
  use m_nctk
  use m_wfk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
 
  use m_io_tools,        only : file_exists
  use m_time,            only : cwtime
@@ -137,6 +140,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer,parameter :: nsphere0=0,prt_ifc0=0,ifcana0=0,ifcout0=0,prtsrlr0=0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
  integer :: iblock,ddb_nqshift,ierr,edos_intmeth
+#ifdef HAVE_NETCDF
+ integer :: ncid,ncerr
+#endif
  real(dp),parameter :: rifcsph0=zero,spinmagntarget=-99.99_dp
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: edos_step,edos_broad
@@ -413,7 +419,15 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      path = strcat(dtfil%filnam_ds(4), "_PHDOS")
      call wrtout(ab_out, sjoin("- Writing phonon dos to file:", path))
      call phdos_print(phdos, path)
-     !call phdos_ncwrite(phdos, ncid)
+     !call phdos_print_debye(phdos, crystal%ucvol)
+#ifdef HAVE_NETCDF
+     path = strcat(dtfil%filnam_ds(4), "_PHDOS.nc")
+     ncerr = nctk_open_create(ncid, path, xmpi_comm_self)
+     NCF_CHECK_MSG(ncerr, "Creating PHDOS.nc file")
+     NCF_CHECK(crystal_ncwrite(cryst, ncid))
+     call phdos_ncwrite(phdos, ncid)
+     NCF_CHECK(nf90_close(ncid))
+#endif
    end if
    call phdos_free(phdos)
  end if

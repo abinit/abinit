@@ -3071,7 +3071,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  if (my_rank == master) then
    NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), "_EPH.nc"), xmpi_comm_self))
    NCF_CHECK(crystal_ncwrite(cryst, ncid))
-   NCF_CHECK(ebands_ncwrite(ebands,ncid))
+   NCF_CHECK(ebands_ncwrite(ebands, ncid))
  end if
 #endif
 
