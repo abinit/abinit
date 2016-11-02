@@ -276,7 +276,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,gsc,kinpw,mpi_enreg,&
 
  if ( .not. l_paw ) then
    !Check l_gvnlc size
-   if ( size(l_gvnlc,dim=2) < nband*l_npw*l_nspinor ) then
+   if ( size(l_gvnlc) < 2*nband*l_npw*l_nspinor ) then
      ABI_FREE(l_gvnlc)
      ABI_MALLOC(l_gvnlc,(2,nband*l_npw*l_nspinor))
    end if
@@ -287,8 +287,16 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,gsc,kinpw,mpi_enreg,&
 &                signs,gsc,l_tim_getghc,cg,l_gvnlc)
  
    else
-     call prep_nonlop(choice,l_cpopt,cprj_dum,enl_out,l_gs_hamk,0,eig,nband,mpi_enreg,1,paw_opt,signs,gsc,l_tim_getghc, &
- &                   cg,l_gvnlc,already_transposed=.false.)
+     do iband=1,nband/blockdim
+       shift = (iband-1)*blockdim*l_npw*l_nspinor
+      call prep_nonlop(choice,l_cpopt,cprj_dum, &
+&       enl_out(shift+1:shift+blockdim),l_gs_hamk,0,&
+&       eig(shift+1:shift+blockdim),blockdim,mpi_enreg,1,paw_opt,signs,&
+&       gsc(:,shift+1:shift+blockdim*l_npw*l_nspinor),l_tim_getghc, &
+&       cg(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
+&       l_gvnlc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
+&       already_transposed=.false.)
+     end do
    end if
    !Compute enlout
    do iband=1,nband
@@ -370,7 +378,7 @@ end subroutine lobpcgwf2
    if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
  end if
 
- if ( size(l_gvnlc,dim=2) < blockdim*spacedim ) then
+ if ( size(l_gvnlc) < 2*blockdim*spacedim ) then
    ABI_FREE(l_gvnlc)
    ABI_MALLOC(l_gvnlc,(2,blockdim*spacedim))
  end if

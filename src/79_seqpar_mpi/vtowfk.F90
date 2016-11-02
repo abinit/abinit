@@ -251,7 +251,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  ABI_CHECK(ierr==0, "out of memory in gsc")
  gsc=zero
 
- if(wfopta10 /= 1) then !chebfi already does this stuff inside
+ if(wfopta10 /= 1 .and. .not. newlobpcg ) then !chebfi already does this stuff inside
    ABI_ALLOCATE(evec,(2*nband_k,nband_k))
    ABI_ALLOCATE(subham,(nband_k*(nband_k+1)))
 
@@ -299,7 +299,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  do inonsc=1,nnsclo_now
 
 !  This initialisation is needed for the MPI-parallelisation (gathering using sum)
-   if(wfopta10 /= 1) then
+   if(wfopta10 /= 1 .and. .not. newlobpcg) then
      subham(:)=zero
      if (gs_hamk%usepaw==0) then
        if (wfopta10==4) then
@@ -405,7 +405,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  ========== DIAGONALIZATION OF HAMILTONIAN IN WFs SUBSPACE ===============
 !  =========================================================================
 
-   if( .not. wfopta10 == 1 .or. .not. newlobpcg ) then
+   if( .not. wfopta10 == 1 .and. .not. newlobpcg ) then
      call timab(585,1,tsec) !"vtowfk(subdiago)"
      call subdiago(cg,eig_k,evec,gsc,icg,igsc,istwf_k,&
 &     mcg,mgsc,nband_k,npw_k,my_nspinor,dtset%paral_kgb,&
@@ -894,14 +894,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      end do
    end if
  end if
- write(std_out,*) enl_k
 
  !Hamiltonian constructor for gwls_sternheimer
  if(dtset%optdriver==RUNL_GWLS) then
    call build_H(dtset,mpi_enreg,cpopt,cg,gs_hamk,kg_k,kinpw)
  end if
 
- if(wfopta10 /= 1) then
+ if(wfopta10 /= 1 .and. .not. newlobpcg) then
    ABI_DEALLOCATE(evec)
    ABI_DEALLOCATE(subham)
    !if (gs_hamk%usepaw==0) then

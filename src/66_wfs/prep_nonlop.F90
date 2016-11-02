@@ -159,7 +159,6 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  npw=hamk%npw_k;if (.not.do_transpose) npw=hamk%npw_fft_k
  if (size(cwavef)/=2*npw*my_nspinor*blocksize) then
    msg = 'Incorrect size for cwavef!'
-   write(std_out,*) size(cwavef), 2,npw,my_nspinor,blocksize
    MSG_BUG(msg)
  end if
  if(choice/=0.and.signs==2) then
