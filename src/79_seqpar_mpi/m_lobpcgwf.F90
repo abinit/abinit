@@ -290,8 +290,8 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,gsc,kinpw,mpi_enreg,&
      do iband=1,nband/blockdim
        shift = (iband-1)*blockdim*l_npw*l_nspinor
       call prep_nonlop(choice,l_cpopt,cprj_dum, &
-&       enl_out(shift+1:shift+blockdim),l_gs_hamk,0,&
-&       eig(shift+1:shift+blockdim),blockdim,mpi_enreg,1,paw_opt,signs,&
+&       enl_out((iband-1)*blockdim+1:iband*blockdim),l_gs_hamk,0,&
+&       eig((iband-1)*blockdim+1:iband*blockdim),blockdim,mpi_enreg,1,paw_opt,signs,&
 &       gsc(:,shift+1:shift+blockdim*l_npw*l_nspinor),l_tim_getghc, &
 &       cg(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
 &       l_gvnlc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&

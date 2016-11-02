@@ -359,7 +359,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            end if
            if (use_subovl==1) call xmpi_sum(subovl,spaceComm,ierr)
          else
-           call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,enl_k,gs_hamk,gsc(:,igsc+1:),kinpw,mpi_enreg,&
+           call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,enl_k,gs_hamk,gsc,kinpw,mpi_enreg,&
 &                        nband_k,npw_k,my_nspinor,prtvol,resid_k)
          end if
 !        In case of FFT parallelism, exchange subspace arrays
@@ -368,7 +368,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    ============ MINIMIZATION OF BANDS: CHEBYSHEV FILTERING =================
 !    =========================================================================
        else if (wfopta10 == 1) then
-         call chebfi(cg(:, icg+1:),dtset,eig_k,enl_k,gs_hamk,gsc(:, igsc+1:),kinpw,&
+         call chebfi(cg(:, icg+1:),dtset,eig_k,enl_k,gs_hamk,gsc,kinpw,&
 &         mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
        end if
 
