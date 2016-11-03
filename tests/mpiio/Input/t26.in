@@ -1,13 +1,11 @@
 # Exercise IO routines in parallel with different combination 
 # of parameters in the GS eigensolvers.
 
-#use_slk 1
-#iomode 1
-
 ngfft 24 24 24
 ngfftdg 36 36 36
 getwfk -1
 paral_kgb 1
+pw_unbal_thresh 10  # Activate load balancing procedure
 
 # Test the prt* variables used in outscf.
 prtden 1
@@ -105,5 +103,6 @@ natom 2
 #%%   C-diamond, Bulk, 2 atoms, with PAW.
 #%%   Test the IO routines with paral_kgb in [1, 0] and different combinations
 #%%   of parameters (npfft, npband, npkpt). 
-#%%   Test also the compuation of PJDOS.
+#%%   Test the plane wave load balancing procedure (pw_unbal_thresh).
+#%%   Test also the computation of PJDOS.
 #%%<END TEST_INFO>

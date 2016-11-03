@@ -496,7 +496,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  call timab(981,2,tsec)
 
 !===================================================================
-! WAVELETS - Branching with a separate VTORHO procedure 
+! WAVELETS - Branching with a separate VTORHO procedure
 !===================================================================
 
  if (dtset%usewvl == 1) then
@@ -579,7 +579,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  else
 
 !===================================================================
-! PLANE WAVES - Standard VTORHO procedure 
+! PLANE WAVES - Standard VTORHO procedure
 !===================================================================
 
 !  Electric fields: set flag to turn on various behaviors
