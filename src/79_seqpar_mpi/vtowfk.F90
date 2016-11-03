@@ -244,12 +244,14 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  n1=gs_hamk%ngfft(1); n2=gs_hamk%ngfft(2); n3=gs_hamk%ngfft(3)
 
- igsc=0
- mgsc=nband_k*npw_k*my_nspinor*gs_hamk%usepaw
+ if ( .not. newlobpcg ) then
+   igsc=0
+   mgsc=nband_k*npw_k*my_nspinor*gs_hamk%usepaw
 
- ABI_STAT_ALLOCATE(gsc,(2,mgsc), ierr)
- ABI_CHECK(ierr==0, "out of memory in gsc")
- gsc=zero
+   ABI_STAT_ALLOCATE(gsc,(2,mgsc), ierr)
+   ABI_CHECK(ierr==0, "out of memory in gsc")
+   gsc=zero
+ end if
 
  if(wfopta10 /= 1 .and. .not. newlobpcg ) then !chebfi already does this stuff inside
    ABI_ALLOCATE(evec,(2*nband_k,nband_k))
@@ -359,7 +361,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            end if
            if (use_subovl==1) call xmpi_sum(subovl,spaceComm,ierr)
          else
-           call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,enl_k,gs_hamk,gsc,kinpw,mpi_enreg,&
+           call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,enl_k,gs_hamk,kinpw,mpi_enreg,&
 &                        nband_k,npw_k,my_nspinor,prtvol,resid_k)
          end if
 !        In case of FFT parallelism, exchange subspace arrays
@@ -453,7 +455,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  DEBUG seq==par comment next block
 !  Fix phases of all bands
    if ((xmpi_paral/=1).or.(mpi_enreg%paral_kgb/=1)) then
-     call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,gs_hamk%usepaw)
+     if ( .not. newlobpcg ) then
+       call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,gs_hamk%usepaw)
+     else
+       ! GSC is local to vtowfk and is completely useless since everything
+       ! is calcultated in my lobpcg, we don't care about the phase of gsc !
+       call fxphas(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,0)
+     end if
    end if
 
    if (residk<dtset%tolwfr) exit  !  Exit loop over inonsc if converged
@@ -912,7 +920,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    !end if
    ABI_DEALLOCATE(subovl)
  end if
- ABI_DEALLOCATE(gsc)
+ if ( .not. newlobpcg ) ABI_DEALLOCATE(gsc)
 
  if(wfoptalg==3) then
    ABI_DEALLOCATE(eig_save)

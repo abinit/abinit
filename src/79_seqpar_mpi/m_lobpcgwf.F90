@@ -92,11 +92,12 @@ module m_lobpcgwf
  public :: lobpcgwf2
   contains
 
-subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,gsc,kinpw,mpi_enreg,&
+subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 &                   nband,npw,nspinor,prtvol,resid)
 
 
  use m_cgtools, only : dotprod_g
+ use iso_c_binding
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -111,38 +112,46 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,gsc,kinpw,mpi_enreg,&
 !Arguments ------------------------------------
  integer,intent(in) :: nband,npw,prtvol,nspinor
  type(gs_hamiltonian_type),target,intent(inout) :: gs_hamk
- type(dataset_type),intent(in) :: dtset
- type(mpi_type),target,intent(inout) :: mpi_enreg
- real(dp),target, intent(inout) :: cg(2,nspinor*nband*npw),gsc(2,nspinor*nband*npw)
- real(dp),intent(in) :: kinpw(npw)
- real(dp),intent(out) :: resid(nband)
- real(dp),intent(  out) :: enl_out(nband)
- real(dp),intent(  out) :: eig(nband)
+ type(dataset_type)              ,intent(in   ) :: dtset
+ type(mpi_type)           ,target,intent(inout) :: mpi_enreg
+ real(dp)                 ,target,intent(inout) :: cg(2,nspinor*nband*npw)!,gsc(2,nspinor*nband*npw)
+ real(dp)                        ,intent(in   ) :: kinpw(npw)
+ real(dp)                 ,target,intent(  out) :: resid(nband)
+ real(dp)                        ,intent(  out) :: enl_out(nband)
+ real(dp)                 ,target,intent(  out) :: eig(nband)
 
 !Local variables-------------------------------
 
  type(xgBlock_t) :: xgx0
- type(xg_t) :: xgeigen
- type(xg_t) :: xgresidu
+ type(xgBlock_t) :: xgeigen
+ type(xgBlock_t) :: xgresidu
  type(xgBlock_t) :: xgghc
- type(xgBlock_t) :: xggsc
- !type(xgBlock_t) :: residBlock
+ type(xg_t) :: xggsc
  type(lobpcg_t) :: lobpcg
 
  integer :: space, blockdim,  nline
  integer :: ipw
- integer :: nthreads
  real(dp), allocatable :: resid_tmp(:,:)
- double precision :: tsec(2)
- integer, parameter :: tim_lobpcgwf2 = 1650
+
+ integer :: nthreads
+
  double precision :: lobpcgMem(2)
  double precision :: localmem
+
+ integer, parameter :: tim_lobpcgwf2 = 1650
  double precision :: cputime, walltime
+ double precision :: tsec(2)
+
+ type(c_ptr) :: cptr
+ real(dp), pointer :: eig_ptr(:,:) => NULL()
+ real(dp), pointer :: resid_ptr(:,:) => NULL()
+
  ! Stupid things for NC
  integer,parameter :: choice=1, paw_opt=0, signs=2
  type(pawcprj_type) :: cprj_dum(gs_hamk%natom,0)
  integer :: iband, shift
  real(dp) :: dprod_i
+ real(dp) :: gsc_dummy(0,0)
 
 ! *********************************************************************
 
@@ -223,57 +232,39 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,gsc,kinpw,mpi_enreg,&
  !call xg_init(xgx0,space,icplx*npw*nspinor,nband)
  call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft)
 
- ! Those are really real vectors
- call xg_init(xgeigen,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
- !call xgBlock_map(xgeigen,eig,SPACE_R,nband,1)
+ !call xg_init(xgeigen,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
+ ! Trick the with C to change rank of arrays (:) to (:,:)
+ cptr = c_loc(eig)
+ call c_f_pointer(cptr,eig_ptr,(/ nband,1 /))
+ call xgBlock_map(xgeigen,eig_ptr,SPACE_R,nband,1)
 
- call xg_init(xgresidu,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
- !call xgBlock_map(xgresidu,resid,SPACE_R,nband,1)
+ !call xg_init(xgresidu,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
+ ! Trick the with C to change rank of arrays (:) to (:,:)
+ cptr = c_loc(resid)
+ call c_f_pointer(cptr,resid_ptr,(/ nband,1 /))
+ call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1)
 
  call lobpcg_init(lobpcg,nband, l_icplx*l_npw*l_nspinor, blockdim,dtset%tolwfr,nline,space, l_mpi_enreg%comm_bandspinorfft)
-
- ! Set x0
- !call xg_set(xgx0,cg,0,npw*nspinor)
 
 !###########################################################################
 !################    RUUUUUUUN    ##########################################
 !###########################################################################
  
  ! Run lobpcg
- call lobpcg_run(lobpcg,xgx0,getghc_gsc,precond,xgeigen%self,xgresidu%self)
+ call lobpcg_run(lobpcg,xgx0,getghc_gsc,precond,xgeigen,xgresidu)
 
  ! Free preconditionning since not needed anymore
  ABI_FREE(l_pcon)
 
- ! Get GSC
- if ( l_paw ) then
-   call lobpcg_getAX_BX(lobpcg,xgghc,xggsc)
-   call xgBlock_get(xggsc,gsc(:,1:npw*nspinor*nband),0,l_npw*l_nspinor)
- end if
-
+ ! Scale back
  if(l_istwf == 2) then
    cg = cg * inv_sqrt2
    if(l_mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * sqrt2
-   if ( l_paw ) then
-     gsc = gsc * inv_sqrt2
-     if(l_mpi_enreg%me_g0 == 1) gsc(:, 1:npw*nspinor*nband:npw) = gsc(:, 1:npw*nspinor*nband:npw) * sqrt2
-   end if
  end if
 
-
- ! Get eigenvalues and residu
- ABI_MALLOC(resid_tmp,(2,nband))
-
- call xgBlock_get(xgeigen%self,resid_tmp,0,nband)
- call xg_free(xgeigen) ! Destroy eigen value we don't use them
- eig(:) = resid_tmp(1,:)
-
- call xgBlock_get(xgresidu%self,resid_tmp,0,nband)
- call xg_free(xgresidu)
- resid(:) = resid_tmp(1,:)
-
- ABI_FREE(resid_tmp)
-
+ ! Compute enlout (nonlocal energy for each band if necessary) This is the best
+ ! quick and dirty trick to compute this part in NC. gvnlc cannot be part of
+ ! lobpcg algorithm
  if ( .not. l_paw ) then
    !Check l_gvnlc size
    if ( size(l_gvnlc) < 2*nband*l_npw*l_nspinor ) then
@@ -284,7 +275,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,gsc,kinpw,mpi_enreg,&
    if (mpi_enreg%paral_kgb==0) then
  
      call nonlop(choice,l_cpopt,cprj_dum,enl_out,l_gs_hamk,0,eig,mpi_enreg,nband,1,paw_opt,&
-&                signs,gsc,l_tim_getghc,cg,l_gvnlc)
+&                signs,gsc_dummy,l_tim_getghc,cg,l_gvnlc)
  
    else
      do iband=1,nband/blockdim
@@ -292,7 +283,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,gsc,kinpw,mpi_enreg,&
       call prep_nonlop(choice,l_cpopt,cprj_dum, &
 &       enl_out((iband-1)*blockdim+1:iband*blockdim),l_gs_hamk,0,&
 &       eig((iband-1)*blockdim+1:iband*blockdim),blockdim,mpi_enreg,1,paw_opt,signs,&
-&       gsc(:,shift+1:shift+blockdim*l_npw*l_nspinor),l_tim_getghc, &
+&       gsc_dummy,l_tim_getghc, &
 &       cg(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
 &       l_gvnlc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
 &       already_transposed=.false.)
@@ -313,7 +304,6 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,gsc,kinpw,mpi_enreg,&
 
 !###########################################################################
 !################    SORRY IT'S ALREADY FINISHED : )  ######################
-!################   COMPUTE LAST RESIDU AND TOTVNL    ######################
 !###########################################################################
 
 
@@ -324,13 +314,9 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,gsc,kinpw,mpi_enreg,&
  write(std_out,*) sjoin("for a wall time of", sec2str(walltime))
  write(std_out,'(a,f6.2)') " -> Ratio of ", cputime/walltime
  nthreads = xomp_get_num_threads(open_parallel = .true.)
- if ( cputime/walltime/dble(nthreads) < 0.75 ) then
+ if ( cputime/walltime/dble(nthreads) < 0.75 .and. (int(cputime/walltime)+1) /= nthreads) then
    MSG_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
  end if
-
- ! Compute enlout (nonlocal energy for each band if necessary) This is the best
- ! quick and dirty trick to compute this part in NC. gvnlc cannot be part of
- ! lobpcg algorithm
 
 
  DBG_EXIT("COLL")
