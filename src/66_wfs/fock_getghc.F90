@@ -128,7 +128,6 @@ type(pseudopotential_type) :: psps
    do iatom=1,fock%natom
      pawrhoij(iatom)%nrhoijsel=1
      pawrhoij(iatom)%rhoijselect(1)=1
-     pawrhoij(iatom)%rhoijp (1,1)=((cwaveprj(iatom,1)%cp(1,1))**2+(cwaveprj(iatom,1)%cp(2,1))**2)!*two
    end do
  end if
  ABI_CHECK(gs_ham%nspinor==1,"only allowed for nspinor=1!")
@@ -293,7 +292,7 @@ type(pseudopotential_type) :: psps
    qvec_j(:)=gs_ham%kpt_k(:)-fock%kptns_bz(:,jkpt)
    call bare_vqg(qvec_j,fock%gsqcut,gs_ham%gmet,fock%usepaw,fock%hybrid_mixing,&
 &   fock%hybrid_mixing_sr,fock%hybrid_range,nfftf,fock%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
-   !call fock_vqg_fftbox(qvec_j, nfft, vqg)
+
 
 ! =================================================
 ! === Loop on the band indices jband of cgocc_k ===
@@ -323,6 +322,7 @@ type(pseudopotential_type) :: psps
 ! ================================================
 !* Calculate the overlap density matrix in real space = conj(cwaveocc_r)*cwavef_r
 !* rhor_munu will contain the overlap density matrix.
+! vfock=-int{conj(cwaveocc_r)*cwavef_r*dr'/|r-r'|}
      call timab(1508,1,tsec)
      ind=0
      do i3=1,n3f
@@ -347,10 +347,22 @@ type(pseudopotential_type) :: psps
        ABI_ALLOCATE(rho12,(2,nfftf,nspinor**2))
        iband_cprj=(my_jsppol-1)*fock%mkptband+jbg+jband
        cwaveocc_prj=>fock%cwaveocc_prj(:,iband_cprj:iband_cprj+nspinor-1)
-       call pawmknhat_psipsi(cwaveocc_prj,cwaveprj,ider,izero,natom,natom,nfftf,ngfftf,&
+
+       if(testtrue)then
+         do iatom=1,fock%natom
+           pawrhoij(iatom)%rhoijp (1,1)=(cwaveprj(iatom,1)%cp(1,1)*cwaveocc_prj(iatom,1)%cp(1,1)+&
+&                                  cwaveprj(iatom,1)%cp(2,1)*cwaveocc_prj(iatom,1)%cp(2,1))
+!          pawrhoij(iatom)%rhoijp (2,1)=(-cwaveprj(iatom,1)%cp(1,1)*cwaveocc_prj(iatom,1)%cp(2,1)+&
+!&                                  cwaveprj(iatom,1)%cp(2,1)*cwaveocc_prj(iatom,1)%cp(1,1))
+           pawrhoij(iatom)%rhoijp (2,1)=zero
+         end do
+       end if
+
+       call pawmknhat_psipsi(cwaveprj,cwaveocc_prj,ider,izero,natom,natom,nfftf,ngfftf,&
 &       nhat12_grdim,nspinor,fock%ntypat,fock%pawang,fock%pawfgrtab,grnhat12,rho12,&
 &       fock%pawtab,gprimd=gs_ham%gprimd,grnhat_12=grnhat_12,qphon=qvec_j,xred=gs_ham%xred)
-       rhor_munu(:,:)=rhor_munu(:,:)+rho12(:,:,nspinor)
+       rhor_munu(1,:)=rhor_munu(1,:)+rho12(1,:,nspinor)
+       rhor_munu(2,:)=rhor_munu(2,:)-rho12(2,:,nspinor)
        ABI_DEALLOCATE(rho12)
      end if
 
@@ -389,7 +401,6 @@ type(pseudopotential_type) :: psps
 #endif
      call timab(1510,2,tsec)
 
-
 !===============================================================
 !======== Calculate Dij_Fock_hat contribution in case of PAW ===
 !===============================================================
@@ -423,22 +434,21 @@ type(pseudopotential_type) :: psps
        if (fock%optfor.and.(fock%ieigen/=0)) then
          call matr3inv(gs_ham%gprimd,rprimd)
          choice=2; dotr=zero;doti=zero;cpopt=4
-         optgr=1;optgr2=0;optstr=0;optstr2=0
 
          if (testtrue) then
+           optgr=1;optgr2=0;optstr=0;optstr2=0
            ABI_ALLOCATE(grnl,(3*natom))
-           ABI_ALLOCATE(vxc,(nfftf,nspden_fock))
-           ABI_ALLOCATE(vtrial,(nfftf,nspden_fock))
+           ABI_ALLOCATE(vxc,(nfftf,cplex_fock))
+           ABI_ALLOCATE(vtrial,(nfftf,1))
            vxc=zero
            do ifft=1,nfftf
              vtrial(ifft,1)=vfock(2*ifft-1)
            end do
            grnl=zero
            call pawgrnl(gs_ham%atindx1,0,dummy,1,dummy,grnl,fock%gsqcut,mgfftf,natom,natom,&
-&            gs_ham%nattyp,nfftf,ngfftf,nhat_dum,dummy,nspden_fock,0,fock%ntypat,optgr,optgr2,optstr,optstr2,&
+&            gs_ham%nattyp,nfftf,ngfftf,nhat_dum,dummy,1,0,fock%ntypat,optgr,optgr2,optstr,optstr2,&
 &            fock%pawang,fock%pawfgrtab,pawrhoij,fock%pawtab,gs_ham%ph1d,psps,qphon,rprimd,dumint,&
 &            gs_ham%typat,vtrial,vxc,gs_ham%xred)
-!       write(79,*)grnl
            ABI_DEALLOCATE(vxc)
            ABI_DEALLOCATE(vtrial)
            ABI_DEALLOCATE(grnl)
@@ -656,10 +666,10 @@ type(pseudopotential_type) :: psps
  ABI_DEALLOCATE(dummytab)
  ABI_DEALLOCATE(vfock)
  ABI_DEALLOCATE(vqg)
-if(testtrue)then
- call pawrhoij_free(pawrhoij)
- ABI_DATATYPE_DEALLOCATE(pawrhoij)
-end if
+ if(testtrue)then
+   call pawrhoij_free(pawrhoij)
+   ABI_DATATYPE_DEALLOCATE(pawrhoij)
+ end if
  call timab(1504,2,tsec)
 
 end subroutine fock_getghc

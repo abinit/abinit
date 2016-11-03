@@ -43,11 +43,11 @@
 !!
 !! OUTPUT
 !!  === if ider=0 or 2
-!!    nhat12(2,nfft,nspinor**2)=nhat on fine rectangular grid
+!!    nhat12(2,nfft,nspinor**2)=nhat on fine rectangular grid*exp(iqr)
 !!  === if ider=1 or 2
-!!    grnhat12(nfft,nspinor**2,3)=gradient of nhat on fine rectangular grid (derivative versus r)
+!!    grnhat12(nfft,nspinor**2,3)=gradient of (nhat*exp(iqr)) on fine rectangular grid (derivative versus r)
 !!  === if ider=3
-!!    grnhat_12(nfft,nspinor**2,3)=derivatives of nhat on fine rectangular grid versus R
+!!    grnhat_12(nfft,nspinor**2,3)=derivatives of nhat on fine rectangular grid versus R*exp(iqr)
 !!
 !! PARENTS
 !!      calc_sigx_me,fock_getghc,prep_calc_ucrpa
@@ -172,6 +172,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
  if (compute_nhat) nhat12=zero
  if (compute_grad) grnhat12=zero
  if (compute_grad1) grnhat_12=zero
+
  if (compute_grad) then
 !   MSG_BUG('compute_grad not tested!')
  end if
@@ -320,7 +321,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
          do ic=1,pawfgrtab(iatom)%nfgd
            jc=pawfgrtab(iatom)%ifftsph(ic)
            ro_ql(1)= pawfgrtab(iatom)%expiqr(1,ic)
-           ro_ql(2)=-pawfgrtab(iatom)%expiqr(2,ic)
+           ro_ql(2)= pawfgrtab(iatom)%expiqr(2,ic)
            ro(1:2)=nhat12_atm(1:2,jc,isploop)
            nhat12_atm(1,jc,isploop)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
            nhat12_atm(2,jc,isploop)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
@@ -332,17 +333,17 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
          do ic=1,pawfgrtab(iatom)%nfgd
            jc=pawfgrtab(iatom)%ifftsph(ic)
            ro_ql(1)= pawfgrtab(iatom)%expiqr(1,ic)
-           ro_ql(2)=-pawfgrtab(iatom)%expiqr(2,ic)
-           ro(1)=grnhat12(1,jc,isploop,1)+qphon(1)*nhat12_atm(2,jc,isploop)
-           ro(2)=grnhat12(2,jc,isploop,1)-qphon(1)*nhat12_atm(1,jc,isploop)
+           ro_ql(2)= pawfgrtab(iatom)%expiqr(2,ic)
+           ro(1)=grnhat12(1,jc,isploop,1)-qphon(1)*nhat12_atm(2,jc,isploop)
+           ro(2)=grnhat12(2,jc,isploop,1)+qphon(1)*nhat12_atm(1,jc,isploop)
            grnhat12(1,jc,isploop,1)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
            grnhat12(2,jc,isploop,1)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
-           ro(1)=grnhat12(1,jc,isploop,2)+qphon(2)*nhat12_atm(2,jc,isploop)
-           ro(2)=grnhat12(2,jc,isploop,2)-qphon(2)*nhat12_atm(1,jc,isploop)
+           ro(1)=grnhat12(1,jc,isploop,2)-qphon(2)*nhat12_atm(2,jc,isploop)
+           ro(2)=grnhat12(2,jc,isploop,2)+qphon(2)*nhat12_atm(1,jc,isploop)
            grnhat12(1,jc,isploop,2)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
            grnhat12(2,jc,isploop,2)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
-           ro(1)=grnhat12(1,jc,isploop,3)+qphon(3)*nhat12_atm(2,jc,isploop)
-           ro(2)=grnhat12(2,jc,isploop,3)-qphon(3)*nhat12_atm(1,jc,isploop)
+           ro(1)=grnhat12(1,jc,isploop,3)-qphon(3)*nhat12_atm(2,jc,isploop)
+           ro(2)=grnhat12(2,jc,isploop,3)+qphon(3)*nhat12_atm(1,jc,isploop)
            grnhat12(1,jc,isploop,3)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
            grnhat12(2,jc,isploop,3)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
          end do
@@ -353,7 +354,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
          do ic=1,pawfgrtab(iatom)%nfgd
            jc=pawfgrtab(iatom)%ifftsph(ic)
            ro_ql(1)= pawfgrtab(iatom)%expiqr(1,ic)
-           ro_ql(2)=-pawfgrtab(iatom)%expiqr(2,ic)
+           ro_ql(2)= pawfgrtab(iatom)%expiqr(2,ic)
            ro(1)=grnhat_12(1,jc,isploop,1,iatom)
            ro(2)=grnhat_12(2,jc,isploop,1,iatom)
            grnhat_12(1,jc,isploop,1,iatom)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)

@@ -1796,7 +1796,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
        ABI_ALLOCATE(indsym_,(4,dtset%nsym,dtset%natom))
        indsym_=indsym
        if (dtset%nsym==1) then
-         indsym_=1
+         indsym_=0
          do iatom=1,dtset%natom
            indsym_(4,:,iatom)=iatom
          end do
@@ -1869,10 +1869,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
            phase_jkpt(:,1:npwj)=fock%phase(:,1+jkg:npwj+jkg)
          end if
 !* phase factor at k-point j
-!write(52,*) ikpt,npwj, jstwfk,ibg,icg,icp,fock%calc_phase(my_jkpt),fock%tab_symkpt(my_jkpt),fock%timerev(my_jkpt),&
-!&            fock%kptns_bz(1,my_jkpt),fock%kptns_bz(2,my_jkpt),fock%kptns_bz(3,my_jkpt),dtset%kptns(:,ikpt),&
-!&            indsym_(:,fock%tab_symkpt(my_jkpt),1)
-!write(53,*) my_jkpt,fock%tab_symkpt(my_jkpt),indsym(:,fock%tab_symkpt(my_jkpt),1)
+
 !* Initialize the band counter
          my_jband=0
          do iband=1,dtset%nband(ikpt)
@@ -1882,6 +1879,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
            if (fock%usepaw==1) then
              call pawcprj_set_zero(cprj_tmp)
            end if
+
            if(ABS(occ(iband+ibg))>tol8) then
 !* If the band is occupied
 
@@ -1920,7 +1918,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
                cgocc_tmp(npwj+2:2*npwj+1)=cg(2,1+(iband-1)*npwj+icg:iband*npwj+icg)
                if (fock%usepaw==1) then
                  call pawcprj_copy(cprj(:,icp+iband:icp+iband+nspinor-1),cprj_tmp)
-!write(92,*) jkpt, my_jband,cprj(1,icp+iband)%cp
                end if
              end if
 !* Broadcast the state (ikpt,iband,isppol) to all the processors of comm_kpt for cgocc
@@ -1962,11 +1959,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
                  cgocc(1,jpw) = phase_jkpt(1,jpw)*cgre - phase_jkpt(2,jpw)*cgim
                  cgocc(2,jpw) = phase_jkpt(1,jpw)*cgim + phase_jkpt(2,jpw)*cgre
                end do
-!               if (fock%usepaw==1) then
-!                 cgre=cprj_tmp(1,jpw) ; cgim=cprj_tmp(2,jpw)
-!                 cprj_tmp(1,jpw) = phase_jkpt(1,jpw)*cgre - phase_jkpt(2,jpw)*cgim
-!                 cprj_tmp(2,jpw) = phase_jkpt(1,jpw)*cgim + phase_jkpt(2,jpw)*cgre
-!               end if
              end if ! phase
 
 !* apply time reversal symmetry if necessary
@@ -1983,45 +1975,21 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
 &               npwj,1,n4,n5,n6,tim_fourwf0,dtset%paral_kgb,0,weight1,weight1,use_gpu_cuda=dtset%use_gpu_cuda)
 
              else
-!               fock%cgocc(:,1+(my_jband+jbg-1)*mpw:(my_jband+jbg-1)*mpw+npwj,my_jsppol)=cgocc(:,1:npwj)
                fock%cgocc(:,jcg+1+(my_jband-1)*npwj:jcg+my_jband*npwj,my_jsppol)=cgocc(:,1:npwj)
              end if
-!write(94,*) jkpt,ikpt,my_jband,npwj, fock%timerev(jkpt)
-!write(94,*) jkpt, my_jband,fock%cwaveocc_bz(:,1:10,1,1,my_jband+jbg,my_jsppol)
-!write(94,*) fock%cwaveocc_bz(:,:,:,:,my_jband+jbg,my_jsppol)
+
 !* calculate cprj and store it in cwaveocc_prj
              if (fock%usepaw==1) then
                iband_cprj=(my_jsppol-1)*fock%mkptband+jbg+my_jband
-!               if (fock%calc_phase(my_jkpt)==1) then
                nband=1;mband0=1;iband0=1
-!write(79,*) "cprj_tmp ",cprj_tmp(1,1)%cp
+
                call pawcprj_symkn(fock%cwaveocc_prj(:,iband_cprj:iband_cprj+nspinor-1),cprj_tmp(:,1:nspinor),&
 &               indsym_,dimlmn,iband0,indlmn,&
 &               fock%tab_symkpt(my_jkpt),fock%timerev(my_jkpt),dtset%kptns(:,ikpt),fock%pawang%l_max-1,lmnmax,&
 &               mband0,dtset%natom,nband,nspinor,dtset%nsym,dtset%ntypat,dtset%typat,fock%pawang%zarot)
-!write(79,*) "cwaveocc_prj ",fock%cwaveocc_prj(1,iband_cprj)%cp
-!write(79,*) "timerev ",fock%timerev(my_jkpt)
-!call pawcprj_copy(cprj_tmp,fock%cwaveocc_prj(:,iband_cprj:iband_cprj+nspinor-1))
-!write(95,*) jkpt, my_jband,fock%cwaveocc_prj(1,iband_cprj)%cp
-!flush(95)
-!               else
-!                 if (fock%timerev(my_jkpt)==1) then 
-!                  call pawcprj_conjg(cprj_tmp)
-!                 end if
-!                 call pawcprj_copy(cprj_tmp,fock%cwaveocc_prj(:,iband_cprj:iband_cprj+nspinor-1))
-!write(96,*) jkpt, my_jband,fock%cwaveocc_prj(1,iband_cprj)%cp
-!read(95,*) ii1,ii2,fock%cwaveocc_prj(1,iband_cprj)%cp,fock%cwaveocc_prj(2,iband_cprj)%cp
-!               end if
 
              end if
-!               else
-!* The band is empty ; the array cgocc_tmp remains equal to 0.d0.
-!                 if (mpi_enreg%proc_distrb(jkpt,jband,jsppol)==mpi_enreg%me_kpt) then
-!* The state (jkpt,jband,jsppol) is stored in the array cg of this processor ; shift are incremented.
-!                   icg=icg+npwj
-!                 end if
 
-             
            end if ! band occupied
 
 !* update the shift to apply to occ in all case because this array is not distributed among the proc.
@@ -2061,6 +2029,7 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
      if (nsppol==1) then 
 !* Update the array %occ_bz => May be limited to the occupied states only 
        fock%occ_bz(:,:)=half*fock%occ_bz(:,:)
+
 ! If nsppol=1, this is a restricted Hartree-Fock calculation.
 ! If nsppol=2, this is an unrestricted Hartree-Fock calculation.
      end if

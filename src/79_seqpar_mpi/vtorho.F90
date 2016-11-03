@@ -847,6 +847,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if (usefock) then
          call fock_updateikpt(fock,ikpt,isppol)
        end if
+       if ((psps%usepaw==1).and.(usefock)) then
+         if (fock%optfor) then
+           fock%forces_ikpt=zero
+         end if
+       end if
 
 !      Compute the eigenvalues, wavefunction, residuals,
 !      contributions to kinetic energy, nonlocal energy, forces,
@@ -910,7 +915,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              if (psps%usepaw==0) then
                energies%e_nonlocalpsp = energies%e_nonlocalpsp + dtset%wtk(ikpt)*occ_k(iband)*enl_k(iband)
              end if
-             if (usefock) energies%e_fock=energies%e_fock + half*fock%eigen_ikpt(iband)*occ(iband)*dtset%wtk(ikpt)
+             if (usefock) energies%e_fock=energies%e_fock + half*fock%eigen_ikpt(iband)*occ_k(iband)*dtset%wtk(ikpt)
            end if
          end do
 !        Calculate Fock contribution to the total energy if required
