@@ -168,6 +168,7 @@ module m_lobpcg2
     call getenv("MKL_NUM_THREADS",mkl_threads)
     read(mkl_threads,'(i5)',iostat=ierr) nthread
     if ( ierr /= 0 ) nthread = 1
+    if ( nthread == 0 ) nthread = 1
 #endif
 
     advice_target = 2.5d6*dble(nthread)
@@ -374,7 +375,7 @@ module m_lobpcg2
 
     nblock = lobpcg%nblock
     nline = lobpcg%nline
-    prevMaxResidu = huge(1d0)
+    prevMaxResidu = huge(1d0)/100.d0 ! Divide by 100 to avoid 10*huge at the first iteration  which is a FPE
 
     call xgBlock_getSize(eigen,rows_tmp, cols_tmp)
     if ( rows_tmp /= lobpcg%neigenpairs .and. cols_tmp /= 1 ) then
