@@ -35,6 +35,7 @@
  ionmov8 3 ntime8 5 toldff8 1.0d-7 tolmxf8 1.0d-5
 
  nstep 20
+ nline 1
  ecut 10. diemac 12.0d0  enunit 2
  ngfft 6 6 6
  ixc 3
@@ -48,7 +49,7 @@
  kptopt 0
  nband 12 occ 4*2 8*0
  ntypat 1 typat 1 1  natom 2
- timopt -1
+# timopt -1
  npkpt 1
  npband 2
  npfft 2

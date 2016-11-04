@@ -16,10 +16,14 @@ getwfk2 -1
 # -- Parallelization
 paral_kgb 1
 npband 2
+bandpp 18
 npkpt 2
 npfft 1
 #iomode 1
 fftalg 401
+nline1 1
+nline2 10
+tolwfr1 1e-20
 
 # -- Convergence Parameters
 nstep1 100
@@ -31,7 +35,7 @@ ecut  8
 
 pawecutdg 20
 tolvrs 1.0d-15
-nband  34
+nband  36
 occopt 3 tsmear 0.003675
 
 
@@ -59,7 +63,7 @@ chksymbreak 0
 
 ## == LDA+DMFT
 usedmft1 0
-usedmft 1
+usedmft 0
 dmftbandi  9
 dmftbandf 34
 dmft_solv2 2

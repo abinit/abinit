@@ -21,7 +21,8 @@
 
  ecut 15. pawecutdg 50
  diemac 12.0d0  enunit 2
- nstep 5
+ nstep 10
+ nline 1
  acell 3*7.0
  rprim 0.0 0.5 0.5
        0.5 0.0 0.5

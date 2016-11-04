@@ -24,11 +24,12 @@ ngfft 8 8 8
  znucl 14
  nband 8
  ntypat 1 typat 1 1  natom 2
- timopt -1
+# timopt -1
  npkpt 1
  npband 2
  npfft 2
  paral_kgb 1
+ nline 1
 
 #Obsolete entries (now set by default)
 #fftalg 401 wfoptalg 4

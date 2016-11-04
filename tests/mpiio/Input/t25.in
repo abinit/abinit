@@ -33,6 +33,7 @@
  ntypat 1 typat 1 1  natom 2
 
  paral_kgb 1
+ nline 1
  fftalg 401 # XG20160213 Although this is announced to be the default with paral_kgb 1 , 
             # removing this line leads to problems with the automatic tests. To be clarified. See KNOWN_PROBLEM 802.1
 
@@ -46,7 +47,7 @@
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = t25_MPI4.out, tolnlines=   16,   tolabs=  5.0e-8,      tolrel= 2.0e-2
+#%% files_to_test = t25_MPI4.out, tolnlines=   16,   tolabs=  5.0e-8,      tolrel= 2.0e-2, fld_options = -medium
 #%% [extra_info]
 #%% keywords = PAW
 #%% authors = Unknown
