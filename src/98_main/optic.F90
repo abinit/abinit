@@ -574,7 +574,6 @@ program optic
      bdtot0_index=0 ; bdtot_index=0
      do isppol=1,nsppol
        do ikpt=1,nkpt
-         call flush(std_out)
          nband1 = nband(ikpt+(isppol-1)*nkpt)
          nband_tmp=MIN(nband1,Epren%mband)
 
