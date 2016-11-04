@@ -73,7 +73,7 @@ toldff 5.0d-5
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tbase4_7.out, tolnlines= 41, tolabs=  1.001e-02, tolrel=  4.000e-03, fld_options = -easy
+#%%   tbase4_7.out, tolnlines= 41, tolabs=1.001e-02, tolrel=0.03, fld_options=-easy
 #%% psp_files =  13al.981214.fhi
 #%% [paral_info]
 #%% max_nprocs = 4
@@ -82,7 +82,6 @@ toldff 5.0d-5
 #%% keywords = 
 #%% description = 
 #%%   Crystalline aluminum : computation of the total energy
-#%%  
 #%%   Determination of the surface energy of aluminum :
 #%%   convergence with respect to the number of vacuum layers.
 #%%<END TEST_INFO>

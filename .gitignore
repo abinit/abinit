@@ -26,6 +26,7 @@ robodoc.log
 tags
 testf.ac
 abiref.ac
+rafael.ac
 tmp
 tmp2
 auto-*.m4
@@ -399,7 +400,6 @@ m_paw_atom.F90_OK
 42_libpaw/m_paw_finegrid.F90_OK
 m_paw_finegrid.F90_O
 m_paw_finegrid.F90_OK
-build1
 src/tags
 build2-debug-s
 .prev_run.pickle
@@ -412,3 +412,9 @@ tests/testbot.cfg
 tests/testbot_summary.json
 tests/testbot_summary.shelve
 !.gitkeep
+src/*/*dSYM/
+src/*/*log
+src/*/test_*
+!tests_*F90
+build1
+build2

@@ -6,11 +6,18 @@
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
 from time import gmtime,strftime
 
-import commands
+try:
+    from commands import getoutput
+except:
+    from subprocess import getoutput
 import os
 import re
 import sys
@@ -299,16 +306,16 @@ my_output  = "config/m4/auto-options.m4"
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
      not os.path.exists("src/98_main/abinit.F90") ):
-  print "%s: You must be in the top of an ABINIT source tree." % my_name
-  print "%s: Aborting now." % my_name
+  print("%s: You must be in the top of an ABINIT source tree." % my_name)
+  print("%s: Aborting now." % my_name)
   sys.exit(1)
 
 # Read config file(s)
 cnf = MyConfigParser()
 for cnf_file in my_configs:
   if ( not os.path.exists(cnf_file) ):
-    print "%s: Could not find config file (%s)." % (my_name,cnf_file)
-    print "%s: Aborting now." % my_name
+    print("%s: Could not find config file (%s)." % (my_name,cnf_file))
+    print("%s: Aborting now." % my_name)
     sys.exit(2)
 
 # What time is it?
@@ -332,7 +339,7 @@ ac_args["enable"].sort()
 ac_args["with"].sort()
 
 # Start writing macro
-m4 = file(my_output,"w")
+m4 = open(my_output, "wt")
 m4.write(macro_header(my_name,now))
 
 # Start writing define macro
@@ -564,12 +571,12 @@ m4.write(re.sub("@MACRO@",triggers,macro_triggers_template()))
 # Finish
 m4.close()
 
-tmp = commands.getoutput("./config/scripts/add-header-typed Autoconf %s" % (my_output))
+tmp = getoutput("./config/scripts/add-header-typed Autoconf %s" % (my_output))
 if ( tmp != "" ):
-  print tmp
+  print(tmp)
 
 # Write option dumper (for debugging)
-dumper = file("config.dump.in","a")
+dumper = open("config.dump.in","a")
 dumper.write("# Command-line options (script: %s)\n" % (my_name))
 for arg in all_args:
   arg_stat = cnf.get(arg,"status")

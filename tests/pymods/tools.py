@@ -2,7 +2,7 @@ from __future__ import print_function, division, absolute_import #, unicode_lite
 
 import os
 import sys
-import shutil 
+import shutil
 import tempfile
 import warnings
 
@@ -23,7 +23,7 @@ __all__ = [
 
 def patch(fromfile, tofile):
     """
-    Use the unix tools diff and patch to patch tofile.  
+    Use the unix tools diff and patch to patch tofile.
     Returns 0 if success
     """
     # Temporary patch file.
@@ -37,7 +37,7 @@ def patch(fromfile, tofile):
 
     retcode = os.system(diff_cmd)
 
-    #if retcode >= 2: 
+    #if retcode >= 2:
     #    warnings.warn("%s returned %s, won't patch!" % (diff_cmd, retcode) )
     #    return retcode
 
@@ -171,10 +171,10 @@ class RestrictedShell(object):
     """
     This object executes a restricted set of shell commands.
     It's main goal is to provide a restricted access to the
-    computing environment as we want to avoid executing 
+    computing environment as we want to avoid executing
     arbitrary code passed through the TEST_INFO sections.
 
-    At present, it supports rm, cp, mv and touch 
+    At present, it supports rm, cp, mv and touch
     """
     _key2command = {
         # key (function,   nargs)
@@ -242,7 +242,7 @@ class RestrictedShell(object):
 
                 # If src does not exist, look for the netcdf version.
                 # and change the extension of dest accordingly.
-                # This trick is needed so that we can run the same 
+                # This trick is needed so that we can run the same
                 # test both with Fortran-IO as well as with Netcdf
                 # without having to use two different TEST_INFO sections..
                 if key in ("cp", "mv"):
@@ -320,7 +320,7 @@ def prompt(question):
     else:
         # python 2.x.
         my_input = raw_input
-    
+
     return my_input(question)
 
 
@@ -393,17 +393,17 @@ class Patcher(object):
         """
         Args:
             patcher:
-                string with the name of the utility we want to use 
+                string with the name of the utility we want to use
                 for generating/applying patchers
-                If patcher is None, we use the applications specified 
-                in the env variables PATHCHER or vimdiff if $PATHCHER is 
+                If patcher is None, we use the applications specified
+                in the env variables PATHCHER or vimdiff if $PATHCHER is
                 not defined
         """
         if patcher is None:
             self.patcher = os.getenv("PATCHER", "vimdiff")
 
         else:
-            if patcher not in Patcher.known_patchers: 
+            if patcher not in Patcher.known_patchers:
                 raise ValueError("%s is not supported" % patcher)
             self.patcher = str(patcher)
 
@@ -418,7 +418,7 @@ class Patcher(object):
     def patch(self, fromfile, tofile):
         """Patch a file."""
         if self.patcher == "patch":
-            try: 
+            try:
                 return patch(fromfile, tofile)
             except Exception as exc:
                 raise self.Error("%s: trying to patch  %s %s:\n%s" % (self.patcher, fromfile, tofile, str(exc)))
@@ -435,7 +435,7 @@ class Patcher(object):
         exit_status = 0
 
         nfiles = len(fromfiles)
-        if not nfiles: 
+        if not nfiles:
             print("Nothing to patch")
             return exit_status
 
@@ -450,7 +450,7 @@ class Patcher(object):
             if self.is_interactive:
                 #print("from %s, to %s" % (fro, to))
                 exit_status = self.patch(fro, to)
-                if idx != (nfiles-1) and user_wants_to_exit(): 
+                if idx != (nfiles-1) and user_wants_to_exit():
                     break
 
             else:
@@ -461,9 +461,9 @@ class Patcher(object):
                 exit_status = self.patch(fro, to)
 
                 if exit_status != 0:
-                    msg = "Error while trying to patch %s with %s, interrupting" % (to, fro) 
+                    msg = "Error while trying to patch %s with %s, interrupting" % (to, fro)
                     break
-                    
+
         return exit_status
 
 
@@ -473,11 +473,11 @@ def pprint_table(table, out=sys.stdout, rstrip=False):
     Each row must have the same number of columns.
 
     Args:
-        out: 
+        out:
             Output stream (file-like object)
-        table: 
+        table:
             The table to print. A list of lists.
-        rstrip: 
+        rstrip:
             if true, trailing withespaces are removed from the entries.
     """
     def max_width_col(table, col_idx):
@@ -582,53 +582,31 @@ cc                   `$$$c`?        ?$.`$$hc, cd$$F ,$'  $$$$$$     ;!!
 c,        ;,        `?$$$$P           !!>             .
 """
 
-
 def ascii_abinit():
     return r"""
-                          :':                                                                       
-                         ''''                                                                       
-                         '''':                                                                      
-                         '''';                                                                      
-                        ''''''                                                                      
-                        ''''''                                                    ,`                
-                       '`,''''                                                  ::                  
-                      :'  ''''                                                ::.                   
-                      '   ''''                                             :::,                     
-                     ''   '''',                                         ::::                        
-                     '    '''''                                      ::::,                          
-    `,              '`    :''''                                  .:::::                             
-  ;;,              ;'      ''''                   :'`        `:::::.                                
- ';;;              '       ''''`                 ;'''`   ,::::::                                    
- ;;;;;:           ''       '''''      '          ''''':::::.                                        
-  ;;;;;;;,       .'         ''''     ,'      `:;:'''';,                  ''                         
-    ';;;;;;;;':`                   ``:';;;;;;;;:, '';                    ''                         
-       ,';;;;;;;;;;;;;;;;;;;;;;;;;;;;;':,`                               ''                         
-              `.,:::;;;:::,,.`       ,'  .;;`      :   ,   ,,       :    ''                         
-               .+            `''''   ,'`''''''     '   '.''''''     '  ''''''                       
-               ''             ;''''  ,'''    ''    '   '''`   ''    '    ''                         
-              ''               ''''' ,''      ''   '   ''      ''   '    ''                         
-              ',                 ,:  ,'       `'   '   ''      :'   '    ''                         
-             ''                      ,'        '   '   '.       '   '    ''                         
-            :'                        '        '   '   '.       '   '    ''                         
-            ''                        '.      ;'   '   '.       '   '    ''                         
-           ''                         ''      ';   '   '.       '   '    ''                         
-           '.                          '''  '''    '   '.       '   '    ,',                        
-          ''                            ;'''':     '   '.       '   '     ''';                      
-         ''                                                                                         
-         ':                                                        :  .       `````````             
-        ''                                                      `,'   `:::::::::::::::::::::::,`    
-        ;                                               `:;;;;;;;:'                     .,::::::::  
-                                                  .;;;;;;:.       ,   '                      `:::::.
-                                             .;;;;;:`              .+;                          :::,
-                                         :;;;;:`                                                ,:` 
-                                     :;;;;.                                                   ..    
-                                  ;;;;,                                                             
-                               ;;;;`                                                                
-                            .;;;                                                                    
-                          :;;                                                                       
-                         ;.                                                                         
-                       ;
+                        -////-                                                        .`
+                       `:////:`                                                   :+ymd-
+                      `:::///:`                                             `.:oyhdNdo.
+                     .::-:////.                                        `.:osddddddho-
+   `.:+-`          `-::` -////:`                                `-:/ysddddhhdddo:.
+:shhdNmh-         `-/:`  .:///:.                  `.`  ``-.o+yhdhddhhhdddyy+:.
+mo++ydhs:-``     `::.     .////-     `.`  .. `:-/:////dhhhhhhhhhmhhso/.-```
+hds++++oyyydshhoooos++++++oo+ooo++++s+/ssdmyhhhhyo///yymyhsoy/:..`      `::.
+ :+yhhhyyyssooooooosssssssyyyyyyyyyyyo/hyhhsyyhy+oo:-:... `..``    `.`  `/:``
+       -:--/ooooosyyyyyyys+//+oo++/:-://:::/:::`  -/. `/::::/:::.  -/:`:://::-
+             -/:.             .:://:.:/:.`  `./:. -/. `//-`  `.:/. -/:  `/:.
+           `-/:`                `    :/:      ./: -/. `/-      ./- -/:  `/:.
+          .:/-`                      -/:.   `./:. -/. `/-      `/- -/:  `/:.
+         .::-`                        .:::::::-.  -/. `/-      `/- -/:   -/::-
+       `-/:.                            ``..``    `.` `..      `.`.:o/-.``.://:-----::::-````.
+       -:-`                                          ``.-.::::/++/+MMMd+oooo++///+ssssooyysysyss++:.
+        `                                ` ..-.://+/+/+/::/-.--```-ydh+`                ```.-/+oyyys
+                                  ``.-:://+/+::-..```              ` `                       .:/+o/:
+                            ``.:://///--.``                                                   `.`
+                        `.-////-..`
+                      .:::-.`
 """
+
 
 if __name__ == "__main__":
     print(ascii_abinit())
