@@ -125,13 +125,10 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  type(xgBlock_t) :: xgx0
  type(xgBlock_t) :: xgeigen
  type(xgBlock_t) :: xgresidu
- type(xgBlock_t) :: xgghc
- type(xg_t) :: xggsc
  type(lobpcg_t) :: lobpcg
 
  integer :: space, blockdim,  nline
  integer :: ipw
- real(dp), allocatable :: resid_tmp(:,:)
 
  integer :: nthreads
 
@@ -407,7 +404,7 @@ end subroutine lobpcgwf2
 
    type(xgBlock_t), intent(inout) :: W
    integer :: ispinor
-   integer :: cplx
+   !integer :: cplx
 
    ! precondition resid_vec
    do ispinor = 1,l_nspinor
