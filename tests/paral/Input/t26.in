@@ -46,6 +46,7 @@
  ixc9 1
 
  nstep 5    # For testing purpose only
+ nline 1 
  ecut 16. pawecutdg 50. diemac 12.0d0  enunit 2
  ixc 2
  acell 3*7.0

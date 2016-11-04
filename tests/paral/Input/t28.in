@@ -35,6 +35,7 @@ nband 32
 # === SCF cycle options
 nstep 20  tolvrs 1.d-7
 ecut 5. pawecutdg 10.
+nline 1
 
 # === K-points and syms
 kptopt 4
@@ -54,7 +55,7 @@ prtden 0  prteig 0  prtwf 0
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = t28_MPI4.out, tolnlines=   42,   tolabs=  2.5e-5,      tolrel= 2.5e-2
+#%% files_to_test = t28_MPI4.out, tolnlines=   42,   tolabs=  2.5e-5,      tolrel= 2.5e-2, fld_options = -easy
 #%% [extra_info]
 #%% keywords = PAW 
 #%% authors = M. Torrent
