@@ -100,8 +100,8 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
 !Local variables-------------------------------
 !scalars
- integer :: choice,cpopt,idir1,idir2,idirc,ipw,ipws,ispinor
- integer :: my_nspinor,natom,nnlout=1,npw,npw1,paw_opt,signs,tim_nonlop
+ integer :: choice,cpopt,idir1,idir2,idirc,ipw,ipws,ispinor,my_nspinor
+ integer :: natom,nnlout=1,npw,npw1,paw_opt,signs,tim_nonlop,usecprj
  logical :: has_kin,has_vnl
  real(dp) :: enlout_dum(1)
  character(len=500) :: msg
@@ -132,10 +132,6 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 !Compatibility tests
  if(ipert/=natom+10.and.ipert/=natom+11)then
    msg='only ipert<>natom+10/natom+11 implemented!'
-   MSG_BUG(msg)
- end if
- if(gs_hamkq%usepaw==0.and.gs_hamkq%usecprj==1)then
-   msg='usecprj==1 not allowed for NC psps!'
    MSG_BUG(msg)
  end if
  if (mpi_enreg%paral_spinor==1) then
@@ -183,9 +179,21 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
      MSG_BUG(msg)
    end if
  end if
- if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj/=0) then
-   if (size(cwaveprj)<gs_hamkq%natom*my_nspinor) then
-     msg='wrong size for cwaveprj!'
+
+!PAW: specific treatment for usecprj input arg
+!     force it to zero if cwaveprj is not allocated
+ usecprj=gs_hamkq%usecprj
+ if(gs_hamkq%usepaw==1) then
+   if (size(cwaveprj)==0) usecprj=0
+   if (usecprj/=0) then
+     if (size(cwaveprj)<gs_hamkq%natom*my_nspinor) then
+       msg='wrong size for cwaveprj!'
+       MSG_BUG(msg)
+     end if
+   end if
+ else
+   if(usecprj==1)then
+     msg='usecprj==1 not allowed for NC psps !'
      MSG_BUG(msg)
    end if
  end if
@@ -220,7 +228,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 !======================================================================
 
  has_vnl=(ipert==natom+10.or.ipert==natom+11)
- 
+
 !Use of gvnl2 depends on usevnl
  if (usevnl==1) then
    gvnl2_ => gvnl2
@@ -236,18 +244,18 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 !  -------------------------------------------
    if (ipert==natom+10) then
      if (gs_hamkq%usepaw==1) then
-       if (gs_hamkq%usecprj==1) then
+       if (usecprj==1) then
          cwaveprj_ptr => cwaveprj
        else
          ABI_DATATYPE_ALLOCATE(cwaveprj_tmp,(natom,my_nspinor))
          call pawcprj_alloc(cwaveprj_tmp,0,gs_hamkq%dimcprj)
          cwaveprj_ptr => cwaveprj_tmp
        end if
-       cpopt=-1+5*gs_hamkq%usecprj
+       cpopt=-1+5*usecprj
        choice=8; signs=2; paw_opt=1; if (sij_opt/=0) paw_opt=sij_opt+3
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout_dum,gs_hamkq,idirc,(/lambda/),mpi_enreg,1,nnlout,&
 &       paw_opt,signs,gs2c,tim_nonlop,cwavef,gvnl2_)
-       if (gs_hamkq%usecprj==0) then
+       if (usecprj==0) then
          call pawcprj_free(cwaveprj_tmp)
          ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
        end if
@@ -264,7 +272,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
      ABI_ALLOCATE(nonlop_out,(2,npw1*my_nspinor))
 
-     if (gs_hamkq%usecprj==1) then
+     if (usecprj==1) then
        cwaveprj_ptr => cwaveprj
      else
        ABI_DATATYPE_ALLOCATE(cwaveprj_tmp,(natom,my_nspinor))
@@ -284,7 +292,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
        end do
 
 !      Compute part of H^(2) due to derivative of projectors (idir1) and derivative of Dij (idir2)
-       cpopt=4*gs_hamkq%usecprj
+       cpopt=4*usecprj
        choice=5 ; paw_opt=1 ; signs=2
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout_dum,gs_hamkq,idir1,(/zero/),mpi_enreg,1,nnlout,&
 &       paw_opt,signs,svectout_dum,tim_nonlop,cwavef,nonlop_out,&
@@ -297,7 +305,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
      end if ! opt_gvnl2==1
 
 !    Compute derivatives due to projectors |d^2[p_i]/dk1dk2>,|d[p_i]/dk1>,|d[p_i]/dk2>
-     cpopt=-1+5*gs_hamkq%usecprj
+     cpopt=-1+5*usecprj
      choice=81 ; paw_opt=3 ; signs=2
      call nonlop(choice,cpopt,cwaveprj_ptr,enlout_dum,gs_hamkq,idirc,(/lambda/),mpi_enreg,1,nnlout,&
 &     paw_opt,signs,nonlop_out,tim_nonlop,cwavef,vectout_dum)
@@ -308,7 +316,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
      end do
      ABI_DEALLOCATE(nonlop_out)
      if (sij_opt==1) gs2c=zero
-     if (gs_hamkq%usecprj==0) then
+     if (usecprj==0) then
        call pawcprj_free(cwaveprj_tmp)
        ABI_DATATYPE_DEALLOCATE(cwaveprj_tmp)
      end if

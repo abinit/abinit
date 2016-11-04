@@ -4,7 +4,7 @@
 !! m_rf2
 !!
 !! FUNCTION
-!! This module defines structures and provides procedures used to compute the 2nd order Sternheimer 
+!! This module defines structures and provides procedures used to compute the 2nd order Sternheimer
 !! equation.
 !!
 !! COPYRIGHT
@@ -51,7 +51,8 @@ MODULE m_rf2
 !scalars
   integer :: ndir ! number of directions to consider
   integer :: nband_k ! number of bands
-  integer :: size_wf ! number of coeffs in a wavefunction
+  integer :: size_wf ! number of components in a wavefunction
+  integer :: size_cprj ! number of components of a cprj variable (i.e. <p_i|WF>)
 
 !arrays
   integer :: iperts(2) ! perturbations to compute
@@ -100,7 +101,7 @@ MODULE m_rf2
    ! Namely :
    ! lambda_mn =  <u^(0)_m| H^(2) |u^(0)_n> + 2 <u^(1)_m| H^(0) |u^(1)_n>
    !          + 2 <u^(1)_m| H^(1) |u^(0)_n> + 2 <u^(0)_m| H^(1) |u^(1)_n>
-   !          - A_mn * (epsilon_m + epsilon_n) / 2 
+   !          - A_mn * (epsilon_m + epsilon_n) / 2
    ! **
    ! Computed in "rf2_init"
 
@@ -213,7 +214,7 @@ end subroutine rf2_getidirs
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
 !!  mpi_enreg=information about MPI parallelization
 !!  iband : band index for vi
-!!  idir1  (used only if print_info/=0)  : direction of the 1st perturbation
+!!  idir1  (us only if print_info/=0)  : direction of the 1st perturbation
 !!  idir2  (used only if print_info/=0)  : direction of the 2nd perturbation
 !!  ipert1 (used only if print_info/=0)  : 1st perturbation
 !!  ipert2 (used only if print_info/=0)  : 2nd perturbation
@@ -257,7 +258,7 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
 
 !arrays
  real(dp),intent(in) :: vi(2,rf2%size_wf),v1j(2,rf2%size_wf),v2j(2,rf2%size_wf)
- 
+
 !Local variables ---------------------------------------
 !scalars
  integer :: nband_k,size_wf
@@ -341,10 +342,12 @@ end subroutine rf2_accumulate_bands
 !!
 !! INPUTS
 !!  rf2 : rf2_t object containing all rf2 data
-!!  cg_jband (used only if print_info/=0) : array containing |u^(0)(jband)> (see NOTES below)
-!!  cprj(natom,nspinor*mband*mkmem*nsppol*usecprj)= wave functions at k
-!!              projected with non-local projectors: cprj=<p_i|Cnk> (see NOTES below)
-!!  copt=0 if work1 is | u^(0) >, cpopt=1 if work1 is | u^(1) >
+!!  cg_jband (used only if print_info/=0) : array containing |u^(0)(jband)> for all bands
+!!  cprj_jband(natom,nspinor*mband*mkmem*nsppol*usecprj)= u^(0) wave functions for all bands
+!!              projected with non-local projectors: cprj_jband=<p_i|u^(0)(jband)>
+!!  cwave(2,size_wf) : input wave function |u>
+!!  cwaveprj(natom,nspinor) : input wave function |u>
+!!              projected with non-local projectors <p_i|u>
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  eig0 : 0-order eigenvalue for the present wavefunction at k
 !!  eig1_k_jband : first-order lagrange multipliers for the band j (Lambda^(1)_ji for all i)
@@ -367,27 +370,25 @@ end subroutine rf2_accumulate_bands
 !!  print_info : if /=0 : some tests are done (see NOTES below). Wrong results are printed in std_out
 !!  prtvol=control print volume and debugging output (for getghc)
 !!  rf_hamk_idir <type(rf_hamiltonian_type)>=all data for the 1st-order Hamiltonian at k,q (here q=0)
-!!  work1 : input wave function
 !!
 !! OUTPUT
-!!  work2 : array containing H^(ipert)|work1>
-!!  work3 : array containing S^(ipert)|work1>
+!!  hcwave(2,size_wf) : array containing H^(ipert)|cwave>
+!!  scwave(2,size_wf) : array containing S^(ipert)|cwave>
 !!
 !! NOTES
 !!  * Tests are done if print_info/=0. In that case : cg_jband(:,jband,1) = |u^(0)(jband)>
 !!    For ipert==natom+2 (electric field) : cg_jband(:,jband,2) = i * |du/dk_idir(jband)>
-!!    According to ipert, we check that : 
+!!    According to ipert, we check that :
 !!    -- ipert = 0 :
 !!      < u^(0)(jband)| H^(0) | u^(0)(jband)> = eig0(jband)
-!!    -- ipert = natom+1 or 2 : 
+!!    -- ipert = natom+1 or 2 :
 !!      < u^(0)(jband)| ( H^(1) - (eig0(jband)+eig0(iband))/2 * S^(1) ) | u^(0)(iband)> = Lambda^(1)(jband,iband)
 !!    --ipert = natom+10 or 11 :
 !!      nothing is done...
 !!  * Use of cprj :
 !!    The cprj array is computed in dfpt_looppert.F90. In the context of rf2 calculation, it contains
-!!    <Proj_i^(0)|u^(0)> and <Proj_i^(1)|u^(0)> (dir=1,2 and 3) for all GS wavefunctions u^(0).
-!!    If |work1> is a GS wavefunction (copt=0), computed cwaveprj can be used.
-!!    If |work1> is not a GS wavefunction (copt=1), cwaveprj must be computed on the fly.
+!!    <Proj_i^(0)|u^(0)> and <Proj_i^(1)|u^(0)> (dir=1,2 and 3) for all wavefunctions u^(0) or
+!!    <Proj_i^(0)|u^(1)> and <Proj_i^(1)|u^(1)> (dir=1,2 and 3) for all 1st-order wavefunctions u^(1).
 !!    Note that <Proj_i^(2)|u^(0)> is always computed on the fly.
 !!
 !! PARENTS
@@ -397,16 +398,17 @@ end subroutine rf2_accumulate_bands
 !!
 !! SOURCE
 
-subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj,copt,dtfil,eig0,eig1_k_jband,jband,gs_hamkq,&
-                                 gvnl1,ibg,idir,ipert,ikpt,isppol,mband,mkmem,mpi_enreg,nsppol,&
-                                 print_info,prtvol,rf_hamk_idir,work1,work2,work3)
+subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave,cwaveprj,hcwave,scwave,dtfil,eig0,eig1_k_jband,&
+&                                jband,gs_hamkq,gvnl1,ibg,idir,ipert,ikpt,isppol,mband,mkmem,mpi_enreg,nsppol,&
+                                 print_info,prtvol,rf_hamk_idir)
 
  use defs_basis
  use defs_abitypes
+ use m_errors
  use m_hamiltonian
  use m_cgtools
 
- use m_pawcprj,      only : pawcprj_type,pawcprj_alloc,pawcprj_get,pawcprj_free
+ use m_pawcprj,      only : pawcprj_type,pawcprj_alloc,pawcprj_copy,pawcprj_free
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -420,7 +422,7 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj,copt,dtfil,eig0,eig1_k_jband,
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: copt,ibg,idir,ipert,ikpt,isppol,jband,mband,mkmem,nsppol,print_info,prtvol
+ integer,intent(in) :: ibg,idir,ipert,ikpt,isppol,jband,mband,mkmem,nsppol,print_info,prtvol
  type(datafiles_type),intent(in) :: dtfil
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(rf2_t),intent(in) :: rf2
@@ -431,22 +433,37 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj,copt,dtfil,eig0,eig1_k_jband,
  real(dp),intent(in) :: cg_jband(2,rf2%size_wf*print_info*rf2%nband_k,2)
  real(dp),intent(in) :: eig0(rf2%nband_k),eig1_k_jband(2*rf2%nband_k)
  real(dp),intent(inout) :: gvnl1(2,rf2%size_wf)
- real(dp),intent(inout) :: work1(2,rf2%size_wf),work2(2,rf2%size_wf),work3(2,rf2%size_wf)
- type(pawcprj_type),intent(in) :: cprj(gs_hamkq%natom,gs_hamkq%nspinor*mband*mkmem*nsppol*gs_hamkq%usecprj)
+ real(dp),intent(inout) :: cwave(2,rf2%size_wf),hcwave(2,rf2%size_wf),scwave(2,rf2%size_wf)
+ type(pawcprj_type),intent(inout) :: cprj_jband(:,:),cwaveprj(:,:)
 
 !Local variables ---------------------------------------
 !scalars
- integer,parameter :: berryopt=0,iorder_cprj=0,optnl=2,tim_getghc=1,tim_getgh1c=1,tim_getgh2c=1 ! to change
- integer :: cpopt,iband,natom,nband_k,ncpgr_loc,sij_opt,size_wf,optlocal,opt_gvnl1,usevnl
+ integer,parameter :: berryopt=0,optnl=2,tim_getghc=1,tim_getgh1c=1,tim_getgh2c=1 ! to change
+ integer :: cpopt,iband,natom,nband_k,sij_opt,size_cprj,size_wf,optlocal,opt_gvnl1,usevnl
+ logical :: has_cprj_jband,has_cwaveprj
  real(dp) :: dotr,doti,dotr2,doti2,tol_test
  character(len=500) :: msg
- 
+
 !arrays
  real(dp) :: dum1(1,1)
  real(dp),allocatable :: gvnlc(:,:),cgj(:,:),iddk(:,:)
- type(pawcprj_type),allocatable :: cwaveprj(:,:)
+ type(pawcprj_type),allocatable :: cwaveprj_jband(:,:)
 
 ! *********************************************************************
+
+!Check sizes
+ if (size(cprj_jband)/=0) then
+   if (size(cprj_jband)/=rf2%nband_k*gs_hamkq%natom*gs_hamkq%nspinor*gs_hamkq%usecprj) then
+     msg='Wrong cprj size!'
+     MSG_BUG(msg)
+   end if
+ end if
+ if (size(cwaveprj)/=0) then
+   if (size(cwaveprj)/=gs_hamkq%natom*gs_hamkq%nspinor*gs_hamkq%usecprj) then
+     msg='Wrong cprj size!'
+     MSG_BUG(msg)
+   end if
+ end if
 
  usevnl     = 0
  optlocal   = 0
@@ -460,32 +477,22 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj,copt,dtfil,eig0,eig1_k_jband,
    end if
  end if
  dum1 = zero
- 
+
  natom = gs_hamkq%natom
  nband_k = rf2%nband_k
  size_wf = rf2%size_wf
+ size_cprj = rf2%size_cprj
  sij_opt=1;if (gs_hamkq%usepaw==0) sij_opt=0
  tol_test=tol8
 
-! In the PAW case : get cwaveprj
- ncpgr_loc = 0
- ABI_DATATYPE_ALLOCATE(cwaveprj,(0,0))
- if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1) then
-   ABI_DATATYPE_DEALLOCATE(cwaveprj)
-   ABI_DATATYPE_ALLOCATE(cwaveprj,(natom,gs_hamkq%nspinor))
-   if (ipert==natom+1.or.ipert==natom+2) ncpgr_loc = 1
-   if (ipert==natom+10.or.ipert==natom+11) ncpgr_loc = 3
-   call pawcprj_alloc(cwaveprj,ncpgr_loc,gs_hamkq%dimcprj)
-   if ((copt==0.or.print_info/=0).and.(ipert==natom+1.or.ipert==natom+2)) then ! get only the gradient along idir
-     call pawcprj_get(gs_hamkq%atindx1,cwaveprj,cprj,natom,jband,ibg,ikpt,iorder_cprj,&
-&    isppol,mband,mkmem,natom,1,nband_k,gs_hamkq%nspinor,nsppol,dtfil%unpaw,&
-&    mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb,ncpgr=3,icpgr=idir)
-   else if ( (copt==0.and.(ipert==0.or.ipert==natom+10.or.ipert==natom+11)).or.&
-             (print_info/=0.and.ipert==0) ) then
-     call pawcprj_get(gs_hamkq%atindx1,cwaveprj,cprj,natom,jband,ibg,ikpt,iorder_cprj,&
-&    isppol,mband,mkmem,natom,1,nband_k,gs_hamkq%nspinor,nsppol,dtfil%unpaw,&
-&    mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-   end if
+! In the PAW case : manage cwaveprj_jband, cwaveprj
+ has_cprj_jband=(gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1.and.size(cprj_jband)/=0)
+ has_cwaveprj=(gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1.and.size(cwaveprj)/=0)
+ if (has_cprj_jband.and.print_info/=0) then
+   ABI_DATATYPE_ALLOCATE(cwaveprj_jband,(gs_hamkq%natom,size_cprj))
+   call pawcprj_alloc(cwaveprj_jband,cprj_jband(1,1)%ncpgr,gs_hamkq%dimcprj)
+ else
+   ABI_DATATYPE_ALLOCATE(cwaveprj_jband,(gs_hamkq%natom,0))
  end if
 
 ! *******************************************************************************************
@@ -499,11 +506,14 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj,copt,dtfil,eig0,eig1_k_jband,
    if(print_info/=0) then
      ABI_ALLOCATE(cgj,(2,size_wf))
      cgj(:,:) = cg_jband(:,1+(jband-1)*size_wf:jband*size_wf,1)
+     if (has_cprj_jband) then
+       call pawcprj_copy(cprj_jband(:,1+(jband-1)*size_cprj:jband*size_cprj),cwaveprj_jband)
+     end if
      cpopt = -1+3*gs_hamkq%usecprj*gs_hamkq%usepaw
-     call getghc(cpopt,cgj,cwaveprj,work2,work3,gs_hamkq,gvnlc,zero,mpi_enreg,1,prtvol,&
+     call getghc(cpopt,cgj,cwaveprj_jband,hcwave,scwave,gs_hamkq,gvnlc,zero,mpi_enreg,1,prtvol,&
                  sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
 
-     call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgj,work2,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+     call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgj,hcwave,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
      dotr = dotr - eig0(jband)
      dotr = sqrt(dotr**2+doti**2)
      if (dotr > tol_test) then
@@ -514,14 +524,8 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj,copt,dtfil,eig0,eig1_k_jband,
 
    end if ! end tests
 
-   if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1) then
-!    copt=0 : |work1> is a GS wavefunction, cwaveprj are already in memory
-!    copt=1 : |work1> is not a GS wavefunction, cwaveprj are computed here
-     cpopt=2-3*copt
-   else
-     cpopt = -1
-   end if
-   call getghc(cpopt,work1,cwaveprj,work2,work3,gs_hamkq,gvnlc,zero,mpi_enreg,1,prtvol,&
+   cpopt=-1;if (has_cwaveprj) cpopt=2
+   call getghc(cpopt,cwave,cwaveprj,hcwave,scwave,gs_hamkq,gvnlc,zero,mpi_enreg,1,prtvol,&
                sij_opt,tim_getghc,0,select_k=KPRIME_H_KPRIME)
    ABI_DEALLOCATE(gvnlc)
 
@@ -535,15 +539,18 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj,copt,dtfil,eig0,eig1_k_jband,
      ABI_ALLOCATE(cgj,(2,size_wf))
      ABI_ALLOCATE(iddk,(2,size_wf))
      cgj(:,:) = cg_jband(:,1+(jband-1)*size_wf:jband*size_wf,1)
+     if (has_cprj_jband) then
+       call pawcprj_copy(cprj_jband(:,1+(jband-1)*size_cprj:jband*size_cprj),cwaveprj_jband)
+     end if
      iddk(:,:) = zero
      if (ipert==natom+2) iddk(:,:) = cg_jband(:,1+(jband-1)*size_wf:jband*size_wf,2)
-     call getgh1c(berryopt,0,cgj,cwaveprj,work2,dum1,work3,gs_hamkq,iddk,idir,ipert,zero,&
+     call getgh1c(berryopt,cgj,cwaveprj_jband,hcwave,dum1,scwave,gs_hamkq,iddk,idir,ipert,zero,&
                   mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamk_idir,sij_opt,tim_getgh1c,usevnl)
      do iband=1,nband_k
        cgj(:,:) = cg_jband(:,1+(iband-1)*size_wf:iband*size_wf,1)
-       call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgj,work2,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+       call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgj,hcwave,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
        if (gs_hamkq%usepaw==1.and.ipert/=natom+2) then ! S^(1) is zero for ipert=natom+2
-         call dotprod_g(dotr2,doti2,gs_hamkq%istwf_k,size_wf,2,cgj,work3,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+         call dotprod_g(dotr2,doti2,gs_hamkq%istwf_k,size_wf,2,cgj,scwave,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
          dotr = dotr - (eig0(iband)+eig0(jband))*dotr2/two
          doti = doti - (eig0(iband)+eig0(jband))*doti2/two
        end if
@@ -560,23 +567,22 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj,copt,dtfil,eig0,eig1_k_jband,
      ABI_DEALLOCATE(iddk)
    end if ! end tests
 
-   call getgh1c(berryopt,copt,work1,cwaveprj,work2,dum1,work3,gs_hamkq,gvnl1,idir,ipert,zero,&
+   call getgh1c(berryopt,cwave,cwaveprj,hcwave,dum1,scwave,gs_hamkq,gvnl1,idir,ipert,zero,&
                 mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamk_idir,sij_opt,tim_getgh1c,usevnl)
 
 ! *******************************************************************************************
 ! apply H^(2)
 ! *******************************************************************************************
  else if (ipert==natom+10.or.ipert==natom+11) then
-
-     call getgh2c(work1,cwaveprj,work2,work3,gs_hamkq,gvnl1,idir,ipert,zero,&
-                   mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamk_idir,sij_opt,tim_getgh2c,usevnl)
+     call getgh2c(cwave,cwaveprj,hcwave,scwave,gs_hamkq,gvnl1,idir,ipert,zero,&
+                  mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamk_idir,sij_opt,tim_getgh2c,usevnl)
 
  end if
 
- if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1) then
-   call pawcprj_free(cwaveprj)
+ if (size(cwaveprj_jband)>0) then
+   call pawcprj_free(cwaveprj_jband)
  end if
- ABI_DATATYPE_DEALLOCATE(cwaveprj)
+ ABI_DATATYPE_DEALLOCATE(cwaveprj_jband)
 
 end subroutine rf2_apply_hamiltonian
 !!***
