@@ -303,7 +303,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*natom))
  call getph(cryst%atindx,natom,n1,n2,n3,ph1d,cryst%xred)
 
- ! Find the appropriate value of mpw 
+ ! Find the appropriate value of mpw
  mpw = 0; cnt=0
  do spin=1,nsppol
    do ik=1,nkpt
@@ -397,7 +397,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 
  ! Compute displacement vectors and phonon frequencies
  call ifc_fourq(ifc,cryst,qpt,phfrq,displ_cart) ! out_d2cart,out_eigvec)
- 
+
  ! Transform phonon displacement vector from cartesian to reduced coordinates
  call phdispl_cart2red(cryst%natom,cryst%gprimd,displ_cart,displ_red)
 

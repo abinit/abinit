@@ -2155,8 +2155,7 @@ subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,pr
  real(dp) :: summ,kT,tstep,abs_delta,rel_delta,alpha,gap
  !character(len=500) :: msg
 !arrays
- real(dp),allocatable :: wmts(:),lambda_ij(:,:)
- real(dp),allocatable,target :: tlist(:)
+ real(dp),allocatable :: wmts(:),lambda_ij(:,:),tmesh(:)
  real(dp),allocatable :: din(:),dout(:),zin(:),zout(:)
 
 ! *********************************************************************
@@ -2168,11 +2167,11 @@ subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,pr
  ! Build linear mesh of temperatures.
  ABI_CHECK(ntemp > 1, "ntemp cannot be 1")
  tstep = (temp_range(2) - temp_range(1)) / (ntemp - 1)
- ABI_MALLOC(tlist, (ntemp))
- tlist = arth(temp_range(1), tstep, ntemp)
+ ABI_MALLOC(tmesh, (ntemp))
+ tmesh = arth(temp_range(1), tstep, ntemp)
 
  ! Matsubara frequencies: i w_n = i (2n+1) pi T
- kT = kb_HaK * tlist(1)
+ kT = kb_HaK * tmesh(1)
  nwm = 0
  do
    if ((2*nwm + 1) * pi * kT > wcut) exit
@@ -2202,12 +2201,12 @@ subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,pr
    NCF_CHECK(ncerr)
 
    NCF_CHECK(nctk_set_datamode(ncid))
-   NCF_CHECK(nf90_put_var(ncid, vid("temperatures"), tlist))
+   NCF_CHECK(nf90_put_var(ncid, vid("temperatures"), tmesh))
  end if
 #endif
 
  do it=1,ntemp
-   kT = kb_HaK * tlist(it)
+   kT = kb_HaK * tmesh(it)
 
    ! Matsubara frequencies: i w_n = i (2n+1) pi T
    nwm = 0
@@ -2295,7 +2294,7 @@ subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,pr
    else
      write(std_out,*)"Not converged",rel_delta / abs_delta
    end if
-   write(std_out,*)"T=",tlist(it)," [K], gap ",gap*Ha_eV," [eV]"
+   write(std_out,*)"T=",tmesh(it)," [K], gap ",gap*Ha_eV," [eV]"
 
    ! Write data to netcd file.
 #ifdef HAVE_NETCDF
@@ -2320,7 +2319,7 @@ subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,pr
    ABI_FREE(lambda_ij)
  end do ! it
 
- ABI_FREE(tlist)
+ ABI_FREE(tmesh)
 
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
@@ -2478,7 +2477,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 !arrays
  integer :: g0_k(3),g0bz_kq(3),g0_kq(3),symq(4,2,cryst%nsym),dummy_gvec(3,dummy_npw)
  integer :: work_ngfft(18),gmax(3),my_gmax(3),gamma_ngqpt(3) !g0ibz_kq(3),
- integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:),blkflg(:,:)
+ integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:)
  integer :: indkk_kq(1,6)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3), phfrq(3*cryst%natom),lf(2),rg(2),res(2)
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
@@ -2610,11 +2609,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
        cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
        kk = fs%kpts(:, ik_bz); kq = kk + qpt
        ! Do computation of G sphere, returning npw. Note istwfk==1.
-       !call kpgsph(ecut,dtset%exchn2n3d,cryst%gmet,0,ik_bz,1,dummy_gvec,kk,0,mpi_enreg,0,onpw)
-       !mpw = max(mpw, onpw)
-       !call kpgsph(ecut,dtset%exchn2n3d,cryst%gmet,0,ik_bz,1,dummy_gvec,kq,0,mpi_enreg,0,onpw)
-       !mpw = max(mpw, onpw)
-
        call get_kg(kk,1,ecut,cryst%gmet,onpw,gtmp)
        mpw = max(mpw, onpw)
        do ipw=1,onpw
@@ -2701,9 +2695,9 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 
 ! Allocate vlocal. Note nvloc
  ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamkq%nvloc))
+ vlocal = huge(one)
 
  ! Allocate work space arrays.
- ABI_MALLOC(blkflg, (natom3,natom3))
  ABI_MALLOC(tgam, (2,natom3,natom3,nsig))
  ABI_CALLOC(dummy_vtrial, (nfftf,nspden))
  ABI_CALLOC(gvals_qibz, (2,natom3,natom3,nsig,gams%nqibz,nsppol))
@@ -2750,8 +2744,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      ! Continue to initialize the Hamiltonian
      call load_spin_hamiltonian(gs_hamkq,spin,vlocal=vlocal, &
 &            comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-    !call load_spin_hamiltonian(gs_hamkq,spin,paw_ij=paw_ij,vlocal=vlocal, &
-    !&       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
      ! Allocate workspace for wavefunctions. Make npw larger than expected.
      ! maxnb is the maximum number of bands crossing the FS, used to dimension arrays.
@@ -2907,8 +2899,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=1)
          call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc), &
               comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-!        call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,spin,paw_ij1=paw_ij1,vlocal1=vlocal1(:,:,:,:,ipc), &
-!             comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
          ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
          call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kk,kq,idir,ipert,&                   ! In
@@ -3046,7 +3036,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ABI_FREE(ylm_k)
  ABI_FREE(ylm_kq)
  ABI_FREE(ylmgr_kq)
- ABI_FREE(blkflg)
  ABI_FREE(tgam)
 
  call destroy_hamiltonian(gs_hamkq)
