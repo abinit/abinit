@@ -148,7 +148,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,option1=1
  integer :: my_rank,nproc,iomode,mband,my_minb,my_maxb,nsppol,nkpt,idir,ipert,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor,onpw
- integer :: ib1,ib2,band
+ integer :: ib1,ib2,band,num_smallw
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq,nqpt_max !timerev_q,
  integer :: spin,istwf_k,istwf_kq,istwf_kirr,npw_k,npw_kq,npw_kirr
  integer :: ii,ipw,mpw,my_mpw,ierr,cnt,ncid
@@ -180,7 +180,8 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  real(dp),allocatable :: sph_shiftq(:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
- real(dp),allocatable :: v1scf(:,:,:,:),tgam(:,:,:,:),gvals_qibz(:,:,:,:,:,:),atmgkk(:,:,:,:)
+ real(dp),allocatable :: v1scf(:,:,:,:),tgam(:,:,:,:),gvals_qibz(:,:,:,:,:,:)
+ real(dp),allocatable :: gkk_atm(:,:,:,:),gkk_mu(:,:,:,:)
  real(dp),allocatable :: bras_kq(:,:,:),kets_k(:,:,:),h1kets_kq(:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
@@ -277,7 +278,6 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  nband=mband; bks_mask=.True.; keep_ur=.False.
 
  ecut = dtset%ecut ! dtset%dilatmx
- !ecut = 5
  call wfd_init(wfd,cryst,pawtab,psps,keep_ur,dtset%paral_kgb,dummy_npw,mband,nband,nkpt,nsppol,bks_mask,&
    nspden,nspinor,dtset%ecutsm,dtset%dilatmx,ebands%istwfk,ebands%kptns,ngfft,&
    dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
@@ -429,7 +429,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
 
    ! Integrations over q-points.
    do iq_ibz=1,nqibz_k
-     write(std_out,*)"in q-point loopq",iq_ibz,nqibz_k
+     !write(std_out,*)"in q-point loopq",iq_ibz,nqibz_k
      call cwtime(cpu,wall,gflops,"start")
      qpt = qibz_k(:,iq_ibz)
      tgam = zero
@@ -451,7 +451,6 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
        ABI_MALLOC(v1scf, (cplex,nfftf,nspden,natom3))
        call dvdb_ftinterp_qpt(dvdb, qpt, nfftf, ngfftf, v1scf, xmpi_comm_self)
      end if
-     !write(std_out,*)"after dvdb"
 
      ! Examine the symmetries of the q wavevector
      !call littlegroup_q(cryst%nsym,qpt,symq,cryst%symrec,cryst%symafm,timerev_q,prtvol=dtset%prtvol)
@@ -495,7 +494,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
      ! Be careful with time-reversal symmetry.
      if (isirr_kq) then
        ! Copy u_kq(G)
-       write(std_out,*)"before isirr"
+       !write(std_out,*)"before isirr"
        istwf_kq = wfd%istwfk(ikq_ibz); npw_kq = wfd%npwarr(ikq_ibz)
        ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
        kg_kq(:,1:npw_kq) = wfd%kdata(ikq_ibz)%kg_k
@@ -507,15 +506,13 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
          band = ib1 + sph_bstart - 1
          call wfd_copy_cg(wfd, band, ikq_ibz, spin, bras_kq(1,1,ib1))
        end do
-       write(std_out,*)"after isirr"
+       !write(std_out,*)"after isirr"
      else
        ! Reconstruct u_kq(G) from the IBZ image.
        !istwf_kq = set_istwfk(kq); if (.not. have_ktimerev) istwf_kq = 1
        !call change_istwfk(from_npw,from_kg,from_istwfk,to_npw,to_kg,to_istwfk,n1,n2,n3,ndat,from_cg,to_cg)
-       write(std_out,*)"Before get_kg with kq",kq
        istwf_kq = 1
        call get_kg(kq,istwf_kq,ecut,cryst%gmet,npw_kq,gtmp)
-       write(std_out,*)"After get_kg with kq",kq
        ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
        kg_kq(:,1:npw_kq) = gtmp(:,:npw_kq)
        ABI_FREE(gtmp)
@@ -534,7 +531,6 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
                         npw_kq, kg_kq, istwf_kirr, istwf_kq, h1kets_kq, bras_kq(:,:,ib1), work_ngfft, work)
        end do
      end if
-     write(std_out,*)"ok"
 
      ! Allocate vlocal1 with correct cplex. Note nvloc
      ABI_STAT_MALLOC(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc,natom3), ierr)
@@ -545,10 +541,10 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
        call rf_transgrid_and_pack(spin,nspden,psps%usepaw,cplex,nfftf,nfft,ngfft,gs_hamkq%nvloc,&
          pawfgr,mpi_enreg,dummy_vtrial,v1scf(:,:,:,ipc),vlocal,vlocal1(:,:,:,:,ipc))
      end do
-     write(std_out,*)"before loas spin"
+     !write(std_out,*)"before loas spin"
 
      ! Allocate workspace for wavefunctions. Make npw larger than expected.
-     ABI_MALLOC(atmgkk, (2, sph_nb, sph_nb, natom3))
+     ABI_MALLOC(gkk_atm, (2, sph_nb, sph_nb, natom3))
 
      ! if PAW, one has to solve a generalized eigenproblem
      ! BE careful here because I will need sij_opt==-1
@@ -571,20 +567,18 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
        ipert = (ipc - idir) / 3 + 1
 
        ! Prepare application of the NL part.
-       write(std_out,*)"before init_rf spin"
+       !write(std_out,*)"before init_rf spin"
        call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=1)
        call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc), &
          comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-       write(std_out,*)"after load_rf spin"
+       !write(std_out,*)"after load_rf spin"
 
-#if 1
        ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
        call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kk,kq,idir,ipert,&  ! In
          cryst%natom,cryst%rmet,cryst%gprimd,cryst%gmet,istwf_k,&          ! In
          npw_k,npw_kq,useylmgr1,kg_k,ylm_k,kg_kq,ylm_kq,ylmgr_kq,&         ! In
          dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)     ! Out
-#endif
-       write(std_out,*)"after getgh1c_setup"
+       !write(std_out,*)"after getgh1c_setup"
 
        ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
        ! Compute H(1) applied to GS wavefunction Psi(0)
@@ -594,18 +588,15 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
          ! Use scissor shift on 0-order eigenvalue
          eshift = eig0nk - dtset%dfpt_sciss
 
-#if 0
          call getgh1c(berryopt0,0,kets_k(:,:,ib2),cwaveprj0,h1kets_kq(:,:,ib2),&
            grad_berry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,mpi_enreg,optlocal,&
            optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
-#endif
 
          ! TODO: Solve Sternheimer equations non-self-consistently
        end do
 
        call destroy_rf_hamiltonian(rf_hamkq)
 
-#if 1
        ABI_FREE(kinpw1)
        ABI_FREE(kpg1_k)
        ABI_FREE(kpg_k)
@@ -616,85 +607,49 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
        if (allocated(ph3d1)) then
          ABI_FREE(ph3d1)
        end if
-#endif
 
        ! Calculate elphmat(j,i) = <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation.
        !The array eig1_k contains:
        !
        ! <u_(band,k+q)^(0)|H_(k+q,k)^(1)|u_(band,k)^(0)>                           (NC psps)
        ! <u_(band,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(band,k)^(0)> (PAW)
-       atmgkk(:,:,:,ipc) = zero
+       gkk_atm(:,:,:,ipc) = zero
        do ib2=1,sph_nb
          do ib1=1,sph_nb
            call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bras_kq(1,1,ib1),h1kets_kq(1,1,ib2),&
              mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-           atmgkk(:,ib1,ib2,ipc) = [dotr, doti]
+           gkk_atm(:,ib1,ib2,ipc) = [dotr, doti]
          end do
        end do
      end do ! ipc (loop over 3*natom atomic perturbations)
 
      ABI_FREE(gs1c)
 
-     ! Accumulate results in tgam (sum over FS and bands).
-     !do ipc2=1,natom3
-     !  do ipc1=1,natom3
-     !     do ib2=1,sph_nb
-     !       do ib1=1,sph_nb
-     !         lf = atmgkk(:, ib1, ib2, ipc1)
-     !         rg = atmgkk(:, ib1, ib2, ipc2)
-     !         res(1) = lf(1) * rg(1) + lf(2) * rg(2)
-     !         res(2) = lf(1) * rg(2) - lf(2) * rg(1)
-     !         ! Loop over smearing values.
-     !         do isig=1,nsig
-     !           !tgam(:,ipc1,ipc2,isig) = tgam(:,ipc1,ipc2,isig) + res * wt_kq(isig, ib1) * wt_k(isig, ib2)
-     !           !write(std_out,*)res, wt_kq(isig, ib,  wt_k(isig, ib2)
-     !         end do
-     !       end do
-     !     end do
-     !  end do
-     !end do
+     ABI_MALLOC(gkk_mu, (2, sph_nb, sph_nb, natom3))
+     call gkkmu_from_atm(sph_nb, sph_nb, 1, natom, gkk_atm, phfrq, displ_red, gkk_mu, num_smallw)
+     ABI_FREE(gkk_mu)
+
 #if 0
-     ! Loop over 3*natom phonon branches.
-     do imode=1,natom3
-       omega = phfrq(imode)
-       ! Ignore negative or too small frequencies
-       if (omega < tol6) cycle
-       gkk_m = zero
+     ! sum contribution to phonon self-energy
+     do ib2=1,mband
+       f_nk = ebands_k%occ(ib2,ik,spin)
+       eig0nk = ebands_k%eig(ib2,ik,spin)
+       do ib1=1,mband_kq
+         f_mkq = ebands_kq%occ(ib1,ikq,spin)
+         eig0mkq = ebands_kq%eig(ib1,ikq,spin)
+         if (abs(f_mkq - f_nk) <= tol12) cycle
 
-       ! Transform the gkk from atom,cart basis to mode basis
-       do idir=1,3
-         do ipert=1,natom
-           gkk_m(1,:,:) = gkk_m(1,:,:) &
-             + gkk(1,:,:,ipert,idir) * displ_red(1,idir,ipert,imode) &
-             - gkk(2,:,:,ipert,idir) * displ_red(2,idir,ipert,imode)
-           gkk_m(2,:,:) = gkk_m(2,:,:) &
-             + gkk(1,:,:,ipert,idir) * displ_red(2,idir,ipert,imode) &
-             + gkk(2,:,:,ipert,idir) * displ_red(1,idir,ipert,imode)
-          end do
+         gkk2 = gkk_mu(1,ib1,ib2) ** 2 + gkk_mu(2,ib1,ib2) ** 2
+         term1 = (f_mkq - f_nk) * (eig0mkq - eig0nk - omega) / ((eig0mkq - eig0nk - omega) ** 2 + eta ** 2)
+         term2 = (f_mkq - f_nk) * (eig0mkq - eig0nk        ) / ((eig0mkq - eig0nk        ) ** 2 + eta ** 2)
+         !Pi_ph(imode) = Pi_ph(imode) + wtk * gkk2 * (term1 - term2)
        end do
-
-       gkk_m = gkk_m / sqrt(two * omega)
-
-       ! sum contribution to phonon self-energy
-       do ib2=1,mband
-         f_nk = ebands_k%occ(ib2,ik,spin)
-         eig0nk = ebands_k%eig(ib2,ik,spin)
-         do ib1=1,mband_kq
-           f_mkq = ebands_kq%occ(ib1,ikq,spin)
-           eig0mkq = ebands_kq%eig(ib1,ikq,spin)
-           if (abs(f_mkq - f_nk) <= tol12) cycle
-
-           gkk2 = gkk_m(1,ib1,ib2) ** 2 + gkk_m(2,ib1,ib2) ** 2
-           term1 = (f_mkq - f_nk) * (eig0mkq - eig0nk - omega) / ((eig0mkq - eig0nk - omega) ** 2 + eta ** 2)
-           term2 = (f_mkq - f_nk) * (eig0mkq - eig0nk        ) / ((eig0mkq - eig0nk        ) ** 2 + eta ** 2)
-           !Pi_ph(imode) = Pi_ph(imode) + wtk * gkk2 * (term1 - term2)
-         end do
-       end do
+     end do
 
      end do  ! imode
 #endif
 
-     ABI_FREE(atmgkk)
+     ABI_FREE(gkk_atm)
      !call xmpi_sum(tgam, comm, ierr)
      !do isig=1,nsig
      !  ! Save results for this (q-point, spin)
@@ -759,6 +714,178 @@ end subroutine sigmaph_driver
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_sigmaph/gkkmu_from_atm
+!! NAME
+!!  gkkmu_from_atm
+!!
+!! FUNCTION
+!!  Transform the gkk from (atom, red_direction) basis to phonon-mode basis
+!!
+!! INPUTS
+!!  nb1,nb2=Number of bands in gkk_atm matrix.
+!!  nk=Number of k-points (usually 1)
+!!  natom=Number of atoms.
+!!  gkk_atm(2,nb1,nb2,3*natom)=EPH matrix elements in the atomic basis.
+!!  phfrq(3*natom)=Phonon frequencies in Ha
+!!  displ_red(2,3*natom,3*natom)=Phonon displacement in reduded coordinates.
+!!
+!! OUTPUT
+!!  gkk_mu(2,nb1,nb2,3*natom)=EPH matrix elements in the phonon-mode basis.
+!!  num_smallw=Number of negative/too small frequencies that have been ignored
+!!    by setting the corresponding gkk_mu to zero.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine gkkmu_from_atm(nb1, nb2, nk, natom, gkk_atm, phfrq, displ_red, gkk_mu, num_smallw)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phdispl_cart2red'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nb1, nb2, nk, natom
+ integer,intent(out) :: num_smallw
+!arrays
+ real(dp),intent(in) :: phfrq(3*natom),displ_red(2,3*natom,3*natom)
+ real(dp),intent(in) :: gkk_atm(2,nb1,nb2,nk,3*natom)
+ real(dp),intent(out) :: gkk_mu(2,nb1,nb2,nk,3*natom)
+
+!Local variables-------------------------
+!scalars
+ integer :: mu,ipc
+
+! *************************************************************************
+
+ gkk_mu = zero; num_smallw = 0
+
+ ! Loop over phonon branches.
+ do mu=1,3*natom
+   ! Ignore negative or too small frequencies
+   if (phfrq(mu) < tol6) then
+     num_smallw = num_smallw + 1; cycle
+   end if
+
+   ! Transform the gkk from atom,red_dir basis to phonon mode basis
+   do ipc=1,3*natom
+     gkk_mu(1,:,:,:,mu) = gkk_mu(1,:,:,:,mu) &
+       + gkk_atm(1,:,:,:,ipc) * displ_red(1,ipc,mu) &
+       - gkk_atm(2,:,:,:,ipc) * displ_red(2,ipc,mu)
+     gkk_mu(2,:,:,:,mu) = gkk_mu(2,:,:,:,mu) &
+       + gkk_atm(1,:,:,:,ipc) * displ_red(2,ipc,mu) &
+       + gkk_atm(2,:,:,:,ipc) * displ_red(1,ipc,mu)
+   end do
+
+   gkk_mu(:,:,:,:,mu) = gkk_mu(:,:,:,:,mu) / sqrt(two * phfrq(mu))
+ end do
+
+end subroutine gkkmu_from_atm
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_sigmaph/nfd
+!! NAME
+!!  nfd
+!!
+!! FUNCTION
+!!   Fermi–Dirac statistic
+!!
+!! INPUTS
+!!   ee=Single particle energy in Ha
+!!   mu=Chemical potential in Ha.
+!!   kT=Value of K_Boltzmann x T in Ha.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+elemental real(dp) function nfd(ee, mu, kT)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phdispl_cart2red'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ real(dp),intent(in) :: ee, mu, kT
+
+! *************************************************************************
+
+ !TODO: Find decent value.
+ if (kT > tol16) then
+   nfd = one / (exp((ee-mu) / kT) + one)
+ else
+   ! Heaviside
+   if (ee > mu) then
+     nfd = zero
+   else if (ee < mu) then
+     nfd = one
+   else
+     nfd = half
+   end if
+ end if
+
+end function nfd
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_sigmaph/nbe
+!! NAME
+!!  nbe
+!!
+!! FUNCTION
+!!   Bose-Einstein statistic
+!!
+!! INPUTS
+!!   ee=Single particle energy in Ha
+!!   mu=Chemical potential in Ha.
+!!   kT=Value of K_Boltzmann x T in Ha.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+elemental real(dp) function nbe(ee, mu, kT)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phdispl_cart2red'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ real(dp),intent(in) :: ee, mu, kT
+
+! *************************************************************************
+
+ if (kT > tol16) then
+   nbe = one / (exp((ee-mu) / kT) - one)
+ else
+   nbe = zero
+ end if
+
+end function nbe
+!!***
 
 end module m_sigmaph
 !!***

@@ -2484,7 +2484,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  real(dp) :: sigmas(2),wminmax(2)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
- real(dp),allocatable :: v1scf(:,:,:,:),tgam(:,:,:,:),gvals_qibz(:,:,:,:,:,:),atmgkk(:,:,:,:)
+ real(dp),allocatable :: v1scf(:,:,:,:),tgam(:,:,:,:),gvals_qibz(:,:,:,:,:,:),gkk_atm(:,:,:,:)
  real(dp),allocatable :: bras_kq(:,:,:),kets_k(:,:,:),h1kets_kq(:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
@@ -2752,7 +2752,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      ABI_MALLOC(bras_kq, (2, mpw*nspinor, mnb))
      ABI_MALLOC(kets_k, (2, mpw*nspinor, mnb))
      ABI_MALLOC(h1kets_kq, (2, mpw*nspinor, mnb))
-     ABI_MALLOC(atmgkk, (2, mnb, mnb, natom3))
+     ABI_MALLOC(gkk_atm, (2, mnb, mnb, natom3))
 
      ! The weights for FS integration.
      ABI_CALLOC(wt_k, (nsig, mnb))
@@ -2937,12 +2937,12 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          !
          ! <u_(band,k+q)^(0)|H_(k+q,k)^(1)|u_(band,k)^(0)>                           (NC psps)
          ! <u_(band,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(band,k)^(0)> (PAW)
-         atmgkk(:,:,:,ipc) = zero
+         gkk_atm(:,:,:,ipc) = zero
          do ib2=1,nband_k
            do ib1=1,nband_kq
              call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bras_kq(1,1,ib1),h1kets_kq(1,1,ib2),&
                mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-             atmgkk(:,ib1,ib2,ipc) = [dotr, doti]
+             gkk_atm(:,ib1,ib2,ipc) = [dotr, doti]
            end do
          end do
        end do ! ipc (loop over 3*natom atomic perturbations)
@@ -2959,8 +2959,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          do ipc1=1,natom3
             do ib2=1,nband_k
               do ib1=1,nband_kq
-                lf = atmgkk(:, ib1, ib2, ipc1)
-                rg = atmgkk(:, ib1, ib2, ipc2)
+                lf = gkk_atm(:, ib1, ib2, ipc1)
+                rg = gkk_atm(:, ib1, ib2, ipc2)
                 res(1) = lf(1) * rg(1) + lf(2) * rg(2)
                 res(2) = lf(1) * rg(2) - lf(2) * rg(1)
                 ! Loop over smearing values.
@@ -2980,7 +2980,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      ABI_FREE(bras_kq)
      ABI_FREE(kets_k)
      ABI_FREE(h1kets_kq)
-     ABI_FREE(atmgkk)
+     ABI_FREE(gkk_atm)
 
      call xmpi_sum(tgam, comm, ierr)
 
