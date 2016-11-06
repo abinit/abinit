@@ -157,7 +157,6 @@ module m_phgamma
 
  public :: phgamma_free          ! Free memory.
  public :: phgamma_init          ! Creation method.
- !public :: phgamma_from_ncfile  ! Init object from file
  public :: phgamma_interp        ! Interpolates the phonon linewidths.
  public :: phgamma_eval_qibz     ! Evaluate phonon linewidths without Fourier interpolation.
  public :: phgamma_interp_setup  ! Compute the tables used for the interpolation in q-space.
@@ -2401,7 +2400,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  use m_fstrings,        only : sjoin, itoa, ftoa, ktoa
  use m_io_tools,        only : iomode_from_fname
  use m_cgtools,         only : dotprod_g
- use m_fftcore,         only : get_kg, kpgsph, sphere
+ use m_fftcore,         only : get_kg
  use m_crystal,         only : crystal_t
  use m_wfd,             only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg,&
                                wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj, wfd_get_ur
@@ -2486,7 +2485,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:),tgam(:,:,:,:),gvals_qibz(:,:,:,:,:,:),atmgkk(:,:,:,:)
- real(dp),allocatable :: bras(:,:,:),kets(:,:,:),h1_kets(:,:,:)
+ real(dp),allocatable :: bras_kq(:,:,:),kets_k(:,:,:),h1kets_kq(:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnl1(:,:),work(:,:,:,:)
@@ -2563,7 +2562,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 
  ! Activate Fourier interpolation if irred q-points are not in the DVDB file.
  if (do_ftv1q /= 0) then
-   call wrtout(std_out, "Will use Fourier trasform to interpolate DFPT potentials")
+   write(msg, "(2(a,i0),a)")"Will use Fourier interpolation of DFPT potentials [",do_ftv1q,"/",gams%nqibz,"]"
+   call wrtout(std_out, msg)
    call wrtout(std_out, sjoin("From ngqpt", ltoa(ifc%ngqpt), "to", ltoa(gamma_ngqpt)))
    call dvdb_ftinterp_setup(dvdb,ifc%ngqpt,1,[zero,zero,zero],nfft,ngfft,comm)
  end if
@@ -2749,9 +2749,9 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      ! maxnb is the maximum number of bands crossing the FS, used to dimension arrays.
      mnb = fs%maxnb
      ABI_CHECK(mnb <= ebands%mband, "mnb > ebands%mband")
-     ABI_MALLOC(bras, (2, mpw*nspinor, mnb))
-     ABI_MALLOC(kets, (2, mpw*nspinor, mnb))
-     ABI_MALLOC(h1_kets, (2, mpw*nspinor, mnb))
+     ABI_MALLOC(bras_kq, (2, mpw*nspinor, mnb))
+     ABI_MALLOC(kets_k, (2, mpw*nspinor, mnb))
+     ABI_MALLOC(h1kets_kq, (2, mpw*nspinor, mnb))
      ABI_MALLOC(atmgkk, (2, mnb, mnb, natom3))
 
      ! The weights for FS integration.
@@ -2819,7 +2819,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          kg_k(:,1:npw_k) = wfd%kdata(ik_ibz)%kg_k
          do ib2=1,nband_k
            band = ib2 + bstart_k - 1
-           call wfd_copy_cg(wfd, band, ik_ibz, spin, kets(1,1,ib2))
+           call wfd_copy_cg(wfd, band, ik_ibz, spin, kets_k(1,1,ib2))
          end do
        else
          ! Reconstruct u_k(G) from the IBZ image.
@@ -2831,14 +2831,14 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          kg_k(:,1:npw_k) = gtmp(:,:npw_k)
          ABI_FREE(gtmp)
 
-         ! Use h1_kets as workspace array, results stored in kets.
+         ! Use h1kets_kq as workspace array, results stored in kets_k.
          istwf_kirr = wfd%istwfk(ik_ibz); npw_kirr = wfd%npwarr(ik_ibz)
          do ib2=1,nband_k
            band = ib2 + bstart_k - 1
-           call wfd_copy_cg(wfd, band, ik_ibz, spin, h1_kets)
+           call wfd_copy_cg(wfd, band, ik_ibz, spin, h1kets_kq)
            call cg_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, nspinor, 1,&
                           npw_kirr, wfd%kdata(ik_ibz)%kg_k,&
-                          npw_k, kg_k, istwf_kirr, istwf_k, h1_kets, kets(:,:,ib2), work_ngfft, work)
+                          npw_k, kg_k, istwf_kirr, istwf_k, h1kets_kq, kets_k(:,:,ib2), work_ngfft, work)
          end do
        end if
 
@@ -2851,7 +2851,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          kg_kq(:,1:npw_kq) = wfd%kdata(ikq_ibz)%kg_k
          do ib1=1,nband_kq
            band = ib1 + bstart_kq - 1
-           call wfd_copy_cg(wfd, band, ikq_ibz, spin, bras(1,1,ib1))
+           call wfd_copy_cg(wfd, band, ikq_ibz, spin, bras_kq(1,1,ib1))
          end do
        else
          ! Reconstruct u_kq(G) from the IBZ image.
@@ -2863,15 +2863,15 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          kg_kq(:,1:npw_kq) = gtmp(:,:npw_kq)
          ABI_FREE(gtmp)
 
-         ! Use h1_kets as workspace array, results stored in bras
+         ! Use h1kets_kq as workspace array, results stored in bras_kq
          istwf_kirr = wfd%istwfk(ikq_ibz); npw_kirr = wfd%npwarr(ikq_ibz)
          !g0_kq =  g0ibz_kq + g0bz_kq
          do ib1=1,nband_kq
            band = ib1 + bstart_kq - 1
-           call wfd_copy_cg(wfd, band, ikq_ibz, spin, h1_kets)
+           call wfd_copy_cg(wfd, band, ikq_ibz, spin, h1kets_kq)
            call cg_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, 1,&
                           npw_kirr, wfd%kdata(ikq_ibz)%kg_k,&
-                          npw_kq, kg_kq, istwf_kirr, istwf_kq, h1_kets, bras(:,:,ib1), work_ngfft, work)
+                          npw_kq, kg_kq, istwf_kirr, istwf_kq, h1kets_kq, bras_kq(:,:,ib1), work_ngfft, work)
          end do
        end if
 
@@ -2901,12 +2901,12 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
               comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
          ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
-         call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kk,kq,idir,ipert,&                   ! In
-           cryst%natom,cryst%rmet,cryst%gprimd,cryst%gmet,istwf_k,&                           ! In
-           npw_k,npw_kq,useylmgr1,kg_k,ylm_k,kg_kq,ylm_kq,ylmgr_kq,&                          ! In
-           dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                      ! Out
+         call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kk,kq,idir,ipert,&   ! In
+           cryst%natom,cryst%rmet,cryst%gprimd,cryst%gmet,istwf_k,&           ! In
+           npw_k,npw_kq,useylmgr1,kg_k,ylm_k,kg_kq,ylm_kq,ylmgr_kq,&          ! In
+           dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)      ! Out
 
-         ! Calculate dvscf * psi_k, results stored in h1_kets on the k+q sphere.
+         ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
          do ib2=1,nband_k
            band = ib2 + bstart_k - 1
@@ -2914,7 +2914,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
            ! Use scissor shift on 0-order eigenvalue
            eshift = eig0nk - dtset%dfpt_sciss
 
-           call getgh1c(berryopt0,0,kets(:,:,ib2),cwaveprj0,h1_kets(:,:,ib2),&
+           call getgh1c(berryopt0,0,kets_k(:,:,ib2),cwaveprj0,h1kets_kq(:,:,ib2),&
 &                       grad_berry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,mpi_enreg,optlocal,&
 &                       optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
          end do
@@ -2940,7 +2940,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          atmgkk(:,:,:,ipc) = zero
          do ib2=1,nband_k
            do ib1=1,nband_kq
-             call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bras(1,1,ib1),h1_kets(1,1,ib2),&
+             call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bras_kq(1,1,ib1),h1kets_kq(1,1,ib2),&
                mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
              atmgkk(:,ib1,ib2,ipc) = [dotr, doti]
            end do
@@ -2977,9 +2977,9 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 
      ABI_FREE(wt_k)
      ABI_FREE(wt_kq)
-     ABI_FREE(bras)
-     ABI_FREE(kets)
-     ABI_FREE(h1_kets)
+     ABI_FREE(bras_kq)
+     ABI_FREE(kets_k)
+     ABI_FREE(h1kets_kq)
      ABI_FREE(atmgkk)
 
      call xmpi_sum(tgam, comm, ierr)

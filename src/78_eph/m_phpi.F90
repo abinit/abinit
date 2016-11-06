@@ -196,7 +196,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:),gkk(:,:,:,:,:), gkk_m(:,:,:)
- real(dp),allocatable :: bras(:,:,:),kets(:,:,:),h1_kets(:,:,:)
+ real(dp),allocatable :: bras_kq(:,:,:),kets_k(:,:,:),h1kets_kq(:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnl1(:,:)
@@ -439,9 +439,9 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
      if (.not. ((ik .ge. my_kstart) .and. (ik .le. my_kstop))) cycle
 
      ! Allocate workspace for wavefunctions. Make npw larger than expected.
-     ABI_MALLOC(bras, (2, mpw*nspinor, mband))
-     ABI_MALLOC(kets, (2, mpw*nspinor, mband))
-     ABI_MALLOC(h1_kets, (2, mpw*nspinor, mband))
+     ABI_MALLOC(bras_kq, (2, mpw*nspinor, mband))
+     ABI_MALLOC(kets_k, (2, mpw*nspinor, mband))
+     ABI_MALLOC(h1kets_kq, (2, mpw*nspinor, mband))
 
      kk = ebands_k%kptns(:,ik)
 
@@ -454,7 +454,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
      ABI_CHECK(mpw >= npw_k, "mpw < npw_k")
      kg_k(:,1:npw_k) = wfd_k%kdata(ik)%kg_k
      do ib2=1,mband
-       call wfd_copy_cg(wfd_k, ib2, ik, spin, kets(1,1,ib2))
+       call wfd_copy_cg(wfd_k, ib2, ik, spin, kets_k(1,1,ib2))
      end do
 
      ! Copy u_kq(G)
@@ -462,7 +462,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
      ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
      kg_kq(:,1:npw_kq) = wfd_kq%kdata(ikq)%kg_k
      do ib1=1,mband_kq
-       call wfd_copy_cg(wfd_kq, ib1, ikq, spin, bras(1,1,ib1))
+       call wfd_copy_cg(wfd_kq, ib1, ikq, spin, bras_kq(1,1,ib1))
      end do
 
      ! if PAW, one has to solve a generalized eigenproblem
@@ -495,14 +495,14 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
          npw_k,npw_kq,useylmgr1,kg_k,ylm_k,kg_kq,ylm_kq,ylmgr_kq,&                          ! In
          dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                      ! Out
 
-       ! Calculate dvscf * psi_k, results stored in h1_kets on the k+q sphere.
+       ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
        ! Compute H(1) applied to GS wavefunction Psi(0)
        do ib2=1,mband
          eig0nk = ebands_k%eig(ib2,ik,spin)
          ! Use scissor shift on 0-order eigenvalue
          eshift = eig0nk - dtset%dfpt_sciss
 
-         call getgh1c(berryopt0,0,kets(:,:,ib2),cwaveprj0,h1_kets(:,:,ib2),&
+         call getgh1c(berryopt0,0,kets_k(:,:,ib2),cwaveprj0,h1kets_kq(:,:,ib2),&
 &                     grad_berry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,mpi_enreg,optlocal,&
 &                     optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
        end do
@@ -530,7 +530,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
        ! <u_(band,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(band,k)^(0)> (PAW)
        do ib2=1,mband
          do ib1=1,mband_kq
-           call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bras(1,1,ib1),h1_kets(1,1,ib2),&
+           call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bras_kq(1,1,ib1),h1kets_kq(1,1,ib2),&
              mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
            gkk(1,ib1,ib2,ipert,idir) = dotr
@@ -589,9 +589,9 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 
      end do  ! imode
 
-     ABI_FREE(bras)
-     ABI_FREE(kets)
-     ABI_FREE(h1_kets)
+     ABI_FREE(bras_kq)
+     ABI_FREE(kets_k)
+     ABI_FREE(h1kets_kq)
 
    end do ! ikfs
 
