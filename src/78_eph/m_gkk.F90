@@ -40,11 +40,10 @@ module m_gkk
 #endif
 
  use m_time,           only : cwtime
- use m_fstrings,       only : toupper, itoa, sjoin, ktoa, ltoa, strcat
+ use m_fstrings,       only : itoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, wrap2_pmhalf, simpson_int, simpson, bisect, mkherm
  use m_io_tools,       only : open_file
  use m_special_funcs,  only : dirac_delta
- use m_geometry,       only : phdispl_cart2red
  use m_fftcore,        only : ngfft_seq
  use m_fft_mesh,       only : rotate_fft_mesh
  use m_dynmat,         only : d2sym3, symdyma, ftgam_init, ftgam
@@ -115,7 +114,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  use m_pawcprj
 
  use m_time,            only : sec2str
- use m_geometry,        only : phdispl_cart2red
  use m_fstrings,        only : sjoin, itoa, ftoa, ktoa
  use m_io_tools,        only : iomode_from_fname
  use m_cgtools,         only : dotprod_g
@@ -303,7 +301,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*natom))
  call getph(cryst%atindx,natom,n1,n2,n3,ph1d,cryst%xred)
 
- ! Find the appropriate value of mpw 
+ ! Find the appropriate value of mpw
  mpw = 0; cnt=0
  do spin=1,nsppol
    do ik=1,nkpt

@@ -26,6 +26,7 @@ module m_phpi
 
  use defs_basis
  use defs_abitypes
+ use defs_datatypes
  use m_profiling_abi
  use m_xmpi
  use m_errors
@@ -38,20 +39,35 @@ module m_phpi
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
+ use m_wfk
+ use m_ddb
+ use m_dvdb
+ use m_fft
+ use m_hamiltonian
+ use m_pawcprj
 
- use m_time,           only : cwtime
- use m_fstrings,       only : toupper, itoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, wrap2_pmhalf, simpson_int, simpson, bisect, mkherm
- use m_io_tools,       only : open_file
- use m_special_funcs,  only : dirac_delta
- use m_geometry,       only : phdispl_cart2red
- use m_fftcore,        only : ngfft_seq
- use m_fft_mesh,       only : rotate_fft_mesh
- use m_dynmat,         only : d2sym3, symdyma, ftgam_init, ftgam
- use defs_datatypes,   only : ebands_t
- use m_crystal,        only : crystal_t
- use m_crystal_io,     only : crystal_ncwrite
- use m_bz_mesh,        only : isamek, make_path, findqg0
+ use defs_datatypes,    only : ebands_t
+ use m_time,            only : cwtime
+ use m_fstrings,        only : sjoin, itoa, ftoa, ktoa, ltoa, strcat
+ use m_io_tools,        only : iomode_from_fname
+ use m_cgtools,         only : dotprod_g
+ use m_fftcore,         only : get_kg, kpgsph, sphere
+ use m_crystal,         only : crystal_t
+ use m_crystal_io,      only : crystal_ncwrite
+ use m_bz_mesh,         only : findqg0
+ use m_wfd,             only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg,&
+                               wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj, wfd_get_ur
+ use m_pawang,          only : pawang_type
+ use m_pawrad,          only : pawrad_type
+ use m_pawtab,          only : pawtab_type
+ use m_pawfgr,          only : pawfgr_type
+ use m_eig2d,           only : gkk_t, gkk_init, gkk_ncwrite,gkk_free
+! use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
+! use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
+! use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
+! use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
+! use m_pawdij,          only : pawdij, symdij
+! use m_pawcprj,         only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
 
  implicit none
 
@@ -61,7 +77,7 @@ module m_phpi
  public :: eph_phpi
 
 
-contains  !=========================================================================================================================
+contains  !=================================================================================
 !!***
 
 !!****f* m_phpi/eph_phpi
@@ -99,41 +115,6 @@ contains  !=====================================================================
 
 subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,ebands_kq,dvdb,ifc,&
                        pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_profiling_abi
- use m_xmpi
- use m_errors
- use m_wfk
- use m_ddb
- use m_dvdb
- use m_ifc
- use m_fft
- use m_hamiltonian
- use m_pawcprj
-
- use m_time,            only : sec2str
- use m_geometry,        only : phdispl_cart2red
- use m_fstrings,        only : sjoin, itoa, ftoa, ktoa
- use m_io_tools,        only : iomode_from_fname
- use m_cgtools,         only : dotprod_g
- use m_fftcore,         only : get_kg, kpgsph, sphere
- use m_crystal,         only : crystal_t
- use m_wfd,             only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg,&
-                               wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj, wfd_get_ur
- use m_pawang,          only : pawang_type
- use m_pawrad,          only : pawrad_type
- use m_pawtab,          only : pawtab_type
- use m_pawfgr,          only : pawfgr_type
- use m_eig2d,           only : gkk_t, gkk_init, gkk_ncwrite,gkk_free
-! use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
-! use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
-! use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
-! use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
-! use m_pawdij,          only : pawdij, symdij
-! use m_pawcprj,         only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -394,12 +375,8 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  ABI_MALLOC(gkk, (2, mband_kq, mband, natom, 3))
  ABI_MALLOC(gkk_m, (2, mband_kq, mband))
 
-
  ! Compute displacement vectors and phonon frequencies
- call ifc_fourq(ifc,cryst,qpt,phfrq,displ_cart) ! out_d2cart,out_eigvec)
-
- ! Transform phonon displacement vector from cartesian to reduced coordinates
- call phdispl_cart2red(cryst%natom,cryst%gprimd,displ_cart,displ_red)
+ call ifc_fourq(ifc,cryst,qpt,phfrq,displ_cart, out_displ_red=displ_red)
 
  ! Broadening parameter
  if (dtset%elph2_imagden .gt. tol12) then

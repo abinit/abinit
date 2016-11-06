@@ -49,7 +49,6 @@ module m_sigmaph
  use m_numeric_tools,  only : arth
  use m_io_tools,       only : iomode_from_fname
  use m_special_funcs,  only : dirac_delta
- use m_geometry,       only : phdispl_cart2red
  use m_fftcore,        only : ngfft_seq
  use m_cgtools,        only : dotprod_g !set_istwfk
  use m_crystal,        only : crystal_t
@@ -458,11 +457,8 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
      ! TODO: Make sure that symmetries in Q-space are preserved.
      ! Avoid fourq if qpt is in ddb
 
-     ! Get phonon frequencies and displacement for this q-point
-     call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart) ! out_d2cart,out_eigvec)
-
-     ! Transform phonon displacement vector from cartesian to reduced coordinates
-     call phdispl_cart2red(cryst%natom, cryst%gprimd, displ_cart, displ_red)
+     ! Get phonon frequencies and displacements in reduced coordinates for this q-point
+     call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
 
      ! Find k+q in the extended zone and extract symmetry info.
      ! Be careful here because there are two umklapp vectors to be considered:
@@ -746,7 +742,7 @@ subroutine gkkmu_from_atm(nb1, nb2, nk, natom, gkk_atm, phfrq, displ_red, gkk_mu
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'phdispl_cart2red'
+#define ABI_FUNC 'gkkmu_from_atm'
 !End of the abilint section
 
  implicit none
@@ -816,7 +812,7 @@ elemental real(dp) function nfd(ee, mu, kT)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'phdispl_cart2red'
+#define ABI_FUNC 'nfd'
 !End of the abilint section
 
  implicit none
@@ -868,7 +864,7 @@ elemental real(dp) function nbe(ee, mu, kT)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'phdispl_cart2red'
+#define ABI_FUNC 'nbe'
 !End of the abilint section
 
  implicit none

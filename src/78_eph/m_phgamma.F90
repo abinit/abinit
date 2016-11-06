@@ -45,7 +45,6 @@ module m_phgamma
  use m_numeric_tools,  only : arth, wrap2_pmhalf, simpson_int, simpson, bisect, mkherm
  use m_io_tools,       only : open_file
  use m_special_funcs,  only : dirac_delta
- use m_geometry,       only : phdispl_cart2red
  use m_fftcore,        only : ngfft_seq
  use m_fft_mesh,       only : rotate_fft_mesh
  !use m_cgtools,        only : set_istwfk
@@ -692,13 +691,11 @@ subroutine phgamma_eval_qibz(gams,cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph
  natom3 = gams%natom3
 
  ! Get phonon frequencies and eigenvectors.
- call ifc_fourq(ifc,cryst,gams%qibz(:,iq_ibz),phfrq,displ_cart,out_eigvec=pheigvec)
+ call ifc_fourq(ifc,cryst,gams%qibz(:,iq_ibz),phfrq,displ_cart,out_eigvec=pheigvec, out_displ_red=displ_red)
 
  select case (gams%eph_scalprod)
  case (0)
    ! If the matrices do not contain the scalar product with the displ_red vectors yet do it now.
-   call phdispl_cart2red(gams%natom,cryst%gprimd,displ_cart,displ_red)
-
    tmp_gam2 = reshape(gams%vals_qibz(:,:,:,iq_ibz,spin), [2,natom3,natom3])
    call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
 
@@ -851,13 +848,11 @@ subroutine phgamma_interp(gams,cryst,ifc,spin,qpt,phfrq,gamma_ph,lambda_ph,displ
  ABI_FREE(sinkr)
 
  ! Get phonon frequencies and eigenvectors.
- call ifc_fourq(ifc,cryst,qpt,phfrq,displ_cart,out_eigvec=pheigvec)
+ call ifc_fourq(ifc,cryst,qpt,phfrq,displ_cart,out_eigvec=pheigvec, out_displ_red=displ_red)
 
  select case (gams%eph_scalprod)
  case (0)
    ! If the matrices do not contain the scalar product with the displ_cart vectors yet do it now.
-   call phdispl_cart2red(gams%natom,cryst%gprimd,displ_cart,displ_red)
-
    tmp_gam2 = reshape (gam_now, [2,natom3,natom3])
    call gam_mult_displ(natom3, displ_red, tmp_gam2, tmp_gam1)
 
@@ -2396,7 +2391,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  use m_pawcprj
 
  use m_time,            only : sec2str
- use m_geometry,        only : phdispl_cart2red
  use m_fstrings,        only : sjoin, itoa, ftoa, ktoa
  use m_io_tools,        only : iomode_from_fname
  use m_cgtools,         only : dotprod_g
@@ -2985,14 +2979,11 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
      call xmpi_sum(tgam, comm, ierr)
 
      if (eph_scalprod == 1) then
-       ! Get phonon frequencies and displacement for this q-point
-       call ifc_fourq(ifc,cryst,qpt,phfrq,displ_cart) ! out_d2cart,out_eigvec)
-       !call ifc_diagoq(ifc,cryst,qpt,phfrq,displ_cart,nanaqdir)
-
-       ! Get displacement vectors for all branches in reduced coordinates
+       ! Get phonon frequencies and displacements for this q-point
        ! used in scalar product with H(1)_atom,idir  matrix elements
-       ! Calculate $displ_red = displ_cart \cdot gprimd$ for each phonon branch
-       call phdispl_cart2red(cryst%natom,cryst%gprimd,displ_cart,displ_red)
+       call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
+
+       !call ifc_diagoq(ifc,cryst,qpt,phfrq,displ_cart,nanaqdir)
      end if
 
      do isig=1,nsig
