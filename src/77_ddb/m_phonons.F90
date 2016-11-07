@@ -1028,6 +1028,7 @@ end subroutine phdos_ncwrite
 !! Ifc<ifc_type>=Interatomic force constants
 !! crystal<type(crystal_t)> = Info on the crystalline structure.
 !! inp= (derived datatype) contains all the input variables
+!! asrq0<asrq0_t>=Object for the treatment of the ASR based on the q=0 block found in the DDB file.
 !! dielt(3,3)=dielectric tensor
 !! tcpui=initial cpu time
 !! twalli=initial wall clock time
@@ -1043,7 +1044,7 @@ end subroutine phdos_ncwrite
 !!
 !! SOURCE
 
-subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,uinvers,vtinvers,zeff,comm)
+subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,d2asr,outfile_radix,singular,tcpui,twalli,uinvers,vtinvers,zeff,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1067,6 +1068,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,
  type(crystal_t),intent(in) :: Crystal
  type(anaddb_dataset_type),target,intent(in) :: inp
  type(ddb_type),intent(in) :: ddb
+ type(asrq0_t),intent(inout) :: asrq0
 !arrays
  real(dp),intent(in) :: zeff(3,3,ddb%natom)
  real(dp),intent(inout) :: singular(1:3*ddb%natom*(3*ddb%natom-1)/2)
@@ -1178,13 +1180,13 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,
      case (0)
        continue
      case (1,2,5)
-       call asria_corr(inp%asr,d2asr,d2cart,mpert,natom)
+       call asria_corr(inp%asr,asrq0%d2asr,d2cart,mpert,natom)
      case (3,4)
        ! Impose acoustic sum rule plus rotational symmetry for 0D and 1D systems
        call asrprs(inp%asr,2,3,uinvers,vtinvers,singular,d2cart,mpert,natom,crystal%xcart)
+       !call asrprs(inp%asr,2,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,d2cart,mpert,natom,crystal%xcart)
      case default
-       write(msg,'(a,i0)')"Wrong value for asr: ",inp%asr
-       MSG_ERROR(msg)
+       MSG_ERROR(sjoin("Wrong value for asr:", itoa(inp%asr)))
      end select
    end if
 

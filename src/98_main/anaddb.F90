@@ -266,9 +266,7 @@ program anaddb
  ! Acoustic Sum Rule
  ! In case the interatomic forces are not calculated, the
  ! ASR-correction (d2asr) has to be determined here from the Dynamical matrix at Gamma.
-
  asrq0 = ddb_get_asrq0(ddb, inp%asr, inp%rfmeth, crystal%xcart)
- call asrq0_free(asrq0)
 
  ABI_ALLOCATE(d2asr,(2,3,natom,3,natom))
  d2asr = zero
@@ -562,7 +560,7 @@ program anaddb
 !**********************************************************************
 
  ! Now treat the first list of vectors (without non-analyticities)
- call mkphbs(Ifc,Crystal,inp,ddb,d2asr,filnam(2),singular,tcpui,twalli,uinvers,vtinvers,zeff,comm)
+ call mkphbs(Ifc,Crystal,inp,ddb,asrq0,d2asr,filnam(2),singular,tcpui,twalli,uinvers,vtinvers,zeff,comm)
 
 !***********************************************************************
 
@@ -586,7 +584,7 @@ program anaddb
 
    !write(std_out,*)'Entering thmeig: '
    elph_base_name=trim(filnam(2))//"_ep"
-   call thmeig(inp%a2fsmear,ddb%acell,ddb%amu,inp,d2asr,&
+   call thmeig(inp%a2fsmear,ddb%acell,ddb%amu,inp,asrq0%d2asr,&
 &   elph_base_name,mband,mpert,msize,natom,nkpt,inp%ntemper,&
 &   ntypat,ddb%rprim,inp%telphint,inp%temperinc,&
 &   inp%tempermin,inp%thmflag,Crystal%typat,Crystal%xred,&
@@ -646,7 +644,7 @@ program anaddb
      d2cart(:,1:msize)=ddb%val(:,:,iblok)
 
      ! Eventually impose the acoustic sum rule
-     call asria_corr(inp%asr,d2asr,d2cart,mpert,natom)
+     call asria_corr(inp%asr,asrq0%d2asr,d2cart,mpert,natom)
    end if ! end of the generation of the dynamical matrix at gamma.
 
    if (nph2l/=0) then
@@ -839,7 +837,7 @@ program anaddb
      rftyp=inp%rfmeth
      call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
      ! then print the internal stain tensor
-     call ddb_internalstr(inp%asr,ddb%val,d2asr,iblok,instrain,ab_out,mpert,natom,ddb%nblok)
+     call ddb_internalstr(inp%asr,ddb%val,asrq0%d2asr,iblok,instrain,ab_out,mpert,natom,ddb%nblok)
    end if
  end if !end the part for internal strain
 
@@ -883,7 +881,7 @@ program anaddb
      call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
      ! print the elastic tensor
-     call ddb_elast(inp,ddb%val,compl,compl_clamped,compl_stress,d2asr,&
+     call ddb_elast(inp,ddb%val,compl,compl_clamped,compl_stress,asrq0%d2asr,&
 &     elast,elast_clamped,elast_stress,iblok,iblok_stress,&
 &     instrain,ab_out,mpert,natom,ddb%nblok,Crystal%ucvol)
      ec_fname = TRIM(filnam(2))//"_EC.nc"
@@ -950,6 +948,7 @@ program anaddb
 
  call anaddb_dtset_free(inp)
  call ddb_free(ddb)
+ call asrq0_free(asrq0)
  call crystal_free(Crystal)
  call ifc_free(Ifc)
 
