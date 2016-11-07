@@ -4332,7 +4332,7 @@ type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
  rfstrs(:)=0
 
  call gtblk9(ddb,asrq0%iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
- ! this is to maintain the old behaviour
+ ! this is to maintain the old behaviour in which the arrays where allocated and set to zero in anaddb.
  ABI_MALLOC(asrq0%d2asr, (2,3,ddb%natom,3,ddb%natom))
  asrq0%d2asr = zero
 
@@ -4344,7 +4344,7 @@ type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
  ABI_CALLOC(asrq0%vtinvers,(dims, dims))
  ABI_CALLOC(asrq0%singular, (dims))
 
- if (asrq0%iblok /=0) return
+ if (asrq0%iblok == 0) return
  iblok = asrq0%iblok
 
  select case (asr)

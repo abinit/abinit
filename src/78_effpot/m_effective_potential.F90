@@ -3305,7 +3305,6 @@ subroutine effective_potential_printPDOS(eff_pot,filename,n_cell,nph1l,option,qp
  type(anaddb_dataset_type) :: inp
  type(ddb_type) :: ddb
  type(asrq0_t) :: asrq0
- real(dp),allocatable  :: d2asr(:,:,:,:,:),singular(:),uinvers(:,:),vtinvers(:,:)
 
 ! *************************************************************************
 
@@ -3325,18 +3324,15 @@ subroutine effective_potential_printPDOS(eff_pot,filename,n_cell,nph1l,option,qp
    inp%nph1l   = nph1l
 
    ! In case the interatomic forces are not calculated, the
-   ! ASR-correction (d2asr) has to be determined here from the Dynamical matrix at Gamma.
+   ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
    if (inp%ifcflag == 0) then
      asrq0 = ddb_get_asrq0(ddb, inp%asr, inp%rfmeth, crystal%xcart)
    end if
 
-   ABI_ALLOCATE(d2asr,(2,3,ddb%natom,3,ddb%natom))
+  call mkphbs(eff_pot%harmonics_terms%ifcs,Crystal,inp,ddb,asrq0,filename,&
+&  tcpui,twalli,eff_pot%harmonics_terms%zeff)
 
-  call mkphbs(eff_pot%harmonics_terms%ifcs,Crystal,inp,ddb,asrq0,d2asr,filename,&
-&  singular,tcpui,twalli,uinvers,vtinvers,eff_pot%harmonics_terms%zeff)
-
-   ABI_DEALLOCATE(d2asr)
-   call asrq0_free(asrq0)
+  call asrq0_free(asrq0)
 
  end if
 

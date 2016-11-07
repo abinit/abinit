@@ -1044,7 +1044,7 @@ end subroutine phdos_ncwrite
 !!
 !! SOURCE
 
-subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,d2asr,outfile_radix,singular,tcpui,twalli,uinvers,vtinvers,zeff,comm)
+subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,outfile_radix,tcpui,twalli,zeff,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1071,10 +1071,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,d2asr,outfile_radix,singular,tcpui,t
  type(asrq0_t),intent(inout) :: asrq0
 !arrays
  real(dp),intent(in) :: zeff(3,3,ddb%natom)
- real(dp),intent(inout) :: singular(1:3*ddb%natom*(3*ddb%natom-1)/2)
- real(dp),intent(inout) :: uinvers(1:3*ddb%natom*(3*ddb%natom-1)/2,1:3*ddb%natom*(3*ddb%natom-1)/2)
- real(dp),intent(inout) :: vtinvers(1:3*ddb%natom*(3*ddb%natom-1)/2,1:3*ddb%natom*(3*ddb%natom-1)/2)
- real(dp),intent(in) :: d2asr(2,3,ddb%natom,3,ddb%natom)
 
 !Local variables -------------------------
 !scalars
@@ -1183,8 +1179,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,d2asr,outfile_radix,singular,tcpui,t
        call asria_corr(inp%asr,asrq0%d2asr,d2cart,mpert,natom)
      case (3,4)
        ! Impose acoustic sum rule plus rotational symmetry for 0D and 1D systems
-       call asrprs(inp%asr,2,3,uinvers,vtinvers,singular,d2cart,mpert,natom,crystal%xcart)
-       !call asrprs(inp%asr,2,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,d2cart,mpert,natom,crystal%xcart)
+       call asrprs(inp%asr,2,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,d2cart,mpert,natom,crystal%xcart)
      case default
        MSG_ERROR(sjoin("Wrong value for asr:", itoa(inp%asr)))
      end select

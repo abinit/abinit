@@ -65,7 +65,7 @@ program anaddb
  use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_ncwrite
- use m_dynmat,         only : asria_calc,asria_corr, chneu9, asrprs, gtdyn9
+ use m_dynmat,         only : chneu9, gtdyn9
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -89,7 +89,7 @@ program anaddb
  integer :: msym !  msym =maximum number of symmetry elements in space group
 !Define input and output unit numbers (some are defined in defs_basis -all should be there ...):
  integer,parameter :: ddbun=2,master=0 ! FIXME: these should not be reserved unit numbers!
- integer :: dimekb,dims,comm,iatom,iblok,iblok_stress,idir,ii,index
+ integer :: dimekb,comm,iatom,iblok,iblok_stress,idir,ii,index
  integer :: ierr,iphl2,lenstr,lmnmax,mband,mtyp,mpert,msize,natom,nblok,nblok2
  integer :: nkpt,nph2l,nsym,ntypat,option,rftyp,usepaw,nproc,my_rank
  logical :: iam_master
@@ -101,14 +101,12 @@ program anaddb
  real(dp) :: dielt_rlx(3,3),elast(6,6),elast_clamped(6,6),elast_stress(6,6)
  real(dp) :: epsinf(3,3),red_ptot(3),pel(3)
  real(dp) :: piezo(6,3),qphnrm(3),qphon(3,3),strten(6),tsec(2)
- real(dp),allocatable :: d2asr(:,:,:,:,:),d2cart(:,:),dchide(:,:,:)
+ real(dp),allocatable :: d2cart(:,:),dchide(:,:,:)
  real(dp),allocatable :: dchidt(:,:,:,:),displ(:),eigval(:,:)
  real(dp),allocatable :: eigvec(:,:,:,:,:),fact_oscstr(:,:,:),instrain(:,:)
  real(dp),allocatable :: fred(:,:),lst(:),phfrq(:)
  real(dp),allocatable :: rsus(:,:,:)
- real(dp),allocatable :: singular(:),uinvers(:,:), vtinvers(:,:)
  real(dp),target,allocatable :: zeff(:,:,:)
- real(dp),allocatable :: d2asr_res(:,:,:,:,:)
  character(len=10) :: procstr
  character(len=24) :: codename
  character(len=24) :: start_datetime
@@ -265,63 +263,14 @@ program anaddb
 
  ! Acoustic Sum Rule
  ! In case the interatomic forces are not calculated, the
- ! ASR-correction (d2asr) has to be determined here from the Dynamical matrix at Gamma.
+ ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
  asrq0 = ddb_get_asrq0(ddb, inp%asr, inp%rfmeth, crystal%xcart)
 
- ABI_ALLOCATE(d2asr,(2,3,natom,3,natom))
- d2asr = zero
-
- ! Pre allocate array used if asr in [3,4]
- dims=3*natom*(3*natom-1)/2
- ABI_CALLOC(uinvers,(1:dims,1:dims))
- ABI_CALLOC(vtinvers,(1:dims,1:dims))
- ABI_CALLOC(singular,(1:dims))
-
- if (inp%ifcflag==0 .or. inp%instrflag/=0 .or. inp%elaflag/=0) then
-   ! Find the Gamma block in the DDB (no need for E-field entries)
-   qphon(:,1)=zero
-   qphnrm(1)=zero
-   rfphon(1:2)=1
-   rfelfd(:)=0
-   rfstrs(:)=0
-   rftyp=inp%rfmeth
-
-   call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
-
-   d2asr = zero
-   if (iblok /=0) then
-     select case (inp%asr)
-     case (0)
-       continue
-
-     case (1,2)
-       call asria_calc(inp%asr,d2asr,ddb%val(:,:,iblok),ddb%mpert,ddb%natom)
-
-     case (3,4)
-       ! Rotational invariance for 1D and 0D systems
-       call asrprs(inp%asr,1,3,uinvers,vtinvers,singular,ddb%val(:,:,iblok),ddb%mpert,ddb%natom,Crystal%xcart)
-
-     case (5)
-       ! d2cart is a temp variable here
-       d2cart = ddb%val(:,:,iblok)
-       ! calculate diagonal correction
-       call asria_calc(2,d2asr,d2cart,ddb%mpert,ddb%natom)
-       ! apply diagonal correction
-       call asria_corr(2,d2asr,d2cart,ddb%mpert,ddb%natom)
-       ! hermitianize
-       call mkherm(d2cart,3*ddb%mpert)
-       ! remove remaining ASR rupture due to Hermitianization
-       ABI_ALLOCATE(d2asr_res,(2,3,ddb%natom,3,ddb%natom))
-       call asria_calc(inp%asr,d2asr_res,d2cart,ddb%mpert,ddb%natom)
-       ! full correction is sum of both
-       d2asr = d2asr + d2asr_res
-       ABI_DEALLOCATE(d2asr_res)
-
-     case default
-       write(message,'(a,i0)')"Wrong value for asr: ",inp%asr
-       MSG_ERROR(message)
-     end select
-   end if
+ ! TODO: This is to maintain the previous behaviour in which all the arrays were initialized to zero.
+ ! In the new version asrq0%d2asr is always computed if the Gamma block is present
+ ! and this causes changes in [v5][t28]
+ if (.not. (inp%ifcflag==0 .or. inp%instrflag/=0 .or. inp%elaflag/=0)) then
+   asrq0%d2asr = zero; asrq0%singular = zero; asrq0%uinvers = zero; asrq0%vtinvers = zero
  end if
 
  ! Get Dielectric Tensor and Effective Charges
@@ -560,7 +509,7 @@ program anaddb
 !**********************************************************************
 
  ! Now treat the first list of vectors (without non-analyticities)
- call mkphbs(Ifc,Crystal,inp,ddb,asrq0,d2asr,filnam(2),singular,tcpui,twalli,uinvers,vtinvers,zeff,comm)
+ call mkphbs(Ifc,Crystal,inp,ddb,asrq0,filnam(2),tcpui,twalli,zeff,comm)
 
 !***********************************************************************
 
@@ -934,7 +883,6 @@ program anaddb
 !**********************************************************************
 
  ABI_DEALLOCATE(displ)
- ABI_DEALLOCATE(d2asr)
  ABI_DEALLOCATE(d2cart)
  ABI_DEALLOCATE(eigval)
  ABI_DEALLOCATE(eigvec)
@@ -942,9 +890,6 @@ program anaddb
  ABI_DEALLOCATE(phfrq)
  ABI_DEALLOCATE(zeff)
  ABI_DEALLOCATE(instrain)
- ABI_DEALLOCATE(uinvers)
- ABI_DEALLOCATE(vtinvers)
- ABI_DEALLOCATE(singular)
 
  call anaddb_dtset_free(inp)
  call ddb_free(ddb)
