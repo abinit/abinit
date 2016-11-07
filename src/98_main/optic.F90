@@ -145,7 +145,6 @@ program optic
  real(dp),allocatable :: kpt(:,:)
  real(dp),allocatable :: cond_kg(:),cond_nd(:),doccde(:)
  real(dp),allocatable :: eig0tmp(:), eigen0(:)
- complex(dpc),allocatable :: eigen0_c(:,:) ! states,temp
  real(dp),allocatable :: eigen11(:),eigen12(:),eigtmp(:)
  real(dp),allocatable :: eigen13(:),occ(:),wtk(:)
  complex(dpc),allocatable :: pmat(:,:,:,:,:)
@@ -175,7 +174,6 @@ program optic
  character(len=fnlen) :: ep_nc_fname
  integer :: ep_ntemp
  logical :: do_ep_renorm
- integer :: nband_tmp
  integer :: itemp
  character(len=10) :: stemp
  type(crystal_t) :: Cryst
@@ -438,7 +436,6 @@ program optic
 
 !Read the eigenvalues of ground-state and ddk files
  ABI_ALLOCATE(eigen0,(mband*nkpt*nsppol))
- ABI_ALLOCATE(eigen0_c,(mband*nkpt*nsppol,ep_ntemp))
  ABI_ALLOCATE(eigen11,(2*mband*mband*nkpt*nsppol))
  ABI_ALLOCATE(eigen12,(2*mband*mband*nkpt*nsppol))
  ABI_ALLOCATE(eigen13,(2*mband*mband*nkpt*nsppol))
@@ -567,45 +564,6 @@ program optic
 
  call pmat_renorm(fermie, eigen0, mband, nkpt, nsppol, pmat, scissor)
 
- !TODO implement renormalization in ebands
- if(my_rank == master) then
-
-   if(do_ep_renorm) then
-     bdtot0_index=0 ; bdtot_index=0
-     do isppol=1,nsppol
-       do ikpt=1,nkpt
-         nband1 = nband(ikpt+(isppol-1)*nkpt)
-         nband_tmp=MIN(nband1,Epren%mband)
-
-         !FIXME change check
-         if (ANY(ABS(eigen0(1+bdtot0_index:MIN(10,nband_tmp)+bdtot0_index) - &
-&             Epren%eigens(1:MIN(10,nband_tmp),ikpt,isppol)) > tol3)) then
-           MSG_ERROR("Error in eigen !")
-         end if
-         if (ANY(ABS(occ(1+bdtot0_index:MIN(10,nband_tmp)+bdtot0_index) - &
-&             Epren%occs(1:MIN(10,nband_tmp),ikpt,isppol)) > tol3)) then
-           MSG_ERROR("Error in occ!")
-         end if
-
-         ! Upgrade energies
-         do itemp = 1,Epren%ntemp
-           eigen0_c(1+bdtot0_index:nband_tmp+bdtot0_index,itemp) = eigen0(1+bdtot0_index:nband_tmp+bdtot0_index) + Epren%renorms(1,1:nband_tmp,ikpt,isppol,itemp) + (0.0_dp,1.0_dp)*Epren%lifetimes(1,1:nband_tmp,ikpt,isppol,itemp)
-         end do
-
-         bdtot0_index=bdtot0_index+nband1
-         bdtot_index=bdtot_index+2*nband1**2
-       end do
-     end do
-   else
-     ! Only 1 temperature (no temperature !)!
-     eigen0_c(:,1) = eigen0(:)
-
-   end if
-
-
- end if
- call xmpi_bcast(eigen0_c,master,comm,ierr)
-
 !IN CALLED ROUTINE
 !call linopt(nspin,,nkpt,wkpt,nsymcrys,symcrys,nstval,occv,evalv,efermi,pmat,v1,v2,nmesh,de,scissor,brod)
 !
@@ -705,7 +663,6 @@ program optic
  ABI_DEALLOCATE(eigen12)
  ABI_DEALLOCATE(eigen13)
  ABI_DEALLOCATE(eigen0)
- ABI_DEALLOCATE(eigen0_c)
  ABI_DEALLOCATE(doccde)
  ABI_DEALLOCATE(wtk)
  ABI_DEALLOCATE(cond_nd)
