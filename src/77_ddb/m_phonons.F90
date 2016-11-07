@@ -1072,7 +1072,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,
  real(dp),intent(inout) :: singular(1:3*ddb%natom*(3*ddb%natom-1)/2)
  real(dp),intent(inout) :: uinvers(1:3*ddb%natom*(3*ddb%natom-1)/2,1:3*ddb%natom*(3*ddb%natom-1)/2)
  real(dp),intent(inout) :: vtinvers(1:3*ddb%natom*(3*ddb%natom-1)/2,1:3*ddb%natom*(3*ddb%natom-1)/2)
- real(dp),intent(inout) :: d2asr(2,3,ddb%natom,3,ddb%natom)
+ real(dp),intent(in) :: d2asr(2,3,ddb%natom,3,ddb%natom)
 
 !Local variables -------------------------
 !scalars

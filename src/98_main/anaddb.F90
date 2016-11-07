@@ -119,6 +119,7 @@ program anaddb
  type(phonon_dos_type) :: Phdos
  type(ifc_type) :: Ifc,Ifc_coarse
  type(ddb_type) :: ddb
+ type(asrq0_t) :: asrq0
  type(crystal_t) :: Crystal
 #ifdef HAVE_NETCDF
  integer :: phdos_ncid, ana_ncid, ec_ncid, ncerr
@@ -266,8 +267,8 @@ program anaddb
  ! In case the interatomic forces are not calculated, the
  ! ASR-correction (d2asr) has to be determined here from the Dynamical matrix at Gamma.
 
- !acorr = ddb_make_asrq0corr(ddb, asr, rftyp, xcart) result(acorr)
- !call asrq0corr_free(acorr)
+ asrq0 = ddb_get_asrq0(ddb, inp%asr, inp%rfmeth, crystal%xcart)
+ call asrq0_free(asrq0)
 
  ABI_ALLOCATE(d2asr,(2,3,natom,3,natom))
  d2asr = zero

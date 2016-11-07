@@ -4,7 +4,7 @@
 !!  m_ddb
 !!
 !! FUNCTION
-!!  This module contains the declaration of data types and methods 
+!!  This module contains the declaration of data types and methods
 !!  used to handle the blocks of data in DDB files:
 !!  blkval, nrm, qpt, flg, and associated dimensions
 !!  Main entry point for client code that needs to read the DDB data.
@@ -42,7 +42,7 @@ MODULE m_ddb
 
  implicit none
 
- private 
+ private
 
  public :: ddb_getdims      ! Open a DDB file and read basic dimensions and variables.
  public :: gtblk9           ! Finds the block containing the derivatives of the total energy.
@@ -53,7 +53,7 @@ MODULE m_ddb
  public :: nlopt            ! Output of all quantities related to third-order derivatives of the energy.
  public :: chkin9
  public :: carttransf       ! Transform a second-derivative matrix (EIG2D) from reduced
-                            ! coordinates to cartesian coordinates. 
+                            ! coordinates to cartesian coordinates.
 
  integer,public,parameter :: DDB_VERSION=100401
  ! DDB Version number.
@@ -98,7 +98,7 @@ MODULE m_ddb
 
   integer :: occopt
   ! Occupation option.
-                      
+
   integer :: prtvol
   ! Verbosity level.
 
@@ -107,11 +107,11 @@ MODULE m_ddb
   real(dp) :: gprim(3,3)
   real(dp) :: acell(3)
 
-  integer,allocatable :: flg(:,:) 
+  integer,allocatable :: flg(:,:)
   ! flg(msize,nblok)
   ! flag to indicate presence of a given block
- 
-  integer,allocatable :: typ(:) 
+
+  integer,allocatable :: typ(:)
   ! typ(nblok)
   ! type of each block - ddk, dde, phonon etc...
 
@@ -119,41 +119,49 @@ MODULE m_ddb
   ! amu(ntypat)
   ! mass of the atoms (atomic mass unit)
 
-  real(dp),allocatable :: nrm(:,:) 
+  real(dp),allocatable :: nrm(:,:)
   ! nrm(3,nblok)
   ! norm of the q-points for each block - can be 0 to indicate a direction of approach to gamma
 
-  real(dp),allocatable :: qpt(:,:) 
+  real(dp),allocatable :: qpt(:,:)
   ! qpt(9,nblok)
   ! q-point vector in reciprocal space (reduced lattice coordinates) for each block
 
-  real(dp),allocatable :: val(:,:,:) 
+  real(dp),allocatable :: val(:,:,:)
   ! val(2,msize,nblok)
   ! values of the second energy derivatives in each block
 
  end type ddb_type
- 
+
  public :: ddb_from_file            ! Construct the object from the DDB file.
  public :: ddb_free                 ! Free dynamic memory.
  public :: ddb_malloc               ! Allocate dynamic memory
- public :: ddb_bcast                ! Broadcast the object. 
+ public :: ddb_bcast                ! Broadcast the object.
  public :: ddb_copy                 ! Copy the object.
  public :: ddb_get_etotal           ! Read the GS total energy.
  public :: ddb_get_dielt_zeff       ! Reads the Dielectric Tensor and the Effective Charges
  public :: ddb_get_dchidet          ! Reads the non-linear optical susceptibility tensor and the
                                     ! first-order change in the linear dielectric susceptibility
- public :: ddb_make_asrq0corr
+ public :: ddb_get_asrq0            ! Return object used to enforce the acoustic sum rule
+                                    ! from the Dynamical matrix at Gamma.
 !!***
 
 !!****t* m_ddb/asr_t
 !! NAME
-!!  asr_t 
+!!  asr_t
 !!
 !! FUNCTION
+!!  Object used to enforce the acoustic sum rule from the Dynamical matrix at Gamma.
+!!  Wraps several approaches that can be activated via the `asr` option.
+!!
 !!
 !! SOURCE
 
- type,public :: asrq0corr_t
+ type,public :: asrq0_t
+
+   integer :: iblok
+    ! Index of the Gamma block in the DDB.
+    ! Set to 0 if no block was found
 
    integer :: asr
    ! Option for the application of the ASR (input variable).
@@ -166,7 +174,7 @@ MODULE m_ddb
    ! In case the interatomic forces are not calculated, the
    ! ASR-correction (d2asr) has to be determined here from the Dynamical matrix at Gamma.
 
-   ! singular, uinvers and vtinvers are allocated and used only if asr in [3,4] 
+   ! singular, uinvers and vtinvers are allocated and used only if asr in [3,4]
    ! i.e. Rotational invariance for 1D and 0D systems. dims=3*natom*(3*natom-1)/2
    real(dp),allocatable :: singular(:)
    ! singular,(1:dims))
@@ -177,10 +185,10 @@ MODULE m_ddb
    real(dp),allocatable :: vtinvers(:,:)
    ! vtinvers,(1:dims,1:dims))
 
- end type asrq0corr_t
+ end type asrq0_t
 
- !public :: asrq0corr_apply
- public :: asrq0corr_free
+ !public :: asrq0_apply
+ public :: asrq0_free
 !!***
 
  ! TODO: We should use this constants instead of magic numbers!
@@ -859,7 +867,7 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
    end if
 
  else if(string==' Description')then
-   if (usepaw==1) then 
+   if (usepaw==1) then
      MSG_BUG('old DDB pspformat not compatible with PAW 1')
    end if
 
@@ -1020,7 +1028,7 @@ subroutine ddb_getdims(dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ierr 
+ integer :: ierr
  !integer :: mpert,msize
 
 ! *********************************************************************
@@ -1071,12 +1079,12 @@ end subroutine ddb_getdims
 !!      1 => the element is in the data blok.
 !!   nrm(3,nblok)=normalization factors for the three allowed wavevectors
 !!   qpt(3,nblok)=wavevector of the perturbation(s). The elements
-!!   typ(nblok)=type of the block. 
+!!   typ(nblok)=type of the block.
 !!      (1=> non-stationary block),
-!!      (2=> stationary block), 
+!!      (2=> stationary block),
 !!      (3=> third order derivative).
 !! qphon(3,3)=wavevectors for the three possible phonons
-!!  (note : only one should be used in case of second derivative of total energy, 
+!!  (note : only one should be used in case of second derivative of total energy,
 !!  because we know that the second is the opposite of this value)
 !! qphnrm(3) =normalisation factors for the three possible phonons
 !! rfphon(4) = 1=> response to phonons (for the four possible derivatives. Two should be used for a second derivative of total energy)
@@ -1481,7 +1489,7 @@ subroutine read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
  character(len=500) :: message
 
 ! *********************************************************************
- 
+
 !Zero every flag
  ddb%flg(1:msize, iblok)=0
  if(present(blkval2))blkval2(:,:,:,:)=zero
@@ -2834,7 +2842,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
 !mtyplo=maximum number of type, locally
 !scalars
  integer,parameter :: msppol=2,mtyplo=6
- integer :: mtypat,mkpt,matom 
+ integer :: mtypat,mkpt,matom
  integer :: choice,fullinit,iblok,intxc,iscf,isym,ixc
  integer :: nsize,nspden,nspinor,nsppol,nunit,timrev,useylm,vrsddb
  real(dp),parameter :: tolsym8=tol8
@@ -3294,7 +3302,7 @@ end subroutine nlopt
 !!    has to be done for atom ia; otherwise 0.
 !!
 !! TODO
-!!   Sorry for the presence of natom, natifc and atifc. 
+!!   Sorry for the presence of natom, natifc and atifc.
 !!   They are needed for legacy code!
 !!
 !! PARENTS
@@ -3329,7 +3337,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,Crystal,comm,prtvo
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ierr,ii,msym,dimekb,lmnmax,mband,nkpt,ntypat,nsym,usepaw 
+ integer :: ierr,ii,msym,dimekb,lmnmax,mband,nkpt,ntypat,nsym,usepaw
  integer :: mtyp,mpert,msize,ddb_natom,nblok,occopt,timrev,space_group,npsp,ddbun
  real(dp) :: factor,ucvol
  logical :: use_antiferro
@@ -3337,7 +3345,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,Crystal,comm,prtvo
  integer,allocatable :: symrec(:,:,:),symrel(:,:,:),symafm(:),indsym(:,:,:),typat(:)
  real(dp) :: acell(3),gmet(3,3),gprim(3,3),rmet(3,3),rprim(3,3),rprimd(3,3)
  real(dp),allocatable :: amu(:),xcart(:),xred(:,:),zion(:),znucl(:),tnons(:,:)
- character(len=132),allocatable :: title(:)  
+ character(len=132),allocatable :: title(:)
  character(len=500) :: message
 
 ! ************************************************************************
@@ -3353,7 +3361,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,Crystal,comm,prtvo
  mpert=natom+6
  msize=3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
 
- ! Allocate arrays depending on msym 
+ ! Allocate arrays depending on msym
  ! (which is actually fixed to nsym inside inprep8)
  ABI_MALLOC(symrel,(3,3,msym))
  ABI_MALLOC(symafm,(msym))
@@ -3413,7 +3421,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,Crystal,comm,prtvo
 
    ! Other useful quantities.
    ! 2 is to preserve the old behaviour
-   ddb%prtvol = 2; if (present(prtvol)) ddb%prtvol = prtvol 
+   ddb%prtvol = 2; if (present(prtvol)) ddb%prtvol = prtvol
    ddb%occopt = occopt
    ddb%amu = amu
    ABI_FREE(amu)
@@ -3446,7 +3454,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,Crystal,comm,prtvo
 !Initialize crystal_t object.
  call mkrdim(acell,rprim,rprimd)
 
-!FIXME: These variables are hardcoded 
+!FIXME: These variables are hardcoded
  npsp = ntypat; space_group = 0; timrev = 2
  use_antiferro=.FALSE. !;  use_antiferro=(nspden==2.and.nsppol==1)
  ABI_MALLOC(title, (ntypat))
@@ -3458,7 +3466,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,Crystal,comm,prtvo
 !Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
  call crystal_init(ddb%amu,Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
 &  zion,znucl,timrev,use_antiferro,.FALSE.,title,&
-&  symrel=symrel,tnons=tnons,symafm=symafm) 
+&  symrel=symrel,tnons=tnons,symafm=symafm)
 
  ABI_FREE(title)
  ABI_FREE(symrel)
@@ -3482,8 +3490,8 @@ end subroutine ddb_from_file
 !!
 !! FUNCTION
 !! Transform a second-derivative matrix (EIG2D) from reduced
-!! coordinates to cartesian coordinates. 
-!! 
+!! coordinates to cartesian coordinates.
+!!
 !! INPUTS
 !!  blkflg(msize,nblok)=
 !!   ( 1 if the element of the dynamical matrix has been calculated ;
@@ -3554,7 +3562,7 @@ real(dp),allocatable :: d2cart(:,:,:,:,:)
 
 !Begin by formating the arrays to be compatible with cart29
 !Then call cart29 to transform the arrays in cartesian coordinates
-!Finally reformat the cartesian arrays in old format 
+!Finally reformat the cartesian arrays in old format
  do ikpt=1,nkpt
    do iband=1,mband
 
@@ -4101,7 +4109,7 @@ end function ddb_get_etotal
 !! OUTPUT
 !!  dielt(3,3) = Macroscopic dielectric tensor
 !!  zeff(3,3,natom)=effective charge on each atom, versus electric field and atomic displacement
-!!  iblok=Index of the block containing the data. 0 if block is not found. 
+!!  iblok=Index of the block containing the data. 0 if block is not found.
 !!
 !! NOTES
 !!  dielt and zeff are initialized to one_3D and zero if the derivatives are not available in the DDB file.
@@ -4200,7 +4208,7 @@ end function ddb_get_dielt_zeff
 !! dchide(3,3,3) = non-linear optical coefficients
 !! dchidt(natom,3,3,3) = first-order change of the electronic dielectric
 !!   tensor induced by an individual atomic displacement
-!! iblok=Index of the block containing the data. 0 if block is not found. 
+!! iblok=Index of the block containing the data. 0 if block is not found.
 !!   The caller should check the returned value.
 !!
 !! PARENTS
@@ -4257,28 +4265,30 @@ end function ddb_get_dchidet
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddb/ddb_make_asrq0corr
+!!****f* m_ddb/ddb_get_asrq0
 !! NAME
-!!  ddb_make_asrq0corr
+!!  ddb_get_asrq0
 !!
 !! FUNCTION
 !!  In case the interatomic forces are not calculated, the
 !!  ASR-correction has to be determined here from the Dynamical matrix at Gamma.
 !!  In case the DDB does not contain this information, the subroutine returns iblok=0
-!!  and no result is computed and stored in acorr%
+!!  %d2asr is initialized and set to zero to preserve the old behaviour.
 !!
 !! INPUTS
 !!  asr=Input variable selecting the method for the ASR
-!!  rftyp
+!!  rftyp  = 1 if non-stationary block
+!!           2 if stationary block
+!!           3 if third order derivatives
 !!  xcart(3,ddb%atom)=Cartesian coordinates of the atoms.
 !!
 !! SIDE EFFECTS
-!!  Ddb<type(ddb_type)>= Database with the derivates. The routine does not change it
-!!  except when asr is in [3,4].
+!!  ddb<type(ddb_type)>= Database with the derivates. The routine does not change it
+!!  except when asr is in [3,4]. TODO This should not happen.
 !!
 !! OUTPUT
-!! acorr<asrq0corr_t>
-!! iblok= number of the block that corresponds to the specifications
+!! asrq0<asrq0_t>
+!!   iblok= is set to 0 if the Gamma block is not found
 !!
 !! PARENTS
 !!
@@ -4286,13 +4296,12 @@ end function ddb_get_dchidet
 !!
 !! SOURCE
 
-subroutine ddb_make_asrq0corr(ddb,asr,rftyp,xcart,acorr,iblok)
-
+type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ddb_make_asrq0corr'
+#define ABI_FUNC 'ddb_get_asrq0'
 !End of the abilint section
 
  implicit none
@@ -4300,16 +4309,14 @@ subroutine ddb_make_asrq0corr(ddb,asr,rftyp,xcart,acorr,iblok)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: asr,rftyp
- integer,intent(out) :: iblok
  type(ddb_type),intent(inout) :: ddb
- type(asrq0corr_t),intent(out) :: acorr
 !arrays
  real(dp),intent(in) :: xcart(3,ddb%natom)
 
 !Local variables-------------------------------
-!scalars 
- integer :: dims
- character(len=500) :: message
+!scalars
+ integer :: dims,iblok
+ !character(len=500) :: msg
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp) :: qphnrm(3),qphon(3,3)
@@ -4323,31 +4330,31 @@ subroutine ddb_make_asrq0corr(ddb,asr,rftyp,xcart,acorr,iblok)
  rfphon(1:2)=1
  rfelfd(:)=0
  rfstrs(:)=0
- !rftyp=inp%rfmeth
 
- call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
-
- if (iblok /=0) return
-
- ABI_MALLOC(acorr%d2asr, (2,3,ddb%natom,3,ddb%natom))
- acorr%d2asr = zero
+ call gtblk9(ddb,asrq0%iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+ ! this is to maintain the old behaviour
+ ABI_MALLOC(asrq0%d2asr, (2,3,ddb%natom,3,ddb%natom))
+ asrq0%d2asr = zero
+ if (asrq0%iblok /=0) return
+ iblok = asrq0%iblok
 
  select case (asr)
  case (0)
-   continue 
+   continue
 
  case (1,2)
-   call asria_calc(asr,acorr%d2asr,ddb%val(:,:,iblok),ddb%mpert,ddb%natom)
+   call asria_calc(asr,asrq0%d2asr,ddb%val(:,:,iblok),ddb%mpert,ddb%natom)
 
  case (3,4)
    ! Rotational invariance for 1D and 0D systems
+   ! Compute uinvers, vtinvers and singular matrices.
 
-   dims=3*ddb%natom*(3*ddb%natom-1)/2
-   ABI_CALLOC(acorr%uinvers,(1:dims,1:dims))
-   ABI_CALLOC(acorr%vtinvers,(1:dims,1:dims))
-   ABI_CALLOC(acorr%singular,(1:dims))
+   dims = 3*ddb%natom*(3*ddb%natom-1) / 2
+   ABI_CALLOC(asrq0%uinvers, (dims, dims))
+   ABI_CALLOC(asrq0%vtinvers,(dims, dims))
+   ABI_CALLOC(asrq0%singular, (dims))
 
-   call asrprs(asr,1,3,acorr%uinvers,acorr%vtinvers,acorr%singular,&
+   call asrprs(asr,1,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,&
 &    ddb%val(:,:,iblok),ddb%mpert,ddb%natom,xcart)
 
  case (5)
@@ -4355,33 +4362,32 @@ subroutine ddb_make_asrq0corr(ddb,asr,rftyp,xcart,acorr,iblok)
    ABI_MALLOC(d2cart,(2,ddb%msize))
    d2cart = ddb%val(:,:,iblok)
    ! calculate diagonal correction
-   call asria_calc(2,acorr%d2asr,d2cart,ddb%mpert,ddb%natom)
+   call asria_calc(2,asrq0%d2asr,d2cart,ddb%mpert,ddb%natom)
    ! apply diagonal correction
-   call asria_corr(2,acorr%d2asr,d2cart,ddb%mpert,ddb%natom)
+   call asria_corr(2,asrq0%d2asr,d2cart,ddb%mpert,ddb%natom)
    ! hermitianize
    call mkherm(d2cart,3*ddb%mpert)
    ! remove remaining ASR rupture due to Hermitianization
    ABI_MALLOC(d2asr_res,(2,3,ddb%natom,3,ddb%natom))
    call asria_calc(asr,d2asr_res,d2cart,ddb%mpert,ddb%natom)
    ! full correction is sum of both
-   acorr%d2asr = acorr%d2asr + d2asr_res
+   asrq0%d2asr = asrq0%d2asr + d2asr_res
 
    ABI_FREE(d2cart)
    ABI_FREE(d2asr_res)
 
  case default
-   write(message,'(a,i0)')"Wrong value for asr: ",asr
-   MSG_ERROR(message)
+   MSG_ERROR(sjoin("Wrong value for asr:", itoa(asr)))
  end select
 
-end subroutine ddb_make_asrq0corr
+end function ddb_get_asrq0
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddb/asrq0corr_free
+!!****f* m_ddb/asrq0_free
 !! NAME
-!! asrq0corr_free
+!! asrq0_free
 !!
 !! FUNCTION
 !!   Free dynamic memory
@@ -4392,45 +4398,43 @@ end subroutine ddb_make_asrq0corr
 !!
 !! SOURCE
 
-subroutine asrq0corr_free(acorr)
-
+subroutine asrq0_free(asrq0)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'asrq0corr_free'
+#define ABI_FUNC 'asrq0_free'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
- type(asrq0corr_t),intent(inout) :: acorr
+ type(asrq0_t),intent(inout) :: asrq0
 
 ! ************************************************************************
 
  ! real
- if (allocated(acorr%d2asr)) then
-   ABI_FREE(acorr%d2asr)
+ if (allocated(asrq0%d2asr)) then
+   ABI_FREE(asrq0%d2asr)
  end if
 
- if (allocated(acorr%singular)) then
-   ABI_FREE(acorr%singular)
+ if (allocated(asrq0%singular)) then
+   ABI_FREE(asrq0%singular)
  end if
 
- if (allocated(acorr%uinvers)) then
-   ABI_FREE(acorr%uinvers)
+ if (allocated(asrq0%uinvers)) then
+   ABI_FREE(asrq0%uinvers)
  end if
 
- if (allocated(acorr%vtinvers)) then
-   ABI_FREE(acorr%vtinvers)
+ if (allocated(asrq0%vtinvers)) then
+   ABI_FREE(asrq0%vtinvers)
  end if
 
-end subroutine asrq0corr_free
+end subroutine asrq0_free
 !!***
 
-
 !!****f* m_ddb/ddb_chkname
-!! NAME ddb_chkname
+!! NAME
 !! ddb_chkname
 !!
 !! FUNCTION

@@ -802,7 +802,7 @@ end subroutine gkkmu_from_atm
 !!  nfd
 !!
 !! FUNCTION
-!!   Fermi–Dirac statistic
+!!  Fermi-Dirac statistic
 !!
 !! INPUTS
 !!   ee=Single particle energy in Ha
