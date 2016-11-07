@@ -2213,7 +2213,6 @@ end subroutine dvdb_rewind
 
 integer function my_hdr_skip(unit,idir,ipert,qpt) result(ierr)
 
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2715,9 +2714,11 @@ end subroutine dvdb_test_symmetries
 !!
 !! INPUT
 !!  nfiles=Number of files to be merged.
-!!  v1files=List of file names
 !!  dvdb_path=Name of output DVDB file.
 !!  prtvol=Verbosity level.
+!!
+!! SIDE EFFECTS
+!!   v1files=List of file names to merge. This list could be changed if POT1 files in netcdf format is found.
 !!
 !! PARENTS
 !!      mrgdv
@@ -2765,13 +2766,8 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
 
  ! If a file is not found, try the netcdf version and change v1files accordingly.
  do ii=1,nfiles
-   if (.not. file_exists(v1files(ii))) then
-     if (file_exists(nctk_ncify(v1files(ii)))) then
-       write(std_out,"(3a)")"- File: ",trim(v1files(ii))," does not exist but found netcdf file with similar name."
-       v1files(ii) = nctk_ncify(v1files(ii))
-     else
-       MSG_ERROR(sjoin('Missing file: ',v1files(ii)))
-     end if
+   if (nctk_try_fort_or_ncfile(v1files(ii), msg) /= 0) then
+     MSG_ERROR(msg)
    end if
  end do
 

@@ -220,12 +220,16 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  use m_wfk
  use m_xmpi
  use m_nctk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
 
  use m_fstrings, only : int2char4, sjoin
  use m_time,     only : abi_wtime, sec2str
+ use m_io_tools, only : open_file
  use m_exit,     only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
  use m_mpinfo,   only : iwrite_fftdatar
- use m_ioarr,    only : ioarr, fftdatar_write_from_hdr
+ use m_ioarr,    only : ioarr, fftdatar_write_from_hdr, fort_denpot_skip
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type
  use m_pawtab,   only : pawtab_type
@@ -339,19 +343,19 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer :: istep,itypat,izero,lmn2_size,me,mgfftdiel,mvdum
  integer :: nfftdiel,nfftmix,nfftotf,nhat1grdim,npawmix,npwdiel,nspden_rhoij,nstep,nzlmopt
  integer :: optene,optfr,option,optres,prtfor,quit,quit_sum,qzero
- integer :: my_quit,quitsum_request,timelimit_exit
+ integer :: my_quit,quitsum_request,timelimit_exit,varid,ncerr,ncid
  integer ABI_ASYNC :: quitsum_async
  integer :: rdwrpaw,spaceComm,sz1,sz2,usexcnhat,Z_kappa
  logical :: need_fermie1,paral_atom,use_nhat_gga
  real(dp) :: wtime_step,now,prev
  real(dp) :: born,born_bar,boxcut,deltae,diffor,diel_q,dum,ecut,ecutf,elast
  real(dp) :: epawdc1_dum,evar,fe1fixed,fermie1,gsqcut,qphon_norm,maxfor,renorm,res2,res3,residm2
+ real(dp) :: vhartr1_g0(2) !,vxc1_g0(2),vpsp1_g0(2)
  real(dp) :: ucvol,vxcavg
  character(len=500) :: msg
  character(len=fnlen) :: fi1o
  type(ab7_mixing_object) :: mix
  type(efield_type) :: dtefield
-
 !arrays
  integer :: ngfftmix(18)
  integer,allocatable :: dimcprj(:),pwindall(:,:,:)
@@ -605,7 +609,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      if (have_timelimit_in(ABI_FUNC)) then
        if (istep > 2) then
          call xmpi_wait(quitsum_request,ierr)
-         if (quitsum_async > 0) then 
+         if (quitsum_async > 0) then
            write(msg,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),". Will exit istep loop in dfpt_scfcv."
            MSG_COMMENT(msg)
            call wrtout(ab_out, msg, "COLL")
@@ -1177,15 +1181,46 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      ngfftf,cplex,nfftf,dtset%nspden,rhor1,mpi_enreg)
    end if
 
-   ! first order potentials are alwyas written because the new eph code neeeds them
-   ! the files are smalls (much much smaller that 1WFK)
-   !if (dtset%prtpot>0) then
+   ! first order potentials are always written because the eph code requires them
+   ! the files are small (much much smaller that 1WFK, actually we should avoid writing 1WFK)
    rdwrpaw=0
    call appdig(pertcase,dtfil%fnameabo_pot,fi1o)
    ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
    call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr,&
    ngfftf,cplex,nfftf,dtset%nspden,vtrial1,mpi_enreg)
-   !end if
+
+#if 0
+   ! Compute vhartr1(G=0)
+   vhartr1_g0 = zero
+   if (cplex == 1) vhartr1_g0(1) = sum(vhartr1)
+   if (cplex == 2) then
+     vhartr1_g0(1) = sum(vhartr1(1:nfftf:2))
+     vhartr1_g0(2) = sum(vhartr1(2:nfftf:2))
+   end if
+   if (mpi_enreg%nproc_fft > 1) call xmpi_sum(vhartr1_g0, mpi_enreg%comm_fft, ierr)
+   vhartr1_g0 = vhartr1_g0 / nfftotf
+
+   ! Write vhartr1(G=0)
+   if (mpi_enreg%me_fft == 0) then
+     if (dtset%iomode == IO_MODE_NETCDF) then
+#ifdef HAVE_NETCDF
+       NCF_CHECK(nctk_open_read(ncid, fi1o, xmpi_comm_self))
+       ncerr = nctk_def_one_array(ncid, nctkarr_t('vhartr1_g0', "dp", "two"), varid=varid)
+       NCF_CHECK(ncerr)
+       NCF_CHECK(nf90_put_var(ncid, varid, vhartr1_g0))
+       NCF_CHECK(nf90_close(ncid))
+#endif
+     else
+       ! Handle Fortran files.
+       if (open_file(fi1o, msg, newunit=ncid, form='unformatted', status='old', action="readwrite") /= 0) then
+         MSG_ERROR(msg)
+       end if
+       if (fort_denpot_skip(ncid, msg) /= 0) MSG_ERROR(msg)
+       write(ncid) vhartr1_g0(:)
+       close(ncid)
+     end if
+   end if
+#endif
 
  end if
 

@@ -2446,7 +2446,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 !Local variables ------------------------------
 !scalars
  integer,parameter :: dummy_npw=1,nsig=1,tim_getgh1c=1,berryopt0=0,timrev1=1
- integer,parameter :: useylmgr=0,useylmgr1=0,master=0
+ integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1,copt0=0
  integer :: my_rank,nproc,iomode,mband,my_minb,my_maxb,nsppol,nkpt,idir,ipert,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor,onpw
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,ib1,ib2,band !band1,band2,
@@ -2830,7 +2830,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          do ib2=1,nband_k
            band = ib2 + bstart_k - 1
            call wfd_copy_cg(wfd, band, ik_ibz, spin, h1kets_kq)
-           call cg_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, nspinor, 1,&
+           call cg_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, nspinor, ndat1,&
                           npw_kirr, wfd%kdata(ik_ibz)%kg_k,&
                           npw_k, kg_k, istwf_kirr, istwf_k, h1kets_kq, kets_k(:,:,ib2), work_ngfft, work)
          end do
@@ -2863,7 +2863,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
          do ib1=1,nband_kq
            band = ib1 + bstart_kq - 1
            call wfd_copy_cg(wfd, band, ikq_ibz, spin, h1kets_kq)
-           call cg_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, 1,&
+           call cg_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1,&
                           npw_kirr, wfd%kdata(ikq_ibz)%kg_k,&
                           npw_kq, kg_kq, istwf_kirr, istwf_kq, h1kets_kq, bras_kq(:,:,ib1), work_ngfft, work)
          end do
@@ -2908,7 +2908,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
            ! Use scissor shift on 0-order eigenvalue
            eshift = eig0nk - dtset%dfpt_sciss
 
-           call getgh1c(berryopt0,0,kets_k(:,:,ib2),cwaveprj0,h1kets_kq(:,:,ib2),&
+           call getgh1c(berryopt0,copt0,kets_k(:,:,ib2),cwaveprj0,h1kets_kq(:,:,ib2),&
 &                       grad_berry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,mpi_enreg,optlocal,&
 &                       optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
          end do

@@ -1193,8 +1193,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,
 &   mpert,Crystal%nsym,natom,nsym,Crystal%ntypat,phfrq,qphnrm(1),qphon,&
 &   crystal%rprimd,inp%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
 
-
-   !call ifc_fourq(Ifc,Crystal,qphon,phfrq,displ,out_eigvec=eigvec)
+   !call ifc_diagoq(Ifc,Crystal,qphon,phfrq,displ,out_eigvec=eigvec)
 
    if (abs(inp%freeze_displ) > tol10) then
      real_qphon = zero

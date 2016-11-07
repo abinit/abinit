@@ -31,6 +31,10 @@ MODULE m_ifc
  use m_errors
  use m_profiling_abi
  use m_sort
+ use m_nctk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
 
  use m_io_tools,    only : open_file
  use m_copy,        only : alloc_copy
@@ -40,10 +44,6 @@ MODULE m_ifc
  use m_dynmat,      only : cell9,canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, &
 &                          make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, symdm9, nanal9, gtdyn9, dymfz9
  use m_ddb,         only : ddb_type
- use m_nctk
-#ifdef HAVE_NETCDF
- use netcdf
-#endif
 
  implicit none
 
