@@ -65,7 +65,7 @@ program anaddb
  use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_ncwrite
- use m_dynmat,         only : chneu9, gtdyn9
+ use m_dynmat,         only : chneu9, gtdyn9, asria_corr
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
