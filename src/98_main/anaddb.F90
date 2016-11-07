@@ -89,14 +89,15 @@ program anaddb
  integer :: msym !  msym =maximum number of symmetry elements in space group
 !Define input and output unit numbers (some are defined in defs_basis -all should be there ...):
  integer,parameter :: ddbun=2,master=0 ! FIXME: these should not be reserved unit numbers!
+ integer,parameter :: rftyp4=4
  integer :: dimekb,comm,iatom,iblok,iblok_stress,idir,ii,index
  integer :: ierr,iphl2,lenstr,lmnmax,mband,mtyp,mpert,msize,natom,nblok,nblok2
- integer :: nkpt,nph2l,nsym,ntypat,option,rftyp,usepaw,nproc,my_rank
+ integer :: nkpt,nph2l,nsym,ntypat,option,usepaw,nproc,my_rank
  logical :: iam_master
  integer :: rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
  integer,allocatable :: d2flg(:)
  real(dp) :: etotal,tcpu,tcpui,twall,twalli
- real(dp),target :: dielt(3,3)
+ real(dp) :: dielt(3,3)
  real(dp) :: compl(6,6),compl_clamped(6,6),compl_stress(6,6)
  real(dp) :: dielt_rlx(3,3),elast(6,6),elast_clamped(6,6),elast_stress(6,6)
  real(dp) :: epsinf(3,3),red_ptot(3),pel(3)
@@ -106,7 +107,7 @@ program anaddb
  real(dp),allocatable :: eigvec(:,:,:,:,:),fact_oscstr(:,:,:),instrain(:,:)
  real(dp),allocatable :: fred(:,:),lst(:),phfrq(:)
  real(dp),allocatable :: rsus(:,:,:)
- real(dp),target,allocatable :: zeff(:,:,:)
+ real(dp),allocatable :: zeff(:,:,:)
  character(len=10) :: procstr
  character(len=24) :: codename
  character(len=24) :: start_datetime
@@ -329,12 +330,11 @@ program anaddb
    qphnrm(:) = zero
    rfphon(:) = 0
    rfstrs(:) = 0
-   rftyp = 4
    rfelfd(:) = 2
    if (inp%relaxat == 1) rfphon(:) = 1
    if (inp%relaxstr == 1) rfstrs(:) = 3
 
-   call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+   call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp4)
 
    if (inp%relaxat == 1) then
      index = 0
@@ -398,7 +398,7 @@ program anaddb
    call wrtout(ab_out,message,'COLL')
 
    if (inp%qrefine > 1) then
-     ! Gaal-Nagy's algorithm in PRB <b>73</b> 014117.
+     ! Gaal-Nagy's algorithm in PRB 73 014117.
 
      ! Build the IFCs using the coarse q-mesh.
      ngqpt_coarse(1:3) = inp%ngqpt(1:3)/inp%qrefine
@@ -586,8 +586,7 @@ program anaddb
      rfphon(1:2)=1
      rfelfd(1:2)=2
      rfstrs(1:2)=0
-     rftyp=inp%rfmeth
-     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
 
      ! Copy the dynamical matrix in d2cart
      d2cart(:,1:msize)=ddb%val(:,:,iblok)
@@ -723,9 +722,8 @@ program anaddb
    rfphon(1:2)=0
    rfelfd(1:2)=2
    rfstrs(1:2)=0
-   rftyp=inp%rfmeth
 
-   call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+   call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
 
    d2cart(:,1:msize)=ddb%val(:,:,iblok)
 
@@ -783,8 +781,8 @@ program anaddb
      rfphon(1:2)=0
      rfelfd(1:2)=0
      rfstrs(1:2)=3
-     rftyp=inp%rfmeth
-     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+
+     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
      ! then print the internal stain tensor
      call ddb_internalstr(inp%asr,ddb%val,asrq0%d2asr,iblok,instrain,ab_out,mpert,natom,ddb%nblok)
    end if
@@ -813,9 +811,8 @@ program anaddb
      rfphon(1:2)=0
      rfelfd(1:2)=0
      rfstrs(1:2)=0
-     rftyp=4
 
-     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp4)
      iblok_stress=iblok
 
      ! look after the blok no.iblok that contains the elastic tensor
@@ -826,8 +823,7 @@ program anaddb
      rfstrs(1:2)=3
 
      ! for both diagonal and shear parts
-     rftyp=inp%rfmeth
-     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
 
      ! print the elastic tensor
      call ddb_elast(inp,ddb%val,compl,compl_clamped,compl_stress,asrq0%d2asr,&
@@ -871,9 +867,8 @@ program anaddb
      rfelfd(1:2)=0
      rfstrs(1:2)=3
      ! for both diagonal and shear parts
-     rftyp=inp%rfmeth
 
-     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+     call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
 
      ! then print out the piezoelectric constants
      call ddb_piezo(inp,ddb%val,dielt_rlx,elast,iblok,instrain,ab_out,mpert,natom,ddb%nblok,piezo,Crystal%ucvol)

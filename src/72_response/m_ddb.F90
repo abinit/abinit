@@ -144,6 +144,7 @@ MODULE m_ddb
                                     ! first-order change in the linear dielectric susceptibility
  public :: ddb_get_asrq0            ! Return object used to enforce the acoustic sum rule
                                     ! from the Dynamical matrix at Gamma.
+ !public :: ddb_diagoq
 !!***
 
 !!****t* m_ddb/asr_t
@@ -4385,6 +4386,115 @@ type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
 
 end function ddb_get_asrq0
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb/ddb_diagoq
+!! NAME
+!!  ddb_diagoq
+!!
+!! FUNCTION
+!!  Compute the phonon frequencies at the specified q-point by performing
+!!  a direct diagonalizatin of the dynamical matrix. The q-point **MUST** be
+!!  one the points used for the DFPT calculation or one of its symmetrical image.
+!!
+!! INPUTS
+!!  crystal<type(crystal_t)> = Information on the crystalline structure.
+!!  ddb<type(ddb_type)>=Object storing the DDB results.
+!!  asrq0<asrq0_t>=Object for the treatment of the ASR based on the q=0 block found in the DDB file.
+!!  qpt(3)=q-point in reduced coordinates (unless nanaqdir is specified)
+!!  [nanaqdir]=If present, the qpt will be treated as a vector specifying the
+!!    direction in q-space along which the non-analytic behaviour of the dynamical
+!!    matrix will be treated. Possible values:
+!!       "cart" if qpt defines a direction in Cartesian coordinates
+!!       "reduced" if qpt defines a direction in reduced coordinates
+!!
+!! OUTPUT
+!!  phfrq(3*crystal%natom)=Phonon frequencies in Hartree
+!!  displ_cart(2,3*%natom,3*%natom)=Phonon displacement in Cartesian coordinates
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if 0
+
+subroutine ddb_diagoq(ddb, crystal, rftyp, asrq0, qpt, phfrq, displ_cart, nanaqdir)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_diagoq'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: rftyp
+ character(len=*),optional,intent(in) :: nanaqdir
+ type(ddb_type),intent(in) :: ddb
+ type(asrq0_t),intent(inout) :: asrq0
+ type(crystal_t),intent(in) :: crystal
+!arrays
+ real(dp),intent(in) :: qpt(3)
+ real(dp),intent(out) :: phfrq(3*Crystal%natom)
+ real(dp),intent(out) :: displ_cart(2,3,Crystal%natom,3,Crystal%natom)
+
+!Local variables-------------------------------
+!Local variables -------------------------
+!scalars
+ !integer :: iphl1,iblok,ii,nfineqpath,nsym,mpert,natom
+ !character(500) :: msg
+!arrays
+ !integer :: rfphon(4),rfelfd(4),rfstrs(4)
+ !real(dp) :: qphnrm(3), qphon_padded(3,3)
+ !real(dp) :: d2cart(2,ddb%msize),real_qphon(3)
+ !real(dp) :: displ(2*3*ddb%natom*3*ddb%natom),eigval(3,ddb%natom)
+ !real(dp),allocatable :: phfrq(:),eigvec(:,:,:,:,:),save_phfrq(:,:),save_phdispl_cart(:,:,:,:),save_qpoints(:,:)
+
+! ************************************************************************
+
+ ! Look for the information in the DDB (no interpolation here!)
+ rfphon(1:2)=1
+ rfelfd(1:2)=0
+ rfstrs(1:2)=0
+ !rftyp=inp%rfmeth
+ qphon_padded = zero
+ qphon_padded(:,1) = qpt
+ qphnrm = one
+
+ call gtblk9(ddb,iblok,qphon_padded,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
+ if (iblock == 0) return
+
+ ! Copy the dynamical matrix in d2cart
+ d2cart(:,1:ddb%msize)=ddb%val(:,:,iblok)
+
+ ! Eventually impose the acoustic sum rule based on previously calculated d2asr
+ select case (asrq0%asr)
+ case (0)
+   continue
+ case (1,2,5)
+   call asria_corr(asrq0%asr,asrq0%d2asr,d2cart,ddb%mpert,crystal%natom)
+ case (3,4)
+   ! Impose acoustic sum rule plus rotational symmetry for 0D and 1D systems
+   call asrprs(asrq0%asr,2,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,d2cart,ddb%mpert,crystal%natom,crystal%xcart)
+ case default
+   MSG_ERROR(sjoin("Wrong value for asr:", itoa(asrq0%asr)))
+ end select
+
+ !  Calculation of the eigenvectors and eigenvalues of the dynamical matrix
+ ! TODO: Add option to change amu.
+ call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,Crystal%indsym,&
+& ddb%mpert,Crystal%nsym,natom,nsym,Crystal%ntypat,phfrq,qphnrm(1),qpt,&
+& crystal%rprimd,inp%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
+
+end subroutine ddb_diagoq
+!!***
+
+#endif
 
 !----------------------------------------------------------------------
 

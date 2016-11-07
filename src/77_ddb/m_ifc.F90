@@ -169,7 +169,6 @@ MODULE m_ifc
  public :: ifc_init       ! Constructor
  public :: ifc_free       ! Release memory
  public :: ifc_fourq      ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
- !public :: ifc_diagoq    ! Compute phonon frequencies via direct diagonalization (mainly for debugging purposes)
  public :: ifc_print       ! Print the ifc (output, netcdf and text file)
  public :: ifc_outphbtrap ! Print out phonon frequencies on regular grid for BoltzTrap code.
 !!***
@@ -808,115 +807,6 @@ subroutine ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,nanaqdir, &
 
 end subroutine ifc_fourq
 !!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_ifc/ifc_diagoq
-!! NAME
-!!  ifc_diagoq
-!!
-!! FUNCTION
-!!  Compute the phonon frequencies at the specified q-point by performing
-!!  a direct diagonalizatin of the dynamical matrix. The q-point **MUST** be
-!!  one the points used for the DFPT calculation or one of its symmetrical image.
-!!
-!! INPUTS
-!!  Ifc<type(ifc_type)>=Object containing the dynamical matrix and the IFCs.
-!!  Crystal<type(crystal_t)> = Information on the crystalline structure.
-!!  qpt(3)=q-point in reduced coordinates (unless nanaqdir is specified)
-!!  [nanaqdir]=If present, the qpt will be treated as a vector specifying the
-!!    direction in q-space along which the non-analytic behaviour of the dynamical
-!!    matrix will be treated. Possible values:
-!!       "cart" if qpt defines a direction in Cartesian coordinates
-!!       "reduced" if qpt defines a direction in reduced coordinates
-!!
-!! OUTPUT
-!!  phfrq(3*Crystal%natom)=Phonon frequencies in Hartree
-!!  displ_cart(2,3*Crystal%natom,3*Crystal%natom)=Phonon displacement in Cartesian coordinates
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      appdig,ifc_fourq,smpbz,symkpt,wrtout
-!!
-!! SOURCE
-
-#if 0
-
-subroutine ifc_diagoq(Ifc,Crystal,qpt,phfrq,displ_cart,nanaqdir)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_diagoq'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- character(len=*),optional,intent(in) :: nanaqdir
- type(ifc_type),intent(in) :: Ifc
- type(crystal_t),intent(in) :: Crystal
-!arrays
- real(dp),intent(in) :: qpt(3)
- real(dp),intent(out) :: phfrq(3*Crystal%natom)
- real(dp),intent(out) :: displ_cart(2,3,Crystal%natom,3,Crystal%natom)
-
-!Local variables-------------------------------
-!scalars
- real(dp) :: qphnrm
-!arrays
- real(dp) :: my_qpt(3) !,eigvec(2,3*Crystal%natom,3*Crystal%natom),eigval(3*Crystal%natom)
- !real(dp) :: d2cart(2,3,Ifc%mpert,3,Ifc%mpert)
-
-! ************************************************************************
- MSG_ERROR("Not implemented error")
-
- ! Use my_qpt because dfpt_phfrq can change the q-point (very bad design)
- qphnrm = one; my_qpt = qpt
-
- if (present(nanaqdir)) then
-   ! This will break backward compatibility because qpt is **always** in reduced coordinates.
-   ! while dfpt_phfrq assume cartesian coordinates !!!!!!!!!!!
-   ! It does not make sense to change API just to treat this particular case
-   ! We should **alwayse use q-points in reduced coordinates.
-   qphnrm = zero
-   select case (nanaqdir)
-   case ("reduced")
-     ! Convert to Cartesian.
-     my_qpt = matmul(Crystal%gprimd, qpt)
-   case ("cart")
-     continue
-   case default
-     MSG_ERROR("Wrong value for nanaqdir: "//trim(nanaqdir))
-   end select
- end if
-
- ! See mkphbs
- ! Copy the dynamical matrix in d2cart
- !d2cart(:,1:msize)=ddb%val(:,:,iblok)
-
- ! Eventually impose the acoustic sum rule based on previously calculated d2asr
- !if (anaddb_dtset%asr==1 .or. anaddb_dtset%asr==2 .or. anaddb_dtset%asr==5) then
- !  call asria_corr(anaddb_dtset%asr,d2asr,d2cart,mpert,natom)
- !end if
-
- ! Impose acoustic sum rule plus rotational symmetry for 0D and 1D systems
- !if (anaddb_dtset%asr==3 .or. anaddb_dtset%asr==4) then
- !  call asrprs(anaddb_dtset%asr,2,3,uinvers,vtinvers,singular,d2cart,mpert,natom,xcart)
- !end if
-
- ! Calculate the eigenvectors and eigenvalues of the dynamical matrix
-! call dfpt_phfrq(amu,displ_cart,d2cart,eigval,eigvec,Crystal%indsym,&
-!&  mpert,Cryst%nsym,Crystal%natom,Crystal%nsym,Crystal%ntypat,phfrq,qphnrm,qpt,&
-!&  Crystal%rprimd,symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
-
-end subroutine ifc_diagoq
-!!***
-
-#endif
 
 !----------------------------------------------------------------------
 

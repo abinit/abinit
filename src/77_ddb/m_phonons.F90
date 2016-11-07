@@ -44,7 +44,7 @@ module m_phonons
  use m_fstrings,        only : itoa, ftoa, sjoin
  use m_numeric_tools,   only : simpson_int, wrap2_pmhalf
  use m_io_tools,        only : open_file
- use m_dynmat,          only : asria_corr,asrprs, gtdyn9
+ use m_dynmat,          only : asria_corr, asrprs, gtdyn9
  use m_crystal,         only : crystal_t
  use m_ifc,             only : ifc_type, ifc_fourq
  use m_anaddb_dataset,  only : anaddb_dataset_type
@@ -1028,6 +1028,7 @@ end subroutine phdos_ncwrite
 !! Ifc<ifc_type>=Interatomic force constants
 !! crystal<type(crystal_t)> = Info on the crystalline structure.
 !! inp= (derived datatype) contains all the input variables
+!! ddb<type(ddb_type)>=Object storing the DDB results.
 !! asrq0<asrq0_t>=Object for the treatment of the ASR based on the q=0 block found in the DDB file.
 !! dielt(3,3)=dielectric tensor
 !! tcpui=initial cpu time
@@ -1151,6 +1152,9 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,outfile_radix,tcpui,twalli,zeff,comm
    ! Generation of the dynamical matrix in cartesian coordinates
    if(inp%ifcflag==1)then
 
+     ! Get phonon frequencies and displacements in reduced coordinates for this q-point
+     !call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
+
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
      call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,mpert,natom,&
@@ -1189,8 +1193,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,outfile_radix,tcpui,twalli,zeff,comm
    call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,Crystal%indsym,&
 &   mpert,Crystal%nsym,natom,nsym,Crystal%ntypat,phfrq,qphnrm(1),qphon,&
 &   crystal%rprimd,inp%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
-
-   !call ifc_diagoq(Ifc,Crystal,qphon,phfrq,displ,out_eigvec=eigvec)
 
    if (abs(inp%freeze_displ) > tol10) then
      real_qphon = zero
