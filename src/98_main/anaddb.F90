@@ -50,7 +50,7 @@ program anaddb
  use m_errors
  use m_ifc
  use m_ddb
- use m_phonons        
+ use m_phonons
  use iso_c_binding
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -96,7 +96,7 @@ program anaddb
  integer :: rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
  integer,allocatable :: d2flg(:)
  real(dp) :: etotal,tcpu,tcpui,twall,twalli
- real(dp),target :: dielt(3,3) 
+ real(dp),target :: dielt(3,3)
  real(dp) :: compl(6,6),compl_clamped(6,6),compl_stress(6,6)
  real(dp) :: dielt_rlx(3,3),elast(6,6),elast_clamped(6,6),elast_stress(6,6)
  real(dp) :: epsinf(3,3),red_ptot(3),pel(3)
@@ -138,7 +138,7 @@ program anaddb
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  iam_master = (my_rank == master)
 
-!Initialize memory profiling if it is activated !if a full abimem.mocc report is desired, 
+!Initialize memory profiling if it is activated !if a full abimem.mocc report is desired,
 !set the argument of abimem_init to "2" instead of "0"
 !note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
@@ -169,7 +169,7 @@ program anaddb
    if (open_file(tmpfilename, message, unit=std_out, form="formatted", action="write") /= 0) then
      MSG_ERROR(message)
    end if
- end if 
+ end if
 
 !******************************************************************
 
@@ -293,7 +293,7 @@ program anaddb
    if (iblok /=0) then
      select case (inp%asr)
      case (0)
-       continue 
+       continue
 
      case (1,2)
        call asria_calc(inp%asr,d2asr,ddb%val(:,:,iblok),ddb%mpert,ddb%natom)
@@ -353,13 +353,13 @@ program anaddb
      d2cart(1:2,1:msize) = ddb%val(1:2,1:msize,iblok)
      d2flg(1:msize) = ddb%flg(1:msize,iblok)
 
-   else 
+   else
      ! the gamma blok has not been found
      if (inp%relaxat==0 .and. inp%relaxstr==0) then
        ! The gamma blok is not needed
        d2cart(1:2,1:msize)=zero
        d2flg(1:msize)=1
-     else 
+     else
        ! There is a problem !
        write(message, '(7a)' )&
 &       'The dynamical matrix at Gamma is needed, in order to perform ',ch10,&
@@ -458,7 +458,7 @@ program anaddb
 &     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,ngqpt_coarse,inp%nqshft,inp%q1shft,dielt,zeff,&
 &     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,prtfreq=.True.)
 
-     ! And now use the coarse q-mesh to fill the entries in dynmat(q) 
+     ! And now use the coarse q-mesh to fill the entries in dynmat(q)
      ! on the dense q-mesh that cannot be obtained from the DDB file.
      call ifc_init(Ifc,Crystal,ddb,&
 &     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
@@ -516,7 +516,7 @@ program anaddb
      ncerr = nctk_open_create(phdos_ncid, trim(phdos_fname)//".nc", xmpi_comm_self)
      NCF_CHECK_MSG(ncerr, "Creating PHDOS.nc file")
      NCF_CHECK(crystal_ncwrite(Crystal, phdos_ncid))
-     call phdos_ncwrite(Phdos, phdos_ncid) 
+     call phdos_ncwrite(Phdos, phdos_ncid)
      NCF_CHECK(nf90_close(phdos_ncid))
 #endif
    end if
@@ -694,7 +694,7 @@ program anaddb
          NCF_CHECK(nf90_inq_varid(ana_ncid, "non_analytical_phonon_modes", na_phmodes_varid))
          NCF_CHECK(nf90_put_var(ana_ncid,na_phmodes_varid,phfrq*Ha_eV,start=[1, iphl2], count=[3*natom, 1]))
          NCF_CHECK(nf90_inq_varid(ana_ncid, "non_analytical_phdispl_cart", na_phdispl_varid))
-         ncerr = nf90_put_var(ana_ncid,na_phdispl_varid,RESHAPE(displ,(/2, 3*natom, 3*natom/))*Bohr_Ang,& 
+         ncerr = nf90_put_var(ana_ncid,na_phdispl_varid,RESHAPE(displ,(/2, 3*natom, 3*natom/))*Bohr_Ang,&
          start=[1,1,1,iphl2], count=[2,3*natom,3*natom, 1])
          NCF_CHECK(ncerr)
 #endif
@@ -888,7 +888,7 @@ program anaddb
      ec_fname = TRIM(filnam(2))//"_EC.nc"
 #ifdef HAVE_NETCDF
      if (iam_master) then
-       ncerr = nctk_open_create(ec_ncid, ec_fname, xmpi_comm_self) 
+       ncerr = nctk_open_create(ec_ncid, ec_fname, xmpi_comm_self)
        NCF_CHECK_MSG(ncerr, "Creating EC.nc file")
        NCF_CHECK(crystal_ncwrite(Crystal, ec_ncid))
        call elast_ncwrite(compl,compl_clamped,compl_stress,elast,elast_clamped,elast_stress,ec_ncid)
