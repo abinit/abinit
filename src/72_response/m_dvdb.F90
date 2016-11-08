@@ -2281,6 +2281,7 @@ end function dvdb_rewind
 
 integer function my_hdr_skip(unit, idir, ipert, qpt, msg) result(ierr)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -3045,10 +3046,11 @@ end subroutine calc_eiqr
 
 integer function dvdb_check_fform(fform, mode, errmsg) result(ierr)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'dvdb_rewind'
+#define ABI_FUNC 'dvdb_check_fform'
 !End of the abilint section
 
  implicit none
