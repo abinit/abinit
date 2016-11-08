@@ -711,7 +711,7 @@ end subroutine ifc_init
 !!  displ_cart(2,3,natom,3*natom) = Phonon displacement in Cartesian coordinates
 !!  [out_d2cart(2,3,3*natom,3,3*natom)] = The (interpolated) dynamical matrix for this q-point
 !!  [out_eigvec(2*3*natom*3*natom) = The (interpolated) eigenvectors of the dynamical matrix.
-!!  [out_displ_red(2*3*natom*3*natom) = The interpolated displacement in reduced coordinates.
+!!  [out_displ_red(2*3*natom*3*natom) = The (interpolated) displacement in reduced coordinates.
 !!
 !! PARENTS
 !!      get_nv_fs_en,get_tau_k,harmonic_thermo,interpolate_gkk,m_ifc,m_phgamma

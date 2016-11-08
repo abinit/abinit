@@ -32,10 +32,11 @@ MODULE m_ddb
  use m_errors
  use m_xmpi
 
- use m_fstrings,       only : sjoin, itoa
+ use m_fstrings,       only : sjoin, itoa, ktoa
  use m_numeric_tools,  only : mkherm
  use m_io_tools,       only : open_file, get_unit
  use m_copy,           only : alloc_copy
+ use m_geometry,       only : phdispl_cart2red
  use m_crystal,        only : crystal_t, crystal_init
  use m_pawtab,         only : pawtab_type,pawtab_nullify,pawtab_free
  use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs
@@ -142,9 +143,14 @@ MODULE m_ddb
  public :: ddb_get_dielt_zeff       ! Reads the Dielectric Tensor and the Effective Charges
  public :: ddb_get_dchidet          ! Reads the non-linear optical susceptibility tensor and the
                                     ! first-order change in the linear dielectric susceptibility
+ public :: ddb_diagoq               ! Compute the phonon frequencies at the specified q-point by performing
+                                    ! a direct diagonalizatin of the dynamical matrix.
  public :: ddb_get_asrq0            ! Return object used to enforce the acoustic sum rule
-                                    ! from the Dynamical matrix at Gamma.
- !public :: ddb_diagoq
+                                    ! from the Dynamical matrix at Gamma. Used in ddb_diagoq.
+
+ ! TODO: Add option to change amu.
+ !public :: ddb_change_amu
+ !public :: ddb_print
 !!***
 
 !!****t* m_ddb/asr_t
@@ -154,7 +160,6 @@ MODULE m_ddb
 !! FUNCTION
 !!  Object used to enforce the acoustic sum rule from the Dynamical matrix at Gamma.
 !!  Wraps several approaches that can be activated via the `asr` option.
-!!
 !!
 !! SOURCE
 
@@ -188,8 +193,8 @@ MODULE m_ddb
 
  end type asrq0_t
 
- !public :: asrq0_apply
- public :: asrq0_free
+ public :: asrq0_apply      ! Impose the acoustic sum rule based on the q=0 block found in the DDB file.
+ public :: asrq0_free       ! Free memory
 !!***
 
  ! TODO: We should use this constants instead of magic numbers!
@@ -3313,7 +3318,7 @@ end subroutine nlopt
 !!
 !! SOURCE
 
-subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,Crystal,comm,prtvol)
+subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,crystal,comm,prtvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -4098,7 +4103,9 @@ end function ddb_get_etotal
 !!
 !! INPUTS
 !!  Crystal<type(crystal_t)>=Crystal structure parameters
-!!  rftyp
+!!  rftyp  = 1 if non-stationary block
+!!           2 if stationary block
+!!           3 if third order derivatives
 !!  chneut=(0 => no ASR, 1 => equal repartition,2 => weighted repartition )
 !!  selectz=selection of some parts of the effective charge tensor attached to one atom.
 !!    (0=> no selection, 1=> trace only, 2=> symmetric part only)                       !!
@@ -4395,23 +4402,25 @@ end function ddb_get_asrq0
 !!
 !! FUNCTION
 !!  Compute the phonon frequencies at the specified q-point by performing
-!!  a direct diagonalizatin of the dynamical matrix. The q-point **MUST** be
-!!  one the points used for the DFPT calculation or one of its symmetrical image.
+!!  a direct diagonalization of the dynamical matrix. The q-point **MUST** be
+!!  one the points stored in the DDB file.
 !!
 !! INPUTS
-!!  crystal<type(crystal_t)> = Information on the crystalline structure.
 !!  ddb<type(ddb_type)>=Object storing the DDB results.
+!!  crystal<type(crystal_t)> = Information on the crystalline structure.
 !!  asrq0<asrq0_t>=Object for the treatment of the ASR based on the q=0 block found in the DDB file.
-!!  qpt(3)=q-point in reduced coordinates (unless nanaqdir is specified)
-!!  [nanaqdir]=If present, the qpt will be treated as a vector specifying the
-!!    direction in q-space along which the non-analytic behaviour of the dynamical
-!!    matrix will be treated. Possible values:
-!!       "cart" if qpt defines a direction in Cartesian coordinates
-!!       "reduced" if qpt defines a direction in reduced coordinates
+!!  symdynmat=If equal to 1, the dynamical matrix is symmetrized in dfpt_phfrq before the diagonalization.
+!!  rftyp  = 1 if non-stationary block
+!!           2 if stationary block
+!!           3 if third order derivatives
+!!  qpt(3)=q-point in reduced coordinates.
 !!
 !! OUTPUT
 !!  phfrq(3*crystal%natom)=Phonon frequencies in Hartree
 !!  displ_cart(2,3*%natom,3*%natom)=Phonon displacement in Cartesian coordinates
+!!  [out_d2cart(2,3,3*natom,3,3*natom)] = The dynamical matrix for this q-point
+!!  [out_eigvec(2*3*natom*3*natom) = The igenvectors of the dynamical matrix.
+!!  [out_displ_red(2*3*natom*3*natom) = The displacement in reduced coordinates.
 !!
 !! PARENTS
 !!
@@ -4419,9 +4428,8 @@ end function ddb_get_asrq0
 !!
 !! SOURCE
 
-#if 0
-
-subroutine ddb_diagoq(ddb, crystal, rftyp, asrq0, qpt, phfrq, displ_cart, nanaqdir)
+subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_cart, &
+                      out_d2cart,out_eigvec,out_displ_red)   ! Optional [out]
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -4433,27 +4441,24 @@ subroutine ddb_diagoq(ddb, crystal, rftyp, asrq0, qpt, phfrq, displ_cart, nanaqd
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: rftyp
- character(len=*),optional,intent(in) :: nanaqdir
+ integer,intent(in) :: rftyp,symdynmat
  type(ddb_type),intent(in) :: ddb
  type(asrq0_t),intent(inout) :: asrq0
  type(crystal_t),intent(in) :: crystal
 !arrays
  real(dp),intent(in) :: qpt(3)
- real(dp),intent(out) :: phfrq(3*Crystal%natom)
- real(dp),intent(out) :: displ_cart(2,3,Crystal%natom,3,Crystal%natom)
+ real(dp),intent(out) :: displ_cart(2,3,crystal%natom,3,crystal%natom)
+ real(dp),intent(out) :: phfrq(3*crystal%natom)
+ real(dp),optional,intent(out) :: out_d2cart(2,3*crystal%natom,3*crystal%natom)
+ real(dp),optional,intent(out) :: out_eigvec(2,3,crystal%natom,3*crystal%natom)
+ real(dp),optional,intent(out) :: out_displ_red(2,3,crystal%natom,3*crystal%natom)
 
 !Local variables-------------------------------
-!Local variables -------------------------
-!scalars
- !integer :: iphl1,iblok,ii,nfineqpath,nsym,mpert,natom
- !character(500) :: msg
+ integer :: iblok,natom
 !arrays
- !integer :: rfphon(4),rfelfd(4),rfstrs(4)
- !real(dp) :: qphnrm(3), qphon_padded(3,3)
- !real(dp) :: d2cart(2,ddb%msize),real_qphon(3)
- !real(dp) :: displ(2*3*ddb%natom*3*ddb%natom),eigval(3,ddb%natom)
- !real(dp),allocatable :: phfrq(:),eigvec(:,:,:,:,:),save_phfrq(:,:),save_phdispl_cart(:,:,:,:),save_qpoints(:,:)
+ integer :: rfphon(4),rfelfd(4),rfstrs(4)
+ real(dp) :: qphnrm(3), qphon_padded(3,3),d2cart(2,ddb%msize)
+ real(dp) :: eigvec(2,3,crystal%natom,3*crystal%natom),eigval(3*crystal%natom)
 
 ! ************************************************************************
 
@@ -4461,40 +4466,98 @@ subroutine ddb_diagoq(ddb, crystal, rftyp, asrq0, qpt, phfrq, displ_cart, nanaqd
  rfphon(1:2)=1
  rfelfd(1:2)=0
  rfstrs(1:2)=0
- !rftyp=inp%rfmeth
  qphon_padded = zero
  qphon_padded(:,1) = qpt
  qphnrm = one
+ natom = crystal%natom
 
  call gtblk9(ddb,iblok,qphon_padded,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
- if (iblock == 0) return
+ if (iblok == 0) then
+   MSG_ERROR(sjoin("Cannot find q-point ", ktoa(qpt)," in DDB file"))
+ end if
 
  ! Copy the dynamical matrix in d2cart
- d2cart(:,1:ddb%msize)=ddb%val(:,:,iblok)
+ d2cart(:,1:ddb%msize) = ddb%val(:,:,iblok)
 
  ! Eventually impose the acoustic sum rule based on previously calculated d2asr
- select case (asrq0%asr)
- case (0)
-   continue
- case (1,2,5)
-   call asria_corr(asrq0%asr,asrq0%d2asr,d2cart,ddb%mpert,crystal%natom)
- case (3,4)
-   ! Impose acoustic sum rule plus rotational symmetry for 0D and 1D systems
-   call asrprs(asrq0%asr,2,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,d2cart,ddb%mpert,crystal%natom,crystal%xcart)
- case default
-   MSG_ERROR(sjoin("Wrong value for asr:", itoa(asrq0%asr)))
- end select
+ call asrq0_apply(asrq0, natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
 
  !  Calculation of the eigenvectors and eigenvalues of the dynamical matrix
- ! TODO: Add option to change amu.
- call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,Crystal%indsym,&
-& ddb%mpert,Crystal%nsym,natom,nsym,Crystal%ntypat,phfrq,qphnrm(1),qpt,&
-& crystal%rprimd,inp%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
+ call dfpt_phfrq(ddb%amu,displ_cart,d2cart,eigval,eigvec,crystal%indsym,&
+&  ddb%mpert,crystal%nsym,natom,crystal%nsym,crystal%ntypat,phfrq,qphnrm(1),qpt,&
+&  crystal%rprimd,symdynmat,crystal%symrel,crystal%symafm,crystal%typat,crystal%ucvol)
+
+ ! Return the dynamical matrix and the eigenvector for this q-point
+ !if (present(out_d2cart)) out_d2cart = d2cart(:,:3*natom,:3*natom)
+ if (present(out_eigvec)) out_eigvec = eigvec
+
+ ! Return phonon displacement in reduced coordinates.
+ if (present(out_displ_red)) call phdispl_cart2red(natom, crystal%gprimd, displ_cart, out_displ_red)
 
 end subroutine ddb_diagoq
 !!***
 
-#endif
+!----------------------------------------------------------------------
+
+!!****f* m_ddb/asrq0_apply
+!! NAME
+!! asrq0_apply
+!!
+!! FUNCTION
+!!  Impose the acoustic sum rule based on the q=0 block found in the DDB file.
+!!
+!! INPUTS
+!!  asrq0<asrq0_t>=Object for the treatment of the ASR based on the q=0 block found in the DDB file.
+!!  natom=Number of atoms per unit cell.
+!!  mpert=Maximum number of perturbation (reported in ddb%mpert)
+!!  msize=Maximum size of array ddb%val
+!!  xcart(3,natom)=Atomic positions in Cartesian coordinates
+!!
+!! SIDE EFFECTS
+!!   d2cart=matrix of second derivatives of total energy, in cartesian coordinates
+!!   Input: Values stored in ddb%
+!!   Output: Changed to enforce ASR.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine asrq0_apply(asrq0, natom, mpert, msize, xcart, d2cart)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'asrq0_free'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom, msize, mpert
+ type(asrq0_t),intent(inout) :: asrq0
+!arrays
+ real(dp),intent(in) :: xcart(3,natom)
+ real(dp),intent(inout) :: d2cart(2,msize)
+
+! ************************************************************************
+
+ select case (asrq0%asr)
+ case (0)
+   return
+ case (1,2,5)
+   call asria_corr(asrq0%asr, asrq0%d2asr, d2cart, mpert, natom)
+ case (3,4)
+   ! Impose acoustic sum rule plus rotational symmetry for 0D and 1D systems
+   call asrprs(asrq0%asr,2,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,d2cart,mpert,natom,xcart)
+ case default
+   MSG_ERROR(sjoin("Wrong value for asr:", itoa(asrq0%asr)))
+ end select
+
+end subroutine asrq0_apply
+!!***
 
 !----------------------------------------------------------------------
 

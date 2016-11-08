@@ -62,7 +62,7 @@ module m_dynmat
  public :: asrif9               ! Imposes the Acoustic Sum Rule to Interatomic Forces
  public :: make_bigbox          ! Generates a Big Box of R points for the Fourier Transforms the dynamical matrix
  public :: bigbx9               ! Helper functions that faciliates the generation  of a Big Box containing
- public :: cell9                ! reorder cell of rpt point 
+ public :: cell9                ! reorder cell of rpt point
  public :: canat9               ! From reduced to canonical coordinates
  public :: canct9               ! Convert from canonical coordinates to cartesian coordinates
  public :: chkrp9               ! Check if the rprim used for the definition of the unit cell (in the
@@ -276,7 +276,7 @@ end subroutine asria_calc
 !!
 !! FUNCTION
 !! Imposition of the Acoustic sum rule on the InterAtomic Forces
-!!  or on the dynamical matrix directly from the previously calculated d2asr
+!! or on the dynamical matrix directly from the previously calculated d2asr
 !!
 !! INPUTS
 !! asr=(0 => no ASR, 1 or 2=> the diagonal element is modified to give the ASR,
@@ -2393,7 +2393,7 @@ end subroutine asrif9
 !! rprim(3,3)= Normalized coordinates in real space  !!! IS THIS CORRECT?
 !!
 !! OUTPUT
-!! cell= (nrpt,3) Give the index of the the cell and irpt 
+!! cell= (nrpt,3) Give the index of the the cell and irpt
 !! nprt= Number of R points in the Big Box
 !! rpt(3,nrpt)= Canonical coordinates of the R points in the unit cell
 !!  These coordinates are normalized (=> * acell(3)!!)
@@ -2476,7 +2476,7 @@ end subroutine make_bigbox
 !! rprim(3,3)= Normalized coordinates in real space  !!! IS THIS CORRECT?
 !!
 !! OUTPUT
-!! cell= (nrpt,3) Give the index of the the cell and irpt 
+!! cell= (nrpt,3) Give the index of the the cell and irpt
 !! nprt= Number of R points in the Big Box
 !! rpt(3,mrpt)= Canonical coordinates of the R points in the unit cell
 !!  These coordinates are normalized (=> * acell(3)!!)
@@ -3874,7 +3874,7 @@ end subroutine wght9
 !! wght9
 !!
 !! FUNCTION
-!! ifc_init use canonical coordinates and cell(irpt,:) is not 
+!! ifc_init use canonical coordinates and cell(irpt,:) is not
 !! more usable with reduced coordinates. This routine reordone
 !! the cell and the Weight associated to the couple of atoms and the R vector
 !! for reduced coordinates
@@ -3960,12 +3960,12 @@ subroutine cell9(atmfrc,brav,cell,gprim,natom,nrpt,rcan,rpt,wghatm,xred)
      end if
 
      shift(:) = anint(red(2,:) - xred(:,ib)) - anint(red(1,:) - xred(:,ia))
- 
+
      icount = 0
      do irpt=1,nrpt
 !      Compute the difference vector
        if (brav==1) then
-         do ii=1,3 
+         do ii=1,3
            red(3,ii)=  rpt(1,irpt)*gprim(1,ii) +rpt(2,irpt)*gprim(2,ii) +rpt(3,irpt)*gprim(3,ii)
          end do
          cell2(:)= int(red(3,:) + shift(:))
@@ -5111,8 +5111,8 @@ subroutine ftgam (wghatm,gam_qpt,gam_rpt,natom,nqpt,nrpt,qtor,coskr, sinkr)
 
 ! *********************************************************************
 
- select case (qtor) 
-!  
+ select case (qtor)
+!
    case (1)  !Recip to real space
      gam_rpt(:,:,:) = zero
      do irpt=1,nrpt
@@ -5132,7 +5132,7 @@ subroutine ftgam (wghatm,gam_qpt,gam_rpt,natom,nqpt,nrpt,qtor,coskr, sinkr)
        end do
      end do
      gam_rpt = gam_rpt/nqpt
-!    
+!
    case (0) ! Recip space from real space
 
      gam_qpt(:,:,:)=zero
@@ -5196,7 +5196,7 @@ end subroutine ftgam
 !!           if qtor=0 these vectors are read in the input file
 !!
 !! OUTPUT
-!! coskr, sinkr = cosine and sine of phase factors for given r and q points 
+!! coskr, sinkr = cosine and sine of phase factors for given r and q points
 !!
 !! PARENTS
 !!      elphon,get_tau_k,integrate_gamma_alt,m_phgamma,mka2f,mka2f_tr

@@ -464,7 +464,7 @@ end subroutine phdos_free
 !! PHdos<phonon_dos_type>=Container with phonon DOS, IDOS and atom-projected DOS.
 !!
 !! NOTES
-!! On the use of the q-grids :
+!! On the use of the q-grids:
 !! Two different q-meshes are used in this subroutine. The first one is the coarse
 !! mesh where the interatomic forces have been calculated during the DFPT run.
 !! This q-grid is used to obtain an initial guess for the max and min frequency
@@ -1153,7 +1153,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,outfile_radix,tcpui,twalli,zeff,comm
    if(inp%ifcflag==1)then
 
      ! Get phonon frequencies and displacements in reduced coordinates for this q-point
-     !call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
+     !call ifc_fourq(ifc, cryst, save_qpoints(:,iphl1), phfrq, displ, out_eigvec=eigvec)
 
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
@@ -1161,6 +1161,9 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,outfile_radix,tcpui,twalli,zeff,comm
 &     Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,zeff)
 
    else if(inp%ifcflag==0)then
+
+     !call ddb_diagoq(ddb, crystal, save_qpoints(:,iphl1), asrq0, inp%symdynmat, inp%rfmeth, phfrq, displ, &
+     !                out_eigvec=eigvec)
 
      ! Look for the information in the DDB (no interpolation here!)
      rfphon(1:2)=1
@@ -1196,17 +1199,13 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,outfile_radix,tcpui,twalli,zeff,comm
 
    if (abs(inp%freeze_displ) > tol10) then
      real_qphon = zero
-     if (abs(qphnrm(1)) > tol8) then
-       real_qphon = qphon / qphnrm(1)
-     end if
+     if (abs(qphnrm(1)) > tol8) real_qphon = qphon / qphnrm(1)
      call freeze_displ_allmodes(displ, inp%freeze_displ, natom, outfile_radix, phfrq, &
 &     real_qphon, crystal%rprimd, Crystal%typat, crystal%xcart, crystal%znucl)
    end if
 
    ! If requested, output projection of each mode on given atoms
-   if (inp%natprj_bs > 0) then
-     call atprj_print(atprj, iphl1, phfrq, eigvec)
-   end if
+   if (inp%natprj_bs > 0) call atprj_print(atprj, iphl1, phfrq, eigvec)
 
    ! In case eivec == 4, write output files for band2eps (visualization of phonon band structures)
    if (inp%eivec == 4) then
@@ -1218,7 +1217,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,outfile_radix,tcpui,twalli,zeff,comm
    call dfpt_prtph(displ,inp%eivec,inp%enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
 
    save_phfrq(:,iphl1) = phfrq
-   save_phdispl_cart(:,:,:,iphl1) = RESHAPE(displ,(/2, 3*natom, 3*natom/))
+   save_phdispl_cart(:,:,:,iphl1) = RESHAPE(displ, [2, 3*natom, 3*natom])
 
    ! Determine the symmetries of the phonon mode at Gamma
    ! TODO: generalize for other q-point little groups.
@@ -1242,9 +1241,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,outfile_radix,tcpui,twalli,zeff,comm
 !deallocate sortph array
  call end_sortph()
 
- if (inp%natprj_bs > 0) then
-   call atprj_destroy(atprj)
- end if
+ if (inp%natprj_bs > 0) call atprj_destroy(atprj)
 
 #ifdef HAVE_NETCDF
  tmpfilename = trim(outfile_radix)//"_PHBST.nc"
@@ -1364,7 +1361,6 @@ subroutine prtvsound(unit,eigvec,gmet,natom,phfrq,qphon,ucvol)
 &   '   in atomic units: ', tdebye, ch10,&
 &   '   in SI units K  : ', tdebye * Ha_K
    call wrtout(unit,msg,'COLL')
-
    call wrtout(unit,"",'COLL')
  end do
 
@@ -1581,7 +1577,6 @@ end subroutine phonons_ncwrite
 ! end do
 !
 ! close(iunit)
-
 
 end subroutine phonons_write
 !!***
