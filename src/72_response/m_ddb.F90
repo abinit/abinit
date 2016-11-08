@@ -39,7 +39,7 @@ MODULE m_ddb
  use m_geometry,       only : phdispl_cart2red
  use m_crystal,        only : crystal_t, crystal_init
  use m_pawtab,         only : pawtab_type,pawtab_nullify,pawtab_free
- use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs
+ use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, dfpt_phfrq
 
  implicit none
 
@@ -4334,6 +4334,8 @@ type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
 
 ! ************************************************************************
 
+ asrq0%asr = asr; asrq0%natom = ddb%natom
+
  ! Find the Gamma block in the DDB (no need for E-field entries)
  qphon(:,1)=zero
  qphnrm(1)=zero
@@ -4367,8 +4369,13 @@ type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
  case (3,4)
    ! Rotational invariance for 1D and 0D systems
    ! Compute uinvers, vtinvers and singular matrices.
+   !dims = 3*ddb%natom*(3*ddb%natom-1) / 2
+   !ABI_CALLOC(asrq0%uinvers, (dims, dims))
+   !ABI_CALLOC(asrq0%vtinvers,(dims, dims))
+   !ABI_CALLOC(asrq0%singular, (dims))
+
    call asrprs(asr,1,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,&
-&    ddb%val(:,:,iblok),ddb%mpert,ddb%natom,xcart)
+     ddb%val(:,:,iblok),ddb%mpert,ddb%natom,xcart)
 
  case (5)
    ! d2cart is a temp variable here
@@ -4459,10 +4466,13 @@ subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_c
  integer :: iblok,natom
 !arrays
  integer :: rfphon(4),rfelfd(4),rfstrs(4)
- real(dp) :: qphnrm(3), qphon_padded(3,3),d2cart(2,ddb%msize)
+ real(dp) :: qphnrm(3), qphon_padded(3,3),d2cart(2,ddb%msize),my_qpt(3)
  real(dp) :: eigvec(2,3,crystal%natom,3*crystal%natom),eigval(3*crystal%natom)
 
 ! ************************************************************************
+
+ ! Use my_qpt because dfpt_phfrq can change the q-point (very bad design)
+ qphnrm = one; my_qpt = qpt
 
  ! Look for the information in the DDB (no interpolation here!)
  rfphon(1:2)=1
@@ -4470,7 +4480,6 @@ subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_c
  rfstrs(1:2)=0
  qphon_padded = zero
  qphon_padded(:,1) = qpt
- qphnrm = one
  natom = crystal%natom
 
  call gtblk9(ddb,iblok,qphon_padded,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
@@ -4484,11 +4493,10 @@ subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_c
  ! Eventually impose the acoustic sum rule based on previously calculated d2asr
  call asrq0_apply(asrq0, natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
 
- !  Calculation of the eigenvectors and eigenvalues of the dynamical matrix
-! Commented out to avoid cyclic deps. dfpt_phfrq should be moved below
-! call dfpt_phfrq(ddb%amu,displ_cart,d2cart,eigval,eigvec,crystal%indsym,&
-!&  ddb%mpert,crystal%nsym,natom,crystal%nsym,crystal%ntypat,phfrq,qphnrm(1),qpt,&
-!&  crystal%rprimd,symdynmat,crystal%symrel,crystal%symafm,crystal%typat,crystal%ucvol)
+ ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
+ call dfpt_phfrq(ddb%amu,displ_cart,d2cart,eigval,eigvec,crystal%indsym,&
+&  ddb%mpert,crystal%nsym,natom,crystal%nsym,crystal%ntypat,phfrq,qphnrm(1),my_qpt,&
+&  crystal%rprimd,symdynmat,crystal%symrel,crystal%symafm,crystal%typat,crystal%ucvol)
 
  ! Return the dynamical matrix and the eigenvector for this q-point
  !if (present(out_d2cart)) out_d2cart = d2cart(:,:3*natom,:3*natom)
@@ -4547,6 +4555,11 @@ subroutine asrq0_apply(asrq0, natom, mpert, msize, xcart, d2cart)
  real(dp),intent(inout) :: d2cart(2,msize)
 
 ! ************************************************************************
+
+ if (asrq0%asr /= 0 .and. asrq0%iblok == 0) then
+   MSG_WARNING("asr != 0 but DDB file does not contain q=Gamma. D(q) cannot be corrected")
+   return
+ end if
 
  select case (asrq0%asr)
  case (0)

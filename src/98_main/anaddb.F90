@@ -58,14 +58,13 @@ program anaddb
 #endif
 
  use m_dfpt_io,        only : elast_ncwrite
- use m_io_tools,       only : open_file, flush_unit, num_opened_units, show_units
+ use m_io_tools,       only : open_file, flush_unit
  use m_fstrings,       only : int2char4, itoa, sjoin, strcat
- use m_numeric_tools,  only : mkherm
  use m_time ,          only : asctime
  use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_ncwrite
- use m_dynmat,         only : chneu9, gtdyn9, asria_corr, dfpt_phfrq
+ use m_dynmat,         only : gtdyn9, dfpt_phfrq
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -592,9 +591,7 @@ program anaddb
      d2cart(:,1:msize)=ddb%val(:,:,iblok)
 
      ! Eventually impose the acoustic sum rule
-     call asria_corr(inp%asr,asrq0%d2asr,d2cart,mpert,natom)
-
-     !call asrq0_apply(asrq0, natom, mpert, msize, crystal%xcart, d2cart)
+     call asrq0_apply(asrq0, natom, mpert, msize, crystal%xcart, d2cart)
    end if ! end of the generation of the dynamical matrix at gamma.
 
    if (nph2l/=0) then

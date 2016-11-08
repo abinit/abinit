@@ -3370,7 +3370,7 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
 
 ! *********************************************************************
 
- dynmat(:,:,:,:,:,:)=zero
+ dynmat = zero
 
  do iqpt=1,nqpt
    do irpt=1,nrpt

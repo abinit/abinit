@@ -44,7 +44,7 @@ module m_phonons
  use m_fstrings,        only : itoa, ftoa, sjoin
  use m_numeric_tools,   only : simpson_int, wrap2_pmhalf
  use m_io_tools,        only : open_file
- use m_dynmat,          only : asria_corr, asrprs, gtdyn9, dfpt_phfrq
+ use m_dynmat,          only : gtdyn9, dfpt_phfrq
  use m_crystal,         only : crystal_t
  use m_ifc,             only : ifc_type, ifc_fourq
  use m_anaddb_dataset,  only : anaddb_dataset_type
@@ -1179,17 +1179,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,outfile_radix,tcpui,twalli,zeff,comm
      d2cart(:,1:ddb%msize)=ddb%val(:,:,iblok)
 
      ! Eventually impose the acoustic sum rule based on previously calculated d2asr
-     select case (inp%asr)
-     case (0)
-       continue
-     case (1,2,5)
-       call asria_corr(inp%asr,asrq0%d2asr,d2cart,mpert,natom)
-     case (3,4)
-       ! Impose acoustic sum rule plus rotational symmetry for 0D and 1D systems
-       call asrprs(inp%asr,2,3,asrq0%uinvers,asrq0%vtinvers,asrq0%singular,d2cart,mpert,natom,crystal%xcart)
-     case default
-       MSG_ERROR(sjoin("Wrong value for asr:", itoa(inp%asr)))
-     end select
+     call asrq0_apply(asrq0, natom, mpert, ddb%msize, crystal%xcart, d2cart)
    end if
 
    !  Calculation of the eigenvectors and eigenvalues of the dynamical matrix
