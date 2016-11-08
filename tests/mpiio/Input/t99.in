@@ -26,7 +26,7 @@ nline2 10
 tolwfr1 1e-20
 
 # -- Convergence Parameters
-nstep1 100
+nstep1 50
 nstep 1
 #nline2 10
 #nnsclo2 5
