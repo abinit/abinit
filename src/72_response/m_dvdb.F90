@@ -723,6 +723,8 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_read_onev1'
+ use interfaces_51_manage_mpi
+ use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -2212,6 +2214,7 @@ end subroutine dvdb_rewind
 !! SOURCE
 
 integer function my_hdr_skip(unit,idir,ipert,qpt) result(ierr)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

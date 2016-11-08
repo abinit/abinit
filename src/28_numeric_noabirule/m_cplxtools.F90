@@ -116,6 +116,7 @@ CONTAINS  !=====================================================================
 
 subroutine cplx_fromreal(n,ireal,ocplx)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -169,6 +170,7 @@ end subroutine cplx_fromreal
 
 subroutine cplx_filter(n, x, mask)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -216,6 +218,7 @@ end subroutine cplx_filter
 !! SOURCE
 
 function cplx_real_zdotc(n,x,y) result(res)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -270,6 +273,7 @@ end function cplx_real_zdotc
 !! SOURCE
 
 subroutine cplx_zaxpby(n,a,x,b,y)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -327,6 +331,7 @@ end subroutine cplx_zaxpby
 !! SOURCE
 
 subroutine cplx_zgemv(trans,nrows,ncols,mat,vec,matvec,alpha,beta)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -407,6 +412,7 @@ end subroutine cplx_zgemv
 
 subroutine cplx_zgemm(transa,transb,npws,ncola,ncolb,amat,bmat,cmat,alpha,beta)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -483,6 +489,7 @@ end subroutine cplx_zgemm
 !! SOURCE
 
 subroutine cplx_box2gsph_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rscal)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -593,6 +600,7 @@ end subroutine cplx_box2gsph_spc
 !! SOURCE
 
 subroutine cplx_box2gsph_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rscal)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -709,6 +717,7 @@ end subroutine cplx_box2gsph_dpc
 !! SOURCE
 
 subroutine cplx_gsph2box_spc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,oarrbox)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -886,6 +895,7 @@ end subroutine cplx_gsph2box_spc
 
 subroutine cplx_gsph2box_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,oarrbox)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1051,6 +1061,7 @@ end subroutine cplx_gsph2box_dpc
 
 subroutine cplx_setaug_zero_spc(nx,ny,nz,ldx,ldy,ldz,ndat,arr)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1121,6 +1132,7 @@ end subroutine cplx_setaug_zero_spc
 !! SOURCE
 
 subroutine cplx_setaug_zero_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,arr)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1195,6 +1207,7 @@ end subroutine cplx_setaug_zero_dpc
 !! SOURCE
 
 subroutine cplx_addtorho_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,weight_r,ur,rho)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

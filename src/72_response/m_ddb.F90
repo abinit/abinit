@@ -4307,6 +4307,7 @@ end function ddb_get_dchidet
 
 type(asrq0_t) function ddb_get_asrq0(ddb, asr, rftyp, xcart) result(asrq0)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -4431,10 +4432,11 @@ end function ddb_get_asrq0
 subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_cart, &
                       out_eigvec,out_displ_red)   ! Optional [out]
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ifc_diagoq'
+#define ABI_FUNC 'ddb_diagoq'
 !End of the abilint section
 
  implicit none
@@ -4527,10 +4529,11 @@ end subroutine ddb_diagoq
 
 subroutine asrq0_apply(asrq0, natom, mpert, msize, xcart, d2cart)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'asrq0_free'
+#define ABI_FUNC 'asrq0_apply'
 !End of the abilint section
 
  implicit none
@@ -4576,6 +4579,7 @@ end subroutine asrq0_apply
 !! SOURCE
 
 subroutine asrq0_free(asrq0)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

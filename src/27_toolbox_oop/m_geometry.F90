@@ -621,6 +621,7 @@ end subroutine wigner_seitz
 
 subroutine phdispl_cart2red(natom,gprimd,displ_cart,displ_red)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

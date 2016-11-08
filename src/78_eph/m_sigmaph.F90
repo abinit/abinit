@@ -747,6 +747,7 @@ end subroutine sigmaph_driver
 
 subroutine gkkmu_from_atm(nb1, nb2, nk, natom, gkk_atm, phfrq, displ_red, gkk_mu, num_smallw)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -817,6 +818,7 @@ end subroutine gkkmu_from_atm
 
 elemental real(dp) function nfd(ee, mu, kT)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -868,6 +870,7 @@ end function nfd
 !! SOURCE
 
 elemental real(dp) function nbe(ee, mu, kT)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

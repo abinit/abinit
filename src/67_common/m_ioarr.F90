@@ -1324,10 +1324,11 @@ end subroutine read_rhor
 
 integer function fort_denpot_skip(unit, msg) result(ierr)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'crystal_free'
+#define ABI_FUNC 'fort_denpot_skip'
 !End of the abilint section
 
  implicit none

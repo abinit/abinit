@@ -731,6 +731,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nspden,natom,typat,&
 &               xred,nfft,mgfft,ngfft,rprimd,nloalg,&
 &               ph1d,usecprj,electronpositron,fock,nucdipmom,use_gpu_cuda) !optional arguments
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1606,6 +1607,7 @@ end subroutine destroy_rf_hamiltonian
 subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
 &                              has_e1kbsc) ! optional argument
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2050,6 +2052,7 @@ end subroutine pawdij2e1kb
 
 subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
 & nband_k,istwf_k,ecutsm,effmass,abstol,range,ilu,vlu,use_scalapack,prtvol)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

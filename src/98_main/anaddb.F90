@@ -786,7 +786,7 @@ program anaddb
 
      call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
      ! then print the internal stain tensor
-     call ddb_internalstr(inp%asr,crystal,ddb%val,asrq0%d2asr,iblok,instrain,ab_out,mpert,msize,natom,ddb%nblok)
+     call ddb_internalstr(inp%asr,crystal,ddb%val,asrq0,asrq0%d2asr,iblok,instrain,ab_out,mpert,msize,natom,ddb%nblok)
    end if
  end if !end the part for internal strain
 
