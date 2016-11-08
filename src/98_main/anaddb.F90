@@ -593,6 +593,8 @@ program anaddb
 
      ! Eventually impose the acoustic sum rule
      call asria_corr(inp%asr,asrq0%d2asr,d2cart,mpert,natom)
+
+     !call asrq0_apply(asrq0, natom, mpert, msize, crystal%xcart, d2cart)
    end if ! end of the generation of the dynamical matrix at gamma.
 
    if (nph2l/=0) then
@@ -784,7 +786,7 @@ program anaddb
 
      call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
      ! then print the internal stain tensor
-     call ddb_internalstr(inp%asr,ddb%val,asrq0%d2asr,iblok,instrain,ab_out,mpert,natom,ddb%nblok)
+     call ddb_internalstr(inp%asr,crystal,ddb%val,asrq0%d2asr,iblok,instrain,ab_out,mpert,msize,natom,ddb%nblok)
    end if
  end if !end the part for internal strain
 
@@ -826,15 +828,15 @@ program anaddb
      call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
 
      ! print the elastic tensor
-     call ddb_elast(inp,ddb%val,compl,compl_clamped,compl_stress,asrq0%d2asr,&
+     call ddb_elast(inp,crystal,ddb%val,compl,compl_clamped,compl_stress,asrq0%d2asr,&
 &     elast,elast_clamped,elast_stress,iblok,iblok_stress,&
-&     instrain,ab_out,mpert,natom,ddb%nblok,Crystal%ucvol)
+&     instrain,ab_out,mpert,msize,natom,ddb%nblok)
      ec_fname = TRIM(filnam(2))//"_EC.nc"
 #ifdef HAVE_NETCDF
      if (iam_master) then
        ncerr = nctk_open_create(ec_ncid, ec_fname, xmpi_comm_self)
        NCF_CHECK_MSG(ncerr, "Creating EC.nc file")
-       NCF_CHECK(crystal_ncwrite(Crystal, ec_ncid))
+       NCF_CHECK(crystal_ncwrite(crystal, ec_ncid))
        call elast_ncwrite(compl,compl_clamped,compl_stress,elast,elast_clamped,elast_stress,ec_ncid)
        NCF_CHECK(nf90_close(ec_ncid))
      end if

@@ -165,9 +165,10 @@ MODULE m_ddb
 
  type,public :: asrq0_t
 
-   integer :: iblok
+   integer :: iblok = 0
     ! Index of the Gamma block in the DDB.
-    ! Set to 0 if no block was found
+    ! Set to 0 if no block was found. Client code can use this flag to understand
+    ! if ASR can be enforced.
 
    integer :: asr
    ! Option for the application of the ASR (input variable).
@@ -4418,7 +4419,6 @@ end function ddb_get_asrq0
 !! OUTPUT
 !!  phfrq(3*crystal%natom)=Phonon frequencies in Hartree
 !!  displ_cart(2,3*%natom,3*%natom)=Phonon displacement in Cartesian coordinates
-!!  [out_d2cart(2,3,3*natom,3,3*natom)] = The dynamical matrix for this q-point
 !!  [out_eigvec(2*3*natom*3*natom) = The igenvectors of the dynamical matrix.
 !!  [out_displ_red(2*3*natom*3*natom) = The displacement in reduced coordinates.
 !!
@@ -4429,7 +4429,7 @@ end function ddb_get_asrq0
 !! SOURCE
 
 subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_cart, &
-                      out_d2cart,out_eigvec,out_displ_red)   ! Optional [out]
+                      out_eigvec,out_displ_red)   ! Optional [out]
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -4449,7 +4449,7 @@ subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_c
  real(dp),intent(in) :: qpt(3)
  real(dp),intent(out) :: displ_cart(2,3,crystal%natom,3,crystal%natom)
  real(dp),intent(out) :: phfrq(3*crystal%natom)
- real(dp),optional,intent(out) :: out_d2cart(2,3*crystal%natom,3*crystal%natom)
+ !real(dp),optional,intent(out) :: out_d2cart(2,3*crystal%natom,3*crystal%natom)
  real(dp),optional,intent(out) :: out_eigvec(2,3,crystal%natom,3*crystal%natom)
  real(dp),optional,intent(out) :: out_displ_red(2,3,crystal%natom,3*crystal%natom)
 
@@ -4483,9 +4483,10 @@ subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_c
  call asrq0_apply(asrq0, natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
 
  !  Calculation of the eigenvectors and eigenvalues of the dynamical matrix
- call dfpt_phfrq(ddb%amu,displ_cart,d2cart,eigval,eigvec,crystal%indsym,&
-&  ddb%mpert,crystal%nsym,natom,crystal%nsym,crystal%ntypat,phfrq,qphnrm(1),qpt,&
-&  crystal%rprimd,symdynmat,crystal%symrel,crystal%symafm,crystal%typat,crystal%ucvol)
+! Commented out to avoid cyclic deps. dfpt_phfrq should be moved below
+! call dfpt_phfrq(ddb%amu,displ_cart,d2cart,eigval,eigvec,crystal%indsym,&
+!&  ddb%mpert,crystal%nsym,natom,crystal%nsym,crystal%ntypat,phfrq,qphnrm(1),qpt,&
+!&  crystal%rprimd,symdynmat,crystal%symrel,crystal%symafm,crystal%typat,crystal%ucvol)
 
  ! Return the dynamical matrix and the eigenvector for this q-point
  !if (present(out_d2cart)) out_d2cart = d2cart(:,:3*natom,:3*natom)
