@@ -79,6 +79,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
  use m_profiling_abi
 
  use m_numeric_tools,  only : mkherm
+ use m_cgtools,        only : fxphas_seq
  use m_dynmat,         only : symdyma
 
 !This section has been created automatically by the script Abilint (TD).
@@ -150,8 +151,8 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
  end if
 
 !In the case the non-analyticity is required :
-! MG: the tensor is in cartesian coordinates and this means that qphon must be in 
-!     given in Cartesian coordinates. 
+! MG: the tensor is in cartesian coordinates and this means that qphon must be in
+!     given in Cartesian coordinates.
  if(analyt==0)then
 
 !  Normalize the limiting direction
@@ -333,7 +334,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 
 !Check the orthonormality of the eigenvectors
 !do imode=1,3*natom
-!  do jmode=imode,3*natom 
+!  do jmode=imode,3*natom
 !    indexi=2*3*natom*(imode-1)
 !    indexj=2*3*natom*(jmode-1)
 !    sc_prod=sum(eigvec(indexi+1:indexi+6*natom)*eigvec(indexj+1:indexj+6*natom))
