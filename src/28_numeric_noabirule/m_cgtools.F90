@@ -4267,6 +4267,7 @@ end subroutine cg_zprecon_block
 
 subroutine fxphas_seq(cg,gsc,icg,igsc,istwfk,mcg,mgsc,nband_k,npw_k,useoverlap)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

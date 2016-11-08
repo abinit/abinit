@@ -63,7 +63,6 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_56_recipspace
- use interfaces_72_response
 !End of the abilint section
 
  implicit none

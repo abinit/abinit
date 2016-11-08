@@ -5095,11 +5095,11 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 & mpert,msym,natom,nsym,ntypat,phfrq,qphnrm,qphon,rprimd,&
 & symdynmat,symrel,symafm,typat,ucvol)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dfpt_phfrq'
- use interfaces_66_wfs
 !End of the abilint section
 
  implicit none

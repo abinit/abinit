@@ -731,7 +731,6 @@ subroutine ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,nanaqdir, &
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_fourq'
- use interfaces_72_response
 !End of the abilint section
 
  implicit none

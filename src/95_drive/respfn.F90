@@ -124,7 +124,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  use m_results_respfn
  use m_hdr
 
- use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3
+ use m_dynmat,      only : chkph3, d2sym3, q0dy3_apply, q0dy3_calc, wings3, dfpt_phfrq
  use m_ddb,         only : psddb8, DDB_VERSION
  use m_efmas,       only : efmasdeg_free_array, efmasfr_free_array
  use m_wfk,         only : wfk_read_eigenvalues
