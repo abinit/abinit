@@ -79,60 +79,93 @@ module m_sigmaph
 !!
 !! FUNCTION
 !! Container for the (diagonal) matrix elements of the electronic self-energy (phonon contribution)
-!! computed in the Bloch states i.e. Sigma_ph(omega, T, band, k, spin).
+!! computed in the Bloch-state representation i.e. Sigma_ph(omega, T, band, k, spin).
 !! Provides methods to compute the QP corrections, the spectral functions and save the results to file.
+!!
+!! TODO
+!!  1) Store (q, mu) or q-resolved contributions? More memory but could be useful for post-processing
+!!  2) Use list of i.delta values instead of single shift? Useful for convergence studies.
 !!
 !! SOURCE
 
  type,public :: sigmaph_t
 
   integer :: nkcalc
-  ! Number of k-points computed.
+   ! Number of k-points computed.
 
   integer :: max_nbcalc
-  ! Maximum number of bands computed (max over nkcalc and spin).
+   ! Maximum number of bands computed (max over nkcalc and spin).
 
   integer :: nsppol
-  ! Number of independent spin polarizations.
+   ! Number of independent spin polarizations.
 
   integer :: nspinor
-  ! Number of spinorial components.
+   ! Number of spinorial components.
 
   integer :: nwr
-  ! Number of frequency points along the real axis
+   ! Number of frequency points along the real axis for Sigma(w) and spectral function A(w)
+   ! Odd number so that the mesh is centered on the KS energy.
 
   integer :: nktemp
-  ! Number of temperatures.
+   ! Number of temperatures.
 
-  real(dp),allocatable :: wreal(:)
+  integer :: symsigma
+   ! 1 if matrix elements should be symmetrized.
+   ! Rrequired when the sum over q in the BZ is replaced by IBZ(k).
+
+  real(dp) :: wr_step
+   ! Step of the linear mesh along the real axis (Ha units).
+
+  real(dp),allocatable :: ktmesh(:)
+   ! ktmesh(nktemp)
+   ! List of temperatures (kT units).
+
+  complex(dpc),allocatable ::  vals_wr(:,:,:,:,:)
+   ! vals_wr(nwr, nktemp, max_nbcalc, nkcalc, nsppol)
+   ! Sigma_ph(omega, kT, band, k, spin).
+   ! enk_KS corresponds to nwr/2 + 1.
+
+  complex(dpc),allocatable ::  dvals_dwr(:,:,:,:)
+   ! vals_wr(nktemp, max_nbcalc, nkcalc, nsppol)
+   ! The derivative of Sigma_ph(omega, kT, band, k, spin) wrt omega computed at the KS energy.
+   ! enk_KS corresponds to nwr/2 + 1.
+
+  complex(dpc),allocatable ::  spfunc_wr(:,:,:,:,:)
+   ! spfunc_wr(nwr, nktemp, max_nbcalc, nkcalc, nsppol)
+   ! Spectral function A(omega, kT, band, k, spin).
+   ! enk_KS corresponds to nwr/2 + 1.
+
+  complex(dpc),allocatable ::  vals_qwr(:,:,:,:,:)
+   !  vals(nwr, nktemp, max_nbcalc, nqpt, natom*3)
+
+  real(dp),allocatable :: kcalc(:,:)
+   ! kcalc(3, nkcalc)
+   ! List of k-points where the self-energy is computed.
+
+  integer,allocatable :: bstart(:)
+   ! bstart(nkcalc)
+   ! Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
+
+  integer,allocatable :: nbcalc(:)
+   ! bstart(nkcalc)
+   ! Number of bands included in self-energy matrix elements for each k-point in kcalc.
+
+  !real(dp),allocatable :: wreal(:)
   ! wreal(nwr)
   ! Frequency mesh along the real axis (Ha units)
 
-  real(dp),allocatable :: ktmesh(:)
-  ! ktmesh(nktemp)
-  ! List of temperatures (KT units)
-
-  complex(dpc),allocatable ::  vals_wr(:,:,:,:)
-  ! vals_wr(nwr, nktemp, max_nbcalc, nkcalc, nsppol)
-  ! Sigma_ph(omega, kT, band, k, spin).
-
-  complex(dpc),allocatable ::  dvals_dwr(:,:,:,:)
-  ! vals_wr(nwr, nktemp, max_nbcalc, nkcalc, nsppol)
-  ! The derivative of Sigma_ph(omega, kT, band, k, spin) wrt omega computed at the KS energy.
-
-  ! TODO? q-point resolved?
+  !complex(dpc) :: jeta
+   ! Used to shift the poles in the complex plane (Ha units)
+   ! Corresponds to `i eta` term in equaions.
 
   !integer :: nqibz
   ! Number of q-points in the IBZ.
 
-  !integer :: nqbz
+  integer :: nqbz
   ! Number of q-points in the BZ.
 
-  !integer :: symgamma
-  ! 1 if gamma matrices should be symmetrized by symdyma when using Fourier interpolation
-
-  !integer :: ngqpt(3)
-  ! Number of divisions in the Q mesh.
+  integer :: ngqpt(3)
+  ! Number of divisions in the Q mesh in the BZ.
 
   !real(dp),allocatable :: qibz(:,:)
   ! qibz(3,nqibz)
@@ -146,18 +179,16 @@ module m_sigmaph
   ! qbz(3,nqbz)
   ! Reduced coordinates of the q-points in the BZ.
 
-  !real(dp),allocatable :: vals_qibz(:,:,:,:,:)
-  ! vals_qibz(2,natom3,natom3,nqibz,nsppol)) in reduced coordinates for each q-point in the IBZ.
-  ! matii_qibz {\tau'\alpha',\tau\alpha} =
-  !   <psi_{k+q,ib1} | H(1)_{\tau'\alpha'} | psi_{k,ib2}>*  \cdot
-  !   <psi_{k+q,ib1} | H(1)_{\tau \alpha } | psi_{k,ib2}>
-
  end type sigmaph_t
 
- !public :: sigmaph_init      ! Creation method.
- !public :: sigmaph_solve     ! Compute the QP corrections.
- !public :: sigmaph_ncwrite   ! Creation method.
- !public :: sigmaph_free      ! Free memory.
+ !public :: sigmaph_new         ! Creation method (allocates memory, initialize data from input vars).
+ !public :: sigmaph_get_qtables ! Return tables used to perform the sum over q-points for a given k-point.
+ !public :: sigmaph_symvals     ! Symmetrize self-energy matrix elements (symsigma == 1).
+ !public :: sigmaph_solve       ! Compute the QP corrections.
+ !public :: sigmaph_print       ! Print results to main output file.
+ !public :: sigmaph_write       ! Write results to formatted file.
+ !public :: sigmaph_ncwrite     ! Write results to netcdf file.
+ !public :: sigmaph_free        ! Free memory.
 
 contains  !=====================================================
 !!***
