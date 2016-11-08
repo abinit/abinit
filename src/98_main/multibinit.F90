@@ -161,7 +161,7 @@ program multibinit
  call wrtout(std_out,message,'COLL')
 
 
-!To automate a maximum calculation, epigine reads the number of atoms 
+!To automate a maximum calculation, multibinit reads the number of atoms 
 !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
 !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
  write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
