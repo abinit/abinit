@@ -116,11 +116,19 @@ subroutine polynomial_term_init(atindx,cell,ndisp,polynomial_term,power,weight)
  type(polynomial_term_type), intent(out) :: polynomial_term
 !Local variables-------------------------------
 !scalar
- integer :: ii
 !arrays
- character(len=500) :: msg
 
 ! *************************************************************************
+
+!First free structure before init
+ call polynomial_term_free(polynomial_term)
+
+!init the values
+ polynomial_term%ndisp  = ndisp
+ polynomial_term%atindx(:) = atindx(:) 
+ polynomial_term%cell(:,:) = cell(:,:)
+ polynomial_term%power = power
+ polynomial_term%weight = weight
 
 end subroutine polynomial_term_init
 !!***

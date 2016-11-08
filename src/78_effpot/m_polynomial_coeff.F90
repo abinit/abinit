@@ -108,16 +108,26 @@ subroutine polynomial_coeff_init(coefficient,name,nterms,polynomial_coeff,terms)
  integer, intent(in) :: nterms
  real(dp),intent(in) :: coefficient
 !arrays
- character(200) :: name
+ character(200),intent(in) :: name
  type(polynomial_term_type),intent(in) :: terms(nterms)
  type(polynomial_coeff_type), intent(out) :: polynomial_coeff
 !Local variables-------------------------------
 !scalar
  integer :: ii
 !arrays
- character(len=500) :: msg
 
 ! *************************************************************************
+ 
+!First free before initilisation
+ call polynomial_coeff_free(polynomial_coeff)
+
+!Initilisation
+ polynomial_coeff%name = name
+ polynomial_coeff%nterms = nterms
+ polynomial_coeff%coefficient = coefficient
+ do ii = 1,polynomial_coeff%nterms
+   polynomial_coeff%terms(ii) = terms(ii)
+ end do
 
 end subroutine polynomial_coeff_init
 !!***

@@ -19,13 +19,11 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
     "compute_anharmonics.F90",
-    "ddb_to_effective_potential.F90",
     "effpot_xml.c",
     "init10.F90",
     "m_anharmonics_terms.F90",
     "m_effective_potential.F90",
     "m_effective_potential_file.F90",
-    "m_effpot_xml.F90",
     "m_harmonics_terms.F90",
     "m_multibinit_dataset.F90",
     "m_monte_carlo.F90",
