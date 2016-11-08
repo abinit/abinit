@@ -1668,7 +1668,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
              write(ount,format01040)names(isort),&
 &             times(1,isort),times(1,isort)*cpunm,&
 &             times(2,isort),times(2,isort)*wallnm,ncount(isort), &
-&             times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
+&             times(1,isort)/(tol14+times(2,isort)),times(1,isort)/(times(2,isort)+tol14)/nthreads
 
              if(ilist/=1)then
                subcpu=subcpu+times(1,isort)
