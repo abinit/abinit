@@ -21,7 +21,6 @@
 
 #include "abi_common.h"
 
-
 module m_phgamma
 
  use defs_basis
@@ -3069,6 +3068,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,comm,qptopt=1)
  if (my_rank == master) call a2fw_write(a2fw, dtfil%filnam_ds(4))
 
+ ! TODO: Use KT mesh instead of T but read T from input.
  ntemp = 6
  temp_range = [0.6_dp, 1.2_dp]
  wcut = 10 * wminmax(2)

@@ -30,7 +30,6 @@ module m_sigmaph
  use m_errors
  use m_ifc
  use m_ebands
- use m_fstab
  use m_wfk
  use m_ddb
  use m_dvdb
@@ -71,6 +70,94 @@ module m_sigmaph
 
  public :: sigmaph_driver
 !!***
+
+!----------------------------------------------------------------------
+
+!!****t* m_sigmaph/sigmaph_t
+!! NAME
+!! sigmaph_t
+!!
+!! FUNCTION
+!! Container for the (diagonal) matrix elements of the electronic self-energy (phonon contribution)
+!! computed in the Bloch states i.e. Sigma_ph(omega, T, band, k, spin).
+!! Provides methods to compute the QP corrections, the spectral functions and save the results to file.
+!!
+!! SOURCE
+
+ type,public :: sigmaph_t
+
+  integer :: nkcalc
+  ! Number of k-points computed.
+
+  integer :: max_nbcalc
+  ! Maximum number of bands computed (max over nkcalc and spin).
+
+  integer :: nsppol
+  ! Number of independent spin polarizations.
+
+  integer :: nspinor
+  ! Number of spinorial components.
+
+  integer :: nwr
+  ! Number of frequency points along the real axis
+
+  integer :: nktemp
+  ! Number of temperatures.
+
+  real(dp),allocatable :: wreal(:)
+  ! wreal(nwr)
+  ! Frequency mesh along the real axis (Ha units)
+
+  real(dp),allocatable :: ktmesh(:)
+  ! ktmesh(nktemp)
+  ! List of temperatures (KT units)
+
+  complex(dpc),allocatable ::  vals_wr(:,:,:,:)
+  ! vals_wr(nwr, nktemp, max_nbcalc, nkcalc, nsppol)
+  ! Sigma_ph(omega, kT, band, k, spin).
+
+  complex(dpc),allocatable ::  dvals_dwr(:,:,:,:)
+  ! vals_wr(nwr, nktemp, max_nbcalc, nkcalc, nsppol)
+  ! The derivative of Sigma_ph(omega, kT, band, k, spin) wrt omega computed at the KS energy.
+
+  ! TODO? q-point resolved?
+
+  !integer :: nqibz
+  ! Number of q-points in the IBZ.
+
+  !integer :: nqbz
+  ! Number of q-points in the BZ.
+
+  !integer :: symgamma
+  ! 1 if gamma matrices should be symmetrized by symdyma when using Fourier interpolation
+
+  !integer :: ngqpt(3)
+  ! Number of divisions in the Q mesh.
+
+  !real(dp),allocatable :: qibz(:,:)
+  ! qibz(3,nqibz)
+  ! Reduced coordinates of the q-points in the IBZ.
+
+  !real(dp),allocatable :: wtq(:)
+  ! wtq(nqibz)
+  ! Weights of the q-points in the IBZ (normalized to one)
+
+  !real(dp),allocatable :: qbz(:,:)
+  ! qbz(3,nqbz)
+  ! Reduced coordinates of the q-points in the BZ.
+
+  !real(dp),allocatable :: vals_qibz(:,:,:,:,:)
+  ! vals_qibz(2,natom3,natom3,nqibz,nsppol)) in reduced coordinates for each q-point in the IBZ.
+  ! matii_qibz {\tau'\alpha',\tau\alpha} =
+  !   <psi_{k+q,ib1} | H(1)_{\tau'\alpha'} | psi_{k,ib2}>*  \cdot
+  !   <psi_{k+q,ib1} | H(1)_{\tau \alpha } | psi_{k,ib2}>
+
+ end type sigmaph_t
+
+ !public :: sigmaph_init      ! Creation method.
+ !public :: sigmaph_solve     ! Compute the QP corrections.
+ !public :: sigmaph_ncwrite   ! Creation method.
+ !public :: sigmaph_free      ! Free memory.
 
 contains  !=====================================================
 !!***
@@ -188,7 +275,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  real(dp),allocatable ::  gs1c(:,:) !,gvnl_direc(:,:),pcon(:),sconjgr(:,:)
  !real(dp),allocatable :: eloc0_k(:),enl0_k(:),enl1_k(:),vlocal_tmp(:,:,:),vlocal1_tmp(:,:,:), rho1wfg(:,:),rho1wfr(:,:)
  !real(dp),allocatable :: wt_kq(:,:)
- real(dp),allocatable :: qibz_k(:,:),qbz(:,:),tmesh(:)
+ real(dp),allocatable :: qibz_k(:,:),qbz(:,:),ktmesh(:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:) !natom,nspinor*usecprj)
  !real(dp),allocatable :: cwave0(:,:),gvnl1(:,:)
@@ -216,8 +303,8 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  ABI_CHECK(ntemp > 1, "ntemp cannot be 1")
  temp_range = [0.6_dp, 1.2_dp]
  tstep = (temp_range(2) - temp_range(1)) / (ntemp - 1)
- ABI_MALLOC(tmesh, (ntemp))
- tmesh = arth(temp_range(1), tstep, ntemp)
+ ABI_MALLOC(ktmesh, (ntemp))
+ ktmesh = arth(temp_range(1), tstep, ntemp)
 
  ! Broadening parameter
  if (dtset%elph2_imagden .gt. tol12) then
@@ -691,7 +778,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
 #endif
 
  ! Free memory
- ABI_FREE(tmesh)
+ ABI_FREE(ktmesh)
  ABI_FREE(gkk_atm)
  ABI_FREE(gkk_mu)
  ABI_FREE(gvnl1)

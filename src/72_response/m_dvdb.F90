@@ -56,8 +56,10 @@ MODULE m_dvdb
  private
 !!***
 
- integer,public,parameter :: dvdb_last_version = 1
- !integer,public,parameter :: dvdb_last_version = 2
+ ! Version 1: header + vscf1(r)
+ ! Version 2: header + vscf1(r) + record with vhartree1(G=0)
+ !integer,public,parameter :: dvdb_last_version = 1
+ integer,public,parameter :: dvdb_last_version = 2
 
  integer,private,parameter :: DVDB_NOMODE    = 0
  integer,private,parameter :: DVDB_READMODE  = 1
@@ -68,8 +70,6 @@ MODULE m_dvdb
  ! Tolerance for the identification of two wavevectors
 
  integer,private,parameter :: FPOS_EOF = -1
-
- !integer,private,parameter :: ALLOWED_FFORMS =
 
 !----------------------------------------------------------------------
 
@@ -197,8 +197,10 @@ MODULE m_dvdb
   ! Wannier representation (real values)
   ! v1scf_rpt(nrpt, nfft , nspden, 3*natom)
 
-  !real(dp),allocatable :: vhartr1_g0(:,:)
+  real(dp),allocatable :: vhartr1_g0(:,:)
   ! vhartr1_g0(2, numv1)
+  ! G=0 component of vhartree1. Used to treat the long range component
+  ! in (polar) semiconductors
 
   type(crystal_t) :: cryst
   ! Crystalline structure read from the the DVDV
@@ -321,7 +323,7 @@ subroutine dvdb_init(db, path, comm)
 
    ABI_MALLOC(db%cplex_v1, (db%numv1))
    ABI_MALLOC(db%ngfft3_v1, (3, db%numv1))
-   !ABI_MALLOC(db%vhartr1_g0, (2, db%numv1))
+   ABI_MALLOC(db%vhartr1_g0, (2, db%numv1))
 
    nqpt = 0
    do iv1=1,db%numv1
@@ -339,9 +341,9 @@ subroutine dvdb_init(db, path, comm)
      do ii=1,hdr1%nspden
        read(unt, err=10, iomsg=msg)
      end do
-     ! Skipt vhartr1_g0
-     !db%vhartr1_g0(:, iv1) = zero
-     !if (db%version > 1) read(unt) db%vhartr1_g0(:, iv1)
+     ! Read vhartr1_g0 (if available)
+     db%vhartr1_g0(:, iv1) = zero
+     if (db%version > 1) read(unt, err=10, iomsg=msg) db%vhartr1_g0(:, iv1)
 
      ! check whether this q-point is already in the list.
      iq_found = 0
@@ -397,14 +399,14 @@ subroutine dvdb_init(db, path, comm)
      ABI_MALLOC(db%ngfft3_v1, (3, db%numv1))
      ABI_MALLOC(db%qpts, (3, db%nqpt))
      ABI_MALLOC(db%pos_dpq, (3, db%mpert, db%nqpt))
-     !ABI_MALLOC(db%vhartr1_g0, (2, db%numv1))
+     ABI_MALLOC(db%vhartr1_g0, (2, db%numv1))
    end if
 
    call xmpi_bcast(db%cplex_v1, master, comm, ierr)
    call xmpi_bcast(db%ngfft3_v1, master, comm, ierr)
    call xmpi_bcast(db%qpts, master, comm, ierr)
    call xmpi_bcast(db%pos_dpq, master, comm, ierr)
-   !call xmpi_bcast(db%vhartr1_g0, master, comm, ierr)
+   call xmpi_bcast(db%vhartr1_g0, master, comm, ierr)
  end if
 
  ! Init crystal_t from the hdr read from file.
@@ -566,9 +568,9 @@ subroutine dvdb_free(db)
    ABI_FREE(db%v1scf_rpt)
  end if
 
- !if (allocated(db%vhartr1_g0)) then
- !  ABI_FREE(db%vhartr1_g0)
- !end if
+ if (allocated(db%vhartr1_g0)) then
+   ABI_FREE(db%vhartr1_g0)
+ end if
 
  ! types
  call crystal_free(db%cryst)
@@ -646,6 +648,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
  call wrtout(my_unt,msg,my_mode)
 
+ write(std_out,*)"Version: ",db%version
  write(std_out,*)"Number of q-points: ",db%nqpt
 
 end subroutine dvdb_print
@@ -2183,8 +2186,8 @@ subroutine dvdb_seek(db, idir, ipert, iqpt)
      do ispden=1,db%nspden
        read(db%fh, err=10, iomsg=msg)
      end do
-     ! Skip record with vhartr1_g0
-     !if (db%version > 1) read(db%fh)
+     ! Skip record with vhartr1_g0 (if present)
+     if (db%version > 1) read(db%fh, err=10, iomsg=msg)
    end do
    db%current_fpos = pos_wanted
 
@@ -2306,7 +2309,7 @@ integer function my_hdr_skip(unit, idir, ipert, qpt, msg) result(ierr)
    if (idir /= mod(tmp_hdr%pertcase-1, 3) + 1 .or. &
        ipert /= (tmp_hdr%pertcase - idir) / 3 + 1 .or. &
        any(abs(qpt - tmp_hdr%qptn) > tol14)) then
-         msg = "Perturbation index on file does not match with those expected by caller"
+         msg = "Perturbation index on file does not match the one expected by caller"
          ierr = -1
    end if
  end if
@@ -2877,8 +2880,8 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
    ! Supported fform:
    ! 109  POT1 files without vh1(G=0)
    ! 111  POT1 files with extra record with vh1(G=0) after FFT data.
-   !has_vh1g0(ii) = .True.
-   !if (fform == 109) has_vh1g0(ii) = .False.
+   has_vh1g0(ii) = .True.
+   if (fform == 109) has_vh1g0(ii) = .False.
  end do
 
  ! Validate headers.
@@ -2889,8 +2892,8 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
  if (open_file(dvdb_path, msg, newunit=ount, form="unformatted", action="write", status="unknown") /= 0) then
    MSG_ERROR(msg)
  end if
- write(ount)dvdb_last_version
- write(ount)nperts
+ write(ount, err=10, iomsg=msg) dvdb_last_version
+ write(ount, err=10, iomsg=msg) nperts
 
  do ii=1,nperts
    jj = ii
@@ -2911,9 +2914,10 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
         read(units(jj), err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfft)
         write(ount, err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfft)
       end do
-      !vhartr1_g0 = zero
-      !if (has_vh1g0(jj)) read(units(jj), err=10, iomsg=msg) vhartr1_g0
-      !write(ount, err=10, iomsg=msg) vhartr1_g0
+      ! Add vh1(G=0)
+      vhartr1_g0 = zero
+      if (has_vh1g0(jj)) read(units(jj), err=10, iomsg=msg) vhartr1_g0
+      if (dvdb_last_version > 1) write(ount, err=10, iomsg=msg) vhartr1_g0
    else
 #ifdef HAVE_NETCDF
       ! Netcdf IO
@@ -2923,16 +2927,17 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
         NCF_CHECK(nf90_get_var(units(ii), v1_varid, v1, start=[1,1,1,ispden], count=[cplex, n1, n2, n3, 1]))
         write(ount, err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfft)
       end do
-      !vhartr1_g0 = zero
-      !if (has_vh1g0(jj)) then
-      !  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "vhartr1_g0"), vhartr1_g0))
-      !end if
-      !write(ount, err=10, iomsg=msg) vhartr1_g0
+      ! Add vh1(G=0)
+      vhartr1_g0 = zero
+      if (has_vh1g0(jj)) then
+        NCF_CHECK(nf90_get_var(units(ii), nctk_idname(units(ii), "vhartr1_g0"), vhartr1_g0))
+      end if
+      if (dvdb_last_version > 1) write(ount, err=10, iomsg=msg) vhartr1_g0
 #endif
    end if
 
    ABI_FREE(v1)
- end do
+ end do ! nperts
 
  close(ount)
 
@@ -3071,13 +3076,13 @@ integer function dvdb_check_fform(fform, mode, errmsg) result(ierr)
  select case (mode)
  case ("merge_dvdb")
     if (all(fform /= [109, 111])) then
-      errmsg = sjoin("fform:", itoa(fform), "is not supported in merge mode")
+      errmsg = sjoin("fform:", itoa(fform), "is not supported in `merge_dvdb` mode")
       ierr = 1; return
     end if
 
  case ("read_dvdb")
     if (all(fform /= [102, 109, 111])) then
-      errmsg = sjoin("fform:", itoa(fform), "is not supported in read_dvdb mode")
+      errmsg = sjoin("fform:", itoa(fform), "is not supported in `read_dvdb` mode")
       ierr = 1; return
     end if
 

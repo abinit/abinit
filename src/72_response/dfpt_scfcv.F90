@@ -1189,7 +1189,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr,&
    ngfftf,cplex,nfftf,dtset%nspden,vtrial1,mpi_enreg)
 
-#if 0
+#if 1
    ! Compute vhartr1(G=0)
    vhartr1_g0 = zero
    if (cplex == 1) vhartr1_g0(1) = sum(vhartr1)
