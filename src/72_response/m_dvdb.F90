@@ -57,6 +57,7 @@ MODULE m_dvdb
 !!***
 
  integer,public,parameter :: dvdb_last_version = 1
+ !integer,public,parameter :: dvdb_last_version = 2
 
  integer,private,parameter :: DVDB_NOMODE    = 0
  integer,private,parameter :: DVDB_READMODE  = 1
@@ -151,8 +152,8 @@ MODULE m_dvdb
 
   integer,allocatable :: pos_dpq(:,:,:)
    ! pos_dpq(3, mpert, nqpt)
-   ! The position of the (idir, ipert, iqpt) potential in the file
-   ! 0 if the corresping entry is not available.
+   ! The position of the (idir, ipert, iqpt) potential in the file (in units for POT1 blocks)
+   ! 0 if the corresponding entry is not available.
 
   integer,allocatable :: cplex_v1(:)
   ! cplex_v1(numv1)
@@ -194,11 +195,14 @@ MODULE m_dvdb
   ! Wannier representation (real values)
   ! v1scf_rpt(nrpt, nfft , nspden, 3*natom)
 
+  !real(dp),allocatable :: vhartr1_g0(:,:)
+  ! vhartr1_g0(2, numv1)
+
   type(crystal_t) :: cryst
   ! Crystalline structure read from the the DVDV
 
   type(mpi_type) :: mpi_enreg
-  ! Interl object used to call fourdp
+  ! Internal object used to call fourdp
 
  end type dvdb_t
 
@@ -312,6 +316,7 @@ subroutine dvdb_init(db, path, comm)
 
    ABI_MALLOC(db%cplex_v1, (db%numv1))
    ABI_MALLOC(db%ngfft3_v1, (3, db%numv1))
+   !ABI_MALLOC(db%vhartr1_g0, (2, db%numv1))
 
    nqpt = 0
    do iv1=1,db%numv1
@@ -327,6 +332,9 @@ subroutine dvdb_init(db, path, comm)
      do ii=1,hdr1%nspden
        read(unt)
      end do
+     ! Skipt vhartr1_g0
+     !db%vhartr1_g0(:, iv1) = zero
+     !if (db%version > 1) read(unt) db%vhartr1_g0(:, iv1)
 
      ! check whether this q-point is already in the list.
      iq_found = 0
@@ -382,12 +390,14 @@ subroutine dvdb_init(db, path, comm)
      ABI_MALLOC(db%ngfft3_v1, (3, db%numv1))
      ABI_MALLOC(db%qpts, (3, db%nqpt))
      ABI_MALLOC(db%pos_dpq, (3, db%mpert, db%nqpt))
+     !ABI_MALLOC(db%vhartr1_g0, (2, db%numv1))
    end if
 
    call xmpi_bcast(db%cplex_v1, master, comm, ierr)
    call xmpi_bcast(db%ngfft3_v1, master, comm, ierr)
    call xmpi_bcast(db%qpts, master, comm, ierr)
    call xmpi_bcast(db%pos_dpq, master, comm, ierr)
+   !call xmpi_bcast(db%vhartr1_g0, master, comm, ierr)
  end if
 
  ! Init crystal_t from the hdr read from file.
@@ -536,6 +546,10 @@ subroutine dvdb_free(db)
  if (allocated(db%v1scf_rpt)) then
    ABI_FREE(db%v1scf_rpt)
  end if
+
+ !if (allocated(db%vhartr1_g0)) then
+ !  ABI_FREE(db%vhartr1_g0)
+ !end if
 
  ! types
  call crystal_free(db%cryst)
@@ -2140,6 +2154,8 @@ subroutine dvdb_seek(db, idir, ipert, iqpt)
      do ispden=1,db%nspden
        read(db%fh)
      end do
+     ! Skip record with vhartr1_g0
+     !if (db%version > 1) read(db%fh)
    end do
    db%current_fpos = pos_wanted
 
@@ -2758,7 +2774,9 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
  type(dvdb_t) :: dvdb
 !arrays
  integer :: units(nfiles)
+ real(dp) :: vhartr1_g0(2) !,vxc1_g0(2),vpsp1_g0(2)
  real(dp),allocatable :: v1(:)
+ logical :: has_vh1g0(nfiles)
  type(hdr_type),target,allocatable :: hdr1_list(:)
 
 !************************************************************************
@@ -2776,6 +2794,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
 
  ! Read the headers
  ABI_DT_MALLOC(hdr1_list, (nfiles))
+
  do ii=1,nfiles
    write(std_out,"(a,i0,2a)")"- Reading header of file [",ii,"]: ",trim(v1files(ii))
 
@@ -2792,12 +2811,17 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
      ABI_CHECK(fform /= 0, sjoin("fform=0 while reading:", v1files(ii)))
    end if
    if (prtvol > 0) call hdr_echo(hdr1_list(ii), fform, 3, unit=std_out)
-   ! FIXME: fform is zero in POT files!
-   !ABI_CHECK(fform /= 0, sjoin("fform=0 while reading: ", v1files(ii)))
-   !write(std_out,*)"done", trim(v1files(ii))
+   ABI_CHECK(fform /= 0, sjoin("fform=0 while reading: ", v1files(ii)))
    if (hdr1_list(ii)%pertcase == 0) then
      MSG_ERROR(sjoin("Found GS potential:", v1files(ii)))
    end if
+   !write(std_out,*)"done", trim(v1files(ii))
+
+   ! Supported fform:
+   ! 109  POT1 files without vh1(G=0)
+   ! 111  POT1 files with extra record with vh1(G=0) after FFT data.
+   !has_vh1g0(ii) = .True.
+   !if (fform == 109) has_vh1g0(ii) = .False.
  end do
 
  ! Validate headers.
@@ -2830,6 +2854,9 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
         read(units(jj)) (v1(ifft), ifft=1,cplex*nfft)
         write(ount) (v1(ifft), ifft=1,cplex*nfft)
       end do
+      !vhartr1_g0 = zero
+      !if (has_vh1g0(jj)) read(units(jj)) vhartr1_g0
+      !write(ount) vhartr1_g0
    else
 #ifdef HAVE_NETCDF
       ! Netcdf IO
@@ -2839,6 +2866,11 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
         NCF_CHECK(nf90_get_var(units(ii), v1_varid, v1, start=[1,1,1,ispden], count=[cplex, n1, n2, n3, 1]))
         write(ount) (v1(ifft), ifft=1,cplex*nfft)
       end do
+      !vhartr1_g0 = zero
+      !if (has_vh1g0(jj)) then
+      !  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "vhartr1_g0"), vhartr1_g0))
+      !end if
+      !write(ount) vhartr1_g0
 #endif
    end if
 
