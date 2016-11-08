@@ -51,7 +51,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  use m_sort
 
  use m_io_tools,       only : open_file
- use m_dynmat,         only : asria_corr
+ use m_dynmat,         only : asria_corr, dfpt_phfrq
  use m_anaddb_dataset, only : anaddb_dataset_type
  use m_pawtab,         only : pawtab_type,pawtab_nullify,pawtab_free
 

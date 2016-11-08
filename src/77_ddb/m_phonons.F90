@@ -44,7 +44,7 @@ module m_phonons
  use m_fstrings,        only : itoa, ftoa, sjoin
  use m_numeric_tools,   only : simpson_int, wrap2_pmhalf
  use m_io_tools,        only : open_file
- use m_dynmat,          only : asria_corr, asrprs, gtdyn9
+ use m_dynmat,          only : asria_corr, asrprs, gtdyn9, dfpt_phfrq
  use m_crystal,         only : crystal_t
  use m_ifc,             only : ifc_type, ifc_fourq
  use m_anaddb_dataset,  only : anaddb_dataset_type
