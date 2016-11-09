@@ -1178,7 +1178,6 @@ type (sigmaph_t) function sigmaph_new(dtset, crystal, ebands, dtfil, comm) resul
    NCF_CHECK(nf90_put_var(ncid, vid("nbcalc"), new%nbcalc))
    NCF_CHECK(nf90_put_var(ncid, vid("kcalc"), new%kcalc))
  end if
-#endif
 
 contains
  integer function vid(vname)
@@ -1193,6 +1192,7 @@ contains
    vid = nctk_idname(ncid, vname)
  end function vid
 !!***
+#endif
 
 end function sigmaph_new
 !!***
@@ -1287,64 +1287,64 @@ end subroutine sigmaph_free
 !!
 !! SOURCE
 
-integer function sigmaph_ncwrite_slice(self, ikcalc, spin) result(ncerr)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'nbe'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
- integer,intent(in) :: ikcalc, spin
- type(sigmaph_t),target,intent(in) :: self
-
-#ifdef HAVE_NETCDF
-!Local variables-------------------------------
-!arrays
- integer :: shape3(3),shape4(4)
- real(dp), ABI_CONTIGUOUS pointer :: rdata3(:,:,:),rdata4(:,:,:,:)
-
-! *************************************************************************
- ncerr = nf90_noerr; shape3(1) = 2; shape4(1) = 2
-
- ! Write data (use iso_c_binding to associate a real pointer to complex data because
- ! netcdf does not support complex types.
- shape4(2:) = shape(self%vals_wr)
- call c_f_pointer(c_loc(self%vals_wr), rdata4, shape4)
- NCF_CHECK(nf90_put_var(self%ncid, vid("vals_wr"), rdata4, start=[1,1,1,1,ikcalc,spin]))
-
- shape3(2:) = shape(self%dvals_dwr)
- call c_f_pointer(c_loc(self%dvals_dwr), rdata3, shape3)
- NCF_CHECK(nf90_put_var(self%ncid, vid("dvals_dwr"), rdata3, start=[1,1,1,ikcalc,spin]))
-
- shape4(2:) = shape(self%spfunc_wr)
- call c_f_pointer(c_loc(self%spfunc_wr), rdata4, shape4)
- NCF_CHECK(nf90_put_var(self%ncid, vid("spfunc_dwr"), rdata4, start=[1,1,1,1,ikcalc,spin]))
-
- !NCF_CHECK(nf90_put_var(self%ncid, vid("vals_qwr"), self%vals_qwr))
-
-#else
- MSG_ERROR("netcdf support is not activated. ")
-#endif
-
-contains
- integer function vid(vname)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
-   character(len=*),intent(in) :: vname
-   vid = nctk_idname(self%ncid, vname)
- end function vid
-
-end function sigmaph_ncwrite_slice
-!!***
+!integer function sigmaph_ncwrite_slice(self, ikcalc, spin) result(ncerr)
+!
+!!This section has been created automatically by the script Abilint (TD).
+!!Do not modify the following lines by hand.
+!#undef ABI_FUNC
+!#define ABI_FUNC 'nbe'
+!!End of the abilint section
+!
+! implicit none
+!
+!!Arguments ------------------------------------
+! integer,intent(in) :: ikcalc, spin
+! type(sigmaph_t),target,intent(in) :: self
+!
+!#ifdef HAVE_NETCDF
+!!Local variables-------------------------------
+!!arrays
+! integer :: shape3(3),shape4(4)
+! real(dp), ABI_CONTIGUOUS pointer :: rdata3(:,:,:),rdata4(:,:,:,:)
+!
+!! *************************************************************************
+! ncerr = nf90_noerr; shape3(1) = 2; shape4(1) = 2
+!
+! ! Write data (use iso_c_binding to associate a real pointer to complex data because
+! ! netcdf does not support complex types.
+! shape4(2:) = shape(self%vals_wr)
+! call c_f_pointer(c_loc(self%vals_wr), rdata4, shape4)
+! NCF_CHECK(nf90_put_var(self%ncid, vid("vals_wr"), rdata4, start=[1,1,1,1,ikcalc,spin]))
+!
+! shape3(2:) = shape(self%dvals_dwr)
+! call c_f_pointer(c_loc(self%dvals_dwr), rdata3, shape3)
+! NCF_CHECK(nf90_put_var(self%ncid, vid("dvals_dwr"), rdata3, start=[1,1,1,ikcalc,spin]))
+!
+! shape4(2:) = shape(self%spfunc_wr)
+! call c_f_pointer(c_loc(self%spfunc_wr), rdata4, shape4)
+! NCF_CHECK(nf90_put_var(self%ncid, vid("spfunc_dwr"), rdata4, start=[1,1,1,1,ikcalc,spin]))
+!
+! !NCF_CHECK(nf90_put_var(self%ncid, vid("vals_qwr"), self%vals_qwr))
+!
+!#else
+! MSG_ERROR("netcdf support is not activated. ")
+!#endif
+!
+!contains
+! integer function vid(vname)
+!
+!!This section has been created automatically by the script Abilint (TD).
+!!Do not modify the following lines by hand.
+!#undef ABI_FUNC
+!#define ABI_FUNC 'vid'
+!!End of the abilint section
+!
+!   character(len=*),intent(in) :: vname
+!   vid = nctk_idname(self%ncid, vname)
+! end function vid
+!
+!end function sigmaph_ncwrite_slice
+!!!***
 
 end module m_sigmaph
 !!***
