@@ -689,23 +689,28 @@ integer function nctk_open_read(ncid, path, comm) result(ncerr)
  integer,intent(in) :: comm
  character(len=*),intent(in) :: path
 
-! *********************************************************************
+!Local variables-------------------------------
+ integer :: nprocs
 
- if (nctk_has_mpiio) then
+! *********************************************************************
+ nprocs = xmpi_comm_size(comm)
+
+ ! Enforce netcdf4 only if the communicator contains more than one processor.
+ if (nctk_has_mpiio .and. nprocs > 1) then
 #ifdef HAVE_NETCDF_MPI
    ncerr = nf90_open(path, mode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_nowrite),&
                      comm=comm, info=xmpio_info, ncid=ncid)
 #else
    ncerr = nf90_einval
    MSG_WARNING("Netcdf without MPI support. Cannot open file, will abort in caller")
-   !ncerr = nf90_open(path, mode=nf90_nowrite, ncid=ncid)
 #endif
-   NCF_CHECK_MSG(ncerr, sjoin("opening file: ",path))
+   NCF_CHECK_MSG(ncerr, sjoin("opening file:", path))
  else
    ncerr = nf90_open(path, mode=nf90_nowrite, ncid=ncid)
-   NCF_CHECK_MSG(ncerr, sjoin("opening file: ",path))
-   if (xmpi_comm_size(comm) > 1) then
-     MSG_WARNING("netcdf without MPI-IO support with nprocs > 1!")
+   NCF_CHECK_MSG(ncerr, sjoin("opening file:", path))
+   if (nprocs > 1) then
+     ncerr = nf90_einval
+     MSG_WARNING("netcdf without MPI-IO support with nprocs > 1! Will abort in the caller")
    end if
  endif
 
