@@ -1144,7 +1144,7 @@ subroutine phgamma_linwid(gams,cryst,ifc,ndivsm,nvert,qverts,basename,ncid,wminm
  real(dp) :: displ_cart(2,3*cryst%natom,3*cryst%natom)
  real(dp) :: phfrq(3*cryst%natom),gamma_ph(3*cryst%natom),lambda_ph(3*cryst%natom)
  real(dp) :: qpt(3),shift(3)
- real(dp),target,allocatable :: qpath(:,:),all_phfreq(:,:,:),all_gammaq(:,:,:),all_lambdaq(:,:,:)
+ real(dp),allocatable :: qpath(:,:),all_phfreq(:,:,:),all_gammaq(:,:,:),all_lambdaq(:,:,:)
 
 ! *********************************************************************
 
@@ -2429,7 +2429,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
- type(dvdb_t),target,intent(inout) :: dvdb
+ type(dvdb_t),intent(inout) :: dvdb
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
  type(pawfgr_type),intent(in) :: pawfgr

@@ -136,12 +136,12 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands_k, ebands_kq
- type(dvdb_t),target,intent(inout) :: dvdb
+ type(dvdb_t),intent(inout) :: dvdb
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
  type(pawfgr_type),intent(in) :: pawfgr
  type(ifc_type),intent(in) :: ifc
- type(mpi_type),intent(inout) :: mpi_enreg
+ type(mpi_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18),ngfftf(18)
  real(dp),intent(in) :: n0(ebands_k%nsppol)

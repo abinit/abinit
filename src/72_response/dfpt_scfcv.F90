@@ -1202,7 +1202,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
    ! Write vhartr1(G=0)
    if (mpi_enreg%me_fft == 0) then
-     if (dtset%iomode == IO_MODE_NETCDF) then
+     if (dtset%iomode == IO_MODE_ETSF) then
 #ifdef HAVE_NETCDF
        NCF_CHECK(nctk_open_read(ncid, fi1o, xmpi_comm_self))
        ncerr = nctk_def_one_array(ncid, nctkarr_t('vhartr1_g0', "dp", "two"), varid=varid)
