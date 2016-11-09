@@ -920,7 +920,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    !end if
    ABI_DEALLOCATE(subovl)
  end if
- if ( .not. newlobpcg ) ABI_DEALLOCATE(gsc)
+ if ( .not. newlobpcg ) then
+   ABI_DEALLOCATE(gsc)
+ end if
 
  if(wfoptalg==3) then
    ABI_DEALLOCATE(eig_save)
