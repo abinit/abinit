@@ -1717,6 +1717,11 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
 
 ! *************************************************************************
 
+ if (allocated(db%v1scf_rpt)) then
+   call wrtout(std_out, "v1scf_rpt is already computed. Returning")
+   return
+ end if
+
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  cryst => db%cryst
  nq1= ngqpt(1); nq2 = ngqpt(2); nq3 = ngqpt(3)
