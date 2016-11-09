@@ -280,8 +280,8 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  integer :: ib1,ib2,band,num_smallw
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq,nqpt_max !timerev_q,
  integer :: spin,istwf_k,istwf_kq,istwf_kirr,npw_k,npw_kq,npw_kirr
- integer :: ii,ipw,mpw,my_mpw,ierr,cnt
- integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q
+ integer :: ii,ipw,mpw,my_mpw,ierr,cnt,iw,it
+ integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q,mu
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nqibz_k,nqbz
  integer :: sph_nb,sph_bstart,sph_nshiftq
@@ -302,7 +302,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  integer :: indkk_k(1,6),indkk_kq(1,6)
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),gtmp(:,:),nband(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),lf(2),rg(2),res(2)
- real(dp) :: eta,f_nk,f_mkq !,omega,wtk,gkk2,term1,term2
+ real(dp) :: eta,f_nk,f_mkq,wph !,wtk,gkk2,term1,term2
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
  !real(dp) :: temp_tgam(2,3*cryst%natom,3*cryst%natom)
  real(dp),allocatable :: sph_shiftq(:,:)
@@ -318,6 +318,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  !real(dp),allocatable :: eloc0_k(:),enl0_k(:),enl1_k(:),vlocal_tmp(:,:,:),vlocal1_tmp(:,:,:), rho1wfg(:,:),rho1wfr(:,:)
  !real(dp),allocatable :: wt_kq(:,:)
  real(dp),allocatable :: qibz_k(:,:),qbz(:,:)
+ complex(dpc),allocatable :: fact_wt(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:) !natom,nspinor*usecprj)
  !real(dp),allocatable :: cwave0(:,:),gvnl1(:,:)
@@ -374,6 +375,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
 
  ! Construct object to store final results.
  sigma = sigmaph_new(dtset, cryst, ebands, dtfil, comm)
+ ABI_MALLOC(fact_wt, (sigma%nwr, sigma%ntemp))
 
  ! Open the DVDB file
  call dvdb_open_read(dvdb, ngfftf, xmpi_comm_self)
@@ -750,11 +752,21 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
          end do
        end do
 
+       ! Get gkk(k, q, nu)
        call gkkmu_from_atm(1, sph_nb, 1, natom, gkk_atm, phfrq, displ_red, gkk_mu, num_smallw)
+
+       ! Accumulate contribution to phonon self-energy
+       do ib2=1,sph_nb
+         do mu=1,natom3
+            wph = phfrq(mu)
+            !sigma%vals_wr(iw, it, ib2) =
+            !sigma%dvals_dwr(iw, it, ib2) =
+         end do
+       end do
+       !fact_wt(iw, it)  = nbe(wqnu) + f(em k+q)
 
 #if 0
        do mu
-         ! sum contribution to phonon self-energy
          do ib2=1,mband
            f_nk = ebands_k%occ(ib2,ik,spin)
            eig0nk = ebands_k%eig(ib2,ik,spin)
@@ -821,6 +833,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  ABI_FREE(ylmgr_kq)
  ABI_FREE(tgam)
  ABI_FREE(qibz_k)
+ ABI_FREE(fact_wt)
 
  call destroy_hamiltonian(gs_hamkq)
  call sigmaph_free(sigma)
@@ -1159,7 +1172,7 @@ type (sigmaph_t) function sigmaph_new(dtset, crystal, ebands, dtfil, comm) resul
      nctkarr_t("nbcalc", "int", "nkcalc"), &
      nctkarr_t("kcalc", "int", "three, nkcalc"), &
      nctkarr_t("ktmesh", "dp", "ntemp"), &
-     ! These arrays acquire two extra (nkcalc, nsppol) dimensions
+     ! These arrays acquire two extra (nkcalc, nsppol) dimensions on file.
      nctkarr_t("vals_wr", "dp", "two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("dvals_dwr", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("spfunc_wr", "dp", "two, nwr, ntemp, max_nbcalc, nkcalc, nsppol") &

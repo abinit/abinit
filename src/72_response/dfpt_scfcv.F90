@@ -1207,6 +1207,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        NCF_CHECK(nctk_open_read(ncid, nctk_ncify(fi1o), xmpi_comm_self))
        ncerr = nctk_def_one_array(ncid, nctkarr_t('vhartr1_g0', "dp", "two"), varid=varid)
        NCF_CHECK(ncerr)
+       NCF_CHECK(nctk_set_datamode(ncid))
        NCF_CHECK(nf90_put_var(ncid, varid, vhartr1_g0))
        NCF_CHECK(nf90_close(ncid))
 #endif
