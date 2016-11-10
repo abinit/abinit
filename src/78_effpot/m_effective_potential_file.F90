@@ -870,7 +870,7 @@ end subroutine system_getDimFromXML
 
  !Local variables-------------------------------
  !scalar
- integer :: ierr,ii,itypat,my_rank,msym,natom,nrpt,ntypat
+ integer :: ierr,ii,itypat,my_rank,msym,natom,ncoeff,nrpt,ntypat
  integer :: nph1l,npsp,nproc,nsym,space_group,timrev
  real(dp):: energy,ucvol
  character(len=500) :: message
@@ -918,7 +918,7 @@ end subroutine system_getDimFromXML
 !Get Dimention of system and allocation/initialisation of array
  call effective_potential_file_getDimSystem(filename,natom,ntypat,nph1l,nrpt,0)
  gmet= zero; gprimd = zero; rmet = zero; rprimd = zero
- elastic_constants = zero; epsilon_inf = zero
+ elastic_constants = zero; epsilon_inf = zero; ncoeff = zero
  ABI_ALLOCATE(all_amu,(ntypat))
  ABI_ALLOCATE(ifcs%atmfrc,(2,3,natom,3,natom,nrpt))
  ABI_ALLOCATE(ifcs%cell,(3,nrpt))
@@ -1549,8 +1549,8 @@ end subroutine system_getDimFromXML
 
 !Initialisation of eff_pot
  call effective_potential_init(crystal,dynmat,energy,eff_pot,epsilon_inf,&
-&                              elastic_constants,has_anharmonics,ifcs,internal_strain,phfrq,qph1l,&
-&                              nph1l,zeff,comm,phonon_strain=phonon_strain)
+&                              elastic_constants,has_anharmonics,ifcs,internal_strain,ncoeff,&
+&                              phfrq,qph1l,nph1l,zeff,comm,phonon_strain=phonon_strain)
 
 !DEALLOCATION OF ARRAYS
  ABI_DEALLOCATE(all_amu)
@@ -2605,8 +2605,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  end if
    
 !Initialisation of eff_pot
-
-!DEALLOCATION OF ARRAYS
+ call effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
  
 !DEALLOCATION OF TYPES
  do ii=1,ncoeff 

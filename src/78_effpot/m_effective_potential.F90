@@ -61,6 +61,7 @@ module m_effective_potential
  public :: effective_potential_print
  public :: effective_potential_printPDOS
  public :: effective_potential_printSupercell
+ public :: effective_potential_setCoeffs
  public :: effective_potential_writeAbiInput
  public :: effective_potential_writeXML
  public :: effective_potential_writeNETCDF
@@ -194,8 +195,8 @@ CONTAINS  !=====================================================================
 
 subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
 &                                   epsilon_inf,elastic_constants,has_anharmonics,ifcs,&
-&                                   internal_strain,phfrq,qpoints,nqpt,zeff,comm,&
-&                                   anharmonics_terms,external_stress,&
+&                                   internal_strain,ncoeff,phfrq,qpoints,nqpt,zeff,comm,&
+&                                   anharmonics_terms,coeffs,external_stress,&
 &                                   forces,internal_stress,phonon_strain,strain,supercell,&
 &                                   name)
 
@@ -214,6 +215,7 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
  integer, intent(in) :: comm
  real(dp),intent(in):: energy
  character(len=fnlen), optional,intent(in) :: name
+ integer,intent(in) :: ncoeff
  logical,intent(in) :: has_anharmonics
 !arrays
  real(dp),intent(in) :: epsilon_inf(3,3)
@@ -227,6 +229,7 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
  type(supercell_type),optional,intent(in) :: supercell
  type(strain_type),optional,intent(in) :: strain
  type(ifc_type),optional,intent(in) :: phonon_strain(6)
+ type(polynomial_coeff_type),optional :: coeffs(ncoeff)
  real(dp),optional,intent(in) :: external_stress(6),internal_stress(6)
  real(dp),optional,intent(in) :: forces(3,crystal%natom)
 !Local variables-------------------------------
@@ -316,13 +319,12 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
    eff_pot%external_stress = external_stress
  end if
 
-  eff_pot%has_anharmonics = .FALSE.
 
  if(has_anharmonics)then 
    if (present(phonon_strain)) then
      eff_pot%has_anharmonics = .TRUE.
 !    Allocation of anharmonics part (3rd order) 
-     call anharmonics_terms_init(eff_pot%anharmonics_terms,crystal%natom,ifcs%nrpt,&
+     call anharmonics_terms_init(eff_pot%anharmonics_terms,crystal%natom,ncoeff,ifcs%nrpt,&
 &                              phonon_strain=phonon_strain)
    else
      write(msg, '(3a)' )&
@@ -330,6 +332,17 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
 &        ' please set it in the initialisation of effective_potential_init',ch10
      MSG_BUG(msg)
    end if
+ end if
+
+
+ if(present(coeffs))then
+   if(ncoeff /= size(coeffs))then
+     write(msg, '(a)' )&
+&        ' ncoeff has not the same size than coeffs array, '
+     MSG_BUG(msg)
+   end if
+   call effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
+   eff_pot%has_anharmonics = .TRUE.
  end if
 
  if(present(supercell))then
@@ -1290,6 +1303,65 @@ subroutine effective_potential_effpot2dynmat(dynmat,delta,eff_pot,natom,n_cell,o
 
 
  end subroutine effective_potential_effpot2dynmat
+!!***
+
+!****f* m_effective_potential/effective_potential_setCoeffs
+!!
+!! NAME
+!! effective_potential_setCoeffs
+!!
+!! FUNCTION
+!! Set the coefficients of  the effective_potential in ouput
+!!
+!! INPUTS
+!! coeffs = polynomial_coeff_type
+!! eff_pot = effective potential structure
+!! ncoeff = number of coefficient
+!!
+!! OUTPUT
+!!
+!!
+!! PARENTS
+!!   multibinit
+!!
+!! CHILDREN
+!!   wrtout
+!!
+!! SOURCE
+ 
+subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
+
+ use m_polynomial_coeff
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'effective_potential_setCoeffs'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  integer,intent(in) :: ncoeff
+!array
+  type(effective_potential_type),intent(inout) :: eff_pot
+  type(polynomial_coeff_type),intent(in) :: coeffs(ncoeff)
+!Local variables-------------------------------
+!scalar
+  character(len=500) :: msg
+!array
+! *************************************************************************
+
+  if(ncoeff /= size(coeffs))then
+    write(msg, '(a)' )&
+&        ' ncoeff has not the same size than coeffs array, '
+    MSG_BUG(msg)
+  end if
+
+  call anharmonics_terms_setCoeffs(coeffs,eff_pot%anharmonics_terms,ncoeff)
+
+end subroutine effective_potential_setCoeffs
 !!***
 
 !****f* m_effective_potential/effective_potential_print
