@@ -723,7 +723,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
  if(option==0) then
    if(((max1-min1+1)/=n_cell(1).and.&
 &    (max2-min2+1)/=n_cell(2).and.(max3-min3+1)/=n_cell(3))) then
-     write(message, '(6a,3I3,5a,3I3,a)' ) ch10,&
+     write(message, '(88a,3I3,5a,3I3,a)' )ch10,('-',i1=1,80),ch10,ch10,&
 &      ' WARNING: dipdip is set to zero, the longe range interation might be wrong',ch10,&
 &      '          because it is not recompute.',ch10,&
 &      '          The previous harmonic part is build for ',(max1-min1+1),(max2-min2+1),(max3-min3+1)&
@@ -731,12 +731,12 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 &      '          is correct for the supercell: ',n_cell(:),' or set dipdip to 1'
      call wrtout(std_out,message,"COLL")
    else
-     write(message,'(a)')&
+     write(message,'(84a)')ch10,('-',i1=1,80),ch10,ch10,&
 &    ' WARNING: dipdip is set to zero, the longe range interation is not recompute'
      call wrtout(std_out,message,"COLL")
    end if
 
-   write(message,'(a,(80a),a)') ch10,('=',i1=1,80),ch10
+   write(message,'(a,(80a))') ch10,('=',i1=1,80)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
@@ -993,6 +993,11 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 ! Impose sum rule
    call effective_potential_applySumRule(asr,eff_pot%harmonics_terms%ifcs,eff_pot%crystal%natom)
  end if
+
+   write(message, '(a,(80a),a)' ) ch10,&
+&    ('-',ii=1,80)
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
 
 ! Free suppercell
  call destroy_supercell(supercell)
@@ -1666,7 +1671,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
    end if
 
    write(message, '(a,(80a),a)' ) ch10,&
-&    ('-',ii=1,80)
+&    ('=',ii=1,80)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 

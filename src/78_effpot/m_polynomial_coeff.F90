@@ -27,9 +27,11 @@ module m_polynomial_coeff
  use m_errors
  use m_profiling_abi
  use m_polynomial_term
+ use m_xmpi
 
  implicit none
 
+ public :: polynomial_coeff_broacast
  public :: polynomial_coeff_init
  public :: polynomial_coeff_free
 !!***
@@ -50,15 +52,15 @@ module m_polynomial_coeff
    character(200) :: name
 !     Name of the polynomial_coeff (Sr_y-O1_y)^3) for example
 
-   integer :: nterms
+   integer :: nterm
 !     Number of terms (short range interaction) for this polynomial_coeff
 
    real(dp) :: coefficient
 !     coefficient = value of the coefficient of this term
 !     \frac{\partial E^{k}}{\partial \tau^{k}}
 
-   type(polynomial_term_type),allocatable :: terms(:)
-!     terms(nterms)
+   type(polynomial_term_type),dimension(:),allocatable :: terms
+!     terms(nterm)
 !     contains all the displacements for this coefficient      
 
  end type polynomial_coeff_type
@@ -77,9 +79,9 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !!  name     = Name of the polynomial_coeff (Sr_y-O1_y)^3) for example
-!!  nterms   = Number of terms (short range interaction) for this polynomial_coeff
+!!  nterm   = Number of terms (short range interaction) for this polynomial_coeff
 !!  coefficient  = Value of the coefficient of this term
-!!  termstype(nterms) = Polynomial_term_type contains all the displacements for this coefficient 
+!!  termstype(nterm) = Polynomial_term_type contains all the displacements for this coefficient 
 !!
 !! OUTPUT
 !! polynomial_coeff = polynomial_coeff structure to be initialized
@@ -92,7 +94,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine polynomial_coeff_init(coefficient,name,nterms,polynomial_coeff,terms)
+subroutine polynomial_coeff_init(coefficient,name,nterm,polynomial_coeff,terms)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -105,11 +107,11 @@ subroutine polynomial_coeff_init(coefficient,name,nterms,polynomial_coeff,terms)
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: nterms
+ integer, intent(in) :: nterm
  real(dp),intent(in) :: coefficient
 !arrays
  character(200),intent(in) :: name
- type(polynomial_term_type),intent(in) :: terms(nterms)
+ type(polynomial_term_type),intent(in) :: terms(nterm)
  type(polynomial_coeff_type), intent(out) :: polynomial_coeff
 !Local variables-------------------------------
 !scalar
@@ -123,10 +125,12 @@ subroutine polynomial_coeff_init(coefficient,name,nterms,polynomial_coeff,terms)
 
 !Initilisation
  polynomial_coeff%name = name
- polynomial_coeff%nterms = nterms
- polynomial_coeff%coefficient = coefficient
- do ii = 1,polynomial_coeff%nterms
-   polynomial_coeff%terms(ii) = terms(ii)
+ polynomial_coeff%nterm = nterm
+ polynomial_coeff%coefficient = coefficient 
+ ABI_DATATYPE_ALLOCATE(polynomial_coeff%terms,(polynomial_coeff%nterm))
+ do ii = 1,polynomial_coeff%nterm
+   call polynomial_term_init(terms(ii)%atindx,terms(ii)%cell,terms(ii)%direction,terms(ii)%ndisp,&
+&                            polynomial_coeff%terms(ii),terms(ii)%power,terms(ii)%weight) 
  end do
 
 end subroutine polynomial_coeff_init
@@ -175,14 +179,108 @@ subroutine polynomial_coeff_free(polynomial_coeff)
 
 ! *************************************************************************
 
- do ii = 1,polynomial_coeff%nterms
-   call polynomial_term_free(polynomial_coeff%terms(ii))
- end do
+ if(allocated(polynomial_coeff%terms))then
+   do ii = 1,polynomial_coeff%nterm
+     call polynomial_term_free(polynomial_coeff%terms(ii))
+   end do
+   ABI_DATATYPE_DEALLOCATE(polynomial_coeff%terms)
+ end if
  polynomial_coeff%name = ""
- polynomial_coeff%nterms = zero
+ polynomial_coeff%nterm = zero
  polynomial_coeff%coefficient = zero
 
 end subroutine polynomial_coeff_free
+!!***
+
+!!****f* m_polynomial_coeff/polynomial_coeff_broacast
+!! NAME
+!! polynomial_coeff_broacast
+!!
+!! FUNCTION
+!!  MPI broadcast all types for the polynomial_coefficent structure
+!!
+!! INPUTS
+!!   master=Rank of Master
+!!   comm=MPI communicator
+!!
+!! SIDE EFFECTS
+!!   coefficent<type(polynomial_coefficent_type)>= Input if node is master, 
+!!                              other nodes returns with a completely initialized instance.
+!!
+!! PARENTS
+!!
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine polynomial_coeff_broacast(coefficients, master, comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'polynomial_coeff_broacast'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!array
+ type(polynomial_coeff_type),intent(inout) :: coefficients
+ integer, intent(in) :: master,comm
+
+!Local variables-------------------------------
+!scalars
+ integer :: ierr,ii
+!arrays
+
+! *************************************************************************
+
+ if (xmpi_comm_size(comm) == 1) return
+
+ DBG_ENTER("COLL")
+
+ ! Transmit variables
+  call xmpi_bcast(coefficients%name, master, comm, ierr)
+  call xmpi_bcast(coefficients%nterm, master, comm, ierr)
+  call xmpi_bcast(coefficients%coefficient, master, comm, ierr)
+ 
+ !Allocate arrays on the other nodes.
+  if (xmpi_comm_rank(comm) /= master) then
+    ABI_DATATYPE_ALLOCATE(coefficients%terms,(coefficients%nterm))
+    do ii=1,1,coefficients%nterm
+      call polynomial_term_free(coefficients%terms(ii))
+    end do
+  end if
+! Set the number of term on each node (needed for allocations of array)
+  do ii = 1,coefficients%nterm
+    call xmpi_bcast(coefficients%terms(ii)%ndisp, master, comm, ierr)
+  end do
+
+! Allocate arrays on the other nodes
+  if (xmpi_comm_rank(comm) /= master) then
+    do ii = 1,coefficients%nterm
+      ABI_ALLOCATE(coefficients%terms(ii)%atindx,(2,coefficients%terms(ii)%ndisp))
+      coefficients%terms(ii)%atindx = zero
+      ABI_ALLOCATE(coefficients%terms(ii)%direction,(coefficients%terms(ii)%ndisp))
+      ABI_ALLOCATE(coefficients%terms(ii)%cell,(3,2,coefficients%terms(ii)%ndisp))      
+      ABI_ALLOCATE(coefficients%terms(ii)%power,(coefficients%terms(ii)%ndisp))
+    end do
+  end if
+
+! Transfert value
+  do ii = 1,coefficients%nterm
+      call xmpi_bcast(coefficients%terms(ii)%weight, master, comm, ierr)
+      call xmpi_bcast(coefficients%terms(ii)%atindx, master, comm, ierr)
+      call xmpi_bcast(coefficients%terms(ii)%direction, master, comm, ierr)
+      call xmpi_bcast(coefficients%terms(ii)%cell, master, comm, ierr)
+      call xmpi_bcast(coefficients%terms(ii)%power, master, comm, ierr)
+  end do
+
+ DBG_EXIT("COLL")
+
+end subroutine polynomial_coeff_broacast
 !!***
 
 end module m_polynomial_coeff

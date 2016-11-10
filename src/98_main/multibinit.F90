@@ -23,7 +23,7 @@
 !!
 !! CHILDREN
 !!      abi_io_redirect,abimem_init,abinit_doctor,compute_anharmonics,
-!!      effective_potential_free,effective_potential_file_getDim,effective_potential_file_read,
+!!      effective_potential_free,effective_potential_file_getDimSystem,effective_potential_file_read,
 !!      effective_potential_writeNETCDF,effective_potential_writeXML,flush_unit,herald
 !!      init10,instrng,invars10,inupper, isfile,mover_effpot,multibinit_dtset_fre
 !!      outvars_multibinit,timein,xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum,wrtout
@@ -169,7 +169,7 @@ program multibinit
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
- call effective_potential_file_getDim(filnam(3),natom,ntypat,nph1l,nrpt,comm)
+ call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt,comm)
  
 !Read the input file, and store the information in a long string of characters
 !strlen from defs_basis module
@@ -194,7 +194,12 @@ program multibinit
 
 ! First step: Read and treat the reference structure 
 !****************************************************************************************
+!Read the harmonics parts
  call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
+!TEST_AM
+!Read the coefficient from fit
+! call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
+!TEST_AM
 !****************************************************************************************
 
 !Second step: Compute the third order derivative with finite differences

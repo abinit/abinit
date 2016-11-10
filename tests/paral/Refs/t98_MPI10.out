@@ -60,6 +60,12 @@
  Opening the file system.xml
 -Reading the file system.xml with LibXML library
 
+================================================================================
+
+ Impose acoustic sum rule on total ifc
+
+--------------------------------------------------------------------------------
+
  This effective potential contains :
   - Reference energy:        -17.1451766220
   - Number of types of atoms:    2
@@ -117,11 +123,6 @@
      -0.000000   -0.000000   -2.012513
 
 ================================================================================
-
-
- Impose acoustic sum rule on total ifc
-
---------------------------------------------------------------------------------
 
  Generation of the xml file for the reference structure in system.xml
 

@@ -44,20 +44,25 @@ module m_polynomial_term
 
  type, public :: polynomial_term_type
 
-   integer :: atindx(2)
-!     atindx(2)
+   integer,allocatable :: atindx(:,:)
+!     atindx(2,ndisp)
 !     Indexes of the atoms a and b in the unit cell
 
-   integer :: cell(3,2)
-!     cell(3,2)
+   integer,allocatable :: cell(:,:,:)
+!     cell(3,2,ndisp)
 !     indexes of the cell of the atom a and b
+
+   integer,allocatable :: direction(:)
+!     direction(ndisp)
+!     direction of the displacement
 
    integer :: ndisp
 !     Number of displacement for this terms
 !     1 for (X_y-O_y)^3, 2 for (X_y-O_y)(X_x-O_y)^2...
 
-   integer :: power
-!      power of the displacement 2 (X_z-O_z)^2 or 1 for (X_y-O_y)^1
+   integer,allocatable :: power(:)
+!     power(ndisp)
+!     power of the displacement 2 (X_z-O_z)^2 or 1 for (X_y-O_y)^1
 
    real(dp) :: weight
 !     weight of the term
@@ -95,7 +100,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine polynomial_term_init(atindx,cell,ndisp,polynomial_term,power,weight)
+subroutine polynomial_term_init(atindx,cell,direction,ndisp,polynomial_term,power,weight)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -108,27 +113,60 @@ subroutine polynomial_term_init(atindx,cell,ndisp,polynomial_term,power,weight)
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: ndisp,power
+ integer, intent(in) :: ndisp
  real(dp),intent(in) :: weight
 !arrays
- integer, intent(in) :: atindx(2)
- integer, intent(in) :: cell(3,2)
+ integer, intent(in) :: atindx(2,ndisp)
+ integer, intent(in) :: cell(3,2,ndisp)
+ integer, intent(in) :: direction(ndisp),power(ndisp)
  type(polynomial_term_type), intent(out) :: polynomial_term
 !Local variables-------------------------------
 !scalar
 !arrays
+ character(500) :: msg
 
 ! *************************************************************************
+
+!Do some checks
+ if (size(atindx,2) /= ndisp) then
+   write(msg,'(a)')' atindx and ndisp have not the same size'
+   MSG_ERROR(msg)
+ end if
+
+ if (size(cell,3) /= ndisp) then
+   write(msg,'(a)')' cell and ndisp have not the same size'
+   MSG_ERROR(msg)
+ end if
+
+ if (size(direction) /= ndisp) then
+   write(msg,'(a)')' direction and ndisp have not the same size'
+   MSG_ERROR(msg)
+ end if
+
+ if (size(power) /= ndisp) then
+   write(msg,'(a)')' power and ndisp have not the same size'
+   MSG_ERROR(msg)
+ end if
 
 !First free structure before init
  call polynomial_term_free(polynomial_term)
 
 !init the values
  polynomial_term%ndisp  = ndisp
- polynomial_term%atindx(:) = atindx(:) 
- polynomial_term%cell(:,:) = cell(:,:)
- polynomial_term%power = power
  polynomial_term%weight = weight
+
+ ABI_ALLOCATE(polynomial_term%atindx,(2,polynomial_term%ndisp))
+ polynomial_term%atindx(:,:) = atindx(:,:) 
+
+ ABI_ALLOCATE(polynomial_term%direction,(polynomial_term%ndisp))
+ polynomial_term%direction(:) = direction(:)
+
+ ABI_ALLOCATE(polynomial_term%cell,(3,2,polynomial_term%ndisp))
+ polynomial_term%cell(:,:,:) = cell(:,:,:)
+
+ ABI_ALLOCATE(polynomial_term%power,(polynomial_term%ndisp))
+ polynomial_term%power(:) = power(:)
+
 
 end subroutine polynomial_term_init
 !!***
@@ -176,11 +214,29 @@ subroutine polynomial_term_free(polynomial_term)
 
 ! *************************************************************************
 
- polynomial_term%atindx(:) = zero
- polynomial_term%cell(:,:) = zero
  polynomial_term%ndisp     = zero
- polynomial_term%power     = zero
  polynomial_term%weight    = zero
+
+ if(allocated(polynomial_term%atindx))then
+   polynomial_term%atindx(:,:) = zero
+   ABI_DEALLOCATE(polynomial_term%atindx)
+ end if
+
+ if(allocated(polynomial_term%cell))then
+   polynomial_term%cell(:,:,:) = zero
+   ABI_DEALLOCATE(polynomial_term%cell)
+ end if
+
+ if(allocated(polynomial_term%direction))then
+   polynomial_term%direction(:) = zero
+   ABI_DEALLOCATE(polynomial_term%direction)
+ end if
+
+ if(allocated(polynomial_term%power))then
+   polynomial_term%power(:) = zero
+   ABI_DEALLOCATE(polynomial_term%power)
+ end if
+
 
 end subroutine polynomial_term_free
 !!***
