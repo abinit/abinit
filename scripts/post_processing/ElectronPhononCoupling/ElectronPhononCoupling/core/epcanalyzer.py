@@ -12,7 +12,7 @@ from .util import create_directory, formatted_array_lines
 
 from .qptanalyzer import QptAnalyzer
 
-from .mpi import comm, size, rank, master_only, mpi_abort_if_exception, mpi_watch, i_am_master
+from .mpi import comm, size, rank, master_only, mpi_watch, i_am_master
 
 # =========================================================================== #
 

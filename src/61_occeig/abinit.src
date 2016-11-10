@@ -19,12 +19,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "dos_hdr_write.F90",
- "dos_degeneratewfs.F90",
- "gaus_dos.F90",
  "getnel.F90",
- "get_dos_1band.F90",
- "get_dos_1band_m.F90",
- "init_bess_spl.F90",
  "init_occ_ent.F90",
  "m_ebands.F90",
  "m_fstab.F90",
@@ -32,8 +27,6 @@ sources = [
  "occeig.F90",
  "pareigocc.F90",
  "printbxsf.F90",
- "recip_ylm.F90",
- "sphericaldens.F90",
- "tetrahedron.F90"]
+]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

@@ -46,6 +46,7 @@ MODULE m_bz_mesh
  use defs_basis
  use m_errors 
  use m_profiling_abi
+ use m_sort
 
  use m_fstrings,       only : ltoa
  use m_numeric_tools,  only : is_zero, isinteger, imin_loc, imax_loc, bisect, wrap2_pmhalf
@@ -775,7 +776,6 @@ subroutine setup_k_rotation(nsym,timrev,symrec,nbz,kbz,gmet,krottb,krottbm1)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setup_k_rotation'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -1833,7 +1833,6 @@ subroutine get_ng0sh(nk1,kbz1,nk2,kbz2,nkfold,kfold,tolq0,opt_ng0)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'get_ng0sh'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

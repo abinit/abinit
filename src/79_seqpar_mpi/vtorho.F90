@@ -496,7 +496,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  call timab(981,2,tsec)
 
 !===================================================================
-! WAVELETS - Branching with a separate VTORHO procedure 
+! WAVELETS - Branching with a separate VTORHO procedure
 !===================================================================
 
  if (dtset%usewvl == 1) then
@@ -579,7 +579,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  else
 
 !===================================================================
-! PLANE WAVES - Standard VTORHO procedure 
+! PLANE WAVES - Standard VTORHO procedure
 !===================================================================
 
 !  Electric fields: set flag to turn on various behaviors
@@ -1143,7 +1143,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !        ==  gather crystal structure date into data "cryst_struc"
          remove_inv=.false.
          if(dtset%nspden==4) remove_inv=.true.
-         call crystal_init(cryst_struc,dtset%spgroup,natom,dtset%npsp,ntypat, &
+         call crystal_init(dtset%amu_orig(:,1),cryst_struc,dtset%spgroup,natom,dtset%npsp,ntypat, &
 &         dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
 &         dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
 &         dtset%symrel,dtset%tnons,dtset%symafm)

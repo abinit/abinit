@@ -91,6 +91,7 @@
  use m_xmpi
  use m_errors
  use m_wffile
+ use m_sort
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -103,7 +104,6 @@
 #define ABI_FUNC 'tddft'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
  use interfaces_32_util
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts

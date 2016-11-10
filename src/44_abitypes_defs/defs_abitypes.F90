@@ -704,6 +704,7 @@ type dataset_type
  real(dp) :: postoldfe
  real(dp) :: postoldff
  real(dp) :: ppmfrq
+ real(dp) :: pw_unbal_thresh
  real(dp) :: ratsph_extra
  real(dp) :: recrcut
  real(dp) :: recefermi
@@ -1115,6 +1116,9 @@ type dataset_type
 
    integer, allocatable :: my_kpttab(:)
     ! Indicates the correspondence between the ikpt and ikpt_this_proc
+
+   real(dp) :: pw_unbal_thresh
+    !Threshold (in %) activating the plane-wave load balancing process (see kpgsph routine)
 
 ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! This is for the parallelisation over kpt/nsppol in the Berry Phase case

@@ -31,22 +31,16 @@ MODULE m_ddk
  use m_profiling_abi
  use m_errors
  use m_xmpi
- use m_distribfft
  use m_nctk
-#ifdef HAVE_NETCDF
- use netcdf
-#endif
  use m_hdr
  use m_kptrank
  use m_fstab
  use m_wfk
 
  use m_fstrings,      only : sjoin, itoa
- use m_io_tools,      only : open_file, file_exists, iomode_from_fname
-! use m_numeric_tools, only : wrap2_pmhalf, vdiff_eval, vdiff_print
-! use m_copy,          only : alloc_copy
+ use m_io_tools,      only : iomode_from_fname
  use defs_abitypes,   only : hdr_type, mpi_type
- use m_mpinfo,        only : destroy_mpi_enreg
+ !use m_mpinfo,        only : destroy_mpi_enreg
  use m_crystal,       only : crystal_t, crystal_free
  use m_crystal_io,    only : crystal_from_hdr
 
@@ -55,19 +49,9 @@ MODULE m_ddk
  private
 !!***
 
- integer,public,parameter :: ddk_last_version = 1
-
  integer,private,parameter :: DDK_NOMODE    = 0
  integer,private,parameter :: DDK_READMODE  = 1
  integer,private,parameter :: DDK_WRITEMODE = 2
-
- ! FIXME
- !real(dp),public,parameter :: DDB_QTOL=2.0d-8
- ! Tolerance for the identification of two wavevectors
-
- integer,private,parameter :: FPOS_EOF = -1
-
-
 
 !----------------------------------------------------------------------
 
@@ -78,22 +62,19 @@ MODULE m_ddk
 !! FUNCTION
 !!  object containing ddk derivatives ([H,r] proportional to band velocities)
 !!
-!! NOTES
-!!
 !! SOURCE
 
  type,public :: ddk_t
 
-  integer :: fh(3)
+  !integer :: fh(3)
   ! file handler
   !  Fortran unit number if iomode==IO_MODE_FORTRAN
   !  MPI file handler if iomode==IO_MODE_MPI
-  ! TODO: add netcdf?
 
   integer :: comm
   ! MPI communicator used for IO.
 
-  integer :: version
+  !integer :: version
   ! File format version read from file.
 
   integer :: iomode=IO_MODE_FORTRAN
@@ -103,9 +84,9 @@ MODULE m_ddk
   !   IO_MODE_ETSF netcdf files in etsf format
 
   integer :: rw_mode = DDK_NOMODE
-   ! (Read|Write) mode 
+   ! (Read|Write) mode
 
-  integer :: current_fpos
+  !integer :: current_fpos
   ! The current position of the file pointer used for sequential access with Fortran-IO
   !  FPOS_EOF signals the end of file
 
@@ -120,6 +101,7 @@ MODULE m_ddk
 
   integer :: maxnb
    ! Max number of bands on the FS.
+   ! TODO: Maybe maxnbfs
 
   integer :: usepaw
    ! 1 if PAW calculation, 0 otherwise
@@ -131,25 +113,27 @@ MODULE m_ddk
    ! Debug flag
 
   character(len=fnlen) :: path(3) = ABI_NOFILE
-   ! File name 
+   ! File name
 
   real(dp) :: acell(3),rprim(3,3),gprim(3,3)
+   ! TODO: Are these really needed?
 
   real(dp), allocatable :: velocity (:,:,:,:)
-   ! dims (3,maxnb,nkfs,nsppol)
- 
-   ! Used for slow FT.
-  type(crystal_t) :: cryst
+   ! (3,maxnb,nkfs,nsppol)
+   ! velocity on the FS in cartesian coordinates.
 
-  type(mpi_type) :: mpi_enreg
+  type(crystal_t) :: cryst
+   ! Crystal structure read from file
+
+  !type(mpi_type) :: mpi_enreg
+   ! TODO: Is this really needed?
 
  end type ddk_t
 
  public :: ddk_init              ! Initialize the object.
- public :: ddk_read_from_file    ! Read ddk matrix elements from file
+ public :: ddk_read_fsvelocities ! Read FS velocities from file.
  public :: ddk_free              ! Close the file and release the memory allocated.
  public :: ddk_print             ! output values
-
 !!***
 
 CONTAINS
@@ -162,7 +146,7 @@ CONTAINS
 !!  ddk_init
 !!
 !! FUNCTION
-!!  Initialize the object from file. This is a COLLECTIVE procedure that must be called 
+!!  Initialize the object from file. This is a COLLECTIVE procedure that must be called
 !!  by each process in the MPI communicator comm.
 !!
 !! INPUTS
@@ -186,7 +170,6 @@ subroutine ddk_init(ddk, path, comm)
 #define ABI_FUNC 'ddk_init'
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_51_manage_mpi
 !End of the abilint section
 
  implicit none
@@ -199,50 +182,37 @@ subroutine ddk_init(ddk, path, comm)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0,timrev2=2
- integer :: ierr,fform
- integer :: fform_ref
- integer :: my_rank
- integer :: restart, restartpaw
+ integer,parameter :: timrev2=2
+ integer :: ierr,fform,fform_ref,my_rank,restart, restartpaw
  character(len=500) :: msg
  type(hdr_type) :: hdr1,hdr_ref
-!arrays 
+!arrays
  real(dp), allocatable :: eigen1(:)
 
 !************************************************************************
 
- my_rank = xmpi_comm_rank(comm) 
+ my_rank = xmpi_comm_rank(comm)
  ddk%path = path; ddk%comm = comm
  ddk%iomode = iomode_from_fname(path(1))
-
-! if (ddk%iomode == IO_MODE_MPI) then
-!   write (msg,'(a)') " MPI iomode found for ddk - not coded yet, will default to FORTRAN "
-!   MSG_WARNING(msg)
-!   ddk%iomode = IO_MODE_FORTRAN
-! end if
-
 
 ! in this call everything is broadcast properly to the whole comm
  call wfk_read_h1mat(path(1), eigen1, hdr_ref, comm)
  fform_ref = 2
- ABI_DEALLOCATE(eigen1)
-
+ ABI_FREE(eigen1)
  if (ddk%debug) call hdr_echo(hdr_ref,fform_ref,4,unit=std_out)
 
  ! check that the other 2 headers are compatible
  call wfk_read_h1mat(path(2), eigen1, hdr1, comm)
  fform = 2
- ABI_DEALLOCATE(eigen1)
+ ABI_FREE(eigen1)
  call hdr_check(fform,fform_ref,hdr1,hdr_ref,'COLL',restart,restartpaw)
  call hdr_free(hdr1)
-
 
  call wfk_read_h1mat(path(3), eigen1, hdr1, comm)
  fform = 2
- ABI_DEALLOCATE(eigen1)
+ ABI_FREE(eigen1)
  call hdr_check(fform,fform_ref,hdr1,hdr_ref,'COLL',restart,restartpaw)
  call hdr_free(hdr1)
-
 
  ddk%nsppol = hdr_ref%nsppol
  ddk%nspinor = hdr_ref%nspinor
@@ -258,21 +228,23 @@ subroutine ddk_init(ddk, path, comm)
  call matr3inv(ddk%rprim,ddk%gprim)
 
  ! MPI_type needed for calling fourdp!
- call initmpi_seq(ddk%mpi_enreg)
+ !call initmpi_seq(ddk%mpi_enreg)
 
 end subroutine ddk_init
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddk/ddk_read_from_file
+!!****f* m_ddk/ddk_read_fsvelocities
 !! NAME
-!!  ddk_read_from_file
+!!  ddk_read_fsvelocities
 !!
 !! FUNCTION
-!!  Read in ddk matrix elements from files
+!!  Read FS velocities from DDK files. Returned in ddk%velocity
 !!
 !! INPUTS
+!!   fstab(ddk%nsppol)=Tables with the correspondence between points of the Fermi surface (FS)
+!!     and the k-points in the IBZ
 !!   comm=MPI communicator
 !!
 !! PARENTS
@@ -283,15 +255,14 @@ end subroutine ddk_init
 !!
 !! SOURCE
 
-subroutine ddk_read_from_file(comm, ddk, fstab)
+subroutine ddk_read_fsvelocities(ddk, fstab, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ddk_read_from_file'
+#define ABI_FUNC 'ddk_read_fsvelocities'
  use interfaces_14_hidewrite
- use interfaces_72_response
 !End of the abilint section
 
  implicit none
@@ -302,28 +273,20 @@ subroutine ddk_read_from_file(comm, ddk, fstab)
  type(ddk_t),intent(inout) :: ddk
  type(fstab_t),target,intent(in) :: fstab(ddk%nsppol)
 
-!arrays 
-
 !Local variables-------------------------------
 !scalars
- integer :: nprocs, my_rank, master=0
- integer :: idir
- integer :: ierr
- integer :: ikfs, ikpt, isppol, ik_ibz
- integer :: symrankkpt, ikpt_ddk
- integer :: iband, bd2tot_index
- integer :: mband
- integer :: bstart_k, nband_k
- integer :: nband_in
- integer :: vdim
- character(len=500) :: message
- real(dp) :: tmpveloc(3), tmpveloc2(3)
+ integer :: idir,ierr,ikfs, ikpt, isppol, ik_ibz
+ integer :: symrankkpt, ikpt_ddk,iband, bd2tot_index
+ integer :: mband,bstart_k, nband_k, nband_in, vdim
  type(hdr_type) :: hdr1
+ type(kptrank_type) :: kptrank_t
+ type(fstab_t), pointer :: fs
+ character(len=500) :: msg
+!arrays
+ real(dp) :: tmpveloc(3), tmpveloc2(3)
  real(dp), allocatable :: eigen1(:)
  real(dp), allocatable :: velocityp(:,:)
  real(dp), allocatable :: velocitypp(:,:)
- type(kptrank_type) :: kptrank_t
- type(fstab_t), pointer :: fs
 
 !************************************************************************
 
@@ -332,52 +295,17 @@ subroutine ddk_read_from_file(comm, ddk, fstab)
  end if
  ddk%rw_mode = ddk_READMODE
 
- nprocs = xmpi_comm_size(comm)
- my_rank = xmpi_comm_rank(comm)
-
  ddk%maxnb = maxval(fstab(:)%maxnb)
  ddk%nkfs = maxval(fstab(:)%nkfs)
- ABI_ALLOCATE(ddk%velocity, (3,ddk%maxnb,ddk%nkfs,ddk%nsppol))
+ ABI_MALLOC(ddk%velocity, (3,ddk%maxnb,ddk%nkfs,ddk%nsppol))
 
-! TODO: make this parallel enabled - at least check for master, at best get distributed k
-
+ call wrtout(std_out, sjoin('Read DDK FILES with iomode=', itoa(ddk%iomode)), 'COLL')
  do idir = 1,3
-   ! Open the files
-   select case (ddk%iomode)
-   case (IO_MODE_FORTRAN)
-#ifdef DEV_MG_WFK
-   write(message,'(a,i2)')' NEW DDK FILES, iomode = ',ddk%iomode
-   call wrtout(std_out,message,'COLL')
+   ! Open the files. All procs in comm receive hdr1 and eigen1
    call wfk_read_h1mat (ddk%path(idir), eigen1, hdr1, comm)
-#else 
-   write(message,'(a,i2)')' OLD DDK FILES, iomode = ',ddk%iomode
-   call wrtout(std_out,message,'COLL')
-   if (my_rank == master) then
-     call inpgkk(eigen1,ddk%path(idir),hdr1)
-   end if
-   if (xmpi_comm_size(comm) > 1) then
-       call hdr_bcast(hdr1, master, my_rank, comm)
-       if (my_rank /= master) then
-         mband = maxval(hdr1%nband)
-         ABI_ALLOCATE(eigen1, (2*hdr1%nsppol*hdr1%nkpt*mband**2))
-       end if
-       call xmpi_bcast(eigen1, master, comm, ierr)
-   end if
-#endif 
-! TODO: later combine these case statements, which can call the same routine, and eliminate the old ddk file format
-   case (IO_MODE_ETSF, IO_MODE_MPI)
-     write(message,'(a,i2)')' NEW DDK FILES, iomode = ',ddk%iomode
-     call wrtout(std_out,message,'COLL')
-     call wfk_read_h1mat (ddk%path(idir), eigen1, hdr1, comm)
-!   case (IO_MODE_MPI)
-!     MSG_ERROR("MPI not coded")
-   case default
-     MSG_ERROR(sjoin("Unsupported iomode:", itoa(ddk%iomode)))
-   end select
-  
    nband_in = maxval(hdr1%nband)
 
-!need correspondence hash between the DDK and the fs k-points
+   ! need correspondence hash between the DDK and the fs k-points
    call mkkptrank (hdr1%kptns,hdr1%nkpt,kptrank_t)
    do isppol=1,ddk%nsppol
      fs => fstab(isppol)
@@ -387,40 +315,37 @@ subroutine ddk_read_from_file(comm, ddk, fstab)
        call get_rank_1kpt (fs%kpts(:,ikfs),symrankkpt, kptrank_t)
        ikpt_ddk = kptrank_t%invrank(symrankkpt)
        if (ikpt_ddk == -1) then
-         write(std_out,*)'ddk_read_from_file ******** error in correspondence between ddk and fsk kpoint sets'
-         write(std_out,*)' kpt sets in fsk and ddk files must agree.'
-         MSG_ERROR("Aborting now")
+         write(msg, "(3a)")&
+           "Error in correspondence between ddk and fsk kpoint sets",ch10,&
+           "kpt sets in fsk and ddk files must agree."
+         MSG_ERROR(msg)
        end if
 
        bd2tot_index=2*nband_in**2*(ikpt_ddk-1) + 2*nband_in**2*hdr1%nkpt*(isppol-1)
        bstart_k = fs%bstcnt_ibz(1, ik_ibz)
        nband_k = fs%bstcnt_ibz(2, ik_ibz)
-!      first derivative eigenvalues for k-point. Diagonal of eigen1 is real -> only use that part
+       ! first derivative eigenvalues for k-point. Diagonal of eigen1 is real -> only use that part
        do iband = bstart_k, bstart_k+nband_k-1
          ddk%velocity(idir, iband-bstart_k+1, ikfs, isppol)=eigen1(bd2tot_index + 2*nband_in*(iband-1) + iband)
        end do
 
      end do
    end do
+
+   ABI_FREE(eigen1)
    call destroy_kptrank (kptrank_t)
-
-
-! This should always be allocated (from within the read h1mat or inpgkk subroutines)
-!   if (allocated(eigen1)) then
-     ABI_DEALLOCATE(eigen1)
-!   end if
    call hdr_free(hdr1)
  end do
 
  ! process the eigenvalues(1): rotate to cartesian and divide by 2 pi
  ! use DGEMM better here on whole matrix and then reshape?
  vdim = ddk%maxnb*ddk%nkfs*ddk%nsppol
- ABI_ALLOCATE(velocityp, (3,vdim))
- velocityp = reshape (ddk%velocity, (/3,vdim/))
- ABI_ALLOCATE(velocitypp, (3,vdim))
+ ABI_MALLOC(velocityp, (3,vdim))
+ velocityp = reshape (ddk%velocity, [3,vdim])
+ ABI_MALLOC(velocitypp, (3,vdim))
  velocitypp = zero
  call dgemm('n','n',3,vdim,3,one,ddk%cryst%rprimd,3,velocityp,3,zero,velocitypp,3)
- ABI_DEALLOCATE(velocityp)
+ ABI_FREE(velocityp)
 
 ! do isppol = 1, ddk%nsppol
 !   do ikpt = 1, ddk%nkfs
@@ -432,12 +357,12 @@ subroutine ddk_read_from_file(comm, ddk, fstab)
 !   end do
 ! end do
 
- ddk%velocity = reshape (velocitypp, (/3,ddk%maxnb,ddk%nkfs,ddk%nsppol/))
- ABI_DEALLOCATE(velocitypp)
+ ddk%velocity = reshape (velocitypp, [3,ddk%maxnb,ddk%nkfs,ddk%nsppol])
 
+ ABI_FREE(velocitypp)
  call destroy_kptrank (kptrank_t)
 
-end subroutine ddk_read_from_file
+end subroutine ddk_read_fsvelocities
 !!***
 
 !----------------------------------------------------------------------
@@ -480,10 +405,10 @@ subroutine ddk_free(ddk)
  if (allocated(ddk%velocity)) then
    ABI_FREE(ddk%velocity)
  end if
- 
+
  ! types
  call crystal_free(ddk%cryst)
- call destroy_mpi_enreg(ddk%mpi_enreg)
+ !call destroy_mpi_enreg(ddk%mpi_enreg)
 
 end subroutine ddk_free
 !!***
@@ -498,7 +423,7 @@ end subroutine ddk_free
 !!  Print info on the object.
 !!
 !! INPUTS
-!! [unit]=the unit number for output 
+!! [unit]=the unit number for output
 !! [prtvol]=verbosity level
 !! [mode_paral]=either "COLL" or "PERS"
 !!
@@ -542,7 +467,7 @@ subroutine ddk_print(ddk, header, unit, prtvol, mode_paral)
  my_unt =std_out; if (PRESENT(unit)) my_unt   =unit
  my_prtvol=0    ; if (PRESENT(prtvol)) my_prtvol=prtvol
  my_mode='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
-                                                                    
+
  msg=' ==== Info on the ddk% object ==== '
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
  call wrtout(my_unt,msg,my_mode)
@@ -557,6 +482,5 @@ subroutine ddk_print(ddk, header, unit, prtvol, mode_paral)
 
 end subroutine ddk_print
 !!***
-
 
 END MODULE m_ddk

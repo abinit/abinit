@@ -13,11 +13,14 @@
 #   * This script changes the current directory to doc/.
 #   * The structure of the script is ready for individual builds.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
 from time import gmtime,strftime
 
-import commands
 import os
 import re
 import sys
@@ -63,16 +66,16 @@ my_configs = ["doc/config/specs/documents.conf"]
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
      not os.path.exists("src/98_main/abinit.F90") ):
-  print "%s: You must be in the top of the ABINIT source tree." % my_name
-  print "%s: Aborting now." % my_name
+  print("%s: You must be in the top of the ABINIT source tree." % my_name)
+  print("%s: Aborting now." % my_name)
   sys.exit(1)
 
 # Read config file(s)
 cnf = MyConfigParser()
 for cnf_file in my_configs:
   if ( not os.path.exists(cnf_file) ):
-    print "%s: Could not find config file (%s)." % (my_name,cnf)
-    print "%s: Aborting now." % my_name
+    print("%s: Could not find config file (%s)." % (my_name,cnf))
+    print("%s: Aborting now." % my_name)
     sys.exit(2)
 
 # What time is it?
@@ -171,7 +174,7 @@ if ( ext != "" ):
 os.chdir("..")
 
 # Create top doc makefile
-mf = file("doc/Makefile.am","w")
+mf = open("doc/Makefile.am", "wt")
 mf.write(makefile_header(my_name,now))
 mf.write(doc)
 if ( ext != "" ):
@@ -188,7 +191,7 @@ if ( ext != "" ):
 # Write additional data
 add = "config/makefiles/doc.am"
 if( os.path.exists(add) ):
-  mf.write("\n"+file(add,"r").read())
+  mf.write("\n" + open(add, "rt").read())
 
 # End of file
 mf.close()
