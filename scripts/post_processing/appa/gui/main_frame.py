@@ -166,7 +166,7 @@ class MainFrame(QtGui.QMainWindow):
 
 #----------------------------------Methods---------------------------------------------#
     def showDialog(self):
-        path = QtGui.QFileDialog.getOpenFileName(self, 'Open file', var.path(), "FILE (*_HIST *_OUT.nc *.out*)")
+        path = QtGui.QFileDialog.getOpenFileName(self, 'Open file', var.path(), "FILE (*_HIST *_OUT.nc *.out* *HIST.nc)")
         pathFile=str(path)
         var.global_path = pathFile
         del path

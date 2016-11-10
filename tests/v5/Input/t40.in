@@ -76,7 +76,7 @@
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = M. Torrent
-#%% keywords = FAILS_IFMPI
+#%% keywords = PAW
 #%% description = 
 ##%%  Test of irdden and prtdosm input keyword.
 #%%   Density from test 38 is read; then a non self-consistent calculation

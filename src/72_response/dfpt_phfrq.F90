@@ -57,7 +57,7 @@
 !!   2) In case of q=Gamma, only the real part is used.
 !!
 !! PARENTS
-!!      anaddb,m_ifc,m_phonons,respfn,thmeig
+!!      anaddb,m_effective_potential,m_ifc,m_phonons,respfn,thmeig
 !!
 !! CHILDREN
 !!      fxphas_seq,mkherm,symdyma,zhpev
