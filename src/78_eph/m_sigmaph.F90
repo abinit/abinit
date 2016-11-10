@@ -1046,10 +1046,10 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  ! TODO: Will become input eph_tsmesh start stop num
  new%ntemp = 10
  ABI_CHECK(new%ntemp > 1, "ntemp cannot be 1")
- temp_range = [0.6_dp, 1.2_dp]
+ temp_range = [100, 300]
  tstep = (temp_range(2) - temp_range(1)) / (new%ntemp - 1)
  ABI_MALLOC(new%kTmesh, (new%ntemp))
- new%kTmesh = arth(temp_range(1), tstep, new%ntemp)
+ new%kTmesh = arth(temp_range(1), tstep, new%ntemp) * kb_HaK
 
  ! Compute the chemical potential at the different physical temperatures with Fermi-Dirac.
  ABI_MALLOC(new%mu_e, (new%ntemp))
@@ -1222,8 +1222,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
    NCF_CHECK(nf90_close(new%ncid))
  end if ! master
 
- call xmpi_barrier(comm)
  ! Now reopen the file in parallel.
+ call xmpi_barrier(comm)
  NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGMAPH.nc"), comm))
  NCF_CHECK(nctk_set_datamode(new%ncid))
 
