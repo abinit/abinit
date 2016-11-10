@@ -1,5 +1,5 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/getghc
+!!****f* ABINIT/multithreaded_getghc
 !!
 !! NAME
 !! multithreaded_getghc

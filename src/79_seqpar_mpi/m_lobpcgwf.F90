@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/lobpcgwf
+!!****f* ABINIT/m_lobpcgwf
 !! NAME
-!! lobpcgwf
+!! m_lobpcgwf
 !!
 !! FUNCTION
 !! this routine updates the whole wave functions at a given k-point,
@@ -11,39 +11,16 @@
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (FBottin,GZ,AR,MT,FDahm)
+!! Copyright (C) 1998-2016 ABINIT group (JB)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! for the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! INPUTS
-!!  dtset <type(dataset_type)>=all input variales for this dataset
-!!  gs_hamk <type(gs_hamiltonian_type)>=all data for the hamiltonian at k
-!!  kinpw(npw)=(modified) kinetic energy for each plane wave (hartree)
-!!  mpi_enreg=informations about MPI parallelization
-!!  nband=number of bands at this k point for that spin polarization
-!!  npw=number of plane waves at this k point
-!!  prtvol=control print volume and debugging output
-!!
-!! OUTPUT
-!!  resid(nband)=residuals for each states
-!!  subham(nband_k*(nband_k+1))=the matrix elements of h
-!!  If gs_hamk%usepaw==0:
-!!    gsc(2,mgsc)=<g|s|c> matrix elements (s=overlap)
-!!    totvnl(nband_k*(1-gs_hamk%usepaw),nband_k*(1-gs_hamk%usepaw))=the matrix elements of vnl
-!!
-!! SIDE EFFECTS
-!!  cg(2,mcg)=updated wavefunctions
-!!
 !! PARENTS
 !!      vtowfk
 !!
 !! CHILDREN
-!!      abi_xcopy,abi_xgemm,abi_xheev,abi_xhegv,abi_xorthonormalize,abi_xtrsm
-!!      alloc_on_gpu,copy_from_gpu,copy_on_gpu,dealloc_on_gpu,getghc,gpu_xgemm
-!!      gpu_xorthonormalize,gpu_xtrsm,prep_getghc,setwfparameter,timab,wfcopy
-!!      wrtout,xmpi_sum,xprecon
 !!
 !! SOURCE
 
