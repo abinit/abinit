@@ -350,7 +350,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: wtime_step,now,prev
  real(dp) :: born,born_bar,boxcut,deltae,diffor,diel_q,dum,ecut,ecutf,elast
  real(dp) :: epawdc1_dum,evar,fe1fixed,fermie1,gsqcut,qphon_norm,maxfor,renorm,res2,res3,residm2
- real(dp) :: vhartr1_g0(2) !,vxc1_g0(2),vpsp1_g0(2)
  real(dp) :: ucvol,vxcavg
  character(len=500) :: msg
  character(len=fnlen) :: fi1o
@@ -1189,26 +1188,15 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr,&
    ngfftf,cplex,nfftf,dtset%nspden,vtrial1,mpi_enreg)
 
-#if 1
-   ! Compute vhartr1(G=0)
-   vhartr1_g0 = zero
-   if (cplex == 1) vhartr1_g0(1) = sum(vhartr1)
-   if (cplex == 2) then
-     vhartr1_g0(1) = sum(vhartr1(1:nfftf:2))
-     vhartr1_g0(2) = sum(vhartr1(2:nfftf:2))
-   end if
-   if (mpi_enreg%nproc_fft > 1) call xmpi_sum(vhartr1_g0, mpi_enreg%comm_fft, ierr)
-   vhartr1_g0 = vhartr1_g0 / nfftotf
-
-   ! Write vhartr1(G=0)
-   if (mpi_enreg%me_fft == 0) then
+   ! Add rhog1(G=0) to file
+   if (mpi_enreg%me_g0 == 1) then
      if (dtset%iomode == IO_MODE_ETSF) then
 #ifdef HAVE_NETCDF
        NCF_CHECK(nctk_open_modify(ncid, nctk_ncify(fi1o), xmpi_comm_self))
-       ncerr = nctk_def_one_array(ncid, nctkarr_t('vhartr1_g0', "dp", "two"), varid=varid)
+       ncerr = nctk_def_one_array(ncid, nctkarr_t('rhog1_g0', "dp", "two"), varid=varid)
        NCF_CHECK(ncerr)
        NCF_CHECK(nctk_set_datamode(ncid))
-       NCF_CHECK(nf90_put_var(ncid, varid, vhartr1_g0))
+       NCF_CHECK(nf90_put_var(ncid, varid, rhog1(:,1)))
        NCF_CHECK(nf90_close(ncid))
 #endif
      else
@@ -1217,11 +1205,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
          MSG_ERROR(msg)
        end if
        if (fort_denpot_skip(ncid, msg) /= 0) MSG_ERROR(msg)
-       write(ncid) vhartr1_g0(:)
+       write(ncid) rhog1(:,1)
        close(ncid)
      end if
    end if
-#endif
 
  end if
 

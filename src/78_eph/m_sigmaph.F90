@@ -1377,13 +1377,13 @@ subroutine sigmaph_solve(self, ikcalc, spin, ebands)
 
  ! Write data (use iso_c_binding to associate a real pointer to complex data because
  ! netcdf does not support complex types.
- shape4(2:) = shape(self%vals_wr)
- call c_f_pointer(c_loc(self%vals_wr), rdata4, shape4)
- NCF_CHECK(nf90_put_var(self%ncid, vid("vals_wr"), rdata4, start=[1,1,1,1,ikcalc,spin]))
+ !shape4(2:) = shape(self%vals_wr)
+ !call c_f_pointer(c_loc(self%vals_wr), rdata4, shape4)
+ !NCF_CHECK(nf90_put_var(self%ncid, vid("vals_wr"), rdata4, start=[1,1,1,1,ikcalc,spin]))
 
- shape3(2:) = shape(self%dvals_dwr)
- call c_f_pointer(c_loc(self%dvals_dwr), rdata3, shape3)
- NCF_CHECK(nf90_put_var(self%ncid, vid("dvals_dwr"), rdata3, start=[1,1,1,ikcalc,spin]))
+ !shape3(2:) = shape(self%dvals_dwr)
+ !call c_f_pointer(c_loc(self%dvals_dwr), rdata3, shape3)
+ !NCF_CHECK(nf90_put_var(self%ncid, vid("dvals_dwr"), rdata3, start=[1,1,1,ikcalc,spin]))
 
  !nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol")])
  !shape4(2:) = shape(self%spfunc_wr)

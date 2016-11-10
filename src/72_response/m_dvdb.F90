@@ -57,7 +57,7 @@ MODULE m_dvdb
 !!***
 
  ! Version 1: header + vscf1(r)
- ! Version 2: header + vscf1(r) + record with vhartree1(G=0)
+ ! Version 2: header + vscf1(r) + record with rhog1(G=0)
  !integer,public,parameter :: dvdb_last_version = 1
  integer,public,parameter :: dvdb_last_version = 2
 
@@ -197,9 +197,9 @@ MODULE m_dvdb
   ! Wannier representation (real values)
   ! v1scf_rpt(nrpt, nfft , nspden, 3*natom)
 
-  real(dp),allocatable :: vhartr1_g0(:,:)
-  ! vhartr1_g0(2, numv1)
-  ! G=0 component of vhartree1. Used to treat the long range component
+  real(dp),allocatable :: rhog1_g0(:,:)
+  ! rhog1_g0(2, numv1)
+  ! G=0 component of rhog1. Used to treat the long range component
   ! in (polar) semiconductors
 
   type(crystal_t) :: cryst
@@ -323,7 +323,7 @@ subroutine dvdb_init(db, path, comm)
 
    ABI_MALLOC(db%cplex_v1, (db%numv1))
    ABI_MALLOC(db%ngfft3_v1, (3, db%numv1))
-   ABI_MALLOC(db%vhartr1_g0, (2, db%numv1))
+   ABI_MALLOC(db%rhog1_g0, (2, db%numv1))
 
    nqpt = 0
    do iv1=1,db%numv1
@@ -341,9 +341,9 @@ subroutine dvdb_init(db, path, comm)
      do ii=1,hdr1%nspden
        read(unt, err=10, iomsg=msg)
      end do
-     ! Read vhartr1_g0 (if available)
-     db%vhartr1_g0(:, iv1) = zero
-     if (db%version > 1) read(unt, err=10, iomsg=msg) db%vhartr1_g0(:, iv1)
+     ! Read rhog1_g0 (if available)
+     db%rhog1_g0(:, iv1) = zero
+     if (db%version > 1) read(unt, err=10, iomsg=msg) db%rhog1_g0(:, iv1)
 
      ! check whether this q-point is already in the list.
      iq_found = 0
@@ -399,14 +399,14 @@ subroutine dvdb_init(db, path, comm)
      ABI_MALLOC(db%ngfft3_v1, (3, db%numv1))
      ABI_MALLOC(db%qpts, (3, db%nqpt))
      ABI_MALLOC(db%pos_dpq, (3, db%mpert, db%nqpt))
-     ABI_MALLOC(db%vhartr1_g0, (2, db%numv1))
+     ABI_MALLOC(db%rhog1_g0, (2, db%numv1))
    end if
 
    call xmpi_bcast(db%cplex_v1, master, comm, ierr)
    call xmpi_bcast(db%ngfft3_v1, master, comm, ierr)
    call xmpi_bcast(db%qpts, master, comm, ierr)
    call xmpi_bcast(db%pos_dpq, master, comm, ierr)
-   call xmpi_bcast(db%vhartr1_g0, master, comm, ierr)
+   call xmpi_bcast(db%rhog1_g0, master, comm, ierr)
  end if
 
  ! Init crystal_t from the hdr read from file.
@@ -567,9 +567,8 @@ subroutine dvdb_free(db)
  if (allocated(db%v1scf_rpt)) then
    ABI_FREE(db%v1scf_rpt)
  end if
-
- if (allocated(db%vhartr1_g0)) then
-   ABI_FREE(db%vhartr1_g0)
+ if (allocated(db%rhog1_g0)) then
+   ABI_FREE(db%rhog1_g0)
  end if
 
  ! types
@@ -634,7 +633,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_unt,my_prtvol
+ integer :: my_unt,my_prtvol,iv1
  character(len=4) :: my_mode
  character(len=500) :: msg
 
@@ -650,6 +649,13 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
 
  write(std_out,*)"Version: ",db%version
  write(std_out,*)"Number of q-points: ",db%nqpt
+
+ if (my_prtvol > 0) then
+   write(std_out,*)"rhog1(q,G=0)"
+   do iv1=1,db%numv1
+     write(std_out,*)db%rhog1_g0(:, iv1)
+   end do
+ end if
 
 end subroutine dvdb_print
 !!***
@@ -2191,7 +2197,7 @@ subroutine dvdb_seek(db, idir, ipert, iqpt)
      do ispden=1,db%nspden
        read(db%fh, err=10, iomsg=msg)
      end do
-     ! Skip record with vhartr1_g0 (if present)
+     ! Skip record with rhog1_g0 (if present)
      if (db%version > 1) read(db%fh, err=10, iomsg=msg)
    end do
    db%current_fpos = pos_wanted
@@ -2827,9 +2833,8 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
 ! Here I made a mistake because 102 corresponds to GS potentials
 ! as a consequence DVDB files generated with version <= 8.1.6
 ! contain list of potentials with fform = 102.
- integer :: fform_pot=102
- !integer :: fform_pot=109
- !integer :: fform_pot=111
+ !integer :: fform_pot=102
+ integer :: fform_pot=111
  integer :: ii,jj,fform,ount,cplex,nfft,ifft,ispden,nperts
  integer :: n1,n2,n3,v1_varid,ierr
  logical :: qeq0
@@ -2838,9 +2843,9 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
  type(dvdb_t) :: dvdb
 !arrays
  integer :: units(nfiles)
- real(dp) :: vhartr1_g0(2) !,vxc1_g0(2),vpsp1_g0(2)
+ real(dp) :: rhog1_g0(2)
  real(dp),allocatable :: v1(:)
- logical :: has_vh1g0(nfiles)
+ logical :: has_rhog1_g0(nfiles)
  type(hdr_type),target,allocatable :: hdr1_list(:)
 
 !************************************************************************
@@ -2886,8 +2891,8 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
    ! Supported fform:
    ! 109  POT1 files without vh1(G=0)
    ! 111  POT1 files with extra record with vh1(G=0) after FFT data.
-   has_vh1g0(ii) = .True.
-   if (fform == 109) has_vh1g0(ii) = .False.
+   has_rhog1_g0(ii) = .True.
+   if (fform == 109) has_rhog1_g0(ii) = .False.
  end do
 
  ! Validate headers.
@@ -2920,10 +2925,10 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
         read(units(jj), err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfft)
         write(ount, err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfft)
       end do
-      ! Add vh1(G=0)
-      vhartr1_g0 = zero
-      if (has_vh1g0(jj)) read(units(jj), err=10, iomsg=msg) vhartr1_g0
-      if (dvdb_last_version > 1) write(ount, err=10, iomsg=msg) vhartr1_g0
+      ! Add rhog1(G=0)
+      rhog1_g0 = zero
+      if (has_rhog1_g0(jj)) read(units(jj), err=10, iomsg=msg) rhog1_g0
+      if (dvdb_last_version > 1) write(ount, err=10, iomsg=msg) rhog1_g0
    else
 #ifdef HAVE_NETCDF
       ! Netcdf IO
@@ -2933,12 +2938,12 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
         NCF_CHECK(nf90_get_var(units(ii), v1_varid, v1, start=[1,1,1,ispden], count=[cplex, n1, n2, n3, 1]))
         write(ount, err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfft)
       end do
-      ! Add vh1(G=0)
-      vhartr1_g0 = zero
-      if (has_vh1g0(jj)) then
-        NCF_CHECK(nf90_get_var(units(ii), nctk_idname(units(ii), "vhartr1_g0"), vhartr1_g0))
+      ! Add rhog1(G=0)
+      rhog1_g0 = zero
+      if (has_rhog1_g0(jj)) then
+        NCF_CHECK(nf90_get_var(units(ii), nctk_idname(units(ii), "rhog1_g0"), rhog1_g0))
       end if
-      if (dvdb_last_version > 1) write(ount, err=10, iomsg=msg) vhartr1_g0
+      if (dvdb_last_version > 1) write(ount, err=10, iomsg=msg) rhog1_g0
 #endif
    end if
 
