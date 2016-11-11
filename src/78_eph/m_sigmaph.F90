@@ -443,6 +443,8 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
 
  ! Open the DVDB file
  call dvdb_open_read(dvdb, ngfftf, xmpi_comm_self)
+ ! This one to symmetrize the potentials.
+ dvdb%symv1 = .True.; dvdb%debug = .True.
 
  ! Loop over k-points for QP corrections.
  do ikcalc=1,sigma%nkcalc
@@ -712,7 +714,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
 
          ! Accumulate contribution to phonon self-energy
          eig0mkq = ebands%eig(ib_kq,ikq_ibz,spin)
-         !f_mkq = ebands%occ(ib_kq,ikq_ibz,spin)
+         f_mkq = ebands%occ(ib_kq,ikq_ibz,spin)
          weigth_q = sigma%wtq_k(iq_ibz)
 
          do imode=1,natom3
@@ -724,11 +726,12 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
 
              do it=1,sigma%ntemp
                nqnu = one; f_mkq = one
-               nqnu = nbe(wqnu, sigma%kTmesh(it), zero)
-               f_mkq = nfd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
-               !f_nk = nfd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
                !write(std_out,*)wqnu,sigma%kTmesh(it)
-               !write(std_out,*)eig0mkq,sigma%kTmesh(it),sigma%mu_e(it)
+               !write(std_out,*)eig0mkq,sigma%kTmesh(it),sigma%mu_e(it),eig0mkq-sigma%mu_e(it) / sigma%kTmesh(it)
+
+               nqnu = nbe(wqnu, sigma%kTmesh(it), zero)
+               !f_mkq = nfd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
+               !f_nk = nfd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
 
                ! Accumulate Sigma(w) for state ib_k
                fact_wr(:) = (nqnu + f_mkq      ) / (sigma%wrmesh_b(:,ib_k) - eig0mkq + wqnu - ieta) + &
