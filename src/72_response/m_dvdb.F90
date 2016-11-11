@@ -3014,6 +3014,7 @@ end subroutine dvdb_check_v1sym
 
 subroutine dvdb_test_symmetries(db_path, comm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -3161,12 +3162,11 @@ end subroutine dvdb_test_symmetries
 
 subroutine dvdb_test_ftinterp(db_path, ngqpt, comm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'dvdb_test_symmetries'
- use interfaces_32_util
- use interfaces_41_geometry
+#define ABI_FUNC 'dvdb_test_ftinterp'
 !End of the abilint section
 
  implicit none

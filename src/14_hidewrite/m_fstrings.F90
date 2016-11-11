@@ -994,10 +994,11 @@ end function sjoin_4
 
 pure function sjoin_5(str1,str2,str3,str4,str5) result(ostr)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'sjoin_4'
+#define ABI_FUNC 'sjoin_5'
 !End of the abilint section
 
  character(len=*),intent(in) :: str1,str2,str3,str4,str5
@@ -1022,10 +1023,11 @@ end function sjoin_5
 
 pure function sjoin_6(str1,str2,str3,str4,str5,str6) result(ostr)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'sjoin_4'
+#define ABI_FUNC 'sjoin_6'
 !End of the abilint section
 
  character(len=*),intent(in) :: str1,str2,str3,str4,str5,str6
@@ -1050,10 +1052,11 @@ end function sjoin_6
 
 pure function sjoin_7(str1,str2,str3,str4,str5,str6,str7) result(ostr)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'sjoin_4'
+#define ABI_FUNC 'sjoin_7'
 !End of the abilint section
 
  character(len=*),intent(in) :: str1,str2,str3,str4,str5,str6,str7
