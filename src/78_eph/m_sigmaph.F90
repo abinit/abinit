@@ -672,8 +672,8 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
        ABI_MALLOC(bras_kq, (2, npw_kq*nspinor, 1))
        ABI_MALLOC(cgwork, (2, npw_kirr*nspinor))
 
-       do ib_kq=1,0
-       !do ib_kq=1,wfd%nband(ikq_ibz, spin)
+       !do ib_kq=1,0
+       do ib_kq=1,wfd%nband(ikq_ibz, spin)
 
          ! symmetrize wavefunctions from IBZ (if needed).
          ! Be careful with time-reversal symmetry.
@@ -722,8 +722,10 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
              gkk2 = gkk_nu(1,ib_k,imode) ** 2 + gkk_nu(2,ib_k,imode) ** 2
 
              do it=1,sigma%ntemp
-               nqnu = nbe(wqnu, sigma%kTmesh(it), zero)
-               f_mkq = nfd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
+               !write(std_out,*)wqnu,sigma%kTmesh(it)
+               !nqnu = nbe(wqnu, sigma%kTmesh(it), zero)
+               nqnu = one; f_mkq = one
+               !f_mkq = nfd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
                !f_nk = nfd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
 
                ! Accumulate Sigma(w) for state ib_k
@@ -904,16 +906,20 @@ elemental real(dp) function nfd(ee, kT, mu)
 !Arguments ------------------------------------
  real(dp),intent(in) :: ee, kT, mu
 
+ real(dp) :: ee_mu
+
 ! *************************************************************************
+
+ ee_mu = ee - mu
 
  !TODO: Find decent value.
  if (kT > tol16) then
-   nfd = one / (exp((ee-mu) / kT) + one)
+   nfd = one / (exp(ee_mu / kT) + one)
  else
    ! Heaviside
-   if (ee > mu) then
+   if (ee_mu > zero) then
      nfd = zero
-   else if (ee < mu) then
+   else if (ee < zero) then
      nfd = one
    else
      nfd = half
@@ -957,10 +963,19 @@ elemental real(dp) function nbe(ee, kT, mu)
 !Arguments ------------------------------------
  real(dp),intent(in) :: ee, kT, mu
 
+!local
+ real(dp) :: ee_mu
+
 ! *************************************************************************
 
+ ee_mu = ee - mu
+
  if (kT > tol16) then
-   nbe = one / (exp((ee-mu) / kT) - one)
+   if (ee_mu > tol12) then
+     nbe = one / (exp(ee_mu / kT) - one)
+   else
+     nbe = zero
+   end if
  else
    ! No condensate for T-->0
    nbe = zero
@@ -999,7 +1014,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
 #define ABI_FUNC 'sigmaph_new'
  use interfaces_14_hidewrite
  use interfaces_56_recipspace
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1351,10 +1365,11 @@ end subroutine sigmaph_free
 
 subroutine sigmaph_setup_kcalc(self, ikcalc)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'nbe'
+#define ABI_FUNC 'sigmaph_setup_kcalc'
 !End of the abilint section
 
  implicit none
@@ -1413,10 +1428,11 @@ end subroutine sigmaph_setup_kcalc
 
 subroutine sigmaph_solve(self, ikcalc, spin, ebands)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'nbe'
+#define ABI_FUNC 'sigmaph_solve'
 !End of the abilint section
 
  implicit none
@@ -1445,13 +1461,13 @@ subroutine sigmaph_solve(self, ikcalc, spin, ebands)
 
  ! Write data (use iso_c_binding to associate a real pointer to complex data because
  ! netcdf does not support complex types.
- !shape4(2:) = shape(self%vals_wr)
- !call c_f_pointer(c_loc(self%vals_wr), rdata4, shape4)
- !NCF_CHECK(nf90_put_var(self%ncid, vid("vals_wr"), rdata4, start=[1,1,1,1,ikcalc,spin]))
+ shape4(2:) = shape(self%vals_wr)
+ call c_f_pointer(c_loc(self%vals_wr), rdata4, shape4)
+ NCF_CHECK(nf90_put_var(self%ncid, vid("vals_wr"), rdata4, start=[1,1,1,1,ikcalc,spin]))
 
- !shape3(2:) = shape(self%dvals_dwr)
- !call c_f_pointer(c_loc(self%dvals_dwr), rdata3, shape3)
- !NCF_CHECK(nf90_put_var(self%ncid, vid("dvals_dwr"), rdata3, start=[1,1,1,ikcalc,spin]))
+ shape3(2:) = shape(self%dvals_dwr)
+ call c_f_pointer(c_loc(self%dvals_dwr), rdata3, shape3)
+ NCF_CHECK(nf90_put_var(self%ncid, vid("dvals_dwr"), rdata3, start=[1,1,1,ikcalc,spin]))
 
  !nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol")])
  !shape4(2:) = shape(self%spfunc_wr)
