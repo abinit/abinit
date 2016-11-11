@@ -1041,6 +1041,7 @@ subroutine v1phq_complete(cryst,qpt,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,sym
  logical :: has_phase
  logical,parameter :: debug=.False.
  character(len=500) :: msg
+ integer,save :: enough=0
 !arrays
  integer :: symrel_eq(3,3),symrec_eq(3,3),symm(3,3),g0_qpt(3),l0(3),tsm1g(3)
  integer :: symq(4,2,cryst%nsym)
@@ -1087,7 +1088,10 @@ pcase_loop: &
    has_phase = any(abs(tnon) > tol12)
    ! FIXME
    !ABI_CHECK(.not. has_phase, "has phase must be tested")
-   if (has_phase) MSG_WARNING("has phase must be tested")
+   if (has_phase) then
+     enough = enough + 1
+     if (enough == 1) MSG_WARNING("has phase must be tested")
+   end if
 
    workg = zero
 
@@ -1363,6 +1367,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourdp0=0
+ integer,save :: enough=0
  integer :: natom3,mu,ispden,idir,ipert,idir_eq,ipert_eq,mu_eq,cnt,tsign
 !arrays
  integer :: symrec_eq(3,3),sm1(3,3),l0(3) !g0_qpt(3), symrel_eq(3,3),
@@ -1401,7 +1406,10 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
    tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym))
    ! FIXME
    !ABI_CHECK(all(abs(tnon) < tol12), "tnon!")
-   if (.not.all(abs(tnon) < tol12)) MSG_WARNING("tnon!")
+   if (.not.all(abs(tnon) < tol12)) then
+     enough = enough + 1
+     if (enough == 1) MSG_WARNING("tnon must be tested!")
+   end if
 
    ipert_eq = cryst%indsym(4,isym,ipert)
 

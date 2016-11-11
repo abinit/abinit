@@ -140,7 +140,7 @@ module m_sigmaph
    ! Step of the linear mesh along the real axis (Ha units).
 
   integer :: ngqpt(3)
-  ! Number of divisions in the Q mesh in the BZ.
+   ! Number of divisions in the Q mesh in the BZ.
 
   integer,allocatable :: bstart_ks(:,:)
    ! bstart_ks(nkcalc,nsppol)
@@ -170,16 +170,19 @@ module m_sigmaph
   real(dp),allocatable :: wrmesh_b(:,:)
   ! wrmesh_b(nwr, max_nbcalc)
   ! Frequency mesh along the real axis (Ha units) used for the different bands
+  ! This array depends on (ikcalc, spin)
 
   complex(dpc),allocatable :: vals_wr(:,:,:)
    ! vals_wr(nwr, ntemp, max_nbcalc)
    ! Sigma_ph(omega, kT, band) for given (k, spin).
    ! enk_KS corresponds to nwr/2 + 1.
+   ! This array depends on (ikcalc, spin)
 
   complex(dpc),allocatable :: dvals_dwr(:,:)
    ! vals_wr(ntemp, max_nbcalc)
    ! The derivative of Sigma_ph(omega, kT, band) for given (k, spin) wrt omega computed at the KS energy.
    ! enk_KS corresponds to nwr/2 + 1.
+   ! This array depends on (ikcalc, spin)
 
   !complex(dpc),allocatable :: vals_qwr(:,:,:)
    !  vals(nwr, ntemp, max_nbcalc, nqpt, natom*3, nkcalc)
@@ -722,10 +725,11 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
              gkk2 = gkk_nu(1,ib_k,imode) ** 2 + gkk_nu(2,ib_k,imode) ** 2
 
              do it=1,sigma%ntemp
-               !write(std_out,*)wqnu,sigma%kTmesh(it)
-               !nqnu = nbe(wqnu, sigma%kTmesh(it), zero)
                nqnu = one; f_mkq = one
-               !f_mkq = nfd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
+               !write(std_out,*)wqnu,sigma%kTmesh(it)
+               nqnu = nbe(wqnu, sigma%kTmesh(it), zero)
+               !write(std_out,*)eig0mkq,sigma%kTmesh(it),sigma%mu_e(it)
+               f_mkq = nfd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
                !f_nk = nfd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
 
                ! Accumulate Sigma(w) for state ib_k
@@ -906,8 +910,8 @@ elemental real(dp) function nfd(ee, kT, mu)
 !Arguments ------------------------------------
  real(dp),intent(in) :: ee, kT, mu
 
+!Local variables ------------------------------
  real(dp) :: ee_mu
-
 ! *************************************************************************
 
  ee_mu = ee - mu
@@ -963,9 +967,8 @@ elemental real(dp) function nbe(ee, kT, mu)
 !Arguments ------------------------------------
  real(dp),intent(in) :: ee, kT, mu
 
-!local
+!Local variables ------------------------------
  real(dp) :: ee_mu
-
 ! *************************************************************************
 
  ee_mu = ee - mu
@@ -1209,12 +1212,14 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("ngqpt", "int", "three"), &
      nctkarr_t("bstart_ks", "int", "nkcalc, nsppol"), &
      nctkarr_t("nbcalc_ks", "int", "nkcalc, nsppol"), &
      nctkarr_t("kcalc", "int", "three, nkcalc"), &
      nctkarr_t("kTmesh", "dp", "ntemp"), &
      nctkarr_t("mu_e", "dp", "ntemp"), &
      ! These arrays acquire two extra dimensions on file (nkcalc, nsppol).
+     nctkarr_t("wrmesh_b", "dp", "nwr, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("vals_wr", "dp", "two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("dvals_dwr", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol") &
    ])
@@ -1234,9 +1239,12 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
    ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "wr_step"], [new%wr_step])
    NCF_CHECK(ncerr)
 
+   NCF_CHECK(nf90_put_var(ncid, vid("ngqpt"), new%ngqpt))
    NCF_CHECK(nf90_put_var(ncid, vid("bstart_ks"), new%bstart_ks))
    NCF_CHECK(nf90_put_var(ncid, vid("nbcalc_ks"), new%nbcalc_ks))
    NCF_CHECK(nf90_put_var(ncid, vid("kcalc"), new%kcalc))
+   NCF_CHECK(nf90_put_var(ncid, vid("kTmesh"), new%kTmesh))
+   NCF_CHECK(nf90_put_var(ncid, vid("mu_e"), new%mu_e))
    NCF_CHECK(nf90_close(new%ncid))
  end if ! master
 
@@ -1461,6 +1469,8 @@ subroutine sigmaph_solve(self, ikcalc, spin, ebands)
 
  ! Write data (use iso_c_binding to associate a real pointer to complex data because
  ! netcdf does not support complex types.
+ NCF_CHECK(nf90_put_var(self%ncid, vid("wrmesh_b"), self%wrmesh_b, start=[1,1,ikcalc,spin]))
+
  shape4(2:) = shape(self%vals_wr)
  call c_f_pointer(c_loc(self%vals_wr), rdata4, shape4)
  NCF_CHECK(nf90_put_var(self%ncid, vid("vals_wr"), rdata4, start=[1,1,1,1,ikcalc,spin]))
