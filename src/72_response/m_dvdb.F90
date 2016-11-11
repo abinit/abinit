@@ -170,7 +170,7 @@ MODULE m_dvdb
    ! ngfft3_v1(3, numv1)
    ! The FFT mesh used for each v1 potential (the one used to store data in the file).
 
- real(dp) :: acell(3),rprim(3,3),gprim(3,3)
+  real(dp) :: acell(3),rprim(3,3),gprim(3,3)
    ! Used for slow FT.
    ! TODO: To be removed.
 
@@ -1580,11 +1580,10 @@ subroutine rotate_fqg(itirev,symm,qpt,tnon,ngfft,nfft,nspden,infg,outfg)
  implicit none
 
 !Arguments ------------------------------------
- integer,intent(in) :: itirev,nfft,nspden
 !scalars
- integer,intent(in) :: ngfft(18)
+ integer,intent(in) :: itirev,nfft,nspden
 !arrays
- integer,intent(in) :: symm(3,3)
+ integer,intent(in) :: symm(3,3),ngfft(18)
  real(dp),intent(in) :: qpt(3),tnon(3)
  real(dp),intent(in) :: infg(2,nfft,nspden)
  real(dp),intent(out) :: outfg(2,nfft,nspden)
@@ -1736,7 +1735,7 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
 ! *************************************************************************
 
  if (allocated(db%v1scf_rpt)) then
-   call wrtout(std_out, "v1scf_rpt is already computed. Returning")
+   if (db%debug) call wrtout(std_out, "v1scf_rpt is already computed. Returning")
    return
  end if
 
@@ -2931,7 +2930,7 @@ subroutine dvdb_check_v1sym(db)
        call littlegroup_pert(cryst%gprimd,idir,cryst%indsym,std_out,ipert,cryst%natom,cryst%nsym,nsym1,rfmeth2,&
          cryst%symafm,symafm1,symq,cryst%symrec,cryst%symrel,symrel1,syuse0,cryst%tnons,tnons1)
 
-       ! FIXME: (3) or (18)
+       ! TODO: (3) or (18)
        cplex = db%cplex_v1(v1pos)
        ngfft(1:3) = db%ngfft3_v1(:, v1pos)
        nfft = product(ngfft(:3))
@@ -3133,8 +3132,6 @@ subroutine dvdb_test_symmetries(db_path, comm)
 
 end subroutine dvdb_test_symmetries
 !!***
-
-
 
 !----------------------------------------------------------------------
 

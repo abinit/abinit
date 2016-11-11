@@ -129,15 +129,23 @@ module m_sigmaph
   integer :: nqbz
   ! Number of q-points in the BZ.
 
+  integer :: nqibz_k
+  ! Number of q-points in the IBZ(k). Depends on ikcalc.
+
   integer :: ncid
   ! Netcdf file used to save results.
 
   integer :: mpw
-  ! Maximum number of PWs for all possible k+q
-  integer :: gmax(3)
+
+  complex(dpc) :: ieta
+   ! Used to shift the poles in the complex plane (Ha units)
+   ! Corresponds to `i eta` term in equations.
 
   real(dp) :: wr_step
    ! Step of the linear mesh along the real axis (Ha units).
+
+  ! Maximum number of PWs for all possible k+q
+  integer :: gmax(3)
 
   integer :: ngqpt(3)
    ! Number of divisions in the Q mesh in the BZ.
@@ -153,11 +161,24 @@ module m_sigmaph
    ! Depends on spin because all denerate states should be included when symmetries are used
 
   integer,allocatable :: kcalc2ibz(:,:)
-   ! Mapping kcalc --> ibz as reported in listkk
+    !kcalc2ibz (nkcalc, 6))
+    ! Mapping kcalc --> ibz as reported by listkk
 
   real(dp),allocatable :: kcalc(:,:)
    ! kcalc(3, nkcalc)
    ! List of k-points where the self-energy is computed.
+
+  real(dp),allocatable :: qibz_k(:,:)
+  ! qibz(3,nqibz)
+  ! Reduced coordinates of the q-points in the IBZ. Depends on ikcalc.
+
+  real(dp),allocatable :: wtq_k(:)
+  ! wtq(nqibz)
+  ! Weights of the q-points in the IBZ (normalized to one). Depends on ikcalc.
+
+  real(dp),allocatable :: qbz(:,:)
+  ! qbz(3,nqbz)
+  ! Reduced coordinates of the q-points in the BZ.
 
   real(dp),allocatable :: kTmesh(:)
    ! kTmesh(ntemp)
@@ -171,6 +192,14 @@ module m_sigmaph
   ! wrmesh_b(nwr, max_nbcalc)
   ! Frequency mesh along the real axis (Ha units) used for the different bands
   ! This array depends on (ikcalc, spin)
+
+  complex(dpc),allocatable :: vals_e0ks(:,:,:,:)
+   ! vals_e0ks(ntemp, max_nbcalc, nkcalc, nsppol)
+   ! Sigma_ph(omega=e_KS, kT, band, kcalc, spin).
+
+  complex(dpc),allocatable :: dvals_de0ks(:,:,:,:)
+   ! dvals_de0ks(ntemp, max_nbcalc, nkcalc, nsppol)
+   ! d Sigma_ph(omega, kT, band, kcalc, spin) / d omega | e_KS
 
   complex(dpc),allocatable :: vals_wr(:,:,:)
    ! vals_wr(nwr, ntemp, max_nbcalc)
@@ -188,25 +217,6 @@ module m_sigmaph
    !  vals(nwr, ntemp, max_nbcalc, nqpt, natom*3, nkcalc)
    !  (q, mu)-resolved self-energy for given (k, spin)
 
-  !complex(dpc) :: ieta
-   ! Used to shift the poles in the complex plane (Ha units)
-   ! Corresponds to `i eta` term in equations.
-
-  integer :: nqibz_k
-  ! Number of q-points in the IBZ(k). Depends on ikcalc.
-
-  real(dp),allocatable :: qibz_k(:,:)
-  ! qibz(3,nqibz)
-  ! Reduced coordinates of the q-points in the IBZ. Depends on ikcalc.
-
-  real(dp),allocatable :: wtq_k(:)
-  ! wtq(nqibz)
-  ! Weights of the q-points in the IBZ (normalized to one). Depends on ikcalc.
-
-  real(dp),allocatable :: qbz(:,:)
-  ! qbz(3,nqbz)
-  ! Reduced coordinates of the q-points in the BZ.
-
  end type sigmaph_t
 
  private :: sigmaph_new             ! Creation method (allocates memory, initialize data from input vars).
@@ -215,7 +225,6 @@ module m_sigmaph
  private :: sigmaph_solve          ! Compute the QP corrections.
  !private :: sigmaph_setup_kcalc_spin   ! Return tables used to perform the sum over q-points for given (k-point, spin)
  !private :: sigmaph_print          ! Print results to main output file.
- !private :: sigmaph_symvals        ! Symmetrize self-energy matrix elements (symsigma == 1).
 
 contains  !=====================================================
 !!***
@@ -302,7 +311,6 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  integer :: nbcalc_ks,bstart_ks,ikcalc
  real(dp) :: cpu,wall,gflops
  real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q
- complex(dpc) :: ieta
  logical,parameter :: have_ktimerev=.True.
  logical :: isirr_k,isirr_kq,gen_eigenpb
  type(wfd_t) :: wfd
@@ -316,7 +324,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  integer :: indkk_kq(1,6)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),lf(2),rg(2),res(2)
- real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mkq,f_mkq !,f_nk,
+ real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mkq,f_mkq !,f_nk
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
@@ -352,13 +360,6 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  ! Get one-dimensional structure factor information on the coarse grid.
  ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*natom))
  call getph(cryst%atindx,natom,n1,n2,n3,ph1d,cryst%xred)
-
- ! Broadening parameter
- if (dtset%elph2_imagden > tol12) then
-   ieta = j_dpc * dtset%elph2_imagden
- else
-   ieta = j_dpc * 0.0001_dp
- end if
 
  ! Construct object to store final results.
  ecut = dtset%ecut ! dtset%dilatmx
@@ -728,20 +729,27 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
                nqnu = one; f_mkq = one
                !write(std_out,*)wqnu,sigma%kTmesh(it)
                !write(std_out,*)eig0mkq,sigma%kTmesh(it),sigma%mu_e(it),eig0mkq-sigma%mu_e(it) / sigma%kTmesh(it)
-
                nqnu = nbe(wqnu, sigma%kTmesh(it), zero)
                !f_mkq = nfd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
                !f_nk = nfd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
 
+               ! Accumulate Sigma(w=e_KS) and its derivative for state ib_k
+               fact_wr(1) =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu - sigma%ieta) + &
+                             (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu - sigma%ieta)
+
+               sigma%vals_e0ks(it, ib_k, ikcalc, spin) = sigma%vals_e0ks(it, ib_k, ikcalc, spin) + &
+                 weigth_q * gkk2 * fact_wr(1)
+               !sigma%dvals_de0ks(it, ib_k, ikcalc, spin) = sigma%dvals_de0ks(it, ib_k, ikcalc, spin) + &
+
                ! Accumulate Sigma(w) for state ib_k
-               fact_wr(:) = (nqnu + f_mkq      ) / (sigma%wrmesh_b(:,ib_k) - eig0mkq + wqnu - ieta) + &
-                            (nqnu - f_mkq + one) / (sigma%wrmesh_b(:,ib_k) - eig0mkq - wqnu - ieta)
-               sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkk2 * fact_wr(:) * weigth_q
+               fact_wr(:) = (nqnu + f_mkq      ) / (sigma%wrmesh_b(:,ib_k) - eig0mkq + wqnu - sigma%ieta) + &
+                            (nqnu - f_mkq + one) / (sigma%wrmesh_b(:,ib_k) - eig0mkq - wqnu - sigma%ieta)
+               sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + weigth_q * gkk2 * fact_wr(:)
 
                ! Accumulate d(Sigma)/dw for state ib_k
-               !fact_wr(1) = (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu - ieta) + &
-               !             (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu - ieta)
-               !sigma%dvals_dwr(it, ib_k) = sigma%dvals_dwr(it, ib_k) + gkk2 * fact_wr(1) * weigth_q
+               !fact_wr(1) = (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu - sigma%ieta) + &
+               !             (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu - sigma%ieta)
+               sigma%dvals_dwr(it, ib_k) = sigma%dvals_dwr(it, ib_k) + weigth_q * gkk2 * fact_wr(1)
              end do
 
            end do
@@ -780,7 +788,11 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
 
  call wrtout(std_out, "Computation of Sigma_ph completed", "COLL", do_flush=.True.)
 
- call sigmaph_print(sigma, std_out, "dims+results", ebands)
+ !call xmpi_sum(sigma%vals_e0ks, comm, ierr)
+ !call xmpi_sum(sigma%dvals_de0ks, comm, ierr)
+ if (my_rank == master) then
+   call sigmaph_print(sigma, std_out, "dims+results", ebands)
+ end if
 
  ! Free memory
  ABI_FREE(gvnl1)
@@ -1060,6 +1072,10 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  ! Copy important dimensions.
  new%nsppol = ebands%nsppol; new%nspinor = ebands%nspinor
 
+ ! Broadening parameter
+ new%ieta = j_dpc * 0.0001_dp
+ if (dtset%elph2_imagden > tol12) new%ieta = j_dpc * dtset%elph2_imagden
+
  ! Build (linear) mesh of temperatures.
  ! TODO: Will become input eph_tsmesh start stop num
  new%ntemp = 10
@@ -1083,7 +1099,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  ! Frequency mesh for spectral function.
  new%nwr = 11
  ABI_CHECK(mod(new%nwr, 2) == 1, "nwr should be odd!")
- new%wr_step = 0.01
+ new%wr_step = 0.01 / eV_Ha
 
  ! Define q-mesh for integration.
  ! Either q-mesh from DDB (no interpolation) or eph_ngqpt_fine (Fourier interpolation if q not in DDB)
@@ -1184,7 +1200,13 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  my_gmax = new%gmax; call xmpi_max(my_gmax, new%gmax, comm, ierr)
  call wrtout(std_out, sjoin('optimal value of mpw=', itoa(new%mpw)))
 
- ! Allocate arrays used to store final results and set them to zero.
+ ! ================================================================
+ ! Allocate arrays used to store final results and set them to zero
+ ! ================================================================
+ ABI_CALLOC(new%vals_e0ks, (new%ntemp, new%max_nbcalc, new%nkcalc, new%nsppol))
+ ABI_CALLOC(new%dvals_de0ks, (new%ntemp, new%max_nbcalc, new%nkcalc, new%nsppol))
+
+ ! Frequency dependent stuff
  ABI_CALLOC(new%vals_wr, (new%nwr, new%ntemp, new%max_nbcalc))
  ABI_CALLOC(new%dvals_dwr, (new%ntemp, new%max_nbcalc))
  ABI_CALLOC(new%wrmesh_b, (new%nwr, new%max_nbcalc))
@@ -1345,6 +1367,12 @@ subroutine sigmaph_free(self)
  end if
 
  ! complex
+ if (allocated(self%vals_e0ks)) then
+   ABI_FREE(self%vals_e0ks)
+ end if
+ if (allocated(self%dvals_de0ks)) then
+   ABI_FREE(self%dvals_de0ks)
+ end if
  if (allocated(self%vals_wr)) then
    ABI_FREE(self%vals_wr)
  end if
@@ -1422,90 +1450,6 @@ subroutine sigmaph_setup_kcalc(self, ikcalc)
 end subroutine sigmaph_setup_kcalc
 !!***
 
-!!****f* m_sigmaph/sigmaph_print
-!! NAME
-!!  sigmaph_print
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!  unt=Fortran unit number
-!!  what: "dims" to print dims, "results" to print QP corrections. Options can be concatenated e.g. "dims+results"
-!!  ebands<ebands_t>=KS band energies.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine sigmaph_print(self, unt, what, ebands)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_print'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
- integer,intent(in) :: unt
- character(len=*),intent(in) :: what
- type(sigmaph_t),intent(in) :: self
- type(ebands_t),intent(in) :: ebands
-
-!Local variables-------------------------------
-!integer
- integer :: ik,is,ib,band,ik_ibz,it
-!arrays
- complex(dpc) :: cval
-
-! *************************************************************************
-
- ! Write dimensions
- if (index(what, "dims") /= 0) then
-   write(unt,"(a)")sjoin("Symsigma: ",itoa(self%symsigma), "Timrev:",itoa(self%timrev))
-   write(unt,"(a)")sjoin("Number of real frequencies:", itoa(self%nwr), ", Step:", ftoa(self%wr_step*Ha_eV), "[eV]")
-   write(unt,"(a)")sjoin("Number of temperatures:", itoa(self%ntemp), &
-     "From:", ftoa(self%kTmesh(1) / kb_HaK), "to", ftoa(self%kTmesh(self%ntemp) / kb_HaK), "[K]")
-   write(unt,"(a)")sjoin("Number of q-points in the BZ:", itoa(self%nqbz))
-   write(unt,"(a)")"List of K-points for self-energy corrections:"
-   do ik=1,self%nkcalc
-     do is=1,self%nsppol
-     if (self%nsppol == 2) write(unt,"(a,i1)")"... For spin: ",is
-       write(unt, "(2(i4,2x),a,2(i4,1x))")&
-         ik, is, trim(ktoa(self%kcalc(:,ik))), self%bstart_ks(ik,is), self%bstart_ks(ik,is) + self%nbcalc_ks(ik,is) - 1
-     end do
-   end do
- end if
-
- ! Write results
- it = 1
- if (index(what, "results") /= 0) then
-   do ik=1,self%nkcalc
-     do is=1,self%nsppol
-       if (self%nsppol == 1) then
-          write(unt,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ik)))
-       else
-          write(unt,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ik)), ", spin:", itoa(is))
-       end if
-       write(unt,"(a)")" e_KS Sigma_1(e_KS)  Sigma_2(e_KS)"
-       ik_ibz = self%kcalc2ibz(ik,1)
-       do ib=1,self%nbcalc_ks(ik,is)
-         band = self%bstart_ks(ik,is) + ib - 1
-         cval = self%vals_wr(self%nwr/2+1, it, ib) * Ha_eV
-         write(unt, "(i4, 4(f8.3,1x))")ib, ebands%eig(band,ik_ibz,is) * Ha_eV, real(cval), aimag(cval)
-       end do
-       write(unt, "(a)")" "
-     end do
-   end do
- end if
-
-end subroutine sigmaph_print
-!!***
-
 !!****f* m_sigmaph/sigmaph_solve
 !! NAME
 !!  sigmaph_solve
@@ -1550,6 +1494,9 @@ subroutine sigmaph_solve(self, ikcalc, spin, ebands)
 ! *************************************************************************
 
  ! Compute QP corrections.
+ ! Symmetrize self-energy matrix elements (symsigma == 1).
+ if (self%symsigma == 1) then
+ end if
 
  ! Compute spectral functions.
  if (self%nwr > 1) then
@@ -1592,6 +1539,90 @@ contains
 #endif
 
 end subroutine sigmaph_solve
+!!***
+
+!!****f* m_sigmaph/sigmaph_print
+!! NAME
+!!  sigmaph_print
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!  unt=Fortran unit number
+!!  what: "dims" to print dims, "results" to print QP corrections. Options can be concatenated e.g. "dims+results"
+!!  ebands<ebands_t>=KS band energies.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine sigmaph_print(self, unt, what, ebands)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'sigmaph_print'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in) :: unt
+ character(len=*),intent(in) :: what
+ type(sigmaph_t),intent(in) :: self
+ type(ebands_t),intent(in) :: ebands
+
+!Local variables-------------------------------
+!integer
+ integer :: ikc,is,ibc,band,ik_ibz,it
+!arrays
+ complex(dpc) :: cval
+
+! *************************************************************************
+
+ ! Write dimensions
+ if (index(what, "dims") /= 0) then
+   write(unt,"(a)")sjoin("Symsigma: ",itoa(self%symsigma), "Timrev:",itoa(self%timrev))
+   write(unt,"(a)")sjoin("Number of real frequencies:", itoa(self%nwr), ", Step:", ftoa(self%wr_step*Ha_eV), "[eV]")
+   write(unt,"(a)")sjoin("Number of temperatures:", itoa(self%ntemp), &
+     "From:", ftoa(self%kTmesh(1) / kb_HaK), "to", ftoa(self%kTmesh(self%ntemp) / kb_HaK), "[K]")
+   write(unt,"(a)")sjoin("Number of q-points in the BZ:", itoa(self%nqbz))
+   write(unt,"(a)")"List of K-points for self-energy corrections:"
+   do ikc=1,self%nkcalc
+     do is=1,self%nsppol
+     if (self%nsppol == 2) write(unt,"(a,i1)")"... For spin: ",is
+       write(unt, "(2(i4,2x),a,2(i4,1x))")&
+         ikc, is, trim(ktoa(self%kcalc(:,ikc))), self%bstart_ks(ikc,is), self%bstart_ks(ikc,is) + self%nbcalc_ks(ikc,is) - 1
+     end do
+   end do
+ end if
+
+ ! Write results
+ it = 1
+ if (index(what, "results") /= 0) then
+   do ikc=1,self%nkcalc
+     do is=1,self%nsppol
+       if (self%nsppol == 1) then
+          write(unt,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ikc)))
+       else
+          write(unt,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ikc)), ", spin:", itoa(is))
+       end if
+       write(unt,"(a)")" e_KS Sigma_1(e_KS)  Sigma_2(e_KS)"
+       ik_ibz = self%kcalc2ibz(ikc,1)
+       do ibc=1,self%nbcalc_ks(ikc,is)
+         band = self%bstart_ks(ikc,is) + ibc - 1
+         cval = self%vals_e0ks(it, ibc, ikc, is) * Ha_eV
+         write(unt, "(i4, 4(f8.3,1x))")ibc, ebands%eig(band,ik_ibz,is) * Ha_eV, real(cval), aimag(cval)
+       end do
+       write(unt, "(a)")" "
+     end do
+   end do
+ end if
+
+end subroutine sigmaph_print
 !!***
 
 end module m_sigmaph

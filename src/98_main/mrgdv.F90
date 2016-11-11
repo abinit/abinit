@@ -50,7 +50,7 @@ program mrgdv
  use m_profiling_abi
  use m_dvdb
 
- use m_fstrings,        only : sjoin, itoa
+ use m_fstrings,        only : sjoin, itoa, ltoa
  use m_numeric_tools,   only : vdiff_eval, vdiff_print
  use m_io_tools,        only : file_exists, prompt
  use m_fftcore,         only : ngfft_seq
@@ -131,6 +131,7 @@ program mrgdv
        write(std_out,*)"Options for developers:"
        write(std_out,*)"test_symmetries            Test symmetrization of DFPT potentials."
        write(std_out,*)"                           Assume DVDB with all 3*natom perturbations for each q (prep_gkk)."
+       write(std_out,*)"test_ftinterp              Test Fourier interpolation of DFPT potentials."
        goto 100
      end if
    end do
@@ -173,7 +174,7 @@ program mrgdv
      call dvdb_free(db)
 
    case ("test_symmetries")
-     call wrtout(std_out," Testing symmetries (assuming overcomplete DVDB)",'COLL')
+     call wrtout(std_out," Testing symmetries (assuming overcomplete DVDB)")
      call get_command_argument(2, db_path)
 
      call dvdb_test_symmetries(db_path, comm)
@@ -190,7 +191,7 @@ program mrgdv
        !ngqpt = [8,8,8]
      end if
 
-     call wrtout(std_out," Testing Fourier interpolation of DFPT potentials",'COLL')
+     write(std_out,"(a)")sjoin("Testing Fourier interpolation with ngqpt:", ltoa(ngqpt))
      call dvdb_test_ftinterp(db_path, ngqpt, comm)
 
    case default
