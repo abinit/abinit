@@ -2687,6 +2687,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ! end if
 
 ! Allocate vlocal. Note nvloc
+ ! I set vlocal to huge to trigger possible bugs (DFPT routines should not access the data)
  ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamkq%nvloc))
  vlocal = huge(one)
 
