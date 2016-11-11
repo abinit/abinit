@@ -46,7 +46,7 @@ module m_sigmaph
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_time,           only : cwtime
- use m_fstrings,       only : itoa, sjoin, ktoa, ltoa, strcat
+ use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth
  use m_io_tools,       only : iomode_from_fname
  use m_special_funcs,  only : dirac_delta
@@ -193,15 +193,15 @@ module m_sigmaph
    ! Corresponds to `i eta` term in equations.
 
   integer :: nqibz_k
-  ! Number of q-points in the IBZ(k)
+  ! Number of q-points in the IBZ(k). Depends on ikcalc.
 
   real(dp),allocatable :: qibz_k(:,:)
   ! qibz(3,nqibz)
-  ! Reduced coordinates of the q-points in the IBZ.
+  ! Reduced coordinates of the q-points in the IBZ. Depends on ikcalc.
 
   real(dp),allocatable :: wtq_k(:)
   ! wtq(nqibz)
-  ! Weights of the q-points in the IBZ (normalized to one)
+  ! Weights of the q-points in the IBZ (normalized to one). Depends on ikcalc.
 
   real(dp),allocatable :: qbz(:,:)
   ! qbz(3,nqbz)
@@ -212,11 +212,9 @@ module m_sigmaph
  private :: sigmaph_new             ! Creation method (allocates memory, initialize data from input vars).
  private :: sigmaph_free            ! Free memory.
  private :: sigmaph_setup_kcalc     ! Return tables used to perform the sum over q-points for given k-point.
+ private :: sigmaph_solve          ! Compute the QP corrections.
  !private :: sigmaph_setup_kcalc_spin   ! Return tables used to perform the sum over q-points for given (k-point, spin)
- !private :: sigmaph_solve          ! Compute the QP corrections.
-
  !private :: sigmaph_print          ! Print results to main output file.
- !private :: sigmaph_write          ! Write results to formatted file.
  !private :: sigmaph_symvals        ! Symmetrize self-energy matrix elements (symsigma == 1).
 
 contains  !=====================================================
@@ -365,6 +363,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  ! Construct object to store final results.
  ecut = dtset%ecut ! dtset%dilatmx
  sigma = sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm)
+ call sigmaph_print(sigma, std_out, "dims", ebands)
 
  ! This is the maximum number of PWs for all possible k+q
  mpw = sigma%mpw; gmax = sigma%gmax
@@ -489,6 +488,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
      bstart_ks = sigma%bstart_ks(ikcalc,spin)
      nbcalc_ks = sigma%nbcalc_ks(ikcalc, spin)
 
+     !call sigmaph_setup_kcalc_spin(sigma, ikcalc, spin, ebands) ??
      ! Zero self-energy matrix elements. Build frequency mesh for nk states.
      sigma%vals_wr = zero; sigma%dvals_dwr = zero
      do ib_k=1,nbcalc_ks
@@ -496,7 +496,6 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
        eig0nk = ebands%eig(band,ik_ibz,spin) - sigma%wr_step * (sigma%nwr/2)
        sigma%wrmesh_b(:,ib_k) = arth(eig0nk, sigma%wr_step, sigma%nwr)
      end do
-     !call sigmaph_setup_kcalc_spin(sigma, ikcalc, spin, ebands) ??
 
      ABI_MALLOC(gkk_atm, (2, nbcalc_ks, natom3))
      ABI_MALLOC(gkk_nu, (2, nbcalc_ks, natom3))
@@ -675,7 +674,6 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
        ABI_MALLOC(bras_kq, (2, npw_kq*nspinor, 1))
        ABI_MALLOC(cgwork, (2, npw_kirr*nspinor))
 
-       !do ib_kq=1,0
        do ib_kq=1,wfd%nband(ikq_ibz, spin)
 
          ! symmetrize wavefunctions from IBZ (if needed).
@@ -726,11 +724,11 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
 
              do it=1,sigma%ntemp
                nqnu = one; f_mkq = one
-               !write(std_out,*)wqnu,sigma%kTmesh(it)
                nqnu = nbe(wqnu, sigma%kTmesh(it), zero)
-               !write(std_out,*)eig0mkq,sigma%kTmesh(it),sigma%mu_e(it)
                f_mkq = nfd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
                !f_nk = nfd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
+               !write(std_out,*)wqnu,sigma%kTmesh(it)
+               !write(std_out,*)eig0mkq,sigma%kTmesh(it),sigma%mu_e(it)
 
                ! Accumulate Sigma(w) for state ib_k
                fact_wr(:) = (nqnu + f_mkq      ) / (sigma%wrmesh_b(:,ib_k) - eig0mkq + wqnu - ieta) + &
@@ -778,6 +776,8 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  end do !ikcalc
 
  call wrtout(std_out, "Computation of Sigma_ph completed", "COLL", do_flush=.True.)
+
+ call sigmaph_print(sigma, std_out, "dims+results", ebands)
 
  ! Free memory
  ABI_FREE(gvnl1)
@@ -911,14 +911,15 @@ elemental real(dp) function nfd(ee, kT, mu)
  real(dp),intent(in) :: ee, kT, mu
 
 !Local variables ------------------------------
- real(dp) :: ee_mu
+ real(dp) :: ee_mu,arg
 ! *************************************************************************
 
  ee_mu = ee - mu
+ arg = ee_mu / kT
 
  !TODO: Find decent value.
  if (kT > tol16) then
-   nfd = one / (exp(ee_mu / kT) + one)
+   nfd = one / (exp(arg) + one)
  else
    ! Heaviside
    if (ee_mu > zero) then
@@ -968,14 +969,15 @@ elemental real(dp) function nbe(ee, kT, mu)
  real(dp),intent(in) :: ee, kT, mu
 
 !Local variables ------------------------------
- real(dp) :: ee_mu
+ real(dp) :: ee_mu, arg
 ! *************************************************************************
 
  ee_mu = ee - mu
+ arg = ee_mu / kT
 
  if (kT > tol16) then
    if (ee_mu > tol12) then
-     nbe = one / (exp(ee_mu / kT) - one)
+     nbe = one / (exp(arg) - one)
    else
      nbe = zero
    end if
@@ -1106,8 +1108,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  ! These parameters will be passed via the input file (similar to kptgw, bdgw)
  ! We initialize IBZ(k) here so that we have all the basic dimensions of the run and it's possible
  ! to distribuite the calculations among the processors.
- new%symsigma = 0
- new%timrev = 1
+ new%symsigma = 0; new%timrev = 1
  new%nkcalc = ebands%nkpt
  !new%nkcalc = 1
 
@@ -1117,7 +1118,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
 
  new%kcalc = ebands%kptns
  !new%kcalc = zero
- new%bstart_ks = 1; new%nbcalc_ks = 2
+ new%bstart_ks = 1; new%nbcalc_ks = 6
  new%max_nbcalc = maxval(new%nbcalc_ks)
 
  ! The k-point and the symmetries relating the BZ k-point to the IBZ.
@@ -1225,14 +1226,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
    ])
    NCF_CHECK(ncerr)
 
-   if (new%nwr > 1) then
-      ! Make room for the spectral function on file.
-      ncerr = nctk_def_arrays(ncid, [ &
-         nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol")])
-      NCF_CHECK(ncerr)
-   end if
-
+   ! ======================================================
    ! Write data that do not depend on the (kpt, spin) loop.
+   ! ======================================================
    NCF_CHECK(nctk_set_datamode(ncid))
    ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: "symsigma"], [new%symsigma])
    NCF_CHECK(ncerr)
@@ -1245,6 +1241,14 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
    NCF_CHECK(nf90_put_var(ncid, vid("kcalc"), new%kcalc))
    NCF_CHECK(nf90_put_var(ncid, vid("kTmesh"), new%kTmesh))
    NCF_CHECK(nf90_put_var(ncid, vid("mu_e"), new%mu_e))
+
+   !if (new%nwr > 1) then
+   !   ! Make room for the spectral function on file.
+   !   ncerr = nctk_def_arrays(ncid, [ &
+   !      nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol")])
+   !   NCF_CHECK(ncerr)
+   !end if
+
    NCF_CHECK(nf90_close(new%ncid))
  end if ! master
 
@@ -1415,6 +1419,89 @@ subroutine sigmaph_setup_kcalc(self, ikcalc)
 end subroutine sigmaph_setup_kcalc
 !!***
 
+!!****f* m_sigmaph/sigmaph_print
+!! NAME
+!!  sigmaph_print
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!  unt=Fortran unit number
+!!  what: "dims" to print dims, "results" to print QP corrections. Options can be concatenated e.g. "dims+results"
+!!  ebands<ebands_t>=KS band energies.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine sigmaph_print(self, unt, what, ebands)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'sigmaph_solve'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in) :: unt
+ character(len=*),intent(in) :: what
+ type(sigmaph_t),intent(in) :: self
+ type(ebands_t),intent(in) :: ebands
+
+!Local variables-------------------------------
+!integer
+ integer :: ik,is,ib,band,ik_ibz,it
+!arrays
+ complex(dpc) :: cval
+
+! *************************************************************************
+
+ ! Write dimensions
+ if (index(what, "dims") /= 0) then
+   write(unt,"(a)")sjoin("Symsigma: ",itoa(self%symsigma), "Timrev:",itoa(self%timrev))
+   write(unt,"(a)")sjoin("Number of real frequencies:", itoa(self%nwr), ", Step:", ftoa(self%wr_step*Ha_eV), "[eV]")
+   write(unt,"(a)")sjoin("Number of temperatures:", itoa(self%ntemp), &
+     "From:", ftoa(self%kTmesh(1) / kb_HaK), "to", ftoa(self%kTmesh(self%ntemp) / kb_HaK), "[K]")
+   write(unt,"(a)")sjoin("Number of q-points in the BZ:", itoa(self%nqbz))
+   write(unt,"(a)")"List of K-points for self-energy corrections:"
+   do ik=1,self%nkcalc
+     do is=1,self%nsppol
+     if (self%nsppol == 2) write(unt,"(a,i1)")"... For spin: ",is
+       write(unt, "(2(i4,2x),a,2(i4,1x))")&
+         ik, is, trim(ktoa(self%kcalc(:,ik))), self%bstart_ks(ik,is), self%bstart_ks(ik,is) + self%nbcalc_ks(ik,is) - 1
+     end do
+   end do
+ end if
+
+ ! Write results
+ it = 1
+ if (index(what, "results") /= 0) then
+   do ik=1,self%nkcalc
+     do is=1,self%nsppol
+       if (self%nsppol == 1) then
+          write(unt,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ik)))
+       else
+          write(unt,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ik)), ", spin:", itoa(is))
+       end if
+       write(unt,"(a)")" e_KS Sigma_1(e_KS)  Sigma_2(e_KS)"
+       ik_ibz = self%kcalc2ibz(ik,1)
+       do ib=1,self%nbcalc_ks(ik,is)
+         band = self%bstart_ks(ik,is) + ib - 1
+         cval = self%vals_wr(self%nwr/2+1, it, ib) * Ha_eV
+         write(unt, "(i4, 4(f8.3,1x))")ib, ebands%eig(band,ik_ibz,is) * Ha_eV, real(cval), aimag(cval)
+       end do
+       write(unt, "(a)")" "
+     end do
+   end do
+ end if
+
+end subroutine sigmaph_print
+!!***
+
 !!****f* m_sigmaph/sigmaph_solve
 !! NAME
 !!  sigmaph_solve
@@ -1435,7 +1522,6 @@ end subroutine sigmaph_setup_kcalc
 !! SOURCE
 
 subroutine sigmaph_solve(self, ikcalc, spin, ebands)
-
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
