@@ -1526,8 +1526,8 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
 
  ! Symmetrize (copied from dfpt_looppert)
  ! Determines the set of symmetries that leaves the perturbation invariant.
- call littlegroup_pert(cryst%gprimd,idir,cryst%indsym,std_out,ipert,cryst%natom,cryst%nsym,nsym1,rfmeth2,&
-   cryst%symafm,symafm1,symq,cryst%symrec,cryst%symrel,symrel1,syuse0,cryst%tnons,tnons1)
+ call littlegroup_pert(cryst%gprimd,idir,cryst%indsym,dev_null,ipert,cryst%natom,cryst%nsym,nsym1,rfmeth2,&
+   cryst%symafm,symafm1,symq,cryst%symrec,cryst%symrel,symrel1,syuse0,cryst%tnons,tnons1,unit=dev_null)
 
  ! Set up corresponding symmetry data
  ABI_MALLOC(irrzon1, (nfft**(1-1/nsym1),2,(nspden/nsppol)-3*(nspden/4)))
@@ -2935,8 +2935,8 @@ subroutine dvdb_check_v1sym(db)
        v1pos = db%pos_dpq(idir, ipert, iqpt); if (v1pos == 0) cycle
 
        ! Determines the set of symmetries that leaves the perturbation invariant.
-       call littlegroup_pert(cryst%gprimd,idir,cryst%indsym,std_out,ipert,cryst%natom,cryst%nsym,nsym1,rfmeth2,&
-         cryst%symafm,symafm1,symq,cryst%symrec,cryst%symrel,symrel1,syuse0,cryst%tnons,tnons1)
+       call littlegroup_pert(cryst%gprimd,idir,cryst%indsym,dev_null,ipert,cryst%natom,cryst%nsym,nsym1,rfmeth2,&
+         cryst%symafm,symafm1,symq,cryst%symrec,cryst%symrel,symrel1,syuse0,cryst%tnons,tnons1,unit=dev_null)
 
        ! TODO: (3) or (18)
        cplex = db%cplex_v1(v1pos)
