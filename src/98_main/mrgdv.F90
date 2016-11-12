@@ -129,8 +129,9 @@ program mrgdv
        write(std_out,*)"-h, --help                 Show this help and exit."
        write(std_out,*)" "
        write(std_out,*)"Options for developers:"
-       write(std_out,*)"test_symmetries            Test symmetrization of DFPT potentials."
+       write(std_out,*)"test_v1complete            Test symmetrization of DFPT potentials."
        write(std_out,*)"                           Assume DVDB with all 3*natom perturbations for each q (prep_gkk)."
+       write(std_out,*)"test_v1rsym                Test symmetries of DFPT potentials in real space."
        write(std_out,*)"test_ftinterp              Test Fourier interpolation of DFPT potentials."
        goto 100
      end if
@@ -173,11 +174,15 @@ program mrgdv
 
      call dvdb_free(db)
 
-   case ("test_symmetries")
+   case ("test_v1comp", "test_v1complete")
      call wrtout(std_out," Testing symmetries (assuming overcomplete DVDB)")
      call get_command_argument(2, db_path)
+     call dvdb_test_v1complete(db_path, comm)
 
-     call dvdb_test_symmetries(db_path, comm)
+   case ("test_v1rsym")
+     call wrtout(std_out," Testing symmetries of V1(r) in real space.")
+     call get_command_argument(2, db_path)
+     call dvdb_test_v1rsym(db_path, comm)
 
    case ("test_ftinterp")
      call get_command_argument(2, db_path)
@@ -187,7 +192,7 @@ program mrgdv
        !read(arg,"(3(i0,a))")ngqpt
      else
        ngqpt = [2,2,2]
-       ngqpt = [4,4,4]
+       !ngqpt = [4,4,4]
        !ngqpt = [8,8,8]
      end if
 

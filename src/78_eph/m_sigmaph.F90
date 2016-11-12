@@ -387,7 +387,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
  ABI_MALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)))
 
- ! Initialize the wave function descriptor.
+ ! Initialize the wave function descriptor (read up to mband states where mband is defined by dtset%nband)
  ! For the time being, no memory distribution, each node has the full set of states.
  mband = dtset%mband
  my_minb = 1; my_maxb = mband
@@ -400,14 +400,14 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
    nspden,nspinor,dtset%ecutsm,dtset%dilatmx,ebands%istwfk,ebands%kptns,ngfft,&
    dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut)
 
- call wfd_print(wfd,header="Wavefunctions on the Fermi Surface",mode_paral='PERS')
+ call wfd_print(wfd,header="Wavefunctions for self-energy calculation.",mode_paral='PERS')
  ABI_FREE(nband)
  ABI_FREE(bks_mask)
  ABI_FREE(keep_ur)
 
  iomode = iomode_from_fname(wfk0_path)
  call wfd_read_wfk(wfd,wfk0_path,iomode)
- if (.False.) call wfd_test_ortho(wfd,cryst,pawtab,unit=std_out,mode_paral="PERS")
+ if (.False.) call wfd_test_ortho(wfd, cryst, pawtab, unit=std_out, mode_paral="PERS")
 
  ! TODO FOR PAW
  usecprj = 0
@@ -474,7 +474,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
    npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
 
    ! Find IBZ(k) for q-point integration.
-   call sigmaph_setup_kcalc(sigma, ikcalc)
+   call sigmaph_setup_kcalc(sigma, cryst, ikcalc)
    call wrtout(std_out, sjoin("Will compute", itoa(sigma%nqibz_k), "q-points in the IBZ(k)"))
 
    ! Activate Fourier interpolation if irred q-points are not in the DVDB file.
@@ -1080,12 +1080,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
 !arrays
  integer :: qptrlatt(3,3),indkk_k(1,6),gmax(3),my_gmax(3)
  integer :: symk(4,2,cryst%nsym),val_indeces(ebands%nkpt, ebands%nsppol)
- integer,allocatable :: gtmp(:,:)
+ integer,allocatable :: gtmp(:,:),ibz2bz(:)
  real(dp) :: my_shiftq(3,1),temp_range(2),kk(3),kq(3)
- real(dp),allocatable :: tmp_qbz(:,:) !qibz_k(:,:),
-!for symkpt
- integer,allocatable :: ibz2bz(:)
- real(dp),allocatable :: tmp_wtq(:),tmp_wtq_folded(:)
+ real(dp),allocatable :: tmp_qbz(:,:),tmp_wtq(:),tmp_wtq_folded(:)
 
 ! *************************************************************************
 
@@ -1332,7 +1329,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  new%mpw = 0; new%gmax = 0; cnt = 0
  do ik=1,new%nkcalc
    kk = new%kcalc(:, ik)
-   !call sigmaph_setup_kcalc(self, ikcalc)
+   !call sigmaph_setup_kcalc(self, crystal, ik)
    do iq_ibz=1,new%nqbz
    !do iq_ibz=1,new%nqibz_k
      cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
@@ -1569,7 +1566,7 @@ end subroutine sigmaph_free
 !!
 !! SOURCE
 
-subroutine sigmaph_setup_kcalc(self, ikcalc)
+subroutine sigmaph_setup_kcalc(self, cryst, ikcalc)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1582,6 +1579,7 @@ subroutine sigmaph_setup_kcalc(self, ikcalc)
 
 !Arguments ------------------------------------
  integer,intent(in) :: ikcalc
+ type(crystal_t),intent(in) :: cryst
  type(sigmaph_t),intent(inout) :: self
 
 !Local variables-------------------------------
@@ -1617,6 +1615,8 @@ subroutine sigmaph_setup_kcalc(self, ikcalc)
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
    ABI_MALLOC(self%wtq_k, (self%nqibz_k))
    NOT_IMPLEMENTED_ERROR()
+   !call lgroup_free(self%lgroup_k)
+   !self%lgroup_k = littlegroup_new(self%kcalc(:, ikcalc), self%nqbz, self%qbz, cryst)
  end if
 
 end subroutine sigmaph_setup_kcalc

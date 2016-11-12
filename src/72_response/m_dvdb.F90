@@ -231,8 +231,8 @@ MODULE m_dvdb
  public :: dvdb_merge_files       ! Merge a list of POT1 files.
 
 ! Debugging tools.
- public :: dvdb_check_v1sym       ! Check symmetries of the DFPT potentials.
- public :: dvdb_test_symmetries   ! Debugging tool used to test the symmetrization of the DFPT potentials.
+ public :: dvdb_test_v1rsym       ! Check symmetries of the DFPT potentials.
+ public :: dvdb_test_v1complete   ! Debugging tool used to test the symmetrization of the DFPT potentials.
  public :: dvdb_test_ftinterp     ! Test Fourier interpolation of DFPT potentials.
 !!***
 
@@ -2896,15 +2896,17 @@ integer function dvdb_check_fform(fform, mode, errmsg) result(ierr)
 end function dvdb_check_fform
 !!***
 
-!!****f* m_dvdb/dvdb_check_v1sym
+!!****f* m_dvdb/dvdb_test_v1rsym
 !! NAME
-!!  dvdb_check_v1sym
+!!  dvdb_test_v1rsym
 !!
 !! FUNCTION
 !!  Debugging tool used to check whether the DFPT potentials in real space fulfill
 !!  the correct symmetries on the real space FFT mesh.
 !!
 !! INPUTS
+!!  db_path=Filename
+!!  comm=MPI communicator.
 !!
 !! OUTPUT
 !!  Only writing.
@@ -2915,13 +2917,13 @@ end function dvdb_check_fform
 !!
 !! SOURCE
 
-subroutine dvdb_check_v1sym(db)
+subroutine dvdb_test_v1rsym(db_path, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'dvdb_check_v1sym'
+#define ABI_FUNC 'dvdb_test_v1rsym'
  use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
@@ -2929,29 +2931,40 @@ subroutine dvdb_check_v1sym(db)
  implicit none
 
 !Arguments ------------------------------------
- type(dvdb_t),target,intent(inout) :: db
+ character(len=*),intent(in) :: db_path
+ integer,intent(in) :: comm
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: iout0=0,rfmeth2=2,syuse0=0
- integer :: iqpt,timerev_q,idir,ipert,nsym1,cplex,v1pos
+ integer :: iqpt,idir,ipert,nsym1,cplex,v1pos
  integer :: isym,nfft,ifft,ifft_rot,ispden
  real(dp) :: max_err,re,im,vre,vim !,pre,pim
  character(len=500) :: msg
  logical :: isok
+ type(dvdb_t),target :: db
  type(crystal_t),pointer :: cryst
 !arrays
  integer :: ngfft(18)
- integer,allocatable :: symq(:,:,:),symafm1(:),symrel1(:,:,:),irottb(:,:)
+ integer,allocatable :: symafm1(:),symrel1(:,:,:),irottb(:,:)
  real(dp) :: qpt(3)
  real(dp),allocatable :: tnons1(:,:),v1scf(:,:)
 
 ! *************************************************************************
 
+ call dvdb_init(db, db_path, comm)
+ db%debug = .True.
+ !db%symv1 = .True.
+ db%symv1 = .False.
+ call dvdb_print(db)
+
+ call ngfft_seq(ngfft, db%ngfft3_v1(:,1))
+ nfft = product(ngfft(1:3))
+ call dvdb_open_read(db, ngfft, comm)
+
  ABI_CHECK(db%nspinor==1, "nspinor == 2 not coded")
 
  cryst => db%cryst
- ABI_MALLOC(symq, (4,2,cryst%nsym))
  ABI_MALLOC(symafm1, (cryst%nsym))
  ABI_MALLOC(symrel1, (3,3,cryst%nsym))
  ABI_MALLOC(tnons1, (3,cryst%nsym))
@@ -2959,16 +2972,14 @@ subroutine dvdb_check_v1sym(db)
  do iqpt=1,db%nqpt
    qpt = db%qpts(:, iqpt)
 
-   ! Examine the symmetries of the q wavevector
-   call littlegroup_q(cryst%nsym,qpt,symq,cryst%symrec,cryst%symafm,timerev_q,prtvol=db%prtvol)
-
    do ipert=1,db%natom
      do idir=1,3
        v1pos = db%pos_dpq(idir, ipert, iqpt); if (v1pos == 0) cycle
 
        ! Determines the set of symmetries that leaves the perturbation invariant.
        call littlegroup_pert(cryst%gprimd,idir,cryst%indsym,dev_null,ipert,cryst%natom,cryst%nsym,nsym1,rfmeth2,&
-         cryst%symafm,symafm1,symq,cryst%symrec,cryst%symrel,symrel1,syuse0,cryst%tnons,tnons1,unit=dev_null)
+         cryst%symafm,symafm1,db%symq_table(:,:,:,iqpt),cryst%symrec,cryst%symrel,symrel1,syuse0,cryst%tnons,&
+         tnons1,unit=dev_null)
 
        ! TODO: (3) or (18)
        cplex = db%cplex_v1(v1pos)
@@ -3020,19 +3031,20 @@ subroutine dvdb_check_v1sym(db)
 
  end do ! iqpt
 
- ABI_FREE(symq)
  ABI_FREE(symafm1)
  ABI_FREE(symrel1)
  ABI_FREE(tnons1)
 
-end subroutine dvdb_check_v1sym
+ call dvdb_free(db)
+
+end subroutine dvdb_test_v1rsym
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_dvdb/dvdb_test_symmetries
+!!****f* m_dvdb/dvdb_test_v1complete
 !! NAME
-!!  dvdb_test_symmetries
+!!  dvdb_test_v1complete
 !!
 !! FUNCTION
 !!  Debugging tool used to test the symmetrization of the DFPT potentials.
@@ -3051,13 +3063,13 @@ end subroutine dvdb_check_v1sym
 !!
 !! SOURCE
 
-subroutine dvdb_test_symmetries(db_path, comm)
+subroutine dvdb_test_v1complete(db_path, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'dvdb_test_symmetries'
+#define ABI_FUNC 'dvdb_test_v1complete'
  use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
@@ -3165,8 +3177,6 @@ subroutine dvdb_test_symmetries(db_path, comm)
    ABI_FREE(file_v1scf)
  end do
 
- !call dvdb_check_v1sym(db)
-
  ABI_FREE(pflag)
  ABI_FREE(rfpert)
  ABI_FREE(symq)
@@ -3174,7 +3184,7 @@ subroutine dvdb_test_symmetries(db_path, comm)
 
  call dvdb_free(db)
 
-end subroutine dvdb_test_symmetries
+end subroutine dvdb_test_v1complete
 !!***
 
 !----------------------------------------------------------------------
@@ -3228,6 +3238,10 @@ subroutine dvdb_test_ftinterp(db_path, ngqpt, comm)
 ! *************************************************************************
 
  call dvdb_init(db, db_path, comm)
+ db%debug = .True.
+ db%symv1 = .True.
+ db%symv1 = .False.
+ call dvdb_print(db)
 
  ! Define FFT mesh for real space representation.
  call ngfft_seq(ngfft, db%ngfft3_v1(:,1))
