@@ -155,6 +155,10 @@ subroutine symkpt(chksymbreak,gmet,indkpt1,iout,kptns,nkpt,nkpt1,nsym1,&
 !  processes by selecting the smallest length of all symmetric vectors
    ABI_ALLOCATE(length2,(nkpt))
 
+
+!MG FIXME:
+! Here there's a possible problem with the order of symmetries because
+! in listkk, time-reversal is the outermost loop. This can create inconsistencies in the symmetry tables.
    do ikpt=1,nkpt
      do isym=1,nsym1
        do itim=1,(1-2*timrev),-2

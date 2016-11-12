@@ -29,7 +29,7 @@
 !!  sppoldbl=if 1, no spin-polarisation doubling
 !!           if 2, spin-polarisation doubling using symafm
 !!  symafm(nsym)=(anti)ferromagnetic part of symmetry operations
-!!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on 
+!!  symmat(3,3,nsym)=symmetry operations (symrel or symrec, depending on
 !!                   value of use_symrec
 !!  timrev=1 if the use of time-reversal is allowed; 0 otherwise
 !!  use_symrec :: if present and true, symmat assumed to be symrec, otherwise assumed to be symrel (default)
@@ -51,7 +51,7 @@
 !! NOTES
 !!  The tolerances tol12 and tol8 aims at giving a machine-independent ordering.
 !!  (this trick is used in bonds.f, listkk.f, prtrhomxmn.f and rsiaf9.f)
-!!  The tolerance tol12 is used for each component of the k vectors, 
+!!  The tolerance tol12 is used for each component of the k vectors,
 !!  and for the length of the vectors
 !!  while the tolerance tol8 is used for the comparison of the squared lengths
 !!  of the separate vectors.
@@ -143,12 +143,12 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
  if(usesym==0)nsym_used=1
  if(usesym==0)timrev_used=0
 
-!Precompute the length of the kpt1 vectors, also taking into account 
+!Precompute the length of the kpt1 vectors, also taking into account
 !possible umpklapp vectors
  limit=1 ; l3 = (2*limit+1)**3
  ABI_ALLOCATE(lkpg1,(l3*nkpt1))
- ABI_ALLOCATE(lkpg1_sorted,(l3*nkpt1)) 
- ABI_ALLOCATE(isort,(l3*nkpt1)) 
+ ABI_ALLOCATE(lkpg1_sorted,(l3*nkpt1))
+ ABI_ALLOCATE(isort,(l3*nkpt1))
 !DEBUG
 !write(std_out,*)' List of kpt1 vectors '
 !write(std_out,*)' Length of the kpt1 vectors :'
@@ -189,7 +189,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 !write(std_out,*)' listkk : output list of kpt1 for checking purposes '
 !write(std_out,*)' ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii)) '
 !do ii=1,l3*nkpt1
-!ikpt1=(isort(ii)-1)/l3+1 
+!ikpt1=(isort(ii)-1)/l3+1
 !write(std_out,*)ii,ikpt1,isort(ii)-l3*(ikpt1-1),lkpg1_sorted(ii),lkpg1(isort(ii))
 !enddo
 !stop
@@ -199,7 +199,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
  do isppol=1,sppoldbl
    do ikpt2=1,nkpt2
 
-     ikpt2_done=0 
+     ikpt2_done=0
 !    Precompute the length of the kpt2 vector, with the Umklapp vector such that it is the closest to the Gamma point
      k2(:)=kptns2(:,ikpt2)
      k2int(:)=nint(k2(:)+tol12)
@@ -254,7 +254,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 !      ENDDEBUG
        if(ldiff**2>dksqmn+tol8)exit
 
-!      If this k-point has already been examined in a previous batch, skip it  
+!      If this k-point has already been examined in a previous batch, skip it
 !      First, compute the minimum of the difference of length of the sets of associated vectors thanks to Umklapp vectors
 !      with the target vector
        ikpt1=(isort(itrial)-1)/l3+1
@@ -266,8 +266,11 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 !      ENDDEBUG
 
        if(min_l > ldiff-tol12)then
-         
+
 !        Now, will examine the trial vector, and the symmetric ones
+!MG FIXME:
+! Here there's a possible problem with the order of symmetries because
+! in symkpt, time-reversal is the innermost loop. This can create inconsistencies in the symmetry tables.
          do itimrev=0,timrev_used
            do isym=1,nsym_used
 
@@ -322,7 +325,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
                  ikpt2_done=1
                end if
 
-!              Update in three cases : either if succeeded to have exactly the vector, or the distance is better, 
+!              Update in three cases : either if succeeded to have exactly the vector, or the distance is better,
 !              or the distance is only slightly worsened so select the lowest itimrev, isym or ikpt1, in order to respect previous ordering
                if(  ikpt2_done==1 .or. &
 &               dksq+tol12<dksqmn .or. &
@@ -353,7 +356,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 !                write(std_out,*)' Actual k1sq=',kasq
 !                ENDDEBUG
                end if
-               
+
              end if
              if(ikpt2_done==1)exit
 
