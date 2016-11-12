@@ -3022,7 +3022,7 @@ subroutine dvdb_test_v1rsym(db_path, comm)
            end do
          end do
        end do
-       write(std_out,"(3(a,i0),a,es16.8)")"For iqpt= ",iqpt,", idir= ",idir,", ipert= ",ipert,",max_err= ",max_err
+       write(std_out,"(3(a,i0),a,es16.8)")"For iqpt= ",iqpt,", idir= ",idir,", ipert= ",ipert,", max_err= ",max_err
 
        ABI_FREE(irottb)
        ABI_FREE(v1scf)
@@ -3267,19 +3267,21 @@ subroutine dvdb_test_ftinterp(db_path, ngqpt, comm)
    ! Interpolate data on the same q-point
    call dvdb_ftinterp_qpt(db, db%qpts(:,iq), nfft, ngfft, intp_v1r, comm)
 
-   write(std_out,*)sjoin("For q-point:", ktoa(db%qpts(:,iq)))
+   write(std_out,"(a)")sjoin("=== For q-point:", ktoa(db%qpts(:,iq)), "===")
    do mu=1,db%natom3
      do ispden=1,db%nspden
+       write(std_out,"(2(a,i0))")"  iatom3: ", mu, ", ispden: ", ispden
        call vdiff_print(vdiff_eval(2,nfft,file_v1r(:,:,ispden,mu),intp_v1r(:,:,ispden,mu),db%cryst%ucvol))
 
-       do ifft=1,2
        !do ifft=1,nfft
+       do ifft=1,0
          write(std_out,*)file_v1r(1,ifft,ispden,mu),intp_v1r(1,ifft,ispden,mu),&
          file_v1r(2,ifft,ispden,mu),intp_v1r(2,ifft,ispden,mu)
        end do
+       write(std_out,*)" "
      end do
    end do
-   write(std_out,*)""
+   write(std_out,*)" "
  end do ! iq
 
  ABI_FREE(intp_v1r)

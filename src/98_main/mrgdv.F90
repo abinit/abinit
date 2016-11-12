@@ -53,7 +53,6 @@ program mrgdv
  use m_fstrings,        only : sjoin, itoa, ltoa
  use m_numeric_tools,   only : vdiff_eval, vdiff_print
  use m_io_tools,        only : file_exists, prompt
- use m_fftcore,         only : ngfft_seq
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -166,12 +165,6 @@ program mrgdv
      call dvdb_init(db, db_path, comm)
      call dvdb_print(db, prtvol=prtvol)
      call dvdb_list_perts(db, [-1,-1,-1])
-
-     !call dvdb_list_perts(db, [2, 2, 2])
-     !call ngfft_seq(ngfft, [12, 12, 12])
-     !nfft = product(ngfft(1:3))
-     !call dvdb_open_read(db, ngfft, xmpi_comm_self)
-
      call dvdb_free(db)
 
    case ("test_v1comp", "test_v1complete")
@@ -188,7 +181,7 @@ program mrgdv
      call get_command_argument(2, db_path)
      if (nargs >= 3) then
        call get_command_argument(3, arg)
-       !call replace_char(arg, ",", " ")
+       !arg = replace_char(arg, ",", " ")
        !read(arg,"(3(i0,a))")ngqpt
      else
        ngqpt = [2,2,2]

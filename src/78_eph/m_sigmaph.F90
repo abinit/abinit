@@ -459,7 +459,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  dvdb%debug = .True.
  ! This one to symmetrize the potentials.
  dvdb%symv1 = .False.
- !dvdb%symv1 = .True.
+ dvdb%symv1 = .True.
 
  ! Loop over k-points for QP corrections.
  do ikcalc=1,sigma%nkcalc
@@ -550,6 +550,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
          cplex = 2
          ABI_MALLOC(v1scf, (cplex,nfftf,nspden,natom3))
          call dvdb_ftinterp_qpt(dvdb, qpt, nfftf, ngfftf, v1scf, xmpi_comm_self)
+         !v1scf = zero
        end if
 
        ! TODO: Make sure that symmetries in Q-space are preserved.
@@ -618,6 +619,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
          call rf_transgrid_and_pack(spin,nspden,psps%usepaw,cplex,nfftf,nfft,ngfft,gs_hamkq%nvloc,&
            pawfgr,mpi_enreg,dummy_vtrial,v1scf(:,:,:,ipc),vlocal,vlocal1(:,:,:,:,ipc))
        end do
+       !vlocal1 = one
 
        ! if PAW, one has to solve a generalized eigenproblem
        ! BE careful here because I will need sij_opt==-1
@@ -649,7 +651,6 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
            cryst%natom,cryst%rmet,cryst%gprimd,cryst%gmet,istwf_k,&          ! In
            npw_k,npw_kq,useylmgr1,kg_k,ylm_k,kg_kq,ylm_kq,ylmgr_kq,&         ! In
            dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)     ! Out
-         !write(std_out,*)"after getgh1c_setup"
 
          ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
@@ -711,6 +712,8 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
            !bras_kq(:,:,1) = zero
          end if
 
+         ! h1kets_kq is the main responsible for the symmetry breaking
+         !h1kets_kq = one
          do ipc=1,natom3
            ! Calculate elphmat(j,i) = <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation.
            !The array eig1_k contains:
@@ -720,8 +723,8 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
            do ib_k=1,nbcalc_ks
              call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bras_kq(:,:,1),h1kets_kq(:,:,ib_k,ipc),&
                   mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-             gkk_atm(:,ib_k,ipc) = [dotr, doti]
              !gkk_atm(:,ib_k,ipc) = one
+             gkk_atm(:,ib_k,ipc) = [dotr, doti]
            end do
          end do
 
@@ -741,10 +744,11 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
              gkk2 = gkk_nu(1,ib_k,imode) ** 2 + gkk_nu(2,ib_k,imode) ** 2
 
              do it=1,sigma%ntemp
-               nqnu = one; f_mkq = one
+               !nqnu = one; f_mkq = one
                !write(std_out,*)wqnu,sigma%kTmesh(it)
                !write(std_out,*)eig0mkq,sigma%kTmesh(it),sigma%mu_e(it),eig0mkq-sigma%mu_e(it) / sigma%kTmesh(it)
                nqnu = nbe(wqnu, sigma%kTmesh(it), zero)
+               ! TODO: Find good tolerances to treat limits
                !f_mkq = nfd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
                !f_nk = nfd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
 
@@ -1099,7 +1103,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  ! TODO: Will become input eph_tsmesh start stop num
  new%ntemp = 10
  ABI_CHECK(new%ntemp > 1, "ntemp cannot be 1")
- temp_range = [100, 300]
+ temp_range = [10, 300]
  tstep = (temp_range(2) - temp_range(1)) / (new%ntemp - 1)
  ABI_MALLOC(new%kTmesh, (new%ntemp))
  new%kTmesh = arth(temp_range(1), tstep, new%ntemp) * kb_HaK
@@ -1595,7 +1599,7 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc)
  end if
 
  if (self%symsigma == 0) then
-#if 1
+#if 0
    ! Do not use symmetries in BZ sum_q --> nqibz_k == nqbz
    self%nqibz_k = self%nqbz
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
@@ -1603,7 +1607,7 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc)
    self%qibz_k = self%qbz
    self%wtq_k = one / self%nqbz
 #else
-   ! DEBUGGING: This is to enforce the sum over IBZ everywhere.
+   ! MGHACK: This is to enforce the sum over IBZ everywhere.
    self%nqibz_k = self%nqibz
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
    ABI_MALLOC(self%wtq_k, (self%nqibz_k))
@@ -1752,8 +1756,8 @@ subroutine sigmaph_print(self, unt, what, ebands)
 !Local variables-------------------------------
 !integer
  integer :: ikc,is,ibc,band,ik_ibz,it
-!arrays
- complex(dpc) :: cval
+ real(dp) :: kse,kse_prev
+ complex(dpc) :: sig0c,qpe,qpe_prev
 
 ! *************************************************************************
 
@@ -1774,9 +1778,18 @@ subroutine sigmaph_print(self, unt, what, ebands)
    end do
  end if
 
- ! Write results
- it = 1
  if (index(what, "results") /= 0) then
+   ! Write results for the first temperature.
+   it = 1
+   write(unt,"(a)")repeat("=", 80)
+   write(unt,"(a)")"Final results in eV."
+   write(unt,"(a)")"Notations:"
+   write(unt,"(a)")"   eKS: Kohn-Sham energy, eQP: quasi-particle energy."
+   write(unt,"(a)")"   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part."
+   write(unt,"(a)")"   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP."
+   write(unt,"(a)")" "
+   write(unt,"(a)")" "
+
    do ikc=1,self%nkcalc
      do is=1,self%nsppol
        if (self%nsppol == 1) then
@@ -1784,12 +1797,21 @@ subroutine sigmaph_print(self, unt, what, ebands)
        else
           write(unt,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ikc)), ", spin:", itoa(is))
        end if
-       write(unt,"(a)")" e_KS Sigma_1(e_KS)  Sigma_2(e_KS)"
+       write(unt,"(a)")"   B    eKS     eQP    SE1(eKS)  SE2(eKS)  DeKS     DeQP"
        ik_ibz = self%kcalc2ibz(ikc,1)
        do ibc=1,self%nbcalc_ks(ikc,is)
          band = self%bstart_ks(ikc,is) + ibc - 1
-         cval = self%vals_e0ks(it, ibc, ikc, is) * Ha_eV
-         write(unt, "(i4, 4(f8.3,1x))")ibc, ebands%eig(band,ik_ibz,is) * Ha_eV, real(cval), aimag(cval)
+         sig0c = self%vals_e0ks(it, ibc, ikc, is) * Ha_eV
+         kse = ebands%eig(band,ik_ibz,is) * Ha_eV
+         qpe = kse + sig0c
+         if (ibc == 1) then
+           kse_prev = kse; qpe_prev = qpe
+         end if
+         write(unt, "(i4, 6(f8.3,1x))") &
+           ibc, kse, real(qpe), real(sig0c), aimag(sig0c), kse - kse_prev, real(qpe - qpe_prev)
+         if (ibc > 1) then
+           kse_prev = kse; qpe_prev = qpe
+         end if
        end do
        write(unt, "(a)")" "
      end do
