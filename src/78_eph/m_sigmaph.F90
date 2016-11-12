@@ -464,7 +464,6 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
    call wrtout(std_out, sjoin("Will compute", itoa(sigma%nqibz_k), "q-points in the IBZ(k)"))
 
    ! Activate Fourier interpolation if irred q-points are not in the DVDB file.
-   ! TODO: This should be done only once
    do_ftv1q = 0
    do iq_ibz=1,sigma%nqibz_k
      if (dvdb_findq(dvdb, sigma%qibz_k(:,iq_ibz)) == -1) do_ftv1q = do_ftv1q + 1
@@ -577,7 +576,6 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
        ! Be careful with time-reversal symmetry.
        if (isirr_kq) then
          ! Copy u_kq(G)
-         !write(std_out,*)"before isirr"
          istwf_kq = wfd%istwfk(ikq_ibz); npw_kq = wfd%npwarr(ikq_ibz)
          ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
          kg_kq(:,1:npw_kq) = wfd%kdata(ikq_ibz)%kg_k
@@ -604,7 +602,6 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
          call rf_transgrid_and_pack(spin,nspden,psps%usepaw,cplex,nfftf,nfft,ngfft,gs_hamkq%nvloc,&
            pawfgr,mpi_enreg,dummy_vtrial,v1scf(:,:,:,ipc),vlocal,vlocal1(:,:,:,:,ipc))
        end do
-       !write(std_out,*)"before load spin"
 
        ! if PAW, one has to solve a generalized eigenproblem
        ! BE careful here because I will need sij_opt==-1
@@ -627,11 +624,9 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
          ipert = (ipc - idir) / 3 + 1
 
          ! Prepare application of the NL part.
-         !write(std_out,*)"before init_rf spin"
          call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=1)
          call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc), &
            comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-         !write(std_out,*)"after load_rf spin"
 
          ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
          call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,kk,kq,idir,ipert,&  ! In
@@ -1050,7 +1045,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
 !scalars
  integer,parameter :: master=0,brav1=1,option1=1,occopt3=3
  integer :: my_rank,nqpt_max,ik,my_nshiftq,nct,my_mpw,cnt,nproc,iq_ibz
- integer :: onpw,ii,ipw,ierr,it,timerev_k
+ integer :: onpw,ii,ipw,ierr,it,timerev_k,spin,gap_err,ikcalc,gw_qprange
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
 #endif
@@ -1058,9 +1053,10 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  real(dp) :: tstep,dksqmax
  character(len=500) :: msg
  type(ebands_t) :: tmp_ebands
+ type(gaps_t) :: gaps
 !arrays
  integer :: qptrlatt(3,3),indkk_k(1,6),gmax(3),my_gmax(3)
- integer :: symk(4,2,cryst%nsym)
+ integer :: symk(4,2,cryst%nsym),val_indeces(ebands%nkpt, ebands%nsppol)
  integer,allocatable :: gtmp(:,:)
  real(dp) :: my_shiftq(3,1),temp_range(2),kk(3),kq(3)
  real(dp),allocatable :: tmp_qbz(:,:) !qibz_k(:,:),
@@ -1085,6 +1081,11 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  ABI_MALLOC(new%kTmesh, (new%ntemp))
  new%kTmesh = arth(temp_range(1), tstep, new%ntemp) * kb_HaK
 
+ gap_err = get_gaps(ebands, gaps)
+ call gaps_print(gaps, unit=std_out)
+ call ebands_report_gap(ebands, unit=std_out)
+ val_indeces = get_valence_idx(ebands)
+
  ! Compute the chemical potential at the different physical temperatures with Fermi-Dirac.
  ABI_MALLOC(new%mu_e, (new%ntemp))
  new%mu_e = ebands%fermie
@@ -1099,7 +1100,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  ! Frequency mesh for spectral function.
  new%nwr = 11
  ABI_CHECK(mod(new%nwr, 2) == 1, "nwr should be odd!")
- new%wr_step = 0.01 / eV_Ha
+ new%wr_step = 0.01 * eV_Ha
 
  ! Define q-mesh for integration.
  ! Either q-mesh from DDB (no interpolation) or eph_ngqpt_fine (Fourier interpolation if q not in DDB)
@@ -1121,24 +1122,111 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  ABI_FREE(tmp_qbz)
 
  ! Select k-point and bands where corrections are wanted
+ ! These parameters will be passed via the input file (similar to kptgw, bdgw)
  ! if symsigma == 1, we have to include all degenerate states in the set
  ! because the final QP corrections will be obtained by averaging the results in the degenerate subspace.
  ! k-point and bands where corrections are wanted
- ! These parameters will be passed via the input file (similar to kptgw, bdgw)
  ! We initialize IBZ(k) here so that we have all the basic dimensions of the run and it's possible
  ! to distribuite the calculations among the processors.
  new%symsigma = 0; new%timrev = 1
- new%nkcalc = ebands%nkpt
- !new%nkcalc = 1
 
- ABI_MALLOC(new%kcalc, (3, new%nkcalc))
- ABI_MALLOC(new%bstart_ks, (new%nkcalc, new%nsppol))
- ABI_MALLOC(new%nbcalc_ks, (new%nkcalc, new%nsppol))
+ if (dtset%nkptgw /= 0) then
+   ! Treat the k-points and bands specified in the input file.
+   new%nkcalc = dtset%nkptgw
+   ABI_MALLOC(new%kcalc, (3, new%nkcalc))
+   ABI_MALLOC(new%bstart_ks, (new%nkcalc, new%nsppol))
+   ABI_MALLOC(new%nbcalc_ks, (new%nkcalc, new%nsppol))
 
- new%kcalc = ebands%kptns
- !new%kcalc = zero
- new%bstart_ks = 1; new%nbcalc_ks = 6
+   new%kcalc = dtset%kptgw(:,1:new%nkcalc)
+   do spin=1,new%nsppol
+     new%bstart_ks(:,spin) = dtset%bdgw(1,1:new%nkcalc,spin)
+     new%nbcalc_ks(:,spin) = dtset%bdgw(2,1:new%nkcalc,spin) - dtset%bdgw(1,1:new%nkcalc,spin) + 1
+   end do
+
+   ! Consistency check on bdgw and mband
+   ierr = 0
+   do spin=1,new%nsppol
+     do ikcalc=1,new%nkcalc
+       if (dtset%bdgw(2,ikcalc,spin) > ebands%mband) then
+         ierr = ierr + 1
+         write(msg,'(a,2i0,2(a,i0))')&
+          "For (k, s) ",ikcalc,spin," bdgw= ",dtset%bdgw(2,ikcalc,spin), " > mband=",ebands%mband
+         MSG_WARNING(msg)
+       end if
+     end do
+   end do
+   ABI_CHECK(ierr == 0, "Not enough bands in WFK file. See messages above. Aborting now.")
+
+ else
+   ! Use qp_range to select the interesting k-points and the corresponing bands.
+   !
+   !    0 --> Compute the QP corrections only for the fundamental and the optical gap.
+   ! +num --> Compute the QP corrections for all the k-points in the irreducible zone and include `num`
+   !           bands above and below the Fermi level.
+   ! -num --> Compute the QP corrections for all the k-points in the irreducible zone.
+   !          Include all occupied states and `num` empty states.
+
+   call wrtout(std_out, "nkptgw == 0 ==> Automatic selection of k-points and bands for the corrections.")
+   gw_qprange = dtset%gw_qprange
+
+   if (gap_err /=0 .and. gw_qprange == 0) then
+     msg = "Problem while computing the fundamental and optical gap (likely metal). Will replace gw_qprange=0 with gw_qprange=1"
+     MSG_WARNING(msg)
+     gw_qprange = 1
+   end if
+
+   if (gw_qprange /= 0) then
+     ! Include all the k-points in the IBZ.
+     ! Note that kcalc == ebands%kptns so we can use a single ik index in the loop over k-points.
+     ! No need to map kcalc onto ebands%kptns.
+     new%nkcalc = ebands%nkpt
+     ABI_MALLOC(new%kcalc, (3, new%nkcalc))
+     ABI_MALLOC(new%bstart_ks, (new%nkcalc, new%nsppol))
+     ABI_MALLOC(new%nbcalc_ks, (new%nkcalc, new%nsppol))
+
+     new%kcalc = ebands%kptns
+     new%bstart_ks = 1; new%nbcalc_ks = 6
+
+     if (gw_qprange>0) then
+       ! All k-points: Add buffer of bands above and below the Fermi level.
+       do spin=1,new%nsppol
+         do ik=1,new%nkcalc
+           new%bstart_ks(ik,spin) = max(val_indeces(ik,spin) - gw_qprange, 1)
+           ii = max(val_indeces(ik,spin) + gw_qprange + 1, ebands%mband)
+           new%nbcalc_ks(ik,spin) = ii - new%bstart_ks(ik,spin) + 1
+         end do
+       end do
+
+     else
+       ! All k-points: include all occupied states and -gw_qprange empty states.
+       new%bstart_ks = 1
+       do spin=1,new%nsppol
+         do ik=1,new%nkcalc
+           new%nbcalc_ks(ik,spin) = min(val_indeces(ik,spin) - gw_qprange, ebands%mband)
+         end do
+       end do
+     end if
+
+   else
+     ! gw_qprange is not specified in the input.
+     ! Include the optical and the fundamental KS gap.
+     ! The main problem here is that kptgw and nkptgw do not depend on the spin and therefore
+     ! we have compute the union of the k-points where the fundamental and the optical gaps are located.
+     !
+     ! Find the list of `interesting` kpoints.
+     ABI_CHECK(gap_err == 0, "gap_err!=0")
+     NOT_IMPLEMENTED_ERROR()
+   end if
+
+ end if ! nkptgw /= 0
+
  new%max_nbcalc = maxval(new%nbcalc_ks)
+ call gaps_free(gaps)
+
+ ! TODO: Make sure that all the degenerate states are included.
+ if (new%symsigma /= 0) then
+   NOT_IMPLEMENTED_ERROR()
+ end if
 
  ! The k-point and the symmetries relating the BZ k-point to the IBZ.
  ABI_MALLOC(new%kcalc2ibz, (new%nkcalc, 6))
@@ -1268,10 +1356,10 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
    NCF_CHECK(nf90_put_var(ncid, vid("mu_e"), new%mu_e))
 
    !if (new%nwr > 1) then
-   !   ! Make room for the spectral function on file.
-   !   ncerr = nctk_def_arrays(ncid, [ &
-   !      nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol")])
-   !   NCF_CHECK(ncerr)
+   !  ! Make room for the spectral function on file.
+   !  ncerr = nctk_def_arrays(ncid, [ &
+   !     nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol")])
+   !  NCF_CHECK(ncerr)
    !end if
 
    NCF_CHECK(nf90_close(new%ncid))
@@ -1496,10 +1584,12 @@ subroutine sigmaph_solve(self, ikcalc, spin, ebands)
  ! Compute QP corrections.
  ! Symmetrize self-energy matrix elements (symsigma == 1).
  if (self%symsigma == 1) then
+   NOT_IMPLEMENTED_ERROR()
  end if
 
  ! Compute spectral functions.
  if (self%nwr > 1) then
+   !NOT_IMPLEMENTED_ERROR()
  end if
 
 #ifdef HAVE_NETCDF

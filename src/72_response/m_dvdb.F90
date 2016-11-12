@@ -242,7 +242,7 @@ CONTAINS
 !!  by each process in the MPI communicator comm.
 !!
 !! INPUTS
-!!   path=Filename.
+!!   path=DVDB Filename.
 !!   comm=MPI communicator.
 !!
 !! PARENTS
@@ -335,7 +335,7 @@ subroutine dvdb_init(db, path, comm)
        MSG_ERROR(sjoin("While reading hdr of v1 potential of index:", itoa(iv1), ch10, msg))
      end if
 
-     ! Save cplex and FFT mesh
+     ! Save cplex and FFT mesh associated to this perturbation.
      cplex = 2; if (hdr1%qptn(1)**2+hdr1%qptn(2)**2+hdr1%qptn(3)**2<1.d-14) cplex = 1
      db%cplex_v1(iv1) = cplex
      db%ngfft3_v1(:, iv1) = hdr1%ngfft(:3)
@@ -348,7 +348,7 @@ subroutine dvdb_init(db, path, comm)
      db%rhog1_g0(:, iv1) = zero
      if (db%version > 1) read(unt, err=10, iomsg=msg) db%rhog1_g0(:, iv1)
 
-     ! check whether this q-point is already in the list.
+     ! Check whether this q-point is already in the list.
      iq_found = 0
      do iq=1,nqpt
        if (all(abs(hdr1%qptn - tmp_qpts(:,iq)) < tol14)) then
@@ -360,6 +360,7 @@ subroutine dvdb_init(db, path, comm)
      idir = mod(hdr1%pertcase-1, 3) + 1
      ipert = (hdr1%pertcase - idir) / 3 + 1
 
+     ! Increment nqpt is new q-points and update tmp_pos
      if (iq_found == 0) then
        nqpt = nqpt + 1
        tmp_qpts(:, nqpt) = hdr1%qptn
@@ -370,7 +371,7 @@ subroutine dvdb_init(db, path, comm)
      call hdr_free(hdr1)
    end do
 
-   ! Allocate arrays with correct shape.
+   ! Allocate arrays with correct nqpt dimension
    db%nqpt = nqpt
    ABI_MALLOC(db%qpts, (3, nqpt))
    db%qpts = tmp_qpts(:,1:nqpt)
@@ -389,6 +390,7 @@ subroutine dvdb_init(db, path, comm)
    call xmpi_bcast(db%numv1, master, comm, ierr)
    call xmpi_bcast(db%nqpt, master, comm, ierr)
    call hdr_bcast(hdr_ref, master, my_rank, comm)
+
    db%natom = hdr_ref%natom
    db%natom3 = 3 * hdr_ref%natom
    db%nspden = hdr_ref%nspden
@@ -442,8 +444,9 @@ end subroutine dvdb_init
 !!  Open the file in read-only mode.
 !!
 !! INPUTS
-!!   ngfft(18)=Info on the FFT used for the potentials. Note that ngfft
-!!     is the mesh used by the parent and can differ from the one found in the file.
+!!   ngfft(18)=Info on the FFT mesh used for the DFPT potentials. Note that ngfft
+!!     is the mesh used by the parent. In principle, it can differ from the one
+!!     found in the file. In this case a Fourier interpolation is required.
 !!   comm=MPI communicator
 !!
 !! PARENTS
@@ -715,8 +718,8 @@ integer function dvdb_get_pinfo(db, iqpt, cplex, pinfo) result(nperts)
 ! *************************************************************************
 
  ! Get the number of perturbations computed for this iqpt
- nperts = 0; cplex = 0
- do ipert=1,db%natom ! natom selects atomic perturbations only.
+ pinfo = 0; cplex = 0; nperts = 0
+ do ipert=1,db%natom ! selects atomic perturbations only.
     do idir=1,3
       iv1 = db%pos_dpq(idir,ipert,iqpt)
       if (iv1 /= 0) then
@@ -809,8 +812,8 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
    return
  end if
 
+ ! Find (idir, ipert, iqpt) and ship the header.
  call dvdb_seek(db, idir, ipert, iqpt)
-
  ierr = my_hdr_skip(db%fh, idir, ipert, db%qpts(:,iqpt), msg)
  if (ierr /= 0) return
 
@@ -823,8 +826,7 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
      read(db%fh, err=10, iomsg=msg) (v1scf(ifft, ispden), ifft=1,cplex*nfftot_file)
    end do
  else
-   ! Fourier interpolation
-   !if (db%debug)
+   ! The FFT mesh used in the caller differ from the one found in the DBDB --> Fourier interpolation
    MSG_ERROR("FFT interpolation of DFPT potentials must be tested.")
    ABI_MALLOC(v1r_file, (cplex*nfftot_file, db%nspden))
    do ispden=1,db%nspden
@@ -880,6 +882,7 @@ end function dvdb_read_onev1
 !!  Read all 3*natom DFPT potentials for the given iqpt (only atomic perturbations).
 !!
 !!  The routine will:
+!!
 !!     1) Reconstruct the potentials by symmetry if the DVDB contains less than 3*natom potentials.
 !!     2) interpolate the data if the input FFT mesh defined by `ngfft` differs
 !!        from the one used to store data in the file.
@@ -953,11 +956,15 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
    end do
  end if
  call xmpi_bcast(v1scf, master, comm, ierr)
+
+ ! Return if all perts are available.
  if (npc == 3*db%natom) return
 
  ! Perturbation are missing and we have to reconstruct them by symmetry.
  ! This is the common case when DFPT calculations are done for independent perturbations only.
- write(std_out,*)sjoin("Will use symmetries to recostruct:", itoa(3*db%natom - npc), "perturbations")
+ if (db%debug) then
+   write(std_out,*)sjoin("Will use symmetries to recostruct:", itoa(3*db%natom - npc), "perturbations")
+ end if
 
  ! 0 if pert is not available.
  ! 1 if pert is on file.
@@ -1213,7 +1220,7 @@ pcase_loop: &
    write(msg,"(5a)")&
      "Cannot recostruct all 3*natom atomic perturbations from file",ch10,&
      "This usually happens when the DVDB does not contain all the independent perturbations for this q-point",ch10,&
-     "See message above for further info"
+     "See message above for further information."
    MSG_ERROR(msg)
  end if
 
@@ -1319,7 +1326,7 @@ end subroutine find_symeq
 !! v1phq_rotate
 !!
 !! FUNCTION
-!!  Reconstruct the DFPT potential for q in BZ starting from the value in the IBZ.
+!!  Reconstruct the DFPT potential for a q-point in the BZ starting from its symmetrical image in the IBZ.
 !!
 !! INPUTS
 !!  cryst<crystal_t>=crystal structure parameters
@@ -1674,7 +1681,7 @@ end subroutine rotate_fqg
 !!  dvdb_ftinterp_setup
 !!
 !! FUNCTION
-!!  Prepare the internal tables for the Fourier interpolation of the DFPT potentials.
+!!  Prepare the internal tables used for the Fourier interpolation of the DFPT potentials.
 !!
 !! INPUTS
 !!  ngqpt(3)=Divisions of the ab-initio q-mesh.
@@ -1995,6 +2002,7 @@ end subroutine dvdb_ftinterp_setup
 !!
 !! FUNCTION
 !!  Fourier interpolation of potentials for a given q-point
+!!  Internal tables must be prepared in advance by calling `dvdb_ftinterp_setup`.
 !!
 !! INPUTS
 !!  qpt(3)=q-point in reduced coordinates.
@@ -2044,7 +2052,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
 
 ! *************************************************************************
 
- ABI_CHECK(allocated(db%v1scf_rpt), "v1scf_rpt is not allocated")
+ ABI_CHECK(allocated(db%v1scf_rpt), "v1scf_rpt is not allocated (call dvdb_ftinterp_setup)")
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
@@ -2109,7 +2117,7 @@ end subroutine dvdb_ftinterp_qpt
 !!
 !! SOURCE
 
-integer function dvdb_findq(db, qpt, qtol) result(iqpt)
+integer pure function dvdb_findq(db, qpt, qtol) result(iqpt)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2446,8 +2454,8 @@ subroutine dvdb_list_perts(db, ngqpt)
 
  ! Loop over the q-points in the IBZ and test whether the q-point is present
  ! and if all the independent perturbations are available.
- ! `tot_miss` counts the number of irreducible perturbations not found in the DVDB (critical)
- ! `tot_weird` counts the number of independent perturbations found in the DVDB (not critical)
+ !   `tot_miss` is the number of irreducible perturbations not found in the DVDB (critical)
+ !   `tot_weird` is the number of redundant perturbations found in the DVDB (not critical)
  tot_miss = 0; tot_weird = 0
  do iq_ibz=1,nqibz
    qq = qibz(:,iq_ibz)
@@ -2464,7 +2472,7 @@ subroutine dvdb_list_perts(db, ngqpt)
      pertsy,rfdir,rfpert,symq,cryst%symrec,cryst%symrel)
 
    if (iq_file /= -1) then
-     ! This q-point is in the db. Test if all the independent perturbations are available.
+     ! This q-point is in the DVDB. Test if all the independent perturbations are available.
      msg = sjoin("qpoint:",ktoa(qq),"is present in the DVDB file")
      call wrtout(std_out,msg,"COLL")
      call wrtout(std_out,' The list of irreducible perturbations for this q vector is:','COLL')
@@ -2552,7 +2560,7 @@ end subroutine dvdb_list_perts
 !!  prtvol=Verbosity level.
 !!
 !! SIDE EFFECTS
-!!   v1files=List of file names to merge. This list could be changed if POT1 files in netcdf format is found.
+!!   v1files=List of file names to merge. This list could be changed if POT1 files in netcdf format are found.
 !!
 !! PARENTS
 !!      mrgdv
