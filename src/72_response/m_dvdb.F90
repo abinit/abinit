@@ -5,9 +5,10 @@
 !!
 !! FUNCTION
 !!  Objects and methods to extract data from the DVDB file.
-!!  The DVDB file is binary file with a collection of DFPT potentials
-!!  associated to the different perturbations (idir, ipert, qpt).
-!!  DVDB files are produced with the `mrgdv` utility.
+!!  The DVDB file is Fortran binary file with a collection of DFPT potentials
+!!  associated to the different phonon perturbations (idir, ipert, qpt).
+!!  DVDB files are produced with the `mrgdv` utility and are used in the EPH code
+!!  to compute the matrix elements <k+q| dvscf_{idir, ipert, qpt} |k>.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2009-2016 ABINIT group (MG)
@@ -162,6 +163,13 @@ MODULE m_dvdb
   ! The value of cplex for each v1(cplex*nfft, nspden) potential
   ! 2 if the potential is complex, 1 if real (q==Gamma)
 
+  integer,allocatable :: symq_table(:,:,:,:)
+  ! symq(4,2,nsym,nqpt)
+  ! Table computed by littlegroup_q for all q-points found in the DVDB.
+  !   three first numbers define the G vector;
+  !   fourth number is zero if the q-vector is not preserved, is 1 otherwise
+  !   second index is one without time-reversal symmetry, two with time-reversal symmetry
+
   integer :: ngfft(18)=-1
    ! Info on the FFT to be used for the potentials.
 
@@ -275,7 +283,7 @@ subroutine dvdb_init(db, path, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,timrev2=2
- integer :: iv1,ii,ierr,unt,fform,nqpt,iq,iq_found,cplex
+ integer :: iv1,ii,ierr,unt,fform,nqpt,iq,iq_found,cplex,trev_q
  integer :: idir,ipert,my_rank
  character(len=500) :: msg
  type(hdr_type) :: hdr1,hdr_ref
@@ -425,6 +433,13 @@ subroutine dvdb_init(db, path, comm)
  ! Internal MPI_type needed for calling fourdp!
  call initmpi_seq(db%mpi_enreg)
 
+ ! Precompute symq_table for all q-points in the DVDB.
+ ABI_MALLOC(db%symq_table, (4, 2, db%cryst%nsym, db%nqpt))
+ do iq=1,db%nqpt
+   call littlegroup_q(db%cryst%nsym, db%qpts(:,iq), db%symq_table(:,:,:,iq), &
+     db%cryst%symrec, db%cryst%symafm, trev_q, prtvol=0)
+ end do
+
  return
 
  ! Handle Fortran IO error
@@ -558,6 +573,9 @@ subroutine dvdb_free(db)
  end if
  if (allocated(db%cplex_v1)) then
    ABI_FREE(db%cplex_v1)
+ end if
+ if (allocated(db%symq_table)) then
+   ABI_FREE(db%symq_table)
  end if
  if (allocated(db%ngfft3_v1)) then
    ABI_FREE(db%ngfft3_v1)
@@ -931,7 +949,7 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ipc,npc,idir,ipert,pcase,my_rank,nproc,ierr,mu,trev_q
+ integer :: ipc,npc,idir,ipert,pcase,my_rank,nproc,ierr,mu
  character(len=500) :: msg
 !arrays
  integer :: symq(4,2,db%cryst%nsym)
@@ -963,12 +981,10 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
  if (npc == 3*db%natom) then
    if (db%symv1) then
      if (db%debug) write(std_out,*)"Potentials are available but will call v1phq_symmetrize because of symv1"
-     ! TODO: Precompute these tables.
-     ! Examine the symmetries of the q wavevector
-     call littlegroup_q(db%cryst%nsym,db%qpts(:,iqpt),symq,db%cryst%symrec,db%cryst%symafm,trev_q,prtvol=0)
      do mu=1,db%natom3
        idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
-       call v1phq_symmetrize(db%cryst,idir,ipert,symq,ngfft,cplex,nfft,db%nspden,db%nsppol,db%mpi_enreg,v1scf(:,:,:,mu))
+       call v1phq_symmetrize(db%cryst,idir,ipert,db%symq_table(:,:,:,iqpt),ngfft,cplex,nfft,&
+         db%nspden,db%nsppol,db%mpi_enreg,v1scf(:,:,:,mu))
      end do
    end if
 
@@ -1591,7 +1607,7 @@ end subroutine v1phq_symmetrize
 !!
 !! SOURCE
 
-subroutine rotate_fqg(itirev,symm,qpt,tnon,ngfft,nfft,nspden,infg,outfg)
+subroutine rotate_fqg(itirev, symm, qpt, tnon, ngfft, nfft, nspden, infg, outfg)
 
 
 !This section has been created automatically by the script Abilint (TD).

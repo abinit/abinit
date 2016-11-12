@@ -2276,8 +2276,7 @@ subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
  type(ebands_t),intent(inout) :: ebands
  integer,intent(in) :: occopt
  integer,optional,intent(in) :: prtvol
- real(dp),intent(in) :: tsmear
- real(dp),intent(in) :: spinmagntarget
+ real(dp),intent(in) :: tsmear,spinmagntarget
 
 !Local variables-------------------------------
 !scalars
@@ -2288,15 +2287,19 @@ subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
 ! *************************************************************************
 
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
-
  ebands%occopt = occopt; ebands%tsmear = tsmear
 
- call wrtout(std_out,"Changing occupation scheme in electron bands", "COLL")
- write(msg,"(2(a,i0))")"occopt:",ebands%occopt," ==> ",occopt; call wrtout(std_out,msg,"COLL")
- write(msg,"(2(a,f6.4))")"tsmear:",ebands%tsmear," ==> ",tsmear; call wrtout(std_out,msg,"COLL")
+ if (prtvol > 0) then
+   call wrtout(std_out, "Changing occupation scheme in electron bands")
+   call wrtout(std_out, sjoin("occopt:", itoa(ebands%occopt), " ==> ", itoa(occopt)))
+   call wrtout(std_out, sjoin("tsmear:", ftoa(ebands%tsmear), " ==> ", ftoa(tsmear)))
+ end if
 
  call ebands_update_occ(ebands,spinmagntarget,stmbias0,prtvol=my_prtvol)
- call wrtout(std_out,sjoin('Fermi level is now: ', ftoa(ebands%fermie)),'COLL')
+
+ if (prtvol > 0) then
+   call wrtout(std_out, sjoin('Fermi level is now:', ftoa(ebands%fermie)))
+ end if
 
 end subroutine ebands_set_scheme
 !!***

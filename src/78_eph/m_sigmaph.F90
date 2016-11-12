@@ -361,7 +361,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
- nkpt = ebands%nkpt; mband=ebands%mband
+ nkpt = ebands%nkpt
 
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
  nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
@@ -389,6 +389,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
 
  ! Initialize the wave function descriptor.
  ! For the time being, no memory distribution, each node has the full set of states.
+ mband = dtset%mband
  my_minb = 1; my_maxb = mband
  ABI_MALLOC(nband, (nkpt, nsppol))
  ABI_MALLOC(bks_mask,(mband, nkpt, nsppol))
@@ -458,7 +459,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  dvdb%debug = .True.
  ! This one to symmetrize the potentials.
  dvdb%symv1 = .False.
- dvdb%symv1 = .True.
+ !dvdb%symv1 = .True.
 
  ! Loop over k-points for QP corrections.
  do ikcalc=1,sigma%nkcalc
@@ -1175,11 +1176,11 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  ! k-point and bands where corrections are wanted
  ! We initialize IBZ(k) here so that we have all the basic dimensions of the run and it's possible
  ! to distribuite the calculations among the processors.
- new%symsigma = dtset%symsigma
- new%timrev = 1
+ new%symsigma = dtset%symsigma; new%timrev = 1
 
  if (dtset%nkptgw /= 0) then
    ! Treat the k-points and bands specified in the input file.
+   call wrtout(std_out, "Getting list of k-points for self-energy from kptgw and bdgw.")
    new%nkcalc = dtset%nkptgw
    ABI_MALLOC(new%kcalc, (3, new%nkcalc))
    ABI_MALLOC(new%bstart_ks, (new%nkcalc, new%nsppol))
@@ -1191,14 +1192,14 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
      new%nbcalc_ks(:,spin) = dtset%bdgw(2,1:new%nkcalc,spin) - dtset%bdgw(1,1:new%nkcalc,spin) + 1
    end do
 
-   ! Consistency check on bdgw and mband
+   ! Consistency check on bdgw and dtset%mband
    ierr = 0
    do spin=1,new%nsppol
      do ikcalc=1,new%nkcalc
-       if (dtset%bdgw(2,ikcalc,spin) > ebands%mband) then
+       if (dtset%bdgw(2,ikcalc,spin) > dtset%mband) then
          ierr = ierr + 1
          write(msg,'(a,2i0,2(a,i0))')&
-          "For (k, s) ",ikcalc,spin," bdgw= ",dtset%bdgw(2,ikcalc,spin), " > mband=",ebands%mband
+          "For (k, s) ",ikcalc,spin," bdgw= ",dtset%bdgw(2,ikcalc,spin), " > mband=",dtset%mband
          MSG_WARNING(msg)
        end if
      end do
@@ -1240,7 +1241,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
        do spin=1,new%nsppol
          do ik=1,new%nkcalc
            new%bstart_ks(ik,spin) = max(val_indeces(ik,spin) - gw_qprange, 1)
-           ii = max(val_indeces(ik,spin) + gw_qprange + 1, ebands%mband)
+           ii = max(val_indeces(ik,spin) + gw_qprange + 1, dtset%mband)
            new%nbcalc_ks(ik,spin) = ii - new%bstart_ks(ik,spin) + 1
          end do
        end do
@@ -1250,7 +1251,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
        new%bstart_ks = 1
        do spin=1,new%nsppol
          do ik=1,new%nkcalc
-           new%nbcalc_ks(ik,spin) = min(val_indeces(ik,spin) - gw_qprange, ebands%mband)
+           new%nbcalc_ks(ik,spin) = min(val_indeces(ik,spin) - gw_qprange, dtset%mband)
          end do
        end do
      end if
@@ -1596,7 +1597,7 @@ subroutine sigmaph_setup_kcalc(self, ikcalc)
  end if
 
  if (self%symsigma == 0) then
-#if 0
+#if 1
    ! Do not use symmetries in BZ sum_q --> nqibz_k == nqbz
    self%nqibz_k = self%nqbz
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
