@@ -123,8 +123,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  integer :: mod10,mod100,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng
  integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev
  integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange !band
- real(dp),parameter :: OMEGASIMIN=0.01d0
- real(dp) :: domegas,domegasi,ucvol,tol_enedif
+ real(dp),parameter :: OMEGASIMIN=0.01d0,tol_enediff=0.001_dp*eV_Ha
+ real(dp) :: domegas,domegasi,ucvol
  logical,parameter :: linear_imag_mesh=.TRUE.
  logical :: ltest,remove_inv,changed,found
  character(len=500) :: msg
@@ -632,12 +632,11 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! * We will have to average the GW corrections over degenerate states if symsigma=1 is used.
  ! * KS states belonging to the same irreducible representation should be included in the basis set used for SCGW.
  if (Sigp%symsigma/=0 .or. mod100>=10) then
-   tol_enedif = 0.001/Ha_eV
    do isppol=1,Sigp%nsppol
      do ikcalc=1,Sigp%nkptgw
 
        if (has_IBZ_item(Kmesh,Sigp%kptgw(:,ikcalc),ikibz,G0)) then
-         call enclose_degbands(KS_BSt,ikibz,isppol,Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,tol_enedif)
+         call enclose_degbands(KS_BSt,ikibz,isppol,Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,tol_enediff)
          if (changed) then
            write(msg,'(2(a,i0),2a,2(1x,i0))')&
 &            "Not all the degenerate states at ikcalc= ",ikcalc,", spin= ",isppol,ch10,&

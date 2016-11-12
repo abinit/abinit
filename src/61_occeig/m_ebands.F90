@@ -1707,8 +1707,7 @@ subroutine enclose_degbands(ebands,ikibz,spin,ibmin,ibmax,changed,tol_enedif)
 
 ! *************************************************************************
 
- ibmin_bkp = ibmin
- ibmax_bkp = ibmax
+ ibmin_bkp = ibmin; ibmax_bkp = ibmax
 
  emin =  ebands%eig(ibmin,ikibz,spin)
  do ib=ibmin-1,1,-1

@@ -121,7 +121,7 @@ module m_sigmaph
 
   integer :: symsigma
    ! 1 if matrix elements should be symmetrized.
-   ! Rrequired when the sum over q in the BZ is replaced by IBZ(k).
+   ! Required when the sum over q in the BZ is replaced by IBZ(k).
 
   integer :: timrev
    !  timrev=1 if the use of time-reversal is allowed; 0 otherwise
@@ -1044,14 +1044,15 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master=0,brav1=1,option1=1,occopt3=3
- integer :: my_rank,nqpt_max,ik,my_nshiftq,nct,my_mpw,cnt,nproc,iq_ibz
- integer :: onpw,ii,ipw,ierr,it,timerev_k,spin,gap_err,ikcalc,gw_qprange
+ integer :: my_rank,nqpt_max,ik,my_nshiftq,nct,my_mpw,cnt,nproc,iq_ibz,ik_ibz
+ integer :: onpw,ii,ipw,ierr,it,timerev_k,spin,gap_err,ikcalc,gw_qprange,ibstop
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
 #endif
- real(dp),parameter :: spinmagntarget=-99.99_dp
+ real(dp),parameter :: spinmagntarget=-99.99_dp,tol_enediff=0.001_dp*eV_Ha
  real(dp) :: tstep,dksqmax
  character(len=500) :: msg
+ logical :: changed
  type(ebands_t) :: tmp_ebands
  type(gaps_t) :: gaps
 !arrays
@@ -1128,7 +1129,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  ! k-point and bands where corrections are wanted
  ! We initialize IBZ(k) here so that we have all the basic dimensions of the run and it's possible
  ! to distribuite the calculations among the processors.
- new%symsigma = 0; new%timrev = 1
+ new%symsigma = dtset%symsigma
+ new%timrev = 1
 
  if (dtset%nkptgw /= 0) then
    ! Treat the k-points and bands specified in the input file.
@@ -1220,23 +1222,23 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
 
  end if ! nkptgw /= 0
 
- new%max_nbcalc = maxval(new%nbcalc_ks)
  call gaps_free(gaps)
-
- ! TODO: Make sure that all the degenerate states are included.
- if (new%symsigma /= 0) then
-   NOT_IMPLEMENTED_ERROR()
- end if
 
  ! The k-point and the symmetries relating the BZ k-point to the IBZ.
  ABI_MALLOC(new%kcalc2ibz, (new%nkcalc, 6))
 
- do ik=1,new%nkcalc
-   kk = new%kcalc(:,ik)
+ do ikcalc=1,new%nkcalc
+   kk = new%kcalc(:,ikcalc)
    call listkk(dksqmax,cryst%gmet,indkk_k,ebands%kptns,kk,ebands%nkpt,1,cryst%nsym,&
       1,cryst%symafm,cryst%symrel,new%timrev,use_symrec=.False.)
 
-   new%kcalc2ibz(ik, :) = indkk_k(1, :)
+   new%kcalc2ibz(ikcalc, :) = indkk_k(1, :)
+
+   ik_ibz = indkk_k(1,1) !; isym_k = indkk_k(1,2)
+   !trev_k = indkk_k(1, 6); g0_k = indkk_k(1, 3:5)
+   !isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+   !kk_ibz = ebands%kptns(:,ik_ibz)
+
    if (dksqmax > tol12) then
      write(msg, '(7a,es16.6,4a)' )&
       'The WFK file cannot be used to start thee present calculation ',ch10,&
@@ -1252,9 +1254,29 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
    ! Examine the symmetries of the k-point
    ! TODO: See timerev_k
    !call littlegroup_q(cryst%nsym,kk,symk,cryst%symrec,cryst%symafm,timerev_k,prtvol=dtset%prtvol)
+   !call wrtout(std_out, sjoin("Will compute", itoa(sigma%nqibz_k), "q-points in the IBZ(k)"))
+
+   ! We will have to average the GW corrections over degenerate states if symsigma=1 is used.
+   ! Here we make sure that all the degenerate states are included.
+   if (new%symsigma /= 0) then
+     do spin=1,new%nsppol
+       ibstop = new%bstart_ks(ikcalc,spin) + new%nbcalc_ks(ikcalc,spin) - 1
+
+       call enclose_degbands(ebands, ik_ibz, spin, new%bstart_ks(ikcalc,spin), ibstop, changed, tol_enediff)
+       if (changed) then
+         new%nbcalc_ks(ikcalc,spin) = ibstop - new%bstart_ks(ikcalc,spin) + 1
+         write(msg,'(2(a,i0),2a,2(1x,i0))')&
+          "Not all the degenerate states at ikcalc= ",ikcalc,", spin= ",spin,ch10,&
+          "were included in the bdgw set. bdgw has been changed to: ",new%bstart_ks(ikcalc,spin),ibstop
+         MSG_COMMENT(msg)
+       end if
+     end do
+   end if ! symsigma
+
  end do
 
- !call wrtout(std_out, sjoin("Will compute", itoa(sigma%nqibz_k), "q-points in the IBZ(k)"))
+ ! Now we can finally compute max_nbcalc
+ new%max_nbcalc = maxval(new%nbcalc_ks)
 
  ! mpw is the maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
  ! we also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
