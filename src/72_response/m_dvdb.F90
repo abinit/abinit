@@ -914,6 +914,7 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_readsym_allv1'
+ use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -930,9 +931,10 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ipc,npc,idir,ipert,pcase,my_rank,nproc,ierr
+ integer :: ipc,npc,idir,ipert,pcase,my_rank,nproc,ierr,mu,trev_q
  character(len=500) :: msg
 !arrays
+ integer :: symq(4,2,db%cryst%nsym)
  integer :: pinfo(3,3*db%mpert),pflag(3, db%natom)
 
 ! *************************************************************************
@@ -959,6 +961,17 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
 
  ! Return if all perts are available.
  if (npc == 3*db%natom) then
+   if (db%symv1) then
+     if (db%debug) write(std_out,*)"Potentials are available but will call v1phq_symmetrize because of symv1"
+     ! TODO: Precompute these tables.
+     ! Examine the symmetries of the q wavevector
+     call littlegroup_q(db%cryst%nsym,db%qpts(:,iqpt),symq,db%cryst%symrec,db%cryst%symafm,trev_q,prtvol=0)
+     do mu=1,db%natom3
+       idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
+       call v1phq_symmetrize(db%cryst,idir,ipert,symq,ngfft,cplex,nfft,db%nspden,db%nsppol,db%mpi_enreg,v1scf(:,:,:,mu))
+     end do
+   end if
+
    if (db%debug) write(std_out,*)ABI_FUNC,": All perts available. Returning"
    return
  end if

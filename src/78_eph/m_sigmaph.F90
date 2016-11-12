@@ -341,7 +341,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:)
  real(dp),allocatable :: gkk_atm(:,:,:),gkk_nu(:,:,:)
- real(dp),allocatable :: bras_kq(:,:,:),kets_k(:,:,:),h1kets_kq(:,:,:),cgwork(:,:)
+ real(dp),allocatable :: bras_kq(:,:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnl1(:,:),work(:,:,:,:)
@@ -455,8 +455,10 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
 
  ! Open the DVDB file
  call dvdb_open_read(dvdb, ngfftf, xmpi_comm_self)
+ dvdb%debug = .True.
  ! This one to symmetrize the potentials.
- dvdb%symv1 = .True.; dvdb%debug = .True.
+ dvdb%symv1 = .False.
+ dvdb%symv1 = .True.
 
  ! Loop over k-points for QP corrections.
  do ikcalc=1,sigma%nkcalc
@@ -534,7 +536,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
        ! Find the index of the q-point in the DVDB.
        db_iqpt = dvdb_findq(dvdb, qpt)
 
-       ! TODO: handle q_bz = S q_ibz case by symmetrizing the potentials in the DVDB.
+       ! TODO: handle q_bz = S q_ibz case by symmetrizing the potentials already available in the DVDB.
        if (db_iqpt /= -1) then
          if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Found: ",ktoa(qpt)," in DVDB with index ",itoa(db_iqpt)))
          ! Read or reconstruct the dvscf potentials for all 3*natom perturbations.
@@ -602,12 +604,13 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
          ABI_FREE(gtmp)
        end if
 
-       ! This array will store H1 |psi_nk>
-       ABI_MALLOC(h1kets_kq, (2, npw_kq*nspinor, nbcalc_ks))
+       ! This array will store H1 |psi_nk> for all 3*natom perturbations
+       ABI_STAT_MALLOC(h1kets_kq, (2, npw_kq*nspinor, nbcalc_ks, natom3), ierr)
+       ABI_CHECK(ierr==0, "oom in h1kets_kq")
 
        ! Allocate vlocal1 with correct cplex. Note nvloc
        ABI_STAT_MALLOC(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc,natom3), ierr)
-       ABI_CHECK(ierr==0, "oom vlocal1")
+       ABI_CHECK(ierr==0, "oom in vlocal1")
 
        ! Set up local potential vlocal1 with proper dimensioning, from vtrial1 taking into account the spin.
        do ipc=1,natom3
@@ -655,7 +658,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
            ! Use scissor shift on 0-order eigenvalue
            eshift = eig0nk - dtset%dfpt_sciss
 
-           call getgh1c(berryopt0,copt0,kets_k(:,:,ib_k),cwaveprj0,h1kets_kq(:,:,ib_k),&
+           call getgh1c(berryopt0,copt0,kets_k(:,:,ib_k),cwaveprj0,h1kets_kq(:,:,ib_k,ipc),&
              grad_berry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,mpi_enreg,optlocal,&
              optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 
@@ -692,7 +695,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
          ! Be careful with time-reversal symmetry.
          if (isirr_kq) then
            ! Copy u_kq(G)
-           call wfd_copy_cg(wfd, ib_kq, ikq_ibz, spin, bras_kq(1,1,1))
+           call wfd_copy_cg(wfd, ib_kq, ikq_ibz, spin, bras_kq(:,:,1))
          else
            ! Reconstruct u_kq(G) from the IBZ image.
            !istwf_kq = set_istwfk(kq); if (.not. have_ktimerev) istwf_kq = 1
@@ -704,10 +707,8 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
            call cg_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1,&
                           npw_kqirr, wfd%kdata(ikq_ibz)%kg_k,&
                           npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bras_kq(:,:,1), work_ngfft, work)
-           bras_kq(:,:,1) = zero
+           !bras_kq(:,:,1) = zero
          end if
-         !bras_kq(:,:,1) = zero
-         !bras_kq(1,:,1) = sqrt(one / npw_kq)
 
          do ipc=1,natom3
            ! Calculate elphmat(j,i) = <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation.
@@ -716,7 +717,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
            ! <u_(band,k+q)^(0)|H_(k+q,k)^(1)|u_(band,k)^(0)>                           (NC psps)
            ! <u_(band,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(band,k)^(0)> (PAW)
            do ib_k=1,nbcalc_ks
-             call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bras_kq(:,:,1),h1kets_kq(:,:,ib_k),&
+             call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bras_kq(:,:,1),h1kets_kq(:,:,ib_k,ipc),&
                   mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
              gkk_atm(:,ib_k,ipc) = [dotr, doti]
              !gkk_atm(:,ib_k,ipc) = one
@@ -1595,8 +1596,8 @@ subroutine sigmaph_setup_kcalc(self, ikcalc)
  end if
 
  if (self%symsigma == 0) then
-   ! Do not use symmetries in BZ sum_q --> nqibz_k == nqbz
 #if 0
+   ! Do not use symmetries in BZ sum_q --> nqibz_k == nqbz
    self%nqibz_k = self%nqbz
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
    ABI_MALLOC(self%wtq_k, (self%nqibz_k))
