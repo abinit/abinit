@@ -8,7 +8,7 @@
 !! the Brillouin Zone, starting from a first set
 !! of weights wtk, and folding it to a new set, by
 !! taking into account the symmetries described
-!! by symrc1, and eventually the timereversal symmetry.
+!! by symrc1, and eventually the time-reversal symmetry.
 !! Also compute the number of k points in the reduced set
 !! This routine is also used for sampling the q vectors in the
 !! Brillouin zone for the computation of thermodynamical
@@ -38,7 +38,7 @@
 !!   The correspondence beween the iq_ibz point in IBZ and the iq_bz point in the full BZ is obtained via:
 !!
 !!       do ik_ibz=1,nkpt1
-!!         ik_bz = indkpt1(ik_ibz)  
+!!         ik_bz = indkpt1(ik_ibz)
 !!       end do
 !!
 !! nkpt1 = number of k-points in the irreducible set

@@ -1856,15 +1856,15 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
  qptrlatt(3,3)=ngqpt(3)
 
  call smpbz(brav1,std_out,qptrlatt,nqpt_max,nqbz,nqshft,option1,qshft,qbz)
-!
-!Reduce the number of such points by symmetrization.
+
+ ! Reduce the number of such points by symmetrization.
  ABI_ALLOCATE(ibz2bz,(nqbz))
  ABI_ALLOCATE(wtq,(nqbz))
  ABI_ALLOCATE(wtq_folded,(nqbz))
- wtq(:)=one/nqbz         ! Weights sum up to one
+ wtq(:)=one/nqbz ! Weights sum up to one
 
  call symkpt(chksymbreak0,cryst%gmet,ibz2bz,std_out,qbz,nqbz,nqibz,nsym,cryst%symrec,timrev1,wtq,wtq_folded)
- write(std_out,*) 'nqibz = ', nqibz
+ !write(std_out,*) 'nqibz = ', nqibz
 
  ABI_ALLOCATE(wtqibz,(nqibz))
  do iq_ibz=1,nqibz

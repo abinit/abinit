@@ -129,6 +129,9 @@ module m_sigmaph
   integer :: nqbz
   ! Number of q-points in the BZ.
 
+  integer :: nqibz
+  ! Number of q-points in the IBZ.
+
   integer :: nqibz_k
   ! Number of q-points in the IBZ(k). Depends on ikcalc.
 
@@ -168,17 +171,25 @@ module m_sigmaph
    ! kcalc(3, nkcalc)
    ! List of k-points where the self-energy is computed.
 
-  real(dp),allocatable :: qibz_k(:,:)
-  ! qibz(3,nqibz)
-  ! Reduced coordinates of the q-points in the IBZ. Depends on ikcalc.
-
-  real(dp),allocatable :: wtq_k(:)
-  ! wtq(nqibz)
-  ! Weights of the q-points in the IBZ (normalized to one). Depends on ikcalc.
-
   real(dp),allocatable :: qbz(:,:)
   ! qbz(3,nqbz)
-  ! Reduced coordinates of the q-points in the BZ.
+  ! Reduced coordinates of the q-points in the full BZ.
+
+  real(dp),allocatable :: qibz(:,:)
+  ! qibz(3,nqibz)
+  ! Reduced coordinates of the q-points in the IBZ.
+
+  real(dp),allocatable :: wtq(:)
+  ! wtq(nqibz)
+  ! Weights of the q-points in the IBZ (normalized to one).
+
+  real(dp),allocatable :: qibz_k(:,:)
+  ! qibz(3,nqibz_k)
+  ! Reduced coordinates of the q-points in the IBZ(k). Depends on ikcalc.
+
+  real(dp),allocatable :: wtq_k(:)
+  ! wtq(nqibz_k)
+  ! Weights of the q-points in the IBZ(k) (normalized to one). Depends on ikcalc.
 
   real(dp),allocatable :: kTmesh(:)
    ! kTmesh(ntemp)
@@ -303,7 +314,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor
  integer :: ib_kq,ib_k,band,num_smallw
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq !,!timerev_q,
- integer :: spin,istwf_k,istwf_kq,istwf_kirr,npw_k,npw_kq,npw_kirr
+ integer :: spin,istwf_k,istwf_kq,istwf_kqirr,npw_k,npw_kq,npw_kqirr
  integer :: mpw,ierr,iw,it !ipw
  integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q,imode
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
@@ -570,6 +581,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
        ikq_ibz = indkk_kq(1,1); isym_kq = indkk_kq(1,2)
        trev_kq = indkk_kq(1, 6); g0_kq = indkk_kq(1, 3:5)
        isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
+       !isirr_kq = .True.
        kq_ibz = ebands%kptns(:,ikq_ibz)
 
        ! Get npw_kq, kg_kq and symmetrize wavefunctions from IBZ (if needed).
@@ -667,12 +679,14 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
 
        ABI_FREE(gs1c)
 
-       ! Sum over bands (all bands are taken for the time being)
-       istwf_kirr = wfd%istwfk(ikq_ibz); npw_kirr = wfd%npwarr(ikq_ibz)
+       ! ==============
+       ! Sum over bands
+       ! ==============
+       istwf_kqirr = wfd%istwfk(ikq_ibz); npw_kqirr = wfd%npwarr(ikq_ibz)
        ABI_MALLOC(bras_kq, (2, npw_kq*nspinor, 1))
-       ABI_MALLOC(cgwork, (2, npw_kirr*nspinor))
+       ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
 
-       do ib_kq=1,wfd%nband(ikq_ibz, spin)
+       do ib_kq=1,wfd%nband(ikq_ibz, spin)  ! all bands are used for the time being.
 
          ! symmetrize wavefunctions from IBZ (if needed).
          ! Be careful with time-reversal symmetry.
@@ -688,9 +702,12 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
            !g0_kq =  g0ibz_kq + g0bz_kq
            call wfd_copy_cg(wfd, ib_kq, ikq_ibz, spin, cgwork)
            call cg_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1,&
-                          npw_kirr, wfd%kdata(ikq_ibz)%kg_k,&
-                          npw_kq, kg_kq, istwf_kirr, istwf_kq, cgwork, bras_kq(:,:,1), work_ngfft, work)
+                          npw_kqirr, wfd%kdata(ikq_ibz)%kg_k,&
+                          npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bras_kq(:,:,1), work_ngfft, work)
+           bras_kq(:,:,1) = zero
          end if
+         !bras_kq(:,:,1) = zero
+         !bras_kq(1,:,1) = sqrt(one / npw_kq)
 
          do ipc=1,natom3
            ! Calculate elphmat(j,i) = <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation.
@@ -699,9 +716,10 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
            ! <u_(band,k+q)^(0)|H_(k+q,k)^(1)|u_(band,k)^(0)>                           (NC psps)
            ! <u_(band,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(band,k)^(0)> (PAW)
            do ib_k=1,nbcalc_ks
-             call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bras_kq(1,1,1),h1kets_kq(1,1,ib_k),&
+             call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bras_kq(:,:,1),h1kets_kq(:,:,ib_k),&
                   mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
              gkk_atm(:,ib_k,ipc) = [dotr, doti]
+             !gkk_atm(:,ib_k,ipc) = one
            end do
          end do
 
@@ -788,6 +806,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  if (my_rank == master) then
    call sigmaph_print(sigma, std_out, "dims+results", ebands)
  end if
+ stop
 
  ! Free memory
  ABI_FREE(gvnl1)
@@ -1028,6 +1047,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
 #undef ABI_FUNC
 #define ABI_FUNC 'sigmaph_new'
  use interfaces_14_hidewrite
+ use interfaces_41_geometry
  use interfaces_56_recipspace
 !End of the abilint section
 
@@ -1043,7 +1063,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,brav1=1,option1=1,occopt3=3
+ integer,parameter :: master=0,brav1=1,option1=1,occopt3=3,qtimrev1=1
  integer :: my_rank,nqpt_max,ik,my_nshiftq,nct,my_mpw,cnt,nproc,iq_ibz,ik_ibz
  integer :: onpw,ii,ipw,ierr,it,timerev_k,spin,gap_err,ikcalc,gw_qprange,ibstop
 #ifdef HAVE_NETCDF
@@ -1061,6 +1081,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  integer,allocatable :: gtmp(:,:)
  real(dp) :: my_shiftq(3,1),temp_range(2),kk(3),kq(3)
  real(dp),allocatable :: tmp_qbz(:,:) !qibz_k(:,:),
+!for symkpt
+ integer,allocatable :: ibz2bz(:)
+ real(dp),allocatable :: tmp_wtq(:),tmp_wtq_folded(:)
 
 ! *************************************************************************
 
@@ -1121,6 +1144,28 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  ABI_MALLOC(new%qbz, (3, new%nqbz))
  new%qbz = tmp_qbz(:,:new%nqbz)
  ABI_FREE(tmp_qbz)
+
+ ! Reduce the number of such points by symmetrization.
+ ! Compute new%wtq and new%qibz.
+ ! Note that time-reversal is always used for the q-points.
+ ABI_ALLOCATE(ibz2bz, (new%nqbz))
+ ABI_ALLOCATE(tmp_wtq, (new%nqbz))
+ ABI_ALLOCATE(tmp_wtq_folded, (new%nqbz))
+ tmp_wtq = one / new%nqbz ! Weights sum up to one
+
+ call symkpt(dtset%chksymbreak,cryst%gmet,ibz2bz,std_out,new%qbz,new%nqbz,new%nqibz,&
+   cryst%nsym,cryst%symrec,qtimrev1,tmp_wtq,tmp_wtq_folded)
+
+ ABI_MALLOC(new%wtq, (new%nqibz))
+ ABI_MALLOC(new%qibz, (3, new%nqibz))
+ do iq_ibz=1,new%nqibz
+   new%wtq(iq_ibz) = tmp_wtq_folded(ibz2bz(iq_ibz))
+   new%qibz(:,iq_ibz) = new%qbz(:, ibz2bz(iq_ibz))
+ end do
+
+ ABI_FREE(ibz2bz)
+ ABI_FREE(tmp_wtq)
+ ABI_FREE(tmp_wtq_folded)
 
  ! Select k-point and bands where corrections are wanted
  ! These parameters will be passed via the input file (similar to kptgw, bdgw)
@@ -1469,6 +1514,12 @@ subroutine sigmaph_free(self)
  if (allocated(self%qbz)) then
    ABI_FREE(self%qbz)
  end if
+ if (allocated(self%qibz)) then
+   ABI_FREE(self%qibz)
+ end if
+ if (allocated(self%wtq)) then
+   ABI_FREE(self%wtq)
+ end if
  if (allocated(self%qibz_k)) then
    ABI_FREE(self%qibz_k)
  end if
@@ -1545,11 +1596,20 @@ subroutine sigmaph_setup_kcalc(self, ikcalc)
 
  if (self%symsigma == 0) then
    ! Do not use symmetries in BZ sum_q --> nqibz_k == nqbz
+#if 0
    self%nqibz_k = self%nqbz
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
    ABI_MALLOC(self%wtq_k, (self%nqibz_k))
    self%qibz_k = self%qbz
    self%wtq_k = one / self%nqbz
+#else
+   ! DEBUGGING: This is to enforce the sum over IBZ everywhere.
+   self%nqibz_k = self%nqibz
+   ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
+   ABI_MALLOC(self%wtq_k, (self%nqibz_k))
+   self%qibz_k = self%qibz
+   self%wtq_k = self%wtq
+#endif
  else
    ! Use symmetries of the little group
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))

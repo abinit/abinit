@@ -958,7 +958,10 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
  call xmpi_bcast(v1scf, master, comm, ierr)
 
  ! Return if all perts are available.
- if (npc == 3*db%natom) return
+ if (npc == 3*db%natom) then
+   if (db%debug) write(std_out,*)ABI_FUNC,": All perts available. Returning"
+   return
+ end if
 
  ! Perturbation are missing and we have to reconstruct them by symmetry.
  ! This is the common case when DFPT calculations are done for independent perturbations only.
@@ -3052,6 +3055,10 @@ subroutine dvdb_test_symmetries(db_path, comm)
 ! *************************************************************************
 
  call dvdb_init(db, db_path, comm)
+ db%debug = .True.
+ db%symv1 = .True.
+ db%symv1 = .False.
+ call dvdb_print(db)
 
  call ngfft_seq(ngfft, db%ngfft3_v1(:,1))
  nfft = product(ngfft(1:3))
@@ -3108,7 +3115,7 @@ subroutine dvdb_test_symmetries(db_path, comm)
 
      write(std_out,"(2(a,i0),2a)")"For idir: ",idir, ", ipert: ", ipert, ", qpt: ",trim(ktoa(qpt))
      do ispden=1,db%nspden
-       write(std_out,*)"  max(abs(f1-f2))",maxval(abs(file_v1scf(:,:,ispden,pcase) - symm_v1scf(:,:,ispden,pcase)))
+       write(std_out,"(a,es10.3)")"  max(abs(f1-f2))",maxval(abs(file_v1scf(:,:,ispden,pcase) - symm_v1scf(:,:,ispden,pcase)))
        call vdiff_print(vdiff_eval(cplex,nfft,file_v1scf(:,:,ispden,pcase),symm_v1scf(:,:,ispden,pcase),cryst%ucvol))
 
        !if (cplex == 1) then
