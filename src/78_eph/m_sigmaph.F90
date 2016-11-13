@@ -1092,17 +1092,18 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  integer,parameter :: master=0,brav1=1,option1=1,occopt3=3,qtimrev1=1
  integer :: my_rank,nqpt_max,ik,my_nshiftq,nct,my_mpw,cnt,nproc,iq_ibz,ik_ibz
  integer :: onpw,ii,ipw,ierr,it,timerev_k,spin,gap_err,ikcalc,gw_qprange,ibstop
+ integer :: nk_found,ifo,jj
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
 #endif
  real(dp),parameter :: spinmagntarget=-99.99_dp,tol_enediff=0.001_dp*eV_Ha
  real(dp) :: tstep,dksqmax
  character(len=500) :: msg
- logical :: changed
+ logical :: changed,found
  type(ebands_t) :: tmp_ebands
  type(gaps_t) :: gaps
 !arrays
- integer :: qptrlatt(3,3),indkk_k(1,6),gmax(3),my_gmax(3)
+ integer :: qptrlatt(3,3),indkk_k(1,6),gmax(3),my_gmax(3),kpos(6)
  integer :: symk(4,2,cryst%nsym),val_indeces(ebands%nkpt, ebands%nsppol)
  integer,allocatable :: gtmp(:,:),ibz2bz(:)
  real(dp) :: my_shiftq(3,1),temp_range(2),kk(3),kq(3)
@@ -1260,7 +1261,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
      new%kcalc = ebands%kptns
      new%bstart_ks = 1; new%nbcalc_ks = 6
 
-     if (gw_qprange>0) then
+     if (gw_qprange > 0) then
        ! All k-points: Add buffer of bands above and below the Fermi level.
        do spin=1,new%nsppol
          do ik=1,new%nkcalc
@@ -1287,9 +1288,37 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
      ! we have compute the union of the k-points where the fundamental and the optical gaps are located.
      !
      ! Find the list of `interesting` kpoints.
-     ABI_CHECK(gap_err == 0, "gap_err!=0")
-     NOT_IMPLEMENTED_ERROR()
-   end if
+     ABI_CHECK(gap_err == 0, "gw_qprange 0 cannot be used because I cannot find the gap (gap_err !=0)")
+     nk_found = 1; kpos(1) = gaps%fo_kpos(1,1)
+
+     do spin=1,new%nsppol
+       do ifo=1,3
+         ik = gaps%fo_kpos(ifo, spin)
+         found = .FALSE.; jj = 0
+         do while (.not. found .and. jj < nk_found)
+           jj = jj + 1; found = (kpos(jj) == ik)
+         end do
+         if (.not. found) then
+           nk_found = nk_found + 1; kpos(nk_found) = ik
+         end if
+       end do
+     end do
+
+     ! Now we can define the list of k-points and the bands range.
+     new%nkcalc = nk_found
+     ABI_MALLOC(new%kcalc, (3, new%nkcalc))
+     ABI_MALLOC(new%bstart_ks, (new%nkcalc, new%nsppol))
+     ABI_MALLOC(new%nbcalc_ks, (new%nkcalc, new%nsppol))
+
+     do ii=1,new%nkcalc
+       ik = kpos(ii)
+       new%kcalc(:,ii) = ebands%kptns(:,ik)
+       do spin=1,new%nsppol
+         new%bstart_ks(ii,spin) = val_indeces(ik,spin)
+         new%nbcalc_ks(ii,spin) = 2
+       end do
+     end do
+   end if ! gw_qprange
 
  end if ! nkptgw /= 0
 
@@ -1713,9 +1742,9 @@ subroutine sigmaph_solve(self, ikcalc, spin, ebands)
  end if
 
  ! Compute spectral functions.
- if (self%nwr > 1) then
+ !if (self%nwr > 1) then
    !NOT_IMPLEMENTED_ERROR()
- end if
+ !end if
 
 #ifdef HAVE_NETCDF
  shape3(1) = 2; shape4(1) = 2; shape5(1) = 2

@@ -560,7 +560,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      ! we have compute the union of the k-points where the fundamental and the optical gaps are located.
      !
      ! Find the list of `interesting` kpoints.
-     ABI_CHECK(gap_err == 0, "gap_err!=0")
+     ABI_CHECK(gap_err == 0, "gw_qprange 0 cannot be used because I cannot find the gap (gap_err !=0)")
      nk_found = 1; kpos(1) = gaps%fo_kpos(1,1)
 
      do spin=1,Sigp%nsppol
@@ -568,12 +568,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
          ik = gaps%fo_kpos(ifo, spin)
          found = .FALSE.; jj = 0
          do while (.not. found .and. jj < nk_found)
-           jj = jj + 1
-           found = (kpos(jj) == ik)
+           jj = jj + 1; found = (kpos(jj) == ik)
          end do
          if (.not. found) then
-           nk_found = nk_found + 1
-           kpos(nk_found) = ik
+           nk_found = nk_found + 1; kpos(nk_found) = ik
          end if
        end do
      end do
