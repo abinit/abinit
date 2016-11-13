@@ -109,7 +109,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_phgamma,         only : eph_phgamma
  use m_gkk,             only : eph_gkk
  use m_phpi,            only : eph_phpi
- use m_sigmaph,         only : sigmaph_driver
+ use m_sigmaph,         only : sigmaph
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -493,8 +493,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  if (dtset%eph_task == 4) then
    ! Compute electron self-energy (phonon contribution)
-   call sigmaph_driver(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
-                       pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+   call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
+                pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
  end if
 
  !=====================

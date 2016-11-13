@@ -23,13 +23,13 @@
 !!     treatment by mrggkk utility or anaddb utility. If 0 no output is provided.
 !!
 !! OUTPUT
-!! symq(4,2,nsym)= (integer) three first numbers define the G vector ;
+!! symq(4,2,nsym)= three first numbers define the G vector;
 !!     fourth number is zero if the q-vector is not preserved, is 1 otherwise
 !!     second index is one without time-reversal symmetry, two with time-reversal symmetry
 !! timrev=1 if the time-reversal symmetry preserves the wavevector, modulo a reciprocal lattice vector (in principle, see below).
 !!
 !! NOTES
-!! The condition is :
+!! The condition is:
 !!    $q =  O  S(q) - G$
 !! with O being either the identity or the time reversal symmetry (= inversion in reciprocal space)
 !! and G being a primitive vector of the reciprocal lattice.

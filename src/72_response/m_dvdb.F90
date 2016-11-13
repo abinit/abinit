@@ -41,7 +41,7 @@ MODULE m_dvdb
 #endif
  use m_hdr
 
- use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, endswith
+ use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
  use m_io_tools,      only : open_file, file_exists
  use m_numeric_tools, only : wrap2_pmhalf, vdiff_eval, vdiff_print
  use m_copy,          only : alloc_copy
@@ -115,7 +115,7 @@ MODULE m_dvdb
   !  FPOS_EOF signals the end of file
 
   integer :: numv1
-  ! Total number of v1 potentials present in file.
+  ! Number of v1 potentials present in file.
 
   integer :: nqpt
   ! Number of q-points
@@ -685,29 +685,31 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
  call wrtout(my_unt,msg,my_mode)
 
- write(std_out,*)"DVDB Version: ",db%version
- write(std_out,*)"Path: ",trim(db%path)
- write(std_out,*)"Number of v1 potentials: ",db%numv1
- write(std_out,*)"Activate symmetrization of v1 potentials: ",db%symv1
- write(std_out,*)"Number of q-points in DVDB: ",db%nqpt
- write(std_out,*)"List of q-points:"
+ write(std_out,"(a)")sjoin("DVDB version:", itoa(db%version))
+ write(std_out,"(a)")sjoin("File path:", db%path)
+ write(std_out,"(a)")sjoin("Number of v1scf potentials:", itoa(db%numv1))
+ write(std_out,"(a)")sjoin("Activate symmetrization of v1scf(r):",yesno(db%symv1))
+ write(std_out,"(a)")sjoin("Number of q-points in DVDB: ", itoa(db%nqpt))
+ write(std_out,"(a)")"List of q-points:"
  do iq=1,db%nqpt
-   write(std_out,*)trim(ktoa(db%qpts(:,iq)))
+   write(std_out,"(a)")sjoin("[", itoa(iq),"]", ktoa(db%qpts(:,iq)))
  end do
 
  !call crystal_print(db%cryst,header,unit,mode_paral,prtvol)
 
- write(std_out,*)"FFT mesh for potentials on file:"
- write(std_out,*)"qpt, idir, ipert, ngfft(3)"
+ write(std_out,"(a)")"FFT mesh for potentials on file:"
+ write(std_out,"(a)")"q-point, idir, ipert, ngfft(:3)"
  do iv1=1,db%numv1
    idir = db%iv_pinfoq(1, iv1); ipert = db%iv_pinfoq(2, iv1); iq = db%iv_pinfoq(4, iv1)
-   write(std_out,*)trim(ktoa(db%qpts(:,iq))), idir, ipert, trim(ltoa(db%ngfft3_v1(:,iv1)))
+   write(std_out,"(a)")sjoin(ktoa(db%qpts(:,iq)), itoa(idir), itoa(ipert), ltoa(db%ngfft3_v1(:,iv1)))
  end do
 
  !if (my_prtvol > 0) then
- write(std_out,*)"rhog1(q,G=0)"
+ write(std_out, "(a)")"q-point, idir, iper, rhog1(q,G=0)"
  do iv1=1,db%numv1
-   write(std_out,*)db%rhog1_g0(:, iv1)
+   idir = db%iv_pinfoq(1, iv1); ipert = db%iv_pinfoq(2, iv1); iq = db%iv_pinfoq(4, iv1)
+   write(std_out,"(a)")sjoin(ktoa(db%qpts(:,iq)), itoa(idir), itoa(ipert), &
+     ftoa(db%rhog1_g0(1, iv1)), ftoa(db%rhog1_g0(2, iv1)))
  end do
  !end if
 
@@ -2714,7 +2716,8 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
  end do
 
  ! Validate headers.
- ! TODO: Should perform consistency check on the headers and rearrange them in blocks of q-points.
+ ! TODO: Should perform consistency check on the headers, rearrange them in blocks of q-points.
+ ! ignore POT1 files that do not correspond to atomic perturbations.
  nperts = size(hdr1_list)
 
  ! Write dvdb file (we only support fortran binary format)

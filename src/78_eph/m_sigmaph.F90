@@ -70,7 +70,7 @@ module m_sigmaph
  private
 !!***
 
- public :: sigmaph_driver
+ public :: sigmaph   ! Main entry point to compute self-energy matrix elements
 !!***
 
 !----------------------------------------------------------------------
@@ -91,7 +91,7 @@ module m_sigmaph
 !!
 !! SOURCE
 
- type,public :: sigmaph_t
+ type,private :: sigmaph_t
 
   integer :: nkcalc
    ! Number of k-points computed.
@@ -110,10 +110,6 @@ module m_sigmaph
    !   1 if (nspinor=1, nsppol=1),
    !   2 if (nspinor=1, nsppol=2),
    !   4 if (nspinor=2)
-
-
-
-
 
   integer :: nwr
    ! Number of frequency points along the real axis for Sigma(w) and spectral function A(w)
@@ -241,18 +237,59 @@ module m_sigmaph
  private :: sigmaph_new             ! Creation method (allocates memory, initialize data from input vars).
  private :: sigmaph_free            ! Free memory.
  private :: sigmaph_setup_kcalc     ! Return tables used to perform the sum over q-points for given k-point.
- private :: sigmaph_solve          ! Compute the QP corrections.
+ private :: sigmaph_solve           ! Compute the QP corrections.
  !private :: sigmaph_setup_kcalc_spin   ! Return tables used to perform the sum over q-points for given (k-point, spin)
- !private :: sigmaph_print          ! Print results to main output file.
+ private :: sigmaph_print           ! Print results to main output file.
+
+!!****t* m_sigmaph/lgroup_t
+!! NAME
+!! lgroup_t
+!!
+!! FUNCTION
+!! The little group of a q-point is defined as the subset of the space group that preserves q,
+!! modulo a G0 vector (also called umklapp vector). Namely:
+!!
+!!  Sq = q +G0,  where S is an operation in reciprocal space (symrec)
+!!
+!! If time reversal symmetry holds true, it is possible to enlarge the little group by
+!! including the operations such as:
+!!
+!!  -Sq = q+ G0.
+!!
+!! The operations of little group define an irriducible wedge that is usually larger
+!! than the irredubile zone defined by the space group. The two zones coincide when q=0
+!!
+!! SOURCE
+
+ type,private :: lgroup_t
+
+   !integer :: nkibz_q
+   ! Number of k-points in the IBZ(q)
+
+   !real(dp) :: qpoint(3)
+   ! The external q-point.
+
+   !real(dp),allocatable :: kibz_q(:,:)
+   ! K-points in the IBZ(q)
+   ! kibz_q(3, nkibz_q)
+
+   !real(dp),allocatable :: wtk_q(:)
+   ! Weights
+   ! wtk_q(nkibz_q)
+
+ end type lgroup_t
+
+ private :: lgroup_new       ! Creation method.
+ private :: lgroup_free      ! Free memory.
 
 contains  !=====================================================
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_sigmaph/sigmaph_driver
+!!****f* m_sigmaph/sigmaph
 !! NAME
-!!  sigmaph_driver
+!!  sigmaph
 !!
 !! FUNCTION
 !!  Compute phonon-contribution to the electron self-energy.
@@ -280,14 +317,14 @@ contains  !=====================================================
 !!
 !! SOURCE
 
-subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
-                          pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
+                   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_driver'
+#define ABI_FUNC 'sigmaph'
  use interfaces_14_hidewrite
  use interfaces_56_recipspace
  use interfaces_66_wfs
@@ -473,10 +510,14 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  dvdb%symv1 = .True.
  call dvdb_print(dvdb, prtvol=dtset%prtvol)
 
- ! Loop over k-points for QP corrections.
+ ! Loop over k-points for Sigma_nk.
  do ikcalc=1,sigma%nkcalc
 
-   ! Symmetry indices for k.
+   ! Find IBZ(k) for q-point integration.
+   call sigmaph_setup_kcalc(sigma, cryst, ikcalc)
+   call wrtout(std_out, sjoin("Will sum", itoa(sigma%nqibz_k), "q-points in the IBZ(k)"))
+
+   ! Symmetry indices for kk.
    kk = sigma%kcalc(:, ikcalc)
    ik_ibz = sigma%kcalc2ibz(ikcalc,1); isym_k = sigma%kcalc2ibz(ikcalc,2)
    trev_k = sigma%kcalc2ibz(ikcalc,6); g0_k = sigma%kcalc2ibz(ikcalc, 3:5)
@@ -485,11 +526,8 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
    kk_ibz = ebands%kptns(:,ik_ibz)
    npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
 
-   ! Find IBZ(k) for q-point integration.
-   call sigmaph_setup_kcalc(sigma, cryst, ikcalc)
-   call wrtout(std_out, sjoin("Will compute", itoa(sigma%nqibz_k), "q-points in the IBZ(k)"))
-
-   ! Activate Fourier interpolation if irred q-points are not in the DVDB file.
+   ! Activate Fourier interpolation if q-points are not in the DVDB file.
+   ! TODO: handle q_bz = S q_ibz case by symmetrizing the potentials already available in the DVDB.
    do_ftv1q = 0
    do iq_ibz=1,sigma%nqibz_k
      if (dvdb_findq(dvdb, sigma%qibz_k(:,iq_ibz)) == -1) do_ftv1q = do_ftv1q + 1
@@ -501,7 +539,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
      call dvdb_ftinterp_setup(dvdb, ifc%ngqpt, 1, [zero,zero,zero], nfft, ngfft, comm)
    end if
 
-   ! Allow PW-arrays dimensioned with mpw
+   ! Allocate PW-arrays dimensioned with mpw
    ABI_MALLOC(kg_k, (3, npw_k))
    kg_k = wfd%kdata(ik_ibz)%kg_k
    ABI_MALLOC(kg_kq, (3, mpw))
@@ -512,14 +550,15 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
    ABI_MALLOC(ylmgr_kq,(mpw, 3, psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
 
    do spin=1,nsppol
-     ! Bands to compute.
+     !call sigmaph_setup_kcalc_spin(sigma, ikcalc, spin, ebands) ??
+
+     ! Bands in Sigma_nk to compute.
      bstart_ks = sigma%bstart_ks(ikcalc,spin)
      nbcalc_ks = sigma%nbcalc_ks(ikcalc, spin)
 
-     !call sigmaph_setup_kcalc_spin(sigma, ikcalc, spin, ebands) ??
      ! Zero self-energy matrix elements. Build frequency mesh for nk states.
-     sigma%vals_wr = zero !; sigma%dvals_dwr = zero
      if (sigma%nwr > 0) then
+       sigma%vals_wr = zero !; sigma%dvals_dwr = zero
        do ib_k=1,nbcalc_ks
          band = ib_k + bstart_ks - 1
          eig0nk = ebands%eig(band,ik_ibz,spin) - sigma%wr_step * (sigma%nwr/2)
@@ -527,6 +566,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
        end do
      end if
 
+     ! Allocate eph matrix elements.
      ABI_MALLOC(gkk_atm, (2, nbcalc_ks, natom3))
      ABI_MALLOC(gkk_nu, (2, nbcalc_ks, natom3))
 
@@ -542,8 +582,11 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
      call load_spin_hamiltonian(gs_hamkq,spin,vlocal=vlocal, &
        comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
-     ! Integrations over q-points.
+     ! Integrations over q-points in the IBZ(k)
      do iq_ibz=1,sigma%nqibz_k
+       ! Quick-parallelization over q-points
+       if (mod(iq_ibz, nproc) /= my_rank) cycle
+
        !write(std_out,*)"in q-point loopq",iq_ibz,sigma%nqibz_k
        call cwtime(cpu,wall,gflops,"start")
        qpt = sigma%qibz_k(:,iq_ibz)
@@ -581,7 +624,6 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
        !   k + q = k_bz + g0_bz = IS(k_ibz) + g0_ibz + g0_bz
        !
        kq = kk + qpt
-
        call listkk(dksqmax,cryst%gmet,indkk_kq,ebands%kptns,kq,ebands%nkpt,1,cryst%nsym,&
          1,cryst%symafm,cryst%symrel,sigma%timrev,use_symrec=.False.)
 
@@ -602,8 +644,8 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
        !isirr_kq = .True.
        kq_ibz = ebands%kptns(:,ikq_ibz)
 
-       ! Get npw_kq, kg_kq and symmetrize wavefunctions from IBZ (if needed).
-       ! Be careful with time-reversal symmetry.
+       ! Get npw_kq, kg_kq for k+q
+       ! Be careful with time-reversal symmetry and istwf_kq
        if (isirr_kq) then
          ! Copy u_kq(G)
          istwf_kq = wfd%istwfk(ikq_ibz); npw_kq = wfd%npwarr(ikq_ibz)
@@ -651,6 +693,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
        !end if
 
        ! Loop over all 3*natom perturbations.
+       ! In the inner loop, I calculate dvscf * psi_k, stored in h1kets_kq on the k+q sphere.
        do ipc=1,natom3
          idir = mod(ipc-1, 3) + 1
          ipert = (ipc - idir) / 3 + 1
@@ -693,7 +736,6 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
          if (allocated(ph3d1)) then
            ABI_FREE(ph3d1)
          end if
-
        end do ! ipc (loop over 3*natom atomic perturbations)
 
        ABI_FREE(gs1c)
@@ -755,7 +797,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
            do ib_k=1,nbcalc_ks
              eig0nk = ebands%eig(ib_k,ik_ibz,spin)
              !f_nk = ebands%occ(ib_k,ik_ibz,spin)
-             gkk2 = gkk_nu(1,ib_k,imode) ** 2 + gkk_nu(2,ib_k,imode) ** 2
+             gkk2 = weigth_q * (gkk_nu(1,ib_k,imode) ** 2 + gkk_nu(2,ib_k,imode) ** 2)
 
              do it=1,sigma%ntemp
                !nqnu = one; f_mkq = one
@@ -768,24 +810,26 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
 
                ! Accumulate Sigma(w=eKS) for state ib_k
                sfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu - sigma%ieta) + &
-                         (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu - sigma%ieta)
-
+                        (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu - sigma%ieta)
                sigma%vals_e0ks(it, ib_k, ikcalc, spin) = sigma%vals_e0ks(it, ib_k, ikcalc, spin) + &
-                 weigth_q * gkk2 * sfact
+                 gkk2 * sfact
 
-               ! Accumulate dSigma(w) / dw (w=eKS) derivative for state ib_k
-               !sigma%dvals_de0ks(it, ib_k, ikcalc, spin) = sigma%dvals_de0ks(it, ib_k, ikcalc, spin) + &
+               ! Accumulate dSigma(w)/dw(w=eKS) derivative for state ib_k
+               sfact = -(nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu - sigma%ieta)**2 &
+                       -(nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu - sigma%ieta)**2
+               sigma%dvals_de0ks(it, ib_k, ikcalc, spin) = sigma%dvals_de0ks(it, ib_k, ikcalc, spin) + &
+                 gkk2 * sfact
 
                ! Accumulate Sigma(w) for state ib_k
                if (sigma%nwr > 0) then
                  sfact_wr(:) = (nqnu + f_mkq      ) / (sigma%wrmesh_b(:,ib_k) - eig0mkq + wqnu - sigma%ieta) + &
                                (nqnu - f_mkq + one) / (sigma%wrmesh_b(:,ib_k) - eig0mkq - wqnu - sigma%ieta)
-                 sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + weigth_q * gkk2 * sfact_wr(:)
+                 sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkk2 * sfact_wr(:)
 
                  ! Accumulate d(Sigma)/dw for state ib_k
-                 !sfact_wr(1) = (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu - sigma%ieta) + &
-                 !             (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu - sigma%ieta)
-                 !sigma%dvals_dwr(it, ib_k) = sigma%dvals_dwr(it, ib_k) + weigth_q * gkk2 * sfact_wr()
+                 !sfact_wr(:) = (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu - sigma%ieta) + &
+                 !              (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu - sigma%ieta)
+                 !sigma%dvals_dwr(it, ib_k) = sigma%dvals_dwr(it, ib_k) + gkk2 * sfact_wr(:)
                end if
              end do
 
@@ -801,17 +845,19 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
        ABI_FREE(vlocal1)
 
        call cwtime(cpu,wall,gflops,"stop")
-       write(msg,'(a,i0,2(a,f8.2))')"q-point [",iq_ibz,"] completed. cpu:",cpu,", wall:",wall
-       call wrtout(std_out,msg,"COLL",do_flush=.True.)
+       write(msg,'(2(a,i0),2(a,f8.2))')"q-point [",iq_ibz,"/",sigma%nqibz_k,"] completed. cpu:",cpu,", wall:",wall
+       call wrtout(std_out, msg, do_flush=.True.)
      end do ! iq_ibz
 
      ABI_FREE(kets_k)
      ABI_FREE(gkk_atm)
      ABI_FREE(gkk_nu)
 
-     ! Collect results and divide by the total number of q-points in the full mesh.
-     call xmpi_sum(sigma%vals_wr, comm, ierr)
-     !call xmpi_sum(sigma%dvals_dwr, comm, ierr)
+     ! Collect results
+     if (sigma%nwr > 0) then
+       call xmpi_sum(sigma%vals_wr, comm, ierr)
+       !call xmpi_sum(sigma%dvals_dwr, comm, ierr)
+     end if
      ! Writes the results for a single (k-point, spin) to NETCDF file
      call sigmaph_solve(sigma, ikcalc, spin, ebands)
    end do ! spin
@@ -825,12 +871,9 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
 
  call wrtout(std_out, "Computation of Sigma_ph completed", "COLL", do_flush=.True.)
 
- !call xmpi_sum(sigma%vals_e0ks, comm, ierr)
- !call xmpi_sum(sigma%dvals_de0ks, comm, ierr)
- if (my_rank == master) then
-   call sigmaph_print(sigma, std_out, "dims+results", ebands)
- end if
- stop
+ call xmpi_sum_master(sigma%vals_e0ks, master, comm, ierr)
+ call xmpi_sum_master(sigma%dvals_de0ks, master, comm, ierr)
+ if (my_rank == master) call sigmaph_print(sigma, std_out, "dims+results", ebands)
 
  ! Free memory
  ABI_FREE(gvnl1)
@@ -849,7 +892,9 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  call pawcprj_free(cwaveprj0)
  ABI_DT_FREE(cwaveprj0)
 
-end subroutine sigmaph_driver
+ stop
+
+end subroutine sigmaph
 !!***
 
 !----------------------------------------------------------------------
@@ -859,7 +904,7 @@ end subroutine sigmaph_driver
 !!  gkknu_from_atm
 !!
 !! FUNCTION
-!!  Transform the gkk matrix elements from (atom, red_direction) basis to phonon-mode basis
+!!  Transform the gkk matrix elements from (atom, red_direction) basis to phonon-mode basis.
 !!
 !! INPUTS
 !!  nb1,nb2=Number of bands in gkk_atm matrix.
@@ -1361,7 +1406,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
    if (new%symsigma /= 0) then
      do spin=1,new%nsppol
        ibstop = new%bstart_ks(ikcalc,spin) + new%nbcalc_ks(ikcalc,spin) - 1
-
        call enclose_degbands(ebands, ik_ibz, spin, new%bstart_ks(ikcalc,spin), ibstop, changed, tol_enediff)
        if (changed) then
          new%nbcalc_ks(ikcalc,spin) = ibstop - new%bstart_ks(ikcalc,spin) + 1
@@ -1629,7 +1673,8 @@ end subroutine sigmaph_free
 !! FUNCTION
 !!
 !! INPUTS
-!!  ikcalc=Index of the computed k-point
+!!  crystal<crystal_t> = Crystal structure.
+!!  ikcalc=Index of the k-point to compute.
 !!
 !! PARENTS
 !!
@@ -1666,28 +1711,29 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc)
  end if
 
  if (self%symsigma == 0) then
-#if 1
    ! Do not use symmetries in BZ sum_q --> nqibz_k == nqbz
    self%nqibz_k = self%nqbz
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
    ABI_MALLOC(self%wtq_k, (self%nqibz_k))
-   self%qibz_k = self%qbz
-   self%wtq_k = one / self%nqbz
-#else
+   self%qibz_k = self%qbz; self%wtq_k = one / self%nqbz
+#if 0
    ! MGHACK: This is to enforce the sum over IBZ everywhere.
+   ABI_FREE(self%qibz_k)
+   ABI_FREE(self%wtq_k)
    self%nqibz_k = self%nqibz
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
    ABI_MALLOC(self%wtq_k, (self%nqibz_k))
-   self%qibz_k = self%qibz
-   self%wtq_k = self%wtq
+   self%qibz_k = self%qibz; self%wtq_k = self%wtq
 #endif
- else
+ else if (self%symsigma == 1) then
    ! Use symmetries of the little group
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
    ABI_MALLOC(self%wtq_k, (self%nqibz_k))
    NOT_IMPLEMENTED_ERROR()
    !call lgroup_free(self%lgroup_k)
-   !self%lgroup_k = littlegroup_new(self%kcalc(:, ikcalc), self%nqibz, self%qibz, self%nqbz, self%qbz, cryst)
+   !self%lgroup_k = lgroup_new(cryst, self%kcalc(:, ikcalc), self%nqbz, self%qbz, self%nqibz, self%qibz)
+ else
+   MSG_ERROR(sjoin("Wrong symsigma:", itoa(self%symsigma)))
  end if
 
 end subroutine sigmaph_setup_kcalc
@@ -1737,9 +1783,9 @@ subroutine sigmaph_solve(self, ikcalc, spin, ebands)
 
  ! Compute QP corrections.
  ! Symmetrize self-energy matrix elements (symsigma == 1).
- if (self%symsigma == 1) then
-   NOT_IMPLEMENTED_ERROR()
- end if
+ !if (self%symsigma == 1) then
+ !  NOT_IMPLEMENTED_ERROR()
+ !end if
 
  ! Compute spectral functions.
  !if (self%nwr > 1) then
@@ -1835,7 +1881,7 @@ subroutine sigmaph_print(self, unt, what, ebands)
 !integer
  integer :: ikc,is,ibc,band,ik_ibz,it
  real(dp) :: kse,kse_prev
- complex(dpc) :: sig0c,qpe,qpe_prev
+ complex(dpc) :: sig0c,zc,qpe,qpe_prev
 
 ! *************************************************************************
 
@@ -1865,6 +1911,7 @@ subroutine sigmaph_print(self, unt, what, ebands)
    write(unt,"(a)")"Notations:"
    write(unt,"(a)")"   eKS: Kohn-Sham energy, eQP: quasi-particle energy."
    write(unt,"(a)")"   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part."
+   write(unt,"(a)")"   Z1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part."
    write(unt,"(a)")"   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP."
    write(unt,"(a)")" "
    write(unt,"(a)")" "
@@ -1876,18 +1923,22 @@ subroutine sigmaph_print(self, unt, what, ebands)
        else
           write(unt,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ikc)), ", spin:", itoa(is))
        end if
-       write(unt,"(a)")"   B    eKS     eQP    SE1(eKS)  SE2(eKS)  DeKS     DeQP"
+       write(unt,"(a)")"   B    eKS     eQP    SE1(eKS)  SE2(eKS)  Z1(eKS)  Z2(eKS)  DeKS     DeQP"
        ik_ibz = self%kcalc2ibz(ikc,1)
        do ibc=1,self%nbcalc_ks(ikc,is)
          band = self%bstart_ks(ikc,is) + ibc - 1
          sig0c = self%vals_e0ks(it, ibc, ikc, is) * Ha_eV
+         ! Note that here I use the full Sigma including the imaginary part
+         zc = one / (one - self%dvals_de0ks(it, ibc, ikc, is))
+         !zc = one / (one - real(self%dvals_de0ks(it, ibc, ikc, is))
          kse = ebands%eig(band,ik_ibz,is) * Ha_eV
          qpe = kse + sig0c
          if (ibc == 1) then
            kse_prev = kse; qpe_prev = qpe
          end if
-         write(unt, "(i4, 6(f8.3,1x))") &
-           ibc, kse, real(qpe), real(sig0c), aimag(sig0c), kse - kse_prev, real(qpe - qpe_prev)
+         write(unt, "(i4,8(f8.3,1x))") &
+           band, kse, real(qpe), real(sig0c), aimag(sig0c), real(zc), aimag(zc), &
+           kse - kse_prev, real(qpe - qpe_prev)
          if (ibc > 1) then
            kse_prev = kse; qpe_prev = qpe
          end if
@@ -1898,6 +1949,102 @@ subroutine sigmaph_print(self, unt, what, ebands)
  end if
 
 end subroutine sigmaph_print
+!!***
+
+!!****f* m_sigmaph/lgroup_new
+!! NAME
+!!  lgroup_new
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!  cryst(crystal_t)=Crystalline structure
+!!  kpoint(3)=External k-point defining the little-group
+!!  nkbz=Number of k-points in the BZ.
+!!  kbz(3,nkbz)=K-points in the BZ.
+!!! nkibz=Number of k-points in the IBZ
+!!  kibz(3,nkibz)=Irreducible zone.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type (lgroup_t) function lgroup_new(cryst, kpoint, nkbz, kbz, nkibz, kibz) result(new)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'sigmaph_new'
+ use interfaces_14_hidewrite
+ use interfaces_32_util
+ use interfaces_41_geometry
+ use interfaces_56_recipspace
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nkibz,nkbz
+ type(crystal_t),intent(in) :: cryst
+!arrays
+ real(dp),intent(in) :: kpoint(3),kbz(3,nkbz),kibz(3,nkibz)
+
+!Local variables ------------------------------
+!scalars
+! integer ::
+ integer :: otimrev_k
+!arrays
+ integer :: sym_kpoint(4,2,cryst%nsym)
+
+! *************************************************************************
+
+ !new%qpoint = kpoint
+
+ ! Determines the symmetry operations by which the k-point is preserved,
+ call littlegroup_q(cryst%nsym, kpoint, sym_kpoint, cryst%symrec, cryst%symafm, otimrev_k, prtvol=0)
+
+end function lgroup_new
+!!***
+
+!!****f* m_sigmaph/lgroup_free
+!! NAME
+!!  lgroup_free
+!!
+!! FUNCTION
+!!  Free memory
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine lgroup_free(self)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'sigmaph_new'
+ use interfaces_14_hidewrite
+ use interfaces_41_geometry
+ use interfaces_56_recipspace
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(lgroup_t),intent(inout) :: self
+
+! *************************************************************************
+
+ !if (associated(self%)) then
+ !end if
+
+end subroutine lgroup_free
 !!***
 
 end module m_sigmaph

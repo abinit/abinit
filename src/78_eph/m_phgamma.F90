@@ -3004,8 +3004,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    ABI_FREE(vlocal1)
 
    call cwtime(cpu,wall,gflops,"stop")
-   write(msg,'(a,i0,2(a,f8.2))')"q-point [",iq_ibz,"] completed. cpu:",cpu,", wall:",wall
-   call wrtout(std_out,msg,"COLL",do_flush=.True.)
+   write(msg,'(2(a,i0),2(a,f8.2))')"q-point [",iq_ibz,"/",gams%nqibz,"] completed. cpu:",cpu,", wall:",wall
+   call wrtout(std_out, msg, do_flush=.True.)
  end do ! iq_ibz
 
  ! Collect gvals_qibz on each node and divide by the total number of k-points in the full mesh.
