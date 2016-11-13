@@ -173,6 +173,13 @@ MODULE m_dvdb
   integer :: ngfft(18)=-1
    ! Info on the FFT to be used for the potentials.
 
+  integer,allocatable :: iv_pinfoq(:,:)
+   !iv_pinfoq(4, numv1)
+   !  iv_pinfoq(1, iv1) gives the `idir` index of the iv1 potential
+   !  iv_pinfoq(2, iv1) gives the `ipert` index of the iv1 potential
+   !  iv_pinfoq(3, iv1) gives `pertcase`=idir + (ipert-1)*3
+   !  iv_pinfoq(4, iv1) gives the `iqpt` index of the iv1 potential
+
   ! FIXME: (3) or (18)
   integer,allocatable :: ngfft3_v1(:,:)
    ! ngfft3_v1(3, numv1)
@@ -334,6 +341,7 @@ subroutine dvdb_init(db, path, comm)
 
    ABI_MALLOC(db%cplex_v1, (db%numv1))
    ABI_MALLOC(db%ngfft3_v1, (3, db%numv1))
+   ABI_MALLOC(db%iv_pinfoq, (4, db%numv1))
    ABI_MALLOC(db%rhog1_g0, (2, db%numv1))
 
    nqpt = 0
@@ -375,6 +383,7 @@ subroutine dvdb_init(db, path, comm)
        iq_found = nqpt
      end if
      tmp_pos(idir, ipert, iq_found) = iv1
+     db%iv_pinfoq(:,iv1) = [idir, ipert, hdr1%pertcase, iq_found]
 
      call hdr_free(hdr1)
    end do
@@ -410,6 +419,7 @@ subroutine dvdb_init(db, path, comm)
    if (my_rank /= master) then
      ABI_MALLOC(db%cplex_v1, (db%numv1))
      ABI_MALLOC(db%ngfft3_v1, (3, db%numv1))
+     ABI_MALLOC(db%iv_pinfoq, (4, db%numv1))
      ABI_MALLOC(db%qpts, (3, db%nqpt))
      ABI_MALLOC(db%pos_dpq, (3, db%mpert, db%nqpt))
      ABI_MALLOC(db%rhog1_g0, (2, db%numv1))
@@ -417,6 +427,7 @@ subroutine dvdb_init(db, path, comm)
 
    call xmpi_bcast(db%cplex_v1, master, comm, ierr)
    call xmpi_bcast(db%ngfft3_v1, master, comm, ierr)
+   call xmpi_bcast(db%iv_pinfoq, master, comm, ierr)
    call xmpi_bcast(db%qpts, master, comm, ierr)
    call xmpi_bcast(db%pos_dpq, master, comm, ierr)
    call xmpi_bcast(db%rhog1_g0, master, comm, ierr)
@@ -577,6 +588,9 @@ subroutine dvdb_free(db)
  if (allocated(db%symq_table)) then
    ABI_FREE(db%symq_table)
  end if
+ if (allocated(db%iv_pinfoq)) then
+   ABI_FREE(db%iv_pinfoq)
+ end if
  if (allocated(db%ngfft3_v1)) then
    ABI_FREE(db%ngfft3_v1)
  end if
@@ -657,7 +671,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_unt,my_prtvol,iv1,iq
+ integer :: my_unt,my_prtvol,iv1,iq,idir,ipert
  character(len=4) :: my_mode
  character(len=500) :: msg
 
@@ -684,8 +698,10 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  !call crystal_print(db%cryst,header,unit,mode_paral,prtvol)
 
  write(std_out,*)"FFT mesh for potentials on file:"
+ write(std_out,*)"qpt, idir, ipert, ngfft(3)"
  do iv1=1,db%numv1
-   write(std_out,*)trim(ltoa(db%ngfft3_v1(:,iv1)))
+   idir = db%iv_pinfoq(1, iv1); ipert = db%iv_pinfoq(2, iv1); iq = db%iv_pinfoq(4, iv1)
+   write(std_out,*)trim(ktoa(db%qpts(:,iq))), idir, ipert, trim(ltoa(db%ngfft3_v1(:,iv1)))
  end do
 
  !if (my_prtvol > 0) then
@@ -705,7 +721,7 @@ end subroutine dvdb_print
 !!  dvdb_get_pinfo
 !!
 !! FUNCTION
-!!  Return information on the perturbations available for a give q-point index.
+!!  Return information on the perturbations available for a given q-point index.
 !!
 !! INPUTS
 !!  iqpt=Index of the q-point
@@ -713,7 +729,7 @@ end subroutine dvdb_print
 !! OUTPUT
 !!  nperts=Number of perturbations found.
 !!  cplex=2 if potentials are complex, 1 for real
-!!  pinfo(:,:)=Array with info on the perturbations present on file
+!!  pinfo(3,3*db%mpert)=Array with info on the perturbations present on file
 !!     pinfo(1, ip) gives the `idir` index of the ip-th perturbation.
 !!     pinfo(2, ip) gives the `ipert` index of the ip-th perturbation.
 !!     pinfo(3, ip) gives `pertcase`=idir + (ipert-1)*3
