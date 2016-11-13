@@ -859,7 +859,7 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
    end do
  else
    ! The FFT mesh used in the caller differ from the one found in the DBDB --> Fourier interpolation
-   MSG_ERROR("FFT interpolation of DFPT potentials must be tested.")
+   !MSG_ERROR("FFT interpolation of DFPT potentials must be tested.")
    ABI_MALLOC(v1r_file, (cplex*nfftot_file, db%nspden))
    do ispden=1,db%nspden
      read(db%fh, err=10, iomsg=msg) (v1r_file(ifft, ispden), ifft=1,cplex*nfftot_file)
@@ -946,7 +946,6 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_readsym_allv1'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1751,7 +1750,6 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_ftinterp_setup'
- use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
  use interfaces_56_recipspace
 !End of the abilint section
@@ -2938,7 +2936,6 @@ subroutine dvdb_test_v1rsym(db_path, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_test_v1rsym'
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 

@@ -1637,7 +1637,7 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc)
  end if
 
  if (self%symsigma == 0) then
-#if 0
+#if 1
    ! Do not use symmetries in BZ sum_q --> nqibz_k == nqbz
    self%nqibz_k = self%nqbz
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
