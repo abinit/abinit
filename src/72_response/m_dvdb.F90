@@ -41,7 +41,7 @@ MODULE m_dvdb
 #endif
  use m_hdr
 
- use m_fstrings,      only : strcat, sjoin, itoa, ktoa, endswith
+ use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, endswith
  use m_io_tools,      only : open_file, file_exists
  use m_numeric_tools, only : wrap2_pmhalf, vdiff_eval, vdiff_print
  use m_copy,          only : alloc_copy
@@ -657,29 +657,43 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_unt,my_prtvol,iv1
+ integer :: my_unt,my_prtvol,iv1,iq
  character(len=4) :: my_mode
  character(len=500) :: msg
 
 ! *************************************************************************
 
- my_unt =std_out; if (PRESENT(unit)) my_unt   =unit
- my_prtvol=0    ; if (PRESENT(prtvol)) my_prtvol=prtvol
- my_mode='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
+ my_unt = std_out; if (PRESENT(unit)) my_unt = unit
+ my_prtvol = 0   ; if (PRESENT(prtvol)) my_prtvol = prtvol
+ my_mode = 'COLL'; if (PRESENT(mode_paral)) my_mode = mode_paral
 
  msg=' ==== Info on the dvdb% object ==== '
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
  call wrtout(my_unt,msg,my_mode)
 
- write(std_out,*)"Version: ",db%version
- write(std_out,*)"Number of q-points: ",db%nqpt
+ write(std_out,*)"DVDB Version: ",db%version
+ write(std_out,*)"Path: ",trim(db%path)
+ write(std_out,*)"Number of v1 potentials: ",db%numv1
+ write(std_out,*)"Activate symmetrization of v1 potentials: ",db%symv1
+ write(std_out,*)"Number of q-points in DVDB: ",db%nqpt
+ write(std_out,*)"List of q-points:"
+ do iq=1,db%nqpt
+   write(std_out,*)trim(ktoa(db%qpts(:,iq)))
+ end do
 
- if (my_prtvol > 0) then
-   write(std_out,*)"rhog1(q,G=0)"
-   do iv1=1,db%numv1
-     write(std_out,*)db%rhog1_g0(:, iv1)
-   end do
- end if
+ !call crystal_print(db%cryst,header,unit,mode_paral,prtvol)
+
+ write(std_out,*)"FFT mesh for potentials on file:"
+ do iv1=1,db%numv1
+   write(std_out,*)trim(ltoa(db%ngfft3_v1(:,iv1)))
+ end do
+
+ !if (my_prtvol > 0) then
+ write(std_out,*)"rhog1(q,G=0)"
+ do iv1=1,db%numv1
+   write(std_out,*)db%rhog1_g0(:, iv1)
+ end do
+ !end if
 
 end subroutine dvdb_print
 !!***
@@ -2540,7 +2554,7 @@ subroutine dvdb_list_perts(db, ngqpt)
 
    else
      ! This q-point is not present in dvdb. Print the list of independent perturbations.
-     msg = sjoin("qpoint:",ktoa(qq),"is NOT present in the DVDB file")
+     msg = sjoin("qpoint:", ktoa(qq), "is NOT present in the DVDB file")
      call wrtout(std_out,msg,"COLL")
      call wrtout(std_out,' The list of irreducible perturbations for this q vector is:','COLL')
      ii = 0

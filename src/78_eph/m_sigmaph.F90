@@ -111,6 +111,10 @@ module m_sigmaph
    !   2 if (nspinor=1, nsppol=2),
    !   4 if (nspinor=2)
 
+
+
+
+
   integer :: nwr
    ! Number of frequency points along the real axis for Sigma(w) and spectral function A(w)
    ! Odd number so that the mesh is centered on the KS energy.
@@ -152,6 +156,10 @@ module m_sigmaph
 
   integer :: ngqpt(3)
    ! Number of divisions in the Q mesh in the BZ.
+
+  integer,allocatable :: nbsum(:,:)
+   ! nbsum(nkpt, nsppol)
+   ! Number of bands used in sum
 
   integer,allocatable :: bstart_ks(:,:)
    ! bstart_ks(nkcalc,nsppol)
@@ -206,11 +214,11 @@ module m_sigmaph
 
   complex(dpc),allocatable :: vals_e0ks(:,:,:,:)
    ! vals_e0ks(ntemp, max_nbcalc, nkcalc, nsppol)
-   ! Sigma_ph(omega=e_KS, kT, band, kcalc, spin).
+   ! Sigma_ph(omega=eKS, kT, band, kcalc, spin).
 
   complex(dpc),allocatable :: dvals_de0ks(:,:,:,:)
    ! dvals_de0ks(ntemp, max_nbcalc, nkcalc, nsppol)
-   ! d Sigma_ph(omega, kT, band, kcalc, spin) / d omega | e_KS
+   ! d Sigma_ph(omega, kT, band, kcalc, spin) / d omega (omega=eKS)
 
   complex(dpc),allocatable :: vals_wr(:,:,:)
    ! vals_wr(nwr, ntemp, max_nbcalc)
@@ -218,7 +226,7 @@ module m_sigmaph
    ! enk_KS corresponds to nwr/2 + 1.
    ! This array depends on (ikcalc, spin)
 
-  complex(dpc),allocatable :: dvals_dwr(:,:)
+  !complex(dpc),allocatable :: dvals_dwr(:,:)
    ! vals_wr(ntemp, max_nbcalc)
    ! The derivative of Sigma_ph(omega, kT, band) for given (k, spin) wrt omega computed at the KS energy.
    ! enk_KS corresponds to nwr/2 + 1.
@@ -322,6 +330,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  integer :: nbcalc_ks,bstart_ks,ikcalc
  real(dp) :: cpu,wall,gflops
  real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q
+ complex(dpc) :: sfact
  logical,parameter :: have_ktimerev=.True.
  logical :: isirr_k,isirr_kq,gen_eigenpb
  type(wfd_t) :: wfd
@@ -346,7 +355,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnl1(:,:),work(:,:,:,:)
  real(dp),allocatable ::  gs1c(:,:)
- complex(dpc),allocatable :: fact_wr(:)
+ complex(dpc),allocatable :: sfact_wr(:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
 
@@ -452,7 +461,9 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  ABI_CALLOC(dummy_vtrial, (nfftf,nspden))
  ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamkq%nvloc))
  vlocal = huge(one)
- ABI_MALLOC(fact_wr, (sigma%nwr))
+ if (sigma%nwr > 0) then
+   ABI_MALLOC(sfact_wr, (sigma%nwr))
+ end if
 
  ! Open the DVDB file
  call dvdb_open_read(dvdb, ngfftf, xmpi_comm_self)
@@ -460,6 +471,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  ! This one to symmetrize the potentials.
  dvdb%symv1 = .False.
  dvdb%symv1 = .True.
+ call dvdb_print(dvdb, prtvol=dtset%prtvol)
 
  ! Loop over k-points for QP corrections.
  do ikcalc=1,sigma%nkcalc
@@ -506,12 +518,14 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
 
      !call sigmaph_setup_kcalc_spin(sigma, ikcalc, spin, ebands) ??
      ! Zero self-energy matrix elements. Build frequency mesh for nk states.
-     sigma%vals_wr = zero; sigma%dvals_dwr = zero
-     do ib_k=1,nbcalc_ks
-       band = ib_k + bstart_ks - 1
-       eig0nk = ebands%eig(band,ik_ibz,spin) - sigma%wr_step * (sigma%nwr/2)
-       sigma%wrmesh_b(:,ib_k) = arth(eig0nk, sigma%wr_step, sigma%nwr)
-     end do
+     sigma%vals_wr = zero !; sigma%dvals_dwr = zero
+     if (sigma%nwr > 0) then
+       do ib_k=1,nbcalc_ks
+         band = ib_k + bstart_ks - 1
+         eig0nk = ebands%eig(band,ik_ibz,spin) - sigma%wr_step * (sigma%nwr/2)
+         sigma%wrmesh_b(:,ib_k) = arth(eig0nk, sigma%wr_step, sigma%nwr)
+       end do
+     end if
 
      ABI_MALLOC(gkk_atm, (2, nbcalc_ks, natom3))
      ABI_MALLOC(gkk_nu, (2, nbcalc_ks, natom3))
@@ -573,7 +587,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
 
        if (dksqmax > tol12) then
          write(msg, '(7a,es16.6,4a)' )&
-          'The WFK file cannot be used to start thee present calculation ',ch10,&
+          'The WFK file cannot be used to start the present calculation ',ch10,&
           'It was asked that the wavefunctions be accurate, but',ch10,&
           'at least one of the k points could not be generated from a symmetrical one.',ch10,&
           'dksqmax=',dksqmax,ch10,&
@@ -691,7 +705,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
        ABI_MALLOC(bras_kq, (2, npw_kq*nspinor, 1))
        ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
 
-       do ib_kq=1,wfd%nband(ikq_ibz, spin)  ! all bands are used for the time being.
+       do ib_kq=1,sigma%nbsum(ikq_ibz, spin)
 
          ! symmetrize wavefunctions from IBZ (if needed).
          ! Be careful with time-reversal symmetry.
@@ -752,23 +766,27 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
                !f_mkq = nfd(eig0mkq, sigma%kTmesh(it), sigma%mu_e(it))
                !f_nk = nfd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
 
-               ! Accumulate Sigma(w=e_KS) and its derivative for state ib_k
-               fact_wr(1) =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu - sigma%ieta) + &
-                             (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu - sigma%ieta)
+               ! Accumulate Sigma(w=eKS) for state ib_k
+               sfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu - sigma%ieta) + &
+                         (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu - sigma%ieta)
 
                sigma%vals_e0ks(it, ib_k, ikcalc, spin) = sigma%vals_e0ks(it, ib_k, ikcalc, spin) + &
-                 weigth_q * gkk2 * fact_wr(1)
+                 weigth_q * gkk2 * sfact
+
+               ! Accumulate dSigma(w) / dw (w=eKS) derivative for state ib_k
                !sigma%dvals_de0ks(it, ib_k, ikcalc, spin) = sigma%dvals_de0ks(it, ib_k, ikcalc, spin) + &
 
                ! Accumulate Sigma(w) for state ib_k
-               fact_wr(:) = (nqnu + f_mkq      ) / (sigma%wrmesh_b(:,ib_k) - eig0mkq + wqnu - sigma%ieta) + &
-                            (nqnu - f_mkq + one) / (sigma%wrmesh_b(:,ib_k) - eig0mkq - wqnu - sigma%ieta)
-               sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + weigth_q * gkk2 * fact_wr(:)
+               if (sigma%nwr > 0) then
+                 sfact_wr(:) = (nqnu + f_mkq      ) / (sigma%wrmesh_b(:,ib_k) - eig0mkq + wqnu - sigma%ieta) + &
+                               (nqnu - f_mkq + one) / (sigma%wrmesh_b(:,ib_k) - eig0mkq - wqnu - sigma%ieta)
+                 sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + weigth_q * gkk2 * sfact_wr(:)
 
-               ! Accumulate d(Sigma)/dw for state ib_k
-               !fact_wr(1) = (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu - sigma%ieta) + &
-               !             (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu - sigma%ieta)
-               sigma%dvals_dwr(it, ib_k) = sigma%dvals_dwr(it, ib_k) + weigth_q * gkk2 * fact_wr(1)
+                 ! Accumulate d(Sigma)/dw for state ib_k
+                 !sfact_wr(1) = (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu - sigma%ieta) + &
+                 !             (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu - sigma%ieta)
+                 !sigma%dvals_dwr(it, ib_k) = sigma%dvals_dwr(it, ib_k) + weigth_q * gkk2 * sfact_wr()
+               end if
              end do
 
            end do
@@ -793,7 +811,7 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
 
      ! Collect results and divide by the total number of q-points in the full mesh.
      call xmpi_sum(sigma%vals_wr, comm, ierr)
-     call xmpi_sum(sigma%dvals_dwr, comm, ierr)
+     !call xmpi_sum(sigma%dvals_dwr, comm, ierr)
      ! Writes the results for a single (k-point, spin) to NETCDF file
      call sigmaph_solve(sigma, ikcalc, spin, ebands)
    end do ! spin
@@ -821,7 +839,9 @@ subroutine sigmaph_driver(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,i
  ABI_FREE(work)
  ABI_FREE(ph1d)
  ABI_FREE(vlocal)
- ABI_FREE(fact_wr)
+ if (sigma%nwr > 0) then
+   ABI_FREE(sfact_wr)
+ end if
 
  call destroy_hamiltonian(gs_hamkq)
  call sigmaph_free(sigma)
@@ -1108,6 +1128,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  ABI_MALLOC(new%kTmesh, (new%ntemp))
  new%kTmesh = arth(temp_range(1), tstep, new%ntemp) * kb_HaK
 
+ ABI_MALLOC(new%nbsum, (ebands%nkpt, new%nsppol))
+ new%nbsum = dtset%mband
+
  gap_err = get_gaps(ebands, gaps)
  call gaps_print(gaps, unit=std_out)
  call ebands_report_gap(ebands, unit=std_out)
@@ -1124,7 +1147,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  end do
  call ebands_free(tmp_ebands)
 
- ! Frequency mesh for spectral function.
+ ! Frequency mesh for sigma(w) and spectral function.
  new%nwr = 11
  ABI_CHECK(mod(new%nwr, 2) == 1, "nwr should be odd!")
  new%wr_step = 0.01 * eV_Ha
@@ -1304,7 +1327,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
    !call littlegroup_q(cryst%nsym,kk,symk,cryst%symrec,cryst%symafm,timerev_k,prtvol=dtset%prtvol)
    !call wrtout(std_out, sjoin("Will compute", itoa(sigma%nqibz_k), "q-points in the IBZ(k)"))
 
-   ! We will have to average the GW corrections over degenerate states if symsigma=1 is used.
+   ! We will have to average the QP corrections over degenerate states if symsigma=1 is used.
    ! Here we make sure that all the degenerate states are included.
    if (new%symsigma /= 0) then
      do spin=1,new%nsppol
@@ -1314,8 +1337,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
        if (changed) then
          new%nbcalc_ks(ikcalc,spin) = ibstop - new%bstart_ks(ikcalc,spin) + 1
          write(msg,'(2(a,i0),2a,2(1x,i0))')&
-          "Not all the degenerate states at ikcalc= ",ikcalc,", spin= ",spin,ch10,&
-          "were included in the bdgw set. bdgw has been changed to: ",new%bstart_ks(ikcalc,spin),ibstop
+           "Not all the degenerate states at ikcalc= ",ikcalc,", spin= ",spin,ch10,&
+           "were included in the bdgw set. bdgw has been changed to: ",new%bstart_ks(ikcalc,spin),ibstop
          MSG_COMMENT(msg)
        end if
      end do
@@ -1363,11 +1386,13 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  ! ================================================================
  ABI_CALLOC(new%vals_e0ks, (new%ntemp, new%max_nbcalc, new%nkcalc, new%nsppol))
  ABI_CALLOC(new%dvals_de0ks, (new%ntemp, new%max_nbcalc, new%nkcalc, new%nsppol))
+ !ABI_CALLOC(new%dvals_dwr, (new%ntemp, new%max_nbcalc))
 
  ! Frequency dependent stuff
- ABI_CALLOC(new%vals_wr, (new%nwr, new%ntemp, new%max_nbcalc))
- ABI_CALLOC(new%dvals_dwr, (new%ntemp, new%max_nbcalc))
- ABI_CALLOC(new%wrmesh_b, (new%nwr, new%max_nbcalc))
+ if (new%nwr > 0) then
+   ABI_CALLOC(new%vals_wr, (new%nwr, new%ntemp, new%max_nbcalc))
+   ABI_CALLOC(new%wrmesh_b, (new%nwr, new%max_nbcalc))
+ end if
 
  ! Open netcdf file within MPI communicator comm.
 #ifdef HAVE_NETCDF
@@ -1384,11 +1409,14 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
      nctkdim_t("nkcalc", new%nkcalc), &
      nctkdim_t("max_nbcalc", new%max_nbcalc), &
      nctkdim_t("nsppol", new%nsppol), &
-     nctkdim_t("nwr", new%nwr), &
      nctkdim_t("ntemp", new%ntemp)], &
      !nctkdim_t("nqbz", new%nqbz)], &
      defmode=.True.)
    NCF_CHECK(ncerr)
+
+   if (new%nwr > 0) then
+     NCF_CHECK(nctk_def_dims(ncid, [nctkdim_t("nwr", new%nwr)]))
+   end if
 
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "symsigma"])
    NCF_CHECK(ncerr)
@@ -1402,12 +1430,19 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
      nctkarr_t("kcalc", "int", "three, nkcalc"), &
      nctkarr_t("kTmesh", "dp", "ntemp"), &
      nctkarr_t("mu_e", "dp", "ntemp"), &
-     ! These arrays acquire two extra dimensions on file (nkcalc, nsppol).
-     nctkarr_t("wrmesh_b", "dp", "nwr, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("vals_wr", "dp", "two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("dvals_dwr", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol") &
+     nctkarr_t("vals_e0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
+     nctkarr_t("dvals_de0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol") &
    ])
    NCF_CHECK(ncerr)
+
+   if (new%nwr > 0) then
+     ! These arrays acquire two extra dimensions on file (nkcalc, nsppol).
+     ncerr = nctk_def_arrays(ncid, [ &
+       nctkarr_t("wrmesh_b", "dp", "nwr, max_nbcalc, nkcalc, nsppol"), &
+       nctkarr_t("vals_wr", "dp", "two, nwr, ntemp, max_nbcalc, nkcalc, nsppol") &
+     ])
+     NCF_CHECK(ncerr)
+   end if
 
    ! ======================================================
    ! Write data that do not depend on the (kpt, spin) loop.
@@ -1491,6 +1526,9 @@ subroutine sigmaph_free(self)
 ! *************************************************************************
 
  ! integer
+ if (allocated(self%nbsum)) then
+   ABI_FREE(self%nbsum)
+ end if
  if (allocated(self%bstart_ks)) then
    ABI_FREE(self%bstart_ks)
  end if
@@ -1540,9 +1578,9 @@ subroutine sigmaph_free(self)
  if (allocated(self%vals_wr)) then
    ABI_FREE(self%vals_wr)
  end if
- if (allocated(self%dvals_dwr)) then
-   ABI_FREE(self%dvals_dwr)
- end if
+ !if (allocated(self%dvals_dwr)) then
+ !  ABI_FREE(self%dvals_dwr)
+ !end if
  !if (allocated(self%vals_qwr)) then
  !  ABI_FREE(self%vals_qwr)
  !end if
@@ -1620,7 +1658,7 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc)
    ABI_MALLOC(self%wtq_k, (self%nqibz_k))
    NOT_IMPLEMENTED_ERROR()
    !call lgroup_free(self%lgroup_k)
-   !self%lgroup_k = littlegroup_new(self%kcalc(:, ikcalc), self%nqbz, self%qbz, cryst)
+   !self%lgroup_k = littlegroup_new(self%kcalc(:, ikcalc), self%nqibz, self%qibz, self%nqbz, self%qbz, cryst)
  end if
 
 end subroutine sigmaph_setup_kcalc
@@ -1663,9 +1701,8 @@ subroutine sigmaph_solve(self, ikcalc, spin, ebands)
 
 !Local variables-------------------------------
 !arrays
- integer :: shape3(3),shape4(4)
- real(dp), ABI_CONTIGUOUS pointer :: rdata3(:,:,:),rdata4(:,:,:,:)
- !read(dp),allocatable :: spfunc(:,:,:,:)
+ integer :: shape3(3),shape4(4),shape5(5)
+ real(dp), ABI_CONTIGUOUS pointer :: rdata3(:,:,:),rdata4(:,:,:,:),rdata5(:,:,:,:,:)
 
 ! *************************************************************************
 
@@ -1681,26 +1718,38 @@ subroutine sigmaph_solve(self, ikcalc, spin, ebands)
  end if
 
 #ifdef HAVE_NETCDF
- shape3(1) = 2; shape4(1) = 2
+ shape3(1) = 2; shape4(1) = 2; shape5(1) = 2
 
  ! Write data (use iso_c_binding to associate a real pointer to complex data because
  ! netcdf does not support complex types.
- NCF_CHECK(nf90_put_var(self%ncid, vid("wrmesh_b"), self%wrmesh_b, start=[1,1,ikcalc,spin]))
 
- shape4(2:) = shape(self%vals_wr)
- call c_f_pointer(c_loc(self%vals_wr), rdata4, shape4)
- NCF_CHECK(nf90_put_var(self%ncid, vid("vals_wr"), rdata4, start=[1,1,1,1,ikcalc,spin]))
+ shape5(2:) = shape(self%vals_e0ks)
+ call c_f_pointer(c_loc(self%vals_e0ks), rdata5, shape5)
+ NCF_CHECK(nf90_put_var(self%ncid, vid("vals_e0ks"), rdata5))
 
- shape3(2:) = shape(self%dvals_dwr)
- call c_f_pointer(c_loc(self%dvals_dwr), rdata3, shape3)
- NCF_CHECK(nf90_put_var(self%ncid, vid("dvals_dwr"), rdata3, start=[1,1,1,ikcalc,spin]))
+ shape5(2:) = shape(self%dvals_de0ks)
+ call c_f_pointer(c_loc(self%dvals_de0ks), rdata5, shape5)
+ NCF_CHECK(nf90_put_var(self%ncid, vid("dvals_de0ks"), rdata5))
 
- !nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol")])
- !shape4(2:) = shape(self%spfunc_wr)
- !call c_f_pointer(c_loc(self%spfunc_wr), rdata4, shape4)
- !NCF_CHECK(nf90_put_var(self%ncid, vid("spfunc_dwr"), rdata4, start=[1,1,ikcalc,spin]))
+ ! Write frequency dependent data.
+ if (self%nwr > 0) then
+   NCF_CHECK(nf90_put_var(self%ncid, vid("wrmesh_b"), self%wrmesh_b, start=[1,1,ikcalc,spin]))
 
- !NCF_CHECK(nf90_put_var(self%ncid, vid("vals_qwr"), self%vals_qwr))
+   shape4(2:) = shape(self%vals_wr)
+   call c_f_pointer(c_loc(self%vals_wr), rdata4, shape4)
+   NCF_CHECK(nf90_put_var(self%ncid, vid("vals_wr"), rdata4, start=[1,1,1,1,ikcalc,spin]))
+
+   !shape3(2:) = shape(self%dvals_dwr)
+   !call c_f_pointer(c_loc(self%dvals_dwr), rdata3, shape3)
+   !NCF_CHECK(nf90_put_var(self%ncid, vid("dvals_dwr"), rdata3, start=[1,1,1,ikcalc,spin]))
+
+   !nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol")])
+   !shape4(2:) = shape(self%spfunc_wr)
+   !call c_f_pointer(c_loc(self%spfunc_wr), rdata4, shape4)
+   !NCF_CHECK(nf90_put_var(self%ncid, vid("spfunc_dwr"), rdata4, start=[1,1,ikcalc,spin]))
+
+   !NCF_CHECK(nf90_put_var(self%ncid, vid("vals_qwr"), self%vals_qwr))
+ end if
 
 contains
  integer function vid(vname)
@@ -1763,6 +1812,7 @@ subroutine sigmaph_print(self, unt, what, ebands)
 
  ! Write dimensions
  if (index(what, "dims") /= 0) then
+   write(unt,"(a)")sjoin("Number of bands in sum:", itoa(maxval(self%nbsum)))
    write(unt,"(a)")sjoin("Symsigma: ",itoa(self%symsigma), "Timrev:",itoa(self%timrev))
    write(unt,"(a)")sjoin("Number of real frequencies:", itoa(self%nwr), ", Step:", ftoa(self%wr_step*Ha_eV), "[eV]")
    write(unt,"(a)")sjoin("Number of temperatures:", itoa(self%ntemp), &

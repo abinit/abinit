@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_einterp
+!!****m* ABINIT/m_skw
 !! NAME
-!!  m_einterp
+!!  m_skw
 !!
 !! FUNCTION
 !!  Shankland-Koelling-Wood Fourier interpolation scheme.
@@ -34,8 +34,8 @@ MODULE m_skw
  use m_sort
 
  use m_fstrings,       only : itoa, sjoin
- use m_numeric_tools,  only :  vdiff_t, vdiff_eval, vdiff_print
- !use m_geometry,       only : normv
+ use m_numeric_tools,  only : vdiff_t, vdiff_eval, vdiff_print
+ !use m_geometry,      only : normv
 
 
  implicit none
@@ -46,12 +46,12 @@ MODULE m_skw
 
 !----------------------------------------------------------------------
 
-!!****t* m_einterp/skw_t
+!!****t* m_skw/skw_t
 !! NAME
-!! skw_t 
-!! 
+!! skw_t
+!!
 !! FUNCTION
-!! 
+!!
 !! SOURCE
 
  type,public :: skw_t
@@ -88,7 +88,7 @@ MODULE m_skw
 CONTAINS  !=====================================================================================
 !!***
 
-!!****f* m_einterp/skw_init
+!!****f* m_skw/skw_init
 !! NAME
 !!  skw_init
 !!
@@ -105,7 +105,7 @@ CONTAINS  !=====================================================================
 !!  eig(nband,nkpt,nsppol)=ab-initio eigenvalues.
 !!
 !! OUTPUT
-!!  skw<skw_t>=New object 
+!!  skw<skw_t>=New object
 !!
 !! PARENTS
 !!      outscfcv
@@ -148,7 +148,7 @@ subroutine skw_init(skw, cryst, cplex, nband, nkpt, nsppol, kpts, eig)
  complex(dpc),allocatable :: srk(:,:),hmat(:,:),lambda(:,:,:)
 
 ! *********************************************************************
- 
+
  skw%nk = nkpt; skw%nband = nband; skw%nsppol = nsppol; skw%cplex = cplex
 
  ! Select R-points then ordered them according to |R|
@@ -183,7 +183,7 @@ subroutine skw_init(skw, cryst, cplex, nband, nkpt, nsppol, kpts, eig)
  ABI_MALLOC(rhor, (nr))
  do ir=1,nr
    r2 = dot_product(skw%rpts(:,ir), matmul(cryst%rmet, skw%rpts(:,ir)))
-   rhor(ir) = c1 * r2 + c2 * r2**2 
+   rhor(ir) = c1 * r2 + c2 * r2**2
  end do
 
  ABI_CALLOC(hmat, (nk-1, nk-1))
@@ -201,7 +201,7 @@ subroutine skw_init(skw, cryst, cplex, nband, nkpt, nsppol, kpts, eig)
    do band=1,nband
      delta_eig(:,band,spin) = eig(band,1:nk-1,spin) - eig(band,nk,spin)
    end do
- end do 
+ end do
 
  ! Solve system of linear equations to get lambda coeffients.
  ABI_MALLOC(lambda, (nk-1, nband, nsppol))
@@ -218,7 +218,7 @@ subroutine skw_init(skw, cryst, cplex, nband, nkpt, nsppol, kpts, eig)
  !ABI_CHECK(info /= 0, sjoin("DGESV returned info", itoa(info)))
  ABI_FREE(ipiv)
 
- ! Compute coefficients 
+ ! Compute coefficients
  ABI_MALLOC(skw%coef, (nr,nband,nsppol))
 
  do spin=1,nsppol
@@ -249,7 +249,7 @@ end subroutine skw_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_einterp/skw_mkstar
+!!****f* m_skw/skw_mkstar
 !! NAME
 !!  skw_mkstar
 !!
@@ -306,7 +306,7 @@ end subroutine skw_mkstar
 
 !----------------------------------------------------------------------
 
-!!****f* m_einterp/skw_evalk
+!!****f* m_skw/skw_evalk
 !! NAME
 !!  skw_evalk
 !!
@@ -363,7 +363,7 @@ end subroutine skw_evalk
 
 !----------------------------------------------------------------------
 
-!!****f* m_einterp/skw_free
+!!****f* m_skw/skw_free
 !! NAME
 !!  skw_free
 !!
@@ -407,7 +407,7 @@ end subroutine skw_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_einterp/skw_genrpts
+!!****f* m_skw/skw_genrpts
 !! NAME
 !!  skw_genrpts
 !!
