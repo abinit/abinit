@@ -139,6 +139,7 @@ module m_sigmaph
   ! Netcdf file used to save results.
 
   integer :: mpw
+  ! Maximum number of PWs for all possible k+q
 
   complex(dpc) :: ieta
    ! Used to shift the poles in the complex plane (Ha units)
@@ -147,7 +148,6 @@ module m_sigmaph
   real(dp) :: wr_step
    ! Step of the linear mesh along the real axis (Ha units).
 
-  ! Maximum number of PWs for all possible k+q
   integer :: gmax(3)
 
   integer :: ngqpt(3)
@@ -155,21 +155,21 @@ module m_sigmaph
 
   integer,allocatable :: nbsum(:,:)
    ! nbsum(nkpt, nsppol)
-   ! Number of bands used in sum
+   ! Number of bands used in sum over states.
 
   integer,allocatable :: bstart_ks(:,:)
    ! bstart_ks(nkcalc,nsppol)
    ! Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
-   ! Depends on spin because all denerate states should be included when symmetries are used
+   ! Depends on spin because all denerate states should be included when symmetries are used.
 
   integer,allocatable :: nbcalc_ks(:,:)
    ! nbcalc_ks(nkcalc,nsppol)
    ! Number of bands included in self-energy matrix elements for each k-point in kcalc.
-   ! Depends on spin because all denerate states should be included when symmetries are used
+   ! Depends on spin because all denerate states should be included when symmetries are used.
 
   integer,allocatable :: kcalc2ibz(:,:)
     !kcalc2ibz (nkcalc, 6))
-    ! Mapping kcalc --> ibz as reported by listkk
+    ! Mapping kcalc --> ibz as reported by listkk.
 
   real(dp),allocatable :: kcalc(:,:)
    ! kcalc(3, nkcalc)
@@ -406,8 +406,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
  ! Copy important dimensions
- natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
- nkpt = ebands%nkpt
+ natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor;
+ nspden = dtset%nspden; nkpt = ebands%nkpt
 
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
  nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
@@ -892,6 +892,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  call pawcprj_free(cwaveprj0)
  ABI_DT_FREE(cwaveprj0)
 
+ call xmpi_end()
  stop
 
 end subroutine sigmaph
@@ -1889,6 +1890,7 @@ subroutine sigmaph_print(self, unt, what, ebands)
  if (index(what, "dims") /= 0) then
    write(unt,"(a)")sjoin("Number of bands in sum:", itoa(maxval(self%nbsum)))
    write(unt,"(a)")sjoin("Symsigma: ",itoa(self%symsigma), "Timrev:",itoa(self%timrev))
+   write(unt,"(a)")sjoin("delta shift: ", ftoa(real(self%ieta)*Ha_eV), "[eV]")
    write(unt,"(a)")sjoin("Number of real frequencies:", itoa(self%nwr), ", Step:", ftoa(self%wr_step*Ha_eV), "[eV]")
    write(unt,"(a)")sjoin("Number of temperatures:", itoa(self%ntemp), &
      "From:", ftoa(self%kTmesh(1) / kb_HaK), "to", ftoa(self%kTmesh(self%ntemp) / kb_HaK), "[K]")
@@ -1962,7 +1964,7 @@ end subroutine sigmaph_print
 !!  kpoint(3)=External k-point defining the little-group
 !!  nkbz=Number of k-points in the BZ.
 !!  kbz(3,nkbz)=K-points in the BZ.
-!!! nkibz=Number of k-points in the IBZ
+!!  nkibz=Number of k-points in the IBZ
 !!  kibz(3,nkibz)=Irreducible zone.
 !!
 !! PARENTS

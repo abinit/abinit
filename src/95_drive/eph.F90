@@ -4,8 +4,9 @@
 !!  eph
 !!
 !! FUNCTION
-!! Main routine that computes the electron phonon coupling matrix elements and
-!! calculates related properties - Tc, phonon linewidths...
+!! Main routine to compute electron phonon coupling matrix elements and
+!! calculate related properties - superconductin Tc, phonon linewidths, electronic renormalization
+!! due to phonons and temperature effects...
 !!
 !! COPYRIGHT
 !! Copyright (C) 2009-2016 ABINIT group (MG, MVer)
@@ -327,7 +328,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')"eph%init: cpu: ",cpu,", wall: ",wall
- call wrtout(std_out,msg,"COLL",do_flush=.True.)
+ call wrtout(std_out, msg, do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
 
  ! Compute electron DOS.
@@ -361,7 +362,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      if (ebands_write_bxsf(ebands,cryst,path) /= 0) then
        msg = "Cannot produce file for Fermi surface, check log file for more info"
        MSG_WARNING(msg)
-       call wrtout(ab_out,msg,'COLL')
+       call wrtout(ab_out,msg)
      end if
    end if
 
@@ -372,14 +373,14 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      if (ebands_write_nesting(ebands,cryst,path,dtset%prtnest,&
      dtset%tsmear,dtset%fermie_nest,dtset%ph_qpath(:,1:dtset%ph_nqpath),msg) /= 0) then
        MSG_WARNING(msg)
-       call wrtout(ab_out,msg,'COLL')
+       call wrtout(ab_out,msg)
      end if
    end if
  end if ! master
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')"eph%edos: cpu:",cpu,", wall: ",wall
- call wrtout(std_out,msg,"COLL",do_flush=.True.)
+ call wrtout(std_out, msg, do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
 
  ! Read the DDB file.
@@ -399,7 +400,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
  iblock = ddb_get_dielt_zeff(ddb,cryst,dtset%rfmeth,dtset%chneut,selectz0,dielt,zeff)
  if (iblock == 0) then
-   call wrtout(std_out,"DDB does not contain the dielectric tensor and the effective charges. Init with zeros", "COLL")
+   call wrtout(std_out,"DDB does not contain the dielectric tensor and the effective charges. Init with zeros")
  end if
 
  ! Build the inter-atomic force constants.
@@ -441,7 +442,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')"eph%ifc: cpu:",cpu,", wall: ",wall
- call wrtout(std_out,msg,"COLL",do_flush=.True.)
+ call wrtout(std_out, msg, do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
 
  ! Initialize the object used to read DeltaVscf
@@ -470,14 +471,15 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! ====================================================
  ! === This is the real epc stuff once all is ready ===
  ! ====================================================
- if (dtset%eph_task == 1) then
-   ! Compute phonon linewidths in metals.
-   call eph_phgamma(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
-&   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
- end if
 ! TODO: decide whether to make several driver functions.
 !  before that, however, need to encapsulate most of the functionalities in eph_phgamma
 !  otherwise there will be tons of duplicated code
+
+ if (dtset%eph_task == 1) then
+   ! Compute phonon linewidths in metals.
+   call eph_phgamma(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
+    pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
+ end if
 
  if (dtset%eph_task == 2) then
    ! Compute electron-phonon matrix elements

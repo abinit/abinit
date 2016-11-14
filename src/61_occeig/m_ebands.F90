@@ -3131,10 +3131,10 @@ subroutine edos_init(edos,ebands,cryst,intmeth,step,broad,comm,ierr)
    edos%gef(spin) = edos%dos(ief,spin)
  end do
 
- write(std_out,*)"fermie from ebands: ",ebands%fermie
- write(std_out,*)"fermie from IDOS: ",edos%mesh(ief)
- write(std_out,*)"gef:from ebands%fermie: " ,edos%dos(bisect(edos%mesh, ebands%fermie), 0)
- write(std_out,*)"gef:from edos: " ,edos%gef(0)
+ !write(std_out,*)"fermie from ebands: ",ebands%fermie
+ !write(std_out,*)"fermie from IDOS: ",edos%mesh(ief)
+ !write(std_out,*)"gef:from ebands%fermie: " ,edos%dos(bisect(edos%mesh, ebands%fermie), 0)
+ !write(std_out,*)"gef:from edos: " ,edos%gef(0)
 
 end subroutine edos_init
 !!***
