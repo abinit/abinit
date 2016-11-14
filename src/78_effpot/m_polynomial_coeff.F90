@@ -33,6 +33,7 @@ module m_polynomial_coeff
 
  public :: polynomial_coeff_broacast
  public :: polynomial_coeff_init
+ public :: polynomial_coeff_setCoefficient
  public :: polynomial_coeff_free
 !!***
 
@@ -191,6 +192,55 @@ subroutine polynomial_coeff_free(polynomial_coeff)
 
 end subroutine polynomial_coeff_free
 !!***
+
+!!****f* m_polynomial_coeff/polynomial_coeff_setCoefficient
+!!
+!! NAME
+!! polynomial_coeff_setCoefficient
+!!
+!! FUNCTION
+!! set the coefficient for this  polynomial_coeff type
+!!
+!! INPUTS
+!! coefficient = coefficient of this coefficient 
+!! 
+!! OUTPUT
+!! polynomial_coeff = polynomial_coeff structure to be free
+!!
+!! PARENTS
+!!
+!!
+!! CHILDREN
+!!   
+!!
+!! SOURCE
+
+subroutine polynomial_coeff_setCoefficient(coefficient,polynomial_coeff)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'polynomial_coeff_setCoefficient'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: coefficient
+!arrays
+ type(polynomial_coeff_type), intent(inout) :: polynomial_coeff
+!Local variables-------------------------------
+!scalar
+!arrays
+! *************************************************************************
+
+ polynomial_coeff%coefficient = coefficient
+
+end subroutine polynomial_coeff_setCoefficient
+!!***
+
 
 !!****f* m_polynomial_coeff/polynomial_coeff_broacast
 !! NAME

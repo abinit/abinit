@@ -221,7 +221,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm)
   type(crystal_t) :: Crystal
 !Local variables------------------------------
 !scalars
-  integer :: filetype,natom,ntypat,nqpt,nrpt
+  integer :: ii,filetype,natom,ntypat,nqpt,nrpt
   character(500) :: message
 !array
   integer,allocatable :: atifc(:)
@@ -234,14 +234,14 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm)
 
   if (filetype/=0) then 
 
-    if(filetype ==1) then
-      if (.not.(present(inp))) then
-        write(message, '(4a)' )&
+    if (.not.(present(inp))) then
+      write(message, '(4a)' )&
 &        ' effective_potential_file_read: you need to give input file to compute ',&
 &        'the response fonction from DDB file ',ch10
-        MSG_ERROR(message)
-      end if
+      MSG_ERROR(message)
+    end if
 
+    if(filetype ==1) then
 !     Read the DDB information, also perform some checks, and symmetrize partially the DDB
       write(message, '(3a)' )' Read the DDB information of the reference',&
  &      ' system and perform some checks',ch10
@@ -303,6 +303,19 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm)
       call wrtout(ab_out,message,'COLL')
 
       call coeffs_xml2effpot(eff_pot,filename,comm)
+
+!     Assign the coeff number from input
+      if (eff_pot%anharmonics_terms%ncoeff > inp%ncoeff)then
+        write(message, '(5a)' )&
+&          ' The number of coefficient in the XML file is superior to the ',ch10,&
+&          ' number of coefficient in the input ',ch10,&
+&          ' Action: correct your input file'
+        MSG_ERROR(message)
+      end if
+      do ii = 1,eff_pot%anharmonics_terms%ncoeff
+        call polynomial_coeff_setCoefficient(inp%coefficients(ii),&
+&                                            eff_pot%anharmonics_terms%coefficients(ii))
+      end do
     end if
 
   else
@@ -2254,11 +2267,8 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
  !Local variables-------------------------------
  !scalar
- integer :: ii,jj,my_rank,ndisp,ncoeff,nproc,nterm
+ integer :: ii,jj,kk,my_rank,ndisp,ncoeff,nproc,nterm
  real(dp):: coefficient,weight
-! integer :: ierr,ii,itypat,my_rank,msym,natom,nrpt,ntypat
-! integer :: nph1l,npsp,nproc,nsym,space_group,timrev
-! real(dp):: energy,ucvol
  character(len=200) :: name
  character(len=500) :: message
  integer,parameter :: master=0
@@ -2332,7 +2342,8 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
      icoeff  = zero
      iterm   = zero
      idisp   = zero
-     
+
+!    Parser     
      do while (ios == 0)
        read(funit,'(a)',iostat=ios) readline
        if(ios == 0)then
@@ -2403,7 +2414,11 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !      4-Read the values of this term with libxml
        call effpot_xml_readTerm(char_f2c(trim(filename)),ii,jj,ndisp,nterm,atindx,cell,direction,&
 &                              power,weight)
-!      5-Initialisation of the polynomial_term structure with the values from the 
+!     5-In the XML the atom index begin to zero
+!       Need to shift for fortran array
+       atindx(:,:) = atindx(:,:) + 1 
+
+!      6-Initialisation of the polynomial_term structure with the values from the 
 !        previous step
        call polynomial_term_init(atindx,cell,direction,ndisp,terms(jj),power,weight)
      end do
@@ -2426,6 +2441,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
      iterm   = one
      idisp   = one
 
+!    Parser
      do while ((ios==0).or..not.found)
        read(funit,'(a)',iostat=ios) readline
        if (ios == 0) then
@@ -2536,7 +2552,12 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
                      end do
                    end if
                  end do
-!                5-Initialisation of the polynomial_term structure with the values from the 
+
+!                5-In the XML the atom index begin to zero
+!                  Need to shift for fortran array
+                 atindx(:,:) = atindx(:,:) + 1 
+
+!                6-Initialisation of the polynomial_term structure with the values from the 
 !                previous step
                  call polynomial_term_init(atindx,cell,direction,ndisp,terms(iterm),power,weight)
                  iterm = iterm + 1 
@@ -2552,11 +2573,11 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
 #endif
 
-!    6-Initialisation of the polynomial_coefficent structure with the values from the 
+!    7-Initialisation of the polynomial_coefficent structure with the values from the 
 !      previous step
      call polynomial_coeff_init(coefficient,name,nterm,coeffs(ii),terms)
 
-!    7-Deallocation of the terms array for this coefficient
+!    8-Deallocation of the terms array for this coefficient
      do jj=1,nterm
        call polynomial_term_free(terms(jj))
      end do
@@ -2567,14 +2588,30 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
      ABI_DEALLOCATE(power)
    end do
  end if !End if master
+ 
 
-
-!8-MPI BROADCAST
+!9-MPI BROADCAST
  do ii=1,ncoeff
    call polynomial_coeff_broacast(coeffs(ii),master, comm)
  end do
 
-!9-debug print
+
+!10-checks
+!check if the cell of the first atom is the cell of reference (0 0 0)
+ do ii=1,ncoeff
+   do jj=1,coeffs(ii)%nterm
+     do kk=1,coeffs(ii)%terms(jj)%ndisp
+       if(any(coeffs(ii)%terms(jj)%cell(:,1,kk)/=zero))then
+         write(message, '(a,I3,a,I3,2a)' )&
+&          'The term ',jj,' of the coefficent ',ii,' has no cell in 0 0 0 for the first atom.',ch10,&
+&          'This is not allow in this version,'
+         MSG_BUG(message)
+       end if
+     end do
+   end do
+ end do
+
+!11-debug print
  if(debug)then
    do ii=1,ncoeff
      do jj=1,coeffs(ii)%nterm
@@ -2604,10 +2641,10 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 #endif
  end if
    
-!Initialisation of eff_pot
+!12-Initialisation of eff_pot
  call effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
  
-!DEALLOCATION OF TYPES
+!13-Deallocation of type
  do ii=1,ncoeff 
    call polynomial_coeff_free(coeffs(ii)) 
  end do
