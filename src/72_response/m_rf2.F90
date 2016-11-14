@@ -65,7 +65,7 @@ MODULE m_rf2
 
   integer :: idirs(2) ! directions of the perturbations (ndir=1 : idirs(1)=idirs(2) , ndir=2 : idirs(1)/=idirs(2))
 
-  real(dp),allocatable :: RHS_Stern(:,:)
+  real(dp), ABI_CONTIGUOUS pointer :: RHS_Stern(:,:) => null() ! need a pointer because is a ptr target
    ! Right-hand side of the 2nd order Sternheimer equation, for every bands.
    ! Namely, for a band "n" :
    ! |(RHS_Stern)_n> = (H^(2)-epsilon_n S^(2)) |u^(0)_n> + 2(H^(1)-epsilon_n S^(1))|u^(1)_n>
@@ -630,7 +630,7 @@ subroutine rf2_destroy(rf2)
 
 ! *************************************************************************
 
- if (allocated(rf2%RHS_Stern)) then
+ if (associated(rf2%RHS_Stern)) then
    ABI_DEALLOCATE(rf2%RHS_Stern)
  end if
  if (allocated(rf2%dcwavef)) then
