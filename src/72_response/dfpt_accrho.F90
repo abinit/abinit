@@ -311,11 +311,12 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
      do i3=1,n3
        do i2=1,n2
          do i1=1,n1
+!TEST DFPT
            diag=vlocal(i1,i2,i3,1)*(wfraug1_up(1,i1,i2,i3)**2+wfraug1_up(2,i1,i2,i3)**2)&
 &           +vlocal(i1,i2,i3,2)*(wfraug1_down(1,i1,i2,i3)**2+wfraug1_down(2,i1,i2,i3)**2)
-           offdiag=(2*vlocal(i1,i2,i3,3)*((wfraug1_up(1,i1,i2,i3)*wfraug1_down(1,i1,i2,i3))+&
+           offdiag=(two*vlocal(i1,i2,i3,3)*((wfraug1_up(1,i1,i2,i3)*wfraug1_down(1,i1,i2,i3))+&
 &           (wfraug1_up(2,i1,i2,i3)*wfraug1_down(2,i1,i2,i3))))+&
-&           (2*vlocal(i1,i2,i3,4)*((-wfraug1_down(2,i1,i2,i3)*wfraug1_up(1,i1,i2,i3))+&
+&           (two*vlocal(i1,i2,i3,4)*((-wfraug1_down(2,i1,i2,i3)*wfraug1_up(1,i1,i2,i3))+&
 &           (wfraug1_down(1,i1,i2,i3)*wfraug1_up(2,i1,i2,i3))))
            valuer=valuer+diag+offdiag
          end do
@@ -379,14 +380,12 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
              rhoaug1(2*i1  ,i2,i3,1)=zero ! imag part of n_upup at k
              rhoaug1(2*i1-1,i2,i3,4)=rhoaug1(2*i1-1,i2,i3,4)+weight*(re0_down*re1_down+im0_down*im1_down) ! n_dndn
              rhoaug1(2*i1  ,i2,i3,4)=zero ! imag part of n_dndn at k
-             rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(i1,i2,i3,2)+weight*(re1_up*re0_down+re0_up*re1_down &
-&                             +im0_up*im1_down+im0_down*im1_up) &
-&                             +(rhoaug1(i1,i2,i3,1)+rhoaug1(i1,i2,i3,4)) ! mx+tr[rhoaug1] see symrhg.F90 for mx
-             rhoaug1(2*i1  ,i2,i3,2)=zero ! imag part of mx+tr[rhoaug1] at k
-             rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(i1,i2,i3,1)+rhoaug1(i1,i2,i3,3)+weight*(-re1_up*im0_down+im1_up*re0_down &
-&                             -re0_up*im1_down+im0_up*re1_down) &
-&                             +(rhoaug1(i1,i2,i3,1)+rhoaug1(i1,i2,i3,4))! my+tr[rhoaug1] see symrhg.F90 for my
-             rhoaug1(2*i1  ,i2,i3,3)=zero ! imag part of mx+tr[rhoaug1] at k
+             rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(2*i1-1,i2,i3,2)+weight*(re1_up*re0_down+re0_up*re1_down &
+&                             +im0_up*im1_down+im0_down*im1_up)! mx; the factor two is inside weight
+             rhoaug1(2*i1  ,i2,i3,2)=zero ! imag part of mx
+             rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(2*i1-1,i2,i3,3)+weight*(re1_up*im0_down-im1_up*re0_down &
+&                             +re0_up*im1_down-im0_up*re1_down) ! my; the factor two is inside weight
+             rhoaug1(2*i1  ,i2,i3,3)=zero ! imag part of my at k
            end do
          end do
        end do
@@ -403,11 +402,9 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
              rhoaug1(i1,i2,i3,1)=rhoaug1(i1,i2,i3,1)+weight*(re0_up*re1_up+im0_up*im1_up) ! n_upup
              rhoaug1(i1,i2,i3,4)=rhoaug1(i1,i2,i3,4)+weight*(re0_down*re1_down+im0_down*im1_down) ! n_dndn
              rhoaug1(i1,i2,i3,2)=rhoaug1(i1,i2,i3,2)+weight*(re1_up*re0_down+re0_up*re1_down &
-&                             +im0_up*im1_down+im0_down*im1_up) &
-&                             +(rhoaug1(i1,i2,i3,1)+rhoaug1(i1,i2,i3,4)) !mx+tr[rhoaug1] see symrhg.F90 for mx
-             rhoaug1(i1,i2,i3,3)=rhoaug1(i1,i2,i3,3)+weight*(-re1_up*im0_down+im1_up*re0_down &
-&                             -re0_up*im1_down+im0_up*re1_down) &
-&                             +(rhoaug1(i1,i2,i3,1)+rhoaug1(i1,i2,i3,4)) !my+tr[rhoaug1] see symrhg.F90 for my
+&                             +im0_up*im1_down+im0_down*im1_up) !mx; the factor two is inside weight
+             rhoaug1(i1,i2,i3,3)=rhoaug1(i1,i2,i3,3)+weight*(re1_up*im0_down-im1_up*re0_down &
+&                             +re0_up*im1_down-im0_up*re1_down) !my; the factor two is inside weight
            end do
          end do
        end do
@@ -415,6 +412,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 
      ABI_DEALLOCATE(wfraug_up)
      ABI_DEALLOCATE(wfraug_down)
+
    end if ! option
 
    ABI_DEALLOCATE(wfraug1_up)
