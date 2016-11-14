@@ -118,7 +118,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !scalars
  integer,parameter :: level=16
  integer :: choice,cplex1,cpopt,ipw,ipws,ispinor,istr,i1,i2,i3
- integer :: my_nspinor,natom,nnlout=1,npw,npw1,paw_opt,signs
+ integer :: my_nspinor,natom,ncpgr,nnlout=1,npw,npw1,paw_opt,signs
  integer :: tim_fourwf,tim_nonlop,usecprj
  logical :: has_kin,usevnl2
  real(dp) :: weight
@@ -209,16 +209,17 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 
 !PAW: specific treatment for usecprj input arg
 !     force it to zero if cwaveprj is not allocated
- usecprj=gs_hamkq%usecprj
+ usecprj=gs_hamkq%usecprj ; ncpgr=0
  if(gs_hamkq%usepaw==1) then
    if (size(cwaveprj)==0) usecprj=0
    if (usecprj/=0) then
+     ncpgr=cwaveprj(1,1)%ncpgr
      if (size(cwaveprj)<gs_hamkq%natom*my_nspinor) then
        msg='wrong size for cwaveprj!'
        MSG_BUG(msg)
      end if
      if(gs_hamkq%usepaw==1.and.(ipert>=0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4))) then
-       if (cwaveprj(1,1)%ncpgr/=1)then
+       if (ncpgr/=1)then
          msg='Projected WFs (cprj) derivatives are not correctly stored !'
          MSG_BUG(msg)
        end if

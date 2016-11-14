@@ -80,13 +80,14 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
  use m_cgtools
  use m_rf2
 
- use m_pawcprj,      only : pawcprj_type,pawcprj_alloc,pawcprj_copy,pawcprj_get,pawcprj_free
+ use m_pawcprj, only : pawcprj_type,pawcprj_alloc,pawcprj_copy,pawcprj_get,pawcprj_free
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'rf2_init'
  use interfaces_14_hidewrite
+ use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none
@@ -116,10 +117,10 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: berryopt=0,iorder_cprj=0,level=19,tim_getghc=1,tim_getgh1c=1,tim_getgh2c=1
- integer :: iband,icpgr_loc,idir1,idir2,ierr
+ integer :: choice_cprj,cpopt_cprj,iband,icpgr_loc,idir1,idir2,idir_cprj,ierr
  integer :: igs,ipert1,ipert2,ipw,ispinor,jband,kdir1
  integer :: natom,ncpgr_loc,print_info
- integer :: size_cprj,size_wf,shift_band1,shift_band2,shift_cprj_band1
+ integer :: size_cprj,size_wf,shift_band1,shift_band2,shift_cprj_band1,shift_cprj_dir1
  integer :: shift_dir1_lambda,shift_dir2_lambda,shift_dir1,shift_dir2,shift_jband_lambda
  real(dp) :: doti,dotr,dot2i,dot2r,invocc,tol_final,factor
  character(len=500) :: msg
@@ -194,6 +195,14 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
  ABI_STAT_ALLOCATE(dudk,(2,rf2%ndir*nband_k*size_wf), ierr)
  ABI_CHECK(ierr==0, "out of memory in m_rf2 : dudk")
  dudk=zero
+ if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1) then
+   ABI_DATATYPE_ALLOCATE(dudkprj,(natom,rf2%ndir*nband_k*size_cprj))
+   ncpgr_loc=1;if(ipert==natom+10.or.ipert==natom+11) ncpgr_loc=3
+   call pawcprj_alloc(dudkprj,ncpgr_loc,gs_hamkq%dimcprj)
+   choice_cprj=5 ; cpopt_cprj=0
+ else
+   ABI_DATATYPE_ALLOCATE(dudkprj,(natom,0))
+ end if
 
  if (print_info/=0) then
    write(msg,'(4(a,i2))') 'RF2_INIT : ipert-natom = ',ipert-natom,' , idir = ',idir,&
@@ -216,7 +225,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
      call WffReadDataRec(eig1_read,ierr,2*nband_k,wffddk(file_index(kdir1)))
      call WffReadDataRec(ddk_read,ierr,2,size_wf,wffddk(file_index(kdir1)))
 #else
-     call wfk_read_bks(ddk_f(file_index(kdir1)), iband, ikpt, isppol, xmpio_single, cg_bks=ddk_read,eig1_bks=eig1_read)
+     call wfk_read_bks(ddk_f(file_index(kdir1)),iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
 #endif
 !    Filter the wavefunctions for large modified kinetic energy
 !    The GS wavefunctions should already be non-zero
@@ -234,6 +243,19 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
      shift_band1=(iband-1)*2*nband_k
      shift_dir1_lambda=2*(kdir1-1)*nband_k**2
      eig1_k_stored(1+shift_band1+shift_dir1_lambda:2*nband_k+shift_band1+shift_dir1_lambda)=eig1_read(:)
+!    Get this dudk projected on NL projectors
+     if (size(dudkprj)>0) then
+       shift_cprj_band1=(iband-1)*size_cprj
+       shift_cprj_dir1=(kdir1-1)*nband_k*size_cprj
+       cprj_dudk => dudkprj(:,1+shift_cprj_band1+shift_cprj_dir1: &
+&                           size_cprj+shift_cprj_band1+shift_cprj_dir1)
+       idir_cprj=0;if (dudkprj(1,1)%ncpgr/=3) idir_cprj=idir1
+       call getcprj(choice_cprj,cpopt_cprj,ddk_read,cprj_dudk,gs_hamkq%ffnl_k,idir_cprj,&
+&        gs_hamkq%indlmn,gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kpg_k,gs_hamkq%kpt_k,&
+&        gs_hamkq%lmnmax,gs_hamkq%mgfft,mpi_enreg,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
+&        gs_hamkq%nloalg,gs_hamkq%npw_k,gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkxred,&
+&        gs_hamkq%ph1d,gs_hamkq%ph3d_k,gs_hamkq%ucvol,gs_hamkq%useylm)
+     end if
    end do
  end do
 
@@ -253,7 +275,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
      call WffReadDataRec(eig1_read,ierr,2*nband_k,wffddk(1))
      call WffReadDataRec(ddk_read,ierr,2,size_wf,wffddk(1))
 #else
-     call wfk_read_bks(ddk_f(1), iband, ikpt, isppol, xmpio_single, cg_bks=ddk_read,eig1_bks=eig1_read)
+     call wfk_read_bks(ddk_f(1),iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
 #endif
      shift_band1=(iband-1)*size_wf
      dudkdk(:,1+shift_band1:size_wf+shift_band1)=ddk_read(:,:)
@@ -286,7 +308,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
        call WffReadDataRec(eig1_read,ierr,2*nband_k,wffddk(4))
        call WffReadDataRec(ddk_read,ierr,2,size_wf,wffddk(4))
 #else
-       call wfk_read_bks(ddk_f(4), iband, ikpt, isppol, xmpio_single, cg_bks=ddk_read,eig1_bks=eig1_read)
+       call wfk_read_bks(ddk_f(4),iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
 #endif
        dudk_dir2(:,1+shift_band1:size_wf+shift_band1)=ddk_read(:,:)
      end if
@@ -333,7 +355,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
      end if
    end if
    if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1) then
-     ABI_DATATYPE_ALLOCATE(cprj_jband,(natom,size_cprj*nband_k*gs_hamkq%usecprj))
+     ABI_DATATYPE_ALLOCATE(cprj_jband,(natom,size_cprj*nband_k))
    else
      ABI_DATATYPE_ALLOCATE(cprj_jband,(natom,0))
    end if
@@ -355,6 +377,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
    idir1=rf2%idirs(kdir1)
    ipert1=rf2%iperts(kdir1)
    shift_dir1=(kdir1-1)*nband_k*size_wf
+   shift_cprj_dir1=(kdir1-1)*nband_k*size_cprj
    shift_dir1_lambda=(kdir1-1)*2*nband_k**2
    if(ipert==natom+10 .and. idir<=3) then
      shift_dir2=0
@@ -392,7 +415,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 !      Extract first order wavefunction and eigenvalues for jband
        eig1_k_jband => eig1_k_stored(1+shift_jband_lambda+shift_dir1_lambda:2*nband_k+shift_jband_lambda+shift_dir1_lambda)
        cwave_dudk => dudk(:,1+shift_band1+shift_dir1:size_wf+shift_band1+shift_dir1)
-       cprj_dudk => cprj_empty
+       cprj_dudk => dudkprj(:,1+shift_cprj_band1+shift_cprj_dir1:size_cprj+shift_cprj_band1+shift_cprj_dir1)
 
 !      Compute H^(0) | du/dpert1 > (in h_cwave) and S^(0) | du/dpert1 > (in s_cwave)
        call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_dudk,cprj_dudk,h_cwave,s_cwave,dtfil,&
@@ -569,6 +592,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 !  pert1 = rf2%iperts(2) along rf2%idirs(2)
 !  pert2 = rf2%iperts(1) along rf2%idirs(1)
    shift_dir1=(kdir1-1)*nband_k*size_wf
+   shift_cprj_dir1=(kdir1-1)*nband_k*size_cprj
    shift_dir1_lambda=(kdir1-1)*2*nband_k**2
    idir1=rf2%idirs(kdir1)
    ipert1=rf2%iperts(kdir1)
@@ -608,7 +632,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 !      Extract first order wavefunction | du/dpert1 > and eigenvalues
        eig1_k_jband => eig1_k_stored(1+shift_jband_lambda+shift_dir2_lambda:2*nband_k+shift_jband_lambda+shift_dir2_lambda)
        cwave_dudk => dudk(:,1+shift_band1+shift_dir1:size_wf+shift_band1+shift_dir1)
-       cprj_dudk => cprj_empty
+       cprj_dudk => dudkprj(:,1+shift_cprj_band1+shift_cprj_dir1:size_cprj+shift_cprj_band1+shift_cprj_dir1)
 
        if (ipert2==natom+2) then
 !        Extract dkdk and multiply by i :
@@ -679,7 +703,11 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
  if (size(cprj_jband)>0) then
    call pawcprj_free(cprj_jband)
  end if
+ if (size(dudkprj)>0) then
+   call pawcprj_free(dudkprj)
+ end if
  ABI_DATATYPE_DEALLOCATE(cprj_jband)
+ ABI_DATATYPE_DEALLOCATE(dudkprj)
 
 ! Compute the part of 2nd order wavefunction that belongs to the space of empty bands
  do jband=1,nband_k

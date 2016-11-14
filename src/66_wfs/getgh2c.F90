@@ -101,7 +101,7 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 !Local variables-------------------------------
 !scalars
  integer :: choice,cpopt,idir1,idir2,idirc,ipw,ipws,ispinor,my_nspinor
- integer :: natom,nnlout=1,npw,npw1,paw_opt,signs,tim_nonlop,usecprj
+ integer :: natom,ncpgr,nnlout=1,npw,npw1,paw_opt,signs,tim_nonlop,usecprj
  logical :: has_kin,has_vnl
  real(dp) :: enlout_dum(1)
  character(len=500) :: msg
@@ -182,10 +182,11 @@ subroutine getgh2c(cwavef,cwaveprj,gh2c,gs2c,gs_hamkq,gvnl2,idir,ipert,lambda,&
 
 !PAW: specific treatment for usecprj input arg
 !     force it to zero if cwaveprj is not allocated
- usecprj=gs_hamkq%usecprj
+ usecprj=gs_hamkq%usecprj ; ncpgr=0
  if(gs_hamkq%usepaw==1) then
    if (size(cwaveprj)==0) usecprj=0
    if (usecprj/=0) then
+     ncpgr=cwaveprj(1,1)%ncpgr
      if (size(cwaveprj)<gs_hamkq%natom*my_nspinor) then
        msg='wrong size for cwaveprj!'
        MSG_BUG(msg)

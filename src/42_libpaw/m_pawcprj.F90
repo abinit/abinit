@@ -1691,7 +1691,7 @@ end subroutine pawcprj_put
      cprj(kk,jj)%cp(:,:)=cprj_tmp(ii,jj)%cp(:,:)
      if (ncpgr>0) then
        LIBPAW_ALLOCATE(cprj(kk,jj)%dcp,(2,ncpgr,nlmn(ii)))
-       cprj(kk,jj)%dcp(:,:,:)=cprj_tmp(kk,jj)%dcp(:,:,:)
+       cprj(kk,jj)%dcp(:,:,:)=cprj_tmp(ii,jj)%dcp(:,:,:)
      end if
    end do
  end do
