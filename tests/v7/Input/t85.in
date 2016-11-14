@@ -77,7 +77,7 @@ znucl  13
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t85.in, t86.in, t87.in, t88.in
+#%% test_chain = t85.in, t86.in, t87.in, t88.in, t89.in
 #%% [files]
 #%% files_to_test = 
 #%%   t85.out, tolnlines= 50, tolabs=3.000e-02, tolrel=6.000e-03, fld_options= -easy
@@ -88,6 +88,7 @@ znucl  13
 #%%  ww_cp t85o_DS10_1WF4 t88o_DS20_1WF4;
 #%%  ww_cp t85o_DS10_1WF5 t88o_DS20_1WF5;
 #%%  ww_cp t85o_DS10_1WF6 t88o_DS20_1WF6;
+#%%  ww_cp t85o_DS1_DEN t89o_DS20_DEN;
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

@@ -33,7 +33,7 @@
 !!  kptopt=option for the generation of k points
 !!  mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
 !!  comm_atom=--optional-- MPI communicator over atoms
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell
 !!  nband_k=number of bands at this k point for that spin polarization
 !!  ncpgr=number of gradients stored in cprj array (cprj=<p_i|Cnk>)
@@ -121,7 +121,7 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  real(dp),intent(out) :: eloc0_k
  character(len=fnlen),intent(in) :: filstat
  type(gs_hamiltonian_type),intent(inout),target :: gs_hamkq
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  real(dp),intent(in),target :: cwave0(2,npw_k*nspinor),cwave1(2,npw1_k*nspinor),cwavef(2,npw1_k*nspinor)
  real(dp),intent(in) :: occ_k(nband_k)

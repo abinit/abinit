@@ -498,7 +498,6 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
 #undef ABI_FUNC
 #define ABI_FUNC 'inprep8'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -538,7 +537,8 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
  end if
 
 !Open the input derivative database.
- write(std_out,'(a,a)') ' inprep8 : open file ',trim(filnam)
+ write(message,'(a,a)') ' inprep8 : open file ',trim(filnam)
+ call wrtout(std_out,message,'COLL')
  if (open_file(filnam,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
    MSG_ERROR(message)
  end if
@@ -738,10 +738,12 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
      read (unddb,*)
    end do
  else
-   write(std_out,*)' inprep8 : nband(1)=',nband(1)
+   write(message,*)' inprep8 : nband(1)=',nband(1)
+   call wrtout(std_out,message,'COLL')
    do iline=1,(nband(1)+2)/3
      read (unddb,'(a80)')rdstring
-     write(std_out,*)trim(rdstring)
+     write(message,*)trim(rdstring)
+     call wrtout(std_out,message,'COLL')
    end do
  end if
 !23. rprim
@@ -1516,7 +1518,7 @@ subroutine read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
    if(msize<(3*mpert*3*mpert))then
      write(message,'(a,a,a,i10,a,i10,a,a,a)')&
 &     'There is not enough space to read a second-derivative block.',ch10,&
-&     'The size provided is only ',msize,' although ',3*mpert*3*mpert,' is needed.',ch10,&
+
 &     'Action: increase msize and recompile.'
      MSG_ERROR(message)
    end if
@@ -2165,7 +2167,6 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
 #undef ABI_FUNC
 #define ABI_FUNC 'ioddb8_in'
  use interfaces_14_hidewrite
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -2204,7 +2205,8 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
  end if
 
 !Open the input derivative database.
- write(std_out,'(a,a)')' About to open file ',TRIM(filnam)
+ write(message,'(a,a)')' About to open file ',TRIM(filnam)
+ call wrtout(std_out,message,'COLL')
  if (open_file(filnam,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
    MSG_ERROR(message)
  end if
@@ -3454,7 +3456,7 @@ subroutine ddb_from_file(ddb,filename,brav,natom,natifc,atifc,Crystal,comm,prtvo
  end do
 
 !Warning znucl is dimension with ntypat = nspsp hence alchemy is not supported here
- call crystal_init(Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
+ call crystal_init(ddb%amu,Crystal,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
 &  zion,znucl,timrev,use_antiferro,.FALSE.,title,&
 &  symrel=symrel,tnons=tnons,symafm=symafm) 
 
@@ -3748,6 +3750,7 @@ subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dtech9'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -3762,6 +3765,7 @@ subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff)
 !Local variables -------------------------
 !scalars
  integer :: depl,elec,elec1,elec2,iatom
+ character(len=1000) :: message
 
 ! *********************************************************************
 
@@ -3783,18 +3787,23 @@ subroutine dtech9(blkval,dielt,iblok,mpert,natom,nblok,zeff)
    end do
  end do
 
- write(std_out,'(/,a,/,3es16.6,/,3es16.6,/,3es16.6)' )&
+ write(message,'(a,3es16.6,3es16.6,3es16.6)' )&
 & ' Dielectric Tensor ',&
 & dielt(1,1),dielt(1,2),dielt(1,3),&
 & dielt(2,1),dielt(2,2),dielt(2,3),&
 & dielt(3,1),dielt(3,2),dielt(3,3)
 
- write(std_out,'(/,a)' ) ' Effectives Charges '
+
+ call wrtout(std_out,message,'COLL')
+
+ write(message,'(a)' ) ' Effectives Charges '
+ call wrtout(std_out,message,'COLL')
  do iatom=1,natom
-   write(std_out,'(a,i4,3es16.6,/,3es16.6,/,3es16.6)' )' atom ',iatom,&
+   write(message,'(a,i4,3es16.6,3es16.6,3es16.6)' )' atom ',iatom,&
 &   zeff(1,1,iatom),zeff(1,2,iatom),zeff(1,3,iatom),&
 &   zeff(2,1,iatom),zeff(2,2,iatom),zeff(2,3,iatom),&
 &   zeff(3,1,iatom),zeff(3,2,iatom),zeff(3,3,iatom)
+    call wrtout(std_out,message,'COLL')
  end do
 
 end subroutine dtech9
@@ -4417,6 +4426,79 @@ subroutine asrq0corr_free(acorr)
  end if
 
 end subroutine asrq0corr_free
+!!***
+
+
+!!****f* m_ddb/ddb_chkname
+!! NAME ddb_chkname
+!! ddb_chkname
+!!
+!! FUNCTION
+!! This small subroutine check the identity of its argument,
+!! who are a6 names, and eventually send a message and stop
+!! if they are found unequal
+!!
+!! INPUTS
+!! nmfond= name which has to be checked
+!! nmxpct= name expected for nmfond
+!! nmxpct2= eventual second optional name (backward compatibility)
+!!
+!! OUTPUT
+!!
+!! TODO
+!! Describe the inputs
+!!
+!! PARENTS
+!!      m_ddb
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ddb_chkname(nmfond,nmxpct,nmxpct2)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ddb_chkname'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ character(len=*),intent(in) :: nmfond,nmxpct
+ character(len=*),intent(in),optional :: nmxpct2
+
+!Local variables-------------------------------
+!scalars
+ logical :: found
+ character(len=500) :: nmfond_,nmxpct_,nmxpct2_
+ character(len=500) :: message
+
+! *********************************************************************
+
+ nmxpct_ = trim(adjustl(nmxpct))
+ nmfond_ = trim(adjustl(nmfond))
+
+ found = (nmxpct_ == nmfond_)
+
+ if (present(nmxpct2) .and. .not. found) then
+   nmxpct2_ = trim(adjustl(nmxpct2))
+   found = (nmxpct2_==nmfond_)
+ end if
+
+ if (.not. found) then
+   write(message, '(a,a,a,a,a,a,a,a,a,a,a)' )&
+&   '  Reading DDB, expected name was "',trim(nmxpct_),'"',ch10,&
+&   '               and name found is "',trim(nmfond_),'"',ch10,&
+&   '  Likely your DDB is incorrect.',ch10,&
+&   '  Action : correct your DDB, or contact the ABINIT group.'
+   MSG_ERROR(message)
+ end if
+
+end subroutine ddb_chkname
 !!***
 
 !----------------------------------------------------------------------

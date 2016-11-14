@@ -31,6 +31,7 @@ MODULE m_skw
  use m_profiling_abi
  use m_xmpi
  use m_crystal
+ use m_sort
 
  use m_fstrings,       only : itoa, sjoin
  use m_numeric_tools,  only :  vdiff_t, vdiff_eval, vdiff_print
@@ -431,7 +432,6 @@ subroutine skw_genrpts(cryst, rmax, nr, rpts)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'skw_genrpts'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

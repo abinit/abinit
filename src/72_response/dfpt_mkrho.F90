@@ -28,7 +28,7 @@
 !!  mgfft=maximum size of 1D FFTs
 !!  mkmem=Number of k points treated by this node (GS data)
 !!  mk1mem=Number of k points treated by this node (RF data)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum allowed value for npw (GS wfs)
 !!  mpw1=maximum allowed value for npw1 (RF data)
 !!  nband_rbz(nkpt_rbz*nsppol)=number of bands to be included in summation
@@ -106,7 +106,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  integer,intent(in) :: cplex,mband,mgfft,mk1mem,mkmem,mpw,mpw1,nfft,nkpt_rbz
  integer,intent(in) :: nspden,nspinor,nsppol,nsym,paral_kgb
  real(dp),intent(in) :: ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))
  integer,intent(in) :: istwfk_rbz(nkpt_rbz),kg(3,mpw*mkmem),kg1(3,mpw1*mk1mem)

@@ -113,9 +113,6 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
  real(dp),allocatable :: magngx(:,:),magngy(:,:),magngz(:,:)
  real(dp),allocatable :: rhosu1_arr(:),rhosu2_arr(:),work(:)
  real(dp),allocatable :: symafm_used(:),symrec_cart(:,:,:),symrel_cart(:,:,:)
-!No abirules
-!Statement functions are obsolete
-!map(j1,n1)=mod(n1+mod(j1,n1),n1)
 
 !*************************************************************************
 !
@@ -468,7 +465,8 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 #define ABI_FUNC 'map_symrhg'
 !End of the abilint section
 
-   integer :: map_symrhg,j1,n1
+   integer :: map_symrhg
+   integer,intent(in) :: j1,n1
    map_symrhg=mod(n1+mod(j1,n1),n1)
  end function map_symrhg
 

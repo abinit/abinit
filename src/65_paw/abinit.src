@@ -40,8 +40,6 @@ sources = [
  "nhatgrid.F90",
  "optics_paw.F90",
  "optics_paw_core.F90",
- "partial_dos_fractions_paw.F90",
- "prtfatbands.F90",
  "pawaccrhoij.F90",
  "pawdenpot.F90",
  "pawdensities.F90",

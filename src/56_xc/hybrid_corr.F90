@@ -16,7 +16,7 @@
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!  ixc = choice of exchange-correlation functional.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft = number of fft grid points.
 !!  ngfft(1:3) = integer fft box dimensions, see getng for ngfft(4:8).
 !!  nspden = number of spin-density components.
@@ -70,7 +70,7 @@ subroutine hybrid_corr(dtset,ixc,nkxc,mpi_enreg,nfft,ngfft,nspden,rhor,rprimd,hy
  integer,intent(in) :: ixc,nfft,nspden,nkxc
  real(dp),intent(in) :: hybrid_mixing
  real(dp),intent(inout) :: enxc
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
 !arrays
  integer,intent(in) :: ngfft(18)

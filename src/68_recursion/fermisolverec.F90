@@ -24,7 +24,7 @@
 !!  acc=accuracy for the fermi energy
 !!  max_it=maximum number of iteration for the Ridder's Method
 !!  long_tranche=number of point computed by thi proc
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  inf_ucvol=infinitesimal unit cell volume
 !!  gputopo=true if topology gpu-cpu= 2 or 3
 !! 
@@ -88,7 +88,7 @@ subroutine fermisolverec(fermie,rho,a,b2,debug_rec,nb_rec, &
  logical,intent(in) :: debug_rec,gputopo
  real(dp),intent(in) :: acc,inf_ucvol,nelect,temperature
  real(dp), intent(inout) :: fermie
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  !arrays 
  real(dp), intent(inout) :: a(0:nb_rec,long_tranche), b2(0:nb_rec,long_tranche)
  real(dp), intent(inout) :: rho(long_tranche)

@@ -103,7 +103,7 @@ subroutine getgh1c(berryopt,copt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !scalars
  integer,intent(in) :: berryopt,copt,idir,ipert,optlocal,optnl,opt_gvnl1,sij_opt,tim_getgh1c,usevnl
  real(dp),intent(in) :: lambda
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(inout),target :: gs_hamkq
  type(rf_hamiltonian_type),intent(inout),target :: rf_hamkq
 !arrays
@@ -796,7 +796,7 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
 !scalars
  integer,intent(in) :: isppol,nspden,usepaw,cplex,nfftf,nfft,nvloc
  type(pawfgr_type),intent(in) :: pawfgr
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in),target :: vtrial(nfftf,nspden)

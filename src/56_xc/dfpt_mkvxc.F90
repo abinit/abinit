@@ -86,7 +86,7 @@ subroutine dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,nhat1gr,
 !scalars
  integer,intent(in) :: cplex,ixc,n3xccc,nfft,nhat1dim,nhat1grdim
  integer,intent(in) :: nkxc,nspden,option,paral_kgb,usexcnhat
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: nhat1(cplex*nfft,nspden*nhat1dim)

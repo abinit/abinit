@@ -49,11 +49,12 @@ subroutine psp6cc(mmax,n1xccc,rchrg,xccc1d,znucl,&
  use m_splines
  use m_profiling_abi
 
+ use m_numeric_tools,  only : smooth
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'psp6cc'
- use interfaces_28_numeric_noabirule
  use interfaces_64_psp, except_this_one => psp6cc
 !End of the abilint section
 

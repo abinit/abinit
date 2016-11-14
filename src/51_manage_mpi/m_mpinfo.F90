@@ -52,6 +52,7 @@ MODULE m_mpinfo
  public :: mpi_distrib_is_ok     ! Check if a MPI datastructure contains number of processors
                                  ! compatible (in terms of efficiency) with the number of spins/kpts/bands
 
+
 ! Destructor methods
  public :: clnmpi_atom
  public :: clnmpi_grid
@@ -118,7 +119,6 @@ subroutine init_mpi_enreg(mpi_enreg)
 
 !Default for sequential use
  call initmpi_seq(mpi_enreg)
-
 !Initialize MPI
 #if defined HAVE_MPI
  mpi_enreg%comm_world=xmpi_world
@@ -169,7 +169,6 @@ subroutine nullify_mpi_enreg(MPI_enreg)
  nullify(mpi_enreg%ngatherarr)
  nullify(mpi_enreg%my_atmtab)
  nullify(mpi_enreg%distribfft)
-
 
  end subroutine nullify_mpi_enreg
 !!***
@@ -301,7 +300,8 @@ subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
 
 !Arguments ------------------------------------
 !scalars
- type(MPI_type),intent(inout) :: mpi_enreg1,MPI_enreg2
+ type(MPI_type),intent(in) :: mpi_enreg1
+ type(MPI_type),intent(out) :: MPI_enreg2
 
 !Local variables-------------------------------
 !scalars
@@ -320,7 +320,6 @@ subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
  mpi_enreg2%nproc_fft=mpi_enreg1%nproc_fft
  mpi_enreg2%paral_kgb=mpi_enreg1%paral_kgb
  mpi_enreg2%me_g0=mpi_enreg1%me_g0
-!mpi_enreg2%flag_ind_kg_mpi_to_seq=mpi_enreg1%flag_ind_kg_mpi_to_seq
  mpi_enreg2%paral_pert=mpi_enreg1%paral_pert
  mpi_enreg2%me_pert=mpi_enreg1%me_pert
  mpi_enreg2%nproc_pert=mpi_enreg1%nproc_pert
@@ -357,6 +356,7 @@ subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
  mpi_enreg2%nproc_hf   =mpi_enreg1%nproc_hf
  mpi_enreg2%comm_hf    =mpi_enreg1%comm_hf
  mpi_enreg2%paral_hf=mpi_enreg1%paral_hf
+ mpi_enreg2%pw_unbal_thresh=mpi_enreg1%pw_unbal_thresh
 
 !pointers
  if (associated(mpi_enreg1%distribfft)) then

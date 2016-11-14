@@ -1,0 +1,42 @@
+##############################################################################
+#Test for multibinit, just read xml and generate the effective potential into XML file
+##############################################################################
+prt_effpot = 3
+
+n_cell =   2 2 2
+dynamics =  1
+temperature = 1000
+ntime  = 50
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = multibinit
+#%% test_chain = t95,t96,t97,t98.in
+#%% input_xml = system.xml
+#%% [files]
+#%% [paral_info]
+#%% nprocs_to_test = 1, 2, 4
+#%% max_nprocs = 4
+#%% [NCPU_1]
+#%% files_to_test = 
+#%%   t97_MPI1.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%% [NCPU_2]
+#%% files_to_test = 
+#%%   t97_MPI2.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%% [NCPU_4]
+#%% files_to_test = 
+#%%   t97_MPI4.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%% [NCPU_10]
+#%% files_to_test = 
+#%%   t97_MPI10.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
+#%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
+#%% [extra_info]
+#%% authors = A. MARTIN
+#%% keywords = Effective potential, multibinit
+#%% description = 
+#%%   read xml and generate effective potential in XML file
+#%%<END TEST_INFO>

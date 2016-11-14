@@ -78,7 +78,7 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nfft,nhat1dim,nhat1grdim,nkxc,nspden,paral_kgb,usexcnhat
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: gprimd(3,3),kxc(nfft,nkxc)

@@ -35,6 +35,7 @@ MODULE m_vcoul
  use m_errors 
  use m_xmpi
  use m_splines
+ use m_sort
 
  use m_fstrings,        only : sjoin, itoa
  use m_special_funcs,   only : abi_derf
@@ -1160,7 +1161,6 @@ subroutine vcoul_plot(Vcp,Qmesh,Gsph,ng,vc,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'vcoul_plot'
- use interfaces_28_numeric_noabirule
  use interfaces_32_util
 !End of the abilint section
 

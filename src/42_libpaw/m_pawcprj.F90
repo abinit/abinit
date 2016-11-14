@@ -73,7 +73,7 @@ module m_pawcprj
  end type pawcprj_type
 
 !public procedures.
- public :: pawcprj_alloc          ! Allocation 
+ public :: pawcprj_alloc          ! Allocation
  public :: pawcprj_free           ! Deallocation
  public :: pawcprj_set_zero       ! Set to zero all arrays in a cprj datastructure
  public :: pawcprj_copy           ! Copy a cprj datastructure into another
@@ -1439,7 +1439,7 @@ end subroutine pawcprj_get
 !arrays
  integer,intent(in) :: atind(natom),nlmn(dimcp)
  integer,intent(in),optional :: proc_distrb(:,:,:)
- type(pawcprj_type),intent(inout) :: cprj(dimcp,nspinor*mband*mkmem*nsppol) !vz_i
+ type(pawcprj_type),intent(inout) :: cprj(dimcp,nspinor*mband*mkmem*nsppol)
  type(pawcprj_type),intent(in) :: cprj_k(dimcp,nspinor*nband)
 
 !Local variables-------------------------------
@@ -1534,7 +1534,7 @@ end subroutine pawcprj_get
 
    end if
 
- else ! mode_para==b and nband>1
+ else ! np_band>1
 
    lmndim=2*sum(nlmn(1:dimcp))*(1+ncpgr)*nspinor
    LIBPAW_ALLOCATE(buffer1,(lmndim))

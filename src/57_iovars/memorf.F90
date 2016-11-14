@@ -33,7 +33,7 @@
 !!  mgfft =maximum single fft dimension
 !!  mkmems=number of k points which can fit in memory; set to 0 if use disk
 !!    the three values correspond to mkmem, mkqmem and mk1mem
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpssang is 1+maximum angular momentum for nonlocal pseudopotential
 !!  mpssoang is 1+maximum (spin*angular momentum) for nonlocal pseudopotential
 !!  mpw   =maximum number of planewaves in basis sphere (large number)

@@ -80,6 +80,7 @@ inp_files = [
 "t86.in",
 "t87.in",
 "t88.in",
+"t89.in",
 "t90.in",
 "t91.in",
 "t92.in",
@@ -90,4 +91,9 @@ inp_files = [
 "t97.in",
 "t98.in",
 "t99.in",
+"t120.in",
+"t121.in",
+"t122.in",
+"t123.in",
+"t124.in",
 ]
