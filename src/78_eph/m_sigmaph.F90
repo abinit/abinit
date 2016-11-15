@@ -264,7 +264,7 @@ module m_sigmaph
 
  type,private :: lgroup_t
 
-   !integer :: nkibz_q
+   integer :: nkibz_q
    ! Number of k-points in the IBZ(q)
 
    real(dp) :: qpoint(3)
@@ -277,11 +277,11 @@ module m_sigmaph
    ! fourth number is zero if the q-vector is not preserved, is 1 otherwise
    ! second index is one without time-reversal symmetry, two with time-reversal symmetry
 
-   !real(dp),allocatable :: kibz_q(:,:)
+   real(dp),allocatable :: kibz_q(:,:)
    ! K-points in the IBZ(q)
    ! kibz_q(3, nkibz_q)
 
-   !real(dp),allocatable :: wtk_q(:)
+   real(dp),allocatable :: wtk_q(:)
    ! Weights
    ! wtk_q(nkibz_q)
 
@@ -1178,6 +1178,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  ! Broadening parameter
  new%ieta = j_dpc * 0.0001_dp
  if (dtset%elph2_imagden > tol12) new%ieta = j_dpc * dtset%elph2_imagden
+ new%ieta = j_dpc * 0.2 * eV_Ha
 
  ! Build (linear) mesh of temperatures.
  ! TODO: Will become input eph_tsmesh start stop num
@@ -1208,9 +1209,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  call ebands_free(tmp_ebands)
 
  ! Frequency mesh for sigma(w) and spectral function.
- new%nwr = 11
+ new%nwr = 101
  ABI_CHECK(mod(new%nwr, 2) == 1, "nwr should be odd!")
- new%wr_step = 0.01 * eV_Ha
+ new%wr_step = 0.02 * eV_Ha
 
  ! Define q-mesh for integration.
  ! Either q-mesh from DDB (no interpolation) or eph_ngqpt_fine (Fourier interpolation if q not in DDB)
@@ -1234,9 +1235,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  ! Reduce the number of such points by symmetrization.
  ! Compute new%wtq and new%qibz.
  ! Note that time-reversal is always used for the q-points.
- ABI_ALLOCATE(ibz2bz, (new%nqbz))
- ABI_ALLOCATE(tmp_wtq, (new%nqbz))
- ABI_ALLOCATE(tmp_wtq_folded, (new%nqbz))
+ ABI_MALLOC(ibz2bz, (new%nqbz))
+ ABI_MALLOC(tmp_wtq, (new%nqbz))
+ ABI_MALLOC(tmp_wtq_folded, (new%nqbz))
  tmp_wtq = one / new%nqbz ! Weights sum up to one
 
  call symkpt(dtset%chksymbreak,cryst%gmet,ibz2bz,std_out,new%qbz,new%nqbz,new%nqibz,&
@@ -1716,7 +1717,7 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc)
  type(sigmaph_t),intent(inout) :: self
 
 !Local variables-------------------------------
-!arrays
+ type(lgroup_t) :: lgk
 
 ! *************************************************************************
 
@@ -1744,11 +1745,13 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc)
 #endif
  else if (self%symsigma == 1) then
    ! Use symmetries of the little group
+   lgk = lgroup_new(cryst, self%kcalc(:, ikcalc), self%nqbz, self%qbz, self%nqibz, self%qibz)
+
+   self%nqibz_k = lgk%nkibz_q
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
    ABI_MALLOC(self%wtq_k, (self%nqibz_k))
-   NOT_IMPLEMENTED_ERROR()
-   !call lgroup_free(self%lgroup_k)
-   !self%lgroup_k = lgroup_new(cryst, self%kcalc(:, ikcalc), self%nqbz, self%qbz, self%nqibz, self%qibz)
+   self%qibz_k = lgk%kibz_q; self%wtq_k = lgk%wtk_q
+   call lgroup_free(lgk)
  else
    MSG_ERROR(sjoin("Wrong symsigma:", itoa(self%symsigma)))
  end if
@@ -2013,27 +2016,60 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, nkbz, kbz, nkibz, kibz) resul
 
 !Local variables ------------------------------
 !scalars
-! integer ::
- integer :: otimrev_k
+ integer,parameter :: iout0=0,my_timrev0=0,chksymbreak0=0
+ integer :: otimrev_k,ierr,itim,isym,nsym_lg,ik
 !arrays
+ integer :: symrec_lg(3,3,2*cryst%nsym),symafm_lg(3,3,2*cryst%nsym)
+ integer,allocatable :: ibz2bz(:)
+ real(dp),allocatable :: wtk(:),wtk_folded(:)
 
 ! *************************************************************************
 
+ ! TODO: Option to exclude umklapp/time-reversal symmetry.
  new%qpoint = kpoint
 
  ! Determines the symmetry operations by which the k-point is preserved,
  ABI_MALLOC(new%symq, (4, 2, cryst%nsym))
  call littlegroup_q(cryst%nsym, kpoint, new%symq, cryst%symrec, cryst%symafm, otimrev_k, prtvol=0)
 
- ! Check group closure.
- !ABI_MALLOC(symafm_ltg,(Ltg%nsym_Ltg))
- !symafm_ltg(:)=1
- !call chkgrp(Ltg%nsym_Ltg,symafm_ltg,symrec_Ltg,ierr)
- !ABI_CHECK(ierr==0,"Error in group closure")
+ nsym_lg = 0
+ do itim=1,2
+   do isym=1,cryst%nsym
+     if (cryst%symafm(isym) == -1) cycle
+     if (new%symq(4,itim,isym)  /= 1) cycle ! not \pm Sq = q+g0
+     nsym_lg = nsym_lg + 1
+     symrec_lg(:,:,nsym_lg) = cryst%symrec(:,:,isym) * (-2* itim + 3)
+   end do
+ end do
 
- !new%nkibz_q
- !ABI_MALLOC(new%kibz_q, (3, new%nkibz_q))
- !ABI_MALLOC(new%wtk_q, (new%nkibz_q))
+ ! Check group closure.
+ symafm_lg = 1
+ call chkgrp(nsym_lg, symafm_lg, symrec_lg, ierr)
+ ABI_CHECK(ierr == 0, "Error in group closure")
+
+ ! Find the irreducible zone with the little group operations.
+ ! Do not use time-reversal since it has been manually introduced previously
+ ABI_MALLOC(ibz2bz, (nkbz))
+ ABI_MALLOC(wtk_folded, (nkbz))
+ ABI_MALLOC(wtk, (nkbz))
+ wtk = one / nkbz ! Weights sum up to one
+
+ ! FIXME: In principle here we would like to have a set that contains the initial IBZ.
+ call symkpt(chksymbreak0,cryst%gmet,ibz2bz,iout0,kbz,nkbz,new%nkibz_q,&
+   nsym_lg,symrec_lg,my_timrev0,wtk,wtk_folded)
+
+ ABI_MALLOC(new%kibz_q, (3, new%nkibz_q))
+ ABI_MALLOC(new%wtk_q, (new%nkibz_q))
+
+ do ik=1,new%nkibz_q
+   new%wtk_q(ik) = wtk_folded(ibz2bz(ik))
+   new%kibz_q(:,ik) = kbz(:, ibz2bz(ik))
+ end do
+ ABI_CHECK(sum(new%wtk_q) - one < tol12, sjoin("Weights don't sum up to one but to:", ftoa(sum(new%wtk_q))))
+
+ ABI_FREE(ibz2bz)
+ ABI_FREE(wtk_folded)
+ ABI_FREE(wtk)
 
 end function lgroup_new
 !!***
@@ -2070,17 +2106,18 @@ subroutine lgroup_free(self)
 
 ! *************************************************************************
 
+ ! integer
  if (allocated(self%symq)) then
    ABI_FREE(self%symq)
  end if
 
- !if (allocated(self%kibz_q)) then
- !  ABI_FREE(self%kibz_q)
- !end if
- !if (allocated(self%wtk_q)) then
- !  ABI_FREE(self%wtk_q)
- !end if
-
+ ! real
+ if (allocated(self%kibz_q)) then
+   ABI_FREE(self%kibz_q)
+ end if
+ if (allocated(self%wtk_q)) then
+   ABI_FREE(self%wtk_q)
+ end if
 
 end subroutine lgroup_free
 !!***
