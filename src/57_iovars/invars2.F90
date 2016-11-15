@@ -697,6 +697,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'adpimd_gamma',tread,'DPR')
  if(tread==1) dtset%adpimd_gamma=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pimd_constraint',tread,'INT')
+ if(tread==1) dtset%pimd_constraint=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pitransform',tread,'INT')
  if(tread==1) dtset%pitransform=intarr(1)
 

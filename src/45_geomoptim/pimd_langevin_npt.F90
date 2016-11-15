@@ -112,12 +112,13 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 
 !scalars
  integer :: idum=-5
- integer :: iatom,ii,iimage,irestart,jj,ndof,prtstress
- real(dp) :: dtion,eharm,eharm2,epot,friction,frictionbar,initemp,kt,scalebar
+ integer :: constraint,iatom,ii,iimage,irestart,jj,ndof,prtstress
+ real(dp) :: dtion,eharm,eharm2,epot,friction,frictionbar,initemp,kt,rescale_temp,scalebar
  real(dp) :: temperature1,temperature2,temp2_prev,thermtemp,tol,tracepg,wg
 !arrays
  real, parameter :: identity(3,3)=reshape((/(one,(zero,ii=1,3),jj=1,2),one/),(/3,3/))
- real(dp) :: aleabar(3,3),ddh(3,3),diffstress(3,3),dstrhh(3,3),fg(3,3),invrprimd(3,3),rescale_temp
+ real(dp) :: aleabar(3,3),constraint_output(2),ddh(3,3),diffstress(3,3)
+ real(dp) :: dstrhh(3,3),fg(3,3),invrprimd(3,3)
  real(dp) :: langev_bar(3,3),pg(3,3),pgdh(3,3),stress_pimd(3,3,3),strtarget(6),tmp(3,3)
  real(dp),allocatable :: alea(:,:,:),forces_orig(:,:,:),forces_pimd(:,:,:),forces_pimd_red(:,:)
  real(dp),allocatable :: fsup(:,:),hxredpoint(:,:,:),inertmass(:),langev(:,:)
@@ -415,7 +416,8 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 
 !Print messages
  prtstress=1
- call pimd_print(eharm,eharm2,epot,forces_pimd,inertmass,irestart,&
+ call pimd_print(constraint,constraint_output,&
+& eharm,eharm2,epot,forces_pimd,inertmass,irestart,&
 & itimimage,kt,natom,pimd_param%optcell,prtstress,prtvolimg,rprimd,&
 & stress_pimd,temperature1,temperature2,&
 & pimd_param%traj_unit,trotter,vel,ddh,xcart,xred)
