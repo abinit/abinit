@@ -193,11 +193,16 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'np_slk',tread(10),'INT')
    if(tread(10)==1) dtsets(idtset)%np_slk=intarr(1)
 
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pw_unbal_thresh',tread0,'DPR')
+   if(tread0==1) dtsets(idtset)%pw_unbal_thresh=dprarr(1)
+   mpi_enregs(idtset)%pw_unbal_thresh=dtsets(idtset)%pw_unbal_thresh
+
    call intagm(dprarr,intarr,jdtset,marr,5,string(1:lenstr),'gpu_devices',tread0,'INT')
    if(tread0==1) dtsets(idtset)%gpu_devices(1:5)=intarr(1:5)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_linalg_limit',tread(11),'INT')
    if(tread(11)==1) dtsets(idtset)%gpu_linalg_limit=intarr(1)
+
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nphf',tread0,'INT')
    if(tread0==1) dtsets(idtset)%nphf=intarr(1)
@@ -824,10 +829,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if (dtsets(idtset)%usedmft==1) dtsets(idtset)%paral_atom=0
    if (optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_RESPFN.and.optdriver/=RUNL_GWLS) dtsets(idtset)%paral_atom=0
    if (dtsets(idtset)%macro_uj/=0) dtsets(idtset)%paral_atom=0
-   if ( (dtsets(idtset)%prtdos>=2.or.dtsets(idtset)%pawfatbnd>0) .and. dtsets(idtset)%paral_atom /= 0) then
-      MSG_WARNING("setting paral_atom to 0 because prtdos >= 2 or pawfatbnd > 0")
-      dtsets(idtset)%paral_atom = 0
-   end if
 
    call initmpi_atom(dtsets(idtset),mpi_enregs(idtset))
 

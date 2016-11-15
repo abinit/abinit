@@ -39,16 +39,11 @@ module m_fstab
 #endif
 
  use m_time,           only : cwtime
- use m_fstrings,       only : toupper, itoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, wrap2_pmhalf, simpson_int, simpson, bisect, mkherm
- use m_io_tools,       only : open_file
- use m_geometry,       only : phdispl_cart2red
+ use m_fstrings,       only : itoa, sjoin
+ use m_numeric_tools,  only : bisect
  use defs_datatypes,   only : ebands_t
  use m_crystal,        only : crystal_t
- use m_crystal_io,     only : crystal_ncwrite
- use m_bz_mesh,        only : isamek, make_path
  use m_special_funcs,  only : dirac_delta
-
 
  implicit none
 
@@ -78,12 +73,13 @@ module m_fstab
 
    integer :: maxnb
    ! Max number of bands on the FS.
+   ! TODO: Maybe maxnbfs
 
    ! real(dp) :: fermie
    ! Fermi energy
 
    integer :: integ_method
-   ! Integration method
+   ! Integration method. 1 for gaussian, 2 for tetrahedra
 
    integer :: nsig
    ! Number of smearing values used for Gaussian integration
@@ -138,7 +134,7 @@ module m_fstab
 
 !----------------------------------------------------------------------
 
-contains  !=========================================================================================================================
+contains  !============================================================
 !!***
 
 !!****f* m_fstab/fstab_free

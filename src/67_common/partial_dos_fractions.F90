@@ -113,8 +113,8 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
  integer,parameter :: prtsphere0=0 ! do not output all the band by band details for projections.
  integer :: shift_b,shift_sk,iat,iatom,iband,ierr,ikpt,ilang,ioffkg,is1, is2, isoff
  integer :: ipw,ispinor,isppol,ixint,mbess,mcg_disk,me_kpt,shift_cg
- integer :: mgfft,my_nspinor,n1,n2,n3,natsph_tot,npw_k,nradintmax
- integer :: comm_kpt,rc_ylm,itypat,nband_k
+ integer :: me_g0,mgfft,my_nspinor,n1,n2,n3,natsph_tot,npw_k,nradintmax
+ integer :: comm_pw,comm_kpt,rc_ylm,itypat,nband_k
  real(dp),parameter :: bessint_delta = 0.1_dp
  real(dp) :: arg,bessarg,bessargmax,kpgmax,rmax
  real(dp) :: cpu,wall,gflops
@@ -161,11 +161,8 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
 
  comm_kpt = mpi_enreg%comm_kpt
  me_kpt = mpi_enreg%me_kpt
+ comm_pw = mpi_enreg%comm_bandfft ; me_g0 = mpi_enreg%me_g0
  my_nspinor = max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
-
- if (mpi_enreg%nproc_band /= 1) then
-   MSG_ERROR("partial_dos_fractions does not support band parallelism")
- end if
 
  n1 = dtset%ngfft(1); n2 = dtset%ngfft(2); n3 = dtset%ngfft(3)
  mgfft = maxval(dtset%ngfft(1:3))
@@ -200,7 +197,7 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
      znucl_sph(iatom) = dtset%znucl(itypat)
    end do
 
-   ! fictitious atoms are declared with 
+   ! fictitious atoms are declared with
    ! %natsph_extra, %ratsph_extra and %xredsph_extra(3, dtset%natsph_extra)
    ! they have atom index (natom + ii) and itype = ntypat + 1
    do iatom=1,dtset%natsph_extra
@@ -318,8 +315,8 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
            ! Select wavefunction in cg array
            shift_cg = shift_sk + shift_b
 
-           call recip_ylm(bess_fit, cg(:,shift_cg+1:shift_cg+npw_k), dtset%istwfk(ikpt),&
-&           nradint, nradintmax,dos%mbesslang, mpi_enreg, dtset%mpw, natsph_tot, typat_extra, dos%mlang_type,&
+           call recip_ylm(bess_fit, cg(:,shift_cg+1:shift_cg+npw_k), comm_pw, dtset%istwfk(ikpt),&
+&           nradint, nradintmax, me_g0, dos%mbesslang , dtset%mpw, natsph_tot, typat_extra, dos%mlang_type,&
 &           npw_k,ph3d, prtsphere0, rint, ratsph, rc_ylm, sum_1atom_1ll, sum_1atom_1lm,&
 &           crystal%ucvol, ylm_k, znucl_sph)
 
@@ -441,13 +438,14 @@ subroutine partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_
        shift_b = shift_b + 2*npw_k
      end do
      ABI_DEALLOCATE(cg_1band)
-     shift_sk = shift_sk + dtset%mband*2*npw_k
+     shift_sk = shift_sk + nband_k*2*npw_k
    end do
    ABI_DEALLOCATE(cg_1kpt)
 
    ! Gather all contributions from different processors
    if (collect == 1) then
      call xmpi_sum(dos%fractions,comm_kpt,ierr)
+     call xmpi_sum(dos%fractions,comm_pw,ierr)
      !below for future use - spinors should not be parallelized for the moment
      !if (mpi_enreg%paral_spinor == 1)then
      !  call xmpi_sum(dos%fractions,mpi_enreg%comm_spinor,ierr)

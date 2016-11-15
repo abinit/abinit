@@ -29,11 +29,9 @@
 !!  rfpert(mpert)=information on the perturbations
 !!  symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal space)
 !!  symrel(3,3,nsym)=3x3 matrices of the group symmetries (real space)
-!!  symq(4,2,nsym)= (integer) three first numbers define the G vector ;
-!!   fourth number is 0 if the q-vector is not preserved,
-!!              is 1 otherwise
-!!   second index is one without time-reversal symmetry,
-!!                two with time-reversal symmetry
+!!  symq(4,2,nsym)= (integer) three first numbers define the G vector;
+!!   fourth number is 0 if the q-vector is not preserved, is 1 otherwise
+!!   second index is one without time-reversal symmetry, two with time-reversal symmetry
 !!
 !! OUTPUT
 !!   pertsy(3,mpert)= the target perturbation is described by the two last indices (idir, and ipert),
@@ -94,11 +92,7 @@ subroutine irreducible_set_pert(indsym,mpert,natom,nsym,pertsy,rfdir,rfpert,symq
  do ipert1=1,mpert
    do idir1=1,3
      if(rfpert(ipert1)==1.and.rfdir(idir1)==1)then
-
-!      DEBUG
-!      write(std_out,*)' for candidate idir =',idir1,&
-!      &            ' ipert = ',ipert1
-!      ENDDEBUG
+!      write(std_out,*)' for candidate idir =',idir1,' ipert = ',ipert1
 
 !      Loop on all symmetries, including time-reversal
        do isym=1,nsym
@@ -156,36 +150,23 @@ subroutine irreducible_set_pert(indsym,mpert,natom,nsym,pertsy,rfdir,rfpert,symq
 !              ENDDEBUG
 
                pertsy(idir1,ipert1)=-1
-!              Exit loop on symmetry operations
-               exit
+               exit ! Exit loop on symmetry operations
 
              end if
 
-!            End loop on all symmetries + time-reversal
-           end if
+           end if !  End loop on all symmetries + time-reversal
          end do
        end do
 
 !      Now that all symmetries have been examined,
 !      if still not symmetric of a linear combination
-!      of basis perturbations, then it is a basis
-!      perturbation
-       if(pertsy(idir1,ipert1)/=-1)then
-         pertsy(idir1,ipert1)=1
-       end if
-
-!      DEBUG
+!      of basis perturbations, then it is a basis perturbation
+       if(pertsy(idir1,ipert1)/=-1) pertsy(idir1,ipert1)=1
 !      write(std_out,'(a,3i5)' ) ' irreducible_set_pert :',idir1,ipert1,pertsy(idir1,ipert1)
-!      ENDDEBUG
 
-!      End big loop on all elements
-     end if
+     end if ! End big loop on all elements
    end do
  end do
-
-!DEBUG
-!write(std_out,*)' irreducible_set_pert : exit '
-!ENDDEBUG
 
 end subroutine irreducible_set_pert
 !!***
