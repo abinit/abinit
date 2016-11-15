@@ -1007,10 +1007,10 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    call effective_potential_applySumRule(asr,eff_pot%harmonics_terms%ifcs,eff_pot%crystal%natom)
  end if
 
-   write(message, '(a,(80a),a)' ) ch10,&
-&    ('-',ii=1,80)
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+ write(message, '(a,(80a),a)' ) ch10,&
+&   ('=',ii=1,80)
+ call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL')
 
 ! Free suppercell
  call destroy_supercell(supercell)
@@ -2608,6 +2608,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 ! 3 - Computation of the elastic part of the energy :
 !------------------------------------
   energy_part = zero; fcart_part=zero
+
   strain_tmp1(:) = zero
   strain_tmp2(:) = zero
 !  Try to find the strain into the input file
@@ -2652,18 +2653,22 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   end if
 
   if(has_strain) then 
-   call elastic_contribution(eff_pot,disp_tmp1,energy_part,fcart_part,&
-&                             ncell,strten,strain_tmp1,strain_tmp2,&
-&                             external_stress=external_stress_tmp)
+    call elastic_contribution(eff_pot,disp_tmp1,energy_part,fcart_part,&
+&                              ncell,strten,strain_tmp1,strain_tmp2,&
+&                              external_stress=external_stress_tmp)
+
+!  MPI_SUM
+    call xmpi_sum(energy_part, eff_pot%comm_supercell, ierr)
+    call xmpi_sum(fcart_part , eff_pot%comm_supercell, ierr)
+
+    write(message, '(a,1ES24.16,a)' ) ' Energy of the elastic part :',energy_part,' Hartree'
+    call wrtout(ab_out,message,'COLL')
+    call wrtout(std_out,message,'COLL')
   end if
-
-  write(message, '(2a,1ES24.16,a)' ) ch10,' Energy of the elastic part :',energy_part,' Hartree'
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,message,'COLL')
-
+ 
   energy = energy + energy_part
   fcart  = fcart  + fcart_part
-   
+
 !------------------------------------
 ! 3 - Treat 3rd order:
 !------------------------------------
@@ -2683,7 +2688,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !------------------------------------
 
   energy_part = zero; fcart_part=zero
-  
   if(eff_pot%anharmonics_terms%ncoeff > zero)then
     call coefficients_contribution(eff_pot,disp_tmp1,&
 &                                  energy_part,fcart_part,eff_pot%supercell%natom_supercell,&
@@ -2694,7 +2698,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     call xmpi_sum(energy_part, eff_pot%comm_supercell, ierr)
     call xmpi_sum(fcart_part , eff_pot%comm_supercell, ierr)
 
-    write(message, '(2a,1ES24.16,a)' ) ch10,' Energy of the fitted coefficient :',&
+    write(message, '(a,1ES24.16,a)' ) ' Energy of the fitted coefficient :',&
 &                                      energy_part,' Hartree'
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
@@ -2702,7 +2706,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 
   energy = energy + energy_part
   fcart  = fcart  + fcart_part
-
 
 !------------------------------------
 ! 5 - Apply factors

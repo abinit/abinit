@@ -52,7 +52,7 @@ ntime  = 50
 #%% [NCPU_10]
 #%% input_ddb  = t95_MPI10o_DS3_DDB 
 #%% files_to_test = 
-#%%   t95_MPI10.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
+#%%   t96_MPI10.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
 #%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [extra_info]
 #%% authors = A. MARTIN

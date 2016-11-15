@@ -196,10 +196,15 @@ program multibinit
 !****************************************************************************************
 !Read the harmonics parts
  call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
-!TEST_AM
 !Read the coefficient from fit
-! call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
-!TEST_AM
+ if(filnam(4)/='')then
+   call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
+ else
+   write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+&                       'There is no file for the coefficients from polynomial fitting'
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+ end if
 !****************************************************************************************
 
 !Second step: Compute the third order derivative with finite differences

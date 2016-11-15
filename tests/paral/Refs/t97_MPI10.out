@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Tue 18 Oct 2016.
-- ( at 17h05 )
+.Starting date : Tue 15 Nov 2016.
+- ( at 09h18 )
   
 -  nproc =   10
 
@@ -73,7 +73,7 @@
 
  Impose acoustic sum rule on total ifc
 
---------------------------------------------------------------------------------
+================================================================================
 
  This effective potential contains :
   - Reference energy:        -17.1451766220
@@ -130,6 +130,10 @@
      -3.872159    0.000000   -0.000000
       0.000000   -3.872159    0.000000
      -0.000000   -0.000000   -2.012513
+
+================================================================================
+
+There is no file for the coefficients from polynomial fitting
 
 ================================================================================
 
@@ -242,7 +246,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  2.8277349741317508E-30 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3716141297600001E+02 Hartree
@@ -258,7 +261,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  2.4480111859909691E-03 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3715896496481400E+02 Hartree
@@ -274,7 +276,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  9.6697361212525305E-03 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3715174323987875E+02 Hartree
@@ -290,7 +291,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  2.1289227958053786E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3714012374804196E+02 Hartree
@@ -306,7 +306,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  3.6651853538619855E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3712476112246139E+02 Hartree
@@ -322,7 +321,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  5.4790780094694833E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3710662219590532E+02 Hartree
@@ -338,7 +336,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  7.4402355048086635E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3708701062095193E+02 Hartree
@@ -354,7 +351,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  9.3862494214741438E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3706755048178528E+02 Hartree
@@ -370,7 +366,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  1.1132997125378022E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3705008300474623E+02 Hartree
@@ -386,7 +381,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  1.2497701252371146E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3703643596347629E+02 Hartree
@@ -402,7 +396,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  1.3333769009859553E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3702807528590142E+02 Hartree
@@ -418,7 +411,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  1.3567197471309947E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3702574100128692E+02 Hartree
@@ -434,7 +426,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  1.3217587557643734E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3702923710042356E+02 Hartree
@@ -450,7 +441,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  1.2391823281712402E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3703749474318289E+02 Hartree
@@ -466,7 +456,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  1.1254010776896436E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3704887286823106E+02 Hartree
@@ -482,7 +471,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  9.9875049201248386E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3706153792679876E+02 Hartree
@@ -498,7 +486,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  8.7640890341436656E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3707377208565856E+02 Hartree
@@ -514,7 +501,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  7.7263052346204342E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3708414992365380E+02 Hartree
@@ -530,7 +516,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  6.9810738834467326E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3709160223716555E+02 Hartree
@@ -546,7 +531,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  6.5998777564166999E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3709541419843583E+02 Hartree
@@ -562,7 +546,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  6.6213636438348530E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3709519933956167E+02 Hartree
@@ -578,7 +561,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  7.0537975839645800E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3709087500016037E+02 Hartree
@@ -594,7 +576,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  7.8761586377924991E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3708265138962207E+02 Hartree
@@ -610,7 +591,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  9.0375715522560365E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3707103726047745E+02 Hartree
@@ -626,7 +606,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  1.0455507940343392E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3705685789659657E+02 Hartree
@@ -642,7 +621,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  1.2014059477315407E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3704127238122686E+02 Hartree
@@ -658,7 +636,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  1.3564799748394735E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3702576497851607E+02 Hartree
@@ -674,7 +651,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  1.4934034080221625E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3701207263519780E+02 Hartree
@@ -690,7 +666,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  1.5940389620158635E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3700200907979843E+02 Hartree
@@ -706,7 +681,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  1.6423670169087926E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3699717627430914E+02 Hartree
@@ -722,7 +696,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  1.6278804350371240E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3699862493249628E+02 Hartree
@@ -738,7 +711,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  1.5481364778999804E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3700659932821000E+02 Hartree
@@ -754,7 +726,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  1.4091456826947546E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3702049840773054E+02 Hartree
@@ -770,7 +741,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  1.2233754077628865E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3703907543522371E+02 Hartree
@@ -786,7 +756,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  1.0064447258926548E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3706076850341074E+02 Hartree
@@ -802,7 +771,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  7.7397732460519786E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3708401524353948E+02 Hartree
@@ -818,7 +786,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  5.3949837317147857E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3710746313868287E+02 Hartree
@@ -834,7 +801,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  3.1347313975037677E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3713006566202498E+02 Hartree
@@ -850,7 +816,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part :  1.0315047009806755E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3715109792899020E+02 Hartree
@@ -866,7 +831,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part : -8.7181976322498328E-03 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3717013117363226E+02 Hartree
@@ -882,7 +846,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part : -2.5580554458750529E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3718699353045875E+02 Hartree
@@ -898,7 +861,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part : -4.0318041763637853E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3720173101776365E+02 Hartree
@@ -914,7 +876,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part : -5.3160019274992296E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3721457299527501E+02 Hartree
@@ -930,7 +891,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part : -6.4487902182428225E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3722590087818244E+02 Hartree
@@ -946,7 +906,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part : -7.4803296414771292E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3723621627241479E+02 Hartree
@@ -962,7 +921,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part : -8.4691075263040025E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3724610405126305E+02 Hartree
@@ -978,7 +936,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part : -9.4774017572207880E-02 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3725618699357221E+02 Hartree
@@ -994,7 +951,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part : -1.0565855649090719E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3726707153249092E+02 Hartree
@@ -1010,7 +966,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part : -1.1787565874044975E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3727928863474045E+02 Hartree
@@ -1026,7 +981,6 @@
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
  Energy of the ifc part : -1.3182556569751108E-01 Hartree
-
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3729323854169752E+02 Hartree
@@ -1043,6 +997,6 @@
 
 ================================================================================
 
-+Total cpu time      3.068  and wall time      3.195 sec
++Total cpu time      2.734  and wall time      2.767 sec
 
  multibinit : the run completed succesfully.
