@@ -868,7 +868,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        !call xmpi_sum(sigma%dvals_dwr, comm, ierr)
      end if
      ! Writes the results for a single (k-point, spin) to NETCDF file
-     call sigmaph_solve(sigma, ikcalc, spin, ebands)
+     if (my_rank == master) then
+       call sigmaph_solve(sigma, ikcalc, spin, ebands)
+     end if
    end do ! spin
 
    ABI_FREE(kg_k)
@@ -1559,7 +1561,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
 
  ! Now reopen the file in parallel.
  call xmpi_barrier(comm)
- NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGMAPH.nc"), comm))
+ !NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGMAPH.nc"), comm))
+ NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGMAPH.nc"), xmpi_comm_self))
  NCF_CHECK(nctk_set_datamode(new%ncid))
 
 contains
