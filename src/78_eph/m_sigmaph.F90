@@ -45,7 +45,7 @@ module m_sigmaph
 #endif
 
  use defs_datatypes,   only : ebands_t, pseudopotential_type
- use m_time,           only : cwtime
+ use m_time,           only : cwtime, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth
  use m_io_tools,       only : iomode_from_fname
@@ -249,12 +249,13 @@ module m_sigmaph
 !! The little group of a q-point is defined as the subset of the space group that preserves q,
 !! modulo a G0 vector (also called umklapp vector). Namely:
 !!
-!!  Sq = q +G0,  where S is an operation in reciprocal space (symrec)
+!!    Sq = q +G0
 !!
+!! where S is an operation in reciprocal space (symrec)
 !! If time reversal symmetry holds true, it is possible to enlarge the little group by
 !! including the operations such as:
 !!
-!!  -Sq = q+ G0.
+!!   -Sq = q+ G0
 !!
 !! The operations of little group define an irriducible wedge that is usually larger
 !! than the irredubile zone defined by the space group. The two zones coincide when q=0
@@ -266,8 +267,15 @@ module m_sigmaph
    !integer :: nkibz_q
    ! Number of k-points in the IBZ(q)
 
-   !real(dp) :: qpoint(3)
+   real(dp) :: qpoint(3)
    ! The external q-point.
+
+   integer,allocatable :: symq(:,:,:)
+   ! symq(4,2,cryst%nsym)
+   ! nsym is the total number of symmetries of the system as given by cryst%nsym
+   ! three first numbers define the G vector;
+   ! fourth number is zero if the q-vector is not preserved, is 1 otherwise
+   ! second index is one without time-reversal symmetry, two with time-reversal symmetry
 
    !real(dp),allocatable :: kibz_q(:,:)
    ! K-points in the IBZ(q)
@@ -365,7 +373,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1
  integer :: nbcalc_ks,bstart_ks,ikcalc
- real(dp) :: cpu,wall,gflops
+ real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all
  real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q
  complex(dpc) :: sfact
  logical,parameter :: have_ktimerev=.True.
@@ -404,6 +412,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  end if
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor;
@@ -869,7 +878,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    ABI_FREE(ylmgr_kq)
  end do !ikcalc
 
- call wrtout(std_out, "Computation of Sigma_ph completed", "COLL", do_flush=.True.)
+ call cwtime(cpu_all, wall_all, gflops_all, "stop")
+ call wrtout(std_out, "Computation of Sigma_ph completed", do_flush=.True.)
+ call wrtout(std_out, sjoin("Total wall-time:", sec2str(cpu_all), ", Total cpu time:", sec2str(wall_all)))
 
  call xmpi_sum_master(sigma%vals_e0ks, master, comm, ierr)
  call xmpi_sum_master(sigma%dvals_de0ks, master, comm, ierr)
@@ -1494,7 +1505,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
 
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "symsigma"])
    NCF_CHECK(ncerr)
-   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "wr_step"])
+   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "eta", "wr_step"])
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_arrays(ncid, [ &
@@ -1524,7 +1535,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
    NCF_CHECK(nctk_set_datamode(ncid))
    ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: "symsigma"], [new%symsigma])
    NCF_CHECK(ncerr)
-   ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "wr_step"], [new%wr_step])
+   ncerr = nctk_write_dpscalars(ncid, &
+     [character(len=nctk_slen) :: "eta", "wr_step"], &
+     [real(new%ieta), new%wr_step])
    NCF_CHECK(ncerr)
 
    NCF_CHECK(nf90_put_var(ncid, vid("ngqpt"), new%ngqpt))
@@ -1894,6 +1907,7 @@ subroutine sigmaph_print(self, unt, what, ebands)
    write(unt,"(a)")sjoin("Number of real frequencies:", itoa(self%nwr), ", Step:", ftoa(self%wr_step*Ha_eV), "[eV]")
    write(unt,"(a)")sjoin("Number of temperatures:", itoa(self%ntemp), &
      "From:", ftoa(self%kTmesh(1) / kb_HaK), "to", ftoa(self%kTmesh(self%ntemp) / kb_HaK), "[K]")
+   write(unt,"(a)")sjoin("ngqpt:", ltoa(self%ngqpt))
    write(unt,"(a)")sjoin("Number of q-points in the BZ:", itoa(self%nqbz))
    write(unt,"(a)")"List of K-points for self-energy corrections:"
    do ikc=1,self%nkcalc
@@ -1999,14 +2013,24 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, nkbz, kbz, nkibz, kibz) resul
 ! integer ::
  integer :: otimrev_k
 !arrays
- integer :: sym_kpoint(4,2,cryst%nsym)
 
 ! *************************************************************************
 
- !new%qpoint = kpoint
+ new%qpoint = kpoint
 
  ! Determines the symmetry operations by which the k-point is preserved,
- call littlegroup_q(cryst%nsym, kpoint, sym_kpoint, cryst%symrec, cryst%symafm, otimrev_k, prtvol=0)
+ ABI_MALLOC(new%symq, (4, 2, cryst%nsym))
+ call littlegroup_q(cryst%nsym, kpoint, new%symq, cryst%symrec, cryst%symafm, otimrev_k, prtvol=0)
+
+ ! Check group closure.
+ !ABI_MALLOC(symafm_ltg,(Ltg%nsym_Ltg))
+ !symafm_ltg(:)=1
+ !call chkgrp(Ltg%nsym_Ltg,symafm_ltg,symrec_Ltg,ierr)
+ !ABI_CHECK(ierr==0,"Error in group closure")
+
+ !new%nkibz_q
+ !ABI_MALLOC(new%kibz_q, (3, new%nkibz_q))
+ !ABI_MALLOC(new%wtk_q, (new%nkibz_q))
 
 end function lgroup_new
 !!***
@@ -2043,8 +2067,17 @@ subroutine lgroup_free(self)
 
 ! *************************************************************************
 
- !if (associated(self%)) then
+ if (allocated(self%symq)) then
+   ABI_FREE(self%symq)
+ end if
+
+ !if (allocated(self%kibz_q)) then
+ !  ABI_FREE(self%kibz_q)
  !end if
+ !if (allocated(self%wtk_q)) then
+ !  ABI_FREE(self%wtk_q)
+ !end if
+
 
 end subroutine lgroup_free
 !!***

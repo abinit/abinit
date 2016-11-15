@@ -2725,8 +2725,8 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
 &    'To run a GW calculation with an old KSS file, use version < 5.5 '
    MSG_ERROR(msg)
  end if
- !
- ! === Find operations in the little group as well as umklapp vectors G0 ===
+
+ ! Find operations in the little group as well as umklapp vectors G0 ===
  call littlegroup_q(nsym,ext_pt,symxpt,symrec,symafm,dummy_timrev,prtvol=0)
 
  Ltg%preserve(:,:)=0; Ltg%g0(:,:,:)=0; Ltg%flag_umklp(:,:)=0; mG0len=zero
@@ -2753,8 +2753,8 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
    nopg0(itim)=SUM(Ltg%flag_umklp(itim,:))
  end do
  nsym_Ltg=SUM(nop(:))
- !
- ! === Store little group operations, include time-reversal if present ===
+
+ ! Store little group operations, include time-reversal if present ===
  Ltg%nsym_Ltg=nsym_Ltg
  ABI_MALLOC(symrec_Ltg,(3,3,Ltg%nsym_Ltg))
 
@@ -2768,8 +2768,8 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
      end if
    end do
  end do
- !
- ! === Check the closure of the (ferromagnetic) little group ===
+
+ ! Check the closure of the (ferromagnetic) little group ===
  ABI_MALLOC(symafm_ltg,(Ltg%nsym_Ltg))
  symafm_ltg(:)=1
  call chkgrp(Ltg%nsym_Ltg,symafm_ltg,symrec_Ltg,ierr)
@@ -2777,8 +2777,8 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
 
  ABI_FREE(symafm_ltg)
  !
- ! === Find the irreducible zone associated to ext_pt ===
- ! * Do not use time-reversal since it has been manually introduced previously
+ ! Find the irreducible zone associated to ext_pt
+ ! Do not use time-reversal since it has been manually introduced previously
  ABI_MALLOC(indkpt1,(nbz))
  ABI_MALLOC(wtk_folded,(nbz))
  ABI_MALLOC(wtk,(nbz))
@@ -2807,11 +2807,11 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
  end do
  ABI_CHECK(ind==Ltg%nibz_Ltg," BUG ind/=Ltg%nibz_Ltg")
  !
- ! === Reconstruct full BZ starting from IBZ_q  ===
+ ! Reconstruct full BZ starting from IBZ_q.
  ! Calculate appropriate weight for each item (point,symmetry operation,time-reversal)
  Ltg%tab=0; Ltg%tabo=0; Ltg%tabi=0; Ltg%wtksym(:,:,:)=0
 
- ! === Zero no. of k-points found ===
+ ! Start with zero no. of k-points found
  ntest=0
  ABI_MALLOC(ktest,(3,nbz))
  ktest=zero
@@ -2886,11 +2886,11 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
    ABI_MALLOC(Ltg%igmG0,(npwe,timrev,nsym))
    Ltg%igmG0(:,:,:)=0
    max_kin=zero
-   !
-   ! === Loop over symmetry operations S and time-reversal ===
+
+   ! Loop over symmetry operations S and time-reversal
    do itim=1,timrev
      do isym=1,nsym
-       ! * Form IS k only for (IS) pairs in the little group
+       ! Form IS k only for (IS) pairs in the little group
        if (symafm(isym)==-1) CYCLE
        if (Ltg%preserve(itim,isym)/=0) then
          g0(:)=Ltg%g0(:,itim,isym)

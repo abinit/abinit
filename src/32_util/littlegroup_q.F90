@@ -95,7 +95,7 @@ subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
  my_prtvol=0 ; if (PRESENT(prtvol)) my_prtvol=prtvol
 
 ! Initialise the array symq
- symq(:,:,:)=0
+ symq = 0
 
  isym = symafm(1) ! just to fool abirules and use symafm for the moment
 
