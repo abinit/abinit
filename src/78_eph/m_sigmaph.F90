@@ -1995,14 +1995,13 @@ end subroutine sigmaph_print
 
 type (lgroup_t) function lgroup_new(cryst, kpoint, nkbz, kbz, nkibz, kibz) result(new)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_new'
- use interfaces_14_hidewrite
+#define ABI_FUNC 'lgroup_new'
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -2089,13 +2088,11 @@ end function lgroup_new
 
 subroutine lgroup_free(self)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_new'
- use interfaces_14_hidewrite
- use interfaces_41_geometry
- use interfaces_56_recipspace
+#define ABI_FUNC 'lgroup_free'
 !End of the abilint section
 
  implicit none
