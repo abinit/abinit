@@ -3213,7 +3213,7 @@ end subroutine effective_potential_getDeltaEnergy
 !!
 !! SOURCE
 
-recursive subroutine index_periodic(index,n_cell)
+subroutine index_periodic(index,n_cell)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3230,16 +3230,23 @@ recursive subroutine index_periodic(index,n_cell)
 !Local variables ---------------------------------------
 ! *********************************************************************
 
-  if (index < 0) then
+  do while (index > n_cell-1)
+    index = index - n_cell
+  end do
+  do while (index < 0)
     index = index + n_cell
-    call index_periodic(index,n_cell)
-  else
-    if(index > n_cell-1) then
-      index = index - n_cell
-      call index_periodic(index,n_cell)
-    end if
-  end if
+  end do
 
+!OLD_ VERSION
+! if (index < 0) then
+!   index = index + n_cell
+!   call index_periodic(index,n_cell)
+! else
+!   if(index > n_cell-1) then
+!     index = index - n_cell
+!     call index_periodic(index,n_cell)
+!   end if
+! end if
 
 end subroutine index_periodic
 !!***
@@ -3591,3 +3598,4 @@ subroutine effective_potential_printPDOS(eff_pot,filename,n_cell,nph1l,option,qp
 !TEST_AM_END_EXPERIMENTAL SECTION
 
 end module m_effective_potential
+!!*** 
