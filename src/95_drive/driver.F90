@@ -258,7 +258,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &   dtset%mkmem,dtset%nsppol)) then
      write(message,'(2a)') trim(message),&
 &     '   -> not optimal: autoparal keyword recommended in input file'
-   end if 
+   end if
    write(message,'(3a)') trim(message),ch10,' '
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'PERS')     ! PERS is choosen to make debugging easier
@@ -298,11 +298,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !  ****************************************************************************
 !  Treat the file names (get variables)
 
+!  In the case of multiple images, the file names will be overwritten later (for each image)
+   call dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enregs(idtset),ndtset)
    if (dtset%optdriver==RUNL_GSTATE.and.dtset%nimage>1) then
      call dtfil_init_img(dtfil,dtset,dtsets,idtset,jdtset_,ndtset,ndtset_alloc)
-!    Call to dtfil_init1 is postponed in the loop over images
-   else
-     call dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enregs(idtset),ndtset)
    end if
 
 !  ****************************************************************************
@@ -680,7 +679,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &     'Action : modify optdriver in the input file.'
      MSG_ERROR(message)
 
-   case (RUNL_BSE) 
+   case (RUNL_BSE)
 
      call status(jdtset_status,filstat,iexit,level,'call bethe_salpeter')
      call bethe_salpeter(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
@@ -693,21 +692,21 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      ABI_ALLOCATE(strten_img,(6,nimage))
 
      call status(jdtset_status,filstat,iexit,level,'call gwls_sternheimer')
-     call gwls_sternheimer(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,& 
-&     fred_img,iexit,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&                 
-&     pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,xred_img,&        
-&     filnam,filstat,idtset,jdtset_,ndtset)                                                 
+     call gwls_sternheimer(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
+&     fred_img,iexit,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
+&     pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,xred_img,&
+&     filnam,filstat,idtset,jdtset_,ndtset)
 
      ABI_DEALLOCATE(etotal_img)
      ABI_DEALLOCATE(fcart_img)
      ABI_DEALLOCATE(fred_img)
      ABI_DEALLOCATE(strten_img)
 
-   case (RUNL_WFK) 
+   case (RUNL_WFK)
      call status(jdtset_status,filstat,iexit,level,'call wfk_analyze')
      call wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
-   case (RUNL_EPH) 
+   case (RUNL_EPH)
      call status(jdtset_status,filstat,iexit,level,'call eph      ')
      call eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
@@ -787,12 +786,12 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 #endif
    end if
 
-!  MG: There are routines such as GW and Berry phase that can change/compute 
-!  entries in the datatype at run-time. These changes won't be visibile 
+!  MG: There are routines such as GW and Berry phase that can change/compute
+!  entries in the datatype at run-time. These changes won't be visibile
 !  in the main output file since we are passing a copy of dtsets.
 !  I tried to update the results with the call below but this creates
-!  several problems in outvars since one should take into account 
-!  the new dimensions (e.g. nkptgw) and their maximum value. 
+!  several problems in outvars since one should take into account
+!  the new dimensions (e.g. nkptgw) and their maximum value.
 !  For the time being, we continue to pass a copy of dtsets(idtset).
 #if 0
    call dtset_free(dtsets(idtset))
@@ -814,7 +813,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
    call timab(643,2,tsec)
 
-   if (iexit/=0)exit
+   if (iexit/=0) exit
+
  end do ! idtset (allocate statements are present - an exit statement is present)
 
 !*********************************************************************

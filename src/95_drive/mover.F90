@@ -5,8 +5,8 @@
 !!
 !! FUNCTION
 !! Move ion or change acell acording to forces and stresses
-!!
-!! COPYRIGHT
+ !!
+ !! COPYRIGHT
 !! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
@@ -18,7 +18,7 @@
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!   | mband=maximum number of bands
 !!   | mgfft=maximum size of 1D FFTs
-!!   | mkmem =number of k points treated by this node 
+!!   | mkmem =number of k points treated by this node
 !!   |  angular momentum for nonlocal pseudopotential
 !!   | mpw=maximum dimensioned size of npw.
 !!   | natom=number of atoms in unit cell
@@ -99,8 +99,8 @@
 !!      gstate
 !!
 !! CHILDREN
-!!      abiforstr_fin,abiforstr_ini,abihist_bcast,abihist_compare,abihist_fin
-!!      abihist_ini,abimover_fin,abimover_ini,abimover_nullify,chkdilatmx
+!!      abiforstr_fin,abiforstr_ini,abihist_bcast,abihist_compare,abihist_free
+!!      abihist_init,abimover_fin,abimover_ini,abimover_nullify,chkdilatmx
 !!      crystal_free,crystal_init,dtfil_init_time,erlxconv,fcart2fred,fconv
 !!      fred2fcart,hist2var,initylmg,metric,mkradim,mttk_fin,mttk_ini
 !!      prec_simple,pred_bfgs,pred_delocint,pred_diisrelax,pred_isokinetic
@@ -188,7 +188,8 @@ type(abimover) :: ab_mover
 type(abimover_specs) :: specs
 type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(mttk_type) :: mttk_vars
-integer :: itime,icycle,iexit,timelimit_exit,ncycle,kk,jj,me,nloop,ntime,option,comm
+integer :: itime,icycle,iexit,ifirst,timelimit_exit,ncycle,ncycletot,kk,jj,me
+integer :: nloop,ntime,option,comm
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
 integer ABI_ASYNC :: quitsum_async
 character(len=500) :: message
@@ -202,19 +203,12 @@ logical :: change,useprtxfase
 logical :: skipcycle
 integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
-real(dp) :: minE,tolerance,wtime_step,now,prev
+real(dp) :: minE,wtime_step,now,prev
 type(crystal_t) :: crystal
 !arrays
-real(dp) :: xred_tmp(3,scfcv_args%dtset%natom)
-real(dp) :: xcart(3,scfcv_args%dtset%natom)
-real(dp) :: fcart2(3,scfcv_args%dtset%natom)
-real(dp) :: fred2(3,scfcv_args%dtset%natom)
-real(dp) :: favg2(3)
-real(dp) :: fred_corrected(3,scfcv_args%dtset%natom)
-real(dp) :: rprim(3,3)
-real(dp) :: gprimd(3,3)
-real(dp) :: gmet(3,3)
-real(dp) :: rmet(3,3)
+real(dp),allocatable :: amu(:),xred_tmp(:,:),xcart(:,:),fcart2(:,:)
+real(dp),allocatable :: fred2(:,:),fred_corrected(:,:)
+real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
 
 ! ***************************************************************
 
@@ -276,6 +270,13 @@ real(dp) :: rmet(3,3)
 !20. Ionic positions relaxation using DIIS
 !21. Steepest descent algorithm
 !23. LOTF method
+
+ ABI_ALLOCATE(amu,(scfcv_args%dtset%ntypat))
+ ABI_ALLOCATE(xred_tmp,(3,scfcv_args%dtset%natom))
+ ABI_ALLOCATE(xcart,(3,scfcv_args%dtset%natom))
+ ABI_ALLOCATE(fcart2,(3,scfcv_args%dtset%natom))
+ ABI_ALLOCATE(fred2,(3,scfcv_args%dtset%natom))
+ ABI_ALLOCATE(fred_corrected,(3,scfcv_args%dtset%natom))
 
  call abimover_nullify(ab_mover)
 
@@ -344,11 +345,9 @@ real(dp) :: rmet(3,3)
  if (ab_mover%restartxf<=0)then
 !  Read history from file (and broadcast if MPI)
    if (me==master) then
-     call read_md_hist(filename,hist_prev)
+     call read_md_hist(filename,hist_prev,specs%isVused,specs%isARused)
    end if
-   if (xmpi_comm_size(comm) > 1) then
-     call abihist_bcast(hist_prev,master,comm)
-   end if
+   call abihist_bcast(hist_prev,master,comm)
 
 !  If restartxf specifies to reconstruct the history
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-1)then
@@ -380,16 +379,12 @@ real(dp) :: rmet(3,3)
 !write(std_out,*) 'mover 05'
 !###########################################################
 !### 05. Allocate the hist structure
+
  iexit=0; timelimit_exit=0
- hist%isVused=specs%isVused
- hist%isARused=specs%isARused
  ncycle=specs%ncycle
 
- if (scfcv_args%dtset%nctime>0) then
-   call abihist_ini(hist,ab_mover%natom,ncycle*ntime+1)
- else
-   call abihist_ini(hist,ab_mover%natom,ncycle*ntime)
- end if
+ ncycletot=ncycle*ntime;if (scfcv_args%dtset%nctime>0) ncycletot=ncycletot+1
+ call abihist_init(hist,ab_mover%natom,ncycletot,specs%isVused,specs%isARused)
 
  call abiforstr_ini(preconforstr,ab_mover%natom)
 
@@ -428,6 +423,16 @@ real(dp) :: rmet(3,3)
    end do
  end do
 
+!Compute atomic masses (in a.u.)
+ do kk=1,ab_mover%ntypat
+   do jj=1,ab_mover%natom
+     if (kk==ab_mover%typat(jj)) then
+       amu(kk)=amass(jj)/amu_emass
+       exit
+     end if
+   end do
+ end do
+
 !Fill history with the values of xred,xcart,acell and rprimd
  call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,DEBUG)
 
@@ -461,11 +466,11 @@ real(dp) :: rmet(3,3)
      wtime_step = now - prev
      prev = now
      write(std_out,*)sjoin("mover: previous time step took ",sec2str(wtime_step))
-     
+
      if (have_timelimit_in(ABI_FUNC)) then
        if (itime > 2) then
          call xmpi_wait(quitsum_request,ierr)
-         if (quitsum_async > 0) then 
+         if (quitsum_async > 0) then
            write(message,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),". Will exit itime loop in mover."
            MSG_COMMENT(message)
            call wrtout(ab_out, message, "COLL")
@@ -542,7 +547,7 @@ real(dp) :: rmet(3,3)
 
      if(hist_prev%mxhist>0.and.ab_mover%restartxf==-1.and.hist_prev%ihist<=hist_prev%mxhist)then
 
-       call abihist_compare(hist_prev,hist,ab_mover%natom,similar,tolerance)
+       call abihist_compare_and_copy(hist_prev,hist,ab_mover%natom,similar,tol8)
        hist_prev%ihist=hist_prev%ihist+1
 
      else
@@ -566,11 +571,11 @@ real(dp) :: rmet(3,3)
         !  We prepare to change rhog (to be removed) and rhor.
            ABI_DEALLOCATE(rhog)
            ABI_DEALLOCATE(rhor)
-           
+
            call wvl_wfsinp_reformat(scfcv_args%dtset, scfcv_args%mpi_enreg,&
 &           scfcv_args%psps, rprimd, scfcv_args%wvl, xred, xred_old)
            scfcv_args%nfftf = scfcv_args%dtset%nfft
-           
+
            ABI_ALLOCATE(rhog,(2, scfcv_args%dtset%nfft))
            ABI_ALLOCATE(rhor,(2, scfcv_args%dtset%nfft))
            call wvl_mkrho(scfcv_args%dtset, scfcv_args%irrzon, scfcv_args%mpi_enreg,&
@@ -598,7 +603,7 @@ real(dp) :: rmet(3,3)
 !      and store those values in the present record
 !      even if initially those values were not exactly
 !      the values entering in scfcv
-!      
+!
 !      One test case with these condition is bigdft/t10
        if (scfcv_args%dtset%usewvl == 1) then
          call mkradim(acell,rprim,rprimd)
@@ -609,7 +614,7 @@ real(dp) :: rmet(3,3)
 !      ANOMALOUS SITUATIONS
 !      * In ionmov 4 & 5 xred could change inside SCFCV
 !      So we need to take the values from the output
-!      
+!
 !      * Inside scfcv.F90 there is a call to symmetrize_xred.F90
 !      for the first SCF cycle symmetrize_xred could change xred
 !      so we need always take xred convert to xcart and
@@ -712,7 +717,9 @@ real(dp) :: rmet(3,3)
 
 #if defined HAVE_NETCDF
      if (me==master) then
-       call write_md_hist(hist,ab_mover,filename,icycle,itime)
+       ifirst=merge(0,1,(itime>1.or.icycle>1))
+       call write_md_hist(hist,filename,ifirst,ab_mover%natom,ab_mover%ntypat,&
+&                    ab_mover%typat,amu,ab_mover%znucl,ab_mover%dtion)
      end if
 #endif
 
@@ -812,7 +819,7 @@ real(dp) :: rmet(3,3)
        if (ii==2) iexit=1
 
        select case (ab_mover%ionmov)
-       case (1) 
+       case (1)
          call pred_moldyn(ab_mover,hist,icycle,itime,ncycle,ntime,DEBUG,iexit)
        case (2,3)
          call pred_bfgs(ab_mover,ab_xfh,preconforstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
@@ -1088,8 +1095,15 @@ real(dp) :: rmet(3,3)
    call mttk_fin(mttk_vars)
  end if
 
- call abihist_fin(hist)
- call abihist_fin(hist_prev)
+ ABI_DEALLOCATE(amu)
+ ABI_DEALLOCATE(xred_tmp)
+ ABI_DEALLOCATE(xcart)
+ ABI_DEALLOCATE(fcart2)
+ ABI_DEALLOCATE(fred2)
+ ABI_DEALLOCATE(fred_corrected)
+
+ call abihist_free(hist)
+ call abihist_free(hist_prev)
  call abimover_fin(ab_mover)
  call abiforstr_fin(preconforstr)
 

@@ -17,8 +17,6 @@
 !! INPUTS
 !!  codvsn=code version
 !!  cpui=initial CPU time
-!!  filnam(5)=character strings giving file names
-!!  filstat=character strings giving name of status file
 !!  nimage=number of images of the cell (treated by current proc)
 !!  === Optional arguments (needed when nimage>1) ===
 !!    filnam(5)=character strings giving file names
@@ -139,6 +137,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  use defs_parameters
  use defs_rectypes
  use m_profiling_abi
+ use m_abihist
  use m_mep
  use m_ga
  use m_pimd
@@ -167,6 +166,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  use interfaces_14_hidewrite
  use interfaces_18_timing
  use interfaces_32_util
+ use interfaces_41_geometry
  use interfaces_45_geomoptim
  use interfaces_67_common
  use interfaces_95_drive, except_this_one => gstateimg
@@ -211,11 +211,14 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 !102 for potential V(r) file. (fformv)  NOT USED
 !scalars
  integer,parameter :: formeig=0,level=100,ndtpawuj=0,response=0
- integer :: history_size,idelta,idynimage,ierr,ii,iimage,itimimage,itimimage_eff
- integer :: last_itimimage,ndynimage,nocc,ntimimage_eff,ntimimage_max,slideimg
- logical :: check_conv,compute_all_images,compute_static_images,is_master
+ integer :: history_size,idelta,idynimage,ierr,ifirst,ihead
+ integer :: ii,iimage,ih,itimimage,itimimage_eff
+ integer :: last_itimimage,ndynimage,nocc
+ integer :: ntimimage,ntimimage_stored,ntimimage_max,similar
+ logical :: check_conv,compute_all_images,compute_static_images
+ logical :: isVused,isARused,is_master,is_mep,is_pimd,use_hist,use_hist_prev
  real(dp) :: delta_energy
- character(len=500) :: msg
+ character(len=500) :: hist_filename,msg
  type(args_gs_type) :: args_gs
  type(mep_type) :: mep_param
  type(ga_type) :: ga_param
@@ -237,9 +240,10 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &   '                                                            ',& ! 11
 &   '                                                            ',& ! 12
 &   'PATH-INTEGRAL MOLECULAR DYNAMICS (CHAIN OF THERMOSTATS)     '/) ! 13
- real(dp) :: acell(3),rprim(3,3),tsec(2)
- real(dp),allocatable :: occ(:),vel(:,:),vel_cell(:,:),xred(:,:)
- type(results_img_type),pointer :: results_img_timimage(:,:)
+ real(dp) :: acell(3),rprim(3,3),rprimd(3,3),tsec(2)
+ real(dp),allocatable :: amass(:,:),occ(:),vel(:,:),vel_cell(:,:),xcart(:,:),xred(:,:)
+ type(abihist),allocatable :: hist(:),hist_prev(:)
+ type(results_img_type),pointer :: results_img_timimage(:,:),res_img(:)
  type(scf_history_type),allocatable :: scf_history(:)
 
 ! ***********************************************************************
@@ -267,29 +271,90 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 !Note: if you modify this flag, do not forget to change it in outvars and outvar1
  compute_static_images=(dtset%istatimg>0)
 
-!Prepare the allocations, by computing flags and dimensions
- slideimg=0;if(dtset%imgmov==9.or.dtset%imgmov==10.or.dtset%imgmov==13)slideimg=1
- ntimimage_eff=dtset%ntimimage;if(slideimg==1)ntimimage_eff=2
+!Prepare the calculation, by computing flags and dimensions
+ ntimimage=dtset%ntimimage
+ is_pimd=(dtset%imgmov==9.or.dtset%imgmov==10.or.dtset%imgmov==13)
+ is_mep =(dtset%imgmov==1.or.dtset%imgmov== 2.or.dtset%imgmov== 5)
  nocc=dtset%mband*dtset%nkpt*dtset%nsppol
+ is_master=(mpi_enreg%me_cell==0.and.mpi_enreg%me_img==0)
+
+!Management of dynamics/relaxation history (positions, forces, stresses, ...)
+ use_hist=(dtset%imgmov/=0.and.nimage>0)
+ use_hist_prev=.false.
+ isVused=is_pimd;isARused=(dtset%optcell/=0)
+ if (use_hist) then
+   !Read history from file (and broadcast if MPI)
+#if defined HAVE_NETCDF
+   use_hist_prev=(dtset%restartxf==-1.and.nimage>0)
+   do iimage=1,nimage
+     if (any(amu_img(:,iimage)/=amu_img(:,1))) then
+       msg='HIST file is not compatible with variable masses!'
+       MSG_ERROR(msg)
+     end if
+   end do
+#endif
+   hist_filename=trim(dtfil%filnam_ds(4))//'_HIST.nc'
+   if (use_hist_prev)then
+     ABI_DATATYPE_ALLOCATE(hist_prev,(nimage))
+     if (mpi_enreg%me_cell==0) then
+       call read_md_hist_img(hist_filename,hist_prev,isVused,isARused,&
+&                            imgtab=mpi_enreg%my_imgtab)
+     end if
+     call abihist_bcast(hist_prev,0,mpi_enreg%comm_cell)
+     if (nimage>0) then
+       if (any(hist_prev(:)%mxhist/=hist_prev(1)%mxhist)) then
+         msg='History problem: all images should have the same number of time steps!'
+         MSG_ERROR(msg)
+       end if
+       use_hist_prev=(hist_prev(1)%mxhist>0)
+       if (use_hist_prev) ntimimage=ntimimage+hist_prev(1)%mxhist
+     end if
+     if (.not.use_hist_prev) then
+       call abihist_free(hist_prev)
+       ABI_DATATYPE_DEALLOCATE(hist_prev)
+     end if
+   end if
+   !Initialize new history
+   ABI_DATATYPE_ALLOCATE(hist,(nimage))
+   call abihist_init(hist,dtset%natom,ntimimage,isVused,isARused)
+   ABI_ALLOCATE(xcart,(3,dtset%natom))
+   if (is_pimd) then
+     ABI_ALLOCATE(amass,(dtset%natom,nimage))
+     do iimage=1,nimage
+       amass(:,iimage)=amu_emass*amu_img(dtset%typat(:),iimage)
+     end do
+   end if
+   do iimage=1,nimage
+     hist(iimage)%isVUsed=is_pimd
+     hist(iimage)%isARUsed=(dtset%optcell/=0)
+     call mkrdim(acell_img(:,iimage),rprim_img(:,:,iimage),rprimd)
+     call xred2xcart(dtset%natom,rprimd,xcart,xred_img(:,:,iimage))
+     call var2hist(acell_img(:,iimage),hist(iimage),dtset%natom,rprim_img(:,:,iimage),&
+&                  rprimd,xcart,xred_img(:,:,iimage),.FALSE.)
+     call vel2hist(amass,hist(iimage),dtset%natom,vel_img(:,:,iimage))
+   end do
+ end if ! imgmov/=0
 
 !Allocations
  ABI_ALLOCATE(occ,(nocc))
  ABI_ALLOCATE(vel,(3,dtset%natom))
  ABI_ALLOCATE(vel_cell,(3,3))
  ABI_ALLOCATE(xred,(3,dtset%natom))
- ABI_DATATYPE_ALLOCATE(results_img_timimage,(nimage,ntimimage_eff))
+ ntimimage_stored=ntimimage;if(is_pimd)ntimimage_stored=2
+ ABI_DATATYPE_ALLOCATE(results_img_timimage,(nimage,ntimimage_stored))
  ABI_ALLOCATE(list_dynimage,(dtset%ndynimage))
- do itimimage=1,ntimimage_eff
-   call init_results_img(dtset%natom,dtset%npspalch,dtset%nsppol,dtset%ntypalch,dtset%ntypat,&
-&   results_img_timimage(:,itimimage))
+ do itimimage=1,ntimimage_stored
+   res_img => results_img_timimage(:,itimimage)
+   call init_results_img(dtset%natom,dtset%npspalch,dtset%nsppol,dtset%ntypalch,&
+&                        dtset%ntypat,res_img)
    do iimage=1,nimage
-     results_img_timimage(iimage,itimimage)%acell(:)     =acell_img(:,iimage)
-     results_img_timimage(iimage,itimimage)%amu(:)       =amu_img(:,iimage)
-     results_img_timimage(iimage,itimimage)%mixalch(:,:) =mixalch_img(:,:,iimage)
-     results_img_timimage(iimage,itimimage)%rprim(:,:)   =rprim_img(:,:,iimage)
-     results_img_timimage(iimage,itimimage)%xred(:,:)    =xred_img(:,:,iimage)
-     results_img_timimage(iimage,itimimage)%vel(:,:)     =vel_img(:,:,iimage)
-     results_img_timimage(iimage,itimimage)%vel_cell(:,:)=vel_cell_img(:,:,iimage)
+     res_img(iimage)%acell(:)     =acell_img(:,iimage)
+     res_img(iimage)%amu(:)       =amu_img(:,iimage)
+     res_img(iimage)%mixalch(:,:) =mixalch_img(:,:,iimage)
+     res_img(iimage)%rprim(:,:)   =rprim_img(:,:,iimage)
+     res_img(iimage)%xred(:,:)    =xred_img(:,:,iimage)
+     res_img(iimage)%vel(:,:)     =vel_img(:,:,iimage)
+     res_img(iimage)%vel_cell(:,:)=vel_cell_img(:,:,iimage)
    end do
  end do
  ndynimage=0
@@ -325,14 +390,13 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  call ga_init(dtset,ga_param)
 
 !PIMD: fill in eventually the data structure pimd_param
- is_master=(mpi_enreg%me_cell==0.and.mpi_enreg%me_img==0)
  call pimd_init(dtset,pimd_param,is_master)
 
 !In the case of the 4th-order Runge-Kutta solver,
 !one must have a number of step multiple of 4.
- ntimimage_max=dtset%ntimimage;idelta=1
+ ntimimage_max=ntimimage;idelta=1
  if (dtset%imgmov==2.and.mep_param%mep_solver==4) then
-   ntimimage_max=4*(dtset%ntimimage/4)
+   ntimimage_max=4*(ntimimage_max/4)
    idelta=4
  end if
  last_itimimage=1
@@ -341,11 +405,38 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
 !-----------------------------------------------------------------------------------------
 !Big loop on the propagation of all images
- do itimimage=1,dtset%ntimimage
+ do itimimage=1,ntimimage
+
+   itimimage_eff=itimimage;if(is_pimd) itimimage_eff=1
+   last_itimimage=itimimage_eff
+   res_img => results_img_timimage(:,itimimage_eff)
+
+!  If history is activated and image inside it: do not compute anything
+   if (use_hist.and.use_hist_prev) then
+     if (all(hist_prev(:)%ihist<=hist_prev(:)%mxhist)) then
+       do iimage=1,nimage
+         call abihist_copy(hist_prev(iimage),hist(iimage))
+         ih=hist(iimage)%ihist
+         call mkradim(hist(iimage)%histA(:,ih),rprim,hist(iimage)%histR(:,:,ih))
+         res_img(iimage)%acell(:)     =hist(iimage)%histA(:,ih)
+         res_img(iimage)%rprim(:,:)   =rprim
+         res_img(iimage)%xred(:,:)    =hist(iimage)%histXF(:,:,2,ih)
+         res_img(iimage)%vel(:,:)     =hist(iimage)%histV(:,:,ih)
+         res_img(iimage)%vel_cell(:,:)=zero !Temporary
+         res_img(iimage)%results_gs%fcart(:,:)=hist(iimage)%histXF(:,:,3,ih)
+         res_img(iimage)%results_gs%fred(:,:) =hist(iimage)%histXF(:,:,4,ih)
+         res_img(iimage)%results_gs%strten(:) =hist(iimage)%histS(:,ih)
+         res_img(iimage)%results_gs%etotal    =hist(iimage)%histE(ih)
+         res_img(iimage)%results_gs%energies%entropy =hist(iimage)%histEnt(ih)
+         hist_prev(iimage)%ihist=hist_prev(iimage)%ihist+1
+         !hist(iimage)%ihist=hist(iimage)%ihist+1
+       end do
+       goto 110
+     end if
+   end if
 
    call timab(704,1,tsec)
    call localfilnam(mpi_enreg%comm_img,mpi_enreg%comm_cell,mpi_enreg%comm_world,filnam,'_IMG',dtset%nimage)
-   itimimage_eff=itimimage;if(slideimg==1) itimimage_eff=1
    compute_all_images=(compute_static_images.and.itimimage==1)
 
 !  Print title for time step
@@ -413,16 +504,16 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          end if
        end if
 
-       acell(:)     =results_img_timimage(iimage,itimimage_eff)%acell(:)
-       rprim(:,:)   =results_img_timimage(iimage,itimimage_eff)%rprim(:,:)
-       vel(:,:)     =results_img_timimage(iimage,itimimage_eff)%vel(:,:)
-       vel_cell(:,:)=results_img_timimage(iimage,itimimage_eff)%vel_cell(:,:)
-       xred(:,:)    =results_img_timimage(iimage,itimimage_eff)%xred(:,:)
+       acell(:)     =res_img(iimage)%acell(:)
+       rprim(:,:)   =res_img(iimage)%rprim(:,:)
+       vel(:,:)     =res_img(iimage)%vel(:,:)
+       vel_cell(:,:)=res_img(iimage)%vel_cell(:,:)
+       xred(:,:)    =res_img(iimage)%xred(:,:)
        occ(:)       =occ_img(:,iimage)
 
        call args_gs_init(args_gs, &
-&       results_img_timimage(iimage,itimimage_eff)%amu(:),&
-&       results_img_timimage(iimage,itimimage_eff)%mixalch(:,:),&
+&       res_img(iimage)%amu(:),&
+&       res_img(iimage)%mixalch(:,:),&
 &       dtset%dmatpawu(:,:,:,:,ii),dtset%upawu(:,ii),dtset%jpawu(:,ii))
 
        call timab(705,2,tsec)
@@ -430,7 +521,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        call status(idynimage+100*itimimage,dtfil%filstat,iexit,level,'call gstate   ')
        call gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,scf_initialized(iimage),&
 &       mpi_enreg,npwtot,occ,pawang,pawrad,pawtab,psps,&
-&       results_img_timimage(iimage,itimimage_eff)%results_gs,&
+&       res_img(iimage)%results_gs,&
 &       rprim,scf_history(iimage),vel,vel_cell,wvl,xred)
 
        call timab(706,1,tsec)
@@ -438,14 +529,16 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        call args_gs_free(args_gs)
 
        if (dtset%dynimage(ii)==1) then
-         results_img_timimage(iimage,itimimage_eff)%acell(:)     =acell(:)
-         results_img_timimage(iimage,itimimage_eff)%rprim(:,:)   =rprim(:,:)
-         results_img_timimage(iimage,itimimage_eff)%vel(:,:)     =vel(:,:)
-         results_img_timimage(iimage,itimimage_eff)%vel_cell(:,:)=vel_cell(:,:)
-         results_img_timimage(iimage,itimimage_eff)%xred(:,:)    =xred(:,:)
-         occ_img(:,iimage)=occ(:)
+         res_img(iimage)%acell(:)     =acell(:)
+         res_img(iimage)%rprim(:,:)   =rprim(:,:)
+         res_img(iimage)%vel(:,:)     =vel(:,:)
+         res_img(iimage)%vel_cell(:,:)=vel_cell(:,:)
+         res_img(iimage)%xred(:,:)    =xred(:,:)
+         occ_img(:,iimage)            =occ(:)
        end if
 
+!    check change de rprim et reecriture dans hist
+!    check change de xred et reecriture dans hist
 
 !      Close output units ; restore defaults
        call localredirect(mpi_enreg%comm_cell,mpi_enreg%comm_world,dtset%nimage,mpi_enreg%paral_img,dtset%prtvolimg)
@@ -454,6 +547,22 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      else if (itimimage_eff>1) then ! For static images, simply copy one time step to the other
        call copy_results_img(results_img_timimage(iimage,itimimage_eff-1), &
 &       results_img_timimage(iimage,itimimage_eff  ))
+     end if
+
+!    Store results in hist datastructure
+     if (use_hist) then
+       ih=hist(iimage)%ihist
+       call mkrdim(res_img(iimage)%acell(:),res_img(iimage)%rprim(:,:),rprimd)
+       call xred2xcart(dtset%natom,rprimd,xcart,res_img(iimage)%xred(:,:))
+       call var2hist(res_img(iimage)%acell(:),hist(iimage),dtset%natom,&
+&           res_img(iimage)%rprim(:,:),rprimd,xcart,res_img(iimage)%xred(:,:),.FALSE.)
+       call vel2hist(amass,hist(iimage),dtset%natom,res_img(iimage)%vel(:,:))
+       hist(iimage)%histE(ih)       =res_img(iimage)%results_gs%etotal
+       hist(iimage)%histEnt(ih)     =res_img(iimage)%results_gs%energies%entropy
+       hist(iimage)%histXF(:,:,3,ih)=res_img(iimage)%results_gs%fcart(:,:)
+       hist(iimage)%histXF(:,:,4,ih)=res_img(iimage)%results_gs%fred(:,:)
+       hist(iimage)%histS(:,ih)     =res_img(iimage)%results_gs%strten(:)
+       hist(iimage)%histT(ih)       =itimimage  !????? this is done like this in mover
      end if
 
    end do ! iimage
@@ -480,11 +589,21 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    call localrdfile(mpi_enreg%comm_img,mpi_enreg%comm_world,compute_all_images,&
 &   dtset%nimage,mpi_enreg%paral_img,dtset%prtvolimg,dyn=dtset%dynimage)
 
+!  Write hist datastructure in HIST file
+#if defined HAVE_NETCDF
+   if (use_hist.and.mpi_enreg%me_cell==0) then
+     ifirst=merge(0,1,itimimage>1);ihead=merge(0,1,mpi_enreg%me/=0)
+     call write_md_hist_img(hist,hist_filename,ifirst,ihead,dtset%natom,dtset%ntypat,&
+&                           dtset%typat,amu_img(:,1),dtset%znucl,dtset%dtion,&
+&                           nimage=dtset%nimage,imgtab=mpi_enreg%my_imgtab)
+   end if
+#endif
+
 !  TESTS WHETHER ONE CONTINUES THE LOOP
 !  Here we calculate the change in energy, and exit if delta_energy < tolimg
    delta_energy=zero
 !  Doesn't check convergence in case of PIMD
-   check_conv=(slideimg/=1.and.itimimage>1)
+   check_conv=((.not.is_pimd).and.itimimage>1)
 !  In case of 4th-order Runge-Kutta, does check convergence every 4 steps
    if (dtset%imgmov==2.and.mep_param%mep_solver==4) then
      check_conv=(mod(itimimage,4)==0.and.itimimage>4)
@@ -522,18 +641,24 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      end if
    end if
 
+!TEST
+110 continue
+
 !  In any case, stop at the maximal value of itimimage
-   last_itimimage=itimimage_eff
-   if (itimimage==ntimimage_max) then
-     if (dtset%imgmov/=9.and.dtset%imgmov/=10.and.dtset%imgmov/=13) exit
-   end if
+   if ((.not.is_pimd).and.(itimimage==ntimimage_max)) exit
 
 !  Predict the next value of the images
-   if (dtset%ntimimage>1) then
+   if (ntimimage>1) then
      call predictimg(delta_energy,imagealgo_str(dtset%imgmov),dtset%imgmov,itimimage,&
 &     list_dynimage,ga_param,mep_param,mpi_enreg,dtset%natom,ndynimage,nimage,dtset%nimage,&
-&     ntimimage_eff,pimd_param,dtset%prtvolimg,results_img_timimage)
-
+&     ntimimage_stored,pimd_param,dtset%prtvolimg,results_img_timimage)
+!    Increment history index
+     if (use_hist) then
+       do iimage=1,nimage
+         hist(iimage)%ihist=hist(iimage)%ihist+1
+       end do
+       ! Need to copy new data into hist datastructure
+     end if
    end if
 
    call timab(707,2,tsec)
@@ -548,7 +673,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    ii=mpi_enreg%my_imgtab(iimage)
    if (dtset%dynimage(ii)==1) then
      acell_img(:,iimage)     =results_img_timimage(iimage,last_itimimage)%acell(:)
-     amu_img(:,iimage)     =results_img_timimage(iimage,last_itimimage)%amu(:)
+     amu_img(:,iimage)       =results_img_timimage(iimage,last_itimimage)%amu(:)
      mixalch_img(:,:,iimage) =results_img_timimage(iimage,last_itimimage)%mixalch(:,:)
      rprim_img(:,:,iimage)   =results_img_timimage(iimage,last_itimimage)%rprim(:,:)
      vel_img(:,:,iimage)     =results_img_timimage(iimage,last_itimimage)%vel(:,:)
@@ -578,8 +703,14 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  ABI_DEALLOCATE(vel_cell)
  ABI_DEALLOCATE(xred)
  ABI_DEALLOCATE(list_dynimage)
+ if (allocated(xcart)) then
+   ABI_DEALLOCATE(xcart)
+ end if
+ if (allocated(amass)) then
+   ABI_DEALLOCATE(amass)
+ end if
 
- do itimimage=1,ntimimage_eff
+ do itimimage=1,ntimimage_stored
    call destroy_results_img(results_img_timimage(:,itimimage))
  end do
  ABI_DATATYPE_DEALLOCATE(results_img_timimage)
@@ -588,6 +719,14 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  end do
  ABI_DATATYPE_DEALLOCATE(scf_history)
  ABI_DEALLOCATE(scf_initialized)
+ if (allocated(hist_prev)) then
+   call abihist_free(hist_prev)
+   ABI_DATATYPE_DEALLOCATE(hist_prev)
+ end if
+ if (allocated(hist)) then
+   call abihist_free(hist)
+   ABI_DATATYPE_DEALLOCATE(hist)
+ end if
 
  call mep_destroy(mep_param)
  call ga_destroy(ga_param)

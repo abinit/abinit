@@ -13,8 +13,8 @@
 !!
 !! Subroutines:
 !!
-!! * abihist_ini
-!! * abihist_fin
+!! * abihist_init
+!! * abihist_free
 !! * abihist_bcast
 !! * abihist_compare
 !! * hist2var
@@ -45,8 +45,6 @@ module m_abihist
 #if defined HAVE_NETCDF
  use netcdf
 #endif
-
- use m_abimover, only : abimover
 
  implicit none
 
@@ -124,15 +122,32 @@ module m_abihist
 
  end type abihist
 
- public :: abihist_ini         ! Initialize the object
- public :: abihist_fin         ! Free memory
- public :: abihist_bcast       ! Broadcast the object
- public :: abihist_compare     ! Compare 2 HIST records
- public :: hist2var            ! Get xcart, xred, acell and rprimd from the history.
- public :: var2hist            ! Append xcart, xred, acell and rprimd
- public :: vel2hist            ! Append velocities and Kinetic Energy
- public :: write_md_hist       ! Write the history into a netcdf dataset
- public :: read_md_hist        ! Read the history file from a netcdf file
+ public :: abihist_init             ! Initialize the object
+ public :: abihist_free             ! Destroy the object
+ public :: abihist_bcast            ! Broadcast the object
+ public :: abihist_copy             ! Copy 2 HIST records
+ public :: abihist_compare_and_copy ! Compare 2 HIST records; if similar copy
+ public :: hist2var                 ! Get xcart, xred, acell and rprimd from the history.
+ public :: var2hist                 ! Append xcart, xred, acell and rprimd
+ public :: vel2hist                 ! Append velocities and Kinetic Energy
+ public :: write_md_hist            ! Write the history into a netcdf file
+ public :: write_md_hist_img        ! Write the history into a netcdf file (with images)
+ public :: read_md_hist             ! Read the history from a netcdf file
+ public :: read_md_hist_img         ! Read the history from a netcdf file (with images)
+
+ interface abihist_init
+   module procedure abihist_init_0D
+   module procedure abihist_init_1D
+ end interface abihist_init
+ interface abihist_free
+   module procedure abihist_free_0D
+   module procedure abihist_free_1D
+ end interface abihist_free
+ interface abihist_bcast
+   module procedure abihist_bcast_0D
+   module procedure abihist_bcast_1D
+ end interface abihist_bcast
+
 !!***
 
 !----------------------------------------------------------------------
@@ -140,17 +155,17 @@ module m_abihist
 contains  !=============================================================
 !!***
 
-!!****f* m_abihist/abihist_ini
+!!****f* m_abihist/abihist_init_0D
 !! NAME
-!! abihist_ini
+!! abihist_init_0D
 !!
 !! FUNCTION
-!! Initialize the hist structure for a given number
-!! configurations and number of atoms
+!! Initialize a hist structure - Target: scalar
 !!
 !! INPUTS
 !!  natom = Number of atoms per unitary cell
-!!  mxhist = Maximal number of records store  
+!!  mxhist = Maximal number of records to store
+!!  isVUsed,isARUsed=flags used to initialize hsit structure
 !!
 !! OUTPUT
 !!  hist <type(abihist)> = The hist to initialize
@@ -158,7 +173,7 @@ contains  !=============================================================
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      m_abiimages,mover
+!!      m_abihist,mover
 !!
 !! CHILDREN
 !!
@@ -166,27 +181,31 @@ contains  !=============================================================
 !!
 !! SOURCE
 
-subroutine abihist_ini(hist,natom,mxhist)
+subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'abihist_ini'
+#define ABI_FUNC 'abihist_init_0D'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
- type(abihist) ,intent(inout) :: hist
- integer       ,intent(in)  :: natom
- integer       ,intent(in)  :: mxhist
+ integer,intent(in) :: natom,mxhist
+ logical,intent(in) :: isVUsed,isARused
+ type(abihist),intent(inout) :: hist
 
 ! ***************************************************************
 
 !Initialize indexes
  hist%ihist=1
  hist%mxhist=mxhist
+
+!Initialize flags
+ hist%isVused=isVUsed
+ hist%isARused=isARUsed
 
 !Allocate all the histories
  ABI_ALLOCATE(hist%histA,(3,mxhist))
@@ -199,17 +218,84 @@ subroutine abihist_ini(hist,natom,mxhist)
  ABI_ALLOCATE(hist%histV,(3,natom,mxhist))
  ABI_ALLOCATE(hist%histXF,(3,natom,4,mxhist))
 
-end subroutine abihist_ini
+ hist%histE(1)=zero
+ hist%histEk(1)=zero
+ hist%histEnt(1)=zero
+ hist%histT(1)=zero
+
+ hist%histA(:,1)=zero
+ hist%histR(:,:,1)=zero
+ hist%histS(:,1)=zero
+ hist%histV(:,:,1)=zero
+ hist%histXF(:,:,:,1)=zero
+
+end subroutine abihist_init_0D
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/abihist_fin
+!!****f* m_abihist/abihist_init_1D
 !! NAME
-!! abihist_fin
+!! abihist_init_1D
 !!
 !! FUNCTION
-!! Deallocate all the pointers in a hist
+!! Initialize a hist structure - Target: 1D array
+!!
+!! INPUTS
+!!  natom = Number of atoms per unitary cell
+!!  mxhist = Maximal number of records to store
+!!  isVUsed,isARUsed=flags used to initialize hsit structure
+!!
+!! OUTPUT
+!!  hist(:) <type(abihist)> = The hist to initialize
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      gstateimg
+!!
+!! CHILDREN
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine abihist_init_1D(hist,natom,mxhist,isVUsed,isARUsed)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'abihist_init_1D'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in) :: natom,mxhist
+ logical,intent(in) :: isVUsed,isARUsed
+ type(abihist),intent(inout) :: hist(:)
+
+!Local variables-------------------------------
+ integer :: ii
+
+! ***************************************************************
+
+ do ii=1,size(hist)
+   call abihist_init_0D(hist(ii),natom,mxhist,isVUsed,isARUsed)
+ end do
+
+end subroutine abihist_init_1D
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abihist/abihist_free_0D
+!! NAME
+!! abihist_free_0D
+!!
+!! FUNCTION
+!! Deallocate all the pointers in a hist structure - Target: scalar
 !!
 !! INPUTS
 !!
@@ -219,24 +305,21 @@ end subroutine abihist_ini
 !!  hist <type(abihist)> = The hist to deallocate
 !!
 !! PARENTS
-!!      m_abihist,m_abiimages,mover
+!!      m_abihist,mover
 !!
 !! CHILDREN
 !!
 !! NOTES
-!!  At present 8 variables are present in abihist
-!!  if a new variable is added in abihist it should
-!!  be added also for deallocate here
 !!
 !! SOURCE
 
-subroutine abihist_fin(hist)
+subroutine abihist_free_0D(hist)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'abihist_fin'
+#define ABI_FUNC 'abihist_free_0D'
 !End of the abilint section
 
  implicit none
@@ -283,17 +366,68 @@ subroutine abihist_fin(hist)
    ABI_DEALLOCATE(hist%histXF)
  end if
 
-end subroutine abihist_fin
+end subroutine abihist_free_0D
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/abihist_bcast
+!!****f* m_abihist/abihist_free_1D
 !! NAME
-!! abihist_bcast
+!! abihist_free_1D
 !!
 !! FUNCTION
-!! Broadcast a hist datastructure (from a root process to all others)
+!! Deallocate all the pointers in a hist structure - Target: 1D array
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!  hist(:) <type(abihist)> = The hist to deallocate
+!!
+!! PARENTS
+!!      gstateimg
+!!
+!! CHILDREN
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine abihist_free_1D(hist)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'abihist_free_1D'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ type(abihist),intent(inout) :: hist(:)
+
+!Local variables-------------------------------
+ integer :: ii
+
+! ***************************************************************
+
+ do ii=1,size(hist)
+   call abihist_free_0D(hist(ii))
+ end do
+
+end subroutine abihist_free_1D
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abihist/abihist_bcast_0D
+!! NAME
+!! abihist_bcast_0D
+!!
+!! FUNCTION
+!! Broadcast a hist datastructure (from a root process to all others) - Target: scalar
 !!
 !! INPUTS
 !!  master=ID of the sending node in comm
@@ -305,24 +439,21 @@ end subroutine abihist_fin
 !!  hist <type(abihist)> = The hist to broadcast
 !!
 !! PARENTS
-!!      mover
+!!      m_abihist,mover
 !!
 !! CHILDREN
 !!
 !! NOTES
-!!  At present 8 variables are present in abihist
-!!  if a new variable is added in abihist it should
-!!  be added also for broadcast here
 !!
 !! SOURCE
 
-subroutine abihist_bcast(hist,master,comm)
+subroutine abihist_bcast_0D(hist,master,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'abihist_bcast'
+#define ABI_FUNC 'abihist_bcast_0D'
 !End of the abilint section
 
  implicit none
@@ -386,11 +517,11 @@ ABI_ALLOCATE(buffer_i,(18))
    sizeXF4=size(hist%histXF,4)
    buffer_i(1)=sizeA1  ;buffer_i(2)=sizeA2
    buffer_i(3)=sizeE   ;buffer_i(4)=sizeEk
-   buffer_i(5)=sizeEnt ;buffer_i(6)=sizeT 
-   buffer_i(7)=sizeR1  ;buffer_i(8)=sizeR2  
-   buffer_i(9)=sizeR3  ;buffer_i(10)=sizeS1 
-   buffer_i(11)=sizeS2 ;buffer_i(12)=sizeV1 
-   buffer_i(13)=sizeV2 ;buffer_i(14)=sizeV3 
+   buffer_i(5)=sizeEnt ;buffer_i(6)=sizeT
+   buffer_i(7)=sizeR1  ;buffer_i(8)=sizeR2
+   buffer_i(9)=sizeR3  ;buffer_i(10)=sizeS1
+   buffer_i(11)=sizeS2 ;buffer_i(12)=sizeV1
+   buffer_i(13)=sizeV2 ;buffer_i(14)=sizeV3
    buffer_i(15)=sizeXF1;buffer_i(16)=sizeXF2
    buffer_i(17)=sizeXF3;buffer_i(18)=sizeXF4
  end if
@@ -399,14 +530,14 @@ ABI_ALLOCATE(buffer_i,(18))
  if (rank/=master) then
    sizeA1 =buffer_i(1) ;sizeA2 =buffer_i(2)
    sizeE  =buffer_i(3) ;sizeEk =buffer_i(4)
-   sizeEnt =buffer_i(5);sizeT  =buffer_i(6) 
-   sizeR1 =buffer_i(7) ;sizeR2 =buffer_i(8) 
+   sizeEnt =buffer_i(5);sizeT  =buffer_i(6)
+   sizeR1 =buffer_i(7) ;sizeR2 =buffer_i(8)
    sizeR3 =buffer_i(9) ;sizeS1 =buffer_i(10)
    sizeS2 =buffer_i(11);sizeV1 =buffer_i(12)
    sizeV2 =buffer_i(13);sizeV3 =buffer_i(14)
    sizeXF1=buffer_i(15);sizeXF2=buffer_i(16)
-   sizeXF3=buffer_i(17);sizeXF4=buffer_i(18)   
-   
+   sizeXF3=buffer_i(17);sizeXF4=buffer_i(18)
+
  end if
  ABI_DEALLOCATE(buffer_i)
 
@@ -435,7 +566,7 @@ ABI_ALLOCATE(buffer_i,(18))
    indx=indx+sizeV
    buffer_r(indx+1:indx+sizeXF)=reshape(hist%histXF(1:sizeXF1,1:sizeXF2,1:sizeXF3,1:sizeXF4),(/sizeXF/))
  else
-   call abihist_fin(hist)
+   call abihist_free(hist)
    ABI_ALLOCATE(hist%histA,(sizeA1,sizeA2))
    ABI_ALLOCATE(hist%histE,(sizeE))
    ABI_ALLOCATE(hist%histEk,(sizeEk))
@@ -471,7 +602,62 @@ ABI_ALLOCATE(buffer_i,(18))
  end if
  ABI_DEALLOCATE(buffer_r)
 
-end subroutine abihist_bcast
+end subroutine abihist_bcast_0D
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abihist/abihist_bcast_1D
+!! NAME
+!! abihist_bcast_1D
+!!
+!! FUNCTION
+!! Broadcast a hist datastructure (from a root process to all others) - Target: 1D array
+!!
+!! INPUTS
+!!  master=ID of the sending node in comm
+!!  comm=MPI Communicator
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!  hist(:) <type(abihist)> = The hist to broadcast
+!!
+!! PARENTS
+!!      gstateimg
+!!
+!! CHILDREN
+!!
+!! NOTES
+!!
+!! SOURCE
+
+subroutine abihist_bcast_1D(hist,master,comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'abihist_bcast_1D'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: master,comm
+ type(abihist),intent(inout) :: hist(:)
+
+!Local variables-------------------------------
+ integer :: ii
+
+! ***************************************************************
+
+ do ii=1,size(hist)
+   call abihist_bcast_0D(hist(ii),master,comm)
+ end do
+
+end subroutine abihist_bcast_1D
 !!***
 
 !----------------------------------------------------------------------
@@ -748,15 +934,21 @@ real(dp) :: ekin
 ! *************************************************************
 
 !Store the velocities
- hist%histV(:,:,hist%ihist)=vel(:,:)
+ if (hist%isVused) then
+   hist%histV(:,:,hist%ihist)=vel(:,:)
+ else
+   hist%histV(:,:,hist%ihist)=zero
+ end if
 
 !Compute the Ionic Kinetic energy
- ekin=0.0
- do ii=1,natom
-   do jj=1,3
-     ekin=ekin+0.5_dp*amass(ii)*vel(jj,ii)**2
+ ekin=zero
+ if (hist%isVused) then
+   do ii=1,natom
+     do jj=1,3
+       ekin=ekin+0.5_dp*amass(ii)*vel(jj,ii)**2
+     end do
    end do
- end do
+ end if
 
 !Store the Ionic Kinetic Energy
  hist%histEk(hist%ihist)=ekin
@@ -766,7 +958,76 @@ end subroutine vel2hist
 
 !----------------------------------------------------------------------
 
-!!****f* m_abihist/abihist_compare
+!!****f* m_abihist/abihist_copy
+!! NAME
+!! abihist_copy
+!!
+!! FUNCTION
+!! Copy one HIST record in another
+!!
+!! INPUTS
+!!  hist_in <type(abihist)>
+!!
+!! OUTPUT
+!! SIDE EFFECTS
+!!  hist_out <type(abihist)>
+!!
+!! PARENTS
+!!
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine abihist_copy(hist_in,hist_out)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'abihist_copy'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+type(abihist),intent(in) :: hist_in
+type(abihist),intent(inout) :: hist_out
+
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: msg
+
+! ***************************************************************
+
+!Check
+ if (size(hist_in%histXF,2)/=size(hist_out%histXF,2)) then
+   msg='Incompatible sizes for hist_in and hist_out!'
+   MSG_BUG(msg)
+ end if
+
+!Copy scalars (except ihist and mxhist)
+ hist_out%isVused=hist_in%isVused
+ hist_out%isARused=hist_in%isARused
+
+!Copy arrays
+ hist_out%histA(:,hist_out%ihist)     = hist_in%histA(:,hist_in%ihist)
+ hist_out%histE(hist_out%ihist)       = hist_in%histE(hist_in%ihist)
+ hist_out%histEk(hist_out%ihist)      = hist_in%histEk(hist_in%ihist)
+ hist_out%histEnt(hist_out%ihist)     = hist_in%histEnt(hist_in%ihist)
+ hist_out%histT(hist_out%ihist)       = hist_in%histT(hist_in%ihist)
+ hist_out%histR(:,:,hist_out%ihist)   = hist_in%histR(:,:,hist_in%ihist)
+ hist_out%histS(:,hist_out%ihist)     = hist_in%histS(:,hist_in%ihist)
+ hist_out%histV(:,:,hist_out%ihist)   = hist_in%histV(:,:,hist_in%ihist)
+ hist_out%histXF(:,:,:,hist_out%ihist)= hist_in%histXF(:,:,:,hist_in%ihist)
+
+end subroutine abihist_copy
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abihist/abihist_compare_and_copy
 !! NAME
 !! abihist_compare
 !!
@@ -791,13 +1052,13 @@ end subroutine vel2hist
 !!
 !! SOURCE
 
-subroutine abihist_compare(hist_in,hist_out,natom,similar,tolerance)
+subroutine abihist_compare_and_copy(hist_in,hist_out,natom,similar,tolerance)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'abihist_compare'
+#define ABI_FUNC 'abihist_compare_and_copy'
 !End of the abilint section
 
  implicit none
@@ -888,14 +1149,20 @@ real(dp) :: x,y
    hist_out%histEk(hist_out%ihist)=      hist_in%histEk(hist_in%ihist)
    hist_out%histEnt(hist_out%ihist)=     hist_in%histEnt(hist_in%ihist)
    hist_out%histT(hist_out%ihist)=       hist_in%histT(hist_in%ihist)
+   hist_out%histXF(:,:,1,hist_out%ihist)=hist_in%histXF(:,:,1,hist_in%ihist)
+   hist_out%histXF(:,:,2,hist_out%ihist)=hist_in%histXF(:,:,2,hist_in%ihist)
    hist_out%histXF(:,:,3,hist_out%ihist)=hist_in%histXF(:,:,3,hist_in%ihist)
    hist_out%histXF(:,:,4,hist_out%ihist)=hist_in%histXF(:,:,4,hist_in%ihist)
    hist_out%histS(:,hist_out%ihist)=     hist_in%histS(:,hist_in%ihist)
+   hist_out%histR(:,:,hist_out%ihist)=   hist_in%histR(:,:,hist_in%ihist)
+   hist_out%histA(:,hist_out%ihist)=   hist_in%histA(:,hist_in%ihist)
 
  end if
 
-end subroutine abihist_compare
+end subroutine abihist_compare_and_copy
 !!***
+
+!----------------------------------------------------------------------
 
 !!****f* m_abihist/write_md_hist
 !!
@@ -903,31 +1170,21 @@ end subroutine abihist_compare
 !! write_md_hist
 !!
 !! FUNCTION
-!! Write the history into a netcdf dataset
+!! Write the history file into a netcdf file
+!! This version is not compatible with multiple images of the
 !!
 !! INPUTS
-!! filname = Filename of the file where the history will be stored
-!! hist<type abihist>=Historical record of positions, forces
-!!      |                    acell, stresses, and energies,
-!!      |                    contains:
-!!      | mxhist:  Maximun number of records
-!!      | histA:   Historical record of acell(A) and rprimd(R)
-!!      | histE:   Historical record of energy(E)
-!!      | histEk:  Historical record of Ionic kinetic energy(Ek)
-!!      | histEnt: Historical record of Entropy
-!!      | histT:   Historical record of time(T) (For MD or iteration for GO)
-!!      | histR:   Historical record of rprimd(R)
-!!      | histS:   Historical record of strten(S)
-!!      | histV:   Historical record of velocity(V)
-!!      | histXF:  Historical record of positions(X) and forces(F)
-!! mover<abimover>=Data used by the different predictors to update positions, acell, etc.
-!!      | ntypat=Number of type of atoms.
-!!      | npsp=Number of pseudopotentials.
-!!      | typat(natom)=Type of each natom
-!!      | znucl(npsp)=Nuclear charge for each type of pseudopotential.
-!!      |             WARNING: alchemical mixing is not supported. We assume npsp == ntypat
-!! itime=index of the present iteration 
-!! icycle=index of the present cycle.
+!!  filname=filename of the file where the history will be stored
+!!  hist<type abihist>=Historical record of positions, forces, stresses,
+!!                        cell dims and energies,
+!!  ifirst=1 if first access to the file
+!!  natom=Number of atoms.
+!!  ntypat=Number of type of atoms.
+!!  typat(natom)=Type of each natom
+!!   amu(ntypat)=mass of the atoms (atomic mass unit)
+!!  znucl(:)=Nuclear charge for each type of pseudopotential.
+!!           WARNING: alchemical mixing is not supported. We assume npsp == ntypat
+!!  dtion=time step for Molecular Dynamics
 !!
 !! TODO
 !!  Have you ever heard about ETSF-IO specifications?
@@ -942,7 +1199,8 @@ end subroutine abihist_compare
 !!
 !! SOURCE
 
-subroutine write_md_hist(hist,mover,filename,icycle,itime)
+subroutine write_md_hist(hist,filename,ifirst,natom,ntypat,&
+&                        typat,amu,znucl,dtion)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -955,309 +1213,231 @@ subroutine write_md_hist(hist,mover,filename,icycle,itime)
 
 !Arguments ------------------------------------
 !scalars
- character(len=*),intent(in) :: filename 
- type(abimover),intent(in) :: mover
- integer,intent(in) :: itime,icycle
- type(abihist),intent(in) :: hist
+ integer,intent(in) :: ifirst,natom,ntypat
+ real(dp),intent(in) :: dtion
+ character(len=*),intent(in) :: filename
 !arrays
+ integer,intent(in) :: typat(natom)
+ real(dp),intent(in) :: amu(ntypat),znucl(:)
+ type(abihist),intent(inout),target :: hist
 
 !Local variables-------------------------------
+#if defined HAVE_NETCDF
 !scalars
- integer :: ncerr,ncid,npsp,itypat,iatom
- integer :: xyz_id,natom_id,time_id,six_id
+ integer :: ncerr,ncid,npsp
  integer :: xcart_id,xred_id,fcart_id,fred_id
  integer :: vel_id,etotal_id,acell_id,rprimd_id,strten_id
  integer :: ntypat_id,npsp_id,typat_id,znucl_id
- integer :: ekin_id,entr_id,mdtime_id,amu_id,dtion_id !amass_id,
+ integer :: ekin_id,entropy_id,mdtime_id,amu_id,dtion_id
+ logical :: has_nimage=.false.
 !arrays
- integer :: dimXFids(3),dimAids(2),dimEids(1),dimRids(3),dimSids(2)
- integer :: count1(1),start1(1)
- integer :: count2(2),start2(2)
- integer :: count3(3),start3(3)
- integer :: dimids_0d(0)
- real(dp) :: amu(mover%ntypat)
+#endif
 
 ! *************************************************************************
 
- write(std_out,*) 'ihist @ write_md_hist',hist%ihist
- write(std_out,*) 'mxhist @ write_md_hist',hist%mxhist
-
 #if defined HAVE_NETCDF
 
-!#####################################################################
-!### Creation of NetCDF file
 
- if (itime==1.and.icycle==1) then
-!  1. Create netCDF file
-   ncerr = nf90_create(path=trim(filename),cmode=NF90_CLOBBER, ncid=ncid)
-   NCF_CHECK_MSG(ncerr,"create netcdf history file")
+ if (ifirst==1) then
+!##### First access: Create NetCDF file and write defs
 
-!  2. Define dimensions
-   ncerr = nf90_def_dim(ncid,"natom",mover%natom,natom_id)
-   NCF_CHECK_MSG(ncerr," define dimension natom")
+   write(std_out,*) 'Write iteration in HIST netCDF file'
+   npsp=size(znucl)
 
-   ncerr = nf90_def_dim(ncid,"ntypat",mover%ntypat,ntypat_id)
-   NCF_CHECK_MSG(ncerr," define dimension ntypat")
+!  Create netCDF file
+   ncerr = nf90_create(path=trim(filename),cmode=NF90_CLOBBER,ncid=ncid)
+   NCF_CHECK_MSG(ncerr," create netcdf history file")
 
-   npsp = size(mover%znucl)
-   if (npsp /= mover%ntypat) then
-     MSG_WARNING("HIST file does not support alchemical mixing!")
-   end if 
-   ncerr = nf90_def_dim(ncid,"npsp",npsp,npsp_id)
-   NCF_CHECK_MSG(ncerr," define dimension npsp")
+!  Define all dims and vars
+   call def_file_hist(ncid,filename,natom,1,ntypat,npsp,has_nimage)
 
-   ncerr = nf90_def_dim(ncid,"xyz",3,xyz_id)
-   NCF_CHECK_MSG(ncerr," define dimension xyz")
-
-   ncerr = nf90_def_dim(ncid,"time",NF90_UNLIMITED,time_id)
-   NCF_CHECK_MSG(ncerr," define dimension time")
-
-   ncerr = nf90_def_dim(ncid,"six",6,six_id)
-   NCF_CHECK_MSG(ncerr," define dimension six")
-
-!  Dimensions for xcart,xred,fcart,fred and vel
-   dimXFids = (/ xyz_id, natom_id, time_id /)
-!  Dimensions for acell
-   dimAids = (/ xyz_id, time_id /)
-!  Dimensions for etotal
-   dimEids = (/ time_id /)
-!  Dimensions for rprimd
-   dimRids = (/ xyz_id, xyz_id, time_id /)
-!  Dimensions for strten
-   dimSids = (/ six_id, time_id /)
-
-!  3. Define variables and their attributes (units and mnemonics)
-
-   ! ======================================
-   ! Constant variables (written only once)
-   ! ======================================
-   ncerr = nf90_def_var(ncid, "typat", NF90_INT, natom_id, typat_id)
-   NCF_CHECK_MSG(ncerr," define variable typat")
-
-   ncerr = nf90_def_var(ncid, "znucl", NF90_DOUBLE, npsp_id, znucl_id)
-   NCF_CHECK_MSG(ncerr," define variable znucl")
-
-!   call ab_define_var(ncid, [natom_id], amass_id, NF90_DOUBLE,&
-!&   "amass","Mass of each atom, in unit of electronic mass (=amu*1822...)","bohr" )
-
-   call ab_define_var(ncid, [ntypat_id], amu_id, NF90_DOUBLE,&
-&   "amu","Masses of each type of atom in atomic mass units", "" )
-
-   ncerr = nf90_def_var(ncid, "dtion", NF90_DOUBLE, dimids_0d, dtion_id)
-   NCF_CHECK_MSG(ncerr," define variable dtion")
-
-   ! ==================
-   ! Evolving variables
-   ! ==================
-   call ab_define_var(ncid, dimXFids, xcart_id, NF90_DOUBLE,&
-&   "xcart","vectors (X) of atom positions in CARTesian coordinates","bohr" )
-
-   call ab_define_var(ncid, dimXFids, xred_id, NF90_DOUBLE,&
-&   "xred","vectors (X) of atom positions in REDuced coordinates","dimensionless" )
-
-   call ab_define_var(ncid, dimXFids, fcart_id, NF90_DOUBLE,&
-&   "fcart","atom Forces in CARTesian coordinates","Ha/bohr" )
-
-   call ab_define_var(ncid, dimXFids, fred_id, NF90_DOUBLE,&
-&   "fred","atom Forces in REDuced coordinates","dimensionless" )
-
-   call ab_define_var(ncid, dimXFids, vel_id, NF90_DOUBLE,&
-&   "vel","VELocity","bohr*Ha/hbar" )
-
-   call ab_define_var(ncid, dimAids, acell_id, NF90_DOUBLE,&
-&   "acell","CELL lattice vector scaling","bohr" )
-
-   call ab_define_var(ncid, dimRids, rprimd_id, NF90_DOUBLE,&
-&   "rprimd","Real space PRIMitive translations, Dimensional","bohr" )
-
-   call ab_define_var(ncid, dimEids, etotal_id, NF90_DOUBLE,&
-&   "etotal","TOTAL Energy","Ha" )
-
-   call ab_define_var(ncid, dimEids, ekin_id, NF90_DOUBLE,&
-&   "ekin","Energy KINetic ionic","Ha" )
-
-   call ab_define_var(ncid, dimEids, entr_id, NF90_DOUBLE,&
-&   "entropy","Entropy","" )
-
-   call ab_define_var(ncid, dimEids, mdtime_id, NF90_DOUBLE,&
-&   "mdtime","Molecular Dynamics TIME","hbar/Ha" )
-
-   call ab_define_var(ncid, dimSids, strten_id, NF90_DOUBLE,&
-&   "strten","STRess tensor","Ha/bohr^3" )
-
-!  4. End define mode
-   ncerr = nf90_enddef(ncid)
-   NCF_CHECK_MSG(ncerr," end define mode")
-
-   ! Write extra info on the cell needed by post-processing tools e.g. vesta, xcrysden,
-   ! Note that these variables do not change and are not read in read_md_hist.
-   ncerr = nf90_put_var(ncid, typat_id, mover%typat)
-   NCF_CHECK_MSG(ncerr," write variable typat")
-
-   ncerr = nf90_put_var(ncid, znucl_id, mover%znucl)
-   NCF_CHECK_MSG(ncerr," write variable znucl")
-
-   ! Get amu from amass.
-   do itypat=1,mover%ntypat
-     do iatom=1,mover%natom
-       if (itypat == mover%typat(iatom)) then
-         amu(itypat) = mover%amass(iatom) / amu_emass
-         exit
-       end if
-     end do
-   end do
-
-   ncerr = nf90_put_var(ncid, amu_id, amu)
-   NCF_CHECK_MSG(ncerr," write variable amu")
-
-   !ncerr = nf90_put_var(ncid, amass_id, mover%amass)
-   !NCF_CHECK_MSG(ncerr," write variable amass")
-
-   ncerr = nf90_put_var(ncid, dtion_id, mover%dtion)
-   NCF_CHECK_MSG(ncerr," write variable dtion")
+!  Write variables that do not change
+!  (they are not read in a hist structure).
+   call write_csts_hist(ncid,dtion,typat,znucl,amu)
 
  else
+!##### itime>2 access: just open NetCDF file
 
-!  #####################################################################
-!  ### Open the NetCDF file for write new iterations
-   write(std_out,*) 'OPEN NETCDF FILE'
+   write(std_out,*) 'Write iteration in HIST netCDF file'
 
-!  1. Open netCDF file
+!  Open netCDF file
    ncerr = nf90_open(path=trim(filename),mode=NF90_WRITE, ncid=ncid)
    NCF_CHECK_MSG(ncerr," open netcdf history file")
 
-!  2. Get the ID of a variables from their name
-   ncerr = nf90_inq_varid(ncid, "xcart", xcart_id)
-   NCF_CHECK_MSG(ncerr," get the id for xcart")
+ endif
 
-   ncerr = nf90_inq_varid(ncid, "xred", xred_id)
-   NCF_CHECK_MSG(ncerr," get the id for xred")
+!##### Write variables into the dataset
+!Get the IDs
+ call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,&
+&     rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+!Write
+call write_vars_hist(ncid,hist,natom,has_nimage,1,&
+&     xcart_id,xred_id,fcart_id,fred_id,vel_id,rprimd_id,acell_id,&
+&     strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
 
-   ncerr = nf90_inq_varid(ncid, "fcart", fcart_id)
-   NCF_CHECK_MSG(ncerr," get the id for fcart")
-
-   ncerr = nf90_inq_varid(ncid, "fred", fred_id)
-   NCF_CHECK_MSG(ncerr," get the id for fred")
-
-   ncerr = nf90_inq_varid(ncid, "vel", vel_id)
-   NCF_CHECK_MSG(ncerr," get the id for vel")
-
-   ncerr = nf90_inq_varid(ncid, "acell", acell_id)
-   NCF_CHECK_MSG(ncerr," get the id for acell")
-
-   ncerr = nf90_inq_varid(ncid, "rprimd", rprimd_id)
-   NCF_CHECK_MSG(ncerr," get the id for rprimd")
-
-   ncerr = nf90_inq_varid(ncid, "etotal", etotal_id)
-   NCF_CHECK_MSG(ncerr," get the id for etotal")
-
-   ncerr = nf90_inq_varid(ncid, "ekin", ekin_id)
-   NCF_CHECK_MSG(ncerr," get the id for ekin")
-
-   ncerr = nf90_inq_varid(ncid, "entropy", entr_id)
-   NCF_CHECK_MSG(ncerr," get the id for entropy")
-
-   ncerr = nf90_inq_varid(ncid, "mdtime", mdtime_id)
-   NCF_CHECK_MSG(ncerr," get the id for mdtime")
-
-   ncerr = nf90_inq_varid(ncid, "strten", strten_id)
-   NCF_CHECK_MSG(ncerr," get the id for strten")
- end if
-
-!#####################################################################
-!### Write variables into the dataset
-
- count3 = (/ 3, mover%natom, 1 /)
- start3 = (/ 1, 1, 1 /)
- start3(3)=hist%ihist
-
- ncerr = nf90_put_var(ncid, xcart_id,&
-& hist%histXF(:,:,1,hist%ihist),&
-& start = start3,count = count3)
- NCF_CHECK_MSG(ncerr," write variable xcart")
-
- ncerr = nf90_put_var(ncid, xred_id,&
-& hist%histXF(:,:,2,hist%ihist),&
-& start = start3,count = count3)
- NCF_CHECK_MSG(ncerr," write variable xred")
-
- ncerr = nf90_put_var(ncid, fcart_id,&
-& hist%histXF(:,:,3,hist%ihist),&
-& start = start3,count = count3)
- NCF_CHECK_MSG(ncerr," write variable fcart")
-
- ncerr = nf90_put_var(ncid, fred_id,&
-& hist%histXF(:,:,4,hist%ihist),&
-& start = start3,count = count3)
- NCF_CHECK_MSG(ncerr," write variable fred")
-
- ncerr = nf90_put_var(ncid, vel_id,&
-& hist%histV(:,:,hist%ihist),&
-& start = start3,count = count3)
- NCF_CHECK_MSG(ncerr," write variable vel")
-
-!RPRIMD
- count3(2)=3
- ncerr = nf90_put_var(ncid, rprimd_id,&
-& hist%histR(:,:,hist%ihist),&
-& start = start3,count = count3)
- NCF_CHECK_MSG(ncerr," write variable rprimd")
-
-!ACELL
- count2 = (/ 3, 1 /)
- start2 = (/ 1, 1 /)
- start2(2)=hist%ihist
- ncerr = nf90_put_var(ncid, acell_id,&
-& hist%histA(:,hist%ihist),&
-& start = start2,count = count2)
- NCF_CHECK_MSG(ncerr," write variable acell")
-
-!STRTEN
- count2(1)=6
- ncerr = nf90_put_var(ncid, strten_id,&
-& hist%histS(:,hist%ihist),&
-& start = start2,count = count2)
- NCF_CHECK_MSG(ncerr," write variable strten")
-
-!ETOTAL
- count1 = (/ 1 /)
- start1 = (/ 1 /)
- start1(1)=hist%ihist
- ncerr = nf90_put_var(ncid, etotal_id,&
-& hist%histE(hist%ihist), start = (/ hist%ihist /) )
- NCF_CHECK_MSG(ncerr," write variable etotal")
-
-!Ekin
- count1 = (/ 1 /)
- start1 = (/ 1 /)
- start1(1)=hist%ihist
- ncerr = nf90_put_var(ncid, ekin_id,&
-& hist%histEk(hist%ihist), start = (/ hist%ihist /) )
- NCF_CHECK_MSG(ncerr," write variable ekin")
-
-!Entropy
- count1 = (/ 1 /)
- start1 = (/ 1 /)
- start1(1)=hist%ihist
- ncerr = nf90_put_var(ncid, entr_id,&
-& hist%histEnt(hist%ihist), start = (/ hist%ihist /) )
- NCF_CHECK_MSG(ncerr," write variable entropy")
-
-!MDTIME
- count1 = (/ 1 /)
- start1 = (/ 1 /)
- start1(1)=hist%ihist
- ncerr = nf90_put_var(ncid, mdtime_id,&
-& hist%histT(hist%ihist), start = (/ hist%ihist /) )
- NCF_CHECK_MSG(ncerr," write variable mdtime")
-
-!#####################################################################
-!### Close NetCDF file
+!##### Close the file
  ncerr = nf90_close(ncid)
  NCF_CHECK_MSG(ncerr," close netcdf history file")
+
 #endif
 
 end subroutine write_md_hist
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abihist/write_md_hist_img
+!!
+!! NAME
+!! write_md_hist_img
+!!
+!! FUNCTION
+!! Write the history file into a netcdf file
+!! This version is compatible with multiple images of the
+!!
+!! INPUTS
+!!  filname=filename of the file where the history will be stored
+!!  hist(:)<type abihist>=Historical record of positions, forces, stresses,
+!!                        cell dims and energies,
+!!    Size(hist) is equal to a number of images to be written
+!!  ifirst=1 if first access to the file
+!!  ihead=1 if header has to be written (non evolving data)
+!!  natom=Number of atoms.
+!!  ntypat=Number of type of atoms.
+!!  typat(natom)=Type of each natom
+!!   amu(ntypat)=mass of the atoms (atomic mass unit)
+!!  znucl(:)=Nuclear charge for each type of pseudopotential.
+!!           WARNING: alchemical mixing is not supported. We assume npsp == ntypat
+!!  dtion=time step for Molecular Dynamics
+!!  [nimage]= Total number of images of the cell
+!!  [imgtab(:)]= In case of multiple images,indexes of images to be read
+!!               Default is 1,2,3,...
+!!               Size must be equal to size(hist)
+!!
+!! TODO
+!!  Have you ever heard about ETSF-IO specifications?
+!!
+!! OUTPUT
+!!  (only writing)
+!!
+!! PARENTS
+!!      gstateimg
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine write_md_hist_img(hist,filename,ifirst,ihead,natom,ntypat,&
+&                            typat,amu,znucl,dtion,&
+&                            nimage,imgtab) ! optional arguments
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'write_md_hist_img'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ifirst,ihead,natom,ntypat
+ integer,intent(in),optional :: nimage
+ real(dp),intent(in) :: dtion
+ character(len=*),intent(in) :: filename
+!arrays
+ integer,intent(in) :: typat(natom)
+ integer,intent(in),optional :: imgtab(:)
+ real(dp),intent(in) :: amu(ntypat),znucl(:)
+ type(abihist),intent(inout),target :: hist(:)
+
+!Local variables-------------------------------
+#if defined HAVE_NETCDF
+!scalars
+ integer :: iimage,iimg,my_nimage,ncerr,ncid,nimage_,npsp
+ integer :: xcart_id,xred_id,fcart_id,fred_id
+ integer :: vel_id,etotal_id,acell_id,rprimd_id,strten_id
+ integer :: ntypat_id,npsp_id,typat_id,znucl_id
+ integer :: ekin_id,entropy_id,mdtime_id,amu_id,dtion_id
+ logical :: has_nimage
+ character(len=500) :: msg
+ type(abihist),pointer :: hist_
+!arrays
+ integer,allocatable :: my_imgtab(:)
+#endif
+
+! *************************************************************************
+
+#if defined HAVE_NETCDF
+
+!Manage multiple images of the cell
+ has_nimage=present(nimage)
+ nimage_=merge(nimage,1,has_nimage)
+ my_nimage=size(hist)
+ if (my_nimage==0) return
+ ABI_ALLOCATE(my_imgtab,(my_nimage))
+ if (present(imgtab)) then
+  if (size(my_imgtab)/=my_nimage) then
+    msg='Inconsistency between hist and imgtab!'
+    MSG_BUG(msg)
+  end if
+  my_imgtab(:)=imgtab(:)
+ else
+   my_imgtab(:)=(/(iimage,iimage=1,my_nimage)/)
+ end if
+
+ if (ifirst==1) then
+!##### First access: Create NetCDF file and write defs
+
+   write(std_out,*) 'Write iteration in HIST netCDF file'
+   npsp=size(znucl)
+
+!  Create netCDF file
+   ncerr = nf90_create(path=trim(filename),cmode=NF90_CLOBBER,ncid=ncid)
+   NCF_CHECK_MSG(ncerr," create netcdf history file")
+
+!  Define all dims and vars
+   call def_file_hist(ncid,filename,natom,nimage_,ntypat,npsp,has_nimage)
+
+!  Write variables that do not change
+!  (they are not read in a hist structure).
+   if (ihead==1) then
+     call write_csts_hist(ncid,dtion,typat,znucl,amu)
+   end if
+
+ else
+!##### itime>2 access: just open NetCDF file
+
+   write(std_out,*) 'Write iteration in HIST netCDF file'
+
+!  Open netCDF file
+   ncerr = nf90_open(path=trim(filename),mode=NF90_WRITE, ncid=ncid)
+   NCF_CHECK_MSG(ncerr," open netcdf history file")
+
+ end if
+
+!##### Write variables into the dataset (loop over images)
+!Get the IDs
+ call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,&
+&     rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+!Write
+ do iimage=1,my_nimage
+   iimg=my_imgtab(iimage)
+   hist_ => hist(iimage)
+   call write_vars_hist(ncid,hist_,natom,has_nimage,iimg,&
+&       xcart_id,xred_id,fcart_id,fred_id,vel_id,rprimd_id,acell_id,&
+&       strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+ end do
+
+!##### Close the file
+ ncerr = nf90_close(ncid)
+ NCF_CHECK_MSG(ncerr," close netcdf history file")
+ ABI_DEALLOCATE(my_imgtab)
+
+#endif
+
+end subroutine write_md_hist_img
 !!***
 
 !----------------------------------------------------------------------
@@ -1269,22 +1449,15 @@ end subroutine write_md_hist
 !!
 !! FUNCTION
 !! Read the history file from a netcdf file and store it into a hist dataset structure
+!! This version is not compatible with multiple images of the simulation cell.
 !!
 !! INPUTS
 !!  filename = Filename of the NetCDF to read
+!!  isVUsed,isARUsed=flags used to initialize hsit structure
 !!
 !! OUTPUT
-!! hist<type abihist>=Historical record of positions, forces
-!!      |                    acell, stresses, and energies,
-!!      |                    contains:
-!!      | mxhist:  Maximun number of records
-!!      | ihist:   Index of present record of hist
-!!      | histA:   Historical record of acell(A) and rprimd(R)
-!!      | histE:   Historical record of energy(E)
-!!      | histR:   Historical record of rprimd(R)
-!!      | histS:   Historical record of strten(S)
-!!      | histV:   Historical record of velocity(V)
-!!      | histXF:  Historical record of positions(X) and forces(F)
+!!  hist<type abihist>=Historical record of positions, forces, stresses,
+!!                     cell dims and energies,
 !!
 !! PARENTS
 !!      mover
@@ -1293,7 +1466,7 @@ end subroutine write_md_hist
 !!
 !! SOURCE
 
-subroutine read_md_hist(filename,hist)
+subroutine read_md_hist(filename,hist,isVUsed,isARUsed)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1306,44 +1479,442 @@ implicit none
 
 !Arguments ------------------------------------
 !scalars
- type(abihist),intent(inout) :: hist
+ logical,intent(in) :: isVUsed,isARUsed
  character(len=*),intent(in) :: filename
+!arrays
+ type(abihist),intent(inout),target :: hist
 
 !Local variables-------------------------------
+#if defined HAVE_NETCDF
 !scalars
- integer :: ncerr,ncid
- integer :: natom,time
- integer :: xyz_id,natom_id,time_id,six_id
- integer :: xcart_id,xred_id,fcart_id,fred_id,ekin_id,entr_id,mdtime_id
- integer :: vel_id,etotal_id,acell_id,rprimd_id,strten_id
- character(len=5) :: char_tmp
- !character(len=500) :: msg
-!arrays
+ integer :: ncerr,ncid,nimage,natom,time
+ integer :: nimage_id,natom_id,xyz_id,time_id,six_id
+ integer :: xcart_id,xred_id,fcart_id,fred_id,ekin_id,entropy_id
+ integer :: mdtime_id,vel_id,etotal_id,acell_id,rprimd_id,strten_id
+ logical :: has_nimage
+ character(len=500) :: msg
+#endif
 
 ! *************************************************************************
 
 #if defined HAVE_NETCDF
 
-!#####################################################################
-!### Reading of NetCDF file
+ hist%ihist=0 ; hist%mxhist=0
 
-!1. Open netCDF file
-
+!Open netCDF file
  ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
-
  if(ncerr /= NF90_NOERR) then
    write(std_out,*) 'Could no open ',trim(filename),', starting from scratch'
-   hist%ihist=0
-   hist%mxhist=0
    return
  else
    write(std_out,*) 'Succesfully open ',trim(filename),' for reading'
    write(std_out,*) 'Extracting information from NetCDF file...'
-   hist%ihist=0
-   hist%mxhist=0
  end if
 
-!2. Inquire dimensions IDs
+!Inquire dimensions IDs and lengths
+ call get_dims_hist(ncid,natom,nimage,time,&
+&     natom_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
+
+!Allocate hist structure
+ call abihist_init(hist,natom,time,isVused,isARused)
+
+!Get the ID of a variables from their name
+ call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,&
+&     rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+
+!Read variables from the dataset and write them into hist
+ call read_vars_hist(ncid,hist,natom,time,has_nimage,1,&
+&     xcart_id,xred_id,fcart_id,fred_id,vel_id,rprimd_id,&
+&     acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+
+!Close NetCDF file
+ ncerr = nf90_close(ncid)
+ NCF_CHECK_MSG(ncerr," close netcdf history file")
+
+#endif
+
+end subroutine read_md_hist
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abihist/read_md_hist_img
+!!
+!! NAME
+!! read_md_hist_img
+!!
+!! FUNCTION
+!! Read the history file from a netcdf file and store it into a hist dataset structure
+!! This version is compatible with multiple images of the simulation cell.
+!!
+!! INPUTS
+!!  filename = Filename of the NetCDF to read
+!!  isVUsed,isARUsed=flags used to initialize hsit structure
+!!  [imgtab(:)]= In case of multiple images,indexes of images to be read
+!!               Default is 1,2,3,...
+!!               Size must be equal to size(hist)
+!!
+!! OUTPUT
+!!  hist(:)<type abihist>=Historical record of positions, forces, stresses,
+!!                        cell dims and energies,
+!!    Size(hist) is equal to a number of images to be read
+!!
+!! PARENTS
+!!      gstateimg
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine read_md_hist_img(filename,hist,isVUsed,isARused,imgtab)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'read_md_hist_img'
+!End of the abilint section
+
+implicit none
+
+!Arguments ------------------------------------
+!scalars
+ logical,intent(in) :: isVUsed,isARused
+ character(len=*),intent(in) :: filename
+!arrays
+ integer,intent(in),optional :: imgtab(:)
+ type(abihist),intent(inout),target :: hist(:)
+
+!Local variables-------------------------------
+#if defined HAVE_NETCDF
+!scalars
+ integer :: iimage,iimg,my_nimage,ncerr,ncid,nimage,natom,time
+ integer :: nimage_id,natom_id,xyz_id,time_id,six_id
+ integer :: xcart_id,xred_id,fcart_id,fred_id,ekin_id,entropy_id
+ integer :: mdtime_id,vel_id,etotal_id,acell_id,rprimd_id,strten_id
+ logical :: has_nimage
+ character(len=500) :: msg
+ type(abihist),pointer :: hist_
+ integer,allocatable :: my_imgtab(:)
+#endif
+
+! *************************************************************************
+
+#if defined HAVE_NETCDF
+
+ hist%ihist=0 ; hist%mxhist=0
+
+!Open netCDF file
+ ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
+ if(ncerr /= NF90_NOERR) then
+   write(std_out,*) 'Could no open ',trim(filename),', starting from scratch'
+   return
+ else
+   write(std_out,*) 'Succesfully open ',trim(filename),' for reading'
+   write(std_out,*) 'Extracting information from NetCDF file...'
+ end if
+
+ !Manage multiple images of the cell
+ my_nimage=size(hist)
+ if (my_nimage==0) return
+ ABI_ALLOCATE(my_imgtab,(my_nimage))
+ if (present(imgtab)) then
+  if (size(my_imgtab)/=my_nimage) then
+    msg='Inconsistency between hist and imgtab!'
+    MSG_BUG(msg)
+  end if
+  my_imgtab(:)=imgtab(:)
+ else
+   my_imgtab(:)=(/(iimage,iimage=1,my_nimage)/)
+ end if
+
+!Inquire dimensions IDs and lengths
+ call get_dims_hist(ncid,natom,nimage,time,&
+&     natom_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
+
+ if (nimage<maxval(my_imgtab)) then
+   msg='Not enough images in the HIST file!'
+   MSG_ERROR(msg)
+ end if
+
+!Loop over images
+ do iimage=1,my_nimage
+   iimg=my_imgtab(iimage)
+   hist_ => hist(iimage)
+
+!  Allocate hist structure
+   call abihist_init(hist_,natom,time,isVused,isARused)
+
+!  Get the ID of a variables from their name
+   call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,&
+&       rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+
+!  Read variables from the dataset and write them into hist
+   call read_vars_hist(ncid,hist_,natom,time,has_nimage,iimg,&
+&       xcart_id,xred_id,fcart_id,fred_id,vel_id,rprimd_id,&
+&       acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+
+ end do
+
+!Close NetCDF file
+ ncerr = nf90_close(ncid)
+ NCF_CHECK_MSG(ncerr," close netcdf history file")
+
+ ABI_DEALLOCATE(my_imgtab)
+
+#endif
+
+end subroutine read_md_hist_img
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abihist/def_file_hist
+!!
+!! NAME
+!! def_file_hist
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine def_file_hist(ncid,filename,natom,nimage,ntypat,npsp,has_nimage)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'def_file_hist'
+!End of the abilint section
+
+implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid
+ integer,intent(in) :: natom,nimage,ntypat,npsp
+ logical,intent(in) :: has_nimage
+ character(len=*),intent(in) :: filename
+
+!Local variables-------------------------------
+#if defined HAVE_NETCDF
+!scalars
+ integer :: ncerr
+ integer :: natom_id,nimage_id,ntypat_id,npsp_id,time_id,xyz_id,six_id
+ integer :: xcart_id,xred_id,fcart_id,fred_id,vel_id
+ integer :: rprimd_id,acell_id,strten_id
+ integer :: etotal_id,ekin_id,entropy_id,mdtime_id
+ integer :: typat_id,znucl_id,amu_id,dtion_id
+ character(len=500) :: msg
+!arrays
+ integer :: dim0(0),dim1(1),dim2(2),dim3(3),dim4(4)
+#endif
+
+! *************************************************************************
+
+#if defined HAVE_NETCDF
+
+!1.Define the dimensions
+
+ if (npsp/=ntypat) then
+   msg='HIST file does not support alchemical mixing!'
+   MSG_WARNING(msg)
+ end if
+
+ ncerr = nf90_def_dim(ncid,"natom",natom,natom_id)
+ NCF_CHECK_MSG(ncerr," define dimension natom")
+
+ ncerr = nf90_def_dim(ncid,"ntypat",ntypat,ntypat_id)
+ NCF_CHECK_MSG(ncerr," define dimension ntypat")
+
+ if (has_nimage) then
+   ncerr = nf90_def_dim(ncid,"nimage",nimage,nimage_id)
+   NCF_CHECK_MSG(ncerr," define dimension nimage")
+ end if
+
+ ncerr = nf90_def_dim(ncid,"npsp",npsp,npsp_id)
+ NCF_CHECK_MSG(ncerr," define dimension npsp")
+
+ ncerr = nf90_def_dim(ncid,"xyz",3,xyz_id)
+ NCF_CHECK_MSG(ncerr," define dimension xyz")
+
+ ncerr = nf90_def_dim(ncid,"six",6,six_id)
+ NCF_CHECK_MSG(ncerr," define dimension six")
+
+ ncerr = nf90_def_dim(ncid,"time",NF90_UNLIMITED,time_id)
+ NCF_CHECK_MSG(ncerr," define dimension time")
+
+!2.Define the constant variables
+
+ dim1=(/natom_id/)
+ call ab_define_var(ncid,dim1,typat_id,NF90_DOUBLE,&
+&  "typat","types of atoms","dimensionless" )
+
+ dim1=(/npsp_id/)
+ call ab_define_var(ncid,dim1,znucl_id,NF90_DOUBLE,&
+&  "znucl","atomic charges","atomic units" )
+
+ dim1=(/ntypat_id/)
+ call ab_define_var(ncid,dim1,amu_id,NF90_DOUBLE,&
+&  "amu","atomic masses","atomic units" )
+
+ call ab_define_var(ncid,dim0,dtion_id,NF90_DOUBLE,&
+&  "dtion","time step","atomic units" )
+
+!3.Define the evolving variables
+
+!mdtime
+ dim1=(/time_id/)
+ call ab_define_var(ncid,dim1,mdtime_id,NF90_DOUBLE,&
+& "mdtime","Molecular Dynamics or Relaxation TIME","hbar/Ha" )
+
+!xcart,xred,fcart,fred,vel
+ if (has_nimage) then
+   dim4=(/xyz_id,natom_id,nimage_id,time_id/)
+   call ab_define_var(ncid,dim4,xcart_id,NF90_DOUBLE,&
+&   "xcart","vectors (X) of atom positions in CARTesian coordinates","bohr" )
+   call ab_define_var(ncid,dim4,xred_id,NF90_DOUBLE,&
+&   "xred","vectors (X) of atom positions in REDuced coordinates","dimensionless" )
+   call ab_define_var(ncid,dim4,fcart_id,NF90_DOUBLE,&
+&   "fcart","atom Forces in CARTesian coordinates","Ha/bohr" )
+   call ab_define_var(ncid,dim4,fred_id,NF90_DOUBLE,&
+&   "fred","atom Forces in REDuced coordinates","dimensionless" )
+   call ab_define_var(ncid,dim4,vel_id,NF90_DOUBLE,&
+&   "vel","VELocity","bohr*Ha/hbar" )
+ else
+   dim3=(/xyz_id,natom_id,time_id/)
+   call ab_define_var(ncid,dim3,xcart_id,NF90_DOUBLE,&
+&   "xcart","vectors (X) of atom positions in CARTesian coordinates","bohr" )
+   call ab_define_var(ncid,dim3,xred_id,NF90_DOUBLE,&
+&   "xred","vectors (X) of atom positions in REDuced coordinates","dimensionless" )
+   call ab_define_var(ncid,dim3,fcart_id,NF90_DOUBLE,&
+&   "fcart","atom Forces in CARTesian coordinates","Ha/bohr" )
+   call ab_define_var(ncid,dim3,fred_id,NF90_DOUBLE,&
+&   "fred","atom Forces in REDuced coordinates","dimensionless" )
+   call ab_define_var(ncid,dim3,vel_id,NF90_DOUBLE,&
+&   "vel","VELocity","bohr*Ha/hbar" )
+ end if
+
+ !rprimd
+ if (has_nimage) then
+   dim4=(/xyz_id,xyz_id,nimage_id,time_id/)
+   call ab_define_var(ncid,dim4,rprimd_id,NF90_DOUBLE,&
+&   "rprimd","Real space PRIMitive translations, Dimensional","bohr" )
+ else
+   dim3=(/xyz_id,xyz_id,time_id/)
+   call ab_define_var(ncid,dim3,rprimd_id,NF90_DOUBLE,&
+&   "rprimd","Real space PRIMitive translations, Dimensional","bohr" )
+ end if
+
+ !acell
+ if (has_nimage) then
+   dim3=(/xyz_id,nimage_id,time_id/)
+   call ab_define_var(ncid,dim3,acell_id,NF90_DOUBLE,&
+&   "acell","CELL lattice vector scaling","bohr" )
+ else
+   dim2=(/xyz_id,time_id/)
+   call ab_define_var(ncid,dim2,acell_id,NF90_DOUBLE,&
+&   "acell","CELL lattice vector scaling","bohr" )
+ end if
+
+ !strten
+ if (has_nimage) then
+   dim3=(/six_id,nimage_id,time_id/)
+   call ab_define_var(ncid,dim3,strten_id,NF90_DOUBLE,&
+&   "strten","STRess tensor","Ha/bohr^3" )
+ else
+   dim2=(/six_id,time_id/)
+   call ab_define_var(ncid,dim2,strten_id,NF90_DOUBLE,&
+&   "strten","STRess tensor","Ha/bohr^3" )
+ end if
+
+ !etotal,ekin,entropy
+ if (has_nimage) then
+   dim2=(/nimage_id,time_id/)
+   call ab_define_var(ncid,dim2,etotal_id,NF90_DOUBLE,&
+&   "etotal","TOTAL Energy","Ha" )
+   call ab_define_var(ncid,dim2,ekin_id,NF90_DOUBLE,&
+&   "ekin","Energy KINetic ionic","Ha" )
+   call ab_define_var(ncid,dim2,entropy_id,NF90_DOUBLE,&
+&   "entropy","Entropy","" )
+ else
+   dim1=(/time_id/)
+   call ab_define_var(ncid,dim1,etotal_id,NF90_DOUBLE,&
+&   "etotal","TOTAL Energy","Ha" )
+   call ab_define_var(ncid,dim1,ekin_id,NF90_DOUBLE,&
+&   "ekin","Energy KINetic ionic","Ha" )
+   call ab_define_var(ncid,dim1,entropy_id,NF90_DOUBLE,&
+&   "entropy","Entropy","" )
+ end if
+
+!4.End define mode
+
+ ncerr = nf90_enddef(ncid)
+ NCF_CHECK_MSG(ncerr," end define mode")
+
+#endif
+
+end subroutine def_file_hist
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abihist/get_dims_hist
+!!
+!! NAME
+!! get_dims_hist
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine get_dims_hist(ncid,natom,nimage,time,&
+&          natom_id,nimage_id,time_id,xyz_id,six_id,has_nimage)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'get_dims_hist'
+!End of the abilint section
+
+implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid
+ integer,intent(out) :: natom,nimage,time
+ integer,intent(out) :: natom_id,nimage_id,time_id,xyz_id,six_id
+ logical,intent(out) :: has_nimage
+
+!Local variables-------------------------------
+#if defined HAVE_NETCDF
+!scalars
+ integer :: ncerr
+ character(len=5) :: char_tmp
+#endif
+
+! *************************************************************************
+
+#if defined HAVE_NETCDF
+
+!Inquire dimensions IDs
 
  ncerr = nf90_inq_dimid(ncid,"natom",natom_id)
  NCF_CHECK_MSG(ncerr," inquire dimension ID for natom")
@@ -1357,7 +1928,16 @@ implicit none
  ncerr = nf90_inq_dimid(ncid,"six",six_id)
  NCF_CHECK_MSG(ncerr," inquire dimension ID for six")
 
-!3. Inquire dimensions lengths
+ ncerr = nf90_inq_dimid(ncid,"nimage",nimage_id)
+ has_nimage=(ncerr==nf90_noerr)
+
+!Inquire dimensions lengths
+
+ if (has_nimage) then
+   ncerr = nf90_inquire_dimension(ncid,nimage_id,char_tmp,nimage)
+   has_nimage=(ncerr==nf90_noerr)
+ end if
+ if (.not.has_nimage) nimage=1
 
  ncerr = nf90_inquire_dimension(ncid,natom_id,char_tmp,natom)
  NCF_CHECK_MSG(ncerr," inquire dimension ID for natom")
@@ -1365,29 +1945,61 @@ implicit none
  ncerr = nf90_inquire_dimension(ncid,time_id,char_tmp,time)
  NCF_CHECK_MSG(ncerr," inquire dimension ID for time")
 
- write(std_out,*) 'Number of atoms readed:',natom
- write(std_out,*) 'Number of iterations recorded:',time
+#endif
 
-! write(msg, '(a,a,i4,a)' )ch10,&
-!&  ' gstate : reading',time,' (x,f) history pairs from input wf file.'
-! call wrtout(std_out,msg,'COLL')
-! call wrtout(ab_out,msg,'COLL')
+end subroutine get_dims_hist
+!!***
 
-!4. Allocate hist structure 
+!----------------------------------------------------------------------
 
- hist%ihist=1
- hist%mxhist=time
- ABI_ALLOCATE(hist%histA,(3,hist%mxhist))
- ABI_ALLOCATE(hist%histE,(hist%mxhist))
- ABI_ALLOCATE(hist%histEk,(hist%mxhist))
- ABI_ALLOCATE(hist%histEnt,(hist%mxhist))
- ABI_ALLOCATE(hist%histT,(hist%mxhist))
- ABI_ALLOCATE(hist%histR,(3,3,hist%mxhist))
- ABI_ALLOCATE(hist%histS,(6,hist%mxhist))
- ABI_ALLOCATE(hist%histV,(3,natom,hist%mxhist))
- ABI_ALLOCATE(hist%histXF,(3,natom,4,hist%mxhist))
+!!****f* m_abihist/get_varid_hist
+!!
+!! NAME
+!! get_varid_hist
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
-!5. Get the ID of a variables from their name
+subroutine get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,&
+&          rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'get_varid_hist'
+!End of the abilint section
+
+implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid
+ integer,intent(out) :: xcart_id,xred_id,fcart_id,fred_id,vel_id
+ integer,intent(out) :: rprimd_id,acell_id,strten_id
+ integer,intent(out) :: etotal_id,ekin_id,entropy_id,mdtime_id
+
+!Local variables-------------------------------
+#if defined HAVE_NETCDF
+!scalars
+ integer :: ncerr
+#endif
+
+! *************************************************************************
+
+#if defined HAVE_NETCDF
+
+ ncerr = nf90_inq_varid(ncid, "mdtime", mdtime_id)
+ NCF_CHECK_MSG(ncerr," get the id for mdtime")
 
  ncerr = nf90_inq_varid(ncid, "xcart", xcart_id)
  NCF_CHECK_MSG(ncerr," get the id for xcart")
@@ -1404,11 +2016,14 @@ implicit none
  ncerr = nf90_inq_varid(ncid, "vel", vel_id)
  NCF_CHECK_MSG(ncerr," get the id for vel")
 
+ ncerr = nf90_inq_varid(ncid, "rprimd", rprimd_id)
+ NCF_CHECK_MSG(ncerr," get the id for rprimd")
+
  ncerr = nf90_inq_varid(ncid, "acell", acell_id)
  NCF_CHECK_MSG(ncerr," get the id for acell")
 
- ncerr = nf90_inq_varid(ncid, "rprimd", rprimd_id)
- NCF_CHECK_MSG(ncerr," get the id for rprimd")
+ ncerr = nf90_inq_varid(ncid, "strten", strten_id)
+ NCF_CHECK_MSG(ncerr," get the id for strten")
 
  ncerr = nf90_inq_varid(ncid, "etotal", etotal_id)
  NCF_CHECK_MSG(ncerr," get the id for etotal")
@@ -1416,71 +2031,402 @@ implicit none
  ncerr = nf90_inq_varid(ncid, "ekin", ekin_id)
  NCF_CHECK_MSG(ncerr," get the id for ekin")
 
- ncerr = nf90_inq_varid(ncid, "entropy", entr_id)
+ ncerr = nf90_inq_varid(ncid, "entropy", entropy_id)
  NCF_CHECK_MSG(ncerr," get the id for entropy")
 
- ncerr = nf90_inq_varid(ncid, "mdtime", mdtime_id)
- NCF_CHECK_MSG(ncerr," get the id for mdtime")
-
- ncerr = nf90_inq_varid(ncid, "strten", strten_id)
- NCF_CHECK_MSG(ncerr," get the id for strten")
-
-!#####################################################################
-!### Read variables from the dataset and write them into hist
-
-!XCART,XRED,FCART,FRED,VEL
- ncerr = nf90_get_var(ncid, xcart_id,hist%histXF(:,:,1,:))
- NCF_CHECK_MSG(ncerr," read variable xcart")
-
- ncerr = nf90_get_var(ncid, xred_id,hist%histXF(:,:,2,:))
- NCF_CHECK_MSG(ncerr," read variable xred")
-
- ncerr = nf90_get_var(ncid, fcart_id,hist%histXF(:,:,3,:))
- NCF_CHECK_MSG(ncerr," read variable fcart")
-
- ncerr = nf90_get_var(ncid, fred_id,hist%histXF(:,:,4,:))
- NCF_CHECK_MSG(ncerr," read variable fred")
-
- ncerr = nf90_get_var(ncid, vel_id,hist%histV(:,:,:))
- NCF_CHECK_MSG(ncerr," read variable vel")
-
-!RPRIMD
- ncerr = nf90_get_var(ncid, rprimd_id,hist%histR(:,:,:))
- NCF_CHECK_MSG(ncerr," read variable rprimd")
-
-!ACELL
- ncerr = nf90_get_var(ncid, acell_id,hist%histA(:,:))
- NCF_CHECK_MSG(ncerr," read variable acell")
-
-!STRTEN
- ncerr = nf90_get_var(ncid, strten_id,hist%histS(:,:))
- NCF_CHECK_MSG(ncerr," read variable strten")
-
-!ETOTAL
- ncerr = nf90_get_var(ncid, etotal_id,hist%histE(:))
- NCF_CHECK_MSG(ncerr," read variable etotal")
-
-!Ekin
- ncerr = nf90_get_var(ncid, ekin_id,hist%histEk(:))
- NCF_CHECK_MSG(ncerr," read variable ekin")
-
-!Entropy
- ncerr = nf90_get_var(ncid, entr_id,hist%histEnt(:))
- NCF_CHECK_MSG(ncerr," read variable entropy")
-
-!MDTime
- ncerr = nf90_get_var(ncid, mdtime_id,hist%histT(:))
- NCF_CHECK_MSG(ncerr," read variable mdtime")
-
-!#####################################################################
-!### Close NetCDF file
- ncerr = nf90_close(ncid)
- NCF_CHECK_MSG(ncerr," close netcdf history file")
 #endif
 
-end subroutine read_md_hist
+end subroutine get_varid_hist
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_abihist/write_csts_hist
+!!
+!! NAME
+!! write_csts_hist
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine write_csts_hist(ncid,dtion,typat,znucl,amu)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'write_csts_hist'
+!End of the abilint section
+
+implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid
+ real(dp),intent(in) :: dtion
+!arrays
+ integer,intent(in) :: typat(:)
+ real(dp),intent(in) :: amu(:),znucl(:)
+
+!Local variables-------------------------------
+#if defined HAVE_NETCDF
+!scalars
+ integer :: ncerr
+ integer :: typat_id,znucl_id,amu_id,dtion_id
+#endif
+
+! *************************************************************************
+
+#if defined HAVE_NETCDF
+
+!1.Get the IDs
+
+ ncerr = nf90_inq_varid(ncid, "typat", typat_id)
+ NCF_CHECK_MSG(ncerr," get the id for typat")
+
+ ncerr = nf90_inq_varid(ncid, "znucl", znucl_id)
+ NCF_CHECK_MSG(ncerr," get the id for znucl")
+
+ ncerr = nf90_inq_varid(ncid, "amu", amu_id)
+ NCF_CHECK_MSG(ncerr," get the id for amu")
+
+ ncerr = nf90_inq_varid(ncid, "dtion", dtion_id)
+ NCF_CHECK_MSG(ncerr," get the id for dtion")
+
+!2.Write the constants
+
+ ncerr = nf90_put_var(ncid, typat_id, typat)
+ NCF_CHECK_MSG(ncerr," write variable typat")
+
+ ncerr = nf90_put_var(ncid, znucl_id, znucl)
+ NCF_CHECK_MSG(ncerr," write variable znucl")
+
+ ncerr = nf90_put_var(ncid, amu_id, amu)
+ NCF_CHECK_MSG(ncerr," write variable amu")
+
+ ncerr = nf90_put_var(ncid, dtion_id, dtion)
+ NCF_CHECK_MSG(ncerr," write variable dtion")
+
+#endif
+
+end subroutine write_csts_hist
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abihist/write_vars_hist
+!!
+!! NAME
+!! write_vars_hist
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,&
+&          xcart_id,xred_id,fcart_id,fred_id,vel_id,rprimd_id,&
+&          acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'write_vars_hist'
+!End of the abilint section
+
+implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid,natom,iimg
+ integer,intent(in) :: xcart_id,xred_id,fcart_id,fred_id,vel_id
+ integer,intent(in) :: rprimd_id,acell_id,strten_id
+ integer,intent(in) :: etotal_id,ekin_id,entropy_id,mdtime_id
+ logical,intent(in) :: has_nimage
+ type(abihist),intent(inout),target :: hist
+
+!Local variables-------------------------------
+#if defined HAVE_NETCDF
+!scalars
+ integer :: ncerr
+!arrays
+ integer :: count1(1),count2(2),count3(3),count4(4)
+ integer :: start1(1),start2(2),start3(3),start4(4)
+#endif
+
+! *************************************************************************
+
+#if defined HAVE_NETCDF
+
+!Variables not depending on images
+
+!mdtime
+ start1=(/hist%ihist/)
+ ncerr = nf90_put_var(ncid,mdtime_id,hist%histT(hist%ihist),start=start1)
+ NCF_CHECK_MSG(ncerr," write variable mdtime")
+
+!Variables depending on images
+
+!xcart,xred,fcart,fred,vel
+ if (has_nimage) then
+   start4=(/1,1,iimg,hist%ihist/);count4=(/3,natom,1,1/)
+   ncerr = nf90_put_var(ncid,xcart_id,hist%histXF(:,:,1,hist%ihist),&
+&                       start = start4,count = count4)
+   NCF_CHECK_MSG(ncerr," write variable xcart")
+   ncerr = nf90_put_var(ncid,xred_id,hist%histXF(:,:,2,hist%ihist),&
+&                       start = start4,count = count4)
+  NCF_CHECK_MSG(ncerr," write variable xred")
+   ncerr = nf90_put_var(ncid,fcart_id,hist%histXF(:,:,3,hist%ihist),&
+&                       start = start4,count = count4)
+   NCF_CHECK_MSG(ncerr," write variable fcart")
+   ncerr = nf90_put_var(ncid,fred_id,hist%histXF(:,:,4,hist%ihist),&
+&                       start = start4,count = count4)
+   NCF_CHECK_MSG(ncerr," write variable fred")
+   ncerr = nf90_put_var(ncid,vel_id,hist%histV(:,:,hist%ihist),&
+&                       start = start4,count = count4)
+   NCF_CHECK_MSG(ncerr," write variable vel")
+ else
+   start3=(/1,1,hist%ihist/);count3=(/3,natom,1/)
+   ncerr = nf90_put_var(ncid,xcart_id,hist%histXF(:,:,1,hist%ihist),&
+&                       start = start3,count = count3)
+   NCF_CHECK_MSG(ncerr," write variable xcart")
+   ncerr = nf90_put_var(ncid,xred_id,hist%histXF(:,:,2,hist%ihist),&
+&                       start = start3,count = count3)
+   NCF_CHECK_MSG(ncerr," write variable xred")
+   ncerr = nf90_put_var(ncid,fcart_id,hist%histXF(:,:,3,hist%ihist),&
+&                       start = start3,count = count3)
+   NCF_CHECK_MSG(ncerr," write variable fcart")
+   ncerr = nf90_put_var(ncid,fred_id,hist%histXF(:,:,4,hist%ihist),&
+&                       start = start3,count = count3)
+   NCF_CHECK_MSG(ncerr," write variable fred")
+   ncerr = nf90_put_var(ncid,vel_id,hist%histV(:,:,hist%ihist),&
+&                       start = start3,count = count3)
+   NCF_CHECK_MSG(ncerr," write variable vel")
+ end if
+
+!rprimd
+ if (has_nimage) then
+   start4=(/1,1,iimg,hist%ihist/);count4=(/3,3,1,1/)
+   ncerr = nf90_put_var(ncid,rprimd_id,hist%histR(:,:,hist%ihist),&
+&                       start = start4,count = count4)
+   NCF_CHECK_MSG(ncerr," write variable rprimd")
+ else
+   start3=(/1,1,hist%ihist/);count3=(/3,3,1/)
+   ncerr = nf90_put_var(ncid,rprimd_id,hist%histR(:,:,hist%ihist),&
+&                       start = start3,count = count3)
+   NCF_CHECK_MSG(ncerr," write variable rprimd")
+ end if
+
+!acell
+ if (has_nimage) then
+   start3=(/1,iimg,hist%ihist/);count3=(/3,1,1/)
+   ncerr = nf90_put_var(ncid,acell_id,hist%histA(:,hist%ihist),&
+&                       start = start3,count = count3)
+   NCF_CHECK_MSG(ncerr," write variable acell")
+ else
+   start2=(/1,hist%ihist/);count2=(/3,1/)
+   ncerr = nf90_put_var(ncid,acell_id,hist%histA(:,hist%ihist),&
+&                       start = start2,count = count2)
+   NCF_CHECK_MSG(ncerr," write variable acell")
+ end if
+
+!strten
+ if (has_nimage) then
+   start3=(/1,iimg,hist%ihist/);count3=(/6,1,1/)
+   ncerr = nf90_put_var(ncid,strten_id,hist%histS(:,hist%ihist),&
+&                       start = start3,count = count3)
+   NCF_CHECK_MSG(ncerr," write variable strten")
+ else
+   start2=(/1,hist%ihist/);count2=(/6,1/)
+   ncerr = nf90_put_var(ncid,strten_id,hist%histS(:,hist%ihist),&
+&                       start = start2,count = count2)
+   NCF_CHECK_MSG(ncerr," write variable strten")
+ end if
+
+!etotal,ekin,entropy
+ if (has_nimage) then
+   start2=(/iimg,hist%ihist/)
+   ncerr = nf90_put_var(ncid,etotal_id,hist%histE(hist%ihist),start=start2)
+   NCF_CHECK_MSG(ncerr," write variable etotal")
+   ncerr = nf90_put_var(ncid,ekin_id,hist%histEk(hist%ihist),start=start2)
+   NCF_CHECK_MSG(ncerr," write variable ekin")
+   ncerr = nf90_put_var(ncid,entropy_id,hist%histEnt(hist%ihist),start=start2)
+   NCF_CHECK_MSG(ncerr," write variable entropy")
+ else
+   start1=(/hist%ihist/)
+   ncerr = nf90_put_var(ncid,etotal_id,hist%histE(hist%ihist),start=start1)
+   NCF_CHECK_MSG(ncerr," write variable etotal")
+   ncerr = nf90_put_var(ncid,ekin_id,hist%histEk(hist%ihist),start=start1)
+   NCF_CHECK_MSG(ncerr," write variable ekin")
+   ncerr = nf90_put_var(ncid,entropy_id,hist%histEnt(hist%ihist),start=start1)
+   NCF_CHECK_MSG(ncerr," write variable entropy")
+ end if
+
+#endif
+
+end subroutine write_vars_hist
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_abihist/read_vars_hist
+!!
+!! NAME
+!! read_vars_hist
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine read_vars_hist(ncid,hist,natom,time,has_nimage,iimg,&
+&          xcart_id,xred_id,fcart_id,fred_id,vel_id,rprimd_id,&
+&          acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'read_vars_hist'
+!End of the abilint section
+
+implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid,natom,time,iimg
+ integer,intent(in) :: xcart_id,xred_id,fcart_id,fred_id,vel_id
+ integer,intent(in) :: rprimd_id,acell_id,strten_id
+ integer,intent(in) :: etotal_id,ekin_id,entropy_id,mdtime_id
+ logical,intent(in) :: has_nimage
+ type(abihist),intent(inout),target :: hist
+
+!Local variables-------------------------------
+#if defined HAVE_NETCDF
+!scalars
+ integer :: ncerr
+!arrays
+ integer :: count1(1),count2(2),count3(3),count4(4)
+ integer :: start1(1),start2(2),start3(3),start4(4)
+#endif
+
+! *************************************************************************
+
+#if defined HAVE_NETCDF
+
+!Variables not depending on imes
+
+!mdtime
+ start1=(/1/);count1=(/time/)
+ ncerr = nf90_get_var(ncid,mdtime_id,hist%histT(:),count=count1,start=start1)
+ NCF_CHECK_MSG(ncerr," read variable mdtime")
+
+!Variables depending on images
+
+!xcart,xred,fcart,fred,vel
+ if (has_nimage) then
+   start4=(/1,1,iimg,1/);count4=(/3,natom,1,time/)
+   ncerr = nf90_get_var(ncid,xcart_id ,hist%histXF(:,:,1,:),count=count4,start=start4)
+   NCF_CHECK_MSG(ncerr," read variable xcart")
+   ncerr = nf90_get_var(ncid,xred_id  ,hist%histXF(:,:,2,:),count=count4,start=start4)
+   NCF_CHECK_MSG(ncerr," read variable xred")
+   ncerr = nf90_get_var(ncid,fcart_id ,hist%histXF(:,:,3,:),count=count4,start=start4)
+   NCF_CHECK_MSG(ncerr," read variable fcart")
+   ncerr = nf90_get_var(ncid,fred_id  ,hist%histXF(:,:,4,:),count=count4,start=start4)
+   NCF_CHECK_MSG(ncerr," read variable fred")
+   ncerr = nf90_get_var(ncid,vel_id,hist%histV(:,:,:)  ,count=count4,start=start4)
+   NCF_CHECK_MSG(ncerr," read variable vel")
+ else
+   start3=(/1,1,1/);count3=(/3,natom,time/)
+   ncerr = nf90_get_var(ncid,xcart_id ,hist%histXF(:,:,1,:),count=count3,start=start3)
+   NCF_CHECK_MSG(ncerr," read variable xcart")
+   ncerr = nf90_get_var(ncid,xred_id  ,hist%histXF(:,:,2,:),count=count3,start=start3)
+   NCF_CHECK_MSG(ncerr," read variable xred")
+   ncerr = nf90_get_var(ncid,fcart_id ,hist%histXF(:,:,3,:),count=count3,start=start3)
+   NCF_CHECK_MSG(ncerr," read variable fcart")
+   ncerr = nf90_get_var(ncid,fred_id  ,hist%histXF(:,:,4,:),count=count3,start=start3)
+   NCF_CHECK_MSG(ncerr," read variable fred")
+   ncerr = nf90_get_var(ncid,vel_id,hist%histV(:,:,:)  ,count=count3,start=start3)
+   NCF_CHECK_MSG(ncerr," read variable vel")
+ end if
+
+!rprimd
+ if (has_nimage) then
+   start4=(/1,1,iimg,1/);count4=(/3,3,1,time/)
+   ncerr = nf90_get_var(ncid,rprimd_id,hist%histR(:,:,:)  ,count=count4,start=start4)
+   NCF_CHECK_MSG(ncerr," read variable rprimd")
+ else
+   start3=(/1,1,1/);count3=(/3,3,time/)
+   ncerr = nf90_get_var(ncid,rprimd_id,hist%histR(:,:,:)  ,count=count3,start=start3)
+   NCF_CHECK_MSG(ncerr," read variable rprimd")
+ end if
+
+!acell
+ if (has_nimage) then
+   start3=(/1,iimg,1/);count3=(/3,1,time/)
+   ncerr = nf90_get_var(ncid,acell_id,hist%histA(:,:),count=count3,start=start3)
+   NCF_CHECK_MSG(ncerr," read variable acell")
+ else
+   start2=(/1,1/);count2=(/3,time/)
+   ncerr = nf90_get_var(ncid,acell_id,hist%histA(:,:),count=count2,start=start2)
+   NCF_CHECK_MSG(ncerr," read variable acell")
+ end if
+
+!strten
+ if (has_nimage) then
+   start3=(/1,iimg,1/);count3=(/6,1,time/)
+   ncerr = nf90_get_var(ncid, strten_id,hist%histS(:,:),count=count3,start=start3)
+   NCF_CHECK_MSG(ncerr," read variable strten")
+ else
+   start2=(/1,1/);count2=(/6,time/)
+   ncerr = nf90_get_var(ncid, strten_id,hist%histS(:,:),count=count2,start=start2)
+   NCF_CHECK_MSG(ncerr," read variable strten")
+ end if
+
+!etotal,ekin,entropy
+ if (has_nimage) then
+   start2=(/1,1/);count2=(/1,time/)
+   ncerr = nf90_get_var(ncid,etotal_id,hist%histE(:),count=count2,start=start2)
+   NCF_CHECK_MSG(ncerr," read variable etotal")
+   ncerr = nf90_get_var(ncid,ekin_id ,hist%histEk(:),count=count2,start=start2)
+   NCF_CHECK_MSG(ncerr," read variable ekin")
+   ncerr = nf90_get_var(ncid,entropy_id,hist%histEnt(:),count=count2,start=start2)
+   NCF_CHECK_MSG(ncerr," read variable entropy")
+ else
+   start1=(/1/);count1=(/time/)
+   ncerr = nf90_get_var(ncid,etotal_id,hist%histE(:),count=count1,start=start1)
+   NCF_CHECK_MSG(ncerr," read variable etotal")
+   ncerr = nf90_get_var(ncid,ekin_id,hist%histEk(:),count=count1,start=start1)
+   NCF_CHECK_MSG(ncerr," read variable ekin")
+   ncerr = nf90_get_var(ncid,entropy_id,hist%histEnt(:),count=count1,start=start1)
+   NCF_CHECK_MSG(ncerr," read variable entropy")
+ end if
+
+#endif
+
+end subroutine read_vars_hist
+!!***
 
 end module m_abihist
