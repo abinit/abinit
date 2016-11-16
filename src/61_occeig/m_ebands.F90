@@ -2114,8 +2114,10 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
 
  if (ebands_has_metal_scheme(ebands)) then
    !  If occupation is metallic have to compute new occupation numbers.
-   write(msg,'(a,f9.5)')' metallic scheme, calling newocc with spinmagntarget = ',spinmagntarget
-   call wrtout(std_out,msg,'COLL')
+   if (my_prtvol > 10) then
+     write(msg,'(a,f9.5)')' metallic scheme, calling newocc with spinmagntarget = ',spinmagntarget
+     call wrtout(std_out,msg,'COLL')
+   end if
 
    ! newocc assumes eigenvalues and occupations packed in 1d-vector!!
    mband  = ebands%mband
@@ -2178,6 +2180,7 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
 
    vtop=MAXVAL(valencetop)
    cbot=MINVAL(condbottom)
+
    write(msg,'(a,f6.2,2a,f6.2)')&
 &    ' top of valence       [eV] ',vtop*Ha_eV,ch10,&
 &    ' bottom of conduction [eV] ',cbot*Ha_eV
@@ -2289,7 +2292,7 @@ subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
  ebands%occopt = occopt; ebands%tsmear = tsmear
 
- if (prtvol > 0) then
+ if (prtvol > 10) then
    call wrtout(std_out, "Changing occupation scheme in electron bands")
    call wrtout(std_out, sjoin("occopt:", itoa(ebands%occopt), " ==> ", itoa(occopt)))
    call wrtout(std_out, sjoin("tsmear:", ftoa(ebands%tsmear), " ==> ", ftoa(tsmear)))
@@ -2297,7 +2300,7 @@ subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
 
  call ebands_update_occ(ebands,spinmagntarget,stmbias0,prtvol=my_prtvol)
 
- if (prtvol > 0) then
+ if (prtvol > 10) then
    call wrtout(std_out, sjoin('Fermi level is now:', ftoa(ebands%fermie)))
  end if
 

@@ -335,7 +335,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! TODO: Optimize this part. Really slow if tetra and lots of points
  ! Could just do DOS around efermi
  edos_intmeth = 2; if (dtset%prtdos == 1) edos_intmeth = 1
- !edos_intmeth = 1
+ edos_intmeth = 1
  edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
  edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
  call edos_init(edos,ebands,cryst,edos_intmeth,edos_step,edos_broad,comm,ierr)
