@@ -425,7 +425,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 #ifdef HAVE_NETCDF
      path = strcat(dtfil%filnam_ds(4), "_PHDOS.nc")
      ncerr = nctk_open_create(ncid, path, xmpi_comm_self)
-     NCF_CHECK_MSG(ncerr, "Creating PHDOS.nc file")
+     NCF_CHECK_MSG(ncerr, sjoin("Creating PHDOS.nc file:", path))
      NCF_CHECK(crystal_ncwrite(cryst, ncid))
      call phdos_ncwrite(phdos, ncid)
      NCF_CHECK(nf90_close(ncid))
@@ -475,6 +475,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 ! TODO: decide whether to make several driver functions.
 !  before that, however, need to encapsulate most of the functionalities in eph_phgamma
 !  otherwise there will be tons of duplicated code
+
+ ! TODO: Make sure that all subdrivers work with useylm == 1
 
  if (dtset%eph_task == 1) then
    ! Compute phonon linewidths in metals.

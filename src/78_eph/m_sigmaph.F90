@@ -537,6 +537,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
    ! Activate Fourier interpolation if q-points are not in the DVDB file.
    ! TODO: handle q_bz = S q_ibz case by symmetrizing the potentials already available in the DVDB.
+   ! without performing FT interpolation.
    do_ftv1q = 0
    do iq_ibz=1,sigma%nqibz_k
      if (dvdb_findq(dvdb, sigma%qibz_k(:,iq_ibz)) == -1) do_ftv1q = do_ftv1q + 1
@@ -758,6 +759,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
 
        do ib_kq=1,sigma%nbsum(ikq_ibz, spin)
+         ! This is to check whether the gkk elements in the degenerate subspace break symmetry
+         if (ib_kq >= bstart_ks .and. ib_kq <= bstart_ks + nbcalc_ks - 1) cycle
 
          ! symmetrize wavefunctions from IBZ (if needed).
          ! Be careful with time-reversal symmetry.

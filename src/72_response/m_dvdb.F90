@@ -87,6 +87,12 @@ MODULE m_dvdb
 !!  natom, nspden, nspinor, and usepaw are global variables in the sense that it's not possible to add
 !!  new entries to the database if these dimension differ from the global ones.
 !!
+!! TODO
+!!  1) Add option to store potentials in memory to reduce IO pressure
+!!  2) handle q_bz = S q_ibz case by symmetrizing the potentials already available in the DVDB.
+!!     without performing FT interpolation.
+!!  3) Implement treatment of long-range behaviour in FT interpolation in polar semiconductors.
+!!
 !! SOURCE
 
  type,public :: dvdb_t
