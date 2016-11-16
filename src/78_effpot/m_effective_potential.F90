@@ -3237,17 +3237,6 @@ subroutine index_periodic(index,n_cell)
     index = index + n_cell
   end do
 
-!OLD_ VERSION
-! if (index < 0) then
-!   index = index + n_cell
-!   call index_periodic(index,n_cell)
-! else
-!   if(index > n_cell-1) then
-!     index = index - n_cell
-!     call index_periodic(index,n_cell)
-!   end if
-! end if
-
 end subroutine index_periodic
 !!***
 
