@@ -1345,11 +1345,10 @@ end subroutine sigmaph_free
 
 subroutine sigmaph_solve(self, ikcalc, spin, ebands)
 
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'sigmaph_solve'
+#define ABI_FUNC 'nbe'
 !End of the abilint section
 
  implicit none

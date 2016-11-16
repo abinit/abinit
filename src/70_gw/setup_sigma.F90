@@ -723,8 +723,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! * Stop if a nonzero umklapp is needed to reconstruct the BZ. In this case, indeed,
  !   epsilon^-1(Sq) should be symmetrized in csigme using a different expression (G-G_o is needed)
  !
- !if (sigma_needs_w(Sigp) .or. mod10==5) then !@WC
- if (sigma_needs_w(Sigp)) then
+ if (sigma_needs_w(Sigp) .or. mod10==5) then !@WC
    if (.not. file_exists(fname)) then
      fname = nctk_ncify(fname)
      MSG_COMMENT(sjoin("File not found. Will try netcdf file:", fname))
@@ -744,17 +743,12 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
    call kmesh_init(Qmesh,Cryst,Er%nqibz,Er%qibz,Dtset%kptopt)
  else
-   !Er%npwe     =1
-   !Sigp%npwc   =1
-   !Dtset%npweps=1
-   Er%npwe     = Sigp%npwx  !@WC
-   Sigp%npwc   = Er%npwe
-   Dtset%npweps= Er%npwe
+   Er%npwe     =1
+   Sigp%npwc   =1
+   Dtset%npweps=1
    call find_qmesh(Qmesh,Cryst,Kmesh)
-   !ABI_MALLOC(Er%gvec,(3,1))
-   !Er%gvec(:,1) = (/0,0,0/)
-   ABI_MALLOC(Er%gvec,(3,ng_kss))
-   Er%gvec = gvec_kss
+   ABI_MALLOC(Er%gvec,(3,1))
+   Er%gvec(:,1) = (/0,0,0/)
  end if
 
  call kmesh_print(Qmesh,"Q-mesh for screening function",std_out,Dtset%prtvol,"COLL")
@@ -787,8 +781,6 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  call gsph_init(Gsph_c,Cryst,Er%npwe,gvec=Er%gvec)
 
  call gsph_init(Gsph_x,Cryst,Sigp%npwx,gvec=gvec_kss)
-
- ABI_FREE(Er%gvec) !@WC
 
  ! === Make biggest G-sphere of Sigp%npwvec vectors ===
  Sigp%npwvec=MAX(Sigp%npwwfn,Sigp%npwx)
