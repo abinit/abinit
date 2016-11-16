@@ -601,6 +601,9 @@
  dprarr(3,:)=dtsets(:)%pvelmax(3)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'pvelmax','DPR',0)
 
+ dprarr(1,:)=dtsets(:)%pw_unbal_thresh
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'pw_unbal_thresh','DPR',0)
+
 !###########################################################
 !### 03. Print all the input variables (Q)
 !##

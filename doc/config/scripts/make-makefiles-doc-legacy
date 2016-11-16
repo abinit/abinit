@@ -6,11 +6,14 @@
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser,NoOptionError
+try:
+    from ConfigParser import ConfigParser,NoOptionError
+except ImportError:
+    from configparser import ConfigParser,NoOptionError
 from time import gmtime,strftime
 
-import commands
 import os
 import re
 import sys
@@ -68,18 +71,18 @@ my_configs = ["config/specs/documents.conf"]
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
      not os.path.exists("config/specs/documents.conf") ):
-  print "%s: You must be in the top of an Abinit Documentation source tree." % my_name
-  print "%s: Aborting now." % my_name
+  print("%s: You must be in the top of an Abinit Documentation source tree." % my_name)
+  print("%s: Aborting now." % my_name)
   sys.exit(1)
 
 # Read config file(s)
 for cnf_file in my_configs:
   if ( os.path.exists(cnf_file) ):
     if ( re.search("\.cf$",cnf_file) ):
-      execfile(cnf_file)
+      exec(compile(open(cnf_file).read(), cnf_file, 'exec'))
   else:
-    print "%s: Could not find config file (%s)." % (my_name,cnf_file)
-    print "%s: Aborting now." % my_name
+    print("%s: Could not find config file (%s)." % (my_name,cnf_file))
+    print("%s: Aborting now." % my_name)
     sys.exit(2)
 
 # What time is it?
@@ -114,6 +117,6 @@ for doc_dir in doc_list:
       dat_files += [os.path.join(root,item) for item in files]
 
 # Write makefile
-mf = file("./Makefile.am","w")
+mf = open("./Makefile.am", "wt")
 mf.write(makefile_data(my_name,now,dat_files))
 mf.close()

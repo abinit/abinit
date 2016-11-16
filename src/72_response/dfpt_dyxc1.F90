@@ -175,6 +175,7 @@ subroutine dfpt_dyxc1(atindx,blkflgfrx1,dyfrx1,gmet,gsqcut,ixc,kxc,mgfft,mpert,m
 !    Compute the corresponding potential
      option=0
      ABI_ALLOCATE(rhor1,(cplex*nfft,nspden))
+     rhor1=zero
 !FR EB Non-collinear magnetism
      if (nspden==4.and.present(rhor)) then
       optnc=1

@@ -1,43 +1,44 @@
 # Exercise IO routines in parallel with different combination 
 # of parameters in the GS eigensolvers.
 
-#use_slk 1
-#iomode 1
-
 ngfft 24 24 24
 ngfftdg 36 36 36
 getwfk -1
 paral_kgb 1
+pw_unbal_thresh 10  # Activate load balancing procedure
 
 # Test the prt* variables used in outscf.
 prtden 1
 prtpot 1 
 prtgeo 1 
-#prtdos 1
- #prtstm 1
+#prtstm 1
 prt1dm 1
 prtvha 1
 prtvhxc 1
 prtvxc 1
 prtnabla 1
- #prtefg 1
+#prtefg 1
 prtvpsp 1
 #prtvclmb 1   # Buggy if MPI-FFT
 prtfc 1
- #prtkden 1
- #prtelf 1
- #prtgden 1
- #prtlden 1
+#prtkden 1
+#prtelf 1
+#prtgden 1
+#prtlden 1
+natsph 1
+iatsph 2
 
 ndtset 5
 
 # Dataset 1
 # Output the GS WFK with MPI-FFT.
 npband1 1 npkpt1 2 npfft1 2
+prtdos1 3
 
 # Dataset 2
 # Read the previous GS WFK. Use MPI-FFT but with different number of procs
 npband2 1 npkpt2 1 npfft2 4
+prtdos2 3
 
 # Dataset 3
 # Read the previous GS WFK in band-only mode.
@@ -53,6 +54,7 @@ npband4 2 npkpt4 1 npfft4 2
 # Read previous WFK file with the simple band-by-band CG solver.
 paral_kgb5 0 
 iomode5 0  # CG with MPI-IO is buggy!
+prtdos5 3
 
 # SCF parameters
 ecut 15. 
@@ -90,12 +92,17 @@ natom 2
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%%   files_to_test=t26_MPI4.out, tolnlines=11, tolabs=2.0e-7, tolrel=1.0
+#%%   files_to_test=t26_MPI4.out, tolnlines=11, tolabs=2.0e-7, tolrel=1.0;
+#%%    t26_MPI4o_DS1_DOS_AT0002, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
+#%%    t26_MPI4o_DS2_DOS_AT0002, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
+#%%    t26_MPI4o_DS5_DOS_AT0002, tolnlines=50, tolabs=0.05, tolrel=0.01, fld_options = -ridiculous;
 #%% [extra_info]
 #%% keywords = PAW
 #%% authors = M. Giantomassi
 #%% description = 
 #%%   C-diamond, Bulk, 2 atoms, with PAW.
 #%%   Test the IO routines with paral_kgb in [1, 0] and different combinations
-#%%   of parameters (npfft, npband, npkpt)
+#%%   of parameters (npfft, npband, npkpt). 
+#%%   Test the plane wave load balancing procedure (pw_unbal_thresh).
+#%%   Test also the computation of PJDOS.
 #%%<END TEST_INFO>

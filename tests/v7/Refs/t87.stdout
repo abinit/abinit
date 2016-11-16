@@ -49,6 +49,7 @@
 - Reading header of file [14]: t85o_DS9_POT2
 Merged successfully 14 files
  ==== Info on the dvdb% object ====
+ Version:            2
  Number of q-points:            8
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:

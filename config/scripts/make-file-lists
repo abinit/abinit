@@ -6,8 +6,12 @@
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
 from time import gmtime,strftime
 
 import fnmatch
@@ -150,8 +154,8 @@ for my_root in cnf.sections():
             sys.stderr.write("%s: ignoring file %s\n" % \
               (my_name,os.path.join(root,src)))
     my_files.sort()
-    file("%s/dist/%s.lst" % (master_root,my_subdir),"w").write("\n".join(my_files) + "\n")
+    open("%s/dist/%s.lst" % (master_root,my_subdir),"wt").write("\n".join(my_files) + "\n")
 
 # Make sure the newly created files will be distributed
-file("%s/dist/%s.lst" % (master_root,master_root),"a").write(
+open("%s/dist/%s.lst" % (master_root,master_root),"a").write(
   "config/dist/" + ".lst\nconfig/dist/".join(master_list) + ".lst\n")

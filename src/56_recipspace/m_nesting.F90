@@ -29,6 +29,7 @@ MODULE m_nesting
  use m_errors
  use m_profiling_abi
  use m_kptrank
+ use m_sort
 
  use m_numeric_tools,  only : wrap2_zero_one, interpol3d
  use m_io_tools,       only : open_file
@@ -190,7 +191,6 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mknesting'
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

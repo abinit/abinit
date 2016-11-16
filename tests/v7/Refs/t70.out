@@ -257,8 +257,7 @@ P           mkmem           4
  Radial grid used for (t)core density is grid 1
  Radial grid used for Vloc is grid 1
  Radial grid used for pseudo valence density is grid 1
-
-  Mesh size for Vloc has been set to  767 to avoid numerical noise.
+ Mesh size for Vloc has been set to  767 to avoid numerical noise.
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
@@ -628,8 +627,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
  Radial grid used for (t)core density is grid 1
  Radial grid used for Vloc is grid 1
  Radial grid used for pseudo valence density is grid 1
-
-  Mesh size for Vloc has been set to  767 to avoid numerical noise.
+ Mesh size for Vloc has been set to  767 to avoid numerical noise.
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 

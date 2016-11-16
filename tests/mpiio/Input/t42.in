@@ -64,6 +64,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = abiref_nag_6.1_openmpi
 #%% [files]
 #%% psp_files = 2he.psphgh
 #%% [paral_info]

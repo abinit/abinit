@@ -1050,7 +1050,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_ALLOCATE(eigenq,(dtset%mband*nkpt_rbz*dtset%nsppol))
 
    !if (sum(dtset%qptn(1:3)**2)>=1.d-14) then ! non-zero q
-   if (dtfil%fnamewffq == dtfil%fnamewffk .and. sum(dtset%qptn(1:3)**2) < 1.d-14) then 
+   if (dtfil%fnamewffq == dtfil%fnamewffk .and. sum(dtset%qptn(1:3)**2) < 1.d-14) then
      call wrtout(std_out, "qpt is Gamma, psi_k+q initialized from psi_k in memory")
      cgq = cg
      eigenq = eigen0
@@ -1473,7 +1473,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &         wtk_rbz)
        end if
 
-     else if (.not. found_eq_gkk .or. ipert==dtset%natom+11) then 
+     else if (.not. found_eq_gkk .or. ipert==dtset%natom+11) then
        ! negative iscf_mod and no symmetric rotation of rhor1
        ! Read rho1(r) from a disk file and broadcast data.
        rdwr=1;rdwrpaw=psps%usepaw;if(dtfil%ireadwf/=0) rdwrpaw=0
@@ -1626,7 +1626,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ! Reshape eigen1 into gkk for netCDF output
      ABI_STAT_ALLOCATE(gkk,(2*dtset%mband*dtset%nsppol,dtset%nkpt,1,1,dtset%mband), ierr)
      ABI_CHECK(ierr==0, "out-of-memory in gkk")
-     gkk(:,:,:,:,:) = zero 
+     gkk(:,:,:,:,:) = zero
      mband = dtset%mband
      band_index = 0
      band2tot_index = 0

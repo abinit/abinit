@@ -22,7 +22,6 @@
 
 #include "abi_common.h"
 
-
 module m_atprj
 
  use defs_basis
@@ -40,10 +39,10 @@ module m_atprj
 !!****t* m_atprj/atprj_type
 !! NAME
 !! atprj_type
-!! 
+!!
 !! FUNCTION
 !! Container for atomic projection file data
-!! 
+!!
 !! SOURCE
 
 type, public :: atprj_type
@@ -250,5 +249,5 @@ subroutine atprj_destroy(t_atprj)
 
 end subroutine atprj_destroy
 
-end module 
+end module
 !!***
