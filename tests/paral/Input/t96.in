@@ -32,8 +32,8 @@ ntime  = 50
 #%% test_chain = t95.in,t96.in,t97.in,t98.in
 #%% [files]
 #%% [paral_info]
-#%% nprocs_to_test = 1, 2, 4
-#%% max_nprocs = 4
+#%% nprocs_to_test = 1, 2, 4, 10
+#%% max_nprocs = 10
 #%% [NCPU_1]
 #%% input_ddb  = t95_MPI1o_DS3_DDB 
 #%% files_to_test = 

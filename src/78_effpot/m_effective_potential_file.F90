@@ -1683,6 +1683,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  real(dp),allocatable :: instrain(:,:),zeff(:,:,:)
  real(dp),pointer :: atmfrc_red(:,:,:,:,:,:),cell_red(:,:),wghatm_red(:,:,:)
  character(len=500) :: message
+ type(asrq0_t) :: asrq0
  type(ifc_type) :: ifc
  real(dp),allocatable :: d2cart(:,:,:,:,:),displ(:)
  real(dp),allocatable :: eigval(:,:),eigvec(:,:,:,:,:),phfrq(:)
@@ -1942,6 +1943,10 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
     call asria_calc(inp%asr,d2asr,ddb%val(:,:,iblok),ddb%mpert,ddb%natom)
   end if
 
+  ! Acoustic Sum Rule
+  ! In case the interatomic forces are not calculated, the
+  ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
+  asrq0 = ddb_get_asrq0(ddb, inp%asr, inp%rfmeth, crystal%xcart)
 
 !**********************************************************************
 ! Interatomic Forces Calculation
@@ -2189,7 +2194,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   if (iblok /=0) then
 
 !    then print the internal stain tensor
-    call ddb_internalstr(inp%asr,ddb%val,d2asr,iblok,instrain,ab_out,mpert,natom,nblok)
+    call ddb_internalstr(inp%asr,crystal,ddb%val,asrq0,d2asr,iblok,instrain,ab_out,mpert,msize,natom,nblok)
 
     do ipert1=1,6
       do ipert2=1,natom
@@ -2211,6 +2216,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   ABI_DEALLOCATE(zeff)
   ABI_DEALLOCATE(instrain)
   ABI_DEALLOCATE(d2asr)
+  call asrq0_free(asrq0)
 
   write(message,'(a)')ch10
   call wrtout(std_out,message,'COLL')
