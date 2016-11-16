@@ -173,10 +173,6 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    msg='Not compatible with parallelization over spinorial components !'
    MSG_BUG(msg)
  end if
- if (gs_hamkq%nvloc>1) then !FR EB
-   msg='Not compatible with nvloc=4 (non-coll. magnetism): work in progress !'
-   MSG_WARNING(msg)
- end if
 
 !Check sizes
  my_nspinor=max(1,gs_hamkq%nspinor/mpi_enreg%nproc_spinor)

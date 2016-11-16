@@ -19,7 +19,7 @@
 !!   number of potentials (integer)
 !!   for each potential:
 !!     Abinit header with info on the perturbation and the FFT mesh
-!!     potential on the FFT mesh 
+!!     potential on the FFT mesh
 !!
 !! CHILDREN
 !!
@@ -101,6 +101,7 @@ program mrgdv
 
  ABI_CHECK(xmpi_comm_size(comm) == 1, "Not programmed for parallel execution")
  prtvol = 0
+ !prtvol = 10
 
  nargs = command_argument_count()
 
@@ -159,7 +160,7 @@ program mrgdv
 
      call dvdb_init(db, db_path, comm)
 
-     call dvdb_print(db)
+     call dvdb_print(db, prtvol=prtvol)
      call dvdb_list_perts(db, [-1,-1,-1])
      !call dvdb_list_perts(db, [2, 2, 2])
 
@@ -205,7 +206,7 @@ program mrgdv
 
      ABI_MALLOC(intp_v1r, (2,nfft,db%nspden,db%natom3))
      ABI_MALLOC(file_v1r, (2,nfft,db%nspden,db%natom3))
-     
+
      call dvdb_ftinterp_setup(db,ngqpt,1,[zero,zero,zero],nfft,ngfft,comm)
 
      do iq=1,db%nqpt
@@ -230,7 +231,7 @@ program mrgdv
            do ifft=1,2
            !do ifft=1,nfft
              write(std_out,*)file_v1r(1,ifft,ispden,mu),intp_v1r(1,ifft,ispden,mu),&
-             file_v1r(2,ifft,ispden,mu),intp_v1r(2,ifft,ispden,mu) 
+             file_v1r(2,ifft,ispden,mu),intp_v1r(2,ifft,ispden,mu)
            end do
          end do
        end do

@@ -1385,7 +1385,7 @@ end subroutine put_eneocc_vect
 !!
 !! SOURCE
 
-function get_bandenergy(ebands) result(band_energy)
+pure function get_bandenergy(ebands) result(band_energy)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1439,7 +1439,7 @@ end function get_bandenergy
 !!
 !! SOURCE
 
-function get_valence_idx(ebands,tol_fermi) result(val_idx)
+pure function get_valence_idx(ebands,tol_fermi) result(val_idx)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1594,7 +1594,7 @@ end subroutine apply_scissor
 !!
 !! NOTES
 !!  We assume that the occupation factors monotonically decrease as a function of energy.
-!!  This is not always true for eavery smearing technique implemented in Abinit.
+!!  This is not always true for every smearing technique implemented in Abinit.
 !!
 !! PARENTS
 !!
@@ -1602,7 +1602,7 @@ end subroutine apply_scissor
 !!
 !! SOURCE
 
-function get_occupied(ebands,tol_occ) result(occ_idx)
+pure function get_occupied(ebands,tol_occ) result(occ_idx)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1745,10 +1745,10 @@ end subroutine enclose_degbands
 !!   return number of electrons in each spin channel (computed from occoputation factors if nsppol=2)
 !!
 !! INPUTS
-!!  BSt<ebands_t>=The object describing the band structure.
+!!  ebands<ebands_t>=The object describing the band structure.
 !!
 !! OUTPUT
-!!  nelect_per_spin(BSt%nsppol)=For each spin the number of electrons (eventually fractional)
+!!  nelect_per_spin(ebands%nsppol)=For each spin the number of electrons (eventually fractional)
 !!
 !! PARENTS
 !!
@@ -1756,7 +1756,7 @@ end subroutine enclose_degbands
 !!
 !! SOURCE
 
-function ebands_nelect_per_spin(ebands) result(nelect_per_spin)
+pure function ebands_nelect_per_spin(ebands) result(nelect_per_spin)
 
 
 !This section has been created automatically by the script Abilint (TD).

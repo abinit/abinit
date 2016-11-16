@@ -164,7 +164,7 @@ subroutine fxphas(cg,gsc,icg,igsc,istwfk,mcg,mgsc,mpi_enreg,nband_k,npw_k,useove
            if (root2>root1) theta=thppi
          else
 !          The real part vector and the imaginary part vector are orthogonal, and of same norm. Strong indeterminacy.
-!          Will determine the first non-zero coefficient, and fix its phase 
+!          Will determine the first non-zero coefficient, and fix its phase
 !          Hypothesis : there is at least one non-zero element on the master node ...
            do ii=1+indx,npw_k+indx
              cre=cg(1,ii)
