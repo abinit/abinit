@@ -513,8 +513,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
  ! Open the DVDB file
  call dvdb_open_read(dvdb, ngfftf, xmpi_comm_self)
- !dvdb%debug = .True.
- !dvdb%symv1 = .True. ! This one to symmetrize the potentials.
+ if (dtset%prtvol > 10) dvdb%debug = .True.
+ ! This one to symmetrize the potentials.
+ if (dtset%symdynmat == 1) dvdb%symv1 = .True.
  call dvdb_print(dvdb, prtvol=dtset%prtvol)
 
  ! Loop over k-points for Sigma_nk.

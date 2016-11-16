@@ -141,6 +141,9 @@ MODULE m_dvdb
   integer :: mpert
    ! Maximum number of perturbations
 
+  integer :: nrpt=0
+  ! Number of real space points used for Fourier interpolation
+
   integer :: prtvol=0
    ! Verbosity level
 
@@ -185,28 +188,13 @@ MODULE m_dvdb
    ! ngfft3_v1(3, numv1)
    ! The FFT mesh used for each v1 potential (the one used to store data in the file).
 
-  real(dp) :: acell(3),rprim(3,3),gprim(3,3)
-   ! Used for slow FT.
-   ! TODO: To be removed.
-
   real(dp),allocatable :: qpts(:,:)
    ! qpts(3,nqpt)
    ! List of q-points in reduced coordinates.
 
-  ! Stuff needed for pawrhoij1
-  !integer :: ntypat
-
-  !integer,allocatable :: nlmn_type(:)
-  !  nlmn_type(ntypat)= Number of (l,m,n) elements for the paw basis for each type of atom. Only used for reading.
-
-  ! Fourier interpolation
-  integer :: nrpt=0
-  ! Number of real space points used for Fourier interpolation
-  ! Note that the points are MPI distributed
-
   real(dp),allocatable :: rpt(:,:)
   ! rpt(3,nrpt)
-  ! Real space points in canonical type coordinates.
+  ! Real space points for Fourier interpolation.
 
   real(dp),allocatable :: v1scf_rpt(:,:,:,:,:)
   ! Wannier representation (real values)
@@ -222,6 +210,12 @@ MODULE m_dvdb
 
   type(mpi_type) :: mpi_enreg
   ! Internal object used to call fourdp
+
+  ! Stuff needed for pawrhoij1
+  !integer :: ntypat
+
+  !integer,allocatable :: nlmn_type(:)
+  !  nlmn_type(ntypat)= Number of (l,m,n) elements for the paw basis for each type of atom. Only used for reading.
 
  end type dvdb_t
 
@@ -436,10 +430,6 @@ subroutine dvdb_init(db, path, comm)
  ! Init crystal_t from the hdr read from file.
  call crystal_from_hdr(db%cryst,hdr_ref,timrev2)
  call hdr_free(hdr_ref)
-
- ! Compute rprim, and gprimd. Used for slow FFT q--r if multiple shifts
- call mkradim(db%acell,db%rprim,db%cryst%rprimd)
- call matr3inv(db%rprim,db%gprim)
 
  ! Internal MPI_type needed for calling fourdp!
  call initmpi_seq(db%mpi_enreg)
@@ -688,8 +678,8 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  write(std_out,"(a)")sjoin("DVDB version:", itoa(db%version))
  write(std_out,"(a)")sjoin("File path:", db%path)
  write(std_out,"(a)")sjoin("Number of v1scf potentials:", itoa(db%numv1))
- write(std_out,"(a)")sjoin("Activate symmetrization of v1scf(r):",yesno(db%symv1))
  write(std_out,"(a)")sjoin("Number of q-points in DVDB: ", itoa(db%nqpt))
+ write(std_out,"(a)")sjoin("Activate symmetrization of v1scf(r):", yesno(db%symv1))
  write(std_out,"(a)")"List of q-points:"
  do iq=1,db%nqpt
    write(std_out,"(a)")sjoin("[", itoa(iq),"]", ktoa(db%qpts(:,iq)))
@@ -697,21 +687,21 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
 
  !call crystal_print(db%cryst,header,unit,mode_paral,prtvol)
 
- write(std_out,"(a)")"FFT mesh for potentials on file:"
- write(std_out,"(a)")"q-point, idir, ipert, ngfft(:3)"
- do iv1=1,db%numv1
-   idir = db%iv_pinfoq(1, iv1); ipert = db%iv_pinfoq(2, iv1); iq = db%iv_pinfoq(4, iv1)
-   write(std_out,"(a)")sjoin(ktoa(db%qpts(:,iq)), itoa(idir), itoa(ipert), ltoa(db%ngfft3_v1(:,iv1)))
- end do
+ if (my_prtvol > 0) then
+   write(std_out,"(a)")"FFT mesh for potentials on file:"
+   write(std_out,"(a)")"q-point, idir, ipert, ngfft(:3)"
+   do iv1=1,db%numv1
+     idir = db%iv_pinfoq(1, iv1); ipert = db%iv_pinfoq(2, iv1); iq = db%iv_pinfoq(4, iv1)
+     write(std_out,"(a)")sjoin(ktoa(db%qpts(:,iq)), itoa(idir), itoa(ipert), ltoa(db%ngfft3_v1(:,iv1)))
+   end do
 
- !if (my_prtvol > 0) then
- write(std_out, "(a)")"q-point, idir, iper, rhog1(q,G=0)"
- do iv1=1,db%numv1
-   idir = db%iv_pinfoq(1, iv1); ipert = db%iv_pinfoq(2, iv1); iq = db%iv_pinfoq(4, iv1)
-   write(std_out,"(a)")sjoin(ktoa(db%qpts(:,iq)), itoa(idir), itoa(ipert), &
-     ftoa(db%rhog1_g0(1, iv1)), ftoa(db%rhog1_g0(2, iv1)))
- end do
- !end if
+   write(std_out, "(a)")"q-point, idir, iper, rhog1(q,G=0)"
+   do iv1=1,db%numv1
+     idir = db%iv_pinfoq(1, iv1); ipert = db%iv_pinfoq(2, iv1); iq = db%iv_pinfoq(4, iv1)
+     write(std_out,"(a)")sjoin(ktoa(db%qpts(:,iq)), itoa(idir), itoa(ipert), &
+       ftoa(db%rhog1_g0(1, iv1)), ftoa(db%rhog1_g0(2, iv1)))
+   end do
+ end if
 
 end subroutine dvdb_print
 !!***
@@ -877,6 +867,7 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
    end do
  else
    ! The FFT mesh used in the caller differ from the one found in the DBDB --> Fourier interpolation
+   ! TODO: Add linear interpolation as well.
    !MSG_ERROR("FFT interpolation of DFPT potentials must be tested.")
    ABI_MALLOC(v1r_file, (cplex*nfftot_file, db%nspden))
    do ispden=1,db%nspden
@@ -1108,7 +1099,7 @@ subroutine v1phq_complete(cryst,qpt,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,sym
 !scalars
  integer,parameter :: syuse0=0,rfmeth2=2,iout0=0,tim_fourdp0=0,iscf1=1
  integer :: idir,ipert,tsign,isym_eq,itirev_eq,ipert_eq !,itirev
- integer :: pcase,trev_q,idir_eq,pcase_eq,ispden,cnt!,trial
+ integer :: pcase,trev_q,idir_eq,pcase_eq,ispden,cnt
  integer :: i1,i2,i3,id1,id2,id3,n1,n2,n3,ind1,ind2,j1,j2,j3,l1,l2,l3,k1,k2,k3,nfftot
  real(dp) :: arg
  logical :: has_phase
@@ -1810,7 +1801,7 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
 
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  cryst => db%cryst
- nq1= ngqpt(1); nq2 = ngqpt(2); nq3 = ngqpt(3)
+ nq1 = ngqpt(1); nq2 = ngqpt(2); nq3 = ngqpt(3)
 
  my_qptopt = 1 !; if (present(qptopt)) my_qptopt = qptopt
 
@@ -1839,11 +1830,10 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
    my_nqshift,cryst%nsym,cryst%rprimd,my_qshift,cryst%symafm,cryst%symrel,vacuum0,wtq,fullbz=qbz)
  nqbz = size(qbz, dim=2)
 
- write(std_out,*)"Irreducible q-points:"
- do iq_ibz=1,nqibz
-   write(std_out,*)trim(ktoa(qibz(:,iq_ibz))),wtq(iq_ibz)*nqbz
- end do
-
+ !write(std_out,*)"Irreducible q-points:"
+ !do iq_ibz=1,nqibz
+ !  write(std_out,*)trim(ktoa(qibz(:,iq_ibz))),wtq(iq_ibz)*nqbz
+ !end do
  ABI_CHECK(nqbz == product(ngqpt) * nqshift, "nqbz /= product(ngqpt) * nqshift")
 
  !nqbz = product(ngqpt)
