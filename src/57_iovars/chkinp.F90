@@ -2062,18 +2062,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  pawusecp
    if (usepaw==1) then
      call chkint_eq(0,0,cond_string,cond_values,ierr,'pawusecp',dt%pawusecp,2,(/0,1/),iout)
-     if (dt%mkmem/=0)then
-       cond_string(1)='mkmem' ; cond_values(1)=dt%mkmem
-       call chkint_eq(1,1,cond_string,cond_values,ierr,'pawusecp',dt%pawusecp,1,(/1/),iout)
-     end if
-     if (dt%mk1mem/=0)then
-       cond_string(1)='mk1mem' ; cond_values(1)=dt%mk1mem
-       call chkint_eq(1,1,cond_string,cond_values,ierr,'pawusecp',dt%pawusecp,1,(/1/),iout)
-     end if
-     if (dt%mkqmem/=0)then
-       cond_string(1)='mkqmem' ; cond_values(1)=dt%mkqmem
-       call chkint_eq(1,1,cond_string,cond_values,ierr,'pawusecp',dt%pawusecp,1,(/1/),iout)
-     end if
+!      if (dt%mkmem/=0)then
+!        cond_string(1)='mkmem' ; cond_values(1)=dt%mkmem
+!        call chkint_eq(1,1,cond_string,cond_values,ierr,'pawusecp',dt%pawusecp,1,(/1/),iout)
+!      end if
+!      if (dt%mk1mem/=0)then
+!        cond_string(1)='mk1mem' ; cond_values(1)=dt%mk1mem
+!        call chkint_eq(1,1,cond_string,cond_values,ierr,'pawusecp',dt%pawusecp,1,(/1/),iout)
+!      end if
+!      if (dt%mkqmem/=0)then
+!        cond_string(1)='mkqmem' ; cond_values(1)=dt%mkqmem
+!        call chkint_eq(1,1,cond_string,cond_values,ierr,'pawusecp',dt%pawusecp,1,(/1/),iout)
+!      end if
    end if
 
 !  pawxcdev
