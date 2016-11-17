@@ -1719,10 +1719,18 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc)
 
  if (self%symsigma == 0) then
    ! Do not use symmetries in BZ sum_q --> nqibz_k == nqbz
+
+#if 1
    self%nqibz_k = self%nqbz
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
    ABI_MALLOC(self%wtq_k, (self%nqibz_k))
    self%qibz_k = self%qbz; self%wtq_k = one / self%nqbz
+#else
+   self%nqibz_k = self%nqibz
+   ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
+   ABI_MALLOC(self%wtq_k, (self%nqibz_k))
+   self%qibz_k = self%qibz; self%wtq_k = self%wtq
+#endif
 
  else if (self%symsigma == 1) then
    ! Use symmetries of the little group
