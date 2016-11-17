@@ -171,7 +171,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
        kptgrid(3)=DBLE(ik3)/kptrlatt(3,3)
 
        ! Find correspondence between the Xcrysden grid and the IBZ ===
-#if 0
+#if 1
        call get_rank_1kpt (kptgrid, symkptrank, kptrank_t)
        fulltoirred(ikgrid) = kptrank_t%invrank(symkptrank)
 
