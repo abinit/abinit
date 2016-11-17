@@ -222,12 +222,6 @@ module m_sigmaph
    ! enk_KS corresponds to nwr/2 + 1.
    ! This array depends on (ikcalc, spin)
 
-  !complex(dpc),allocatable :: dvals_dwr(:,:)
-   ! vals_wr(ntemp, max_nbcalc)
-   ! The derivative of Sigma_ph(omega, kT, band) for given (k, spin) wrt omega computed at the KS energy.
-   ! enk_KS corresponds to nwr/2 + 1.
-   ! This array depends on (ikcalc, spin)
-
   !complex(dpc),allocatable :: vals_qwr(:,:,:)
    !  vals(nwr, ntemp, max_nbcalc, nqpt, natom*3, nkcalc)
    !  (q, mu)-resolved self-energy for given (k, spin)
@@ -394,7 +388,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:)
- real(dp),allocatable :: gkk_atm(:,:,:),gkk_nu(:,:,:)
+ real(dp),allocatable :: gkk_atm(:,:,:),gkk_nu(:,:,:),dw_atm2(:,:,:,:)
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
@@ -568,7 +562,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
      ! Zero self-energy matrix elements. Build frequency mesh for nk states.
      if (sigma%nwr > 0) then
-       sigma%vals_wr = zero !; sigma%dvals_dwr = zero
+       sigma%vals_wr = zero
        do ib_k=1,nbcalc_ks
          band = ib_k + bstart_ks - 1
          eig0nk = ebands%eig(band,ik_ibz,spin) - sigma%wr_step * (sigma%nwr/2)
@@ -579,6 +573,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      ! Allocate eph matrix elements.
      ABI_MALLOC(gkk_atm, (2, nbcalc_ks, natom3))
      ABI_MALLOC(gkk_nu, (2, nbcalc_ks, natom3))
+     ABI_CALLOC(dw_atm2, (2, nbcalc_ks, natom3, natom3))
 
      ! Load ground-state wavefunctions for which corrections are wanted (available on each node)
      ! TODO: symmetrize them if kk is not irred
@@ -760,7 +755,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
        do ib_kq=1,sigma%nbsum(ikq_ibz, spin)
          ! This is to check whether the gkk elements in the degenerate subspace break symmetry
-         if (ib_kq >= bstart_ks .and. ib_kq <= bstart_ks + nbcalc_ks - 1) cycle
+         !if (ib_kq >= bstart_ks .and. ib_kq <= bstart_ks + nbcalc_ks - 1) cycle
 
          ! symmetrize wavefunctions from IBZ (if needed).
          ! Be careful with time-reversal symmetry.
@@ -792,7 +787,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            do ib_k=1,nbcalc_ks
              call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bra_kq,h1kets_kq(:,:,ib_k,ipc),&
                   mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-             !gkk_atm(:,ib_k,ipc) = one
              gkk_atm(:,ib_k,ipc) = [dotr, doti]
            end do
          end do
@@ -800,7 +794,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          ! Get gkk(k, q, nu)
          call gkknu_from_atm(1, nbcalc_ks, 1, natom, gkk_atm, phfrq, displ_red, gkk_nu, num_smallw)
 
-         ! Accumulate contribution to phonon self-energy
+         ! Accumulate contribution to self-energy
          eig0mkq = ebands%eig(ib_kq,ikq_ibz,spin)
          f_mkq = ebands%occ(ib_kq,ikq_ibz,spin)
          if (nsppol == 1 .and. nspinor == 1 .and. nspden == 1) f_mkq = f_mkq * half
@@ -839,15 +833,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                  sfact_wr(:) = (nqnu + f_mkq      ) / (sigma%wrmesh_b(:,ib_k) - eig0mkq + wqnu - sigma%ieta) + &
                                (nqnu - f_mkq + one) / (sigma%wrmesh_b(:,ib_k) - eig0mkq - wqnu - sigma%ieta)
                  sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkk2 * sfact_wr(:)
-
-                 ! Accumulate d(Sigma)/dw for state ib_k
-                 !sfact_wr(:) = (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu - sigma%ieta) + &
-                 !              (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu - sigma%ieta)
-                 !sigma%dvals_dwr(it, ib_k) = sigma%dvals_dwr(it, ib_k) + gkk2 * sfact_wr(:)
                end if
-             end do
-
-           end do
+             end do ! it
+             !if (isqzero) then
+             !end if
+           end do ! ib_k
          end do ! imode
 
        end do ! ib_kq (sum over bands at k+q)
@@ -866,11 +856,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      ABI_FREE(kets_k)
      ABI_FREE(gkk_atm)
      ABI_FREE(gkk_nu)
+     ABI_FREE(dw_atm2)
 
      ! Collect results
      if (sigma%nwr > 0) then
        call xmpi_sum(sigma%vals_wr, comm, ierr)
-       !call xmpi_sum(sigma%dvals_dwr, comm, ierr)
      end if
      ! Writes the results for a single (k-point, spin) to NETCDF file
      if (my_rank == master) call sigmaph_solve(sigma, ikcalc, spin, ebands)
@@ -1477,7 +1467,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  ! ================================================================
  ABI_CALLOC(new%vals_e0ks, (new%ntemp, new%max_nbcalc, new%nkcalc, new%nsppol))
  ABI_CALLOC(new%dvals_de0ks, (new%ntemp, new%max_nbcalc, new%nkcalc, new%nsppol))
- !ABI_CALLOC(new%dvals_dwr, (new%ntemp, new%max_nbcalc))
 
  ! Frequency dependent stuff
  if (new%nwr > 0) then
@@ -1672,9 +1661,6 @@ subroutine sigmaph_free(self)
  if (allocated(self%vals_wr)) then
    ABI_FREE(self%vals_wr)
  end if
- !if (allocated(self%dvals_dwr)) then
- !  ABI_FREE(self%dvals_dwr)
- !end if
  !if (allocated(self%vals_qwr)) then
  !  ABI_FREE(self%vals_qwr)
  !end if
@@ -1828,10 +1814,6 @@ subroutine sigmaph_solve(self, ikcalc, spin, ebands)
    shape4(2:) = shape(self%vals_wr)
    call c_f_pointer(c_loc(self%vals_wr), rdata4, shape4)
    NCF_CHECK(nf90_put_var(self%ncid, vid("vals_wr"), rdata4, start=[1,1,1,1,ikcalc,spin]))
-
-   !shape3(2:) = shape(self%dvals_dwr)
-   !call c_f_pointer(c_loc(self%dvals_dwr), rdata3, shape3)
-   !NCF_CHECK(nf90_put_var(self%ncid, vid("dvals_dwr"), rdata3, start=[1,1,1,ikcalc,spin]))
 
    !nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol")])
    !shape4(2:) = shape(self%spfunc_wr)
@@ -2065,6 +2047,14 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, nkbz, kbz, nkibz, kibz) resul
  ABI_FREE(ibz2bz)
  ABI_FREE(wtk_folded)
  ABI_FREE(wtk)
+
+ do ik=1,new%nkibz_q
+   if (ik <= nkibz) then
+     write(std_out,"(a)")sjoin(ktoa(new%kibz_q(:,ik)), ktoa(new%kibz_q(:,ik) - kibz(:,ik)), ftoa(new%wtk_q(ik)))
+   else
+     write(std_out,"(a)")sjoin(ktoa(new%kibz_q(:,ik)), "[---]", ftoa(new%wtk_q(ik)))
+   end if
+ end do
 
 end function lgroup_new
 !!***

@@ -400,8 +400,13 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
  iblock = ddb_get_dielt_zeff(ddb,cryst,dtset%rfmeth,dtset%chneut,selectz0,dielt,zeff)
- if (iblock == 0) then
-   call wrtout(std_out,"DDB does not contain the dielectric tensor and the effective charges. Init with zeros")
+ if (my_rank == master) then
+   if (iblock == 0) then
+     call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_path))
+     call wrtout(ab_out, "Values initialized with zeros")
+   else
+     call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_path))
+   end if
  end if
 
  ! Build the inter-atomic force constants.
@@ -448,8 +453,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ! Initialize the object used to read DeltaVscf
  call dvdb_init(dvdb, dvdb_path, comm)
- call dvdb_print(dvdb)
- if (dtset%prtvol > 0) call dvdb_list_perts(dvdb, [-1,-1,-1])
+ if (my_rank == master) then
+   call dvdb_print(dvdb)
+   call dvdb_list_perts(dvdb, [-1,-1,-1], unit=ab_out)
+ end if
 
  ! TODO Recheck getng, should use same trick as that used in screening and sigma.
  call pawfgr_init(pawfgr,dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&

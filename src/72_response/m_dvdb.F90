@@ -81,7 +81,7 @@ MODULE m_dvdb
 !! FUNCTION
 !!  Database of DFPT results. The database contains `numv1` perturbations
 !!  and the corresponding first order local potential in real space on the FFT mesh.
-!!  Note that one can have different FFT meshes for the different perturbations
+!!  Note that one can have different FFT meshes for the different perturbations.
 !!
 !! NOTES
 !!  natom, nspden, nspinor, and usepaw are global variables in the sense that it's not possible to add
@@ -1915,7 +1915,7 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
    ! This call allocates v1r_qibz(cplex_qibz, nfft, nspden, 3*natom)
    call dvdb_readsym_allv1(db, iq_dvdb, cplex_qibz, nfft, ngfft, v1r_qibz, comm)
 
-   ! Find number of symmetric q-ponts associated to iq_ibz
+   ! Find number of symmetric q-points associated to iq_ibz
    nqst = 0
    do ii=iqst+1,nqbz
      if (bz2ibz_sort(ii) /= iq_ibz) exit
@@ -2121,6 +2121,8 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
  ABI_MALLOC(eiqr, (2,db%nrpt))
  call calc_eiqr(qpt,db%nrpt,db%rpt,eiqr)
 
+ ! TODO: If high-symmetry q-points, one could save flops by FFT interpolating the independent
+ ! perturbations and then rotate ...
  ov1r = zero; cnt = 0
  do mu=1,db%natom3
    idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
@@ -2421,6 +2423,7 @@ end function my_hdr_skip
 !! INPUTS
 !!  ngqpt(3)=Q-mesh divisions. If all(ngqpt == -1), the list of q-points in the DVDB
 !!    (i.e. db%qpts) is analyzed instead of the q-points generated from ngqpt.
+!!  [unit]=Unit number for output. Default `std_out`.
 !!
 !! OUTPUT
 !!  Only writing.
@@ -2432,7 +2435,7 @@ end function my_hdr_skip
 !!
 !! SOURCE
 
-subroutine dvdb_list_perts(db, ngqpt)
+subroutine dvdb_list_perts(db, ngqpt, unit)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2449,6 +2452,7 @@ subroutine dvdb_list_perts(db, ngqpt)
 
 !Arguments ------------------------------------
  type(dvdb_t),target,intent(in) :: db
+ integer,optional,intent(in) :: unit
 !arrays
  integer,intent(in) :: ngqpt(3)
 
@@ -2456,7 +2460,7 @@ subroutine dvdb_list_perts(db, ngqpt)
 !scalars
  integer,parameter :: iout0=0,iscf1=1
  integer :: tot_miss,tot_weird,miss_q,idir,ipert,nqpt_computed,iv1,psy,weird_q
- integer :: iq_ibz,nqibz,iq_file,chksymbreak,kptopt,nshiftk,ii,timerev_q
+ integer :: iq_ibz,nqibz,iq_file,chksymbreak,kptopt,nshiftk,ii,timerev_q,unt
  real(dp) :: kptrlen
  character(len=500) :: msg,ptype,found
  type(crystal_t),pointer :: cryst
@@ -2469,6 +2473,7 @@ subroutine dvdb_list_perts(db, ngqpt)
 
 ! *************************************************************************
 
+ unt = std_out; if (present(unit)) unt = unit
  cryst => db%cryst
 
  if (all(ngqpt == -1)) then
@@ -2531,9 +2536,9 @@ subroutine dvdb_list_perts(db, ngqpt)
 
    if (iq_file /= -1) then
      ! This q-point is in the DVDB. Test if all the independent perturbations are available.
-     msg = sjoin("qpoint:",ktoa(qq),"is present in the DVDB file")
-     call wrtout(std_out,msg,"COLL")
-     call wrtout(std_out,' The list of irreducible perturbations for this q vector is:','COLL')
+     msg = sjoin("qpoint:", ktoa(qq), "is present in the DVDB file")
+     call wrtout(unt, msg)
+     call wrtout(unt,' The list of irreducible perturbations for this q vector is:')
      ii = 0; weird_q = 0; miss_q = 0
      do ipert=1,db%mpert
        do idir=1,3
@@ -2548,50 +2553,47 @@ subroutine dvdb_list_perts(db, ngqpt)
 
          ii=ii+1
          write(msg,'(i5,a,i2,a,i4,4a)')ii,')  idir=',idir,', ipert=',ipert,", type=",trim(ptype),", found=",trim(found)
-         call wrtout(std_out,msg,'COLL')
+         call wrtout(unt, msg)
        end do
      end do
 
      if (weird_q /= 0) then
        write(msg,"(a,i0,a)")"DVDB is overcomplete. ",weird_q, " perturbation(s) can be reconstructed by symmetry."
-       call wrtout(std_out,msg,"COLL")
+       call wrtout(unt, msg)
      end if
 
      tot_weird = tot_weird + weird_q
      tot_miss = tot_miss + miss_q
      if (miss_q /=0) then
-       write(msg,"(a,i0,a)")"WARNING: ",miss_q, " independent perturbation(s) are missing!. "
-       call wrtout(std_out,msg,"COLL")
+       call wrtout(unt, sjoin("WARNING:", itoa(miss_q), "independent perturbation(s) are missing!."))
      end if
 
    else
      ! This q-point is not present in dvdb. Print the list of independent perturbations.
-     msg = sjoin("qpoint:", ktoa(qq), "is NOT present in the DVDB file")
-     call wrtout(std_out,msg,"COLL")
-     call wrtout(std_out,' The list of irreducible perturbations for this q vector is:','COLL')
+     call wrtout(unt, sjoin("qpoint:", ktoa(qq), "is NOT present in the DVDB file"))
+     call wrtout(unt,' The list of irreducible perturbations for this q vector is:')
      ii = 0
      do ipert=1,db%mpert
        do idir=1,3
          if (pertsy(idir,ipert) == 1) then
            ii=ii+1
            write(msg,'(i5,a,i2,a,i4,a)')ii,')  idir=',idir,', ipert=',ipert,", type=independent, found=No"
-           call wrtout(std_out,msg,'COLL')
+           call wrtout(unt, msg)
            tot_miss = tot_miss + 1
          end if
        end do
      end do
    end if
 
-   call wrtout(std_out,"","COLL")
+   call wrtout(unt," ")
  end do ! iq_ibz
 
  if (tot_miss /= 0) then
-    write(msg,"(2a,i0,a)")ch10,"There are ",tot_miss, " independent perturbations missing!. "
-    call wrtout(std_out,msg,"COLL")
+    call wrtout(unt, sjoin(ch10, "There are ",itoa(tot_miss), "independent perturbations missing!"))
  else
-    call wrtout(std_out,"All the independent perturbations are available","COLL")
+    call wrtout(unt, "All the independent perturbations are available")
     if (tot_weird /= 0) then
-      call wrtout(std_out,"Note however that the DVDB is overcomplete as symmetric perturbations are present.", "COLL")
+      call wrtout(unt, "Note however that the DVDB is overcomplete as symmetric perturbations are present.")
     end if
  end if
 
