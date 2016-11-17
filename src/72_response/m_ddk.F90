@@ -125,9 +125,6 @@ MODULE m_ddk
   type(crystal_t) :: cryst
    ! Crystal structure read from file
 
-  !type(mpi_type) :: mpi_enreg
-   ! TODO: Is this really needed?
-
  end type ddk_t
 
  public :: ddk_init              ! Initialize the object.
@@ -226,9 +223,6 @@ subroutine ddk_init(ddk, path, comm)
  ! Compute rprim, and gprimd. Used for slow FFT q--r if multiple shifts
  call mkradim(ddk%acell,ddk%rprim,ddk%cryst%rprimd)
  call matr3inv(ddk%rprim,ddk%gprim)
-
- ! MPI_type needed for calling fourdp!
- !call initmpi_seq(ddk%mpi_enreg)
 
 end subroutine ddk_init
 !!***
@@ -408,7 +402,6 @@ subroutine ddk_free(ddk)
 
  ! types
  call crystal_free(ddk%cryst)
- !call destroy_mpi_enreg(ddk%mpi_enreg)
 
 end subroutine ddk_free
 !!***

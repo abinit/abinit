@@ -73,6 +73,7 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
  integer :: my_rank,nproc
  logical :: iam_master=.FALSE.
  integer,parameter :: master=0
+ type(asrq0_t) :: asrq0
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp):: dielt(3,3),elast_clamped(6,6),fact
@@ -92,7 +93,7 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
 !Free the eff_pot before filling
  call effective_potential_free(effective_potential)
 
-!Initialisation of usefull values  
+!Initialisation of usefull values
   natom = ddb%natom
   nblok = ddb%nblok
   mpert=natom+6
@@ -104,7 +105,7 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
   blkval = reshape(ddb%val,(/2,3,mpert,3,mpert,nblok/))
 
 !**********************************************************************
-! Transfert basics values 
+! Transfert basics values
 !**********************************************************************
 
   effective_potential%crystal%natom  = crystal%natom
@@ -151,7 +152,7 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
 !**********************************************************************
   ABI_ALLOCATE(zeff,(3,3,natom))
   ABI_ALLOCATE(effective_potential%harmonics_terms%zeff,(3,3,natom))
- 
+
   rftyp   = 1 ! Blocks obtained by a non-stationary formulation.
   chneut  = 1 ! The ASR for effective charges is imposed
   selectz = 0 ! No selection of some parts of the effective charge tensor
@@ -160,9 +161,9 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
     effective_potential%harmonics_terms%epsilon_inf = dielt
     effective_potential%harmonics_terms%zeff = zeff
   else
-    effective_potential%harmonics_terms%epsilon_inf(1,1) = one 
-    effective_potential%harmonics_terms%epsilon_inf(2,2) = one 
-    effective_potential%harmonics_terms%epsilon_inf(3,3) = one 
+    effective_potential%harmonics_terms%epsilon_inf(1,1) = one
+    effective_potential%harmonics_terms%epsilon_inf(2,2) = one
+    effective_potential%harmonics_terms%epsilon_inf(3,3) = one
     effective_potential%harmonics_terms%zeff = zero
   end if
 
@@ -237,12 +238,12 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
    call wrtout(std_out,  message,'COLL')
 
  else
-   
+
     write(message,'(2a)')ch10,&
 &    ' Warning : Stress Tensor and forces are set to zero (not available in the DDB)'
     call wrtout(std_out,message,'COLL')
     call wrtout(ab_out,message,'COLL')
-   
+
   end if
 
 !**********************************************************************
@@ -298,12 +299,12 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
     call wrtout(std_out,message,'COLL')
     call wrtout(ab_out,message,'COLL')
     end do
-    
+
 !   Set the clamped tensor into the effective potentiel
     effective_potential%harmonics_terms%elastic_constants = elast_clamped
 
   else
-    
+
     write(message,'(3a)')ch10,&
 &    ' Warning : Elastic Tensor is set to zero (not available in the DDB)'
     call wrtout(std_out,message,'COLL')
@@ -333,12 +334,16 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
   rftyp=inp%rfmeth
 
   call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
-  
+
   d2asr = zero
   if (iblok /=0) then
     call asria_calc(inp%asr,d2asr,ddb%val(:,:,iblok),ddb%mpert,ddb%natom)
   end if
 
+  ! Acoustic Sum Rule
+  ! In case the interatomic forces are not calculated, the
+  ! ASR-correction (asrq0%d2asr) has to be determined here from the Dynamical matrix at Gamma.
+  asrq0 = ddb_get_asrq0(ddb, inp%asr, inp%rfmeth, crystal%xcart)
 
 !**********************************************************************
 ! Interatomic Forces Calculation
@@ -371,11 +376,11 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
 &     ' Calculation of dynamical matrix for each ph1l points '
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
-  
+
 !Transfer value in effective_potential structure
   effective_potential%harmonics_terms%nqpt      = inp%nph1l
   effective_potential%harmonics_terms%qpoints(:,:) = inp%qph1l(:,:)
-  
+
   do iphl1=1,inp%nph1l
 
    ! Initialisation of the phonon wavevector
@@ -395,12 +400,12 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
 
     ! Write the phonon frequencies
     call dfpt_prtph(displ,inp%eivec,inp%enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
-    
+
     effective_potential%harmonics_terms%dynmat(:,:,:,:,:,iphl1) = d2cart(:,:,:natom,:,:natom)
     effective_potential%harmonics_terms%phfrq(:,iphl1) = phfrq(:) * Ha_cmm1
-    
+
   end do
-  
+
   ABI_DEALLOCATE(d2cart)
   ABI_DEALLOCATE(displ)
   ABI_DEALLOCATE(eigval)
@@ -417,9 +422,9 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
 
 ! Apply weight on each R point
   do irpt=1,ifc%nrpt
-    do ia=1,effective_potential%crystal%natom 
-      do ib=1,effective_potential%crystal%natom 
-        ifc%atmfrc(:,:,ia,:,ib,irpt) = ifc%atmfrc(:,:,ia,:,ib,irpt)*ifc%wghatm(ia,ib,irpt) 
+    do ia=1,effective_potential%crystal%natom
+      do ib=1,effective_potential%crystal%natom
+        ifc%atmfrc(:,:,ia,:,ib,irpt) = ifc%atmfrc(:,:,ia,:,ib,irpt)*ifc%wghatm(ia,ib,irpt)
       end do
     end do
   end do
@@ -434,7 +439,7 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
 
 ! Copy ifc into effective potential
 ! !!Warning eff_pot%ifcs only contains atmfrc,short_atmfrc,ewald_atmfrc,,nrpt and cell!!
-! rcan,ifc%rpt,wghatm and other quantities 
+! rcan,ifc%rpt,wghatm and other quantities
 ! are not needed for effective potential!!!
   effective_potential%harmonics_terms%ifcs%nrpt = ifc%nrpt
   call alloc_copy(ifc%atmfrc      ,effective_potential%harmonics_terms%ifcs%atmfrc)
@@ -461,14 +466,14 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
   rfstrs(1:2)=3
   rftyp=1
   call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
-  
+
   ABI_ALLOCATE(effective_potential%harmonics_terms%internal_strain,(6,natom,3))
   effective_potential%harmonics_terms%internal_strain = zero
 
   if (iblok /=0) then
 
 !    then print the internal stain tensor
-    call ddb_internalstr(inp%asr,ddb%val,d2asr,iblok,instrain,ab_out,mpert,natom,nblok)
+    call ddb_internalstr(inp%asr,crystal,ddb%val,asrq0,d2asr,iblok,instrain,ab_out,mpert,msize,natom,nblok)
 
     do ipert1=1,6
       do ipert2=1,natom
@@ -490,6 +495,7 @@ subroutine ddb_to_effective_potential(crystal,ddb, effective_potential,inp,comm)
   ABI_DEALLOCATE(zeff)
   ABI_DEALLOCATE(instrain)
   ABI_DEALLOCATE(d2asr)
+  call asrq0_free(asrq0)
 
   write(message,'(a)')ch10
   call wrtout(std_out,message,'COLL')

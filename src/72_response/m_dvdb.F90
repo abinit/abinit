@@ -56,7 +56,10 @@ MODULE m_dvdb
  private
 !!***
 
- integer,public,parameter :: dvdb_last_version = 1
+ ! Version 1: header + vscf1(r)
+ ! Version 2: header + vscf1(r) + record with rhog1(G=0)
+ !integer,public,parameter :: dvdb_last_version = 1
+ integer,public,parameter :: dvdb_last_version = 2
 
  integer,private,parameter :: DVDB_NOMODE    = 0
  integer,private,parameter :: DVDB_READMODE  = 1
@@ -151,8 +154,8 @@ MODULE m_dvdb
 
   integer,allocatable :: pos_dpq(:,:,:)
    ! pos_dpq(3, mpert, nqpt)
-   ! The position of the (idir, ipert, iqpt) potential in the file
-   ! 0 if the corresping entry is not available.
+   ! The position of the (idir, ipert, iqpt) potential in the file (in units for POT1 blocks)
+   ! 0 if the corresponding entry is not available.
 
   integer,allocatable :: cplex_v1(:)
   ! cplex_v1(numv1)
@@ -194,11 +197,16 @@ MODULE m_dvdb
   ! Wannier representation (real values)
   ! v1scf_rpt(nrpt, nfft , nspden, 3*natom)
 
+  real(dp),allocatable :: rhog1_g0(:,:)
+  ! rhog1_g0(2, numv1)
+  ! G=0 component of rhog1. Used to treat the long range component
+  ! in (polar) semiconductors
+
   type(crystal_t) :: cryst
   ! Crystalline structure read from the the DVDV
 
   type(mpi_type) :: mpi_enreg
-  ! Interl object used to call fourdp
+  ! Internal object used to call fourdp
 
  end type dvdb_t
 
@@ -283,16 +291,19 @@ subroutine dvdb_init(db, path, comm)
    if (open_file(path, msg, newunit=unt, form="unformatted", status="old", action="read") /= 0) then
      MSG_ERROR(msg)
    end if
-   read(unt) db%version
-   read(unt) db%numv1
+   read(unt, err=10, iomsg=msg) db%version
+   read(unt, err=10, iomsg=msg) db%numv1
 
    ! Get important dimensions from the first header and rewind the file.
    call hdr_fort_read(hdr_ref, unt, fform)
-   ABI_CHECK(fform /= 0, sjoin("fform=0 while reading:", path))
+   if (dvdb_check_fform(fform, "read_dvdb", msg) /= 0) then
+     MSG_ERROR(sjoin("While reading:", path, ch10, msg))
+   end if
    if (db%debug) call hdr_echo(hdr_ref,fform,4,unit=std_out)
+
    rewind(unt)
-   read(unt)
-   read(unt)
+   read(unt, err=10, iomsg=msg)
+   read(unt, err=10, iomsg=msg)
 
    ! The code below must be executed by the other procs if MPI.
    db%natom = hdr_ref%natom
@@ -312,11 +323,14 @@ subroutine dvdb_init(db, path, comm)
 
    ABI_MALLOC(db%cplex_v1, (db%numv1))
    ABI_MALLOC(db%ngfft3_v1, (3, db%numv1))
+   ABI_MALLOC(db%rhog1_g0, (2, db%numv1))
 
    nqpt = 0
    do iv1=1,db%numv1
      call hdr_fort_read(hdr1, unt, fform)
-     ABI_CHECK(fform /= 0, sjoin("fform=0 while reading header of v1 potential of index:", itoa(iv1)))
+     if (dvdb_check_fform(fform, "read_dvdb", msg) /= 0) then
+       MSG_ERROR(sjoin("While reading hdr of v1 potential of index:", itoa(iv1), ch10, msg))
+     end if
 
      ! Save cplex and FFT mesh
      cplex = 2; if (hdr1%qptn(1)**2+hdr1%qptn(2)**2+hdr1%qptn(3)**2<1.d-14) cplex = 1
@@ -325,8 +339,11 @@ subroutine dvdb_init(db, path, comm)
 
      ! Skip the records with v1.
      do ii=1,hdr1%nspden
-       read(unt)
+       read(unt, err=10, iomsg=msg)
      end do
+     ! Read rhog1_g0 (if available)
+     db%rhog1_g0(:, iv1) = zero
+     if (db%version > 1) read(unt, err=10, iomsg=msg) db%rhog1_g0(:, iv1)
 
      ! check whether this q-point is already in the list.
      iq_found = 0
@@ -382,12 +399,14 @@ subroutine dvdb_init(db, path, comm)
      ABI_MALLOC(db%ngfft3_v1, (3, db%numv1))
      ABI_MALLOC(db%qpts, (3, db%nqpt))
      ABI_MALLOC(db%pos_dpq, (3, db%mpert, db%nqpt))
+     ABI_MALLOC(db%rhog1_g0, (2, db%numv1))
    end if
 
    call xmpi_bcast(db%cplex_v1, master, comm, ierr)
    call xmpi_bcast(db%ngfft3_v1, master, comm, ierr)
    call xmpi_bcast(db%qpts, master, comm, ierr)
    call xmpi_bcast(db%pos_dpq, master, comm, ierr)
+   call xmpi_bcast(db%rhog1_g0, master, comm, ierr)
  end if
 
  ! Init crystal_t from the hdr read from file.
@@ -400,6 +419,12 @@ subroutine dvdb_init(db, path, comm)
 
  ! Internal MPI_type needed for calling fourdp!
  call initmpi_seq(db%mpi_enreg)
+
+ return
+
+ ! Handle Fortran IO error
+10 continue
+ MSG_ERROR(sjoin("Error while reading:", path, ch10, msg))
 
 end subroutine dvdb_init
 !!***
@@ -468,8 +493,8 @@ subroutine dvdb_open_read(db, ngfft, comm)
    if (open_file(db%path, msg, newunit=db%fh, form="unformatted", status="old", action="read") /= 0) then
      MSG_ERROR(msg)
    end if
-   read(db%fh)
-   read(db%fh)
+   read(db%fh, err=10, iomsg=msg)
+   read(db%fh, err=10, iomsg=msg)
    db%current_fpos = 1
 
  case (IO_MODE_MPI)
@@ -478,6 +503,12 @@ subroutine dvdb_open_read(db, ngfft, comm)
  case default
    MSG_ERROR(sjoin("Unsupported iomode:", itoa(db%iomode)))
  end select
+
+ return
+
+ ! Handle Fortran IO error
+10 continue
+ MSG_ERROR(sjoin("Error while reading", db%path, ch10, msg))
 
 end subroutine dvdb_open_read
 !!***
@@ -535,6 +566,9 @@ subroutine dvdb_free(db)
  end if
  if (allocated(db%v1scf_rpt)) then
    ABI_FREE(db%v1scf_rpt)
+ end if
+ if (allocated(db%rhog1_g0)) then
+   ABI_FREE(db%rhog1_g0)
  end if
 
  ! types
@@ -599,7 +633,7 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_unt,my_prtvol
+ integer :: my_unt,my_prtvol,iv1
  character(len=4) :: my_mode
  character(len=500) :: msg
 
@@ -613,7 +647,15 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  if (PRESENT(header)) msg=' ==== '//TRIM(ADJUSTL(header))//' ==== '
  call wrtout(my_unt,msg,my_mode)
 
+ write(std_out,*)"Version: ",db%version
  write(std_out,*)"Number of q-points: ",db%nqpt
+
+ if (my_prtvol > 0) then
+   write(std_out,*)"rhog1(q,G=0)"
+   do iv1=1,db%numv1
+     write(std_out,*)db%rhog1_g0(:, iv1)
+   end do
+ end if
 
 end subroutine dvdb_print
 !!***
@@ -723,6 +765,8 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_read_onev1'
+ use interfaces_51_manage_mpi
+ use interfaces_65_paw
 !End of the abilint section
 
  implicit none
@@ -738,7 +782,13 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
 
 !Local variables-------------------------------
 !scalars
- integer :: iv1,ispden,nfftot,ifft
+ integer,parameter :: paral_kgb0=0
+ integer :: iv1,ispden,nfftot_file,nfftot_out,ifft
+ type(MPI_type) :: MPI_enreg_seq
+!arrays
+ integer :: ngfft_in(18),ngfft_out(18)
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
+ real(dp),allocatable :: v1r_file(:,:),v1g_in(:,:),v1g_out(:,:)
 
 ! *************************************************************************
 
@@ -758,26 +808,61 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
 
  call dvdb_seek(db, idir, ipert, iqpt)
 
- ierr = my_hdr_skip(db%fh, idir, ipert, db%qpts(:,iqpt))
- if (ierr /= 0)  then
-   msg = sjoin("hdr_skip returned ierr:", itoa(ierr)); return
- end if
+ ierr = my_hdr_skip(db%fh, idir, ipert, db%qpts(:,iqpt), msg)
+ if (ierr /= 0) return
 
  ! Read v1 from file.
- nfftot = product(db%ngfft3_v1(:, iv1))
- if (all(ngfft(:3) == db%ngfft3_v1(1:3, iv1))) then
+ nfftot_out = product(ngfft(:3))
+ nfftot_file = product(db%ngfft3_v1(:3, iv1))
+
+ if (all(ngfft(:3) == db%ngfft3_v1(:3, iv1))) then
    do ispden=1,db%nspden
-     read(db%fh) (v1scf(ifft, ispden), ifft=1,cplex*nfftot)
+     read(db%fh, err=10, iomsg=msg) (v1scf(ifft, ispden), ifft=1,cplex*nfftot_file)
    end do
  else
    ! Fourier interpolation
-   MSG_ERROR("Fourier interpolation is missing")
-   !ABI_MALLOC(v1glob, (cplex*nfftot, db%nspden))
-   !do ispden=1,db%nspden
-   !  read(db%fh) (v1glob(ifft, ispden), ifft=1,cplex*nfftot)
-   !end do
-   !ABI_FREE(v1glob)
+   !if (db%debug)
+   MSG_ERROR("FFT interpolation of DFPT potentials must be tested.")
+   ABI_MALLOC(v1r_file, (cplex*nfftot_file, db%nspden))
+   do ispden=1,db%nspden
+     read(db%fh, err=10, iomsg=msg) (v1r_file(ifft, ispden), ifft=1,cplex*nfftot_file)
+   end do
+
+   ! Call fourier_interpol to get v1scf on ngfft mesh.
+   ngfft_in = ngfft; ngfft_out = ngfft
+   ngfft_in(1:3) = db%ngfft3_v1(1:3, iv1); ngfft_out(1:3) = ngfft(1:3)
+   ngfft_in(4:6) = ngfft_in(1:3); ngfft_out(4:6) = ngfft_out(1:3)
+   ngfft_in(9:18) = 0; ngfft_out(9:18) = 0
+   ngfft_in(10) = 1; ngfft_out(10) = 1
+
+   call initmpi_seq(MPI_enreg_seq)
+   ! Which one is coarse? Note that this part is not very robust and can fail!
+   if (ngfft_in(2) * ngfft_in(3) < ngfft_out(2) * ngfft_out(3)) then
+     call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft_in(2),ngfft_in(3),'all')
+     call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfft_out(2),ngfft_out(3),'all')
+   else
+     call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfft_in(2),ngfft_in(3),'all')
+     call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft_out(2),ngfft_out(3),'all')
+   end if
+
+   ABI_MALLOC(v1g_in,  (2, nfftot_file))
+   ABI_MALLOC(v1g_out, (2, nfftot_out))
+
+   call fourier_interpol(cplex,db%nspden,0,0,nfftot_file,ngfft_in,nfftot_out,ngfft_out,&
+     paral_kgb0,MPI_enreg_seq,v1r_file,v1scf,v1g_in,v1g_out)
+
+   ABI_FREE(v1g_in)
+   ABI_FREE(v1g_out)
+   ABI_FREE(v1r_file)
+   call destroy_mpi_enreg(MPI_enreg_seq)
  end if
+
+ return
+
+ ! Handle Fortran IO error
+10 continue
+ ierr = 1
+ msg = sjoin("Error while reading", db%path, ch10, msg)
 
 end function dvdb_read_onev1
 !!***
@@ -953,8 +1038,8 @@ subroutine v1phq_complete(cryst,qpt,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,sym
  integer :: pcase,trev_q,idir_eq,pcase_eq,ispden,cnt!,trial
  integer :: i1,i2,i3,id1,id2,id3,n1,n2,n3,ind1,ind2,j1,j2,j3,l1,l2,l3,k1,k2,k3,nfftot
  real(dp) :: arg
- logical,parameter :: debug=.False.
  logical :: has_phase
+ logical,parameter :: debug=.False.
  character(len=500) :: msg
 !arrays
  integer :: symrel_eq(3,3),symrec_eq(3,3),symm(3,3),g0_qpt(3),l0(3),tsm1g(3)
@@ -1000,7 +1085,9 @@ pcase_loop: &
 
    tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym_eq))
    has_phase = any(abs(tnon) > tol12)
-   ABI_CHECK(.not. has_phase, "has phase must be tested")
+   ! FIXME
+   !ABI_CHECK(.not. has_phase, "has phase must be tested")
+   if (has_phase) MSG_WARNING("has phase must be tested")
 
    workg = zero
 
@@ -1312,7 +1399,10 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
    ! Phase due to L0 + R^{-1}tau
    l0 = cryst%indsym(1:3,isym,ipert)
    tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym))
-   ABI_CHECK(all(abs(tnon) < tol12), "tnon!")
+   ! FIXME
+   !ABI_CHECK(all(abs(tnon) < tol12), "tnon!")
+   if (.not.all(abs(tnon) < tol12)) MSG_WARNING("tnon!")
+
    ipert_eq = cryst%indsym(4,isym,ipert)
 
    v1g_mu = zero; cnt = 0
@@ -1633,6 +1723,11 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
 
 ! *************************************************************************
 
+ if (allocated(db%v1scf_rpt)) then
+   call wrtout(std_out, "v1scf_rpt is already computed. Returning")
+   return
+ end if
+
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  cryst => db%cryst
  nq1= ngqpt(1); nq2 = ngqpt(2); nq3 = ngqpt(3)
@@ -1780,6 +1875,7 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
        do mu=1,db%natom3
          do ispden=1,db%nspden
            do irpt=1,db%nrpt
+             ! MPI-parallelism
              cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
              do ifft=1,nfft
                db%v1scf_rpt(1, irpt, ifft, ispden, mu) = db%v1scf_rpt(1, irpt, ifft, ispden, mu) + &
@@ -1818,6 +1914,7 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
        do mu=1,db%natom3
          do ispden=1,db%nspden
            do irpt=1,db%nrpt
+             ! MPI parallelism.
              cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
              phre = emiqr(1,irpt); phim = emiqr(2,irpt)
 
@@ -1947,7 +2044,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
  ABI_MALLOC(eiqr, (2,db%nrpt))
  call calc_eiqr(qpt,db%nrpt,db%rpt,eiqr)
 
- ov1r = zero
+ ov1r = zero; cnt = 0
  do mu=1,db%natom3
    idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
    do ispden=1,db%nspden
@@ -2079,30 +2176,42 @@ subroutine dvdb_seek(db, idir, ipert, iqpt)
 !Local variables-------------------------------
  integer :: pos_wanted,ii,ispden,ierr
  real(dp),parameter :: fake_qpt(3)=zero
- !character(len=500) :: msg
+ character(len=500) :: msg
 
 ! *************************************************************************
 
  if (db%iomode == IO_MODE_FORTRAN) then
    ! Numb code: rewind the file and read it from the beginning
    ! TODO: Here I need a routine to backspace the hdr!
-   call dvdb_rewind(db)
+   if (dvdb_rewind(db, msg) /= 0) then
+     MSG_ERROR(msg)
+   end if
    pos_wanted = db%pos_dpq(idir,ipert,iqpt)
 
    do ii=1,pos_wanted-1
      !write(std_out,*)"in seek with ii: ",ii,"pos_wanted: ",pos_wanted
-     ierr = my_hdr_skip(db%fh, -1, -1, fake_qpt)
-     ABI_CHECK(ierr==0, "Error in hdr_skip")
+     if (my_hdr_skip(db%fh, -1, -1, fake_qpt, msg) /= 0) then
+       MSG_ERROR(msg)
+     end if
      ! Skip the records with v1.
      do ispden=1,db%nspden
-       read(db%fh)
+       read(db%fh, err=10, iomsg=msg)
      end do
+     ! Skip record with rhog1_g0 (if present)
+     if (db%version > 1) read(db%fh, err=10, iomsg=msg)
    end do
    db%current_fpos = pos_wanted
 
  else
-   MSG_ERROR("should not be called when iomode /= IO_MODE_FORTRAN")
+   MSG_ERROR("Should not be called when iomode /= IO_MODE_FORTRAN")
  end if
+
+ return
+
+ ! Handle Fortran IO error
+10 continue
+ !ierr = 1
+ msg = sjoin("Error while reading", db%path, ch10, msg)
 
 end subroutine dvdb_seek
 !!***
@@ -2115,6 +2224,7 @@ end subroutine dvdb_seek
 !!
 !! FUNCTION
 !!   Rewind the file and move to the first header. Needed only if dvdb%iomode==IO_MODE_FORTRAN
+!!   Return exit code and error message in msg if ierr != 0
 !!
 !! PARENTS
 !!      m_dvdb
@@ -2123,7 +2233,7 @@ end subroutine dvdb_seek
 !!
 !! SOURCE
 
-subroutine dvdb_rewind(db)
+integer function dvdb_rewind(db, msg) result(ierr)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2136,20 +2246,30 @@ subroutine dvdb_rewind(db)
 
 !Arguments ------------------------------------
  type(dvdb_t),intent(inout) :: db
+ character(len=*),intent(out) :: msg
 
 ! *************************************************************************
 
+ ierr = 0
  if (db%iomode == IO_MODE_FORTRAN) then
-   rewind(db%fh)
-   read(db%fh)  ! version
-   read(db%fh)  ! numv1
+   rewind(db%fh, err=10, iomsg=msg)
+   read(db%fh, err=10, iomsg=msg)  ! version
+   read(db%fh, err=10, iomsg=msg)  ! numv1
    db%current_fpos = 1
 
  else
-   MSG_ERROR("should not be called when iomode /= IO_MODE_FORTRAN")
+   ierr = -1
+   msg = "should not be called when iomode /= IO_MODE_FORTRAN"
  end if
 
-end subroutine dvdb_rewind
+ return
+
+ ! Handle Fortran IO error
+10 continue
+ ierr = 1
+ msg = sjoin("Error while reading", db%path, ch10, msg)
+
+end function dvdb_rewind
 !!***
 
 !----------------------------------------------------------------------
@@ -2170,7 +2290,7 @@ end subroutine dvdb_rewind
 !!
 !! SOURCE
 
-integer function my_hdr_skip(unit,idir,ipert,qpt) result(ierr)
+integer function my_hdr_skip(unit, idir, ipert, qpt, msg) result(ierr)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2185,24 +2305,28 @@ integer function my_hdr_skip(unit,idir,ipert,qpt) result(ierr)
 !scalars
  integer,intent(in) :: unit,idir,ipert
  real(dp),intent(in) :: qpt(3)
+ character(len=500),intent(out) :: msg
 
 !Local variables-------------------------------
  integer :: fform
  type(hdr_type) :: tmp_hdr
 !************************************************************************
 
- ierr = 0
+ ierr = 0; msg = ""
  call hdr_fort_read(tmp_hdr, unit, fform)
- ABI_CHECK(fform /= 0, "hdr_fort_read returned fform == 0")
+ ierr = dvdb_check_fform(fform, "read_dvdb", msg)
+ if (ierr /= 0) return
 
  if (idir /= -1 .and. ipert /= -1) then
    if (idir /= mod(tmp_hdr%pertcase-1, 3) + 1 .or. &
        ipert /= (tmp_hdr%pertcase - idir) / 3 + 1 .or. &
-       any(abs(qpt - tmp_hdr%qptn) > tol14)) ierr = -1
+       any(abs(qpt - tmp_hdr%qptn) > tol14)) then
+         msg = "Perturbation index on file does not match the one expected by caller"
+         ierr = -1
+   end if
  end if
 
  call hdr_free(tmp_hdr)
- if (fform == 0) ierr = 1
 
 end function my_hdr_skip
 !!***
@@ -2674,9 +2798,11 @@ end subroutine dvdb_test_symmetries
 !!
 !! INPUT
 !!  nfiles=Number of files to be merged.
-!!  v1files=List of file names
 !!  dvdb_path=Name of output DVDB file.
 !!  prtvol=Verbosity level.
+!!
+!! SIDE EFFECTS
+!!   v1files=List of file names to merge. This list could be changed if POT1 files in netcdf format is found.
 !!
 !! PARENTS
 !!      mrgdv
@@ -2704,7 +2830,11 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
 
 !Local variables-------------------------------
 !scalars
- integer :: fform_pot=102
+! Here I made a mistake because 102 corresponds to GS potentials
+! as a consequence DVDB files generated with version <= 8.1.6
+! contain list of potentials with fform = 102.
+ !integer :: fform_pot=102
+ integer :: fform_pot=111
  integer :: ii,jj,fform,ount,cplex,nfft,ifft,ispden,nperts
  integer :: n1,n2,n3,v1_varid,ierr
  logical :: qeq0
@@ -2713,7 +2843,9 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
  type(dvdb_t) :: dvdb
 !arrays
  integer :: units(nfiles)
+ real(dp) :: rhog1_g0(2)
  real(dp),allocatable :: v1(:)
+ logical :: has_rhog1_g0(nfiles)
  type(hdr_type),target,allocatable :: hdr1_list(:)
 
 !************************************************************************
@@ -2724,18 +2856,14 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
 
  ! If a file is not found, try the netcdf version and change v1files accordingly.
  do ii=1,nfiles
-   if (.not. file_exists(v1files(ii))) then
-     if (file_exists(nctk_ncify(v1files(ii)))) then
-       write(std_out,"(3a)")"- File: ",trim(v1files(ii))," does not exist but found netcdf file with similar name."
-       v1files(ii) = nctk_ncify(v1files(ii))
-     else
-       MSG_ERROR(sjoin('Missing file: ',v1files(ii)))
-     end if
+   if (nctk_try_fort_or_ncfile(v1files(ii), msg) /= 0) then
+     MSG_ERROR(msg)
    end if
  end do
 
  ! Read the headers
  ABI_DT_MALLOC(hdr1_list, (nfiles))
+
  do ii=1,nfiles
    write(std_out,"(a,i0,2a)")"- Reading header of file [",ii,"]: ",trim(v1files(ii))
 
@@ -2749,15 +2877,22 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
        MSG_ERROR(msg)
      end if
      call hdr_fort_read(hdr1_list(ii), units(ii), fform)
-     ABI_CHECK(fform /= 0, sjoin("fform=0 while reading:", v1files(ii)))
+   end if
+
+   if (dvdb_check_fform(fform, "merge_dvdb", msg) /= 0) then
+     MSG_ERROR(sjoin("While reading:", v1files(ii), msg))
    end if
    if (prtvol > 0) call hdr_echo(hdr1_list(ii), fform, 3, unit=std_out)
-   ! FIXME: fform is zero in POT files!
-   !ABI_CHECK(fform /= 0, sjoin("fform=0 while reading: ", v1files(ii)))
-   !write(std_out,*)"done", trim(v1files(ii))
    if (hdr1_list(ii)%pertcase == 0) then
      MSG_ERROR(sjoin("Found GS potential:", v1files(ii)))
    end if
+   !write(std_out,*)"done", trim(v1files(ii))
+
+   ! Supported fform:
+   ! 109  POT1 files without vh1(G=0)
+   ! 111  POT1 files with extra record with vh1(G=0) after FFT data.
+   has_rhog1_g0(ii) = .True.
+   if (fform == 109) has_rhog1_g0(ii) = .False.
  end do
 
  ! Validate headers.
@@ -2768,8 +2903,8 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
  if (open_file(dvdb_path, msg, newunit=ount, form="unformatted", action="write", status="unknown") /= 0) then
    MSG_ERROR(msg)
  end if
- write(ount)dvdb_last_version
- write(ount)nperts
+ write(ount, err=10, iomsg=msg) dvdb_last_version
+ write(ount, err=10, iomsg=msg) nperts
 
  do ii=1,nperts
    jj = ii
@@ -2787,9 +2922,13 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
    if (.not. endswith(v1files(ii), ".nc")) then
       ! Fortran IO
       do ispden=1,hdr1%nspden
-        read(units(jj)) (v1(ifft), ifft=1,cplex*nfft)
-        write(ount) (v1(ifft), ifft=1,cplex*nfft)
+        read(units(jj), err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfft)
+        write(ount, err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfft)
       end do
+      ! Add rhog1(G=0)
+      rhog1_g0 = zero
+      if (has_rhog1_g0(jj)) read(units(jj), err=10, iomsg=msg) rhog1_g0
+      if (dvdb_last_version > 1) write(ount, err=10, iomsg=msg) rhog1_g0
    else
 #ifdef HAVE_NETCDF
       ! Netcdf IO
@@ -2797,13 +2936,19 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
       NCF_CHECK(nf90_inq_varid(units(ii), "first_order_potential", v1_varid))
       do ispden=1,hdr1%nspden
         NCF_CHECK(nf90_get_var(units(ii), v1_varid, v1, start=[1,1,1,ispden], count=[cplex, n1, n2, n3, 1]))
-        write(ount) (v1(ifft), ifft=1,cplex*nfft)
+        write(ount, err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfft)
       end do
+      ! Add rhog1(G=0)
+      rhog1_g0 = zero
+      if (has_rhog1_g0(jj)) then
+        NCF_CHECK(nf90_get_var(units(ii), nctk_idname(units(ii), "rhog1_g0"), rhog1_g0))
+      end if
+      if (dvdb_last_version > 1) write(ount, err=10, iomsg=msg) rhog1_g0
 #endif
    end if
 
    ABI_FREE(v1)
- end do
+ end do ! nperts
 
  close(ount)
 
@@ -2826,6 +2971,12 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
  call dvdb_print(dvdb)
  call dvdb_list_perts(dvdb, [-1,-1,-1])
  call dvdb_free(dvdb)
+
+ return
+
+ ! Handle Fortran IO error
+10 continue
+ MSG_ERROR(sjoin("Error while merging files", ch10, msg))
 
 end subroutine dvdb_merge_files
 !!***
@@ -2878,6 +3029,81 @@ subroutine calc_eiqr(qpt,nrpt,rpt,eiqr)
  end do
 
 end subroutine calc_eiqr
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_check_fform
+!! NAME
+!!  dvdb_check_fform
+!!
+!! FUNCTION
+!!  Check the value of fform. Return exit status and error message.
+!!
+!! INPUTS
+!!   fform=Value read from the header
+!!   mode="merge_dvdb" to check the value of fform when we are merging POT1 files
+!!        "read_dvdb" when we are reading POT1 files from a DVDB file.
+!!
+!! OUTPUT
+!!   errmsg=String with error message if ierr /= 0
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+integer function dvdb_check_fform(fform, mode, errmsg) result(ierr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dvdb_check_fform'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in) :: fform
+ character(len=*),intent(in) :: mode
+ character(len=*),intent(out) :: errmsg
+
+! *************************************************************************
+ ierr = 0
+
+! Here I made a mistake because 102 corresponds to GS potentials
+! as a consequence DVDB files generated with version <= 8.1.6
+! contain list of potentials with fform = 102.
+ !integer :: fform_pot=102
+ !integer :: fform_pot=109
+ !integer :: fform_pot=111
+
+ if (fform == 0) then
+   errmsg = "fform == 0! Either corrupted/nonexistent file or IO error"
+   ierr = 42; return
+ end if
+
+ select case (mode)
+ case ("merge_dvdb")
+    if (all(fform /= [109, 111])) then
+      errmsg = sjoin("fform:", itoa(fform), "is not supported in `merge_dvdb` mode")
+      ierr = 1; return
+    end if
+
+ case ("read_dvdb")
+    if (all(fform /= [102, 109, 111])) then
+      errmsg = sjoin("fform:", itoa(fform), "is not supported in `read_dvdb` mode")
+      ierr = 1; return
+    end if
+
+ case default
+   errmsg = sjoin("Invalid mode:", mode)
+   ierr = -1; return
+ end select
+
+end function dvdb_check_fform
 !!***
 
 END MODULE m_dvdb

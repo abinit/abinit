@@ -44,7 +44,7 @@ module m_phonons
  use m_fstrings,        only : itoa, ftoa, sjoin
  use m_numeric_tools,   only : simpson_int, wrap2_pmhalf
  use m_io_tools,        only : open_file
- use m_dynmat,          only : asria_corr,asrprs, gtdyn9
+ use m_dynmat,          only : gtdyn9, dfpt_phfrq
  use m_crystal,         only : crystal_t
  use m_ifc,             only : ifc_type, ifc_fourq
  use m_anaddb_dataset,  only : anaddb_dataset_type
@@ -464,7 +464,7 @@ end subroutine phdos_free
 !! PHdos<phonon_dos_type>=Container with phonon DOS, IDOS and atom-projected DOS.
 !!
 !! NOTES
-!! On the use of the q-grids :
+!! On the use of the q-grids:
 !! Two different q-meshes are used in this subroutine. The first one is the coarse
 !! mesh where the interatomic forces have been calculated during the DFPT run.
 !! This q-grid is used to obtain an initial guess for the max and min frequency
@@ -1028,6 +1028,8 @@ end subroutine phdos_ncwrite
 !! Ifc<ifc_type>=Interatomic force constants
 !! crystal<type(crystal_t)> = Info on the crystalline structure.
 !! inp= (derived datatype) contains all the input variables
+!! ddb<type(ddb_type)>=Object storing the DDB results.
+!! asrq0<asrq0_t>=Object for the treatment of the ASR based on the q=0 block found in the DDB file.
 !! dielt(3,3)=dielectric tensor
 !! tcpui=initial cpu time
 !! twalli=initial wall clock time
@@ -1043,7 +1045,7 @@ end subroutine phdos_ncwrite
 !!
 !! SOURCE
 
-subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,uinvers,vtinvers,zeff,comm)
+subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,outfile_radix,tcpui,twalli,zeff,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1067,12 +1069,9 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,
  type(crystal_t),intent(in) :: Crystal
  type(anaddb_dataset_type),target,intent(in) :: inp
  type(ddb_type),intent(in) :: ddb
+ type(asrq0_t),intent(inout) :: asrq0
 !arrays
  real(dp),intent(in) :: zeff(3,3,ddb%natom)
- real(dp),intent(inout) :: singular(1:3*ddb%natom*(3*ddb%natom-1)/2)
- real(dp),intent(inout) :: uinvers(1:3*ddb%natom*(3*ddb%natom-1)/2,1:3*ddb%natom*(3*ddb%natom-1)/2)
- real(dp),intent(inout) :: vtinvers(1:3*ddb%natom*(3*ddb%natom-1)/2,1:3*ddb%natom*(3*ddb%natom-1)/2)
- real(dp),intent(inout) :: d2asr(2,3,ddb%natom,3,ddb%natom)
 
 !Local variables -------------------------
 !scalars
@@ -1153,12 +1152,18 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,
    ! Generation of the dynamical matrix in cartesian coordinates
    if(inp%ifcflag==1)then
 
+     ! Get phonon frequencies and displacements in reduced coordinates for this q-point
+     !call ifc_fourq(ifc, cryst, save_qpoints(:,iphl1), phfrq, displ, out_eigvec=eigvec)
+
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
      call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,mpert,natom,&
 &     Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,zeff)
 
    else if(inp%ifcflag==0)then
+
+     !call ddb_diagoq(ddb, crystal, save_qpoints(:,iphl1), asrq0, inp%symdynmat, inp%rfmeth, phfrq, displ, &
+     !                out_eigvec=eigvec)
 
      ! Look for the information in the DDB (no interpolation here!)
      rfphon(1:2)=1
@@ -1174,18 +1179,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,
      d2cart(:,1:ddb%msize)=ddb%val(:,:,iblok)
 
      ! Eventually impose the acoustic sum rule based on previously calculated d2asr
-     select case (inp%asr)
-     case (0)
-       continue
-     case (1,2,5)
-       call asria_corr(inp%asr,d2asr,d2cart,mpert,natom)
-     case (3,4)
-       ! Impose acoustic sum rule plus rotational symmetry for 0D and 1D systems
-       call asrprs(inp%asr,2,3,uinvers,vtinvers,singular,d2cart,mpert,natom,crystal%xcart)
-     case default
-       write(msg,'(a,i0)')"Wrong value for asr: ",inp%asr
-       MSG_ERROR(msg)
-     end select
+     call asrq0_apply(asrq0, natom, mpert, ddb%msize, crystal%xcart, d2cart)
    end if
 
    !  Calculation of the eigenvectors and eigenvalues of the dynamical matrix
@@ -1193,22 +1187,15 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,
 &   mpert,Crystal%nsym,natom,nsym,Crystal%ntypat,phfrq,qphnrm(1),qphon,&
 &   crystal%rprimd,inp%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
 
-
-   !call ifc_fourq(Ifc,Crystal,qphon,phfrq,displ,out_eigvec=eigvec)
-
    if (abs(inp%freeze_displ) > tol10) then
      real_qphon = zero
-     if (abs(qphnrm(1)) > tol8) then
-       real_qphon = qphon / qphnrm(1)
-     end if
+     if (abs(qphnrm(1)) > tol8) real_qphon = qphon / qphnrm(1)
      call freeze_displ_allmodes(displ, inp%freeze_displ, natom, outfile_radix, phfrq, &
 &     real_qphon, crystal%rprimd, Crystal%typat, crystal%xcart, crystal%znucl)
    end if
 
    ! If requested, output projection of each mode on given atoms
-   if (inp%natprj_bs > 0) then
-     call atprj_print(atprj, iphl1, phfrq, eigvec)
-   end if
+   if (inp%natprj_bs > 0) call atprj_print(atprj, iphl1, phfrq, eigvec)
 
    ! In case eivec == 4, write output files for band2eps (visualization of phonon band structures)
    if (inp%eivec == 4) then
@@ -1220,7 +1207,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,
    call dfpt_prtph(displ,inp%eivec,inp%enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
 
    save_phfrq(:,iphl1) = phfrq
-   save_phdispl_cart(:,:,:,iphl1) = RESHAPE(displ,(/2, 3*natom, 3*natom/))
+   save_phdispl_cart(:,:,:,iphl1) = RESHAPE(displ, [2, 3*natom, 3*natom])
 
    ! Determine the symmetries of the phonon mode at Gamma
    ! TODO: generalize for other q-point little groups.
@@ -1244,9 +1231,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,
 !deallocate sortph array
  call end_sortph()
 
- if (inp%natprj_bs > 0) then
-   call atprj_destroy(atprj)
- end if
+ if (inp%natprj_bs > 0) call atprj_destroy(atprj)
 
 #ifdef HAVE_NETCDF
  tmpfilename = trim(outfile_radix)//"_PHBST.nc"
@@ -1366,7 +1351,6 @@ subroutine prtvsound(unit,eigvec,gmet,natom,phfrq,qphon,ucvol)
 &   '   in atomic units: ', tdebye, ch10,&
 &   '   in SI units K  : ', tdebye * Ha_K
    call wrtout(unit,msg,'COLL')
-
    call wrtout(unit,"",'COLL')
  end do
 
@@ -1583,7 +1567,6 @@ end subroutine phonons_ncwrite
 ! end do
 !
 ! close(iunit)
-
 
 end subroutine phonons_write
 !!***
