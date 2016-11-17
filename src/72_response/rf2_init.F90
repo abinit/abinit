@@ -132,6 +132,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
  real(dp),allocatable :: eig1_read(:),gvnl1(:,:),h_cwave(:,:),s_cwave(:,:)
  real(dp),allocatable,target :: dsusdu(:,:),dudk(:,:),eig1_k_stored(:)
  real(dp), ABI_CONTIGUOUS pointer :: cwave_dudk(:,:),cwave_i(:,:),cwave_j(:,:),eig1_k_jband(:)
+ real(dp),pointer :: rhs_j(:,:)
  type(pawcprj_type),target :: cprj_empty(0,0)
  type(pawcprj_type),allocatable,target :: cprj_jband(:,:),dudkprj(:,:)
  type(pawcprj_type),pointer :: cprj_dudk(:,:),cprj_j(:,:)
@@ -580,8 +581,8 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 
 !      Add d^2H/(dk_dir1 dk_dir2)|u^(0)> to RHS_Stern :
        if (gs_hamkq%usepaw==1) h_cwave(:,:)=h_cwave(:,:)-eig0_k(jband)*s_cwave(:,:) ! if PAW : we add H^(2)-eps^(0) S^(2)
-       cwave_j => rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
-       call cg_zaxpy(size_wf,(/one,zero/),h_cwave,cwave_j)
+       rhs_j => rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
+       call cg_zaxpy(size_wf,(/one,zero/),h_cwave,rhs_j)
 
      end if ! empty band test
    end do ! jband
@@ -668,8 +669,8 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 
 !      Add dH/dpert2 | du/dpert1 > to RHS_Stern :
        if (gs_hamkq%usepaw==1) h_cwave(:,:)=h_cwave(:,:)-eig0_k(jband)*s_cwave(:,:) ! if PAW : we add H^(1)-eps^(0) S^(1)
-       cwave_j => rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
-       call cg_zaxpy(size_wf,(/factor*one,zero/),h_cwave,cwave_j)
+       rhs_j => rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
+       call cg_zaxpy(size_wf,(/factor*one,zero/),h_cwave,rhs_j)
 
 !      Compute : -factor * sum_iband ( dLambda/dpert1_{iband,jband} * dsusdu_{iband} )
        do iband=1,nband_k
@@ -684,8 +685,8 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
            cwave_i => dsusdu(:,1+shift_band2+shift_dir2:size_wf+shift_band2+shift_dir2)
 
 !          Compute Lambda_{iband,jband} * dsusdu_{iband} and add it to RHS_Stern
-           cwave_j => rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
-           call cg_zaxpy(size_wf,(/-factor*lambda_ij(1),-factor*lambda_ij(2)/),cwave_i,cwave_j) !do not forget the minus sign!
+           rhs_j => rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
+           call cg_zaxpy(size_wf,(/-factor*lambda_ij(1),-factor*lambda_ij(2)/),cwave_i,rhs_j) !do not forget the minus sign!
 
          end if ! empty iband test
        end do ! iband
@@ -714,7 +715,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
    shift_band1=(jband-1)*size_wf
    if (abs(occ_k(jband))>tol8) then
      invocc = one/occ_k(jband)
-     cwave_j => rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
+     rhs_j => rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
      do iband=1,nband_k
        if (iband /= jband) then
          if (print_info/=0) then
@@ -744,7 +745,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
          if ( abs(occ_k(iband))<tol8 ) then ! for empty bands only
            shift_band2=(iband-1)*size_wf
            cwave_i => cg(:,1+shift_band2+icg:size_wf+shift_band2+icg)
-           call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cwave_i,cwave_j,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+           call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cwave_i,rhs_j,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 !          Store it in a_mn
 !          /!\ There is a factor "-2" to simplify the use of amn in the following.
 !          /!\ Occupied and empty bands will be treated in a same way.
@@ -799,9 +800,9 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 !       write(msg,'(3(a,i2))') 'RF2 TEST FINAL : ipert=',ipert-natom,' idir=',idir,' jband=',jband
 !       call wrtout(std_out,msg)
        shift_band1=(jband-1)*size_wf
-       cwave_i => rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
+       rhs_j => rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
        cwave_j => cg(:,1+shift_band1+icg:size_wf+shift_band1+icg)
-       call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cwave_i,cwave_j,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+       call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,rhs_j,cwave_j,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 !       write(msg,'(2(a,es22.13E3))') 'RF2 TEST FINAL :       dot =',dotr,',',doti
 !       call wrtout(std_out,msg)
 !       write(msg,'(2(a,es22.13E3))') 'RF2 TEST FINAL : lambda_jj =',rf2%lambda_mn(1,jband+(jband-1)*nband_k),&
