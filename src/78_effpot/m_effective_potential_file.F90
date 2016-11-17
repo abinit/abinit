@@ -1670,7 +1670,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  real(dp):: icount1,icount2
  integer :: chneut,i1,i2,i3,ia,ib,iblok,idir1,idir2,ierr,ii,ipert1,iphl1
  integer :: ipert2,irpt,irpt2,ivarA,ivarB,max1,max2,max3,min1,min2,min3
- integer :: msize,mpert,natom,nblok,nrpt_new,rftyp,selectz
+ integer :: msize,mpert,natom,nblok,nrpt_new,nrpt_new2,rftyp,selectz
  integer :: my_rank,nproc
  logical :: iam_master=.FALSE.
  integer,parameter :: master=0
@@ -2022,6 +2022,12 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !Reorder cell from canonical coordinates to reduced coordinates (for multibinit)
 !store the number of ifc before rearrangement  
 
+! Store the sum of the weight of IFC for the final check
+  icount1 = 0
+  do irpt=1,ifc%nrpt
+    icount1 = icount1 + sum(ifc%wghatm(:,:,irpt))
+  end do
+
 !Set the maximum and the miminum for the bound of the cell
   max1 = maxval(ifc%cell(1,:));  min1 = minval(ifc%cell(1,:))
   max2 = maxval(ifc%cell(2,:));  min2 = minval(ifc%cell(2,:))
@@ -2039,13 +2045,9 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   ABI_ALLOCATE(cell_red,(3,nrpt_new))
   
   wghatm_red(:,:,:) = zero
-  atmfrc_red(:,:,:,:,:,:) =  zero
+
   
   if(iam_master)then
-    icount1 = 0
-    do irpt=1,ifc%nrpt
-      icount1 = icount1 + sum(ifc%wghatm(:,:,irpt))
-    end do
 
     do ia=1,natom
       do ib=1,natom
@@ -2098,7 +2100,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
                     i2  ==  cell2(2)  .and.&
                     i3  ==  cell2(3)) then
                   wghatm_red(ia,ib,irpt2) =  ifc%wghatm(ia,ib,irpt)
-                  atmfrc_red(:,:,ia,:,ib,irpt2) = ifc%atmfrc(:,:,ia,:,ib,irpt)
+                  atmfrc_red(:,:,ia,:,ib,irpt2) = ifc%atmfrc(:,:,ia,:,ib,irpt) * ifc%wghatm(ia,ib,irpt)
                   cell_red(1,irpt2) = i1
                   cell_red(2,irpt2) = i2
                   cell_red(3,irpt2) = i3
@@ -2107,30 +2109,6 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
               end do
             end do
           end do
-        end do
-      end do
-    end do
-
-    irpt2 = 0
-    icount2 = 0
-    do irpt = 1, nrpt_new
-      icount2 = icount2 + sum(wghatm_red(:,:,irpt))
-      if (sum(wghatm_red(:,:,irpt)) /= 0) then
-        irpt2 = irpt2 + 1
-      end if
-    end do
-
-    if (icount1 /= icount2) then
-      write(message,'(2a,I7,a,I7,a)')'The total wghatm is no more the same',ch10,&
-&                        icount1,' before and ', icount2, ' now.'
-      MSG_BUG(message)
-    end if
- 
-!  Apply weight on each R point
-    do irpt=1,nrpt_new
-      do ia=1,effective_potential%crystal%natom 
-        do ib=1,effective_potential%crystal%natom 
-          atmfrc_red(:,:,ia,:,ib,irpt) = atmfrc_red(:,:,ia,:,ib,irpt)*wghatm_red(ia,ib,irpt) 
         end do
       end do
     end do
@@ -2147,30 +2125,65 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   call ifc_free(ifc)
   call ifc_free(effective_potential%harmonics_terms%ifcs)
 
-  effective_potential%harmonics_terms%ifcs%nrpt = nrpt_new
+! Only conserve the necessary points in rpt
+  nrpt_new2 = 0
+  do irpt = 1, nrpt_new
+    if (sum(wghatm_red(:,:,irpt)) /= 0) then
+      nrpt_new2 = nrpt_new2 + 1
+    end if
+  end do
 
-  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%atmfrc,(2,3,natom,3,natom,nrpt_new))
-  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%short_atmfrc,(2,3,natom,3,natom,nrpt_new))
-  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%ewald_atmfrc,(2,3,natom,3,natom,nrpt_new))
-  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%cell,(3,nrpt_new))
+! Set the new number of rpt
+  effective_potential%harmonics_terms%ifcs%nrpt = nrpt_new2
+
+! Allocation of the final arrays
+  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%atmfrc,(2,3,natom,3,natom,nrpt_new2))
+  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%short_atmfrc,(2,3,natom,3,natom,nrpt_new2))
+  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%ewald_atmfrc,(2,3,natom,3,natom,nrpt_new2))
+  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%cell,(3,nrpt_new2))
+  ABI_ALLOCATE(effective_potential%harmonics_terms%ifcs%wghatm,(natom,natom,nrpt_new2))
   
-  effective_potential%harmonics_terms%ifcs%nrpt = nrpt_new
-  effective_potential%harmonics_terms%ifcs%cell(:,:) = cell_red(:,:)
-  effective_potential%harmonics_terms%ifcs%atmfrc(:,:,:,:,:,:) = atmfrc_red(:,:,:,:,:,:)
-  if (inp%dipdip == 1) then
-    effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,:) = atmfrc_red(:,:,:,:,:,:)
-  else
-    effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,:) = zero
-  end if
-  effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,:) = atmfrc_red(:,:,:,:,:,:)
-  effective_potential%harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,:,:) = zero
- 
+  irpt2 = 0
+  do irpt = 1,nrpt_new
+    if (sum(wghatm_red(:,:,irpt)) /= 0) then
+      irpt2 = irpt2 + 1 
+      !  Apply weight on each R point
+      do ia=1,effective_potential%crystal%natom 
+        do ib=1,effective_potential%crystal%natom 
+!          atmfrc_red(:,:,ia,:,ib,irpt) = atmfrc_red(:,:,ia,:,ib,irpt)*wghatm_red(ia,ib,irpt) 
+        end do
+      end do
+      effective_potential%harmonics_terms%ifcs%cell(:,irpt2) = cell_red(:,irpt)
+      effective_potential%harmonics_terms%ifcs%atmfrc(:,:,:,:,:,irpt2) = atmfrc_red(:,:,:,:,:,irpt)
+      if (inp%dipdip == 1) then
+        effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2)=atmfrc_red(:,:,:,:,:,irpt)
+      else
+        effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2) = zero
+      end if
+      effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2) = atmfrc_red(:,:,:,:,:,irpt)
+      effective_potential%harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,:,irpt2) = zero
+      effective_potential%harmonics_terms%ifcs%wghatm(:,:,irpt2) =  wghatm_red(:,:,irpt)
+    end if
+  end do
+
   
   ABI_DEALLOCATE(atmfrc_red)
   ABI_DEALLOCATE(wghatm_red)
   ABI_DEALLOCATE(cell_red)
-  
 
+! Final check
+  icount2 = 0
+  do irpt = 1, effective_potential%harmonics_terms%ifcs%nrpt
+    icount2 = icount2 + sum(effective_potential%harmonics_terms%ifcs%wghatm(:,:,irpt))
+  end do
+    
+  if (icount1 /= icount2) then
+    write(message,'(2a,ES15.4,a,ES15.4,a)')'The total wghatm is no more the same',ch10,&
+&                        icount1,' before and ', icount2, ' now.'
+    MSG_BUG(message)
+  end if
+
+ 
 !**********************************************************************
 ! Internal strain tensors at Gamma point
 !**********************************************************************
