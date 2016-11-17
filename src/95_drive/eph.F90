@@ -316,7 +316,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    NOT_IMPLEMENTED_ERROR()
    ! TODO: Be careful with the trick used in elphon for passing the concentration
    !call ebands_set_nelect(ebands, dtset%eph_extrael, spinmagntarget, msg)
-   call wrtout(ab_out,msg)
+   !call wrtout(ab_out,msg)
+   !if (usewfq) then
+   !  call ebands_set_nelect(ebands_kq, dtset%eph_extrael, spinmagntarget, msg)
+   !  call wrtout(ab_out,msg)
+   !end if
  end if
 
  call ebands_update_occ(ebands, spinmagntarget)

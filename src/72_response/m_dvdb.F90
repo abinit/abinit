@@ -2536,8 +2536,7 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
 
    if (iq_file /= -1) then
      ! This q-point is in the DVDB. Test if all the independent perturbations are available.
-     msg = sjoin("qpoint:", ktoa(qq), "is present in the DVDB file")
-     call wrtout(unt, msg)
+     call wrtout(unt, sjoin("qpoint:", ktoa(qq), "is present in the DVDB file"))
      call wrtout(unt,' The list of irreducible perturbations for this q vector is:')
      ii = 0; weird_q = 0; miss_q = 0
      do ipert=1,db%mpert
