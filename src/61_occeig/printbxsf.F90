@@ -153,7 +153,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 
  timrev=0; if (use_tr) timrev=1
 
- call mkkptrank (kptirred,nkptirred,kptrank_t,nsymfm,symrecfm, time_reversal=use_tr)
+ call mkkptrank (kptirred,nkptirred,kptrank_t, nsym=nsymfm, symrec=symrecfm, time_reversal=use_tr)
 
 !Xcrysden employs the C-ordering for the Fermi Surface.
  ikgrid=0
@@ -174,8 +174,8 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
          write(msg,'(a,3es16.8,2a,I8,2a)')&
 &         'kpt = ',kptgrid,ch10,' with rank ', symkptrank, ch10,&
 &         'has no symmetric among the k-points used in the GS calculation '
-         ierr=ierr+1
-         MSG_ERROR(msg)
+         ierr=ierr + 1
+         MSG_WARNING(msg)
        end if
 
      end do !ik1
@@ -186,6 +186,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 
  if (ierr/=0) then
    ABI_FREE(fulltoirred)
+   MSG_ERROR("Bug")
    RETURN
  end if
 
