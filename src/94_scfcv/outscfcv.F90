@@ -816,7 +816,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Generate DOS using the tetrahedron method or using Gaussians
 !FIXME: Should centralize all calculations of DOS here in outscfcv
 !WC: read QPS
- if (dtset%getqps /= 0) then
+ if (dtset%getqps > 0) then
    ABI_ALLOCATE(eigen2,(mband*nkpt*nsppol))
    eigen2 = eigen
    call mlwfovlp_qp(cg,cprj,dtset,dtfil,eigen2,mband,mcg,mcprj,mkmem,mpw,natom,&
