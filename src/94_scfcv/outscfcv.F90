@@ -235,7 +235,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,cplex1=1,fform_den=52,rdwr2=2,rdwrpaw0=0
- integer :: bantot,fform,collect
+ integer :: bantot,fform,collect,timrev
  integer :: accessfil,coordn
  integer :: ii,ierr,ifft,ikpt,ispden,isppol
  integer :: me_fft,n1,n2,n3
@@ -300,8 +300,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  remove_inv=.false.
  if(dtset%nspden==4 .and. dtset%usedmft==1) remove_inv=.true. ! MG: why this?
 
+ timrev = 2; if (any(dtset%kptopt == [3, 4])) timrev= 1
  call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,natom,dtset%npsp,ntypat, &
-& dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
+& dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,timrev,&
 & dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
 & dtset%symrel,dtset%tnons,dtset%symafm)
 
