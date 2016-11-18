@@ -384,6 +384,8 @@ subroutine phgamma_init(gams,cryst,ifc,symdynmat,eph_scalprod,ngqpt,nsppol,nspin
  gams%ngqpt = ngqpt
  gams%nqbz  = product(ngqpt)
 
+
+
  ! Call smpbz to get the full grid of k-points `kpt_full`
  ! brav1=1 is able to treat all bravais lattices (same option used in getkgrid)
  qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
@@ -406,6 +408,9 @@ subroutine phgamma_init(gams,cryst,ifc,symdynmat,eph_scalprod,ngqpt,nsppol,nspin
 
  call symkpt(chksymbreak0,cryst%gmet,ibz2bz,iout0,gams%qbz,gams%nqbz,gams%nqibz,cryst%nsym,cryst%symrec,&
    timerev1,wtq_bz,wtq_folded)
+
+ !call kpts_ibz_from_kptrlatt(cryst, qptrlatt, 1, [zero, zero, zero], &
+ !  gams%nqibz, gams%qibz, gams%wtq, gams%nqbz, gams%qbz, timrev=1)
 
  ABI_MALLOC(gams%qibz, (3, gams%nqibz))
  ABI_MALLOC(gams%wtq, (gams%nqibz))

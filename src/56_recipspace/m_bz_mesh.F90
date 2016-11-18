@@ -29,6 +29,10 @@
 !!  Note that this particular ordering should be used in any routine used to
 !!  symmetrize k-dependent quantities in the full BZ zone to avoid possible errors.
 !!
+!! NOTES
+!!  This module is deprecated and should be used only in the GW/BSE part.
+!!  Some of the routines will be gradually moved to m_kpts
+!!
 !! PARENTS
 !!
 !! CHILDREN

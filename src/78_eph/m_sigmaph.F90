@@ -1213,12 +1213,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
    new%ngqpt = dtset%eph_ngqpt_fine; my_shiftq = 0
  end if
 
- qptrlatt = 0
- qptrlatt(1,1) = new%ngqpt(1)
- qptrlatt(2,2) = new%ngqpt(2)
- qptrlatt(3,3) = new%ngqpt(3)
- nqpt_max = (product(new%ngqpt) * my_nshiftq)
+ qptrlatt = 0; qptrlatt(1,1) = new%ngqpt(1); qptrlatt(2,2) = new%ngqpt(2); qptrlatt(3,3) = new%ngqpt(3)
 
+ nqpt_max = (product(new%ngqpt) * my_nshiftq)
  ABI_MALLOC(tmp_qbz, (3,nqpt_max))
  call smpbz(brav1,std_out,qptrlatt,nqpt_max,new%nqbz,my_nshiftq,option1,my_shiftq,tmp_qbz)
  ABI_MALLOC(new%qbz, (3, new%nqbz))
@@ -1235,6 +1232,9 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
 
  call symkpt(dtset%chksymbreak,cryst%gmet,ibz2bz,std_out,new%qbz,new%nqbz,new%nqibz,&
    cryst%nsym,cryst%symrec,qtimrev1,tmp_wtq,tmp_wtq_folded)
+
+ !call kpts_ibz_from_kptrlatt(cryst, qptrlatt, my_nshiftq, my_shiftq,
+ !  new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz, timrev=1)
 
  ABI_MALLOC(new%wtq, (new%nqibz))
  ABI_MALLOC(new%qibz, (3, new%nqibz))

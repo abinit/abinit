@@ -42,6 +42,7 @@ MODULE m_ifc
  use m_ewald,       only : ewald9
  use m_crystal,     only : crystal_t
  use m_geometry,    only : phdispl_cart2red
+ use m_kpts,        only : kpts_ibz_from_kptrlatt
  use m_dynmat,      only : canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, &
 &                          make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, symdm9, nanal9, gtdyn9, dymfz9, dfpt_phfrq
  use m_ddb,         only : ddb_type
@@ -1794,13 +1795,10 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
 !scalars
  integer,parameter :: brav1=1,chksymbreak0=0,option1=1
  integer,parameter :: timrev1=1 ! TODO timrev should be input
- integer :: natom,nsym
- integer :: facbrv,imode,iq_ibz,msym
- integer :: nqbz,nqpt_max
- integer :: nqibz, nreals,unit_btrap
- integer :: iatom, idir
+ integer :: natom,nsym,facbrv,imode,iq_ibz,msym
+ integer :: nqbz,nqpt_max,nqibz, nreals,unit_btrap,iatom, idir
  real(dp) :: bzvol
- character(len=500) :: message,format_nreals,format_line_btrap
+ character(len=500) :: msg,format_nreals,format_line_btrap
  character(len=fnlen) :: outfile
 !arrays
  integer :: qptrlatt(3,3)
@@ -1818,13 +1816,13 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
  msym  = nsym
 
  outfile = trim(basename) // '_BTRAP'
- write(message, '(3a)')ch10,&
+ write(msg, '(3a)')ch10,&
 & ' Will write phonon FREQS in BoltzTrap format to file ',trim(outfile)
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
 
- if (open_file(outfile,message,newunit=unit_btrap,status="replace") /= 0) then
-   MSG_ERROR(message)
+ if (open_file(outfile,msg,newunit=unit_btrap,status="replace") /= 0) then
+   MSG_ERROR(msg)
  end if
 
  write (unit_btrap,'(a)') '#'
@@ -1852,12 +1850,11 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
  ABI_ALLOCATE(qibz,(3,nqpt_max))
  ABI_ALLOCATE(qbz,(3,nqpt_max))
 
- qptrlatt(:,:)=0
- qptrlatt(1,1)=ngqpt(1)
- qptrlatt(2,2)=ngqpt(2)
- qptrlatt(3,3)=ngqpt(3)
+ qptrlatt = 0; qptrlatt(1,1)=ngqpt(1); qptrlatt(2,2)=ngqpt(2); qptrlatt(3,3)=ngqpt(3)
 
  call smpbz(brav1,std_out,qptrlatt,nqpt_max,nqbz,nqshft,option1,qshft,qbz)
+
+ !call kpts_ibz_from_kptrlatt(cryst, qptrlatt, nqshft, qshft, nqibz, qibz, wtq, nqbz, qbz, timrev=1)
 
  ! Reduce the number of such points by symmetrization.
  ABI_ALLOCATE(ibz2bz,(nqbz))
@@ -1878,7 +1875,7 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
 
 ! Loop over irreducible q-points
  do iq_ibz=1,nqibz
-   qphon(:)=qibz(:,iq_ibz);
+   qphon(:)=qibz(:,iq_ibz)
 
    call ifc_fourq(ifc,cryst,qphon,phfrq,displ,out_d2cart=d2cart)
 
@@ -1978,41 +1975,16 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
 !arrays
  integer :: qptrlatt(3,3),dummy_symafm(cryst%nsym)
  real(dp) :: phfrq(3*cryst%natom),displ_cart(2,3*cryst%natom,3*cryst%natom)
- real(dp),allocatable :: qibz(:,:),wtq(:),freqs_qibz(:,:)
+ real(dp),allocatable :: qibz(:,:),wtq(:),qbz(:,:),freqs_qibz(:,:)
 
 ! *********************************************************************
 
-#if 0
-! Save memory during the generation of the q-mesh in the full BZ
-! Take into account the type of Bravais lattice
- nqpt_max = (product(ngqpt)*nqshft)
- ABI_MALLOC(qibz, (3,nqpt_max))
- ABI_MALLOC(qbz, (3,nqpt_max))
-
- qptrlatt = 0
- qptrlatt(1,1) = ngqpt(1)
- qptrlatt(2,2) = ngqpt(2)
- qptrlatt(3,3) = ngqpt(3)
-
- call smpbz(brav1,std_out,qptrlatt,nqpt_max,nqbz,nqshft,option1,qshft,qbz)
-
- ! Reduce the number of such points by symmetrization.
- ABI_MALLOC(ibz2bz, (nqbz))
- ABI_MALLOC(wtq, (nqbz))
- ABI_MALLOC(wtq_folded, (nqbz))
- wtq = one / nqbz ! Weights sum up to one
-
- call symkpt(chksymbreak0,cryst%gmet,ibz2bz,std_out,qbz,nqbz,nqibz,nsym,cryst%symrec,timrev1,wtq,wtq_folded)
-
- ABI_MALLOC(wtqibz,(nqibz))
- do iq_ibz=1,nqibz
-   wtqibz(iq_ibz)=wtq_folded(ibz2bz(iq_ibz))
-   qibz(:,iq_ibz)=qbz(:,ibz2bz(iq_ibz))
- end do
- ABI_FREE(wtq_folded)
-#endif
-
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, nqshft, qshft, nqibz, qibz, wtq, nqbz, qbz, timrev=1)
+ ABI_FREE(qbz)
+ ABI_FREE(wtq)
 
  ! Compute phonon frequencies in the irreducible wedge.
  ABI_CALLOC(freqs_qibz, (3*cryst%natom, nqibz))
@@ -2023,18 +1995,13 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
  end do
  call xmpi_sum(freqs_qibz, comm, ierr)
 
- !ABI_FREE(ibz2bz)
- !ABI_FREE(qibz)
- !ABI_FREE(qbz)
- !ABI_FREE(wtq)
- !ABI_FREE(wtqibz)
-
  ! Output phonon isosurface.
  dummy_symafm = 1
  call printbxsf(freqs_qibz, zero, zero, cryst%gprimd, qptrlatt, 3*cryst%natom,&
    nqibz, qibz, cryst%nsym, .False., cryst%symrec, dummy_symafm, .True., nsppol1, qshft, nqshft, path, ierr)
 
  ABI_FREE(freqs_qibz)
+ ABI_FREE(qibz)
 
 end subroutine ifc_printbxsf
 !!***
