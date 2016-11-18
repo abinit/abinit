@@ -28,11 +28,7 @@ MODULE m_kpts
  use defs_basis
  use m_errors
  use m_profiling_abi
- !use m_xmpi
  use m_crystal
- !use m_sort
-
- !use m_fstrings,       only : itoa, sjoin
 
  implicit none
 

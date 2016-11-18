@@ -1756,7 +1756,7 @@ end subroutine omega_decomp
 !!  qshft(3,nqshft)=Shifts of the q-mesh.
 !!
 !! OUTPUT
-!!  only write to file
+!!  only write to file. This routine should be called by a single processor.
 !!
 !! PARENTS
 !!      anaddb,eph
@@ -1766,7 +1766,7 @@ end subroutine omega_decomp
 !!
 !! SOURCE
 
-subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
+subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1793,31 +1793,27 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
 
 !Local variables -------------------------
 !scalars
- integer,parameter :: brav1=1,chksymbreak0=0,option1=1
- integer,parameter :: timrev1=1 ! TODO timrev should be input
- integer :: natom,nsym,facbrv,imode,iq_ibz,msym
- integer :: nqbz,nqpt_max,nqibz, nreals,unit_btrap,iatom, idir
- real(dp) :: bzvol
+ integer :: natom,imode,iq_ibz,nqbz,nqibz, nreals,unit_btrap,iatom,idir
  character(len=500) :: msg,format_nreals,format_line_btrap
  character(len=fnlen) :: outfile
 !arrays
  integer :: qptrlatt(3,3)
- integer,allocatable :: ibz2bz(:)
  real(dp) :: d2cart(2,3,cryst%natom,3,cryst%natom),displ(2*3*cryst%natom*3*cryst%natom)
- real(dp) :: gprimd(3,3),phfrq(3*cryst%natom),qphon(3)
- real(dp),allocatable :: qbz(:,:),qibz(:,:),wtq(:),wtq_folded(:),wtqibz(:)
+ real(dp) :: phfrq(3*cryst%natom),qphon(3)
+ real(dp),allocatable :: qbz(:,:),qibz(:,:),wtq(:)
 
 ! *********************************************************************
 
  DBG_ENTER("COLL")
 
  natom = cryst%natom
- nsym  = cryst%nsym
- msym  = nsym
+
+ ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons
+ qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, nqshft, qshft, nqibz, qibz, wtq, nqbz, qbz, timrev=1)
 
  outfile = trim(basename) // '_BTRAP'
- write(msg, '(3a)')ch10,&
-& ' Will write phonon FREQS in BoltzTrap format to file ',trim(outfile)
+ write(msg, '(3a)')ch10,' Will write phonon FREQS in BoltzTrap format to file ',trim(outfile)
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
 
@@ -1834,53 +1830,16 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
  write (unit_btrap,'(a)') '#  qpt weight   '
  write (unit_btrap,'(a)') '#  freq_1^2, dynmat column for mode 1 '
  write (unit_btrap,'(a)') '#  etc for mode 2,3,4... qpt 2,3,4... '
-
- gprimd = cryst%gprimd
- bzvol=ABS ( gprimd(1,1)*(gprimd(2,2)*gprimd(3,3)-gprimd(3,2)*gprimd(2,3)) &
-& -gprimd(2,1)*(gprimd(1,2)*gprimd(3,3)-gprimd(3,2)*gprimd(1,3)) &
-& +gprimd(3,1)*(gprimd(1,2)*gprimd(2,3)-gprimd(2,2)*gprimd(1,3)))
-!
-!Save memory during the generation of the q-mesh in the full BZ
-!Take into account the type of Bravais lattice
- facbrv=1
- if (brav1==2) facbrv=2
- if (brav1==3) facbrv=4
-
- nqpt_max=(product(ngqpt)*nqshft)/facbrv
- ABI_ALLOCATE(qibz,(3,nqpt_max))
- ABI_ALLOCATE(qbz,(3,nqpt_max))
-
- qptrlatt = 0; qptrlatt(1,1)=ngqpt(1); qptrlatt(2,2)=ngqpt(2); qptrlatt(3,3)=ngqpt(3)
-
- call smpbz(brav1,std_out,qptrlatt,nqpt_max,nqbz,nqshft,option1,qshft,qbz)
-
- !call kpts_ibz_from_kptrlatt(cryst, qptrlatt, nqshft, qshft, nqibz, qibz, wtq, nqbz, qbz, timrev=1)
-
- ! Reduce the number of such points by symmetrization.
- ABI_ALLOCATE(ibz2bz,(nqbz))
- ABI_ALLOCATE(wtq,(nqbz))
- ABI_ALLOCATE(wtq_folded,(nqbz))
- wtq(:)=one/nqbz ! Weights sum up to one
-
- call symkpt(chksymbreak0,cryst%gmet,ibz2bz,std_out,qbz,nqbz,nqibz,nsym,cryst%symrec,timrev1,wtq,wtq_folded)
-
- ABI_ALLOCATE(wtqibz,(nqibz))
- do iq_ibz=1,nqibz
-   wtqibz(iq_ibz)=wtq_folded(ibz2bz(iq_ibz))
-   qibz(:,iq_ibz)=qbz(:,ibz2bz(iq_ibz))
- end do
- ABI_DEALLOCATE(wtq_folded)
-
  write (unit_btrap,'(2I6)') nqibz, 3*natom
 
 ! Loop over irreducible q-points
  do iq_ibz=1,nqibz
    qphon(:)=qibz(:,iq_ibz)
 
-   call ifc_fourq(ifc,cryst,qphon,phfrq,displ,out_d2cart=d2cart)
+   call ifc_fourq(ifc, cryst, qphon, phfrq, displ, out_d2cart=d2cart)
 
    write (unit_btrap,'(3E20.10)') qphon
-   write (unit_btrap,'(E20.10)') wtqibz(iq_ibz)
+   write (unit_btrap,'(E20.10)') wtq(iq_ibz)
    nreals=1+2*3*natom
    call appdig(nreals,'(',format_nreals)
    format_line_btrap=trim(format_nreals)//'E20.10)'
@@ -1889,26 +1848,15 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
        imode = idir + 3*(iatom-1)
 !      factor two for Ry output - this may change in definitive BT and abinit formats
        write (unit_btrap,trim(format_line_btrap))phfrq(imode)*two,d2cart(1:2,1:3,1:natom,idir,iatom)
-!      XG130409 : This was the old coding for the previous line, but was not portable...
-!      write (unit_btrap,'(E20.10)', ADVANCE='NO') phfrq(imode)*two
-!      do jatom = 1, natom
-!      do jdir = 1, 3
-!      write (unit_btrap,'(2E20.10)', ADVANCE='NO') d2cart(:,jdir,jatom,idir, iatom)
-!      end do
-!      end do
-!      write (unit_btrap,*)
      end do
    end do
 
  end do !irred q-points
+ close (unit=unit_btrap)
 
- ABI_DEALLOCATE(ibz2bz)
  ABI_DEALLOCATE(qibz)
  ABI_DEALLOCATE(qbz)
  ABI_DEALLOCATE(wtq)
- ABI_DEALLOCATE(wtqibz)
-
- close (unit=unit_btrap)
 
  DBG_EXIT("COLL")
 
@@ -1981,6 +1929,7 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
+ ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons
  qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, nqshft, qshft, nqibz, qibz, wtq, nqbz, qbz, timrev=1)
  ABI_FREE(qbz)
@@ -1996,9 +1945,11 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
  call xmpi_sum(freqs_qibz, comm, ierr)
 
  ! Output phonon isosurface.
- dummy_symafm = 1
- call printbxsf(freqs_qibz, zero, zero, cryst%gprimd, qptrlatt, 3*cryst%natom,&
-   nqibz, qibz, cryst%nsym, .False., cryst%symrec, dummy_symafm, .True., nsppol1, qshft, nqshft, path, ierr)
+ if (my_rank == master) then
+   dummy_symafm = 1
+   call printbxsf(freqs_qibz, zero, zero, cryst%gprimd, qptrlatt, 3*cryst%natom,&
+     nqibz, qibz, cryst%nsym, .False., cryst%symrec, dummy_symafm, .True., nsppol1, qshft, nqshft, path, ierr)
+ end if
 
  ABI_FREE(freqs_qibz)
  ABI_FREE(qibz)

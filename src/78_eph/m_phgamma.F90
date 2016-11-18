@@ -52,6 +52,7 @@ module m_phgamma
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
  use m_bz_mesh,        only : isamek, make_path
+ use m_kpts,           only : kpts_ibz_from_kptrlatt
 
  implicit none
 
@@ -359,20 +360,13 @@ subroutine phgamma_init(gams,cryst,ifc,symdynmat,eph_scalprod,ngqpt,nsppol,nspin
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: option1=1,brav1=1,timerev1=1,chksymbreak0=0,iout0=0
- integer :: iq_ibz,mqpt,ierr  !iq_bz,
- real(dp) :: cpu,wall,gflops
- !character(len=500) :: msg
+ integer :: iq_ibz,ierr
 !arrays
- integer :: qptrlatt(3,3) !,g0(3)
- integer,allocatable :: ibz2bz(:)
- real(dp),allocatable :: wtq_folded(:),wtq_bz(:)
+ integer :: qptrlatt(3,3)
 
 ! *************************************************************************
 
  !@phgamma_t
- call cwtime(cpu,wall,gflops,"start")
-
  ! Set basic dimensions.
  gams%natom = cryst%natom; gams%natom3 = 3*cryst%natom; gams%nsppol = nsppol; gams%nspinor = nspinor
  gams%symgamma = symdynmat; gams%eph_scalprod = eph_scalprod
@@ -380,57 +374,18 @@ subroutine phgamma_init(gams,cryst,ifc,symdynmat,eph_scalprod,ngqpt,nsppol,nspin
  ABI_MALLOC(gams%n0, (nsppol))
  gams%n0 = n0
 
- ! Setup q-points and q-mesh tables.
+ ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons
  gams%ngqpt = ngqpt
- gams%nqbz  = product(ngqpt)
-
-
-
- ! Call smpbz to get the full grid of k-points `kpt_full`
- ! brav1=1 is able to treat all bravais lattices (same option used in getkgrid)
  qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
- mqpt= qptrlatt(1,1)*qptrlatt(2,2)*qptrlatt(3,3) &
-   +qptrlatt(1,2)*qptrlatt(2,3)*qptrlatt(3,1) &
-   +qptrlatt(1,3)*qptrlatt(2,1)*qptrlatt(3,2) &
-   -qptrlatt(1,2)*qptrlatt(2,1)*qptrlatt(3,3) &
-   -qptrlatt(1,3)*qptrlatt(2,2)*qptrlatt(3,1) &
-   -qptrlatt(1,1)*qptrlatt(2,3)*qptrlatt(3,2)
-
- ABI_MALLOC(gams%qbz ,(3,mqpt))
- call smpbz(brav1,-1,qptrlatt,mqpt,gams%nqbz,1,option1,[zero,zero,zero],gams%qbz)
- ABI_CHECK(mqpt == gams%nqbz, "mqpt != gams%nqbz")
-
- ! Call symkpt to get IBZ and weights.
- ABI_MALLOC(ibz2bz, (gams%nqbz))
- ABI_MALLOC(wtq_folded, (gams%nqbz))
- ABI_MALLOC(wtq_bz, (gams%nqbz))
- wtq_bz = one/gams%nqbz ! weights normalized to unity
-
- call symkpt(chksymbreak0,cryst%gmet,ibz2bz,iout0,gams%qbz,gams%nqbz,gams%nqibz,cryst%nsym,cryst%symrec,&
-   timerev1,wtq_bz,wtq_folded)
-
- !call kpts_ibz_from_kptrlatt(cryst, qptrlatt, 1, [zero, zero, zero], &
- !  gams%nqibz, gams%qibz, gams%wtq, gams%nqbz, gams%qbz, timrev=1)
-
- ABI_MALLOC(gams%qibz, (3, gams%nqibz))
- ABI_MALLOC(gams%wtq, (gams%nqibz))
-
- do iq_ibz=1,gams%nqibz
-   gams%wtq(iq_ibz) = wtq_folded(ibz2bz(iq_ibz))
-   gams%qibz(:,iq_ibz) = gams%qbz(:,ibz2bz(iq_ibz))
- end do
- ABI_CHECK(abs(sum(gams%wtq) - one) < tol10, "sum!")
-
- ABI_FREE(ibz2bz)
- ABI_FREE(wtq_folded)
- ABI_FREE(wtq_bz)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, 1, [zero, zero, zero], &
+   gams%nqibz, gams%qibz, gams%wtq, gams%nqbz, gams%qbz, timrev=1)
 
  ! Allocate matrices in the IBZ.
- ABI_STAT_MALLOC(gams%vals_qibz, (2,gams%natom3,gams%natom3,gams%nqibz,nsppol), ierr)
+ ABI_STAT_MALLOC(gams%vals_qibz, (2, gams%natom3, gams%natom3, gams%nqibz, nsppol), ierr)
  ABI_CHECK(ierr==0, "out of memory in %vals_qibz")
  gams%vals_qibz = zero
 
- ! Fourier interpolation.
+ ! Prepare Fourier interpolation.
  gams%gprim = ifc%gprim
  gams%nrpt  = ifc%nrpt
  ABI_MALLOC(gams%rpt,(3,gams%nrpt))
@@ -485,7 +440,6 @@ subroutine phgamma_finalize(gams,cryst,ifc)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: option1=1,brav1=1,timerev1=1,chksymbreak0=0,iout0=0
  integer :: iq_ibz,spin,mu
  real(dp) :: lambda_tot
  character(len=500) :: msg

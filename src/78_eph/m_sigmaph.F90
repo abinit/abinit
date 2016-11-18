@@ -54,6 +54,7 @@ module m_sigmaph
  use m_cgtools,        only : dotprod_g !set_istwfk
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
+ use m_kpts,           only : kpts_ibz_from_kptrlatt
  use m_fftcore,        only : get_kg
  use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type
@@ -1141,8 +1142,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,brav1=1,option1=1,occopt3=3,qtimrev1=1
- integer :: my_rank,nqpt_max,ik,my_nshiftq,nct,my_mpw,cnt,nproc,iq_ibz,ik_ibz
+ integer,parameter :: master=0,brav1=1,occopt3=3
+ integer :: my_rank,ik,my_nshiftq,nct,my_mpw,cnt,nproc,iq_ibz,ik_ibz
  integer :: onpw,ii,ipw,ierr,it,timerev_k,spin,gap_err,ikcalc,gw_qprange,ibstop
  integer :: nk_found,ifo,jj
 #ifdef HAVE_NETCDF
@@ -1157,9 +1158,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
 !arrays
  integer :: qptrlatt(3,3),indkk_k(1,6),gmax(3),my_gmax(3),kpos(6)
  integer :: symk(4,2,cryst%nsym),val_indeces(ebands%nkpt, ebands%nsppol)
- integer,allocatable :: gtmp(:,:),ibz2bz(:)
+ integer,allocatable :: gtmp(:,:)
  real(dp) :: my_shiftq(3,1),temp_range(2),kk(3),kq(3)
- real(dp),allocatable :: tmp_qbz(:,:),tmp_wtq(:),tmp_wtq_folded(:)
 
 ! *************************************************************************
 
@@ -1206,6 +1206,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  ABI_CHECK(mod(new%nwr, 2) == 1, "nwr should be odd!")
  new%wr_step = 0.02 * eV_Ha
 
+ ! TODO: Use ph_ngqpt?
  ! Define q-mesh for integration.
  ! Either q-mesh from DDB (no interpolation) or eph_ngqpt_fine (Fourier interpolation if q not in DDB)
  new%ngqpt = dtset%ddb_ngqpt; my_nshiftq = 1; my_shiftq(:,1) = dtset%ddb_shiftq
@@ -1213,39 +1214,10 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
    new%ngqpt = dtset%eph_ngqpt_fine; my_shiftq = 0
  end if
 
+ ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons
  qptrlatt = 0; qptrlatt(1,1) = new%ngqpt(1); qptrlatt(2,2) = new%ngqpt(2); qptrlatt(3,3) = new%ngqpt(3)
-
- nqpt_max = (product(new%ngqpt) * my_nshiftq)
- ABI_MALLOC(tmp_qbz, (3,nqpt_max))
- call smpbz(brav1,std_out,qptrlatt,nqpt_max,new%nqbz,my_nshiftq,option1,my_shiftq,tmp_qbz)
- ABI_MALLOC(new%qbz, (3, new%nqbz))
- new%qbz = tmp_qbz(:,:new%nqbz)
- ABI_FREE(tmp_qbz)
-
- ! Reduce the number of such points by symmetrization.
- ! Compute new%wtq and new%qibz.
- ! Note that time-reversal is always used for the q-points.
- ABI_MALLOC(ibz2bz, (new%nqbz))
- ABI_MALLOC(tmp_wtq, (new%nqbz))
- ABI_MALLOC(tmp_wtq_folded, (new%nqbz))
- tmp_wtq = one / new%nqbz ! Weights sum up to one
-
- call symkpt(dtset%chksymbreak,cryst%gmet,ibz2bz,std_out,new%qbz,new%nqbz,new%nqibz,&
-   cryst%nsym,cryst%symrec,qtimrev1,tmp_wtq,tmp_wtq_folded)
-
- !call kpts_ibz_from_kptrlatt(cryst, qptrlatt, my_nshiftq, my_shiftq,
- !  new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz, timrev=1)
-
- ABI_MALLOC(new%wtq, (new%nqibz))
- ABI_MALLOC(new%qibz, (3, new%nqibz))
- do iq_ibz=1,new%nqibz
-   new%wtq(iq_ibz) = tmp_wtq_folded(ibz2bz(iq_ibz))
-   new%qibz(:,iq_ibz) = new%qbz(:, ibz2bz(iq_ibz))
- end do
-
- ABI_FREE(ibz2bz)
- ABI_FREE(tmp_wtq)
- ABI_FREE(tmp_wtq_folded)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, my_nshiftq, my_shiftq, &
+   new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz, timrev=1)
 
  ! Select k-point and bands where corrections are wanted
  ! These parameters will be passed via the input file (similar to kptgw, bdgw)

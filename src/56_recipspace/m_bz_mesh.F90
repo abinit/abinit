@@ -3464,7 +3464,7 @@ subroutine tetra_from_kptrlatt(tetra, cryst, kptopt, kptrlatt, nshiftk, shiftk, 
  !   - we use symrec (operations in reciprocal space)
  !
  sppoldbl = 1
- timrev = 1; if (kptopt == 4) timrev = 0
+ timrev = 1; if (any(kptopt == [3, 4])) timrev = 0
  ABI_MALLOC(indkk, (nkfull*sppoldbl,6))
 
  ! Compute k points from input file closest to the output file
