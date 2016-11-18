@@ -30,6 +30,7 @@ MODULE m_ifc
  use defs_basis
  use m_errors
  use m_profiling_abi
+ use m_xmpi
  use m_sort
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -166,11 +167,12 @@ MODULE m_ifc
     ! Long-range part of dynmat in q-space
  end type ifc_type
 
- public :: ifc_init       ! Constructor
- public :: ifc_free       ! Release memory
- public :: ifc_fourq      ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
+ public :: ifc_init        ! Constructor
+ public :: ifc_free        ! Release memory
+ public :: ifc_fourq       ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
  public :: ifc_print       ! Print the ifc (output, netcdf and text file)
- public :: ifc_outphbtrap ! Print out phonon frequencies on regular grid for BoltzTrap code.
+ public :: ifc_outphbtrap  ! Print out phonon frequencies on regular grid for BoltzTrap code.
+ public :: ifc_printbxsf   ! Output phonon isosurface in Xcrysden format.
 !!***
 
 !----------------------------------------------------------------------
@@ -723,8 +725,8 @@ end subroutine ifc_init
 !! SOURCE
 
 
-subroutine ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,nanaqdir, &
-                     out_d2cart,out_eigvec,out_displ_red)   ! Optional [out]
+subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
+                     nanaqdir, out_d2cart, out_eigvec, out_displ_red)   ! Optional [out]
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1864,7 +1866,6 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
  wtq(:)=one/nqbz ! Weights sum up to one
 
  call symkpt(chksymbreak0,cryst%gmet,ibz2bz,std_out,qbz,nqbz,nqibz,nsym,cryst%symrec,timrev1,wtq,wtq_folded)
- !write(std_out,*) 'nqibz = ', nqibz
 
  ABI_ALLOCATE(wtqibz,(nqibz))
  do iq_ibz=1,nqibz
@@ -1917,4 +1918,127 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
 end subroutine ifc_outphbtrap
 !!***
 
-END MODULE m_ifc
+!----------------------------------------------------------------------
+
+!!****f* m_ifc/ifc_printbxsf
+!! NAME
+!! ifc_printbxsf
+!!
+!! FUNCTION
+!!  Output phonon isosurface in Xcrysden format.
+!!
+!! INPUTS
+!!  ifc<ifc_type>=Stores data related to interatomic force constants.
+!!  crystal<crystal_t>=Info on the crystal structure
+!!  path = file name for output to disk
+!!  ngqpt(3)=Divisions of the q-mesh
+!!  nqshft=Number of shifts
+!!  qshft(3,nqshft)=Shifts of the q-mesh.
+!!  path=File name
+!!  comm=MPI communicator.
+!!
+!! OUTPUT
+!!  Only write to file
+!!
+!! PARENTS
+!!      eph
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_printbxsf'
+ use interfaces_41_geometry
+ use interfaces_56_recipspace
+ use interfaces_61_occeig
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: nqshft,comm
+ character(len=*),intent(in) :: path
+ type(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: cryst
+!arrays
+ integer,intent(in) :: ngqpt(3)
+ real(dp),intent(in) :: qshft(3,nqshft)
+
+!Local variables -------------------------
+!scalars
+ integer,parameter :: nsppol1=1
+ integer :: my_rank,nprocs,iq_ibz,nqibz,nqbz,ierr
+!arrays
+ integer :: qptrlatt(3,3),dummy_symafm(cryst%nsym)
+ real(dp) :: phfrq(3*cryst%natom),displ_cart(2,3*cryst%natom,3*cryst%natom)
+ real(dp),allocatable :: qibz(:,:),wtq(:),freqs_qibz(:,:)
+
+! *********************************************************************
+
+#if 0
+! Save memory during the generation of the q-mesh in the full BZ
+! Take into account the type of Bravais lattice
+ nqpt_max = (product(ngqpt)*nqshft)
+ ABI_MALLOC(qibz, (3,nqpt_max))
+ ABI_MALLOC(qbz, (3,nqpt_max))
+
+ qptrlatt = 0
+ qptrlatt(1,1) = ngqpt(1)
+ qptrlatt(2,2) = ngqpt(2)
+ qptrlatt(3,3) = ngqpt(3)
+
+ call smpbz(brav1,std_out,qptrlatt,nqpt_max,nqbz,nqshft,option1,qshft,qbz)
+
+ ! Reduce the number of such points by symmetrization.
+ ABI_MALLOC(ibz2bz, (nqbz))
+ ABI_MALLOC(wtq, (nqbz))
+ ABI_MALLOC(wtq_folded, (nqbz))
+ wtq = one / nqbz ! Weights sum up to one
+
+ call symkpt(chksymbreak0,cryst%gmet,ibz2bz,std_out,qbz,nqbz,nqibz,nsym,cryst%symrec,timrev1,wtq,wtq_folded)
+
+ ABI_MALLOC(wtqibz,(nqibz))
+ do iq_ibz=1,nqibz
+   wtqibz(iq_ibz)=wtq_folded(ibz2bz(iq_ibz))
+   qibz(:,iq_ibz)=qbz(:,ibz2bz(iq_ibz))
+ end do
+ ABI_FREE(wtq_folded)
+#endif
+
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ ! Compute phonon frequencies in the irreducible wedge.
+ ABI_CALLOC(freqs_qibz, (3*cryst%natom, nqibz))
+
+ do iq_ibz=1,nqibz
+   if (mod(iq_ibz, nprocs) /= my_rank) cycle
+   call ifc_fourq(ifc, cryst, qibz(:,iq_ibz), freqs_qibz(:,iq_ibz), displ_cart)
+ end do
+ call xmpi_sum(freqs_qibz, comm, ierr)
+
+ !ABI_FREE(ibz2bz)
+ !ABI_FREE(qibz)
+ !ABI_FREE(qbz)
+ !ABI_FREE(wtq)
+ !ABI_FREE(wtqibz)
+
+ ! Output phonon isosurface.
+ dummy_symafm = 1
+ call printbxsf(freqs_qibz, zero, zero, cryst%gprimd, qptrlatt, 3*cryst%natom,&
+   nqibz, qibz, cryst%nsym, .False., cryst%symrec, dummy_symafm, .True., nsppol1, qshft, nqshft, path, ierr)
+
+ ABI_FREE(freqs_qibz)
+
+end subroutine ifc_printbxsf
+!!***
+
+!----------------------------------------------------------------------
+
+end module m_ifc

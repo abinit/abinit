@@ -492,7 +492,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_56_recipspace
- use interfaces_61_occeig
 !End of the abilint section
 
  implicit none
@@ -525,7 +524,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  real(dp) :: displ(2*3*Crystal%natom*3*Crystal%natom)
  real(dp) :: eigvec(2,3,Crystal%natom,3*Crystal%natom),phfrq(3*Crystal%natom)
  real(dp) :: qlatt(3,3),qphon(3),rlatt(3,3)
- real(dp),allocatable :: dtweightde(:,:),full_eigvec(:,:,:,:,:),full_phfrq(:,:),Prf3D(:,:,:)
+ real(dp),allocatable :: dtweightde(:,:),full_eigvec(:,:,:,:,:),full_phfrq(:,:)
  real(dp),allocatable :: kpt_fullbz(:,:),qbz(:,:),qibz(:,:),qshft(:,:),tmp_phfrq(:),tweight(:,:)
  real(dp),allocatable :: qibz2(:,:),qshft2(:,:),wtq(:),wtq_folded(:),wtqibz(:)
 
@@ -693,8 +692,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
      ABI_MALLOC(full_phfrq,(3*natom,PHdos%nqibz))
      ABI_STAT_MALLOC(full_eigvec,(2,3,natom,3*natom,PHdos%nqibz), ierr)
      ABI_CHECK(ierr==0, 'out-of-memory in full_eigvec')
-
-     !ABI_MALLOC(Prf3D,(3*natom,PHdos%nqibz,1))
    end if  ! prtdos==2.and.imesh==2
    !
    ! This infinite loop is used to be sure that the frequency mesh is large enough to contain
@@ -738,8 +735,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
        ! Fourier interpolation.
        call ifc_fourq(Ifc,Crystal,qphon,phfrq,displ,out_eigvec=eigvec)
 
-       !if (prtdos==2.and.imesh==2) Prf3D(:,iq_ibz,1)=phfrq(:)
-
        dum=MINVAL(phfrq); PHdos%omega_min=MIN(PHdos%omega_min,dum)
        dum=MAXVAL(phfrq); PHdos%omega_max=MAX(PHdos%omega_max,dum)
        out_of_bounds = (PHdos%omega_min<low_bound .or. PHdos%omega_max>upr_bound)
@@ -770,7 +765,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
            !  * Sum is done after the loops over the two meshes.
            full_phfrq(:,iq_ibz)=phfrq(:)
            full_eigvec(:,:,:,:,iq_ibz)=eigvec
-           !if (prtdos==2.and.imesh==2) Prf3D(:,iq_ibz,1)=phfrq(:)
          case default
            write(msg,'(a,i0)')" Wrong value for prtdos= ",prtdos
            MSG_ERROR(msg)
@@ -885,15 +879,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
    do itype=1,Crystal%ntypat
      call simpson_int(PHdos%nomega,PHdos%omega_step,PHdos%pjdos_type(:,itype),PHdos%pjdos_type_int(:,itype))
    end do
- end if
-
-!output phonon isosurface
-! MG Commented this call on  Wed Jul 16 2014
-! TODO: The calculation of the isosurface should be done in a specialized routine
- if (.False. .and. prtdos==2) then
-   call printbxsf(Prf3D,zero,zero,crystal%gprimd,qptrlatt,3*natom,&
-     PHdos%nqibz,qibz2,Crystal%nsym,.FALSE.,Crystal%symrec,Crystal%symafm,.TRUE.,1,qshft2,nqshft,'Phfrq3D',ierr)
-   ABI_FREE(Prf3D)
  end if
 
  if (allocated(qibz2)) then

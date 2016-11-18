@@ -275,7 +275,6 @@ subroutine dvdb_init(db, path, comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_init'
  use interfaces_32_util
- use interfaces_41_geometry
  use interfaces_51_manage_mpi
 !End of the abilint section
 
@@ -1765,7 +1764,6 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'dvdb_ftinterp_setup'
- use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
  use interfaces_56_recipspace
 !End of the abilint section
