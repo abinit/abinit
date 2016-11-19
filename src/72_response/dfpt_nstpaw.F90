@@ -11,7 +11,7 @@
 !! to non-stationnary 2nd-order total energy).
 !! Compared with NC-pseudopotentials, PAW contributions include:
 !!  - changes of the overlap between 0-order wave-functions,
-!!  - on-site contributions.  
+!!  - on-site contributions.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2010-2016 ABINIT group (MT, AM)
@@ -170,7 +170,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_xmpi
  use m_errors
  use m_profiling_abi
- use m_wffile
  use m_wfk
  use m_hamiltonian
  use m_cgtools
@@ -205,7 +204,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_61_occeig
- use interfaces_62_iowfdenpot
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_66_nonlocal
@@ -278,10 +276,10 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer :: bd2tot_index,bdtot_index,berryopt,bufsz,choice,cpopt,counter,cplex_rhoij,ddkcase
  integer :: dimffnl,dimffnl1,dimffnl1_idir1,dimylmgr1
  integer :: ia,iatom,iband,ibg,ibgq,ibg1,icg,icgq,icg1,ider,idir0,idir1,idir_cprj
- integer :: ierr,ii,ikg,ikg1,ikpt,ikpt_,ikpt_me,ilmn,iorder_cprj,ipert1
+ integer :: ierr,ii,ikg,ikg1,ikpt,ikpt_me,ilmn,iorder_cprj,ipert1
  integer :: ispden,isppol,istwf_k,istr,istr1,itypat,jband,jj,kdir1,kpert1,master,mcgq,mcprjq
- integer :: mdir1,me,mpert1,my_natom,my_comm_atom,nband_,nband_k,nband_kocc,need_ylmgr1
- integer :: nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nskip,nspden_rhoij,nspinor_
+ integer :: mdir1,me,mpert1,my_natom,my_comm_atom,nband_k,nband_kocc,need_ylmgr1
+ integer :: nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nskip,nspden_rhoij
  integer :: nvh1,nvxc1,nzlmopt_ipert,nzlmopt_ipert1,optlocal,optnl
  integer :: option,optxc,opt_gvnl1,sij_opt,spaceworld,usevnl,wfcorr,ik_ddk
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
@@ -319,14 +317,11 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  type(paw_ij_type),allocatable :: paw_ij10(:,:)
  type(pawrhoij_type),target,allocatable :: pawdrhoij1(:,:)
  type(pawrhoij_type),pointer :: pawdrhoij1_unsym(:,:)
- type(wffile_type) :: wffddk(3)
  type(wfk_t) :: ddks(3)
 
 ! *********************************************************************
 
  DBG_ENTER("COLL")
-
- ABI_UNUSED((/ikpt_, nband_, nspinor_, wffddk%unwff/))
 
 !Keep track of total time spent in dfpt_nstpaw
  call timab(566,1,tsec)
@@ -466,11 +461,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        write(msg, '(a,a)') '-open ddk wf file :',trim(fiwfddk(idir1))
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
-#ifdef DEV_MG_WFK
        call wfk_open_read(ddks(idir1),fiwfddk(idir1),formeig1,dtset%iomode,ddkfil(idir1),spaceworld)
-#else
-       call WffOpen(dtset%iomode,spaceworld,fiwfddk(idir1),ierr,wffddk(idir1),master,me,ddkfil(idir1))
-#endif
      end if
    end do
  end if
@@ -725,17 +716,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !  Prepare DDK files for reading
    skipddk(:)=0;ikpt_fbz(1:3)=0;ikpt_fbz_previous(1:3)=0
-   if (need_ddk_file) then
-     do kdir1=1,mdir1
-       idir1=jdir1(kdir1)
-       if (ddkfil(idir1)/=0) then
-#ifndef DEV_MG_WFK
-         call clsopn(wffddk(idir1))
-         call hdr_skip(wffddk(idir1),ierr)
-#endif
-       end if
-     end do
-   end if
 
 !  Allocate arrays used to accumulate density change due to overlap
    if (has_drho) then
@@ -779,21 +759,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !    Rewind (k+G) data if needed
      ikg=0;ikg1=0;ikpt_fbz(1:3)=0
-
-!    DDK files: skip the remaining isppol=1 records
-     if (isppol==2.and.need_ddk_file) then
-       do kdir1=1,mdir1
-         idir1=jdir1(kdir1)
-         if ((ddkfil(idir1)/=0).and.(skipddk(idir1)<nkpt)) then
-#ifndef DEV_MG_WFK
-           do ikpt=1,(nkpt-skipddk(idir1))
-             call WffReadNpwRec(ierr,ikpt,isppol,nband_,npw_,nspinor_,wffddk(idir1))
-             call WffReadSkipRec(ierr,1+2*nband_,wffddk(idir1))
-           end do
-#endif
-         end if
-       end do
-     end if
 
 !    Continue to initialize the GS/RF Hamiltonian
      call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij,&
@@ -872,20 +837,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !            Number of k points to skip in the full set of k pointsp
              nskip=ikpt_fbz(idir1)-ikpt_fbz_previous(idir1)-1
              skipddk(idir1)=skipddk(idir1)+nskip+1
-#ifndef DEV_MG_WFK
-             if (nskip/=0) then
-               do ikpt_=1+ikpt_fbz_previous(idir1),ikpt_fbz(idir1)-1
-                 call WffReadSkipK(1,0,ikpt_,isppol,mpi_enreg,wffddk(idir1))
-               end do
-             end if
-!            Begin to read current record (k+G)
-             call WffReadNpwRec(ierr,ikpt,isppol,nband_,npw_,nspinor_,wffddk(idir1))
-             call WffReadSkipRec(ierr,1,wffddk(idir1))
-#else
              !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
              ik_ddk = indkpt1(ikpt)
              npw_ = ddks(idir1)%hdr%npwarr(ik_ddk)
-#endif
              if (npw_/=npw_k) then
                write(unit=msg,fmt='(a,i3,a,i5,a,i3,a,a,i5,a,a,i5)')&
 &               'For isppol = ',isppol,', ikpt = ',ikpt,' and idir = ',idir,ch10,&
@@ -1050,19 +1004,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !        Skip band if not to be treated by this proc
          if (xmpi_paral==1) then
-           if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=me) then
-#ifndef DEV_MG_WFK
-             if (need_ddk_file) then
-               do kdir1=1,mdir1
-                 idir1=jdir1(kdir1)
-                 if (ddkfil(idir1)/=0) then
-                   call WffReadSkipRec(ierr,2,wffddk(idir1))
-                 end if
-               end do
-             end if
-#endif
-             cycle
-           end if
+           if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=me) cycle
          end if
 
 !        Extract GS wavefunctions
@@ -1195,14 +1137,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
              ABI_ALLOCATE(gvnl1,(2,npw1_k*nspinor*usevnl))
              if (need_ddk_file) then
                if (ddkfil(idir1)/=0) then
-#ifndef DEV_MG_WFK
-                 call WffReadSkipRec(ierr,1,wffddk(idir1))
-                 call WffReadDataRec(gvnl1,ierr,2,npw1_k*nspinor,wffddk(idir1))
-#else
                  !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
                  ik_ddk = indkpt1(ikpt)
                  call wfk_read_bks(ddks(idir1), iband, ik_ddk, isppol, xmpio_single, cg_bks=gvnl1)
-#endif
                else
                  gvnl1=zero
                end if
@@ -1342,21 +1279,11 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !            note: gh1 used as temporary space (to store idir ddk WF)
              if (idir==idir1) then
                gh1=cwavef
-#ifndef DEV_MG_WFK
-               if (need_ddk_file.and.ddkfil(idir1)/=0) then
-                 call WffReadSkipRec(ierr,2,wffddk(idir1))
-               end if
-#endif
              else
                if (need_ddk_file.and.ddkfil(idir1)/=0) then
-#ifndef DEV_MG_WFK
-                 call WffReadSkipRec(ierr,1,wffddk(idir1))
-                 call WffReadDataRec(gh1,ierr,2,npw1_k*nspinor,wffddk(idir1))
-#else
                  !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
                  ik_ddk = indkpt1(ikpt)
                  call wfk_read_bks(ddks(idir1), iband, ik_ddk, isppol, xmpio_single, cg_bks=gh1)
-#endif
                else
                  gh1=zero
                end if
@@ -1649,11 +1576,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    do kdir1=1,mdir1
      idir1=jdir1(kdir1)
      if (ddkfil(idir1)/=0)then
-#ifndef DEV_MG_WFK
-       call WffClose(wffddk(idir1),ierr)
-#else
        call wfk_close(ddks(idir1))
-#endif
      end if
    end do
  end if
