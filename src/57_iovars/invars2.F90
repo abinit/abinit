@@ -1103,7 +1103,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    ABI_MALLOC(dtset%ph_qpath, (3, dtset%ph_nqpath))
    ABI_CHECK(3 * dtset%ph_nqpath <= marr, "3 * dtset%ph_nqpath > marr!")
    call intagm(dprarr,intarr,jdtset,marr,3*dtset%ph_nqpath,string(1:lenstr),'ph_qpath',tread,'DPR')
-   if (tread==0) then 
+   if (tread==0) then
      MSG_ERROR("When ph_nqpath > 0, ph_qpath should be specified")
    end if
    dtset%ph_qpath = reshape(dprarr(1:3*dtset%ph_nqpath), [3, dtset%ph_nqpath])
@@ -1118,7 +1118,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if (tread == 1) then
      ABI_CHECK(3 * dtset%ph_nqshift <= marr, "3 * dtset%ph_nqshift > marr!")
      call intagm(dprarr,intarr,jdtset,marr,3*dtset%ph_nqshift,string(1:lenstr),'ph_qshift',tread,'DPR')
-     if (tread == 0) then 
+     if (tread == 0) then
        MSG_ERROR("When ph_nqshift > 0, ph_qshift should be specified")
      end if
      dtset%ph_qshift = reshape(dprarr(1:3*dtset%ph_nqshift), [3, dtset%ph_nqshift])
@@ -2000,6 +2000,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtphdos',tread,'INT')
  if(tread==1) dtset%prtphdos=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtphsurf',tread,'INT')
+ if(tread==1) dtset%prtphsurf=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtposcar',tread,'INT')
  if(tread==1) dtset%prtposcar=intarr(1)

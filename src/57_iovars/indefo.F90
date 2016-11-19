@@ -477,7 +477,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 
 !  nloalg is also a special case
    dtsets(idtset)%nloalg(1)=4
-   dtsets(idtset)%nloalg(2)=1 
+   dtsets(idtset)%nloalg(2)=1
    dtsets(idtset)%nloalg(3)=dtsets(idtset)%usepaw
    dtsets(idtset)%ngkpt=0
    dtsets(idtset)%nnsclo=0
@@ -597,6 +597,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prtnabla=0
    dtsets(idtset)%prtnest=0
    dtsets(idtset)%prtphdos=1
+   dtsets(idtset)%prtphsurf=0
    dtsets(idtset)%prtposcar=0
    dtsets(idtset)%prtpot=0
    dtsets(idtset)%prtpsps=0

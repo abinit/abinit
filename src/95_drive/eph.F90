@@ -449,11 +449,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call ebands_prtbltztrp(ebands, cryst, dtfil%filnam_ds(4))
  end if
 
- ! TODO
- !if (dtset%prtphsurf == 1) then
- !  path = strcat(dtfil%filnam_ds(4), "_PH.bxsf")
- !  call ifc_printbxsf(ifc, cryst, dtset%ph_ngqpt, dtset%ph_nqshft, dtset%ph_qshft, path, comm)
- !end if
+!!  Output phonon isosurface in Xcrysden format.
+ if (dtset%prtphsurf == 1) then
+   path = strcat(dtfil%filnam_ds(4), "_PH.bxsf")
+   call ifc_printbxsf(ifc, cryst, dtset%ph_ngqpt, dtset%ph_nqshift, dtset%ph_qshift, path, comm)
+ end if
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')"eph%ifc: cpu:",cpu,", wall: ",wall

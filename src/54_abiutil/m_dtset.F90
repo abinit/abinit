@@ -779,6 +779,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtnabla           = dtin%prtnabla
  dtout%prtnest            = dtin%prtnest
  dtout%prtphdos           = dtin%prtphdos
+ dtout%prtphsurf          = dtin%prtphsurf
  dtout%prtposcar          = dtin%prtposcar
  dtout%prtpot             = dtin%prtpot
  dtout%prtpsps            = dtin%prtpsps
