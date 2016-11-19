@@ -205,7 +205,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  integer,save :: nskip=0
  integer :: counter,iband,idir0,ierr,iexit,igs,igscq,ii,dim_dcwf,inonsc
  integer :: iorder_cprj,iorder_cprj1,ipw,iscf_mod,ispinor,me,mgscq,nkpt_max
- integer :: nband_k_file,ndir,npw1_k_file,nspinor_file,option,opt_gvnl1,quit,test_ddk
+ integer :: option,opt_gvnl1,quit,test_ddk
  integer :: tocceig,usedcwavef,ptr,shift_band
  real(dp) :: aa,ai,ar,eig0nk,resid,residk,scprod,energy_factor
  character(len=500) :: message
@@ -219,8 +219,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  type(pawcprj_type),allocatable :: cwaveprj(:,:),cwaveprj0(:,:),cwaveprj1(:,:)
 
 ! *********************************************************************
-
- ABI_UNUSED((/ierr,nband_k_file,ndir,npw1_k_file,nspinor_file/))
 
  DBG_ENTER('COLL')
 

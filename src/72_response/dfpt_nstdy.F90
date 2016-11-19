@@ -164,9 +164,9 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !scalars
  integer,parameter :: formeig1=1
  integer :: ban2tot,bantot,bdtot_index,ddkcase,iband,icg,icg1,idir1
- integer :: ierr,ifft,ii,ikg,ikg1,ikpt,ikpt_dum,ilm,ipert1,ispden,isppol
- integer :: istwf_k,isym,jj,master,me,n1,n2,n3,n3xccc,n4,n5,n6,nband_dum
- integer :: nband_k,nfftot,npw1_k,npw_k,nskip,nspinor_,option,spaceworld
+ integer :: ierr,ifft,ii,ikg,ikg1,ikpt,ilm,ipert1,ispden,isppol
+ integer :: istwf_k,isym,jj,master,me,n1,n2,n3,n3xccc,n4,n5,n6
+ integer :: nband_k,nfftot,npw1_k,npw_k,nspinor_,option,spaceworld
  integer :: optnc,optxc
  real(dp) :: doti,dotr,wtk_k
  logical :: t_exist
@@ -174,7 +174,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  character(len=fnlen) :: fiwfddk
  type(gs_hamiltonian_type) :: gs_hamkq
 !arrays
- integer :: ddkfil(3),ikpt_fbz(3),ikpt_fbz_previous(3),skipddk(3)
+ integer :: ddkfil(3)
  integer,allocatable :: kg1_k(:,:),kg_k(:,:),symrl1(:,:,:)
  real(dp) :: d2nl_elfd(2,3),d2nl_mgfd(2,3),kpoint(3),kpq(3),sumelfd(2),summgfd(2),tsec(2)
  real(dp),allocatable :: buffer1(:),buffer2(:),d2bbb_k(:,:,:,:),d2nl_k(:,:,:)
@@ -187,7 +187,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
 ! *********************************************************************
 
- ABI_UNUSED((/nkpt, ii, ikpt_dum, nband_dum/))
+ ABI_UNUSED(nkpt)
 
  DBG_ENTER("COLL")
 
@@ -272,7 +272,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
  bantot = 0
  ban2tot = 0
- skipddk(:) = 0
 
 !==== Initialize most of the Hamiltonian ====
 !1) Allocate all arrays and initialize quantities that do not depend on k and spin.
@@ -288,8 +287,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  do isppol=1,nsppol
 
    ikg=0;ikg1=0
-
-   ikpt_fbz(1:3)=0
 
 !  Continue to initialize the Hamiltonian
    call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij)
@@ -323,13 +320,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
      do idir1=1,3
        if (ddkfil(idir1)/=0) then
-!        Must select the corresponding k point in the full set of k points
-!        used in the ddk file : compute the number of k points to skip
-         ikpt_fbz_previous(idir1)=ikpt_fbz(idir1)
-         ikpt_fbz(idir1)=indkpt1(ikpt)
-
-         nskip=ikpt_fbz(idir1)-ikpt_fbz_previous(idir1)-1
-         skipddk(idir1) = skipddk(idir1) + 1 + nskip
          ii = wfk_findk(ddks(idir1), kpt_rbz(:, ikpt))
          ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1")
        end if

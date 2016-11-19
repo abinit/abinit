@@ -189,7 +189,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  integer :: dimffnl,dimffnl_str,dimnhat,ia,iatom,iashift,iband,jband,ibg,icg,icplx,ideg,ider,idir
  integer :: ider_str,idir_ffnl,idir_str,ielt,ieltx,ierr,ii,ikg,ikpt,ilm,ipw
  integer :: ispinor,isppol,istwf_k,isub,itypat,jj,jsub,klmn,master,me,mu
- integer :: my_comm_atom,n1,n2,n3,nband_k,ncpgr,nfftot,nskip,ngrhoij,nkpg,nnlout_bec1,nnlout_bec2,nnlout_efmas
+ integer :: my_comm_atom,n1,n2,n3,nband_k,ncpgr,nfftot,ngrhoij,nkpg,nnlout_bec1,nnlout_bec2,nnlout_efmas
  integer :: nnlout_piez1,nnlout_piez2,nnlout_phon,nnlout_strs,npw_,npw_k,nsp,nsploop,nu
  integer :: optgr,optgr2,option,option_rhoij,optstr,optstr2,paw_opt,paw_opt_1,paw_opt_3,paw_opt_efmas
  integer :: shift_rhoij,signs,signs_field,spaceworld,sz2,sz3,tim_nonlop
@@ -198,7 +198,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  character(len=500) :: msg
  type(gs_hamiltonian_type) :: gs_ham
 !arrays
- integer :: ik_ddk(3),ddkfil(3),ikpt_fbz(3),ikpt_fbz_previous(3),skipddk(3)
+ integer :: ik_ddk(3),ddkfil(3)
  integer,allocatable :: dimlmn(:),kg_k(:,:),l_size_atm(:)
  integer,pointer :: my_atmtab(:)
  real(dp) :: dotprod(2),dummy(0),gmet(3,3),gprimd(3,3),grhoij(3),kpoint(3),nonlop_dum(1,1)
@@ -459,7 +459,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
 !  Rewind (k+G) data if needed
-   ikg=0;ikg=0;ikpt_fbz(1:3)=0
+   ikg=0
 
 !  Loop over k points
    do ikpt=1,dtset%nkpt
@@ -479,12 +479,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      if (need_becfr.or.need_piezofr) then
        do ii=1,3 ! Loop over elect. field directions
          if (ddkfil(ii)/=0)then
-!        Skip records in ddk file
-           ikpt_fbz_previous(ii)=ikpt_fbz(ii)
-           ikpt_fbz(ii)=ikpt
 !        Number of k points to skip in the full set of k pointsp
-           nskip=ikpt_fbz(ii)-ikpt_fbz_previous(ii)-1
-           skipddk(ii)=skipddk(ii)+nskip+1
            ik_ddk(ii) = wfk_findk(ddkfiles(ii), kpoint)
            ABI_CHECK(ik_ddk(ii) /= -1, "Cannot find k-point in DDK")
            npw_ = ddkfiles(ii)%hdr%npwarr(ik_ddk(ii))

@@ -279,7 +279,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer :: ierr,ii,ikg,ikg1,ikpt,ikpt_me,ilmn,iorder_cprj,ipert1
  integer :: ispden,isppol,istwf_k,istr,istr1,itypat,jband,jj,kdir1,kpert1,master,mcgq,mcprjq
  integer :: mdir1,me,mpert1,my_natom,my_comm_atom,nband_k,nband_kocc,need_ylmgr1
- integer :: nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nskip,nspden_rhoij
+ integer :: nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nspden_rhoij
  integer :: nvh1,nvxc1,nzlmopt_ipert,nzlmopt_ipert1,optlocal,optnl
  integer :: option,optxc,opt_gvnl1,sij_opt,spaceworld,usevnl,wfcorr,ik_ddk
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
@@ -292,8 +292,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  type(rf_hamiltonian_type) :: rf_hamkq
  type(MPI_type) :: mpi_enreg_seq
 !arrays
- integer :: ddkfil(3),ikpt_fbz(3),ikpt_fbz_previous(3),nband_tmp(1)
- integer :: npwar1_tmp(1),skipddk(3)
+ integer :: ddkfil(3),nband_tmp(1)
+ integer :: npwar1_tmp(1)
  integer,allocatable :: jpert1(:),jdir1(:),kg1_k(:,:),kg_k(:,:)
  integer,pointer :: my_atmtab(:)
  real(dp) :: dum1(1,1),dum2(1,1),dum3(1,1),epawnst(2),kpoint(3),kpq(3)
@@ -714,9 +714,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !  Prepare RF PAW files for reading and writing if mkmem, mkqmem or mk1mem==0
    iorder_cprj=0
 
-!  Prepare DDK files for reading
-   skipddk(:)=0;ikpt_fbz(1:3)=0;ikpt_fbz_previous(1:3)=0
-
 !  Allocate arrays used to accumulate density change due to overlap
    if (has_drho) then
      ABI_ALLOCATE(drhoaug1,(cplex*dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),mdir1))
@@ -758,7 +755,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      ikpt_me=0
 
 !    Rewind (k+G) data if needed
-     ikg=0;ikg1=0;ikpt_fbz(1:3)=0
+     ikg=0;ikg1=0
 
 !    Continue to initialize the GS/RF Hamiltonian
      call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij,&
@@ -831,12 +828,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          do kdir1=1,mdir1
            idir1=jdir1(kdir1)
            if (ddkfil(idir1)/=0)then
-!            Skip records in DDK file
-             ikpt_fbz_previous(idir1)=ikpt_fbz(idir1)
-             ikpt_fbz(idir1)=indkpt1(ikpt)
-!            Number of k points to skip in the full set of k pointsp
-             nskip=ikpt_fbz(idir1)-ikpt_fbz_previous(idir1)-1
-             skipddk(idir1)=skipddk(idir1)+nskip+1
              !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
              ik_ddk = indkpt1(ikpt)
              npw_ = ddks(idir1)%hdr%npwarr(ik_ddk)
