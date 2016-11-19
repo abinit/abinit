@@ -382,6 +382,20 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    end if
  end if ! master
 
+#if 0
+ ! Gaussian
+ call ebands_jdos(ebands, cryst, 1, zero, zero, comm, ierr)
+ ! Tetra
+ call ebands_jdos(ebands, cryst, 2, zero, zero, comm, ierr)
+
+ !new_ebands = ebands_bspline(ebands, cryst, new_kptrlatt, new_nshiftk, new_shiftk)
+ !call ebands_jdos(new_bands, cryst, 2, zero, zero, comm, ierr)
+ !call ebands_free(new_bands)
+
+ call skw_init(skw, crystal, 1, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig)
+ call skw_free(skw)
+#endif
+
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')"eph%edos: cpu:",cpu,", wall: ",wall
  call wrtout(std_out, msg, do_flush=.True.)
@@ -422,6 +436,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! Phonon Density of States.
 
    ! FIXME: mkphdos expects qshift(3) instead of qshift(3, nqshift)
+   ! TODO: Parallelize this routine.
    call mkphdos(phdos,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,dtset%ph_smear,dtset%ph_ngqpt,dtset%ph_qshift)
 
    !call phdos_print_debye(phdos, cryst%ucvol)
@@ -449,9 +464,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call ebands_prtbltztrp(ebands, cryst, dtfil%filnam_ds(4))
  end if
 
-!!  Output phonon isosurface in Xcrysden format.
+ ! Output phonon isosurface in Xcrysden format.
  if (dtset%prtphsurf == 1) then
    path = strcat(dtfil%filnam_ds(4), "_PH.bxsf")
+   call wrtout(ab_out, sjoin("- Writing phonon frequencies in Xcrysden format to file:", path))
    call ifc_printbxsf(ifc, cryst, dtset%ph_ngqpt, dtset%ph_nqshift, dtset%ph_qshift, path, comm)
  end if
 

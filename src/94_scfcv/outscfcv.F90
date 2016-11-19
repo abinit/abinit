@@ -1118,20 +1118,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    call ebands_prtbltztrp(ebands, crystal, dtfil%filnam_ds(4))
  end if
 
-#if 0
- ! Gaussian
- call ebands_jdos(ebands,crystal,1,zero,zero,spacecomm,ierr)
- ! Tetra
- call ebands_jdos(ebands,crystal,2,zero,zero,spacecomm,ierr)
-
- !new_ebands = ebands_bspline(ebands, cryst, new_kptrlatt, new_nshiftk, new_shiftk)
- !call ebands_jdos(new_bands,crystal,2,zero,zero,spacecomm,ierr)
- !call ebands_free(new_bands)
-
- call skw_init(skw, crystal, 1, bands%mband, bands%nkpt, bands%nsppol, bands%kptns, bands%eig)
- call skw_free(skw)
-#endif
-
  call crystal_free(crystal)
  call ebands_free(ebands)
 

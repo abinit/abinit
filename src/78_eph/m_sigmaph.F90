@@ -228,6 +228,7 @@ module m_sigmaph
    !  (q, mu)-resolved self-energy for given (k, spin)
 
  end type sigmaph_t
+!!***
 
  private :: sigmaph_new             ! Creation method (allocates memory, initialize data from input vars).
  private :: sigmaph_free            ! Free memory.
@@ -281,6 +282,7 @@ module m_sigmaph
    ! wtk_q(nkibz_q)
 
  end type lgroup_t
+!!***
 
  private :: lgroup_new       ! Creation method.
  private :: lgroup_free      ! Free memory.
