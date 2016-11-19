@@ -342,8 +342,6 @@ subroutine phgamma_init(gams,cryst,ifc,symdynmat,eph_scalprod,ngqpt,nsppol,nspin
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phgamma_init'
- use interfaces_41_geometry
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

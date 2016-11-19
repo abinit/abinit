@@ -78,10 +78,12 @@ contains  !============================================================
 
 subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, timrev)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'kpts_ibz_from_kptrlatt'
+ use interfaces_41_geometry
  use interfaces_56_recipspace
 !End of the abilint section
 

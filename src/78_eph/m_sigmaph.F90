@@ -1126,7 +1126,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
 #undef ABI_FUNC
 #define ABI_FUNC 'sigmaph_new'
  use interfaces_14_hidewrite
- use interfaces_41_geometry
  use interfaces_56_recipspace
 !End of the abilint section
 

@@ -1775,8 +1775,6 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
 #define ABI_FUNC 'ifc_outphbtrap'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_41_geometry
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -1899,8 +1897,7 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_printbxsf'
- use interfaces_41_geometry
- use interfaces_56_recipspace
+ use interfaces_14_hidewrite
  use interfaces_61_occeig
 !End of the abilint section
 
