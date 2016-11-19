@@ -1214,7 +1214,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
    new%ngqpt = dtset%eph_ngqpt_fine; my_shiftq = 0
  end if
 
- ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons
+ ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
  qptrlatt = 0; qptrlatt(1,1) = new%ngqpt(1); qptrlatt(2,2) = new%ngqpt(2); qptrlatt(3,3) = new%ngqpt(3)
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, my_nshiftq, my_shiftq, &
    new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz, timrev=1)

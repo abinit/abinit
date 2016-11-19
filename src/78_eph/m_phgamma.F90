@@ -374,7 +374,7 @@ subroutine phgamma_init(gams,cryst,ifc,symdynmat,eph_scalprod,ngqpt,nsppol,nspin
  ABI_MALLOC(gams%n0, (nsppol))
  gams%n0 = n0
 
- ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons
+ ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
  gams%ngqpt = ngqpt
  qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, 1, [zero, zero, zero], &

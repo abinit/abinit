@@ -1808,7 +1808,7 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
 
  natom = cryst%natom
 
- ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons
+ ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
  qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, nqshft, qshft, nqibz, qibz, wtq, nqbz, qbz, timrev=1)
 
@@ -1918,8 +1918,9 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
 
 !Local variables -------------------------
 !scalars
- integer,parameter :: nsppol1=1
+ integer,parameter :: nsppol1=1,master=0
  integer :: my_rank,nprocs,iq_ibz,nqibz,nqbz,ierr
+ character(len=500) :: msg
 !arrays
  integer :: qptrlatt(3,3),dummy_symafm(cryst%nsym)
  real(dp) :: phfrq(3*cryst%natom),displ_cart(2,3*cryst%natom,3*cryst%natom)
@@ -1929,7 +1930,7 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
- ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons
+ ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
  qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, nqshft, qshft, nqibz, qibz, wtq, nqbz, qbz, timrev=1)
  ABI_FREE(qbz)
@@ -1949,6 +1950,11 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
    dummy_symafm = 1
    call printbxsf(freqs_qibz, zero, zero, cryst%gprimd, qptrlatt, 3*cryst%natom,&
      nqibz, qibz, cryst%nsym, .False., cryst%symrec, dummy_symafm, .True., nsppol1, qshft, nqshft, path, ierr)
+   if (ierr /=0) then
+     msg = "Cannot produce BXSF file with phonon isosurface, see log file for more info"
+     MSG_WARNING(msg)
+     call wrtout(ab_out, msg, 'COLL')
+   end if
  end if
 
  ABI_FREE(freqs_qibz)
