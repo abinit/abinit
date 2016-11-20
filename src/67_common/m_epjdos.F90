@@ -48,6 +48,7 @@ module m_epjdos
  use m_numeric_tools,  only : simpson, simpson_int
  use m_fstrings,       only : int2char4
  use m_pawtab,         only : pawtab_type
+ use m_bz_mesh,        only : tetra_from_kptrlatt
 
  implicit none
 
@@ -466,9 +467,11 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata,comm)
 
  call cwtime(cpu, wall, gflops, "start")
 
- ! TODO
- !call tetra_from_kptrlatt(tetra, crystal, dtset%kptopt, dtset%kptrlatt, &
- !                         dtset%nshiftk, dtset%shiftk, dtset%nkpt, dtset%kpt)
+#if 0
+ call tetra_from_kptrlatt(tetrahedra, crystal, dtset%kptopt, dtset%kptrlatt, &
+                          dtset%nshiftk, dtset%shiftk, dtset%nkpt, dtset%kpt)
+#else
+ ! FIXME: Here there's a bug if TR is not used because get_full_kgrid assumes kptopt==1 !!!!
 
 ! Calculate nkpt_fullbz
  nkpt_fullbz= dtset%kptrlatt(1,1)*dtset%kptrlatt(2,2)*dtset%kptrlatt(3,3) &
@@ -502,6 +505,10 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata,comm)
 !Get tetrahedra, ie indexes of the full kpoints at their summits
  call init_tetra (indkpt,crystal%gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetrahedra, ierr, errstr)
  ABI_CHECK(ierr==0,errstr)
+
+ ABI_DEALLOCATE(indkpt)
+ ABI_DEALLOCATE(kpt_fullbz)
+#endif
 
  natsph=dtset%natsph; natsph_extra=dtset%natsph_extra
 
@@ -867,8 +874,6 @@ end if ! iam_master
    end if
  end if
 
- ABI_DEALLOCATE(indkpt)
- ABI_DEALLOCATE(kpt_fullbz)
  ABI_DEALLOCATE(partial_dos)
  ABI_DEALLOCATE(integ_dos)
  ABI_DEALLOCATE(total_dos)
