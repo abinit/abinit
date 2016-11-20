@@ -80,7 +80,7 @@ MODULE m_skw
 
  end type skw_t
 
- public :: skw_init     ! Initialize the object.
+ public :: skw_new      ! Create new object.
  public :: skw_evalk    ! Evaluate the interpolated eigenvalues.
  public :: skw_free     ! Free memory.
 !!***
@@ -88,9 +88,9 @@ MODULE m_skw
 CONTAINS  !=====================================================================================
 !!***
 
-!!****f* m_skw/skw_init
+!!****f* m_skw/skw_new
 !! NAME
-!!  skw_init
+!!  skw_new
 !!
 !! FUNCTION
 !!  Initialize the object.
@@ -115,13 +115,12 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine skw_init(skw, cryst, cplex, nband, nkpt, nsppol, kpts, eig)
-
+type(skw_t) function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig) result(skw)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'skw_init'
+#define ABI_FUNC 'skw_new'
 !End of the abilint section
 
  implicit none
@@ -130,7 +129,6 @@ subroutine skw_init(skw, cryst, cplex, nband, nkpt, nsppol, kpts, eig)
 !scalars
  integer,intent(in) :: nband,nkpt,nsppol,cplex
  type(crystal_t),intent(in) :: cryst
- type(skw_t),intent(out) :: skw
 !arrays
  real(dp),intent(in) :: kpts(3,nkpt)
  real(dp),intent(in) :: eig(nband,nkpt,nsppol)
@@ -244,7 +242,7 @@ subroutine skw_init(skw, cryst, cplex, nband, nkpt, nsppol, kpts, eig)
    end do
  end do
 
-end subroutine skw_init
+end function skw_new
 !!***
 
 !----------------------------------------------------------------------

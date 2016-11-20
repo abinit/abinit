@@ -56,7 +56,7 @@
 !!      crystal_free,crystal_from_hdr,crystal_print,cwtime,ddb_free
 !!      ddb_from_file,ddk_free,ddk_init,destroy_mpi_enreg,dvdb_free,dvdb_init
 !!      dvdb_list_perts,dvdb_print,ebands_free,ebands_print,ebands_set_fermie
-!!      ebands_set_scheme,ebands_update_occ,edos_free,edos_init,edos_write
+!!      ebands_set_scheme,ebands_update_occ,edos_free,ebands_get_edos,edos_write
 !!      eph_phgamma,hdr_free,hdr_vs_dtset,ifc_free,ifc_init,ifc_outphbtrap
 !!      init_distribfft_seq,initmpi_seq,mkphdos,pawfgr_destroy,pawfgr_init
 !!      phdos_free,phdos_print,print_ngfft,ebands_prtbltztrp,pspini
@@ -148,12 +148,13 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: edos_step,edos_broad
  real(dp) :: cpu,wall,gflops
+ logical :: usewfq
  character(len=500) :: msg
  character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,path
  character(len=fnlen) :: ddk_path(3)
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
- type(ebands_t) :: ebands, ebands_kq
+ type(ebands_t) :: ebands, ebands_kq, ebands_spl
  type(edos_t) :: edos
  type(ddb_type) :: ddb
  type(dvdb_t) :: dvdb
@@ -169,11 +170,14 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: dielt(3,3),zeff(3,3,dtset%natom),n0(dtset%nsppol)
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
- logical :: usewfq
  !real(dp) :: tsec(2)
  !type(pawfgrtab_type),allocatable :: pawfgrtab(:)
  !type(paw_ij_type),allocatable :: paw_ij(:)
  !type(paw_an_type),allocatable :: paw_an(:)
+
+ integer :: nshiftk_spl
+ integer :: kptrlatt_spl(3,3)
+ real(dp),allocatable :: shiftk_spl(:,:)
 
 !************************************************************************
 
@@ -341,8 +345,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  !edos_intmeth = 1
  edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
  edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
- call edos_init(edos,ebands,cryst,edos_intmeth,edos_step,edos_broad,comm,ierr)
- ABI_CHECK(ierr==0, "Error in edos_init, see message above.")
+ edos = ebands_get_edos(ebands,cryst,edos_intmeth,edos_step,edos_broad,comm,ierr)
+ ABI_CHECK(ierr==0, "Error in ebands_get_edos, see message above.")
 
  ! Store DOS per spin channels
  n0(:) = edos%gef(1:edos%nsppol)
@@ -383,17 +387,29 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if ! master
 
 #if 0
- ! Gaussian
- call ebands_jdos(ebands, cryst, 1, zero, zero, comm, ierr)
- ! Tetra
- call ebands_jdos(ebands, cryst, 2, zero, zero, comm, ierr)
+ ! This is to test the interpolation of the electronic bands.
+ !skw = skw_new(crystal, 1, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig)
+ !call skw_free(skw)
 
- !new_ebands = ebands_bspline(ebands, cryst, new_kptrlatt, new_nshiftk, new_shiftk)
- !call ebands_jdos(new_bands, cryst, 2, zero, zero, comm, ierr)
- !call ebands_free(new_bands)
+ kptrlatt_spl = reshape([16,0,0,0,16,0,0,0,16], [3,3])
+ kptrlatt_spl = 4 * kptrlatt_spl
+ nshiftk_spl = 1
+ ABI_CALLOC(shiftk_spl, (3,nshiftk_spl))
+ ebands_spl = ebands_bspline(ebands, cryst, [3,3,3], kptrlatt_spl, nshiftk_spl, shiftk_spl, comm)
+ ABI_FREE(shiftk_spl)
+ !call ebands_jdos(ebands_spl, cryst, 2, zero, zero, comm, ierr)
 
- call skw_init(skw, crystal, 1, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig)
- call skw_free(skw)
+ edos = ebands_get_edos(ebands_spl, cryst, edos_intmeth, edos_step, edos_broad, comm, ierr)
+ ABI_CHECK(ierr==0, "Error in ebands_get_edos, see message above.")
+
+ if (my_rank == master) then
+   call edos_print(edos, unit=ab_out)
+   path = strcat(dtfil%filnam_ds(4), "_BSPLINE_EDOS")
+   call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
+   call edos_write(edos, path)
+ end if
+ call edos_free(edos)
+ call ebands_free(ebands_spl)
 #endif
 
  call cwtime(cpu,wall,gflops,"stop")
@@ -509,30 +525,33 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !  otherwise there will be tons of duplicated code
 
  ! TODO: Make sure that all subdrivers work with useylm == 1
+ select case (dtset%eph_task)
+ case (0)
+   continue
 
- if (dtset%eph_task == 1) then
+ case (1)
    ! Compute phonon linewidths in metals.
    call eph_phgamma(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
     pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
- end if
 
- if (dtset%eph_task == 2) then
+ case (2)
    ! Compute electron-phonon matrix elements
    call eph_gkk(wfk0_path,wfq_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,ebands_kq,dvdb,ifc,&
    pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
- end if
 
- if (dtset%eph_task == 3) then
+ case (3)
    ! Compute phonon self-energy
    call eph_phpi(wfk0_path,wfq_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,ebands_kq,dvdb,ifc,&
    pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
- end if
 
- if (dtset%eph_task == 4) then
+ case (4)
    ! Compute electron self-energy (phonon contribution)
    call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                 pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
- end if
+
+ case default
+   MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))
+ end select
 
  !=====================
  !==== Free memory ====

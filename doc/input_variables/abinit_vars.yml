@@ -5558,15 +5558,14 @@
     excludes: null
     requires: null
     section: varrf
-    text: |-
-        <p>
-        When [[optdriver]]==7, select the task to be performed.
-         The choice is among :
-         <br />
-         [[eph_task]]=1 : phonon linewidth
-         <br />
-         [[eph_task]]=2 : electron-phonon coupling elements
-        </p>
+    text: "<p>\nWhen [[optdriver]]==7, select the task to be performed.\n\
+        \ The choice is among:\n <br />\n [[eph_task]]=1: phonon linewidth\n\
+        \ <br />\n [[eph_task]]=2: electron-phonon coupling elements\n</p>\n\
+        \nThe special value eph_task 0 corresponds to a fake task in which\n\
+        the code returns after the initial pre-processing of the input data.\n\
+        This option could be useful if you want to access the post-processing\
+        \ tools in the EPH code (Fermi surface, Phonon DOS ...) without running\
+        \ any task.    "
     varname: eph_task
     vartype: integer
 - !variable
@@ -9277,7 +9276,7 @@
         \ the next geometry for image(iimage) using ionmov\n    enddo\n  enddo\n\
         \n  Examine whether the stopping criterion defined by tolimg is fulfilled\n\
         \  Predict the next geometries for all images using imgmov\nenddo\n\
-        </pre></p>\n   \n<ul>\n  <li>    = 0  => simply <b> copy </b> images\
+        </pre></p>\n  \n<ul>\n  <li>    = 0  => simply <b> copy </b> images\
         \ from previous timimage step.</li>\n  <li>    = 1  => move images\
         \ according to <b> Steepest Descent </b>\n                 following\
         \ the (scaled) forces, the scaling factor being [[fxcartfactor]].\
