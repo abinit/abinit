@@ -151,7 +151,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 !Local variables ------------------------------
 !scalars
  integer,parameter :: dummy_npw=1,nsig=1,tim_getgh1c=1,berryopt0=0,timrev1=1
- integer,parameter :: useylmgr=0,useylmgr1=0,master=0,copt0=0
+ integer,parameter :: useylmgr=0,useylmgr1=0,master=0
  integer :: my_rank,nproc,iomode,mband,mband_kq,my_minb,my_maxb,nsppol,nkpt,nkpt_kq,idir,ipert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,onpw,imode
  integer :: ib1,ib2
@@ -482,7 +482,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
          ! Use scissor shift on 0-order eigenvalue
          eshift = eig0nk - dtset%dfpt_sciss
 
-         call getgh1c(berryopt0,copt0,kets_k(:,:,ib2),cwaveprj0,h1kets_kq(:,:,ib2),&
+         call getgh1c(berryopt0,kets_k(:,:,ib2),cwaveprj0,h1kets_kq(:,:,ib2),&
 &                     grad_berry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,mpi_enreg,optlocal,&
 &                     optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
        end do

@@ -359,7 +359,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 !Local variables ------------------------------
 !scalars
  integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0
- integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1,copt0=0
+ integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1
  integer :: my_rank,nproc,iomode,mband,my_minb,my_maxb,nsppol,nkpt,idir,ipert,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor
  integer :: ib_kq,ib_k,band,num_smallw
@@ -728,7 +728,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            ! Use scissor shift on 0-order eigenvalue
            eshift = eig0nk - dtset%dfpt_sciss
 
-           call getgh1c(berryopt0,copt0,kets_k(:,:,ib_k),cwaveprj0,h1kets_kq(:,:,ib_k,ipc),&
+           call getgh1c(berryopt0,kets_k(:,:,ib_k),cwaveprj0,h1kets_kq(:,:,ib_k,ipc),&
              grad_berry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,mpi_enreg,optlocal,&
              optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 
