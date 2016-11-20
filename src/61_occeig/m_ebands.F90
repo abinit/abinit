@@ -3438,7 +3438,7 @@ integer function ebands_write_nesting(ebands,cryst,filepath,prtnest,tsmear,fermi
    end do
  end do
 
- if (ebands%kptopt == 3) then ! no symmetry
+ if (any(ebands%kptopt == [3, 4])) then ! no symmetry
    call mknesting(ebands%nkpt,ebands%kptns,ebands%kptrlatt,ebands%nband(1),fs_weights,nqpath,&
      qpath_vertices,1,[zero, zero, zero],filepath,cryst%gprimd,cryst%gmet,prtnest,identity_3d)
  else
@@ -3554,7 +3554,7 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
  sppoldbl = 1 !; if (any(cryst%symafm == -1) .and. inb%nsppol == 1) sppoldbl=2
  ABI_MALLOC(bz2ibz, (nkfull*sppoldbl,6))
 
- timrev = 1; if (inb%kptopt == 4) timrev = 0
+ timrev = 1; if (any(inb%kptopt == [3, 4])) timrev = 0
  call listkk(dksqmax,cryst%gmet,bz2ibz,inb%kptns,kfull,inb%nkpt,nkfull,cryst%nsym,&
    sppoldbl,cryst%symafm,cryst%symrel,timrev,use_symrec=.False.)
    !sppoldbl,cryst%symafm,cryst%symrec,timrev,use_symrec=.True.)
@@ -3767,7 +3767,7 @@ subroutine ebspline_init(ebspl, ebands, cryst, band_block)
  sppoldbl = 1
  ABI_MALLOC(bz2ibz, (nkfull*sppoldbl,6))
 
- timrev = 1; if (ebands%kptopt == 4) timrev = 0
+ timrev = 1; if (any(ebands%kptopt == [3, 4])) timrev = 0
  call listkk(dksqmax,cryst%gmet,bz2ibz,ebands%kptns,kfull,ebands%nkpt,nkfull,cryst%nsym,&
    sppoldbl,cryst%symafm,cryst%symrec,timrev,use_symrec=.True.)
  ABI_FREE(kfull)
