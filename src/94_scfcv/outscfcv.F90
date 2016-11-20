@@ -839,12 +839,12 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    end if
 
 !  Here, computation and output of DOS and partial DOS  _DOS
-   if (me == master .and. dos%fatbands_flag==0) then
-     if (dos%prtdos/=4) then
-       call tetrahedron(dos,dtset,crystal,ebands,dtfil%fnameabo_app_dos)
+   if (dos%fatbands_flag == 0) then
+     if (dos%prtdos /= 4) then
+       call tetrahedron(dos,dtset,crystal,ebands,dtfil%fnameabo_app_dos,spacecomm)
      else
 !      this option is not documented in input variables: is it working?
-       call gaus_dos(dos, dtset, ebands, eigen, dtfil%fnameabo_app_dos)
+       if (me == master) call gaus_dos(dos, dtset, ebands, eigen, dtfil%fnameabo_app_dos)
      end if
    end if
 

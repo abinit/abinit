@@ -345,6 +345,7 @@ end subroutine epjdos_free
 !!  ndosfraction= number of types of DOS we are calculating, e.g. the number
 !!    of l channels. Could be much more general, for other types of partial DOS
 !!  paw_dos_flag= option for partial dos in PAW
+!!  comm=MPI communicator.
 !!
 !! OUTPUT
 !!  (no explicit output)
@@ -364,7 +365,7 @@ end subroutine epjdos_free
 !!
 !! SOURCE
 
-subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
+subroutine tetrahedron(dos,dtset,crystal,ebands,fildata,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -381,6 +382,7 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
 
 !Arguments ------------------------------------
 !scalars
+ integer,intent(in) :: comm
  character(len=*),intent(in) :: fildata
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: crystal
@@ -389,13 +391,14 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: bcorr0=0
+ integer,parameter :: bcorr0=0,master=0
  integer :: iat,iband,iene,ifract,ikpt,isppol,natsph,natsph_extra,nkpt,nsppol,i1,i2
  integer :: nene,nkpt_fullbz,prtdos,unitdos,ierr,prtdosm,paw_dos_flag,mbesslang,ndosfraction
+ integer :: my_rank,nprocs
  real(dp),parameter :: dos_max=9999.9999_dp
- real(dp) :: buffer,deltaene,enemax,enemin,enex,integral_DOS,max_occ,rcvol
+ real(dp) :: buffer,deltaene,enemax,enemin,enex,integral_DOS,max_occ
  real(dp) :: cpu,wall,gflops
- logical :: bigDOS
+ logical :: bigDOS,iam_master
  character(len=10) :: tag
  character(len=500) :: frmt,frmt_extra,message
  character(len=fnlen) :: tmpfil
@@ -403,7 +406,7 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
  type(t_tetrahedron) :: tetrahedra
 !arrays
  integer,allocatable :: indkpt(:),unitdos_arr(:)
- real(dp) :: gprimd(3,3),klatt(3,3),rlatt(3,3)
+ real(dp) :: klatt(3,3),rlatt(3,3),list_dp(3)
  real(dp),allocatable :: dtweightde(:,:),integ_dos(:,:),integ_dos_m(:,:)
  real(dp),allocatable :: kpt_fullbz(:,:),partial_dos(:,:)
  real(dp),allocatable :: partial_dos_m(:,:),tmp_eigen(:),total_dos(:,:)
@@ -413,6 +416,9 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
  real(dp),allocatable :: work_ndos(:,:),work_ndosmbessl(:,:)
 
 ! *********************************************************************
+
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm); iam_master = (my_rank == master)
+
  prtdosm = dos%prtdosm; paw_dos_flag = dos%paw_dos_flag
  mbesslang = dos%mbesslang; ndosfraction = dos%ndosfraction
 
@@ -486,12 +492,6 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
  rlatt = dtset%kptrlatt(:,:)
  call matr3inv(rlatt,klatt)
 
-!Get metric tensors
- gprimd = crystal%gprimd
- rcvol = abs (gprimd(1,1)*(gprimd(2,2)*gprimd(3,3)-gprimd(3,2)*gprimd(2,3)) &
-& -gprimd(2,1)*(gprimd(1,2)*gprimd(3,3)-gprimd(3,2)*gprimd(1,3)) &
-& +gprimd(3,1)*(gprimd(1,2)*gprimd(2,3)-gprimd(2,2)*gprimd(1,3)))
-
  ABI_ALLOCATE(indkpt,(nkpt_fullbz))
  ABI_ALLOCATE(kpt_fullbz,(3,nkpt_fullbz))
 
@@ -500,42 +500,46 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
 & nkpt,nkpt_fullbz,dtset%nshiftk,dtset%nsym,dtset%shiftk,dtset%symrel)
 
 !Get tetrahedra, ie indexes of the full kpoints at their summits
- call init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetrahedra, ierr, errstr)
+ call init_tetra (indkpt,crystal%gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetrahedra, ierr, errstr)
  ABI_CHECK(ierr==0,errstr)
 
  natsph=dtset%natsph; natsph_extra=dtset%natsph_extra
 
- ! Open the DOS file
- if (dtset%prtdos == 2 .or. dtset%prtdos == 5) then
-   if (open_file(fildata,message,newunit=unitdos,status='unknown',form='formatted') /= 0) then
-     MSG_ERROR(message)
-   end if
+ ! Master opens the DOS files.
 
- else if (dtset%prtdos == 3) then
-   ABI_ALLOCATE(unitdos_arr,(natsph+natsph_extra))
-   do iat=1,natsph
-     call int2char4(dtset%iatsph(iat),tag)
-     ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
-     tmpfil = trim(fildata)//'_AT'//trim(tag)
-     if (open_file(tmpfil, message, newunit=unitdos_arr(iat), status='unknown',form='formatted') /= 0) then
+ if (iam_master) then
+   if (any(dtset%prtdos == [2, 5])) then
+     if (open_file(fildata,message,newunit=unitdos,status='unknown',form='formatted') /= 0) then
        MSG_ERROR(message)
      end if
-   end do
-!  do extra spheres in vacuum too. Use _ATEXTRA[NUM] suffix
-   do iat=1,natsph_extra
-     call int2char4(iat,tag)
-     ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
-     tmpfil = trim(fildata)//'_ATEXTRA'//trim(tag)
-     if (open_file(tmpfil, message, newunit=unitdos_arr(natsph+iat), status='unknown',form='formatted') /= 0) then
-       MSG_ERROR(message)
-     end if
-   end do
+
+   else if (dtset%prtdos == 3) then
+     ABI_ALLOCATE(unitdos_arr,(natsph+natsph_extra))
+     do iat=1,natsph
+       call int2char4(dtset%iatsph(iat),tag)
+       ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
+       tmpfil = trim(fildata)//'_AT'//trim(tag)
+       if (open_file(tmpfil, message, newunit=unitdos_arr(iat), status='unknown',form='formatted') /= 0) then
+         MSG_ERROR(message)
+       end if
+     end do
+     ! do extra spheres in vacuum too. Use _ATEXTRA[NUM] suffix
+     do iat=1,natsph_extra
+       call int2char4(iat,tag)
+       ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
+       tmpfil = trim(fildata)//'_ATEXTRA'//trim(tag)
+       if (open_file(tmpfil, message, newunit=unitdos_arr(natsph+iat), status='unknown',form='formatted') /= 0) then
+         MSG_ERROR(message)
+       end if
+     end do
+   end if
  end if
 
 !Write the header of the DOS file, and determine the energy range and spacing
  prtdos=dtset%prtdos
  buffer=0.01_dp ! Size of the buffer around the min and max ranges
- if (dtset%prtdos == 2 .or. dtset%prtdos == 5) then
+if (iam_master) then
+ if (any(dtset%prtdos == [2, 5])) then
    call dos_hdr_write(buffer,deltaene,dtset%dosdeltae,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
 &   dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
 &   dtset%tphysel,dtset%tsmear,unitdos)
@@ -546,6 +550,12 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
 &     dtset%tphysel,dtset%tsmear,unitdos_arr(iat))
    end do
  end if
+end if 
+
+ call xmpi_bcast(nene, master, comm, ierr)
+ if (iam_master) list_dp = [deltaene, enemin, enemax]
+ call xmpi_bcast(list_dp, master, comm, ierr)
+ deltaene = list_dp(1); enemin = list_dp(2); enemax = list_dp(3)
 
  ABI_ALLOCATE(partial_dos,(nene,ndosfraction))
  ABI_ALLOCATE(integ_dos,(nene,ndosfraction))
@@ -585,11 +595,11 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
      total_dos_paw1(:,:)=zero;total_dos_pawt1(:,:)=zero
    end if
 
-   if (nsppol==2) then
+   if (nsppol==2 .and. iam_master) then
      if(isppol==1) write(message,'(a,16x,a)')  '#','Spin-up DOS'
      if(isppol==2) write(message,'(2a,16x,a)')  ch10,'#','Spin-dn DOS'
      ! NB: dtset%prtdos == 5 should not happen for nsppol==2
-     if (dtset%prtdos == 2 .or. dtset%prtdos == 5) then
+     if (any(dtset%prtdos == [2, 5])) then
        write(unitdos, "(a)")trim(message)
      else if (dtset%prtdos == 3) then
        do iat=1,natsph+natsph_extra
@@ -599,6 +609,9 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
    end if
 
    do iband=1,dtset%nband(1)
+     ! Mpi parallelism.
+     if (mod(iband, nprocs) /= my_rank) cycle
+     
      ! For each band get its contribution
      tmp_eigen(:) = ebands%eig(iband, :, isppol)
 
@@ -636,13 +649,26 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
      end if
 
    end do ! iband
+
+   ! Collect results on master
+   call xmpi_sum_master(total_dos, master, comm, ierr)
+   call xmpi_sum_master(total_integ_dos, master, comm, ierr)
+
+   if (paw_dos_flag == 1) then
+     call xmpi_sum_master(total_dos_paw1, master, comm, ierr)
+     call xmpi_sum_master(total_dos_pawt1, master, comm, ierr)
+   end if
+   if (prtdosm >= 1) then
+     call xmpi_sum_master(total_dos_m, master, comm, ierr)
+     call xmpi_sum_master(total_integ_dos_m, master, comm, ierr)
+   end if
+
    bigDOS=(maxval(total_dos)>999._dp)
 
-   !call wrtout(std_out,'about to write to the DOS file ',"COLL")
    ! header lines depend on the type of DOS (projected etc...) which is output
    enex=enemin
-   integral_DOS=zero
 
+if (iam_master) then
    if(prtdos==2)then
      write(unitdos, '(a)' )'# energy(Ha)     DOS  integrated DOS'
 
@@ -738,8 +764,7 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
    if (prtdos==2) then
      ! E, DOS, IDOS
      do iene=1,nene
-       write(unitdos, '(f11.5,1x,2(f10.4,1x))') &
-&        enex, min(total_dos(iene,:), dos_max), total_integ_dos(iene,:)
+       write(unitdos, '(f11.5,1x,2(f10.4,1x))') enex, min(total_dos(iene,:), dos_max), total_integ_dos(iene,:)
        enex=enex+deltaene
      end do
    else if (prtdos==3) then
@@ -820,6 +845,7 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
        enex=enex+deltaene
      end do
    end if
+end if ! iam_master
 
    integral_DOS=sum(total_integ_dos(nene,:))
    write(message, '(a,es16.8)' ) ' tetrahedron : integrate to',integral_DOS
@@ -830,13 +856,15 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata)
  ABI_FREE(work_ndos)
  ABI_FREE(work_ndosmbessl)
 
- if(prtdos==2 .or. prtdos==5) then
-   close(unitdos)
- else if(prtdos==3) then
-   do iat=1,natsph+natsph_extra
-     close(unitdos_arr(iat))
-   end do
-   ABI_DEALLOCATE(unitdos_arr)
+ if (iam_master) then
+   if (any(prtdos == [2, 5])) then
+     close(unitdos)
+   else if (prtdos==3) then
+     do iat=1,natsph+natsph_extra
+       close(unitdos_arr(iat))
+     end do
+     ABI_DEALLOCATE(unitdos_arr)
+   end if
  end if
 
  ABI_DEALLOCATE(indkpt)
