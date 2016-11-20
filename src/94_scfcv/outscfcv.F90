@@ -106,7 +106,7 @@
 !! CHILDREN
 !!      bonds_lgth_angles,bound_deriv,calc_efg,calc_fc,calcdensph
 !!      compute_coeff_plowannier,crystal_free,crystal_init,datafordmft,denfgr
-!!      destroy_dmft,destroy_oper,destroy_plowannier,dos_degeneratewfs
+!!      destroy_dmft,destroy_oper,destroy_plowannier
 !!      ebands_free,ebands_init,ebands_jdos,fftdatar_write,gaus_dos,init_dmft
 !!      init_oper,init_plowannier,ioarr,mag_constr_e,mlwfovlp,mlwfovlp_qp
 !!      multipoles_out,optics_paw,optics_paw_core,optics_vloc,out1dm,outkss
@@ -171,7 +171,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft
  use m_numeric_tools,    only : simpson_int
- use m_epjdos,           only : tetrahedron, gaus_dos, dos_degeneratewfs, &
+ use m_epjdos,           only : tetrahedron, gaus_dos, &
                                 epjdos_t, epjdos_new, epjdos_free, prtfatbands, fatbands_ncwrite
 
 !This section has been created automatically by the script Abilint (TD).
@@ -828,12 +828,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !      TODO: update partial_dos_fractions_paw for extra atoms - no PAW contribution normally, but check bounds and so on.
        call partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enreg,pawrad,pawtab)
      end if
-     ! MG: fractions_average_m has been removed because dos_degeneratewfs was already deactivated.
-     ! Note that fractions_m could be large hence dos_degeneratewfs should perform the average in-place.
-     !if (dos%prtdosm>=1) then
-     !  call dos_degeneratewfs(dos%fractions_m,dos%fractions_average_m,&
-     !    eigen,mband,dtset%nband,dos%ndosfraction*dos%mbesslang,dtset%nkpt,dtset%nsppol)
-     !end if
 
    else
      dos%fractions(:,:,:,1)=one
