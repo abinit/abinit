@@ -369,7 +369,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: n1,n2,n3,n4,n5,n6,nspden,do_ftv1q,imode
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1
- integer :: nbcalc_ks,bstart_ks,ikcalc
+ integer :: nbcalc_ks,nbsum_ks,bstart_ks,ikcalc
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all
  real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q
  complex(dpc) :: sfact
@@ -391,7 +391,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:)
- real(dp),allocatable :: gkk_atm(:,:,:),gkk_nu(:,:,:),dw_atm2(:,:,:,:)
+ real(dp),allocatable :: gkk_atm(:,:,:),gkk_nu(:,:,:),dbwl_nu(:,:,:,:)
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
@@ -559,9 +559,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    do spin=1,nsppol
      !call sigmaph_setup_kcalc_spin(sigma, ikcalc, spin, ebands) ??
 
-     ! Bands in Sigma_nk to compute.
+     ! Bands in Sigma_nk to compute and number of bands in sum over states.
      bstart_ks = sigma%bstart_ks(ikcalc, spin)
      nbcalc_ks = sigma%nbcalc_ks(ikcalc, spin)
+     nbsum_ks = sigma%nbsum(ikq_ibz, spin)
 
      ! Zero self-energy matrix elements. Build frequency mesh for nk states.
      if (sigma%nwr > 0) then
@@ -576,7 +577,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      ! Allocate eph matrix elements.
      ABI_MALLOC(gkk_atm, (2, nbcalc_ks, natom3))
      ABI_MALLOC(gkk_nu, (2, nbcalc_ks, natom3))
-     ABI_CALLOC(dw_atm2, (2, nbcalc_ks, natom3, natom3))
+     ABI_STAT_MALLOC(dbwl_nu, (2, nbsum_ks, nbcalc_ks, natom3), ierr)
+     ABI_CHECK(ierr == 0, "oom in dbwl_nu")
 
      ! Load ground-state wavefunctions for which corrections are wanted (available on each node)
      ! TODO: symmetrize them if kk is not irred
@@ -756,7 +758,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        ABI_MALLOC(bra_kq, (2, npw_kq*nspinor))
        ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
 
-       do ib_kq=1,sigma%nbsum(ikq_ibz, spin)
+       do ib_kq=1,nbsum_ks
          ! This is to check whether the gkk elements in the degenerate subspace break symmetry
          !if (ib_kq >= bstart_ks .and. ib_kq <= bstart_ks + nbcalc_ks - 1) cycle
 
@@ -838,10 +840,13 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
                  sigma%vals_wr(:, it, ib_k) = sigma%vals_wr(:, it, ib_k) + gkk2 * sfact_wr(:)
                end if
              end do ! it
-             !if (isqzero) then
-             !end if
+
            end do ! ib_k
          end do ! imode
+
+         ! Add Debye-Waller term
+         !if (isqzero) then
+         !end if
 
        end do ! ib_kq (sum over bands at k+q)
 
@@ -859,7 +864,11 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      ABI_FREE(kets_k)
      ABI_FREE(gkk_atm)
      ABI_FREE(gkk_nu)
-     ABI_FREE(dw_atm2)
+     ABI_FREE(dbwl_nu)
+
+     ! Compute Debye-Waller term.
+     !call xmpi_sum(dbwl_nu, comm, ierr)
+     !call sigmaph_compute_dbwl(sigma, ifc, dbwl_nu)
 
      ! Collect results
      if (sigma%nwr > 0) then
