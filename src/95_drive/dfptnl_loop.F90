@@ -529,12 +529,8 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,g
                      write(message,'(2a)')'-dfptnl_loop : read the wavefunctions from file: ',trim(fiwfddk)
                      call wrtout(std_out,message,'COLL')
                      call wrtout(ab_out,message,'COLL')
-#ifdef DEV_MG_WFK
 !                    Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
                      call wfk_open_read(ddk_f(ii),fiwfddk,1,dtset%iomode,dtfil%unddk+(ii-1),mpi_enreg%comm_cell)
-#else
-                     call WffOpen(dtset%iomode,mpi_enreg%comm_cell,fiwfddk,ierr,wffddk(ii),master,me,dtfil%unddk+(ii-1))
-#endif
                    end do
 
 !                  Perform DFPT part of the 3dte calculation
@@ -544,7 +540,7 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,g
                    call dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,i1dir,&
 &                   i2dir,i3dir,i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
 &                   mpsang,mpw,natom,nfftf,nfftotf,nkpt,nk3xc,nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,&
-&                   rf_hamkq,rho1r1,rho2r1,rho3r1,rprimd,ucvol,vtrial,vtrial1,wffddk,ddk_f,&
+&                   rf_hamkq,rho1r1,rho2r1,rho3r1,rprimd,ucvol,vtrial,vtrial1,ddk_f,&
 &                   xccc3d1,xccc3d2,xccc3d3,xred)
                    call timab(512,2,tsec)
 
@@ -584,19 +580,10 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,g
 !&                   d3etot(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
 
 !                  Eventually close the dot file
-#ifdef DEV_MG_WFK
                    call wfk_close(ddk_f(1))
-#else
-                   call WffClose(wffddk(1),ierr)
-#endif
                    if (i2pert==dtset%natom+2) then
-#ifdef DEV_MG_WFK
                      call wfk_close(ddk_f(2))
                      call wfk_close(ddk_f(3)) ! TO CHANGE
-#else
-                     call WffClose(wffddk(2),ierr)
-                     call WffClose(wffddk(3),ierr) ! TO CHANGE
-#endif
                    end if
 
                  end if   !rfpert

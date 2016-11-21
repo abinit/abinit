@@ -71,7 +71,7 @@
 subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,i1dir,i2dir,i3dir,&
 & i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nfftf,nfftotf,nkpt,nk3xc,&
 & nspden,nspinor,nsppol,npwarr,occ,pawfgr,ph1d,psps,rf_hamkq,rho1r1,rho2r1,rho3r1,rprimd,&
-& ucvol,vtrial,vtrial1,wffddk,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred)
+& ucvol,vtrial,vtrial1,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred)
 
  use defs_basis
  use defs_datatypes
@@ -96,7 +96,6 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
  use interfaces_32_util
  use interfaces_53_spacepar
  use interfaces_56_recipspace
- use interfaces_62_iowfdenpot
  use interfaces_66_wfs
 !End of the abilint section
 
@@ -115,7 +114,6 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(pawfgr_type),intent(in) :: pawfgr
  type(rf_hamiltonian_type),intent(inout) :: rf_hamkq
- type(wffile_type),intent(inout) :: wffddk(3)
  type(wfk_t),intent(inout) :: ddk_f(3)
 
 !arrays
@@ -210,18 +208,6 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
    dtset%nkpt,npwarr,dtset%nsppol,option,rprimd,ylm1,ylmgr1)
  end if
 
-!Initialisation of the wfdot file in case of electric field (or 2nd order Sternheimer equation) 
-#ifndef DEV_MG_WFK
- call clsopn(wffddk(1))
- call hdr_skip(wffddk(1),ierr)
- if (i2pert==natom+2) then
-   call clsopn(wffddk(2))
-   call hdr_skip(wffddk(2),ierr)
-   call clsopn(wffddk(3))
-   call hdr_skip(wffddk(3),ierr)
- end if
-#endif
-
 !Loop over spins
 
  do isppol = 1, nsppol
@@ -253,31 +239,8 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
    do ikpt = 1, nkpt
 
      if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,mband,-1,mpi_enreg%me)) then
-#ifndef DEV_MG_WFK
-     call WffReadSkipK(1,0,ikpt,isppol,mpi_enreg,wffddk(1))
-     if (i2pert==natom+2) then
-       WffReadSkipK(1,0,ikpt,isppol,mpi_enreg,wffddk(2))
-       WffReadSkipK(1,0,ikpt,isppol,mpi_enreg,wffddk(3))
-     end if
-#endif
        cycle ! Skip the rest of the k-point loop
      end if
-
-#ifndef DEV_MG_WFK
-!    Read npw record
-     call WffReadNpwRec(ierr,ikpt,isppol,nband_k_file,npw1_k_file,nspinor_file,wffddk(1))
-     if (i2pert==natom+2) then
-       call WffReadNpwRec(ierr,ikpt,isppol,nband_k_file,npw1_k_file,nspinor_file,wffddk(2))
-       call WffReadNpwRec(ierr,ikpt,isppol,nband_k_file,npw1_k_file,nspinor_file,wffddk(3))
-     end if
-!    Skip k+G record
-     call WffReadSkipRec(ierr,1,wffddk(1))
-     if (i2pert==natom+2) then
-       call WffReadSkipRec(ierr,1,wffddk(2))
-       call WffReadSkipRec(ierr,1,wffddk(3))
-     end if
-   end do
-#endif
 
      counter = 100*ikpt
 
@@ -347,23 +310,13 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
      do iband = 1,nband_k
 
 !      Read dude file
-#ifndef DEV_MG_WFK
-       call WffReadDataRec(eig1_k_tmp,ierr,2*nband_k,wffddk(file_index(1)))
-       call WffReadDataRec(work1,ierr,2,size_wf,wffddk(file_index(1)))
-#else
        call wfk_read_bks(ddk_f(1), iband, ikpt, isppol, xmpio_single, cg_bks=work1,eig1_bks=eig1_k_tmp)
-#endif
 !      Copy eig1_k_tmp in "eig1_k_stored"
        eig1_k_stored(1+(iband-1)*2*nband_k:2*nband_k+(iband-1)*2*nband_k)=eig1_k_tmp(:)
 
        if (i2pert==natom+2) then
 !        Read dudk file
-#ifndef DEV_MG_WFK
-         call WffReadDataRec(eig1_k_tmp,ierr,2*nband_k,wffddk(file_index(2)))
-         call WffReadDataRec(work1,ierr,2,size_wf,wffddk(file_index(2)))
-#else
          call wfk_read_bks(ddk_f(2), iband, ikpt, isppol, xmpio_single, cg_bks=work1,eig1_bks=eig1_k_tmp)
-#endif
          offset_cgi = (iband-1)*size_wf+icg0
          cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
          call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgi,cgi,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
@@ -378,12 +331,7 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
          dudk(:,1+(iband-1)*size_wf:iband*size_wf)=work1(:,:)
 
 !        Read dudkde file
-#ifndef DEV_MG_WFK
-         call WffReadDataRec(eig1_k_tmp,ierr,2*nband_k,wffddk(file_index(3)))
-         call WffReadDataRec(work1,ierr,2,size_wf,wffddk(file_index(3)))
-#else
          call wfk_read_bks(ddk_f(3), iband, ikpt, isppol, xmpio_single, cg_bks=work1,eig1_bks=eig1_k_tmp)
-#endif
          offset_cgi = (iband-1)*size_wf+icg0
          cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
          call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgi,cgi,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
@@ -480,7 +428,7 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
          print '(2(a,es22.13E3))',' < cgj | iddk > = ',dotr,',',doti
        end if
 !LTEST
-       call getgh1c(berryopt,0,cgj,cwaveprj,work1,dum_grad_berry,work2,gs_hamkq,iddk,i2dir,i2pert,zero,&
+       call getgh1c(berryopt,cgj,cwaveprj,work1,dum_grad_berry,work2,gs_hamkq,iddk,i2dir,i2pert,zero,&
                     mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
        do iband=1,nband_k
 !LTEST
@@ -537,12 +485,12 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
        iddk(2,:) =  dudkde(1,1+(jband-1)*size_wf:jband*size_wf)
        if (i3pert==natom+2) then
 !        NOTE : Compute < u^(ip1) | ( H^(ip2) - eps^(0) S^(ip2) ) | u^(ip3) >
-         call getgh1c(berryopt,0,cwavef3,cwaveprj,work1,dum_grad_berry,work2,gs_hamkq,iddk,i2dir,i2pert,zero,&
+         call getgh1c(berryopt,cwavef3,cwaveprj,work1,dum_grad_berry,work2,gs_hamkq,iddk,i2dir,i2pert,zero,&
                       mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
          call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cwavef1,work1,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
        else if (i1pert==natom+2) then
 !        NOTE : Compute < u^(ip3) | ( H^(ip2) - eps^(0) S^(ip2) ) | u^(ip1) > and take the complex congujate
-         call getgh1c(berryopt,0,cwavef1,cwaveprj,work1,dum_grad_berry,work2,gs_hamkq,iddk,i2dir,i2pert,zero,&
+         call getgh1c(berryopt,cwavef1,cwaveprj,work1,dum_grad_berry,work2,gs_hamkq,iddk,i2dir,i2pert,zero,&
                       mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
          call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cwavef3,work1,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
          doti = -doti ! We want the conjugate
