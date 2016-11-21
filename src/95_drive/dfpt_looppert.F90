@@ -138,8 +138,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_profiling_abi
  use m_xmpi
  use m_errors
- use m_wffile
  use m_wfk
+ use m_wffile
  use m_io_redirect
  use m_paral_pert
  use m_abi_etsf
@@ -281,7 +281,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(gkk_t)     :: gkk2d
  type(hdr_type) :: hdr,hdr_den
  type(pawang_type) :: pawang1
- type(wffile_type) :: wff1,wffddk(4),wffgs,wffkq,wffnow,wfftgs,wfftkq
+ type(wffile_type) :: wff1,wffgs,wffkq,wffnow,wfftgs,wfftkq
  type(wfk_t) :: ddk_f(4)
  type(wvl_data) :: wvl
 !arrays
@@ -1277,12 +1277,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        write(message,'(2a)')'-dfpt_looppert : read the wavefunctions from file: ',trim(fiwfddk)
        call wrtout(std_out,message,'COLL')
        call wrtout(ab_out,message,'COLL')
-#ifdef DEV_MG_WFK
 !      Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
        call wfk_open_read(ddk_f(ii),fiwfddk,formeig1,dtset%iomode,dtfil%unddk+(ii-1),spaceComm)
-#else
-       call WffOpen(dtset%iomode,spaceComm,fiwfddk,ierr,wffddk(ii),master,me,dtfil%unddk+(ii-1))
-#endif
      end do
    end if
 
@@ -1523,7 +1519,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     pertcase,phnons1,ph1d,ph1df,prtbbb,psps,&
 &     dtset%qptn,resid,residm,rhog,rhog1,&
 &     rhor,rhor1,rprimd,symaf1,symrc1,symrl1,&
-&     usecprj,useylmgr,useylmgr1,wffddk,ddk_f,vpsp1,vtrial,vxc,&
+&     usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
 &     wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,dfpt_scfcv_retcode)
 
      _IBM6("after dfpt_scfcv")

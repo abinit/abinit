@@ -920,7 +920,7 @@ end function wfk_validate_ks
 !!
 !! SOURCE
 
-integer function wfk_findk(wfk, kpt, ktol) result(ikpt)
+integer pure function wfk_findk(wfk, kpt, ktol) result(ikpt)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -950,8 +950,7 @@ integer function wfk_findk(wfk, kpt, ktol) result(ikpt)
  ikpt = -1
  do ik=1,wfk%hdr%nkpt
    if (all(abs(wfk%hdr%kptns(:, ik) - kpt) < my_ktol)) then
-     ikpt = ik
-     exit
+     ikpt = ik; exit
    end if
  end do
 
