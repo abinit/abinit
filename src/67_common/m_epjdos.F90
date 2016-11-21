@@ -467,7 +467,7 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata,comm)
 
  call cwtime(cpu, wall, gflops, "start")
 
-#if 0
+#if 1
  call tetra_from_kptrlatt(tetrahedra, crystal, dtset%kptopt, dtset%kptrlatt, &
                           dtset%nshiftk, dtset%shiftk, dtset%nkpt, dtset%kpt)
 #else
