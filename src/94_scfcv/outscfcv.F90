@@ -214,13 +214,11 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !arrays
  integer,intent(in) :: atindx1(natom),dimcprj(natom*usecprj)
  integer,intent(in) :: kg(3,mpw*mkmem),nattyp(ntypat),ngfft(18),npwarr(nkpt)
- !real(dp),intent(in) :: dmatpawu(:,:,:,:),eigen(mband*nkpt*nsppol)  !@WC
- real(dp),intent(in) :: dmatpawu(:,:,:,:)
+ real(dp),intent(in) :: dmatpawu(:,:,:,:),eigen(mband*nkpt*nsppol)
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3)
  real(dp),intent(in) :: occ(mband*nkpt*nsppol)
  real(dp),intent(in) :: rprimd(3,3),vhartr(nfft),xccc3d(n3xccc)
  real(dp),intent(in) :: vpsp(nfft)
- real(dp),intent(inout) :: eigen(mband*nkpt*nsppol) 
  real(dp),intent(inout) :: cg(2,mcg)
  real(dp),intent(inout) :: nhat(nfft,nspden*psps%usepaw)
  real(dp),intent(inout) :: rhor(nfft,nspden),vtrial(nfft,nspden)
@@ -816,17 +814,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 !Generate DOS using the tetrahedron method or using Gaussians
 !FIXME: Should centralize all calculations of DOS here in outscfcv
-!WC: read QPS
- if (dtset%getqps /= 0 .and. dtset%prtdos > 0) then
-   ABI_ALLOCATE(eigen2,(mband*nkpt*nsppol))
-   eigen2 = eigen
-   call mlwfovlp_qp(cg,cprj,dtset,dtfil,eigen2,mband,mcg,mcprj,mkmem,mpw,natom,&
-&    nkpt,npwarr,nspden,nsppol,ntypat,Hdr,pawtab,rprimd,MPI_enreg)
-   eigen = eigen2
-   ABI_DEALLOCATE(eigen2)
- end if 
-!--QPS
-
  if (dtset%prtdos>=2.or.dtset%pawfatbnd>0) then
    dos = epjdos_new(dtset, psps, pawtab)
 
