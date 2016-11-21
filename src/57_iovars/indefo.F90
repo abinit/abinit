@@ -216,7 +216,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%dmftctqmc_mrka  =0
    dtsets(idtset)%dmftctqmc_mov   =0
    dtsets(idtset)%dmftctqmc_order =0
-   dtsets(idtset)%dmftctqmc_triqs_nleg=30
+  ! dtsets(idtset)%dmftctqmc_triqs_nleg=30
    dtsets(idtset)%dmftqmc_l=0
    dtsets(idtset)%dmftqmc_n=0.0_dp
    dtsets(idtset)%dmftqmc_seed=jdtset

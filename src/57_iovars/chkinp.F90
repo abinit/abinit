@@ -509,8 +509,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
          if (dt%dmft_solv>=6) then
            cond_string(1)='dmft_solv' ; cond_values(1)=5
            call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_qmc_l',dt%dmftqmc_l,2*dt%dmft_nwli+1,iout)
-           cond_string(1)='usedmft' ; cond_values(1)=1
-           call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_nleg',dt%dmftctqmc_triqs_nleg,1,iout)
+          ! cond_string(1)='usedmft' ; cond_values(1)=1
+          ! call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_nleg',dt%dmftctqmc_triqs_nleg,1,iout)
          end if
 #endif
        end if

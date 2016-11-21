@@ -460,7 +460,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%dmftctqmc_mrka     = dtin%dmftctqmc_mrka
  dtout%dmftctqmc_mov      = dtin%dmftctqmc_mov
  dtout%dmftctqmc_order    = dtin%dmftctqmc_order
- dtout%dmftctqmc_triqs_nleg = dtin%dmftctqmc_triqs_nleg
+! dtout%dmftctqmc_triqs_nleg = dtin%dmftctqmc_triqs_nleg
  dtout%dmftqmc_n          = dtin%dmftqmc_n
  dtout%dmftqmc_l          = dtin%dmftqmc_l
  dtout%dmftqmc_seed       = dtin%dmftqmc_seed

@@ -1408,7 +1408,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          nfreq = paw_dmft%dmft_nwli
        !paw_dmft%dmft_nwlo = paw_dmft%dmft_nwli !transparent for user 
          ntau  = paw_dmft%dmftqmc_l !(2*paw_dmft%dmftqmc_l)+1 !nfreq=paw_dmft%dmft_nwli
-         nleg  = paw_dmft%dmftctqmc_triqs_nleg
+         !nleg  = paw_dmft%dmftctqmc_triqs_nleg
+         nleg  = 10
 
          if ( ntau >= (2*nfreq)+1 ) then
 

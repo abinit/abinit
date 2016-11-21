@@ -212,7 +212,7 @@ type dataset_type
  integer :: dmftctqmc_mov
  integer :: dmftctqmc_mrka
  integer :: dmftctqmc_order
- integer :: dmftctqmc_triqs_nleg
+! integer :: dmftctqmc_triqs_nleg
  integer :: dmftqmc_l
  integer :: dmftqmc_seed
  integer :: dmftqmc_therm
