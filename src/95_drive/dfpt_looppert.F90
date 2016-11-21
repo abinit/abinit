@@ -138,8 +138,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  use m_profiling_abi
  use m_xmpi
  use m_errors
- use m_wffile
  use m_wfk
+ use m_wffile
  use m_io_redirect
  use m_paral_pert
  use m_abi_etsf
@@ -281,7 +281,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(gkk_t)     :: gkk2d
  type(hdr_type) :: hdr,hdr_den
  type(pawang_type) :: pawang1
- type(wffile_type) :: wff1,wffddk(4),wffgs,wffkq,wffnow,wfftgs,wfftkq
+ type(wffile_type) :: wff1,wffgs,wffkq,wffnow,wfftgs,wfftkq
  type(wfk_t) :: ddk_f(4)
  type(wvl_data) :: wvl
 !arrays
@@ -1050,7 +1050,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_ALLOCATE(eigenq,(dtset%mband*nkpt_rbz*dtset%nsppol))
 
    !if (sum(dtset%qptn(1:3)**2)>=1.d-14) then ! non-zero q
-   if (dtfil%fnamewffq == dtfil%fnamewffk .and. sum(dtset%qptn(1:3)**2) < 1.d-14) then 
+   if (dtfil%fnamewffq == dtfil%fnamewffk .and. sum(dtset%qptn(1:3)**2) < 1.d-14) then
      call wrtout(std_out, "qpt is Gamma, psi_k+q initialized from psi_k in memory")
      cgq = cg
      eigenq = eigen0
@@ -1277,12 +1277,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        write(message,'(2a)')'-dfpt_looppert : read the wavefunctions from file: ',trim(fiwfddk)
        call wrtout(std_out,message,'COLL')
        call wrtout(ab_out,message,'COLL')
-#ifdef DEV_MG_WFK
 !      Note that the unit number for these files is 50,51,52 or 53 (dtfil%unddk=50)
        call wfk_open_read(ddk_f(ii),fiwfddk,formeig1,dtset%iomode,dtfil%unddk+(ii-1),spaceComm)
-#else
-       call WffOpen(dtset%iomode,spaceComm,fiwfddk,ierr,wffddk(ii),master,me,dtfil%unddk+(ii-1))
-#endif
      end do
    end if
 
@@ -1473,7 +1469,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &         wtk_rbz)
        end if
 
-     else if (.not. found_eq_gkk .or. ipert==dtset%natom+11) then 
+     else if (.not. found_eq_gkk .or. ipert==dtset%natom+11) then
        ! negative iscf_mod and no symmetric rotation of rhor1
        ! Read rho1(r) from a disk file and broadcast data.
        rdwr=1;rdwrpaw=psps%usepaw;if(dtfil%ireadwf/=0) rdwrpaw=0
@@ -1523,7 +1519,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     pertcase,phnons1,ph1d,ph1df,prtbbb,psps,&
 &     dtset%qptn,resid,residm,rhog,rhog1,&
 &     rhor,rhor1,rprimd,symaf1,symrc1,symrl1,&
-&     usecprj,useylmgr,useylmgr1,wffddk,ddk_f,vpsp1,vtrial,vxc,&
+&     usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
 &     wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,dfpt_scfcv_retcode)
 
      _IBM6("after dfpt_scfcv")
@@ -1626,7 +1622,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ! Reshape eigen1 into gkk for netCDF output
      ABI_STAT_ALLOCATE(gkk,(2*dtset%mband*dtset%nsppol,dtset%nkpt,1,1,dtset%mband), ierr)
      ABI_CHECK(ierr==0, "out-of-memory in gkk")
-     gkk(:,:,:,:,:) = zero 
+     gkk(:,:,:,:,:) = zero
      mband = dtset%mband
      band_index = 0
      band2tot_index = 0
@@ -1648,7 +1644,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      end do !isppol
 
      ! Initialize Crystal to write in the GKK.nc file
-     call crystal_init(Crystal,dtset%spgroup,dtset%natom,dtset%npsp,psps%ntypat, &
+     call crystal_init(dtset%amu_orig(:,1),Crystal,dtset%spgroup,dtset%natom,dtset%npsp,psps%ntypat, &
 &     dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
 &     dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr0%title,&
 &     dtset%symrel,dtset%tnons,dtset%symafm)
@@ -1965,8 +1961,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          remove_inv=.false.
          if(dtset%nspden==4 .and. dtset%usedmft==1) remove_inv=.true.
 
-         call crystal_init(Crystal,dtset%spgroup,dtset%natom,dtset%npsp,psps%ntypat, &
-&         dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
+         call crystal_init(dtset%amu_orig(:,1),Crystal,dtset%spgroup,dtset%natom,dtset%npsp,&
+&         psps%ntypat, dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
 &         dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr0%title,&
 &         dtset%symrel,dtset%tnons,dtset%symafm)
 

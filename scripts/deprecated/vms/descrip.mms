@@ -27,7 +27,7 @@ AR_RECURSION=[.src.67_recursion]lib67_recursion.olb
 AR_RSPRC=[.src.68_rsprc]lib68_rsprc.olb
 AR_GW=[.src.68_gw]lib68_gw.olb
 AR_IOVARS=[.src.57_iovars]lib57_iovars.olb
-AR_IONETCDF=[.src.61_ionetcdf]lib61_ionetcdf.olb
+AR_IONETCDF=[.src.59_ionetcdf]lib59_ionetcdf.olb
 AR_PAW=[.src.13paw]lib13paw.olb
 AR_RECIPSPACE=[.src.56_recipspace]lib56_recipspace.olb
 AR_XC=[.src.56_xc]lib56_xc.olb
@@ -493,9 +493,9 @@ conducti.exe : [.src.98_main]conducti.obj $(DEP_CONDUCTI)
 	$(MMS)
 	set default [--]
 
-[.src.61_ionetcdf]lib61_ionetcdf.olb :
-	$(MMS) [.src.61_ionetcdf]descrip.mms
-	set default [.src.61_ionetcdf]
+[.src.59_ionetcdf]lib59_ionetcdf.olb :
+	$(MMS) [.src.59_ionetcdf]descrip.mms
+	set default [.src.59_ionetcdf]
 	$(MMS)
 	set default [--]
 
@@ -734,8 +734,8 @@ conducti.exe : [.src.98_main]conducti.obj $(DEP_CONDUCTI)
 	run [--]crea_descrip_mms
 	set def [--]
 
-[.src.61_ionetcdf]descrip.mms : crea_descrip_mms.exe
-	set def [.src.61_ionetcdf]
+[.src.59_ionetcdf]descrip.mms : crea_descrip_mms.exe
+	set def [.src.59_ionetcdf]
 	run [--]crea_descrip_mms
 	set def [--]
 

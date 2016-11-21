@@ -197,8 +197,8 @@ subroutine scf_history_init(dtset,mpi_enreg,scf_history)
 
 !Arguments ------------------------------------
 !scalars
- type(dataset_type),intent(inout) :: dtset
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(dataset_type),intent(in) :: dtset
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  type(scf_history_type),intent(inout) :: scf_history
 

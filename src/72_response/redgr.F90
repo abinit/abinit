@@ -67,7 +67,7 @@ subroutine redgr (frin,frredgr,mpi_enreg,nfft,ngfft,paral_kgb)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,paral_kgb
- type(MPI_type) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: frin(nfft)

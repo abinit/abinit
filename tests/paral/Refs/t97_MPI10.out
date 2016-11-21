@@ -1,0 +1,1002 @@
+
+.Version 8.1.7 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
+
+.Copyright (C) 1998-2016 ABINIT group . 
+ MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read ~abinit/doc/users/acknowledgments.html for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : Thu 17 Nov 2016.
+- ( at 10h15 )
+  
+-  nproc =   10
+
+================================================================================
+
+ Read the information in the reference structure in 
+-system.xml
+ to initialize the multibinit input
+
+================================================================================
+
+ -outvars_multibinit: echo values of input variables ----------------------
+
+ Flags :
+     ifcflag         1
+   prt_effpo         3
+ Molecular Dynamics :
+        temp    1000.0
+       ntime        50
+       ncell         2         2         2
+ Miscellaneous information :
+         asr         2
+ Interatomic Force Constants Inputs :
+      dipdip         1
+      ifcana         0
+      ifcout   2000000
+      natifc         4
+       atifc         1   2   3   4
+ Description of grid 1 :
+        brav         1
+       ngqpt         1         1         1
+      nqshft         1
+      q1shft
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00
+ First list of wavevector (reduced coord.) :
+       nph1l         1
+       qph1l
+                     0.00000000E+00  0.00000000E+00  0.00000000E+00    0.000E+00
+
+================================================================================
+
+ Opening the file system.xml
+-Reading the file system.xml with LibXML library
+
+================================================================================
+ Generation of new ifc
+
+ dipdip is set to one, the dipole-dipole interation is recompute.
+
+ New bound for ifc (long+short):
+
+ x=[ -1  0], y=[ -1  0] and z=[ -1  1]
+
+ Computation of new dipole-dipole interaction.
+
+ Impose acoustic sum rule on total ifc
+
+================================================================================
+
+ This effective potential contains :
+  - Reference energy:        -17.1451766220
+  - Number of types of atoms:    2
+  - Number of atoms:     4
+  - Number of cells:    12
+  - Number of qpoints:    8
+  - Primitive vectors (unit:Bohr):
+    6.528935    3.769482    0.000000
+   -6.528935    3.769482    0.000000
+    0.000000    0.000000   12.277795
+  - acell (unit:Bohr):
+    1.000000    1.000000    1.000000
+  - Dielectric tensor:
+   25.944545   -0.000000   -0.000000
+   -0.000000   25.944545   -0.000000
+   -0.000000   -0.000000    8.373944
+  - Elastic tensor (unit:10^2GPa):
+    1.873830    0.414444    0.178057    0.000000    0.000000   -0.000000
+    0.414444    1.873830    0.178057    0.000000    0.000000    0.000000
+    0.177855    0.177855    1.660337    0.000000    0.000000    0.000000
+    0.000000   -0.000000    0.000000    0.345671    0.000000    0.000000
+    0.000000    0.000000    0.000000    0.000000    0.345665    0.000000
+    0.000000    0.000000    0.000000    0.000000    0.000000    0.729651
+  - Atoms   1
+    - atomic number:   13.0000
+    - atomic mass:   26.9815
+    - cartesian position:   -2.176312    3.769482    0.000000
+    - Effective charges:
+      3.872159   -0.000000    0.000000
+     -0.000000    3.872159    0.000000
+      0.000000    0.000000    2.012513
+  - Atoms   2
+    - atomic number:   13.0000
+    - atomic mass:   26.9815
+    - cartesian position:    2.176312    3.769482    6.138898
+    - Effective charges:
+      3.872159   -0.000000    0.000000
+     -0.000000    3.872159    0.000000
+     -0.000000    0.000000    2.012513
+  - Atoms   3
+    - atomic number:   33.0000
+    - atomic mass:   74.9216
+    - cartesian position:   -2.176312    3.769482    4.617506
+    - Effective charges:
+     -3.872159   -0.000000   -0.000000
+     -0.000000   -3.872159   -0.000000
+      0.000000    0.000000   -2.012513
+  - Atoms   4
+    - atomic number:   33.0000
+    - atomic mass:   74.9216
+    - cartesian position:    2.176312    3.769482   10.756403
+    - Effective charges:
+     -3.872159    0.000000   -0.000000
+      0.000000   -3.872159    0.000000
+     -0.000000   -0.000000   -2.012513
+
+================================================================================
+
+There is no file for the coefficients from polynomial fitting
+
+================================================================================
+
+ Generation of the xml file for the reference structure in system.xml
+
+================================================================================
+
+ Structure parameters of the supercell :
+
+  natom       32
+
+  znucl
+   13   33
+
+  ntypat      2
+
+  typat
+    1    1    2    2    1    1    2    2    1    1    2    2
+    1    1    2    2    1    1    2    2    1    1    2    2
+    1    1    2    2    1    1    2    2
+
+  acell 1.0 1.0 1.0
+
+  rprim
+   0.13057870095015E+02   0.75389648144000E+01   0.00000000000000E+00
+  -0.13057870095015E+02   0.75389648144000E+01   0.00000000000000E+00
+   0.00000000000000E+00   0.00000000000000E+00   0.24555590748000E+02
+
+  xcart
+  -0.21763116825025E+01   0.37694824072000E+01   0.00000000000000E+00
+   0.21763116825025E+01   0.37694824072000E+01   0.61388976870000E+01
+  -0.21763116825025E+01   0.37694824072000E+01   0.46175055234869E+01
+   0.21763116825025E+01   0.37694824072000E+01   0.10756403210487E+02
+  -0.21763116825025E+01   0.37694824072000E+01   0.12277795374000E+02
+   0.21763116825025E+01   0.37694824072000E+01   0.18416693061000E+02
+  -0.21763116825025E+01   0.37694824072000E+01   0.16895300897487E+02
+   0.21763116825025E+01   0.37694824072000E+01   0.23034198584487E+02
+  -0.87052467300099E+01   0.75389648144000E+01   0.00000000000000E+00
+  -0.43526233650049E+01   0.75389648144000E+01   0.61388976870000E+01
+  -0.87052467300099E+01   0.75389648144000E+01   0.46175055234869E+01
+  -0.43526233650049E+01   0.75389648144000E+01   0.10756403210487E+02
+  -0.87052467300099E+01   0.75389648144000E+01   0.12277795374000E+02
+  -0.43526233650049E+01   0.75389648144000E+01   0.18416693061000E+02
+  -0.87052467300099E+01   0.75389648144000E+01   0.16895300897487E+02
+  -0.43526233650049E+01   0.75389648144000E+01   0.23034198584487E+02
+   0.43526233650049E+01   0.75389648144000E+01   0.00000000000000E+00
+   0.87052467300099E+01   0.75389648144000E+01   0.61388976870000E+01
+   0.43526233650049E+01   0.75389648144000E+01   0.46175055234869E+01
+   0.87052467300099E+01   0.75389648144000E+01   0.10756403210487E+02
+   0.43526233650049E+01   0.75389648144000E+01   0.12277795374000E+02
+   0.87052467300099E+01   0.75389648144000E+01   0.18416693061000E+02
+   0.43526233650049E+01   0.75389648144000E+01   0.16895300897487E+02
+   0.87052467300099E+01   0.75389648144000E+01   0.23034198584487E+02
+  -0.21763116825025E+01   0.11308447221600E+02   0.00000000000000E+00
+   0.21763116825025E+01   0.11308447221600E+02   0.61388976870000E+01
+  -0.21763116825025E+01   0.11308447221600E+02   0.46175055234869E+01
+   0.21763116825025E+01   0.11308447221600E+02   0.10756403210487E+02
+  -0.21763116825025E+01   0.11308447221600E+02   0.12277795374000E+02
+   0.21763116825025E+01   0.11308447221600E+02   0.18416693061000E+02
+  -0.21763116825025E+01   0.11308447221600E+02   0.16895300897487E+02
+   0.21763116825025E+01   0.11308447221600E+02   0.23034198584487E+02
+
+  xred
+   0.16666666666667E+00   0.33333333333333E+00   0.00000000000000E+00
+   0.33333333333333E+00   0.16666666666667E+00   0.25000000000000E+00
+   0.16666666666667E+00   0.33333333333333E+00   0.18804294186500E+00
+   0.33333333333333E+00   0.16666666666667E+00   0.43804294186500E+00
+   0.16666666666667E+00   0.33333333333333E+00   0.50000000000000E+00
+   0.33333333333333E+00   0.16666666666667E+00   0.75000000000000E+00
+   0.16666666666667E+00   0.33333333333333E+00   0.68804294186500E+00
+   0.33333333333333E+00   0.16666666666667E+00   0.93804294186500E+00
+   0.16666666666667E+00   0.83333333333333E+00   0.00000000000000E+00
+   0.33333333333333E+00   0.66666666666667E+00   0.25000000000000E+00
+   0.16666666666667E+00   0.83333333333333E+00   0.18804294186500E+00
+   0.33333333333333E+00   0.66666666666667E+00   0.43804294186500E+00
+   0.16666666666667E+00   0.83333333333333E+00   0.50000000000000E+00
+   0.33333333333333E+00   0.66666666666667E+00   0.75000000000000E+00
+   0.16666666666667E+00   0.83333333333333E+00   0.68804294186500E+00
+   0.33333333333333E+00   0.66666666666667E+00   0.93804294186500E+00
+   0.66666666666667E+00   0.33333333333333E+00   0.00000000000000E+00
+   0.83333333333333E+00   0.16666666666667E+00   0.25000000000000E+00
+   0.66666666666667E+00   0.33333333333333E+00   0.18804294186500E+00
+   0.83333333333333E+00   0.16666666666667E+00   0.43804294186500E+00
+   0.66666666666667E+00   0.33333333333333E+00   0.50000000000000E+00
+   0.83333333333333E+00   0.16666666666667E+00   0.75000000000000E+00
+   0.66666666666667E+00   0.33333333333333E+00   0.68804294186500E+00
+   0.83333333333333E+00   0.16666666666667E+00   0.93804294186500E+00
+   0.66666666666667E+00   0.83333333333333E+00   0.00000000000000E+00
+   0.83333333333333E+00   0.66666666666667E+00   0.25000000000000E+00
+   0.66666666666667E+00   0.83333333333333E+00   0.18804294186500E+00
+   0.83333333333333E+00   0.66666666666667E+00   0.43804294186500E+00
+   0.66666666666667E+00   0.83333333333333E+00   0.50000000000000E+00
+   0.83333333333333E+00   0.66666666666667E+00   0.75000000000000E+00
+   0.66666666666667E+00   0.83333333333333E+00   0.68804294186500E+00
+   0.83333333333333E+00   0.66666666666667E+00   0.93804294186500E+00
+
+--------------------------------------------------------------------------------
+-Monte Carlo / Molecular Dynamics 
+
+
+=== [ionmov=12] Isokinetic ensemble molecular dynamics with effective potential
+================================================================================
+
+--- Iteration: ( 1/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  2.8100823806789492E-30 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3716141297600001E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: ( 2/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  2.4447906761224910E-03 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3715896818532389E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: ( 3/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  9.6584453483202874E-03 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3715175453065169E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: ( 4/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  2.1269719191097682E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3714014325680890E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: ( 5/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  3.6631495563136905E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3712478148043687E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: ( 6/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  5.4786501926334739E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3710662647407366E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: ( 7/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  7.4441040608285269E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3708697193539172E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: ( 8/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  9.3978454168719638E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3706743452183130E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: ( 9/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.1155831994877730E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3704985465605122E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (10/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.2534315600680052E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3703606981999320E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (11/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.3384602904141640E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3702756694695859E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (12/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.3629958807885054E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3702511338792115E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (13/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.3287599873533931E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3702853697726468E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (14/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.2463296995148643E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3703678000604853E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (15/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.1321651085574824E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3704819646514426E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (16/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.0047820478818766E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3706093477121183E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (17/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  8.8161160223245022E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3707325181577676E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (18/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  7.7718068392754927E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3708369490760725E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (19/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  7.0244034252569282E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3709116894174744E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (20/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  6.6476550630069589E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3709493642536995E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (21/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  6.6820225708867240E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3709459275029113E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (22/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  7.1369798804384363E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3709004317719561E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (23/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  7.9918698213782363E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3708149427778622E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (24/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  9.1949804033830296E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3706946317196619E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (25/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.0661281037784898E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3705480016562217E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (26/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.2270227555561290E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3703871070044440E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (27/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.3866434491603707E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3702274863108397E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (28/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.5267512831303442E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3700873784768697E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (29/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.6283556767873791E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3699857740832127E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (30/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.6749177989264211E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3699392119610738E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (31/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.6560652254789970E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3699580645345210E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (32/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.5702481344359354E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3700438816255641E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (33/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.4248951080716790E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3701892346519284E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (34/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.2339716292441918E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3703801581307559E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (35/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.0142816925463904E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3705998480674538E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (36/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  7.8214142194230410E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3708319883380577E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (37/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  5.5129103580257952E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3710628387241974E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (38/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  3.3203891122889975E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3712820908487711E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (39/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part :  1.3121675728115567E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3714829130027189E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (40/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -4.7481510753532314E-03 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3716616112707536E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (41/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -2.0305208966580439E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3718171818496660E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (42/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -3.3675016738993466E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3719508799273899E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (43/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -4.5170249980346390E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3720658322598035E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (44/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -5.5253876717785644E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3721666685271779E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (45/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -6.4499625245809517E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3722591260124582E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (46/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -7.3545493657828198E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3723495846965784E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (47/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -8.3038376488943272E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3724445135248894E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (48/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -9.3572154087370671E-02 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3725498513008739E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (49/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -1.0562673623974370E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3726703971223975E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+--- Iteration: (50/50) Internal Cycle: (1/1)
+--------------------------------------------------------------------------------
+
+---EFFECTIVE POTENTIAL CALCULATION--------------------------------------------
+
+ Calculation of the energy with effective potential
+
+ Energy of the reference strucure : -1.3716141297600001E+02 Hartree
+ Energy of the ifc part : -1.1951937476433988E-01 Hartree
+ Energy of the elastic part :  0.0000000000000000E+00 Hartree
+
+ Total energy : -1.3728093235076435E+02 Hartree
+
+---OUTPUT-----------------------------------------------------------------------
+
+================================================================================
+
+
+================================================================================
+
+-
+- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
+
+================================================================================
+
++Total cpu time      2.173  and wall time      2.200 sec
+
+ multibinit : the run completed succesfully.

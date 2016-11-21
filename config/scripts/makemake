@@ -6,15 +6,31 @@
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
 from time import gmtime, strftime
 
-import commands
 import os
 import re
 import stat
 import sys
+
+py2 = sys.version_info[0] <= 2
+
+from subprocess import Popen, PIPE
+import shlex
+
+def getstatusoutput(command):
+    if py2:
+        process = Popen(command, shell=True, stdout=PIPE, stderr=PIPE)
+    else:
+        process = Popen(command, shell=True, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    out, _ = process.communicate()
+    return (process.returncode, out)
 
 # ---------------------------------------------------------------------------- #
 
@@ -49,7 +65,8 @@ def run_script(name, title, cmdline, stop_on_error=True,
       indent_output=True):
 
   print("[%s]   %s" % (name, title))
-  (ret, msg) = commands.getstatusoutput(cmdline)
+  #print(cmdline)
+  (ret, msg) = getstatusoutput(cmdline)
   if ( msg != "" ):
     if ( indent_output ):
       sys.stderr.write("    " + re.sub("\n", "\n    ", msg) + "\n")
@@ -324,10 +341,10 @@ if ( opts.run_clean ):
   sys.exit(0)
 
 # Get Autotools versions
-(m4_ret, m4_version) = commands.getstatusoutput("m4 --version | sed 's/o/ /g' ")
-(ac_ret, ac_version) = commands.getstatusoutput("autoconf --version")
-(am_ret, am_version) = commands.getstatusoutput("automake --version")
-(lt_ret, lt_version) = commands.getstatusoutput("libtool  --version")
+(m4_ret, m4_version) = getstatusoutput("m4 --version | sed 's/o/ /g' ")
+(ac_ret, ac_version) = getstatusoutput("autoconf --version")
+(am_ret, am_version) = getstatusoutput("automake --version")
+(lt_ret, lt_version) = getstatusoutput("libtool  --version")
 
 # Extract and process version numbers
 if ( m4_ret == 0 ):
@@ -381,7 +398,7 @@ if ( am_version < 11000 ):
   sys.exit(30)
 
 # Make version information available to other scripts
-at_info = file("config/local/autotools.sh", "w")
+at_info = open("config/local/autotools.sh", "wt")
 at_info.write("""# Autotools version information
 abi_m4_version="%6.6d"
 abi_ac_version="%6.6d"
@@ -484,7 +501,7 @@ if ( opts.run_subsystems ):
 
   if ( opts.toggle ):
     sub_togls = opts.toggle.split(",")
-    sub_mlist = file("config/dist/custom-modes.lst", "w")
+    sub_mlist = open("config/dist/custom-modes.lst", "wt")
 
   for subsys in bcnf.sections():
     if ( bcnf.get(subsys, "type") == "subsystem" ):
@@ -555,7 +572,7 @@ else:
 
 # Display warnings
 if ( m4_version < 10415 ):
-  print """
+  print("""
      ****************************************************************
      ***                        WARNING!                          ***
      ****************************************************************
@@ -570,10 +587,10 @@ if ( m4_version < 10415 ):
      *** Thanks a lot in advance for your understanding.          ***
      ***                                                          ***
      ****************************************************************
-"""
+""")
 
 if ( ac_version < 26800 ):
-  print """
+  print("""
      ****************************************************************
      ***                        WARNING!                          ***
      ****************************************************************
@@ -596,10 +613,10 @@ if ( ac_version < 26800 ):
      *** Thanks a lot in advance for your understanding.          ***
      ***                                                          ***
      ****************************************************************
-"""
+""")
 
 if ( am_version < 11202 ):
-  print """
+  print("""
      ****************************************************************
      ***                        WARNING!                          ***
      ****************************************************************
@@ -620,10 +637,10 @@ if ( am_version < 11202 ):
      *** Thanks a lot in advance for your understanding.          ***
      ***                                                          ***
      ****************************************************************
-"""
+""")
 
 if ( lt_version < 20402 ):
-  print """
+  print("""
      ****************************************************************
      ***                        WARNING!                          ***
      ****************************************************************
@@ -637,7 +654,7 @@ if ( lt_version < 20402 ):
      *** one is 2.4.6.                                            ***
      ***                                                          ***
      ****************************************************************
-"""
+""")
 
 # Footer
 now = strftime("%Y/%m/%d %H:%M:%S +0000", gmtime())

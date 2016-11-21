@@ -22,6 +22,8 @@ class GkkFile(EpcFile):
         """Open the EIG2D.nc file and read it."""
         fname = fname if fname else self.fname
 
+        super(GkkFile, self).read_nc(fname)
+
         with nc.Dataset(fname, 'r') as root:
 
             self.natom = len(root.dimensions['number_of_atoms'])
@@ -64,6 +66,24 @@ class GkkFile(EpcFile):
         # nkpt,nband,3,natom,3,natom,nband
         gkk2 = einsum('ijklm,ijnom->ijklnom', self.GKK[:,0,...],
                                               self.GKK[:,0,...].conjugate())
+
+        return gkk2
+
+    def get_kpt_gkk_squared(self, ikpt):
+        """
+        Get squared values of gkk with  reordered indices for a ginven k-point.
+        Returns:
+            gkk2[nband,3,natom,3,natom,nband]
+        """
+
+        # No spin polarization at the moment.
+
+        gkk2 = zeros((self.nband, 3, self.natom, 3, self.natom,
+                      self.nband), dtype=np.complex)
+
+        # nkpt,nband,3,natom,3,natom,nband
+        gkk2 = einsum('jklm,jnom->jklnom', self.GKK[ikpt,0,...],
+                                           self.GKK[ikpt,0,...].conjugate())
 
         return gkk2
 

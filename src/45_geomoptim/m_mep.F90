@@ -695,7 +695,7 @@ end subroutine mep_lbfgs
 !!  list_dynimage(nimage)=list of dynamical images.
 !!  mep_param=datastructure of type mep_type.
 !!  mpi_enreg=MPI-parallelisation information
-!!            several parameters for Minimal Energy Path (MEP) search.
+!!  mep_param=several parameters for Minimal Energy Path (MEP) search.
 !!  natom=number of atoms
 !!  ndynimage=number of dynamical images along the path
 !!  nimage=number of images (including static ones)
@@ -742,7 +742,7 @@ subroutine mep_gbfgs(fcart,itime,list_dynimage,mep_param,mpi_enreg,natom,&
 !scalars
  integer,intent(in) :: itime,natom,ndynimage,nimage,nimage_tot
  type(mep_type),intent(inout) :: mep_param
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: list_dynimage(ndynimage)
  real(dp),intent(in) :: fcart(3,natom,nimage),rprimd(3,3,nimage)

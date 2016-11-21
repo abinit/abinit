@@ -23,7 +23,6 @@ sources = [
  "m_invovl.F90",
  "chebfi.F90",
  "fxphas.F90",
- "fxphas_seq.F90",
  "getdc1.F90",
  "getghcnd.F90",
  "fock_getghc.F90",

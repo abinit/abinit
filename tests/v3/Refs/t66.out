@@ -1,5 +1,5 @@
 
-.Version 8.0.3 of CUT3D 
+.Version 8.1.5 of CUT3D 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2016 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 07h33 )
+.Starting date : Mon 19 Sep 2016.
+- ( at 22h31 )
   
 
   What is the name of the 3D function (density, potential or wavef) file ?
@@ -27,7 +27,7 @@
  ECHO of the ABINIT file header 
  
  First record :
-.codvsn,headform,fform = 8.0.3    80    2
+.codvsn,headform,fform = 8.1.5    80    2
  
  Second record :
  bantot,intxc,ixc,natom  =    30     0     7     1
@@ -123,7 +123,7 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Al, in-sphere charge =  0.996233
  l=0, charge= 0.996164, m=-l,l splitting: 0.996
@@ -202,7 +202,7 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Al, in-sphere charge =  0.987234
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
@@ -281,13 +281,13 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Al, in-sphere charge =  0.987239
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
- l=1, charge= 0.985084, m=-l,l splitting: 0.493 0.000 0.493
+ l=1, charge= 0.985084, m=-l,l splitting: 0.985 0.000 0.000
  l=2, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
- l=3, charge= 0.002155, m=-l,l splitting: 0.001 0.000 0.000 0.000 0.000 0.000 0.001
+ l=3, charge= 0.002155, m=-l,l splitting: 0.001 0.000 0.001 0.000 0.000 0.000 0.000
  l=4, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
 
  Sum of angular contributions for all atomic spheres 
@@ -360,13 +360,13 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Al, in-sphere charge =  0.987244
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
- l=1, charge= 0.985088, m=-l,l splitting: 0.493 0.000 0.493
+ l=1, charge= 0.985088, m=-l,l splitting: 0.000 0.000 0.985
  l=2, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
- l=3, charge= 0.002156, m=-l,l splitting: 0.001 0.000 0.000 0.000 0.000 0.000 0.001
+ l=3, charge= 0.002156, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.001 0.000 0.001
  l=4, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
 
  Sum of angular contributions for all atomic spheres 
@@ -439,7 +439,7 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Al, in-sphere charge =  0.486308
  l=0, charge= 0.486306, m=-l,l splitting: 0.486
@@ -518,12 +518,12 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Al, in-sphere charge =  0.713503
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
  l=1, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000
- l=2, charge= 0.713148, m=-l,l splitting: 0.022 0.000 0.670 0.000 0.022
+ l=2, charge= 0.713148, m=-l,l splitting: 0.000 0.000 0.670 0.000 0.043
  l=3, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000
  l=4, charge= 0.000355, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
 
@@ -597,12 +597,12 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Al, in-sphere charge =  0.713662
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
  l=1, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000
- l=2, charge= 0.713308, m=-l,l splitting: 0.335 0.000 0.043 0.000 0.335
+ l=2, charge= 0.713308, m=-l,l splitting: 0.000 0.000 0.043 0.000 0.670
  l=3, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000
  l=4, charge= 0.000354, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
 
@@ -676,7 +676,7 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Al, in-sphere charge =  0.458464
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
@@ -755,13 +755,13 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Al, in-sphere charge =  0.458452
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
- l=1, charge= 0.307858, m=-l,l splitting: 0.154 0.000 0.154
+ l=1, charge= 0.307858, m=-l,l splitting: 0.308 0.000 0.000
  l=2, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
- l=3, charge= 0.150594, m=-l,l splitting: 0.047 0.000 0.028 0.000 0.028 0.000 0.047
+ l=3, charge= 0.150594, m=-l,l splitting: 0.094 0.000 0.056 0.000 0.000 0.000 0.000
  l=4, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
 
  Sum of angular contributions for all atomic spheres 
@@ -834,13 +834,13 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Al, in-sphere charge =  0.458440
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
- l=1, charge= 0.307822, m=-l,l splitting: 0.154 0.000 0.154
+ l=1, charge= 0.307822, m=-l,l splitting: 0.000 0.000 0.308
  l=2, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
- l=3, charge= 0.150619, m=-l,l splitting: 0.047 0.000 0.028 0.000 0.028 0.000 0.047
+ l=3, charge= 0.150619, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.056 0.000 0.094
  l=4, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
 
  Sum of angular contributions for all atomic spheres 
@@ -913,7 +913,7 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Al, in-sphere charge =  0.997321
  l=0, charge= 0.997055, m=-l,l splitting: 0.997
@@ -992,7 +992,7 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Al, in-sphere charge =  0.998950
  l=0, charge= 0.998844, m=-l,l splitting: 0.999
@@ -1050,7 +1050,7 @@
 
   Run interpolation again? (1=default=yes,0=no)
 -
-- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.6
+- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.2
 
   Thank you for using me
 

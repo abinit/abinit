@@ -55,12 +55,12 @@ subroutine mlwfovlp_radial(alpha,lmax,lmax2,radial,rvalue,xx)
  use m_profiling_abi
 
  use m_numeric_tools,   only : simpson_int
+ use m_special_funcs,   only : besjm
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mlwfovlp_radial'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

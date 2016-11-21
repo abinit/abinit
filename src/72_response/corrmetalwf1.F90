@@ -32,7 +32,7 @@
 !!  istwf_k=option parameter that describes the storage of wfs
 !!  mcgq=second dimension of the cgq array
 !!  mcprjq=second dimension of the cprjq array
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell
 !!  nband=number of bands
 !!  npw1=number of plane waves at this k+q point
@@ -93,7 +93,7 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc,eig1,fe
  integer,intent(in) :: iband,ibgq,icgq,istwf_k,mcgq,mcprjq,natom,nband,npw1,nspinor,timcount,usepaw
  integer,intent(out) :: wf_corrected
  real(dp),intent(in) :: fermie1
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  real(dp),intent(in) :: cgq(2,mcgq),cwavef(2,npw1*nspinor)
  real(dp),intent(in) :: eig1(2*nband**2),ghc(2,npw1*nspinor),occ(nband),rocceig(nband,nband)
@@ -151,7 +151,7 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc,eig1,fe
        facti= rocceig(ibandkq,iband)*invocc*eig1(index_eig1+1)
 
 !      Apply correction to 1st-order WF
-!$OMP PARALLEL DO PRIVATE(ii) SHARED(cgq,cwave1,cwavef,cwcorr,facti,factr,index_cgq,npw1,nspinor)
+!$OMP PARALLEL DO PRIVATE(ii) SHARED(cgq,cwave1,facti,factr,index_cgq,npw1,nspinor)
        do ii=1,npw1*nspinor
          cwave1(1,ii)=cwave1(1,ii)+(factr*cgq(1,ii+index_cgq)-facti*cgq(2,ii+index_cgq))
          cwave1(2,ii)=cwave1(2,ii)+(facti*cgq(1,ii+index_cgq)+factr*cgq(2,ii+index_cgq))
@@ -173,7 +173,9 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,edocc,eig1,fe
 !In the PAW case, compute <Psi^(1)_ortho|H-Eig0_k.S|Psi^(1)_parallel> contribution to 2DTE
  if (usepaw==1.and.wf_corrected==1) then
    ABI_ALLOCATE(cwcorr,(2,npw1*nspinor))
-   cwcorr=cwave1-cwavef
+!$OMP WORKSHARE
+   cwcorr(:,:)=cwave1(:,:)-cwavef(:,:)
+!$OMP END WORKSHARE
    call dotprod_g(factr,facti,istwf_k,npw1*nspinor,1,cwcorr,ghc,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
    edocc(iband)=edocc(iband)+four*factr
    ABI_DEALLOCATE(cwcorr)

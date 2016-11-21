@@ -22,7 +22,7 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  xcart(3,natom)=cartesian atomic coordinates.
 !!
@@ -75,7 +75,7 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: option, natom, nfft, nspden
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(wvl_denspot_type), intent(inout) :: wvl_den
  type(wvl_internal_type), intent(in) :: wvl_descr
 !arrays
