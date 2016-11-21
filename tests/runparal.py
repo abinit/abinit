@@ -13,7 +13,7 @@ import subprocess
 
 script = os.path.join(os.path.dirname(__file__), "runtests.py")
 
-MPI_NPROCS_LIST = [1, 2, 4, 10]
+MPI_NPROCS_LIST = [1, 2, 4, 8, 10]
 
 def str_examples():
     examples = """
