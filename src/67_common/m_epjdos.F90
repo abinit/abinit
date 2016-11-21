@@ -394,7 +394,7 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata,comm)
 !scalars
  integer,parameter :: bcorr0=0,master=0
  integer :: iat,iband,iene,ifract,ikpt,isppol,natsph,natsph_extra,nkpt,nsppol,i1,i2
- integer :: nene,nkpt_fullbz,prtdos,unitdos,ierr,prtdosm,paw_dos_flag,mbesslang,ndosfraction
+ integer :: nene,prtdos,unitdos,ierr,prtdosm,paw_dos_flag,mbesslang,ndosfraction
  integer :: my_rank,nprocs
  real(dp),parameter :: dos_max=9999.9999_dp
  real(dp) :: buffer,deltaene,enemax,enemin,enex,integral_DOS,max_occ
@@ -403,13 +403,12 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata,comm)
  character(len=10) :: tag
  character(len=500) :: frmt,frmt_extra,message
  character(len=fnlen) :: tmpfil
- character(len=80) :: errstr
  type(t_tetrahedron) :: tetrahedra
 !arrays
- integer,allocatable :: indkpt(:),unitdos_arr(:)
- real(dp) :: klatt(3,3),rlatt(3,3),list_dp(3)
+ integer,allocatable :: unitdos_arr(:)
+ real(dp) :: list_dp(3)
  real(dp),allocatable :: dtweightde(:,:),integ_dos(:,:),integ_dos_m(:,:)
- real(dp),allocatable :: kpt_fullbz(:,:),partial_dos(:,:)
+ real(dp),allocatable :: partial_dos(:,:)
  real(dp),allocatable :: partial_dos_m(:,:),tmp_eigen(:),total_dos(:,:)
  real(dp),allocatable :: total_dos_m(:,:),total_dos_paw1(:,:)
  real(dp),allocatable :: total_dos_pawt1(:,:),total_integ_dos(:,:)
@@ -467,48 +466,8 @@ subroutine tetrahedron(dos,dtset,crystal,ebands,fildata,comm)
 
  call cwtime(cpu, wall, gflops, "start")
 
-#if 1
  call tetra_from_kptrlatt(tetrahedra, crystal, dtset%kptopt, dtset%kptrlatt, &
                           dtset%nshiftk, dtset%shiftk, dtset%nkpt, dtset%kpt)
-#else
- ! FIXME: Here there's a bug if TR is not used because get_full_kgrid assumes kptopt==1 !!!!
-
-! Calculate nkpt_fullbz
- nkpt_fullbz= dtset%kptrlatt(1,1)*dtset%kptrlatt(2,2)*dtset%kptrlatt(3,3) &
-& +dtset%kptrlatt(1,2)*dtset%kptrlatt(2,3)*dtset%kptrlatt(3,1) &
-& +dtset%kptrlatt(1,3)*dtset%kptrlatt(2,1)*dtset%kptrlatt(3,2) &
-& -dtset%kptrlatt(1,2)*dtset%kptrlatt(2,1)*dtset%kptrlatt(3,3) &
-& -dtset%kptrlatt(1,3)*dtset%kptrlatt(2,2)*dtset%kptrlatt(3,1) &
-& -dtset%kptrlatt(1,1)*dtset%kptrlatt(2,3)*dtset%kptrlatt(3,2)
- nkpt_fullbz = nkpt_fullbz*dtset%nshiftk
-
- if (nkpt_fullbz==0) then
-   write(std_out,*)'tetrahedron: skip subroutine.'
-   write(std_out,*)'no homogeneous grid  of k-points is defined ...'
-   write(std_out,*)'in order to obtain the DOS using the tetrahedron method,'
-   write(std_out,*)'you need to re-define ngkpt or kptrlatt.'
-   MSG_WARNING('tetrahedron: skip subroutine. See message above')
-   return
- end if
-
-!Make klatt
- rlatt = dtset%kptrlatt(:,:)
- call matr3inv(rlatt,klatt)
-
- ABI_ALLOCATE(indkpt,(nkpt_fullbz))
- ABI_ALLOCATE(kpt_fullbz,(3,nkpt_fullbz))
-
-!Make full kpoint grid and get equivalence to irred kpoints
- call get_full_kgrid(indkpt,dtset%kpt,kpt_fullbz,dtset%kptrlatt,&
-& nkpt,nkpt_fullbz,dtset%nshiftk,dtset%nsym,dtset%shiftk,dtset%symrel)
-
-!Get tetrahedra, ie indexes of the full kpoints at their summits
- call init_tetra (indkpt,crystal%gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetrahedra, ierr, errstr)
- ABI_CHECK(ierr==0,errstr)
-
- ABI_DEALLOCATE(indkpt)
- ABI_DEALLOCATE(kpt_fullbz)
-#endif
 
  natsph=dtset%natsph; natsph_extra=dtset%natsph_extra
 
