@@ -83,7 +83,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
  list_vars=trim(list_vars)//' charge chkexit chkprim chksymbreak chneut cineb_start cpus cpum cpuh cgtyphf' 
 !D
- list_vars=trim(list_vars)//' ddamp ddb_ngqpt delayperm densfor_pred densty dfield'
+ list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
  list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dmatpawu dmatpuopt dmatudiag'
  list_vars=trim(list_vars)//' dmft_entropy dmft_nlambda'
@@ -100,7 +100,8 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' efmas_bands efmas_calc_dirs efmas_deg efmas_deg_tol'
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
  list_vars=trim(list_vars)//' efield elph2_imagden enunit eshift esmear exchmix exchn2n3d extrapwf'
- list_vars=trim(list_vars)//' eph_intmeth eph_extrael eph_fermie eph_fsmear eph_fsewin eph_mustar eph_ngqpt_fine eph_transport'
+ list_vars=trim(list_vars)//' eph_intmeth eph_extrael eph_fermie eph_fsmear eph_fsewin eph_mustar '
+ list_vars=trim(list_vars)//' eph_ngqpt_fine eph_task eph_transport'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw'
@@ -185,10 +186,10 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtcif prtden'
  list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtefg prteig prtelf'
  list_vars=trim(list_vars)//' prtfc prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
- list_vars=trim(list_vars)//' prtnabla prtnest prtposcar prtpot prtpsps'
+ list_vars=trim(list_vars)//' prtnabla prtnest prtphdos prtposcar prtpot prtpsps'
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc'
  list_vars=trim(list_vars)//' prtvol prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm ptcharge'
- list_vars=trim(list_vars)//' pvelmax'
+ list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q
  list_vars=trim(list_vars)//' qmass qprtrb qpt qptdm qptnrm '
  list_vars=trim(list_vars)//' qptopt qptrlatt quadmom'

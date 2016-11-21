@@ -37,7 +37,7 @@
 !!  istep=step number in the main loop of scfcv
 !!  mgfft=maximum size of 1D FFTs
 !!  moved_rhor=1 if the density was moved just before
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
@@ -171,7 +171,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
  logical,intent(in),optional :: add_tfw
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(out) :: vxcavg
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(inout) :: dtset
  type(electronpositron_type),pointer,optional :: electronpositron
  type(energies_type),intent(inout) :: energies
@@ -367,7 +367,6 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grewtn,grvdw,gsqcut,&
    ABI_DEALLOCATE(gr_dum)
 
  end if  ! PAW or NC
-
 
 !Adds the jellium potential to the local part of ionic potential
  if (dtset%jellslab/=0) then

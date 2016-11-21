@@ -18,7 +18,7 @@
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>= all input variables in this dataset
-!!  mpi_enreg= informations about MPI parallelization
+!!  mpi_enreg= information about MPI parallelization
 !!  nfft= number of fft grid points.
 !!  ngfft(1:3)= integer fft box dimensions, see getng for ngfft(4:8).
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
@@ -60,9 +60,10 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
  use defs_basis
  use m_profiling_abi
  use m_errors
+ use libxc_functionals
+
  use defs_abitypes, only : MPI_type, dataset_type
  use m_dtset,       only : dtset_copy, dtset_free
- use libxc_functionals
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -78,7 +79,7 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
  integer,intent(in) :: nfft,n3xccc
  real(dp),intent(out) :: enxc,vxcavg
  type(dataset_type),intent(in) :: dtset
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: rhor(nfft,dtset%nspden),rprimd(3,3),xccc3d(n3xccc)

@@ -62,7 +62,7 @@ use defs_abitypes
  integer, intent(in) :: ngfft(18),typat(natom)
  real(dp),intent(in) :: spinat(3,natom), rprimd(3,3)
  real(dp),intent(in) :: ratsph(ntypat),rhor(nfft,nspden),xred(3,natom)
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 
 !Local variables-------------------------------
 !scalars

@@ -596,6 +596,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prtlden=0
    dtsets(idtset)%prtnabla=0
    dtsets(idtset)%prtnest=0
+   dtsets(idtset)%prtphdos=1
    dtsets(idtset)%prtposcar=0
    dtsets(idtset)%prtpot=0
    dtsets(idtset)%prtpsps=0
@@ -619,6 +620,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    end do
    dtsets(idtset)%prt1dm=0
    dtsets(idtset)%pvelmax(:)=one
+   dtsets(idtset)%pw_unbal_thresh=40.
 !  Q
    dtsets(idtset)%qmass(:)=ten
    dtsets(idtset)%qprtrb(1:3)=0
@@ -800,6 +802,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%eph_fsmear = 0.01
    dtsets(idtset)%eph_fsewin = 0.04
    dtsets(idtset)%eph_ngqpt_fine = [0, 0, 0]
+   dtsets(idtset)%eph_task = 1
    dtsets(idtset)%eph_transport  = 0
 
    dtsets(idtset)%ph_wstep = 0.1/Ha_meV
@@ -807,6 +810,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%ph_nqshift = 1
    dtsets(idtset)%ph_smear = 0.00002_dp
    dtsets(idtset)%ddb_ngqpt = [0, 0, 0]
+   dtsets(idtset)%ddb_shiftq(:) = zero
 
 ! JB:UNINITIALIZED VALUES (not found in this file neither indefo1)
 ! They might be initialized somewhereelse, I don't know.

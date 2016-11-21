@@ -66,6 +66,7 @@ MODULE m_use_ga
  use defs_basis
  use m_profiling_abi
  use m_ga
+ use m_sort
 
  use m_results_img, only : results_img_type,gather_array_img
  use interfaces_28_numeric_noabirule

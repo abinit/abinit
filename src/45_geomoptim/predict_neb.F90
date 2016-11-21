@@ -89,7 +89,7 @@ subroutine predict_neb(itimimage,list_dynimage,mep_param,mpi_enreg,natom,&
 !scalars
  integer,intent(in) :: itimimage,natom,ndynimage,nimage,nimage_tot,ntimimage
  type(mep_type),intent(inout) :: mep_param
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in)     :: list_dynimage(ndynimage)
  type(results_img_type),intent(inout) :: results_img(nimage,ntimimage)

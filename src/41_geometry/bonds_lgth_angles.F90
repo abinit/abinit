@@ -89,11 +89,6 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 
 ! *************************************************************************
 
-! Statement functions are obsolete
-! dot(u1,u2,u3,v1,v2,v3)=rmet(1,1)*u1*v1+rmet(2,1)*u2*v1+&
-!& rmet(3,1)*u3*v1+rmet(1,2)*u1*v2+rmet(2,2)*u2*v2+&
-!& rmet(3,2)*u3*v2+rmet(1,3)*u1*v3+rmet(2,3)*u2*v3+rmet(3,3)*u3*v3
-
 !Initialize the file
  write(message, '(a,a,a)' )' bonds_lgth_angles : about to open file ',trim(fnameabo_app_geo),ch10
  call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
@@ -366,8 +361,8 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 !End of the abilint section
 
    real(dp) :: rsdot
-   real(dp) :: u1,u2,u3,v1,v2,v3
-   real(dp) :: rmet(3,3)
+   real(dp),intent(in) :: u1,u2,u3,v1,v2,v3
+   real(dp),intent(in) :: rmet(3,3)
    rsdot=rmet(1,1)*u1*v1+rmet(2,1)*u2*v1+&
 &   rmet(3,1)*u3*v1+rmet(1,2)*u1*v2+rmet(2,2)*u2*v2+&
 &   rmet(3,2)*u3*v2+rmet(1,3)*u1*v3+rmet(2,3)*u2*v3+rmet(3,3)*u3*v3

@@ -26,7 +26,7 @@
 !!  isppol  = spin polarization
 !!  mband=maximum number of bands
 !!  mkmem =number of k points treated by this node.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell.
 !!  nkpt=number of k points.
 !!  nspinor=number of spinorial components of the wavefunctions (on current proc)
@@ -91,7 +91,7 @@
  integer,intent(in) :: ikpt1,ikpt2,isppol,mband,mbandw,mkmem,natom,nkpt,nspinor,nsppol
  integer,intent(in) :: ntypat
  character(len=fnlen) ::  seed_name  !seed names of files containing cg info used in case of MPI
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(pawang_type),intent(in) :: pawang
 
 !arrays

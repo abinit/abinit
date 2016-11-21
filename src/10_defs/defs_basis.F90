@@ -29,6 +29,10 @@
 
 module defs_basis
 
+!#ifdef HAVE_FC_ISO_FORTRAN_2008
+! use ISO_FORTRAN_ENV, only : input_unit, output_unit, error_unit
+!#endif
+
  implicit none
 
 !Keyword 'integer' stands for default integer type
@@ -85,9 +89,17 @@ module defs_basis
 ! it makes the code more readable and easier to change.
 
 !Default values
- integer, parameter :: std_in=5,ab_in=5
- integer, parameter :: std_out_default=6,ab_out_default=7
+ !integer, parameter :: std_in = input_unit
+ !integer, parameter :: ab_in = input_unit
+ !integer, parameter :: std_out_default = output_unit
+ !integer, parameter :: ab_out_default=7
+ !integer, parameter :: std_err = error_unit
+ integer, parameter :: std_in=5
+ integer, parameter :: ab_in=5
+ integer, parameter :: std_out_default=6
+ integer, parameter :: ab_out_default=7    ! TODO: This should be initialized at run-time.
  integer, parameter :: std_err=0
+
  integer, parameter :: dev_null=-1       ! Fake unit number used to skip the printing in wrtout.
  integer, parameter :: ab_xml_out = 50   ! this unit is used to print output into an XML file
  integer, parameter :: tmp_unit=9,tmp_unit2=10

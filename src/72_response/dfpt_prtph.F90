@@ -98,81 +98,91 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
  end if
 
 !write the phonon frequencies on unit std_out
- write(std_out,'(a)' )' '
- write(std_out,'(a,a)' )' phonon wavelength (reduced coordinates) , ','norm, and energies in hartree'
+ write(message,'(4a)' )' ',ch10,&
+& ' phonon wavelength (reduced coordinates) , ','norm, and energies in hartree'
+ call wrtout(std_out,message,'COLL')
 
 !The next format should be rewritten
- write(std_out,'(a,4f5.2)' )' ',(qphon(i),i=1,3),qphnrm
+ write(message,'(a,4f5.2)' )' ',(qphon(i),i=1,3),qphnrm
+ call wrtout(std_out,message,'COLL')
  do jj=1,3*natom,5
    if (3*natom-jj<5) then
-     write(std_out,'(5es17.9)') (phfrq(ii),ii=jj,3*natom)
+     write(message,'(5es17.9)') (phfrq(ii),ii=jj,3*natom)
    else
-     write(std_out,'(5es17.9)') (phfrq(ii),ii=jj,jj+4)
+     write(message,'(5es17.9)') (phfrq(ii),ii=jj,jj+4)
    end if
+   call wrtout(std_out,message,'COLL')
  end do
- write(std_out,'(a,es17.9)')' Zero Point Motion energy (sum of freqs/2)=',sum(phfrq(1:3*natom))/2
+ write(message,'(a,es17.9)')' Zero Point Motion energy (sum of freqs/2)=',sum(phfrq(1:3*natom))/2
+ call wrtout(std_out,message,'COLL')
 
 !Put the wavevector in nice format
  if(iout>=0)then
-   write(iout, '(a)' )' '
+   call wrtout(iout,' ','COLL')
    if(qphnrm/=0.0_dp)then
-     write(iout, '(a,3f9.5)' )&
+     write(message, '(a,3f9.5)' )&
 &     '  Phonon wavevector (reduced coordinates) :',(qphon(i)/qphnrm+tol10,i=1,3)
    else
-     write(iout, '(a,/,a,3f9.5)' )&
-&     '  Phonon at Gamma, with non-analyticity in the',&
+     write(message, '(3a,3f9.5)' )&
+&     '  Phonon at Gamma, with non-analyticity in the',ch10,&
 &     '  direction (cartesian coordinates)',qphon(1:3)+tol10
    end if
-
+   call wrtout(iout,message,'COLL')
+   
 !  Write it, in different units.
    if(enunit/=1)then
      write(iout, '(a)' )' Phonon energies in Hartree :'
      do jj=1,3*natom,5
        if (3*natom-jj<5) then
-         write(iout, '(1x,5es14.6)') (phfrq(ii),ii=jj,3*natom)
+         write(message, '(1x,5es14.6)') (phfrq(ii),ii=jj,3*natom)
        else
-         write(iout, '(1x,5es14.6)') (phfrq(ii),ii=jj,jj+4)
+         write(message, '(1x,5es14.6)') (phfrq(ii),ii=jj,jj+4)
        end if
+       call wrtout(iout,message,'COLL')
      end do
    end if
    if(enunit/=0)then
      write(iout, '(a)' )' Phonon energies in meV     :'
      do jj=1,3*natom,5
        if (3*natom-jj<5) then
-         write(iout, '("-",5es14.6)') (phfrq(ii)*Ha_eV*1.0d3,ii=jj,3*natom)
+         write(message, '("-",5es14.6)') (phfrq(ii)*Ha_eV*1.0d3,ii=jj,3*natom)
        else
-         write(iout, '("-",5es14.6)') (phfrq(ii)*Ha_eV*1.0d3,ii=jj,jj+4)
+         write(message, '("-",5es14.6)') (phfrq(ii)*Ha_eV*1.0d3,ii=jj,jj+4)
        end if
+       call wrtout(iout,message,'COLL')
      end do
    end if
    if(enunit/=1)then
      write(iout, '(a)' )' Phonon frequencies in cm-1    :'
      do jj=1,3*natom,5
        if (3*natom-jj<5) then
-         write(iout, '("-",5es14.6)') (phfrq(ii)*Ha_cmm1,ii=jj,3*natom)
+         write(message, '("-",5es14.6)') (phfrq(ii)*Ha_cmm1,ii=jj,3*natom)
        else
-         write(iout, '("-",5es14.6)') (phfrq(ii)*Ha_cmm1,ii=jj,jj+4)
+         write(message, '("-",5es14.6)') (phfrq(ii)*Ha_cmm1,ii=jj,jj+4)
        end if
+       call wrtout(iout,message,'COLL')
      end do
    end if
    if(enunit/=0)then
      write(iout, '(a)' )' Phonon frequencies in Thz     :'
      do jj=1,3*natom,5
        if (3*natom-jj<5) then
-         write(iout, '("-",5es14.6)') (phfrq(ii)*Ha_THz,ii=jj,3*natom)
+         write(message, '("-",5es14.6)') (phfrq(ii)*Ha_THz,ii=jj,3*natom)
        else
-         write(iout, '("-",5es14.6)') (phfrq(ii)*Ha_THz,ii=jj,jj+4)
+         write(message, '("-",5es14.6)') (phfrq(ii)*Ha_THz,ii=jj,jj+4)
        end if
+       call wrtout(iout,message,'COLL')
      end do
    end if
    if(enunit/=0.and.enunit/=1)then
      write(iout, '(a)' )' Phonon energies in Kelvin  :'
      do jj=1,3*natom,5
        if (3*natom-jj<5) then
-         write(iout, '("-",5es14.6)') (phfrq(ii)/kb_HaK,ii=jj,3*natom)
+         write(message, '("-",5es14.6)') (phfrq(ii)/kb_HaK,ii=jj,3*natom)
        else
-         write(iout, '("-",5es14.6)') (phfrq(ii)/kb_HaK,ii=jj,jj+4)
+         write(message, '("-",5es14.6)') (phfrq(ii)/kb_HaK,ii=jj,jj+4)
        end if
+       call wrtout(iout,message,'COLL')
      end do
    end if
  end if
@@ -206,18 +216,21 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
    end do
 
    do imode=1,3*natom
-     write(std_out,'(a,i4,a,es16.6)' )'  Mode number ',imode,'   Energy',phfrq(imode)
+     write(message,'(a,i4,a,es16.6)' )'  Mode number ',imode,'   Energy',phfrq(imode)
+     call wrtout(std_out,message,'COLL')
      if(iout>=0)then
-       write(iout, '(a,i4,a,es16.6)' )'  Mode number ',imode,'   Energy',phfrq(imode)
+       write(message, '(a,i4,a,es16.6)' )'  Mode number ',imode,'   Energy',phfrq(imode)
+       call wrtout(iout,message,'COLL')
      end if
      tolerance=1.0d-7
      if(abs(phfrq(imode))<1.0d-5)tolerance=2.0d-7
      if(phfrq(imode)<1.0d-5)then
-       write(std_out,'(a)' )' Attention : low frequency mode.'
-       write(std_out,'(a)' )'   (Could be unstable or acoustic mode)'
+       write(message,'(3a)' )' Attention : low frequency mode.',ch10,&
+&                           '   (Could be unstable or acoustic mode)'
+       call wrtout(std_out,message,'COLL')
        if(iout>=0)then
-         write(iout, '(a)' )' Attention : low frequency mode.'
-         write(iout, '(a)' )'   (Could be unstable or acoustic mode)'
+         write(iout, '(3a)' )' Attention : low frequency mode.',ch10,&
+&                            '   (Could be unstable or acoustic mode)'
        end if
      end if
      do ii=1,natom
@@ -227,11 +240,12 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
          vecti(idir)=displ(2,idir+(ii-1)*3,imode)
          if(abs(vecti(idir))<tolerance)vecti(idir)=0.0_dp
        end do
-       write(std_out,'(i4,3es16.8)' ) ii,vectr(:)
-       write(std_out,'(4x,3es16.8)' )    vecti(:)
+       write(message,'(i4,3es16.8,a,4x,3es16.8)' ) ii,vectr(:),ch10,vecti(:)
+       call wrtout(std_out,message,'COLL')
        if(iout>=0)then
-         write(iout,'(a,i3,3es16.8)') metacharacter(imode),ii,vectr(:)
-         write(iout,'(a,3x,3es16.8)') metacharacter(imode),   vecti(:)
+         write(message,'(a,i3,3es16.8,2a,3x,3es16.8)') metacharacter(imode),ii,vectr(:),ch10,&
+&                                                      metacharacter(imode),   vecti(:)
+         call wrtout(iout,message,'COLL')
        end if
      end do
    end do

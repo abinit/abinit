@@ -18,7 +18,7 @@
 !!  inf_rmet=define the  infinitesimal metric : rprimd*(transpose(rprimd)) divided by the number of discretisation point
 !!  inf_ucvol=volume of infinitesimal cell
 !!  mult=variance of the Gaussian (=rtrotter/beta)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  ngfft=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
 !!  nfft=total number of fft grid points
 !!  debug_rec=debugging variable
@@ -45,11 +45,10 @@
 #include "abi_common.h"
 
 subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
-
- use m_profiling_abi
  
  use defs_basis
  use defs_abitypes
+ use m_profiling_abi
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -66,7 +65,7 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 !scalars
  integer,intent(in) :: nfft
  real(dp),intent(in) :: inf_ucvol,mult
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: inf_rmet(3,3)
@@ -83,14 +82,6 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
  real(dp),allocatable :: T_p(:)
 
 ! *************************************************************************
- 
-!Statement functions are obsolete
-! dsq(ii,jj,kk)=inf_rmet(1,1)*(dble(ii))**2&
-!& +inf_rmet(2,2)*(dble(jj**2))&
-!& +inf_rmet(3,3)*(dble(kk**2))&
-!& +two*(inf_rmet(1,2)*dble(ii*jj)&
-!& +inf_rmet(2,3)*dble(jj*kk)&
-!& +inf_rmet(3,1)*dble(kk*ii))
  
  call timab(603,1,tsec)
  
@@ -169,9 +160,9 @@ subroutine green_kernel(ZT_p,inf_rmet,inf_ucvol,mult,mpi_enreg,ngfft,nfft)
 #define ABI_FUNC 'dsq_green'
 !End of the abilint section
 
-   integer :: ii,jj,kk
    real(dp) :: dsq_green
-   real(dp) :: inf_rmet(3,3)
+   integer,intent(in) :: ii,jj,kk
+   real(dp),intent(in) :: inf_rmet(3,3)
    dsq_green= inf_rmet(1,1)*dble(ii**2)&
 &   +inf_rmet(2,2)*dble(jj**2)&
 &   +inf_rmet(3,3)*dble(kk**2)&

@@ -39,16 +39,11 @@ module m_fstab
 #endif
 
  use m_time,           only : cwtime
- use m_fstrings,       only : toupper, itoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, wrap2_pmhalf, simpson_int, simpson, bisect, mkherm
- use m_io_tools,       only : open_file
- use m_geometry,       only : phdispl_cart2red
+ use m_fstrings,       only : itoa, sjoin
+ use m_numeric_tools,  only : bisect
  use defs_datatypes,   only : ebands_t
  use m_crystal,        only : crystal_t
- use m_crystal_io,     only : crystal_ncwrite
- use m_bz_mesh,        only : isamek, make_path
  use m_special_funcs,  only : dirac_delta
-
 
  implicit none
 
@@ -78,12 +73,13 @@ module m_fstab
 
    integer :: maxnb
    ! Max number of bands on the FS.
+   ! TODO: Maybe maxnbfs
 
    ! real(dp) :: fermie
    ! Fermi energy
 
    integer :: integ_method
-   ! Integration method
+   ! Integration method. 1 for gaussian, 2 for tetrahedra
 
    integer :: nsig
    ! Number of smearing values used for Gaussian integration
@@ -138,7 +134,7 @@ module m_fstab
 
 !----------------------------------------------------------------------
 
-contains  !=========================================================================================================================
+contains  !============================================================
 !!***
 
 !!****f* m_fstab/fstab_free
@@ -153,8 +149,10 @@ contains  !=====================================================================
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_phgamma
 !!
 !! CHILDREN
+!!      wrtout
 !!
 !! SOURCE
 
@@ -229,19 +227,10 @@ end subroutine fstab_free
 !!  then k-points contributing to FS integral are selected according to some threshold.
 !!
 !! PARENTS
-!!      m_fstab
+!!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_solve_gap,a2fw_write,cg_rotate,cwtime
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
-!!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
-!!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
-!!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
-!!      ngfft_seq,pawcprj_free,phdispl_cart2red,phgamma_finalize,phgamma_free
-!!      phgamma_init,phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free
-!!      wfd_init,wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work
-!!      xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 
@@ -596,19 +585,10 @@ end function fstab_findkg0
 !!   wtk(fs%nsig,fs%maxnb)=Weights for FS integration.
 !!
 !! PARENTS
-!!      m_fstab
+!!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_solve_gap,a2fw_write,cg_rotate,cwtime
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
-!!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
-!!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
-!!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
-!!      ngfft_seq,pawcprj_free,phdispl_cart2red,phgamma_finalize,phgamma_free
-!!      phgamma_init,phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free
-!!      wfd_init,wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work
-!!      xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 
@@ -686,19 +666,10 @@ end subroutine fstab_weights_ibz
 !!  Only printing.
 !!
 !! PARENTS
-!!      m_fstab
+!!      m_phgamma
 !!
 !! CHILDREN
-!!      a2fw_free,a2fw_init,a2fw_solve_gap,a2fw_write,cg_rotate,cwtime
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g,dvdb_ftinterp_qpt
-!!      dvdb_ftinterp_setup,dvdb_open_read,dvdb_readsym_allv1,fstab_free
-!!      fstab_init,fstab_print,fstab_weights_ibz,gam_mult_displ,get_kg,getgh1c
-!!      getgh1c_setup,getph,ifc_fourq,init_hamiltonian,init_rf_hamiltonian
-!!      listkk,littlegroup_q,load_spin_hamiltonian,load_spin_rf_hamiltonian
-!!      ngfft_seq,pawcprj_free,phdispl_cart2red,phgamma_finalize,phgamma_free
-!!      phgamma_init,phgamma_linwid,rf_transgrid_and_pack,wfd_copy_cg,wfd_free
-!!      wfd_init,wfd_print,wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work
-!!      xmpi_sum
+!!      wrtout
 !!
 !! SOURCE
 

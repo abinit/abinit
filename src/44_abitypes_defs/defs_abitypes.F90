@@ -228,6 +228,7 @@ type dataset_type
  integer :: efmas_n_dirs
  integer :: efmas_ntheta
  integer :: enunit
+ integer :: eph_task
  integer :: exchn2n3d
  integer :: extrapwf
  integer :: fftgw
@@ -492,6 +493,7 @@ type dataset_type
  integer :: prtnest
  integer :: prtpmp
  integer :: prtposcar
+ integer :: prtphdos
  integer :: prtpot
  integer :: prtpsps=0
  integer :: prtspcur
@@ -703,6 +705,7 @@ type dataset_type
  real(dp) :: postoldfe
  real(dp) :: postoldff
  real(dp) :: ppmfrq
+ real(dp) :: pw_unbal_thresh
  real(dp) :: ratsph_extra
  real(dp) :: recrcut
  real(dp) :: recefermi
@@ -896,6 +899,7 @@ type dataset_type
  real(dp) :: ph_wstep
  real(dp) :: ph_smear
  integer :: ddb_ngqpt(3)
+ real(dp) :: ddb_shiftq(3)
 !END EPH
 
  end type dataset_type
@@ -1113,6 +1117,9 @@ type dataset_type
 
    integer, allocatable :: my_kpttab(:)
     ! Indicates the correspondence between the ikpt and ikpt_this_proc
+
+   real(dp) :: pw_unbal_thresh
+    !Threshold (in %) activating the plane-wave load balancing process (see kpgsph routine)
 
 ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! This is for the parallelisation over kpt/nsppol in the Berry Phase case

@@ -1,26 +1,26 @@
 #Input file for 'band2eps.' This data layout must be used, line-by-line.
     #number of atoms in a cell :
-2
+natom 2
     #minimum value, maximum value and number of tics of the vertical axe :
-0.0  400.0  8
+min 0.0 max 400.0 ngrad 8
     #Units : 1 for cm-1, 2 for THz :
-1
+cunit 1
     #Number of lines :
-7
+nlines 7
     #Description of the points in q space :
-gamma  K  X  gamma  L  X  W  L  
+qpoint_name gamma  K  X  gamma  L  X  W  L  
     #Number of q points for each line :
-10  10  10  10  10  10  10
+nqline 10  10  10  10  10  10  11
     #Scale factor for each line :
-1.06066017  0.35355339  1.0  0.86602540  0.86602540  0.5  0.70710678
+scale 1.06066017  0.35355339  1.0  0.86602540  0.86602540  0.5  0.70710678
     #COLOR DEFINITION :
     #put 1 in place of the atom you want to be colored in 
     #red
-0 0
+red 0 0
     #green
-0 0
+green 0 0
     #blue
-0 0
+blue 0 0
 
 
 ## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r

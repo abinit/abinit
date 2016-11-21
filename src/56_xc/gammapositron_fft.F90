@@ -22,7 +22,7 @@
 !!     2:  Boronski and Nieminen, RPA limit [1]
 !!     3:  Sterne and Kaiser [2]
 !!     4:  Puska, Seitsonen and Nieminen [3]
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
 !!  nfft=number of FFT grid points
 !!  ngfft(18)=contain all needed information about 3D FFT
@@ -76,7 +76,7 @@ subroutine gammapositron_fft(electronpositron,gamma,gprimd,igamma,mpi_enreg,&
 !scalars
  integer,intent(in) :: igamma,n3xccc,nfft
  type(electronpositron_type),pointer :: electronpositron
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: gprimd(3,3),rhor_e(nfft),rhor_p(nfft),xccc3d(n3xccc)

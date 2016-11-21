@@ -26,7 +26,7 @@
 !!  mband_cprj=maximum number of bands used in the dimensioning of cprj array (usually mband/nproc_band)
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mkmem =number of k points treated by this node.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell
 !!  nband=number of bands for all k points
 !!  nkpt=number of k points
@@ -99,7 +99,7 @@
 !scalars
  integer,intent(in) :: kptopt,mband,mband_cprj,mcprj,mkmem,natom,nkpt,nspinor,nsppol
  integer,intent(in) :: paral_kgb,pawprtvol,unpaw,usewvl
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: atindx(natom),atindx1(natom),dimcprj(natom),istwfk(nkpt)
  integer,intent(in) :: nband(nkpt*nsppol)
@@ -151,7 +151,7 @@
 !Check if cprj is distributed over bands
  nprocband=(mband/mband_cprj)
  if (paral_kgb==1.and.nprocband/=mpi_enreg%nproc_band) then
-   msg=' mband/mband_cprj must be equal to mband !'
+   msg=' mband/mband_cprj must be equal to nproc_band!'
    MSG_BUG(msg)
  end if
  if (paw_dmft%use_sc_dmft/=0.and.nprocband/=1) then

@@ -23,7 +23,7 @@
 !!  eigen1 = response function 1st order eigenvalue matrix
 !!
 !! PARENTS
-!!      read_el_veloc
+!!      m_ddk,read_el_veloc
 !!
 !! CHILDREN
 !!      hdr_fort_read,hdr_free,wrtout

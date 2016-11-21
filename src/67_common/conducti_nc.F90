@@ -112,7 +112,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
 !Arguments -----------------------------------
 !scalars
  character(len=fnlen) :: filnam,filnam_out
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 
 !Local variables-------------------------------
 !scalars

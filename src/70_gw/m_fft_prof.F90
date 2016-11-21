@@ -31,6 +31,7 @@ MODULE m_FFT_prof
  use m_time,           only : cwtime
  use m_io_tools,       only : open_file
  use m_blas,           only : xcopy
+ use m_cgtools,        only : set_istwfk
  use m_fftcore,        only : get_kg, print_ngfft, fftalg_info
  use m_fft_mesh,       only : calc_eigr, calc_ceigr
  use m_mpinfo,         only : nullify_mpi_enreg, destroy_mpi_enreg, copy_mpi_enreg
@@ -188,7 +189,6 @@ subroutine fft_test_init(Ftest,fft_setup,kpoint,ecut,boxcutmin,rprimd,nsym,symre
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fft_test_init'
- use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_52_fft_mpi_noabirule
  use interfaces_53_ffts
@@ -201,7 +201,7 @@ subroutine fft_test_init(Ftest,fft_setup,kpoint,ecut,boxcutmin,rprimd,nsym,symre
  integer,intent(in) :: nsym
  real(dp),intent(in) :: ecut,boxcutmin
  type(FFT_test_t),intent(inout) :: Ftest
- type(MPI_type),intent(inout) :: MPI_enreg_in
+ type(MPI_type),intent(in) :: MPI_enreg_in
 !arrays
  integer,intent(in) :: fft_setup(5),symrel(3,3,nsym)
  real(dp),intent(in) :: kpoint(3),rprimd(3,3)
@@ -1850,7 +1850,7 @@ subroutine prof_fourdp(fft_setups,isign,cplex,necut,ecut_arth,boxcutmin,rprimd,n
 !scalars
  integer,intent(in) :: nsym,isign,cplex,necut
  real(dp),intent(in) :: boxcutmin
- type(MPI_type),intent(inout) :: MPI_enreg_in
+ type(MPI_type),intent(in) :: MPI_enreg_in
 !arrays
  integer,intent(in) :: fft_setups(:,:),symrel(3,3,nsym)
  real(dp),intent(in) :: ecut_arth(2)
@@ -1956,7 +1956,6 @@ subroutine prof_fourwf(fft_setups,cplex,option,kpoint,necut,ecut_arth,boxcutmin,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'prof_fourwf'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -1965,7 +1964,7 @@ subroutine prof_fourwf(fft_setups,cplex,option,kpoint,necut,ecut_arth,boxcutmin,
 !scalars
  integer,intent(in) :: nsym,cplex,necut,option
  real(dp),intent(in) :: boxcutmin
- type(MPI_type),intent(inout) :: MPI_enreg_in
+ type(MPI_type),intent(in) :: MPI_enreg_in
 !arrays
  integer,intent(in) :: fft_setups(:,:),symrel(3,3,nsym)
  real(dp),intent(in) :: ecut_arth(2)
@@ -2080,7 +2079,7 @@ subroutine prof_rhotwg(fft_setups,map2sphere,use_padfft,necut,ecut_arth,osc_ecut
 !scalars
  integer,intent(in) :: nsym,necut,map2sphere,use_padfft
  real(dp),intent(in) :: boxcutmin,osc_ecut
- type(MPI_type),intent(inout) :: MPI_enreg_in
+ type(MPI_type),intent(in) :: MPI_enreg_in
 !arrays
  integer,intent(in) :: fft_setups(:,:),symrel(3,3,nsym)
  real(dp),intent(in) :: ecut_arth(2)

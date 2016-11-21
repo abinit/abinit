@@ -80,8 +80,13 @@ def mpicfg_parser(fname, defaults=None):
 
     return d
 
+#NB: Pickle fail if JobRunnerError inherits from Exception
+# so we inherit from object. This should represents a serious problem 
+# because we never catch JobRunner Exceptions. This object is mainly
+# used to store info about the exception in JobRunner exceptions (see run method)
 
-class JobRunnerError(Exception):
+class JobRunnerError(object):
+#class JobRunnerError(Exception):
     """Exceptions raised by `Jobrunner`."""
 
     def __init__(self, return_code, cmd, run_etime, prev_errmsg=None):
@@ -93,7 +98,7 @@ class JobRunnerError(Exception):
             prev_errmsg: Previous error message.
         """
         # This is needed for pickle
-        super(JobRunnerError, self).__init__()
+        #super(JobRunnerError, self).__init__("jobrunner error")
         self.return_code = return_code
         self.cmd = cmd
         self.run_etime = run_etime
@@ -106,10 +111,24 @@ class JobRunnerError(Exception):
 
         return string
 
+    #def __getstate__(self):
+    #    """
+    #    Return state is pickled as the contents for the instance.
+    #    """
+    #    print("in getstate")
+    #    return {k: getattr(self, k) for k in ("return_code", "cmd", "run_etime", "prev_errmsg")}
+
+    #def __setstate__(self, state):
+    #    print("in setstate")
+    #    self.return_code = state["return_code"]
+    #    self.cmd = state["cmd"]
+    #    self.run_etime = state["run_etime"]
+    #    self.prev_errmsg = state["prev_errmsg"]
+
 
 class JobRunner(object):
     """Base Class used to manage the execution of jobs in an MPI environment."""
-    Error = JobRunnerError
+    #Error = JobRunnerError
 
     @classmethod
     def fromdict(cls, kwargs, ompenv=None, timebomb=None):
@@ -134,8 +153,19 @@ class JobRunner(object):
         return cls(dict(ompenv=ompenv, timebomb=timebomb))
 
     @classmethod
+    def srun(cls, ompenv=None, timebomb=None):
+        """
+        Build a `JobRunner` based on srun (assumes some default values).
+        """
+        d = dict(ompenv=ompenv, timebomb=timebomb)
+        d["mpirun_np"] = "srun -n"
+        return cls(d)
+
+    @classmethod
     def generic_mpi(cls, ompenv=None, use_mpiexec=False, timebomb=None):
-        """Build a simple `JobRunner` for MPI runs (assumes some default values)."""
+        """
+        Build a `JobRunner` for MPI jobs (assumes some default values).
+        """
         # It should work, provided that the shell environment is properly defined.
         d = dict(ompenv=ompenv, timebomb=timebomb)
 
@@ -143,7 +173,6 @@ class JobRunner(object):
             d["mpirun_np"] = "mpiexec -np"
         else:
             d["mpirun_np"] = "mpirun -np"
-        #d["mpirun_extra_args"] = ""
 
         return cls(d)
 
@@ -157,8 +186,8 @@ class JobRunner(object):
             else:
                 raise ValueError("key %s is already in self.__dict__, cannot overwrite" % k)
 
-        if self.has_poe and self.has_mpirun:
-            raise ValueError("poe and mpirun are mutually exclusive")
+        if self.has_poe and (self.has_mpirun or self.has_srun):
+            raise ValueError("poe and (mpirun||srun) are mutually exclusive")
 
     def __str__(self):
         #return "\n".join([str(k) + " : " + str(v) for (k, v) in self.__dict__.items()] )
@@ -215,9 +244,15 @@ class JobRunner(object):
         return hasattr(self, "perf_command")
 
     @property
+    def has_srun(self):
+        """True if we are running with Slurm srun"""
+        return hasattr(self, "mpirun_np") and getattr(self, "mpirun_np") == "srun -n"
+
+    @property
     def has_mpirun(self):
         """True if we are running a MPI job with mpirun"""
-        return hasattr(self, "mpirun_np") and bool(getattr(self, "mpirun_np"))
+        return hasattr(self, "mpirun_np") and getattr(self, "mpirun_np") != "srun -n"
+
 
     @property
     def has_poe(self):
@@ -267,7 +302,7 @@ class JobRunner(object):
 
         # Build valgrind command line
         valcmd = ""
-        if self.has_valgrind: 
+        if self.has_valgrind:
             valcmd = "valgrind --tool=%s " % self.valgrind_cmdline
 
         # Perf command
@@ -275,14 +310,14 @@ class JobRunner(object):
         if self.has_perf:
             perf_cmd = "perf %s " % self.perf_command
 
-        if self.has_mpirun:
-            args = [perf_cmd, self.mpirun_np, str(mpi_nprocs), valcmd, bin_path, 
+        if self.has_mpirun or self.has_srun:
+            args = [perf_cmd, self.mpirun_np, str(mpi_nprocs), valcmd, bin_path,
                    "<", stdin_fname, ">", stdout_fname, "2>", stderr_fname]
 
         elif self.has_poe:
             # example ${poe} abinit ${poe_args} -procs 4
             # no support for valgrind, debugger or perf here since poe uses a weird syntax for command line options.
-            args = [self.poe, bin_path, self.poe_args, " -procs "+str(mpi_nprocs),
+            args = [self.poe, bin_path, self.poe_args, " -procs "+ str(mpi_nprocs),
                     " <", stdin_fname, ">", stdout_fname, "2>", stderr_fname]
         else:
             assert mpi_nprocs == 1
@@ -301,7 +336,7 @@ class JobRunner(object):
             fh.write("run < %s" % stdin_fname) # Use dbg syntax
             fh.close()
 
-            if self.has_mpirun:
+            if self.has_mpirun or self.has_srun:
                 args = [self.mpirun_np, str(mpi_nprocs), "xterm -e gdb", bin_path, "--command=%s" % dbg_filepath]
             else:
                 args = ["gdb", bin_path, "--command=%s" % dbg_filepath]
@@ -331,7 +366,7 @@ class JobRunner(object):
         except:
             run_etime = time.time() - start_time
             prev_errmsg = str(sys.exc_info()[1])
-            exc = JobRunnerError(self.retcode, " ".join(args), run_etime, prev_errmsg)
+            exc = JobRunnerError(self.retcode, " ".join(args), run_etime, prev_errmsg=prev_errmsg)
             self.exceptions.append(exc)
 
         return run_etime
@@ -341,9 +376,9 @@ class BaseValgrindParser(object):
     """
     Base class for parsers used to analyze the output of Valgrind
     Concrete classes must implement the methods:
-    
+
         parse(filename) to parse the content of filename
-    
+
 
     error_report
         string that evaluates to True if errors are found.
@@ -388,7 +423,7 @@ class MemcheckParser(BaseValgrindParser):
 
         lost_bytes = 0
         fh = open(filename, "r")
-                                                                                             
+
         for line in fh:
             if "LEAK SUMMARY:" in line: break
         else:
@@ -402,15 +437,15 @@ class MemcheckParser(BaseValgrindParser):
 
         # Inspect the next len(keys) line (memleak section)
         errors = {}
-        for key, line in zip(keys, fh): 
+        for key, line in zip(keys, fh):
             bytes = fragile_parser(key, line)
             if bytes:
                 errors[key] = bytes
 
         # Get total number of errors.
-        key = "ERROR SUMMARY:" 
+        key = "ERROR SUMMARY:"
         for line in fh:
-            if key in line: 
+            if key in line:
                 num_errors = fragile_parser(key, line)
                 if num_errors: errors[key] = num_errors
 
@@ -481,7 +516,7 @@ class TimeBomb(object):
 
 class OMPEnvironment(dict):
     """
-    OpenMP variables. 
+    OpenMP variables.
     see https://computing.llnl.gov/tutorials/openMP/#EnvironmentVariables
     """
     _keys = [
