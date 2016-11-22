@@ -57,15 +57,12 @@ dmft_rslf 0
 dmft_mxsf 0.7
 dmft_dc 1
 dmft_t2g 1   # special value for t2g only calculation.
-dmft_tolfreq 0.01
 
 # == CTQMC
 dmft_solv 7 # Rotationally invariant interaction with TRIQS/CTHYB Monte Carlo code.
 dmftqmc_l 201
 dmftqmc_n 3.d6
 dmftqmc_therm 10000
-dmftctqmc_triqs_nleg 10
-
 
 # == LDA+U
 usepawu     1  #  For density matrix printout.
@@ -86,12 +83,12 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 #%%                  t01.out,  tolnlines =2, tolabs =1.1e-06, tolrel = 2.0e-03, fld_options=-medium ;
 #%% psp_files = 23v.paw, 38sr.paw, 8o.2.paw
 #%% [paral_info]
-#%% nprocs_to_test = 8
-#%% max_nprocs = 8
-#%% [NCPU_8]
+#%% nprocs_to_test = 10
+#%% max_nprocs = 10
+#%% [NCPU_10]
 #%% files_to_test = 
-#%%   t99_MPI8.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
-#%%   t99_MPI8o_DS2_Legendre_coefficients.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium
+#%%   t99_MPI10.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t99_MPI10o_DS2_Legendre_coefficients.dat, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium
 #%% [extra_info]
 #%% authors = B. Amadon, V. Planes
 #%% keywords = PAW, DMFT, CTQMC, TRIQS

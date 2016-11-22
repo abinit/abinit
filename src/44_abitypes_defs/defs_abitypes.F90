@@ -212,7 +212,6 @@ type dataset_type
  integer :: dmftctqmc_mov
  integer :: dmftctqmc_mrka
  integer :: dmftctqmc_order
-! integer :: dmftctqmc_triqs_nleg
  integer :: dmftqmc_l
  integer :: dmftqmc_seed
  integer :: dmftqmc_therm
@@ -656,7 +655,6 @@ type dataset_type
  real(dp) :: diemixmag
  real(dp) :: dilatmx
  real(dp) :: dmft_mxsf
-! real(dp) :: dmft_tolfreq
  real(dp) :: dmft_tollc
  real(dp) :: dmftqmc_n
  real(dp) :: dosdeltae

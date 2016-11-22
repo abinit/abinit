@@ -57,15 +57,12 @@ dmft_rslf 0
 dmft_mxsf 0.7
 dmft_dc 1
 dmft_t2g 1   # special value for t2g only calculation.
-dmft_tolfreq 0.01
 
 # == CTQMC
 dmft_solv 7 # Rotationally invariant interaction with TRIQS/CTHYB Monte Carlo code.
 dmftqmc_l 201
 dmftqmc_n 5.d5
 dmftqmc_therm 10000
-dmftctqmc_triqs_nleg 10
-
 
 # == LDA+U
 usepawu     1  #  For density matrix printout.
