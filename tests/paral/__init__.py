@@ -66,5 +66,4 @@ inp_files = [
 "t97.in",
 "t98.in",
 "t99.in",
-#"-t99.in", # MPI-IO, not tested here!
 ]
