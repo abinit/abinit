@@ -323,6 +323,8 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      do iimage=1,nimage
        amass(:,iimage)=amu_emass*amu_img(dtset%typat(:),iimage)
      end do
+   else
+     ABI_ALLOCATE(amass,(0,0))
    end if
    do iimage=1,nimage
      hist(iimage)%isVUsed=is_pimd
@@ -331,7 +333,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      call xred2xcart(dtset%natom,rprimd,xcart,xred_img(:,:,iimage))
      call var2hist(acell_img(:,iimage),hist(iimage),dtset%natom,rprim_img(:,:,iimage),&
 &                  rprimd,xcart,xred_img(:,:,iimage),.FALSE.)
-     call vel2hist(amass,hist(iimage),dtset%natom,vel_img(:,:,iimage))
+     call vel2hist(amass(:,iimage),hist(iimage),vel_img(:,:,iimage))
    end do
  end if ! imgmov/=0
 
@@ -556,7 +558,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        call xred2xcart(dtset%natom,rprimd,xcart,res_img(iimage)%xred(:,:))
        call var2hist(res_img(iimage)%acell(:),hist(iimage),dtset%natom,&
 &           res_img(iimage)%rprim(:,:),rprimd,xcart,res_img(iimage)%xred(:,:),.FALSE.)
-       call vel2hist(amass,hist(iimage),dtset%natom,res_img(iimage)%vel(:,:))
+       call vel2hist(amass(:,iimage),hist(iimage),res_img(iimage)%vel(:,:))
        hist(iimage)%histE(ih)       =res_img(iimage)%results_gs%etotal
        hist(iimage)%histEnt(ih)     =res_img(iimage)%results_gs%energies%entropy
        hist(iimage)%histXF(:,:,3,ih)=res_img(iimage)%results_gs%fcart(:,:)

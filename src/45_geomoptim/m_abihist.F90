@@ -890,8 +890,7 @@ end subroutine hist2var
 !! The array of velocities and Kinetic Energy
 !!
 !! INPUTS
-!! amass = mass of the atoms
-!! natom = number of atoms
+!! amass(natom) = mass of the atoms
 !! vel(3,natom)= Velocities of the atoms
 !!
 !! OUTPUT
@@ -907,7 +906,7 @@ end subroutine hist2var
 !!
 !! SOURCE
 
-subroutine vel2hist(amass,hist,natom,vel)
+subroutine vel2hist(amass,hist,vel)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -920,34 +919,36 @@ subroutine vel2hist(amass,hist,natom,vel)
 
 !Arguments ------------------------------------
 !scalars
-integer,intent(in) :: natom
 type(abihist),intent(inout) :: hist
 !arrays
-real(dp),intent(in) :: vel(3,natom)
-real(dp),intent(in) :: amass(natom)
+real(dp),intent(in) :: vel(:,:)
+real(dp),intent(in) :: amass(:)
 
 !Local variables-------------------------------
 !scalars
-integer :: ii,jj
+integer :: ii,jj,natom
 real(dp) :: ekin
 
 ! *************************************************************
 
-!Store the velocities
- if (hist%isVused) then
-   hist%histV(:,:,hist%ihist)=vel(:,:)
- else
-   hist%histV(:,:,hist%ihist)=zero
- end if
+ natom=size(vel,2)
 
-!Compute the Ionic Kinetic energy
- ekin=zero
  if (hist%isVused) then
+
+!  Store the velocities
+   hist%histV(:,:,hist%ihist)=vel(:,:)
+
+!  Compute the Ionic Kinetic energy
+   ekin=zero
    do ii=1,natom
      do jj=1,3
        ekin=ekin+0.5_dp*amass(ii)*vel(jj,ii)**2
      end do
    end do
+
+ else
+   hist%histV(:,:,hist%ihist)=zero
+  ekin=zero
  end if
 
 !Store the Ionic Kinetic Energy

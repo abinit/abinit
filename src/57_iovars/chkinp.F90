@@ -232,7 +232,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  berryopt
 !  berryopt must be between -3 to +4, 6,7,14,16,17
    call chkint_eq(0,0,cond_string,cond_values,ierr,&
-&   'berryopt',dt%berryopt,13,(/-3,-2,-1,0,1,2,3,4,6,7,14,16,17/),iout)   
+&   'berryopt',dt%berryopt,13,(/-3,-2,-1,0,1,2,3,4,6,7,14,16,17/),iout)
 !  berryopt must be positive when mkmem==0
    if(dt%mkmem==0)then
      cond_string(1)='mkmem' ; cond_values(1)=dt%mkmem
@@ -251,15 +251,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      cond_string(3)='tolrff' ; cond_values(3)=dt%tolrff
      cond_string(4)='tolvrs' ; cond_values(4)=dt%tolvrs
      call chkint_ne(4,4,cond_string,cond_values,ierr,'berryopt',dt%berryopt,1,(/4/),iout)
-     cond_string(1)='toldfe' ; cond_string(2)='toldff' ; cond_string(3)='tolrff' ; cond_string(4)='tolvrs' 
+     cond_string(1)='toldfe' ; cond_string(2)='toldff' ; cond_string(3)='tolrff' ; cond_string(4)='tolvrs'
      call chkint_ne(4,4,cond_string,cond_values,ierr,'berryopt',dt%berryopt,1,(/6/),iout)
-     cond_string(1)='toldfe' ; cond_string(2)='toldff' ; cond_string(3)='tolrff' ; cond_string(4)='tolvrs' 
+     cond_string(1)='toldfe' ; cond_string(2)='toldff' ; cond_string(3)='tolrff' ; cond_string(4)='tolvrs'
      call chkint_ne(4,4,cond_string,cond_values,ierr,'berryopt',dt%berryopt,1,(/7/),iout)
-     cond_string(1)='toldfe' ; cond_string(2)='toldff' ; cond_string(3)='tolrff' ; cond_string(4)='tolvrs' 
+     cond_string(1)='toldfe' ; cond_string(2)='toldff' ; cond_string(3)='tolrff' ; cond_string(4)='tolvrs'
      call chkint_ne(4,4,cond_string,cond_values,ierr,'berryopt',dt%berryopt,1,(/14/),iout)
-     cond_string(1)='toldfe' ; cond_string(2)='toldff' ; cond_string(3)='tolrff' ; cond_string(4)='tolvrs' 
+     cond_string(1)='toldfe' ; cond_string(2)='toldff' ; cond_string(3)='tolrff' ; cond_string(4)='tolvrs'
      call chkint_ne(4,4,cond_string,cond_values,ierr,'berryopt',dt%berryopt,1,(/16/),iout)
-     cond_string(1)='toldfe' ; cond_string(2)='toldff' ; cond_string(3)='tolrff' ; cond_string(4)='tolvrs' 
+     cond_string(1)='toldfe' ; cond_string(2)='toldff' ; cond_string(3)='tolrff' ; cond_string(4)='tolvrs'
      call chkint_ne(4,4,cond_string,cond_values,ierr,'berryopt',dt%berryopt,1,(/17/),iout)
    end if
 !  Non-zero berryopt and usepaw==1 cannot be done unless response==0
@@ -618,11 +618,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
    if ( ANY(optdriver==(/RUNL_SCREENING, RUNL_SIGMA/)) ) then
-!    
+!
 !    Check for GW calculations that are not implemented.
      !cond_string(1)='optdriver' ; cond_values(1)=optdriver
      !call chkint_eq(1,1,cond_string,cond_values,ierr,'nspinor',dt%nspinor,1,(/1/),iout)
-!    
+!
 !    Avoid wasting CPUs if nsppol==2.
      if (dt%nsppol==2.and..not.iseven(nproc).and.nproc>1) then
        write(msg,'(3a)') "Spin-polarized GW calculations should be run with an even number of processors ",ch10,&
@@ -654,13 +654,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      end if
    end if
 
-!  efmas  
+!  efmas
    if(optdriver==RUNL_RESPFN) then !.and.usepaw==1)then
      cond_string(1)='optdriver' ; cond_values(1)=1
      cond_string(2)='usepaw'    ; cond_values(2)=0 !usepaw
      cond_string(3)='ieig2rf'   ; cond_values(3)=1
      cond_string(4)='nsym'      ; cond_values(4)=1
-     !cond_string(5)='useylm'    ; cond_values(5)=1 
+     !cond_string(5)='useylm'    ; cond_values(5)=1
      call chkint_eq(1,4,cond_string,cond_values,ierr,'efmas',dt%efmas,2,(/0,1/),iout)
      if (dt%paral_rf==1) then
        cond_string(1)='paral_rf' ; cond_values(1)=1
@@ -688,7 +688,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      call chkint_eq(0,0,cond_string,cond_values,ierr,'efmas_dim',dt%efmas_dim,3,(/1,2,3/),iout)
    end if
 
-!  efmas_n_dirs 
+!  efmas_n_dirs
    if(dt%efmas==1) then
      call chkint_ge(0,0,cond_string,cond_values,ierr,'efmas_n_dirs',dt%efmas_n_dirs,0,iout)
    end if
@@ -839,7 +839,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    call chkint_ge(0,0,cond_string,cond_values,ierr,'gwls_dielectric_model',dt%gwls_dielectric_model,1,iout)
    call chkint_le(0,0,cond_string,cond_values,ierr,'gwls_dielectric_model',dt%gwls_dielectric_model,3,iout)
 
-! gwls_model_parameter 
+! gwls_model_parameter
    call chkdpr(0,0,cond_string,cond_values,ierr,'gwls_model_parameter',dt%gwls_model_parameter,1,zero,iout)
 
 ! gwls_second_model_parameter
@@ -1501,7 +1501,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      call chkint_le(1,3,cond_string,cond_values,ierr,'nkpt',nkpt,50,iout)
    end if
 
-!  nloalg(1)= nloc_alg 
+!  nloalg(1)= nloc_alg
 !  Must be 2, 3, 4
    call chkint_eq(0,0,cond_string,cond_values,ierr,'nloc_alg',dt%nloalg(1),3,(/2,3,4/),iout)
 
@@ -2089,7 +2089,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
 !  pimd_constraint
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'pitransform',dt%pitransform,2,(/0,1/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'pimd_constraint',dt%pimd_constraint,2,(/0,1/),iout)
    if(dt%pimd_constraint==1.and.dt%nconeq>1 )then
      cond_string(1)='pimd_constraint' ; cond_values(1)=dt%pimd_constraint
 !    Make sure that nconeq=1
@@ -2524,13 +2524,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &         'Action: modify value of so_psp (old name : so_typat) or nspinor in input file.'
          MSG_ERROR_NOSTOP(message, ierr)
        end if
-!      If nspinor=2, the spin-orbit contribution should be present in the pseudopotentials, 
+!      If nspinor=2, the spin-orbit contribution should be present in the pseudopotentials,
 !      unless the user explicitly allows not to treat it.
        if ( nspinor==2 .and. dt%so_psp(ipsp)/=0 .and. pspheads(ipsp)%pspso==0 ) then
          write(message, '(a,i2,a,i3,9a)' )&
 &         'so_psp(',ipsp,') was input as',dt%so_psp(ipsp),', with nspinor=2 and usepaw=0.',ch10,&
 &         'This requires a treatment of the spin-orbit interaction. However, it has been detected ',ch10,&
-&         'that the pseudopotential that you want to use does not specify the spin-orbit coupling.',ch10,& 
+&         'that the pseudopotential that you want to use does not specify the spin-orbit coupling.',ch10,&
 &         'Action: choose a pseudopotential that contains information about the spin-orbit interaction,',ch10,&
 &         ' or deliberately switch off the spin-orbit interaction by setting so_psp=0 for that pseudopotential in the input file.'
          MSG_ERROR_NOSTOP(message, ierr)

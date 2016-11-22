@@ -437,7 +437,7 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
  call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,DEBUG)
 
 !Fill velocities and ionic kinetic energy
- call vel2hist(ab_mover%amass,hist,ab_mover%natom,vel)
+ call vel2hist(ab_mover%amass,hist,vel)
  hist%histT(hist%ihist)=0.0
 
 !Decide if prtxfase will be called
@@ -649,7 +649,7 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
        end if
 
 !      Fill velocities and ionic kinetic energy
-       call vel2hist(ab_mover%amass,hist,ab_mover%natom,vel)
+       call vel2hist(ab_mover%amass,hist,vel)
        hist%histE(hist%ihist)       =scfcv_args%results_gs%etotal
        hist%histEnt(hist%ihist)     =scfcv_args%results_gs%energies%entropy
        hist%histXF(:,:,3,hist%ihist)=scfcv_args%results_gs%fcart(:,:)
