@@ -107,7 +107,7 @@
 !!      bonds_lgth_angles,bound_deriv,calc_efg,calc_fc,calcdensph
 !!      compute_coeff_plowannier,crystal_free,crystal_init,datafordmft,denfgr
 !!      destroy_dmft,destroy_oper,destroy_plowannier
-!!      ebands_free,ebands_init,ebands_jdos,fftdatar_write,gaus_dos,init_dmft
+!!      ebands_free,ebands_init,ebands_jdos,fftdatar_write,init_dmft
 !!      init_oper,init_plowannier,ioarr,mag_constr_e,mlwfovlp,mlwfovlp_qp
 !!      multipoles_out,optics_paw,optics_paw_core,optics_vloc,out1dm,outkss
 !!      outwant,partial_dos_fractions,partial_dos_fractions_paw,pawmkaewf
@@ -171,7 +171,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft
  use m_numeric_tools,    only : simpson_int
- use m_epjdos,           only : tetrahedron, gaus_dos, &
+ use m_epjdos,           only : tetrahedron, &
                                 epjdos_t, epjdos_new, epjdos_free, prtfatbands, fatbands_ncwrite
 
 !This section has been created automatically by the script Abilint (TD).
@@ -841,10 +841,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !  Here, computation and output of DOS and partial DOS  _DOS
    if (dos%fatbands_flag == 0) then
      if (dos%prtdos /= 4) then
-       call tetrahedron(dos,dtset,crystal,ebands,dtfil%fnameabo_app_dos,spacecomm)
-     else
-!      this option is not documented in input variables: is it working?
-       if (me == master) call gaus_dos(dos, dtset, ebands, eigen, dtfil%fnameabo_app_dos)
+       call dos_calcnwrite(dos,dtset,crystal,ebands,dtfil%fnameabo_app_dos,spacecomm)
      end if
    end if
 
