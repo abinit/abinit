@@ -630,36 +630,40 @@ end if
        ! for extra atoms in vacuum need more precision
        frmt_extra = '(f11.5,1x,5(f20.16,1x),10x,5(f20.16,1x),10x,25(f20.16,1x))'
 
-       do iene=1,nene
-
-         do iat=1,natsph
-           i1 = (iat-1)*mbesslang+1; i2 = iat*mbesslang
-           if (prtdosm==0) then
+       do iat=1,natsph
+         i1 = (iat-1)*mbesslang+1; i2 = iat*mbesslang
+         if (prtdosm==0) then
+           do iene=1,nene
              write(unitdos_arr(iat), fmt=frmt) enemin + (iene-1)*deltaene, &
-&             min(total_dos(iene, i1:i2), dos_max), total_integ_dos(iene, i1:i2)
-           else
+&              min(total_dos(iene, i1:i2), dos_max), total_integ_dos(iene, i1:i2)
+           end do
+         else
+           do iene=1,nene
              write(unitdos_arr(iat), fmt=frmt) enemin + (iene-1)*deltaene, &
-&             min(total_dos(iene, i1:i2), dos_max),&
-&             total_integ_dos(iene, i1:i2),&
-&             min(total_dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2), dos_max)
-           end if
-         end do
+&              min(total_dos(iene, i1:i2), dos_max),&
+&              total_integ_dos(iene, i1:i2),&
+&              min(total_dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2), dos_max)
+           end do
+         end if
+       end do
 
-         ! Extra spheres.
-         do iat=natsph+1,natsph+natsph_extra
-           i1 = (iat-1)*mbesslang+1; i2 = iat*mbesslang
-           if (prtdosm==0) then
+       ! Extra spheres.
+       do iat=natsph+1,natsph+natsph_extra
+         i1 = (iat-1)*mbesslang+1; i2 = iat*mbesslang
+         if (prtdosm==0) then
+           do iene=1,nene
              write(unitdos_arr(iat), fmt=frmt_extra) enemin + (iene-1)*deltaene, &
 &             total_dos(iene, i1:i2), &
 &             total_integ_dos(iene, i1:i2)
-           else
+           end do
+         else
+           do iene=1,nene
              write(unitdos_arr(iat), fmt=frmt_extra) enemin + (iene-1)*deltaene, &
 &             total_dos(iene, i1:i2),&
 &             total_integ_dos(iene, i1:i2),&
 &             total_dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2)
-           end if
-         end do
-
+           end do
+         end if
        end do
 
      else
@@ -668,24 +672,26 @@ end if
        ! for extra atom spheres in vacuum need more precision
        frmt_extra = '(f11.5,1x,5(f20.16,1x),3(6x,5f20.16))'
 
-       do iene=1,nene
-         do iat=1,natsph
-           i1 = iat*5-4; i2 = iat*5
+       do iat=1,natsph
+         i1 = iat*5-4; i2 = iat*5
+         do iene=1,nene
            write(unitdos_arr(iat), fmt=frmt) enemin + (iene-1)*deltaene, &
 &           min(total_dos(iene, i1:i2), dos_max),&
 &           min(total_dos(iene,i1:i2) - total_dos_paw1(iene,i1:i2) + total_dos_pawt1(iene,i1:i2), dos_max),&
 &           min(total_dos_paw1(iene,i1:i2), dos_max),&
 &           min(total_dos_pawt1(iene,i1:i2), dos_max)
          end do
+       end do
 
-         ! Extra spheres.
-         do iat=natsph+1,natsph+natsph_extra
-           i1 = iat*5-4; i2 = iat*5
+       ! Extra spheres.
+       do iat=natsph+1,natsph+natsph_extra
+         i1 = iat*5-4; i2 = iat*5
+         do iene=1,nene
            write(unitdos_arr(iat), fmt=frmt_extra) enemin + (iene-1)*deltaene, &
-&           min(total_dos(iene,i1:i2), dos_max),&
-&           min(total_dos(iene,i1:i2) - total_dos_paw1(iene,i1:i2) + total_dos_pawt1(iene,i1:i2), dos_max),&
-&           min(total_dos_paw1(iene,i1:i2), dos_max),&
-&           min(total_dos_pawt1(iene,i1:i2), dos_max)
+&            min(total_dos(iene,i1:i2), dos_max),&
+&            min(total_dos(iene,i1:i2) - total_dos_paw1(iene,i1:i2) + total_dos_pawt1(iene,i1:i2), dos_max),&
+&            min(total_dos_paw1(iene,i1:i2), dos_max),&
+&            min(total_dos_pawt1(iene,i1:i2), dos_max)
          end do
        end do
      end if
