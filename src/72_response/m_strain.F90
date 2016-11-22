@@ -571,8 +571,8 @@ subroutine strain_print(strain)
 ! *************************************************************************
 
  if(strain%name == "reference") then 
-   write(message,'(a,a,a)') ch10,' no strain found:',&
-&  ' This structure is equivalent to the reference structure'
+   write(message,'(4a)') ch10,' no strain found:',&
+&  ' This structure is equivalent to the reference structure',ch10
    call wrtout(std_out,message,'COLL')
  else
    if(strain%name /= "") then 

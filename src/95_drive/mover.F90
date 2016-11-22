@@ -198,7 +198,7 @@ character(len=8) :: stat4xml
 character(len=35) :: fmt
 character(len=fnlen) :: filename
 real(dp) :: ucvol,favg
-logical :: DEBUG=.false.
+logical :: DEBUG=.FALSE.
 logical :: need_scfcv_cycle = .TRUE.
 logical :: change,useprtxfase
 logical :: skipcycle

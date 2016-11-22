@@ -63,6 +63,9 @@ module m_effective_potential
  public :: effective_potential_printPDOS
  public :: effective_potential_printSupercell
  public :: effective_potential_setCoeffs
+ public :: effective_potential_setStrainPhononCoupling
+ public :: effective_potential_setElastic3rd
+ public :: effective_potential_setElasticDispCoupling
  public :: effective_potential_writeAbiInput
  public :: effective_potential_writeXML
  public :: effective_potential_writeNETCDF
@@ -531,27 +534,24 @@ subroutine effective_potential_free(eff_pot)
 
   eff_pot%name   = ''
   eff_pot%energy = zero
-  eff_pot%strain%name = ""
-  eff_pot%strain%delta = zero
-  eff_pot%strain%direction = zero
-  eff_pot%strain%strain = zero
   eff_pot%internal_stress = zero
   eff_pot%external_stress = zero
   eff_pot%has_3rd = .false.
   eff_pot%has_strain = .false.
 
-  if(allocated(eff_pot%forces)) then
-    eff_pot%forces=zero
-    ABI_DEALLOCATE(eff_pot%forces)
-  end if
+   if(allocated(eff_pot%forces)) then
+     eff_pot%forces=zero
+     ABI_DEALLOCATE(eff_pot%forces)
+   end if
 
 
 ! Free others structures
-  call anharmonics_terms_free(eff_pot%anharmonics_terms)
-  call harmonics_terms_free(eff_pot%harmonics_terms)
-  call destroy_supercell(eff_pot%supercell)
-  call crystal_free(eff_pot%crystal)
-  call effective_potential_freempi_supercell(eff_pot)
+   call anharmonics_terms_free(eff_pot%anharmonics_terms)
+   call strain_free(eff_pot%strain)
+   call harmonics_terms_free(eff_pot%harmonics_terms)
+   call destroy_supercell(eff_pot%supercell)
+   call crystal_free(eff_pot%crystal)
+   call effective_potential_freempi_supercell(eff_pot)
 
 end subroutine effective_potential_free
 !!***
@@ -986,6 +986,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
 !  Compute total ifc
    ifc_tmp%atmfrc = ifc_tmp%short_atmfrc + ifc_tmp%ewald_atmfrc
 
+
 !  Copy ifc into effective potential
 !  !!!Warning eff_pot%harmonics_terms%ifcs only contains atmfrc,short_atmfrc,ewald_atmfrc,nrpt
 !    and cell!!  rcan,ifc%rpt,wghatm and other quantities
@@ -998,6 +999,7 @@ subroutine effective_potential_generateDipDip(eff_pot,n_cell,option,asr,comm)
    call alloc_copy(ifc_tmp%short_atmfrc,eff_pot%harmonics_terms%ifcs%short_atmfrc)
    call alloc_copy(ifc_tmp%ewald_atmfrc,eff_pot%harmonics_terms%ifcs%ewald_atmfrc)
    call alloc_copy(ifc_tmp%cell        ,eff_pot%harmonics_terms%ifcs%cell)
+
 !  Free temporary ifc
    call ifc_free(ifc_tmp)
  end if
@@ -1363,6 +1365,162 @@ subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
 
 end subroutine effective_potential_setCoeffs
 !!***
+
+!****f* m_effective_potential/effective_potential_setElastic3rd
+!!
+!! NAME
+!! effective_potential_setElastic3rd
+!!
+!! FUNCTION
+!! Set the 3rd order derivative of with respect to 3 strain
+!!
+!! INPUTS
+!! elastics = 3d order of elastics constant
+!!
+!! OUTPUT
+!! anharmonics = set the coefficient from the fited polynome 
+!!
+!!
+!! PARENTS
+!!   multibinit
+!!
+!! CHILDREN
+!!   wrtout
+!!
+!! SOURCE
+ 
+subroutine effective_potential_setElastic3rd(eff_pot,elastics)
+
+ use m_polynomial_coeff
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'effective_potential_setElastic3rd'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+!array
+  real(dp),intent(in) :: elastics(6,6,6)
+  type(effective_potential_type),intent(inout) :: eff_pot
+!Local variables-------------------------------
+!scalar
+!array
+! *************************************************************************
+  call anharmonics_terms_setElastic3rd(eff_pot%anharmonics_terms,elastics)
+
+end subroutine effective_potential_setElastic3rd
+!!***
+
+!****f* m_effective_potential/effective_potential_setStrainPhononCoupling
+!!
+!! NAME
+!! effective_potential_setStrainPhononCoupling
+!!
+!! FUNCTION
+!! Set the strain phonon coupling of  the effective_potential 
+!!
+!! INPUTS
+!! natom  = number of atoms
+!! ncoeff = number of coefficient
+!! nrpt   = number of rpt 
+!! strain_phonon = (size 6) array of type ifc   
+!!
+!! OUTPUT
+!! eff_pot = effective potential structure
+!!
+!! PARENTS
+!!   multibinit
+!!
+!! CHILDREN
+!!   wrtout
+!!
+!! SOURCE
+ 
+subroutine effective_potential_setStrainPhononCoupling(eff_pot,natom,nrpt,phonon_strain)
+
+ use m_polynomial_coeff
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'effective_potential_setStrainPhononCoupling'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  integer, intent(in) :: natom,nrpt
+!array
+  type(ifc_type),intent(in) :: phonon_strain(6)
+  type(effective_potential_type),intent(inout) :: eff_pot
+!Local variables-------------------------------
+!scalar
+!array
+! *************************************************************************
+
+  call anharmonics_terms_setStrainPhononCoupling(eff_pot%anharmonics_terms,natom,nrpt,phonon_strain)
+  eff_pot%has_3rd = .True.
+
+end subroutine effective_potential_setStrainPhononCoupling
+!!***
+
+!****f* m_effective_potential/effective_potential_setElasticDispCoupling
+!!
+!! NAME
+!! effective_potential_setElasticDispCoupling
+!!
+!! FUNCTION
+!! Set the elastic constant displacement coupling of  the effective_potential 
+!!
+!! INPUTS
+!! natom  = number of atoms
+!! elastic_displacement = (6,6,3,natom) array with elastic constant displacement coupling
+!!
+!! OUTPUT
+!! eff_pot = effective potential structure
+!!
+!! PARENTS
+!!   multibinit
+!!
+!! CHILDREN
+!!   wrtout
+!!
+!! SOURCE
+ 
+subroutine effective_potential_setElasticDispCoupling(eff_pot,natom,elastic_displacement)
+
+ use m_polynomial_coeff
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'effective_potential_setElasticDispCoupling'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  integer, intent(in) :: natom
+!array
+  real(dp) :: elastic_displacement(6,6,3,natom)
+  type(effective_potential_type),intent(inout) :: eff_pot 
+!Local variables-------------------------------
+!scalar
+!array
+! *************************************************************************
+
+  call anharmonics_terms_setElasticDispCoupling(eff_pot%anharmonics_terms,natom,elastic_displacement)
+  eff_pot%has_3rd = .True.
+
+end subroutine effective_potential_setElasticDispCoupling
+!!***
+
 
 !****f* m_effective_potential/effective_potential_print
 !!
@@ -1886,9 +2044,9 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
      WRITE(unit_xml,'("    </strain>")')
      WRITE(unit_xml,'("    <correction_force units=""hartree/bohrradius"">")')
      do ia=1,eff_pot%crystal%natom
-       do mu=1,3
+       do mu=1,3     
          WRITE(unit_xml,'(e22.14)', advance="no")&
-&             (eff_pot%harmonics_terms%internal_strain(ii,ia,mu))
+&             (eff_pot%harmonics_terms%internal_strain(ii,mu,ia))
        end do
        WRITE(unit_xml,'(a)')''
      end do
@@ -2506,7 +2664,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !array
   type(strain_type) :: strain
   integer  :: supercell(3)
-  real(dp) :: strain_tmp1(6),strain_tmp2(6)
+  real(dp) :: strain_tmp1(6),strain_tmp2(6),strten_part(6)
   real(dp) :: fcart_part(3,eff_pot%supercell%natom_supercell)
   real(dp) :: external_stress_tmp(6)
   real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
@@ -2553,10 +2711,9 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 
   call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
-  fcart          = zero
-  energy         = zero
-  strten         = zero
-  strten         = zero
+  fcart(:,:)     = 9.9999999999D99
+  energy         = 9.9999999999D99
+  strten(:)      = 9.9999999999D99
 
 !------------------------------------
 ! 1 - Transfert the reference energy
@@ -2594,20 +2751,21 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   call wrtout(std_out,message,'COLL')
 
   if(energy_part < zero)then
-    write(message, '(6a)' )ch10,&
+    write(message, '(8a)' )ch10,&
 &        ' --- !WARNING!',ch10,&
-&        '        The harmonic part is negative, the structure is not stable.',ch10,&
+&        '        The harmonic part is negative, the simulation will diverge',ch10,&
+&        '        if the anharmonic part is not used',ch10,&
 &        ' ---'
     call wrtout(std_out,message,"COLL")
   end if
 
   energy = energy + energy_part
-  fcart  = fcart  + fcart_part
+  fcart  = fcart_part
 
 !------------------------------------
 ! 3 - Computation of the elastic part of the energy :
 !------------------------------------
-  energy_part = zero; fcart_part=zero
+  energy_part = zero; fcart_part=zero;strten_part = zero
 
   strain_tmp1(:) = zero
   strain_tmp2(:) = zero
@@ -2654,7 +2812,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 
   if(has_strain) then
     call elastic_contribution(eff_pot,disp_tmp1,energy_part,fcart_part,&
-&                              ncell,strten,strain_tmp1,strain_tmp2,&
+&                              ncell,strten_part,strain_tmp1,strain_tmp2,&
 &                              external_stress=external_stress_tmp)
 
 !  MPI_SUM
@@ -2667,7 +2825,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   end if
  
   energy = energy + energy_part
-  fcart  = fcart  + fcart_part
+  fcart(:,:)  = fcart(:,:)  + fcart_part(:,:)
+  strten(:) = strten_part(:)
 
 !------------------------------------
 ! 3 - Treat 3rd order:
@@ -2790,13 +2949,13 @@ subroutine elastic_contribution(eff_pot,disp,energy,fcart,ncell,strten,strain1,s
  ii = 1
  do ia = 1,eff_pot%supercell%natom_supercell
    do mu = 1,3
-     temp(mu) = dot_product(eff_pot%harmonics_terms%internal_strain(:,ii,mu),strain1)
+     temp(mu) = dot_product(eff_pot%harmonics_terms%internal_strain(:,mu,ii),strain1)
    end do
    energy = energy +  half*dot_product(temp,disp(:,ia))
    fcart(:,ia) = fcart(:,ia) + temp(:)
 
    do jj = 1,6
-     strten(jj) = strten(jj) + dot_product(eff_pot%harmonics_terms%internal_strain(jj,ii,:),disp(:,ia))
+     strten(jj) = strten(jj) + dot_product(eff_pot%harmonics_terms%internal_strain(jj,:,ii),disp(:,ia))
    end do
    ii = ii +1
 !  Reset to 1 if the number of atoms is superior than in the initial cell

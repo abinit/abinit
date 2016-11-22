@@ -36,6 +36,11 @@
         temp    1000.0
        ntime        50
        ncell         2         2         2
+       dtion       100
+     optcell         0
+       bmass         1.0
+        nnos         5
+        qmass             50       100       150       200       250
  Miscellaneous information :
          asr         2
  Interatomic Force Constants Inputs :
@@ -155,7 +160,7 @@
 
 ================================================================================
 
- Calculation of the interatomic forces 
+ Calculation of the interatomic forces from DDB
 
        Homogeneous q point set in the B.Z.
  Grid q points  :        1

@@ -61,13 +61,14 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
  !scalars
   integer, intent(in) :: comm
   character(len=fnlen),intent(in) :: filenames(15)
-  type(effective_potential_type), intent(inout) :: eff_pot
+  type(effective_potential_type),target, intent(inout) :: eff_pot
   type(multibinit_dataset_type),intent(in) :: inp
  !arrays
 
  !Local variables-------------------------------
  !scalar
-  integer :: ia,ii,irpt,jj,kk,nfile
+  integer :: ia,ii,irpt,jj,kk,natom
+  integer :: nfile,nrpt
   real(dp) :: delta,delta1,delta2
   character(len=500) :: message
   character(len=fnlen):: name
@@ -75,11 +76,14 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   logical :: has_any_strain = .False.
   logical :: has_all_strain = .True.
  !arrays
-  type(effective_potential_type),dimension(:),allocatable :: eff_pots
-  type(strain_type) :: strain
   integer  :: have_strain(6)
-  real(dp) :: deformation(6,2),rprimd_def(3,3)
-  logical, allocatable  :: file_usable(:)
+  real(dp) :: deformation(6,2),elastics(6,6,6),rprimd_def(3,3)
+  type(strain_type) :: strain
+  type(ifc_type) :: phonon_strain(6)
+  logical, allocatable :: file_usable(:)
+  real(dp),allocatable :: elastic_displacement(:,:,:,:)
+  type(effective_potential_type),dimension(:),allocatable :: eff_pots
+  type(effective_potential_type),pointer :: ref_eff_pot
 
  ! *************************************************************************
 
@@ -101,7 +105,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 
  !==========================================
  !1) Get the list of files
-  nfile = 1
+  nfile = 0
   jj = 4
   do while (jj < 16) 
     if (filenames(jj)/="") then 
@@ -137,20 +141,19 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   ABI_DATATYPE_ALLOCATE(eff_pots,(nfile))
   ABI_ALLOCATE(file_usable,(nfile))
 
-  eff_pots(1) = eff_pot
+  ref_eff_pot => eff_pot
   file_usable(:) = .True.
 
   do while (jj < 16) 
     if (filenames(jj)/="") then
+      !Read and Intialisation of the effective potential type
       call effective_potential_file_read(filenames(jj),eff_pots(ii),inp,comm)
-      !Intialisation of the effective potential type
-
       !Eventualy print the xml file
       if(inp%prt_effpot==-1.or.inp%prt_effpot>=3) then
         call int2char4(ii,message)
         name = 'structure_'//trim(itoa(ii-1))//'.xml'
         call isfile(name,'new')
-        call effective_potential_writeXML(eff_pots(ii),1,filename=name)
+!        call effective_potential_writeXML(eff_pots(ii),1,filename=name)
       end if
 
       !Fill the eff_pots with the conresponding strain
@@ -169,25 +172,25 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 
   !Do some checks
   do ii=1,size(eff_pots)
-    if (eff_pots(ii)%harmonics_terms%ifcs%nrpt/=eff_pots(1)%harmonics_terms%ifcs%nrpt) then
+    if (eff_pots(ii)%harmonics_terms%ifcs%nrpt/=ref_eff_pot%harmonics_terms%ifcs%nrpt) then
       write(message,'(a,I5,a,a,a,a,a,I5,a,a,a,a)' )&
-&    'the number of cell in reference  (',eff_pots(1)%harmonics_terms%ifcs%nrpt,&
+&    'the number of cell in reference  (',ref_eff_pot%harmonics_terms%ifcs%nrpt,&
 &     ') is not equal to the  ',ch10,'the number of cell  in',trim(filenames(ii+2)),&
 &    ' (',eff_pots(ii)%harmonics_terms%ifcs%nrpt,')',ch10,'this files cannot be used',ch10
       MSG_WARNING(message)
       file_usable(ii) = .False.
     end if
-    if (eff_pots(ii)%crystal%natom/=eff_pots(1)%crystal%natom) then
+    if (eff_pots(ii)%crystal%natom/=ref_eff_pot%crystal%natom) then
       write(message, '(a,I5,a,a,a,a,a,I5,a,a,a,a)' )&
-&    'the number of atoms in reference  (',eff_pots(1)%crystal%natom,') is not equal to the  ',ch10,&
+&    'the number of atoms in reference  (',ref_eff_pot%crystal%natom,') is not equal to the  ',ch10,&
 &    'the number of atoms  in',trim(filenames(ii+2)),' (',eff_pots(ii)%crystal%natom,')',ch10,&
 &    'this files cannot be used',ch10
       MSG_WARNING(message)
       file_usable(ii) = .False.
     end if
-    if (eff_pots(ii)%crystal%ntypat/=eff_pots(1)%crystal%ntypat) then
+    if (eff_pots(ii)%crystal%ntypat/=ref_eff_pot%crystal%ntypat) then
       write(message, '(a,I5,a,a,a,a,a,I5,a,a,a,a)' )&
-&    'the number of type of atoms in reference  (',eff_pots(1)%crystal%ntypat,') is not equal to the  ',&
+&    'the number of type of atoms in reference  (',ref_eff_pot%crystal%ntypat,') is not equal to the  ',&
 &     ch10,'the number of type of atoms  in',trim(filenames(ii+2)),' (',eff_pots(ii)%crystal%ntypat,')',&
 &     ch10,'this files can not be used',ch10
       MSG_WARNING(message)
@@ -384,6 +387,12 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
  !================================================
  !3) Compute finate differences
   if(has_all_strain) then
+
+!   Allocation of array and set some values
+    nrpt  = ref_eff_pot%harmonics_terms%ifcs%nrpt
+    natom = ref_eff_pot%crystal%natom
+    ABI_ALLOCATE(elastic_displacement,(6,6,3,natom))
+
     do ii=1,6
       if(have_strain(ii)/=0) then
  !      We want the find the index of the perturbation ii in eff_pots(ii)
@@ -407,34 +416,66 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
             delta2 = delta
           end if
 
-          eff_pot%anharmonics_terms%phonon_strain(ii)%nrpt =&
-&                                        eff_pots(int(delta1))%harmonics_terms%ifcs%nrpt
-          eff_pot%anharmonics_terms%phonon_strain(ii)%cell =&
-&                                        eff_pots(int(delta1))%harmonics_terms%ifcs%cell
+!         Compute strain phonon-coupling part
+          phonon_strain(ii)%nrpt =  nrpt
+          ABI_ALLOCATE(phonon_strain(ii)%atmfrc,(2,3,natom,3,natom,nrpt))
+          ABI_ALLOCATE(phonon_strain(ii)%cell,(3,nrpt))
+          phonon_strain(ii)%cell =  eff_pots(int(delta1))%harmonics_terms%ifcs%cell
 
-          do irpt=1,eff_pot%anharmonics_terms%phonon_strain(ii)%nrpt
-            eff_pot%anharmonics_terms%phonon_strain(ii)%atmfrc(:,:,:,:,:,irpt) =&
-&            (eff_pots(int(delta1))%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt)&
-&           - eff_pots(int(delta2))%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt) ) / &
+
+
+          do irpt=1,phonon_strain(ii)%nrpt
+            phonon_strain(ii)%atmfrc(:,:,:,:,:,irpt) =&
+&           (eff_pots(int(delta1))%harmonics_terms%ifcs%atmfrc(:,:,:,:,:,irpt)&
+&          - eff_pots(int(delta2))%harmonics_terms%ifcs%atmfrc(:,:,:,:,:,irpt) ) / &
 &            (2 * abs(eff_pots(int(delta1))%strain%delta))
           end do
+
+!         Compute elastic constants part
+          elastics(ii,:,:) = (eff_pots(int(delta1))%harmonics_terms%elastic_constants(:,:)&
+&          - eff_pots(int(delta2))%harmonics_terms%elastic_constants(:,:)) / &
+&            (2 * abs(eff_pots(int(delta1))%strain%delta))
+
+
+!         Compute elasctic-displacement coupling
+          elastic_displacement(ii,:,:,:) = (eff_pots(int(delta1))%harmonics_terms%internal_strain(:,:,:)&
+&          - eff_pots(int(delta2))%harmonics_terms%internal_strain(:,:,:)) / &
+&            (2 * abs(eff_pots(int(delta1))%strain%delta))
         end if
-        cycle
+
       end if
     end do
-    eff_pot%has_3rd = .True.
+
+!   Set all the values in the effective potential type
+    call effective_potential_setStrainPhononCoupling(eff_pot,natom,nrpt,phonon_strain)
+    call effective_potential_setElastic3rd(eff_pot,elastics)
+    call effective_potential_setElasticDispCoupling(eff_pot,natom,elastic_displacement)
+
+!   Free the phonon-strain coupling array
+    do ii = 1,6
+      call ifc_free(phonon_strain(ii))
+    end do
+    ABI_DEALLOCATE(elastic_displacement)
+
   end if
+  
+  write(message,'(4a)') ch10, ' The computation of the 3rd order elastics constants, ',ch10,&
+&    ' the phonon-strain coupling and the elastic-displacement coupling is done'
+  call wrtout(ab_out,message,'COLL')
+  call wrtout(std_out,message,'COLL')
 
  !===============================================
  !4) Free the array of effective potential
 
-  do jj=1,size(eff_pots)
+  do jj=1,nfile
  !  Free the effective potential type
     call effective_potential_free(eff_pots(jj))
   end do
 
   ABI_DATATYPE_DEALLOCATE(eff_pots)
   ABI_DEALLOCATE(file_usable)
+
+
   write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10  
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')

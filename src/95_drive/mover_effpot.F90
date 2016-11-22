@@ -202,7 +202,7 @@ implicit none
 
  call effective_potential_printSupercell(effective_potential)
 
- if(inp%dynamics==1) then
+ if(inp%dynamics==12.or.inp%dynamics==13) then
 !***************************************************************
 !1 Convert some parameters into the structures used by mover.F90
 !***************************************************************
@@ -213,28 +213,26 @@ implicit none
 
 !Set the fake abinit dataset 
 !Scalar
-   dtset%bmass = 10     ! Barostat mass
+   dtset%bmass = inp%bmass  ! Barostat mass
    dtset%nctime = 0     ! NetCdf TIME between output of molecular dynamics informations 
    dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
-   dtset%dilatmx = 1    ! DILATation : MaXimal value
-   dtset%dtion = 100     ! Delta Time for IONs
+   dtset%dilatmx = 1.2   ! DILATation : MaXimal value
+   dtset%dtion = inp%dtion  ! Delta Time for IONs
    dtset%diismemory = 8 ! Direct Inversion in the Iterative Subspace MEMORY
    dtset%friction = 0.0001 ! internal FRICTION coefficient
    dtset%goprecon = 0   ! Geometry Optimization PREconditioner equations
-   if(inp%dynamics==1)then
-     dtset%ionmov = 12  ! Number for the dynamics
-   end if
+   dtset%ionmov = inp%dynamics  ! Number for the dynamic
    dtset%jellslab = 0   ! include a JELLium SLAB in the cell
    dtset%mdwall = 10000 ! Molecular Dynamics WALL location
    dtset%natom = effective_potential%supercell%natom_supercell
    dtset%ntypat = effective_potential%crystal%ntypat
    dtset%nconeq = 0     ! Number of CONstraint EQuations
    dtset%noseinert = 1.d-5 ! NOSE INERTia factor
-   dtset%nnos = 5       ! Number of nose masses Characteristic
+   dtset%nnos = inp%nnos       ! Number of nose masses Characteristic
    dtset%ntime = inp%ntime  ! Number of TIME steps 
    dtset%nsym = 1       ! Number of SYMmetry operations
    dtset%prtxml = 0     ! print the xml
-   dtset%optcell = 0    ! OPTimize the CELL shape and dimensions Characteristic
+   dtset%optcell = inp%optcell    ! OPTimize the CELL shape and dimensions Characteristic
    dtset%restartxf = 0  ! RESTART from (X,F) history
    dtset%signperm = 1   ! SIGN of PERMutation potential      
    dtset%strprecon = 1  ! STRess PRECONditioner
@@ -255,7 +253,7 @@ implicit none
 
    if(dtset%nnos>0) then
      ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
-     dtset%qmass = dtset%nnos * 10 
+     dtset%qmass = inp%qmass
    end if
    dtset%strtarget = zero ! STRess TARGET
    ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
@@ -292,7 +290,6 @@ implicit none
      amass(jj)=amu_emass*&
 &      effective_potential%crystal%amu(effective_potential%supercell%typat_supercell(jj))
    end do
-
 !  Set the dffil structure
    dtfil%filnam_ds(1:2)=filnam(1:2)
    dtfil%filnam_ds(3)=""
@@ -369,7 +366,7 @@ implicit none
 !    end do
 ! !  Now rescale the velocities to give the exact temperature
 !    rescale_vel=sqrt(3._dp*dtset%natom*kb_HaK*dtset%mdtemp(1)/v2gauss)
-!   vel(:,:)=vel(:,:)*rescale_vel
+!    vel(:,:)=vel(:,:)*rescale_vel
 !TEST_AM
 
 !*********************************************************
@@ -412,7 +409,7 @@ implicit none
  call wrtout(std_out,message,'COLL')
 
 
-!  if(inp%dynamics == 2) then
+!  if(inp%dynamics == 3) then
 ! !*************************************************************
 ! !   Call the routine for calculation of the energy for specific 
 ! !   partern of displacement or strain for the effective 

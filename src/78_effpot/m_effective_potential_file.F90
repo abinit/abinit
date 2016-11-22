@@ -267,7 +267,9 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm)
 &        'in ddb_from_file',ch10
         MSG_BUG(message)
       end if
+
       ABI_DEALLOCATE(atifc)
+
 !     Must read some value to initialze  array (nprt for ifc)
       call bigbx9(inp%brav,dummy_cell,0,1,inp%ngqpt,inp%nqshft,nrpt,ddb%rprim,dummy_rpt)
 
@@ -937,7 +939,7 @@ end subroutine system_getDimFromXML
  ABI_ALLOCATE(ifcs%cell,(3,nrpt))
  ABI_ALLOCATE(ifcs%short_atmfrc,(2,3,natom,3,natom,nrpt))
  ABI_ALLOCATE(ifcs%ewald_atmfrc,(2,3,natom,3,natom,nrpt))
- ABI_ALLOCATE(internal_strain,(6,natom,3))
+ ABI_ALLOCATE(internal_strain,(6,3,natom))
  ABI_ALLOCATE(dynmat,(2,3,natom,3,natom,nph1l))
  ABI_ALLOCATE(typat,(natom))
  ABI_ALLOCATE(phfrq,(3*natom,nph1l))
@@ -1394,11 +1396,11 @@ end subroutine system_getDimFromXML
          if ((line(1:22)=='<correction_force unit')) then
            call rdfromline_value('correction_force',line,strg)
            if (strg/="") then 
-             ABI_ALLOCATE(work2,(natom,3))
+             ABI_ALLOCATE(work2,(3,natom))
              strg1=trim(strg)
-             read(strg1,*) (work2(1,nu),nu=1,3)
+             read(strg1,*) (work2(nu,1),nu=1,3)
              do mu=2,natom-1
-               read(funit,*)(work2(mu,nu),nu=1,3)
+               read(funit,*)(work2(nu,mu),nu=1,3)
              end do
              read(funit,'(a)',iostat=ios) readline
              call rmtabfromline(readline)
@@ -1406,17 +1408,17 @@ end subroutine system_getDimFromXML
              call rdfromline_value('correction_force',line,strg)
              if (strg/="") then 
                strg1=trim(strg)
-               read(strg1,*) (work2(natom,nu),nu=1,3)
+               read(strg1,*) (work2(nu,natom),nu=1,3)
              else
                strg1=trim(line)
-               read(strg1,*) (work2(natom,nu),nu=1,3)
+               read(strg1,*) (work2(nu,natom),nu=1,3)
              end if
              internal_strain(voigt+1,:,:) = work2(:,:)
              ABI_DEALLOCATE(work2)
            else
-             ABI_ALLOCATE(work2,(natom,3))
+             ABI_ALLOCATE(work2,(3,natom))
              do mu=1,natom
-               read(funit,*)(work2(mu,nu),nu=1,3)
+               read(funit,*)(work2(nu,mu),nu=1,3)
              end do
              internal_strain(voigt+1,:,:) = work2(:,:)
              ABI_DEALLOCATE(work2)
@@ -1641,7 +1643,6 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  use m_ifc
  use m_copy,            only : alloc_copy
  use m_crystal,         only : crystal_t,crystal_print
- use m_dynmat,          only : asrif9,gtdyn9,canat9
  use m_multibinit_dataset, only : multibinit_dataset_type
  use m_effective_potential, only : effective_potential_type, effective_potential_free
 
@@ -1650,7 +1651,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'system_ddb2effpot'
  use interfaces_14_hidewrite
- use interfaces_72_response
+ use interfaces_56_recipspace
  use interfaces_77_ddb
 !End of the abilint section
 
@@ -1675,8 +1676,8 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  logical :: iam_master=.FALSE.
  integer,parameter :: master=0
 !arrays
- integer :: cell_number(3),cell2(3),rfelfd(4),rfphon(4),rfstrs(4)
- integer :: shift(3)
+ integer :: cell_number(3),cell2(3)
+ integer :: shift(3),rfelfd(4),rfphon(4),rfstrs(4)
  real(dp):: dielt(3,3),elast_clamped(6,6),fact
  real(dp):: red(3,3),qphnrm(3),qphon(3,3)
  real(dp),allocatable :: blkval(:,:,:,:,:,:),d2asr(:,:,:,:,:)
@@ -1687,6 +1688,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  type(ifc_type) :: ifc
  real(dp),allocatable :: d2cart(:,:,:,:,:),displ(:)
  real(dp),allocatable :: eigval(:,:),eigvec(:,:,:,:,:),phfrq(:)
+
 ! *************************************************************************
 
 !0 MPI variables
@@ -1953,7 +1955,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !**********************************************************************
 ! ifc to be calculated for interpolation
   write(message, '(a,a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,&
-&   ' Calculation of the interatomic forces ',ch10
+&   ' Calculation of the interatomic forces from DDB',ch10
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
 
@@ -1962,7 +1964,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 &   inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,prtfreq=.True.)
 
 !***************************************************************************
-! Dynamical matrix calculation for each qpoint give in input (default:gamma)
+! Dynamical matrix calculation for each qpoint for ifc
 !***************************************************************************
 
   ABI_ALLOCATE(d2cart,(2,3,mpert,3,mpert))
@@ -1983,7 +1985,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !Transfer value in effective_potential structure
   effective_potential%harmonics_terms%nqpt      = inp%nph1l
   effective_potential%harmonics_terms%qpoints(:,:) = inp%qph1l(:,:)
-  
+
   do iphl1=1,inp%nph1l
 
    ! Initialisation of the phonon wavevector
@@ -2032,9 +2034,10 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   max1 = maxval(ifc%cell(1,:));  min1 = minval(ifc%cell(1,:))
   max2 = maxval(ifc%cell(2,:));  min2 = minval(ifc%cell(2,:))
   max3 = maxval(ifc%cell(3,:));  min3 = minval(ifc%cell(3,:))
-  cell_number(1) = max1 - min1 +1
-  cell_number(2) = max2 - min2 +1
-  cell_number(3) = max3 - min3 +1
+  cell_number(1) = max1 - min1 + 1
+  cell_number(2) = max2 - min2 + 1
+  cell_number(3) = max3 - min3 + 1
+
 ! set the new number of cell, sometimes, in canonical coordinates,
 ! somme cell are delete but they exist in reduced coordinates.
   nrpt_new = product(cell_number(:))
@@ -2045,10 +2048,8 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   ABI_ALLOCATE(cell_red,(3,nrpt_new))
   
   wghatm_red(:,:,:) = zero
-
   
   if(iam_master)then
-
     do ia=1,natom
       do ib=1,natom
 
@@ -2056,23 +2057,23 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
         if (inp%brav==1) then
 !      In this case, it is better to work in reduced coordinates
 !      As rcan is in canonical coordinates, => multiplication by gprim
-          do ii=1,3
-            red(1,ii)=  ifc%rcan(1,ia)*ddb%gprim(1,ii) + &
-&                       ifc%rcan(2,ia)*ddb%gprim(2,ii) + &
-&                       ifc%rcan(3,ia)*ddb%gprim(3,ii)
-            red(2,ii)=  ifc%rcan(1,ib)*ddb%gprim(1,ii) + &
-                        ifc%rcan(2,ib)*ddb%gprim(2,ii) + &
-&                       ifc%rcan(3,ib)*ddb%gprim(3,ii)
-          end do
-        end if
+           do ii=1,3
+             red(1,ii)=  ifc%rcan(1,ia)*ddb%gprim(1,ii) + &
+ &                       ifc%rcan(2,ia)*ddb%gprim(2,ii) + &
+ &                       ifc%rcan(3,ia)*ddb%gprim(3,ii)
+             red(2,ii)=  ifc%rcan(1,ib)*ddb%gprim(1,ii) + &
+                         ifc%rcan(2,ib)*ddb%gprim(2,ii) + &
+ &                       ifc%rcan(3,ib)*ddb%gprim(3,ii)
+           end do
+         end if
 
 !       Get the shift of cell
         shift(:) = anint(red(2,:) - crystal%xred(:,ib)) - anint(red(1,:) - crystal%xred(:,ia))
 
         do irpt=1,ifc%nrpt
-       
+
           cell2(:)= int(ifc%cell(:,irpt) + shift(:))
-       
+
 !         Use boundary condition to get the right cell
           if (cell2(1) < min1 .and. cell2(1) < max1) then
             cell2(1) = cell2(1) + cell_number(1)
@@ -2092,22 +2093,22 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
             cell2(3) = cell2(3) - cell_number(3)
           end if
 
-          irpt2=1
-          do i1=min1,max1
-            do i2=min2,max2
-              do i3=min3,max3
-                if (i1  ==  cell2(1)  .and.&
-                    i2  ==  cell2(2)  .and.&
-                    i3  ==  cell2(3)) then
-                  wghatm_red(ia,ib,irpt2) =  ifc%wghatm(ia,ib,irpt)
-                  atmfrc_red(:,:,ia,:,ib,irpt2) = ifc%atmfrc(:,:,ia,:,ib,irpt) * ifc%wghatm(ia,ib,irpt)
-                  cell_red(1,irpt2) = i1
-                  cell_red(2,irpt2) = i2
-                  cell_red(3,irpt2) = i3
-                end if
-                irpt2 = irpt2 + 1
-              end do
-            end do
+           irpt2=1
+           do i1=min1,max1
+             do i2=min2,max2
+               do i3=min3,max3
+                 if (i1  ==  cell2(1)  .and.&
+                     i2  ==  cell2(2)  .and.&
+                     i3  ==  cell2(3)) then
+                   wghatm_red(ia,ib,irpt2) =  ifc%wghatm(ia,ib,irpt)
+                   atmfrc_red(:,:,ia,:,ib,irpt2) = ifc%atmfrc(:,:,ia,:,ib,irpt)
+                   cell_red(1,irpt2) = i1
+                   cell_red(2,irpt2) = i2
+                   cell_red(3,irpt2) = i3
+                 end if
+                 irpt2 = irpt2 + 1
+               end do
+             end do
           end do
         end do
       end do
@@ -2150,17 +2151,18 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
       !  Apply weight on each R point
       do ia=1,effective_potential%crystal%natom 
         do ib=1,effective_potential%crystal%natom 
-!          atmfrc_red(:,:,ia,:,ib,irpt) = atmfrc_red(:,:,ia,:,ib,irpt)*wghatm_red(ia,ib,irpt) 
+          atmfrc_red(:,:,ia,:,ib,irpt) = atmfrc_red(:,:,ia,:,ib,irpt)*wghatm_red(ia,ib,irpt) 
         end do
       end do
       effective_potential%harmonics_terms%ifcs%cell(:,irpt2) = cell_red(:,irpt)
       effective_potential%harmonics_terms%ifcs%atmfrc(:,:,:,:,:,irpt2) = atmfrc_red(:,:,:,:,:,irpt)
       if (inp%dipdip == 1) then
-        effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2)=atmfrc_red(:,:,:,:,:,irpt)
+        effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2)=&
+&                                                                     atmfrc_red(:,:,:,:,:,irpt)
       else
         effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2) = zero
       end if
-      effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2) = atmfrc_red(:,:,:,:,:,irpt)
+      effective_potential%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,:,irpt2)=atmfrc_red(:,:,:,:,:,irpt)
       effective_potential%harmonics_terms%ifcs%ewald_atmfrc(:,:,:,:,:,irpt2) = zero
       effective_potential%harmonics_terms%ifcs%wghatm(:,:,irpt2) =  wghatm_red(:,:,irpt)
     end if
@@ -2201,19 +2203,21 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   rftyp=1
   call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
   
-  ABI_ALLOCATE(effective_potential%harmonics_terms%internal_strain,(6,natom,3))
+  ABI_ALLOCATE(effective_potential%harmonics_terms%internal_strain,(6,3,natom))
   effective_potential%harmonics_terms%internal_strain = zero
 
   if (iblok /=0) then
 
 !    then print the internal stain tensor
-    call ddb_internalstr(inp%asr,crystal,ddb%val,asrq0,d2asr,iblok,instrain,ab_out,mpert,msize,natom,nblok)
+    call ddb_internalstr(inp%asr,crystal,ddb%val,asrq0,d2asr,iblok,instrain,&
+&                        ab_out,mpert,msize,natom,nblok)
 
     do ipert1=1,6
       do ipert2=1,natom
         do idir2=1,3
           ii=3*(ipert2-1)+idir2
-          effective_potential%harmonics_terms%internal_strain(ipert1,ipert2,idir2)=instrain(ii,ipert1)
+            effective_potential%harmonics_terms%internal_strain(ipert1,idir2,ipert2)=&
+&                                                            instrain(ii,ipert1)
         end do
       end do
     end do

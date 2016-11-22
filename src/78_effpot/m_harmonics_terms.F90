@@ -62,7 +62,7 @@ module m_harmonics_terms
 !     Elastic tensor Hartree
 
    real(dp), allocatable :: internal_strain(:,:,:)    
-!    internal_strain(6,natom,3)
+!    internal_strain(6,3,natom)
 !    internal strain tensor 
 
    real(dp), allocatable :: zeff(:,:,:)             
@@ -135,7 +135,7 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
  integer, optional,intent(in) :: nqpt
  real(dp),optional,intent(in) :: epsilon_inf(3,3),dynmat(:,:,:,:,:,:)
  real(dp),optional,intent(in) :: elastic_constants(6,6)
- real(dp),optional,intent(in) :: internal_strain(:,:,:),zeff(:,:,:)
+ real(dp),optional,intent(in) :: internal_strain(6,3,natom),zeff(3,3,natom)
  real(dp),optional,intent(in) :: phfrq(:,:),qpoints(:,:)
 !Local variables-------------------------------
 !scalar
@@ -234,7 +234,7 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
  end if
 
 !Allocation of internal strain tensor 
- ABI_ALLOCATE(harmonics_terms%internal_strain,(6,natom,3))
+ ABI_ALLOCATE(harmonics_terms%internal_strain,(6,3,natom))
  harmonics_terms%internal_strain = zero
  if (present(internal_strain)) then
    harmonics_terms%internal_strain(:,:,:) = internal_strain(:,:,:)

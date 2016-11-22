@@ -149,7 +149,7 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
                      double elastic_constants[6][6],
                      double *energy,double epsilon_inf[3][3],
                      double ewald_atmfrc[*nrpt][*natom][3][*natom][3][2],
-                     double internal_strain[3][*natom][6],
+                     double internal_strain[*natom][3][6],
                      double phfrq[*nqpt][3* *natom],double rprimd[3][3],double qph1l[*nqpt][3],
                      double short_atmfrc[*nrpt][*natom][3][*natom][3][2],
                      int typat[*natom],double xcart[*natom][3],double zeff[*natom][3][3]){
@@ -418,7 +418,7 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
             for(ia=0;ia<*natom;ia++){
               for(mu=0;mu<3;mu++){
                 if (pch != NULL){
-                  internal_strain[mu][ia][atoi(uri)]=strtod(pch,NULL);
+                  internal_strain[ia][mu][atoi(uri)]=strtod(pch,NULL);
                   pch = strtok(NULL,"\t \n");
                 }
               }

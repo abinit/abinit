@@ -75,7 +75,7 @@ program multibinit
 !Local variables-------------------------------
 ! Set array dimensions
  integer,parameter :: ddbun=2,master=0 ! FIXME: these should not be reserved unit numbers!
- integer :: comm,ii,ierr,lenstr
+ integer :: comm,filetype,ii,ierr,lenstr
  integer :: natom,nph1l,nrpt,ntypat,nproc,my_rank
  integer :: option
  logical :: iam_master
@@ -198,7 +198,10 @@ program multibinit
  call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
 !Read the coefficient from fit
  if(filnam(4)/='')then
-   call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
+   call effective_potential_file_getType(filnam(4),filetype)
+   if(filetype==3) then
+     call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
+   end if
  else
    write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
 &                       'There is no file for the coefficients from polynomial fitting'
