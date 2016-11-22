@@ -223,7 +223,7 @@ MODULE m_paw_dmft
   real(dp) :: dmft_mxsf
   ! Mixing coefficient for Self-Energy during the SCF DMFT cycle.
 
-  real(dp) :: dmft_tolfreq
+ ! real(dp) :: dmft_tolfreq
   ! Required precision on local correlated density matrix  (depends on
   ! frequency mesh), used in dmft_solve.
 
@@ -610,7 +610,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  !paw_dmft%idmftloop=0
  paw_dmft%prtvol = dtset%prtvol
  paw_dmft%prtdos = dtset%prtdos
- paw_dmft%dmft_tolfreq = dtset%dmft_tolfreq
+! paw_dmft%dmft_tolfreq = dtset%dmft_tolfreq
  paw_dmft%dmft_lcpr = dtset%dmft_tollc
 
 !=======================

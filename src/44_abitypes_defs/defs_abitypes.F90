@@ -656,7 +656,7 @@ type dataset_type
  real(dp) :: diemixmag
  real(dp) :: dilatmx
  real(dp) :: dmft_mxsf
- real(dp) :: dmft_tolfreq
+! real(dp) :: dmft_tolfreq
  real(dp) :: dmft_tollc
  real(dp) :: dmftqmc_n
  real(dp) :: dosdeltae

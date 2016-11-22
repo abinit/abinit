@@ -203,7 +203,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%dmft_rslf=0
    dtsets(idtset)%dmft_solv=5
    dtsets(idtset)%dmft_t2g=0
-   dtsets(idtset)%dmft_tolfreq=tol4
+  ! dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
    dtsets(idtset)%dmftbandi=0
    dtsets(idtset)%dmftbandf=0

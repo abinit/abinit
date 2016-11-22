@@ -170,7 +170,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 & '  == Check lda occ. mat. from green with respect to the direct calc =='
  call wrtout(std_out,message,'COLL')
  call diff_oper("Occup from LDA green function",&
-& "LDA occupations",greenlda%occup,lda_occup,1,paw_dmft%dmft_tolfreq)
+& "LDA occupations",greenlda%occup,lda_occup,1,tol2)
 ! write(message,'(2a)') ch10,&
 !& '  ***** => Warning : diff_oper is suppressed for test'
 ! call wrtout(std_out,message,'COLL')
