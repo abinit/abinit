@@ -2628,6 +2628,7 @@ subroutine pimd_apply_constraint(constraint,constraint_output,forces,mass,natom,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pimd_apply_constraint'
+ use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -2642,9 +2643,10 @@ subroutine pimd_apply_constraint(constraint,constraint_output,forces,mass,natom,
 !Local variables-------------------------------
 !scalars
  integer :: iatom,ii,iimage
- real(dp) :: lambda,one_over_trotter,force_centroid,xcart_centroid,zz
+ real(dp) :: af,lambda_cst,masstot,one_over_trotter,xcart_centroid,zz
  !character(len=500) :: msg
 !arrays
+ real(dp) :: force_centroid(3),lambda_com(3),mat(3,3),matinv(3,3),vec(3),weightsum(3)
 
 !************************************************************************
 
@@ -2660,19 +2662,32 @@ subroutine pimd_apply_constraint(constraint,constraint_output,forces,mass,natom,
 !=== Linear combination of centroid coordinates ==========================
  case(1)
 
-   !Calculation of Lagrange multiplier "lambda"
-   lambda=zero;zz=zero
-   do iatom=1,natom
-     do ii=1,3
-       force_centroid=zero
-       do iimage=1,trotter
-         force_centroid=force_centroid+forces(ii,iatom,iimage)
+!  Some useful quantities
+   zz=zero;af=zero;force_centroid=zero
+   do iimage=1,trotter
+     do iatom=1,natom
+       do ii=1,3
+         force_centroid(ii)=force_centroid(ii)+forces(ii,iatom,iimage)
+         af=af+wtatcon(ii,iatom)*forces(ii,iatom,iimage)/mass(iatom)
+         zz=zz+wtatcon(ii,iatom)**2/mass(iatom)
        end do
-       lambda=lambda+force_centroid*wtatcon(ii,iatom)/mass(iatom)
-       zz=zz+wtatcon(ii,iatom)**2/mass(iatom)
      end do
    end do
-   lambda=lambda/zz
+   masstot=sum(mass)*dble(trotter)
+   weightsum(:)=sum(wtatcon,dim=2)*dble(trotter)
+   vec(:)=force_centroid(:)-weightsum(:)*af/zz
+   do ii=1,3
+     mat(:,ii)=-weightsum(:)*weightsum(ii)/zz
+     mat(ii,ii)=mat(ii,ii)+masstot
+   end do
+   call matr3inv(mat,matinv)
+
+
+   !Calculation of a Lagrange multipliers:
+   ! lambda_cst: to apply the constraint
+   ! lambda_com: to maintain the position of the center of mass
+   lambda_com(:)=matmul(matinv,vec)
+   lambda_cst=(af - dot_product(weightsum,lambda_com)) *dble(trotter)/zz
 
    !Modification of forces
    one_over_trotter=one/dble(trotter)
@@ -2680,7 +2695,8 @@ subroutine pimd_apply_constraint(constraint,constraint_output,forces,mass,natom,
      do iatom=1,natom
        do ii=1,3
          forces(ii,iatom,iimage)=forces(ii,iatom,iimage) &
-&                               -lambda*wtatcon(ii,iatom)*one_over_trotter
+&                               -lambda_cst*wtatcon(ii,iatom)*one_over_trotter &
+&                               -lambda_com(ii)*mass(iatom)
        end do
      end do
    end do
@@ -2698,7 +2714,7 @@ subroutine pimd_apply_constraint(constraint,constraint_output,forces,mass,natom,
      end do
    end do
    !2-Force on reaction coordinate
-   constraint_output(2)=-lambda
+   constraint_output(2)=-lambda_cst
 
  end select
 

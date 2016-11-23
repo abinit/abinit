@@ -127,6 +127,7 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
  zeroforce=1
  if(pitransform==1) zeroforce=0
  if(pitransform==2) zeroforce=0
+ if(pimd_param%constraint==1) zeroforce=0
 
 !Allocation of local arrays
  ABI_ALLOCATE(xcart,(3,natom,trotter))
