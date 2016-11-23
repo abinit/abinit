@@ -61,7 +61,7 @@ dmft_t2g 1   # special value for t2g only calculation.
 # == CTQMC
 dmft_solv 7 # Rotationally invariant interaction with TRIQS/CTHYB Monte Carlo code.
 dmftqmc_l 201
-dmftqmc_n 5.d5
+dmftqmc_n 2.d5
 dmftqmc_therm 10000
 
 # == LDA+U
