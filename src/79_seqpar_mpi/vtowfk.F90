@@ -741,7 +741,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          if(gs_hamk%usepaw==1) then
            call timab(554,2,tsec)
          end if
-
          if (optforces>0) then
            iband=(iblock-1)*blocksize
            do iblocksize=1,blocksize

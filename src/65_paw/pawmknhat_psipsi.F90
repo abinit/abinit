@@ -67,7 +67,7 @@
 
 subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
 &          nspinor,ntypat,pawang,pawfgrtab,grnhat12,nhat12,pawtab, &
-&          gprimd,grnhat_12,qphon,xred,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft) ! optional arguments
+&          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft) ! optional arguments
 
  use defs_basis
  use m_profiling_abi
@@ -107,6 +107,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
  type(pawang_type),intent(in) :: pawang
 !arrays
  integer,intent(in) :: ngfft(18)
+ integer,optional,intent(in) ::atindx(natom)
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),optional, intent(in) ::gprimd(3,3),qphon(3),xred(3,natom)
  real(dp),intent(out) :: grnhat12(2,nfft,nspinor**2,3*nhat12_grdim)
@@ -118,11 +119,11 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 
 !Local variables ---------------------------------------
 !scalars
- integer :: iatom,iatom_tot,ic,ierr,ils,ilslm,isp1,isp2,isploop,itypat,jc,klm,klmn
+ integer :: iatm,iatom,iatom_tot,ic,ierr,ils,ilslm,isp1,isp2,isploop,itypat,jc,klm,klmn
  integer :: lmax,lmin,lm_size,mm,my_comm_atom,my_comm_fft,optgr0,optgr1,paral_kgb_fft
  integer :: cplex,ilmn,jlmn,lmn_size,lmn2_size
  real(dp) :: re_p,im_p
- logical :: compute_grad,compute_grad1,compute_nhat,my_atmtab_allocated,paral_atom,qeq0,compute_phonon
+ logical :: compute_grad,compute_grad1,compute_nhat,my_atmtab_allocated,paral_atom,qeq0,compute_phonon,order
  type(distribfft_type),pointer :: my_distribfft
  type(mpi_type) :: mpi_enreg_fft
 !arrays
@@ -156,7 +157,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
  compute_phonon=.false.;qeq0=.false.
  if (present(gprimd).and.present(qphon).and.present(xred)) compute_phonon=.true.
  if (compute_phonon) qeq0=(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15)
-
+ if (present(atindx)) order=.true.
 !Set up parallelism over atoms
  paral_atom=(present(comm_atom).and.(my_natom/=natom))
  nullify(my_atmtab);if (present(mpi_atmtab)) my_atmtab => mpi_atmtab
@@ -182,6 +183,8 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 !------------------------------------------------------------------------
  do iatom=1,my_natom
    iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
+   iatm=iatom_tot
+!   if (order) iatm=atindx(iatom_tot)
    itypat    = pawfgrtab(iatom)%itypat
    lm_size   = pawfgrtab(iatom)%l_size**2
    lmn_size  = pawtab(itypat)%lmn_size
@@ -243,15 +246,15 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 
 
 !      Retrieve the factor due to the PAW projections.
-       re_p =  cprj1(iatom_tot,isp1)%cp(1,ilmn) * cprj2(iatom_tot,isp2)%cp(1,jlmn) &
-&       +cprj1(iatom_tot,isp1)%cp(2,ilmn) * cprj2(iatom_tot,isp2)%cp(2,jlmn) &
-&       +cprj1(iatom_tot,isp1)%cp(1,jlmn) * cprj2(iatom_tot,isp2)%cp(1,ilmn) &
-&       +cprj1(iatom_tot,isp1)%cp(2,jlmn) * cprj2(iatom_tot,isp2)%cp(2,ilmn)
+       re_p =  cprj1(iatm,isp1)%cp(1,ilmn) * cprj2(iatm,isp2)%cp(1,jlmn) &
+&       +cprj1(iatm,isp1)%cp(2,ilmn) * cprj2(iatm,isp2)%cp(2,jlmn) &
+&       +cprj1(iatm,isp1)%cp(1,jlmn) * cprj2(iatm,isp2)%cp(1,ilmn) &
+&       +cprj1(iatm,isp1)%cp(2,jlmn) * cprj2(iatm,isp2)%cp(2,ilmn)
 
-       im_p =  cprj1(iatom_tot,isp1)%cp(1,ilmn) * cprj2(iatom_tot,isp2)%cp(2,jlmn) &
-&       -cprj1(iatom_tot,isp1)%cp(2,ilmn) * cprj2(iatom_tot,isp2)%cp(1,jlmn) &
-&       +cprj1(iatom_tot,isp1)%cp(1,jlmn) * cprj2(iatom_tot,isp2)%cp(2,ilmn) &
-&       -cprj1(iatom_tot,isp1)%cp(2,jlmn) * cprj2(iatom_tot,isp2)%cp(1,ilmn)
+       im_p =  cprj1(iatm,isp1)%cp(1,ilmn) * cprj2(iatm,isp2)%cp(2,jlmn) &
+&       -cprj1(iatm,isp1)%cp(2,ilmn) * cprj2(iatm,isp2)%cp(1,jlmn) &
+&       +cprj1(iatm,isp1)%cp(1,jlmn) * cprj2(iatm,isp2)%cp(2,ilmn) &
+&       -cprj1(iatm,isp1)%cp(2,jlmn) * cprj2(iatm,isp2)%cp(1,ilmn)
 
        cpf(1)=re_p*pawtab(itypat)%dltij(klmn)*half
        cpf(2)=im_p*pawtab(itypat)%dltij(klmn)*half
@@ -272,6 +275,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
            end do
          end do
        end if ! compute_nhat
+
        if (compute_grad) then
          do ils=lmin,lmax,2  ! Sum over (L,M)
            do mm=-ils,ils
@@ -328,6 +332,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
          end do
        end if
      end if
+
      if (compute_grad) then
        if(compute_phonon.and.(.not.qeq0).and.pawfgrtab(iatom)%expiqr_allocated/=0) then
          do ic=1,pawfgrtab(iatom)%nfgd

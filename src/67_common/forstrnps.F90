@@ -201,7 +201,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
 !TESTDFPT
 
 !*************************************************************************
-
+write(80,*) "coucou"
  call timab(920,1,tsec)
  call timab(921,1,tsec)
 
@@ -252,8 +252,8 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
  if ((usefock_loc).and.(psps%usepaw==1)) then
 !   usecprj_local=usecprj
    if(optfor==1)then 
-!     fock%optfor=.true.
-     fock%optfor=.false.
+     fock%optfor=.true.
+!     fock%optfor=.false.
      if (.not.allocated(fock%forces_ikpt)) then
        ABI_ALLOCATE(fock%forces_ikpt,(3,natom,mband))
      end if
@@ -278,9 +278,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
 
 
 !need to reorder cprj=<p_lmn|Cnk> (from unsorted to atom-sorted)
- if (psps%usepaw==1.and.usecprj_local==1) then
-   call pawcprj_reorder(cprj,gs_hamk%atindx)
- end if
+! if (psps%usepaw==1.and.usecprj_local==1) then
+!   call pawcprj_reorder(cprj,gs_hamk%atindx)
+! end if
 !Common data for "nonlop" routine
  signs=1 ; idir=0  ; ishift=0 ; tim_nonlop=4 ; tim_nonlop_prep=12
  choice=2*optfor;if (stress_needed==1) choice=10*choice+3
@@ -771,6 +771,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
            call timab(924,2,tsec)
          end if
 !        Accumulate stress tensor and forces for the Fock part
+write(80,*) "coucou1",nblockbd,blocksize
          if (usefock_loc) then
            if(fock%optstr.or.fock%optfor) then
              if (mpi_enreg%paral_kgb==1) then
@@ -783,6 +784,16 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
              do iblocksize=1,blocksize
                fock%ieigen=(iblock-1)*blocksize+iblocksize
                if (gs_hamk%usepaw==1) cwaveprj_idat => cwaveprj(:,(iblocksize-1)*my_nspinor+1:iblocksize*my_nspinor)
+write (80,*) "fostrnps",fock%ieigen
+!write (80,*) cg(1,1:100)
+!write (80,*) cwavef(1,1:100)
+!flush(80)
+!write (80,*)cprj (1,1)%cp
+!write (80,*)cwaveprj_idat (1,1)%cp
+!flush(80)
+!write (80,*)cprj (1,1)%dcp
+!flush(80)
+
                call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
 &               ghc_dum,gs_hamk,mpi_enreg)
                if (fock%optstr) then
@@ -790,6 +801,9 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
                end if
                if (fock%optfor) then
                  fock%forces(:,:)=fock%forces(:,:)+weight(iblocksize)*fock%forces_ikpt(:,:,fock%ieigen)
+write (80,*)fock%forces_ikpt(:,:,fock%ieigen)
+write (80,*)weight(iblocksize)
+write (80,*)fock%forces
                end if
              end do 
              ABI_DEALLOCATE(ghc_dum)

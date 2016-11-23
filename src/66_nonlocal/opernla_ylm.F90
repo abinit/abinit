@@ -245,6 +245,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !      ALL CHOICES:
 !      Accumulate Gx
 !      --------------------------------------------------------------------
+
        if (choice>=0) then
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)

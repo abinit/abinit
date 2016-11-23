@@ -212,7 +212,6 @@
  cplex=2;if (istwf_k>1) cplex=1
  choice_=choice;if (cpopt==1) choice_=-choice
  signs=1;if (idir>0) signs=2
-
 !Loop over atom types
  ia1=1;iatm=0
  do itypat=1,ntypat
@@ -228,7 +227,6 @@
 !  Loop on blocks of atoms inside type
    do ia3=ia1,ia2,mincat
      ia4=min(ia2,ia3+mincat-1);nincat=ia4-ia3+1
-
 !     Prepare the phase factors if they were not already computed
      if (nloalg(2)<=0) then
        call ph1d3d(ia3,ia4,kg_k,matblk,natom,npw_k,ngfft(1),ngfft(2),ngfft(3),&

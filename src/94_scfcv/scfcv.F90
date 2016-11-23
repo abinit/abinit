@@ -1053,7 +1053,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        ! Initialize data_type fock for the calculation
        cplex_hf=cplex
        if (psps%usepaw==1) cplex_hf=dtset%pawcpxocc
-       call fock_init(cplex_hf,dtset,fock,gsqcut,indsym,kg,mpi_enreg,nattyp,npwarr,pawang,pawfgr,pawtab,rprimd)
+       call fock_init(atindx,cplex_hf,dtset,fock,gsqcut,indsym,kg,mpi_enreg,nattyp,npwarr,pawang,pawfgr,pawtab,rprimd)
        if (fock%usepaw==1) then
          optcut_hf = 0 ! use rpaw to construct local_pawfgrtab
          optgr0_hf = 0; optgr1_hf = 0; optgr2_hf = 0 ! dont need gY terms locally
@@ -1069,14 +1069,13 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &         useylmgr,xred,ylm,ylmgr)
        end if
      end if
-     rewind(83)
- 
+
      if (fock%optfor) then
        fock%forces=zero
      end if
      hybrid_mixing=fock%hybrid_mixing ; hybrid_mixing_sr=fock%hybrid_mixing_sr
      ! Update data relative to the occupied states in fock
-     call fock_updatecwaveocc(cg,cprj,dtset,fock,energies%e_exactX,indsym,istep,mcg,mcprj,mpi_enreg,npwarr,occ,ucvol)
+     call fock_updatecwaveocc(cg,cprj,dtset,fock,energies%e_exactX,indsym,istep,mcg,mcprj,mpi_enreg,nattyp,npwarr,occ,ucvol)
    end if ! usefock
 
 !  Initialize/update data in the electron-positron case
@@ -1859,7 +1858,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !need to reorder them (from atom-sorted to unsorted)
  if (psps%usepaw==1.and.usecprj==1) then
    iorder_cprj=1
-   call pawcprj_reorder(cprj,atindx1)
+!   call pawcprj_reorder(cprj,atindx1)
    if (dtset%positron/=0) then
      if (electronpositron%dimcprj>0) then
        call pawcprj_reorder(electronpositron%cprj_ep,atindx1)

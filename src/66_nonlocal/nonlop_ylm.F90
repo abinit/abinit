@@ -645,7 +645,9 @@
 
 !      Prepare the phase factors if they were not already computed
        if (nloalg(2)<=0) then
+!write(87,*) "coucou0",ia3,ia4
          call ph1d3d(ia3,ia4,kgin,matblk,natom,npwin,n1,n2,n3,phkxredin,ph1d,ph3din)
+!write(87,*) "ph3din",ph3din(1,487,:)
        end if
 
 !      Allocate memory for projected scalars

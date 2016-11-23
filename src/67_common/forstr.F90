@@ -296,7 +296,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
    if(dtset%usefock==1 .and. associated(fock)) then
      if((dtset%optforces/=0).or.(dtset%optstress/=0)) then
        call fock_updatecwaveocc(cg,cprj,dtset,fock,dum,indsym,fock%nnsclo_hf+1,mcg,mcprj,&
-&       mpi_enreg,npwarr,occ,ucvol)
+&       mpi_enreg,nattyp,npwarr,occ,ucvol)
      end if
    end if
    call forstrnps(cg,cprj,dtset%ecut,dtset%ecutsm,dtset%effmass,eigen,electronpositron,fock,grnl,&

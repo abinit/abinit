@@ -191,7 +191,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
  real(dp),allocatable :: dyfrx2_dum(:,:,:),eltfrn_dum(:,:),gauss_dum(:,:)
  real(dp),allocatable :: epawf3red(:,:),fin(:,:),fionred(:,:),grl(:,:),grnl_tmp(:,:),grtn(:,:)
  real(dp),allocatable :: grtn_indx(:,:),v_dum(:),vxctotg(:,:)
- real(dp),allocatable :: xccc3d_dum(:)
+ real(dp),allocatable :: xccc3d_dum(:), fockforces(:,:)
 
 ! *************************************************************************
 
@@ -406,10 +406,19 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
 !This gives non-symmetrized Hellman-Feynman reduced gradients
  ABI_ALLOCATE(grtn,(3,dtset%natom))
  grtn(:,:)=grl(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
+write(80,*) "grl", grl
+write(80,*) "grewtn", grewtn
+write(80,*) "synlgr", synlgr
+write(80,*) "grxc", grxc
+write(80,*) "grtn", grtn
  if (usefock==1 .and. associated(fock).and.fock%optfor) then
+   ABI_ALLOCATE(fockforces,(3,dtset%natom))
+!   call sygrad(fockforces,dtset%natom,fock%forces,dtset%nsym,symrec,indsym)
+write(80,*) "fock", fock%forces
+!write(80,*) "fock", fockforces
    grtn(:,:)=grtn(:,:)+fock%forces(:,:)
+   ABI_DEALLOCATE(fockforces)
  end if
-
  if (ngrvdw==dtset%natom) grtn(:,:)=grtn(:,:)+grvdw(:,:)
 ! note that fionred is subtracted, because it really is a force and we need to
 ! turn it back into a gradient. The fred2fcart routine below includes the minus
