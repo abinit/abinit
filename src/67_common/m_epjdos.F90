@@ -348,7 +348,7 @@ end subroutine epjdos_free
 !!      outscfcv
 !!
 !! CHILDREN
-!!      destroy_tetra,dos_hdr_write,get_dos_1band,get_dos_1band_m
+!!      destroy_tetra,dos_hdr_write,get_dos_1band
 !!      get_full_kgrid,get_tetra_weight,init_tetra,int2char4,matr3inv,metric
 !!      wrtout
 !!
@@ -505,7 +505,7 @@ if (iam_master) then
 &     dtset%tphysel,dtset%tsmear,unitdos_arr(iat))
    end do
  end if
-end if 
+end if
 
  call xmpi_bcast(nene, master, comm, ierr)
  if (iam_master) list_dp = [deltaene, enemin, enemax]
@@ -554,7 +554,7 @@ end if
    do iband=1,dtset%nband(1)
      ! Mpi parallelism.
      if (mod(iband, nprocs) /= my_rank) cycle
-     
+
      ! For each band get its contribution
      tmp_eigen(:) = ebands%eig(iband, :, isppol)
 
@@ -584,8 +584,9 @@ end if
 
      if (prtdosm>=1) then
        work_ndosmbessl = dos%fractions_m(:,iband,isppol,:)
-       call get_dos_1band_m(work_ndosmbessl,integ_dos_m,nene,nkpt,ndosfraction*mbesslang,&
-&       partial_dos_m,tweight,dtweightde)
+
+       call get_dos_1band(work_ndosmbessl,integ_dos_m,nene,nkpt,ndosfraction*mbesslang, &
+         partial_dos_m,tweight,dtweightde)
 
         total_dos_m = total_dos_m + partial_dos_m
         total_integ_dos_m = total_integ_dos_m + integ_dos_m
@@ -752,7 +753,7 @@ end if
  write(message,'(2(a,f8.2),a)')" tetrahedron: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
  call wrtout(std_out,message,"PERS")
 
-contains 
+contains
 
 subroutine write_headers()
 
@@ -930,74 +931,6 @@ subroutine get_dos_1band(dos_fractions,integ_dos,nene,nkpt,ndosfraction,&
  end do
 
 end subroutine get_dos_1band
-!!***
-
-!!****f* m_epjdos/get_dos_1band_m
-!! NAME
-!! get_dos_1band_m
-!!
-!! FUNCTION
-!! calculate DOS from tetrahedron method for 1 band and 1 sppol
-!!
-!! INPUTS
-!! dos_fractions_m=fractional DOS at each irred kpoint
-!! nene=number of energies for DOS
-!! nkpt=number of irreducible kpoints
-!! ndosfraction_m=number of different fractional DOSs
-!! tweight=sum of tetrahedron weights for each irred kpoint
-!! dtweightde=energy derivative of tweight
-!!
-!! OUTPUT
-!!  partial_dos_m(nene,ndosfraction_m)=partial DOS, for each different channel
-!!  integ_dos_m_m(nene,ndosfraction_m)=integrated DOS, for each different channel
-!!
-!! PARENTS
-!!      tetrahedron
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine get_dos_1band_m(dos_fractions_m,integ_dos_m,nene,nkpt,ndosfraction_m,&
-&                          partial_dos_m,tweight,dtweightde)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'get_dos_1band_m'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: ndosfraction_m,nene,nkpt
-!arrays
- real(dp),intent(in) :: dos_fractions_m(nkpt,ndosfraction_m)
- real(dp),intent(in) :: dtweightde(nene,nkpt),tweight(nene,nkpt)
- real(dp),intent(out) :: integ_dos_m(nene,ndosfraction_m)
- real(dp),intent(out) :: partial_dos_m(nene,ndosfraction_m)
-
-!Local variables-------------------------------
-!scalars
- integer :: ieps,ifract,ikpt
-
-! *********************************************************************
-
- partial_dos_m = zero; integ_dos_m = zero
-
- ! Calculate parameters of DOS at each point eps in [epsmin,epsmax]
- do ifract=1,ndosfraction_m
-   do ikpt=1,nkpt
-     do ieps=1,nene
-       partial_dos_m(ieps,ifract) = partial_dos_m(ieps,ifract) + dtweightde(ieps,ikpt)*dos_fractions_m(ikpt,ifract)
-       integ_dos_m(ieps,ifract) = integ_dos_m(ieps,ifract) + tweight(ieps,ikpt)*dos_fractions_m(ikpt,ifract)
-     end do
-   end do
- end do
-
-end subroutine get_dos_1band_m
 !!***
 
 !!****f* m_epjdos/recip_ylm

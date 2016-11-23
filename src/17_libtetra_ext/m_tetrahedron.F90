@@ -51,10 +51,10 @@ double precision,parameter  :: tol6 = 1.d-6, tol14 = 1.d-14, zero = 0.d0
 !!****t* m_tetrahedron/t_tetrahedron
 !! NAME
 !! t_tetrahedron
-!! 
+!!
 !! FUNCTION
 !! tetrahedron geometry object
-!! 
+!!
 !! SOURCE
 
 type, public :: t_tetrahedron
@@ -62,20 +62,20 @@ type, public :: t_tetrahedron
   integer :: ntetra=0
   ! Number of tetrahedra
 
-  double precision  :: vv  
+  double precision  :: vv
   ! volume of the tetrahedra
 
-  integer,allocatable :: tetra_full(:,:,:) 
+  integer,allocatable :: tetra_full(:,:,:)
   !(4,2,ntetra)
   ! For each tetra
   !   (:,1,itetra) indices of the vertex in IBZ (symmetrical image)
   !   (:,2,itetra) indices of the vertexes in the BZ
 
-  integer,allocatable :: tetra_mult(:)     
+  integer,allocatable :: tetra_mult(:)
   !(ntetra)
   ! multiplicity of each irred tetrahedron
 
-  integer,allocatable :: tetra_wrap(:,:,:) 
+  integer,allocatable :: tetra_wrap(:,:,:)
   !(3,4,ntetra)
   ! flag to wrap tetrahedron summit into IBZ
 
@@ -84,8 +84,8 @@ end type t_tetrahedron
 public :: init_tetra           ! Initialize the object.
 public :: get_tetra_weight     ! Calculate integration weights and their derivatives. shape (nkpt,nene)
 public :: tetra_blochl_weights ! Same as in get_tetra_weight but weights have shape (nene,nkpt)
-public :: get_dbl_tetra_weight ! Calculate integration weights for double tetrahedron 
-                               !  integration of delta functions (NB these correspond 
+public :: get_dbl_tetra_weight ! Calculate integration weights for double tetrahedron
+                               !  integration of delta functions (NB these correspond
                                !  to the derivative terms in normal tetrahedron).
 public :: destroy_tetra        ! Free memory.
 
@@ -199,17 +199,15 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetrahedra,ier
 ! 3 dimensions, 4 summits, and 6 tetrahedra / kpoint box
 !scalars
  integer :: ialltetra,ikpt2,ikpt_full,isummit,itetra,jalltetra,jsummit
- integer :: symrankkpt,mtetra,itmp
- integer :: ntetra_irred
- double precision  :: shift1,shift2,shift3, rcvol
- double precision :: hashfactor
+ integer :: symrankkpt,mtetra,itmp,ntetra_irred
+ double precision  :: shift1,shift2,shift3, rcvol,hashfactor
  type(kptrank_type) :: kptrank_t
 !arrays
  integer :: tetra_shifts(3,4,6)
  double precision  :: k1(3),k2(3),k3(3)
- integer,allocatable :: tetra_full_(:,:,:) !(4,2,mtetra)
- integer,allocatable :: tetra_mult_(:)     !(ntetra)
- integer,allocatable :: tetra_wrap_(:,:,:) !(3,4,ntetra)
+ integer,allocatable :: tetra_full_(:,:,:)
+ integer,allocatable :: tetra_mult_(:)
+ integer,allocatable :: tetra_wrap_(:,:,:)
  integer, allocatable :: reforder(:)
  integer, allocatable :: irred_itetra(:)
  double precision, allocatable :: tetra_hash(:)
@@ -228,9 +226,9 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetrahedra,ier
  TETRA_ALLOCATE(tetra_mult_, (mtetra))
  TETRA_ALLOCATE(tetra_wrap_, (3,4,mtetra))
 
- tetra_mult_(:) = 1
- tetra_full_(:,:,:) = 0
- tetra_wrap_(:,:,:) = 0
+ tetra_mult_ = 1
+ tetra_full_ = 0
+ tetra_wrap_ = 0
 
 ! tetra_shifts(:,1,1) = (/0,0,0/)
 ! tetra_shifts(:,2,1) = (/0,1,0/)
@@ -299,7 +297,7 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetrahedra,ier
 !      Find full kpoint which is summit isummit of tetrahedron itetra around full kpt ikpt_full !
        call get_rank_1kpt (k1,symrankkpt,kptrank_t)
        ikpt2 = kptrank_t%invrank(symrankkpt)
-       if (ikpt2 < 1) then 
+       if (ikpt2 < 1) then
          errorstring='Error in ranking k-points - exiting with un-initialized tetrahedra.'
          ierr = 2
          call destroy_kptrank (kptrank_t)
@@ -360,10 +358,10 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetrahedra,ier
      end do !  loop isummit
 
      if (ialltetra > mtetra) then
-       write (errorstring, '(3a,i6,a,i6)' ) &
+       write (errorstring, '(3a,i0,a,i0)' ) &
 &       ' init_tetra: BUG - ',&
 &       '  ialltetra > mtetra ',&
-&       '  ialltetra=  ',ialltetra,', mtetra=',mtetra
+&       '  ialltetra=  ',ialltetra,', mtetra= ',mtetra
        ierr = 1
        return
      end if
@@ -380,15 +378,9 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetrahedra,ier
 !Volume of all tetrahedra should be the same as that of tetra 1
 !this is the volume of 1 tetrahedron, should be coherent with
 !notation in Lehmann & Taut
- k1(:) = gprimd(:,1)*klatt(1,1) &
-& +  gprimd(:,2)*klatt(2,1) &
-& +  gprimd(:,3)*klatt(3,1)
- k2(:) = gprimd(:,1)*klatt(1,2) &
-& +  gprimd(:,2)*klatt(2,2) &
-& +  gprimd(:,3)*klatt(3,2)
- k3(:) = gprimd(:,1)*klatt(1,3) &
-& +  gprimd(:,2)*klatt(2,3) &
-& +  gprimd(:,3)*klatt(3,3)
+ k1(:) = gprimd(:,1)*klatt(1,1) +  gprimd(:,2)*klatt(2,1) +  gprimd(:,3)*klatt(3,1)
+ k2(:) = gprimd(:,1)*klatt(1,2) +  gprimd(:,2)*klatt(2,2) +  gprimd(:,3)*klatt(3,2)
+ k3(:) = gprimd(:,1)*klatt(1,3) +  gprimd(:,2)*klatt(2,3) +  gprimd(:,3)*klatt(3,3)
  tetrahedra%vv  = abs (k1(1)*(k2(2)*k3(3)-k2(3)*k3(2)) &
 & -k1(2)*(k2(1)*k3(3)-k2(3)*k3(1)) &
 & +k1(3)*(k2(1)*k3(2)-k2(2)*k3(1))) / 6.d0 / rcvol
@@ -408,14 +400,15 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetrahedra,ier
  TETRA_ALLOCATE(tetra_hash, (tetrahedra%ntetra))
  TETRA_ALLOCATE(reforder, (tetrahedra%ntetra))
 
+!MG: In principle the order of the indices should not matter.
  do ialltetra=1, tetrahedra%ntetra
    tetra_hash(ialltetra) = tetra_full_(1,1,ialltetra)*hashfactor**3+&
 &      tetra_full_(2,1,ialltetra)*hashfactor**2+&
 &      tetra_full_(3,1,ialltetra)*hashfactor**1+&
 &      tetra_full_(4,1,ialltetra)
-   reforder(ialltetra) = ialltetra 
+   reforder(ialltetra) = ialltetra
  end do
- 
+
  call sort_tetra(tetrahedra%ntetra, tetra_hash, reforder, tol6)
 
 ! determine number of tetra after reduction
@@ -432,7 +425,7 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetrahedra,ier
 ! reset number of tetrahedra
  ntetra_irred = jalltetra
 
-! allocate definitive tetra arrays 
+! allocate definitive tetra arrays
  ! transfer to new arrays
  TETRA_ALLOCATE(tetrahedra%tetra_full, (4,2,ntetra_irred))
  TETRA_ALLOCATE(tetrahedra%tetra_mult, (ntetra_irred))
@@ -484,7 +477,7 @@ end subroutine init_tetra
 !! FUNCTION
 !!  Write text file with tetra info.
 !!
-!! INPUTS 
+!! INPUTS
 !!  tetra<t_tetrahedron>=tetrahedron geometry object
 !!  nkibz=Number of k-points in the IBZ used to generate tetra
 !!  kibz(3,nkibz)=Reduced coordinates of the IBZ
@@ -648,7 +641,7 @@ end subroutine get_tetra_weight
 
 !----------------------------------------------------------------------
 
-!!****f* m_tetrahedron/tetra_blochl_weights 
+!!****f* m_tetrahedron/tetra_blochl_weights
 !! NAME
 !! tetra_blochl_weights
 !!
@@ -697,7 +690,7 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
  double precision  :: epsilon21,epsilon31,epsilon32,epsilon41,epsilon42,epsilon43
  double precision  :: gau_prefactor,gau_width,gau_width2,inv_epsilon21,inv_epsilon31
  double precision  :: inv_epsilon32,inv_epsilon41,inv_epsilon42,inv_epsilon43
- double precision  :: deleps1, deleps2, deleps3, deleps4 
+ double precision  :: deleps1, deleps2, deleps3, deleps4
  double precision  :: invepsum, cc_pre, dccde_pre
  double precision  :: cc1_pre, cc2_pre, cc3_pre
  double precision  :: cc_tmp, dccde_tmp
@@ -710,7 +703,7 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
  double precision , allocatable :: tweight_tmp(:,:)
  double precision , allocatable :: dtweightde_tmp(:,:)
  double precision  :: eigen_1tetra(4)
- double precision , allocatable :: buffer(:,:) 
+ double precision , allocatable :: buffer(:,:)
 
 ! *********************************************************************
 
@@ -751,9 +744,7 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
    eigen_1tetra(4) = eigen_in(ind_dum(4))
    call sort_tetra(4,eigen_1tetra,ind_dum,tol14)
 
-!  
 !  all notations are from Blochl PRB 49 16223 Appendix B
-!  
    epsilon21 = eigen_1tetra(2)-eigen_1tetra(1)
    epsilon31 = eigen_1tetra(3)-eigen_1tetra(1)
    epsilon41 = eigen_1tetra(4)-eigen_1tetra(1)
@@ -766,24 +757,12 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
    inv_epsilon32 = zero
    inv_epsilon42 = zero
    inv_epsilon43 = zero
-   if (epsilon21 > tol6) then
-     inv_epsilon21 = 1.d0 / epsilon21
-   end if
-   if (epsilon31 > tol6) then
-     inv_epsilon31 = 1.d0 / epsilon31
-   end if
-   if (epsilon41 > tol6) then
-     inv_epsilon41 = 1.d0 / epsilon41
-   end if
-   if (epsilon32 > tol6) then
-     inv_epsilon32 = 1.d0 / epsilon32
-   end if
-   if (epsilon42 > tol6) then
-     inv_epsilon42 = 1.d0 / epsilon42
-   end if
-   if (epsilon43 > tol6) then
-     inv_epsilon43 = 1.d0 / epsilon43
-   end if
+   if (epsilon21 > tol6) inv_epsilon21 = 1.d0 / epsilon21
+   if (epsilon31 > tol6) inv_epsilon31 = 1.d0 / epsilon31
+   if (epsilon41 > tol6) inv_epsilon41 = 1.d0 / epsilon41
+   if (epsilon32 > tol6) inv_epsilon32 = 1.d0 / epsilon32
+   if (epsilon42 > tol6) inv_epsilon42 = 1.d0 / epsilon42
+   if (epsilon43 > tol6) inv_epsilon43 = 1.d0 / epsilon43
    nn1 = int((eigen_1tetra(1)-enemin)/deltaene)+1
    nn2 = int((eigen_1tetra(2)-enemin)/deltaene)+1
    nn3 = int((eigen_1tetra(3)-enemin)/deltaene)+1
@@ -799,12 +778,12 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
    nn4 = min(nn4,nene)
 
    eps = enemin+nn1*deltaene
-!  
+!
 !  interval enemin < eps < e1 nothing to do
-!  
-!  
+!
+!
 !  interval e1 < eps < e2
-!  
+!
    deleps1 = eps-eigen_1tetra(1)
    cc_pre = volconst_mult*inv_epsilon21*inv_epsilon31*inv_epsilon41
    invepsum = inv_epsilon21+inv_epsilon31+inv_epsilon41
@@ -817,14 +796,10 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
      tweight_tmp(ieps,4) = tweight_tmp(ieps,4) + cc*deleps1*inv_epsilon41
 
      dccde = dccde_pre * deleps1*deleps1
-     dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) + &
-&     dccde*(4.d0 - deleps1*invepsum) -cc*invepsum
-     dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) + &
-&     (dccde*deleps1 + cc) * inv_epsilon21
-     dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) + &
-&     (dccde*deleps1 + cc) * inv_epsilon31
-     dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + &
-&     (dccde*deleps1 + cc) * inv_epsilon41
+     dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) + dccde*(4.d0 - deleps1*invepsum) -cc*invepsum
+     dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) + (dccde*deleps1 + cc) * inv_epsilon21
+     dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) + (dccde*deleps1 + cc) * inv_epsilon31
+     dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + (dccde*deleps1 + cc) * inv_epsilon41
 
      if (bcorr == 1) then
 ! bxu, correction terms based on Bloechl's paper
@@ -850,9 +825,9 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
      deleps1 = deleps1 + deltaene
    end do
    eps = eps + (nn2-nn1)*deltaene
-!  
+!
 !  interval e2 < eps < e3
-!  
+!
    deleps1 = eps-eigen_1tetra(1)
    deleps2 = eps-eigen_1tetra(2)
    deleps3 = eigen_1tetra(3)-eps
@@ -871,17 +846,13 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
      cc3 = cc3_pre * deleps2*deleps2*deleps4
 
      tweight_tmp(ieps,1) = tweight_tmp(ieps,1) + &
-&     cc1 + (cc1+cc2)*deleps3*inv_epsilon31 + &
-&     (cc1+cc2+cc3)*deleps4*inv_epsilon41
+&     cc1 + (cc1+cc2)*deleps3*inv_epsilon31 + (cc1+cc2+cc3)*deleps4*inv_epsilon41
      tweight_tmp(ieps,2) = tweight_tmp(ieps,2) + &
-&     cc1+cc2+cc3+(cc2+cc3)*deleps3*inv_epsilon32 +&
-&     cc3*deleps4*inv_epsilon42
+&     cc1+cc2+cc3+(cc2+cc3)*deleps3*inv_epsilon32 + cc3*deleps4*inv_epsilon42
      tweight_tmp(ieps,3) = tweight_tmp(ieps,3) + &
-&     (cc1+cc2)*deleps1*inv_epsilon31 + &
-&     (cc2+cc3)*deleps2*inv_epsilon32
+&     (cc1+cc2)*deleps1*inv_epsilon31 + (cc2+cc3)*deleps2*inv_epsilon32
      tweight_tmp(ieps,4) = tweight_tmp(ieps,4) + &
-&     (cc1+cc2+cc3)*deleps1*inv_epsilon41 + &
-&     cc3*deleps2*inv_epsilon42
+&     (cc1+cc2+cc3)*deleps1*inv_epsilon41 + cc3*deleps2*inv_epsilon42
 
 
      dcc1de = dcc1de_pre * deleps1
@@ -947,9 +918,9 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
      deleps4 = deleps4 - deltaene
    end do
    eps = eps + (nn3-nn2)*deltaene
-!  
+!
 !  interval e3 < eps < e4
-!  
+!
    deleps4 = eigen_1tetra(4)-eps
    cc_pre = volconst_mult*inv_epsilon41*inv_epsilon42*inv_epsilon43
    invepsum = inv_epsilon41+inv_epsilon42+inv_epsilon43
@@ -990,15 +961,15 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
 &       24.d0*cc_pre*deleps4*(-epsilon31-epsilon32+epsilon43)/40.d0
        dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) - &
 &       24.d0*cc_pre*deleps4*(-epsilon41-epsilon42-epsilon43)/40.d0
-     end if 
+     end if
 
      deleps4 = deleps4 - deltaene
    end do
    eps = eps + (nn4-nn3)*deltaene
-!  
-!  
+!
+!
 !  interval e4 < eps < enemax
-!  
+!
    do ieps=nn4+1,nene
      tweight_tmp(ieps,1) = tweight_tmp(ieps,1) + volconst_mult
      tweight_tmp(ieps,2) = tweight_tmp(ieps,2) + volconst_mult
@@ -1007,11 +978,11 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
 !    dtweightde unchanged by this tetrahedron
    end do
 
-!  
+!
 !  if we have a fully degenerate tetrahedron,
 !  1) the tweight is a Heaviside (step) function, which is correct above, but
 !  2) the dtweightde should contain a Dirac function: add a Gaussian here
-!  
+!
    if (epsilon41 < tol6) then
 
 !    to ensure the gaussian will integrate properly:
@@ -1020,14 +991,13 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
      gau_width = 10.0d0*deltaene
      gau_width2 = 1.0 / gau_width / gau_width
      gau_prefactor = volconst_mult / gau_width / sqrtpi
-!    
+!
 !    average position since bracket for epsilon41 is relatively large
      cc = (eigen_1tetra(1)+eigen_1tetra(2)+eigen_1tetra(3)+eigen_1tetra(4))/4.d0
      eps = enemin
      do ieps=1,nene
        tmp = eps - cc
-       dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + &
-&       gau_prefactor*exp(-tmp*tmp*gau_width2)
+       dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + gau_prefactor*exp(-tmp*tmp*gau_width2)
        eps = eps + deltaene
      end do
    end if
@@ -1081,10 +1051,10 @@ end subroutine tetra_blochl_weights
 !! FUNCTION
 !! calculate integration weights and their derivatives
 !! for double tetrahedron method from Allen Phys Stat Sol B 120 529 (1983)
-!! the k-points and tetrahedra must be the same for both grids, of course, 
+!! the k-points and tetrahedra must be the same for both grids, of course,
 !! but the range of energies is arbitrary
 !!
-!! Omega is called eigen1 here 
+!! Omega is called eigen1 here
 !! E is called eigen2 here
 !! indexing goes from 1 to 4 for the tetrahedron corners, in order of increasing eigen1
 !!  in Allen, from 0 to 3...
@@ -1157,7 +1127,7 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
 
  double precision  :: deltaene1,eps1
  double precision  :: deltaene2,eps2
-! double precision  :: gau_prefactor,gau_width,gau_width2 
+! double precision  :: gau_prefactor,gau_width,gau_width2
  double precision  :: epsilon1(4,4)
  double precision  :: epsilon2(4,4)
  double precision  :: inv_epsilon1(4,4)
@@ -1267,7 +1237,7 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
    nn1_4 = min(nn1_4,nene1)
 
    ! calculate Allen a_i b_i and c_i parameters
-   ! sort the a_i b_i c_i 
+   ! sort the a_i b_i c_i
    !
    ! NOTE: indices here go from 1 to 4 instead of 0 to 3 as in Allen...
    aa(1) = epsilon2(2,1) * inv_epsilon1(2,1)
@@ -1296,7 +1266,7 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
    if(delbb(1)> tol6) inv_delbb(1)= 1.0d0 / delbb(1)
    if(delbb(2)> tol6) inv_delbb(2)= 1.0d0 / delbb(2)
    if(delbb(3)> tol6) inv_delbb(3)= 1.0d0 / delbb(3)
-    
+
    cc(1) = epsilon2(1,4) * inv_epsilon1(1,4)
    cc(2) = epsilon2(2,4) * inv_epsilon1(2,4)
    cc(3) = epsilon2(3,4) * inv_epsilon1(3,4)
@@ -1314,12 +1284,12 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
 ! start main loop A B C over eps1
 !----------------------------------------------------------------------
 
-!  
+!
 !  interval enemin1 < eps1 < e1 nothing to do
-!  
-!  
+!
+!
 !  interval e1 < eps1 < e3   CASE A in Allen + first term in B
-!  
+!
 ! NB: eps1 is not updated inside the loop, only between the loops
    eps1 = enemin1+nn1_1*deltaene1
    deleps1 = eps1-eigen1_1tetra(1) ! this is Omega - omega_0
@@ -1398,9 +1368,9 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
    end do
 
 
-!  
+!
 !  interval e2 < eps < e3
-!  
+!
    eps1 = eps1 + (nn1_2-nn1_1)*deltaene1
 
    deleps1 = eps1-eigen1_1tetra(2) ! Omega - omega_1
@@ -1479,9 +1449,9 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
      deleps1 = deleps1 + deltaene1
    end do
 
-!  
+!
 !  interval e3 < eps < e4
-!  
+!
    eps1 = eps1 + (nn1_3-nn1_2)*deltaene1
    deleps1 = eps1-eigen1_1tetra(4)
    dccde1_pre = 6.d0*volconst_mult*inv_epsilon1(4,1)*inv_epsilon1(4,2)*inv_epsilon1(4,3)
@@ -1557,20 +1527,20 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
    end do
 
    eps1 = eps1 + (nn1_4-nn1_3)*deltaene1
-!  
-!  
+!
+!
 !  interval e4 < eps < enemax
-!  
+!
    do ieps1=nn1_4+1,nene1
 !    dtweightde unchanged by this tetrahedron
    end do
 
-!  
+!
 !  if we have a fully degenerate tetrahedron,
 !  1) the tweight is a Heaviside (step) function, which is correct above, but
 !  2) the dtweightde should contain a Dirac function: add a Gaussian here
 
-! TODO : add treatment in double tetra case  
+! TODO : add treatment in double tetra case
 !  end degenerate tetrahedron if
 
 ! NOTE: the following blas calls are not working systematically, or do not give speed ups, strange...
@@ -1603,7 +1573,7 @@ end subroutine get_dbl_tetra_weight
 !! NAME
 !!  sort_tetra
 !!
-!! FUNCTION 
+!! FUNCTION
 !!  Sort double precision array list(n) into ascending numerical order using Heapsort
 !!  algorithm, while making corresponding rearrangement of the integer
 !!  array iperm. Consider that two double precision numbers
@@ -1695,7 +1665,7 @@ subroutine sort_tetra(n,list,iperm,tol)
    i=l
    j=l+l
 
-   do while (j<=ir) 
+   do while (j<=ir)
     if (j<ir) then
      if ( list(j)<list(j+1)-tol .or.  &
 &        (list(j)<list(j+1)+tol.and.iperm(j)<iperm(j+1))) j=j+1
