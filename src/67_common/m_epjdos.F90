@@ -119,9 +119,6 @@ module m_epjdos
    real(dp),allocatable :: fractions_m(:,:,:,:)
    ! fractions_m(nkpt,mband,nsppol,ndosfraction*mbesslang)
 
-   !real(dp),allocatable :: fractions_average_m(:,:,:,:)
-   ! fractions_average_m(nkpt,mband,nsppol,ndosfraction*mbesslang)
-
    real(dp),allocatable :: fractions_paw1(:,:,:,:)
    ! fractions_paw1(nkpt,mband,nsppol,ndosfraction)
 

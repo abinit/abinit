@@ -698,7 +698,7 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
  double precision  :: tmp,volconst,volconst_mult
  double precision ,parameter :: sqrtpi = 1.7724538509055159d0
 !arrays
- integer :: ind_dum(4)
+ integer :: ind_ibz(4)
  !character(len=500) :: msg
  double precision , allocatable :: tweight_tmp(:,:)
  double precision , allocatable :: dtweightde_tmp(:,:)
@@ -723,10 +723,7 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
  call split_work(tetrahedra%ntetra,comm,nprocs,my_start,my_stop,ierr)
  if (ierr /= 0) TETRA_ERROR("Error in MPI layer")
 
-!
-!for each tetrahedron
-!
- !do itetra=1,tetrahedra%ntetra
+ ! for each tetrahedron
  do itetra=my_start,my_stop
    tweight_tmp = zero
    dtweightde_tmp = zero
@@ -734,15 +731,17 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
    volconst_mult = max_occ*volconst*float(tetrahedra%tetra_mult(itetra))
 
 !  Here we need the original ordering to reference the correct irred kpoints
-   ind_dum(1) = tetrahedra%tetra_full(1,1,itetra)
-   ind_dum(2) = tetrahedra%tetra_full(2,1,itetra)
-   ind_dum(3) = tetrahedra%tetra_full(3,1,itetra)
-   ind_dum(4) = tetrahedra%tetra_full(4,1,itetra)
-   eigen_1tetra(1) = eigen_in(ind_dum(1))
-   eigen_1tetra(2) = eigen_in(ind_dum(2))
-   eigen_1tetra(3) = eigen_in(ind_dum(3))
-   eigen_1tetra(4) = eigen_in(ind_dum(4))
-   call sort_tetra(4,eigen_1tetra,ind_dum,tol14)
+   ind_ibz(1) = tetrahedra%tetra_full(1,1,itetra)
+   ind_ibz(2) = tetrahedra%tetra_full(2,1,itetra)
+   ind_ibz(3) = tetrahedra%tetra_full(3,1,itetra)
+   ind_ibz(4) = tetrahedra%tetra_full(4,1,itetra)
+   eigen_1tetra(1) = eigen_in(ind_ibz(1))
+   eigen_1tetra(2) = eigen_in(ind_ibz(2))
+   eigen_1tetra(3) = eigen_in(ind_ibz(3))
+   eigen_1tetra(4) = eigen_in(ind_ibz(4))
+   call sort_tetra(4,eigen_1tetra,ind_ibz,tol14)
+
+   !call get_onetetra(eigen_1tetra, ind_ibz, bcorr, tweight_tmp, dtweightde_tmp)
 
 !  all notations are from Blochl PRB 49 16223 Appendix B
    epsilon21 = eigen_1tetra(2)-eigen_1tetra(1)
@@ -1004,25 +1003,24 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
 !  end degenerate tetrahedron if
 
 ! NOTE: the following blas calls are not working systematically, or do not give speed ups, strange...
-!   call daxpy (nene, 1.d0,    tweight_tmp(:,1), 1,    tweight_t(:,ind_dum(1)), 1)
-!   call daxpy (nene, 1.d0,    tweight_tmp(:,2), 1,    tweight_t(:,ind_dum(2)), 1)
-!   call daxpy (nene, 1.d0,    tweight_tmp(:,3), 1,    tweight_t(:,ind_dum(3)), 1)
-!   call daxpy (nene, 1.d0,    tweight_tmp(:,4), 1,    tweight_t(:,ind_dum(4)), 1)
-!   call daxpy (nene, 1.d0, dtweightde_tmp(:,1), 1, dtweightde_t(:,ind_dum(1)), 1)
-!   call daxpy (nene, 1.d0, dtweightde_tmp(:,2), 1, dtweightde_t(:,ind_dum(2)), 1)
-!   call daxpy (nene, 1.d0, dtweightde_tmp(:,3), 1, dtweightde_t(:,ind_dum(3)), 1)
-!   call daxpy (nene, 1.d0, dtweightde_tmp(:,4), 1, dtweightde_t(:,ind_dum(4)), 1)
-   tweight_t(:,ind_dum(1)) = tweight_t(:,ind_dum(1)) + tweight_tmp(:,1)
-   tweight_t(:,ind_dum(2)) = tweight_t(:,ind_dum(2)) + tweight_tmp(:,2)
-   tweight_t(:,ind_dum(3)) = tweight_t(:,ind_dum(3)) + tweight_tmp(:,3)
-   tweight_t(:,ind_dum(4)) = tweight_t(:,ind_dum(4)) + tweight_tmp(:,4)
-   dtweightde_t(:,ind_dum(1)) = dtweightde_t(:,ind_dum(1)) + dtweightde_tmp(:,1)
-   dtweightde_t(:,ind_dum(2)) = dtweightde_t(:,ind_dum(2)) + dtweightde_tmp(:,2)
-   dtweightde_t(:,ind_dum(3)) = dtweightde_t(:,ind_dum(3)) + dtweightde_tmp(:,3)
-   dtweightde_t(:,ind_dum(4)) = dtweightde_t(:,ind_dum(4)) + dtweightde_tmp(:,4)
+!   call daxpy (nene, 1.d0,    tweight_tmp(:,1), 1,    tweight_t(:,ind_ibz(1)), 1)
+!   call daxpy (nene, 1.d0,    tweight_tmp(:,2), 1,    tweight_t(:,ind_ibz(2)), 1)
+!   call daxpy (nene, 1.d0,    tweight_tmp(:,3), 1,    tweight_t(:,ind_ibz(3)), 1)
+!   call daxpy (nene, 1.d0,    tweight_tmp(:,4), 1,    tweight_t(:,ind_ibz(4)), 1)
+!   call daxpy (nene, 1.d0, dtweightde_tmp(:,1), 1, dtweightde_t(:,ind_ibz(1)), 1)
+!   call daxpy (nene, 1.d0, dtweightde_tmp(:,2), 1, dtweightde_t(:,ind_ibz(2)), 1)
+!   call daxpy (nene, 1.d0, dtweightde_tmp(:,3), 1, dtweightde_t(:,ind_ibz(3)), 1)
+!   call daxpy (nene, 1.d0, dtweightde_tmp(:,4), 1, dtweightde_t(:,ind_ibz(4)), 1)
+   tweight_t(:,ind_ibz(1)) = tweight_t(:,ind_ibz(1)) + tweight_tmp(:,1)
+   tweight_t(:,ind_ibz(2)) = tweight_t(:,ind_ibz(2)) + tweight_tmp(:,2)
+   tweight_t(:,ind_ibz(3)) = tweight_t(:,ind_ibz(3)) + tweight_tmp(:,3)
+   tweight_t(:,ind_ibz(4)) = tweight_t(:,ind_ibz(4)) + tweight_tmp(:,4)
+   dtweightde_t(:,ind_ibz(1)) = dtweightde_t(:,ind_ibz(1)) + dtweightde_tmp(:,1)
+   dtweightde_t(:,ind_ibz(2)) = dtweightde_t(:,ind_ibz(2)) + dtweightde_tmp(:,2)
+   dtweightde_t(:,ind_ibz(3)) = dtweightde_t(:,ind_ibz(3)) + dtweightde_tmp(:,3)
+   dtweightde_t(:,ind_ibz(4)) = dtweightde_t(:,ind_ibz(4)) + dtweightde_tmp(:,4)
 
- end do
-!end do itetra
+ end do ! itetra
 
  TETRA_DEALLOCATE(tweight_tmp)
  TETRA_DEALLOCATE(dtweightde_tmp)
@@ -1544,10 +1542,10 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
 !  end degenerate tetrahedron if
 
 ! NOTE: the following blas calls are not working systematically, or do not give speed ups, strange...
-!   call daxpy (nene, 1.d0, dtweightde_tmp(:,1), 1, dtweightde_t(:,ind_dum(1)), 1)
-!   call daxpy (nene, 1.d0, dtweightde_tmp(:,2), 1, dtweightde_t(:,ind_dum(2)), 1)
-!   call daxpy (nene, 1.d0, dtweightde_tmp(:,3), 1, dtweightde_t(:,ind_dum(3)), 1)
-!   call daxpy (nene, 1.d0, dtweightde_tmp(:,4), 1, dtweightde_t(:,ind_dum(4)), 1)
+!   call daxpy (nene, 1.d0, dtweightde_tmp(:,1), 1, dtweightde_t(:,ind_ibz(1)), 1)
+!   call daxpy (nene, 1.d0, dtweightde_tmp(:,2), 1, dtweightde_t(:,ind_ibz(2)), 1)
+!   call daxpy (nene, 1.d0, dtweightde_tmp(:,3), 1, dtweightde_t(:,ind_ibz(3)), 1)
+!   call daxpy (nene, 1.d0, dtweightde_tmp(:,4), 1, dtweightde_t(:,ind_ibz(4)), 1)
 
    do ieps2 = 1, nene2
      dtweightde(ind_k(1),:,ieps2) = dtweightde(ind_k(1),:,ieps2) + dtweightde_tmp(1,ieps2,:)
