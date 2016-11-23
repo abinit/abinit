@@ -184,7 +184,7 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 
 !Initialize derivatives
  if (mod(irestart,10)==0) then
-   call pimd_initvel(idum,mass,natom,initemp,trotter,vel)
+   call pimd_initvel(idum,mass,natom,initemp,trotter,vel,pimd_param%constraint,pimd_param%wtatcon)
  end if
 !vel_cell does not depend on Trotter...
  ddh=vel_cell(:,:,1);if (irestart<10) ddh=zero
@@ -212,6 +212,8 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 !  Compute PIMD and Langevin contributions to forces
    call pimd_forces(forces,natom,spring,0,trotter,xcart)
    call pimd_langevin_forces(alea,forces,forces_pimd,friction,langev,mass,natom,trotter,hxredpoint)
+   call pimd_apply_constraint(pimd_param%constraint,constraint_output,forces_pimd,&
+&                             mass,natom,trotter,pimd_param%wtatcon,xcart)
    tmp=matmul(invrprimd,ddh)
    pg=wg*matmul(ddh,invrprimd)
    tracepg=pg(1,1)+pg(2,2)+pg(3,3)
@@ -307,6 +309,8 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 !  Compute PIMD and Langevin contributions to forces
    call pimd_forces(forces,natom,spring,0,trotter,xcart)
    call pimd_langevin_forces(alea,forces,forces_pimd,friction,langev,mass,natom,trotter,hxredpoint)
+   call pimd_apply_constraint(pimd_param%constraint,constraint_output,forces_pimd,&
+&                             mass,natom,trotter,pimd_param%wtatcon,xcart)
 
 !  Compute difference between instantaneous stress and imposed stress (barostat)
    call pimd_stresses(mass,natom,quantummass,stress_pimd,stressin,thermtemp,thermtemp,trotter,hxredpoint,volume,xcart)
@@ -352,6 +356,8 @@ subroutine pimd_langevin_npt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
      end do
 !    Reestimate the forces
      call pimd_langevin_forces(alea,forces,forces_pimd,friction,langev,mass,natom,trotter,hxredpoint)
+     call pimd_apply_constraint(pimd_param%constraint,constraint_output,forces_pimd,&
+&                               mass,natom,trotter,pimd_param%wtatcon,xcart)
 !    Compute variation of temperature (to check convergence of SC loop)
      temperature2=pimd_temperature(mass,xredpoint)*rescale_temp
      tol=dabs(temperature2-temp2_prev)/dabs(temp2_prev)

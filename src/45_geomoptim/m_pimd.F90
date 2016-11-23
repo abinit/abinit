@@ -867,12 +867,15 @@ end subroutine pimd_print
 !! FUNCTION
 !!  Initialize velocities for PIMD with a gaussian distribution
 !!  fixing the center of mass
+!!  and eventually applying a constraint on atomic positions
 !!
 !! INPUTS
+!!  constraint=type of constraint to be applied
 !!  mass(natom,mass_dim)=masses of atoms (mass_dim=1 or trotter)
 !!  natom=number of atoms
 !!  temperature=temperature used to define velocities
 !!  trotter=Trotter number
+!!  wtatcon(3,natom)=weights for atomic constraints
 !!
 !! OUTPUT
 !!  vel(3,natom,trotter)=velocities of atoms in in each cell
@@ -888,7 +891,7 @@ end subroutine pimd_print
 !!
 !! SOURCE
 
-subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel)
+subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel,constraint,wtatcon)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -902,11 +905,11 @@ subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: natom,trotter
+ integer,intent(in) :: constraint,natom,trotter
  integer,intent(inout) :: iseed
  real(dp),intent(in) :: temperature
 !arrays
- real(dp),intent(in) :: mass(:,:)
+ real(dp),intent(in) :: mass(:,:),wtatcon(3,natom)
  real(dp),intent(out) :: vel(3,natom,trotter)
 !Local variables-------------------------------
 !scalars
@@ -924,9 +927,18 @@ subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel)
    MSG_BUG(msg)
  end if
 
- mtot=sum(mass(1:natom,1:nmass))
+!Compute total mass (of non-constrained atoms)
+ if (constraint==0) then
+   mtot=sum(mass(1:natom,1:nmass))
+ else
+   mtot=zero
+   do iatom=1,natom
+     if (all(abs(wtatcon(:,iatom))<tol8)) mtot=mtot+sum(mass(iatom,1:nmass))
+   end do
+ end if
  if (nmass==1) mtot=mtot*dble(trotter)
 
+!Initialize randomly the velocities
  do iimage=1,trotter
    imass=min(nmass,iimage)
    do iatom=1,natom
@@ -936,6 +948,15 @@ subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel)
      end do
    end do
  end do
+
+!Cancel velocities of constrained atoms
+ if (constraint/=0) then
+   do iimage=1,trotter
+     do iatom=1,natom
+       if (any(abs(wtatcon(:,iatom))>=tol8)) vel(:,iatom,iimage)=zero
+     end do
+   end do
+ end if
 
 !Make sure that the (sum of m_i v_i) at step zero is zero
  mvini=zero
@@ -947,14 +968,21 @@ subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel)
      end do
    end do
  end do
- do iimage=1,trotter
-   do iatom=1,natom
-     do ii=1,3
-       vel(ii,iatom,iimage)=vel(ii,iatom,iimage)-(mvini(ii)/mtot)
+ if (constraint==0) then
+   do iimage=1,trotter
+     do iatom=1,natom
+       do ii=1,3
+         vel(ii,iatom,iimage)=vel(ii,iatom,iimage)-(mvini(ii)/mtot)
+       end do
      end do
    end do
- end do
-!at this point (sum of m_i v_i) at step zero is zero
+ else
+   do iimage=1,trotter
+     do iatom=1,natom
+       if (all(abs(wtatcon(:,iatom))<tol8)) vel(:,iatom,iimage)=vel(:,iatom,iimage)-(mvini(:)/mtot)
+     end do
+   end do
+ end if
 
 !Now rescale the velocities to give the exact temperature
  rescale_vel=sqrt(temperature/pimd_temperature(mass,vel))
@@ -2628,6 +2656,7 @@ subroutine pimd_apply_constraint(constraint,constraint_output,forces,mass,natom,
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'pimd_apply_constraint'
+ use interfaces_32_util
 !End of the abilint section
 
  implicit none
@@ -2642,9 +2671,10 @@ subroutine pimd_apply_constraint(constraint,constraint_output,forces,mass,natom,
 !Local variables-------------------------------
 !scalars
  integer :: iatom,ii,iimage
- real(dp) :: lambda,one_over_trotter,force_centroid,xcart_centroid,zz
+ real(dp) :: af,lambda_cst,masstot,one_over_trotter,xcart_centroid,zz
  !character(len=500) :: msg
 !arrays
+ real(dp) :: force_centroid(3),lambda_com(3),mat(3,3),matinv(3,3),vec(3),weightsum(3)
 
 !************************************************************************
 
@@ -2660,19 +2690,31 @@ subroutine pimd_apply_constraint(constraint,constraint_output,forces,mass,natom,
 !=== Linear combination of centroid coordinates ==========================
  case(1)
 
-   !Calculation of Lagrange multiplier "lambda"
-   lambda=zero;zz=zero
-   do iatom=1,natom
-     do ii=1,3
-       force_centroid=zero
-       do iimage=1,trotter
-         force_centroid=force_centroid+forces(ii,iatom,iimage)
+!  Some useful quantities
+   masstot=sum(mass)*dble(trotter)
+   weightsum(:)=sum(wtatcon,dim=2)*dble(trotter)
+   zz=zero;af=zero;force_centroid=zero
+   do iimage=1,trotter
+     do iatom=1,natom
+       do ii=1,3
+         force_centroid(ii)=force_centroid(ii)+forces(ii,iatom,iimage)
+         af=af+wtatcon(ii,iatom)*forces(ii,iatom,iimage)/mass(iatom)
+         zz=zz+wtatcon(ii,iatom)**2/mass(iatom)
        end do
-       lambda=lambda+force_centroid*wtatcon(ii,iatom)/mass(iatom)
-       zz=zz+wtatcon(ii,iatom)**2/mass(iatom)
      end do
    end do
-   lambda=lambda/zz
+   vec(:)=force_centroid(:)-weightsum(:)*af/zz
+   do ii=1,3
+     mat(:,ii)=-weightsum(:)*weightsum(ii)/zz
+     mat(ii,ii)=mat(ii,ii)+masstot
+   end do
+   call matr3inv(mat,matinv)
+
+   !Calculation of a Lagrange multipliers:
+   ! lambda_cst: to apply the constraint
+   ! lambda_com: to maintain the position of the center of mass
+   lambda_com(:)=matmul(matinv,vec)
+   lambda_cst=(af-dot_product(weightsum,lambda_com))*dble(trotter)/zz
 
    !Modification of forces
    one_over_trotter=one/dble(trotter)
@@ -2680,7 +2722,8 @@ subroutine pimd_apply_constraint(constraint,constraint_output,forces,mass,natom,
      do iatom=1,natom
        do ii=1,3
          forces(ii,iatom,iimage)=forces(ii,iatom,iimage) &
-&                               -lambda*wtatcon(ii,iatom)*one_over_trotter
+&                               -lambda_cst*wtatcon(ii,iatom)*one_over_trotter &
+&                               -lambda_com(ii)*mass(iatom)
        end do
      end do
    end do
@@ -2698,7 +2741,7 @@ subroutine pimd_apply_constraint(constraint,constraint_output,forces,mass,natom,
      end do
    end do
    !2-Force on reaction coordinate
-   constraint_output(2)=-lambda
+   constraint_output(2)=-lambda_cst
 
  end select
 

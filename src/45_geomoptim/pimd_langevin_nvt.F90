@@ -127,6 +127,7 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
  zeroforce=1
  if(pitransform==1) zeroforce=0
  if(pitransform==2) zeroforce=0
+ if(pimd_param%constraint==1) zeroforce=0
 
 !Allocation of local arrays
  ABI_ALLOCATE(xcart,(3,natom,trotter))
@@ -187,7 +188,7 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 !If this is a calculation from scratch,generate random distribution of velocities
  irestart=1;if (itimimage==1) irestart=pimd_is_restart(mass,vel)
  if (irestart==0) then
-   call pimd_initvel(idum,mass,natom,initemp,trotter,vel)
+   call pimd_initvel(idum,mass,natom,initemp,trotter,vel,pimd_param%constraint,pimd_param%wtatcon)
  end if
 
 !Compute temperature at t
@@ -241,6 +242,8 @@ subroutine pimd_langevin_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolimg,
 !    Reestimate the force
      call pimd_langevin_forces(alea,forces,forces_pimd,friction,&
 &     langev,mass,natom,trotter,vel)
+     call pimd_apply_constraint(pimd_param%constraint,constraint_output,forces_pimd,&
+&                               mass,natom,trotter,pimd_param%wtatcon,xcart)
 !    Compute new positions
      call pimd_predict_verlet(dtion,forces_pimd,mass,natom,trotter,&
 &     xcart,xcart_next,xcart_prev)

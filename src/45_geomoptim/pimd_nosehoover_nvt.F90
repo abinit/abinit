@@ -181,7 +181,7 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 !If this is a calculation from scratch,generate random distribution of velocities
  irestart=1;if (itimimage==1) irestart=pimd_is_restart(mass,vel)
  if (irestart==0) then
-   call pimd_initvel(idum,mass,natom,initemp,trotter,vel)
+   call pimd_initvel(idum,mass,natom,initemp,trotter,vel,pimd_param%constraint,pimd_param%wtatcon)
  end if
 
 !Compute temperature at t
@@ -237,6 +237,8 @@ subroutine pimd_nosehoover_nvt(etotal,forces,itimimage,natom,pimd_param,prtvolim
      temperature2=pimd_temperature(mass,vel)
 !    Reestimate the force
      call pimd_nosehoover_forces(dzeta,forces,forces_pimd,mass,natom,nnos,trotter,vel)
+     call pimd_apply_constraint(pimd_param%constraint,constraint_output,forces_pimd,&
+&                               mass,natom,trotter,pimd_param%wtatcon,xcart)
 !    Compute new positions
      call pimd_predict_verlet(dtion,forces_pimd,mass,natom,trotter,&
 &     xcart,xcart_next,xcart_prev)

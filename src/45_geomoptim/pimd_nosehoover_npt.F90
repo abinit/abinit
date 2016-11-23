@@ -152,7 +152,7 @@ subroutine pimd_nosehoover_npt(etotal,forces,itimimage,natom,pimd_param,prtvolim
 
 !Initialize derivatives
  if (mod(irestart,10)==0) then
-   call pimd_initvel(idum,masseff,natom,initemp,trotter,vel)
+   call pimd_initvel(idum,masseff,natom,initemp,trotter,vel,pimd_param%constraint,pimd_param%wtatcon)
  end if
 !vel_cell does not depend on Trotter...
  ddh=vel_cell(:,:,1);if (irestart<10) ddh=zero
