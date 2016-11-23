@@ -389,9 +389,9 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  real(dp) :: cpu,wall,gflops
  logical :: bigDOS,iam_master
  character(len=10) :: tag
- character(len=500) :: frmt,frmt_extra,message
+ character(len=500) :: frmt,frmt_extra,msg
  character(len=fnlen) :: tmpfil
- type(t_tetrahedron) :: tetrahedra
+ type(t_tetrahedron) :: tetra
 !arrays
  integer,allocatable :: unitdos_arr(:)
  real(dp) :: list_dp(3)
@@ -414,28 +414,8 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
 !m-decomposed DOS not compatible with PAW-decomposed DOS
  if (prtdosm>=1.and.paw_dos_flag==1) then
-   message = 'm-decomposed DOS (prtdosm>=1) not compatible with PAW-decomposed DOS (pawprtdos=1) !'
-   MSG_ERROR(message)
- end if
-
-!Refuse only 1 kpoint: the algorithms are no longer valid. DOH !
- if (nkpt == 1) then
-   MSG_WARNING('You need at least 2 kpoints to use the tetrahedron method. DOS cannot be computed')
-   return
- end if
-
-!Do not support nshiftk > 1: lattice must be decomposed into boxes
-!and this is not always possible (I think) with bizzare shiftks
-!normally at this point we have incorporated everything into
-!kptrlatt, and only 1 shift is needed (in particular for MP grids).
- if (dtset%nshiftk > 1) then
-   write(std_out,*) 'tetrahedron: skip subroutine.'
-   write(std_out,*) 'Problem with a composite k-point grid.'
-   write(std_out,*) 'Only simple lattices are supported. Action: use nshiftk=1.'
-   write(std_out,*) 'dtset%nshiftk, dtset%shiftk = ', dtset%nshiftk, dtset%shiftk
-   write(std_out,*) 'dtset%kptrlatt= ', dtset%kptrlatt
-   MSG_WARNING('tetrahedron: skip subroutine. See message above')
-   return
+   msg = 'm-decomposed DOS (prtdosm>=1) not compatible with PAW-decomposed DOS (pawprtdos=1) !'
+   MSG_ERROR(msg)
  end if
 
 !Refuse nband different for different kpoints
@@ -454,16 +434,20 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
  call cwtime(cpu, wall, gflops, "start")
 
- call tetra_from_kptrlatt(tetrahedra, crystal, dtset%kptopt, dtset%kptrlatt, &
-                          dtset%nshiftk, dtset%shiftk, dtset%nkpt, dtset%kpt)
+ tetra = tetra_from_kptrlatt(crystal, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
+   dtset%shiftk, dtset%nkpt, dtset%kpt, msg, ierr)
+ if (ierr /= 0) then
+   MSG_WARNING(msg)
+   return
+ end if
 
  natsph=dtset%natsph; natsph_extra=dtset%natsph_extra
 
  ! Master opens the DOS files.
  if (iam_master) then
    if (any(dtset%prtdos == [2, 5])) then
-     if (open_file(fildata, message, newunit=unitdos, status='unknown', form='formatted', action="write") /= 0) then
-       MSG_ERROR(message)
+     if (open_file(fildata, msg, newunit=unitdos, status='unknown', form='formatted', action="write") /= 0) then
+       MSG_ERROR(msg)
      end if
 
    else if (dtset%prtdos == 3) then
@@ -472,9 +456,9 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
        call int2char4(dtset%iatsph(iat),tag)
        ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
        tmpfil = trim(fildata)//'_AT'//trim(tag)
-       if (open_file(tmpfil, message, newunit=unitdos_arr(iat), &
+       if (open_file(tmpfil, msg, newunit=unitdos_arr(iat), &
                      status='unknown', form='formatted', action="write") /= 0) then
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
      end do
      ! do extra spheres in vacuum too. Use _ATEXTRA[NUM] suffix
@@ -482,9 +466,9 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
        call int2char4(iat,tag)
        ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
        tmpfil = trim(fildata)//'_ATEXTRA'//trim(tag)
-       if (open_file(tmpfil, message, newunit=unitdos_arr(natsph+iat), &
+       if (open_file(tmpfil, msg, newunit=unitdos_arr(natsph+iat), &
                      status='unknown', form='formatted', action="write") /= 0) then
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
      end do
    end if
@@ -559,7 +543,7 @@ end if
      tmp_eigen(:) = ebands%eig(iband, :, isppol)
 
      ! calculate general integration weights at each irred kpoint as in Blochl et al PRB 49 16223
-     call tetra_blochl_weights(tetrahedra,tmp_eigen,enemin,enemax,max_occ,nene,nkpt,&
+     call tetra_blochl_weights(tetra,tmp_eigen,enemin,enemax,max_occ,nene,nkpt,&
        bcorr0,tweight,dtweightde,xmpi_comm_self)
 
      work_ndos = dos%fractions(:,iband,isppol,:)
@@ -709,8 +693,8 @@ end if
 
 10 continue
    integral_DOS=sum(total_integ_dos(nene,:))
-   write(message, '(a,es16.8)' ) ' tetrahedron : integrate to',integral_DOS
-   call wrtout(std_out,message,'COLL')
+   write(msg, '(a,es16.8)' ) ' tetrahedron : integrate to',integral_DOS
+   call wrtout(std_out,msg,'COLL')
  end do ! isppol
 
  ABI_DEALLOCATE(tmp_eigen)
@@ -747,25 +731,25 @@ end if
    ABI_DEALLOCATE(total_dos_pawt1)
  end if
 
- call destroy_tetra(tetrahedra)
+ call destroy_tetra(tetra)
 
  call cwtime(cpu,wall,gflops,"stop")
- write(message,'(2(a,f8.2),a)')" tetrahedron: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
- call wrtout(std_out,message,"PERS")
+ write(msg,'(2(a,f8.2),a)')" tetrahedron: cpu_time: ",cpu,"[s], walltime: ",wall," [s]"
+ call wrtout(std_out,msg,"PERS")
 
 contains
 
 subroutine write_headers()
 
  if (nsppol==2) then
-   if(isppol==1) write(message,'(a,16x,a)')  '#','Spin-up DOS'
-   if(isppol==2) write(message,'(2a,16x,a)')  ch10,'#','Spin-dn DOS'
+   if(isppol==1) write(msg,'(a,16x,a)')  '#','Spin-up DOS'
+   if(isppol==2) write(msg,'(2a,16x,a)')  ch10,'#','Spin-dn DOS'
    ! NB: dtset%prtdos == 5 should not happen for nsppol==2
    if (any(dtset%prtdos == [2, 5])) then
-     write(unitdos, "(a)")trim(message)
+     write(unitdos, "(a)")trim(msg)
    else if (dtset%prtdos == 3) then
      do iat=1,natsph+natsph_extra
-       write(unitdos_arr(iat), "(a)")trim(message)
+       write(unitdos_arr(iat), "(a)")trim(msg)
      end do
    end if
  end if
@@ -787,23 +771,23 @@ subroutine write_headers()
 &         '# PAW: note that only all-electron on-site part has been used to compute DOS !',ch10,"#"
        end if
        if (bigDOS) then
-         write(message, '(a,a)' ) &
+         write(msg, '(a,a)' ) &
 &         '# energy(Ha)   l=0       l=1       l=2       l=3       l=4',&
 &         '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
        else
-         write(message, '(a,a)' ) &
+         write(msg, '(a,a)' ) &
 &         '# energy(Ha)  l=0      l=1      l=2      l=3      l=4',&
 &         '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
        end if
        if (prtdosm>=1) then
-         write(message, '(7a)' ) trim(message),'          ',&
+         write(msg, '(7a)' ) trim(msg),'          ',&
 &         '  lm=0 0',&
 &         '  lm=1-1  lm=1 0  lm=1 1',&
 &         '  lm=2-2  lm=2-1  lm=2 0  lm=2 1  lm=2 2',&
 &         '  lm=3-3  lm=3-2  lm=3-1  lm=3 0  lm=3 1  lm=3 2  lm=3 3',&
 &         '  lm=4-4  lm=4-3  lm=4-2  lm=4-1  lm=4 0  lm=4 1  lm=4 2  lm=4 3  lm=4 4'
        end if
-       write(unitdos_arr(iat), "(a)")trim(message)
+       write(unitdos_arr(iat), "(a)")trim(msg)
      end do
    else
      do iat=1,natsph
@@ -815,19 +799,19 @@ subroutine write_headers()
 &       '# for atom number iat=',iat,'  iatom=',dtset%iatsph(iat),ch10,&
 &       '# inside sphere of radius ratsph=',dtset%ratsph(dtset%typat(dtset%iatsph(iat))),' Bohr.',ch10,"#"
        if (bigDOS) then
-         write(message, '(4a)' ) &
+         write(msg, '(4a)' ) &
 &         '#energy(Ha)   l=0       l=1       l=2       l=3       l=4',&
 &         '       (PW)  l=0       l=1       l=2       l=3       l=4',&
 &         '      (Phi)  l=0       l=1       l=2       l=3       l=4',&
 &         '     (tPhi)  l=0       l=1       l=2       l=3       l=4'
        else
-         write(message, '(4a)' ) &
+         write(msg, '(4a)' ) &
 &         '#energy(Ha)  l=0      l=1      l=2      l=3      l=4',&
 &         '       (PW) l=0      l=1      l=2      l=3      l=4',&
 &         '      (Phi) l=0      l=1      l=2      l=3      l=4',&
 &         '     (tPhi) l=0      l=1      l=2      l=3      l=4'
        end if
-       write(unitdos_arr(iat), "(a)")trim(message)
+       write(unitdos_arr(iat), "(a)")trim(msg)
      end do
    end if
    do iat=1,natsph_extra
@@ -836,23 +820,23 @@ subroutine write_headers()
 &     '# for non-atomic sphere number iat=',iat,ch10,&
 &     '# of radius ratsph=',dtset%ratsph_extra,' Bohr.',ch10,"#"
      if (bigDOS) then
-       write(message, '(a,a)' ) &
+       write(msg, '(a,a)' ) &
 &       '# energy(Ha)   l=0       l=1       l=2       l=3       l=4',&
 &       '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
      else
-       write(message, '(a,a)' ) &
+       write(msg, '(a,a)' ) &
 &       '# energy(Ha)  l=0      l=1      l=2      l=3      l=4',&
 &       '    (integral=>)  l=0     l=1     l=2     l=3     l=4'
      end if
      if (prtdosm>=1) then
-       write(message, '(7a)' ) trim(message),'          ',&
+       write(msg, '(7a)' ) trim(msg),'          ',&
 &       '  lm=0 0',&
 &       '  lm=1-1  lm=1 0  lm=1 1',&
 &       '  lm=2-2  lm=2-1  lm=2 0  lm=2 1  lm=2 2',&
 &       '  lm=3-3  lm=3-2  lm=3-1  lm=3 0  lm=3 1  lm=3 2  lm=3 3',&
 &       '  lm=4-4  lm=4-3  lm=4-2  lm=4-1  lm=4 0  lm=4 1  lm=4 2  lm=4 3  lm=4 4'
      end if
-     write(unitdos_arr(natsph+iat), "(a)")trim(message)
+     write(unitdos_arr(natsph+iat), "(a)")trim(msg)
    end do
 
  else if (prtdos==5) then

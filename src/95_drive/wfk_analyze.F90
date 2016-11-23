@@ -9,7 +9,7 @@
 !!
 !!   - MPI support.
 !!   - No interactive prompt.
-!!   - Run the analysis once, store all the important results in netcdf files 
+!!   - Run the analysis once, store all the important results in netcdf files
 !!     and use python tools to analyze data
 !!
 !! COPYRIGHT
@@ -146,7 +146,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  !real(dp) :: edos_step,edos_broad
  !real(dp) :: cpu,wall,gflops
  !real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,nelect,norm,oldefermi
- !character(len=500) :: !msg,
+ character(len=500) :: msg
  character(len=fnlen) :: wfk0_path,wfkfull_path
  logical :: call_pawinit, use_paw_aeur
  type(hdr_type) :: wfk0_hdr
@@ -163,7 +163,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  integer,allocatable :: l_size_atm(:)
  real(dp),parameter :: k0(3)=zero
  !real(dp) :: nelect_per_spin(dtset%nsppol),n0(dtset%nsppol)
- real(dp),pointer :: gs_eigen(:,:,:) 
+ real(dp),pointer :: gs_eigen(:,:,:)
  complex(gwpc),allocatable :: ur_ae(:)
  logical,allocatable :: keep_ur(:,:,:),bks_mask(:,:,:)
  real(dp) :: tsec(2)
@@ -178,12 +178,12 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  integer :: min_bsize,nbounds,ndivsm,intp_mband
  real(dp) :: sh_coverage
  !integer,allocatable :: intp_nband(:,:)
- real(dp) :: ewin(2,dtset%nsppol) 
+ real(dp) :: ewin(2,dtset%nsppol)
  real(dp),allocatable :: kptbounds(:,:)
  !type(ebands_t) :: obands
  type(kpath_t) :: kpath
  character(len=fnlen) :: sh_fname
- !type(wfd_t) :: owsh 
+ !type(wfd_t) :: owsh
 !END SHIRLEY
 
 !************************************************************************
@@ -221,7 +221,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
  ebands = ebands_from_hdr(wfk0_hdr,maxval(wfk0_hdr%nband),gs_eigen)
 
- ! TODO: 
+ ! TODO:
  ! Make sure everything is OK if WFK comes from a NSCF run since occ are set to zero
  ! fermie is set to 0 if nscf!
 
@@ -236,7 +236,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  !  call wrtout(ab_out,msg)
  !  call ebands_set_scheme(ebands,dtset%occopt,dtset%tsmear,spinmagntarget,dtset%prtvol)
  !end if
- 
+
  !if (dtset%eph_fermie /= zero) then ! default value of eph_fermie is zero hence no tolerance is used!
  !  ABI_CHECK(abs(dtset%eph_extrael) <= tol12, "eph_fermie and eph_extrael are mutually exclusive")
  !  call wrtout(ab_out, sjoin(" Fermi level set by the user at:",ftoa(dtset%eph_fermie)))
@@ -266,7 +266,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  ! Store DOS per spin channels
  !n0(:) = edos%gef(1:edos%nsppol)
  !if (my_rank == master) then
- !  path = strcat(dtfil%filnam_ds(4), "_EDOS") 
+ !  path = strcat(dtfil%filnam_ds(4), "_EDOS")
  !  call edos_write(edos, path)
  !  !call edos_print(edos)
  !  write(ab_out,"(a)")sjoin("- Writing electron DOS to file:", path)
@@ -320,9 +320,9 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
    ! Initialize values for several basic arrays
    gnt_option=1;if (dtset%pawxcdev==2.or.(dtset%pawxcdev==1.and.dtset%positron/=0)) gnt_option=2
-   
+
    ! Test if we have to call pawinit
-   call paw_gencond(dtset,gnt_option,"test",call_pawinit) 
+   call paw_gencond(dtset,gnt_option,"test",call_pawinit)
 
    if (psp_gencond==1 .or. call_pawinit) then
      call timab(553,1,tsec)
@@ -333,7 +333,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
      call timab(553,2,tsec)
 
      ! Update internal values
-     call paw_gencond(dtset,gnt_option,"save",call_pawinit) 
+     call paw_gencond(dtset,gnt_option,"save",call_pawinit)
 
    else
      if (pawtab(1)%has_kij  ==1) pawtab(1:cryst%ntypat)%has_kij  =2
@@ -377,7 +377,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    !  * 0 if Vloc in atomic data is Vbare    (Blochl s formulation)
    !  * 1 if Vloc in atomic data is VH(tnzc) (Kresse s formulation)
    call wrtout(std_out,sjoin("using usexcnhat= ",itoa(usexcnhat)))
-   !  
+   !
    ! Identify parts of the rectangular grid where the density has to be calculated ===
    !optcut=0; optgr0=dtset%pawstgylm; optgr1=0; optgr2=0; optrad=1-dtset%pawstgylm
    !if (dtset%xclevel==2 .and. usexcnhat>0) optgr1=dtset%pawstgylm
@@ -405,13 +405,15 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
      call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path)
 
      ! Write tetrahedron tables.
-     if (dtset%nkpt >= 4 .and. .not. all(dtset%kptrlatt == 0)) then
-       call tetra_from_kptrlatt(tetra, cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, dtset%shiftk, dtset%nkpt, dtset%kptns)
+     tetra = tetra_from_kptrlatt(cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
+        dtset%shiftk, dtset%nkpt, dtset%kptns, msg, ierr)
+     if (ierr == 0) then
        call tetra_write(tetra, dtset%nkpt, dtset%kptns, strcat(dtfil%filnam_ds(4), "_TETRA"))
-       call destroy_tetra(tetra)
      else
-       MSG_WARNING("nkpt < 4 or kptrlatt == 0, cannot produce TETRA file")
+       MSG_WARNING(sjoin("Cannot produce TETRA file", ch10, msg))
      end if
+
+     call destroy_tetra(tetra)
    end if
    call xmpi_barrier(comm)
 
@@ -452,7 +454,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    call paw_pwaves_lmn_init(paw_onsite,cryst%natom,cryst%natom,cryst%ntypat,&
    cryst%rprimd,cryst%xcart,pawtab,pawrad,pawfgrtab)
 
-   ! Use dense FFT mesh 
+   ! Use dense FFT mesh
    call wfd_change_ngfft(wfd,cryst,psps,ngfftf)
    band = 1; spin = 1; ik_ibz = 1
 
@@ -474,7 +476,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
    ! Energy window
    !ABI_CHECK(dtset%gwpara==1,"Must use gwpara==1 for shirley")
-   ewin(1,:) = smallest_real; ewin(2,:) = greatest_real 
+   ewin(1,:) = smallest_real; ewin(2,:) = greatest_real
    if (dtset%userrc > dtset%userrb) then
      ewin(1,:) = dtset%userrb
      ewin(2,:) = dtset%userrc
@@ -499,7 +501,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    one/3, one/3, half, & !H
    half, zero, half,   & !L
    zero, zero, half,   & !A
-   zero, zero, zero], [3,nbounds]) 
+   zero, zero, zero], [3,nbounds])
 
    call kpath_init(kpath,kptbounds,cryst%gprimd,ndivsm)
    ABI_FREE(kptbounds)
@@ -529,7 +531,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
      ! Energies only
      call shirley_interp(owsh,"N",dtset,cryst,psps,pawtab,pawfgr,pawang,pawrad,&
      pawrhoij,paw_ij,ngfftc,ngfftf,nfftf,ks_vtrial,&
-     intp_nband,intp_mband,kpath%npts,kpath%points,sh_fname,obands)   
+     intp_nband,intp_mband,kpath%npts,kpath%points,sh_fname,obands)
 
      ABI_FREE(intp_nband)
    end if
@@ -560,7 +562,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  call hdr_free(wfk0_hdr)
 
  ! Deallocation for PAW.
- if (dtset%usepaw==1) then 
+ if (dtset%usepaw==1) then
    call pawrhoij_free(pawrhoij)
    ABI_DT_FREE(pawrhoij)
    call pawfgrtab_free(pawfgrtab)
@@ -573,12 +575,12 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
  DBG_EXIT('COLL')
 
- contains 
+ contains
 !!***
 
 !!****f* wfk_analyze/read_wfd
 !! NAME
-!!  read_wfd 
+!!  read_wfd
 !!
 !! FUNCTION
 !!  Initialize the wavefunction descriptor
@@ -611,15 +613,15 @@ subroutine read_wfd()
    ABI_MALLOC(keep_ur, (ebands%mband, ebands%nkpt, ebands%nsppol))
    ABI_MALLOC(bks_mask, (ebands%mband, ebands%nkpt, ebands%nsppol))
    keep_ur = .False.; bks_mask = .True.
-   
+
    call wfd_init(wfd,cryst,pawtab,psps,keep_ur,dtset%paral_kgb,dummy_npw,&
    ebands%mband,ebands%nband,ebands%nkpt,dtset%nsppol,bks_mask,&
    dtset%nspden,dtset%nspinor,dtset%ecutsm,dtset%dilatmx,wfk0_hdr%istwfk,ebands%kptns,ngfftc,&
    dummy_gvec,dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm,opt_ecut=ecut_eff)
-   
+
    ABI_FREE(keep_ur)
    ABI_FREE(bks_mask)
-   
+
    call wfd_read_wfk(wfd,wfk0_path,IO_MODE_MPI)
    call wfd_test_ortho(wfd,cryst,pawtab)
 
