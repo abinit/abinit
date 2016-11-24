@@ -399,13 +399,15 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
      call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path)
 
      ! Write tetrahedron tables.
-     if (dtset%nkpt >= 4 .and. .not. all(dtset%kptrlatt == 0)) then
-       call tetra_from_kptrlatt(tetra, cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, dtset%shiftk, dtset%nkpt, dtset%kptns)
+     tetra = tetra_from_kptrlatt(cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
+        dtset%shiftk, dtset%nkpt, dtset%kptns, msg, ierr)
+     if (ierr == 0) then
        call tetra_write(tetra, dtset%nkpt, dtset%kptns, strcat(dtfil%filnam_ds(4), "_TETRA"))
-       call destroy_tetra(tetra)
      else
-       MSG_WARNING("nkpt < 4 or kptrlatt == 0, cannot produce TETRA file")
+       MSG_WARNING(sjoin("Cannot produce TETRA file", ch10, msg))
      end if
+
+     call destroy_tetra(tetra)
    end if
    call xmpi_barrier(comm)
 

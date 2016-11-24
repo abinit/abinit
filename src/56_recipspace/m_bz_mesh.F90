@@ -52,7 +52,7 @@ MODULE m_bz_mesh
  use m_profiling_abi
  use m_sort
 
- use m_fstrings,       only : ltoa
+ use m_fstrings,       only : ltoa, itoa, sjoin
  use m_numeric_tools,  only : is_zero, isinteger, imin_loc, imax_loc, bisect, wrap2_pmhalf
  use m_geometry,       only : normv
  use m_crystal,        only : crystal_t
@@ -3400,7 +3400,9 @@ end subroutine kpath_free
 !!  kibz(3,nkibz)=Reduced coordinates of the k-points in the IBZ.
 !!
 !! OUTPUT
-!!  tetra<t_tetrahedron>=Tetrahedron object.
+!!  tetra<t_tetrahedron>=Tetrahedron object, fully initialized if ierr == 0.
+!!  msg=Error message if ierr /= 0
+!!  ierr=Exit status
 !!
 !! PARENTS
 !!      gstate,wfk_analyze
@@ -3410,7 +3412,8 @@ end subroutine kpath_free
 !!
 !! SOURCE
 
-subroutine tetra_from_kptrlatt(tetra, cryst, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz)
+type(t_tetrahedron) function tetra_from_kptrlatt( &
+&  cryst, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, msg, ierr) result (tetra)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3425,7 +3428,8 @@ subroutine tetra_from_kptrlatt(tetra, cryst, kptopt, kptrlatt, nshiftk, shiftk, 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: kptopt,nshiftk,nkibz
- type(t_tetrahedron),intent(out) :: tetra
+ integer,intent(out) :: ierr
+ character(len=*),intent(out) :: msg
  type(crystal_t),intent(in) :: cryst
 !arrays
  integer,intent(in) :: kptrlatt(3,3)
@@ -3434,9 +3438,8 @@ subroutine tetra_from_kptrlatt(tetra, cryst, kptopt, kptrlatt, nshiftk, shiftk, 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: brav1=1,option0=0
- integer :: mkpt,nkfull,ierr,timrev,sppoldbl
+ integer :: mkpt,nkfull,timrev,sppoldbl
  real(dp) :: dksqmax
- character(len=500) :: msg
  character(len=80) :: errorstring
 !arrays
  integer,allocatable :: indkk(:,:)
@@ -3444,6 +3447,22 @@ subroutine tetra_from_kptrlatt(tetra, cryst, kptopt, kptrlatt, nshiftk, shiftk, 
  real(dp),allocatable :: kfull(:,:)
 
 ! *************************************************************************
+
+ ierr = 0
+
+ ! Refuse only 1 kpoint: the algorithms are no longer valid. DOH !
+ if (nkibz == 1) then
+   msg = 'You need at least 2 kpoints to use the tetrahedron method.'
+   ierr = 1; goto 10
+ end if
+ if (all(kptrlatt == 0)) then
+   msg = 'Cannot generate tetrahedron because input kptrlatt == 0.'
+   ierr = 1; goto 10
+ end if
+ if (kptopt <= 0) then
+   msg = sjoin("Cannot generate tetrahedron because input kptopt:", itoa(kptopt))
+   ierr = 1; goto 10
+ end if
 
  ! Call smpbz to get the full grid of k-points `kfull`
  ! brav1=1 is able to treat all bravais lattices (same option used in getkgrid)
@@ -3455,8 +3474,22 @@ subroutine tetra_from_kptrlatt(tetra, cryst, kptopt, kptrlatt, nshiftk, shiftk, 
    -kptrlatt(1,1)*kptrlatt(2,3)*kptrlatt(3,2)
  mkpt = mkpt * nshiftk
 
+ ! TODO: Replace with getkgrid.
  ABI_MALLOC(kfull, (3,mkpt))
  call smpbz(brav1,std_out,kptrlatt,mkpt,nkfull,nshiftk,option0,shiftk,kfull)
+
+ ! Do not support nshiftk > 1: lattice must be decomposed into boxes
+ ! and this is not always possible (I think) with bizzare shiftks
+ ! normally at this point we have incorporated everything into
+ ! kptrlatt, and only 1 shift is needed (in particular for MP grids).
+ if (nshiftk > 1) then
+   write(msg, "(9a)") &
+     'Cannot create tetrahedron object...',ch10, &
+     'Only simple lattices are supported. Action: use nshiftk=1.',ch10, &
+     'shiftk: ', trim(ltoa(reshape(shiftk, [3*nshiftk]))),ch10, &
+     'kptrlatt: ', trim(ltoa(reshape(kptrlatt, [9])))
+   ierr = 2; goto 10
+ end if
 
  ! Costruct full BZ and create mapping BZ --> IBZ
  ! Note:
@@ -3477,18 +3510,23 @@ subroutine tetra_from_kptrlatt(tetra, cryst, kptopt, kptrlatt, nshiftk, shiftk, 
    'dksqmax=',dksqmax,ch10,&
    'kptrkatt= ',trim(ltoa(reshape(kptrlatt, [9]))),ch10,&
    'shiftk= ',trim(ltoa(reshape(shiftk, [3*nshiftk])))
-   MSG_ERROR(msg)
+   ierr = 2; goto 10
  end if
 
  rlatt = kptrlatt; call matr3inv(rlatt,klatt)
 
  call init_tetra(indkk(:,1), cryst%gprimd, klatt, kfull, nkfull, tetra, ierr, errorstring)
- if (ierr /= 0) MSG_ERROR(errorstring)
+ if (ierr /= 0) msg = errorstring
 
- ABI_FREE(indkk)
- ABI_FREE(kfull)
+ 10 continue
+ if (allocated(indkk)) then
+   ABI_FREE(indkk)
+ end if
+ if (allocated(kfull)) then
+   ABI_FREE(kfull)
+ end if
 
-end subroutine tetra_from_kptrlatt
+end function tetra_from_kptrlatt
 !!***
 
 !----------------------------------------------------------------------
