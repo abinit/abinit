@@ -6,8 +6,6 @@
 !!
 !! FUNCTION
 !! Write the header of the DOS files, for both smearing and tetrahedron methods.
-!! Also compute the minimum, maximum energies, the energy increment
-!! and the number of points for the DOS.
 !!
 !! COPYRIGHT
 !! Copyright (C) 1998-2016 ABINIT group (XG, AF)
@@ -17,6 +15,10 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
+!! deltaene=increment of DOS energy arguments
+!! enemax=maximal value of the DOS energy argument
+!! enemin=minimal value of the DOS energy argument
+!! nene=number of DOS energy argument
 !! buffer=approximative buffer energy for the output of the DOS
 !!  (beyond the max and min energy values).
 !! dosdeltae=DOS delta of Energy (if zero, take default values)
@@ -33,10 +35,7 @@
 !! unitdos=unit number of output of the DOS.
 !!
 !! OUTPUT
-!! deltaene=increment of DOS energy arguments
-!! enemax=maximal value of the DOS energy argument
-!! enemin=minimal value of the DOS energy argument
-!! nene=number of DOS energy argument
+!!   Only writing.
 !!
 !! PARENTS
 !!      getnel,dos_calcnwrite
@@ -71,39 +70,18 @@ subroutine dos_hdr_write(buffer,deltaene,dosdeltae,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mband,nkpt,nsppol,occopt,prtdos,unitdos
- integer,intent(out) :: nene
+ integer,intent(in) :: mband,nkpt,nsppol,occopt,prtdos,unitdos,nene
  real(dp),intent(in) :: buffer,dosdeltae,fermie,tphysel,tsmear
- real(dp),intent(out) :: deltaene,enemax,enemin
+ real(dp),intent(in) :: deltaene,enemax,enemin
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
  real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
 
 !Local variables-------------------------------
 !scalars
- integer :: bantot
  character(len=500) :: msg
 
 ! *************************************************************************
-
- bantot=sum(nband(:))
-
-!Choose the lower and upper energies
- enemax=maxval(eigen(1:bantot))+buffer
- enemin=minval(eigen(1:bantot))-buffer
-
-!Extend the range to a nicer value
- enemax=0.1_dp*ceiling(enemax*10._dp)
- enemin=0.1_dp*floor(enemin*10._dp)
-
-!Choose the energy increment
- if(abs(dosdeltae)<tol10)then
-   deltaene=0.001_dp
-   if(prtdos>=2)deltaene=0.0005_dp ! Higher resolution possible (and wanted) for tetrahedron
- else
-   deltaene=dosdeltae
- end if
- nene=nint((enemax-enemin)/deltaene)+1
 
 !Write the DOS file
  write(msg, '(7a,i2,a,i5,a,i4)' ) "#",ch10, &
