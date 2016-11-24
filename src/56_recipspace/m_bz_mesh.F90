@@ -48,7 +48,7 @@ MODULE m_bz_mesh
  use m_profiling_abi
  use m_sort
 
- use m_fstrings,       only : ltoa
+ use m_fstrings,       only : ltoa, itoa, sjoin
  use m_numeric_tools,  only : is_zero, isinteger, imin_loc, imax_loc, bisect, wrap2_pmhalf
  use m_geometry,       only : normv
  use m_crystal,        only : crystal_t
@@ -3449,6 +3449,14 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
  ! Refuse only 1 kpoint: the algorithms are no longer valid. DOH !
  if (nkibz == 1) then
    msg = 'You need at least 2 kpoints to use the tetrahedron method.'
+   ierr = 1; goto 10
+ end if
+ if (all(kptrlatt == 0)) then
+   msg = 'Cannot generate tetrahedron because input kptrlatt == 0.'
+   ierr = 1; goto 10
+ end if
+ if (kptopt <= 0) then
+   msg = sjoin("Cannot generate tetrahedron because input kptopt:", itoa(kptopt))
    ierr = 1; goto 10
  end if
 

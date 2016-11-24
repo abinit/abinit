@@ -392,13 +392,14 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 !arrays
  integer,allocatable :: unitdos_arr(:)
  real(dp) :: list_dp(3)
- real(dp),allocatable :: dtweightde(:,:),integ_dos(:,:),integ_dos_m(:,:)
+ real(dp),allocatable :: dtweightde(:,:),dummy_idos(:,:)
  real(dp),allocatable :: partial_dos(:,:)
- real(dp),allocatable :: partial_dos_m(:,:),tmp_eigen(:),total_dos(:,:)
+ real(dp),allocatable :: tmp_eigen(:),total_dos(:,:)
  real(dp),allocatable :: total_dos_m(:,:),total_dos_paw1(:,:)
- real(dp),allocatable :: total_dos_pawt1(:,:),total_integ_dos(:,:)
- real(dp),allocatable :: total_integ_dos_m(:,:),tweight(:,:)
+ real(dp),allocatable :: total_dos_pawt1(:,:),total_idos(:,:)
+ real(dp),allocatable :: total_idos_m(:,:),tweight(:,:)
  real(dp),allocatable :: work_ndos(:,:),work_ndosmbessl(:,:)
+ real(dp),allocatable :: eig_idos(:),eig_dos(:)
 
 ! *********************************************************************
 
@@ -434,6 +435,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  tetra = tetra_from_kptrlatt(crystal, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
    dtset%shiftk, dtset%nkpt, dtset%kpt, msg, ierr)
  if (ierr /= 0) then
+   call destroy_tetra(tetra)
    MSG_WARNING(msg)
    return
  end if
@@ -493,22 +495,25 @@ end if
  call xmpi_bcast(list_dp, master, comm, ierr)
  deltaene = list_dp(1); enemin = list_dp(2); enemax = list_dp(3)
 
- ABI_ALLOCATE(partial_dos,(nene,ndosfraction))
- ABI_ALLOCATE(integ_dos,(nene,ndosfraction))
- ABI_ALLOCATE(total_dos,(nene,ndosfraction))
- ABI_ALLOCATE(total_integ_dos,(nene,ndosfraction))
- ABI_ALLOCATE(tweight,(nene, nkpt))
- ABI_ALLOCATE(dtweightde,(nene, nkpt))
+ ! Tetra weights
+ ABI_MALLOC(tweight,(nene, nkpt))
+ ABI_MALLOC(dtweightde,(nene, nkpt))
+
+ ! Allocate arrays to stores DOSes and fill with zeros.
+ ABI_CALLOC(partial_dos,(nene,ndosfraction))
+ ABI_CALLOC(dummy_idos,(nene,ndosfraction))
+ ABI_CALLOC(total_dos,(nene,ndosfraction))
+ ABI_CALLOC(total_idos,(nene,ndosfraction))
+ ABI_CALLOC(eig_idos, (nene))
+ ABI_CALLOC(eig_dos, (nene))
 
  if (paw_dos_flag==1) then
-   ABI_ALLOCATE(total_dos_paw1,(nene,ndosfraction))
-   ABI_ALLOCATE(total_dos_pawt1,(nene,ndosfraction))
+   ABI_CALLOC(total_dos_paw1,(nene,ndosfraction))
+   ABI_CALLOC(total_dos_pawt1,(nene,ndosfraction))
  end if
  if (prtdosm>=1) then
-   ABI_ALLOCATE(partial_dos_m,(nene,ndosfraction*mbesslang))
-   ABI_ALLOCATE(integ_dos_m,(nene,ndosfraction*mbesslang))
-   ABI_ALLOCATE(total_dos_m,(nene,ndosfraction*mbesslang))
-   ABI_ALLOCATE(total_integ_dos_m,(nene,ndosfraction*mbesslang))
+   ABI_CALLOC(total_dos_m,(nene,ndosfraction*mbesslang))
+   ABI_CALLOC(total_idos_m,(nene,ndosfraction*mbesslang))
  end if
 
 !Get maximum occupation value (2 or 1)
@@ -526,7 +531,7 @@ end if
 
  do isppol=1,nsppol
 
-   total_dos = zero; total_integ_dos = zero
+   total_dos = zero; total_idos = zero
    if (prtdosm>=1) total_dos_m = zero
    if (paw_dos_flag==1) then
      total_dos_paw1(:,:)=zero;total_dos_pawt1(:,:)=zero
@@ -543,41 +548,37 @@ end if
      call tetra_blochl_weights(tetra,tmp_eigen,enemin,enemax,max_occ,nene,nkpt,&
        bcorr0,tweight,dtweightde,xmpi_comm_self)
 
+     ! Accumulate total DOS from eigenvalues (this is the **exact** total DOS)
+     call get_dos_1band(work_ndos,eig_idos,nene,nkpt,1,eig_dos,tweight,dtweightde)
+
+     ! Accumulate L-DOS
      work_ndos = dos%fractions(:,iband,isppol,:)
-     call get_dos_1band(work_ndos,integ_dos,nene,nkpt,ndosfraction,partial_dos,tweight,dtweightde)
+     call get_dos_1band(work_ndos,total_idos,nene,nkpt,ndosfraction,total_dos,tweight,dtweightde)
 
-     ! Add to total dos
-     total_dos = total_dos + partial_dos
-     total_integ_dos = total_integ_dos + integ_dos
-
-     ! calculate DOS and integrated DOS projected with the input dos_fractions
      if (paw_dos_flag==1) then
+       ! calculate DOS and integrated DOS projected with the input dos_fractions
        work_ndos = dos%fractions_paw1(:,iband,isppol,:)
-       call get_dos_1band(work_ndos,integ_dos,nene,nkpt,ndosfraction,partial_dos,tweight,dtweightde)
-
-       total_dos_paw1 = total_dos_paw1 + partial_dos
+       call get_dos_1band(work_ndos,dummy_idos,nene,nkpt,ndosfraction,total_dos_paw1,tweight,dtweightde)
 
        work_ndos = dos%fractions_pawt1(:,iband,isppol,:)
-       call get_dos_1band(work_ndos,integ_dos,nene,nkpt,ndosfraction,partial_dos,tweight,dtweightde)
-
-       total_dos_pawt1 = total_dos_pawt1 + partial_dos
+       call get_dos_1band(work_ndos,dummy_idos,nene,nkpt,ndosfraction,total_dos_pawt1,tweight,dtweightde)
      end if
 
      if (prtdosm>=1) then
+       ! Accumulate LM-DOS
        work_ndosmbessl = dos%fractions_m(:,iband,isppol,:)
 
-       call get_dos_1band(work_ndosmbessl,integ_dos_m,nene,nkpt,ndosfraction*mbesslang, &
-         partial_dos_m,tweight,dtweightde)
-
-        total_dos_m = total_dos_m + partial_dos_m
-        total_integ_dos_m = total_integ_dos_m + integ_dos_m
+       call get_dos_1band(work_ndosmbessl,total_idos_m,nene,nkpt,ndosfraction*mbesslang, &
+         total_dos_m,tweight,dtweightde)
      end if
 
    end do ! iband
 
    ! Collect results on master
+   call xmpi_sum_master(eig_idos, master, comm, ierr)
+   call xmpi_sum_master(eig_dos, master, comm, ierr)
    call xmpi_sum_master(total_dos, master, comm, ierr)
-   call xmpi_sum_master(total_integ_dos, master, comm, ierr)
+   call xmpi_sum_master(total_idos, master, comm, ierr)
    bigDOS=(maxval(total_dos)>999._dp)
 
    if (paw_dos_flag == 1) then
@@ -586,7 +587,7 @@ end if
    end if
    if (prtdosm >= 1) then
      call xmpi_sum_master(total_dos_m, master, comm, ierr)
-     call xmpi_sum_master(total_integ_dos_m, master, comm, ierr)
+     call xmpi_sum_master(total_idos_m, master, comm, ierr)
    end if
 
    ! Write the DOS value in the DOS file
@@ -601,7 +602,7 @@ end if
      ! E, DOS, IDOS
      do iene=1,nene
        write(unitdos, '(f11.5,1x,2(f10.4,1x))') &
-        enemin + (iene-1)*deltaene, min(total_dos(iene,:), dos_max), total_integ_dos(iene,:)
+        enemin + (iene-1)*deltaene, min(total_dos(iene,:), dos_max), total_idos(iene,:)
      end do
 
    else if (prtdos==3) then
@@ -618,13 +619,13 @@ end if
          if (prtdosm==0) then
            do iene=1,nene
              write(unitdos_arr(iat), fmt=frmt) enemin + (iene-1)*deltaene, &
-&              min(total_dos(iene, i1:i2), dos_max), total_integ_dos(iene, i1:i2)
+&              min(total_dos(iene, i1:i2), dos_max), total_idos(iene, i1:i2)
            end do
          else
            do iene=1,nene
              write(unitdos_arr(iat), fmt=frmt) enemin + (iene-1)*deltaene, &
 &              min(total_dos(iene, i1:i2), dos_max),&
-&              total_integ_dos(iene, i1:i2),&
+&              total_idos(iene, i1:i2),&
 &              min(total_dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2), dos_max)
            end do
          end if
@@ -637,13 +638,13 @@ end if
            do iene=1,nene
              write(unitdos_arr(iat), fmt=frmt_extra) enemin + (iene-1)*deltaene, &
 &             total_dos(iene, i1:i2), &
-&             total_integ_dos(iene, i1:i2)
+&             total_idos(iene, i1:i2)
            end do
          else
            do iene=1,nene
              write(unitdos_arr(iat), fmt=frmt_extra) enemin + (iene-1)*deltaene, &
 &             total_dos(iene, i1:i2),&
-&             total_integ_dos(iene, i1:i2),&
+&             total_idos(iene, i1:i2),&
 &             total_dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2)
            end do
          end if
@@ -684,12 +685,12 @@ end if
      frmt = '(f11.5,1x,7(f9.4,1x),10x,7(f8.2,1x))'
      if (bigDOS) frmt = '(f11.5,1x,7(f10.4,1x),10x,7(f8.2,1x))'
      do iene=1,nene
-       write(unitdos, fmt=frmt) enemin + (iene-1)*deltaene, min(total_dos(iene,1:7), dos_max), total_integ_dos(iene,1:7)
+       write(unitdos, fmt=frmt) enemin + (iene-1)*deltaene, min(total_dos(iene,1:7), dos_max), total_idos(iene,1:7)
      end do
    end if
 
 10 continue
-   integral_DOS=sum(total_integ_dos(nene,:))
+   integral_DOS=sum(total_idos(nene,:))
    write(msg, '(a,es16.8)' ) ' tetrahedron : integrate to',integral_DOS
    call wrtout(std_out,msg,'COLL')
  end do ! isppol
@@ -710,17 +711,17 @@ end if
  end if
 
  ABI_DEALLOCATE(partial_dos)
- ABI_DEALLOCATE(integ_dos)
+ ABI_DEALLOCATE(dummy_idos)
  ABI_DEALLOCATE(total_dos)
- ABI_DEALLOCATE(total_integ_dos)
+ ABI_DEALLOCATE(total_idos)
  ABI_DEALLOCATE(tweight)
  ABI_DEALLOCATE(dtweightde)
+ ABI_DEALLOCATE(eig_idos)
+ ABI_DEALLOCATE(eig_dos)
 
  if (prtdosm>=1)  then
-   ABI_DEALLOCATE(partial_dos_m)
-   ABI_DEALLOCATE(integ_dos_m)
    ABI_DEALLOCATE(total_dos_m)
-   ABI_DEALLOCATE(total_integ_dos_m)
+   ABI_DEALLOCATE(total_idos_m)
  end if
 
  if (paw_dos_flag==1)  then
@@ -851,7 +852,7 @@ end subroutine dos_calcnwrite
 !! get_dos_1band
 !!
 !! FUNCTION
-!! calculate DOS from tetrahedron method for 1 band and 1 sppol
+!! calculate DOS from tetrahedron method for 1 band and 1 sppol and accumulate results.
 !!
 !! INPUTS
 !! dos_fractions=fractional DOS at each irred kpoint
@@ -861,9 +862,9 @@ end subroutine dos_calcnwrite
 !! tweight=sum of tetrahedron weights for each irred kpoint
 !! dtweightde=energy derivative of tweight
 !!
-!! OUTPUT
-!!  partial_dos(nene,ndosfraction)=partial DOS, for each different channel
-!!  integ_dos(nene,ndosfraction)=integrated DOS, for each different channel
+!! SIDE EFFECTS
+!!  partial_dos(nene,ndosfraction)=accumulated partial DOS, for each different channel
+!!  integ_dos(nene,ndosfraction)=accumulated integrated DOS, for each different channel
 !!
 !! PARENTS
 !!      tetrahedron
@@ -890,16 +891,14 @@ subroutine get_dos_1band(dos_fractions,integ_dos,nene,nkpt,ndosfraction,&
 !arrays
  real(dp),intent(in) :: dos_fractions(nkpt,ndosfraction),dtweightde(nene,nkpt)
  real(dp),intent(in) :: tweight(nene,nkpt)
- real(dp),intent(out) :: integ_dos(nene,ndosfraction)
- real(dp),intent(out) :: partial_dos(nene,ndosfraction)
+ real(dp),intent(inout) :: integ_dos(nene,ndosfraction)
+ real(dp),intent(inout) :: partial_dos(nene,ndosfraction)
 
 !Local variables-------------------------------
 !scalars
  integer :: ieps,ifract,ikpt
 
 ! *********************************************************************
-
- partial_dos = zero; integ_dos = zero
 
  ! Calculate parameters of DOS at each point eps in [epsmin,epsmax]
  do ifract=1,ndosfraction
