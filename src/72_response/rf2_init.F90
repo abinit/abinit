@@ -43,7 +43,6 @@
 !!    same as rf_hamkq, but the direction of the perturbation is different
 !!  occ_k(nband_k)=occupation number for each band (usually 2) for each k.
 !!  rocceig(nband_k,nband_k)= (occ_kq(m)-occ_k(n))/(eig0_kq(m)-eig0_k(n))
-!!  wffddk=struct info for wf ddk file.
 !!  ddk<wfk_t>=struct info for DDK file.
 !!
 !! OUTPUT
@@ -67,14 +66,13 @@
 #include "abi_common.h"
 
 subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,ikpt,ipert,isppol,mkmem,&
-                     mpi_enreg,mpw,nband_k,nsppol,rf_hamkq,rf_hamk_dir2,occ_k,rocceig,wffddk,ddk_f)
+                     mpi_enreg,mpw,nband_k,nsppol,rf_hamkq,rf_hamk_dir2,occ_k,rocceig,ddk_f)
 
  use defs_basis
  use defs_datatypes
  use defs_abitypes
  use m_xmpi
  use m_errors
- use m_wffile
  use m_wfk
  use m_hamiltonian
  use m_cgtools
@@ -111,7 +109,6 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
  real(dp),intent(in) :: occ_k(nband_k),rocceig(nband_k,nband_k)
  type(pawcprj_type),intent(in) :: cprj(gs_hamkq%natom,gs_hamkq%nspinor*dtset%mband*mkmem*nsppol*gs_hamkq%usecprj)
  type(rf2_t),intent(inout) :: rf2
- type(wffile_type),intent(inout) :: wffddk(4)
  type(wfk_t),intent(inout) :: ddk_f(4)
 !
 !Local variables-------------------------------
@@ -141,10 +138,6 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 ! *********************************************************************
 
  DBG_ENTER("COLL")
-
-#ifdef DEV_MG_WFK
- ABI_UNUSED((/wffddk(1)%unwff/))
-#endif
 
  size_wf=gs_hamkq%npw_k*gs_hamkq%nspinor
  size_cprj=gs_hamkq%nspinor
@@ -224,12 +217,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
    idir1=rf2%idirs(kdir1)
    ipert1=rf2%iperts(kdir1)
    do iband=1,nband_k
-#ifndef DEV_MG_WFK
-     call WffReadDataRec(eig1_read,ierr,2*nband_k,wffddk(file_index(kdir1)))
-     call WffReadDataRec(ddk_read,ierr,2,size_wf,wffddk(file_index(kdir1)))
-#else
      call wfk_read_bks(ddk_f(file_index(kdir1)),iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
-#endif
 !    Filter the wavefunctions for large modified kinetic energy
 !    The GS wavefunctions should already be non-zero
      do ispinor=1,gs_hamkq%nspinor
@@ -274,12 +262,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
      ABI_ALLOCATE(dudk_dir2,(2,nband_k*size_wf))
    end if
    do iband=1,nband_k
-#ifndef DEV_MG_WFK
-     call WffReadDataRec(eig1_read,ierr,2*nband_k,wffddk(1))
-     call WffReadDataRec(ddk_read,ierr,2,size_wf,wffddk(1))
-#else
      call wfk_read_bks(ddk_f(1),iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
-#endif
      shift_band1=(iband-1)*size_wf
      dudkdk(:,1+shift_band1:size_wf+shift_band1)=ddk_read(:,:)
 !    Check that < u^(0) | u^(2) > = - Re[< u^(1) | u^(1) >]
@@ -307,12 +290,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
      end if ! print_info
 !Read ddk for idir2
      if (idir>3) then
-#ifndef DEV_MG_WFK
-       call WffReadDataRec(eig1_read,ierr,2*nband_k,wffddk(4))
-       call WffReadDataRec(ddk_read,ierr,2,size_wf,wffddk(4))
-#else
        call wfk_read_bks(ddk_f(4),iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
-#endif
        dudk_dir2(:,1+shift_band1:size_wf+shift_band1)=ddk_read(:,:)
      end if
    end do !iband

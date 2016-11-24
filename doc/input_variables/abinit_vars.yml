@@ -8416,6 +8416,10 @@
         <p>
         [[gwgamma]]=-4 activates the bootstrap kernel of Sharma et al. [Phys. Rev. Lett. 107, 186401 (2011)] in the test-charge-test-charge dielectric function [cf. Chen and Pasquarello, Phys. Rev. B 92, 041115(R) (2015)]. A cheaper one-shot variant can be achieved with [[gwgamma]]=-6 using only the head of the kernel.
         </p>
+        <p>
+        [[gwgamma]]=-8 uses the RPA bootstrap-like kernel (one-shot) [Phys. Rev.  Lett. 115, 137402 (2015), ibid. 114, 146402 (2015)].
+        </p>
+        </p>
     varname: gwgamma
     vartype: integer
 - !variable
