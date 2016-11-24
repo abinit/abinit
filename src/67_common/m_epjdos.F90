@@ -345,7 +345,7 @@ end subroutine epjdos_free
 !!      outscfcv
 !!
 !! CHILDREN
-!!      destroy_tetra,dos_hdr_write,get_dos_1band
+!!      destroy_tetra,dos_hdr_write,acc_dos_1band
 !!      get_full_kgrid,get_tetra_weight,init_tetra,int2char4,matr3inv,metric
 !!      wrtout
 !!
@@ -390,15 +390,15 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  character(len=fnlen) :: tmpfil
  type(t_tetrahedron) :: tetra
 !arrays
- integer,allocatable :: unitdos_arr(:)
+ integer,allocatable :: unt_atsph(:)
  real(dp) :: list_dp(3)
  real(dp),allocatable :: dtweightde(:,:),dummy_idos(:,:)
  real(dp),allocatable :: partial_dos(:,:)
  real(dp),allocatable :: tmp_eigen(:),total_dos(:,:)
- real(dp),allocatable :: total_dos_m(:,:),total_dos_paw1(:,:)
- real(dp),allocatable :: total_dos_pawt1(:,:),total_idos(:,:)
- real(dp),allocatable :: total_idos_m(:,:),tweight(:,:)
- real(dp),allocatable :: work_ndos(:,:),work_ndosmbessl(:,:)
+ real(dp),allocatable :: dos_m(:,:),dos_paw1(:,:)
+ real(dp),allocatable :: dos_pawt1(:,:),total_idos(:,:)
+ real(dp),allocatable :: idos_m(:,:),tweight(:,:)
+ real(dp),allocatable :: work_kf(:,:),work_m(:,:)
  real(dp),allocatable :: eig_idos(:),eig_dos(:)
 
 ! *********************************************************************
@@ -450,12 +450,12 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
      end if
 
    else if (dtset%prtdos == 3) then
-     ABI_ALLOCATE(unitdos_arr,(natsph+natsph_extra))
+     ABI_MALLOC(unt_atsph,(natsph+natsph_extra))
      do iat=1,natsph
        call int2char4(dtset%iatsph(iat),tag)
        ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
        tmpfil = trim(fildata)//'_AT'//trim(tag)
-       if (open_file(tmpfil, msg, newunit=unitdos_arr(iat), &
+       if (open_file(tmpfil, msg, newunit=unt_atsph(iat), &
                      status='unknown', form='formatted', action="write") /= 0) then
          MSG_ERROR(msg)
        end if
@@ -465,7 +465,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
        call int2char4(iat,tag)
        ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
        tmpfil = trim(fildata)//'_ATEXTRA'//trim(tag)
-       if (open_file(tmpfil, msg, newunit=unitdos_arr(natsph+iat), &
+       if (open_file(tmpfil, msg, newunit=unt_atsph(natsph+iat), &
                      status='unknown', form='formatted', action="write") /= 0) then
          MSG_ERROR(msg)
        end if
@@ -485,7 +485,7 @@ if (iam_master) then
    do iat=1,natsph+natsph_extra
      call dos_hdr_write(buffer,deltaene,dtset%dosdeltae,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
 &     dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
-&     dtset%tphysel,dtset%tsmear,unitdos_arr(iat))
+&     dtset%tphysel,dtset%tsmear,unt_atsph(iat))
    end do
  end if
 end if
@@ -508,12 +508,13 @@ end if
  ABI_CALLOC(eig_dos, (nene))
 
  if (paw_dos_flag==1) then
-   ABI_CALLOC(total_dos_paw1,(nene,ndosfraction))
-   ABI_CALLOC(total_dos_pawt1,(nene,ndosfraction))
+   ABI_CALLOC(dos_paw1,(nene,ndosfraction))
+   ABI_CALLOC(dos_pawt1,(nene,ndosfraction))
  end if
  if (prtdosm>=1) then
-   ABI_CALLOC(total_dos_m,(nene,ndosfraction*mbesslang))
-   ABI_CALLOC(total_idos_m,(nene,ndosfraction*mbesslang))
+   ABI_CALLOC(dos_m, (nene,ndosfraction*mbesslang))
+   ABI_CALLOC(idos_m, (nene,ndosfraction*mbesslang))
+   ABI_MALLOC(work_m, (nkpt, ndosfraction*mbesslang))
  end if
 
 !Get maximum occupation value (2 or 1)
@@ -525,16 +526,15 @@ end if
 !-------------------------------------------------------------------
 
  ! Workspace arrays.
- ABI_MALLOC(work_ndos, (nkpt, ndosfraction))
- ABI_MALLOC(work_ndosmbessl, (nkpt, ndosfraction*mbesslang))
- ABI_ALLOCATE(tmp_eigen,(nkpt))
+ ABI_MALLOC(work_kf, (nkpt, ndosfraction))
+ ABI_MALLOC(tmp_eigen,(nkpt))
 
  do isppol=1,nsppol
 
    total_dos = zero; total_idos = zero
-   if (prtdosm>=1) total_dos_m = zero
+   if (prtdosm>=1) dos_m = zero
    if (paw_dos_flag==1) then
-     total_dos_paw1(:,:)=zero;total_dos_pawt1(:,:)=zero
+     dos_paw1 = zero; dos_pawt1 = zero
    end if
 
    do iband=1,dtset%nband(1)
@@ -549,27 +549,26 @@ end if
        bcorr0,tweight,dtweightde,xmpi_comm_self)
 
      ! Accumulate total DOS from eigenvalues (this is the **exact** total DOS)
-     call get_dos_1band(work_ndos,eig_idos,nene,nkpt,1,eig_dos,tweight,dtweightde)
+     call acc_dos_1band(nene, nkpt, 1, tweight, dtweightde, tmp_eigen, eig_dos, eig_idos)
 
      ! Accumulate L-DOS
-     work_ndos = dos%fractions(:,iband,isppol,:)
-     call get_dos_1band(work_ndos,total_idos,nene,nkpt,ndosfraction,total_dos,tweight,dtweightde)
+     work_kf = dos%fractions(:,iband,isppol,:)
+     call acc_dos_1band(nene, nkpt, ndosfraction, tweight, dtweightde, work_kf, total_dos, total_idos)
 
      if (paw_dos_flag==1) then
        ! calculate DOS and integrated DOS projected with the input dos_fractions
-       work_ndos = dos%fractions_paw1(:,iband,isppol,:)
-       call get_dos_1band(work_ndos,dummy_idos,nene,nkpt,ndosfraction,total_dos_paw1,tweight,dtweightde)
+       work_kf = dos%fractions_paw1(:,iband,isppol,:)
+       call acc_dos_1band(nene, nkpt, ndosfraction, tweight, dtweightde, work_kf, dos_paw1, dummy_idos)
 
-       work_ndos = dos%fractions_pawt1(:,iband,isppol,:)
-       call get_dos_1band(work_ndos,dummy_idos,nene,nkpt,ndosfraction,total_dos_pawt1,tweight,dtweightde)
+       work_kf = dos%fractions_pawt1(:,iband,isppol,:)
+       call acc_dos_1band(nene, nkpt, ndosfraction, tweight, dtweightde, work_kf, dos_pawt1, dummy_idos)
      end if
 
      if (prtdosm>=1) then
        ! Accumulate LM-DOS
-       work_ndosmbessl = dos%fractions_m(:,iband,isppol,:)
-
-       call get_dos_1band(work_ndosmbessl,total_idos_m,nene,nkpt,ndosfraction*mbesslang, &
-         total_dos_m,tweight,dtweightde)
+       work_m = dos%fractions_m(:,iband,isppol,:)
+       call acc_dos_1band(nene, nkpt, ndosfraction*mbesslang, tweight, dtweightde, work_m, &
+         dos_m, idos_m)
      end if
 
    end do ! iband
@@ -582,12 +581,12 @@ end if
    bigDOS=(maxval(total_dos)>999._dp)
 
    if (paw_dos_flag == 1) then
-     call xmpi_sum_master(total_dos_paw1, master, comm, ierr)
-     call xmpi_sum_master(total_dos_pawt1, master, comm, ierr)
+     call xmpi_sum_master(dos_paw1, master, comm, ierr)
+     call xmpi_sum_master(dos_pawt1, master, comm, ierr)
    end if
    if (prtdosm >= 1) then
-     call xmpi_sum_master(total_dos_m, master, comm, ierr)
-     call xmpi_sum_master(total_idos_m, master, comm, ierr)
+     call xmpi_sum_master(dos_m, master, comm, ierr)
+     call xmpi_sum_master(idos_m, master, comm, ierr)
    end if
 
    ! Write the DOS value in the DOS file
@@ -618,15 +617,15 @@ end if
          i1 = (iat-1)*mbesslang+1; i2 = iat*mbesslang
          if (prtdosm==0) then
            do iene=1,nene
-             write(unitdos_arr(iat), fmt=frmt) enemin + (iene-1)*deltaene, &
+             write(unt_atsph(iat), fmt=frmt) enemin + (iene-1)*deltaene, &
 &              min(total_dos(iene, i1:i2), dos_max), total_idos(iene, i1:i2)
            end do
          else
            do iene=1,nene
-             write(unitdos_arr(iat), fmt=frmt) enemin + (iene-1)*deltaene, &
+             write(unt_atsph(iat), fmt=frmt) enemin + (iene-1)*deltaene, &
 &              min(total_dos(iene, i1:i2), dos_max),&
 &              total_idos(iene, i1:i2),&
-&              min(total_dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2), dos_max)
+&              min(dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2), dos_max)
            end do
          end if
        end do
@@ -636,16 +635,16 @@ end if
          i1 = (iat-1)*mbesslang+1; i2 = iat*mbesslang
          if (prtdosm==0) then
            do iene=1,nene
-             write(unitdos_arr(iat), fmt=frmt_extra) enemin + (iene-1)*deltaene, &
+             write(unt_atsph(iat), fmt=frmt_extra) enemin + (iene-1)*deltaene, &
 &             total_dos(iene, i1:i2), &
 &             total_idos(iene, i1:i2)
            end do
          else
            do iene=1,nene
-             write(unitdos_arr(iat), fmt=frmt_extra) enemin + (iene-1)*deltaene, &
+             write(unt_atsph(iat), fmt=frmt_extra) enemin + (iene-1)*deltaene, &
 &             total_dos(iene, i1:i2),&
 &             total_idos(iene, i1:i2),&
-&             total_dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2)
+&             dos_m(iene,(iat-1)*mbesslang**2+1:iat*mbesslang**2)
            end do
          end if
        end do
@@ -659,11 +658,11 @@ end if
        do iat=1,natsph
          i1 = iat*5-4; i2 = iat*5
          do iene=1,nene
-           write(unitdos_arr(iat), fmt=frmt) enemin + (iene-1)*deltaene, &
+           write(unt_atsph(iat), fmt=frmt) enemin + (iene-1)*deltaene, &
 &           min(total_dos(iene, i1:i2), dos_max),&
-&           min(total_dos(iene,i1:i2) - total_dos_paw1(iene,i1:i2) + total_dos_pawt1(iene,i1:i2), dos_max),&
-&           min(total_dos_paw1(iene,i1:i2), dos_max),&
-&           min(total_dos_pawt1(iene,i1:i2), dos_max)
+&           min(total_dos(iene,i1:i2) - dos_paw1(iene,i1:i2) + dos_pawt1(iene,i1:i2), dos_max),&
+&           min(dos_paw1(iene,i1:i2), dos_max),&
+&           min(dos_pawt1(iene,i1:i2), dos_max)
          end do
        end do
 
@@ -671,11 +670,11 @@ end if
        do iat=natsph+1,natsph+natsph_extra
          i1 = iat*5-4; i2 = iat*5
          do iene=1,nene
-           write(unitdos_arr(iat), fmt=frmt_extra) enemin + (iene-1)*deltaene, &
+           write(unt_atsph(iat), fmt=frmt_extra) enemin + (iene-1)*deltaene, &
 &            min(total_dos(iene,i1:i2), dos_max),&
-&            min(total_dos(iene,i1:i2) - total_dos_paw1(iene,i1:i2) + total_dos_pawt1(iene,i1:i2), dos_max),&
-&            min(total_dos_paw1(iene,i1:i2), dos_max),&
-&            min(total_dos_pawt1(iene,i1:i2), dos_max)
+&            min(total_dos(iene,i1:i2) - dos_paw1(iene,i1:i2) + dos_pawt1(iene,i1:i2), dos_max),&
+&            min(dos_paw1(iene,i1:i2), dos_max),&
+&            min(dos_pawt1(iene,i1:i2), dos_max)
          end do
        end do
      end if
@@ -695,38 +694,38 @@ end if
    call wrtout(std_out,msg,'COLL')
  end do ! isppol
 
- ABI_DEALLOCATE(tmp_eigen)
- ABI_FREE(work_ndos)
- ABI_FREE(work_ndosmbessl)
-
+ ! Close files.
  if (iam_master) then
    if (any(prtdos == [2, 5])) then
      close(unitdos)
    else if (prtdos==3) then
      do iat=1,natsph+natsph_extra
-       close(unitdos_arr(iat))
+       close(unt_atsph(iat))
      end do
-     ABI_DEALLOCATE(unitdos_arr)
+     ABI_FREE(unt_atsph)
    end if
  end if
 
- ABI_DEALLOCATE(partial_dos)
- ABI_DEALLOCATE(dummy_idos)
- ABI_DEALLOCATE(total_dos)
- ABI_DEALLOCATE(total_idos)
- ABI_DEALLOCATE(tweight)
- ABI_DEALLOCATE(dtweightde)
- ABI_DEALLOCATE(eig_idos)
- ABI_DEALLOCATE(eig_dos)
+ ABI_FREE(tmp_eigen)
+ ABI_FREE(work_kf)
+ ABI_FREE(partial_dos)
+ ABI_FREE(dummy_idos)
+ ABI_FREE(total_dos)
+ ABI_FREE(total_idos)
+ ABI_FREE(tweight)
+ ABI_FREE(dtweightde)
+ ABI_FREE(eig_idos)
+ ABI_FREE(eig_dos)
 
  if (prtdosm>=1)  then
-   ABI_DEALLOCATE(total_dos_m)
-   ABI_DEALLOCATE(total_idos_m)
+   ABI_FREE(dos_m)
+   ABI_FREE(idos_m)
+   ABI_FREE(work_m)
  end if
 
  if (paw_dos_flag==1)  then
-   ABI_DEALLOCATE(total_dos_paw1)
-   ABI_DEALLOCATE(total_dos_pawt1)
+   ABI_FREE(dos_paw1)
+   ABI_FREE(dos_pawt1)
  end if
 
  call destroy_tetra(tetra)
@@ -747,7 +746,7 @@ subroutine write_headers()
      write(unitdos, "(a)")trim(msg)
    else if (dtset%prtdos == 3) then
      do iat=1,natsph+natsph_extra
-       write(unitdos_arr(iat), "(a)")trim(msg)
+       write(unt_atsph(iat), "(a)")trim(msg)
      end do
    end if
  end if
@@ -759,13 +758,13 @@ subroutine write_headers()
 
    if (paw_dos_flag/=1.or.dtset%pawprtdos==2) then
      do iat=1,natsph
-       write(unitdos_arr(iat), '(3a,i5,a,i5,a,a,es16.6,3a)' ) &
+       write(unt_atsph(iat), '(3a,i5,a,i5,a,a,es16.6,3a)' ) &
 &       '# Local DOS (columns 2-6) and integrated local DOS (columns 7-11),',ch10,&
 &       '# for atom number iat=',iat,'  iatom=',dtset%iatsph(iat),ch10,&
 &       '# inside sphere of radius ratsph=',dtset%ratsph(dtset%typat(dtset%iatsph(iat))),' Bohr.',ch10,"#"
 
        if (dtset%usepaw==1.and.dtset%pawprtdos==2) then
-         write(unitdos_arr(iat), '(3a)' ) &
+         write(unt_atsph(iat), '(3a)' ) &
 &         '# PAW: note that only all-electron on-site part has been used to compute DOS !',ch10,"#"
        end if
        if (bigDOS) then
@@ -785,11 +784,11 @@ subroutine write_headers()
 &         '  lm=3-3  lm=3-2  lm=3-1  lm=3 0  lm=3 1  lm=3 2  lm=3 3',&
 &         '  lm=4-4  lm=4-3  lm=4-2  lm=4-1  lm=4 0  lm=4 1  lm=4 2  lm=4 3  lm=4 4'
        end if
-       write(unitdos_arr(iat), "(a)")trim(msg)
+       write(unt_atsph(iat), "(a)")trim(msg)
      end do
    else
      do iat=1,natsph
-       write(unitdos_arr(iat), '(9a,i5,a,i5,a,a,es16.6,3a)' ) &
+       write(unt_atsph(iat), '(9a,i5,a,i5,a,a,es16.6,3a)' ) &
 &       '# Local DOS (columns 2-6),',ch10,&
 &       '#  plane-waves contrib. to DOS (columns 7-11),',ch10,&
 &       '#  AE on-site  contrib. to DOS (columns 12-16),',ch10,&
@@ -809,11 +808,11 @@ subroutine write_headers()
 &         '      (Phi) l=0      l=1      l=2      l=3      l=4',&
 &         '     (tPhi) l=0      l=1      l=2      l=3      l=4'
        end if
-       write(unitdos_arr(iat), "(a)")trim(msg)
+       write(unt_atsph(iat), "(a)")trim(msg)
      end do
    end if
    do iat=1,natsph_extra
-     write(unitdos_arr(natsph+iat), '(3a,i5,2a,es16.6,3a)' ) &
+     write(unt_atsph(natsph+iat), '(3a,i5,2a,es16.6,3a)' ) &
 &     '# Local DOS (columns 2-6) and integrated local DOS (columns 7-11),',ch10,&
 &     '# for non-atomic sphere number iat=',iat,ch10,&
 &     '# of radius ratsph=',dtset%ratsph_extra,' Bohr.',ch10,"#"
@@ -834,7 +833,7 @@ subroutine write_headers()
 &       '  lm=3-3  lm=3-2  lm=3-1  lm=3 0  lm=3 1  lm=3 2  lm=3 3',&
 &       '  lm=4-4  lm=4-3  lm=4-2  lm=4-1  lm=4 0  lm=4 1  lm=4 2  lm=4 3  lm=4 4'
      end if
-     write(unitdos_arr(natsph+iat), "(a)")trim(msg)
+     write(unt_atsph(natsph+iat), "(a)")trim(msg)
    end do
 
  else if (prtdos==5) then
@@ -847,24 +846,24 @@ end subroutine write_headers
 end subroutine dos_calcnwrite
 !!***
 
-!!****f* m_epjdos/get_dos_1band
+!!****f* m_epjdos/acc_dos_1band
 !! NAME
-!! get_dos_1band
+!! acc_dos_1band
 !!
 !! FUNCTION
 !! calculate DOS from tetrahedron method for 1 band and 1 sppol and accumulate results.
 !!
 !! INPUTS
-!! dos_fractions=fractional DOS at each irred kpoint
 !! nene=number of energies for DOS
 !! nkpt=number of irreducible kpoints
-!! ndosfraction=number of different fractional DOSs
+!! nfract=number of different fractional DOSs
+!! dos_fractions=fractional DOS at each irred kpoint
 !! tweight=sum of tetrahedron weights for each irred kpoint
 !! dtweightde=energy derivative of tweight
 !!
 !! SIDE EFFECTS
-!!  partial_dos(nene,ndosfraction)=accumulated partial DOS, for each different channel
-!!  integ_dos(nene,ndosfraction)=accumulated integrated DOS, for each different channel
+!!  dos(nene,nfract)=accumulated DOS, for each different channel
+!!  idos(nene,nfract)=accumulated integrated IDOS, for each different channel
 !!
 !! PARENTS
 !!      tetrahedron
@@ -873,26 +872,25 @@ end subroutine dos_calcnwrite
 !!
 !! SOURCE
 
-subroutine get_dos_1band(dos_fractions,integ_dos,nene,nkpt,ndosfraction,&
-&            partial_dos,tweight,dtweightde)
+subroutine acc_dos_1band(nene, nkpt, nfract, tweight, dtweightde, dos_fractions, dos, idos)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'get_dos_1band'
+#define ABI_FUNC 'acc_dos_1band'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ndosfraction,nene,nkpt
+ integer,intent(in) :: nfract,nene,nkpt
 !arrays
- real(dp),intent(in) :: dos_fractions(nkpt,ndosfraction),dtweightde(nene,nkpt)
- real(dp),intent(in) :: tweight(nene,nkpt)
- real(dp),intent(inout) :: integ_dos(nene,ndosfraction)
- real(dp),intent(inout) :: partial_dos(nene,ndosfraction)
+ real(dp),intent(in) :: dos_fractions(nkpt,nfract)
+ real(dp),intent(in) :: dtweightde(nene,nkpt), tweight(nene,nkpt)
+ real(dp),intent(inout) :: dos(nene,nfract)
+ real(dp),intent(inout) :: idos(nene,nfract)
 
 !Local variables-------------------------------
 !scalars
@@ -901,16 +899,16 @@ subroutine get_dos_1band(dos_fractions,integ_dos,nene,nkpt,ndosfraction,&
 ! *********************************************************************
 
  ! Calculate parameters of DOS at each point eps in [epsmin,epsmax]
- do ifract=1,ndosfraction
+ do ifract=1,nfract
    do ikpt=1,nkpt
      do ieps=1,nene
-       partial_dos(ieps,ifract) = partial_dos(ieps,ifract) + dtweightde(ieps,ikpt)*dos_fractions(ikpt,ifract)
-       integ_dos(ieps,ifract) = integ_dos(ieps,ifract) + tweight(ieps,ikpt)*dos_fractions(ikpt,ifract)
+       dos(ieps,ifract) = dos(ieps,ifract) + dtweightde(ieps,ikpt) * dos_fractions(ikpt,ifract)
+       idos(ieps,ifract) = idos(ieps,ifract) + tweight(ieps,ikpt) * dos_fractions(ikpt,ifract)
      end do
    end do
  end do
 
-end subroutine get_dos_1band
+end subroutine acc_dos_1band
 !!***
 
 !!****f* m_epjdos/recip_ylm
