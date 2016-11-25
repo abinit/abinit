@@ -450,7 +450,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  ! This to test the B-spline interpolation of phonons
  if (.False.) then
-   call test_phbspl(ifc, cryst, 2*[12,12,12], 1, [zero,zero,zero], [3,3,3], comm)
+ !if (.True.) then
+   call test_phbspl(ifc, cryst, 4*[12,12,12], 1, [zero,zero,zero], [3,3,3], comm)
    !call xmpi_end()
  end if
 

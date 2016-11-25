@@ -2367,8 +2367,8 @@ subroutine test_phbspl(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
 
 !local variables-------------------------------
 !scalars
- integer :: iq
- real(dp) :: mare
+ integer :: iq,nq
+ real(dp) :: mare,mae
  real(dp) :: cpu,wall,gflops
  real(dp) :: cpu_fourq,wall_fourq,gflops_fourq
  real(dp) :: cpu_bspl,wall_bspl,gflops_bspl
@@ -2388,9 +2388,11 @@ subroutine test_phbspl(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
 
  cpu_fourq = zero; wall_fourq = zero; gflops_fourq = zero
  cpu_bspl = zero; wall_bspl = zero; gflops_bspl = zero
+ mae = zero; mare = zero
 
  if (xmpi_comm_rank(comm) == 0) then
-   do iq=1,1000
+   nq = 10000
+   do iq=1,nq
      !call random_number(qpt)
      call random_number(qred)
      !call wrap2_zero_one(qred, qpt, shift)
@@ -2413,12 +2415,14 @@ subroutine test_phbspl(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
      end where
      rel_err = 100 * rel_err
      adiff_meV = adiff_meV * Ha_eV * 1000
-     !write(std_out,*)minval(adiff_meV),maxval(adiff_meV), maxval(rel_err), trim(ktoa(qpt))
-     write(std_out,*)maxval(adiff_meV), maxval(rel_err), trim(ktoa(qpt))
+     mae = mae + sum(adiff_meV) / nq
+     mare = mare + sum(rel_err) / nq
+     !write(std_out,*)maxval(adiff_meV), maxval(rel_err), trim(ktoa(qpt))
      !write(456, *)phfrq
      !write(457, *)ofreqs
    end do
 
+   write(std_out,*)"MAE: ",mae," [meV], MARE: ",mare, "% with nqpoints:",nq
    write(std_out,'(2(a,f8.2))')"fourq: cpu: ",cpu_fourq,", wall: ",wall_fourq
    write(std_out,'(2(a,f8.2))')"bspl: cpu: ",cpu_bspl,", wall: ",wall_bspl
  end if
