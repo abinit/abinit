@@ -378,7 +378,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  integer,parameter :: bcorr0=0,master=0
  integer :: iat,iband,iene,ifract,ikpt,isppol,natsph,natsph_extra,nkpt,nsppol,i1,i2
  integer :: nene,prtdos,unitdos,ierr,prtdosm,paw_dos_flag,mbesslang,ndosfraction
- integer :: my_rank,nprocs
+ integer :: my_rank,nprocs,cnt,ifrac,ii
  real(dp),parameter :: dos_max=9999.9999_dp
  real(dp) :: buffer,deltaene,enemax,enemin,integral_DOS,max_occ
  real(dp) :: cpu,wall,gflops
@@ -392,7 +392,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  real(dp),allocatable :: dtweightde(:,:),tweight(:,:)
  real(dp),allocatable :: tmp_eigen(:),total_dos(:,:,:),eig_dos(:,:)
  real(dp),allocatable :: dos_m(:,:,:),dos_paw1(:,:,:),dos_pawt1(:,:,:)
- real(dp),allocatable :: work_kf(:,:),work_m(:,:)
+ real(dp),allocatable :: work_kf(:,:),work_m(:,:),wdt(:,:)
 
 ! *********************************************************************
 
@@ -517,6 +517,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  ! Tetra weights
  ABI_MALLOC(tweight,(nene, nkpt))
  ABI_MALLOC(dtweightde,(nene, nkpt))
+ ABI_MALLOC(wdt, (nene, 2))
 
  ! Allocate arrays to store DOSes and fill with zeros.
  ! 1--> DOS , 2--> IDOS
@@ -544,6 +545,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  ABI_MALLOC(work_kf, (nkpt, ndosfraction))
  ABI_MALLOC(tmp_eigen,(nkpt))
 
+ cnt = 0
  do isppol=1,nsppol
 
    total_dos = zero; eig_dos = zero
@@ -552,6 +554,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
      dos_paw1 = zero; dos_pawt1 = zero
    end if
 
+#if 0
    do iband=1,dtset%nband(1)
      ! Mpi parallelism.
      if (mod(iband, nprocs) /= my_rank) cycle
@@ -585,8 +588,47 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
        work_m = dos%fractions_m(:,iband,isppol,:)
        call acc_dos_1band(nene, nkpt, ndosfraction*mbesslang, tweight, dtweightde, work_m, dos_m)
      end if
-
    end do ! iband
+
+#else
+   do ikpt=1,nkpt
+      do iband=1,ebands%nband(ikpt+(isppol-1)*ebands%nkpt)
+        cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! Mpi parallelism.
+
+        ! Accumulate total DOS from eigenvalues (this is the **exact** total DOS)
+        tmp_eigen(:) = ebands%eig(iband, :, isppol)
+        call tetra_get_onewk(tetra,ikpt,bcorr0,nene,nkpt,tmp_eigen,enemin,enemax,max_occ,wdt)
+        eig_dos = eig_dos + wdt
+
+        ! Accumulate L-DOS
+        do ii=1,2
+          do ifrac=1,ndosfraction
+            total_dos(:,ifrac,ii) = total_dos(:,ifrac,ii) + wdt(:,ii) * dos%fractions(ikpt,iband,isppol,ifrac)
+          end do
+        end do
+
+        if (paw_dos_flag==1) then
+          ! Accumulate LM-DOS
+          do ii=1,2
+            do ifrac=1,ndosfraction
+              dos_paw1(:,ifrac,ii) = dos_paw1(:,ifrac,ii) + wdt(:,ii) * dos%fractions_paw1(ikpt,iband,isppol,ifrac)
+              dos_pawt1(:,ifrac,ii) = dos_pawt1(:,ifrac,ii) + wdt(:,ii) * dos%fractions_pawt1(ikpt,iband,isppol,ifrac)
+            end do
+          end do
+        end if
+
+        if (prtdosm>=1) then
+         ! Accumulate LM-DOS
+         do ii=1,2
+           do ifrac=1,ndosfraction*mbesslang
+             dos_m(:,ifrac,ii) = dos_m(:,ifrac,ii) + wdt(:,ii) * dos%fractions_m(ikpt, iband, isppol, ifrac)
+           end do
+         end do
+        end if
+
+      end do ! ikpt
+   end do ! iband
+#endif
 
    ! Collect results on master
    call xmpi_sum_master(eig_dos, master, comm, ierr)
@@ -728,6 +770,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  ABI_FREE(total_dos)
  ABI_FREE(tweight)
  ABI_FREE(dtweightde)
+ ABI_FREE(wdt)
  ABI_FREE(eig_dos)
 
  if (prtdosm>=1)  then

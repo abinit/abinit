@@ -2182,8 +2182,9 @@ end subroutine get_onetetra_
 !! max_occ=maximal occupation number (2 for nsppol=1, 1 for nsppol=2)
 !!
 !! OUTPUT
-!!  wtheta(nene) = integration weights for Theta (Heaviside) function.
-!!  wdelta(nene) = integration weights for Dirac delta. derivative of wtheta wrt energy
+!!  weights(nene,2) = integration weights for
+!!    Dirac delta (derivative of theta wrt energy) and Theta (Heaviside function)
+!!    for a given (band, k-point, spin).
 !!
 !! PARENTS
 !!
@@ -2191,7 +2192,7 @@ end subroutine get_onetetra_
 !!
 !! SOURCE
 
-subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,max_occ,wtheta,wdelta)
+subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,max_occ,weights)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2209,7 +2210,7 @@ subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,m
  double precision ,intent(in) :: enemin,enemax,max_occ
 !arrays
  double precision ,intent(in) :: eig_ibz(nkibz)
- double precision ,intent(out) :: wdelta(nene),wtheta(nene)
+ double precision ,intent(out) :: weights(nene,2)
 
 !Local variables-------------------------------
 !scalars
@@ -2218,6 +2219,7 @@ subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,m
 !arrays
  integer :: ind_ibz(4)
  double precision :: tweight_tmp(nene,4),dtweightde_tmp(nene,4)
+ !double precision,allocatable :: tweight_tmp(:,:),dtweightde_tmp(:,:)
  double precision :: eigen_1tetra(4)
 
 ! *********************************************************************
@@ -2229,7 +2231,11 @@ subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,m
    deltaene = (enemax-enemin) / (nene-1)
  end if
 
- wtheta = zero; wdelta = zero
+ weights = zero
+
+ !ABI_MALLOC(tweight_tmp, (nene,4))
+ !ABI_MALLOC(dtweightde_tmp, (nene,4))
+
  ! For each tetrahedron
  do itetra=1,tetra%ntetra
    !volconst_mult = max_occ*volconst*float(tetra%tetra_mult(itetra))
@@ -2252,11 +2258,15 @@ subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,m
 &   nene,nkibz,bcorr,tweight_tmp,dtweightde_tmp)
 
    do ii=1,4
-     if (ind_ibz(ii) == ik_ibz) exit
+     if (ind_ibz(ii) == ik_ibz) then
+       weights(:,1) = weights(:,1) + dtweightde_tmp(:,ii)
+       weights(:,2) = weights(:,2) + tweight_tmp(:,ii)
+     end if
    end do
-   wtheta = wtheta + tweight_tmp(:,ii)
-   wdelta = wdelta + dtweightde_tmp(:,ii)
  end do ! itetra
+
+ !ABI_FREE(tweight_tmp)
+ !ABI_FREE(dtweightde_tmp)
 
 end subroutine tetra_get_onewk
 !!***
