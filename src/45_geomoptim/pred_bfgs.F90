@@ -9,11 +9,11 @@
 !! IONMOV 2:
 !! Given a starting point xred that is a vector of length 3*natom
 !! (reduced nuclei coordinates), and unit cell parameters
-!! (acell and rprim) the Broyden-Fletcher-Goldfarb-Shanno
+!! (acell and rprimd) the Broyden-Fletcher-Goldfarb-Shanno
 !! minimization is performed on the total energy function, using
-!! its gradient (atomic forces and stress : fred or fcart and
-!! stress) as calculated by the routine scfcv. Some atoms can be
-!! kept fixed, while the optimization of unit cell parameters is
+!! its gradient (atomic forces and stresse) as calculated
+!! by the routine scfcv. Some atoms can be kept fixed,
+!! while the optimization of unit cell parameters is
 !! only performed if optcell/=0. The convergence requirement on
 !! the atomic forces, dtset%tolmxf,  allows an early exit.
 !! Otherwise no more than dtset%ntime steps are performed.
@@ -121,8 +121,7 @@ real(dp) :: gprimd(3,3)
 real(dp) :: gmet(3,3)
 real(dp) :: rmet(3,3)
 real(dp) :: residual(3,ab_mover%natom),residual_corrected(3,ab_mover%natom)
-real(dp) :: xred(3,ab_mover%natom),xcart(3,ab_mover%natom)
-real(dp) :: strten(6)
+real(dp) :: xred(3,ab_mover%natom),strten(6)
 
 !***************************************************************************
 !Beginning of executable session
@@ -148,7 +147,7 @@ real(dp) :: strten(6)
      ABI_DEALLOCATE(vin1)
    end if
    if (allocated(hessin))     then
-     ABI_DEALLOCATE(hessin) 
+     ABI_DEALLOCATE(hessin)
    end if
    return
  end if
@@ -224,7 +223,8 @@ real(dp) :: strten(6)
 !##########################################################
 !### 04. Obtain the present values from the history
 
- call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+ call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+ do ii=1,3;rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3);end do
 
  strten(:)=hist%histS(:,hist%ihist)
  etotal   =hist%histE(hist%ihist)
@@ -232,9 +232,9 @@ real(dp) :: strten(6)
 !Fill the residual with forces (No preconditioning)
 !Or the preconditioned forces
  if (ab_mover%goprecon==0)then
-   residual(:,:)= hist%histXF(:,:,4,hist%ihist)
+   call fcart2fred(hist%histXF(:,:,2,hist%ihist),residual,rprimd,ab_mover%natom)
  else
-   residual(:,:)= forstr%fred(:,:)
+   residual(:,:)=forstr%fred(:,:)
  end if
 
  if(zDEBUG)then
@@ -264,15 +264,14 @@ real(dp) :: strten(6)
 
 !Get rid of mean force on whole unit cell, but only if no
 !generalized constraints are in effect
+ residual_corrected(:,:)=residual(:,:)
  if(ab_mover%nconeq==0)then
    do ii=1,3
-     favg=sum(residual(ii,:))/dble(ab_mover%natom)
-     residual_corrected(ii,:)=residual(ii,:)-favg
-     if(ab_mover%jellslab/=0.and.ii==3)&
-&     residual_corrected(ii,:)=residual(ii,:)
+     if (ii/=3.or.ab_mover%jellslab==0) then
+       favg=sum(residual_corrected(ii,:))/dble(ab_mover%natom)
+       residual_corrected(ii,:)=residual_corrected(ii,:)-favg
+     end if
    end do
- else
-   residual_corrected(:,:)=residual(:,:)
  end if
 
 !write(std_out,*) 'bfgs 05'
@@ -400,7 +399,7 @@ real(dp) :: strten(6)
          vinres(jj,:)=vinres(jj+1,:)
          vin1(jj,:)=vin1(jj+1,:)
        end do
-     end if 
+     end if
      vinres(nitpul,:)=vin(:)-vin_prev(:)
      vin1(nitpul,:)=vin_prev(:)
    end if
@@ -426,7 +425,7 @@ real(dp) :: strten(6)
          ABI_ALLOCATE(rwork,(nitpul))
 !          amatinv=1.d5*amatinv
          call dgetrf(nitpul,nitpul,amatinv,nitpul,ipiv,ierr)
-         call dgetri(nitpul,amatinv,nitpul,ipiv,rwork,nitpul,ierr) 
+         call dgetri(nitpul,amatinv,nitpul,ipiv,rwork,nitpul,ierr)
 !          amatinv=1.d5*amatinv
          ABI_DEALLOCATE(ipiv)
          ABI_DEALLOCATE(rwork)
@@ -450,7 +449,7 @@ real(dp) :: strten(6)
      ABI_DEALLOCATE(alpha)
    end if
 
-   
+
 !  Previous atomic forces
    vout_prev(:)=vout(:)
 
@@ -515,12 +514,10 @@ real(dp) :: strten(6)
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  end if
 
-!Compute xcart from xred, and rprimd
- call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
-
 !Fill the history with the variables
-!xcart, xred, acell, rprimd
- call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+!xred, acell, rprimd, vel
+ call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+ hist%histV(:,:,hist%ihist)=hist%histV(:,:,hist%ihist-1)
 
  if(zDEBUG)then
    write (std_out,*) 'residual:'
@@ -532,8 +529,6 @@ real(dp) :: strten(6)
    write (std_out,*) 'etotal:'
    write (std_out,*) etotal
  end if
-
- hist%histV(:,:,hist%ihist)=hist%histV(:,:,hist%ihist-1)
 
 end subroutine pred_bfgs
 !!***

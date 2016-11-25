@@ -34,7 +34,7 @@ module m_abimover
 
  ! Helper function
  public :: bond_length
- 
+
  integer,public, parameter :: mover_BEFORE=0
  integer,public, parameter :: mover_AFTER=1
 !!***
@@ -283,15 +283,15 @@ end type abimover
 type, public :: abiforstr
 
   ! scalars
-  real(dp) :: etotal     
+  real(dp) :: etotal
    ! Total energy
 
   ! arrays
-  real(dp),allocatable :: fcart(:,:) 
+  real(dp),allocatable :: fcart(:,:)
    ! Cartesian forces
-  real(dp),allocatable :: fred(:,:)  
+  real(dp),allocatable :: fred(:,:)
    ! Reduced forces
-  real(dp) :: strten(6)  
+  real(dp) :: strten(6)
     ! Stress tensor (Symmetrical 3x3 matrix)
 
 end type abiforstr
@@ -1805,7 +1805,7 @@ subroutine make_dihedrals(badangles,deloc,icenter)
 !  if (maxshift > deloc%nrshift) then
 !  deloc%dihedrals(2,:,idihed) = deloc%dihedrals(2,:,idihed)-maxshift
 !  end if
-!  
+!
    minshift = minval(diheds_tmp(2,:,idihed))
    maxshift = maxval(diheds_tmp(2,:,idihed))
    if (minshift <= 0 .or. maxshift > deloc%nrshift) then

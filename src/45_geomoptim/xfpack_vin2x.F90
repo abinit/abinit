@@ -80,7 +80,7 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
 !arrays
  integer,intent(in) :: symrel(3,3,nsym)
  real(dp),intent(in) :: acell0(3),rprimd0(3,3)
- real(dp),intent(inout) :: acell(3),rprim(3,3) !vz_i hist%histA fred mkrdim
+ real(dp),intent(inout) :: acell(3),rprim(3,3)
  real(dp),intent(in) :: vin(ndim)
  real(dp),intent(out) :: xred(3,natom)
 

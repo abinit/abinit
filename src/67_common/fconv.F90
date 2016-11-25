@@ -30,7 +30,7 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  fcart(3,natom)=cartesian forces on atoms in hartree/bohr
+!!  fcart(3,natom)= forces on atoms in hartree/bohr in cartesian coordinates
 !!  iatfix(3,natom)=1 for frozen atom, 0 for unfrozen
 !!  itime=current number of Broyden/Moldyn iterations
 !!  natom=number of atoms in unit cell
@@ -101,7 +101,7 @@ subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,
 ! *************************************************************************
 
 !Compute maximal component of forces, EXCLUDING any fixed components
- fmax=0.0_dp
+ fmax=zero
  do iatom=1,natom
    do idir=1,3
      if (iatfix(idir,iatom) /= 1) then

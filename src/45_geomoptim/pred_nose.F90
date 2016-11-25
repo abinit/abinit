@@ -10,17 +10,16 @@
 !! IONMOV 8:
 !! Given a starting point xred that is a vector of length 3*natom
 !! (reduced nuclei coordinates), a velocity vector (in cartesian
-!! coordinates), and unit cell parameters (acell and rprim -
+!! coordinates), and unit cell parameters (acell and rprimd -
 !! without velocities in the present implementation),
 !! the Verlet dynamics is performed, using the gradient of the
-!! energy (atomic forces and stress : fred or fcart and stress)
-!! as calculated by the routine scfcv.
+!! energy (atomic forces and stresses) as calculated by the routine scfcv.
 !!
 !! Some atoms can be kept fixed, while the propagation of unit cell
 !! parameters is only performed if optcell/=0.
 !! No more than "ntime" steps are performed.
 !! The time step is governed by dtion (contained in dtset)
-!! Returned quantities are xred, and eventually acell and rprim
+!! Returned quantities are xred, and eventually acell and rprimd
 !! (new ones!).
 !!
 !! See ionmov=6, but with a nose-hoover thermostat
@@ -95,24 +94,22 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  integer  :: ii,jj,kk
  integer  :: idum=-5
  real(dp),parameter :: v2tol=tol8,nosetol=tol10
- real(dp) :: delxi,xio,ktemp,rescale_vel,amass_tot
+ real(dp) :: delxi,xio,ktemp,rescale_vel
  real(dp) :: dnose,v2nose,xin_nose
  real(dp),save :: xi_nose,fsnose,snose
  real(dp) :: gnose
  real(dp) :: ucvol,ucvol_next
  real(dp) :: etotal
- real(dp) :: favg
  logical  :: ready
 
 !arrays
- real(dp) :: acell(3),acell_next(3)
+ real(dp) :: acell(3),acell_next(3),favg_(3)
  real(dp) :: rprimd(3,3),rprimd_next(3,3)
- real(dp) :: rprim(3,3),rprim_next(3,3)
  real(dp) :: gprimd(3,3)
  real(dp) :: gmet(3,3)
  real(dp) :: rmet(3,3)
- real(dp) :: fred(3,ab_mover%natom),fcart(3,ab_mover%natom)
- real(dp) :: fred_corrected(3,ab_mover%natom)
+ real(dp) :: fcart(3,ab_mover%natom)
+!real(dp) :: fred_corrected(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom),xred_next(3,ab_mover%natom)
  real(dp) :: xcart(3,ab_mover%natom),xcart_next(3,ab_mover%natom)
  real(dp) :: vel(3,ab_mover%natom),vel_temp(3,ab_mover%natom)
@@ -160,20 +157,18 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !##########################################################
 !### 02. Obtain the present values from the history
 
- call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+ call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
- fred(:,:)=hist%histXF(:,:,4,hist%ihist)
- fcart(:,:)=hist%histXF(:,:,3,hist%ihist)
- etotal=hist%histE(hist%ihist)
-
+ fcart(:,:)=hist%histXF(:,:,2,hist%ihist)
  strten(:)=hist%histS(:,hist%ihist)
  vel(:,:)=hist%histV(:,:,hist%ihist)
+ etotal=hist%histE(hist%ihist)
 
  write(std_out,*) 'RPRIMD'
  do ii=1,3
    write(std_out,*) rprimd(:,ii)
  end do
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  write(std_out,*) 'RMET'
  do ii=1,3
    write(std_out,*) rmet(ii,:)
@@ -181,19 +176,16 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
 !Get rid of mean force on whole unit cell, but only if no
 !generalized constraints are in effect
- if(ab_mover%nconeq==0)then
-   amass_tot=sum(ab_mover%amass(:))
-   do ii=1,3
-     favg=sum(fred(ii,:))/dble(ab_mover%natom)
-!    Note that the masses are used, in order to weight the repartition of the average force.
-!    This procedure is adequate for dynamics, as pointed out by Hichem Dammak (2012 Jan 6)..
-     fred_corrected(ii,:)=fred(ii,:)-favg*ab_mover%amass(:)/amass_tot
-     if(ab_mover%jellslab/=0.and.ii==3)&
-&     fred_corrected(ii,:)=fred(ii,:)
-   end do
- else
-   fred_corrected(:,:)=fred(:,:)
- end if
+!  call fcart2fred(fcart,fred_corrected,rprimd,ab_mover%natom)
+!  if(ab_mover%nconeq==0)then
+!    amass_tot=sum(ab_mover%amass(:))
+!    do ii=1,3
+!      if (ii/=3.or.ab_mover%jellslab==0) then
+!        favg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
+!        fred_corrected(ii,:)=fred_corrected(ii,:)-favg*ab_mover%amass(:)/amass_tot
+!      end if
+!    end do
+!  end if
 
 !write(std_out,*) 'nose 03'
 !##########################################################
@@ -215,7 +207,6 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
  acell_next(:)=acell(:)
  ucvol_next=ucvol
- rprim_next(:,:)=rprim(:,:)
  rprimd_next(:,:)=rprimd(:,:)
 
  if(itime==1)then
@@ -325,7 +316,6 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
      write (std_out,*) vel(:,kk)
    end do
  end if
-
 
 !Calculate v2nose
  v2nose=0.0_dp
@@ -488,23 +478,9 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !Increase indexes
  hist%ihist=hist%ihist+1
 
-!Compute xcart from xred, and rprimd
- call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
-
- call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
-
+ call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
  hist%histV(:,:,hist%ihist)=vel(:,:)
  hist%histT(hist%ihist)=itime*ab_mover%dtion
-
-!write(std_out,*) 'nose 07'
-!##########################################################
-!### 07. Deallocate in the last iteration
-
-!Temporarily deactivated (MT sept. 2011)
-!if(itime==ntime-1)then
-!if(allocated(fcart_m)) deallocate(fcart_m)
-!if(allocated(fcart_mold)) deallocate(fcart_mold)
-!end if
 
 end subroutine pred_nose
 !!***

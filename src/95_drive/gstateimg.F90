@@ -216,8 +216,9 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  integer :: last_itimimage,ndynimage,nocc
  integer :: ntimimage,ntimimage_stored,ntimimage_max,similar
  logical :: check_conv,compute_all_images,compute_static_images
- logical :: isVused,isARused,is_master,is_mep,is_pimd,use_hist,use_hist_prev
- real(dp) :: delta_energy
+ logical :: isVused,isARused,is_master,is_mep,is_pimd
+ logical :: use_hist,use_hist_prev
+ real(dp) :: delta_energy,dtion
  character(len=500) :: hist_filename,msg
  type(args_gs_type) :: args_gs
  type(mep_type) :: mep_param
@@ -241,7 +242,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 &   '                                                            ',& ! 12
 &   'PATH-INTEGRAL MOLECULAR DYNAMICS (CHAIN OF THERMOSTATS)     '/) ! 13
  real(dp) :: acell(3),rprim(3,3),rprimd(3,3),tsec(2)
- real(dp),allocatable :: amass(:,:),occ(:),vel(:,:),vel_cell(:,:),xcart(:,:),xred(:,:)
+ real(dp),allocatable :: amass(:,:),occ(:),vel(:,:),vel_cell(:,:),xred(:,:)
  type(abihist),allocatable :: hist(:),hist_prev(:)
  type(results_img_type),pointer :: results_img_timimage(:,:),res_img(:)
  type(scf_history_type),allocatable :: scf_history(:)
@@ -317,7 +318,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    !Initialize new history
    ABI_DATATYPE_ALLOCATE(hist,(nimage))
    call abihist_init(hist,dtset%natom,ntimimage,isVused,isARused)
-   ABI_ALLOCATE(xcart,(3,dtset%natom))
    if (is_pimd) then
      ABI_ALLOCATE(amass,(dtset%natom,nimage))
      do iimage=1,nimage
@@ -330,9 +330,8 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      hist(iimage)%isVUsed=is_pimd
      hist(iimage)%isARUsed=(dtset%optcell/=0)
      call mkrdim(acell_img(:,iimage),rprim_img(:,:,iimage),rprimd)
-     call xred2xcart(dtset%natom,rprimd,xcart,xred_img(:,:,iimage))
-     call var2hist(acell_img(:,iimage),hist(iimage),dtset%natom,rprim_img(:,:,iimage),&
-&                  rprimd,xcart,xred_img(:,:,iimage),.FALSE.)
+     call var2hist(acell_img(:,iimage),hist(iimage),dtset%natom,&
+&                  rprimd,xred_img(:,:,iimage),.FALSE.)
      call vel2hist(amass(:,iimage),hist(iimage),vel_img(:,:,iimage))
    end do
  end if ! imgmov/=0
@@ -393,6 +392,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
 !PIMD: fill in eventually the data structure pimd_param
  call pimd_init(dtset,pimd_param,is_master)
+ dtion=one;if (is_pimd) dtion=pimd_param%dtion
 
 !In the case of the 4th-order Runge-Kutta solver,
 !one must have a number of step multiple of 4.
@@ -422,14 +422,15 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          call mkradim(hist(iimage)%histA(:,ih),rprim,hist(iimage)%histR(:,:,ih))
          res_img(iimage)%acell(:)     =hist(iimage)%histA(:,ih)
          res_img(iimage)%rprim(:,:)   =rprim
-         res_img(iimage)%xred(:,:)    =hist(iimage)%histXF(:,:,2,ih)
+         res_img(iimage)%xred(:,:)    =hist(iimage)%histXF(:,:,1,ih)
          res_img(iimage)%vel(:,:)     =hist(iimage)%histV(:,:,ih)
          res_img(iimage)%vel_cell(:,:)=zero !Temporary
-         res_img(iimage)%results_gs%fcart(:,:)=hist(iimage)%histXF(:,:,3,ih)
-         res_img(iimage)%results_gs%fred(:,:) =hist(iimage)%histXF(:,:,4,ih)
+         res_img(iimage)%results_gs%fcart(:,:) =hist(iimage)%histXF(:,:,2,ih)
          res_img(iimage)%results_gs%strten(:) =hist(iimage)%histS(:,ih)
          res_img(iimage)%results_gs%etotal    =hist(iimage)%histE(ih)
          res_img(iimage)%results_gs%energies%entropy =hist(iimage)%histEnt(ih)
+         call fcart2fred(res_img(iimage)%results_gs%fcart,res_img(iimage)%results_gs%fred,&
+&                        hist(iimage)%histR(:,:,ih),dtset%natom)
          hist_prev(iimage)%ihist=hist_prev(iimage)%ihist+1
          !hist(iimage)%ihist=hist(iimage)%ihist+1
        end do
@@ -555,16 +556,14 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      if (use_hist) then
        ih=hist(iimage)%ihist
        call mkrdim(res_img(iimage)%acell(:),res_img(iimage)%rprim(:,:),rprimd)
-       call xred2xcart(dtset%natom,rprimd,xcart,res_img(iimage)%xred(:,:))
        call var2hist(res_img(iimage)%acell(:),hist(iimage),dtset%natom,&
-&           res_img(iimage)%rprim(:,:),rprimd,xcart,res_img(iimage)%xred(:,:),.FALSE.)
+&                    rprimd,res_img(iimage)%xred(:,:),.FALSE.)
        call vel2hist(amass(:,iimage),hist(iimage),res_img(iimage)%vel(:,:))
        hist(iimage)%histE(ih)       =res_img(iimage)%results_gs%etotal
        hist(iimage)%histEnt(ih)     =res_img(iimage)%results_gs%energies%entropy
-       hist(iimage)%histXF(:,:,3,ih)=res_img(iimage)%results_gs%fcart(:,:)
-       hist(iimage)%histXF(:,:,4,ih)=res_img(iimage)%results_gs%fred(:,:)
+       hist(iimage)%histXF(:,:,2,ih)=res_img(iimage)%results_gs%fcart(:,:)
        hist(iimage)%histS(:,ih)     =res_img(iimage)%results_gs%strten(:)
-       hist(iimage)%histT(ih)       =itimimage  !????? this is done like this in mover
+       hist(iimage)%histT(ih)       =real(itimimage,kind=dp)*dtion
      end if
 
    end do ! iimage
@@ -596,7 +595,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    if (use_hist.and.mpi_enreg%me_cell==0) then
      ifirst=merge(0,1,itimimage>1);ihead=merge(0,1,mpi_enreg%me/=0)
      call write_md_hist_img(hist,hist_filename,ifirst,ihead,dtset%natom,dtset%ntypat,&
-&                           dtset%typat,amu_img(:,1),dtset%znucl,dtset%dtion,&
+&                           dtset%typat,amu_img(:,1),dtset%znucl,dtion,&
 &                           nimage=dtset%nimage,imgtab=mpi_enreg%my_imgtab)
    end if
 #endif
@@ -705,9 +704,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  ABI_DEALLOCATE(vel_cell)
  ABI_DEALLOCATE(xred)
  ABI_DEALLOCATE(list_dynimage)
- if (allocated(xcart)) then
-   ABI_DEALLOCATE(xcart)
- end if
  if (allocated(amass)) then
    ABI_DEALLOCATE(amass)
  end if

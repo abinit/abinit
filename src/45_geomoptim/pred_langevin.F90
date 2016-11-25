@@ -84,10 +84,10 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 !Local variables-------------------------------
 !scalars
  integer  :: ii,kk,iatom,idim,iatom1,iatom2,itypat,idum=5,mcfac
- real(dp) :: ucvol,ucvol_next,amass_tot
+ real(dp) :: ucvol,ucvol_next
  real(dp),parameter :: v2tol=tol8
  real(dp) :: etotal,rescale_vel,ran_num1,ran_num2
- real(dp) :: favg,ktemp,dist,distx,disty,distz,maxp1,maxp2,v2nose
+ real(dp) :: ktemp,dist,distx,disty,distz,maxp1,maxp2,v2nose
  real(dp) :: sig_gauss,delxi
  logical  :: jump_end_of_cycle=.FALSE.
  character(len=5000) :: message
@@ -99,11 +99,9 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 
  real(dp) :: acell(3),acell_next(3)
  real(dp) :: rprim(3,3),rprimd(3,3),rprimd_next(3,3),rprim_next(3,3)
- real(dp) :: gprimd(3,3)
- real(dp) :: gmet(3,3)
- real(dp) :: rmet(3,3)
+ real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3)
  real(dp) :: fcart(3,ab_mover%natom)
- real(dp) :: fred(3,ab_mover%natom),fred_corrected(3,ab_mover%natom)
+!real(dp) :: fred_corrected(3,ab_mover%natom)
  real(dp) :: xcart(3,ab_mover%natom),xcart_next(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom),xred_next(3,ab_mover%natom)
  real(dp) :: vel(3,ab_mover%natom)
@@ -196,32 +194,29 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 !##########################################################
 !### 03. Obtain the present values from the history
 
- call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+ call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
- fcart(:,:) =hist%histXF(:,:,3,hist%ihist)
- fred(:,:)  =hist%histXF(:,:,4,hist%ihist)
+ fcart(:,:) =hist%histXF(:,:,2,hist%ihist)
  vel(:,:)   =hist%histV(:,:,hist%ihist)
-
  etotal     =hist%histE(hist%ihist)
  strten(:)  =hist%histS(:,hist%ihist)
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+ do ii=1,3;rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3);end do
+ call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 
 !Get rid of mean force on whole unit cell, but only if no
 !generalized constraints are in effect
- if(ab_mover%nconeq==0)then
-   amass_tot=sum(ab_mover%amass(:))
-   do ii=1,3
-     favg=sum(fred(ii,:))/dble(ab_mover%natom)
-!    Note that the masses are used, in order to weight the repartition of the average force.
-!    This procedure is adequate for dynamics, as pointed out by Hichem Dammak (2012 Jan 6)..
-     fred_corrected(ii,:)=fred(ii,:)-favg*ab_mover%amass(:)/amass_tot
-     if(ab_mover%jellslab/=0.and.ii==3)&
-&     fred_corrected(ii,:)=fred(ii,:)
-   end do
- else
-   fred_corrected(:,:)=fred(:,:)
- end if
+!  call fcart2fred(fcart,fred_corrected,rprimd,ab_mover%natom)
+!  if(ab_mover%nconeq==0)then
+!    amass_tot=sum(ab_mover%amass(:))
+!    do ii=1,3
+!      if (ii/=3.or.ab_mover%jellslab==0) then
+!        favg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
+!        fred_corrected(ii,:)=fred_corrected(ii,:)-favg*ab_mover%amass(:)/amass_tot
+!      end if
+!    end do
+!  end if
 
 !write(std_out,*) 'langevin 04',jump_end_of_cycle
 !##########################################################
@@ -477,10 +472,8 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
    if (etotal>hist%histE(hist%ihist-1).and.icycle==2) then
 
 !    Discard the changes
-     xcart(:,:) =hist%histXF(:,:,1,hist%ihist-1)
-     xred(:,:)  =hist%histXF(:,:,2,hist%ihist-1)
-     fcart(:,:) =hist%histXF(:,:,3,hist%ihist-1)
-     fred(:,:)  =hist%histXF(:,:,4,hist%ihist-1)
+     xred(:,:)  =hist%histXF(:,:,1,hist%ihist-1)
+     fcart(:,:) =hist%histXF(:,:,2,hist%ihist-1)
      vel(:,:)   =hist%histV(:,:,hist%ihist-1)
 
      etotal     =hist%histE(hist%ihist-1)
@@ -488,6 +481,8 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
      acell(:)   =hist%histA(:,hist%ihist-1)
      rprimd(:,:)=hist%histR(:,:,hist%ihist-1)
      strten(:)  =hist%histS(:,hist%ihist-1)
+
+     call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 
 !    distx=xcart(1,iatom1)
 !    disty=xcart(2,iatom1)
@@ -514,31 +509,16 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 
 !    Get rid of mean force on whole unit cell, but only if no generalized
 !    constraints are in effect
-     if(ab_mover%nconeq==0)then
-       amass_tot=sum(ab_mover%amass(:))
-       do ii=1,3
-         favg=sum(fred(ii,:))/dble(ab_mover%natom)
-!        Note that the masses are used, in order to weight the repartition of the average force.
-!        This procedure is adequate for dynamics, as pointed out by Hichem Dammak (2012 Jan 6)..
-         fred_corrected(ii,:)=fred(ii,:)-favg*ab_mover%amass(:)/amass_tot
-         if(ab_mover%jellslab/=0.and.ii==3) fred_corrected(ii,:)=fred(ii,:)
-       end do
-     else
-       fred_corrected(:,:)=fred(:,:)
-     end if
-
-!    Inside xfh_update nxfh is increased by 1
-!    ab_xfh%nxfh=ab_xfh%nxfh-1
-!    call xfh_update(ab_xfh,acell,fred_corrected,ab_mover%natom,rprim,&
-!    &             strten,xred)
-
-!    !            Update xfhist
-!    ab_xfh%xfhist(:,1:ab_mover%natom,1,ab_xfh%nxfh)=xred(:,:)
-!    ab_xfh%xfhist(:,ab_mover%natom+1,1,ab_xfh%nxfh)=acell(:)
-!    ab_xfh%xfhist(:,ab_mover%natom+2:ab_mover%natom+4,1,ab_xfh%nxfh)=rprim(1:3,1:3)
-!    ab_xfh%xfhist(:,1:ab_mover%natom,2,ab_xfh%nxfh)=fred_corrected(:,:)
-!    ab_xfh%xfhist(:,ab_mover%natom+2,2,ab_xfh%nxfh)=results_gs%strten(1:3)
-!    ab_xfh%xfhist(:,ab_mover%natom+3,2,ab_xfh%nxfh)=results_gs%strten(4:6)
+!    call fcart2fred(fcart,fred_corrected,rprimd,ab_mover%natom)
+!    if(ab_mover%nconeq==0)then
+!      amass_tot=sum(ab_mover%amass(:))
+!      do ii=1,3
+!        if (ii/=3.or.ab_mover%jellslab==0) then
+!          favg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
+!          fred_corrected(ii,:)=fred_corrected(ii,:)-favg*ab_mover%amass(:)/amass_tot
+!        end if
+!      end do
+!    end if
 
 !    In thisc case we do not need to compute again SCFCV
 !    We avoid the second iteration on ii
@@ -667,9 +647,9 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 !  Convert input xred (reduced coordinates) to xcart (cartesian)
    call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 !  Uses the velocity
-!  
+!
 !  If an atom wants to cross the walls, velocity is reversed.
-!  
+!
    do iatom=1,ab_mover%natom
      do idim=1,3
        delxi=xcart(idim,iatom)+ab_mover%dtion*vel(idim,iatom)+ &
@@ -725,32 +705,12 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 !Increase indexes
  hist%ihist=hist%ihist+1
 
-!Compute xcart from xred, and rprimd
- call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
-
- call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
-
+ call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
  hist%histV(:,:,hist%ihist)=vel(:,:)
  hist%histT(hist%ihist)=itime*ab_mover%dtion
 
-!write(std_out,*) 'langevin 08',jump_end_of_cycle
-!##########################################################
-!### 08. Deallocate in the last iteration
-!###     When itime==ntime the predictor will be no called
-
  if (ab_mover%delayperm==0 .or. ab_mover%ntypat<=2) ncycle=1
-
- if(itime==ntime-1)then
-   ncycle=1
-!  Temporarily deactivated (MT sept. 2011)
-!  if (allocated(pot_perm))   deallocate(pot_perm)
-!  if (allocated(max_perm))   deallocate(max_perm)
-!  if (allocated(imax_perm))  deallocate(imax_perm)
-!  if (allocated(ran_force))  deallocate(ran_force)
-!  if (allocated(lang_force)) deallocate(lang_force)
-!  if (allocated(fcart_mold)) deallocate(fcart_mold)
-!  if (allocated(fcart_m))    deallocate(fcart_m)
- end if
+ if(itime==ntime-1) ncycle=1
 
 end subroutine pred_langevin
 !!***

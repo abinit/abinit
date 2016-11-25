@@ -73,7 +73,7 @@ module m_abihist
 !! * histR(3,3,mxhist)       : Rprimd
 !! * histS(6,mxhist)         : Strten
 !! * histV(3,natom,mxhist)   : Velocity
-!! * histXF(3,natom,4,mxhist): Xcart,Xred,Fcart,Fred
+!! * histXF(3,natom,2,mxhist): Xred,Fcart
 !!
 !! NOTES
 !! The vectors are not allocated because in some cases
@@ -117,7 +117,7 @@ module m_abihist
     real(dp), allocatable :: histS(:,:)
 ! Vector of (x,y,z)X(natom)X(mxhist) values of velocity
     real(dp), allocatable :: histV(:,:,:)
-! Vector of (x,y,z)X(natom)X(xcart,xred,fcart,fred)X(mxhist)
+! Vector of (x,y,z)X(natom)X(xred,fcart)X(mxhist)
     real(dp), allocatable :: histXF(:,:,:,:)
 
  end type abihist
@@ -127,8 +127,8 @@ module m_abihist
  public :: abihist_bcast            ! Broadcast the object
  public :: abihist_copy             ! Copy 2 HIST records
  public :: abihist_compare_and_copy ! Compare 2 HIST records; if similar copy
- public :: hist2var                 ! Get xcart, xred, acell and rprimd from the history.
- public :: var2hist                 ! Append xcart, xred, acell and rprimd
+ public :: hist2var                 ! Get xred, acell and rprimd from the history.
+ public :: var2hist                 ! Append xred, acell and rprimd
  public :: vel2hist                 ! Append velocities and Kinetic Energy
  public :: write_md_hist            ! Write the history into a netcdf file
  public :: write_md_hist_img        ! Write the history into a netcdf file (with images)
@@ -216,7 +216,7 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
  ABI_ALLOCATE(hist%histR,(3,3,mxhist))
  ABI_ALLOCATE(hist%histS,(6,mxhist))
  ABI_ALLOCATE(hist%histV,(3,natom,mxhist))
- ABI_ALLOCATE(hist%histXF,(3,natom,4,mxhist))
+ ABI_ALLOCATE(hist%histXF,(3,natom,2,mxhist))
 
  hist%histE(1)=zero
  hist%histEk(1)=zero
@@ -361,7 +361,7 @@ subroutine abihist_free_0D(hist)
  if (allocated(hist%histV))  then
    ABI_DEALLOCATE(hist%histV)
  end if
-! Vector of (x,y,z)X(natom)X(xcart,xred,fcart,fred)X(mxhist)
+! Vector of (x,y,z)X(natom)X(xred,fred)X(mxhist)
  if (allocated(hist%histXF))  then
    ABI_DEALLOCATE(hist%histXF)
  end if
@@ -496,8 +496,8 @@ subroutine abihist_bcast_0D(hist,master,comm)
  if (rank/=master) then
    hist%ihist=buffer_i(1)
    hist%mxhist=buffer_i(2)
-   hist%isVused =(buffer_i(3)==1)
-   hist%isARused=(buffer_i(4)==1)
+   hist%isVused  =(buffer_i(3)==1)
+   hist%isARused =(buffer_i(4)==1)
  end if
  ABI_DEALLOCATE(buffer_i)
 
@@ -505,7 +505,7 @@ subroutine abihist_bcast_0D(hist,master,comm)
  if (hist%mxhist==0.or.hist%ihist==0) return
 
 !=== Broadcast sizes of arrays
-ABI_ALLOCATE(buffer_i,(18))
+ ABI_ALLOCATE(buffer_i,(18))
  if (rank==master) then
    sizeA1=size(hist%histA,1);sizeA2=size(hist%histA,2)
    sizeE=size(hist%histE,1);sizeEk=size(hist%histEk,1);
@@ -669,14 +669,12 @@ end subroutine abihist_bcast_1D
 !!
 !! FUNCTION
 !! Set the values of the history "hist"
-!! with the values of xcart, xred, acell and rprimd
+!! with the values of xred, acell and rprimd
 !!
 !! INPUTS
 !! natom = number of atoms
 !! xred(3,natom) = reduced dimensionless atomic
 !!                           coordinates
-!! xcart(3,natom)= cartesian dimensional atomic
-!!                           coordinates (bohr)
 !! acell(3)    = length scales of primitive translations (bohr)
 !! rprimd(3,3) = dimensionlal real space primitive translations
 !!               (bohr)
@@ -686,18 +684,6 @@ end subroutine abihist_bcast_1D
 !! SIDE EFFECTS
 !! hist<type abihist>=Historical record of positions, forces
 !!      |                    acell, stresses, and energies,
-!!      |                    contains:
-!!      | mxhist:  Maximun number of records
-!!      | ihist:   Index of present record
-!!      | histA:   Historical record of acell(A) and rprimd(R)
-!!      | histE:   Historical record of energy(E)
-!!      | histEk:  Historical record of kinetic energy(Ek)
-!!      | histEnt: Historical record of Entropy
-!!      | histT:   Historical record of time(T)
-!!      | histR:   Historical record of rprimd(R)
-!!      | histS:   Historical record of strten(S)
-!!      | histV:   Historical record of velocity(V)
-!!      | histXF:  Historical record of positions(X) and forces(F)
 !!
 !! PARENTS
 !!      m_pred_lotf,mover,pred_bfgs,pred_delocint,pred_diisrelax
@@ -708,56 +694,43 @@ end subroutine abihist_bcast_1D
 !!
 !! SOURCE
 
-subroutine var2hist(acell,hist,natom,rprim,rprimd,xcart,xred,zDEBUG)
+subroutine var2hist(acell,hist,natom,rprimd,xred,zDEBUG)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'var2hist'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
-
-integer,intent(in) :: natom
-type(abihist),intent(inout) :: hist
-logical,intent(in) :: zDEBUG
+ integer,intent(in) :: natom
+ type(abihist),intent(inout) :: hist
+ logical,intent(in) :: zDEBUG
 !arrays
-real(dp),intent(in) :: acell(3)
-real(dp),intent(in) :: rprimd(3,3)
-real(dp),intent(in) :: rprim(3,3)
-real(dp),intent(in) :: xcart(3,natom)
-real(dp),intent(in) :: xred(3,natom)
+ real(dp),intent(in) :: acell(3)
+ real(dp),intent(in) :: rprimd(3,3)
+ real(dp),intent(in) :: xred(3,natom)
 
 !Local variables-------------------------------
 !scalars
-integer :: kk
+ integer :: kk
 
 ! *************************************************************
 
- hist%histXF(:,:,1,hist%ihist)=xcart(:,:)
- hist%histXF(:,:,2,hist%ihist)=xred(:,:)
- hist%histA(:,hist%ihist)     =acell(:)
- hist%histR(:,:,hist%ihist)   =rprimd(:,:)
+ hist%histXF(:,:,1,hist%ihist)=xred(:,:)
+ hist%histA (:    ,hist%ihist)=acell(:)
+ hist%histR (:,:  ,hist%ihist)=rprimd(:,:)
 
  if(zDEBUG)then
    write (std_out,*) 'Atom positions and cell parameters '
    write (std_out,*) 'ihist: ',hist%ihist
-   write (std_out,*) 'xcart:'
-   do kk=1,natom
-     write (std_out,*) xcart(:,kk)
-   end do
    write (std_out,*) 'xred:'
    do kk=1,natom
      write (std_out,*) xred(:,kk)
-   end do
-   write(std_out,*) 'rprim:'
-   do kk=1,3
-     write(std_out,*) rprim(:,kk)
    end do
    write(std_out,*) 'rprimd:'
    do kk=1,3
@@ -765,7 +738,6 @@ integer :: kk
    end do
    write(std_out,*) 'acell:'
    write(std_out,*) acell(:)
-   call chkrprimd(acell,rprim,rprimd,std_out)
  end if
 
 end subroutine var2hist
@@ -779,7 +751,7 @@ end subroutine var2hist
 !! hist2var
 !!
 !! FUNCTION
-!! Set the values of xcart, xred, acell and rprimd
+!! Set the values of xred, acell and rprimd
 !! with the values that comes from the history "hist"
 !!
 !! INPUTS
@@ -789,14 +761,9 @@ end subroutine var2hist
 !! zDebug = If true some output will be printed
 !!
 !! OUTPUT
-!!  xred(3,natom) = reduced dimensionless atomic
-!!                           coordinates
-!!  xcart(3,natom)= cartesian dimensional atomic
-!!                           coordinates (bohr)
+!!  xred(3,natom) = reduced dimensionless atomic coordinates
 !!  acell(3)    = length scales of primitive translations (bohr)
-!!  rprim(3,3) = dimensionless real space primitive translations
-!!  rprimd(3,3) = dimensional real space primitive translations
-!!                (bohr)
+!!  rprimd(3,3) = dimensional real space primitive translations (bohr)
 !!
 !! SIDE EFFECTS
 !!
@@ -809,14 +776,13 @@ end subroutine var2hist
 !!
 !! SOURCE
 
-subroutine hist2var(acell,hist,natom,rprim,rprimd,xcart,xred,zDEBUG)
+subroutine hist2var(acell,hist,natom,rprimd,xred,zDEBUG)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'hist2var'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -829,8 +795,6 @@ logical,intent(in) :: zDEBUG
 !arrays
 real(dp),intent(out) :: acell(3)
 real(dp),intent(out) :: rprimd(3,3)
-real(dp),intent(out) :: rprim(3,3)
-real(dp),intent(out) :: xcart(3,natom)
 real(dp),intent(out) :: xred(3,natom)
 
 !Local variables-------------------------------
@@ -839,32 +803,16 @@ integer :: jj,kk
 
 ! *************************************************************
 
- xcart(:,:) =hist%histXF(:,:,1,hist%ihist)
- xred(:,:)  =hist%histXF(:,:,2,hist%ihist)
- acell(:)   =hist%histA(:,hist%ihist)
+ xred  (:,:)=hist%histXF(:,:,1,hist%ihist)
+ acell (:  )=hist%histA(:,hist%ihist)
  rprimd(:,:)=hist%histR(:,:,hist%ihist)
-
-!Compute rprim from rprimd and acell
- do kk=1,3
-   do jj=1,3
-     rprim(jj,kk)=rprimd(jj,kk)/acell(kk)
-   end do
- end do
 
  if(zDEBUG)then
    write (std_out,*) 'Atom positions and cell parameters '
    write (std_out,*) 'ihist: ',hist%ihist
-   write (std_out,*) 'xcart:'
-   do kk=1,natom
-     write (std_out,*) xcart(:,kk)
-   end do
    write (std_out,*) 'xred:'
    do kk=1,natom
      write (std_out,*) xred(:,kk)
-   end do
-   write(std_out,*) 'rprim:'
-   do kk=1,3
-     write(std_out,*) rprim(:,kk)
    end do
    write(std_out,*) 'rprimd:'
    do kk=1,3
@@ -872,7 +820,6 @@ integer :: jj,kk
    end do
    write(std_out,*) 'acell:'
    write(std_out,*) acell(:)
-   call chkrprimd(acell,rprim,rprimd,std_out)
  end if
 
 end subroutine hist2var
@@ -900,7 +847,7 @@ end subroutine hist2var
 !!                           acell, stresses, and energies,
 !!
 !! PARENTS
-!!      mover
+!!      gstateimg,mover
 !!
 !! CHILDREN
 !!
@@ -942,7 +889,7 @@ real(dp) :: ekin
    ekin=zero
    do ii=1,natom
      do jj=1,3
-       ekin=ekin+0.5_dp*amass(ii)*vel(jj,ii)**2
+       ekin=ekin+half*amass(ii)*vel(jj,ii)**2
      end do
    end do
 
@@ -1009,8 +956,8 @@ type(abihist),intent(inout) :: hist_out
  end if
 
 !Copy scalars (except ihist and mxhist)
- hist_out%isVused=hist_in%isVused
- hist_out%isARused=hist_in%isARused
+ hist_out%isVused  =hist_in%isVused
+ hist_out%isARused =hist_in%isARused
 
 !Copy arrays
  hist_out%histA(:,hist_out%ihist)     = hist_in%histA(:,hist_in%ihist)
@@ -1097,21 +1044,6 @@ real(dp) :: x,y
      if (diff>maxdiff) maxdiff=diff
    end do
  end do
- write(std_out,'(a,e12.5)') 'xcart:    ',maxdiff
- if (maxdiff>tolerance) similar=0
-
-
- x=hist_out%histXF(1,1,2,hist_out%ihist)
- y=hist_in%histXF(1,1,2,hist_in%ihist)
- maxdiff=2*abs(x-y)/(abs(x)+abs(y))
- do kk=1,natom
-   do jj=1,3
-     x=hist_out%histXF(jj,kk,2,hist_out%ihist)
-     y=hist_in%histXF(jj,kk,2,hist_in%ihist)
-     diff=2*abs(x-y)/(abs(x)+abs(y))
-     if (diff>maxdiff) maxdiff=diff
-   end do
- end do
  write(std_out,'(a,e12.5)') 'xred:     ',maxdiff
  if (maxdiff>tolerance) similar=0
 
@@ -1145,18 +1077,16 @@ real(dp) :: x,y
 
  if (similar==1) then
 
-   hist_out%histV(:,:,hist_out%ihist)=   hist_in%histV(:,:,hist_in%ihist)
-   hist_out%histE(hist_out%ihist)=       hist_in%histE(hist_in%ihist)
-   hist_out%histEk(hist_out%ihist)=      hist_in%histEk(hist_in%ihist)
-   hist_out%histEnt(hist_out%ihist)=     hist_in%histEnt(hist_in%ihist)
-   hist_out%histT(hist_out%ihist)=       hist_in%histT(hist_in%ihist)
+   hist_out%histV(:,:,hist_out%ihist)   =hist_in%histV(:,:,hist_in%ihist)
+   hist_out%histE(hist_out%ihist)       =hist_in%histE(hist_in%ihist)
+   hist_out%histEk(hist_out%ihist)      =hist_in%histEk(hist_in%ihist)
+   hist_out%histEnt(hist_out%ihist)     =hist_in%histEnt(hist_in%ihist)
+   hist_out%histT(hist_out%ihist)       =hist_in%histT(hist_in%ihist)
    hist_out%histXF(:,:,1,hist_out%ihist)=hist_in%histXF(:,:,1,hist_in%ihist)
    hist_out%histXF(:,:,2,hist_out%ihist)=hist_in%histXF(:,:,2,hist_in%ihist)
-   hist_out%histXF(:,:,3,hist_out%ihist)=hist_in%histXF(:,:,3,hist_in%ihist)
-   hist_out%histXF(:,:,4,hist_out%ihist)=hist_in%histXF(:,:,4,hist_in%ihist)
-   hist_out%histS(:,hist_out%ihist)=     hist_in%histS(:,hist_in%ihist)
-   hist_out%histR(:,:,hist_out%ihist)=   hist_in%histR(:,:,hist_in%ihist)
-   hist_out%histA(:,hist_out%ihist)=   hist_in%histA(:,hist_in%ihist)
+   hist_out%histS(:,hist_out%ihist)     =hist_in%histS(:,hist_in%ihist)
+   hist_out%histR(:,:,hist_out%ihist)   =hist_in%histR(:,:,hist_in%ihist)
+   hist_out%histA(:,hist_out%ihist)     =hist_in%histA(:,hist_in%ihist)
 
  end if
 
@@ -1272,7 +1202,7 @@ subroutine write_md_hist(hist,filename,ifirst,natom,ntypat,&
  call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,&
 &     rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
 !Write
-call write_vars_hist(ncid,hist,natom,has_nimage,1,&
+ call write_vars_hist(ncid,hist,natom,has_nimage,1,&
 &     xcart_id,xred_id,fcart_id,fred_id,vel_id,rprimd_id,acell_id,&
 &     strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
 
@@ -1454,7 +1384,7 @@ end subroutine write_md_hist_img
 !!
 !! INPUTS
 !!  filename = Filename of the NetCDF to read
-!!  isVUsed,isARUsed=flags used to initialize hsit structure
+!!  isVUsed,isARUsed=flags used to initialize hist structure
 !!
 !! OUTPUT
 !!  hist<type abihist>=Historical record of positions, forces, stresses,
@@ -1525,8 +1455,8 @@ implicit none
 
 !Read variables from the dataset and write them into hist
  call read_vars_hist(ncid,hist,natom,time,has_nimage,1,&
-&     xcart_id,xred_id,fcart_id,fred_id,vel_id,rprimd_id,&
-&     acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+&     xred_id,fcart_id,vel_id,rprimd_id,acell_id,strten_id,&
+&     etotal_id,ekin_id,entropy_id,mdtime_id)
 
 !Close NetCDF file
  ncerr = nf90_close(ncid)
@@ -1550,7 +1480,7 @@ end subroutine read_md_hist
 !!
 !! INPUTS
 !!  filename = Filename of the NetCDF to read
-!!  isVUsed,isARUsed=flags used to initialize hsit structure
+!!  isVUsed,isARUsed=flags used to initialize hist structure
 !!  [imgtab(:)]= In case of multiple images,indexes of images to be read
 !!               Default is 1,2,3,...
 !!               Size must be equal to size(hist)
@@ -1652,8 +1582,8 @@ implicit none
 
 !  Read variables from the dataset and write them into hist
    call read_vars_hist(ncid,hist_,natom,time,has_nimage,iimg,&
-&       xcart_id,xred_id,fcart_id,fred_id,vel_id,rprimd_id,&
-&       acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+&       xred_id,fcart_id,vel_id,rprimd_id,acell_id,strten_id,&
+&       etotal_id,ekin_id,entropy_id,mdtime_id)
 
  end do
 
@@ -2145,10 +2075,12 @@ subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,&
 &          xcart_id,xred_id,fcart_id,fred_id,vel_id,rprimd_id,&
 &          acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'write_vars_hist'
+ use interfaces_41_geometry
 !End of the abilint section
 
 implicit none
@@ -2169,11 +2101,18 @@ implicit none
 !arrays
  integer :: count1(1),count2(2),count3(3),count4(4)
  integer :: start1(1),start2(2),start3(3),start4(4)
+ real(dp),allocatable :: conv(:,:)
+ real(dp),pointer :: xred(:,:),fcart(:,:),rprimd(:,:),vel(:,:)
 #endif
 
 ! *************************************************************************
 
 #if defined HAVE_NETCDF
+
+ xred   => hist%histXF(:,:,1,hist%ihist)
+ fcart  => hist%histXF(:,:,2,hist%ihist)
+ vel    => hist%histV(:,:,hist%ihist)
+ rprimd => hist%histR(:,:,hist%ihist)
 
 !Variables not depending on images
 
@@ -2184,42 +2123,40 @@ implicit none
 
 !Variables depending on images
 
+ ABI_ALLOCATE(conv,(3,natom))
+
 !xcart,xred,fcart,fred,vel
  if (has_nimage) then
    start4=(/1,1,iimg,hist%ihist/);count4=(/3,natom,1,1/)
-   ncerr = nf90_put_var(ncid,xcart_id,hist%histXF(:,:,1,hist%ihist),&
-&                       start = start4,count = count4)
+   call xred2xcart(natom,rprimd,conv,xred)
+   ncerr = nf90_put_var(ncid,xcart_id,conv, start = start4,count = count4)
    NCF_CHECK_MSG(ncerr," write variable xcart")
-   ncerr = nf90_put_var(ncid,xred_id,hist%histXF(:,:,2,hist%ihist),&
-&                       start = start4,count = count4)
-  NCF_CHECK_MSG(ncerr," write variable xred")
-   ncerr = nf90_put_var(ncid,fcart_id,hist%histXF(:,:,3,hist%ihist),&
-&                       start = start4,count = count4)
+   ncerr = nf90_put_var(ncid,xred_id,xred, start = start4,count = count4)
+   NCF_CHECK_MSG(ncerr," write variable xred")
+   ncerr = nf90_put_var(ncid,fcart_id,fcart,start = start4,count = count4)
    NCF_CHECK_MSG(ncerr," write variable fcart")
-   ncerr = nf90_put_var(ncid,fred_id,hist%histXF(:,:,4,hist%ihist),&
-&                       start = start4,count = count4)
+   call fcart2fred(fcart,conv,rprimd,natom)
+   ncerr = nf90_put_var(ncid,fred_id,conv, start = start4,count = count4)
    NCF_CHECK_MSG(ncerr," write variable fred")
-   ncerr = nf90_put_var(ncid,vel_id,hist%histV(:,:,hist%ihist),&
-&                       start = start4,count = count4)
+   ncerr = nf90_put_var(ncid,vel_id,vel, start = start4,count = count4)
    NCF_CHECK_MSG(ncerr," write variable vel")
  else
    start3=(/1,1,hist%ihist/);count3=(/3,natom,1/)
-   ncerr = nf90_put_var(ncid,xcart_id,hist%histXF(:,:,1,hist%ihist),&
-&                       start = start3,count = count3)
+   call xred2xcart(natom,rprimd,conv,xred)
+   ncerr = nf90_put_var(ncid,xcart_id,conv, start = start3,count = count3)
    NCF_CHECK_MSG(ncerr," write variable xcart")
-   ncerr = nf90_put_var(ncid,xred_id,hist%histXF(:,:,2,hist%ihist),&
-&                       start = start3,count = count3)
+   ncerr = nf90_put_var(ncid,xred_id,xred, start = start3,count = count3)
    NCF_CHECK_MSG(ncerr," write variable xred")
-   ncerr = nf90_put_var(ncid,fcart_id,hist%histXF(:,:,3,hist%ihist),&
-&                       start = start3,count = count3)
+   ncerr = nf90_put_var(ncid,fcart_id,fcart,start = start3,count = count3)
    NCF_CHECK_MSG(ncerr," write variable fcart")
-   ncerr = nf90_put_var(ncid,fred_id,hist%histXF(:,:,4,hist%ihist),&
-&                       start = start3,count = count3)
+   call fcart2fred(fcart,conv,rprimd,natom)
+   ncerr = nf90_put_var(ncid,fred_id,conv, start = start3,count = count3)
    NCF_CHECK_MSG(ncerr," write variable fred")
-   ncerr = nf90_put_var(ncid,vel_id,hist%histV(:,:,hist%ihist),&
-&                       start = start3,count = count3)
+   ncerr = nf90_put_var(ncid,vel_id,vel, start = start3,count = count3)
    NCF_CHECK_MSG(ncerr," write variable vel")
  end if
+
+ ABI_DEALLOCATE(conv)
 
 !rprimd
  if (has_nimage) then
@@ -2304,8 +2241,9 @@ end subroutine write_vars_hist
 !! SOURCE
 
 subroutine read_vars_hist(ncid,hist,natom,time,has_nimage,iimg,&
-&          xcart_id,xred_id,fcart_id,fred_id,vel_id,rprimd_id,&
-&          acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+&          xred_id,fcart_id,vel_id,rprimd_id,acell_id,strten_id,&
+&          etotal_id,ekin_id,entropy_id,mdtime_id)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2318,8 +2256,7 @@ implicit none
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid,natom,time,iimg
- integer,intent(in) :: xcart_id,xred_id,fcart_id,fred_id,vel_id
- integer,intent(in) :: rprimd_id,acell_id,strten_id
+ integer,intent(in) :: xred_id,fcart_id,vel_id,rprimd_id,acell_id,strten_id
  integer,intent(in) :: etotal_id,ekin_id,entropy_id,mdtime_id
  logical,intent(in) :: has_nimage
  type(abihist),intent(inout),target :: hist
@@ -2346,29 +2283,21 @@ implicit none
 
 !Variables depending on images
 
-!xcart,xred,fcart,fred,vel
+!xred,fcart,vel
  if (has_nimage) then
    start4=(/1,1,iimg,1/);count4=(/3,natom,1,time/)
-   ncerr = nf90_get_var(ncid,xcart_id ,hist%histXF(:,:,1,:),count=count4,start=start4)
-   NCF_CHECK_MSG(ncerr," read variable xcart")
-   ncerr = nf90_get_var(ncid,xred_id  ,hist%histXF(:,:,2,:),count=count4,start=start4)
+   ncerr = nf90_get_var(ncid,xred_id  ,hist%histXF(:,:,1,:),count=count4,start=start4)
    NCF_CHECK_MSG(ncerr," read variable xred")
-   ncerr = nf90_get_var(ncid,fcart_id ,hist%histXF(:,:,3,:),count=count4,start=start4)
+   ncerr = nf90_get_var(ncid,fcart_id ,hist%histXF(:,:,2,:),count=count4,start=start4)
    NCF_CHECK_MSG(ncerr," read variable fcart")
-   ncerr = nf90_get_var(ncid,fred_id  ,hist%histXF(:,:,4,:),count=count4,start=start4)
-   NCF_CHECK_MSG(ncerr," read variable fred")
    ncerr = nf90_get_var(ncid,vel_id,hist%histV(:,:,:)  ,count=count4,start=start4)
    NCF_CHECK_MSG(ncerr," read variable vel")
  else
    start3=(/1,1,1/);count3=(/3,natom,time/)
-   ncerr = nf90_get_var(ncid,xcart_id ,hist%histXF(:,:,1,:),count=count3,start=start3)
-   NCF_CHECK_MSG(ncerr," read variable xcart")
-   ncerr = nf90_get_var(ncid,xred_id  ,hist%histXF(:,:,2,:),count=count3,start=start3)
+   ncerr = nf90_get_var(ncid,xred_id  ,hist%histXF(:,:,1,:),count=count3,start=start3)
    NCF_CHECK_MSG(ncerr," read variable xred")
-   ncerr = nf90_get_var(ncid,fcart_id ,hist%histXF(:,:,3,:),count=count3,start=start3)
+   ncerr = nf90_get_var(ncid,fcart_id ,hist%histXF(:,:,2,:),count=count3,start=start3)
    NCF_CHECK_MSG(ncerr," read variable fcart")
-   ncerr = nf90_get_var(ncid,fred_id  ,hist%histXF(:,:,4,:),count=count3,start=start3)
-   NCF_CHECK_MSG(ncerr," read variable fred")
    ncerr = nf90_get_var(ncid,vel_id,hist%histV(:,:,:)  ,count=count3,start=start3)
    NCF_CHECK_MSG(ncerr," read variable vel")
  end if

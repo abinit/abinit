@@ -67,7 +67,7 @@
 !!  xred_old(3,natom)=work space for old xred
 !!
 !! NOTES
-!! This subroutine uses the arguments natom, xred, vel, fcart, amass,
+!! This subroutine uses the arguments natom, xred, vel, amass,
 !! vis, and dtion (the last two contained in dtset) to make
 !! molecular dynamics updates.  The rest of the lengthy
 !! argument list supports the underlying lda computation
@@ -101,14 +101,14 @@
 !! CHILDREN
 !!      abiforstr_fin,abiforstr_ini,abihist_bcast,abihist_compare,abihist_free
 !!      abihist_init,abimover_fin,abimover_ini,abimover_nullify,chkdilatmx
-!!      crystal_free,crystal_init,dtfil_init_time,erlxconv,fcart2fred,fconv
-!!      fred2fcart,hist2var,initylmg,metric,mkradim,mttk_fin,mttk_ini
+!!      crystal_free,crystal_init,dtfil_init_time,erlxconv,fconv,
+!!      hist2var,initylmg,mttk_fin,matr3inv,mttk_ini
 !!      prec_simple,pred_bfgs,pred_delocint,pred_diisrelax,pred_isokinetic
 !!      pred_isothermal,pred_langevin,pred_lotf,pred_moldyn,pred_nose
 !!      pred_simple,pred_srkna14,pred_steepdesc,pred_verlet,prtxfase
 !!      read_md_hist,scfcv_run,status,symmetrize_xred,var2hist,vel2hist
 !!      write_md_hist,wrt_moldyn_netcdf,wrtout,wvl_mkrho,wvl_wfsinp_reformat
-!!      xfh_update,xmpi_barrier,xmpi_isum,xmpi_wait,xred2xcart
+!!      xfh_update,xmpi_barrier,xmpi_isum,xmpi_wait
 !!
 !! SOURCE
 
@@ -198,6 +198,7 @@ character(len=8) :: stat4xml
 character(len=35) :: fmt
 character(len=fnlen) :: filename
 real(dp) :: ucvol,favg
+!TEST
 logical :: DEBUG=.FALSE.
 logical :: change,useprtxfase
 logical :: skipcycle
@@ -206,9 +207,8 @@ integer :: iapp
 real(dp) :: minE,wtime_step,now,prev
 type(crystal_t) :: crystal
 !arrays
-real(dp),allocatable :: amu(:),xred_tmp(:,:),xcart(:,:),fcart2(:,:)
-real(dp),allocatable :: fred2(:,:),fred_corrected(:,:)
-real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
+real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3)
+real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
 ! ***************************************************************
 
@@ -232,7 +232,7 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
 !04. Try to read history of previous calculations
 !05. Allocate the hist structure
 !06. First output before any itime or icycle
-!07. Compute xcart and fill the history of the first SCFCV
+!07. Fill the history of the first SCFCV
 !08. Loop for itime (From 1 to ntime)
 !09. Loop for icycle (From 1 to ncycles)
 !10. Output for each icycle (and itime)
@@ -246,7 +246,7 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
 !18. Use the history  to extract the new values
 !19. End loop icycle
 !20. End loop itime
-!21. Set the final values of xcart and xred
+!21. Set the final values of xred
 !22. XML Output at the end
 !23. Deallocate hist and ab_mover datatypes
 !
@@ -270,13 +270,6 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
 !20. Ionic positions relaxation using DIIS
 !21. Steepest descent algorithm
 !23. LOTF method
-
- ABI_ALLOCATE(amu,(scfcv_args%dtset%ntypat))
- ABI_ALLOCATE(xred_tmp,(3,scfcv_args%dtset%natom))
- ABI_ALLOCATE(xcart,(3,scfcv_args%dtset%natom))
- ABI_ALLOCATE(fcart2,(3,scfcv_args%dtset%natom))
- ABI_ALLOCATE(fred2,(3,scfcv_args%dtset%natom))
- ABI_ALLOCATE(fred_corrected,(3,scfcv_args%dtset%natom))
 
  call abimover_nullify(ab_mover)
 
@@ -318,7 +311,6 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
    call mttk_ini(mttk_vars,ab_mover%nnos)
  end if
 
-!write(std_out,*) 'mover 03'
 !###########################################################
 !### 03. Set the number of iterations ntime
 !###     By default ntime==1 but if the user enter a lower
@@ -330,7 +322,6 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
    ntime=scfcv_args%dtset%ntime
  end if
 
-!write(std_out,*) 'mover 04'
 !###########################################################
 !### 04. Try to read history of previous calculations
 !###     It requires access to the NetCDF library
@@ -367,16 +358,14 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
      end do
      write(std_out,*) 'The lowest energy occurs at iteration:',minIndex,'etotal=',minE
      acell(:)   =hist_prev%histA(:,minIndex)
-     xcart(:,:) =hist_prev%histXF(:,:,1,minIndex)
-     xred(:,:)  =hist_prev%histXF(:,:,2,minIndex)
      rprimd(:,:)=hist_prev%histR(:,:,minIndex)
+     xred(:,:)  =hist_prev%histXF(:,:,1,minIndex)
    end if
 
  end if !if (ab_mover%restartxf<=0)
 
 #endif
 
-!write(std_out,*) 'mover 05'
 !###########################################################
 !### 05. Allocate the hist structure
 
@@ -388,7 +377,6 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
 
  call abiforstr_ini(preconforstr,ab_mover%natom)
 
-!write(std_out,*) 'mover 06'
 !###########################################################
 !### 06. First output before any itime or icycle
 
@@ -405,25 +393,12 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
 & ',a,i',int(log10(real(ncycle))+1),&
 & ',a,i',int(log10(real(ncycle))+1),&
 & ',a,a,80a)'
-!write(std_out,*) fmt
-!write(std_out,*) HUGE(1)
-!write(std_out,*) int(log10(real(HUGE(1)))+1)
 
-!write(std_out,*) 'mover 07'
 !###########################################################
-!### 07. Compute xcart and fill the history of the first SCFCV
-
-!Compute xcart from xred, and rprimd
- call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
-
-!Compute rprim from rprimd and acell
- do kk=1,3
-   do jj=1,3
-     rprim(jj,kk)=rprimd(jj,kk)/acell(kk)
-   end do
- end do
+!### 07. Fill the history of the first SCFCV
 
 !Compute atomic masses (in a.u.)
+ ABI_ALLOCATE(amu,(scfcv_args%dtset%ntypat))
  do kk=1,ab_mover%ntypat
    do jj=1,ab_mover%natom
      if (kk==ab_mover%typat(jj)) then
@@ -433,12 +408,12 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
    end do
  end do
 
-!Fill history with the values of xred,xcart,acell and rprimd
- call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,DEBUG)
+!Fill history with the values of xred, acell and rprimd
+ call var2hist(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
 
 !Fill velocities and ionic kinetic energy
  call vel2hist(ab_mover%amass,hist,vel)
- hist%histT(hist%ihist)=0.0
+ hist%histT(hist%ihist)=zero
 
 !Decide if prtxfase will be called
  useprtxfase=.FALSE.
@@ -452,7 +427,8 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
 !At beginning no error
  nerr_dilatmx = 0
 
-!write(std_out,*) 'mover 08'
+ ABI_ALLOCATE(xred_prev,(3,scfcv_args%dtset%natom))
+
 !###########################################################
 !### 08. Loop for itime (From 1 to ntime)
  quitsum_request = xmpi_request_null
@@ -488,12 +464,11 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
 #if defined HAVE_LOTF
    if(ab_mover%ionmov==23 .and. .not. lotf_extrapolation(itime)) skipcycle=.True.
 #endif
-!  write(std_out,*) 'mover 09'
+
 !  ###########################################################
 !  ### 09. Loop for icycle (From 1 to ncycles)
    do icycle=1,ncycle
 
-!    write(std_out,*) 'mover 10'
 !    ###########################################################
 !    ### 10. Output for each icycle (and itime)
 
@@ -506,37 +481,26 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
        call prtxfase(ab_mover,hist,std_out,mover_BEFORE)
      end if
 
-!    write(std_out,*) 'mover 11'
+     xred_prev(:,:)=xred(:,:)
+     rprimd_prev(:,:)=rprimd(:,:)
+
 !    ###########################################################
 !    ### 11. Symmetrize atomic coordinates over space group elements
-
-     change=.FALSE.
-     xred_tmp(:,:)=xred(:,:)
 
      call symmetrize_xred(scfcv_args%indsym,ab_mover%natom,&
 &     scfcv_args%dtset%nsym,scfcv_args%dtset%symrel,scfcv_args%dtset%tnons,xred)
 
-     do kk=1,ab_mover%natom
-       do jj=1,3
-         if (xred(jj,kk)/=xred_tmp(jj,kk)) change=.TRUE.
-       end do
-     end do
-
+     change=any(xred(:,:)/=xred_prev(:,:))
      if (change)then
-       call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
-       hist%histXF(:,:,1,hist%ihist)=xcart(:,:)
-       hist%histXF(:,:,2,hist%ihist)=xred(:,:)
+       hist%histXF(:,:,1,hist%ihist)=xred(:,:)
        write(std_out,*) 'WARNING: ATOMIC COORDINATES WERE SYMMETRIZED'
        write(std_out,*) 'DIFFERENCES:'
-
        do kk=1,ab_mover%natom
-         write(std_out,*) xred(:,kk)-xred_tmp(:,kk)
+         write(std_out,*) xred(:,kk)-xred_prev(:,kk)
        end do
-
-       xred_tmp(:,:)=xred(:,:)
+       xred_prev(:,:)=xred(:,:)
      end if
 
-!    write(std_out,*) 'mover 12'
 !    ###########################################################
 !    ### 12. => Call to SCFCV routine and fill history with forces
      write(message,'(a,3a,33a,44a)')&
@@ -561,26 +525,24 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
 #if defined HAVE_LOTF
        if (ab_mover%ionmov/=23 .or.(lotf_extrapolation(itime).and.(icycle/=1.or.itime==1)))then
 #endif
-         !call scfcv_new2(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
          !WVL - reformat the wavefunctions in the case of xred != xred_old
          if (scfcv_args%dtset%usewvl == 1 .and. maxval(xred_old - xred) > zero) then
-        !  WVL - Before running scfcv, on non-first geometry step iterations,
-        !  we need to reformat the wavefunctions, taking into acount the new
-        !  coordinates.
-        !  We prepare to change rhog (to be removed) and rhor.
+          !Before running scfcv, on non-first geometry step iterations,
+          ! we need to reformat the wavefunctions, taking into acount the new
+          ! coordinates. We prepare to change rhog (to be removed) and rhor.
            ABI_DEALLOCATE(rhog)
            ABI_DEALLOCATE(rhor)
-
            call wvl_wfsinp_reformat(scfcv_args%dtset, scfcv_args%mpi_enreg,&
 &           scfcv_args%psps, rprimd, scfcv_args%wvl, xred, xred_old)
            scfcv_args%nfftf = scfcv_args%dtset%nfft
-
            ABI_ALLOCATE(rhog,(2, scfcv_args%dtset%nfft))
            ABI_ALLOCATE(rhor,(2, scfcv_args%dtset%nfft))
            call wvl_mkrho(scfcv_args%dtset, scfcv_args%irrzon, scfcv_args%mpi_enreg,&
 &           scfcv_args%phnons, rhor,scfcv_args%wvl%wfs,scfcv_args%wvl%den)
          end if
+
+!        MAIN CALL TO SELF-CONSISTENT FIELD ROUTINE
          call dtfil_init_time(dtfil,iapp)
          call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
@@ -599,14 +561,11 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
 !      a different value.
 !      Notice that normally scfcv should not change rprimd
 !      And even worse if optcell==0
-!      The solution here is to recompute acell and rprim
-!      and store those values in the present record
-!      even if initially those values were not exactly
-!      the values entering in scfcv
-!
+!      The solution here is to recompute acell and store these value
+!      in the present record even if initially it was not exactly
+!      the value entering in scfcv
 !      One test case with these condition is bigdft/t10
-       if (scfcv_args%dtset%usewvl == 1) then
-         call mkradim(acell,rprim,rprimd)
+       if (any(rprimd(:,:)/=rprimd_prev(:,:))) then
          hist%histA(:,hist%ihist)=acell(:)
          hist%histR(:,:,hist%ihist)=rprimd(:,:)
        end if
@@ -617,97 +576,50 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
 !
 !      * Inside scfcv.F90 there is a call to symmetrize_xred.F90
 !      for the first SCF cycle symmetrize_xred could change xred
-!      so we need always take xred convert to xcart and
-!      store in the history
-
        if (ab_mover%ionmov<10)then
-
-         change=.FALSE.
-
-         do kk=1,ab_mover%natom
-           do jj=1,3
-             if (xred(jj,kk)/=xred_tmp(jj,kk)) change=.TRUE.
-           end do
-         end do
-
+         change=any(xred(:,:)/=xred_prev(:,:))
          if (change)then
-           call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
-           hist%histXF(:,:,1,hist%ihist)=xcart(:,:)
-           hist%histXF(:,:,2,hist%ihist)=xred(:,:)
+           hist%histXF(:,:,1,hist%ihist)=xred(:,:)
            write(std_out,*) 'WARNING: ATOMIC COORDINATES WERE SYMMETRIZED AFTER SCFCV'
            write(std_out,*) 'DIFFERENCES:'
-
            do kk=1,ab_mover%natom
-             write(std_out,*) xred(:,kk)-xred_tmp(:,kk)
+             write(std_out,*) xred(:,kk)-xred_prev(:,kk)
            end do
-
          end if !if (change)
-
-!        call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
-!        hist%histXF(:,:,1,hist%ihist)=xcart(:,:)
-!        hist%histXF(:,:,2,hist%ihist)=xred(:,:)
        end if
 
 !      Fill velocities and ionic kinetic energy
        call vel2hist(ab_mover%amass,hist,vel)
        hist%histE(hist%ihist)       =scfcv_args%results_gs%etotal
        hist%histEnt(hist%ihist)     =scfcv_args%results_gs%energies%entropy
-       hist%histXF(:,:,3,hist%ihist)=scfcv_args%results_gs%fcart(:,:)
-       hist%histXF(:,:,4,hist%ihist)=scfcv_args%results_gs%fred(:,:)
+       hist%histXF(:,:,2,hist%ihist)=scfcv_args%results_gs%fcart(:,:)
        hist%histS(:,hist%ihist)     =scfcv_args%results_gs%strten(:)
-       hist%histT(hist%ihist)       =itime
-
-!      !######################################################################
-!      ! Test of convertion fcart and fred
-
-       call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
-       call fred2fcart(favg2,fcart2,scfcv_args%results_gs%fred,gprimd,ab_mover%jellslab,ab_mover%natom)
-       call fcart2fred(scfcv_args%results_gs%fcart,fred2,rprimd,ab_mover%natom)
-
-!      write (std_out,*) 'FCART'
-!      do kk=1,ab_mover%natom
-!      write (std_out,*) scfcv_args%results_gs%fcart(:,kk)
-!      end do
-!      write (std_out,*) 'FCART converted from fred'
-!      do kk=1,ab_mover%natom
-!      write (std_out,*) fcart2(:,kk)
-!      end do
-!      write (std_out,*) 'FRED'
-!      do kk=1,ab_mover%natom
-!      write (std_out,*) scfcv_args%results_gs%fred(:,kk)
-!      end do
-!      write (std_out,*) 'FRED converted from fcart'
-!      do kk=1,ab_mover%natom
-!      write (std_out,*) fred2(:,kk)
-!      end do
+       hist%histT(hist%ihist)       =real(itime,kind=dp)
 
 !      !######################################################################
 
      end if ! if(hist_prev%mxhist>0.and.ab_mover%restartxf==-1.and.hist_prev%ihist<=hist_prev%mxhist)then
 
+!    Store trajectory in xfh file
      if(ab_xfh%nxfh==0.or.itime/=1) then
-
-       call mkradim(acell,rprim,rprimd)
-!      Get rid of mean force on whole unit cell, but only if no
-!      generalized constraints are in effect
-!      hist%histXF(:,:,4,hist%ihist) are reduced forces
-       if(ab_mover%nconeq==0)then
-         do kk=1,3
-           favg=sum(hist%histXF(kk,:,4,hist%ihist))/dble(ab_mover%natom)
-           fred_corrected(kk,:)=hist%histXF(kk,:,4,hist%ihist)-favg
-           if(ab_mover%jellslab/=0.and.kk==3)&
-&           fred_corrected(kk,:)=hist%histXF(kk,:,4,hist%ihist)
+       ABI_ALLOCATE(fred_corrected,(3,scfcv_args%dtset%natom))
+       call fcart2fred(hist%histXF(:,:,2,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
+!      Get rid of mean force on whole unit cell,
+!       but only if no generalized constraints are in effect
+       if (ab_mover%nconeq==0)then
+         do ii=1,3
+           if (ii/=3.or.ab_mover%jellslab==0) then
+             favg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
+             fred_corrected(ii,:)=fred_corrected(ii,:)-favg
+           end if
          end do
-       else
-         fred_corrected(:,:)=hist%histXF(:,:,4,hist%ihist)
        end if
-
        if (ncycle<10.and.ab_mover%restartxf>=0) then
+         do ii=1,3;rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3);end do
          call xfh_update(ab_xfh,acell,fred_corrected,ab_mover%natom,rprim,&
-&         hist%histS(:,hist%ihist),xred)
+&                        hist%histS(:,hist%ihist),xred)
        end if
-
+       ABI_DEALLOCATE(fred_corrected)
      end if
 
 !    write(std_out,*) 'mover 13'
@@ -736,31 +648,6 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
        call prtxfase(ab_mover,hist,std_out,mover_AFTER)
      end if
 
-!    !    DEBUG (XRA AFTER SCFCV)
-!    if(DEBUG)then
-!    write (std_out,*) '---XRA AFTER SCFCV---'
-!    write (std_out,*) 'XCART'
-!    do kk=1,ab_mover%natom
-!    write (std_out,*) xcart(:,kk)
-!    end do
-!    write (std_out,*) 'XRED'
-!    do kk=1,ab_mover%natom
-!    write (std_out,*) xred(:,kk)
-!    end do
-!    if (ab_mover%ionmov==1)then
-!    write (std_out,*) 'VEL'
-!    do kk=1,ab_mover%natom
-!    write (std_out,*) hist%histV(:,kk,hist%ihist)
-!    end do
-!    end if
-!    write(std_out,*) 'RPRIMD'
-!    do kk=1,3
-!    write(std_out,*) rprimd(:,kk)
-!    end do
-!    write(std_out,*) 'ACELL'
-!    write(std_out,*) acell(:)
-!    end if
-
 !    write(std_out,*) 'mover 15'
 !    ###########################################################
 !    ### 15. => Test Convergence of forces and stresses
@@ -776,9 +663,9 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
      if(specs%isFconv)then
        if ((ab_mover%ionmov/=4.and.ab_mover%ionmov/=5).or.mod(itime,2)==1)then
          if (scfcv_args%dtset%tolmxf/=0)then
-           call fconv(hist%histXF(:,:,3,hist%ihist),&
+           call fconv(hist%histXF(:,:,2,hist%ihist),&
 &           scfcv_args%dtset%iatfix, &
-&           iexit, itime,&
+&           iexit,itime,&
 &           ab_mover%natom,&
 &           ntime,&
 &           ab_mover%optcell,&
@@ -901,7 +788,7 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
            call wrt_moldyn_netcdf(amass,scfcv_args%dtset,jj,option,dtfil%fnameabo_moldyn,&
 &           scfcv_args%mpi_enreg,scfcv_args%results_gs,&
 &           hist%histR(:,:,hist%ihist-1),dtfil%unpos,hist%histV(:,:,hist%ihist),&
-&           hist%histXF(:,:,1,hist%ihist-1),hist%histXF(:,:,2,hist%ihist-1))
+&           hist%histXF(:,:,1,hist%ihist-1))
          end if
          if (iexit==1) hist%ihist=hist%ihist-1
        end if
@@ -911,38 +798,13 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
 !    write(std_out,*) 'mover 17'
 !    ###########################################################
 !    ### 18. Use the history  to extract the new values
-!    ###     acell, rprimd, xcart and xred
+!    ###     acell, rprimd and xred
 
-!    !    DEBUG (XRA BEFORE USE OF HISTORY)
-!    if(DEBUG)then
-!    write (std_out,*) '---XRA BEFORE USE OF HISTORY---',hist%ihist
-!    write (std_out,*) 'XCART'
-!    do kk=1,ab_mover%natom
-!    write (std_out,*) xcart(:,kk)
-!    end do
-!    write (std_out,*) 'XRED'
-!    do kk=1,ab_mover%natom
-!    write (std_out,*) xred(:,kk)
-!    end do
-!    if (ab_mover%ionmov==1)then
-!    write (std_out,*) 'VEL'
-!    do kk=1,ab_mover%natom
-!    write (std_out,*) hist%histV(:,kk,hist%ihist)
-!    end do
-!    end if
-!    write(std_out,*) 'RPRIMD'
-!    do kk=1,3
-!    write(std_out,*) rprimd(:,kk)
-!    end do
-!    write(std_out,*) 'ACELL'
-!    write(std_out,*) acell(:)
-!    end if
-
-     call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,DEBUG)
+     call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
 
      if(ab_mover%optcell/=0)then
 
-       call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+       call matr3inv(rprimd,gprimd)
 
 !      If metric has changed since the initialization, update the Ylm's
        if (scfcv_args%psps%useylm==1)then
@@ -968,7 +830,7 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
 
      vel(:,:)=hist%histV(:,:,hist%ihist)
 
-!    vell_cell(3,3)= velocities of cell parameters
+!    vel_cell(3,3)= velocities of cell parameters
 !    Not yet used here but compute it for consistency
      vel_cell(:,:)=zero
      if (ab_mover%ionmov==13) then
@@ -978,31 +840,6 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
          vel_cell(:,:)=(hist%histR(:,:,hist%ihist)-hist%histR(:,:,hist%ihist-1))/(ab_mover%dtion)
        end if
      end if
-
-!    !    DEBUG (XRA AFTER USE OF HISTORY)
-!    if(DEBUG)then
-!    write (std_out,*) '---XRA AFTER USE OF HISTORY---',hist%ihist
-!    write (std_out,*) 'XCART'
-!    do kk=1,ab_mover%natom
-!    write (std_out,*) xcart(:,kk)
-!    end do
-!    write (std_out,*) 'XRED'
-!    do kk=1,ab_mover%natom
-!    write (std_out,*) xred(:,kk)
-!    end do
-!    if (ab_mover%ionmov==1)then
-!    write (std_out,*) 'VEL'
-!    do kk=1,ab_mover%natom
-!    write (std_out,*) hist%histV(:,kk,hist%ihist)
-!    end do
-!    end if
-!    write(std_out,*) 'RPRIMD'
-!    do kk=1,3
-!    write(std_out,*) rprimd(:,kk)
-!    end do
-!    write(std_out,*) 'ACELL'
-!    write(std_out,*) acell(:)
-!    end if
 
 !    This is needed for some compilers such as
 !    pathscale, g95, xlf that do not exit
@@ -1035,9 +872,8 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
    iexit = timelimit_exit
    ntime = itime-1
    if ((ab_mover%ionmov/=4.and.ab_mover%ionmov/=5)) then
-     !write(std_out,*)"hist%ihist",hist%ihist
      if (scfcv_args%dtset%tolmxf/=0)then
-       call fconv(hist%histXF(:,:,3,hist%ihist-1),&
+       call fconv(hist%histXF(:,:,2,hist%ihist-1),&
 &       scfcv_args%dtset%iatfix, &
 &       iexit, itime,&
 &       ab_mover%natom,&
@@ -1058,10 +894,10 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
  call xmpi_wait(quitsum_request,ierr)
 
 !###########################################################
-!### 21. Set the final values of xcart and xred with the last
+!### 21. Set the final values of xred with the last
 !###     computed values (not the last predicted)
 
- call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,DEBUG)
+ call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
 
  vel(:,:)=hist%histV(:,:,hist%ihist)
 
@@ -1096,11 +932,7 @@ real(dp) :: favg2(3),rprim(3,3), gprimd(3,3),gmet(3,3),rmet(3,3)
  end if
 
  ABI_DEALLOCATE(amu)
- ABI_DEALLOCATE(xred_tmp)
- ABI_DEALLOCATE(xcart)
- ABI_DEALLOCATE(fcart2)
- ABI_DEALLOCATE(fred2)
- ABI_DEALLOCATE(fred_corrected)
+ ABI_DEALLOCATE(xred_prev)
 
  call abihist_free(hist)
  call abihist_free(hist_prev)

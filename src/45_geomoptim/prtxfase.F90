@@ -58,6 +58,8 @@
 #include "config.h"
 #endif
 
+#include "abi_common.h"
+
 subroutine prtxfase(ab_mover,hist,iout,pos)
 
  use defs_basis
@@ -70,33 +72,36 @@ subroutine prtxfase(ab_mover,hist,iout,pos)
 #undef ABI_FUNC
 #define ABI_FUNC 'prtxfase'
  use interfaces_14_hidewrite
+ use interfaces_41_geometry
 !End of the abilint section
 
 implicit none
 
 !Arguments ------------------------------------
 !scalars
-type(abimover),intent(in) :: ab_mover
-type(abihist),intent(in) :: hist
-integer,intent(in) :: iout
-integer,intent(in) :: pos
+ type(abimover),intent(in) :: ab_mover
+ type(abihist),intent(in),target :: hist
+ integer,intent(in) :: iout
+ integer,intent(in) :: pos
 !arrays
 
 !Local variables-------------------------------
 !scalars
-integer :: jj,kk,unfixd,iprt
-real(dp) :: val_max,val_rms,ucvol ! Values maximal and RMS, Volume of Unitary cell
-real(dp) :: dEabs,dErel ! Diff of energy absolute and relative
-real(dp) :: ekin
-real(dp) :: angle(3),rmet(3,3)
+ integer :: jj,kk,unfixd,iprt
+ real(dp) :: val_max,val_rms,ucvol ! Values maximal and RMS, Volume of Unitary cell
+ real(dp) :: dEabs,dErel ! Diff of energy absolute and relative
+ real(dp) :: ekin
+ real(dp) :: angle(3),rmet(3,3)
 !character(len=80*(max(ab_mover%natom,3)+1)) :: message
 !MGNAG: This is not very safe. One should use line-based output istead of appending chars
 ! and then outputting everything! For the time being I use this temporary hack to solve the problem with NAG
-character(len=max(80*(max(ab_mover%natom,3)+1),50000)) :: message
-character(len=18)   :: fmt1
-logical :: prtallatoms
+ character(len=max(80*(max(ab_mover%natom,3)+1),50000)) :: message
+ character(len=18)   :: fmt1
+ logical :: prtallatoms
 !arrays
-logical :: atlist(ab_mover%natom)
+ logical :: atlist(ab_mover%natom)
+ real(dp),allocatable :: fred(:,:),xcart(:,:)
+ real(dp),pointer :: fcart(:,:),rprimd(:,:),xred(:,:)
 
 ! ***********************************************************
 
@@ -115,26 +120,34 @@ logical :: atlist(ab_mover%natom)
    if (ab_mover%prtatlist(iprt)>0.and.ab_mover%prtatlist(iprt)<=ab_mover%natom) atlist(ab_mover%prtatlist(iprt))=.TRUE.
  end do
 
-!write(iout,*) 'GAF_NATOM=',ab_mover%natom
+ xred   => hist%histXF(:,:,1,hist%ihist)
+ fcart  => hist%histXF(:,:,2,hist%ihist)
+ rprimd => hist%histR(:,:,hist%ihist)
 
 !###########################################################
 !### 1. Positions
 
+ ABI_ALLOCATE(xcart,(3,ab_mover%natom))
+ call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
+
  write(message, '(a,a)' )&
 & ch10,' Cartesian coordinates (xcart) [bohr]'
- call prtnatom(atlist,iout,message,ab_mover%natom,&
-& prtallatoms,hist%histXF(:,:,1,hist%ihist))
+ call prtnatom(atlist,iout,message,ab_mover%natom,prtallatoms,xcart)
 
  write(message, '(a)' )&
 & ' Reduced coordinates (xred)'
- call prtnatom(atlist,iout,message,ab_mover%natom,&
-& prtallatoms,hist%histXF(:,:,2,hist%ihist))
+ call prtnatom(atlist,iout,message,ab_mover%natom,prtallatoms,xred)
 
+ ABI_DEALLOCATE(xcart)
 
 !###########################################################
 !### 2. Forces
 
  if(pos==mover_AFTER)then
+
+   ABI_ALLOCATE(fred,(3,ab_mover%natom))
+   call fcart2fred(fcart,fred,rprimd,ab_mover%natom)
+
 !  Compute max |f| and rms f,
 !  EXCLUDING the components determined by iatfix
    val_max=0.0_dp
@@ -144,8 +157,8 @@ logical :: atlist(ab_mover%natom)
      do jj=1,3
        if (ab_mover%iatfix(jj,kk) /= 1) then
          unfixd=unfixd+1
-         val_rms=val_rms+hist%histXF(jj,kk,3,hist%ihist)**2
-         val_max=max(val_max,abs(hist%histXF(jj,kk,3,hist%ihist)**2))
+         val_rms=val_rms+fcart(jj,kk)**2
+         val_max=max(val_max,abs(fcart(jj,kk)**2))
        end if
      end do
    end do
@@ -154,14 +167,13 @@ logical :: atlist(ab_mover%natom)
    write(message, '(a,1p,2e12.5,a)' ) &
 &   ' Cartesian forces (fcart) [Ha/bohr]; max,rms=',&
 &   sqrt(val_max),val_rms,' (free atoms)'
-   call prtnatom(atlist,iout,message,ab_mover%natom,&
-&   prtallatoms,hist%histXF(:,:,3,hist%ihist))
-
+   call prtnatom(atlist,iout,message,ab_mover%natom,prtallatoms,fcart)
 
    write(message, '(a)' )&
 &   ' Reduced forces (fred)'
-   call prtnatom(atlist,iout,message,ab_mover%natom,&
-&   prtallatoms,hist%histXF(:,:,4,hist%ihist))
+   call prtnatom(atlist,iout,message,ab_mover%natom,prtallatoms,fred)
+
+   ABI_DEALLOCATE(fred)
 
  end if
 
@@ -345,7 +357,7 @@ logical :: atlist(ab_mover%natom)
    call wrtout(iout,message,'COLL')
  end if
 
- contains 
+ contains
 !!***
 
 !!****f* ABINIT/gettag

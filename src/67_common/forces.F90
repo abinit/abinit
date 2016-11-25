@@ -464,7 +464,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,gres
 ! notice that fred2fcart multiplies fred by -1 to convert it 
 ! from a gradient (input) to a force (output)
 
- call fred2fcart(favg,fcart,fred,gprimd,dtset%jellslab,dtset%natom)
+ call fred2fcart(favg,(dtset%jellslab==0),fcart,fred,gprimd,dtset%natom)
 
 !Compute maximal force and maximal difference
  maxfor=zero;diffor=zero

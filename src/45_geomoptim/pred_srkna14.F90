@@ -87,21 +87,18 @@ subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
 !Local variables-------------------------------
 !scalars
  integer  :: ii,jj,kk
- real(dp) :: ucvol,ucvol_next,amass_tot
+ real(dp) :: ucvol,ucvol_next
  real(dp),parameter :: v2tol=tol8
  real(dp) :: etotal
- real(dp) :: favg
  logical  :: jump_end_of_cycle=.FALSE.
 ! character(len=5000) :: message
 !arrays
  real(dp),save :: aa(15),bb(15)
  real(dp) :: acell(3),acell_next(3)
- real(dp) :: rprimd(3,3),rprim(3,3),rprimd_next(3,3),rprim_next(3,3)
- real(dp) :: gprimd(3,3)
- real(dp) :: gmet(3,3)
- real(dp) :: rmet(3,3)
+ real(dp) :: rprimd(3,3),rprimd_next(3,3)
+ real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3)
  real(dp) :: fcart(3,ab_mover%natom),fcart_m(3,ab_mover%natom)
- real(dp) :: fred(3,ab_mover%natom),fred_corrected(3,ab_mover%natom)
+!real(dp) :: fred_corrected(3,ab_mover%natom)
  real(dp) :: xcart(3,ab_mover%natom)
  real(dp) :: xred(3,ab_mover%natom)
  real(dp) :: vel(3,ab_mover%natom)
@@ -122,10 +119,12 @@ subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
 !##########################################################
 !### 03. Obtain the present values from the history
 
- call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
+ call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
- fcart(:,:) =hist%histXF(:,:,3,hist%ihist)
- fred(:,:)  =hist%histXF(:,:,4,hist%ihist)
+ call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
+ fcart(:,:)  =hist%histXF(:,:,2,hist%ihist)
+
  vel(:,:)   =hist%histV(:,:,hist%ihist)
  strten(:)  =hist%histS(:,hist%ihist)
  etotal     =hist%histE(hist%ihist)
@@ -134,10 +133,6 @@ subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
    write (std_out,*) 'fcart:'
    do kk=1,ab_mover%natom
      write (std_out,*) fcart(:,kk)
-   end do
-   write (std_out,*) 'fred:'
-   do kk=1,ab_mover%natom
-     write (std_out,*) fred(:,kk)
    end do
    write (std_out,*) 'vel:'
    do kk=1,ab_mover%natom
@@ -149,7 +144,6 @@ subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
    write (std_out,*) etotal
  end if
 
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  write(std_out,*) 'RMET'
  do ii=1,3
    write(std_out,*) rmet(ii,:)
@@ -157,19 +151,16 @@ subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
 
 !Get rid of mean force on whole unit cell, but only if no
 !generalized constraints are in effect
- if(ab_mover%nconeq==0)then
-   amass_tot=sum(ab_mover%amass(:))
-   do ii=1,3
-     favg=sum(fred(ii,:))/dble(ab_mover%natom)
-!    Note that the masses are used, in order to weight the repartition of the average force.
-!    This procedure is adequate for dynamics, as pointed out by Hichem Dammak (2012 Jan 6)..
-     fred_corrected(ii,:)=fred(ii,:)-favg*ab_mover%amass(:)/amass_tot
-     if(ab_mover%jellslab/=0.and.ii==3)&
-&     fred_corrected(ii,:)=fred(ii,:)
-   end do
- else
-   fred_corrected(:,:)=fred(:,:)
- end if
+!  call fcart2fred(fcart,fred_corrected,rprimd,ab_mover%natom)
+!  if(ab_mover%nconeq==0)then
+!    amass_tot=sum(ab_mover%amass(:))
+!    do ii=1,3
+!      if (ii/=3.or.ab_mover%jellslab==0) then
+!        favg=sum(fred_corrected(ii,:))/dble(ab_mover%natom)
+!        fred_corrected(ii,:)=fred_corrected(ii,:)-favg*ab_mover%amass(:)/amass_tot
+!      end if
+!    end do
+!  end if
 
 !write(std_out,*) 'srkna14 04',jump_end_of_cycle
 !##########################################################
@@ -216,7 +207,6 @@ subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
 
    acell_next(:)=acell(:)
    ucvol_next=ucvol
-   rprim_next(:,:)=rprim(:,:)
    rprimd_next(:,:)=rprimd(:,:)
 
 !  step 1 of 15
@@ -285,13 +275,9 @@ subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
 !Increase indexes
  hist%ihist=hist%ihist+1
 
-!Compute xcart from xred, and rprimd
- call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
-
 !Fill the history with the variables
-!xcart, xred, acell, rprimd
- call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
-
+!xred, acell, rprimd, vel
+ call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
  hist%histV(:,:,hist%ihist)=vel(:,:)
  hist%histT(hist%ihist)=hist%histT(hist%ihist-1)+ab_mover%dtion
 
