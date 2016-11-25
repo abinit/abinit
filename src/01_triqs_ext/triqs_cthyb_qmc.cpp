@@ -315,7 +315,7 @@ void ctqmc_triqs_run( bool rot_inv, bool leg_measure, bool hist, bool wrt_files,
   if( rank==0 && wrt_files ){
     
   ofstream gtau;
-  gtau.open("gtau");
+  gtau.open("Gtau_triqs.dat");
   double _tau_=0.0;
   
   for(int tau = 0; tau < n_tau; ++tau){

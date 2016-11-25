@@ -4289,7 +4289,7 @@
             instructions at https://triqs.ipht.cnrs.fr/1.3/applications/cthyb/install.html.
             The current interface is valid for TRIQS 1.3 and TRIQS/CTHYB 1.3.
          <br />
-         See the usefull variables for CT-QMC solver :
+         See the useful variables for CT-QMC solver :
         [[dmftctqmc_basis]],
         [[dmftctqmc_check]],
         [[dmftctqmc_correl]],
