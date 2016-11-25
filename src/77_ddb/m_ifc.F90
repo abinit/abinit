@@ -32,12 +32,16 @@ MODULE m_ifc
  use m_profiling_abi
  use m_xmpi
  use m_sort
+ use m_bspline
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
  use m_io_tools,    only : open_file
+ use m_fstrings,    only : ktoa
+ use m_time,        only : cwtime
+ use m_numeric_tools, only : wrap2_zero_one, wrap2_pmhalf
  use m_copy,        only : alloc_copy
  use m_ewald,       only : ewald9
  use m_crystal,     only : crystal_t
@@ -177,6 +181,42 @@ MODULE m_ifc
 !!***
 
 !----------------------------------------------------------------------
+
+!!****t* m_ifc/phbspl_t
+!! NAME
+!! phbspl_t
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+ type :: bcoeff_t
+   real(dp),allocatable :: vals(:,:,:)
+ end type bcoeff_t
+
+ type,public :: phbspl_t
+
+   integer :: natom3
+
+   integer :: nqx,nqy,nqz
+   ! Number of input data points
+
+   integer :: qxord,qyord,qzord
+   ! Order of the spline.
+
+   !real(dp),allocatable :: xvec(:),yvec(:),zvec(:)
+   real(dp),allocatable :: xknot(:),yknot(:),zknot(:)
+   ! Array of length ndata+korder containing the knot
+
+   type(bcoeff_t),allocatable :: coeff(:)
+   ! coeff(natom3)
+
+ end type phbspl_t
+
+ public :: phbspl_new        ! Build B-spline object.
+ public :: phbspl_evalq      ! Interpolate frequencies at arbitrary q-point.
+ public :: phbspl_free       ! Free memory.
+ public :: test_phbspl
 
 CONTAINS  !===========================================================
 !!***
@@ -1958,6 +1998,434 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
  ABI_FREE(qibz)
 
 end subroutine ifc_printbxsf
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ifc/phbspl_new
+!! NAME
+!! phbspl_new
+!!
+!! FUNCTION
+!! build the phbspl_t object to interpolate the phonon band structure.
+!!
+!! INPUTS
+!!  ords(3)=order of the spline for the three directions. ord(1) must be in [0, nqx] where
+!!    nqx is the number of points along the x-axis.
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      m_ifc
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(phbspl_t) function phbspl_new(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm) result(new)
+
+
+!this section has been created automatically by the script abilint (td).
+!do not modify the following lines by hand.
+#undef abi_func
+#define abi_func 'phbspl_new'
+ use interfaces_56_recipspace
+!end of the abilint section
+
+ implicit none
+
+!arguments ------------------------------------
+!scalars
+ integer,intent(in) :: comm,nshiftq
+ type(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: cryst
+!arrays
+ integer,intent(in) :: ngqpt(3)
+ integer,intent(in) :: ords(3)
+ real(dp),intent(in) :: shiftq(3,nshiftq)
+
+!local variables-------------------------------
+!scalars
+ integer,parameter :: sppoldbl1=1,timrev1=1
+ integer :: qxord,qyord,qzord,nxknot,nyknot,nzknot,nqibz,nqbz,nqfull,iqf,ierr
+ integer :: nu,iq_ibz,ix,iy,iz,nqx,nqy,nqz
+ integer :: my_rank,nprocs,cnt
+ real(dp) :: dksqmax
+ character(len=500) :: msg
+!arrays
+ integer :: qptrlatt(3,3)
+ integer,allocatable :: bz2ibz(:,:)
+ real(dp) :: phfrq(3*cryst%natom),qpt(3)
+ real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
+ real(dp),allocatable :: xvec(:),yvec(:),zvec(:),xyzdata(:,:,:)
+ real(dp),allocatable :: ibz_freqs(:,:),ibzdata_qnu(:,:)
+ real(dp),allocatable :: wtq(:),qbz(:,:),qfull(:,:),qibz(:,:)
+
+! *********************************************************************
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ ! Check input parameters
+ ierr = 0
+ if (nshiftq /= 1) then
+   MSG_WARNING('Multiple shifts not allowed')
+   ierr = ierr + 1
+ end if
+ !if (any(ebands%shiftk(:,1) /= zero)) then
+ !  MSG_WARNING("shifted k-mesh are not tested")
+ !  ierr = ierr + 1
+ !end if
+ if (ierr /= 0) then
+   MSG_WARNING("bspline interpolation cannot be performed. See warnings above. Returning")
+   return
+ end if
+
+ ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
+ qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, nshiftq, shiftq, nqibz, qibz, wtq, nqbz, qbz, timrev=timrev1)
+
+ ABI_FREE(wtq)
+ ABI_FREE(qbz)
+
+ ! Build BZ mesh Note that:
+ ! 1) q-point coordinates are in [0, 1]
+ ! 2) The mesh is closed e.g. (0,0,0) and (1,1,1) are included
+ nqx = ngqpt(1)+1; nqy = ngqpt(2)+1; nqz = ngqpt(3)+1
+
+ ABI_MALLOC(xvec, (nqx))
+ ABI_MALLOC(yvec, (nqy))
+ ABI_MALLOC(zvec, (nqz))
+
+ ! Multiple shifts are not supported here.
+ do ix=1,nqx
+   xvec(ix) = (ix-1+shiftq(1,1)) / ngqpt(1)
+ end do
+ do iy=1,nqy
+   yvec(iy) = (iy-1+shiftq(2,1)) / ngqpt(2)
+ end do
+ do iz=1,nqz
+   zvec(iz) = (iz-1+shiftq(3,1)) / ngqpt(3)
+ end do
+
+ ! Build list of q-points in full BZ (ordered as required by B-spline routines)
+ nqfull = nqx*nqy*nqz
+ ABI_MALLOC(qfull, (3,nqfull))
+ iqf = 0
+ do iz=1,nqz
+   do iy=1,nqy
+     do ix=1,nqx
+       iqf = iqf + 1
+       qfull(:,iqf) = [xvec(ix), yvec(iy), zvec(iz)]
+     end do
+   end do
+ end do
+
+ ! Build mapping qfull --> IBZ (q --> -q symmetry is always used)
+ ABI_MALLOC(bz2ibz, (nqfull*sppoldbl1,6))
+
+ call listkk(dksqmax,cryst%gmet,bz2ibz,qibz,qfull,nqibz,nqfull,cryst%nsym,&
+   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
+ ABI_FREE(qfull)
+
+ if (dksqmax > tol12) then
+   write(msg, '(3a,es16.6,4a)' )&
+   'At least one of the q-points could not be generated from a symmetrical one.',ch10,&
+   'dksqmax=',dksqmax,ch10,&
+   'Action: check q-point input variables',ch10,&
+   '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
+   MSG_ERROR(msg)
+ end if
+
+ ! Generate knots (ords is input)
+ qxord = ords(1); qyord = ords(2); qzord = ords(3)
+ nxknot = nqx + qxord
+ nyknot = nqy + qyord
+ nzknot = nqz + qzord
+
+ new%nqx = nqx; new%qxord = qxord
+ new%nqy = nqy; new%qyord = qyord
+ new%nqz = nqz; new%qzord = qzord
+
+ ABI_MALLOC(new%xknot,(nxknot))
+ ABI_MALLOC(new%yknot,(nyknot))
+ ABI_MALLOC(new%zknot,(nzknot))
+
+ call dbsnak(nqx, xvec, qxord, new%xknot)
+ call dbsnak(nqy, yvec, qyord, new%yknot)
+ call dbsnak(nqz, zvec, qzord, new%zknot)
+
+ new%natom3 = 3 * cryst%natom
+
+ ! Get phonon frequencies in IBZ
+ ABI_CALLOC(ibz_freqs, (new%natom3, nqibz))
+ cnt = 0
+ do iq_ibz=1,nqibz
+   cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! Mpi parallelism.
+   call ifc_fourq(ifc, cryst, qibz(:,iq_ibz), ibz_freqs(:,iq_ibz), displ_cart)
+ end do
+ call xmpi_sum(ibz_freqs, comm, ierr)
+
+ ABI_MALLOC(ibzdata_qnu, (nqibz, new%natom3))
+ ibzdata_qnu = transpose(ibz_freqs)
+ ABI_FREE(ibz_freqs)
+
+ ABI_MALLOC(xyzdata,(nqx,nqy,nqz))
+ ABI_DT_MALLOC(new%coeff, (new%natom3))
+
+ do nu=1,new%natom3
+
+   ABI_MALLOC(new%coeff(nu)%vals, (nqx,nqy,nqz))
+
+   ! Build array in full bz to prepare call to dbs3in.
+   iqf = 0
+   do iz=1,nqz
+     do iy=1,nqy
+       do ix=1,nqx
+         iqf = iqf + 1
+         iq_ibz = bz2ibz(iqf,1)
+         xyzdata(ix,iy,iz) = ibzdata_qnu(iq_ibz, nu)
+       end do
+     end do
+   end do
+
+   ! Construct 3D tensor for B-spline. Results in coeff(nu)%vals
+   call dbs3in(nqx,xvec,nqy,yvec,nqz,zvec,xyzdata,nqx,nqy,qxord,qyord,qzord,new%xknot,new%yknot,new%zknot,&
+      new%coeff(nu)%vals)
+ end do
+
+ ABI_FREE(xvec)
+ ABI_FREE(yvec)
+ ABI_FREE(zvec)
+ ABI_FREE(bz2ibz)
+ ABI_FREE(xyzdata)
+ ABI_FREE(ibzdata_qnu)
+ ABI_FREE(qibz)
+
+end function phbspl_new
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ifc/phbspl_evalq
+!! NAME
+!! phbspl_evalq
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      m_ifc
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine phbspl_evalq(phbspl, qpt, ofreqs)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phbspl_evalq'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(phbspl_t),intent(in) :: phbspl
+!arrays
+ real(dp),intent(in) :: qpt(3)
+ real(dp),intent(out) :: ofreqs(phbspl%natom3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: nu
+!arrays
+ real(dp) :: qred(3),shift(3)
+ integer :: iperm(phbspl%natom3)
+
+! *********************************************************************
+
+ ! Wrap k-point in the interval [0,1[ where 1 is not included (tol12)
+ call wrap2_zero_one(qpt, qred, shift)
+
+ do nu=1,phbspl%natom3
+   ! B-spline interpolation.
+   ofreqs(nu) = dbs3vl(qred(1), qred(2), qred(3), phbspl%qxord, phbspl%qyord, phbspl%qzord,&
+                       phbspl%xknot, phbspl%yknot, phbspl%zknot, phbspl%nqx, phbspl%nqy, phbspl%nqz,&
+                       phbspl%coeff(nu)%vals)
+ end do
+
+ iperm = [(nu, nu=1, phbspl%natom3)]
+ call sort_dp(phbspl%natom3, ofreqs, iperm, tol14)
+
+end subroutine phbspl_evalq
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ifc/phbspl_free
+!! NAME
+!! phbspl_free
+!!
+!! FUNCTION
+!!  Free dynamic memory.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine phbspl_free(phbspl)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phspline_free'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(phbspl_t),intent(inout) :: phbspl
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii
+
+! *********************************************************************
+
+ if (allocated(phbspl%xknot)) then
+   ABI_FREE(phbspl%xknot)
+ end if
+ if (allocated(phbspl%yknot)) then
+   ABI_FREE(phbspl%yknot)
+ end if
+ if (allocated(phbspl%zknot)) then
+   ABI_FREE(phbspl%zknot)
+ end if
+
+ ! Free B-spline coefficients.
+ if (allocated(phbspl%coeff)) then
+   do ii=1,size(phbspl%coeff, dim=1)
+     if (allocated(phbspl%coeff(ii)%vals)) then
+       ABI_FREE(phbspl%coeff(ii)%vals)
+     end if
+   end do
+   ABI_DT_FREE(phbspl%coeff)
+ end if
+
+end subroutine phbspl_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ifc/test_phbspl
+!! NAME
+!! test_phbspl
+!!
+!! INPUTS
+!!  ords(3)=order of the spline for the three directions. ord(1) must be in [0, nqx] where
+!!    nqx is the number of points along the x-axis.
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      m_ifc
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine test_phbspl(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
+
+
+!this section has been created automatically by the script abilint (td).
+!do not modify the following lines by hand.
+#undef abi_func
+#define abi_func 'test_phbspl'
+ use interfaces_56_recipspace
+!end of the abilint section
+
+ implicit none
+
+!arguments ------------------------------------
+!scalars
+ integer,intent(in) :: comm,nshiftq
+ type(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: cryst
+!arrays
+ integer,intent(in) :: ngqpt(3)
+ integer,intent(in) :: ords(3)
+ real(dp),intent(in) :: shiftq(3,nshiftq)
+
+!local variables-------------------------------
+!scalars
+ integer :: iq
+ real(dp) :: mare
+ real(dp) :: cpu,wall,gflops
+ real(dp) :: cpu_fourq,wall_fourq,gflops_fourq
+ real(dp) :: cpu_bspl,wall_bspl,gflops_bspl
+ type(phbspl_t) :: phbspl
+!arrays
+ real(dp) :: phfrq(3*cryst%natom),ofreqs(3*cryst%natom),qpt(3)
+ real(dp) :: adiff_mev(3*cryst%natom), rel_err(3*cryst%natom)
+ real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
+ real(dp) :: qred(3),shift(3)
+
+! *********************************************************************
+
+ phbspl = phbspl_new(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
+
+ !call make_path(Kpath%nbounds,bounds,Kpath%gmet,"G",ndiv_small,Kpath%ndivs,Kpath%npts,pts,unit=dev_null)
+ !call kpath_init(Kpath,bounds,gprimd,ndiv_small)
+
+ cpu_fourq = zero; wall_fourq = zero; gflops_fourq = zero
+ cpu_bspl = zero; wall_bspl = zero; gflops_bspl = zero
+
+ if (xmpi_comm_rank(comm) == 0) then
+   do iq=1,1000
+     !call random_number(qpt)
+     call random_number(qred)
+     !call wrap2_zero_one(qred, qpt, shift)
+     call wrap2_pmhalf(qred, qpt, shift)
+
+     call cwtime(cpu, wall, gflops, "start")
+     call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart)
+     call cwtime(cpu, wall, gflops, "stop")
+     cpu_fourq = cpu_fourq + cpu; wall_fourq = wall_fourq + wall
+
+     call cwtime(cpu, wall, gflops, "start")
+     call phbspl_evalq(phbspl, qpt, ofreqs)
+     call cwtime(cpu, wall, gflops, "stop")
+     cpu_bspl = cpu_bspl + cpu; wall_bspl = wall_bspl + wall
+
+     adiff_meV = abs(phfrq - ofreqs)
+     rel_err = zero
+     where (abs(phfrq) > tol16)
+       rel_err = adiff_meV / abs(phfrq)
+     end where
+     rel_err = 100 * rel_err
+     adiff_meV = adiff_meV * Ha_eV * 1000
+     !write(std_out,*)minval(adiff_meV),maxval(adiff_meV), maxval(rel_err), trim(ktoa(qpt))
+     write(std_out,*)maxval(adiff_meV), maxval(rel_err), trim(ktoa(qpt))
+     !write(456, *)phfrq
+     !write(457, *)ofreqs
+   end do
+
+   write(std_out,'(2(a,f8.2))')"fourq: cpu: ",cpu_fourq,", wall: ",wall_fourq
+   write(std_out,'(2(a,f8.2))')"bspl: cpu: ",cpu_bspl,", wall: ",wall_bspl
+ end if
+
+ call phbspl_free(phbspl)
+
+end subroutine test_phbspl
 !!***
 
 !----------------------------------------------------------------------

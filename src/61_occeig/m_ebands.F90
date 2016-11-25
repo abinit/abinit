@@ -208,9 +208,9 @@ MODULE m_ebands
 
 !----------------------------------------------------------------------
 
-!!****t* m_ebands/ebspline_t
+!!****t* m_ebands/ebspl_t
 !! NAME
-!! ebspline_t
+!! ebspl_t
 !!
 !! FUNCTION
 !!
@@ -220,22 +220,26 @@ MODULE m_ebands
    real(dp),allocatable :: vals(:,:,:)
  end type bcoeff_t
 
- type,public :: ebspline_t
+ type,public :: ebspl_t
 
    integer :: nkx,nky,nkz
+   ! Number of input data points
+
    integer :: kxord,kyord,kzord
+   ! Order of the spline.
 
    !real(dp),allocatable :: xvec(:),yvec(:),zvec(:)
    real(dp),allocatable :: xknot(:),yknot(:),zknot(:)
+   ! Array of length ndata+korder containing the knot
 
    type(bcoeff_t),allocatable :: coeff(:,:)
    ! coeff(mband, nsppol)
 
- end type ebspline_t
+ end type ebspl_t
 
- public :: ebspline_new
- public :: ebspline_evalk
- public :: ebspline_free
+ public :: ebspl_new         ! Build B-spline object.
+ public :: ebspl_evalk       ! Interpolate eigenvalues at arbitrary k-point.
+ public :: ebspl_free        ! Free memory.
 
 
 CONTAINS  !=====================================================================================
@@ -2929,6 +2933,7 @@ end function ebands_ncwrite_path
 
 type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm,ierr) result(edos)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -3650,12 +3655,12 @@ end subroutine ebands_expandk
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/ebspline_new
+!!****f* m_ebands/ebspl_new
 !! NAME
-!! ebspline_new
+!! ebspl_new
 !!
 !! FUNCTION
-!! Build the ebspline_t object used to interpolate the band structure.
+!! Build the `ebspl_t` object used to interpolate the band structure.
 !!
 !! INPUTS
 !!  ords(3)=order of the spline for the three directions. ord(1) must be in [0, nkx] where
@@ -3673,12 +3678,13 @@ end subroutine ebands_expandk
 !!
 !! SOURCE
 
-type(ebspline_t) function ebspline_new(ebands, cryst, ords, band_block) result(ebspl)
+type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block) result(ebspl)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ebspline_new'
+#define ABI_FUNC 'ebspl_new'
  use interfaces_56_recipspace
 !End of the abilint section
 
@@ -3693,8 +3699,9 @@ type(ebspline_t) function ebspline_new(ebands, cryst, ords, band_block) result(e
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: sppoldbl1=1
  integer :: kxord,kyord,kzord,nxknot,nyknot,nzknot,ierr,nkfull,ikf
- integer :: spin,band,ik_ibz,sppoldbl,timrev,ix,iy,iz,nkx,nky,nkz
+ integer :: spin,band,ik_ibz,timrev,ix,iy,iz,nkx,nky,nkz
  real(dp) :: dksqmax
  character(len=500) :: msg
 !arrays
@@ -3768,12 +3775,11 @@ type(ebspline_t) function ebspline_new(ebands, cryst, ords, band_block) result(e
  end do
 
  ! Build mapping kfull --> IBZ
- sppoldbl = 1
- ABI_MALLOC(bz2ibz, (nkfull*sppoldbl,6))
+ ABI_MALLOC(bz2ibz, (nkfull*sppoldbl1,6))
 
  timrev = 1; if (any(ebands%kptopt == [3, 4])) timrev = 0
  call listkk(dksqmax,cryst%gmet,bz2ibz,ebands%kptns,kfull,ebands%nkpt,nkfull,cryst%nsym,&
-   sppoldbl,cryst%symafm,cryst%symrec,timrev,use_symrec=.True.)
+   sppoldbl1,cryst%symafm,cryst%symrec,timrev,use_symrec=.True.)
  ABI_FREE(kfull)
 
  if (dksqmax > tol12) then
@@ -3799,9 +3805,9 @@ type(ebspline_t) function ebspline_new(ebands, cryst, ords, band_block) result(e
  ABI_MALLOC(ebspl%yknot,(nyknot))
  ABI_MALLOC(ebspl%zknot,(nzknot))
 
- call dbsnak (nkx, xvec, kxord, ebspl%xknot)
- call dbsnak (nky, yvec, kyord, ebspl%yknot)
- call dbsnak (nkz, zvec, kzord, ebspl%zknot)
+ call dbsnak(nkx, xvec, kxord, ebspl%xknot)
+ call dbsnak(nky, yvec, kyord, ebspl%yknot)
+ call dbsnak(nkz, zvec, kzord, ebspl%zknot)
 
  ABI_MALLOC(xyzdata,(nkx,nky,nkz))
 
@@ -3839,14 +3845,14 @@ type(ebspline_t) function ebspline_new(ebands, cryst, ords, band_block) result(e
  ABI_FREE(bz2ibz)
  ABI_FREE(xyzdata)
 
-end function ebspline_new
+end function ebspl_new
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/ebspline_evalk
+!!****f* m_ebands/ebspl_evalk
 !! NAME
-!! ebspline_evalk
+!! ebspl_evalk
 !!
 !! FUNCTION
 !!
@@ -3864,12 +3870,13 @@ end function ebspline_new
 !!
 !! SOURCE
 
-subroutine ebspline_evalk(ebspl, band_block, kpt, spin, oeig)
+subroutine ebspl_evalk(ebspl, band_block, kpt, spin, oeig)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ebspline_evalk'
+#define ABI_FUNC 'ebspl_evalk'
 !End of the abilint section
 
  implicit none
@@ -3877,7 +3884,7 @@ subroutine ebspline_evalk(ebspl, band_block, kpt, spin, oeig)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: spin
- type(ebspline_t),intent(in) :: ebspl
+ type(ebspl_t),intent(in) :: ebspl
 !arrays
  integer,intent(in) :: band_block(2)
  real(dp),intent(in) :: kpt(3)
@@ -3905,14 +3912,14 @@ subroutine ebspline_evalk(ebspl, band_block, kpt, spin, oeig)
                      ebspl%coeff(band,spin)%vals)
  end do
 
-end subroutine ebspline_evalk
+end subroutine ebspl_evalk
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/ebspline_free
+!!****f* m_ebands/ebspl_free
 !! NAME
-!! ebspline_free
+!! ebspl_free
 !!
 !! FUNCTION
 !!  Free dynamic memory.
@@ -3926,20 +3933,20 @@ end subroutine ebspline_evalk
 !!
 !! SOURCE
 
-subroutine ebspline_free(ebspl)
+subroutine ebspl_free(ebspl)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ebspline_free'
+#define ABI_FUNC 'ebspl_free'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- type(ebspline_t),intent(inout) :: ebspl
+ type(ebspl_t),intent(inout) :: ebspl
 
 !Local variables-------------------------------
 !scalars
@@ -3978,7 +3985,7 @@ subroutine ebspline_free(ebspl)
    ABI_DT_FREE(ebspl%coeff)
  end if
 
-end subroutine ebspline_free
+end subroutine ebspl_free
 !!***
 
 !----------------------------------------------------------------------
@@ -4000,6 +4007,7 @@ end subroutine ebspline_free
 !! SOURCE
 
 type(ebands_t) function ebands_bspline(ebands, cryst, ords, new_kptrlatt, new_nshiftk, new_shiftk, comm) result(new)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -4027,7 +4035,7 @@ type(ebands_t) function ebands_bspline(ebands, cryst, ords, new_kptrlatt, new_ns
  integer :: ik_ibz,spin,new_bantot,new_nkpt,nsppol,new_mband,nkpt_computed,kptopt
  integer :: nprocs,my_rank,cnt,ierr
  real(dp) :: kptrlen
- type(ebspline_t) :: ebspl
+ type(ebspl_t) :: ebspl
 !arrays
  integer,parameter :: vacuum0(3)=[0,0,0]
  integer :: kptrlatt_orig(3,3),band_block0(2)
@@ -4093,20 +4101,19 @@ type(ebands_t) function ebands_bspline(ebands, cryst, ords, new_kptrlatt, new_ns
  ABI_FREE(new_occ)
 
  ! Build B-spline object.
- ebspl = ebspline_new(ebands, cryst, ords, band_block0)
+ ebspl = ebspl_new(ebands, cryst, ords, band_block0)
 
  ! Spline eigenvalues.
  new%eig = zero; cnt = 0
  do spin=1,new%nsppol
    do ik_ibz=1,new%nkpt
-     cnt = cnt + 1
-     if (mod(cnt, nprocs) /= my_rank) cycle  ! Mpi parallelism.
-     call ebspline_evalk(ebspl, band_block0, new%kptns(:,ik_ibz), spin, new%eig(:,ik_ibz,spin))
+     cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle  ! Mpi parallelism.
+     call ebspl_evalk(ebspl, band_block0, new%kptns(:,ik_ibz), spin, new%eig(:,ik_ibz,spin))
    end do
  end do
  call xmpi_sum(new%eig, comm, ierr)
 
- call ebspline_free(ebspl)
+ call ebspl_free(ebspl)
 
 end function ebands_bspline
 !!***

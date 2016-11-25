@@ -120,6 +120,7 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, nshiftk, shiftk, nkibz, kibz,
    - kptrlatt(1,1)*kptrlatt(2,3)*kptrlatt(3,2)
  max_nkpt = max_nkpt * nshiftk
 
+ ! TODO: Replace smpbz with getkgrid
  ABI_MALLOC(my_kbz, (3, max_nkpt))
  call smpbz(brav1, -1, kptrlatt, max_nkpt, nkbz, nshiftk, option1, shiftk, my_kbz)
 

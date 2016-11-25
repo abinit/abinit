@@ -359,8 +359,6 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'dos_calcnwrite'
  use interfaces_14_hidewrite
- use interfaces_32_util
- use interfaces_56_recipspace
  use interfaces_61_occeig
 !End of the abilint section
 
@@ -739,6 +737,13 @@ end if
 contains
 
 subroutine write_headers()
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'write_headers'
+!End of the abilint section
 
  if (nsppol==2) then
    if(isppol==1) write(msg,'(a,16x,a)')  '#','Spin-up DOS'

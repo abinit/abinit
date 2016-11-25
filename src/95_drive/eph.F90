@@ -154,7 +154,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  character(len=fnlen) :: ddk_path(3)
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
- type(ebands_t) :: ebands, ebands_kq, ebands_spl
+ type(ebands_t) :: ebands, ebands_kq, ebands_bspl
  type(edos_t) :: edos
  type(ddb_type) :: ddb
  type(dvdb_t) :: dvdb
@@ -342,7 +342,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! TODO: Optimize this part. Really slow if tetra and lots of points
  ! Could just do DOS around efermi
  edos_intmeth = 2; if (dtset%prtdos == 1) edos_intmeth = 1
- !edos_intmeth = 1
+ edos_intmeth = 1
  edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
  edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
  edos = ebands_get_edos(ebands,cryst,edos_intmeth,edos_step,edos_broad,comm,ierr)
@@ -395,11 +395,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  kptrlatt_spl = 4 * kptrlatt_spl
  nshiftk_spl = 1
  ABI_CALLOC(shiftk_spl, (3,nshiftk_spl))
- ebands_spl = ebands_bspline(ebands, cryst, [3,3,3], kptrlatt_spl, nshiftk_spl, shiftk_spl, comm)
+ ebands_bspl = ebands_bspline(ebands, cryst, [3,3,3], kptrlatt_spl, nshiftk_spl, shiftk_spl, comm)
  ABI_FREE(shiftk_spl)
- !call ebands_jdos(ebands_spl, cryst, 2, zero, zero, comm, ierr)
+ !call ebands_jdos(ebands_bspl, cryst, 2, zero, zero, comm, ierr)
 
- edos = ebands_get_edos(ebands_spl, cryst, edos_intmeth, edos_step, edos_broad, comm, ierr)
+ edos = ebands_get_edos(ebands_bspl, cryst, edos_intmeth, edos_step, edos_broad, comm, ierr)
  ABI_CHECK(ierr==0, "Error in ebands_get_edos, see message above.")
 
  if (my_rank == master) then
@@ -409,7 +409,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call edos_write(edos, path)
  end if
  call edos_free(edos)
- call ebands_free(ebands_spl)
+ call ebands_free(ebands_bspl)
 #endif
 
  call cwtime(cpu,wall,gflops,"stop")
@@ -447,6 +447,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  brav1,dtset%asr,dtset%symdynmat,dtset%dipdip,dtset%rfmeth,dtset%ddb_ngqpt,ddb_nqshift,ddb_qshifts,dielt,zeff,&
  nsphere0,rifcsph0,prtsrlr0,dtset%enunit)
  ABI_FREE(ddb_qshifts)
+
+ ! This to test the B-spline interpolation of phonons
+ if (.False.) then
+   call test_phbspl(ifc, cryst, 2*[12,12,12], 1, [zero,zero,zero], [3,3,3], comm)
+   !call xmpi_end()
+ end if
 
  if (dtset%prtphdos == 1) then
    ! Phonon Density of States.
