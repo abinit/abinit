@@ -39,7 +39,7 @@
 #%%   t48_0002_0002_0002-ChiRe.out      , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00; 
 #%%   t48_0001_0002_0003-ChiEORe.out    , tolnlines = 1,   tolabs = 1.1e-05, tolrel = 2.0e-07;
 #%%   t48_0001_0002_0003-ChiEOIm.out    , tolnlines = 81,  tolabs = 1.1e-06, tolrel = 2.0e-06;
-#%%   t48_0001_0002_0003-ChiEOAbs.out   , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00;
+#%%   t48_0001_0002_0003-ChiEOAbs.out   , tolnlines = 1,   tolabs = 1.1e-06, tolrel = 5.5e-08;
 #%%   t48_0001_0002_0003-ChiEOTotRe.out , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00;
 #%%   t48_0002_0002_0002-ChiEORe.out    , tolnlines = 0,   tolabs = 0.0e+00, tolrel = 0.0e+00;
 #%%   t48_0001_0002_0003-ChiSHGRe.out   , tolnlines = 1,   tolabs = 1.1e-05, tolrel = 2.0e-07;
