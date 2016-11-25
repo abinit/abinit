@@ -101,7 +101,6 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
  integer :: itypat
  logical :: etot_var
  character(len=200) :: char_enddmft
- real(dp) :: tolfreq
 ! type
  type(green_type) :: green
  type(green_type) :: greenlda
@@ -118,8 +117,6 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 
  DBG_ENTER('COLL')
  my_rank = xmpi_comm_rank(paw_dmft%spacecomm)
- tolfreq=tol4
- if(paw_dmft%dmft_solv>=6) tolfreq=0.01_dp
 
  check=paw_dmft%dmftcheck ! checks enabled
  paw_dmft%dmft_fepr=tol5
@@ -173,7 +170,7 @@ subroutine dmft_solve(cryst_struc,istep,lda_occup,paw_dmft,pawang,pawtab,pawprtv
 & '  == Check lda occ. mat. from green with respect to the direct calc =='
  call wrtout(std_out,message,'COLL')
  call diff_oper("Occup from LDA green function",&
-& "LDA occupations",greenlda%occup,lda_occup,1,tolfreq)
+& "LDA occupations",greenlda%occup,lda_occup,1,paw_dmft%dmft_tolfreq)
 ! write(message,'(2a)') ch10,&
 !& '  ***** => Warning : diff_oper is suppressed for test'
 ! call wrtout(std_out,message,'COLL')
