@@ -9,7 +9,7 @@
 !! All terms are stored in a rf2_t object.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2015-2016 ABINIT group (LB)
+!! Copyright (C) 2015-2016 ABINIT group (LB,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -402,7 +402,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 
 !      Compute H^(0) | du/dpert1 > (in h_cwave) and S^(0) | du/dpert1 > (in s_cwave)
        call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_dudk,cprj_dudk,h_cwave,s_cwave,dtfil,&
-&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,ibg,0,0,ikpt,isppol,dtset%mband,mkmem,&
+&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,0,0,ikpt,isppol,dtset%mband,mkmem,&
 &       mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
 
        if (gs_hamkq%usepaw==0) s_cwave(:,:)=cwave_dudk(:,:) ! Store | du/dpert1 > in s_cwave
@@ -430,7 +430,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 
 !      Extract GS wavefunction for jband
        cwave_j => cg(:,1+shift_band1+icg:size_wf+shift_band1+icg)
-       if(has_cprj_jband) cprj_j => cprj_jband(:,1+shift_cprj_band1+ibg:size_cprj+shift_cprj_band1+ibg)
+       if(has_cprj_jband) cprj_j => cprj_jband(:,1+shift_cprj_band1:size_cprj+shift_cprj_band1)
 
        if (ipert1==natom+2) then
 !        Extract ddk and multiply by i :
@@ -445,7 +445,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 
 !      Compute dH/dpert1 | u^(0) > (in h_cwave) and dS/dpert1 | u^(0) > (in s_cwave)
        call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,dtfil,&
-&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,ibg,idir1,ipert1,ikpt,isppol,&
+&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir1,ipert1,ikpt,isppol,&
 &       dtset%mband,mkmem,mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
 
 !      Copy infos in dsusdu
@@ -513,7 +513,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 !      Extract GS wavefunction
        eig1_k_jband => null()
        cwave_j => cg(:,1+shift_band1+icg:size_wf+shift_band1+icg)
-       if(has_cprj_jband) cprj_j => cprj_jband(:,1+shift_cprj_band1+ibg:size_cprj+shift_cprj_band1+ibg)
+       if(has_cprj_jband) cprj_j => cprj_jband(:,1+shift_cprj_band1:size_cprj+shift_cprj_band1)
 
        if (ipert==natom+11) then
 !        Extract ddk and multiply by i :
@@ -529,7 +529,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 !      Compute  : d^2H/(dpert1 dpert2)|u^(0)>  (in h_cwave)
 !      and      : d^2S/(dpert1 dpert2)|u^(0)>  (in s_cwave)
        call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,dtfil,&
-&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,ibg,idir,ipert,ikpt,isppol,dtset%mband,&
+&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,dtset%mband,&
 &       mkmem,mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
 
        if (print_info/=0) then
@@ -625,7 +625,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 
 !      Compute dH/dpert2 | du/dpert1 > (in h_cwave) and dS/dpert2 | du/dpert1 > (in s_cwave)
        call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_dudk,cprj_dudk,h_cwave,s_cwave,dtfil,&
-&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,ibg,idir2,ipert2,ikpt,isppol,&
+&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir2,ipert2,ikpt,isppol,&
 &       dtset%mband,mkmem,mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
 
        if (print_info/=0) then

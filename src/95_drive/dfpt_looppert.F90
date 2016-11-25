@@ -1445,8 +1445,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      end if
 
    else  ! rhor1 not being forced to 0.0
-     if(iscf_mod>0 .and. ipert/=dtset%natom+11) then
-!      For ipert==natom+11, we want to read the 1st order density from a previous calculation
+     if(iscf_mod>0) then
 !      cplex=2 gets the complex density, =1 only real part
        if (psps%usepaw==1) then
 !        Be careful: in PAW, rho does not include the 1st-order compensation
@@ -1469,7 +1468,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &         wtk_rbz)
        end if
 
-     else if (.not. found_eq_gkk .or. ipert==dtset%natom+11) then
+     else if (.not. found_eq_gkk) then
        ! negative iscf_mod and no symmetric rotation of rhor1
        ! Read rho1(r) from a disk file and broadcast data.
        rdwr=1;rdwrpaw=psps%usepaw;if(dtfil%ireadwf/=0) rdwrpaw=0
@@ -1600,11 +1599,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &   ' ----iterations are completed or convergence reached----',ch10
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
-
-!  Update the content of the header (evolving variables)
-   call hdr_update(hdr,bantot_rbz,etotal,fermie,&
-&   residm,rprimd,occ_rbz,pawrhoij1,xred,dtset%amu_orig(:,1),&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
 
 !  Print _gkk file for this perturbation
    if (dtset%prtgkk == 1) then

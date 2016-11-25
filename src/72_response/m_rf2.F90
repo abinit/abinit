@@ -8,7 +8,7 @@
 !! equation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2016 ABINIT group (LB)
+!!  Copyright (C) 2015-2016 ABINIT group (LB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -355,7 +355,6 @@ end subroutine rf2_accumulate_bands
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
 !!  gvnl1(2,npw1*nspinor)=  part of <G|K^(1)+Vnl^(1)|C> not depending on VHxc^(1)              (sij_opt/=-1)
 !!                       or part of <G|K^(1)+Vnl^(1)-lambda.S^(1)|C> not depending on VHxc^(1) (sij_opt==-1)
-!!  ibg=shift to be applied on the location of data in the array cprj
 !!  idir=direction of the perturbation
 !!  ipert=type of the perturbation of the Hamiltonian :
 !!     ipert = 0           : GS calculation, call of getghc
@@ -399,7 +398,7 @@ end subroutine rf2_accumulate_bands
 !! SOURCE
 
 subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cwave,dtfil,eig0,eig1_k_jband,&
-&                                jband,gs_hamkq,gvnl1,ibg,idir,ipert,ikpt,isppol,mband,mkmem,mpi_enreg,nsppol,&
+&                                jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,mband,mkmem,mpi_enreg,nsppol,&
                                  print_info,prtvol,rf_hamk_idir)
 
  use defs_basis
@@ -422,7 +421,7 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: ibg,idir,ipert,ikpt,isppol,jband,mband,mkmem,nsppol,print_info,prtvol
+ integer,intent(in) :: idir,ipert,ikpt,isppol,jband,mband,mkmem,nsppol,print_info,prtvol
  type(datafiles_type),intent(in) :: dtfil
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(rf2_t),intent(in) :: rf2
