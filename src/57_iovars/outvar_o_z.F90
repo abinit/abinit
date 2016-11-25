@@ -757,6 +757,12 @@
  intarr(1,:)=dtsets(:)%rfuser
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfuser','INT',0)
 
+ intarr(1,:)=dtsets(:)%rf2_dkdk
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rf2_dkdk','INT',0)
+
+ intarr(1,:)=dtsets(:)%rf2_dkde
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rf2_dkde','INT',0)
+
  dprarr(1,:)=dtsets(:)%rhoqpmix
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rhoqpmix','DPR',0)
 
