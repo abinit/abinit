@@ -63,6 +63,8 @@ dmft_solv 7 # Rotationally invariant interaction with TRIQS/CTHYB Monte Carlo co
 dmftqmc_l 201
 dmftqmc_n 2.d5
 dmftqmc_therm 10000
+dmft_tolfreq 0.01
+dmftctqmc_triqs_nleg 30
 
 # == LDA+U
 usepawu     1  #  For density matrix printout.

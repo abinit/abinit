@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Wed 23 Nov 2016.
-- ( at 16h34 )
+.Starting date : Fri 25 Nov 2016.
+- ( at 12h52 )
   
 - input  file    -> t01.in
 - output file    -> t01.out
@@ -86,6 +86,8 @@ _ WF disk file :      8.291 Mbytes ; DEN or POT disk file :      2.405 Mbytes.
         dmft_nwli2        100
         dmft_solv1          5
         dmft_solv2          7
+     dmft_tolfreq1     1.0000000000E-04
+     dmft_tolfreq2     1.0000000000E-02
              ecut      1.60000000E+01 Hartree
 -          fftalg         112
            getwfk          -1
@@ -1626,6 +1628,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1169.259    1169.216
         dmft_nwli2        100
         dmft_solv1          5
         dmft_solv2          7
+     dmft_tolfreq1     1.0000000000E-04
+     dmft_tolfreq2     1.0000000000E-02
              ecut      1.60000000E+01 Hartree
            etotal1    -1.5200586507E+02
            etotal2    -1.5196609964E+02
@@ -1986,10 +1990,10 @@ P           mkmem          10
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=        113.3  wall=        116.4
+- Proc.   0 individual time (sec): cpu=        115.0  wall=        118.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  17 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        113.3  wall=        116.4
++Overall time at end (sec) : cpu=        115.0  wall=        118.1
