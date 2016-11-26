@@ -2010,8 +2010,14 @@ end subroutine ifc_printbxsf
 !! build the phbspl_t object to interpolate the phonon band structure.
 !!
 !! INPUTS
+!!  ifc<type(ifc_type)>=Object containing the dynamical matrix and the IFCs.
+!!  crystal<type(crystal_t)> = Information on the crystalline structure.
+!!  ngqpt(3)=Divisions of the q-mesh used to produce the B-spline.
+!!  nshiftq=Number of shifts in Q-mesh
+!!  shiftq(3,nshiftq)=Shifts of the q-mesh.
 !!  ords(3)=order of the spline for the three directions. ord(1) must be in [0, nqx] where
 !!    nqx is the number of points along the x-axis.
+!!  comm=MPI communicator
 !!
 !! OUTPUT
 !!
@@ -2071,10 +2077,6 @@ type(phbspl_t) function phbspl_new(ifc, cryst, ngqpt, nshiftq, shiftq, ords, com
    MSG_WARNING('Multiple shifts not allowed')
    ierr = ierr + 1
  end if
- !if (any(ebands%shiftk(:,1) /= zero)) then
- !  MSG_WARNING("shifted k-mesh are not tested")
- !  ierr = ierr + 1
- !end if
  if (ierr /= 0) then
    MSG_WARNING("bspline interpolation cannot be performed. See warnings above. Returning")
    return
@@ -2098,13 +2100,13 @@ type(phbspl_t) function phbspl_new(ifc, cryst, ngqpt, nshiftq, shiftq, ords, com
 
  ! Multiple shifts are not supported here.
  do ix=1,nqx
-   xvec(ix) = (ix-1+shiftq(1,1)) / ngqpt(1)
+   xvec(ix) = (ix-one+shiftq(1,1)) / ngqpt(1)
  end do
  do iy=1,nqy
-   yvec(iy) = (iy-1+shiftq(2,1)) / ngqpt(2)
+   yvec(iy) = (iy-one+shiftq(2,1)) / ngqpt(2)
  end do
  do iz=1,nqz
-   zvec(iz) = (iz-1+shiftq(3,1)) / ngqpt(3)
+   zvec(iz) = (iz-one+shiftq(3,1)) / ngqpt(3)
  end do
 
  ! Build list of q-points in full BZ (ordered as required by B-spline routines)
@@ -2211,10 +2213,14 @@ end function phbspl_new
 !! phbspl_evalq
 !!
 !! FUNCTION
+!!   Interpolate phonon frequencies at an arbitrary q-point.
 !!
 !! INPUTS
+!!   qpt(3)=Q-point in reduced coordinate (will be wrapped in the interval [0,1[
 !!
 !! OUTPUT
+!!  ofreqs(%natom3)=Interpolated phonon frequencies. Sorted in ascending order.
+!!  [oder1(3,%natom3)]=First order derivatives.
 !!
 !! PARENTS
 !!      m_ifc
@@ -2223,7 +2229,7 @@ end function phbspl_new
 !!
 !! SOURCE
 
-subroutine phbspl_evalq(phbspl, qpt, ofreqs)
+subroutine phbspl_evalq(phbspl, qpt, ofreqs, oder1)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2240,13 +2246,15 @@ subroutine phbspl_evalq(phbspl, qpt, ofreqs)
 !arrays
  real(dp),intent(in) :: qpt(3)
  real(dp),intent(out) :: ofreqs(phbspl%natom3)
+ real(dp),optional,intent(out) :: oder1(3,phbspl%natom3)
 
 !Local variables-------------------------------
 !scalars
- integer :: nu
+ integer :: nu,ii
 !arrays
- real(dp) :: qred(3),shift(3)
+ integer :: iders(3)
  integer :: iperm(phbspl%natom3)
+ real(dp) :: qred(3),shift(3)
 
 ! *********************************************************************
 
@@ -2260,8 +2268,23 @@ subroutine phbspl_evalq(phbspl, qpt, ofreqs)
                        phbspl%coeff(nu)%vals)
  end do
 
- iperm = [(nu, nu=1, phbspl%natom3)]
- call sort_dp(phbspl%natom3, ofreqs, iperm, tol14)
+ ! Sort frequencies.
+ !iperm = [(nu, nu=1, phbspl%natom3)]
+ !call sort_dp(phbspl%natom3, ofreqs, iperm, tol14)
+
+ if (present(oder1)) then
+   ! Compute first-order derivatives.
+   do nu=1,phbspl%natom3
+     do ii=1,3
+       iders = 0; iders(ii) = 1
+       oder1(ii,nu) = dbs3dr(iders(1), iders(2), iders(3), &
+                             qred(1), qred(2), qred(3), phbspl%qxord, phbspl%qyord, phbspl%qzord,&
+                             phbspl%xknot, phbspl%yknot, phbspl%zknot, phbspl%nqx, phbspl%nqy, phbspl%nqz,&
+                             phbspl%coeff(nu)%vals)
+     end do
+   end do
+
+ end if
 
 end subroutine phbspl_evalq
 !!***
@@ -2331,10 +2354,16 @@ end subroutine phbspl_free
 !! test_phbspl
 !!
 !! INPUTS
+!!  crystal<type(crystal_t)> = Information on the crystalline structure.
+!!  ngqpt(3)=Divisions of the q-mesh used to produce the B-spline.
+!!  nshiftq=Number of shifts in Q-mesh
+!!  shiftq(3,nshiftq)=Shifts of the q-mesh.
 !!  ords(3)=order of the spline for the three directions. ord(1) must be in [0, nqx] where
 !!    nqx is the number of points along the x-axis.
+!!  comm=MPI communicator
 !!
 !! OUTPUT
+!!  Only writing
 !!
 !! PARENTS
 !!      m_ifc

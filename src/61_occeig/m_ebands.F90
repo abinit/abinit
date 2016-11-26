@@ -213,6 +213,7 @@ MODULE m_ebands
 !! ebspl_t
 !!
 !! FUNCTION
+!!  B-spline interpolation of electronic eigenvalues.
 !!
 !! SOURCE
 
@@ -238,7 +239,7 @@ MODULE m_ebands
  end type ebspl_t
 
  public :: ebspl_new         ! Build B-spline object.
- public :: ebspl_evalk       ! Interpolate eigenvalues at arbitrary k-point.
+ public :: ebspl_evalk       ! Interpolate eigenvalues at an arbitrary k-point.
  public :: ebspl_free        ! Free memory.
 
 
@@ -3725,10 +3726,6 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block) result(ebspl)
    MSG_WARNING('Multiple shifts not allowed')
    ierr = ierr + 1
  end if
- if (any(ebands%shiftk(:,1) /= zero)) then
-   MSG_WARNING("shifted k-mesh are not tested")
-   ierr = ierr + 1
- end if
  if (any(ebands%nband(:) /= ebands%nband(1))) then
    MSG_WARNING("nband must be constant")
    ierr = ierr + 1
@@ -3752,13 +3749,13 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block) result(ebspl)
 
  ! Multiple shifts are not supported here.
  do ix=1,nkx
-   xvec(ix) = (ix-1+ebands%shiftk(1,1)) / ngkpt(1)
+   xvec(ix) = (ix-one+ebands%shiftk(1,1)) / ngkpt(1)
  end do
  do iy=1,nky
-   yvec(iy) = (iy-1+ebands%shiftk(2,1)) / ngkpt(2)
+   yvec(iy) = (iy-one+ebands%shiftk(2,1)) / ngkpt(2)
  end do
  do iz=1,nkz
-   zvec(iz) = (iz-1+ebands%shiftk(3,1)) / ngkpt(3)
+   zvec(iz) = (iz-one+ebands%shiftk(3,1)) / ngkpt(3)
  end do
 
  ! Build list of k-points in full BZ (ordered as required by B-spline routines)
@@ -3810,7 +3807,6 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block) result(ebspl)
  call dbsnak(nkz, zvec, kzord, ebspl%zknot)
 
  ABI_MALLOC(xyzdata,(nkx,nky,nkz))
-
  ABI_DT_MALLOC(ebspl%coeff, (ebands%mband,ebands%nsppol))
 
  do spin=1,ebands%nsppol
@@ -3855,11 +3851,17 @@ end function ebspl_new
 !! ebspl_evalk
 !!
 !! FUNCTION
+!!   Interpolate eigenvalues at an arbitrary k-point.
 !!
 !! INPUTS
 !!  band_block(2)=Initial and final band index.
+!!  band_block(2)=Index of the first and last band defining the block of states to be interpolated
+!!  kpt(3)=K-point in reduced coordinate (will be wrapped in the interval [0,1[
+!!  spin=Spin index
 !!
 !! OUTPUT
+!!  oeig=Array of size band_block(2) - band_block(1) + 1 with the interpolated eigenvalues.
+!!  [oder1]
 !!
 !! PARENTS
 !!      m_ebands
@@ -3870,7 +3872,7 @@ end function ebspl_new
 !!
 !! SOURCE
 
-subroutine ebspl_evalk(ebspl, band_block, kpt, spin, oeig)
+subroutine ebspl_evalk(ebspl, band_block, kpt, spin, oeig, oder1)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3888,12 +3890,14 @@ subroutine ebspl_evalk(ebspl, band_block, kpt, spin, oeig)
 !arrays
  integer,intent(in) :: band_block(2)
  real(dp),intent(in) :: kpt(3)
- real(dp),intent(inout) :: oeig(:)
+ real(dp),intent(out) :: oeig(:)
+ real(dp),optional,intent(out) :: oder1(:,:)
 
 !Local variables-------------------------------
 !scalars
- integer :: band,ib
+ integer :: band,ib,ii
 !arrays
+ integer :: iders(3)
  real(dp) :: kred(3),shift(3)
 
 ! *********************************************************************
@@ -3910,6 +3914,18 @@ subroutine ebspl_evalk(ebspl, band_block, kpt, spin, oeig)
    oeig(ib) = dbs3vl(kred(1), kred(2), kred(3), ebspl%kxord, ebspl%kyord, ebspl%kzord,&
                      ebspl%xknot, ebspl%yknot, ebspl%zknot, ebspl%nkx, ebspl%nky, ebspl%nkz,&
                      ebspl%coeff(band,spin)%vals)
+
+   if (present(oder1)) then
+     ! Compute firs-order derivatives.
+     do ii=1,3
+       iders = 0; iders(ii) = 1
+       oder1(ii,ib) = dbs3dr(iders(1), iders(2), iders(3), &
+                             kred(1), kred(2), kred(3), ebspl%kxord, ebspl%kyord, ebspl%kzord,&
+                             ebspl%xknot, ebspl%yknot, ebspl%zknot, ebspl%nkx, ebspl%nky, ebspl%nkz,&
+                             ebspl%coeff(band,spin)%vals)
+     end do
+   end if
+
  end do
 
 end subroutine ebspl_evalk
@@ -3954,15 +3970,6 @@ subroutine ebspl_free(ebspl)
 
 ! *********************************************************************
 
- !if (allocated(ebspl%xvec)) then
- !  ABI_FREE(ebspl%xvec)
- !end if
- !if (allocated(ebspl%yvec)) then
- !  ABI_FREE(ebspl%yvec)
- !end if
- !if (allocated(ebspl%zvec)) then
- !  ABI_FREE(ebspl%zvec)
- !end if
  if (allocated(ebspl%xknot)) then
    ABI_FREE(ebspl%xknot)
  end if
