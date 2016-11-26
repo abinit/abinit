@@ -51,7 +51,6 @@ sources = [
  "dfpt_nsteltwf.F90",
  "dfpt_nstpaw.F90",
  "dfpt_nstwf.F90",
- "dfpt_phfrq.F90",
  "dfpt_prtph.F90",
  "dfpt_prtene.F90",
  "dfpt_rhofermi.F90",

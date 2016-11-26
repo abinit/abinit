@@ -478,10 +478,10 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
      write(message, '(a,a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of ABINIT'
    else if(dmft_solv==6) then
      write(message, '(a,a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS&
-     &(with density density interactions)'
+     & (with density density interactions)'
    else if(dmft_solv==7) then
      write(message, '(a,a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS&
-     &(with rotationaly invariant interaction)'
+     & (with rotationaly invariant interaction)'
   endif
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')

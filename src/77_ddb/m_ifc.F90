@@ -4,8 +4,8 @@
 !!  m_ifc
 !!
 !! FUNCTION
-!!  This module contains the declaration of data types and methods 
-!!  used to handle interatomic force constant sets 
+!!  This module contains the declaration of data types and methods
+!!  used to handle interatomic force constant sets
 !!
 !! COPYRIGHT
 !! Copyright (C) 2011-2016 ABINIT group (XG,MJV,EB,MG)
@@ -31,23 +31,23 @@ MODULE m_ifc
  use m_errors
  use m_profiling_abi
  use m_sort
+ use m_nctk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
 
  use m_io_tools,    only : open_file
  use m_copy,        only : alloc_copy
  use m_ewald,       only : ewald9
  use m_crystal,     only : crystal_t
  use m_geometry,    only : phdispl_cart2red
- use m_dynmat,      only : cell9,canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, &
-&                          make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, symdm9, nanal9, gtdyn9, dymfz9
+ use m_dynmat,      only : canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, &
+&                          make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, symdm9, nanal9, gtdyn9, dymfz9, dfpt_phfrq
  use m_ddb,         only : ddb_type
- use m_nctk
-#ifdef HAVE_NETCDF
- use netcdf
-#endif
 
  implicit none
 
- private 
+ private
 !!***
 
 !!****t* m_ifc/ifc_type
@@ -66,7 +66,7 @@ MODULE m_ifc
    integer :: natom
      ! Number of atoms in the unit cell.
 
-   integer :: mpert 
+   integer :: mpert
      ! Maximum number of ipert.
 
    !integer :: ifcflag
@@ -80,7 +80,7 @@ MODULE m_ifc
 
    integer :: dipdip
      ! dipole dipole interaction flag.
-                                                                                              
+
    integer :: symdynmat
      ! If equal to 1, the dynamical matrix is symmetrized in dfpt_phfrq before the diagonalization.
 
@@ -113,7 +113,7 @@ MODULE m_ifc
 
    integer,allocatable :: cell(:,:)
      ! cell(nrpt,3)
-     ! Give the index of the the cell and irpt 
+     ! Give the index of the the cell and irpt
 
    real(dp),allocatable :: ewald_atmfrc(:,:,:,:,:,:)
      ! Ewald_atmfrc(2,3,natom,3,natom,nrpt)
@@ -136,7 +136,7 @@ MODULE m_ifc
      ! Weights for each point and atom in the Wigner Seitz supercell in real space.
 
    real(dp),allocatable :: rcan(:,:)
-     ! rcan(3,natom) 
+     ! rcan(3,natom)
      ! Atomic position in canonical coordinates.
 
    real(dp),allocatable :: trans(:,:)
@@ -153,7 +153,7 @@ MODULE m_ifc
 
    real(dp),allocatable :: qbz(:,:)
      ! qbz(3,nqpt))
-     ! List of q-points in the full BZ 
+     ! List of q-points in the full BZ
 
    real(dp),allocatable :: dynmat(:,:,:,:,:,:)
      ! dynmat(2,3,natom,3,natom,nqpt))
@@ -161,15 +161,14 @@ MODULE m_ifc
      ! Note that the long-range dip-dip part has been removed if dipdip=1
      ! Moreover the array is multiplied by a phase shift in mkifc9.
 
-   !real(dp),allocatable :: dynmat_lr(:,:,:,:,:,:) 
+   !real(dp),allocatable :: dynmat_lr(:,:,:,:,:,:)
     ! dynmat_lr(2,3,natom,3,natom,nqpt))
     ! Long-range part of dynmat in q-space
  end type ifc_type
- 
+
  public :: ifc_init       ! Constructor
  public :: ifc_free       ! Release memory
  public :: ifc_fourq      ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
- !public :: ifc_diagoq    ! Compute phonon frequencies via direct diagonalization (mainly for debugging purposes)
  public :: ifc_print       ! Print the ifc (output, netcdf and text file)
  public :: ifc_outphbtrap ! Print out phonon frequencies on regular grid for BoltzTrap code.
 !!***
@@ -319,7 +318,7 @@ end subroutine ifc_free
 !! nsphere=number of atoms to be included in the cut-off sphere for interatomic
 !!  force constant; if = 0 : maximum extent allowed by the grid.
 !! rifcsph=radius for cutoff of IFC
-!! [Ifc_coarse]=Optional. 
+!! [Ifc_coarse]=Optional.
 !! [prtfreq]=True if phonon frequencies should be printed (default: false)
 !!
 !! OUTPUT
@@ -389,7 +388,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  integer :: ngqpt(9),qptrlatt(3,3)
  integer,allocatable :: qmissing(:)
  real(dp) :: gprim(3,3),rprim(3,3),qpt(3),rprimd(3,3)
- real(dp):: rcan(3,Crystal%natom),trans(3,Crystal%natom),dyewq0(3,3,Crystal%natom) 
+ real(dp):: rcan(3,Crystal%natom),trans(3,Crystal%natom),dyewq0(3,3,Crystal%natom)
  real(dp) :: displ_cart(2*3*Crystal%natom*3*Crystal%natom)
  real(dp) :: phfrq(3*Crystal%natom) !eigval(3,Crystal%natom),
  real(dp) :: eigvec(2,3,Crystal%natom,3,Crystal%natom)
@@ -415,7 +414,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  !enunit = anaddb_dtset%enunit
  !atifc(:)=anaddb_dtset%atifc(:)
 
- ! This dimension should be encapsulated somewhere. We don't want to 
+ ! This dimension should be encapsulated somewhere. We don't want to
  ! change the entire code if someone adds a new kind of perturbation.
  mpert = Crystal%natom + 6; iout = ab_out
 
@@ -485,7 +484,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    ! Then use Ifc_coarse to fill the missing entries with Fourier interpolated matrices.
    !
    ! TODO: The previous version of refineblk was hacking the DDB database to add the q-points in the **IBZ**
-   ! Then D(q) was symmetrized in symdm9. This version avoids the symmetrization: the q-points 
+   ! Then D(q) was symmetrized in symdm9. This version avoids the symmetrization: the q-points
    ! in the BZ that are not in the coarse q-mesh are obtained by an explicit FT.
    ! This means that the final D(q) may break some symmetry in q-space if the FT does not preserve it.
    ! The most elegant approach would be to get D(q_ibz) via FT if q_ibz is not in the coarse mesh and then
@@ -622,9 +621,9 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ABI_MALLOC(Ifc%wghatm,(natom,natom,Ifc%nrpt))
  ABI_MALLOC(Ifc%short_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
  ABI_MALLOC(Ifc%ewald_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
- 
+
  Ifc%short_atmfrc = zero
- Ifc%ewald_atmfrc = zero 
+ Ifc%ewald_atmfrc = zero
  Ifc%short_atmfrc = zero
  Ifc%ewald_atmfrc = zero
  Ifc%cell = zero
@@ -639,7 +638,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      irpt_new = irpt_new + 1
    end if
  end do
- 
+
  ! Copy other useful arrays.
  Ifc%dielt = dielt
  Ifc%nqbz = nqbz
@@ -701,17 +700,18 @@ end subroutine ifc_init
 !!  Ifc<type(ifc_type)>=Object containing the dynamical matrix and the IFCs.
 !!  Crystal<type(crystal_t)> = Information on the crystalline structure.
 !!  qpt(3)=q-point in reduced coordinates (unless nanaqdir is specified)
-!!  [nanaqdir]=If present, the qpt will be treated as a vector specifying the 
+!!  [nanaqdir]=If present, the qpt will be treated as a vector specifying the
 !!    direction in q-space along which the non-analytic behaviour of the dynamical
 !!    matrix will be treated. Possible values:
 !!       "cart" if qpt defines a direction in Cartesian coordinates
 !!       "reduced" if qpt defines a direction in reduced coordinates
 !!
 !! OUTPUT
-!!  phfrq(3*Crystal%natom)=Phonon frequencies in Hartree
-!!  displ_cart(2,3,Crystal%natom,3*Crystal%natom)=Phonon displacement in Cartesian coordinates
-!!  [out_d2cart(2,3,3*natom,3,3*natom)]=Optional. The (interpolated) dynamical matrix for this q-point
-!!  [out_eigvec(2*3*natom*3*natom)= Optional. The (interpolated) eigenvectors of the dynamical matrix.
+!!  phfrq(3*natom) = Phonon frequencies in Hartree
+!!  displ_cart(2,3,natom,3*natom) = Phonon displacement in Cartesian coordinates
+!!  [out_d2cart(2,3,3*natom,3,3*natom)] = The (interpolated) dynamical matrix for this q-point
+!!  [out_eigvec(2*3*natom*3*natom) = The (interpolated) eigenvectors of the dynamical matrix.
+!!  [out_displ_red(2*3*natom*3*natom) = The (interpolated) displacement in reduced coordinates.
 !!
 !! PARENTS
 !!      get_nv_fs_en,get_tau_k,harmonic_thermo,interpolate_gkk,m_ifc,m_phgamma
@@ -723,14 +723,14 @@ end subroutine ifc_init
 !! SOURCE
 
 
-subroutine ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,nanaqdir,out_d2cart,out_eigvec)
+subroutine ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,nanaqdir, &
+                     out_d2cart,out_eigvec,out_displ_red)   ! Optional [out]
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_fourq'
- use interfaces_72_response
 !End of the abilint section
 
  implicit none
@@ -746,12 +746,13 @@ subroutine ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,nanaqdir,out_d2cart,out_ei
  real(dp),intent(out) :: phfrq(3*Crystal%natom)
  real(dp),optional,intent(out) :: out_d2cart(2,3,Crystal%natom,3,Crystal%natom)
  real(dp),optional,intent(out) :: out_eigvec(2,3,Crystal%natom,3*Crystal%natom)
+ real(dp),optional,intent(out) :: out_displ_red(2,3,Crystal%natom,3*Crystal%natom)
 
 !Local variables-------------------------------
 !scalars
  integer :: natom
  real(dp) :: qphnrm
-!arrays 
+!arrays
  real(dp) :: my_qpt(3),eigvec(2,3,Crystal%natom,3*Crystal%natom),eigval(3*Crystal%natom)
  real(dp) :: d2cart(2,3,Ifc%mpert,3,Ifc%mpert)
 
@@ -771,7 +772,7 @@ subroutine ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,nanaqdir,out_d2cart,out_ei
    select case (nanaqdir)
    case ("reduced")
      ! Convert to Cartesian.
-     my_qpt = matmul(Crystal%gprimd, qpt) 
+     my_qpt = matmul(Crystal%gprimd, qpt)
    case ("cart")
      continue
    case default
@@ -793,125 +794,18 @@ subroutine ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,nanaqdir,out_d2cart,out_ei
  !  call omega_decomp(amu,natom,ntypat,typat,dynmatfull,dynmatsr,dynmatlr,iqpt,nqpt,eigvec)
  !end if
 
- ! Returns the interpolated dynamical matrix and the eigenvector for this q-point
+ ! Return the interpolated dynamical matrix and the eigenvector for this q-point
  if (present(out_d2cart)) out_d2cart = d2cart(:,:,:natom,:,:natom)
  if (present(out_eigvec)) out_eigvec = eigvec
 
+ ! Return phonon displacement in reduced coordinates.
+ if (present(out_displ_red)) call phdispl_cart2red(natom, crystal%gprimd, displ_cart, out_displ_red)
+
  ! Option to get vectors in reduced coordinates?
- !call phdispl_cart2red(natom,Crystal%gprimd,displ_cart,displ_red)
- !call phdispl_cart2red(natom,Crystal%gprimd,out_eigvec,displ_red)
+ !call phdispl_cart2red(natom, crystal%gprimd, out_eigvec, out_eigvec_red)
 
 end subroutine ifc_fourq
 !!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_ifc/ifc_diagoq
-!! NAME
-!!  ifc_diagoq
-!!
-!! FUNCTION
-!!  Compute the phonon frequencies at the specified q-point by performing
-!!  a direct diagonalizatin of the dynamical matrix. The q-point **MUST** be
-!!  one the points used for the DFPT calculation or one of its symmetrical image.
-!!
-!! INPUTS
-!!  Ifc<type(ifc_type)>=Object containing the dynamical matrix and the IFCs.
-!!  Crystal<type(crystal_t)> = Information on the crystalline structure.
-!!  qpt(3)=q-point in reduced coordinates (unless nanaqdir is specified)
-!!  [nanaqdir]=If present, the qpt will be treated as a vector specifying the 
-!!    direction in q-space along which the non-analytic behaviour of the dynamical
-!!    matrix will be treated. Possible values:
-!!       "cart" if qpt defines a direction in Cartesian coordinates
-!!       "reduced" if qpt defines a direction in reduced coordinates
-!!
-!! OUTPUT
-!!  phfrq(3*Crystal%natom)=Phonon frequencies in Hartree
-!!  displ_cart(2,3*Crystal%natom,3*Crystal%natom)=Phonon displacement in Cartesian coordinates
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      appdig,ifc_fourq,smpbz,symkpt,wrtout
-!!
-!! SOURCE
-
-#if 0
-
-subroutine ifc_diagoq(Ifc,Crystal,qpt,phfrq,displ_cart,nanaqdir)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_diagoq'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- character(len=*),optional,intent(in) :: nanaqdir
- type(ifc_type),intent(in) :: Ifc
- type(crystal_t),intent(in) :: Crystal
-!arrays
- real(dp),intent(in) :: qpt(3)
- real(dp),intent(out) :: phfrq(3*Crystal%natom)
- real(dp),intent(out) :: displ_cart(2,3,Crystal%natom,3,Crystal%natom)
-
-!Local variables-------------------------------
-!scalars
- real(dp) :: qphnrm
-!arrays 
- real(dp) :: my_qpt(3) !,eigvec(2,3*Crystal%natom,3*Crystal%natom),eigval(3*Crystal%natom)
- !real(dp) :: d2cart(2,3,Ifc%mpert,3,Ifc%mpert)
-
-! ************************************************************************
- MSG_ERROR("Not implemented error")
-
- ! Use my_qpt because dfpt_phfrq can change the q-point (very bad design)
- qphnrm = one; my_qpt = qpt
-                                                                                              
- if (present(nanaqdir)) then
-   ! This will break backward compatibility because qpt is **always** in reduced coordinates.
-   ! while dfpt_phfrq assume cartesian coordinates !!!!!!!!!!!
-   ! It does not make sense to change API just to treat this particular case
-   ! We should **alwayse use q-points in reduced coordinates.
-   qphnrm = zero
-   select case (nanaqdir)
-   case ("reduced")
-     ! Convert to Cartesian.
-     my_qpt = matmul(Crystal%gprimd, qpt) 
-   case ("cart")
-     continue
-   case default
-     MSG_ERROR("Wrong value for nanaqdir: "//trim(nanaqdir))
-   end select
- end if
-
- ! See mkphbs
- ! Copy the dynamical matrix in d2cart
- !d2cart(:,1:msize)=ddb%val(:,:,iblok)
-
- ! Eventually impose the acoustic sum rule based on previously calculated d2asr
- !if (anaddb_dtset%asr==1 .or. anaddb_dtset%asr==2 .or. anaddb_dtset%asr==5) then
- !  call asria_corr(anaddb_dtset%asr,d2asr,d2cart,mpert,natom)
- !end if
-
- ! Impose acoustic sum rule plus rotational symmetry for 0D and 1D systems
- !if (anaddb_dtset%asr==3 .or. anaddb_dtset%asr==4) then
- !  call asrprs(anaddb_dtset%asr,2,3,uinvers,vtinvers,singular,d2cart,mpert,natom,xcart)
- !end if
-
- ! Calculate the eigenvectors and eigenvalues of the dynamical matrix
-! call dfpt_phfrq(amu,displ_cart,d2cart,eigval,eigvec,Crystal%indsym,&
-!&  mpert,Cryst%nsym,Crystal%natom,Crystal%nsym,Crystal%ntypat,phfrq,qphnrm,qpt,&
-!&  Crystal%rprimd,symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
-
-end subroutine ifc_diagoq
-!!***
-
-#endif
 
 !----------------------------------------------------------------------
 
@@ -989,9 +883,9 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,wghatm
  ABI_MALLOC(list,(natom*nrpt))
  ABI_MALLOC(wkdist,(natom*nrpt))
 
- ! loop on all generic atoms. 
+ ! loop on all generic atoms.
  do ia=1,natom
-       
+
    wkdist(:)=reshape(dist(ia,:,:),(/natom*nrpt/))
    do ii=1,natom*nrpt
      list(ii)=ii
@@ -1020,14 +914,13 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,wghatm
      end do
    end if
 
- end do 
+ end do
 
  ABI_FREE(dist)
  ABI_FREE(list)
  ABI_FREE(wkdist)
 
 end subroutine corsifc9
-
 !!***
 
 !----------------------------------------------------------------------
@@ -1049,7 +942,7 @@ end subroutine corsifc9
 !! atifc(natom) =  atifc(ia) equals 1 if the analysis of ifc
 !!  has to be done for atom ia; otherwise 0.
 !! ifcout= Number of interatomic force constants written in the output file
-!! prt_ifc = flag to print out ifc information for dynamical matrix (AI2PS) 
+!! prt_ifc = flag to print out ifc information for dynamical matrix (AI2PS)
 !! ncid=the unit of the open NetCDF file.
 !!
 !! OUTPUT
@@ -1092,7 +985,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 !Local variables -------------------------
 !scalars
  integer :: ia,ii,ncerr,iatifc,ifcout1,mu,nu,iout
-! unit number to print out ifc information for dynamical matrix (AI2PS) 
+! unit number to print out ifc information for dynamical matrix (AI2PS)
  integer :: unit_ifc
  real(dp) :: detdlt
  character(len=500) :: message
@@ -1167,13 +1060,13 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
    end if
    write(iout, '(a,a)' )ch10,&
 &   '  NOTE: Open file ifcinfo.out, for the output of interatomic force constants. This is because prt_ifc==1. '
-  
+
 #ifdef HAVE_NETCDF
   ! initialize netcdf variables
    ncerr = nctk_def_dims(ncid, [nctkdim_t("natifc", SUM(atifc)), nctkdim_t("number_of_r_points_big_box", Ifc%nrpt), &
      nctkdim_t("number_of_atoms_big_box", Ifc%natom*Ifc%nrpt), nctkdim_t("ifcout", ifcout1)], defmode=.True.)
-   NCF_CHECK(ncerr)   
-  
+   NCF_CHECK(ncerr)
+
    ncerr = nctk_def_arrays(ncid, [&
      nctkarr_t('ifc_atoms_indices', "i", "natifc"),&
      nctkarr_t('ifc_neighbours_indices', "i", "ifcout, natifc"),&
@@ -1187,7 +1080,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
        "number_of_cartesian_directions, number_of_cartesian_directions, ifcout, natifc")])
      NCF_CHECK(ncerr)
    end if
-   
+
    if (ifcana==1) then
      ncerr = nctk_def_arrays(ncid, [&
        nctkarr_t('ifc_local_vectors', "dp", "number_of_cartesian_directions, number_of_cartesian_directions, ifcout, natifc")])
@@ -1203,7 +1096,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
  ABI_MALLOC(vect,(3,3,ifcout1))
  ABI_MALLOC(indngb,(ifcout1))
  ABI_MALLOC(posngb,(3,ifcout1))
-  
+
  iatifc=0
 
  ! BIG loop on all generic atoms
@@ -1247,7 +1140,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
          write(unit_ifc,'(3es28.16)') posngb(1:3,ii)
          do nu=1,3
            write(unit_ifc,   '(3f28.16)'  )(rsiaf(nu,mu,ii),mu=1,3)
-         end do     
+         end do
        end do
 
 #ifdef HAVE_NETCDF
@@ -1270,7 +1163,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 #endif
      end if
    end if ! End the condition on atifc
-  
+
  end do ! End Big loop on atoms in the unit cell, and corresponding test .
 
  ABI_FREE(rsiaf)
@@ -1287,7 +1180,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 
 #ifdef HAVE_NETCDF
 contains
- integer function vid(vname) 
+ integer function vid(vname)
 
    character(len=*),intent(in) :: vname
    vid = nctk_idname(ncid, vname)
@@ -1307,8 +1200,8 @@ end subroutine ifc_print
 !! ifc_getiaf
 !!
 !! FUNCTION
-!! Extracts the IFCs needed for the output for one atom in the 
-!! unit cell. Accumulates the results for writing in the NetCDF file. 
+!! Extracts the IFCs needed for the output for one atom in the
+!! unit cell. Accumulates the results for writing in the NetCDF file.
 !! Prints to the output file
 !!
 !! INPUTS
@@ -1319,7 +1212,7 @@ end subroutine ifc_print
 !! zeff(3,3,natom)=effective charge on each atom, versus electric field and atomic displacement
 !! ia=index of the atom in the unit cell for which the IFCs are being analyzed
 !! ra(3)=position of atom ia in cartesian coordinates
-!! list(ifcout)=index of permutation for distances from atom ia in ascending order 
+!! list(ifcout)=index of permutation for distances from atom ia in ascending order
 !! dist(natom,natom,nrpt)=distance from atom ia to atom ib in unit cell irpt.
 !! invdlt(3,3)=inverse (transpose) of the dielectric tensor
 !! detdlt=determinant of the dielectric tensor
@@ -1452,7 +1345,7 @@ implicit none
      vect1(2)=(posngb(2,ii)-ra(2))/dist1
      vect1(3)=(posngb(3,ii)-ra(3))/dist1
    end if
-     
+
    if(Ifc%dipdip==0)then
      ! Get the "total" force constants (=real space FC)
      ! without taking into account the dipole-dipole interaction
@@ -1465,7 +1358,7 @@ implicit none
      if (iout > 0) then
        do nu=1,3
          write(iout, '(1x,3f9.5)' )(rsiaf(mu,nu,ii)+tol10,mu=1,3)
-!       transfer short range and long range       
+!       transfer short range and long range
          do mu=1,3
            Ifc%short_atmfrc(1,mu,ia,nu,ib,irpt) = rsiaf(mu,nu,ii) + tol10
            Ifc%ewald_atmfrc(1,mu,ia,nu,ib,irpt) = zero
@@ -1495,7 +1388,7 @@ implicit none
            write(iout, '(1x,3f9.5)' )(ifcloc(mu,nu)+tol10,mu=1,3)
          end do
        end if
-       
+
        vect(:,1,ii) = vect1
        vect(:,2,ii) = vect2
        vect(:,3,ii) = vect3
@@ -1572,7 +1465,7 @@ implicit none
 &         (ewiaf1(mu,nu)+tol10,mu=1,3),&
 &         (sriaf(mu,nu,ii) +tol10,mu=1,3)
 
-!       transfer short range and long range       
+!       transfer short range and long range
          do mu=1,3
            Ifc%short_atmfrc(1,mu,ia,nu,ib,irpt) = sriaf(mu,nu,ii) + tol10
            Ifc%ewald_atmfrc(1,mu,ia,nu,ib,irpt) = ewiaf1(mu,nu) + tol10
@@ -1643,10 +1536,10 @@ implicit none
 !!  omega_decomp
 !!
 !! FUNCTION
-!! Compute and return the eigenvalues (frequencies) of the short-range and 
+!! Compute and return the eigenvalues (frequencies) of the short-range and
 !! long-range part of the dynamical matrix  See Europhys. Lett. 33 p.713 (1996) for details.
 !! (included by U. Aschauer and EB)
-!!  
+!!
 !! INPUTS
 !!  argin(sizein)=description
 !!
@@ -1699,7 +1592,7 @@ subroutine omega_decomp(amu,natom,ntypat,typat,dynmatfl,dynmatsr,dynmatlr,iqpt,n
 
 !write(ab_out,*)''
 !write(std_out,*) 'SR/LR decomposition: enter for wavevector number :',iqpt
- 
+
 !apply asr (note the lr part is already asred by construction in mkifc9)
  do ipert1=1,natom
    do idir1=1,3
@@ -1725,16 +1618,16 @@ subroutine omega_decomp(amu,natom,ntypat,typat,dynmatfl,dynmatsr,dynmatlr,iqpt,n
 !Include Mass
  do ipert1=1,natom
    do ipert2=1,natom
-     
+
      fac=1.0d0/sqrt(amu(typat(ipert1))*amu(typat(ipert2)))/amu_emass
-     
+
      do idir1=1,3
        do idir2=1,3
-         
+
          dynmatfl(1,idir1,ipert1,idir2,ipert2,iqpt)=&
 &         dynmatfl(1,idir1,ipert1,idir2,ipert2,iqpt)*&
 &         fac*nearidentity(idir1,idir2)
-         
+
          dynmatsr(1,idir1,ipert1,idir2,ipert2,iqpt)=&
 &         dynmatsr(1,idir1,ipert1,idir2,ipert2,iqpt)*&
 &         fac*nearidentity(idir1,idir2)
@@ -1779,21 +1672,21 @@ subroutine omega_decomp(amu,natom,ntypat,typat,dynmatfl,dynmatsr,dynmatlr,iqpt,n
 !write(std_out,'(a12,2x,a10,2x,a10,2x,a10,2x,a16,2x,a16,2x,a16)') 'Mode number.','tot','SR','LR','tot**2','SR**2','LR**2'
 
  do imode=1,3*natom
-   
+
    sumfl=0.0d0
    sumlr=0.0d0
    sumsr=0.0d0
-   
+
    do ipert1=1,natom
      do ipert2=1,natom
        do i1=1,3
          do i2=1,3
-           
+
            index1=i1+(ipert1-1)*3+3*natom*(imode-1)
            index2=i2+(ipert2-1)*3+3*natom*(imode-1)
            ! MG FIXME: I don't think these expressions are correct when q != 0
            ! We should also include the imaginary part
-           
+
            sumfl = sumfl + eigenvec(2*index1-1) * dynmatfl(1,i1,ipert1,i2,ipert2,iqpt) * eigenvec(2*index2-1)
            sumlr = sumlr + eigenvec(2*index1-1) * dynmatlr(1,i1,ipert1,i2,ipert2,iqpt) * eigenvec(2*index2-1)
            sumsr = sumsr + eigenvec(2*index1-1) * dynmatsr(1,i1,ipert1,i2,ipert2,iqpt) * eigenvec(2*index2-1)
@@ -1801,11 +1694,11 @@ subroutine omega_decomp(amu,natom,ntypat,typat,dynmatfl,dynmatsr,dynmatlr,iqpt,n
        end do
      end do
    end do
-   
+
    sumfl = sumfl * Ha_cmm1 * Ha_cmm1
    sumsr = sumsr * Ha_cmm1 * Ha_cmm1
    sumlr = sumlr * Ha_cmm1 * Ha_cmm1
-   
+
 !  Compute omega=sqrt(omega**2)
    if(sumfl>=1.0d-16)then
      omegafl=sqrt(sumfl)
@@ -1898,7 +1791,7 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
 !Local variables -------------------------
 !scalars
  integer,parameter :: brav1=1,chksymbreak0=0,option1=1
- integer,parameter :: timrev1=1 ! TODO timrev should be input 
+ integer,parameter :: timrev1=1 ! TODO timrev should be input
  integer :: natom,nsym
  integer :: facbrv,imode,iq_ibz,msym
  integer :: nqbz,nqpt_max
@@ -1947,7 +1840,7 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
 & -gprimd(2,1)*(gprimd(1,2)*gprimd(3,3)-gprimd(3,2)*gprimd(1,3)) &
 & +gprimd(3,1)*(gprimd(1,2)*gprimd(2,3)-gprimd(2,2)*gprimd(1,3)))
 !
-!Save memory during the generation of the q-mesh in the full BZ  
+!Save memory during the generation of the q-mesh in the full BZ
 !Take into account the type of Bravais lattice
  facbrv=1
  if (brav1==2) facbrv=2
@@ -1980,7 +1873,7 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
  end do
  ABI_DEALLOCATE(wtq_folded)
 
- write (unit_btrap,'(2I6)') nqibz, 3*natom 
+ write (unit_btrap,'(2I6)') nqibz, 3*natom
 
 ! Loop over irreducible q-points
  do iq_ibz=1,nqibz
@@ -1996,7 +1889,7 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
    do iatom = 1, natom
      do idir = 1, 3
        imode = idir + 3*(iatom-1)
-!      factor two for Ry output - this may change in definitive BT and abinit formats 
+!      factor two for Ry output - this may change in definitive BT and abinit formats
        write (unit_btrap,trim(format_line_btrap))phfrq(imode)*two,d2cart(1:2,1:3,1:natom,idir,iatom)
 !      XG130409 : This was the old coding for the previous line, but was not portable...
 !      write (unit_btrap,'(E20.10)', ADVANCE='NO') phfrq(imode)*two
@@ -2008,7 +1901,7 @@ subroutine ifc_outphbtrap(ifc,cryst,ngqpt,nqshft,qshft,basename)
 !      write (unit_btrap,*)
      end do
    end do
-   
+
  end do !irred q-points
 
  ABI_DEALLOCATE(ibz2bz)

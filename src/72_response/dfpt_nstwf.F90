@@ -48,7 +48,6 @@
 !!  occ_k(nband_k)=occupation number for each band (usually 2) for each k.
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rmet(3,3)=real space metric (bohr**2)
-!!  wffddk(3)=struct info for for the three possible dot files for ipert1
 !!  ddks(3)<wfk_t>=struct info for for the three possible DDK files for ipert1
 !!  wtk_k=weight assigned to the k point.
 !!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
@@ -83,7 +82,7 @@
 subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 &                 icg,icg1,idir,ikpt,ipert,isppol,istwf_k,kg_k,kg1_k,kpt,kpq,&
 &                 mkmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,nband_k,npw_k,npw1_k,nsppol,&
-&                 occ_k,psps,rmet,wffddk,ddks,wtk_k,ylm,ylm1)
+&                 occ_k,psps,rmet,ddks,wtk_k,ylm,ylm1)
 
 
  use defs_basis
@@ -93,7 +92,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  use m_cgtools
  use m_hamiltonian
  use m_errors
- use m_wffile
  use m_wfk
  use m_xmpi
 
@@ -132,13 +130,12 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  real(dp),intent(inout) :: eig1_k(2*nsppol*dtset%mband**2)
  real(dp),intent(out) :: d2bbb_k(2,3,dtset%mband,dtset%mband*dtset%prtbbb)
  real(dp),intent(inout) :: d2nl_k(2,3,mpert)
- type(wffile_type),intent(inout) :: wffddk(3)
  type(wfk_t),intent(inout) :: ddks(3)
 
 !Local variables-------------------------------
 !scalars
- integer :: berryopt,dimffnl,dimffnl1,dimph3d,ii
- integer :: iband,ider,idir1,ierr,ipert1,ipw,jband,nband_kocc,nkpg,nkpg1
+ integer :: berryopt,dimffnl,dimffnl1,dimph3d
+ integer :: iband,ider,idir1,ipert1,ipw,jband,nband_kocc,nkpg,nkpg1 !ierr,ii
  integer :: npw_disk,nsp,optlocal,optnl,opt_gvnl1,sij_opt,tim_getgh1c,usevnl
  logical :: ddk
  real(dp) :: aa,dot1i,dot1r,dot2i,dot2r,dot_ndiagi,dot_ndiagr,doti,dotr,lambda
@@ -155,8 +152,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 ! *********************************************************************
 
  DBG_ENTER("COLL")
-
- ABI_UNUSED((/wffddk%unwff, ierr, ii/))
 
 !Not valid for PAW
  if (psps%usepaw==1) then
@@ -245,15 +240,9 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
    if (ddkfil(idir1)/=0)then
 !    Read npw record
      nsp=dtset%nspinor
-#ifndef DEV_MG_WFK
-     call WffReadNpwRec(ierr,ikpt,isppol,nband_k,npw_disk,nsp,wffddk(idir1))
-!    Skip k+G record
-     call WffReadSkipRec(ierr,1,wffddk(idir1))
-#else
      ik_ddks(idir1) = wfk_findk(ddks(idir1), kpt)
      ABI_CHECK(ik_ddks(idir1) /= -1, "Cannot find kpt")
      npw_disk = ddks(idir1)%hdr%npwarr(ik_ddks(idir1))
-#endif
      if (npw_k /= npw_disk) then
        write(unit=msg,fmt='(a,i3,a,i5,a,i3,a,a,i5,a,a,i5)')&
 &       'For isppol = ',isppol,', ikpt = ',ikpt,' and idir = ',idir,ch10,&
@@ -286,17 +275,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !Loop over bands
  do iband=1,nband_k
 
-   if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) then
-#ifndef DEV_MG_WFK
-     do idir1=1,3
-!      Skip the eigenvalue and the wf records of this band
-       if (ddkfil(idir1) /= 0) then
-         call WffReadSkipRec(ierr,2,wffddk(idir1))
-       end if
-     end do
-#endif
-     cycle
-   end if
+   if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
 
 !  Read ground-state wavefunctions
    if (dtset%prtbbb==0 .or. ipert==dtset%natom+2) then
@@ -338,22 +317,17 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
              if( ipert1<=dtset%natom )then
                lambda=eig_k((isppol-1)*nband_k+iband)
                berryopt=1;optlocal=0;optnl=1;usevnl=0;opt_gvnl1=0;sij_opt=0
-               call getgh1c(berryopt,0,cwave0,dum_cwaveprj,gvnl1,dum_grad_berry,&
+               call getgh1c(berryopt,cwave0,dum_cwaveprj,gvnl1,dum_grad_berry,&
 &               dum_gs1,gs_hamkq,dum_gvnl1,idir1,ipert1,lambda,mpi_enreg,optlocal,&
 &               optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 
 !              ==== Electric field perturbation
              else if( ipert1==dtset%natom+2 )then
-#ifndef DEV_MG_WFK
-               call WffReadDataRec(eig2_k(1+(iband-1)*2*nband_k:2*iband*nband_k),ierr,2*nband_k,wffddk(idir1))
-               call WffReadDataRec(gvnl1,ierr,2,npw1_k*dtset%nspinor,wffddk(idir1))
-#else
                ! TODO: Several tests fail here ifdef HAVE_MPI_IO_DEFAULT
                ! The problem is somehow related to the use of MPI-IO file views!.
                call wfk_read_bks(ddks(idir1), iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnl1, &
                eig1_bks=eig2_k(1+(iband-1)*2*nband_k:))
                  !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:2*iband*nband_k))
-#endif
                !write(777,*)"eig2_k, gvnl1 for band: ",iband,", ikpt: ",ikpt
                !do ii=1,2*nband_k
                !  write(777,*)eig2_k(ii+(iband-1))
@@ -421,23 +395,13 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
        eig2_k(:) = zero
        gvnl1(:,:) = zero
        if (idir == idir1) then
-#ifndef DEV_MG_WFK
-         if (ddkfil(idir1) /= 0) then
-           call WffReadSkipRec(ierr,2,wffddk(idir1))
-         end if
-#endif
          gvnl1(:,:) = cwavef(:,:)
          eig2_k(:) = eig1_k(:)
        else
          if (ddkfil(idir1) /= 0) then
-#ifndef DEV_MG_WFK
-           call WffReadDataRec(eig2_k(1+(iband-1)*2*nband_k:2*iband*nband_k),ierr,2*nband_k,wffddk(idir1))
-           call WffReadDataRec(gvnl1,ierr,2,npw1_k*dtset%nspinor,wffddk(idir1))
-#else
            call wfk_read_bks(ddks(idir1), iband, ik_ddks(idir1), isppol, xmpio_single, cg_bks=gvnl1, &
            eig1_bks=eig2_k(1+(iband-1)*2*nband_k:))
              !eig1_bks=eig2_k(1+(iband-1)*2*nband_k:2*iband*nband_k))
-#endif
            !write(778,*)"eig2_k, gvnl1 for band: ",iband,", ikpt: ",ikpt
            !do ii=1,2*nband_k
            !  write(778,*)eig2_k(ii+(iband-1))

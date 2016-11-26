@@ -452,8 +452,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_entropy',dt%dmft_entropy,0,iout)
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_iter',dt%dmft_iter,0,iout)
-       cond_string(1)='usedmft' ; cond_values(1)=1
-       call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwlo',dt%dmft_nwlo,1,iout)
+       if(dt%dmft_solv<6.or.dt%dmft_solv>7) then
+         cond_string(1)='usedmft' ; cond_values(1)=1
+         call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwlo',dt%dmft_nwlo,1,iout)
+       endif
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwli',dt%dmft_nwli,1,iout)
        cond_string(1)='usedmft' ; cond_values(1)=1
@@ -710,7 +712,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  eph variables
    if (optdriver==RUNL_EPH) then
      cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task,3,(/1,2,3/),iout)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task,4, [1,2,3,4],iout)
      if (dt%eph_task==2 .and. dt%irdwfq==0 .and. dt%getwfq==0) then
        MSG_ERROR('Either getwfq or irdwfq must be non-zero in order to compute the gkk')
      end if
@@ -2062,18 +2064,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  pawusecp
    if (usepaw==1) then
      call chkint_eq(0,0,cond_string,cond_values,ierr,'pawusecp',dt%pawusecp,2,(/0,1/),iout)
-     if (dt%mkmem/=0)then
-       cond_string(1)='mkmem' ; cond_values(1)=dt%mkmem
-       call chkint_eq(1,1,cond_string,cond_values,ierr,'pawusecp',dt%pawusecp,1,(/1/),iout)
-     end if
-     if (dt%mk1mem/=0)then
-       cond_string(1)='mk1mem' ; cond_values(1)=dt%mk1mem
-       call chkint_eq(1,1,cond_string,cond_values,ierr,'pawusecp',dt%pawusecp,1,(/1/),iout)
-     end if
-     if (dt%mkqmem/=0)then
-       cond_string(1)='mkqmem' ; cond_values(1)=dt%mkqmem
-       call chkint_eq(1,1,cond_string,cond_values,ierr,'pawusecp',dt%pawusecp,1,(/1/),iout)
-     end if
+!      if (dt%mkmem/=0)then
+!        cond_string(1)='mkmem' ; cond_values(1)=dt%mkmem
+!        call chkint_eq(1,1,cond_string,cond_values,ierr,'pawusecp',dt%pawusecp,1,(/1/),iout)
+!      end if
+!      if (dt%mk1mem/=0)then
+!        cond_string(1)='mk1mem' ; cond_values(1)=dt%mk1mem
+!        call chkint_eq(1,1,cond_string,cond_values,ierr,'pawusecp',dt%pawusecp,1,(/1/),iout)
+!      end if
+!      if (dt%mkqmem/=0)then
+!        cond_string(1)='mkqmem' ; cond_values(1)=dt%mkqmem
+!        call chkint_eq(1,1,cond_string,cond_values,ierr,'pawusecp',dt%pawusecp,1,(/1/),iout)
+!      end if
    end if
 
 !  pawxcdev
