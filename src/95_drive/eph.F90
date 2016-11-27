@@ -89,6 +89,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_phonons
  use m_nctk
  use m_wfk
+ use m_skw
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -155,6 +156,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
  type(ebands_t) :: ebands, ebands_kq, ebands_bspl
+ type(skw_t) :: skw
  type(edos_t) :: edos
  type(ddb_type) :: ddb
  type(dvdb_t) :: dvdb
@@ -388,8 +390,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
 #if 0
  ! This is to test the interpolation of the electronic bands.
- !skw = skw_new(crystal, 1, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig)
- !call skw_free(skw)
+ skw = skw_new(cryst, 1, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, comm)
+ call skw_free(skw)
+ call xmpi_abort()
 
  kptrlatt_spl = reshape([16,0,0,0,16,0,0,0,16], [3,3])
  kptrlatt_spl = 4 * kptrlatt_spl
@@ -467,7 +470,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      path = strcat(dtfil%filnam_ds(4), "_PHDOS")
      call wrtout(ab_out, sjoin("- Writing phonon dos to file:", path))
      call phdos_print(phdos, path)
-     !call phdos_print_debye(phdos, crystal%ucvol)
+     !call phdos_print_debye(phdos, cryst%ucvol)
 #ifdef HAVE_NETCDF
      path = strcat(dtfil%filnam_ds(4), "_PHDOS.nc")
      ncerr = nctk_open_create(ncid, path, xmpi_comm_self)
