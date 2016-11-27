@@ -390,7 +390,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
 #if 0
  ! This is to test the interpolation of the electronic bands.
- skw = skw_new(cryst, 1, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, comm)
+ skw = skw_new(cryst, 1, 1, ebands%mband, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, comm)
  call skw_free(skw)
  call xmpi_abort()
 
@@ -452,10 +452,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ABI_FREE(ddb_qshifts)
 
  ! This to test the B-spline interpolation of phonons
- if (.False.) then
- !if (.True.) then
-   call test_phbspl(ifc, cryst, 4*[12,12,12], 1, [zero,zero,zero], [3,3,3], comm)
-   !call xmpi_end()
+ !if (.False.) then
+ if (.True.) then
+   call ifc_test_phinterp(ifc, cryst, [12,12,12], 1, [zero,zero,zero], [3,3,3], comm)
+   call xmpi_end()
  end if
 
  if (dtset%prtphdos == 1) then

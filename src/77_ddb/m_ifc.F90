@@ -33,6 +33,7 @@ MODULE m_ifc
  use m_xmpi
  use m_sort
  use m_bspline
+ use m_skw
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
@@ -213,10 +214,10 @@ MODULE m_ifc
 
  end type phbspl_t
 
- public :: phbspl_new        ! Build B-spline object.
+ public :: ifc_build_phbspl  ! Build B-spline object.
  public :: phbspl_evalq      ! Interpolate frequencies at arbitrary q-point.
  public :: phbspl_free       ! Free memory.
- public :: test_phbspl
+ public :: ifc_test_phinterp
 
 CONTAINS  !===========================================================
 !!***
@@ -2002,9 +2003,9 @@ end subroutine ifc_printbxsf
 
 !----------------------------------------------------------------------
 
-!!****f* m_ifc/phbspl_new
+!!****f* m_ifc/ifc_build_phbspl
 !! NAME
-!! phbspl_new
+!! ifc_build_phbspl
 !!
 !! FUNCTION
 !! build the phbspl_t object to interpolate the phonon band structure.
@@ -2028,13 +2029,13 @@ end subroutine ifc_printbxsf
 !!
 !! SOURCE
 
-type(phbspl_t) function phbspl_new(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm) result(new)
+type(phbspl_t) function ifc_build_phbspl(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm) result(new)
 
 
 !this section has been created automatically by the script abilint (td).
 !do not modify the following lines by hand.
 #undef abi_func
-#define abi_func 'phbspl_new'
+#define abi_func 'ifc_build_phbspl'
  use interfaces_56_recipspace
 !end of the abilint section
 
@@ -2203,7 +2204,7 @@ type(phbspl_t) function phbspl_new(ifc, cryst, ngqpt, nshiftq, shiftq, ords, com
  ABI_FREE(ibzdata_qnu)
  ABI_FREE(qibz)
 
-end function phbspl_new
+end function ifc_build_phbspl
 !!***
 
 !----------------------------------------------------------------------
@@ -2349,9 +2350,9 @@ end subroutine phbspl_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_ifc/test_phbspl
+!!****f* m_ifc/ifc_test_phinterp
 !! NAME
-!! test_phbspl
+!! ifc_test_phinterp
 !!
 !! INPUTS
 !!  crystal<type(crystal_t)> = Information on the crystalline structure.
@@ -2372,13 +2373,13 @@ end subroutine phbspl_free
 !!
 !! SOURCE
 
-subroutine test_phbspl(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
+subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
 
 
 !this section has been created automatically by the script abilint (td).
 !do not modify the following lines by hand.
 #undef abi_func
-#define abi_func 'test_phbspl'
+#define abi_func 'ifc_test_phinterp'
  use interfaces_56_recipspace
 !end of the abilint section
 
@@ -2396,69 +2397,225 @@ subroutine test_phbspl(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
 
 !local variables-------------------------------
 !scalars
- integer :: iq,nq
- real(dp) :: mare,mae
+ integer,parameter :: master=0
+ integer :: iq,nq,natom3,my_rank,nprocs,ierr
+ real(dp) :: mare_bspl,mae_bspl,mare_skw,mae_skw
  real(dp) :: cpu,wall,gflops
  real(dp) :: cpu_fourq,wall_fourq,gflops_fourq
  real(dp) :: cpu_bspl,wall_bspl,gflops_bspl
+ real(dp) :: cpu_skw,wall_skw,gflops_skw
  type(phbspl_t) :: phbspl
+ type(skw_t) :: skw
 !arrays
  real(dp) :: phfrq(3*cryst%natom),ofreqs(3*cryst%natom),qpt(3)
  real(dp) :: adiff_mev(3*cryst%natom), rel_err(3*cryst%natom)
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
- real(dp) :: qred(3),shift(3)
+ real(dp) :: qred(3),shift(3),vals4(4)
 
 ! *********************************************************************
-
- phbspl = phbspl_new(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
 
  !call make_path(Kpath%nbounds,bounds,Kpath%gmet,"G",ndiv_small,Kpath%ndivs,Kpath%npts,pts,unit=dev_null)
  !call kpath_init(Kpath,bounds,gprimd,ndiv_small)
 
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ natom3 = 3 * cryst%natom
+
+ ! Build interpolator objects.
+ phbspl = ifc_build_phbspl(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
+ skw = ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm)
+
  cpu_fourq = zero; wall_fourq = zero; gflops_fourq = zero
  cpu_bspl = zero; wall_bspl = zero; gflops_bspl = zero
- mae = zero; mare = zero
+ cpu_skw = zero; wall_skw = zero; gflops_skw = zero
+ mae_bspl = zero; mare_bspl = zero
+ mae_skw = zero; mare_skw = zero
 
- if (xmpi_comm_rank(comm) == 0) then
-   nq = 10000
-   do iq=1,nq
-     !call random_number(qpt)
-     call random_number(qred)
-     !call wrap2_zero_one(qred, qpt, shift)
-     call wrap2_pmhalf(qred, qpt, shift)
+ nq = 1000
+ !call random_seed(put=my_rank*100)
+ do iq=1,nq
+   if (mod(iq, nprocs) /= my_rank) cycle ! mpi parallelism
+   !call random_number(qpt)
+   call random_number(qred)
+   qred = qred + (0.1_dp * my_rank / nprocs)
+   !call wrap2_zero_one(qred, qpt, shift)
+   call wrap2_pmhalf(qred, qpt, shift)
 
-     call cwtime(cpu, wall, gflops, "start")
-     call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart)
-     call cwtime(cpu, wall, gflops, "stop")
-     cpu_fourq = cpu_fourq + cpu; wall_fourq = wall_fourq + wall
+   ! Fourier interpolation
+   call cwtime(cpu, wall, gflops, "start")
+   call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart)
+   call cwtime(cpu, wall, gflops, "stop")
+   cpu_fourq = cpu_fourq + cpu; wall_fourq = wall_fourq + wall
 
-     call cwtime(cpu, wall, gflops, "start")
-     call phbspl_evalq(phbspl, qpt, ofreqs)
-     call cwtime(cpu, wall, gflops, "stop")
-     cpu_bspl = cpu_bspl + cpu; wall_bspl = wall_bspl + wall
+   ! B-spline interpolation
+   call cwtime(cpu, wall, gflops, "start")
+   call phbspl_evalq(phbspl, qpt, ofreqs)
+   call cwtime(cpu, wall, gflops, "stop")
+   cpu_bspl = cpu_bspl + cpu; wall_bspl = wall_bspl + wall
 
-     adiff_meV = abs(phfrq - ofreqs)
-     rel_err = zero
-     where (abs(phfrq) > tol16)
-       rel_err = adiff_meV / abs(phfrq)
-     end where
-     rel_err = 100 * rel_err
-     adiff_meV = adiff_meV * Ha_eV * 1000
-     mae = mae + sum(adiff_meV) / nq
-     mare = mare + sum(rel_err) / nq
-     !write(std_out,*)maxval(adiff_meV), maxval(rel_err), trim(ktoa(qpt))
-     !write(456, *)phfrq
-     !write(457, *)ofreqs
-   end do
+   adiff_meV = abs(phfrq - ofreqs); rel_err = zero
+   where (abs(phfrq) > tol16)
+     rel_err = adiff_meV / abs(phfrq)
+   end where
+   rel_err = 100 * rel_err; adiff_meV = adiff_meV * Ha_eV * 1000
+   mae_bspl = mae_bspl + sum(adiff_meV) / natom3
+   mare_bspl = mare_bspl + sum(rel_err) / natom3
+   !if (my_rank == master)
+   !write(std_out,*)maxval(adiff_meV), maxval(rel_err), trim(ktoa(qpt))
+   !write(456, *)phfrq; write(457, *)ofreqs
+   !end if
 
-   write(std_out,*)"MAE: ",mae," [meV], MARE: ",mare, "% with nqpoints:",nq
-   write(std_out,'(2(a,f8.2))')"fourq: cpu: ",cpu_fourq,", wall: ",wall_fourq
-   write(std_out,'(2(a,f8.2))')"bspl: cpu: ",cpu_bspl,", wall: ",wall_bspl
+   ! SKW interpolation
+   call cwtime(cpu, wall, gflops, "start")
+   call skw_evalk(skw, cryst, qpt, 1, ofreqs)
+   call cwtime(cpu, wall, gflops, "stop")
+   cpu_skw = cpu_skw + cpu; wall_skw = wall_skw + wall
+
+   adiff_meV = abs(phfrq - ofreqs); rel_err = zero
+   where (abs(phfrq) > tol16)
+     rel_err = adiff_meV / abs(phfrq)
+   end where
+   rel_err = 100 * rel_err; adiff_meV = adiff_meV * Ha_eV * 1000
+   mae_skw = mae_skw + sum(adiff_meV) / natom3
+   mare_skw = mare_skw + sum(rel_err) / natom3
+   !if (my_rank == master) then
+   !write(std_out,*)maxval(adiff_meV), maxval(rel_err), trim(ktoa(qpt))
+   !write(456, *)phfrq; write(457, *)ofreqs
+   !endif
+ end do
+ vals4 = [mae_bspl, mare_bspl, mae_skw, mare_skw]
+ call xmpi_sum(vals4, comm, ierr)
+ mae_bspl = vals4(1); mare_bspl = vals4(2); mae_skw = vals4(3); mare_skw = vals4(4)
+
+ mae_bspl = mae_bspl / nq; mare_bspl = mare_bspl / nq
+ mae_skw = mae_skw / nq; mare_skw = mare_skw / nq
+
+ if (my_rank == master) then
+   write(std_out,"(2(a,f6.2),a,i0)")"B-spline MAE: ",mae_bspl," [meV], MARE: ",mare_bspl, "% with nqpt: ",nq
+   write(std_out,"(2(a,f6.2),a,i0)")"SKW      MAE: ",mae_skw, " [meV], MARE: ",mare_skw, "% with nqpt: ",nq
+   write(std_out,"(2(a,f6.2))")"fourq: cpu: ",cpu_fourq,", wall: ",wall_fourq
+   write(std_out,"(2(a,f6.2))")"bspl:  cpu: ",cpu_bspl,", wall: ",wall_bspl
+   write(std_out,"(2(a,f6.2))")"skw:   cpu: ",cpu_skw,", wall: ",wall_skw
  end if
 
  call phbspl_free(phbspl)
+ call skw_free(skw)
 
-end subroutine test_phbspl
+end subroutine ifc_test_phinterp
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ifc/ifc_build_skw
+!! NAME
+!! ifc_build_skw
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!  ifc<type(ifc_type)>=Object containing the dynamical matrix and the IFCs.
+!!  crystal<type(crystal_t)> = Information on the crystalline structure.
+!!  ngqpt(3)=Divisions of the q-mesh used to produce the B-spline.
+!!  nshiftq=Number of shifts in Q-mesh
+!!  shiftq(3,nshiftq)=Shifts of the q-mesh.
+!!  ords(3)=order of the spline for the three directions. ord(1) must be in [0, nqx] where
+!!    nqx is the number of points along the x-axis.
+!!  comm=MPI communicator
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) result(new)
+
+!this section has been created automatically by the script abilint (td).
+!do not modify the following lines by hand.
+#undef abi_func
+#define abi_func 'ifc_build_skw'
+ use interfaces_56_recipspace
+!end of the abilint section
+
+ implicit none
+
+!arguments ------------------------------------
+!scalars
+ integer,intent(in) :: comm,nshiftq
+ type(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: cryst
+!arrays
+ integer,intent(in) :: ngqpt(3)
+ real(dp),intent(in) :: shiftq(3,nshiftq)
+
+!local variables-------------------------------
+!scalars
+ integer,parameter :: sppoldbl1=1,timrev1=1
+ integer :: nqibz,nqbz,iq_ibz,iq_bz,natom3,ierr
+ integer :: my_rank,nprocs,cnt
+ real(dp) :: dksqmax
+ character(len=500) :: msg
+!arrays
+ integer :: qptrlatt(3,3)
+ integer,allocatable :: bz2ibz(:,:)
+ real(dp) :: phfrq(3*cryst%natom),displ_cart(2,3,cryst%natom,3*cryst%natom)
+ real(dp),allocatable :: ibz_freqs(:,:),wtq(:),qbz(:,:),qibz(:,:)
+
+! *********************************************************************
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ natom3 = 3 * cryst%natom
+
+ ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
+ qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, nshiftq, shiftq, nqibz, qibz, wtq, nqbz, qbz, timrev=timrev1)
+
+ ! Get phonon frequencies in IBZ
+ ABI_CALLOC(ibz_freqs, (natom3, nqibz))
+ cnt = 0
+ do iq_ibz=1,nqibz
+   cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! Mpi parallelism.
+   call ifc_fourq(ifc, cryst, qibz(:,iq_ibz), ibz_freqs(:,iq_ibz), displ_cart)
+ end do
+ call xmpi_sum(ibz_freqs, comm, ierr)
+
+ new = skw_new(cryst, 1, 1, natom3, natom3, nqibz, 1, qibz, ibz_freqs, comm)
+
+ ABI_FREE(qibz)
+ ABI_FREE(wtq)
+ ABI_FREE(qbz)
+
+ ! Test whether SKW preserves symmetries.
+ ! Build mapping qbz --> IBZ (q --> -q symmetry is always used)
+ ABI_MALLOC(bz2ibz, (nqbz*sppoldbl1,6))
+
+ call listkk(dksqmax,cryst%gmet,bz2ibz,qibz,qbz,nqibz,nqbz,cryst%nsym,&
+   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
+
+ if (dksqmax > tol12) then
+   write(msg, '(3a,es16.6,4a)' )&
+   'At least one of the q-points could not be generated from a symmetrical one.',ch10,&
+   'dksqmax=',dksqmax,ch10,&
+   'Action: check q-point input variables',ch10,&
+   '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
+   MSG_ERROR(msg)
+ end if
+
+ if (.False. .and. my_rank == master) then
+   do iq_bz=1,nqbz
+     iq_ibz = bz2ibz(iq_bz,1)
+     call skw_evalk(new, cryst, qbz(:,iq_bz), 1, phfrq)
+     write(std_out,*)"BZ-IBZ:", maxval(abs(phfrq - ibz_freqs(:, iq_ibz)))
+   end do
+ end if
+ ABI_FREE(bz2ibz)
+
+ ABI_FREE(ibz_freqs)
+
+end function ifc_build_skw
 !!***
 
 !----------------------------------------------------------------------
