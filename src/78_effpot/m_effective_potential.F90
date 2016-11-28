@@ -39,7 +39,7 @@ module m_effective_potential
  use m_anharmonics_terms
  use m_harmonics_terms
  use m_special_funcs,  only : factorial
- use m_xmpi,           only : xmpi_sum_master,xmpi_allgather,xmpi_gatherv
+ use m_xmpi
  use m_copy,           only : alloc_copy
  use m_crystal,        only : crystal_t, crystal_init, crystal_free, crystal_t,crystal_print
  use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
@@ -321,7 +321,7 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
  end if
 
 
- if(has_3rd)then 
+ if(has_3rd)then
    if (present(phonon_strain)) then
      eff_pot%has_3rd = .TRUE.
 !    Allocation of anharmonics part (3rd order)
@@ -1328,7 +1328,7 @@ subroutine effective_potential_effpot2dynmat(dynmat,delta,eff_pot,natom,n_cell,o
 !!   wrtout
 !!
 !! SOURCE
- 
+
 subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
 
  use m_polynomial_coeff
@@ -2665,7 +2665,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
   end if
- 
+
   energy = energy + energy_part
   fcart  = fcart  + fcart_part
 
@@ -2674,7 +2674,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !------------------------------------
 
   energy_part = zero; fcart_part=zero
-  
+
   if (eff_pot%has_3rd) then
     write(message, '(2a)' ) ch10,' Third order is not yet implemented'
     call wrtout(std_out,message,'COLL')
@@ -2924,14 +2924,14 @@ end subroutine ifc_contribution
 !! Compute the energy related to the coefficients from
 !! fitted polynome
 !!
-!! INPUTS 
-!!  eff_pot = effective potential of the structure 
+!! INPUTS
+!!  eff_pot = effective potential of the structure
 !!            also contain supercell information
 !!  ncoeffs   = number of coefficients
 !!  ncell   = total number of cell to treat
 !!  cells(ncell) = number of the cells into the supercell (1,2,3,4,5)
 !!  index_cells(3,ncell) = indexes of the cells into  supercell (-1 -1 -1 ,...,1 1 1)
-!! 
+!!
 !! OUTPUT
 !!   energy = contribution of the ifc to the energy
 !!   fcart(3,natom) = contribution of the ifc to the forces
@@ -2953,7 +2953,7 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,cell
   integer, intent(in) :: natom,ncell,ncoeff
 ! array
   integer,intent(in) ::   cells(ncell),index_cells(ncell,3)
-  type(effective_potential_type),intent(in) :: eff_pot 
+  type(effective_potential_type),intent(in) :: eff_pot
   real(dp),intent(out):: fcart(3,natom)
   real(dp),intent(in) :: disp(3,natom)
 
@@ -2973,7 +2973,7 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,cell
   fcart(:,:) = zero
 
   do icell = 1,ncell
-    ii = (cells(icell)-1)*eff_pot%crystal%natom 
+    ii = (cells(icell)-1)*eff_pot%crystal%natom
     i1=index_cells(icell,1); i2=index_cells(icell,2); i3=index_cells(icell,3)
 !   Loop over coefficient
     do icoeff=1,ncoeff
@@ -2984,7 +2984,7 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,cell
 !       Set the weight of the term
         weight =eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%weight
         tmp1 = one
-!       Loop over displacement 
+!       Loop over displacement
         do idisp1=1,eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%ndisp
           tmp2 = one
 !         index of the first atom (position in the supercell and direction)
@@ -3000,7 +3000,7 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,cell
           cell_atom1(3) =  (i3-1) + cell_atom1(3)
           call index_periodic(cell_atom1(3),cell_number(3))
 
-!         index of the second atom in the (position in the supercell) 
+!         index of the second atom in the (position in the supercell)
           ib1 = cell_atom1(1)*cell_number(2)*cell_number(3)*eff_pot%crystal%natom+&
 &               cell_atom1(2)*cell_number(3)*eff_pot%crystal%natom+&
 &               cell_atom1(3)*eff_pot%crystal%natom+&
@@ -3033,7 +3033,7 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,cell
               cell_atom2(3) =  (i3-1) + cell_atom2(3)
               call index_periodic(cell_atom2(3),cell_number(3))
 
-!            index of the second atom in the (position in the supercell) 
+!            index of the second atom in the (position in the supercell)
               ib2 = cell_atom2(1)*cell_number(2)*cell_number(3)*eff_pot%crystal%natom+&
 &                   cell_atom2(2)*cell_number(3)*eff_pot%crystal%natom+&
 &                   cell_atom2(3)*eff_pot%crystal%natom+&
@@ -3043,17 +3043,17 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,cell
               disp2 = disp(idir2,ib2)
 !             Set the power of the displacement:
               power = eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%power(idisp2)
-            
+
               tmp2 = tmp2 * (disp1-disp2)**power
             end if
           end do
-          
+
 !         Accumule  forces
           fcart(idir1,ia1) =  fcart(idir1,ia1)  + coeff * weight * tmp2
 
         end do
-        
-!       accumule energy     
+
+!       accumule energy
         energy = energy +  coeff * weight * tmp1
 
       end do
@@ -3572,8 +3572,9 @@ subroutine effective_potential_printPDOS(eff_pot,filename,n_cell,nph1l,option,qp
      asrq0 = ddb_get_asrq0(ddb, inp%asr, inp%rfmeth, crystal%xcart)
    end if
 
+  !MG: Note that I'm passing xmpi_comm_self here.
   call mkphbs(eff_pot%harmonics_terms%ifcs,Crystal,inp,ddb,asrq0,filename,&
-&  tcpui,twalli,eff_pot%harmonics_terms%zeff)
+&  tcpui,twalli,eff_pot%harmonics_terms%zeff, xmpi_comm_self)
 
   call asrq0_free(asrq0)
 
@@ -3584,4 +3585,4 @@ subroutine effective_potential_printPDOS(eff_pot,filename,n_cell,nph1l,option,qp
 !TEST_AM_END_EXPERIMENTAL SECTION
 
 end module m_effective_potential
-!!*** 
+!!***

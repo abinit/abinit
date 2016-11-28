@@ -33,7 +33,6 @@ module m_phonons
  use m_nctk
  use iso_c_binding
  use m_crystal_io
- use m_bz_mesh
  use m_atprj
  use m_sortph
  use m_ddb
@@ -41,11 +40,12 @@ module m_phonons
  use netcdf
 #endif
 
- use m_fstrings,        only : itoa, ftoa, sjoin
+ use m_fstrings,        only : itoa, ftoa, sjoin, ktoa, strcat
  use m_numeric_tools,   only : simpson_int, wrap2_pmhalf
  use m_io_tools,        only : open_file
  use m_dynmat,          only : gtdyn9, dfpt_phfrq
  use m_crystal,         only : crystal_t
+ use m_bz_mesh,         only : isamek, make_path
  use m_ifc,             only : ifc_type, ifc_fourq
  use m_anaddb_dataset,  only : anaddb_dataset_type
 
@@ -53,7 +53,8 @@ module m_phonons
 
  private
 
- public :: mkphbs     ! Compute phonon band structure
+ public :: mkphbs                        ! Compute phonon band structure
+ public :: phonons_write_xmgrace         ! Write phonons bands in Xmgrace format.
 ! TODO Write object to store the bands
 !!***
 
@@ -1015,6 +1016,7 @@ end subroutine phdos_ncwrite
 !! inp= (derived datatype) contains all the input variables
 !! ddb<type(ddb_type)>=Object storing the DDB results.
 !! asrq0<asrq0_t>=Object for the treatment of the ASR based on the q=0 block found in the DDB file.
+!! prefix=Prefix for output files.
 !! dielt(3,3)=dielectric tensor
 !! tcpui=initial cpu time
 !! twalli=initial wall clock time
@@ -1030,7 +1032,7 @@ end subroutine phdos_ncwrite
 !!
 !! SOURCE
 
-subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,outfile_radix,tcpui,twalli,zeff,comm)
+subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1047,9 +1049,9 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,outfile_radix,tcpui,twalli,zeff,comm
 
 !Arguments -------------------------------
 !scalars
- integer,optional,intent(in) :: comm
+ integer,intent(in) :: comm
  real(dp),intent(in) :: tcpui,twalli
- character(len=*),intent(in) :: outfile_radix
+ character(len=*),intent(in) :: prefix
  type(ifc_type),intent(in) :: Ifc
  type(crystal_t),intent(in) :: Crystal
  type(anaddb_dataset_type),target,intent(in) :: inp
@@ -1061,7 +1063,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,outfile_radix,tcpui,twalli,zeff,comm
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iphl1,iblok,rftyp, ii,nfineqpath,nsym,mpert,natom,ncid
+ integer :: iphl1,iblok,rftyp, ii,nfineqpath,nsym,mpert,natom,ncid,nprocs,my_rank
  real(dp) :: tcpu,twall,res
  character(len=fnlen) :: tmpfilename
  character(500) :: msg
@@ -1079,9 +1081,8 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,outfile_radix,tcpui,twalli,zeff,comm
 ! *********************************************************************
 
  ! Only master works for the time being
- if(present(comm)) then
-   if (xmpi_comm_rank(comm) /= master) return
- end if
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ if (my_rank /= master) return
 
  nsym = Crystal%nsym; natom = Crystal%natom
  mpert = ddb%mpert
@@ -1095,7 +1096,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,outfile_radix,tcpui,twalli,zeff,comm
      return ! if there is nothing to do, return
    else
      ! allow override of nph1l with nqpath if the former is not set
-     ! allocatae and compute path here and make fineqpath points to it
+     ! allocate and compute path here and make fineqpath points to it
      ABI_MALLOC(ndiv,(inp%nqpath-1))
      call make_path(inp%nqpath,inp%qpath,Crystal%gmet,'G',inp%ndivsm,ndiv,nfineqpath,alloc_path,std_out)
      ABI_FREE(ndiv)
@@ -1113,7 +1114,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,outfile_radix,tcpui,twalli,zeff,comm
  call wrtout(ab_out,msg,'COLL')
 
  if (inp%natprj_bs > 0) then
-   call atprj_init(atprj, natom, inp%natprj_bs, inp%iatprj_bs, outfile_radix)
+   call atprj_init(atprj, natom, inp%natprj_bs, inp%iatprj_bs, prefix)
  end if
 
  ABI_MALLOC(phfrq,(3*natom))
@@ -1175,7 +1176,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,outfile_radix,tcpui,twalli,zeff,comm
    if (abs(inp%freeze_displ) > tol10) then
      real_qphon = zero
      if (abs(qphnrm(1)) > tol8) real_qphon = qphon / qphnrm(1)
-     call freeze_displ_allmodes(displ, inp%freeze_displ, natom, outfile_radix, phfrq, &
+     call freeze_displ_allmodes(displ, inp%freeze_displ, natom, prefix, phfrq, &
 &     real_qphon, crystal%rprimd, Crystal%typat, crystal%xcart, crystal%znucl)
    end if
 
@@ -1184,7 +1185,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,outfile_radix,tcpui,twalli,zeff,comm
 
    ! In case eivec == 4, write output files for band2eps (visualization of phonon band structures)
    if (inp%eivec == 4) then
-     tmpfilename = trim(outfile_radix)//"_B2EPS"
+     tmpfilename = trim(prefix)//"_B2EPS"
      call sortph(eigvec,displ,tmpfilename,natom,phfrq)
    end if
 
@@ -1218,20 +1219,25 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,outfile_radix,tcpui,twalli,zeff,comm
 
  if (inp%natprj_bs > 0) call atprj_destroy(atprj)
 
+ if (my_rank == master) then
 #ifdef HAVE_NETCDF
- tmpfilename = trim(outfile_radix)//"_PHBST.nc"
- NCF_CHECK_MSG(nctk_open_create(ncid, tmpfilename, xmpi_comm_self), "Creating PHBST")
- NCF_CHECK(crystal_ncwrite(Crystal, ncid))
- call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,(/(one, iphl1=1,nfineqpath)/),save_phfrq,save_phdispl_cart)
- NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")],defmode=.True.))
- NCF_CHECK(nctk_set_datamode(ncid))
- NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'atomic_mass_units'), ddb%amu))
- NCF_CHECK(nf90_close(ncid))
+   tmpfilename = trim(prefix)//"_PHBST.nc"
+   NCF_CHECK_MSG(nctk_open_create(ncid, tmpfilename, xmpi_comm_self), "Creating PHBST")
+   NCF_CHECK(crystal_ncwrite(Crystal, ncid))
+   call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,[(one, iphl1=1,nfineqpath)],save_phfrq,save_phdispl_cart)
+   NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")],defmode=.True.))
+   NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'atomic_mass_units'), ddb%amu))
+   NCF_CHECK(nf90_close(ncid))
 #endif
 
- call phonons_write(natom,nfineqpath,save_qpoints,(/(one, iphl1=1,nfineqpath)/),save_phfrq,save_phdispl_cart)
+   call phonons_write(natom,nfineqpath,save_qpoints,[(one, iphl1=1,nfineqpath)],save_phfrq,save_phdispl_cart)
 
-! call phonons_writeEPS(natom,nfineqpath,Crystal%ntypat,save_qpoints,Crystal%typat,(/(one, iphl1=1,nfineqpath)/),save_phfrq,save_phdispl_cart)
+   call phonons_write_xmgrace(strcat(prefix, "_PHBANDS.xmgr"), natom, nfineqpath, save_qpoints, save_phfrq)
+
+   !call phonons_writeEPS(natom,nfineqpath,Crystal%ntypat,save_qpoints,Crystal%typat, &
+   !  [(one, iphl1=1,nfineqpath)],save_phfrq,save_phdispl_cart)
+ end if
 
  ABI_FREE(save_qpoints)
  ABI_FREE(save_phfrq)
@@ -1392,8 +1398,8 @@ subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
 !scalars
  integer,intent(in) :: ncid,natom,nqpts
 !arrays
- real(dp),target,intent(in) :: qpoints(3,nqpts),weights(nqpts)
- real(dp),target,intent(in) :: phfreq(3*natom,nqpts),phdispl_cart(2,3*natom,3*natom,nqpts)
+ real(dp),intent(in) :: qpoints(3,nqpts),weights(nqpts)
+ real(dp),intent(in) :: phfreq(3*natom,nqpts),phdispl_cart(2,3*natom,3*natom,nqpts)
 
 !Local variables-------------------------------
 !scalars
@@ -1494,8 +1500,7 @@ end subroutine phonons_ncwrite
 
 !Local variables-------------------------------
 !scalars
- integer :: nphmodes, iq, iunit
-! integer :: imod, icomp
+ integer :: nphmodes, iq, iunit, imod, icomp
  real(dp) :: dummy
  character(len=300) :: formt
  character(len=500) :: msg
@@ -1520,41 +1525,62 @@ end subroutine phonons_ncwrite
 
  write (formt,'(a,i0,a)') "(I5, ", nphmodes, "E20.10)"
 
- do iq = 1, nqpts
+ do iq= 1, nqpts
    write (iunit, formt)  iq, phfreq(:,iq)
  end do
 
  close(iunit)
 
-! if (open_file("PHDISPL", msg, unit=iunit, form="formatted", status="unknown", action="write") /= 0) then
-!   MSG_ERROR(msg)
-! end if
-!
-! write (iunit, '(a)')     '# ANADDB generated phonon displacements, along points in PHFRQ file. All in Ha atomic units'
-! write (iunit, '(a)')     '# '
-! write (iunit, '(a)')     '# displacements in cartesian coordinates, Re and Im parts '
-! write (iunit, '(a,I5)')  '# number_of_qpoints ', nqpts
-! write (iunit, '(a,I5)')  '# number_of_phonon_modes ', nphmodes
-! write (iunit, '(a)')     '# '
-!
-! !write (formt,'(a,I3,a)') "( ", nphmodes, "(2E20.10,2x))"
-! formt = "(2E20.10,2x)"
-!
-! do iq = 1, nqpts
-!   write (iunit, '(a, I5)') '# iq ', iq
-!   do imod = 1, nphmodes
-!     write (iunit, '(a, I5)') '# imode ', imod
-!     do icomp = 1, nphmodes
-!       write (iunit, formt, ADVANCE='NO') phdispl_cart(:,icomp,imod,iq)
-!     end do
-!     write (iunit, '(a)') ' '
-!   end do
-! end do
-!
-! close(iunit)
+ if (.False.) then
+   if (open_file("PHDISPL", msg, unit=iunit, form="formatted", status="unknown", action="write") /= 0) then
+     MSG_ERROR(msg)
+   end if
+
+   write (iunit, '(a)')     '# ANADDB generated phonon displacements, along points in PHFRQ file. All in Ha atomic units'
+   write (iunit, '(a)')     '# '
+   write (iunit, '(a)')     '# displacements in cartesian coordinates, Re and Im parts '
+   write (iunit, '(a,i0)')  '# number_of_qpoints ', nqpts
+   write (iunit, '(a,i0)')  '# number_of_phonon_modes ', nphmodes
+   write (iunit, '(a)')     '# '
+
+   !write (formt,'(a,I3,a)') "( ", nphmodes, "(2E20.10,2x))"
+   formt = "(2E20.10,2x)"
+
+   do iq = 1, nqpts
+     write (iunit, '(a, i0)') '# iq ', iq
+     do imod = 1, nphmodes
+       write (iunit, '(a, i0)') '# imode ', imod
+       do icomp = 1, nphmodes
+         write (iunit, formt, ADVANCE='NO') phdispl_cart(:,icomp,imod,iq)
+       end do
+       write (iunit, '(a)') ' '
+     end do
+   end do
+
+   close(iunit)
+ end if
 
 end subroutine phonons_write
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_phonons/phonons_writeEPS
+!! NAME
+!! phonons_writeEPS
+!!
+!! FUNCTION
+!!  Write phonons bands in EPS format. This routine should be called by a single processor.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine phonons_writeEPS(natom,nqpts,ntypat,qpoints,typat,weights,phfreq,phdispl_cart)
 
@@ -1951,6 +1977,141 @@ subroutine phonons_writeEPS(natom,nqpts,ntypat,qpoints,typat,weights,phfreq,phdi
  close(unt)
 
 end subroutine phonons_writeEPS
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_phonons/phonons_write_xmgrace
+!! NAME
+!! phonons_write_xmgrace
+!!
+!! FUNCTION
+!!  Write phonons bands in Xmgrace format. This routine should be called by a single processor.
+!!
+!! INPUTS
+!!  path=Filename
+!!  natom=Number of atoms
+!!  nqpts=Number of q-points
+!!  qpts(3,nqpts)=Q-points
+!!  phfreqs(3*natom,nqpts)=Phonon frequencies.
+!!  [qptbounds(:,:)]=Optional argument giving the extrema of the q-path.
+!!
+!! OUTPUT
+!!  Only writing
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine phonons_write_xmgrace(path, natom, nqpts, qpts, phfreqs, qptbounds)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phonons_write_xmgrace'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: natom,nqpts
+ real(dp),intent(in) :: qpts(3,nqpts),phfreqs(3*natom,nqpts)
+ character(len=*),intent(in) :: path
+!arrays
+ real(dp),optional,intent(in) :: qptbounds(:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: unt,iq,nu,ii,start,nqbounds
+ character(len=500) :: msg
+!arrays
+ integer :: g0(3)
+ integer,allocatable :: bounds2qpt(:)
+
+! *********************************************************************
+
+ nqbounds = 0
+ if (present(qptbounds)) then
+   ! Find correspondence between qptbounds and k-points in ebands.
+   nqbounds = size(qptbounds, dim=2)
+   ABI_MALLOC(bounds2qpt, (nqbounds))
+   bounds2qpt = 1
+   do ii=1,nqbounds
+      start = 1
+      do iq=start,nqpts
+        if (isamek(qpts(:, iq), qptbounds(:, ii), g0)) then
+          bounds2qpt(ii) = iq; start = iq + 1; exit
+        end if
+      end do
+   end do
+ end if
+
+ if (open_file(path, msg, newunit=unt, form="formatted", action="write") /= 0) then
+   MSG_ERROR(msg)
+ end if
+
+ write(unt,'(a)') "# Grace project file"
+ write(unt,'(a)') "# Generated by Abinit"
+ write(unt,'(2(a,i0))') "# natom: ",natom,", nqpt: ",nqpts
+ write(unt,'(a)') "# Frequencies are in meV"
+ write(unt,'(a)')"# List of q-points and their index (C notation i.e. count from 0)"
+ do iq=1,nqpts
+   write(unt, "(a)")sjoin("#", itoa(iq-1), ktoa(qpts(:,iq)))
+ end do
+
+ write(unt,'(a)') "@page size 792, 612"
+ write(unt,'(a)') "@page scroll 5%"
+ write(unt,'(a)') "@page inout 5%"
+ write(unt,'(a)') "@link page off"
+ write(unt,'(a)') "@with g0"
+ write(unt,'(a)') "@world xmin 0.00"
+ write(unt,'(a,i0)') '@world xmax ',nqpts
+ write(unt,'(a,e16.8)') '@world ymin ',minval(phfreqs * Ha_meV)
+ write(unt,'(a,e16.8)') '@world ymax ',maxval(phfreqs * Ha_meV)
+ write(unt,'(a)') '@default linewidth 1.5'
+ write(unt,'(a)') '@xaxis  tick on'
+ write(unt,'(a)') '@xaxis  tick major 1'
+ write(unt,'(a)') '@xaxis  tick major color 1'
+ write(unt,'(a)') '@xaxis  tick major linestyle 3'
+ write(unt,'(a)') '@xaxis  tick major grid on'
+ write(unt,'(a)') '@xaxis  tick spec type both'
+ write(unt,'(a)') '@xaxis  tick major 0, 0'
+ ! TODO: Test whether this is ok.
+ if (nqbounds /= 0) then
+   write(unt,'(a,i0)') '@xaxis  tick spec ',nqbounds
+   do iq=1,nqbounds
+      write(unt,'(a,i0,a,a)') '@xaxis  ticklabel ',iq-1,',', "foo"
+      write(unt,'(a,i0,a,i0)') '@xaxis  tick major ',iq-1,' , ',bounds2qpt(iq)
+   end do
+ end if
+ write(unt,'(a)') '@xaxis  ticklabel char size 1.500000'
+ write(unt,'(a)') '@yaxis  tick major 10'
+ write(unt,'(a)') '@yaxis  label "Band Energy [eV]"'
+ write(unt,'(a)') '@yaxis  label char size 1.500000'
+ write(unt,'(a)') '@yaxis  ticklabel char size 1.500000'
+ do nu=1,3*natom
+   write(unt,'(a,i0,a)') '@    s',nu-1,' line color 1'
+ end do
+ do nu=1,3*natom
+   write(unt,'(a,i0)') '@target G0.S',nu
+   write(unt,'(a)') '@type xy'
+   do iq=1,nqpts
+      write(unt,'(i0,1x,e16.8)') iq-1, phfreqs(nu, iq) * Ha_meV
+   end do
+   write(unt,'(a)') '&'
+ end do
+
+ close(unt)
+
+ if (allocated(bounds2qpt)) then
+   ABI_FREE(bounds2qpt)
+ end if
+
+end subroutine phonons_write_xmgrace
 !!***
 
 !----------------------------------------------------------------------

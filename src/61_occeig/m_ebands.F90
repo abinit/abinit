@@ -4800,6 +4800,8 @@ end subroutine ebands_prtbltztrp_tau_out
 !!  Write bands in Xmgrace format. This routine should be called by a single processor.
 !!
 !! INPUTS
+!!  path=Filename
+!!  [kptbounds(:,:)]=Optional argument giving the extrema of the k-path.
 !!
 !! OUTPUT
 !!
