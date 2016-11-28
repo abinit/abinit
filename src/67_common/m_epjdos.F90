@@ -127,11 +127,11 @@ module m_epjdos
 
  end type epjdos_t
 
- public :: epjdos_new
- public :: epjdos_free
+ public :: epjdos_new         ! Create new object
+ public :: epjdos_free        ! Free dynamic memory
 
- public :: prtfatbands
- public :: fatbands_ncwrite
+ public :: prtfatbands        ! Print PJDOS contributions in xmgrace format.
+ public :: fatbands_ncwrite   ! Write PJDOS contributions to netcdf file.
 
 !----------------------------------------------------------------------
 
@@ -378,7 +378,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  integer,parameter :: bcorr0=0,master=0
  integer :: iat,iband,iene,ifract,ikpt,isppol,natsph,natsph_extra,nkpt,nsppol,i1,i2
  integer :: nene,prtdos,unitdos,ierr,prtdosm,paw_dos_flag,mbesslang,ndosfraction
- integer :: my_rank,nprocs
+ integer :: my_rank,nprocs,cnt,ifrac,ii
  real(dp),parameter :: dos_max=9999.9999_dp
  real(dp) :: buffer,deltaene,enemax,enemin,integral_DOS,max_occ
  real(dp) :: cpu,wall,gflops
@@ -392,7 +392,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  real(dp),allocatable :: dtweightde(:,:),tweight(:,:)
  real(dp),allocatable :: tmp_eigen(:),total_dos(:,:,:),eig_dos(:,:)
  real(dp),allocatable :: dos_m(:,:,:),dos_paw1(:,:,:),dos_pawt1(:,:,:)
- real(dp),allocatable :: work_kf(:,:),work_m(:,:)
+ real(dp),allocatable :: work_kf(:,:),work_m(:,:),wdt(:,:)
 
 ! *********************************************************************
 
@@ -444,7 +444,15 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
      end if
 
    else if (dtset%prtdos == 3) then
-     ABI_MALLOC(unt_atsph,(natsph+natsph_extra))
+     ! unt_atsph(0) is used for the total DOS.
+     ABI_MALLOC(unt_atsph,(0:natsph+natsph_extra))
+
+     ! Open file for total DOS as well.
+     if (open_file(strcat(fildata, '_TOTAL'), msg, newunit=unt_atsph(0), &
+         status='unknown', form='formatted', action="write") /= 0) then
+       MSG_ERROR(msg)
+     end if
+
      do iat=1,natsph
        call int2char4(dtset%iatsph(iat),tag)
        ABI_CHECK((tag(1:1)/='#'),'Bug: string length too short!')
@@ -462,53 +470,66 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
          MSG_ERROR(msg)
        end if
      end do
-
-     ! Open file for total DOS as well.
-     if (open_file(strcat(fildata, '_TOTDOS'), msg, newunit=unitdos, &
-         status='unknown', form='formatted', action="write") /= 0) then
-       MSG_ERROR(msg)
-     end if
    end if
  end if
 
-!Write the header of the DOS file, and determine the energy range and spacing
+ ! Write the header of the DOS file, and determine the energy range and spacing
  prtdos=dtset%prtdos
  buffer=0.01_dp ! Size of the buffer around the min and max ranges
 
-if (iam_master) then
- if (any(dtset%prtdos == [2, 5])) then
-   call dos_hdr_write(buffer,deltaene,dtset%dosdeltae,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
-&   dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
-&   dtset%tphysel,dtset%tsmear,unitdos)
- else if (dtset%prtdos == 3) then
-   do iat=1,natsph+natsph_extra
-     call dos_hdr_write(buffer,deltaene,dtset%dosdeltae,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
-&     dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
-&     dtset%tphysel,dtset%tsmear,unt_atsph(iat))
-   end do
+ ! A Similar section is present is getnel. Should move all DOS stuff to m_ebands
+ ! Choose the lower and upper energies
+ enemax = maxval(ebands%eig) + buffer
+ enemin = minval(ebands%eig) - buffer
+
+ ! Extend the range to a nicer value
+ enemax=0.1_dp*ceiling(enemax*10._dp)
+ enemin=0.1_dp*floor(enemin*10._dp)
+
+ ! Choose the energy increment
+ if(abs(dtset%dosdeltae)<tol10)then
+   deltaene=0.001_dp
+   if(dtset%prtdos>=2)deltaene=0.0005_dp ! Higher resolution possible (and wanted) for tetrahedron
+ else
+   deltaene=dtset%dosdeltae
  end if
-end if
+ nene=nint((enemax-enemin)/deltaene)+1
 
  call xmpi_bcast(nene, master, comm, ierr)
- if (iam_master) list_dp = [deltaene, enemin, enemax]
+ if (iam_master) list_dp(1:3) = [deltaene, enemin, enemax]
  call xmpi_bcast(list_dp, master, comm, ierr)
  deltaene = list_dp(1); enemin = list_dp(2); enemax = list_dp(3)
+
+ if (iam_master) then
+   if (any(dtset%prtdos == [2, 5])) then
+     call dos_hdr_write(buffer,deltaene,dtset%dosdeltae,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
+     dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
+     dtset%tphysel,dtset%tsmear,unitdos)
+   else if (dtset%prtdos == 3) then
+     do iat=0,natsph+natsph_extra
+       call dos_hdr_write(buffer,deltaene,dtset%dosdeltae,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
+       dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
+       dtset%tphysel,dtset%tsmear,unt_atsph(iat))
+     end do
+   end if
+ end if
 
  ! Tetra weights
  ABI_MALLOC(tweight,(nene, nkpt))
  ABI_MALLOC(dtweightde,(nene, nkpt))
+ ABI_MALLOC(wdt, (nene, 2))
 
  ! Allocate arrays to store DOSes and fill with zeros.
  ! 1--> DOS , 2--> IDOS
- ABI_CALLOC(total_dos,(nene,ndosfraction,2))
- ABI_CALLOC(eig_dos, (nene, 2))
+ ABI_MALLOC(total_dos,(nene,ndosfraction,2))
+ ABI_MALLOC(eig_dos, (nene, 2))
 
  if (paw_dos_flag==1) then
-   ABI_CALLOC(dos_paw1,(nene,ndosfraction,2))
-   ABI_CALLOC(dos_pawt1,(nene,ndosfraction,2))
+   ABI_MALLOC(dos_paw1,(nene,ndosfraction,2))
+   ABI_MALLOC(dos_pawt1,(nene,ndosfraction,2))
  end if
  if (prtdosm>=1) then
-   ABI_CALLOC(dos_m, (nene,ndosfraction*mbesslang,2))
+   ABI_MALLOC(dos_m, (nene,ndosfraction*mbesslang,2))
    ABI_MALLOC(work_m, (nkpt, ndosfraction*mbesslang))
  end if
 
@@ -524,14 +545,16 @@ end if
  ABI_MALLOC(work_kf, (nkpt, ndosfraction))
  ABI_MALLOC(tmp_eigen,(nkpt))
 
+ cnt = 0
  do isppol=1,nsppol
 
-   total_dos = zero
+   total_dos = zero; eig_dos = zero
    if (prtdosm>=1) dos_m = zero
    if (paw_dos_flag==1) then
      dos_paw1 = zero; dos_pawt1 = zero
    end if
 
+#if 0
    do iband=1,dtset%nband(1)
      ! Mpi parallelism.
      if (mod(iband, nprocs) /= my_rank) cycle
@@ -544,6 +567,7 @@ end if
        bcorr0,tweight,dtweightde,xmpi_comm_self)
 
      ! Accumulate total DOS from eigenvalues (this is the **exact** total DOS)
+     tmp_eigen = one
      call acc_dos_1band(nene, nkpt, 1, tweight, dtweightde, tmp_eigen, eig_dos)
 
      ! Accumulate L-DOS
@@ -564,8 +588,47 @@ end if
        work_m = dos%fractions_m(:,iband,isppol,:)
        call acc_dos_1band(nene, nkpt, ndosfraction*mbesslang, tweight, dtweightde, work_m, dos_m)
      end if
-
    end do ! iband
+
+#else
+   do ikpt=1,nkpt
+      do iband=1,ebands%nband(ikpt+(isppol-1)*ebands%nkpt)
+        cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! Mpi parallelism.
+
+        ! Accumulate total DOS from eigenvalues (this is the **exact** total DOS)
+        tmp_eigen(:) = ebands%eig(iband, :, isppol)
+        call tetra_get_onewk(tetra,ikpt,bcorr0,nene,nkpt,tmp_eigen,enemin,enemax,max_occ,wdt)
+        eig_dos = eig_dos + wdt
+
+        ! Accumulate L-DOS
+        do ii=1,2
+          do ifrac=1,ndosfraction
+            total_dos(:,ifrac,ii) = total_dos(:,ifrac,ii) + wdt(:,ii) * dos%fractions(ikpt,iband,isppol,ifrac)
+          end do
+        end do
+
+        if (paw_dos_flag==1) then
+          ! Accumulate LM-DOS
+          do ii=1,2
+            do ifrac=1,ndosfraction
+              dos_paw1(:,ifrac,ii) = dos_paw1(:,ifrac,ii) + wdt(:,ii) * dos%fractions_paw1(ikpt,iband,isppol,ifrac)
+              dos_pawt1(:,ifrac,ii) = dos_pawt1(:,ifrac,ii) + wdt(:,ii) * dos%fractions_pawt1(ikpt,iband,isppol,ifrac)
+            end do
+          end do
+        end if
+
+        if (prtdosm>=1) then
+         ! Accumulate LM-DOS
+         do ii=1,2
+           do ifrac=1,ndosfraction*mbesslang
+             dos_m(:,ifrac,ii) = dos_m(:,ifrac,ii) + wdt(:,ii) * dos%fractions_m(ikpt, iband, isppol, ifrac)
+           end do
+         end do
+        end if
+
+      end do ! ikpt
+   end do ! iband
+#endif
 
    ! Collect results on master
    call xmpi_sum_master(eig_dos, master, comm, ierr)
@@ -584,7 +647,7 @@ end if
    ! header lines depend on the type of DOS (projected etc...) which is output
 
    if (.not. iam_master) goto 10
-   call write_headers()
+   call write_extra_headers()
 
    if (prtdos==2) then
      ! E, DOS, IDOS
@@ -595,17 +658,9 @@ end if
 
    else if (prtdos==3) then
 
-     ! TODO: Write header.
      ! Write E, DOS, IDOS
-     if (nsppol==2) then
-       if(isppol==1) write(msg,'(a,16x,a)')  '#','Spin-up DOS'
-       if(isppol==2) write(msg,'(2a,16x,a)')  ch10,'#','Spin-dn DOS'
-       write(unitdos, "(a)")trim(msg)
-     end if
-     write(unitdos, '(a)' )'# energy(Ha)     DOS  integrated DOS'
-
      do iene=1,nene
-       write(unitdos, '(f11.5,1x,2(f10.4,1x))') &
+       write(unt_atsph(0), '(f11.5,1x,2(f10.4,1x))') &
         enemin + (iene-1)*deltaene, min(eig_dos(iene,1), dos_max), eig_dos(iene,2)
      end do
 
@@ -703,8 +758,7 @@ end if
    if (any(prtdos == [2, 5])) then
      close(unitdos)
    else if (prtdos == 3) then
-     close(unitdos)
-     do iat=1,natsph+natsph_extra
+     do iat=0,natsph+natsph_extra
        close(unt_atsph(iat))
      end do
      ABI_FREE(unt_atsph)
@@ -716,6 +770,7 @@ end if
  ABI_FREE(total_dos)
  ABI_FREE(tweight)
  ABI_FREE(dtweightde)
+ ABI_FREE(wdt)
  ABI_FREE(eig_dos)
 
  if (prtdosm>=1)  then
@@ -736,7 +791,14 @@ end if
 
 contains
 
-subroutine write_headers()
+subroutine write_extra_headers()
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'write_extra_headers'
+!End of the abilint section
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -749,19 +811,24 @@ subroutine write_headers()
    if(isppol==1) write(msg,'(a,16x,a)')  '#','Spin-up DOS'
    if(isppol==2) write(msg,'(2a,16x,a)')  ch10,'#','Spin-dn DOS'
    ! NB: dtset%prtdos == 5 should not happen for nsppol==2
+
    if (any(dtset%prtdos == [2, 5])) then
      write(unitdos, "(a)")trim(msg)
+
    else if (dtset%prtdos == 3) then
-     do iat=1,natsph+natsph_extra
+     do iat=0,natsph+natsph_extra
        write(unt_atsph(iat), "(a)")trim(msg)
      end do
    end if
+
  end if
 
  if (prtdos==2) then
    write(unitdos, '(a)' )'# energy(Ha)     DOS  integrated DOS'
 
  else if (prtdos==3) then
+
+   write(unt_atsph(0), '(a)' )'# energy(Ha)     DOS  integrated DOS'
 
    if (paw_dos_flag/=1.or.dtset%pawprtdos==2) then
      do iat=1,natsph
@@ -848,7 +915,7 @@ subroutine write_headers()
 &    '# energy(Ha)     DOS up,up  up,dn  dn,up  dn,dn  sigma_x sigma_y sigma_z  and integrated DOS components'
  end if ! prtdos value
 
-end subroutine write_headers
+end subroutine write_extra_headers
 
 end subroutine dos_calcnwrite
 !!***
@@ -1784,9 +1851,15 @@ end subroutine prtfatbands
 !! fatbands_ncwrite
 !!
 !! FUNCTION
+!!  Write PJDOS contributions to netcdf file.
 !!
 !! INPUTS
 !!  crystal<crystal_t>=Object defining the unit cell and its symmetries.
+!!  ebands<ebands_t>=Band structure data.
+!!  hdr<hdr_t>=Abinit header
+!!  dtset<dtset_type>=Dataset type
+!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  ncid=NC file handle.
 !!
 !! OUTPUT
@@ -1797,8 +1870,6 @@ end subroutine prtfatbands
 !! CHILDREN
 !!
 !! SOURCE
-
-
 
 subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid)
 
