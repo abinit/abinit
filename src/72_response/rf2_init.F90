@@ -116,7 +116,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
  integer,parameter :: berryopt=0,iorder_cprj=0,level=19,tim_getghc=1,tim_getgh1c=1,tim_getgh2c=1
  integer :: choice_cprj,cpopt_cprj,iband,icpgr_loc,idir1,idir2,idir_cprj,ierr
  integer :: igs,ipert1,ipert2,ipw,ispinor,jband,kdir1
- integer :: natom,ncpgr_loc,print_info
+ integer :: me,natom,ncpgr_loc,print_info
  integer :: size_cprj,size_wf,shift_band1,shift_band2,shift_cprj_band1,shift_cprj_dir1
  integer :: shift_dir1_lambda,shift_dir2_lambda,shift_dir1,shift_dir2,shift_jband_lambda
  logical :: has_cprj_jband,has_dudkprj
@@ -138,6 +138,9 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 ! *********************************************************************
 
  DBG_ENTER("COLL")
+
+!my mpi rank :
+ me=mpi_enreg%me_kpt
 
  size_wf=gs_hamkq%npw_k*gs_hamkq%nspinor
  size_cprj=gs_hamkq%nspinor
@@ -235,7 +238,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
      shift_dir1_lambda=2*(kdir1-1)*nband_k**2
      eig1_k_stored(1+shift_band1+shift_dir1_lambda:2*nband_k+shift_band1+shift_dir1_lambda)=eig1_read(:)
 !    Get this dudk projected on NL projectors
-     if (has_dudkprj) then
+     if (has_dudkprj.and.mpi_enreg%proc_distrb(ikpt,jband,isppol)/=me) then
        shift_cprj_band1=(iband-1)*size_cprj
        shift_cprj_dir1=(kdir1-1)*nband_k*size_cprj
        cprj_dudk => dudkprj(:,1+shift_cprj_band1+shift_cprj_dir1: &
@@ -389,6 +392,10 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 
 !  LOOP OVER BANDS
    do jband=1,nband_k ! = band n
+
+!    Skip bands not treated by current proc
+     if(mpi_enreg%proc_distrb(ikpt,jband,isppol)/=me) cycle
+
      shift_band1=(jband-1)*size_wf
      shift_cprj_band1=(jband-1)*size_cprj
      shift_jband_lambda=(jband-1)*2*nband_k
@@ -505,6 +512,10 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
    end if
 
    do jband=1,nband_k
+
+!    Skip bands not treated by current proc
+     if(mpi_enreg%proc_distrb(ikpt,jband,isppol)/=me) cycle
+
      if (abs(occ_k(jband))>tol8) then
        shift_band1=(jband-1)*size_wf
        shift_cprj_band1=(jband-1)*size_cprj
@@ -607,6 +618,10 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
    end if
 
    do jband=1,nband_k
+
+!    Skip bands not treated by current proc
+     if(mpi_enreg%proc_distrb(ikpt,jband,isppol)/=me) cycle
+
      if (abs(occ_k(jband))>tol8) then
        shift_band1=(jband-1)*size_wf
        shift_cprj_band1=(jband-1)*size_cprj
@@ -690,6 +705,10 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 
 ! Compute the part of 2nd order wavefunction that belongs to the space of empty bands
  do jband=1,nband_k
+
+!  Skip bands not treated by current proc
+   if(mpi_enreg%proc_distrb(ikpt,jband,isppol)/=me) cycle
+
    shift_band1=(jband-1)*size_wf
    if (abs(occ_k(jband))>tol8) then
      invocc = one/occ_k(jband)
@@ -744,6 +763,10 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
  rf2%dcwavef=zero
 
  do jband=1,nband_k
+
+!  Skip bands not treated by current proc
+   if(mpi_enreg%proc_distrb(ikpt,jband,isppol)/=me) cycle
+
    shift_band1=(jband-1)*size_wf
    if (abs(occ_k(jband))>tol8) then
      do iband=1,nband_k
@@ -774,6 +797,10 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
  tol_final = tol6
  if (print_info/=0) then
    do jband=1,nband_k
+
+!    Skip bands not treated by current proc
+     if(mpi_enreg%proc_distrb(ikpt,jband,isppol)/=me) cycle
+
      if (abs(occ_k(jband))>tol8) then
 !       write(msg,'(3(a,i2))') 'RF2 TEST FINAL : ipert=',ipert-natom,' idir=',idir,' jband=',jband
 !       call wrtout(std_out,msg)
