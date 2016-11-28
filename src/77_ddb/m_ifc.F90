@@ -1914,11 +1914,10 @@ end subroutine ifc_outphbtrap
 !! INPUTS
 !!  ifc<ifc_type>=Stores data related to interatomic force constants.
 !!  crystal<crystal_t>=Info on the crystal structure
-!!  path = file name for output to disk
 !!  ngqpt(3)=Divisions of the q-mesh
 !!  nqshft=Number of shifts
 !!  qshft(3,nqshft)=Shifts of the q-mesh.
-!!  path=File name
+!!  path=File name for output to disk
 !!  comm=MPI communicator.
 !!
 !! OUTPUT
@@ -2483,6 +2482,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
    !write(456, *)phfrq; write(457, *)ofreqs
    !endif
  end do
+
  vals4 = [mae_bspl, mare_bspl, mae_skw, mare_skw]
  call xmpi_sum(vals4, comm, ierr)
  mae_bspl = vals4(1); mare_bspl = vals4(2); mae_skw = vals4(3); mare_skw = vals4(4)
@@ -2552,7 +2552,7 @@ type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) res
 
 !local variables-------------------------------
 !scalars
- integer,parameter :: sppoldbl1=1,timrev1=1
+ integer,parameter :: sppoldbl1=1,timrev1=1,master=0
  integer :: nqibz,nqbz,iq_ibz,iq_bz,natom3,ierr
  integer :: my_rank,nprocs,cnt
  real(dp) :: dksqmax
@@ -2584,10 +2584,6 @@ type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) res
 
  new = skw_new(cryst, 1, 1, natom3, natom3, nqibz, 1, qibz, ibz_freqs, comm)
 
- ABI_FREE(qibz)
- ABI_FREE(wtq)
- ABI_FREE(qbz)
-
  ! Test whether SKW preserves symmetries.
  ! Build mapping qbz --> IBZ (q --> -q symmetry is always used)
  ABI_MALLOC(bz2ibz, (nqbz*sppoldbl1,6))
@@ -2613,6 +2609,9 @@ type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) res
  end if
  ABI_FREE(bz2ibz)
 
+ ABI_FREE(qibz)
+ ABI_FREE(wtq)
+ ABI_FREE(qbz)
  ABI_FREE(ibz_freqs)
 
 end function ifc_build_skw

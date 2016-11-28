@@ -3303,9 +3303,9 @@ subroutine kpath_init(Kpath,bounds,gprimd,ndiv_small)
  integer,intent(in) :: ndiv_small
 !!arrays
  real(dp),intent(in) :: bounds(:,:),gprimd(3,3)
-!
-!!Local variables-------------------------------
-!!arrays
+
+!Local variables-------------------------------
+!arrays
  real(dp),allocatable :: pts(:,:)
 
 ! *************************************************************************

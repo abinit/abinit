@@ -388,19 +388,25 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    end if
  end if ! master
 
+ if (my_rank == master) then ! .and. (ebands%mband < 100 .or. dtset%printxmgr == 1)
+   call ebands_write_xmgrace(ebands, strcat(dtfil%filnam_ds(4), "_EBANDS.xmgr"))
+ end if
+
 #if 0
- ! This is to test the interpolation of the electronic bands.
+ ! Test the interpolation of electronic bands.
  skw = skw_new(cryst, 1, 1, ebands%mband, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, comm)
  call skw_free(skw)
- call xmpi_abort()
 
- kptrlatt_spl = reshape([16,0,0,0,16,0,0,0,16], [3,3])
- kptrlatt_spl = 4 * kptrlatt_spl
- nshiftk_spl = 1
+ ! Interpolate bands on dense k-mesh.
+ kptrlatt_spl = reshape([8,0,0,0,8,0,0,0,8], [3,3])
+ kptrlatt_spl = 8 * kptrlatt_spl; nshiftk_spl = 1
  ABI_CALLOC(shiftk_spl, (3,nshiftk_spl))
  ebands_bspl = ebands_bspline(ebands, cryst, [3,3,3], kptrlatt_spl, nshiftk_spl, shiftk_spl, comm)
  ABI_FREE(shiftk_spl)
- !call ebands_jdos(ebands_bspl, cryst, 2, zero, zero, comm, ierr)
+
+ if (my_rank == master) then ! .and. (ebands%mband < 100 .or. dtset%printxmgr == 1)
+   call ebands_write_xmgrace(ebands_bspl, strcat(dtfil%filnam_ds(4), "_EBANDS_BSPLINE.xmgr"))
+ end if
 
  edos = ebands_get_edos(ebands_bspl, cryst, edos_intmeth, edos_step, edos_broad, comm, ierr)
  ABI_CHECK(ierr==0, "Error in ebands_get_edos, see message above.")
@@ -451,7 +457,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  nsphere0,rifcsph0,prtsrlr0,dtset%enunit)
  ABI_FREE(ddb_qshifts)
 
- ! This to test the B-spline interpolation of phonons
+ ! Test B-spline interpolation of phonons
  !if (.False.) then
  if (.True.) then
    call ifc_test_phinterp(ifc, cryst, [12,12,12], 1, [zero,zero,zero], [3,3,3], comm)
