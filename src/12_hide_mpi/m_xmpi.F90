@@ -739,7 +739,11 @@ subroutine xmpi_end()
  call MPI_BARRIER(MPI_COMM_WORLD,mpierr)  !  Needed by some HPC architectures (MT, 20110315)
  call MPI_FINALIZE(mpierr)
 #endif
+
+#ifndef FC_IBM
+ ! IBM8 returns 260. 320 ...
  call sys_exit(0)
+#endif
 
 end subroutine xmpi_end
 !!***

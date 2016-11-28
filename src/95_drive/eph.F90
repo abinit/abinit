@@ -392,6 +392,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
 
 #if 0
+ !call ebands_set_interpolator(ebands, cryst, bstart, bcount, mode, espline_ords, eskw_ratio, comm)
+ !call ebands_test_intepolator(ifc, dtset, dtfil, comm)
  ! Test the interpolation of electronic bands.
  skw = skw_new(cryst, 1, 1, ebands%mband, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, comm)
  call skw_free(skw)
@@ -460,6 +462,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  !if (.True.) then
    call ifc_test_phinterp(ifc, cryst, [12,12,12], 1, [zero,zero,zero], [3,3,3], comm)
    call xmpi_end()
+
+   !call ifc_set_interpolator(ifc, cryst, nustart, nucount, mode, phspline_ords, phskw_ratio, comm)
+   !call ifc_test_intepolator(ifc, dtset, dtfil, comm)
  end if
 
  if (dtset%prtphdos == 1) then
