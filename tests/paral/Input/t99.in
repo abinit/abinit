@@ -57,6 +57,8 @@ dmft_rslf 0
 dmft_mxsf 0.7
 dmft_dc 1
 dmft_t2g 1   # special value for t2g only calculation.
+dmft_tolfreq 0.01
+dmftctqmc_triqs_nleg 30
 
 # == CTQMC
 dmft_solv 7 # Rotationally invariant interaction with TRIQS/CTHYB Monte Carlo code.

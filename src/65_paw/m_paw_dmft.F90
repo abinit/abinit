@@ -146,6 +146,12 @@ MODULE m_paw_dmft
   ! CTQMC: Gives order in perturbation for CTQMC solver
   ! 0 : nothing, >=1 max order evaluated in Perturbation.dat
 
+  integer :: dmftctqmc_triqs_nleg
+  ! CTQMC of TRIQS: Nb of Legendre polynomial used to compute the
+  ! Green's function (Phys. Rev. B 84, 075145). Default is 30.
+  
+  ! 0 : nothing, >=1 max order evaluated in Perturbation.dat
+
   real(dp) :: dmftqmc_n
   ! qmc number of sweeps
 
@@ -217,6 +223,10 @@ MODULE m_paw_dmft
 
   real(dp) :: dmft_mxsf
   ! Mixing coefficient for Self-Energy during the SCF DMFT cycle.
+
+  real(dp) :: dmft_tolfreq
+  ! Required precision on local correlated density matrix  (depends on
+  ! frequency mesh), used in dmft_solve.
 
   real(dp) :: dmft_lcpr
   ! Required precision on local correlated charge  in order to stop SCF
@@ -601,6 +611,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  !paw_dmft%idmftloop=0
  paw_dmft%prtvol = dtset%prtvol
  paw_dmft%prtdos = dtset%prtdos
+ paw_dmft%dmft_tolfreq = dtset%dmft_tolfreq
  paw_dmft%dmft_lcpr = dtset%dmft_tollc
 
 !=======================
@@ -676,6 +687,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, nspinor, paw_dmf
  paw_dmft%dmftctqmc_mrka  =dtset%dmftctqmc_mrka
  paw_dmft%dmftctqmc_mov   =dtset%dmftctqmc_mov
  paw_dmft%dmftctqmc_order =dtset%dmftctqmc_order
+ paw_dmft%dmftctqmc_triqs_nleg =dtset%dmftctqmc_triqs_nleg
 
  if ( paw_dmft%dmft_solv >= 4 ) then
  write(message, '(a,a,i6)' )ch10,&
