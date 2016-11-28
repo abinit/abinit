@@ -127,11 +127,11 @@ module m_epjdos
 
  end type epjdos_t
 
- public :: epjdos_new
- public :: epjdos_free
+ public :: epjdos_new         ! Create new object
+ public :: epjdos_free        ! Free dynamic memory
 
- public :: prtfatbands
- public :: fatbands_ncwrite
+ public :: prtfatbands        ! Print PJDOS contributions in xmgrace format.
+ public :: fatbands_ncwrite   ! Write PJDOS contributions to netcdf file.
 
 !----------------------------------------------------------------------
 
@@ -1844,9 +1844,15 @@ end subroutine prtfatbands
 !! fatbands_ncwrite
 !!
 !! FUNCTION
+!!  Write PJDOS contributions to netcdf file.
 !!
 !! INPUTS
 !!  crystal<crystal_t>=Object defining the unit cell and its symmetries.
+!!  ebands<ebands_t>=Band structure data.
+!!  hdr<hdr_t>=Abinit header
+!!  dtset<dtset_type>=Dataset type
+!!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  ncid=NC file handle.
 !!
 !! OUTPUT
@@ -1857,8 +1863,6 @@ end subroutine prtfatbands
 !! CHILDREN
 !!
 !! SOURCE
-
-
 
 subroutine fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid)
 
