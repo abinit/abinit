@@ -458,8 +458,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ABI_FREE(ddb_qshifts)
 
  ! Test B-spline interpolation of phonons
- !if (.False.) then
- if (.True.) then
+ if (.False.) then
+ !if (.True.) then
    call ifc_test_phinterp(ifc, cryst, [12,12,12], 1, [zero,zero,zero], [3,3,3], comm)
    call xmpi_end()
  end if
