@@ -349,7 +349,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 
    call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfft, dtset%ngfft, rdwrpaw, &
    mpi_enreg, rhor, hdr_den, pawrhoij, comm_cell, check_hdr=hdr)
-   etotal = hdr_den%etot; call hdr_free(hdr_den)
+   call hdr_free(hdr_den)
 
 !  Compute up+down rho(G) by fft
    ABI_ALLOCATE(work,(nfft))
@@ -444,7 +444,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 & nkpt3,nneigh,npwarr,nsppol,occ,pwind)
 
  call status(0,dtfil%filstat,iexit,level,'call dfptnl_loop ')
- call dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,etotal,gmet,gprimd,gsqcut,&
+ call dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,gmet,gprimd,gsqcut,&
 & hdr,kg,kneigh,kg_neigh,kptindex,kpt3,kxc,k3xc,mband,mgfft,&
 & mkmem,mkmem_max,dtset%mk1mem,mpert,mpi_enreg,mpw,mvwtk,natom,nfft,&
 & nkpt,nkpt3,nkxc,nk3xc,nneigh,nspinor,nsppol,npwarr,occ,psps,pwind,&
@@ -614,6 +614,10 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 
 !Clean the header
  call hdr_free(hdr)
+
+!As the etotal energy has no meaning here, we set it to zero
+!(to avoid meaningless side-effects when comparing ouputs...)
+ etotal = zero
 
  call status(0,dtfil%filstat,iexit,level,' exit         ')
  call timab(501,2,tsec)
