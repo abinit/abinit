@@ -344,11 +344,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! TODO: Optimize this part. Really slow if tetra and lots of points
  ! Could just do DOS around efermi
  edos_intmeth = 2; if (dtset%prtdos == 1) edos_intmeth = 1
- edos_intmeth = 1
+ !edos_intmeth = 1
  edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
  edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
- edos = ebands_get_edos(ebands,cryst,edos_intmeth,edos_step,edos_broad,comm,ierr)
- ABI_CHECK(ierr==0, "Error in ebands_get_edos, see message above.")
+ edos = ebands_get_edos(ebands,cryst,edos_intmeth,edos_step,edos_broad,comm)
 
  ! Store DOS per spin channels
  n0(:) = edos%gef(1:edos%nsppol)
@@ -408,8 +407,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call ebands_write_xmgrace(ebands_bspl, strcat(dtfil%filnam_ds(4), "_EBANDS_BSPLINE.xmgr"))
  end if
 
- edos = ebands_get_edos(ebands_bspl, cryst, edos_intmeth, edos_step, edos_broad, comm, ierr)
- ABI_CHECK(ierr==0, "Error in ebands_get_edos, see message above.")
+ edos = ebands_get_edos(ebands_bspl, cryst, edos_intmeth, edos_step, edos_broad, comm)
 
  if (my_rank == master) then
    call edos_print(edos, unit=ab_out)

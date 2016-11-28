@@ -277,6 +277,7 @@ end function skw_new
 
 subroutine skw_print(skw, unt)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -390,7 +391,7 @@ subroutine skw_eval_kgrid(skw, cryst, ngkpt, spin)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'skw_kgrid'
+#define ABI_FUNC 'skw_eval_kgrid'
 !End of the abilint section
 
  implicit none
@@ -602,7 +603,6 @@ subroutine mkstar_(skw, cryst, kpt, srk)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'mkstar_'
- use interfaces_32_util
 !End of the abilint section
 
  implicit none

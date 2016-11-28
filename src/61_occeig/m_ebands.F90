@@ -2922,7 +2922,6 @@ end function ebands_ncwrite_path
 !!
 !! OUTPUT
 !!  edos<edos_t>=Electronic DOS and IDOS.
-!!  ierr=Exit status. The routine can return ierr/=0 if method=="tetra"
 !!
 !! PARENTS
 !!      eph
@@ -2933,7 +2932,7 @@ end function ebands_ncwrite_path
 !!
 !! SOURCE
 
-type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm,ierr) result(edos)
+type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) result(edos)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2949,7 +2948,6 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm,ierr)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: intmeth,comm
- integer,intent(out) :: ierr
  real(dp),intent(in) :: step,broad
  type(ebands_t),target,intent(in)  :: ebands
  type(crystal_t),intent(in) :: cryst
@@ -2957,7 +2955,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm,ierr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: bcorr0=0
- integer :: iw,nw,spin,band,ikpt,ief,nbz,nibz,nproc,my_rank,mpierr,cnt
+ integer :: iw,nw,spin,band,ikpt,ief,nbz,nibz,nproc,my_rank,mpierr,cnt,ierr
  real(dp) :: max_ene,min_ene,wtk,max_occ
  character(len=500) :: msg
  character(len=80) :: errstr
@@ -2972,7 +2970,6 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm,ierr)
 
 ! *********************************************************************
 
- ierr = 0
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  edos%nkibz = ebands%nkpt; edos%intmeth = intmeth; edos%nsppol = ebands%nsppol
@@ -3028,7 +3025,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm,ierr)
      MSG_WARNING(sjoin("for tetrahedrons, nshift must be (0,1) but found:", itoa(ebands%nshiftk)))
      ierr = ierr + 1
    end if
-   if (ierr/=0) return
+   if (ierr/=0) MSG_ERROR("Aborting now")
 
    ! convert kptrlatt to double and invert.
    rlatt = dble(ebands%kptrlatt)
@@ -3057,15 +3054,13 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm,ierr)
 
    if (ierr == 0) then
      call init_tetra(bz2ibz, cryst%gprimd, qlatt, fullbz, nbz, tetra, ierr, errstr)
-     if (ierr/=0) MSG_WARNING(errstr)
+     if (ierr/=0) MSG_ERROR(errstr)
    end if
    ABI_FREE(bz2ibz)
    ABI_FREE(fullbz)
 
    !call tetra_from_kptrlatt(tetra, cryst, ebands%kptopt, ebands%kptrlatt, &
    !  ebands%nshiftk, ebands%shiftk, ebands%nkpt, ebands%kptns)
-
-   if (ierr /= 0) return
 
    ! For each spin and band, interpolate over kpoints,
    ! calculate integration weights and DOS contribution.
@@ -4813,11 +4808,11 @@ end subroutine ebands_prtbltztrp_tau_out
 
 subroutine ebands_write_xmgrace(ebands, path, kptbounds)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_write_xmgrace'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

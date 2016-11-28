@@ -800,13 +800,6 @@ subroutine write_extra_headers()
 #define ABI_FUNC 'write_extra_headers'
 !End of the abilint section
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'write_headers'
-!End of the abilint section
-
  if (nsppol==2) then
    if(isppol==1) write(msg,'(a,16x,a)')  '#','Spin-up DOS'
    if(isppol==2) write(msg,'(2a,16x,a)')  ch10,'#','Spin-dn DOS'

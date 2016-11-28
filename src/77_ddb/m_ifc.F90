@@ -2031,12 +2031,12 @@ end subroutine ifc_printbxsf
 type(phbspl_t) function ifc_build_phbspl(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm) result(new)
 
 
-!this section has been created automatically by the script abilint (td).
-!do not modify the following lines by hand.
-#undef abi_func
-#define abi_func 'ifc_build_phbspl'
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_build_phbspl'
  use interfaces_56_recipspace
-!end of the abilint section
+!End of the abilint section
 
  implicit none
 
@@ -2306,10 +2306,11 @@ end subroutine phbspl_evalq
 
 subroutine phbspl_free(phbspl)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'phspline_free'
+#define ABI_FUNC 'phbspl_free'
 !End of the abilint section
 
  implicit none
@@ -2375,12 +2376,11 @@ end subroutine phbspl_free
 subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
 
 
-!this section has been created automatically by the script abilint (td).
-!do not modify the following lines by hand.
-#undef abi_func
-#define abi_func 'ifc_test_phinterp'
- use interfaces_56_recipspace
-!end of the abilint section
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_test_phinterp'
+!End of the abilint section
 
  implicit none
 
@@ -2532,12 +2532,13 @@ end subroutine ifc_test_phinterp
 
 type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) result(new)
 
-!this section has been created automatically by the script abilint (td).
-!do not modify the following lines by hand.
-#undef abi_func
-#define abi_func 'ifc_build_skw'
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_build_skw'
  use interfaces_56_recipspace
-!end of the abilint section
+!End of the abilint section
 
  implicit none
 
