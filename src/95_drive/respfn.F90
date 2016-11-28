@@ -569,7 +569,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if(psps%usepaw==1) then
 !  1-Initialize values for several arrays depending only on atomic data
    gnt_option=1
-   if (dtset%pawxcdev==2.or.dtset%rfphon/=0.or.dtset%rfstrs/=0.or.dtset%rfelfd==1.or.dtset%rfelfd==3) gnt_option=2
+   if (dtset%pawxcdev==2.or.dtset%rfphon/=0.or.dtset%rfstrs/=0.or.dtset%rfelfd==1.or.&
+       dtset%rfelfd==3.or.dtset%rf2_dkde==1) gnt_option=2
 
    ! Test if we have to call pawinit
    call paw_gencond(Dtset,gnt_option,"test",call_pawinit)
@@ -621,12 +622,12 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      optgr1=dtset%pawstgylm
      if (rfphon==1) optgr2=1
    end if
-   if (rfphon==1.or.rfstrs/=0.or.rfelfd==3) then
+   if (rfphon==1.or.rfstrs/=0.or.rfelfd==3.or.rf2_dkde==1) then ! LB2016-11-28 : Why not rfelfd==1?
      if (optgr1==0) optgr1=dtset%pawstgylm
      if (optgr2==0) optgr2=dtset%pawstgylm
-     if (optrad==0.and.(.not.qeq0.or.rfstrs/=0.or.rfelfd==3)) optrad=1
+     if (optrad==0.and.(.not.qeq0.or.rfstrs/=0.or.rfelfd==3.or.rf2_dkde==1)) optrad=1  ! LB2016-11-28 : Why not rfelfd==1?
    end if
-   if (rfelfd==1.or.rfelfd==3) then
+   if (rfelfd==1.or.rfelfd==3.or.rf2_dkde==1) then
      if (optgr1==0) optgr1=dtset%pawstgylm
    end if
    call status(0,dtfil%filstat,iexit,level,'call nhatgrid ')
@@ -656,7 +657,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    if(any(abs(dtset%nucdipmom)>tol8)) then
      has_dijnd=1; req_cplex_dij=2
    end if
-   if (rfphon/=0.or.rfelfd==1.or.rfelfd==3.or.rfstrs/=0) then
+   if (rfphon/=0.or.rfelfd==1.or.rfelfd==3.or.rfstrs/=0.or.rf2_dkde/=0) then
      has_kxc=1;nkxc1=2*dtset%nspden-1 ! LDA only
      if(dtset%xclevel==2.and.dtset%pawxcdev==0) nkxc1=23
    end if

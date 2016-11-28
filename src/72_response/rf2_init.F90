@@ -238,7 +238,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
      shift_dir1_lambda=2*(kdir1-1)*nband_k**2
      eig1_k_stored(1+shift_band1+shift_dir1_lambda:2*nband_k+shift_band1+shift_dir1_lambda)=eig1_read(:)
 !    Get this dudk projected on NL projectors
-     if (has_dudkprj.and.mpi_enreg%proc_distrb(ikpt,jband,isppol)/=me) then
+     if (has_dudkprj.and.mpi_enreg%proc_distrb(ikpt,iband,isppol)==me) then
        shift_cprj_band1=(iband-1)*size_cprj
        shift_cprj_dir1=(kdir1-1)*nband_k*size_cprj
        cprj_dudk => dudkprj(:,1+shift_cprj_band1+shift_cprj_dir1: &
