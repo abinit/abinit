@@ -2971,6 +2971,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
 ! *********************************************************************
 
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ ierr = 0
 
  edos%nkibz = ebands%nkpt; edos%intmeth = intmeth; edos%nsppol = ebands%nsppol
 
@@ -3100,7 +3101,9 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
 
    ! Filter so that dos[i] is always >= 0 and idos is monotonic
    ! IDOS is computed afterwards with simpson
-   where (edos%dos(:,1:) <= zero) edos%dos(:,1:) = zero
+   where (edos%dos(:,1:) <= zero)
+     edos%dos(:,1:) = zero
+   end where
 
  case default
    MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
