@@ -1024,6 +1024,7 @@ end subroutine phdos_ncwrite
 !! comm=MPI communicator
 !!
 !! OUTPUT
+!!  Only writing.
 !!
 !! PARENTS
 !!      anaddb
@@ -1063,14 +1064,16 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iphl1,iblok,rftyp, ii,nfineqpath,nsym,mpert,natom,ncid,nprocs,my_rank
- real(dp) :: tcpu,twall,res
+ integer :: iphl1,iblok,rftyp, ii,nfineqpath,nsym,natom,ncid,nprocs,my_rank
+ integer :: ifcflag,natprj_bs,eivec,enunit
+ real(dp) :: tcpu,twall
+ real(dp) :: freeze_displ
  character(len=fnlen) :: tmpfilename
  character(500) :: msg
 !arrays
  integer :: rfphon(4),rfelfd(4),rfstrs(4)
  integer,allocatable :: ndiv(:)
- real(dp) :: qphnrm(3), qphon(3), qphon_padded(3,3)
+ real(dp) :: qphnrm(3), qphon(3), qphon_padded(3,3),res(3)
  real(dp) :: d2cart(2,ddb%msize),real_qphon(3)
  real(dp) :: displ(2*3*ddb%natom*3*ddb%natom),eigval(3,ddb%natom)
  real(dp),allocatable :: phfrq(:),eigvec(:,:,:,:,:),save_phfrq(:,:),save_phdispl_cart(:,:,:,:),save_qpoints(:,:)
@@ -1085,7 +1088,13 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
  if (my_rank /= master) return
 
  nsym = Crystal%nsym; natom = Crystal%natom
- mpert = ddb%mpert
+
+ ! Copy parameters from inp (then I will try to remove inp from the API so that I can call mkphbs in eph)
+ ifcflag = inp%ifcflag
+ natprj_bs = inp%natprj_bs
+ freeze_displ = inp%freeze_displ
+ eivec = inp%eivec; enunit = inp%enunit
+ rftyp=inp%rfmeth
 
  nullify(fineqpath)
  nfineqpath = inp%nph1l
@@ -1113,17 +1122,13 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
 
- if (inp%natprj_bs > 0) then
-   call atprj_init(atprj, natom, inp%natprj_bs, inp%iatprj_bs, prefix)
- end if
+ if (natprj_bs > 0) call atprj_init(atprj, natom, natprj_bs, inp%iatprj_bs, prefix)
 
  ABI_MALLOC(phfrq,(3*natom))
  ABI_MALLOC(eigvec,(2,3,natom,3,natom))
-
  ABI_MALLOC(save_qpoints,(3,nfineqpath))
  ABI_MALLOC(save_phfrq,(3*natom,nfineqpath))
  ABI_MALLOC(save_phdispl_cart,(2,3*natom,3*natom,nfineqpath))
-
  qphnrm = one
 
  do iphl1=1,nfineqpath
@@ -1136,26 +1141,25 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
    save_qpoints(:,iphl1) = qphon / qphnrm(1)
 
    ! Generation of the dynamical matrix in cartesian coordinates
-   if(inp%ifcflag==1)then
+   if (ifcflag == 1) then
 
      ! Get phonon frequencies and displacements in reduced coordinates for this q-point
      !call ifc_fourq(ifc, cryst, save_qpoints(:,iphl1), phfrq, displ, out_eigvec=eigvec)
 
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
-     call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,mpert,natom,&
+     call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,ddb%mpert,natom,&
 &     Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,zeff)
 
-   else if(inp%ifcflag==0)then
+   else if (ifcflag == 0) then
 
-     !call ddb_diagoq(ddb, crystal, save_qpoints(:,iphl1), asrq0, inp%symdynmat, inp%rfmeth, phfrq, displ, &
+     !call ddb_diagoq(ddb, crystal, save_qpoints(:,iphl1), asrq0, ifc%symdynmat, rftyp, phfrq, displ, &
      !                out_eigvec=eigvec)
 
      ! Look for the information in the DDB (no interpolation here!)
      rfphon(1:2)=1
      rfelfd(1:2)=0
      rfstrs(1:2)=0
-     rftyp=inp%rfmeth
      qphon_padded = zero
      qphon_padded(:,1) = qphon
 
@@ -1165,48 +1169,45 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
      d2cart(:,1:ddb%msize)=ddb%val(:,:,iblok)
 
      ! Eventually impose the acoustic sum rule based on previously calculated d2asr
-     call asrq0_apply(asrq0, natom, mpert, ddb%msize, crystal%xcart, d2cart)
+     call asrq0_apply(asrq0, natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
    end if
 
    !  Calculation of the eigenvectors and eigenvalues of the dynamical matrix
    call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,Crystal%indsym,&
-&   mpert,Crystal%nsym,natom,nsym,Crystal%ntypat,phfrq,qphnrm(1),qphon,&
-&   crystal%rprimd,inp%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
+&   ddb%mpert,Crystal%nsym,natom,nsym,Crystal%ntypat,phfrq,qphnrm(1),qphon,&
+&   crystal%rprimd,ifc%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
 
-   if (abs(inp%freeze_displ) > tol10) then
+   if (abs(freeze_displ) > tol10) then
      real_qphon = zero
      if (abs(qphnrm(1)) > tol8) real_qphon = qphon / qphnrm(1)
-     call freeze_displ_allmodes(displ, inp%freeze_displ, natom, prefix, phfrq, &
+     call freeze_displ_allmodes(displ, freeze_displ, natom, prefix, phfrq, &
 &     real_qphon, crystal%rprimd, Crystal%typat, crystal%xcart, crystal%znucl)
    end if
 
    ! If requested, output projection of each mode on given atoms
-   if (inp%natprj_bs > 0) call atprj_print(atprj, iphl1, phfrq, eigvec)
+   if (natprj_bs > 0) call atprj_print(atprj, iphl1, phfrq, eigvec)
 
    ! In case eivec == 4, write output files for band2eps (visualization of phonon band structures)
-   if (inp%eivec == 4) then
+   if (eivec == 4) then
      tmpfilename = trim(prefix)//"_B2EPS"
      call sortph(eigvec,displ,tmpfilename,natom,phfrq)
    end if
 
    ! Write the phonon frequencies
-   call dfpt_prtph(displ,inp%eivec,inp%enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
+   call dfpt_prtph(displ,eivec,enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
 
    save_phfrq(:,iphl1) = phfrq
    save_phdispl_cart(:,:,:,iphl1) = RESHAPE(displ, [2, 3*natom, 3*natom])
 
    ! Determine the symmetries of the phonon mode at Gamma
    ! TODO: generalize for other q-point little groups.
-   if(sum(abs(qphon(:)))<DDB_QTOL)then
+   if (sum(abs(qphon)) < DDB_QTOL) then
      call dfpt_symph(ab_out,ddb%acell,eigvec,Crystal%indsym,natom,nsym,phfrq,ddb%rprim,Crystal%symrel)
    end if
 
    ! if we have an acoustic mode (small q and acoustic type displacements)
    ! extrapolate speed of sound in this direction, and Debye frequency
-   call wrap2_pmhalf(qphon(1),real_qphon(1),res)
-   call wrap2_pmhalf(qphon(2),real_qphon(2),res)
-   call wrap2_pmhalf(qphon(3),real_qphon(3),res)
-
+   call wrap2_pmhalf(qphon, real_qphon, res)
    if (sqrt(real_qphon(1)**2+real_qphon(2)**2+real_qphon(3)**2) < quarter .and. &
 &   sqrt(real_qphon(1)**2+real_qphon(2)**2+real_qphon(3)**2) > tol6) then
      call prtvsound(ab_out,eigvec, Crystal%gmet, natom, phfrq, real_qphon, Crystal%ucvol)
@@ -1217,7 +1218,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
 !deallocate sortph array
  call end_sortph()
 
- if (inp%natprj_bs > 0) call atprj_destroy(atprj)
+ if (natprj_bs > 0) call atprj_destroy(atprj)
 
  if (my_rank == master) then
 #ifdef HAVE_NETCDF

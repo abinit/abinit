@@ -442,22 +442,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
 !******************************************************************
 
- !brav   = anaddb_dtset%brav
- !nqshft = anaddb_dtset%nqshft
- !q1shft = anaddb_dtset%q1shft
- !asr    = anaddb_dtset%asr
- !symdynmat = anaddb_dtset%symdynmat
- !dipdip = anaddb_dtset%dipdip
- !rfmeth = anaddb_dtset%rfmeth
- !nsphere = anaddb_dtset%nsphere
- !prt_ifc = anaddb_dtset%prt_ifc
- !ifcana = anaddb_dtset%ifcana
- !rifcsph = anaddb_dtset%rifcsph
- !ifcout = anaddb_dtset%ifcout
- !prtsrlr = anaddb_dtset%prtsrlr
- !enunit = anaddb_dtset%enunit
- !atifc(:)=anaddb_dtset%atifc(:)
-
  ! This dimension should be encapsulated somewhere. We don't want to
  ! change the entire code if someone adds a new kind of perturbation.
  mpert = Crystal%natom + 6; iout = ab_out
