@@ -8,7 +8,7 @@ prtdos   3  # Compute PJDOS
 prtpot   1
 prtvha   1
 prtvpsp  1
-#prtvclmb 1
+prtvclmb 1
 prtvhxc  1
 prtvxc   1
 
