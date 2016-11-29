@@ -576,12 +576,12 @@ void effpot_xml_readTerm(char *filename,int*icoeff,int *iterm,int*ndisp,int*nter
   xmlFreeDoc(doc);
 }
   
-void effpot_xml_getDimTerm(char *filename,int*icoeff,int*ndisp,int*nterm){
+void effpot_xml_getDimTerm(char *filename,int*icoeff,char **name_term,int*ndisp,int*nterm){
   int idisp,iterm;
   xmlDocPtr doc;
   char * pch;
   xmlNodePtr cur,cur2,cur3;
-  xmlChar *uri;
+  xmlChar *uri,*uri2;
 
   if (*icoeff <= 0){ 
     printf(" error: The number of coeff must be superior to zero\n");
@@ -606,6 +606,9 @@ void effpot_xml_getDimTerm(char *filename,int*icoeff,int*ndisp,int*nterm){
     if (!xmlStrcmp(cur->name, (const  xmlChar *) "coefficient")) {
       uri = xmlGetProp(cur, (const  xmlChar *) "number");
       if(strtod(uri, NULL)==*icoeff){
+        uri2 = xmlGetProp(cur, (const  xmlChar *) "text");
+        *name_term = "";
+        xmlFree(uri2);
         cur2 = cur->xmlChildrenNode;
         while (cur2 != NULL){
           if (!xmlStrcmp(cur2->name, (const  xmlChar *) "term")) {

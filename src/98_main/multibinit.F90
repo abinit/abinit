@@ -192,7 +192,7 @@ program multibinit
    call outvars_multibinit(inp,ab_out)
  end if
 
-! First step: Read and treat the reference structure 
+! Read and treat the reference structure 
 !****************************************************************************************
 !Read the harmonics parts
  call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
@@ -210,20 +210,28 @@ program multibinit
  end if
 !****************************************************************************************
 
-!Second step: Compute the third order derivative with finite differences
+! Compute the third order derivative with finite differences
 !****************************************************************************************
  if (inp%prt_3rd > 0) then 
    call compute_anharmonics(reference_effective_potential,filnam,inp,comm)
  end if
 !****************************************************************************************
 
+!If needed, fit the anharmonic part
 !****************************************************************************************
-!Print the effective potential (only master CPU)
+ if (inp%ncoeff > 0) then
+!   call fit_polynomial_coeff_init
+!   call fit_polynomial_coeff_init(reference_effective_potential%,filnam,inp,comm)
+ end if
+!****************************************************************************************
+
+!****************************************************************************************
+!Print the effective potential system + coefficients (only master CPU)
  if(iam_master.and.(inp%prt_effpot<=-1.or.inp%prt_effpot>=3)) then
    select case(inp%prt_effpot)
    case (-1)  
      name = "system.xml"
-     call effective_potential_writeXML(reference_effective_potential,1,filename=name)
+     call effective_potential_writeXML(reference_effective_potential,-1,filename=name)
    case(-2)
      name = "system.nc"
      call effective_potential_writeNETCDF(reference_effective_potential,1,filename=name)

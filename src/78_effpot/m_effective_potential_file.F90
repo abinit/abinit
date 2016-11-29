@@ -30,7 +30,6 @@ module m_effective_potential_file
  use m_profiling_abi
  use m_xmpi
 
- use iso_c_binding
  use m_harmonics_terms
  use m_anharmonics_terms
  use m_effective_potential
@@ -108,10 +107,11 @@ module m_effective_potential_file
  end interface
 
  interface
-   subroutine effpot_xml_getDimTerm(filename,icoeff,ndisp,nterm)&
+   subroutine effpot_xml_getDimTerm(filename,icoeff,name,ndisp,nterm)&
 &                          bind(C,name="effpot_xml_getDimTerm")
-     use iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT
+     use iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT,C_PTR
      character(kind=C_CHAR) :: filename(*)
+     type(C_PTR) :: name
      integer(C_INT) :: icoeff,ndisp,nterm
    end subroutine effpot_xml_getDimTerm
  end interface
@@ -150,6 +150,7 @@ module m_effective_potential_file
      character(kind=C_CHAR) :: filename(*),name_value(*),name_attribute(*)
    end subroutine effpot_xml_getAttribute
  end interface
+
  interface
    subroutine effpot_xml_getNumberKey(filename,name_value,number) &
 &                          bind(C,name="effpot_xml_getNumberKey")
@@ -321,8 +322,9 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm)
     end if
 
   else
-    write(message, '(a,a,a,a)' )&
-&      ' The file ',trim(filename),' is not readable'
+    write(message, '(5a)' )&
+&      ' The file ',trim(filename),' is not readable with Multibinit',ch10,&
+&      ' Action: Change the file.'
     MSG_BUG(message)
   end if
 
@@ -1651,7 +1653,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'system_ddb2effpot'
  use interfaces_14_hidewrite
- use interfaces_56_recipspace
+ use interfaces_72_response
  use interfaces_77_ddb
 !End of the abilint section
 
@@ -1737,21 +1739,30 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 &     ' Extraction of the energy of the structure (unit: Hartree)',ch10
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
-  if(inp%energy_reference==zero)then
-   write(message,'(6a)')ch10,&
-&    ' Warning : Energy of the reference structure is not specify in',&
-&    ' the input file.',ch10,' Energy will set to zero):',ch10
-    call wrtout(std_out,message,'COLL')
-    call wrtout(ab_out,message,'COLL')
-
+  if (ddb_get_etotal(ddb,effective_potential%energy) == 0) then
+    if(inp%energy_reference==zero)then
+      write(message,'(5a)')&
+&      ' Warning : Energy of the reference structure is not specify in',&
+&      ' the input file.',ch10,' Energy will set to zero',ch10
+      call wrtout(std_out,message,'COLL')
+      effective_potential%energy = zero
+    else
+      effective_potential%energy = inp%energy_reference
+    end if
   else
-    effective_potential%energy = inp%energy_reference
-    write(message,'(a,es25.12)') ' Energy = ',&
-&                  effective_potential%energy
-    call wrtout(std_out,message,'COLL')
-    call wrtout(ab_out,message,'COLL')
+    if(inp%energy_reference/=zero)then
+      write(message,'(6a)')&
+&      ' Warning : Energy of the reference structure is specify in',&
+&      ' the input file.',ch10,' and in the DDB.',&
+&      ' The value of the energy is set with the value from the input file',ch10
+      call wrtout(std_out,message,'COLL')
+    end if
   end if
-
+  write(message,'(a,es25.12)') ' Energy  = ',&
+&                    effective_potential%energy
+  call wrtout(std_out,message,'COLL')
+  call wrtout(ab_out,message,'COLL')
+  
 !**********************************************************************
 ! Dielectric Tensor and Effective Charges
 !**********************************************************************
@@ -2148,7 +2159,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   do irpt = 1,nrpt_new
     if (sum(wghatm_red(:,:,irpt)) /= 0) then
       irpt2 = irpt2 + 1 
-      !  Apply weight on each R point
+!     Apply weight on each R point
       do ia=1,effective_potential%crystal%natom 
         do ib=1,effective_potential%crystal%natom 
           atmfrc_red(:,:,ia,:,ib,irpt) = atmfrc_red(:,:,ia,:,ib,irpt)*wghatm_red(ia,ib,irpt) 
@@ -2271,6 +2282,9 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  use m_effective_potential, only : effective_potential_type
  use m_polynomial_coeff
  use m_polynomial_term
+#if defined HAVE_LIBXML
+ use iso_c_binding, only : C_CHAR,C_PTR,c_f_pointer
+#endif
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2293,16 +2307,26 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  integer :: ii,jj,kk,my_rank,ndisp,ncoeff,nproc,nterm
  real(dp):: coefficient,weight
  character(len=200) :: name
- character(len=500) :: message
- integer,parameter :: master=0
- logical :: iam_master
+#ifdef HAVE_LIBXML
+ type(C_PTR) :: name_tmp
+ character(kind=C_CHAR,len=1),pointer :: name_tmp2
+ integer :: funit = 1,ios = 0
+ integer :: icoeff,idisp,iterm
+ logical :: found
+ character (len=XML_RECL) :: line,readline
+ character (len=XML_RECL) :: strg,strg1
+#endif
+
 #ifndef HAVE_LIBXML
  integer :: funit = 1,ios = 0
  integer :: icoeff,idisp,iterm,mu
  logical :: found,found2,displacement
  character (len=XML_RECL) :: line,readline
- character (len=XML_RECL) :: strg,strg1
+ character (len=XML_RECL) :: strg,strg1 
 #endif
+ character(len=500) :: message
+ integer,parameter :: master=0
+ logical :: iam_master
  logical :: debug =.FALSE.
  !arrays
  integer,allocatable :: atindx(:,:), cell(:,:,:),direction(:),power(:)
@@ -2342,13 +2366,62 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
-  !Read with libxml librarie
+!  Read all the coefficients
    do ii=1,ncoeff
+    !Read with libxml librarie
 
 #if defined HAVE_LIBXML
 !    1- Read the number of terms and diplacement for this coefficients
-     call effpot_xml_getDimTerm(char_f2c(trim(filename)),ii,ndisp,nterm)
+     call effpot_xml_getDimTerm(char_f2c(trim(filename)),ii,name_tmp,ndisp,nterm)
+
+!  AM_NEED TO FIX BUG IN THE READING OF THE NAME
+!    Convert character from C 
+     call c_f_pointer(name_tmp,name_tmp2)
+     call char_c2f(name_tmp2,name)
+!    AM_TEST
+! Read by hand nedd to fix bug
+     name = ''
+     if (open_file(filename,message,unit=funit,form="formatted",&
+&                 status="old",action="read") /= 0) then
+       MSG_ERROR(message)
+     end if
+!Start a reading loop in fortran
+     rewind(unit=funit)
+     ios = 0
+     found=.false.
+!  Initialisation of counter
+     icoeff  = zero
+     iterm   = zero
+     idisp   = zero
+!    Parser     
+     do while (ios == 0..and..not.found)
+       read(funit,'(a)',iostat=ios) readline
+       if(ios == 0)then
+         call rmtabfromline(readline)
+         line=adjustl(readline)
+         if ((line(1:12)==char(60)//'coefficient')) then
+           call rdfromline('number',line,strg)
+           if (strg/="") then 
+             strg1=trim(strg)
+             read(strg1,*) icoeff
+           end if
+           if (icoeff==ii)then
+             call rdfromline('text',line,strg)
+             if (strg/="") then 
+               strg1=trim(strg)
+               read(strg1,*) name
+               found = .true.
+               cycle
+             end if
+           end if
+         end if
+       end if
+     end do
+     close(unit=funit)
+!    AM_TEST
+
 #else
+
 ! Read by hand
      if (open_file(filename,message,unit=funit,form="formatted",&
 &                 status="old",action="read") /= 0) then
@@ -2379,6 +2452,11 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
              read(strg1,*) icoeff
            end if
            if (icoeff==ii)then
+             call rdfromline('text',line,strg)
+             if (strg/="") then 
+               strg1=trim(strg)
+               read(strg1,*) name
+             end if
              do while (.not.found)
                read(funit,'(a)',iostat=ios) readline
                call rmtabfromline(readline)
@@ -2406,6 +2484,8 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
          end if
        end if
      end do
+
+     close(unit=funit)
 
      nterm = iterm
      ndisp = idisp
@@ -2435,8 +2515,9 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !    3- Loop over the number of term of this coefficient
      do jj=1,nterm
 !      4-Read the values of this term with libxml
-       call effpot_xml_readTerm(char_f2c(trim(filename)),ii,jj,ndisp,nterm,atindx,cell,direction,&
-&                              power,weight)
+       call effpot_xml_readTerm(char_f2c(trim(filename)),ii,jj,ndisp,nterm,&
+&                               atindx,cell,direction,power,weight)
+
 !     5-In the XML the atom index begin to zero
 !       Need to shift for fortran array
        atindx(:,:) = atindx(:,:) + 1 
@@ -3000,7 +3081,11 @@ end subroutine rdfromline_value
 !!
 !! SOURCE
 
+#if defined HAVE_LIBXML
+
 function char_f2c(f_string) result(c_string)
+
+ use iso_c_binding, only : C_CHAR,C_NULL_CHAR
 !Arguments ------------------------------------
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3046,6 +3131,8 @@ end function char_f2c
 !! SOURCE
 
 subroutine char_c2f(c_string,f_string)
+
+ use iso_c_binding, only : C_CHAR,C_NULL_CHAR
 !Arguments ------------------------------------
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3066,6 +3153,7 @@ subroutine char_c2f(c_string,f_string)
  if (ii<len(f_string)) f_string(ii:)=' '
 end subroutine char_c2f
 !!***
+#endif
 
 end module m_effective_potential_file
 !!***
