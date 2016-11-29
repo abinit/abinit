@@ -85,12 +85,28 @@ MODULE m_skw
   complex(dpc),allocatable :: coef(:,:,:)
    ! coef(nr, nbc, nsppol)
 
+  complex(dpc),allocatable :: cached_srk(:)
+   ! cached_srk(skw%nr)
+   ! The star function for cached_kpt (used in skw_eval_bks)
+  real(dp) :: cached_kpt(3)
+
+  complex(dpc),allocatable :: cached_srk_dk1(:,:)
+   ! cached_srk_dk1(skw%nr, 3)
+   ! The 1d derivative wrt k of the star function for cached_kpt_dk1 (used in skw_eval_bks)
+  real(dp),private :: cached_kpt_dk1(3)
+
+  complex(dpc),allocatable :: cached_srk_dk2(:,:,:)
+   ! cached_srk_dk2(skw%nr,3,3)
+   ! The 2d derivatives wrt k of the star function for cached_kpt_dk2 (used in skw_eval_bks)
+  real(dp) :: cached_kpt_dk2(3)
+
  end type skw_t
 
- public :: skw_new      ! Create new object.
- public :: skw_print    ! Print info about object.
- public :: skw_evalk    ! Evaluate the interpolated eigenvalues.
- public :: skw_free     ! Free memory.
+ public :: skw_new          ! Create new object.
+ public :: skw_print        ! Print info about object.
+ public :: skw_evalk        ! Evaluate the interpolated eigenvalues at an arbitrary k-point.
+ public :: skw_eval_bks     ! Interpolate eigenvalues, 1st, 2nd derivates wrt k, at an arbitrary k-point.
+ public :: skw_free         ! Free memory.
 !!***
 
 CONTAINS  !=====================================================================================
@@ -174,7 +190,7 @@ type(skw_t) function skw_new(cryst, cplex, bstart, bcount, nband, nkpt, nsppol, 
  nk = new%nk; nr = new%nr
  ABI_MALLOC(srk, (nr, nk))
  do ik=1,nkpt
-   call mkstar_(new, cryst, kpts(:,ik), srk(:,ik))
+   call mkstar(new, cryst, kpts(:,ik), srk(:,ik))
  end do
 
  ! Compute roughness function.
@@ -236,6 +252,14 @@ type(skw_t) function skw_new(cryst, cplex, bstart, bcount, nband, nkpt, nsppol, 
      new%coef(1,ib,spin) = eig(band,nk,spin) - dot_product(conjg(new%coef(2:nr, ib,spin)), srk(2:nr, nk))
    end do
  end do
+
+ ! Prepare workspace arrays.
+ new%cached_kpt = huge(one)
+ ABI_MALLOC(new%cached_srk, (new%nr))
+ new%cached_kpt_dk1 = huge(one)
+ ABI_MALLOC(new%cached_srk_dk1, (new%nr, 3))
+ new%cached_kpt_dk2 = huge(one)
+ ABI_MALLOC(new%cached_srk_dk2, (new%nr, 3, 3))
 
  ABI_FREE(srk)
  ABI_FREE(rhor)
@@ -343,7 +367,7 @@ subroutine skw_evalk(skw, cryst, kpt, spin, oeig)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: spin
- type(skw_t),intent(in) :: skw
+ type(skw_t),intent(inout) :: skw
  type(crystal_t),intent(in) :: cryst
 !arrays
  real(dp),intent(in) :: kpt(3)
@@ -352,21 +376,111 @@ subroutine skw_evalk(skw, cryst, kpt, spin, oeig)
 !Local variables-------------------------------
 !scalars
  integer :: ib
-!arrays
- complex(dpc) :: srk(skw%nr)
 
 ! *********************************************************************
 
- ! Compute star function for this k-point
- call mkstar_(skw, cryst, kpt, srk)
-
  do ib=1,skw%nbc
-   oeig(ib) = dot_product(conjg(skw%coef(:,ib,spin)), srk)
+   call skw_eval_bks(skw, cryst, ib, kpt, spin, oeig(ib))
  end do
 
- ! TODO: Derivatives
-
 end subroutine skw_evalk
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_skw/skw_eval_bks
+!! NAME
+!!  skw_eval_bks
+!!
+!! FUNCTION
+!!  Interpolate the energies for an arbitrary k-point and spin with slow FT.
+!!
+!! INPUTS
+!!  cryst<crystal_t>=Crystalline structure.
+!!  band=Band index.
+!!  kpt(3)=K-point in reduced coordinates.
+!!  spin=Spin index.
+!!
+!! OUTPUT
+!!  oeig=interpolated eigenvalues
+!!    Note that oeig is not necessarily sorted in ascending order.
+!!    The routine does not reorder the interpolated eigenvalues
+!!    to be consistent with the interpolation of the derivatives.
+!!  [oder1(3)]=First-order derivatives wrt k in reduced coordinates.
+!!  [oder2(3,3)]=Second-order derivatives wrt k in reduced coordinates.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine skw_eval_bks(skw, cryst, band, kpt, spin, oeig, oder1, oder2)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'skw_eval_bks'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: band,spin
+ type(skw_t),intent(inout) :: skw
+ type(crystal_t),intent(in) :: cryst
+!arrays
+ real(dp),intent(in) :: kpt(3)
+ real(dp),intent(out) :: oeig
+ real(dp),optional,intent(out) :: oder1(3)
+ real(dp),optional,intent(out) :: oder2(3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ib,ii,jj
+! *********************************************************************
+
+ ! Compute star function for this k-point (if not already in memory)
+ if (any(kpt /= skw%cached_kpt)) then
+   call mkstar(skw, cryst, kpt, skw%cached_srk)
+   skw%cached_kpt = kpt
+ end if
+
+ ib = band
+ oeig = dot_product(conjg(skw%coef(:,ib,spin)), skw%cached_srk)
+
+ ! TODO: Finalize Derivatives
+
+ if (present(oder1)) then
+   ! Compute first-order derivatives.
+   if (any(kpt /= skw%cached_kpt_dk1)) then
+     call mkstar_dk1(skw, cryst, kpt, skw%cached_srk_dk1)
+     skw%cached_kpt_dk1 = kpt
+   end if
+   do ii=1,3
+     oder1(ii) = dot_product(conjg(skw%coef(:,ib,spin)), skw%cached_srk_dk1(:,ii))
+   end do
+ end if
+
+ if (present(oder2)) then
+   ! Compute second-order derivatives.
+   if (any(kpt /= skw%cached_kpt_dk2)) then
+     call mkstar_dk2(skw, cryst, kpt, skw%cached_srk_dk2)
+     skw%cached_kpt_dk2 = kpt
+   end if
+
+   oder2 = zero
+   do jj=1,3
+     do ii=1,jj
+       oder2(ii, jj) = dot_product(conjg(skw%coef(:,ib,spin)), skw%cached_srk_dk2(:,ii,jj))
+       if (ii /= jj) oder2(jj, ii) = oder2(ii, jj)
+     end do
+   end do
+ end if
+
+end subroutine skw_eval_bks
 !!***
 
 !----------------------------------------------------------------------
@@ -418,7 +532,7 @@ subroutine skw_eval_kgrid(skw, cryst, ngkpt, spin)
 ! *********************************************************************
 
  ! Compute star function for this k-point
- !call mkstar_(skw, cryst, kpt, srk)
+ !call mkstar(skw, cryst, kpt, srk)
 
  !do band=1,skw%nbc
  !  oeig(band) = dot_product(conjg(skw%coef(:,band,spin)), srk)
@@ -469,6 +583,21 @@ subroutine skw_free(skw)
  if (allocated(skw%coef)) then
    ABI_FREE(skw%coef)
  end if
+
+ if (allocated(skw%cached_srk)) then
+   ABI_FREE(skw%cached_srk)
+ end if
+ skw%cached_kpt = huge(one)
+
+ if (allocated(skw%cached_srk_dk1)) then
+   ABI_FREE(skw%cached_srk_dk1)
+ end if
+ skw%cached_kpt_dk1 = huge(one)
+
+ if (allocated(skw%cached_srk_dk2)) then
+   ABI_FREE(skw%cached_srk_dk2)
+ end if
+ skw%cached_kpt_dk2 = huge(one)
 
 end subroutine skw_free
 !!***
@@ -589,12 +718,12 @@ end subroutine genrpts_
 
 !----------------------------------------------------------------------
 
-!!****f* m_skw/mkstar_
+!!****f* m_skw/mkstar
 !! NAME
-!!  mkstar_
+!!  mkstar
 !!
 !! FUNCTION
-!!  Compute the star function at the given k-point kpt
+!!  Compute the star function for k-point kpt
 !!
 !! INPUTS
 !!  cryst<crystal_t>=Crystalline structure.
@@ -609,13 +738,13 @@ end subroutine genrpts_
 !!
 !! SOURCE
 
-subroutine mkstar_(skw, cryst, kpt, srk)
+subroutine mkstar(skw, cryst, kpt, srk)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'mkstar_'
+#define ABI_FUNC 'mkstar'
 !End of the abilint section
 
  implicit none
@@ -680,7 +809,115 @@ subroutine mkstar_(skw, cryst, kpt, srk)
  end do
 #endif
 
-end subroutine mkstar_
+end subroutine mkstar
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_skw/mkstar_dk1
+!! NAME
+!!  mkstar_dk1
+!!
+!! FUNCTION
+!!  Compute the 1st derivative of the star function wrt k
+!!
+!! INPUTS
+!!  cryst<crystal_t>=Crystalline structure.
+!!  kpt(3)=K-point in reduced coordinates.
+!!
+!! OUTPUT
+!!  srk_dk1(%nr,3)=Derivative of the star function wrt k
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine mkstar_dk1(skw, cryst, kpt, srk_dk1)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'mkstar'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(skw_t),intent(in) :: skw
+ type(crystal_t),intent(in) :: cryst
+!arrays
+ real(dp),intent(in) :: kpt(3)
+ complex(dpc),intent(out) :: srk_dk1(skw%nr,3)
+
+!Local variables-------------------------------
+!scalars
+ !integer :: ik,ir,isym,my_nsym,nkstar
+!arrays
+ !integer :: g0(3),mit(3,3)
+ !real(dp) :: kstar(3,cryst%nsym),new_sk(3)
+
+! *********************************************************************
+
+ srk_dk1 = zero
+
+end subroutine mkstar_dk1
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_skw/mkstar_dk2
+!! NAME
+!!  mkstar_dk2
+!!
+!! FUNCTION
+!!  Compute the 2st derivatives of the star function wrt k
+!!
+!! INPUTS
+!!  cryst<crystal_t>=Crystalline structure.
+!!  kpt(3)=K-point in reduced coordinates.
+!!
+!! OUTPUT
+!!  srk_dk2(%nr,3,3)=2nd derivatives of the star function wrt k
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine mkstar_dk2(skw, cryst, kpt, srk_dk2)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'mkstar'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(skw_t),intent(in) :: skw
+ type(crystal_t),intent(in) :: cryst
+!arrays
+ real(dp),intent(in) :: kpt(3)
+ complex(dpc),intent(out) :: srk_dk2(skw%nr,3,3)
+
+!Local variables-------------------------------
+!scalars
+ !integer :: ik,ir,isym,my_nsym,nkstar
+!arrays
+ !integer :: g0(3),mit(3,3)
+ !real(dp) :: kstar(3,cryst%nsym),new_sk(3)
+
+! *********************************************************************
+
+ srk_dk2 = zero
+
+end subroutine mkstar_dk2
 !!***
 
 !----------------------------------------------------------------------

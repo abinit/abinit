@@ -2552,7 +2552,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
    where (abs(phfrq) > tol16)
      rel_err = adiff_meV / abs(phfrq)
    end where
-   rel_err = 100 * rel_err; adiff_meV = adiff_meV * Ha_eV * 1000
+   rel_err = 100 * rel_err; adiff_meV = adiff_meV * Ha_meV
    mae_bspl = mae_bspl + sum(adiff_meV) / natom3
    mare_bspl = mare_bspl + sum(rel_err) / natom3
    !if (my_rank == master)
@@ -2570,7 +2570,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
    where (abs(phfrq) > tol16)
      rel_err = adiff_meV / abs(phfrq)
    end where
-   rel_err = 100 * rel_err; adiff_meV = adiff_meV * Ha_eV * 1000
+   rel_err = 100 * rel_err; adiff_meV = adiff_meV * Ha_meV
    mae_skw = mae_skw + sum(adiff_meV) / natom3
    mare_skw = mare_skw + sum(rel_err) / natom3
    !if (my_rank == master) then
