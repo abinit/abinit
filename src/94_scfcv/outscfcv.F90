@@ -341,6 +341,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  me = xmpi_comm_rank(spacecomm)
 
  paral_atom=(my_natom/=natom)
+ my_comm_atom = mpi_enreg%comm_atom
  nullify(my_atmtab)
  if (paral_atom) then
    call get_my_atmtab(mpi_enreg%comm_atom, my_atmtab, my_atmtab_allocated, paral_atom,natom,my_natom_ref=my_natom)
@@ -819,10 +820,11 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
          ABI_DEALLOCATE(vh1_corrector)
        end do ! iatom_
      end do !ispden
-     ! MPI collect vwork on atoms
-     !if (dtset%natom/=my_natom) call xmpi_sum(vwork,mpi_enreg%comm_atom,ierr)
      !if (paral_fft) call xmpi_sum(vwork,mpi_enreg%comm_fft,ierr)
    end if ! if paw: adds all electron vhartree in spheres
+
+   ! MPI collect vwork on atoms
+   if (psps%usepaw > 0 .and. dtset%natom/=my_natom) call xmpi_sum(vwork,my_comm_atom,ierr)
 
    ! add the non-PAW part of the potential
    do ispden=1,nspden
