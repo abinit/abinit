@@ -736,61 +736,6 @@ call wrtout(std_out,message,'PERS')
    if (psps%usepaw > 0 .and. maxval(pawfgrtab(:)%nfgd) > 0) then
      nradint = 1000 ! radial integration grid density
 
-     my_comm_atom = mpi_enreg%comm_atom
-write (message, '(a)') "shapes before loops "
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') 'paw_an ', shape(paw_an)
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') 'pawfgrtab ', shape(pawfgrtab)
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') 'dtset%typat ', shape(dtset%typat)
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') 'me_fft ', me_fft
-call wrtout(std_out,message,'PERS')
-write (message, '(a,2i6)') 'nfgd ', pawfgrtab(:)%nfgd
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') 'comm_atom ', mpi_enreg%comm_atom
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') 'comm_world ', mpi_enreg%comm_world
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') 'xmpi_comm_self ', xmpi_comm_self
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') 'mpi_enreg%comm_band ', mpi_enreg%comm_band
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') '   mpi_enreg%comm_cell           ', mpi_enreg%comm_cell         
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') '   mpi_enreg%comm_fft            ', mpi_enreg%comm_fft          
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') '   mpi_enreg%comm_band           ', mpi_enreg%comm_band         
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') '   mpi_enreg%comm_hf             ', mpi_enreg%comm_hf           
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') '   mpi_enreg%comm_kpt            ', mpi_enreg%comm_kpt          
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') '   mpi_enreg%comm_kptband        ', mpi_enreg%comm_kptband      
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') '   mpi_enreg%comm_spinor         ', mpi_enreg%comm_spinor       
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') '   mpi_enreg%comm_bandspinor     ', mpi_enreg%comm_bandspinor   
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') '   mpi_enreg%comm_spinorfft      ', mpi_enreg%comm_spinorfft    
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') '   mpi_enreg%comm_bandfft        ', mpi_enreg%comm_bandfft      
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') '   mpi_enreg%comm_bandspinorfft  ', mpi_enreg%comm_bandspinorfft
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') '    mpi_enreg%comm_pert ', mpi_enreg%comm_pert
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') '    mpi_enreg%comm_img ', mpi_enreg%comm_img
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') '    mpi_enreg%comm_cell_pert ', mpi_enreg%comm_cell_pert
-call wrtout(std_out,message,'PERS')
-write (message, '(a,i6)') '    mpi_enreg%comm_wvl     ', mpi_enreg%comm_wvl    
-call wrtout(std_out,message,'PERS')
-write (message, '(a,2i6)') 'atmtab ', my_atmtab
-call wrtout(std_out,message,'PERS')
-
-
      do ispden=1,nspden
        ! for points inside spheres, replace with full AE hartree potential.
        ! In principle the correction could be more subtle (not spherical)
