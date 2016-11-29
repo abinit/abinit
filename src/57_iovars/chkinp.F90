@@ -3179,9 +3179,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      if(abs(dt%tolvrs)>tiny(zero))ttolvrs=1
 
      ! If non-scf calculations, tolwfr must be defined
-     if(ttolwfr /= 1 .and. (dt%iscf<0 .and. dt%iscf/=-3) )then
+     if(ttolwfr /= 1 .and. ((dt%iscf<0 .and. dt%iscf/=-3) .or. dt%rf2_dkdk/=0 .or. dt%rf2_dkde/=0))then
        write(message,'(a,a,a,es14.6,a,a)')&
-&       'when iscf <0 and /= -3, tolwfr must be strictly',ch10,&
+&       'when iscf <0 and /= -3, or when rf2_dkdk/=0 or rf2_dkde/=0, tolwfr must be strictly',ch10,&
 &       'positive, while it is ',dt%tolwfr,ch10,&
 &       'Action: change tolwfr in your input file and resubmit the job.'
        MSG_ERROR_NOSTOP(message, ierr)
