@@ -221,14 +221,6 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
    ipert1=rf2%iperts(kdir1)
    do iband=1,nband_k
      call wfk_read_bks(ddk_f(file_index(kdir1)),iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
-!    Filter the wavefunctions for large modified kinetic energy
-!    The GS wavefunctions should already be non-zero
-     do ispinor=1,gs_hamkq%nspinor
-       igs=(ispinor-1)*gs_hamkq%npw_k
-       do ipw=1+igs,gs_hamkq%npw_k+igs
-         if(gs_hamkq%kinpw_kp(ipw-igs)>huge(zero)*1.d-11) ddk_read(1:2,ipw)=zero
-       end do
-     end do
 !    Copy ddk_read in "dudk"
      shift_band1=(iband-1)*size_wf
      shift_dir1=(kdir1-1)*nband_k*size_wf
