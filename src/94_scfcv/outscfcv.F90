@@ -731,8 +731,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    ABI_ALLOCATE(vwork,(nfft,nspden))
    vwork = zero
 
-write (message, '(a,i6)') ' on proc ', me_fft
-call wrtout(std_out,message,'PERS')
    if (psps%usepaw > 0 .and. maxval(pawfgrtab(:)%nfgd) > 0) then
      nradint = 1000 ! radial integration grid density
 
@@ -764,8 +762,6 @@ call wrtout(std_out,message,'PERS')
            isort(ifgd) = ifgd
            radii(ifgd) = sqrt(sum(pawfgrtab(iatom_)%rfgd(:,ifgd)**2))
          end do
-         write(message,'(a,2i6)') 'me_fft, nfgd ', me_fft, pawfgrtab(iatom_)%nfgd
-         call wrtout(std_out,message,'PERS')
          call sort_dp(pawfgrtab(iatom_)%nfgd, radii, isort, tol12)
 
          ! spline interpolate the vh1 value for current radii
