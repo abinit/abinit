@@ -149,7 +149,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: edos_step,edos_broad
  real(dp) :: cpu,wall,gflops
- logical :: usewfq
+ logical :: use_wfq,use_dvdb
  character(len=500) :: msg
  character(len=fnlen) :: wfk0_path,wfq_path,ddb_path,dvdb_path,path
  character(len=fnlen) :: ddk_path(3)
@@ -214,7 +214,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  wfq_path = dtfil%fnamewffq
  ddb_path = dtfil%filddbsin
  dvdb_path = dtfil%filddbsin; ii=len_trim(dvdb_path); dvdb_path(ii-2:ii+1) = "DVDB"
- usewfq = (dtset%irdwfq/=0 .or. dtset%getwfq/=0)
+ use_wfq = (dtset%irdwfq/=0 .or. dtset%getwfq/=0)
+ use_dvdb = (dtset%eph_task /= 0)
 
  ddk_path(1) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+1))
  ddk_path(2) = strcat(dtfil%fnamewffddk, itoa(3*dtset%natom+2))
@@ -222,14 +223,14 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  if (my_rank == master) then
    if (.not. file_exists(ddb_path)) MSG_ERROR(sjoin("Cannot find DDB file:", ddb_path))
-   if (.not. file_exists(dvdb_path)) MSG_ERROR(sjoin("Cannot find DVDB file:", dvdb_path))
+   if (use_dvdb .and. .not. file_exists(dvdb_path)) MSG_ERROR(sjoin("Cannot find DVDB file:", dvdb_path))
 
    ! Accept WFK file in Fortran or netcdf format.
    if (nctk_try_fort_or_ncfile(wfk0_path, msg) /= 0) then
      MSG_ERROR(sjoin("Cannot find GS WFK file:", wfk0_path, msg))
    end if
    ! WFQ file
-   if (usewfq) then
+   if (use_wfq) then
      if (nctk_try_fort_or_ncfile(wfq_path, msg) /= 0) then
        MSG_ERROR(sjoin("Cannot find GS WFQ file:", wfq_path, msg))
      end if
@@ -248,12 +249,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
  call xmpi_bcast(wfk0_path,master,comm,ierr)
  call wrtout(ab_out, sjoin("- Reading GS states from WFK file:", wfk0_path))
- if (usewfq) then
+ if (use_wfq) then
    call xmpi_bcast(wfq_path,master,comm,ierr)
    call wrtout(ab_out, sjoin("- Reading GS states from WFQ file:", wfq_path) )
  end if
  call wrtout(ab_out, sjoin("- Reading DDB from file:", ddb_path))
- call wrtout(ab_out, sjoin("- Reading DVDB from file:", dvdb_path))
+ if (use_dvdb) call wrtout(ab_out, sjoin("- Reading DVDB from file:", dvdb_path))
  if (dtset%eph_transport > 0) then
    call xmpi_bcast(ddk_path,master,comm,ierr)
    call wrtout(ab_out, sjoin("- Reading DDK x from file:", ddk_path(1)))
@@ -283,7 +284,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! fermie is set to 0 if nscf!
 
  ! Read WFQ and construct ebands on the shifted grid.
- if (usewfq) then
+ if (use_wfq) then
    call wfk_read_eigenvalues(wfq_path,gs_eigen,wfq_hdr,comm) !,gs_occ)
    !call hdr_vs_dtset(wfq_hdr,dtset)  ! GKA TODO: Have to construct a header with the proper set of q-shifted k-points
                                       !           then compare against file.
@@ -302,7 +303,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
    call wrtout(ab_out,msg)
    call ebands_set_scheme(ebands,dtset%occopt,dtset%tsmear,spinmagntarget,dtset%prtvol)
-   if (usewfq) then
+   if (use_wfq) then
      call ebands_set_scheme(ebands_kq,dtset%occopt,dtset%tsmear,spinmagntarget,dtset%prtvol)
    end if
  end if
@@ -312,7 +313,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call wrtout(ab_out, sjoin(" Fermi level set by the user at:",ftoa(dtset%eph_fermie)))
    call ebands_set_fermie(ebands, dtset%eph_fermie, msg)
    call wrtout(ab_out,msg)
-   if (usewfq) then
+   if (use_wfq) then
      call ebands_set_fermie(ebands_kq, dtset%eph_fermie, msg)
      call wrtout(ab_out,msg)
    end if
@@ -322,7 +323,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! TODO: Be careful with the trick used in elphon for passing the concentration
    !call ebands_set_nelect(ebands, dtset%eph_extrael, spinmagntarget, msg)
    !call wrtout(ab_out,msg)
-   !if (usewfq) then
+   !if (use_wfq) then
    !  call ebands_set_nelect(ebands_kq, dtset%eph_extrael, spinmagntarget, msg)
    !  call wrtout(ab_out,msg)
    !end if
@@ -330,7 +331,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  call ebands_update_occ(ebands, spinmagntarget)
  call ebands_print(ebands,header="Ground state energies",prtvol=dtset%prtvol)
- if (usewfq) then
+ if (use_wfq) then
    call ebands_update_occ(ebands_kq, spinmagntarget)
    call ebands_print(ebands_kq,header="Ground state energies (K+Q)",prtvol=dtset%prtvol)
  end if
@@ -393,7 +394,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
 #if 0
  !call ebands_set_interpolator(ebands, cryst, bstart, bcount, mode, espline_ords, eskw_ratio, comm)
- !call ebands_test_intepolator(ifc, dtset, dtfil, comm)
+ !call ebands_test_intepolator(ifc, dtset, dtfil%filnam_ds(4), comm)
  ! Test the interpolation of electronic bands.
  skw = skw_new(cryst, 1, 1, ebands%mband, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, comm)
  call skw_free(skw)
@@ -405,7 +406,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ebands_bspl = ebands_bspline(ebands, cryst, [3,3,3], kptrlatt_spl, nshiftk_spl, shiftk_spl, comm)
  ABI_FREE(shiftk_spl)
 
- if (my_rank == master) then ! .and. (ebands%mband < 100 .or. dtset%printxmgr == 1)
+ if (my_rank == master) then ! .and. (ebands%mband < 100 .or. dtset%prtebands == 1)
    call ebands_write_xmgrace(ebands_bspl, strcat(dtfil%filnam_ds(4), "_EBANDS_BSPLINE.xmgr"))
  end if
 
@@ -515,11 +516,13 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call wrtout(std_out, msg, do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
 
- ! Initialize the object used to read DeltaVscf
- call dvdb_init(dvdb, dvdb_path, comm)
- if (my_rank == master) then
-   call dvdb_print(dvdb)
-   call dvdb_list_perts(dvdb, [-1,-1,-1], unit=ab_out)
+ ! Initialize the object used to read DeltaVscf (required if eph_tash /= 0)
+ if (use_dvdb) then
+   call dvdb_init(dvdb, dvdb_path, comm)
+   if (my_rank == master) then
+     call dvdb_print(dvdb)
+     call dvdb_list_perts(dvdb, [-1,-1,-1], unit=ab_out)
+   end if
  end if
 
  ! TODO Recheck getng, should use same trick as that used in screening and sigma.
@@ -585,7 +588,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call ddk_free(ddk)
  call ifc_free(ifc)
  call ebands_free(ebands)
- if (usewfq) call ebands_free(ebands_kq)
+ if (use_wfq) call ebands_free(ebands_kq)
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
 
