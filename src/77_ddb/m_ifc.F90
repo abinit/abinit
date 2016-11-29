@@ -2414,7 +2414,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
  mae_bspl = zero; mare_bspl = zero
  mae_skw = zero; mare_skw = zero
 
- nq = 5000
+ nq = 1000
  !call random_seed(put=my_rank*100)
  do iq=1,nq
    if (mod(iq, nprocs) /= my_rank) cycle ! mpi parallelism
