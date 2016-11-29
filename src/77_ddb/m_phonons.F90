@@ -1065,7 +1065,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
 !scalars
  integer,parameter :: master=0
  integer :: iphl1,iblok,rftyp, ii,nfineqpath,nsym,natom,ncid,nprocs,my_rank
- integer :: ifcflag,natprj_bs,eivec,enunit
+ integer :: natprj_bs,eivec,enunit,ifcflag
  real(dp) :: tcpu,twall
  real(dp) :: freeze_displ
  character(len=fnlen) :: tmpfilename
@@ -1172,10 +1172,11 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
      call asrq0_apply(asrq0, natom, ddb%mpert, ddb%msize, crystal%xcart, d2cart)
    end if
 
-   !  Calculation of the eigenvectors and eigenvalues of the dynamical matrix
+   ! Use inp%symdynmat instead of ifc because of ifcflag
+   ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
    call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,Crystal%indsym,&
 &   ddb%mpert,Crystal%nsym,natom,nsym,Crystal%ntypat,phfrq,qphnrm(1),qphon,&
-&   crystal%rprimd,ifc%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
+&   crystal%rprimd,inp%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
 
    if (abs(freeze_displ) > tol10) then
      real_qphon = zero
