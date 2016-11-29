@@ -177,7 +177,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 !arrays
  real(dp) :: dummy(0,0),tsec(2)
  real(dp),allocatable :: conjgr(:,:),cwaveq(:,:),cwwork(:,:),direc(:,:)
- real(dp),allocatable :: gberry(:,:),gh1c(:,:),gh_direc(:,:),gresid(:,:)
+ real(dp),allocatable :: gberry(:,:),gh1c(:,:),gh_direc(:,:),gresid(:,:),gvnl1_saved(:,:)
  real(dp),allocatable :: gs1c(:,:),gvnl_direc(:,:),pcon(:),sconjgr(:,:)
  real(dp),allocatable :: scprod(:,:),work(:,:),work1(:,:),work2(:,:)
  real(dp),pointer :: kinpw1(:)
@@ -325,6 +325,10 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      sij_opt=0
    end if
    usevnl=1; optlocal=1; optnl=2
+   if (prtvol==-level.or.prtvol==-19) then
+     ABI_ALLOCATE(gvnl1_saved,(2,npw1*nspinor))
+     gvnl1_saved(:,:) = gvnl1(:,:)
+   end if
    call getgh1c(berryopt,cwave0,cwaveprj0,gh1c,gberry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,&
 &   mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 
@@ -869,7 +873,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
 !  Check that final cwavef (Psi^(1)) satisfies the orthogonality condition
    if (prtvol==-level.or.prtvol==-19) then
-     sij_opt=0 ; usevnl=0 ; optlocal=1 ; optnl=2 ; if (gen_eigenpb)  sij_opt=1
+     sij_opt=0 ; usevnl=1 ; optlocal=1 ; optnl=2 ; if (gen_eigenpb)  sij_opt=1
      ABI_ALLOCATE(work,(2,npw1*nspinor))
      ABI_ALLOCATE(work1,(2,npw1*nspinor))
      ABI_ALLOCATE(work2,(2,npw1*nspinor*sij_opt))
@@ -884,7 +888,7 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
 
        if (ipert/=natom+10.and.ipert/=natom+11) then
          if (gen_eigenpb) then
-           call getgh1c(berryopt,cwave0,cwaveprj0,work1,gberry,work2,gs_hamkq,dummy,idir,ipert,eshift,&
+           call getgh1c(berryopt,cwave0,cwaveprj0,work1,gberry,work2,gs_hamkq,gvnl1_saved,idir,ipert,eshift,&
 &           mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
            work(:,:)=cgq(:,1+npw1*nspinor*(iband-1)+icgq:npw1*nspinor*iband+icgq)
            call dotprod_g(dotr,doti,istwf_k,npw1*nspinor,2,work,work2,me_g0,mpi_enreg%comm_spinorfft)
@@ -897,8 +901,8 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
          dotr=prod1+half*rf2%amn(1,iband+(band-1)*nband)
          doti=prod2+half*rf2%amn(2,iband+(band-1)*nband)
        else
-         write(msg,'(a)') 'Use prtvol=-19 for ipert=natom+10 or +11'
-         MSG_BUG(msg)
+         write(msg,'(a)') 'CGWF3_WARNING : Use prtvol=-19 to test orthogonality for ipert=natom+10 or +11'
+         call wrtout(std_out,msg,'COLL')
        end if
        dotr=sqrt(dotr**2+doti**2)
        if(dotr>tol10) then
@@ -914,6 +918,9 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
      ABI_DEALLOCATE(work)
      ABI_DEALLOCATE(work1)
      ABI_DEALLOCATE(work2)
+     if (ipert/=natom+10.and.ipert/=natom+11) then
+       ABI_DEALLOCATE(gvnl1_saved)
+     end if
    end if
 
 !  Check that final cwavef Psi^(1) is Pc.Psi^(1)+delta_Psi^(1)
