@@ -240,7 +240,7 @@ MODULE m_ebands
  end type ebspl_t
 
  public :: ebspl_new         ! Build B-spline object.
- public :: ebspl_evalk       ! Interpolate eigenvalues at an arbitrary k-point.
+ public :: ebspl_eval_bks    ! Interpolate eigenvalues, 1st, 2nd derivates wrt k, at an arbitrary k-point.
  public :: ebspl_free        ! Free memory.
 
 
@@ -3845,22 +3845,25 @@ end function ebspl_new
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/ebspl_evalk
+!!****f* m_ebands/ebspl_eval_bks
 !! NAME
-!! ebspl_evalk
+!! ebspl_eval_bks
 !!
 !! FUNCTION
-!!   Interpolate eigenvalues at an arbitrary k-point.
+!!   Interpolate eigenvalues, 1st and 2nd derivates wrt k at an arbitrary k-point.
 !!
 !! INPUTS
-!!  band_block(2)=Initial and final band index.
-!!  band_block(2)=Index of the first and last band defining the block of states to be interpolated
+!!  band=Band index
 !!  kpt(3)=K-point in reduced coordinate (will be wrapped in the interval [0,1[
 !!  spin=Spin index
 !!
 !! OUTPUT
-!!  oeig=Array of size band_block(2) - band_block(1) + 1 with the interpolated eigenvalues.
-!!  [oder1]
+!!  oeig=Interpolated eigenvalues.
+!!    Note that oeig is not necessarily sorted in ascending order.
+!!    The routine does not reorder the interpolated eigenvalues
+!!    to be consistent with the interpolation of the derivatives.
+!!  [oder1(3)]=First-order derivatives wrt k in reduced coordinates.
+!!  [oder2(3,3)]=Second-order derivatives wrt k in reduced coordinates.
 !!
 !! PARENTS
 !!      m_ebands
@@ -3871,63 +3874,76 @@ end function ebspl_new
 !!
 !! SOURCE
 
-subroutine ebspl_evalk(ebspl, band_block, kpt, spin, oeig, oder1)
+subroutine ebspl_eval_bks(ebspl, band, kpt, spin, oeig, oder1, oder2)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ebspl_evalk'
+#define ABI_FUNC 'ebspl_eval_bks'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: spin
+ integer,intent(in) :: band,spin
  type(ebspl_t),intent(in) :: ebspl
 !arrays
- integer,intent(in) :: band_block(2)
  real(dp),intent(in) :: kpt(3)
- real(dp),intent(out) :: oeig(:)
- real(dp),optional,intent(out) :: oder1(:,:)
+ real(dp),intent(out) :: oeig
+ real(dp),optional,intent(out) :: oder1(3)
+ real(dp),optional,intent(out) :: oder2(3,3)
 
 !Local variables-------------------------------
 !scalars
- integer :: band,ib,ii
+ integer :: ib,ii,jj
 !arrays
  integer :: iders(3)
  real(dp) :: kred(3),shift(3)
 
 ! *********************************************************************
 
- ABI_CHECK(size(oeig) >= (band_block(2) - band_block(1) + 1), "oeig too small")
+ ! TODO: Use bstart
+ ib = band
+ !ABI_CHECK(size(oeig) >= (band_block(2) - band_block(1) + 1), "oeig too small")
 
  ! Wrap k-point in the interval [0,1[ where 1 is not included (tol12)
  call wrap2_zero_one(kpt, kred, shift)
 
- ib = 0
- do band=band_block(1),band_block(2)
-   ib = ib +1
-   ! B-spline interpolation.
-   oeig(ib) = dbs3vl(kred(1), kred(2), kred(3), ebspl%kxord, ebspl%kyord, ebspl%kzord,&
-                     ebspl%xknot, ebspl%yknot, ebspl%zknot, ebspl%nkx, ebspl%nky, ebspl%nkz,&
-                     ebspl%coeff(band,spin)%vals)
+ ! B-spline interpolation.
+ oeig = dbs3vl(kred(1), kred(2), kred(3), ebspl%kxord, ebspl%kyord, ebspl%kzord, &
+               ebspl%xknot, ebspl%yknot, ebspl%zknot, ebspl%nkx, ebspl%nky, ebspl%nkz, &
+               ebspl%coeff(ib,spin)%vals)
 
-   if (present(oder1)) then
-     ! Compute firs-order derivatives.
-     do ii=1,3
-       iders = 0; iders(ii) = 1
-       oder1(ii,ib) = dbs3dr(iders(1), iders(2), iders(3), &
-                             kred(1), kred(2), kred(3), ebspl%kxord, ebspl%kyord, ebspl%kzord,&
-                             ebspl%xknot, ebspl%yknot, ebspl%zknot, ebspl%nkx, ebspl%nky, ebspl%nkz,&
-                             ebspl%coeff(band,spin)%vals)
+ if (present(oder1)) then
+   ! Compute first-order derivatives.
+   do ii=1,3
+     iders = 0; iders(ii) = 1
+     oder1(ii) = dbs3dr(iders(1), iders(2), iders(3), &
+                        kred(1), kred(2), kred(3), ebspl%kxord, ebspl%kyord, ebspl%kzord, &
+                        ebspl%xknot, ebspl%yknot, ebspl%zknot, ebspl%nkx, ebspl%nky, ebspl%nkz, &
+                        ebspl%coeff(ib,spin)%vals)
+   end do
+ end if
+
+ if (present(oder2)) then
+   ! Compute second-order derivatives.
+   oder2 = zero
+   do jj=1,3
+     iders = 0; iders(jj) = 1
+     do ii=1,jj
+       iders(ii) = iders(ii) + 1
+       oder2(ii, jj) = dbs3dr(iders(1), iders(2), iders(3), &
+                        kred(1), kred(2), kred(3), ebspl%kxord, ebspl%kyord, ebspl%kzord, &
+                        ebspl%xknot, ebspl%yknot, ebspl%zknot, ebspl%nkx, ebspl%nky, ebspl%nkz, &
+                        ebspl%coeff(ib,spin)%vals)
+       if (ii /= jj) oder2(jj, ii) = oder2(ii, jj)
      end do
-   end if
+   end do
+ end if
 
- end do
-
-end subroutine ebspl_evalk
+end subroutine ebspl_eval_bks
 !!***
 
 !----------------------------------------------------------------------
@@ -4039,12 +4055,12 @@ type(ebands_t) function ebands_bspline(ebands, cryst, ords, new_kptrlatt, new_ns
 !scalars
  integer,parameter :: iout0=0,chksymbreak0=0,iscf2=2
  integer :: ik_ibz,spin,new_bantot,new_nkpt,nsppol,new_mband,nkpt_computed,kptopt
- integer :: nprocs,my_rank,cnt,ierr
+ integer :: nprocs,my_rank,cnt,ierr,band
  real(dp) :: kptrlen
  type(ebspl_t) :: ebspl
 !arrays
  integer,parameter :: vacuum0(3)=[0,0,0]
- integer :: kptrlatt_orig(3,3),band_block0(2)
+ integer :: kptrlatt_orig(3,3)
  integer,allocatable :: new_istwfk(:),new_nband(:,:),new_npwarr(:)
  real(dp) :: mynew_shiftk(3,210)
  real(dp),allocatable :: new_kpts(:,:),new_doccde(:),new_eig(:),new_occ(:),new_wtk(:)
@@ -4054,7 +4070,6 @@ type(ebands_t) function ebands_bspline(ebands, cryst, ords, new_kptrlatt, new_ns
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  nsppol = ebands%nsppol; kptrlatt_orig = ebands%kptrlatt; kptopt = ebands%kptopt
- band_block0 = [1, ebands%mband]
 
  ! First call to getkgrid to obtain the number of new_kpts.
  ! TODO: write wrapper
@@ -4106,15 +4121,17 @@ type(ebands_t) function ebands_bspline(ebands, cryst, ords, new_kptrlatt, new_ns
  ABI_FREE(new_eig)
  ABI_FREE(new_occ)
 
- ! Build B-spline object.
- ebspl = ebspl_new(ebands, cryst, ords, band_block0)
+ ! Build B-spline object for all bands
+ ebspl = ebspl_new(ebands, cryst, ords, [1, ebands%mband])
 
  ! Spline eigenvalues.
  new%eig = zero; cnt = 0
  do spin=1,new%nsppol
    do ik_ibz=1,new%nkpt
-     cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle  ! Mpi parallelism.
-     call ebspl_evalk(ebspl, band_block0, new%kptns(:,ik_ibz), spin, new%eig(:,ik_ibz,spin))
+     do band=1,new%nband(ik_ibz+(spin-1)*new%nkpt)
+       cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle  ! Mpi parallelism.
+       call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
+     end do
    end do
  end do
  call xmpi_sum(new%eig, comm, ierr)

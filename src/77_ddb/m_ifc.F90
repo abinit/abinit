@@ -214,9 +214,9 @@ MODULE m_ifc
 
  end type phbspl_t
 
- public :: ifc_build_phbspl  ! Build B-spline object.
- public :: phbspl_evalq      ! Interpolate frequencies at arbitrary q-point.
- public :: phbspl_free       ! Free memory.
+ public :: ifc_build_phbspl     ! Build B-spline object.
+ public :: phbspl_evalq         ! Interpolate frequencies at arbitrary q-point.
+ public :: phbspl_free          ! Free memory.
  public :: ifc_test_phinterp
 
 CONTAINS  !===========================================================
@@ -2030,23 +2030,20 @@ type(phbspl_t) function ifc_build_phbspl(ifc, cryst, ngqpt, nshiftq, shiftq, ord
  type(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: cryst
 !arrays
- integer,intent(in) :: ngqpt(3)
- integer,intent(in) :: ords(3)
+ integer,intent(in) :: ngqpt(3),ords(3)
  real(dp),intent(in) :: shiftq(3,nshiftq)
 
 !local variables-------------------------------
 !scalars
  integer,parameter :: sppoldbl1=1,timrev1=1
  integer :: qxord,qyord,qzord,nxknot,nyknot,nzknot,nqibz,nqbz,nqfull,iqf,ierr
- integer :: nu,iq_ibz,ix,iy,iz,nqx,nqy,nqz
- integer :: my_rank,nprocs,cnt
+ integer :: nu,iq_ibz,ix,iy,iz,nqx,nqy,nqz,my_rank,nprocs,cnt
  real(dp) :: dksqmax
  character(len=500) :: msg
 !arrays
  integer :: qptrlatt(3,3)
  integer,allocatable :: bz2ibz(:,:)
- real(dp) :: phfrq(3*cryst%natom),qpt(3)
- real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
+ real(dp) :: phfrq(3*cryst%natom),qpt(3),displ_cart(2,3,cryst%natom,3*cryst%natom)
  real(dp),allocatable :: xvec(:),yvec(:),zvec(:),xyzdata(:,:,:)
  real(dp),allocatable :: ibz_freqs(:,:),ibzdata_qnu(:,:)
  real(dp),allocatable :: wtq(:),qbz(:,:),qfull(:,:),qibz(:,:)
@@ -2197,13 +2194,16 @@ end function ifc_build_phbspl
 !! phbspl_evalq
 !!
 !! FUNCTION
-!!   Interpolate phonon frequencies at an arbitrary q-point.
+!!  Interpolate phonon frequencies at an arbitrary q-point.
 !!
 !! INPUTS
-!!   qpt(3)=Q-point in reduced coordinate (will be wrapped in the interval [0,1[
+!!  qpt(3)=Q-point in reduced coordinate (will be wrapped in the interval [0,1[
 !!
 !! OUTPUT
-!!  ofreqs(%natom3)=Interpolated phonon frequencies. Sorted in ascending order.
+!!  ofreqs(%natom3)=Interpolated phonon frequencies.
+!!    Note that ofreqs is not necessarily sorted in ascending order.
+!!    The routine does not reorder the interpolated frequencies
+!!    to be consistent with the interpolation of the derivatives.
 !!  [oder1(3,%natom3)]=First order derivatives.
 !!
 !! PARENTS
@@ -2236,8 +2236,7 @@ subroutine phbspl_evalq(phbspl, qpt, ofreqs, oder1)
 !scalars
  integer :: nu,ii
 !arrays
- integer :: iders(3)
- integer :: iperm(phbspl%natom3)
+ integer :: iders(3)!, iperm(phbspl%natom3)
  real(dp) :: qred(3),shift(3)
 
 ! *********************************************************************
@@ -2253,8 +2252,7 @@ subroutine phbspl_evalq(phbspl, qpt, ofreqs, oder1)
  end do
 
  ! Sort frequencies.
- !iperm = [(nu, nu=1, phbspl%natom3)]
- !call sort_dp(phbspl%natom3, ofreqs, iperm, tol14)
+ !iperm = [(nu, nu=1, phbspl%natom3)]; call sort_dp(phbspl%natom3, ofreqs, iperm, tol14)
 
  if (present(oder1)) then
    ! Compute first-order derivatives.
@@ -2330,6 +2328,120 @@ subroutine phbspl_free(phbspl)
  end if
 
 end subroutine phbspl_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ifc/ifc_build_skw
+!! NAME
+!! ifc_build_skw
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!  ifc<type(ifc_type)>=Object containing the dynamical matrix and the IFCs.
+!!  crystal<type(crystal_t)> = Information on the crystalline structure.
+!!  ngqpt(3)=Divisions of the q-mesh used to produce the B-spline.
+!!  nshiftq=Number of shifts in Q-mesh
+!!  shiftq(3,nshiftq)=Shifts of the q-mesh.
+!!  ords(3)=order of the spline for the three directions. ord(1) must be in [0, nqx] where
+!!    nqx is the number of points along the x-axis.
+!!  comm=MPI communicator
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) result(new)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_build_skw'
+ use interfaces_56_recipspace
+!End of the abilint section
+
+ implicit none
+
+!arguments ------------------------------------
+!scalars
+ integer,intent(in) :: comm,nshiftq
+ type(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: cryst
+!arrays
+ integer,intent(in) :: ngqpt(3)
+ real(dp),intent(in) :: shiftq(3,nshiftq)
+
+!local variables-------------------------------
+!scalars
+ integer,parameter :: sppoldbl1=1,timrev1=1,master=0
+ integer :: nqibz,nqbz,iq_ibz,iq_bz,natom3,ierr
+ integer :: my_rank,nprocs,cnt
+ real(dp) :: dksqmax
+ character(len=500) :: msg
+!arrays
+ integer :: qptrlatt(3,3)
+ integer,allocatable :: bz2ibz(:,:)
+ real(dp) :: phfrq(3*cryst%natom),displ_cart(2,3,cryst%natom,3*cryst%natom)
+ real(dp),allocatable :: ibz_freqs(:,:),wtq(:),qbz(:,:),qibz(:,:)
+
+! *********************************************************************
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ natom3 = 3 * cryst%natom
+
+ ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
+ qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, nshiftq, shiftq, nqibz, qibz, wtq, nqbz, qbz, timrev=timrev1)
+
+ ! Get phonon frequencies in IBZ
+ ABI_CALLOC(ibz_freqs, (natom3, nqibz))
+ cnt = 0
+ do iq_ibz=1,nqibz
+   cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! Mpi parallelism.
+   call ifc_fourq(ifc, cryst, qibz(:,iq_ibz), ibz_freqs(:,iq_ibz), displ_cart)
+ end do
+ call xmpi_sum(ibz_freqs, comm, ierr)
+
+ new = skw_new(cryst, 1, 1, natom3, natom3, nqibz, 1, qibz, ibz_freqs, comm)
+
+ if (.False. .and. my_rank == master) then
+   ! Test whether SKW preserves symmetries.
+   ! Build mapping qbz --> IBZ (q --> -q symmetry is always used)
+   ABI_MALLOC(bz2ibz, (nqbz*sppoldbl1,6))
+
+   call listkk(dksqmax,cryst%gmet,bz2ibz,qibz,qbz,nqibz,nqbz,cryst%nsym,&
+     sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
+
+   if (dksqmax > tol12) then
+     write(msg, '(3a,es16.6,4a)' )&
+     'At least one of the q-points could not be generated from a symmetrical one.',ch10,&
+     'dksqmax=',dksqmax,ch10,&
+     'Action: check q-point input variables',ch10,&
+     '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
+     MSG_ERROR(msg)
+   end if
+
+   do iq_bz=1,nqbz
+     iq_ibz = bz2ibz(iq_bz,1)
+     call skw_evalk(new, cryst, qbz(:,iq_bz), 1, phfrq)
+     write(std_out,*)"BZ-IBZ:", maxval(abs(phfrq - ibz_freqs(:, iq_ibz)))
+   end do
+   ABI_FREE(bz2ibz)
+ end if
+
+ ABI_FREE(qibz)
+ ABI_FREE(wtq)
+ ABI_FREE(qbz)
+ ABI_FREE(ibz_freqs)
+
+end function ifc_build_skw
 !!***
 
 !----------------------------------------------------------------------
@@ -2486,120 +2598,6 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
  call skw_free(skw)
 
 end subroutine ifc_test_phinterp
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_ifc/ifc_build_skw
-!! NAME
-!! ifc_build_skw
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!  ifc<type(ifc_type)>=Object containing the dynamical matrix and the IFCs.
-!!  crystal<type(crystal_t)> = Information on the crystalline structure.
-!!  ngqpt(3)=Divisions of the q-mesh used to produce the B-spline.
-!!  nshiftq=Number of shifts in Q-mesh
-!!  shiftq(3,nshiftq)=Shifts of the q-mesh.
-!!  ords(3)=order of the spline for the three directions. ord(1) must be in [0, nqx] where
-!!    nqx is the number of points along the x-axis.
-!!  comm=MPI communicator
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) result(new)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'ifc_build_skw'
- use interfaces_56_recipspace
-!End of the abilint section
-
- implicit none
-
-!arguments ------------------------------------
-!scalars
- integer,intent(in) :: comm,nshiftq
- type(ifc_type),intent(in) :: ifc
- type(crystal_t),intent(in) :: cryst
-!arrays
- integer,intent(in) :: ngqpt(3)
- real(dp),intent(in) :: shiftq(3,nshiftq)
-
-!local variables-------------------------------
-!scalars
- integer,parameter :: sppoldbl1=1,timrev1=1,master=0
- integer :: nqibz,nqbz,iq_ibz,iq_bz,natom3,ierr
- integer :: my_rank,nprocs,cnt
- real(dp) :: dksqmax
- character(len=500) :: msg
-!arrays
- integer :: qptrlatt(3,3)
- integer,allocatable :: bz2ibz(:,:)
- real(dp) :: phfrq(3*cryst%natom),displ_cart(2,3,cryst%natom,3*cryst%natom)
- real(dp),allocatable :: ibz_freqs(:,:),wtq(:),qbz(:,:),qibz(:,:)
-
-! *********************************************************************
-
- nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
-
- natom3 = 3 * cryst%natom
-
- ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
- qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
- call kpts_ibz_from_kptrlatt(cryst, qptrlatt, nshiftq, shiftq, nqibz, qibz, wtq, nqbz, qbz, timrev=timrev1)
-
- ! Get phonon frequencies in IBZ
- ABI_CALLOC(ibz_freqs, (natom3, nqibz))
- cnt = 0
- do iq_ibz=1,nqibz
-   cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! Mpi parallelism.
-   call ifc_fourq(ifc, cryst, qibz(:,iq_ibz), ibz_freqs(:,iq_ibz), displ_cart)
- end do
- call xmpi_sum(ibz_freqs, comm, ierr)
-
- new = skw_new(cryst, 1, 1, natom3, natom3, nqibz, 1, qibz, ibz_freqs, comm)
-
- ! Test whether SKW preserves symmetries.
- ! Build mapping qbz --> IBZ (q --> -q symmetry is always used)
- ABI_MALLOC(bz2ibz, (nqbz*sppoldbl1,6))
-
- call listkk(dksqmax,cryst%gmet,bz2ibz,qibz,qbz,nqibz,nqbz,cryst%nsym,&
-   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
-
- if (dksqmax > tol12) then
-   write(msg, '(3a,es16.6,4a)' )&
-   'At least one of the q-points could not be generated from a symmetrical one.',ch10,&
-   'dksqmax=',dksqmax,ch10,&
-   'Action: check q-point input variables',ch10,&
-   '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
-   MSG_ERROR(msg)
- end if
-
- if (.False. .and. my_rank == master) then
-   do iq_bz=1,nqbz
-     iq_ibz = bz2ibz(iq_bz,1)
-     call skw_evalk(new, cryst, qbz(:,iq_bz), 1, phfrq)
-     write(std_out,*)"BZ-IBZ:", maxval(abs(phfrq - ibz_freqs(:, iq_ibz)))
-   end do
- end if
- ABI_FREE(bz2ibz)
-
- ABI_FREE(qibz)
- ABI_FREE(wtq)
- ABI_FREE(qbz)
- ABI_FREE(ibz_freqs)
-
-end function ifc_build_skw
 !!***
 
 !----------------------------------------------------------------------

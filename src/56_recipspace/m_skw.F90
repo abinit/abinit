@@ -49,6 +49,12 @@ MODULE m_skw
 !! skw_t
 !!
 !! FUNCTION
+!!  Object implementing the Shankland-Koelling-Wood Fourier interpolation scheme.
+!!  It can be used to interpolate functions in k-space with the periodicity of the
+!!  reciprocal lattice and satisfying F(k) = F(Sk) for each rotation S
+!!  belonging to the point group of the crystal. For readability reason,
+!!  the names of the variables are chosen assuming we are interpolating electronic eigenvalues
+!!  but the same object can be use to interpolate phonons as well. Just use nsppol=1 and nband = 3 * natom
 !!
 !! SOURCE
 
@@ -73,11 +79,11 @@ MODULE m_skw
    ! Number of independent spin polarizations.
 
   integer,allocatable :: rpts(:,:)
-  ! rpts(3, nr)
-  ! Real-space lattice points (reduced coordinates) ordered with non-decreasing length.
+   ! rpts(3, nr)
+   ! Real-space lattice points (reduced coordinates) ordered with non-decreasing length.
 
   complex(dpc),allocatable :: coef(:,:,:)
-  ! coef(nr, nbc, nsppol)
+   ! coef(nr, nbc, nsppol)
 
  end type skw_t
 
@@ -179,7 +185,7 @@ type(skw_t) function skw_new(cryst, cplex, bstart, bcount, nband, nkpt, nsppol, 
    rhor(ir) = c1 * r2 + c2 * r2**2
  end do
 
- ! Build H matrix.
+ ! Build H(k,k') matrix.
  ABI_CALLOC(hmat, (nk-1, nk-1))
  cnt = 0
  do jj=1,nk-1
@@ -202,12 +208,11 @@ type(skw_t) function skw_new(cryst, cplex, bstart, bcount, nband, nkpt, nsppol, 
    end do
  end do
 
- ! Solve system of linear equations to get lambda coeffients.
+ ! Solve system of linear equations to get lambda coeffients (eq. 10 of PRB 38 2721)
+ ! Solve all bands at once
  ABI_MALLOC(lambda, (nk-1, nbc, nsppol))
  ABI_MALLOC(ipiv, (nk-1))
  lambda = delta_eig
-
- ! Solve all the equations for all the bands at once (eq. 10 of PRB 38 2721)
 
  ! LU factorization of hmat matrix, kept in 2 triangular blocks of the matrix
  !call DGETRF(nk-1,nk-1,hmat,nk-1,ipiv,ierr)
@@ -308,7 +313,7 @@ end subroutine skw_print
 !!  skw_evalk
 !!
 !! FUNCTION
-!!  Interpolate the energies for a given k-point and spin with slow FT.
+!!  Interpolate the energies for an arbitrary k-point and spin with slow FT.
 !!
 !! INPUTS
 !!  cryst<crystal_t>=Crystalline structure.
@@ -478,8 +483,13 @@ end subroutine skw_free
 !!  Generate the list of real-space points.
 !!
 !! INPUTS
+!!  cryst<crystal_t>=Crystalline structure.
+!!  nk=Number of ab-initio k-points.
 !!
 !! OUTPUT
+!!  nr=Number of points generated.
+!!  rpts(3,nr)= Real-space lattice points (reduced coordinates) ordered with non-decreasing length.
+!!    The array is allocated by the routine.
 !!
 !! PARENTS
 !!
@@ -587,8 +597,11 @@ end subroutine genrpts_
 !!  Compute the star function at the given k-point kpt
 !!
 !! INPUTS
+!!  cryst<crystal_t>=Crystalline structure.
+!!  kpt(3)=K-point in reduced coordinates.
 !!
 !! OUTPUT
+!!  srk(%nr)=Star function for this k-point.
 !!
 !! PARENTS
 !!
