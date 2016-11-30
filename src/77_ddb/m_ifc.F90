@@ -2409,7 +2409,7 @@ type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) res
  end do
  call xmpi_sum(ibz_freqs, comm, ierr)
 
- new = skw_new(cryst, 1, 1, natom3, natom3, nqibz, 1, qibz, ibz_freqs, comm)
+ new = skw_new(cryst, 1, 1, natom3, natom3, nqibz, 1, qibz, ibz_freqs, [0,0], [0,0], comm)
 
  if (.False. .and. my_rank == master) then
    ! Test whether SKW preserves symmetries.
@@ -2495,10 +2495,8 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
  integer,parameter :: master=0
  integer :: iq,nq,natom3,my_rank,nprocs,ierr
  real(dp) :: mare_bspl,mae_bspl,mare_skw,mae_skw
- real(dp) :: cpu,wall,gflops
- real(dp) :: cpu_fourq,wall_fourq,gflops_fourq
- real(dp) :: cpu_bspl,wall_bspl,gflops_bspl
- real(dp) :: cpu_skw,wall_skw,gflops_skw
+ real(dp) :: cpu,wall,gflops,cpu_fourq,wall_fourq,gflops_fourq
+ real(dp) :: cpu_bspl,wall_bspl,gflops_bspl,cpu_skw,wall_skw,gflops_skw
  type(phbspl_t) :: phbspl
  type(skw_t) :: skw
 !arrays

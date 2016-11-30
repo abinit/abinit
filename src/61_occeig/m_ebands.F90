@@ -230,6 +230,12 @@ MODULE m_ebands
    integer :: kxord,kyord,kzord
    ! Order of the spline.
 
+   integer :: band_block(2)
+    ! Initial and final band index treated by this processor
+
+   integer :: spin_block(2)
+    ! Initial and final spin index treated by this processor
+
    !real(dp),allocatable :: xvec(:),yvec(:),zvec(:)
    real(dp),allocatable :: xknot(:),yknot(:),zknot(:)
    ! Array of length ndata+korder containing the knot
@@ -3666,6 +3672,7 @@ end subroutine ebands_expandk
 !!  ords(3)=order of the spline for the three directions. ord(1) must be in [0, nkx] where
 !!    nkx is the number of points along the x-axis.
 !!  band_block(2)=Initial and final band index. If [0,0], all bands are used
+!!  spin_block(2)=Initial and final spin index. If [0,0], all bands are used
 !!
 !! OUTPUT
 !!
@@ -3678,7 +3685,7 @@ end subroutine ebands_expandk
 !!
 !! SOURCE
 
-type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block) result(ebspl)
+type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block, spin_block) result(new)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3695,7 +3702,7 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block) result(ebspl)
  type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
 !arrays
- integer,intent(in) :: ords(3), band_block(2)
+ integer,intent(in) :: ords(3), band_block(2),spin_block(2)
 
 !Local variables-------------------------------
 !scalars
@@ -3793,28 +3800,29 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block) result(ebspl)
  nyknot = nky + kyord
  nzknot = nkz + kzord
 
- ebspl%nkx = nkx; ebspl%kxord = kxord
- ebspl%nky = nky; ebspl%kyord = kyord
- ebspl%nkz = nkz; ebspl%kzord = kzord
+ new%nkx = nkx; new%kxord = kxord
+ new%nky = nky; new%kyord = kyord
+ new%nkz = nkz; new%kzord = kzord
 
- ABI_MALLOC(ebspl%xknot,(nxknot))
- ABI_MALLOC(ebspl%yknot,(nyknot))
- ABI_MALLOC(ebspl%zknot,(nzknot))
+ ABI_MALLOC(new%xknot,(nxknot))
+ ABI_MALLOC(new%yknot,(nyknot))
+ ABI_MALLOC(new%zknot,(nzknot))
 
- call dbsnak(nkx, xvec, kxord, ebspl%xknot)
- call dbsnak(nky, yvec, kyord, ebspl%yknot)
- call dbsnak(nkz, zvec, kzord, ebspl%zknot)
+ call dbsnak(nkx, xvec, kxord, new%xknot)
+ call dbsnak(nky, yvec, kyord, new%yknot)
+ call dbsnak(nkz, zvec, kzord, new%zknot)
 
  ABI_MALLOC(xyzdata,(nkx,nky,nkz))
- ABI_DT_MALLOC(ebspl%coeff, (ebands%mband,ebands%nsppol))
+ ABI_DT_MALLOC(new%coeff, (ebands%mband,ebands%nsppol))
+ new%band_block = band_block; if (all(band_block == 0)) new%band_block = [1, ebands%mband]
+ new%spin_block = spin_block; if (all(spin_block == 0)) new%spin_block = [1, ebands%nsppol]
 
  do spin=1,ebands%nsppol
+   if (spin < new%spin_block(1) .or. spin > new%spin_block(2)) cycle
    do band=1,ebands%mband
-     if (all(band_block /= 0)) then
-       if (band < band_block(1) .or. band > band_block(2)) cycle
-     end if
+     if (band < new%band_block(1) .or. band > new%band_block(2)) cycle
 
-     ABI_MALLOC(ebspl%coeff(band,spin)%vals, (nkx,nky,nkz))
+     ABI_MALLOC(new%coeff(band,spin)%vals, (nkx,nky,nkz))
 
      ! Build array in full bz to prepare call to dbs3in.
      ikf = 0
@@ -3829,8 +3837,8 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block) result(ebspl)
      end do
 
      ! Construct 3D tensor for B-spline. Results in coeff(band,spin)%vals
-     call dbs3in(nkx,xvec,nky,yvec,nkz,zvec,xyzdata,nkx,nky,kxord,kyord,kzord,ebspl%xknot,ebspl%yknot,ebspl%zknot,&
-        ebspl%coeff(band,spin)%vals)
+     call dbs3in(nkx,xvec,nky,yvec,nkz,zvec,xyzdata,nkx,nky,kxord,kyord,kzord,new%xknot,new%yknot,new%zknot,&
+        new%coeff(band,spin)%vals)
    end do
  end do
 
@@ -3897,16 +3905,14 @@ subroutine ebspl_eval_bks(ebspl, band, kpt, spin, oeig, oder1, oder2)
 
 !Local variables-------------------------------
 !scalars
- integer :: ib,ii,jj
+ integer :: ii,jj
 !arrays
  integer :: iders(3)
  real(dp) :: kred(3),shift(3)
 
 ! *********************************************************************
 
- ! TODO: Use bstart
- ib = band
- !ABI_CHECK(size(oeig) >= (band_block(2) - band_block(1) + 1), "oeig too small")
+ !ABI_CHECK(allocated(ebspl%coeff(band, spin)%vals), sjoin("Unallocated (band, spin):", ltoa([band, spin])))
 
  ! Wrap k-point in the interval [0,1[ where 1 is not included (tol12)
  call wrap2_zero_one(kpt, kred, shift)
@@ -3914,7 +3920,7 @@ subroutine ebspl_eval_bks(ebspl, band, kpt, spin, oeig, oder1, oder2)
  ! B-spline interpolation.
  oeig = dbs3vl(kred(1), kred(2), kred(3), ebspl%kxord, ebspl%kyord, ebspl%kzord, &
                ebspl%xknot, ebspl%yknot, ebspl%zknot, ebspl%nkx, ebspl%nky, ebspl%nkz, &
-               ebspl%coeff(ib,spin)%vals)
+               ebspl%coeff(band,spin)%vals)
 
  if (present(oder1)) then
    ! Compute first-order derivatives.
@@ -3923,7 +3929,7 @@ subroutine ebspl_eval_bks(ebspl, band, kpt, spin, oeig, oder1, oder2)
      oder1(ii) = dbs3dr(iders(1), iders(2), iders(3), &
                         kred(1), kred(2), kred(3), ebspl%kxord, ebspl%kyord, ebspl%kzord, &
                         ebspl%xknot, ebspl%yknot, ebspl%zknot, ebspl%nkx, ebspl%nky, ebspl%nkz, &
-                        ebspl%coeff(ib,spin)%vals)
+                        ebspl%coeff(band,spin)%vals)
    end do
  end if
 
@@ -3937,7 +3943,7 @@ subroutine ebspl_eval_bks(ebspl, band, kpt, spin, oeig, oder1, oder2)
        oder2(ii, jj) = dbs3dr(iders(1), iders(2), iders(3), &
                         kred(1), kred(2), kred(3), ebspl%kxord, ebspl%kyord, ebspl%kzord, &
                         ebspl%xknot, ebspl%yknot, ebspl%zknot, ebspl%nkx, ebspl%nky, ebspl%nkz, &
-                        ebspl%coeff(ib,spin)%vals)
+                        ebspl%coeff(band,spin)%vals)
        if (ii /= jj) oder2(jj, ii) = oder2(ii, jj)
      end do
    end do
@@ -4122,7 +4128,7 @@ type(ebands_t) function ebands_bspline(ebands, cryst, ords, new_kptrlatt, new_ns
  ABI_FREE(new_occ)
 
  ! Build B-spline object for all bands
- ebspl = ebspl_new(ebands, cryst, ords, [1, ebands%mband])
+ ebspl = ebspl_new(ebands, cryst, ords, [1, ebands%mband], [0,0])
 
  ! Spline eigenvalues.
  new%eig = zero; cnt = 0

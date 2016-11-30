@@ -58,6 +58,10 @@ MODULE m_skw
 !!
 !! SOURCE
 
+ !type :: coeff_t
+ !  complex(dpc),allocatable :: vals(:,:,:)
+ !end type coeff_t
+
  type,public :: skw_t
 
   integer :: cplex
@@ -72,8 +76,14 @@ MODULE m_skw
   integer :: bstart
    ! Index of the first band included in the fit.
 
-  integer :: nbc
+  integer :: bcount
    ! Number of bands included in the fit (first band starts at bstart)
+
+  integer :: band_block(2)
+   ! Initial and final band index treated by this processor
+
+  integer :: spin_block(2)
+   ! Initial and final spin index treated by this processor
 
   integer :: nsppol
    ! Number of independent spin polarizations.
@@ -83,7 +93,7 @@ MODULE m_skw
    ! Real-space lattice points (reduced coordinates) ordered with non-decreasing length.
 
   complex(dpc),allocatable :: coef(:,:,:)
-   ! coef(nr, nbc, nsppol)
+   ! coef(nr, bcount, nsppol)
 
   complex(dpc),allocatable :: cached_srk(:)
    ! cached_srk(skw%nr)
@@ -129,6 +139,8 @@ CONTAINS  !=====================================================================
 !!  nsppol=Number of independent spin polarizations.
 !!  kpts(3,nkpt)=ab-initio k-points in reduced coordinates.
 !!  eig(nband,nkpt,nsppol)=ab-initio eigenvalues.
+!!  band_block(2)=Initial and final band index. If [0,0], all bands are used
+!!  spin_block(2)=Initial and final spin index. If [0,0], all bands are used
 !!  comm=MPI communicator
 !!
 !! PARENTS
@@ -139,7 +151,8 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-type(skw_t) function skw_new(cryst, cplex, bstart, bcount, nband, nkpt, nsppol, kpts, eig, comm) result(new)
+type(skw_t) function skw_new(cryst, cplex, bstart, bcount, nband, nkpt, nsppol, kpts, eig, &
+                             band_block, spin_block, comm) result(new)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -155,15 +168,16 @@ type(skw_t) function skw_new(cryst, cplex, bstart, bcount, nband, nkpt, nsppol, 
  integer,intent(in) :: cplex,bstart,bcount,nband,nkpt,nsppol,comm
  type(crystal_t),intent(in) :: cryst
 !arrays
+ integer,intent(in) :: band_block(2),spin_block(2)
  real(dp),intent(in) :: kpts(3,nkpt)
  real(dp),intent(in) :: eig(nband,nkpt,nsppol)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: my_rank,nprocs,cnt,nbc,bstop
+ integer :: my_rank,nprocs,cnt,bstop
  integer :: nk,ir,ik,ib,ii,jj,nr,band,spin,isym,nsh,ierr
- real(dp) :: arg,ecut,r2,rmin2
+ real(dp) :: arg,ecut,r2,r2min
  real(dp),parameter :: c1=0.25_dp,c2=0.25_dp
  character(len=500) :: fmt
 !arrays
@@ -180,11 +194,13 @@ type(skw_t) function skw_new(cryst, cplex, bstart, bcount, nband, nkpt, nsppol, 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  new%cplex = cplex; new%nk = nkpt; new%nsppol = nsppol
- new%bstart = bstart; new%nbc = bcount; nbc = bcount
+ new%bstart = bstart; new%bcount = bcount
+ new%band_block = band_block; if (all(band_block == 0)) new%band_block = [1, nband]
+ new%spin_block = spin_block; if (all(spin_block == 0)) new%spin_block = [1, nsppol]
 
  ! Select R-points and order them according to |R|
  call genrpts_(cryst, new%nk, new%nr, new%rpts)
- rmin2 = dot_product(new%rpts(:,2), matmul(cryst%rmet, new%rpts(:,2)))
+ r2min = dot_product(new%rpts(:,2), matmul(cryst%rmet, new%rpts(:,2)))
 
  ! Construct star functions for the ab-initio k-points.
  nk = new%nk; nr = new%nr
@@ -197,7 +213,7 @@ type(skw_t) function skw_new(cryst, cplex, bstart, bcount, nband, nkpt, nsppol, 
  ABI_MALLOC(rhor, (nr))
  do ir=1,nr
    r2 = dot_product(new%rpts(:,ir), matmul(cryst%rmet, new%rpts(:,ir)))
-   !rhor(ir) = (one - c1 * r2/rmin2)**2 + c2 * (r2 / rmin2)**3
+   !rhor(ir) = (one - c1 * r2/r2min)**2 + c2 * (r2 / r2min)**3
    rhor(ir) = c1 * r2 + c2 * r2**2
  end do
 
@@ -216,9 +232,9 @@ type(skw_t) function skw_new(cryst, cplex, bstart, bcount, nband, nkpt, nsppol, 
  end do
  call xmpi_sum(hmat, comm, ierr)
 
- ABI_MALLOC(delta_eig, (nk-1, nbc, nsppol))
+ ABI_MALLOC(delta_eig, (nk-1, bcount, nsppol))
  do spin=1,nsppol
-   do ib=1,nbc
+   do ib=1,bcount
      band = ib + bstart - 1
      delta_eig(:,ib,spin) = eig(band,1:nk-1,spin) - eig(band,nk,spin)
    end do
@@ -226,7 +242,7 @@ type(skw_t) function skw_new(cryst, cplex, bstart, bcount, nband, nkpt, nsppol, 
 
  ! Solve system of linear equations to get lambda coeffients (eq. 10 of PRB 38 2721)
  ! Solve all bands at once
- ABI_MALLOC(lambda, (nk-1, nbc, nsppol))
+ ABI_MALLOC(lambda, (nk-1, bcount, nsppol))
  ABI_MALLOC(ipiv, (nk-1))
  lambda = delta_eig
 
@@ -234,15 +250,15 @@ type(skw_t) function skw_new(cryst, cplex, bstart, bcount, nband, nkpt, nsppol, 
  !call DGETRF(nk-1,nk-1,hmat,nk-1,ipiv,ierr)
  !CALL DGETRS('N',bs%nkpt-1,bs%icut2-bs%icut1+1,hmat,bs%nkpt-1,ipiv,lambda(1,bs%icut1),bs%nkpt-1,inf)
 
- call zgesv(nk-1, nbc*nsppol, hmat, nk-1, ipiv, lambda, nk-1, ierr)
- !call zhesv(nk-1, nbc*nsppol, hmat, nk-1, ipiv, lambda, nk-1, ierr)
+ call zgesv(nk-1, bcount*nsppol, hmat, nk-1, ipiv, lambda, nk-1, ierr)
+ !call zhesv(nk-1, bcount*nsppol, hmat, nk-1, ipiv, lambda, nk-1, ierr)
  ABI_CHECK(ierr == 0, sjoin("ZGESV returned info:", itoa(ierr)))
 
  ! Compute coefficients
- ABI_MALLOC(new%coef, (nr,nbc,nsppol))
+ ABI_MALLOC(new%coef, (nr,bcount,nsppol))
 
  do spin=1,nsppol
-   do ib=1,nbc
+   do ib=1,bcount
      band = ib + bstart - 1
      do ir=2,nr
        new%coef(ir,ib,spin) = (one/rhor(ir)) * dot_product(srk(ir,:nk-1) - srk(ir,nk), lambda(:nk-1, ib, spin))
@@ -253,7 +269,7 @@ type(skw_t) function skw_new(cryst, cplex, bstart, bcount, nband, nkpt, nsppol, 
    end do
  end do
 
- ! Prepare workspace arrays.
+ ! Prepare workspace arrays for star functions.
  new%cached_kpt = huge(one)
  ABI_MALLOC(new%cached_srk, (new%nr))
  new%cached_kpt_dk1 = huge(one)
@@ -269,15 +285,15 @@ type(skw_t) function skw_new(cryst, cplex, bstart, bcount, nband, nkpt, nsppol, 
  ABI_FREE(ipiv)
 
  ! Compare ab-initio data with interpolated results.
- fmt = sjoin("(a,",itoa(nbc),"(f8.3))")
- bstop = bstart + nbc - 1
+ fmt = sjoin("(a,",itoa(bcount),"(f8.3))")
+ bstop = bstart + bcount - 1
  do spin=1,nsppol
    do ik=1,nkpt
      call skw_evalk(new, cryst, kpts(:,ik), spin, oeig)
-     write(std_out,fmt)"-- ref ", eig(bstart:bstop,ik,spin) * Ha_eV
-     write(std_out,fmt)"-- int ", oeig * Ha_eV
-     write(std_out,*)"maxerr:", maxval(eig(bstart:bstop,ik,spin) - oeig) * Ha_eV, "[eV], ", trim(ktoa(kpts(:,ik)))
-     !call vdiff_print(vdiff_eval(1, nbc, eig(bstart:bstop,ik,spin), oeig, one))
+     write(std_out,fmt)"-- ref ", eig(bstart:bstop,ik,spin) * Ha_meV
+     write(std_out,fmt)"-- int ", oeig * Ha_meV
+     write(std_out,*)"maxerr:", maxval(eig(bstart:bstop,ik,spin) - oeig) * Ha_meV, " [meV], ", trim(ktoa(kpts(:,ik)))
+     !call vdiff_print(vdiff_eval(1, bcount, eig(bstart:bstop,ik,spin), oeig, one))
    end do
  end do
 
@@ -324,7 +340,7 @@ subroutine skw_print(skw, unt)
 
  write(unt,"(a)")sjoin("Number of real-space lattice points:", itoa(skw%nr))
  write(unt,"(a)")sjoin("Number of ab-initio k-points:", itoa(skw%nk))
- write(unt,"(a)")sjoin("bstart", itoa(skw%bstart), "nbcount:", itoa(skw%nbc))
+ write(unt,"(a)")sjoin("bstart", itoa(skw%bstart), "bcount:", itoa(skw%bcount))
  write(unt,"(a)")sjoin("nsppol", itoa(skw%nsppol), "cplex:", itoa(skw%cplex))
 
 end subroutine skw_print
@@ -345,7 +361,7 @@ end subroutine skw_print
 !!  spin=Spin index.
 !!
 !! OUTPUT
-!!  oeig(skw%nbc)
+!!  oeig(skw%bcount)
 !!
 !! PARENTS
 !!
@@ -371,7 +387,7 @@ subroutine skw_evalk(skw, cryst, kpt, spin, oeig)
  type(crystal_t),intent(in) :: cryst
 !arrays
  real(dp),intent(in) :: kpt(3)
- real(dp),intent(out) :: oeig(skw%nbc)
+ real(dp),intent(out) :: oeig(skw%bcount)
 
 !Local variables-------------------------------
 !scalars
@@ -379,7 +395,7 @@ subroutine skw_evalk(skw, cryst, kpt, spin, oeig)
 
 ! *********************************************************************
 
- do ib=1,skw%nbc
+ do ib=1,skw%bcount
    call skw_eval_bks(skw, cryst, ib, kpt, spin, oeig(ib))
  end do
 
@@ -442,13 +458,17 @@ subroutine skw_eval_bks(skw, cryst, band, kpt, spin, oeig, oder1, oder2)
  integer :: ib,ii,jj
 ! *********************************************************************
 
+ !ABI_CHECK(allocated(ebspl%coeff(band, spin)%vals), sjoin("Unallocated (band, spin):", ltoa([band, spin])))
+
+ ib = band - skw%bstart + 1
+ ABI_CHECK(ib >= 1 .and. ib <= skw%bcount, sjoin("out of range band:", itoa(band)))
+
  ! Compute star function for this k-point (if not already in memory)
  if (any(kpt /= skw%cached_kpt)) then
    call mkstar(skw, cryst, kpt, skw%cached_srk)
    skw%cached_kpt = kpt
  end if
 
- ib = band
  oeig = dot_product(conjg(skw%coef(:,ib,spin)), skw%cached_srk)
 
  ! TODO: Finalize Derivatives
@@ -481,66 +501,6 @@ subroutine skw_eval_bks(skw, cryst, band, kpt, spin, oeig, oder1, oder2)
  end if
 
 end subroutine skw_eval_bks
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_skw/skw_eval_kgrid
-!! NAME
-!!  skw_eval_kgrid
-!!
-!! FUNCTION
-!!  Interpolate the energies on a grid with FFT.
-!!
-!! INPUTS
-!!  cryst<crystal_t>=Crystalline structure.
-!!  spin=Spin index.
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine skw_eval_kgrid(skw, cryst, ngkpt, spin)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'skw_eval_kgrid'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: spin
- type(skw_t),intent(in) :: skw
- type(crystal_t),intent(in) :: cryst
-!arrays
- integer,intent(in) :: ngkpt(3)
-
-!Local variables-------------------------------
-!scalars
- !integer :: band
-!arrays
- !complex(dpc) :: srk(skw%nr)
-
-! *********************************************************************
-
- ! Compute star function for this k-point
- !call mkstar(skw, cryst, kpt, srk)
-
- !do band=1,skw%nbc
- !  oeig(band) = dot_product(conjg(skw%coef(:,band,spin)), srk)
- !end do
-
- ! TODO: Derivatives
-
-end subroutine skw_eval_kgrid
 !!***
 
 !----------------------------------------------------------------------
@@ -836,10 +796,11 @@ end subroutine mkstar
 
 subroutine mkstar_dk1(skw, cryst, kpt, srk_dk1)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'mkstar'
+#define ABI_FUNC 'mkstar_dk1'
 !End of the abilint section
 
  implicit none
@@ -890,10 +851,11 @@ end subroutine mkstar_dk1
 
 subroutine mkstar_dk2(skw, cryst, kpt, srk_dk2)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'mkstar'
+#define ABI_FUNC 'mkstar_dk2'
 !End of the abilint section
 
  implicit none

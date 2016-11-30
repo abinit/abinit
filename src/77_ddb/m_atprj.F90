@@ -235,6 +235,7 @@ end subroutine atprj_print
 
 subroutine atprj_destroy(t_atprj)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
