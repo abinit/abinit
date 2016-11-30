@@ -166,7 +166,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
  if (ipert==natom+10.and.idir<=3) then ! One perturbation, one direction
    rf2%ndir=1
    rf2%idirs(1)=idir ; rf2%idirs(2)=idir
- else ! Two perturbation or/and two directions
+ else ! Two perturbations or/and two directions
    rf2%ndir=2
    call rf2_getidirs(idir,idir1,idir2)
    rf2%idirs(1)=idir1
