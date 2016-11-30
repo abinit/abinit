@@ -392,7 +392,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  real(dp),allocatable :: dtweightde(:,:),tweight(:,:)
  real(dp),allocatable :: tmp_eigen(:),total_dos(:,:,:),eig_dos(:,:)
  real(dp),allocatable :: dos_m(:,:,:),dos_paw1(:,:,:),dos_pawt1(:,:,:)
- real(dp),allocatable :: work_kf(:,:),work_m(:,:),wdt(:,:)
+ real(dp),allocatable :: wdt(:,:)
 
 ! *********************************************************************
 
@@ -530,7 +530,6 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  end if
  if (prtdosm>=1) then
    ABI_MALLOC(dos_m, (nene,ndosfraction*mbesslang,2))
-   ABI_MALLOC(work_m, (nkpt, ndosfraction*mbesslang))
  end if
 
 !Get maximum occupation value (2 or 1)
@@ -542,7 +541,6 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 !-------------------------------------------------------------------
 
  ! Workspace arrays.
- ABI_MALLOC(work_kf, (nkpt, ndosfraction))
  ABI_MALLOC(tmp_eigen,(nkpt))
 
  cnt = 0
@@ -554,43 +552,6 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
      dos_paw1 = zero; dos_pawt1 = zero
    end if
 
-#if 0
-   do iband=1,dtset%nband(1)
-     ! Mpi parallelism.
-     if (mod(iband, nprocs) /= my_rank) cycle
-
-     ! For each band get its contribution
-     tmp_eigen(:) = ebands%eig(iband, :, isppol)
-
-     ! calculate general integration weights at each irred kpoint as in Blochl et al PRB 49 16223
-     call tetra_blochl_weights(tetra,tmp_eigen,enemin,enemax,max_occ,nene,nkpt,&
-       bcorr0,tweight,dtweightde,xmpi_comm_self)
-
-     ! Accumulate total DOS from eigenvalues (this is the **exact** total DOS)
-     tmp_eigen = one
-     call acc_dos_1band(nene, nkpt, 1, tweight, dtweightde, tmp_eigen, eig_dos)
-
-     ! Accumulate L-DOS
-     work_kf = dos%fractions(:,iband,isppol,:)
-     call acc_dos_1band(nene, nkpt, ndosfraction, tweight, dtweightde, work_kf, total_dos)
-
-     if (paw_dos_flag==1) then
-       ! calculate DOS and integrated DOS projected with the input dos_fractions
-       work_kf = dos%fractions_paw1(:,iband,isppol,:)
-       call acc_dos_1band(nene, nkpt, ndosfraction, tweight, dtweightde, work_kf, dos_paw1)
-
-       work_kf = dos%fractions_pawt1(:,iband,isppol,:)
-       call acc_dos_1band(nene, nkpt, ndosfraction, tweight, dtweightde, work_kf, dos_pawt1)
-     end if
-
-     if (prtdosm>=1) then
-       ! Accumulate LM-DOS
-       work_m = dos%fractions_m(:,iband,isppol,:)
-       call acc_dos_1band(nene, nkpt, ndosfraction*mbesslang, tweight, dtweightde, work_m, dos_m)
-     end if
-   end do ! iband
-
-#else
    do ikpt=1,nkpt
       do iband=1,ebands%nband(ikpt+(isppol-1)*ebands%nkpt)
         cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! Mpi parallelism.
@@ -600,7 +561,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
         call tetra_get_onewk(tetra,ikpt,bcorr0,nene,nkpt,tmp_eigen,enemin,enemax,max_occ,wdt)
         eig_dos = eig_dos + wdt
 
-        ! Accumulate L-DOS
+        ! Accumulate L-DOS.
         do ii=1,2
           do ifrac=1,ndosfraction
             total_dos(:,ifrac,ii) = total_dos(:,ifrac,ii) + wdt(:,ii) * dos%fractions(ikpt,iband,isppol,ifrac)
@@ -608,7 +569,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
         end do
 
         if (paw_dos_flag==1) then
-          ! Accumulate LM-DOS
+          ! Accumulate L-DOS (on-site terms).
           do ii=1,2
             do ifrac=1,ndosfraction
               dos_paw1(:,ifrac,ii) = dos_paw1(:,ifrac,ii) + wdt(:,ii) * dos%fractions_paw1(ikpt,iband,isppol,ifrac)
@@ -618,7 +579,7 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
         end if
 
         if (prtdosm>=1) then
-         ! Accumulate LM-DOS
+         ! Accumulate LM-DOS.
          do ii=1,2
            do ifrac=1,ndosfraction*mbesslang
              dos_m(:,ifrac,ii) = dos_m(:,ifrac,ii) + wdt(:,ii) * dos%fractions_m(ikpt, iband, isppol, ifrac)
@@ -628,7 +589,6 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
       end do ! ikpt
    end do ! iband
-#endif
 
    ! Collect results on master
    call xmpi_sum_master(eig_dos, master, comm, ierr)
@@ -766,7 +726,6 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
  end if
 
  ABI_FREE(tmp_eigen)
- ABI_FREE(work_kf)
  ABI_FREE(total_dos)
  ABI_FREE(tweight)
  ABI_FREE(dtweightde)
@@ -775,7 +734,6 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
  if (prtdosm>=1)  then
    ABI_FREE(dos_m)
-   ABI_FREE(work_m)
  end if
 
  if (paw_dos_flag==1)  then
@@ -911,76 +869,6 @@ subroutine write_extra_headers()
 end subroutine write_extra_headers
 
 end subroutine dos_calcnwrite
-!!***
-
-!!****f* m_epjdos/acc_dos_1band
-!! NAME
-!! acc_dos_1band
-!!
-!! FUNCTION
-!! calculate DOS from tetrahedron method for 1 band and 1 sppol and accumulate results.
-!!
-!! INPUTS
-!! nene=number of energies for DOS
-!! nkpt=number of irreducible kpoints
-!! nfract=number of different fractional DOSs
-!! dos_fractions=fractional DOS at each irred kpoint
-!! tweight=sum of tetrahedron weights for each irred kpoint
-!! dtweightde=energy derivative of tweight
-!!
-!! SIDE EFFECTS
-!!  dos_idos(nene,nfract,2)=accumulated DOS/IDOS, for each different channel
-!!
-!! PARENTS
-!!      tetrahedron
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine acc_dos_1band(nene, nkpt, nfract, tweight, dtweightde, dos_fractions, dos_idos)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'acc_dos_1band'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: nfract,nene,nkpt
-!arrays
- real(dp),intent(in) :: dos_fractions(nkpt,nfract)
- real(dp),intent(in) :: dtweightde(nene,nkpt), tweight(nene,nkpt)
- real(dp),intent(inout) :: dos_idos(nene,nfract,2)
-
-!Local variables-------------------------------
-!scalars
- integer :: ieps,ifract,ikpt
-
-! *********************************************************************
-
- ! Calculate parameters of DOS at each point eps in [epsmin,epsmax]
- do ifract=1,nfract
-   do ikpt=1,nkpt
-     do ieps=1,nene
-       dos_idos(ieps,ifract,1) = dos_idos(ieps,ifract,1) + dtweightde(ieps,ikpt) * dos_fractions(ikpt,ifract)
-     end do
-   end do
- end do
-
- do ifract=1,nfract
-   do ikpt=1,nkpt
-     do ieps=1,nene
-       dos_idos(ieps,ifract,2) = dos_idos(ieps,ifract,2) + tweight(ieps,ikpt) * dos_fractions(ikpt,ifract)
-     end do
-   end do
- end do
-
-end subroutine acc_dos_1band
 !!***
 
 !!****f* m_epjdos/recip_ylm
