@@ -50,7 +50,7 @@ program multibinit
  use m_effective_potential
  use m_multibinit_dataset
  use m_effective_potential_file
-
+ use m_abihist
  use m_io_tools,   only : get_unit, flush_unit,open_file
  use m_fstrings,   only : int2char4
  use m_time ,      only : asctime
@@ -86,7 +86,8 @@ program multibinit
  character(len=fnlen) :: filnam(15),tmpfilename,name
  character(len=500) :: message
  type(multibinit_dataset_type) :: inp
- type(effective_potential_type),target :: reference_effective_potential
+ type(effective_potential_type) :: reference_effective_potential
+ type(abihist) :: hist
 !TEST_AM
 ! integer :: natom_sp
 ! real(dp),allocatable :: dynmat(:,:,:,:,:)
@@ -219,9 +220,29 @@ program multibinit
 
 !If needed, fit the anharmonic part
 !****************************************************************************************
- if (inp%ncoeff > 0) then
+!TEST_AM_SECTION
+ if(.false.)then
+ if (iam_master.and.inp%ncoeff == 0.and.reference_effective_potential%anharmonics_terms%ncoeff>0) then
+   write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
+&      '-Reading the file ',trim(filnam(5)),ch10,&
+&   ' with NetCDF in order to fit the polynomial coefficients'
+   call wrtout(std_out,message,'COLL') 
+   call wrtout(ab_out,message,'COLL') 
+   if(filnam(5)/='')then
+     call read_md_hist(filnam(5),hist)
+   else
+     write(message, '(3a)' )&
+&          'There is no MD file to fit the coefficients ',ch10,&
+&          'Action: add MD file'
+        MSG_ERROR(message)
+   end if
+ 
 !   call fit_polynomial_coeff_init
 !   call fit_polynomial_coeff_init(reference_effective_potential%,filnam,inp,comm)
+ end if
+
+!MPI BROADCAST
+ call abihist_bcast(hist,master,comm)
  end if
 !****************************************************************************************
 
@@ -278,6 +299,7 @@ program multibinit
 !**************************************************************************************** 
  call effective_potential_free(reference_effective_potential)
  call multibinit_dtset_free(inp)
+ call abihist_fin(hist)
 !****************************************************************************************
 
  write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10

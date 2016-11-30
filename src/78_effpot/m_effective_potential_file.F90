@@ -308,19 +308,32 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm)
       call coeffs_xml2effpot(eff_pot,filename,comm)
 
 !     Assign the coeff number from input
-      if (eff_pot%anharmonics_terms%ncoeff > inp%ncoeff)then
-        write(message, '(5a)' )&
-&          ' The number of coefficient in the XML file is superior to the ',ch10,&
-&          ' number of coefficient in the input ',ch10,&
-&          ' Action: correct your input file'
-        MSG_ERROR(message)
+      if(inp%ncoeff==zero)then
+        write(message,'(6a)'),ch10,&
+&      ' WARNING : The number of coefficients in set to 0',&
+&      ' in the input file.',ch10,&
+&      '           The coefficients must be fitted'
+        call wrtout(std_out,message,'COLL')
+!       if no coefficients is set in the input
+!       their values are set to zero in oder to fit them.        
+        do ii = 1,eff_pot%anharmonics_terms%ncoeff
+          call polynomial_coeff_setCoefficient(zero,&
+&                                              eff_pot%anharmonics_terms%coefficients(ii))
+        end do
+      else
+        if (eff_pot%anharmonics_terms%ncoeff > inp%ncoeff)then
+          write(message, '(5a)' )&
+&            ' The number of coefficient in the XML file is superior to the ',ch10,&
+&            ' number of coefficient in the input ',ch10,&
+&            ' Action: correct your input file'
+          MSG_ERROR(message)
+        end if
+        do ii = 1,eff_pot%anharmonics_terms%ncoeff
+          call polynomial_coeff_setCoefficient(inp%coefficients(ii),&
+&                                              eff_pot%anharmonics_terms%coefficients(ii))
+        end do
       end if
-      do ii = 1,eff_pot%anharmonics_terms%ncoeff
-        call polynomial_coeff_setCoefficient(inp%coefficients(ii),&
-&                                            eff_pot%anharmonics_terms%coefficients(ii))
-      end do
     end if
-
   else
     write(message, '(5a)' )&
 &      ' The file ',trim(filename),' is not readable with Multibinit',ch10,&
@@ -2357,10 +2370,10 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
  if(iam_master)then
 #if defined HAVE_LIBXML
-   write(message,'(a,a,a,a)')'-Reading the file ',trim(filename),&
+   write(message,'(3a)')'-Reading the file ',trim(filename),&
 &   ' with LibXML library'  
 #else
-   write(message,'(a,a,a,a)')'-Reading the file ',trim(filename),&
+   write(message,'(3a)')'-Reading the file ',trim(filename),&
 &   ' with Fortran'  
 #endif
    call wrtout(ab_out,message,'COLL')

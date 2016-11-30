@@ -54,7 +54,7 @@ module m_anharmonics_terms
 
  type, public :: anharmonics_terms_type
 
-   integer :: ncoeff
+   integer :: ncoeff = 0
 !    nterm store the number of coefficients
 
    type(polynomial_coeff_type),dimension(:),allocatable :: coefficients
@@ -159,6 +159,7 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,nrpt,&
    call anharmonics_terms_setElasticDispCoupling(anharmonics_terms,natom,elastic_displacement)
  end if
 
+ anharmonics_terms%ncoeff = zero
 !Allocation of the coefficient
   if(present(coeffs))then
    if(ncoeff /= size(coeffs))then

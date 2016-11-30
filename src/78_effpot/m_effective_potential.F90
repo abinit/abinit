@@ -2088,8 +2088,11 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
 
 !Print only the coefficients into XML file
  if (option==  -1 .or. option == 2) then
-   call polynomial_coeff_writeXML(eff_pot%anharmonics_terms%coefficients,&
-&                                 eff_pot%anharmonics_terms%ncoeff,filename)
+   namefile='coefficients.xml'
+   if(eff_pot%anharmonics_terms%ncoeff > 0) then
+     call polynomial_coeff_writeXML(eff_pot%anharmonics_terms%coefficients,&
+&                                 eff_pot%anharmonics_terms%ncoeff,namefile)
+   end if
  end if!end option
 
 end subroutine effective_potential_writeXML

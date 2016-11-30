@@ -33,7 +33,6 @@ module m_fit_polynomial_coeff
 
  public :: fit_polynomial_coeff_free
  public :: fit_polynomial_coeff_init
-!!***
 
 !!****t* m_fit_polynomial_coeff/fit_polynomial_coeff_type
 !! NAME
