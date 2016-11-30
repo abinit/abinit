@@ -390,6 +390,11 @@ subroutine xmpi_sum_master_dp3d(xval,master,spaceComm,ier)
 !    Accumulate xval on all proc. in spaceComm
      ABI_STAT_ALLOCATE(xsum,(n1,n2,n3), ier)
      if (ier /= 0) call xmpi_abort(msg='error allocating xsum')
+     ! This is needed to avoid SIFPE in [mpiio][t28_MPI4][np=4] on tikal_gnu_4.9_mpich
+     ! with mpich3-3.1.3_gcc492
+     ! Strictly speaking the initialization is not needed because xsum has intent(out) --> bug in mpich2
+     xsum = zero
+
      call MPI_REDUCE(xval,xsum,n1*n2*n3,MPI_DOUBLE_PRECISION,MPI_SUM,master,spaceComm,ier)
      xval (:,:,:) = xsum(:,:,:)
      ABI_DEALLOCATE(xsum)
