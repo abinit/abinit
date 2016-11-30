@@ -126,7 +126,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &  mkmem,mkqmem,mk1mem,mpert,mpi_enreg,my_natom,nattyp,&
 &  nfftf,nhat,nkpt,nkxc,nspden,nsym,occ,&
 &  paw_an,paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
-&  pertsy,prtbbb,psps,rfpert,rhog,rhor,symq,symrec,timrev,&
+&  pertsy,prtbbb,psps,rfpert,rf2_dirs_from_rfpert_nl,rhog,rhor,symq,symrec,timrev,&
 &  usecprj,usevdw,vtrial,vxc,vxcavg,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
 &  eigen1_pert,nkpt_rbz,eigenq_fine,hdr_fine,hdr0)
 
@@ -214,7 +214,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(pseudopotential_type), intent(inout) :: psps
  integer, intent(in) :: atindx(dtset%natom),indsym(4,nsym,dtset%natom)
  integer, intent(in) :: nattyp(dtset%ntypat),pertsy(3,dtset%natom+6)
- integer, intent(in) :: rfpert(mpert),symq(4,2,nsym),symrec(3,3,nsym)
+ integer, intent(in) :: rfpert(mpert),rf2_dirs_from_rfpert_nl(3,3),symq(4,2,nsym),symrec(3,3,nsym)
  integer, intent(out) :: ddkfil(3)
  integer, intent(inout) :: blkflg(3,mpert,3,mpert)
  integer, intent(out) :: clflg(3,mpert)
@@ -257,8 +257,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer,parameter :: level=11,response=1,formeig1=1,master=0,fake_unit=-666
  integer :: ask_accurate,band_index,bantot,bantot_rbz,bdeigrf,bdtot1_index,nsppol,nspinor,band2tot_index
  integer :: bdtot_index,choice,cplex,cplex_rhoij,dim_eig2rf,formeig
- integer :: fullinit,gscase,iband,iblok,icase,icase_eq,idir,idir0,idir1,idir2,idir_eq,ierr,ii,ikpt,ikpt1,jband
- integer :: initialized,iorder_cprj,ipert,ipert_cnt,ipert_eq,ipert_me,ireadwf0
+ integer :: fullinit,gscase,iband,iblok,icase,icase_eq,idir,idir0,idir1,idir2,idir_eq,idir_dkdk,ierr
+ integer :: ii,ikpt,ikpt1,jband,initialized,iorder_cprj,ipert,ipert_cnt,ipert_eq,ipert_me,ireadwf0
  integer :: iscf_mod,iscf_mod_save,isppol,istr,isym,mcg,mcgq,mcg1,mcprj,mcprjq,mband
  integer :: maxidir,me,mgfftf,mkmem_rbz,mk1mem_rbz,mkqmem_rbz,mpw,mpw1,my_nkpt_rbz
  integer :: n3xccc,nband_k,nblok,ncpgr,ndir,nkpt_eff,nkpt_max,nline_save,nmatel,npert_io,npert_me,nspden_rhoij
@@ -431,18 +431,34 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !Initialize rf2dir :
  rf2_dir1(1:3)=dtset%rf2_pert1_dir(1:3)
  rf2_dir2(1:3)=dtset%rf2_pert2_dir(1:3)
-!Diagonal terms :
- rf2dir(1) = rf2_dir1(1)*rf2_dir2(1)
- rf2dir(2) = rf2_dir1(2)*rf2_dir2(2)
- rf2dir(3) = rf2_dir1(3)*rf2_dir2(3)
-!Upper triangular terms :
- rf2dir(4) = rf2_dir1(2)*rf2_dir2(3)
- rf2dir(5) = rf2_dir1(1)*rf2_dir2(3)
- rf2dir(6) = rf2_dir1(1)*rf2_dir2(2)
-!Lower triangular terms :
- rf2dir(7) = rf2_dir1(3)*rf2_dir2(2)
- rf2dir(8) = rf2_dir1(3)*rf2_dir2(1)
- rf2dir(9) = rf2_dir1(2)*rf2_dir2(1)
+ if (sum(rf2_dir1)==3.and.sum(rf2_dir2)==3.and.dtset%prepanl==1) then
+   print *,"I'm here!"
+!  Diagonal terms :
+   rf2dir(1) = rf2_dirs_from_rfpert_nl(1,1)
+   rf2dir(2) = rf2_dirs_from_rfpert_nl(2,2)
+   rf2dir(3) = rf2_dirs_from_rfpert_nl(3,3)
+!  Upper triangular terms :
+   rf2dir(4) = rf2_dirs_from_rfpert_nl(2,3)
+   rf2dir(5) = rf2_dirs_from_rfpert_nl(1,3)
+   rf2dir(6) = rf2_dirs_from_rfpert_nl(1,2)
+!  Lower triangular terms :
+   rf2dir(7) = rf2_dirs_from_rfpert_nl(3,2)
+   rf2dir(8) = rf2_dirs_from_rfpert_nl(3,1)
+   rf2dir(9) = rf2_dirs_from_rfpert_nl(2,1)
+ else
+!  Diagonal terms :
+   rf2dir(1) = rf2_dir1(1)*rf2_dir2(1)
+   rf2dir(2) = rf2_dir1(2)*rf2_dir2(2)
+   rf2dir(3) = rf2_dir1(3)*rf2_dir2(3)
+!  Upper triangular terms :
+   rf2dir(4) = rf2_dir1(2)*rf2_dir2(3)
+   rf2dir(5) = rf2_dir1(1)*rf2_dir2(3)
+   rf2dir(6) = rf2_dir1(1)*rf2_dir2(2)
+!  Lower triangular terms :
+   rf2dir(7) = rf2_dir1(3)*rf2_dir2(2)
+   rf2dir(8) = rf2_dir1(3)*rf2_dir2(1)
+   rf2dir(9) = rf2_dir1(2)*rf2_dir2(1)
+ end if
 
 !Determine existence of pertubations and of pertubation symmetries
 !Create array with pertubations which have to be calculated
@@ -458,25 +474,12 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      rfdir(1:9) = rf2dir(:)
    end if
    do idir=1,maxidir
-     if( rfpert(ipert)==1 .and. rfdir(idir) == 1 )then
-       to_compute_this_pert = 0
-       if (ipert>=dtset%natom+10) then
-         to_compute_this_pert = 1
-       else if ((pertsy(idir,ipert)==1).or.&
+     to_compute_this_pert = 0
+     if(ipert<dtset%natom+10 .and. rfpert(ipert)==1 .and. rfdir(idir) == 1 ) then
+       if ((pertsy(idir,ipert)==1).or.&
 &         ((dtset%prepanl == 1).and.(ipert == dtset%natom+2)).or.&
 &         ((dtset%prepgkk == 1).and.(ipert <= dtset%natom))  ) then
          to_compute_this_pert = 1
-       end if
-       if (to_compute_this_pert /= 0) then
-         ipert_cnt = ipert_cnt+1;
-         pert_tmp(1,ipert_cnt) = ipert
-         pert_tmp(2,ipert_cnt) = idir
-!        Store "pertcase" in pert_tmp(3,ipert_cnt)
-         if (ipert<dtset%natom+10) then
-           pert_tmp(3,ipert_cnt) = idir + (ipert-1)*3
-         else
-           pert_tmp(3,ipert_cnt) = idir + (ipert-dtset%natom-10)*9 + (dtset%natom+6)*3
-         end if
        else
          write(message, '(a,a,i4,a,i4,a,a,a,a,a,a)' )ch10,&
 &         ' The perturbation idir=',idir,'  ipert=',ipert,' is',ch10,&
@@ -485,9 +488,68 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          call wrtout(std_out,message,'COLL')
          call wrtout(ab_out,message,'COLL')
        end if ! Test of existence of symmetry of perturbation
-     end if ! Test of existence of perturbation
-   end do
- end do
+     else if (ipert==dtset%natom+11 .and. rfpert(ipert)==1 .and. rfdir(idir) == 1 ) then
+       to_compute_this_pert = 1
+     else if (ipert==dtset%natom+10 .and. rfpert(ipert)==1 .and. idir <= 6) then
+       if (idir<=3) then
+         if (rfdir(idir) == 1) to_compute_this_pert = 1
+       else
+         if (rfdir(idir) == 1 .or. rfdir(idir+3) == 1) to_compute_this_pert = 1
+       end if
+     end if
+     if (to_compute_this_pert /= 0) then
+       ipert_cnt = ipert_cnt+1;
+       pert_tmp(1,ipert_cnt) = ipert
+       pert_tmp(2,ipert_cnt) = idir
+!      Store "pertcase" in pert_tmp(3,ipert_cnt)
+       if (ipert<dtset%natom+10) then
+         pert_tmp(3,ipert_cnt) = idir + (ipert-1)*3
+       else
+         pert_tmp(3,ipert_cnt) = idir + (ipert-dtset%natom-10)*9 + (dtset%natom+6)*3
+       end if
+     end if
+   end do ! idir
+ end do !ipert
+! do ipert=1,mpert
+!   if (ipert<dtset%natom+10) then
+!     maxidir = 3
+!     rfdir(1:3) = dtset%rfdir(:)
+!     rfdir(4:9) = 0
+!   else
+!     maxidir = 9
+!     rfdir(1:9) = rf2dir(:)
+!   end if
+!   do idir=1,maxidir
+!     if( rfpert(ipert)==1 .and. rfdir(idir) == 1 )then
+!       to_compute_this_pert = 0
+!       if (ipert>=dtset%natom+10) then
+!         to_compute_this_pert = 1
+!       else if ((pertsy(idir,ipert)==1).or.&
+!&         ((dtset%prepanl == 1).and.(ipert == dtset%natom+2)).or.&
+!&         ((dtset%prepgkk == 1).and.(ipert <= dtset%natom))  ) then
+!         to_compute_this_pert = 1
+!       end if
+!       if (to_compute_this_pert /= 0) then
+!         ipert_cnt = ipert_cnt+1;
+!         pert_tmp(1,ipert_cnt) = ipert
+!         pert_tmp(2,ipert_cnt) = idir
+!!        Store "pertcase" in pert_tmp(3,ipert_cnt)
+!         if (ipert<dtset%natom+10) then
+!           pert_tmp(3,ipert_cnt) = idir + (ipert-1)*3
+!         else
+!           pert_tmp(3,ipert_cnt) = idir + (ipert-dtset%natom-10)*9 + (dtset%natom+6)*3
+!         end if
+!       else
+!         write(message, '(a,a,i4,a,i4,a,a,a,a,a,a)' )ch10,&
+!&         ' The perturbation idir=',idir,'  ipert=',ipert,' is',ch10,&
+!&         ' symmetric of a previously calculated perturbation.',ch10,&
+!&         ' So, its SCF calculation is not needed.',ch10
+!         call wrtout(std_out,message,'COLL')
+!         call wrtout(ab_out,message,'COLL')
+!       end if ! Test of existence of symmetry of perturbation
+!     end if ! Test of existence of perturbation
+!   end do
+! end do
  ABI_ALLOCATE(pert_calc,(3,ipert_cnt))
  do icase=1,ipert_cnt
    pert_calc(:,icase)=pert_tmp(:,icase)
@@ -1248,7 +1310,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      else if (ipert==dtset%natom+11) then
        ! 2nd order (k,E)
        nwffile=3 ! dk, dE and dkdk
-       file_index(1)=idir +(dtset%natom+6)*3 ! dkdk
+       idir_dkdk = idir
+       if(idir_dkdk>6) idir_dkdk = idir_dkdk - 3
+       file_index(1)=idir_dkdk +(dtset%natom+6)*3 ! dkdk
        file_index(2)=idir2+(dtset%natom+1)*3 ! defld file (dir2)
        file_index(3)=idir1+dtset%natom*3     ! ddk file (dir1)
        fnamewff(1)=dtfil%fnamewffdkdk
