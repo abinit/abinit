@@ -1106,7 +1106,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    MSG_WARNING(message)
  end if
 
- if (dtset%prepanl==1) then
+ if (dtset%prepanl==1.and.(rf2_dkdk/=0 .or. rf2_dkde/=0)) then
    ABI_ALLOCATE(rfpert_nl,(3,natom+2,3,natom+2,3,natom+2))
    rfpert_nl = 0
    rfpert_nl(:,natom+2,:,natom+2,:,natom+2) = 1
@@ -1298,6 +1298,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call wrtout(std_out,message,'COLL')
 
  ABI_DEALLOCATE(vxc)
+ if (dtset%prepanl==1.and.(rf2_dkdk/=0 .or. rf2_dkde/=0)) then
+   ABI_DEALLOCATE(rfpert_nl)
+ end if
 
 !Output of the localization tensor
  if ( rfpert(natom+1) /= 0 .and. (me == 0) .and. dtset%occopt<=2) then
