@@ -1893,7 +1893,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          end do
        end do
      end if
-     ABI_DEALLOCATE(gw_tmp)
+     if(paw_dmft%dmft_solv<6) ABI_DEALLOCATE(gw_tmp)
      ABI_DEALLOCATE(gw_tmp_nd)
      ABI_DEALLOCATE(gtmp)
      ABI_DEALLOCATE(gtmp_nd)

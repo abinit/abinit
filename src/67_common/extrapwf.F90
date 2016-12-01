@@ -24,7 +24,7 @@
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  npwarr(nkpt)=number of planewaves in basis at this k point
@@ -93,7 +93,7 @@ subroutine extrapwf(atindx,atindx1,cg,dtset,istep,kg,mcg,mgfft,mpi_enreg,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: istep,mcg,mgfft,ntypat,usepaw
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(scf_history_type),intent(inout) :: scf_history
  type(pseudopotential_type),intent(in) :: psps

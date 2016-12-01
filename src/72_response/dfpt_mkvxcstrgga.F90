@@ -20,7 +20,7 @@
 !!  dgprimdds(3,3)=strain derivaive of gprimd.
 !!  gprimd(3,3)=dimensional primitive translations in reciprocal space (bohr^-1)
 !!  kxc(nfft,nkxc)=exchange and correlation kernel (see rhohxc.f)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT,
 !!    see ~abinit/doc/input_variables/vargs.htm#ngfft
@@ -70,7 +70,7 @@ subroutine dfpt_mkvxcstrgga(cplex,dgprimdds,gprimd,kxc,mpi_enreg,nfft,ngfft,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,nfft,nkxc,nspden,paral_kgb
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: dgprimdds(3,3),gprimd(3,3),kxc(nfft,nkxc)

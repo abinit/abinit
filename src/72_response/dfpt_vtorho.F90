@@ -136,7 +136,6 @@
 !!    nhat1(cplex*nfftf,nspden*psps%usepaw)=1st-order compensation charge density
 !!
 !! SIDE EFFECTS
-!!  mpi_enreg=information about MPI parallelization
 !!  pawrhoij1(natom) <type(pawrhoij_type)>= 1st-order paw rhoij occupancies and related data
 !!  rhor1(cplex*nfftf,nspden)=RF electron density in electrons/bohr**3.
 !!
@@ -219,7 +218,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer,optional,intent(in) :: cg1_out
  real(dp),intent(in) :: fermie1,ucvol
  real(dp),intent(out) :: edocc,eeig0,ek0,ek1,eloc0,enl0,enl1,nres2,residm
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(efield_type),intent(in) :: dtefield
@@ -713,9 +712,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
            call fftpac(ispden,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rho1wfr,rhoaug1(:,:,:,ispden),1)
          end do
        end if
-
      end if
-
    end if
 
  end do !  End loop over spins

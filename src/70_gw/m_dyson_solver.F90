@@ -44,7 +44,7 @@ MODULE m_dyson_solver
 
  private
 
- public :: solve_dyson 
+ public :: solve_dyson     ! Solve the Dyson equation for the QP energies.
 
  integer,private,parameter :: NR_MAX_NITER=1000            
   ! Max no of iterations in the Newton-Raphson method. 
@@ -233,7 +233,8 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
 
            if (ABS(Sigp%mbpt_sciss) < tol6) then
              Sr%degw(jb,sk_ibz,spin) = Sr%ze0(jb,sk_ibz,spin) * &
-&              (Sr%sigxme(jb,sk_ibz,spin) + Sr%sigcmee0(jb,sk_ibz,spin) - Sr%e0(jb,sk_ibz,spin) + Sr%hhartree(jb,jb,sk_ibz,spin))
+&              (Sr%sigxme(jb,sk_ibz,spin) + Sr%sigcmee0(jb,sk_ibz,spin) - Sr%e0(jb,sk_ibz,spin) + &
+&              Sr%hhartree(jb,jb,sk_ibz,spin))
 
              Sr%egw(jb,sk_ibz,spin) = Sr%e0(jb,sk_ibz,spin) + Sr%degw(jb,sk_ibz,spin)
 
@@ -244,13 +245,15 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
            else 
              ! If GW+scissor: e0 is replaced by qp_ene which contains the updated energy eigenvalue
              Sr%degw(jb,sk_ibz,spin)= Sr%ze0(jb,sk_ibz,spin) * &
-&              (Sr%sigxme(jb,sk_ibz,spin)+Sr%sigcmee0(jb,sk_ibz,spin)-qp_ene(jb,sk_ibz,spin)+Sr%hhartree(jb,jb,sk_ibz,spin))
+&              (Sr%sigxme(jb,sk_ibz,spin) + Sr%sigcmee0(jb,sk_ibz,spin) - qp_ene(jb,sk_ibz,spin) + &
+&              Sr%hhartree(jb,jb,sk_ibz,spin))
 
              Sr%egw(jb,sk_ibz,spin) = qp_ene(jb,sk_ibz,spin) + Sr%degw(jb,sk_ibz,spin)
 
              ! Estimate Sigma at the QP-energy: Sigma(E_qp)=Sigma(E0)+(E_qp-E0)*dSigma/dE
              Sr%sigmee(jb,sk_ibz,spin)= &
-&              Sr%sigxme(jb,sk_ibz,spin) + Sr%sigcmee0(jb,sk_ibz,spin) + Sr%degw(jb,sk_ibz,spin) * Sr%dsigmee0(jb,sk_ibz,spin)
+&              Sr%sigxme(jb,sk_ibz,spin) + Sr%sigcmee0(jb,sk_ibz,spin) + &
+&              Sr%degw(jb,sk_ibz,spin) * Sr%dsigmee0(jb,sk_ibz,spin)
 
              ! RS: In the output, the gw corr with respect to e0 without mbpt_sciss is reported.
              Sr%degw(jb,sk_ibz,spin) = Sr%egw(jb,sk_ibz,spin) - Sr%e0(jb,sk_ibz,spin)
@@ -442,7 +445,7 @@ subroutine solve_dyson(ikcalc,minbnd,maxbnd,nomega_sigc,Sigp,Kmesh,sigcme_tmp,qp
    h_tmp1 = htotal(:,:,spin)
    htotal(:,:,spin)= half * (h_tmp1 + h_tmp2)
  end do 
- !
+
  ! Print the different matrix elements of sigma if QPSC and prtvol>9
  if (Sigp%gwcalctyp>=20.and.prtvol>9.and.my_rank==master) then
    call print_sigma_melems(ikcalc,ib1,ib2,Sr%nsppol*Sr%nsig_ab,htotal,hhartree,&
@@ -638,7 +641,6 @@ subroutine print_sigma_melems(ikcalc,ib1,ib2,nsp,htotal,hhartree,sigxme,sigcme,p
  ! Then print to file
  ! Format is: row, column, value; with a blank space for each full
  ! set of columns for easy plotting with the gnuplot splot command
-
  write(fmtfile,*)'(3X,I6,2X,I6,',nsp,'(2(ES28.16E3,3x)))'
  
  call int2char10(ikcalc,sidx)

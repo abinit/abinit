@@ -53,6 +53,7 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
  use m_kptrank
  use m_profiling_abi
  use m_errors
+ use m_sort
 
  use m_numeric_tools,   only : wrap2_pmhalf
 
@@ -61,7 +62,6 @@ subroutine mkFSkgrid (elph_k, nsym, symrec, timrev)
 #undef ABI_FUNC
 #define ABI_FUNC 'mkFSkgrid'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

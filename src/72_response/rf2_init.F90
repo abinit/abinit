@@ -32,7 +32,7 @@
 !!  ipert=type of the perturbation
 !!  isppol=index of current spin component
 !!  mkmem =number of k points trated by this node (GS data).
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw or wfs at k
 !!  nband_k=number of bands at this k point for that spin polarization
 !!  ncpgr=number of gradients stored in cprj array (cprj=<p_i|Cnk>)
@@ -101,7 +101,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
  type(dataset_type),intent(in) :: dtset
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(rf_hamiltonian_type),intent(inout),target :: rf_hamkq,rf_hamk_dir2
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 
 !arrays
  real(dp),intent(in) :: cg(2,mpw*gs_hamkq%nspinor*dtset%mband*mkmem*nsppol)

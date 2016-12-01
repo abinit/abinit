@@ -237,7 +237,7 @@ subroutine ingeo (acell,amu,dtset,bravais,&
      if( abs(angdeg(1)-angdeg(2))<tol12 .and. &
 &     abs(angdeg(2)-angdeg(3))<tol12 .and. &
 &     abs(angdeg(1)-90._dp)+abs(angdeg(2)-90._dp)+abs(angdeg(3)-90._dp)>tol12 )then
-!      Treat the case of equal angles (except all right angles) :
+!      Treat the case of equal angles (except all right angles):
 !      generates trigonal symmetry wrt third axis
        cosang=cos(pi*angdeg(1)/180.0_dp)
        a2=2.0_dp/3.0_dp*(1.0_dp-cosang)
