@@ -311,31 +311,24 @@ implicit none
  ABI_MALLOC(om1dos,(PHdos%nomega))
  ABI_MALLOC(intdos,(PHdos%nomega))
  avgom2dos = zero
+ om1dos = zero
+ om2dos = zero
  do io=1,PHdos%nomega
-   om1dos(io) = PHdos%omega(io)    * PHdos%phdos(io)
-   om2dos(io) = PHdos%omega(io)**2 * PHdos%phdos(io)
+   if (abs(PHdos%omega(io)) > 1.e-8) then
+     om1dos(io) = PHdos%phdos(io) / PHdos%omega(io)
+     om2dos(io) = PHdos%phdos(io) / PHdos%omega(io)**2
+   end if
  end do
 
-! integrate dos * omega
+! integrate dos / omega
  intdos = zero
  call simpson_int(PHdos%nomega,PHdos%omega_step,om1dos,intdos)
  meanfreq = intdos(PHdos%nomega)
 
-! integrate dos * omega^2
+! integrate dos / omega^2
  intdos = zero
  call simpson_int(PHdos%nomega,PHdos%omega_step,om2dos,intdos)
  meanfreq2 = intdos(PHdos%nomega)
-
-! Debye frequency = sqrt(<omega^2>* 3/2)
- debyefreq = sqrt (meanfreq2 * three * half)
- write (msg,'(a,E20.10,a,E20.10,a)') ' Debye frequency from DOS: ', debyefreq, ' (Ha) = ', debyefreq*Ha_THz, ' (THz)'
- call wrtout (ab_out,msg,"COLL")
- call wrtout (std_out,msg,"COLL")
-
-! Debye temperature = hbar * Debye frequency / kb
- write (msg,'(a,E20.10,2a)') ' Debye temperature from DOS: ', debyefreq*Ha_K, ' (K)', ch10
- call wrtout (ab_out,msg,"COLL")
- call wrtout (std_out,msg,"COLL")
 
  iomin = 1; iomax = PHdos%nomega
  do io = 1, PHdos%nomega
@@ -360,6 +353,17 @@ implicit none
  avgspeedofsound = (ucvol / 2 / pi**2 / avgom2dos)**third
  write (msg,'(a,E20.10,a,F16.4,2a)') '- Average speed of sound: ', avgspeedofsound, ' (at units) = ', &
 &    avgspeedofsound * Bohr_Ang * 1.d-10 / Time_Sec, ' (m/s)',ch10
+ call wrtout (ab_out,msg,"COLL")
+ call wrtout (std_out,msg,"COLL")
+
+! Debye frequency = vs * (6 pi^2 natom / ucvol)**1/3
+ debyefreq = avgspeedofsound * (six*pi**2/ucvol)**(1./3.)
+ write (msg,'(a,E20.10,a,E20.10,a)') ' Debye frequency from DOS: ', debyefreq, ' (Ha) = ', debyefreq*Ha_THz, ' (THz)'
+ call wrtout (ab_out,msg,"COLL")
+ call wrtout (std_out,msg,"COLL")
+
+! Debye temperature = hbar * Debye frequency / kb
+ write (msg,'(a,E20.10,2a)') ' Debye temperature from DOS: ', debyefreq*Ha_K, ' (K)', ch10
  call wrtout (ab_out,msg,"COLL")
  call wrtout (std_out,msg,"COLL")
 
