@@ -432,7 +432,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  rf2_dir1(1:3)=dtset%rf2_pert1_dir(1:3)
  rf2_dir2(1:3)=dtset%rf2_pert2_dir(1:3)
  if (sum(rf2_dir1)==3.and.sum(rf2_dir2)==3.and.dtset%prepanl==1) then
-   print *,"I'm here!"
 !  Diagonal terms :
    rf2dir(1) = rf2_dirs_from_rfpert_nl(1,1)
    rf2dir(2) = rf2_dirs_from_rfpert_nl(2,2)
