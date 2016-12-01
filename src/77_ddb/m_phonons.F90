@@ -341,7 +341,7 @@ implicit none
    ! accumulate dos * om^2 to make an average
    avgom2dos = avgom2dos + om2dos(io)
    ! first deviation from initial value of more than 10 percent
-   if (abs(one-om2dos(1)/om2dos(io)) > 0.1_dp) then
+   if (abs(one-om2dos(iomin)/om2dos(io)) > 0.1_dp) then
      iomax = io
      exit
    end if
