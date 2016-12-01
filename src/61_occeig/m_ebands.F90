@@ -42,6 +42,7 @@ MODULE m_ebands
  use netcdf
 #endif
  use m_hdr
+ use m_kptrank
 
  use defs_datatypes,   only : ebands_t
  use defs_abitypes,    only : hdr_type, dataset_type
@@ -77,6 +78,7 @@ MODULE m_ebands
  public :: apply_scissor           ! Apply a scissor operator (no k-dependency)
  public :: get_occupied            ! Returns band indeces after wich occupations are less than an input value.
  public :: enclose_degbands        ! Adjust band indeces such that all degenerate states are treated.
+ !public :: ebands_find_erange      !
  public :: ebands_nelect_per_spin  ! Returns number of electrons per spin channel
  public :: get_minmax              ! Returns min and Max value of (eig|occ|doccde).
  public :: ebands_edstats          ! Compute statistical parameters of the energy differences e_ks[b+1] - e_ks[b]
@@ -91,7 +93,7 @@ MODULE m_ebands
  public :: ebands_ncwrite_path     ! Dump the object into NETCDF file (use filepath)
  public :: ebands_write_nesting    ! Calculate the nesting function and output data to file.
  public :: ebands_expandk          ! Build a new ebands_t in the full BZ.
- public :: ebands_jdos             ! Compute the joint density of states.
+ public :: ebands_get_jdos         ! Compute the joint density of states.
  public :: ebands_bspline
 
  public :: ebands_prtbltztrp
@@ -218,9 +220,9 @@ MODULE m_ebands
 !!
 !! SOURCE
 
- type :: bcoeff_t
+ type :: bcoefs_t
    real(dp),allocatable :: vals(:,:,:)
- end type bcoeff_t
+ end type bcoefs_t
 
  type,public :: ebspl_t
 
@@ -240,7 +242,7 @@ MODULE m_ebands
    real(dp),allocatable :: xknot(:),yknot(:),zknot(:)
    ! Array of length ndata+korder containing the knot
 
-   type(bcoeff_t),allocatable :: coeff(:,:)
+   type(bcoefs_t),allocatable :: coeff(:,:)
    ! coeff(mband, nsppol)
 
  end type ebspl_t
@@ -1749,6 +1751,86 @@ subroutine enclose_degbands(ebands,ikibz,spin,ibmin,ibmax,changed,tol_enedif)
  changed = (ibmin /= ibmin_bkp) .or. (ibmax /= ibmax_bkp)
 
 end subroutine enclose_degbands
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/ebands_get_erange
+!! NAME
+!!  ebands_get_erange
+!!
+!! FUNCTION
+!!  Compute the minimum and maximum energy enclosing a list of states
+!!  specified by k-points and band indices.
+!!
+!! INPUTS
+!!  ebands<ebands_t>=The object describing the band structure.
+!!  nkpts=Number of k-points
+!!  kpoints(3,nkpts)=K-points
+!!  band_block(2,nkpts)=Gives for each k-points, the initial and the final band index to include.
+!!
+!! OUTPUT
+!!  emin,emax=min and max energy
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'enclose_get_erange'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nkpts
+ real(dp),intent(out) :: emin,emax
+ type(ebands_t),intent(in) :: ebands
+!arrays
+ integer,intent(in) :: band_block(2,nkpts)
+ real(dp),intent(in) :: kpoints(3,nkpts)
+
+!Local variables-------------------------------
+!scalars
+ integer :: spin,band,ik,ikpt,cnt
+ type(kptrank_type) :: krank
+
+! *************************************************************************
+
+ call mkkptrank(ebands%kptns, ebands%nkpt, krank)
+
+ emin = -huge(one); emax = huge(one); cnt = 0
+
+ do spin=1,ebands%nsppol
+   do ik=1,nkpts
+     ikpt = kptrank_index(krank, kpoints(:,ik))
+     if (ikpt == -1) then
+       MSG_WARNING(sjoin("Cannot find k-point:", ktoa(kpoints(:,ik))))
+       cycle
+     end if
+     if (.not. (band_block(1,ik) >= 1 .and. band_block(2,ik) <= ebands%mband)) cycle
+     cnt = cnt + 1
+     emin = min(emin, minval(ebands%eig(band_block(1,ik):band_block(2,ik), ikpt, spin)))
+     emax = min(emax, maxval(ebands%eig(band_block(1,ik):band_block(2,ik), ikpt, spin)))
+   end do
+ end do
+
+ call destroy_kptrank(krank)
+
+ ! This can happen if wrong input.
+ if (cnt == 0) then
+    MSG_WARNING("None of the k-points/bands provided was found in ebands%")
+    emin = minval(ebands%eig); emax = maxval(ebands%eig)
+ end if
+
+end subroutine ebands_get_erange
 !!***
 
 !----------------------------------------------------------------------
@@ -3912,7 +3994,9 @@ subroutine ebspl_eval_bks(ebspl, band, kpt, spin, oeig, oder1, oder2)
 
 ! *********************************************************************
 
- !ABI_CHECK(allocated(ebspl%coeff(band, spin)%vals), sjoin("Unallocated (band, spin):", ltoa([band, spin])))
+#ifdef DEBUG_MODE
+ ABI_CHECK(allocated(ebspl%coeff(band, spin)%vals), sjoin("Unallocated (band, spin):", ltoa([band, spin])))
+#endif
 
  ! Wrap k-point in the interval [0,1[ where 1 is not included (tol12)
  call wrap2_zero_one(kpt, kred, shift)
@@ -4149,9 +4233,9 @@ end function ebands_bspline
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/ebands_jdos
+!!****f* m_ebands/ebands_get_jdos
 !! NAME
-!! ebands_jdos
+!! ebands_get_jdos
 !!
 !! FUNCTION
 !!  Compute the joint density of states.
@@ -4177,13 +4261,13 @@ end function ebands_bspline
 !!
 !! SOURCE
 
-subroutine ebands_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
+subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ebands_jdos'
+#define ABI_FUNC 'ebands_get_jdos'
  use interfaces_32_util
  use interfaces_56_recipspace
 !End of the abilint section
@@ -4385,7 +4469,7 @@ subroutine ebands_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
  ABI_FREE(wmesh)
  ABI_FREE(jdos)
 
-end subroutine ebands_jdos
+end subroutine ebands_get_jdos
 !!***
 
 !----------------------------------------------------------------------

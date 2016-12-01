@@ -179,10 +179,11 @@ MODULE m_crystal
  public :: crystal_print           ! Print dimensions and basic info stored in the object
  public :: print_symmetries        ! Helper function to print symmetries in a nice format.
  public :: idx_spatial_inversion   ! Return the index of the spatial inversion, 0 if not present.
- public :: isymmorphic             ! .TRUE. if space group is symmorphic.
- public :: isalchemical            ! .TRUE. if we are using alchemical pseudopotentials.
- public :: adata_type              ! Return atomic data from the itypat index
- public :: symbol_type             ! Return the atomic symbol from the itypat index
+ public :: isymmorphic             ! True if space group is symmorphic.
+ public :: isalchemical            ! True if we are using alchemical pseudopotentials.
+ public :: adata_type              ! Return atomic data from the itypat index.
+ public :: symbol_type             ! Return the atomic symbol from the itypat index.
+ public :: crystal_point_group     ! Return the symmetries of the point group of the crystal.
 !!***
 
 CONTAINS  !====================================================================================================
@@ -271,7 +272,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  real(dp) :: tolsym8,ucvol
  character(len=500) :: msg
 !arrays
- integer :: symrec(3,3),inversion(3,3)
+ integer :: symrec(3,3)
  real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3)
  integer,pointer :: symrel_noI(:,:,:)
  integer,allocatable :: indsym(:,:,:)
@@ -340,7 +341,6 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  !atom%amu
 
  Cryst%timrev = timrev
- call set2unit(inversion) ; inversion=-inversion
 
  if (PRESENT(symrel).and.PRESENT(tnons).and.PRESENT(symafm)) then
    if (.not.remove_inv) then
@@ -407,6 +407,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  do isym=1,Cryst%nsym
    call getspinrot(Cryst%rprimd,Cryst%spinrot(:,isym),Cryst%symrel(:,:,isym))
  end do
+
 end subroutine crystal_init
 !!***
 
@@ -712,17 +713,13 @@ pure function idx_spatial_inversion(Cryst) result(inv_idx)
 !Local variables-------------------------------
 !scalars
  integer :: isym
-!arrays
- integer :: inversion(3,3)
 
 ! *************************************************************************
 
- inversion=RESHAPE((/-1,0,0,0,-1,0,0,0,-1/),(/3,3/))
-
  inv_idx=0
- do isym=1,Cryst%nsym
-   if ( ALL(Cryst%symrel(:,:,isym)==inversion) ) then
-    inv_idx=isym; RETURN
+ do isym=1,cryst%nsym
+   if (all(cryst%symrel(:,:,isym) == inversion_3d)) then
+    inv_idx=isym; return
    end if
  end do
 
@@ -882,6 +879,78 @@ function symbol_type(crystal,itypat) result(symbol)
  symbol = atom%symbol
 
 end function symbol_type
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/crystal_point_group
+!! NAME
+!!  crystal_point_group
+!!
+!! FUNCTION
+!!  Return the symmetries of the point group of the crystal.
+!!
+!! OUTPUT
+!!  ptg_nsym=Number of symmetries in the point group
+!!  ptg_symrel(3,3,ptg_nsym)=Rotations in real space
+!!  ptg_symrec(3,3,ptg_nsym)=Rotations in reciprocal space
+!!  has_inversion=True if spatial inversion is present in the point group.
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inversion)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'symbol_type'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(crystal_t),intent(in) :: cryst
+ integer,intent(out) :: ptg_nsym
+ logical,intent(out) :: has_inversion
+!arrays
+ integer,allocatable,intent(out) :: ptg_symrel(:,:,:),ptg_symrec(:,:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: isym,search
+ logical :: found
+!arrays
+ integer :: work_symrel(3,3,cryst%nsym)
+
+! *************************************************************************
+
+ ptg_nsym = 1; work_symrel(:,:,1) = cryst%symrel(:,:,1)
+ do isym=1,cryst%nsym
+   if (cryst%symafm(isym) == -1) cycle
+   do search=1,ptg_nsym
+     found = all(work_symrel(:,:,search) == cryst%symrel(:,:,isym))
+     if (found) exit
+   end do
+   if (.not. found) then
+     ptg_nsym = ptg_nsym + 1
+     work_symrel(:,:,ptg_nsym) = cryst%symrel(:,:,isym)
+   end if
+ end do
+
+ ! Now we know the symmetries of the point group.
+ ABI_MALLOC(ptg_symrel, (3,3,ptg_nsym))
+ ABI_MALLOC(ptg_symrec, (3,3,ptg_nsym))
+ ptg_symrel = work_symrel(:,:,1:ptg_nsym)
+ has_inversion = .False.
+ do isym=1,ptg_nsym
+   if (all(ptg_symrel(:,:,isym) == inversion_3d) ) has_inversion = .True.
+   call mati3inv(ptg_symrel(:,:,isym), ptg_symrec(:,:,isym))
+ end do
+
+end subroutine crystal_point_group
 !!***
 
 !----------------------------------------------------------------------

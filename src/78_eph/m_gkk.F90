@@ -29,11 +29,8 @@ module m_gkk
  use m_profiling_abi
  use m_xmpi
  use m_errors
- use m_kptrank
- use m_tetrahedron
  use m_ifc
  use m_ebands
- use iso_c_binding
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
@@ -41,16 +38,11 @@ module m_gkk
 
  use m_time,           only : cwtime
  use m_fstrings,       only : itoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, wrap2_pmhalf, simpson_int, simpson, bisect, mkherm
- use m_io_tools,       only : open_file
- use m_special_funcs,  only : dirac_delta
  use m_fftcore,        only : ngfft_seq
- use m_fft_mesh,       only : rotate_fft_mesh
- use m_dynmat,         only : d2sym3, symdyma, ftgam_init, ftgam
  use defs_datatypes,   only : ebands_t
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
- use m_bz_mesh,        only : isamek, make_path, findqg0
+ use m_bz_mesh,        only : findqg0
 
  implicit none
 

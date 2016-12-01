@@ -2380,7 +2380,7 @@ type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) res
 !local variables-------------------------------
 !scalars
  integer,parameter :: sppoldbl1=1,timrev1=1,master=0
- integer :: nqibz,nqbz,iq_ibz,iq_bz,natom3,ierr
+ integer :: nqibz,nqbz,iq_ibz,iq_bz,natom3,ierr,nu
  integer :: my_rank,nprocs,cnt
  real(dp) :: dksqmax
  character(len=500) :: msg
@@ -2409,7 +2409,7 @@ type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) res
  end do
  call xmpi_sum(ibz_freqs, comm, ierr)
 
- new = skw_new(cryst, 1, 1, natom3, natom3, nqibz, 1, qibz, ibz_freqs, [0,0], [0,0], comm)
+ new = skw_new(cryst, 1, natom3, nqibz, 1, qibz, ibz_freqs, [0,0], [0,0], comm)
 
  if (.False. .and. my_rank == master) then
    ! Test whether SKW preserves symmetries.
@@ -2430,7 +2430,9 @@ type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) res
 
    do iq_bz=1,nqbz
      iq_ibz = bz2ibz(iq_bz,1)
-     call skw_evalk(new, cryst, qbz(:,iq_bz), 1, phfrq)
+     do nu=1,natom3
+       call skw_eval_bks(new, cryst, nu, qbz(:,iq_bz), 1, phfrq(nu))
+     end do
      write(std_out,*)"BZ-IBZ:", maxval(abs(phfrq - ibz_freqs(:, iq_ibz)))
    end do
    ABI_FREE(bz2ibz)
@@ -2493,7 +2495,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
 !local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iq,nq,natom3,my_rank,nprocs,ierr
+ integer :: iq,nq,natom3,my_rank,nprocs,ierr,mu
  real(dp) :: mare_bspl,mae_bspl,mare_skw,mae_skw
  real(dp) :: cpu,wall,gflops,cpu_fourq,wall_fourq,gflops_fourq
  real(dp) :: cpu_bspl,wall_bspl,gflops_bspl,cpu_skw,wall_skw,gflops_skw
@@ -2560,7 +2562,9 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
 
    ! SKW interpolation
    call cwtime(cpu, wall, gflops, "start")
-   call skw_evalk(skw, cryst, qpt, 1, ofreqs)
+   do mu=1,natom3
+     call skw_eval_bks(skw, cryst, mu, qpt, 1, ofreqs(mu))
+   end do
    call cwtime(cpu, wall, gflops, "stop")
    cpu_skw = cpu_skw + cpu; wall_skw = wall_skw + wall
 

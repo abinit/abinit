@@ -411,6 +411,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
 
  edos = ebands_get_edos(ebands_bspl, cryst, edos_intmeth, edos_step, edos_broad, comm)
+ !call ebands_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
 
  if (my_rank == master) then
    call edos_print(edos, unit=ab_out)
