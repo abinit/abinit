@@ -9,7 +9,7 @@
 !! All terms are stored in a rf2_t object.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2015-2016 ABINIT group (LB)
+!! Copyright (C) 2015-2016 ABINIT group (LB,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,7 +23,7 @@
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  eig0_k(mband*nsppol)=GS eigenvalues at k (hartree)
-!!  eig1_k(2*mband*mband*nsppol)=1st-order eigenvalues at k,q (hartree)
+!!  eig1_k(2*mband*mband*nsppol)=2nd-order eigenvalues at k,q (hartree)
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
 !!  ibg=shift to be applied on the location of data in the array cprj
 !!  icg=shift to be applied on the location of data in the array cg
@@ -115,10 +115,10 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 !scalars
  integer,parameter :: berryopt=0,iorder_cprj=0,level=19,tim_getghc=1,tim_getgh1c=1,tim_getgh2c=1
  integer :: choice_cprj,cpopt_cprj,iband,icpgr_loc,idir1,idir2,idir_cprj,ierr
- integer :: igs,ipert1,ipert2,ipw,ispinor,jband,kdir1
- integer :: natom,ncpgr_loc,print_info
- integer :: size_cprj,size_wf,shift_band1,shift_band2,shift_cprj_band1,shift_cprj_dir1
- integer :: shift_dir1_lambda,shift_dir2_lambda,shift_dir1,shift_dir2,shift_jband_lambda
+ integer :: igs,indb,ipert1,ipert2,iproc,ipw,ispinor,jband,kdir1
+ integer :: me,my_nband,natom,ncpgr_loc,nproc_band,print_info
+ integer :: size_cprj,size_wf,shift_band1,shift_band2,shift_cprj_band1,shift_cprj_dir1,shift_proc
+ integer :: shift_dir1_lambda,shift_dir2_lambda,shift_dir1,shift_dir1_loc,shift_dir2,shift_jband_lambda
  logical :: has_cprj_jband,has_dudkprj
  real(dp) :: doti,dotr,dot2i,dot2r,invocc,tol_final,factor
  character(len=500) :: msg
@@ -126,7 +126,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
  integer :: file_index(2)
  real(dp) :: lambda_ij(2)
  real(dp),allocatable :: cg_jband(:,:,:),ddk_read(:,:),dudkdk(:,:),dudk_dir2(:,:)
- real(dp),allocatable :: eig1_read(:),gvnl1(:,:),h_cwave(:,:),s_cwave(:,:)
+ real(dp),allocatable :: eig1_read(:),gvnl1(:,:),h_cwave(:,:),s_cwave(:,:),dsusdu_loc(:,:),dsusdu_gather(:,:)
  real(dp),allocatable,target :: dsusdu(:,:),dudk(:,:),eig1_k_stored(:)
  real(dp), ABI_CONTIGUOUS pointer :: cwave_dudk(:,:),cwave_i(:,:),cwave_j(:,:),eig1_k_jband(:)
  real(dp),pointer :: rhs_j(:,:)
@@ -138,6 +138,9 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 ! *********************************************************************
 
  DBG_ENTER("COLL")
+
+!my mpi rank :
+ me=mpi_enreg%me_kpt
 
  size_wf=gs_hamkq%npw_k*gs_hamkq%nspinor
  size_cprj=gs_hamkq%nspinor
@@ -163,7 +166,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
  if (ipert==natom+10.and.idir<=3) then ! One perturbation, one direction
    rf2%ndir=1
    rf2%idirs(1)=idir ; rf2%idirs(2)=idir
- else ! Two perturbation or/and two directions
+ else ! Two perturbations or/and two directions
    rf2%ndir=2
    call rf2_getidirs(idir,idir1,idir2)
    rf2%idirs(1)=idir1
@@ -218,14 +221,6 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
    ipert1=rf2%iperts(kdir1)
    do iband=1,nband_k
      call wfk_read_bks(ddk_f(file_index(kdir1)),iband,ikpt,isppol,xmpio_single,cg_bks=ddk_read,eig1_bks=eig1_read)
-!    Filter the wavefunctions for large modified kinetic energy
-!    The GS wavefunctions should already be non-zero
-     do ispinor=1,gs_hamkq%nspinor
-       igs=(ispinor-1)*gs_hamkq%npw_k
-       do ipw=1+igs,gs_hamkq%npw_k+igs
-         if(gs_hamkq%kinpw_kp(ipw-igs)>huge(zero)*1.d-11) ddk_read(1:2,ipw)=zero
-       end do
-     end do
 !    Copy ddk_read in "dudk"
      shift_band1=(iband-1)*size_wf
      shift_dir1=(kdir1-1)*nband_k*size_wf
@@ -235,7 +230,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
      shift_dir1_lambda=2*(kdir1-1)*nband_k**2
      eig1_k_stored(1+shift_band1+shift_dir1_lambda:2*nband_k+shift_band1+shift_dir1_lambda)=eig1_read(:)
 !    Get this dudk projected on NL projectors
-     if (has_dudkprj) then
+     if (has_dudkprj.and.mpi_enreg%proc_distrb(ikpt,iband,isppol)==me) then
        shift_cprj_band1=(iband-1)*size_cprj
        shift_cprj_dir1=(kdir1-1)*nband_k*size_cprj
        cprj_dudk => dudkprj(:,1+shift_cprj_band1+shift_cprj_dir1: &
@@ -389,6 +384,10 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 
 !  LOOP OVER BANDS
    do jband=1,nband_k ! = band n
+
+!    Skip bands not treated by current proc
+     if(mpi_enreg%proc_distrb(ikpt,jband,isppol)/=me) cycle
+
      shift_band1=(jband-1)*size_wf
      shift_cprj_band1=(jband-1)*size_cprj
      shift_jband_lambda=(jband-1)*2*nband_k
@@ -402,7 +401,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 
 !      Compute H^(0) | du/dpert1 > (in h_cwave) and S^(0) | du/dpert1 > (in s_cwave)
        call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_dudk,cprj_dudk,h_cwave,s_cwave,dtfil,&
-&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,ibg,0,0,ikpt,isppol,dtset%mband,mkmem,&
+&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,0,0,ikpt,isppol,dtset%mband,mkmem,&
 &       mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
 
        if (gs_hamkq%usepaw==0) s_cwave(:,:)=cwave_dudk(:,:) ! Store | du/dpert1 > in s_cwave
@@ -412,7 +411,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
        +dsusdu(:,1+shift_band1+shift_dir1:size_wf+shift_band1+shift_dir1)
 
        if (print_info/=0) then
-         write(msg,'(a)') 'RF2 TEST before accumulate_bands choice=1'
+         write(msg,'(2(a,i2))') 'RF2 TEST before accumulate_bands choice = 1 kdir1 = ',kdir1,' jband = ',jband
          call wrtout(std_out,msg)
        end if
 
@@ -430,7 +429,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 
 !      Extract GS wavefunction for jband
        cwave_j => cg(:,1+shift_band1+icg:size_wf+shift_band1+icg)
-       if(has_cprj_jband) cprj_j => cprj_jband(:,1+shift_cprj_band1+ibg:size_cprj+shift_cprj_band1+ibg)
+       if(has_cprj_jband) cprj_j => cprj_jband(:,1+shift_cprj_band1:size_cprj+shift_cprj_band1)
 
        if (ipert1==natom+2) then
 !        Extract ddk and multiply by i :
@@ -445,7 +444,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 
 !      Compute dH/dpert1 | u^(0) > (in h_cwave) and dS/dpert1 | u^(0) > (in s_cwave)
        call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,dtfil,&
-&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,ibg,idir1,ipert1,ikpt,isppol,&
+&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir1,ipert1,ikpt,isppol,&
 &       dtset%mband,mkmem,mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
 
 !      Copy infos in dsusdu
@@ -455,7 +454,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
        end if
 
        if (print_info/=0) then
-         write(msg,'(a)') 'RF2 TEST before accumulate_bands choice=2'
+         write(msg,'(2(a,i2))') 'RF2 TEST before accumulate_bands choice = 2 kdir1 = ',kdir1,' jband = ',jband
          call wrtout(std_out,msg)
        end if
 
@@ -474,6 +473,55 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
      end if ! empty band test
    end do ! jband
  end do ! idir1
+
+! Allgather dsusdu
+ nproc_band = xmpi_comm_size(mpi_enreg%comm_band)
+ if (nproc_band>1) then
+
+   my_nband = nband_k/nproc_band;if (mod(nband_k,nproc_band)/=0) my_nband=my_nband+1
+   ABI_ALLOCATE(dsusdu_loc,(2,size_wf*my_nband*rf2%ndir))
+   ABI_ALLOCATE(dsusdu_gather,(2,size_wf*my_nband*rf2%ndir*nproc_band))
+   dsusdu_loc(:,:) = zero
+   dsusdu_gather(:,:) = zero
+
+   do kdir1=1,rf2%ndir
+     indb = 1
+     shift_dir1=(kdir1-1)*size_wf*nband_k
+     shift_dir1_loc=(kdir1-1)*size_wf*my_nband
+     do jband=1,nband_k
+!      Skip bands not treated by current proc
+       if(mpi_enreg%proc_distrb(ikpt,jband,isppol)/=me) cycle
+
+       shift_band1=(jband-1)*size_wf
+       dsusdu_loc(:,indb+shift_dir1_loc:indb-1+size_wf+shift_dir1_loc) = &
+                   dsusdu(:,1+shift_band1+shift_dir1:size_wf+shift_band1+shift_dir1)
+       indb = indb + size_wf
+     end do
+   end do
+
+   call xmpi_allgather(dsusdu_loc,2*size_wf*my_nband*rf2%ndir,dsusdu_gather,mpi_enreg%comm_band,ierr)
+
+   do kdir1=1,rf2%ndir
+     shift_dir1=(kdir1-1)*size_wf*nband_k
+     shift_dir1_loc=(kdir1-1)*size_wf*my_nband
+     do iproc=1,nproc_band
+       shift_proc = (iproc-1)*size_wf*my_nband*rf2%ndir
+       indb = 1
+       do jband=1,my_nband
+         iband = jband+(iproc-1)*my_nband
+         if(iband<=nband_k) then
+           shift_band1=(iband-1)*size_wf
+           dsusdu(:,1+shift_band1+shift_dir1:size_wf+shift_band1+shift_dir1) = &
+            dsusdu_gather(:,indb+shift_dir1_loc+shift_proc:indb-1+size_wf+shift_dir1_loc+shift_proc)
+         end if
+         indb = indb + size_wf
+       end do
+     end do
+   end do
+   ABI_DEALLOCATE(dsusdu_loc)
+   ABI_DEALLOCATE(dsusdu_gather)
+
+ end if
 
 ! **************************************************************************************************
 ! COMPUTATION OF "RHS_Stern", THE LAST PART OF "A_mn" AND A PART OF "Lambda_mn"
@@ -505,6 +553,10 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
    end if
 
    do jband=1,nband_k
+
+!    Skip bands not treated by current proc
+     if(mpi_enreg%proc_distrb(ikpt,jband,isppol)/=me) cycle
+
      if (abs(occ_k(jband))>tol8) then
        shift_band1=(jband-1)*size_wf
        shift_cprj_band1=(jband-1)*size_cprj
@@ -513,7 +565,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 !      Extract GS wavefunction
        eig1_k_jband => null()
        cwave_j => cg(:,1+shift_band1+icg:size_wf+shift_band1+icg)
-       if(has_cprj_jband) cprj_j => cprj_jband(:,1+shift_cprj_band1+ibg:size_cprj+shift_cprj_band1+ibg)
+       if(has_cprj_jband) cprj_j => cprj_jband(:,1+shift_cprj_band1:size_cprj+shift_cprj_band1)
 
        if (ipert==natom+11) then
 !        Extract ddk and multiply by i :
@@ -529,11 +581,11 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 !      Compute  : d^2H/(dpert1 dpert2)|u^(0)>  (in h_cwave)
 !      and      : d^2S/(dpert1 dpert2)|u^(0)>  (in s_cwave)
        call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,dtfil,&
-&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,ibg,idir,ipert,ikpt,isppol,dtset%mband,&
+&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,dtset%mband,&
 &       mkmem,mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
 
        if (print_info/=0) then
-         write(msg,'(a)') 'RF2 TEST before accumulate_bands choice=3'
+         write(msg,'(a,i2)') 'RF2 TEST before accumulate_bands choice = 3 jband = ',jband
          call wrtout(std_out,msg)
        end if
 
@@ -607,6 +659,10 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
    end if
 
    do jband=1,nband_k
+
+!    Skip bands not treated by current proc
+     if(mpi_enreg%proc_distrb(ikpt,jband,isppol)/=me) cycle
+
      if (abs(occ_k(jband))>tol8) then
        shift_band1=(jband-1)*size_wf
        shift_cprj_band1=(jband-1)*size_cprj
@@ -625,11 +681,11 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 
 !      Compute dH/dpert2 | du/dpert1 > (in h_cwave) and dS/dpert2 | du/dpert1 > (in s_cwave)
        call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_dudk,cprj_dudk,h_cwave,s_cwave,dtfil,&
-&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,ibg,idir2,ipert2,ikpt,isppol,&
+&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir2,ipert2,ikpt,isppol,&
 &       dtset%mband,mkmem,mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
 
        if (print_info/=0) then
-         write(msg,'(a)') 'RF2 TEST before accumulate_bands choice=4'
+         write(msg,'(2(a,i2))') 'RF2 TEST before accumulate_bands choice = 4 kdir1 = ',kdir1,' jband = ',jband
          call wrtout(std_out,msg)
        end if
 
@@ -690,6 +746,10 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 
 ! Compute the part of 2nd order wavefunction that belongs to the space of empty bands
  do jband=1,nband_k
+
+!  Skip bands not treated by current proc
+   if(mpi_enreg%proc_distrb(ikpt,jband,isppol)/=me) cycle
+
    shift_band1=(jband-1)*size_wf
    if (abs(occ_k(jband))>tol8) then
      invocc = one/occ_k(jband)
@@ -744,6 +804,10 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
  rf2%dcwavef=zero
 
  do jband=1,nband_k
+
+!  Skip bands not treated by current proc
+   if(mpi_enreg%proc_distrb(ikpt,jband,isppol)/=me) cycle
+
    shift_band1=(jband-1)*size_wf
    if (abs(occ_k(jband))>tol8) then
      do iband=1,nband_k
@@ -767,6 +831,9 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
    end if ! empty band test
  end do ! jband
 
+! For the following, "rf2%lambda_mn" and "rf2%RHS_Stern" must be computed for every bands
+call xmpi_barrier(mpi_enreg%comm_band)
+
 ! **************************************************************************************************
 !  FINAL TEST
 ! **************************************************************************************************
@@ -774,6 +841,10 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
  tol_final = tol6
  if (print_info/=0) then
    do jband=1,nband_k
+
+!    Skip bands not treated by current proc
+     if(mpi_enreg%proc_distrb(ikpt,jband,isppol)/=me) cycle
+
      if (abs(occ_k(jband))>tol8) then
 !       write(msg,'(3(a,i2))') 'RF2 TEST FINAL : ipert=',ipert-natom,' idir=',idir,' jband=',jband
 !       call wrtout(std_out,msg)

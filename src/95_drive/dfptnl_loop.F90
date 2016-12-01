@@ -19,7 +19,6 @@
 !!                         of the WF in the cg array
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  etotal = new total energy (no meaning at output)
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space(bohr^-1)
 !!  gsqcut=Fourier cutoff on G^2 for "large sphere" of radius double
@@ -91,7 +90,7 @@
 #include "abi_common.h"
 
 
-subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,gprimd,gsqcut, &
+subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gsqcut, &
 & hdr,kg,kneigh,kg_neigh,kptindex,kpt3,kxc,k3xc,mband,mgfft,mkmem,mkmem_max,mk1mem,&
 & mpert,mpi_enreg,mpw,mvwtk,natom,nfftf,nkpt,nkpt3,nkxc,nk3xc,nneigh,nspinor,nsppol,&
 & npwarr,occ,pawfgr,pawtab,psps,pwind,rfpert,rhog,rhor,rprimd,ucvol,usecprj,vtrial,xred)
@@ -136,7 +135,6 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,g
  integer,intent(in) :: mband,mgfft,mk1mem,mkmem,mkmem_max,mpert,mpw,natom,nfftf
  integer,intent(in) :: nk3xc,nkpt,nkpt3,nkxc,nneigh,nspinor,nsppol,usecprj
  real(dp),intent(in) :: gsqcut,ucvol
- real(dp),intent(inout) :: etotal
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
@@ -302,7 +300,7 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,g
 
          call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, dtset%ngfft, rdwrpaw, mpi_enreg, rho1r1, &
          hdr_den, rhoij_dum, comm_cell, check_hdr=hdr)
-         etotal = hdr_den%etot; call hdr_free(hdr_den)
+         call hdr_free(hdr_den)
        end if
 
        xccc3d1(:) = zero
@@ -345,7 +343,7 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,g
 
                call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, dtset%ngfft, rdwrpaw, mpi_enreg, rho3r1, &
                hdr_den, rhoij_dum, comm_cell, check_hdr=hdr)
-               etotal = hdr_den%etot; call hdr_free(hdr_den)
+               call hdr_free(hdr_den)
              end if
 
              xccc3d3(:) = zero
@@ -438,7 +436,7 @@ subroutine dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,g
 
                      call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, dtset%ngfft, rdwrpaw, mpi_enreg, rho2r1, &
                      hdr_den, rhoij_dum, comm_cell, check_hdr=hdr)
-                     etotal = hdr_den%etot; call hdr_free(hdr_den)
+                     call hdr_free(hdr_den)
 
 !                    Compute up+down rho1(G) by fft
                      ABI_ALLOCATE(work,(cplex*nfftf))

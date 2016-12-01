@@ -263,22 +263,28 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
        do i2dir = 1, 3
          do i3pert = 1, mpert
            do i3dir = 1, 3
-             perm(1) = d3e_pert1(i1pert)*dtset%d3e_pert1_dir(i1dir) &
+             perm(1) = &
+&              d3e_pert1(i1pert)*dtset%d3e_pert1_dir(i1dir) &
 &             *d3e_pert2(i2pert)*dtset%d3e_pert2_dir(i2dir) &
 &             *d3e_pert3(i3pert)*dtset%d3e_pert3_dir(i3dir)
-             perm(2) = d3e_pert1(i1pert)*dtset%d3e_pert1_dir(i1dir) &
+             perm(2) = &
+&              d3e_pert1(i1pert)*dtset%d3e_pert1_dir(i1dir) &
 &             *d3e_pert2(i3pert)*dtset%d3e_pert2_dir(i3dir) &
 &             *d3e_pert3(i2pert)*dtset%d3e_pert3_dir(i2dir)
-             perm(3) = d3e_pert1(i2pert)*dtset%d3e_pert1_dir(i2dir) &
+             perm(3) = &
+&              d3e_pert1(i2pert)*dtset%d3e_pert1_dir(i2dir) &
 &             *d3e_pert2(i1pert)*dtset%d3e_pert2_dir(i1dir) &
 &             *d3e_pert3(i3pert)*dtset%d3e_pert3_dir(i3dir)
-             perm(4) = d3e_pert1(i2pert)*dtset%d3e_pert1_dir(i2dir) &
+             perm(4) = &
+&              d3e_pert1(i2pert)*dtset%d3e_pert1_dir(i2dir) &
 &             *d3e_pert2(i3pert)*dtset%d3e_pert2_dir(i3dir) &
 &             *d3e_pert3(i1pert)*dtset%d3e_pert3_dir(i1dir)
-             perm(5) = d3e_pert1(i3pert)*dtset%d3e_pert1_dir(i3dir) &
+             perm(5) = &
+&              d3e_pert1(i3pert)*dtset%d3e_pert1_dir(i3dir) &
 &             *d3e_pert2(i2pert)*dtset%d3e_pert2_dir(i2dir) &
 &             *d3e_pert3(i1pert)*dtset%d3e_pert3_dir(i1dir)
-             perm(6) = d3e_pert1(i3pert)*dtset%d3e_pert1_dir(i3dir) &
+             perm(6) = &
+&              d3e_pert1(i3pert)*dtset%d3e_pert1_dir(i3dir) &
 &             *d3e_pert2(i1pert)*dtset%d3e_pert2_dir(i1dir) &
 &             *d3e_pert3(i2pert)*dtset%d3e_pert3_dir(i2dir)
              if (sum(perm(:)) > 0) rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
@@ -323,11 +329,12 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 & ' The list of irreducible elements of the Raman and non-linear',&
 & ch10,' optical susceptibility tensors is:',ch10
  call wrtout(ab_out,message,'COLL')
-
+ call wrtout(std_out,message,'COLL')
+ 
  write(message,'(12x,a)')&
 & 'i1pert  i1dir   i2pert  i2dir   i3pert  i3dir'
  call wrtout(ab_out,message,'COLL')
-
+ call wrtout(std_out,message,'COLL')
  n1 = 0
  do i1pert = 1, natom + 2
    do i1dir = 1, 3
@@ -340,6 +347,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
                write(message,'(2x,i4,a,6(5x,i3))') n1,')', &
 &               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir
                call wrtout(ab_out,message,'COLL')
+               call wrtout(std_out,message,'COLL')
              else if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-2) then
                blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
              end if
@@ -351,6 +359,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  end do
  write(message,'(a,a)') ch10,ch10
  call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL')
 
 !Some data for parallelism
  nkpt_max=50;if(xmpi_paral==1)nkpt_max=-1
@@ -443,9 +452,9 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 &   mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
-!LBTEST
+!LTEST
 ! *** TO CALL CTOCPRJ HERE ***
-!LBTEST
+!LTEST
 
 ! call timab(135,2,tsec)
 ! call timab(136,1,tsec)
@@ -551,11 +560,11 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
  if(psps%usepaw==1) then
 !  1-Initialize values for several arrays depending only on atomic data
 
-!LBTEST
+!LTEST
 ! TO UNDERSTAND THAT
    gnt_option=1
 !   if (dtset%pawxcdev==2.or.dtset%rfphon/=0.or.dtset%rfstrs/=0.or.dtset%rfelfd==1.or.dtset%rfelfd==3) gnt_option=2
-!LBTEST
+!LTEST
 
    ! Test if we have to call pawinit
    call paw_gencond(Dtset,gnt_option,"test",call_pawinit)
@@ -688,7 +697,7 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
 !    MT july 2013: Should we read rhoij from the density file ?
    call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor, &
    hdr_den, pawrhoij_read, spaceworld, check_hdr=hdr)
-   etotal = hdr_den%etot; call hdr_free(hdr_den)
+   call hdr_free(hdr_den)
 
    if (rdwrpaw/=0) then
      call pawrhoij_bcast(pawrhoij_read,hdr%pawrhoij,0,spaceworld)
@@ -1021,7 +1030,7 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
 &   nkpt3,nneigh,npwarr,dtset%nsppol,occ,pwind)
 
   call status(0,dtfil%filstat,iexit,level,'call pead_nl_loop ')
-  call pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,etotal,gmet,gprimd,gsqcut,&
+  call pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,gmet,gprimd,gsqcut,&
 &  hdr,kg,kneigh,kg_neigh,kptindex,kpt3,kxc,k3xc,dtset%mband,dtset%mgfft,&
 &  dtset%mkmem,mkmem_max,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,mvwtk,natom,nfftf,&
 &  dtset%nkpt,nkpt3,nkxc,nk3xc,nneigh,dtset%nspinor,dtset%nsppol,npwarr,occ,psps,pwind,&
@@ -1030,7 +1039,7 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
  else ! pead=0 in this case
 
    call status(0,dtfil%filstat,iexit,level,'call dfptnl_loop ')
-   call dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,gprimd,gsqcut,&
+   call dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gsqcut,&
 &   hdr,kg,kneigh,kg_neigh,kptindex,kpt3,kxc,k3xc,dtset%mband,mgfftf,&
 &   dtset%mkmem,mkmem_max,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,mvwtk,natom,nfftf,&
 &   dtset%nkpt,nkpt3,nkxc,nk3xc,nneigh,dtset%nspinor,dtset%nsppol,npwarr,occ,pawfgr,pawtab,psps,pwind,&
@@ -1225,6 +1234,10 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
 
 !Clean the header
  call hdr_free(hdr)
+
+!As the etotal energy has no meaning here, we set it to zero
+!(to avoid meaningless side-effects when comparing ouputs...)
+ etotal = zero
 
  call status(0,dtfil%filstat,iexit,level,' exit         ')
  call timab(501,2,tsec)

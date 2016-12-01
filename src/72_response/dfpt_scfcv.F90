@@ -218,6 +218,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  use m_wfk
  use m_xmpi
  use m_nctk
+ use m_hdr
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -334,7 +335,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=12,response=1
- integer :: afford,choice,cplex_rhoij,dbl_nnsclo
+ integer :: afford,bantot_rbz,choice,cplex_rhoij,dbl_nnsclo
  integer :: has_dijfr,iatom,ider,idir_dum,idir_paw1,ierr,iexit,errid,denpot
  integer :: iprcel,iscf10_mod,iscf_mod,ispden,ispmix
  integer :: istep,itypat,izero,lmn2_size,me,mgfftdiel,mvdum
@@ -1149,6 +1150,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 & nstep,occ_rbz,0,prtfor,0,&
 & quit,res2,resid,residm,response,&
 & tollist,psps%usepaw,vxcavg,wtk_rbz,xred,conv_retcode)
+
+!Update the content of the header (evolving variables)
+ bantot_rbz = sum(nband_rbz(1:nkpt_rbz*dtset%nsppol))
+ call hdr_update(hdr,bantot_rbz,etotal,fermie,&
+& residm,rprimd,occ_rbz,pawrhoij1,xred,dtset%amu_orig(:,1),&
+& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
 
 !Optionally provide output of charge density and/or potential in real space,
 !as well as analysis of geometrical factors (bond lengths and bond angles).

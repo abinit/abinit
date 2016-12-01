@@ -8,7 +8,7 @@
 !! equation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2016 ABINIT group (LB)
+!!  Copyright (C) 2015-2016 ABINIT group (LB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -214,7 +214,7 @@ end subroutine rf2_getidirs
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
 !!  mpi_enreg=information about MPI parallelization
 !!  iband : band index for vi
-!!  idir1  (us only if print_info/=0)  : direction of the 1st perturbation
+!!  idir1  (used only if print_info/=0)  : direction of the 1st perturbation
 !!  idir2  (used only if print_info/=0)  : direction of the 2nd perturbation
 !!  ipert1 (used only if print_info/=0)  : 1st perturbation
 !!  ipert2 (used only if print_info/=0)  : 2nd perturbation
@@ -355,7 +355,6 @@ end subroutine rf2_accumulate_bands
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
 !!  gvnl1(2,npw1*nspinor)=  part of <G|K^(1)+Vnl^(1)|C> not depending on VHxc^(1)              (sij_opt/=-1)
 !!                       or part of <G|K^(1)+Vnl^(1)-lambda.S^(1)|C> not depending on VHxc^(1) (sij_opt==-1)
-!!  ibg=shift to be applied on the location of data in the array cprj
 !!  idir=direction of the perturbation
 !!  ipert=type of the perturbation of the Hamiltonian :
 !!     ipert = 0           : GS calculation, call of getghc
@@ -399,7 +398,7 @@ end subroutine rf2_accumulate_bands
 !! SOURCE
 
 subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cwave,dtfil,eig0,eig1_k_jband,&
-&                                jband,gs_hamkq,gvnl1,ibg,idir,ipert,ikpt,isppol,mband,mkmem,mpi_enreg,nsppol,&
+&                                jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,mband,mkmem,mpi_enreg,nsppol,&
                                  print_info,prtvol,rf_hamk_idir)
 
  use defs_basis
@@ -422,7 +421,7 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: ibg,idir,ipert,ikpt,isppol,jband,mband,mkmem,nsppol,print_info,prtvol
+ integer,intent(in) :: idir,ipert,ikpt,isppol,jband,mband,mkmem,nsppol,print_info,prtvol
  type(datafiles_type),intent(in) :: dtfil
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(rf2_t),intent(in) :: rf2
@@ -491,6 +490,16 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,
  has_cwaveprj=(gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1.and.size(cwaveprj)/=0)
  cprj_j => cprj_empty
 
+ if (print_info/=0) then
+   if (ipert/=0) then
+     write(msg,'(3(a,i2))') 'RF2 TEST rf2_apply_hamiltonian ipert = ',ipert-natom,' idir =',idir,&
+     & ' jband = ',jband
+   else
+     write(msg,'(a,i2)') 'RF2 TEST rf2_apply_hamiltonian ipert = 0 idir = 0 jband = ',jband
+   end if
+   call wrtout(std_out,msg)
+ end if
+
 ! *******************************************************************************************
 ! apply H^(0)
 ! *******************************************************************************************
@@ -536,9 +545,9 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,
                   mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamk_idir,sij_opt,tim_getgh1c,usevnl)
      do iband=1,nband_k
        cwave_i => cg_jband(:,1+(iband-1)*size_wf:iband*size_wf,1)
-       call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cwave_i,h_cwave,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+       call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cwave_i,h_cwave,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
        if (gs_hamkq%usepaw==1.and.ipert/=natom+2) then ! S^(1) is zero for ipert=natom+2
-         call dotprod_g(dotr2,doti2,gs_hamkq%istwf_k,size_wf,2,cwave_i,s_cwave,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+         call dotprod_g(dotr2,doti2,gs_hamkq%istwf_k,size_wf,2,cwave_i,s_cwave,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
          dotr = dotr - (eig0(iband)+eig0(jband))*dotr2/two
          doti = doti - (eig0(iband)+eig0(jband))*doti2/two
        end if
