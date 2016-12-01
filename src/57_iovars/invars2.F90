@@ -1677,6 +1677,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if(tread==1) dtset%dmft_solv=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_t2g',tread,'INT')
    if(tread==1) dtset%dmft_t2g=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_tolfreq',tread,'DPR')
+   if(tread==1) dtset%dmft_tolfreq=dprarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_tollc',tread,'DPR')
    if(tread==1) dtset%dmft_tollc=dprarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftbandi',tread,'INT')
@@ -1741,6 +1743,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
        if(tread==1) dtset%dmftctqmc_mov    =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_order',tread,'INT')
        if(tread==1) dtset%dmftctqmc_order  =intarr(1)
+     end if
+     if(dtset%dmft_solv>=6.and.dtset%dmft_solv<=7) then
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_nleg',tread,'INT')
+       if(tread==1) dtset%dmftctqmc_triqs_nleg  =intarr(1)
      end if
    end if
  end if

@@ -70,7 +70,7 @@ iatprj_bs 1 1
 #%% test_chain = t90.in, t91.in, t92.in, t93.in, t94.in
 #%% [files]
 #%% files_to_test = 
-#%%   t93.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00 ;
+#%%   t93.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00;
 #%%   t93.out_ep_SBK, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 1
