@@ -222,7 +222,7 @@ program multibinit
 !****************************************************************************************
 !TEST_AM_SECTION
  if(.false.)then
- if (iam_master.and.inp%ncoeff == 0.and.reference_effective_potential%anharmonics_terms%ncoeff>0) then
+ if (iam_master.and.inp%ncoeff == 0.and.inp%fit_coeff==1) then
    write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
 &      '-Reading the file ',trim(filnam(5)),ch10,&
 &   ' with NetCDF in order to fit the polynomial coefficients'
@@ -236,13 +236,14 @@ program multibinit
 &          'Action: add MD file'
         MSG_ERROR(message)
    end if
+ end if
+!MPI BROADCAST
+ call abihist_bcast(hist,master,comm)
+
  
 !   call fit_polynomial_coeff_init
 !   call fit_polynomial_coeff_init(reference_effective_potential%,filnam,inp,comm)
- end if
 
-!MPI BROADCAST
- call abihist_bcast(hist,master,comm)
  end if
 !****************************************************************************************
 

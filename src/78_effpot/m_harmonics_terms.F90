@@ -36,7 +36,6 @@ module m_harmonics_terms
 
  public :: harmonics_terms_init
  public :: harmonics_terms_free
-
 !!***
 
 !!****t* defs_abitypes/harmonics_terms_type

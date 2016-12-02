@@ -67,14 +67,15 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 
  !Local variables-------------------------------
  !scalar
-  integer :: ia,ii,irpt,jj,kk,natom
-  integer :: nfile,nrpt
+  integer :: ia,ii,irpt,jj,kk,my_rank,natom
+  integer :: nfile,nrpt,nproc
   real(dp) :: delta,delta1,delta2
   character(len=500) :: message
   character(len=fnlen):: name
-  logical :: files_availables = .True.
-  logical :: has_any_strain = .False.
+  logical :: files_availables = .True.,has_any_strain = .False.
   logical :: has_all_strain = .True.
+  logical :: iam_master=.FALSE.
+  integer,parameter :: master=0
  !arrays
   integer  :: have_strain(6)
   real(dp) :: deformation(6,2),elastics(6,6,6),rprimd_def(3,3)
@@ -101,13 +102,15 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 
  !==========================================
  !0)Initialisation of variables:
-
-
+! Set MPI local varibaless
+  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+  iam_master = (eff_pot%me_supercell == master)
+ 
  !==========================================
  !1) Get the list of files
   nfile = 0
-  jj = 4
-  do while (jj < 16) 
+  jj = 6
+  do while (jj < 18) 
     if (filenames(jj)/="") then 
       if(jj==4) nfile = 1
       write(message, '(a,a)' )'  - ',trim(filenames(jj))
@@ -136,7 +139,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
  !   - Also get the strain
  !   - perform some checks
   ii = 2
-  jj = 4
+  jj = 6
 
   ABI_DATATYPE_ALLOCATE(eff_pots,(nfile))
   ABI_ALLOCATE(file_usable,(nfile))
@@ -144,7 +147,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   ref_eff_pot => eff_pot
   file_usable(:) = .True.
 
-  do while (jj < 16) 
+  do while (jj < 18) 
     if (filenames(jj)/="") then
       !Read and Intialisation of the effective potential type
       call effective_potential_file_read(filenames(jj),eff_pots(ii),inp,comm)
@@ -190,8 +193,10 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
     end if
     if (eff_pots(ii)%crystal%ntypat/=ref_eff_pot%crystal%ntypat) then
       write(message, '(a,I5,a,a,a,a,a,I5,a,a,a,a)' )&
-&    'the number of type of atoms in reference  (',ref_eff_pot%crystal%ntypat,') is not equal to the  ',&
-&     ch10,'the number of type of atoms  in',trim(filenames(ii+2)),' (',eff_pots(ii)%crystal%ntypat,')',&
+&    'the number of type of atoms in reference  (',ref_eff_pot%crystal%ntypat,&
+&     ') is not equal to the  ',&
+&     ch10,'the number of type of atoms  in',trim(filenames(ii+2)),&
+&     ' (',eff_pots(ii)%crystal%ntypat,')',&
 &     ch10,'this files can not be used',ch10
       MSG_WARNING(message)
       file_usable(ii) = .False.
@@ -438,7 +443,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 
 
 !         Compute elasctic-displacement coupling
-          elastic_displacement(ii,:,:,:) = (eff_pots(int(delta1))%harmonics_terms%internal_strain(:,:,:)&
+          elastic_displacement(ii,:,:,:)=(eff_pots(int(delta1))%harmonics_terms%internal_strain(:,:,:)&
 &          - eff_pots(int(delta2))%harmonics_terms%internal_strain(:,:,:)) / &
 &            (2 * abs(eff_pots(int(delta1))%strain%delta))
         end if

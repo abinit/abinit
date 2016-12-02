@@ -216,7 +216,7 @@ implicit none
    dtset%bmass = inp%bmass  ! Barostat mass
    dtset%nctime = 0     ! NetCdf TIME between output of molecular dynamics informations 
    dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
-   dtset%dilatmx = 1.2   ! DILATation : MaXimal value
+   dtset%dilatmx = 1.05   ! DILATation : MaXimal value
    dtset%dtion = inp%dtion  ! Delta Time for IONs
    dtset%diismemory = 8 ! Direct Inversion in the Iterative Subspace MEMORY
    dtset%friction = 0.0001 ! internal FRICTION coefficient
@@ -255,7 +255,7 @@ implicit none
      ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
      dtset%qmass = inp%qmass
    end if
-   dtset%strtarget = zero ! STRess TARGET
+   dtset%strtarget(:) = -1/29421.033d0 ! STRess TARGET
    ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
    symrel = one
    call alloc_copy(symrel,dtset%symrel)
@@ -307,10 +307,19 @@ implicit none
 !2  initialization of the structure for the dynamics
 !***************************************************************
 
+   ABI_ALLOCATE(dtset%rprimd_orig,(3,3,1))
+   dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd_supercell
+ 
+   ABI_ALLOCATE(xred,(3,dtset%natom))
+   ABI_ALLOCATE(xred_old,(3,dtset%natom))
+   ABI_ALLOCATE(vel,(3,dtset%natom))
+   ABI_ALLOCATE(fred,(3,dtset%natom))
+   ABI_ALLOCATE(fcart,(3,dtset%natom))
+
 ! Fill the strain from input file
    call strain_init(strain)
    if (any(inp%strain /= zero)) then
-     write(message,'(a)') ' Strain is imposed during the simulation'
+     write(message,'(2a)') ch10, ' Strain is imposed during the simulation'
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
 !    convert strain into matrix
@@ -320,18 +329,12 @@ implicit none
      mat_strain(1,2) = half * inp%strain(6) ; mat_strain(2,1) = half * inp%strain(6)
      call strain_get(strain,mat_delta = mat_strain)
      effective_potential%strain = strain
-     effective_potential%has_strain = .TRUE.
+     effective_potential%has_strain = .FALSE.
      call strain_print(effective_potential%strain)
+    call strain_apply(effective_potential%supercell%rprimd_supercell,dtset%rprimd_orig(:,:,1),&
+&                     effective_potential%strain)
    end if
  
-   ABI_ALLOCATE(dtset%rprimd_orig,(3,3,1))
-   dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd_supercell
- 
-   ABI_ALLOCATE(xred,(3,dtset%natom))
-   ABI_ALLOCATE(xred_old,(3,dtset%natom))
-   ABI_ALLOCATE(vel,(3,dtset%natom))
-   ABI_ALLOCATE(fred,(3,dtset%natom))
-   ABI_ALLOCATE(fcart,(3,dtset%natom))
    
    call xcart2xred(dtset%natom,effective_potential%supercell%rprimd_supercell,&
 &                  effective_potential%supercell%xcart_supercell,xred)

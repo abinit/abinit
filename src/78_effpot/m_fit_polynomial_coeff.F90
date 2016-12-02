@@ -1,5 +1,5 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/m_polynomial_coeff
+!!****f* ABINIT/m_fit_polynomial_coeff
 !!
 !! NAME
 !! m_fit_polynomial_coeff
@@ -135,7 +135,7 @@ end subroutine fit_polynomial_coeff_init
 !!
 !!
 !! CHILDREN
-!!   
+!!
 !!
 !! SOURCE
 

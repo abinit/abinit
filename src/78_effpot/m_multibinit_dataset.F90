@@ -66,6 +66,8 @@ module m_multibinit_dataset
   integer :: eivec
   integer :: elphflag
   integer :: enunit
+  integer :: fit_coeff
+  integer :: fit_option
   integer :: ifcana
   integer :: ifcflag
   integer :: ifcout
@@ -90,6 +92,7 @@ module m_multibinit_dataset
   integer :: rfmeth
   integer :: symdynmat
 
+  integer :: fit_grid(3)
   integer :: n_cell(3)
   integer :: ngqpt(9)             ! ngqpt(9) instead of ngqpt(3) is needed in wght9.f
   integer :: ng2qpt(3)
@@ -802,6 +805,41 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 !F
+ multibinit_dtset%fit_coeff=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_coeff',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_coeff=intarr(1)
+ if(multibinit_dtset%fit_coeff<0.and.multibinit_dtset%fit_coeff>1)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_coeff is',multibinit_dtset%fit_coeff,', but the only allowed values',ch10,&
+&   'are 0 or 1 for multibinit.',ch10,&
+&   'Action: correct fit_coeff in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%fit_option=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_option',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_option=intarr(1)
+! No test for now
+! if(multibinit_dtset%fit_option=0.or.multibinit_dtset%fit_option/=1)then
+!   write(message, '(a,i8,a,a,a,a,a)' )&
+!&   'fit_option is',multibinit_dtset%fit_option,', but the only allowed values',ch10,&
+!&   'are 0 or 1 for multibinit.',ch10,&
+!&   'Action: correct fit_option in your input file.'
+!   MSG_ERROR(message)
+! end if
+
+ multibinit_dtset%fit_grid(:)= one
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'fit_grid',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_grid(1:3)=intarr(1:3)
+ do ii=1,3
+   if(multibinit_dtset%fit_grid(ii)<0.or.multibinit_dtset%fit_grid(ii)>20)then
+     write(message, '(a,i0,a,i0,a,a,a,i0,a)' )&
+&     'fit_grid(',ii,') is ',multibinit_dtset%fit_grid(ii),', which is lower',&
+&     ' than 0 of superior than 20.',&
+&     ch10,'Action: correct fit_grid(',ii,') in your input file.'
+     MSG_ERROR(message)
+   end if
+ end do
 
 !G
 
@@ -1072,6 +1110,13 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(3x,a12)',advance='no')'    qmass  '
    write(nunit,'(3x,15i10)') (multibinit_dtset%qmass(ii)*ii,ii=1,multibinit_dtset%nnos)
 
+ end if
+
+ if(multibinit_dtset%fit_coeff/=0)then
+   write(nunit,'(a)')' Fit the coefficients :'
+   write(nunit,'(3x,a10,I10.1)')'fit_coeff ',multibinit_dtset%fit_coeff
+   write(nunit,'(3x,a10,I10.1)')'fit_option',multibinit_dtset%fit_option
+   write(nunit,'(3x,a10,3i10)') '  fit_grid',multibinit_dtset%fit_grid
  end if
 
 !Write the general information

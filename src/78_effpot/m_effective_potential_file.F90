@@ -309,7 +309,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm)
 
 !     Assign the coeff number from input
       if(inp%ncoeff==zero)then
-        write(message,'(6a)'),ch10,&
+        write(message,'(6a)') ch10,&
 &      ' WARNING : The number of coefficients in set to 0',&
 &      ' in the input file.',ch10,&
 &      '           The coefficients must be fitted'

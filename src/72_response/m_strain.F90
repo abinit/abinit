@@ -251,7 +251,6 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta)
    
    call matr3inv(rprim,rprim_inv)
    mat_delta_tmp =  matmul(transpose(rprim_inv),rprim_def)-identity
-   
    identity = zero
    do i=1,3
      do j=1,3
@@ -323,11 +322,12 @@ subroutine strain_apply(rprim,rprim_def,strain)
  real(dp) :: identity(3,3)
 ! *************************************************************************
 
+ rprim_def(:,:) = zero
 ! Fill the identity matrix
  identity = zero
  forall(i=1:3)identity(i,i)=1
  
- rprim_def(:,:) = matmul(rprim(:,:),strain%strain(:,:))
+ rprim_def(:,:) = matmul(rprim(:,:),identity(:,:)+strain%strain(:,:))
 
 end subroutine strain_apply
 !!***
@@ -582,7 +582,7 @@ subroutine strain_print(strain)
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
      do ii = 1,3
-       write(message,'(3es12.2)') strain%strain(1,ii),strain%strain(2,ii),strain%strain(3,ii)
+       write(message,'(3es12.2)') strain%strain(ii,1),strain%strain(ii,2),strain%strain(ii,3)
        call wrtout(std_out,message,'COLL')
        call wrtout(ab_out,message,'COLL')
      end do
@@ -591,7 +591,7 @@ subroutine strain_print(strain)
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
      do ii = 1,3
-       write(message,'(3es12.2)') strain%strain(1,ii),strain%strain(2,ii),strain%strain(3,ii)
+       write(message,'(3es12.2)') strain%strain(ii,1),strain%strain(ii,2),strain%strain(ii,3)
        call wrtout(std_out,message,'COLL')
        call wrtout(ab_out,message,'COLL')
      end do
