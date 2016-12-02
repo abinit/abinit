@@ -762,6 +762,16 @@
 
  intarr(1,:)=dtsets(:)%rf2_dkde
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rf2_dkde','INT',0)
+ 
+ intarr(1,:)=dtsets(:)%rf2_pert1_dir(1)
+ intarr(2,:)=dtsets(:)%rf2_pert1_dir(2)
+ intarr(3,:)=dtsets(:)%rf2_pert1_dir(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'rf2_pert1_dir','INT',0)
+
+ intarr(1,:)=dtsets(:)%rf2_pert2_dir(1)
+ intarr(2,:)=dtsets(:)%rf2_pert2_dir(2)
+ intarr(3,:)=dtsets(:)%rf2_pert2_dir(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'rf2_pert2_dir','INT',0)
 
  dprarr(1,:)=dtsets(:)%rhoqpmix
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rhoqpmix','DPR',0)
