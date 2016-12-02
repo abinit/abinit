@@ -215,7 +215,7 @@ subroutine phdos_print(PHdos,fname)
    MSG_ERROR(msg)
  end if
  fname_msqd = trim(fname) // "_msqd"
- if (open_file(fname_by_atom,msg,newunit=unt_msqd,form="formatted",action="write") /= 0) then
+ if (open_file(fname_msqd,msg,newunit=unt_msqd,form="formatted",action="write") /= 0) then
    MSG_ERROR(msg)
  end if
 
@@ -607,6 +607,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  ABI_MALLOC(PHdos%pjdos_type_int,(nomega,crystal%ntypat))
  ABI_MALLOC(PHdos%pjdos_rc_type,(nomega,3,crystal%ntypat))
  ABI_MALLOC(PHdos%msqd_dos_atom,(nomega,3,3,natom))
+
  !
  ! === Parameters defining the gaussian approximant ===
  if (prtdos==1) then
@@ -747,6 +748,9 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
      if (allocated(PHdos%pjdos)) then
        ABI_FREE(PHdos%pjdos)
      end if
+     if (allocated(PHdos%msqd_dos_atom)) then
+       ABI_FREE(PHdos%msqd_dos_atom)
+     end if
      !
      ! Frequency mesh.
      PHdos%omega_min=low_bound; if (ABS(PHdos%omega_min)<tol5) PHdos%omega_min=-tol5
@@ -766,6 +770,8 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 
      ABI_CALLOC(PHdos%phdos,(PHdos%nomega))
      ABI_CALLOC(PHdos%pjdos,(PHdos%nomega,3,natom))
+     ABI_CALLOC(PHdos%msqd_dos_atom,(PHdos%nomega,3,3,natom))
+     PHdos%msqd_dos_atom = zero
      !
      ! === Sum over irreducible q-points ===
      do iq_ibz=1,PHdos%nqibz
@@ -798,8 +804,8 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 
                    ! accumulate outer product of displacement vectors
                    idispl = (imode-1)*3*natom + (iat-1)*3 + idir
-                   jdispl = (imode-1)*3*natom + (iat-1)*3 + jdir
                    do jdir=1,3
+                     jdispl = (imode-1)*3*natom + (iat-1)*3 + jdir
                      ! NB: only accumulate real part. I think the full sum over the BZ should guarantee Im=0
                      PHdos%msqd_dos_atom(io,jdir,idir,iat) = PHdos%msqd_dos_atom(io,jdir,idir,iat) &
 &                       + (displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+1) &
@@ -888,8 +894,8 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 
              ! accumulate outer product of displacement vectors
              idispl = (imode-1)*3*natom + (iat-1)*3 + idir
-             jdispl = (imode-1)*3*natom + (iat-1)*3 + jdir
              do jdir=1,3
+               jdispl = (imode-1)*3*natom + (iat-1)*3 + jdir
                ! NB: only accumulate real part. I think the full sum over the BZ should guarantee Im=0
                PHdos%msqd_dos_atom(io,jdir,idir,iat) = PHdos%msqd_dos_atom(io,jdir,idir,iat) &
 &                + (displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+1) &
