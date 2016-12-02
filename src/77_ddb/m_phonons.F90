@@ -131,6 +131,12 @@ module m_phonons
    ! phonon DOS contribution arising from a particular atom-type
    ! decomposed along the three reduced directions.
 
+  real(dp),allocatable :: msqd_dos_atom(:,:,:,:)
+   ! msqd_dos_atom(nomega,3,3,natom)
+   ! mean square displacement matrix, frequency dependent like a DOS
+   ! allows to calculate Debye Waller factors by integration with 1/omega
+   ! and the Bose Einstein factor
+
  end type phonon_dos_type
 
  public :: mkphdos
@@ -182,10 +188,11 @@ subroutine phdos_print(PHdos,fname)
  type(phonon_dos_type),intent(in) :: PHdos
 
 !Local variables-------------------------------
- integer :: io,itype,unt,unt_by_atom,iatom
+ integer :: io,itype,unt,unt_by_atom,unt_msqd,iatom
  real(dp) :: cfact
  character(len=500) :: msg
  character(len=fnlen) :: fname_by_atom
+ character(len=fnlen) :: fname_msqd
  character(len=3) :: unitname
 
 ! *************************************************************************
@@ -207,6 +214,10 @@ subroutine phdos_print(PHdos,fname)
  if (open_file(fname_by_atom,msg,newunit=unt_by_atom,form="formatted",action="write") /= 0) then
    MSG_ERROR(msg)
  end if
+ fname_msqd = trim(fname) // "_msqd"
+ if (open_file(fname_by_atom,msg,newunit=unt_msqd,form="formatted",action="write") /= 0) then
+   MSG_ERROR(msg)
+ end if
 
  write(msg,'(3a)')'# ',ch10,'# Phonon density of states and atom type projected DOS'
  call wrtout(unt,msg,'COLL')
@@ -217,6 +228,11 @@ subroutine phdos_print(PHdos,fname)
  call wrtout(unt_by_atom,msg,'COLL')
  write(msg,'(6a)')'# ',ch10,'# Energy in ',unitname,', DOS in states/',unitname
  call wrtout(unt_by_atom,msg,'COLL')
+
+ write(msg,'(3a)')'# ',ch10,'# Phonon density of states weighted msq displacement matrix'
+ call wrtout(unt_msqd,msg,'COLL')
+ write(msg,'(6a)')'# ',ch10,'# Energy in ',unitname,', DOS in bohr^2 states/',unitname
+ call wrtout(unt_msqd,msg,'COLL')
 
  select case (PHdos%prtdos)
  case (1)
@@ -230,27 +246,38 @@ subroutine phdos_print(PHdos,fname)
  end select
  call wrtout(unt,msg,'COLL')
  call wrtout(unt_by_atom,msg,'COLL')
+ call wrtout(unt_msqd,msg,'COLL')
 
- write(msg,'(5a)')'# ',ch10,'# omega     PHDOS    INT_PHDOS   PJDOS[atom_type=1]  INT_PJDOS[atom_type1] ...  ',ch10,'# '
+ write(msg,'(5a)')'# ',ch10,'# omega     PHDOS    INT_PHDOS   PJDOS[atom_type=1]  INT_PJDOS[atom_type=1] ...  ',ch10,'# '
  call wrtout(unt,msg,'COLL')
- write(msg,'(5a)')'# ',ch10,'# omega     PHDOS    PJDOS[atom=1]  PJDOS[atom2] ...  ',ch10,'# '
+ write(msg,'(5a)')'# ',ch10,'# omega     PHDOS    PJDOS[atom=1]  PJDOS[atom=2] ...  ',ch10,'# '
  call wrtout(unt_by_atom,msg,'COLL')
+ write(msg,'(5a)')'# ',ch10,'# omega     MSQDisp[atom=1, xx, xy,...]  MSQDisp[atom=2, xx, xy,...] ...  ',ch10,'# '
+ call wrtout(unt_msqd,msg,'COLL')
 
  do io=1,PHdos%nomega
    write(unt,'(3es17.8)',advance='NO')PHdos%omega(io)*cfact,PHdos%phdos(io)/cfact,PHdos%phdos_int(io)/cfact
-   write(unt_by_atom,'(2es17.8)',advance='NO')PHdos%omega(io)*cfact,PHdos%phdos(io)/cfact
    do itype=1,PHdos%ntypat
      write(unt,'(2es17.8,2x)',advance='NO')PHdos%pjdos_type(io,itype)/cfact,PHdos%pjdos_type_int(io,itype)/cfact
    end do
+   write(unt,*)
+
+   write(unt_by_atom,'(2es17.8)',advance='NO')PHdos%omega(io)*cfact,PHdos%phdos(io)/cfact
    do iatom=1,PHdos%natom
      write(unt_by_atom,'(1es17.8,2x)',advance='NO') sum(PHdos%pjdos(io,1:3,iatom))/cfact
    end do
-   write(unt,*)
    write(unt_by_atom,*)
+
+   write(unt_msqd,'(2es17.8)',advance='NO')PHdos%omega(io)*cfact
+   do iatom=1,PHdos%natom
+     write(unt_msqd,'(9es17.8,2x)',advance='NO') sum(PHdos%msqd_dos_atom(io,1:3,1:3,iatom))/cfact
+   end do
+   write(unt_msqd,*)
  end do
 
  close(unt)
  close(unt_by_atom)
+ close(unt_msqd)
 
 end subroutine phdos_print
 !!***
@@ -438,6 +465,9 @@ subroutine phdos_free(PHdos)
  if (allocated(PHdos%pjdos_rc_type)) then
    ABI_FREE(PHdos%pjdos_rc_type)
  end if
+ if (allocated(PHdos%msqd_dos_atom)) then
+   ABI_FREE(PHdos%msqd_dos_atom)
+ end if
 
 end subroutine phdos_free
 !!***
@@ -517,6 +547,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  integer,parameter :: brav1=1,chksymbreak0=0,bcorr0=0
  integer :: facbrv,iat,idir,imesh,imode,io,iq_ibz,itype,nkpt_fullbz
  integer :: nmesh,nqbz,nqpt_max,nqshft,option,timrev,ierr,natom,nomega
+ integer :: jdir, idispl, jdispl
  real(dp) :: dum,gaussfactor,gaussprefactor,gaussval,low_bound,max_occ,pnorm
  real(dp) :: qphnrm,upr_bound,xx,gaussmaxarg
  logical :: out_of_bounds
@@ -575,6 +606,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  ABI_MALLOC(PHdos%pjdos_type,(nomega,crystal%ntypat))
  ABI_MALLOC(PHdos%pjdos_type_int,(nomega,crystal%ntypat))
  ABI_MALLOC(PHdos%pjdos_rc_type,(nomega,3,crystal%ntypat))
+ ABI_MALLOC(PHdos%msqd_dos_atom,(nomega,3,3,natom))
  !
  ! === Parameters defining the gaussian approximant ===
  if (prtdos==1) then
@@ -763,6 +795,18 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
                  do idir=1,3
                    pnorm=eigvec(1,idir,iat,imode)**2+eigvec(2,idir,iat,imode)**2
                    PHdos%pjdos(io,idir,iat)=PHdos%pjdos(io,idir,iat)+ pnorm*wtqibz(iq_ibz)*gaussval
+
+                   ! accumulate outer product of displacement vectors
+                   idispl = (imode-1)*3*natom + (iat-1)*3 + idir
+                   jdispl = (imode-1)*3*natom + (iat-1)*3 + jdir
+                   do jdir=1,3
+                     ! NB: only accumulate real part. I think the full sum over the BZ should guarantee Im=0
+                     PHdos%msqd_dos_atom(io,jdir,idir,iat) = PHdos%msqd_dos_atom(io,jdir,idir,iat) &
+&                       + (displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+1) &
+&                       -  displ(2*(idispl-1)+2)* displ(2*(jdispl-1)+2) &
+&                       +  displ(2*(idispl-1)+2)* displ(2*(jdispl-1)+1) &
+&                       -  displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+2)) * wtqibz(iq_ibz) * gaussval
+                   end do
                  end do
                end do
              end do
@@ -841,6 +885,18 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
              pnorm=full_eigvec(1,idir,iat,imode,iq_ibz)**2 + full_eigvec(2,idir,iat,imode,iq_ibz)**2
              PHdos%pjdos(io,idir,iat)=PHdos%pjdos(io,idir,iat) + pnorm*dtweightde(iq_ibz,io)
              PHdos%pjdos_int(io,idir,iat)=PHdos%pjdos_int(io,idir,iat) + pnorm*tweight(iq_ibz,io)
+
+             ! accumulate outer product of displacement vectors
+             idispl = (imode-1)*3*natom + (iat-1)*3 + idir
+             jdispl = (imode-1)*3*natom + (iat-1)*3 + jdir
+             do jdir=1,3
+               ! NB: only accumulate real part. I think the full sum over the BZ should guarantee Im=0
+               PHdos%msqd_dos_atom(io,jdir,idir,iat) = PHdos%msqd_dos_atom(io,jdir,idir,iat) &
+&                + (displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+1) &
+&                -  displ(2*(idispl-1)+2)* displ(2*(jdispl-1)+2) &
+&                +  displ(2*(idispl-1)+2)* displ(2*(jdispl-1)+1) &
+&                -  displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+2)) * tweight(iq_ibz,io)
+             end do
            end do
          end do
        end do
@@ -1592,8 +1648,27 @@ end subroutine phonons_ncwrite
 end subroutine phonons_write
 !!***
 
-subroutine phonons_writeEPS(natom,nqpts,ntypat,qpoints,typat,weights,phfreq,phdispl_cart)
+!!****f* m_phonons/phonons_writeEPS
+!! NAME
+!! phonons_writeEPS
+!!
+!! FUNCTION
+!!  TODO: fill me!
+!!
+!! INPUTS
+!!
+!! NOTES
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
+
+subroutine phonons_writeEPS(natom,nqpts,ntypat,qpoints,typat,weights,phfreq,phdispl_cart)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
