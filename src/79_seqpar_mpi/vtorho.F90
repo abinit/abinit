@@ -918,7 +918,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
              if (usefock) energies%e_fock=energies%e_fock + half*fock%eigen_ikpt(iband)*occ_k(iband)*dtset%wtk(ikpt)
            end if
          end do
-write(81,*)energies%e_fock
+
 !        Calculate Fock contribution to the total energy if required
          if ((psps%usepaw==1).and.(usefock)) then
            if (fock%optfor) then
@@ -984,8 +984,6 @@ write(81,*)energies%e_fock
    if (usefock) then
      if(fock%optfor) then
        call xmpi_sum(fock%forces,mpi_enreg%comm_kpt,ierr)
-!            write(82,*) "forces",fock%forces
-!            flush(82)
      end if
    end if
 !  Electric field: compute string-averaged change in Zak phase

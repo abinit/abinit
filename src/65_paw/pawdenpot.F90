@@ -879,7 +879,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
            end do
          end if
        end if
-!efock=zero;efockdc=zero
+
        ABI_DEALLOCATE(dijfock_vv)
        ABI_DEALLOCATE(dijfock_cv)
 

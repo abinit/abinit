@@ -877,10 +877,8 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,indsym,kg,mpi_enreg,nattyp,n
 &            nkpt_bz,1,1,indx,symm,timrev)
        else
 !* As in getkgrid, no use of antiferromagnetic symmetries thans to the option sppoldbl=1
-!write(92,*)dtset%symafm
          call listkk(dksqmax,gmet,indkk(1:nkpt_bz,:),dtset%kptns,kptns_hf,dtset%nkpt, & 
 &            nkpt_bz,dtset%nsym,1,dtset%symafm,dtset%symrel,timrev)
-!write(92,*)dksqmax
        end if
 !* indkk(nkpt_bz,6) describes the k point of IBZ that generates each k point of BZ
 !*      indkk(:,1)   = k point of IBZ, kpt_ibz
@@ -1124,12 +1122,10 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,indsym,kg,mpi_enreg,nattyp,n
      end do
 
 !* Apply a symmetry operation on kg_bz if necessary
-!write(92,*) jkpt,jsym, indkk(jkpt,:),kptns_hf(:,jkpt)
      if (jsym/=0) then
        symm(:,:)=dtset%symrel(:,:,jsym) 
 !      tau_nons(:)=dtset%tnons(:,jsym)
        tau_nons(:)=-Rtnons(:,invsym(jsym))
-!write(92,*)tau_nons
 !* The symmetry operation in k-space (symm) and the non-symorphic translation (tau_nons) are now defined. 
        if(sum(tau_nons(:)**2)>tol8) then
 !* Initialize %calc_phase(jkpt) to 1
@@ -1789,10 +1785,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
        ABI_DATATYPE_ALLOCATE(cprj_tmp,(dtset%natom,nspinor))
        ABI_ALLOCATE(dimlmn,(dtset%natom))
        call pawcprj_getdim(dimlmn,dtset%natom,nattyp,dtset%ntypat,dtset%typat,fock%pawtab,"O")
-!       do iatom=1,dtset%natom
-!         dimlmn(iatom)=fock%pawtab(dtset%typat(iatom))%lmn_size
-!       end do
-
        ncpgr = 0
        if (dtset%optforces/= 0 .and. dtset%optstress == 0) then
 !       if (dtset%optforces/= 0) then 
@@ -1810,32 +1802,25 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
        end do
        ABI_ALLOCATE(indsym_,(4,dtset%nsym,dtset%natom))
        ABI_ALLOCATE(typat_srt,(dtset%natom))
-!       indsym_=indsym
-       do iatom=1,dtset%natom
-         iatm=fock%atindx(iatom)
-         typat_srt(iatm)=dtset%typat(iatom)
-         indsym_(1:3,:,iatm)=indsym(1:3,:,iatom)
-         indsym_(4,:,iatm)=fock%atindx(indsym(4,:,iatom))
-       end do
+
        if (dtset%nsym==1) then
          indsym_=0
          do iatom=1,dtset%natom
+           iatm=fock%atindx(iatom)
+           typat_srt(iatm)=dtset%typat(iatom)
            indsym_(4,:,iatom)=iatom
          end do
+       else
+         do iatom=1,dtset%natom
+           iatm=fock%atindx(iatom)
+           typat_srt(iatm)=dtset%typat(iatom)
+           indsym_(1:3,:,iatm)=indsym(1:3,:,iatom)
+           indsym_(4,:,iatm)=fock%atindx(indsym(4,:,iatom))
+       end do
        end if
-!write(84,*) "typat",typat_srt
-!flush(84)
+
      end if
 
-
-
-!do iband=1,dtset%nsym
-!do iatom=1,dtset%natom
-!write(84,*) indsym(4,iband,iatom)
-!write(84,*) indsym_(4,iband,iatom)
-!enddo
-!enddo
-!flush(84)
 ! Local variables to perform FFT
      n4=ngfft(4) ; n5=ngfft(5) ; n6=ngfft(6)
      ABI_ALLOCATE(dummytab3,(n4,n5,n6))
@@ -1953,11 +1938,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
                end if
              end if
 
-!write(81,*) jkpt,iband,ikpt
-!write(81,*) cprj(1,icp+iband)%cp
-!write(81,*) cprj(2,icp+iband)%cp
-!write(81,*) cprj(1,icp+iband)%dcp
-!write(81,*) cprj(2,icp+iband)%dcp
 !* Broadcast the state (ikpt,iband,isppol) to all the processors of comm_kpt for cgocc
              call timab(1503,1,tsec2)
              call xmpi_bcast(cgocc_tmp,mpi_enreg%proc_distrb(ikpt,iband,isppol),mpi_enreg%comm_kpt,ier)
@@ -2024,23 +2004,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
              if (fock%usepaw==1) then
                iband_cprj=(my_jsppol-1)*fock%mkptband+jbg+my_jband
                nband=1;mband0=1;iband0=1
-!write(81,*) cprj_tmp(1,1)%cp
-!write(81,*) cprj_tmp(2,1)%cp
-!write(81,*) cprj_tmp(1,1)%dcp
-!write(81,*) cprj_tmp(2,1)%dcp
-!write(84,*) my_jkpt,fock%tab_symkpt(my_jkpt),fock%timerev(my_jkpt),fock%calc_phase(my_jkpt)
-!                if(fock%optfor) then
-!                do iatom=1,dtset%natom
-!                do ispinor=1,nspinor
-!                do ilmn=1,fock%pawtab(dtset%typat(iatom))%lmn_size
-!                dcp(:)= MATMUL(fock%symrec(:,:,fock%tab_symkpt(my_jkpt)),cprj_tmp(iatom,ispinor)%dcp(1,:,ilmn))
-!                cprj_tmp(iatom,ispinor)%dcp(1,:,ilmn)=dcp(:)
-!                dcp(:)= MATMUL(fock%symrec(:,:,fock%tab_symkpt(my_jkpt)),cprj_tmp(iatom,ispinor)%dcp(2,:,ilmn))
-!                cprj_tmp(iatom,ispinor)%dcp(2,:,ilmn)=dcp(:)
-!                end do
-!                end do
-!                end do
-!                end if
                call pawcprj_symkn(fock%cwaveocc_prj(:,iband_cprj:iband_cprj+nspinor-1),cprj_tmp(:,1:nspinor),&
 &               indsym_,dimlmn,iband0,indlmn,&
 &               fock%tab_symkpt(my_jkpt),fock%timerev(my_jkpt),dtset%kptns(:,ikpt),fock%pawang%l_max-1,lmnmax,&
@@ -2060,12 +2023,6 @@ subroutine fock_updatecwaveocc(cg,cprj,dtset,fock,fock_energy,indsym,istep,mcg,m
                    end do
                  end do
                end if
-
-!write(81,*) fock%cwaveocc_prj(1,iband_cprj)%cp
-!write(81,*) fock%cwaveocc_prj(2,iband_cprj)%cp
-!write(81,*) fock%cwaveocc_prj(1,iband_cprj)%dcp
-!write(81,*) fock%cwaveocc_prj(2,iband_cprj)%dcp
-
              end if
 
            end if ! band occupied

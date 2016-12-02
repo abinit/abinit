@@ -771,7 +771,6 @@ write(80,*) "coucou"
            call timab(924,2,tsec)
          end if
 !        Accumulate stress tensor and forces for the Fock part
-write(80,*) "coucou1",nblockbd,blocksize
          if (usefock_loc) then
            if(fock%optstr.or.fock%optfor) then
              if (mpi_enreg%paral_kgb==1) then
@@ -784,16 +783,6 @@ write(80,*) "coucou1",nblockbd,blocksize
              do iblocksize=1,blocksize
                fock%ieigen=(iblock-1)*blocksize+iblocksize
                if (gs_hamk%usepaw==1) cwaveprj_idat => cwaveprj(:,(iblocksize-1)*my_nspinor+1:iblocksize*my_nspinor)
-write (80,*) "fostrnps",fock%ieigen
-!write (80,*) cg(1,1:100)
-!write (80,*) cwavef(1,1:100)
-!flush(80)
-!write (80,*)cprj (1,1)%cp
-!write (80,*)cwaveprj_idat (1,1)%cp
-!flush(80)
-!write (80,*)cprj (1,1)%dcp
-!flush(80)
-
                call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
 &               ghc_dum,gs_hamk,mpi_enreg)
                if (fock%optstr) then
@@ -801,9 +790,6 @@ write (80,*) "fostrnps",fock%ieigen
                end if
                if (fock%optfor) then
                  fock%forces(:,:)=fock%forces(:,:)+weight(iblocksize)*fock%forces_ikpt(:,:,fock%ieigen)
-write (80,*)fock%forces_ikpt(:,:,fock%ieigen)
-write (80,*)weight(iblocksize)
-write (80,*)fock%forces
                end if
              end do 
              ABI_DEALLOCATE(ghc_dum)

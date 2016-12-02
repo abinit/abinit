@@ -184,7 +184,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
  do iatom=1,my_natom
    iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
    iatm=iatom_tot
-!   if (order) iatm=atindx(iatom_tot)
+   if (order) iatm=atindx(iatom_tot)
    itypat    = pawfgrtab(iatom)%itypat
    lm_size   = pawfgrtab(iatom)%l_size**2
    lmn_size  = pawtab(itypat)%lmn_size
@@ -196,7 +196,6 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 !  Eventually compute g_l(r).Y_lm(r) factors for the current atom (if not already done)
    if (((compute_nhat).and.(pawfgrtab(iatom)%gylm_allocated==0)).or.&
 &   (((compute_grad).or.(compute_grad1)).and.(pawfgrtab(iatom)%gylmgr_allocated==0))) then
-
      optgr0=0; optgr1=0
      if ((compute_nhat).and.(pawfgrtab(iatom)%gylm_allocated==0)) then
        if (allocated(pawfgrtab(iatom)%gylm))  then
@@ -243,7 +242,6 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
        ilmn=pawtab(itypat)%indklmn(7,klmn)
        jlmn=pawtab(itypat)%indklmn(8,klmn)
 !       call klmn2ijlmn(klmn,lmn_size,ilmn,jlmn)  ! This mapping should be stored in pawtab_type
-
 
 !      Retrieve the factor due to the PAW projections.
        re_p =  cprj1(iatm,isp1)%cp(1,ilmn) * cprj2(iatm,isp2)%cp(1,jlmn) &

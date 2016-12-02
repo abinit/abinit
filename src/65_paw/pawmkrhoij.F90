@@ -322,7 +322,6 @@
 &             nspinor,occup(1),option,pawrhoij_all,usetimerev,wtk_k)
            end if
          end if
-
        end do ! ib1c
      end do ! ib
 

@@ -643,7 +643,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        end do
      end if   
      LIBPAW_DEALLOCATE(dij0)
-
    end if
 
 !  ------------------------------------------------------------------------
@@ -655,6 +654,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
 !    ===== DijFock already computed
      if (paw_ij(iatom)%has_dijfock==2) then
+
        if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+paw_ij(iatom)%dijfock(:,:)
 
      else
@@ -670,7 +670,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        end if
        if (dijfock_need) paw_ij(iatom)%dijfock(:,:)=dijfock_vv(:,:)+dijfock_cv(:,:)
        if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+dijfock_vv(:,:)+dijfock_cv(:,:)
-
        LIBPAW_DEALLOCATE(dijfock_vv)
        LIBPAW_DEALLOCATE(dijfock_cv)
      end if
@@ -747,7 +746,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
        if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+dijxc(:,:)
        LIBPAW_DEALLOCATE(dijxc)
      end if
- 
+
    end if
 
 !  ------------------------------------------------------------------------

@@ -137,7 +137,7 @@ type(pseudopotential_type) :: psps
    ABI_CHECK((size(cwaveprj,1)==gs_ham%natom.and.size(cwaveprj,2)==gs_ham%nspinor),"error on cwaveprj dims")
  end if
  need_ghc=(size(ghc,2)>0)
-!write(80,*) "ghc",need_ghc
+
 !Some constants
  invucvol=1.d0/sqrt(gs_ham%ucvol)
  cplex_fock=2;nspden_fock=1
@@ -350,12 +350,7 @@ type(pseudopotential_type) :: psps
        ABI_ALLOCATE(rho12,(2,nfftf,nspinor**2))
        iband_cprj=(my_jsppol-1)*fock%mkptband+jbg+jband
        cwaveocc_prj=>fock%cwaveocc_prj(:,iband_cprj:iband_cprj+nspinor-1)
-!if (fock%ieigen/=0) then
-!write(80,*)jkpt, jband
-!write(80,*) "cwaveocc", cwaveocc_r(1,1:10,1:10,1:10)
-!write(80,*)"cprj",cwaveocc_prj(1,1)%cp
-!write(80,*)"dcprj",cwaveocc_prj(1,1)%dcp
-!endif
+
        if(testtrue)then
          do iatom=1,fock%natom
            pawrhoij(iatom)%rhoijp (1,1)=(cwaveprj(iatom,1)%cp(1,1)*cwaveocc_prj(iatom,1)%cp(1,1)+&
@@ -366,18 +361,11 @@ type(pseudopotential_type) :: psps
          end do
        end if
 
-!do ifft=1,nfftf
-!write(81,*)rhor_munu(1,ifft)
-!enddo
        call pawmknhat_psipsi(cwaveprj,cwaveocc_prj,ider,izero,natom,natom,nfftf,ngfftf,&
 &       nhat12_grdim,nspinor,fock%ntypat,fock%pawang,fock%pawfgrtab,grnhat12,rho12,&
 &       fock%pawtab,gprimd=gs_ham%gprimd,grnhat_12=grnhat_12,qphon=qvec_j,xred=gs_ham%xred,atindx=gs_ham%atindx)
        rhor_munu(1,:)=rhor_munu(1,:)+rho12(1,:,nspinor)
        rhor_munu(2,:)=rhor_munu(2,:)-rho12(2,:,nspinor)
-
-!do ifft=1,nfftf
-!write(81,*)rho12(1,ifft,1)
-!enddo
        ABI_DEALLOCATE(rho12)
      end if
 
@@ -435,7 +423,7 @@ type(pseudopotential_type) :: psps
          ABI_ALLOCATE(dijhat_tmp,(cplex_dij*lmn2_size,ndij))
          dijhat_tmp=zero
          call pawdijhat(cplex_fock,cplex_dij,dijhat_tmp,gs_ham%gprimd,iatom,ipert,&
-&         natom,ndij,nfftf,nfftotf,nspden_fock,my_jsppol,fock%pawang,fock%pawfgrtab(gs_ham%atindx(iatom)),&
+&         natom,ndij,nfftf,nfftotf,nspden_fock,my_jsppol,fock%pawang,fock%pawfgrtab(iatom),&
 &         fock%pawtab(itypat),vfock,qphon,gs_ham%ucvol,gs_ham%xred)
          dijhat(1:cplex_dij*lmn2_size,iatom,:)=dijhat_tmp(1:cplex_dij*lmn2_size,:)
          ABI_DEALLOCATE(dijhat_tmp)
@@ -443,13 +431,12 @@ type(pseudopotential_type) :: psps
        signs=2; cpopt=2;idir=0; paw_opt=1;nnlout=1;tim_nonlop=1
        if(need_ghc) then
          choice=1
-
          call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
 &         ndat1,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,gvnlc,enl=dijhat,&
 &         select_k=K_H_KPRIME)
           ghc2=ghc2-gvnlc*occ*wtk
-
        end if
+
 ! Forces calculation
        if (fock%optfor.and.(fock%ieigen/=0)) then
          call matr3inv(gs_ham%gprimd,rprimd)
@@ -482,8 +469,8 @@ type(pseudopotential_type) :: psps
 &             select_k=K_H_KPRIME)
              call dotprod_g(dotr(idir),doti,gs_ham%istwf_k,npw,2,cwavef,forout,mpi_enreg%me_g0,mpi_enreg%comm_fft)
              for1(idir)=zero
-             do ifft=1,fock%pawfgrtab(gs_ham%atindx(iatom))%nfgd
-               ind=fock%pawfgrtab(gs_ham%atindx(iatom))%ifftsph(ifft)
+             do ifft=1,fock%pawfgrtab(iatom)%nfgd
+               ind=fock%pawfgrtab(iatom)%ifftsph(ifft)
                for1(idir)=for1(idir)+vfock(2*ind-1)*grnhat_12(1,ind,1,idir,iatom)-&
 &               vfock(2*ind)*grnhat_12(2,ind,1,idir,iatom)
              end do
@@ -492,8 +479,6 @@ type(pseudopotential_type) :: psps
            do idir=1,3
              for12(idir)=rprimd(1,idir)*for1(1)+rprimd(2,idir)*for1(2)+rprimd(3,idir)*for1(3)
              forikpt(idir,iatom)=forikpt(idir,iatom)-(for12(idir)*gs_ham%ucvol/nfftf+dotr(idir))*occ*wtk
-!             forikpt(idir,iatom)=forikpt(idir,iatom)-(for12(idir)*gs_ham%ucvol/nfftf)*occ*wtk
-write(80,*) "forikpt",-dotr(idir)*occ*wtk,occ,wtk
            end do
          end do
 
@@ -562,7 +547,6 @@ write(80,*) "forikpt",-dotr(idir)*occ*wtk,occ,wtk
        ia=gs_ham%atindx(iatom)
        fock%forces_ikpt(:,ia,fock%ieigen)=forikpt(:,iatom)
      end do
-write(80,*) "forces",fock%forces_ikpt(:,:,fock%ieigen)
    end if
  end if
  if(fock%optstr) then
@@ -629,9 +613,6 @@ write(80,*) "forces",fock%forces_ikpt(:,:,fock%ieigen)
 & use_gpu_cuda=gs_ham%use_gpu_cuda)
  ABI_DEALLOCATE(psilocal)
 
-!write(81,*) ghc2
-!write(81,*) ghc1
-!write(81,*) ghc
  ghc1=ghc1*sqrt(gs_ham%ucvol)+ghc2
 
 !* If the calculation is parallelized, perform an MPI_allreduce to sum all the contributions in the array ghc
@@ -685,7 +666,6 @@ write(80,*) "forces",fock%forces_ikpt(:,:,fock%ieigen)
    if(gs_ham%istwf_k>=2) eigen=two*eigen
    call xmpi_sum(eigen,mpi_enreg%comm_hf,ier)
    fock%eigen_ikpt(fock%ieigen)= eigen
-write(81,*) "eigen",eigen
    fock%ieigen = 0
  end if
 

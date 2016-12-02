@@ -229,13 +229,13 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !    Loop on atoms (blocking)
      do ia=1,nincat
        iaph3d=ia;if (nloalg(2)>0) iaph3d=ia+ia3-1
-
 !      Compute c(g).exp(2pi.i.g.R)
        do ipw=ipw0,npw
          jpw=ipw+ipwshft
          scalr(ipw)=(vect(1,jpw)*ph3d(1,ipw,iaph3d)-vect(2,jpw)*ph3d(2,ipw,iaph3d))
          scali(ipw)=(vect(2,jpw)*ph3d(1,ipw,iaph3d)+vect(1,jpw)*ph3d(2,ipw,iaph3d))
        end do
+
        if (ipw0==2) then
          scalr(1)=half*vect(1,1+ipwshft)*ph3d(1,1,iaph3d)
          scali(1)=half*vect(1,1+ipwshft)*ph3d(2,1,iaph3d)
