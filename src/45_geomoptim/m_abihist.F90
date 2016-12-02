@@ -1302,7 +1302,6 @@ end subroutine write_md_hist
 !!                        cell dims and energies,
 !!    Size(hist) is equal to a number of images to be written
 !!  ifirst=1 if first access to the file
-!!  ihead=1 if header has to be written (non evolving data)
 !!  natom=Number of atoms.
 !!  ntypat=Number of type of atoms.
 !!  typat(natom)=Type of each natom
@@ -1311,7 +1310,8 @@ end subroutine write_md_hist
 !!           WARNING: alchemical mixing is not supported. We assume npsp == ntypat
 !!  dtion=time step for Molecular Dynamics
 !!  [nimage]= Total number of images of the cell
-!!  [imgtab(:)]= In case of multiple images,indexes of images to be read
+!!  [comm_img]= MPI communicator over images of the cell
+!!  [imgtab(:)]= In case of multiple images, indexes of images to be read
 !!               Default is 1,2,3,...
 !!               Size must be equal to size(hist)
 !!
@@ -1328,9 +1328,9 @@ end subroutine write_md_hist
 !!
 !! SOURCE
 
-subroutine write_md_hist_img(hist,filename,ifirst,ihead,natom,ntypat,&
+subroutine write_md_hist_img(hist,filename,ifirst,natom,ntypat,&
 &                            typat,amu,znucl,dtion,&
-&                            nimage,imgtab) ! optional arguments
+&                            nimage,comm_img,imgtab) ! optional arguments
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1343,8 +1343,8 @@ subroutine write_md_hist_img(hist,filename,ifirst,ihead,natom,ntypat,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ifirst,ihead,natom,ntypat
- integer,intent(in),optional :: nimage
+ integer,intent(in) :: ifirst,natom,ntypat
+ integer,intent(in),optional :: nimage,comm_img
  real(dp),intent(in) :: dtion
  character(len=*),intent(in) :: filename
 !arrays
@@ -1356,7 +1356,8 @@ subroutine write_md_hist_img(hist,filename,ifirst,ihead,natom,ntypat,&
 !Local variables-------------------------------
 #if defined HAVE_NETCDF
 !scalars
- integer :: iimage,iimg,my_nimage,ncerr,ncid,nimage_,npsp
+ integer :: ii,iimage,iimg,me_img,my_comm_img,my_nimage,ncerr
+ integer :: ncid,nimage_,nproc_img,npsp
  integer :: xcart_id,xred_id,fcart_id,fred_id
  integer :: vel_id,etotal_id,acell_id,rprimd_id,strten_id
  integer :: ntypat_id,npsp_id,typat_id,znucl_id
@@ -1375,8 +1376,10 @@ subroutine write_md_hist_img(hist,filename,ifirst,ihead,natom,ntypat,&
 !Manage multiple images of the cell
  has_nimage=present(nimage)
  nimage_=merge(nimage,1,has_nimage)
- my_nimage=size(hist)
- if (my_nimage==0) return
+ my_nimage=size(hist) ; if (my_nimage==0) return
+ my_comm_img=xmpi_comm_self;if(present(comm_img)) my_comm_img=comm_img
+ nproc_img=xmpi_comm_size(my_comm_img)
+ me_img=xmpi_comm_rank(my_comm_img)
  ABI_ALLOCATE(my_imgtab,(my_nimage))
  if (present(imgtab)) then
   if (size(my_imgtab)/=my_nimage) then
@@ -1388,53 +1391,54 @@ subroutine write_md_hist_img(hist,filename,ifirst,ihead,natom,ntypat,&
    my_imgtab(:)=(/(iimage,iimage=1,my_nimage)/)
  end if
 
- if (ifirst==1) then
-!##### First access: Create NetCDF file and write defs
+!Has to access the HIST file sequentially, proc by proc
+ do ii=0,nproc_img-1
+   call xmpi_barrier(my_comm_img)
+   if (me_img==ii) then
 
-   write(std_out,*) 'Write iteration in HIST netCDF file'
-   npsp=size(znucl)
+!    ##### First access: Create NetCDF file and write defs
+     if (ifirst==1.and.me_img==0) then
+       npsp=size(znucl)
+!      Create netCDF file
+       ncerr = nf90_create(path=trim(filename),cmode=NF90_CLOBBER,ncid=ncid)
+       NCF_CHECK_MSG(ncerr," create netcdf history file")
+!      Define all dims and vars
+       call def_file_hist(ncid,filename,natom,nimage_,ntypat,npsp,has_nimage)
+!      Write variables that do not change
+!      (they are not read in a hist structure).
+       call write_csts_hist(ncid,dtion,typat,znucl,amu)
+     end if
 
-!  Create netCDF file
-   ncerr = nf90_create(path=trim(filename),cmode=NF90_CLOBBER,ncid=ncid)
-   NCF_CHECK_MSG(ncerr," create netcdf history file")
+!    ##### itime>2 access: just open NetCDF file
+     if (ifirst/=1.or.me_img/=0) then
+!      Open netCDF file
+       ncerr = nf90_open(path=trim(filename),mode=NF90_WRITE, ncid=ncid)
+       NCF_CHECK_MSG(ncerr," open netcdf history file")
+     end if
 
-!  Define all dims and vars
-   call def_file_hist(ncid,filename,natom,nimage_,ntypat,npsp,has_nimage)
+     write(std_out,*) 'Write iteration in HIST netCDF file'
 
-!  Write variables that do not change
-!  (they are not read in a hist structure).
-   if (ihead==1) then
-     call write_csts_hist(ncid,dtion,typat,znucl,amu)
+!    ##### Write variables into the dataset (loop over images)
+!    Get the IDs
+     call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,&
+&         rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+!    Write
+     do iimage=1,my_nimage
+       iimg=my_imgtab(iimage)
+       hist_ => hist(iimage)
+       call write_vars_hist(ncid,hist_,natom,has_nimage,iimg,&
+&           xcart_id,xred_id,fcart_id,fred_id,vel_id,rprimd_id,acell_id,&
+&           strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+     end do
+
+!    ##### Close the file
+     ncerr = nf90_close(ncid)
+     NCF_CHECK_MSG(ncerr," close netcdf history file")
+     ABI_DEALLOCATE(my_imgtab)
+
+!  End loop on MPI processes
    end if
-
- else
-!##### itime>2 access: just open NetCDF file
-
-   write(std_out,*) 'Write iteration in HIST netCDF file'
-
-!  Open netCDF file
-   ncerr = nf90_open(path=trim(filename),mode=NF90_WRITE, ncid=ncid)
-   NCF_CHECK_MSG(ncerr," open netcdf history file")
-
- end if
-
-!##### Write variables into the dataset (loop over images)
-!Get the IDs
- call get_varid_hist(ncid,xcart_id,xred_id,fcart_id,fred_id,vel_id,&
-&     rprimd_id,acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
-!Write
- do iimage=1,my_nimage
-   iimg=my_imgtab(iimage)
-   hist_ => hist(iimage)
-   call write_vars_hist(ncid,hist_,natom,has_nimage,iimg,&
-&       xcart_id,xred_id,fcart_id,fred_id,vel_id,rprimd_id,acell_id,&
-&       strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
  end do
-
-!##### Close the file
- ncerr = nf90_close(ncid)
- NCF_CHECK_MSG(ncerr," close netcdf history file")
- ABI_DEALLOCATE(my_imgtab)
 
 #endif
 
@@ -2145,6 +2149,7 @@ subroutine write_vars_hist(ncid,hist,natom,has_nimage,iimg,&
 &          xcart_id,xred_id,fcart_id,fred_id,vel_id,rprimd_id,&
 &          acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -2306,6 +2311,7 @@ end subroutine write_vars_hist
 subroutine read_vars_hist(ncid,hist,natom,time,has_nimage,iimg,&
 &          xcart_id,xred_id,fcart_id,fred_id,vel_id,rprimd_id,&
 &          acell_id,strten_id,etotal_id,ekin_id,entropy_id,mdtime_id)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
