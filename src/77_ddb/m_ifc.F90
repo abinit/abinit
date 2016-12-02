@@ -1074,6 +1074,7 @@ end subroutine corsifc9
 
 subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 
+ use m_fstrings,         only : int2char4
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1082,8 +1083,6 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
  use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
-
- use m_fstrings,         only : int2char4
 
  implicit none
 
@@ -1161,7 +1160,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
    end if
  end if
 
- if (ifcout>Ifc%natom*Ifc%nrpt) then
+ if (ifcout>Ifc%natom*Ifc%nrpt .or. ifcout == -1) then
    ifcout1=Ifc%natom*Ifc%nrpt
    write(message, '(3a,i0,a)' )&
 &   'The value of ifcout exceeds the number of atoms in the big box.', ch10, &
@@ -1220,7 +1219,6 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
    NCF_CHECK(nctk_set_datamode(ncid))
 #endif
 
- end if
  ABI_MALLOC(rsiaf,(3,3,ifcout1))
  ABI_MALLOC(sriaf,(3,3,ifcout1))
  ABI_MALLOC(vect,(3,3,ifcout1))

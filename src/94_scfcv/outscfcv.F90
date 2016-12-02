@@ -175,7 +175,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
                                 epjdos_t, epjdos_new, epjdos_free, prtfatbands, fatbands_ncwrite
  use m_paral_atom,       only : get_my_atmtab, free_my_atmtab
 
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

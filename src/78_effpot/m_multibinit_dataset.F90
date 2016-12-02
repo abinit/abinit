@@ -371,7 +371,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
- multibinit_dtset%ifcout=2000000
+ multibinit_dtset%ifcout=-1 !2000000
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ifcout',tread,'INT')
  if(tread==1) multibinit_dtset%ifcout=intarr(1)
  if(multibinit_dtset%ifcout<0)then
