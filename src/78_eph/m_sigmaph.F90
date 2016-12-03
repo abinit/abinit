@@ -1152,7 +1152,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0,brav1=1,occopt3=3
+ integer,parameter :: master=0,brav1=1,occopt3=3,qptopt1=1
  integer :: my_rank,ik,my_nshiftq,nct,my_mpw,cnt,nproc,iq_ibz,ik_ibz
  integer :: onpw,ii,ipw,ierr,it,timerev_k,spin,gap_err,ikcalc,gw_qprange,ibstop
  integer :: nk_found,ifo,jj
@@ -1226,8 +1226,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
 
  ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
  qptrlatt = 0; qptrlatt(1,1) = new%ngqpt(1); qptrlatt(2,2) = new%ngqpt(2); qptrlatt(3,3) = new%ngqpt(3)
- call kpts_ibz_from_kptrlatt(cryst, qptrlatt, my_nshiftq, my_shiftq, &
-   new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz, timrev=1)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &
+   new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz)
 
  ! Select k-point and bands where corrections are wanted
  ! These parameters will be passed via the input file (similar to kptgw, bdgw)
@@ -1788,7 +1788,7 @@ subroutine sigmaph_solve(self, ikcalc, spin, ebands)
 
  ! Write data (use iso_c_binding to associate a real pointer to complex data because
  ! netcdf does not support complex types.
-
+#if 0
  shape5(2:) = shape(self%vals_e0ks)
  call c_f_pointer(c_loc(self%vals_e0ks), rdata5, shape5)
  NCF_CHECK(nf90_put_var(self%ncid, vid("vals_e0ks"), rdata5))
@@ -1812,6 +1812,7 @@ subroutine sigmaph_solve(self, ikcalc, spin, ebands)
 
    !NCF_CHECK(nf90_put_var(self%ncid, vid("vals_qwr"), self%vals_qwr))
  end if
+#endif
 
 contains
  integer function vid(vname)

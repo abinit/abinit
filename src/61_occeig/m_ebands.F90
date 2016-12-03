@@ -43,6 +43,7 @@ MODULE m_ebands
 #endif
  use m_hdr
  use m_kptrank
+ use m_kpts
 
  use defs_datatypes,   only : ebands_t
  use defs_abitypes,    only : hdr_type, dataset_type
@@ -244,6 +245,8 @@ MODULE m_ebands
 
    type(bcoefs_t),allocatable :: coeff(:,:)
    ! coeff(mband, nsppol)
+   ! coff(band, spin)%vals(nkx, nky, nkz)
+   ! B-spline coefficients for a given (band, spin)
 
  end type ebspl_t
 
@@ -3650,10 +3653,9 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
  sppoldbl = 1 !; if (any(cryst%symafm == -1) .and. inb%nsppol == 1) sppoldbl=2
  ABI_MALLOC(bz2ibz, (nkfull*sppoldbl,6))
 
- timrev = 1; if (any(inb%kptopt == [3, 4])) timrev = 0
+ timrev = kpts_timrev_from_kptopt(inb%kptopt)
  call listkk(dksqmax,cryst%gmet,bz2ibz,inb%kptns,kfull,inb%nkpt,nkfull,cryst%nsym,&
    sppoldbl,cryst%symafm,cryst%symrel,timrev,use_symrec=.False.)
-   !sppoldbl,cryst%symafm,cryst%symrec,timrev,use_symrec=.True.)
 
  ABI_MALLOC(wtk, (nkfull))
  wtk = one/nkfull ! weights normalized to one
@@ -3814,7 +3816,7 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block, spin_block) re
    MSG_WARNING('Multiple shifts not allowed')
    ierr = ierr + 1
  end if
- if (any(ebands%nband(:) /= ebands%nband(1))) then
+ if (any(ebands%nband /= ebands%nband(1))) then
    MSG_WARNING("nband must be constant")
    ierr = ierr + 1
  end if
@@ -3862,7 +3864,7 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block, spin_block) re
  ! Build mapping kfull --> IBZ
  ABI_MALLOC(bz2ibz, (nkfull*sppoldbl1,6))
 
- timrev = 1; if (any(ebands%kptopt == [3, 4])) timrev = 0
+ timrev = kpts_timrev_from_kptopt(ebands%kptopt)
  call listkk(dksqmax,cryst%gmet,bz2ibz,ebands%kptns,kfull,ebands%nkpt,nkfull,cryst%nsym,&
    sppoldbl1,cryst%symafm,cryst%symrec,timrev,use_symrec=.True.)
  ABI_FREE(kfull)
@@ -3889,7 +3891,6 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block, spin_block) re
  ABI_MALLOC(new%xknot,(nxknot))
  ABI_MALLOC(new%yknot,(nyknot))
  ABI_MALLOC(new%zknot,(nzknot))
-
  call dbsnak(nkx, xvec, kxord, new%xknot)
  call dbsnak(nky, yvec, kyord, new%yknot)
  call dbsnak(nkz, zvec, kzord, new%zknot)
@@ -3999,6 +4000,7 @@ subroutine ebspl_eval_bks(ebspl, band, kpt, spin, oeig, oder1, oder2)
 #endif
 
  ! Wrap k-point in the interval [0,1[ where 1 is not included (tol12)
+ ! This is required because the spline has been constructed in this region.
  call wrap2_zero_one(kpt, kred, shift)
 
  ! B-spline interpolation.
@@ -4118,7 +4120,7 @@ end subroutine ebspl_free
 !!
 !! SOURCE
 
-type(ebands_t) function ebands_bspline(ebands, cryst, ords, new_kptrlatt, new_nshiftk, new_shiftk, comm) result(new)
+type(ebands_t) function ebands_bspline(ebands, cryst, ords, bspl_kptrlatt, bspl_nshiftk, bspl_shiftk, comm) result(new)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -4132,78 +4134,56 @@ type(ebands_t) function ebands_bspline(ebands, cryst, ords, new_kptrlatt, new_ns
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: comm
- integer,intent(inout) :: new_nshiftk
+ integer,intent(in) :: bspl_nshiftk,comm
  type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
 !arrays
- integer,intent(in) :: ords(3)
- integer,intent(inout) :: new_kptrlatt(3,3)
- real(dp),intent(inout) :: new_shiftk(3,new_nshiftk)
+ integer,intent(in) :: ords(3),bspl_kptrlatt(3,3)
+ real(dp),intent(in) :: bspl_shiftk(3,bspl_nshiftk)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: iout0=0,chksymbreak0=0,iscf2=2
- integer :: ik_ibz,spin,new_bantot,new_nkpt,nsppol,new_mband,nkpt_computed,kptopt
- integer :: nprocs,my_rank,cnt,ierr,band
- real(dp) :: kptrlen
+ integer :: ik_ibz,spin,new_bantot,new_mband,kptopt
+ integer :: nprocs,my_rank,cnt,ierr,band,new_nkbz,new_nkibz,new_nshiftk
  type(ebspl_t) :: ebspl
 !arrays
- integer,parameter :: vacuum0(3)=[0,0,0]
- integer :: kptrlatt_orig(3,3)
+ integer :: new_kptrlatt(3,3)
  integer,allocatable :: new_istwfk(:),new_nband(:,:),new_npwarr(:)
- real(dp) :: mynew_shiftk(3,210)
- real(dp),allocatable :: new_kpts(:,:),new_doccde(:),new_eig(:),new_occ(:),new_wtk(:)
+ real(dp),allocatable :: new_shiftk(:,:),new_kibz(:,:),new_kbz(:,:),new_wtk(:)
+ real(dp),allocatable :: new_doccde(:),new_eig(:),new_occ(:)
 
 ! *********************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- nsppol = ebands%nsppol; kptrlatt_orig = ebands%kptrlatt; kptopt = ebands%kptopt
+ kptopt = ebands%kptopt
 
- ! First call to getkgrid to obtain the number of new_kpts.
- ! TODO: write wrapper
- ABI_MALLOC(new_kpts, (3,0))
- ABI_MALLOC(new_wtk, (0))
-
- ! Be careful as getkgrid expects shiftk(3,8).
- mynew_shiftk = zero; mynew_shiftk(:,1:new_nshiftk) = new_shiftk
- ABI_CHECK(new_nshiftk > 0 .and. new_nshiftk <=210, "new_nshiftk must be in [1,210]")
-
- call getkgrid(chksymbreak0,iout0,iscf2,new_kpts,kptopt,new_kptrlatt,kptrlen,&
-   cryst%nsym,0,new_nkpt,new_nshiftk,cryst%nsym,cryst%rprimd,mynew_shiftk,cryst%symafm,cryst%symrel,vacuum0,new_wtk)
-
- ABI_FREE(new_kpts)
- ABI_FREE(new_wtk)
-
- ! Recall getkgrid to get new_kpts and new_wtk.
- ABI_MALLOC(new_kpts,(3,new_nkpt))
- ABI_MALLOC(new_wtk,(new_nkpt))
-
- call getkgrid(chksymbreak0,iout0,iscf2,new_kpts,kptopt,new_kptrlatt,kptrlen,&
-   cryst%nsym,new_nkpt,nkpt_computed,new_nshiftk,cryst%nsym,cryst%rprimd,mynew_shiftk,&
-   cryst%symafm,cryst%symrel,vacuum0,new_wtk)
- new_shiftk = mynew_shiftk(:,1:new_nshiftk)
+ ! Get ibz, new shifts and new kptrlatt.
+ call kpts_ibz_from_kptrlatt(cryst, bspl_kptrlatt, ebands%kptopt, bspl_nshiftk, bspl_shiftk, &
+   new_nkibz, new_kibz, new_wtk, new_nkbz, new_kbz, new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
+ new_nshiftk = size(new_shiftk, dim=2)
 
  ! Initialize new ebands_t in new IBZ
- ABI_MALLOC(new_istwfk, (new_nkpt))
+ ABI_MALLOC(new_istwfk, (new_nkibz))
  new_istwfk = 1
- ABI_MALLOC(new_nband, (new_nkpt, nsppol))
+ ABI_MALLOC(new_nband, (new_nkibz, ebands%nsppol))
  new_nband = ebands%mband
- ABI_MALLOC(new_npwarr, (new_nkpt))
+ ABI_MALLOC(new_npwarr, (new_nkibz))
  new_npwarr = maxval(ebands%npwarr)
  new_bantot = sum(new_nband); new_mband = maxval(new_nband)
  ABI_MALLOC(new_doccde, (new_bantot))
  ABI_MALLOC(new_eig, (new_bantot))
  ABI_MALLOC(new_occ, (new_bantot))
 
- call ebands_init(new_bantot,new,ebands%nelect,new_doccde,new_eig,new_istwfk,new_kpts,&
-   new_nband,new_nkpt,new_npwarr,ebands%nsppol,ebands%nspinor,ebands%tphysel,ebands%tsmear,&
+ call ebands_init(new_bantot,new,ebands%nelect,new_doccde,new_eig,new_istwfk,new_kibz,&
+   new_nband,new_nkibz,new_npwarr,ebands%nsppol,ebands%nspinor,ebands%tphysel,ebands%tsmear,&
    ebands%occopt,new_occ,new_wtk,&
-   ebands%charge, kptopt, kptrlatt_orig, ebands%nshiftk, ebands%shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
+   ebands%charge, kptopt, bspl_kptrlatt, bspl_nshiftk, bspl_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
 
- ABI_FREE(new_kpts)
+ ABI_FREE(new_kibz)
  ABI_FREE(new_wtk)
+ ABI_FREE(new_shiftk)
+ ABI_FREE(new_kbz)
  ABI_FREE(new_istwfk)
  ABI_FREE(new_nband)
  ABI_FREE(new_npwarr)
@@ -4479,7 +4459,7 @@ end subroutine ebands_get_jdos
 !! ebands_prtbltztrp
 !!
 !! FUNCTION
-!!   output files for BoltzTraP code, which integrates Boltzmann transport quantities
+!!   Output files for BoltzTraP code, which integrates Boltzmann transport quantities
 !!   over the Fermi surface for different T and chemical potentials. Abinit provides
 !!   all necessary input files: struct, energy, input file, and def file for the unit
 !!   definitions of fortran files in BT.
@@ -4531,6 +4511,9 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
  character(len=3) :: spinsuffix(ebands%nsppol)
 
 ! *************************************************************************
+
+ !MG FIXME The number of electrons is wrong if the file is produced in a NSCF run.
+ ! See http://forum.abinit.org/viewtopic.php?f=19&t=3339
 
  nelec = ebands_nelect_per_spin(ebands)
  nsppol = ebands%nsppol

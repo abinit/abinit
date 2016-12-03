@@ -145,8 +145,8 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-type(skw_t) &
-function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_block, spin_block, comm) result(new)
+type(skw_t) function &
+skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_block, spin_block, comm) result(new)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -194,6 +194,7 @@ function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_block, spin_
 
  new%cplex = cplex; new%nkpt = nkpt; new%nsppol = nsppol
 
+ ! Get list of point group operations.
  !call crystal_point_group(cryst, new%ptg_nsym, new%ptg_symrel, new%ptg_symrec, has_inversion)
 
  ! -----------------------------------------------
@@ -226,7 +227,7 @@ function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_block, spin_
    end do
  end do
 
- ! Sort norm
+ ! Sort r2vals
  ABI_MALLOC(iperm, (msize))
  iperm = [(i1, i1=1,msize)]
  call sort_dp(msize, r2vals, iperm, tolr)
@@ -249,7 +250,15 @@ function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_block, spin_
  do i1=1,nr
    new%rpts(:,i1) = rtmp(:,iperm(i1))
  end do
- r2min = dot_product(new%rpts(:,2), matmul(cryst%rmet, new%rpts(:,2)))
+ r2min = r2vals(2)
+
+ ! Compute roughness function.
+ ABI_MALLOC(rhor, (nr))
+ do ir=1,nr
+   r2 = dot_product(new%rpts(:,ir), matmul(cryst%rmet, new%rpts(:,ir)))
+   !rhor(ir) = (one - c1 * r2/r2min)**2 + c2 * (r2 / r2min)**3
+   rhor(ir) = c1 * r2 + c2 * r2**2
+ end do
 
  ABI_FREE(iperm)
  ABI_FREE(rtmp)
@@ -259,14 +268,6 @@ function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_block, spin_
  ABI_MALLOC(srk, (nr, nkpt))
  do ik=1,nkpt
    call mkstar(new, cryst, kpts(:,ik), srk(:,ik))
- end do
-
- ! Compute roughness function.
- ABI_MALLOC(rhor, (nr))
- do ir=1,nr
-   r2 = dot_product(new%rpts(:,ir), matmul(cryst%rmet, new%rpts(:,ir)))
-   !rhor(ir) = (one - c1 * r2/r2min)**2 + c2 * (r2 / r2min)**3
-   rhor(ir) = c1 * r2 + c2 * r2**2
  end do
 
  ! Build H(k,k') matrix.
@@ -319,6 +320,8 @@ function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_block, spin_
      new%coefs(1,ib,spin) = eig(band,nkpt,spin) - dot_product(conjg(new%coefs(2:nr, ib,spin)), srk(2:nr, nkpt))
    end do
  end do
+
+ ! Filter coefficients.
 
  ! Prepare workspace arrays for star functions.
  new%cached_kpt = huge(one)

@@ -394,7 +394,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
 #if 0
  !call ebands_set_interpolator(ebands, cryst, bstart, bcount, mode, espline_ords, eskw_ratio, comm)
- !call ebands_test_intepolator(ifc, dtset, dtfil%filnam_ds(4), comm)
+ !call ebands_test_intepolator(ebands, dtset, dtfil%filnam_ds(4), comm)
  ! Test the interpolation of electronic bands.
  skw = skw_new(cryst, 1, 1, ebands%mband, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, comm)
  call skw_free(skw)
@@ -411,7 +411,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  end if
 
  edos = ebands_get_edos(ebands_bspl, cryst, edos_intmeth, edos_step, edos_broad, comm)
- !call ebands_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
+ !call ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
 
  if (my_rank == master) then
    call edos_print(edos, unit=ab_out)

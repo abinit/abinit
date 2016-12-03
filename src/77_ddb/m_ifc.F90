@@ -1816,6 +1816,7 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
 
 !Local variables -------------------------
 !scalars
+ integer,parameter :: qptopt1=1
  integer :: natom,imode,iq_ibz,nqbz,nqibz, nreals,unit_btrap,iatom,idir
  character(len=500) :: msg,format_nreals,format_line_btrap
  character(len=fnlen) :: outfile
@@ -1833,7 +1834,7 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
 
  ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
  qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
- call kpts_ibz_from_kptrlatt(cryst, qptrlatt, nqshft, qshft, nqibz, qibz, wtq, nqbz, qbz, timrev=1)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, nqshft, qshft, nqibz, qibz, wtq, nqbz, qbz)
 
  outfile = trim(basename) // '_BTRAP'
  write(msg, '(3a)')ch10,' Will write phonon FREQS in BoltzTrap format to file ',trim(outfile)
@@ -1939,7 +1940,7 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
 
 !Local variables -------------------------
 !scalars
- integer,parameter :: nsppol1=1,master=0
+ integer,parameter :: nsppol1=1,master=0,qptopt1=1
  integer :: my_rank,nprocs,iq_ibz,nqibz,nqbz,ierr
  character(len=500) :: msg
 !arrays
@@ -1953,7 +1954,7 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
 
  ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
  qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
- call kpts_ibz_from_kptrlatt(cryst, qptrlatt, nqshft, qshft, nqibz, qibz, wtq, nqbz, qbz, timrev=1)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, nqshft, qshft, nqibz, qibz, wtq, nqbz, qbz)
  ABI_FREE(qbz)
  ABI_FREE(wtq)
 
@@ -2035,7 +2036,7 @@ type(phbspl_t) function ifc_build_phbspl(ifc, cryst, ngqpt, nshiftq, shiftq, ord
 
 !local variables-------------------------------
 !scalars
- integer,parameter :: sppoldbl1=1,timrev1=1
+ integer,parameter :: sppoldbl1=1,timrev1=1,qptopt1=1
  integer :: qxord,qyord,qzord,nxknot,nyknot,nzknot,nqibz,nqbz,nqfull,iqf,ierr
  integer :: nu,iq_ibz,ix,iy,iz,nqx,nqy,nqz,my_rank,nprocs,cnt
  real(dp) :: dksqmax
@@ -2065,7 +2066,7 @@ type(phbspl_t) function ifc_build_phbspl(ifc, cryst, ngqpt, nshiftq, shiftq, ord
 
  ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
  qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
- call kpts_ibz_from_kptrlatt(cryst, qptrlatt, nshiftq, shiftq, nqibz, qibz, wtq, nqbz, qbz, timrev=timrev1)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, nshiftq, shiftq, nqibz, qibz, wtq, nqbz, qbz)
 
  ABI_FREE(wtq)
  ABI_FREE(qbz)
@@ -2242,6 +2243,7 @@ subroutine phbspl_evalq(phbspl, qpt, ofreqs, oder1)
 ! *********************************************************************
 
  ! Wrap k-point in the interval [0,1[ where 1 is not included (tol12)
+ ! This is required because the spline has been constructed in this region.
  call wrap2_zero_one(qpt, qred, shift)
 
  do nu=1,phbspl%natom3
@@ -2379,7 +2381,7 @@ type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) res
 
 !local variables-------------------------------
 !scalars
- integer,parameter :: sppoldbl1=1,timrev1=1,master=0
+ integer,parameter :: sppoldbl1=1,timrev1=1,master=0,qptopt1=1
  integer :: nqibz,nqbz,iq_ibz,iq_bz,natom3,ierr,nu
  integer :: my_rank,nprocs,cnt
  real(dp) :: dksqmax
@@ -2398,7 +2400,7 @@ type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) res
 
  ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
  qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
- call kpts_ibz_from_kptrlatt(cryst, qptrlatt, nshiftq, shiftq, nqibz, qibz, wtq, nqbz, qbz, timrev=timrev1)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, nshiftq, shiftq, nqibz, qibz, wtq, nqbz, qbz)
 
  ! Get phonon frequencies in IBZ
  ABI_CALLOC(ibz_freqs, (natom3, nqibz))

@@ -34,6 +34,7 @@ MODULE m_kpts
 
  private
 
+ public :: kpts_timrev_from_kptopt     ! Returns the value of timrev from kptopt
  public :: kpts_ibz_from_kptrlatt      ! Determines the IBZ, the weights and the BZ from kptrlatt
 !!***
 
@@ -42,33 +43,17 @@ MODULE m_kpts
 contains  !============================================================
 !!***
 
-!!****f* m_kpts/kpts_ibz_from_kptrlatt
+!!****f* m_kpts/kpts_timrev_from_kptopt
 !! NAME
-!!  kpts_ibz_from_kptrlatt
+!!  kpts_timrev_from_kptopt
 !!
 !! FUNCTION
-!!   Determines the irreducible wedge, the corresponding weights and the list
-!!   of k-points in the Brillouin Zone starting from kptrlatt and the set shifts.
+!!  Returns the value of timrev from kptopt
+!!  1 if the use of time-reversal is allowed; 0 otherwise
 !!
 !! INPUTS
-!!  cryst<crystal_t> = crystalline structure with info on symmetries and time-reversal.
-!!  kptrlatt(3,3)=integer coordinates of the primitive vectors of the
-!!   lattice reciprocal to the k point lattice to be generated here
-!!   If diagonal, the three values are the Monkhorst-Pack usual values, in case of simple cubic.
-!!  nshiftk= number of shift vectors in the repeated cell
-!!  shiftk(3,nshiftk) = vectors that will be used to determine the shifts from (0. 0. 0.).
-!!  [timrev]: Time-reversal symmetry flag. By default this info is passed via crystal.
-!!    One can change the default behaviour by passing this option explicitly.
-!!    In this case:
-!!        if 1, the time reversal operation has to be taken into account.
-!!        if 0, no time-reversal symmetry.
-!!
-!! OUTPUT
-!!  nkibz,nkbz = Number of points in IBZ and BZ, respectively.
-!!  These arrays are allocated and returned by the routine:
-!!  kibz(3,nkibz)=k-points in the IBZ.
-!!  wtk(nkibz)=weights of the k-points in the IBZ (normalized to one).
-!!  kbz(3,nkbz)=k-points in the BZ.
+!!  kptopt=option for the generation of k points
+!!    (defines whether spatical symmetries and/or time-reversal can be used)
 !!
 !! PARENTS
 !!
@@ -76,8 +61,63 @@ contains  !============================================================
 !!
 !! SOURCE
 
-subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, timrev)
+integer pure function kpts_timrev_from_kptopt(kptopt) result(timrev)
 
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'kpts_timrev_from_kptopt'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: kptopt
+
+! *********************************************************************
+
+ timrev = 1; if (any(kptopt == [3, 4])) timrev = 0
+
+end function kpts_timrev_from_kptopt
+!!***
+
+!!****f* m_kpts/kpts_ibz_from_kptrlatt
+!! NAME
+!!  kpts_ibz_from_kptrlatt
+!!
+!! FUNCTION
+!!  Determines the irreducible wedge, the corresponding weights and the list
+!!  of k-points in the Brillouin Zone starting from kptrlatt and the set shifts.
+!!
+!! INPUTS
+!!  cryst<crystal_t> = crystalline structure with info on symmetries and time-reversal.
+!!  kptopt=option for the generation of k points
+!!    (defines whether spatical symmetries and/or time-reversal can be used)
+!!  kptrlatt(3,3)=integer coordinates of the primitive vectors of the
+!!   lattice reciprocal to the k point lattice to be generated here
+!!   If diagonal, the three values are the Monkhorst-Pack usual values, in case of simple cubic.
+!!  nshiftk= number of shift vectors in the repeated cell
+!!  shiftk(3,nshiftk) = vectors that will be used to determine the shifts from (0. 0. 0.).
+!!
+!! OUTPUT
+!!  nkibz,nkbz = Number of points in IBZ and BZ, respectively.
+!!  The following arrays are allocated and returned by the routine:
+!!  kibz(3,nkibz) = k-points in the IBZ.
+!!  wtk(nkibz) = weights of the k-points in the IBZ (normalized to one).
+!!  kbz(3,nkbz) = k-points in the BZ.
+!!  [new_kptrlatt] = New value of kptrlatt returned by getkgrid
+!!  [new_shiftk(3,new_nshiftk)] = New set of shifts returned by getkgrid
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine kpts_ibz_from_kptrlatt( &
+  cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
+  new_kptrlatt, new_shiftk)  ! Optional
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -91,67 +131,62 @@ subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, nshiftk, shiftk, nkibz, kibz,
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nshiftk
+ integer,intent(in) :: nshiftk,kptopt
  integer,intent(out) :: nkibz,nkbz
- integer,optional,intent(in) :: timrev
  type(crystal_t),intent(in) :: cryst
 !arrays
  integer,intent(in) :: kptrlatt(3,3)
+ integer,optional,intent(out) :: new_kptrlatt(3,3)
  real(dp),intent(in) :: shiftk(3,nshiftk)
  real(dp),allocatable,intent(out) :: wtk(:),kibz(:,:),kbz(:,:)
+ real(dp),optional,allocatable,intent(out) :: new_shiftk(:,:)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: option1=1,brav1=1,iout0=0,chksymbreak0=0
- integer :: ik_ibz,max_nkpt,ierr,my_timerev
+ integer,parameter :: iout0=0,chksymbreak0=0,iscf2=2
+ integer :: my_nshiftk,nkpt_computed
+ real(dp) :: kptrlen
 !arrays
- integer,allocatable :: ibz2bz(:)
- real(dp),allocatable :: wtk_folded(:),wtk_bz(:),my_kbz(:,:)
+ integer,parameter :: vacuum0(3)=[0,0,0]
+ integer :: my_kptrlatt(3,3)
+ real(dp) :: my_shiftk(3,210)
 
 ! *********************************************************************
 
- ! Call smpbz to get the full grid of k-points `my_kbz`
- ! brav1=1 is able to treat all bravais lattices (same option used in getkgrid)
- max_nkpt = kptrlatt(1,1)*kptrlatt(2,2)*kptrlatt(3,3) &
-   + kptrlatt(1,2)*kptrlatt(2,3)*kptrlatt(3,1) &
-   + kptrlatt(1,3)*kptrlatt(2,1)*kptrlatt(3,2) &
-   - kptrlatt(1,2)*kptrlatt(2,1)*kptrlatt(3,3) &
-   - kptrlatt(1,3)*kptrlatt(2,2)*kptrlatt(3,1) &
-   - kptrlatt(1,1)*kptrlatt(2,3)*kptrlatt(3,2)
- max_nkpt = max_nkpt * nshiftk
+ ! First call to getkgrid to obtain the number of points in the BZ.
+ ABI_MALLOC(kibz, (3,0))
+ ABI_MALLOC(wtk, (0))
 
- ! TODO: Replace smpbz with getkgrid
- ABI_MALLOC(my_kbz, (3, max_nkpt))
- call smpbz(brav1, -1, kptrlatt, max_nkpt, nkbz, nshiftk, option1, shiftk, my_kbz)
+ ! Copy kptrlatt and shifts because getkgrid can change them
+ ! Be careful as getkgrid expects shiftk(3,210).
+ ABI_CHECK(nshiftk > 0 .and. nshiftk <= 210, "nshiftk must be in [1,210]")
+ my_nshiftk = nshiftk; my_shiftk = zero; my_shiftk(:,1:nshiftk) = shiftk
+ my_kptrlatt = kptrlatt
 
- ! Call symkpt to get IBZ and weights.
- ABI_MALLOC(ibz2bz, (nkbz))
- ABI_MALLOC(wtk_folded, (nkbz))
- ABI_MALLOC(wtk_bz, (nkbz))
- wtk_bz = one / nkbz ! weights normalized to unity
+ call getkgrid(chksymbreak0,iout0,iscf2,kibz,kptopt,my_kptrlatt,kptrlen,&
+   cryst%nsym,0,nkibz,my_nshiftk,cryst%nsym,cryst%rprimd,my_shiftk,cryst%symafm,cryst%symrel,vacuum0,wtk)
 
-  ! TODO BE CAREFUL here, the convention used in cryst%timrev is different.
- my_timerev = 1; if (cryst%timrev == 1) my_timerev = 0
- if (present(timrev)) my_timerev = timrev
- call symkpt(chksymbreak0, cryst%gmet, ibz2bz, iout0, my_kbz, nkbz, nkibz, &
-   cryst%nsym, cryst%symrec, my_timerev, wtk_bz, wtk_folded)
+ ABI_FREE(kibz)
+ ABI_FREE(wtk)
 
- ! Allocate output arrays.
- ABI_MALLOC(wtk, (nkibz))
+ ! Recall getkgrid to get kibz and wtk.
  ABI_MALLOC(kibz, (3, nkibz))
- ABI_MALLOC(kbz, (3, nkbz))
- kbz(:,:) = my_kbz(:, 1:nkbz)
+ ABI_MALLOC(wtk, (nkibz))
 
- do ik_ibz=1,nkibz
-   wtk(ik_ibz) = wtk_folded(ibz2bz(ik_ibz))
-   kibz(:,ik_ibz) = my_kbz(:,ibz2bz(ik_ibz))
- end do
- !ABI_CHECK(abs(sum(wtk) - one) < tol10, "sum(wtk) != one")
+ call getkgrid(chksymbreak0,iout0,iscf2,kibz,kptopt,my_kptrlatt,kptrlen,&
+   cryst%nsym,nkibz,nkpt_computed,my_nshiftk,cryst%nsym,cryst%rprimd,my_shiftk,&
+   cryst%symafm,cryst%symrel,vacuum0,wtk,fullbz=kbz)
 
- ABI_FREE(ibz2bz)
- ABI_FREE(wtk_folded)
- ABI_FREE(wtk_bz)
- ABI_FREE(my_kbz)
+ nkbz = size(kbz, dim=2)
+
+ ! Optionally, return new shifts and new_kptrlatt
+ if (present(new_shiftk)) then
+   ABI_MALLOC(new_shiftk, (3, my_nshiftk))
+   new_shiftk = my_shiftk(:, 1:my_nshiftk)
+ end if
+ if (present(new_kptrlatt)) new_kptrlatt = my_kptrlatt
+
+ DBG_CHECK(abs(sum(wtk) - one) < tol10, "sum(wtk) != one")
 
 end subroutine kpts_ibz_from_kptrlatt
 !!***

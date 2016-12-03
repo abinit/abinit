@@ -3464,6 +3464,10 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
    ierr = 1; goto 10
  end if
 
+ !call kpts_ibz_from_kptrlatt( &
+ ! cryst, kptrlatt, kptopt, nshiftk, shiftk, my_nkibz, my_kibz, my_wtk, nkfull, kfull, &
+ ! new_kptrlatt, new_shiftk)  ! optional
+
  ! Call smpbz to get the full grid of k-points `kfull`
  ! brav1=1 is able to treat all bravais lattices (same option used in getkgrid)
  mkpt= kptrlatt(1,1)*kptrlatt(2,2)*kptrlatt(3,3) &
@@ -3498,6 +3502,7 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
  !
  sppoldbl = 1
  timrev = 1; if (any(kptopt == [3, 4])) timrev = 0
+ !timrev = kpts_timrev_from_kptopt(kptopt)
  ABI_MALLOC(indkk, (nkfull*sppoldbl,6))
 
  ! Compute k points from input file closest to the output file
