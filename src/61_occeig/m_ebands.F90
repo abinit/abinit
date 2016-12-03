@@ -1783,10 +1783,11 @@ end subroutine enclose_degbands
 
 subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'enclose_get_erange'
+#define ABI_FUNC 'ebands_get_erange'
 !End of the abilint section
 
  implicit none
@@ -4127,7 +4128,6 @@ type(ebands_t) function ebands_bspline(ebands, cryst, ords, bspl_kptrlatt, bspl_
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_bspline'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

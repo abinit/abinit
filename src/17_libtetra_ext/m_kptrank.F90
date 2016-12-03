@@ -319,6 +319,7 @@ end subroutine get_rank_1kpt
 
 integer function kptrank_index(krank, kpt) result(ikpt)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

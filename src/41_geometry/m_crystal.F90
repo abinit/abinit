@@ -902,10 +902,12 @@ end function symbol_type
 
 subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inversion)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'symbol_type'
+#define ABI_FUNC 'crystal_point_group'
+ use interfaces_32_util
 !End of the abilint section
 
  implicit none
