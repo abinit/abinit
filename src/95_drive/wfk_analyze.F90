@@ -87,7 +87,8 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  !use m_time,            only : cwtime
  use m_fstrings,        only : strcat, sjoin, itoa, ftoa
  use m_fftcore,         only : print_ngfft
- use m_bz_mesh,         only : tetra_from_kptrlatt, kpath_t, kpath_init, kpath_free
+ use m_kpts,            only : tetra_from_kptrlatt
+ use m_bz_mesh,         only : kpath_t, kpath_init, kpath_free
  use m_mpinfo,          only : destroy_mpi_enreg
  use m_esymm,           only : esymm_t, esymm_free, esymm_failed
  use m_pawang,          only : pawang_type

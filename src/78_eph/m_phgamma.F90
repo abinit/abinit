@@ -52,7 +52,7 @@ module m_phgamma
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
  use m_bz_mesh,        only : isamek, make_path
- use m_kpts,           only : kpts_ibz_from_kptrlatt
+ use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt
 
  implicit none
 
@@ -1395,25 +1395,22 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
 
 !Local variables -------------------------
 !scalars
- integer,parameter :: iout0=0,chksymbreak0=0,iscf2=2,bcorr0=0,master=0
- integer :: my_qptopt,iq_ibz,nqibz,nqpt_computed,ount,ii,nqbz,my_rank,nproc,cnt
- integer :: my_nqshift,mu,iw,natom3,nsppol,spin,ierr,nomega
+ integer,parameter :: bcorr0=0,master=0
+ integer :: my_qptopt,iq_ibz,nqibz,nqpt_computed,ount,ii,my_rank,nproc,cnt
+ integer :: mu,iw,natom3,nsppol,spin,ierr,nomega,nqbz
  real(dp) :: cpu,wall,gflops
  real(dp) :: lambda_iso,omega,omega_log,xx,qptrlen,omega_min,omega_max,ww,mustar,tc_macmill
  logical :: do_qintp
  character(len=500) :: msg
- character(len=80) :: errstr
  type(t_tetrahedron) :: tetra
 !arrays
- integer,parameter :: vacuum0(3)=[0,0,0]
- integer :: qptrlatt(3,3)
- integer,allocatable :: bz2ibz(:)
- real(dp) :: qlatt(3,3),rlatt(3,3),my_qshift(3,210)
+ integer :: qptrlatt(3,3),new_qptrlatt(3,3)
+ real(dp),allocatable :: my_qshift(:,:)
  real(dp) :: displ_cart(2,gams%natom3,gams%natom3)
  real(dp) :: phfrq(gams%natom3),gamma_ph(gams%natom3),lambda_ph(gams%natom3)
  real(dp),allocatable :: tmp_a2f(:)
  real(dp), ABI_CONTIGUOUS pointer :: a2f_1d(:)
- real(dp),allocatable :: qibz(:,:),wtq(:),fullbz(:,:)
+ real(dp),allocatable :: qibz(:,:),wtq(:),qbz(:,:)
  real(dp),allocatable :: a2f_1mom(:),a2flogmom(:),a2flogmom_int(:)
  real(dp),allocatable :: bdelta(:,:),btheta(:,:)
  real(dp),allocatable :: lambda_tetra(:,:,:),phfreq_tetra(:,:,:)
@@ -1435,29 +1432,16 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
    do ii=1,3
      qptrlatt(ii,ii) = ngqpt(ii)
    end do
-   my_nqshift = nqshift ! Be careful as getkgrid expects shiftk(3,210).
-   ABI_CHECK(my_nqshift>0 .and. my_nqshift<=210, "nqshift must be in [1,210]")
 
-   ! First call to getkgrid to obtain nqibz.
-   my_qshift=zero; my_qshift(:,1:nqshift) = qshift
-   ABI_MALLOC(qibz, (3,0))
-   ABI_MALLOC(wtq, (0))
-   call getkgrid(chksymbreak0,iout0,iscf2,qibz,my_qptopt,qptrlatt,qptrlen,&
-     cryst%nsym,0,nqibz,my_nqshift,cryst%nsym,cryst%rprimd,my_qshift,cryst%symafm,cryst%symrel,vacuum0,wtq)
-   ABI_FREE(qibz)
-   ABI_FREE(wtq)
-
-   ! Recall getkgrid to get qibz and wtq.
-   ABI_MALLOC(qibz,(3,nqibz))
-   ABI_MALLOC(wtq,(nqibz))
-
-   call getkgrid(chksymbreak0,iout0,iscf2,qibz,my_qptopt,qptrlatt,qptrlen,&
-     cryst%nsym,nqibz,nqpt_computed,my_nqshift,cryst%nsym,cryst%rprimd,my_qshift,cryst%symafm,cryst%symrel,vacuum0,wtq)
+   call kpts_ibz_from_kptrlatt(cryst, qptrlatt, my_qptopt, nqshift, qshift, nqibz, qibz, wtq, nqbz, qbz, &
+      new_kptrlatt=new_qptrlatt, new_shiftk=my_qshift)
+   ABI_FREE(qbz)
 
    ! Store quantities that cannot be easily (and safely) calculated if we only know the IBZ.
-   a2f%ngqpt = ngqpt; a2f%nqshift = my_nqshift
+   a2f%ngqpt = ngqpt; a2f%nqshift = size(my_qshift, dim=2)
    ABI_MALLOC(a2f%qshift, (3, a2f%nqshift))
-   a2f%qshift = my_qshift(:,1:a2f%nqshift)
+   a2f%qshift = my_qshift
+   ABI_FREE(my_qshift)
 
  else
    ! No interpolation. Use q-mesh parameters from gams%
@@ -1493,29 +1477,17 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
  ABI_CALLOC(a2f%lambdaw, (nomega,0:natom3, nsppol))
  ABI_MALLOC(tmp_a2f, (nomega))
 
- ! Prepare tetrahedron integration.
  if (intmeth == 2) then
    call cwtime(cpu,wall,gflops,"start")
 
-   nqbz = product(a2f%ngqpt) * a2f%nqshift
-   ABI_MALLOC(bz2ibz,(nqbz))
-   ABI_MALLOC(fullbz,(3, nqbz))
-
+   ! Prepare tetrahedron integration.
    qptrlatt = 0
    do ii=1,3
      qptrlatt(ii,ii) = a2f%ngqpt(ii)
    end do
-   ! convert kptrlatt to double and invert.
-   rlatt = dble(qptrlatt)
-   call matr3inv(rlatt,qlatt)  ! qlatt refers to the shortest qpt vectors.
 
-   ! TODO: Pass comm, fix timerev, add exit statement
-   call get_full_kgrid(bz2ibz,qibz,fullbz,qptrlatt,nqibz,nqbz,a2f%nqshift,cryst%nsym,a2f%qshift,cryst%symrel)
-
-   call init_tetra(bz2ibz, cryst%gprimd, qlatt, fullbz, nqbz, tetra, ierr, errstr)
-   ABI_FREE(fullbz)
-   ABI_FREE(bz2ibz)
-   if (ierr/=0) MSG_ERROR(errstr)
+   tetra = tetra_from_kptrlatt(cryst, my_qptopt, qptrlatt, a2f%nqshift, a2f%qshift, nqibz, qibz, msg, ierr)
+   if (ierr/=0) MSG_ERROR(msg)
 
    ABI_STAT_MALLOC(lambda_tetra, (nqibz,natom3,nsppol), ierr)
    ABI_CHECK(ierr==0, "oom in lambda_tetra, use gaussians for A2F")

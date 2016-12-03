@@ -81,7 +81,8 @@ type, public :: t_tetrahedron
 
 end type t_tetrahedron
 
-public :: init_tetra           ! Initialize the object.
+public :: init_tetra           ! Initialize the object
+                               ! (see also the high-level interface tetra_from_kptrlatt provided by m_kpts).
 public :: get_tetra_weight     ! Calculate integration weights and their derivatives. shape (nkpt,nene)
 public :: tetra_blochl_weights ! Same as in get_tetra_weight but weights have shape (nene,nkpt)
 public :: get_dbl_tetra_weight ! Calculate integration weights for double tetrahedron
