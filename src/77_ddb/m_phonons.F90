@@ -270,7 +270,7 @@ subroutine phdos_print(PHdos,fname)
 
    write(unt_msqd,'(2es17.8)',advance='NO')PHdos%omega(io)*cfact
    do iatom=1,PHdos%natom
-     write(unt_msqd,'(9es17.8,2x)',advance='NO') sum(PHdos%msqd_dos_atom(io,1:3,1:3,iatom))/cfact
+     write(unt_msqd,'(9es17.8,2x)',advance='NO') PHdos%msqd_dos_atom(io,1:3,1:3,iatom)/cfact
    end do
    write(unt_msqd,*)
  end do
@@ -901,7 +901,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 &                + (displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+1) &
 &                -  displ(2*(idispl-1)+2)* displ(2*(jdispl-1)+2) &
 &                +  displ(2*(idispl-1)+2)* displ(2*(jdispl-1)+1) &
-&                -  displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+2)) * tweight(iq_ibz,io)
+&                -  displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+2)) * dtweightde(iq_ibz,io)
              end do
            end do
          end do
