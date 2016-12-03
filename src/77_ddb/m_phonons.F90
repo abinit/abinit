@@ -48,6 +48,7 @@ module m_phonons
  use m_bz_mesh,         only : isamek, make_path
  use m_ifc,             only : ifc_type, ifc_fourq
  use m_anaddb_dataset,  only : anaddb_dataset_type
+ use m_kpts,            only : kpts_ibz_from_kptrlatt
 
  implicit none
 
@@ -510,24 +511,24 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 
 !Local variables -------------------------
 !scalars
- integer,parameter :: brav1=1,chksymbreak0=0,bcorr0=0
- integer :: facbrv,iat,idir,imesh,imode,io,iq_ibz,itype,nkpt_fullbz
- integer :: nmesh,nqbz,nqpt_max,nqshft,option,timrev,ierr,natom,nomega
+ integer,parameter :: bcorr0=0,qptopt1=1
+ integer :: iat,idir,imesh,imode,io,iq_ibz,itype,nkpt_fullbz
+ integer :: nmesh,nqbz,nqshft,ierr,natom,nomega
  real(dp) :: dum,gaussfactor,gaussprefactor,gaussval,low_bound,max_occ,pnorm
- real(dp) :: qphnrm,upr_bound,xx,gaussmaxarg
+ real(dp) :: upr_bound,xx,gaussmaxarg
  logical :: out_of_bounds
  character(len=500) :: msg
  character(len=80) :: errstr
  type(t_tetrahedron) :: tetraq
 !arrays
  integer :: qptrlatt(3,3)
- integer,allocatable :: bz2ibz(:),ibz2bz(:),ngqpt(:,:)
+ integer,allocatable :: bz2ibz(:),ngqpt(:,:)
  real(dp) :: displ(2*3*Crystal%natom*3*Crystal%natom)
  real(dp) :: eigvec(2,3,Crystal%natom,3*Crystal%natom),phfrq(3*Crystal%natom)
- real(dp) :: qlatt(3,3),qphon(3),rlatt(3,3)
+ real(dp) :: qlatt(3,3),rlatt(3,3)
  real(dp),allocatable :: dtweightde(:,:),full_eigvec(:,:,:,:,:),full_phfrq(:,:)
  real(dp),allocatable :: kpt_fullbz(:,:),qbz(:,:),qibz(:,:),qshft(:,:),tmp_phfrq(:),tweight(:,:)
- real(dp),allocatable :: qibz2(:,:),qshft2(:,:),wtq(:),wtq_folded(:),wtqibz(:)
+ real(dp),allocatable :: wtqibz(:)
 
 ! *********************************************************************
 
@@ -585,23 +586,17 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
    write(msg,'(2a)')ch10,'mkphdos: calculating phonon DOS using tetrahedron method'
  end if
  call wrtout(std_out,msg,'COLL')
- !
+
  ! Initial lower and upper bound of the phonon spectrum.
  low_bound=real(huge(0))*half*PHdos%omega_step
  upr_bound=-low_bound
- !
- ! Save memory during the generation of the q-mesh in the full BZ
- ! Take into account the type of Bravais lattice
- facbrv=1
- if (brav1==2) facbrv=2
- if (brav1==3) facbrv=4
 
  nmesh=2
  ABI_MALLOC(ngqpt,(3,nmesh))
  do imesh=1,nmesh
 
    if (imesh==1) then
-     ! Coarse q-mesh used during RF calculation.
+     ! Coarse q-mesh used in RF calculation.
      ngqpt(:,imesh)=ifc%ngqpt(1:3)
      nqshft=ifc%nqshft
      ABI_MALLOC(qshft,(3,nqshft))
@@ -615,63 +610,24 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
      ABI_MALLOC(qshft,(3,nqshft))
      !qshft(:,1)=inp%q2shft(:)  ! FIXME small inconsistency in the dimension of q1shft
      qshft(:,1)=dos_qshift(:)
-     if (prtdos == 2) then
-       ABI_MALLOC(qshft2,(3,nqshft))
-       qshft2(:,:)=qshft(:,:)
-     end if
    end if
 
-   nqpt_max=(ngqpt(1,imesh)*ngqpt(2,imesh)*ngqpt(3,imesh)*nqshft)/facbrv
-   ABI_MALLOC(qibz,(3,nqpt_max))
-   ABI_MALLOC(qbz,(3,nqpt_max))
-   if (prtdos == 2 .and. imesh == 2) then
-     ABI_MALLOC(qibz2,(3,nqpt_max))
-   endif
+   qptrlatt=0
+   qptrlatt(1,1)=ngqpt(1,imesh); qptrlatt(2,2)=ngqpt(2,imesh); qptrlatt(3,3)=ngqpt(3,imesh)
 
-   qptrlatt(:,:)=0
-   qptrlatt(1,1)=ngqpt(1,imesh)
-   qptrlatt(2,2)=ngqpt(2,imesh)
-   qptrlatt(3,3)=ngqpt(3,imesh)
-   option=1
-   !
-   ! here I noticed a problem in the declaration of q1shft in the anaddb datatype
-   ! FIXME we write on unit std_out just to avoid problem with automatic tests
-   call smpbz(brav1,std_out,qptrlatt,nqpt_max,nqbz,nqshft,option,qshft,qbz)
-   !
-   !  Reduce the number of such points by symmetrization.
-   ABI_MALLOC(ibz2bz,(nqbz))
-   ABI_MALLOC(wtq,(nqbz))
-   ABI_MALLOC(wtq_folded,(nqbz))
-   wtq(:)=one/nqbz         ! Weights sum up to one
-   timrev=1; option=1     ! TODO timrev should be input
-   !
-   ! This call will set PHdos%nqibz
-   call symkpt(chksymbreak0,Crystal%gmet,ibz2bz,std_out,qbz,nqbz,&
-&    PHdos%nqibz,Crystal%nsym,Crystal%symrec,timrev,wtq,wtq_folded)
-   write(std_out,*) 'PHdos%nqibz = ', PHdos%nqibz
-
-   ABI_MALLOC(wtqibz,(PHdos%nqibz))
-   do iq_ibz=1,PHdos%nqibz
-     wtqibz(iq_ibz)=wtq_folded(ibz2bz(iq_ibz))
-     qibz(:,iq_ibz)=qbz(:,ibz2bz(iq_ibz))
-     if (prtdos==2 .and. imesh==2)   qibz2(:,:)=qibz(:,:)
-   end do
-   ABI_FREE(wtq_folded)
+   ! This call will set %nqibz, IBZ and BZ arrays
+   call kpts_ibz_from_kptrlatt(crystal, qptrlatt, qptopt1, nqshft, qshft, &
+     phdos%nqibz, qibz, wtqibz, nqbz, qbz) ! new_kptrlatt, new_shiftk)  ! Optional
    ABI_FREE(qshft)
 
    if (prtdos==2.and.imesh==2) then
-     !
      ! Second mesh with tetrahedron method
      ! convert kptrlatt to double and invert, qlatt here refer to the shortest qpt vectors
-     rlatt(:,:)=qptrlatt(:,:)
-     call matr3inv(rlatt,qlatt)
+     rlatt = qptrlatt; call matr3inv(rlatt,qlatt)
 
      ABI_MALLOC(qshft,(3,nqshft))
      !qshft(:,1)=inp%q2shft(:)  ! FIXME small inconsistency in the dimension of q1shft
      qshft(:,1)= dos_qshift(:)
-     ABI_FREE(qshft2)
-     ABI_MALLOC(qshft2,(3,nqshft))
-     qshft2(:,:)=qshft(:,:)
      nkpt_fullbz=nqbz
      ABI_MALLOC(bz2ibz,(nkpt_fullbz))
      ABI_MALLOC(kpt_fullbz,(3,nkpt_fullbz))
@@ -680,7 +636,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
      ! This routines scales **very badly** wrt nkpt_fullbz, should introduce check on the norm.
      call get_full_kgrid(bz2ibz,qibz,kpt_fullbz,qptrlatt,PHdos%nqibz,&
 &      nkpt_fullbz,nqshft,Crystal%nsym,qshft,Crystal%symrel)
-     !
+
      ! Get tetrahedra, ie indexes of the full q-points at their summits
      call init_tetra(bz2ibz, crystal%gprimd, qlatt, kpt_fullbz, nqbz, tetraq, ierr, errstr)
      ABI_CHECK(ierr==0,errstr)
@@ -688,7 +644,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
      ABI_FREE(qshft)
      ABI_FREE(bz2ibz)
      ABI_FREE(kpt_fullbz)
-     !
+
      ! Allocate arrays used to store the entire spectrum, Required to calculate tetra weights.
      ABI_MALLOC(full_phfrq,(3*natom,PHdos%nqibz))
      ABI_STAT_MALLOC(full_eigvec,(2,3,natom,3*natom,PHdos%nqibz), ierr)
@@ -709,7 +665,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
      if (allocated(PHdos%pjdos)) then
        ABI_FREE(PHdos%pjdos)
      end if
-     !
+
      ! Frequency mesh.
      PHdos%omega_min=low_bound; if (ABS(PHdos%omega_min)<tol5) PHdos%omega_min=-tol5
      PHdos%omega_max=upr_bound
@@ -721,20 +677,19 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
        PHdos%omega(io)=PHdos%omega_min+PHdos%omega_step*(io-1)
      end do
 
-     if (imesh/=1) then
-       write(std_out,*)&
-        'nomega = ',PHdos%nomega,' omega_min [cm-1] =',PHdos%omega_min*Ha_cmm1,' omega_max [cm-1] =',PHdos%omega_max*Ha_cmm1
-     end if
+     !if (imesh/=1) then
+     !  write(std_out,*)&
+     !   'nomega = ',PHdos%nomega,' omega_min [cm-1] =',PHdos%omega_min*Ha_cmm1,' omega_max [cm-1] =',PHdos%omega_max*Ha_cmm1
+     !end if
 
      ABI_CALLOC(PHdos%phdos,(PHdos%nomega))
      ABI_CALLOC(PHdos%pjdos,(PHdos%nomega,3,natom))
-     !
+
      ! === Sum over irreducible q-points ===
      do iq_ibz=1,PHdos%nqibz
-       qphon(:)=qibz(:,iq_ibz); qphnrm=one
 
        ! Fourier interpolation.
-       call ifc_fourq(Ifc,Crystal,qphon,phfrq,displ,out_eigvec=eigvec)
+       call ifc_fourq(Ifc,Crystal,qibz(:,iq_ibz),phfrq,displ,out_eigvec=eigvec)
 
        dum=MINVAL(phfrq); PHdos%omega_min=MIN(PHdos%omega_min,dum)
        dum=MAXVAL(phfrq); PHdos%omega_max=MAX(PHdos%omega_max,dum)
@@ -767,11 +722,10 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
            full_phfrq(:,iq_ibz)=phfrq(:)
            full_eigvec(:,:,:,:,iq_ibz)=eigvec
          case default
-           write(msg,'(a,i0)')" Wrong value for prtdos= ",prtdos
-           MSG_ERROR(msg)
+           MSG_ERROR(sjoin("Wrong value for prtdos:", itoa(prtdos)))
          end select
        end if !Second mesh and not out of boundaries
-       !
+
      end do !irred q-points
 
      if (out_of_bounds) then
@@ -788,10 +742,8 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
      end if
    end do !infinite loop
 
-   ABI_FREE(ibz2bz)
    ABI_FREE(qibz)
    ABI_FREE(qbz)
-   ABI_FREE(wtq)
    ABI_FREE(wtqibz)
  end do !imesh
  ABI_FREE(ngqpt)
@@ -880,13 +832,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
    do itype=1,Crystal%ntypat
      call simpson_int(PHdos%nomega,PHdos%omega_step,PHdos%pjdos_type(:,itype),PHdos%pjdos_type_int(:,itype))
    end do
- end if
-
- if (allocated(qibz2)) then
-   ABI_FREE(qibz2)
- end if
- if (allocated(qshft2)) then
-   ABI_FREE(qshft2)
  end if
 
  if (prtdos==2) then

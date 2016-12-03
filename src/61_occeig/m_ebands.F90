@@ -3004,11 +3004,11 @@ end function ebands_ncwrite_path
 !! INPUTS
 !!  ebands<ebands_t>=Band structure object.
 !!  cryst<cryst_t>=Info on the crystalline structure.
-!!  intmeth= 1 for gaussian, 2 for tetra
+!!  intmeth= 1 for gaussian, 2 or 3 for tetrahedrons (3 if Blochl corrections must be included).
 !!  step=Step on the linear mesh in Ha. If <0, the routine will use the mean of the energy level spacing
 !!  broad=Gaussian broadening, If <0, the routine will use a default
 !!    value for the broadening computed from the mean of the energy level spacing.
-!!    No meaning if method == "tetra"
+!!    No meaning for tetrahedrons
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -3045,8 +3045,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: bcorr0=0
- integer :: iw,nw,spin,band,ikpt,ief,nproc,my_rank,mpierr,cnt,ierr
+ integer :: iw,nw,spin,band,ikpt,ief,nproc,my_rank,mpierr,cnt,ierr,bcorr
  real(dp) :: max_ene,min_ene,wtk,max_occ
  character(len=500) :: msg
  type(stats_t) :: ediffs
@@ -3099,7 +3098,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
    ABI_FREE(wme0)
    call xmpi_sum(edos%dos, comm, mpierr)
 
- case (2)
+ case (2, 3)
    ! Consistency test
    if (any(ebands%nband /= ebands%nband(1)) ) MSG_ERROR('for tetrahedrons, nband(:) must be constant')
 
@@ -3113,6 +3112,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
    ABI_MALLOC(tmp_eigen, (ebands%nkpt))
    ABI_MALLOC(wdt, (nw, 2))
 
+   bcorr = 0; if (intmeth == 3) bcorr = 1
    cnt = 0
    do spin=1,ebands%nsppol
      do band=1,ebands%nband(1)
@@ -3122,7 +3122,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! mpi parallelism.
 
          ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223)
-         call tetra_get_onewk(tetra, ikpt, bcorr0, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)
+         call tetra_get_onewk(tetra, ikpt, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)
 
          edos%dos(:,spin) = edos%dos(:,spin) + wdt(:, 1)
          ! IDOS is computed afterwards with simpson
@@ -4161,7 +4161,7 @@ end function ebands_bspline
 !! INPUTS
 !!  ebands<ebands_t>=Band structure object.
 !!  cryst<cryst_t>=Info on the crystalline structure.
-!!  intmeth= 1 for gaussian, 2 for tetra
+!!  intmeth= 1 for gaussian, 2 or 3 for tetrahedrons (3 if Blochl corrections must be included).
 !!  step=Step on the linear mesh in Ha. If <0, the routine will use the mean of the energy level spacing
 !!  broad=Gaussian broadening, If <0, the routine will use a default
 !!    value for the broadening computed from the mean of the energy level spacing.
@@ -4202,8 +4202,7 @@ subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: bcorr0=0
- integer :: ik_ibz,ibc,ibv,spin,iw,nw,nband_k,nbv,nproc,my_rank,nkibz,cnt,mpierr,unt
+ integer :: ik_ibz,ibc,ibv,spin,iw,nw,nband_k,nbv,nproc,my_rank,nkibz,cnt,mpierr,unt,bcorr
  real(dp) :: wtk,wmax,wstep,wbroad
  type(stats_t) :: ediffs
  type(t_tetrahedron) :: tetra
@@ -4274,7 +4273,7 @@ subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
    ABI_FREE(cvmw)
    call xmpi_sum(jdos, comm, mpierr)
 
- case (2)
+ case (2, 3)
    ! Tetrahedron method
    if (any(ebands%nband /= ebands%nband(1)) ) then
      MSG_WARNING('for tetrahedrons, nband(:) must be constant')
@@ -4293,6 +4292,7 @@ subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
    ABI_MALLOC(cvmw, (nkibz))
    ABI_MALLOC(wdt, (nw, 2))
 
+   bcorr = 0; if (intmeth == 3) bcorr = 1
    cnt = 0
    do spin=1,ebands%nsppol
      nbv = val_idx(1, spin)
@@ -4304,19 +4304,18 @@ subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
            cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! mpi-parallelism
 
            ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223)
-           call tetra_get_onewk(tetra, ik_ibz, bcorr0, nw, ebands%nkpt, cvmw, wmesh(0), wmesh(nw), one, wdt)
+           call tetra_get_onewk(tetra, ik_ibz, bcorr, nw, ebands%nkpt, cvmw, wmesh(0), wmesh(nw), one, wdt)
            jdos(:,spin) = jdos(:,spin) + wdt(:, 1)
          end do
        end do ! ibc
      end do ! ibv
-   end do !spin
+   end do ! spin
 
    call xmpi_sum(jdos, comm, mpierr)
 
    ! Free memory
    ABI_FREE(wdt)
    ABI_FREE(cvmw)
-
    call destroy_tetra(tetra)
 
  case default
