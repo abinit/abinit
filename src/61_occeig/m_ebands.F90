@@ -3053,8 +3053,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
  type(t_tetrahedron) :: tetra
 !arrays
  real(dp) :: eminmax_spin(2,ebands%nsppol)
- real(dp),allocatable :: wme0(:)
- real(dp),allocatable :: tmp_eigen(:),bdelta(:,:),btheta(:,:)
+ real(dp),allocatable :: wme0(:),wdt(:,:),tmp_eigen(:)
 
 ! *********************************************************************
 
@@ -3102,9 +3101,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
 
  case (2)
    ! Consistency test
-   if (any(ebands%nband /= ebands%nband(1)) ) then
-     MSG_ERROR('for tetrahedrons, nband(:) must be constant')
-   end if
+   if (any(ebands%nband /= ebands%nband(1)) ) MSG_ERROR('for tetrahedrons, nband(:) must be constant')
 
    ! Build tetra object.
    tetra = tetra_from_kptrlatt(cryst, ebands%kptopt, ebands%kptrlatt, &
@@ -3114,37 +3111,31 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
    ! For each spin and band, interpolate over kpoints,
    ! calculate integration weights and DOS contribution.
    ABI_MALLOC(tmp_eigen, (ebands%nkpt))
-   ABI_MALLOC(btheta, (nw, ebands%nkpt))
-   ABI_MALLOC(bdelta, (nw, ebands%nkpt))
+   ABI_MALLOC(wdt, (nw, 2))
 
    cnt = 0
    do spin=1,ebands%nsppol
      do band=1,ebands%nband(1)
-       cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! mpi parallelism.
        ! For each band get its contribution
        tmp_eigen = ebands%eig(band,:,spin)
-
-       ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223)
-       call tetra_blochl_weights(tetra,tmp_eigen,min_ene,max_ene,one,nw,ebands%nkpt,bcorr0,&
-         btheta,bdelta,xmpi_comm_self)
-
        do ikpt=1,ebands%nkpt
-         do iw=1,nw
-           edos%dos(iw,spin) = edos%dos(iw,spin) + bdelta(iw, ikpt)
-           ! IDOS is computed afterwards with simpson
-           !edos%idos(iw,spin) = edos%idos(iw,spin) + btheta(iw,ikpt)
-         end do
-       end do
+         cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! mpi parallelism.
+
+         ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223)
+         call tetra_get_onewk(tetra, ikpt, bcorr0, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)
+
+         edos%dos(:,spin) = edos%dos(:,spin) + wdt(:, 1)
+         ! IDOS is computed afterwards with simpson
+         !edos%idos(:,spin) = edos%idos(:,spin) + wdt(:, 2)
+       end do ! ikpt
      end do ! band
-   end do !spin
+   end do ! spin
 
    call xmpi_sum(edos%dos, comm, mpierr)
 
    ! Free memory
    ABI_FREE(tmp_eigen)
-   ABI_FREE(btheta)
-   ABI_FREE(bdelta)
-
+   ABI_FREE(wdt)
    call destroy_tetra(tetra)
 
    ! Filter so that dos[i] is always >= 0 and idos is monotonic
@@ -4222,8 +4213,7 @@ subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
 !arrays
  integer :: val_idx(ebands%nkpt,ebands%nsppol)
  real(dp) :: eminmax(2,ebands%nsppol)
- real(dp),allocatable :: jdos(:,:),wmesh(:),cvmw(:)
- real(dp),allocatable :: bdelta(:,:),btheta(:,:)
+ real(dp),allocatable :: jdos(:,:),wmesh(:),cvmw(:),wdt(:,:)
 
 ! *********************************************************************
 
@@ -4301,28 +4291,22 @@ subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
    ! For each spin and band, interpolate over kpoints,
    ! calculate integration weights and DOS contribution.
    ABI_MALLOC(cvmw, (nkibz))
-   ABI_MALLOC(btheta, (nw, nkibz))
-   ABI_MALLOC(bdelta, (nw, nkibz))
+   ABI_MALLOC(wdt, (nw, 2))
 
    cnt = 0
    do spin=1,ebands%nsppol
      nbv = val_idx(1, spin)
      do ibv=1,nbv
        do ibc=nbv+1,ebands%mband
-         cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
          ! For each (c,v) get its contribution
          cvmw = ebands%eig(ibc,:,spin) - ebands%eig(ibv,:,spin)
+         do ik_ibz=1,ebands%nkpt
+           cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! mpi-parallelism
 
-         ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223)
-         call tetra_blochl_weights(tetra,cvmw,wmesh(0),wmesh(nw),one,nw,nkibz,bcorr0,&
-           btheta,bdelta,xmpi_comm_self)
-
-         do ik_ibz=1,nkibz
-           do iw=1,nw
-             jdos(iw,spin) = jdos(iw,spin) + bdelta(iw, ik_ibz)
-           end do
+           ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223)
+           call tetra_get_onewk(tetra, ik_ibz, bcorr0, nw, ebands%nkpt, cvmw, wmesh(0), wmesh(nw), one, wdt)
+           jdos(:,spin) = jdos(:,spin) + wdt(:, 1)
          end do
-
        end do ! ibc
      end do ! ibv
    end do !spin
@@ -4330,8 +4314,7 @@ subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
    call xmpi_sum(jdos, comm, mpierr)
 
    ! Free memory
-   ABI_FREE(btheta)
-   ABI_FREE(bdelta)
+   ABI_FREE(wdt)
    ABI_FREE(cvmw)
 
    call destroy_tetra(tetra)

@@ -1411,8 +1411,7 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
  real(dp),allocatable :: tmp_a2f(:)
  real(dp), ABI_CONTIGUOUS pointer :: a2f_1d(:)
  real(dp),allocatable :: qibz(:,:),wtq(:),qbz(:,:)
- real(dp),allocatable :: a2f_1mom(:),a2flogmom(:),a2flogmom_int(:)
- real(dp),allocatable :: bdelta(:,:),btheta(:,:)
+ real(dp),allocatable :: a2f_1mom(:),a2flogmom(:),a2flogmom_int(:),wdt(:,:)
  real(dp),allocatable :: lambda_tetra(:,:,:),phfreq_tetra(:,:,:)
 
 ! *********************************************************************
@@ -1547,34 +1546,27 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
    call xmpi_sum(phfreq_tetra, comm, ierr)
 
    ! workspace for tetra.
-   ABI_MALLOC(btheta, (nomega, nqibz))
-   ABI_MALLOC(bdelta, (nomega, nqibz))
+   ABI_MALLOC(wdt, (nomega, 2))
 
    ! For each mode get its contribution
    cnt = 0
    do spin=1,nsppol
      do mu=1,natom3
-       cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
-
-       ! Calculate integration weights at each irred kpoint (Blochl et al PRB 49 16223)
-       call tetra_blochl_weights(tetra,phfreq_tetra(:,mu,spin),omega_min,omega_max,one,nomega,nqibz,&
-         bcorr0,btheta,bdelta,xmpi_comm_self)
-
-       ! Accumulate
        do iq_ibz=1,nqibz
-         do iw=1,nomega
-           a2f%vals(iw,mu,spin) = a2f%vals(iw,mu,spin) + lambda_tetra(iq_ibz,mu,spin) * bdelta(iw,iq_ibz)
-           ! Integral of a2F is computed afterwards
-           !a2f%lambdaw(iw,mu,spin) = a2f%lambdaw(iw,mu,spin)) + lambda_tetra(iq_ibz, mu) * btheta(iw,iq_ibz)
-         end do
-       end do
+         cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! mpi-parallelism
 
+         call tetra_get_onewk(tetra, iq_ibz, bcorr0, nomega, nqibz, phfreq_tetra(:,mu,spin), &
+           omega_min, omega_max, one, wdt)
+
+         ! Accumulate (Integral of a2F is computed afterwards)
+         a2f%vals(:,mu,spin) = a2f%vals(:,mu,spin) + wdt(:,1) * lambda_tetra(iq_ibz,mu,spin)
+         !a2f%lambdaw(:,mu,spin) = a2f%lambdaw(:,mu,spin) + wdt(:,2) * lambda_tetra(iq_ibz, mu, spin)
+      end do
      end do
    end do
 
    ! Free memory allocated for tetra.
-   ABI_FREE(btheta)
-   ABI_FREE(bdelta)
+   ABI_FREE(wdt)
    ABI_FREE(lambda_tetra)
    ABI_FREE(phfreq_tetra)
    call destroy_tetra(tetra)
