@@ -57,7 +57,7 @@ MODULE m_ebands
  use m_cgtools,        only : set_istwfk
  use m_nesting,        only : mknesting
  use m_crystal,        only : crystal_t
- use m_bz_mesh,        only : kmesh_t, isamek
+ use m_bz_mesh,        only : isamek
  use m_fftcore,        only : get_kg
 
  implicit none
@@ -3945,9 +3945,7 @@ subroutine ebspl_eval_bks(ebspl, band, kpt, spin, oeig, oder1, oder2)
 
 ! *********************************************************************
 
-#ifdef DEBUG_MODE
- ABI_CHECK(allocated(ebspl%coeff(band, spin)%vals), sjoin("Unallocated (band, spin):", ltoa([band, spin])))
-#endif
+ DBG_CHECK(allocated(ebspl%coeff(band, spin)%vals), sjoin("Unallocated (band, spin):", ltoa([band, spin])))
 
  ! Wrap k-point in the interval [0,1[ where 1 is not included (tol12)
  ! This is required because the spline has been constructed in this region.
