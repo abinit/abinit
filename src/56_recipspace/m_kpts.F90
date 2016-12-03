@@ -120,8 +120,7 @@ end function kpts_timrev_from_kptopt
 !!
 !! SOURCE
 
-subroutine kpts_ibz_from_kptrlatt( &
-  cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
+subroutine kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
   new_kptrlatt, new_shiftk)  ! Optional
 
 
@@ -252,14 +251,14 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: brav1=1,option0=0
- integer :: mkpt,nkfull,timrev,sppoldbl
+ integer :: nkfull,timrev,sppoldbl,my_nkibz,new_nshiftk
  real(dp) :: dksqmax
  character(len=80) :: errorstring
 !arrays
+ integer :: new_kptrlatt(3,3)
  integer,allocatable :: indkk(:,:)
  real(dp) :: rlatt(3,3),klatt(3,3)
- real(dp),allocatable :: kfull(:,:)
+ real(dp),allocatable :: kfull(:,:),my_kibz(:,:),my_wtk(:),new_shiftk(:,:)
 
 ! *************************************************************************
 
@@ -279,37 +278,28 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
    ierr = 1; goto 10
  end if
 
- !call kpts_ibz_from_kptrlatt( &
- ! cryst, kptrlatt, kptopt, nshiftk, shiftk, my_nkibz, my_kibz, my_wtk, nkfull, kfull, &
- ! new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)  ! optional
- !ABI_FREE(my_kibz)
- !ABI_FREE(my_wtk)
- !ABI_FREE(new_shiftk)
+ call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, &
+   my_nkibz, my_kibz, my_wtk, nkfull, kfull, new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
 
- ! Call smpbz to get the full grid of k-points `kfull`
- ! brav1=1 is able to treat all bravais lattices (same option used in getkgrid)
- mkpt= kptrlatt(1,1)*kptrlatt(2,2)*kptrlatt(3,3) &
-   +kptrlatt(1,2)*kptrlatt(2,3)*kptrlatt(3,1) &
-   +kptrlatt(1,3)*kptrlatt(2,1)*kptrlatt(3,2) &
-   -kptrlatt(1,2)*kptrlatt(2,1)*kptrlatt(3,3) &
-   -kptrlatt(1,3)*kptrlatt(2,2)*kptrlatt(3,1) &
-   -kptrlatt(1,1)*kptrlatt(2,3)*kptrlatt(3,2)
- mkpt = mkpt * nshiftk
+ ABI_FREE(my_kibz)
+ ABI_FREE(my_wtk)
+ new_nshiftk = size(new_shiftk, dim=2)
 
- ! TODO: Replace with getkgrid.
- ABI_MALLOC(kfull, (3,mkpt))
- call smpbz(brav1,std_out,kptrlatt,mkpt,nkfull,nshiftk,option0,shiftk,kfull)
+ if (my_nkibz /= nkibz) then
+   msg = sjoin("Input nkibz:", itoa(nkibz), "does not agree with computed value:", itoa(my_nkibz))
+   ierr = 1; goto 10
+ end if
 
- ! Do not support nshiftk > 1: lattice must be decomposed into boxes
+ ! Do not support new_nshiftk > 1: lattice must be decomposed into boxes
  ! and this is not always possible (I think) with bizzare shiftks
  ! normally at this point we have incorporated everything into
- ! kptrlatt, and only 1 shift is needed (in particular for MP grids).
- if (nshiftk > 1) then
+ ! new_kptrlatt, and only 1 shift is needed (in particular for MP grids).
+ if (new_nshiftk > 1) then
    write(msg, "(9a)") &
      'Cannot create tetrahedron object...',ch10, &
      'Only simple lattices are supported. Action: use nshiftk=1.',ch10, &
-     'shiftk: ', trim(ltoa(reshape(shiftk, [3*nshiftk]))),ch10, &
-     'kptrlatt: ', trim(ltoa(reshape(kptrlatt, [9])))
+     'new_shiftk: ', trim(ltoa(reshape(new_shiftk, [3*new_nshiftk]))),ch10, &
+     'new_kptrlatt: ', trim(ltoa(reshape(new_kptrlatt, [9])))
    ierr = 2; goto 10
  end if
 
@@ -329,12 +319,12 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
    write(msg, '(3a,es16.6,6a)' )&
    'At least one of the k points could not be generated from a symmetrical one.',ch10,&
    'dksqmax=',dksqmax,ch10,&
-   'kptrkatt= ',trim(ltoa(reshape(kptrlatt, [9]))),ch10,&
-   'shiftk= ',trim(ltoa(reshape(shiftk, [3*nshiftk])))
+   'new_kptrkatt= ',trim(ltoa(reshape(new_kptrlatt, [9]))),ch10,&
+   'new_shiftk= ',trim(ltoa(reshape(new_shiftk, [3*new_nshiftk])))
    ierr = 2; goto 10
  end if
 
- rlatt = kptrlatt; call matr3inv(rlatt,klatt)
+ rlatt = new_kptrlatt; call matr3inv(rlatt,klatt)
 
  call init_tetra(indkk(:,1), cryst%gprimd, klatt, kfull, nkfull, tetra, ierr, errorstring)
  if (ierr /= 0) msg = errorstring
@@ -345,6 +335,9 @@ type(t_tetrahedron) function tetra_from_kptrlatt( &
  end if
  if (allocated(kfull)) then
    ABI_FREE(kfull)
+ end if
+ if (allocated(new_shiftk)) then
+   ABI_FREE(new_shiftk)
  end if
 
 end function tetra_from_kptrlatt
