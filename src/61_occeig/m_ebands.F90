@@ -3061,10 +3061,13 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
 
  edos%nkibz = ebands%nkpt; edos%intmeth = intmeth; edos%nsppol = ebands%nsppol
 
- ! Compute the mean value of the energy spacing.
- ediffs = ebands_edstats(ebands)
- edos%broad = broad; if (broad <= tol16) edos%broad = ediffs%mean
- edos%step = step; if (step <= tol16) edos%step = 0.1 * ediffs%mean
+ edos%broad = broad; edos%step = step
+ if (broad <= tol16 .or. step <= tol16) then
+   ! Compute the mean value of the energy spacing.
+   ediffs = ebands_edstats(ebands)
+   if (edos%broad <= tol16) edos%broad = ediffs%mean
+   if (edos%step <= tol16) edos%step = 0.1 * ediffs%mean
+ end if
 
  ! Compute the linear mesh so that it encloses all bands.
  eminmax_spin = get_minmax(ebands, "eig")

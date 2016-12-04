@@ -558,6 +558,10 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  end if
 #endif
 
+ !if (my_rank == master) then ! .and. (ebands%mband < 100 .or. dtset%printxmgr == 1)
+ !  call ebands_write_xmgrace(ebands, strcat(dtfil%filnam_ds(4), "_EBANDS.xmgr"))
+ !end if
+
  if (iwrite_fftdatar(mpi_enreg)) then
 
    ! output the electron localization function ELF

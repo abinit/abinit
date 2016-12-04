@@ -139,7 +139,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master=0,level40=40,natifc0=0,brav1=1,timrev2=2,selectz0=0
- integer,parameter :: nsphere0=0,prt_ifc0=0,ifcana0=0,ifcout0=0,prtsrlr0=0
+ integer,parameter :: nsphere0=0,prtsrlr0=0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
  integer :: iblock,ddb_nqshift,ierr,edos_intmeth
 #ifdef HAVE_NETCDF
@@ -564,12 +564,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  case (2)
    ! Compute electron-phonon matrix elements
    call eph_gkk(wfk0_path,wfq_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,ebands_kq,dvdb,ifc,&
-   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
+   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
  case (3)
    ! Compute phonon self-energy
    call eph_phpi(wfk0_path,wfq_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,ebands_kq,dvdb,ifc,&
-   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
+   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
  case (4)
    ! Compute electron self-energy (phonon contribution)

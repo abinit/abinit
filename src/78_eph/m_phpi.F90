@@ -99,7 +99,6 @@ contains  !=====================================================================
 !! pawrad(ntypat*usepaw)<pawrad_type>=Paw radial mesh and related data.
 !! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
-!! n0(nsppol)=Electronic density at the Fermi level for each spin.
 !! comm=MPI communicator.
 !!
 !! OUTPUT
@@ -114,7 +113,7 @@ contains  !=====================================================================
 !! SOURCE
 
 subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,ebands_kq,dvdb,ifc,&
-                       pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
+                       pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -144,7 +143,6 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  type(mpi_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18),ngfftf(18)
- real(dp),intent(in) :: n0(ebands_k%nsppol)
  type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 

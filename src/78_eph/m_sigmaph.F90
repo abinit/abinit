@@ -579,6 +579,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      ABI_MALLOC(gkk_nu, (2, nbcalc_ks, natom3))
      ABI_STAT_MALLOC(dbwl_nu, (2, nbsum_ks, nbcalc_ks, natom3), ierr)
      ABI_CHECK(ierr == 0, "oom in dbwl_nu")
+     dbwl_nu = zero
 
      ! Load ground-state wavefunctions for which corrections are wanted (available on each node)
      ! TODO: symmetrize them if kk is not irred
@@ -652,8 +653,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
        ikq_ibz = indkk_kq(1,1); isym_kq = indkk_kq(1,2)
        trev_kq = indkk_kq(1, 6); g0_kq = indkk_kq(1, 3:5)
-       isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
-       !isirr_kq = .True.
+       isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0)) !; isirr_kq = .True.
        kq_ibz = ebands%kptns(:,ikq_ibz)
 
        ! Get npw_kq, kg_kq for k+q
@@ -731,8 +731,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            call getgh1c(berryopt0,kets_k(:,:,ib_k),cwaveprj0,h1kets_kq(:,:,ib_k,ipc),&
              grad_berry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,mpi_enreg,optlocal,&
              optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
-
-           ! TODO: Solve Sternheimer equations non-self-consistently (??)
          end do
 
          call destroy_rf_hamiltonian(rf_hamkq)
@@ -844,9 +842,15 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            end do ! ib_k
          end do ! imode
 
-         ! Add Debye-Waller term
-         !if (isqzero) then
-         !end if
+         ! Debye-Waller term
+         if (isqzero) then
+           do imode=1,natom3
+             do ib_k=1,nbcalc_ks
+               !(gkk_nu(1,ib_k,imode) + gkk_nu(2,ib_k,imode)
+               !dbwl_nu(:, ib_kq, ib_k, iomode) =
+             end do
+           end do
+         end if
 
        end do ! ib_kq (sum over bands at k+q)
 
@@ -864,18 +868,18 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      ABI_FREE(kets_k)
      ABI_FREE(gkk_atm)
      ABI_FREE(gkk_nu)
-     ABI_FREE(dbwl_nu)
 
      ! Compute Debye-Waller term.
      !call xmpi_sum(dbwl_nu, comm, ierr)
-     !call sigmaph_compute_dbwl(sigma, ifc, dbwl_nu)
+     !call compute_dbwl(sigma, ifc, dbwl_nu)
+     ABI_FREE(dbwl_nu)
 
      ! Collect results
      if (sigma%nwr > 0) then
        call xmpi_sum(sigma%vals_wr, comm, ierr)
      end if
      ! Writes the results for a single (k-point, spin) to NETCDF file
-     if (my_rank == master) call sigmaph_solve(sigma, ikcalc, spin, ebands)
+     !if (my_rank == master) call sigmaph_solve(sigma, ikcalc, spin, ebands)
    end do ! spin
 
    ABI_FREE(kg_k)
@@ -911,7 +915,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  ABI_DT_FREE(cwaveprj0)
 
  call xmpi_end()
- stop
 
 end subroutine sigmaph
 !!***
