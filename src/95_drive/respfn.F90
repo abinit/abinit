@@ -1137,9 +1137,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
                  call wrtout(std_out,message,'COLL')
                  if (i2pert==natom+2) then
                    if (i3pert==natom+2) then
-                     rf2_dirs_from_rfpert_nl(i3dir,i2dir) = 1
+                     rf2_dirs_from_rfpert_nl(i2dir,i3dir) = 1
                    else if (i1pert==natom+2) then
-                     rf2_dirs_from_rfpert_nl(i1dir,i2dir) = 1
+                     rf2_dirs_from_rfpert_nl(i2dir,i1dir) = 1
                    end if
                  end if
                end if
