@@ -144,21 +144,21 @@ void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, i
 }
 
 void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *nqpt,
-                     double amu[*ntypat],double atmfrc[*nrpt][*natom][3][*natom][3][2],
-                     int cell[*nrpt][3],double dynmat[*nqpt][*natom][3][*natom][3][2],
-                     double elastic_constants[6][6],
-                     double *energy,double epsilon_inf[3][3],
-                     double ewald_atmfrc[*nrpt][*natom][3][*natom][3][2],
-                     double internal_strain[*natom][3][6],
-                     double phfrq[*nqpt][3* *natom],double rprimd[3][3],double qph1l[*nqpt][3],
-                     double short_atmfrc[*nrpt][*natom][3][*natom][3][2],
-                     int typat[*natom],double xcart[*natom][3],double zeff[*natom][3][3]){
+                           double amu[*ntypat],double atmfrc[*nrpt][*natom][3][*natom][3][2],
+                           int cell[*nrpt][3],double dynmat[*nqpt][*natom][3][*natom][3][2],
+                           double elastic_constants[6][6],
+                           double *energy,double epsilon_inf[3][3],
+                           double ewald_atmfrc[*nrpt][*natom][3][*natom][3][2],
+                           double phfrq[*nqpt][3* *natom],
+                           double rprimd[3][3],double qph1l[*nqpt][3],
+                           double short_atmfrc[*nrpt][*natom][3][*natom][3][2],
+                           int typat[*natom],double xcart[*natom][3],double zeff[*natom][3][3]){
   xmlDocPtr doc;
-  char * pch;
+  char *pch;
   int iatom,iamu,irpt,iqpt,present;
   int ia,ib,mu,nu,voigt;
   int i,j;
-  xmlNodePtr cur,cur2;
+  xmlNodePtr cur,cur2,cur3;
   xmlChar *key,*uri;
 
   if (*natom <= 0){ 
@@ -192,8 +192,6 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
     }
     else if ((!xmlStrcmp(cur->name, (const  xmlChar *) "unit_cell"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      char * pch;
-      i=0 ; j=0;
       pch = strtok(key,"\t \n");
       for(mu=0;mu<3;mu++){
         for(nu=0;nu<3;nu++){
@@ -207,8 +205,6 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
     }
     else if ((!xmlStrcmp(cur->name, (const  xmlChar *) "epsilon_inf"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      char * pch;
-      i=0 ; j=0;
       pch = strtok(key,"\t \n");
       for(mu=0;mu<3;mu++){
         for(nu=0;nu<3;nu++){
@@ -222,8 +218,6 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
     }
     else if ((!xmlStrcmp(cur->name, (const  xmlChar *) "elastic"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      char * pch;
-      i=0 ; j=0;
       pch = strtok(key,"\t \n");
       for(mu=0;mu<6;mu++){
         for(nu=0;nu<6;nu++){
@@ -407,52 +401,175 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
       }
       iqpt++;
     }
-    else if ((!xmlStrcmp(cur->name, (const  xmlChar *) "strain_coupling"))){
+    cur = cur->next;
+  }
+  xmlFreeDoc(doc);
+}
+
+
+void effpot_xml_getDimStrainCoupling(char *filename, int *nrpt,int *voigt){
+  xmlDocPtr doc;
+  int i,irpt;
+  xmlNodePtr cur,cur2,cur3;
+  xmlChar *key,*uri;
+
+  doc = xmlParseFile(filename);
+  if (doc == NULL) printf(" error: could not parse file file.xml\n");
+
+  cur = xmlDocGetRootElement(doc);
+  if (cur == NULL) {
+    fprintf(stderr," The document is empty \n");
+    xmlFreeDoc(doc);
+    return;
+  }
+  cur = cur->xmlChildrenNode;
+  while (cur != NULL) {
+    if ((!xmlStrcmp(cur->name, (const  xmlChar *) "strain_coupling"))){
+      irpt = 0;
       uri = xmlGetProp(cur, (const  xmlChar *) "voigt");
-      cur2 = cur->xmlChildrenNode;
-      while (cur2 != NULL) {
-        if (voigt<=12) {
-          if ((!xmlStrcmp(cur2->name, (const  xmlChar *) "correction_force"))) {
-            key = xmlNodeListGetString(doc, cur2->xmlChildrenNode, 1);
-            pch = strtok(key,"\t \n");
-            for(ia=0;ia<*natom;ia++){
-              for(mu=0;mu<3;mu++){
-                if (pch != NULL){
-                  internal_strain[ia][mu][atoi(uri)]=strtod(pch,NULL);
-                  pch = strtok(NULL,"\t \n");
+      if (strtod(uri,NULL) == *voigt){
+        cur2 = cur->xmlChildrenNode;
+        while (cur2 != NULL) {
+          if (*voigt<=12) {
+            if ((!xmlStrcmp(cur2->name, (const  xmlChar *) "correction_force_constant"))) {
+              cur3 = cur2->xmlChildrenNode;
+              while (cur3 != NULL) {
+                if ((!xmlStrcmp(cur3->name, (const  xmlChar *) "data"))) {
+                  irpt++;
+                }
+                cur3 = cur3->next;             
+              }
+            }
+            *nrpt = irpt;
+          }
+          else{
+            printf(" error: The number of strain doesn't match with the XML file\n");
+            exit(0);
+          }
+          cur2 = cur2->next;
+        }
+      }
+      xmlFree(uri);
+    }
+    cur = cur->next;
+  }
+}
+
+void effpot_xml_readStrainCoupling(char *filename,int *natom,int *nrpt,int *voigt,
+                                   double elastic3rd[6][6], double elastic_displacement[*natom][3][6],
+                                   double internal_strain[*natom][3],
+                                   double phonon_strain_atmfrc[*nrpt][*natom][3][*natom][3],
+                                   int phonon_strain_cell[*nrpt][3]){
+  xmlDocPtr doc;
+  char *pch;
+  int i,irpt,ia,ib,mu,nu;
+  xmlNodePtr cur,cur2,cur3;
+  xmlChar *key,*uri;
+
+  if (*natom <= 0){ 
+    printf(" error: The number of atom must be superior to zero\n");
+    exit(0);
+  }
+
+  irpt    = 0;
+
+  doc = xmlParseFile(filename);
+  if (doc == NULL) printf(" error: could not parse file file.xml\n");
+
+  cur = xmlDocGetRootElement(doc);
+  if (cur == NULL) {
+    fprintf(stderr," The document is empty \n");
+    xmlFreeDoc(doc);
+    return;
+  }
+ 
+  cur = cur->xmlChildrenNode;
+  while (cur != NULL) {
+    if ((!xmlStrcmp(cur->name, (const  xmlChar *) "strain_coupling"))){
+      irpt = 0;
+      uri = xmlGetProp(cur, (const  xmlChar *) "voigt");
+      if(atoi(uri) == *voigt){
+        cur2 = cur->xmlChildrenNode;
+        while (cur2 != NULL) {
+          if (atoi(uri)<=12) {
+            if ((!xmlStrcmp(cur2->name, (const  xmlChar *) "correction_force"))) {
+              key = xmlNodeListGetString(doc, cur2->xmlChildrenNode, 1);
+              pch = strtok(key,"\t \n");
+              for(ia=0;ia<*natom;ia++){
+                for(mu=0;mu<3;mu++){
+                  if (pch != NULL){
+                    internal_strain[ia][mu]=strtod(pch,NULL);
+                    pch = strtok(NULL,"\t \n");
+                  }
                 }
               }
             }
-          }
-          if ((!xmlStrcmp(cur2->name, (const  xmlChar *) "correction_force_constant"))) {
-            key = xmlNodeListGetString(doc, cur2->xmlChildrenNode, 1);
-            pch = strtok(key,"\t \n");
-            for(ia=0;ia<*natom;ia++){
-              for(mu=0;mu<3;mu++){
-                if (pch != NULL){
-                  for(ia=0;ia<*natom;ia++){
-                    for(mu=0;mu<3;mu++){
-                      for(ib=0;ib<*natom;ib++){
-                        for(nu=0;nu<3;nu++){
-                          if (pch != NULL){
-                            //to do
-                            //short_atmfrc[irpt][ib][nu][ia][mu][0]=strtod(pch,NULL);
-                            pch = strtok(NULL,"\t \n");
-                          }
-                        }
-                      }
+            if ((!xmlStrcmp(cur2->name, (const  xmlChar *) "elastic3rd"))) {
+              key = xmlNodeListGetString(doc, cur2->xmlChildrenNode, 1);
+              pch = strtok(key,"\t \n");
+              for(mu=0;mu<6;mu++){
+                for(nu=0;nu<6;nu++){
+                  if (pch != NULL){
+                    elastic3rd[mu][nu]=strtod(pch,NULL);
+                    pch = strtok(NULL,"\t \n");
+                  }
+                }
+              }
+            }
+            if ((!xmlStrcmp(cur2->name, (const  xmlChar *) "correction_strain_force"))) {
+              key = xmlNodeListGetString(doc, cur2->xmlChildrenNode, 1);
+              pch = strtok(key,"\t \n");
+              for(ia=0;ia<*natom;ia++){
+                for(mu=0;mu<3;mu++){
+                  for(nu=0;nu<6;nu++){
+                    if (pch != NULL){
+                      elastic_displacement[ia][mu][nu]=strtod(pch,NULL);
+                      pch = strtok(NULL,"\t \n");
                     }
                   }
                 }
               }
             }
+            if ((!xmlStrcmp(cur2->name, (const  xmlChar *) "correction_force_constant"))) {
+              cur3 = cur2->xmlChildrenNode;
+              while (cur3 != NULL) {
+                if (irpt<=*nrpt) {
+                  if ((!xmlStrcmp(cur3->name, (const  xmlChar *) "data"))) {
+                    key = xmlNodeListGetString(doc, cur3->xmlChildrenNode, 1);
+                    pch = strtok(key,"\t \n");
+                    for(ia=0;ia<*natom;ia++){
+                      for(mu=0;mu<3;mu++){
+                        for(ib=0;ib<*natom;ib++){
+                          for(nu=0;nu<3;nu++){
+                            if (pch != NULL){
+                              phonon_strain_atmfrc[irpt][ib][nu][ia][mu]=strtod(pch,NULL);
+                              pch = strtok(NULL,"\t \n");
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  if ((!xmlStrcmp(cur3->name, (const  xmlChar *) "cell"))) {
+                    key = xmlNodeListGetString(doc, cur3->xmlChildrenNode, 1);
+                    pch = strtok(key,"\t \n");
+                    for(i=0;i<3;i++){
+                      phonon_strain_cell[irpt][i]=atoi(pch);
+                      pch = strtok(NULL,"\t \n");
+                    }
+                    irpt++;
+                  }
+                }
+                cur3 = cur3->next;             
+              }
+            }
           }
+          else{
+            printf(" error: The number of strain doesn't match with the XML file %d %d\n",irpt,*nrpt);
+            exit(0);
+          }
+          cur2 = cur2->next;
         }
-        else{
-          printf(" error: The number of strain doesn't match with the XML file %d %d\n",irpt,*nrpt);
-          exit(0);
-        }
-        cur2 = cur2->next;
       }
       xmlFree(uri);
     }
@@ -461,7 +578,6 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
   }
   xmlFreeDoc(doc);
 }
-
 
 void effpot_xml_readTerm(char *filename,int*icoeff,int *iterm,int*ndisp,int*nterm,
                          int atindx[*ndisp][2],int cell[*ndisp][2][3],int direction[*ndisp],
@@ -576,7 +692,7 @@ void effpot_xml_readTerm(char *filename,int*icoeff,int *iterm,int*ndisp,int*nter
   xmlFreeDoc(doc);
 }
   
-void effpot_xml_getDimTerm(char *filename,int*icoeff,char **name_term,int*ndisp,int*nterm){
+void effpot_xml_getDimTerm(char *filename,int*icoeff,char *name_term,int*ndisp,int*nterm){
   int idisp,iterm;
   xmlDocPtr doc;
   char * pch;
@@ -607,7 +723,7 @@ void effpot_xml_getDimTerm(char *filename,int*icoeff,char **name_term,int*ndisp,
       uri = xmlGetProp(cur, (const  xmlChar *) "number");
       if(strtod(uri, NULL)==*icoeff){
         uri2 = xmlGetProp(cur, (const  xmlChar *) "text");
-        *name_term = "";
+        strcpy(name_term,uri2);
         xmlFree(uri2);
         cur2 = cur->xmlChildrenNode;
         while (cur2 != NULL){

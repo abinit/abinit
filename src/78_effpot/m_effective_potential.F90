@@ -101,7 +101,7 @@ module m_effective_potential
 !     internal_stress(6)
 !     stress tensor of the structure
 
-   logical :: has_3rd
+   logical :: has_strainCoupling
 !     True : the 3rd order derivative is computed
 
    logical :: has_strain
@@ -171,13 +171,14 @@ CONTAINS  !=====================================================================
 !! elastic_constants(6,6) = elastic constants tensor
 !! energy = energy of the reference structure
 !! dynmat(2,3,natom,3,natom,nqpt) = dynamical matrix for each qpoints
-!! has_3rd = true if the anharmonic par is present
+!! has_strainCoupling = true if the anharmonic par is present
 !! ifcs = ifc type with cell,ewald short and total range of the ifcs
 !! internal_strain(6,natom,3) = internal strain tensor
 !! nqpt = number of qpoints
 !! zeff(3,natom) = effective charges
 !! comm  = mpi comunicator
-!! anharmonics_terms = optional,struture with anharmonics terms
+!! elastic3rd(6,6,6) = 3 order derivatives with respect to to 3 strain
+!! elastic_displacement(6,6,3,natom) =3 order derivatives with respect to 2 strain and 1 Atom disp
 !! external_stress(6) = optional,extrenal strain
 !! forces(3,natom) = optional,initial forces in the structure
 !! internal_stress(6) = optional,initial strain in the structure
@@ -198,9 +199,9 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
-&                                   epsilon_inf,elastic_constants,has_3rd,ifcs,&
+&                                   epsilon_inf,elastic_constants,straincoupling,ifcs,&
 &                                   internal_strain,ncoeff,phfrq,qpoints,nqpt,zeff,comm,&
-&                                   anharmonics_terms,coeffs,external_stress,&
+&                                   coeffs,elastic3rd,elastic_displacement,external_stress,&
 &                                   forces,internal_stress,phonon_strain,strain,supercell,&
 &                                   name)
 
@@ -220,7 +221,7 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
  real(dp),intent(in):: energy
  character(len=fnlen), optional,intent(in) :: name
  integer,intent(in) :: ncoeff
- logical,intent(in) :: has_3rd
+ logical,intent(in) :: straincoupling
 !arrays
  real(dp),intent(in) :: epsilon_inf(3,3)
  real(dp),intent(in) :: elastic_constants(6,6)
@@ -229,10 +230,11 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
  type(crystal_t),intent(in) :: crystal
  type(effective_potential_type), intent(out) :: eff_pot
  type(ifc_type),intent(in) :: ifcs
- type(anharmonics_terms_type),optional,intent(in) :: anharmonics_terms
  type(supercell_type),optional,intent(in) :: supercell
  type(strain_type),optional,intent(in) :: strain
  type(ifc_type),optional,intent(in) :: phonon_strain(6)
+ real(dp),optional,intent(in) :: elastic3rd(6,6,6)
+ real(dp),optional,intent(in) :: elastic_displacement(6,6,3,crystal%natom)
  type(polynomial_coeff_type),optional :: coeffs(ncoeff)
  real(dp),optional,intent(in) :: external_stress(6),internal_stress(6)
  real(dp),optional,intent(in) :: forces(3,crystal%natom)
@@ -291,11 +293,11 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
 
 !4-Fill harmonic part
  call harmonics_terms_init(eff_pot%harmonics_terms,ifcs,crystal%natom,&
-&                  ifcs%nrpt,dynmat=dynmat,&
-&                  epsilon_inf=epsilon_inf,&
-&                  elastic_constants=elastic_constants,&
-&                  internal_strain=internal_strain,&
-&                  nqpt=nqpt,phfrq=phfrq,qpoints=qpoints,zeff=zeff)
+&                          ifcs%nrpt,dynmat=dynmat,&
+&                          epsilon_inf=epsilon_inf,&
+&                          elastic_constants=elastic_constants,&
+&                          internal_strain=internal_strain,&
+&                          nqpt=nqpt,phfrq=phfrq,qpoints=qpoints,zeff=zeff)
 
 
 !5-Fill optional inputs
@@ -324,15 +326,16 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
  end if
 
 
- if(has_3rd)then 
-   if (present(phonon_strain)) then
-     eff_pot%has_3rd = .TRUE.
+ if(straincoupling)then 
+   if (present(phonon_strain).and.present(elastic3rd).and.present(elastic_displacement)) then
+     eff_pot%has_strainCoupling = .TRUE.
 !    Allocation of anharmonics part (3rd order)
-     call anharmonics_terms_init(eff_pot%anharmonics_terms,crystal%natom,ncoeff,ifcs%nrpt,&
-&                              phonon_strain=phonon_strain)
+     call anharmonics_terms_init(eff_pot%anharmonics_terms,crystal%natom,ncoeff,&
+&                                elastic3rd=elastic3rd,elastic_displacement=elastic_displacement,&
+&                                phonon_strain=phonon_strain)
    else
      write(msg, '(3a)' )&
-&        ' has_3rd is set to true but there is no 3rd order, ',&
+&        ' has_strainCoupling is set to true but there is no 3rd order, ',&
 &        ' please set it in the initialisation of effective_potential_init',ch10
      MSG_BUG(msg)
    end if
@@ -536,7 +539,7 @@ subroutine effective_potential_free(eff_pot)
   eff_pot%energy = zero
   eff_pot%internal_stress = zero
   eff_pot%external_stress = zero
-  eff_pot%has_3rd = .false.
+  eff_pot%has_strainCoupling = .false.
   eff_pot%has_strain = .false.
 
    if(allocated(eff_pot%forces)) then
@@ -1463,8 +1466,8 @@ subroutine effective_potential_setStrainPhononCoupling(eff_pot,natom,nrpt,phonon
 !array
 ! *************************************************************************
 
-  call anharmonics_terms_setStrainPhononCoupling(eff_pot%anharmonics_terms,natom,nrpt,phonon_strain)
-  eff_pot%has_3rd = .True.
+  call anharmonics_terms_setStrainPhononCoupling(eff_pot%anharmonics_terms,natom,phonon_strain)
+  eff_pot%has_strainCoupling = .True.
 
 end subroutine effective_potential_setStrainPhononCoupling
 !!***
@@ -1516,7 +1519,7 @@ subroutine effective_potential_setElasticDispCoupling(eff_pot,natom,elastic_disp
 ! *************************************************************************
 
   call anharmonics_terms_setElasticDispCoupling(eff_pot%anharmonics_terms,natom,elastic_displacement)
-  eff_pot%has_3rd = .True.
+  eff_pot%has_strainCoupling = .True.
 
 end subroutine effective_potential_setElasticDispCoupling
 !!***
@@ -2055,7 +2058,25 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
        WRITE(unit_xml,'(a)')''
      end do
      WRITE(unit_xml,'("    </correction_force>")')
-     if (eff_pot%has_3rd) then
+     if (eff_pot%anharmonics_terms%has_elastic3rd) then
+       WRITE(unit_xml,'("  <elastic3rd units=""hartree"">")')
+       WRITE(unit_xml,'(6(E23.14))') (eff_pot%anharmonics_terms%elastic3rd(ii,:,:))
+       WRITE(unit_xml,'("  </elastic3rd>")')
+     end if
+     if (eff_pot%anharmonics_terms%has_elastic_displ) then
+       WRITE(unit_xml,'("    <correction_strain_force units=""hartree/bohrradius"">")')
+       do ia=1,eff_pot%crystal%natom
+         do mu=1,3
+           do nu=1,6
+             WRITE(unit_xml,'(e22.14)', advance="no")&
+&                 (eff_pot%anharmonics_terms%elastic_displacement(ii,nu,mu,ia))
+           end do
+         end do
+         WRITE(unit_xml,'(a)')''
+       end do
+     end if
+     if (eff_pot%anharmonics_terms%has_strain_coupling) then
+       WRITE(unit_xml,'("    </correction_strain_force>")')
        do irpt=1,eff_pot%anharmonics_terms%phonon_strain(ii)%nrpt
          WRITE(unit_xml,'("    <correction_force_constant units=""hartree/bohrradius**2"">")')
          WRITE(unit_xml,'("      <data>")')
@@ -2554,7 +2575,7 @@ subroutine effective_potential_getForces(eff_pot,fcart,fred,natom,rprimd,xcart,d
 !Local variables-------------------------------
 !scalar
   integer,parameter :: master=0
-  integer :: ierr,ii
+  integer :: ii
 !array
   real(dp):: disp_tmp1(3,natom),dummy
   integer :: cell_number(3)
@@ -2663,7 +2684,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 
 !Local variables-------------------------------
 !scalar
-  integer :: ii,ierr,ncell
+  integer :: ii,ncell
   real(dp):: energy_part,ucvol
   character(len=500) :: message
   logical :: has_strain = .FALSE.
@@ -2826,7 +2847,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 ! 3 - Treat 3rd order strain-coupling:
 !------------------------------------
 
-  if (.false..and.eff_pot%has_3rd) then
+  if (.false..and.eff_pot%has_strainCoupling) then
 
 ! TREAT ELASTICS 3RD
     do ii=1,6 ! Loop over strain
@@ -2940,7 +2961,7 @@ subroutine elastic_contribution(eff_pot,disp,energy,fcart,ncell,strten,strain,&
  !Local variables-------------------------------
 ! scalar
  integer :: ia,ii,mu,alpha,beta
- real(dp):: tmp1,fact
+ real(dp):: tmp1
 ! array
  real(dp) :: tmp2(3),tmp3(6)
 ! *************************************************************************
@@ -3364,11 +3385,13 @@ subroutine straincoupling_contribution(eff_pot,disp,energy,fcart,strain,&
   real(dp),intent(in) :: strain(6)
 !Local variables-------------------------------
 ! scalar
-  integer :: i1,i2,i3,ia,ib,icell,ierr,ii,jj,irpt,ll
+  integer :: ii,icell
+!  integer :: i1,i2,i3,ia,ib,jj,irpt,ll
+  integer :: ierr
 ! array
-  real(dp) :: tmp(3)
+!  real(dp) :: tmp(3)
   integer :: cell_number(3)
-  integer :: cell_atom2(3)
+!  integer :: cell_atom2(3)
   character(500) :: msg
 
 ! *************************************************************************
@@ -3631,7 +3654,7 @@ subroutine find_bound(min,max,n_cell)
   integer, intent(in) :: n_cell
 !Local variables ---------------------------------------
   if(abs(max)>abs(min)) then
-    max=(n_cell)/2; min=-max; if(mod(n_cell,2)==0) max = max -1
+    max=(n_cell)/2; min=-max;  if(mod(n_cell,2)==0) max = max -1
   else
     min=-(n_cell)/2; max=-min; if(mod(n_cell,2)==0)  min= min +1
   end if

@@ -41,6 +41,7 @@ module m_effective_potential_file
 
  public :: effective_potential_file_getDimCoeff
  public :: effective_potential_file_getDimSystem
+ public :: effective_potential_file_getDimStrainCoupling
  public :: effective_potential_file_getType
  public :: effective_potential_file_read
  public :: effective_potential_file_readDisplacement
@@ -69,9 +70,9 @@ module m_effective_potential_file
 
  interface
    subroutine effpot_xml_readSystem(filename,natom,&
-&     ntypat,nrpt,nqpt,amu,atmfrc,cell,dynmat,elastic_constants,energy,&
-&     epsilon_inf,ewald_atmfrc,internal_strain,phfrq,rprimd,qph1l,&
-&     short_atmfrc,typat,xcart,zeff)&
+&     ntypat,nrpt,nqpt,amu,atmfrc,cell,dynmat,elastic_constants,&
+&     energy,epsilon_inf,ewald_atmfrc,&
+&     phfrq,rprimd,qph1l,short_atmfrc,typat,xcart,zeff)&
 &                          bind(C,name="effpot_xml_readSystem")
      use iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT
      integer(C_INT) :: natom,ntypat,nrpt,nqpt
@@ -79,7 +80,6 @@ module m_effective_potential_file
      integer(C_INT) :: cell(3,nrpt)
      real(C_DOUBLE) :: energy
      real(C_DOUBLE) :: dynmat(2,3,natom,3,natom,nqpt)
-     real(C_DOUBLE) :: internal_strain(6,natom,3)
      real(C_DOUBLE) :: phfrq(3*natom,nqpt),qph1l(3,nqpt)
      real(C_DOUBLE) :: atmfrc(2,3,natom,3,natom,nrpt)
      real(C_DOUBLE) :: short_atmfrc(2,3,natom,3,natom,nrpt)
@@ -89,6 +89,22 @@ module m_effective_potential_file
      real(C_DOUBLE) :: elastic_constants(6,6),xcart(3,natom)
      character(kind=C_CHAR) :: filename(*)
    end subroutine effpot_xml_readSystem
+ end interface
+
+ interface
+   subroutine effpot_xml_readStrainCoupling(filename,natom,&
+&     nrpt,voigt,elastic3rd,elastic_displacement,&
+&     internal_strain,phonon_strain_atmfrc,phonon_strain_cell)&
+&                          bind(C,name="effpot_xml_readStrainCoupling")
+     use iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT
+     integer(C_INT) :: natom
+     integer(C_INT) :: nrpt,voigt
+     integer(c_INT) :: phonon_strain_cell(3,nrpt)
+     real(C_DOUBLE) :: elastic3rd(6,6),elastic_displacement(6,3,natom)
+     real(C_DOUBLE) :: internal_strain(3,natom)
+     real(C_DOUBLE) :: phonon_strain_atmfrc(3,natom,3,natom,nrpt)
+     character(kind=C_CHAR) :: filename(*)
+   end subroutine effpot_xml_readStrainCoupling
  end interface
 
  interface
@@ -107,16 +123,6 @@ module m_effective_potential_file
  end interface
 
  interface
-   subroutine effpot_xml_getDimTerm(filename,icoeff,name,ndisp,nterm)&
-&                          bind(C,name="effpot_xml_getDimTerm")
-     use iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT,C_PTR
-     character(kind=C_CHAR) :: filename(*)
-     type(C_PTR) :: name
-     integer(C_INT) :: icoeff,ndisp,nterm
-   end subroutine effpot_xml_getDimTerm
- end interface
-
- interface
    subroutine effpot_xml_getDimSystem(filename,natom,ntypat,nqpt,nrpt)&
 &                          bind(C,name="effpot_xml_getDimSystem")
      use iso_c_binding, only : C_CHAR,C_INT
@@ -124,6 +130,28 @@ module m_effective_potential_file
      character(kind=C_CHAR) :: filename(*)
    end subroutine effpot_xml_getDimSystem
  end interface
+
+ interface
+   subroutine effpot_xml_getDimStrainCoupling(filename,nrpt,voigt)&
+&                          bind(C,name="effpot_xml_getDimStrainCoupling")
+     use iso_c_binding, only : C_CHAR,C_INT
+     integer(C_INT) :: voigt
+     integer(C_INT) :: nrpt
+     character(kind=C_CHAR) :: filename(*)
+   end subroutine effpot_xml_getDimStrainCoupling
+ end interface
+
+ interface
+   subroutine effpot_xml_getDimTerm(filename,icoeff,name,ndisp,nterm)&
+&                          bind(C,name="effpot_xml_getDimTerm")
+     use iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT,C_PTR
+     character(kind=C_CHAR) :: filename(*)
+!     character(kind=C_CHAR) :: name(*)
+     type(C_PTR) :: name
+     integer(C_INT) :: icoeff,ndisp,nterm
+   end subroutine effpot_xml_getDimTerm
+ end interface
+
 
  interface
    subroutine effpot_xml_checkXML(filename,name_root) &
@@ -317,8 +345,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm)
 !       if no coefficients is set in the input
 !       their values are set to zero in oder to fit them.        
         do ii = 1,eff_pot%anharmonics_terms%ncoeff
-          call polynomial_coeff_setCoefficient(zero,&
-&                                              eff_pot%anharmonics_terms%coefficients(ii))
+          call polynomial_coeff_setCoefficient(zero,eff_pot%anharmonics_terms%coefficients(ii))
         end do
       else
         if (eff_pot%anharmonics_terms%ncoeff > inp%ncoeff)then
@@ -680,6 +707,116 @@ end subroutine effective_potential_file_getDimCoeff
 !!***
 
 
+!!****f* m_phonon_effective_potential/effective_potential_file_getDimStrainCoupling
+!!
+!! NAME
+!! effective_potential_file_getDimStrainCoupling
+!!
+!! FUNCTION
+!! Return the number of nrpt for specific strain coupling from xml system file
+!!
+!! INPUTS
+!! filename = names of the files
+!! voigt    = 
+!!
+!! OUTPUT
+!! nrpt  = number of rpt points 
+!!
+!! PARENTS
+!!   multibinit
+!!
+!! CHILDREN
+!!   ddb_getdims,system_getDimFromXML,effective_potential_file_getType
+!!
+!! SOURCE
+
+subroutine effective_potential_file_getDimStrainCoupling(filename,nrpt,voigt)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'effective_potential_file_getDimStrainCoupling'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ character(len=fnlen),intent(in) :: filename
+ integer,intent(in) :: voigt
+ integer,intent(out) :: nrpt
+!Local variables-------------------------------
+ !scalar
+#ifndef HAVE_LIBXML
+ integer :: irpt,ivoigt
+ integer :: funit = 1,ios=0
+ logical :: found
+#endif
+!arrays
+#ifndef HAVE_LIBXML
+ character (len=XML_RECL) :: line,readline,strg,strg1
+ character(len=500) :: message
+#endif
+
+! *************************************************************************
+
+   nrpt = zero
+
+#if defined HAVE_LIBXML
+!  Read with libxml the number of coefficient
+   call effpot_xml_getDimStrainCoupling(char_f2c(trim(filename)),nrpt,voigt)
+#else
+!  Read by hand
+!  Start a reading loop
+   found=.false.
+
+   if (open_file(filename,message,unit=funit,form="formatted",status="old",&
+&                action="read") /= 0) then
+     MSG_ERROR(message)
+   end if
+
+!  First parse to know the number of atoms 
+   do while (ios == 0.and.(.not.found))
+     read(funit,'(a)',iostat=ios) readline
+     if(ios == 0)then
+       call rmtabfromline(readline)
+       line=adjustl(readline)
+       if ((line(1:16)=='<strain_coupling')) then
+         read(funit,'(a)',iostat=ios) readline
+         call rdfromline("voigt",line,strg)
+         strg1=trim(strg)
+         read(strg1,*) ivoigt
+         if (ivoigt == voigt)then
+           irpt = 0
+           do while (.not.found)
+             read(funit,'(a)',iostat=ios) readline
+             call rmtabfromline(readline)
+             line=adjustl(readline)
+             if ((line(1:26)=='<correction_force_constant')) then
+               irpt = irpt + 1
+               cycle
+             end if
+             if ((line(1:17)=='</strain_coupling')) then
+               found = .TRUE.
+               nrpt = irpt
+               cycle
+             end if
+           end do
+         else
+           cycle
+         end if
+       end if
+     end if
+   end do
+
+   close(funit)
+#endif
+
+end subroutine effective_potential_file_getDimStrainCoupling
+!!***
+
+
 !!****f* m_effective_potential_file/system_getDimFromXML
 !! NAME
 !! system_getDimFromXML
@@ -900,8 +1037,8 @@ end subroutine system_getDimFromXML
 
  !Local variables-------------------------------
  !scalar
- integer :: ierr,ii,itypat,my_rank,msym,natom,ncoeff,nrpt,ntypat
- integer :: nph1l,npsp,nproc,nsym,space_group,timrev
+ integer :: ierr,ii,itypat,my_rank,msym,natom,ncoeff,nrpt,nrpt_scoupling
+ integer :: ntypat,nph1l,npsp,nproc,nsym,space_group,timrev,voigt
  real(dp):: energy,ucvol
  character(len=500) :: message
  integer,parameter :: master=0
@@ -909,19 +1046,19 @@ end subroutine system_getDimFromXML
  logical :: iam_master
 #ifndef HAVE_LIBXML
  integer :: funit = 1,ios=0
- integer :: iatom,iamu,iph1l,irpt,mu,nu,voigt
+ integer :: iatom,iamu,iph1l,irpt,mu,nu
  real(dp):: amu
  logical :: found,short_range,total_range
  character (len=XML_RECL) :: line,readline
  character (len=XML_RECL) :: strg,strg1
- logical :: has_straincoupling= .FALSE.
+ logical :: has_straincoupling = .FALSE.
 #endif
  !arrays
  integer,allocatable :: typat(:)
  integer,allocatable  :: symrel(:,:,:),symafm(:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
- real(dp) :: elastic_constants(6,6),epsilon_inf(3,3)
- real(dp),allocatable :: all_amu(:),dynmat(:,:,:,:,:,:)
+ real(dp) :: elastic_constants(6,6),elastic3rd(6,6,6),epsilon_inf(3,3)
+ real(dp),allocatable :: all_amu(:),elastic_displacement(:,:,:,:),dynmat(:,:,:,:,:,:)
  real(dp),allocatable :: internal_strain(:,:,:),phfrq(:,:),qph1l(:,:),tnons(:,:)
  real(dp),allocatable :: xcart(:,:),xred(:,:),zeff(:,:,:),znucl(:),zion(:)
  character(len=132),allocatable :: title(:)  
@@ -929,6 +1066,10 @@ end subroutine system_getDimFromXML
  type(ifc_type),dimension(:),allocatable :: phonon_strain
  type(crystal_t)  :: crystal
  type(atomdata_t) :: atom
+#ifdef HAVE_LIBXML
+ real(dp),allocatable :: phonon_strain_atmfrc(:,:,:,:,:)
+ integer,allocatable  :: phonon_strain_cell(:,:)
+#endif
 #ifndef HAVE_LIBXML
  real(dp),allocatable :: work2(:,:)
 #endif
@@ -950,6 +1091,7 @@ end subroutine system_getDimFromXML
  gmet= zero; gprimd = zero; rmet = zero; rprimd = zero
  elastic_constants = zero; epsilon_inf = zero; ncoeff = zero
  ABI_ALLOCATE(all_amu,(ntypat))
+ ABI_ALLOCATE(elastic_displacement,(6,6,3,natom))
  ABI_ALLOCATE(ifcs%atmfrc,(2,3,natom,3,natom,nrpt))
  ABI_ALLOCATE(ifcs%cell,(3,nrpt))
  ABI_ALLOCATE(ifcs%short_atmfrc,(2,3,natom,3,natom,nrpt))
@@ -966,16 +1108,21 @@ end subroutine system_getDimFromXML
  ABI_ALLOCATE(znucl,(ntypat))
 
  ABI_DATATYPE_ALLOCATE(phonon_strain,(6))
+ nrpt_scoupling = zero
  do ii = 1,6
-   ABI_ALLOCATE(phonon_strain(ii)%atmfrc,(2,3,natom,3,natom,nrpt))
-   ABI_ALLOCATE(phonon_strain(ii)%cell,(3,nrpt))
-   phonon_strain(ii)%nrpt   = nrpt
+!  Get The size of the strainPhonon-coupling
+   call effective_potential_file_getDimStrainCoupling(filename,nrpt_scoupling,ii-1)
+   ABI_ALLOCATE(phonon_strain(ii)%atmfrc,(2,3,natom,3,natom,nrpt_scoupling))
+   ABI_ALLOCATE(phonon_strain(ii)%cell,(3,nrpt_scoupling))
+   phonon_strain(ii)%nrpt   = nrpt_scoupling
    phonon_strain(ii)%atmfrc = zero
    phonon_strain(ii)%cell   = zero
  end do
 
  all_amu(:) = zero
  dynmat(:,:,:,:,:,:)  = zero
+ elastic3rd(:,:,:) = zero
+ elastic_displacement(:,:,:,:) = zero
  ifcs%nrpt = nrpt
  ifcs%atmfrc(:,:,:,:,:,:)  = zero
  ifcs%cell(:,:)  = zero
@@ -997,14 +1144,12 @@ end subroutine system_getDimFromXML
   
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
+
   !Read with libxml librarie
    call effpot_xml_readSystem(char_f2c(trim(filename)),natom,ntypat,nrpt,nph1l,all_amu,&
-&                       ifcs%atmfrc,ifcs%cell,&
-&                       dynmat,elastic_constants,energy,&
-&                       epsilon_inf,ifcs%ewald_atmfrc,&
-&                       internal_strain,phfrq,rprimd,&
-&                       qph1l,ifcs%short_atmfrc,typat,&
-&                       xcart,zeff)
+&                       ifcs%atmfrc,ifcs%cell,dynmat,elastic_constants,energy,&
+&                       epsilon_inf,ifcs%ewald_atmfrc,phfrq,rprimd,qph1l,ifcs%short_atmfrc,&
+&                       typat,xcart,zeff)
 
 !  convert atomic mass unit to znucl
    do itypat=1,ntypat
@@ -1018,6 +1163,27 @@ end subroutine system_getDimFromXML
      end do
    end do
 
+!  Get the Phonon Strain coupling
+   do voigt = 1,6
+     nrpt_scoupling = phonon_strain(voigt)%nrpt
+     ABI_ALLOCATE(phonon_strain_cell,(3,nrpt_scoupling))
+     ABI_ALLOCATE(phonon_strain_atmfrc,(3,natom,3,natom,nrpt_scoupling))
+
+!      Get The value
+       call effpot_xml_readStrainCoupling(char_f2c(trim(filename)),natom,nrpt_scoupling,(voigt-1),&
+&                                         elastic3rd(voigt,:,:),elastic_displacement(voigt,:,:,:),&
+&                                         internal_strain(voigt,:,:),&
+&                                         phonon_strain_atmfrc,phonon_strain_cell)
+
+!      Check if the 3rd order strain_coupling is present
+       if(any(elastic3rd>tol10).or.any(elastic_displacement>tol10)) has_anharmonics = .TRUE.
+       phonon_strain(voigt)%atmfrc(1,:,:,:,:,:) = phonon_strain_atmfrc(:,:,:,:,:)
+       phonon_strain(voigt)%cell(:,:)   = phonon_strain_cell(:,:)
+       if(any(phonon_strain(voigt)%atmfrc > tol10)) has_anharmonics = .TRUE.
+
+       ABI_DEALLOCATE(phonon_strain_cell)
+       ABI_DEALLOCATE(phonon_strain_atmfrc)
+   end do
 #else
 
 ! Read by hand
@@ -1064,11 +1230,10 @@ end subroutine system_getDimFromXML
              call rdfromline_value('energy',line,strg)
              if (strg/="") then 
                strg1=trim(strg)
-               read(strg1,*) energy
              else
                strg1=trim(line)
-               read(strg1,*) energy
              end if
+             read(strg1,*) energy
            end if
            cycle
          end if
@@ -1090,11 +1255,10 @@ end subroutine system_getDimFromXML
            call rdfromline_value('unit_cell',line,strg)
            if (strg/="") then 
              strg1=trim(strg)
-             read(strg1,*) (rprimd(mu,3),mu=1,3)
            else
              strg1=trim(line)
-             read(strg1,*) (rprimd(mu,3),mu=1,3)
            end if
+           read(strg1,*) (rprimd(mu,3),mu=1,3)
            cycle
          end if
          
@@ -1115,11 +1279,10 @@ end subroutine system_getDimFromXML
            call rdfromline_value('epsilon_inf',line,strg)
            if (strg/="") then 
              strg1=trim(strg)
-             read(strg1,*) (epsilon_inf(mu,3),mu=1,3)
            else
              strg1=trim(line)
-             read(strg1,*) (epsilon_inf(mu,3),mu=1,3)
            end if
+           read(strg1,*) (epsilon_inf(mu,3),mu=1,3)
            cycle
          end  if
          
@@ -1142,11 +1305,10 @@ end subroutine system_getDimFromXML
            call rdfromline_value('elastic',line,strg)
            if (strg/="") then 
              strg1=trim(strg)
-             read(strg1,*) (elastic_constants(mu,6),mu=1,6)
            else
              strg1=trim(line)
-             read(strg1,*) (elastic_constants(mu,6),mu=1,6)
            end if
+           read(strg1,*) (elastic_constants(mu,6),mu=1,6)
            cycle
          end if
          
@@ -1188,11 +1350,10 @@ end subroutine system_getDimFromXML
              call rdfromline_value('position',line,strg)
              if (strg/="") then 
                strg1=trim(strg)
-               read(strg1,*)(xcart(mu,iatom),mu=1,3)
              else
                strg1=trim(line)
-               read(strg1,*)(xcart(mu,iatom),mu=1,3)
              end if
+             read(strg1,*)(xcart(mu,iatom),mu=1,3)
            end if
            cycle
          end if
@@ -1213,11 +1374,10 @@ end subroutine system_getDimFromXML
            call rdfromline_value('borncharge',line,strg)
            if (strg/="") then 
              strg1=trim(strg)
-             read(strg1,*) (zeff(mu,3,iatom),mu=1,3)
            else
              strg1=trim(line)
-             read(strg1,*) (zeff(mu,3,iatom),mu=1,3)
            end if
+             read(strg1,*) (zeff(mu,3,iatom),mu=1,3)
            cycle
          end if
          
@@ -1244,11 +1404,10 @@ end subroutine system_getDimFromXML
              call rdfromline_value('data',line,strg)
              if (strg/="") then 
                strg1=trim(strg)
-               read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
              else
                strg1=trim(line)
-               read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
              end if
+             read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
              ifcs%short_atmfrc(1,:,:,:,:,irpt) =&
 &                           reshape(work2,(/3,natom,3,natom/))
              ABI_DEALLOCATE(work2)
@@ -1282,11 +1441,10 @@ end subroutine system_getDimFromXML
              call rdfromline_value('data',line,strg)
              if (strg/="") then 
                strg1=trim(strg)
-               read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
              else
                strg1=trim(line)
-               read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
              end if
+             read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
              ifcs%atmfrc(1,:,:,:,:,irpt) = reshape(work2,(/3,natom,3,natom/))
              ABI_DEALLOCATE(work2)
            else
@@ -1360,11 +1518,10 @@ end subroutine system_getDimFromXML
              call rdfromline_value('dynamical_matrix',line,strg)
              if (strg/="") then 
                strg1=trim(strg)
-               read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
              else
                strg1=trim(line)
-               read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
              end if
+             read(strg1,*) (work2(nu,3*natom),nu=1,3*natom)
              dynmat(1,:,:,:,:,iph1l) = reshape(work2,(/3,natom,3,natom/))
              ABI_DEALLOCATE(work2)
            else
@@ -1386,6 +1543,7 @@ end subroutine system_getDimFromXML
            call rdfromline("voigt",line,strg)
            strg1=trim(strg)
            read(strg1,*) voigt 
+           voigt = voigt + 1 ! 0 to 5 in the xml
            has_straincoupling = .true.
            irpt = 1 
          end if
@@ -1397,11 +1555,12 @@ end subroutine system_getDimFromXML
            call rdfromline("voigt",line,strg)
            strg1=trim(strg)
            read(strg1,*) voigt
+           voigt = voigt + 1 ! 0 to 5 in the xml
            irpt = 1 
            cycle
          end if
          
-         if(voigt+1>6)then
+         if(voigt>6)then
            write(message, '(4a)' )ch10,&
 &               ' WARNING: the number of strain phonon coupling is superior to 6 in ',filename,ch10
            call wrtout(std_out,message,'COLL')
@@ -1428,14 +1587,74 @@ end subroutine system_getDimFromXML
                strg1=trim(line)
                read(strg1,*) (work2(nu,natom),nu=1,3)
              end if
-             internal_strain(voigt+1,:,:) = work2(:,:)
+             internal_strain(voigt,:,:) = work2(:,:)
              ABI_DEALLOCATE(work2)
            else
              ABI_ALLOCATE(work2,(3,natom))
              do mu=1,natom
                read(funit,*)(work2(nu,mu),nu=1,3)
              end do
-             internal_strain(voigt+1,:,:) = work2(:,:)
+             internal_strain(voigt,:,:) = work2(:,:)
+             ABI_DEALLOCATE(work2)
+           end if
+         end if
+         
+         if ((line(1:11)=='<elastic3rd')) then
+           call rdfromline_value('elastic3rd',line,strg)
+           if (strg/="") then 
+             strg1=trim(strg)
+             read(strg1,*) (elastic3rd(voigt,mu,1),mu=1,6)
+             do nu=2,5
+               read(funit,*) (elastic3rd(voigt,mu,nu),mu=1,6)
+             end do
+           else
+             do nu=1,5
+               read(funit,*) (elastic3rd(voigt,mu,nu),mu=1,6)
+             end do
+           end if
+           read(funit,'(a)',iostat=ios) readline
+           call rmtabfromline(readline)
+           line=adjustl(readline)
+           call rdfromline_value('elastic3rd',line,strg)
+           if (strg/="") then 
+             strg1=trim(strg)
+             read(strg1,*) (elastic3rd(voigt,mu,6),mu=1,6)
+           else
+             strg1=trim(line)
+             read(strg1,*) (elastic3rd(voigt,mu,6),mu=1,6)
+           end if
+           has_anharmonics = .true.
+           cycle
+         end if
+
+         if ((line(1:29)=='<correction_strain_force unit')) then
+           call rdfromline_value('correction_strain_force',line,strg)
+           if (strg/="") then 
+             ABI_ALLOCATE(work2,(3*6,natom))
+             strg1=trim(strg)
+             read(strg1,*) (work2(nu,1),nu=1,3*6)
+             do mu=2,natom-1
+               read(funit,*)(work2(nu,mu),nu=1,3*6)
+             end do
+             read(funit,'(a)',iostat=ios) readline
+             call rmtabfromline(readline)
+             line=adjustl(readline)
+             call rdfromline_value('correction_strain_force',line,strg)
+             if (strg/="") then 
+               strg1=trim(strg)
+               read(strg1,*) (work2(nu,natom),nu=1,3*6)
+             else
+               strg1=trim(line)
+               read(strg1,*) (work2(nu,natom),nu=1,3*6)
+             end if
+             elastic_displacement(voigt,:,:,:) = reshape(work2(:,:),(/6,3,natom/))
+             ABI_DEALLOCATE(work2)
+           else
+             ABI_ALLOCATE(work2,(3*6,natom))
+             do mu=1,natom
+               read(funit,*)(work2(nu,mu),nu=1,3*6)
+             end do
+             elastic_displacement(voigt,:,:,:) = reshape(work2(:,:),(/6,3,natom/))
              ABI_DEALLOCATE(work2)
            end if
          end if
@@ -1463,7 +1682,7 @@ end subroutine system_getDimFromXML
                strg1=trim(line)
                read(strg1,*) (work2(3*natom,nu),nu=1,3*natom)
              end if
-             phonon_strain(voigt+1)%atmfrc(1,:,:,:,:,irpt) = &
+             phonon_strain(voigt)%atmfrc(1,:,:,:,:,irpt) = &
 &                          reshape(work2,(/3,natom,3,natom/))
              ABI_DEALLOCATE(work2)
            else
@@ -1471,7 +1690,7 @@ end subroutine system_getDimFromXML
              do mu=1,3*natom
                read(funit,*)(work2(mu,nu),nu=1,3*natom)
              end do
-             phonon_strain(voigt+1)%atmfrc(1,:,:,:,:,irpt) =&
+             phonon_strain(voigt)%atmfrc(1,:,:,:,:,irpt) =&
 &              reshape(work2,(/3,natom,3,natom/))
              ABI_DEALLOCATE(work2)
            end if
@@ -1483,9 +1702,9 @@ end subroutine system_getDimFromXML
            call rdfromline_value('cell',line,strg)
            if (strg/="") then 
              strg1=trim(strg)
-             read(strg1,*)(phonon_strain(voigt+1)%cell(mu,irpt),mu=1,3)
+             read(strg1,*)(phonon_strain(voigt)%cell(mu,irpt),mu=1,3)
            else
-             read(funit,*)(phonon_strain(voigt+1)%cell(mu,irpt),mu=1,3)
+             read(funit,*)(phonon_strain(voigt)%cell(mu,irpt),mu=1,3)
            end if
            irpt = irpt + 1
            cycle
@@ -1493,7 +1712,7 @@ end subroutine system_getDimFromXML
 
          if ((line(1:17)==char(60)//char(47)//'strain_coupling')) then
 !          set nrpt for the previous value of strain
-           phonon_strain(voigt+1)%nrpt = irpt - 1
+           phonon_strain(voigt)%nrpt = irpt - 1
 !         restart the calculation of nrpt
          end if
        end if
@@ -1543,6 +1762,13 @@ end subroutine system_getDimFromXML
  call xmpi_bcast(xcart,master, comm, ierr)
  call xmpi_bcast(zeff,master, comm, ierr)
  call xmpi_bcast(znucl,master, comm, ierr)
+ do ii = 1,6
+   call xmpi_bcast(phonon_strain(ii)%nrpt   ,master, comm, ierr)
+   call xmpi_bcast(phonon_strain(ii)%atmfrc ,master, comm, ierr)
+   call xmpi_bcast(phonon_strain(ii)%cell   ,master, comm, ierr)
+ end do
+ call xmpi_bcast(elastic3rd   ,master, comm, ierr)
+ call xmpi_bcast(elastic_displacement ,master, comm, ierr)
 
 !Fill somes others variables
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -1580,7 +1806,8 @@ end subroutine system_getDimFromXML
 !Initialisation of eff_pot
  call effective_potential_init(crystal,dynmat,energy,eff_pot,epsilon_inf,&
 &                              elastic_constants,has_anharmonics,ifcs,internal_strain,ncoeff,&
-&                              phfrq,qph1l,nph1l,zeff,comm,phonon_strain=phonon_strain)
+&                              phfrq,qph1l,nph1l,zeff,comm,elastic3rd=elastic3rd,&
+&                              elastic_displacement=elastic_displacement,phonon_strain=phonon_strain)
 
 !DEALLOCATION OF ARRAYS
  ABI_DEALLOCATE(all_amu)
@@ -1607,6 +1834,7 @@ end subroutine system_getDimFromXML
    ABI_DEALLOCATE(phonon_strain(ii)%cell)
  end do
  ABI_FREE(phonon_strain)
+ ABI_DEALLOCATE(elastic_displacement)
 
 !DEALLOCATION OF TYPES
  call ifc_free(ifcs)
@@ -2322,7 +2550,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  character(len=200) :: name
 #ifdef HAVE_LIBXML
  type(C_PTR) :: name_tmp
- character(kind=C_CHAR,len=1),pointer :: name_tmp2
+ !character(kind=C_CHAR,len=1),pointer :: name_tmp2
  integer :: funit = 1,ios = 0
  integer :: icoeff,idisp,iterm
  logical :: found
@@ -2384,13 +2612,13 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
     !Read with libxml librarie
 
 #if defined HAVE_LIBXML
-!    1- Read the number of terms and diplacement for this coefficients
+!    1- Read the number of terms and displacement for this coefficients
      call effpot_xml_getDimTerm(char_f2c(trim(filename)),ii,name_tmp,ndisp,nterm)
 
 !  AM_NEED TO FIX BUG IN THE READING OF THE NAME
 !    Convert character from C 
-     call c_f_pointer(name_tmp,name_tmp2)
-     call char_c2f(name_tmp2,name)
+!     call c_f_pointer(name_tmp,name_tmp2)
+!     call char_c2f(name_tmp2,name)
 !    AM_TEST
 ! Read by hand nedd to fix bug
      name = ''
@@ -2407,7 +2635,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
      iterm   = zero
      idisp   = zero
 !    Parser     
-     do while (ios == 0..and..not.found)
+      do while (ios == 0..and..not.found)
        read(funit,'(a)',iostat=ios) readline
        if(ios == 0)then
          call rmtabfromline(readline)
