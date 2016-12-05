@@ -32,7 +32,6 @@ module m_fstab
  use m_kptrank
  use m_tetrahedron
  use m_ebands
- use iso_c_binding
 
  use m_time,           only : cwtime
  use m_fstrings,       only : itoa, sjoin
@@ -266,7 +265,6 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  logical :: inwin
  character (len=80) :: errstr
 !arrays
- integer,parameter :: identity(3,3)=reshape([1,0,0,0,1,0,0,0,1], [3,3])
  integer,allocatable :: fs2full(:),indkk(:,:) !,fs2irr(:)
  character(len=500) :: msg
  type(fstab_t),pointer :: fs
@@ -285,9 +283,13 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  !@fstab_t
  call cwtime(cpu,wall,gflops,"start")
 
+ if (any(cryst%symrel(:,:,1) /= identity_3d) .and. any(abs(cryst%tnons(:,1)) > tol10) ) then
+  MSG_ERROR('The first symmetry is not the identity operator!')
+ end if
+
  nkibz = ebands%nkpt
 
- !call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
+ !call kpts_ibz_from_kptrlatt(cryst, kptrlatt, ebands%kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
  ! new_kptrlatt, new_shiftk)  ! Optional
 
  ! Call smpbz to get the full grid of k-points `kpt_full`
@@ -303,10 +305,6 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  ABI_CHECK(ierr==0, 'allocating kpt_full')
 
  call smpbz(brav1,std_out,kptrlatt,mkpt,nkpt_full,nshiftk,option0,shiftk,kpt_full)
-
- if (any(cryst%symrel(:,:,1) /= identity) .and. any(abs(cryst%tnons(:,1)) > tol10) ) then
-  MSG_ERROR('The first symmetry is not the identity operator!')
- end if
 
  ! Find correspondence BZ --> ebands%kpt
  timrev = kpts_timrev_from_kptopt(ebands%kptopt)

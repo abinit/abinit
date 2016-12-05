@@ -262,8 +262,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call wrtout(ab_out, sjoin("- Reading DDK z from file:", ddk_path(3)))
    ! Read header in DDK files and init basic dimensions.
    ! subdrivers will use ddk to get the matrix elements from file.
-   ! TODO: Should perform consistency check
    call ddk_init(ddk, ddk_path, comm)
+   ! TODO: Should perform consistency check
+   !call hdr_vs_dtset(ddk_hdr(ii), dtset)
  end if
 
  call cwtime(cpu,wall,gflops,"start")
@@ -286,8 +287,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Read WFQ and construct ebands on the shifted grid.
  if (use_wfq) then
    call wfk_read_eigenvalues(wfq_path,gs_eigen,wfq_hdr,comm) !,gs_occ)
-   !call hdr_vs_dtset(wfq_hdr,dtset)  ! GKA TODO: Have to construct a header with the proper set of q-shifted k-points
-                                      !           then compare against file.
+   ! GKA TODO: Have to construct a header with the proper set of q-shifted k-points then compare against file.
+   !call hdr_vs_dtset(wfq_hdr,dtset)
    ebands_kq = ebands_from_hdr(wfq_hdr,maxval(wfq_hdr%nband),gs_eigen)
    call hdr_free(wfq_hdr)
    ABI_FREE(gs_eigen)
@@ -524,6 +525,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      call dvdb_print(dvdb)
      call dvdb_list_perts(dvdb, [-1,-1,-1], unit=ab_out)
    end if
+   ! TODO: Routine to compute \delta V_{q,nu)(r) and dumpt the results in XSF format.
  end if
 
  ! TODO Recheck getng, should use same trick as that used in screening and sigma.

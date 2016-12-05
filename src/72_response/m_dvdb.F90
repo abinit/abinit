@@ -17,9 +17,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
-!! TODO
-!!  Routine to compute \delta V_{q,nu)(r) and dumpt the results in XSF format.
-!!
 !! PARENTS
 !!
 !! SOURCE
@@ -3273,10 +3270,9 @@ subroutine dvdb_test_ftinterp(db_path, ngqpt, comm)
        call vdiff_print(vdiff_eval(2,nfft,file_v1r(:,:,ispden,mu),intp_v1r(:,:,ispden,mu),db%cryst%ucvol))
 
        !do ifft=1,nfft
-       do ifft=1,0
-         write(std_out,*)file_v1r(1,ifft,ispden,mu),intp_v1r(1,ifft,ispden,mu),&
-         file_v1r(2,ifft,ispden,mu),intp_v1r(2,ifft,ispden,mu)
-       end do
+       !  write(std_out,*)file_v1r(1,ifft,ispden,mu),intp_v1r(1,ifft,ispden,mu),&
+       !  file_v1r(2,ifft,ispden,mu),intp_v1r(2,ifft,ispden,mu)
+       !end do
        write(std_out,*)" "
      end do
    end do

@@ -372,7 +372,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: nbcalc_ks,nbsum,bstart_ks,ikcalc
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all
  real(dp) :: ecut,eshift,dotr,doti,dksqmax,weigth_q
- complex(dpc) :: sfact
+ complex(dpc) :: sfact,uka,ukap,ukpa,ukpap
  logical,parameter :: have_ktimerev=.True.
  logical :: isirr_k,isirr_kq,gen_eigenpb,isqzero
  type(wfd_t) :: wfd
@@ -390,7 +390,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
- real(dp),allocatable :: gkk_atm(:,:,:),gkk_nu(:,:,:),dbwl_nu(:,:,:,:),gdw2(:,:),tpp_nu(:,:,:),hmn_nu(:,:,:,:)
+ real(dp),allocatable :: gkk_atm(:,:,:),gkk_nu(:,:,:),dbwl_nu(:,:,:,:),gdw2(:,:)
+ complex(dpc),allocatable :: tpp(:,:),hmn_nu(:,:,:)
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
@@ -870,34 +871,42 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      ! Compute Debye-Waller term.
      call xmpi_sum(dbwl_nu, comm, ierr)
      ABI_MALLOC(gdw2, (nbcalc_ks, nbsum))
-     ABI_MALLOC(tpp_nu, (2, natom3, natom3))
-     ABI_MALLOC(hmn_nu, (2, nbcalc_ks, nbsum, natom3))
+     ABI_MALLOC(tpp, (natom3, natom3))
+     ABI_MALLOC(hmn_nu, (nbcalc_ks, nbsum, natom3))
 
      ! Integral over IBZ. Note that here we can use IBZ(k=0).
      do iq_ibz=1,sigma%nqibz
        qpt = sigma%qibz(:,iq_ibz); weigth_q = -sigma%wtq(iq_ibz)
-       ! displ_red is actually the ph eigvec.
+       ! displ_red is actually the phonon eigvec.
        call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_eigvec=displ_red)
 
        do nu=1,natom3
-         wqnu = phfrq(nu) !; if (wqnu < tol6) cycle
+         wqnu = phfrq(nu); if (wqnu < tol6) cycle
 
          ! Compute T-matrix.
          do ip2=1,natom3
            idir2 = mod(ip2-1, 3) + 1; ipert2 = (ip2 - idir2) / 3 + 1
            do ip1=1,natom3
              idir1 = mod(ip1-1, 3) + 1; ipert1 = (ip1 - idir1) / 3 + 1
-             !tpp_nu(1, ip1, ip2) = displ_red(2, idir, ipert, nu)
-             !tpp_nu(2, ip1, ip2) = displ_red(2, idir, ipert, nu)
+             ! (k,a)* (k,a') + (k',a)* (k',a')
+             uka = dcmplx(displ_red(1, idir1, ipert1, nu), displ_red(2, idir1, ipert1, nu))
+             ukap = dcmplx(displ_red(1, idir2, ipert1, nu), displ_red(2, idir2, ipert1, nu))
+             ukpa = dcmplx(displ_red(1, idir1, ipert2, nu), displ_red(2, idir1, ipert2, nu))
+             ukpap = dcmplx(displ_red(1, idir2, ipert2, nu), displ_red(2, idir2, ipert2, nu))
+             tpp(ip1,ip2) = conjg(uka) * ukap + conjg(ukpa) * ukpap
            end do
          end do
 
-         ! Compute hmn_nu-matrix.
+         ! Compute hmn_nu-matrix (nbcalc_ks, nbsum, natom3))
          !dbwl_nu, (2, nbsum, nbcalc_ks, natom3))
+         !do ii=1,natom3
+         !end do
 
          ! H* T H
          !gdw2 = H* T H
-         !gdw2 = gdw2 / (two * wqnu)
+         gdw2 = zero
+         !call adagger_b_a(nbsum*nbcalc_ks, natom3, hmn_nu, tpp, gdw2)
+         gdw2 = gdw2 / (two * wqnu)
 
          ! Get phonon occupation for all temperatures.
          nqnu_tlist = nbe(wqnu, sigma%kTmesh(:), zero)
@@ -908,7 +917,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
              eig0nk = ebands%eig(ib_k, ik_ibz, spin)
              ediff = (eig0nk - eig0mk); if (abs(ediff) < tol12) cycle
              do it=1,sigma%ntemp
-               !weigth_q * gdw2(ib_k, ibsum) * (two * nqnu_tlist(it) + one)  / ediff
+               sigma%vals_e0ks(it, ib_k, ikcalc, spin) = sigma%vals_e0ks(it, ib_k, ikcalc, spin) + &
+                 weigth_q * gdw2(ib_k, ibsum) * (two * nqnu_tlist(it) + one)  / ediff
              end do
            end do
          end do
@@ -917,7 +927,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      end do ! iq_ibz
 
      ABI_FREE(gdw2)
-     ABI_FREE(tpp_nu)
+     ABI_FREE(tpp)
      ABI_FREE(hmn_nu)
      ABI_FREE(dbwl_nu)
 
@@ -926,7 +936,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        call xmpi_sum(sigma%vals_wr, comm, ierr)
      end if
      ! Writes the results for a single (k-point, spin) to NETCDF file
-     !if (my_rank == master) call sigmaph_solve(sigma, ikcalc, spin, ebands)
+     if (my_rank == master) call sigmaph_solve(sigma, ikcalc, spin, ebands)
    end do ! spin
 
    ABI_FREE(kg_k)
