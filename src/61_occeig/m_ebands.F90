@@ -3030,8 +3030,6 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_get_edos'
- use interfaces_32_util
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -4189,8 +4187,6 @@ subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_get_jdos'
- use interfaces_32_util
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

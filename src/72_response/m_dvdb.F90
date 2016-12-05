@@ -1801,14 +1801,15 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
 ! *************************************************************************
 
  if (allocated(db%v1scf_rpt)) then
-   if (db%debug) call wrtout(std_out, "v1scf_rpt is already computed. Returning")
+   if (db%debug) then
+     call wrtout(std_out, "v1scf_rpt is already computed. Returning")
+   end if
    return
  end if
 
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  cryst => db%cryst
  nq1 = ngqpt(1); nq2 = ngqpt(2); nq3 = ngqpt(3)
-
  my_qptopt = 1 !; if (present(qptopt)) my_qptopt = qptopt
 
  ! Generate the q-mesh by finding the IBZ and the corresponding weights.
@@ -1816,6 +1817,10 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
  do ii=1,3
    qptrlatt(ii,ii) = ngqpt(ii)
  end do
+
+ !call kpts_ibz_from_kptrlatt(cryst, qptrlatt, my_qptopt, nqshift, qshift, &
+ !  nqibz, qibz, wtq, nqbz, qbz) ! new_kptrlatt, new_shiftk)  ! Optional
+
  my_nqshift = nqshift ! Be careful as getkgrid expects shiftk(3,210).
  ABI_CHECK(my_nqshift>0 .and. my_nqshift<=210, "nqshift must be in [1,210]")
 
@@ -1879,7 +1884,6 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
  !   * time-reversal is always used for phonons
  !   * we use symrec instead of symrel
  ABI_MALLOC(indqq, (nqbz*sppoldbl1,6))
-
  call listkk(dksqmax,cryst%gmet,indqq,qibz,qbz,nqibz,nqbz,cryst%nsym,&
    sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
 
@@ -1990,8 +1994,7 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
        do mu=1,db%natom3
          do ispden=1,db%nspden
            do irpt=1,db%nrpt
-             ! MPI parallelism.
-             cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
+             cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism.
              phre = emiqr(1,irpt); phim = emiqr(2,irpt)
 
              do ifft=1,nfft

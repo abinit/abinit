@@ -879,10 +879,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        ! displ_red is actually the ph eigvec.
        call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_eigvec=displ_red)
 
-
        do nu=1,natom3
          wqnu = phfrq(nu) !; if (wqnu < tol6) cycle
-#if 1
+
          ! Compute T-matrix.
          do ip2=1,natom3
            idir2 = mod(ip2-1, 3) + 1; ipert2 = (ip2 - idir2) / 3 + 1
@@ -913,7 +912,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
              end do
            end do
          end do
-#endif
 
        end do ! nu
      end do ! iq_ibz

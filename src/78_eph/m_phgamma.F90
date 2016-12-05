@@ -1373,8 +1373,6 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
 #define ABI_FUNC 'a2fw_init'
  use interfaces_14_hidewrite
  use interfaces_28_numeric_noabirule
- use interfaces_32_util
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
