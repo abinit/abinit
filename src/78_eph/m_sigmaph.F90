@@ -619,7 +619,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          call dvdb_readsym_allv1(dvdb, db_iqpt, cplex, nfftf, ngfftf, v1scf, xmpi_comm_self)
        else
          if (dtset%prtvol > 0) call wrtout(std_out, sjoin("Could not find:", ktoa(qpt), "in DVDB - interpolating"))
-         ! Fourier interpolate of the potential
+         ! Fourier interpolation of the potential
          ABI_CHECK(any(abs(qpt) > tol12), "qpt cannot be zero if Fourier interpolation is used")
          cplex = 2
          ABI_MALLOC(v1scf, (cplex,nfftf,nspden,natom3))

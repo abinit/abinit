@@ -17,6 +17,9 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
+!! TODO
+!!  Routine to compute \delta V_{q,nu)(r) and dumpt the results in XSF format.
+!!
 !! PARENTS
 !!
 !! SOURCE
@@ -41,16 +44,17 @@ MODULE m_dvdb
 #endif
  use m_hdr
 
+ use defs_abitypes,   only : hdr_type, mpi_type
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
  use m_io_tools,      only : open_file, file_exists
  use m_numeric_tools, only : wrap2_pmhalf, vdiff_eval, vdiff_print
  use m_copy,          only : alloc_copy
- use defs_abitypes,   only : hdr_type, mpi_type
  use m_mpinfo,        only : destroy_mpi_enreg
  use m_fftcore,       only : ngfft_seq
  use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft
  use m_crystal,       only : crystal_t, crystal_free
  use m_crystal_io,    only : crystal_from_hdr
+ use m_kpts,          only : kpts_ibz_from_kptrlatt
 
  implicit none
 
@@ -1102,7 +1106,7 @@ subroutine v1phq_complete(cryst,qpt,ngfft,cplex,nfft,nspden,nsppol,mpi_enreg,sym
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: syuse0=0,rfmeth2=2,iout0=0,tim_fourdp0=0,iscf1=1
+ integer,parameter :: syuse0=0,rfmeth2=2,tim_fourdp0=0
  integer :: idir,ipert,tsign,isym_eq,itirev_eq,ipert_eq !,itirev
  integer :: pcase,trev_q,idir_eq,pcase_eq,ispden,cnt
  integer :: i1,i2,i3,id1,id2,id3,n1,n2,n3,ind1,ind2,j1,j2,j3,l1,l2,l3,k1,k2,k3,nfftot
@@ -1568,7 +1572,7 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
  real(dp),intent(inout) :: v1r(cplex*nfft,nspden)
 
 !Local variables-------------------------------
- integer,parameter :: syuse0=0,rfmeth2=2,iscf1=1 !iout0=0,
+ integer,parameter :: syuse0=0,rfmeth2=2,iscf1=1
  integer :: nsym1,nfftot
 !arrays
  integer :: symafm1(cryst%nsym),symrel1(3,3,cryst%nsym),symrc1(3,3,cryst%nsym)
@@ -1781,20 +1785,19 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: chksymbreak0=0,iout0=0,iscf2=2,brav1=1,sppoldbl1=1,timrev1=1,tim_fourdp0=0,parak_kgb0=0
- integer :: my_qptopt,iq_ibz,nqibz,iq_bz,nqbz,nqpt_computed
- integer :: ii,my_nqshift,iq_dvdb,cplex_qibz,ispden,mu,irpt
+ integer,parameter :: sppoldbl1=1,timrev1=1,tim_fourdp0=0
+ integer :: my_qptopt,iq_ibz,nqibz,iq_bz,nqbz
+ integer :: ii,iq_dvdb,cplex_qibz,ispden,mu,irpt
  integer :: iqst,nqst,itimrev,tsign,isym,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3
  integer :: nproc,my_rank,ifft,cnt,ierr
- real(dp) :: qptrlen,dksqmax,phre,phim
+ real(dp) :: dksqmax,phre,phim
  logical :: isirr_q
  type(crystal_t),pointer :: cryst
  type(mpi_type) :: mpi_enreg_seq
 !arrays
- integer,parameter :: vacuum0(3)=[0,0,0]
  integer :: qptrlatt(3,3),g0q(3),ngfft_qspace(18)
  integer,allocatable :: indqq(:,:),iperm(:),bz2ibz_sort(:)
- real(dp) :: my_qshift(3,210),qpt_bz(3),shift(3) !,qpt_ibz(3)
+ real(dp) :: qpt_bz(3),shift(3) !,qpt_ibz(3)
  real(dp),allocatable :: qibz(:,:),qbz(:,:),wtq(:),emiqr(:,:)
  real(dp),allocatable :: v1r_qibz(:,:,:,:),v1r_qbz(:,:,:,:) !,all_v1qr(:,:,:,:)
 
@@ -1808,9 +1811,9 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
  end if
 
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
  cryst => db%cryst
- nq1 = ngqpt(1); nq2 = ngqpt(2); nq3 = ngqpt(3)
- my_qptopt = 1 !; if (present(qptopt)) my_qptopt = qptopt
+ nq1 = ngqpt(1); nq2 = ngqpt(2); nq3 = ngqpt(3); my_qptopt = 1 !; if (present(qptopt)) my_qptopt = qptopt
 
  ! Generate the q-mesh by finding the IBZ and the corresponding weights.
  qptrlatt = 0
@@ -1818,36 +1821,18 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
    qptrlatt(ii,ii) = ngqpt(ii)
  end do
 
- !call kpts_ibz_from_kptrlatt(cryst, qptrlatt, my_qptopt, nqshift, qshift, &
- !  nqibz, qibz, wtq, nqbz, qbz) ! new_kptrlatt, new_shiftk)  ! Optional
-
- my_nqshift = nqshift ! Be careful as getkgrid expects shiftk(3,210).
- ABI_CHECK(my_nqshift>0 .and. my_nqshift<=210, "nqshift must be in [1,210]")
-
- ! First call to getkgrid to obtain nqibz.
- my_qshift=zero; my_qshift(:,1:nqshift) = qshift
- ABI_MALLOC(qibz, (3, 0))
- ABI_MALLOC(wtq, (0))
- call getkgrid(chksymbreak0,iout0,iscf2,qibz,my_qptopt,qptrlatt,qptrlen,cryst%nsym,0,nqibz,&
-   my_nqshift,cryst%nsym,cryst%rprimd,my_qshift,cryst%symafm,cryst%symrel,vacuum0,wtq)
- ABI_FREE(qibz)
- ABI_FREE(wtq)
-
- ! Recall getkgrid to get qibz and wtq.
- ABI_MALLOC(qibz,(3,nqibz))
- ABI_MALLOC(wtq,(nqibz))
-
- call getkgrid(chksymbreak0,iout0,iscf2,qibz,my_qptopt,qptrlatt,qptrlen,cryst%nsym,nqibz,nqpt_computed,&
-   my_nqshift,cryst%nsym,cryst%rprimd,my_qshift,cryst%symafm,cryst%symrel,vacuum0,wtq,fullbz=qbz)
- nqbz = size(qbz, dim=2)
+ ! Get IBZ and BZ.
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, my_qptopt, nqshift, qshift, &
+   nqibz, qibz, wtq, nqbz, qbz) ! new_kptrlatt, new_shiftk)
 
  !write(std_out,*)"Irreducible q-points:"
- !do iq_ibz=1,nqibz
- !  write(std_out,*)trim(ktoa(qibz(:,iq_ibz))),wtq(iq_ibz)*nqbz
- !end do
+ !do iq_ibz=1,nqibz; write(std_out,*)trim(ktoa(qibz(:,iq_ibz))),wtq(iq_ibz)*nqbz; end do
  ABI_CHECK(nqbz == product(ngqpt) * nqshift, "nqbz /= product(ngqpt) * nqshift")
 
- !nqbz = product(ngqpt)
+ ! We want a gamma centered q-mesh for FFT.
+ ABI_CHECK(nqshift == 1, "nshift > 1 not supported")
+ ABI_CHECK(all(qshift(:,1) == zero), "qshift != 0 not supported")
+
  ABI_FREE(qbz)
  ABI_MALLOC(qbz, (3, nqbz))
  ii = 0
@@ -2461,18 +2446,15 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: iout0=0,iscf1=1
- integer :: tot_miss,tot_weird,miss_q,idir,ipert,nqpt_computed,iv1,psy,weird_q
- integer :: iq_ibz,nqibz,iq_file,chksymbreak,kptopt,nshiftk,ii,timerev_q,unt
- real(dp) :: kptrlen
+ integer :: tot_miss,tot_weird,miss_q,idir,ipert,iv1,psy,weird_q
+ integer :: iq_ibz,nqibz,iq_file,qptopt,nshiftq,ii,timerev_q,unt,nqbz
  character(len=500) :: msg,ptype,found
  type(crystal_t),pointer :: cryst
 !arrays
- integer,parameter :: vacuum0(3)=[0, 0, 0]
- integer :: rfdir(3),kptrlatt(3,3)
+ integer :: rfdir(3),qptrlatt(3,3)
  integer,allocatable :: pertsy(:,:),symq(:,:,:),rfpert(:)
- real(dp) :: qq(3),shiftk(3,210)
- real(dp),allocatable :: qibz(:,:),wtq(:)
+ real(dp) :: qq(3),shiftq(3,1)
+ real(dp),allocatable :: qibz(:,:),wtq(:),qbz(:,:)
 
 ! *************************************************************************
 
@@ -2484,29 +2466,16 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
    call alloc_copy(db%qpts, qibz)
    nqibz = db%nqpt
  else
-   ! Will test the q-points in the IBZ associated to ngqpt hence
-   ! I call `getkgrid` to get the q-points in the IBZ from ngqpt.
-   chksymbreak = 0; kptopt = 1; shiftk = zero; nshiftk = 1; kptrlatt = 0
+   ! Will test the q-points in the IBZ associated to ngqpt hence build IBZ and BZ from ngqpt.
+   qptopt = 1; shiftq = zero; nshiftq = 1; qptrlatt = 0
    do ii=1,3
-     kptrlatt(ii, ii) = ngqpt(ii)
+     qptrlatt(ii, ii) = ngqpt(ii)
    end do
 
-   ABI_MALLOC(qibz, (3,0))
-   ABI_MALLOC(wtq, (0))
+   call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt, nshiftq, shiftq, &
+     nqibz, qibz, wtq, nqbz, qbz)
 
-   call getkgrid(chksymbreak,iout0,iscf1,qibz,kptopt,kptrlatt,kptrlen,&
-     cryst%nsym,0,nqpt_computed,nshiftk,cryst%nsym,cryst%rprimd,shiftk,cryst%symafm,cryst%symrel,vacuum0,wtq)
-
-   ABI_FREE(qibz)
-   ABI_FREE(wtq)
-
-   nqibz = nqpt_computed
-   ABI_MALLOC(qibz, (3,nqibz))
-   ABI_MALLOC(wtq, (nqibz))
-
-   call getkgrid(chksymbreak,iout0,iscf1,qibz,kptopt,kptrlatt,kptrlen,&
-     cryst%nsym,nqibz,nqpt_computed,nshiftk,cryst%nsym,cryst%rprimd,shiftk,cryst%symafm,cryst%symrel,vacuum0,wtq)
-
+   ABI_FREE(qbz)
    ABI_FREE(wtq)
  end if
 
@@ -2781,7 +2750,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
 #ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(units(ii)))
 #endif
-   endif
+   end if
  end do
  ABI_DT_FREE(hdr1_list)
 
@@ -2966,7 +2935,7 @@ subroutine dvdb_test_v1rsym(db_path, comm)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: iout0=0,rfmeth2=2,syuse0=0
+ integer,parameter :: rfmeth2=2,syuse0=0
  integer :: iqpt,idir,ipert,nsym1,cplex,v1pos
  integer :: isym,nfft,ifft,ifft_rot,ispden
  real(dp) :: max_err,re,im,vre,vim !,pre,pim

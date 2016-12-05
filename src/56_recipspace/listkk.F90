@@ -101,7 +101,6 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 
 !Local variables-------------------------------
 !scalars
-!integer, save :: counter=0
  integer :: l3,ig1,ig2,ig3,ii,ikpg1,ikpt1,ikpt2,ikpt2_done
  integer :: ilarger,ismaller,itrial
  integer :: isppol,isym,itimrev,jkpt1,jsym,jtime,limit
@@ -113,18 +112,12 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
  integer, allocatable :: isort(:)
  real(dp) :: tsec(2)
  real(dp) :: dk(3),kpg1(3),kpt1a(3),k1(3),k2(3)
-!DEBUG
 !real(dp) :: kasq,ka(3)
-!ENDDEBUG
  real(dp),allocatable :: lkpg1(:),lkpg1_sorted(:)
 
 ! *************************************************************************
 
-!DEBUG
-!write(std_out,*)' listkk : enter, counter= ',counter
-!counter=counter+1
 !write(std_out,*)' listkk : nkpt1,nkpt2,nsym=',nkpt1,nkpt2,nsym
-!ENDDEBUG
  call timab(1021,1,tsec)
 
  if(sppoldbl<1 .or. sppoldbl>2)then
@@ -149,16 +142,12 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
  ABI_ALLOCATE(lkpg1,(l3*nkpt1))
  ABI_ALLOCATE(lkpg1_sorted,(l3*nkpt1))
  ABI_ALLOCATE(isort,(l3*nkpt1))
-!DEBUG
 !write(std_out,*)' List of kpt1 vectors '
 !write(std_out,*)' Length of the kpt1 vectors :'
-!ENDDEBUG
 
  do ikpt1=1,nkpt1
    k1(:)=kptns1(:,ikpt1)
-!  DEBUG
 !  write(std_out,*)ikpt1,k1(:)
-!  ENDDEBUG
    k1int(:)=nint(k1(:)+tol12)
    k1(:)=k1(:)-k1int(:)
    do ig1=-limit,limit
@@ -175,9 +164,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
 &         gmet(3,2)*kpg1(3)*kpg1(2)+gmet(3,1)*kpg1(3)*kpg1(1)))
          lkpg1_sorted(ikpg1)=lkpg1(ikpg1)
          isort(ikpg1)=ikpg1
-!        DEBUG
 !        write(std_out,*)' ikpt1,ig1,ig2,ig3,lkpg1=',ikpt1,ig1,ig2,ig3,lkpg1(ikpg1)
-!        ENDDEBUG
        end do
      end do
    end do
@@ -234,9 +221,7 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
      if(abs(llarger-lk2)<abs(lsmaller-lk2)-tol12)itrial=ilarger
      if(itrial==0)itrial=ilarger
      ismaller=itrial ; ilarger=itrial
-!    DEBUG
 !    write(std_out,*)' listkk : starting search at itrial=',itrial
-!    ENDDEBUG
 
      dksqmn=huge(one)
 
@@ -416,11 +401,6 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
  ABI_DEALLOCATE(lkpg1_sorted)
 
  call timab(1021,2,tsec)
-
-!DEBUG
-!write(std_out,*)' listkk : exit '
-!stop
-!ENDDEBUG
 
 end subroutine listkk
 !!***
