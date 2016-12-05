@@ -79,7 +79,7 @@ MODULE m_ebands
  public :: apply_scissor           ! Apply a scissor operator (no k-dependency)
  public :: get_occupied            ! Returns band indeces after wich occupations are less than an input value.
  public :: enclose_degbands        ! Adjust band indeces such that all degenerate states are treated.
- !public :: ebands_find_erange      !
+ public :: ebands_get_erange       ! Compute the minimum and maximum energy enclosing a list of states.
  public :: ebands_nelect_per_spin  ! Returns number of electrons per spin channel
  public :: get_minmax              ! Returns min and Max value of (eig|occ|doccde).
  public :: ebands_edstats          ! Compute statistical parameters of the energy differences e_ks[b+1] - e_ks[b]
@@ -1809,7 +1809,7 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
 
  call mkkptrank(ebands%kptns, ebands%nkpt, krank)
 
- emin = -huge(one); emax = huge(one); cnt = 0
+ emin = huge(one); emax = -huge(one); cnt = 0
 
  do spin=1,ebands%nsppol
    do ik=1,nkpts
@@ -1821,7 +1821,7 @@ subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
      if (.not. (band_block(1,ik) >= 1 .and. band_block(2,ik) <= ebands%mband)) cycle
      cnt = cnt + 1
      emin = min(emin, minval(ebands%eig(band_block(1,ik):band_block(2,ik), ikpt, spin)))
-     emax = min(emax, maxval(ebands%eig(band_block(1,ik):band_block(2,ik), ikpt, spin)))
+     emax = max(emax, maxval(ebands%eig(band_block(1,ik):band_block(2,ik), ikpt, spin)))
    end do
  end do
 
@@ -1843,7 +1843,7 @@ end subroutine ebands_get_erange
 !!  ebands_nelect_per_spin
 !!
 !! FUNCTION
-!!   return number of electrons in each spin channel (computed from occoputation factors if nsppol=2)
+!!   Return number of electrons in each spin channel (computed from occoputation factors if nsppol=2)
 !!
 !! INPUTS
 !!  ebands<ebands_t>=The object describing the band structure.

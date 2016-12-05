@@ -100,7 +100,7 @@ MODULE m_skw
   complex(dpc),allocatable :: cached_srk_dk1(:,:)
    ! cached_srk_dk1(skw%nr, 3)
    ! The 1d derivative wrt k of the star function for cached_kpt_dk1 (used in skw_eval_bks)
-  real(dp),private :: cached_kpt_dk1(3)
+  real(dp) :: cached_kpt_dk1(3)
 
   complex(dpc),allocatable :: cached_srk_dk2(:,:,:)
    ! cached_srk_dk2(skw%nr,3,3)
@@ -177,8 +177,7 @@ type(skw_t) function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_
 !arrays
  integer :: rmax(3) !,ngmax(3),ngmin(3)
  integer,allocatable :: ipiv(:),iperm(:)
- real(dp),allocatable :: rtmp(:,:),r2vals(:)
- real(dp),allocatable :: delta_eig(:,:,:),rhor(:),oeig(:)
+ real(dp),allocatable :: rtmp(:,:),r2vals(:),rhor(:),oeig(:)
  complex(dpc),allocatable :: srk(:,:),hmat(:,:),lambda(:,:,:)
 
 ! *********************************************************************
@@ -285,19 +284,17 @@ type(skw_t) function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_
  end do
  call xmpi_sum(hmat, comm, ierr)
 
- ABI_MALLOC(delta_eig, (nkpt-1, bcount, nsppol))
+ ABI_MALLOC(lambda, (nkpt-1, bcount, nsppol))
  do spin=1,nsppol
    do ib=1,bcount
      band = ib + bstart - 1
-     delta_eig(:,ib,spin) = eig(band,1:nkpt-1,spin) - eig(band,nkpt,spin)
+     lambda(:,ib,spin) = eig(band,1:nkpt-1,spin) - eig(band,nkpt,spin)
    end do
  end do
 
  ! Solve system of linear equations to get lambda coeffients (eq. 10 of PRB 38 2721)
  ! Solve all bands and spins at once
- ABI_MALLOC(lambda, (nkpt-1, bcount, nsppol))
  ABI_MALLOC(ipiv, (nkpt-1))
- lambda = delta_eig
 
  !call DGETRF(nkpt-1,nkpt-1,hmat,nkpt-1,ipiv,ierr)
  !CALL DGETRS('N',bs%nkpt-1,bs%icut2-bs%icut1+1,hmat,bs%nkpt-1,ipiv,lambda(1,bs%icut1),bs%nkpt-1,inf)
@@ -334,7 +331,6 @@ type(skw_t) function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_
  ABI_FREE(srk)
  ABI_FREE(rhor)
  ABI_FREE(hmat)
- ABI_FREE(delta_eig)
  ABI_FREE(lambda)
  ABI_FREE(ipiv)
 
@@ -365,7 +361,7 @@ type(skw_t) function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_
  !list2 = [mare/cnt, mae/cnt]
  !call xmpi_sum(list2, comm, ierr)
 
- call skw_print(new, std_out)
+ if (my_rank == master) call skw_print(new, std_out)
 
  ABI_FREE(oeig)
 
@@ -379,10 +375,13 @@ end function skw_new
 !!  skw_print
 !!
 !! FUNCTION
+!!  Print info on object
 !!
 !! INPUTS
+!!  unt=Fortran unit number.
 !!
 !! OUTPUT
+!!  only writing
 !!
 !! PARENTS
 !!
@@ -471,10 +470,8 @@ subroutine skw_eval_bks(skw, cryst, band, kpt, spin, oeig, oder1, oder2)
  integer :: ii,jj
 ! *********************************************************************
 
-#ifdef DEBUG_MODE
- !ABI_CHECK(allocated(ebspl%coefs(band, spin)%vals), sjoin("Unallocated (band, spin):", ltoa([band, spin])))
- !ABI_CHECK(ib >= 1 .and. ib <= skw%bcount, sjoin("out of range band:", itoa(band)))
-#endif
+ !DBG_CHECK(allocated(ebspl%coefs(band, spin)%vals), sjoin("Unallocated (band, spin):", ltoa([band, spin])))
+ !DBG_CHECK(ib >= 1 .and. ib <= skw%bcount, sjoin("out of range band:", itoa(band)))
 
  ! Compute star function for this k-point (if not already in memory)
  if (any(kpt /= skw%cached_kpt)) then
