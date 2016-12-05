@@ -33,10 +33,6 @@ module m_fstab
  use m_tetrahedron
  use m_ebands
  use iso_c_binding
- use m_nctk
-#ifdef HAVE_NETCDF
- use netcdf
-#endif
 
  use m_time,           only : cwtime
  use m_fstrings,       only : itoa, sjoin
