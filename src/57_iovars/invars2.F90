@@ -470,6 +470,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf2_dkde',tread,'INT')
  if(tread==1) dtset%rf2_dkde=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rf2_pert1_dir',tread,'INT')
+ if(tread==1) dtset%rf2_pert1_dir(1:3)=intarr(1:3)
+
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rf2_pert2_dir',tread,'INT')
+ if(tread==1) dtset%rf2_pert2_dir(1:3)=intarr(1:3)
+
 !Set value of response to 1 and also set rfdir to 1 1 1 if we are doing
 !response calculation but rfdir was left at default 0 0 0 value.
 !For rf2_dkdk and rf2_dkde, we do the same for rf2_pert1_dir and rf2_pert2_dir
@@ -558,6 +564,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 &     'Action: change to the d3e_pertx_*** input parameters!'
      MSG_WARNING(message)
    end if
+
  end if
 
  response=0
