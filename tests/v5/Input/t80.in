@@ -18,7 +18,7 @@ tsmear2? 0.001   # Hartree
 tsmear3? 0.005   # Hartree
 
 nstep11 7
-toldfe11 1.e-20  # This *extremely* small value is used to render the code portable
+toldfe11 1.e-13  # This small value is used to render the code portable
                  # 1.e-12 is usually good for production calculations.
 nstep   3
 

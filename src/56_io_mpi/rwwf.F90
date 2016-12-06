@@ -99,7 +99,7 @@ subroutine rwwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enr
 #if defined HAVE_MPI2 && !defined FC_G95
  use mpi
 #endif
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -124,7 +124,7 @@ subroutine rwwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enr
  integer,intent(inout),target :: kg_k(3,optkg*npw)
  real(dp),intent(inout),target :: cg(2,mcg),eigen((2*mband)**formeig*mband),occ(mband)
  type(wffile_type),intent(inout) :: wff
- type(MPI_type), intent(inout) :: mpi_enreg
+ type(MPI_type), intent(in) :: mpi_enreg
 
 !Local variables-------------------------------
 !scalars
@@ -247,7 +247,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
 #ifdef HAVE_MPI2
  use mpi
 #endif
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -269,7 +269,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
  integer,intent(inout) :: nband_disk
  integer,intent(inout),target :: kg_k(3,optkg*npw)
  real(dp),intent(inout),target :: cg(2,mcg),eigen((2*mband)**formeig*mband),occ(mband)
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(wffile_type),intent(inout) :: wff
 
 !Local variables-------------------------------
@@ -280,7 +280,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
  character(len=fnlen) :: fname
  integer :: ikpt_this_proc,ispinor
  integer,allocatable :: ind_cg_mpi_to_seq(:)
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,h1_varid,mband_varid,ncerr,ii,mband_file
  integer,allocatable :: gall(:,:)
  real(dp),allocatable :: cg_all(:,:,:),h1mat(:,:,:)
@@ -418,7 +418,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
        end if
        call xderiveRRecEnd(wff,ios)
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      else if (wff%iomode == IO_MODE_ETSF) then 
        ! Read reduced_coordinates_of_plane_waves for this k point (npw1 is npw_disk).
        ! TODO: spinor parallelism
@@ -487,7 +487,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
      MSG_ERROR(msg)
    end if
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    if (wff%iomode == IO_MODE_ETSF) then  
      ! get eigenvalues and occupations
      NCF_CHECK(nf90_inq_varid(wff%unwff, "eigenvalues", eig_varid))
@@ -544,7 +544,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
        MSG_ERROR(msg)
      end if
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      if (wff%iomode == IO_MODE_ETSF) then 
        ! The coefficients_of_wavefunctions on file have shape [cplex, mpw, nspinor, mband, nkpt, nsppol]
        NCF_CHECK(nf90_inq_varid(wff%unwff, "coefficients_of_wavefunctions", cg_varid))
@@ -631,7 +631,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
        end do ! iband
 
      else 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
         ! ETSF-IO
        if (any(option == [1, 3, -4])) then
           ! Read eigen. Remember that the matrix on file has shape [2, mband, mband, nkpt, nspin]
@@ -768,7 +768,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 #ifdef HAVE_MPI2
  use mpi
 #endif
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -788,7 +788,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
  integer,intent(in) :: formeig,icg,ikpt,isppol,mband,mcg,nband,nband_disk,npw,nspinor,option,optkg
  integer,intent(in),target :: kg_k(3,optkg*npw)
  real(dp),intent(in),target :: cg(2,mcg),eigen((2*mband)**formeig*mband),occ(mband)
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(wffile_type),intent(inout) :: wff
 
 !Local variables-------------------------------
@@ -798,7 +798,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
  integer :: ikpt_this_proc,ispinor,me_cart_3d
  integer,allocatable :: ind_cg_mpi_to_seq(:)
  real(dp),ABI_CONTIGUOUS pointer :: cg_ptr(:,:)
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr
  character(len=nctk_slen) :: kdep
 #endif
@@ -895,7 +895,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
        call xderiveWRecEnd(wff,ios)
      end if
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    else if (wff%iomode == IO_MODE_ETSF) then
      ! Write the reduced_coordinates_of_plane_waves for this k point.
      NCF_CHECK(nf90_inq_varid(wff%unwff, "reduced_coordinates_of_plane_waves", kg_varid))
@@ -935,7 +935,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
 #ifdef HAVE_MPI
      call MPI_BCAST(wff%offwff,1,wff%offset_mpi_type,0,wff%spaceComm_mpiio,ios)
 #endif
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    else if (wff%iomode == IO_MODE_ETSF) then
      ! Write eigenvalues and occupation factors.
      NCF_CHECK(nf90_inq_varid(wff%unwff, "eigenvalues", eig_varid))
@@ -974,7 +974,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
        cg_ptr => cg ! Need pointer to bypass "inout" intent attribute
        call WffReadWrite_mpio(wff,2,cg_ptr,mcg,icg,nband_disk,npwso,npwsotot,ind_cg_mpi_to_seq,ios)
        nullify(cg_ptr)
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      else if (wff%iomode == IO_MODE_ETSF .and. option/=5) then
 
        NCF_CHECK(nf90_inq_varid(wff%unwff, "reduced_coordinates_of_plane_waves", kg_varid))

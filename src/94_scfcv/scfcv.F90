@@ -206,7 +206,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  use m_paw_dmft,         only : paw_dmft_type
  use m_fock,             only : fock_type,fock_init,fock_destroy,fock_update_exc,fock_updatecwaveocc
  use gwls_hamiltonian,   only : build_vxc
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API,         only : cprj_clean,cprj_paw_alloc
 #endif
  use m_io_kss,             only : gshgg_mkncwrite
@@ -448,7 +448,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 !  We need to tune the volume when wavelets are used because, not
 !  all FFT points are used.
 !  ucvol_local = (half * dtset%wvl_hgrid) ** 3 * ngfft(1)*ngfft(2)*ngfft(3)
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
    ucvol_local = product(wvl%den%denspot%dpbox%hgrids) * real(product(wvl%den%denspot%dpbox%ndims), dp)
 #endif
  end if
@@ -484,7 +484,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  case(2)
      ! No need to include the PspCore energy since it is already included in the
      ! local pseudopotential  (vpsp)
-   energies%e_corepsp   = zero 
+   energies%e_corepsp   = zero
    energies%e_corepspdc = zero
  end select
 
@@ -508,6 +508,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    if (dtset%prtnabla>0) usecprj=1
    if (dtset%extrapwf>0) usecprj=1
    if (dtset%usewvl==1)  usecprj=1
+   if (dtset%pawfatbnd>0)usecprj=1
+   if (dtset%prtdos==3)  usecprj=1
    if (nstep==0) usecprj=0
    if (usefock==1)  usecprj=1
  end if
@@ -664,7 +666,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        ABI_DATATYPE_DEALLOCATE(cprj)
      end if
      ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj))
-     ncpgr=0 
+     ncpgr=0
      if (usefock==1) then
        ctocprj_choice = 1 ; useylmgr = 0
        if (dtset%optforces /= 0 .and. dtset%optstress == 0) then
@@ -674,7 +676,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        end if
      end if
      call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
      if (dtset%usewvl==1) then
        ABI_DATATYPE_ALLOCATE(wvl%descr%paw%cprj,(dtset%natom,mcprj))
        call cprj_paw_alloc(wvl%descr%paw%cprj,0,dimcprj_srt)
@@ -1004,7 +1006,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &         comm_fft=spaceComm_fft,distribfft=mpi_enreg%distribfft)
        else
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
          call wvl_nhatgrid(atindx1,wvl%descr%atoms%astruct%geocode,&
 &         wvl%descr%h,wvl%den%denspot%dpbox%i3s,dtset%natom,dtset%natom,&
 &         nattyp,psps%ntypat,wvl%descr%Glr%d%n1,wvl%descr%Glr%d%n1i,&
@@ -1065,7 +1067,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
          call ctocprj(atindx,cg,ctocprj_choice,cprj,gmet,gprimd,iatom,idir,&
 &         iorder_cprj,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &         dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft, dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
-&         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
+&         dtset%nsppol,dtset%ntypat,3,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
 &         useylmgr,xred,ylm,ylmgr)
        end if
      end if
@@ -1876,7 +1878,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
  if (recompute_cprj) then
    usecprj=1
-   mband_cprj=dtset%mband
+   mband_cprj=dtset%mband/mpi_enreg%nproc_band
    mcprj=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
    call pawcprj_free(cprj)
    ABI_DATATYPE_DEALLOCATE(cprj) ! Was previously allocated (event if size = 0,0)
@@ -1898,7 +1900,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &   dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &   dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft,&
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,dtset%nsppol,&
-&   dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
+&   dtset%ntypat,3,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
 &   ucvol,dtfil%unpaw,useylmgr,xred,ylm,ylmgr)
  end if
 
@@ -1961,7 +1963,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  call timab(249,1,tsec)
 
 !Transfer eigenvalues and occupation computed by BigDFT in afterscfloop to eigen.
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  if (dtset%usewvl == 1) then
    if (dtset%nsppol == 1) then
      eigen = wvl%wfs%ks%orbs%eval
@@ -2037,7 +2039,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    call paw_ij_free(paw_ij)
    call pawfgrtab_free(pawfgrtab)
    if(dtset%usewvl==1) then
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
      call cprj_clean(wvl%descr%paw%cprj)
      ABI_DATATYPE_DEALLOCATE(wvl%descr%paw%cprj)
 #endif

@@ -25,7 +25,7 @@ module defs_wannier90
  implicit none
 
  interface
-#ifndef HAVE_DFT_WANNIER90_V1
+#ifndef HAVE_WANNIER90_V1
 !WANNIER90_V2
  subroutine wannier_setup(seed__name,mp_grid_loc,num_kpts_loc,&
      real_lattice_loc,recip_lattice_loc,kpt_latt_loc,num_bands_tot, &
@@ -70,7 +70,7 @@ module defs_wannier90
   real(dp), dimension(3,num_bands_tot), intent(out) :: proj_x_loc
   real(dp), dimension(num_bands_tot), intent(out) :: proj_zona_loc
   integer, dimension(num_bands_tot), intent(out) :: exclude_bands_loc
-#ifndef HAVE_DFT_WANNIER90_V1
+#ifndef HAVE_WANNIER90_V1
   !WANNIER90_V2
   integer, dimension(num_bands_tot), optional, intent(out) :: proj_s_loc  
   real(dp), dimension(3,num_bands_tot), optional, intent(out) :: proj_s_qaxis_loc

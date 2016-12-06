@@ -19,7 +19,7 @@
 !!  ikpt=index of k-point
 !!  isppol=index of spin
 !!  mcg=second dimension of the cg array
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands involved in subspace matrix.
 !!  npw=number of planewaves in basis sphere at this k point.
 !!  prtvol=control print volume and debugging output

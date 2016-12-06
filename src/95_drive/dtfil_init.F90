@@ -90,7 +90,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
 !Local variables-------------------------------
 !scalars
 ! Define input and output unit numbers (do not forget, unit 5 and 6 are standard input and output)
-! Also, unit number 21, 22 and 23 are used in dfpt_nstdy, for the 3 dot wavefunctions. 
+! Also, unit number 21, 22 and 23 are used in dfpt_nstdy, for the 3 dot wavefunctions.
 ! Unit 50,51,52 and 53 are used in dfpt_looppert (for ipert=natom+2, ipert=natom+10 and ipert=natom+11).
 ! Others unit numbers will be used in the case of the variational and 2n+1 expressions.
 ! In defs_basis, one defines :
@@ -189,7 +189,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  end if
 
 !Treatment of the other get wavefunction variable, if response function case or nonlinear case
- if ( ANY(dtset%optdriver == (/RUNL_RESPFN, RUNL_NONLINEAR/)) ) then
+ if ( ANY(dtset%optdriver == (/RUNL_RESPFN, RUNL_NONLINEAR, RUNL_EPH/)) ) then
 
 !  According to getwfq and irdwfq, build _WFQ file name, referred as fnamewffq
    stringfile='_WFQ' ; stringvar='wfq'

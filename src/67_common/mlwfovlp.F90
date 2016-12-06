@@ -32,7 +32,7 @@
 !!  mgfft=maximum size of 1D FFTs
 !!  mgfftc=maximum size of 1D FFTs (coarse grid)
 !!  mkmem =number of k points treated by this node.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw.
 !   natom=number of atoms in cell.
 !!  nattyp(ntypat)= # atoms of each type.
@@ -110,7 +110,7 @@
  integer,intent(in) :: mband,mcg,mcprj,mgfftc,mkmem,mpw,natom,nfft,nkpt
  integer,intent(in) :: nsppol,ntypat,prtvol
  real(dp),intent(in) :: ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
  type(hdr_type),intent(in) :: hdr
@@ -1079,7 +1079,7 @@
 
 
 
-#if defined HAVE_DFT_WANNIER90
+#if defined HAVE_WANNIER90
    do isppol=1,nsppol
      if(spin.ne.0 .and. spin.ne.isppol) cycle
 !    when nsppol>1, master runs isppol 1 and rank==1 runs isppol 2

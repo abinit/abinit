@@ -60,7 +60,7 @@
 !!  moved_atm_inside= if 1, then the preconditioned forces
 !!    as well as the preconditioned density residual must be computed;
 !!    otherwise, compute only the preconditioned density residual.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
@@ -164,7 +164,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  integer,intent(in) :: nkxc,npawmix,npwdiel,ntypat,usepaw
  integer,intent(inout) :: dbl_nnsclo
  real(dp),intent(in) :: etotal,gsqcut
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(ab7_mixing_object), intent(inout) :: mix
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
@@ -245,7 +245,7 @@ subroutine newrho(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,dtn_pc,dtset,etotal,
  if(dtset%usewvl==0) then
    ucvol_local=ucvol
  else
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
    ucvol_local = product(wvl_den%denspot%dpbox%hgrids) * real(nfftot, dp)
 #endif
  end if

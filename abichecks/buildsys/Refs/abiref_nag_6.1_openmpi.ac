@@ -690,7 +690,7 @@ with_mpi_prefix="/usr/local/openmpi_nag"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf+etsf_io"
+with_trio_flavor="netcdf"
 
                        # ------------------------------ #
 
@@ -716,17 +716,17 @@ with_trio_flavor="netcdf+etsf_io"
 
 # Include flags for the NetCDF library (default is unset)
 #
-#with_netcdf_incs="-I/usr/local/include/netcdf"
+with_netcdf_incs="-I/usr/local/netcdf-4.4.1_nag/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-#with_netcdf_libs="-L/usr/local/lib/netcdf -lnetcdff -lnetcdf"
+with_netcdf_libs="-L/usr/local/netcdf-4.4.1_nag/lib -lnetcdff -lnetcdf -L/usr/local/hdf5-1.8.17_openmpi/lib -lhdf5_hl -lhdf5 -lz -lcurl -ldl"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
 # change the default values of accesswff)   
 #
-#enable_netcdf_default="no"
+enable_netcdf_default="yes"
 
                        # ------------------------------ #
 
@@ -764,7 +764,7 @@ with_trio_flavor="netcdf+etsf_io"
 #   * By default, Abinit will use the internal Goedecker FFT library
 #   * This connector is highly experimental - USE AT YOUR OWN RISKS!
 #
-#with_fft_flavor="fftw3"
+with_fft_flavor="fftw3"
 
 # Include flags for the FFT library (default is unset)
 #
@@ -772,7 +772,7 @@ with_trio_flavor="netcdf+etsf_io"
 
 # Link flags for the FFT library (default is unset)
 #
-#with_fft_libs="-L/usr/local/lib/fftw -lfftw3"
+with_fft_libs="-L${MKLROOT}/mkl/lib/intel64 -lmkl_gf_lp64 -lmkl_core -lmkl_sequential -lpthread -lm"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -847,7 +847,7 @@ with_trio_flavor="netcdf+etsf_io"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="none"
+with_linalg_flavor="mkl"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
@@ -855,7 +855,7 @@ with_linalg_flavor="none"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-#with_linalg_libs="-L/usr/local/lib -llapack -lblas"
+with_linalg_libs="-L${MKLROOT}/mkl/lib/intel64 -lmkl_gf_lp64 -lmkl_core -lmkl_sequential -lpthread -lm"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -918,7 +918,7 @@ with_linalg_flavor="none"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="none"
+with_dft_flavor="libxc"
 
                        # ------------------------------ #
 
@@ -948,11 +948,11 @@ with_dft_flavor="none"
 
 # Include flags for the LibXC library (default is unset)
 #
-#with_libxc_incs="-I/opt/etsf/include"
+with_libxc_incs="-I/usr/local/fallbacks/nag/6.1/mpi/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-#with_libxc_libs="-L/opt/etsf/lib -lxc"
+with_libxc_libs="-L/usr/local/fallbacks/nag/6.1/mpi/lib -lxcf90 -lxc"
 
                        # ------------------------------ #
 
@@ -971,6 +971,14 @@ with_dft_flavor="none"
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
 #
 #enable_wannier90_v1="no"
+
+# ---------------------------------------------------------------------------- #
+# LIBXML support
+# ---------------------------------------------------------------------------- #
+
+# Flag to enable LIBXML library
+#
+#enable_xml=no
 
 # ---------------------------------------------------------------------------- #
 # DMFT library connector                                                        #

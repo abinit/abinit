@@ -22,7 +22,7 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  xcart(3,natom)=cartesian atomic coordinates.
 !!
@@ -58,7 +58,7 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
  use m_profiling_abi
  use m_xmpi
  use m_errors
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API, only : createIonicPotential, local_forces
  use poisson_solver, only : H_potential
 #endif
@@ -75,7 +75,7 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: option, natom, nfft, nspden
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(wvl_denspot_type), intent(inout) :: wvl_den
  type(wvl_internal_type), intent(in) :: wvl_descr
 !arrays
@@ -85,7 +85,7 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
  real(dp),intent(inout) :: xcart(3,natom)
 
 !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 !scalars
  integer :: i,i1,i2,i3,ia,ierr,igeo,me,nproc,shift,comm
  real(dp) :: charge
@@ -99,7 +99,7 @@ subroutine mklocl_wavelets(efield, grtn, mpi_enreg, natom, nfft, &
 
 ! *********************************************************************
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
  elecfield=zero !not used here
 

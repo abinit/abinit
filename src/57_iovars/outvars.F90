@@ -78,7 +78,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  use m_errors
  use m_xomp
  use m_xmpi
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
  use netcdf
 #endif
 
@@ -109,7 +109,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  integer :: marr,mu,ncerr
  integer :: nshiftk
  integer :: prtvol_glob,max_nthreads
- integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser
+ integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde
  integer :: ncid=0 ! Variables for NetCDF output
  character(len=500) :: message
  character(len=4) :: stringimage
@@ -164,7 +164,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !###########################################################
 !### 02. Open NetCDF file for export variables
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  ! Enable netcdf output only if the number of datasets is small.
  ! otherwise v6[34] crashes with errmess: 
  !    nf90_def_dim - NetCDF library returned:   NetCDF: NC_MAX_DIMS exceeded
@@ -277,8 +277,10 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
    rfphon=dtsets(idtset)%rfphon
    rfstrs=dtsets(idtset)%rfstrs
    rfuser=dtsets(idtset)%rfuser
-   if(rfddk/=0 .or. rfelfd/=0 .or. &
-&   rfphon/=0 .or. rfstrs/=0 .or. rfuser/=0)then
+   rf2_dkdk=dtsets(idtset)%rf2_dkdk
+   rf2_dkde=dtsets(idtset)%rf2_dkde
+   if(rfddk/=0 .or. rfelfd/=0 .or. rfphon/=0 .or. rfstrs/=0 .or. &
+&   rfuser/=0 .or. rf2_dkdk/=0 .or. rf2_dkde/=0)then
      response_(idtset)=1
    end if
  end do
@@ -353,7 +355,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  write(message,'(a,80a)')ch10,('=',mu=1,80)
  call wrtout(iout,message,'COLL')
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  if (ncid /= 0) then
    ncerr=nf90_close(abs(ncid))
    if (ncerr/=nf90_NoErr) then

@@ -18,7 +18,7 @@
 !!  atindx1(natom)=index table for atoms, inverse of atindx (see gstate.f)
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nattyp(ntypat)= # atoms of each type.
 !!  option=0: allocate data for local operator (FFT)
 !!         1: allocate data for nonlocal operator
@@ -67,7 +67,7 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
 !scalars
  integer,intent(in) :: option,use_gpu_cuda
  type(dataset_type),intent(in) :: dtset
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: atindx1(dtset%natom),nattyp(dtset%ntypat),npwarr(dtset%nkpt)

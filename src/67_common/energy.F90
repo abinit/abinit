@@ -44,7 +44,7 @@
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
 !!  kg(3,mpw*mkmem)=work array for coordinates of G vectors in basis
 !!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  nfftf= -PAW ONLY- number of FFT grid points for the fine grid
 !!         (nfftf=nfft for norm-conserving potential runs)
@@ -311,7 +311,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 !  We need to tune the volume when wavelets are used because, not
 !  all FFT points are used.
 !  ucvol_local = (half * dtset%wvl_hgrid) ** 3 * ngfft(1)*ngfft(2)*ngfft(3)
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
    ucvol_local = product(wvl_den%denspot%dpbox%hgrids) * real(product(wvl_den%denspot%dpbox%ndims), dp)
 #endif
  end if

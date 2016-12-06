@@ -38,7 +38,7 @@
 !!
 !! SIDE EFFECTS
 !! Dtset<Dataset_type>=All input variables for this dataset.
-!!  %ecutwfn, %npwwfn, 
+!!  %ecutwfn, %npwwfn,
 !!  %ecuteps, %npweps
 !!   might be redefined in setshells in order to close the shell.
 !!
@@ -67,13 +67,13 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  use m_profiling_abi
  use m_xmpi
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_hdr
 
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, GW_Q0_DEFAULT, czero_gw, em1params_t
- use m_fstrings,      only : strcat, sjoin
+ use m_fstrings,      only : strcat, sjoin, ltoa, itoa
  use m_io_tools,      only : file_exists
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_print, crystal_t
@@ -124,8 +124,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: NOMEGAGAUSS=30,NOMEGAREAL=201
- integer,parameter :: pertcase0=0,master=0
+ integer,parameter :: NOMEGAGAUSS=30,NOMEGAREAL=201,pertcase0=0,master=0
  integer :: bantot,ib,ibtot,ikibz,iq,iqp,isppol,ig,ng,ierr
  integer :: jj,mod10,mband,ng_kss,iqbz,isym,iq_ibz,itim
  integer :: timrev,use_umklp,ncerr
@@ -154,8 +153,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ltest=ALL(Dtset%nband(1:Dtset%nkpt*Dtset%nsppol)==Dtset%nband(1))
  ABI_CHECK(ltest,'Dtset%nband(:) must be constant')
 
- my_rank = xmpi_comm_rank(comm)
- nprocs  = xmpi_comm_size(comm)
+ my_rank = xmpi_comm_rank(comm); nprocs  = xmpi_comm_size(comm)
 
  call mkrdim(acell,rprim,rprimd)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -181,7 +179,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 &  ' GW calculation type              = ',Ep%gwcalctyp,ch10,&
 &  ' zcut to avoid poles in chi0 [eV] = ',Ep%zcut*Ha_eV,ch10
  call wrtout(std_out,msg,'COLL')
- !
+
  Ep%awtr  =Dtset%awtr
  Ep%npwe  =Dtset%npweps
  Ep%npwwfn=Dtset%npwwfn
@@ -191,11 +189,10 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
             ! 1 --> do not use time-reversal symmetry
             ! 2 --> take advantage of time-reversal symmetry
  if (timrev==1.and.Dtset%awtr/=0) then
-   msg = "awtr/=0 cannot be used when time-reversal symmetry doesn't hold"
-   MSG_ERROR(msg)
+   MSG_ERROR("awtr/=0 cannot be used when time-reversal symmetry doesn't hold")
  end if
- !
- ! === Read parameters from (WFK|KSS) and verifify them ===
+
+ ! Read parameters from WFK and verifify them.
  call wfk_read_eigenvalues(wfk_fname,energies_p,Hdr_wfk,comm)
  mband = MAXVAL(Hdr_wfk%nband)
 
@@ -293,7 +290,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ! This file is used by abipy to generate multiple input files.
  if (Dtset%nqptdm == -1) then
    if (my_rank==master) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
       ncerr = nctk_write_ibz(strcat(dtfil%filnam_ds(4), "_qptdms.nc"), qmesh%ibz, qmesh%wt)
       NCF_CHECK(ncerr)
 #endif
@@ -316,8 +313,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ! === Find optimal value for G-sphere enlargment due to oscillator matrix elements ===
  call get_ng0sh(Kmesh%nbz,Kmesh%bz,Qmesh%nibz,Qmesh%ibz,Kmesh%nbz,Kmesh%bz,GW_TOLQ0,ng0sh_opt)
 
- write(msg,'(a,3i2)') ' Optimal value for ng0sh = ',ng0sh_opt(:)
- call wrtout(std_out,msg,"COLL")
+ call wrtout(std_out,sjoin('Optimal value for ng0sh:',ltoa(ng0sh_opt)),"COLL")
 
  Ep%mG0(:)=ng0sh_opt(:)
  !Ep%mG0(:)=(/3,3,3/)
@@ -446,22 +442,18 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  if (Ep%analytic_continuation.or.Ep%contour_deformation) then
    Ep%nomegaei=Dtset%nfreqim
    if (Dtset%gw_frqim_inzgrid==1) then
-     write(msg,'(a)')' iomega = z/1-z transfom grid will be used for imaginary frequency grid'
-     MSG_WARNING(msg)
+     MSG_WARNING('iomega = z/1-z transfom grid will be used for imaginary frequency grid')
    end if
    if (Dtset%cd_customnimfrqs/=0) then
-     write(msg,'(a)')' Custom imaginary grid specified. Assuming experienced user.'
-     MSG_WARNING(msg)
+     MSG_WARNING('Custom imaginary grid specified. Assuming experienced user.')
      Ep%nomegaei=Dtset%cd_customnimfrqs
    end if
    if (Ep%nomegaei==-1) then
      Ep%nomegaei=NOMEGAGAUSS
-     write(msg,'(a,i5)')' Number of imaginary frequencies set to default= ',NOMEGAGAUSS
-     MSG_WARNING(msg)
+     MSG_WARNING(sjoin('Number of imaginary frequencies set to default= ',itoa(NOMEGAGAUSS)))
    end if
    if (Ep%nomegaei==0) then
-     write(msg,'(a)')' nfreqim = 0 ! Assuming experienced user merging several frequency calculations.'
-     MSG_WARNING(msg)
+     MSG_WARNING(' nfreqim = 0! Assuming experienced user merging several frequency calculations.')
    end if
  end if
 
@@ -471,21 +463,17 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    Ep%nomegaer=Dtset%nfreqre; Ep%omegaermin=Dtset%freqremin; Ep%omegaermax=Dtset%freqremax
    if (Dtset%gw_frqre_tangrid==1) then
      Ep%omegaermax=Dtset%cd_max_freq
-     write(msg,'(a)')' Tangent transfom grid will be used for real frequency grid'
-     MSG_WARNING(msg)
+     MSG_WARNING(' Tangent transfom grid will be used for real frequency grid')
    end if
    if (Dtset%gw_frqre_tangrid==1) then
-     write(msg,'(a)')' Tangent transfom grid will be used for real frequency grid'
-     MSG_WARNING(msg)
+     MSG_WARNING(' Tangent transfom grid will be used for real frequency grid')
    end if
-   if (Ep%nomegaer==-1) then 
+   if (Ep%nomegaer==-1) then
      Ep%nomegaer=NOMEGAREAL
-     write(msg,'(a,i5)')' Number of real frequencies set to default= ',NOMEGAREAL
-     MSG_WARNING(msg)
+     MSG_WARNING(sjoin(' Number of real frequencies set to default= ',itoa(NOMEGAREAL)))
    end if
    if (Ep%nomegaer==0) then
-     write(msg,'(a)')'  nfreqre = 0 ! Assuming experienced user.'
-     MSG_WARNING(msg)
+     MSG_WARNING('  nfreqre = 0 ! Assuming experienced user.')
    end if
    if (ABS(Ep%omegaermin)<TOL16) then
      Ep%omegaermin=zero
@@ -510,7 +498,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
      write(msg,'(2(a,i0))')' Using cd_subset_freq to only do freq. from ',istart,' to ',iend
      MSG_WARNING(msg)
      ! Reset the numbers
-     if (Dtset%gw_frqre_tangrid/=1) then ! Normal equidistant grid 
+     if (Dtset%gw_frqre_tangrid/=1) then ! Normal equidistant grid
        Ep%nomegaer = iend-istart+1
        domegareal=(Ep%omegaermax-Ep%omegaermin)/(Ep%nomegaer-1)
        Ep%omegaermin = Ep%omegaermin+(istart-1)*domegareal
@@ -577,8 +565,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
    ltest=(Ep%nqcalc<=Qmesh%nibz)
-   msg = 'nqptdm should not exceed the number of q points in the IBZ'
-   ABI_CHECK(ltest,msg)
+   ABI_CHECK(ltest, 'nqptdm should not exceed the number of q points in the IBZ')
    Ep%qcalc(:,:)=Dtset%qptdm(:,1:Ep%nqcalc)
    do iq=1,Ep%nqcalc ! * Check whether the q-points provided are correct.
      found=.FALSE.
@@ -587,8 +574,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
        found=(normv(qtmp,gmet,'G')<GW_TOLQ)
        if (found) EXIT
      end do
-     msg = 'One or more points specified by Dtset%qptdm do not satisfy q=k1-k2'
-     ABI_CHECK(found,msg)
+     ABI_CHECK(found, 'One or more points specified by Dtset%qptdm do not satisfy q=k1-k2')
    end do
  else
    Ep%qcalc(:,:)=Ep%qibz(:,:)
@@ -773,7 +759,7 @@ subroutine chi0_bksmask(Dtset,Ep,Kmesh,nbvw,nbcw,my_rank,nprocs,bks_mask,keep_ur
  character(len=500) :: msg
  logical :: store_ur
 !arrays
- integer :: my_spins(Dtset%nsppol),nprocs_spin(Dtset%nsppol) 
+ integer :: my_spins(Dtset%nsppol),nprocs_spin(Dtset%nsppol)
  integer,allocatable :: istart(:),istop(:)
 
 ! *************************************************************************
@@ -782,22 +768,22 @@ subroutine chi0_bksmask(Dtset,Ep,Kmesh,nbvw,nbcw,my_rank,nprocs,bks_mask,keep_ur
 
  my_nspins=Dtset%nsppol; my_spins= [(isp,isp=1,nsppol)]
 
- ! List of spins for each node, number of processors per each spin 
+ ! List of spins for each node, number of processors per each spin
  ! and the MPI rank in the "spin" communicator.
  nprocs_spin = nprocs; rank_spin = my_rank
 
- if (nsppol==2.and.nprocs>1) then 
+ if (nsppol==2.and.nprocs>1) then
    ! Distribute spins (optimal distribution if nprocs is even)
    nprocs_spin(1) = nprocs/2
    nprocs_spin(2) = nprocs - nprocs/2
    my_nspins=1; my_spins(1)=1
    if (my_rank+1>nprocs/2) then
      my_spins(1)=2
-     rank_spin = my_rank - nprocs/2 
+     rank_spin = my_rank - nprocs/2
    end if
  end if
 
- store_ur = (MODULO(Dtset%gwmem,10)==1) 
+ store_ur = (MODULO(Dtset%gwmem,10)==1)
  bks_mask=.FALSE.; keep_ur=.FALSE.
 
  select case (Dtset%gwpara)
@@ -818,7 +804,7 @@ subroutine chi0_bksmask(Dtset,Ep,Kmesh,nbvw,nbcw,my_rank,nprocs,bks_mask,keep_ur
      if (nprocs_spin(spin) <= nbcw) then
        ! Distribute nbcw empty bands among nprocs_spin (block of bands without replicas).
        ! Bands are distributed in contiguous blocks because
-       ! this distribution is well suited for the Hilber transform 
+       ! this distribution is well suited for the Hilber transform
        ! since each node will allocate only a smaller frequency interval
        ! for the spectral function whose size scales with the number of MPI nodes.
        ! Note it is now meaningless to distinguish gwcomp=0 or 1 since the workload is well balanced later on

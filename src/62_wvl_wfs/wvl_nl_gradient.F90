@@ -43,7 +43,7 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
  use m_errors
  use m_xmpi
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API, only: nonlocal_forces
 #endif
 
@@ -59,14 +59,14 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(wvl_data),intent(inout) :: wvl
 !arrays
  real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)
  real(dp),intent(inout) :: grnl(3,natom)
 
 !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 !scalars
  integer :: ia,ierr,igeo,me,nproc,spaceComm
  character(len=500) :: message
@@ -77,7 +77,7 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
 
 ! *************************************************************************
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
 !Compute forces
  write(message, '(a,a)' ) 'wvl_nl_gradient(): compute non-local part to gradient.'

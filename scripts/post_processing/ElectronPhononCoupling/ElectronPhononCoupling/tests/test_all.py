@@ -129,21 +129,22 @@ class AllTests(EPCTest):
 
         self.AssertClose(out, ref, 'zero_point_broadening')
 
-    def test_t24(self):
-        """Static Tdep Brd"""
+    # Not implemented
+    #def test_t24(self):
+    #    """Static Tdep Brd"""
 
-        root = pjoin(self.tmpdir, 't24')
-        ref = LiF_outputs['t24']
-        out = root + '_EP.nc'
+    #    root = pjoin(self.tmpdir, 't24')
+    #    ref = LiF_outputs['t24']
+    #    out = root + '_EP.nc'
 
-        compute_epc(
-            calc_type=2,
-            temperature=True,
-            lifetime=True,
-            output=root,
-            **self.common)
+    #    compute_epc(
+    #        calc_type=2,
+    #        temperature=True,
+    #        lifetime=True,
+    #        output=root,
+    #        **self.common)
 
-        self.AssertClose(out, ref, 'temperature_dependent_broadening')
+    #    self.AssertClose(out, ref, 'temperature_dependent_broadening')
 
     def test_t31(self):
         """Static ZP Ren"""
@@ -193,19 +194,20 @@ class AllTests(EPCTest):
 
         self.AssertClose(out, ref, 'zero_point_broadening')
 
-    def test_t34(self):
-        """Static Tdep Brd"""
+    # Not implemented
+    #def test_t34(self):
+    #    """Static Tdep Brd"""
 
-        root = pjoin(self.tmpdir, 't34')
-        ref = LiF_outputs['t34']
-        out = root + '_EP.nc'
+    #    root = pjoin(self.tmpdir, 't34')
+    #    ref = LiF_outputs['t34']
+    #    out = root + '_EP.nc'
 
-        compute_epc(
-            calc_type=3,
-            temperature=True,
-            lifetime=True,
-            output=root,
-            **self.common)
+    #    compute_epc(
+    #        calc_type=3,
+    #        temperature=True,
+    #        lifetime=True,
+    #        output=root,
+    #        **self.common)
 
-        self.AssertClose(out, ref, 'temperature_dependent_broadening')
+    #    self.AssertClose(out, ref, 'temperature_dependent_broadening')
 

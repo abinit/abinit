@@ -152,7 +152,6 @@ character(len=fnlen) :: file_displ,file_freq
 character(len=20) :: fmt_phfrq
 character(len=500) :: msg
 !arrays
-integer :: i(1)
 logical     ::               mask(3*natom)
 real(dp)    ::           phfrqNew(3*natom)
 complex(dpc) ::           displIn(3*natom,3*natom)
@@ -161,21 +160,20 @@ complex(dpc) ::           eigvecIn(3*natom,3*natom)
 complex(dpc) ::          eigvecNew(3*natom,3*natom)
 complex(dpc) ::   transpose_eigvec(3*natom,3*natom)
 real(dp)    ::     abs_similarity(3*natom,3*natom)  !|<displNew|displLast>|
-
 ! *********************************************************************
 
- do ipert2=1,natom
-   do idir2=1,3
-     i2=idir2+(ipert2-1)*3
-     do ipert1=1,natom
-       do idir1=1,3
-         i1=idir1+(ipert1-1)*3
-         eigvecIn(i1,i2)=cmplx(eigvec(1,idir1,ipert1,idir2,ipert2),eigvec(2,idir1,ipert1,idir2,ipert2))
-         displIn(i1,i2)=cmplx(displ(1+2*(i1-1)+2*3*natom*(i2-1)),displ(2+2*(i1-1)+2*3*natom*(i2-1)))
-       end do
-     end do
-   end do
- end do
+do ipert2=1,natom
+  do idir2=1,3
+    i2=idir2+(ipert2-1)*3
+    do ipert1=1,natom
+      do idir1=1,3
+        i1=idir1+(ipert1-1)*3
+        eigvecIn(i1,i2)=cmplx(eigvec(1,idir1,ipert1,idir2,ipert2),eigvec(2,idir1,ipert1,idir2,ipert2))
+        displIn(i1,i2)=cmplx(displ(1+2*(i1-1)+2*3*natom*(i2-1)),displ(2+2*(i1-1)+2*3*natom*(i2-1)))
+      end do
+    end do
+  end do
+end do
 
  if(.not.allocated(eigvecLast)) then
    file_freq  = trim(filnam)//".freq" !---------------------------------------------------
@@ -199,33 +197,29 @@ real(dp)    ::     abs_similarity(3*natom,3*natom)  !|<displNew|displLast>|
    transpose_eigvec = transpose(eigvecIn)
    abs_similarity = abs(matmul(conjg(transpose_eigvec),eigvecLast))
    mask(:) = .true.
-   do j = 1, 3*natom
-     i(:) = maxloc( abs_similarity(:,j), mask(:) )
-     mask(i(1)) = .false.
-     phfrqNew(j)   =    phfrq(i(1))
-     displNew(:,j) =  displIn(:,i(1))
-     eigvecNew(:,j) = eigvecIn(:,i(1))
-   end do
+   phfrqNew(:)   =  phfrq(:)
+   displNew(:,:) =  displIn(:,:)
+   eigvecNew(:,:) = eigvecIn(:,:)
  end if
 
 
 !Write frequencies in a file
- write(fmt_phfrq,'(a,i3,a)') '(', 3*natom, 'e14.6)'
+ write(fmt_phfrq,'(a,i3,a)') '(', 3*natom, 'e18.10)'
  write(ufreq,fmt_phfrq) (phfrqNew(j),j=1,3*natom)
 
 !write displacements in a file
 ! NB: sqrt still returns a complex number could be using modulus or something simpler
- do imode=1,3*natom
-   do iatom=1,natom
-     write(udispl,'(e14.6)') &
-     real(sqrt(       displNew(3*(iatom-1)+1,imode)*   &
-&     conjg(displNew(3*(iatom-1)+1,imode)) + &
-&     displNew(3*(iatom-1)+2,imode)*   &
-&     conjg(displNew(3*(iatom-1)+2,imode)) + &
-&     displNew(3*(iatom-1)+3,imode)*   &
-&     conjg(displNew(3*(iatom-1)+3,imode)) ))
+   do imode=1,3*natom
+     do iatom=1,natom
+       write(udispl,'(e18.10)') &
+       real(sqrt(displNew(3*(iatom-1)+1,imode)*   &
+       conjg(displNew(3*(iatom-1)+1,imode)) + &
+&      displNew(3*(iatom-1)+2,imode)*   &
+&      conjg(displNew(3*(iatom-1)+2,imode)) + &
+&      displNew(3*(iatom-1)+3,imode)*   &
+&      conjg(displNew(3*(iatom-1)+3,imode)) ))
+     end do
    end do
- end do
 
  eigvecLast(:,:) = eigvecNew(:,:)
 

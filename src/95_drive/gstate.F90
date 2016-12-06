@@ -142,7 +142,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use m_hdr
  use m_ebands
 
- use m_fstrings,         only : strcat
+ use m_fstrings,         only : strcat, sjoin
  use m_bz_mesh,          only : tetra_from_kptrlatt
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type
@@ -161,7 +161,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use m_iowf,             only : outwf
  use m_ioarr,            only : read_rhor
  use defs_wvltypes,      only : wvl_data,coulomb_operator,wvl_wf_type
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API,         only : wvl_timing => timing,xc_init,xc_end,XC_MIXED,XC_ABINIT,&
 &                               local_potential_dimensions,nullify_gaussian_basis, &
 &                               copy_coulomb_operator,deallocate_coulomb_operator
@@ -231,7 +231,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !scalars
  integer,parameter :: formeig=0,level=101,response=0 ,cplex1=1, master=0
  integer :: ndtpawuj=0  ! Cannot use parameter because scfargs points to this! Have to get rid of pointers to scalars!
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  integer :: icoulomb
 #endif
  integer :: ask_accurate,bantot,choice,comm_psp,fullinit
@@ -305,7 +305,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !  Default value, to be set-up elsewhere.
    wvl%descr%h(:)                 = dtset%wvl_hgrid
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
    wvl%descr%paw%usepaw=psps%usepaw
    wvl%descr%paw%natom=dtset%natom
 #endif
@@ -315,7 +315,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%ntypat, dtset%typat, wvl%descr)
    if(dtset%usepaw==0) then
 !    nullify PAW proj_G in NC case:
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
      ABI_DATATYPE_ALLOCATE(wvl%projectors%G,(dtset%ntypat))
      do itypat=1,dtset%ntypat
        call nullify_gaussian_basis(wvl%projectors%G(itypat))
@@ -445,7 +445,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call wvl_denspot_set(wvl%den, psps%gth_params, dtset%ixc, dtset%natom, dtset%nsppol, rprimd, &
 &   wvl%descr, dtset%wvl_crmult, dtset%wvl_frmult, mpi_enreg%comm_wvl, xred)
 !  TODO: to be moved in a routine.
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
    if (wvl%descr%atoms%astruct%geocode == "F") then
      icoulomb = 1
    else if (wvl%descr%atoms%astruct%geocode == "S") then
@@ -482,7 +482,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      call paw2wvl(pawtab,wvl%projectors,wvl%descr)
    end if
  else if (dtset%icoulomb /= 0) then
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
    if (dtset%ixc < 0) then
      call xc_init(wvl%den%denspot%xc, dtset%ixc, XC_MIXED, dtset%nsppol)
    else
@@ -567,7 +567,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (dtset%usewvl == 0) then
    nfftot=ngfft(1)*ngfft(2)*ngfft(3)
  else
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
    nfftot=product(wvl%den%denspot%dpbox%ndims)
 #else
    BIGDFT_NOTENABLED_ERROR()
@@ -597,7 +597,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (dtset%usewvl == 1) then
    call wvl_descr_atoms_set_sym(wvl%descr, dtset%efield, irrzon, dtset%nsppol, &
 &   dtset%nsym, phnons, dtset%symafm, dtset%symrel, dtset%tnons, dtset%tolsym)
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
    wvl%den%symObj = wvl%descr%atoms%astruct%sym%symObj
 #endif
  end if
@@ -635,7 +635,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   psps, rprimd, wvl%wfs, dtset%wtk, wvl%descr, dtset%wvl_crmult, dtset%wvl_frmult, &
 &   xred)
 !  We transfer wavelets information to the hdr structure.
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
    call local_potential_dimensions(mpi_enreg%me_wvl,wvl%wfs%ks%lzd,wvl%wfs%ks%orbs,wvl%den%denspot%xc,&
 &   wvl%den%denspot%dpbox%ngatherarr(0,1))
    hdr%nwvlarr(1) = wvl%wfs%ks%lzd%Glr%wfd%nvctr_c
@@ -881,7 +881,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ! Update internal values
      call paw_gencond(Dtset,gnt_option,"save",call_pawinit)
      call timab(553,2,tsec)
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 !    In the PAW+WVL case, copy sij:
      if(dtset%usewvl==1) then
        do itypat=1,dtset%ntypat
@@ -1020,7 +1020,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
            !since wavefunctions are taken from diagonalisation of LCAO.
            call wvl_mkrho(dtset, irrzon, mpi_enreg, phnons, rhor, wvl%wfs, wvl%den)
          else !usepaw
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
            call wvl_initro(atindx1,wvl%descr%atoms%astruct%geocode,wvl%descr%h,mpi_enreg%me_wvl,&
 &           dtset%natom,nattyp,nfftf,dtset%nspden,psps%ntypat,&
 &           wvl%descr%Glr%d%n1,wvl%descr%Glr%d%n1i,&
@@ -1110,7 +1110,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  rprimd_orig(:,:)=rprimd
 
  if (dtset%usewvl == 1 .and. wvl_debug) then
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
    call wvl_timing(me,'INIT','PR')
 #endif
  end if
@@ -1221,7 +1221,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Mark this GS computation as done
  initialized=1
  if (dtset%usewvl == 1 .and. wvl_debug) then
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
    call wvl_timing(me,'WFN_OPT','PR')
 #endif
  end if
@@ -1292,16 +1292,17 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call wfk_tofullbz(filnam, dtset, psps, pawtab, wfkfull_path)
 
    ! Write tetrahedron tables.
-   if (dtset%nkpt >= 4 .and. .not. all(dtset%kptrlatt == 0)) then
-     call crystal_from_hdr(cryst,hdr,2)
-     call tetra_from_kptrlatt(tetra, cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
-     dtset%shiftk, dtset%nkpt, dtset%kptns)
+   call crystal_from_hdr(cryst, hdr, 2)
+   tetra = tetra_from_kptrlatt(cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
+     dtset%shiftk, dtset%nkpt, dtset%kptns, message, ierr)
+   if (ierr == 0) then
      call tetra_write(tetra, dtset%nkpt, dtset%kptns, strcat(dtfil%filnam_ds(4), "_TETRA"))
-     call destroy_tetra(tetra)
-     call crystal_free(cryst)
    else
-     MSG_WARNING("nkpt < 4 or kptrlatt == 0, cannot produce TETRA file")
+     MSG_WARNING(sjoin("Cannot produce TETRA file", ch10, message))
    end if
+
+   call destroy_tetra(tetra)
+   call crystal_free(cryst)
  end if
 
  call clnup1(acell,dtset,eigen,results_gs%energies%e_fermie,&
@@ -1689,7 +1690,7 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
        write(message, '(a,2f12.3)' ) &
 &       '_setup2: Arith. and geom. avg. npw (full set) are',arith+tol8,geom
      else
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
        write(message, '(a,2I8)' ) ' setup2: nwvl coarse and fine are', &
 &       wfs%ks%lzd%Glr%wfd%nvctr_c, wfs%ks%lzd%Glr%wfd%nvctr_f
 #endif
@@ -1703,7 +1704,7 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !write(std_out,*)' setup2 : leave '
 !ENDDEBUG
 
-#if !defined HAVE_DFT_BIGDFT
+#if !defined HAVE_BIGDFT
    if (.false.) write(std_out,*) wfs%ks
 #endif
 

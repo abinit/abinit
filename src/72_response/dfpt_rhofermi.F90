@@ -57,7 +57,7 @@
 !!  ngfftf(1:18)=integer array with FFT box dimensions and other for the "fine" grid
 !!  nhatfermi(nfft,nspden)=array for fermi-level compensation charge density (PAW only)
 !!  nkpt_rbz=number of k points in the IBZ for this perturbation
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  npwarr(nkpt_rbz)=number of planewaves in basis at this GS k point
 !!  npwar1(nkpt_rbz)=number of planewaves in basis at this RF k+q point
@@ -103,9 +103,6 @@
 !!   (nonlocal and kinetic in the case of strain)
 !!  nhatfermi(cplex*nfftf,nspden)=fermi-level compensation charge density (PAW only)
 !!  rhorfermi(cplex*nfftf,nspden)=fermi-level electronic density
-!!
-!! SIDE EFFECTS
-!!  mpi_enreg=information about MPI parallelization
 !!
 !! NOTES
 !!  This routine will NOT work with nspden==4:
@@ -187,7 +184,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  integer,intent(in) :: prtvol,usecprj,useylmgr1
  real(dp),intent(in) :: ucvol
  real(dp),intent(out) :: fe1fixed
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(pawang_type),intent(in) :: pawang,pawang1

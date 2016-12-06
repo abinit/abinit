@@ -29,10 +29,10 @@ MODULE m_errors
  use defs_basis
  use m_profiling_abi
  use m_xmpi
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  use etsf_io_low_level
  use etsf_io
 #endif
@@ -72,10 +72,11 @@ include "fexcp.h"
  public :: die              ! Stop execution in case of unexpected events.
  public :: msg_hndl         ! Basic Error handlers.
  public :: netcdf_check     ! Stop execution after a NetCDF I/O error
- public :: check_mpi_ierr   ! Erro handler for MPI routines.
- public :: show_backtrace   ! Shows a backtrace at an arbitrary place in user code. (Gfortran extension)
+ public :: check_mpi_ierr   ! Error handler for MPI routines.
+ public :: set_backtrace_onerr ! Activate show_backtrace call in msg_hndl. 0 to disable it.
+ !public :: show_backtrace   ! Shows a backtrace at an arbitrary place in user code. (Gfortran/Ifort extension)
  public :: unused_var       ! Helper function used to silence compiler warnings due to unused variables.
-#if defined HAVE_TRIO_ETSF_IO
+#if defined HAVE_ETSF_IO
  public :: abietsf_msg_hndl ! Error handler for ETSF-IO routines.
  public :: abietsf_warn     ! Write warnings reported by ETSF-IO routines.
 #endif
@@ -84,14 +85,19 @@ include "fexcp.h"
  public :: abinit_doctor         ! Perform checks on memory leaks and leaking file descriptors
                                  ! at the end of the run.
 
- interface assert_eq  
+ ! This flag activate the output of the backtrace in msg_hndl
+ ! Unfortunately, gcc4.9 seems to crash inside this routine
+ ! hence, for the time being, this optional feature has been disabled
+ integer, save, private :: m_errors_show_backtrace = 0
+
+ interface assert_eq
    module procedure assert_eq2
    module procedure assert_eq3
    module procedure assert_eq4
    module procedure assert_eqn
  end interface assert_eq
 
- interface assert 
+ interface assert
    module procedure assert1
    module procedure assert2
    module procedure assert3
@@ -121,7 +127,7 @@ CONTAINS  !===========================================================
 !! FUNCTION
 !!  Report and die gracefully if integers not all equal (used for size checking).
 !!
-!! INPUTS 
+!! INPUTS
 !!  l1,l2,.. Integers to be checked (array version is also provided)
 !!  message(len=*)=tag with additional information
 !!
@@ -139,7 +145,7 @@ function assert_eq2(l1,l2,message,file,line)
  implicit none
 
 !Arguments ------------------------------------
- integer,intent(in) :: l1,l2 
+ integer,intent(in) :: l1,l2
  integer,optional,intent(in) :: line
  integer :: assert_eq2
  character(len=*),intent(in) :: message
@@ -171,7 +177,7 @@ end function assert_eq2
 !! FUNCTION
 !!  Report and die gracefully if integers not all equal (used for size checking).
 !!
-!! INPUTS 
+!! INPUTS
 !!  l1,l2,.. Integers to be checked (array version is also provided)
 !!  message(len=*)=tag with additional information
 !!
@@ -189,7 +195,7 @@ function assert_eq3(l1,l2,l3,message,file,line)
  implicit none
 
 !Arguments ------------------------------------
- integer,intent(in) :: l1,l2,l3 
+ integer,intent(in) :: l1,l2,l3
  integer,optional,intent(in) :: line
  integer :: assert_eq3
  character(len=*),intent(in) :: message
@@ -220,7 +226,7 @@ end function assert_eq3
 !! FUNCTION
 !!  Report and die gracefully if integers not all equal (used for size checking).
 !!
-!! INPUTS 
+!! INPUTS
 !!  l1,l2,.. Integers to be checked (array version is also provided)
 !!  message(len=*)=tag with additional information
 !!
@@ -239,7 +245,7 @@ function assert_eq4(l1,l2,l3,l4,message,file,line)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: l1,l2,l3,l4 
+ integer,intent(in) :: l1,l2,l3,l4
  integer,optional,intent(in) :: line
  integer :: assert_eq4
  character(len=*),intent(in) :: message
@@ -288,7 +294,7 @@ function assert_eqn(nn,message,file,line)
  integer,optional,intent(in) :: line
  integer :: assert_eqn
  character(len=*),intent(in) :: message
- character(len=*),optional,intent(in) :: file 
+ character(len=*),optional,intent(in) :: file
 !arrays
  integer,intent(in) :: nn(:)
 
@@ -315,10 +321,10 @@ end function assert_eqn
 !!  assert1
 !!
 !! FUNCTION
-!!  Routines for argument checking and error handling. Report and die if 
+!!  Routines for argument checking and error handling. Report and die if
 !!  any logical is false (used for arg range checking).
 !!
-!! INPUTS 
+!! INPUTS
 !!  l1,l2,.. logical values to be checked (array version is also provided)
 !!  message(len=*)=tag with additiona information
 !!
@@ -367,10 +373,10 @@ end subroutine assert1
 !!  assert2
 !!
 !! FUNCTION
-!!  Routines for argument checking and error handling. Report and die if 
+!!  Routines for argument checking and error handling. Report and die if
 !   any logical is false (used for arg range checking).
 !!
-!! INPUTS 
+!! INPUTS
 !!  l1,l2,.. logical values to be checked (array version is also provided)
 !!  message(len=*)=tag with additional information
 !!
@@ -419,10 +425,10 @@ end subroutine assert2
 !!  assert3
 !!
 !! FUNCTION
-!!  Routines for argument checking and error handling. Report and die if 
+!!  Routines for argument checking and error handling. Report and die if
 !!  any logical is false (used for arg range checking).
 !!
-!! INPUTS 
+!! INPUTS
 !!  l1,l2,.. logical values to be checked (array version is also provided)
 !!  message(len=*)=tag with additional information
 !!
@@ -471,10 +477,10 @@ end subroutine assert3
 !!  assert4
 !!
 !! FUNCTION
-!!  Routines for argument checking and error handling. Report and die if 
+!!  Routines for argument checking and error handling. Report and die if
 !!  any logical is false (used for arg range checking).
 !!
-!! INPUTS 
+!! INPUTS
 !!  l1,l2,.. logical values to be checked (array version is also provided)
 !!  message(len=*)=tag with additional information
 !!
@@ -523,7 +529,7 @@ end subroutine assert4
 !!  assert_v
 !!
 !! FUNCTION
-!!  Routines for argument checking and error handling. Report and die if 
+!!  Routines for argument checking and error handling. Report and die if
 !!  any logical is false (used for arg range checking).
 !!
 !! PARENTS
@@ -573,7 +579,7 @@ end subroutine assert_v
 !! FUNCTION
 !!  Error handler for Netcdf calls.
 !!
-!! INPUTS 
+!! INPUTS
 !!  ncerr=Status error returned by the Netcdf library.
 !!  msg=User-defined string with info on the action that was performed
 !!  file= name of the file.
@@ -609,19 +615,19 @@ subroutine netcdf_check(ncerr,msg,file,line)
 !Local variables-------------------------------
  integer :: f90line
  character(len=500) :: f90name
- character(len=1024) :: nc_msg 
+ character(len=1024) :: nc_msg
  character(len=2048) :: my_msg
 
 ! *************************************************************************
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  if (ncerr /= NF90_NOERR) then
    if (PRESENT(line)) then
      f90line=line
-   else 
+   else
      f90line=0
    end if
-   if (PRESENT(file)) then 
+   if (PRESENT(file)) then
      f90name = basename(file)
    else
      f90name='Subroutine Unknown'
@@ -648,9 +654,9 @@ end subroutine netcdf_check
 !! FUNCTION
 !!  Announce the entering and the exiting from a function. Useful for poor-man debugging.
 !!
-!! INPUTS 
+!! INPUTS
 !!  level=1 when entering, 2 for exit.
-!!  mode_paral= ['COLL'|'PERS'|'COLL_SILENT|PERS_SILENT'] 
+!!  mode_paral= ['COLL'|'PERS'|'COLL_SILENT|PERS_SILENT']
 !!   'COLL' and 'PERS' refer to the output mode used in wrtout to report the message.
 !!   'COLL_SILENT' and 'PERS_SILENT' can be used if the procedure is called several times inside a loop.
 !!   In this case sentinel will report only the first entry and the first exit using either 'COLL' or 'PERS' mode.
@@ -678,7 +684,7 @@ subroutine sentinel(level,mode_paral,file,func,line)
  use interfaces_14_hidewrite
 !End of the abilint section
 
- implicit none 
+ implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: level
@@ -688,7 +694,7 @@ subroutine sentinel(level,mode_paral,file,func,line)
  character(len=*),optional,intent(in) :: file
 
 !Local variables-------------------------------
- integer,save :: level_save=0 
+ integer,save :: level_save=0
  integer :: ii
  integer :: f90line
  character(len=500),save :: func_save
@@ -721,17 +727,17 @@ subroutine sentinel(level,mode_paral,file,func,line)
  write(lnum,"(i0)")f90line
  my_func= TRIM(my_func)//"@"//TRIM(my_file)//":"//TRIM(lnum)
 
- if (level==1) then 
+ if (level==1) then
     msg = ' '//TRIM(my_func)//' >>>>> ENTER'//ch10
  else if (level==2) then
     msg = ' '//TRIM(my_func)//' >>>>> EXIT '//ch10
- else 
+ else
     call die('Wrong level', &
 &   __FILE__,&
 &   __LINE__)
  end if
 
- call wrtout(std_out,msg,my_mode) 
+ call wrtout(std_out,msg,my_mode)
  call flush_unit(std_out)
 
 end subroutine sentinel
@@ -745,11 +751,11 @@ end subroutine sentinel
 !!
 !! FUNCTION
 !!  Stop smoothly the execution in case of unexpected events reporting the
-!!  line number and the file name where the error occurred as well as the 
-!!  MPI rank of the processor. This routine is usually interfaced through 
+!!  line number and the file name where the error occurred as well as the
+!!  MPI rank of the processor. This routine is usually interfaced through
 !!  some macro defined in abi_common.h
 !!
-!! INPUTS 
+!! INPUTS
 !!  message=String containing additional information on the nature of the problem
 !!  line=Line number of the file where problem occurred
 !!  f90name=Name of the f90 file containing the caller
@@ -781,7 +787,7 @@ subroutine die(message,file,line)
  character(len=*),optional,intent(in) :: file
 
 !Local variables-------------------------------
- integer :: rank 
+ integer :: rank
  integer :: f90line=0
  character(len=10) :: lnum,strank
  character(len=500) :: f90name='Subroutine Unknown'
@@ -803,7 +809,7 @@ subroutine die(message,file,line)
 & TRIM(msg),ch10,&
 & TRIM(message)
 
- call wrtout(std_out,msg,'PERS') 
+ call wrtout(std_out,msg,'PERS')
  call leave_new('PERS')
 
 end subroutine die
@@ -818,7 +824,7 @@ end subroutine die
 !! FUNCTION
 !!  Basic error handler for abinit. This routine is usually interfaced through some macro defined in abi_common.h
 !!
-!! INPUTS 
+!! INPUTS
 !!  message=string containing additional information on the nature of the problem
 !!  level=string defining the type of problem. Possible values are
 !!   COMMENT
@@ -865,19 +871,19 @@ subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP)
  integer :: f90line,ierr
  character(len=10) :: lnum
  character(len=500) :: f90name
- character(len=LEN(message)) :: my_msg 
- character(len=MAX(4*LEN(message),2000)) :: sbuf ! Increase size and keep fingers crossed! 
+ character(len=LEN(message)) :: my_msg
+ character(len=MAX(4*LEN(message),2000)) :: sbuf ! Increase size and keep fingers crossed!
 
 ! *********************************************************************
 
  if (PRESENT(line)) then
    f90line=line
- else 
+ else
    f90line=0
  end if
  write(lnum,"(i0)")f90line
 
- if (PRESENT(file)) then 
+ if (PRESENT(file)) then
    f90name = basename(file)
  else
    f90name='Subroutine Unknown'
@@ -895,17 +901,17 @@ subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP)
      "src_line: ",f90line,ch10,&
      "message: |",ch10,TRIM(indent(my_msg)),ch10,&
      "...",ch10
-   call wrtout(std_out,sbuf,mode_paral) 
+   call wrtout(std_out,sbuf,mode_paral)
 
  ! ERROR' or 'BUG'
- case default 
+ case default
 
    if ((.not.present(NOSTOP)).and.(.not.present(NODUMP))) then
-     call print_kinds()
-     call xmpi_show_info()
-     call dump_config(std_out)
+     !call print_kinds()
+     !call xmpi_show_info()
+     !call dump_config(std_out)
      ! Dump the backtrace if the compiler supports it.
-     call show_backtrace()
+     if (m_errors_show_backtrace == 1) call show_backtrace()
    end if
 
    write(sbuf,'(8a,i0,2a,i0,7a)')ch10,&
@@ -915,7 +921,7 @@ subroutine msg_hndl(message,level,mode_paral,file,line,NODUMP,NOSTOP)
      "mpi_rank: ",xmpi_comm_rank(xmpi_world),ch10,&
      "message: |",ch10,TRIM(indent(my_msg)),ch10,&
      "...",ch10
-   call wrtout(std_out,sbuf,mode_paral) 
+   call wrtout(std_out,sbuf,mode_paral)
 
    if (.not.present(NOSTOP)) then
      ! The first MPI proc that gets here, writes the ABI_MPIABORTFILE with the message!
@@ -934,16 +940,50 @@ end subroutine msg_hndl
 
 !----------------------------------------------------------------------
 
+!!****f* m_errors/set_backtrace_onerr
+!! NAME
+!! set_backtrace_onerr
+!!
+!! FUNCTION
+!!  1 to activate show_backtrace call in msg_hndl. 0 to disable it
+!!
+!! PARENTS
+!!      m_errors
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine set_backtrace_onerr(iflag)
+
+!Arguments ------------------------------------
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'set_backtrace_onerr'
+!End of the abilint section
+
+ integer,intent(in) :: iflag
+! *********************************************************************
+
+  m_errors_show_backtrace = iflag
+
+end subroutine set_backtrace_onerr
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_errors/show_backtrace
 !! NAME
 !! show_backtrace
 !!
 !! FUNCTION
-!!  shows a backtrace at an arbitrary place in user code. 
-!!  Program execution continues normally afterwards. 
-!!  The backtrace information is printed to the unit corresponding to ERROR_UNIT in ISO_FORTRAN_ENV. 
+!!  shows a backtrace at an arbitrary place in user code.
+!!  Program execution continues normally afterwards.
+!!  The backtrace information is printed to the unit corresponding to ERROR_UNIT in ISO_FORTRAN_ENV.
 !!  This is a (Gfortran extension| Ifort Extension)
-!!  
+!!
 !! PARENTS
 !!      m_errors
 !!
@@ -981,7 +1021,7 @@ end subroutine show_backtrace
 !! FUNCTION
 !!  Basic error handler for MPI calls. This routine is usually interfaced through some macro defined in abi_common.h
 !!
-!! INPUTS 
+!! INPUTS
 !!  ierr=Exit status reported by an MPI call.
 !!  line=line number of the file where problem occurred
 !!  file=name of the f90 file containing the caller
@@ -1049,10 +1089,10 @@ end subroutine check_mpi_ierr
 !!  unused_int
 !!
 !! FUNCTION
-!!  Helper function used to silence compiler warnings due to unused variables.  
+!!  Helper function used to silence compiler warnings due to unused variables.
 !!  Interfaced via the ABI_UNUSED macro.
 !!
-!! INPUTS 
+!! INPUTS
 !!  var=Scalar integer value
 !!
 !! OUTPUT
@@ -1062,7 +1102,7 @@ end subroutine check_mpi_ierr
 !!
 !! SOURCE
 
-elemental subroutine unused_int(var) 
+elemental subroutine unused_int(var)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1092,10 +1132,10 @@ end subroutine unused_int
 !!  unused_real_dp
 !!
 !! FUNCTION
-!!  Helper function used to silence warning messages due to unused variables.  
+!!  Helper function used to silence warning messages due to unused variables.
 !!  Interfaced via the ABI_UNUSED macro.
 !!
-!! INPUTS 
+!! INPUTS
 !!  var=Scalar real value.
 !!
 !! OUTPUT
@@ -1108,7 +1148,7 @@ end subroutine unused_int
 !!
 !! SOURCE
 
-elemental subroutine unused_real_dp(var) 
+elemental subroutine unused_real_dp(var)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1138,7 +1178,7 @@ end subroutine unused_real_dp
 !!  unused_real_sp
 !!
 !! FUNCTION
-!!  Helper function used to silence compiler warnings due to unused variables.  
+!!  Helper function used to silence compiler warnings due to unused variables.
 !!  Interfaced via the ABI_UNUSED macro. Target: one-dimensional real(dp) vector.
 !!
 !! SOURCE
@@ -1173,10 +1213,10 @@ end subroutine unused_real_sp
 !!  unused_cplx_spc
 !!
 !! FUNCTION
-!!  Helper function used to silence compiler warnings due to unused variables.  
+!!  Helper function used to silence compiler warnings due to unused variables.
 !!  Interfaced via the ABI_UNUSED macro.
 !!
-!! INPUTS 
+!! INPUTS
 !!  var=Scalar complex value
 !!
 !! OUTPUT
@@ -1184,7 +1224,7 @@ end subroutine unused_real_sp
 !!
 !! SOURCE
 
-elemental subroutine unused_cplx_spc(var) 
+elemental subroutine unused_cplx_spc(var)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1214,10 +1254,10 @@ end subroutine unused_cplx_spc
 !!  unused_cplx_dpc
 !!
 !! FUNCTION
-!!  Helper function used to silence compiler warnings due to unused variables.  
+!!  Helper function used to silence compiler warnings due to unused variables.
 !!  Interfaced via the ABI_UNUSED macro.
 !!
-!! INPUTS 
+!! INPUTS
 !!  var=Scalar complex value
 !!
 !! OUTPUT
@@ -1230,7 +1270,7 @@ end subroutine unused_cplx_spc
 !!
 !! SOURCE
 
-elemental subroutine unused_cplx_dpc(var) 
+elemental subroutine unused_cplx_dpc(var)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1260,10 +1300,10 @@ end subroutine unused_cplx_dpc
 !!  unused_logical
 !!
 !! FUNCTION
-!!  Helper function used to silence compiler warnings due to unused variables.  
+!!  Helper function used to silence compiler warnings due to unused variables.
 !!  Interfaced via the ABI_UNUSED macro.
 !!
-!! INPUTS 
+!! INPUTS
 !!  var=Scalar logical value
 !!
 !! OUTPUT
@@ -1276,7 +1316,7 @@ end subroutine unused_cplx_dpc
 !!
 !! SOURCE
 
-elemental subroutine unused_logical(var) 
+elemental subroutine unused_logical(var)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1306,10 +1346,10 @@ end subroutine unused_logical
 !!  unused_ch
 !!
 !! FUNCTION
-!!  Helper function used to silence compiler warnings due to unused variables.  
+!!  Helper function used to silence compiler warnings due to unused variables.
 !!  Interfaced via the ABI_UNUSED macro.
 !!
-!! INPUTS 
+!! INPUTS
 !!  var=Scalar character value
 !!
 !! OUTPUT
@@ -1322,7 +1362,7 @@ end subroutine unused_logical
 !!
 !! SOURCE
 
-elemental subroutine unused_ch(var) 
+elemental subroutine unused_ch(var)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1355,7 +1395,7 @@ end subroutine unused_ch
 !!  Wrapper to interface the abinint error handlers with the error handling routines used in etsf-io.
 !!  It is usually interfaced via the macro ETSF_* defined in abi_common.h
 !!
-!! INPUTS 
+!! INPUTS
 !!  lstat=Logical flag returned by etsf-io routines.
 !!  Error_data<ETSF_io_low_error>=Structure storing the error returned by etsf-io calls.
 !!  [line]=line number of the file where the problem occurred
@@ -1372,7 +1412,7 @@ end subroutine unused_ch
 !!
 !! SOURCE
 
-#if defined HAVE_TRIO_ETSF_IO
+#if defined HAVE_ETSF_IO
 
 subroutine abietsf_msg_hndl(lstat,Error_data,mode_paral,file,line)
 
@@ -1416,10 +1456,10 @@ end subroutine abietsf_msg_hndl
 !!  abietsf_warn
 !!
 !! FUNCTION
-!!  Wrapper to write warning messages, only used for ETSF_IO routines 
+!!  Wrapper to write warning messages, only used for ETSF_IO routines
 !!  It is usually interfaced via the macro ETSF_WARN defined in abi_common.h
 !!
-!! INPUTS 
+!! INPUTS
 !!  lstat=status error.
 !!  Error_data<ETSF_io_low_error>=Structure storing the error returned by etsf-io calls.
 !!  [line]=line number of the file where the problem occurred
@@ -1461,7 +1501,7 @@ subroutine abietsf_warn(lstat,Error_data,mode_paral,file,line)
  character(len=etsf_io_low_error_len) :: errmess
 ! *********************************************************************
 
- if (lstat) RETURN 
+ if (lstat) RETURN
 
  if (PRESENT(line)) f90line=line
  if (PRESENT(file)) f90name = file
@@ -1484,7 +1524,7 @@ end subroutine abietsf_warn
 !!  Stop the code if bigdft library has not been enabled.
 !!  Interfaced with the CPP macro BIGDFT_NOTENABLED_ERROR
 !!
-!! INPUTS 
+!! INPUTS
 !!  line=line number of the file where problem occurred
 !!  file=name of the f90 file containing the caller
 !!
@@ -1541,18 +1581,18 @@ end subroutine bigdft_lib_error
 !!   See http://publib.boulder.ibm.com/infocenter/compbgpl/v9v111/index.jsp?topic=/com.ibm.xlf111.bg.doc/xlfopg/fptrap.htm
 !!   The XL Fortran exception handlers and related routines are:
 !!   xl__ieee
-!!   Produces a traceback and an explanation of the signal and continues execution by supplying the default IEEE result 
+!!   Produces a traceback and an explanation of the signal and continues execution by supplying the default IEEE result
 !!   for the failed computation. This handler allows the program to produce the same results as if exception detection was not turned on.
 !!   xl__trce
 !!   Produces a traceback and stops the program.
 !!   xl__trcedump
 !!   Produces a traceback and a core file and stops the program.
 !!   xl__sigdump
-!!   Provides a traceback that starts from the point at which it is called and provides information about the signal. 
-!!   You can only call it from inside a user-written signal handler. 
+!!   Provides a traceback that starts from the point at which it is called and provides information about the signal.
+!!   You can only call it from inside a user-written signal handler.
 !!   It does not stop the program. To successfully continue, the signal handler must perform some cleanup after calling this subprogram.
 !!   xl__trbk
-!!   Provides a traceback that starts from the point at which it is called. 
+!!   Provides a traceback that starts from the point at which it is called.
 !!   You call it as a subroutine from your code, rather than specifying it with the -qsigtrap option. It requires no parameters. It does not stop the program.
 !!
 !! PARENTS
@@ -1647,7 +1687,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
 
 #ifdef HAVE_MEM_PROFILING
  errmsg = ""; ierr = 0
- 
+
  ! Test on memory leaks.
  call abimem_get_info(nalloc, ndealloc, memtot)
  call abimem_shutdown()
@@ -1664,7 +1704,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
 &      '   There were ',nalloc,' allocations and ',ndealloc,' deallocations',ch10, &
 &      '   Remaining memory at the end of the calculation is ',memtot,ch10, &
 &      '   As a help for debugging, you might set call abimem_init(2) in the main program,', ch10,&
-&      '   then use tests/Scripts/memcheck.py to analyse the file abimem_rank[num].mocc that has been created.',ch10,&
+&      '   then use tests/Scripts/abimem.py to analyse the file abimem_rank[num].mocc that has been created.',ch10,&
        '   Note that abimem files can easily be multiple GB in size so do not use this option normally!'
      ! And this will make the code call mpi_abort if the leak occurs on my_rank != master
      ierr = ierr + 1
@@ -1678,9 +1718,9 @@ subroutine abinit_doctor(prefix, print_mem_report)
  end if
 
  ! Test whether all logical units have been closed.
- ! If you wonder why I'm doing this, remember that there's a per-user 
+ ! If you wonder why I'm doing this, remember that there's a per-user
  ! limit on the maximum number of open file descriptors. Hence descriptors
- ! represent a precious resource and we should close them as soon as possible. 
+ ! represent a precious resource and we should close them as soon as possible.
  ii = num_opened_units(ignore=[std_err, std_in, std_out, ab_out])
  if (ii > 0) then
    path = strcat(prefix, "_lunits_rank", itoa(my_rank), ".flun")

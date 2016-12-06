@@ -84,7 +84,7 @@ _ WF disk file :      1.037 Mbytes ; DEN or POT disk file :      0.135 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -604,12 +604,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     524.167     524.148
   prteigrs : nnsclo,ikpt=   70    3 max resid (incl. the buffer)=  2.51032E-05
   prteigrs : nnsclo,ikpt=   70    4 max resid (incl. the buffer)=  3.35913E-04
 
- Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  3.3000000 -3.3000000  0.0000000  G(1)=  0.1515152 -0.1515152  0.0000000
- R(2)=  3.3000000  3.3000000  0.0000000  G(2)=  0.1515152  0.1515152  0.0000000
- R(3)=  0.0000000  0.0000000  6.6000000  G(3)=  0.0000000  0.0000000  0.1515152
- Unit cell volume ucvol=  1.4374800E+02 bohr^3
- Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Note: Diff(up-dn) is a rough approximation of local magnetic moment
@@ -736,12 +730,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     524.167     524.148
   prteigrs : nnsclo,ikpt=   70    3 max resid (incl. the buffer)=  2.51032E-05
   prteigrs : nnsclo,ikpt=   70    4 max resid (incl. the buffer)=  3.35913E-04
 
- Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  3.3000000 -3.3000000  0.0000000  G(1)=  0.1515152 -0.1515152  0.0000000
- R(2)=  3.3000000  3.3000000  0.0000000  G(2)=  0.1515152  0.1515152  0.0000000
- R(3)=  0.0000000  0.0000000  6.6000000  G(3)=  0.0000000  0.0000000  0.1515152
- Unit cell volume ucvol=  1.4374800E+02 bohr^3
- Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Note: Diff(up-dn) is a rough approximation of local magnetic moment

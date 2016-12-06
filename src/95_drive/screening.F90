@@ -95,7 +95,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  use m_ab7_mixing
  use m_kxc
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use libxc_functionals
@@ -104,12 +104,12 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_fstrings,      only : int2char10, sjoin, strcat, itoa
  use m_energies,      only : energies_type, energies_init
- use m_numeric_tools, only : print_arr, iseven
+ use m_numeric_tools, only : print_arr, iseven, coeffs_gausslegint
  use m_geometry,      only : normv, vdotw
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_free, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg
  use m_crystal,       only : crystal_free, crystal_t
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use m_crystal_io,    only : crystal_ncwrite
 #endif
  use m_ebands,        only : ebands_update_occ, ebands_copy, get_valence_idx, get_occupied, apply_scissor, &
@@ -144,7 +144,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 #define ABI_FUNC 'screening'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_53_ffts
@@ -1211,7 +1210,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        ikxc=0; test_type=0; tordering=1
        hchi0 = hscr_new("polarizability",dtset,ep,hdr_local,ikxc,test_type,tordering,title,Ep%npwe,Gsph_epsG0%gvec)
        if (dtset%iomode == IO_MODE_ETSF) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
          NCF_CHECK(nctk_open_create(unt_susc, nctk_ncify(dtfil%fnameabo_sus), xmpi_comm_self))
          NCF_CHECK(crystal_ncwrite(cryst, unt_susc))
          NCF_CHECK(ebands_ncwrite(QP_BSt, unt_susc))
@@ -1317,21 +1316,24 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
 
 !  @WC: bootstrap --
-   case (-3, -4)
+   case (-3, -4, -5, -6, -7, -8)
      ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
-     MSG_WARNING('EXPERIMENTAL: Bootstrap kernel is being added to screening')
-     approx_type=4; dim_kxcg=0
-     if (Dtset%gwgamma==-3) option_test=1 ! TESTELECTRON, vertex in chi0 *and* sigma
-     if (Dtset%gwgamma==-4) option_test=0 ! TESTPARTICLE, vertex in chi0 only
-     ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg)) !--@WC
-
-   case (-5, -6)
-     ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
-     MSG_WARNING('EXPERIMENTAL: Bootstrap kernel (one-shot) is being added to screening')
-     approx_type=5; dim_kxcg=0
-     if (Dtset%gwgamma==-5) option_test=1 ! TESTELECTRON, vertex in chi0 *and* sigma
-     if (Dtset%gwgamma==-6) option_test=0 ! TESTPARTICLE, vertex in chi0 only
-     ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg)) !--@WC
+     if (Dtset%gwgamma>-5) then
+        MSG_WARNING('EXPERIMENTAL: Bootstrap kernel is being added to screening')
+        approx_type=4 
+     else if (Dtset%gwgamma>-7) then
+        MSG_WARNING('EXPERIMENTAL: Bootstrap kernel (head-only) is being added to screening')
+        approx_type=5
+     else 
+        MSG_WARNING('EXPERIMENTAL: Bootstrap kernel (RPA-type, head-only) is being added to screening')
+        approx_type=6
+     end if
+     dim_kxcg=0
+     option_test=MOD(Dtset%gwgamma,2)
+     ! 1 -> TESTELECTRON, vertex in chi0 *and* sigma
+     ! 0 -> TESTPARTICLE, vertex in chi0 only
+     ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg)) 
+!--@WC
 
    case default
      MSG_ERROR(sjoin("Wrong gwgamma:", itoa(dtset%gwgamma)))
@@ -1345,7 +1347,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      call make_epsm1_driver(iqibz,dim_wing,Ep%npwe,Ep%nI,Ep%nJ,Ep%nomega,Ep%omega,&
      approx_type,option_test,Vcp,nfftf_tot,ngfftf,dim_kxcg,kxcg,Gsph_epsG0%gvec,&
      chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm,fxc_ADA=fxc_ADA(:,:,iqibz))
-   else if (approx_type<6) then !@WC: bootstrap
+   else if (approx_type<7) then !@WC: bootstrap
      call make_epsm1_driver(iqibz,dim_wing,Ep%npwe,Ep%nI,Ep%nJ,Ep%nomega,Ep%omega,&
      approx_type,option_test,Vcp,nfftf_tot,ngfftf,dim_kxcg,kxcg,Gsph_epsG0%gvec,&
      chi0_head,chi0_lwing,chi0_uwing,chi0,spectra,comm)
@@ -1432,7 +1434,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 &       Ep%npwe,Gsph_epsG0%gvec)
        fform_em1 = hem1%fform
        if (dtset%iomode == IO_MODE_ETSF) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
          NCF_CHECK(nctk_open_create(unt_em1, nctk_ncify(dtfil%fnameabo_scr), xmpi_comm_self))
          NCF_CHECK(crystal_ncwrite(cryst, unt_em1))
          NCF_CHECK(ebands_ncwrite(QP_BSt, unt_em1))
@@ -1458,7 +1460,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! Close Files.
  if (my_rank==master) then
    if (dtset%iomode == IO_MODE_ETSF) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(unt_em1))
      if (dtset%prtsuscep>0) then
        NCF_CHECK(nf90_close(unt_susc))

@@ -7,7 +7,7 @@
 !!  This module contains basic tools for numeric computations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2016 ABINIT group (MG, GMR, MJV, XG, MVeithen)
+!! Copyright (C) 2008-2016 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,6 +56,7 @@ MODULE m_numeric_tools
  public :: llsfit_svd            ! Linear least squares fit with SVD of an user-defined set of functions
  public :: polyn_interp          ! Polynomial interpolation with Nevilles"s algorithms, error estimate is reported 
  public :: quadrature            ! Driver routine for performing quadratures in finite domains using different algorithms
+ public :: coeffs_gausslegint    ! Compute the coefficients (supports and weights) for Gauss-Legendre integration.
  public :: simpson_cplx          ! Integrate a complex function via extended Simpson's rule.
  public :: hermitianize          ! Force a square matrix to be hermitian
  public :: mkherm                ! Make the complex array(2,ndim,ndim) hermitian, by adding half of it to its hermitian conjugate.
@@ -79,6 +80,8 @@ MODULE m_numeric_tools
  public :: simpson_int           ! Simpson integral of a tabulated function. Returns arrays with integrated values
  public :: simpson               ! Simpson integral of a tabulated function. Returns scalar with the integral on the full mesh.
  public :: rhophi                ! Compute the phase and the module of a complex number.
+ public :: smooth                ! Smooth data.
+ public :: nderiv                ! Compute first or second derivative of input function y(x) on a regular grid.
 
  interface arth
    module procedure arth_int 
@@ -2962,6 +2965,89 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
 end subroutine quadrature
 !!***
 
+!!****f* m_numeric_tools/coeffs_gausslegint
+!! NAME
+!!  coeffs_gausslegint
+!!
+!! FUNCTION
+!! Compute the coefficients (supports and weights) for Gauss-Legendre integration.
+!! Inspired by a routine due to G. Rybicki.
+!!
+!! INPUTS
+!! xmin=lower bound of integration
+!! xmax=upper bound of integration
+!! n=order of integration
+!!
+!! OUTPUT
+!! x(n)=array of support points
+!! weights(n)=array of integration weights
+!!
+!! PARENTS
+!!      calc_rpa_functional,calc_sigc_me,integrho,integvol,m_numeric_tools
+!!      screening,surf
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine coeffs_gausslegint(xmin,xmax,x,weights,n)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'coeffs_gausslegint'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: n
+ real(dp),intent(in) :: xmin,xmax
+ real(dp),intent(out) :: x(n),weights(n)
+
+!Local variables ------------------------------
+!scalars
+ integer :: i,j 
+ real(dp),parameter :: tol=1.d-13
+ real(dp),parameter :: pi=4.d0*atan(1.d0)
+ real(dp) :: z,z1,xmean,p1,p2,p3,pp,xl
+
+!************************************************************************
+
+ xl=(xmax-xmin)*0.5d0
+ xmean=(xmax+xmin)*0.5d0
+
+ do i=1,(n+1)/2
+  z=cos(pi*(i-0.25d0)/(n+0.5d0))
+ 
+  do 
+    p1=1.d0
+    p2=0.d0
+ 
+    do j=1,n
+     p3=p2
+     p2=p1
+     p1=((2.d0*j - 1.d0)*z*p2 - (j-1.d0)*p3)/j
+    end do
+  
+    pp=n*(p2-z*p1)/(1.0d0-z**2)
+    z1=z
+    z=z1-p1/pp
+    
+    if(abs(z-z1) < tol) exit
+  end do
+
+  x(i)=xmean-xl*z
+  x(n+1-i)=xmean+xl*z
+  weights(i)=2.d0*xl/((1.d0-z**2)*pp**2)
+  weights(n+1-i)=weights(i)
+ end do
+
+end subroutine coeffs_gausslegint
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_numeric_tools/simpson_cplx
@@ -3241,7 +3327,7 @@ end subroutine hermitianize_dpc
 
 !----------------------------------------------------------------------
 
-!!****f* ABINIT/mkherm
+!!****f* m_numeric_tools/mkherm
 !! NAME
 !! mkherm
 !!
@@ -5365,6 +5451,179 @@ subroutine vdiff_print(vd,unit)
                            ", Mean{|f1-f2|}=",vd%mean_adiff,", stdev{|f1-f2|}=",vd%stdev_adiff
 
 end subroutine vdiff_print
+!!***
+
+!!****f* m_numeric_tools/smooth
+!! NAME
+!!  smooth data.
+!!
+!! FUNCTION
+!!  smooth  
+!!
+!! INPUTS
+!!  mesh=Number of points.
+!!  it=Number of iterations.
+!!
+!! SIDE EFFECTS
+!!  a(mesh)=Input values, smoothed in output
+!!
+!! PARENTS
+!!      psp6cc,upf2abinit
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine smooth(a,mesh,it)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'smooth'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: it,mesh
+ real(dp), intent(inout) :: a(mesh)
+!Local variables-------------------------------
+ integer :: i,k
+ real(dp) :: asm(mesh)
+! *********************************************************************
+
+ do k=1,it
+   asm(1)=1.0d0/3.0d0*(a(1)+a(2)+a(3))
+   asm(2)=0.25d0*(a(1)+a(2)+a(3)+a(4))
+   asm(3)=0.2d0*(a(1)+a(2)+a(3)+a(4)+a(5))
+   asm(4)=0.2d0*(a(2)+a(3)+a(4)+a(5)+a(6))
+   asm(5)=0.2d0*(a(3)+a(4)+a(5)+a(6)+a(7))
+   asm(mesh-4)=0.2d0*(a(mesh-2)+a(mesh-3)+a(mesh-4)+&
+&                   a(mesh-5)+a(mesh-6))
+   asm(mesh-3)=0.2d0*(a(mesh-1)+a(mesh-2)+a(mesh-3)+&
+&                   a(mesh-4)+a(mesh-5))
+   asm(mesh-2)=0.2d0*(a(mesh)+a(mesh-1)+a(mesh-2)+&
+&                   a(mesh-3)+a(mesh-4))
+   asm(mesh-1)=0.25d0*(a(mesh)+a(mesh-1)+a(mesh-2)+a(mesh-3))
+   asm(mesh)=1.0d0/3.0d0*(a(mesh)+a(mesh-1)+a(mesh-2))
+
+   do i=6,mesh-5
+     asm(i)=0.1d0*a(i)+0.1d0*(a(i+1)+a(i-1))+&
+&             0.1d0*(a(i+2)+a(i-2))+&
+&             0.1d0*(a(i+3)+a(i-3))+&
+&             0.1d0*(a(i+4)+a(i-4))+&
+&             0.05d0*(a(i+5)+a(i-5))
+   end do
+
+   do i=1,mesh
+     a(i)=asm(i)
+   end do
+ end do
+
+end subroutine smooth
+!!***
+
+!!****f* m_numeric_tools/nderiv
+!! NAME
+!! nderiv
+!!
+!! FUNCTION
+!! Given an input function y(x) on a regular grid,
+!! compute its first or second derivative.
+!!
+!! INPUTS
+!!  hh= radial step
+!!  ndim= radial mesh size
+!!  yy(ndim)= input function
+!!  norder= order of derivation (1 or 2)
+!!
+!! OUTPUT
+!!  zz(ndim)= first or second derivative of y
+!!
+!! PARENTS
+!!      upf2abinit
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine nderiv(hh,yy,zz,ndim,norder)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'nderiv'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: ndim,norder
+ real(dp),intent(in) :: hh
+!arrays
+ real(dp),intent(in) :: yy(ndim)
+ real(dp),intent(out) :: zz(ndim)
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: ier,ii
+ real(dp) :: aa,bb,cc,h1,y1
+
+! *********************************************************************
+
+!Initialization (common to 1st and 2nd derivative)
+ h1=one/(12.d0*hh)
+ y1=yy(ndim-4)
+
+!FIRST DERIVATIVE
+!================
+ if (norder==1) then
+
+!  Prepare differentiation loop
+   bb=h1*(-25.d0*yy(1)+48.d0*yy(2)-36.d0*yy(3)+16.d0*yy(4)-3.d0*yy(5))
+   cc=h1*(-3.d0*yy(1)-10.d0*yy(2)+18.d0*yy(3)-6.d0*yy(4)+yy(5))
+!  Start differentiation loop
+   do ii=5,ndim
+     aa=bb;bb=cc
+     cc=h1*(yy(ii-4)-yy(ii)+8.d0*(yy(ii-1)-yy(ii-3)))
+     zz(ii-4)=aa
+   end do
+!  Normal exit
+   ier=0
+   aa=h1*(-y1+6.d0*yy(ndim-3)-18.d0*yy(ndim-2)+10.d0*yy(ndim-1)+3.d0*yy(ndim))
+   zz(ndim)=h1*(3.d0*y1-16.d0*yy(ndim-3)+36.d0*yy(ndim-2) -48.d0*yy(ndim-1)+25.d0*yy(ndim))
+   zz(ndim-1)=aa
+   zz(ndim-2)=cc
+   zz(ndim-3)=bb
+
+!  SECOND DERIVATIVE
+!  =================
+ else
+   h1=h1/hh
+!  Prepare differentiation loop
+   bb=h1*(35.d0*yy(1)-104.d0*yy(2)+114.d0*yy(3)-56.d0*yy(4)+11.d0*yy(5))
+   cc=h1*(11.d0*yy(1)-20.d0*yy(2)+6.d0*yy(3)+4.d0*yy(4)-yy(5))
+!  Start differentiation loop
+   do ii=5,ndim
+     aa=bb;bb=cc
+     cc=h1*(-yy(ii-4)-yy(ii)+16.d0*(yy(ii-1)+yy(ii-3))-30.d0*yy(ii-2))
+     zz(ii-4)=aa
+   end do
+!  Normal exit
+   ier=0
+   aa=h1*(-y1+4.d0*yy(ndim-3)+6.d0*yy(ndim-2)-20.d0*yy(ndim-1)+11.d0*yy(ndim))
+   zz(ndim)=h1*(11.d0*y1-56.d0*yy(ndim-3)+114.d0*yy(ndim-2) -104.d0*yy(ndim-1)+35.d0*yy(ndim))
+   zz(ndim-1)=aa
+   zz(ndim-2)=cc
+   zz(ndim-3)=bb
+
+ end if !norder
+
+end subroutine nderiv
 !!***
 
 !----------------------------------------------------------------------

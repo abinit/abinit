@@ -52,7 +52,7 @@
 !!  mkqmem =number of k+q points treated by this node (GS data).
 !!  mk1mem =number of k points treated by this node (RF data)
 !!  mpert =maximum number of ipert
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw or wfs at k
 !!  mpw1=maximum dimensioned size of npw for wfs at k+q (also for 1-order wfs).
 !!  nattyp(ntypat)= # atoms of each type.
@@ -170,7 +170,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use m_xmpi
  use m_errors
  use m_profiling_abi
- use m_wffile
  use m_wfk
  use m_hamiltonian
  use m_cgtools
@@ -205,7 +204,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  use interfaces_56_recipspace
  use interfaces_56_xc
  use interfaces_61_occeig
- use interfaces_62_iowfdenpot
  use interfaces_64_psp
  use interfaces_65_paw
  use interfaces_66_nonlocal
@@ -225,7 +223,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),intent(out) :: eovl1
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(pawang_type),intent(in) :: pawang,pawang1
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type),intent(in) :: psps
@@ -278,10 +276,10 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer :: bd2tot_index,bdtot_index,berryopt,bufsz,choice,cpopt,counter,cplex_rhoij,ddkcase
  integer :: dimffnl,dimffnl1,dimffnl1_idir1,dimylmgr1
  integer :: ia,iatom,iband,ibg,ibgq,ibg1,icg,icgq,icg1,ider,idir0,idir1,idir_cprj
- integer :: ierr,ii,ikg,ikg1,ikpt,ikpt_,ikpt_me,ilmn,iorder_cprj,ipert1
+ integer :: ierr,ii,ikg,ikg1,ikpt,ikpt_me,ilmn,iorder_cprj,ipert1
  integer :: ispden,isppol,istwf_k,istr,istr1,itypat,jband,jj,kdir1,kpert1,master,mcgq,mcprjq
- integer :: mdir1,me,mpert1,my_natom,my_comm_atom,nband_,nband_k,nband_kocc,need_ylmgr1
- integer :: nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nskip,nspden_rhoij,nspinor_
+ integer :: mdir1,me,mpert1,my_natom,my_comm_atom,nband_k,nband_kocc,need_ylmgr1
+ integer :: nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nspden_rhoij
  integer :: nvh1,nvxc1,nzlmopt_ipert,nzlmopt_ipert1,optlocal,optnl
  integer :: option,optxc,opt_gvnl1,sij_opt,spaceworld,usevnl,wfcorr,ik_ddk
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
@@ -294,8 +292,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  type(rf_hamiltonian_type) :: rf_hamkq
  type(MPI_type) :: mpi_enreg_seq
 !arrays
- integer :: ddkfil(3),ikpt_fbz(3),ikpt_fbz_previous(3),nband_tmp(1)
- integer :: npwar1_tmp(1),skipddk(3)
+ integer :: ddkfil(3),nband_tmp(1)
+ integer :: npwar1_tmp(1)
  integer,allocatable :: jpert1(:),jdir1(:),kg1_k(:,:),kg_k(:,:)
  integer,pointer :: my_atmtab(:)
  real(dp) :: dum1(1,1),dum2(1,1),dum3(1,1),epawnst(2),kpoint(3),kpq(3)
@@ -319,14 +317,11 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  type(paw_ij_type),allocatable :: paw_ij10(:,:)
  type(pawrhoij_type),target,allocatable :: pawdrhoij1(:,:)
  type(pawrhoij_type),pointer :: pawdrhoij1_unsym(:,:)
- type(wffile_type) :: wffddk(3)
  type(wfk_t) :: ddks(3)
 
 ! *********************************************************************
 
  DBG_ENTER("COLL")
-
- ABI_UNUSED((/ikpt_, nband_, nspinor_, wffddk%unwff/))
 
 !Keep track of total time spent in dfpt_nstpaw
  call timab(566,1,tsec)
@@ -466,11 +461,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        write(msg, '(a,a)') '-open ddk wf file :',trim(fiwfddk(idir1))
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
-#ifdef DEV_MG_WFK
        call wfk_open_read(ddks(idir1),fiwfddk(idir1),formeig1,dtset%iomode,ddkfil(idir1),spaceworld)
-#else
-       call WffOpen(dtset%iomode,spaceworld,fiwfddk(idir1),ierr,wffddk(idir1),master,me,ddkfil(idir1))
-#endif
      end if
    end do
  end if
@@ -573,6 +564,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      if (need_pawij10) then
        ABI_DATATYPE_ALLOCATE(paw_ij10,(my_natom,mdir1))
        ABI_ALLOCATE(e1kbfr,(rf_hamkq%dime1kb1,rf_hamkq%dime1kb2,nspinor**2,mdir1))
+     else
+       ABI_DATATYPE_ALLOCATE(paw_ij10,(0,0))
      end if
 
 !    LOOP OVER PERTURBATION DIRECTIONS
@@ -642,8 +635,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !          Non-collinear magnetism (should the second nkxc be nkxc_cur ?)
            if (nspden==4) then
              option=0;optxc=1
-             call dfpt_mkvxc_noncoll(cplex,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum2,0,dum3,0,nkxc,&
-&             nkxc,nspden,n3xccc,2,option,optxc,dtset%paral_kgb,dtset%qptn,rhor,dum1,rprimd,0,&
+             call dfpt_mkvxc_noncoll(1,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum2,0,dum3,0,nkxc,&
+&             nkxc,nspden,n3xccc,1,option,optxc,dtset%paral_kgb,dtset%qptn,dum1,dum1,rprimd,0,&
 &             vxc10,xccc3d1_idir1)
            else
              call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfftf,ngfftf,dum2,0,dum3,0,nkxc,&
@@ -721,20 +714,6 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !  Prepare RF PAW files for reading and writing if mkmem, mkqmem or mk1mem==0
    iorder_cprj=0
 
-!  Prepare DDK files for reading
-   skipddk(:)=0;ikpt_fbz(1:3)=0;ikpt_fbz_previous(1:3)=0
-   if (need_ddk_file) then
-     do kdir1=1,mdir1
-       idir1=jdir1(kdir1)
-       if (ddkfil(idir1)/=0) then
-#ifndef DEV_MG_WFK
-         call clsopn(wffddk(idir1))
-         call hdr_skip(wffddk(idir1),ierr)
-#endif
-       end if
-     end do
-   end if
-
 !  Allocate arrays used to accumulate density change due to overlap
    if (has_drho) then
      ABI_ALLOCATE(drhoaug1,(cplex*dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),mdir1))
@@ -776,22 +755,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      ikpt_me=0
 
 !    Rewind (k+G) data if needed
-     ikg=0;ikg1=0;ikpt_fbz(1:3)=0
-
-!    DDK files: skip the remaining isppol=1 records
-     if (isppol==2.and.need_ddk_file) then
-       do kdir1=1,mdir1
-         idir1=jdir1(kdir1)
-         if ((ddkfil(idir1)/=0).and.(skipddk(idir1)<nkpt)) then
-#ifndef DEV_MG_WFK
-           do ikpt=1,(nkpt-skipddk(idir1))
-             call WffReadNpwRec(ierr,ikpt,isppol,nband_,npw_,nspinor_,wffddk(idir1))
-             call WffReadSkipRec(ierr,1+2*nband_,wffddk(idir1))
-           end do
-#endif
-         end if
-       end do
-     end if
+     ikg=0;ikg1=0
 
 !    Continue to initialize the GS/RF Hamiltonian
      call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij,&
@@ -864,26 +828,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          do kdir1=1,mdir1
            idir1=jdir1(kdir1)
            if (ddkfil(idir1)/=0)then
-!            Skip records in DDK file
-             ikpt_fbz_previous(idir1)=ikpt_fbz(idir1)
-             ikpt_fbz(idir1)=indkpt1(ikpt)
-!            Number of k points to skip in the full set of k pointsp
-             nskip=ikpt_fbz(idir1)-ikpt_fbz_previous(idir1)-1
-             skipddk(idir1)=skipddk(idir1)+nskip+1
-#ifndef DEV_MG_WFK
-             if (nskip/=0) then
-               do ikpt_=1+ikpt_fbz_previous(idir1),ikpt_fbz(idir1)-1
-                 call WffReadSkipK(1,0,ikpt_,isppol,mpi_enreg,wffddk(idir1))
-               end do
-             end if
-!            Begin to read current record (k+G)
-             call WffReadNpwRec(ierr,ikpt,isppol,nband_,npw_,nspinor_,wffddk(idir1))
-             call WffReadSkipRec(ierr,1,wffddk(idir1))
-#else
              !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
              ik_ddk = indkpt1(ikpt)
              npw_ = ddks(idir1)%hdr%npwarr(ik_ddk)
-#endif
              if (npw_/=npw_k) then
                write(unit=msg,fmt='(a,i3,a,i5,a,i3,a,a,i5,a,a,i5)')&
 &               'For isppol = ',isppol,', ikpt = ',ikpt,' and idir = ',idir,ch10,&
@@ -1048,19 +995,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !        Skip band if not to be treated by this proc
          if (xmpi_paral==1) then
-           if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=me) then
-#ifndef DEV_MG_WFK
-             if (need_ddk_file) then
-               do kdir1=1,mdir1
-                 idir1=jdir1(kdir1)
-                 if (ddkfil(idir1)/=0) then
-                   call WffReadSkipRec(ierr,2,wffddk(idir1))
-                 end if
-               end do
-             end if
-#endif
-             cycle
-           end if
+           if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=me) cycle
          end if
 
 !        Extract GS wavefunctions
@@ -1193,14 +1128,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
              ABI_ALLOCATE(gvnl1,(2,npw1_k*nspinor*usevnl))
              if (need_ddk_file) then
                if (ddkfil(idir1)/=0) then
-#ifndef DEV_MG_WFK
-                 call WffReadSkipRec(ierr,1,wffddk(idir1))
-                 call WffReadDataRec(gvnl1,ierr,2,npw1_k*nspinor,wffddk(idir1))
-#else
                  !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
                  ik_ddk = indkpt1(ikpt)
                  call wfk_read_bks(ddks(idir1), iband, ik_ddk, isppol, xmpio_single, cg_bks=gvnl1)
-#endif
                else
                  gvnl1=zero
                end if
@@ -1267,7 +1197,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !          If needed, compute here <delta_u^(j1)_k_i|H-Eps_k_i.S|u^(j2)_k_i>
 !          This is equal to <delta_u^(j1)_k_i|H-Eps_k_i.S|delta_u^(j2)_k_i>  (I)
-!          +<delta_u^(j1)_k_i|H-Eps_k_i.S|u^paral^(j2)_k_i>  (II)
+!                          +<delta_u^(j1)_k_i|H-Eps_k_i.S|u^paral^(j2)_k_i>  (II)
 !          (u^paral^(j2)_k_i is the part of u^(j2)_k_i parallel to active space : metals)
 !          (I) can be rewritten as:
 !          Sum_j{ 1/4.<u0_k_i|S^(j1)|u0_k+q_j>.<u0_k+q_j|S^(j2)|u0_k_i>.(Eps_k+q_j-Eps_k_i) }
@@ -1276,28 +1206,29 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !          where Eps1_k,q_ij=<u0_k+q_j|H^(j2)-1/2(Eps_k+q_j-Eps_k_i)S^(j2)|u0_k_i>
 !          At first call (when j1=j2), cs1c=<u0_k_i|S^(j1)|u0_k+q_j> is stored
 !          For the next calls, it is re-used.
-           if (has_dcwf.and.has_dcwf2.and.is_metal_or_qne0.and.usepaw==1) then
+           if (has_dcwf.and.is_metal_or_qne0) then
              ABI_ALLOCATE(gvnl1,(2,npw1_k*nspinor))
              dotr=zero;doti=zero
-             invocc=zero
-             if (abs(occ_k(iband))>tol8) invocc=two/occ_k(iband)
+             invocc=zero ; if (abs(occ_k(iband))>tol8) invocc=two/occ_k(iband)
              do jband=1,nband_k
 !              Computation of cs1c=<u0_k_i|S^(j1)|u0_k+q_j>
                if ((ipert==ipert1.and.idir==idir1).or.(abs(occ_k(iband))>tol8)) then
                  gvnl1(:,1:npw1_k*nspinor)=cgq(:,1+npw1_k*nspinor*(jband-1)+icgq:npw1_k*nspinor*jband+icgq)
                  call dotprod_g(dot1r,dot1i,istwf_k,npw1_k*nspinor,2,gs1,gvnl1,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
-                 if (ipert==ipert1.and.idir==idir1) then
+                 if (ipert==ipert1.and.idir==idir1.and.has_dcwf2) then
                    cs1c(1,jband,iband,ikpt_me)=dot1r
                    cs1c(2,jband,iband,ikpt_me)=dot1i
                  end if
                end if
                if (abs(occ_k(iband))>tol8) then
 !                Computation of term (I)
-                 arg=eig_kq(jband)-eig_k(iband)
-                 dot2r=cs1c(1,jband,iband,ikpt_me)
-                 dot2i=cs1c(2,jband,iband,ikpt_me)
-                 dotr=dotr+(dot1r*dot2r+dot1i*dot2i)*arg
-                 doti=doti+(dot1i*dot2r-dot1r*dot2i)*arg
+                 if (has_dcwf2) then
+                   arg=eig_kq(jband)-eig_k(iband)
+                   dot2r=cs1c(1,jband,iband,ikpt_me)
+                   dot2i=cs1c(2,jband,iband,ikpt_me)
+                   dotr=dotr+(dot1r*dot2r+dot1i*dot2i)*arg
+                   doti=doti+(dot1i*dot2r-dot1r*dot2i)*arg
+                 end if
 !                Computation of term (II)
                  if (is_metal) then
                    if (abs(rocceig(jband,iband))>tol8) then
@@ -1339,21 +1270,11 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !            note: gh1 used as temporary space (to store idir ddk WF)
              if (idir==idir1) then
                gh1=cwavef
-#ifndef DEV_MG_WFK
-               if (need_ddk_file.and.ddkfil(idir1)/=0) then
-                 call WffReadSkipRec(ierr,2,wffddk(idir1))
-               end if
-#endif
              else
                if (need_ddk_file.and.ddkfil(idir1)/=0) then
-#ifndef DEV_MG_WFK
-                 call WffReadSkipRec(ierr,1,wffddk(idir1))
-                 call WffReadDataRec(gh1,ierr,2,npw1_k*nspinor,wffddk(idir1))
-#else
                  !ik_ddk = wfk_findk(ddks(idir1), kpt_rbz(:,ikpt)
                  ik_ddk = indkpt1(ikpt)
                  call wfk_read_bks(ddks(idir1), iband, ik_ddk, isppol, xmpio_single, cg_bks=gh1)
-#endif
                else
                  gh1=zero
                end if
@@ -1635,7 +1556,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  end if
 
 !Build complete d2ovl matrix
- if (usepaw==1) d2ovl=d2ovl+d2ovl_drho
+ if (usepaw==1) d2ovl(:,:,:,idir,ipert)=d2ovl(:,:,:,idir,ipert)+d2ovl_drho(:,:,:,idir,ipert)
 
  if (usepaw==1) then
    ABI_DEALLOCATE(d2ovl_drho)
@@ -1646,11 +1567,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    do kdir1=1,mdir1
      idir1=jdir1(kdir1)
      if (ddkfil(idir1)/=0)then
-#ifndef DEV_MG_WFK
-       call WffClose(wffddk(idir1),ierr)
-#else
        call wfk_close(ddks(idir1))
-#endif
      end if
    end do
  end if
@@ -1680,18 +1597,38 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !the symmetry-reduced kpt set will leave a non-zero imaginary part.
  if(ipert==dtset%natom+3.or.ipert==dtset%natom+4) then
    d2nl(2,:,:,idir,ipert)=zero
+   if (usepaw==1) d2ovl(2,:,:,idir,ipert)=zero
+ else
+   d2nl(2,:,dtset%natom+3:dtset%natom+4,idir,ipert)=zero
    if (usepaw==1) d2ovl(2,:,dtset%natom+3:dtset%natom+4,idir,ipert)=zero
  end if
 
-!Symmetrize the elastic tensor contributions, as was needed for the stresses in a GS calculation
- if (ipert==dtset%natom+3.or.ipert==dtset%natom+4)then
-   if (nsym1>1) then
-     ABI_ALLOCATE(work,(6,1,1))
+
+!Symmetrize the strain perturbation contributions, as was needed for the stresses in a GS calculation
+!if (ipert==dtset%natom+3.or.ipert==dtset%natom+4)then
+ if (nsym1>1) then
+   ABI_ALLOCATE(work,(6,1,1))
+   ii=0
+   do ipert1=dtset%natom+3,dtset%natom+4
+     do idir1=1,3
+       ii=ii+1
+       work(ii,1,1)=d2nl(1,idir1,ipert1,idir,ipert)
+     end do
+   end do
+   call stresssym(gprimd,nsym1,work(:,1,1),symrc1)
+   ii=0
+   do ipert1=dtset%natom+3,dtset%natom+4
+     do idir1=1,3
+       ii=ii+1
+       d2nl(1,idir1,ipert1,idir,ipert)=work(ii,1,1)
+     end do
+   end do
+   if (usepaw==1) then
      ii=0
      do ipert1=dtset%natom+3,dtset%natom+4
        do idir1=1,3
          ii=ii+1
-         work(ii,1,1)=d2nl(1,idir1,ipert1,idir,ipert)
+         work(ii,1,1)=d2ovl(1,idir1,ipert1,idir,ipert)
        end do
      end do
      call stresssym(gprimd,nsym1,work(:,1,1),symrc1)
@@ -1699,29 +1636,13 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      do ipert1=dtset%natom+3,dtset%natom+4
        do idir1=1,3
          ii=ii+1
-         d2nl(1,idir1,ipert1,idir,ipert)=work(ii,1,1)
+         d2ovl(1,idir1,ipert1,idir,ipert)=work(ii,1,1)
        end do
      end do
-     if (usepaw==1) then
-       ii=0
-       do ipert1=dtset%natom+3,dtset%natom+4
-         do idir1=1,3
-           ii=ii+1
-           work(ii,1,1)=d2ovl(1,idir1,ipert1,idir,ipert)
-         end do
-       end do
-       call stresssym(gprimd,nsym1,work(:,1,1),symrc1)
-       ii=0
-       do ipert1=dtset%natom+3,dtset%natom+4
-         do idir1=1,3
-           ii=ii+1
-           d2ovl(1,idir1,ipert1,idir,ipert)=work(ii,1,1)
-         end do
-       end do
-       ABI_DEALLOCATE(work)
-     end if
+     ABI_DEALLOCATE(work)
    end if
  end if
+!end if
 
 !Must also symmetrize the electric field perturbation response !
 !Note: d2ovl is not symetrized because it is zero for electric field perturbation
