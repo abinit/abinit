@@ -572,7 +572,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    do ispden=1,nspden
      ! for points inside spheres, replace with full AE hartree potential.
      ! In principle the correction could be more subtle (not spherical)
-
      do iatom=1,my_natom
        iatom_tot=iatom;if (paral_atom) iatom_tot=mpi_enreg%my_atmtab(iatom)
        itypat=dtset%typat(iatom_tot)
@@ -595,11 +594,13 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
          isort(ifgd) = ifgd
          radii(ifgd) = sqrt(sum(pawfgrtab(iatom)%rfgd(:,ifgd)**2))
        end do
-       call sort_dp(pawfgrtab(iatom)%nfgd, radii, isort, tol12)
 
+       if (pawfgrtab(iatom)%nfgd/=0) then
        ! spline interpolate the vh1 value for current radii
-       call splint(pawrad(itypat)%mesh_size, pawrad(itypat)%rad, &
-&           vh1_corrector, vh1spl, pawfgrtab(iatom)%nfgd, radii,  vh1_interp, ierr)
+         call sort_dp(pawfgrtab(iatom)%nfgd, radii, isort, tol12)
+         call splint(pawrad(itypat)%mesh_size, pawrad(itypat)%rad, &
+&             vh1_corrector, vh1spl, pawfgrtab(iatom)%nfgd, radii,  vh1_interp, ierr)
+       end if
 
        norm=SUM(vh1_interp)*ucvol/PRODUCT(ngfft(1:3))
        call xmpi_sum(norm,comm_fft,ierr)
@@ -607,9 +608,11 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &           ' = ', norm
        call wrtout(std_out,message,'COLL')
 
-       vpaw(pawfgrtab(iatom)%ifftsph(isort(1:pawfgrtab(iatom)%nfgd)),ispden) = &
-&           vpaw(pawfgrtab(iatom)%ifftsph(isort(1:pawfgrtab(iatom)%nfgd)),ispden) + &
-&           vh1_interp(1:pawfgrtab(iatom)%nfgd)
+       if (pawfgrtab(iatom)%nfgd/=0) then
+         vpaw(pawfgrtab(iatom)%ifftsph(isort(1:pawfgrtab(iatom)%nfgd)),ispden) = &
+&             vpaw(pawfgrtab(iatom)%ifftsph(isort(1:pawfgrtab(iatom)%nfgd)),ispden) + &
+&             vh1_interp(1:pawfgrtab(iatom)%nfgd)
+       end if
 
        ! get integral of correction term in whole sphere
        ABI_DEALLOCATE(radii)
