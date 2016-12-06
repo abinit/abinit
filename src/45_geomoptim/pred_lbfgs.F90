@@ -9,7 +9,7 @@
 !! IONMOV 22:
 !! Given a starting point xred that is a vector of length 3*natom
 !! (reduced nuclei coordinates), and unit cell parameters
-!! (acell and rprim) the Broyden-Fletcher-Goldfarb-Shanno
+!! (acell and rprim) the L-Broyden-Fletcher-Goldfarb-Shanno
 !! minimization is performed on the total energy function, using
 !! its gradient (atomic forces and stress : fred or fcart and
 !! stress) as calculated by the routine scfcv. Some atoms can be
@@ -19,10 +19,10 @@
 !! Otherwise no more than dtset%ntime steps are performed.
 !! Returned quantities are xred, and eventually acell and rprim
 !! (new ones!).
-!! Could see Numerical Recipes (Fortran), 1986, page 307.
+!! Could see MinPack on netlib.org
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, JCC, SE)
+!! Copyright (C) 1998-2016 ABINIT group (DCA, XG, GMR, JCC, SE, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,7 +47,7 @@
 !!      mover
 !!
 !! CHILDREN
-!!      brdene,dgetrf,dgetri,hessinit,hessupdt,hist2var,metric,mkrdim,var2hist
+!!      lbfgs_init,lbfgs_destroy,lbfgs_execute,hist2var,metric,mkrdim,var2hist
 !!      xfh_recover_new,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
@@ -91,7 +91,6 @@ logical,intent(in) :: zDEBUG
 !Local variables-------------------------------
 !scalars
 integer :: info
-type(lbfgs_internal),save :: plan
 integer  :: ndim,cycl_main
 integer, parameter :: npul=0
 integer  :: ierr,ii,jj,kk,nitpul
@@ -124,6 +123,8 @@ real(dp) :: strten(6)
 !***************************************************************************
 
  if(iexit/=0)then
+   call lbfgs_destroy()
+
    if (allocated(vin))        then
      ABI_DEALLOCATE(vin)
    end if
@@ -295,10 +296,19 @@ real(dp) :: strten(6)
  if (itime==1)then
 
     ABI_ALLOCATE(diag,(ndim))
-    do ii=1,ndim
-      diag(ii) = 1.00_dp / rprimd(MODULO(ii-1,3)+1,MODULO(ii-1,3)+1)**2
+    do ii=1,3*ab_mover%natom
+!      diag(ii) = 1.00_dp / rprimd(MODULO(ii-1,3)+1,MODULO(ii-1,3)+1)**2
+      diag(ii) = gmet(MODULO(ii-1,3)+1,MODULO(ii-1,3)+1)
     enddo
-    plan = lbfgs_init_diag(ndim,5,diag)
+    if(ab_mover%optcell/=0)then
+!     These values might lead to too large changes in some cases ...
+      do ii=3*ab_mover%natom+1,ndim
+        diag(ii) = ab_mover%strprecon*30.0_dp/ucvol
+        if(ab_mover%optcell==1) diag(ii) = diag(ii) / three
+      end do
+    end if
+
+    call lbfgs_init(ndim,5,diag)
     ABI_DEALLOCATE(diag)
 
    if (ab_mover%restartxf/=0) then
@@ -351,7 +361,7 @@ real(dp) :: strten(6)
 
  vin_prev(:) = vin
  vout_prev(:) = vout
- info = lbfgs_execute(plan,vin,etotal,vout)
+ info = lbfgs_execute(vin,etotal,vout)
 
 
 !zDEBUG (vin,vout and hessin after prediction)

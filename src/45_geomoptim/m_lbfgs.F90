@@ -1,3 +1,26 @@
+!{\src2tex{textfont=tt}}
+!!****m* ABINIT/m_bfgs
+!! NAME
+!!  m_bfgs
+!!
+!! FUNCTION
+!!  This module provides several routines for the application of a
+!!  Limited-memory Broyden-Fletcher-Goldfarb-Shanno (LBFGS) minimization algorithm.
+!!  The working routines were based on the original implementation of J. Nocera available on netlib.org
+!!  They have been reshaped and translated into modern fortran here.
+!!
+!! COPYRIGHT
+!! Copyright (C) 2012-2016 ABINIT group (FB)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
 module m_lbfgs
  use defs_basis
 
@@ -37,46 +60,89 @@ type(lbfgs_internal),public :: lbfgs_plan
 contains
 
 
-function lbfgs_init_diag(ndim,history_record,diag_guess) 
+!----------------------------------------------------------------------
+
+!!****f* m_lbfgs/lbfgs_init
+!! NAME
+!! lbfgs_init
+!!
+!! FUNCTION
+!!   Initialize the internal object lbfgs_internal for LBFGS minimization
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      pred_lbfgs
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine lbfgs_init(ndim,history_record,diag_guess) 
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'lbfgs_init_diag'
+#define ABI_FUNC 'lbfgs_init'
 !End of the abilint section
 
 implicit none
+
 integer,intent(in)   :: ndim
 integer,intent(in)   :: history_record
 real(dp),intent(in)  :: diag_guess(ndim)
-type(lbfgs_internal) :: lbfgs_init_diag
 
 integer :: nwork
 
- lbfgs_init_diag%lbfgs_status = 0
- lbfgs_init_diag%iter   = 0
- lbfgs_init_diag%ndim = ndim
- lbfgs_init_diag%history_record = history_record
- ALLOCATE(lbfgs_init_diag%diag(ndim))
-! ABI_ALLOCATE(lbfgs_init_diag%diag,(ndim))
+ lbfgs_plan%lbfgs_status = 0
+ lbfgs_plan%iter   = 0
+ lbfgs_plan%ndim = ndim
+ lbfgs_plan%history_record = history_record
+ ALLOCATE(lbfgs_plan%diag(ndim))
+! ABI_ALLOCATE(lbfgs_plan%diag,(ndim))
 
  nwork = ndim * ( 2 * history_record + 1 ) + 2 * history_record
- ALLOCATE(lbfgs_init_diag%work(nwork))
-! ABI_ALLOCATE(lbfgs_init_diag%work,(nwork))
+ ALLOCATE(lbfgs_plan%work(nwork))
+! ABI_ALLOCATE(lbfgs_plan%work,(nwork))
 
- lbfgs_init_diag%gtol = 0.9
- lbfgs_init_diag%line_stpmin = 1.0e-20
- lbfgs_init_diag%line_stpmax = 1.0e+20
- lbfgs_init_diag%line_stp    = 1.0
+ lbfgs_plan%gtol = 0.9
+ lbfgs_plan%line_stpmin = 1.0e-20
+ lbfgs_plan%line_stpmax = 1.0e+20
+ lbfgs_plan%line_stp    = 1.0
 
- lbfgs_init_diag%diag(:) = diag_guess(:)
-
-
-end function lbfgs_init_diag
+ lbfgs_plan%diag(:) = diag_guess(:)
 
 
-subroutine lbfgs_destroy(p)
+end subroutine lbfgs_init
+!!***
+
+
+!----------------------------------------------------------------------
+
+!!****f* m_lbfgs/lbfgs_destroy
+!! NAME
+!! lbfgs_destroy
+!!
+!! FUNCTION
+!!   Free the memory of the internal object lbfgs_internal for LBFGS minimization
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      pred_lbfgs
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine lbfgs_destroy()
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -86,17 +152,41 @@ subroutine lbfgs_destroy(p)
 !End of the abilint section
 
 implicit none
-type(lbfgs_internal),intent(inout) :: p
 
- deallocate(p%work)
- deallocate(p%diag)
+ deallocate(lbfgs_plan%work)
+ deallocate(lbfgs_plan%diag)
 ! ABI_DEALLOCATE(lbfgs_plan%work)
 ! ABI_DEALLOCATE(p%diag)
 
 end subroutine lbfgs_destroy
+!!***
 
 
-function lbfgs_execute(p, x, f, gradf) 
+!----------------------------------------------------------------------
+
+!!****f* m_lbfgs/lbfgs_execute
+!! NAME
+!! lbfgs_execute
+!!
+!! FUNCTION
+!!   Perform one-step of LBFGS minimization
+!!   all the internal information are stored in the lbfgs_internal object
+!! INPUTS
+!!   x: input and output position vector (atomic reduced coordinates + cell parameters)
+!!   f: total energy
+!!   gradf: gradient of the total energy (=negative forces)
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      pred_lbfgs
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+function lbfgs_execute(x,f,gradf) 
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -106,28 +196,50 @@ function lbfgs_execute(p, x, f, gradf)
 !End of the abilint section
 
 implicit none
-type(lbfgs_internal),intent(inout) :: p
-real(dp),intent(inout) :: x(p%ndim)
+real(dp),intent(inout) :: x(lbfgs_plan%ndim)
 real(dp),intent(in)    :: f
-real(dp),intent(in)    :: gradf(p%ndim)
+real(dp),intent(in)    :: gradf(lbfgs_plan%ndim)
 integer                :: lbfgs_execute
  
- call lbfgs(p%ndim, p%history_record, x, f, gradf, p%diag, p%work, p%lbfgs_status, &
-       p%gtol, p%line_stpmin, p%line_stpmax, p%line_stp, p%iter,                   &
-       p%line_info, p%line_nfev,                                                   &
-       p%line_dginit, p%line_finit,                                                &
-       p%line_stx,  p%line_fx,  p%line_dgx,                                        &
-       p%line_sty,  p%line_fy,  p%line_dgy,                                        &
-       p%line_stmin,  p%line_stmax,                                                &
-       p%line_bracket, p%line_stage1, p%line_infoc)
+ call lbfgs(lbfgs_plan%ndim, lbfgs_plan%history_record, x, f, gradf, lbfgs_plan%diag, lbfgs_plan%work, lbfgs_plan%lbfgs_status, &
+       lbfgs_plan%gtol, lbfgs_plan%line_stpmin, lbfgs_plan%line_stpmax, lbfgs_plan%line_stp, lbfgs_plan%iter,                   &
+       lbfgs_plan%line_info, lbfgs_plan%line_nfev,                                                   &
+       lbfgs_plan%line_dginit, lbfgs_plan%line_finit,                                                &
+       lbfgs_plan%line_stx,  lbfgs_plan%line_fx,  lbfgs_plan%line_dgx,                               &
+       lbfgs_plan%line_sty,  lbfgs_plan%line_fy,  lbfgs_plan%line_dgy,                               &
+       lbfgs_plan%line_stmin,  lbfgs_plan%line_stmax,                                                &
+       lbfgs_plan%line_bracket, lbfgs_plan%line_stage1, lbfgs_plan%line_infoc)
 
 
- lbfgs_execute = p%lbfgs_status
+ lbfgs_execute = lbfgs_plan%lbfgs_status
 
 end function lbfgs_execute
+!!***
 
 
-!=======================================================
+!----------------------------------------------------------------------
+
+!!****f* m_lbfgs/lbfgs
+!! NAME
+!! lbfgs
+!!
+!! FUNCTION
+!!   Perform the LBFGS step
+!!   Fortran90 rewritting of the original subroutine by J. Nocera
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      lbfgs_execute
+!!
+!! CHILDREN
+!!      mcsrch
+!!
+!! SOURCE
+
 subroutine lbfgs(N,M,X,F,G,DIAG,W,IFLAG,      &
                  GTOL,STPMIN,STPMAX,STP,ITER, &
                  INFO, NFEV,                  &
@@ -146,25 +258,30 @@ subroutine lbfgs(N,M,X,F,G,DIAG,W,IFLAG,      &
 
  implicit none
 
+!Arguments ------------------------------------
+!scalars
+ integer,intent(inout) :: LINE_INFOC
+ integer,intent(inout)  :: ITER,IFLAG,INFO,NFEV
+ integer,intent(in)     :: N,M
  real(dp),intent(inout) :: GTOL
  real(dp),intent(in)    :: STPMIN,STPMAX
  real(dp),intent(inout) :: STP
- integer,intent(inout)  :: ITER,IFLAG,INFO,NFEV
- integer,intent(in)     :: N,M
  real(dp),intent(in)    :: F
- real(dp),intent(inout) :: X(N),DIAG(N),W(N*(2*M+1)+2*M)
- real(dp),intent(in)    :: G(N)
  real(dp),intent(inout) :: LINE_DGINIT,LINE_FINIT
- logical,intent(inout):: LINE_BRACKT,LINE_STAGE1
- integer,intent(inout) :: LINE_INFOC
  real(dp),intent(inout) :: LINE_STX,LINE_FX,LINE_DGX
  real(dp),intent(inout) :: LINE_STY,LINE_FY,LINE_DGY
  real(dp),intent(inout) :: LINE_STMIN,LINE_STMAX
-!=======================================================
+ logical,intent(inout)  :: LINE_BRACKT,LINE_STAGE1
+!arrays
+ real(dp),intent(inout) :: X(N),DIAG(N),W(N*(2*M+1)+2*M)
+ real(dp),intent(in)    :: G(N)
+
+!Local variables-------------------------------
+!scalars
  real(dp) :: FTOL,YS,YY,SQ,YR,BETA
  integer :: POINT,ISPT,IYPT,MAXFEV, &
          BOUND,NPT,CP,I,INMC,IYCN,ISCN
-!=======================================================
+!***************************************************************************
 
 
 !
@@ -276,10 +393,33 @@ subroutine lbfgs(N,M,X,F,G,DIAG,W,IFLAG,      &
    return
  endif
 
- end subroutine lbfgs
+end subroutine lbfgs
+!!***
 
 
-!=======================================================
+
+!----------------------------------------------------------------------
+
+!!****f* m_lbfgs/mcsrch
+!! NAME
+!! mcsrch
+!!
+!! FUNCTION
+!!   Perform the line minimization step
+!!   Fortran90 rewritting of the original subroutine by J. Nocera
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      lbfgs
+!!
+!! CHILDREN
+!!      mcstep
+!!
+!! SOURCE
 
 subroutine mcsrch(N,X,F,G,S,STP,FTOL,MAXFEV,INFO,NFEV,WA, &
                   GTOL,STPMIN,STPMAX,DGINIT,FINIT, &
@@ -295,19 +435,24 @@ subroutine mcsrch(N,X,F,G,S,STP,FTOL,MAXFEV,INFO,NFEV,WA, &
 
  implicit none
 
- real(dp),intent(in)     :: GTOL,STPMIN,STPMAX
+!Arguments ------------------------------------
+!scalars
  integer,intent(in)     :: N,MAXFEV
- integer,intent(inout)         :: INFO,NFEV
- real(dp),intent(in)     :: F,FTOL
- real(dp),intent(inout)  :: STP,DGINIT,FINIT
+ integer,intent(inout)  :: INFO,NFEV
+ integer,intent(inout)  :: INFOC
+ real(dp),intent(in)    :: GTOL,STPMIN,STPMAX
+ real(dp),intent(in)    :: F,FTOL
+ real(dp),intent(inout) :: STP,DGINIT,FINIT
+ real(dp),intent(inout) :: STX,FX,DGX
+ real(dp),intent(inout) :: STY,FY,DGY
+ real(dp),intent(inout) :: STMIN,STMAX
+ logical,intent(inout) :: BRACKT,STAGE1
+!arrays
  real(dp),intent(in)     :: G(N)
  real(dp),intent(inout)  :: X(N),S(N),WA(N)
- logical,intent(inout) :: BRACKT,STAGE1
- integer,intent(inout)  :: INFOC
- real(dp),intent(inout)  :: STX,FX,DGX
- real(dp),intent(inout)  :: STY,FY,DGY
- real(dp),intent(inout)  :: STMIN,STMAX
-!==================================================
+
+!Local variables-------------------------------
+!scalars
  real(dp),parameter :: XTOL=1.0e-17_dp
  real(dp),parameter :: P5     = 0.50_dp
  real(dp),parameter :: P66    = 0.66_dp
@@ -315,7 +460,7 @@ subroutine mcsrch(N,X,F,G,S,STP,FTOL,MAXFEV,INFO,NFEV,WA, &
  integer :: J
  real(dp) :: DG,DGM,DGTEST,DGXM,DGYM, &
         FTEST1,FM,FXM,FYM,WIDTH,WIDTH1
-!==================================================
+!***************************************************************************
 
  DGTEST = FTOL * DGINIT
  WIDTH = STPMAX - STPMIN
@@ -481,7 +626,30 @@ subroutine mcsrch(N,X,F,G,S,STP,FTOL,MAXFEV,INFO,NFEV,WA, &
 
 
 end subroutine mcsrch
+!!***
 
+
+!----------------------------------------------------------------------
+
+!!****f* m_lbfgs/mcstep
+!! NAME
+!! mcstep
+!!
+!! FUNCTION
+!!   Perform the step choice in line minimization
+!!   Fortran90 rewritting of the original subroutine by J. Nocera
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! PARENTS
+!!      mcsrch
+!!
+!! CHILDREN
+!!
+!! SOURCE
 
 subroutine mcstep(STX,FX,DX,STY,FY,DY,STP,FP,DG,BRACKT,STPMIN,STPMAX,INFO)
 
@@ -494,14 +662,18 @@ subroutine mcstep(STX,FX,DX,STY,FY,DY,STP,FP,DG,BRACKT,STPMIN,STPMAX,INFO)
 
  implicit none
 
+!Arguments ------------------------------------
+!scalars
  integer,intent(inout)  :: INFO
  real(dp),intent(in)     :: FP
  real(dp),intent(inout)  :: STX,FX,DX,STY,FY,DY,STP,DG,STPMIN,STPMAX
  logical,intent(inout) :: BRACKT
-!==================================
+
+!Local variables-------------------------------
+!scalars
  logical BOUND
  real(dp) GAM,P,Q,R,S,SGND,STPC,STPF,STPQ,THETA
-!==================================
+!***************************************************************************
 
  INFO = 0
 !
@@ -668,17 +840,9 @@ subroutine mcstep(STX,FX,DX,STY,FY,DY,STP,FP,DG,BRACKT,STPMIN,STPMAX,INFO)
 
 
 end subroutine mcstep
-
-
-
-
-
-
-
-
-
-
+!!***
 
 
 
 end module m_lbfgs
+!!***
