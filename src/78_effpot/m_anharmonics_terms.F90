@@ -436,7 +436,7 @@ subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,pho
 ! 1-Do some check
   do ii=1,6
     if(natom /= size(phonon_strain(ii)%atmfrc,3).or.&
-&      phonon_strain(ii)%nrpt < 1)then
+&      phonon_strain(ii)%nrpt < 0)then
       write(msg, '(a)' )&
 &        ' natom or/and nrpt have not the same size than phonon_strain array. '
       MSG_BUG(msg)

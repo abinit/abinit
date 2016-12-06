@@ -1556,7 +1556,7 @@ end subroutine system_getDimFromXML
            strg1=trim(strg)
            read(strg1,*) voigt
            voigt = voigt + 1 ! 0 to 5 in the xml
-           irpt = 1 
+           irpt = 1
            cycle
          end if
          
@@ -1804,10 +1804,12 @@ end subroutine system_getDimFromXML
  ABI_DEALLOCATE(tnons)
 
 !Initialisation of eff_pot
- call effective_potential_init(crystal,dynmat,energy,eff_pot,epsilon_inf,&
-&                              elastic_constants,has_anharmonics,ifcs,internal_strain,ncoeff,&
-&                              phfrq,qph1l,nph1l,zeff,comm,elastic3rd=elastic3rd,&
-&                              elastic_displacement=elastic_displacement,phonon_strain=phonon_strain)
+call effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nph1l,comm,&
+&                             dynmat=dynmat,elastic_constants=elastic_constants,&
+&                             elastic3rd=elastic3rd,elastic_displacement=elastic_displacement,&
+&                             epsilon_inf=epsilon_inf,internal_strain=internal_strain,&
+&                             phonon_strain=phonon_strain,phfrq=phfrq,qpoints=qph1l,&
+&                             straincoupling=has_anharmonics,zeff=zeff)
 
 !DEALLOCATION OF ARRAYS
  ABI_DEALLOCATE(all_amu)

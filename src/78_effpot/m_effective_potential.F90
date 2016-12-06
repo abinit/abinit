@@ -198,12 +198,11 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
-&                                   epsilon_inf,elastic_constants,straincoupling,ifcs,&
-&                                   internal_strain,ncoeff,phfrq,qpoints,nqpt,zeff,comm,&
-&                                   coeffs,elastic3rd,elastic_displacement,external_stress,&
-&                                   forces,internal_stress,phonon_strain,strain,supercell,&
-&                                   name)
+subroutine effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nqpt,comm,&
+&                                   coeffs,dynmat,elastic_constants,elastic3rd,&
+&                                   elastic_displacement,epsilon_inf,external_stress,&
+&                                   forces,internal_strain,internal_stress,name,phonon_strain,&
+&                                   phfrq,qpoints,strain,straincoupling,supercell,zeff)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -223,10 +222,9 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
  integer,intent(in) :: ncoeff
  logical,intent(in) :: straincoupling
 !arrays
- real(dp),intent(in) :: epsilon_inf(3,3)
- real(dp),intent(in) :: elastic_constants(6,6)
- real(dp),intent(in) :: dynmat(:,:,:,:,:,:),qpoints(:,:),phfrq(:,:)
- real(dp),intent(in) :: internal_strain(:,:,:),zeff(:,:,:)
+ real(dp),optional,intent(in) :: epsilon_inf(3,3),elastic_constants(6,6)
+ real(dp),optional,intent(in) :: dynmat(:,:,:,:,:,:),qpoints(:,:),phfrq(:,:)
+ real(dp),optional,intent(in) :: internal_strain(:,:,:),zeff(:,:,:)
  type(crystal_t),intent(in) :: crystal
  type(effective_potential_type), intent(out) :: eff_pot
  type(ifc_type),intent(in) :: ifcs
@@ -292,13 +290,10 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
  eff_pot%crystal%znucl = crystal%znucl
 
 !4-Fill harmonic part
- call harmonics_terms_init(eff_pot%harmonics_terms,ifcs,crystal%natom,&
-&                          ifcs%nrpt,dynmat=dynmat,&
-&                          epsilon_inf=epsilon_inf,&
-&                          elastic_constants=elastic_constants,&
-&                          internal_strain=internal_strain,&
-&                          nqpt=nqpt,phfrq=phfrq,qpoints=qpoints,zeff=zeff)
+ call harmonics_terms_init(eff_pot%harmonics_terms,ifcs,crystal%natom,ifcs%nrpt)
 
+!5-Init the anharmonics_terms to set the flag to false
+ call anharmonics_terms_init(eff_pot%anharmonics_terms,crystal%natom,ncoeff)
 
 !5-Fill optional inputs
  ABI_ALLOCATE(eff_pot%forces,(3,eff_pot%crystal%natom))
@@ -307,6 +302,31 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
    eff_pot%forces = forces
  end if
 
+ if(present(elastic_constants))then
+   eff_pot%harmonics_terms%elastic_constants(:,:) = elastic_constants
+ end if
+
+ if(present(epsilon_inf))then
+   eff_pot%harmonics_terms%epsilon_inf(:,:) = epsilon_inf(:,:)
+ end if
+
+ if(present(dynmat).and.present(qpoints).and.present(phfrq))then
+   call harmonics_terms_setDynmat(dynmat,eff_pot%harmonics_terms,crystal%natom,nqpt,phfrq,qpoints)
+ end if
+
+ if(present(internal_strain))then
+   call harmonics_terms_setInternalStrain(internal_strain,eff_pot%harmonics_terms,crystal%natom)
+ end if
+
+ if(present(zeff))then
+   call harmonics_terms_setEffectiveCharges(eff_pot%harmonics_terms,crystal%natom,zeff)
+ end if
+
+!if(present(dynmat))then
+!  eff_pot%harmonics_terms
+!end if
+
+!&                          nqpt=nqpt,phfrq=phfrq,qpoints=qpoints
  eff_pot%has_strain = .FALSE.
  if(present(strain)) then
    eff_pot%has_strain = .TRUE.
@@ -325,23 +345,23 @@ subroutine effective_potential_init(crystal,dynmat,energy,eff_pot,&
    eff_pot%external_stress = external_stress
  end if
 
-
- if(straincoupling)then 
-   if (present(phonon_strain).and.present(elastic3rd).and.present(elastic_displacement)) then
-     eff_pot%has_strainCoupling = .TRUE.
-!    Allocation of anharmonics part (3rd order)
-     call anharmonics_terms_init(eff_pot%anharmonics_terms,crystal%natom,ncoeff,&
-&                                elastic3rd=elastic3rd,elastic_displacement=elastic_displacement,&
-&                                phonon_strain=phonon_strain)
-   else
-     write(msg, '(3a)' )&
-&        ' has_strainCoupling is set to true but there is no 3rd order, ',&
-&        ' please set it in the initialisation of effective_potential_init',ch10
-     MSG_BUG(msg)
-   end if
+!Allocation of phonon strain coupling array (3rd order)
+ if(present(phonon_strain)) then
+   call anharmonics_terms_setStrainPhononCoupling(eff_pot%anharmonics_terms,crystal%natom,phonon_strain)
  end if
 
+!Set the 3rd order elastic tensor
+ if(present(elastic3rd))then
+   call anharmonics_terms_setElastic3rd(eff_pot%anharmonics_terms,elastic3rd)
+ end if
 
+!Allocation of 3rd order with respecto to 2 strain and 1 atomic displacement
+ if(present(elastic_displacement))then
+   call anharmonics_terms_setElasticDispCoupling(eff_pot%anharmonics_terms,crystal%natom,&
+&                                                elastic_displacement)
+ end if
+
+!Allocation of the coefficients
  if(present(coeffs))then
    if(ncoeff /= size(coeffs))then
      write(msg, '(a)' )&
@@ -2814,14 +2834,19 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   ! else => calculation of the strain
     call strain_get(strain,rprim=eff_pot%supercell%rprimd_supercell,rprim_def=rprimd)
     call strain_print(strain)
-    do ii=1,3
-      strain_tmp(ii) = strain%strain(ii,ii)
-    end do
+    if (strain%name /= "reference")  then
+      has_strain = .TRUE.
+      do ii=1,3
+        strain_tmp(ii) = strain%strain(ii,ii)
+      end do
       strain_tmp(4) = strain%strain(2,3) * 2
       strain_tmp(5) = strain%strain(3,1) * 2
       strain_tmp(6) = strain%strain(2,1) * 2
-      has_strain = .TRUE.
+    else
+      strain_tmp(:) = zero
     end if
+    
+  end if
 
 ! if external stress is present
   if (present(external_stress)) then
@@ -2832,13 +2857,15 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   end if
 
   call elastic_contribution(eff_pot,disp_tmp1,energy_part,fcart_part,&
-&                              ncell,strten_part,strain_tmp,&
-&                              external_stress=external_stress_tmp)
+&                           ncell,strten_part,strain_tmp,&
+&                           external_stress=external_stress_tmp)
 
-  write(message, '(a,1ES24.16,a)' ) ' Energy of the elastic part :',energy_part,' Hartree'
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,message,'COLL')
- 
+  if(has_strain)then
+    write(message, '(a,1ES24.16,a)' ) ' Energy of the elastic part :',energy_part,' Hartree'
+    call wrtout(ab_out,message,'COLL')
+    call wrtout(std_out,message,'COLL')
+  end if
+
   energy = energy + energy_part
   fcart(:,:)  = fcart(:,:)  + fcart_part(:,:)
   strten(:) = strten_part(:)
@@ -2849,20 +2876,32 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 
   if (.false..and.eff_pot%has_strainCoupling) then
 
-! TREAT ELASTICS 3RD
-    do ii=1,6 ! Loop over strain
+!   1-Treat 3rd order elastic constants
+    if (eff_pot%anharmonics_terms%has_elastic3rd) then
+      energy_part = zero
+      do ii=1,6 ! Loop over strain
+!       Accumulate energy
+        energy_part = energy_part + ncell*(1/6)*strain_tmp(ii)*&
+&                dot_product(matmul(eff_pot%anharmonics_terms%elastic3rd(ii,:,:),strain_tmp),strain_tmp)
+!       Accumulate Stresses
+        strten(ii)=strten(ii)+ ncell*dot_product(matmul(eff_pot%anharmonics_terms%elastic3rd(ii,:,:),&
+&                                                       strain_tmp(:)),strain_tmp(:))
+      end do
 
-      energy = energy + ncell*(1/6)*strain_tmp(ii)*&
-&                 dot_product(matmul(eff_pot%anharmonics_terms%elastic3rd(ii,:,:),&
-&                          strain_tmp),strain_tmp)
+      energy = energy + energy_part
+      
+      write(message, '(a,1ES24.16,a)' ) ' Energy of the 3rd elastics constants :',energy_part,' Hartree'
+      call wrtout(ab_out,message,'COLL')
+      call wrtout(std_out,message,'COLL')
 
-      strten(ii)=strten(ii)+ ncell*dot_product(matmul(eff_pot%anharmonics_terms%elastic3rd(ii,:,:),&
-&                                             strain_tmp(:)),strain_tmp(:))
-    end do
+    end if
 
-    call straincoupling_contribution(eff_pot,disp_tmp1,energy_part,fcart_part,strain_tmp,&
-&                         eff_pot%my_cells,eff_pot%my_ncell,eff_pot%my_index_cells,&
-&                         eff_pot%comm_supercell)
+    if (eff_pot%anharmonics_terms%has_strain_coupling .or.&
+&       eff_pot%anharmonics_terms%has_elastic_displ) then
+      call straincoupling_contribution(eff_pot,disp_tmp1,energy_part,fcart_part,strain_tmp,&
+&                                      eff_pot%my_cells,eff_pot%my_ncell,eff_pot%my_index_cells,&
+&                                      eff_pot%comm_supercell)
+    end if
 
     write(message, '(a,1ES24.16,a)' ) ' Energy of the 3rd (strain coupling) :',energy_part,' Hartree'
     call wrtout(ab_out,message,'COLL')

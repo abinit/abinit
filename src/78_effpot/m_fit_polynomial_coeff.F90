@@ -1,5 +1,5 @@
 !{\src2tex{textfont=tt}}
-!!****f* ABINIT/m_fit_polynomial_coeff
+!!****m* ABINIT/m_fit_polynomial_coeff
 !!
 !! NAME
 !! m_fit_polynomial_coeff

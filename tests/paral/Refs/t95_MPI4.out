@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Thu 17 Nov 2016.
-- ( at 10h14 )
+.Starting date : Tue  6 Dec 2016.
+- ( at 09h44 )
   
 - input  file    -> t95.in
 - output file    -> t95_MPI4.out
@@ -6635,10 +6635,10 @@ P          mk1mem3          2
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=         15.2  wall=         15.2
+- Proc.   0 individual time (sec): cpu=         16.2  wall=         16.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         60.9  wall=         60.9
++Overall time at end (sec) : cpu=         64.8  wall=         64.9
