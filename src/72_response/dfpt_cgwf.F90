@@ -198,16 +198,18 @@ subroutine dfpt_cgwf(band,berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,rf2,dcwa
  usetolrde = 1
 ! LB-29/11/17:
 ! For ipert=natom+10 or ipert=natom+11, the Sternheimer equation is non-self-consistent, so we have
-! to solve a true linear problem (A.x = b) for each kpoint and band. In this case, the conjugate
-! gradient algorithm can find the solution up to numerical precision with only ONE call of dfpt_cgwf
-! (per kpoint and band). This way, in order to avoid useless scfcv loops (and calls of rf2_init, which
-! can be time-consuming), we want leave this routine only if tolwfr is reached so tolrde and nline are
-! not used to end the procedure.
+! to solve a true linear problem (A.X = B) for each kpoint and band. In this case, the conjugate
+! gradient algorithm can find the exact solution (within the numerical precision) with only ONE call
+! of dfpt_cgwf (per kpoint and band...). Moreover, the solution is found in (at most) N steps, where
+! N is the dimension of X.
+! This way, in order to avoid useless scfcv loops (and many calls of rf2_init, which can be time consuming),
+! we want leave this routine only if tolwfr is reached. This way, tolrde is not used and nline is 
+! set to npw1*nspinor.
 ! NOTE : This is also true for ipert==natom+1, but a lot of references in the test suite have to be
 ! changed...
  if(ipert==natom+10.or.ipert==natom+11) then
-   nline = 200 ! The default value is only 4...
-   if (nline_in>200) nline = nline_in ! Keep the possibility to increase nline
+   nline = npw1*nspinor ! The default value is only 4...
+   if (nline_in > npw1*nspinor) nline = nline_in ! Keep the possibility to increase nline
    usetolrde = 0  ! see below
  end if
 
