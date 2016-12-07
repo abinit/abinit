@@ -96,7 +96,7 @@ integer, parameter :: npul=0
 integer  :: ierr,ii,jj,kk,nitpul
 real(dp),save :: ucvol0
 real(dp) :: ucvol,det
-real(dp) :: etotal,etotal_prev
+real(dp) :: etotal
 real(dp) :: favg,alpha0
 
 !arrays
@@ -356,8 +356,6 @@ real(dp) :: strten(6)
 !##########################################################
 !### 07. Compute the next values
 
-
- etotal_prev=hist%histE(hist%ihist-1)
 
  vin_prev(:) = vin
  vout_prev(:) = vout
