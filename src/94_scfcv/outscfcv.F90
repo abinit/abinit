@@ -237,9 +237,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer,parameter :: master=0,cplex1=1,fform_den=52,rdwr2=2,rdwrpaw0=0
  integer :: bantot,fform,collect,timrev
  integer :: accessfil,coordn
- integer :: ii,ierr,ifft,ikpt,ispden,isppol
+ integer :: ii,ierr,ifft,ikpt,ispden,isppol,itypat
  integer :: me_fft,n1,n2,n3
- integer :: ifgd, iatom, nradint
+ integer :: ifgd, iatom, iatom_tot,nradint
  integer :: me,my_natom_tmp
  integer :: occopt
  integer :: prtnabla
@@ -258,7 +258,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  real(dp) :: tsec(2),nt_ntone_norm(nspden)
  real(dp),allocatable :: eigen2(:)
  real(dp),allocatable :: elfr_down(:,:),elfr_up(:,:)
- real(dp),allocatable :: rhor_paw(:,:),rhor_paw_core(:,:),rhor_paw_val(:,:),vwork(:,:)
+ real(dp),allocatable :: rhor_paw(:,:),rhor_paw_core(:,:),rhor_paw_val(:,:),vpaw(:,:),vwork(:,:)
  real(dp),allocatable :: rhor_n_one(:,:),rhor_nt_one(:,:),ps_norms(:,:,:)
  real(dp), allocatable :: doccde(:)
  real(dp), allocatable :: vh1spl(:)
@@ -268,7 +268,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  real(dp), allocatable :: radii(:)
  type(pawrhoij_type) :: pawrhoij_dum(0)
  type(pawrhoij_type),pointer :: pawrhoij_all(:)
- logical :: remove_inv
+ logical :: paral_atom,remove_inv
  real(dp) :: e_fermie
  type(oper_type) :: lda_occup
  type(crystal_t) :: crystal
@@ -370,6 +370,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  spacecomm=mpi_enreg%comm_cell; me=xmpi_comm_rank(spacecomm)
  comm_fft=mpi_enreg%comm_fft
+ paral_atom=(my_natom/=natom)
 
 !Warnings :
 !- core charge is excluded from the charge density;
@@ -446,6 +447,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
      if (prtvol>9) then  ! Check normalisation
        norm = SUM(rhor_paw(:,1))*ucvol/PRODUCT(pawfgr%ngfft(1:3))
+       call xmpi_sum(norm,comm_fft,ierr)
        write(message,'(a,F8.4)') '  PAWDEN - NORM OF DENSITY: ',norm
        call wrtout(std_out,message,'COLL')
      end if
@@ -458,6 +460,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
      if (prtvol>9) then  ! Check normalisation
        norm = SUM(rhor_paw_core(:,1))*ucvol/PRODUCT(pawfgr%ngfft(1:3))
+       call xmpi_sum(norm,comm_fft,ierr)
        write(message,'(a,F8.4)') '  ATMDEN - NORM OF CORE DENSITY: ', norm
        call wrtout(std_out,message,'COLL')
      end if
@@ -470,6 +473,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
      if (prtvol>9) then ! Check normalisation
        norm = SUM(rhor_paw_val(:,1))*ucvol/PRODUCT(pawfgr%ngfft(1:3))
+       call xmpi_sum(norm,comm_fft,ierr)
        write(message,'(a,F8.4)') '  ATMDEN - NORM OF VALENCE PROTODENSITY: ', norm
        call wrtout(std_out,message,'COLL')
      end if
@@ -557,6 +561,98 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    NCF_CHECK(nf90_close(ncid))
  end if
 #endif
+
+ ! Output of VCLMB file
+ ! The PAW correction has to be computed here (all processors contribute)
+ if (psps%usepaw > 0 .AND. dtset%prtvclmb>0) then
+   nradint = 1000 ! radial integration grid density
+   ABI_ALLOCATE(vpaw,(nfft,nspden))
+   vpaw(:,:)=zero
+
+   do ispden=1,nspden
+     ! for points inside spheres, replace with full AE hartree potential.
+     ! In principle the correction could be more subtle (not spherical)
+     do iatom=1,my_natom
+       iatom_tot=iatom;if (paral_atom) iatom_tot=mpi_enreg%my_atmtab(iatom)
+       itypat=dtset%typat(iatom_tot)
+
+       ABI_ALLOCATE(vh1spl,(paw_an(iatom)%mesh_size))
+       ABI_ALLOCATE(vh1_corrector,(paw_an(iatom)%mesh_size))
+       ABI_ALLOCATE(vh1_interp,(pawfgrtab(iatom)%nfgd))
+       ABI_ALLOCATE(radii,(pawfgrtab(iatom)%nfgd))
+       ABI_ALLOCATE(isort,(pawfgrtab(iatom)%nfgd))
+       vh1_corrector(:) = paw_an(iatom)%vh1(:,1,ispden)-paw_an(iatom)%vht1(:,1,ispden)
+       ! get end point derivatives
+       call bound_deriv(vh1_corrector, pawrad(itypat), pawrad(itypat)%mesh_size, yp1, ypn)
+       ! spline the vh1 function
+       ! NB for second argument of vh1: only first moment lm_size appears to be used
+       ! NB2: vh1 can in principle be complex - not sure what to do with the imaginary part. Ignored for now.
+       call spline(pawrad(itypat)%rad, vh1_corrector, paw_an(iatom)%mesh_size, yp1, ypn, vh1spl)
+
+       do ifgd = 1, pawfgrtab(iatom)%nfgd
+         ! get radii for this point
+         isort(ifgd) = ifgd
+         radii(ifgd) = sqrt(sum(pawfgrtab(iatom)%rfgd(:,ifgd)**2))
+       end do
+
+       if (pawfgrtab(iatom)%nfgd/=0) then
+       ! spline interpolate the vh1 value for current radii
+         call sort_dp(pawfgrtab(iatom)%nfgd, radii, isort, tol12)
+         call splint(pawrad(itypat)%mesh_size, pawrad(itypat)%rad, &
+&             vh1_corrector, vh1spl, pawfgrtab(iatom)%nfgd, radii,  vh1_interp, ierr)
+       end if
+
+       norm=SUM(vh1_interp)*ucvol/PRODUCT(ngfft(1:3))
+       call xmpi_sum(norm,comm_fft,ierr)
+       write(message,'(a,i6,a,E20.10)') ' sum of Hartree correction term on fft grid of atom : ', iatom, &
+&           ' = ', norm
+       call wrtout(std_out,message,'COLL')
+
+       if (pawfgrtab(iatom)%nfgd/=0) then
+         vpaw(pawfgrtab(iatom)%ifftsph(isort(1:pawfgrtab(iatom)%nfgd)),ispden) = &
+&             vpaw(pawfgrtab(iatom)%ifftsph(isort(1:pawfgrtab(iatom)%nfgd)),ispden) + &
+&             vh1_interp(1:pawfgrtab(iatom)%nfgd)
+       end if
+
+       ! get integral of correction term in whole sphere
+       ABI_DEALLOCATE(radii)
+       ABI_DEALLOCATE(vh1_interp)
+
+       ABI_ALLOCATE(radii,(nradint))
+       ABI_ALLOCATE(vh1_interp,(nradint))
+
+       ABI_ALLOCATE(vh1_integ,(nradint))
+       dr = pawrad(itypat)%rad(paw_an(iatom)%mesh_size) / dble(nradint)
+       do ifgd = 1, nradint
+         radii(ifgd) = dble(ifgd-1)*dr
+       end do
+
+       ! spline interpolate the vh1 value for current radii
+       call splint(pawrad(itypat)%mesh_size, pawrad(itypat)%rad, &
+&           vh1_corrector, vh1spl, nradint, radii,  vh1_interp, ierr)
+
+       do ifgd = 1, nradint
+         vh1_interp(ifgd) = vh1_interp(ifgd)*radii(ifgd)**2
+       end do
+
+       call simpson_int(nradint, dr, vh1_interp, vh1_integ)
+       write(message,'(a,i6,a,E20.10)') ' integral of Hartree correction term in sphere of atom: ', iatom, &
+&           ' = ', vh1_integ(nradint)*four*pi
+       call wrtout(std_out,message,'COLL')
+
+       ABI_DEALLOCATE(vh1spl)
+       ABI_DEALLOCATE(vh1_corrector)
+       ABI_DEALLOCATE(vh1_interp)
+       ABI_DEALLOCATE(vh1_integ)
+       ABI_DEALLOCATE(radii)
+       ABI_DEALLOCATE(isort)
+     end do ! iatom
+   end do !ispden
+   call xmpi_sum_master(vpaw,master,mpi_enreg%comm_atom,ierr)
+   if (.not.iwrite_fftdatar(mpi_enreg)) then
+     ABI_DEALLOCATE(vpaw)
+   end if
+ end if ! if paw - add all electron vhartree in spheres
 
  if (iwrite_fftdatar(mpi_enreg)) then
 
@@ -686,90 +782,16 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 ! VCouLoMB
    if (dtset%prtvclmb>0) then
 
-!    set to 1 for netcdf output
      ABI_ALLOCATE(vwork,(nfft,nspden))
      do ispden=1,nspden
        vwork(:,ispden)=vpsp(:)+vhartr(:)
      end do
-
-     if (psps%usepaw > 0 .AND. dtset%prtvclmb==1) then
-       nradint = 1000 ! radial integration grid density
-
-       ! FIXME: MG I got a SIGSEV here if I run with npfft=4 and prtvclmb==1
-       ! Could someome check this code, in particular the way we access the vwork array below
-       ! when MPI-FFT is used?
-
+     if (psps%usepaw==1) then
        do ispden=1,nspden
-         ! for points inside spheres, replace with full AE hartree potential.
-         ! In principle the correction could be more subtle (not spherical)
-         do iatom = 1, natom
-           ABI_ALLOCATE(vh1spl,(paw_an(iatom)%mesh_size))
-           ABI_ALLOCATE(vh1_corrector,(paw_an(iatom)%mesh_size))
-           ABI_ALLOCATE(vh1_interp,(pawfgrtab(iatom)%nfgd))
-           ABI_ALLOCATE(radii,(pawfgrtab(iatom)%nfgd))
-           ABI_ALLOCATE(isort,(pawfgrtab(iatom)%nfgd))
-           vh1_corrector(:) = paw_an(iatom)%vh1(:,1,ispden)-paw_an(iatom)%vht1(:,1,ispden)
-           ! get end point derivatives
-           call bound_deriv(vh1_corrector, pawrad(dtset%typat(iatom)), pawrad(dtset%typat(iatom))%mesh_size, yp1, ypn)
-           ! spline the vh1 function
-           ! NB for second argument of vh1: only first moment lm_size appears to be used
-           ! NB2: vh1 can in principle be complex - not sure what to do with the imaginary part. Ignored for now.
-           call spline(pawrad(dtset%typat(iatom))%rad, vh1_corrector, paw_an(iatom)%mesh_size, yp1, ypn, vh1spl)
-
-           do ifgd = 1, pawfgrtab(iatom)%nfgd
-             ! get radii for this point
-             isort(ifgd) = ifgd
-             radii(ifgd) = sqrt(sum(pawfgrtab(iatom)%rfgd(:,ifgd)**2))
-           end do
-           call sort_dp(pawfgrtab(iatom)%nfgd, radii, isort, tol12)
-
-           ! spline interpolate the vh1 value for current radii
-           call splint(pawrad(dtset%typat(iatom))%mesh_size, pawrad(dtset%typat(iatom))%rad, &
-&           vh1_corrector, vh1spl, pawfgrtab(iatom)%nfgd, radii,  vh1_interp, ierr)
-
-           write(message,'(a,i6,a,E20.10)') ' sum of Hartree correction term on fft grid of atom : ', iatom, &
-&           ' = ', sum(vh1_interp)*ucvol/ngfft(1)/ngfft(2)/ngfft(3)
-           call wrtout(std_out,message,'COLL')
-
-           vwork(pawfgrtab(iatom)%ifftsph(isort(1:pawfgrtab(iatom)%nfgd)), ispden) = &
-&           vwork(pawfgrtab(iatom)%ifftsph(isort(1:pawfgrtab(iatom)%nfgd)), ispden) + &
-&           vh1_interp(1:pawfgrtab(iatom)%nfgd)
-
-           ! get integral of correction term in whole sphere
-           ABI_DEALLOCATE(radii)
-           ABI_DEALLOCATE(vh1_interp)
-
-           ABI_ALLOCATE(radii,(nradint))
-           ABI_ALLOCATE(vh1_interp,(nradint))
-
-           ABI_ALLOCATE(vh1_integ,(nradint))
-           dr = pawrad(dtset%typat(iatom))%rad(paw_an(iatom)%mesh_size) / dble(nradint)
-           do ifgd = 1, nradint
-             radii(ifgd) = dble(ifgd-1)*dr
-           end do
-
-           ! spline interpolate the vh1 value for current radii
-           call splint(pawrad(dtset%typat(iatom))%mesh_size, pawrad(dtset%typat(iatom))%rad, &
-&           vh1_corrector, vh1spl, nradint, radii,  vh1_interp, ierr)
-
-           do ifgd = 1, nradint
-             vh1_interp(ifgd) = vh1_interp(ifgd)*radii(ifgd)**2
-           end do
-
-           call simpson_int(nradint, dr, vh1_interp, vh1_integ)
-           write(message,'(a,i6,a,E20.10)') ' integral of Hartree correction term in sphere of atom: ', iatom, &
-&           ' = ', vh1_integ(nradint)*four*pi
-           call wrtout(std_out,message,'COLL')
-
-           ABI_DEALLOCATE(vh1spl)
-           ABI_DEALLOCATE(vh1_corrector)
-           ABI_DEALLOCATE(vh1_interp)
-           ABI_DEALLOCATE(vh1_integ)
-           ABI_DEALLOCATE(radii)
-           ABI_DEALLOCATE(isort)
-         end do ! iatom
-       end do !ispden
-     end if ! if paw - add all electron vhartree in spheres
+         vwork(:,ispden)=vwork(:,ispden)+vpaw(:,ispden)
+       end do
+       ABI_DEALLOCATE(vpaw)
+     end if
 
      call fftdatar_write("vhartree_vloc",dtfil%fnameabo_app_vclmb,dtset%iomode,hdr,&
      crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
