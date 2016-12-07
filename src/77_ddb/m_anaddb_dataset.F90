@@ -782,12 +782,12 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
- anaddb_dtset%ifcout=-1
+ anaddb_dtset%ifcout=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ifcout',tread,'INT')
  if(tread==1) anaddb_dtset%ifcout=intarr(1)
  if(anaddb_dtset%ifcout<-1)then
    write(message, '(a,i0,a,a,a)' )&
-&   'ifcout is',anaddb_dtset%ifcout,', which is lower than -1 (the default = output all ifc).',ch10,&
+&   'ifcout is',anaddb_dtset%ifcout,', which is lower than -1.',ch10,&
 &   'Action: correct ifcout in your input file.'
    MSG_ERROR(message)
  end if
