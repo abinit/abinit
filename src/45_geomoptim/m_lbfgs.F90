@@ -52,7 +52,7 @@ type,public :: lbfgs_internal
  logical              :: line_stage1
 end type lbfgs_internal
 
-type(lbfgs_internal),public :: lbfgs_plan
+type(lbfgs_internal),save,public :: lbfgs_plan
 
 
 
