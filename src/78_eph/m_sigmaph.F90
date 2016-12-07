@@ -889,9 +889,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            do ip1=1,natom3
              idir1 = mod(ip1-1, 3) + 1; ipert1 = (ip1 - idir1) / 3 + 1
              ! (k,a)* (k,a') + (k',a)* (k',a')
-             uka = dcmplx(displ_red(1, idir1, ipert1, nu), displ_red(2, idir1, ipert1, nu))
-             ukap = dcmplx(displ_red(1, idir2, ipert1, nu), displ_red(2, idir2, ipert1, nu))
-             ukpa = dcmplx(displ_red(1, idir1, ipert2, nu), displ_red(2, idir1, ipert2, nu))
+             uka   = dcmplx(displ_red(1, idir1, ipert1, nu), displ_red(2, idir1, ipert1, nu))
+             ukap  = dcmplx(displ_red(1, idir2, ipert1, nu), displ_red(2, idir2, ipert1, nu))
+             ukpa  = dcmplx(displ_red(1, idir1, ipert2, nu), displ_red(2, idir1, ipert2, nu))
              ukpap = dcmplx(displ_red(1, idir2, ipert2, nu), displ_red(2, idir2, ipert2, nu))
              tpp(ip1,ip2) = conjg(uka) * ukap + conjg(ukpa) * ukpap
            end do
@@ -900,12 +900,13 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          ! Compute hmn_nu-matrix (nbcalc_ks, nbsum, natom3))
          !dbwl_nu, (2, nbsum, nbcalc_ks, natom3))
          !do ii=1,natom3
+           !wqnu = phfrq(ii); if (wqnu < tol6) cycle
          !end do
 
          ! H* T H
          !gdw2 = H* T H
          gdw2 = zero
-         !call adagger_b_a(nbsum*nbcalc_ks, natom3, hmn_nu, tpp, gdw2)
+         !call adagger_b_a(nbsum*nbcalc_ks, natom3, tpp, hmn_nu, gdw2)
          gdw2 = gdw2 / (two * wqnu)
 
          ! Get phonon occupation for all temperatures.
@@ -1245,7 +1246,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  new%ieta = j_dpc * 0.1_dp * eV_Ha
 
  ! Build (linear) mesh of temperatures.
- ! TODO: Will become input eph_tsmesh start stop num
+ ! TODO: Will become input tsmesh with `start step num`
  new%ntemp = 5
  ABI_CHECK(new%ntemp > 1, "ntemp cannot be 1")
  temp_range = [5, 300]
@@ -1758,17 +1759,10 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc)
 
  if (self%symsigma == 0) then
    ! Do not use symmetries in BZ sum_q --> nqibz_k == nqbz
-#if 1
    self%nqibz_k = self%nqbz
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
    ABI_MALLOC(self%wtq_k, (self%nqibz_k))
    self%qibz_k = self%qbz; self%wtq_k = one / self%nqbz
-#else
-   self%nqibz_k = self%nqibz
-   ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
-   ABI_MALLOC(self%wtq_k, (self%nqibz_k))
-   self%qibz_k = self%qibz; self%wtq_k = self%wtq
-#endif
 
  else if (self%symsigma == 1) then
    ! Use symmetries of the little group

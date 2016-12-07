@@ -549,15 +549,14 @@ integer function fstab_findkg0(fstab, kpt, g0) result(ikfs)
  integer,intent(out) :: g0(3)
  real(dp),intent(in) :: kpt(3)
 
-!Local variables-------------------------------
-!scalars
- integer :: kpt_rank
-
 ! *************************************************************************
 
- call get_rank_1kpt(kpt, kpt_rank, fstab%krank)
- ikfs = fstab%krank%invrank(kpt_rank); if (ikfs == -1) return
- g0 = nint(kpt - fstab%kpts(:, ikfs))
+ ikfs = kptrank_index(fstab%krank, kpt)
+ if (ikfs /= -1) then
+   g0 = nint(kpt - fstab%kpts(:, ikfs))
+ else
+   g0 = huge(1)
+ end if
 
 end function fstab_findkg0
 !!***

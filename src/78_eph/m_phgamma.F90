@@ -912,7 +912,7 @@ subroutine phgamma_interp_setup(gams,cryst,action)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: qtor1=1
- integer :: iq_bz,iq_ibz,spin,symrankkpt_phon,isym,ierr
+ integer :: iq_bz,iq_ibz,isq_bz,spin,isym,ierr
  !character(len=500) :: msg
  type(kptrank_type) :: qrank
 !arrays
@@ -939,8 +939,7 @@ subroutine phgamma_interp_setup(gams,cryst,action)
 
      do iq_ibz=1,gams%nqibz
        qirr = gams%qibz(:,iq_ibz)
-       call get_rank_1kpt(qirr,symrankkpt_phon,qrank)
-       iq_bz = qrank%invrank(symrankkpt_phon)
+       iq_bz = kptrank_index(qrank, qirr)
        if (iq_bz /= -1) then
          ABI_CHECK(isamek(qirr,gams%qbz(:,iq_bz),g0), "isamek")
          qirredtofull(iq_ibz) = iq_bz
@@ -956,18 +955,19 @@ subroutine phgamma_interp_setup(gams,cryst,action)
        do isym=1,cryst%nsym
          tmp_qpt = matmul(cryst%symrec(:,:,isym), gams%qbz(:,iq_bz))
 
-         call get_rank_1kpt(tmp_qpt,symrankkpt_phon,qrank)
-         if (qrank%invrank(symrankkpt_phon) == -1) then
+         isq_bz = kptrank_index(qrank, tmp_qpt)
+         if (isq_bz == -1) then
            MSG_ERROR("looks like no kpoint equiv to q by symmetry without time reversal!")
          end if
-         qpttoqpt(1,isym,qrank%invrank(symrankkpt_phon)) = iq_bz
+         qpttoqpt(1,isym,isq_bz) = iq_bz
 
+         ! q --> -q
          tmp_qpt = -tmp_qpt
-         call get_rank_1kpt (tmp_qpt,symrankkpt_phon,qrank)
-         if (qrank%invrank(symrankkpt_phon) == -1) then
+         isq_bz = kptrank_index(qrank, tmp_qpt)
+         if (isq_bz == -1) then
            MSG_ERROR("looks like no kpoint equiv to q by symmetry with time reversal!")
          end if
-         qpttoqpt(2,isym,qrank%invrank(symrankkpt_phon)) = iq_bz
+         qpttoqpt(2,isym,isq_bz) = iq_bz
        end do
      end do
      call destroy_kptrank(qrank)
@@ -2806,8 +2806,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 
        ! Loop over all 3*natom perturbations.
        do ipc=1,natom3
-         idir = mod(ipc-1, 3) + 1
-         ipert = (ipc - idir) / 3 + 1
+         idir = mod(ipc-1, 3) + 1; ipert = (ipc - idir) / 3 + 1
 
          ! Prepare application of the NL part.
          call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=1)
