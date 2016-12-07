@@ -21,8 +21,16 @@
 !!
 !! SOURCE
 
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
 module m_lbfgs
  use defs_basis
+ use m_profiling_abi
 
 type,public :: lbfgs_internal
  integer              :: lbfgs_status
@@ -102,12 +110,10 @@ integer :: nwork
  lbfgs_plan%iter   = 0
  lbfgs_plan%ndim = ndim
  lbfgs_plan%history_record = history_record
- ALLOCATE(lbfgs_plan%diag(ndim))
-! ABI_ALLOCATE(lbfgs_plan%diag,(ndim))
+ ABI_ALLOCATE(lbfgs_plan%diag,(ndim))
 
  nwork = ndim * ( 2 * history_record + 1 ) + 2 * history_record
- ALLOCATE(lbfgs_plan%work(nwork))
-! ABI_ALLOCATE(lbfgs_plan%work,(nwork))
+ ABI_ALLOCATE(lbfgs_plan%work,(nwork))
 
  lbfgs_plan%gtol = 0.9
  lbfgs_plan%line_stpmin = 1.0e-20
