@@ -142,6 +142,7 @@ module m_phonons
  public :: mkphdos
  public :: phdos_print
  public :: phdos_print_debye
+ public :: phdos_print_msqd
  public :: phdos_free
  public :: phdos_ncwrite
 !!**
@@ -545,9 +546,9 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 !Local variables -------------------------
 !scalars
  integer,parameter :: brav1=1,chksymbreak0=0,bcorr0=0
- integer :: facbrv,iat,idir,imesh,imode,io,iq_ibz,itype,nkpt_fullbz
+ integer :: facbrv,iat,jat,idir,imesh,imode,io,iq_ibz,itype,nkpt_fullbz
  integer :: nmesh,nqbz,nqpt_max,nqshft,option,timrev,ierr,natom,nomega
- integer :: jdir, idispl, jdispl
+ integer :: jdir, idispl, jdispl, isym
  real(dp) :: dum,gaussfactor,gaussprefactor,gaussval,low_bound,max_occ,pnorm
  real(dp) :: qphnrm,upr_bound,xx,gaussmaxarg
  logical :: out_of_bounds
@@ -560,9 +561,12 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  real(dp) :: displ(2*3*Crystal%natom*3*Crystal%natom)
  real(dp) :: eigvec(2,3,Crystal%natom,3*Crystal%natom),phfrq(3*Crystal%natom)
  real(dp) :: qlatt(3,3),qphon(3),rlatt(3,3)
+ real(dp) :: msqd_atom_tmp(3,3)
+ real(dp),allocatable :: symcart(:,:,:)
  real(dp),allocatable :: dtweightde(:,:),full_eigvec(:,:,:,:,:),full_phfrq(:,:),Prf3D(:,:,:)
  real(dp),allocatable :: kpt_fullbz(:,:),qbz(:,:),qibz(:,:),qshft(:,:),tmp_phfrq(:),tweight(:,:)
  real(dp),allocatable :: qibz2(:,:),qshft2(:,:),wtq(:),wtq_folded(:),wtqibz(:)
+ real(dp),allocatable :: invmass(:)
 
 ! *********************************************************************
 
@@ -583,6 +587,16 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 
  natom = Crystal%natom
  gaussmaxarg = sqrt(-log(1.d-90))
+
+ ABI_ALLOCATE (symcart, (3,3,Crystal%nsym))
+ do isym = 1, Crystal%nsym
+   call symredcart(Crystal%rprimd,Crystal%gprimd,symcart(:,:,isym),Crystal%symrel(:,:,isym))
+ end do
+
+ ABI_ALLOCATE (invmass, (natom))
+ do iat = 1, natom
+   invmass(iat) = one / Crystal%amu(Crystal%typat(iat))/amu_emass
+ end do
 
  ! Initialize container type, but with minimal values
  !call init_phondos(PHdos,Crystal%ntypat,natom,prtdos,1,1,1,smallest_real,greatest_real,dosdeltae,dossmear)
@@ -798,6 +812,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
                if(abs(xx) < gaussmaxarg) gaussval=gaussprefactor*exp(-xx*xx)
                PHdos%phdos(io)=PHdos%phdos(io) + wtqibz(iq_ibz)*gaussval
                do iat=1,natom
+                 msqd_atom_tmp = zero
                  do idir=1,3
                    pnorm=eigvec(1,idir,iat,imode)**2+eigvec(2,idir,iat,imode)**2
                    PHdos%pjdos(io,idir,iat)=PHdos%pjdos(io,idir,iat)+ pnorm*wtqibz(iq_ibz)*gaussval
@@ -807,17 +822,29 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
                    do jdir=1,3
                      jdispl = (imode-1)*3*natom + (iat-1)*3 + jdir
                      ! NB: only accumulate real part. I think the full sum over the BZ should guarantee Im=0
-                     PHdos%msqd_dos_atom(io,jdir,idir,iat) = PHdos%msqd_dos_atom(io,jdir,idir,iat) &
+                     ! this sum only does irreducible points: the matrix is symmetrized below
+                     ! msqd_atom_tmp has units of bohr^2 / Ha as gaussval ~ 1/smear ~ 1/Ha
+                     msqd_atom_tmp(jdir,idir) = msqd_atom_tmp(jdir,idir) &
 &                       + (displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+1) &
 &                       -  displ(2*(idispl-1)+2)* displ(2*(jdispl-1)+2) &
 &                       +  displ(2*(idispl-1)+2)* displ(2*(jdispl-1)+1) &
-&                       -  displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+2)) * wtqibz(iq_ibz) * gaussval
-                   end do
-                 end do
-               end do
-             end do
-           end do
+&                       -  displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+2)) * wtqibz(iq_ibz) * gaussval 
+                   end do ! jdir
+                 end do ! idir
+                 ! msqd_atom_tmp is in cartesian coordinates
 
+! Symmetrize matrices to get full sum of tensor over all BZ, not just IBZ.
+!   the atom is not necessarily invariant under symops, so these contributions should be added to each iat separately
+!   normalization by nsym is done at the end outside the iqpt loop and after the tetrahedron clause
+                 do isym=1, Crystal%nsym
+                   jat = Crystal%indsym(4,isym,iat)
+!  TODO:  need to check the direction of the symcart vs transpose or inverse, given that jat is the pre-image of iat...
+                   PHdos%msqd_dos_atom(io,:,:,jat) = PHdos%msqd_dos_atom(io,:,:,jat) &
+&                    + matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) )
+                 end do
+               end do ! iat
+             end do ! io
+           end do ! imode
          case (2)
            ! === Tetrahedrons ===
            !  * Save phonon frequencies and eigenvectors.
@@ -887,32 +914,49 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
          PHdos%phdos(io)=PHdos%phdos(io)+dtweightde(iq_ibz,io)
          PHdos%phdos_int(io)=PHdos%phdos_int(io)+tweight(iq_ibz,io)
          do iat=1,natom
+           msqd_atom_tmp = zero
            do idir=1,3
              pnorm=full_eigvec(1,idir,iat,imode,iq_ibz)**2 + full_eigvec(2,idir,iat,imode,iq_ibz)**2
              PHdos%pjdos(io,idir,iat)=PHdos%pjdos(io,idir,iat) + pnorm*dtweightde(iq_ibz,io)
              PHdos%pjdos_int(io,idir,iat)=PHdos%pjdos_int(io,idir,iat) + pnorm*tweight(iq_ibz,io)
 
              ! accumulate outer product of displacement vectors
-             idispl = (imode-1)*3*natom + (iat-1)*3 + idir
              do jdir=1,3
-               jdispl = (imode-1)*3*natom + (iat-1)*3 + jdir
                ! NB: only accumulate real part. I think the full sum over the BZ should guarantee Im=0
-               PHdos%msqd_dos_atom(io,jdir,idir,iat) = PHdos%msqd_dos_atom(io,jdir,idir,iat) &
-&                + (displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+1) &
-&                -  displ(2*(idispl-1)+2)* displ(2*(jdispl-1)+2) &
-&                +  displ(2*(idispl-1)+2)* displ(2*(jdispl-1)+1) &
-&                -  displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+2)) * dtweightde(iq_ibz,io)
+               msqd_atom_tmp(jdir,idir) = msqd_atom_tmp(jdir,idir) &
+&                + (full_eigvec(1,idir,iat,imode,iq_ibz)* full_eigvec(1,jdir,iat,imode,iq_ibz) &
+&                -  full_eigvec(2,idir,iat,imode,iq_ibz)* full_eigvec(2,jdir,iat,imode,iq_ibz) &
+&                +  full_eigvec(2,idir,iat,imode,iq_ibz)* full_eigvec(1,jdir,iat,imode,iq_ibz) &
+&                -  full_eigvec(1,idir,iat,imode,iq_ibz)* full_eigvec(2,jdir,iat,imode,iq_ibz)) &
+&                * dtweightde(iq_ibz,io) 
              end do
            end do
-         end do
-       end do
-     end do
 
-   end do
+! Symmetrize matrices to get full sum of tensor over all BZ, not just IBZ.
+!   the atom is not necessarily invariant under symops, so these contributions should be added to each iat separately
+!   normalization by nsym is done at the end outside the iqpt loop and after the tetrahedron clause
+           do isym=1, Crystal%nsym
+             jat = Crystal%indsym(4,isym,iat)
+!   from loops above only the eigvec are kept and not the displ, so we still have to divide by the masses
+!  TODO:  need to check the direction of the symcart vs transpose or inverse, given that jat is the pre-image of iat...
+             PHdos%msqd_dos_atom(io,:,:,jat) = PHdos%msqd_dos_atom(io,:,:,jat) + &
+&                matmul( (symcart(:,:,isym)), matmul(msqd_atom_tmp, transpose(symcart(:,:,isym))) ) * invmass(iat)
+           end do
+         end do ! isym
+       end do ! iat
+     end do  ! io
+   end do ! imode
    ABI_FREE(tmp_phfrq)
    ABI_FREE(tweight)
    ABI_FREE(dtweightde)
- end if
+ end if ! prtdos 2 = tetrahedra
+
+! normalize by nsym : symmetrization is used in all prtdos cases
+ PHdos%msqd_dos_atom = PHdos%msqd_dos_atom / Crystal%nsym 
+
+
+ ABI_FREE(symcart)
+ ABI_FREE(invmass)
  !
  ! =======================
  ! === calculate IPDOS ===
@@ -1302,7 +1346,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,
 
    if (sqrt(real_qphon(1)**2+real_qphon(2)**2+real_qphon(3)**2) < quarter .and. &
 &   sqrt(real_qphon(1)**2+real_qphon(2)**2+real_qphon(3)**2) > tol6) then
-     call prtvsound(ab_out,eigvec, Crystal%gmet, natom, phfrq, real_qphon, Crystal%ucvol)
+     call phdos_print_vsound(ab_out,eigvec, Crystal%gmet, natom, phfrq, real_qphon, Crystal%ucvol)
    end if
 
  end do ! iphl1
@@ -1342,10 +1386,10 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,d2asr,outfile_radix,singular,tcpui,twalli,
 contains
 !!***
 
-!!****f* m_phonons/prtvsound
+!!****f* m_phonons/phdos_print_vsound
 !!
 !! NAME
-!! prtvsound
+!! phdos_print_vsound
 !!
 !! FUNCTION
 !!  From the frequencies for acoustic modes at small q, estimate speed of sound and Debye temperature
@@ -1368,13 +1412,13 @@ contains
 !!
 !! SOURCE
 
-subroutine prtvsound(unit,eigvec,gmet,natom,phfrq,qphon,ucvol)
+subroutine phdos_print_vsound(unit,eigvec,gmet,natom,phfrq,qphon,ucvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'prtvsound'
+#define ABI_FUNC 'phdos_print_vsound'
  use interfaces_14_hidewrite
 !End of the abilint section
 
@@ -1436,10 +1480,127 @@ subroutine prtvsound(unit,eigvec,gmet,natom,phfrq,qphon,ucvol)
    call wrtout(unit,"",'COLL')
  end do
 
-end subroutine prtvsound
+end subroutine phdos_print_vsound
 !!***
 
 end subroutine mkphbs
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_phonons/phdos_print_msqd
+!!
+!! NAME
+!! phdos_print_msqd
+!!
+!! FUNCTION
+!!  Print out mean square displacement for each atom (trace and full matrix) as a function of T
+!!  see for example https://atztogo.github.io/phonopy/thermal-displacement.html#thermal-displacement
+!!
+!! INPUTS
+!!   PHdos structure
+!!
+!! OUTPUT
+!!   to file only
+!!
+!! PARENTS
+!!      m_phonons
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
+
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer, intent(in) :: ntemper
+ type(phonon_dos_type),intent(in) :: PHdos
+ character(len=fnlen) :: fname
+ real(dp), intent(in) :: tempermin, temperinc
+
+!arrays
+
+!Local variables -------------------------
+ integer :: io, itemp, iunit, iatom
+ real(dp) :: temper
+ character(len=500) :: msg
+
+ real(dp), allocatable :: bose(:,:), tmp_msqd(:,:), integ(:,:)
+
+! *********************************************************************
+
+ if (open_file(fname, msg, newunit=iunit, form="formatted", status="unknown", action="write") /= 0) then
+   MSG_ERROR(msg)
+ end if
+
+! write a header
+   write (msg, '(2a)') '# mean square displacement for each atom as a function of T'
+
+! NB: this call to wrtout does not seem to work from the eph executable, even in sequential, and whether within or outside a clause for me==master. 
+!  Do not change this to wrtout without checking extensively.
+   !call wrtout(iunit, msg, 'COLL')
+   write (iunit, '(a)') trim(msg)
+   write (msg, '(a,F18.10,a,F18.10,a)') '#  T in Kelvin, from ', tempermin, ' to ', tempermin+(ntemper-1)*temperinc
+   !call wrtout(iunit, msg, 'COLL')
+   write (iunit, '(a)') trim(msg)
+   write (msg, '(3a)') '#    T             |u^2|                u_xx                u_xy                u_xz',&
+&                                              '                u_yx                u_yy                y_yz',&
+&                                              '                u_zx                u_zy                u_zz  in bohr^2'
+   !call wrtout(iunit, msg, 'COLL')
+   write (iunit, '(a)') trim(msg)
+
+ ABI_ALLOCATE (tmp_msqd, (PHdos%nomega,9))
+ ABI_ALLOCATE (integ, (9,ntemper))
+
+ ! calculate bose only once for each atom (instead of for each atom)
+ ABI_ALLOCATE (bose, (PHdos%nomega, ntemper))
+ bose = zero
+ do io = 1, PHdos%nomega
+   if (PHdos%omega(io) < 1.e-10) cycle
+   do itemp = 1, ntemper
+     temper = tempermin + (itemp-1) * temperinc
+! NB: factors follow convention in phonopy documentation
+!   the 1/sqrt(omega) factor in phonopy is contained in the displacement vector definition
+!   bose() is dimensionless
+     bose(io, itemp) =  (half + one  / ( exp(PHdos%omega(io)/(kb_HaK*temper)) - one )) / PHdos%omega(io)
+   end do
+ end do
+
+ do iatom=1,PHdos%natom
+   write (msg, '(a,I8)') '# atom number ', iatom
+   !call wrtout(iunit, msg, 'COLL')
+   write (iunit, '(a)') trim(msg)
+! for each T and each atom, integrate msqd matrix with Bose Einstein factor and output
+   integ = zero
+   tmp_msqd = reshape(PHdos%msqd_dos_atom(:,:,:,iatom), (/PHdos%nomega, 9/))
+
+! perform all integrations as matrix multiplication: integ (idir, itemp) = [tmp_msqd(io,idir)]^T  * bose(io,itemp)
+   call DGEMM('T','N', 9, ntemper, PHdos%nomega, one, tmp_msqd,PHdos%nomega,&
+&      bose, PHdos%nomega, zero, integ, 9)
+! NB: this presumes an equidistant omega grid
+   integ = integ * (PHdos%omega(2)-PHdos%omega(1))
+
+! print out stuff
+   do itemp = 1, ntemper
+     temper = tempermin + (itemp-1) * temperinc
+     write (msg, '(F10.2,4x,F18.10,2x,9F18.10)') temper, third*(integ(1,itemp)+integ(5,itemp)+integ(9,itemp)), integ(:,itemp)
+     !call wrtout(iunit, msg, 'COLL')
+     write (iunit, '(a)') trim(msg)
+   end do ! itemp
+   !call wrtout(iunit, msg, 'COLL')
+   write (iunit, '(a)') ''
+ enddo ! iatom
+
+ ABI_DEALLOCATE (tmp_msqd)
+ ABI_DEALLOCATE (bose)
+ ABI_DEALLOCATE (integ)
+ close(iunit)
+
+end subroutine phdos_print_msqd
 !!***
 
 !----------------------------------------------------------------------
@@ -1733,7 +1894,7 @@ subroutine phonons_writeEPS(natom,nqpts,ntypat,qpoints,typat,weights,phfreq,phdi
  kmaxN=9600
 
 !convert phdispl_cart in cpx array
- displcpx = cmplx(phdispl_cart(1,:,:,:),phdispl_cart(2,:,:,:))
+ displcpx = dcmplx(phdispl_cart(1,:,:,:),phdispl_cart(2,:,:,:))
 
 !Read the input file, and store the information in a long string of characters
 !strlen from defs_basis module
