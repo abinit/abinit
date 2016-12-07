@@ -253,7 +253,7 @@ subroutine phdos_print(PHdos,fname)
  call wrtout(unt,msg,'COLL')
  write(msg,'(5a)')'# ',ch10,'# omega     PHDOS    PJDOS[atom=1]  PJDOS[atom=2] ...  ',ch10,'# '
  call wrtout(unt_by_atom,msg,'COLL')
- write(msg,'(5a)')'# ',ch10,'# omega     MSQDisp[atom=1, xx, xy,...]  MSQDisp[atom=2, xx, xy,...] ...  ',ch10,'# '
+ write(msg,'(5a)')'# ',ch10,'# omega     MSQDisp[atom=1, xx, yy, zz, yz, xz, xy]  MSQDisp[atom=2, xx, yy,...] ...  ',ch10,'# '
  call wrtout(unt_msqd,msg,'COLL')
 
  do io=1,PHdos%nomega
@@ -271,7 +271,13 @@ subroutine phdos_print(PHdos,fname)
 
    write(unt_msqd,'(2es17.8)',advance='NO')PHdos%omega(io)*cfact
    do iatom=1,PHdos%natom
-     write(unt_msqd,'(9es17.8,2x)',advance='NO') PHdos%msqd_dos_atom(io,1:3,1:3,iatom)/cfact
+     write(unt_msqd,'(6es17.8,2x)',advance='NO') &
+&        PHdos%msqd_dos_atom(io,1,1,iatom)/cfact, &
+&        PHdos%msqd_dos_atom(io,2,2,iatom)/cfact, &
+&        PHdos%msqd_dos_atom(io,3,3,iatom)/cfact, &
+&        PHdos%msqd_dos_atom(io,2,3,iatom)/cfact, &
+&        PHdos%msqd_dos_atom(io,1,3,iatom)/cfact, &
+&        PHdos%msqd_dos_atom(io,1,2,iatom)/cfact
    end do
    write(unt_msqd,*)
  end do
@@ -1547,9 +1553,8 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
    write (msg, '(a,F18.10,a,F18.10,a)') '#  T in Kelvin, from ', tempermin, ' to ', tempermin+(ntemper-1)*temperinc
    !call wrtout(iunit, msg, 'COLL')
    write (iunit, '(a)') trim(msg)
-   write (msg, '(3a)') '#    T             |u^2|                u_xx                u_xy                u_xz',&
-&                                              '                u_yx                u_yy                y_yz',&
-&                                              '                u_zx                u_zy                u_zz  in bohr^2'
+   write (msg, '(2a)') '#    T             |u^2|                u_xx                u_yy                u_zz',&
+&                                              '                u_yz                u_xz                y_xy in bohr^2'
    !call wrtout(iunit, msg, 'COLL')
    write (iunit, '(a)') trim(msg)
 
@@ -1587,7 +1592,9 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
 ! print out stuff
    do itemp = 1, ntemper
      temper = tempermin + (itemp-1) * temperinc
-     write (msg, '(F10.2,4x,F18.10,2x,9F18.10)') temper, third*(integ(1,itemp)+integ(5,itemp)+integ(9,itemp)), integ(:,itemp)
+     write (msg, '(F10.2,4x,F18.10,2x,6F18.10)') temper, third*(integ(1,itemp)+integ(5,itemp)+integ(9,itemp)), &
+&                      integ(1,itemp),integ(5,itemp),integ(9,itemp), &
+&                      integ(6,itemp),integ(3,itemp),integ(2,itemp)
      !call wrtout(iunit, msg, 'COLL')
      write (iunit, '(a)') trim(msg)
    end do ! itemp
