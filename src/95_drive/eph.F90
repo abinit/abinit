@@ -137,7 +137,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master=0,level40=40,natifc0=0,brav1=1,timrev2=2,selectz0=0
- integer,parameter :: nsphere0=0,prt_ifc0=0,ifcana0=0,ifcout0=-1,prtsrlr0=0
+ integer,parameter :: nsphere0=0,prt_ifc0=0,ifcana0=0,ifcout0=0,prtsrlr0=0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
  integer :: iblock,ddb_nqshift,ierr,edos_intmeth
 #ifdef HAVE_NETCDF
