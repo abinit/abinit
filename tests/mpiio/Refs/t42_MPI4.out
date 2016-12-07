@@ -1,5 +1,5 @@
 
-.Version 8.0.3 of ABINIT 
+.Version 8.1.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2016 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 12h12 )
+.Starting date : Wed  7 Dec 2016.
+- ( at 20h29 )
   
 - input  file    -> t42.in
 - output file    -> t42_MPI4.out
@@ -44,13 +44,13 @@ _ WF disk file :      0.016 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
--       accesswff           1
+-          iomode           1
             acell      7.1287592924E+00  7.1287592924E+00  7.1287592924E+00 Bohr
               amu      4.00260200E+00
         boxcutmin      1.00000000E+00
@@ -135,8 +135,8 @@ fine grid =   12 12 12
          ecut(hartree)=      5.000   => boxcut(ratio)=   1.67231
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/2he.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/2he.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/2he.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/2he.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Hydrogen,  from PRB58, 3641 (1998) paper
 -  2.00000   2.00000    991006                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -230,10 +230,10 @@ _setup2: Arith. and geom. avg. npw (full set) are       0.000       0.000
   4.01975299022715E-15  5.88331660332295E-15  5.09668897213213E-16
  -2.72879982473616E-15 -4.35160961864556E-15 -4.23612909721531E-15
  Reduced forces (fred)
-  6.50047032804854E-16  1.84887413447806E-14 -1.36313436081001E-14
-  5.27865015176888E-14  2.21866915028823E-14  9.52829840654813E-15
- -6.53902439430872E-15 -2.70626166824324E-14  7.59768940144371E-15
-  4.15697841956819E-14  4.58997087295582E-14  4.14293409541276E-14
+ -2.14667800551618E-14  3.61061012108343E-15 -2.48623398966049E-14
+  3.06696744297221E-14  7.30856027918508E-15 -1.70269788195673E-15
+ -2.86558514822754E-14 -4.19407479061296E-14 -3.63330688706114E-15
+  1.94529571077152E-14  3.10215775058610E-14  3.01983446656228E-14
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
@@ -307,10 +307,10 @@ _setup2: Arith. and geom. avg. npw (full set) are       0.000       0.000
  -1.18553048608318E-01  7.03180229321712E-01  1.90000340759544E-01
   1.86380040223023E-01 -6.03801471033971E-01  1.38286069922561E-01
  Reduced forces (fred)
- -1.37647079796151E+00 -3.85674352925158E-01  1.41251369072170E+00
-  1.79966838704387E+00  1.11060199840121E+00  8.71837864216327E-01
-  8.14973793076504E-01 -5.00456239458421E+00 -1.38242831764270E+00
- -1.35882079749326E+00  4.31259554683643E+00 -1.01376972886334E+00
+ -1.34630844412791E+00 -3.93914552357227E-01  1.44047531361370E+00
+  1.82983074087747E+00  1.10236179896914E+00  8.99799487108331E-01
+  8.45136146910101E-01 -5.01280259401628E+00 -1.35446669475070E+00
+ -1.32865844365966E+00  4.30435534740436E+00 -9.85808105971338E-01
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 3.69185E-02 2.08334E-02 (free atoms)
  -1.75051134717685E-02 -2.70512543399619E-02 -3.59948251631659E-03
   8.38146360852743E-03 -9.61972344460439E-03  2.26659088291983E-02
@@ -398,7 +398,7 @@ _setup2: Arith. and geom. avg. npw (full set) are       0.000       0.000
 ================================================================================
   
  -outvars: echo values of variables after computation  --------
--       accesswff           1
+-          iomode           1
             acell      7.1287592924E+00  7.1287592924E+00  7.1287592924E+00 Bohr
               amu      4.00260200E+00
         boxcutmin      1.00000000E+00
@@ -471,29 +471,29 @@ P           mkmem           1
 
  Test the timer : 
   a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
-- CPU time =    7.1389E-07 sec,    Wall time =    7.1316E-07 sec
+- CPU time =    7.0968E-07 sec,    Wall time =    7.0653E-07 sec
 
-- Total cpu        time (s,m,h):         11.0        0.18      0.003
-- Total wall clock time (s,m,h):         11.1        0.19      0.003
+- Total cpu        time (s,m,h):         10.5        0.18      0.003
+- Total wall clock time (s,m,h):         10.5        0.18      0.003
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            2.7, wall_time =            2.8
+- cpu_time =            2.6, wall_time =            2.6
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops 
 -                                                                  (-1=no count)
-- fourdp                         1.477  13.4      1.360  12.2          24222      -1.00    
-- timing timab                   0.139   1.3      0.139   1.2             14      -1.00    
-- invars2                        0.123   1.1      0.124   1.1              1      -1.00    
-- ewald                          0.043   0.4      0.043   0.4              2      -1.00    
-- abinit(2)                      0.029   0.3      0.030   0.3              1      -1.00    
+- fourdp                         1.476  14.0      1.349  12.8          24222      -1.00    
+- timing timab                   0.138   1.3      0.137   1.3             14      -1.00    
+- invars2                        0.109   1.0      0.109   1.0              1      -1.00    
+- ewald                          0.041   0.4      0.042   0.4              2      -1.00    
+- abinit(2)                      0.027   0.3      0.028   0.3              1      -1.00    
 - stress                         0.022   0.2      0.022   0.2              2      -1.00    
 - ewald2 (+vdw_dftd)             0.021   0.2      0.021   0.2              2      -1.00    
-- xc:pot/=fourdp                 0.001   0.0      0.001   0.0              9      -1.00    
-- pspini                         0.001   0.0      0.001   0.0              1      -1.00    
+- xc:pot/=fourdp                 0.002   0.0      0.001   0.0              9      -1.00    
+- scfcv-scprqt                   0.001   0.0      0.001   0.0              7      -1.00    
+- pspini                         0.000   0.0      0.001   0.0              1      -1.00    
 - forces                         0.000   0.0      0.000   0.0              2      -1.00    
-- scfcv-scprqt                   0.000   0.0      0.000   0.0              7      -1.00    
 - status                         0.000   0.0      0.000   0.0              1      -1.00    
 - kpgsph                         0.000   0.0      0.000   0.0              1      -1.00    
 - getghc-other                   0.000   0.0      0.000   0.0             -1      -1.00    
@@ -504,26 +504,26 @@ P           mkmem           1
 - others (94)                    0.000   0.0      0.000   0.0             -1      -1.00    
 -<END_TIMER>
 -
-- subtotal                       1.857  16.9      1.742  15.6
+- subtotal                       1.839  17.5      1.711  16.2
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          11.0, wall_time =          11.1
+- cpu_time =          10.5, wall_time =          10.5
 -
 - routine                         cpu     %       wall     %      number of calls Gflops 
 -                                                                  (-1=no count)
-- fourdp                         5.870  53.3      5.427  48.7          96888      -1.00    
-- timing timab                   0.558   5.1      0.556   5.0             56      -1.00    
-- invars2                        0.492   4.5      0.497   4.5              4      -1.00    
-- ewald                          0.171   1.6      0.171   1.5              8      -1.00    
-- abinit(2)                      0.114   1.0      0.116   1.0              4      -1.00    
-- stress                         0.088   0.8      0.088   0.8              8      -1.00    
+- fourdp                         5.806  55.2      5.382  51.1          96888      -1.00    
+- timing timab                   0.554   5.3      0.552   5.2             56      -1.00    
+- invars2                        0.433   4.1      0.435   4.1              4      -1.00    
+- ewald                          0.169   1.6      0.170   1.6              8      -1.00    
+- abinit(2)                      0.108   1.0      0.110   1.0              4      -1.00    
+- stress                         0.087   0.8      0.087   0.8              8      -1.00    
 - ewald2 (+vdw_dftd)             0.085   0.8      0.085   0.8              8      -1.00    
-- xc:pot/=fourdp                 0.004   0.0      0.004   0.0             36      -1.00    
-- pspini                         0.003   0.0      0.002   0.0              4      -1.00    
-- scfcv-scprqt                   0.001   0.0      0.002   0.0             28      -1.00    
+- xc:pot/=fourdp                 0.005   0.1      0.004   0.0             36      -1.00    
+- scfcv-scprqt                   0.004   0.0      0.003   0.0             28      -1.00    
+- pspini                         0.002   0.0      0.002   0.0              4      -1.00    
 - forces                         0.001   0.0      0.001   0.0              8      -1.00    
 - kpgsph                         0.000   0.0      0.000   0.0              4      -1.00    
 - status                         0.000   0.0      0.000   0.0              1      -1.00    
@@ -535,104 +535,103 @@ P           mkmem           1
 - others (94)                    0.000   0.0      0.000   0.0             -1      -1.00    
 -<END_TIMER>
 
-- subtotal                       7.387  67.1      6.950  62.3
+- subtotal                       7.253  69.0      6.832  64.9
 
  Partitioning of abinit
-- abinit                        11.013 100.0     11.150 100.0              4
+- abinit                        10.509 100.0     10.531 100.0              4
  
-- abinit(1)                      0.054   0.5      0.056   0.5              4
-- abinit(2)                      0.114   1.0      0.116   1.0              4
-- indefo+macroin+invars2m        0.493   4.5      0.499   4.5              4
-- abinit(4)                      0.053   0.5      0.070   0.6              4
-- abinit(5)                      0.087   0.8      0.087   0.8              4
-- driver                         9.650  87.6      9.748  87.4              4
-- abinit(6)                      0.004   0.0      0.017   0.2              4
-- timing timab                   0.558   5.1      0.556   5.0             56
+- abinit(1)                      0.046   0.4      0.047   0.4              4
+- abinit(2)                      0.108   1.0      0.110   1.0              4
+- indefo+macroin+invars2m        0.435   4.1      0.437   4.1              4
+- abinit(4)                      0.048   0.5      0.049   0.5              4
+- abinit(5)                      0.034   0.3      0.034   0.3              4
+- driver                         9.280  88.3      9.294  88.3              4
+- abinit(6)                      0.004   0.0      0.008   0.1              4
+- timing timab                   0.554   5.3      0.552   5.2             56
 
-- subtotal                      11.013 100.0     11.150 100.0
+- subtotal                      10.509 100.0     10.531 100.0
 
  Partitioning of driver
-- driver                         9.650  87.6      9.748  87.4              4
+- driver                         9.280  88.3      9.294  88.3              4
  
-- gstateimg                      9.647  87.6      9.746  87.4              4
+- gstateimg                      9.277  88.3      9.291  88.2              4
 
-- subtotal                       9.650  87.6      9.748  87.4
+- subtotal                       9.280  88.3      9.294  88.3
 
  Partitioning of gstateimg+gstate
-- gstateimg                      9.647  87.6      9.746  87.4              4
+- gstateimg                      9.277  88.3      9.291  88.2              4
  
-- gstate->kpgsph                 0.002   0.0      0.003   0.0              8
-- gstate(pspini)                 0.003   0.0      0.002   0.0              4
-- gstate(...scfcv)               9.469  86.0      9.567  85.8              4
-- gstate  (3)                    0.171   1.6      0.172   1.5              4
+- gstate(pspini)                 0.002   0.0      0.002   0.0              4
+- gstate(...scfcv)               9.255  88.1      9.269  88.0              4
+- gstate  (3)                    0.015   0.1      0.016   0.1              4
 
-- subtotal                       9.647  87.6      9.746  87.4
+- subtotal                       9.276  88.3      9.291  88.2
 
  Partitioning of scfcv
-- scfcv                          9.461  85.9      9.559  85.7              8
+- scfcv                          9.247  88.0      9.261  87.9              8
  
-- scfcv(iniloop, setvtr  )       0.179   1.6      0.179   1.6             28
-- scfcv(vtorho(f))               9.172  83.3      9.174  82.3             28
+- scfcv(iniloop, setvtr  )       0.176   1.7      0.177   1.7             28
+- scfcv(vtorho(f))               8.957  85.2      8.971  85.2             28
+- scfcv-scprqt                   0.004   0.0      0.003   0.0             28
 - scfcv(rhotov)                  0.006   0.1      0.006   0.1             28
-- scfcv(mix pot)                 0.003   0.0      0.004   0.0             20
-- scfcv(afterscfloop)            0.090   0.8      0.090   0.8              8
-- scfcv(outscfcv)                0.007   0.1      0.100   0.9              8
+- scfcv(mix pot)                 0.005   0.0      0.004   0.0             20
+- scfcv(afterscfloop)            0.088   0.8      0.089   0.8              8
+- scfcv(outscfcv)                0.008   0.1      0.008   0.1              8
 
-- subtotal                       9.461  85.9      9.559  85.7
+- subtotal                       9.247  88.0      9.261  87.9
 
  Partitioning of rhotov
 - rhotov                         0.006   0.1      0.006   0.1             28
  
-- rhotov(rhohxc)                 0.005   0.0      0.005   0.0             28
+- rhotov(rhohxc)                 0.005   0.1      0.005   0.0             28
 
 - subtotal                       0.006   0.1      0.006   0.1
 
  Partitioning of newvtr
-- newvtr                         0.003   0.0      0.004   0.0             20
+- newvtr                         0.005   0.0      0.004   0.0             20
  
-- newvtr(call prcref_PMA)        0.002   0.0      0.003   0.0             20
+- newvtr(call prcref_PMA)        0.003   0.0      0.003   0.0             20
 
-- subtotal                       0.003   0.0      0.004   0.0
+- subtotal                       0.005   0.0      0.004   0.0
 
  Partitioning of  fourdp (upwards partitioning)
-- fourdp                         5.870  53.3      5.427  48.7          96888
+- fourdp                         5.806  55.2      5.382  51.1          96888
  
-- fourdp%(other)                 0.009   0.1      0.008   0.1            120
-- fourdp%rec%rho                 5.861  53.2      5.419  48.6          96768
+- fourdp%(other)                 0.007   0.1      0.007   0.1            120
+- fourdp%rec%rho                 5.798  55.2      5.375  51.0          96768
 
-- subtotal                       5.870  53.3      5.427  48.7
+- subtotal                       5.806  55.2      5.382  51.1
 
  Partitioning of afterscfloop
-- afterscfloop                   0.090   0.8      0.090   0.8              8
+- afterscfloop                   0.088   0.8      0.089   0.8              8
  
-- afterscfloop(forstr)           0.089   0.8      0.089   0.8              8
+- afterscfloop(forstr)           0.088   0.8      0.088   0.8              8
 
-- subtotal                       0.090   0.8      0.090   0.8
+- subtotal                       0.088   0.8      0.089   0.8
 
  Partitioning of forstr
-- forstr                         0.089   0.8      0.089   0.8              8
+- forstr                         0.088   0.8      0.088   0.8              8
  
-- forstr(stress)                 0.088   0.8      0.088   0.8              8
+- forstr(stress)                 0.087   0.8      0.087   0.8              8
 
-- subtotal                       0.089   0.8      0.089   0.8
+- subtotal                       0.088   0.8      0.088   0.8
 
  Partitioning of outscfcv
-- outscfcv                       0.007   0.1      0.100   0.9              8
+- outscfcv                       0.008   0.1      0.008   0.1              8
  
-- outscfcv([PAW]prtden)          0.001   0.0      0.094   0.8              8
-- outscfcv(prtelf)               0.006   0.1      0.006   0.1              2
+- outscfcv(prtelf)               0.007   0.1      0.007   0.1              2
 
-- subtotal                       0.007   0.1      0.100   0.9
+- subtotal                       0.008   0.1      0.008   0.1
 -
 -Synchronisation (=leave_test) and MPI calls 
-- communic.MPI                   0.001   0.0      0.000   0.0             52
+- communic.MPI                   0.000   0.0      0.000   0.0             52
 -
 -
 - subtotal                       0.000   0.0      0.000   0.0
 
  Additional information
 - timana(1)                      0.000   0.0      0.000   0.0              4
-- total timab                    0.724   6.6      0.721   6.5        1009873
+- total timab                    0.718   6.8      0.716   6.8        1009873
 - mklocl(2)                      0.001   0.0      0.001   0.0              8
 - status                         0.000   0.0      0.000   0.0              1
 
@@ -642,12 +641,12 @@ P           mkmem           1
                                  (sec)                (msec)              (microsec)
 - fourwf%(pot)                   0.000         0
 - fourwf%(den)                   0.000         0
-- fourdp                         5.870     96888       0.061      1728       0.035
+- fourdp                         5.806     96888       0.060      1728       0.035
 - nonlop(apply)                  0.000         0
 - nonlop(forces)                 0.000         0
 - nonlop(forstr)                 0.000         0
 - projbd                         0.000         0
-- xc:pot/=fourdp                 0.004        36       0.110      1728       0.064
+- xc:pot/=fourdp                 0.005        36       0.148      1728       0.085
 
 ================================================================================
 
@@ -670,23 +669,40 @@ P           mkmem           1
 - Strong suggestion to cite this paper in your publications.
 - This paper is also available at http://www.arxiv.org/abs/0707.3405
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xue, A.Zhou, J.W.Zwanziger.
+- Comment : the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+-
+- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
-- [3] A brief introduction to the ABINIT software package.
+- [4] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
@@ -696,20 +712,16 @@ P           mkmem           1
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties : the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- [5] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=          2.7  wall=          2.8
+- Proc.   0 individual time (sec): cpu=          2.6  wall=          2.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.1  wall=         11.2
++Overall time at end (sec) : cpu=         10.5  wall=         10.6

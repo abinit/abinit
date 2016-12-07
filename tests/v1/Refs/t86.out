@@ -1,5 +1,5 @@
 
-.Version 8.0.3 of ABINIT 
+.Version 8.1.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2016 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 06h22 )
+.Starting date : Wed  7 Dec 2016.
+- ( at 20h15 )
   
 - input  file    -> t86.in
 - output file    -> t86.out
@@ -44,7 +44,7 @@ _ WF disk file :      0.018 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -130,8 +130,8 @@ P           mkmem           1
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -148,8 +148,8 @@ P           mkmem           1
              1    1.849886
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/1h.pspnc
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/1h.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -226,11 +226,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
   3.71042119266417E-03  5.27850182033630E-03 -7.58852873263906E-03
   3.71042119266417E-03 -5.27850182033630E-03 -7.58852873263906E-03
  Reduced forces (fred)
-  6.07859173063866E-02  0.00000000000000E+00  1.06909514583724E-01
- -1.34571326843572E-03  0.00000000000000E+00 -2.77254717253785E-01
- -7.32939594636811E-05  0.00000000000000E+00  4.89287823710061E-02
- -2.96833125426932E-02 -4.22280145626904E-02  6.07082430021690E-02
- -2.96833125426932E-02  4.22280145626904E-02  6.07082430021690E-02
+  6.07858603077665E-02  0.00000000000000E+00  1.06909501442667E-01
+ -1.34577026705586E-03 -0.00000000000000E+00 -2.77254730394842E-01
+ -7.33509580838271E-05 -0.00000000000000E+00  4.89287692299496E-02
+ -2.96833695413134E-02 -4.22280145626904E-02  6.07082298611125E-02
+ -2.96833695413134E-02  4.22280145626904E-02  6.07082298611125E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
@@ -288,11 +288,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
   3.71051382465603E-03  5.27866072419361E-03 -7.58850417936058E-03
   3.71051382465603E-03 -5.27866072419361E-03 -7.58850417936058E-03
  Reduced forces (fred)
-  6.07865774962482E-02  0.00000000000000E+00  1.06908296118817E-01
- -1.34420099830306E-03  0.00000000000000E+00 -2.77253861003417E-01
- -7.41410018142742E-05  0.00000000000000E+00  4.89294764757384E-02
- -2.96841058300368E-02 -4.22292857935489E-02  6.07080262551872E-02
- -2.96841058300368E-02  4.22292857935489E-02  6.07080262551872E-02
+  6.07865727290368E-02  0.00000000000000E+00  1.06908303298514E-01
+ -1.34420576551450E-03 -0.00000000000000E+00 -2.77253853823719E-01
+ -7.41457690257123E-05 -0.00000000000000E+00  4.89294836554358E-02
+ -2.96841105972483E-02 -4.22292857935489E-02  6.07080334348846E-02
+ -2.96841105972483E-02  4.22292857935489E-02  6.07080334348846E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 4.61414E-06 3.26753E-06 (free atoms)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   4.61414082194536E-06  0.00000000000000E+00  0.00000000000000E+00
@@ -355,11 +355,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
   3.71246656448952E-03  5.27841305829044E-03 -7.58829482660964E-03
   3.71246656448952E-03 -5.27841305829044E-03 -7.58829482660964E-03
  Reduced forces (fred)
-  6.03345880651217E-02  0.00000000000000E+00  1.06905408386613E-01
- -9.20596921794971E-04  0.00000000000000E+00 -2.77236924415037E-01
- -1.41561552327439E-05  0.00000000000000E+00  4.89185640012733E-02
- -2.96996091971623E-02 -4.22273044663235E-02  6.07062803457450E-02
- -2.96996091971623E-02  4.22273044663235E-02  6.07062803457450E-02
+  6.03344647463678E-02  0.00000000000000E+00  1.06905486653745E-01
+ -9.20720240548831E-04 -0.00000000000000E+00 -2.77236846147904E-01
+ -1.42794739866038E-05 -0.00000000000000E+00  4.89186422684054E-02
+ -2.96997325159162E-02 -4.22273044663235E-02  6.07063586128771E-02
+ -2.96997325159162E-02  4.22273044663235E-02  6.07063586128771E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 8.04735E-06 5.69866E-06 (free atoms)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  -8.04734804234591E-06  0.00000000000000E+00  0.00000000000000E+00
@@ -423,11 +423,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
   3.70284565362228E-03  5.27962275246336E-03 -7.58907986414643E-03
   3.70284565362228E-03 -5.27962275246336E-03 -7.58907986414643E-03
  Reduced forces (fred)
-  6.23490137040237E-02  0.00000000000000E+00  1.06920662033466E-01
- -2.83204254909703E-03  0.00000000000000E+00 -2.77310547419460E-01
- -2.71934979670258E-04  0.00000000000000E+00  4.89649133267767E-02
- -2.96229299898782E-02 -4.22369820197069E-02  6.07127408355466E-02
- -2.96229299898782E-02  4.22369820197069E-02  6.07127408355466E-02
+  6.23491784649237E-02  0.00000000000000E+00  1.06920560111091E-01
+ -2.83187778819704E-03 -0.00000000000000E+00 -2.77310649341836E-01
+ -2.71770218770260E-04 -0.00000000000000E+00  4.89648114044016E-02
+ -2.96227652289782E-02 -4.22369820197069E-02  6.07126389131715E-02
+ -2.96227652289782E-02  4.22369820197069E-02  6.07126389131715E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 5.04597E-05 3.57238E-05 (free atoms)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   5.04597424495938E-05  0.00000000000000E+00  0.00000000000000E+00
@@ -492,11 +492,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
   3.71744508679601E-03  5.27774631219433E-03 -7.58789308270586E-03
   3.71744508679601E-03 -5.27774631219433E-03 -7.58789308270586E-03
  Reduced forces (fred)
-  5.93776345265400E-02  0.00000000000000E+00  1.06899322747116E-01
- -5.13584359777567E-06  0.00000000000000E+00 -2.77203349923710E-01
-  1.06765072155523E-04  0.00000000000000E+00  4.88977481992123E-02
- -2.97395132389142E-02 -4.22219704975547E-02  6.07031481102844E-02
- -2.97395132389142E-02  4.22219704975547E-02  6.07031481102844E-02
+  5.93775870710862E-02  0.00000000000000E+00  1.06899319298479E-01
+ -5.18329905163387E-06 -0.00000000000000E+00 -2.77203353372348E-01
+  1.06717616701665E-04  0.00000000000000E+00  4.88977447505748E-02
+ -2.97395606943681E-02 -4.22219704975547E-02  6.07031446616469E-02
+ -2.97395606943681E-02  4.22219704975547E-02  6.07031446616469E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 2.99058E-05 2.11678E-05 (free atoms)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  -2.99057907335135E-05  0.00000000000000E+00  0.00000000000000E+00
@@ -558,11 +558,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
   3.71692888769069E-03  5.27755455234456E-03 -7.58790252577043E-03
   3.71692888769069E-03 -5.27755455234456E-03 -7.58790252577043E-03
  Reduced forces (fred)
-  5.94740594069579E-02  0.00000000000000E+00  1.06897980980200E-01
- -1.00567305438035E-04  0.00000000000000E+00 -2.77208940145841E-01
-  9.74674738818816E-05  0.00000000000000E+00  4.89044553566343E-02
- -2.97353986440753E-02 -4.22204364187565E-02  6.07031990739366E-02
- -2.97353986440753E-02  4.22204364187565E-02  6.07031990739366E-02
+  5.94740269495077E-02  0.00000000000000E+00  1.06898002112426E-01
+ -1.00599762888250E-04 -0.00000000000000E+00 -2.77208919013615E-01
+  9.74350164316666E-05  0.00000000000000E+00  4.89044764888611E-02
+ -2.97354311015256E-02 -4.22204364187565E-02  6.07032202061634E-02
+ -2.97354311015256E-02  4.22204364187565E-02  6.07032202061634E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 2.99058E-05 2.11678E-05 (free atoms)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  -2.99057907335135E-05  0.00000000000000E+00  0.00000000000000E+00
@@ -625,11 +625,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
   3.71731324710394E-03  5.27754988075313E-03 -7.58774349593287E-03
   3.71731324710394E-03 -5.27754988075313E-03 -7.58774349593287E-03
  Reduced forces (fred)
-  5.93474250572337E-02  0.00000000000000E+00  1.06898294648501E-01
-  1.36412905484888E-05  0.00000000000000E+00 -2.77205250831871E-01
-  1.16069787473685E-04  0.00000000000000E+00  4.89029873614082E-02
- -2.97384645829673E-02 -4.22203990460250E-02  6.07019236717843E-02
- -2.97384645829673E-02  4.22203990460250E-02  6.07019236717843E-02
+  5.93473836633695E-02  0.00000000000000E+00  1.06898318944179E-01
+  1.35998966842234E-05 -0.00000000000000E+00 -2.77205226536192E-01
+  1.16028393609419E-04  0.00000000000000E+00  4.89030116570868E-02
+ -2.97385059768316E-02 -4.22203990460250E-02  6.07019479674629E-02
+ -2.97385059768316E-02  4.22203990460250E-02  6.07019479674629E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.37584E-07 9.72877E-08 (free atoms)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   6.37367364262995E-10  0.00000000000000E+00  0.00000000000000E+00
@@ -691,11 +691,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
   3.71716361769475E-03  5.27743161503703E-03 -7.58768351134849E-03
   3.71716361769475E-03 -5.27743161503703E-03 -7.58768351134849E-03
  Reduced forces (fred)
-  5.93735142754156E-02  0.00000000000000E+00  1.06897660164320E-01
- -1.37355267688539E-05  0.00000000000000E+00 -2.77207983586175E-01
-  1.14899380689066E-04  0.00000000000000E+00  4.89073773158149E-02
- -2.97372888594847E-02 -4.22194529202963E-02  6.07014647826334E-02
- -2.97372888594847E-02  4.22194529202963E-02  6.07014647826334E-02
+  5.93734941933423E-02  0.00000000000000E+00  1.06897663472475E-01
+ -1.37556088421291E-05 -0.00000000000000E+00 -2.77207980278020E-01
+  1.14879298615790E-04  0.00000000000000E+00  4.89073806239694E-02
+ -2.97373089415580E-02 -4.22194529202963E-02  6.07014680907879E-02
+ -2.97373089415580E-02  4.22194529202963E-02  6.07014680907879E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.38782E-07 9.96131E-08 (free atoms)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   2.41894136277032E-08  0.00000000000000E+00  0.00000000000000E+00
@@ -713,7 +713,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
  ----iterations are completed or convergence reached----
 
  Mean square residual over all n,k,spin=   1.0446E-14; max=  2.0003E-14
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
  reduced coordinates (array xred) for    5 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.337590957732      0.000000000000      0.000000000000
@@ -877,23 +876,40 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also http://www.abinit.org/about/?text=acknowledgments.
 -
-- [1] ABINIT : First-principles approach of materials and nanosystem properties.
+- [1] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xue, A.Zhou, J.W.Zwanziger.
+- Comment : the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+-
+- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
 - Comment : the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at http://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 -
-- [2] A brief introduction to the ABINIT software package.
+- [3] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
 - Comment : the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
@@ -903,20 +919,16 @@ P           mkmem           1
 -
 - And optionally:
 -
-- [3] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties : the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- [4] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=          4.3  wall=          1.6
+- Proc.   0 individual time (sec): cpu=          1.9  wall=          1.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.3  wall=          1.6
+.Delivered   5 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.9  wall=          1.9
