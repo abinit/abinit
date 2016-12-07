@@ -37,6 +37,7 @@ ifcana 1
 #  ifc for all atoms?
 natifc 0
 atifc 1 2 3
+ifcout 0
 
 #  print dielectric matrix with freq dependence
 dieflag 0
