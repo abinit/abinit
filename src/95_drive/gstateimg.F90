@@ -419,8 +419,8 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        do iimage=1,nimage
          call abihist_copy(hist_prev(iimage),hist(iimage))
          ih=hist(iimage)%ihist
-         call mkradim(hist(iimage)%histA(:,ih),rprim,hist(iimage)%histR(:,:,ih))
-         res_img(iimage)%acell(:)     =hist(iimage)%histA(:,ih)
+         call mkradim(hist(iimage)%acell(:,ih),rprim,hist(iimage)%histR(:,:,ih))
+         res_img(iimage)%acell(:)     =hist(iimage)%acell(:,ih)
          res_img(iimage)%rprim(:,:)   =rprim
          res_img(iimage)%xred(:,:)    =hist(iimage)%xred(:,:,ih)
          res_img(iimage)%vel(:,:)     =hist(iimage)%histV(:,:,ih)

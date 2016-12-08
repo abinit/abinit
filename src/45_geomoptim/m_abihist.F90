@@ -65,7 +65,7 @@ module m_abihist
 !! It contains:
 !! * mxhist                  : Maximum size of history
 !! * ihist                   : index of history
-!! * histA(3,mxhist)         : Acell
+!! * acell(3,mxhist)         : Acell
 !! * histE(mxhist)           : Energy
 !! * histEk(mxhist)          : Ionic Kinetic Energy
 !! * histEnt(mxhist)         : Entropy
@@ -103,7 +103,7 @@ module m_abihist
 
 ! arrays
 ! Vector of (x,y,z)X(mxhist)
-    real(dp), allocatable :: histA(:,:)
+    real(dp), allocatable :: acell(:,:)
 ! Vector of (mxhist) values of energy
     real(dp), allocatable :: histE(:)
 ! Vector of (mxhist) values of ionic kinetic energy
@@ -211,7 +211,7 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
  hist%isARused=isARUsed
 
 !Allocate all the histories
- ABI_ALLOCATE(hist%histA,(3,mxhist))
+ ABI_ALLOCATE(hist%acell,(3,mxhist))
  ABI_ALLOCATE(hist%histE,(mxhist))
  ABI_ALLOCATE(hist%histEk,(mxhist))
  ABI_ALLOCATE(hist%histEnt,(mxhist))
@@ -227,7 +227,7 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
  hist%histEnt(1)=zero
  hist%histT(1)=zero
 
- hist%histA(:,1)=zero
+ hist%acell(:,1)=zero
  hist%histR(:,:,1)=zero
  hist%histS(:,1)=zero
  hist%histV(:,:,1)=zero
@@ -335,8 +335,8 @@ subroutine abihist_free_0D(hist)
 ! ***************************************************************
 
 ! Vector of (x,y,z)X(mxhist)
- if (allocated(hist%histA))  then
-   ABI_DEALLOCATE(hist%histA)
+ if (allocated(hist%acell))  then
+   ABI_DEALLOCATE(hist%acell)
  end if
 ! Vector of (mxhist) values of energy
  if (allocated(hist%histE))  then
@@ -480,8 +480,8 @@ subroutine abihist_bcast_0D(hist,master,comm)
  integer :: sizeR,sizeR1,sizeR2,sizeR3
  integer :: sizeS,sizeS1,sizeS2
  integer :: sizeV,sizeV1,sizeV2,sizeV3
- integer :: sizeXred,sizeXred1,sizeXred2,sizeXred3
- integer :: sizeFcart,sizeFcart1,sizeFcart2,sizeFcart3
+ integer :: sizeX,sizeX1,sizeX2,sizeX3
+ integer :: sizeF,sizeF1,sizeF2,sizeF3
 !arrays
  integer,allocatable :: buffer_i(:)
  real(dp),allocatable :: buffer_r(:)
@@ -517,14 +517,14 @@ subroutine abihist_bcast_0D(hist,master,comm)
 !=== Broadcast sizes of arrays
  ABI_ALLOCATE(buffer_i,(20))
  if (rank==master) then
-   sizeA1=size(hist%histA,1);sizeA2=size(hist%histA,2)
+   sizeA1=size(hist%acell,1);sizeA2=size(hist%acell,2)
    sizeE=size(hist%histE,1);sizeEk=size(hist%histEk,1);
    sizeEnt=size(hist%histEnt,1);sizeT=size(hist%histT,1)
    sizeR1=size(hist%histR,1);sizeR2=size(hist%histR,2);sizeR3=size(hist%histR,3)
    sizeS1=size(hist%histS,1);sizeS2=size(hist%histS,2)
    sizeV1=size(hist%histV,1);sizeV2=size(hist%histV,2);sizeV3=size(hist%histV,3)
-   sizeXred1=size(hist%xred,1);sizeXred2=size(hist%xred,2);sizeXred3=size(hist%xred,3)
-   sizeFcart1=size(hist%fcart,1);sizeFcart2=size(hist%fcart,2);sizeFcart3=size(hist%fcart,3)
+   sizeX1=size(hist%xred,1);sizeX2=size(hist%xred,2);sizeX3=size(hist%xred,3)
+   sizeF1=size(hist%fcart,1);sizeF2=size(hist%fcart,2);sizeF3=size(hist%fcart,3)
    buffer_i(1)=sizeA1  ;buffer_i(2)=sizeA2
    buffer_i(3)=sizeE   ;buffer_i(4)=sizeEk
    buffer_i(5)=sizeEnt ;buffer_i(6)=sizeT
@@ -532,8 +532,8 @@ subroutine abihist_bcast_0D(hist,master,comm)
    buffer_i(9)=sizeR3  ;buffer_i(10)=sizeS1
    buffer_i(11)=sizeS2 ;buffer_i(12)=sizeV1
    buffer_i(13)=sizeV2 ;buffer_i(14)=sizeV3
-   buffer_i(15)=sizeXred1;buffer_i(16)=sizeXred2;buffer_i(17)=sizeXred3
-   buffer_i(18)=sizeFcart1;buffer_i(19)=sizeFcart2;buffer_i(20)=sizeFcart3
+   buffer_i(15)=sizeX1;buffer_i(16)=sizeX2;buffer_i(17)=sizeX3
+   buffer_i(18)=sizeF1;buffer_i(19)=sizeF2;buffer_i(20)=sizeF3
  end if
  call xmpi_bcast(buffer_i,master,comm,ierr)
 
@@ -545,20 +545,20 @@ subroutine abihist_bcast_0D(hist,master,comm)
    sizeR3 =buffer_i(9) ;sizeS1 =buffer_i(10)
    sizeS2 =buffer_i(11);sizeV1 =buffer_i(12)
    sizeV2 =buffer_i(13);sizeV3 =buffer_i(14)
-   sizeXred1=buffer_i(15);sizeXred2=buffer_i(16);sizeXred3=buffer_i(17)
-   sizeFcart1=buffer_i(18);sizeFcart2=buffer_i(19);sizeFcart3=buffer_i(20)
+   sizeX1=buffer_i(15);sizeX2=buffer_i(16);sizeX3=buffer_i(17)
+   sizeF1=buffer_i(18);sizeF2=buffer_i(19);sizeF3=buffer_i(20)
  end if
  ABI_DEALLOCATE(buffer_i)
 
 !=== Broadcast reals
  sizeA=sizeA1*sizeA2;sizeR=sizeR1*sizeR2*sizeR3;sizeS=sizeS1*sizeS2
- sizeV=sizeV1*sizeV2*sizeV3;sizeXred=sizeXred1*sizeXred2*sizeXred3
- sizeFcart=sizeFcart1*sizeFcart2*sizeFcart3
- bufsize=sizeA+sizeE+sizeEk+sizeEnt+sizeT+sizeR+sizeS+sizeV+sizeXred+sizeFcart
+ sizeV=sizeV1*sizeV2*sizeV3;sizeX=sizeX1*sizeX2*sizeX3
+ sizeF=sizeF1*sizeF2*sizeF3
+ bufsize=sizeA+sizeE+sizeEk+sizeEnt+sizeT+sizeR+sizeS+sizeV+sizeX+sizeF
  ABI_ALLOCATE(buffer_r,(bufsize))
  if (rank==master) then
    indx=0
-   buffer_r(indx+1:indx+sizeA)=reshape(hist%histA(1:sizeA1,1:sizeA2),(/sizeA/))
+   buffer_r(indx+1:indx+sizeA)=reshape(hist%acell(1:sizeA1,1:sizeA2),(/sizeA/))
    indx=indx+sizeA
    buffer_r(indx+1:indx+sizeE)=hist%histE(1:sizeE)
    indx=indx+sizeE
@@ -574,12 +574,12 @@ subroutine abihist_bcast_0D(hist,master,comm)
    indx=indx+sizeS
    buffer_r(indx+1:indx+sizeV)=reshape(hist%histV(1:sizeV1,1:sizeV2,1:sizeV3),(/sizeV/))
    indx=indx+sizeV
-   buffer_r(indx+1:indx+sizeXred)=reshape(hist%xred(1:sizeXred1,1:sizeXred2,1:sizeXred3),(/sizeXred/))
-   indx=indx+sizeXred
-   buffer_r(indx+1:indx+sizeFcart)=reshape(hist%fcart(1:sizeFcart1,1:sizeFcart2,1:sizeFcart3),(/sizeFcart/))
+   buffer_r(indx+1:indx+sizeX)=reshape(hist%xred(1:sizeX1,1:sizeX2,1:sizeX3),(/sizeX/))
+   indx=indx+sizeX
+   buffer_r(indx+1:indx+sizeF)=reshape(hist%fcart(1:sizeF1,1:sizeF2,1:sizeF3),(/sizeF/))
  else
    call abihist_free(hist)
-   ABI_ALLOCATE(hist%histA,(sizeA1,sizeA2))
+   ABI_ALLOCATE(hist%acell,(sizeA1,sizeA2))
    ABI_ALLOCATE(hist%histE,(sizeE))
    ABI_ALLOCATE(hist%histEk,(sizeEk))
    ABI_ALLOCATE(hist%histEnt,(sizeEnt))
@@ -587,14 +587,14 @@ subroutine abihist_bcast_0D(hist,master,comm)
    ABI_ALLOCATE(hist%histR,(sizeR1,sizeR2,sizeR3))
    ABI_ALLOCATE(hist%histS,(sizeS1,sizeS2))
    ABI_ALLOCATE(hist%histV,(sizeV1,sizeV2,sizeV3))
-   ABI_ALLOCATE(hist%xred,(sizeXred1,sizeXred2,sizeXred3))
-   ABI_ALLOCATE(hist%fcart,(sizeFcart1,sizeFcart2,sizeFcart3))
+   ABI_ALLOCATE(hist%xred,(sizeX1,sizeX2,sizeX3))
+   ABI_ALLOCATE(hist%fcart,(sizeF1,sizeF2,sizeF3))
  end if
  call xmpi_bcast(buffer_r,master,comm,ierr)
 
  if (rank/=master) then
    indx=0
-   hist%histA(1:sizeA1,1:sizeA2)=reshape(buffer_r(indx+1:indx+sizeA),(/sizeA1,sizeA2/))
+   hist%acell(1:sizeA1,1:sizeA2)=reshape(buffer_r(indx+1:indx+sizeA),(/sizeA1,sizeA2/))
    indx=indx+sizeA
    hist%histE(1:sizeE)=buffer_r(indx+1:indx+sizeE)
    indx=indx+sizeE
@@ -610,11 +610,11 @@ subroutine abihist_bcast_0D(hist,master,comm)
    indx=indx+sizeS
    hist%histV(1:sizeV1,1:sizeV2,1:sizeV3)=reshape(buffer_r(indx+1:indx+sizeV),(/sizeV1,sizeV2,sizeV3/))
    indx=indx+sizeV
-   hist%xred(1:sizeXred1,1:sizeXred2,1:sizeXred3)=reshape(buffer_r(indx+1:indx+sizeXred), &
-&                                                 (/sizeXred1,sizeXred2,sizeXred3/))
-   indx=indx+sizeXred
-   hist%fcart(1:sizeFcart1,1:sizeFcart2,1:sizeFcart3)=reshape(buffer_r(indx+1:indx+sizeFcart), &
-&                                                     (/sizeFcart1,sizeFcart2,sizeFcart3/))
+   hist%xred(1:sizeX1,1:sizeX2,1:sizeX3)=reshape(buffer_r(indx+1:indx+sizeX), &
+&                                                 (/sizeX1,sizeX2,sizeX3/))
+   indx=indx+sizeX
+   hist%fcart(1:sizeF1,1:sizeF2,1:sizeF3)=reshape(buffer_r(indx+1:indx+sizeF), &
+&                                                     (/sizeF1,sizeF2,sizeF3/))
  end if
  ABI_DEALLOCATE(buffer_r)
 
@@ -739,7 +739,7 @@ subroutine var2hist(acell,hist,natom,rprimd,xred,zDEBUG)
 
  hist%xred (:,:,hist%ihist)=xred(:,:)
  hist%histR(:,:,hist%ihist)=rprimd(:,:)
- hist%histA(:  ,hist%ihist)=acell(:)
+ hist%acell(:  ,hist%ihist)=acell(:)
 
  if(zDEBUG)then
    write (std_out,*) 'Atom positions and cell parameters '
@@ -820,7 +820,7 @@ integer :: jj,kk
 ! *************************************************************
 
  xred  (:,:)=hist%xred(:,:,hist%ihist)
- acell (:  )=hist%histA(:,hist%ihist)
+ acell (:  )=hist%acell(:,hist%ihist)
  rprimd(:,:)=hist%histR(:,:,hist%ihist)
 
  if(zDEBUG)then
@@ -976,7 +976,7 @@ type(abihist),intent(inout) :: hist_out
  hist_out%isARused =hist_in%isARused
 
 !Copy arrays
- hist_out%histA(:,hist_out%ihist)   = hist_in%histA(:,hist_in%ihist)
+ hist_out%acell(:,hist_out%ihist)   = hist_in%acell(:,hist_in%ihist)
  hist_out%histE(hist_out%ihist)     = hist_in%histE(hist_in%ihist)
  hist_out%histEk(hist_out%ihist)    = hist_in%histEk(hist_in%ihist)
  hist_out%histEnt(hist_out%ihist)   = hist_in%histEnt(hist_in%ihist)
@@ -1080,12 +1080,12 @@ real(dp) :: x,y
  if (maxdiff>tolerance) similar=0
 
 
- x=hist_out%histA(1,hist_out%ihist)
- y=hist_in%histA(1,hist_in%ihist)
+ x=hist_out%acell(1,hist_out%ihist)
+ y=hist_in%acell(1,hist_in%ihist)
  maxdiff=2*abs(x-y)/(abs(x)+abs(y))
  do kk=1,3
-   x=hist_out%histA(kk,hist_out%ihist)
-   y=hist_in%histA(kk,hist_in%ihist)
+   x=hist_out%acell(kk,hist_out%ihist)
+   y=hist_in%acell(kk,hist_in%ihist)
    diff=2*abs(x-y)/(abs(x)+abs(y))
    if (diff>maxdiff) maxdiff=diff
  end do
@@ -1102,7 +1102,7 @@ real(dp) :: x,y
    hist_out%fcart(:,:,hist_out%ihist) =hist_in%fcart(:,:,hist_in%ihist)
    hist_out%histS(:,hist_out%ihist)   =hist_in%histS(:,hist_in%ihist)
    hist_out%histR(:,:,hist_out%ihist) =hist_in%histR(:,:,hist_in%ihist)
-   hist_out%histA(:,hist_out%ihist)   =hist_in%histA(:,hist_in%ihist)
+   hist_out%acell(:,hist_out%ihist)   =hist_in%acell(:,hist_in%ihist)
  end if
 
 end subroutine abihist_compare_and_copy
@@ -2193,12 +2193,12 @@ implicit none
 !acell
  if (has_nimage) then
    start3=(/1,iimg,hist%ihist/);count3=(/3,1,1/)
-   ncerr = nf90_put_var(ncid,acell_id,hist%histA(:,hist%ihist),&
+   ncerr = nf90_put_var(ncid,acell_id,hist%acell(:,hist%ihist),&
 &                       start = start3,count = count3)
    NCF_CHECK_MSG(ncerr," write variable acell")
  else
    start2=(/1,hist%ihist/);count2=(/3,1/)
-   ncerr = nf90_put_var(ncid,acell_id,hist%histA(:,hist%ihist),&
+   ncerr = nf90_put_var(ncid,acell_id,hist%acell(:,hist%ihist),&
 &                       start = start2,count = count2)
    NCF_CHECK_MSG(ncerr," write variable acell")
  end if
@@ -2335,11 +2335,11 @@ implicit none
 !acell
  if (has_nimage) then
    start3=(/1,iimg,1/);count3=(/3,1,time/)
-   ncerr = nf90_get_var(ncid,acell_id,hist%histA(:,:),count=count3,start=start3)
+   ncerr = nf90_get_var(ncid,acell_id,hist%acell(:,:),count=count3,start=start3)
    NCF_CHECK_MSG(ncerr," read variable acell")
  else
    start2=(/1,1/);count2=(/3,time/)
-   ncerr = nf90_get_var(ncid,acell_id,hist%histA(:,:),count=count2,start=start2)
+   ncerr = nf90_get_var(ncid,acell_id,hist%acell(:,:),count=count2,start=start2)
    NCF_CHECK_MSG(ncerr," read variable acell")
  end if
 

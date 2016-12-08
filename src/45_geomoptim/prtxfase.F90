@@ -219,13 +219,13 @@ implicit none
 !Only if the acell is being used
  if (hist%isARused)then
 !  Only if acell is recorded in a history
-   if (allocated(hist%histA))then
+   if (allocated(hist%acell))then
 
      write(message, '(a)' ) &
 &     ' Scale of Primitive Cell (acell) [bohr]'
      write(message,fmt1)&
 &     TRIM(message),ch10,&
-&     hist%histA(:,hist%ihist)
+&     hist%acell(:,hist%ihist)
      call wrtout(iout,message,'COLL')
    end if
  end if

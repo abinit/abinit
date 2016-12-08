@@ -478,7 +478,7 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 
      etotal     =hist%histE(hist%ihist-1)
 
-     acell(:)   =hist%histA(:,hist%ihist-1)
+     acell(:)   =hist%acell(:,hist%ihist-1)
      rprimd(:,:)=hist%histR(:,:,hist%ihist-1)
      strten(:)  =hist%histS(:,hist%ihist-1)
 

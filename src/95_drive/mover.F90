@@ -359,7 +359,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        end if
      end do
      write(std_out,*) 'The lowest energy occurs at iteration:',minIndex,'etotal=',minE
-     acell(:)   =hist_prev%histA(:,minIndex)
+     acell(:)   =hist_prev%acell(:,minIndex)
      rprimd(:,:)=hist_prev%histR(:,:,minIndex)
      xred(:,:)  =hist_prev%xred(:,:,minIndex)
    end if
@@ -595,7 +595,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !      the value entering in scfcv
 !      One test case with these condition is bigdft/t10
        if (any(rprimd(:,:)/=rprimd_prev(:,:))) then
-         hist%histA(:,hist%ihist)=acell(:)
+         hist%acell(:,hist%ihist)=acell(:)
          hist%histR(:,:,hist%ihist)=rprimd(:,:)
        end if
 

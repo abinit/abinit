@@ -91,19 +91,16 @@ subroutine pred_simple(ab_mover,hist,iexit)
      hist%xred(jj,kk, hist%ihist+1)=hist%xred (jj,kk,hist%ihist)
      hist%fcart(jj,kk,hist%ihist+1)=hist%fcart(jj,kk,hist%ihist)
      hist%histV(jj,kk,hist%ihist+1)=hist%histV(jj,kk,hist%ihist)
-   end do ! jj=1,3
- end do ! kk=1,ab_mover%natom
+   end do
+ end do
 
 !ACELL
-!For the 3 dimensions of space
  do jj=1,3
-   hist%histA(jj,hist%ihist+1)=hist%histA(jj,hist%ihist)
+   hist%acell(jj,hist%ihist+1)=hist%acell(jj,hist%ihist)
  end do
 
 !RPRIMD
-!For the 3 dimensions of space
  do kk=1,3
-!  For the 3 dimensions of space
    do jj=1,3
      hist%histR(jj,kk,hist%ihist+1)=hist%histR(jj,kk,hist%ihist)
    end do
