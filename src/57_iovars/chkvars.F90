@@ -81,7 +81,7 @@ subroutine chkvars (string)
 !C
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
- list_vars=trim(list_vars)//' charge chkexit chkprim chksymbreak chneut cineb_start cpus cpum cpuh cgtyphf' 
+ list_vars=trim(list_vars)//' charge chkexit chkprim chksymbreak chneut cineb_start cpus cpum cpuh cgtyphf'
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
@@ -150,13 +150,13 @@ subroutine chkvars (string)
 !M
  list_vars=trim(list_vars)//' max_ncpus macro_uj maxestep maxnsym mdf_epsinf mdtemp mdwall'
  list_vars=trim(list_vars)//' magconon magcon_lambda mbpt_sciss'
- list_vars=trim(list_vars)//' mep_mxstep mep_solver mem_test mixalch'   
+ list_vars=trim(list_vars)//' mep_mxstep mep_solver mem_test mixalch'
  list_vars=trim(list_vars)//' mqgrid mqgriddg'
 !N
  list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz'
  list_vars=trim(list_vars)//' natom natrd natsph natsph_extra natvshift nband nbandkss nbandhf'
  list_vars=trim(list_vars)//' nbdblock nbdbuf nberry nconeq nc_xccc_gspace'
- list_vars=trim(list_vars)//' nctime ndivk ndivsm ndtset neb_algo neb_spring'   
+ list_vars=trim(list_vars)//' nctime ndivk ndivsm ndtset neb_algo neb_spring'
  list_vars=trim(list_vars)//' nfreqim nfreqre nfreqsp ngfft ngfftdg'
  list_vars=trim(list_vars)//' ngkpt ngqpt nimage nkpt nkptgw nkpthf'
  list_vars=trim(list_vars)//' nline nloc_alg nloc_mem nnos nnsclo nnsclohf'
@@ -181,12 +181,12 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' ph_wstep ph_intmeth ph_smear ph_nqshift ph_qshift'
  list_vars=trim(list_vars)//' plowan_bandi plowan_bandf plowan_compute plowan_iatom plowan_it plowan_lcalc'
  list_vars=trim(list_vars)//' plowan_natom plowan_nbl plowan_nt plowan_projcalc plowan_realspace'
- list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff ppmfrq ppmodel'  
+ list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff ppmfrq ppmodel'
  list_vars=trim(list_vars)//' prepanl prepgkk papiopt'
  list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtcif prtden'
  list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtefg prteig prtelf'
  list_vars=trim(list_vars)//' prtfc prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
- list_vars=trim(list_vars)//' prtnabla prtnest prtphdos prtposcar prtpot prtpsps'
+ list_vars=trim(list_vars)//' prtnabla prtnest prtphdos prtphsurf prtposcar prtpot prtpsps'
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc'
  list_vars=trim(list_vars)//' prtvol prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm ptcharge'
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
@@ -194,7 +194,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' qmass qprtrb qpt qptdm qptnrm '
  list_vars=trim(list_vars)//' qptopt qptrlatt quadmom'
 !R
- list_vars=trim(list_vars)//' random_atpos ratsph ratsph_extra rcut'  
+ list_vars=trim(list_vars)//' random_atpos ratsph ratsph_extra rcut'
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
  list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmeth rfphon'

@@ -29,6 +29,10 @@
 !!  Note that this particular ordering should be used in any routine used to
 !!  symmetrize k-dependent quantities in the full BZ zone to avoid possible errors.
 !!
+!! NOTES
+!!  This module is deprecated and should be used only in the GW/BSE part.
+!!  Some of the routines will be gradually moved to m_kpts
+!!
 !! PARENTS
 !!
 !! CHILDREN
@@ -52,7 +56,6 @@ MODULE m_bz_mesh
  use m_numeric_tools,  only : is_zero, isinteger, imin_loc, imax_loc, bisect, wrap2_pmhalf
  use m_geometry,       only : normv
  use m_crystal,        only : crystal_t
- use m_tetrahedron,    only : t_tetrahedron, init_tetra, destroy_tetra
 
  implicit none
 
@@ -191,7 +194,6 @@ MODULE m_bz_mesh
  public :: findq                 ! Helper routine returning the list of q-points.
  public :: findqg0               ! Identify q + G0 = k1-k2.
  public :: box_len               ! Return the length of the vector connecting the origin with one the faces of the unit cell.
- public :: tetra_from_kptrlatt   ! Create an instance of `t_tetrahedron` from kptrlatt and shiftk
 !!***
 
 !----------------------------------------------------------------------
@@ -264,7 +266,7 @@ type,public :: kpath_t
 !!
 !! TODO
 !! Rationalize most of the arrays, in particular the tables
-!! This structre shoud be rewritten almost from scratch, thus avoid using it
+!! This structure shoud be rewritten almost from scratch, thus avoid using it
 !! for your developments.
 !!
 !! SOURCE
@@ -2725,8 +2727,8 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
 &    'To run a GW calculation with an old KSS file, use version < 5.5 '
    MSG_ERROR(msg)
  end if
- !
- ! === Find operations in the little group as well as umklapp vectors G0 ===
+
+ ! Find operations in the little group as well as umklapp vectors G0 ===
  call littlegroup_q(nsym,ext_pt,symxpt,symrec,symafm,dummy_timrev,prtvol=0)
 
  Ltg%preserve(:,:)=0; Ltg%g0(:,:,:)=0; Ltg%flag_umklp(:,:)=0; mG0len=zero
@@ -2753,8 +2755,8 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
    nopg0(itim)=SUM(Ltg%flag_umklp(itim,:))
  end do
  nsym_Ltg=SUM(nop(:))
- !
- ! === Store little group operations, include time-reversal if present ===
+
+ ! Store little group operations, include time-reversal if present ===
  Ltg%nsym_Ltg=nsym_Ltg
  ABI_MALLOC(symrec_Ltg,(3,3,Ltg%nsym_Ltg))
 
@@ -2768,8 +2770,8 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
      end if
    end do
  end do
- !
- ! === Check the closure of the (ferromagnetic) little group ===
+
+ ! Check the closure of the (ferromagnetic) little group ===
  ABI_MALLOC(symafm_ltg,(Ltg%nsym_Ltg))
  symafm_ltg(:)=1
  call chkgrp(Ltg%nsym_Ltg,symafm_ltg,symrec_Ltg,ierr)
@@ -2777,8 +2779,8 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
 
  ABI_FREE(symafm_ltg)
  !
- ! === Find the irreducible zone associated to ext_pt ===
- ! * Do not use time-reversal since it has been manually introduced previously
+ ! Find the irreducible zone associated to ext_pt
+ ! Do not use time-reversal since it has been manually introduced previously
  ABI_MALLOC(indkpt1,(nbz))
  ABI_MALLOC(wtk_folded,(nbz))
  ABI_MALLOC(wtk,(nbz))
@@ -2807,11 +2809,11 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
  end do
  ABI_CHECK(ind==Ltg%nibz_Ltg," BUG ind/=Ltg%nibz_Ltg")
  !
- ! === Reconstruct full BZ starting from IBZ_q  ===
+ ! Reconstruct full BZ starting from IBZ_q.
  ! Calculate appropriate weight for each item (point,symmetry operation,time-reversal)
  Ltg%tab=0; Ltg%tabo=0; Ltg%tabi=0; Ltg%wtksym(:,:,:)=0
 
- ! === Zero no. of k-points found ===
+ ! Start with zero no. of k-points found
  ntest=0
  ABI_MALLOC(ktest,(3,nbz))
  ktest=zero
@@ -2886,11 +2888,11 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
    ABI_MALLOC(Ltg%igmG0,(npwe,timrev,nsym))
    Ltg%igmG0(:,:,:)=0
    max_kin=zero
-   !
-   ! === Loop over symmetry operations S and time-reversal ===
+
+   ! Loop over symmetry operations S and time-reversal
    do itim=1,timrev
      do isym=1,nsym
-       ! * Form IS k only for (IS) pairs in the little group
+       ! Form IS k only for (IS) pairs in the little group
        if (symafm(isym)==-1) CYCLE
        if (Ltg%preserve(itim,isym)/=0) then
          g0(:)=Ltg%g0(:,itim,isym)
@@ -3299,9 +3301,9 @@ subroutine kpath_init(Kpath,bounds,gprimd,ndiv_small)
  integer,intent(in) :: ndiv_small
 !!arrays
  real(dp),intent(in) :: bounds(:,:),gprimd(3,3)
-!
-!!Local variables-------------------------------
-!!arrays
+
+!Local variables-------------------------------
+!arrays
  real(dp),allocatable :: pts(:,:)
 
 ! *************************************************************************
@@ -3375,154 +3377,6 @@ subroutine kpath_free(Kpath)
  end if
 
 end subroutine kpath_free
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_bz_mesh/tetra_from_kptrlatt
-!! NAME
-!! tetra_from_kptrlatt
-!!
-!! FUNCTION
-!!  Create an instance of `t_tetrahedron` from kptrlatt and shiftk
-!!
-!! INPUTS
-!!  cryst<cryst_t>=Crystalline structure.
-!!  kptopt=Option for the k-point generation.
-!!  kptrlatt(3,3)=k-point lattice specification
-!!  nshiftk= number of shift vectors.
-!!  shiftk(3,nshiftk)=shift vectors for k point generation
-!!  nkibz=Number of points in the IBZ
-!!  kibz(3,nkibz)=Reduced coordinates of the k-points in the IBZ.
-!!
-!! OUTPUT
-!!  tetra<t_tetrahedron>=Tetrahedron object, fully initialized if ierr == 0.
-!!  msg=Error message if ierr /= 0
-!!  ierr=Exit status
-!!
-!! PARENTS
-!!      gstate,wfk_analyze
-!!
-!! CHILDREN
-!!      init_tetra,listkk,smpbz
-!!
-!! SOURCE
-
-type(t_tetrahedron) function tetra_from_kptrlatt( &
-&  cryst, kptopt, kptrlatt, nshiftk, shiftk, nkibz, kibz, msg, ierr) result (tetra)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'tetra_from_kptrlatt'
- use interfaces_56_recipspace
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: kptopt,nshiftk,nkibz
- integer,intent(out) :: ierr
- character(len=*),intent(out) :: msg
- type(crystal_t),intent(in) :: cryst
-!arrays
- integer,intent(in) :: kptrlatt(3,3)
- real(dp),intent(in) :: shiftk(3,nshiftk),kibz(3,nkibz)
-
-!Local variables-------------------------------
-!scalars
- integer,parameter :: brav1=1,option0=0
- integer :: mkpt,nkfull,timrev,sppoldbl
- real(dp) :: dksqmax
- character(len=80) :: errorstring
-!arrays
- integer,allocatable :: indkk(:,:)
- real(dp) :: rlatt(3,3),klatt(3,3)
- real(dp),allocatable :: kfull(:,:)
-
-! *************************************************************************
-
- ierr = 0
-
- ! Refuse only 1 kpoint: the algorithms are no longer valid. DOH !
- if (nkibz == 1) then
-   msg = 'You need at least 2 kpoints to use the tetrahedron method.'
-   ierr = 1; goto 10
- end if
- if (all(kptrlatt == 0)) then
-   msg = 'Cannot generate tetrahedron because input kptrlatt == 0.'
-   ierr = 1; goto 10
- end if
- if (kptopt <= 0) then
-   msg = sjoin("Cannot generate tetrahedron because input kptopt:", itoa(kptopt))
-   ierr = 1; goto 10
- end if
-
- ! Call smpbz to get the full grid of k-points `kfull`
- ! brav1=1 is able to treat all bravais lattices (same option used in getkgrid)
- mkpt= kptrlatt(1,1)*kptrlatt(2,2)*kptrlatt(3,3) &
-   +kptrlatt(1,2)*kptrlatt(2,3)*kptrlatt(3,1) &
-   +kptrlatt(1,3)*kptrlatt(2,1)*kptrlatt(3,2) &
-   -kptrlatt(1,2)*kptrlatt(2,1)*kptrlatt(3,3) &
-   -kptrlatt(1,3)*kptrlatt(2,2)*kptrlatt(3,1) &
-   -kptrlatt(1,1)*kptrlatt(2,3)*kptrlatt(3,2)
- mkpt = mkpt * nshiftk
-
- ! TODO: Replace with getkgrid.
- ABI_MALLOC(kfull, (3,mkpt))
- call smpbz(brav1,std_out,kptrlatt,mkpt,nkfull,nshiftk,option0,shiftk,kfull)
-
- ! Do not support nshiftk > 1: lattice must be decomposed into boxes
- ! and this is not always possible (I think) with bizzare shiftks
- ! normally at this point we have incorporated everything into
- ! kptrlatt, and only 1 shift is needed (in particular for MP grids).
- if (nshiftk > 1) then
-   write(msg, "(9a)") &
-     'Cannot create tetrahedron object...',ch10, &
-     'Only simple lattices are supported. Action: use nshiftk=1.',ch10, &
-     'shiftk: ', trim(ltoa(reshape(shiftk, [3*nshiftk]))),ch10, &
-     'kptrlatt: ', trim(ltoa(reshape(kptrlatt, [9])))
-   ierr = 2; goto 10
- end if
-
- ! Costruct full BZ and create mapping BZ --> IBZ
- ! Note:
- !   - we don't change the value of nsppol hence sppoldbl is set to 1
- !   - we use symrec (operations in reciprocal space)
- !
- sppoldbl = 1
- timrev = 1; if (kptopt == 4) timrev = 0
- ABI_MALLOC(indkk, (nkfull*sppoldbl,6))
-
- ! Compute k points from input file closest to the output file
- call listkk(dksqmax,cryst%gmet,indkk,kibz,kfull,nkibz,nkfull,cryst%nsym,&
-    sppoldbl,cryst%symafm,cryst%symrec,timrev,use_symrec=.True.)
-
- if (dksqmax > tol12) then
-   write(msg, '(3a,es16.6,6a)' )&
-   'At least one of the k points could not be generated from a symmetrical one.',ch10,&
-   'dksqmax=',dksqmax,ch10,&
-   'kptrkatt= ',trim(ltoa(reshape(kptrlatt, [9]))),ch10,&
-   'shiftk= ',trim(ltoa(reshape(shiftk, [3*nshiftk])))
-   ierr = 2; goto 10
- end if
-
- rlatt = kptrlatt; call matr3inv(rlatt,klatt)
-
- call init_tetra(indkk(:,1), cryst%gprimd, klatt, kfull, nkfull, tetra, ierr, errorstring)
- if (ierr /= 0) msg = errorstring
-
- 10 continue
- if (allocated(indkk)) then
-   ABI_FREE(indkk)
- end if
- if (allocated(kfull)) then
-   ABI_FREE(kfull)
- end if
-
-end function tetra_from_kptrlatt
 !!***
 
 !----------------------------------------------------------------------

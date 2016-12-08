@@ -531,6 +531,9 @@
  intarr(1,:)=dtsets(:)%prtphdos
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtphdos','INT',0)
 
+ intarr(1,:)=dtsets(:)%prtphsurf
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtphsurf','INT',0)
+
  intarr(1,:)=dtsets(:)%prtposcar
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtposcar','INT',0)
 

@@ -716,10 +716,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !  eph variables
    if (optdriver==RUNL_EPH) then
      cond_string(1)='optdriver' ; cond_values(1)=RUNL_EPH
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task,4, [1,2,3,4],iout)
-     if (dt%eph_task==2 .and. dt%irdwfq==0 .and. dt%getwfq==0) then
-       MSG_ERROR('Either getwfq or irdwfq must be non-zero in order to compute the gkk')
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task,5,[0,1,2,3,4],iout)
+
+     if (any(dt%ddb_ngqpt <= 0)) then
+        MSG_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
      end if
+     if (dt%eph_task==2 .and. dt%irdwfq==0 .and. dt%getwfq==0) then
+       MSG_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
+     end if
+
    end if
 
 !  exchmix
@@ -739,7 +744,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    call chkdpr(0,0,cond_string,cond_values,ierr,'fermie_nest',dt%fermie_nest,1,0.0_dp,iout)
 
 !  fftgw
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'fftgw',dt%fftgw,8,(/00,01,10,11,20,21,30,31/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'fftgw',dt%fftgw,8, [00,01,10,11,20,21,30,31],iout)
 
 !  frzfermi
    call chkint_eq(0,0,cond_string,cond_values,ierr,'frzfermi',dt%frzfermi,2,(/0,1/),iout)
@@ -786,10 +791,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &   4,(/GWSC_one_shot,GWSC_only_W,GWSC_only_G,GWSC_both_G_and_W/),iout)
 
 !  gw_sigxcore
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_sigxcore',dt%gw_sigxcore,2,(/0,1/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'gw_sigxcore',dt%gw_sigxcore,2,[0,1],iout)
 
 !  gwcomp
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'gwcomp',dt%gwcomp,2,(/0,1/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'gwcomp',dt%gwcomp,2,[0,1],iout)
    if (dt%gwcomp/=0) then
      if (optdriver==RUNL_SCREENING .and. ( dt%awtr /=1 .or. dt%spmeth /=0 )) then
        write(message,'(3a)' )&
@@ -801,14 +806,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 !    Extrapolar trick with HF, SEX and COHSEX is meaningless for Sigma
      if(optdriver==RUNL_SIGMA) then
        mod10=MOD(dt%gwcalctyp,10)
-       if ( ANY(mod10 == (/SIG_HF, SIG_SEX, SIG_COHSEX/)) ) then
+       if ( ANY(mod10 == [SIG_HF, SIG_SEX, SIG_COHSEX]) ) then
          write(message,'(3a)' )&
          'gwcomp/=0, is meaningless in the case of HF, SEX or COHSEX calculations. ',ch10,&
          'Action: set gwcomp to 0 or change gwcalctyp'
          MSG_ERROR_NOSTOP(message,ierr)
        end if
      end if
-     if (optdriver==RUNL_SIGMA .and. ALL( dt%ppmodel /= (/0,1,2/) )) then
+     if (optdriver==RUNL_SIGMA .and. ALL( dt%ppmodel /= [0,1,2] )) then
        write(message,'(a,i0,a)')&
 &       'The completeness trick cannot be used when ppmodel is ',dt%ppmodel,'. It should be set to 0, 1 or 2. '
        MSG_ERROR_NOSTOP(message,ierr)
@@ -816,10 +821,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    end if
 
 !  gwmem
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'gwmem',dt%gwmem,4,(/0,1,10,11/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'gwmem',dt%gwmem,4,[0,1,10,11],iout)
 
 !  gwpara
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'gwpara',dt%gwpara,3,(/0,1,2/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'gwpara',dt%gwpara,3,[0,1,2],iout)
 
 !  gwrpacorr
    if(dt%gwrpacorr>0) then

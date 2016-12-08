@@ -50,10 +50,9 @@ program mrgdv
  use m_profiling_abi
  use m_dvdb
 
- use m_fstrings,        only : sjoin, itoa, ktoa
+ use m_fstrings,        only : sjoin, itoa, ltoa
  use m_numeric_tools,   only : vdiff_eval, vdiff_print
  use m_io_tools,        only : file_exists, prompt
- use m_fftcore,         only : ngfft_seq
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -67,15 +66,13 @@ program mrgdv
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,nargs,nfiles,comm,prtvol,nfft,ifft
- integer :: iq,cplex,mu,ispden,my_rank
+ integer :: ii,nargs,nfiles,comm,prtvol,nfft,my_rank
  character(len=24) :: codename
  character(len=500) :: command,arg !msg,
  character(len=fnlen) :: db_path
  type(dvdb_t) :: db
 !arrays
  integer :: ngfft(18),ngqpt(3)
- real(dp),allocatable :: file_v1r(:,:,:,:),intp_v1r(:,:,:,:),tmp_v1r(:,:,:,:)
  character(len=fnlen),allocatable :: v1files(:)
 
 ! *************************************************************************
@@ -129,6 +126,12 @@ program mrgdv
        write(std_out,*)"merge out_DVDB POT1 POT2   Merge list of POT files, produce out_DVDB file."
        write(std_out,*)"info out_DVDB              Print information on DVDB file"
        write(std_out,*)"-h, --help                 Show this help and exit."
+       write(std_out,*)" "
+       write(std_out,*)"Options for developers:"
+       write(std_out,*)"test_v1complete            Test symmetrization of DFPT potentials."
+       write(std_out,*)"                           Assume DVDB with all 3*natom perturbations for each q (prep_gkk)."
+       write(std_out,*)"test_v1rsym                Test symmetries of DFPT potentials in real space."
+       write(std_out,*)"test_ftinterp              Test Fourier interpolation of DFPT potentials."
        goto 100
      end if
    end do
@@ -150,6 +153,7 @@ program mrgdv
        call get_command_argument(ii+2, v1files(ii))
      end do
 
+     ! Merge POT files.
      call dvdb_merge_files(nfiles, v1files, db_path, prtvol)
      ABI_FREE(v1files)
 
@@ -159,88 +163,34 @@ program mrgdv
      call get_command_argument(2, db_path)
 
      call dvdb_init(db, db_path, comm)
-
      call dvdb_print(db, prtvol=prtvol)
      call dvdb_list_perts(db, [-1,-1,-1])
-     !call dvdb_list_perts(db, [2, 2, 2])
-
-     !call ngfft_seq(ngfft, [12, 12, 12])
-     !nfft = product(ngfft(1:3))
-     !call dvdb_open_read(db, ngfft, xmpi_comm_self)
-
      call dvdb_free(db)
 
-   case ("test_symmetries")
-     call wrtout(std_out," Testing symmetries",'COLL')
+   case ("test_v1comp", "test_v1complete")
+     call wrtout(std_out," Testing symmetries (assuming overcomplete DVDB)")
      call get_command_argument(2, db_path)
+     call dvdb_test_v1complete(db_path, comm)
 
-     call dvdb_init(db, db_path, comm)
-
-     call ngfft_seq(ngfft, db%ngfft3_v1(:,1))
-     nfft = product(ngfft(1:3))
-     call dvdb_open_read(db, ngfft, xmpi_comm_self)
-
-     call dvdb_test_symmetries(db)
-     !call dvdb_check_v1sym(db)
-
-     call dvdb_free(db)
+   case ("test_v1rsym")
+     call wrtout(std_out," Testing symmetries of V1(r) in real space.")
+     call get_command_argument(2, db_path)
+     call dvdb_test_v1rsym(db_path, comm)
 
    case ("test_ftinterp")
      call get_command_argument(2, db_path)
      if (nargs >= 3) then
        call get_command_argument(3, arg)
-       !call replace_char(arg, ",", " ")
+       !arg = replace_char(arg, ",", " ")
        !read(arg,"(3(i0,a))")ngqpt
      else
        ngqpt = [2,2,2]
-       ngqpt = [4,4,4]
+       !ngqpt = [4,4,4]
        !ngqpt = [8,8,8]
      end if
 
-     call wrtout(std_out," Calling dvdb_ftinterp_setup",'COLL')
-     call dvdb_init(db, db_path, comm)
-
-     call ngfft_seq(ngfft, db%ngfft3_v1(:,1))
-     nfft = product(ngfft(1:3))
-     call dvdb_open_read(db, ngfft, xmpi_comm_self)
-
-     ABI_MALLOC(intp_v1r, (2,nfft,db%nspden,db%natom3))
-     ABI_MALLOC(file_v1r, (2,nfft,db%nspden,db%natom3))
-
-     call dvdb_ftinterp_setup(db,ngqpt,1,[zero,zero,zero],nfft,ngfft,comm)
-
-     do iq=1,db%nqpt
-       ! Read data from file
-       call dvdb_readsym_allv1(db, dvdb_findq(db, db%qpts(:,iq)), cplex, nfft, ngfft, tmp_v1r, comm)
-       if (cplex == 1) then
-         file_v1r(1,:,:,:) = tmp_v1r(1,:,:,:)
-         file_v1r(2,:,:,:) = zero
-       else
-         file_v1r = tmp_v1r
-       end if
-       ABI_FREE(tmp_v1r)
-
-       ! Interpolate data on the same q-point
-       call dvdb_ftinterp_qpt(db, db%qpts(:,iq), nfft, ngfft, intp_v1r, comm)
-
-       write(std_out,*)sjoin("For q-point:", ktoa(db%qpts(:,iq)))
-       do mu=1,db%natom3
-         do ispden=1,db%nspden
-           call vdiff_print(vdiff_eval(2,nfft,file_v1r(:,:,ispden,mu),intp_v1r(:,:,ispden,mu),db%cryst%ucvol))
-
-           do ifft=1,2
-           !do ifft=1,nfft
-             write(std_out,*)file_v1r(1,ifft,ispden,mu),intp_v1r(1,ifft,ispden,mu),&
-             file_v1r(2,ifft,ispden,mu),intp_v1r(2,ifft,ispden,mu)
-           end do
-         end do
-       end do
-       write(std_out,*)""
-     end do ! iq
-
-     call dvdb_free(db)
-     ABI_FREE(intp_v1r)
-     ABI_FREE(file_v1r)
+     write(std_out,"(a)")sjoin("Testing Fourier interpolation with ngqpt:", ltoa(ngqpt))
+     call dvdb_test_ftinterp(db_path, ngqpt, comm)
 
    case default
      MSG_ERROR(sjoin("Unknown command:", command))

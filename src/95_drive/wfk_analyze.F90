@@ -84,11 +84,11 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  use m_wfk
  use m_wfd
 
- use m_io_tools,        only : file_exists
  !use m_time,            only : cwtime
  use m_fstrings,        only : strcat, sjoin, itoa, ftoa
  use m_fftcore,         only : print_ngfft
- use m_bz_mesh,         only : kmesh_t, kmesh_free, tetra_from_kptrlatt, kpath_t, kpath_init, kpath_free
+ use m_kpts,            only : tetra_from_kptrlatt
+ use m_bz_mesh,         only : kpath_t, kpath_init, kpath_free
  use m_mpinfo,          only : destroy_mpi_enreg
  use m_esymm,           only : esymm_t, esymm_free, esymm_failed
  use m_pawang,          only : pawang_type
@@ -101,7 +101,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  !use m_pawpwij,        only : pawpwff_t, pawpwff_init, pawpwff_free
- !use m_paw_dmft,        only : paw_dmft_type
+ !use m_paw_dmft,       only : paw_dmft_type
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
 
 !This section has been created automatically by the script Abilint (TD).
@@ -198,13 +198,8 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  wfk0_path = dtfil%fnamewffk
  if (my_rank == master) then
    ! Accept WFK file in Fortran or netcdf format.
-   if (.not. file_exists(wfk0_path)) then
-     if (file_exists(nctk_ncify(wfk0_path))) then
-       write(std_out,"(3a)")"- File: ",trim(wfk0_path)," does not exist but found netcdf file with similar name."
-       wfk0_path = nctk_ncify(wfk0_path)
-     else
-       MSG_ERROR(sjoin("Cannot find GS WFK file:", wfk0_path))
-     end if
+   if (nctk_try_fort_or_ncfile(wfk0_path, msg) /= 0) then
+     MSG_ERROR(sjoin("Cannot find GS WFK file:", ch10, msg))
    end if
  end if
  call xmpi_bcast(wfk0_path,master,comm,ierr)

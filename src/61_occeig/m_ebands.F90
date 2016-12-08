@@ -36,17 +36,20 @@ MODULE m_ebands
  use m_profiling_abi
  use m_xmpi
  use m_tetrahedron
+ use m_bspline
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_hdr
+ use m_kptrank
+ use m_kpts
 
  use defs_datatypes,   only : ebands_t
  use defs_abitypes,    only : hdr_type, dataset_type
  use m_copy,           only : alloc_copy
  use m_io_tools,       only : file_exists, open_file
- use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa
+ use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa
  use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson_int, wrap2_zero_one,&
                               isdiagmat
  use m_special_funcs,  only : dirac_delta
@@ -54,7 +57,7 @@ MODULE m_ebands
  use m_cgtools,        only : set_istwfk
  use m_nesting,        only : mknesting
  use m_crystal,        only : crystal_t
- use m_bz_mesh,        only : kmesh_t, isamek
+ use m_bz_mesh,        only : isamek
  use m_fftcore,        only : get_kg
 
  implicit none
@@ -76,6 +79,7 @@ MODULE m_ebands
  public :: apply_scissor           ! Apply a scissor operator (no k-dependency)
  public :: get_occupied            ! Returns band indeces after wich occupations are less than an input value.
  public :: enclose_degbands        ! Adjust band indeces such that all degenerate states are treated.
+ public :: ebands_get_erange       ! Compute the minimum and maximum energy enclosing a list of states.
  public :: ebands_nelect_per_spin  ! Returns number of electrons per spin channel
  public :: get_minmax              ! Returns min and Max value of (eig|occ|doccde).
  public :: ebands_edstats          ! Compute statistical parameters of the energy differences e_ks[b+1] - e_ks[b]
@@ -90,10 +94,12 @@ MODULE m_ebands
  public :: ebands_ncwrite_path     ! Dump the object into NETCDF file (use filepath)
  public :: ebands_write_nesting    ! Calculate the nesting function and output data to file.
  public :: ebands_expandk          ! Build a new ebands_t in the full BZ.
- public :: ebands_jdos             ! Compute the joint density of states.
+ public :: ebands_get_jdos         ! Compute the joint density of states.
+ public :: ebands_bspline
 
  public :: ebands_prtbltztrp
  public :: ebands_prtbltztrp_tau_out
+ public :: ebands_write_xmgrace
 !!***
 
 !----------------------------------------------------------------------
@@ -111,6 +117,9 @@ MODULE m_ebands
 
    integer :: nsppol
     ! Number of spins.
+
+   integer :: nkibz
+    ! Number of k-points in the IBZ.
 
    integer :: nw
    ! Number of points in the frequency mesh.
@@ -145,15 +154,15 @@ MODULE m_ebands
    ! gef(0:nsppol)
    ! DOS at the Fermi level. Total, spin up, spin down
 
-   type(ebands_t),pointer :: ebands => null()
+   !type(ebands_t),pointer :: ebands => null()
    ! Reference to the bandstructure.
 
  end type edos_t
 
- public :: edos_init     ! Compute the dos from the band structure.
- public :: edos_free     ! Free memory
- public :: edos_write    ! Write results to file (formatted mode)
- public :: edos_print    ! Print DOS info to Fortran unit.
+ public :: ebands_get_edos   ! Compute the dos from the band structure.
+ public :: edos_free         ! Free memory
+ public :: edos_write        ! Write results to file (formatted mode)
+ public :: edos_print        ! Print DOS info to Fortran unit.
 !!***
 
 !----------------------------------------------------------------------
@@ -203,34 +212,47 @@ MODULE m_ebands
 
 !----------------------------------------------------------------------
 
-!!****t* m_ebands/ebspline_t
+!!****t* m_ebands/ebspl_t
 !! NAME
-!! ebspline_t
+!! ebspl_t
 !!
 !! FUNCTION
+!!  B-spline interpolation of electronic eigenvalues.
 !!
 !! SOURCE
 
- type :: bcoeff_t
+ type :: bcoefs_t
    real(dp),allocatable :: vals(:,:,:)
- end type bcoeff_t
+ end type bcoefs_t
 
- type,public :: ebspline_t
+ type,public :: ebspl_t
 
    integer :: nkx,nky,nkz
+   ! Number of input data points
+
    integer :: kxord,kyord,kzord
+   ! Order of the spline.
+
+   integer :: band_block(2)
+    ! Initial and final band index treated by this processor
+
+   integer :: spin_block(2)
+    ! Initial and final spin index treated by this processor
 
    !real(dp),allocatable :: xvec(:),yvec(:),zvec(:)
    real(dp),allocatable :: xknot(:),yknot(:),zknot(:)
+   ! Array of length ndata+korder containing the knot
 
-   type(bcoeff_t),allocatable :: coeff(:,:)
+   type(bcoefs_t),allocatable :: coeff(:,:)
    ! coeff(mband, nsppol)
+   ! coff(band, spin)%vals(nkx, nky, nkz)
+   ! B-spline coefficients for a given (band, spin)
 
- end type ebspline_t
+ end type ebspl_t
 
- public :: ebspline_init
- public :: ebspline_evalk
- public :: ebspline_free
+ public :: ebspl_new         ! Build B-spline object.
+ public :: ebspl_eval_bks    ! Interpolate eigenvalues, 1st, 2nd derivates wrt k, at an arbitrary k-point.
+ public :: ebspl_free        ! Free memory.
 
 
 CONTAINS  !=====================================================================================
@@ -593,7 +615,6 @@ subroutine ebands_init(bantot,ebands,nelect,doccde,eig,istwfk,kptns,&
  integer,intent(in) :: istwfk(nkpt),nband(nkpt*nsppol),npwarr(nkpt)
  real(dp),intent(in) :: doccde(bantot),eig(bantot),kptns(3,nkpt),occ(bantot)
  real(dp),intent(in) :: wtk(nkpt)
-
  integer,intent(in) :: kptopt, nshiftk_orig, nshiftk
  real(dp),intent(in) :: charge
  integer,intent(in) :: kptrlatt_orig(3,3),kptrlatt(3,3)
@@ -1052,7 +1073,7 @@ subroutine ebands_print(ebands,header,unit,prtvol,mode_paral)
    '  Tphysel value ....................... ',ebands%tphysel,ch10
  call wrtout(my_unt,msg,my_mode)
 
- if (my_prtvol>0) then
+ if (my_prtvol > 10) then
    if (ebands%nsppol==1)then
      write(msg,'(a,i0,a)')' New occ. numbers for occopt= ',ebands%occopt,' , spin-unpolarized case. '
      call wrtout(my_unt,msg,my_mode)
@@ -1707,8 +1728,7 @@ subroutine enclose_degbands(ebands,ikibz,spin,ibmin,ibmax,changed,tol_enedif)
 
 ! *************************************************************************
 
- ibmin_bkp = ibmin
- ibmax_bkp = ibmax
+ ibmin_bkp = ibmin; ibmax_bkp = ibmax
 
  emin =  ebands%eig(ibmin,ikibz,spin)
  do ib=ibmin-1,1,-1
@@ -1737,12 +1757,93 @@ end subroutine enclose_degbands
 
 !----------------------------------------------------------------------
 
+!!****f* m_ebands/ebands_get_erange
+!! NAME
+!!  ebands_get_erange
+!!
+!! FUNCTION
+!!  Compute the minimum and maximum energy enclosing a list of states
+!!  specified by k-points and band indices.
+!!
+!! INPUTS
+!!  ebands<ebands_t>=The object describing the band structure.
+!!  nkpts=Number of k-points
+!!  kpoints(3,nkpts)=K-points
+!!  band_block(2,nkpts)=Gives for each k-points, the initial and the final band index to include.
+!!
+!! OUTPUT
+!!  emin,emax=min and max energy
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ebands_get_erange(ebands, nkpts, kpoints, band_block, emin, emax)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ebands_get_erange'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nkpts
+ real(dp),intent(out) :: emin,emax
+ type(ebands_t),intent(in) :: ebands
+!arrays
+ integer,intent(in) :: band_block(2,nkpts)
+ real(dp),intent(in) :: kpoints(3,nkpts)
+
+!Local variables-------------------------------
+!scalars
+ integer :: spin,band,ik,ikpt,cnt
+ type(kptrank_type) :: krank
+
+! *************************************************************************
+
+ call mkkptrank(ebands%kptns, ebands%nkpt, krank)
+
+ emin = huge(one); emax = -huge(one); cnt = 0
+
+ do spin=1,ebands%nsppol
+   do ik=1,nkpts
+     ikpt = kptrank_index(krank, kpoints(:,ik))
+     if (ikpt == -1) then
+       MSG_WARNING(sjoin("Cannot find k-point:", ktoa(kpoints(:,ik))))
+       cycle
+     end if
+     if (.not. (band_block(1,ik) >= 1 .and. band_block(2,ik) <= ebands%mband)) cycle
+     cnt = cnt + 1
+     emin = min(emin, minval(ebands%eig(band_block(1,ik):band_block(2,ik), ikpt, spin)))
+     emax = max(emax, maxval(ebands%eig(band_block(1,ik):band_block(2,ik), ikpt, spin)))
+   end do
+ end do
+
+ call destroy_kptrank(krank)
+
+ ! This can happen if wrong input.
+ if (cnt == 0) then
+    MSG_WARNING("None of the k-points/bands provided was found in ebands%")
+    emin = minval(ebands%eig); emax = maxval(ebands%eig)
+ end if
+
+end subroutine ebands_get_erange
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_ebands/ebands_nelect_per_spin
 !! NAME
 !!  ebands_nelect_per_spin
 !!
 !! FUNCTION
-!!   return number of electrons in each spin channel (computed from occoputation factors if nsppol=2)
+!!   Return number of electrons in each spin channel (computed from occoputation factors if nsppol=2)
 !!
 !! INPUTS
 !!  ebands<ebands_t>=The object describing the band structure.
@@ -2115,8 +2216,10 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
 
  if (ebands_has_metal_scheme(ebands)) then
    !  If occupation is metallic have to compute new occupation numbers.
-   write(msg,'(a,f9.5)')' metallic scheme, calling newocc with spinmagntarget = ',spinmagntarget
-   call wrtout(std_out,msg,'COLL')
+   if (my_prtvol > 10) then
+     write(msg,'(a,f9.5)')' metallic scheme, calling newocc with spinmagntarget = ',spinmagntarget
+     call wrtout(std_out,msg,'COLL')
+   end if
 
    ! newocc assumes eigenvalues and occupations packed in 1d-vector!!
    mband  = ebands%mband
@@ -2179,6 +2282,7 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
 
    vtop=MAXVAL(valencetop)
    cbot=MINVAL(condbottom)
+
    write(msg,'(a,f6.2,2a,f6.2)')&
 &    ' top of valence       [eV] ',vtop*Ha_eV,ch10,&
 &    ' bottom of conduction [eV] ',cbot*Ha_eV
@@ -2277,8 +2381,7 @@ subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
  type(ebands_t),intent(inout) :: ebands
  integer,intent(in) :: occopt
  integer,optional,intent(in) :: prtvol
- real(dp),intent(in) :: tsmear
- real(dp),intent(in) :: spinmagntarget
+ real(dp),intent(in) :: tsmear,spinmagntarget
 
 !Local variables-------------------------------
 !scalars
@@ -2289,15 +2392,19 @@ subroutine ebands_set_scheme(ebands,occopt,tsmear,spinmagntarget,prtvol)
 ! *************************************************************************
 
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
-
  ebands%occopt = occopt; ebands%tsmear = tsmear
 
- call wrtout(std_out,"Changing occupation scheme in electron bands", "COLL")
- write(msg,"(2(a,i0))")"occopt:",ebands%occopt," ==> ",occopt; call wrtout(std_out,msg,"COLL")
- write(msg,"(2(a,f6.4))")"tsmear:",ebands%tsmear," ==> ",tsmear; call wrtout(std_out,msg,"COLL")
+ if (prtvol > 10) then
+   call wrtout(std_out, "Changing occupation scheme in electron bands")
+   call wrtout(std_out, sjoin("occopt:", itoa(ebands%occopt), " ==> ", itoa(occopt)))
+   call wrtout(std_out, sjoin("tsmear:", ftoa(ebands%tsmear), " ==> ", ftoa(tsmear)))
+ end if
 
  call ebands_update_occ(ebands,spinmagntarget,stmbias0,prtvol=my_prtvol)
- call wrtout(std_out,sjoin('Fermi level is now: ', ftoa(ebands%fermie)),'COLL')
+
+ if (prtvol > 10) then
+   call wrtout(std_out, sjoin('Fermi level is now:', ftoa(ebands%fermie)))
+ end if
 
 end subroutine ebands_set_scheme
 !!***
@@ -2887,26 +2994,25 @@ end function ebands_ncwrite_path
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/edos_init
+!!****f* m_ebands/ebands_get_edos
 !! NAME
-!!  edos_init
+!!  ebands_get_edos
 !!
 !! FUNCTION
-!!  Calculate the electronic density of states.
+!!  Calculate the electronic density of states from ebands_t
 !!
 !! INPUTS
 !!  ebands<ebands_t>=Band structure object.
 !!  cryst<cryst_t>=Info on the crystalline structure.
-!!  intmeth= 1 for gaussian, 2 for tetra
+!!  intmeth= 1 for gaussian, 2 or 3 for tetrahedrons (3 if Blochl corrections must be included).
 !!  step=Step on the linear mesh in Ha. If <0, the routine will use the mean of the energy level spacing
 !!  broad=Gaussian broadening, If <0, the routine will use a default
 !!    value for the broadening computed from the mean of the energy level spacing.
-!!    No meaning if method == "tetra"
+!!    No meaning for tetrahedrons
 !!  comm=MPI communicator
 !!
 !! OUTPUT
 !!  edos<edos_t>=Electronic DOS and IDOS.
-!!  ierr=Exit status. The routine can return ierr/=0 if method=="tetra"
 !!
 !! PARENTS
 !!      eph
@@ -2917,15 +3023,13 @@ end function ebands_ncwrite_path
 !!
 !! SOURCE
 
-subroutine edos_init(edos,ebands,cryst,intmeth,step,broad,comm,ierr)
+type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) result(edos)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'edos_init'
- use interfaces_32_util
- use interfaces_56_recipspace
+#define ABI_FUNC 'ebands_get_edos'
 !End of the abilint section
 
  implicit none
@@ -2933,42 +3037,35 @@ subroutine edos_init(edos,ebands,cryst,intmeth,step,broad,comm,ierr)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: intmeth,comm
- integer,intent(out) :: ierr
  real(dp),intent(in) :: step,broad
  type(ebands_t),target,intent(in)  :: ebands
  type(crystal_t),intent(in) :: cryst
- type(edos_t),intent(out) :: edos
-!arrays
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: bcorr0=0
- integer :: iw,nw,spin,band,ikpt,ief,nbz,nibz,nproc,my_rank,mpierr,cnt
+ integer :: iw,nw,spin,band,ikpt,ief,nproc,my_rank,mpierr,cnt,ierr,bcorr
  real(dp) :: max_ene,min_ene,wtk,max_occ
  character(len=500) :: msg
- character(len=80) :: errstr
  type(stats_t) :: ediffs
  type(t_tetrahedron) :: tetra
 !arrays
  real(dp) :: eminmax_spin(2,ebands%nsppol)
- real(dp) :: qlatt(3,3),rlatt(3,3)
- integer,allocatable :: bz2ibz(:)
- real(dp),allocatable :: wme0(:),fullbz(:,:)
- real(dp),allocatable :: tmp_eigen(:),bdelta(:,:),btheta(:,:)
+ real(dp),allocatable :: wme0(:),wdt(:,:),tmp_eigen(:)
 
 ! *********************************************************************
 
- ierr = 0
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ ierr = 0
 
- ! Keep a reference to ebands
- edos%ebands => ebands
- edos%intmeth = intmeth; edos%nsppol = ebands%nsppol
+ edos%nkibz = ebands%nkpt; edos%intmeth = intmeth; edos%nsppol = ebands%nsppol
 
- ! Compute the mean value of the energy spacing.
- ediffs = ebands_edstats(ebands)
- edos%broad = broad; if (broad <= tol16) edos%broad = ediffs%mean
- edos%step = step; if (step <= tol16) edos%step = 0.1 * ediffs%mean
+ edos%broad = broad; edos%step = step
+ if (broad <= tol16 .or. step <= tol16) then
+   ! Compute the mean value of the energy spacing.
+   ediffs = ebands_edstats(ebands)
+   if (edos%broad <= tol16) edos%broad = ediffs%mean
+   if (edos%step <= tol16) edos%step = 0.1 * ediffs%mean
+ end if
 
  ! Compute the linear mesh so that it encloses all bands.
  eminmax_spin = get_minmax(ebands, "eig")
@@ -3002,99 +3099,51 @@ subroutine edos_init(edos,ebands,cryst,intmeth,step,broad,comm,ierr)
    ABI_FREE(wme0)
    call xmpi_sum(edos%dos, comm, mpierr)
 
- case (2)
-   ! Consistency test: return immediately if cannot use tetra.
-   if (ebands%nkpt<2) then
-     MSG_WARNING('at least 2 points are needed for tetrahedrons')
-     ierr = ierr + 1
-   end if
-   if (any(ebands%nband /= ebands%nband(1)) ) then
-     MSG_WARNING('for tetrahedrons, nband(:) must be constant')
-     ierr = ierr + 1
-   end if
-   if (ebands%nshiftk > 1) then
-     MSG_WARNING(sjoin("for tetrahedrons, nshift must be (0,1) but found: ",itoa(ebands%nshiftk)))
-     ierr = ierr + 1
-   end if
-   if (ierr/=0) return
+ case (2, 3)
+   ! Consistency test
+   if (any(ebands%nband /= ebands%nband(1)) ) MSG_ERROR('for tetrahedrons, nband(:) must be constant')
 
-   ! convert kptrlatt to double and invert.
-   rlatt = dble(ebands%kptrlatt)
-   call matr3inv(rlatt,qlatt)  ! qlatt refers to the shortest qpt vectors.
-
-   ! Calculate total number of k-points in the full BZ
-   nbz = &
-      ebands%kptrlatt(1,1)*ebands%kptrlatt(2,2)*ebands%kptrlatt(3,3) &
-     +ebands%kptrlatt(1,2)*ebands%kptrlatt(2,3)*ebands%kptrlatt(3,1) &
-     +ebands%kptrlatt(1,3)*ebands%kptrlatt(2,1)*ebands%kptrlatt(3,2) &
-     -ebands%kptrlatt(1,2)*ebands%kptrlatt(2,1)*ebands%kptrlatt(3,3) &
-     -ebands%kptrlatt(1,3)*ebands%kptrlatt(2,2)*ebands%kptrlatt(3,1) &
-     -ebands%kptrlatt(1,1)*ebands%kptrlatt(2,3)*ebands%kptrlatt(3,2)
-   nbz = nbz * ebands%nshiftk
-
-   ABI_MALLOC(bz2ibz,(nbz))
-   ABI_MALLOC(fullbz,(3, nbz))
-   nibz = ebands%nkpt
-
-   ! === Make full kpoint grid and get equivalence to irred kpoints ===
-   ! * Note: This routines scales badly wrt Kmesh%nbz
-   ! TODO should be rewritten, pass kptopt and test whether listkk is faster.
-   !ABI_CHECK(Kmesh%kptopt==1,"get_full_kgrid assumes kptopt==1")
-   call get_full_kgrid(bz2ibz,ebands%kptns,fullbz,ebands%kptrlatt,nibz,nbz,ebands%nshiftk,&
-     cryst%nsym,ebands%shiftk,cryst%symrel)
-
-   if (ierr == 0) then
-     call init_tetra(bz2ibz, cryst%gprimd, qlatt, fullbz, nbz, tetra, ierr, errstr)
-     if (ierr/=0) MSG_WARNING(errstr)
-   end if
-   ABI_FREE(bz2ibz)
-   ABI_FREE(fullbz)
-
-   !call tetra_from_kptrlatt(tetra, cryst, ebands%kptopt, ebands%kptrlatt, &
-   !  ebands%nshiftk, ebands%shiftk, ebands%nkpt, ebands%kptns)
-
-   if (ierr /= 0) return
+   ! Build tetra object.
+   tetra = tetra_from_kptrlatt(cryst, ebands%kptopt, ebands%kptrlatt, &
+     ebands%nshiftk, ebands%shiftk, ebands%nkpt, ebands%kptns, msg, ierr)
+   if (ierr /= 0) MSG_ERROR(msg)
 
    ! For each spin and band, interpolate over kpoints,
    ! calculate integration weights and DOS contribution.
    ABI_MALLOC(tmp_eigen, (ebands%nkpt))
+   ABI_MALLOC(wdt, (nw, 2))
 
-   ABI_MALLOC(btheta, (nw, ebands%nkpt))
-   ABI_MALLOC(bdelta, (nw, ebands%nkpt))
-
+   bcorr = 0; if (intmeth == 3) bcorr = 1
    cnt = 0
    do spin=1,ebands%nsppol
      do band=1,ebands%nband(1)
-       cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
        ! For each band get its contribution
        tmp_eigen = ebands%eig(band,:,spin)
-
-       ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223)
-       call tetra_blochl_weights(tetra,tmp_eigen,min_ene,max_ene,one,nw,ebands%nkpt,bcorr0,&
-         btheta,bdelta,xmpi_comm_self)
-
        do ikpt=1,ebands%nkpt
-         do iw=1,nw
-           edos%dos(iw,spin) = edos%dos(iw,spin) + bdelta(iw, ikpt)
-           ! IDOS is computed afterwards with simpson
-           !edos%idos(iw,spin) = edos%idos(iw,spin) + btheta(iw,ikpt)
-         end do
-       end do
+         cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! mpi parallelism.
+
+         ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223)
+         call tetra_get_onewk(tetra, ikpt, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)
+
+         edos%dos(:,spin) = edos%dos(:,spin) + wdt(:, 1)
+         ! IDOS is computed afterwards with simpson
+         !edos%idos(:,spin) = edos%idos(:,spin) + wdt(:, 2)
+       end do ! ikpt
      end do ! band
-   end do !spin
+   end do ! spin
 
    call xmpi_sum(edos%dos, comm, mpierr)
 
    ! Free memory
    ABI_FREE(tmp_eigen)
-   ABI_FREE(btheta)
-   ABI_FREE(bdelta)
-
+   ABI_FREE(wdt)
    call destroy_tetra(tetra)
 
    ! Filter so that dos[i] is always >= 0 and idos is monotonic
    ! IDOS is computed afterwards with simpson
-   where (edos%dos(:,1:) <= zero) edos%dos(:,1:) = zero
+   where (edos%dos(:,1:) <= zero)
+     edos%dos(:,1:) = zero
+   end where
 
  case default
    MSG_ERROR(sjoin("Wrong integration method:", itoa(intmeth)))
@@ -3129,12 +3178,14 @@ subroutine edos_init(edos,ebands,cryst,intmeth,step,broad,comm,ierr)
    edos%gef(spin) = edos%dos(ief,spin)
  end do
 
- write(std_out,*)"fermie from ebands: ",ebands%fermie
- write(std_out,*)"fermie from IDOS: ",edos%mesh(ief)
- write(std_out,*)"gef:from ebands%fermie: " ,edos%dos(bisect(edos%mesh, ebands%fermie), 0)
- write(std_out,*)"gef:from edos: " ,edos%gef(0)
+ if (.False.) then
+   write(std_out,*)"fermie from ebands: ",ebands%fermie
+   write(std_out,*)"fermie from IDOS: ",edos%mesh(ief)
+   write(std_out,*)"gef:from ebands%fermie: " ,edos%dos(bisect(edos%mesh, ebands%fermie), 0)
+   write(std_out,*)"gef:from edos: " ,edos%gef(0)
+ end if
 
-end subroutine edos_init
+end function ebands_get_edos
 !!***
 
 !----------------------------------------------------------------------
@@ -3185,9 +3236,6 @@ subroutine edos_free(edos)
  if (allocated(edos%gef)) then
    ABI_FREE(edos%gef)
  end if
-
-! Nullify pointers.
- nullify(edos%ebands)
 
 end subroutine edos_free
 !!***
@@ -3242,7 +3290,7 @@ subroutine edos_write(edos, path)
  ! Convert everything into eV
  ! I know that Abinit should use Ha but Hartrees are not readable.
  ! Please don't change this code, in case add an optional argument to specify different units.
- cfact=Ha_eV
+ cfact = Ha_eV
 
  if (open_file(path, msg, newunit=unt, form="formatted", action="write") /= 0) then
    MSG_ERROR(msg)
@@ -3255,9 +3303,9 @@ subroutine edos_write(edos, path)
  select case (edos%intmeth)
  case (1)
    write(unt,'(a,es16.8,a,i0)')&
-     '# Gaussian method with smearing= ',edos%broad*cfact,' [eV], nkibz= ',edos%ebands%nkpt
+     '# Gaussian method with smearing= ',edos%broad*cfact,' [eV], nkibz= ',edos%nkibz
  case (2)
-   write(unt,'(a,i0)')'# Tetrahedron method, nkibz= ',edos%ebands%nkpt
+   write(unt,'(a,i0)')'# Tetrahedron method, nkibz= ',edos%nkibz
  case default
    MSG_ERROR(sjoin("Wrong method:", itoa(edos%intmeth)))
  end select
@@ -3506,7 +3554,7 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
 !scalars
  real(dp),intent(in) :: ecut_eff
  real(dp),intent(out) :: dksqmax
- logical :: force_istwfk1
+ logical,intent(in) :: force_istwfk1
  type(ebands_t),intent(in) :: inb
  type(ebands_t),intent(out) :: outb
  type(crystal_t),intent(in) :: cryst
@@ -3515,15 +3563,15 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: brav1=1,option0=0,istwfk_1=1
- integer :: mkpt,nkfull,timrev,bantot,sppoldbl,npw_k,nsppol,istw
- integer :: ik_ibz,ikf,isym,itimrev,spin,mband
+ integer,parameter :: istwfk_1=1,kptopt3=3
+ integer :: nkfull,timrev,bantot,sppoldbl,npw_k,nsppol,istw
+ integer :: ik_ibz,ikf,isym,itimrev,spin,mband,my_nkibz
  logical :: isirred_k
  !character(len=500) :: msg
 !arrays
  integer :: g0(3)
  integer,allocatable :: istwfk(:),nband(:,:),npwarr(:),kg_k(:,:)
- real(dp),allocatable :: kfull(:,:),doccde(:),eig(:),occ(:),wtk(:)
+ real(dp),allocatable :: kfull(:,:),doccde(:),eig(:),occ(:),wtk(:),my_kibz(:,:)
  real(dp),allocatable :: doccde_3d(:,:,:),eig_3d(:,:,:),occ_3d(:,:,:)
 
 ! *********************************************************************
@@ -3532,19 +3580,12 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
 
  nsppol = inb%nsppol
 
- ! Call smpbz to get the full grid of k-points `kfull`
- ! brav1=1 is able to treat all bravais lattices (same option used in getkgrid)
- mkpt= &
-    inb%kptrlatt(1,1)*inb%kptrlatt(2,2)*inb%kptrlatt(3,3) &
-   +inb%kptrlatt(1,2)*inb%kptrlatt(2,3)*inb%kptrlatt(3,1) &
-   +inb%kptrlatt(1,3)*inb%kptrlatt(2,1)*inb%kptrlatt(3,2) &
-   -inb%kptrlatt(1,2)*inb%kptrlatt(2,1)*inb%kptrlatt(3,3) &
-   -inb%kptrlatt(1,3)*inb%kptrlatt(2,2)*inb%kptrlatt(3,1) &
-   -inb%kptrlatt(1,1)*inb%kptrlatt(2,3)*inb%kptrlatt(3,2)
- mkpt = mkpt * inb%nshiftk
+ ! Note kptopt=3
+ call kpts_ibz_from_kptrlatt(cryst, inb%kptrlatt, kptopt3, inb%nshiftk, inb%shiftk, &
+   my_nkibz, my_kibz, wtk, nkfull, kfull) ! new_kptrlatt, new_shiftk)
 
- ABI_MALLOC(kfull, (3,mkpt))
- call smpbz(brav1,std_out,inb%kptrlatt,mkpt,nkfull,inb%nshiftk,option0,inb%shiftk,kfull)
+ ABI_FREE(my_kibz)
+ ABI_FREE(wtk)
 
  ! Costruct full BZ and create mapping BZ --> IBZ
  ! Note:
@@ -3554,13 +3595,12 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
  sppoldbl = 1 !; if (any(cryst%symafm == -1) .and. inb%nsppol == 1) sppoldbl=2
  ABI_MALLOC(bz2ibz, (nkfull*sppoldbl,6))
 
- timrev = 1; if (any(inb%kptopt == [3, 4])) timrev = 0
+ timrev = kpts_timrev_from_kptopt(inb%kptopt)
  call listkk(dksqmax,cryst%gmet,bz2ibz,inb%kptns,kfull,inb%nkpt,nkfull,cryst%nsym,&
    sppoldbl,cryst%symafm,cryst%symrel,timrev,use_symrec=.False.)
-   !sppoldbl,cryst%symafm,cryst%symrec,timrev,use_symrec=.True.)
 
  ABI_MALLOC(wtk, (nkfull))
- wtk = one/nkfull ! weights normalized to one
+ wtk = one / nkfull ! weights normalized to one
 
  ABI_MALLOC(istwfk, (nkfull))
  ABI_MALLOC(nband, (nkfull, nsppol))
@@ -3631,7 +3671,7 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
 
  call ebands_init(bantot,outb,inb%nelect,doccde,eig,istwfk,kfull,&
    nband,nkfull,npwarr,nsppol,inb%nspinor,inb%tphysel,inb%tsmear,inb%occopt,occ,wtk,&
-   inb%charge, inb%kptopt, inb%kptrlatt_orig, inb%nshiftk_orig, inb%shiftk_orig, inb%kptrlatt, inb%nshiftk, inb%shiftk)
+   inb%charge, kptopt3, inb%kptrlatt_orig, inb%nshiftk_orig, inb%shiftk_orig, inb%kptrlatt, inb%nshiftk, inb%shiftk)
 
  ABI_FREE(istwfk)
  ABI_FREE(nband)
@@ -3647,15 +3687,18 @@ end subroutine ebands_expandk
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/ebspline_init
+!!****f* m_ebands/ebspl_new
 !! NAME
-!! ebspline_init
+!! ebspl_new
 !!
 !! FUNCTION
-!! Build the ebspline_t object used to interpolate the band structure.
+!! Build the `ebspl_t` object used to interpolate the band structure.
 !!
 !! INPUTS
+!!  ords(3)=order of the spline for the three directions. ord(1) must be in [0, nkx] where
+!!    nkx is the number of points along the x-axis.
 !!  band_block(2)=Initial and final band index. If [0,0], all bands are used
+!!  spin_block(2)=Initial and final spin index. If [0,0], all bands are used
 !!
 !! OUTPUT
 !!
@@ -3668,14 +3711,13 @@ end subroutine ebands_expandk
 !!
 !! SOURCE
 
-subroutine ebspline_init(ebspl, ebands, cryst, band_block)
+type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block, spin_block) result(new)
 
- use m_bspline
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ebspline_init'
+#define ABI_FUNC 'ebspl_new'
  use interfaces_56_recipspace
 !End of the abilint section
 
@@ -3685,14 +3727,14 @@ subroutine ebspline_init(ebspl, ebands, cryst, band_block)
 !scalars
  type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
- type(ebspline_t),intent(out) :: ebspl
 !arrays
- integer,intent(in) :: band_block(2)
+ integer,intent(in) :: ords(3), band_block(2),spin_block(2)
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: sppoldbl1=1
  integer :: kxord,kyord,kzord,nxknot,nyknot,nzknot,ierr,nkfull,ikf
- integer :: spin,band,ik_ibz,sppoldbl,timrev,ix,iy,iz,nkx,nky,nkz
+ integer :: spin,band,ik_ibz,timrev,ix,iy,iz,nkx,nky,nkz
  real(dp) :: dksqmax
  character(len=500) :: msg
 !arrays
@@ -3716,11 +3758,7 @@ subroutine ebspline_init(ebspl, ebands, cryst, band_block)
    MSG_WARNING('Multiple shifts not allowed')
    ierr = ierr + 1
  end if
- if (any(ebands%shiftk(:,1) /= zero)) then
-   MSG_WARNING("shifted k-mesh are not tested")
-   ierr = ierr + 1
- end if
- if (any(ebands%nband(:) /= ebands%nband(1))) then
+ if (any(ebands%nband /= ebands%nband(1))) then
    MSG_WARNING("nband must be constant")
    ierr = ierr + 1
  end if
@@ -3729,7 +3767,9 @@ subroutine ebspline_init(ebspl, ebands, cryst, band_block)
    return
  end if
 
- ! Build BZ mesh Note that k-point coordinates are in [0, 1]
+ ! Build BZ mesh Note that:
+ ! 1) k-point coordinates are in [0, 1]
+ ! 2) The mesh is closed e.g. (0,0,0) and (1,1,1) are included
  ngkpt(1)=ebands%kptrlatt(1,1)
  ngkpt(2)=ebands%kptrlatt(2,2)
  ngkpt(3)=ebands%kptrlatt(3,3)
@@ -3739,15 +3779,15 @@ subroutine ebspline_init(ebspl, ebands, cryst, band_block)
  ABI_MALLOC(yvec, (nky))
  ABI_MALLOC(zvec, (nkz))
 
- ! TODO shiftk!
+ ! Multiple shifts are not supported here.
  do ix=1,nkx
-   xvec(ix) = (ix-1+ebands%shiftk(1,1)) / ngkpt(1)
+   xvec(ix) = (ix-one+ebands%shiftk(1,1)) / ngkpt(1)
  end do
  do iy=1,nky
-   yvec(iy) = (iy-1+ebands%shiftk(2,1)) / ngkpt(2)
+   yvec(iy) = (iy-one+ebands%shiftk(2,1)) / ngkpt(2)
  end do
  do iz=1,nkz
-   zvec(iz) = (iz-1+ebands%shiftk(3,1)) / ngkpt(3)
+   zvec(iz) = (iz-one+ebands%shiftk(3,1)) / ngkpt(3)
  end do
 
  ! Build list of k-points in full BZ (ordered as required by B-spline routines)
@@ -3764,12 +3804,11 @@ subroutine ebspline_init(ebspl, ebands, cryst, band_block)
  end do
 
  ! Build mapping kfull --> IBZ
- sppoldbl = 1
- ABI_MALLOC(bz2ibz, (nkfull*sppoldbl,6))
+ ABI_MALLOC(bz2ibz, (nkfull*sppoldbl1,6))
 
- timrev = 1; if (any(ebands%kptopt == [3, 4])) timrev = 0
+ timrev = kpts_timrev_from_kptopt(ebands%kptopt)
  call listkk(dksqmax,cryst%gmet,bz2ibz,ebands%kptns,kfull,ebands%nkpt,nkfull,cryst%nsym,&
-   sppoldbl,cryst%symafm,cryst%symrec,timrev,use_symrec=.True.)
+   sppoldbl1,cryst%symafm,cryst%symrec,timrev,use_symrec=.True.)
  ABI_FREE(kfull)
 
  if (dksqmax > tol12) then
@@ -3781,34 +3820,34 @@ subroutine ebspline_init(ebspl, ebands, cryst, band_block)
    MSG_ERROR(msg)
  end if
 
- ! Generate knots (order could be passed in input)
- kxord = nkx; nxknot = nkx + kxord
- kyord = nky; nyknot = nky + kyord
- kzord = nkz; nzknot = nkz + kzord
+ ! Generate knots (ords is input)
+ kxord = ords(1); kyord = ords(2); kzord = ords(3)
+ nxknot = nkx + kxord
+ nyknot = nky + kyord
+ nzknot = nkz + kzord
 
- ebspl%nkx = nkx; ebspl%kxord = kxord
- ebspl%nky = nky; ebspl%kyord = kyord
- ebspl%nkz = nkz; ebspl%kzord = kzord
+ new%nkx = nkx; new%kxord = kxord
+ new%nky = nky; new%kyord = kyord
+ new%nkz = nkz; new%kzord = kzord
 
- ABI_MALLOC(ebspl%xknot,(nxknot))
- ABI_MALLOC(ebspl%yknot,(nyknot))
- ABI_MALLOC(ebspl%zknot,(nzknot))
-
- call dbsnak (nkx, xvec, kxord, ebspl%xknot)
- call dbsnak (nky, yvec, kyord, ebspl%yknot)
- call dbsnak (nkz, zvec, kzord, ebspl%zknot)
+ ABI_MALLOC(new%xknot,(nxknot))
+ ABI_MALLOC(new%yknot,(nyknot))
+ ABI_MALLOC(new%zknot,(nzknot))
+ call dbsnak(nkx, xvec, kxord, new%xknot)
+ call dbsnak(nky, yvec, kyord, new%yknot)
+ call dbsnak(nkz, zvec, kzord, new%zknot)
 
  ABI_MALLOC(xyzdata,(nkx,nky,nkz))
-
- ABI_DT_MALLOC(ebspl%coeff, (ebands%mband,ebands%nsppol))
+ ABI_DT_MALLOC(new%coeff, (ebands%mband,ebands%nsppol))
+ new%band_block = band_block; if (all(band_block == 0)) new%band_block = [1, ebands%mband]
+ new%spin_block = spin_block; if (all(spin_block == 0)) new%spin_block = [1, ebands%nsppol]
 
  do spin=1,ebands%nsppol
+   if (spin < new%spin_block(1) .or. spin > new%spin_block(2)) cycle
    do band=1,ebands%mband
-     if (all(band_block /= 0)) then
-       if (band < band_block(1) .or. band > band_block(2)) cycle
-     end if
+     if (band < new%band_block(1) .or. band > new%band_block(2)) cycle
 
-     ABI_MALLOC(ebspl%coeff(band,spin)%vals, (nkx,nky,nkz))
+     ABI_MALLOC(new%coeff(band,spin)%vals, (nkx,nky,nkz))
 
      ! Build array in full bz to prepare call to dbs3in.
      ikf = 0
@@ -3823,8 +3862,8 @@ subroutine ebspline_init(ebspl, ebands, cryst, band_block)
      end do
 
      ! Construct 3D tensor for B-spline. Results in coeff(band,spin)%vals
-     call dbs3in(nkx,xvec,nky,yvec,nkz,zvec,xyzdata,nkx,nky,kxord,kyord,kzord,ebspl%xknot,ebspl%yknot,ebspl%zknot,&
-        ebspl%coeff(band,spin)%vals)
+     call dbs3in(nkx,xvec,nky,yvec,nkz,zvec,xyzdata,nkx,nky,kxord,kyord,kzord,new%xknot,new%yknot,new%zknot,&
+        new%coeff(band,spin)%vals)
    end do
  end do
 
@@ -3834,21 +3873,30 @@ subroutine ebspline_init(ebspl, ebands, cryst, band_block)
  ABI_FREE(bz2ibz)
  ABI_FREE(xyzdata)
 
-end subroutine ebspline_init
+end function ebspl_new
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/ebspline_evalk
+!!****f* m_ebands/ebspl_eval_bks
 !! NAME
-!! ebspline_evalk
+!! ebspl_eval_bks
 !!
 !! FUNCTION
+!!   Interpolate eigenvalues, 1st and 2nd derivates wrt k at an arbitrary k-point.
 !!
 !! INPUTS
-!!  band_block(2)=Initial and final band index.
+!!  band=Band index
+!!  kpt(3)=K-point in reduced coordinate (will be wrapped in the interval [0,1[
+!!  spin=Spin index
 !!
 !! OUTPUT
+!!  oeig=Interpolated eigenvalues.
+!!    Note that oeig is not necessarily sorted in ascending order.
+!!    The routine does not reorder the interpolated eigenvalues
+!!    to be consistent with the interpolation of the derivatives.
+!!  [oder1(3)]=First-order derivatives wrt k in reduced coordinates.
+!!  [oder2(3,3)]=Second-order derivatives wrt k in reduced coordinates.
 !!
 !! PARENTS
 !!      m_ebands
@@ -3859,57 +3907,82 @@ end subroutine ebspline_init
 !!
 !! SOURCE
 
-subroutine ebspline_evalk(ebspl, band_block, kpt, spin, oeig)
+subroutine ebspl_eval_bks(ebspl, band, kpt, spin, oeig, oder1, oder2)
 
- use m_bspline
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ebspline_evalk'
+#define ABI_FUNC 'ebspl_eval_bks'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer :: spin
- type(ebspline_t),intent(in) :: ebspl
+ integer,intent(in) :: band,spin
+ type(ebspl_t),intent(in) :: ebspl
 !arrays
- integer,intent(in) :: band_block(2)
  real(dp),intent(in) :: kpt(3)
- real(dp),intent(inout) :: oeig(:)
+ real(dp),intent(out) :: oeig
+ real(dp),optional,intent(out) :: oder1(3)
+ real(dp),optional,intent(out) :: oder2(3,3)
 
 !Local variables-------------------------------
 !scalars
- integer :: band,ib
+ integer :: ii,jj
 !arrays
+ integer :: iders(3)
  real(dp) :: kred(3),shift(3)
 
 ! *********************************************************************
 
- ABI_CHECK(size(oeig) >= (band_block(2) - band_block(1) + 1), "oeig too small")
+ DBG_CHECK(allocated(ebspl%coeff(band, spin)%vals), sjoin("Unallocated (band, spin):", ltoa([band, spin])))
 
  ! Wrap k-point in the interval [0,1[ where 1 is not included (tol12)
+ ! This is required because the spline has been constructed in this region.
  call wrap2_zero_one(kpt, kred, shift)
 
- ib = 0
- do band=band_block(1),band_block(2)
-   ib = ib +1
-   ! B-spline interpolation.
-   oeig(ib) = dbs3vl(kred(1), kred(2), kred(3), ebspl%kxord, ebspl%kyord, ebspl%kzord,&
-                     ebspl%xknot, ebspl%yknot, ebspl%zknot, ebspl%nkx, ebspl%nky, ebspl%nkz,&
-                     ebspl%coeff(band,spin)%vals)
- end do
+ ! B-spline interpolation.
+ oeig = dbs3vl(kred(1), kred(2), kred(3), ebspl%kxord, ebspl%kyord, ebspl%kzord, &
+               ebspl%xknot, ebspl%yknot, ebspl%zknot, ebspl%nkx, ebspl%nky, ebspl%nkz, &
+               ebspl%coeff(band,spin)%vals)
 
-end subroutine ebspline_evalk
+ if (present(oder1)) then
+   ! Compute first-order derivatives.
+   do ii=1,3
+     iders = 0; iders(ii) = 1
+     oder1(ii) = dbs3dr(iders(1), iders(2), iders(3), &
+                        kred(1), kred(2), kred(3), ebspl%kxord, ebspl%kyord, ebspl%kzord, &
+                        ebspl%xknot, ebspl%yknot, ebspl%zknot, ebspl%nkx, ebspl%nky, ebspl%nkz, &
+                        ebspl%coeff(band,spin)%vals)
+   end do
+ end if
+
+ if (present(oder2)) then
+   ! Compute second-order derivatives.
+   oder2 = zero
+   do jj=1,3
+     iders = 0; iders(jj) = 1
+     do ii=1,jj
+       iders(ii) = iders(ii) + 1
+       oder2(ii, jj) = dbs3dr(iders(1), iders(2), iders(3), &
+                        kred(1), kred(2), kred(3), ebspl%kxord, ebspl%kyord, ebspl%kzord, &
+                        ebspl%xknot, ebspl%yknot, ebspl%zknot, ebspl%nkx, ebspl%nky, ebspl%nkz, &
+                        ebspl%coeff(band,spin)%vals)
+       if (ii /= jj) oder2(jj, ii) = oder2(ii, jj)
+     end do
+   end do
+ end if
+
+end subroutine ebspl_eval_bks
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/ebspline_free
+!!****f* m_ebands/ebspl_free
 !! NAME
-!! ebspline_free
+!! ebspl_free
 !!
 !! FUNCTION
 !!  Free dynamic memory.
@@ -3923,20 +3996,20 @@ end subroutine ebspline_evalk
 !!
 !! SOURCE
 
-subroutine ebspline_free(ebspl)
+subroutine ebspl_free(ebspl)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ebspline_free'
+#define ABI_FUNC 'ebspl_free'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- type(ebspline_t),intent(inout) :: ebspl
+ type(ebspl_t),intent(inout) :: ebspl
 
 !Local variables-------------------------------
 !scalars
@@ -3944,15 +4017,6 @@ subroutine ebspline_free(ebspl)
 
 ! *********************************************************************
 
- !if (allocated(ebspl%xvec)) then
- !  ABI_FREE(ebspl%xvec)
- !end if
- !if (allocated(ebspl%yvec)) then
- !  ABI_FREE(ebspl%yvec)
- !end if
- !if (allocated(ebspl%zvec)) then
- !  ABI_FREE(ebspl%zvec)
- !end if
  if (allocated(ebspl%xknot)) then
    ABI_FREE(ebspl%xknot)
  end if
@@ -3975,7 +4039,7 @@ subroutine ebspline_free(ebspl)
    ABI_DT_FREE(ebspl%coeff)
  end if
 
-end subroutine ebspline_free
+end subroutine ebspl_free
 !!***
 
 !----------------------------------------------------------------------
@@ -3996,88 +4060,69 @@ end subroutine ebspline_free
 !!
 !! SOURCE
 
-type(ebands_t) function ebands_bspline(ebands, cryst, new_kptrlatt, new_nshiftk, new_shiftk) result(new)
+type(ebands_t) function ebands_bspline(ebands, cryst, ords, bspl_kptrlatt, bspl_nshiftk, bspl_shiftk, comm) result(new)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_bspline'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(inout) :: new_nshiftk
+ integer,intent(in) :: bspl_nshiftk,comm
  type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
 !arrays
- integer,intent(inout) :: new_kptrlatt(3,3)
- real(dp),intent(inout) :: new_shiftk(3,new_nshiftk)
+ integer,intent(in) :: ords(3),bspl_kptrlatt(3,3)
+ real(dp),intent(in) :: bspl_shiftk(3,bspl_nshiftk)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: iout0=0,chksymbreak0=0,iscf2=2
- integer :: ik_ibz,spin,new_bantot,new_nkpt,nsppol,new_mband,nkpt_computed,kptopt
- real(dp) :: kptrlen
- type(ebspline_t) :: ebspl
+ integer :: ik_ibz,spin,new_bantot,new_mband,kptopt
+ integer :: nprocs,my_rank,cnt,ierr,band,new_nkbz,new_nkibz,new_nshiftk
+ type(ebspl_t) :: ebspl
 !arrays
- integer,parameter :: band_block0(2)=[0,0],vacuum0(3)=[0,0,0]
- integer :: kptrlatt_orig(3,3)
+ integer :: new_kptrlatt(3,3)
  integer,allocatable :: new_istwfk(:),new_nband(:,:),new_npwarr(:)
- real(dp) :: mynew_shiftk(3,210)
- real(dp),allocatable :: new_kpts(:,:),new_doccde(:),new_eig(:),new_occ(:),new_wtk(:)
+ real(dp),allocatable :: new_shiftk(:,:),new_kibz(:,:),new_kbz(:,:),new_wtk(:)
+ real(dp),allocatable :: new_doccde(:),new_eig(:),new_occ(:)
 
 ! *********************************************************************
 
- nsppol = ebands%nsppol; kptrlatt_orig = ebands%kptrlatt; kptopt = ebands%kptopt
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- ! First call to getkgrid to obtain the number of new_kpts.
- ! TODO: write wrapper
- ABI_MALLOC(new_kpts, (3,0))
- ABI_MALLOC(new_wtk, (0))
+ kptopt = ebands%kptopt
 
- ! Be careful as getkgrid expects shiftk(3,8).
- mynew_shiftk = zero; mynew_shiftk(:,1:new_nshiftk) = new_shiftk
- ABI_CHECK(new_nshiftk > 0 .and. new_nshiftk <=210, "new_nshiftk must be in [1,210]")
-
- call getkgrid(chksymbreak0,iout0,iscf2,new_kpts,kptopt,new_kptrlatt,kptrlen,&
-   cryst%nsym,0,new_nkpt,new_nshiftk,cryst%nsym,cryst%rprimd,mynew_shiftk,cryst%symafm,cryst%symrel,vacuum0,new_wtk)
-
- ABI_FREE(new_kpts)
- ABI_FREE(new_wtk)
-
- ! Recall getkgrid to get new_kpts and new_wtk.
- ABI_MALLOC(new_kpts,(3,new_nkpt))
- ABI_MALLOC(new_wtk,(new_nkpt))
-
- call getkgrid(chksymbreak0,iout0,iscf2,new_kpts,kptopt,new_kptrlatt,kptrlen,&
-   cryst%nsym,new_nkpt,nkpt_computed,new_nshiftk,cryst%nsym,cryst%rprimd,mynew_shiftk,&
-   cryst%symafm,cryst%symrel,vacuum0,new_wtk)
- new_shiftk = mynew_shiftk(:,1:new_nshiftk)
+ ! Get ibz, new shifts and new kptrlatt.
+ call kpts_ibz_from_kptrlatt(cryst, bspl_kptrlatt, ebands%kptopt, bspl_nshiftk, bspl_shiftk, &
+   new_nkibz, new_kibz, new_wtk, new_nkbz, new_kbz, new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
+ new_nshiftk = size(new_shiftk, dim=2)
 
  ! Initialize new ebands_t in new IBZ
- ABI_MALLOC(new_istwfk, (new_nkpt))
+ ABI_MALLOC(new_istwfk, (new_nkibz))
  new_istwfk = 1
- ABI_MALLOC(new_nband, (new_nkpt, nsppol))
+ ABI_MALLOC(new_nband, (new_nkibz, ebands%nsppol))
  new_nband = ebands%mband
- ABI_MALLOC(new_npwarr, (new_nkpt))
+ ABI_MALLOC(new_npwarr, (new_nkibz))
  new_npwarr = maxval(ebands%npwarr)
  new_bantot = sum(new_nband); new_mband = maxval(new_nband)
  ABI_MALLOC(new_doccde, (new_bantot))
  ABI_MALLOC(new_eig, (new_bantot))
  ABI_MALLOC(new_occ, (new_bantot))
 
- call ebands_init(new_bantot,new,ebands%nelect,new_doccde,new_eig,new_istwfk,new_kpts,&
-   new_nband,new_nkpt,new_npwarr,ebands%nsppol,ebands%nspinor,ebands%tphysel,ebands%tsmear,&
+ call ebands_init(new_bantot,new,ebands%nelect,new_doccde,new_eig,new_istwfk,new_kibz,&
+   new_nband,new_nkibz,new_npwarr,ebands%nsppol,ebands%nspinor,ebands%tphysel,ebands%tsmear,&
    ebands%occopt,new_occ,new_wtk,&
-   ebands%charge, kptopt, kptrlatt_orig, ebands%nshiftk, ebands%shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
+   ebands%charge, kptopt, bspl_kptrlatt, bspl_nshiftk, bspl_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
 
- ABI_FREE(new_kpts)
+ ABI_FREE(new_kibz)
  ABI_FREE(new_wtk)
-
+ ABI_FREE(new_shiftk)
+ ABI_FREE(new_kbz)
  ABI_FREE(new_istwfk)
  ABI_FREE(new_nband)
  ABI_FREE(new_npwarr)
@@ -4085,26 +4130,31 @@ type(ebands_t) function ebands_bspline(ebands, cryst, new_kptrlatt, new_nshiftk,
  ABI_FREE(new_eig)
  ABI_FREE(new_occ)
 
- ! Build B-spline object.
- call ebspline_init(ebspl, ebands, cryst, band_block0)
+ ! Build B-spline object for all bands
+ ebspl = ebspl_new(ebands, cryst, ords, [1, ebands%mband], [0,0])
 
  ! Spline eigenvalues.
+ new%eig = zero; cnt = 0
  do spin=1,new%nsppol
    do ik_ibz=1,new%nkpt
-     call ebspline_evalk(ebspl, band_block0, new%kptns(:,ik_ibz), spin, new%eig(:,ik_ibz,spin))
+     do band=1,new%nband(ik_ibz+(spin-1)*new%nkpt)
+       cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle  ! Mpi parallelism.
+       call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
+     end do
    end do
  end do
+ call xmpi_sum(new%eig, comm, ierr)
 
- call ebspline_free(ebspl)
+ call ebspl_free(ebspl)
 
 end function ebands_bspline
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/ebands_jdos
+!!****f* m_ebands/ebands_get_jdos
 !! NAME
-!! ebands_jdos
+!! ebands_get_jdos
 !!
 !! FUNCTION
 !!  Compute the joint density of states.
@@ -4112,7 +4162,7 @@ end function ebands_bspline
 !! INPUTS
 !!  ebands<ebands_t>=Band structure object.
 !!  cryst<cryst_t>=Info on the crystalline structure.
-!!  intmeth= 1 for gaussian, 2 for tetra
+!!  intmeth= 1 for gaussian, 2 or 3 for tetrahedrons (3 if Blochl corrections must be included).
 !!  step=Step on the linear mesh in Ha. If <0, the routine will use the mean of the energy level spacing
 !!  broad=Gaussian broadening, If <0, the routine will use a default
 !!    value for the broadening computed from the mean of the energy level spacing.
@@ -4130,15 +4180,13 @@ end function ebands_bspline
 !!
 !! SOURCE
 
-subroutine ebands_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
+subroutine ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ebands_jdos'
- use interfaces_32_util
- use interfaces_56_recipspace
+#define ABI_FUNC 'ebands_get_jdos'
 !End of the abilint section
 
  implicit none
@@ -4153,8 +4201,7 @@ subroutine ebands_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: bcorr0=0
- integer :: ik_ibz,ibc,ibv,spin,iw,nw,nband_k,nbv,nproc,my_rank,nbz,nibz,cnt,mpierr,unt
+ integer :: ik_ibz,ibc,ibv,spin,iw,nw,nband_k,nbv,nproc,my_rank,nkibz,cnt,mpierr,unt,bcorr
  real(dp) :: wtk,wmax,wstep,wbroad
  type(stats_t) :: ediffs
  type(t_tetrahedron) :: tetra
@@ -4163,16 +4210,15 @@ subroutine ebands_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
  character(len=fnlen) :: path
 !arrays
  integer :: val_idx(ebands%nkpt,ebands%nsppol)
- integer,allocatable :: bz2ibz(:)
- real(dp) :: qlatt(3,3),rlatt(3,3)
  real(dp) :: eminmax(2,ebands%nsppol)
- real(dp),allocatable :: jdos(:,:),wmesh(:),cvmw(:),fullbz(:,:)
- real(dp),allocatable :: bdelta(:,:),btheta(:,:)
+ real(dp),allocatable :: jdos(:,:),wmesh(:),cvmw(:),wdt(:,:)
 
 ! *********************************************************************
 
  ierr = 0
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ nkibz = ebands%nkpt
 
  ! Find the valence band index for each k and spin ===
  val_idx = get_valence_idx(ebands)
@@ -4226,95 +4272,49 @@ subroutine ebands_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
    ABI_FREE(cvmw)
    call xmpi_sum(jdos, comm, mpierr)
 
- case (2)
+ case (2, 3)
    ! Tetrahedron method
-   ! consistency test: return immediately if cannot use tetra.
-   if (ebands%nkpt<2) then
-     MSG_WARNING('at least 2 points are needed for tetrahedrons')
-     ierr = ierr + 1
-   end if
    if (any(ebands%nband /= ebands%nband(1)) ) then
      MSG_WARNING('for tetrahedrons, nband(:) must be constant')
      ierr = ierr + 1
    end if
-   if (ebands%nshiftk>1) then
-     MSG_WARNING(sjoin("for tetrahedrons, nshiftk must be (0,1) but found: ",itoa(ebands%nshiftk)))
-     ierr = ierr + 1
-   end if
    if (ierr/=0) return
 
-   ! convert kptrlatt to double and invert.
-   rlatt = dble(ebands%kptrlatt)
-   call matr3inv(rlatt,qlatt)  ! qlatt refers to the shortest qpt vectors.
-
-   ! Calculate total number of k-points in the full BZ
-   nbz = &
-      ebands%kptrlatt(1,1)*ebands%kptrlatt(2,2)*ebands%kptrlatt(3,3) &
-     +ebands%kptrlatt(1,2)*ebands%kptrlatt(2,3)*ebands%kptrlatt(3,1) &
-     +ebands%kptrlatt(1,3)*ebands%kptrlatt(2,1)*ebands%kptrlatt(3,2) &
-     -ebands%kptrlatt(1,2)*ebands%kptrlatt(2,1)*ebands%kptrlatt(3,3) &
-     -ebands%kptrlatt(1,3)*ebands%kptrlatt(2,2)*ebands%kptrlatt(3,1) &
-     -ebands%kptrlatt(1,1)*ebands%kptrlatt(2,3)*ebands%kptrlatt(3,2)
-   nbz = nbz * ebands%nshiftk
-
-   ABI_MALLOC(bz2ibz,(nbz))
-   ABI_MALLOC(fullbz,(3, nbz))
-   nibz = ebands%nkpt
-
-   ! === Make full kpoint grid and get equivalence to irred kpoints ===
-   ! * Note: This routines scales badly wrt Kmesh%nbz
-   ! TODO should be rewritten, pass kptopt and test whether listkk is faster.
-   call get_full_kgrid(bz2ibz,ebands%kptns,fullbz,ebands%kptrlatt,nibz,nbz,ebands%nshiftk,&
-     cryst%nsym,ebands%shiftk,cryst%symrel)
-
-   if (ierr == 0) then
-     call init_tetra(bz2ibz, cryst%gprimd, qlatt, fullbz, nbz, tetra, ierr, errstr)
-     if (ierr/=0) MSG_WARNING(errstr)
+   tetra = tetra_from_kptrlatt(cryst, ebands%kptopt, ebands%kptrlatt, &
+     ebands%nshiftk, ebands%shiftk, ebands%nkpt, ebands%kptns, msg, ierr)
+   if (ierr/=0) then
+     call destroy_tetra(tetra); return
    end if
-   ABI_FREE(bz2ibz)
-   ABI_FREE(fullbz)
-
-   !call tetra_from_kptrlatt(tetra, cryst, ebands%kptopt, ebands%kptrlatt, &
-   !  ebands%nshiftk, ebands%shiftk, ebands%nkpt, ebands%kptns)
-
-   if (ierr /= 0) return
 
    ! For each spin and band, interpolate over kpoints,
    ! calculate integration weights and DOS contribution.
-   ABI_MALLOC(cvmw, (nibz))
-   ABI_MALLOC(btheta, (nw, nibz))
-   ABI_MALLOC(bdelta, (nw, nibz))
+   ABI_MALLOC(cvmw, (nkibz))
+   ABI_MALLOC(wdt, (nw, 2))
 
+   bcorr = 0; if (intmeth == 3) bcorr = 1
    cnt = 0
    do spin=1,ebands%nsppol
      nbv = val_idx(1, spin)
      do ibv=1,nbv
        do ibc=nbv+1,ebands%mband
-         cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
          ! For each (c,v) get its contribution
          cvmw = ebands%eig(ibc,:,spin) - ebands%eig(ibv,:,spin)
+         do ik_ibz=1,ebands%nkpt
+           cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle  ! mpi-parallelism
 
-         ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223)
-         call tetra_blochl_weights(tetra,cvmw,wmesh(0),wmesh(nw),one,nw,nibz,bcorr0,&
-           btheta,bdelta,xmpi_comm_self)
-
-         do ik_ibz=1,nibz
-           do iw=1,nw
-             jdos(iw,spin) = jdos(iw,spin) + bdelta(iw, ik_ibz)
-           end do
+           ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223)
+           call tetra_get_onewk(tetra, ik_ibz, bcorr, nw, ebands%nkpt, cvmw, wmesh(0), wmesh(nw), one, wdt)
+           jdos(:,spin) = jdos(:,spin) + wdt(:, 1)
          end do
-
        end do ! ibc
      end do ! ibv
-   end do !spin
+   end do ! spin
 
    call xmpi_sum(jdos, comm, mpierr)
 
    ! Free memory
-   ABI_FREE(btheta)
-   ABI_FREE(bdelta)
+   ABI_FREE(wdt)
    ABI_FREE(cvmw)
-
    call destroy_tetra(tetra)
 
  case default
@@ -4338,7 +4338,7 @@ subroutine ebands_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
  ABI_FREE(wmesh)
  ABI_FREE(jdos)
 
-end subroutine ebands_jdos
+end subroutine ebands_get_jdos
 !!***
 
 !----------------------------------------------------------------------
@@ -4348,7 +4348,7 @@ end subroutine ebands_jdos
 !! ebands_prtbltztrp
 !!
 !! FUNCTION
-!!   output files for BoltzTraP code, which integrates Boltzmann transport quantities
+!!   Output files for BoltzTraP code, which integrates Boltzmann transport quantities
 !!   over the Fermi surface for different T and chemical potentials. Abinit provides
 !!   all necessary input files: struct, energy, input file, and def file for the unit
 !!   definitions of fortran files in BT.
@@ -4400,6 +4400,9 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
  character(len=3) :: spinsuffix(ebands%nsppol)
 
 ! *************************************************************************
+
+ !MG FIXME The number of electrons is wrong if the file is produced in a NSCF run.
+ ! See http://forum.abinit.org/viewtopic.php?f=19&t=3339
 
  nelec = ebands_nelect_per_spin(ebands)
  nsppol = ebands%nsppol
@@ -4488,7 +4491,6 @@ subroutine ebands_prtbltztrp(ebands, crystal, fname_radix, tau_k)
  write (iout, '(3E20.10)') crystal%rprimd(:,1)
  write (iout, '(3E20.10)') crystal%rprimd(:,2)
  write (iout, '(3E20.10)') crystal%rprimd(:,3)
-
  write (iout, '(I7)') crystal%nsym
 
  do isym=1,crystal%nsym
@@ -4767,5 +4769,144 @@ subroutine ebands_prtbltztrp_tau_out (eigen, tempermin, temperinc, ntemper, ferm
 end subroutine ebands_prtbltztrp_tau_out
 !!***
 
-END MODULE m_ebands
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/ebands_write_xmgrace
+!! NAME
+!! ebands_write_xmgrace
+!!
+!! FUNCTION
+!!  Write bands in Xmgrace format. This routine should be called by a single processor.
+!!
+!! INPUTS
+!!  path=Filename
+!!  [kptbounds(:,:)]=Optional argument giving the extrema of the k-path.
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ebands_write_xmgrace(ebands, path, kptbounds)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ebands_write_xmgrace'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(ebands_t),intent(in) :: ebands
+ character(len=*),intent(in) :: path
+ real(dp),optional,intent(in) :: kptbounds(:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: unt,ik,spin,band,ii,start,nkbounds
+ character(len=500) :: msg
+!arrays
+ integer :: g0(3)
+ integer,allocatable :: bounds2kpt(:)
+
+! *********************************************************************
+
+ nkbounds = 0
+ if (present(kptbounds)) then
+   ! Find correspondence between kptbounds and k-points in ebands.
+   nkbounds = size(kptbounds, dim=2)
+   ABI_MALLOC(bounds2kpt, (nkbounds))
+   bounds2kpt = 1
+   do ii=1,nkbounds
+      start = 1
+      do ik=start,ebands%nkpt
+        if (isamek(ebands%kptns(:, ik), kptbounds(:, ii), g0)) then
+          bounds2kpt(ii) = ik; start = ik + 1; exit
+        end if
+      end do
+   end do
+ end if
+
+ if (open_file(path, msg, newunit=unt, form="formatted", action="write") /= 0) then
+   MSG_ERROR(msg)
+ end if
+
+ write(unt,'(a)') "# Grace project file"
+ write(unt,'(a)') "# Generated by Abinit"
+ write(unt,'(4(a,i0))') &
+   "# mband: ",ebands%mband,", nkpt: ",ebands%nkpt,", nsppol: ",ebands%nsppol,", nspinor: ",ebands%nspinor
+ write(unt,'(a,f8.2,a,i0,2(a,f8.2))') &
+   "# nelect: ",ebands%nelect,", occopt: ",ebands%occopt,", tsmear: ",ebands%tsmear,", tphysel: ",ebands%tphysel
+ write(unt,'(a,f8.2,a)') "# Energies are in eV. Zero set to efermi: ",ebands%fermie, " [Ha]"
+ write(unt,'(a)')"# List of k-points and their index (C notation i.e. count from 0)"
+ do ik=1,ebands%nkpt
+   write(unt, "(a)")sjoin("#", itoa(ik-1), ktoa(ebands%kptns(:,ik)))
+ end do
+ !write(unt,'(a)') "@version 50113"
+ write(unt,'(a)') "@page size 792, 612"
+ write(unt,'(a)') "@page scroll 5%"
+ write(unt,'(a)') "@page inout 5%"
+ write(unt,'(a)') "@link page off"
+ write(unt,'(a)') "@with g0"
+ write(unt,'(a)') "@world xmin 0.00"
+ write(unt,'(a,i0)') '@world xmax ',ebands%nkpt
+ write(unt,'(a,e16.8)') '@world ymin ',minval((ebands%eig - ebands%fermie) * Ha_eV)
+ write(unt,'(a,e16.8)') '@world ymax ',maxval((ebands%eig - ebands%fermie) * Ha_eV)
+ write(unt,'(a)') '@default linewidth 1.5'
+ write(unt,'(a)') '@xaxis  tick on'
+ write(unt,'(a)') '@xaxis  tick major 1'
+ write(unt,'(a)') '@xaxis  tick major color 1'
+ write(unt,'(a)') '@xaxis  tick major linestyle 3'
+ write(unt,'(a)') '@xaxis  tick major grid on'
+ write(unt,'(a)') '@xaxis  tick spec type both'
+ write(unt,'(a)') '@xaxis  tick major 0, 0'
+ ! TODO: Test whether this is ok.
+ if (nkbounds /= 0) then
+   write(unt,'(a,i0)') '@xaxis  tick spec ',nkbounds
+   do ik=1,nkbounds
+      write(unt,'(a,i0,a,a)') '@xaxis  ticklabel ',ik-1,',', "foo"
+      write(unt,'(a,i0,a,i0)') '@xaxis  tick major ',ik-1,' , ',bounds2kpt(ik)
+   end do
+ end if
+ write(unt,'(a)') '@xaxis  ticklabel char size 1.500000'
+ write(unt,'(a)') '@yaxis  tick major 10'
+ write(unt,'(a)') '@yaxis  label "Band Energy [eV]"'
+ write(unt,'(a)') '@yaxis  label char size 1.500000'
+ write(unt,'(a)') '@yaxis  ticklabel char size 1.500000'
+ ii = -1
+ do spin=1,ebands%nsppol
+   do band=1,ebands%mband
+     ii = ii + 1
+     write(unt,'(a,i0,a,i0)') '@    s',ii,' line color ',spin
+   end do
+ end do
+ ii = -1
+ do spin=1,ebands%nsppol
+   do band=1,ebands%mband
+     ii = ii + 1
+     write(unt,'(a,i0)') '@target G0.S',ii
+     write(unt,'(a)') '@type xy'
+     do ik=1,ebands%nkpt
+        write(unt,'(i0,1x,e16.8)') ik-1, (ebands%eig(band, ik, spin) - ebands%fermie) * Ha_eV
+     end do
+     write(unt,'(a)') '&'
+   end do
+ end do
+
+ close(unt)
+
+ if (allocated(bounds2kpt)) then
+   ABI_FREE(bounds2kpt)
+ end if
+
+end subroutine ebands_write_xmgrace
+!!***
+
+end module m_ebands
 !!***

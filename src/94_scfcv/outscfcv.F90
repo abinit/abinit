@@ -1100,7 +1100,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Optionally provide Xcrysden output for the Fermi surface (Only master writes)
  if (dtset%prtfsurf==1.and.me==master) then
    if (ebands_write_bxsf(ebands,crystal,dtfil%fnameabo_app_bxsf) /= 0) then
-     MSG_WARNING("Cannot produce file for Fermi surface, see log file for more info")
+     message = "Cannot produce BXSF file with Fermi surface, see log file for more info"
+     MSG_WARNING(message)
+     call wrtout(ab_out, message)
    end if
  end if ! prtfsurf==1
 
@@ -1128,20 +1130,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (dtset%prtbltztrp == 1 .and. me==master) then
    call ebands_prtbltztrp(ebands, crystal, dtfil%filnam_ds(4))
  end if
-
-#if 0
- ! Gaussian
- call ebands_jdos(ebands,crystal,1,zero,zero,spacecomm,ierr)
- ! Tetra
- call ebands_jdos(ebands,crystal,2,zero,zero,spacecomm,ierr)
-
- !new_ebands = ebands_bspline(ebands, cryst, new_kptrlatt, new_nshiftk, new_shiftk)
- !call ebands_jdos(new_bands,crystal,2,zero,zero,spacecomm,ierr)
- !call ebands_free(new_bands)
-
- call skw_init(skw, crystal, 1, bands%mband, bands%nkpt, bands%nsppol, bands%kptns, bands%eig)
- call skw_free(skw)
-#endif
 
  call crystal_free(crystal)
  call ebands_free(ebands)

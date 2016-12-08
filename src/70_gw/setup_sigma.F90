@@ -123,8 +123,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  integer :: mod10,mod100,mqmem,mband,ng_kss,nsheps,ikcalc2bz,ierr,gap_err,ng
  integer :: gwc_nfftot,gwx_nfftot,nqlwl,test_npwkss,my_rank,nprocs,ik,nk_found,ifo,timrev
  integer :: iqbz,isym,iq_ibz,itim,ic,pinv,ig1,ng_sigx,spin,gw_qprange !band
- real(dp),parameter :: OMEGASIMIN=0.01d0
- real(dp) :: domegas,domegasi,ucvol,tol_enedif
+ real(dp),parameter :: OMEGASIMIN=0.01d0,tol_enediff=0.001_dp*eV_Ha
+ real(dp) :: domegas,domegasi,ucvol
  logical,parameter :: linear_imag_mesh=.TRUE.
  logical :: ltest,remove_inv,changed,found
  character(len=500) :: msg
@@ -465,8 +465,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  gap_err = get_gaps(KS_BSt, gaps)
  call gaps_print(gaps, unit=std_out)
-
- call ebands_report_gap(KS_BSt,unit=std_out)
+ call ebands_report_gap(KS_BSt, unit=std_out)
 
  ABI_MALLOC(val_indeces,(KS_BSt%nkpt,KS_BSt%nsppol))
  val_indeces = get_valence_idx(KS_BSt)
@@ -494,18 +493,26 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! * maxbdgw and minbdgw are the Max and min band index for GW corrections over k-points.
  !   They are used to dimension the wavefunctions and to calculate the matrix elements.
  !
- if (Dtset%nkptgw==0) then
+ if (dtset%nkptgw==0) then
+   ! Use qp_range to select the interesting k-points and the corresponing bands.
+   !
+   !    0 --> Compute the QP corrections only for the fundamental and the optical gap.
+   ! +num --> Compute the QP corrections for all the k-points in the irreducible zone and include `num`
+   !           bands above and below the Fermi level.
+   ! -num --> Compute the QP corrections for all the k-points in the irreducible zone.
+   !          Include all occupied states and `num` empty states.
+
    call wrtout(std_out, "nkptgw == 0 ==> Automatic selection of k-points and bands for the corrections.")
-   if (gap_err /=0 .and. Dtset%gw_qprange==0) then
+   if (gap_err /=0 .and. dtset%gw_qprange==0) then
      msg = "Problem while computing the fundamental and optical gap (likely metal). Will replace gw_qprange=0 with gw_qprange=1"
      MSG_WARNING(msg)
-     Dtset%gw_qprange = 1
+     dtset%gw_qprange = 1
    end if
-   gw_qprange = Dtset%gw_qprange
+   gw_qprange = dtset%gw_qprange
 
    if (dtset%ucrpa>0) then
-     Dtset%nkptgw=Kmesh%nbz
-     Sigp%nkptgw =Dtset%nkptgw
+     dtset%nkptgw=Kmesh%nbz
+     Sigp%nkptgw =dtset%nkptgw
      ABI_MALLOC(Sigp%kptgw,(3,Sigp%nkptgw))
      ABI_MALLOC(Sigp%minbnd,(Sigp%nkptgw,Sigp%nsppol))
      ABI_MALLOC(Sigp%maxbnd,(Sigp%nkptgw,Sigp%nsppol))
@@ -515,8 +522,10 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
    else if (gw_qprange/=0) then
      ! Include all the k-points in the IBZ.
-     Dtset%nkptgw=Kmesh%nibz
-     Sigp%nkptgw =Dtset%nkptgw
+     ! Note that kptgw == ebands%kptns so we can use a single ik index in the loop over k-points
+     ! No need to map kptgw onto ebands%kptns.
+     dtset%nkptgw=Kmesh%nibz
+     Sigp%nkptgw =dtset%nkptgw
      ABI_MALLOC(Sigp%kptgw,(3,Sigp%nkptgw))
      ABI_MALLOC(Sigp%minbnd,(Sigp%nkptgw,Sigp%nsppol))
      ABI_MALLOC(Sigp%maxbnd,(Sigp%nkptgw,Sigp%nsppol))
@@ -526,6 +535,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
      if (gw_qprange>0) then
        ! All k-points: Add buffer of bands above and below the Fermi level.
+
        do spin=1,Sigp%nsppol
          do ik=1,Sigp%nkptgw
            Sigp%minbnd(ik,spin) = MAX(val_indeces(ik,spin) - gw_qprange, 1)
@@ -550,7 +560,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      ! we have compute the union of the k-points where the fundamental and the optical gaps are located.
      !
      ! Find the list of `interesting` kpoints.
-     ABI_CHECK(gap_err==0, "gap_err!=0")
+     ABI_CHECK(gap_err == 0, "gw_qprange 0 cannot be used because I cannot find the gap (gap_err !=0)")
      nk_found = 1; kpos(1) = gaps%fo_kpos(1,1)
 
      do spin=1,Sigp%nsppol
@@ -558,19 +568,17 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
          ik = gaps%fo_kpos(ifo, spin)
          found = .FALSE.; jj = 0
          do while (.not. found .and. jj < nk_found)
-           jj = jj + 1
-           found = (kpos(jj) == ik)
+           jj = jj + 1; found = (kpos(jj) == ik)
          end do
          if (.not. found) then
-           nk_found = nk_found + 1
-           kpos(nk_found) = ik
+           nk_found = nk_found + 1; kpos(nk_found) = ik
          end if
        end do
      end do
 
      ! Now we can define the list of k-points and the bands range.
-     Dtset%nkptgw=nk_found
-     Sigp%nkptgw =Dtset%nkptgw
+     dtset%nkptgw=nk_found
+     Sigp%nkptgw =dtset%nkptgw
 
      ABI_MALLOC(Sigp%kptgw,(3,Sigp%nkptgw))
      ABI_MALLOC(Sigp%minbnd,(Sigp%nkptgw,Sigp%nsppol))
@@ -587,15 +595,15 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
    end if
 
  else
-   ! * Treat only the k-points and bands specified in the input file.
-   Sigp%nkptgw=Dtset%nkptgw
+   ! Treat only the k-points and bands specified in the input file.
+   Sigp%nkptgw=dtset%nkptgw
    ABI_MALLOC(Sigp%kptgw,(3,Sigp%nkptgw))
    ABI_MALLOC(Sigp%minbnd,(Sigp%nkptgw,Sigp%nsppol))
    ABI_MALLOC(Sigp%maxbnd,(Sigp%nkptgw,Sigp%nsppol))
 
    do spin=1,Sigp%nsppol
-     Sigp%minbnd(:,spin)=Dtset%bdgw(1,:,spin)
-     Sigp%maxbnd(:,spin)=Dtset%bdgw(2,:,spin)
+     Sigp%minbnd(:,spin)=dtset%bdgw(1,:,spin)
+     Sigp%maxbnd(:,spin)=dtset%bdgw(2,:,spin)
    end do
 
    do ii=1,3
@@ -622,12 +630,11 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  ! * We will have to average the GW corrections over degenerate states if symsigma=1 is used.
  ! * KS states belonging to the same irreducible representation should be included in the basis set used for SCGW.
  if (Sigp%symsigma/=0 .or. mod100>=10) then
-   tol_enedif = 0.001/Ha_eV
    do isppol=1,Sigp%nsppol
      do ikcalc=1,Sigp%nkptgw
 
        if (has_IBZ_item(Kmesh,Sigp%kptgw(:,ikcalc),ikibz,G0)) then
-         call enclose_degbands(KS_BSt,ikibz,isppol,Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,tol_enedif)
+         call enclose_degbands(KS_BSt,ikibz,isppol,Sigp%minbnd(ikcalc,isppol),Sigp%maxbnd(ikcalc,isppol),changed,tol_enediff)
          if (changed) then
            write(msg,'(2(a,i0),2a,2(1x,i0))')&
 &            "Not all the degenerate states at ikcalc= ",ikcalc,", spin= ",isppol,ch10,&
