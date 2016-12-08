@@ -83,7 +83,7 @@ program multibinit
  real(dp) :: tsec(2)
  character(len=24) :: codename,start_datetime
  character(len=strlen) :: string
- character(len=fnlen) :: filnam(15),tmpfilename,name
+ character(len=fnlen) :: filnam(17),tmpfilename,name
  character(len=500) :: message
  type(multibinit_dataset_type) :: inp
  type(effective_potential_type) :: reference_effective_potential
@@ -195,10 +195,11 @@ program multibinit
 
 ! Read and treat the reference structure 
 !****************************************************************************************
+
 !Read the harmonics parts
  call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
 !Read the coefficient from fit
- if(filnam(4)/='')then
+ if(filnam(4)/=''.and.filnam(4)/='no')then
    call effective_potential_file_getType(filnam(4),filetype)
    if(filetype==3) then
      call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
@@ -228,7 +229,7 @@ program multibinit
 &   ' with NetCDF in order to fit the polynomial coefficients'
    call wrtout(std_out,message,'COLL') 
    call wrtout(ab_out,message,'COLL') 
-   if(filnam(5)/='')then
+   if(filnam(5)/=''.or.filnam(5)/='no')then
      call read_md_hist(filnam(5),hist)
    else
      write(message, '(3a)' )&

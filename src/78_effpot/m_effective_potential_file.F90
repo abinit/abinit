@@ -1769,6 +1769,7 @@ end subroutine system_getDimFromXML
  end do
  call xmpi_bcast(elastic3rd   ,master, comm, ierr)
  call xmpi_bcast(elastic_displacement ,master, comm, ierr)
+ call xmpi_bcast(has_anharmonics ,master, comm, ierr)
 
 !Fill somes others variables
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -1809,7 +1810,7 @@ call effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nph1l,comm,&
 &                             elastic3rd=elastic3rd,elastic_displacement=elastic_displacement,&
 &                             epsilon_inf=epsilon_inf,internal_strain=internal_strain,&
 &                             phonon_strain=phonon_strain,phfrq=phfrq,qpoints=qph1l,&
-&                             straincoupling=has_anharmonics,zeff=zeff)
+&                             has_strainCoupling=has_anharmonics,zeff=zeff)
 
 !DEALLOCATION OF ARRAYS
  ABI_DEALLOCATE(all_amu)

@@ -5,6 +5,7 @@
 !! m_fit_polynomial_coeff
 !!
 !! FUNCTION
+!!
 !! COPYRIGHT
 !! Copyright (C) 2010-2015 ABINIT group (AM)
 !! This file is distributed under the terms of the
@@ -33,6 +34,7 @@ module m_fit_polynomial_coeff
 
  public :: fit_polynomial_coeff_free
  public :: fit_polynomial_coeff_init
+!!***
 
 !!****t* m_fit_polynomial_coeff/fit_polynomial_coeff_type
 !! NAME

@@ -205,24 +205,20 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
  ABI_ALLOCATE(harmonics_terms%ifcs%cell,(3,nrpt))
  harmonics_terms%ifcs%cell(:,:) = ifcs%cell(:,:)
 
- if(present(nqpt))then
-   harmonics_terms%nqpt = nqpt
-   ABI_ALLOCATE(harmonics_terms%dynmat,(2,3,natom,3,natom,nqpt))
-   ABI_ALLOCATE(harmonics_terms%qpoints,(3,nqpt))
-   ABI_ALLOCATE(harmonics_terms%phfrq,(3*natom,nqpt))
-   harmonics_terms%dynmat = zero
-   harmonics_terms%qpoints = zero
-   harmonics_terms%phfrq = zero
-   if(present(dynmat))  harmonics_terms%dynmat(:,:,:,:,:,:) = dynmat(:,:,:,:,:,:)
-   if(present(qpoints)) harmonics_terms%qpoints(:,:) = qpoints(:,:)
-   if(present(phfrq))   harmonics_terms%phfrq(:,:) = phfrq(:,:)
+!Allocation of the dynamical matrix
+ harmonics_terms%nqpt = zero 
+ if(present(nqpt).and.present(dynmat).and.present(qpoints).and.present(phfrq))then
+   call harmonics_terms_setDynmat(dynmat,harmonics_terms,natom,nqpt,&
+&                                 harmonics_terms%phfrq,harmonics_terms%qpoints)
  end if
 
+!Allocation of the elastic constants
  harmonics_terms%elastic_constants = zero
  if (present(elastic_constants)) then
    harmonics_terms%elastic_constants = elastic_constants
  end if
 
+!Allication of the dielectric tensor
  harmonics_terms%epsilon_inf = zero
  if (present(epsilon_inf)) then
    harmonics_terms%epsilon_inf = epsilon_inf
@@ -232,6 +228,7 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
  ABI_ALLOCATE(harmonics_terms%zeff,(3,3,natom))
  harmonics_terms%zeff = zero 
  if (present(zeff)) then
+   call harmonics_terms_setEffectiveCharges(harmonics_terms,natom,zeff)
    harmonics_terms%zeff = zeff
  end if
 
@@ -239,7 +236,7 @@ subroutine harmonics_terms_init(harmonics_terms,ifcs,natom,nrpt,&
  ABI_ALLOCATE(harmonics_terms%internal_strain,(6,3,natom))
  harmonics_terms%internal_strain = zero
  if (present(internal_strain)) then
-   harmonics_terms%internal_strain(:,:,:) = internal_strain(:,:,:)
+   call harmonics_terms_setInternalStrain(internal_strain,harmonics_terms,natom)
  end if
 
 end subroutine harmonics_terms_init 
@@ -551,7 +548,6 @@ subroutine harmonics_terms_setDynmat(dynmat,harmonics_terms,natom,nqpt,phfrq,qpo
 
   ABI_ALLOCATE(harmonics_terms%qpoints,(3,nqpt))
   harmonics_terms%qpoints(:,:) = qpoints(:,:)
-
 
 end subroutine harmonics_terms_setDynmat
 !!***

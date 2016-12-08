@@ -888,7 +888,7 @@ real(dp) :: rmet(3,3)
      end do
 
      ! check dilatmx here and correct if necessary
-     if (need_scfcv_cycle.and.scfcv_args%dtset%usewvl == 0) then
+     if (scfcv_args%dtset%usewvl == 0) then
        call chkdilatmx(scfcv_args%dtset%dilatmx,rprimd,scfcv_args%dtset%rprimd_orig(1:3,1:3,1),&
 &                      dilatmx_errmsg)
        _IBM6("dilatxm_errmsg: "//TRIM(dilatmx_errmsg))

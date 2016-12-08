@@ -216,7 +216,7 @@ implicit none
    dtset%bmass = inp%bmass  ! Barostat mass
    dtset%nctime = 0     ! NetCdf TIME between output of molecular dynamics informations 
    dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
-   dtset%dilatmx = 1.05   ! DILATation : MaXimal value
+   dtset%dilatmx = 1.01   ! DILATation : MaXimal value
    dtset%dtion = inp%dtion  ! Delta Time for IONs
    dtset%diismemory = 8 ! Direct Inversion in the Iterative Subspace MEMORY
    dtset%friction = 0.0001 ! internal FRICTION coefficient
@@ -255,7 +255,7 @@ implicit none
      ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
      dtset%qmass = inp%qmass
    end if
-   dtset%strtarget(:) = -1/29421.033d0 ! STRess TARGET
+   dtset%strtarget(:) = -5/29421.033d0 ! STRess TARGET
    ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
    symrel = one
    call alloc_copy(symrel,dtset%symrel)
@@ -331,8 +331,8 @@ implicit none
      effective_potential%strain = strain
      effective_potential%has_strain = .FALSE.
      call strain_print(effective_potential%strain)
-    call strain_apply(effective_potential%supercell%rprimd_supercell,dtset%rprimd_orig(:,:,1),&
-&                     effective_potential%strain)
+     call strain_apply(effective_potential%supercell%rprimd_supercell,dtset%rprimd_orig(:,:,1),&
+&                      effective_potential%strain)
    end if
  
    

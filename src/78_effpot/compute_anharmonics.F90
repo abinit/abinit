@@ -60,14 +60,14 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
  !Arguments ------------------------------------
  !scalars
   integer, intent(in) :: comm
-  character(len=fnlen),intent(in) :: filenames(15)
+  character(len=fnlen),intent(in) :: filenames(17)
   type(effective_potential_type),target, intent(inout) :: eff_pot
   type(multibinit_dataset_type),intent(in) :: inp
  !arrays
 
  !Local variables-------------------------------
  !scalar
-  integer :: ia,ii,irpt,jj,kk,my_rank,natom
+  integer :: ia,ii,ierr,irpt,jj,kk,my_rank,natom
   integer :: nfile,nrpt,nproc
   real(dp) :: delta,delta1,delta2
   character(len=500) :: message
@@ -88,7 +88,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 
  ! *************************************************************************
 
-  write(message,'(a,a,(80a))') ('=',ii=1,80),ch10
+  write(message,'(a,(80a),a)') ch10,('=',ii=1,80),ch10
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
 
@@ -104,7 +104,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
  !0)Initialisation of variables:
 ! Set MPI local varibaless
   nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
-  iam_master = (eff_pot%me_supercell == master)
+  iam_master = (my_rank == master)
  
  !==========================================
  !1) Get the list of files
@@ -112,7 +112,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   jj = 6
   do while (jj < 18) 
     if (filenames(jj)/="") then 
-      if(jj==4) nfile = 1
+      if(jj==6) nfile = 1
       write(message, '(a,a)' )'  - ',trim(filenames(jj))
       call wrtout(std_out,message,'COLL')
       call wrtout(ab_out,message,'COLL') 
@@ -123,7 +123,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
     end if
   end do
 
-  if(nfile==1) then
+  if(nfile==0) then
     write(message,'(a)') '  - No file found -'
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
@@ -174,44 +174,51 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   end do
 
   !Do some checks
+  if(iam_master)then
+    do ii=1,size(eff_pots)
+      if (eff_pots(ii)%harmonics_terms%ifcs%nrpt/=ref_eff_pot%harmonics_terms%ifcs%nrpt) then
+        write(message,'(a,I5,a,a,a,a,a,I5,a,a,a,a)' )&
+&      'the number of cell in reference  (',ref_eff_pot%harmonics_terms%ifcs%nrpt,&
+&       ') is not equal to the  ',ch10,'the number of cell  in',trim(filenames(ii+2)),&
+&      ' (',eff_pots(ii)%harmonics_terms%ifcs%nrpt,')',ch10,'this files cannot be used',ch10
+        MSG_WARNING(message)
+        file_usable(ii) = .False.
+      end if
+      if (eff_pots(ii)%crystal%natom/=ref_eff_pot%crystal%natom) then
+        write(message, '(a,I5,a,a,a,a,a,I5,a,a,a,a)' )&
+&      'the number of atoms in reference  (',ref_eff_pot%crystal%natom,') is not equal to the  ',ch10,&
+&      'the number of atoms  in',trim(filenames(ii+2)),' (',eff_pots(ii)%crystal%natom,')',ch10,&
+&      'this files cannot be used',ch10
+        MSG_WARNING(message)
+        file_usable(ii) = .False.
+      end if
+      if (eff_pots(ii)%crystal%ntypat/=ref_eff_pot%crystal%ntypat) then
+        write(message, '(a,I5,a,a,a,a,a,I5,a,a,a,a)' )&
+&      'the number of type of atoms in reference  (',ref_eff_pot%crystal%ntypat,&
+&       ') is not equal to the  ',&
+&       ch10,'the number of type of atoms  in',trim(filenames(ii+2)),&
+&       ' (',eff_pots(ii)%crystal%ntypat,')',&
+&       ch10,'this files can not be used',ch10
+        MSG_WARNING(message)
+        file_usable(ii) = .False.
+      end if
+    end do
+  end if
+
+! MPI BROADCAST 
   do ii=1,size(eff_pots)
-    if (eff_pots(ii)%harmonics_terms%ifcs%nrpt/=ref_eff_pot%harmonics_terms%ifcs%nrpt) then
-      write(message,'(a,I5,a,a,a,a,a,I5,a,a,a,a)' )&
-&    'the number of cell in reference  (',ref_eff_pot%harmonics_terms%ifcs%nrpt,&
-&     ') is not equal to the  ',ch10,'the number of cell  in',trim(filenames(ii+2)),&
-&    ' (',eff_pots(ii)%harmonics_terms%ifcs%nrpt,')',ch10,'this files cannot be used',ch10
-      MSG_WARNING(message)
-      file_usable(ii) = .False.
-    end if
-    if (eff_pots(ii)%crystal%natom/=ref_eff_pot%crystal%natom) then
-      write(message, '(a,I5,a,a,a,a,a,I5,a,a,a,a)' )&
-&    'the number of atoms in reference  (',ref_eff_pot%crystal%natom,') is not equal to the  ',ch10,&
-&    'the number of atoms  in',trim(filenames(ii+2)),' (',eff_pots(ii)%crystal%natom,')',ch10,&
-&    'this files cannot be used',ch10
-      MSG_WARNING(message)
-      file_usable(ii) = .False.
-    end if
-    if (eff_pots(ii)%crystal%ntypat/=ref_eff_pot%crystal%ntypat) then
-      write(message, '(a,I5,a,a,a,a,a,I5,a,a,a,a)' )&
-&    'the number of type of atoms in reference  (',ref_eff_pot%crystal%ntypat,&
-&     ') is not equal to the  ',&
-&     ch10,'the number of type of atoms  in',trim(filenames(ii+2)),&
-&     ' (',eff_pots(ii)%crystal%ntypat,')',&
-&     ch10,'this files can not be used',ch10
-      MSG_WARNING(message)
-      file_usable(ii) = .False.
-    end if
+    call xmpi_bcast (file_usable(ii), master, comm, ierr)
   end do
 
   if (count((eff_pots%strain%name=="reference"))>1) then
-    write(message, '(a,a)' )&
+    write(message, '(2a)' )&
 &    ' There is several file corresponding to the reference ',ch10
     MSG_BUG(message)
   end if  
 
   have_strain = zero
 
-  write(message,'(a,a)') ch10, ' Strains available after reading the files after:'
+  write(message,'(a)') ' Strains available after reading the files after:'
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
   do ii=1,size(eff_pots)
@@ -234,7 +241,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
     write(message,'(a)') '  - No strain found -'
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
-    write(message,'(a,(80a))') ch10,('-',ia=1,80)
+    write(message,'(a,(80a),a)') ch10,('-',ia=1,80),ch10
     call wrtout(ab_out,message,'COLL')
     call wrtout(std_out,message,'COLL')
   end if
@@ -252,9 +259,9 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
       if(ii>=4) name = 'shear'
       if (jj==1) then
         write(message, '(a,a,a,I1,a,a)' )&
-&    ' There is only one strain ',trim(name),' in direction ',ii,ch10,&
-&    'the finate diferences will not be centering'
-        MSG_WARNING(message)
+&       ' WARNING: There is only one strain ',trim(name),' in direction ',ii,ch10,&
+&       '          the finate diferences will not be centering'
+        call wrtout(std_out,message,"COLL")
         has_all_strain = .False.
         have_strain(ii)=jj
       else
@@ -266,8 +273,8 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
           have_strain(ii)=jj
         else
           write(message, '(a,a,a,I1,a,a)' )&
-&        ' There is no strain ',trim(name),' in direction ',ii,ch10
-          MSG_WARNING(message)
+&        ' WARNING: There is no strain ',trim(name),' in direction ',ii,ch10
+          call wrtout(std_out,message,"COLL")
           has_all_strain = .False.
           if (inp%prt_3rd == 2) then
             do kk = 1,2 
@@ -291,7 +298,9 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 &               rprimd_def(:,1),ch10, rprimd_def(:,2), ch10,rprimd_def(:,3)
               call wrtout(ab_out,message,'COLL')
               call wrtout(std_out,message,'COLL')
-              call effective_potential_writeAbiInput(eff_pot,strain=strain)
+              if(iam_master)then
+                call effective_potential_writeAbiInput(eff_pot,strain=strain)
+              end if
               call strain_free(strain)
             end do
           end if
@@ -300,17 +309,17 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
     end if
   end do
 
- !check if strain exist
+! check if strain exist
   if(all(have_strain==zero).and.inp%prt_3rd /= 2) then
-      write(message, '(a,a,a,a,a,a,a)' )&
-&    ' There is no file corresponding to strain',&
+      write(message, '(6a)' )&
+&    ' WARNING: There is no file corresponding to strain',&
 &    ' to compute 3rd order derivatives.',ch10,&
-&    'In this case the 3rd order derivatives are not set',ch10,&
-&    '(add files or set prt_3rd to 0)',ch10
-      MSG_WARNING(message)   
+&    '          In this case the 3rd order derivatives are not set',ch10,&
+&    '          (add files or set prt_3rd to 0)'
+      call wrtout(std_out,message,"COLL")
   end if
 
- !check if the existing strains have opposite deformation
+! check if the existing strains have opposite deformation
   deformation = zero
   do ii=1,6
     if(have_strain(ii)/=0) then
@@ -368,25 +377,34 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   call wrtout(std_out,message,'COLL')
 
   if(has_all_strain) then 
-    write(message,'(a,a,a)') ch10, ' The computation of the third order derivative ',&
+    write(message,'(3a)') ch10, ' The computation of the third order derivative ',&
 &    'is possible'
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')
   else
     if (inp%prt_3rd /= 2) then
-      write(message,'(a,a,a,a,a,a,a,a,a)') ch10, ' The computation of the third order derivative ',&
-&      'is not possible',ch10,' somes files are missing please use prt_3rd 2 to generate',&
-&      ' inputs files',ch10,' usable by abinit The third order derivative will not be set in',&
-&      ' the XML file'
-      call wrtout(ab_out,message,'COLL')
-      call wrtout(std_out,message,'COLL')   
+      if(ref_eff_pot%has_strainCoupling)then
+        write(message,'(10a)') ch10, ' The computation of the third order derivative ',&
+&        'is not possible',ch10,' somes files are missing please use prt_3rd 2 to generate',&
+&        ' inputs files',ch10,' usable by abinit. The third order derivatives  present in  ',&
+&        trim(filenames(3)),' will be used'
+      else
+        write(message,'(9a)') ch10, ' The computation of the third order derivative ',&
+&        'is not possible',ch10,' somes files are missing please use prt_3rd 2 to generate',&
+&        ' inputs files',ch10,' usable by abinit. The third order derivative will not be set in',&
+&        ' the XML file'
+      end if
     else
-      write(message,'(a,a,a,a,a,a,a,a,a,a)') ch10, ' The computation of the third order derivative ',&
-&    'is not possible',ch10,' somes files are missing, the input files usable by abinit have been',&
-&    ' generate.',ch10,' The third order derivative will be not set in the XML file'
-      call wrtout(ab_out,message,'COLL')
-      call wrtout(std_out,message,'COLL')   
+      if(ref_eff_pot%has_strainCoupling)then
+        write(message,'(10a)') ch10, ' The computation of the third order derivative ',&
+&      'is not possible',ch10,' somes files are missing, the input files usable by abinit have been',&
+&      ' generate.',ch10,' The third order derivatives present in ',trim(filenames(3)),' will be used'
+      else
+        write(message,'(8a)') ch10, ' The computation of the third order derivative ',&
+&      'is not possible',ch10,' somes files are missing, the input files usable by abinit have been',&
+&      ' generate.',ch10,' The third order derivatives will be not set in the XML file'
+      end if
     end if
+    call wrtout(ab_out,message,'COLL')
+    call wrtout(std_out,message,'COLL')   
   end if
 
  !================================================
@@ -420,14 +438,11 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
             delta1 = delta2
             delta2 = delta
           end if
-
-!         Compute strain phonon-coupling part
+!         Compute strain phonon-coupling
           phonon_strain(ii)%nrpt =  nrpt
           ABI_ALLOCATE(phonon_strain(ii)%atmfrc,(2,3,natom,3,natom,nrpt))
           ABI_ALLOCATE(phonon_strain(ii)%cell,(3,nrpt))
           phonon_strain(ii)%cell =  eff_pots(int(delta1))%harmonics_terms%ifcs%cell
-
-
 
           do irpt=1,phonon_strain(ii)%nrpt
             phonon_strain(ii)%atmfrc(:,:,:,:,:,irpt) =&
@@ -436,13 +451,12 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 &            (2 * abs(eff_pots(int(delta1))%strain%delta))
           end do
 
-!         Compute elastic constants part
+!         Compute elastic constants
           elastics(ii,:,:) = (eff_pots(int(delta1))%harmonics_terms%elastic_constants(:,:)&
 &          - eff_pots(int(delta2))%harmonics_terms%elastic_constants(:,:)) / &
 &            (2 * abs(eff_pots(int(delta1))%strain%delta))
 
-
-!         Compute elasctic-displacement coupling
+!         Compute elastic-displacement coupling
           elastic_displacement(ii,:,:,:)=(eff_pots(int(delta1))%harmonics_terms%internal_strain(:,:,:)&
 &          - eff_pots(int(delta2))%harmonics_terms%internal_strain(:,:,:)) / &
 &            (2 * abs(eff_pots(int(delta1))%strain%delta))
@@ -462,12 +476,13 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
     end do
     ABI_DEALLOCATE(elastic_displacement)
 
+    write(message,'(4a)') ch10, ' The computation of the 3rd order elastics constants, ',ch10,&
+&    ' the phonon-strain coupling and the elastic-displacement coupling is done'
+    call wrtout(ab_out,message,'COLL')
+    call wrtout(std_out,message,'COLL')
+  
   end if
   
-  write(message,'(4a)') ch10, ' The computation of the 3rd order elastics constants, ',ch10,&
-&    ' the phonon-strain coupling and the elastic-displacement coupling is done'
-  call wrtout(ab_out,message,'COLL')
-  call wrtout(std_out,message,'COLL')
 
  !===============================================
  !4) Free the array of effective potential
