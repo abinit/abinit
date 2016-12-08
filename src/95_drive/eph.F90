@@ -424,7 +424,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
 !TODO: do we want to pass the temper etc... from anaddb_dtset into the full dtset for abinit? Otherwise just leave these defaults.
      path = strcat(dtfil%filnam_ds(4), "_MSQD_T")
-     call phdos_print_msqd(phdos, path, 1000, zero, one)
+     call phdos_print_msqd(phdos, path, 1000, one, one)
 
 #ifdef HAVE_NETCDF
      path = strcat(dtfil%filnam_ds(4), "_PHDOS.nc")

@@ -1531,7 +1531,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
 !arrays
 
 !Local variables -------------------------
- integer :: io, itemp, iunit, iatom
+ integer :: io, iomin, itemp, iunit, iatom
  real(dp) :: temper
  character(len=500) :: msg
 
@@ -1561,13 +1561,18 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
  ABI_ALLOCATE (tmp_msqd, (PHdos%nomega,9))
  ABI_ALLOCATE (integ, (9,ntemper))
 
- ! calculate bose only once for each atom (instead of for each atom)
  ABI_ALLOCATE (bose, (PHdos%nomega, ntemper))
+ do io=1, PHdos%nomega
+     if (PHdos%omega(io) >= 1.d-10) exit
+ end do
+ iomin = io
+
+ ! calculate bose only once for each atom (instead of for each atom)
  bose = zero
- do io = 1, PHdos%nomega
-   if (PHdos%omega(io) < 1.e-10) cycle
-   do itemp = 1, ntemper
-     temper = tempermin + (itemp-1) * temperinc
+ do itemp = 1, ntemper
+   temper = tempermin + (itemp-1) * temperinc
+   if (abs(temper) < 1.e-10) cycle
+   do io = iomin, PHdos%nomega
 ! NB: factors follow convention in phonopy documentation
 !   the 1/sqrt(omega) factor in phonopy is contained in the displacement vector definition
 !   bose() is dimensionless
