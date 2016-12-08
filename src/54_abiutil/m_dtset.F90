@@ -446,6 +446,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%dmft_rslf          = dtin%dmft_rslf
  dtout%dmft_solv          = dtin%dmft_solv
  dtout%dmft_t2g           = dtin%dmft_t2g
+ dtout%dmft_tolfreq       = dtin%dmft_tolfreq
  dtout%dmft_tollc         = dtin%dmft_tollc
  dtout%dmftbandi          = dtin%dmftbandi
  dtout%dmftbandf          = dtin%dmftbandf
@@ -459,6 +460,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%dmftctqmc_mrka     = dtin%dmftctqmc_mrka
  dtout%dmftctqmc_mov      = dtin%dmftctqmc_mov
  dtout%dmftctqmc_order    = dtin%dmftctqmc_order
+ dtout%dmftctqmc_triqs_nleg = dtin%dmftctqmc_triqs_nleg
  dtout%dmftqmc_n          = dtin%dmftqmc_n
  dtout%dmftqmc_l          = dtin%dmftqmc_l
  dtout%dmftqmc_seed       = dtin%dmftqmc_seed
@@ -779,6 +781,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtnabla           = dtin%prtnabla
  dtout%prtnest            = dtin%prtnest
  dtout%prtphdos           = dtin%prtphdos
+ dtout%prtphsurf          = dtin%prtphsurf
  dtout%prtposcar          = dtin%prtposcar
  dtout%prtpot             = dtin%prtpot
  dtout%prtpsps            = dtin%prtpsps

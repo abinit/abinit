@@ -90,8 +90,8 @@ ndtset 3 jdtset 1 2 3
 #%% [files]
 #%% psp_files = al_ps.abinit.paw, as_ps.paw
 #%% [paral_info]
-#%% nprocs_to_test = 1, 2, 4
-#%% max_nprocs = 4 
+#%% nprocs_to_test = 1, 2, 4, 10
+#%% max_nprocs = 10
 #%% [NCPU_1]
 #%% files_to_test = 
 #%%   t95_MPI1.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy
