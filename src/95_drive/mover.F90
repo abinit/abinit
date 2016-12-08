@@ -426,7 +426,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
 !Fill velocities and ionic kinetic energy
  call vel2hist(ab_mover%amass,hist,vel)
- hist%histT(hist%ihist)=zero
+ hist%time(hist%ihist)=zero
 
 !Decide if prtxfase will be called
  useprtxfase=.FALSE.
@@ -624,7 +624,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        hist%strten(:,hist%ihist) =scfcv_args%results_gs%strten(:)
        hist%etot(hist%ihist)     =scfcv_args%results_gs%etotal
        hist%entropy(hist%ihist)  =scfcv_args%results_gs%energies%entropy
-       hist%histT(hist%ihist)    =real(itime,kind=dp)
+       hist%time(hist%ihist)     =real(itime,kind=dp)
 
 !      !######################################################################
 

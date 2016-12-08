@@ -575,7 +575,7 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 !xred, acell, rprimd, vel
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
  hist%vel(:,:,hist%ihist)=vel(:,:)
- hist%histT(hist%ihist)=itime*ab_mover%dtion
+ hist%time(hist%ihist)=real(itime,kind=dp)*ab_mover%dtion
 
  if(zDEBUG)then
    write (std_out,*) 'fcart:'

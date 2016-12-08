@@ -74,7 +74,7 @@ module m_abihist
 !! * etot(mxhist)            : Electronic total Energy
 !! * ekin(mxhist)            : Ionic Kinetic Energy
 !! * entropy(mxhist)         : Entropy
-!! * histT(mxhist)           : Time (Or iteration number for GO)
+!! * time(mxhist)            : Time (or iteration number for GO)
 !!
 !! NOTES
 !! The vectors are not allocated because in some cases
@@ -121,7 +121,7 @@ module m_abihist
 ! Vector of (mxhist) values of Entropy
     real(dp), allocatable :: entropy(:)
 ! Vector of (mxhist) values of time (relevant for MD calculations)
-    real(dp), allocatable :: histT(:)
+    real(dp), allocatable :: time(:)
 
  end type abihist
 
@@ -220,12 +220,12 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
  ABI_ALLOCATE(hist%etot,(mxhist))
  ABI_ALLOCATE(hist%ekin,(mxhist))
  ABI_ALLOCATE(hist%entropy,(mxhist))
- ABI_ALLOCATE(hist%histT,(mxhist))
+ ABI_ALLOCATE(hist%time,(mxhist))
 
  hist%etot(1)=zero
  hist%ekin(1)=zero
  hist%entropy(1)=zero
- hist%histT(1)=zero
+ hist%time(1)=zero
 
  hist%acell(:,1)=zero
  hist%rprimd(:,:,1)=zero
@@ -371,8 +371,8 @@ subroutine abihist_free_0D(hist)
    ABI_DEALLOCATE(hist%entropy)
  end if
 ! Vector of (mxhist) values of time (relevant for MD calculations)
- if (allocated(hist%histT))  then
-   ABI_DEALLOCATE(hist%histT)
+ if (allocated(hist%time))  then
+   ABI_DEALLOCATE(hist%time)
  end if
 
 end subroutine abihist_free_0D
@@ -519,7 +519,7 @@ subroutine abihist_bcast_0D(hist,master,comm)
  if (rank==master) then
    sizeA1=size(hist%acell,1);sizeA2=size(hist%acell,2)
    sizeEt=size(hist%etot,1);sizeEk=size(hist%ekin,1);
-   sizeEnt=size(hist%entropy,1);sizeT=size(hist%histT,1)
+   sizeEnt=size(hist%entropy,1);sizeT=size(hist%time,1)
    sizeR1=size(hist%rprimd,1);sizeR2=size(hist%rprimd,2);sizeR3=size(hist%rprimd,3)
    sizeS1=size(hist%strten,1);sizeS2=size(hist%strten,2)
    sizeV1=size(hist%vel,1);sizeV2=size(hist%vel,2);sizeV3=size(hist%vel,3)
@@ -566,7 +566,7 @@ subroutine abihist_bcast_0D(hist,master,comm)
    indx=indx+sizeEk
    buffer_r(indx+1:indx+sizeEnt)=hist%entropy(1:sizeEnt)
    indx=indx+sizeEnt
-   buffer_r(indx+1:indx+sizeT)=hist%histT(1:sizeT)
+   buffer_r(indx+1:indx+sizeT)=hist%time(1:sizeT)
    indx=indx+sizeT
    buffer_r(indx+1:indx+sizeR)=reshape(hist%rprimd(1:sizeR1,1:sizeR2,1:sizeR3),(/sizeR/))
    indx=indx+sizeR
@@ -583,7 +583,7 @@ subroutine abihist_bcast_0D(hist,master,comm)
    ABI_ALLOCATE(hist%etot,(sizeEt))
    ABI_ALLOCATE(hist%ekin,(sizeEk))
    ABI_ALLOCATE(hist%entropy,(sizeEnt))
-   ABI_ALLOCATE(hist%histT,(sizeT))
+   ABI_ALLOCATE(hist%time,(sizeT))
    ABI_ALLOCATE(hist%rprimd,(sizeR1,sizeR2,sizeR3))
    ABI_ALLOCATE(hist%strten,(sizeS1,sizeS2))
    ABI_ALLOCATE(hist%vel,(sizeV1,sizeV2,sizeV3))
@@ -602,7 +602,7 @@ subroutine abihist_bcast_0D(hist,master,comm)
    indx=indx+sizeEk
    hist%entropy(1:sizeEnt)=buffer_r(indx+1:indx+sizeEnt)
    indx=indx+sizeEnt
-   hist%histT(1:sizeT)=buffer_r(indx+1:indx+sizeT)
+   hist%time(1:sizeT)=buffer_r(indx+1:indx+sizeT)
    indx=indx+sizeT
    hist%rprimd(1:sizeR1,1:sizeR2,1:sizeR3)=reshape(buffer_r(indx+1:indx+sizeR),(/sizeR1,sizeR2,sizeR3/))
    indx=indx+sizeR
@@ -985,7 +985,7 @@ type(abihist),intent(inout) :: hist_out
  hist_out%etot(hist_out%ihist)      = hist_in%etot(hist_in%ihist)
  hist_out%ekin(hist_out%ihist)      = hist_in%ekin(hist_in%ihist)
  hist_out%entropy(hist_out%ihist)   = hist_in%entropy(hist_in%ihist)
- hist_out%histT(hist_out%ihist)     = hist_in%histT(hist_in%ihist)
+ hist_out%time(hist_out%ihist)      = hist_in%time(hist_in%ihist)
 
 end subroutine abihist_copy
 !!***
@@ -1102,7 +1102,7 @@ real(dp) :: x,y
    hist_out%etot(hist_out%ihist)      =hist_in%etot(hist_in%ihist)
    hist_out%ekin(hist_out%ihist)      =hist_in%ekin(hist_in%ihist)
    hist_out%entropy(hist_out%ihist)   =hist_in%entropy(hist_in%ihist)
-   hist_out%histT(hist_out%ihist)     =hist_in%histT(hist_in%ihist)
+   hist_out%time(hist_out%ihist)      =hist_in%time(hist_in%ihist)
  end if
 
 end subroutine abihist_compare_and_copy
@@ -2137,7 +2137,7 @@ implicit none
 
 !mdtime
  start1=(/hist%ihist/)
- ncerr = nf90_put_var(ncid,mdtime_id,hist%histT(hist%ihist),start=start1)
+ ncerr = nf90_put_var(ncid,mdtime_id,hist%time(hist%ihist),start=start1)
  NCF_CHECK_MSG(ncerr," write variable mdtime")
 
 !Variables depending on images
@@ -2297,7 +2297,7 @@ implicit none
 
 !mdtime
  start1=(/1/);count1=(/time/)
- ncerr = nf90_get_var(ncid,mdtime_id,hist%histT(:),count=count1,start=start1)
+ ncerr = nf90_get_var(ncid,mdtime_id,hist%time(:),count=count1,start=start1)
  NCF_CHECK_MSG(ncerr," read variable mdtime")
 
 !Variables depending on images

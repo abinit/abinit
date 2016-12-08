@@ -279,7 +279,7 @@ subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
 !xred, acell, rprimd, vel
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
  hist%vel(:,:,hist%ihist)=vel(:,:)
- hist%histT(hist%ihist)=hist%histT(hist%ihist-1)+ab_mover%dtion
+ hist%time(hist%ihist)=hist%time(hist%ihist-1)+ab_mover%dtion
 
 end subroutine pred_srkna14
 !!***

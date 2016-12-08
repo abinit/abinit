@@ -563,7 +563,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        hist(iimage)%strten(:,ih)=res_img(iimage)%results_gs%strten(:)
        hist(iimage)%etot(ih)=res_img(iimage)%results_gs%etotal
        hist(iimage)%entropy(ih)=res_img(iimage)%results_gs%energies%entropy
-       hist(iimage)%histT(ih)=real(itimimage,kind=dp)*dtion
+       hist(iimage)%time(ih)=real(itimimage,kind=dp)*dtion
      end if
 
    end do ! iimage

@@ -704,7 +704,7 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
  hist%vel(:,:,hist%ihist)=vel(:,:)
- hist%histT(hist%ihist)=itime*ab_mover%dtion
+ hist%time(hist%ihist)=real(itime,kind=dp)*ab_mover%dtion
 
  if (ab_mover%delayperm==0 .or. ab_mover%ntypat<=2) ncycle=1
  if(itime==ntime-1) ncycle=1

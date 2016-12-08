@@ -379,7 +379,7 @@ real(dp),pointer :: fcart_cur(:,:),fcart_prev(:,:),fcart_prev2(:,:)
    end if
  end if
  time=time+hh
- hist%histT(hist%ihist)=time
+ hist%time(hist%ihist)=time
 
  if (allocated(xcart)) then
    ABI_DEALLOCATE(xcart)
