@@ -1199,14 +1199,15 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
          ! cartesian vector...
          irpt=(list(ii)-1)/Ifc%natom+1
          write(unit_tdep,'(3es28.16)') matmul(Ifc%rpt(1:3,irpt),Ifc%gprim) 
+
          !AI2PS
          write(unit_ifc,'(i6,i6)') ia,ii
          write(unit_ifc,'(3es28.16)') posngb(1:3,ii)
          do nu=1,3
            !TDEp
-           ! And the actual forceconstant: TODO: check if
+           ! And the actual short ranged forceconstant: TODO: check if
            ! a transpose is needed or a swap between the nu and the mu
-           write(unit_tdep,'(3f28.16)') (rsiaf(nu,mu,ii)*Ha_eV/amu_emass, mu=1, 3)
+           write(unit_tdep,'(3f28.16)') (sriaf(nu,mu,ii)*Ha_eV/amu_emass, mu=1, 3)
            
            !AI2PS
            write(unit_ifc,'(3f28.16)')(rsiaf(nu,mu,ii),mu=1,3)
@@ -1253,6 +1254,19 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 
  if (prt_ifc == 1) then
    close(unit_ifc)
+   close(unit_tdep)
+
+   if (open_file('infile.lotosplitting_ABINIT', message, newunit=unit_tdep, status="replace") /= 0) then
+     MSG_ERROR(message)
+   end if
+   write(unit_tdep,'(3es28.16)') dielt(:,1)
+   write(unit_tdep,'(3es28.16)') dielt(:,2)
+   write(unit_tdep,'(3es28.16)') dielt(:,3)
+   do iatom = 1, Ifc%natom
+     do idir = 1, 3
+       write(unit_tdep,'(3es28.16)') zeff(:,idir,iatom)
+     end do
+   end do
    close(unit_tdep)
  end if
 
