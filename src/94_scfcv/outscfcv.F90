@@ -799,6 +799,37 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      ABI_DEALLOCATE(vwork)
    end if
 
+! VCouLoMB
+   if (dtset%prtvclmb>0) then
+
+     ABI_ALLOCATE(vwork,(nfft,nspden))
+     do ispden=1,nspden
+       vwork(:,ispden)=vpsp(:)+vhartr(:)
+     end do
+     if (psps%usepaw==1) then
+       do ispden=1,nspden
+         vwork(:,ispden)=vwork(:,ispden)+vpaw(:,ispden)
+       end do
+       ABI_DEALLOCATE(vpaw)
+     end if
+
+     call fftdatar_write("vhartree_vloc",dtfil%fnameabo_app_vclmb,dtset%iomode,hdr,&
+     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
+
+     call out1dm(dtfil%fnameabo_app_vclmb_1dm,mpi_enreg,natom,nfft,ngfft,nspden,psps%ntypat,&
+&     rhor,rprimd,dtset%typat,ucvol,vwork,xred,dtset%znucl)
+
+! TODO: add TEM phase with CE = (2 pi / lambda) (E+E0)/(E(E+2E0)) from p.49 of RE Dunin Borkowski 2004 encyclopedia of nanoscience volume 3 pp 41-99
+!   where E is energy of electron, E0 rest mass, lambda the relativistic wavelength
+!   values of CE at 200 300 and 1000 kV:  7.29e6  6.53e6   5.39e6 rad / V / m
+!   vertical integral of vclmb * c / ngfft(3) / cross sectional area factor (= sin(gamma))
+!      * 0.5291772083e-10*27.2113834 to get to SI
+!      * CE factor above
+!   should be done for each plane perpendicular to the axes...
+     ABI_DEALLOCATE(vwork)
+   end if ! prtvclmb
+
+
 !  VHXC
    if (dtset%prtvhxc>0) then
      ABI_ALLOCATE(vwork,(nfft,nspden))
@@ -822,135 +853,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  end if ! if iwrite_fftdatar
 
  call timab(959,1,tsec)
-
-
-! VCouLoMB - should encapsulate this in a subroutine
- if (dtset%prtvclmb>0) then
-
-!  set to 1 for netcdf output
-   ABI_ALLOCATE(vwork,(nfft,nspden))
-   vwork = zero
-
-   if (psps%usepaw > 0 .and. maxval(pawfgrtab(:)%nfgd) > 0) then
-     nradint = 1000 ! radial integration grid density
-
-     do ispden=1,nspden
-       ! for points inside spheres, replace with full AE hartree potential.
-       ! In principle the correction could be more subtle (not spherical)
-       do iatom_ = 1, my_natom
-         if (pawfgrtab(iatom_)%nfgd == 0) continue
-         iatom = my_atmtab(iatom_)
-         ABI_ALLOCATE(vh1spl,(paw_an(iatom_)%mesh_size)) ! distrib over natom
-         ABI_ALLOCATE(vh1_corrector,(paw_an(iatom_)%mesh_size))
-         ABI_ALLOCATE(vh1_interp,(pawfgrtab(iatom_)%nfgd))
-         vh1_interp = zero
-         ABI_ALLOCATE(radii,(pawfgrtab(iatom_)%nfgd))
-         radii = zero
-         ABI_ALLOCATE(isort,(pawfgrtab(iatom_)%nfgd))
-
-! TODO: for nspden 4 this should probably be limited to ispden 1. Check for nspden 2 as well.
-         vh1_corrector(:) = paw_an(iatom_)%vh1(:,1,ispden)-paw_an(iatom_)%vht1(:,1,ispden)
-         ! get end point derivatives
-         call bound_deriv(vh1_corrector, pawrad(dtset%typat(iatom)), pawrad(dtset%typat(iatom))%mesh_size, yp1, ypn)
-         ! spline the vh1 function on the irregular set of radial distances corresponding to cell grid points 
-         ! NB for second argument of vh1: only first moment lm_size appears to be used
-         ! NB2: vh1 can in principle be complex - not sure what to do with the imaginary part. Ignored for now.
-         call spline(pawrad(dtset%typat(iatom))%rad, vh1_corrector, paw_an(iatom_)%mesh_size, yp1, ypn, vh1spl)
-
-         do ifgd = 1, pawfgrtab(iatom_)%nfgd
-           ! get radii for this point
-           isort(ifgd) = ifgd
-           radii(ifgd) = sqrt(sum(pawfgrtab(iatom_)%rfgd(:,ifgd)**2))
-         end do
-         call sort_dp(pawfgrtab(iatom_)%nfgd, radii, isort, tol12)
-
-         ! spline interpolate the vh1 value for current radii
-         call splint(pawrad(dtset%typat(iatom))%mesh_size, pawrad(dtset%typat(iatom))%rad, &
-          vh1_corrector, vh1spl, pawfgrtab(iatom_)%nfgd, radii,  vh1_interp, ierr)
-
-         !if () call xmpi_sum(vh1_interp,mpi_enreg%comm_fft,ierr)
-         write(message,'(a,i6,a,E20.10)') ' sum of Hartree correction term on fft grid of atom : ', iatom, &
-&         ' = ', sum(vh1_interp)*ucvol/ngfft(1)/ngfft(2)/ngfft(3)
-         call wrtout(std_out,message,'COLL')
-
-! TODO: ifftsph is distributed in parallel npfft case:
-         do ifft = 1, pawfgrtab(iatom_)%nfgd
-           jfft = isort(ifft)
-           vwork(pawfgrtab(iatom_)%ifftsph(jfft), ispden) = &
-&           vwork(pawfgrtab(iatom_)%ifftsph(jfft), ispden) + &
-&           vh1_interp(ifft)
-         end do
-
-         ABI_DEALLOCATE(isort)
-         ABI_DEALLOCATE(radii)
-         ABI_DEALLOCATE(vh1_interp)
-
-         ! get integral of correction term in whole sphere
-         ABI_ALLOCATE(vh1_integ,(nradint))
-         vh1_integ = zero
-         ABI_ALLOCATE(radii,(nradint))
-         radii = zero
-         ABI_ALLOCATE(vh1_interp,(nradint))
-         vh1_interp = zero
-
-         dr = pawrad(dtset%typat(iatom))%rad(paw_an(iatom_)%mesh_size) / dble(nradint)
-         do ifgd = 1, nradint
-           radii(ifgd) = dble(ifgd-1)*dr
-         end do
-
-         ! spline interpolate the vh1 value for homogeneous radii used in integration routine
-         call splint(pawrad(dtset%typat(iatom))%mesh_size, pawrad(dtset%typat(iatom))%rad, &
-&         vh1_corrector, vh1spl, nradint, radii,  vh1_interp, ierr)
-
-         do ifgd = 1, nradint
-           vh1_interp(ifgd) = vh1_interp(ifgd)*radii(ifgd)**2
-         end do
-
-         call simpson_int(nradint, dr, vh1_interp, vh1_integ)
-         write(message,'(a,i6,a,E20.10)') ' integral of Hartree correction term in sphere of atom: ', iatom, &
-          ' = ', vh1_integ(nradint)*four*pi
-         call wrtout(std_out,message,'COLL')
-
-         ABI_DEALLOCATE(vh1_interp)
-         ABI_DEALLOCATE(vh1_integ)
-         ABI_DEALLOCATE(radii)
-
-         ABI_DEALLOCATE(vh1spl)
-         ABI_DEALLOCATE(vh1_corrector)
-       end do ! iatom_
-     end do !ispden
-     !if (paral_fft) call xmpi_sum(vwork,mpi_enreg%comm_fft,ierr)
-   end if ! if paw: adds all electron vhartree in spheres
-
-   ! MPI collect vwork on atoms
-   if (psps%usepaw > 0 .and. dtset%natom/=my_natom) call xmpi_sum(vwork,my_comm_atom,ierr)
-
-   ! add the non-PAW part of the potential
-   do ispden=1,nspden
-     vwork(:,ispden)=vwork(:,ispden) + vpsp(:) + vhartr(:)
-   end do
-
-   if (iwrite_fftdatar(mpi_enreg)) then
-! these routines know about fft parallelization - I presume you feed them vwork which must be an fft array
-! cplex1 = 1 so real numbers
-     call fftdatar_write("vhartree_vloc",dtfil%fnameabo_app_vclmb,dtset%iomode,hdr,&
-&     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
-   end if
-
-   call out1dm(dtfil%fnameabo_app_vclmb_1dm,mpi_enreg,natom,nfft,ngfft,nspden,psps%ntypat,&
-&   rhor,rprimd,dtset%typat,ucvol,vwork,xred,dtset%znucl)
-
-! TODO: add TEM phase with CE = (2 pi / lambda) (E+E0)/(E(E+2E0)) from p.49 of RE Dunin Borkowski 2004 encyclopedia of nanoscience volume 3 pp 41-99
-!   where E is energy of electron, E0 rest mass, lambda the relativistic wavelength
-!   values of CE at 200 300 and 1000 kV:  7.29e6  6.53e6   5.39e6 rad / V / m
-!   vertical integral of vclmb * c / ngfft(3) / cross sectional area factor (= sin(gamma))
-!      * 0.5291772083e-10*27.2113834 to get to SI
-!      * CE factor above
-!   should be done for each plane perpendicular to the axes...
-     ABI_DEALLOCATE(vwork)
- end if ! prtvclmb
-
-
 
 !Generate DOS using the tetrahedron method or using Gaussians
 !FIXME: Should centralize all calculations of DOS here in outscfcv
