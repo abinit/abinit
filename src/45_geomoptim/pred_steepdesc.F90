@@ -35,19 +35,8 @@
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! hist<type abihist>=Historical record of positions, forces
-!!      |                    acell, stresses, and energies,
-!!      |                    contains:
-!!      | mxhist:  Maximun number of records
-!!      | histA:   Historical record of acell(A) and rprimd(R)
-!!      | histE:   Historical record of energy(E)
-!!      | histEk:  Historical record of Ionic kinetic energy(Ek)
-!!      | histEnt: Historical record of Entropy
-!!      | histT:   Historical record of time(T) (For MD or iteration for GO)
-!!      | histR:   Historical record of rprimd(R)
-!!      | histS:   Historical record of strten(S)
-!!      | histV:   Historical record of velocity(V)
-!!      | histXF:  Historical record of positions(X) and forces(F)
+!! hist<type abihist>=Historical record of positions, forces,
+!!                               stresses, cell and energies.
 !!
 !! ncycle: Number of cycles of a particular time step
 !!
@@ -128,7 +117,7 @@ real(dp), ABI_CONTIGUOUS pointer :: fcart(:,:),vel(:,:)
 
  call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
  strten(:)=hist%histS(:,hist%ihist)
- fcart => hist%histXF(:,:,2,hist%ihist)
+ fcart => hist%fcart(:,:,hist%ihist)
  vel => hist%histV(:,:,hist%ihist)
 
 !Fill the residual with forces (No preconditioning)

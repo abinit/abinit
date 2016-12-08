@@ -232,7 +232,7 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
 !Fill the residual with forces (No preconditioning)
 !Or the preconditioned forces
  if (ab_mover%goprecon==0)then
-   call fcart2fred(hist%histXF(:,:,2,hist%ihist),residual,rprimd,ab_mover%natom)
+   call fcart2fred(hist%fcart(:,:,hist%ihist),residual,rprimd,ab_mover%natom)
  else
    residual(:,:)=forstr%fred(:,:)
  end if

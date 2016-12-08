@@ -196,7 +196,7 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 
  call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
- fcart(:,:) =hist%histXF(:,:,2,hist%ihist)
+ fcart(:,:) =hist%fcart(:,:,hist%ihist)
  vel(:,:)   =hist%histV(:,:,hist%ihist)
  etotal     =hist%histE(hist%ihist)
  strten(:)  =hist%histS(:,hist%ihist)
@@ -472,8 +472,8 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
    if (etotal>hist%histE(hist%ihist-1).and.icycle==2) then
 
 !    Discard the changes
-     xred(:,:)  =hist%histXF(:,:,1,hist%ihist-1)
-     fcart(:,:) =hist%histXF(:,:,2,hist%ihist-1)
+     xred(:,:)  =hist%xred(:,:,hist%ihist-1)
+     fcart(:,:) =hist%fcart(:,:,hist%ihist-1)
      vel(:,:)   =hist%histV(:,:,hist%ihist-1)
 
      etotal     =hist%histE(hist%ihist-1)

@@ -314,7 +314,7 @@ subroutine monte_carlo_step(ab_mover,eff_pot,hist,itime,ntime,zDEBUG,iexit)
 
  call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
- fcart(:,:) =hist%histXF(:,:,2,hist%ihist)
+ fcart(:,:) =hist%fcart(:,:,hist%ihist)
  vel(:,:)   =hist%histV(:,:,hist%ihist)
  strten(:)  =hist%histS(:,hist%ihist)
  etotal     =hist%histE(hist%ihist)

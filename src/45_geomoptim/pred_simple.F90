@@ -88,9 +88,9 @@ subroutine pred_simple(ab_mover,hist,iexit)
 !XRED, FCART and VEL
  do kk=1,ab_mover%natom
    do jj=1,3
-     hist%histXF(jj,kk,1,hist%ihist+1)=hist%histXF(jj,kk,1,hist%ihist)
-     hist%histXF(jj,kk,2,hist%ihist+1)=hist%histXF(jj,kk,2,hist%ihist)
-     hist%histV (jj,kk,  hist%ihist+1)=hist%histV (jj,kk,  hist%ihist)
+     hist%xred(jj,kk, hist%ihist+1)=hist%xred (jj,kk,hist%ihist)
+     hist%fcart(jj,kk,hist%ihist+1)=hist%fcart(jj,kk,hist%ihist)
+     hist%histV(jj,kk,hist%ihist+1)=hist%histV(jj,kk,hist%ihist)
    end do ! jj=1,3
  end do ! kk=1,ab_mover%natom
 

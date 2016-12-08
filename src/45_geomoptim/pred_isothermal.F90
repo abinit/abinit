@@ -172,7 +172,7 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 
  call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
- fcart(:,:) =hist%histXF(:,:,2,hist%ihist)
+ fcart(:,:) =hist%fcart(:,:,hist%ihist)
  vel(:,:)   =hist%histV(:,:,hist%ihist)
  strten(:)  =hist%histS(:,hist%ihist)
  etotal     =hist%histE(hist%ihist)
@@ -204,7 +204,7 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
 
 !Get rid of mean force on whole unit cell, but only if no
 !generalized constraints are in effect
-!  call fcart2fred(hist%histXF(:,:,2,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
+!  call fcart2fred(hist%fcart(:,:,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
 !  if(ab_mover%nconeq==0)then
 !    amass_tot=sum(ab_mover%amass(:))
 !    do ii=1,3

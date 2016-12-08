@@ -73,7 +73,8 @@ module m_abihist
 !! * histR(3,3,mxhist)       : Rprimd
 !! * histS(6,mxhist)         : Strten
 !! * histV(3,natom,mxhist)   : Velocity
-!! * histXF(3,natom,2,mxhist): Xred,Fcart
+!! * xred(3,natom,mxhist)    : Xred
+!! * fcart(3,natom,mxhist)   : Fcart
 !!
 !! NOTES
 !! The vectors are not allocated because in some cases
@@ -117,8 +118,10 @@ module m_abihist
     real(dp), allocatable :: histS(:,:)
 ! Vector of (x,y,z)X(natom)X(mxhist) values of velocity
     real(dp), allocatable :: histV(:,:,:)
-! Vector of (x,y,z)X(natom)X(xred,fcart)X(mxhist)
-    real(dp), allocatable :: histXF(:,:,:,:)
+! Vector of (x,y,z)x(natom)x(mxhist) values of Xred
+    real(dp), allocatable :: xred(:,:,:)
+! Vector of (x,y,z)x(natom)x(mxhist) values of Fcart
+    real(dp), allocatable :: fcart(:,:,:)
 
  end type abihist
 
@@ -216,7 +219,8 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
  ABI_ALLOCATE(hist%histR,(3,3,mxhist))
  ABI_ALLOCATE(hist%histS,(6,mxhist))
  ABI_ALLOCATE(hist%histV,(3,natom,mxhist))
- ABI_ALLOCATE(hist%histXF,(3,natom,2,mxhist))
+ ABI_ALLOCATE(hist%xred,(3,natom,mxhist))
+ ABI_ALLOCATE(hist%fcart,(3,natom,mxhist))
 
  hist%histE(1)=zero
  hist%histEk(1)=zero
@@ -227,7 +231,8 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
  hist%histR(:,:,1)=zero
  hist%histS(:,1)=zero
  hist%histV(:,:,1)=zero
- hist%histXF(:,:,:,1)=zero
+ hist%xred(:,:,1)=zero
+ hist%fcart(:,:,1)=zero
 
 end subroutine abihist_init_0D
 !!***
@@ -361,9 +366,13 @@ subroutine abihist_free_0D(hist)
  if (allocated(hist%histV))  then
    ABI_DEALLOCATE(hist%histV)
  end if
-! Vector of (x,y,z)X(natom)X(xred,fred)X(mxhist)
- if (allocated(hist%histXF))  then
-   ABI_DEALLOCATE(hist%histXF)
+! Vector of reduced coordinates Xred
+ if (allocated(hist%xred))  then
+   ABI_DEALLOCATE(hist%xred)
+ end if
+! Vector of cartesian forces Fcart
+ if (allocated(hist%fcart))  then
+   ABI_DEALLOCATE(hist%fcart)
  end if
 
 end subroutine abihist_free_0D
@@ -471,7 +480,8 @@ subroutine abihist_bcast_0D(hist,master,comm)
  integer :: sizeR,sizeR1,sizeR2,sizeR3
  integer :: sizeS,sizeS1,sizeS2
  integer :: sizeV,sizeV1,sizeV2,sizeV3
- integer :: sizeXF,sizeXF1,sizeXF2,sizeXF3,sizeXF4
+ integer :: sizeXred,sizeXred1,sizeXred2,sizeXred3
+ integer :: sizeFcart,sizeFcart1,sizeFcart2,sizeFcart3
 !arrays
  integer,allocatable :: buffer_i(:)
  real(dp),allocatable :: buffer_r(:)
@@ -505,7 +515,7 @@ subroutine abihist_bcast_0D(hist,master,comm)
  if (hist%mxhist==0.or.hist%ihist==0) return
 
 !=== Broadcast sizes of arrays
- ABI_ALLOCATE(buffer_i,(18))
+ ABI_ALLOCATE(buffer_i,(20))
  if (rank==master) then
    sizeA1=size(hist%histA,1);sizeA2=size(hist%histA,2)
    sizeE=size(hist%histE,1);sizeEk=size(hist%histEk,1);
@@ -513,8 +523,8 @@ subroutine abihist_bcast_0D(hist,master,comm)
    sizeR1=size(hist%histR,1);sizeR2=size(hist%histR,2);sizeR3=size(hist%histR,3)
    sizeS1=size(hist%histS,1);sizeS2=size(hist%histS,2)
    sizeV1=size(hist%histV,1);sizeV2=size(hist%histV,2);sizeV3=size(hist%histV,3)
-   sizeXF1=size(hist%histXF,1);sizeXF2=size(hist%histXF,2);sizeXF3=size(hist%histXF,3)
-   sizeXF4=size(hist%histXF,4)
+   sizeXred1=size(hist%xred,1);sizeXred2=size(hist%xred,2);sizeXred3=size(hist%xred,3)
+   sizeFcart1=size(hist%fcart,1);sizeFcart2=size(hist%fcart,2);sizeFcart3=size(hist%fcart,3)
    buffer_i(1)=sizeA1  ;buffer_i(2)=sizeA2
    buffer_i(3)=sizeE   ;buffer_i(4)=sizeEk
    buffer_i(5)=sizeEnt ;buffer_i(6)=sizeT
@@ -522,8 +532,8 @@ subroutine abihist_bcast_0D(hist,master,comm)
    buffer_i(9)=sizeR3  ;buffer_i(10)=sizeS1
    buffer_i(11)=sizeS2 ;buffer_i(12)=sizeV1
    buffer_i(13)=sizeV2 ;buffer_i(14)=sizeV3
-   buffer_i(15)=sizeXF1;buffer_i(16)=sizeXF2
-   buffer_i(17)=sizeXF3;buffer_i(18)=sizeXF4
+   buffer_i(15)=sizeXred1;buffer_i(16)=sizeXred2;buffer_i(17)=sizeXred3
+   buffer_i(18)=sizeFcart1;buffer_i(19)=sizeFcart2;buffer_i(20)=sizeFcart3
  end if
  call xmpi_bcast(buffer_i,master,comm,ierr)
 
@@ -535,16 +545,16 @@ subroutine abihist_bcast_0D(hist,master,comm)
    sizeR3 =buffer_i(9) ;sizeS1 =buffer_i(10)
    sizeS2 =buffer_i(11);sizeV1 =buffer_i(12)
    sizeV2 =buffer_i(13);sizeV3 =buffer_i(14)
-   sizeXF1=buffer_i(15);sizeXF2=buffer_i(16)
-   sizeXF3=buffer_i(17);sizeXF4=buffer_i(18)
-
+   sizeXred1=buffer_i(15);sizeXred2=buffer_i(16);sizeXred3=buffer_i(17)
+   sizeFcart1=buffer_i(18);sizeFcart2=buffer_i(19);sizeFcart3=buffer_i(20)
  end if
  ABI_DEALLOCATE(buffer_i)
 
 !=== Broadcast reals
  sizeA=sizeA1*sizeA2;sizeR=sizeR1*sizeR2*sizeR3;sizeS=sizeS1*sizeS2
- sizeV=sizeV1*sizeV2*sizeV3;sizeXF=sizeXF1*sizeXF2*sizeXF3*sizeXF4
- bufsize=sizeA+sizeE+sizeEk+sizeEnt+sizeT+sizeR+sizeS+sizeV+sizeXF
+ sizeV=sizeV1*sizeV2*sizeV3;sizeXred=sizeXred1*sizeXred2*sizeXred3
+ sizeFcart=sizeFcart1*sizeFcart2*sizeFcart3
+ bufsize=sizeA+sizeE+sizeEk+sizeEnt+sizeT+sizeR+sizeS+sizeV+sizeXred+sizeFcart
  ABI_ALLOCATE(buffer_r,(bufsize))
  if (rank==master) then
    indx=0
@@ -564,7 +574,9 @@ subroutine abihist_bcast_0D(hist,master,comm)
    indx=indx+sizeS
    buffer_r(indx+1:indx+sizeV)=reshape(hist%histV(1:sizeV1,1:sizeV2,1:sizeV3),(/sizeV/))
    indx=indx+sizeV
-   buffer_r(indx+1:indx+sizeXF)=reshape(hist%histXF(1:sizeXF1,1:sizeXF2,1:sizeXF3,1:sizeXF4),(/sizeXF/))
+   buffer_r(indx+1:indx+sizeXred)=reshape(hist%xred(1:sizeXred1,1:sizeXred2,1:sizeXred3),(/sizeXred/))
+   indx=indx+sizeXred
+   buffer_r(indx+1:indx+sizeFcart)=reshape(hist%fcart(1:sizeFcart1,1:sizeFcart2,1:sizeFcart3),(/sizeFcart/))
  else
    call abihist_free(hist)
    ABI_ALLOCATE(hist%histA,(sizeA1,sizeA2))
@@ -575,7 +587,8 @@ subroutine abihist_bcast_0D(hist,master,comm)
    ABI_ALLOCATE(hist%histR,(sizeR1,sizeR2,sizeR3))
    ABI_ALLOCATE(hist%histS,(sizeS1,sizeS2))
    ABI_ALLOCATE(hist%histV,(sizeV1,sizeV2,sizeV3))
-   ABI_ALLOCATE(hist%histXF,(sizeXF1,sizeXF2,sizeXF3,sizeXF4))
+   ABI_ALLOCATE(hist%xred,(sizeXred1,sizeXred2,sizeXred3))
+   ABI_ALLOCATE(hist%fcart,(sizeFcart1,sizeFcart2,sizeFcart3))
  end if
  call xmpi_bcast(buffer_r,master,comm,ierr)
 
@@ -597,8 +610,11 @@ subroutine abihist_bcast_0D(hist,master,comm)
    indx=indx+sizeS
    hist%histV(1:sizeV1,1:sizeV2,1:sizeV3)=reshape(buffer_r(indx+1:indx+sizeV),(/sizeV1,sizeV2,sizeV3/))
    indx=indx+sizeV
-   hist%histXF(1:sizeXF1,1:sizeXF2,1:sizeXF3,1:sizeXF4)=reshape(buffer_r(indx+1:indx+sizeXF), &
-&                                                       (/sizeXF1,sizeXF2,sizeXF3,sizeXF4/))
+   hist%xred(1:sizeXred1,1:sizeXred2,1:sizeXred3)=reshape(buffer_r(indx+1:indx+sizeXred), &
+&                                                 (/sizeXred1,sizeXred2,sizeXred3/))
+   indx=indx+sizeXred
+   hist%fcart(1:sizeFcart1,1:sizeFcart2,1:sizeFcart3)=reshape(buffer_r(indx+1:indx+sizeFcart), &
+&                                                     (/sizeFcart1,sizeFcart2,sizeFcart3/))
  end if
  ABI_DEALLOCATE(buffer_r)
 
@@ -721,9 +737,9 @@ subroutine var2hist(acell,hist,natom,rprimd,xred,zDEBUG)
 
 ! *************************************************************
 
- hist%histXF(:,:,1,hist%ihist)=xred(:,:)
- hist%histA (:    ,hist%ihist)=acell(:)
- hist%histR (:,:  ,hist%ihist)=rprimd(:,:)
+ hist%xred (:,:,hist%ihist)=xred(:,:)
+ hist%histR(:,:,hist%ihist)=rprimd(:,:)
+ hist%histA(:  ,hist%ihist)=acell(:)
 
  if(zDEBUG)then
    write (std_out,*) 'Atom positions and cell parameters '
@@ -803,7 +819,7 @@ integer :: jj,kk
 
 ! *************************************************************
 
- xred  (:,:)=hist%histXF(:,:,1,hist%ihist)
+ xred  (:,:)=hist%xred(:,:,hist%ihist)
  acell (:  )=hist%histA(:,hist%ihist)
  rprimd(:,:)=hist%histR(:,:,hist%ihist)
 
@@ -950,7 +966,7 @@ type(abihist),intent(inout) :: hist_out
 ! ***************************************************************
 
 !Check
- if (size(hist_in%histXF,2)/=size(hist_out%histXF,2)) then
+ if (size(hist_in%xred,2)/=size(hist_out%xred,2)) then
    msg='Incompatible sizes for hist_in and hist_out!'
    MSG_BUG(msg)
  end if
@@ -960,15 +976,16 @@ type(abihist),intent(inout) :: hist_out
  hist_out%isARused =hist_in%isARused
 
 !Copy arrays
- hist_out%histA(:,hist_out%ihist)     = hist_in%histA(:,hist_in%ihist)
- hist_out%histE(hist_out%ihist)       = hist_in%histE(hist_in%ihist)
- hist_out%histEk(hist_out%ihist)      = hist_in%histEk(hist_in%ihist)
- hist_out%histEnt(hist_out%ihist)     = hist_in%histEnt(hist_in%ihist)
- hist_out%histT(hist_out%ihist)       = hist_in%histT(hist_in%ihist)
- hist_out%histR(:,:,hist_out%ihist)   = hist_in%histR(:,:,hist_in%ihist)
- hist_out%histS(:,hist_out%ihist)     = hist_in%histS(:,hist_in%ihist)
- hist_out%histV(:,:,hist_out%ihist)   = hist_in%histV(:,:,hist_in%ihist)
- hist_out%histXF(:,:,:,hist_out%ihist)= hist_in%histXF(:,:,:,hist_in%ihist)
+ hist_out%histA(:,hist_out%ihist)   = hist_in%histA(:,hist_in%ihist)
+ hist_out%histE(hist_out%ihist)     = hist_in%histE(hist_in%ihist)
+ hist_out%histEk(hist_out%ihist)    = hist_in%histEk(hist_in%ihist)
+ hist_out%histEnt(hist_out%ihist)   = hist_in%histEnt(hist_in%ihist)
+ hist_out%histT(hist_out%ihist)     = hist_in%histT(hist_in%ihist)
+ hist_out%histR(:,:,hist_out%ihist) = hist_in%histR(:,:,hist_in%ihist)
+ hist_out%histS(:,hist_out%ihist)   = hist_in%histS(:,hist_in%ihist)
+ hist_out%histV(:,:,hist_out%ihist) = hist_in%histV(:,:,hist_in%ihist)
+ hist_out%xred(:,:,hist_out%ihist)  = hist_in%xred(:,:,hist_in%ihist)
+ hist_out%fcart(:,:,hist_out%ihist) = hist_in%fcart(:,:,hist_in%ihist)
 
 end subroutine abihist_copy
 !!***
@@ -1033,13 +1050,13 @@ real(dp) :: x,y
  write(std_out,*) 'Differences between present history and values stored'
  write(std_out,*) 'on the previous history.(Relative difference)'
 
- x=hist_out%histXF(1,1,1,hist_out%ihist)
- y=hist_in%histXF(1,1,1,hist_in%ihist)
+ x=hist_out%xred(1,1,hist_out%ihist)
+ y=hist_in%xred(1,1,hist_in%ihist)
  maxdiff=2*abs(x-y)/(abs(x)+abs(y))
  do kk=1,natom
    do jj=1,3
-     x=hist_out%histXF(jj,kk,1,hist_out%ihist)
-     y=hist_in%histXF(jj,kk,1,hist_in%ihist)
+     x=hist_out%xred(jj,kk,hist_out%ihist)
+     y=hist_in%xred(jj,kk,hist_in%ihist)
      diff=2*abs(x-y)/(abs(x)+abs(y))
      if (diff>maxdiff) maxdiff=diff
    end do
@@ -1076,18 +1093,16 @@ real(dp) :: x,y
  if (maxdiff>tolerance) similar=0
 
  if (similar==1) then
-
-   hist_out%histV(:,:,hist_out%ihist)   =hist_in%histV(:,:,hist_in%ihist)
-   hist_out%histE(hist_out%ihist)       =hist_in%histE(hist_in%ihist)
-   hist_out%histEk(hist_out%ihist)      =hist_in%histEk(hist_in%ihist)
-   hist_out%histEnt(hist_out%ihist)     =hist_in%histEnt(hist_in%ihist)
-   hist_out%histT(hist_out%ihist)       =hist_in%histT(hist_in%ihist)
-   hist_out%histXF(:,:,1,hist_out%ihist)=hist_in%histXF(:,:,1,hist_in%ihist)
-   hist_out%histXF(:,:,2,hist_out%ihist)=hist_in%histXF(:,:,2,hist_in%ihist)
-   hist_out%histS(:,hist_out%ihist)     =hist_in%histS(:,hist_in%ihist)
-   hist_out%histR(:,:,hist_out%ihist)   =hist_in%histR(:,:,hist_in%ihist)
-   hist_out%histA(:,hist_out%ihist)     =hist_in%histA(:,hist_in%ihist)
-
+   hist_out%histV(:,:,hist_out%ihist) =hist_in%histV(:,:,hist_in%ihist)
+   hist_out%histE(hist_out%ihist)     =hist_in%histE(hist_in%ihist)
+   hist_out%histEk(hist_out%ihist)    =hist_in%histEk(hist_in%ihist)
+   hist_out%histEnt(hist_out%ihist)   =hist_in%histEnt(hist_in%ihist)
+   hist_out%histT(hist_out%ihist)     =hist_in%histT(hist_in%ihist)
+   hist_out%xred(:,:,hist_out%ihist)  =hist_in%xred(:,:,hist_in%ihist)
+   hist_out%fcart(:,:,hist_out%ihist) =hist_in%fcart(:,:,hist_in%ihist)
+   hist_out%histS(:,hist_out%ihist)   =hist_in%histS(:,hist_in%ihist)
+   hist_out%histR(:,:,hist_out%ihist) =hist_in%histR(:,:,hist_in%ihist)
+   hist_out%histA(:,hist_out%ihist)   =hist_in%histA(:,hist_in%ihist)
  end if
 
 end subroutine abihist_compare_and_copy
@@ -2113,8 +2128,8 @@ implicit none
 
 #if defined HAVE_NETCDF
 
- xred   => hist%histXF(:,:,1,hist%ihist)
- fcart  => hist%histXF(:,:,2,hist%ihist)
+ xred   => hist%xred(:,:,hist%ihist)
+ fcart  => hist%fcart(:,:,hist%ihist)
  vel    => hist%histV(:,:,hist%ihist)
  rprimd => hist%histR(:,:,hist%ihist)
 
@@ -2290,17 +2305,17 @@ implicit none
 !xred,fcart,vel
  if (has_nimage) then
    start4=(/1,1,iimg,1/);count4=(/3,natom,1,time/)
-   ncerr = nf90_get_var(ncid,xred_id  ,hist%histXF(:,:,1,:),count=count4,start=start4)
+   ncerr = nf90_get_var(ncid,xred_id  ,hist%xred(:,:,:),count=count4,start=start4)
    NCF_CHECK_MSG(ncerr," read variable xred")
-   ncerr = nf90_get_var(ncid,fcart_id ,hist%histXF(:,:,2,:),count=count4,start=start4)
+   ncerr = nf90_get_var(ncid,fcart_id ,hist%fcart(:,:,:),count=count4,start=start4)
    NCF_CHECK_MSG(ncerr," read variable fcart")
    ncerr = nf90_get_var(ncid,vel_id,hist%histV(:,:,:)  ,count=count4,start=start4)
    NCF_CHECK_MSG(ncerr," read variable vel")
  else
    start3=(/1,1,1/);count3=(/3,natom,time/)
-   ncerr = nf90_get_var(ncid,xred_id  ,hist%histXF(:,:,1,:),count=count3,start=start3)
+   ncerr = nf90_get_var(ncid,xred_id  ,hist%xred(:,:,:),count=count3,start=start3)
    NCF_CHECK_MSG(ncerr," read variable xred")
-   ncerr = nf90_get_var(ncid,fcart_id ,hist%histXF(:,:,2,:),count=count3,start=start3)
+   ncerr = nf90_get_var(ncid,fcart_id ,hist%fcart(:,:,:),count=count3,start=start3)
    NCF_CHECK_MSG(ncerr," read variable fcart")
    ncerr = nf90_get_var(ncid,vel_id,hist%histV(:,:,:)  ,count=count3,start=start3)
    NCF_CHECK_MSG(ncerr," read variable vel")

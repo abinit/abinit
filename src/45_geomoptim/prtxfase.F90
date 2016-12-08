@@ -28,19 +28,8 @@
 !!          | vis:    viscosity
 !!          | iatfix: Index of atoms and directions fixed
 !!          | amass:  Mass of ions
-!! hist<type abihist>=Historical record of positions, forces
-!!      |                    acell, stresses, and energies,
-!!      |                    contains:
-!!      | mxhist:  Maximun number of records
-!!      | histA:   Historical record of acell(A) and rprimd(R)
-!!      | histE:   Historical record of energy(E)
-!!      | histEk:  Historical record of Ionic kinetic energy(Ek)
-!!      | histEnt: Historical record of Entropy
-!!      | histT:   Historical record of time(T) (For MD or iteration for GO)
-!!      | histR:   Historical record of rprimd(R)
-!!      | histS:   Historical record of strten(S)
-!!      | histV:   Historical record of velocity(V)
-!!      | histXF:  Historical record of positions(X) and forces(F)
+!! hist<type abihist>=Historical record of positions, forces,
+!!                               stresses, cell and energies,
 !! iout=unit number for printing
 !!
 !! OUTPUT
@@ -120,8 +109,8 @@ implicit none
    if (ab_mover%prtatlist(iprt)>0.and.ab_mover%prtatlist(iprt)<=ab_mover%natom) atlist(ab_mover%prtatlist(iprt))=.TRUE.
  end do
 
- xred   => hist%histXF(:,:,1,hist%ihist)
- fcart  => hist%histXF(:,:,2,hist%ihist)
+ xred   => hist%xred(:,:,hist%ihist)
+ fcart  => hist%fcart(:,:,hist%ihist)
  rprimd => hist%histR(:,:,hist%ihist)
 
 !###########################################################

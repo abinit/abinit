@@ -422,10 +422,10 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          call mkradim(hist(iimage)%histA(:,ih),rprim,hist(iimage)%histR(:,:,ih))
          res_img(iimage)%acell(:)     =hist(iimage)%histA(:,ih)
          res_img(iimage)%rprim(:,:)   =rprim
-         res_img(iimage)%xred(:,:)    =hist(iimage)%histXF(:,:,1,ih)
+         res_img(iimage)%xred(:,:)    =hist(iimage)%xred(:,:,ih)
          res_img(iimage)%vel(:,:)     =hist(iimage)%histV(:,:,ih)
          res_img(iimage)%vel_cell(:,:)=zero !Temporary
-         res_img(iimage)%results_gs%fcart(:,:) =hist(iimage)%histXF(:,:,2,ih)
+         res_img(iimage)%results_gs%fcart(:,:)=hist(iimage)%fcart(:,:,ih)
          res_img(iimage)%results_gs%strten(:) =hist(iimage)%histS(:,ih)
          res_img(iimage)%results_gs%etotal    =hist(iimage)%histE(ih)
          res_img(iimage)%results_gs%energies%entropy =hist(iimage)%histEnt(ih)
@@ -559,11 +559,11 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        call var2hist(res_img(iimage)%acell(:),hist(iimage),dtset%natom,&
 &                    rprimd,res_img(iimage)%xred(:,:),.FALSE.)
        call vel2hist(amass(:,iimage),hist(iimage),res_img(iimage)%vel(:,:))
-       hist(iimage)%histE(ih)       =res_img(iimage)%results_gs%etotal
-       hist(iimage)%histEnt(ih)     =res_img(iimage)%results_gs%energies%entropy
-       hist(iimage)%histXF(:,:,2,ih)=res_img(iimage)%results_gs%fcart(:,:)
-       hist(iimage)%histS(:,ih)     =res_img(iimage)%results_gs%strten(:)
-       hist(iimage)%histT(ih)       =real(itimimage,kind=dp)*dtion
+       hist(iimage)%histE(ih)    =res_img(iimage)%results_gs%etotal
+       hist(iimage)%histEnt(ih)  =res_img(iimage)%results_gs%energies%entropy
+       hist(iimage)%fcart(:,:,ih)=res_img(iimage)%results_gs%fcart(:,:)
+       hist(iimage)%histS(:,ih)  =res_img(iimage)%results_gs%strten(:)
+       hist(iimage)%histT(ih)    =real(itimimage,kind=dp)*dtion
      end if
 
    end do ! iimage

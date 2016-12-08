@@ -160,7 +160,7 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
- fcart(:,:)=hist%histXF(:,:,2,hist%ihist)
+ fcart(:,:)=hist%fcart(:,:,hist%ihist)
  strten(:)=hist%histS(:,hist%ihist)
  vel(:,:)=hist%histV(:,:,hist%ihist)
  etotal=hist%histE(hist%ihist)

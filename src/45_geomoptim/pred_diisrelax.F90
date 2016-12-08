@@ -225,7 +225,7 @@ implicit none
  if(zDEBUG)then
    write (std_out,*) 'fcart:'
    do kk=1,ab_mover%natom
-     write (std_out,*) hist%histXF(:,kk,2,hist%ihist)
+     write (std_out,*) hist%fcart(:,kk,hist%ihist)
    end do
    write (std_out,*) 'strten:'
    write (std_out,*) strten(1:3),ch10,strten(4:6)
@@ -236,13 +236,13 @@ implicit none
 !Need also history in cartesian coordinates
  ABI_ALLOCATE(xcart_hist,(3,ab_mover%natom,diisSize))
  do ii=1,diisSize
-   call xred2xcart(ab_mover%natom,rprimd,xcart_hist(:,:,ii),hist%histXF(:,:,1,ii+shift))
+   call xred2xcart(ab_mover%natom,rprimd,xcart_hist(:,:,ii),hist%xred(:,:,ii+shift))
  end do
- fcart_hist => hist%histXF(:,:,2,1+shift:diisSize+shift)
+ fcart_hist => hist%fcart(:,:,1+shift:diisSize+shift)
 
 !Get rid of mean force on whole unit cell, but only if no
 !generalized constraints are in effect
-!  call fcart2fred(hist%histXF(:,:,2,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
+!  call fcart2fred(hist%fcart(:,:,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
 !  if(ab_mover%nconeq==0)then
 !    do ii=1,3
 !      if (ii/=3.or.ab_mover%jellslab==0) then

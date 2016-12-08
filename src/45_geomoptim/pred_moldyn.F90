@@ -31,19 +31,8 @@
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!! hist<type abihist>=Historical record of positions, forces
-!!      |                    acell, stresses, and energies,
-!!      |                    contains:
-!!      | mxhist:  Maximun number of records
-!!      | histA:   Historical record of acell(A) and rprimd(R)
-!!      | histE:   Historical record of energy(E)
-!!      | histEk:  Historical record of Ionic kinetic energy(Ek)
-!!      | histEnt: Historical record of Entropy
-!!      | histT:   Historical record of time(T) (For MD or iteration for GO)
-!!      | histR:   Historical record of rprimd(R)
-!!      | histS:   Historical record of strten(S)
-!!      | histV:   Historical record of velocity(V)
-!!      | histXF:  Historical record of positions(X) and forces(F)
+!! hist<type abihist>=Historical record of positions, forces,
+!!                               stresses, cell and energies,
 !!
 !! ncycle: Number of cycles of a particular time step
 !!
@@ -59,7 +48,7 @@
 !!   first positions of itime=1, for itime>1 they will contain
 !!   positions in 2 previous steps, those values are different
 !!   from the values store in the history, thats the reason why
-!!   we cannot simply use histXF to obtain those positions.
+!!   we cannot simply use hist%xred to obtain those positions.
 !!
 !! PARENTS
 !!      mover
@@ -169,14 +158,14 @@ real(dp),pointer :: fcart_cur(:,:),fcart_prev(:,:),fcart_prev2(:,:)
 
  if (itime==1.or.itime==2)then
    ABI_ALLOCATE(xcart_prev,(3,ab_mover%natom))
-   call xred2xcart(ab_mover%natom,rprimd,xcart_prev,hist%histXF(:,:,1,1))
+   call xred2xcart(ab_mover%natom,rprimd,xcart_prev,hist%xred(:,:,1))
  end if
 
- fcart_cur => hist%histXF(:,:,2,hist%ihist)
- if (itime==2.and.icycle<2) fcart_prev  => hist%histXF(:,:,2,1)
- if (itime==3.and.icycle<3) fcart_prev2 => hist%histXF(:,:,2,1)
- if (itime >2.or. icycle>=2)fcart_prev  => hist%histXF(:,:,2,hist%ihist-1)
- if (itime >3.or. icycle>=3)fcart_prev2 => hist%histXF(:,:,2,hist%ihist-2)
+ fcart_cur => hist%fcart(:,:,hist%ihist)
+ if (itime==2.and.icycle<2) fcart_prev  => hist%fcart(:,:,1)
+ if (itime==3.and.icycle<3) fcart_prev2 => hist%fcart(:,:,1)
+ if (itime >2.or. icycle>=2)fcart_prev  => hist%fcart(:,:,hist%ihist-1)
+ if (itime >3.or. icycle>=3)fcart_prev2 => hist%fcart(:,:,hist%ihist-2)
 
  vel_cur  => hist%histV(:,:,hist%ihist)
  vel_next => hist%histV(:,:,hist%ihist+1)

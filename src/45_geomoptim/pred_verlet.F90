@@ -206,7 +206,7 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  do ii=1,3;rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3);end do
 
- fcart(:,:)  =hist%histXF(:,:,2,hist%ihist)
+ fcart(:,:)  =hist%fcart(:,:,hist%ihist)
  call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 
  vel(:,:)   =hist%histV(:,:,hist%ihist)

@@ -361,7 +361,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      write(std_out,*) 'The lowest energy occurs at iteration:',minIndex,'etotal=',minE
      acell(:)   =hist_prev%histA(:,minIndex)
      rprimd(:,:)=hist_prev%histR(:,:,minIndex)
-     xred(:,:)  =hist_prev%histXF(:,:,1,minIndex)
+     xred(:,:)  =hist_prev%xred(:,:,minIndex)
    end if
 
  end if !if (ab_mover%restartxf<=0)
@@ -505,7 +505,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
      change=any(xred(:,:)/=xred_prev(:,:))
      if (change)then
-       hist%histXF(:,:,1,hist%ihist)=xred(:,:)
+       hist%xred(:,:,hist%ihist)=xred(:,:)
        write(std_out,*) 'WARNING: ATOMIC COORDINATES WERE SYMMETRIZED'
        write(std_out,*) 'DIFFERENCES:'
        do kk=1,ab_mover%natom
@@ -608,7 +608,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        if (ab_mover%ionmov<10)then
          change=any(xred(:,:)/=xred_prev(:,:))
          if (change)then
-           hist%histXF(:,:,1,hist%ihist)=xred(:,:)
+           hist%xred(:,:,hist%ihist)=xred(:,:)
            write(std_out,*) 'WARNING: ATOMIC COORDINATES WERE SYMMETRIZED AFTER SCFCV'
            write(std_out,*) 'DIFFERENCES:'
            do kk=1,ab_mover%natom
@@ -619,11 +619,11 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
 !      Fill velocities and ionic kinetic energy
        call vel2hist(ab_mover%amass,hist,vel)
-       hist%histE(hist%ihist)       =scfcv_args%results_gs%etotal
-       hist%histEnt(hist%ihist)     =scfcv_args%results_gs%energies%entropy
-       hist%histXF(:,:,2,hist%ihist)=scfcv_args%results_gs%fcart(:,:)
-       hist%histS(:,hist%ihist)     =scfcv_args%results_gs%strten(:)
-       hist%histT(hist%ihist)       =real(itime,kind=dp)
+       hist%histE(hist%ihist)    =scfcv_args%results_gs%etotal
+       hist%histEnt(hist%ihist)  =scfcv_args%results_gs%energies%entropy
+       hist%fcart(:,:,hist%ihist)=scfcv_args%results_gs%fcart(:,:)
+       hist%histS(:,hist%ihist)  =scfcv_args%results_gs%strten(:)
+       hist%histT(hist%ihist)    =real(itime,kind=dp)
 
 !      !######################################################################
 
@@ -632,7 +632,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    Store trajectory in xfh file
      if(need_scfcv_cycle.and.(ab_xfh%nxfh==0.or.itime/=1)) then
        ABI_ALLOCATE(fred_corrected,(3,scfcv_args%dtset%natom))
-       call fcart2fred(hist%histXF(:,:,2,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
+       call fcart2fred(hist%fcart(:,:,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
 !      Get rid of mean force on whole unit cell,
 !       but only if no generalized constraints are in effect
        if (ab_mover%nconeq==0)then
@@ -692,7 +692,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      if(specs%isFconv)then
        if ((ab_mover%ionmov/=4.and.ab_mover%ionmov/=5).or.mod(itime,2)==1)then
          if (scfcv_args%dtset%tolmxf/=0)then
-           call fconv(hist%histXF(:,:,2,hist%ihist),&
+           call fconv(hist%fcart(:,:,hist%ihist),&
 &           scfcv_args%dtset%iatfix, &
 &           iexit,itime,&
 &           ab_mover%natom,&
@@ -821,7 +821,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
            call wrt_moldyn_netcdf(amass,scfcv_args%dtset,jj,option,dtfil%fnameabo_moldyn,&
 &           scfcv_args%mpi_enreg,scfcv_args%results_gs,&
 &           hist%histR(:,:,hist%ihist-1),dtfil%unpos,hist%histV(:,:,hist%ihist),&
-&           hist%histXF(:,:,1,hist%ihist-1))
+&           hist%xred(:,:,hist%ihist-1))
          end if
          if (iexit==1) hist%ihist=hist%ihist-1
        end if
@@ -907,7 +907,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
    ntime = itime-1
    if ((ab_mover%ionmov/=4.and.ab_mover%ionmov/=5)) then
      if (scfcv_args%dtset%tolmxf/=0)then
-       call fconv(hist%histXF(:,:,2,hist%ihist-1),&
+       call fconv(hist%fcart(:,:,hist%ihist-1),&
 &       scfcv_args%dtset%iatfix, &
 &       iexit, itime,&
 &       ab_mover%natom,&
