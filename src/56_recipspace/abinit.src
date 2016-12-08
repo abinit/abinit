@@ -18,7 +18,6 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
- "cg_outer_spin_product.F90",
  "cg_rotate.F90",
  "getcut.F90",
  "getkgrid.F90",
@@ -27,7 +26,6 @@ sources = [
  "getph.F90",
  "get_full_kgrid.F90",
  "get_kpt_fullbz.F90",
- "getspin_1state.F90",
  "initylmg.F90",
  "irrzg.F90",
  "kpgio.F90",
@@ -38,6 +36,7 @@ sources = [
  "m_bz_mesh.F90",
  "m_double_grid.F90",
  "m_gsphere.F90",
+ "m_kpts.F90",
  "m_nesting.F90",
  "m_skw.F90",
  "mkkin.F90",

@@ -29,29 +29,20 @@ module m_gkk
  use m_profiling_abi
  use m_xmpi
  use m_errors
- use m_kptrank
- use m_tetrahedron
  use m_ifc
  use m_ebands
- use iso_c_binding
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
  use m_time,           only : cwtime
- use m_fstrings,       only : toupper, itoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, wrap2_pmhalf, simpson_int, simpson, bisect, mkherm
- use m_io_tools,       only : open_file
- use m_special_funcs,  only : dirac_delta
- use m_geometry,       only : phdispl_cart2red
+ use m_fstrings,       only : itoa, sjoin, ktoa, ltoa, strcat
  use m_fftcore,        only : ngfft_seq
- use m_fft_mesh,       only : rotate_fft_mesh
- use m_dynmat,         only : d2sym3, symdyma, ftgam_init, ftgam
  use defs_datatypes,   only : ebands_t
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
- use m_bz_mesh,        only : isamek, make_path, findqg0
+ use m_bz_mesh,        only : findqg0
 
  implicit none
 
@@ -83,7 +74,6 @@ contains  !=====================================================================
 !! pawrad(ntypat*usepaw)<pawrad_type>=Paw radial mesh and related data.
 !! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
-!! n0(nsppol)=Electronic density at the Fermi level for each spin.
 !! comm=MPI communicator.
 !!
 !! OUTPUT
@@ -98,7 +88,7 @@ contains  !=====================================================================
 !! SOURCE
 
 subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,ebands_kq,dvdb,ifc,&
-                       pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
+                       pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
  use defs_basis
  use defs_datatypes
@@ -115,7 +105,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  use m_pawcprj
 
  use m_time,            only : sec2str
- use m_geometry,        only : phdispl_cart2red
  use m_fstrings,        only : sjoin, itoa, ftoa, ktoa
  use m_io_tools,        only : iomode_from_fname
  use m_cgtools,         only : dotprod_g
@@ -163,7 +152,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  type(mpi_type),intent(inout) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18),ngfftf(18)
- real(dp),intent(in) :: n0(ebands_k%nsppol)
  type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
@@ -303,7 +291,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*natom))
  call getph(cryst%atindx,natom,n1,n2,n3,ph1d,cryst%xred)
 
- ! Find the appropriate value of mpw 
+ ! Find the appropriate value of mpw
  mpw = 0; cnt=0
  do spin=1,nsppol
    do ik=1,nkpt
@@ -479,7 +467,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
          ! Use scissor shift on 0-order eigenvalue
          eshift = eig0nk - dtset%dfpt_sciss
 
-         call getgh1c(berryopt0,0,kets(:,:,ib2),cwaveprj0,h1_kets(:,:,ib2),&
+         call getgh1c(berryopt0,kets(:,:,ib2),cwaveprj0,h1_kets(:,:,ib2),&
 &                     grad_berry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,mpi_enreg,optlocal,&
 &                     optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
        end do

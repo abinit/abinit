@@ -78,7 +78,7 @@ _ WF disk file :      0.430 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -495,12 +495,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     284.500     284.488
   prteigrs : nnsclo,ikpt=   10   16 max resid (incl. the buffer)=  1.35044E-08
   prteigrs : nnsclo,ikpt=   10   19 max resid (incl. the buffer)=  3.60972E-10
 
- Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
- R(1)=  0.0000000  5.0900000  5.0900000  G(1)= -0.0982318  0.0982318  0.0982318
- R(2)=  5.0900000  0.0000000  5.0900000  G(2)=  0.0982318 -0.0982318  0.0982318
- R(3)=  5.0900000  5.0900000  0.0000000  G(3)=  0.0982318  0.0982318 -0.0982318
- Unit cell volume ucvol=  2.6374446E+02 bohr^3
- Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density

@@ -244,6 +244,7 @@ interface xmpi_allgather
   module procedure xmpi_allgather_int
   module procedure xmpi_allgather_char
   module procedure xmpi_allgather_int1d
+  module procedure xmpi_allgather_int2d
   module procedure xmpi_allgather_dp1d
   module procedure xmpi_allgather_dp2d
   module procedure xmpi_allgather_dp3d
@@ -260,6 +261,8 @@ interface xmpi_allgatherv
   module procedure xmpi_allgatherv_dp2d
   module procedure xmpi_allgatherv_dp3d
   module procedure xmpi_allgatherv_dp4d
+  module procedure xmpi_allgatherv_dp5d
+  module procedure xmpi_allgatherv_dp6d
   module procedure xmpi_allgatherv_coeff2d
   module procedure xmpi_allgatherv_coeff2d_indx
 end interface xmpi_allgatherv
@@ -324,6 +327,8 @@ interface xmpi_bcast
   module procedure xmpi_bcast_dp2d
   module procedure xmpi_bcast_dp3d
   module procedure xmpi_bcast_dp4d
+  module procedure xmpi_bcast_dp5d
+  module procedure xmpi_bcast_dp6d
   module procedure xmpi_bcast_spv
   module procedure xmpi_bcast_sp1d
   module procedure xmpi_bcast_sp2d
@@ -382,6 +387,8 @@ interface xmpi_gatherv
   module procedure xmpi_gatherv_dp2d
   module procedure xmpi_gatherv_dp3d
   module procedure xmpi_gatherv_dp4d
+  module procedure xmpi_gatherv_dp5d
+  module procedure xmpi_gatherv_dp6d
 end interface xmpi_gatherv
 
 !----------------------------------------------------------------------
@@ -461,6 +468,7 @@ interface xmpi_sum_master
   module procedure xmpi_sum_master_int
   module procedure xmpi_sum_master_int2d
   module procedure xmpi_sum_master_int4d
+  module procedure xmpi_sum_master_dp
   module procedure xmpi_sum_master_dp1d
   module procedure xmpi_sum_master_dp2d
   module procedure xmpi_sum_master_dp3d
@@ -730,6 +738,11 @@ subroutine xmpi_end()
 #ifdef HAVE_MPI
  call MPI_BARRIER(MPI_COMM_WORLD,mpierr)  !  Needed by some HPC architectures (MT, 20110315)
  call MPI_FINALIZE(mpierr)
+#endif
+
+#ifndef FC_IBM
+ ! IBM8 returns 260. 320 ...
+ call sys_exit(0)
 #endif
 
 end subroutine xmpi_end
@@ -2654,7 +2667,7 @@ pure function xmpi_distrib_with_replicas(itask,ntasks,rank,nprocs) result(bool)
 
 ! *************************************************************************
 
- ! If the number of processors is less than ntasks, we have max one task per processor, 
+ ! If the number of processors is less than ntasks, we have max one task per processor,
  ! else we replicate the tasks inside a pool of max size mnp_pool
  if (nprocs <= ntasks) then
    bool = (MODULO(itask-1, nprocs)==rank)
@@ -4232,7 +4245,7 @@ subroutine xmpio_write_frmarkers(fh,offset,sc_mode,nfrec,bsize_frecord,ierr)
    block_displ(jj+1)     = displ + bsize_frm + bsize_frecord(irec)
    jj=jj+2
    displ = displ + bsize_frecord(irec) + 2*bsize_frm ! Move to the beginning of the next column.
-   if (xmpio_max_address(displ)) then ! Check for wraparound. 
+   if (xmpio_max_address(displ)) then ! Check for wraparound.
       ierr = -1; return
    end if
  end do

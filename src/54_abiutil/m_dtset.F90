@@ -397,7 +397,7 @@ subroutine dtset_copy(dtout, dtin)
 
  dtout%bs_haydock_tol   = dtin%bs_haydock_tol
  dtout%bs_hayd_term     = dtin%bs_hayd_term
- 
+
  dtout%bs_interp_m3_width = dtin%bs_interp_m3_width
  dtout%bs_interp_method = dtin%bs_interp_method
  dtout%bs_interp_mode   = dtin%bs_interp_mode
@@ -446,19 +446,21 @@ subroutine dtset_copy(dtout, dtin)
  dtout%dmft_rslf          = dtin%dmft_rslf
  dtout%dmft_solv          = dtin%dmft_solv
  dtout%dmft_t2g           = dtin%dmft_t2g
+ dtout%dmft_tolfreq       = dtin%dmft_tolfreq
  dtout%dmft_tollc         = dtin%dmft_tollc
  dtout%dmftbandi          = dtin%dmftbandi
  dtout%dmftbandf          = dtin%dmftbandf
  dtout%dmftcheck          = dtin%dmftcheck
  dtout%dmftctqmc_basis    = dtin%dmftctqmc_basis
- dtout%dmftctqmc_check    = dtin%dmftctqmc_check 
+ dtout%dmftctqmc_check    = dtin%dmftctqmc_check
  dtout%dmftctqmc_correl   = dtin%dmftctqmc_correl
- dtout%dmftctqmc_gmove    = dtin%dmftctqmc_gmove 
- dtout%dmftctqmc_grnns    = dtin%dmftctqmc_grnns 
- dtout%dmftctqmc_meas     = dtin%dmftctqmc_meas  
- dtout%dmftctqmc_mrka     = dtin%dmftctqmc_mrka  
- dtout%dmftctqmc_mov      = dtin%dmftctqmc_mov   
- dtout%dmftctqmc_order    = dtin%dmftctqmc_order 
+ dtout%dmftctqmc_gmove    = dtin%dmftctqmc_gmove
+ dtout%dmftctqmc_grnns    = dtin%dmftctqmc_grnns
+ dtout%dmftctqmc_meas     = dtin%dmftctqmc_meas
+ dtout%dmftctqmc_mrka     = dtin%dmftctqmc_mrka
+ dtout%dmftctqmc_mov      = dtin%dmftctqmc_mov
+ dtout%dmftctqmc_order    = dtin%dmftctqmc_order
+ dtout%dmftctqmc_triqs_nleg = dtin%dmftctqmc_triqs_nleg
  dtout%dmftqmc_n          = dtin%dmftqmc_n
  dtout%dmftqmc_l          = dtin%dmftqmc_l
  dtout%dmftqmc_seed       = dtin%dmftqmc_seed
@@ -490,7 +492,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%eph_fsewin         = dtin%eph_fsewin
  dtout%eph_ngqpt_fine     = dtin%eph_ngqpt_fine
  dtout%eph_task           = dtin%eph_task
- dtout%eph_transport      = dtin%eph_transport 
+ dtout%eph_transport      = dtin%eph_transport
 
  dtout%ph_wstep          = dtin%ph_wstep
  dtout%ph_intmeth        = dtin%ph_intmeth
@@ -570,16 +572,16 @@ subroutine dtset_copy(dtout, dtin)
  dtout%gwls_npt_gauss_quad  = dtin%gwls_npt_gauss_quad
  dtout%gwls_dielectric_model= dtin%gwls_dielectric_model
  dtout%gwls_print_debug     = dtin%gwls_print_debug
- dtout%gwls_nseeds          = dtin%gwls_nseeds               
- dtout%gwls_n_proj_freq     = dtin%gwls_n_proj_freq               
- dtout%gwls_kmax_complement = dtin%gwls_kmax_complement 
- dtout%gwls_kmax_poles      = dtin%gwls_kmax_poles      
+ dtout%gwls_nseeds          = dtin%gwls_nseeds
+ dtout%gwls_n_proj_freq     = dtin%gwls_n_proj_freq
+ dtout%gwls_kmax_complement = dtin%gwls_kmax_complement
+ dtout%gwls_kmax_poles      = dtin%gwls_kmax_poles
  dtout%gwls_kmax_analytic   = dtin%gwls_kmax_analytic
  dtout%gwls_kmax_numeric    = dtin%gwls_kmax_numeric
- dtout%gwls_band_index      = dtin%gwls_band_index      
- dtout%gwls_exchange        = dtin%gwls_exchange        
- dtout%gwls_correlation     = dtin%gwls_correlation     
- dtout%gwls_first_seed      = dtin%gwls_first_seed      
+ dtout%gwls_band_index      = dtin%gwls_band_index
+ dtout%gwls_exchange        = dtin%gwls_exchange
+ dtout%gwls_correlation     = dtin%gwls_correlation
+ dtout%gwls_first_seed      = dtin%gwls_first_seed
  dtout%gwls_recycle         = dtin%gwls_recycle
  dtout%iboxcut            = dtin%iboxcut
  dtout%icoulomb           = dtin%icoulomb
@@ -624,8 +626,8 @@ subroutine dtset_copy(dtout, dtin)
  dtout%localrdwf          = dtin%localrdwf
 #if defined HAVE_LOTF
  dtout%lotf_classic       = dtin%lotf_classic
- dtout%lotf_nitex         = dtin%lotf_nitex  
- dtout%lotf_nneigx        = dtin%lotf_nneigx 
+ dtout%lotf_nitex         = dtin%lotf_nitex
+ dtout%lotf_nneigx        = dtin%lotf_nneigx
  dtout%lotf_version       = dtin%lotf_version
 #endif
  dtout%magconon           = dtin%magconon
@@ -780,19 +782,20 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtnabla           = dtin%prtnabla
  dtout%prtnest            = dtin%prtnest
  dtout%prtphdos           = dtin%prtphdos
+ dtout%prtphsurf          = dtin%prtphsurf
  dtout%prtposcar          = dtin%prtposcar
  dtout%prtpot             = dtin%prtpot
  dtout%prtpsps            = dtin%prtpsps
  dtout%prtspcur           = dtin%prtspcur
  dtout%prtsuscep          = dtin%prtsuscep
  dtout%prtstm             = dtin%prtstm
- dtout%prtvclmb           = dtin%prtvclmb  
+ dtout%prtvclmb           = dtin%prtvclmb
  dtout%prtvdw             = dtin%prtvdw
  dtout%prtvha             = dtin%prtvha
  dtout%prtvhxc            = dtin%prtvhxc
  dtout%prtvol             = dtin%prtvol
  dtout%prtvolimg          = dtin%prtvolimg
- dtout%prtvpsp            = dtin%prtvpsp   
+ dtout%prtvpsp            = dtin%prtvpsp
  dtout%prtvxc             = dtin%prtvxc
  dtout%prtwant            = dtin%prtwant
  dtout%prtwf              = dtin%prtwf
@@ -972,6 +975,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%postoldfe          = dtin%postoldfe
  dtout%postoldff          = dtin%postoldff
  dtout%ppmfrq             = dtin%ppmfrq
+ dtout%pw_unbal_thresh    = dtin%pw_unbal_thresh
  dtout%ratsph_extra       = dtin%ratsph_extra
  dtout%recrcut            = dtin%recrcut
  dtout%recefermi          = dtin%recefermi
@@ -988,7 +992,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%tl_nprccg          = dtin%tl_nprccg
  dtout%td_maxene          = dtin%td_maxene
  dtout%toldfe             = dtin%toldfe
- dtout%tolmxde          = dtin%tolmxde
+ dtout%tolmxde            = dtin%tolmxde
  dtout%toldff             = dtin%toldff
  dtout%tolimg             = dtin%tolimg
  dtout%tolmxf             = dtin%tolmxf
@@ -1112,7 +1116,7 @@ subroutine dtset_copy(dtout, dtin)
 
  call alloc_copy( dtin%gw_freqsp, dtout%gw_freqsp)
 
- call alloc_copy( dtin%gwls_list_proj_freq, dtout%gwls_list_proj_freq) 
+ call alloc_copy( dtin%gwls_list_proj_freq, dtout%gwls_list_proj_freq)
 
  call alloc_copy( dtin%jpawu, dtout%jpawu)
 

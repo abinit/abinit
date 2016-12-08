@@ -826,10 +826,23 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    specs%method = 'Using LOTF Molecular dynamics'
+!  This is the initialization for ionmov==31
+!  -------------------------------------------
+ case (31)
+   specs%ncycle=1 ! Number of internal cycles for first itime
+   specs%isFconv=.FALSE.     ! Convergence is not used for MD
+   specs%isVused=.FALSE. ! Velocities are used
+!  TEMPORARLY optcell is not allow
+   specs%isARused=.FALSE.
+!  Values use in XML Output
+   specs%type4xml='none'
+   specs%crit4xml='none'
+!  Name of specs%method
+   write(specs%method,'(a,1p,e12.5,a)')&
+     'Monte carlo'
  case default
    write(msg,"(a,i0)")"Wrong value for ionmov: ",ab_mover%ionmov
  end select
-
 end subroutine abimover_ini
 !!***
 

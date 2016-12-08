@@ -363,7 +363,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
    call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 
    if(itime==1.and.ifirst==1) then
-     write(std_out,*) 'if itime==1'
+     call wrtout(std_out,'if itime==1','COLL')
      vel_nexthalf(:,:)=vel(:,:)
      xcart_next(:,:)=xcart(:,:)
      call xcart2xred(ab_mover%natom,rprimd,xcart_next,xred_next)
@@ -383,10 +383,10 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
      b=b+fcart_m(idim,iatom)*fcart_m(idim,iatom)*ab_mover%amass(iatom)
    end do
  end do
- a=a/v2gauss
- b=b/v2gauss
+ a=a/v2gauss+tol20
+ b=b/v2gauss+tol20
 !Computation of s and scdot
- sqb=sqrt(b)
+ sqb=sqrt(b)+tol20
  as=sqb*ab_mover%dtion/2.
 ! jmb
  if ( as > 300.0 ) as=300.0
@@ -394,7 +394,6 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  s2=sinh(as)
  s=a*(s1-1.)/b+s2/sqb
  scdot=a*s2/sqb+s1
-
  vel_nexthalf(:,:)=(vel(:,:)+fcart_m(:,:)*s)/scdot
 
 !Computation of the next positions
@@ -408,6 +407,7 @@ subroutine pred_isokinetic(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  end if
 
 !Convert back to xred (reduced coordinates)
+
  call xcart2xred(ab_mover%natom,rprimd,xcart_next,xred_next)
 
 !write(std_out,*) 'isokinetic 06'

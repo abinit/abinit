@@ -70,7 +70,7 @@ subroutine initmpi_seq(mpi_enreg)
  mpi_enreg%me_band=0
  mpi_enreg%me_cell=0
  mpi_enreg%me_fft=0
- mpi_enreg%me_g0=0
+ mpi_enreg%me_g0=1
  mpi_enreg%me_img=0
  mpi_enreg%me_hf=0
  mpi_enreg%me_kpt=0
@@ -98,7 +98,8 @@ subroutine initmpi_seq(mpi_enreg)
  mpi_enreg%paral_kgb=0
  mpi_enreg%paral_pert=0
  mpi_enreg%paral_spinor=0
- 
+ mpi_enreg%pw_unbal_thresh=-1._dp
+
 !Set default seq values for communicators
  mpi_enreg%comm_world          = xmpi_world
  mpi_enreg%comm_atom           = xmpi_comm_self

@@ -143,6 +143,8 @@ subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
  use m_exit,             only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
  use m_electronpositron, only : electronpositron_type
  use m_scfcv,            only : scfcv_t, scfcv_run
+ use m_effective_potential
+ use m_monte_carlo
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -164,13 +166,8 @@ implicit none
 !Arguments ------------------------------------
 !scalars
 type(scfcv_t),intent(inout) :: scfcv_args
-!type(MPI_type),intent(inout) :: mpi_enreg
 type(datafiles_type),intent(inout),target :: dtfil
-!type(dataset_type),intent(inout),target :: dtset
 type(electronpositron_type),pointer :: electronpositron
-!type(paw_dmft_type) :: paw_dmft
-!type(ab_scfcv_args_in),intent(inout) :: ab_scfcv_in
-!type(ab_scfcv_args_inout),intent(inout) :: ab_scfcv_inout
 type(ab_xfh_type),intent(inout) :: ab_xfh
 !arrays
 !no_abirules
@@ -179,6 +176,7 @@ real(dp), intent(in),target :: amass(:) !(scfcv%dtset%natom) cause segfault of g
 real(dp), pointer :: rhog(:,:),rhor(:,:)
 real(dp), intent(inout) :: xred(3,scfcv_args%dtset%natom),xred_old(3,scfcv_args%dtset%natom)
 real(dp), intent(inout) :: vel(3,scfcv_args%dtset%natom),vel_cell(3,3),rprimd(3,3)
+type(effective_potential_type),optional,intent(in) :: effective_potential
 
 !Local variables-------------------------------
 !scalars
@@ -198,8 +196,8 @@ character(len=8) :: stat4xml
 character(len=35) :: fmt
 character(len=fnlen) :: filename
 real(dp) :: ucvol,favg
-!TEST
 logical :: DEBUG=.FALSE.
+logical :: need_scfcv_cycle = .TRUE.
 logical :: change,useprtxfase
 logical :: skipcycle
 integer :: minIndex,ii,similar,conv_retcode
@@ -307,6 +305,10 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 & dtfil%fnameabi_hes,&
 & dtfil%filnam_ds)
 
+ if (ab_mover%ionmov==31.and..not.present(effective_potential)) then
+   MSG_BUG("effective_potential is not present.")
+ end if
+
  if (ab_mover%ionmov==13)then
    call mttk_ini(mttk_vars,ab_mover%nnos)
  end if
@@ -380,11 +382,22 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !###########################################################
 !### 06. First output before any itime or icycle
 
- write(message,'(a,a,i2,a,a,a,80a)')&
-& ch10,'=== [ionmov=',ab_mover%ionmov,'] ',specs%method,&
-& ch10,('=',kk=1,80)
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+!If effective potential is present,
+!  forces will be compute with it
+ if (present(effective_potential)) then
+   need_scfcv_cycle = .FALSE.
+   write(message,'(a,a,i2,a,a,a,a,80a)')&
+     & ch10,'=== [ionmov=',ab_mover%ionmov,'] ',trim(specs%method),&
+     & ' with effective potential',ch10,('=',kk=1,80)
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+ else
+   write(message,'(a,a,i2,a,a,a,80a)')&
+&   ch10,'=== [ionmov=',ab_mover%ionmov,'] ',specs%method,&
+&   ch10,('=',kk=1,80)
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+ end if
 
 !Format for printing on each cycle
  write(fmt,'(a6,i2,a4,i2,a4,i2,a4,i2,a9)')&
@@ -441,8 +454,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      now = abi_wtime()
      wtime_step = now - prev
      prev = now
-     write(std_out,*)sjoin("mover: previous time step took ",sec2str(wtime_step))
-
+     write(message,*)sjoin("mover: previous time step took ",sec2str(wtime_step))
+     call wrtout(std_out, message, "COLL")
      if (have_timelimit_in(ABI_FUNC)) then
        if (itime > 2) then
          call xmpi_wait(quitsum_request,ierr)
@@ -503,9 +516,15 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
 !    ###########################################################
 !    ### 12. => Call to SCFCV routine and fill history with forces
-     write(message,'(a,3a,33a,44a)')&
-&     ch10,('-',kk=1,3),&
-&     'SELF-CONSISTENT-FIELD CONVERGENCE',('-',kk=1,44)
+     if (need_scfcv_cycle) then
+       write(message,'(a,3a,33a,44a)')&
+&        ch10,('-',kk=1,3),&
+&        'SELF-CONSISTENT-FIELD CONVERGENCE',('-',kk=1,44)
+     else
+       write(message,'(a,3a,33a,44a)')&
+&        ch10,('-',kk=1,3),&
+&        'EFFECTIVE POTENTIAL CALCULATION',('-',kk=1,44)
+     end if
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
 
@@ -525,6 +544,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 #if defined HAVE_LOTF
        if (ab_mover%ionmov/=23 .or.(lotf_extrapolation(itime).and.(icycle/=1.or.itime==1)))then
 #endif
+         !call scfcv_new2(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
          !WVL - reformat the wavefunctions in the case of xred != xred_old
          if (scfcv_args%dtset%usewvl == 1 .and. maxval(xred_old - xred) > zero) then
@@ -543,12 +563,22 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
          end if
 
 !        MAIN CALL TO SELF-CONSISTENT FIELD ROUTINE
-         call dtfil_init_time(dtfil,iapp)
-         call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
+         if (need_scfcv_cycle) then
+           call dtfil_init_time(dtfil,iapp)
+           call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)   
+           if (conv_retcode == -1) then
+             message = "Scf cycle returned conv_retcode == -1 (timelimit is approaching), this should not happen inside mover"
+             MSG_WARNING(message)
+           end if
 
-         if (conv_retcode == -1) then
-           message = "Scf cycle returned conv_retcode == -1 (timelimit is approaching), this should not happen inside mover"
-           MSG_WARNING(message)
+         else if(ab_mover%ionmov /= 31) then
+!          For monte carlo don't need to recompute energy here
+!          (done in pred_montecarlo)
+           call xred2xcart
+           call effective_potential_evaluate( &
+&               effective_potential,scfcv_args%results_gs%etotal,&
+&               scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
+&               scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred)
          end if
 
 #if defined HAVE_LOTF
@@ -686,7 +716,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    ###########################################################
 !    ### 16. => Precondition forces, stress and energy
 
-     write(std_out,*) 'Geometry Optimization Precondition:',ab_mover%goprecon
+     write(message,*) 'Geometry Optimization Precondition:',ab_mover%goprecon
+     call wrtout(std_out,message,'COLL')
      if (ab_mover%goprecon>0)then
        call prec_simple(ab_mover,preconforstr,hist,icycle,itime,0)
      end if
@@ -734,16 +765,20 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        case (23)
          call pred_lotf(ab_mover,hist,itime,icycle,DEBUG,iexit)
 #endif
+       case (31)         
+         call monte_carlo_step(ab_mover,effective_potential,hist,itime,ntime,DEBUG,iexit)
+         write(std_out,*) "Developpement Monte carlo"
        case default
-         write(message,"(a,i0)")"Wrong value of ionmov: ",ab_mover%ionmov
+         write(message,"(a,i0)") "Wrong value of ionmov: ",ab_mover%ionmov
          MSG_ERROR(message)
        end select
 
      end do
 
      ! check dilatmx here and correct if necessary
-     if (scfcv_args%dtset%usewvl == 0) then
-       call chkdilatmx(scfcv_args%dtset%dilatmx,rprimd,scfcv_args%dtset%rprimd_orig(1:3,1:3,1), dilatmx_errmsg)
+     if (need_scfcv_cycle.and.scfcv_args%dtset%usewvl == 0) then
+       call chkdilatmx(scfcv_args%dtset%dilatmx,rprimd,scfcv_args%dtset%rprimd_orig(1:3,1:3,1),&
+&                      dilatmx_errmsg)
        _IBM6("dilatxm_errmsg: "//TRIM(dilatmx_errmsg))
 
        if (LEN_TRIM(dilatmx_errmsg) /= 0) then
@@ -755,8 +790,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
            ! zion is not available, but it's not useful here.
            if (me == master) then
              ! Init crystal
-             call crystal_init(crystal,0,ab_mover%natom,scfcv_args%dtset%npsp,ab_mover%ntypat,&
-&             scfcv_args%dtset%nsym,rprimd,ab_mover%typat,xred,&
+             call crystal_init(scfcv_args%dtset%amu_orig(:,1),crystal,0,ab_mover%natom,&
+&             scfcv_args%dtset%npsp,ab_mover%ntypat,scfcv_args%dtset%nsym,rprimd,ab_mover%typat,xred,&
 &             [(-one, ii=1,ab_mover%ntypat)],ab_mover%znucl,2,.False.,.False.,"dilatmx_structure",&
 &             symrel=scfcv_args%dtset%symrel,tnons=scfcv_args%dtset%tnons,symafm=scfcv_args%dtset%symafm)
 
@@ -777,7 +812,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
          end if
        end if
      end if
-
 
 !    Write MOLDYN netcdf and POSABIN files (done every dtset%nctime time step)
      if(ab_mover%ionmov/=23 .or. icycle==1)then
@@ -850,9 +884,10 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        exit
      end if
 
-     write(std_out,*) 'ICYCLE',icycle,skipcycle
-     write(std_out,*) 'NCYCLE',ncycle
-
+     write(message,*) 'ICYCLE',icycle,skipcycle
+     call wrtout(std_out,message,'COLL')
+     write(message,*) 'NCYCLE',ncycle
+     call wrtout(std_out,message,'COLL')
      if (skipcycle) exit
 
 !    write(std_out,*) 'mover 18'
