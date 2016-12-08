@@ -419,7 +419,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        do iimage=1,nimage
          call abihist_copy(hist_prev(iimage),hist(iimage))
          ih=hist(iimage)%ihist
-         call mkradim(hist(iimage)%acell(:,ih),rprim,hist(iimage)%histR(:,:,ih))
+         call mkradim(hist(iimage)%acell(:,ih),rprim,hist(iimage)%rprimd(:,:,ih))
          res_img(iimage)%acell(:)     =hist(iimage)%acell(:,ih)
          res_img(iimage)%rprim(:,:)   =rprim
          res_img(iimage)%xred(:,:)    =hist(iimage)%xred(:,:,ih)
@@ -430,7 +430,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          res_img(iimage)%results_gs%etotal    =hist(iimage)%histE(ih)
          res_img(iimage)%results_gs%energies%entropy =hist(iimage)%histEnt(ih)
          call fcart2fred(res_img(iimage)%results_gs%fcart,res_img(iimage)%results_gs%fred,&
-&                        hist(iimage)%histR(:,:,ih),dtset%natom)
+&                        hist(iimage)%rprimd(:,:,ih),dtset%natom)
          hist_prev(iimage)%ihist=hist_prev(iimage)%ihist+1
          !hist(iimage)%ihist=hist(iimage)%ihist+1
        end do

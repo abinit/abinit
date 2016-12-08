@@ -90,13 +90,13 @@ implicit none
 !arrays
  logical :: atlist(ab_mover%natom)
  real(dp),allocatable :: fred(:,:),xcart(:,:)
- real(dp),pointer :: fcart(:,:),rprimd(:,:),xred(:,:)
+ real(dp),pointer :: acell(:),fcart(:,:),rprimd(:,:),strten(:),vel(:,:),xred(:,:)
 
 ! ***********************************************************
 
  fmt1='(a,a,1p,3e22.14)'
 
-!###########################################################
+!##########################################################
 !### 1. Organize list of atoms to print
 
  prtallatoms=.TRUE.
@@ -109,9 +109,12 @@ implicit none
    if (ab_mover%prtatlist(iprt)>0.and.ab_mover%prtatlist(iprt)<=ab_mover%natom) atlist(ab_mover%prtatlist(iprt))=.TRUE.
  end do
 
+ acell  => hist%acell(:,hist%ihist)
+ rprimd => hist%rprimd(:,:,hist%ihist)
  xred   => hist%xred(:,:,hist%ihist)
  fcart  => hist%fcart(:,:,hist%ihist)
- rprimd => hist%histR(:,:,hist%ihist)
+ strten => hist%histS(:,hist%ihist)
+ vel    => hist%histV(:,:,hist%ihist)
 
 !###########################################################
 !### 1. Positions
@@ -182,8 +185,8 @@ implicit none
        do jj=1,3
          if (ab_mover%iatfix(jj,kk) /= 1) then
            unfixd=unfixd+1
-           val_rms=val_rms+hist%histV(jj,kk,hist%ihist)**2
-           val_max=max(val_max,abs(hist%histV(jj,kk,hist%ihist)**2))
+           val_rms=val_rms+vel(jj,kk)**2
+           val_max=max(val_max,abs(vel(jj,kk)**2))
          end if
        end do
      end do
@@ -192,8 +195,7 @@ implicit none
      write(message, '(a,1p,2e12.5,a)' ) &
 &     ' Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms=',&
 &     sqrt(val_max),val_rms,' (free atoms)'
-     call prtnatom(atlist,iout,message,ab_mover%natom,&
-&     prtallatoms,hist%histV(:,:,hist%ihist))
+     call prtnatom(atlist,iout,message,ab_mover%natom,prtallatoms,vel)
 
 !    Compute the ionic kinetic energy (no cell shape kinetic energy yet)
      ekin=0.0_dp
@@ -202,7 +204,7 @@ implicit none
 !        Warning : the fixing of atoms is implemented in reduced
 !        coordinates, so that this expression is wrong
          if (ab_mover%iatfix(jj,kk) == 0) then
-           ekin=ekin+0.5_dp*ab_mover%amass(kk)*hist%histV(jj,kk,hist%ihist)**2
+           ekin=ekin+0.5_dp*ab_mover%amass(kk)*vel(jj,kk)**2
          end if
        end do
      end do
@@ -224,8 +226,7 @@ implicit none
      write(message, '(a)' ) &
 &     ' Scale of Primitive Cell (acell) [bohr]'
      write(message,fmt1)&
-&     TRIM(message),ch10,&
-&     hist%acell(:,hist%ihist)
+&     TRIM(message),ch10,acell(:)
      call wrtout(iout,message,'COLL')
    end if
  end if
@@ -236,13 +237,13 @@ implicit none
 !Only if the acell is being used
  if (hist%isARused)then
 !  Only if rprimd is recorded in a history
-   if (allocated(hist%histR))then
+   if (allocated(hist%rprimd))then
      write(message, '(a)' ) &
 &     ' Real space primitive translations (rprimd) [bohr]'
      do kk=1,3
        write(message,fmt1)&
 &       TRIM(message),ch10,&
-&       hist%histR(:,kk,hist%ihist)
+&       rprimd(:,kk)
      end do
      call wrtout(iout,message,'COLL')
    end if
@@ -253,15 +254,10 @@ implicit none
 
  if (ab_mover%optcell/=0)then
 
-   ucvol=hist%histR(1,1,hist%ihist)*&
-&   (hist%histR(2,2,hist%ihist)*hist%histR(3,3,hist%ihist)-&
-&   hist%histR(3,2,hist%ihist)*hist%histR(2,3,hist%ihist))+&
-&   hist%histR(2,1,hist%ihist)*&
-&   (hist%histR(3,2,hist%ihist)*hist%histR(1,3,hist%ihist)-&
-&   hist%histR(1,2,hist%ihist)*hist%histR(3,3,hist%ihist))+&
-&   hist%histR(3,1,hist%ihist)*&
-&   (hist%histR(1,2,hist%ihist)*hist%histR(2,3,hist%ihist)-&
-&   hist%histR(2,2,hist%ihist)*hist%histR(1,3,hist%ihist))
+   ucvol=&
+&   rprimd(1,1)*(rprimd(2,2)*rprimd(3,3)-rprimd(3,2)*rprimd(2,3))+&
+&   rprimd(2,1)*(rprimd(3,2)*rprimd(1,3)-rprimd(1,2)*rprimd(3,3))+&
+&   rprimd(3,1)*(rprimd(1,2)*rprimd(2,3)-rprimd(2,2)*rprimd(1,3))
 
    write(message, '(a,1p,e22.14)' )&
 &   ' Unitary Cell Volume (ucvol) [Bohr^3]=',&
@@ -272,7 +268,7 @@ implicit none
 !  ### 5. Angles and lengths
 
 !  Compute real space metric.
-   rmet = MATMUL(TRANSPOSE(hist%histR(:,:,hist%ihist)),hist%histR(:,:,hist%ihist))
+   rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
 
    angle(1)=acos(rmet(2,3)/sqrt(rmet(2,2)*rmet(3,3)))/two_pi*360.0d0
    angle(2)=acos(rmet(1,3)/sqrt(rmet(1,1)*rmet(3,3)))/two_pi*360.0d0
@@ -305,19 +301,13 @@ implicit none
 
        write(message,fmt1)&
 &       TRIM(message),ch10,&
-&       hist%histS(1,hist%ihist),&
-&       hist%histS(6,hist%ihist),&
-&       hist%histS(5,hist%ihist)
+&       strten(1),strten(6),strten(5)
        write(message,fmt1)&
 &       TRIM(message),ch10,&
-&       hist%histS(6,hist%ihist),&
-&       hist%histS(2,hist%ihist),&
-&       hist%histS(4,hist%ihist)
+&       strten(6),strten(2),strten(4)
        write(message,fmt1)&
 &       TRIM(message),ch10,&
-&       hist%histS(5,hist%ihist),&
-&       hist%histS(4,hist%ihist),&
-&       hist%histS(3,hist%ihist)
+&       strten(5),strten(4),strten(3)
        call wrtout(iout,message,'COLL')
      end if
    end if

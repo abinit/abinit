@@ -472,16 +472,13 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
    if (etotal>hist%histE(hist%ihist-1).and.icycle==2) then
 
 !    Discard the changes
+     acell(:)   =hist%acell(:,hist%ihist-1)
+     rprimd(:,:)=hist%rprimd(:,:,hist%ihist-1)
      xred(:,:)  =hist%xred(:,:,hist%ihist-1)
      fcart(:,:) =hist%fcart(:,:,hist%ihist-1)
-     vel(:,:)   =hist%histV(:,:,hist%ihist-1)
-
-     etotal     =hist%histE(hist%ihist-1)
-
-     acell(:)   =hist%acell(:,hist%ihist-1)
-     rprimd(:,:)=hist%histR(:,:,hist%ihist-1)
      strten(:)  =hist%histS(:,hist%ihist-1)
-
+     vel(:,:)   =hist%histV(:,:,hist%ihist-1)
+     etotal     =hist%histE(hist%ihist-1)
      call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 
 !    distx=xcart(1,iatom1)

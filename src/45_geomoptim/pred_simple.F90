@@ -102,7 +102,7 @@ subroutine pred_simple(ab_mover,hist,iexit)
 !RPRIMD
  do kk=1,3
    do jj=1,3
-     hist%histR(jj,kk,hist%ihist+1)=hist%histR(jj,kk,hist%ihist)
+     hist%rprimd(jj,kk,hist%ihist+1)=hist%rprimd(jj,kk,hist%ihist)
    end do
  end do
 

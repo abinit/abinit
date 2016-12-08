@@ -119,9 +119,9 @@ subroutine prec_simple(ab_mover,forstr,hist,icycle,itime,iexit)
 !##########################################################
 !### 02. Take the coordinates and cell parameters from HIST
 
- rprimd(:,:)=hist%histR(:,:,hist%ihist)
- call xred2xcart(ab_mover%natom,hist%histR(:,:,hist%ihist),xcart,hist%xred(:,:,hist%ihist))
+ rprimd(:,:)=hist%rprimd(:,:,hist%ihist)
  fcart(:,:)=hist%fcart(:,:,hist%ihist)
+ call xred2xcart(ab_mover%natom,rprimd,xcart,hist%xred(:,:,hist%ihist))
 
 !##########################################################
 !### 03. Decide based on kind of precondiotioner if

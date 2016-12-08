@@ -70,7 +70,7 @@ module m_abihist
 !! * histEk(mxhist)          : Ionic Kinetic Energy
 !! * histEnt(mxhist)         : Entropy
 !! * histT(mxhist)           : Time (Or iteration number for GO)
-!! * histR(3,3,mxhist)       : Rprimd
+!! * rprimd(3,3,mxhist)      : Rprimd
 !! * histS(6,mxhist)         : Strten
 !! * histV(3,natom,mxhist)   : Velocity
 !! * xred(3,natom,mxhist)    : Xred
@@ -113,7 +113,7 @@ module m_abihist
 ! Vector of (mxhist) values of time (relevant for MD calculations)
     real(dp), allocatable :: histT(:)
 ! Vector of (x,y,z)X(x,y,z)X(mxhist)
-    real(dp), allocatable :: histR(:,:,:)
+    real(dp), allocatable :: rprimd(:,:,:)
 ! Vector of (stress [6])X(mxhist)
     real(dp), allocatable :: histS(:,:)
 ! Vector of (x,y,z)X(natom)X(mxhist) values of velocity
@@ -216,7 +216,7 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
  ABI_ALLOCATE(hist%histEk,(mxhist))
  ABI_ALLOCATE(hist%histEnt,(mxhist))
  ABI_ALLOCATE(hist%histT,(mxhist))
- ABI_ALLOCATE(hist%histR,(3,3,mxhist))
+ ABI_ALLOCATE(hist%rprimd,(3,3,mxhist))
  ABI_ALLOCATE(hist%histS,(6,mxhist))
  ABI_ALLOCATE(hist%histV,(3,natom,mxhist))
  ABI_ALLOCATE(hist%xred,(3,natom,mxhist))
@@ -228,7 +228,7 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
  hist%histT(1)=zero
 
  hist%acell(:,1)=zero
- hist%histR(:,:,1)=zero
+ hist%rprimd(:,:,1)=zero
  hist%histS(:,1)=zero
  hist%histV(:,:,1)=zero
  hist%xred(:,:,1)=zero
@@ -355,8 +355,8 @@ subroutine abihist_free_0D(hist)
    ABI_DEALLOCATE(hist%histT)
  end if
 ! Vector of (x,y,z)X(x,y,z)X(mxhist)
- if (allocated(hist%histR))  then
-   ABI_DEALLOCATE(hist%histR)
+ if (allocated(hist%rprimd))  then
+   ABI_DEALLOCATE(hist%rprimd)
  end if
 ! Vector of (stress [6])X(mxhist)
  if (allocated(hist%histS))  then
@@ -520,7 +520,7 @@ subroutine abihist_bcast_0D(hist,master,comm)
    sizeA1=size(hist%acell,1);sizeA2=size(hist%acell,2)
    sizeE=size(hist%histE,1);sizeEk=size(hist%histEk,1);
    sizeEnt=size(hist%histEnt,1);sizeT=size(hist%histT,1)
-   sizeR1=size(hist%histR,1);sizeR2=size(hist%histR,2);sizeR3=size(hist%histR,3)
+   sizeR1=size(hist%rprimd,1);sizeR2=size(hist%rprimd,2);sizeR3=size(hist%rprimd,3)
    sizeS1=size(hist%histS,1);sizeS2=size(hist%histS,2)
    sizeV1=size(hist%histV,1);sizeV2=size(hist%histV,2);sizeV3=size(hist%histV,3)
    sizeX1=size(hist%xred,1);sizeX2=size(hist%xred,2);sizeX3=size(hist%xred,3)
@@ -568,7 +568,7 @@ subroutine abihist_bcast_0D(hist,master,comm)
    indx=indx+sizeEnt
    buffer_r(indx+1:indx+sizeT)=hist%histT(1:sizeT)
    indx=indx+sizeT
-   buffer_r(indx+1:indx+sizeR)=reshape(hist%histR(1:sizeR1,1:sizeR2,1:sizeR3),(/sizeR/))
+   buffer_r(indx+1:indx+sizeR)=reshape(hist%rprimd(1:sizeR1,1:sizeR2,1:sizeR3),(/sizeR/))
    indx=indx+sizeR
    buffer_r(indx+1:indx+sizeS)=reshape(hist%histS(1:sizeS1,1:sizeS2),(/sizeS/))
    indx=indx+sizeS
@@ -584,7 +584,7 @@ subroutine abihist_bcast_0D(hist,master,comm)
    ABI_ALLOCATE(hist%histEk,(sizeEk))
    ABI_ALLOCATE(hist%histEnt,(sizeEnt))
    ABI_ALLOCATE(hist%histT,(sizeT))
-   ABI_ALLOCATE(hist%histR,(sizeR1,sizeR2,sizeR3))
+   ABI_ALLOCATE(hist%rprimd,(sizeR1,sizeR2,sizeR3))
    ABI_ALLOCATE(hist%histS,(sizeS1,sizeS2))
    ABI_ALLOCATE(hist%histV,(sizeV1,sizeV2,sizeV3))
    ABI_ALLOCATE(hist%xred,(sizeX1,sizeX2,sizeX3))
@@ -604,7 +604,7 @@ subroutine abihist_bcast_0D(hist,master,comm)
    indx=indx+sizeEnt
    hist%histT(1:sizeT)=buffer_r(indx+1:indx+sizeT)
    indx=indx+sizeT
-   hist%histR(1:sizeR1,1:sizeR2,1:sizeR3)=reshape(buffer_r(indx+1:indx+sizeR),(/sizeR1,sizeR2,sizeR3/))
+   hist%rprimd(1:sizeR1,1:sizeR2,1:sizeR3)=reshape(buffer_r(indx+1:indx+sizeR),(/sizeR1,sizeR2,sizeR3/))
    indx=indx+sizeR
    hist%histS(1:sizeS1,1:sizeS2)=reshape(buffer_r(indx+1:indx+sizeS),(/sizeS1,sizeS2/))
    indx=indx+sizeS
@@ -737,9 +737,9 @@ subroutine var2hist(acell,hist,natom,rprimd,xred,zDEBUG)
 
 ! *************************************************************
 
- hist%xred (:,:,hist%ihist)=xred(:,:)
- hist%histR(:,:,hist%ihist)=rprimd(:,:)
- hist%acell(:  ,hist%ihist)=acell(:)
+ hist%xred(:,:,hist%ihist)=xred(:,:)
+ hist%rprimd(:,:,hist%ihist)=rprimd(:,:)
+ hist%acell(:,hist%ihist)=acell(:)
 
  if(zDEBUG)then
    write (std_out,*) 'Atom positions and cell parameters '
@@ -821,7 +821,7 @@ integer :: jj,kk
 
  xred  (:,:)=hist%xred(:,:,hist%ihist)
  acell (:  )=hist%acell(:,hist%ihist)
- rprimd(:,:)=hist%histR(:,:,hist%ihist)
+ rprimd(:,:)=hist%rprimd(:,:,hist%ihist)
 
  if(zDEBUG)then
    write (std_out,*) 'Atom positions and cell parameters '
@@ -981,7 +981,7 @@ type(abihist),intent(inout) :: hist_out
  hist_out%histEk(hist_out%ihist)    = hist_in%histEk(hist_in%ihist)
  hist_out%histEnt(hist_out%ihist)   = hist_in%histEnt(hist_in%ihist)
  hist_out%histT(hist_out%ihist)     = hist_in%histT(hist_in%ihist)
- hist_out%histR(:,:,hist_out%ihist) = hist_in%histR(:,:,hist_in%ihist)
+ hist_out%rprimd(:,:,hist_out%ihist)= hist_in%rprimd(:,:,hist_in%ihist)
  hist_out%histS(:,hist_out%ihist)   = hist_in%histS(:,hist_in%ihist)
  hist_out%histV(:,:,hist_out%ihist) = hist_in%histV(:,:,hist_in%ihist)
  hist_out%xred(:,:,hist_out%ihist)  = hist_in%xred(:,:,hist_in%ihist)
@@ -1065,13 +1065,13 @@ real(dp) :: x,y
  if (maxdiff>tolerance) similar=0
 
 
- x=hist_out%histR(1,1,hist_out%ihist)
- y=hist_in%histR(1,1,hist_in%ihist)
+ x=hist_out%rprimd(1,1,hist_out%ihist)
+ y=hist_in%rprimd(1,1,hist_in%ihist)
  maxdiff=2*abs(x-y)/(abs(x)+abs(y))
  do kk=1,3
    do jj=1,3
-     x=hist_out%histR(jj,kk,hist_out%ihist)
-     y=hist_in%histR(jj,kk,hist_in%ihist)
+     x=hist_out%rprimd(jj,kk,hist_out%ihist)
+     y=hist_in%rprimd(jj,kk,hist_in%ihist)
      diff=2*abs(x-y)/(abs(x)+abs(y))
      if (diff>maxdiff) maxdiff=diff
    end do
@@ -1101,7 +1101,7 @@ real(dp) :: x,y
    hist_out%xred(:,:,hist_out%ihist)  =hist_in%xred(:,:,hist_in%ihist)
    hist_out%fcart(:,:,hist_out%ihist) =hist_in%fcart(:,:,hist_in%ihist)
    hist_out%histS(:,hist_out%ihist)   =hist_in%histS(:,hist_in%ihist)
-   hist_out%histR(:,:,hist_out%ihist) =hist_in%histR(:,:,hist_in%ihist)
+   hist_out%rprimd(:,:,hist_out%ihist)=hist_in%rprimd(:,:,hist_in%ihist)
    hist_out%acell(:,hist_out%ihist)   =hist_in%acell(:,hist_in%ihist)
  end if
 
@@ -2131,7 +2131,7 @@ implicit none
  xred   => hist%xred(:,:,hist%ihist)
  fcart  => hist%fcart(:,:,hist%ihist)
  vel    => hist%histV(:,:,hist%ihist)
- rprimd => hist%histR(:,:,hist%ihist)
+ rprimd => hist%rprimd(:,:,hist%ihist)
 
 !Variables not depending on images
 
@@ -2180,12 +2180,12 @@ implicit none
 !rprimd
  if (has_nimage) then
    start4=(/1,1,iimg,hist%ihist/);count4=(/3,3,1,1/)
-   ncerr = nf90_put_var(ncid,rprimd_id,hist%histR(:,:,hist%ihist),&
+   ncerr = nf90_put_var(ncid,rprimd_id,hist%rprimd(:,:,hist%ihist),&
 &                       start = start4,count = count4)
    NCF_CHECK_MSG(ncerr," write variable rprimd")
  else
    start3=(/1,1,hist%ihist/);count3=(/3,3,1/)
-   ncerr = nf90_put_var(ncid,rprimd_id,hist%histR(:,:,hist%ihist),&
+   ncerr = nf90_put_var(ncid,rprimd_id,hist%rprimd(:,:,hist%ihist),&
 &                       start = start3,count = count3)
    NCF_CHECK_MSG(ncerr," write variable rprimd")
  end if
@@ -2324,11 +2324,11 @@ implicit none
 !rprimd
  if (has_nimage) then
    start4=(/1,1,iimg,1/);count4=(/3,3,1,time/)
-   ncerr = nf90_get_var(ncid,rprimd_id,hist%histR(:,:,:)  ,count=count4,start=start4)
+   ncerr = nf90_get_var(ncid,rprimd_id,hist%rprimd(:,:,:)  ,count=count4,start=start4)
    NCF_CHECK_MSG(ncerr," read variable rprimd")
  else
    start3=(/1,1,1/);count3=(/3,3,time/)
-   ncerr = nf90_get_var(ncid,rprimd_id,hist%histR(:,:,:)  ,count=count3,start=start3)
+   ncerr = nf90_get_var(ncid,rprimd_id,hist%rprimd(:,:,:)  ,count=count3,start=start3)
    NCF_CHECK_MSG(ncerr," read variable rprimd")
  end if
 

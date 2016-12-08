@@ -360,7 +360,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      end do
      write(std_out,*) 'The lowest energy occurs at iteration:',minIndex,'etotal=',minE
      acell(:)   =hist_prev%acell(:,minIndex)
-     rprimd(:,:)=hist_prev%histR(:,:,minIndex)
+     rprimd(:,:)=hist_prev%rprimd(:,:,minIndex)
      xred(:,:)  =hist_prev%xred(:,:,minIndex)
    end if
 
@@ -596,7 +596,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !      One test case with these condition is bigdft/t10
        if (any(rprimd(:,:)/=rprimd_prev(:,:))) then
          hist%acell(:,hist%ihist)=acell(:)
-         hist%histR(:,:,hist%ihist)=rprimd(:,:)
+         hist%rprimd(:,:,hist%ihist)=rprimd(:,:)
        end if
 
 !      ANOMALOUS SITUATIONS
@@ -820,7 +820,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
            option=3
            call wrt_moldyn_netcdf(amass,scfcv_args%dtset,jj,option,dtfil%fnameabo_moldyn,&
 &           scfcv_args%mpi_enreg,scfcv_args%results_gs,&
-&           hist%histR(:,:,hist%ihist-1),dtfil%unpos,hist%histV(:,:,hist%ihist),&
+&           hist%rprimd(:,:,hist%ihist-1),dtfil%unpos,hist%histV(:,:,hist%ihist),&
 &           hist%xred(:,:,hist%ihist-1))
          end if
          if (iexit==1) hist%ihist=hist%ihist-1
@@ -868,9 +868,9 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      vel_cell(:,:)=zero
      if (ab_mover%ionmov==13) then
        if (hist%ihist>2) then
-         vel_cell(:,:)=(hist%histR(:,:,hist%ihist)-hist%histR(:,:,hist%ihist-2))/(two*ab_mover%dtion)
+         vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)-hist%rprimd(:,:,hist%ihist-2))/(two*ab_mover%dtion)
        else if (hist%ihist>1) then
-         vel_cell(:,:)=(hist%histR(:,:,hist%ihist)-hist%histR(:,:,hist%ihist-1))/(ab_mover%dtion)
+         vel_cell(:,:)=(hist%rprimd(:,:,hist%ihist)-hist%rprimd(:,:,hist%ihist-1))/(ab_mover%dtion)
        end if
      end if
 
