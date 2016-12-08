@@ -39,8 +39,7 @@ MODULE m_ddk
 
  use m_fstrings,      only : sjoin, itoa
  use m_io_tools,      only : iomode_from_fname
- use defs_abitypes,   only : hdr_type, mpi_type
- !use m_mpinfo,        only : destroy_mpi_enreg
+ use defs_abitypes,   only : hdr_type
  use m_crystal,       only : crystal_t, crystal_free
  use m_crystal_io,    only : crystal_from_hdr
 

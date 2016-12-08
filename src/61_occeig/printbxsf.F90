@@ -60,6 +60,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'printbxsf'
+ use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -81,48 +82,52 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
  integer :: iband,ik1,ik2,ik3,ikgrid,ikpt,indx
  integer :: isppol,isym,maxband,minband,nk1,nk2,nk3,nkptfull,ubxsf,timrev
  integer :: symkptrank, nsymfm, isymfm
- real(dp) :: ene
+ real(dp) :: ene,dksqmax
  character(len=500) :: msg
  type(kptrank_type) :: kptrank_t
 !arrays
+ integer :: indkk_kq(1,6)
  integer,allocatable :: fulltoirred(:),symrecfm(:,:,:)
- real(dp) :: kptgrid(3)
+ real(dp) :: kptgrid(3),gmet(3,3)
 
 ! *************************************************************************
 
- ierr=0
+ ierr = 0
 
-!Error if klatt is no simple orthogonal lattice (in red space)
-!for generalization to MP grids, need new version of XCrysDen
+! Error if klatt is no simple orthogonal lattice (in red space)
+! for generalization to MP grids, need new version of XCrysDen
 
  if ( kptrlatt(1,2)/=0 .or. kptrlatt(1,3)/=0 .or. kptrlatt(2,1)/=0 .or. &
-& kptrlatt(2,3)/=0 .or. kptrlatt(3,1)/=0 .or. kptrlatt(3,2)/=0 ) then
+&     kptrlatt(2,3)/=0 .or. kptrlatt(3,1)/=0 .or. kptrlatt(3,2)/=0 ) then
    write(msg,'(3a)')&
 &   'kptrlatt should be diagonal, for the FS calculation ',ch10,&
-&   'action: use an orthogonal k-grid for the GS calculation '
+&   'Action: use an orthogonal k-grid for the GS calculation '
    MSG_COMMENT(msg)
-   ierr=ierr+1
+   ierr = ierr + 1
  end if
 
-! Error if there are not at least 2 kpts in each direction: 
+! Error if there are not at least 2 kpts in each direction:
 ! kptrank will fail for the intermediate points below
  if ( abs(kptrlatt(1,1))<2 .or. abs(kptrlatt(2,2))<2 .or. abs(kptrlatt(3,3))<2) then
    write(msg,'(3a)')&
 &   'You need at least 2 points in each direction in k space to output BXSF files ',ch10,&
-&   'action: use an augmented k-grid for the GS calculation (at least 2x2x2) '
+&   'Action: use an augmented k-grid for the GS calculation (at least 2x2x2) '
    MSG_COMMENT(msg)
-   ierr=ierr+1
+   ierr = ierr + 1
  end if
 
- if (ANY(ABS(shiftk(:,:))>tol10)) then
+ if (ANY(ABS(shiftk) > tol10)) then
    write(msg,'(3a)')&
 &   'Origin of the k-grid should be (0,0,0) for the FS calculation ',ch10,&
 &   'Action: use a non-shifted k-grid for the GS calculation. Returning '
    MSG_COMMENT(msg)
-   ierr=ierr+1
+   ierr = ierr + 1
  end if
 
- if (ierr/=0) RETURN
+ if (ierr /= 0) return
+
+ ! Compute reciprocal space metric.
+ gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
 
  if (use_afm) then
    nsymfm = 0
@@ -150,10 +155,9 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
  nkptfull=(nk1+1)*(nk2+1)*(nk3+1)
 
  ABI_MALLOC(fulltoirred,(nkptfull))
-
  timrev=0; if (use_tr) timrev=1
 
- call mkkptrank (kptirred,nkptirred,kptrank_t,nsymfm,symrecfm, time_reversal=use_tr)
+ call mkkptrank (kptirred,nkptirred,kptrank_t, nsym=nsymfm, symrec=symrecfm, time_reversal=use_tr)
 
 !Xcrysden employs the C-ordering for the Fermi Surface.
  ikgrid=0
@@ -166,7 +170,8 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
        kptgrid(2)=DBLE(ik2)/kptrlatt(2,2)
        kptgrid(3)=DBLE(ik3)/kptrlatt(3,3)
 
-!      === Find correspondence between the Xcrysden grid and the IBZ ===
+       ! Find correspondence between the Xcrysden grid and the IBZ ===
+#if 1
        call get_rank_1kpt (kptgrid, symkptrank, kptrank_t)
        fulltoirred(ikgrid) = kptrank_t%invrank(symkptrank)
 
@@ -174,9 +179,33 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
          write(msg,'(a,3es16.8,2a,I8,2a)')&
 &         'kpt = ',kptgrid,ch10,' with rank ', symkptrank, ch10,&
 &         'has no symmetric among the k-points used in the GS calculation '
-         ierr=ierr+1
-         MSG_ERROR(msg)
+         ierr=ierr + 1
+         MSG_WARNING(msg)
        end if
+
+#else
+       ! TODO:: symafm are not passed in a consisten way.
+       call listkk(dksqmax,gmet,indkk_kq,kptirred,kptgrid,nkptirred,1,nsymfm,&
+         1,symafm,symrecfm,timrev,use_symrec=.True.)
+
+       if (dksqmax > tol12) then
+         write(msg, '(7a,es16.6,4a)' )&
+          'The WFK file cannot be used to start thee present calculation ',ch10,&
+          'It was asked that the wavefunctions be accurate, but',ch10,&
+          'at least one of the k points could not be generated from a symmetrical one.',ch10,&
+          'dksqmax=',dksqmax,ch10,&
+          'Action: check your WFK file and k point input variables',ch10,&
+          '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
+         MSG_WARNING(msg)
+         ierr = ierr + 1
+       end if
+       fulltoirred(ikgrid) = indkk_kq(1,1)
+
+       !ikq_ibz = indkk_kq(1,1); isym_kq = indkk_kq(1,2)
+       !trev_kq = indkk_kq(1, 6); g0_kq = indkk_kq(1, 3:5)
+       !isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
+       !kq_ibz = ebands%kptns(:,ikq_ibz)
+#endif
 
      end do !ik1
    end do !ik2
@@ -186,13 +215,14 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 
  if (ierr/=0) then
    ABI_FREE(fulltoirred)
+   MSG_ERROR("Bug")
    RETURN
  end if
 
  if (abs(ewind) < tol12 ) then ! Keep all bands.
    minband=1
    maxband=mband
- else ! Select a subset of bands. 
+ else ! Select a subset of bands.
    minband = mband
    maxband = 0
    ene=abs(ewind)
@@ -211,13 +241,13 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 
  end if ! abs(energy_window)
 
-!=== Dump the results on file ===
+ ! Dump the results on file
  if (open_file(fname,msg,newunit=ubxsf,status='unknown',form='formatted') /=0) then
    MSG_WARNING(msg)
    ierr=ierr +1; RETURN
  end if
 
-!write header
+! Write header
  write(ubxsf,*)' BEGIN_INFO'
  write(ubxsf,*)'   #'
  write(ubxsf,*)'   # this is a Band-XCRYSDEN-Structure-File for Visualization of Fermi Surface'
@@ -260,7 +290,6 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 
  write(ubxsf,*)'  END_BANDGRID_3D'
  write(ubxsf,*)' END_BLOCK_BANDGRID_3D'
-
  close (ubxsf)
 
  ABI_FREE(fulltoirred)

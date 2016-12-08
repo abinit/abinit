@@ -52,6 +52,7 @@ module m_phgamma
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
  use m_bz_mesh,        only : isamek, make_path
+ use m_kpts,           only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt
 
  implicit none
 
@@ -341,8 +342,6 @@ subroutine phgamma_init(gams,cryst,ifc,symdynmat,eph_scalprod,ngqpt,nsppol,nspin
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'phgamma_init'
- use interfaces_41_geometry
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -359,20 +358,14 @@ subroutine phgamma_init(gams,cryst,ifc,symdynmat,eph_scalprod,ngqpt,nsppol,nspin
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: option1=1,brav1=1,timerev1=1,chksymbreak0=0,iout0=0
- integer :: iq_ibz,mqpt,ierr  !iq_bz,
- real(dp) :: cpu,wall,gflops
- !character(len=500) :: msg
+ integer,parameter :: qptopt1=1
+ integer :: iq_ibz,ierr
 !arrays
- integer :: qptrlatt(3,3) !,g0(3)
- integer,allocatable :: ibz2bz(:)
- real(dp),allocatable :: wtq_folded(:),wtq_bz(:)
+ integer :: qptrlatt(3,3)
 
 ! *************************************************************************
 
  !@phgamma_t
- call cwtime(cpu,wall,gflops,"start")
-
  ! Set basic dimensions.
  gams%natom = cryst%natom; gams%natom3 = 3*cryst%natom; gams%nsppol = nsppol; gams%nspinor = nspinor
  gams%symgamma = symdynmat; gams%eph_scalprod = eph_scalprod
@@ -380,52 +373,18 @@ subroutine phgamma_init(gams,cryst,ifc,symdynmat,eph_scalprod,ngqpt,nsppol,nspin
  ABI_MALLOC(gams%n0, (nsppol))
  gams%n0 = n0
 
- ! Setup q-points and q-mesh tables.
+ ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems wo inversion
  gams%ngqpt = ngqpt
- gams%nqbz  = product(ngqpt)
-
- ! Call smpbz to get the full grid of k-points `kpt_full`
- ! brav1=1 is able to treat all bravais lattices (same option used in getkgrid)
  qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
- mqpt= qptrlatt(1,1)*qptrlatt(2,2)*qptrlatt(3,3) &
-   +qptrlatt(1,2)*qptrlatt(2,3)*qptrlatt(3,1) &
-   +qptrlatt(1,3)*qptrlatt(2,1)*qptrlatt(3,2) &
-   -qptrlatt(1,2)*qptrlatt(2,1)*qptrlatt(3,3) &
-   -qptrlatt(1,3)*qptrlatt(2,2)*qptrlatt(3,1) &
-   -qptrlatt(1,1)*qptrlatt(2,3)*qptrlatt(3,2)
-
- ABI_MALLOC(gams%qbz ,(3,mqpt))
- call smpbz(brav1,-1,qptrlatt,mqpt,gams%nqbz,1,option1,[zero,zero,zero],gams%qbz)
- ABI_CHECK(mqpt == gams%nqbz, "mqpt != gams%nqbz")
-
- ! Call symkpt to get IBZ and weights.
- ABI_MALLOC(ibz2bz, (gams%nqbz))
- ABI_MALLOC(wtq_folded, (gams%nqbz))
- ABI_MALLOC(wtq_bz, (gams%nqbz))
- wtq_bz = one/gams%nqbz ! weights normalized to unity
-
- call symkpt(chksymbreak0,cryst%gmet,ibz2bz,iout0,gams%qbz,gams%nqbz,gams%nqibz,cryst%nsym,cryst%symrec,&
-   timerev1,wtq_bz,wtq_folded)
-
- ABI_MALLOC(gams%qibz, (3, gams%nqibz))
- ABI_MALLOC(gams%wtq, (gams%nqibz))
-
- do iq_ibz=1,gams%nqibz
-   gams%wtq(iq_ibz) = wtq_folded(ibz2bz(iq_ibz))
-   gams%qibz(:,iq_ibz) = gams%qbz(:,ibz2bz(iq_ibz))
- end do
- ABI_CHECK(abs(sum(gams%wtq) - one) < tol10, "sum!")
-
- ABI_FREE(ibz2bz)
- ABI_FREE(wtq_folded)
- ABI_FREE(wtq_bz)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, 1, [zero, zero, zero], &
+   gams%nqibz, gams%qibz, gams%wtq, gams%nqbz, gams%qbz)
 
  ! Allocate matrices in the IBZ.
- ABI_STAT_MALLOC(gams%vals_qibz, (2,gams%natom3,gams%natom3,gams%nqibz,nsppol), ierr)
+ ABI_STAT_MALLOC(gams%vals_qibz, (2, gams%natom3, gams%natom3, gams%nqibz, nsppol), ierr)
  ABI_CHECK(ierr==0, "out of memory in %vals_qibz")
  gams%vals_qibz = zero
 
- ! Fourier interpolation.
+ ! Prepare Fourier interpolation.
  gams%gprim = ifc%gprim
  gams%nrpt  = ifc%nrpt
  ABI_MALLOC(gams%rpt,(3,gams%nrpt))
@@ -480,7 +439,6 @@ subroutine phgamma_finalize(gams,cryst,ifc)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: option1=1,brav1=1,timerev1=1,chksymbreak0=0,iout0=0
  integer :: iq_ibz,spin,mu
  real(dp) :: lambda_tot
  character(len=500) :: msg
@@ -1415,8 +1373,6 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
 #define ABI_FUNC 'a2fw_init'
  use interfaces_14_hidewrite
  use interfaces_28_numeric_noabirule
- use interfaces_32_util
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -1437,27 +1393,23 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
 
 !Local variables -------------------------
 !scalars
- integer,parameter :: iout0=0,chksymbreak0=0,iscf2=2,bcorr0=0,master=0
- integer :: my_qptopt,iq_ibz,nqibz,nqpt_computed,ount,ii,nqbz,my_rank,nproc,cnt
- integer :: my_nqshift,mu,iw,natom3,nsppol,spin,ierr,nomega
+ integer,parameter :: bcorr0=0,master=0
+ integer :: my_qptopt,iq_ibz,nqibz,nqpt_computed,ount,ii,my_rank,nproc,cnt
+ integer :: mu,iw,natom3,nsppol,spin,ierr,nomega,nqbz
  real(dp) :: cpu,wall,gflops
  real(dp) :: lambda_iso,omega,omega_log,xx,qptrlen,omega_min,omega_max,ww,mustar,tc_macmill
  logical :: do_qintp
  character(len=500) :: msg
- character(len=80) :: errstr
  type(t_tetrahedron) :: tetra
 !arrays
- integer,parameter :: vacuum0(3)=[0,0,0]
- integer :: qptrlatt(3,3)
- integer,allocatable :: bz2ibz(:)
- real(dp) :: qlatt(3,3),rlatt(3,3),my_qshift(3,210)
+ integer :: qptrlatt(3,3),new_qptrlatt(3,3)
+ real(dp),allocatable :: my_qshift(:,:)
  real(dp) :: displ_cart(2,gams%natom3,gams%natom3)
  real(dp) :: phfrq(gams%natom3),gamma_ph(gams%natom3),lambda_ph(gams%natom3)
  real(dp),allocatable :: tmp_a2f(:)
  real(dp), ABI_CONTIGUOUS pointer :: a2f_1d(:)
- real(dp),allocatable :: qibz(:,:),wtq(:),fullbz(:,:)
- real(dp),allocatable :: a2f_1mom(:),a2flogmom(:),a2flogmom_int(:)
- real(dp),allocatable :: bdelta(:,:),btheta(:,:)
+ real(dp),allocatable :: qibz(:,:),wtq(:),qbz(:,:)
+ real(dp),allocatable :: a2f_1mom(:),a2flogmom(:),a2flogmom_int(:),wdt(:,:)
  real(dp),allocatable :: lambda_tetra(:,:,:),phfreq_tetra(:,:,:)
 
 ! *********************************************************************
@@ -1477,29 +1429,16 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
    do ii=1,3
      qptrlatt(ii,ii) = ngqpt(ii)
    end do
-   my_nqshift = nqshift ! Be careful as getkgrid expects shiftk(3,210).
-   ABI_CHECK(my_nqshift>0 .and. my_nqshift<=210, "nqshift must be in [1,210]")
 
-   ! First call to getkgrid to obtain nqibz.
-   my_qshift=zero; my_qshift(:,1:nqshift) = qshift
-   ABI_MALLOC(qibz, (3,0))
-   ABI_MALLOC(wtq, (0))
-   call getkgrid(chksymbreak0,iout0,iscf2,qibz,my_qptopt,qptrlatt,qptrlen,&
-     cryst%nsym,0,nqibz,my_nqshift,cryst%nsym,cryst%rprimd,my_qshift,cryst%symafm,cryst%symrel,vacuum0,wtq)
-   ABI_FREE(qibz)
-   ABI_FREE(wtq)
-
-   ! Recall getkgrid to get qibz and wtq.
-   ABI_MALLOC(qibz,(3,nqibz))
-   ABI_MALLOC(wtq,(nqibz))
-
-   call getkgrid(chksymbreak0,iout0,iscf2,qibz,my_qptopt,qptrlatt,qptrlen,&
-     cryst%nsym,nqibz,nqpt_computed,my_nqshift,cryst%nsym,cryst%rprimd,my_qshift,cryst%symafm,cryst%symrel,vacuum0,wtq)
+   call kpts_ibz_from_kptrlatt(cryst, qptrlatt, my_qptopt, nqshift, qshift, nqibz, qibz, wtq, nqbz, qbz, &
+      new_kptrlatt=new_qptrlatt, new_shiftk=my_qshift)
+   ABI_FREE(qbz)
 
    ! Store quantities that cannot be easily (and safely) calculated if we only know the IBZ.
-   a2f%ngqpt = ngqpt; a2f%nqshift = my_nqshift
+   a2f%ngqpt = ngqpt; a2f%nqshift = size(my_qshift, dim=2)
    ABI_MALLOC(a2f%qshift, (3, a2f%nqshift))
-   a2f%qshift = my_qshift(:,1:a2f%nqshift)
+   a2f%qshift = my_qshift
+   ABI_FREE(my_qshift)
 
  else
    ! No interpolation. Use q-mesh parameters from gams%
@@ -1535,29 +1474,17 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
  ABI_CALLOC(a2f%lambdaw, (nomega,0:natom3, nsppol))
  ABI_MALLOC(tmp_a2f, (nomega))
 
- ! Prepare tetrahedron integration.
  if (intmeth == 2) then
    call cwtime(cpu,wall,gflops,"start")
 
-   nqbz = product(a2f%ngqpt) * a2f%nqshift
-   ABI_MALLOC(bz2ibz,(nqbz))
-   ABI_MALLOC(fullbz,(3, nqbz))
-
+   ! Prepare tetrahedron integration.
    qptrlatt = 0
    do ii=1,3
      qptrlatt(ii,ii) = a2f%ngqpt(ii)
    end do
-   ! convert kptrlatt to double and invert.
-   rlatt = dble(qptrlatt)
-   call matr3inv(rlatt,qlatt)  ! qlatt refers to the shortest qpt vectors.
 
-   ! TODO: Pass comm, fix timerev, add exit statement
-   call get_full_kgrid(bz2ibz,qibz,fullbz,qptrlatt,nqibz,nqbz,a2f%nqshift,cryst%nsym,a2f%qshift,cryst%symrel)
-
-   call init_tetra(bz2ibz, cryst%gprimd, qlatt, fullbz, nqbz, tetra, ierr, errstr)
-   ABI_FREE(fullbz)
-   ABI_FREE(bz2ibz)
-   if (ierr/=0) MSG_ERROR(errstr)
+   tetra = tetra_from_kptrlatt(cryst, my_qptopt, qptrlatt, a2f%nqshift, a2f%qshift, nqibz, qibz, msg, ierr)
+   if (ierr/=0) MSG_ERROR(msg)
 
    ABI_STAT_MALLOC(lambda_tetra, (nqibz,natom3,nsppol), ierr)
    ABI_CHECK(ierr==0, "oom in lambda_tetra, use gaussians for A2F")
@@ -1617,34 +1544,27 @@ subroutine a2fw_init(a2f,gams,cryst,ifc,intmeth,wstep,wminmax,smear,ngqpt,nqshif
    call xmpi_sum(phfreq_tetra, comm, ierr)
 
    ! workspace for tetra.
-   ABI_MALLOC(btheta, (nomega, nqibz))
-   ABI_MALLOC(bdelta, (nomega, nqibz))
+   ABI_MALLOC(wdt, (nomega, 2))
 
    ! For each mode get its contribution
    cnt = 0
    do spin=1,nsppol
      do mu=1,natom3
-       cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
-
-       ! Calculate integration weights at each irred kpoint (Blochl et al PRB 49 16223)
-       call tetra_blochl_weights(tetra,phfreq_tetra(:,mu,spin),omega_min,omega_max,one,nomega,nqibz,&
-         bcorr0,btheta,bdelta,xmpi_comm_self)
-
-       ! Accumulate
        do iq_ibz=1,nqibz
-         do iw=1,nomega
-           a2f%vals(iw,mu,spin) = a2f%vals(iw,mu,spin) + lambda_tetra(iq_ibz,mu,spin) * bdelta(iw,iq_ibz)
-           ! Integral of a2F is computed afterwards
-           !a2f%lambdaw(iw,mu,spin) = a2f%lambdaw(iw,mu,spin)) + lambda_tetra(iq_ibz, mu) * btheta(iw,iq_ibz)
-         end do
-       end do
+         cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! mpi-parallelism
 
+         call tetra_get_onewk(tetra, iq_ibz, bcorr0, nomega, nqibz, phfreq_tetra(:,mu,spin), &
+           omega_min, omega_max, one, wdt)
+
+         ! Accumulate (Integral of a2F is computed afterwards)
+         a2f%vals(:,mu,spin) = a2f%vals(:,mu,spin) + wdt(:,1) * lambda_tetra(iq_ibz,mu,spin)
+         !a2f%lambdaw(:,mu,spin) = a2f%lambdaw(:,mu,spin) + wdt(:,2) * lambda_tetra(iq_ibz, mu, spin)
+      end do
      end do
    end do
 
    ! Free memory allocated for tetra.
-   ABI_FREE(btheta)
-   ABI_FREE(bdelta)
+   ABI_FREE(wdt)
    ABI_FREE(lambda_tetra)
    ABI_FREE(phfreq_tetra)
    call destroy_tetra(tetra)
@@ -2445,7 +2365,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
 !Local variables ------------------------------
 !scalars
  integer,parameter :: dummy_npw=1,nsig=1,tim_getgh1c=1,berryopt0=0,timrev1=1
- integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1,copt0=0
+ integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1
  integer :: my_rank,nproc,iomode,mband,my_minb,my_maxb,nsppol,nkpt,idir,ipert,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor,onpw
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,ib1,ib2,band !band1,band2,
@@ -2687,6 +2607,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  ! end if
 
 ! Allocate vlocal. Note nvloc
+ ! I set vlocal to huge to trigger possible bugs (DFPT routines should not access the data)
  ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamkq%nvloc))
  vlocal = huge(one)
 
@@ -2907,7 +2828,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
            ! Use scissor shift on 0-order eigenvalue
            eshift = eig0nk - dtset%dfpt_sciss
 
-           call getgh1c(berryopt0,copt0,kets_k(:,:,ib2),cwaveprj0,h1kets_kq(:,:,ib2),&
+           call getgh1c(berryopt0,kets_k(:,:,ib2),cwaveprj0,h1kets_kq(:,:,ib2),&
 &                       grad_berry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,mpi_enreg,optlocal,&
 &                       optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
          end do
@@ -3003,8 +2924,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    ABI_FREE(vlocal1)
 
    call cwtime(cpu,wall,gflops,"stop")
-   write(msg,'(a,i0,2(a,f8.2))')"q-point [",iq_ibz,"] completed. cpu:",cpu,", wall:",wall
-   call wrtout(std_out,msg,"COLL",do_flush=.True.)
+   write(msg,'(2(a,i0),2(a,f8.2))')"q-point [",iq_ibz,"/",gams%nqibz,"] completed. cpu:",cpu,", wall:",wall
+   call wrtout(std_out, msg, do_flush=.True.)
  end do ! iq_ibz
 
  ! Collect gvals_qibz on each node and divide by the total number of k-points in the full mesh.

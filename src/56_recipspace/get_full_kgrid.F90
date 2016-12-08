@@ -32,6 +32,8 @@
 !! NOTES
 !!  MG: The present inplementation always assumes kptopt==1 !!!!
 !!
+!! TODO: This routine should be removed
+!!
 !! PARENTS
 !!      m_ebands,m_phgamma,m_phonons,tetrahedron
 !!
