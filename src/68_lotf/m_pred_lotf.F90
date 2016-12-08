@@ -201,7 +201,7 @@ CONTAINS !===========================================================
   fcart(:,:)=hist%fcart(:,:,hist%ihist)
   strten(:) =hist%strten(:,hist%ihist)
   vel(:,:)  =hist%vel(:,:,hist%ihist)
-  etotal    =hist%histE(hist%ihist)
+  etotal    =hist%etot(hist%ihist)
 
   if(zDEBUG)then
     write (std_out,*) 'fcart:'

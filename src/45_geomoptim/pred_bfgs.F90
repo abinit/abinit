@@ -227,7 +227,7 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
  do ii=1,3;rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3);end do
 
  strten(:)=hist%strten(:,hist%ihist)
- etotal   =hist%histE(hist%ihist)
+ etotal   =hist%etot(hist%ihist)
 
 !Fill the residual with forces (No preconditioning)
 !Or the preconditioned forces
@@ -456,7 +456,7 @@ real(dp) :: xred(3,ab_mover%natom),strten(6)
  else
    if(ionmov==3)then
 
-     etotal_prev=hist%histE(hist%ihist-1)
+     etotal_prev=hist%etot(hist%ihist-1)
 !    Here the BFGS algorithm, modified to take into account the energy
      call brdene(etotal,etotal_prev,hessin,ndim,vin,vin_prev,vout,vout_prev)
    end if

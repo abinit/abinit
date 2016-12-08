@@ -319,12 +319,12 @@ implicit none
  if(pos==mover_AFTER)then
    write(message, '(a,1p,e22.14)' )&
 &   ' Total energy (etotal) [Ha]=',&
-&   hist%histE(hist%ihist)
+&   hist%etot(hist%ihist)
 
    if (hist%ihist>1)then
-     dEabs=hist%histE(hist%ihist)-hist%histE(hist%ihist-1)
-     dErel=2*dEabs/(abs(hist%histE(hist%ihist))+&
-&     abs(hist%histE(hist%ihist-1)))
+     dEabs=hist%etot(hist%ihist)-hist%etot(hist%ihist-1)
+     dErel=2*dEabs/(abs(hist%etot(hist%ihist))+&
+&     abs(hist%etot(hist%ihist-1)))
      write(message, '(a,a,a,a)' )&
 &     TRIM(message),ch10,ch10,&
 &     ' Difference of energy with previous step (new-old):'

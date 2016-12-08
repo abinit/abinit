@@ -199,7 +199,7 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
  fcart(:,:)=hist%fcart(:,:,hist%ihist)
  strten(:) =hist%strten(:,hist%ihist)
  vel(:,:)  =hist%vel(:,:,hist%ihist)
- etotal    =hist%histE(hist%ihist)
+ etotal    =hist%etot(hist%ihist)
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  do ii=1,3;rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3);end do
@@ -465,11 +465,11 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 !  and compute again
 
 !  write(std_out,*) ch10
-!  write(std_out,*) 'EVALUATION FORCES',etotal,hist%histE(hist%ihist-1)
+!  write(std_out,*) 'EVALUATION FORCES',etotal,hist%etot(hist%ihist-1)
 !  write(std_out,*) ch10
 
 !  This is the worst case (2 evaluations of SCFCV)
-   if (etotal>hist%histE(hist%ihist-1).and.icycle==2) then
+   if (etotal>hist%etot(hist%ihist-1).and.icycle==2) then
 
 !    Discard the changes
      acell(:)   =hist%acell(:,hist%ihist-1)
@@ -478,7 +478,7 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
      fcart(:,:) =hist%fcart(:,:,hist%ihist-1)
      strten(:)  =hist%strten(:,hist%ihist-1)
      vel(:,:)   =hist%vel(:,:,hist%ihist-1)
-     etotal     =hist%histE(hist%ihist-1)
+     etotal     =hist%etot(hist%ihist-1)
      call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 
 !    distx=xcart(1,iatom1)

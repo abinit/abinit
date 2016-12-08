@@ -220,7 +220,7 @@ implicit none
  call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
  strten(:)=hist%strten(:,hist%ihist)
- etotal   =hist%histE(hist%ihist)
+ etotal   =hist%etot(hist%ihist)
 
  if(zDEBUG)then
    write (std_out,*) 'fcart:'

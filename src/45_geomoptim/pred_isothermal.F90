@@ -175,7 +175,7 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
  fcart(:,:)=hist%fcart(:,:,hist%ihist)
  strten(:) =hist%strten(:,hist%ihist)
  vel(:,:)  =hist%vel(:,:,hist%ihist)
- etotal    =hist%histE(hist%ihist)
+ etotal    =hist%etot(hist%ihist)
 
  do ii=1,3;rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3);end do
  call xred2xcart(ab_mover%natom,rprimd,xcart,xred)

@@ -71,9 +71,9 @@ module m_abihist
 !! * fcart(3,natom,mxhist)   : Fcart
 !! * strten(6,mxhist)        : STRten
 !! * vel(3,natom,mxhist)     : Velocities of atoms
-!! * histE(mxhist)           : Energy
-!! * histEk(mxhist)          : Ionic Kinetic Energy
-!! * histEnt(mxhist)         : Entropy
+!! * etot(mxhist)            : Electronic total Energy
+!! * ekin(mxhist)            : Ionic Kinetic Energy
+!! * entropy(mxhist)         : Entropy
 !! * histT(mxhist)           : Time (Or iteration number for GO)
 !!
 !! NOTES
@@ -114,14 +114,12 @@ module m_abihist
     real(dp), allocatable :: strten(:,:)
 ! Vector of (x,y,z)x(natom)x(mxhist) values of atomic velocities
     real(dp), allocatable :: vel(:,:,:)
-
-
-! Vector of (mxhist) values of energy
-    real(dp), allocatable :: histE(:)
+! Vector of (mxhist) values of electronic total energy
+    real(dp), allocatable :: etot(:)
 ! Vector of (mxhist) values of ionic kinetic energy
-    real(dp), allocatable :: histEk(:)
+    real(dp), allocatable :: ekin(:)
 ! Vector of (mxhist) values of Entropy
-    real(dp), allocatable :: histEnt(:)
+    real(dp), allocatable :: entropy(:)
 ! Vector of (mxhist) values of time (relevant for MD calculations)
     real(dp), allocatable :: histT(:)
 
@@ -219,14 +217,14 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
  ABI_ALLOCATE(hist%fcart,(3,natom,mxhist))
  ABI_ALLOCATE(hist%strten,(6,mxhist))
  ABI_ALLOCATE(hist%vel,(3,natom,mxhist))
- ABI_ALLOCATE(hist%histE,(mxhist))
- ABI_ALLOCATE(hist%histEk,(mxhist))
- ABI_ALLOCATE(hist%histEnt,(mxhist))
+ ABI_ALLOCATE(hist%etot,(mxhist))
+ ABI_ALLOCATE(hist%ekin,(mxhist))
+ ABI_ALLOCATE(hist%entropy,(mxhist))
  ABI_ALLOCATE(hist%histT,(mxhist))
 
- hist%histE(1)=zero
- hist%histEk(1)=zero
- hist%histEnt(1)=zero
+ hist%etot(1)=zero
+ hist%ekin(1)=zero
+ hist%entropy(1)=zero
  hist%histT(1)=zero
 
  hist%acell(:,1)=zero
@@ -360,18 +358,17 @@ subroutine abihist_free_0D(hist)
  if (allocated(hist%vel))  then
    ABI_DEALLOCATE(hist%vel)
  end if
-
-! Vector of (mxhist) values of energy
- if (allocated(hist%histE))  then
-   ABI_DEALLOCATE(hist%histE)
+! Vector of (mxhist) values of electronic total energy
+ if (allocated(hist%etot))  then
+   ABI_DEALLOCATE(hist%etot)
  end if
 ! Vector of (mxhist) values of ionic kinetic energy
- if (allocated(hist%histEk))  then
-   ABI_DEALLOCATE(hist%histEk)
+ if (allocated(hist%ekin))  then
+   ABI_DEALLOCATE(hist%ekin)
  end if
 ! Vector of (mxhist) values of Entropy
- if (allocated(hist%histEnt))  then
-   ABI_DEALLOCATE(hist%histEnt)
+ if (allocated(hist%entropy))  then
+   ABI_DEALLOCATE(hist%entropy)
  end if
 ! Vector of (mxhist) values of time (relevant for MD calculations)
  if (allocated(hist%histT))  then
@@ -479,7 +476,7 @@ subroutine abihist_bcast_0D(hist,master,comm)
 !scalars
  integer :: bufsize,ierr,indx,nproc,rank
  integer :: sizeA,sizeA1,sizeA2
- integer :: sizeE,sizeEk,sizeEnt,sizeT
+ integer :: sizeEt,sizeEk,sizeEnt,sizeT
  integer :: sizeR,sizeR1,sizeR2,sizeR3
  integer :: sizeS,sizeS1,sizeS2
  integer :: sizeV,sizeV1,sizeV2,sizeV3
@@ -521,15 +518,15 @@ subroutine abihist_bcast_0D(hist,master,comm)
  ABI_ALLOCATE(buffer_i,(20))
  if (rank==master) then
    sizeA1=size(hist%acell,1);sizeA2=size(hist%acell,2)
-   sizeE=size(hist%histE,1);sizeEk=size(hist%histEk,1);
-   sizeEnt=size(hist%histEnt,1);sizeT=size(hist%histT,1)
+   sizeEt=size(hist%etot,1);sizeEk=size(hist%ekin,1);
+   sizeEnt=size(hist%entropy,1);sizeT=size(hist%histT,1)
    sizeR1=size(hist%rprimd,1);sizeR2=size(hist%rprimd,2);sizeR3=size(hist%rprimd,3)
    sizeS1=size(hist%strten,1);sizeS2=size(hist%strten,2)
    sizeV1=size(hist%vel,1);sizeV2=size(hist%vel,2);sizeV3=size(hist%vel,3)
    sizeX1=size(hist%xred,1);sizeX2=size(hist%xred,2);sizeX3=size(hist%xred,3)
    sizeF1=size(hist%fcart,1);sizeF2=size(hist%fcart,2);sizeF3=size(hist%fcart,3)
    buffer_i(1)=sizeA1  ;buffer_i(2)=sizeA2
-   buffer_i(3)=sizeE   ;buffer_i(4)=sizeEk
+   buffer_i(3)=sizeEt  ;buffer_i(4)=sizeEk
    buffer_i(5)=sizeEnt ;buffer_i(6)=sizeT
    buffer_i(7)=sizeR1  ;buffer_i(8)=sizeR2
    buffer_i(9)=sizeR3  ;buffer_i(10)=sizeS1
@@ -542,8 +539,8 @@ subroutine abihist_bcast_0D(hist,master,comm)
 
  if (rank/=master) then
    sizeA1 =buffer_i(1) ;sizeA2 =buffer_i(2)
-   sizeE  =buffer_i(3) ;sizeEk =buffer_i(4)
-   sizeEnt =buffer_i(5);sizeT  =buffer_i(6)
+   sizeEt =buffer_i(3) ;sizeEk =buffer_i(4)
+   sizeEnt=buffer_i(5);sizeT  =buffer_i(6)
    sizeR1 =buffer_i(7) ;sizeR2 =buffer_i(8)
    sizeR3 =buffer_i(9) ;sizeS1 =buffer_i(10)
    sizeS2 =buffer_i(11);sizeV1 =buffer_i(12)
@@ -557,17 +554,17 @@ subroutine abihist_bcast_0D(hist,master,comm)
  sizeA=sizeA1*sizeA2;sizeR=sizeR1*sizeR2*sizeR3;sizeS=sizeS1*sizeS2
  sizeV=sizeV1*sizeV2*sizeV3;sizeX=sizeX1*sizeX2*sizeX3
  sizeF=sizeF1*sizeF2*sizeF3
- bufsize=sizeA+sizeE+sizeEk+sizeEnt+sizeT+sizeR+sizeS+sizeV+sizeX+sizeF
+ bufsize=sizeA+sizeEt+sizeEk+sizeEnt+sizeT+sizeR+sizeS+sizeV+sizeX+sizeF
  ABI_ALLOCATE(buffer_r,(bufsize))
  if (rank==master) then
    indx=0
    buffer_r(indx+1:indx+sizeA)=reshape(hist%acell(1:sizeA1,1:sizeA2),(/sizeA/))
    indx=indx+sizeA
-   buffer_r(indx+1:indx+sizeE)=hist%histE(1:sizeE)
-   indx=indx+sizeE
-   buffer_r(indx+1:indx+sizeEk)=hist%histEk(1:sizeEk)
+   buffer_r(indx+1:indx+sizeEt)=hist%etot(1:sizeEt)
+   indx=indx+sizeEt
+   buffer_r(indx+1:indx+sizeEk)=hist%ekin(1:sizeEk)
    indx=indx+sizeEk
-   buffer_r(indx+1:indx+sizeEnt)=hist%histEnt(1:sizeEnt)
+   buffer_r(indx+1:indx+sizeEnt)=hist%entropy(1:sizeEnt)
    indx=indx+sizeEnt
    buffer_r(indx+1:indx+sizeT)=hist%histT(1:sizeT)
    indx=indx+sizeT
@@ -583,9 +580,9 @@ subroutine abihist_bcast_0D(hist,master,comm)
  else
    call abihist_free(hist)
    ABI_ALLOCATE(hist%acell,(sizeA1,sizeA2))
-   ABI_ALLOCATE(hist%histE,(sizeE))
-   ABI_ALLOCATE(hist%histEk,(sizeEk))
-   ABI_ALLOCATE(hist%histEnt,(sizeEnt))
+   ABI_ALLOCATE(hist%etot,(sizeEt))
+   ABI_ALLOCATE(hist%ekin,(sizeEk))
+   ABI_ALLOCATE(hist%entropy,(sizeEnt))
    ABI_ALLOCATE(hist%histT,(sizeT))
    ABI_ALLOCATE(hist%rprimd,(sizeR1,sizeR2,sizeR3))
    ABI_ALLOCATE(hist%strten,(sizeS1,sizeS2))
@@ -599,11 +596,11 @@ subroutine abihist_bcast_0D(hist,master,comm)
    indx=0
    hist%acell(1:sizeA1,1:sizeA2)=reshape(buffer_r(indx+1:indx+sizeA),(/sizeA1,sizeA2/))
    indx=indx+sizeA
-   hist%histE(1:sizeE)=buffer_r(indx+1:indx+sizeE)
-   indx=indx+sizeE
-   hist%histEk(1:sizeEk)=buffer_r(indx+1:indx+sizeEk)
+   hist%etot(1:sizeEt)=buffer_r(indx+1:indx+sizeEt)
+   indx=indx+sizeEt
+   hist%ekin(1:sizeEk)=buffer_r(indx+1:indx+sizeEk)
    indx=indx+sizeEk
-   hist%histEnt(1:sizeEnt)=buffer_r(indx+1:indx+sizeEnt)
+   hist%entropy(1:sizeEnt)=buffer_r(indx+1:indx+sizeEnt)
    indx=indx+sizeEnt
    hist%histT(1:sizeT)=buffer_r(indx+1:indx+sizeT)
    indx=indx+sizeT
@@ -918,7 +915,7 @@ real(dp) :: ekin
  end if
 
 !Store the Ionic Kinetic Energy
- hist%histEk(hist%ihist)=ekin
+ hist%ekin(hist%ihist)=ekin
 
 end subroutine vel2hist
 !!***
@@ -985,9 +982,9 @@ type(abihist),intent(inout) :: hist_out
  hist_out%fcart(:,:,hist_out%ihist) = hist_in%fcart(:,:,hist_in%ihist)
  hist_out%strten(:,hist_out%ihist)  = hist_in%strten(:,hist_in%ihist)
  hist_out%vel(:,:,hist_out%ihist)   = hist_in%vel(:,:,hist_in%ihist)
- hist_out%histE(hist_out%ihist)     = hist_in%histE(hist_in%ihist)
- hist_out%histEk(hist_out%ihist)    = hist_in%histEk(hist_in%ihist)
- hist_out%histEnt(hist_out%ihist)   = hist_in%histEnt(hist_in%ihist)
+ hist_out%etot(hist_out%ihist)      = hist_in%etot(hist_in%ihist)
+ hist_out%ekin(hist_out%ihist)      = hist_in%ekin(hist_in%ihist)
+ hist_out%entropy(hist_out%ihist)   = hist_in%entropy(hist_in%ihist)
  hist_out%histT(hist_out%ihist)     = hist_in%histT(hist_in%ihist)
 
 end subroutine abihist_copy
@@ -1102,9 +1099,9 @@ real(dp) :: x,y
    hist_out%fcart(:,:,hist_out%ihist) =hist_in%fcart(:,:,hist_in%ihist)
    hist_out%strten(:,hist_out%ihist)  =hist_in%strten(:,hist_in%ihist)
    hist_out%vel(:,:,hist_out%ihist)   =hist_in%vel(:,:,hist_in%ihist)
-   hist_out%histE(hist_out%ihist)     =hist_in%histE(hist_in%ihist)
-   hist_out%histEk(hist_out%ihist)    =hist_in%histEk(hist_in%ihist)
-   hist_out%histEnt(hist_out%ihist)   =hist_in%histEnt(hist_in%ihist)
+   hist_out%etot(hist_out%ihist)      =hist_in%etot(hist_in%ihist)
+   hist_out%ekin(hist_out%ihist)      =hist_in%ekin(hist_in%ihist)
+   hist_out%entropy(hist_out%ihist)   =hist_in%entropy(hist_in%ihist)
    hist_out%histT(hist_out%ihist)     =hist_in%histT(hist_in%ihist)
  end if
 
@@ -2222,19 +2219,19 @@ implicit none
 !etotal,ekin,entropy
  if (has_nimage) then
    start2=(/iimg,hist%ihist/)
-   ncerr = nf90_put_var(ncid,etotal_id,hist%histE(hist%ihist),start=start2)
+   ncerr = nf90_put_var(ncid,etotal_id,hist%etot(hist%ihist),start=start2)
    NCF_CHECK_MSG(ncerr," write variable etotal")
-   ncerr = nf90_put_var(ncid,ekin_id,hist%histEk(hist%ihist),start=start2)
+   ncerr = nf90_put_var(ncid,ekin_id,hist%ekin(hist%ihist),start=start2)
    NCF_CHECK_MSG(ncerr," write variable ekin")
-   ncerr = nf90_put_var(ncid,entropy_id,hist%histEnt(hist%ihist),start=start2)
+   ncerr = nf90_put_var(ncid,entropy_id,hist%entropy(hist%ihist),start=start2)
    NCF_CHECK_MSG(ncerr," write variable entropy")
  else
    start1=(/hist%ihist/)
-   ncerr = nf90_put_var(ncid,etotal_id,hist%histE(hist%ihist),start=start1)
+   ncerr = nf90_put_var(ncid,etotal_id,hist%etot(hist%ihist),start=start1)
    NCF_CHECK_MSG(ncerr," write variable etotal")
-   ncerr = nf90_put_var(ncid,ekin_id,hist%histEk(hist%ihist),start=start1)
+   ncerr = nf90_put_var(ncid,ekin_id,hist%ekin(hist%ihist),start=start1)
    NCF_CHECK_MSG(ncerr," write variable ekin")
-   ncerr = nf90_put_var(ncid,entropy_id,hist%histEnt(hist%ihist),start=start1)
+   ncerr = nf90_put_var(ncid,entropy_id,hist%entropy(hist%ihist),start=start1)
    NCF_CHECK_MSG(ncerr," write variable entropy")
  end if
 
@@ -2360,19 +2357,19 @@ implicit none
 !etotal,ekin,entropy
  if (has_nimage) then
    start2=(/1,1/);count2=(/1,time/)
-   ncerr = nf90_get_var(ncid,etotal_id,hist%histE(:),count=count2,start=start2)
+   ncerr = nf90_get_var(ncid,etotal_id,hist%etot(:),count=count2,start=start2)
    NCF_CHECK_MSG(ncerr," read variable etotal")
-   ncerr = nf90_get_var(ncid,ekin_id ,hist%histEk(:),count=count2,start=start2)
+   ncerr = nf90_get_var(ncid,ekin_id ,hist%ekin(:),count=count2,start=start2)
    NCF_CHECK_MSG(ncerr," read variable ekin")
-   ncerr = nf90_get_var(ncid,entropy_id,hist%histEnt(:),count=count2,start=start2)
+   ncerr = nf90_get_var(ncid,entropy_id,hist%entropy(:),count=count2,start=start2)
    NCF_CHECK_MSG(ncerr," read variable entropy")
  else
    start1=(/1/);count1=(/time/)
-   ncerr = nf90_get_var(ncid,etotal_id,hist%histE(:),count=count1,start=start1)
+   ncerr = nf90_get_var(ncid,etotal_id,hist%etot(:),count=count1,start=start1)
    NCF_CHECK_MSG(ncerr," read variable etotal")
-   ncerr = nf90_get_var(ncid,ekin_id,hist%histEk(:),count=count1,start=start1)
+   ncerr = nf90_get_var(ncid,ekin_id,hist%ekin(:),count=count1,start=start1)
    NCF_CHECK_MSG(ncerr," read variable ekin")
-   ncerr = nf90_get_var(ncid,entropy_id,hist%histEnt(:),count=count1,start=start1)
+   ncerr = nf90_get_var(ncid,entropy_id,hist%entropy(:),count=count1,start=start1)
    NCF_CHECK_MSG(ncerr," read variable entropy")
  end if
 

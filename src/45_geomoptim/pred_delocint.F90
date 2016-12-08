@@ -248,7 +248,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
  call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 
  strten(:)=hist%strten(:,hist%ihist)
- etotal   =hist%histE(hist%ihist)
+ etotal   =hist%etot(hist%ihist)
 
 !Fill the residual with forces (No preconditioning)
 !Or the preconditioned forces
@@ -529,7 +529,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
  else
    if(ionmov==11)then
 
-     etotal_prev=hist%histE(hist%ihist-1)
+     etotal_prev=hist%etot(hist%ihist-1)
 !    Here the BFGS algorithm, modified to take into account the
 !    energy
      call brdene(etotal,etotal_prev,hessin,&

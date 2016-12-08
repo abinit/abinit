@@ -427,8 +427,8 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          res_img(iimage)%vel_cell(:,:)=zero !Temporary
          res_img(iimage)%results_gs%fcart(:,:)=hist(iimage)%fcart(:,:,ih)
          res_img(iimage)%results_gs%strten(:)=hist(iimage)%strten(:,ih)
-         res_img(iimage)%results_gs%etotal=hist(iimage)%histE(ih)
-         res_img(iimage)%results_gs%energies%entropy =hist(iimage)%histEnt(ih)
+         res_img(iimage)%results_gs%etotal=hist(iimage)%etot(ih)
+         res_img(iimage)%results_gs%energies%entropy=hist(iimage)%entropy(ih)
          call fcart2fred(res_img(iimage)%results_gs%fcart,res_img(iimage)%results_gs%fred,&
 &                        hist(iimage)%rprimd(:,:,ih),dtset%natom)
          hist_prev(iimage)%ihist=hist_prev(iimage)%ihist+1
@@ -559,11 +559,11 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        call var2hist(res_img(iimage)%acell(:),hist(iimage),dtset%natom,&
 &                    rprimd,res_img(iimage)%xred(:,:),.FALSE.)
        call vel2hist(amass(:,iimage),hist(iimage),res_img(iimage)%vel(:,:))
-       hist(iimage)%histE(ih)    =res_img(iimage)%results_gs%etotal
-       hist(iimage)%histEnt(ih)  =res_img(iimage)%results_gs%energies%entropy
        hist(iimage)%fcart(:,:,ih)=res_img(iimage)%results_gs%fcart(:,:)
-       hist(iimage)%strten(:,ih) =res_img(iimage)%results_gs%strten(:)
-       hist(iimage)%histT(ih)    =real(itimimage,kind=dp)*dtion
+       hist(iimage)%strten(:,ih)=res_img(iimage)%results_gs%strten(:)
+       hist(iimage)%etot(ih)=res_img(iimage)%results_gs%etotal
+       hist(iimage)%entropy(ih)=res_img(iimage)%results_gs%energies%entropy
+       hist(iimage)%histT(ih)=real(itimimage,kind=dp)*dtion
      end if
 
    end do ! iimage

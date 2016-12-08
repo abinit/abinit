@@ -349,12 +349,12 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
 !  If restartxf specifies to start from the lowest energy
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-2)then
-     minE=hist_prev%histE(1)
+     minE=hist_prev%etot(1)
      minIndex=1
      do ii=1,hist_prev%mxhist
-       write(std_out,*) 'Iteration:',ii,' Total Energy:',hist_prev%histE(ii)
-       if (minE>hist_prev%histE(ii))then
-         minE=hist_prev%histE(ii)
+       write(std_out,*) 'Iteration:',ii,' Total Energy:',hist_prev%etot(ii)
+       if (minE>hist_prev%etot(ii))then
+         minE=hist_prev%etot(ii)
          minIndex=ii
        end if
      end do
@@ -619,10 +619,11 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
 !      Fill velocities and ionic kinetic energy
        call vel2hist(ab_mover%amass,hist,vel)
+
        hist%fcart(:,:,hist%ihist)=scfcv_args%results_gs%fcart(:,:)
        hist%strten(:,hist%ihist) =scfcv_args%results_gs%strten(:)
-       hist%histE(hist%ihist)    =scfcv_args%results_gs%etotal
-       hist%histEnt(hist%ihist)  =scfcv_args%results_gs%energies%entropy
+       hist%etot(hist%ihist)     =scfcv_args%results_gs%etotal
+       hist%entropy(hist%ihist)  =scfcv_args%results_gs%energies%entropy
        hist%histT(hist%ihist)    =real(itime,kind=dp)
 
 !      !######################################################################
@@ -703,7 +704,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 &           hist%strten(:,hist%ihist),&
 &           scfcv_args%dtset%tolmxf)
          else
-           call erlxconv(hist%histE(:),iexit,hist%ihist,&
+           call erlxconv(hist%etot(:),iexit,hist%ihist,&
 &           itime,hist%mxhist,ntime,scfcv_args%dtset%tolmxde)
          end if
        end if
@@ -918,7 +919,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 &       hist%strten(:,hist%ihist-1),&
 &       scfcv_args%dtset%tolmxf)
      else
-       call erlxconv(hist%histE(:),iexit,hist%ihist,&
+       call erlxconv(hist%etot(:),iexit,hist%ihist,&
 &       itime,hist%mxhist,ntime,scfcv_args%dtset%tolmxde)
      end if
    end if
