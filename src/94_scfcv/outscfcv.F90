@@ -799,37 +799,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      ABI_DEALLOCATE(vwork)
    end if
 
-! VCouLoMB
-   if (dtset%prtvclmb>0) then
-
-     ABI_ALLOCATE(vwork,(nfft,nspden))
-     do ispden=1,nspden
-       vwork(:,ispden)=vpsp(:)+vhartr(:)
-     end do
-     if (psps%usepaw==1) then
-       do ispden=1,nspden
-         vwork(:,ispden)=vwork(:,ispden)+vpaw(:,ispden)
-       end do
-       ABI_DEALLOCATE(vpaw)
-     end if
-
-     call fftdatar_write("vhartree_vloc",dtfil%fnameabo_app_vclmb,dtset%iomode,hdr,&
-     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
-
-     call out1dm(dtfil%fnameabo_app_vclmb_1dm,mpi_enreg,natom,nfft,ngfft,nspden,psps%ntypat,&
-&     rhor,rprimd,dtset%typat,ucvol,vwork,xred,dtset%znucl)
-
-! TODO: add TEM phase with CE = (2 pi / lambda) (E+E0)/(E(E+2E0)) from p.49 of RE Dunin Borkowski 2004 encyclopedia of nanoscience volume 3 pp 41-99
-!   where E is energy of electron, E0 rest mass, lambda the relativistic wavelength
-!   values of CE at 200 300 and 1000 kV:  7.29e6  6.53e6   5.39e6 rad / V / m
-!   vertical integral of vclmb * c / ngfft(3) / cross sectional area factor (= sin(gamma))
-!      * 0.5291772083e-10*27.2113834 to get to SI
-!      * CE factor above
-!   should be done for each plane perpendicular to the axes...
-     ABI_DEALLOCATE(vwork)
-   end if ! prtvclmb
-
-
 !  VHXC
    if (dtset%prtvhxc>0) then
      ABI_ALLOCATE(vwork,(nfft,nspden))

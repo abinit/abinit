@@ -1262,9 +1262,9 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
    write(unit_tdep,'(3es28.16)') dielt(:,1)
    write(unit_tdep,'(3es28.16)') dielt(:,2)
    write(unit_tdep,'(3es28.16)') dielt(:,3)
-   do iatom = 1, Ifc%natom
-     do idir = 1, 3
-       write(unit_tdep,'(3es28.16)') zeff(:,idir,iatom)
+   do ia = 1, Ifc%natom
+     do ii = 1, 3
+       write(unit_tdep,'(3es28.16)') zeff(:,ii,ia)
      end do
    end do
    close(unit_tdep)
