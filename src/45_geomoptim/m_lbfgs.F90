@@ -1,7 +1,7 @@
 !{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_bfgs
+!!****m* ABINIT/m_lbfgs
 !! NAME
-!!  m_bfgs
+!!  m_lbfgs
 !!
 !! FUNCTION
 !!  This module provides several routines for the application of a
@@ -159,10 +159,8 @@ subroutine lbfgs_destroy()
 
 implicit none
 
- deallocate(lbfgs_plan%work)
- deallocate(lbfgs_plan%diag)
-! ABI_DEALLOCATE(lbfgs_plan%work)
-! ABI_DEALLOCATE(p%diag)
+ ABI_DEALLOCATE(lbfgs_plan%work)
+ ABI_DEALLOCATE(lbfgs_plan%diag)
 
 end subroutine lbfgs_destroy
 !!***
