@@ -90,7 +90,7 @@ subroutine pred_simple(ab_mover,hist,iexit)
    do jj=1,3
      hist%xred(jj,kk, hist%ihist+1)=hist%xred (jj,kk,hist%ihist)
      hist%fcart(jj,kk,hist%ihist+1)=hist%fcart(jj,kk,hist%ihist)
-     hist%histV(jj,kk,hist%ihist+1)=hist%histV(jj,kk,hist%ihist)
+     hist%vel(jj,kk,hist%ihist+1)=hist%vel(jj,kk,hist%ihist)
    end do
  end do
 

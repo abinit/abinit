@@ -247,7 +247,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
  call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
  call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 
- strten(:)=hist%histS(:,hist%ihist)
+ strten(:)=hist%strten(:,hist%ihist)
  etotal   =hist%histE(hist%ihist)
 
 !Fill the residual with forces (No preconditioning)
@@ -624,7 +624,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 !Fill the history with the variables
 !xred, acell, rprimd, vel
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
- hist%histV(:,:,hist%ihist)=hist%histV(:,:,hist%ihist-1)
+ hist%vel(:,:,hist%ihist)=hist%vel(:,:,hist%ihist-1)
 
  if(zDEBUG)then
    write (std_out,*) 'residual:'

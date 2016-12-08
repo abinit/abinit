@@ -167,8 +167,8 @@ real(dp),pointer :: fcart_cur(:,:),fcart_prev(:,:),fcart_prev2(:,:)
  if (itime >2.or. icycle>=2)fcart_prev  => hist%fcart(:,:,hist%ihist-1)
  if (itime >3.or. icycle>=3)fcart_prev2 => hist%fcart(:,:,hist%ihist-2)
 
- vel_cur  => hist%histV(:,:,hist%ihist)
- vel_next => hist%histV(:,:,hist%ihist+1)
+ vel_cur  => hist%vel(:,:,hist%ihist)
+ vel_next => hist%vel(:,:,hist%ihist+1)
 
 !write(std_out,*) '01'
 !##########################################################
@@ -192,12 +192,12 @@ real(dp),pointer :: fcart_cur(:,:),fcart_prev(:,:),fcart_prev2(:,:)
 !    ### 03. Filling other values from history (forces and vel)
      fcart=fcart_cur(jj,kk)
      xc=xcart(jj,kk)
-     vel=hist%histV(jj,kk,1)
+     vel=hist%vel(jj,kk,1)
 
 !    Previous values only after first iteration
      if (itime>=2.or.icycle>=2) then
        fprev=fcart_prev(jj,kk)
-       vprev=hist%histV(jj,kk,hist%ihist)
+       vprev=hist%vel(jj,kk,hist%ihist)
      end if
      if (itime>=3.or.icycle>=3) then
        fprev2=fcart_prev2(jj,kk)

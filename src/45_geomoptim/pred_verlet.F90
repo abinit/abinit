@@ -206,11 +206,10 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  do ii=1,3;rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3);end do
 
- fcart(:,:)  =hist%fcart(:,:,hist%ihist)
  call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
-
- vel(:,:)   =hist%histV(:,:,hist%ihist)
- strten(:)  =hist%histS(:,hist%ihist)
+ fcart(:,:)  =hist%fcart(:,:,hist%ihist)
+ strten(:)  =hist%strten(:,hist%ihist)
+ vel(:,:)   =hist%vel(:,:,hist%ihist)
  etotal     =hist%histE(hist%ihist)
 
  if(zDEBUG)then
@@ -538,7 +537,7 @@ subroutine pred_verlet(ab_mover,hist,ionmov,itime,ntime,zDEBUG,iexit)
 !Fill the history with the variables
 !xred, acell, rprimd, vel
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
- hist%histV(:,:,hist%ihist)=vel(:,:)
+ hist%vel(:,:,hist%ihist)=vel(:,:)
  hist%histT(hist%ihist)=itime*ab_mover%dtion
 
  if(zDEBUG)then

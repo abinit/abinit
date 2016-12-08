@@ -123,11 +123,11 @@ subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
- fcart(:,:)=hist%fcart(:,:,hist%ihist)
 
- vel(:,:) =hist%histV(:,:,hist%ihist)
- strten(:)=hist%histS(:,hist%ihist)
- etotal   =hist%histE(hist%ihist)
+ fcart(:,:)=hist%fcart(:,:,hist%ihist)
+ strten(:) =hist%strten(:,hist%ihist)
+ vel(:,:)  =hist%vel(:,:,hist%ihist)
+ etotal    =hist%histE(hist%ihist)
 
  if(zDEBUG)then
    write (std_out,*) 'fcart:'
@@ -278,7 +278,7 @@ subroutine pred_srkna14(ab_mover,hist,icycle,zDEBUG,iexit,skipcycle)
 !Fill the history with the variables
 !xred, acell, rprimd, vel
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
- hist%histV(:,:,hist%ihist)=vel(:,:)
+ hist%vel(:,:,hist%ihist)=vel(:,:)
  hist%histT(hist%ihist)=hist%histT(hist%ihist-1)+ab_mover%dtion
 
 end subroutine pred_srkna14

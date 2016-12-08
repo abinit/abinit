@@ -196,10 +196,10 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
 
  call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
- fcart(:,:) =hist%fcart(:,:,hist%ihist)
- vel(:,:)   =hist%histV(:,:,hist%ihist)
- etotal     =hist%histE(hist%ihist)
- strten(:)  =hist%histS(:,hist%ihist)
+ fcart(:,:)=hist%fcart(:,:,hist%ihist)
+ strten(:) =hist%strten(:,hist%ihist)
+ vel(:,:)  =hist%vel(:,:,hist%ihist)
+ etotal    =hist%histE(hist%ihist)
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
  do ii=1,3;rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3);end do
@@ -476,8 +476,8 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
      rprimd(:,:)=hist%rprimd(:,:,hist%ihist-1)
      xred(:,:)  =hist%xred(:,:,hist%ihist-1)
      fcart(:,:) =hist%fcart(:,:,hist%ihist-1)
-     strten(:)  =hist%histS(:,hist%ihist-1)
-     vel(:,:)   =hist%histV(:,:,hist%ihist-1)
+     strten(:)  =hist%strten(:,hist%ihist-1)
+     vel(:,:)   =hist%vel(:,:,hist%ihist-1)
      etotal     =hist%histE(hist%ihist-1)
      call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
 
@@ -703,7 +703,7 @@ subroutine pred_langevin(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iexit,sk
  hist%ihist=hist%ihist+1
 
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
- hist%histV(:,:,hist%ihist)=vel(:,:)
+ hist%vel(:,:,hist%ihist)=vel(:,:)
  hist%histT(hist%ihist)=itime*ab_mover%dtion
 
  if (ab_mover%delayperm==0 .or. ab_mover%ntypat<=2) ncycle=1

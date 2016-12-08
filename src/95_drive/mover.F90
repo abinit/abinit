@@ -619,10 +619,10 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
 !      Fill velocities and ionic kinetic energy
        call vel2hist(ab_mover%amass,hist,vel)
+       hist%fcart(:,:,hist%ihist)=scfcv_args%results_gs%fcart(:,:)
+       hist%strten(:,hist%ihist) =scfcv_args%results_gs%strten(:)
        hist%histE(hist%ihist)    =scfcv_args%results_gs%etotal
        hist%histEnt(hist%ihist)  =scfcv_args%results_gs%energies%entropy
-       hist%fcart(:,:,hist%ihist)=scfcv_args%results_gs%fcart(:,:)
-       hist%histS(:,hist%ihist)  =scfcv_args%results_gs%strten(:)
        hist%histT(hist%ihist)    =real(itime,kind=dp)
 
 !      !######################################################################
@@ -646,7 +646,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        if (ncycle<10.and.ab_mover%restartxf>=0) then
          do ii=1,3;rprim(ii,1:3)=rprimd(ii,1:3)/acell(1:3);end do
          call xfh_update(ab_xfh,acell,fred_corrected,ab_mover%natom,rprim,&
-&                        hist%histS(:,hist%ihist),xred)
+&                        hist%strten(:,hist%ihist),xred)
        end if
        ABI_DEALLOCATE(fred_corrected)
      end if
@@ -700,7 +700,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 &           ab_mover%optcell,&
 &           scfcv_args%dtset%strfact,&
 &           scfcv_args%dtset%strtarget,&
-&           hist%histS(:,hist%ihist),&
+&           hist%strten(:,hist%ihist),&
 &           scfcv_args%dtset%tolmxf)
          else
            call erlxconv(hist%histE(:),iexit,hist%ihist,&
@@ -820,7 +820,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
            option=3
            call wrt_moldyn_netcdf(amass,scfcv_args%dtset,jj,option,dtfil%fnameabo_moldyn,&
 &           scfcv_args%mpi_enreg,scfcv_args%results_gs,&
-&           hist%rprimd(:,:,hist%ihist-1),dtfil%unpos,hist%histV(:,:,hist%ihist),&
+&           hist%rprimd(:,:,hist%ihist-1),dtfil%unpos,hist%vel(:,:,hist%ihist),&
 &           hist%xred(:,:,hist%ihist-1))
          end if
          if (iexit==1) hist%ihist=hist%ihist-1
@@ -861,7 +861,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
      end if
 
-     vel(:,:)=hist%histV(:,:,hist%ihist)
+     vel(:,:)=hist%vel(:,:,hist%ihist)
 
 !    vel_cell(3,3)= velocities of cell parameters
 !    Not yet used here but compute it for consistency
@@ -915,7 +915,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 &       ab_mover%optcell,&
 &       scfcv_args%dtset%strfact,&
 &       scfcv_args%dtset%strtarget,&
-&       hist%histS(:,hist%ihist-1),&
+&       hist%strten(:,hist%ihist-1),&
 &       scfcv_args%dtset%tolmxf)
      else
        call erlxconv(hist%histE(:),iexit,hist%ihist,&
@@ -932,13 +932,12 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !###     computed values (not the last predicted)
 
  call hist2var(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
-
- vel(:,:)=hist%histV(:,:,hist%ihist)
+ vel(:,:)=hist%vel(:,:,hist%ihist)
 
  if (DEBUG .and. ab_mover%ionmov==1)then
    write (std_out,*) 'vel'
    do kk=1,ab_mover%natom
-     write (std_out,*) hist%histV(:,kk,hist%ihist)
+     write (std_out,*) hist%vel(:,kk,hist%ihist)
    end do
  end if
 

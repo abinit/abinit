@@ -161,8 +161,8 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  fcart(:,:)=hist%fcart(:,:,hist%ihist)
- strten(:)=hist%histS(:,hist%ihist)
- vel(:,:)=hist%histV(:,:,hist%ihist)
+ strten(:)=hist%strten(:,hist%ihist)
+ vel(:,:)=hist%vel(:,:,hist%ihist)
  etotal=hist%histE(hist%ihist)
 
  write(std_out,*) 'RPRIMD'
@@ -479,7 +479,7 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  hist%ihist=hist%ihist+1
 
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
- hist%histV(:,:,hist%ihist)=vel(:,:)
+ hist%vel(:,:,hist%ihist)=vel(:,:)
  hist%histT(hist%ihist)=itime*ab_mover%dtion
 
 end subroutine pred_nose

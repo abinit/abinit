@@ -116,9 +116,9 @@ real(dp), ABI_CONTIGUOUS pointer :: fcart(:,:),vel(:,:)
  do jj=1,3;rprim(jj,1:3)=rprimd(jj,1:3)/acell(1:3);end do
 
  call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
- strten(:)=hist%histS(:,hist%ihist)
+ strten(:)=hist%strten(:,hist%ihist)
  fcart => hist%fcart(:,:,hist%ihist)
- vel => hist%histV(:,:,hist%ihist)
+ vel => hist%vel(:,:,hist%ihist)
 
 !Fill the residual with forces (No preconditioning)
 !Or the preconditioned forces
@@ -225,7 +225,7 @@ real(dp), ABI_CONTIGUOUS pointer :: fcart(:,:),vel(:,:)
  call xcart2xred(ab_mover%natom,rprimd,xcart,xred)
 
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
- hist%histV(:,:,hist%ihist)=hist%histV(:,:,hist%ihist-1)
+ hist%vel(:,:,hist%ihist)=hist%vel(:,:,hist%ihist-1)
 
 end subroutine pred_steepdesc
 !!***

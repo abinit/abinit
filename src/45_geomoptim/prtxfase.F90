@@ -113,8 +113,8 @@ implicit none
  rprimd => hist%rprimd(:,:,hist%ihist)
  xred   => hist%xred(:,:,hist%ihist)
  fcart  => hist%fcart(:,:,hist%ihist)
- strten => hist%histS(:,hist%ihist)
- vel    => hist%histV(:,:,hist%ihist)
+ strten => hist%strten(:,hist%ihist)
+ vel    => hist%vel(:,:,hist%ihist)
 
 !###########################################################
 !### 1. Positions
@@ -175,7 +175,7 @@ implicit none
 !Only if the velocities are being used
  if (hist%isVused)then
 !  Only if velocities are recorded in a history
-   if (allocated(hist%histV))then
+   if (allocated(hist%vel))then
 !    Compute max |v| and rms v,
 !    EXCLUDING the components determined by iatfix
      val_max=0.0_dp
@@ -294,7 +294,7 @@ implicit none
 
    if(pos==mover_AFTER)then
 !    Only if strten is recorded in a history
-     if (allocated(hist%histS))then
+     if (allocated(hist%strten))then
 
        write(message, '(a)' ) &
 &       ' Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]'

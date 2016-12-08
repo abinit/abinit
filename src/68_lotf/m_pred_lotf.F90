@@ -198,10 +198,10 @@ CONTAINS !===========================================================
 
   call hist2var(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 
-  fcart(:,:) =hist%fcart(:,:,hist%ihist)
-  vel(:,:)   =hist%histV(:,:,hist%ihist)
-  strten(:)  =hist%histS(:,hist%ihist)
-  etotal     =hist%histE(hist%ihist)
+  fcart(:,:)=hist%fcart(:,:,hist%ihist)
+  strten(:) =hist%strten(:,hist%ihist)
+  vel(:,:)  =hist%vel(:,:,hist%ihist)
+  etotal    =hist%histE(hist%ihist)
 
   if(zDEBUG)then
     write (std_out,*) 'fcart:'
@@ -363,7 +363,7 @@ CONTAINS !===========================================================
   !Fill the history with the variables
   !xcart, xred, acell, rprimd
   call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
-  hist%histV(:,:,hist%ihist) = vel(:,:)
+  hist%vel(:,:,hist%ihist) = vel(:,:)
   hist%histT(hist%ihist) = itime*ab_mover%dtion
 
   if(zDEBUG)then
