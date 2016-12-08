@@ -630,7 +630,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      end if ! if(hist_prev%mxhist>0.and.ab_mover%restartxf==-1.and.hist_prev%ihist<=hist_prev%mxhist)then
 
 !    Store trajectory in xfh file
-     if(ab_xfh%nxfh==0.or.itime/=1) then
+     if(need_scfcv_cycle.and.(ab_xfh%nxfh==0.or.itime/=1)) then
        ABI_ALLOCATE(fred_corrected,(3,scfcv_args%dtset%natom))
        call fcart2fred(hist%histXF(:,:,2,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
 !      Get rid of mean force on whole unit cell,

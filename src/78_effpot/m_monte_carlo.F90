@@ -242,7 +242,6 @@ subroutine monte_carlo_step(ab_mover,eff_pot,hist,itime,ntime,zDEBUG,iexit)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'monte_carlo_step'
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
