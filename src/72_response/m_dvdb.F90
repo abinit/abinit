@@ -2430,7 +2430,6 @@ subroutine dvdb_list_perts(db, ngqpt, unit)
  use interfaces_14_hidewrite
  use interfaces_32_util
  use interfaces_41_geometry
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none

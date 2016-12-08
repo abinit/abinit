@@ -119,7 +119,8 @@
 #include "abi_common.h"
 
 subroutine mover(scfcv_args,ab_xfh,acell,amass,dtfil,&
-& electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old)
+& electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
+& effective_potential)
 
  use defs_basis
  use defs_abitypes
@@ -169,14 +170,13 @@ type(scfcv_t),intent(inout) :: scfcv_args
 type(datafiles_type),intent(inout),target :: dtfil
 type(electronpositron_type),pointer :: electronpositron
 type(ab_xfh_type),intent(inout) :: ab_xfh
+type(effective_potential_type),optional,intent(in) :: effective_potential
 !arrays
-!no_abirules
 real(dp),intent(inout) :: acell(3)
 real(dp), intent(in),target :: amass(:) !(scfcv%dtset%natom) cause segfault of g95 on yquem_g95 A check of the dim has been added
 real(dp), pointer :: rhog(:,:),rhor(:,:)
 real(dp), intent(inout) :: xred(3,scfcv_args%dtset%natom),xred_old(3,scfcv_args%dtset%natom)
 real(dp), intent(inout) :: vel(3,scfcv_args%dtset%natom),vel_cell(3,3),rprimd(3,3)
-type(effective_potential_type),optional,intent(in) :: effective_potential
 
 !Local variables-------------------------------
 !scalars
@@ -574,7 +574,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
          else if(ab_mover%ionmov /= 31) then
 !          For monte carlo don't need to recompute energy here
 !          (done in pred_montecarlo)
-           call xred2xcart
            call effective_potential_evaluate( &
 &               effective_potential,scfcv_args%results_gs%etotal,&
 &               scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
