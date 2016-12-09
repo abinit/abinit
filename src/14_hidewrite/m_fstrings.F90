@@ -93,6 +93,9 @@ MODULE m_fstrings
    module procedure sjoin_2
    module procedure sjoin_3
    module procedure sjoin_4
+   module procedure sjoin_5
+   module procedure sjoin_6
+   module procedure sjoin_7
  end interface sjoin
 
  interface strcat
@@ -643,7 +646,7 @@ pure function rmquotes(istr) result(ostr)
 ! *********************************************************************
 
  ostr = ""; cnt = 0
- do ii=1,len_trim(istr) 
+ do ii=1,len_trim(istr)
    if (any(istr(ii:ii) == ["'", '"'])) cycle
    cnt = cnt + 1
    ostr(cnt:cnt) = istr(ii:ii)
@@ -957,7 +960,7 @@ end function sjoin_3
 !! sjoin_4
 !!
 !! FUNCTION
-!!  Joins three strings with a space separator.
+!!  Joins four strings with a space separator.
 !!
 
 pure function sjoin_4(str1,str2,str3,str4) result(ostr)
@@ -977,6 +980,94 @@ pure function sjoin_4(str1,str2,str3,str4) result(ostr)
  ostr = sjoin_2(str1, sjoin_3(str2, str3, str4))
 
 end function sjoin_4
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fstrings/sjoin_5
+!! NAME
+!! sjoin_5
+!!
+!! FUNCTION
+!!  Joins five strings with a space separator.
+!!
+
+pure function sjoin_5(str1,str2,str3,str4,str5) result(ostr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'sjoin_5'
+!End of the abilint section
+
+ character(len=*),intent(in) :: str1,str2,str3,str4,str5
+ character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+len_trim(str4)+len_trim(str5)+4) :: ostr
+
+! *********************************************************************
+
+ ostr = sjoin_2(str1, sjoin_4(str2, str3, str4, str5))
+
+end function sjoin_5
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fstrings/sjoin_6
+!! NAME
+!! sjoin_6
+!!
+!! FUNCTION
+!!  Joins six strings with a space separator.
+!!
+
+pure function sjoin_6(str1,str2,str3,str4,str5,str6) result(ostr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'sjoin_6'
+!End of the abilint section
+
+ character(len=*),intent(in) :: str1,str2,str3,str4,str5,str6
+ character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+len_trim(str4)+len_trim(str5)+len_trim(str6)+5) :: ostr
+
+! *********************************************************************
+
+ ostr = sjoin_2(str1, sjoin_5(str2, str3, str4, str5, str6))
+
+end function sjoin_6
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fstrings/sjoin_7
+!! NAME
+!! sjoin_7
+!!
+!! FUNCTION
+!!  Joins six strings with a space separator.
+!!
+
+pure function sjoin_7(str1,str2,str3,str4,str5,str6,str7) result(ostr)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'sjoin_7'
+!End of the abilint section
+
+ character(len=*),intent(in) :: str1,str2,str3,str4,str5,str6,str7
+ character(len=LEN_TRIM(str1)+LEN_TRIM(str2)+LEN_TRIM(str3)+len_trim(str4)+len_trim(str5)+len_trim(str6)+len(str7)+6) &
+&  :: ostr
+
+! *********************************************************************
+
+ ostr = sjoin_2(str1, sjoin_6(str2, str3, str4, str5, str6, str7))
+
+end function sjoin_7
 !!***
 
 !----------------------------------------------------------------------
@@ -1212,7 +1303,6 @@ pure function ftoa(value,fmt)
    write(ftoa,quote(fmt))value
  else
    write(ftoa,"(es16.6)")value
-
  end if
  ftoa = ADJUSTL(ftoa)
 
@@ -1226,7 +1316,7 @@ end function ftoa
 !! ktoa
 !!
 !! FUNCTION
-!!  Convert an vector into a string using format fmt  (es.16.6 if fmt is not given).
+!!  Convert an k-point into a string using format fmt  (es.16.6 if fmt is not given).
 !!
 !! PARENTS
 !!
@@ -1357,7 +1447,7 @@ pure function ltoa_dp(list, fmt) result(str)
  character(len=MAX_SLEN) :: temp,myfmt,fa
 
 ! *********************************************************************
- 
+
  myfmt = "es13.4"; if (present(fmt)) myfmt = fmt
  sz = size(list)
 
@@ -1636,8 +1726,6 @@ pure function endswith(string, suffix) result(ans)
 
 end function endswith
 !!***
-
-!----------------------------------------------------------------------
 
 !!****f* m_fstrings/indent
 !! NAME
@@ -1940,7 +2028,7 @@ integer pure function char_count(string, char)
  do i=1,len(string)
    if (string(i:i) == char) char_count = char_count + 1
  end do
-    
+
 end function char_count
 
 !----------------------------------------------------------------------

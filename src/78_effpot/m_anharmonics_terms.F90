@@ -29,13 +29,14 @@ module m_anharmonics_terms
  use defs_basis
  use m_errors
  use m_profiling_abi
-
+ use m_polynomial_coeff
  use m_ifc
 
  implicit none
 
  public :: anharmonics_terms_init
  public :: anharmonics_terms_free
+ public :: anharmonics_terms_setCoeffs
 
 !!***
 
@@ -49,6 +50,12 @@ module m_anharmonics_terms
 !! SOURCE
 
  type, public :: anharmonics_terms_type
+
+   integer :: ncoeff
+!  nterm store the number of coefficients
+
+   type(polynomial_coeff_type),dimension(:),allocatable :: coefficients
+!  array with all the coefficients from fited polynome
 
    real(dp) :: elastics(6,6,6)
 !     elastic_constant(6,6,6)
@@ -77,10 +84,11 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !! natom  = number of atoms in primitive cell
+!! ncoeff = number of coefficient for the fited polynome 
 !! nrpt   = number of cell into ifc
 !!
 !! OUTPUT
-!! eff_pot = effective_potential structure to be initialized
+!! anharmonics_terms = anharmonics_terms structure to be initialized
 !!
 !! PARENTS
 !!    multibinit
@@ -90,8 +98,8 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine anharmonics_terms_init(anharmonics_terms,natom,nrpt,&
-&                                 elastics,internal_strain,phonon_strain)
+subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,nrpt,&
+&                                 elastics,internal_strain,phonon_strain,coeffs)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -104,10 +112,11 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,nrpt,&
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: natom,nrpt
+ integer, intent(in) :: natom,ncoeff,nrpt
  type(anharmonics_terms_type), intent(out) :: anharmonics_terms
  real(dp),optional,intent(in) :: internal_strain(6,6,natom,3)
  real(dp),optional,intent(in) :: elastics(6,6,6)
+ type(polynomial_coeff_type),optional :: coeffs(ncoeff)
  type(ifc_type),intent(in) :: phonon_strain(6)
 !arrays
 !Local variables-------------------------------
@@ -153,6 +162,16 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,nrpt,&
 !Allocation of elastic 3rd order
  ABI_ALLOCATE(anharmonics_terms%internal_strain,(6,6,natom,3))
  anharmonics_terms%internal_strain = zero
+
+!Allocation of the coefficient
+  if(present(coeffs))then
+   if(ncoeff /= size(coeffs))then
+     write(msg, '(a)' )&
+&        ' ncoeff has not the same size than coeffs array, '
+     MSG_BUG(msg)
+   end if
+   call anharmonics_terms_setCoeffs(coeffs,anharmonics_terms,ncoeff)
+ end if
 
 end subroutine anharmonics_terms_init 
 !!***
@@ -201,8 +220,6 @@ subroutine anharmonics_terms_free(anharmonics_terms)
 
 ! *************************************************************************
 
-  anharmonics_terms%elastics = zero
-
   if(allocated(anharmonics_terms%internal_strain)) then
     anharmonics_terms%internal_strain=zero
     ABI_DEALLOCATE(anharmonics_terms%internal_strain)
@@ -215,7 +232,92 @@ subroutine anharmonics_terms_free(anharmonics_terms)
     ABI_DATATYPE_DEALLOCATE(anharmonics_terms%phonon_strain)
   end if
 
+  if(allocated(anharmonics_terms%coefficients))then
+    do ii=1,anharmonics_terms%ncoeff
+      call polynomial_coeff_free(anharmonics_terms%coefficients(ii))
+    end do
+    ABI_DATATYPE_DEALLOCATE(anharmonics_terms%coefficients)
+  end if
+
+  anharmonics_terms%elastics = zero
+  anharmonics_terms%ncoeff = zero
+
 end subroutine anharmonics_terms_free
+!!***
+
+!****f* m_anharmonics_terms/anharmonics_terms_setCoeffs
+!!
+!! NAME
+!! anharmonics_terms_setCoeffs
+!!
+!! FUNCTION
+!! Set the coefficients
+!!
+!! INPUTS
+!! coeffs = polynomial_coeff_type
+!! anharmonics = anharmonics type
+!! ncoeff = number of coefficient
+!!
+!! OUTPUT
+!! anharmonics = set the coefficient from the fited polynome 
+!!
+!!
+!! PARENTS
+!!   multibinit
+!!
+!! CHILDREN
+!!   wrtout
+!!
+!! SOURCE
+ 
+subroutine anharmonics_terms_setCoeffs(coeffs,anharmonics,ncoeff)
+
+ use m_polynomial_coeff
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'anharmonics_terms_setCoeffs'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  integer,intent(in) :: ncoeff
+!array
+  type(anharmonics_terms_type),intent(inout) :: anharmonics
+  type(polynomial_coeff_type),intent(in) :: coeffs(ncoeff)
+!Local variables-------------------------------
+!scalar
+  integer :: ii
+  character(len=500) :: msg
+!array
+! *************************************************************************
+
+  if(ncoeff /= size(coeffs))then
+    write(msg, '(a)' )&
+&        ' ncoeff has not the same size than coeffs array, '
+    MSG_BUG(msg)
+  end if
+
+! 1-deallocation of the previous value
+  if(allocated(anharmonics%coefficients))then
+    do ii=1,anharmonics%ncoeff
+      call polynomial_coeff_free(anharmonics%coefficients(ii))
+    end do
+    ABI_DATATYPE_DEALLOCATE(anharmonics%coefficients)
+  end if
+
+! Allocation of the new array
+  anharmonics%ncoeff = ncoeff  
+  ABI_DATATYPE_ALLOCATE(anharmonics%coefficients,(ncoeff))
+  do ii=1,anharmonics%ncoeff
+    call polynomial_coeff_init(coeffs(ii)%coefficient,coeffs(ii)%name,coeffs(ii)%nterm,&
+&                              anharmonics%coefficients(ii),coeffs(ii)%terms)
+  end do
+
+end subroutine anharmonics_terms_setCoeffs
 !!***
 
 end module m_anharmonics_terms

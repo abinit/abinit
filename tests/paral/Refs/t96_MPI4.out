@@ -1,5 +1,5 @@
 
-.Version 8.1.6 of MULTIBINIT 
+.Version 8.1.7 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
 
 .Copyright (C) 1998-2016 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Tue 18 Oct 2016.
-- ( at 17h03 )
+.Starting date : Thu 17 Nov 2016.
+- ( at 10h14 )
   
 -  nproc =    4
 
@@ -281,13 +281,19 @@
 
  New bound for ifc (long+short):
 
- x=[ -1  1], y=[ -1  1] and z=[ -1  1]
+ x=[ -1  0], y=[ -1  0] and z=[ -1  1]
 
  Computation of new dipole-dipole interaction.
 
  Impose acoustic sum rule on total ifc
 
---------------------------------------------------------------------------------
+================================================================================
+
+================================================================================
+
+There is no file for the coefficients from polynomial fitting
+
+================================================================================
 
  Generation of the xml file for the reference structure in system.xml
 
@@ -397,8 +403,7 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  4.5803123897002926E-30 Hartree
-
+ Energy of the ifc part :  4.5828085765422615E-30 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3716141297600001E+02 Hartree
@@ -413,11 +418,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  2.4480112507719856E-03 Hartree
-
+ Energy of the ifc part :  2.4447907407259845E-03 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3715896496474923E+02 Hartree
+ Total energy : -1.3715896818525928E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -429,11 +433,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  9.6697363732607226E-03 Hartree
-
+ Energy of the ifc part :  9.6584455997075422E-03 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3715174323962674E+02 Hartree
+ Total energy : -1.3715175453040030E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -445,11 +448,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  2.1289228497635787E-02 Hartree
-
+ Energy of the ifc part :  2.1269719729610455E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3714012374750237E+02 Hartree
+ Total energy : -1.3714014325627039E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -461,11 +463,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  3.6651854427037563E-02 Hartree
-
+ Energy of the ifc part :  3.6631496450436993E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3712476112157296E+02 Hartree
+ Total energy : -1.3712478147954957E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -477,11 +478,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  5.4790781334863266E-02 Hartree
-
+ Energy of the ifc part :  5.4786503166207076E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3710662219466514E+02 Hartree
+ Total energy : -1.3710662647283380E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -493,11 +493,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  7.4402356565033662E-02 Hartree
-
+ Energy of the ifc part :  7.4441042126989904E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3708701061943498E+02 Hartree
+ Total energy : -1.3708697193387303E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -509,11 +508,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  9.3862495841844515E-02 Hartree
-
+ Energy of the ifc part :  9.3978455800834956E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3706755048015816E+02 Hartree
+ Total energy : -1.3706743452019919E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -525,11 +523,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.1132997273580553E-01 Hartree
-
+ Energy of the ifc part :  1.1155832143950768E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3705008300326421E+02 Hartree
+ Total energy : -1.3704985465456051E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -541,11 +538,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.2497701354928792E-01 Hartree
-
+ Energy of the ifc part :  1.2534315704360793E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3703643596245072E+02 Hartree
+ Total energy : -1.3703606981895641E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -557,11 +553,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.3333769036598780E-01 Hartree
-
+ Energy of the ifc part :  1.3384602931942391E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3702807528563403E+02 Hartree
+ Total energy : -1.3702756694668059E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -573,11 +568,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.3567197401239844E-01 Hartree
-
+ Energy of the ifc part :  1.3629958738374182E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3702574100198760E+02 Hartree
+ Total energy : -1.3702511338861626E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -589,11 +583,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.3217587385309570E-01 Hartree
-
+ Energy of the ifc part :  1.3287599700859398E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3702923710214691E+02 Hartree
+ Total energy : -1.3702853697899141E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -605,11 +598,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.2391823018753792E-01 Hartree
-
+ Energy of the ifc part :  1.2463296730768254E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3703749474581247E+02 Hartree
+ Total energy : -1.3703678000869232E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -621,11 +613,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.1254010448756201E-01 Hartree
-
+ Energy of the ifc part :  1.1321650755043459E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3704887287151246E+02 Hartree
+ Total energy : -1.3704819646844956E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -637,11 +628,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  9.9875045603282281E-02 Hartree
-
+ Energy of the ifc part :  1.0047820116040693E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3706153793039672E+02 Hartree
+ Total energy : -1.3706093477483961E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -653,11 +643,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  8.7640886787793276E-02 Hartree
-
+ Energy of the ifc part :  8.8161156639555552E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3707377208921221E+02 Hartree
+ Total energy : -1.3707325181936045E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -669,11 +658,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  7.7263049183465188E-02 Hartree
-
+ Energy of the ifc part :  7.7718065206504303E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3708414992681654E+02 Hartree
+ Total energy : -1.3708369491079350E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -685,11 +673,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  6.9810736370690601E-02 Hartree
-
+ Energy of the ifc part :  7.0244031779081159E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3709160223962931E+02 Hartree
+ Total energy : -1.3709116894422093E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -701,11 +688,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  6.5998776054940797E-02 Hartree
-
+ Energy of the ifc part :  6.6476549132231111E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3709541419994505E+02 Hartree
+ Total energy : -1.3709493642686778E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -717,11 +703,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  6.6213636077012750E-02 Hartree
-
+ Energy of the ifc part :  6.6820225386831231E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3709519933992300E+02 Hartree
+ Total energy : -1.3709459275061317E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -733,11 +718,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  7.0537976746967018E-02 Hartree
-
+ Energy of the ifc part :  7.1369799784476051E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3709087499925303E+02 Hartree
+ Total energy : -1.3709004317621554E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -749,11 +733,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  7.8761588588191878E-02 Hartree
-
+ Energy of the ifc part :  7.9918700533372106E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3708265138741183E+02 Hartree
+ Total energy : -1.3708149427546664E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -765,11 +748,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  9.0375718964757407E-02 Hartree
-
+ Energy of the ifc part :  9.1949807620669649E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3707103725703524E+02 Hartree
+ Total energy : -1.3706946316837934E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -781,11 +763,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.0455508387849954E-01 Hartree
-
+ Energy of the ifc part :  1.0661281502487939E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3705685789212151E+02 Hartree
+ Total energy : -1.3705480016097513E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -797,11 +778,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.2014059993235265E-01 Hartree
-
+ Energy of the ifc part :  1.2270228089674712E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3704127237606767E+02 Hartree
+ Total energy : -1.3703871069510325E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -813,11 +793,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.3564800281967282E-01 Hartree
-
+ Energy of the ifc part :  1.3866435041561095E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3702576497318034E+02 Hartree
+ Total energy : -1.3702274862558440E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -829,11 +808,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.4934034566938653E-01 Hartree
-
+ Energy of the ifc part :  1.5267513328955795E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3701207263033064E+02 Hartree
+ Total energy : -1.3700873784271045E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -845,11 +823,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.5940389988864012E-01 Hartree
-
+ Energy of the ifc part :  1.6283557138446858E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3700200907611136E+02 Hartree
+ Total energy : -1.3699857740461553E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -861,11 +838,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.6423670354395264E-01 Hartree
-
+ Energy of the ifc part :  1.6749178165198803E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3699717627245604E+02 Hartree
+ Total energy : -1.3699392119434802E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -877,11 +853,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.6278804307359290E-01 Hartree
-
+ Energy of the ifc part :  1.6560652191780234E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3699862493292642E+02 Hartree
+ Total energy : -1.3699580645408221E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -893,11 +868,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.5481364494090286E-01 Hartree
-
+ Energy of the ifc part :  1.5702481032546248E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3700659933105911E+02 Hartree
+ Total energy : -1.3700438816567456E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -909,11 +883,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.4091456319711759E-01 Hartree
-
+ Energy of the ifc part :  1.4248950545428735E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3702049841280288E+02 Hartree
+ Total energy : -1.3701892347054573E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -925,11 +898,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.2233753393314006E-01 Hartree
-
+ Energy of the ifc part :  1.2339715584955196E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3703907544206686E+02 Hartree
+ Total energy : -1.3703801582015046E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -941,11 +913,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.0064446456322888E-01 Hartree
-
+ Energy of the ifc part :  1.0142816109428415E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3706076851143678E+02 Hartree
+ Total energy : -1.3705998481490573E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -957,11 +928,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  7.7397723860715556E-02 Hartree
-
+ Energy of the ifc part :  7.8214133588040219E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3708401525213930E+02 Hartree
+ Total energy : -1.3708319884241197E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -973,11 +943,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  5.3949828695601366E-02 Hartree
-
+ Energy of the ifc part :  5.5129095092803164E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3710746314730440E+02 Hartree
+ Total energy : -1.3710628388090720E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -989,11 +958,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  3.1347305786008771E-02 Hartree
-
+ Energy of the ifc part :  3.3203883205807340E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3713006567021401E+02 Hartree
+ Total energy : -1.3712820909279421E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -1005,11 +973,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.0315039595362747E-02 Hartree
-
+ Energy of the ifc part :  1.3121668708632378E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3715109793640465E+02 Hartree
+ Total energy : -1.3714829130729137E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -1021,11 +988,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -8.7182040429181016E-03 Hartree
-
+ Energy of the ifc part : -4.7481569929410852E-03 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3717013118004292E+02 Hartree
+ Total energy : -1.3716616113299295E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -1037,11 +1003,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -2.5580559744867185E-02 Hartree
-
+ Energy of the ifc part : -2.0305213694933613E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3718699353574488E+02 Hartree
+ Total energy : -1.3718171818969495E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -1053,11 +1018,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -4.0318045907503708E-02 Hartree
-
+ Energy of the ifc part : -3.3675020300914286E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3720173102190751E+02 Hartree
+ Total energy : -1.3719508799630091E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -1069,11 +1033,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -5.3160022356794283E-02 Hartree
-
+ Energy of the ifc part : -4.5170252501420288E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3721457299835680E+02 Hartree
+ Total energy : -1.3720658322850142E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -1085,11 +1048,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -6.4487904374087912E-02 Hartree
-
+ Energy of the ifc part : -5.5253878416702887E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3722590088037410E+02 Hartree
+ Total energy : -1.3721666685441670E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -1101,11 +1063,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -7.4803297970444188E-02 Hartree
-
+ Energy of the ifc part : -6.4499626419584954E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3723621627397046E+02 Hartree
+ Total energy : -1.3722591260241958E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -1117,11 +1078,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -8.4691076503395357E-02 Hartree
-
+ Energy of the ifc part : -7.3545494659238375E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3724610405250340E+02 Hartree
+ Total energy : -1.3723495847065925E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -1133,11 +1093,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -9.4774018860191683E-02 Hartree
-
+ Energy of the ifc part : -8.3038377694967705E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3725618699486020E+02 Hartree
+ Total energy : -1.3724445135369498E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -1149,11 +1108,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -1.0565855819860701E-01 Hartree
-
+ Energy of the ifc part : -9.3572155860322331E-02 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3726707153419861E+02 Hartree
+ Total energy : -1.3725498513186034E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -1165,11 +1123,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -1.1787566120983264E-01 Hartree
-
+ Energy of the ifc part : -1.0562673888637132E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3727928863720985E+02 Hartree
+ Total energy : -1.3726703971488638E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -1181,11 +1138,10 @@
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -1.3182556920124450E-01 Hartree
-
+ Energy of the ifc part : -1.1951937850089696E-01 Hartree
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3729323854520126E+02 Hartree
+ Total energy : -1.3728093235450092E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -1195,10 +1151,10 @@
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.8
+- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.7
 
 ================================================================================
 
-+Total cpu time      3.350  and wall time      3.348 sec
++Total cpu time      2.811  and wall time      2.815 sec
 
  multibinit : the run completed succesfully.
