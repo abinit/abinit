@@ -425,7 +425,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
  call var2hist(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
 
 !Fill velocities and ionic kinetic energy
- call vel2hist(ab_mover%amass,hist,vel)
+ call vel2hist(ab_mover%amass,hist,vel,vel_cell)
  hist%time(hist%ihist)=zero
 
 !Decide if prtxfase will be called
@@ -618,7 +618,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        end if
 
 !      Fill velocities and ionic kinetic energy
-       call vel2hist(ab_mover%amass,hist,vel)
+       call vel2hist(ab_mover%amass,hist,vel,vel_cell)
 
        hist%fcart(:,:,hist%ihist)=scfcv_args%results_gs%fcart(:,:)
        hist%strten(:,hist%ihist) =scfcv_args%results_gs%strten(:)

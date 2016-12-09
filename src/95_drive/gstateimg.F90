@@ -332,7 +332,8 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      call mkrdim(acell_img(:,iimage),rprim_img(:,:,iimage),rprimd)
      call var2hist(acell_img(:,iimage),hist(iimage),dtset%natom,&
 &                  rprimd,xred_img(:,:,iimage),.FALSE.)
-     call vel2hist(amass(:,iimage),hist(iimage),vel_img(:,:,iimage))
+     call vel2hist(amass(:,iimage),hist(iimage),vel_img(:,:,iimage),&
+&                  vel_cell_img(:,:,iimage))
    end do
  end if ! imgmov/=0
 
@@ -424,7 +425,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          res_img(iimage)%rprim(:,:)=rprim
          res_img(iimage)%xred(:,:)=hist(iimage)%xred(:,:,ih)
          res_img(iimage)%vel(:,:)=hist(iimage)%vel(:,:,ih)
-         res_img(iimage)%vel_cell(:,:)=zero !Temporary
+         res_img(iimage)%vel_cell(:,:)=hist(iimage)%vel_cell(:,:,ih)
          res_img(iimage)%results_gs%fcart(:,:)=hist(iimage)%fcart(:,:,ih)
          res_img(iimage)%results_gs%strten(:)=hist(iimage)%strten(:,ih)
          res_img(iimage)%results_gs%etotal=hist(iimage)%etot(ih)
@@ -558,7 +559,8 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        call mkrdim(res_img(iimage)%acell(:),res_img(iimage)%rprim(:,:),rprimd)
        call var2hist(res_img(iimage)%acell(:),hist(iimage),dtset%natom,&
 &                    rprimd,res_img(iimage)%xred(:,:),.FALSE.)
-       call vel2hist(amass(:,iimage),hist(iimage),res_img(iimage)%vel(:,:))
+       call vel2hist(amass(:,iimage),hist(iimage),res_img(iimage)%vel(:,:),&
+&                    res_img(iimage)%vel_cell(:,:))
        hist(iimage)%fcart(:,:,ih)=res_img(iimage)%results_gs%fcart(:,:)
        hist(iimage)%strten(:,ih)=res_img(iimage)%results_gs%strten(:)
        hist(iimage)%etot(ih)=res_img(iimage)%results_gs%etotal
