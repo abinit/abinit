@@ -348,6 +348,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  else
    ABI_ALLOCATE(my_atmtab, (natom))
    my_atmtab = (/ (iatom, iatom=1, natom) /)
+   my_atmtab_allocated = .true.
  end if
 
 !wannier interface
