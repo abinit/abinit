@@ -953,7 +953,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
  call xmpi_sum_master(sigma%vals_e0ks, master, comm, ierr)
  call xmpi_sum_master(sigma%dvals_de0ks, master, comm, ierr)
- if (my_rank == master) call sigmaph_print(sigma, std_out, "dims+results", ebands)
+ if (my_rank == master) then
+   call sigmaph_print(sigma, std_out, "dims+results", ebands)
+   call sigmaph_print(sigma, ab_out, "dims+results", ebands)
+ end if
 
  ! Free memory
  ABI_FREE(gvnl1)
@@ -972,8 +975,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  call wfd_free(wfd)
  call pawcprj_free(cwaveprj0)
  ABI_DT_FREE(cwaveprj0)
-
- call xmpi_end()
 
 end subroutine sigmaph
 !!***

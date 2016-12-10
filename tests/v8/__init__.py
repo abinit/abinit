@@ -4,11 +4,15 @@
 need_cpp_vars = [
 ]
 
-#: List of keywords that are automatically added to all the tests of this suite. 
+#: List of keywords that are automatically added to all the tests of this suite.
 keywords = [
 ]
 
 #: List of input files
 inp_files = [
 "t01.in",
+"t41.in",
+"t42.in",
+"t43.in",
+"t44.in",
 ]
