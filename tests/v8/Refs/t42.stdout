@@ -60,36 +60,6 @@
  read the input derivative database number     2
  About to open file t41o_DS4_DDB
  compare the current and input DDB information
-
---- !WARNING
-src_file: ddb_compare.F90
-src_line: 260
-message: |
-    Comparing integers for variable ngfft.
-    Value from input DDB is        20 and
-    from transfer DDB is        20.
-...
-
-
---- !WARNING
-src_file: ddb_compare.F90
-src_line: 260
-message: |
-    Comparing integers for variable ngfft.
-    Value from input DDB is        20 and
-    from transfer DDB is        20.
-...
-
-
---- !WARNING
-src_file: ddb_compare.F90
-src_line: 260
-message: |
-    Comparing integers for variable ngfft.
-    Value from input DDB is        20 and
-    from transfer DDB is        20.
-...
-
  Will try to merge this input DDB with the current one.
  Current number of bloks =    1
  Will read     1 blocks from the input DDB
@@ -98,36 +68,6 @@ message: |
  read the input derivative database number     3
  About to open file t41o_DS5_DDB
  compare the current and input DDB information
-
---- !WARNING
-src_file: ddb_compare.F90
-src_line: 260
-message: |
-    Comparing integers for variable ngfft.
-    Value from input DDB is        20 and
-    from transfer DDB is        20.
-...
-
-
---- !WARNING
-src_file: ddb_compare.F90
-src_line: 260
-message: |
-    Comparing integers for variable ngfft.
-    Value from input DDB is        20 and
-    from transfer DDB is        20.
-...
-
-
---- !WARNING
-src_file: ddb_compare.F90
-src_line: 260
-message: |
-    Comparing integers for variable ngfft.
-    Value from input DDB is        20 and
-    from transfer DDB is        20.
-...
-
  Will try to merge this input DDB with the current one.
  Current number of bloks =    2
  Will read     1 blocks from the input DDB

@@ -54,7 +54,7 @@ module m_sigmaph
  use m_cgtools,        only : dotprod_g !set_istwfk
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
- use m_kpts,           only : kpts_ibz_from_kptrlatt
+ use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt
  use m_fftcore,        only : get_kg
  use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type
@@ -1298,7 +1298,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  ! k-point and bands where corrections are wanted
  ! We initialize IBZ(k) here so that we have all the basic dimensions of the run and it's possible
  ! to distribuite the calculations among the processors.
- new%symsigma = dtset%symsigma; new%timrev = 1
+ new%symsigma = dtset%symsigma; new%timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  if (dtset%nkptgw /= 0) then
    ! Treat the k-points and bands specified in the input file.
@@ -1767,7 +1767,7 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc)
 
  else if (self%symsigma == 1) then
    ! Use symmetries of the little group
-   lgk = lgroup_new(cryst, self%kcalc(:, ikcalc), self%nqbz, self%qbz, self%nqibz, self%qibz)
+   lgk = lgroup_new(cryst, self%kcalc(:, ikcalc), self%timrev, self%nqbz, self%qbz, self%nqibz, self%qibz)
 
    self%nqibz_k = lgk%nkibz_q
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
@@ -2002,6 +2002,7 @@ end subroutine sigmaph_print
 !! INPUTS
 !!  cryst(crystal_t)=Crystalline structure
 !!  kpoint(3)=External k-point defining the little-group
+!!  timrev=1 if time-reversal symmetry can be used, 0 otherwise.
 !!  nkbz=Number of k-points in the BZ.
 !!  kbz(3,nkbz)=K-points in the BZ.
 !!  nkibz=Number of k-points in the IBZ
@@ -2013,7 +2014,7 @@ end subroutine sigmaph_print
 !!
 !! SOURCE
 
-type (lgroup_t) function lgroup_new(cryst, kpoint, nkbz, kbz, nkibz, kibz) result(new)
+type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz) result(new)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2028,7 +2029,7 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, nkbz, kbz, nkibz, kibz) resul
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nkibz,nkbz
+ integer,intent(in) :: timrev,nkibz,nkbz
  type(crystal_t),intent(in) :: cryst
 !arrays
  real(dp),intent(in) :: kpoint(3),kbz(3,nkbz),kibz(3,nkibz)
@@ -2051,6 +2052,7 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, nkbz, kbz, nkibz, kibz) resul
  ABI_MALLOC(new%symq, (4, 2, cryst%nsym))
  call littlegroup_q(cryst%nsym, kpoint, new%symq, cryst%symrec, cryst%symafm, otimrev_k, prtvol=0)
 
+ ABI_CHECK(timrev==1, "timrev == 0 not coded")
  nsym_lg = 0
  do itim=1,2
    do isym=1,cryst%nsym
