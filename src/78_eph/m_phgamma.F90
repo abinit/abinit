@@ -2993,7 +2993,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  temp_range = [0.6_dp, 1.2_dp]
  wcut = 10 * wminmax(2)
  reltol = 0.001
- call a2fw_solve_gap(a2fw,cryst,ntemp,temp_range,wcut,dtset%eph_mustar,dtset%nstep,reltol,dtfil%filnam_ds(4),comm)
+ !call a2fw_solve_gap(a2fw,cryst,ntemp,temp_range,wcut,dtset%eph_mustar,dtset%nstep,reltol,dtfil%filnam_ds(4),comm)
  call a2fw_free(a2fw)
 
  ! Compute A2fw using Fourier interpolation and full BZ for debugging purposes.

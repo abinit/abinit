@@ -43,9 +43,10 @@ module m_phonons
  use m_fstrings,        only : itoa, ftoa, sjoin, ktoa, strcat
  use m_numeric_tools,   only : simpson_int, wrap2_pmhalf
  use m_io_tools,        only : open_file
+ use defs_abitypes,     only : dataset_type
  use m_dynmat,          only : gtdyn9, dfpt_phfrq
  use m_crystal,         only : crystal_t
- use m_bz_mesh,         only : isamek, make_path
+ use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_init, kpath_free
  use m_ifc,             only : ifc_type, ifc_fourq
  use m_anaddb_dataset,  only : anaddb_dataset_type
  use m_kpts,            only : kpts_ibz_from_kptrlatt
@@ -54,9 +55,10 @@ module m_phonons
 
  private
 
+! TODO Write object to store the bands
  public :: mkphbs                        ! Compute phonon band structure
  public :: phonons_write_xmgrace         ! Write phonons bands in Xmgrace format.
-! TODO Write object to store the bands
+ public :: ifc_mkphbs                    ! Compute the phonon band structure from the IFC and write data to file(s)
 !!***
 
 !!****t* m_phonons/phonon_dos_type
@@ -2059,7 +2061,114 @@ subroutine phonons_write_xmgrace(path, natom, nqpts, qpts, phfreqs, qptbounds)
 end subroutine phonons_write_xmgrace
 !!***
 
+
+
 !----------------------------------------------------------------------
+
+!!****f* m_phonons/ifc_mkphbs
+!! NAME
+!! ifc_mkphbs
+!!
+!! FUNCTION
+!! Compute the phonon band structure from the IFC and write data to file(s)
+!!
+!! INPUTS
+!! ifc<ifc_type>=Interatomic force constants
+!! cryst<crystal_t> = Info on the crystalline structure.
+!! dtset=<datasets_type>: input: all input variables initialized from the input file.
+!! prefix=Prefix for output files.
+!! comm=MPI communicator
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'mkphbs'
+ use interfaces_14_hidewrite
+ use interfaces_18_timing
+ use interfaces_72_response
+ use interfaces_77_ddb
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: comm
+ character(len=*),intent(in) :: prefix
+ type(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: cryst
+ type(dataset_type),intent(in) :: dtset
+
+!Local variables -------------------------
+!scalars
+ integer,parameter :: master=0
+ integer :: iqpt,nqpts,natom,ncid,nprocs,my_rank,ierr
+ !character(500) :: msg
+ type(kpath_t) :: qpath
+!arrays
+ real(dp) :: eigval(3,cryst%natom)
+ real(dp),allocatable :: eigvec(:,:,:,:,:),phfrqs(:,:),phdispl_cart(:,:,:,:)
+
+! *********************************************************************
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ natom = cryst%natom
+
+ if (dtset%ph_nqpath <= 0 .or. dtset%ph_ndivsm <= 0) then
+   MSG_WARNING("ph_nqpath <=0 or ph_ndivsm <= 0, phonon bands won't be produced. returning")
+   return
+ end if
+
+ call kpath_init(qpath, dtset%ph_qpath(:,1:dtset%ph_nqpath), cryst%gprimd, dtset%ph_ndivsm)
+ nqpts = qpath%npts
+
+ ABI_CALLOC(phfrqs, (3*natom,nqpts))
+ ABI_CALLOC(phdispl_cart, (2,3*natom,3*natom,nqpts))
+ ABI_CALLOC(eigvec, (2,3,natom,3,natom))
+
+ do iqpt=1,nqpts
+   if (mod(iqpt, nprocs) /= my_rank) cycle ! mpi-parallelism
+   ! Get phonon frequencies and displacements in cartesian coordinates for this q-point
+   call ifc_fourq(ifc, cryst, qpath%points(:,iqpt), phfrqs(:,iqpt), phdispl_cart(:,:,:,iqpt), out_eigvec=eigvec)
+ end do
+
+ call xmpi_sum_master(phfrqs, master, comm, ierr)
+ call xmpi_sum_master(phdispl_cart, master, comm, ierr)
+
+ if (my_rank == master) then
+#ifdef HAVE_NETCDF
+   NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
+   NCF_CHECK(crystal_ncwrite(cryst, ncid))
+   call phonons_ncwrite(ncid,natom,nqpts, qpath%points, [(one, iqpt=1,nqpts)], phfrqs, phdispl_cart)
+   NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")],defmode=.True.))
+   NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'atomic_mass_units'), ifc%amu))
+   NCF_CHECK(nf90_close(ncid))
+#endif
+
+   call phonons_write(natom, nqpts, qpath%points, [(one, iqpt=1,nqpts)], phfrqs, phdispl_cart)
+   call phonons_write_xmgrace(strcat(prefix, "_PHBANDS.xmgr"), natom, nqpts, qpath%points, phfrqs)
+ end if
+
+ ABI_FREE(phfrqs)
+ ABI_FREE(phdispl_cart)
+ ABI_FREE(eigvec)
+
+ call kpath_free(qpath)
+
+end subroutine ifc_mkphbs
+!!***
 
 end module m_phonons
 !!***

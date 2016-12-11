@@ -359,7 +359,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 !scalars
  integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1
- integer :: my_rank,nproc,iomode,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
+ integer :: my_rank,nproc,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor
  integer :: ibsum_kq,ib_k,band,num_smallw,ibsum
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
@@ -429,7 +429,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  sigma = sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm)
  if (my_rank == master) call sigmaph_print(sigma, std_out, "dims", ebands)
 
- ! This is the maximum number of PWs for all possible k+q
+ ! This is the maximum number of PWs for all possible k+q treated.
  mpw = sigma%mpw; gmax = sigma%gmax
 
  ! Init work_ngfft
@@ -457,8 +457,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  ABI_FREE(bks_mask)
  ABI_FREE(keep_ur)
 
- iomode = iomode_from_fname(wfk0_path)
- call wfd_read_wfk(wfd,wfk0_path,iomode)
+ call wfd_read_wfk(wfd, wfk0_path, iomode_from_fname(wfk0_path))
  if (.False.) call wfd_test_ortho(wfd, cryst, pawtab, unit=std_out, mode_paral="PERS")
 
  ! TODO FOR PAW

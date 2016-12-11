@@ -472,11 +472,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  if (dtset%prtphdos == 1) then
 
-   ! TODO: Phonon band structure.
-   !call mkphbs(ifc, cryst, inp, ddb, asrq0, prefix, tcpui, twalli, zeff, comm)
+   ! Output phonon band structure (requires qpath)
+   call ifc_mkphbs(ifc, cryst, dtset, dtfil%filnam_ds(4), comm)
 
    ! Phonon Density of States.
-
    ! FIXME: mkphdos expects qshift(3) instead of qshift(3, nqshift)
    ! TODO: Parallelize this routine.
    call mkphdos(phdos,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,dtset%ph_smear,dtset%ph_ngqpt,dtset%ph_qshift)
