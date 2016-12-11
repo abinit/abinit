@@ -1945,8 +1945,7 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
        else
          call v1phq_rotate(cryst, qibz(:,iq_ibz), isym, itimrev, g0q,&
            ngfft, cplex_qibz, nfft, db%nspden, db%nsppol, db%mpi_enreg, v1r_qibz, v1r_qbz)
-         !v1r_qbz = zero
-         !v1r_qbz = v1r_qibz
+         !v1r_qbz = zero; v1r_qbz = v1r_qibz
 
          !call times_eigr(-tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
          !call times_eigr(+tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
@@ -2103,8 +2102,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
    idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
    do ispden=1,db%nspden
      do ifft=1,nfft
-       ! MPI-parallelism
-       cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
+       cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI-parallelism
 
        do ir=1,db%nrpt
          wr = db%v1scf_rpt(1, ir,ifft,ispden,mu)
@@ -3035,7 +3033,8 @@ end subroutine dvdb_test_v1rsym
 !!  Debugging tool used to test the symmetrization of the DFPT potentials.
 !!
 !! INPUTS
-!!  db_path=Filename
+!!  db_path=Filename of the DVDB file.
+!!  dump_path=File used to dump potentials (empty string to disable output)
 !!  comm=MPI communicator.
 !!
 !! OUTPUT
@@ -3048,7 +3047,7 @@ end subroutine dvdb_test_v1rsym
 !!
 !! SOURCE
 
-subroutine dvdb_test_v1complete(db_path, comm)
+subroutine dvdb_test_v1complete(db_path, dump_path, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3062,13 +3061,14 @@ subroutine dvdb_test_v1complete(db_path, comm)
  implicit none
 
 !Arguments ------------------------------------
- character(len=*),intent(in) :: db_path
+ character(len=*),intent(in) :: db_path,dump_path
  integer,intent(in) :: comm
 
 !Local variables-------------------------------
 !scalars
- integer :: iqpt,pcase,idir,ipert,cplex,nfft,ispden,timerev_q,ifft,unt
- !character(len=500) :: msg
+ integer,parameter :: master=0
+ integer :: iqpt,pcase,idir,ipert,cplex,nfft,ispden,timerev_q,ifft,unt,my_rank
+ character(len=500) :: msg
  type(crystal_t),pointer :: cryst
  type(dvdb_t),target :: db
 !arrays
@@ -3079,6 +3079,8 @@ subroutine dvdb_test_v1complete(db_path, comm)
  real(dp),allocatable :: file_v1scf(:,:,:,:),symm_v1scf(:,:,:,:)
 
 ! *************************************************************************
+
+ my_rank = xmpi_comm_rank(comm)
 
  call dvdb_init(db, db_path, comm)
  db%debug = .True.
@@ -3103,6 +3105,14 @@ subroutine dvdb_test_v1complete(db_path, comm)
 
  ABI_MALLOC(symq, (4,2,cryst%nsym))
  ABI_MALLOC(pertsy, (3,db%mpert))
+
+ unt = -1
+ if (len_trim(dump_path) /= 0 .and. my_rank == master) then
+   if (open_file(dump_path, msg, newunit=unt, action="write", status="unknown", form="formatted") /= 0) then
+     MSG_ERROR(msg)
+   end if
+   write(std_out,"(a)")sjoin("Will write potentials to:", dump_path)
+ end if
 
  do iqpt=1,db%nqpt
    qpt = db%qpts(:,iqpt)
@@ -3146,8 +3156,7 @@ subroutine dvdb_test_v1complete(db_path, comm)
        call vdiff_print(vdiff_eval(cplex,nfft,file_v1scf(:,:,ispden,pcase),symm_v1scf(:,:,ispden,pcase),cryst%ucvol))
 
        ! Debug: Write potentials to file.
-       unt = 555 !; unt = 0
-       if (unt /= 0) then
+       if (unt /= -1) then
          write(unt,*)"# q-point:", trim(ktoa(qpt))
          write(unt,*)"# idir: ",idir,", ipert: ",ipert,", ispden:", ispden
          write(unt,*)"# file_v1scf, symmetrized_v1scf, diff"
@@ -3182,6 +3191,8 @@ subroutine dvdb_test_v1complete(db_path, comm)
  ABI_FREE(pertsy)
 
  call dvdb_free(db)
+
+ if (unt /= -1) close(unt)
 
 end subroutine dvdb_test_v1complete
 !!***

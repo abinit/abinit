@@ -1097,8 +1097,13 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    call timab(967,2,tsec)
  end if
 
+ ! Output electron bands.
+ !if (my_rank == master .and. dtset%prtebands /= 0) then
+ !  call ebands_write_xmgrace(ebands, strcat(dtfil%filnam_ds(4), "_EBANDS.xmgr"))
+ !end if
+
 !Optionally provide Xcrysden output for the Fermi surface (Only master writes)
- if (dtset%prtfsurf==1.and.me==master) then
+ if (me == master .and. dtset%prtfsurf == 1) then
    if (ebands_write_bxsf(ebands,crystal,dtfil%fnameabo_app_bxsf) /= 0) then
      message = "Cannot produce BXSF file with Fermi surface, see log file for more info"
      MSG_WARNING(message)
