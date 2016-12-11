@@ -97,7 +97,8 @@ znucl  13
 #%%   t88o_DS1_EDOS, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_BXSF, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_PH.bxsf, tolnlines=20, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
-#%%   t88o_DS1_PHBANDS.xmgr, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t88o_DS1_PHBANDS.xmgr, tolnlines=0, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t88o_DS1_PHFRQ, tolnlines=0, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_NEST, tolnlines=50, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_PHDOS, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS2_PHDOS, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;

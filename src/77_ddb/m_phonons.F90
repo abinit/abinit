@@ -1013,7 +1013,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
  integer :: natprj_bs,eivec,enunit,ifcflag
  real(dp) :: tcpu,twall
  real(dp) :: freeze_displ
- character(len=fnlen) :: tmpfilename
  character(500) :: msg
 !arrays
  integer :: rfphon(4),rfelfd(4),rfstrs(4)
@@ -1022,6 +1021,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
  real(dp) :: d2cart(2,ddb%msize),real_qphon(3)
  real(dp) :: displ(2*3*ddb%natom*3*ddb%natom),eigval(3,ddb%natom)
  real(dp),allocatable :: phfrq(:),eigvec(:,:,:,:,:),save_phfrq(:,:),save_phdispl_cart(:,:,:,:),save_qpoints(:,:)
+ real(dp),allocatable :: weights(:)
  real(dp),allocatable,target :: alloc_path(:,:)
  real(dp),pointer :: fineqpath(:,:)
  type(atprj_type) :: atprj
@@ -1135,8 +1135,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
 
    ! In case eivec == 4, write output files for band2eps (visualization of phonon band structures)
    if (eivec == 4) then
-     tmpfilename = trim(prefix)//"_B2EPS"
-     call sortph(eigvec,displ,tmpfilename,natom,phfrq)
+     call sortph(eigvec,displ,strcat(prefix, "_B2EPS"),natom,phfrq)
    end if
 
    ! Write the phonon frequencies
@@ -1167,23 +1166,25 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
  if (natprj_bs > 0) call atprj_destroy(atprj)
 
  if (my_rank == master) then
+   ABI_MALLOC(weights, (nfineqpath))
+   weights = one
+
 #ifdef HAVE_NETCDF
-   tmpfilename = trim(prefix)//"_PHBST.nc"
-   NCF_CHECK_MSG(nctk_open_create(ncid, tmpfilename, xmpi_comm_self), "Creating PHBST")
+   NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
    NCF_CHECK(crystal_ncwrite(Crystal, ncid))
-   call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,[(one, iphl1=1,nfineqpath)],save_phfrq,save_phdispl_cart)
+   call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart)
    NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")],defmode=.True.))
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'atomic_mass_units'), ddb%amu))
    NCF_CHECK(nf90_close(ncid))
 #endif
 
-   call phonons_write(natom,nfineqpath,save_qpoints,[(one, iphl1=1,nfineqpath)],save_phfrq,save_phdispl_cart)
-
+   call phonons_write(strcat(prefix, "_PHFRQ"), natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart)
    call phonons_write_xmgrace(strcat(prefix, "_PHBANDS.xmgr"), natom, nfineqpath, save_qpoints, save_phfrq)
 
    !call phonons_writeEPS(natom,nfineqpath,Crystal%ntypat,save_qpoints,Crystal%typat, &
-   !  [(one, iphl1=1,nfineqpath)],save_phfrq,save_phdispl_cart)
+   !  weights,save_phfrq,save_phdispl_cart)
+   ABI_FREE(weights)
  end if
 
  ABI_FREE(save_qpoints)
@@ -1426,7 +1427,7 @@ end subroutine phonons_ncwrite
 !!
 !! SOURCE
 
- subroutine phonons_write(natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
+ subroutine phonons_write(path,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1440,6 +1441,7 @@ end subroutine phonons_ncwrite
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,nqpts
+ character(len=*),intent(in) :: path
 !arrays
  real(dp),intent(in) :: qpoints(3,nqpts),weights(nqpts)
  real(dp),intent(in) :: phfreq(3*natom,nqpts)
@@ -1456,22 +1458,19 @@ end subroutine phonons_ncwrite
 
  nphmodes = 3*natom
 
- dummy = qpoints(1,1)
- dummy = weights(1)
- dummy = phdispl_cart(1,1,1,1)
+ dummy = qpoints(1,1); dummy = weights(1)
 
- if (open_file("PHFRQ", msg, newunit=iunit, form="formatted", status="unknown", action="write") /= 0) then
+ if (open_file(path, msg, newunit=iunit, form="formatted", status="unknown", action="write") /= 0) then
    MSG_ERROR(msg)
  end if
 
- write (iunit, '(a)')  '# ANADDB generated phonon band structure file. All in Ha atomic units'
+ write (iunit, '(a)')  '# ABINIT generated phonon band structure file. All in Ha atomic units'
  write (iunit, '(a)')  '# '
  write (iunit, '(a,i0)')  '# number_of_qpoints ', nqpts
  write (iunit, '(a,i0)')  '# number_of_phonon_modes ', nphmodes
  write (iunit, '(a)')  '# '
 
  write (formt,'(a,i0,a)') "(I5, ", nphmodes, "E20.10)"
-
  do iq= 1, nqpts
    write (iunit, formt)  iq, phfreq(:,iq)
  end do
@@ -1479,11 +1478,11 @@ end subroutine phonons_ncwrite
  close(iunit)
 
  if (.False.) then
-   if (open_file("PHDISPL", msg, unit=iunit, form="formatted", status="unknown", action="write") /= 0) then
+   if (open_file(strcat(path, "_PHDISPL"), msg, unit=iunit, form="formatted", status="unknown", action="write") /= 0) then
      MSG_ERROR(msg)
    end if
 
-   write (iunit, '(a)')     '# ANADDB generated phonon displacements, along points in PHFRQ file. All in Ha atomic units'
+   write (iunit, '(a)')     '# ABINIT generated phonon displacements, along points in PHFRQ file. All in Ha atomic units'
    write (iunit, '(a)')     '# '
    write (iunit, '(a)')     '# displacements in cartesian coordinates, Re and Im parts '
    write (iunit, '(a,i0)')  '# number_of_qpoints ', nqpts
@@ -2037,14 +2036,14 @@ subroutine phonons_write_xmgrace(path, natom, nqpts, qpts, phfreqs, qptbounds)
  end if
  write(unt,'(a)') '@xaxis  ticklabel char size 1.500000'
  write(unt,'(a)') '@yaxis  tick major 10'
- write(unt,'(a)') '@yaxis  label "Band Energy [eV]"'
+ write(unt,'(a)') '@yaxis  label "Phonon Energy [meV]"'
  write(unt,'(a)') '@yaxis  label char size 1.500000'
  write(unt,'(a)') '@yaxis  ticklabel char size 1.500000'
  do nu=1,3*natom
    write(unt,'(a,i0,a)') '@    s',nu-1,' line color 1'
  end do
  do nu=1,3*natom
-   write(unt,'(a,i0)') '@target G0.S',nu
+   write(unt,'(a,i0)') '@target G0.S',nu-1
    write(unt,'(a)') '@type xy'
    do iq=1,nqpts
       write(unt,'(i0,1x,e16.8)') iq-1, phfreqs(nu, iq) * Ha_meV
@@ -2060,8 +2059,6 @@ subroutine phonons_write_xmgrace(path, natom, nqpts, qpts, phfreqs, qptbounds)
 
 end subroutine phonons_write_xmgrace
 !!***
-
-
 
 !----------------------------------------------------------------------
 
@@ -2118,7 +2115,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
  type(kpath_t) :: qpath
 !arrays
  real(dp) :: eigval(3,cryst%natom)
- real(dp),allocatable :: eigvec(:,:,:,:,:),phfrqs(:,:),phdispl_cart(:,:,:,:)
+ real(dp),allocatable :: eigvec(:,:,:,:,:),phfrqs(:,:),phdispl_cart(:,:,:,:),weights(:)
 
 ! *********************************************************************
 
@@ -2147,18 +2144,23 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
  call xmpi_sum_master(phdispl_cart, master, comm, ierr)
 
  if (my_rank == master) then
+   ABI_MALLOC(weights, (nqpts))
+   weights = one
+
 #ifdef HAVE_NETCDF
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
    NCF_CHECK(crystal_ncwrite(cryst, ncid))
-   call phonons_ncwrite(ncid,natom,nqpts, qpath%points, [(one, iqpt=1,nqpts)], phfrqs, phdispl_cart)
+   call phonons_ncwrite(ncid,natom,nqpts, qpath%points, weights, phfrqs, phdispl_cart)
    NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")],defmode=.True.))
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'atomic_mass_units'), ifc%amu))
    NCF_CHECK(nf90_close(ncid))
 #endif
 
-   call phonons_write(natom, nqpts, qpath%points, [(one, iqpt=1,nqpts)], phfrqs, phdispl_cart)
+   call phonons_write(strcat(prefix, "_PHFRQ"), natom, nqpts, qpath%points, weights, phfrqs, phdispl_cart)
    call phonons_write_xmgrace(strcat(prefix, "_PHBANDS.xmgr"), natom, nqpts, qpath%points, phfrqs)
+
+   ABI_FREE(weights)
  end if
 
  ABI_FREE(phfrqs)

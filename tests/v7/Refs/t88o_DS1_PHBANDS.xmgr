@@ -63,13 +63,13 @@
 @xaxis  tick major 0, 0
 @xaxis  ticklabel char size 1.500000
 @yaxis  tick major 10
-@yaxis  label "Band Energy [eV]"
+@yaxis  label "Phonon Energy [meV]"
 @yaxis  label char size 1.500000
 @yaxis  ticklabel char size 1.500000
 @    s0 line color 1
 @    s1 line color 1
 @    s2 line color 1
-@target G0.S1
+@target G0.S0
 @type xy
 0   0.00000000E+00
 1   0.63803077E+00
@@ -113,7 +113,7 @@
 39   0.16756521E+02
 40   0.16827986E+02
 &
-@target G0.S2
+@target G0.S1
 @type xy
 0   0.00000000E+00
 1   0.63803077E+00
@@ -157,7 +157,7 @@
 39   0.17125926E+02
 40   0.16827986E+02
 &
-@target G0.S3
+@target G0.S2
 @type xy
 0   0.00000000E+00
 1   0.28662081E+01
