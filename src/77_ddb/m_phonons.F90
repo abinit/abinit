@@ -2087,14 +2087,11 @@ end subroutine phonons_write_xmgrace
 
 subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'mkphbs'
- use interfaces_14_hidewrite
- use interfaces_18_timing
- use interfaces_72_response
- use interfaces_77_ddb
+#define ABI_FUNC 'ifc_mkphbs'
 !End of the abilint section
 
  implicit none
