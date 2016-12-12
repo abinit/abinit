@@ -1374,7 +1374,10 @@ subroutine put_eneocc_vect(ebands,arr_name,vect)
  case ('occ')
    call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%occ, val=zero)
  case ('eig')
-   call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%eig, val=maxval(vect))
+   ! DFPT routines call ebands_init with the wrong bantot. Using maxval(vect) causes SIGFAULT
+   ! so I have to recompute the correct bantot here
+   !ABI_CHECK(sum(ebands%nband) == ebands%bantot, "bantot and nband are incosistent")
+   call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%eig, val=maxval(vect(1:sum(ebands%nband))))
  case ('doccde')
    call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%doccde, val=zero)
  case default
