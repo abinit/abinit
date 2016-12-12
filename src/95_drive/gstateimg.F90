@@ -212,8 +212,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 !scalars
  integer,parameter :: formeig=0,level=100,ndtpawuj=0,response=0
  integer :: history_size,idelta,idynimage,ierr,ifirst
- integer :: ii,iimage,ih,itimimage,itimimage_eff
- integer :: last_itimimage,ndynimage,nocc
+ integer :: ii,iimage,ih,itimimage,itimimage_eff,itimimage_prev,ndynimage,nocc
  integer :: ntimimage,ntimimage_stored,ntimimage_max,similar
  logical :: check_conv,compute_all_images,compute_static_images
  logical :: isVused,isARused,is_master,is_mep,is_pimd
@@ -274,25 +273,19 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 
 !Prepare the calculation, by computing flags and dimensions
  ntimimage=dtset%ntimimage
+ ntimimage_stored=ntimimage;if(is_pimd)ntimimage_stored=2
  is_pimd=(dtset%imgmov==9.or.dtset%imgmov==10.or.dtset%imgmov==13)
  is_mep =(dtset%imgmov==1.or.dtset%imgmov== 2.or.dtset%imgmov== 5)
  nocc=dtset%mband*dtset%nkpt*dtset%nsppol
  is_master=(mpi_enreg%me_cell==0.and.mpi_enreg%me_img==0)
 
 !Management of dynamics/relaxation history (positions, forces, stresses, ...)
- use_hist=(dtset%imgmov/=0.and.nimage>0)
- use_hist_prev=.false.
+ use_hist=(dtset%imgmov/=0.and.nimage>0) ; use_hist_prev=.false.
  isVused=is_pimd;isARused=(dtset%optcell/=0)
  if (use_hist) then
    !Read history from file (and broadcast if MPI)
 #if defined HAVE_NETCDF
    use_hist_prev=(dtset%restartxf==-1.and.nimage>0)
-   do iimage=1,nimage
-     if (any(amu_img(:,iimage)/=amu_img(:,1))) then
-       msg='HIST file is not compatible with variable masses!'
-       MSG_ERROR(msg)
-     end if
-   end do
 #endif
    hist_filename=trim(dtfil%filnam_ds(4))//'_HIST.nc'
    if (use_hist_prev)then
@@ -315,26 +308,9 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        ABI_DATATYPE_DEALLOCATE(hist_prev)
      end if
    end if
-   !Initialize new history
+   !Initialize a variable to write the history
    ABI_DATATYPE_ALLOCATE(hist,(nimage))
-   call abihist_init(hist,dtset%natom,ntimimage,isVused,isARused)
-   if (is_pimd) then
-     ABI_ALLOCATE(amass,(dtset%natom,nimage))
-     do iimage=1,nimage
-       amass(:,iimage)=amu_emass*amu_img(dtset%typat(:),iimage)
-     end do
-   else
-     ABI_ALLOCATE(amass,(0,0))
-   end if
-   do iimage=1,nimage
-     hist(iimage)%isVUsed=is_pimd
-     hist(iimage)%isARUsed=(dtset%optcell/=0)
-     call mkrdim(acell_img(:,iimage),rprim_img(:,:,iimage),rprimd)
-     call var2hist(acell_img(:,iimage),hist(iimage),dtset%natom,&
-&                  rprimd,xred_img(:,:,iimage),.FALSE.)
-     call vel2hist(amass(:,iimage),hist(iimage),vel_img(:,:,iimage),&
-&                  vel_cell_img(:,:,iimage))
-   end do
+   call abihist_init(hist,dtset%natom,1,isVused,isARused)
  end if ! imgmov/=0
 
 !Allocations
@@ -342,7 +318,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  ABI_ALLOCATE(vel,(3,dtset%natom))
  ABI_ALLOCATE(vel_cell,(3,3))
  ABI_ALLOCATE(xred,(3,dtset%natom))
- ntimimage_stored=ntimimage;if(is_pimd)ntimimage_stored=2
  ABI_DATATYPE_ALLOCATE(results_img_timimage,(nimage,ntimimage_stored))
  ABI_ALLOCATE(list_dynimage,(dtset%ndynimage))
  do itimimage=1,ntimimage_stored
@@ -395,6 +370,18 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  call pimd_init(dtset,pimd_param,is_master)
  dtion=one;if (is_pimd) dtion=pimd_param%dtion
 
+!In some cases, need amass variable
+ if (use_hist.and.is_pimd) then
+   ABI_ALLOCATE(amass,(dtset%natom,nimage))
+   do iimage=1,nimage
+     if (any(amu_img(:,iimage)/=amu_img(:,1))) then
+       msg='HIST file is not compatible with variable masses!'
+       MSG_ERROR(msg)
+     end if
+     amass(:,iimage)=amu_emass*amu_img(dtset%typat(:),iimage)
+   end do
+ end if
+
 !In the case of the 4th-order Runge-Kutta solver,
 !one must have a number of step multiple of 4.
  ntimimage_max=ntimimage;idelta=1
@@ -402,38 +389,35 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    ntimimage_max=4*(ntimimage_max/4)
    idelta=4
  end if
- last_itimimage=1
 
  call timab(703,2,tsec)
 
 !-----------------------------------------------------------------------------------------
 !Big loop on the propagation of all images
+ itimimage_eff=1
  do itimimage=1,ntimimage
 
-   itimimage_eff=itimimage;if(is_pimd) itimimage_eff=1
-   last_itimimage=itimimage_eff
    res_img => results_img_timimage(:,itimimage_eff)
 
-!  If history is activated and image inside it: do not compute anything
-   if (use_hist.and.use_hist_prev) then
+!  If history is activated and if curent image is inside it: do not compute anything
+   if (use_hist_prev) then
      if (all(hist_prev(:)%ihist<=hist_prev(:)%mxhist)) then
        do iimage=1,nimage
+         ih=hist_prev(iimage)%ihist
          call abihist_copy(hist_prev(iimage),hist(iimage))
-         ih=hist(iimage)%ihist
-         call mkradim(hist(iimage)%acell(:,ih),rprim,hist(iimage)%rprimd(:,:,ih))
-         res_img(iimage)%acell(:)=hist(iimage)%acell(:,ih)
+         call mkradim(hist_prev(iimage)%acell(:,ih),rprim,hist_prev(iimage)%rprimd(:,:,ih))
+         res_img(iimage)%acell(:)=hist_prev(iimage)%acell(:,ih)
          res_img(iimage)%rprim(:,:)=rprim
-         res_img(iimage)%xred(:,:)=hist(iimage)%xred(:,:,ih)
-         res_img(iimage)%vel(:,:)=hist(iimage)%vel(:,:,ih)
-         res_img(iimage)%vel_cell(:,:)=hist(iimage)%vel_cell(:,:,ih)
-         res_img(iimage)%results_gs%fcart(:,:)=hist(iimage)%fcart(:,:,ih)
-         res_img(iimage)%results_gs%strten(:)=hist(iimage)%strten(:,ih)
-         res_img(iimage)%results_gs%etotal=hist(iimage)%etot(ih)
-         res_img(iimage)%results_gs%energies%entropy=hist(iimage)%entropy(ih)
+         res_img(iimage)%xred(:,:)=hist_prev(iimage)%xred(:,:,ih)
+         res_img(iimage)%vel(:,:)=hist_prev(iimage)%vel(:,:,ih)
+         res_img(iimage)%vel_cell(:,:)=hist_prev(iimage)%vel_cell(:,:,ih)
+         res_img(iimage)%results_gs%fcart(:,:)=hist_prev(iimage)%fcart(:,:,ih)
+         res_img(iimage)%results_gs%strten(:)=hist_prev(iimage)%strten(:,ih)
+         res_img(iimage)%results_gs%etotal=hist_prev(iimage)%etot(ih)
+         res_img(iimage)%results_gs%energies%entropy=hist_prev(iimage)%entropy(ih)
          call fcart2fred(res_img(iimage)%results_gs%fcart,res_img(iimage)%results_gs%fred,&
-&                        hist(iimage)%rprimd(:,:,ih),dtset%natom)
+&                        hist_prev(iimage)%rprimd(:,:,ih),dtset%natom)
          hist_prev(iimage)%ihist=hist_prev(iimage)%ihist+1
-         !hist(iimage)%ihist=hist(iimage)%ihist+1
        end do
        goto 110
      end if
@@ -548,14 +532,16 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
        call localredirect(mpi_enreg%comm_cell,mpi_enreg%comm_world,dtset%nimage,mpi_enreg%paral_img,dtset%prtvolimg)
        call timab(706,2,tsec)
 
-     else if (itimimage_eff>1) then ! For static images, simply copy one time step to the other
-       call copy_results_img(results_img_timimage(iimage,itimimage_eff-1), &
-&       results_img_timimage(iimage,itimimage_eff  ))
+     else if (itimimage>1) then ! For static images, simply copy one time step to the other
+       itimimage_prev=itimimage_eff-1
+       if (itimimage_prev<1) itimimage_prev=ntimimage_stored
+       call copy_results_img(results_img_timimage(iimage,itimimage_prev), &
+&                            results_img_timimage(iimage,itimimage_eff ))
      end if
 
 !    Store results in hist datastructure
      if (use_hist) then
-       ih=hist(iimage)%ihist
+       ih=1
        call mkrdim(res_img(iimage)%acell(:),res_img(iimage)%rprim(:,:),rprimd)
        call var2hist(res_img(iimage)%acell(:),hist(iimage),dtset%natom,&
 &                    rprimd,res_img(iimage)%xred(:,:),.FALSE.)
@@ -583,8 +569,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 !    === 1st option: reduced outputs ===
      if (dtset%prtvolimg>0) then
        call prtimg(dtset%dynimage,imagealgo_str(dtset%imgmov),dtset%imgmov,ab_out,&
-&       mpi_enreg,nimage,dtset%nimage,compute_all_images,dtset%prtvolimg,&
-&       results_img_timimage(:,itimimage_eff))
+&       mpi_enreg,nimage,dtset%nimage,compute_all_images,dtset%prtvolimg,res_img)
      end if
    end if
 
@@ -616,8 +601,8 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      do idynimage=1,ndynimage
        iimage=list_dynimage(idynimage)
        delta_energy=delta_energy &
-&       +abs(results_img_timimage(iimage,itimimage       )%results_gs%etotal &
-&       -results_img_timimage(iimage,itimimage-idelta)%results_gs%etotal)
+&       +abs(results_img_timimage(iimage,itimimage)%results_gs%etotal &
+&           -results_img_timimage(iimage,itimimage-idelta)%results_gs%etotal)
      end do
      if (mpi_enreg%paral_img==1) then
        call xmpi_sum(delta_energy,mpi_enreg%comm_img,ierr)
@@ -654,16 +639,12 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
 !  Predict the next value of the images
    if (ntimimage>1) then
      call predictimg(delta_energy,imagealgo_str(dtset%imgmov),dtset%imgmov,itimimage,&
-&     list_dynimage,ga_param,mep_param,mpi_enreg,dtset%natom,ndynimage,nimage,dtset%nimage,&
-&     ntimimage_stored,pimd_param,dtset%prtvolimg,results_img_timimage)
-!    Increment history index
-     if (use_hist) then
-       do iimage=1,nimage
-         hist(iimage)%ihist=hist(iimage)%ihist+1
-       end do
-       ! Need to copy new data into hist datastructure
-     end if
+&     itimimage_eff,list_dynimage,ga_param,mep_param,mpi_enreg,dtset%natom,ndynimage,&
+&     nimage,dtset%nimage,ntimimage_stored,pimd_param,dtset%prtvolimg,results_img_timimage)
    end if
+
+   itimimage_eff=itimimage_eff+1
+   if (itimimage_eff>ntimimage_stored) itimimage_eff=1
 
    call timab(707,2,tsec)
 
@@ -676,17 +657,17 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  do iimage=1,nimage
    ii=mpi_enreg%my_imgtab(iimage)
    if (dtset%dynimage(ii)==1) then
-     acell_img(:,iimage)     =results_img_timimage(iimage,last_itimimage)%acell(:)
-     amu_img(:,iimage)       =results_img_timimage(iimage,last_itimimage)%amu(:)
-     mixalch_img(:,:,iimage) =results_img_timimage(iimage,last_itimimage)%mixalch(:,:)
-     rprim_img(:,:,iimage)   =results_img_timimage(iimage,last_itimimage)%rprim(:,:)
-     vel_img(:,:,iimage)     =results_img_timimage(iimage,last_itimimage)%vel(:,:)
-     vel_cell_img(:,:,iimage)=results_img_timimage(iimage,last_itimimage)%vel_cell(:,:)
-     xred_img(:,:,iimage)    =results_img_timimage(iimage,last_itimimage)%xred(:,:)
-     etotal_img(iimage)      =results_img_timimage(iimage,last_itimimage)%results_gs%etotal
-     fcart_img(:,:,iimage)   =results_img_timimage(iimage,last_itimimage)%results_gs%fcart(:,:)
-     fred_img(:,:,iimage)    =results_img_timimage(iimage,last_itimimage)%results_gs%fred(:,:)
-     strten_img(:,iimage)    =results_img_timimage(iimage,last_itimimage)%results_gs%strten(:)
+     acell_img(:,iimage)     =results_img_timimage(iimage,itimimage_eff)%acell(:)
+     amu_img(:,iimage)       =results_img_timimage(iimage,itimimage_eff)%amu(:)
+     mixalch_img(:,:,iimage) =results_img_timimage(iimage,itimimage_eff)%mixalch(:,:)
+     rprim_img(:,:,iimage)   =results_img_timimage(iimage,itimimage_eff)%rprim(:,:)
+     vel_img(:,:,iimage)     =results_img_timimage(iimage,itimimage_eff)%vel(:,:)
+     vel_cell_img(:,:,iimage)=results_img_timimage(iimage,itimimage_eff)%vel_cell(:,:)
+     xred_img(:,:,iimage)    =results_img_timimage(iimage,itimimage_eff)%xred(:,:)
+     etotal_img(iimage)      =results_img_timimage(iimage,itimimage_eff)%results_gs%etotal
+     fcart_img(:,:,iimage)   =results_img_timimage(iimage,itimimage_eff)%results_gs%fcart(:,:)
+     fred_img(:,:,iimage)    =results_img_timimage(iimage,itimimage_eff)%results_gs%fred(:,:)
+     strten_img(:,iimage)    =results_img_timimage(iimage,itimimage_eff)%results_gs%strten(:)
    else if (compute_static_images) then
      etotal_img(iimage)    =results_img_timimage(iimage,1)%results_gs%etotal
      fcart_img(:,:,iimage) =results_img_timimage(iimage,1)%results_gs%fcart(:,:)
