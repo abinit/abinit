@@ -655,9 +655,9 @@ subroutine ebands_init(bantot,ebands,nelect,doccde,eig,istwfk,kptns,&
 
  ! In ebands, energies and occupations are stored in a matrix (mband,nkpt,nsppol).
  ! put_eneocc_vect is used to reshape the values stored in vectorial form.
- ABI_CALLOC(ebands%eig   ,(ebands%mband,nkpt,nsppol))
- ABI_CALLOC(ebands%occ   ,(ebands%mband,nkpt,nsppol))
- ABI_CALLOC(ebands%doccde,(ebands%mband,nkpt,nsppol))
+ ABI_MALLOC(ebands%eig   ,(ebands%mband,nkpt,nsppol))
+ ABI_MALLOC(ebands%occ   ,(ebands%mband,nkpt,nsppol))
+ ABI_MALLOC(ebands%doccde,(ebands%mband,nkpt,nsppol))
 
  call put_eneocc_vect(ebands,'eig',   eig   )
  call put_eneocc_vect(ebands,'occ',   occ   )
@@ -1117,6 +1117,7 @@ end subroutine ebands_print
 !!  mband=Max number of bands over k-points (just to dimension the output)
 !!  nbands(nkpt*nsppol)=Number of bands at eack k and spin
 !!  vect(:)=The input values to reshape
+!!  [val]=Optional value used to initialize the array.
 !!
 !! OUTPUT
 !!  array3d(mband,nkpt,nsppol)=Arrays containing the values of vect.
@@ -1132,7 +1133,7 @@ end subroutine ebands_print
 !!
 !! SOURCE
 
-subroutine unpack_eneocc(nkpt,nsppol,mband,nband,vect,array3d)
+subroutine unpack_eneocc(nkpt,nsppol,mband,nband,vect,array3d,val)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1146,6 +1147,7 @@ subroutine unpack_eneocc(nkpt,nsppol,mband,nband,vect,array3d)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nkpt,nsppol,mband
+ real(dp),optional,intent(in) :: val
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
  real(dp),intent(in) :: vect(:)
@@ -1155,7 +1157,11 @@ subroutine unpack_eneocc(nkpt,nsppol,mband,nband,vect,array3d)
  integer :: spin,ikpt,band,idx
 ! *************************************************************************
 
- array3d=HUGE(zero)
+ if (present(val)) then
+   array3d = val
+ else
+   array3d = huge(one)
+ end if
 
  idx=0
  ! elements in vect are packed in the first positions.
@@ -1362,21 +1368,18 @@ subroutine put_eneocc_vect(ebands,arr_name,vect)
  integer :: nkpt,nsppol,mband,bantot
 ! *************************************************************************
 
- mband =ebands%mband
- bantot=ebands%bantot
- nkpt  =ebands%nkpt
- nsppol=ebands%nsppol
+ mband =ebands%mband; bantot=ebands%bantot; nkpt  =ebands%nkpt; nsppol=ebands%nsppol
 
- SELECT CASE (tolower(arr_name))
- CASE ('occ')
-   call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%occ)
- CASE ('eig')
-   call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%eig)
- CASE ('doccde')
-   call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%doccde)
- CASE DEFAULT
+ select case (tolower(arr_name))
+ case ('occ')
+   call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%occ, val=zero)
+ case ('eig')
+   call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%eig, val=maxval(vect) + ten)
+ case ('doccde')
+   call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%doccde, val=zero)
+ case default
    MSG_BUG(sjoin('Wrong arr_name= ', arr_name))
- END SELECT
+ end select
 
 end subroutine put_eneocc_vect
 !!***
