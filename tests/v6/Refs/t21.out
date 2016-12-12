@@ -8768,6 +8768,7 @@ P           mkmem           2
            occopt           4
         optforces           1
            prtden           0
+        prtebands           0
            prteig           0
             prtwf           0
             rprim      5.5318805038E-01  0.0000000000E+00  8.3305640920E-01

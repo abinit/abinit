@@ -255,7 +255,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=11,response=1,formeig1=1,master=0,fake_unit=-666
- integer :: ask_accurate,band_index,bantot,bantot_rbz,bdeigrf,bdtot1_index,nsppol,nspinor,band2tot_index
+ integer :: ask_accurate,band_index,bantot_rbz,bdeigrf,bdtot1_index,nsppol,nspinor,band2tot_index
  integer :: bdtot_index,choice,cplex,cplex_rhoij,dim_eig2rf,formeig
  integer :: fullinit,gscase,iband,iblok,icase,icase_eq,idir,idir0,idir1,idir2,idir_eq,idir_dkdk,ierr
  integer :: ii,ikpt,ikpt1,jband,initialized,iorder_cprj,ipert,ipert_cnt,ipert_eq,ipert_me,ireadwf0
@@ -1707,8 +1707,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     dtset%symrel,dtset%tnons,dtset%symafm)
 
      ! Initialize Bands to write in the GKK.nc file
-     bantot= dtset%mband*dtset%nkpt*dtset%nsppol
-     call ebands_init(bantot,Bands,dtset%nelect,doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
+     call ebands_init(bantot_rbz,Bands,dtset%nelect,doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
 &     hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
 &     hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
 &     hdr0%charge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
@@ -2024,8 +2023,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &         dtset%symrel,dtset%tnons,dtset%symafm)
 
 !        Electronic band energies.
-         bantot= dtset%mband*dtset%nkpt*dtset%nsppol
-         call ebands_init(bantot,Bands,dtset%nelect,doccde,eigen0_pert,hdr0%istwfk,hdr0%kptns,&
+         call ebands_init(bantot_rbz,Bands,dtset%nelect,doccde,eigen0_pert,hdr0%istwfk,hdr0%kptns,&
 &         hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
 &         hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
 &         hdr0%charge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &

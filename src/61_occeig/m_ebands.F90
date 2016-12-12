@@ -1374,7 +1374,7 @@ subroutine put_eneocc_vect(ebands,arr_name,vect)
  case ('occ')
    call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%occ, val=zero)
  case ('eig')
-   call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%eig, val=maxval(vect) + ten)
+   call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%eig, val=maxval(vect))
  case ('doccde')
    call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%doccde, val=zero)
  case default
@@ -4819,10 +4819,10 @@ subroutine ebands_write(ebands, prtebands, prefix, kptbounds)
 
 ! *********************************************************************
 
- write(std_out,*)"in ebands_write"
- write(std_out,*)"efermi:", ebands%fermie
- write(std_out,*)"minval eig:", minval(ebands%eig)
- write(std_out,*)"maxval eig:", maxval(ebands%eig)
+ !write(std_out,*)"in ebands_write"
+ !write(std_out,*)"efermi:", ebands%fermie
+ !write(std_out,*)"minval eig:", minval(ebands%eig)
+ !write(std_out,*)"maxval eig:", maxval(ebands%eig)
 
  select case (prtebands)
  case (0)
