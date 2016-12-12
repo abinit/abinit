@@ -655,10 +655,9 @@ subroutine ebands_init(bantot,ebands,nelect,doccde,eig,istwfk,kptns,&
 
  ! In ebands, energies and occupations are stored in a matrix (mband,nkpt,nsppol).
  ! put_eneocc_vect is used to reshape the values stored in vectorial form.
- ABI_MALLOC(ebands%eig   ,(ebands%mband,nkpt,nsppol))
- ABI_MALLOC(ebands%occ   ,(ebands%mband,nkpt,nsppol))
- ABI_MALLOC(ebands%doccde,(ebands%mband,nkpt,nsppol))
- ebands%eig=HUGE(one); ebands%occ=zero; ebands%doccde=zero
+ ABI_CALLOC(ebands%eig   ,(ebands%mband,nkpt,nsppol))
+ ABI_CALLOC(ebands%occ   ,(ebands%mband,nkpt,nsppol))
+ ABI_CALLOC(ebands%doccde,(ebands%mband,nkpt,nsppol))
 
  call put_eneocc_vect(ebands,'eig',   eig   )
  call put_eneocc_vect(ebands,'occ',   occ   )
@@ -4816,6 +4815,11 @@ subroutine ebands_write(ebands, prtebands, prefix, kptbounds)
  real(dp),optional,intent(in) :: kptbounds(:,:)
 
 ! *********************************************************************
+
+ write(std_out,*)"in ebands_write"
+ write(std_out,*)"efermi:", ebands%fermie
+ write(std_out,*)"minval eig:", minval(ebands%eig)
+ write(std_out,*)"maxval eig:", maxval(ebands%eig)
 
  select case (prtebands)
  case (0)
