@@ -49,7 +49,7 @@ MODULE m_ebands
  use defs_abitypes,    only : hdr_type, dataset_type
  use m_copy,           only : alloc_copy
  use m_io_tools,       only : file_exists, open_file
- use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa
+ use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename
  use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson_int, wrap2_zero_one,&
                               isdiagmat
  use m_special_funcs,  only : dirac_delta
@@ -97,9 +97,9 @@ MODULE m_ebands
  public :: ebands_get_jdos         ! Compute the joint density of states.
  public :: ebands_bspline
 
- public :: ebands_prtbltztrp
- public :: ebands_prtbltztrp_tau_out
- public :: ebands_write_xmgrace
+ public :: ebands_prtbltztrp          ! Output files for BoltzTraP code.
+ public :: ebands_prtbltztrp_tau_out  ! Output files for BoltzTraP code,
+ public :: ebands_write               ! Driver routine to write bands in different (txt) formats.
 !!***
 
 !----------------------------------------------------------------------
@@ -4771,12 +4771,77 @@ end subroutine ebands_prtbltztrp_tau_out
 
 !----------------------------------------------------------------------
 
+!!****f* m_ebands/ebands_write
+!! NAME
+!! ebands_write
+!!
+!! FUNCTION
+!!  Driver routine to write bands in different (txt) formats.
+!!  This routine should be called by a single processor.
+!!
+!! INPUTS
+!!  prtebands=Flag seleecting the output format:
+!!    0 --> None
+!!    1 --> xmgrace
+!!    2 --> gnuplot     (not coded yet)
+!!    3 --> EIG format  (not coded yet)
+!!  prefix=Prefix for output filename.
+!!  [kptbounds(:,:)]=Optional argument giving the extrema of the k-path.
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ebands_write(ebands, prtebands, prefix, kptbounds)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ebands_write'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: prtebands
+ type(ebands_t),intent(in) :: ebands
+ character(len=*),intent(in) :: prefix
+ real(dp),optional,intent(in) :: kptbounds(:,:)
+
+! *********************************************************************
+
+ select case (prtebands)
+ case (0)
+    continue
+ case (1)
+   call ebands_write_xmgrace(ebands, strcat(prefix, "_EBANDS.agr"))
+ case (2)
+   call ebands_write_gnuplot(ebands, prefix)
+ !case (3)
+ !  call ebands_write_eigfile(ebands, strcat(prefix, "_EIG"))
+ case default
+   MSG_WARNING(sjoin("Unsupported value of prtebands:", itoa(prtebands)))
+ end select
+
+end subroutine ebands_write
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_ebands/ebands_write_xmgrace
 !! NAME
 !! ebands_write_xmgrace
 !!
 !! FUNCTION
 !!  Write bands in Xmgrace format. This routine should be called by a single processor.
+!!  Use the driver `ebands_write` to support different formats.
 !!
 !! INPUTS
 !!  path=Filename
@@ -4843,12 +4908,11 @@ subroutine ebands_write_xmgrace(ebands, path, kptbounds)
    "# mband: ",ebands%mband,", nkpt: ",ebands%nkpt,", nsppol: ",ebands%nsppol,", nspinor: ",ebands%nspinor
  write(unt,'(a,f8.2,a,i0,2(a,f8.2))') &
    "# nelect: ",ebands%nelect,", occopt: ",ebands%occopt,", tsmear: ",ebands%tsmear,", tphysel: ",ebands%tphysel
- write(unt,'(a,f8.2,a)') "# Energies are in eV. Zero set to efermi: ",ebands%fermie, " [Ha]"
+ write(unt,'(a,f8.2,a)') "# Energies are in eV. Zero set to efermi, previously it was at: ",ebands%fermie * Ha_eV, " [eV]"
  write(unt,'(a)')"# List of k-points and their index (C notation i.e. count from 0)"
  do ik=1,ebands%nkpt
    write(unt, "(a)")sjoin("#", itoa(ik-1), ktoa(ebands%kptns(:,ik)))
  end do
- !write(unt,'(a)') "@version 50113"
  write(unt,'(a)') "@page size 792, 612"
  write(unt,'(a)') "@page scroll 5%"
  write(unt,'(a)') "@page inout 5%"
@@ -4856,8 +4920,8 @@ subroutine ebands_write_xmgrace(ebands, path, kptbounds)
  write(unt,'(a)') "@with g0"
  write(unt,'(a)') "@world xmin 0.00"
  write(unt,'(a,i0)') '@world xmax ',ebands%nkpt
- write(unt,'(a,e16.8)') '@world ymin ',minval((ebands%eig - ebands%fermie) * Ha_eV)
- write(unt,'(a,e16.8)') '@world ymax ',maxval((ebands%eig - ebands%fermie) * Ha_eV)
+ write(unt,'(a,es16.8)') '@world ymin ',minval((ebands%eig - ebands%fermie) * Ha_eV)
+ write(unt,'(a,es16.8)') '@world ymax ',maxval((ebands%eig - ebands%fermie) * Ha_eV)
  write(unt,'(a)') '@default linewidth 1.5'
  write(unt,'(a)') '@xaxis  tick on'
  write(unt,'(a)') '@xaxis  tick major 1'
@@ -4893,7 +4957,7 @@ subroutine ebands_write_xmgrace(ebands, path, kptbounds)
      write(unt,'(a,i0)') '@target G0.S',ii
      write(unt,'(a)') '@type xy'
      do ik=1,ebands%nkpt
-        write(unt,'(i0,1x,e16.8)') ik-1, (ebands%eig(band, ik, spin) - ebands%fermie) * Ha_eV
+        write(unt,'(i0,1x,es16.8)') ik-1, (ebands%eig(band, ik, spin) - ebands%fermie) * Ha_eV
      end do
      write(unt,'(a)') '&'
    end do
@@ -4906,6 +4970,155 @@ subroutine ebands_write_xmgrace(ebands, path, kptbounds)
  end if
 
 end subroutine ebands_write_xmgrace
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/ebands_write_gnuplot
+!! NAME
+!! ebands_write_gnuplot
+!!
+!! FUNCTION
+!!  Write bands in gnuplot format. This routine should be called by a single processor.
+!!  Use the driver `ebands_write` to support different formats.
+!!
+!! INPUTS
+!!  prefix=prefix for files (.data, .gnuplot)
+!!  [kptbounds(:,:)]=Optional argument giving the extrema of the k-path.
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ebands_write_gnuplot'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(ebands_t),intent(in) :: ebands
+ character(len=*),intent(in) :: prefix
+ real(dp),optional,intent(in) :: kptbounds(:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: unt,gpl_unt,ik,spin,band,ii,start,nkbounds
+ character(len=500) :: msg,fmt,datafile
+!arrays
+ integer :: g0(3)
+ integer,allocatable :: bounds2kpt(:)
+
+! *********************************************************************
+
+ nkbounds = 0
+ if (present(kptbounds)) then
+   ! Find correspondence between kptbounds and k-points in ebands.
+   nkbounds = size(kptbounds, dim=2)
+   ABI_MALLOC(bounds2kpt, (nkbounds))
+   bounds2kpt = 1
+   do ii=1,nkbounds
+      start = 1
+      do ik=start,ebands%nkpt
+        if (isamek(ebands%kptns(:, ik), kptbounds(:, ii), g0)) then
+          bounds2kpt(ii) = ik; start = ik + 1; exit
+        end if
+      end do
+   end do
+ end if
+
+ datafile = strcat(prefix, "_EBANDS.data")
+ if (open_file(datafile, msg, newunit=unt, form="formatted", action="write") /= 0) then
+   MSG_ERROR(msg)
+ end if
+ if (open_file(strcat(prefix, "_EBANDS.gnuplot"), msg, newunit=gpl_unt, form="formatted", action="write") /= 0) then
+   MSG_ERROR(msg)
+ end if
+
+ write(unt,'(a)') "# Electron band structure data file"
+ write(unt,'(a)') "# Generated by Abinit"
+ write(unt,'(4(a,i0))') &
+   "# mband: ",ebands%mband,", nkpt: ",ebands%nkpt,", nsppol: ",ebands%nsppol,", nspinor: ",ebands%nspinor
+ write(unt,'(a,f8.2,a,i0,2(a,f8.2))') &
+   "# nelect: ",ebands%nelect,", occopt: ",ebands%occopt,", tsmear: ",ebands%tsmear,", tphysel: ",ebands%tphysel
+ write(unt,'(a,f8.2,a)') "# Energies are in eV. Zero set to efermi, Previously it was at: ",ebands%fermie * Ha_eV, " [eV]"
+ write(unt,'(a)')"# List of k-points and their index (C notation i.e. count from 0)"
+ do ik=1,ebands%nkpt
+   write(unt, "(a)")sjoin("#", itoa(ik-1), ktoa(ebands%kptns(:,ik)))
+ end do
+! ! TODO: Test whether this is ok.
+! if (nkbounds /= 0) then
+!   write(unt,'(a,i0)') '@xaxis  tick spec ',nkbounds
+!   do ik=1,nkbounds
+!      write(unt,'(a,i0,a,a)') '@xaxis  ticklabel ',ik-1,',', "foo"
+!      write(unt,'(a,i0,a,i0)') '@xaxis  tick major ',ik-1,' , ',bounds2kpt(ik)
+!   end do
+! end if
+ fmt = sjoin("(i0,1x,", itoa(ebands%mband), "(es16.8,1x))")
+ write(unt,'(a)') ' '
+ do spin=1,ebands%nsppol
+   write(unt,'(a,i0)') '# [kpt-index, band_1, band_2 ...]  for spin: ',spin
+   do ik=1,ebands%nkpt
+     write(unt,fmt) ik-1, (ebands%eig(:, ik, spin) - ebands%fermie) * Ha_eV
+   end do
+   write(unt,'(a)') ' '
+ end do
+
+ ! gnuplot script file
+  write(gpl_unt,'(a)') '# File to plot bandstructure with gnuplot'
+  write(gpl_unt,'(a)') 'set palette defined ( 0 "blue", 3 "green", 6 "yellow", 10 "red" )'
+  write(gpl_unt,'(a)') 'unset ztics'
+  write(gpl_unt,'(a)') 'unset key'
+  write(gpl_unt,'(a)') '# can make pointsize smaller (~0.5). Too small and nothing is printed'
+  write(gpl_unt,'(a)') 'set pointsize 0.8'
+  write(gpl_unt,'(a)') 'set grid xtics'
+  write(gpl_unt,'(a)') 'set view 0,0'
+  write(gpl_unt,'(a,i0,a)') 'set xrange [0:',ebands%nkpt-1,']'
+  write(gpl_unt,'(2(a,es16.8),a)')&
+    'set yrange [',minval((ebands%eig - ebands%fermie) * Ha_eV),':',maxval((ebands%eig - ebands%fermie) * Ha_eV),']'
+  write(gpl_unt,'(a)') '#use the next lines to make a nice figure for a paper'
+  write(gpl_unt,'(a)') '#set term postscript enhanced eps color lw 0.5 dl 0.5'
+  write(gpl_unt,'(a)') '#set pointsize 0.275'
+  write(gpl_unt,"(a)")sjoin("mband =", itoa(ebands%mband))
+  write(gpl_unt,"(a)")strcat('plot for [i=2:mband] "', basename(datafile), '" u 1:i every :1 with lines linetype -1')
+  if (ebands%nsppol == 2) then
+    write(gpl_unt,"(a)")strcat('replot for [i=2:mband] "', basename(datafile), '" u 1:i every :2 with lines linetype 4')
+  end if
+ write(gpl_unt, "(a)")"pause -1"
+
+ !write(gpl_unt,701) xval(total_pts),emin,emax
+ !do i = 1, num_paths-1
+ !  write(gpl_unt,705) sum(kpath_len(1:i)),emin,sum(kpath_len(1:i)),emax
+ !enddo
+ !write(gpl_unt,702, advance="no") glabel(1),0.0_dp,(glabel(i+1),sum(kpath_len(1:i)),i=1,bands_num_spec_points/2-1)
+ !write(gpl_unt,703) glabel(1+bands_num_spec_points/2),sum(kpath_len(:))
+ !write(gpl_unt,*) 'plot ','"'//trim(seedname)//'_band.dat','"'
+ ! write(gpl_unt,702, advance="no") glabel(1),0.0_dp,(glabel(i+1),sum(kpath_len(1:i)),i=1,bands_num_spec_points/2-1)
+ ! write(gpl_unt,703) glabel(1+bands_num_spec_points/2),sum(kpath_len(:))
+ ! write(gpl_unt,'(a,a,a,a)') 'splot ','"'//trim(seedname)//'_band.dat','"',' u 1:2:3 w p pt 13 palette'
+!701 format('set style data dots',/,'set nokey',/, 'set xrange [0:',F8.5,']',/,'set yrange [',F9.5,' :',F9.5,']')
+!702 format('set xtics (',:20('"',A3,'" ',F8.5,','))
+!703 format(A3,'" ',F8.5,')')
+!705 format('set arrow from ',F8.5,',',F10.5,' to ',F8.5,',',F10.5, ' nohead')
+
+ close(unt)
+ close(gpl_unt)
+
+ if (allocated(bounds2kpt)) then
+   ABI_FREE(bounds2kpt)
+ end if
+
+end subroutine ebands_write_gnuplot
 !!***
 
 end module m_ebands

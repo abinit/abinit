@@ -387,9 +387,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    end if
  end if ! master
 
- if (my_rank == master) then ! .and. (dtset%prtebands /= 0)
-   call ebands_write_xmgrace(ebands, strcat(dtfil%filnam_ds(4), "_EBANDS.xmgr"))
- end if
+ if (my_rank == master) call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
 
 #if 0
  !call ebands_set_interpolator(ebands, cryst, bstart, bcount, mode, espline_ords, eskw_ratio, comm)
@@ -404,10 +402,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ABI_CALLOC(shiftk_spl, (3,nshiftk_spl))
  ebands_bspl = ebands_bspline(ebands, cryst, [3,3,3], kptrlatt_spl, nshiftk_spl, shiftk_spl, comm)
  ABI_FREE(shiftk_spl)
-
- if (my_rank == master) then ! .and. (dtset%prtebands /= 0)
-   call ebands_write_xmgrace(ebands_bspl, strcat(dtfil%filnam_ds(4), "_EBANDS_BSPLINE.xmgr"))
- end if
+ if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(dtfil%filnam_ds(4), "_BSPLINE"))
 
  edos = ebands_get_edos(ebands_bspl, cryst, edos_intmeth, edos_step, edos_broad, comm)
  !call ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
@@ -467,10 +462,10 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    !call xmpi_end()
  end if
 
- if (dtset%prtphdos == 1) then
+ ! Output phonon band structure (requires qpath)
+ if (dtset%prtphbands /= 0) call ifc_mkphbs(ifc, cryst, dtset, dtfil%filnam_ds(4), comm)
 
-   ! Output phonon band structure (requires qpath)
-   call ifc_mkphbs(ifc, cryst, dtset, dtfil%filnam_ds(4), comm)
+ if (dtset%prtphdos == 1) then
 
    ! Phonon Density of States.
    ! FIXME: mkphdos expects qshift(3) instead of qshift(3, nqshift)

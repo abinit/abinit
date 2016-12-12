@@ -478,6 +478,7 @@ type dataset_type
  integer :: prtdipole
  integer :: prtdos
  integer :: prtdosm
+ integer :: prtebands=1
  integer :: prtefg
  integer :: prteig
  integer :: prtelf
@@ -495,6 +496,7 @@ type dataset_type
  integer :: prtpmp
  integer :: prtposcar
  integer :: prtphdos
+ integer :: prtphbands=1
  integer :: prtphsurf=0
  integer :: prtpot
  integer :: prtpsps=0

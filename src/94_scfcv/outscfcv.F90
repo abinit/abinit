@@ -1098,9 +1098,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  end if
 
  ! Output electron bands.
- !if (my_rank == master .and. dtset%prtebands /= 0) then
- !  call ebands_write_xmgrace(ebands, strcat(dtfil%filnam_ds(4), "_EBANDS.xmgr"))
- !end if
+ if (me == master) call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
 
 !Optionally provide Xcrysden output for the Fermi surface (Only master writes)
  if (me == master .and. dtset%prtfsurf == 1) then

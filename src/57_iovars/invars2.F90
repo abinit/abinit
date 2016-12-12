@@ -1972,6 +1972,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtdosm',tread,'INT')
  if(tread==1) dtset%prtdosm=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtebands',tread,'INT')
+ if(tread==1) dtset%prtebands=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtefg',tread,'INT')
  if(tread==1) dtset%prtefg=intarr(1)
 
@@ -2010,6 +2013,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtnest',tread,'INT')
  if(tread==1) dtset%prtnest=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtphbands',tread,'INT')
+ if(tread==1) dtset%prtphbands=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtphdos',tread,'INT')
  if(tread==1) dtset%prtphdos=intarr(1)

@@ -766,6 +766,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtdipole          = dtin%prtdipole
  dtout%prtdos             = dtin%prtdos
  dtout%prtdosm            = dtin%prtdosm
+ dtout%prtebands          = dtin%prtebands    ! TODO prteig could be replaced by prtebands...
  dtout%prtefg             = dtin%prtefg
  dtout%prteig             = dtin%prteig
  dtout%prtelf             = dtin%prtelf
@@ -780,6 +781,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%prtlden            = dtin%prtlden
  dtout%prtnabla           = dtin%prtnabla
  dtout%prtnest            = dtin%prtnest
+ dtout%prtphbands         = dtin%prtphbands
  dtout%prtphdos           = dtin%prtphdos
  dtout%prtphsurf          = dtin%prtphsurf
  dtout%prtposcar          = dtin%prtposcar
