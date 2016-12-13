@@ -78,7 +78,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
  use m_cgtools
  use m_rf2
 
- use m_pawcprj, only : pawcprj_type,pawcprj_alloc,pawcprj_copy,pawcprj_get,pawcprj_free
+ use m_pawcprj, only : pawcprj_type,pawcprj_alloc,pawcprj_copy,pawcprj_get,pawcprj_free,pawcprj_output
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -134,7 +134,6 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
  type(pawcprj_type),allocatable,target :: cprj_jband(:,:),dudkprj(:,:)
  type(pawcprj_type),pointer :: cprj_dudk(:,:),cprj_j(:,:)
  type(rf_hamiltonian_type),pointer :: rf_hamk_idir
-
 ! *********************************************************************
 
  DBG_ENTER("COLL")
@@ -400,9 +399,12 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
        if (has_dudkprj) cprj_dudk => dudkprj(:,1+shift_cprj_band1+shift_cprj_dir1:size_cprj+shift_cprj_band1+shift_cprj_dir1)
 
 !      Compute H^(0) | du/dpert1 > (in h_cwave) and S^(0) | du/dpert1 > (in s_cwave)
-       call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_dudk,cprj_dudk,h_cwave,s_cwave,dtfil,&
-&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,0,0,ikpt,isppol,dtset%mband,mkmem,&
-&       mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
+       call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_dudk,cprj_dudk,h_cwave,s_cwave,&
+&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,0,0,ikpt,isppol,mkmem,&
+&       mpi_enreg,nband_k,nsppol,print_info,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf)
+!       call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_dudk,cprj_dudk,h_cwave,s_cwave,dtfil,&
+!&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,0,0,ikpt,isppol,dtset%mband,mkmem,&
+!&       mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
 
        if (gs_hamkq%usepaw==0) s_cwave(:,:)=cwave_dudk(:,:) ! Store | du/dpert1 > in s_cwave
 
@@ -443,9 +445,12 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
        end if
 
 !      Compute dH/dpert1 | u^(0) > (in h_cwave) and dS/dpert1 | u^(0) > (in s_cwave)
-       call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,dtfil,&
+       call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,&
 &       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir1,ipert1,ikpt,isppol,&
-&       dtset%mband,mkmem,mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
+&       mkmem,mpi_enreg,nband_k,nsppol,print_info,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf)
+!       call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,dtfil,&
+!&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir1,ipert1,ikpt,isppol,&
+!&       dtset%mband,mkmem,mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
 
 !      Copy infos in dsusdu
        if (gs_hamkq%usepaw==1) then
@@ -580,9 +585,12 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 
 !      Compute  : d^2H/(dpert1 dpert2)|u^(0)>  (in h_cwave)
 !      and      : d^2S/(dpert1 dpert2)|u^(0)>  (in s_cwave)
-       call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,dtfil,&
-&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,dtset%mband,&
-&       mkmem,mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
+       call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,&
+&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,&
+&       mkmem,mpi_enreg,nband_k,nsppol,print_info,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf)
+!       call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_j,cprj_j,h_cwave,s_cwave,dtfil,&
+!&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,dtset%mband,&
+!&       mkmem,mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
 
        if (print_info/=0) then
          write(msg,'(a,i2)') 'RF2 TEST before accumulate_bands choice = 3 jband = ',jband
@@ -680,9 +688,12 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
        end if
 
 !      Compute dH/dpert2 | du/dpert1 > (in h_cwave) and dS/dpert2 | du/dpert1 > (in s_cwave)
-       call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_dudk,cprj_dudk,h_cwave,s_cwave,dtfil,&
+       call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_dudk,cprj_dudk,h_cwave,s_cwave,&
 &       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir2,ipert2,ikpt,isppol,&
-&       dtset%mband,mkmem,mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
+&       mkmem,mpi_enreg,nband_k,nsppol,print_info,dtset%prtvol,rf_hamk_idir,size_cprj,size_wf)
+!       call rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave_dudk,cprj_dudk,h_cwave,s_cwave,dtfil,&
+!&       eig0_k,eig1_k_jband,jband,gs_hamkq,gvnl1,idir2,ipert2,ikpt,isppol,&
+!&       dtset%mband,mkmem,mpi_enreg,nsppol,print_info,dtset%prtvol,rf_hamk_idir)
 
        if (print_info/=0) then
          write(msg,'(2(a,i2))') 'RF2 TEST before accumulate_bands choice = 4 kdir1 = ',kdir1,' jband = ',jband

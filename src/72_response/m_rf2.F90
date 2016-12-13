@@ -76,7 +76,7 @@ MODULE m_rf2
    !  - lambda_mn^(1) = <u^(0)_m| (H^(1)-(epsilon_n+epsilon_m)/2 S^(1) |u^(0)_n> (1st order Lagrange multiplier)
    !  - X^(2) = d^2X/(dk_dir1 dlambda_dir2)
    !  - 2X^(1)Y^(1) = dX/dk_dir1 dY/dlambda_dir2 + dX/dlambda_dir2 dY/dk_dir1
-   !  lambbda_dir2 = k_dir2 (ipert==natom+10) , E_dir2 (ipert==natom+11)
+   !  lambda_dir2 = k_dir2 (ipert==natom+10) , E_dir2 (ipert==natom+11)
    ! Note : P_c^* will be apply to |(RHS_Stern)_n> in dfpt_cgwf.F90
    ! **
    ! Computed in "rf2_init"
@@ -343,12 +343,11 @@ end subroutine rf2_accumulate_bands
 !! INPUTS
 !!  rf2 : rf2_t object containing all rf2 data
 !!  cg_jband (used only if print_info/=0) : array containing |u^(0)(jband)> for all bands
-!!  cprj_jband(natom,nspinor*mband*mkmem*nsppol*usecprj)= u^(0) wave functions for all bands
+!!  cprj_jband(natom,nspinor*usecprj)= u^(0) wave functions for all bands
 !!              projected with non-local projectors: cprj_jband=<p_i|u^(0)(jband)>
 !!  cwave(2,size_wf) : input wave function |u>
 !!  cwaveprj(natom,nspinor) : input wave function |u>
 !!              projected with non-local projectors <p_i|u>
-!!  dtfil <type(datafiles_type)>=variables related to files
 !!  eig0 : 0-order eigenvalue for the present wavefunction at k
 !!  eig1_k_jband : first-order lagrange multipliers for the band j (Lambda^(1)_ji for all i)
 !!  jband : band index of the input wavefunction
@@ -362,7 +361,6 @@ end subroutine rf2_accumulate_bands
 !!     ipert = natom+10,11 : 2nd order calculation, call of getgh2c
 !!  ikpt=number of the k-point
 !!  isppol=1 index of current spin component
-!!  mband=maximum number of bands
 !!  mkmem =number of k points trated by this node (GS data).
 !!  mpi_enreg=information about MPI parallelization
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
@@ -397,9 +395,12 @@ end subroutine rf2_accumulate_bands
 !!
 !! SOURCE
 
-subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cwave,dtfil,eig0,eig1_k_jband,&
-&                                jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,mband,mkmem,mpi_enreg,nsppol,&
-                                 print_info,prtvol,rf_hamk_idir)
+!subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cwave,dtfil,eig0,eig1_k_jband,&
+!&                                jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,mband,mkmem,mpi_enreg,nsppol,&
+!                                 print_info,prtvol,rf_hamk_idir)
+subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cwave,eig0,eig1_k_jband,&
+&                                jband,gs_hamkq,gvnl1,idir,ipert,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
+                                 print_info,prtvol,rf_hamk_idir,size_cprj,size_wf)
 
  use defs_basis
  use defs_abitypes
@@ -407,7 +408,7 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,
  use m_hamiltonian
  use m_cgtools
 
- use m_pawcprj,      only : pawcprj_type,pawcprj_alloc,pawcprj_copy,pawcprj_free
+ use m_pawcprj,      only : pawcprj_type,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_output
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -421,24 +422,23 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: idir,ipert,ikpt,isppol,jband,mband,mkmem,nsppol,print_info,prtvol
- type(datafiles_type),intent(in) :: dtfil
+ integer,intent(in) :: idir,ipert,ikpt,isppol,jband,mkmem,nband_k,nsppol,print_info,prtvol,size_wf,size_cprj
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
- type(rf2_t),intent(in) :: rf2
+! type(rf2_t),intent(in) :: rf2
  type(rf_hamiltonian_type),intent(inout),target :: rf_hamk_idir
  type(MPI_type),intent(in) :: mpi_enreg
 
 !arrays
- real(dp),intent(in),target :: cg_jband(2,rf2%size_wf*print_info*rf2%nband_k,2)
- real(dp),intent(in) :: eig0(rf2%nband_k),eig1_k_jband(2*rf2%nband_k)
- real(dp),intent(inout) :: gvnl1(2,rf2%size_wf)
- real(dp),intent(inout) :: cwave(2,rf2%size_wf),h_cwave(2,rf2%size_wf),s_cwave(2,rf2%size_wf)
+ real(dp),intent(in),target :: cg_jband(2,size_wf*print_info*nband_k,2)
+ real(dp),intent(in) :: eig0(nband_k),eig1_k_jband(2*nband_k)
+ real(dp),intent(inout) :: gvnl1(2,size_wf)
+ real(dp),intent(inout) :: cwave(2,size_wf),h_cwave(2,size_wf),s_cwave(2,size_wf)
  type(pawcprj_type),intent(inout),target :: cprj_jband(:,:),cwaveprj(:,:)
 
 !Local variables ---------------------------------------
 !scalars
  integer,parameter :: berryopt=0,optnl=2,tim_getghc=1,tim_getgh1c=1,tim_getgh2c=1 ! to change
- integer :: cpopt,iband,natom,nband_k,sij_opt,size_cprj,size_wf,optlocal,opt_gvnl1,usevnl
+ integer :: cpopt,iband,natom,sij_opt,optlocal,opt_gvnl1,usevnl
  logical :: has_cprj_jband,has_cwaveprj
  real(dp) :: dotr,doti,dotr2,doti2,tol_test
  character(len=500) :: msg
@@ -449,12 +449,11 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,
  real(dp), ABI_CONTIGUOUS pointer :: cwave_i(:,:),cwave_j(:,:)
  type(pawcprj_type),target :: cprj_empty(0,0)
  type(pawcprj_type),pointer :: cprj_j(:,:)
-
 ! *********************************************************************
 
 !Check sizes
  if (size(cprj_jband)/=0) then
-   if (size(cprj_jband)/=rf2%nband_k*gs_hamkq%natom*gs_hamkq%nspinor*gs_hamkq%usecprj) then
+   if (size(cprj_jband)/=nband_k*gs_hamkq%natom*gs_hamkq%nspinor*gs_hamkq%usecprj) then
      msg='Wrong cprj size!'
      MSG_BUG(msg)
    end if
@@ -471,17 +470,11 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,
  opt_gvnl1  = 0
  if(ipert==gs_hamkq%natom+2.or.(ipert==gs_hamkq%natom+11.and.gs_hamkq%usepaw==1)) then
    usevnl = 1
-   opt_gvnl1 = 1
-   if (ipert==gs_hamkq%natom+2) then
-     optlocal = 1
-     if (gs_hamkq%usepaw==1) opt_gvnl1 = 2
-   end if
+   opt_gvnl1 = 2
+   if (ipert==gs_hamkq%natom+2) optlocal = 1
  end if
 
  natom = gs_hamkq%natom
- nband_k = rf2%nband_k
- size_wf = rf2%size_wf
- size_cprj = rf2%size_cprj
  sij_opt=1;if (gs_hamkq%usepaw==0) sij_opt=0
  tol_test=tol8
 
@@ -492,7 +485,7 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,
 
  if (print_info/=0) then
    if (ipert/=0) then
-     write(msg,'(3(a,i2))') 'RF2 TEST rf2_apply_hamiltonian ipert = ',ipert-natom,' idir =',idir,&
+     write(msg,'(3(a,i2))') 'RF2 TEST rf2_apply_hamiltonian ipert = ',ipert,' idir =',idir,&
      & ' jband = ',jband
    else
      write(msg,'(a,i2)') 'RF2 TEST rf2_apply_hamiltonian ipert = 0 idir = 0 jband = ',jband
@@ -551,11 +544,17 @@ subroutine rf2_apply_hamiltonian(rf2,cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,
          dotr = dotr - (eig0(iband)+eig0(jband))*dotr2/two
          doti = doti - (eig0(iband)+eig0(jband))*doti2/two
        end if
+!       if (ipert==natom+2) then
+!         write(msg,'(2(a,es22.13E3))') 'RF2 TEST GETGH1 :  dotr = ',dotr,'  doti = ',doti
+!         call wrtout(std_out,msg)
+!         write(msg,'(2(a,es22.13E3))') 'RF2 TEST GETGH1 : eig1r = ',eig1_k_jband(1+2*(iband-1)),' eig1i = ',eig1_k_jband(2+2*(iband-1))
+!       end if
+       call wrtout(std_out,msg)
        dotr = dotr - eig1_k_jband(1+2*(iband-1))
        doti = doti - eig1_k_jband(2+2*(iband-1))
        dotr = sqrt(dotr**2+doti**2)
        if (dotr > tol_test) then
-         write(msg,'(4(a,i2),a,es22.13E3)') 'RF2 TEST GETGH1 : ipert=',ipert-natom,' idir=',idir,&
+         write(msg,'(4(a,i2),a,es22.13E3)') 'RF2 TEST GETGH1 : ipert=',ipert,' idir=',idir,&
                                             ' jband=',jband,' iband=',iband,' NOT PASSED dotr = ',dotr
          call wrtout(std_out,msg)
        end if
