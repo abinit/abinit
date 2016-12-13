@@ -829,6 +829,8 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
  ! Option to get vectors in reduced coordinates?
  !call phdispl_cart2red(natom, crystal%gprimd, out_eigvec, out_eigvec_red)
 
+ !if (present(dwdq) call ifc_get_dwdq(ifc, crystal, my_qpt, phfrq, eigvec, dwdq)
+
 end subroutine ifc_fourq
 !!***
 

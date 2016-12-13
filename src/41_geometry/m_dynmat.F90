@@ -4800,22 +4800,17 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,&
 
 !Local variables -------------------------
 !scalars
- integer :: i1,i2,ib,iqpt,nqpt,nsize,option,plus
- integer :: sumg0
- !character(len=500) :: msg
+ integer,parameter :: nqpt1=1,option2=2,sumg0=0,plus1=1,iqpt1=1
+ integer :: i1,i2,ib,nsize
 !arrays
  real(dp) :: qphon(3)
  real(dp),allocatable :: dq(:,:,:,:,:),dyew(:,:,:,:,:)
 
 ! *********************************************************************
 
- !write(msg, '(a,3es15.5)' )'  gtdyn9 : enter ftiaf9 with q =',qphon(1:3)
- !call wrtout(std_out,message,'COLL')
-
  ABI_ALLOCATE(dq,(2,3,natom,3,natom))
 
 !Get the normalized wavevector
-!write(std_out,*)' gtdyn9 : wavevector entirely blocked on zero'
  if(abs(qphnrm)<1.0d-7)then
    qphon(1:3)=zero
  else
@@ -4823,16 +4818,12 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,&
  end if
 
 !Generate the analytical part from the interatomic forces
- nqpt=1
- call ftifc_r2q (atmfrc,dq,gprim,natom,nqpt,nrpt,rpt,qphon,wghatm)
+ call ftifc_r2q (atmfrc,dq,gprim,natom,nqpt1,nrpt,rpt,qphon,wghatm)
 
 !The analytical dynamical matrix dq has been generated
 !in the normalized canonical coordinate system. Now, the
-!phase is modified, in order to recover the usual (xred)
-!coordinate of atoms.
-
- option=2; nqpt=1
- call dymfz9(dq,natom,nqpt,gprim,option,qphon,trans)
+!phase is modified, in order to recover the usual (xred) coordinate of atoms.
+ call dymfz9(dq,natom,nqpt1,gprim,option2,qphon,trans)
 
  if (dipdip==1) then
 !  Add the non-analytical part
@@ -4841,12 +4832,10 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,&
 !  (Denoted A-bar in the notes)
    ABI_ALLOCATE(dyew,(2,3,natom,3,natom))
 
-   sumg0=0
    call ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff)
    call q0dy3_apply(natom,dyewq0,dyew)
 
-   plus=1; iqpt=1
-   call nanal9(dyew,dq,iqpt,natom,nqpt,plus)
+   call nanal9(dyew,dq,iqpt1,natom,nqpt1,plus1)
    ABI_DEALLOCATE(dyew)
  end if
 
