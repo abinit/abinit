@@ -619,9 +619,11 @@ end if
    end if
    has_kxc=1;nkxc1=2*dtset%nspden-1 ! LDA only
    if(dtset%xclevel==2.and.dtset%pawxcdev==0) nkxc1=23
-   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,dtset%nspden,cplex,dtset%pawxcdev,&
+   ! TO CHANGE
+   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,0,dtset%nspden,cplex,dtset%pawxcdev,&
 &   dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+   ! END TO CHANGE
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
 &   has_dijso=1,has_pawu_occ=1,has_exexch_pot=1,req_cplex_dij=req_cplex_dij,&

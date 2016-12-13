@@ -81,6 +81,10 @@ MODULE m_paw_an
    ! set to 1 if xc kernels kxc1 and kxct1 are allocated and used
    !        2 if they are already computed
 
+  integer :: has_k3xc
+   ! set to 1 if the third derivative of the XC energy functionals k3xc1 and k3xct1 are allocated and used
+   !        2 if it is already computed
+
   integer :: has_vhartree
    ! set to 1 if vh1 and vht1 are allocated and used
    !        2 if they are already computed
@@ -112,6 +116,10 @@ MODULE m_paw_an
    ! number of independent components of Kxc1 and Kxct1
    ! (usually 3 for LDA, 23 for GGA)
 
+  integer :: nk3xc1
+   ! number of independent components of K3xc1 and K3xct1
+   ! (usually 4 for LDA, not available for GGA)
+
   integer :: nspden
    ! Number of spin-density components
 
@@ -134,6 +142,18 @@ MODULE m_paw_an
    ! Gives xc pseudo kernel inside the sphere
    !   (theta,phi) values of kernel if pawxcdev=0
    !   LM-moments of kernel if pawxcdev/=0
+
+  real(dp), allocatable :: k3xc1 (:,:,:)
+   ! k3xc1(cplex*mesh_size,lm_size or angl_size,nk3xc1)
+   ! Gives third derivative of the XC energy functionals inside the sphere
+   !   (theta,phi) values if pawxcdev=0
+   !   LM-moments if pawxcdev/=0 => NOT AVAILABLE YET
+
+  real(dp), allocatable :: k3xct1 (:,:,:)
+   ! k3xct1(cplex*mesh_size,lm_size or angl_size,nk3xc1)
+   ! Gives third derivative of the pseudo XC energy functionals inside the sphere
+   !   (theta,phi) values if pawxcdev=0
+   !   LM-moments if pawxcdev/=0 => NOT AVAILABLE YET
 
   real(dp), allocatable :: vh1 (:,:,:)
    ! vh1(cplex*mesh_size,lm_size,nspden)
@@ -205,8 +225,8 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine paw_an_init(Paw_an,natom,ntypat,nkxc1,nspden,cplex,pawxcdev,typat,Pawang,Pawtab,&
-&          has_vhartree,has_vxc,has_vxcval,has_kxc,has_vxc_ex, & ! optional arguments
+subroutine paw_an_init(Paw_an,natom,ntypat,nkxc1,nk3xc1,nspden,cplex,pawxcdev,typat,Pawang,Pawtab,&
+&          has_vhartree,has_vxc,has_vxcval,has_kxc,has_k3xc,has_vxc_ex, & ! optional arguments
 &          mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
 
@@ -220,8 +240,8 @@ subroutine paw_an_init(Paw_an,natom,ntypat,nkxc1,nspden,cplex,pawxcdev,typat,Paw
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: natom,nkxc1,ntypat,cplex,nspden,pawxcdev
- integer,optional,intent(in) :: has_vhartree,has_vxc,has_vxcval,has_kxc,has_vxc_ex
+ integer,intent(in) :: natom,nkxc1,nk3xc1,ntypat,cplex,nspden,pawxcdev
+ integer,optional,intent(in) :: has_vhartree,has_vxc,has_vxcval,has_kxc,has_k3xc,has_vxc_ex
  integer,optional,intent(in) :: comm_atom
 !arrays
  integer,intent(in) :: typat(natom)
@@ -259,6 +279,7 @@ subroutine paw_an_init(Paw_an,natom,ntypat,nkxc1,nspden,cplex,pawxcdev,typat,Paw
   Paw_an(iat)%lm_size    =lm_size
   Paw_an(iat)%mesh_size  =Pawtab(itypat)%mesh_size
   Paw_an(iat)%nkxc1      =nkxc1
+  Paw_an(iat)%nk3xc1     =nk3xc1
   Paw_an(iat)%nspden     =nspden
 
   ! === Non-zero LM-moments of "one-center" densities/potentials ===
@@ -315,6 +336,19 @@ subroutine paw_an_init(Paw_an,natom,ntypat,nkxc1,nspden,cplex,pawxcdev,typat,Paw
     LIBPAW_ALLOCATE(Paw_an(iat)%kxct1,(cplex*Paw_an(iat)%mesh_size,v_size,nkxc1))
     if (nkxc1>0) then
       Paw_an(iat)%kxc1=zero;Paw_an(iat)%kxct1=zero
+    end if
+   end if
+  end if
+
+  ! third derivative of the XC energy functionals inside the sphere
+  Paw_an(iat)%has_k3xc=0
+  if (PRESENT(has_k3xc)) then
+   if (has_k3xc>0) then
+    Paw_an(iat)%has_k3xc=1
+    LIBPAW_ALLOCATE(Paw_an(iat)%k3xc1 ,(cplex*Paw_an(iat)%mesh_size,v_size,nk3xc1))
+    LIBPAW_ALLOCATE(Paw_an(iat)%k3xct1,(cplex*Paw_an(iat)%mesh_size,v_size,nk3xc1))
+    if (nk3xc1>0) then
+      Paw_an(iat)%k3xc1=zero;Paw_an(iat)%k3xct1=zero
     end if
    end if
   end if
@@ -412,12 +446,19 @@ subroutine paw_an_free(Paw_an)
   if (allocated(Paw_an(iat)%kxct1    ))  then
     LIBPAW_DEALLOCATE(Paw_an(iat)%kxct1)
   end if
+  if (allocated(Paw_an(iat)%k3xc1     ))  then
+    LIBPAW_DEALLOCATE(Paw_an(iat)%k3xc1)
+  end if
+  if (allocated(Paw_an(iat)%k3xct1    ))  then
+    LIBPAW_DEALLOCATE(Paw_an(iat)%k3xct1)
+  end if
   if (allocated(Paw_an(iat)%vxc_ex   ))  then
     LIBPAW_DEALLOCATE(Paw_an(iat)%vxc_ex)
   end if
 
   ! === Reset all has_* flags ===
   Paw_an(iat)%has_kxc     =0
+  Paw_an(iat)%has_k3xc    =0
   Paw_an(iat)%has_vhartree=0
   Paw_an(iat)%has_vxc     =0
   Paw_an(iat)%has_vxcval  =0
@@ -479,6 +520,7 @@ subroutine paw_an_nullify(Paw_an)
  do iat=1,natom
   ! Set all has_* flags to zero.
   Paw_an(iat)%has_kxc      =0
+  Paw_an(iat)%has_k3xc     =0
   Paw_an(iat)%has_vhartree =0
   Paw_an(iat)%has_vxc      =0
   Paw_an(iat)%has_vxcval   =0
@@ -539,7 +581,7 @@ subroutine paw_an_copy(paw_an_in,paw_an_cpy,&
 
 !Local variables-------------------------------
 !scalars
- integer :: cplx_mesh_size,ij,ij1,lm_size,my_comm_atom,my_natom,nkxc1,npaw_an_in
+ integer :: cplx_mesh_size,ij,ij1,lm_size,my_comm_atom,my_natom,nkxc1,nk3xc1,npaw_an_in
  integer :: npaw_an_max,npaw_an_out,nspden,paral_case,v_size,sz1
  logical :: my_atmtab_allocated,paral_atom
  character(len=500) :: msg
@@ -601,6 +643,7 @@ subroutine paw_an_copy(paw_an_in,paw_an_cpy,&
      paw_an_out1%angl_size =paw_an_in1%angl_size
      paw_an_out1%cplex =paw_an_in1%cplex
      paw_an_out1%has_kxc =paw_an_in1%has_kxc
+     paw_an_out1%has_k3xc =paw_an_in1%has_k3xc
      paw_an_out1%has_vhartree =paw_an_in1%has_vhartree
      paw_an_out1%has_vxc =paw_an_in1%has_vxc
      paw_an_out1%has_vxcval =paw_an_in1%has_vxcval
@@ -609,6 +652,7 @@ subroutine paw_an_copy(paw_an_in,paw_an_cpy,&
      paw_an_out1%lm_size =paw_an_in1%lm_size
      paw_an_out1%mesh_size =paw_an_in1%mesh_size
      paw_an_out1%nkxc1 =paw_an_in1%nkxc1
+     paw_an_out1%nk3xc1 =paw_an_in1%nk3xc1
      paw_an_out1%nspden =paw_an_in1%nspden
      if (allocated(paw_an_in1%lmselect)) then
        sz1=size(paw_an_in1%lmselect)
@@ -620,6 +664,8 @@ subroutine paw_an_copy(paw_an_in,paw_an_cpy,&
        v_size=size(paw_an_in1%vxc1,2)
      else if (paw_an_in1%has_kxc>0) then
        v_size=size(paw_an_in1%kxc1,2)
+     else if (paw_an_in1%has_k3xc>0) then
+       v_size=size(paw_an_in1%k3xc1,2)
      else if (paw_an_in1%has_vxcval>0) then
        v_size=size(paw_an_in1%vxc1_val,2)
      else if (paw_an_in1%has_vxc_ex>0) then
@@ -637,6 +683,15 @@ subroutine paw_an_copy(paw_an_in,paw_an_cpy,&
        if (paw_an_in1%has_kxc==2.and.nkxc1>0) then
          paw_an_out1%kxc1(:,:,:)=paw_an_in1%kxc1(:,:,:)
          paw_an_out1%kxct1(:,:,:)=paw_an_in1%kxct1(:,:,:)
+       end if
+     end if
+     nk3xc1=paw_an_in1%nk3xc1
+     if (paw_an_in1%has_k3xc>0) then
+       LIBPAW_ALLOCATE(paw_an_out1%k3xc1,(cplx_mesh_size,v_size,nk3xc1))
+       LIBPAW_ALLOCATE(paw_an_out1%k3xct1,(cplx_mesh_size,v_size,nk3xc1))
+       if (paw_an_in1%has_k3xc==2.and.nk3xc1>0) then
+         paw_an_out1%k3xc1(:,:,:)=paw_an_in1%k3xc1(:,:,:)
+         paw_an_out1%k3xct1(:,:,:)=paw_an_in1%k3xct1(:,:,:)
        end if
      end if
      if (paw_an_in1%has_vhartree>0) then
@@ -770,6 +825,8 @@ subroutine paw_an_print(Paw_an,unit,mode_paral, &
    call wrtout(my_unt,msg,my_mode)
    write(msg,'(a,i4)')'  has_kxc     = ',paw_an(iatom)%has_kxc
    call wrtout(my_unt,msg,my_mode)
+   write(msg,'(a,i4)')'  has_k3xc    = ',paw_an(iatom)%has_k3xc
+   call wrtout(my_unt,msg,my_mode)
    write(msg,'(a,i4)')'  has_vhartree= ',paw_an(iatom)%has_vhartree
    call wrtout(my_unt,msg,my_mode)
    write(msg,'(a,i4)')'  has_vxc     = ',paw_an(iatom)%has_vxc
@@ -785,6 +842,8 @@ subroutine paw_an_print(Paw_an,unit,mode_paral, &
    write(msg,'(a,i4)')'  mesh_size   = ',paw_an(iatom)%mesh_size
    call wrtout(my_unt,msg,my_mode)
    write(msg,'(a,i4)')'  nkxc1       = ',paw_an(iatom)%nkxc1
+   call wrtout(my_unt,msg,my_mode)
+   write(msg,'(a,i4)')'  nk3xc1      = ',paw_an(iatom)%nk3xc1
    call wrtout(my_unt,msg,my_mode)
    write(msg,'(a,i4)')'  nspden      = ',paw_an(iatom)%nspden
    call wrtout(my_unt,msg,my_mode)
@@ -841,7 +900,7 @@ subroutine paw_an_gather(Paw_an_in,paw_an_gathered,master,comm_atom,mpi_atmtab)
  integer :: buf_dp_size,buf_dp_size_all,buf_int_size,buf_int_size_all,cplx_mesh_size
  integer :: iat,iatot,ierr,has_lm_select,i1,i2,ij,indx_int,indx_dp
  integer :: lm_size,me_atom
- integer :: my_natom,natom,nkxc1,npaw_an_in_sum,nproc_atom,nspden,v_size,sz1,sz2,sz3
+ integer :: my_natom,natom,nkxc1,nk3xc1,npaw_an_in_sum,nproc_atom,nspden,v_size,sz1,sz2,sz3
  logical :: my_atmtab_allocated,paral_atom
  character(len=500) :: msg
  type(Paw_an_type),pointer :: paw_an_in1,paw_an_gathered1
@@ -884,8 +943,10 @@ subroutine paw_an_gather(Paw_an_in,paw_an_gathered,master,comm_atom,mpi_atmtab)
        paw_an_gathered1%angl_size =paw_an_in1%angl_size
        paw_an_gathered1%lm_size =paw_an_in1%lm_size
        paw_an_gathered1%nkxc1 =paw_an_in1%nkxc1
+       paw_an_gathered1%nk3xc1 =paw_an_in1%nk3xc1
        paw_an_gathered1%has_vxc =paw_an_in1%has_vxc
        paw_an_gathered1%has_kxc =paw_an_in1%has_kxc
+       paw_an_gathered1%has_k3xc =paw_an_in1%has_k3xc
        paw_an_gathered1%has_vxcval =paw_an_in1%has_vxcval
        paw_an_gathered1%has_vxc_ex =paw_an_in1%has_vxc_ex
        paw_an_gathered1%has_vhartree =paw_an_in1%has_vhartree
@@ -912,11 +973,23 @@ subroutine paw_an_gather(Paw_an_in,paw_an_gathered,master,comm_atom,mpi_atmtab)
          LIBPAW_ALLOCATE(paw_an_gathered1%kxc1,(sz1,sz2,sz3))
          if (sz3>0) paw_an_gathered1%kxc1(:,:,:)=paw_an_in1%kxc1(:,:,:)
        end if
+       if (allocated(paw_an_in1%k3xc1)) then
+         sz1=size(paw_an_in1%k3xc1,1);sz2=size(paw_an_in1%k3xc1,2)
+         sz3=size(paw_an_in1%k3xc1,3)
+         LIBPAW_ALLOCATE(paw_an_gathered1%k3xc1,(sz1,sz2,sz3))
+         if (sz3>0) paw_an_gathered1%k3xc1(:,:,:)=paw_an_in1%k3xc1(:,:,:)
+       end if
        if (allocated(paw_an_in1%kxct1)) then
          sz1=size(paw_an_in1%kxct1,1);sz2=size(paw_an_in1%kxct1,2)
          sz3=size(paw_an_in1%kxct1,3)
          LIBPAW_ALLOCATE(paw_an_gathered1%kxct1,(sz1,sz2,sz3))
          if (sz3>0) paw_an_gathered1%kxct1(:,:,:)=paw_an_in1%kxct1(:,:,:)
+       end if
+       if (allocated(paw_an_in1%k3xct1)) then
+         sz1=size(paw_an_in1%k3xct1,1);sz2=size(paw_an_in1%k3xct1,2)
+         sz3=size(paw_an_in1%k3xct1,3)
+         LIBPAW_ALLOCATE(paw_an_gathered1%k3xct1,(sz1,sz2,sz3))
+         if (sz3>0) paw_an_gathered1%k3xct1(:,:,:)=paw_an_in1%k3xct1(:,:,:)
        end if
        if (allocated(paw_an_in1%vxc1_val)) then
          sz1=size(paw_an_in1%vxc1_val,1);sz2=size(paw_an_in1%vxc1_val,2)
@@ -983,6 +1056,10 @@ subroutine paw_an_gather(Paw_an_in,paw_an_gathered,master,comm_atom,mpi_atmtab)
      buf_dp_size=buf_dp_size+size(paw_an_in1%kxc1)
      buf_dp_size=buf_dp_size+size(paw_an_in1%kxct1)
    end if
+   if (paw_an_in1%has_k3xc==2) then
+     buf_dp_size=buf_dp_size+size(paw_an_in1%k3xc1)
+     buf_dp_size=buf_dp_size+size(paw_an_in1%k3xct1)
+   end if
    if (paw_an_in1%has_vxcval==2) then
      buf_dp_size=buf_dp_size+size(paw_an_in1%vxc1_val)
      buf_dp_size=buf_dp_size+size(paw_an_in1%vxct1_val)
@@ -1010,8 +1087,10 @@ subroutine paw_an_gather(Paw_an_in,paw_an_gathered,master,comm_atom,mpi_atmtab)
    buf_int(indx_int)=paw_an_in1%angl_size; indx_int=indx_int+1
    buf_int(indx_int)=paw_an_in1%lm_size; indx_int=indx_int+1
    buf_int(indx_int)=paw_an_in1%nkxc1; indx_int=indx_int+1
+   buf_int(indx_int)=paw_an_in1%nk3xc1; indx_int=indx_int+1
    buf_int(indx_int)=paw_an_in1%has_vxc; indx_int=indx_int+1
    buf_int(indx_int)=paw_an_in1%has_kxc; indx_int=indx_int+1
+   buf_int(indx_int)=paw_an_in1%has_k3xc; indx_int=indx_int+1
    buf_int(indx_int)=paw_an_in1%has_vxcval; indx_int=indx_int+1
    buf_int(indx_int)=paw_an_in1%has_vxc_ex; indx_int=indx_int+1
    buf_int(indx_int)=paw_an_in1%has_vhartree; indx_int=indx_int+1
@@ -1020,6 +1099,8 @@ subroutine paw_an_gather(Paw_an_in,paw_an_gathered,master,comm_atom,mpi_atmtab)
      v_size=size(paw_an_in1%vxc1,2)
    else if (paw_an_in1%has_kxc>0) then
      v_size=size(paw_an_in1%kxc1,2)
+   else if (paw_an_in1%has_k3xc>0) then
+     v_size=size(paw_an_in1%k3xc1,2)
    else if (paw_an_in1%has_vxcval>0) then
      v_size=size(paw_an_in1%vxc1_val,2)
    else if (paw_an_in1%has_vxc_ex>0) then
@@ -1072,6 +1153,20 @@ subroutine paw_an_gather(Paw_an_in,paw_an_gathered,master,comm_atom,mpi_atmtab)
      do i1=1,paw_an_in1%nkxc1
        do i2=1,v_size
          buf_dp(indx_dp:indx_dp+cplx_mesh_size-1)=paw_an_in1%kxct1(:,i2,i1)
+         indx_dp=indx_dp+cplx_mesh_size
+       end do
+     end do
+   end if
+   if (paw_an_in1%has_k3xc==2.and.paw_an_in1%nk3xc1>0) then
+     do i1=1,paw_an_in1%nk3xc1
+       do i2=1,v_size
+         buf_dp(indx_dp:indx_dp+cplx_mesh_size-1)=paw_an_in1%k3xc1(:,i2,i1)
+         indx_dp=indx_dp+cplx_mesh_size
+       end do
+     end do
+     do i1=1,paw_an_in1%nk3xc1
+       do i2=1,v_size
+         buf_dp(indx_dp:indx_dp+cplx_mesh_size-1)=paw_an_in1%k3xct1(:,i2,i1)
          indx_dp=indx_dp+cplx_mesh_size
        end do
      end do
@@ -1165,8 +1260,10 @@ subroutine paw_an_gather(Paw_an_in,paw_an_gathered,master,comm_atom,mpi_atmtab)
    paw_an_gathered1%angl_size=buf_int_all(indx_int); indx_int=indx_int+1
    paw_an_gathered1%lm_size=buf_int_all(indx_int); indx_int=indx_int+1
    paw_an_gathered1%nkxc1=buf_int_all(indx_int); indx_int=indx_int+1
+   paw_an_gathered1%nk3xc1=buf_int_all(indx_int); indx_int=indx_int+1
    paw_an_gathered1%has_vxc=buf_int_all(indx_int); indx_int=indx_int+1
    paw_an_gathered1%has_kxc=buf_int_all(indx_int); indx_int=indx_int+1
+   paw_an_gathered1%has_k3xc=buf_int_all(indx_int); indx_int=indx_int+1
    paw_an_gathered1%has_vxcval=buf_int_all(indx_int); indx_int=indx_int+1
    paw_an_gathered1%has_vxc_ex=buf_int_all(indx_int); indx_int=indx_int+1
    paw_an_gathered1%has_vhartree=buf_int_all(indx_int); indx_int=indx_int+1
@@ -1175,6 +1272,7 @@ subroutine paw_an_gather(Paw_an_in,paw_an_gathered,master,comm_atom,mpi_atmtab)
    nspden=paw_an_gathered1%nspden
    lm_size=paw_an_gathered1%lm_size
    nkxc1=paw_an_gathered1%nkxc1
+   nk3xc1=paw_an_gathered1%nk3xc1
    cplx_mesh_size=paw_an_gathered1%cplex*paw_an_gathered1%mesh_size
    if (has_lm_select==1) then
      LIBPAW_ALLOCATE(paw_an_gathered1%lmselect,(lm_size))
@@ -1219,6 +1317,24 @@ subroutine paw_an_gather(Paw_an_in,paw_an_gathered,master,comm_atom,mpi_atmtab)
        do i1=1,nkxc1
          do i2=1,v_size
            paw_an_gathered1%kxct1(:,i2,i1)=buf_dp_all(indx_dp:indx_dp+cplx_mesh_size-1)
+           indx_dp=indx_dp+cplx_mesh_size
+         end do
+       end do
+     end if
+    end if
+   if (paw_an_gathered1%has_k3xc>0) then
+     LIBPAW_ALLOCATE(paw_an_gathered1%k3xc1,(cplx_mesh_size,v_size,nk3xc1))
+     LIBPAW_ALLOCATE(paw_an_gathered1%k3xct1,(cplx_mesh_size,v_size,nk3xc1))
+     if (paw_an_gathered1%has_k3xc==2.and.nk3xc1>0) then
+       do i1=1,nk3xc1
+         do i2=1,v_size
+           paw_an_gathered1%k3xc1(:,i2,i1)=buf_dp_all(indx_dp:indx_dp+cplx_mesh_size-1)
+           indx_dp=indx_dp+cplx_mesh_size
+         end do
+       end do
+       do i1=1,nk3xc1
+         do i2=1,v_size
+           paw_an_gathered1%k3xct1(:,i2,i1)=buf_dp_all(indx_dp:indx_dp+cplx_mesh_size-1)
            indx_dp=indx_dp+cplx_mesh_size
          end do
        end do
@@ -1693,6 +1809,7 @@ subroutine paw_an_reset_flags(Paw_an)
  natom=SIZE(Paw_an);if (natom==0) return
  do iat=1,natom
    if (Paw_an(iat)%has_kxc     >0) Paw_an(iat)%has_kxc     =1
+   if (Paw_an(iat)%has_k3xc    >0) Paw_an(iat)%has_k3xc    =1
    if (Paw_an(iat)%has_vhartree>0) Paw_an(iat)%has_vhartree=1
    if (Paw_an(iat)%has_vxc     >0) Paw_an(iat)%has_vxc     =1
    if (Paw_an(iat)%has_vxcval  >0) Paw_an(iat)%has_vxcval  =1
@@ -1753,7 +1870,7 @@ implicit none
 !Local variables-------------------------------
 !scalars
  integer :: buf_int_size,buf_dp_size,cplx_mesh_size,has_lm_select,i1,i2
- integer :: iat,iatot,ij,indx_int,indx_dp,lm_size,nkxc1,nspden,v_size
+ integer :: iat,iatot,ij,indx_int,indx_dp,lm_size,nkxc1,nk3xc1,nspden,v_size
  character(len=500) :: msg
  type(paw_an_type),pointer :: paw_an1
 !arrays
@@ -1775,8 +1892,10 @@ implicit none
    paw_an1%angl_size=buf_int(indx_int); indx_int=indx_int+1
    paw_an1%lm_size=buf_int(indx_int); indx_int=indx_int+1
    paw_an1%nkxc1=buf_int(indx_int); indx_int=indx_int+1
+   paw_an1%nk3xc1=buf_int(indx_int); indx_int=indx_int+1
    paw_an1%has_vxc=buf_int(indx_int); indx_int=indx_int+1
    paw_an1%has_kxc=buf_int(indx_int); indx_int=indx_int+1
+   paw_an1%has_k3xc=buf_int(indx_int); indx_int=indx_int+1
    paw_an1%has_vxcval=buf_int(indx_int); indx_int=indx_int+1
    paw_an1%has_vxc_ex=buf_int(indx_int); indx_int=indx_int+1
    paw_an1%has_vhartree=buf_int(indx_int); indx_int=indx_int+1
@@ -1785,6 +1904,7 @@ implicit none
    nspden=paw_an1%nspden
    lm_size=paw_an1%lm_size
    nkxc1=paw_an1%nkxc1
+   nk3xc1=paw_an1%nk3xc1
    cplx_mesh_size=paw_an1%cplex*paw_an1%mesh_size
    if (has_lm_select==1) then
      LIBPAW_ALLOCATE(paw_an1%lmselect,(lm_size))
@@ -1829,6 +1949,24 @@ implicit none
        do i1=1,nkxc1
          do i2=1,v_size
            paw_an1%kxct1(:,i2,i1)=buf_dp(indx_dp:indx_dp+cplx_mesh_size-1)
+           indx_dp=indx_dp+cplx_mesh_size
+         end do
+       end do
+     end if
+   end if
+   if (paw_an1%has_k3xc>0) then
+     LIBPAW_ALLOCATE(paw_an1%k3xc1,(cplx_mesh_size,v_size,nk3xc1))
+     LIBPAW_ALLOCATE(paw_an1%k3xct1,(cplx_mesh_size,v_size,nk3xc1))
+     if (paw_an1%has_k3xc==2.and.nk3xc1>0) then
+       do i1=1,nk3xc1
+         do i2=1,v_size
+           paw_an1%k3xc1(:,i2,i1)=buf_dp(indx_dp:indx_dp+cplx_mesh_size-1)
+           indx_dp=indx_dp+cplx_mesh_size
+         end do
+       end do
+       do i1=1,nk3xc1
+         do i2=1,v_size
+           paw_an1%k3xct1(:,i2,i1)=buf_dp(indx_dp:indx_dp+cplx_mesh_size-1)
            indx_dp=indx_dp+cplx_mesh_size
          end do
        end do
@@ -1968,6 +2106,10 @@ implicit none
      buf_dp_size=buf_dp_size+size(paw_an1%kxc1)
      buf_dp_size=buf_dp_size+size(paw_an1%kxct1)
    end if
+   if (paw_an1%has_k3xc==2) then
+     buf_dp_size=buf_dp_size+size(paw_an1%k3xc1)
+     buf_dp_size=buf_dp_size+size(paw_an1%k3xct1)
+   end if
    if (paw_an1%has_vxcval==2) then
      buf_dp_size=buf_dp_size+size(paw_an1%vxc1_val)
      buf_dp_size=buf_dp_size+size(paw_an1%vxct1_val)
@@ -1997,8 +2139,10 @@ implicit none
    buf_int(indx_int)=paw_an1%angl_size; indx_int=indx_int+1
    buf_int(indx_int)=paw_an1%lm_size; indx_int=indx_int+1
    buf_int(indx_int)=paw_an1%nkxc1; indx_int=indx_int+1
+   buf_int(indx_int)=paw_an1%nk3xc1; indx_int=indx_int+1
    buf_int(indx_int)=paw_an1%has_vxc; indx_int=indx_int+1
    buf_int(indx_int)=paw_an1%has_kxc; indx_int=indx_int+1
+   buf_int(indx_int)=paw_an1%has_k3xc; indx_int=indx_int+1
    buf_int(indx_int)=paw_an1%has_vxcval; indx_int=indx_int+1
    buf_int(indx_int)=paw_an1%has_vxc_ex; indx_int=indx_int+1
    buf_int(indx_int)=paw_an1%has_vhartree; indx_int=indx_int+1
@@ -2007,6 +2151,8 @@ implicit none
      v_size=size(paw_an1%vxc1,2)
    else if (paw_an1%has_kxc>0) then
      v_size=size(paw_an1%kxc1,2)
+   else if (paw_an1%has_k3xc>0) then
+     v_size=size(paw_an1%k3xc1,2)
    else if (paw_an1%has_vxcval>0) then
      v_size=size(paw_an1%vxc1_val,2)
    else if (paw_an1%has_vxc_ex>0) then
@@ -2063,6 +2209,21 @@ implicit none
        end do
      end do
    end if
+   if (paw_an1%has_k3xc==2.and.paw_an1%nk3xc1>0) then
+     do i1=1,paw_an1%nk3xc1
+       do i2=1,v_size
+         buf_dp(indx_dp:indx_dp+cplx_mesh_size-1)=paw_an1%k3xc1(:,i2,i1)
+         indx_dp=indx_dp+cplx_mesh_size
+       end do
+     end do
+     do i1=1,paw_an1%nk3xc1
+       do i2=1,v_size
+         buf_dp(indx_dp:indx_dp+cplx_mesh_size-1)=paw_an1%k3xct1(:,i2,i1)
+         indx_dp=indx_dp+cplx_mesh_size
+       end do
+     end do
+   end if
+
    if (paw_an1%has_vxcval==2) then
      do i1=1,nspden
        do i2=1,v_size

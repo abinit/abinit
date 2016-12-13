@@ -312,7 +312,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
    call paw_ij_nullify(paw_ij1_i2pert)
 
    has_dijfr=1
-   call paw_an_init(paw_an1_i2pert,dtset%natom,dtset%ntypat,0,dtset%nspden,cplex,dtset%pawxcdev,&
+   call paw_an_init(paw_an1_i2pert,dtset%natom,dtset%ntypat,0,0,dtset%nspden,cplex,dtset%pawxcdev,&
 &   dtset%typat,pawang,pawtab,has_vxc=1,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
