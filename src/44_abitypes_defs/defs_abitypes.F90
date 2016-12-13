@@ -212,6 +212,7 @@ type dataset_type
  integer :: dmftctqmc_mov
  integer :: dmftctqmc_mrka
  integer :: dmftctqmc_order
+ integer :: dmftctqmc_triqs_nleg
  integer :: dmftqmc_l
  integer :: dmftqmc_seed
  integer :: dmftqmc_therm
@@ -494,6 +495,7 @@ type dataset_type
  integer :: prtpmp
  integer :: prtposcar
  integer :: prtphdos
+ integer :: prtphsurf=0
  integer :: prtpot
  integer :: prtpsps=0
  integer :: prtspcur
@@ -655,6 +657,7 @@ type dataset_type
  real(dp) :: diemixmag
  real(dp) :: dilatmx
  real(dp) :: dmft_mxsf
+ real(dp) :: dmft_tolfreq
  real(dp) :: dmft_tollc
  real(dp) :: dmftqmc_n
  real(dp) :: dosdeltae
@@ -704,6 +707,7 @@ type dataset_type
  real(dp) :: postoldfe
  real(dp) :: postoldff
  real(dp) :: ppmfrq
+ real(dp) :: pw_unbal_thresh
  real(dp) :: ratsph_extra
  real(dp) :: recrcut
  real(dp) :: recefermi
@@ -868,10 +872,10 @@ type dataset_type
 
 !EPH variables
 ! ifc variables
- integer :: asr 
+ integer :: asr
  integer :: dipdip
  integer :: chneut
- integer :: symdynmat 
+ integer :: symdynmat
 
 ! Phonon variables.
  integer :: ph_ndivsm    ! =20
@@ -891,7 +895,7 @@ type dataset_type
  real(dp) :: eph_fsmear != 0.01
  real(dp) :: eph_fsewin != 0.04
  integer :: eph_ngqpt_fine(3)
- integer :: eph_transport 
+ integer :: eph_transport
 
  integer :: ph_intmeth
  real(dp) :: ph_wstep
@@ -1115,6 +1119,9 @@ type dataset_type
 
    integer, allocatable :: my_kpttab(:)
     ! Indicates the correspondence between the ikpt and ikpt_this_proc
+
+   real(dp) :: pw_unbal_thresh
+    !Threshold (in %) activating the plane-wave load balancing process (see kpgsph routine)
 
 ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! This is for the parallelisation over kpt/nsppol in the Berry Phase case
@@ -1584,10 +1591,10 @@ type dataset_type
   integer :: nwvlarr(2)
   ! nwvlarr(2) array holding the number of wavelets for each resolution.
 
-  integer :: kptrlatt_orig(3,3)   
+  integer :: kptrlatt_orig(3,3)
   ! Original kptrlatt
 
-  integer :: kptrlatt(3,3)        
+  integer :: kptrlatt(3,3)
   ! kptrlatt after inkpts.
 
   integer, allocatable :: istwfk(:)
@@ -1638,13 +1645,13 @@ type dataset_type
   real(dp), allocatable :: wtk(:)
   ! weight of kpoints wtk(nkpt)
 
-  real(dp),allocatable :: shiftk_orig(:,:)   
+  real(dp),allocatable :: shiftk_orig(:,:)
   ! original shifts given in input (changed in inkpts).
 
-  real(dp),allocatable :: shiftk(:,:)        
+  real(dp),allocatable :: shiftk(:,:)
   ! shiftk(3,nshiftk), shiftks after inkpts
 
-  real(dp),allocatable :: amu(:)             
+  real(dp),allocatable :: amu(:)
   ! amu(ntypat) ! EVOLVING variable
 
   real(dp), allocatable :: xred(:,:)

@@ -531,6 +531,9 @@
  intarr(1,:)=dtsets(:)%prtphdos
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtphdos','INT',0)
 
+ intarr(1,:)=dtsets(:)%prtphsurf
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtphsurf','INT',0)
+
  intarr(1,:)=dtsets(:)%prtposcar
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtposcar','INT',0)
 
@@ -600,6 +603,9 @@
  dprarr(2,:)=dtsets(:)%pvelmax(2)
  dprarr(3,:)=dtsets(:)%pvelmax(3)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'pvelmax','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%pw_unbal_thresh
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'pw_unbal_thresh','DPR',0)
 
 !###########################################################
 !### 03. Print all the input variables (Q)
@@ -753,6 +759,22 @@
 
  intarr(1,:)=dtsets(:)%rfuser
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfuser','INT',0)
+
+ intarr(1,:)=dtsets(:)%rf2_dkdk
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rf2_dkdk','INT',0)
+
+ intarr(1,:)=dtsets(:)%rf2_dkde
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rf2_dkde','INT',0)
+ 
+ intarr(1,:)=dtsets(:)%rf2_pert1_dir(1)
+ intarr(2,:)=dtsets(:)%rf2_pert1_dir(2)
+ intarr(3,:)=dtsets(:)%rf2_pert1_dir(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'rf2_pert1_dir','INT',0)
+
+ intarr(1,:)=dtsets(:)%rf2_pert2_dir(1)
+ intarr(2,:)=dtsets(:)%rf2_pert2_dir(2)
+ intarr(3,:)=dtsets(:)%rf2_pert2_dir(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'rf2_pert2_dir','INT',0)
 
  dprarr(1,:)=dtsets(:)%rhoqpmix
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rhoqpmix','DPR',0)

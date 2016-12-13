@@ -27,6 +27,8 @@
 #include "config.h"
 #endif
 
+!#define DEBUG_MODE
+
 #include "abi_common.h"
 
 module m_hamiltonian
@@ -42,10 +44,10 @@ module m_hamiltonian
  use m_fstrings,          only : toupper
  use m_pawtab,            only : pawtab_type
  use m_fftcore,           only : kpgsph
+ use m_cgtools,           only : set_istwfk
  use m_pawcprj,           only : pawcprj_getdim
  use m_paw_ij,            only : paw_ij_type
  use m_paral_atom,        only : get_my_atmtab, free_my_atmtab
-
  use m_electronpositron,  only : electronpositron_type, electronpositron_calctype
  use m_mpinfo,            only : destroy_mpi_enreg
  use m_fock,              only : fock_type
@@ -590,6 +592,8 @@ subroutine destroy_hamiltonian(Ham)
 
 ! *************************************************************************
 
+ DBG_ENTER("COLL")
+
 !@gs_hamiltonian_type
 
 ! Integer Pointers
@@ -671,6 +675,8 @@ subroutine destroy_hamiltonian(Ham)
  end if
 #endif
 
+ DBG_EXIT("COLL")
+
 end subroutine destroy_hamiltonian
 !!***
 
@@ -725,7 +731,6 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nspden,natom,typat,&
 &               xred,nfft,mgfft,ngfft,rprimd,nloalg,&
 &               ph1d,usecprj,electronpositron,fock,nucdipmom,use_gpu_cuda) !optional arguments
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -760,6 +765,8 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nspden,natom,typat,&
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
 
 ! *************************************************************************
+
+ DBG_ENTER("COLL")
 
  !@gs_hamiltonian_type
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -822,7 +829,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nspden,natom,typat,&
  end if
 
  ham%xred => xred
- 
+
  if (present(fock)) then
    ham%fock => fock
  end if
@@ -890,6 +897,8 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nspden,natom,typat,&
      end if
    end do
  end if
+
+ DBG_EXIT("COLL")
 
 end subroutine init_hamiltonian
 !!***
@@ -965,9 +974,11 @@ subroutine load_k_hamiltonian(ham,ffnl_k,gbound_k,istwf_k,kinpw_k,&
  integer :: iat,iatom
  logical :: compute_gbound_
  real(dp) :: arg
- character(len=100) :: msg
+ !character(len=500) :: msg
 
 ! *************************************************************************
+
+ DBG_ENTER("COLL")
 
 !@gs_hamiltonian_type
 
@@ -1055,9 +1066,10 @@ subroutine load_k_hamiltonian(ham,ffnl_k,gbound_k,istwf_k,kinpw_k,&
      ham%gbound_k(:,:)=gbound_k(:,:)
    else
      if (.not.associated(ham%kg_k)) then
-       msg='Something is missing for gbound_k computation!'
-       MSG_BUG(msg)
+       MSG_BUG('Something is missing for gbound_k computation!')
      end if
+     !write(std_out,*)"About to call sphereboundary"
+     !write(std_out,*)"size(kg_k), npw_k, mgfft",size(ham%kg_k, dim=2), ham%npw_k, ham%mgfft
      call sphereboundary(ham%gbound_k,ham%istwf_k,ham%kg_k,ham%mgfft,ham%npw_k)
    end if
    ham%gbound_kp => ham%gbound_k
@@ -1068,13 +1080,14 @@ subroutine load_k_hamiltonian(ham,ffnl_k,gbound_k,istwf_k,kinpw_k,&
    if (compute_ph3d.and.ham%nloalg(2)>0) then
      if ((.not.allocated(ham%phkxred)).or.(.not.associated(ham%kg_k)).or.&
 &        (.not.associated(ham%ph3d_k))) then
-       msg='Something is missing for ph3d_k computation!'
-       MSG_BUG(msg)
+       MSG_BUG('Something is missing for ph3d_k computation!')
      end if
      call ph1d3d(1,ham%natom,ham%kg_k,ham%matblk,ham%natom,ham%npw_k,ham%ngfft(1),&
 &                ham%ngfft(2),ham%ngfft(3),ham%phkxred,ham%ph1d,ham%ph3d_k)
    end if
  end if
+
+ DBG_EXIT("COLL")
 
 end subroutine load_k_hamiltonian
 !!***
@@ -1151,6 +1164,8 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
 
 ! *************************************************************************
 
+ DBG_ENTER("COLL")
+
 !@gs_hamiltonian_type
 
 !k-dependent scalars
@@ -1221,6 +1236,8 @@ subroutine load_kprime_hamiltonian(ham,ffnl_kp,gbound_kp,istwf_kp,kinpw_kp,&
    end if
  end if
 
+ DBG_EXIT("COLL")
+
 end subroutine load_kprime_hamiltonian
 !!***
 
@@ -1280,6 +1297,8 @@ implicit none
 #endif
 
 ! *************************************************************************
+
+ DBG_ENTER("COLL")
 
 !@gs_hamiltonian_type
 
@@ -1384,6 +1403,8 @@ implicit none
    nullify(gs_hamk_out%fock)
  end if
 
+ DBG_EXIT("COLL")
+
 end subroutine copy_hamiltonian
 !!***
 
@@ -1449,6 +1470,8 @@ subroutine load_spin_hamiltonian(Ham,isppol,paw_ij,vlocal,vxctaulocal, &
 
 ! *************************************************************************
 
+ DBG_ENTER("COLL")
+
 !@gs_hamiltonian_type
 
  if (present(vlocal)) then
@@ -1485,6 +1508,8 @@ subroutine load_spin_hamiltonian(Ham,isppol,paw_ij,vlocal,vxctaulocal, &
    call gpu_update_ham_data(Ham%ekb,size(Ham%ekb),Ham%sij,size(Ham%sij),Ham%gprimd,size(Ham%gprimd))
  end if
 #endif
+
+ DBG_EXIT("COLL")
 
 end subroutine load_spin_hamiltonian
 !!***
@@ -1524,6 +1549,8 @@ subroutine destroy_rf_hamiltonian(rf_Ham)
 
 ! *************************************************************************
 
+ DBG_ENTER("COLL")
+
 !@rf_hamiltonian_type
 
 ! Real arrays
@@ -1540,6 +1567,8 @@ subroutine destroy_rf_hamiltonian(rf_Ham)
  if (associated(rf_Ham%ddkinpw_k)) nullify(rf_Ham%ddkinpw_k)
  if (associated(rf_Ham%ddkinpw_kp)) nullify(rf_Ham%ddkinpw_kp)
  if (associated(rf_Ham%vlocal1)) nullify(rf_Ham%vlocal1)
+
+ DBG_EXIT("COLL")
 
 end subroutine destroy_rf_hamiltonian
 !!***
@@ -1578,7 +1607,6 @@ end subroutine destroy_rf_hamiltonian
 subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
 &                              has_e1kbsc) ! optional argument
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1600,6 +1628,8 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
  integer :: cplex_dij1,has_e1kbsc_
 
 ! *************************************************************************
+
+ DBG_ENTER("COLL")
 
 !@rf_hamiltonian_type
 
@@ -1630,6 +1660,8 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
      end if
    end if
  end if
+
+ DBG_EXIT("COLL")
 
 end subroutine init_rf_hamiltonian
 !!***
@@ -1696,6 +1728,8 @@ subroutine load_spin_rf_hamiltonian(rf_Ham,gs_Ham,isppol,paw_ij1,vlocal1, &
 
 ! *************************************************************************
 
+ DBG_ENTER("COLL")
+
 !@rf_hamiltonian_type
 
  if (present(vlocal1)) then
@@ -1730,6 +1764,8 @@ subroutine load_spin_rf_hamiltonian(rf_Ham,gs_Ham,isppol,paw_ij1,vlocal1, &
    call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
  end if
+
+ DBG_EXIT("COLL")
 
 end subroutine load_spin_rf_hamiltonian
 !!***
@@ -1782,6 +1818,8 @@ subroutine load_k_rf_hamiltonian(rf_Ham,dkinpw_k,ddkinpw_k,npw_k)
 
 ! *************************************************************************
 
+ DBG_ENTER("COLL")
+
 !@gs_hamiltonian_type
 
 !k-dependent scalars
@@ -1799,6 +1837,8 @@ subroutine load_k_rf_hamiltonian(rf_Ham,dkinpw_k,ddkinpw_k,npw_k)
    rf_Ham%ddkinpw_k  => ddkinpw_k
    rf_Ham%ddkinpw_kp => ddkinpw_k
  end if
+
+ DBG_EXIT("COLL")
 
 end subroutine load_k_rf_hamiltonian
 !!***
@@ -1851,6 +1891,8 @@ subroutine pawdij2ekb(ekb,paw_ij,isppol,mpi_atmtab,comm_atom)
 
 ! *************************************************************************
 
+ DBG_ENTER("COLL")
+
  ekb=zero
  paral_atom=(xmpi_comm_size(comm_atom)>1)
  my_natom=size(paw_ij)
@@ -1876,6 +1918,8 @@ subroutine pawdij2ekb(ekb,paw_ij,isppol,mpi_atmtab,comm_atom)
  if (paral_atom) then
    call xmpi_sum(ekb,comm_atom,ierr)
  end if
+
+ DBG_EXIT("COLL")
 
 end subroutine pawdij2ekb
 !!***
@@ -1928,6 +1972,8 @@ subroutine pawdij2e1kb(paw_ij1,isppol,mpi_atmtab,comm_atom,e1kbfr,e1kbsc)
 
 ! *************************************************************************
 
+ DBG_ENTER("COLL")
+
  if (present(e1kbfr)) e1kbfr=zero
  if (present(e1kbsc)) e1kbsc=zero
  paral_atom=(xmpi_comm_size(comm_atom)>1)
@@ -1979,6 +2025,8 @@ subroutine pawdij2e1kb(paw_ij1,isppol,mpi_atmtab,comm_atom,e1kbfr,e1kbsc)
    end if
  end if
 
+ DBG_EXIT("COLL")
+
 end subroutine pawdij2e1kb
 !!***
 
@@ -2005,14 +2053,12 @@ end subroutine pawdij2e1kb
 subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
 & nband_k,istwf_k,ecutsm,effmass,abstol,range,ilu,vlu,use_scalapack,prtvol)
 
- use defs_basis
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'init_ddiago_ctl'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_51_manage_mpi
 !End of the abilint section
 
@@ -2096,8 +2142,8 @@ subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
   if (Dctl%nband_k==-1.or.Dctl%nband_k>=npw_k*nspinor) then
     Dctl%nband_k=npw_k*nspinor
     write(msg,'(4a)')ch10,&
-&    ' Since the number of bands to be computed was (-1) or',ch10,&
-&    ' too large, it has been set to the max. value npw_k*nspinor. '
+&    'Since the number of bands to be computed was (-1) or',ch10,&
+&    'too large, it has been set to the max. value npw_k*nspinor. '
     if (Dctl%prtvol>0) then
       call wrtout(std_out,msg,'COLL')
     end if
@@ -2109,14 +2155,14 @@ subroutine init_ddiago_ctl(Dctl,jobz,isppol,nspinor,ecut,kpoint,nloalg,gmet,&
 
   if (Dctl%do_full_diago) then
     write(msg,'(6a)')ch10,&
-&    ' Since the number of bands to be computed',ch10,&
-&    ' is equal to the number of G-vectors found for this k-point,',ch10,&
-&    ' the program will perform complete diagonalization.'
+&    'Since the number of bands to be computed',ch10,&
+&    'is equal to the number of G-vectors found for this k-point,',ch10,&
+&    'the program will perform complete diagonalization.'
   else
     write(msg,'(6a)')ch10,&
-&     ' Since the number of bands to be computed',ch10,&
-&     ' is less than the number of G-vectors found,',ch10,&
-&     ' the program will perform partial diagonalization.'
+&     'Since the number of bands to be computed',ch10,&
+&     'is less than the number of G-vectors found,',ch10,&
+&     'the program will perform partial diagonalization.'
   end if
   if (Dctl%prtvol>0) then
     call wrtout(std_out,msg,'COLL')

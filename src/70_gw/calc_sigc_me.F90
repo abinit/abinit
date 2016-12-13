@@ -136,7 +136,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  use m_time
 
  use m_blas,          only : xdotc, xgemv
- use m_numeric_tools, only : hermitianize, imin_loc
+ use m_numeric_tools, only : hermitianize, imin_loc, coeffs_gausslegint
  use m_fstrings,      only : sjoin, itoa
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
@@ -164,7 +164,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 #define ABI_FUNC 'calc_sigc_me'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
  use interfaces_65_paw
  use interfaces_70_gw, except_this_one => calc_sigc_me
 !End of the abilint section

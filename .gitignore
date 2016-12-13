@@ -1,3 +1,4 @@
+config.h.in~
 .DS_Store
 .deps
 .directory
@@ -26,6 +27,7 @@ robodoc.log
 tags
 testf.ac
 abiref.ac
+rafael.ac
 tmp
 tmp2
 auto-*.m4
@@ -326,6 +328,7 @@ tests/TestBot_MPI*/*
 /src/98_main/mrgdv
 /src/98_main/mrggkk
 /src/98_main/mrgscr
+/src/98_main/multibinit
 /src/98_main/newsp
 /src/98_main/optic
 /src/98_main/ujdet
@@ -411,5 +414,9 @@ tests/testbot.cfg
 tests/testbot_summary.json
 tests/testbot_summary.shelve
 !.gitkeep
+src/*/*dSYM/
+src/*/*log
+src/*/test_*
+!tests_*F90
 build1
 build2

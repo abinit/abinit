@@ -38,6 +38,7 @@ subroutine shellstruct(xred,rprimd,natom,magv,distv,smult,sdisv,nsh,atp,prtvol)
 
  use defs_basis
  use m_profiling_abi
+ use m_sort
 
  use m_pptools,       only : prmat
 
@@ -46,7 +47,6 @@ subroutine shellstruct(xred,rprimd,natom,magv,distv,smult,sdisv,nsh,atp,prtvol)
 #undef ABI_FUNC
 #define ABI_FUNC 'shellstruct'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry, except_this_one => shellstruct
 !End of the abilint section
 

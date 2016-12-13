@@ -58,6 +58,7 @@ ph_qshift
 prtfsurf1 1           # Output BXSF file with Fermi surface in Xcrysden format.
 prtnest1  1           # Output nesting factor file.
 prtbltztrp1 1         # Output data for Bolztrap code. 
+prtphsurf   1         # Output BXSF with Phonon frequencies
 
 ###############
 ## DATASET 2 ##
@@ -95,6 +96,7 @@ znucl  13
 #%%   t88.out, tolnlines= 100, tolabs=5.000e-02, tolrel=5.0e-02, fld_options= -easy;
 #%%   t88o_DS1_EDOS, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_BXSF, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t88o_DS1_PH.bxsf, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_NEST, tolnlines=50, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_PHDOS, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS2_PHDOS, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;

@@ -6,8 +6,12 @@
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
 from time import gmtime,strftime
 
 import os
@@ -36,8 +40,8 @@ my_macro    = "config/m4/auto-subsystems.m4"
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
      not os.path.exists("src/98_main/abinit.F90") ):
-  print "%s: You must be in the top of an ABINIT source tree." % my_name
-  print "%s: Aborting now." % my_name
+  print("%s: You must be in the top of an ABINIT source tree." % my_name)
+  print("%s: Aborting now." % my_name)
   sys.exit(1)
 
 # Check if we have a config file
@@ -45,8 +49,8 @@ if ( os.path.exists(my_config) ):
   cnf = MyConfigParser()
   cnf.read(my_config)
 else:
-  print "%s: Could not find config file (%s)." % (my_name,my_config)
-  print "%s: Aborting now." % my_name
+  print("%s: Could not find config file (%s)." % (my_name,my_config))
+  print("%s: Aborting now." % my_name)
   sys.exit(2)
 
 # What time is it?
@@ -86,7 +90,7 @@ AC_DEFUN([ABI_SUBSYSTEMS_INIT],[
 # Check whether some subsystem modes have been customized
 sub_custom = {}
 if ( os.path.exists(my_custom) ):
-  for line in file(my_custom,"r").readlines():
+  for line in open(my_custom, "rt").readlines():
     (key,val) = line.strip().split()
     sub_custom[key] = val
 
@@ -114,7 +118,7 @@ for subsys in sub_list:
 
 # Build config command
 m4_subdirs = ""
-priorities = mf_subdirs.keys()
+priorities = list(mf_subdirs.keys())
 priorities.sort()
 for prty in priorities:
   m4_subdirs += " " + " ".join(mf_subdirs[prty])
@@ -123,4 +127,4 @@ m4_conf = "  AC_CONFIG_SUBDIRS([%s])\n" % m4_subdirs[1:]
 # Write down subsystems data
 m4_macro = re.sub("@SUBSYS_PARAMS@",m4_prms,m4_macro)
 m4_macro = re.sub("@SUBSYS_CONFIG@",m4_conf,m4_macro)
-file(my_macro,"w").write(m4_macro)
+open(my_macro, "wt").write(m4_macro)

@@ -26,6 +26,7 @@ module m_phpi
 
  use defs_basis
  use defs_abitypes
+ use defs_datatypes
  use m_profiling_abi
  use m_xmpi
  use m_errors
@@ -38,20 +39,35 @@ module m_phpi
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
+ use m_wfk
+ use m_ddb
+ use m_dvdb
+ use m_fft
+ use m_hamiltonian
+ use m_pawcprj
 
- use m_time,           only : cwtime
- use m_fstrings,       only : toupper, itoa, sjoin, ktoa, ltoa, strcat
- use m_numeric_tools,  only : arth, wrap2_pmhalf, simpson_int, simpson, bisect, mkherm
- use m_io_tools,       only : open_file
- use m_special_funcs,  only : dirac_delta
- use m_geometry,       only : phdispl_cart2red
- use m_fftcore,        only : ngfft_seq
- use m_fft_mesh,       only : rotate_fft_mesh
- use m_dynmat,         only : d2sym3, symdyma, ftgam_init, ftgam
- use defs_datatypes,   only : ebands_t
- use m_crystal,        only : crystal_t
- use m_crystal_io,     only : crystal_ncwrite
- use m_bz_mesh,        only : isamek, make_path, findqg0
+ use defs_datatypes,    only : ebands_t
+ use m_time,            only : cwtime
+ use m_fstrings,        only : sjoin, itoa, ftoa, ktoa, ltoa, strcat
+ use m_io_tools,        only : iomode_from_fname
+ use m_cgtools,         only : dotprod_g
+ use m_fftcore,         only : get_kg, kpgsph, sphere
+ use m_crystal,         only : crystal_t
+ use m_crystal_io,      only : crystal_ncwrite
+ use m_bz_mesh,         only : findqg0
+ use m_wfd,             only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg,&
+                               wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj, wfd_get_ur
+ use m_pawang,          only : pawang_type
+ use m_pawrad,          only : pawrad_type
+ use m_pawtab,          only : pawtab_type
+ use m_pawfgr,          only : pawfgr_type
+ use m_eig2d,           only : gkk_t, gkk_init, gkk_ncwrite,gkk_free
+! use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
+! use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
+! use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
+! use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
+! use m_pawdij,          only : pawdij, symdij
+! use m_pawcprj,         only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
 
  implicit none
 
@@ -61,7 +77,7 @@ module m_phpi
  public :: eph_phpi
 
 
-contains  !=========================================================================================================================
+contains  !=================================================================================
 !!***
 
 !!****f* m_phpi/eph_phpi
@@ -83,7 +99,6 @@ contains  !=====================================================================
 !! pawrad(ntypat*usepaw)<pawrad_type>=Paw radial mesh and related data.
 !! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
-!! n0(nsppol)=Electronic density at the Fermi level for each spin.
 !! comm=MPI communicator.
 !!
 !! OUTPUT
@@ -98,42 +113,8 @@ contains  !=====================================================================
 !! SOURCE
 
 subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,ebands_kq,dvdb,ifc,&
-                       pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
+                       pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_profiling_abi
- use m_xmpi
- use m_errors
- use m_wfk
- use m_ddb
- use m_dvdb
- use m_ifc
- use m_fft
- use m_hamiltonian
- use m_pawcprj
-
- use m_time,            only : sec2str
- use m_geometry,        only : phdispl_cart2red
- use m_fstrings,        only : sjoin, itoa, ftoa, ktoa
- use m_io_tools,        only : iomode_from_fname
- use m_cgtools,         only : dotprod_g
- use m_fftcore,         only : get_kg, kpgsph, sphere
- use m_crystal,         only : crystal_t
- use m_wfd,             only : wfd_init, wfd_free, wfd_print, wfd_t, wfd_test_ortho, wfd_copy_cg,&
-                               wfd_read_wfk, wfd_wave_free, wfd_rotate, wfd_reset_ur_cprj, wfd_get_ur
- use m_pawang,          only : pawang_type
- use m_pawrad,          only : pawrad_type
- use m_pawtab,          only : pawtab_type
- use m_pawfgr,          only : pawfgr_type
- use m_eig2d,           only : gkk_t, gkk_init, gkk_ncwrite,gkk_free
-! use m_paw_an,          only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
-! use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
-! use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
-! use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
-! use m_pawdij,          only : pawdij, symdij
-! use m_pawcprj,         only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -154,15 +135,14 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands_k, ebands_kq
- type(dvdb_t),target,intent(inout) :: dvdb
+ type(dvdb_t),intent(inout) :: dvdb
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
  type(pawfgr_type),intent(in) :: pawfgr
  type(ifc_type),intent(in) :: ifc
- type(mpi_type),intent(inout) :: mpi_enreg
+ type(mpi_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18),ngfftf(18)
- real(dp),intent(in) :: n0(ebands_k%nsppol)
  type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
@@ -196,7 +176,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:),gkk(:,:,:,:,:), gkk_m(:,:,:)
- real(dp),allocatable :: bras(:,:,:),kets(:,:,:),h1_kets(:,:,:)
+ real(dp),allocatable :: bras_kq(:,:,:),kets_k(:,:,:),h1kets_kq(:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnl1(:,:)
@@ -303,7 +283,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*natom))
  call getph(cryst%atindx,natom,n1,n2,n3,ph1d,cryst%xred)
 
- ! Find the appropriate value of mpw 
+ ! Find the appropriate value of mpw
  mpw = 0; cnt=0
  do spin=1,nsppol
    do ik=1,nkpt
@@ -359,8 +339,10 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
    dtset%typat,cryst%xred,nfft,mgfft,ngfft,cryst%rprimd,dtset%nloalg,&
    usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
 
-! Allocate vlocal. Note nvloc
+ ! Allocate vlocal. Note nvloc
+ ! I set vlocal to huge to trigger possible bugs (DFPT routines should not access the data)
  ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamkq%nvloc))
+ vlocal = huge(one)
 
  ! Allocate work space arrays.
  ABI_MALLOC(blkflg, (natom3,natom3))
@@ -394,12 +376,8 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  ABI_MALLOC(gkk, (2, mband_kq, mband, natom, 3))
  ABI_MALLOC(gkk_m, (2, mband_kq, mband))
 
-
  ! Compute displacement vectors and phonon frequencies
- call ifc_fourq(ifc,cryst,qpt,phfrq,displ_cart) ! out_d2cart,out_eigvec)
- 
- ! Transform phonon displacement vector from cartesian to reduced coordinates
- call phdispl_cart2red(cryst%natom,cryst%gprimd,displ_cart,displ_red)
+ call ifc_fourq(ifc,cryst,qpt,phfrq,displ_cart, out_displ_red=displ_red)
 
  ! Broadening parameter
  if (dtset%elph2_imagden .gt. tol12) then
@@ -439,9 +417,9 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
      if (.not. ((ik .ge. my_kstart) .and. (ik .le. my_kstop))) cycle
 
      ! Allocate workspace for wavefunctions. Make npw larger than expected.
-     ABI_MALLOC(bras, (2, mpw*nspinor, mband))
-     ABI_MALLOC(kets, (2, mpw*nspinor, mband))
-     ABI_MALLOC(h1_kets, (2, mpw*nspinor, mband))
+     ABI_MALLOC(bras_kq, (2, mpw*nspinor, mband))
+     ABI_MALLOC(kets_k, (2, mpw*nspinor, mband))
+     ABI_MALLOC(h1kets_kq, (2, mpw*nspinor, mband))
 
      kk = ebands_k%kptns(:,ik)
 
@@ -454,7 +432,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
      ABI_CHECK(mpw >= npw_k, "mpw < npw_k")
      kg_k(:,1:npw_k) = wfd_k%kdata(ik)%kg_k
      do ib2=1,mband
-       call wfd_copy_cg(wfd_k, ib2, ik, spin, kets(1,1,ib2))
+       call wfd_copy_cg(wfd_k, ib2, ik, spin, kets_k(1,1,ib2))
      end do
 
      ! Copy u_kq(G)
@@ -462,7 +440,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
      ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
      kg_kq(:,1:npw_kq) = wfd_kq%kdata(ikq)%kg_k
      do ib1=1,mband_kq
-       call wfd_copy_cg(wfd_kq, ib1, ikq, spin, bras(1,1,ib1))
+       call wfd_copy_cg(wfd_kq, ib1, ikq, spin, bras_kq(1,1,ib1))
      end do
 
      ! if PAW, one has to solve a generalized eigenproblem
@@ -495,14 +473,14 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
          npw_k,npw_kq,useylmgr1,kg_k,ylm_k,kg_kq,ylm_kq,ylmgr_kq,&                          ! In
          dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                      ! Out
 
-       ! Calculate dvscf * psi_k, results stored in h1_kets on the k+q sphere.
+       ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
        ! Compute H(1) applied to GS wavefunction Psi(0)
        do ib2=1,mband
          eig0nk = ebands_k%eig(ib2,ik,spin)
          ! Use scissor shift on 0-order eigenvalue
          eshift = eig0nk - dtset%dfpt_sciss
 
-         call getgh1c(berryopt0,0,kets(:,:,ib2),cwaveprj0,h1_kets(:,:,ib2),&
+         call getgh1c(berryopt0,kets_k(:,:,ib2),cwaveprj0,h1kets_kq(:,:,ib2),&
 &                     grad_berry,gs1c,gs_hamkq,gvnl1,idir,ipert,eshift,mpi_enreg,optlocal,&
 &                     optnl,opt_gvnl1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
        end do
@@ -530,7 +508,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
        ! <u_(band,k+q)^(0)|H_(k+q,k)^(1)-(eig0_k+eig0_k+q)/2.S^(1)|u_(band,k)^(0)> (PAW)
        do ib2=1,mband
          do ib1=1,mband_kq
-           call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bras(1,1,ib1),h1_kets(1,1,ib2),&
+           call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bras_kq(1,1,ib1),h1kets_kq(1,1,ib2),&
              mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
            gkk(1,ib1,ib2,ipert,idir) = dotr
@@ -589,9 +567,9 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
 
      end do  ! imode
 
-     ABI_FREE(bras)
-     ABI_FREE(kets)
-     ABI_FREE(h1_kets)
+     ABI_FREE(bras_kq)
+     ABI_FREE(kets_k)
+     ABI_FREE(h1kets_kq)
 
    end do ! ikfs
 
@@ -701,10 +679,10 @@ subroutine out_phpi(iout, Pi_ph, phfrq, qpt, natom3)
  write(iout,'(a)')' '
  write(iout,'(a,3f14.8)')' qpt =',qpt
  write(iout,'(a)')' '
- write(iout,'(x,a,10x,a)')'omega','Pi(omega)'
+ write(iout,'(1x,a,10x,a)')'omega','Pi(omega)'
 
  do imode=1,natom3
-    write(iout,'(x,f12.8,x,es14.6)') phfrq(imode), Pi_ph(imode)
+    write(iout,'(1x,f12.8,1x,es14.6)') phfrq(imode), Pi_ph(imode)
  end do
 
  write(iout,'(a)')' '
@@ -743,6 +721,13 @@ subroutine out_phpi_nc(dtfil, cryst, Pi_ph, phfrq, qpt, natom3)
 
 !Arguments ------------------------------------
 !scalars
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'out_phpi_nc'
+!End of the abilint section
+
  integer,intent(in) :: natom3
  type(datafiles_type), intent(in) :: dtfil
  type(crystal_t),intent(in) :: cryst
