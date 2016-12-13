@@ -614,10 +614,10 @@ real(dp) :: rmet(3,3)
 !        every is done in pred_montecarlo
          else if(ab_mover%ionmov /= 31) then
            call effective_potential_evaluate(effective_potential,&
-&                                             scfcv_args%results_gs%etotal,&
-&                                             scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
-&                                             scfcv_args%results_gs%strten,ab_mover%natom,rprimd,&
-&                                             xcart)
+&                                            scfcv_args%results_gs%etotal,&
+&                                            scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
+&                                            scfcv_args%results_gs%strten,ab_mover%natom,rprimd,&
+&                                            xcart)
          end if
 #if defined HAVE_LOTF
        end if

@@ -216,7 +216,7 @@ implicit none
    dtset%bmass = inp%bmass  ! Barostat mass
    dtset%nctime = 0     ! NetCdf TIME between output of molecular dynamics informations 
    dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
-   dtset%dilatmx = 1.01   ! DILATation : MaXimal value
+   dtset%dilatmx = 1.0  ! DILATation : MaXimal value
    dtset%dtion = inp%dtion  ! Delta Time for IONs
    dtset%diismemory = 8 ! Direct Inversion in the Iterative Subspace MEMORY
    dtset%friction = 0.0001 ! internal FRICTION coefficient
@@ -255,7 +255,8 @@ implicit none
      ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
      dtset%qmass = inp%qmass
    end if
-   dtset%strtarget(:) = -5/29421.033d0 ! STRess TARGET
+   dtset%strtarget(1:3) = 0.0/29421.033d0 ! STRess TARGET
+   dtset%strtarget(4:6) = 0.0 ! STRess TARGET
    ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
    symrel = one
    call alloc_copy(symrel,dtset%symrel)
@@ -346,30 +347,34 @@ implicit none
 !TEST_AM
 !  Random initilisation of the velocitie and scale to the temperature 
 !  with Maxwell-Boltzman distribution
-!    do ia=1,dtset%natom
-!      do mu=1,3
-!        vel(mu,ia)=sqrt(kb_HaK*dtset%mdtemp(1)/amass(ia))*cos(two_pi*uniformrandom(rand_seed))
-!        vel(mu,ia)=vel(mu,ia)*sqrt(-2._dp*log(uniformrandom(rand_seed)))
-!      end do
-!    end do
+!     do ia=1,dtset%natom
+!       do mu=1,3
+!         vel(mu,ia)=sqrt(kb_HaK*dtset%mdtemp(1)/amass(ia))*cos(two_pi*uniformrandom(rand_seed))
+!         vel(mu,ia)=vel(mu,ia)*sqrt(-2._dp*log(uniformrandom(rand_seed)))
+!       end do
+!     end do
 
-! !  Get rid of center-of-mass velocity
-!    sum_mass=sum(amass(:))
-!    do mu=1,3
-!      mass_ia=sum(amass(:)*vel(mu,:))
-!      vel(mu,:)=vel(mu,:)-mass_ia/sum_mass
-!    end do
+! ! !  Get rid of center-of-mass velocity
+!     sum_mass=sum(amass(:))
+!     do mu=1,3
+!       mass_ia=sum(amass(:)*vel(mu,:))
+!       vel(mu,:)=vel(mu,:)-mass_ia/sum_mass
+!     end do
 
-! !  Compute v2gauss
-!    v2gauss = zero
-!    do ia=1,dtset%natom
-!      do mu=1,3
-!        v2gauss=v2gauss+vel(mu,ia)*vel(mu,ia)*amass(ia)
-!      end do
-!    end do
-! !  Now rescale the velocities to give the exact temperature
-!    rescale_vel=sqrt(3._dp*dtset%natom*kb_HaK*dtset%mdtemp(1)/v2gauss)
-!    vel(:,:)=vel(:,:)*rescale_vel
+! ! !  Compute v2gauss
+!     v2gauss = zero
+!     do ia=1,dtset%natom
+!       do mu=1,3
+!         v2gauss=v2gauss+vel(mu,ia)*vel(mu,ia)*amass(ia)
+!       end do
+!     end do
+!  !  Now rescale the velocities to give the exact temperature
+!     rescale_vel=sqrt(3._dp*dtset%natom*kb_HaK*dtset%mdtemp(1)/v2gauss)
+!     vel(:,:)=vel(:,:)*rescale_vel
+
+   vel_cell(:,:) = zero
+   vel(:,:)      = zero
+
 !TEST_AM
 
 !*********************************************************

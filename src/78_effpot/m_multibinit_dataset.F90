@@ -310,7 +310,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bmass',tread,'DPR')
  if(tread==1) multibinit_dtset%bmass=dprarr(1)
  if(multibinit_dtset%bmass<1)then
-   write(message, '(a,i8,a,a,a,a,a)' )&
+   write(message, '(a,f10.2,a,a,a,a,a)' )&
 &   'bmass is',multibinit_dtset%bmass,', but the only allowed values',ch10,&
 &   'is superior to 1.',ch10,&
 &   'Action: correct bmass in your input file.'
@@ -1108,7 +1108,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(3x,a9,3F12.1)')'    bmass',multibinit_dtset%bmass
    write(nunit,'(3x,a9,3I10)')'     nnos',multibinit_dtset%nnos
    write(nunit,'(3x,a12)',advance='no')'    qmass  '
-   write(nunit,'(3x,15i10)') (multibinit_dtset%qmass(ii)*ii,ii=1,multibinit_dtset%nnos)
+   write(nunit,'(3x,15i10)') (multibinit_dtset%qmass(ii),ii=1,multibinit_dtset%nnos)
 
  end if
 

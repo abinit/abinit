@@ -255,11 +255,11 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta)
    do i=1,3
      do j=1,3
        if (abs(mat_delta_tmp(i,j))>tol10) then 
-         identity(i,j) = ANINT(mat_delta_tmp(i,j)*1000)/1000
+         identity(i,j) = mat_delta_tmp(i,j)
        end if
      end do
    end do
-  
+
    mat_delta_tmp = identity
 
  else if (present(mat_delta)) then
@@ -387,7 +387,8 @@ subroutine strain_def2strain(mat_strain,strain)
    if(abs(mat_strain(1,1))>tol10.and.abs(mat_strain(1,2))<tol10.and.abs(mat_strain(1,3))<tol10.and.&
 &   abs(mat_strain(2,1))<tol10.and.abs(mat_strain(2,2))>tol10.and.abs(mat_strain(2,3))<tol10.and.&
 &   abs(mat_strain(3,1))<tol10.and.abs(mat_strain(3,2))<tol10.and.abs(mat_strain(3,3))>tol10) then
-     if(mat_strain(1,1)==mat_strain(2,2).and.mat_strain(1,1)==mat_strain(3,3)) then
+     if((mat_strain(1,1)-mat_strain(2,2))< tol10.and.&
+&       (mat_strain(1,1)-mat_strain(3,3))< tol10) then
        strain%name = "isostatic"
        strain%delta = mat_strain(1,1)
        strain%direction = -1
@@ -421,7 +422,7 @@ subroutine strain_def2strain(mat_strain,strain)
     if(abs(mat_strain(1,1))<tol10.and.abs(mat_strain(1,2))<tol10.and.abs(mat_strain(1,3))<tol10.and.&
 &    abs(mat_strain(2,1))<tol10.and.abs(mat_strain(2,2))<tol10.and.abs(mat_strain(2,3))>tol10.and.&
 &    abs(mat_strain(3,1))<tol10.and.abs(mat_strain(3,2))>tol10.and.abs(mat_strain(3,3))<tol10) then
-      if (mat_strain(3,2)==mat_strain(3,2)) then 
+      if (abs(mat_strain(3,2)-mat_strain(3,2))<tol10) then 
         strain%name = "shear"
         strain%delta = mat_strain(3,2) * 2
         strain%direction = 4
@@ -431,7 +432,7 @@ subroutine strain_def2strain(mat_strain,strain)
     if(abs(mat_strain(1,1))<tol10.and.abs(mat_strain(1,2))<tol10.and.abs(mat_strain(1,3))>tol10.and.&
 &    abs(mat_strain(2,1))<tol10.and.abs(mat_strain(2,2))<tol10.and.abs(mat_strain(2,3))<tol10.and.&
 &    abs(mat_strain(3,1))>tol10.and.abs(mat_strain(3,2))<tol10.and.abs(mat_strain(3,3))<tol10) then
-      if (mat_strain(3,1)==mat_strain(1,3)) then 
+      if (abs(mat_strain(3,1)-mat_strain(1,3))<tol10) then 
         strain%name = "shear"
         strain%delta = mat_strain(3,1) * 2
         strain%direction = 5
@@ -441,7 +442,7 @@ subroutine strain_def2strain(mat_strain,strain)
     if(abs(mat_strain(1,1))<tol10.and.abs(mat_strain(1,2))>tol10.and.abs(mat_strain(1,3))<tol10.and.&
 &    abs(mat_strain(2,1))>tol10.and.abs(mat_strain(2,2))<tol10.and.abs(mat_strain(2,3))<tol10.and.&
 &    abs(mat_strain(3,1))<tol10.and.abs(mat_strain(3,2))<tol10.and.abs(mat_strain(3,3))<tol10) then
-      if (mat_strain(1,2)==mat_strain(2,1)) then 
+      if (abs(mat_strain(1,2)-mat_strain(2,1))<tol10) then 
         strain%name = "shear"
         strain%delta = mat_strain(2,1) * 2
         strain%direction = 6
@@ -587,7 +588,7 @@ subroutine strain_print(strain)
      end do
    else
      write(message,'(a,a,a)') ch10,' Strain does not correspond to standard strain:'
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
      do ii = 1,3
        write(message,'(3es12.2)') strain%strain(ii,1),strain%strain(ii,2),strain%strain(ii,3)
        call wrtout(std_out,message,'COLL')

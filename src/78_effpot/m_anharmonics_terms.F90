@@ -38,6 +38,7 @@ module m_anharmonics_terms
  public :: anharmonics_terms_free
  public :: anharmonics_terms_setCoeffs
  public :: anharmonics_terms_setElastic3rd
+ public :: anharmonics_terms_setElastic4rd
  public :: anharmonics_terms_setElasticDispCoupling
  public :: anharmonics_terms_setStrainPhononCoupling
 
@@ -60,6 +61,9 @@ module m_anharmonics_terms
    logical ::  has_elastic3rd
 !   Flag to know if the 3rd derivatives with respect to strain is present
 
+   logical ::  has_elastic4rd
+!   Flag to know if the 3rd derivatives with respect to strain is present
+
    logical ::  has_strain_coupling
 !   Flag to know if the 3rd derivatives with respect to strain and 2 atom disp is present
 
@@ -70,6 +74,10 @@ module m_anharmonics_terms
 !    array with all the coefficients from fited polynome
 
    real(dp) :: elastic3rd(6,6,6)
+!    elastic_constant(6,6,6)
+!    Elastic tensor Hartree
+
+   real(dp) :: elastic4rd(6,6,6,6)
 !    elastic_constant(6,6,6)
 !    Elastic tensor Hartree
 
@@ -111,7 +119,8 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
-&                                 elastic3rd,elastic_displacement,phonon_strain,coeffs)
+&                                 elastic3rd,elastic4rd,elastic_displacement,&
+&                                 phonon_strain,coeffs)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -127,7 +136,7 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
  integer, intent(in) :: natom,ncoeff
  type(anharmonics_terms_type), intent(out) :: anharmonics_terms
  real(dp),optional,intent(in) :: elastic_displacement(6,6,3,natom)
- real(dp),optional,intent(in) :: elastic3rd(6,6,6)
+ real(dp),optional,intent(in) :: elastic3rd(6,6,6),elastic4rd(6,6,6,6)
  type(polynomial_coeff_type),optional :: coeffs(ncoeff)
  type(ifc_type),optional,intent(in) :: phonon_strain(6)
 !arrays
@@ -157,6 +166,12 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
  anharmonics_terms%elastic3rd = zero
  if(present(elastic3rd))then
    call anharmonics_terms_setElastic3rd(anharmonics_terms,elastic3rd)
+ end if
+
+!Set the 3rd order elastic tensor
+ anharmonics_terms%elastic4rd = zero
+ if(present(elastic4rd))then
+   call anharmonics_terms_setElastic4rd(anharmonics_terms,elastic4rd)
  end if
 
 !Allocation of 3rd order with respecto to 2 strain and 1 atomic displacement
@@ -385,6 +400,65 @@ subroutine anharmonics_terms_setElastic3rd(anharmonics_terms,elastics)
 
 end subroutine anharmonics_terms_setElastic3rd
 !!***
+
+!****f* m_anharmonics_terms/anharmonics_terms_setElastic4rd
+!!
+!! NAME
+!! anharmonics_terms_setElastic4rd
+!!
+!! FUNCTION
+!! Set the 3rd order derivative of with respect to 3 strain
+!!
+!! INPUTS
+!! elastics = 3d order of elastics constant
+!!
+!! OUTPUT
+!! anharmonics = set the coefficient from the fited polynome 
+!!
+!!
+!! PARENTS
+!!   multibinit
+!!
+!! CHILDREN
+!!   wrtout
+!!
+!! SOURCE
+ 
+subroutine anharmonics_terms_setElastic4rd(anharmonics_terms,elastics)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'anharmonics_terms_setElastic4rd'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+!array
+  type(anharmonics_terms_type),intent(inout) :: anharmonics_terms
+  real(dp),intent(in) :: elastics(6,6,6,6)
+!Local variables-------------------------------
+!scalar
+!array
+! *************************************************************************
+
+! 1-reinitialise the previous value
+  anharmonics_terms%elastic4rd(:,:,:,:) = zero
+
+! 2-Allocation of the new array
+  anharmonics_terms%elastic4rd(:,:,:,:) = elastics(:,:,:,:)
+
+! 3-Set the flag
+  if(any(abs(anharmonics_terms%elastic4rd)> tol15)) then
+    anharmonics_terms%has_elastic4rd = .TRUE. 
+  end if
+
+end subroutine anharmonics_terms_setElastic4rd
+!!***
+
 
 !****f* m_anharmonics_terms/anharmonics_terms_setStrainPhononCoupling
 !!

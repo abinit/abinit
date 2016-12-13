@@ -78,7 +78,8 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   integer,parameter :: master=0
  !arrays
   integer  :: have_strain(6)
-  real(dp) :: deformation(6,2),elastics(6,6,6),rprimd_def(3,3)
+  real(dp) :: deformation(6,2),elastics3rd(6,6,6)
+  real(dp) :: elastics4rd(6,6,6,6),rprimd_def(3,3)
   type(strain_type) :: strain
   type(ifc_type) :: phonon_strain(6)
   logical, allocatable :: file_usable(:)
@@ -331,14 +332,14 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
         end if
       end do
       if (have_strain(ii)==2)  then 
-         delta1 = deformation(ii,1) 
-         delta2 = deformation(ii,2)
-         if (delta1/=-delta2) then
-             write(message, '(a,I1,a,a)' )&
+        delta1 = deformation(ii,1) 
+        delta2 = deformation(ii,2)
+        if (delta1+delta2 > tol15) then
+          write(message, '(a,I1,a,a)' )&
 &             ' The deformations for strain ',ii,&
 &             ' are not the opposite',ch10
-             MSG_ERROR(message)   
-         end if
+          MSG_ERROR(message)   
+        end if
       end if
     end if
   end do
@@ -416,6 +417,9 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
     natom = ref_eff_pot%crystal%natom
     ABI_ALLOCATE(elastic_displacement,(6,6,3,natom))
 
+    elastics3rd = zero
+    elastics4rd = zero
+
     do ii=1,6
       if(have_strain(ii)/=0) then
  !      We want the find the index of the perturbation ii in eff_pots(ii)
@@ -442,6 +446,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
           phonon_strain(ii)%nrpt =  nrpt
           ABI_ALLOCATE(phonon_strain(ii)%atmfrc,(2,3,natom,3,natom,nrpt))
           ABI_ALLOCATE(phonon_strain(ii)%cell,(3,nrpt))
+          phonon_strain(ii)%atmfrc = zero
           phonon_strain(ii)%cell =  eff_pots(int(delta1))%harmonics_terms%ifcs%cell
 
           do irpt=1,phonon_strain(ii)%nrpt
@@ -451,8 +456,14 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 &            (2 * abs(eff_pots(int(delta1))%strain%delta))
           end do
 
+          if(inp%asr >= 0) then
+            ! Impose sum rule
+            call effective_potential_applySumRule(inp%asr,phonon_strain(ii),&
+&                                                 eff_pot%crystal%natom)
+          end if
+
 !         Compute elastic constants
-          elastics(ii,:,:) = (eff_pots(int(delta1))%harmonics_terms%elastic_constants(:,:)&
+          elastics3rd(ii,:,:) = (eff_pots(int(delta1))%harmonics_terms%elastic_constants(:,:)&
 &          - eff_pots(int(delta2))%harmonics_terms%elastic_constants(:,:)) / &
 &            (2 * abs(eff_pots(int(delta1))%strain%delta))
 
@@ -460,6 +471,13 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
           elastic_displacement(ii,:,:,:)=(eff_pots(int(delta1))%harmonics_terms%internal_strain(:,:,:)&
 &          - eff_pots(int(delta2))%harmonics_terms%internal_strain(:,:,:)) / &
 &            (2 * abs(eff_pots(int(delta1))%strain%delta))
+
+!         Compute elastic constants
+!          elastics4rd(ii,ii,:,:) = (eff_pots(int(delta1))%harmonics_terms%elastic_constants(:,:)&
+!&            - 2*ref_eff_pot%harmonics_terms%elastic_constants(:,:)&
+!&          + eff_pots(int(delta2))%harmonics_terms%elastic_constants(:,:)) / &
+!&            (abs(eff_pots(int(delta1))%strain%delta)**2)
+
         end if
 
       end if
@@ -467,8 +485,10 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 
 !   Set all the values in the effective potential type
     call effective_potential_setStrainPhononCoupling(eff_pot,natom,nrpt,phonon_strain)
-    call effective_potential_setElastic3rd(eff_pot,elastics)
+    call effective_potential_setElastic3rd(eff_pot,elastics3rd)
     call effective_potential_setElasticDispCoupling(eff_pot,natom,elastic_displacement)
+
+!    call effective_potential_setElastic4rd(eff_pot,elastics4rd)
 
 !   Free the phonon-strain coupling array
     do ii = 1,6

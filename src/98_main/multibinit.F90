@@ -246,6 +246,7 @@ program multibinit
 !   call fit_polynomial_coeff_init(reference_effective_potential%,filnam,inp,comm)
 
  end if
+!END_TEST_AM_SECTION
 !****************************************************************************************
 
 !****************************************************************************************
