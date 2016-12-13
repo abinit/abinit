@@ -31,6 +31,7 @@ class QptAnalyzer(object):
                  temperatures=None,
                  omegase=None,
                  asr=True,
+                 mu=None,
                                 ):
 
         # Files
@@ -49,6 +50,7 @@ class QptAnalyzer(object):
         self.smearing = smearing
         self.omegase = omegase if omegase else list()
         self.temperatures = temperatures if temperatures else list()
+        self.mu = mu
 
     @property
     def nkpt(self):
@@ -163,6 +165,25 @@ class QptAnalyzer(object):
             occ = occ / 2.0
 
         return occ
+
+    def get_max_val(self):
+        """Get the maximum valence band energy."""
+        occ0 = self.get_occ_nospin()
+        nband_occ = sum(occ0[0])
+        return np.max(self.eigq.EIG[0,:,nband_occ-1])
+
+    def get_min_cond(self):
+        """Get the minimum conduction band energy."""
+        occ0 = self.get_occ_nospin()
+        nband_occ = sum(occ0[0])
+        return np.min(self.eigq.EIG[0,:,nband_occ])
+
+    def find_fermi_level(self):
+        """
+        Find the Fermi level locally, using the eigenvalues
+        at all k+q points available. Assuming a gapped system.
+        """
+        return (self.get_max_val() + self.get_min_cond()) / 2.0
 
     def get_fan_ddw_sternheimer(self):
         """
@@ -626,6 +647,124 @@ class QptAnalyzer(object):
         # nkpt, nband, nband
         ddw_tmp = np.sum(ddw_num, axis=3)
     
+        # nband
+        occ = self.get_occ_nospin()
+    
+        # nkpt, nband, nband
+        delta_E_ddw = (einsum('ij,k->ijk', eig0[0,:,:].real, ones(nband))
+                     - einsum('ij,k->ikj', eig0[0,:,:].real, ones(nband))
+                     - einsum('ij,k->ijk', ones((nkpt,nband)), (2*occ-1)) * self.smearing * 1j)
+    
+        # nkpt, nband
+        ddw_add = einsum('ijk,ijk->ij', ddw_tmp, 1.0 / delta_E_ddw)
+    
+        # nband
+        num1 = 1.0 - occ
+    
+        # nomegase, nkpt, nband
+        fan_add = zeros((nomegase, nkpt, nband), dtype=complex)
+    
+        for kband in range(nband):
+    
+            # nkpt, nband
+            # delta_E[ikpt,jband] = E[ikpt,jband] - E[ikpt,kband] - (2f[kband] -1) * eta * 1j
+            delta_E = (self.eig0.EIG[0,:,:].real
+                     - einsum('i,j->ij', self.eigq.EIG[0,:,kband].real, ones(nband))
+                     - ones((nkpt,nband)) * (2*occ[kband]-1) * self.smearing * 1j)
+    
+            # nkpt, nband, nomegase
+            # delta_E_omega[ikpt,jband,lomega] = omega[lomega] + E[ikpt,jband] - E[ikpt,kband] - (2f[kband] -1) * eta * 1j
+            delta_E_omega = (einsum('ij,l->ijl', delta_E, ones(nomegase))
+                           + einsum('ij,l->ijl', ones((nkpt,nband)), omegase))
+    
+            # nkpt, nband, nomegase, nmode
+            deno1 = (einsum('ijl,m->ijlm', delta_E_omega, ones(3*natom))
+                   - einsum('ijl,m->ijlm', ones((nkpt,nband,nomegase)), omega))
+    
+            # nmode, nkpt, nband, nomegase
+            div1 = num1[kband] * einsum('ijlm->mijl', 1.0 / deno1)
+    
+            del deno1
+    
+            # nkpt, nband, nomegase, nmode
+            deno2 = (einsum('ijl,m->ijlm', delta_E_omega, ones(3*natom))
+                   + einsum('ijl,m->ijlm', ones((nkpt,nband,nomegase)), omega))
+    
+            del delta_E_omega
+    
+            # nmode, nkpt, nband, nomegase
+            div2 = occ[kband] * einsum('ijlm->mijl', 1.0 / deno2)
+    
+            del deno2
+    
+            # nomegase, nkpt, nband
+            fan_add += einsum('ijm,mijl->lij', fan_num[:,:,kband,:], div1 + div2)
+    
+            del div1, div2
+      
+    
+        # Correction from active space 
+        fan_term += fan_add
+        ddw_term += ddw_add
+        ddw_term = einsum('ij,m->mij', ddw_term, ones(nomegase))
+    
+        self.sigma = (fan_term - ddw_term) * self.wtq
+    
+        self.sigma = self.eig0.make_average(qpt_sigma)
+        self.sigma = einsum('mij->ijm', qpt_sigma)
+      
+        return self.sigma
+
+    def get_td_self_energy(self):
+        """
+        Compute the td frequency-dependent dynamical self-energy from one q-point.
+    
+        The self-energy is evaluated on a frequency mesh 'omegase' that is shifted by the bare energies,
+        such that, what is retured is
+    
+            Simga'_kn(omega) = Sigma_kn(omega + E^0_kn)
+    
+        """
+    
+        nkpt = self.eigr2d.nkpt
+        nband = self.eigr2d.nband
+        natom = self.eigr2d.natom
+    
+        nomegase = self.nomegase
+    
+        bose = self.ddb.get_bose(self.temperatures)
+      
+        self.sigma = zeros((nkpt, nband, nomegase, ntemp), dtype=complex)
+      
+        # nmode
+        omega = self.ddb.omega[:].real
+    
+        fan_term = zeros((nomegase, nkpt, nband), dtype=complex)
+        ddw_term = zeros((nkpt, nband), dtype=complex)
+        fan_add  = zeros((nomegase, nkpt,nband), dtype=complex)
+        ddw_add  = zeros((nkpt, nband), dtype=complex)
+      
+        # Sternheimer contribution
+      
+        # nmode, nkpt, nband
+        fan_stern, ddw_stern = self.get_fan_ddw_sternheimer()
+        fan_stern = einsum('oij,m->omij', fan_stern, ones(nomegase))
+      
+        # Sum Sternheimer (upper) contribution
+        fan_term = np.sum(fan_stern, axis=0)
+        ddw_term = np.sum(ddw_stern, axis=0)
+      
+        # Active space contribution
+      
+        # nkpt, nband, nband, nmode
+        fan_num, ddw_num = self.get_fan_ddw_active()
+    
+        # nkpt, nband, nband
+        ddw_tmp = np.sum(ddw_num, axis=3)
+    
+        # FIXME
+        # nspin, nkpt, nband, ntemp
+        occ = self.eigq.get_fermi_function(self.mu, self.temperatures)
         # nband
         occ = self.get_occ_nospin()
     

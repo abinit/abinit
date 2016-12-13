@@ -34,6 +34,7 @@ class EpcAnalyzer(object):
     temperatures = []
     omegase = []
     smearing = None
+    mu = None
 
     qred = None
     omega = None
@@ -69,6 +70,7 @@ class EpcAnalyzer(object):
                  smearing=0.00367,
                  asr=True,
                  verbose=False,
+                 fermi_level=None,
                  **kwargs):
 
         # Check that the minimum number of files is present
@@ -128,6 +130,7 @@ class EpcAnalyzer(object):
         self.set_omega_range(omega_range)
         self.set_smearing(smearing)
         self.set_output(output)
+        self.set_fermi_level(fermi_level)
 
         self.verbose = verbose
 
@@ -180,6 +183,31 @@ class EpcAnalyzer(object):
             self.wtq = np.array(wtq) / sum(wtq)
         else:
             self.wtq = np.array(wtq)
+
+    def set_fermi_level(self, mu):
+        """Set the Fermi level, in Hartree."""
+        self.mu = mu
+        self.qptanalyzer.mu = mu
+
+    @mpi_watch
+    def find_fermi_level(self):
+        """
+        Find the Fermi level by gathering information from all workers
+        and broadcast the result.
+        """
+        all_max_val = gather_qpt_function('get_max_val')
+        all_min_cond = gather_qpt_function('get_min_cond')
+        if i_am_master:
+            max_val = np.max(all_max_val)
+            min_cond = np.min(all_min_cond)
+            mu = (max_val + min_cond) / 2.0
+            mu = np.array(mu, dtype=np.float64)
+        else:
+            mu = np.empty(1, dtype=np.float64)
+
+        comm.Bcast([mu, MPI.DOUBLE])
+
+        self.set_fermi_level(mu)
 
     def set_iqpt(self, iqpt):
         """
