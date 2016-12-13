@@ -20453,6 +20453,31 @@
     characteristics: null
     commentdefault: null
     commentdims: null
+    defaultval: !valuewithconditions
+        '[[nimage]] > 1': 0
+        defaultval: 1
+    definition: PRinT Electron BANDS
+    dimensions: null
+    excludes: null
+    requires: null
+    section: vargs
+    text: |-
+        This option activates the output of the electron eigenvalues.
+        Possible values:
+
+        <ul>
+        <li>0 Disable the output of the band energies.</li>
+        <li>1 Write eigenvalues in xmgrace format.  A file with extension `EBANDS.agr` is produced at the end of the run.
+        Use `xmgrace file_EBANDS.agr` to visualize the band energies</li>
+        <li>2 Write eigenvalues in gnuplot format. The code produces a `EBANDS.dat` file with the eigenvalues and a `EBANDS.gnuplot` script.
+        Use `gnuplot file_EBANDS.gnuplot` to visualize the band energies.</li>
+        </ul>
+    varname: prtebands
+    vartype: null
+- !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
     defaultval: 0
     definition: PRint Electric Field Gradient
     dimensions: scalar
@@ -20852,6 +20877,31 @@
          If set to 1, the nesting function for the k-point grid is printed. For the moment the path in q space for the nesting function is fixed, but will become an input as well.
         </p>
     varname: prtnest
+    vartype: integer
+- !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1
+    definition: PRinT PHonon BANDS
+    dimensions: null
+    excludes: null
+    requires: null
+    section: vareph
+    text: |-
+        This option activates the output of the phonon frequencies in the EPH code.
+        Possible values:
+
+        <ul>
+        <li>0 Disable the output of the phonon frequencies.</li>
+
+        <li>1 Write frequencies in xmgrace format.  A file with extension `PHBANDS.agr` is produced.
+        Use `xmgrace file_PHBANDS.agr` to visualize the data</li>
+
+        <li>2 Write frequencies in gnuplot format. The code produces a `PHBANDS.dat` file with the eigenvalues and a `PHBANDS.gnuplot` script.
+        Use `gnuplot file_PHBANDS.gnuplot` to visualize the phonon band structure.</li>
+        </ul>
+    varname: prtphbands
     vartype: integer
 - !variable
     characteristics:

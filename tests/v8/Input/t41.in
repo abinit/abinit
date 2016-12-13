@@ -68,10 +68,10 @@
 #%% test_chain = t41.in, t42.in, t43.in, t44.in
 #%% [files]
 #%% files_to_test = 
-#%%   t41.out, tolnlines = 20, tolabs = 1.1e-3, tolrel = 2.0e-4
+#%%   t41.out, tolnlines = 20, tolabs = 1.1e-3, tolrel = 4.0e-4
 #%% psp_files = 6c.pspnc
 #%% [paral_info]
-#%% max_nprocs = 8
+#%% max_nprocs = 10
 #%% [shell]
 #%% post_commands = ww_mv t41o_DS2_WFK t44o_DS20_WFK
 #%% [extra_info]
