@@ -32,11 +32,6 @@ module m_fstab
  use m_kptrank
  use m_tetrahedron
  use m_ebands
- use iso_c_binding
- use m_nctk
-#ifdef HAVE_NETCDF
- use netcdf
-#endif
 
  use m_time,           only : cwtime
  use m_fstrings,       only : itoa, sjoin
@@ -44,6 +39,7 @@ module m_fstab
  use defs_datatypes,   only : ebands_t
  use m_crystal,        only : crystal_t
  use m_special_funcs,  only : dirac_delta
+ use m_kpts,           only : kpts_timrev_from_kptopt
 
  implicit none
 
@@ -125,11 +121,11 @@ module m_fstab
 
  end type fstab_t
 
- public :: fstab_init        ! Initialize the object.
- public :: fstab_free        ! Free memory.
- public :: fstab_findkg0     ! Find the index of the k-point on the FS
- public :: fstab_weights_ibz ! Compute weights for FS integration.
- public :: fstab_print       ! Print the object
+ public :: fstab_init            ! Initialize the object.
+ public :: fstab_free            ! Free memory.
+ public :: fstab_findkg0         ! Find the index of the k-point on the FS
+ public :: fstab_weights_ibz     ! Compute weights for FS integration.
+ public :: fstab_print           ! Print the object
 !!***
 
 !----------------------------------------------------------------------
@@ -269,7 +265,6 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  logical :: inwin
  character (len=80) :: errstr
 !arrays
- integer,parameter :: identity(3,3)=reshape([1,0,0,0,1,0,0,0,1], [3,3])
  integer,allocatable :: fs2full(:),indkk(:,:) !,fs2irr(:)
  character(len=500) :: msg
  type(fstab_t),pointer :: fs
@@ -288,7 +283,14 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
  !@fstab_t
  call cwtime(cpu,wall,gflops,"start")
 
+ if (any(cryst%symrel(:,:,1) /= identity_3d) .and. any(abs(cryst%tnons(:,1)) > tol10) ) then
+  MSG_ERROR('The first symmetry is not the identity operator!')
+ end if
+
  nkibz = ebands%nkpt
+
+ !call kpts_ibz_from_kptrlatt(cryst, kptrlatt, ebands%kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
+ ! new_kptrlatt, new_shiftk)  ! Optional
 
  ! Call smpbz to get the full grid of k-points `kpt_full`
  ! brav1=1 is able to treat all bravais lattices (same option used in getkgrid)
@@ -304,12 +306,8 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
 
  call smpbz(brav1,std_out,kptrlatt,mkpt,nkpt_full,nshiftk,option0,shiftk,kpt_full)
 
- if (any(cryst%symrel(:,:,1) /= identity) .and. any(abs(cryst%tnons(:,1)) > tol10) ) then
-  MSG_ERROR('The first symmetry is not the identity operator!')
- end if
-
  ! Find correspondence BZ --> ebands%kpt
- timrev = 1
+ timrev = kpts_timrev_from_kptopt(ebands%kptopt)
  sppoldbl = 1; if (any(cryst%symafm == -1) .and. ebands%nsppol==1) sppoldbl=2
  ABI_MALLOC(indkk, (nkpt_full*sppoldbl,6))
 
@@ -368,18 +366,16 @@ subroutine fstab_init(fstab, ebands, cryst, fsewin, integ_method, kptrlatt, nshi
      blow = bisect(ebands%eig(:nband_k,ik_ibz,spin), ebis)
      if (blow == 0) blow = 1
      !if (blow == nband_k .or. blow == 0) cycle ! out of range
-
      !write(std_out,*)"here with blow: ", blow,nband_k
-     !write(std_out,*)"eig_blow, eig_max, elow, ehigh:", ebands%eig(blow, ik_ibz, spin), ebands%eig(nband_k, ik_ibz, spin), elow,ehigh
+     !write(std_out,*)"eig_blow, eig_max, elow, ehigh:", &
+     !  ebands%eig(blow, ik_ibz, spin), ebands%eig(nband_k, ik_ibz, spin), elow,ehigh
 
      inwin = .False.; i1 = huge(1); i2 = -1
      do band=blow,nband_k
         !if (ebands%eig(band, ik_ibz, spin) > ehigh) exit
         !write(std_out,*)band, ebands%eig(band, ik_ibz, spin) >= elow, ebands%eig(band, ik_ibz, spin) <= ehigh
         if (ebands%eig(band, ik_ibz, spin) >= elow .and. ebands%eig(band, ik_ibz, spin) <= ehigh) then
-          inwin = .True.
-          i1 = min(i1, band)
-          i2 = max(i2, band)
+          inwin = .True.; i1 = min(i1, band); i2 = max(i2, band)
         end if
      end do
 

@@ -111,7 +111,6 @@
 !!  usecprj= 1 if cprj, cprjq arrays are stored in memory
 !!  useylmgr = 1 if ylmgr  array is allocated
 !!  useylmgr1= 1 if ylmgr1 array is allocated
-!!  wffddk=struct info for ddk file
 !!  ddk<wfk_t>=ddk file
 !!  vpsp1(cplex*nfftf)=first-order derivative of the ionic potential
 !!  vtrial(nfftf,nspden)=GS potential (Hartree).
@@ -206,7 +205,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &  pertcase,phnons1,ph1d,ph1df,&
 &  prtbbb,psps,qphon,resid,residm,rhog,rhog1,&
 &  rhor,rhor1,rprimd,symaf1,symrc1,symrl1,&
-&  usecprj,useylmgr,useylmgr1,wffddk,ddk_f,vpsp1,vtrial,vxc,&
+&  usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
 &  wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,conv_retcode)
 
  use defs_basis
@@ -216,10 +215,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  use m_efield
  use m_errors
  use m_profiling_abi
- use m_wffile
  use m_wfk
  use m_xmpi
  use m_nctk
+ use m_hdr
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -331,13 +330,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  type(pawrhoij_type),intent(inout) :: pawrhoij1(my_natom*psps%usepaw)
  type(pawtab_type), intent(in) :: pawtab(psps%ntypat*psps%usepaw)
  type(MPI_type),intent(inout) :: mpi_enreg
- type(wffile_type),intent(inout) :: wffddk(4)
  type(wfk_t),intent(inout) :: ddk_f(4)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=12,response=1
- integer :: afford,choice,cplex_rhoij,dbl_nnsclo
+ integer :: afford,bantot_rbz,choice,cplex_rhoij,dbl_nnsclo
  integer :: has_dijfr,iatom,ider,idir_dum,idir_paw1,ierr,iexit,errid,denpot
  integer :: iprcel,iscf10_mod,iscf_mod,ispden,ispmix
  integer :: istep,itypat,izero,lmn2_size,me,mgfftdiel,mvdum
@@ -793,7 +791,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   nhat1,nkpt_rbz,npwarr,npwar1,res2,nspden,dtset%nsppol,nsym1,dtset%ntypat,nvresid1,&
 &   occkq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
 &   pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid,residm,rhog1,&
-&   rhor1,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,usecprj,useylmgr1,wffddk,ddk_f,&
+&   rhor1,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,usecprj,useylmgr1,ddk_f,&
 &   vtrial,vtrial1,wtk_rbz,xred,ylm,ylm1,ylmgr1)
 
    if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
@@ -972,7 +970,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   nhat1,nkpt_rbz,npwarr,npwar1,res3,nspden,dtset%nsppol,nsym1,dtset%ntypat,nvresid2,&
 &   occkq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
 &   pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid2,residm2,rhog2,&
-&   rhor2,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,usecprj,useylmgr1,wffddk,ddk_f,&
+&   rhor2,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,usecprj,useylmgr1,ddk_f,&
 &   vtrial,vtrial2,wtk_rbz,xred,ylm,ylm1,ylmgr1,1)
 
    write(msg,'(a)') ' '//NEW_LINE('A')//'&
@@ -1018,27 +1016,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 & (dtset%berryopt/=4 .and.dtset%berryopt/= 6.and.dtset%berryopt/= 7.and.&
 & dtset%berryopt/=14.and.dtset%berryopt/=16.and.dtset%berryopt/=17)).or.&
 & ipert==dtset%natom+10.or.ipert==dtset%natom+11) then
-#ifdef DEV_MG_WFK
    call wfk_close(ddk_f(1))
-#else
-   call WffClose(wffddk(1),ierr)
-#endif
  end if
  if ((ipert==dtset%natom+10 .and. idir>3) .or. ipert==dtset%natom+11) then
-#ifdef DEV_MG_WFK
    call wfk_close(ddk_f(2))
-#else
-   call WffClose(wffddk(2),ierr)
-#endif
  end if
  if (ipert==dtset%natom+11) then
-#ifdef DEV_MG_WFK
    call wfk_close(ddk_f(3))
    if(idir>3) call wfk_close(ddk_f(4))
-#else
-   call WffClose(wffddk(3),ierr)
-   if(idir>3) call WffClose(wffddk(4),ierr)
-#endif
  end if
 
 !Deallocate the no more needed arrays
@@ -1165,6 +1150,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 & nstep,occ_rbz,0,prtfor,0,&
 & quit,res2,resid,residm,response,&
 & tollist,psps%usepaw,vxcavg,wtk_rbz,xred,conv_retcode)
+
+!Update the content of the header (evolving variables)
+ bantot_rbz = sum(nband_rbz(1:nkpt_rbz*dtset%nsppol))
+ call hdr_update(hdr,bantot_rbz,etotal,fermie,&
+& residm,rprimd,occ_rbz,pawrhoij1,xred,dtset%amu_orig(:,1),&
+& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
 
 !Optionally provide output of charge density and/or potential in real space,
 !as well as analysis of geometrical factors (bond lengths and bond angles).
