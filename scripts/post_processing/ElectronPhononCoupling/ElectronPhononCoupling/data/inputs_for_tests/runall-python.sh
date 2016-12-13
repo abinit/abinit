@@ -11,3 +11,5 @@ python t31.py
 python t32.py
 python t33.py
 python t34.py
+python t41.py
+python t42.py
