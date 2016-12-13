@@ -35,7 +35,7 @@ module m_dynmat
  use m_linalg_interfaces
 
  use m_numeric_tools,   only : wrap2_pmhalf, mkherm
- use m_cgtools,        only : fxphas_seq
+ use m_cgtools,         only : fxphas_seq
  use m_ewald,           only : ewald9
 
  implicit none
@@ -3259,7 +3259,7 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt)
  DBG_ENTER("COLL")
 
 !Interatomic Forces from Dynamical Matrices
- atmfrc(:,:,:,:,:,:)=zero
+ atmfrc = zero
  do irpt=1,nrpt
    do iqpt=1,nqpt
 
@@ -3299,7 +3299,7 @@ subroutine ftifc_q2r(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt)
  end do
 
 !The sum has to be weighted by a normalization factor of 1/nqpt
- atmfrc(:,:,:,:,:,:)=atmfrc(:,:,:,:,:,:)/nqpt
+ atmfrc = atmfrc/nqpt
 
  DBG_EXIT("COLL")
 
@@ -4802,14 +4802,14 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,&
 !scalars
  integer :: i1,i2,ib,iqpt,nqpt,nsize,option,plus
  integer :: sumg0
- !character(len=500) :: message
+ !character(len=500) :: msg
 !arrays
  real(dp) :: qphon(3)
  real(dp),allocatable :: dq(:,:,:,:,:),dyew(:,:,:,:,:)
 
 ! *********************************************************************
 
- !write(message, '(a,3es15.5)' )'  gtdyn9 : enter ftiaf9 with q =',qphon(1:3)
+ !write(msg, '(a,3es15.5)' )'  gtdyn9 : enter ftiaf9 with q =',qphon(1:3)
  !call wrtout(std_out,message,'COLL')
 
  ABI_ALLOCATE(dq,(2,3,natom,3,natom))
@@ -4966,18 +4966,18 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 !Local variables -------------------------
 !scalars
  integer :: analyt,i1,i2,idir1,idir2,ier,ii,imode,index,ipert1,ipert2
-!integer :: jmode,indexi,indexj
+ integer :: jmode,indexi,indexj
  real(dp),parameter :: break_symm=1.0d-12
  real(dp) :: epsq,fac,norm,qphon2
-!real(dp) :: sc_prod
-!character(len=500) :: message
+ logical,parameter :: debug = .False.
+ real(dp) :: sc_prod
 !arrays
  real(dp) :: nearidentity(3,3),qptn(3),dum(2,0)
  real(dp),allocatable :: matrx(:,:),zeff(:,:),zhpev1(:,:),zhpev2(:)
 
 ! *********************************************************************
 
-!Prepare the diagonalisation : analytical part.
+!Prepare the diagonalisation: analytical part.
 !Note: displ is used as work space here
  i1=0
  do ipert1=1,natom
@@ -5049,9 +5049,8 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
          do idir2=1,3
            i2=i2+1
            index=i1+3*natom*(i2-1)
-           displ(2*index-1)=displ(2*index-1)+four_pi/ucvol*&
-&           zeff(idir1,ipert1)*zeff(idir2,ipert2)/epsq
-           displ(2*index  )=0.0_dp
+           displ(2*index-1)=displ(2*index-1)+four_pi/ucvol*zeff(idir1,ipert1)*zeff(idir2,ipert2)/epsq
+           displ(2*index  )=zero
          end do
        end do
      end do
@@ -5123,15 +5122,17 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
  ABI_DEALLOCATE(zhpev1)
  ABI_DEALLOCATE(zhpev2)
 
-!Check the orthonormality of the eigenvectors
-!do imode=1,3*natom
-!  do jmode=imode,3*natom
-!    indexi=2*3*natom*(imode-1)
-!    indexj=2*3*natom*(jmode-1)
-!    sc_prod=sum(eigvec(indexi+1:indexi+6*natom)*eigvec(indexj+1:indexj+6*natom))
-!    write(std_out,'(a,2i4,a,es16.6)')' imode,jmode=',imode,jmode,' real scalar product =',sc_prod
-!  enddo
-!enddo
+ if (debug) then
+   ! Check the orthonormality of the eigenvectors
+   do imode=1,3*natom
+     do jmode=imode,3*natom
+       indexi=2*3*natom*(imode-1)
+       indexj=2*3*natom*(jmode-1)
+       sc_prod=sum(eigvec(indexi+1:indexi+6*natom)*eigvec(indexj+1:indexj+6*natom))
+       write(std_out,'(a,2i4,a,es16.6)')' imode,jmode=',imode,jmode,' real scalar product =',sc_prod
+     end do
+   end do
+ end if
 
 !***********************************************************************
 
@@ -5183,24 +5184,24 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    end do
  end do
 
-!DEBUG
-!  write(std_out,'(a)')' Phonon eigenvectors and displacements '
-!  do imode=1,3*natom
-!    indexi=2*3*natom*(imode-1)
-!   write(std_out,'(a,i4,a,12es16.6)')' imode=',imode,' eigvec(1:6*natom)=',eigvec(indexi+1:indexi+6*natom)
-!    write(std_out,'(a,i4,a,12es16.6)')' imode=',imode,' displ(1:6*natom)=',displ(indexi+1:indexi+6*natom)
-!  enddo
-!ENDDEBUG
+ if (debug) then
+   write(std_out,'(a)')' Phonon eigenvectors and displacements '
+   do imode=1,3*natom
+     indexi=2*3*natom*(imode-1)
+     write(std_out,'(a,i4,a,12es16.6)')' imode=',imode,' eigvec(1:6*natom)=',eigvec(indexi+1:indexi+6*natom)
+     write(std_out,'(a,i4,a,12es16.6)')' imode=',imode,' displ(1:6*natom)=',displ(indexi+1:indexi+6*natom)
+   end do
 
-!Check the orthonormality of the eigenvectors
-!do imode=1,3*natom
-!  do jmode=imode,3*natom
-!    indexi=2*3*natom*(imode-1)
-!    indexj=2*3*natom*(jmode-1)
-!    sc_prod=sum(eigvec(indexi+1:indexi+6*natom)*eigvec(indexj+1:indexj+6*natom))
-!    write(std_out,'(a,2i4,a,es16.6)')' imode,jmode=',imode,jmode,' real scalar product =',sc_prod
-!  enddo
-!enddo
+   !Check the orthonormality of the eigenvectors
+   do imode=1,3*natom
+     do jmode=imode,3*natom
+       indexi=2*3*natom*(imode-1)
+       indexj=2*3*natom*(jmode-1)
+       sc_prod=sum(eigvec(indexi+1:indexi+6*natom)*eigvec(indexj+1:indexj+6*natom))
+       write(std_out,'(a,2i4,a,es16.6)')' imode,jmode=',imode,jmode,' real scalar product =',sc_prod
+     end do
+   end do
+ end if
 
 end subroutine dfpt_phfrq
 !!***

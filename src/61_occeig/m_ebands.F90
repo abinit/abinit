@@ -4822,14 +4822,9 @@ subroutine ebands_write(ebands, prtebands, prefix, kptbounds)
 
 ! *********************************************************************
 
- !write(std_out,*)"in ebands_write"
- !write(std_out,*)"efermi:", ebands%fermie
- !write(std_out,*)"minval eig:", minval(ebands%eig)
- !write(std_out,*)"maxval eig:", maxval(ebands%eig)
-
  select case (prtebands)
  case (0)
-    continue
+    return
  case (1)
    call ebands_write_xmgrace(ebands, strcat(prefix, "_EBANDS.agr"))
  case (2)
