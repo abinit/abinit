@@ -62,11 +62,9 @@ end type lbfgs_internal
 
 type(lbfgs_internal),save,public :: lbfgs_plan
 
-
-
+!!***
 
 contains
-
 
 !----------------------------------------------------------------------
 
