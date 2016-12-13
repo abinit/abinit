@@ -1768,8 +1768,8 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
        exit
      else if (istep < nstep) then
        chi0_tmp = chi0(:,:,1)
-       vfxc_boot = chi0(:,:,1)/chi00_head ! full G vectors
-       !vfxc_boot = czero; vfxc_boot(1,1) = chi0(1,1,1)/chi00_head ! head only
+       !vfxc_boot = chi0(:,:,1)/chi00_head ! full G vectors
+       vfxc_boot = czero; vfxc_boot(1,1) = chi0(1,1,1)/chi00_head ! head only
        fxc_head = vfxc_boot(1,1)
        do ig1=1,npwe
          vfxc_boot(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*vfxc_boot(ig1,:)
@@ -1830,7 +1830,7 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    chi0 = chi0_save
    do io=1,nomega
      if (omega_distrb(io) == my_rank) then
-       call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,option_test,my_nqlwl,dim_wing,omega(io),&
+       call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,0,my_nqlwl,dim_wing,omega(io),&
 &         chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
        epsm_lf(io,:) = tmp_lf
        epsm_nlf(io,:) = tmp_nlf
@@ -1840,62 +1840,6 @@ subroutine make_epsm1_driver(iqibz,dim_wing,npwe,nI,nJ,nomega,omega,&
    write(msg,'(a,2f10.6)')  '    eps^-1(head):   ',chi0(1,1,1)
    call wrtout(std_out,msg,'COLL')
    
-   ABI_FREE(chi0_save)
-   ABI_FREE(vfxc_boot)
-
-   do io=1,nomega
-     write(msg,'(a,i4,a,2f9.4,a)')' Symmetrical epsilon^-1(G,G'') at the ',io,' th omega',omega(io)*Ha_eV,' [eV]'
-     call wrtout(std_out,msg,'COLL')
-     call print_arr(chi0(:,:,io),mode_paral='PERS')
-   end do
-
-CASE(6)
-   !@WC: RPA bootstrap by Rigamonti et al. (PRL 114, 146402) and Berger (PRL 115, 137402)
-   ABI_STAT_MALLOC(vfxc_boot,(npwe*nI,npwe*nJ), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in vfxc_boot")
-   ABI_STAT_MALLOC(chi0_save,(npwe*nI,npwe*nJ,nomega), ierr)
-   ABI_CHECK(ierr==0, "out-of-memory in chi0_save")
-
-   if (iqibz==1) then
-     vc_sqrt => Vcp%vcqlwl_sqrt(:,1)  ! Use Coulomb term for q-->0
-   else
-     vc_sqrt => Vcp%vc_sqrt(:,iqibz)
-   end if
-
-   chi0_save = chi0 ! a copy of chi0
-   fxc_head = czero; vfxc_boot = czero;
-   epsm_lf = czero; epsm_nlf = czero; eelf = zero
-   chi00_head = chi0(1,1,1)*vc_sqrt(1)**2
-   write(msg,'(a,2f10.6)') ' -> chi0_dft(head): ',chi00_head
-   call wrtout(std_out,msg,'COLL')
-
-   ! static
-   io = 1
-   call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,0,my_nqlwl,dim_wing,omega(io),&
-&    chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
-   epsm_lf(1,:) = tmp_lf
-
-   vfxc_boot(1,1) = 1.0/(chi00_head * epsm_lf(1,1))
-   fxc_head = vfxc_boot(1,1)
-   do ig1=1,npwe
-     vfxc_boot(ig1,:) = vc_sqrt(ig1)*vc_sqrt(:)*vfxc_boot(ig1,:)
-   end do
-   write(msg,'(a,2f10.6)') ' -> v^-1*fxc(head): ',fxc_head
-   call wrtout(std_out,msg,'COLL')
-
-   chi0 = chi0_save
-   do io=1,nomega
-     if (omega_distrb(io) == my_rank) then
-       call atddft_symepsm1(iqibz,Vcp,npwe,nI,nJ,chi0(:,:,io),vfxc_boot,option_test,my_nqlwl,dim_wing,omega(io),&
-&        chi0_head(:,:,io),chi0_lwing(:,io,:),chi0_uwing(:,io,:),tmp_lf,tmp_nlf,tmp_eelf,comm_self)
-       epsm_lf(io,:) = tmp_lf
-       epsm_nlf(io,:) = tmp_nlf
-       eelf(io,:) = tmp_eelf
-     end if
-   end do
-   write(msg,'(a,2f10.6)')  '    eps^-1(head):   ',chi0(1,1,1)
-   call wrtout(std_out,msg,'COLL')
-
    ABI_FREE(chi0_save)
    ABI_FREE(vfxc_boot)
 

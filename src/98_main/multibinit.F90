@@ -23,7 +23,7 @@
 !!
 !! CHILDREN
 !!      abi_io_redirect,abimem_init,abinit_doctor,compute_anharmonics,
-!!      effective_potential_free,effective_potential_file_getDimSystem,effective_potential_file_read,
+!!      effective_potential_free,effective_potential_file_getDim,effective_potential_file_read,
 !!      effective_potential_writeNETCDF,effective_potential_writeXML,flush_unit,herald
 !!      init10,instrng,invars10,inupper, isfile,mover_effpot,multibinit_dtset_fre
 !!      outvars_multibinit,timein,xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum,wrtout
@@ -161,7 +161,7 @@ program multibinit
  call wrtout(std_out,message,'COLL')
 
 
-!To automate a maximum calculation, multibinit reads the number of atoms 
+!To automate a maximum calculation, epigine reads the number of atoms 
 !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
 !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
  write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
@@ -169,7 +169,7 @@ program multibinit
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
- call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt,comm)
+ call effective_potential_file_getDim(filnam(3),natom,ntypat,nph1l,nrpt,comm)
  
 !Read the input file, and store the information in a long string of characters
 !strlen from defs_basis module
@@ -194,17 +194,7 @@ program multibinit
 
 ! First step: Read and treat the reference structure 
 !****************************************************************************************
-!Read the harmonics parts
  call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
-!Read the coefficient from fit
- if(filnam(4)/='')then
-   call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
- else
-   write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-&                       'There is no file for the coefficients from polynomial fitting'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
- end if
 !****************************************************************************************
 
 !Second step: Compute the third order derivative with finite differences

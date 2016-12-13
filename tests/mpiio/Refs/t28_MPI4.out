@@ -33,7 +33,6 @@
     occopt =       1   xclevel =       1
 -    mband =          50        mffmem =           1         mkmem =           2
        mpw =          80          nfft =        2048          nkpt =           4
-Pmy_natom=         1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =      6912
 ================================================================================
@@ -121,6 +120,7 @@ P           mkmem2          4
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000
+-      paral_atom           0
         paral_kgb           1
         pawcpxocc           2
         pawecutdg      1.00000000E+01 Hartree
@@ -128,7 +128,6 @@ P           mkmem2          4
         pawspnorb           1
            prtdos           3
            prtpot           1
-         prtvclmb           1
            prtvha           1
           prtvhxc           1
           prtvpsp           1
@@ -268,7 +267,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      79.500      79.495
   sigma(2 2)=  5.31050263E-01  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.31050263E-01  sigma(2 1)=  0.00000000E+00
 
- io1dm : about to open file t28_MPI4o_DS1_VCLMB_1DM
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Note:      this is a rough approximation of local magnetic moments
@@ -883,7 +881,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      79.500      79.495
   sigma(2 2)=  5.31049975E-01  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.31049975E-01  sigma(2 1)=  0.00000000E+00
 
- io1dm : about to open file t28_MPI4o_DS2_VCLMB_1DM
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Note:      this is a rough approximation of local magnetic moments
@@ -1506,6 +1503,7 @@ P           mkmem2          4
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000
+-      paral_atom           0
         paral_kgb           1
         pawcpxocc           2
         pawecutdg      1.00000000E+01 Hartree
@@ -1513,7 +1511,6 @@ P           mkmem2          4
         pawspnorb           1
            prtdos           3
            prtpot           1
-         prtvclmb           1
            prtvha           1
           prtvhxc           1
           prtvpsp           1

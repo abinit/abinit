@@ -5,9 +5,11 @@
 !!
 !! FUNCTION
 !! Checks that the set of k points chosen for a response function
-!! calculation has the full space group symmetry, modulo time reversal if appropriate.
-!! Returns ierr/=0 with error message if not satisfied
-!! Currently used only when strain perturbation is treated. Based on symkpt.
+!! calculation has the full space group symmetry, modulo time reversal
+!! if appropirate.
+!! Aborts run with error message if not satisfied
+!! Currently used only when strain perturbation is treated
+!! Based on symkpt.
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2016 ABINIT group (DRH, XG, LSI)
@@ -25,7 +27,8 @@
 !! if 0, no time reversal symmetry.
 !!
 !! OUTPUT
-!!  msg=Error message if ierr /= 0
+!!
+!! NOTES
 !!
 !! PARENTS
 !!      respfn
@@ -42,13 +45,11 @@
 #include "abi_common.h"
 
 
-integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
+subroutine symkchk(kptns,nkpt,nsym,symrec,timrev)
 
  use defs_basis
  use m_errors
  use m_profiling_abi
-
- use m_fstrings,    only : itoa, sjoin
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -62,7 +63,6 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: nkpt,nsym,timrev
- character(len=*),intent(out) :: errmsg
 !arrays
  integer,intent(in) :: symrec(3,3,nsym)
  real(dp),intent(in) :: kptns(3,nkpt)
@@ -76,13 +76,12 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
  real(dp) :: ksym(3)
 
 ! *********************************************************************
- ierr = 0
 
  if(timrev/=1 .and. timrev/=0)then
-   write(errmsg, '(3a,i0,a)' )&
+   write(message, '(3a,i4,a)' )&
 &   'timrev should be 0 or 1, while',ch10,&
 &   'it is equal to ',timrev,'.'
-   ierr = 1; return
+   MSG_BUG(message)
  end if
 
  if(nsym/=1)then
@@ -98,13 +97,14 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
      end do
      if(tident==1)then
        identi=isym
-       call wrtout(std_out,sjoin(' symkchk: found identity with number:', itoa(identi)))
+       write(message, '(a,i3)' )' symkchk : found identity, with number',identi
+       call wrtout(std_out,message,'COLL')
        exit
      end if
    end do
    if(tident==0)then
-     errmsg = 'Did not found the identity operation.'
-     ierr = 1; return
+     message = 'Did not found the identity operation.'
+     MSG_BUG(message)
    end if
  end if
 
@@ -152,23 +152,27 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
            if(imatch==1)exit
          end if
 
-       end do ! End secondary loop over k-points
-       if (imatch/=1) then
-         write(errmsg, '(a,a,a,i4,a,i4,a,a,a,a)' )&
+!        End secondary loop over k-points
+       end do
+       if(imatch/=1)then
+         write(message, '(a,a,a,i4,a,i4,a,a,a,a)' )&
 &         'k-point set must have full space-group symmetry',ch10,&
 &         'there is no match for kpt',ikpt,' transformed by symmetry',isym,ch10,&
 &         'Action: change kptopt to 2 or 3 and/or change or use shiftk',ch10,&
 &         'shiftk = 0 0 0 is always a safe choice.'
-         ierr = 2; return
+         MSG_ERROR(message)
        end if
 
-     end do ! End loop on isym
-   end do ! End primary loop over k-points
+!      End loop on isym
+     end do
+
+!    End primary loop over k-points
+   end do
 
    write(message,'(a)')' symkchk : k-point set has full space-group symmetry.'
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
  end if
 
-end function symkchk
+end subroutine symkchk
 !!***

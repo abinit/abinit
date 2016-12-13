@@ -32,8 +32,8 @@ ntime  = 50
 #%% test_chain = t95.in,t96.in,t97.in,t98.in
 #%% [files]
 #%% [paral_info]
-#%% nprocs_to_test = 1, 2, 4, 10
-#%% max_nprocs = 10
+#%% nprocs_to_test = 1, 2, 4
+#%% max_nprocs = 4
 #%% [NCPU_1]
 #%% input_ddb  = t95_MPI1o_DS3_DDB 
 #%% files_to_test = 
@@ -52,7 +52,7 @@ ntime  = 50
 #%% [NCPU_10]
 #%% input_ddb  = t95_MPI10o_DS3_DDB 
 #%% files_to_test = 
-#%%   t96_MPI10.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
+#%%   t95_MPI10.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
 #%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [extra_info]
 #%% authors = A. MARTIN

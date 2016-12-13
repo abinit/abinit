@@ -107,6 +107,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  use m_profiling_abi
  use m_xmpi
  use m_errors
+ use m_wffile
  use m_wfk
  use m_nctk
  use m_hamiltonian
@@ -125,6 +126,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  use interfaces_32_util
  use interfaces_53_spacepar
  use interfaces_56_xc
+ use interfaces_62_iowfdenpot
  use interfaces_72_response, except_this_one => dfpt_nstdy
 !End of the abilint section
 
@@ -164,9 +166,9 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !scalars
  integer,parameter :: formeig1=1
  integer :: ban2tot,bantot,bdtot_index,ddkcase,iband,icg,icg1,idir1
- integer :: ierr,ifft,ii,ikg,ikg1,ikpt,ilm,ipert1,ispden,isppol
- integer :: istwf_k,isym,jj,master,me,n1,n2,n3,n3xccc,n4,n5,n6
- integer :: nband_k,nfftot,npw1_k,npw_k,nspinor_,option,spaceworld
+ integer :: ierr,ifft,ii,ikg,ikg1,ikpt,ikpt_dum,ilm,ipert1,ispden,isppol
+ integer :: istwf_k,isym,jj,master,me,n1,n2,n3,n3xccc,n4,n5,n6,nband_dum
+ integer :: nband_k,nfftot,npw1_k,npw_k,nskip,nspinor_,option,spaceworld
  integer :: optnc,optxc
  real(dp) :: doti,dotr,wtk_k
  logical :: t_exist
@@ -174,7 +176,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  character(len=fnlen) :: fiwfddk
  type(gs_hamiltonian_type) :: gs_hamkq
 !arrays
- integer :: ddkfil(3)
+ integer :: ddkfil(3),ikpt_fbz(3),ikpt_fbz_previous(3),skipddk(3)
  integer,allocatable :: kg1_k(:,:),kg_k(:,:),symrl1(:,:,:)
  real(dp) :: d2nl_elfd(2,3),d2nl_mgfd(2,3),kpoint(3),kpq(3),sumelfd(2),summgfd(2),tsec(2)
  real(dp),allocatable :: buffer1(:),buffer2(:),d2bbb_k(:,:,:,:),d2nl_k(:,:,:)
@@ -183,11 +185,12 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  real(dp),allocatable :: vpsp1(:),vxc1(:,:),work1(:,:,:),xccc3d1(:),ylm1_k(:,:),ylm_k(:,:)
  type(paw_ij_type) :: paw_ij(dtset%natom*psps%usepaw)
  type(pawtab_type) :: pawtab(dtset%ntypat*psps%usepaw)
+ type(wffile_type) :: wffddk(3)
  type(wfk_t) :: ddks(3)
 
 ! *********************************************************************
 
- ABI_UNUSED(nkpt)
+ ABI_UNUSED((/nkpt, ii, ikpt_dum, nband_dum/))
 
  DBG_ENTER("COLL")
 
@@ -241,7 +244,11 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
      write(msg, '(a,a)') '-open ddk wf file :',trim(fiwfddk)
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
+#ifndef DEV_MG_WFK
+     call WffOpen(dtset%iomode,spaceworld,fiwfddk,ierr,wffddk(idir1),master,me,ddkfil(idir1))
+#else
      call wfk_open_read(ddks(idir1),fiwfddk,formeig1,dtset%iomode,ddkfil(idir1),spaceworld)
+#endif
    end if
  end do
 
@@ -270,8 +277,18 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  n4=dtset%ngfft(4) ; n5=dtset%ngfft(5) ; n6=dtset%ngfft(6)
  nspinor_=dtset%nspinor
 
+!Initialisation of the ddk files
+#ifndef DEV_MG_WFK
+ do idir1=1,3
+   if (ddkfil(idir1)/=0)then
+     call hdr_skip(wffddk(idir1),ierr)
+   end if
+ end do
+#endif
+
  bantot = 0
  ban2tot = 0
+ skipddk(:) = 0
 
 !==== Initialize most of the Hamiltonian ====
 !1) Allocate all arrays and initialize quantities that do not depend on k and spin.
@@ -286,7 +303,26 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  icg=0;icg1=0
  do isppol=1,nsppol
 
+!  In case isppol = 2, skip the records that correspond to isppol = 1 and that have not been read
+#ifndef DEV_MG_WFK
+   if (isppol == 2) then
+     do idir1 = 1, 3
+       if ((ddkfil(idir1)/=0).and.(skipddk(idir1) < nkpt)) then
+         do ikpt = 1, (nkpt - skipddk(idir1))
+           call WffReadNpwRec(ierr,ikpt,isppol,nband_k,npw_k,nspinor_,wffddk(idir1))
+           call WffReadSkipRec(ierr,1,wffddk(idir1))
+           do iband = 1, nband_k
+             call WffReadSkipRec(ierr,2,wffddk(idir1))
+           end do
+         end do
+       end if
+     end do
+   end if
+#endif
+
    ikg=0;ikg1=0
+
+   ikpt_fbz(1:3)=0
 
 !  Continue to initialize the Hamiltonian
    call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij)
@@ -320,8 +356,25 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
      do idir1=1,3
        if (ddkfil(idir1)/=0) then
+!        Must select the corresponding k point in the full set of k points
+!        used in the ddk file : compute the number of k points to skip
+         ikpt_fbz_previous(idir1)=ikpt_fbz(idir1)
+         ikpt_fbz(idir1)=indkpt1(ikpt)
+
+         nskip=ikpt_fbz(idir1)-ikpt_fbz_previous(idir1)-1
+         skipddk(idir1) = skipddk(idir1) + 1 + nskip
+#ifndef DEV_MG_WFK
+         if(nskip/=0)then
+           do ikpt_dum=1+ikpt_fbz_previous(idir1),ikpt_fbz(idir1)-1
+             nband_dum=dtset%nband(ikpt_dum+(isppol-1)*nkpt)
+!            Skip the records whose information is not needed (in case of parallelism)
+             call WffReadSkipK(1,0,ikpt_dum,isppol,mpi_enreg,wffddk(idir1))
+           end do
+         end if
+#else
          ii = wfk_findk(ddks(idir1), kpt_rbz(:, ikpt))
          ABI_CHECK(ii == indkpt1(ikpt),  "ii !=  indkpt1")
+#endif
        end if
      end do
 
@@ -356,7 +409,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
      call dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 &     icg,icg1,idir,ikpt,ipert,isppol,istwf_k,kg_k,kg1_k,kpoint,kpq,mkmem,mk1mem,mpert,&
 &     mpi_enreg,mpw,mpw1,nband_k,npw_k,npw1_k,nsppol,&
-&     occ_k,psps,rmet,ddks,wtk_k,ylm_k,ylm1_k)
+&     occ_k,psps,rmet,wffddk,ddks,wtk_k,ylm_k,ylm1_k)
 
      d2nl(:,:,:,idir,ipert)=d2nl(:,:,:,idir,ipert)+d2nl_k(:,:,:)
      if(dtset%prtbbb==1)d2bbb(:,:,idir,ipert,:,:)=d2bbb(:,:,idir,ipert,:,:)+d2bbb_k(:,:,:,:)
@@ -431,7 +484,11 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !In case of electric field ipert1, close the ddk wf files
  do idir1=1,3
    if (ddkfil(idir1)/=0)then
+#ifndef DEV_MG_WFK
+     call WffClose(wffddk(idir1),ierr)
+#else
      call wfk_close(ddks(idir1))
+#endif
    end if
  end do
 

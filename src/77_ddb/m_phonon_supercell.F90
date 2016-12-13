@@ -6,7 +6,7 @@
 !!
 !! FUNCTION
 !! Module for using a phonon supercell
-!! Container type is defined, and destruction, print subroutines
+!! Container type is defined, and destruction, print subroutines 
 !! as well as the central init_supercell
 !!
 !! COPYRIGHT
@@ -58,7 +58,7 @@ module m_phonon_supercell
    real(dp) :: qphon(3)                             ! phonon q vector
    real(dp), allocatable :: xcart_supercell(:,:)        ! (3, natom_supercell) positions of atoms
    real(dp), allocatable :: xcart_supercell_ref(:,:)    ! (3, natom_supercell) equilibrium positions of atoms
-   integer, allocatable :: atom_indexing_supercell(:)   ! (natom_supercell) indexes original atom: 1..natom
+   integer, allocatable :: atom_indexing_supercell(:)   ! (natom_supercell) indexes original atom: 1..natom 
    integer, allocatable :: uc_indexing_supercell(:,:)   ! (3, natom_supercell) indexes unit cell atom is in:
    integer, allocatable :: typat_supercell(:)        ! (3, natom_supercell) positions of atoms
  end type supercell_type
@@ -130,12 +130,12 @@ subroutine init_supercell(natom, option, qphon, rprimd, typat, xcart, scell)
 ! *************************************************************************
 
 ! maximum number of unit cells in a given direction
- maxsc = 10
+ maxsc = 10  
 
 ! find smallest supercell which will accomodate phonon.
 ! FIXME: for the moment, just get smallest multiple along each direction, with an upper bound
  supercell = -1
- if(option == 1 ) then
+ if(option == 1 ) then 
    do ii=1,3
      do iscmult=1,maxsc
        qbymult = qphon(ii)*iscmult
@@ -158,9 +158,9 @@ subroutine init_supercell(natom, option, qphon, rprimd, typat, xcart, scell)
 
  scell%natom = natom
  scell%qphon = qphon
- scell%rprimd_supercell(:,1) = rprimd(:,1) * supercell(1)
- scell%rprimd_supercell(:,2) = rprimd(:,2) * supercell(2)
- scell%rprimd_supercell(:,3) = rprimd(:,3) * supercell(3)
+ scell%rprimd_supercell(:,1) = rprimd(:,1) * supercell(1) 
+ scell%rprimd_supercell(:,2) = rprimd(:,2) * supercell(2) 
+ scell%rprimd_supercell(:,3) = rprimd(:,3) * supercell(3) 
 
 !number of atoms in full supercell
  scell%natom_supercell = natom*supercell(1)*supercell(2)*supercell(3)
@@ -171,9 +171,9 @@ subroutine init_supercell(natom, option, qphon, rprimd, typat, xcart, scell)
  ABI_ALLOCATE(scell%uc_indexing_supercell,(3,scell%natom_supercell))
 
  iatom_supercell = 0
- do i1 = 1, supercell(1)
-   do i2 = 1, supercell(2)
-     do i3 = 1, supercell(3)
+ do i1 = 1, supercell(1) 
+   do i2 = 1, supercell(2) 
+     do i3 = 1, supercell(3) 
        do iatom = 1, natom
          iatom_supercell = iatom_supercell + 1
          r_cell = (/i1-1,i2-1,i3-1/)
@@ -190,7 +190,7 @@ subroutine init_supercell(natom, option, qphon, rprimd, typat, xcart, scell)
 
  scell%xcart_supercell = scell%xcart_supercell_ref
 
-end subroutine init_supercell
+end subroutine init_supercell 
 !!***
 
 !!****f* m_phonon_supercell/freeze_displ_supercell
@@ -252,7 +252,7 @@ subroutine freeze_displ_supercell (displ,freeze_displ,jmode,scell)
    ipratom = (scell%atom_indexing_supercell(iatom)-1)*3
    scell%xcart_supercell(:,iatom) = scell%xcart_supercell_ref(:,iatom) &
 &        + freeze_displ * cos(qdotr) * displ(1,ipratom+1:ipratom+3,jmode) &
-&        - freeze_displ * sin(qdotr) * displ(2,ipratom+1:ipratom+3,jmode)
+&        - freeze_displ * sin(qdotr) * displ(2,ipratom+1:ipratom+3,jmode) 
  end do
 
 end subroutine freeze_displ_supercell
@@ -399,7 +399,7 @@ end subroutine prt_supercell
 !! CHILDREN
 !!
 !! SOURCE
-
+ 
 subroutine copy_supercell (scell_in,scell_copy)
 
 
@@ -413,7 +413,7 @@ subroutine copy_supercell (scell_in,scell_copy)
 
 !Arguments ------------------------------------
 !scalars
-  type(supercell_type), intent(in) :: scell_in
+  type(supercell_type), intent(in) :: scell_in 
   type(supercell_type), intent(inout) :: scell_copy
 
 ! *************************************************************************
@@ -453,7 +453,7 @@ end subroutine copy_supercell
 !! CHILDREN
 !!
 !! SOURCE
-
+ 
 subroutine destroy_supercell (scell)
 
 

@@ -33,7 +33,7 @@ MODULE m_numeric_tools
 
  implicit none
 
- private
+ private 
 
  public :: arth                  ! Return an arithmetic progression
  public :: geop                  ! Return a geometric progression
@@ -48,13 +48,13 @@ MODULE m_numeric_tools
  public :: is_zero               ! Return .TRUE. if all elements of rr differ from zero by less than tol
  public :: bisect                ! Given a monotonic array A and x find j such that A(j)>x>A(j+1) using bisection
  public :: imax_loc              ! Index of maxloc on an array returned as scalar instead of array-valued quantity
- public :: imin_loc              ! Index of minloc on an array returned as scalar instead of array-valued quantity
+ public :: imin_loc              ! Index of minloc on an array returned as scalar instead of array-valued quantity 
  public :: lfind                 ! Find the index of the first occurrence of .True. in a logical array.
  public :: list2blocks           ! Given a list of integers, find the number of contiguos groups of values.
  public :: mask2blocks           ! Find groups of .TRUE. elements in a logical mask.
  public :: linfit                ! Perform a linear fit, y=ax+b, of data
  public :: llsfit_svd            ! Linear least squares fit with SVD of an user-defined set of functions
- public :: polyn_interp          ! Polynomial interpolation with Nevilles"s algorithms, error estimate is reported
+ public :: polyn_interp          ! Polynomial interpolation with Nevilles"s algorithms, error estimate is reported 
  public :: quadrature            ! Driver routine for performing quadratures in finite domains using different algorithms
  public :: coeffs_gausslegint    ! Compute the coefficients (supports and weights) for Gauss-Legendre integration.
  public :: simpson_cplx          ! Integrate a complex function via extended Simpson's rule.
@@ -64,7 +64,7 @@ MODULE m_numeric_tools
  public :: print_arr             ! Print a vector/array
  public :: pade,dpade            ! Functions for Pade approximation (complex case)
  public :: newrap_step           ! Apply single step Newton-Raphson method to find root of a complex function
- public :: OPERATOR(.x.)         ! Cross product of two 3D vectors
+ public :: OPERATOR(.x.)         ! Cross product of two 3D vectors 
  public :: l2norm                ! Return the length (ordinary L2 norm) of a vector
  public :: remove_copies         ! Find the subset of inequivalent items in a list.
  public :: denominator           ! Return the denominator of a rational number.
@@ -84,17 +84,17 @@ MODULE m_numeric_tools
  public :: nderiv                ! Compute first or second derivative of input function y(x) on a regular grid.
 
  interface arth
-   module procedure arth_int
+   module procedure arth_int 
    module procedure arth_rdp
  end interface arth
 
  interface reverse
-   module procedure arth_int
+   module procedure arth_int 
    module procedure arth_rdp
  end interface reverse
 
  interface set2unit
-   module procedure unit_matrix_int
+   module procedure unit_matrix_int 
    module procedure unit_matrix_rdp
    module procedure unit_matrix_cdp
  end interface set2unit
@@ -116,16 +116,16 @@ MODULE m_numeric_tools
    !module procedure isdiagmat_cdp
  end interface isdiagmat
 
- interface r2c
-   module procedure rdp2cdp_1D
-   module procedure rdp2cdp_2D
-   module procedure rdp2cdp_3D
-   module procedure rdp2cdp_4D
-   module procedure rdp2cdp_5D
-   module procedure rdp2cdp_6D
+ interface r2c 
+   module procedure rdp2cdp_1D 
+   module procedure rdp2cdp_2D 
+   module procedure rdp2cdp_3D 
+   module procedure rdp2cdp_4D 
+   module procedure rdp2cdp_5D 
+   module procedure rdp2cdp_6D 
  end interface r2c
 
- interface c2r
+ interface c2r 
    module procedure cdp2rdp_1D
    module procedure cdp2rdp_2D
    module procedure cdp2rdp_3D
@@ -134,12 +134,12 @@ MODULE m_numeric_tools
  end interface c2r
 
  interface isinteger
-   module procedure is_integer_0d
+   module procedure is_integer_0d 
    module procedure is_integer_1d
  end interface isinteger
 
  interface is_zero
-   module procedure is_zero_rdp_0d
+   module procedure is_zero_rdp_0d 
    module procedure is_zero_rdp_1d
  end interface is_zero
 
@@ -148,31 +148,31 @@ MODULE m_numeric_tools
    module procedure bisect_int
  end interface bisect
 
- interface imax_loc
+ interface imax_loc 
    module procedure imax_loc_int
    module procedure imax_loc_rdp
  end interface imax_loc
 
- interface imin_loc
+ interface imin_loc 
    module procedure imin_loc_int
    module procedure imin_loc_rdp
  end interface imin_loc
 
  interface linfit
-   module procedure linfit_rdp
-   module procedure linfit_spc
-   module procedure linfit_dpc
+   module procedure linfit_rdp  
+   module procedure linfit_spc 
+   module procedure linfit_dpc 
  end interface linfit
 
  interface hermitianize
-   module procedure hermitianize_spc
-   module procedure hermitianize_dpc
+   module procedure hermitianize_spc 
+   module procedure hermitianize_dpc 
  end interface hermitianize
 
- interface symmetrize
-   module procedure symmetrize_spc
-   module procedure symmetrize_dpc
- end interface symmetrize
+ interface symmetrize 
+   module procedure symmetrize_spc 
+   module procedure symmetrize_dpc 
+ end interface symmetrize 
 
  interface print_arr  !TODO add prtm
    module procedure print_arr1d_spc
@@ -181,7 +181,7 @@ MODULE m_numeric_tools
    module procedure print_arr2d_dpc
  end interface print_arr
 
- interface operator (.x.)
+ interface operator (.x.)           
    module procedure cross_product_int
    module procedure cross_product_rdp
  end interface
@@ -200,10 +200,10 @@ MODULE m_numeric_tools
 !!****t* m_numeric_tools/stats_t
 !! NAME
 !! stats_t
-!!
+!! 
 !! FUNCTION
 !!  Statistical parameters of a data distribution.
-!!
+!! 
 !! SOURCE
 
  type,public :: stats_t
@@ -212,7 +212,7 @@ MODULE m_numeric_tools
    real(dp) :: min
    real(dp) :: max
  end type stats_t
-
+ 
  public :: stats_eval  ! Calculate the statistical parameters of a data distribution.
 !!***
 
@@ -221,11 +221,11 @@ MODULE m_numeric_tools
 !!****t* m_numeric_tools/vdiff_t
 !! NAME
 !! vdiff_t
-!!
+!! 
 !! FUNCTION
 !!  Estimate the "distance" between two functions tabulated on a homogeneous grid.
 !!  Use `vidff` function to construct the object.
-!!
+!! 
 !! SOURCE
 
  type,public :: vdiff_t
@@ -238,7 +238,7 @@ MODULE m_numeric_tools
    real(dp) :: l1_rerr        ! (\int |f1-f2| dr) / (\int |f2| dr)
 
  end type vdiff_t
-
+ 
  public :: vdiff_eval         ! Estimate the "distance" between two functions tabulated on a homogeneous grid.
  public :: vdiff_print        ! Print vdiff_t to formatted file.
 !!***
@@ -253,7 +253,7 @@ CONTAINS  !===========================================================
 !!
 !! FUNCTION
 !!  Returns an array of length nn containing an arithmetic progression whose
-!!  starting value is start and whose step is step.
+!!  starting value is start and whose step is step. 
 !!
 !! INPUTS
 !!  start=initial point
@@ -294,7 +294,7 @@ pure function arth_int(start,step,nn)
     arth_int(ii)=arth_int(ii-1)+step
    end do
 
- case (0)
+ case (0) 
    RETURN
  end select
 
@@ -344,7 +344,7 @@ pure function arth_rdp(start,step,nn)
    arth_rdp(ii)=arth_rdp(ii-1)+step
   end do
 
- case (0)
+ case (0) 
   RETURN
 
  end select
@@ -417,7 +417,7 @@ end function geop
 !!
 !! SOURCE
 
-subroutine reverse_int(arr)
+subroutine reverse_int(arr) 
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -439,7 +439,7 @@ subroutine reverse_int(arr)
  if (nn <= 1) return
 
  do ii=1,nn/2
-   swap = arr(ii)
+   swap = arr(ii) 
    arr(ii) = arr(nn-ii+1)
    arr(nn-ii+1) = swap
  end do
@@ -462,7 +462,7 @@ end subroutine reverse_int
 !!
 !! SOURCE
 
-subroutine reverse_rdp(arr)
+subroutine reverse_rdp(arr) 
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -485,7 +485,7 @@ subroutine reverse_rdp(arr)
  if (nn <= 1) return
 
  do ii=1,nn/2
-   swap = arr(ii)
+   swap = arr(ii) 
    arr(ii) = arr(nn-ii+1)
    arr(nn-ii+1) = swap
  end do
@@ -638,13 +638,13 @@ end subroutine unit_matrix_cdp
 !!  get_trace_int
 !!
 !! FUNCTION
-!!  Calculate the trace of a square matrix
+!!  Calculate the trace of a square matrix 
 !!
-!! INPUTS
-!!  matrix(:,:)
-!!
-!! OUTPUT
-!!  trace=the trace
+!! INPUTS 
+!!  matrix(:,:) 
+!! 
+!! OUTPUT 
+!!  trace=the trace 
 !!
 !! SOURCE
 
@@ -685,11 +685,11 @@ end function get_trace_int
 !! FUNCTION
 !!  Calculate the trace of a square matrix (real(dp) version)
 !!
-!! INPUTS
-!!  matrix(:,:)
-!!
-!! OUTPUT
-!!  trace=the trace
+!! INPUTS 
+!!  matrix(:,:) 
+!! 
+!! OUTPUT 
+!!  trace=the trace 
 !!
 !! SOURCE
 
@@ -773,10 +773,10 @@ end function get_trace_cdp
 !! FUNCTION
 !!  Return the trace of a square matrix as a vector
 !!
-!! INPUTS
-!!  matrix(:,:)
-!!
-!! OUTPUT
+!! INPUTS 
+!!  matrix(:,:) 
+!! 
+!! OUTPUT 
 !!  diag(:)=the diagonalr
 !!
 !! SOURCE
@@ -956,7 +956,7 @@ end function isdiagmat_rdp
 !!
 !! FUNCTION
 !!  Create a complex array starting from a real array containing real and imaginary part
-!!
+!! 
 !! INPUTS
 !!  rr(:)=the real array
 !!
@@ -1180,8 +1180,8 @@ end function rdp2cdp_6D
 !!  cdp2rdp_1D
 !!
 !! FUNCTION
-!!  Create a real array containing real and imaginary part starting from a complex array
-!!
+!!  Create a real array containing real and imaginary part starting from a complex array 
+!! 
 !! INPUTS
 !!  cc(:)=the input complex array
 !!
@@ -1221,7 +1221,7 @@ end function cdp2rdp_1D
 !!  cdp2rdp_2D
 !!
 !! FUNCTION
-!!
+!! 
 !! INPUTS
 !!
 !! OUTPUT
@@ -1371,7 +1371,7 @@ end function cdp2rdp_5D
 !!  iseven
 !!
 !! FUNCTION
-!!  Return .TRUE. if the given integer is even
+!!  Return .TRUE. if the given integer is even 
 !!
 !! PARENTS
 !!
@@ -1408,7 +1408,7 @@ end function iseven
 !!  is_integer_0D
 !!
 !! FUNCTION
-!!  Return .TRUE. if all elements differ from an integer by less that tol
+!!  Return .TRUE. if all elements differ from an integer by less that tol 
 !!
 !! INPUTS
 !!  rr=the set of real values to be checked
@@ -1436,7 +1436,7 @@ pure function is_integer_0d(rr,tol) result(ans)
 
 ! *************************************************************************
 
- ans=(ABS(rr-NINT(rr))<tol)
+ ans=(ABS(rr-NINT(rr))<tol) 
 
 end function is_integer_0d
 !!***
@@ -1487,7 +1487,7 @@ end function is_integer_1d
 !!  is_zero_rdp_0D
 !!
 !! FUNCTION
-!!  Return .TRUE. if all elements differ from zero by less that tol
+!!  Return .TRUE. if all elements differ from zero by less that tol 
 !!
 !! INPUTS
 !!  rr=the set of real values to be checked
@@ -1520,7 +1520,7 @@ function is_zero_rdp_0d(rr,tol) result(ans)
  real(dp),intent(in) :: rr
 ! *************************************************************************
 
- ans=(ABS(rr)<tol)
+ ans=(ABS(rr)<tol) 
 
 end function is_zero_rdp_0d
 !!***
@@ -1570,7 +1570,7 @@ end function is_zero_rdp_1d
 !!  bisect_rdp
 !!
 !! FUNCTION
-!!  Given an array AA(1:N), and a value x, returns the index j such that AA(j)<=x<= AA(j + 1).
+!!  Given an array AA(1:N), and a value x, returns the index j such that AA(j)<=x<= AA(j + 1). 
 !!  AA must be monotonic, either increasing or decreasing. j=0 or
 !!  j=N is returned to indicate that x is out of range.
 !!
@@ -1598,7 +1598,7 @@ pure function bisect_rdp(AA,xx) result(loc)
  logical :: ascnd
 ! *********************************************************************
 
- nn=SIZE(AA); ascnd=(AA(nn)>=AA(1))
+ nn=SIZE(AA); ascnd=(AA(nn)>=AA(1)) 
  !
  ! === Initialize lower and upper limits ===
  jl=0; ju=nn+1
@@ -1631,7 +1631,7 @@ end function bisect_rdp
 !!  bisect_int
 !!
 !! FUNCTION
-!!  Given an array AA(1:N), and a value x, returns the index j such that AA(j)<=x<= AA(j + 1).
+!!  Given an array AA(1:N), and a value x, returns the index j such that AA(j)<=x<= AA(j + 1). 
 !!  AA must be monotonic, either increasing or decreasing. j=0 or
 !!  j=N is returned to indicate that x is out of range.
 !!
@@ -1662,7 +1662,7 @@ pure function bisect_int(AA,xx) result(loc)
  logical :: ascnd
 ! *********************************************************************
 
- nn=SIZE(AA) ; ascnd=(AA(nn)>=AA(1))
+ nn=SIZE(AA) ; ascnd=(AA(nn)>=AA(1)) 
  !
  ! === Initialize lower and upper limits ===
  jl=0 ; ju=nn+1
@@ -1722,9 +1722,9 @@ pure function imax_loc_int(iarr,mask)
 ! *************************************************************************
 
  if (PRESENT(mask)) then
-  imax=MAXLOC(iarr,MASK=mask)
- else
-  imax=MAXLOC(iarr)
+  imax=MAXLOC(iarr,MASK=mask) 
+ else 
+  imax=MAXLOC(iarr) 
  end if
  imax_loc_int=imax(1)
 
@@ -1767,9 +1767,9 @@ pure function imax_loc_rdp(arr,mask)
 ! *************************************************************************
 
  if (PRESENT(mask)) then
-  imax=MAXLOC(arr,MASK=mask)
+  imax=MAXLOC(arr,MASK=mask) 
  else
-  imax=MAXLOC(arr)
+  imax=MAXLOC(arr) 
  end if
  imax_loc_rdp=imax(1)
 
@@ -1810,9 +1810,9 @@ pure function imin_loc_int(arr,mask)
 ! *************************************************************************
 
  if (PRESENT(mask)) then
-  imin=MINLOC(arr,MASK=mask)
- else
-  imin=MINLOC(arr)
+  imin=MINLOC(arr,MASK=mask) 
+ else 
+  imin=MINLOC(arr) 
  end if
  imin_loc_int=imin(1)
 
@@ -1856,11 +1856,11 @@ pure function imin_loc_rdp(arr,mask)
 ! *************************************************************************
 
  if (PRESENT(mask)) then
-  imin=MINLOC(arr,MASK=mask)
- else
-  imin=MINLOC(arr)
+  imin=MINLOC(arr,MASK=mask) 
+ else 
+  imin=MINLOC(arr) 
  end if
-
+ 
  imin_loc_rdp=imin(1)
 
 end function imin_loc_rdp
@@ -1874,7 +1874,7 @@ end function imin_loc_rdp
 !!
 !! FUNCTION
 !!  Find the index of the first occurrence of .True. in a logical array.
-!!  Return -1 if not found. If back is True, the search starts from the
+!!  Return -1 if not found. If back is True, the search starts from the 
 !!  last element of the array (default: False).
 !!
 !! INPUTS
@@ -1948,8 +1948,8 @@ end function lfind
 !!
 !! OUTPUTS
 !! nblocks=Number of blocks
-!! blocks(2,nblocks)=
-!!    allocatable array in input
+!! blocks(2,nblocks)= 
+!!    allocatable array in input 
 !!    in output:
 !!       blocks(1,i) gives the start of the i-th block
 !!       blocks(2,i) gives the end of the i-th block
@@ -1990,7 +1990,7 @@ subroutine list2blocks(list,nblocks,blocks)
  nitems = size(list)
 
  ! Handle nitems == 1 case
- if (nitems == 1) then
+ if (nitems == 1) then 
    ABI_MALLOC(blocks, (2,1))
    blocks = 1
    return
@@ -2087,7 +2087,7 @@ subroutine mask2blocks(mask,nblocks,blocks)
  if (start /= 0 .and. nitems == 1) then
    nblocks = 1
    ABI_MALLOC(blocks, (2,1))
-   blocks(:,1) = [1,1]
+   blocks(:,1) = [1,1] 
  end if
 
  nblocks = 1; work(1,1) = start; inblock = .True.
@@ -2135,7 +2135,7 @@ end subroutine mask2blocks
 !!
 !! SOURCE
 
-function linfit_rdp(nn,xx,yy,aa,bb) result(res)
+function linfit_rdp(nn,xx,yy,aa,bb) result(res) 
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2158,12 +2158,12 @@ function linfit_rdp(nn,xx,yy,aa,bb) result(res)
  real(dp) :: res
  real(dp),intent(out) :: aa,bb
 !arrays
- real(dp),intent(in) :: xx(nn),yy(nn)
-
+ real(dp),intent(in) :: xx(nn),yy(nn) 
+ 
 !Local variables-------------------------------
 !scalars
  integer :: ii
- real(dp) :: msrt,sx2,sx,sxy,sy,tx,ty
+ real(dp) :: msrt,sx2,sx,sxy,sy,tx,ty 
 ! *************************************************************************
 
  sx=zero ; sy=zero ; sxy=zero ; sx2=zero
@@ -2229,7 +2229,7 @@ function linfit_spc(nn,xx,zz,aa,bb) result(res)
  complex(dpc) :: sz,sxz
 ! *************************************************************************
 
- sx=zero ; sx2=zero ; msrt=zero
+ sx=zero ; sx2=zero ; msrt=zero 
  sz=czero ; sxz=czero
  do ii=1,nn
   sx=sx+xx(ii)
@@ -2290,7 +2290,7 @@ function linfit_dpc(nn,xx,zz,aa,bb) result(res)
  complex(dpc) :: sz,sxz
 ! *************************************************************************
 
- sx=zero  ; sx2=zero ; msrt=zero
+ sx=zero  ; sx2=zero ; msrt=zero 
  sz=czero ; sxz=czero
  do ii=1,nn
   sx=sx+xx(ii)
@@ -2317,11 +2317,11 @@ end function linfit_dpc
 !!  llsfit_svd
 !!
 !! FUNCTION
-!!  Given a set of N data points (x,y) with individual standard deviations sigma_i,
-!!  use chi-square minimization to determine the M coefficients, par, of a function that
-!!  depends linearly on nfuncs functions, i.e f(x) = \sum_i^{nfuncs} par_i * func_i(x).
+!!  Given a set of N data points (x,y) with individual standard deviations sigma_i, 
+!!  use chi-square minimization to determine the M coefficients, par, of a function that 
+!!  depends linearly on nfuncs functions, i.e f(x) = \sum_i^{nfuncs} par_i * func_i(x). 
 !!  Solve the fitting equations using singular value decomposition of the design matrix as in Eq 14.3.17
-!!  of Numerical Recipes. The program returns values for the M fit parameters par, and chi-square.
+!!  of Numerical Recipes. The program returns values for the M fit parameters par, and chi-square. 
 !!  The user supplies a subroutine funcs(x,nfuncs) that returns the M basis functions evaluated at xx.
 !!
 !! INPUTS
@@ -2387,7 +2387,7 @@ subroutine llsfit_svd(xx,yy,sigma,nfuncs,funcs,chisq,par,var,cov,info)
  ! * dmat_ij=f_j(x_i)/sigma_i, b_i=y_i/sigma_i
  sigm1(:)=one/sigma(:) ; bb(:)=yy(:)*sigm1(:)
  do ii=1,npts
-  dmat_save(ii,:)=funcs(xx(ii),nfuncs)
+  dmat_save(ii,:)=funcs(xx(ii),nfuncs) 
  end do
  dmat=dmat_save*SPREAD(sigm1,DIM=2,ncopies=nfuncs)
  dmat_save(:,:)=dmat(:,:)
@@ -2404,7 +2404,7 @@ subroutine llsfit_svd(xx,yy,sigma,nfuncs,funcs,chisq,par,var,cov,info)
  GOTO 10
  !
  ! === Set to zero small singular values according to TOL_ and find coefficients ===
- WHERE (S>TOL_*MAXVAL(S))
+ WHERE (S>TOL_*MAXVAL(S)) 
   tmp=MATMUL(bb,U)/S
  ELSEWHERE
   S  =zero
@@ -2424,7 +2424,7 @@ subroutine llsfit_svd(xx,yy,sigma,nfuncs,funcs,chisq,par,var,cov,info)
  cov(:,:)=MATMUL(TRANSPOSE(Vt),cov)
  var(:)=SQRT(get_diag(cov))
 
-10 continue
+10 continue  
  ABI_FREE(U)
  ABI_FREE(S)
  ABI_FREE(Vt)
@@ -2439,7 +2439,7 @@ end subroutine llsfit_svd
 !!  polyn_interp
 !!
 !! FUNCTION
-!!  Given arrays xa and ya of length N, and given a value x, return a value y, and an error estimate dy.
+!!  Given arrays xa and ya of length N, and given a value x, return a value y, and an error estimate dy. 
 !!  If P(x) is the polynomial of degree N-1 such that P(xai)=yai, i=1,...,N, then the returned value y=P(x).
 !!
 !! INPUTS
@@ -2496,15 +2496,15 @@ subroutine polyn_interp(xa,ya,x,y,dy)
  ! === For each column of the tableau loop over current c and d and up-date them ===
  do m=1,n-1
   den(1:n-m)=ho(1:n-m)-ho(1+m:n)
-  if (ANY(den(1:n-m)==zero)) then
+  if (ANY(den(1:n-m)==zero)) then 
    MSG_ERROR('Two input xa are identical')
   end if
 
   den(1:n-m)=(c(2:n-m+1)-d(1:n-m))/den(1:n-m)
-  d(1:n-m)=ho(1+m:n)*den(1:n-m) ! Update c and d
+  d(1:n-m)=ho(1+m:n)*den(1:n-m) ! Update c and d 
   c(1:n-m)=ho(1:n-m)*den(1:n-m)
 
-  if (2*ns<n-m) then  ! Now decide which correction, c or d, we want to add to the
+  if (2*ns<n-m) then  ! Now decide which correction, c or d, we want to add to the 
    dy=c(ns+1)         ! accumulating value of y, The last dy added is the error indication.
   else
    dy=d(ns)
@@ -2530,13 +2530,13 @@ end subroutine polyn_interp
 !! INPUTS
 !!  func(external)=the name of the function to be integrated
 !!  xmin,xmax=the limits of integration
-!!  nn=integer defining the refinement of the mesh, each call adds 2^(n-2) additional interior points
+!!  nn=integer defining the refinement of the mesh, each call adds 2^(n-2) additional interior points 
 !!
 !! OUTPUT
 !!  See SIDE EFFECTS
 !!
 !! SIDE EFFECTS
-!!  quad=the integral at the n-th stage.
+!!  quad=the integral at the n-th stage. 
 !!
 !! PARENTS
 !!
@@ -2602,10 +2602,10 @@ recursive subroutine trapezoidal_(func,nn,xmin,xmax,quad)
 
  case (2:)
    ! === Add npt interior points of spacing space ===
-   npt=2**(nn-2) ; space=(xmax-xmin)/npt
+   npt=2**(nn-2) ; space=(xmax-xmin)/npt 
    ! === The new sum is combined with the old integral to give a refined integral ===
    !new=SUM(func(arth(xmin+half*space,space,npt))) !PARALLEL version
-   !allocate(xx(npt))
+   !allocate(xx(npt)) 
    !xx(:)=arth(xmin+half*space,space,npt)
    !xx(1)=xmin+half*space
    !do ii=2,nn
@@ -2619,7 +2619,7 @@ recursive subroutine trapezoidal_(func,nn,xmin,xmax,quad)
     yy=yy+space
    end do
    !deallocate(xx)
-   quad=half*(quad+space*new)
+   quad=half*(quad+space*new) 
    !write(std_out,*) 'trapezoidal',quad
 
  case (:0)
@@ -2642,14 +2642,14 @@ end subroutine trapezoidal_
 !! INPUTS
 !!  func(external)=the name of the function to be integrated
 !!  xmin,xmax=the limits of integration
-!!  nn=integer defining the refinement of the mesh, each call adds (2/3)*3n-1 additional
+!!  nn=integer defining the refinement of the mesh, each call adds (2/3)*3n-1 additional 
 !!   interior points between xmin ans xmax
 !!
 !! OUTPUT
 !!  See SIDE EFFECTS
 !!
 !! SIDE EFFECTS
-!!  quad=the integral at the n-th stage.
+!!  quad=the integral at the n-th stage. 
 !!
 !! PARENTS
 !!
@@ -2717,14 +2717,14 @@ end subroutine trapezoidal_
  case (2:)
    ! === Add npt interior points, they alternate in spacing between space and 2*space ===
    ABI_MALLOC(xx,(2*3**(nn-2)))
-   npt=3**(nn-2) ; space=(xmax-xmin)/(three*npt)
-   xx(1:2*npt-1:2)=arth(xmin+half*space,three*space,npt)
+   npt=3**(nn-2) ; space=(xmax-xmin)/(three*npt) 
+   xx(1:2*npt-1:2)=arth(xmin+half*space,three*space,npt) 
    xx(2:2*npt:2)=xx(1:2*npt-1:2)+two*space
    ! === The new sum is combined with the old integral to give a refined integral ===
    !quad=quad/three+space*SUM(func(xx))  !PARALLEL version
    quad=quad/three
    do ix=1,SIZE(xx)
-     quad=quad+space*func(xx(ix))
+     quad=quad+space*func(xx(ix)) 
    end do
    ABI_FREE(xx)
 
@@ -2738,7 +2738,7 @@ end subroutine midpoint_
 
 !----------------------------------------------------------------------
 
-!!****f* m_numeric_tools/quadrature
+!!****f* m_numeric_tools/quadrature 
 !! NAME
 !!  quadrature
 !!
@@ -2753,7 +2753,7 @@ end subroutine midpoint_
 !!  accuracy=fractional accuracy required
 !!  ntrial=Max number of attempts
 !!  qopt=integer flag defining the algorithm for the quadrature:
-!!    1 for Trapezoidal rule, closed, O(1/N^2)
+!!    1 for Trapezoidal rule, closed, O(1/N^2) 
 !!    2 for Simpson based on trapezoidal,closed, O(1/N^4)
 !!    3 for Midpoint rule, open, O(1/N^2)
 !!    4 for midpoint rule with cancellation of leading error, open, O(1/N^4)
@@ -2763,7 +2763,7 @@ end subroutine midpoint_
 !!
 !! OUTPUT
 !!  quad=the integral
-!!  ierr=0 if quadrature converged.
+!!  ierr=0 if quadrature converged. 
 !!
 !! PARENTS
 !!
@@ -2813,7 +2813,7 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
  integer :: K,KM,NT,NX,NX0,it,ix
  real(dp) :: EPS,old_st,st,old_quad,dqromb
  real(dp) :: TOL
- character(len=500) :: msg
+ character(len=500) :: msg      
 !arrays
  real(dp),allocatable :: h(:),s(:)
  real(dp),allocatable :: wx(:),xx(:)
@@ -2824,11 +2824,11 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
  EPS  =tol6  ; if (PRESENT(accuracy)) EPS=accuracy
  NT   =20    ; if (PRESENT(ntrial  )) NT=ntrial
  quad =zero
-
+                                          
  select case (qopt)
 
  case (1)
-   ! === Trapezoidal, closed form, O(1/N^2)
+   ! === Trapezoidal, closed form, O(1/N^2) 
    do it=1,NT
      call trapezoidal_(func,it,xmin,xmax,quad)
      if (it>5) then ! Avoid spurious early convergence
@@ -2841,7 +2841,7 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
   ! === Extended Simpson rule based on trapezoidal O(1/N^4) ===
    do it=1,NT
      call trapezoidal_(func,it,xmin,xmax,st)
-     if (it==1) then
+     if (it==1) then 
        quad=st
      else
        quad=(four*st-old_st)/three
@@ -2853,7 +2853,7 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
      old_st=st
    end do
 
- case (3)
+ case (3) 
   ! === Midpoint rule, open form, O(1/N^2) ===
   do it=1,NT
     call midpoint_(func,it,xmin,xmax,quad)
@@ -2863,11 +2863,11 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
     old_quad=quad
   end do
 
- case (4)
+ case (4) 
    ! === Midpoint rule with cancellation of leading 1/N^2 term, open form, O(1/N^4) ===
    do it=1,NT
      call midpoint_(func,it,xmin,xmax,st)
-     if (it==1) then
+     if (it==1) then 
        quad=st
      else
        quad=(nine*st-old_st)/eight
@@ -2879,45 +2879,45 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
      old_st=st
    end do
 
- case (5)
+ case (5) 
    ! === Romberg Integration, closed form ===
    K=5 ; KM=K-1 ! Order 10
    ABI_MALLOC(h,(NT+1))
    ABI_MALLOC(s,(NT+1))
-   h=zero
+   h=zero 
    s=zero
    h(1)=one
    do it=1,NT
      call trapezoidal_(func,it,xmin,xmax,s(it))
      !write(std_out,*) ' romberg-trap at ',ncall,it,s(it)
-     if (it>=K) then
+     if (it>=K) then 
        call polyn_interp(h(it-KM:it),s(it-KM:it),zero,quad,dqromb)
-       if (ABS(dqromb)<EPS*ABS(quad)) then
+       if (ABS(dqromb)<EPS*ABS(quad)) then 
          ABI_FREE(h)
          ABI_FREE(s)
          RETURN
        end if
      end if
      s(it+1)=s(it)
-     h(it+1)=quarter*h(it) ! Quarter makes the extrapolation a polynomial in h^2,
-   end do                 ! This is required to use the Euler-Maclaurin formula
+     h(it+1)=quarter*h(it) ! Quarter makes the extrapolation a polynomial in h^2, 
+   end do                 ! This is required to use the Euler-Maclaurin formula 
    ABI_FREE(h)
    ABI_FREE(s)
 
- case (6)
+ case (6) 
    ! === Romberg Integration, closed form ===
    K=5 ; KM=K-1 ! Order 10
    ABI_MALLOC(h,(NT+1))
    ABI_MALLOC(s,(NT+1))
-   h=zero
+   h=zero 
    s=zero
    h(1)=one
    do it=1,NT
      call midpoint_(func,it,xmin,xmax,s(it))
-     if (it>=K) then
+     if (it>=K) then 
        call polyn_interp(h(it-KM:it),s(it-KM:it),zero,quad,dqromb)
        !write(std_out,*) quad,dqromb
-       if (ABS(dqromb)<EPS*ABS(quad)) then
+       if (ABS(dqromb)<EPS*ABS(quad)) then 
          ABI_FREE(h)
          ABI_FREE(s)
          RETURN
@@ -2925,25 +2925,25 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
      end if
      s(it+1)=s(it)
      h(it+1)=ninth*h(it) ! factor is due to step tripling in midpoint and even error series
-   end do
+   end do                 
    ABI_FREE(h)
    ABI_FREE(s)
 
- case (7)
+ case (7) 
    ! === Gauss-Legendre ===
-   NX0=5 ; if (PRESENT(npts)) NX0=npts
+   NX0=5 ; if (PRESENT(npts)) NX0=npts 
    NX=NX0
    do it=1,NT
      ABI_MALLOC(wx,(NX))
      ABI_MALLOC(xx,(NX))
      call coeffs_gausslegint(xmin,xmax,xx,wx,NX)
-     quad=zero
-     do ix=1,NX
+     quad=zero 
+     do ix=1,NX 
        quad=quad+wx(ix)*func(xx(ix))
      end do
      ABI_FREE(wx)
      ABI_FREE(xx)
-     if (it>1) then
+     if (it>1) then 
        !write(std_out,*) quad
        if (ABS(quad-old_quad)<EPS*ABS(old_quad).or.(ABS(quad)<TOL.and.ABS(old_quad)<TOL)) RETURN
      end if
@@ -2952,7 +2952,7 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
      !NX=2*NX
    end do
 
- case default
+ case default 
    write(msg,'(a,i3)')'Wrong value for qopt',qopt
    MSG_BUG(msg)
  end select
@@ -3009,7 +3009,7 @@ subroutine coeffs_gausslegint(xmin,xmax,x,weights,n)
 
 !Local variables ------------------------------
 !scalars
- integer :: i,j
+ integer :: i,j 
  real(dp),parameter :: tol=1.d-13
  real(dp),parameter :: pi=4.d0*atan(1.d0)
  real(dp) :: z,z1,xmean,p1,p2,p3,pp,xl
@@ -3021,21 +3021,21 @@ subroutine coeffs_gausslegint(xmin,xmax,x,weights,n)
 
  do i=1,(n+1)/2
   z=cos(pi*(i-0.25d0)/(n+0.5d0))
-
-  do
+ 
+  do 
     p1=1.d0
     p2=0.d0
-
+ 
     do j=1,n
      p3=p2
      p2=p1
      p1=((2.d0*j - 1.d0)*z*p2 - (j-1.d0)*p3)/j
     end do
-
+  
     pp=n*(p2-z*p1)/(1.0d0-z**2)
     z1=z
     z=z1-p1/pp
-
+    
     if(abs(z-z1) < tol) exit
   end do
 
@@ -3058,7 +3058,7 @@ end subroutine coeffs_gausslegint
 !!  Integrate a complex function using extended Simpson's rule.
 !!
 !! INPUTS
-!!  npts=Number of points.
+!!  npts=Number of points. 
 !!  step=Step of the mesh.
 !!  ff(npts)=Values of the integrand.
 !!
@@ -3093,7 +3093,7 @@ function simpson_cplx(npts,step,ff)
  real(dp),intent(in)  :: step
  complex(dpc),intent(in) :: ff(npts)
  complex(dpc) :: simpson_cplx
-
+      
 !Local variables ------------------------------
 !scalars
  integer :: ii,my_n
@@ -3111,19 +3111,19 @@ function simpson_cplx(npts,step,ff)
  do ii=2,my_n-1,2
    sum_odd = sum_odd + ff(ii)
  end do
-
+      
  sum_even=zero
  do ii=3,my_n-2,2
    sum_even = sum_even + ff(ii)
  end do
-
+      
  ! Eq 25.4.6 Abramowitz. Error is O(step^4)
  simpson_cplx = step/three * (ff(1) + four*sum_odd + two*sum_even + ff(my_n))
 
  if (my_n/=npts) then ! Simpson's 3/8 rule. Eq 25.4.13 Abramowitz. Error is O(step^5)
-  simpson_cplx = simpson_cplx + three*step/eight * (ff(npts-3) + 3*ff(npts-2) + 3*ff(npts-1) + ff(npts))
+  simpson_cplx = simpson_cplx + three*step/eight * (ff(npts-3) + 3*ff(npts-2) + 3*ff(npts-1) + ff(npts)) 
  end if
-
+      
 end function simpson_cplx
 !!***
 
@@ -3180,7 +3180,7 @@ subroutine hermitianize_spc(mat,uplo)
 !arrays
  complex(spc),allocatable :: tmp(:)
 ! *************************************************************************
-
+ 
  nn=assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',&
 & __FILE__,__LINE__)
 
@@ -3201,29 +3201,29 @@ subroutine hermitianize_spc(mat,uplo)
    do jj=1,nn
      do ii=1,jj
        if (ii/=jj) then
-         mat(jj,ii) = CONJG(mat(ii,jj))
+         mat(jj,ii) = CONJG(mat(ii,jj)) 
        else
          mat(ii,ii) = CMPLX(REAL(mat(ii,ii)),0.0_sp)
        end if
      end do
    end do
-
+                                                      
  case ("L","l") ! Only the lower triangle is used.
   do jj=1,nn
     do ii=1,jj
       if (ii/=jj) then
-        mat(ii,jj) = CONJG(mat(jj,ii))
+        mat(ii,jj) = CONJG(mat(jj,ii)) 
       else
         mat(ii,ii) = CMPLX(REAL(mat(ii,ii)),0.0_sp)
       end if
     end do
   end do
-
+                                                      
  case default
    MSG_ERROR("Wrong uplo"//TRIM(uplo))
  end select
 
-end subroutine hermitianize_spc
+end subroutine hermitianize_spc 
 !!***
 
 !----------------------------------------------------------------------
@@ -3279,7 +3279,7 @@ subroutine hermitianize_dpc(mat,uplo)
 !arrays
  complex(dpc),allocatable :: tmp(:)
 ! *************************************************************************
-
+ 
  nn=assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',&
 & __FILE__,__LINE__)
 
@@ -3300,7 +3300,7 @@ subroutine hermitianize_dpc(mat,uplo)
    do jj=1,nn
      do ii=1,jj
        if (ii/=jj) then
-         mat(jj,ii) = DCONJG(mat(ii,jj))
+         mat(jj,ii) = DCONJG(mat(ii,jj)) 
        else
          mat(ii,ii) = DCMPLX(DBLE(mat(ii,ii)),zero)
        end if
@@ -3311,7 +3311,7 @@ subroutine hermitianize_dpc(mat,uplo)
   do jj=1,nn
     do ii=1,jj
       if (ii/=jj) then
-        mat(ii,jj) = DCONJG(mat(jj,ii))
+        mat(ii,jj) = DCONJG(mat(jj,ii)) 
       else
         mat(ii,ii) = DCMPLX(REAL(mat(ii,ii)),zero)
       end if
@@ -3322,7 +3322,7 @@ subroutine hermitianize_dpc(mat,uplo)
    MSG_ERROR("Wrong uplo"//TRIM(uplo))
  end select
 
-end subroutine hermitianize_dpc
+end subroutine hermitianize_dpc 
 !!***
 
 !----------------------------------------------------------------------
@@ -3437,7 +3437,7 @@ subroutine symmetrize_spc(mat,uplo)
 !arrays
  complex(spc),allocatable :: tmp(:)
 ! *************************************************************************
-
+ 
  nn=assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',&
 & __FILE__,__LINE__)
 
@@ -3460,19 +3460,19 @@ subroutine symmetrize_spc(mat,uplo)
        mat(jj,ii) = mat(ii,jj)
      end do
    end do
-
+                                                      
  case ("L","l") ! Only the lower triangle is used.
   do jj=1,nn
     do ii=1,jj-1
       mat(ii,jj) = mat(jj,ii)
     end do
   end do
-
+                                                      
  case default
    MSG_ERROR("Wrong uplo"//TRIM(uplo))
  end select
 
-end subroutine symmetrize_spc
+end subroutine symmetrize_spc 
 !!***
 
 !----------------------------------------------------------------------
@@ -3528,7 +3528,7 @@ subroutine symmetrize_dpc(mat,uplo)
 !arrays
  complex(dpc),allocatable :: tmp(:)
 ! *************************************************************************
-
+ 
  nn=assert_eq(SIZE(mat,1),SIZE(mat,2),'Matrix not square',&
 & __FILE__,__LINE__)
 
@@ -3563,7 +3563,7 @@ subroutine symmetrize_dpc(mat,uplo)
    MSG_ERROR("Wrong uplo"//TRIM(uplo))
  end select
 
-end subroutine symmetrize_dpc
+end subroutine symmetrize_dpc 
 !!***
 
 !----------------------------------------------------------------------
@@ -3579,11 +3579,11 @@ end subroutine symmetrize_dpc
 !!  arr(:)=vector/matrix to be printed
 !!  mode_paral(optional)=parallel mode, DEFAULT is "COLL"
 !!   "COLL" if all procs are calling the routine with the same message to be written only once
-!!   "PERS" if the procs are calling the routine with different mesgs each to be written,
+!!   "PERS" if the procs are calling the routine with different mesgs each to be written, 
 !!          or if one proc is calling the routine
 !!  unit(optional)=the unit number of the file, DEFAULT=std_out
-!!  max_r,max_c(optional)=Max number of rows and columns to be printed
-!!   (DEFAULT is 9, output format assumes to be less that 99, but there might be
+!!  max_r,max_c(optional)=Max number of rows and columns to be printed 
+!!   (DEFAULT is 9, output format assumes to be less that 99, but there might be 
 !!    problems with wrtout if message size exceeds 500 thus max number of elements should be ~60)
 !!
 !! OUTPUT
@@ -3625,11 +3625,11 @@ subroutine print_arr1d_spc(arr,max_r,unit,mode_paral)
  unt=std_out ; if (PRESENT(unit      )) unt=unit
  mode='COLL' ; if (PRESENT(mode_paral)) mode=mode_paral
  mr=15       ; if (PRESENT(max_r     )) mr=max_r
-
- if (mode/='COLL'.and.mode/='PERS') then
+ 
+ if (mode/='COLL'.and.mode/='PERS') then 
   write(msg,'(2a)')' Wrong value of mode_paral ',mode
   MSG_BUG(msg)
- end if
+ end if 
  !
  ! === Print out matrix ===
  nr=SIZE(arr,DIM=1) ; if (mr>nr) mr=nr
@@ -3637,11 +3637,11 @@ subroutine print_arr1d_spc(arr,max_r,unit,mode_paral)
  write(fmth,*)'(6x,',mr,'(i2,6x))'
  write(fmt1,*)'(3x,',mr,'f8.3)'
 
- write(msg,fmth)(ii,ii=1,mr)
+ write(msg,fmth)(ii,ii=1,mr)     
  call wrtout(unt,msg,mode) !header
- write(msg,fmt1)REAL (arr(1:mr))
+ write(msg,fmt1)REAL (arr(1:mr)) 
  call wrtout(unt,msg,mode) !real part
- write(msg,fmt1)AIMAG(arr(1:mr))
+ write(msg,fmt1)AIMAG(arr(1:mr)) 
  call wrtout(unt,msg,mode) !imag part
 
 end subroutine print_arr1d_spc
@@ -3695,11 +3695,11 @@ subroutine print_arr1d_dpc(arr,max_r,unit,mode_paral)
  unt=std_out ; if (PRESENT(unit      )) unt=unit
  mode='COLL' ; if (PRESENT(mode_paral)) mode=mode_paral
  mr=15       ; if (PRESENT(max_r     )) mr=max_r
-
- if (mode/='COLL'.and.mode/='PERS') then
+ 
+ if (mode/='COLL'.and.mode/='PERS') then 
   write(msg,'(2a)')' Wrong value of mode_paral ',mode
   MSG_BUG(msg)
- end if
+ end if 
  !
  ! === Print out matrix ===
  nr=SIZE(arr,DIM=1) ; if (mr>nr) mr=nr
@@ -3707,11 +3707,11 @@ subroutine print_arr1d_dpc(arr,max_r,unit,mode_paral)
  write(fmth,*)'(6x,',mr,'(i2,6x))'
  write(fmt1,*)'(3x,',mr,'f8.3)'
 
- write(msg,fmth)(ii,ii=1,mr)
+ write(msg,fmth)(ii,ii=1,mr)     
  call wrtout(unt,msg,mode) !header
- write(msg,fmt1)REAL (arr(1:mr))
+ write(msg,fmt1)REAL (arr(1:mr)) 
  call wrtout(unt,msg,mode) !real part
- write(msg,fmt1)AIMAG(arr(1:mr))
+ write(msg,fmt1)AIMAG(arr(1:mr)) 
  call wrtout(unt,msg,mode) !imag part
 
 end subroutine print_arr1d_dpc
@@ -3766,11 +3766,11 @@ subroutine print_arr2d_spc(arr,max_r,max_c,unit,mode_paral)
  mode='COLL' ; if (PRESENT(mode_paral)) mode=mode_paral
  mc  =9      ; if (PRESENT(max_c     )) mc  =max_c
  mr  =9      ; if (PRESENT(max_r     )) mr  =max_r
-
- if (mode/='COLL'.and.mode/='PERS') then
+ 
+ if (mode/='COLL'.and.mode/='PERS') then 
    write(msg,'(2a)')'Wrong value of mode_paral ',mode
    MSG_BUG(msg)
- end if
+ end if 
  !
  ! === Print out matrix ===
  nr=SIZE(arr,DIM=1); if (mr>nr) mr=nr
@@ -3780,12 +3780,12 @@ subroutine print_arr2d_spc(arr,max_r,max_c,unit,mode_paral)
  write(fmt1,*)'(3x,i2,',mc,'f8.3)'
  write(fmt2,*)'(5x   ,',mc,'f8.3,a)'
 
- write(msg,fmth)(jj,jj=1,mc)
+ write(msg,fmth)(jj,jj=1,mc) 
  call wrtout(unt,msg,mode) !header
  do ii=1,mr
-   write(msg,fmt1)ii,REAL(arr(ii,1:mc))
+   write(msg,fmt1)ii,REAL(arr(ii,1:mc))      
    call wrtout(unt,msg,mode) !real part
-   write(msg,fmt2)  AIMAG(arr(ii,1:mc)),ch10
+   write(msg,fmt2)  AIMAG(arr(ii,1:mc)),ch10 
    call wrtout(unt,msg,mode) !imag part
  end do
 
@@ -3841,11 +3841,11 @@ subroutine print_arr2d_dpc(arr,max_r,max_c,unit,mode_paral)
  mode='COLL' ; if (PRESENT(mode_paral)) mode=mode_paral
  mc  =9      ; if (PRESENT(max_c     )) mc  =max_c
  mr  =9      ; if (PRESENT(max_r     )) mr  =max_r
-
- if (mode/='COLL'.and.mode/='PERS') then
+ 
+ if (mode/='COLL'.and.mode/='PERS') then 
    write(msg,'(2a)')'Wrong value of mode_paral ',mode
    MSG_BUG(msg)
- end if
+ end if 
  !
  ! === Print out matrix ===
  nr=SIZE(arr,DIM=1); if (mr>nr) mr=nr
@@ -3855,12 +3855,12 @@ subroutine print_arr2d_dpc(arr,max_r,max_c,unit,mode_paral)
  write(fmt1,*)'(3x,i2,',mc,'f8.3)'
  write(fmt2,*)'(5x   ,',mc,'f8.3,a)'
 
- write(msg,fmth)(jj,jj=1,mc)
+ write(msg,fmth)(jj,jj=1,mc) 
  call wrtout(unt,msg,mode) !header
  do ii=1,mr
-   write(msg,fmt1)ii,REAL(arr(ii,1:mc))
+   write(msg,fmt1)ii,REAL(arr(ii,1:mc))      
    call wrtout(unt,msg,mode) !real part
-   write(msg,fmt2)  AIMAG(arr(ii,1:mc)),ch10
+   write(msg,fmt2)  AIMAG(arr(ii,1:mc)),ch10 
    call wrtout(unt,msg,mode) !imag part
  end do
 
@@ -4032,7 +4032,7 @@ subroutine calculate_pade_a(a,n,z,f)
 ! *************************************************************************
 
  g(1,1:n)=f(1:n)
-
+  
  do i=2,n
    do j=i,n
      if (REAL(g(i-1,j))==zero.and.AIMAG(g(i-1,j))==zero) write(std_out,*) 'g_i(z_j)',i,j,g(i,j)
@@ -4050,13 +4050,13 @@ end subroutine calculate_pade_a
 
 !----------------------------------------------------------------------
 
-!!****f* m_numeric_tools/newrap_step
+!!****f* m_numeric_tools/newrap_step 
 !! NAME
 !!  newrap_step
 !!
 !! FUNCTION
-!!  Apply single step newton-raphson method to find the root of a complex function
-!!   z_k+1=z_k-f(z_k)/(df/dz(z_k))
+!!  Apply single step newton-raphson method to find the root of a complex function 
+!!   z_k+1=z_k-f(z_k)/(df/dz(z_k)) 
 !!
 !! SOURCE
 
@@ -4086,7 +4086,7 @@ function newrap_step(z,f,df)
  newrap_step= z - (f*CONJG(df))/dfm2
  !& z-one/(ABS(df)*ABS(df)) * CMPLX( REAL(f)*REAL(df)+AIMAG(f)*AIMAG(df), -REAL(f)*AIMAG(df)+AIMAG(f)*EAL(df) )
 
-end function newrap_step
+end function newrap_step 
 !!***
 
 !----------------------------------------------------------------------
@@ -4192,7 +4192,7 @@ end function l2norm_rdp
 !!
 !! FUNCTION
 !!  Given an initial set of elements, set_in, return the subset of inequivalent items
-!!  packed in the firt n_out positions of set_in. Use the logical function is_equal
+!!  packed in the firt n_out positions of set_in. Use the logical function is_equal 
 !!  to define whether two items are equivalent.
 !!
 !! INPUTS
@@ -4208,8 +4208,8 @@ end function l2norm_rdp
 !!  In output set_in(3,1:n_out) contains the inequivalent elements found.
 !!
 !! NOTES
-!! The routines only deals with arrays of 3D-vectors although generalizing the
-!! algorithm to nD-space is straightforward.
+!! The routines only deals with arrays of 3D-vectors although generalizing the 
+!! algorithm to nD-space is straightforward. 
 !!
 !! PARENTS
 !!      m_io_screening
@@ -4234,7 +4234,7 @@ subroutine remove_copies(n_in,set_in,n_out,is_equal)
  integer,intent(in) :: n_in
  integer,intent(out) :: n_out
 
-!arrays
+!arrays 
  real(dp),target,intent(inout) :: set_in(3,n_in)
 
  interface
@@ -4252,7 +4252,7 @@ subroutine remove_copies(n_in,set_in,n_out,is_equal)
 !arrays
  type rdp1d_pt
   integer :: idx
-  real(dp),pointer :: rpt(:)
+  real(dp),pointer :: rpt(:) 
  end type rdp1d_pt
  type(rdp1d_pt),allocatable :: Ap(:)
 
@@ -4267,7 +4267,7 @@ subroutine remove_copies(n_in,set_in,n_out,is_equal)
 
    isnew=.TRUE.
    do jj=1,n_out
-     if (is_equal(set_in(:,ii),Ap(jj)%rpt(:))) then
+     if (is_equal(set_in(:,ii),Ap(jj)%rpt(:))) then 
        isnew=.FALSE.
        exit
      end if
@@ -4285,7 +4285,7 @@ subroutine remove_copies(n_in,set_in,n_out,is_equal)
    do ii=1,n_out
      jj=Ap(ii)%idx
      set_in(:,ii) = set_in(:,jj)
-     !write(std_out,*) Ap(ii)%idx,Ap(ii)%rpt(:)
+     !write(std_out,*) Ap(ii)%idx,Ap(ii)%rpt(:) 
    end do
  end if
 
@@ -4306,8 +4306,8 @@ end subroutine remove_copies
 !! INPUTS
 !!  dd=The rational number
 !!  tolerance=Absolute tolerance
-!!
-!! OUTPUT
+!! 
+!! OUTPUT 
 !!  ierr=If /=0  the input number is not rational within the given tolerance.
 !!
 !! SOURCE
@@ -4354,7 +4354,7 @@ integer function denominator(dd,ierr,tolerance)
    ii=ii+1
  end do
 
-end function denominator
+end function denominator 
 !!***
 
 !----------------------------------------------------------------------
@@ -4385,10 +4385,10 @@ integer function mincm(ii,jj)
 
 !************************************************************************
 
- if (ii==0.or.jj==0) then
+ if (ii==0.or.jj==0) then 
    MSG_BUG('ii==0 or jj==0')
  end if
-
+ 
  mincm=MAX(ii,jj)
  do
    if ( ((mincm/ii)*ii)==mincm .and. ((mincm/jj)*jj)==mincm ) RETURN
@@ -4406,7 +4406,7 @@ end function mincm
 !!
 !! FUNCTION
 !!  This routine calculates the continued fraction:
-!!
+!!  
 !!                        1
 !! f(z) =  _______________________________
 !!           z - a1 -        b1^2
@@ -4419,7 +4419,7 @@ end function mincm
 !!  nlev=Number of "levels" in the continued fraction.
 !!  term_type=Type of the terminator.
 !!    0 --> No terminator.
-!!   -1 --> Assume constant coefficients for a_i and b_i for i>nlev with a_inf = a(nlev) and b_inf = b(nleb)
+!!   -1 --> Assume constant coefficients for a_i and b_i for i>nlev with a_inf = a(nlev) and b_inf = b(nleb) 
 !!    1 --> Same as above but a_inf and b_inf are obtained by averaging over the nlev values.
 !!  aa(nlev)=Set of a_i coefficients.
 !!  bb(nlev)=Set of b_i coefficients.
@@ -4473,7 +4473,7 @@ subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
  select case (term_type)
  case (0) ! No terminator.
    div=czero
- case (-1,1)
+ case (-1,1) 
    if (term_type==-1) then
      bb_inf=bb(nlev)
      aa_inf=aa(nlev)
@@ -4483,12 +4483,12 @@ subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
    end if
    ! Be careful with the sign of the SQRT.
    div(:) = half*(bb(nlev)/(bb_inf))**2 * ( zpts-aa_inf - SQRT((zpts-aa_inf)**2 - four*bb_inf**2) )
- case (2)
+ case (2) 
    MSG_ERROR("To be tested")
    div = zero
    if (nlev>4) then
      bg=zero; bu=zero
-     do it=1,nlev,2
+     do it=1,nlev,2  
        if (it+2<nlev) bg = bg + bb(it+2)
        bu = bu + bb(it)
      end do
@@ -4497,7 +4497,7 @@ subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
      !if (iseven(nlev)) then
      if (.not.iseven(nlev)) then
        swap = bg
-       bg = bu
+       bg = bu 
        bu = bg
      end if
      !write(std_out,*)nlev,bg,bu
@@ -4517,7 +4517,7 @@ subroutine continued_fract(nlev,term_type,aa,bb,nz,zpts,spectrum)
    den(:) = zpts(:) - aa(it) - div(:)
    div(:) = (bb(it-1)**2 )/ den(:)
  end do
-
+                                                                  
  den = zpts(:) - aa(1) - div(:)
  div = one/den(:)
 
@@ -4540,9 +4540,9 @@ end subroutine continued_fract
 !!
 !! INPUTS
 !!  from=Option specifying the format used to store the complex values. See below.
-!!  [units]=Option to specify if angles are given in  "Radians" (default) or "Degrees".
+!!  [units]=Option to specify if angles are given in  "Radians" (default) or "Degrees". 
 !!
-!! SIDE EFFECTS
+!! SIDE EFFECTS 
 !!  carr(:,:):
 !!    input:  array with complex values in Cartesian form if from="C" or spherical form if from="S"
 !!    output: array with values converted to the new representation.
@@ -4663,7 +4663,7 @@ subroutine pfactorize(nn,nfactors,pfactors,powers)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nn,nfactors
- integer,intent(in) :: pfactors(nfactors)
+ integer,intent(in) :: pfactors(nfactors) 
  integer,intent(out) :: powers (nfactors+1)
 
 !Local variables ------------------------------
@@ -4749,7 +4749,7 @@ function isordered_rdp(nn,arr,direction,tol) result(isord)
 
  SELECT CASE (direction(1:1))
  CASE(">")
- ii=2;
+ ii=2; 
  do while (ii<=nn .and. isord)
    if (ABS(arr(ii)-prev) > tol) isord = (arr(ii) >= prev)
    prev = arr(ii)
@@ -4757,7 +4757,7 @@ function isordered_rdp(nn,arr,direction,tol) result(isord)
  end do
 
  CASE("<")
- ii=2;
+ ii=2; 
  do while (ii<=nn .and. isord)
    if (ABS(arr(ii)-prev) > tol) isord = (arr(ii) <= prev)
    prev = arr(ii)
@@ -4843,10 +4843,10 @@ pure function stats_eval(arr) result(stats)
    x2_sum = x2_sum + (xx - stats%mean)*(xx - stats%mean)
  end do
 
- if (nn>1) then
+ if (nn>1) then 
    stats%stdev  = x2_sum/(nn-1)
    stats%stdev = SQRT(ABS(stats%stdev))
- else
+ else 
    stats%stdev = zero
  end if
 
@@ -5021,7 +5021,7 @@ pure function interpol3d(r,nr1,nr2,nr3,grid) result(res)
 
  call interpol3d_indices (r,nr1,nr2,nr3,ir1,ir2,ir3, pr1,pr2,pr3)
 
-!weight
+!weight 
  x1=one+r(1)*nr1-real(ir1)
  x2=one+r(2)*nr2-real(ir2)
  x3=one+r(3)*nr3-real(ir3)
@@ -5108,7 +5108,7 @@ pure subroutine interpol3d_indices (r,nr1,nr2,nr3,ir1,ir2,ir3,pr1,pr2,pr3)
 
  if(ir1==0) ir1=nr1
  if(ir2==0) ir2=nr2
- if(ir3==0) ir3=nr3
+ if(ir3==0) ir3=nr3 
 
  if(ir1>nr1) ir1=ir1-nr1
  if(ir2>nr2) ir2=ir2-nr2
@@ -5344,7 +5344,7 @@ end subroutine rhophi
 !!  f1(cplex,nr), f2(cplex,nr)=Vectors with values
 !!
 !! OUTPUT
-!!  vdiff_t object
+!!  vdiff_t object 
 !!
 !! PARENTS
 !!
@@ -5397,7 +5397,7 @@ pure function vdiff_eval(cplex,nr,f1,f2,volume) result(vd)
  end if
 
  vd%int_adiff = num * dr
- vd%l1_rerr = num / den
+ vd%l1_rerr = num / den 
 
  stats = stats_eval(abs_diff)
  vd%mean_adiff = stats%mean
@@ -5424,7 +5424,7 @@ end function vdiff_eval
 !!
 !! SOURCE
 
-subroutine vdiff_print(vd, unit)
+subroutine vdiff_print(vd,unit)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -5446,12 +5446,9 @@ subroutine vdiff_print(vd, unit)
 ! *********************************************************************
 
  unt = std_out; if (present(unit)) unt = unit
- write(unt,"(a,es10.3)")"  L1_rerr: ", vd%l1_rerr
- write(unt,"(a,es10.3)")"  Integral |f1-f2| dr: ", vd%int_adiff
- write(unt,"(a,es10.3)")"  min {|f1-f2|}: ", vd%min_adiff
- write(unt,"(a,es10.3)")"  Max {|f1-f2|}: ", vd%max_adiff
- write(unt,"(a,es10.3)")"  mean {|f1-f2|}: ", vd%mean_adiff
- write(unt,"(a,es10.3)")"  stdev {|f1-f2|}: ", vd%stdev_adiff
+ write(unt,"(2(a,es10.3))")" l1_rerr=",vd%l1_rerr,", \int|f1-f2|dr=",vd%int_adiff
+ write(unt,"(4(a,es10.3))")" Max{|f1-f2|}=",vd%max_adiff,", min{|f1-f2|}=",vd%min_adiff,&
+                           ", Mean{|f1-f2|}=",vd%mean_adiff,", stdev{|f1-f2|}=",vd%stdev_adiff
 
 end subroutine vdiff_print
 !!***
@@ -5461,7 +5458,7 @@ end subroutine vdiff_print
 !!  smooth data.
 !!
 !! FUNCTION
-!!  smooth
+!!  smooth  
 !!
 !! INPUTS
 !!  mesh=Number of points.

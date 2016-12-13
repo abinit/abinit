@@ -16,7 +16,7 @@
  rfphon10   1
  getwfk10   8
  kptopt10   2
- toldfe10   1.1d-12
+ toldfe10   1.0d-12
   nstep10   15
 
 #Common data

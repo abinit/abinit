@@ -1074,7 +1074,6 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  end do
  dimpsichi = 2*dimpsichi !for complex
  ABI_ALLOCATE(buffer1,(dimpsichi))
- buffer1 = zero
  nnn = 0
  do ikpt = 1,wan%nkpt
    do ibandc = 1,wan%bandf_wan-wan%bandi_wan+1

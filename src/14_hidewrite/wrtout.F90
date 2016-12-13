@@ -255,24 +255,24 @@ subroutine wrtout_myproc(unit,message,do_flush) ! optional argument
 !scalars
  integer :: i_one=1
  logical :: print_std_err
+!arrays
 
 !******************************************************************
 
- print_std_err = (unit == std_out .and. std_out /= std_err .and. &
-&   (index(trim(message),'BUG')/=0.or.index(trim(message),'ERROR')/=0))
+ print_std_err=(unit==std_out.and.(index(trim(message),'BUG')/=0.or.index(trim(message),'ERROR')/=0))
 
 !Print message
  call write_lines(unit,message)
- if (print_std_err) call write_lines(std_err,message)
+ if (print_std_err) then
+   call write_lines(std_err,message)
+ end if
 
 !Append "Contact Abinit group" to BUG messages
  if( index(trim(message),'BUG') /= 0 )then
-   write(unit, '(a)' ) '  Action: contact ABINIT group (please attach the output of `abinit -b`)'
+   write(unit, '(a)' ) '  Action : contact ABINIT group.'
+   if (print_std_err) write(std_err, '(a)' ) '  Action : contact ABINIT group.'
    write(unit,*)
-   if (print_std_err) then
-      write(std_err, '(a)' ) '  Action: contact ABINIT group (please attach the output of `abinit -b`)'
-      write(std_err,*)
-   end if
+   if (print_std_err) write(std_err,*)
  end if
 
 !Count the number of warnings and comments. Only take into
@@ -289,11 +289,15 @@ subroutine wrtout_myproc(unit,message,do_flush) ! optional argument
 
 !Flush unit
  if (present(do_flush)) then
-   if (do_flush) call flush_unit(unit)
+   if (do_flush) then
+     call flush_unit(unit)
+   end if
  end if
 #ifdef DEBUG_MODE
  call flush_unit(unit)
- if (print_std_err) call flush_unit(std_err)
+ if (print_std_err) then
+   call flush_unit(std_err)
+ end if
 #endif
 
 end subroutine wrtout_myproc

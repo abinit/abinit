@@ -1,5 +1,5 @@
 
-.Version 8.1.7 of MULTIBINIT 
+.Version 8.1.6 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
 
 .Copyright (C) 1998-2016 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Thu 17 Nov 2016.
-- ( at 10h12 )
+.Starting date : Tue 18 Oct 2016.
+- ( at 16h52 )
   
 -  nproc =    1
 
@@ -60,26 +60,11 @@
  Opening the file system.xml
 -Reading the file system.xml with LibXML library
 
-================================================================================
- Generation of new ifc
-
- dipdip is set to one, the dipole-dipole interation is recompute.
-
- New bound for ifc (long+short):
-
- x=[ -1  0], y=[ -1  0] and z=[ -1  1]
-
- Computation of new dipole-dipole interaction.
-
- Impose acoustic sum rule on total ifc
-
-================================================================================
-
  This effective potential contains :
   - Reference energy:        -17.1451766220
   - Number of types of atoms:    2
   - Number of atoms:     4
-  - Number of cells:    12
+  - Number of cells:    27
   - Number of qpoints:    8
   - Primitive vectors (unit:Bohr):
     6.528935    3.769482    0.000000
@@ -132,10 +117,19 @@
      -0.000000   -0.000000   -2.012513
 
 ================================================================================
+ Generation of new ifc
 
-There is no file for the coefficients from polynomial fitting
+ dipdip is set to one, the dipole-dipole interation is recompute.
 
-================================================================================
+ New bound for ifc (long+short):
+
+ x=[ -1  1], y=[ -1  1] and z=[ -1  1]
+
+ Computation of new dipole-dipole interaction.
+
+ Impose acoustic sum rule on total ifc
+
+--------------------------------------------------------------------------------
 
  Generation of the xml file for the reference structure in system.xml
 
@@ -245,7 +239,8 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  2.8100823811412438E-30 Hartree
+ Energy of the ifc part :  2.8277349745946438E-30 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
  Total energy : -1.3716141297600001E+02 Hartree
@@ -260,10 +255,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  2.4447906769250339E-03 Hartree
+ Energy of the ifc part :  2.4480111867932804E-03 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3715896818532309E+02 Hartree
+ Total energy : -1.3715896496481321E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -275,10 +271,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  9.6584453514361821E-03 Hartree
+ Energy of the ifc part :  9.6697361243677678E-03 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3715175453064856E+02 Hartree
+ Total energy : -1.3715174323987563E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -290,10 +287,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  2.1269719197746263E-02 Hartree
+ Energy of the ifc part :  2.1289227964701080E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3714014325680228E+02 Hartree
+ Total energy : -1.3714012374803531E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -305,10 +303,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  3.6631495574025195E-02 Hartree
+ Energy of the ifc part :  3.6651853549507035E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3712478148042598E+02 Hartree
+ Total energy : -1.3712476112245051E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -320,10 +319,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  5.4786501941412401E-02 Hartree
+ Energy of the ifc part :  5.4790780109772647E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3710662647405860E+02 Hartree
+ Total energy : -1.3710662219589022E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -335,10 +335,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  7.4441040626503474E-02 Hartree
+ Energy of the ifc part :  7.4402355066310683E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3708697193537350E+02 Hartree
+ Total energy : -1.3708701062093371E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -350,10 +351,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  9.3978454187875884E-02 Hartree
+ Energy of the ifc part :  9.3862494233918167E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3706743452181215E+02 Hartree
+ Total energy : -1.3706755048176609E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -365,10 +367,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.1155831996558598E-01 Hartree
+ Energy of the ifc part :  1.1132997127064172E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3704985465603443E+02 Hartree
+ Total energy : -1.3705008300472937E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -380,10 +383,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.2534315601734908E-01 Hartree
+ Energy of the ifc part :  1.2497701253437239E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3703606981998266E+02 Hartree
+ Total energy : -1.3703643596346564E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -395,10 +399,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.3384602904204254E-01 Hartree
+ Energy of the ifc part :  1.3333769009942573E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3702756694695796E+02 Hartree
+ Total energy : -1.3702807528590057E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -410,10 +415,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.3629958806720455E-01 Hartree
+ Energy of the ifc part :  1.3567197470177086E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3702511338793281E+02 Hartree
+ Total energy : -1.3702574100129823E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -425,10 +431,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.3287599871117167E-01 Hartree
+ Energy of the ifc part :  1.3217587555269247E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3702853697728884E+02 Hartree
+ Total energy : -1.3702923710044732E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -440,10 +447,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.2463296991678602E-01 Hartree
+ Energy of the ifc part :  1.2391823278290662E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3703678000608323E+02 Hartree
+ Total energy : -1.3703749474321711E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -455,10 +463,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.1321651081425439E-01 Hartree
+ Energy of the ifc part :  1.1254010772793541E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3704819646518575E+02 Hartree
+ Total energy : -1.3704887286827207E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -470,10 +479,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.0047820474460284E-01 Hartree
+ Energy of the ifc part :  9.9875049158013623E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3706093477125540E+02 Hartree
+ Total energy : -1.3706153792684199E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -485,10 +495,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  8.8161160182499129E-02 Hartree
+ Energy of the ifc part :  8.7640890300828722E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3707325181581751E+02 Hartree
+ Total energy : -1.3707377208569918E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -500,10 +511,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  7.7718068359483888E-02 Hartree
+ Energy of the ifc part :  7.7263052312772543E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3708369490764053E+02 Hartree
+ Total energy : -1.3708414992368725E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -515,10 +527,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  7.0244034230804955E-02 Hartree
+ Energy of the ifc part :  6.9810738812176198E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3709116894176921E+02 Hartree
+ Total energy : -1.3709160223718783E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -530,10 +543,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  6.6476550623060057E-02 Hartree
+ Energy of the ifc part :  6.5998777556220800E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3709493642537694E+02 Hartree
+ Total energy : -1.3709541419844379E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -545,10 +559,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  6.6820225718945997E-02 Hartree
+ Energy of the ifc part :  6.6213636447066529E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3709459275028107E+02 Hartree
+ Total energy : -1.3709519933955295E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -560,10 +575,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  7.1369798832826153E-02 Hartree
+ Energy of the ifc part :  7.0537975866328040E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3709004317716719E+02 Hartree
+ Total energy : -1.3709087500013368E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -575,10 +591,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  7.9918698260608920E-02 Hartree
+ Energy of the ifc part :  7.8761586422672503E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3708149427773941E+02 Hartree
+ Total energy : -1.3708265138957734E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -590,10 +607,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  9.1949804097556445E-02 Hartree
+ Energy of the ifc part :  9.0375715584041644E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3706946317190244E+02 Hartree
+ Total energy : -1.3707103726041598E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -605,10 +623,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.0661281045519175E-01 Hartree
+ Energy of the ifc part :  1.0455507947861854E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3705480016554480E+02 Hartree
+ Total energy : -1.3705685789652139E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -620,10 +639,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.2270227564125452E-01 Hartree
+ Energy of the ifc part :  1.2014059485709348E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3703871070035876E+02 Hartree
+ Total energy : -1.3704127238114290E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -635,10 +655,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.3866434500262320E-01 Hartree
+ Energy of the ifc part :  1.3564799756976170E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3702274863099740E+02 Hartree
+ Total energy : -1.3702576497843026E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -650,10 +671,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.5267512839166689E-01 Hartree
+ Energy of the ifc part :  1.4934034088152245E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3700873784760833E+02 Hartree
+ Total energy : -1.3701207263511850E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -665,10 +687,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.6283556774021160E-01 Hartree
+ Energy of the ifc part :  1.5940389626558255E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3699857740825979E+02 Hartree
+ Total energy : -1.3700200907973442E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -680,10 +703,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.6749177992936268E-01 Hartree
+ Energy of the ifc part :  1.6423670173206173E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3699392119607066E+02 Hartree
+ Total energy : -1.3699717627426796E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -695,10 +719,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.6560652255590508E-01 Hartree
+ Energy of the ifc part :  1.6278804351774862E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3699580645344409E+02 Hartree
+ Total energy : -1.3699862493248227E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -710,10 +735,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.5702481342372715E-01 Hartree
+ Energy of the ifc part :  1.5481364777692633E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3700438816257628E+02 Hartree
+ Total energy : -1.3700659932822307E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -725,10 +751,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.4248951076478147E-01 Hartree
+ Energy of the ifc part :  1.4091456823362394E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3701892346523522E+02 Hartree
+ Total energy : -1.3702049840776638E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -740,10 +767,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.2339716286782858E-01 Hartree
+ Energy of the ifc part :  1.2233754072501221E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3703801581313218E+02 Hartree
+ Total energy : -1.3703907543527501E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -755,10 +783,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.0142816919318395E-01 Hartree
+ Energy of the ifc part :  1.0064447253120118E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3705998480680682E+02 Hartree
+ Total energy : -1.3706076850346881E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -770,10 +799,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  7.8214142136690479E-02 Hartree
+ Energy of the ifc part :  7.7397732404068081E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3708319883386332E+02 Hartree
+ Total energy : -1.3708401524359593E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -785,10 +815,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  5.5129103533914536E-02 Hartree
+ Energy of the ifc part :  5.3949837269506591E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3710628387246609E+02 Hartree
+ Total energy : -1.3710746313873051E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -800,10 +831,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  3.3203891093139232E-02 Hartree
+ Energy of the ifc part :  3.1347313941758062E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3712820908490687E+02 Hartree
+ Total energy : -1.3713006566205826E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -815,10 +847,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part :  1.3121675718412409E-02 Hartree
+ Energy of the ifc part :  1.0315046994687774E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3714829130028158E+02 Hartree
+ Total energy : -1.3715109792900532E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -830,10 +863,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -4.7481510633981712E-03 Hartree
+ Energy of the ifc part : -8.7181976271020877E-03 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3716616112706342E+02 Hartree
+ Total energy : -1.3717013117362711E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -845,10 +879,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -2.0305208933062164E-02 Hartree
+ Energy of the ifc part : -2.5580554432804891E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3718171818493306E+02 Hartree
+ Total energy : -1.3718699353043280E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -860,10 +895,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -3.3675016685557814E-02 Hartree
+ Energy of the ifc part : -4.0318041717809984E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3719508799268556E+02 Hartree
+ Total energy : -1.3720173101771780E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -875,10 +911,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -4.5170249910018348E-02 Hartree
+ Energy of the ifc part : -5.3160019211509202E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3720658322591004E+02 Hartree
+ Total energy : -1.3721457299521151E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -890,10 +927,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -5.5253876634743307E-02 Hartree
+ Energy of the ifc part : -6.4487902104663736E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3721666685263475E+02 Hartree
+ Total energy : -1.3722590087810468E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -905,10 +943,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -6.4499625155067575E-02 Hartree
+ Energy of the ifc part : -7.4803296327019417E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3722591260115507E+02 Hartree
+ Total energy : -1.3723621627232703E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -920,10 +959,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -7.3545493564802777E-02 Hartree
+ Energy of the ifc part : -8.4691075170192573E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3723495846956482E+02 Hartree
+ Total energy : -1.3724610405117019E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -935,10 +975,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -8.3038376398903352E-02 Hartree
+ Energy of the ifc part : -9.4774017479322861E-02 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3724445135239893E+02 Hartree
+ Total energy : -1.3725618699347933E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -950,10 +991,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -9.3572154004827768E-02 Hartree
+ Energy of the ifc part : -1.0565855640268537E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3725498513000483E+02 Hartree
+ Total energy : -1.3726707153240270E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -965,10 +1007,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -1.0562673616788808E-01 Hartree
+ Energy of the ifc part : -1.1787565866068604E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3726703971216790E+02 Hartree
+ Total energy : -1.3727928863466070E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -980,10 +1023,11 @@ There is no file for the coefficients from polynomial fitting
  Calculation of the energy with effective potential
 
  Energy of the reference strucure : -1.3716141297600001E+02 Hartree
- Energy of the ifc part : -1.1951937470464306E-01 Hartree
+ Energy of the ifc part : -1.3182556562861994E-01 Hartree
+
  Energy of the elastic part :  0.0000000000000000E+00 Hartree
 
- Total energy : -1.3728093235070466E+02 Hartree
+ Total energy : -1.3729323854162863E+02 Hartree
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -993,10 +1037,10 @@ There is no file for the coefficients from polynomial fitting
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.8
+- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.5
 
 ================================================================================
 
-+Total cpu time      0.800  and wall time      0.800 sec
++Total cpu time      1.488  and wall time      1.489 sec
 
  multibinit : the run completed succesfully.

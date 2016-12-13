@@ -10,5 +10,4 @@ keywords = [
 
 #: List of input files
 inp_files = [
-"t01.in",
 ]

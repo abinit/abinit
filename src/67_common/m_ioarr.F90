@@ -55,6 +55,7 @@ MODULE m_ioarr
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp
  use m_distribfft,    only : init_distribfft_seq
 
+
  implicit none
 
 #ifdef HAVE_MPI1
@@ -63,12 +64,10 @@ MODULE m_ioarr
 
  private
 
- public :: ioarr                     ! Read or write rho(r) or v(r), either ground-state or response-functions.
- public :: fftdatar_write            ! Write an array in real space. IO library is automatically selected
-                                     ! from the file extension and the number of FFT processors:
- public :: fftdatar_write_from_hdr   ! Write an array in real-space to file plus crystal_t and ebands_t
- public :: read_rhor                 ! Read rhor from DEN file.
- public :: fort_denpot_skip          ! Skip the header and the DEN/POT records (Fortran format)
+ public :: ioarr
+ public :: fftdatar_write
+ public :: fftdatar_write_from_hdr
+ public :: read_rhor
 
 CONTAINS  !====================================================================================================
 !!***
@@ -1303,65 +1302,6 @@ end subroutine read_rhor
 !!***
 
 !----------------------------------------------------------------------
-
-!!****f* m_ioarr/fort_denpot_skip
-!! NAME
-!!  fort_denpot_skip
-!!
-!! FUNCTION
-!!  Skip the header and the DEN/POT records. Mainly used to append data to a pre-existent file.
-!!  Return exit code.
-!!
-!! INPUTS
-!!  unit=Fortran unit number (already opened in the caller).
-!!  msg=Error message if ierr /= 0
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-integer function fort_denpot_skip(unit, msg) result(ierr)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'fort_denpot_skip'
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
- integer,intent(in) :: unit
- character(len=*),intent(out) :: msg
-
-!Local variables-------------------------------
- integer :: ii,fform,nspden
- type(hdr_type) :: hdr
-
-! *********************************************************************
-
- ierr = 1
- call hdr_fort_read(hdr, unit, fform)
- if (fform == 0) then
-    msg = "hdr_fort_read returned fform == 0"; return
- end if
-
- nspden = hdr%nspden
- call hdr_free(hdr)
-
- ! Skip the records with v1.
- do ii=1,nspden
-   read(unit, iostat=ierr, iomsg=msg)
-   if (ierr /= 0) return
- end do
-
- ierr = 0
-
-end function fort_denpot_skip
-!!***
 
 end module m_ioarr
 !!***

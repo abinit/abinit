@@ -81,7 +81,7 @@ void effpot_xml_checkXML(char *filename,char *name_xml){
   xmlFreeDoc(doc);
 }
 
-void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, int *nrpt){
+void effpot_xml_getDims(char *filename,int *natom,int *ntypat, int *nqpt, int *nrpt){
   xmlDocPtr doc;
   int i,iatom,irpt,iqpt,itypat,present;
   xmlNodePtr cur,cur2;
@@ -143,7 +143,7 @@ void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, i
   *ntypat = itypat;
 }
 
-void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *nqpt,
+void effpot_xml_read(char *filename,int *natom,int *ntypat,int *nrpt,int *nqpt,
                      double amu[*ntypat],double atmfrc[*nrpt][*natom][3][*natom][3][2],
                      int cell[*nrpt][3],double dynmat[*nqpt][*natom][3][*natom][3][2],
                      double elastic_constants[6][6],
@@ -462,198 +462,6 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
   xmlFreeDoc(doc);
 }
 
-
-void effpot_xml_readTerm(char *filename,int*icoeff,int *iterm,int*ndisp,int*nterm,
-                         int atindx[*ndisp][2],int cell[*ndisp][2][3],int direction[*ndisp],
-                         int power[*ndisp],double *weight){
-  int i,idisp,jterm;
-  xmlDocPtr doc;
-  char * pch;
-  xmlNodePtr cur,cur2,cur3,cur4;
-  xmlChar *key,*uri,*uri2;
-
-  if (*icoeff <= 0){ 
-    printf(" error: The number of coeff must be superior to zero\n");
-    exit(0);
-  }
-
-  if (*ndisp <= 0){ 
-    printf(" error: The number of coeff must be superior to zero\n");
-    exit(0);
-  }
-
-  if (*nterm <= 0){ 
-    printf(" error: The number of coeff must be superior to zero\n");
-    exit(0);
-  }
- 
-  doc = xmlParseFile(filename);
-  if (doc == NULL) printf(" error: could not parse file file.xml\n");
-
-  cur = xmlDocGetRootElement(doc);
-  if (cur == NULL) {
-    fprintf(stderr," The document is empty \n");
-    xmlFreeDoc(doc);
-    return;
-  }
-
- jterm = 0;
- idisp = 0;
-   
-  cur = cur->xmlChildrenNode;
-  while (cur != NULL) {
-    if (!xmlStrcmp(cur->name, (const  xmlChar *) "coefficient")) {
-      uri = xmlGetProp(cur, (const  xmlChar *) "number");
-      if(strtod(uri, NULL)==*icoeff){
-        cur2 = cur->xmlChildrenNode;
-        while (cur2 != NULL){
-          if (!xmlStrcmp(cur2->name, (const  xmlChar *) "term")){
-            jterm++;
-            if (jterm==*iterm){
-              uri2 = xmlGetProp(cur2, (const  xmlChar *) "weight");
-              *weight = strtod(uri2,NULL);
-              xmlFree(uri2);            
-              cur3 = cur2->xmlChildrenNode;
-              while (cur3 != NULL){
-                if (!xmlStrcmp(cur3->name, (const  xmlChar *) "displacement_diff")){
-                  if (idisp > *ndisp){ 
-                    printf(" error: idisp is superior to ndisp\n");
-                    exit(0);
-                  }
-                  uri2 = xmlGetProp(cur3, (const  xmlChar *) "atom_a");
-                  atindx[idisp][0] = strtod(uri2,NULL);
-                  xmlFree(uri2);
-                  uri2 = xmlGetProp(cur3, (const  xmlChar *) "atom_b");
-                  atindx[idisp][1] = strtod(uri2,NULL);
-                  xmlFree(uri2);
-                  uri2 = xmlGetProp(cur3, (const  xmlChar *) "direction");
-                  if(strcmp(uri2,"x") == 0){direction[idisp] = 1;}
-                  if(strcmp(uri2,"y") == 0){direction[idisp] = 2;}
-                  if(strcmp(uri2,"z") == 0){direction[idisp] = 3;}
-                  xmlFree(uri2);
-                  uri2 = xmlGetProp(cur3, (const  xmlChar *) "power");
-                  power[idisp] = strtod(uri2,NULL);
-                  
-                  cur4 = cur3->xmlChildrenNode;
-                  while (cur4 != NULL){
-                    if (!xmlStrcmp(cur4->name, (const  xmlChar *) "cell_a")){
-                      key = xmlNodeListGetString(doc, cur4->xmlChildrenNode, 1);
-                      pch = strtok(key,"\t \n");  
-                      for(i=0;i<3;i++){
-                        if (pch != NULL){
-                          cell[idisp][0][i]=strtod(pch,NULL);
-                          pch = strtok(NULL,"\t \n");
-                        }
-                      }
-                    }
-                    if (!xmlStrcmp(cur4->name, (const  xmlChar *) "cell_b")){
-                      key = xmlNodeListGetString(doc, cur4->xmlChildrenNode, 1);
-                      pch = strtok(key,"\t \n");  
-                      for(i=0;i<3;i++){
-                        if (pch != NULL){
-                          cell[idisp][1][i]=strtod(pch,NULL);
-                          pch = strtok(NULL,"\t \n");
-                          
-                        }
-                      }
-                    }
-                    cur4 = cur4->next;
-                  }
-                  idisp++;
-                }
-                cur3 = cur3->next;
-              }          
-            }
-          }
-          idisp = 0;
-          cur2 = cur2->next;
-        }
-        xmlFree(uri);
-      }
-    }
-    cur = cur->next;
-  }
-  xmlFreeDoc(doc);
-}
-  
-void effpot_xml_getDimTerm(char *filename,int*icoeff,int*ndisp,int*nterm){
-  int idisp,iterm;
-  xmlDocPtr doc;
-  char * pch;
-  xmlNodePtr cur,cur2,cur3;
-  xmlChar *uri;
-
-  if (*icoeff <= 0){ 
-    printf(" error: The number of coeff must be superior to zero\n");
-    exit(0);
-  }
-
-  iterm = 0;
-  idisp = 0;
-  
-  doc = xmlParseFile(filename);
-  if (doc == NULL) printf(" error: could not parse file file.xml\n");
-
-  cur = xmlDocGetRootElement(doc);
-  if (cur == NULL) {
-    fprintf(stderr," The document is empty \n");
-    xmlFreeDoc(doc);
-    return;
-  }
-  
-  cur = cur->xmlChildrenNode;
-  while (cur != NULL) {
-    if (!xmlStrcmp(cur->name, (const  xmlChar *) "coefficient")) {
-      uri = xmlGetProp(cur, (const  xmlChar *) "number");
-      if(strtod(uri, NULL)==*icoeff){
-        cur2 = cur->xmlChildrenNode;
-        while (cur2 != NULL){
-          if (!xmlStrcmp(cur2->name, (const  xmlChar *) "term")) {
-            if(idisp==0.0){
-              cur3 = cur2->xmlChildrenNode;
-              while (cur3 != NULL){
-                if (!xmlStrcmp(cur3->name, (const  xmlChar *) "displacement_diff")) {idisp ++;}
-                cur3 = cur3->next;
-              }
-            }
-            iterm ++;
-          }
-          cur2 = cur2->next;
-        }
-      }
-      xmlFree(uri);
-    }
-    cur = cur->next;
-  }
-  xmlFreeDoc(doc);
-  *nterm = iterm;
-  *ndisp = idisp;
-}
-
-
-void effpot_xml_getNumberKey(char *filename,char*name_key,int*result){
-  int i;
-  xmlDocPtr doc;
-  xmlNodePtr cur;
-  
-  i = 0;
-  doc = xmlParseFile(filename);
-  if (doc == NULL) printf(" error: could not parse file file.xml\n");
-
-  cur = xmlDocGetRootElement(doc);
-  if (cur == NULL) {
-    fprintf(stderr," The document is empty \n");
-    xmlFreeDoc(doc);
-    return;
-  }
-  cur = cur->xmlChildrenNode;
-  while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const  xmlChar *) name_key))) {i++;}
-    cur = cur->next;
-  }
-  xmlFreeDoc(doc);
-  *result = i;
-}
 
 void effpot_xml_getValue(char *filename,char*name_key,char*result){
   xmlDocPtr doc;

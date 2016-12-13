@@ -30,7 +30,7 @@ module m_argparse
  use m_xmpi
  use m_xomp
  use m_xieee
- use m_errors
+ use m_errors 
  use m_abi_linalg
  use m_fft
  use m_exit
@@ -42,27 +42,27 @@ module m_argparse
  use m_fstrings,        only : atoi, firstchar
  use m_time,            only : str2sec
  use m_libpaw_tools,    only : libpaw_log_flag_set
-
+ 
  implicit none
 
- private
+ private 
 !!***
 
 !!****t* m_argparse/args_t
 !! NAME
 !! args_t
-!!
+!! 
 !! FUNCTION
 !! Stores the command line options
-!!
+!! 
 !! SOURCE
 
  type,public :: args_t
 
-   integer :: exit=0
+   integer :: exit=0        
      ! /=0 to exit after having parsed the command line options.
 
-   integer :: dry_run=0
+   integer :: dry_run=0  
      ! /= 0 to exit after the validation of the input file.
 
     character(len=500) :: cmdline=""
@@ -73,7 +73,7 @@ module m_argparse
  public :: args_parser   ! Parse command line options.
 !!***
 
-contains
+contains 
 
 !----------------------------------------------------------------------
 
@@ -135,8 +135,6 @@ function args_parser() result(args)
       args%exit = args%exit + 1
 
     else if (arg == "-b" .or. arg == "--build") then
-      call print_kinds(unit=std_out)
-      call xmpi_show_info(unit=std_out)
       call dump_cpp_options(std_out)
       call dump_config(std_out)
       call dump_optim(std_out)
@@ -182,7 +180,7 @@ function args_parser() result(args)
     else if (arg == "--gnu-mtrace") then
       if (iam_master) then
         call clib_mtrace(ierr)
-        if (ierr/=0 .and. iam_master) write(std_out,"(a,i0)")"clib_mtrace returned ierr: ",ierr
+        if (ierr/=0 .and. iam_master) write(std_out,"(a,i0)")"clib_mtrace returned ierr: ",ierr 
     end if
 
     else if (arg == "--log") then
@@ -207,7 +205,7 @@ function args_parser() result(args)
     !  close(std_out)
     !  if (open_file(arg, msg, unit=std_out, form='formatted', status='new', action="write") /= 0) then
     !    MSG_ERROR(message)
-    !  end if
+    !  end if 
     !  end if
 
     else if (arg == "-h" .or. arg == "--help") then
@@ -244,7 +242,7 @@ function args_parser() result(args)
         continue
       end if
     end if
-  end do
+  end do 
 
   !call wrtout(std_out,"Command line: "//trim(args%cmdline),"COLL")
 #endif
@@ -288,7 +286,7 @@ end function begins_with
 !!  parse_yesno
 !!
 !! FUNCTION
-!!  This function receives an argument, arg of the form --foo[=bool_value]
+!!  This function receives an argument, arg of the form --foo[=bool_value] 
 !!  that begins with optname (i.e. --foo) and returns the value of bool_value
 !!  If bool_value is not present, returns default (.True. if not specified)
 !!
@@ -315,9 +313,9 @@ logical function parse_yesno(arg, optname, default) result(bool)
  ! Assume default if value is not given
  if (len_trim(optname) == len_trim(arg)) return
 
- select case (arg(len(optname)+1:))
- case ("=yes", "=y")
-   bool = .True.
+ select case (arg(len(optname)+1:)) 
+ case ("=yes", "=y")  
+   bool = .True.  
  case ("=no", "=n")
    bool = .False.
  case default

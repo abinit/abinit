@@ -116,25 +116,25 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
 &   kptrlatt(1,3)/=0 .or. kptrlatt(3,1)/=0 .or. &
 &   kptrlatt(2,3)/=0 .or. kptrlatt(3,2)/=0     ) then
      write(message, '(2a,a,3i4,a,a,3i4,a,a,3i4)' )&
-&     'When brav/=1, kptrlatt must be diagonal, while it is',ch10,&
-&     'kptrlatt(:,1)=',kptrlatt(:,1),ch10,&
-&     'kptrlatt(:,2)=',kptrlatt(:,2),ch10,&
-&     'kptrlatt(:,3)=',kptrlatt(:,3)
+&     '  When brav/=1, kptrlatt must be diagonal, while it is',ch10,&
+&     '  kptrlatt(:,1)=',kptrlatt(:,1),ch10,&
+&     '  kptrlatt(:,2)=',kptrlatt(:,2),ch10,&
+&     '  kptrlatt(:,3)=',kptrlatt(:,3)
      MSG_BUG(message)
    end if
 
    ngkpt(1)=kptrlatt(1,1)
    ngkpt(2)=kptrlatt(2,2)
    ngkpt(3)=kptrlatt(3,3)
-!
+!  
    if( (ngkpt(1)<=0.or.ngkpt(2)<=0.or.ngkpt(3)<=0) .and. (ngkpt(1)/=0.or.ngkpt(2)/=0.or.ngkpt(3)/=0) ) then
      write(message, '(5a,i4,a,a,i4,a,a,i4,a,a)' )&
-&     'All ngkpt (or ngqpt) must be strictly positive',ch10,&
-&     'or all ngk(q)pt must be zero (for Gamma sampling), but :',ch10,&
-&     'ngk(q)pt(1) = ',ngkpt(1),ch10,&
-&     'ngk(q)pt(2) = ',ngkpt(2),ch10,&
-&     'ngk(q)pt(3) = ',ngkpt(3),ch10,&
-&     'Action: correct ngkpt or ngqpt in the input file.'
+&     '  All ngkpt (or ngqpt) must be strictly positive',ch10,&
+&     '  or all ngk(q)pt must be zero (for Gamma sampling), but :',ch10,&
+&     ' ngk(q)pt(1) = ',ngkpt(1),ch10,&
+&     ' ngk(q)pt(2) = ',ngkpt(2),ch10,&
+&     ' ngk(q)pt(3) = ',ngkpt(3),ch10,&
+&     ' Action : correct ngkpt or ngqpt in the input file.'
      MSG_BUG(message)
    end if
  end if
@@ -156,10 +156,10 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
    call wrtout(std_out,'       Simple Lattice Grid ','COLL')
    if (mkpt<nkptlatt*nshiftk) then
      write(message, '(a,a,a,i8,a,a,a,a,a)' )&
-&     'The value of mkpt is not large enough. It should be',ch10,&
-&     'at least',nkptlatt*nshiftk,',',ch10,&
-&     'Action: set mkpt to that value in the main routine,',ch10,&
-&     'and recompile the code.'
+&     '  The value of mkpt is not large enough. It should be',ch10,&
+&     '  at least',nkptlatt*nshiftk,',',ch10,&
+&     '  Action : set mkpt to that value in the main routine,',ch10,&
+&     '  and recompile the code.'
      MSG_BUG(message)
    end if
 
@@ -222,8 +222,8 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
 
    if(nkpt/=nkptlatt*nshiftk)then
      write(message, '(a,i8,a,a,a,i8,a)' )&
-&     'The number of k points ',nkpt,'  is not equal to',ch10,&
-&     'nkptlatt*nshiftk which is',nkptlatt*nshiftk,'.'
+&     '  The number of k points ',nkpt,'  is not equal to',ch10,&
+&     '  nkptlatt*nshiftk which is',nkptlatt*nshiftk,'.'
      MSG_BUG(message)
    end if
 
@@ -233,31 +233,31 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
    call wrtout(std_out,'       Face-Centered Lattice Grid ','COLL')
    if (mkpt<ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk/2) then
      write(message, '(a,a,a,i8,a,a,a,a,a)' )&
-&     'The value of mkpt is not large enough. It should be',ch10,&
-&     'at least',(ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/2,',',ch10,&
-&     'Action: set mkpt to that value in the main routine,',ch10,&
-&     'and recompile the code.'
+&     '  The value of mkpt is not large enough. It should be',ch10,&
+&     '  at least',(ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/2,',',ch10,&
+&     '  Action : set mkpt to that value in the main routine,',ch10,&
+&     '  and recompile the code.'
      MSG_BUG(message)
    end if
    nn=1
    if (ngkpt(1)/=ngkpt(2).or.ngkpt(1)/=ngkpt(3)) then
      write(message, '(4a,3(a,i6,a),a)' )&
-&     'For face-centered lattices, the numbers ngqpt(1:3)',ch10,&
-&     'must be equal, while they are :',ch10,&
-&     'ngqpt(1) = ',ngkpt(1),ch10,&
-&     'ngqpt(2) = ',ngkpt(2),ch10,&
-&     'ngqpt(3) = ',ngkpt(3),ch10,&
-&     'Action: modify ngqpt(1:3) in the input file.'
+&     '  For face-centered lattices, the numbers ngqpt(1:3)',ch10,&
+&     '  must be equal, while they are :',ch10,&
+&     '  ngqpt(1) = ',ngkpt(1),ch10,&
+&     '  ngqpt(2) = ',ngkpt(2),ch10,&
+&     '  ngqpt(3) = ',ngkpt(3),ch10,&
+&     '  Action : modify ngqpt(1:3) in the input file.'
      MSG_BUG(message)
    end if
    if ((ngkpt(1)*nshiftk)/=(((ngkpt(1)*nshiftk)/2)*2)) then
      write(message, '(4a,3(a,i6,a),a)' )&
-&     'For face-centered lattices, the numbers ngqpt(1:3)*nshiftk',ch10,&
-&     'must be even, while they are :',ch10,&
-&     'ngqpt(1)*nshiftk = ',ngkpt(1)*nshiftk,ch10,&
-&     'ngqpt(2)*nshiftk = ',ngkpt(2)*nshiftk,ch10,&
-&     'ngqpt(3)*nshiftk = ',ngkpt(3)*nshiftk,ch10,&
-&     'Action: modify ngqpt(1:3)*nshiftk in the input file.'
+&     '  For face-centered lattices, the numbers ngqpt(1:3)*nshiftk',ch10,&
+&     '  must be even, while they are :',ch10,&
+&     '  ngqpt(1)*nshiftk = ',ngkpt(1)*nshiftk,ch10,&
+&     '  ngqpt(2)*nshiftk = ',ngkpt(2)*nshiftk,ch10,&
+&     '  ngqpt(3)*nshiftk = ',ngkpt(3)*nshiftk,ch10,&
+&     '  Action : modify ngqpt(1:3)*nshiftk in the input file.'
      MSG_ERROR(message)
    end if
    if (ngkpt(1)==0.or.ngkpt(2)==0.or.ngkpt(3)==0) then
@@ -297,8 +297,8 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
      nkpt=nn-1
      if(nkpt/=ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk/2)then
        write(message, '(a,i8,a,a,a,i8,a)' )&
-&       'The number of k points ',nkpt,'  is not equal to',ch10,&
-&       '(ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/2 which is',&
+&       '  The number of k points ',nkpt,'  is not equal to',ch10,&
+&       '  (ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/2 which is',&
 &       (ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/2,'.'
        MSG_BUG(message)
      end if
@@ -310,10 +310,10 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
    call wrtout(std_out,'       Body-Centered Lattice Grid ','COLL')
    if (mkpt<ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk/4) then
      write(message, '(a,a,a,i8,a,a,a,a,a)' )&
-&     'The value of mkpt is not large enough. It should be',ch10,&
-&     'at least',(ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/4,',',ch10,&
-&     'Action: set mkpt to that value in the main routine,',ch10,&
-&     'and recompile the code.'
+&     '  The value of mkpt is not large enough. It should be',ch10,&
+&     '  at least',(ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/4,',',ch10,&
+&     '  Action : set mkpt to that value in the main routine,',ch10,&
+&     '  and recompile the code.'
      MSG_BUG(message)
    end if
    nn=1
@@ -321,12 +321,12 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
 &   (ngkpt(2)*nshiftk)/=(((ngkpt(2)*nshiftk)/2)*2) .or.&
 &   (ngkpt(3)*nshiftk)/=(((ngkpt(3)*nshiftk)/2)*2) ) then
      write(message, '(4a,3(a,i6,a),a)' )&
-&     'For body-centered lattices, the numbers ngqpt(1:3)',ch10,&
-&     'must be even, while they are :',ch10,&
-&     'ngqpt(1)*nshiftk = ',ngkpt(1)*nshiftk,ch10,&
-&     'ngqpt(2)*nshiftk = ',ngkpt(2)*nshiftk,ch10,&
-&     'ngqpt(3)*nshiftk = ',ngkpt(3)*nshiftk,ch10,&
-&     'Action: modify ngqpt(1:3) in the input file.'
+&     '  For body-centered lattices, the numbers ngqpt(1:3)',ch10,&
+&     '  must be even, while they are :',ch10,&
+&     '  ngqpt(1)*nshiftk = ',ngkpt(1)*nshiftk,ch10,&
+&     '  ngqpt(2)*nshiftk = ',ngkpt(2)*nshiftk,ch10,&
+&     '  ngqpt(3)*nshiftk = ',ngkpt(3)*nshiftk,ch10,&
+&     '  Action : modify ngqpt(1:3) in the input file.'
      MSG_ERROR(message)
    end if
    if (ngkpt(1)==0.or.ngkpt(2)==0.or.ngkpt(3)==0) then
@@ -370,14 +370,14 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
      nkpt=nn-1
      if(nkpt==0)then
        write(message, '(3a)' )&
-&       'BCC lattice, input ngqpt=0, so no kpt is generated.',ch10,&
-&       'Action: modify ngqpt(1:3) in the input file.'
+&       '  BCC lattice, input ngqpt=0, so no kpt is generated.',ch10,&
+&       '  Action : modify ngqpt(1:3) in the input file.'
        MSG_ERROR(message)
      end if
      if(nkpt/=(ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/4)then
        write(message, '(a,i8,a,a,a,i8,a)' )&
-&       'The number of k points ',nkpt,'  is not equal to',ch10,&
-&       '(ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/4 which is',&
+&       '  The number of k points ',nkpt,'  is not equal to',ch10,&
+&       '  (ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/4 which is',&
 &       (ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)/4,'.'
        MSG_BUG(message)
      end if
@@ -389,26 +389,26 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
    call wrtout(std_out,'       Hexagonal Lattice Grid ','COLL')
    if (mkpt<ngkpt(1)*ngkpt(2)*ngkpt(3)) then
      write(message, '(a,a,a,i8,a,a,a,a,a)' )&
-&     'The value of mkpt is not large enough. It should be',ch10,&
-&     'at least',ngkpt(1)*ngkpt(2)*ngkpt(3),',',ch10,&
-&     'Action: set mkpt to that value in the main routine,',ch10,&
-&     'and recompile the code.'
-     MSG_BUG(message)
+&     '  The value of mkpt is not large enough. It should be',ch10,&
+&     '  at least',ngkpt(1)*ngkpt(2)*ngkpt(3),',',ch10,&
+&     '  Action : set mkpt to that value in the main routine,',ch10,&
+&     '  and recompile the code.'
+     MSG_BUG(message) 
    end if
    nn=1
    if (ngkpt(1)/=ngkpt(2)) then
      write(message, '(4a,2(a,i6,a),a)' )&
-&     'For hexagonal lattices, the numbers ngqpt(1:2)',ch10,&
-&     'must be equal, while they are :',ch10,&
-&     'ngqpt(1) = ',ngkpt(1),ch10,&
-&     'ngqpt(2) = ',ngkpt(2),ch10,&
-&     'Action: modify ngqpt(1:3) in the input file.'
+&     '  For hexagonal lattices, the numbers ngqpt(1:2)',ch10,&
+&     '  must be equal, while they are :',ch10,&
+&     '  ngqpt(1) = ',ngkpt(1),ch10,&
+&     '  ngqpt(2) = ',ngkpt(2),ch10,&
+&     '  Action : modify ngqpt(1:3) in the input file.'
      MSG_ERROR(message)
    end if
    if (ngkpt(1)==0.or.ngkpt(2)==0.or.ngkpt(3)==0) then
      write(message, '(3a)' )&
-&     'For hexagonal lattices, ngqpt(1:3)=0 is not permitted',ch10,&
-&     'Action: modify ngqpt(1:3) in the input file.'
+&     '  For hexagonal lattices, ngqpt(1:3)=0 is not permitted',ch10,&
+&     '  Action : modify ngqpt(1:3) in the input file.'
      MSG_ERROR(message)
    else
      do kk=1,ngkpt(3)
@@ -431,8 +431,8 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
      nkpt=nn-1
      if(nkpt/=ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk)then
        write(message, '(a,i8,a,a,a,i8,a)' )&
-&       'The number of k points ',nkpt,'  is not equal to',ch10,&
-&       'ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk which is',&
+&       '  The number of k points ',nkpt,'  is not equal to',ch10,&
+&       '  ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk which is',&
 &       ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk,'.'
        MSG_BUG(message)
      end if
@@ -441,8 +441,8 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
  else
 
    write(message, '(a,i6,a,a,a)' )&
-&   'The calling routine asks brav=',brav,'.',ch10,&
-&   'but only brav=1,2,3 or 4 are allowed.'
+&   '  The calling routine asks brav=',brav,'.',ch10,&
+&   '  but only brav=1,2,3 or 4 are allowed.'
    MSG_BUG(message)
  end if
 
@@ -452,7 +452,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt)
    if(nkpt>1)then
      do ii=1,nkpt
        if(sum(abs(spkpt(:,ii)))<tol8)then
-         spkpt(:,ii)=spkpt(:,1)
+         spkpt(:,ii)=spkpt(:,1)   
          spkpt(:,1)=zero
          exit
        end if

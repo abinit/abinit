@@ -92,7 +92,7 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
 !Obtain a list of rotated atom labels:
  tolsym8=tol8
  call symatm(indsym,dtset%natom,dtset%nsym,symrec,dtset%tnons,tolsym8,dtset%typat,dtset%xred_orig)
-
+ 
  ABI_ALLOCATE(symq,(4,2,dtset%nsym))
  timrev=1
  call littlegroup_q(dtset%nsym,dtset%qptn,symq,symrec,dtset%symafm,timrev)
@@ -212,7 +212,7 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
 !    idir  : 1
 !  - qpt: [ 0.0000000000000000,  0.0000000000000000,  0.0000000000000000]
 !    ipert : 2
-!    idir  : 1
+!    idir  : 1                
 !..
  write(std_out,'(a)')"--- !IrredPerts"
  write(std_out,'(a)')'# List of irreducible perturbations'
@@ -269,7 +269,7 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
    ABI_ALLOCATE(symaf1,(dtset%nsym))
    ABI_ALLOCATE(tnons1_tmp,(3,dtset%nsym))
 !  MJV TODO: check whether prepgkk should be used here
-   if (dtset%prepanl /= 1 .and. dtset%berryopt /=4 .and. dtset%berryopt /=6 .and. dtset%berryopt /=7 .and. &
+   if (dtset%prepanl /= 1 .and. dtset%berryopt /=4 .and. dtset%berryopt /=6 .and. dtset%berryopt /=7 .and. & 
 &   dtset%berryopt /=14 .and. dtset%berryopt /=16 .and. dtset%berryopt /=17) then   !!HONG
      call littlegroup_pert(gprimd,idir,indsym,std_out,ipert,dtset%natom,dtset%nsym,nsym1,2,&
 &     dtset%symafm,symaf1,symq,symrec,&
@@ -288,7 +288,7 @@ subroutine get_npert_rbz(dtset,nband_rbz,nkpt_rbz,npert)
      call mati3inv(symrl1(:,:,isym),symrc1(:,:,isym))
    end do
    ABI_DEALLOCATE(symrl1)
-
+   
    ABI_ALLOCATE(wtk_folded,(dtset%nkpt))
    timrev_pert=timrev
    if(dtset%ieig2rf>0) then

@@ -1,5 +1,5 @@
 
-.Version 8.1.7 of ABINIT 
+.Version 8.1.5 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu4.8 computer) 
 
 .Copyright (C) 1998-2016 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Thu 17 Nov 2016.
-- ( at 10h12 )
+.Starting date : Wed 14 Sep 2016.
+- ( at 13h54 )
   
 - input  file    -> t120.in
 - output file    -> t120.out
@@ -6362,7 +6362,7 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   4 by node    0
   
   Warning: The rigid-atom proper piezoelectric tensor
   from  electric field response requires nsym=1
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
   -2.312970E-04 -2.312970E-04 -5.148144E-05  1.390237E-04  1.390237E-04
@@ -6372,7 +6372,7 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   4 by node    0
 - -5.076382E+01 -5.076382E+01 -1.129887E+01  3.051217E+01  3.051217E+01
 -  1.940900E+02  3.446742E+02  3.536883E+02  3.609395E+02  3.609395E+02
 -  3.708423E+02  3.708423E+02
-
+ 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  1.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -6383,7 +6383,7 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   4 by node    0
 - -5.076382E+01 -1.129887E+01  3.051217E+01  3.051217E+01  1.000730E+02
 -  1.940900E+02  3.446742E+02  3.536883E+02  3.609395E+02  3.609395E+02
 -  3.708423E+02  3.899189E+02
-
+ 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  1.00000  0.00000
  Phonon energies in Hartree :
@@ -6394,7 +6394,7 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   4 by node    0
 - -5.076382E+01 -1.129887E+01  3.051217E+01  3.051217E+01  1.000730E+02
 -  1.940900E+02  3.446742E+02  3.536883E+02  3.609395E+02  3.609395E+02
 -  3.708423E+02  3.899189E+02
-
+ 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
  Phonon energies in Hartree :
@@ -6691,10 +6691,10 @@ P          mk1mem3          8
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
 -
-- Proc.   0 individual time (sec): cpu=         31.3  wall=         31.3
+- Proc.   0 individual time (sec): cpu=         27.3  wall=         27.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  47 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         31.3  wall=         31.3
++Overall time at end (sec) : cpu=         27.3  wall=         27.4

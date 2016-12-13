@@ -5,9 +5,9 @@
 !! FUNCTION
 !!  Routine for clean exit of f90 code, taking into account possible parallelization.
 !!
-!!  Note the this routine is private and should never be called explicitly.
+!!  Note the this routine is private and should never be called explicitly. 
 !!  Please, use the macros:
-!!    MSG_ERROR, MSG_BUG
+!!    MSG_ERROR, MSG_BUG 
 !!  defined in abi_common.h to abort the execution.
 !!  XG : this is not true, in very rare cases, ABINIT has to exit without giving an error (e.g. for non-zero prtkpt )
 !!
@@ -77,7 +77,7 @@ subroutine leave_new(mode_paral,exit_status,print_config)
  end if
 
 !Dump configuration before exiting
- print_config_=.False.; if (present(print_config)) print_config_=print_config
+ print_config_=.true.; if (present(print_config)) print_config_=print_config
  if (print_config_) then
    call print_kinds()
    call xmpi_show_info()

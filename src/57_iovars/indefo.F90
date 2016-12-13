@@ -203,7 +203,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%dmft_rslf=0
    dtsets(idtset)%dmft_solv=5
    dtsets(idtset)%dmft_t2g=0
-   dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
    dtsets(idtset)%dmftbandi=0
    dtsets(idtset)%dmftbandf=0
@@ -216,7 +215,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%dmftctqmc_mrka  =0
    dtsets(idtset)%dmftctqmc_mov   =0
    dtsets(idtset)%dmftctqmc_order =0
-   dtsets(idtset)%dmftctqmc_triqs_nleg=30
    dtsets(idtset)%dmftqmc_l=0
    dtsets(idtset)%dmftqmc_n=0.0_dp
    dtsets(idtset)%dmftqmc_seed=jdtset
@@ -479,7 +477,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 
 !  nloalg is also a special case
    dtsets(idtset)%nloalg(1)=4
-   dtsets(idtset)%nloalg(2)=1
+   dtsets(idtset)%nloalg(2)=1 
    dtsets(idtset)%nloalg(3)=dtsets(idtset)%usepaw
    dtsets(idtset)%ngkpt=0
    dtsets(idtset)%nnsclo=0
@@ -599,7 +597,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prtnabla=0
    dtsets(idtset)%prtnest=0
    dtsets(idtset)%prtphdos=1
-   dtsets(idtset)%prtphsurf=0
    dtsets(idtset)%prtposcar=0
    dtsets(idtset)%prtpot=0
    dtsets(idtset)%prtpsps=0

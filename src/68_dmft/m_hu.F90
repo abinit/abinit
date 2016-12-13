@@ -872,10 +872,15 @@ subroutine rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,rot_mat,udens_at
      if(lpawu.ne.-1) then
        nat_correl=nat_correl+1
        if(nat_correl>1.and.(hu(itypat)%jpawu>tol4)) then
-          write(message,'(3a)')  ch10,'  -------> Warning: several atoms: '&
-&         ,' not extensively tested '
-          MSG_WARNING(message)
+          write(message,'(3a)')  ch10,'  -------> Warning: assume all atoms '&
+&         ,' of the same species are equivalent '
+          MSG_ERROR(message)
        endif
+       if(nspinor==2.and.(hu(itypat)%jpawu>tol4)) then
+          write(message,'(a)')  ch10,' Generalization to spinorial case is not done for jpawu/=0'
+          MSG_ERROR(message)
+       endif
+
 
 !  ! ================================================================
 !  !  If rotation for spin 2 and rotation for spin 1 are not equal print

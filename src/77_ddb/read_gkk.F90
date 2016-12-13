@@ -256,7 +256,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
      ss=redkpt(1)**2+redkpt(2)**2+redkpt(3)**2
      if(ss < tol6) then
        new=0
-       exit  !MG We can use this information to avoid recalculating the dynamical matrix
+       exit  !MG We can use this information to avoid recalculating the dynamical matrix 
      end if !but we need to use a fixed format in GKK!
    end do !iqptirred
 
@@ -286,7 +286,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 !  check only 1st kpoint and spinpol, then check others
    verify = 0
    if (gkk_flag(hdr1%pertcase,hdr1%pertcase,1,1,elph_ds%qirredtofull(iqptirred)) /= -1) then
-!
+!    
      do isppol=1,nsppol
        do ik_this_proc=1,elph_ds%k_phon%my_nkpt
          if (gkk_flag(hdr1%pertcase,hdr1%pertcase,ik_this_proc,isppol,elph_ds%qirredtofull(iqptirred)) == -1) then
@@ -295,7 +295,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
          end if
        end do ! ikpt_phon
      end do ! isppol
-!
+!    
      MSG_WARNING(' gkk perturbation is already filled')
      write(std_out,*)' hdr1%pertcase,iqptirred,iqptfull = ',hdr1%pertcase,iqptirred,iqptfull,&
 &     gkk_flag(hdr1%pertcase,hdr1%pertcase,1,1,elph_ds%qirredtofull(iqptirred))
@@ -327,7 +327,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 
 !  prefactors for gk+q,n\prime;k,n matrix element
 !  COMMENT : in decaft there is a weird term in the mass factor, of M-zval(species)
-!  dont know why. Not needed to reproduce decaft results, though...
+!  dont know why. Not needed to reproduce decaft results, though... 
 !  weight is squared in evaluation of
 !  gamma_{k,q,j} = 2 \pi omega_{q,j} sum_{nu,nu\prime} |g^{q,j}_{k+q,nu\prime; k,nu}|^2
 !  normally cancels with the 2 \pi omega_{q,j} factor in front of the sum...
@@ -339,7 +339,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
    write (msg,'(4a,i3,a,i3,a,i4,a)')ch10,&
 &   ' read_gkk : calling littlegroup_pert to examine the symmetries of the full perturbation ',ch10,&
 &   ' idir = ',idir,' ipert = ',ipert,' and Q point = ',iqptirred,ch10
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg,'COLL') 
 
 !  Examine the symmetries of the full perturbation these will be used to complete the kpoints
 !  DOESNT USE TIME REVERSAL IN littlegroup_pert except for gamma
@@ -360,14 +360,14 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 
 !  MG NOTE : in the present implementation, if nsppol /=1 the code stops in rchkGSheader!
    do isppol=1,hdr1%nsppol !Loop over spins is trivial? Not tested.
-     write (std_out,*) ' read_gkk : isppol = ', isppol
+     write (std_out,*) ' read_gkk : isppol = ', isppol 
 
      do ikpt1=1,hdr1%nkpt   !Loop over irred kpoints, WARNING  nkpt depends on qpoint and symmetry!
-!
+!      
 !      this is the main read of the gkk matrix elements from the file (eigen1 arrays)
 !      it has to be done exactly nsppol*nkpt times, and the kpt_phon are completed
 !      where appropriate in the loop below (normally succeeding only once for each kpt)
-!
+!      
        if (master == me) then
          read(unitgkk) ((eigen1(:,ii,ib),ii=1,nband),ib=1,nband)
        end if
@@ -427,7 +427,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
          end do
        end if !verify end DEBUG code
 
-
+       
        do ik_this_proc = 1, elph_ds%k_phon%my_nkpt
 !        should I be dealing with this k-point?
          jkpt_phon = elph_ds%k_phon%my_ikpt(ik_this_proc)
@@ -457,7 +457,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
          do ib1=1,nFSband
            do ib2=1,nFSband
              ibb = (ib1-1)*nFSband+ib2
-
+             
 !            real
              res=eigen1(1,minFSband-1+ib2,minFSband-1+ib1)
              h1_mat_el(1,ibb,hdr1%pertcase,ik_this_proc,isppol) = res
@@ -471,7 +471,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
          if (FSirrtok(2,jkpt_phon) == 1) then
            gkk_flag(hdr1%pertcase,hdr1%pertcase,ik_this_proc,isppol,elph_ds%qirredtofull(iqptirred)) = 3
 !          if jkpt_phon comes from ikpt1_phon flag == 2 with some symop
-         else
+         else 
            gkk_flag(hdr1%pertcase,hdr1%pertcase,ik_this_proc,isppol,elph_ds%qirredtofull(iqptirred)) = 2
          end if
 
@@ -481,8 +481,8 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 !      we now have contribution to g(k+q,k; \kappa,\alpha) from one
 !      kpoint,and one perturbation,
 !      NB: each perturbation will contribute to all the modes later!
-!
-!      SHOULD ONLY DO THIS FOR THE SYMS NEEDED
+!      
+!      SHOULD ONLY DO THIS FOR THE SYMS NEEDED 
 !      TO COMPLETE THE PERTURBATIONS!!!
 !      ================================================================
 
@@ -492,7 +492,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 ! 14 Jan 2014 removed test on verify - in new scheme full BZ is read in and should be used to avoid phase errors
 !   if (verify == 1) cycle
 
-!  Checks on irred grid provided and on gkk_flag accumulated up to now
+!  Checks on irred grid provided and on gkk_flag accumulated up to now 
    if (elph_ds%tuniformgrid == 1) then  ! check if irred kpoints found reconstitute the FS kpts
      do ikpt_phon=1,elph_ds%k_phon%nkpt
        if (FSirrtok(1,ikpt_phon) == 0) then
@@ -570,11 +570,11 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 !    Now use more general symops to complete the other equivalent
 !    perturbations: the kpoints are also shuffled by these symops
 !    afterwards h1_mat_el_sq contains gamma_\tau\alpha,\tau'\alpha' in reduced coordinates
-!
+!    
 !    \gamma_{\tau'\alpha',\tau\alpha} =
-!    <psi_{k+q,ib2}| H(1)_{\tau'\alpha'}| psi_{k,ib1}>* \cdot
+!    <psi_{k+q,ib2}| H(1)_{\tau'\alpha'}| psi_{k,ib1}>* \cdot  
 !    <psi_{k+q,ib2}| H(1)_{\tau \alpha }| psi_{k,ib1}>
-!
+!    
 !    ========================================================================
 
      call completeperts(Cryst,nbranch,nFSband,elph_ds%k_phon%my_nkpt,nsppol,&
@@ -586,7 +586,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 !  ==============================================================
 !  if we have all the perturbations for this qpoint, proceed
 !  with scalar product, norm squared, and add weight factors
-!
+!  
 !  SHOULD HAVE A TEST SO h1_mat_el IS NOT OVERWRITTEN
 !  BEFORE PREVIOUS QPOINT IS FINISHED!!!!!
 !  ==============================================================
@@ -613,7 +613,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
      call normsq_gkq(displ_red,eigvec,elph_ds,FSfullpqtofull,&
 &     h1_mat_el_sq,iqptirred,phfrq_tmp,qptirred_local,qdata)
 
-!    save gkk_qpt, eventually to disk, for bands up to ngkkband,
+!    save gkk_qpt, eventually to disk, for bands up to ngkkband, 
 !    NB: if the sum over bands has been performed ngkkband is 1 instead of nFSband
      if (elph_ds%gkqwrite == 0) then
        elph_ds%gkk_qpt(:,:,:,:,:,iqptirred) = h1_mat_el_sq(:,1:elph_ds%ngkkband*elph_ds%ngkkband,:,:,:)
@@ -636,7 +636,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 
    call hdr_free(hdr1)
 
- end do !of i1wf
+ end do !of i1wf 
 
 !got all the gkk perturbations
 

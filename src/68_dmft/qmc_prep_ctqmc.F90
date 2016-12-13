@@ -7,7 +7,7 @@
 !! Prepare and call the qmc subroutines
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2016 ABINIT group (BAmadon,VPlanes)
+!! Copyright (C) 1999-2016 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -159,7 +159,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  
  integer :: nfreq,unt,unt2
  integer :: ntau ! >= 2*nfreq + 1
- integer :: nleg 
+ integer :: nleg = 30  ! default value
  integer :: ileg
  integer :: verbosity_solver ! min 0 -> max 3
  integer :: seed
@@ -1335,7 +1335,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      
      if(paw_dmft%dmft_solv>=6) then
        ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwli,nflavor,nflavor)) !because size allocation problem with TRIQS paw_dmft%dmft_nwlo must be >= paw_dmft%dmft_nwli
-       open(unit=505,file=trim(paw_dmft%filapp)//"_Legendre_coefficients.dat", status='unknown',form='formatted')
      else
        ABI_ALLOCATE(gw_tmp,(paw_dmft%dmft_nwlo,nflavor+1))
        ABI_ALLOCATE(gw_tmp_nd,(paw_dmft%dmft_nwlo,nflavor,nflavor+1))
@@ -1408,7 +1407,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          nfreq = paw_dmft%dmft_nwli
        !paw_dmft%dmft_nwlo = paw_dmft%dmft_nwli !transparent for user 
          ntau  = paw_dmft%dmftqmc_l !(2*paw_dmft%dmftqmc_l)+1 !nfreq=paw_dmft%dmft_nwli
-         nleg  = paw_dmft%dmftctqmc_triqs_nleg
 
          if ( ntau >= (2*nfreq)+1 ) then
 
@@ -1570,7 +1568,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
              do ileg=1,nleg
                WRITE(505,*) ileg,((gl_nd(ileg,iflavor,iflavor1),iflavor=1,nflavor),iflavor1=1,nflavor)
              end do
-             close(505)
            end if
 !        if(paw_dmft%myproc==0) then
 !          do itau=1,paw_dmft%dmftqmc_l

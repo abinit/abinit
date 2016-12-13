@@ -6,10 +6,10 @@
 !!
 !! FUNCTION
 !! If syuse==0 and rfmeth==2, determines the set of symmetries that leaves a perturbation invariant.
-!! (Actually, all symmetries that leaves a q-wavevector invariant should be used to reduce the number
+!! (Actually, all symmetries that leaves a q-wavevector invariant should be used to reduce the number 
 !! of k-points for all perturbations. Unfortunately, one has to take into account the sign reversal of the
-!! perturbation under the symmetry operations, which makes GS routines not usable for the respfn code.
-!! The intermediate choice was to select only those that keep also the perturbation invariant.
+!! perturbation under the symmetry operations, which makes GS routines not usable for the respfn code. 
+!! The intermediate choice was to select only those that keep also the perturbation invariant. 
 !! Note that the wavevector of the perturbation must also be invariant, a translation vector in real space is NOT allowed ).
 !!
 !! COPYRIGHT
@@ -27,11 +27,11 @@
 !! ipert=characteristics of the perturbation
 !! natom= number of atoms
 !! nsym=number of space group symmetries
-!! rfmeth =
+!! rfmeth = 
 !!   1 if non-stationary block
 !!   2 if stationary block
 !!   3 if third order derivatives
-!! symq(4,2,nsym)= Table computed by littlegroup_q.
+!! symq(4,2,nsym)= Table computed by littlegroup_q. 
 !!   three first numbers define the G vector;
 !!   fourth number is zero if the q-vector is not preserved, is 1 otherwise
 !!   second index is one without time-reversal symmetry, two with time-reversal symmetry
@@ -41,8 +41,6 @@
 !! syuse= flag to use the symmetries or not. If 0 usei it, if 1 do not use it.
 !! tnons(3,nsym)=nonsymmorphic translations of space group in terms
 !!  of real space primitive translations (may be 0)
-!! [unit]=By default the routine writes to std_out and this is very annoying if we are inside a big loop.
-!!   Use unit=dev_null or a negative integer to disable writing.
 !!
 !! OUTPUT
 !! nsym1 =number of space group symmetries that leaves the perturbation invariant
@@ -65,9 +63,8 @@
 
 #include "abi_common.h"
 
-subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
-&    rfmeth,symafm,symaf1,symq,symrec,symrel,symrl1,syuse,tnons,tnons1, &
-&    unit) ! Optional
+subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1,&
+&    rfmeth,symafm,symaf1,symq,symrec,symrel,symrl1,syuse,tnons,tnons1)
 
  use defs_basis
  use m_profiling_abi
@@ -86,7 +83,6 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: idir,iout,ipert,natom,nsym,rfmeth,syuse
- integer,intent(in),optional :: unit
  integer,intent(out) :: nsym1
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom),symafm(nsym),symq(4,2,nsym)
@@ -97,15 +93,13 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
 
 !Local variables -------------------------
 !scalars
- integer :: idir1,ii,istr,isym,jj,nsym_test,tok,ount
+ integer :: idir1,ii,istr,isym,jj,nsym_test,tok
  character(len=500) :: msg
 !arrays
  integer :: sym_test(3,3,2)
  real(dp) :: str_test(6)
 
 ! *********************************************************************
-
- ount = std_out; if (present(unit)) ount = unit
 
  nsym1=0
  if((ipert==natom+3 .or. ipert==natom+4) .and. syuse==0 .and. rfmeth==2) then
@@ -194,28 +188,26 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
    MSG_BUG(msg)
  end if
 
- if (nsym1 /= 1) then
-   if (iout /= ount .and. iout > 0) then
+ if (nsym1/=1) then
+   if(iout/=std_out)then
      write(msg,'(a,i5,a)')' Found ',nsym1,' symmetries that leave the perturbation invariant.'
      call wrtout(iout,msg,'COLL')
    end if
    write(msg,'(a,i5,a)')' littlegroup_pert : found ',nsym1,' symmetries that leave the perturbation invariant :'
-   call wrtout(ount,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
  else
-   if (iout /= ount .and. iout > 0) then
+   if(iout/=std_out)then
      write(msg,'(a,a)')' The set of symmetries contains',' only one element for this perturbation.'
      call wrtout(iout,msg,'COLL')
    end if
    write(msg,'(a)')' littlegroup_pert : only one element in the set of symmetries for this perturbation :'
-   call wrtout(ount,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
  end if
 
- if (ount > 0) then
-   do isym=1,nsym1
-     write(msg, '(9i4)' )((symrl1(ii,jj,isym),ii=1,3),jj=1,3)
-     call wrtout(ount,msg,'COLL')
-   end do
- end if
+ do isym=1,nsym1
+   write(msg, '(9i4)' )((symrl1(ii,jj,isym),ii=1,3),jj=1,3)
+   call wrtout(std_out,msg,'COLL')
+ end do
 
 end subroutine littlegroup_pert
 !!***

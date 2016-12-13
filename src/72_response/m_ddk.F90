@@ -39,7 +39,8 @@ MODULE m_ddk
 
  use m_fstrings,      only : sjoin, itoa
  use m_io_tools,      only : iomode_from_fname
- use defs_abitypes,   only : hdr_type
+ use defs_abitypes,   only : hdr_type, mpi_type
+ !use m_mpinfo,        only : destroy_mpi_enreg
  use m_crystal,       only : crystal_t, crystal_free
  use m_crystal_io,    only : crystal_from_hdr
 
@@ -123,6 +124,9 @@ MODULE m_ddk
 
   type(crystal_t) :: cryst
    ! Crystal structure read from file
+
+  !type(mpi_type) :: mpi_enreg
+   ! TODO: Is this really needed?
 
  end type ddk_t
 
@@ -222,6 +226,9 @@ subroutine ddk_init(ddk, path, comm)
  ! Compute rprim, and gprimd. Used for slow FFT q--r if multiple shifts
  call mkradim(ddk%acell,ddk%rprim,ddk%cryst%rprimd)
  call matr3inv(ddk%rprim,ddk%gprim)
+
+ ! MPI_type needed for calling fourdp!
+ !call initmpi_seq(ddk%mpi_enreg)
 
 end subroutine ddk_init
 !!***
@@ -401,6 +408,7 @@ subroutine ddk_free(ddk)
 
  ! types
  call crystal_free(ddk%cryst)
+ !call destroy_mpi_enreg(ddk%mpi_enreg)
 
 end subroutine ddk_free
 !!***

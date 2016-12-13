@@ -4,7 +4,7 @@
 !! m_crystal
 !!
 !! FUNCTION
-!! Module containing the definition of the crystal_t data type and methods used to handle it.
+!! Module containing the definition of the crystal_t data type and methods used to handle it. 
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2016 ABINIT group (MG, YP)
@@ -27,7 +27,7 @@
 MODULE m_crystal
 
  use defs_basis
- use m_errors
+ use m_errors 
  use m_profiling_abi
  use m_atomdata
 
@@ -35,7 +35,7 @@ MODULE m_crystal
 
  implicit none
 
- private
+ private 
 !!***
 
 !----------------------------------------------------------------------
@@ -43,10 +43,10 @@ MODULE m_crystal
 !!****t* m_crystal/crystal_t
 !! NAME
 !! crystal_t
-!!
+!! 
 !! FUNCTION
 !! Structure defining the unit cell (geometry, atomic positions and symmetry operations in real and reciprocal space)
-!!
+!! 
 !! SOURCE
 
  type,public :: crystal_t
@@ -64,29 +64,29 @@ MODULE m_crystal
   !ptsymrel(3,3,nptsym)
   ! nptsym point-symmetry operations of the Bravais lattice in real space in terms of primitive translations.
 
-  integer :: natom
+  integer :: natom     
   ! Number of atoms
 
   integer :: nsym
   ! Number of symmetry operations
 
-  integer :: ntypat
+  integer :: ntypat   
   ! Number of type of atoms
 
   !$integer :: ntypalch,ntyppure
 
-  integer :: npsp
+  integer :: npsp  
   ! No. of pseudopotentials
 
-  integer :: space_group
+  integer :: space_group 
   ! Space group
 
-  integer :: timrev
+  integer :: timrev  
   ! TODO BE CAREFUL here, as the convention used in abinit is different.
   ! 1 => do not use time-reversal symmetry.
-  ! 2 => take advantage of time-reversal symmetry.
+  ! 2 => take advantage of time-reversal symmetry. 
 
-  real(dp) :: ucvol
+  real(dp) :: ucvol                          
   ! Real space unit cell volume.
 
   logical :: use_antiferro
@@ -108,15 +108,15 @@ MODULE m_crystal
   real(dp) :: rprimd(3,3)
   ! Direct lattice vectors, Bohr units.
 
-  integer,allocatable :: indsym(:,:,:)
+  integer,allocatable :: indsym(:,:,:) 
   ! indsym(4,nsym,natom)
   ! indirect indexing array for atoms, see symatm.F90.
 
-  integer,allocatable :: symafm(:)
+  integer,allocatable :: symafm(:)  
   ! symafm(nsym)
-  ! (Anti)Ferromagnetic symmetries. +1/-1
+  ! (Anti)Ferromagnetic symmetries.
 
-  integer,allocatable :: symrec(:,:,:)
+  integer,allocatable :: symrec(:,:,:)  
   ! symrec(3,3,nsym)
   ! Symmetry operation in reciprocal space (reduced coordinates)
 
@@ -129,16 +129,16 @@ MODULE m_crystal
   ! atindx(natom), atindx1(natom)
   ! Index tables for atoms useful to treat atoms type after type.
 
-  integer,allocatable :: typat(:)
+  integer,allocatable :: typat(:) 
   integer,allocatable :: nattyp(:)
   ! typat(natom), nattyp(ntypat)
   ! Type of each natom and number of atoms of each type.
 
-  real(dp),allocatable :: tnons(:,:)
+  real(dp),allocatable :: tnons(:,:) 
   ! tnons(3,nsym)
   ! Fractional translations (reduced coordinates)
 
-  real(dp),allocatable :: xcart(:,:)
+  real(dp),allocatable :: xcart(:,:) 
   ! xcart(3,natom)
   ! Cartesian coordinates.
 
@@ -146,29 +146,29 @@ MODULE m_crystal
   ! xred(3,natom)
   ! Reduced coordinates.
 
-  real(dp),allocatable :: spinrot(:,:)
+  real(dp),allocatable :: spinrot(:,:) 
   ! spinrot(4,nsym)
   ! spinor rotation matrices.
 
   ! Useful quantities that might be added in the future
-  real(dp),allocatable :: amu(:)
+  real(dp),allocatable :: amu(:)                
   !  amu(ntypat)
   !  mass of the atoms (atomic mass unit)
 
-  real(dp),allocatable :: zion(:)
+  real(dp),allocatable :: zion(:) 
   ! zion(ntypat)
-  ! Charge of the pseudo-ion
+  ! Charge of the pseudo-ion 
   ! (No of valence electrons needed to screen exactly the pseudopotential).
 
   !real(dp),allocatable :: znucltypat(:)
    ! znucltypat(ntypat)
    ! The atomic number of each type of atom (might be alchemy wrt psps)
 
-  real(dp),allocatable :: znucl(:)
+  real(dp),allocatable :: znucl(:) 
   ! znucl(npsp)
   ! Nuclear charge for each type of pseudopotential
 
-  character(len=132),allocatable :: title(:)
+  character(len=132),allocatable :: title(:) 
    ! title(ntypat)
    ! The content of first line read from the psp file
 
@@ -179,11 +179,10 @@ MODULE m_crystal
  public :: crystal_print           ! Print dimensions and basic info stored in the object
  public :: print_symmetries        ! Helper function to print symmetries in a nice format.
  public :: idx_spatial_inversion   ! Return the index of the spatial inversion, 0 if not present.
- public :: isymmorphic             ! True if space group is symmorphic.
- public :: isalchemical            ! True if we are using alchemical pseudopotentials.
- public :: adata_type              ! Return atomic data from the itypat index.
- public :: symbol_type             ! Return the atomic symbol from the itypat index.
- public :: crystal_point_group     ! Return the symmetries of the point group of the crystal.
+ public :: isymmorphic             ! .TRUE. if space group is symmorphic.
+ public :: isalchemical            ! .TRUE. if we are using alchemical pseudopotentials.
+ public :: adata_type              ! Return atomic data from the itypat index
+ public :: symbol_type             ! Return the atomic symbol from the itypat index
 !!***
 
 CONTAINS  !====================================================================================================
@@ -191,7 +190,7 @@ CONTAINS  !=====================================================================
 
 !!****f* m_crystal/crystal_init
 !! NAME
-!!  crystal_init
+!!  crystal_init 
 !!
 !! FUNCTION
 !!  Initialize a crystal_t data type.
@@ -199,7 +198,7 @@ CONTAINS  !=====================================================================
 !!  Either the symmetries are directly supplied or the space group
 !!  is determined starting from the definition of the unit cell.
 !!  Only the first method is implemented, the second one should be
-!!  a wrapper for the symmetry finder library. To implement the
+!!  a wrapper for the symmetry finder library. To implement the 
 !!  second case I have to add additional entries in the object
 !!  and I have also to pass an object describing the (optional) geometry builder.
 !!
@@ -216,7 +215,7 @@ CONTAINS  !=====================================================================
 !!  symafm(nsym) [optional]=  ferromagnetic symmetries
 !!  remove_inv [optional]= if .TRUE. the inversion is removed from the set of symmetries
 !!  timrev ==2 => take advantage of time-reversal symmetry
-!!         ==1 ==> do not use time-reversal symmetry
+!!         ==1 ==> do not use time-reversal symmetry 
 !!
 !! OUTPUT
 !!  Cryst<crystal_t>= the object completely initialized.
@@ -270,9 +269,9 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
 !scalars
  integer :: iat,indx,itypat,pinv,isym,nsym_noI
  real(dp) :: tolsym8,ucvol
- character(len=500) :: msg
+ character(len=500) :: msg      
 !arrays
- integer :: symrec(3,3)
+ integer :: symrec(3,3),inversion(3,3)
  real(dp) :: gprimd(3,3),gmet(3,3),rmet(3,3)
  integer,pointer :: symrel_noI(:,:,:)
  integer,allocatable :: indsym(:,:,:)
@@ -280,16 +279,16 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
 ! *************************************************************************
 
  !@crystal_t
- Cryst%natom  = natom
+ Cryst%natom  = natom 
  Cryst%ntypat = ntypat
  Cryst%npsp   = npsp
 
  Cryst%space_group = space_group
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
+ 
  Cryst%ucvol  = ucvol
- Cryst%rprimd = rprimd
+ Cryst%rprimd = rprimd 
  Cryst%rmet   = rmet
  Cryst%gmet   = gmet
  Cryst%gprimd = gprimd
@@ -306,8 +305,8 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  ABI_MALLOC(Cryst%amu, (ntypat))
 
  Cryst%amu   = amu
- Cryst%typat = typat
- Cryst%xred  = xred
+ Cryst%typat = typat 
+ Cryst%xred  = xred 
  Cryst%zion  = zion
  Cryst%znucl = znucl
 
@@ -326,7 +325,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
    Cryst%nattyp(itypat)=0
    do iat=1,natom
      if (Cryst%typat(iat)==itypat) then
-       Cryst%atindx (iat )=indx
+       Cryst%atindx (iat )=indx 
        Cryst%atindx1(indx)=iat
        indx=indx+1
        Cryst%nattyp(itypat)=Cryst%nattyp(itypat)+1
@@ -341,16 +340,17 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  !atom%amu
 
  Cryst%timrev = timrev
+ call set2unit(inversion) ; inversion=-inversion
 
- if (PRESENT(symrel).and.PRESENT(tnons).and.PRESENT(symafm)) then
+ if (PRESENT(symrel).and.PRESENT(tnons).and.PRESENT(symafm)) then 
    if (.not.remove_inv) then
-     ! * Just a copy
+     ! * Just a copy 
      Cryst%nsym= nsym
      ABI_MALLOC(Cryst%symrel,(3,3,nsym))
      ABI_MALLOC(Cryst%symrec,(3,3,nsym))
      ABI_MALLOC(Cryst%tnons,(3,nsym))
      ABI_MALLOC(Cryst%symafm,(nsym))
-     Cryst%symrel=symrel
+     Cryst%symrel=symrel 
      Cryst%tnons=tnons
      Cryst%symafm=symafm
      Cryst%use_antiferro = use_antiferro
@@ -358,7 +358,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
        call mati3inv(symrel(:,:,isym),symrec)
        Cryst%symrec(:,:,isym)=symrec
      end do
-   else
+   else 
      ! * Remove inversion, just to be compatible with old GW implementation
      ! TODO should be removed!
      call remove_inversion(nsym,symrel,tnons,nsym_noI,symrel_noI,tnons_noI,pinv)
@@ -369,12 +369,12 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
      ABI_MALLOC(Cryst%symafm,(nsym_noI))
      Cryst%symrel=symrel_noI
      Cryst%tnons=tnons_noI
-     if (ANY(symafm==-1)) then
+     if (ANY(symafm==-1)) then 
        msg = 'Solve the problem with inversion before adding ferromagnetic symmetries '
        MSG_BUG(msg)
      end if
      Cryst%symafm=1
-     Cryst%use_antiferro=use_antiferro
+     Cryst%use_antiferro=use_antiferro 
      do isym=1,nsym_noI
        call mati3inv(symrel_noI(:,:,isym),symrec)
        Cryst%symrec(:,:,isym)=symrec
@@ -390,16 +390,16 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  end if
 
  ! === Obtain a list of rotated atoms ===
- ! $ R^{-1} (xred(:,iat)-\tau) = xred(:,iat_sym) + R_0 $
+ ! $ R^{-1} (xred(:,iat)-\tau) = xred(:,iat_sym) + R_0 $ 
  ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
  ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
- !
+ ! 
  ABI_MALLOC(indsym,(4,Cryst%nsym,natom))
  tolsym8=tol8
  call symatm(indsym,natom,Cryst%nsym,Cryst%symrec,Cryst%tnons,tolsym8,Cryst%typat,Cryst%xred)
 
  ABI_MALLOC(Cryst%indsym,(4,Cryst%nsym,natom))
- Cryst%indsym=indsym
+ Cryst%indsym=indsym  
  ABI_FREE(indsym)
 
  ! === Rotation in spinor space ===
@@ -407,7 +407,6 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  do isym=1,Cryst%nsym
    call getspinrot(Cryst%rprimd,Cryst%spinrot(:,isym),Cryst%symrel(:,:,isym))
  end do
-
 end subroutine crystal_init
 !!***
 
@@ -415,7 +414,7 @@ end subroutine crystal_init
 
 !!****f* m_crystal/crystal_free
 !! NAME
-!!  crystal_free
+!!  crystal_free 
 !!
 !! FUNCTION
 !!  Destroy the dynamic arrays in a crystal_t data type.
@@ -447,7 +446,7 @@ subroutine crystal_free(Cryst)
 ! *********************************************************************
 
  DBG_ENTER("COLL")
-
+ 
  !@crystal_t
 
 !integer
@@ -513,7 +512,7 @@ end subroutine crystal_free
 
 !!****f* m_crystal/crystal_print
 !! NAME
-!!  crystal_print
+!!  crystal_print 
 !!
 !! FUNCTION
 !!  Print the content of crystal_t data type
@@ -526,7 +525,7 @@ end subroutine crystal_free
 !!  [header]=String to be printed as header for additional info.
 !!
 !! OUTPUT
-!!  Only printing
+!!  Only printing 
 !!
 !! PARENTS
 !!      eph,gwls_hamiltonian,setup_bse,setup_screening,setup_sigma,wfk_analyze
@@ -536,7 +535,7 @@ end subroutine crystal_free
 !!
 !! SOURCE
 
-subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
+subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol) 
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -551,18 +550,18 @@ subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
 !Arguments ------------------------------------
 !scalars
  integer,optional,intent(in) :: unit,prtvol
- character(len=*),optional,intent(in) :: mode_paral
+ character(len=*),optional,intent(in) :: mode_paral 
  character(len=*),optional,intent(in) :: header
  type(crystal_t),intent(in) :: Cryst
 
 !Local variables-------------------------------
  integer :: my_unt,my_prtvol,nu,iatom
  character(len=4) :: my_mode
- character(len=500) :: msg
-! *********************************************************************
+ character(len=500) :: msg      
+! ********************************************************************* 
 
  my_unt   =std_out; if (PRESENT(unit      )) my_unt   =unit
- my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
+ my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol 
  my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
 
  msg=' ==== Info on the Cryst% object ==== '
@@ -584,12 +583,12 @@ subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
  write(msg,'(a,3es16.8,a)')' Angles (23,13,12)=',Cryst%angdeg(1:3),' degrees'
  call wrtout(my_unt,msg,my_mode)
 
- if (Cryst%timrev==1) then
+ if (Cryst%timrev==1) then 
    msg = ' Time-reversal symmetry is not present '
- else if (Cryst%timrev==2) then
+ else if (Cryst%timrev==2) then 
    msg = ' Time-reversal symmetry is present '
- else
-   MSG_BUG('Wrong value for timrev')
+ else 
+   MSG_BUG('Wrong value for timrev') 
  end if
  call wrtout(my_unt,msg,my_mode)
 
@@ -650,7 +649,7 @@ subroutine print_symmetries(nsym,symrel,tnons,symafm,unit,mode_paral)
 
 !Local variables-------------------------------
  integer :: my_unt,isym,isymin,isymend,ii,jj
- character(len=500) :: msg
+ character(len=500) :: msg      
  character(len=4) :: my_mode
 ! *********************************************************************
 
@@ -661,7 +660,7 @@ subroutine print_symmetries(nsym,symrel,tnons,symafm,unit,mode_paral)
  !do isym=1,nsym
  ! write(msg,'(1x,3(3i3,1x),4x,3(f11.7,1x),6x,i2)')symrel(:,:,isym),tnons(:,isym),symafm(isym)
  ! call wrtout(my_unt,msg,my_mode)
- !end do
+ !end do 
 
  write(msg,'(2a)')ch10,' Symmetry operations in real space (Rotation tnons AFM)'
  call wrtout(my_unt,msg,my_mode)
@@ -676,7 +675,7 @@ subroutine print_symmetries(nsym,symrel,tnons,symafm,unit,mode_paral)
    call wrtout(my_unt,msg,my_mode)
  end do
 
-end subroutine print_symmetries
+end subroutine print_symmetries 
 !!***
 
 !----------------------------------------------------------------------
@@ -713,13 +712,17 @@ pure function idx_spatial_inversion(Cryst) result(inv_idx)
 !Local variables-------------------------------
 !scalars
  integer :: isym
+!arrays
+ integer :: inversion(3,3)
 
 ! *************************************************************************
 
+ inversion=RESHAPE((/-1,0,0,0,-1,0,0,0,-1/),(/3,3/))
+
  inv_idx=0
- do isym=1,cryst%nsym
-   if (all(cryst%symrel(:,:,isym) == inversion_3d)) then
-    inv_idx=isym; return
+ do isym=1,Cryst%nsym
+   if ( ALL(Cryst%symrel(:,:,isym)==inversion) ) then 
+    inv_idx=isym; RETURN
    end if
  end do
 
@@ -759,7 +762,7 @@ pure function isymmorphic(Cryst) result(ans)
 
 ! *************************************************************************
 
- ans = ALL (ABS(Cryst%tnons)<tol6)
+ ans = ALL (ABS(Cryst%tnons)<tol6) 
 
 end function isymmorphic
 !!***
@@ -834,7 +837,7 @@ function adata_type(crystal,itypat) result(atom)
 
 ! *************************************************************************
 
- call atomdata_from_znucl(atom,crystal%znucl(itypat))
+ call atomdata_from_znucl(atom,crystal%znucl(itypat)) 
 
 end function adata_type
 !!***
@@ -879,80 +882,6 @@ function symbol_type(crystal,itypat) result(symbol)
  symbol = atom%symbol
 
 end function symbol_type
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_crystal/crystal_point_group
-!! NAME
-!!  crystal_point_group
-!!
-!! FUNCTION
-!!  Return the symmetries of the point group of the crystal.
-!!
-!! OUTPUT
-!!  ptg_nsym=Number of symmetries in the point group
-!!  ptg_symrel(3,3,ptg_nsym)=Rotations in real space
-!!  ptg_symrec(3,3,ptg_nsym)=Rotations in reciprocal space
-!!  has_inversion=True if spatial inversion is present in the point group.
-!!
-!! PARENTS
-!!
-!! SOURCE
-
-subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inversion)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'crystal_point_group'
- use interfaces_32_util
-!End of the abilint section
-
- implicit none
-
-!Arguments ------------------------------------
-!scalars
- type(crystal_t),intent(in) :: cryst
- integer,intent(out) :: ptg_nsym
- logical,intent(out) :: has_inversion
-!arrays
- integer,allocatable,intent(out) :: ptg_symrel(:,:,:),ptg_symrec(:,:,:)
-
-!Local variables-------------------------------
-!scalars
- integer :: isym,search
- logical :: found
-!arrays
- integer :: work_symrel(3,3,cryst%nsym)
-
-! *************************************************************************
-
- ptg_nsym = 1; work_symrel(:,:,1) = cryst%symrel(:,:,1)
- do isym=1,cryst%nsym
-   if (cryst%symafm(isym) == -1) cycle
-   do search=1,ptg_nsym
-     found = all(work_symrel(:,:,search) == cryst%symrel(:,:,isym))
-     if (found) exit
-   end do
-   if (.not. found) then
-     ptg_nsym = ptg_nsym + 1
-     work_symrel(:,:,ptg_nsym) = cryst%symrel(:,:,isym)
-   end if
- end do
-
- ! Now we know the symmetries of the point group.
- ABI_MALLOC(ptg_symrel, (3,3,ptg_nsym))
- ABI_MALLOC(ptg_symrec, (3,3,ptg_nsym))
- ptg_symrel = work_symrel(:,:,1:ptg_nsym)
- has_inversion = .False.
- do isym=1,ptg_nsym
-   if (all(ptg_symrel(:,:,isym) == inversion_3d) ) has_inversion = .True.
-   call mati3inv(ptg_symrel(:,:,isym), ptg_symrec(:,:,isym))
- end do
-
-end subroutine crystal_point_group
 !!***
 
 !----------------------------------------------------------------------

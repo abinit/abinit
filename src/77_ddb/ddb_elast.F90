@@ -19,7 +19,6 @@
 !!
 !! INPUTS
 !! anaddb_dtset= (derived datatype) contains all the input variables
-!! crystal<crystal_t>=Info on crystalline structure.
 !! blkval(2,3,mpert,3,mpert,nblok)=
 !!   second derivatives of total energy with respect to electric fields
 !!   atom displacements,strain,...... all in cartesian coordinates
@@ -31,6 +30,7 @@
 !! mpert=maximum number of ipert
 !! natom=number of atoms in unit cell
 !! nblok=number of total bloks in DDB file
+!! ucvol=unit cell volume
 !!
 !! OUTPUT
 !! elast=relaxed-ion elastic tensor(without stress correction) (6*6) in Voigt notation
@@ -57,15 +57,13 @@
 #include "abi_common.h"
 
 
-subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
+subroutine ddb_elast(anaddb_dtset,blkval,compl,compl_clamped,compl_stress,d2asr,&
 &            elast,elast_clamped,elast_stress,iblok,iblok_stress,&
-&            instrain,iout,mpert,msize,natom,nblok)
+&            instrain,iout,mpert,natom,nblok,ucvol)
 
  use defs_basis
  use m_profiling_abi
  use m_errors
- use m_crystal
- use m_ddb
 
  use m_dynmat,         only : asria_corr
  use m_anaddb_dataset, only : anaddb_dataset_type
@@ -82,8 +80,8 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 
 !Arguments -------------------------------------------
 !scalars
- integer,intent(in) :: iblok,iblok_stress,iout,mpert,msize,natom,nblok
- type(crystal_t),intent(in) :: crystal
+ integer,intent(in) :: iblok,iblok_stress,iout,mpert,natom,nblok
+ real(dp),intent(in) :: ucvol
  type(anaddb_dataset_type),intent(in) :: anaddb_dtset
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok),instrain(3*natom,6)
@@ -94,7 +92,6 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 !Local variables------------------------------------
 !scalars
  integer :: ier,ii1,ii2,ipert1,ipert2,ivarA,ivarB
- real(dp) :: ucvol
  character(len=500) :: message
 !arrays
  real(dp) :: Amatr(3*natom-3,3*natom-3),Apmatr(3*natom,3*natom)
@@ -110,8 +107,6 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
  real(dp) :: d2cart(2,3*natom,3*natom)
 
 !***************************************************************************
-
- ucvol = crystal%ucvol
 
 !extraction of the elastic constants from the blkvals
 
@@ -176,7 +171,6 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 
 !  Eventually impose the acoustic sum rule
 !  FIXME: this might depend on ifcflag: impose that it is 0 or generalize
-   !call asrq0_apply(asrq0, natom, mpert, msize, crystal%xcart, d2cart)
    call asria_corr(anaddb_dtset%asr,d2asr,d2cart,natom,natom)
    kmatrix = d2cart(1,:,:)
 
@@ -191,7 +185,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 !  according to formula, invert the kmatrix(3natom,3natom)
    Apmatr(:,:)=kmatrix(:,:)
 
-!  NOTE: MJV 13/3/2011 This is just the 3x3 unit matrix copied throughout the dynamical matrix
+!  NOTE: MJV 13/3/2011 This is just the 3x3 unit matrix copied throughout the dynamical matrix 
    Nmatr(:,:)=0.0_dp
    do ivarA=1,3*natom
      do ivarB=1,3*natom
@@ -235,7 +229,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 !  this means the orientation of the 0-eigenvalue eigenvectors is kind of random...
 !  Is the usage just to get out the translational modes? We know what the eigenvectors look like already!
 !  The translational modes are the last 3 with eigenvalue 6
-!
+!  
    call ZHPEV ('V','U',3*natom,Bpmatr,eigvalp,eigvecp,3*natom,&
 &   zhpev1p,zhpev2p,ier)
 

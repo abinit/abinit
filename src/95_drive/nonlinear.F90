@@ -198,28 +198,22 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
        do i2dir = 1, 3
          do i3pert = 1, mpert
            do i3dir = 1, 3
-             perm(1) = &
-&              d3e_pert1(i1pert)*dtset%d3e_pert1_dir(i1dir) &
+             perm(1) = d3e_pert1(i1pert)*dtset%d3e_pert1_dir(i1dir) &
 &             *d3e_pert2(i2pert)*dtset%d3e_pert2_dir(i2dir) &
 &             *d3e_pert3(i3pert)*dtset%d3e_pert3_dir(i3dir)
-             perm(2) = &
-&              d3e_pert1(i1pert)*dtset%d3e_pert1_dir(i1dir) &
+             perm(2) = d3e_pert1(i1pert)*dtset%d3e_pert1_dir(i1dir) &
 &             *d3e_pert2(i3pert)*dtset%d3e_pert2_dir(i3dir) &
 &             *d3e_pert3(i2pert)*dtset%d3e_pert3_dir(i2dir)
-             perm(3) = &
-&              d3e_pert1(i2pert)*dtset%d3e_pert1_dir(i2dir) &
+             perm(3) = d3e_pert1(i2pert)*dtset%d3e_pert1_dir(i2dir) &
 &             *d3e_pert2(i1pert)*dtset%d3e_pert2_dir(i1dir) &
 &             *d3e_pert3(i3pert)*dtset%d3e_pert3_dir(i3dir)
-             perm(4) = &
-&              d3e_pert1(i2pert)*dtset%d3e_pert1_dir(i2dir) &
+             perm(4) = d3e_pert1(i2pert)*dtset%d3e_pert1_dir(i2dir) &
 &             *d3e_pert2(i3pert)*dtset%d3e_pert2_dir(i3dir) &
 &             *d3e_pert3(i1pert)*dtset%d3e_pert3_dir(i1dir)
-             perm(5) = &
-&              d3e_pert1(i3pert)*dtset%d3e_pert1_dir(i3dir) &
+             perm(5) = d3e_pert1(i3pert)*dtset%d3e_pert1_dir(i3dir) &
 &             *d3e_pert2(i2pert)*dtset%d3e_pert2_dir(i2dir) &
 &             *d3e_pert3(i1pert)*dtset%d3e_pert3_dir(i1dir)
-             perm(6) = &
-&              d3e_pert1(i3pert)*dtset%d3e_pert1_dir(i3dir) &
+             perm(6) = d3e_pert1(i3pert)*dtset%d3e_pert1_dir(i3dir) &
 &             *d3e_pert2(i1pert)*dtset%d3e_pert2_dir(i1dir) &
 &             *d3e_pert3(i2pert)*dtset%d3e_pert3_dir(i2dir)
              if (sum(perm(:)) > 0) rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
@@ -249,12 +243,11 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 & ' The list of irreducible elements of the Raman and non-linear',&
 & ch10,' optical susceptibility tensors is:',ch10
  call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
- 
+
  write(message,'(12x,a)')&
 & 'i1pert  i1dir   i2pert  i2dir   i3pert  i3dir'
  call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
+
  n1 = 0
  do i1pert = 1, natom + 2
    do i1dir = 1, 3
@@ -267,7 +260,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
                write(message,'(2x,i4,a,6(5x,i3))') n1,')', &
 &               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir
                call wrtout(ab_out,message,'COLL')
-               call wrtout(std_out,message,'COLL')
              else if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-2) then
                blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
              end if
@@ -279,7 +271,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  end do
  write(message,'(a,a)') ch10,ch10
  call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,message,'COLL')
 
 !Set up for iterations
  ecut_eff= (dtset%ecut) * (dtset%dilatmx) **2
@@ -358,7 +349,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 
    call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfft, dtset%ngfft, rdwrpaw, &
    mpi_enreg, rhor, hdr_den, pawrhoij, comm_cell, check_hdr=hdr)
-   call hdr_free(hdr_den)
+   etotal = hdr_den%etot; call hdr_free(hdr_den)
 
 !  Compute up+down rho(G) by fft
    ABI_ALLOCATE(work,(nfft))
@@ -453,7 +444,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 & nkpt3,nneigh,npwarr,nsppol,occ,pwind)
 
  call status(0,dtfil%filstat,iexit,level,'call dfptnl_loop ')
- call dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,gmet,gprimd,gsqcut,&
+ call dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,etotal,gmet,gprimd,gsqcut,&
 & hdr,kg,kneigh,kg_neigh,kptindex,kpt3,kxc,k3xc,mband,mgfft,&
 & mkmem,mkmem_max,dtset%mk1mem,mpert,mpi_enreg,mpw,mvwtk,natom,nfft,&
 & nkpt,nkpt3,nkxc,nk3xc,nneigh,nspinor,nsppol,npwarr,occ,psps,pwind,&
@@ -623,10 +614,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
 
 !Clean the header
  call hdr_free(hdr)
-
-!As the etotal energy has no meaning here, we set it to zero
-!(to avoid meaningless side-effects when comparing ouputs...)
- etotal = zero
 
  call status(0,dtfil%filstat,iexit,level,' exit         ')
  call timab(501,2,tsec)

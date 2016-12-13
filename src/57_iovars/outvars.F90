@@ -109,7 +109,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  integer :: marr,mu,ncerr
  integer :: nshiftk
  integer :: prtvol_glob,max_nthreads
- integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde
+ integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser
  integer :: ncid=0 ! Variables for NetCDF output
  character(len=500) :: message
  character(len=4) :: stringimage
@@ -277,10 +277,8 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
    rfphon=dtsets(idtset)%rfphon
    rfstrs=dtsets(idtset)%rfstrs
    rfuser=dtsets(idtset)%rfuser
-   rf2_dkdk=dtsets(idtset)%rf2_dkdk
-   rf2_dkde=dtsets(idtset)%rf2_dkde
-   if(rfddk/=0 .or. rfelfd/=0 .or. rfphon/=0 .or. rfstrs/=0 .or. &
-&   rfuser/=0 .or. rf2_dkdk/=0 .or. rf2_dkde/=0)then
+   if(rfddk/=0 .or. rfelfd/=0 .or. &
+&   rfphon/=0 .or. rfstrs/=0 .or. rfuser/=0)then
      response_(idtset)=1
    end if
  end do

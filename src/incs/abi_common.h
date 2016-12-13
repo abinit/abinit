@@ -355,6 +355,7 @@
 
 /*
 */
+#define DEV_MG_WFK
 
 #endif
 /* _ABINIT_COMMON_H */

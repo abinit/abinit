@@ -304,19 +304,18 @@ module defs_basis
  character(len=fnlen),parameter :: ABI_MAIN_LOG_FILE="_MAINLOG"
 
 ! Arrays
- integer,parameter :: identity_3d(3,3) = reshape([1,0,0,0,1,0,0,0,1], [3,3])
- integer,parameter :: inversion_3d(3,3) = reshape([-1,0,0,0,-1,0,0,0,-1], [3,3])
+ integer,parameter :: identity_3d(3,3)=reshape([1,0,0,0,1,0,0,0,1], [3,3])
 
 
 !A collection of small datatypes for ragged arrays
 !A small datatype for ragged real 1D-arrays
  type coeff1_type
-  real(dp), allocatable :: value(:)
+  real(dp), allocatable :: value(:) 
  end type coeff1_type
 !A small datatype for ragged integer 1D-arrays
  type coeffi1_type
   !integer :: size
-  integer, allocatable :: value(:)
+  integer, allocatable :: value(:) 
  end type coeffi1_type
 !A small datatype for ragged integer 2D-arrays
  type coeffi2_type
@@ -325,23 +324,23 @@ module defs_basis
  end type coeffi2_type
 !A small datatype for ragged real 2D-arrays
  type coeff2_type
-  real(dp), allocatable :: value(:,:)
+  real(dp), allocatable :: value(:,:)  
  end type coeff2_type
 !A small datatype for ragged complex 2D-arrays
  type coeff2c_type
-  complex(dpc), allocatable :: value(:,:)
+  complex(dpc), allocatable :: value(:,:) 
  end type coeff2c_type
 !A small datatype for ragged real 3D-arrays
  type coeff3_type
-  real(dp), allocatable :: value(:,:,:)
+  real(dp), allocatable :: value(:,:,:) 
  end type coeff3_type
 !A small datatype for ragged real 4D-arrays
  type coeff4_type
-  real(dp), allocatable :: value(:,:,:,:)
+  real(dp), allocatable :: value(:,:,:,:)  
  end type coeff4_type
 !A small datatype for ragged real 5D-arrays
  type coeff5_type
-  real(dp), allocatable :: value(:,:,:,:,:)
+  real(dp), allocatable :: value(:,:,:,:,:)  
  end type coeff5_type
 !A small datatype for ragged real 6D-arrays
  type coeff6_type

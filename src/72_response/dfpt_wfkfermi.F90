@@ -250,7 +250,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 
 !    Apply H^(1)-Esp.S^(1) to Psi^(0) (H(^1)=only (NL+kin) frozen part)
      lambda=eig0_k(iband)
-     call getgh1c(berryopt,cwave0,cwaveprj0,gh1,dum_grad_berry,dum_gs1,gs_hamkq,dum_gvnl1,&
+     call getgh1c(berryopt,0,cwave0,cwaveprj0,gh1,dum_grad_berry,dum_gs1,gs_hamkq,dum_gvnl1,&
 &     idir,ipert,lambda,mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamkq,sij_opt,&
 &     tim_getgh1c,usevnl)
 

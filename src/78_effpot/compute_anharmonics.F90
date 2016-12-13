@@ -422,7 +422,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
         cycle
       end if
     end do
-    eff_pot%has_3rd = .True.
+    eff_pot%has_anharmonics = .True.
   end if
 
  !===============================================

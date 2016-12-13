@@ -148,7 +148,7 @@
 
  !FR EB
  if (nspden==4) then
-   MSG_WARNING('DFPT with nspden=4 works just for m quantization axis along z, for insulators and norm-conserving psp!')
+   MSG_WARNING('DFPT under development for nspden=4!')
  end if
 
 !Get size of FFT grid
@@ -299,7 +299,7 @@
 !$OMP PARALLEL DO COLLAPSE(2)
      do ispden=3,4
        do ifft=1,cplex*nfft
-         vresid1(ifft,ispden)=vxc1_(ifft,ispden)-vtrial1(ifft,ispden)
+         vresid1(ifft,ispden)=vxc1_(ifft,ispden)
        end do
      end do
    end if

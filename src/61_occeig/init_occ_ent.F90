@@ -90,11 +90,16 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
  if(occopt_prev/=occopt           .or. &
 & abs(tsmear_prev-tsmear)  >tol12 .or. &
 & abs(tphysel_prev-tphysel)>tol12       ) then
+!  DEBUG
 !  write(std_out,*) 'INIT_OCC_ENT CHANGE ..........'
+!  ENDDEBUG
    occopt_prev=occopt
    tsmear_prev=tsmear
    tphysel_prev=tphysel
 
+
+
+!  
 !  Check whether input values of tphysel tsmear and occopt are consistent
    dblsmr = 0
    if (abs(tphysel)>tol12) then
@@ -107,9 +112,12 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        MSG_ERROR(message)
      end if
    end if
+!  DEBUG
 !  write(std_out,*) 'getnel : input read.'
 !  write(std_out,*) '  dblsmr = ', dblsmr
 !  write(std_out,*) '  tphysel, tsmear = ', tphysel, tsmear
+!  ENDDEBUG
+
 
    ABI_ALLOCATE(entder,(-nptsdiv2_def:nptsdiv2_def))
    ABI_ALLOCATE(occder,(-nptsdiv2_def:nptsdiv2_def))
@@ -132,6 +140,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
      limit_occ=30.0_dp + 6.0_dp*tratio
    end if
 
+
 !  With nptsdiv2_def=6000 (thus increm=0.001 for 4<=occopt<=8,
 !  and increm=0.005 for occopt==3, the O(1/N4) algorithm gives 1.0d-12
 !  accuracy on the stored values occfun and entfun. These, together
@@ -141,10 +150,12 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
      xgrid_prev(ii)=ii*increm
    end do
 
+
 !  ---------------------------------------------------------
 !  Ordinary (unique) smearing function
 !  ---------------------------------------------------------
    if (dblsmr == 0) then
+
 
 !    Compute the unnormalized smeared delta function between -limit_occ and +limit_occ
 !    (well, they are actually normalized ...)
@@ -158,6 +169,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        end do
 
      else if(occopt==4 .or. occopt==5)then
+
 
 !      Cold smearing of Marzari, two values of the "a" parameter being possible
 !      first value gives minimization of the bump
@@ -194,7 +206,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        end do
 
      else if(occopt==8)then
-
+       
 !      Constant value of the delta function over the smearing interval, for testing purposes only.
        do ii=0,nptsdiv2_def
          xx=xgrid_prev(ii)
@@ -228,7 +240,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
      ABI_ALLOCATE(tgrid,(-nconvd2:nconvd2))
 
 !    FD function in smd1( ii) and second smearing delta in smd2( ii)
-!
+!    
 !    smd1(:) contains delta_FD ( x )
      do ii=0,nconvd2
        tgrid(ii)=ii*incconv
@@ -242,8 +254,8 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
 !    smd2(:) contains delta_resmear ( x )
      if(occopt == 3) then
        write(message, '(a,a)' )&
-&       'Occopt=3 is not allowed as a re-smearing.', &
-&       'Use a single FD, or re-smear with a different delta type (faster cutoff). '
+&       ' Occopt=3 is not allowed as a re-smearing.', &
+&       ' Use a single FD, or re-smear with a different delta type (faster cutoff). '
        MSG_ERROR(message)
      else if(occopt==4 .or. occopt==5)then
 !      Cold smearing of Marzari, two values of the "a" parameter being possible
@@ -292,7 +304,7 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
 
 
 !    Use O(1/N4) algorithm from Num Rec (see below)
-!
+!    
 !    The grid for the convoluted delta is taken (conservatively)
 !    to be that for the FD delta ie 6000 pts in [-limit_occ;limit_occ]
 !    Smearing functions are given on [-dbllim;dbllim] and the grid must
@@ -312,7 +324,9 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
 
      expinc = exp(half*incconv*tratio)
 
+!    
 !    jj = position of point at which we are calculating smdfun_prev
+!    
      do jj=-nptsdiv2_def,nptsdiv2_def
 !      Do not care about the 8 boundary points,
 !      where the values should be extremely small anyway
@@ -341,7 +355,9 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
        tmpexpsum = expxo2 / (expx22 + 1.0_dp)
        resFD1 = tmpexpsum * tmpexpsum
 
+!      
 !      core contribution to the integral with constant weight (48)
+!      
        tmpsmdfun = 0.0_dp
        do ii=nminFD+4,nmaxFD-4
          expxo2 = expxo2*expinc
@@ -350,8 +366,9 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
          tmpexpsum = expxo2 / (expx22 + 1.0_dp)
          tmpsmdfun = tmpsmdfun + smd2(ii) * tmpexpsum * tmpexpsum
        end do
-
-!      Add on end contributions for show (both functions smd and smdFD are very small
+!      
+!      Add on end contributions for show (both functions smd and smdFD are
+!      very small
        smdfun_prev(jj,1)=smdfun_prev(jj,1)       +48.0_dp*tmpsmdfun             &
 &       + 31.0_dp*smd2(nminFD+3)*resFD1 -11.0_dp*smd2(nminFD+2)*resFD2 &
 &       +  5.0_dp*smd2(nminFD+1)*resFD3 -       smd2(nminFD)*resFD4
@@ -402,10 +419,10 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
      end do
      secmom=increm * secmom / 48.0_dp
 !    thdmom=increm * thdmom / 48.0_dp
-!
+!    
 !    smom1  = second moment of delta in smd1(:)
 !    smom2  = second moment of delta in smd2(:)
-!
+!    
      smom1  = 0.0_dp
      smom2  = 0.0_dp
      tmom1  = 0.0_dp
@@ -506,7 +523,9 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
 &       -       (-xgrid_prev(ii-4))*smdfun_prev(ii-4,1) )/48.0_dp
      end do
 
-   end if ! End of choice between different algorithms for integration
+!    End of choice between different algorithms for integration
+   end if
+
 
 !  Normalize the functions (actually not needed for occopt=3..7)
    factor=1.0_dp/occfun_prev(nptsdiv2_def,1)
@@ -537,6 +556,8 @@ subroutine init_occ_ent(entfun,limit,nptsdiv2,occfun,occopt,option,smdfun,tphyse
    ABI_DEALLOCATE(smdder)
    ABI_DEALLOCATE(work)
    ABI_DEALLOCATE(workfun)
+
+!  ---------------------------------------------------------------------
 
  end if
 

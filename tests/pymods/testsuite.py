@@ -55,24 +55,6 @@ _MY_NAME = os.path.basename(__file__)[:-3] + "-" + __version__
 
 # Helper functions and tools
 
-def fix_punctuation_marks(s):
-    """
-    Remove whitespaces before `,` and `;` that trigger a bug in ConfigParser
-    when the option spans multiple lines separated by `;`
-
-    For instance:
-
-        #%% files_to_test =
-        #%%   t93.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00 ;
-        #%%   t93.out_ep_SBK, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-
-    is not treated properly by ConfigParser due to ` ;` at the end of the line and
-    only t93.out is stored in dictionary and tested by fldiff.
-    """
-    for mark in (",", ";"):
-        s = (mark + " ").join([tok.rstrip() for tok in s.split(mark)])
-    return s + "\n"
-
 
 def html_colorize_text(string, code):
     return "<FONT COLOR='%s'>%s</FONT>" % (code, string)
@@ -580,18 +562,12 @@ class AbinitTestInfoParser(object):
         # Hack to allow options occupying more than one line.
         string = ""
         for l in lines:
-            # MGDEBUG
-            # This is needed to avoid problems with multiple lines, see docstring.
-            l = fix_punctuation_marks(l)
             if line_starts_with_section_or_option(l):
                 string += l
             else:
                 if l.startswith("#"): continue
                 string = string.rstrip() + " " + l
         lines = [l + "\n" for l in string.split("\n")]
-        #MGDEBUG
-        #print("in gmatteo's parser ")
-        #for l in lines: print(l, end="")
 
         s = StringIO()
         s.writelines(lines)
@@ -604,13 +580,11 @@ class AbinitTestInfoParser(object):
             def get(self, section, option, raw=False, vars=None):
                 if option in self.raw_options and section == TESTCNF_KEYWORDS[option][2]:
                     logger.debug("Disabling interpolation for section = %s, option = %s" % (section, option))
-                    #print("Disabling interpolation for section = %s, option = %s" % (section, option))
                     if py2:
                         return SafeConfigParser.get(self, section, option, raw=True, vars=vars)
                     else:
                         return SafeConfigParser.get(self, section, option, raw=True, vars=vars, fallback=None)
                 else:
-                    #print("Calling SafeConfigParser for section = %s, option = %s" % (section, option))
                     if py2:
                         return SafeConfigParser.get(self, section, option, raw, vars)
                     else:
@@ -675,7 +649,6 @@ class AbinitTestInfoParser(object):
                 d[key] = tup[1] # Section does not exist. Use default value.
 
             # Process the line
-            #if key == "files_to_test": print("hello files", d[key], "bye files")
             try:
                 d[key] = line_parser(d[key])
             except Exception as exc:
@@ -1290,9 +1263,9 @@ class FldiffResult(object):
 
         isok = status in ["passed", "succeeded"]
 
-        #if not self.success:
-        # Add the name of the file.
-        msg += " [file=%s]" % os.path.basename(self.fname1)
+        if not self.success:
+            # Add the name of the file.
+            msg += " [file=%s]" % os.path.basename(self.fname1)
 
         return isok, status, msg
 
@@ -1663,7 +1636,8 @@ class BaseTest(object):
     @property
     def full_id(self):
         """Full identifier of the test."""
-        return "[%s][%s][np=%s]" % (self.suite_name, self.id, self.nprocs)
+        #return "["+self.suite_name+"]["+self.id+"]"
+        return "["+self.suite_name+"]["+self.id+"][np="+str(self.nprocs)+"]"
 
     @property
     def bin_path(self):

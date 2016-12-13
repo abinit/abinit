@@ -243,12 +243,9 @@ subroutine sphereboundary(gbound,istwf_k,kg_k,mgfft,npw)
          end if ! Endif take into account time-reversal symmetry
 
          if (igb+1>2*mgfft+4) then
-           write(message, '(2a, 4(a,3(i0,1x),a))' )&
-             "About to overwrite gbound array (FFT mesh too small) ",ch10, &
-             "   iloop, igb, mgb = ",iloop,igb,2*mgfft+4, ch10, &
-             "   istwfk, mgfft, npw = ",istwf_k, mgfft, npw, ch10, &
-             "   minval(kg_k) = ",minval(kg_k, dim=2), ch10, &
-             "   maxval(kg_k) = ",maxval(kg_k, dim=2), ch10
+           write(message, '(a,3i8,a,a)' )&
+&           'iloop,igb,mgb=',iloop,igb,(2*mgfft+4),ch10,&
+&           'about to overwrite gbound.'
            MSG_BUG(message)
          end if
 
