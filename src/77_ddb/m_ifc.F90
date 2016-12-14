@@ -50,7 +50,8 @@ MODULE m_ifc
  use m_geometry,    only : phdispl_cart2red, normv
  use m_kpts,        only : kpts_ibz_from_kptrlatt
  use m_dynmat,      only : canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, dynmat_dq, &
-&                          make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, symdm9, nanal9, gtdyn9, dymfz9, dfpt_phfrq
+&                          make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, symdm9, nanal9, gtdyn9, dymfz9, &
+&                          massmult_and_breaksym, dfpt_phfrq
  use m_ddb,         only : ddb_type
 
  implicit none
@@ -719,7 +720,7 @@ end subroutine ifc_init
 !!  ifc_fourq
 !!
 !! FUNCTION
-!!  Compute the phonon frequencies at the specified q-point by performing
+!!  Compute the phonon frequencies and the group velocities at the specified q-point by performing
 !!  a Fourier transform on the IFCs matrix in real space.
 !!
 !! INPUTS
@@ -738,7 +739,7 @@ end subroutine ifc_init
 !!  [out_d2cart(2,3,3*natom,3,3*natom)] = The (interpolated) dynamical matrix for this q-point
 !!  [out_eigvec(2*3*natom*3*natom) = The (interpolated) eigenvectors of the dynamical matrix.
 !!  [out_displ_red(2*3*natom*3*natom) = The (interpolated) displacement in reduced coordinates.
-!!  [dwdq(3,3*natom)] = Group velocities e.g. d(omega(q))/dq
+!!  [dwdq(3,3*natom)] = Group velocities e.g. d(omega(q))/dq in Cartesian coordinates.
 !!
 !! PARENTS
 !!      get_nv_fs_en,get_tau_k,harmonic_thermo,interpolate_gkk,m_ifc,m_phgamma
@@ -832,6 +833,7 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
  ! Option to get vectors in reduced coordinates?
  !call phdispl_cart2red(natom, crystal%gprimd, out_eigvec, out_eigvec_red)
 
+ ! Compute group velocities.
  if (present(dwdq)) call ifc_get_dwdq(ifc, crystal, my_qpt, phfrq, eigvec, dwdq)
 
 end subroutine ifc_fourq
@@ -842,15 +844,25 @@ end subroutine ifc_fourq
 !!  ifc_get_dwdq
 !!
 !! FUNCTION
-!!  Compute the phonon group velocity
+!!  Compute phonon group velocities at an arbitrary q-point.
 !!
 !! INPUTS
 !!  ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
 !!  crystal<crystal_t> = Information on the crystalline structure.
-!!  qpt(3)=q-point in reduced coordinates (unless nanaqdir is specified)
+!!  qpt(3)=q-point in reduced coordinates.
 !!  eigvec(2*3*natom*3*natom) = The eigenvectors of the dynamical matrix.
 !!
 !! OUTPUT
+!!  dwdq(3,3*natom) = Group velocities e.g. d(omega(q))/dq in Cartesian coordinates.
+!!
+!! NOTES
+!!  Using:
+!!
+!!    D(q) u(q,nu) = w(q, nu)**2 and <u(q,nu) | u(q,nu')> = \delta_{nu, nu'}
+!!
+!!  one can show, using the Hellman-Feynman theorem, that:
+!!
+!!    \nabla_q w(q, nu) = 1/(2 w(q, nu))  <u(q, nu)| \nabla_q D(q) | u(q, nu)>
 !!
 !! PARENTS
 !!
@@ -901,9 +913,13 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq)
  end do
 
  if (ifc%dipdip==1) then
-   ! TODO qeq0 case
-   MSG_ERROR("dipdip==1 not yet implemented")
+   ! TODO
+   MSG_WARNING("dipdip==1 not yet implemented. Phonon velocities are wrong")
  end if
+
+ do ii=1,3
+   call massmult_and_breaksym(cryst%natom, cryst%ntypat, cryst%typat, ifc%amu, dddq(:,:,:,ii))
+ end do
 
  ! Compute 1/(2w(q)) <u(q)|dD(q)/dq|u(q)>
  do ii=1,3
@@ -2618,9 +2634,12 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
  mae_skw = zero; mare_skw = zero
 
  ! Test computation of group velocites
- q1 = [0.01_dp, zero, zero]; q2 = [half, zero, zero]
+ q1 = zero; q2 = [half, zero, zero]
+ !q1 = [0.01_dp, zero, zero]; q2 = [half, zero, zero]
+ !q1 = [0.01_dp, zero, zero]; q2 = [half, half, half]
  !q2 = [0.01_dp, zero, zero]; q1 = [half, zero, zero]
- nq = 100
+ !q2 = [0.01_dp, zero, zero]; q1 = [half, zero, zero]
+ nq = 1000
  dq = normv(q2 - q1, cryst%gmet, "G") / (nq - 1)
  qvers_red = (q2 -q1) / normv(q2 - q1, cryst%gmet, "G")
  qvers_cart = two_pi * matmul(cryst%gprimd, qvers_red)
@@ -2630,7 +2649,8 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
     if (iq > 1) then
       imax = maxloc(abs(phfrq - wnext)); ii = imax(1)
       !write(*,*)ii, phfrq(ii), wnext(ii), (phfrq(ii) - wnext(ii)) * Ha_meV
-      write(*,*)"wvel:", qpt(1), minval(abs(phfrq - wnext)) * Ha_meV, maxval(abs(phfrq - wnext)) * Ha_meV, imax
+      write(*,*)"wvel:", qpt, minval(abs(phfrq - wnext)) * Ha_meV, maxval(abs(phfrq - wnext)) * Ha_meV, imax
+      write(*,*)"dwdq:",dwdq
       write(100,*)phfrq * Ha_meV
       write(101,*)wnext * Ha_meV
     end if
@@ -2652,7 +2672,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
 
    ! Fourier interpolation
    call cwtime(cpu, wall, gflops, "start")
-   call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, dwdq=dwdq)
+   call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart) !, dwdq=dwdq)
    call cwtime(cpu, wall, gflops, "stop")
    cpu_fourq = cpu_fourq + cpu; wall_fourq = wall_fourq + wall
 

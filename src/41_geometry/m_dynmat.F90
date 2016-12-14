@@ -84,6 +84,7 @@ module m_dynmat
                                 ! long-range electrostatic interactions.
  public :: dfpt_phfrq           ! Diagonalize IFC(q), return phonon frequencies and eigenvectors.
                                 ! If q is Gamma, the non-analytical behaviour can be included.
+ public :: massmult_and_breaksym  ! Multiply IFC(q) by atomic masses.
 
  ! TODO: Change name,
  public :: ftgam
@@ -3423,7 +3424,8 @@ end subroutine ftifc_r2q
 !! dynmat_dq
 !!
 !! FUNCTION
-!!   Compute the derivative D(q)/dq via Fourier transform of the interatomic forces
+!!   Compute the derivative D(q)/dq of the dynamical matrix via Fourier transform
+!!   of the interatomic forces
 !!
 !! INPUTS
 !! qpt(3)= Reduced coordinates of the q vector in reciprocal space
@@ -3437,7 +3439,7 @@ end subroutine ftifc_r2q
 !! wghatm(natom,natom,nrpt)= Weights associated to a pair of atoms and to a R vector
 !!
 !! OUTPUT
-!! dddq(2,3,natom,3,natom,3)= Derivate of the dynamical matrix.
+!! dddq(2,3,natom,3,natom,3)= Derivate of the dynamical matrix in cartesian coordinates.
 !!  The tree directions are stored in the last dimension.
 !!
 !! PARENTS
@@ -5054,14 +5056,13 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 
 !Local variables -------------------------
 !scalars
- integer :: analyt,i1,i2,idir1,idir2,ier,ii,imode,index,ipert1,ipert2
- integer :: jmode,indexi,indexj
- real(dp),parameter :: break_symm=1.0d-12
- real(dp) :: epsq,fac,norm,qphon2
+ integer :: analyt,i1,i2,idir1,idir2,ier,ii,imode,ipert1,ipert2
+ integer :: jmode,indexi,indexj,index
+ real(dp) :: epsq,norm,qphon2
  logical,parameter :: debug = .False.
  real(dp) :: sc_prod
 !arrays
- real(dp) :: nearidentity(3,3),qptn(3),dum(2,0)
+ real(dp) :: qptn(3),dum(2,0)
  real(dp),allocatable :: matrx(:,:),zeff(:,:),zhpev1(:,:),zhpev2(:)
 
 ! *********************************************************************
@@ -5148,35 +5149,8 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    ABI_DEALLOCATE(zeff)
  end if !  End of the non-analyticity treatment :
 
-!This slight breaking of the symmetry allows the
-!results to be more portable between machines
- nearidentity(:,:)=one
- nearidentity(1,1)=one+break_symm
- nearidentity(3,3)=one-break_symm
-
-!Include the masses in the dynamical matrix
- do ipert1=1,natom
-   do ipert2=1,natom
-     fac=1.0_dp/sqrt(amu(typat(ipert1))*amu(typat(ipert2)))/amu_emass
-     do idir1=1,3
-       do idir2=1,3
-         i1=idir1+(ipert1-1)*3
-         i2=idir2+(ipert2-1)*3
-         index=i1+3*natom*(i2-1)
-         displ(2*index-1)=displ(2*index-1)*fac*nearidentity(idir1,idir2)
-         displ(2*index  )=displ(2*index  )*fac*nearidentity(idir1,idir2)
-!        This is to break slightly the translation invariance, and make
-!        the automatic tests more portable
-         if(ipert1==ipert2 .and. idir1==idir2)then
-           displ(2*index-1)=displ(2*index-1)+break_symm*natom/amu_emass/idir1*0.01_dp
-         end if
-       end do
-     end do
-   end do
- end do
-
-!Make the dynamical matrix hermitian
- call mkherm(displ,3*natom)
+ ! Multiply IFC(q) by masses
+ call massmult_and_breaksym(natom, ntypat, typat, amu, displ)
 
 !***********************************************************************
 !Diagonalize the dynamical matrix
@@ -5186,9 +5160,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
 !if (symdynmat==1 .and. analyt > 0) then
  if (symdynmat==1 .and. analyt == 1) then
    qptn(:)=qphon(:)
-   if (analyt==1) then
-     qptn(:)=qphon(:)/qphnrm
-   end if
+   if (analyt==1) qptn(:)=qphon(:)/qphnrm
    call symdyma(displ,indsym,natom,nsym,qptn,rprimd,symrel,symafm)
  end if
 
@@ -5293,6 +5265,91 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
  end if
 
 end subroutine dfpt_phfrq
+!!***
+
+!!****f* m_dynmat/massmult_and_breaksym
+!!
+!! NAME
+!!  mult_masses_and_break_symms
+!!
+!! FUNCTION
+!!  Multiply the IFC(q) by the atomic masses, slightly break symmetry to make tests more
+!!  portable and make the matrix hermitian before returning.
+!!
+!! INPUTS
+!!  amu(ntypat)=mass of the atoms (atomic mass unit) matrix (diagonal in the atoms)
+!!  natom=number of atoms in unit cell
+!!  ntypat=number of atom types
+!!  typat(natom)=integer label of each type of atom (1,2,...)
+!!
+!! SIDE EFFECTS
+!!  mat(2*3*natom*3*natom)=Multiplies by atomic masses in output.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dfpt_phfrq'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: natom,ntypat
+!arrays
+ integer,intent(in) :: typat(natom)
+ real(dp),intent(in) :: amu(ntypat)
+ real(dp),intent(inout) :: mat(2*3*natom*3*natom)
+
+!Local variables -------------------------
+!scalars
+ integer :: i1,i2,idir1,idir2,index,ipert1,ipert2
+ real(dp),parameter :: break_symm=1.0d-12
+ real(dp) :: fac
+!arrays
+ real(dp) :: nearidentity(3,3)
+
+! *********************************************************************
+
+!This slight breaking of the symmetry allows the
+!results to be more portable between machines
+ nearidentity(:,:)=one
+ nearidentity(1,1)=one+break_symm
+ nearidentity(3,3)=one-break_symm
+
+!Include the masses in the dynamical matrix
+ do ipert1=1,natom
+   do ipert2=1,natom
+     fac=1.0_dp/sqrt(amu(typat(ipert1))*amu(typat(ipert2)))/amu_emass
+     do idir1=1,3
+       do idir2=1,3
+         i1=idir1+(ipert1-1)*3
+         i2=idir2+(ipert2-1)*3
+         index=i1+3*natom*(i2-1)
+         mat(2*index-1)=mat(2*index-1)*fac*nearidentity(idir1,idir2)
+         mat(2*index  )=mat(2*index  )*fac*nearidentity(idir1,idir2)
+!        This is to break slightly the translation invariance, and make
+!        the automatic tests more portable
+         if(ipert1==ipert2 .and. idir1==idir2)then
+           mat(2*index-1)=mat(2*index-1)+break_symm*natom/amu_emass/idir1*0.01_dp
+         end if
+       end do
+     end do
+   end do
+ end do
+
+ ! Make the dynamical matrix hermitian
+ call mkherm(mat,3*natom)
+
+end subroutine massmult_and_breaksym
 !!***
 
 !!****f* m_dynmat/ftgam
