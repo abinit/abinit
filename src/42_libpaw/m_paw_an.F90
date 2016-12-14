@@ -82,7 +82,7 @@ MODULE m_paw_an
    !        2 if they are already computed
 
   integer :: has_k3xc
-   ! set to 1 if the third derivative of the XC energy functionals k3xc1 and k3xct1 are allocated and used
+   ! set to 1 if xc kernel derivatives k3xc1 and k3xct1 are allocated and used
    !        2 if it is already computed
 
   integer :: has_vhartree
@@ -145,15 +145,15 @@ MODULE m_paw_an
 
   real(dp), allocatable :: k3xc1 (:,:,:)
    ! k3xc1(cplex*mesh_size,lm_size or angl_size,nk3xc1)
-   ! Gives third derivative of the XC energy functionals inside the sphere
-   !   (theta,phi) values if pawxcdev=0
-   !   LM-moments if pawxcdev/=0 => NOT AVAILABLE YET
+   ! Gives xc kernel derivative inside the sphere
+   !   (theta,phi) values of kernel derivative if pawxcdev=0
+   !   LM-moments of kernel derivative if pawxcdev/=0 => NOT AVAILABLE YET
 
   real(dp), allocatable :: k3xct1 (:,:,:)
    ! k3xct1(cplex*mesh_size,lm_size or angl_size,nk3xc1)
-   ! Gives third derivative of the pseudo XC energy functionals inside the sphere
-   !   (theta,phi) values if pawxcdev=0
-   !   LM-moments if pawxcdev/=0 => NOT AVAILABLE YET
+   ! Gives xc pseudo kernel derivative inside the sphere
+   !   (theta,phi) values of kernel derivative if pawxcdev=0
+   !   LM-moments of kernel derivative if pawxcdev/=0 => NOT AVAILABLE YET
 
   real(dp), allocatable :: vh1 (:,:,:)
    ! vh1(cplex*mesh_size,lm_size,nspden)
@@ -340,7 +340,7 @@ subroutine paw_an_init(Paw_an,natom,ntypat,nkxc1,nk3xc1,nspden,cplex,pawxcdev,ty
    end if
   end if
 
-  ! third derivative of the XC energy functionals inside the sphere
+  ! xc kernel derivatives inside the sphere
   Paw_an(iat)%has_k3xc=0
   if (PRESENT(has_k3xc)) then
    if (has_k3xc>0) then
@@ -1044,7 +1044,7 @@ subroutine paw_an_gather(Paw_an_in,paw_an_gathered,master,comm_atom,mpi_atmtab)
 !Compute sizes of buffers
  buf_int_size=0;buf_dp_size=0
  do ij=1,my_natom
-   buf_int_size=buf_int_size+15+size(paw_an_in(ij)%lmselect)
+   buf_int_size=buf_int_size+17+size(paw_an_in(ij)%lmselect)
  end do
  do ij=1,my_natom
    paw_an_in1=>paw_an_in(ij)
@@ -2097,7 +2097,7 @@ implicit none
    iatom_tot=atmtab_send(ipaw_an_send)
    ij = atm_indx_send(iatom_tot)
    paw_an1=>paw_an(ij)
-   buf_int_size=buf_int_size+15+size(paw_an1%lmselect)
+   buf_int_size=buf_int_size+17+size(paw_an1%lmselect)
    if (paw_an1%has_vxc==2) then
      buf_dp_size=buf_dp_size+size(paw_an1%vxc1)
      buf_dp_size=buf_dp_size+size(paw_an1%vxct1)
@@ -2262,7 +2262,8 @@ implicit none
    end if
  end do
  if ((indx_int-1/=buf_int_size).or.(indx_dp-1/=buf_dp_size)) then
-   write(msg,'(a,i10,a,i10)') 'Wrong buffer sizes: buf_int_size=',buf_int_size,' buf_dp_size=',buf_dp_size
+   write(msg,'(4(a,i10))') 'Wrong buffer sizes: buf_int =',buf_int_size,'/',indx_int-1,&
+   &                                           ' buf_dp =',buf_dp_size ,'/',indx_dp-1
    MSG_BUG(msg)
  end if
 

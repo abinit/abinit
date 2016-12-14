@@ -786,6 +786,9 @@ end subroutine pawxc_mkdenpos_wrapper
 !!  == if nkxc>0 ==
 !!    kxc(nrad,pawang%angl_size,nkxc)=xc kernel
 !!        (see notes below for nkxc)
+!!  == if nk3xc>0 ==
+!!    k3xc(nrad,pawang%angl_size,nk3xc)= derivative of xc kernel
+!!        (see notes below for nk3xc)
 !!
 !! NOTES
 !!  Dimension of Kxc:
@@ -796,6 +799,13 @@ end subroutine pawxc_mkdenpos_wrapper
 !!    if nspden>=2, return  kxc(:,1)=d2Exc/drho_up drho_up
 !!                          kxc(:,2)=d2Exc/drho_up drho_dn
 !!                          kxc(:,3)=d2Exc/drho_dn drho_dn
+!!  Dimension of K3xc:
+!!   ===== if LDA (xclevel=1) :
+!!    if nspden==1: return  k3xc(:,1)=d3Exc/drho3
+!!    if nspden>=2, return  k3xc(:,1)=d3Exc/drho_up drho_up drho_up
+!!                          k3xc(:,2)=d3Exc/drho_up drho_up drho_dn
+!!                          k3xc(:,3)=d3Exc/drho_up drho_dn drho_dn
+!!                          k3xc(:,4)=d3Exc/drho_dn drho_dn drho_dn
 !!
 !! PARENTS
 !!      m_pawpsp,pawdenpot
@@ -805,7 +815,7 @@ end subroutine pawxc_mkdenpos_wrapper
 !!
 !! SOURCE
 
-subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspden,option,&
+subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3xc,nrad,nspden,option,&
 &                pawang,pawrad,rhor,usecore,usexcnhat,vxc,xclevel,xc_denpos)
 
 
@@ -819,7 +829,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ixc,lm_size,nkxc,nrad,nspden,option,usecore,usexcnhat,xclevel
+ integer,intent(in) :: ixc,lm_size,nkxc,nk3xc,nrad,nspden,option,usecore,usexcnhat,xclevel
  real(dp),intent(in) :: xc_denpos
  real(dp),intent(out) :: enxc,enxcdc
  type(pawang_type),intent(in) :: pawang
@@ -830,6 +840,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
  real(dp),intent(in) :: nhat(nrad,lm_size,nspden*((usexcnhat+1)/2))
  real(dp),intent(in),target :: rhor(nrad,lm_size,nspden)
  real(dp),intent(out) :: kxc(nrad,pawang%angl_size,nkxc)
+ real(dp),intent(out) :: k3xc(nrad,pawang%angl_size,nk3xc)
  real(dp),intent(out) :: vxc(nrad,pawang%angl_size,nspden)
 
 !Local variables-------------------------------
@@ -840,7 +851,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
  character(len=500) :: msg
 !arrays
 ! real(dp) :: tsec(2)
- real(dp),allocatable :: dgxc(:),dnexcdn(:,:),drho(:),drhocore(:),dvxcdgr(:,:),dvxci(:,:)
+ real(dp),allocatable :: dgxc(:),dnexcdn(:,:),drho(:),drhocore(:),dvxcdgr(:,:),dvxci(:,:),d2vxci(:,:)
  real(dp),allocatable :: dylmdr(:,:,:),exci(:),ff(:),grho2_updn(:,:),gxc(:,:,:,:),m_norm(:)
  real(dp),allocatable :: rhoarr(:,:),rhonow(:,:,:),rho_updn(:,:),vxci(:,:)
  real(dp),allocatable,target :: rhohat(:,:,:)
@@ -853,6 +864,14 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
 !----------------------------------------------------------------------
  if(nspden==4.and.nkxc>0) then
    msg='Kxc for nspden=4 not implemented!'
+   MSG_ERROR(msg)
+ end if
+ if(nspden==4.and.nk3xc>0) then
+   msg='K3xc for nspden=4 not implemented!'
+   MSG_ERROR(msg)
+ end if
+ if(nk3xc>0.and.nkxc==0) then
+   msg='nkxc must be non-zero if nk3xc is'
    MSG_ERROR(msg)
  end if
  if(nspden==4.and.xclevel==2) then
@@ -906,7 +925,8 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
  if (option/=1.and.option/=5) enxc=zero
  if (option==0.or.option==2) enxcdc=zero
  if (option/=3.and.option/=4) vxc(:,:,:)=zero
- if (nkxc>0) kxc(:,:,:)=zero
+ if (nkxc>0)  kxc(:,:,:) =zero
+ if (nk3xc>0) k3xc(:,:,:)=zero
  m_norm_min=EPSILON(0.0_dp)**2
  mgga=0 !metaGGA contributions are not taken into account here
 
@@ -1006,7 +1026,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
 
 !    The variable order indicates to which derivative of the energy
 !    the computation must be done. Here, no derivative, except if Kxc is requested.
-     order=1;if (nkxc>0) order=2
+     order=1;if (nkxc>0) order=2; if(nk3xc>0) order=3
 
 !    Allocation of mandatory arguments of drivexc
      LIBPAW_ALLOCATE(exci,(nrad))
@@ -1016,6 +1036,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
 !    Allocation of optional arguments
      call pawxc_size_dvxc_wrapper(ixc,ndvxc,ngr2,nd2vxc,nspden_updn,nvxcdgr,order)
      LIBPAW_ALLOCATE(dvxci,(nrad,ndvxc))
+     LIBPAW_ALLOCATE(d2vxci,(nrad,nd2vxc))
      LIBPAW_ALLOCATE(dvxcdgr,(nrad,nvxcdgr))
      LIBPAW_ALLOCATE(grho2_updn,(nrad,ngr2))
      LIBPAW_ALLOCATE(dnexcdn,(nrad,nspgrad))
@@ -1047,11 +1068,11 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
 
 !    Call to main XC driver
      call pawxc_drivexc_wrapper(exci,ixc,mgga,ndvxc,nd2vxc,ngr2,nrad,nspden_updn,nvxcdgr,order,rho_updn,vxci,xclevel, &
-&     dvxc=dvxci,grho2=grho2_updn,vxcgrho=dvxcdgr)
+&     dvxc=dvxci,d2vxc=d2vxci,grho2=grho2_updn,vxcgrho=dvxcdgr)
 
 
 !    ----------------------------------------------------------------------
-!    ----- Accumulate and store XC kernel
+!    ----- Accumulate and store XC kernel and its derivative
 !    ----------------------------------------------------------------------
      if (nkxc>0.and.ndvxc>0) then
        kxc(1:nrad,ipts,1:nkxc)=zero
@@ -1071,6 +1092,11 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
            end do
          end do
        end if
+     end if
+
+!    kernel derivative :
+     if (nk3xc>0.and.nd2vxc>0) then
+       k3xc(1:nrad,ipts,1:min(nk3xc,nd2vxc))=d2vxci(1:nrad,1:min(nk3xc,nd2vxc))
      end if
 
 !    ----------------------------------------------------------------------
@@ -1197,6 +1223,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,lm_size,lmselect,nhat,nkxc,nrad,nspd
      LIBPAW_DEALLOCATE(exci)
      LIBPAW_DEALLOCATE(vxci)
      LIBPAW_DEALLOCATE(dvxci)
+     LIBPAW_DEALLOCATE(d2vxci)
      LIBPAW_DEALLOCATE(dvxcdgr)
      LIBPAW_DEALLOCATE(rho_updn)
      LIBPAW_DEALLOCATE(grho2_updn)

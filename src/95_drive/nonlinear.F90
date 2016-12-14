@@ -149,12 +149,12 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  integer,parameter :: level=50,formeig=0,response=1,cplex1=1
  integer :: ask_accurate,band_index,bantot,choice,cplex,dum_nshiftk,flag
  integer :: fullinit,gencond,gnt_option,gscase
- integer :: has_dijnd,has_kxc
+ integer :: has_dijnd,has_kxc,has_k3xc
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  integer :: iatom,iatom_tot,indx,iband,ider,idir,ierr,ifft,ikpt,ipert,isppol
  integer :: ireadwf0,iscf_eff,ispden,itypat,izero,mcg,me,mgfftf,mkmem_max,mpert,my_natom
  integer :: n1,n2,n3,n3xccc,natom,nband_k,nblok,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
- integer :: nkpt_eff,nkpt_max,nkpt3,nkxc,nkxc1,nk3xc,nneigh,ntypat,nsym1,nspden_rhoij,nzlmopt
+ integer :: nkpt_eff,nkpt_max,nkpt3,nkxc,nkxc1,nk3xc,nk3xc1,nneigh,ntypat,nsym1,nspden_rhoij,nzlmopt
  integer :: optcut,optgr0,optgr1,optgr2,optrad,option,optorth
  integer :: optatm,optdyfr,opteltfr,optgr,optstr,optv,optn,optn2
  integer :: psp_gencond,pead,req_cplex_dij,rdwr,rdwrpaw,spaceworld,tim_mkrho,timrev
@@ -618,12 +618,11 @@ end if
      has_dijnd=1; req_cplex_dij=2
    end if
    has_kxc=1;nkxc1=2*dtset%nspden-1 ! LDA only
+   has_k3xc=1; nk3xc1=3*min(dtset%nspden,2)-2 ! LDA only
    if(dtset%xclevel==2.and.dtset%pawxcdev==0) nkxc1=23
-   ! TO CHANGE
-   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,0,dtset%nspden,cplex,dtset%pawxcdev,&
-&   dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
+   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,nk3xc1,dtset%nspden,cplex,dtset%pawxcdev,&
+&   dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,has_k3xc=has_k3xc,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
-   ! END TO CHANGE
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
 &   has_dijso=1,has_pawu_occ=1,has_exexch_pot=1,req_cplex_dij=req_cplex_dij,&
