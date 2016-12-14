@@ -23338,13 +23338,17 @@
         </p>
         <p>
          1) When the primitive vectors of the lattice do NOT form
-        a FCC or a BCC lattice, the usual (shifted) Monkhorst-Pack
+        a FCC or a BCC lattice, the default (shifted) Monkhorst-Pack
         grids are formed by using
         [[nshiftk]]=1 and [[shiftk]] 0.5 0.5 0.5 .
-        This is often the preferred k point sampling.
+        This is often the preferred k point sampling, as the shift improves the sampling efficiency.
+        However, it can also break symmetry, if the 111 direction is not an axis of rotation, 
+        e.g. in tetragonal or hexagonal systems. Abinit will complain about this breaking, and you 
+        should adapt [[shiftk]].
         For a non-shifted Monkhorst-Pack grid, use
         [[nshiftk]]=1 and [[shiftk]] 0.0 0.0 0.0 ,
-        but there is little reason to do that.
+        which will be compatible with all symmetries, and is necessary for some features such as k-point
+        interpolation.
         </p>
         <p>
          2) When the primitive vectors of the lattice form a FCC lattice,

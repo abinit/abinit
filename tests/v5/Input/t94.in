@@ -44,6 +44,7 @@ nqshft 1
 q1shft 0.0 0.0 0.0
 #
 ifcflag 1
+ifcout 0
 ifcana 1
 #  ifc for all atoms?
 natifc 0

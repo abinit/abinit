@@ -180,8 +180,8 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
 
  Calculation of phonon density of states 
 
- Debye frequency from DOS:     0.2005872640E-02 (Ha) =     0.1319800796E+02 (THz)
- Debye temperature from DOS:     0.6334037310E+03 (K)
+ Debye frequency from DOS:     0.5112948294E-04 (Ha) =     0.3364158367E+00 (THz)
+ Debye temperature from DOS:     0.1614539458E+02 (K)
 
 - Average speed of sound:     0.4707493623E+04 (at units) = 10298542627.8063 (m/s)
 

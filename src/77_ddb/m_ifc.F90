@@ -680,7 +680,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  call ifc_free(ifc_tmp)
 
-
  ! TODO (This is to be suppressed in a future version)
  do_prtfreq = .False.; if (present(prtfreq)) do_prtfreq = prtfreq
  if (do_prtfreq .or. prtsrlr == 1) then
@@ -715,6 +714,7 @@ end subroutine ifc_init
 !!***
 
 !----------------------------------------------------------------------
+
 
 !!****f* m_ifc/ifc_fourq
 !! NAME
@@ -959,8 +959,11 @@ end subroutine corsifc9
 !! ifc_print
 !!
 !! FUNCTION
-!! Adds the real-space interatomic force constants to the output file,
-!! the NetCDF file and, if prt_ifc==1, to the ifcinfo.out file.
+!! Adds the real-space interatomic force constants to:
+!!  the output file,
+!!  a NetCDF file which is already open on ncid
+!!  if prt_ifc==1, to the ifcinfo.out file
+!!  to a TDEP file named outfile.forceconstants_ABINIT
 !!
 !! INPUTS
 !! Ifc<type(ifc_type)>=Object containing the dynamical matrix and the IFCs.
@@ -978,6 +981,9 @@ end subroutine corsifc9
 !!
 !! NOTES
 !! This routine should be executed by one processor only
+!!  NB: this is unreadable and horrible - 3/4 different file formats for the
+!!  same stuff. We should make different subroutines, even if it duplicates some
+!!  code
 !!
 !! PARENTS
 !!      anaddb
@@ -989,6 +995,7 @@ end subroutine corsifc9
 
 subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 
+ use m_fstrings,         only : int2char4
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1012,17 +1019,19 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
  real(dp),intent(in) :: zeff(3,3,Ifc%natom)
 !Local variables -------------------------
 !scalars
- integer :: ia,ii,ncerr,iatifc,ifcout1,mu,nu,iout
-! unit number to print out ifc information for dynamical matrix (AI2PS)
- integer :: unit_ifc
+ integer :: ia,ii,ncerr,iatifc,ifcout1,mu,nu,iout, irpt
+! unit number to print out ifc information for dynamical matrix (AI2PS) 
+ integer :: unit_ifc, unit_tdep
  real(dp) :: detdlt
  character(len=500) :: message
+ character(len=4) :: str1, str2
 !arrays
  integer,allocatable :: list(:)
+ integer,allocatable :: indngb(:)
  real(dp) :: invdlt(3,3),ra(3),xred(3)
  real(dp),allocatable :: dist(:,:,:),wkdist(:),rsiaf(:,:,:),sriaf(:,:,:),vect(:,:,:)
+ real(dp),allocatable :: posngb(:,:)
  real(dp) :: gprimd(3,3),rprimd(3,3)
- real(dp),allocatable :: indngb(:),posngb(:,:)
 
 ! *********************************************************************
 
@@ -1045,6 +1054,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 & dielt(2,2)*dielt(3,1)-dielt(1,1)*dielt(2,3)*dielt(3,2)-&
 & dielt(1,2)*dielt(2,1)*dielt(3,3)
 
+! echo to log file
  write(std_out,'(a)' )' ifc_print : analysis of interatomic force constants '
  call mkrdim(Ifc%acell,Ifc%rprim,rprimd)
  call matr3inv(rprimd,gprimd)
@@ -1071,10 +1081,10 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
    end if
  end if
 
- if (ifcout>Ifc%natom*Ifc%nrpt) then
+ if (ifcout>Ifc%natom*Ifc%nrpt .or. ifcout == -1) then
    ifcout1=Ifc%natom*Ifc%nrpt
    write(message, '(3a,i0,a)' )&
-&   'The value of ifcout exceed the number of atoms in the big box.', ch10, &
+&   'The value of ifcout exceeds the number of atoms in the big box.', ch10, &
 &   'Output limited to ',Ifc%natom*Ifc%nrpt,' atoms.'
    MSG_WARNING(message)
  else
@@ -1088,6 +1098,18 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
    end if
    write(iout, '(a,a)' )ch10,&
 &   '  NOTE: Open file ifcinfo.out, for the output of interatomic force constants. This is because prt_ifc==1. '
+
+   if (open_file('outfile.forceconstants_ABINIT', message, newunit=unit_tdep, status="replace") /= 0) then
+     MSG_ERROR(message)
+   end if
+   write(iout, '(a,a,a)' )ch10,&
+&   '  NOTE: Open file outfile.forceconstants_ABINIT, for the output of interatomic force',&
+&   ' constants in TDEP format. This is because prt_ifc==1. '
+   ! Print necessary stuff for TDEP
+   write(unit_tdep,"(1X,I10,15X,'How many atoms per unit cell')") Ifc%natom
+
+   write(unit_tdep,"(1X,F20.15,5X,'Realspace cutoff (A)')") maxval(dist)*Bohr_Ang+1E-5_dp
+ end if
 
 #ifdef HAVE_NETCDF
   ! initialize netcdf variables
@@ -1118,7 +1140,6 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
    NCF_CHECK(nctk_set_datamode(ncid))
 #endif
 
- end if
  ABI_MALLOC(rsiaf,(3,3,ifcout1))
  ABI_MALLOC(sriaf,(3,3,ifcout1))
  ABI_MALLOC(vect,(3,3,ifcout1))
@@ -1136,7 +1157,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 
      ! First transform canonical coordinates to reduced coordinates
      do ii=1,3
-        xred(ii)=Ifc%gprim(1,ii)*Ifc%rcan(1,ia)+Ifc%gprim(2,ii)*Ifc%rcan(2,ia)+Ifc%gprim(3,ii)*Ifc%rcan(3,ia)
+       xred(ii)=Ifc%gprim(1,ii)*Ifc%rcan(1,ia)+Ifc%gprim(2,ii)*Ifc%rcan(2,ia)+Ifc%gprim(3,ii)*Ifc%rcan(3,ia)
      end do
 
      ! Then to cartesian coordinates
@@ -1163,12 +1184,34 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 
 
      if (prt_ifc == 1) then
+       write(unit_tdep,"(1X,I10,15X,'How many neighbours does atom ',I3,' have')") ifcout1, ia
+
        do ii=1,ifcout1
+         !TDEP
+         call int2char4(ii, str1)
+         call int2char4(ia, str2)
+         write(unit_tdep,"(1X,I10,15X,a,a,a,a)") indngb(ii), &
+&            'In the unit cell, what is the index of neighbour ', &
+&            trim(str1), " of atom ", trim(str2)
+         ! The lattice vector needs to be in reduced coordinates?
+         ! TODO: check whether this is correct for TDEP: might need just lattice
+         ! vector part and not full vector, and could be in integers instead of
+         ! cartesian vector...
+         irpt=(list(ii)-1)/Ifc%natom+1
+         write(unit_tdep,'(3es28.16)') matmul(Ifc%rpt(1:3,irpt),Ifc%gprim) 
+
+         !AI2PS
          write(unit_ifc,'(i6,i6)') ia,ii
          write(unit_ifc,'(3es28.16)') posngb(1:3,ii)
          do nu=1,3
-           write(unit_ifc,   '(3f28.16)'  )(rsiaf(nu,mu,ii),mu=1,3)
-         end do
+           !TDEp
+           ! And the actual short ranged forceconstant: TODO: check if
+           ! a transpose is needed or a swap between the nu and the mu
+           write(unit_tdep,'(3f28.16)') (sriaf(nu,mu,ii)*Ha_eV/amu_emass, mu=1, 3)
+           
+           !AI2PS
+           write(unit_ifc,'(3f28.16)')(rsiaf(nu,mu,ii),mu=1,3)
+         end do     
        end do
 
 #ifdef HAVE_NETCDF
@@ -1191,17 +1234,47 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 #endif
      end if
    end if ! End the condition on atifc
+ end do ! End Big loop on atoms in the unit cell, and corresponding test
 
- end do ! End Big loop on atoms in the unit cell, and corresponding test .
+
+! NB for future use: in TDEP the following can also be provided.
+!        ! Print some auxiliary information, if it is there. Such as norm of
+!        ! forceconstant per shell, which shells there are and so on.
+!        if ( fc%npairshells .gt. 0 .and. allocated(fc%pairshell) ) then
+!            write(u,"(1X,I10,15X,'Number of irreducible coordination shells')") fc%npairshells
+!            do i=1,fc%npairshells
+!                write(u,"(1X,I10,1X,F16.10,1X,F16.10,15X,'number atoms in shell, radius, norm of forceconstant',I0)") fc%pairshell(i)%n,fc%pairshell(i)%rad,fc%pairshell(i)%norm,i
+!            enddo
+!            do i=1,fc%npairshells
+!                do j=1,fc%pairshell(i)%n
+!                    write(u,"(1X,3(1X,F18.12),2(1X,I0))") lo_chop(matmul(p%inv_latticevectors,fc%pairshell(i)%vec(:,j)),lo_sqtol),fc%pairshell(i)%atind(j),fc%pairshell(i)%pairind(j)
+!                enddo
+!            enddo
+!        endif
+
+ if (prt_ifc == 1) then
+   close(unit_ifc)
+   close(unit_tdep)
+
+   if (open_file('infile.lotosplitting_ABINIT', message, newunit=unit_tdep, status="replace") /= 0) then
+     MSG_ERROR(message)
+   end if
+   write(unit_tdep,'(3es28.16)') dielt(:,1)
+   write(unit_tdep,'(3es28.16)') dielt(:,2)
+   write(unit_tdep,'(3es28.16)') dielt(:,3)
+   do ia = 1, Ifc%natom
+     do ii = 1, 3
+       write(unit_tdep,'(3es28.16)') zeff(:,ii,ia)
+     end do
+   end do
+   close(unit_tdep)
+ end if
 
  ABI_FREE(rsiaf)
  ABI_FREE(sriaf)
  ABI_FREE(vect)
  ABI_FREE(indngb)
  ABI_FREE(posngb)
-
- if (prt_ifc == 1) close(unit_ifc)
-
  ABI_FREE(dist)
  ABI_FREE(list)
  ABI_FREE(wkdist)
@@ -1286,7 +1359,8 @@ implicit none
  real(dp),intent(in) :: dist(Ifc%natom,Ifc%natom,Ifc%nrpt)
  real(dp),intent(in) :: zeff(3,3,Ifc%natom)
  integer,intent(in) :: list(Ifc%natom*Ifc%nrpt)
- real(dp),intent(out) :: rsiaf(3,3,ifcout),sriaf(3,3,ifcout),vect(3,3,ifcout),indngb(ifcout),posngb(3,ifcout)
+ integer,intent(out) :: indngb(ifcout)
+ real(dp),intent(out) :: rsiaf(3,3,ifcout),sriaf(3,3,ifcout),vect(3,3,ifcout),posngb(3,ifcout)
 
 !Local variables -------------------------
 !scalars
@@ -1846,7 +1920,7 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
  end if
 
  write (unit_btrap,'(a)') '#'
- write (unit_btrap,'(a)') '# ABINIT package : Boltztrap phonon file. Remove this header before feeding to BT'
+ write (unit_btrap,'(a)') '# ABINIT package : Boltztrap phonon file. With old BT versions remove this header before feeding to BT'
  write (unit_btrap,'(a)') '#    for compatibility with PHON output the freq are in Ry (before the square)'
  write (unit_btrap,'(a)') '#'
  write (unit_btrap,'(a)') '#    nq, nband  '

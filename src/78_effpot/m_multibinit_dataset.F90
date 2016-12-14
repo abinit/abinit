@@ -378,12 +378,12 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
- multibinit_dtset%ifcout=2000000
+ multibinit_dtset%ifcout=2000000 ! or -1 -> max number of ifc
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ifcout',tread,'INT')
  if(tread==1) multibinit_dtset%ifcout=intarr(1)
- if(multibinit_dtset%ifcout<0)then
+ if(multibinit_dtset%ifcout<-1)then
    write(message, '(a,i0,a,a,a)' )&
-&   'ifcout is',multibinit_dtset%ifcout,', which is lower than 0 .',ch10,&
+&   'ifcout is',multibinit_dtset%ifcout,', which is lower than -1 (default = all ifc) .',ch10,&
 &   'Action: correct ifcout in your input file.'
    MSG_ERROR(message)
  end if

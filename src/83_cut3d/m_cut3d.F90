@@ -2945,11 +2945,11 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
        end do
 
        do ir3=1,nr3+1
-         ii3=mod(ir3-1,nr3) + 1
+         ii3=mod(ir3-1+gridshift3, nr3) + 1
          do ir2=1,nr2+1
-           ii2=mod(ir2-1,nr2) + 1
+           ii2=mod(ir2-1+gridshift2, nr2) + 1
            do ir1=1,nr1+1
-             ii1=mod(ir1-1,nr1) + 1
+             ii1=mod(ir1-1+gridshift1, nr1) + 1
              write(unout,'(ES17.10)') fofr(1,ii1,ii2,ii3)
            end do
          end do
