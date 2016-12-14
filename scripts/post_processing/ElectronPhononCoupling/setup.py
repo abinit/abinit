@@ -40,6 +40,12 @@ recursive-include ElectronPhononCoupling *.py
 recursive-include ElectronPhononCoupling/scripts *
 recursive-include ElectronPhononCoupling/data *
 prune ElectronPhononCoupling/data/inputs-for-tests/output
+graft Examples
+exclude Examples/Calculations/*/odat*
+exclude Examples/Calculations/*/*.out*
+exclude Examples/Calculations/*/*.log*
+exclude Examples/Calculations/*/*fort*
+exclude Examples/Out/*
 """
     with open('MANIFEST.in', 'write') as f:
         f.write(content)
@@ -72,6 +78,7 @@ setup_args = dict(
       description      = description,
       long_description = long_description,
       author           = author,
+      author_email     = author_email,
       url              = url,
       license          = license,
       packages         = find_packages(),

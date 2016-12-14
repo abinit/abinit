@@ -975,7 +975,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !  Verify that k-point set has full space-group symmetry; otherwise exit
    call status(0,dtfil%filstat,iexit,level,'call symkchk ')
    timrev=1
-   call symkchk(dtset%kptns,dtset%nkpt,dtset%nsym,symrec,timrev)
+   if (symkchk(dtset%kptns,dtset%nkpt,dtset%nsym,symrec,timrev,message) /= 0) then
+     MSG_ERROR(message)
+   end if
 
 !  Calculate the kinetic part of the elastic tensor
    call dfpt_eltfrkin(cg,eltfrkin,dtset%ecut,dtset%ecutsm,dtset%effmass,&

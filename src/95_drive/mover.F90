@@ -873,6 +873,8 @@ real(dp) :: rmet(3,3)
          call pred_diisrelax(ab_mover,hist,itime,ntime,DEBUG,iexit)
        case (21)
          call pred_steepdesc(ab_mover,preconforstr,hist,itime,DEBUG,iexit)
+       case (22)
+         call pred_lbfgs(ab_mover,ab_xfh,preconforstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
 #if defined HAVE_LOTF
        case (23)
          call pred_lotf(ab_mover,hist,itime,icycle,DEBUG,iexit)

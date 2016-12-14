@@ -3002,8 +3002,8 @@ function paw_overlap(cprj1,cprj2,typat,pawtab,spinor_comm) result(onsite)
 &           +cprj1(iatom,isp)%cp(2,jlmn) * cprj2(iatom,isp)%cp(2,ilmn) &
 &           )
 
-           onsite(2)=onsite(2) + sij*(                                  &
-&           cprj1(iatom,isp)%cp(1,ilmn) * cprj2(iatom,isp)%cp(2,jlmn) &
+           onsite(2)=onsite(2) + sij*(                                 &
+&           cprj1(iatom,isp)%cp(1,ilmn) * cprj2(iatom,isp)%cp(2,jlmn)  &
 &           -cprj1(iatom,isp)%cp(2,ilmn) * cprj2(iatom,isp)%cp(1,jlmn) &
 &           +cprj1(iatom,isp)%cp(1,jlmn) * cprj2(iatom,isp)%cp(2,ilmn) &
 &           -cprj1(iatom,isp)%cp(2,jlmn) * cprj2(iatom,isp)%cp(1,ilmn) &
