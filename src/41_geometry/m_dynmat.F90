@@ -7,7 +7,7 @@
 !!  This module provides low-level tools to operate on the dynamical matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2016 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM)
+!!  Copyright (C) 2014-2016 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -70,6 +70,7 @@ module m_dynmat
  public :: dist9                ! Compute the distance between atoms in the big box
  public :: ftifc_q2r            ! Fourier transform of the dynamical matrices to obtain interatomic forces (real space).
  public :: ftifc_r2q            ! Fourier transform of the interatomic forces to obtain dynamical matrices (reciprocal space).
+ public :: dynmat_dq            ! Compute the derivative D(q)/dq via Fourier transform of the interatomic forces
  public :: ifclo9               ! Convert from cartesian coordinates to local coordinates
  public :: wght9                ! Generates a weight to each R points of the Big Box and for each pair of atoms
  public :: d3sym                ! Given a set of calculated elements of the 3DTE matrix,
@@ -2400,7 +2401,7 @@ end subroutine asrif9
 !! nprt= Number of R points in the Big Box
 !! rpt(3,nrpt)= Canonical coordinates of the R points in the unit cell
 !!  These coordinates are normalized (=> * acell(3)!!)
-!!  The array is allocated here wit the proper dimension. Client code is responsible
+!!  The array is allocated here with the proper dimension. Client code is responsible
 !!  for the deallocation.
 !!
 !! PARENTS
@@ -3319,14 +3320,14 @@ end subroutine ftifc_q2r
 !!   to obtain dynamical matrices (reciprocal space).
 !!
 !! INPUTS
-!! atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space !!
-!!  We used the imaginary part just for debugging !
+!! atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space
+!!  We use the imaginary part just for debugging!
 !! gprim(3,3)= Normalized coordinates in reciprocal space
 !! natom= Number of atoms in the unit cell
 !! nqpt= Number of q points in the Brillouin zone
 !! nrpt= Number of R points in the Big Box
 !! rpt(3,nprt)= Canonical coordinates of the R points in the unit cell
-!!           These coordinates are normalized (=> * acell(3)!!)
+!!   These coordinates are normalized (=> * acell(3)!!)
 !! spqpt(3,nqpt)= Reduced coordinates of the q vectors in reciprocal space
 !! wghatm(natom,natom,nrpt)= Weights associated to a pair of atoms and to a R vector
 !!
@@ -3412,6 +3413,105 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
  end do
 
 end subroutine ftifc_r2q
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dynmat/dynmat_dq
+!!
+!! NAME
+!! dynmat_dq
+!!
+!! FUNCTION
+!!   Compute the derivative D(q)/dq via Fourier transform of the interatomic forces
+!!
+!! INPUTS
+!! qpt(3)= Reduced coordinates of the q vector in reciprocal space
+!! natom= Number of atoms in the unit cell
+!! gprim(3,3)= Normalized coordinates in reciprocal space
+!! nrpt= Number of R points in the Big Box
+!! rpt(3,nprt)= Canonical coordinates of the R points in the unit cell
+!!   These coordinates are normalized (=> * acell(3)!!)
+!! atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space
+!!  We use the imaginary part just for debugging!
+!! wghatm(natom,natom,nrpt)= Weights associated to a pair of atoms and to a R vector
+!!
+!! OUTPUT
+!! dddq(2,3,natom,3,natom,3)= Derivate of the dynamical matrix.
+!!  The tree directions are stored in the last dimension.
+!!
+!! PARENTS
+!!      m_dynmat
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dynmat_dq(qpt,natom,gprim,nrpt,rpt,atmfrc,wghatm,dddq)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dynmat_dq'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: natom,nrpt
+!arrays
+ real(dp),intent(in) :: gprim(3,3),rpt(3,nrpt),qpt(3)
+ real(dp),intent(in) :: wghatm(natom,natom,nrpt)
+ real(dp),intent(in) :: atmfrc(2,3,natom,3,natom,nrpt)
+ real(dp),intent(out) :: dddq(2,3,natom,3,natom,3)
+
+!Local variables -------------------------
+!scalars
+ integer :: ia,ib,irpt,mu,nu,ii
+ real(dp) :: im,kr,re
+!arrays
+ real(dp) :: kk(3),fact(2,3)
+
+! *********************************************************************
+
+ dddq = zero
+
+ do irpt=1,nrpt
+   ! Calculation of the k coordinates in Normalized Reciprocal coordinates
+   kk(1) = qpt(1)*gprim(1,1)+ qpt(2)*gprim(1,2) + qpt(3)*gprim(1,3)
+   kk(2) = qpt(1)*gprim(2,1)+ qpt(2)*gprim(2,2) + qpt(3)*gprim(2,3)
+   kk(3) = qpt(1)*gprim(3,1)+ qpt(2)*gprim(3,2) + qpt(3)*gprim(3,3)
+
+   ! Product of k and r
+   kr=kk(1)*rpt(1,irpt)+kk(2)*rpt(2,irpt)+kk(3)*rpt(3,irpt)
+
+   ! Get phase factor
+   re=cos(two_pi*kr); im=sin(two_pi*kr)
+
+   ! Inner loop on atoms and directions
+   do ib=1,natom
+     do ia=1,natom
+       if (abs(wghatm(ia,ib,irpt))>1.0d-10) then
+         ! take into account rotation due to i.
+         fact(1,:) = -im * wghatm(ia,ib,irpt) * rpt(:,irpt)
+         fact(2,:) =  re * wghatm(ia,ib,irpt) * rpt(:,irpt)
+         do nu=1,3
+           do mu=1,3
+             ! Real and imaginary part of the dynamical matrices
+             ! Atmfrc should be real
+             do ii=1,3
+               dddq(1,mu,ia,nu,ib,ii) = dddq(1,mu,ia,nu,ib,ii) + fact(1,ii) * atmfrc(1,mu,ia,nu,ib,irpt)
+               dddq(2,mu,ia,nu,ib,ii) = dddq(2,mu,ia,nu,ib,ii) + fact(2,ii) * atmfrc(1,mu,ia,nu,ib,irpt)
+             end do
+           end do
+         end do
+       end if
+     end do
+   end do
+ end do
+
+end subroutine dynmat_dq
 !!***
 
 !----------------------------------------------------------------------

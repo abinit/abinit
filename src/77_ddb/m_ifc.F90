@@ -32,6 +32,7 @@ MODULE m_ifc
  use m_profiling_abi
  use m_xmpi
  use m_sort
+ use m_cgtools
  use m_bspline
  use m_skw
  use m_nctk
@@ -46,9 +47,9 @@ MODULE m_ifc
  use m_copy,        only : alloc_copy
  use m_ewald,       only : ewald9
  use m_crystal,     only : crystal_t
- use m_geometry,    only : phdispl_cart2red
+ use m_geometry,    only : phdispl_cart2red, normv
  use m_kpts,        only : kpts_ibz_from_kptrlatt
- use m_dynmat,      only : canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, &
+ use m_dynmat,      only : canct9, dist9 , ifclo9, axial9, q0dy3_apply, q0dy3_calc, asrif9, dynmat_dq, &
 &                          make_bigbox, canat9, chkrp9, ftifc_q2r, wght9, symdm9, nanal9, gtdyn9, dymfz9, dfpt_phfrq
  use m_ddb,         only : ddb_type
 
@@ -737,6 +738,7 @@ end subroutine ifc_init
 !!  [out_d2cart(2,3,3*natom,3,3*natom)] = The (interpolated) dynamical matrix for this q-point
 !!  [out_eigvec(2*3*natom*3*natom) = The (interpolated) eigenvectors of the dynamical matrix.
 !!  [out_displ_red(2*3*natom*3*natom) = The (interpolated) displacement in reduced coordinates.
+!!  [dwdq(3,3*natom)] = Group velocities e.g. d(omega(q))/dq
 !!
 !! PARENTS
 !!      get_nv_fs_en,get_tau_k,harmonic_thermo,interpolate_gkk,m_ifc,m_phgamma
@@ -749,7 +751,7 @@ end subroutine ifc_init
 
 
 subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
-                     nanaqdir, out_d2cart, out_eigvec, out_displ_red)   ! Optional [out]
+                     nanaqdir, out_d2cart, out_eigvec, out_displ_red, dwdq)   ! Optional [out]
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -772,6 +774,7 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
  real(dp),optional,intent(out) :: out_d2cart(2,3,Crystal%natom,3,Crystal%natom)
  real(dp),optional,intent(out) :: out_eigvec(2,3,Crystal%natom,3*Crystal%natom)
  real(dp),optional,intent(out) :: out_displ_red(2,3,Crystal%natom,3*Crystal%natom)
+ real(dp),optional,intent(out) :: dwdq(3,3*crystal%natom)
 
 !Local variables-------------------------------
 !scalars
@@ -829,9 +832,94 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
  ! Option to get vectors in reduced coordinates?
  !call phdispl_cart2red(natom, crystal%gprimd, out_eigvec, out_eigvec_red)
 
- !if (present(dwdq) call ifc_get_dwdq(ifc, crystal, my_qpt, phfrq, eigvec, dwdq)
+ if (present(dwdq)) call ifc_get_dwdq(ifc, crystal, my_qpt, phfrq, eigvec, dwdq)
 
 end subroutine ifc_fourq
+!!***
+
+!!****f* m_ifc/ifc_get_dwdq
+!! NAME
+!!  ifc_get_dwdq
+!!
+!! FUNCTION
+!!  Compute the phonon group velocity
+!!
+!! INPUTS
+!!  ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
+!!  crystal<crystal_t> = Information on the crystalline structure.
+!!  qpt(3)=q-point in reduced coordinates (unless nanaqdir is specified)
+!!  eigvec(2*3*natom*3*natom) = The eigenvectors of the dynamical matrix.
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_get_dwdq'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: cryst
+!arrays
+ real(dp),intent(in) :: qpt(3)
+ real(dp),intent(in) :: phfrq(3*cryst%natom)
+ real(dp),intent(in) :: eigvec(2,3*cryst%natom,3*cryst%natom)
+ real(dp),intent(out) :: dwdq(3,3*cryst%natom)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: nqpt1=1,option2=2 !,sumg0=0,plus1=1,iqpt1=1
+ integer :: ii,nu,natom3
+ real(dp) :: dddq(2,3*cryst%natom,3*cryst%natom,3),dot(2)
+ real(dp) :: omat(2,3*cryst%natom,3*cryst%natom)
+
+! ************************************************************************
+
+ natom3 = cryst%natom * 3
+
+ ! Generate the analytical part from the interatomic forces
+ call dynmat_dq(qpt, cryst%natom, ifc%gprim, ifc%nrpt, ifc%rpt, ifc%atmfrc, ifc%wghatm, dddq)
+
+ ! The analytical dynamical matrix dq has been generated
+ ! in the normalized canonical coordinate system. Now, the
+ ! phase is modified, in order to recover the usual (xred) coordinate of atoms.
+ do ii=1,3
+   call dymfz9(dddq(:,:,:,ii), cryst%natom, nqpt1, ifc%gprim, option2, qpt, ifc%trans)
+ end do
+
+ if (ifc%dipdip==1) then
+   ! TODO qeq0 case
+   MSG_ERROR("dipdip==1 not yet implemented")
+ end if
+
+ ! Compute 1/(2w(q)) <u(q)|dD(q)/dq|u(q)>
+ do ii=1,3
+   call zgemm('N','N',natom3,natom3,natom3,cone,dddq(:,:,:,ii),natom3,eigvec,natom3,czero,omat,natom3)
+   do nu=1,natom3
+     if (abs(phfrq(nu)) > tol12) then
+       dot = cg_zdotc(natom3, eigvec(1,1,nu), omat(1,1,nu))
+       dwdq(ii, nu) = dot(1) / (two * phfrq(nu))
+       !write(std_out,*)"dot", dot
+     else
+       dwdq(ii, nu) = zero
+     end if
+   end do
+ end do
+
+end subroutine ifc_get_dwdq
 !!***
 
 !----------------------------------------------------------------------
@@ -2496,17 +2584,19 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
 !local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: iq,nq,natom3,my_rank,nprocs,ierr,mu
- real(dp) :: mare_bspl,mae_bspl,mare_skw,mae_skw
+ integer :: iq,nq,natom3,my_rank,nprocs,ierr,nu,ii
+ real(dp) :: mare_bspl,mae_bspl,mare_skw,mae_skw,dq
  real(dp) :: cpu,wall,gflops,cpu_fourq,wall_fourq,gflops_fourq
  real(dp) :: cpu_bspl,wall_bspl,gflops_bspl,cpu_skw,wall_skw,gflops_skw
  type(phbspl_t) :: phbspl
  type(skw_t) :: skw
 !arrays
- real(dp) :: phfrq(3*cryst%natom),ofreqs(3*cryst%natom),qpt(3)
- real(dp) :: adiff_mev(3*cryst%natom), rel_err(3*cryst%natom)
- real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
- real(dp) :: qred(3),shift(3),vals4(4)
+ integer :: imax(1)
+ real(dp) :: phfrq(3*cryst%natom),ofreqs(3*cryst%natom),qpt(3),wnext(3*cryst%natom)
+ real(dp) :: adiff_mev(3*cryst%natom),rel_err(3*cryst%natom)
+ real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),qvers_cart(3),qvers_red(3),qstep(3)
+ real(dp) :: qred(3),shift(3),vals4(4),dwdq(3,3*cryst%natom)
+ real(dp) :: q1(3),q2(3)
 
 ! *********************************************************************
 
@@ -2527,6 +2617,29 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
  mae_bspl = zero; mare_bspl = zero
  mae_skw = zero; mare_skw = zero
 
+ ! Test computation of group velocites
+ q1 = [0.01_dp, zero, zero]; q2 = [half, zero, zero]
+ !q2 = [0.01_dp, zero, zero]; q1 = [half, zero, zero]
+ nq = 100
+ dq = normv(q2 - q1, cryst%gmet, "G") / (nq - 1)
+ qvers_red = (q2 -q1) / normv(q2 - q1, cryst%gmet, "G")
+ qvers_cart = two_pi * matmul(cryst%gprimd, qvers_red)
+ do iq=1,nq
+    qpt = q1 + (iq - 1) * dq * qvers_red
+    call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, dwdq=dwdq)
+    if (iq > 1) then
+      imax = maxloc(abs(phfrq - wnext)); ii = imax(1)
+      !write(*,*)ii, phfrq(ii), wnext(ii), (phfrq(ii) - wnext(ii)) * Ha_meV
+      write(*,*)"wvel:", qpt(1), minval(abs(phfrq - wnext)) * Ha_meV, maxval(abs(phfrq - wnext)) * Ha_meV, imax
+      write(100,*)phfrq * Ha_meV
+      write(101,*)wnext * Ha_meV
+    end if
+    do nu=1,natom3
+      wnext(nu) = phfrq(nu) + dq * dot_product(dwdq(:, nu), qvers_cart)
+    end do
+ end do
+ stop
+
  nq = 1000
  !call random_seed(put=my_rank*100)
  do iq=1,nq
@@ -2539,7 +2652,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
 
    ! Fourier interpolation
    call cwtime(cpu, wall, gflops, "start")
-   call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart)
+   call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, dwdq=dwdq)
    call cwtime(cpu, wall, gflops, "stop")
    cpu_fourq = cpu_fourq + cpu; wall_fourq = wall_fourq + wall
 
@@ -2563,8 +2676,8 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
 
    ! SKW interpolation
    call cwtime(cpu, wall, gflops, "start")
-   do mu=1,natom3
-     call skw_eval_bks(skw, cryst, mu, qpt, 1, ofreqs(mu))
+   do nu=1,natom3
+     call skw_eval_bks(skw, cryst, nu, qpt, 1, ofreqs(nu))
    end do
    call cwtime(cpu, wall, gflops, "stop")
    cpu_skw = cpu_skw + cpu; wall_skw = wall_skw + wall

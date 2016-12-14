@@ -454,12 +454,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ABI_FREE(ddb_qshifts)
 
  ! Test B-spline interpolation of phonons
- if (.False.) then
- !if (.True.) then
+ !if (.False.) then
+ if (.True.) then
    call ifc_test_phinterp(ifc, cryst, [12,12,12], 1, [zero,zero,zero], [3,3,3], comm)
    !call ifc_set_interpolator(ifc, cryst, nustart, nucount, mode, phspline_ords, phskw_ratio, comm)
    !call ifc_test_intepolator(ifc, dtset, dtfil, comm)
-   !call xmpi_end()
+   call xmpi_end()
  end if
 
  ! Output phonon band structure (requires qpath)
