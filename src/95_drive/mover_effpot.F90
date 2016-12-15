@@ -148,7 +148,7 @@ implicit none
 !a new supercell is compute
  acell = one
  rprimd = effective_potential%crystal%rprimd
- 
+
  if(all(inp%acell > one))then   
    acell = inp%acell
  end if
@@ -303,6 +303,7 @@ implicit none
 !  Initialize xf history (should be put in inwffil)
    ab_xfh%nxfh=0
    ab_xfh%mxfh=(ab_xfh%nxfh-dtset%restartxf+1)+dtset%ntime+5 
+   ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
 
 !***************************************************************
 !2  initialization of the structure for the dynamics
@@ -311,6 +312,10 @@ implicit none
    ABI_ALLOCATE(dtset%rprimd_orig,(3,3,1))
    dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd_supercell
  
+   acell(1) = dtset%rprimd_orig(1,1,1)
+   acell(2) = dtset%rprimd_orig(2,2,1)
+   acell(3) = dtset%rprimd_orig(3,3,1)
+
    ABI_ALLOCATE(xred,(3,dtset%natom))
    ABI_ALLOCATE(xred_old,(3,dtset%natom))
    ABI_ALLOCATE(vel,(3,dtset%natom))
@@ -403,7 +408,7 @@ implicit none
    ABI_DEALLOCATE(vel)
    ABI_DEALLOCATE(xred)
    ABI_DEALLOCATE(xred_old)
-!   ABI_DEALLOCATE(ab_xfh%xfhist)
+   ABI_DEALLOCATE(ab_xfh%xfhist)
 
    call dtset_free(dtset)
    call destroy_results_gs(results_gs)

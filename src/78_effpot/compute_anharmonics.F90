@@ -452,7 +452,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
           do irpt=1,phonon_strain(ii)%nrpt
             phonon_strain(ii)%atmfrc(:,:,:,:,:,irpt) =&
 &           (eff_pots(int(delta1))%harmonics_terms%ifcs%atmfrc(:,:,:,:,:,irpt)&
-&          - eff_pots(int(delta2))%harmonics_terms%ifcs%atmfrc(:,:,:,:,:,irpt) ) / &
+&          - eff_pots(int(delta2))%harmonics_terms%ifcs%atmfrc(:,:,:,:,:,irpt)) / &
 &            (2 * abs(eff_pots(int(delta1))%strain%delta))
           end do
 

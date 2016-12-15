@@ -2757,7 +2757,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !scalar
   integer :: alpha,beta,gamma,delta,ii,ia,mu,ncell
   real(dp):: cijk,energy_part
-  real(dp):: tmp1,ucvol
+  real(dp):: ucvol
   character(len=500) :: message
   logical :: has_strain = .FALSE.
   logical :: iam_master
@@ -2769,7 +2769,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !  real(dp) :: external_stress_tmp(6)
   real(dp) :: fcart_part(3,eff_pot%supercell%natom_supercell)
   real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
-  real(dp) :: strain_tmp(6),strten_part(6),tmp2(3),tmp3(6)
+  real(dp) :: strain_tmp(6),strten_part(6)
   real(dp) :: xred_tmp(3,eff_pot%supercell%natom_supercell)
   real(dp) :: xcart_tmp(3,eff_pot%supercell%natom_supercell)
 
@@ -2892,6 +2892,9 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 ! 3 - Computation of the IFC part :
 !------------------------------------
 
+  energy_part    = zero
+  fcart_part(:,:)= zero
+
   call ifc_contribution(eff_pot,disp_tmp,energy_part,fcart_part,&
 &                       eff_pot%my_cells,eff_pot%my_ncell,eff_pot%my_index_cells,&
 &                       eff_pot%comm_supercell)
@@ -2926,6 +2929,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !    external_stress_tmp(:) = zero
 !  end if
 
+  energy_part    = zero
+  fcart_part(:,:)= zero
+  strten_part(:) = zero
+
   call elastic_contribution(eff_pot,disp_tmp,energy_part,fcart_part,&
 &                           ncell,strten_part,strain_tmp)
 
@@ -2937,8 +2944,8 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   end if
 
   energy = energy + energy_part
-  fcart(:,:)  = fcart(:,:)  + fcart_part(:,:)
-  strten(:) = strten_part(:)
+  fcart(:,:) = fcart(:,:)  + fcart_part(:,:)
+  strten(:) = strten(:) + strten_part(:)
 
 !------------------------------------
 ! 5 - Treat 3rd order strain-coupling:
@@ -2963,7 +2970,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
         end do
       end do
 
-
       write(message, '(a,1ES24.16,a)' ) ' Energy of the 3rd elastics constants      :',&
 &                                         energy_part,' Hartree'
       call wrtout(ab_out,message,'COLL')
@@ -2973,7 +2979,62 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
       strten(:) = strten(:) + strten_part(:)
     end if
 
-!   1-Treat 4rd order elastic constants
+!   2-Part due to the internat strain
+    if(eff_pot%anharmonics_terms%has_elastic_displ)then
+      energy_part    = zero
+      strten_part(:) = zero
+      fcart_part(:,:)= zero
+
+      ii = 1
+      do ia = 1,eff_pot%supercell%natom_supercell
+        do mu = 1,3
+          do beta=1,6
+            do alpha=1,6
+              cijk = eff_pot%anharmonics_terms%elastic_displacement(alpha,beta,mu,ii)
+!             Accumulte for this atom
+              energy_part = energy_part + sixth*cijk*strain_tmp(alpha)*strain_tmp(beta)*disp_tmp(mu,ia)
+              fcart_part(mu,ia) = fcart_part(mu,ia)  +  half*cijk*strain_tmp(alpha)*strain_tmp(beta)
+              strten_part(alpha) = strten_part(alpha) +  half*cijk*strain_tmp(beta)*disp_tmp(mu,ia)
+            end do
+          end do
+        end do
+        ii = ii +1
+!       Reset to 1 if the number of atoms is superior than in the initial cell
+        if(ii==eff_pot%crystal%natom+1) ii = 1
+      end do
+
+      energy = energy +  energy_part
+      strten(:) = strten(:) + strten_part(:)
+      fcart(:,:)= fcart(:,:)+ fcart_part(:,:) 
+
+      write(message, '(a,1ES24.16,a)' ) ' Energy of the 3rd (elastics-disp coupling):',&
+&                                         energy_part,' Hartree'
+      call wrtout(ab_out,message,'COLL')
+      call wrtout(std_out,message,'COLL')
+    end if
+
+!   3-Part due to the strain-phonon coupling
+    if (eff_pot%anharmonics_terms%has_strain_coupling) then
+      energy_part    = zero
+      strten_part(:) = zero
+      fcart_part(:,:)= zero
+
+      call ifcStrainCoupling_contribution(eff_pot,disp_tmp,energy_part,fcart_part,strain_tmp,&
+&                                      strten_part,eff_pot%my_cells,eff_pot%my_ncell,&
+&                                      eff_pot%my_index_cells,eff_pot%comm_supercell)
+
+      write(message, '(a,1ES24.16,a)' ) ' Energy of the 3rd (strain-phonon coupling):',&
+&                                         energy_part,' Hartree'
+      call wrtout(ab_out,message,'COLL')
+      call wrtout(std_out,message,'COLL')
+
+      energy = energy + energy_part
+      fcart  = fcart  + fcart_part
+      strten = strten + strten_part
+    end if
+
+
+!   4-Treat 4rd order elastic constants
     if (eff_pot%anharmonics_terms%has_elastic4rd) then
       energy_part    = zero
       strten_part(:) = zero
@@ -3003,64 +3064,6 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
       energy = energy + energy_part
       strten(:) = strten(:) + strten_part(:)
     end if
-
-!   2-Part due to the internat strain
-    if(eff_pot%anharmonics_terms%has_elastic_displ)then
-      energy_part    = zero
-      strten_part(:) = zero
-      fcart_part(:,:)= zero
-
-      ii = 1
-      do ia = 1,eff_pot%supercell%natom_supercell
-        tmp1=zero;tmp2=zero;tmp3=zero
-        do mu = 1,3
-          do beta=1,6
-            do alpha=1,6
-              cijk = eff_pot%anharmonics_terms%elastic_displacement(alpha,beta,mu,ii)
-              tmp1     = tmp1   + sixth*cijk*strain_tmp(alpha)*strain_tmp(beta)*disp_tmp(mu,ia)
-              tmp2(mu) = tmp2(mu)  +  half*cijk*strain_tmp(alpha)*strain_tmp(beta)
-              tmp3(alpha) = tmp3(alpha) +  half*cijk*strain_tmp(beta)*disp_tmp(mu,ia)
-            end do
-          end do
-        end do
-!       Accumulte for this atom
-        energy_part  = energy_part + tmp1
-        fcart(:,ia)  = fcart(:,ia) + tmp2(:)
-        strten(:)    = strten(:)   + tmp3(:)
-        ii = ii +1
-!       Reset to 1 if the number of atoms is superior than in the initial cell
-        if(ii==eff_pot%crystal%natom+1) ii = 1
-      end do
-
-      energy = energy +  energy_part
-      strten(:) = strten(:) + strten_part(:)
-      fcart(:,:)= fcart(:,:)+ fcart_part(:,:) 
-
-      write(message, '(a,1ES24.16,a)' ) ' Energy of the 3rd (elastics-disp coupling):',&
-&                                         energy_part,' Hartree'
-      call wrtout(ab_out,message,'COLL')
-      call wrtout(std_out,message,'COLL')
-
-    end if
-
-    energy_part    = zero
-    strten_part(:) = zero
-    fcart_part(:,:)= zero
-
-    if (eff_pot%anharmonics_terms%has_strain_coupling) then
-      call ifcStrainCoupling_contribution(eff_pot,disp_tmp,energy_part,fcart_part,strain_tmp,&
-&                                      strten_part,eff_pot%my_cells,eff_pot%my_ncell,&
-&                                      eff_pot%my_index_cells,eff_pot%comm_supercell)
-    end if
-
-    write(message, '(a,1ES24.16,a)' ) ' Energy of the 3rd (strain-phonon coupling):',&
-&                                      energy_part,' Hartree'
-    call wrtout(ab_out,message,'COLL')
-    call wrtout(std_out,message,'COLL')
-    
-    energy = energy + energy_part
-    fcart  = fcart  + fcart_part
-    strten = strten + strten_part
   end if
 
 
@@ -3069,6 +3072,10 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
 !----------------------------------
 
   if(eff_pot%anharmonics_terms%ncoeff > zero)then
+
+    energy_part = zero
+    fcart(:,:)  = zero
+
     call coefficients_contribution(eff_pot,disp_tmp,&
 &                                  energy_part,fcart_part,eff_pot%supercell%natom_supercell,&
 &                                  eff_pot%anharmonics_terms%ncoeff,&
@@ -3230,7 +3237,6 @@ subroutine ifc_contribution(eff_pot,disp,energy,fcart,cells,ncell,index_cells,co
 
   do icell = 1,ncell
     ii = (cells(icell)-1)*eff_pot%crystal%natom
-    
     i1=index_cells(icell,1); i2=index_cells(icell,2); i3=index_cells(icell,3)
     do irpt = 1,eff_pot%harmonics_terms%ifcs%nrpt
 !     get the cell of atom2  (0 0 0, 0 0 1...)
@@ -3372,7 +3378,7 @@ subroutine ifcStrainCoupling_contribution(eff_pot,disp,energy,fcart,strain,strte
 !               accumule energy
                 energy =  energy + sixth*strain(alpha)*disp(mu,kk)*disp(nu,ll)*ifc
 !               accumule forces
-                fcart(mu,kk) = fcart(mu,kk)  + half*strain(alpha)*disp(nu,ll)*ifc
+                fcart(mu,kk) = fcart(mu,kk) + half*strain(alpha)*disp(nu,ll)*ifc
 !               accumule stresses
                 strten(alpha) = strten(alpha) + half*disp(mu,kk)*disp(nu,ll)*ifc
               end do
