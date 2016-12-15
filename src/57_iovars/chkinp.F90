@@ -452,9 +452,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_entropy',dt%dmft_entropy,0,iout)
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_iter',dt%dmft_iter,0,iout)
-       if(dt%dmft_solv<6.or.dt%dmft_solv>7) then
+       if((dt%dmft_solv<6.or.dt%dmft_solv>7).and.dt%ucrpa==0) then
          cond_string(1)='usedmft' ; cond_values(1)=1
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwlo',dt%dmft_nwlo,1,iout)
+         cond_string(1)='usedmft' ; cond_values(1)=1
+         call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwli',dt%dmft_nwli,1,iout)
        endif
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwli',dt%dmft_nwli,1,iout)
@@ -474,7 +476,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_tollc',dt%dmft_tollc,-1,tol5,iout)
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_dc',dt%dmft_dc,3,(/0,1,2/),iout)
-       if(dt%getwfk==0.and.dt%irdwfk==0.and.dt%irdden==0.and.dt%getden==0) then
+       if(dt%getwfk==0.and.dt%irdwfk==0.and.dt%irdden==0.and.dt%getden==0.and.dt%ucrpa==0) then
          write(message,'(3a,i3,a,i3,a,i3,a,i3,a)' )&
 &         'When usedmft==1, A WFC file or a DEN file have to be read. In the current calculation:',ch10, &
 &         '  getwfk =',dt%getwfk, &
@@ -486,7 +488,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        end if
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_t2g',dt%dmft_t2g,2,(/0,1/),iout)
-       if (dt%dmft_solv>=4) then
+       if (dt%dmft_solv>=4.and.dt%ucrpa==0) then
          cond_string(1)='usedmft' ; cond_values(1)=1
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_l',dt%dmftqmc_l,1,iout)
          cond_string(1)='usedmft' ; cond_values(1)=1

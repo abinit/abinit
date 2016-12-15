@@ -1685,6 +1685,15 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if(tread==1) dtset%dmftbandi=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftbandf',tread,'INT')
    if(tread==1) dtset%dmftbandf=intarr(1)
+   if((dtset%dmftbandf-dtset%dmftbandi+1)<2*maxval(dtset%lpawu(:))+1.and.(dtset%dmft_t2g==0)) then
+     write(message, '(4a,i2,2a)' )&
+      '   dmftbandf-dmftbandi+1)<2*max(lpawu(:))+1)',ch10, &
+&     '   Number of bands to construct Wannier functions is not', &
+&     ' sufficient to build Wannier functions for l=',maxval(dtset%lpawu(:)),ch10, &
+&     '   Action: select a correct number of KS bands with dmftbandi and dmftbandf.'
+     MSG_ERROR(message)
+   endif
+
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftcheck',tread,'INT')
    if(tread==1) dtset%dmftcheck=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_entropy',tread,'INT')
@@ -1695,6 +1704,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_n',tread,'DPR')
      if(tread==1) then
        dtset%dmftqmc_n=dprarr(1)
+     else if(dtset%ucrpa==0) then
      else
        write(message, '(5a)' )&
 &       'When DFT+DMFT is activated and one of QMC solvers is used,', ch10, &
@@ -1705,7 +1715,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_l',tread,'INT')
      if(tread==1) then
        dtset%dmftqmc_l=intarr(1)
-     else
+     else if(dtset%ucrpa==0) then
        write(message, '(5a)' )&
 &       'When DFT+DMFT is activated and one of QMC solvers is used,', ch10, &
 &       'dmftqmc_l MUST be defined.',ch10,&
@@ -1717,7 +1727,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_therm',tread,'INT')
      if(tread==1) then
        dtset%dmftqmc_therm=intarr(1)
-     else
+     else if(dtset%ucrpa==0) then
        write(message, '(5a)' )&
 &       'When DFT+DMFT is activated and one of QMC solvers is used,', ch10, &
 &       'dmftqmc_therm MUST be defined.',ch10,&
