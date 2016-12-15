@@ -214,7 +214,7 @@ program multibinit
 
 ! Compute the third order derivative with finite differences
 !****************************************************************************************
- if (inp%prt_3rd > 0) then 
+ if (inp%strcpling > 0) then 
    call compute_anharmonics(reference_effective_potential,filnam,inp,comm)
  end if
 !****************************************************************************************

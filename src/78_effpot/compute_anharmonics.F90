@@ -277,7 +277,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
 &        ' WARNING: There is no strain ',trim(name),' in direction ',ii,ch10
           call wrtout(std_out,message,"COLL")
           has_all_strain = .False.
-          if (inp%prt_3rd == 2) then
+          if (inp%strcpling == 2) then
             do kk = 1,2 
               delta = inp%delta_df
               if (kk==1) delta = -1 * delta 
@@ -311,12 +311,12 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   end do
 
 ! check if strain exist
-  if(all(have_strain==zero).and.inp%prt_3rd /= 2) then
+  if(all(have_strain==zero).and.inp%strcpling /= 2) then
       write(message, '(6a)' )&
 &    ' WARNING: There is no file corresponding to strain',&
 &    ' to compute 3rd order derivatives.',ch10,&
 &    '          In this case the 3rd order derivatives are not set',ch10,&
-&    '          (add files or set prt_3rd to 0)'
+&    '          (add files or set strcpling to 0)'
       call wrtout(std_out,message,"COLL")
   end if
 
@@ -381,15 +381,15 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
     write(message,'(3a)') ch10, ' The computation of the third order derivative ',&
 &    'is possible'
   else
-    if (inp%prt_3rd /= 2) then
+    if (inp%strcpling /= 2) then
       if(ref_eff_pot%has_strainCoupling)then
         write(message,'(10a)') ch10, ' The computation of the third order derivative ',&
-&        'is not possible',ch10,' somes files are missing please use prt_3rd 2 to generate',&
+&        'is not possible',ch10,' somes files are missing please use strcpling 2 to generate',&
 &        ' inputs files',ch10,' usable by abinit. The third order derivatives  present in  ',&
 &        trim(filenames(3)),' will be used'
       else
         write(message,'(9a)') ch10, ' The computation of the third order derivative ',&
-&        'is not possible',ch10,' somes files are missing please use prt_3rd 2 to generate',&
+&        'is not possible',ch10,' somes files are missing please use strcpling 2 to generate',&
 &        ' inputs files',ch10,' usable by abinit. The third order derivative will not be set in',&
 &        ' the XML file'
       end if

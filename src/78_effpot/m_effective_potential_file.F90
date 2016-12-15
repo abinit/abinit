@@ -1012,7 +1012,7 @@ end subroutine system_getDimFromXML
 !!
 !! SOURCE
 
- subroutine system_xml2effpot(eff_pot,filename,comm)
+ subroutine system_xml2effpot(eff_pot,filename,comm,strcpling)
 
  use m_atomdata
  use m_effective_potential, only : effective_potential_type
@@ -1032,6 +1032,7 @@ end subroutine system_getDimFromXML
  !scalars
  character(len=*),intent(in) :: filename
  integer, intent(in) :: comm
+ integer, optional,intent(in) :: strcpling
  !arrays
  type(effective_potential_type), intent(inout) :: eff_pot
 
@@ -1803,6 +1804,14 @@ end subroutine system_getDimFromXML
  ABI_DEALLOCATE(symrel)
  ABI_DEALLOCATE(symafm)
  ABI_DEALLOCATE(tnons)
+
+!if strcpling is set to 0 by the user, need to set the flag to false for
+!the initialisation of the effective potential
+ if (present(strcpling))then
+   if(strcpling == 0 )then
+     has_anharmonics = .FALSE.
+   end if
+ end if
 
 !Initialisation of eff_pot
 call effective_potential_init(crystal,eff_pot,energy,ifcs,ncoeff,nph1l,comm,&
@@ -2662,7 +2671,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
        end if
      end do
      close(unit=funit)
-!    AM_TEST
+!AM_TEST
 
 #else
 
