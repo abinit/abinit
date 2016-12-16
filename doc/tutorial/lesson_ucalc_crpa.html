@@ -41,7 +41,7 @@ about correlated orbitals.</p>
 The first GW tutorial in ABINIT
 (<a href="lesson_gw1.html">GW</a>) is useful to learn how
 to compute the screening, and how to converge the relevant parameters
-(energy cutoffs and number of bands for the polarisability). </p>
+(energy cutoffs and number of bands for the polarizability). </p>
 
 <p>This lesson should take two hours to
 complete (you should have access to more than 8 processors).</p>
@@ -142,10 +142,10 @@ In this case, on still use the variable
 <a href="../input_variables/html_automatically_generated/vargw.html#ucrpa_bands" target="ucrpa_bands">ucrpa_bands</a>.
 The variable will in this case be used to define Projected Local Orbitals Wannier functions.
 The Wannier functions will then be used to define
-the weighting function in the polarisability.
+the weighting function in the polarizability.
 (see Eq. (5) and (7) in Ref.  <a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a>).
 
-<LI> <B> Convergence parameters </B> are the same as for a polarisability calculation for the screening calculation,
+<LI> <B> Convergence parameters </B> are the same as for a polarizability calculation for the screening calculation,
 <a href="../input_variables/html_automatically_generated/vargw.html#ecuteps" target="ecuteps">ecuteps</a>,
 <a href="../input_variables/html_automatically_generated/vargw.html#ecutwfn" target="ecutwfn">ecutwfn</a>,
 <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="nband">nband</a>.
@@ -154,7 +154,7 @@ and the same as for the exchange part of GW for the effective interaction, ie
 <a href="../input_variables/html_automatically_generated/vargw.html#ecutwfn" target="ecutwfn">ecutwfn</a>.
 It is recommended, as discussed in appendix A of <a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a>,
 to use <a href="../input_variables/html_automatically_generated/varpaw.html#pawoptosc" target="pawoptosc">pawoptosc</a>=1.
-If the calculation is carried out with several atoms, use nsym=1, the calculation is not symetrized over atoms
+If the calculation is carried out with several atoms, use nsym=1, the calculation is not symmetrized over atoms
 in this case.
 
 </UL>
@@ -238,21 +238,20 @@ Definition of screening and orbitals, input and log file  </b></h3>
 As discussed briefly in Appendix A of <a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a>
 as well as in section III B <a href="lesson_ucalc_crpa.html#Vaugier2012">[Vaugier2012]</a> and Section II B of
 <a href="lesson_ucalc_crpa.html#Sakuma2013">[Sakuma2013]</a>,  one
-can use different scheme for the cRPA calculations. Let us discuss these different models. namely the (<i>d-d</i>), (<i>dp-dp</i>), (<i>d-dp</i>(a)), and (<i>d-dp</i>(b)) models. In the notation (A-B), A and B refers respectively to bands of A-like and B-like character.
-Moreover, A refers to the definition of screening and B refers to the definition of correlated orbitals.
-refers to a calculaton in which
-correlated orbitals are defined using A-like bands
+can use different schemes for the cRPA calculations. Let us discuss these different models namely the (<i>d-d</i>), (<i>dp-dp</i>), (<i>d-dp</i>(a)), and (<i>d-dp</i>(b)) models. In the notation (A-B), A and B refers respectively to bands of A-like and B-like character.
+Moreover, A refers to the definition of screening and B refers to the definition of correlated orbitals. 
+To clarify this definition, we give below some examples:
 <ul> 
 <li> <span style="color:rgb(200, 100, 000); font-style: italic">(<i>t<SUB>2g</SUB></i>-<i>t<SUB>2g</SUB></i>) model (or <i>t<SUB>2g</SUB></i> model)</span>: The correlated orbitals are defined with only
 <i>t<SUB>2g</SUB></i>-like bands (bands 21, 22 and 23). The screening inside these bands is not taken into account.
-Note that if this case (and in the (<i>d-d</i>) and (<i>dp-dp</i>) models), using ucpra=1 or 2 given the same results,
-provided one uses: ucrpa_bands identical to (<a href="../input_variables/html_automatically_generated/vardev.html#dmftbandi" target="dmftbandi">dmftbandi</a> <a href="../input_variables/html_automatically_generated/vardev.html#dmftbandf" target="dmftbandf">dmftbandf</a> ).
+Note that if this case (and in the (<i>d-d</i>) and (<i>dp-dp</i>) models), using ucrpa=1 or 2 give the same results,
+provided one uses ucrpa_bands equal to (<a href="../input_variables/html_automatically_generated/vardev.html#dmftbandi" target="dmftbandi">dmftbandi</a> <a href="../input_variables/html_automatically_generated/vardev.html#dmftbandf" target="dmftbandf">dmftbandf</a> ).
 <li> <span style="color:rgb(200, 100, 000); font-style: italic">(<i>d-d</i>) model (or d model) </span>: The correlated orbitals are defined with only
-d-like bands (bands 21 to 25). The screening inside these bands is not taken into account.
+<i>d</i>-like bands (bands 21 to 25). The screening inside these bands is not taken into account.
 <li> <span style="color:rgb(200, 100, 000); font-style: italic">(<i>dp-dp</i>) model (or dp model)</span>: The correlated orbitals are defined with only
-d-like and Op-like bands (bands 12 to 23). The screening inside these bands is not taken into account.
-<li> <span style="color:rgb(200, 100, 000); font-style: italic">(<i>d-dp</i>(a)) model</span>: In this scheme the Wannier orbitals are contructed as in the (<i>dp-dp</i>) model. However,
-in this scheme, one only supress the screening inside d-like bands 
+<i>d</i>-like and Op-like bands (bands 12 to 23). The screening inside these bands is not taken into account.
+<li> <span style="color:rgb(200, 100, 000); font-style: italic">(<i>d-dp</i>(a)) model</span>: In this scheme the Wannier orbitals are constructed as in the (<i>dp-dp</i>) model. However,
+in this scheme, one only supress the screening inside <i>d</i>-like bands 
 (<a href="../input_variables/html_automatically_generated/vargw.html#ucrpa" target="ucrpa">ucrpa</a>=1).
 It is coherent with the fact that the DMFT will
 only be applied to the d orbitals: so the screening for Op-like bands need to be taken into account.
@@ -272,7 +271,7 @@ in the case of the <i>d-d</i> model.
 The input file for a typical cRPA calculation (tucrpa_1.in) contains four datasets (as usual GW calculations,
 see the <a href="lesson_gw1.html#1a">GW tutorial</a>):
 the first one is a well converged LDA calculation,  the second is non self-consistent calculation to
-compute accurately full and empty states, the third computes the constrained non interacting polarisability,
+compute accurately full and empty states, the third computes the constrained non interacting polarizability,
 and the fourth computes effective interaction <i>U</i> and <i>J</i>.
 We discuss these four datasets  in the next four subsections.
 
@@ -324,7 +323,7 @@ iscf2          -2    <span style="color: #008800; font-style: italic"># Perform 
 nbandkss2      -1    <span style="color: #008800; font-style: italic"># Number of bands in KSS file (-1 means the maximum possible) </span>
 kssform         3    <span style="color: #008800; font-style: italic"># Format of the Wavefunction file (should be 3) </span>
 nbdbuf2         4    <span style="color: #008800; font-style: italic"># The last four bands will not be perfectly diagonalized </span>
-tolwfr2   1.0d-18    <span style="color: #008800; font-style: italic"># The criterium to stop diagonalization </span>
+tolwfr2   1.0d-18    <span style="color: #008800; font-style: italic"># The criterion to stop diagonalization </span>
 
 <span style="color: #008800; font-style: italic"># == Compute Wannier functions </span>
 usedmft2        1    <span style="color: #008800; font-style: italic"># Mandatory to enable the calculation of Wannier functions as in DMFT. </span>
@@ -333,8 +332,8 @@ dmftbandf2     25    <span style="color: #008800; font-style: italic"># Precise 
 </pre></div> 
 
 
-<h5>3.2.2. The third DATASET: Compute the constrained polarisability and dielectric function </h5>
-The second DATASET drive the computation of the constrained polarisability and the dielectric function.
+<h5>3.2.2. The third DATASET: Compute the constrained polarizability and dielectric function </h5>
+The second DATASET drive the computation of the constrained polarizability and the dielectric function.
 Again, we reproduce below the input variables peculiar to this dataset.
 
 <p> 
@@ -483,7 +482,7 @@ In the third dataset, the code writes the Coulomb interaction matrix as:
 <ul> 
 <li> First we see that diagonal interactions are larger than off-diagonal terms, which is logical, because
 electron interaction is larger if electrons are located in the same orbitals.
-<li>We recover in these interaction matrix the degeneracy of <i>d</i> orbitals in the cubic symetry
+<li>We recover in these interaction matrix the degeneracy of <i>d</i> orbitals in the cubic symmetry
 (we remind, as listed in this 
 <a href="../input_variables/html_automatically_generated/varpaw.html#dmatpawu" target="dmatpawu">page</a>, 
 that the order of orbitals in ABINIT are xy, yz, z2, xy, x2-y2). 
@@ -506,7 +505,7 @@ in the log file:
 </pre>
 [To speed up the calculation and if one needs only these average values of <i>U</i> and <i>J</i>, one can use 
 nsym=0 in the input file, but in this case, the interaction matrix
-does not anymore reproduce the correct symetry. For several correlated atoms, the implementation is under test
+does not anymore reproduce the correct symmetry. For several correlated atoms, the implementation is under test
 and it is mandatory to use nsym=1.]
 <p>
 <li> Bare exchange interaction.
@@ -567,7 +566,7 @@ The first frequency is zero and the cRPA interactions are:
 
 
 We give here the results of some convergence studies, than can be 
-made by the readers. Some are computationaly expensive. It
+made by the readers. Some are computationally expensive. It
 is recommanded to use at least 32 processors. An example input file is provided in tucrpa_3.in and tucrpa_3.files.
 
 <h4><a name="4.1">4.1</a> ecuteps </h4>
@@ -587,7 +586,7 @@ So, for <a href="../input_variables/html_automatically_generated/varbas.html#nba
 the effective interactions are converged with a precision of 0.02 eV for <a href="../input_variables/html_automatically_generated/vargw.html#ecuteps" target="ecuteps">ecuteps</a> 5.
 
 <h4><a name="4.2">4.2</a> nband </h4>
-The RPA polarisability depends also of the number of Kohn-Sham bands as
+The RPA polarizability depends also of the number of Kohn-Sham bands as
 also discussed in the <a href="theory_mbt.html#RPA_Fourier_space">Notes on RPA calculations</a>.
 <pre>
    nband          U (eV)     J (eV)
@@ -605,7 +604,7 @@ the effective interactions are converged with a precision of 0.05 eV for <a href
 the input variable determining the number of plane waves used in the calculation of
 the exchange part of the self-energy. The same variable is used here to determine the number
 of plane waves used in the calculation of the effective interaction. The study
-of the convergency gives:
+of the convergence gives:
 
 <pre>
      ecutsigx (Ha)            U_bare (eV)    J_bare (eV)      U (eV)       J (eV)
@@ -676,7 +675,7 @@ Wannier functions obtained with <i>d</i> bands and also larger than interaction 
 <li> When one supresses all transitions inside the <i>d</i>-like and <i>p</i>-like bands (<i>dp-dp</i> model), U is large.
 <li> When only the transitions inside the <i>d</i>-like bands are suppressed, <i>U</i> is smaller (<i>d-dp</i> (a) model) in comparison
 to the <i>dp-dp</i> model, because the screening is more efficient.
-<li> Lastly, when one uses the  weighting scheme to compute the polarisability,<i> U</i> is very small. Indeed, in this case,
+<li> Lastly, when one uses the  weighting scheme to compute the polarizability,<i> U</i> is very small. Indeed, in this case,
 one can show that there are some residual transitions  near the Fermi level (due to the hybridization between <i>d</i> orbitals and O<i>p</i> orbitals)
 which are very efficient to screen the interaction (A similar effect is discussed in
  <a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a> for UO<SUB>2</SUB> or  
@@ -729,7 +728,7 @@ We recover in the picture the main results found in the Fig. 3 of
 
 This simple tutorial showed how to compute effective interactions for SrVO3.
 It emphasized the importance of the definition of correlated
-orbitals and the definition of constrained polarisability.
+orbitals and the definition of constrained polarizability.
 
 <h4><b><a name="8"></a> References </b></h4>
 <font id="title"><a name="Aryasetiawan2004"> [Aryasetiawan2004] 
