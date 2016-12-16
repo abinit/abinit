@@ -198,7 +198,7 @@ character(len=8) :: stat4xml
 character(len=35) :: fmt
 character(len=fnlen) :: filename
 real(dp) :: ucvol,favg
-logical :: DEBUG=.false.
+logical :: DEBUG=.FALSE.
 logical :: need_scfcv_cycle = .TRUE.
 logical :: change,useprtxfase
 logical :: skipcycle
@@ -523,31 +523,29 @@ real(dp) :: rmet(3,3)
 !    write(std_out,*) 'mover 11'
 !    ###########################################################
 !    ### 11. Symmetrize atomic coordinates over space group elements
-     if (need_scfcv_cycle) then
-       change=.FALSE.
-       xred_tmp(:,:)=xred(:,:)
+     change=.FALSE.
+     xred_tmp(:,:)=xred(:,:)
 
-       call symmetrize_xred(scfcv_args%indsym,ab_mover%natom,&
-&       scfcv_args%dtset%nsym,scfcv_args%dtset%symrel,scfcv_args%dtset%tnons,xred)
-       do kk=1,ab_mover%natom
-         do jj=1,3
-           if (xred(jj,kk)/=xred_tmp(jj,kk)) change=.TRUE.
-         end do
+     call symmetrize_xred(scfcv_args%indsym,ab_mover%natom,&
+&     scfcv_args%dtset%nsym,scfcv_args%dtset%symrel,scfcv_args%dtset%tnons,xred)
+     do kk=1,ab_mover%natom
+       do jj=1,3
+         if (xred(jj,kk)/=xred_tmp(jj,kk)) change=.TRUE.
        end do
+     end do
        
-       if (change)then
-         call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
-         hist%histXF(:,:,1,hist%ihist)=xcart(:,:)
-         hist%histXF(:,:,2,hist%ihist)=xred(:,:)
-         write(std_out,*) 'WARNING: ATOMIC COORDINATES WERE SYMMETRIZED'
-         write(std_out,*) 'DIFFERENCES:'
+     if (change)then
+       call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
+       hist%histXF(:,:,1,hist%ihist)=xcart(:,:)
+       hist%histXF(:,:,2,hist%ihist)=xred(:,:)
+       write(std_out,*) 'WARNING: ATOMIC COORDINATES WERE SYMMETRIZED'
+       write(std_out,*) 'DIFFERENCES:'
 
-         do kk=1,ab_mover%natom
-           write(std_out,*) xred(:,kk)-xred_tmp(:,kk)
-         end do
+       do kk=1,ab_mover%natom
+         write(std_out,*) xred(:,kk)-xred_tmp(:,kk)
+       end do
          
-         xred_tmp(:,:)=xred(:,:)
-       end if
+       xred_tmp(:,:)=xred(:,:)
      end if
 
 !    write(std_out,*) 'mover 12'
@@ -614,10 +612,10 @@ real(dp) :: rmet(3,3)
 !        every is done in pred_montecarlo
          else if(ab_mover%ionmov /= 31) then
            call effective_potential_evaluate(effective_potential,&
-&                                             scfcv_args%results_gs%etotal,&
-&                                             scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
-&                                             scfcv_args%results_gs%strten,ab_mover%natom,rprimd,&
-&                                             xcart)
+&                                            scfcv_args%results_gs%etotal,&
+&                                            scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
+&                                            scfcv_args%results_gs%strten,ab_mover%natom,rprimd,&
+&                                            xcart)
          end if
 #if defined HAVE_LOTF
        end if
@@ -717,7 +715,7 @@ real(dp) :: rmet(3,3)
 
      end if ! if(hist_prev%mxhist>0.and.ab_mover%restartxf==-1.and.hist_prev%ihist<=hist_prev%mxhist)then
 
-     if(need_scfcv_cycle.and.(ab_xfh%nxfh==0.or.itime/=1)) then
+     if((ab_xfh%nxfh==0.or.itime/=1)) then
        !Not yet needing for effective potential
        call mkradim(acell,rprim,rprimd)
 !      Get rid of mean force on whole unit cell, but only if no
@@ -890,7 +888,7 @@ real(dp) :: rmet(3,3)
      end do
 
      ! check dilatmx here and correct if necessary
-     if (need_scfcv_cycle.and.scfcv_args%dtset%usewvl == 0) then
+     if (scfcv_args%dtset%usewvl == 0) then
        call chkdilatmx(scfcv_args%dtset%dilatmx,rprimd,scfcv_args%dtset%rprimd_orig(1:3,1:3,1),&
 &                      dilatmx_errmsg)
        _IBM6("dilatxm_errmsg: "//TRIM(dilatmx_errmsg))
