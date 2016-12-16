@@ -114,7 +114,7 @@ generally, the larger dmftbandf-dmftbandi is, the more localized is the radial p
 Note that Wannier orbitals are used in DMFT and cRPA implementation but this
 is not the usual choice of correlated orbitals in
 the DFT+U implementation in particular in ABINIT
-(see Ref. <a href="lesson_ucalc_crpa.html#Amadon2008a">[Amadon2008]</a>).
+(see Ref. <a href="lesson_ucalc_crpa.html#Amadon2008a">[Amadon2008a]</a>).
 The relation between the two expressions is briefly discussed in
 Ref. <a href="lesson_ucalc_crpa.html#Geneste2016">[Geneste2016]</a>.
 
@@ -153,7 +153,7 @@ and the same as for the exchange part of GW for the effective interaction, ie
 <a href="../input_variables/html_automatically_generated/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>,
 <a href="../input_variables/html_automatically_generated/vargw.html#ecutwfn" target="ecutwfn">ecutwfn</a>.
 It is recommended, as discussed in appendix A of <a href="lesson_ucalc_crpa.html#Amadon2014">[Amadon2014]</a>,
-to use <a href="../input_variables/html_automatically_generated/vargw.html#pawoptosc" target="pawoptosc">pawoptosc</a>=1.
+to use <a href="../input_variables/html_automatically_generated/varpaw.html#pawoptosc" target="pawoptosc">pawoptosc</a>=1.
 If the calculation is carried out with several atoms, use nsym=1, the calculation is not symetrized over atoms
 in this case.
 
@@ -191,7 +191,7 @@ to have well diagonalized eigenfunctions even for empty states. In practice, you
 that the residue of wavefunctions is small at the end of the calculation. In this calculation, we find 1.E-06,
 which is large (1.E-10 would be better, so 
 <a href="../input_variables/html_automatically_generated/vargs.html#nline" target="nline">nline</a>  and
-<a href="../input_variables/html_automatically_generated/vargs.html#nnsclo" target="nnsclo">nnsclo</a> 
+<a href="../input_variables/html_automatically_generated/vardev.html#nnsclo" target="nnsclo">nnsclo</a> 
 should be increased, but it would take more time).
 
 When the calculation is finished, you can plot the fatbands for Vanadium and l=2 with <pre>
@@ -292,7 +292,7 @@ The first dataset is a simple calculation of the density using LDA using 50 band
 We do not use symmetry in this calculation, so nsym=1.
 If symmetry is used (nsym=0), then the calculation of <i>U</i> and <i>J</i> will
 be valid, but the full interaction matrix described in
-section <a href="#3.2.4">3.2.4</a> will not be correct. 
+section 3.2.4 will not be correct. 
 
 
 
@@ -307,7 +307,7 @@ relevant to this dataset.
 Kohn Sham eigenstates are precisely determined , including
 the empty states. Indeed these empty states are necessary both to build Wannier functions and to compute the 
 polarizability  For this reason we choose a very low value of
-<a href="../input_variables/html_automatically_generated/vargs.html#tolwfr" target="tolwfr">tolwfr</a>  
+<a href="../input_variables/html_automatically_generated/varbas.html#tolwfr" target="tolwfr">tolwfr</a>  
 in the input file tucrpa_1.in.
 
 <li> <span style="color: #101010; font-style: italic; font-weight: 500"> Wannier functions </span>: Once the calculation is converged, we compute Wannier functions, as in a DFT+DMFT calculation. To
@@ -635,7 +635,7 @@ an expected precision of 0.1 eV.
 We will use instead <a href="../input_variables/html_automatically_generated/vargw.html#ecuteps" target="ecuteps">ecuteps</a>=5,<a href="../input_variables/html_automatically_generated/vargw.html#ecutsigx" target="ecutsigx">ecutsigx</a>=30,ngkpt=4 4 4, <a href="../input_variables/html_automatically_generated/varbas.html#nband" target="nband">nband</a>=50 to lower the computational cost.
 In this case, we find values of <i>U</i> and <i>J</i> of  2.75 eV and 0.41 eV and <i>U</i> is probably underestimated by 0.1 eV.
 
-<h3><b><a name="7">5.</a> Effective interactions for different models </b></h3>
+<h3><b><a name="5">5.</a> Effective interactions for different models </b></h3>
 
 In this section, we compute, using the converged values of parameters, the
 value of effective interactions for the models discussed in section
@@ -735,6 +735,7 @@ orbitals and the definition of constrained polarisability.
 <font id="title"><a name="Aryasetiawan2004"> [Aryasetiawan2004] 
 F. Aryasetiawan, M. Imada, A. Georges, G. Kotliar, S. Biermann, and A. I. Lichtenstein </a></font> <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.70.195104">Phys. Rev. B 70, 195104 (2004)</a> 
 <br><font id="title"><a name="Amadon2008"> [Amadon2008] B. Amadon, F. Lechermann, A. Georges, F. Jollet, T. O. Wehling, and A. I. Lichtenstein</a></font> <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.205112"> Phys. Rev. B 77, 205112 (2008)</a>
+<br><font id="title"><a name="Amadon2008a"> [Amadon2008a] </a></font> B. Amadon, F. Jollet, and M. Torrent <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.77.155104"> Phys. Rev. B 77, 155104 (2008)</a>
 <br><font id="title"><a name="Vaugier2012"> [Vaugier2012] Loig Vaugier, Hong Jiang, and Silke Biermann  </a></font> <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.86.165105"> Phys. Rev. B 86, 165105 (2012)</a>
 <br><font id="title"><a name="Sakuma2013"> [Sakuma2013] R. Sakuma and F. Aryasetiawan </a></font> <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.87.165118"> Phys. Rev. B 87, 165118 (2013)</a>
 <br><font id="title"><a name="Amadon2014"> [Amadon2014] </a></font> Bernard Amadon, Thomas Applencourt, and Fabien Bruneval <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.89.125110">Phys. Rev. B 89, 125110 (2014)</a>.
