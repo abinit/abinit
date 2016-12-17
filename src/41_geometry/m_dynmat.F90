@@ -3441,6 +3441,7 @@ end subroutine ftifc_r2q
 !! OUTPUT
 !! dddq(2,3,natom,3,natom,3)= Derivate of the dynamical matrix in cartesian coordinates.
 !!  The tree directions are stored in the last dimension.
+!!  These coordinates are normalized (=> * acell(3)!!)
 !!
 !! PARENTS
 !!      m_dynmat
@@ -4785,10 +4786,8 @@ subroutine nanal9(dyew,dynmat,iqpt,natom,nqpt,plus)
        do mu=1,3
          do nu=1,3
 !          The following four lines are OK
-           dynmat(1,mu,ia,nu,ib,iqpt)=dynmat(1,mu,ia,nu,ib,iqpt)&
-&           -dyew(1,mu,ia,nu,ib)
-           dynmat(2,mu,ia,nu,ib,iqpt)=dynmat(2,mu,ia,nu,ib,iqpt)&
-&           -dyew(2,mu,ia,nu,ib)
+           dynmat(1,mu,ia,nu,ib,iqpt)=dynmat(1,mu,ia,nu,ib,iqpt) - dyew(1,mu,ia,nu,ib)
+           dynmat(2,mu,ia,nu,ib,iqpt)=dynmat(2,mu,ia,nu,ib,iqpt) - dyew(2,mu,ia,nu,ib)
          end do
        end do
      end do
@@ -4802,10 +4801,8 @@ subroutine nanal9(dyew,dynmat,iqpt,natom,nqpt,plus)
        do mu=1,3
          do nu=1,3
 !          The following four lines arethe good ones
-           dynmat(1,mu,ia,nu,ib,iqpt)=dynmat(1,mu,ia,nu,ib,iqpt)&
-&           +dyew(1,mu,ia,nu,ib)
-           dynmat(2,mu,ia,nu,ib,iqpt)=dynmat(2,mu,ia,nu,ib,iqpt)&
-&           +dyew(2,mu,ia,nu,ib)
+           dynmat(1,mu,ia,nu,ib,iqpt)=dynmat(1,mu,ia,nu,ib,iqpt) + dyew(1,mu,ia,nu,ib)
+           dynmat(2,mu,ia,nu,ib,iqpt)=dynmat(2,mu,ia,nu,ib,iqpt) + dyew(2,mu,ia,nu,ib)
 !          DEBUG
 !          dynmat(1,mu,ia,nu,ib,iqpt)=dyew(1,mu,ia,nu,ib)
 !          dynmat(2,mu,ia,nu,ib,iqpt)=dyew(2,mu,ia,nu,ib)

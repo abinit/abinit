@@ -20457,7 +20457,7 @@
         '[[nimage]] > 1': 0
         defaultval: 1
     definition: PRinT Electron BANDS
-    dimensions: null
+    dimensions: scalar
     excludes: null
     requires: null
     section: vargs
@@ -20473,7 +20473,7 @@
         Use `gnuplot file_EBANDS.gnuplot` to visualize the band energies.</li>
         </ul>
     varname: prtebands
-    vartype: null
+    vartype: integer
 - !variable
     characteristics: null
     commentdefault: null
@@ -20884,7 +20884,7 @@
     commentdims: null
     defaultval: 1
     definition: PRinT PHonon BANDS
-    dimensions: null
+    dimensions: scalar
     excludes: null
     requires: null
     section: vareph

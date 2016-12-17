@@ -2613,6 +2613,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),qvers_cart(3),qvers_red(3),qstep(3)
  real(dp) :: qred(3),shift(3),vals4(4),dwdq(3,3*cryst%natom)
  real(dp) :: q1(3),q2(3)
+ real(dp),allocatable :: winterp(:,:),wdata(:,:)
 
 ! *********************************************************************
 
@@ -2635,29 +2636,40 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
 
  ! Test computation of group velocites
  q1 = zero; q2 = [half, zero, zero]
+ q1 = -q2
  !q1 = [0.01_dp, zero, zero]; q2 = [half, zero, zero]
  !q1 = [0.01_dp, zero, zero]; q2 = [half, half, half]
  !q2 = [0.01_dp, zero, zero]; q1 = [half, zero, zero]
  !q2 = [0.01_dp, zero, zero]; q1 = [half, zero, zero]
- nq = 1000
+ nq = 100
  dq = normv(q2 - q1, cryst%gmet, "G") / (nq - 1)
  qvers_red = (q2 -q1) / normv(q2 - q1, cryst%gmet, "G")
- qvers_cart = two_pi * matmul(cryst%gprimd, qvers_red)
+ qvers_cart = matmul(cryst%gprimd, qvers_red) * two_pi
+ ABI_MALLOC(wdata, (natom3, nq))
+ ABI_MALLOC(winterp, (natom3, nq))
+
  do iq=1,nq
     qpt = q1 + (iq - 1) * dq * qvers_red
     call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, dwdq=dwdq)
+    wdata(:,iq) = phfrq
+    if (iq == 1) winterp(:,iq) = phfrq
     if (iq > 1) then
-      imax = maxloc(abs(phfrq - wnext)); ii = imax(1)
+      do nu=1,natom3
+         winterp(nu, iq) = winterp(nu, iq-1) + dq * dot_product(ifc%acell(:) * dwdq(:, nu), qvers_cart)
+      end do
+      !imax = maxloc(abs(phfrq - wnext)); ii = imax(1)
       !write(*,*)ii, phfrq(ii), wnext(ii), (phfrq(ii) - wnext(ii)) * Ha_meV
-      write(*,*)"wvel:", qpt, minval(abs(phfrq - wnext)) * Ha_meV, maxval(abs(phfrq - wnext)) * Ha_meV, imax
-      write(*,*)"dwdq:",dwdq
-      write(100,*)phfrq * Ha_meV
-      write(101,*)wnext * Ha_meV
+      !write(std_out,*)"wvel:", qpt, minval(abs(phfrq - wnext)) * Ha_meV, maxval(abs(phfrq - wnext)) * Ha_meV, imax
+      !write(std_out,*)"dwdq:",dwdq
     end if
-    do nu=1,natom3
-      wnext(nu) = phfrq(nu) + dq * dot_product(dwdq(:, nu), qvers_cart)
-    end do
+    write(100,*)wdata(:,iq) * Ha_meV
+    write(101,*)winterp(:,iq) * Ha_meV
+    !do nu=1,natom3
+    !  wnext(nu) = phfrq(nu) + dq * dot_product(dwdq(:, nu), qvers_cart)
+    !end do
  end do
+ ABI_FREE(wdata)
+ ABI_FREE(winterp)
  stop
 
  nq = 1000
