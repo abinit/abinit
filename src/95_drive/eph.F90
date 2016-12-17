@@ -524,7 +524,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call wrtout(std_out, msg, do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
 
- ! Initialize the object used to read DeltaVscf (required if eph_tash /= 0)
+ ! Initialize the object used to read DeltaVscf (required if eph_task /= 0)
  if (use_dvdb) then
    call dvdb_init(dvdb, dvdb_path, comm)
    if (my_rank == master) then

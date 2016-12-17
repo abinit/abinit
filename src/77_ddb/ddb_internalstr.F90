@@ -430,7 +430,7 @@ subroutine ddb_internalstr(asr,crystal,blkval,asrq0,d2asr,iblok,instrain,iout,mp
    end do
  end do
 
-!Now the inverse in in Cpmatr
+!Now the inverse is in Cpmatr
  kmatrix(:,:)=Cpmatr(:,:)
 !transfer the inverse of k-matrix back to the k matrix
 !so now the inverse of k matrix is in the kmatrix

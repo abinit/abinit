@@ -115,18 +115,18 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
  end if
 
  write(message, '(a,a)' ) ch10,'# ABINIT package : 1DM file '
- if (me_fft == 0) call wrtout(temp_unit,message,'COLL')
+ if (me_fft == 0) write(temp_unit,'(a)') message  
 
  write(message, '(a,a)' )ch10,'# Primitive vectors of the periodic cell (bohr)'
- if (me_fft == 0) call wrtout(temp_unit,message,'COLL')
+ if (me_fft == 0) write(temp_unit,'(a)') message  
  do nu=1,3
    write(message, '(1x,a,i1,a,3f10.5)' ) '#  R(',nu,')=',rprimd(:,nu)
-   if (me_fft == 0) call wrtout(temp_unit,message,'COLL')
+   if (me_fft == 0) write(temp_unit,'(a)') message  
  end do
 
  write(message, '(a,a)' ) ch10,&
 & '# Atom list        Reduced coordinates          Cartesian coordinates (bohr)'
- if (me_fft == 0) call wrtout(temp_unit,message,'COLL')
+ if (me_fft == 0) write(temp_unit,'(a)') message  
 
 !Set up a list of character identifiers for all atoms : iden(ia)
  ABI_ALLOCATE(iden,(natom))
@@ -153,7 +153,7 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
  do ia=1,natom
    write(message, '(a,a,3f10.5,a,3f10.5)' ) &
 &   '#   ',iden(ia),xred(1:3,ia),'    ',xcart(1:3,ia)
-   if (me_fft == 0) call wrtout(temp_unit,message,'COLL')
+   if (me_fft == 0) write(temp_unit,'(a)') message  
  end do
  ABI_DEALLOCATE(iden)
  ABI_DEALLOCATE(xcart)
@@ -185,7 +185,7 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
      if(ispden==1)then
        write(message, '(a,a,a)' ) ch10,'#===========',&
 &       '====================================================================='
-       if (me_fft == 0) call wrtout(temp_unit,message,'COLL')
+       if (me_fft == 0) write(temp_unit,'(a)') message  
      end if
 
      select case(idim)
@@ -196,7 +196,7 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
      case(3)
        write(message, '(a)' )'# Projection along the third dimension '
      end select
-     if (me_fft == 0) call wrtout(temp_unit,message,'COLL')
+     if (me_fft == 0) write(temp_unit,'(a)') message  
 
      if(nspden==2)then
        select case(ispden)
@@ -205,7 +205,7 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
        case(2)
          write(message, '(a)' )'# Spin down '
        end select
-       if (me_fft == 0) call wrtout(temp_unit,message,'COLL')
+       if (me_fft == 0) write(temp_unit,'(a)') message  
      else if (nspden == 4) then
        select case(ispden)
        case(1)
@@ -217,16 +217,16 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
        case(4)
          write(message, '(a)' )'# Spinor down up'
        end select
-       if (me_fft == 0) call wrtout(temp_unit,message,'COLL')
+       if (me_fft == 0) write(temp_unit,'(a)') message  
      end if
 
      write(message, '(2a)' ) ch10,&
 &     '#     Red. coord. Mean KS potential  Linear density  '
-     if (me_fft == 0) call wrtout(temp_unit,message,'COLL')
+     if (me_fft == 0) write(temp_unit,'(a)') message  
 
      write(message, '(a)' ) &
 &     '#                  (Hartree unit)   (electron/red. unit)'
-     if (me_fft == 0) call wrtout(temp_unit,message,'COLL')
+     if (me_fft == 0) write(temp_unit,'(a)') message  
 
      global_pot=zero
      global_den=zero
@@ -288,12 +288,12 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
      do islice=1,ngfft(idim)
        write(message, '(f10.4,es20.6,es16.6)' )&
 &       reduced_coord(islice),mean_pot(islice),lin_den(islice)
-       if (me_fft == 0) call wrtout(temp_unit,message,'COLL')
+       if (me_fft == 0) write(temp_unit,'(a)') message
      end do
 
      write(message, '(a,a,es15.6,es16.6,a)' ) ch10,&
 &     '# Cell mean       :',global_pot,global_den, ch10
-     if (me_fft == 0) call wrtout(temp_unit,message,'COLL')
+     if (me_fft == 0) write(temp_unit,'(a)') message
 
 
 !    End of the loop on spins
