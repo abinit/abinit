@@ -62,7 +62,9 @@ LiF_outputs = dict()
 
 for t in ['t11', 't12', 't13', 't14',
           't21', 't22', 't23', 't24',
-          't31', 't32', 't33', 't34']:
+          't31', 't32', 't33', 't34',
+          't41', 't42',
+            ]:
     LiF_outputs[t] = pjoin(LiF_outputdir, t + '_EP.nc')
 
 

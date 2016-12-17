@@ -251,16 +251,15 @@ subroutine strain_get(strain,rprim,rprim_def,mat_delta)
    
    call matr3inv(rprim,rprim_inv)
    mat_delta_tmp =  matmul(transpose(rprim_inv),rprim_def)-identity
-   
    identity = zero
    do i=1,3
      do j=1,3
        if (abs(mat_delta_tmp(i,j))>tol10) then 
-         identity(i,j) = ANINT(mat_delta_tmp(i,j)*1000)/1000
+         identity(i,j) = mat_delta_tmp(i,j)
        end if
      end do
    end do
-  
+
    mat_delta_tmp = identity
 
  else if (present(mat_delta)) then
@@ -323,11 +322,12 @@ subroutine strain_apply(rprim,rprim_def,strain)
  real(dp) :: identity(3,3)
 ! *************************************************************************
 
+ rprim_def(:,:) = zero
 ! Fill the identity matrix
  identity = zero
  forall(i=1:3)identity(i,i)=1
  
- rprim_def(:,:) = matmul(rprim(:,:),strain%strain(:,:))
+ rprim_def(:,:) = matmul(rprim(:,:),identity(:,:)+strain%strain(:,:))
 
 end subroutine strain_apply
 !!***
@@ -387,7 +387,8 @@ subroutine strain_def2strain(mat_strain,strain)
    if(abs(mat_strain(1,1))>tol10.and.abs(mat_strain(1,2))<tol10.and.abs(mat_strain(1,3))<tol10.and.&
 &   abs(mat_strain(2,1))<tol10.and.abs(mat_strain(2,2))>tol10.and.abs(mat_strain(2,3))<tol10.and.&
 &   abs(mat_strain(3,1))<tol10.and.abs(mat_strain(3,2))<tol10.and.abs(mat_strain(3,3))>tol10) then
-     if(mat_strain(1,1)==mat_strain(2,2).and.mat_strain(1,1)==mat_strain(3,3)) then
+     if((mat_strain(1,1)-mat_strain(2,2))< tol10.and.&
+&       (mat_strain(1,1)-mat_strain(3,3))< tol10) then
        strain%name = "isostatic"
        strain%delta = mat_strain(1,1)
        strain%direction = -1
@@ -421,7 +422,7 @@ subroutine strain_def2strain(mat_strain,strain)
     if(abs(mat_strain(1,1))<tol10.and.abs(mat_strain(1,2))<tol10.and.abs(mat_strain(1,3))<tol10.and.&
 &    abs(mat_strain(2,1))<tol10.and.abs(mat_strain(2,2))<tol10.and.abs(mat_strain(2,3))>tol10.and.&
 &    abs(mat_strain(3,1))<tol10.and.abs(mat_strain(3,2))>tol10.and.abs(mat_strain(3,3))<tol10) then
-      if (mat_strain(3,2)==mat_strain(3,2)) then 
+      if (abs(mat_strain(3,2)-mat_strain(3,2))<tol10) then 
         strain%name = "shear"
         strain%delta = mat_strain(3,2) * 2
         strain%direction = 4
@@ -431,7 +432,7 @@ subroutine strain_def2strain(mat_strain,strain)
     if(abs(mat_strain(1,1))<tol10.and.abs(mat_strain(1,2))<tol10.and.abs(mat_strain(1,3))>tol10.and.&
 &    abs(mat_strain(2,1))<tol10.and.abs(mat_strain(2,2))<tol10.and.abs(mat_strain(2,3))<tol10.and.&
 &    abs(mat_strain(3,1))>tol10.and.abs(mat_strain(3,2))<tol10.and.abs(mat_strain(3,3))<tol10) then
-      if (mat_strain(3,1)==mat_strain(1,3)) then 
+      if (abs(mat_strain(3,1)-mat_strain(1,3))<tol10) then 
         strain%name = "shear"
         strain%delta = mat_strain(3,1) * 2
         strain%direction = 5
@@ -441,7 +442,7 @@ subroutine strain_def2strain(mat_strain,strain)
     if(abs(mat_strain(1,1))<tol10.and.abs(mat_strain(1,2))>tol10.and.abs(mat_strain(1,3))<tol10.and.&
 &    abs(mat_strain(2,1))>tol10.and.abs(mat_strain(2,2))<tol10.and.abs(mat_strain(2,3))<tol10.and.&
 &    abs(mat_strain(3,1))<tol10.and.abs(mat_strain(3,2))<tol10.and.abs(mat_strain(3,3))<tol10) then
-      if (mat_strain(1,2)==mat_strain(2,1)) then 
+      if (abs(mat_strain(1,2)-mat_strain(2,1))<tol10) then 
         strain%name = "shear"
         strain%delta = mat_strain(2,1) * 2
         strain%direction = 6
@@ -571,8 +572,8 @@ subroutine strain_print(strain)
 ! *************************************************************************
 
  if(strain%name == "reference") then 
-   write(message,'(a,a,a)') ch10,' no strain found:',&
-&  ' This structure is equivalent to the reference structure'
+   write(message,'(4a)') ch10,' no strain found:',&
+&  ' This structure is equivalent to the reference structure',ch10
    call wrtout(std_out,message,'COLL')
  else
    if(strain%name /= "") then 
@@ -582,18 +583,15 @@ subroutine strain_print(strain)
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
      do ii = 1,3
-       write(message,'(3es12.2)') strain%strain(1,ii),strain%strain(2,ii),strain%strain(3,ii)
+       write(message,'(3es12.2)') strain%strain(ii,1),strain%strain(ii,2),strain%strain(ii,3)
        call wrtout(std_out,message,'COLL')
-       call wrtout(ab_out,message,'COLL')
      end do
    else
      write(message,'(a,a,a)') ch10,' Strain does not correspond to standard strain:'
-     call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
      do ii = 1,3
-       write(message,'(3es12.2)') strain%strain(1,ii),strain%strain(2,ii),strain%strain(3,ii)
+       write(message,'(3es12.2)') strain%strain(ii,1),strain%strain(ii,2),strain%strain(ii,3)
        call wrtout(std_out,message,'COLL')
-       call wrtout(ab_out,message,'COLL')
      end do
    end if
  end if

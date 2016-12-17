@@ -50,7 +50,7 @@ program multibinit
  use m_effective_potential
  use m_multibinit_dataset
  use m_effective_potential_file
-
+ use m_abihist
  use m_io_tools,   only : get_unit, flush_unit,open_file
  use m_fstrings,   only : int2char4
  use m_time ,      only : asctime
@@ -75,7 +75,7 @@ program multibinit
 !Local variables-------------------------------
 ! Set array dimensions
  integer,parameter :: ddbun=2,master=0 ! FIXME: these should not be reserved unit numbers!
- integer :: comm,ii,ierr,lenstr
+ integer :: comm,filetype,ii,ierr,lenstr
  integer :: natom,nph1l,nrpt,ntypat,nproc,my_rank
  integer :: option
  logical :: iam_master
@@ -83,10 +83,11 @@ program multibinit
  real(dp) :: tsec(2)
  character(len=24) :: codename,start_datetime
  character(len=strlen) :: string
- character(len=fnlen) :: filnam(15),tmpfilename,name
+ character(len=fnlen) :: filnam(17),tmpfilename,name
  character(len=500) :: message
  type(multibinit_dataset_type) :: inp
- type(effective_potential_type),target :: reference_effective_potential
+ type(effective_potential_type) :: reference_effective_potential
+ type(abihist) :: hist
 !TEST_AM
 ! integer :: natom_sp
 ! real(dp),allocatable :: dynmat(:,:,:,:,:)
@@ -192,13 +193,17 @@ program multibinit
    call outvars_multibinit(inp,ab_out)
  end if
 
-! First step: Read and treat the reference structure 
+! Read and treat the reference structure 
 !****************************************************************************************
+
 !Read the harmonics parts
  call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
 !Read the coefficient from fit
- if(filnam(4)/='')then
-   call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
+ if(filnam(4)/=''.and.filnam(4)/='no')then
+   call effective_potential_file_getType(filnam(4),filetype)
+   if(filetype==3) then
+     call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
+   end if
  else
    write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
 &                       'There is no file for the coefficients from polynomial fitting'
@@ -207,20 +212,50 @@ program multibinit
  end if
 !****************************************************************************************
 
-!Second step: Compute the third order derivative with finite differences
+! Compute the third order derivative with finite differences
 !****************************************************************************************
  if (inp%prt_3rd > 0) then 
    call compute_anharmonics(reference_effective_potential,filnam,inp,comm)
  end if
 !****************************************************************************************
 
+!If needed, fit the anharmonic part
 !****************************************************************************************
-!Print the effective potential (only master CPU)
+!TEST_AM_SECTION
+ if(.false.)then
+ if (iam_master.and.inp%ncoeff == 0.and.inp%fit_coeff==1) then
+   write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
+&      '-Reading the file ',trim(filnam(5)),ch10,&
+&   ' with NetCDF in order to fit the polynomial coefficients'
+   call wrtout(std_out,message,'COLL') 
+   call wrtout(ab_out,message,'COLL') 
+   if(filnam(5)/=''.or.filnam(5)/='no')then
+     call read_md_hist(filnam(5),hist)
+   else
+     write(message, '(3a)' )&
+&          'There is no MD file to fit the coefficients ',ch10,&
+&          'Action: add MD file'
+        MSG_ERROR(message)
+   end if
+ end if
+!MPI BROADCAST
+ call abihist_bcast(hist,master,comm)
+
+ 
+!   call fit_polynomial_coeff_init
+!   call fit_polynomial_coeff_init(reference_effective_potential%,filnam,inp,comm)
+
+ end if
+!END_TEST_AM_SECTION
+!****************************************************************************************
+
+!****************************************************************************************
+!Print the effective potential system + coefficients (only master CPU)
  if(iam_master.and.(inp%prt_effpot<=-1.or.inp%prt_effpot>=3)) then
    select case(inp%prt_effpot)
    case (-1)  
      name = "system.xml"
-     call effective_potential_writeXML(reference_effective_potential,1,filename=name)
+     call effective_potential_writeXML(reference_effective_potential,-1,filename=name)
    case(-2)
      name = "system.nc"
      call effective_potential_writeNETCDF(reference_effective_potential,1,filename=name)
@@ -267,6 +302,7 @@ program multibinit
 !**************************************************************************************** 
  call effective_potential_free(reference_effective_potential)
  call multibinit_dtset_free(inp)
+ call abihist_fin(hist)
 !****************************************************************************************
 
  write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10

@@ -69,7 +69,7 @@ qph1l
 #%% test_chain = t85.in, t86.in, t87.in, t88.in, t89.in, t90.in, t91.in, t92.in, t93.in, t94.in, t95.in
 #%% [files]
 #%% files_to_test = 
-#%%   t88.out, tolnlines = 19, tolabs = 4.0e-05, tolrel = 1.100e-00
+#%%   t88.out, tolnlines = 19, tolabs = 3.0e-04, tolrel = 4.0e-06
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
