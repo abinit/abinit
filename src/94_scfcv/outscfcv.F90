@@ -173,6 +173,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_numeric_tools,    only : simpson_int
  use m_epjdos,           only : dos_calcnwrite, &
                                 epjdos_t, epjdos_new, epjdos_free, prtfatbands, fatbands_ncwrite
+ use m_paral_atom,       only : get_my_atmtab, free_my_atmtab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -238,13 +239,15 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer :: bantot,fform,collect,timrev
  integer :: accessfil,coordn
  integer :: ii,ierr,ifft,ikpt,ispden,isppol,itypat
+ integer :: jfft
  integer :: me_fft,n1,n2,n3
- integer :: ifgd, iatom, iatom_tot,nradint
+ integer :: ifgd, iatom, iatom_, iatom_tot,nradint
  integer :: me,my_natom_tmp
  integer :: occopt
  integer :: prtnabla
  integer :: pawprtden
  integer :: iband,nocc,spacecomm,comm_fft,tmp_unt,nfft_tot
+ integer :: my_comm_atom
 #ifdef HAVE_NETCDF
  integer :: ncid
 #endif
@@ -255,6 +258,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  character(len=fnlen) :: fname
 !arrays
  integer, allocatable :: isort(:)
+ integer, pointer :: my_atmtab(:)
  real(dp) :: tsec(2),nt_ntone_norm(nspden)
  real(dp),allocatable :: eigen2(:)
  real(dp),allocatable :: elfr_down(:,:),elfr_up(:,:)
@@ -268,7 +272,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  real(dp), allocatable :: radii(:)
  type(pawrhoij_type) :: pawrhoij_dum(0)
  type(pawrhoij_type),pointer :: pawrhoij_all(:)
- logical :: paral_atom,remove_inv
+ logical :: remove_inv
+ logical :: paral_atom, paral_fft, my_atmtab_allocated
  real(dp) :: e_fermie
  type(oper_type) :: lda_occup
  type(crystal_t) :: crystal
@@ -328,7 +333,23 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  ! Parameters for MPI-FFT
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3); nfft_tot = product(ngfft(1:3))
- me_fft = xmpi_comm_rank(mpi_enreg%comm_fft)
+ comm_fft = mpi_enreg%comm_fft
+ me_fft = xmpi_comm_rank(comm_fft)
+ paral_fft = (mpi_enreg%paral_kgb==1)
+
+ spacecomm = mpi_enreg%comm_cell
+ me = xmpi_comm_rank(spacecomm)
+
+ paral_atom=(my_natom/=natom)
+ my_comm_atom = mpi_enreg%comm_atom
+ nullify(my_atmtab)
+ if (paral_atom) then
+   call get_my_atmtab(mpi_enreg%comm_atom, my_atmtab, my_atmtab_allocated, paral_atom,natom,my_natom_ref=my_natom)
+ else
+   ABI_ALLOCATE(my_atmtab, (natom))
+   my_atmtab = (/ (iatom, iatom=1, natom) /)
+   my_atmtab_allocated = .true.
+ end if
 
 !wannier interface
  call timab(951,1,tsec)
@@ -818,7 +839,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      end do
 
      call fftdatar_write("vhxc",dtfil%fnameabo_app_vhxc,dtset%iomode,hdr,&
-     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
+&     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
 
      ABI_DEALLOCATE(vwork)
    end if
@@ -830,7 +851,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    end if
 
    call timab(958,2,tsec)
- end if ! if master
+ end if ! if iwrite_fftdatar
 
  call timab(959,1,tsec)
 
@@ -1138,6 +1159,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  call crystal_free(crystal)
  call ebands_free(ebands)
+
+!Destroy atom table used for parallelism
+ call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
  call timab(969,2,tsec)
  call timab(950,2,tsec) ! outscfcv

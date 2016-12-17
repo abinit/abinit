@@ -179,6 +179,8 @@
 
   NOTE: Open file ifcinfo.out, for the output of interatomic force constants. This is because prt_ifc==1. 
 
+  NOTE: Open file outfile.forceconstants_ABINIT, for the output of interatomic force constants in TDEP format. This is because prt_ifc==1. 
+
  generic atom number   1
  with cartesian coordinates  4.19798664E+00 -1.81969603E-09  1.67621667E+00
 
