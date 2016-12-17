@@ -110,9 +110,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 !scalars
  integer :: bantot,berryopt,dmatsize,ndim,getocc,iat,iatom,ii,iimage,ikpt,ionmov,intimage
  integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,nband1,nberry,mkpt
- integer :: niatcon,nimage,nkpt,nkpt_fullbz,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure,nkpt_hf
+ integer :: niatcon,nimage,nkpt,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure,nkpt_hf
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_key
- integer :: itol, itol_gen, ds_input, ifreq,ncerr
+ integer :: itol, itol_gen, ds_input, ifreq,ncerr !nkpt_fullbz,
  real(dp) :: areaxy,charge,fband,kptrlen,nelectjell
  real(dp) :: rhoavg,zelect,zval
  real(dp) :: toldfe_, tolrff_, toldff_, tolwfr_, tolvrs_
@@ -120,13 +120,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  character(len=500) :: message
  character(len=fnlen) :: key_value
 !arrays
- integer :: rlatt(3,3),vacuum(3)
+ integer :: vacuum(3) !rlatt(3,3),
  integer,allocatable :: iatcon(:),natcon(:)
  integer,allocatable :: intarr(:) !Dummy arguments for subroutine 'intagm' to parse input file
- real(dp) :: gprimd(3,3),kpt_cart(3),tsec(2)
+ real(dp) :: tsec(2) !gprimd(3,3),kpt_cart(3),
  real(dp),allocatable :: dmatpawu_tmp(:)
  real(dp),allocatable :: dprarr(:) !Dummy arguments for subroutine 'intagm' to parse input file
- real(dp),allocatable :: kpt_fullbz(:,:)
+ !real(dp),allocatable :: kpt_fullbz(:,:)
  real(dp),allocatable :: kptns_hf(:,:) !Dummy arguments for subroutine 'smpbz' to calculate the value of nkpthf
 
 ! *************************************************************************
@@ -2573,6 +2573,16 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    dtset%kptns(3,1:nkpt)=dtset%kptns(3,1:nkpt)+dtset%qptn(3)
  end if
 
+! This part has been commented out as get_kpt_fullbz is not able to handle kptrlatt with shifts e.g.
+! kptrlatt
+!   0 6 0
+!   0 0 6
+!   3 3 3
+!nshiftk 1
+!shiftk 0.0 1.0 0.5
+! A test (v8/t03.in) has been added to make sure the job does not stop at the level of the parser.
+
+#if 0
 !Echo the information about the k point grid
  call matr3inv(dtset%rprimd_orig(1:3,1:3,intimage),gprimd)
  write(std_out,'(3a)')' ',ch10,' invars2 : Printing the k point grid (values of kptns - max 100 of them)'
@@ -2608,6 +2618,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    end do
    ABI_DEALLOCATE(kpt_fullbz)
  end if
+#endif
 
 !if prtkpt==-2, write the k-points in netcdf format and exit here so that AbiPy can read the data.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtkpt',tread,'INT')
