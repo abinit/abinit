@@ -22,13 +22,13 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,compute_anharmonics,
-!!      effective_potential_free,effective_potential_file_getDimSystem,effective_potential_file_read,
-!!      effective_potential_writeNETCDF,effective_potential_writeXML,flush_unit,herald
-!!      init10,instrng,invars10,inupper, isfile,mover_effpot,multibinit_dtset_fre
-!!      outvars_multibinit,timein,xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum,wrtout
-!!      abi_io_redirec,flush_unit,herald,int2char4,
-!!      init10,timein,xmpi_bcast,wrtout,xmpi_init
+!!      abi_io_redirect,abihist_bcast,abihist_fin,abimem_init,abinit_doctor
+!!      compute_anharmonics,effective_potential_file_getdimsystem
+!!      effective_potential_file_gettype,effective_potential_file_read
+!!      effective_potential_free,effective_potential_writenetcdf
+!!      effective_potential_writexml,flush_unit,herald,init10,instrng,inupper
+!!      invars10,isfile,mover_effpot,multibinit_dtset_free,outvars_multibinit
+!!      read_md_hist,timein,wrtout,xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum
 !!
 !! SOURCE
 

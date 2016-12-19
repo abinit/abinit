@@ -41,7 +41,7 @@
 !! called by one processor only
 !!
 !! PARENTS
-!!      anaddb,m_ifc,m_phonons,respfn
+!!      anaddb,m_effective_potential_file,m_ifc,m_phonons,respfn
 !!
 !! CHILDREN
 !!      wrtout

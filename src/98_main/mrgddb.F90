@@ -38,9 +38,8 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,ddb_getdims,destroy_mpi_enreg
-!!      flush_unit,get_command_argument,herald,initmpi_seq,mblktyp1,mblktyp5
-!!      mrgddb_init,timein,wrtout,xmpi_end,xmpi_init
+!!      abi_io_redirect,abimem_init,abinit_doctor,ddb_getdims
+!!      get_command_argument,herald,mblktyp1,mblktyp5,timein,wrtout,xmpi_init
 !!
 !! SOURCE
 

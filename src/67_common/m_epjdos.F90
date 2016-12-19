@@ -267,6 +267,10 @@ end function epjdos_new
 !!  deallocate memory
 !!
 !! PARENTS
+!!      outscfcv
+!!
+!! CHILDREN
+!!      cwtime,wrtout
 !!
 !! SOURCE
 
@@ -345,9 +349,7 @@ end subroutine epjdos_free
 !!      outscfcv
 !!
 !! CHILDREN
-!!      destroy_tetra,dos_hdr_write,acc_dos_1band
-!!      get_full_kgrid,get_tetra_weight,init_tetra,int2char4,matr3inv,metric
-!!      wrtout
+!!      cwtime,wrtout
 !!
 !! SOURCE
 
@@ -919,7 +921,7 @@ end subroutine dos_calcnwrite
 !!      m_cut3d,partial_dos_fractions
 !!
 !! CHILDREN
-!!      atomdata_from_znucl,dotprod_g
+!!      cwtime,wrtout
 !!
 !! SOURCE
 
@@ -1222,8 +1224,7 @@ end subroutine recip_ylm
 !!      m_cut3d
 !!
 !! CHILDREN
-!!      dotprod_v,fftpac,fourdp,fourwf,ph1d3d,sphereboundary,sphericaldens
-!!      sqnorm_g
+!!      cwtime,wrtout
 !!
 !! SOURCE
 
@@ -1427,9 +1428,10 @@ end subroutine dens_in_sph
 !!  sphfofg(2,nfft)=convoluted function, in reciprocal space
 !!
 !! PARENTS
-!!      dens_in_sph
+!!      m_epjdos
 !!
 !! CHILDREN
+!!      cwtime,wrtout
 !!
 !! SOURCE
 
@@ -1506,7 +1508,7 @@ end subroutine sphericaldens
 !!      outscfcv
 !!
 !! CHILDREN
-!!      atomdata_from_znucl,int2char4,wrtout
+!!      cwtime,wrtout
 !!
 !! SOURCE
 
@@ -1747,8 +1749,10 @@ end subroutine prtfatbands
 !!  Only writing
 !!
 !! PARENTS
+!!      outscfcv
 !!
 !! CHILDREN
+!!      cwtime,wrtout
 !!
 !! SOURCE
 

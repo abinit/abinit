@@ -28,9 +28,9 @@
 !!      elphon
 !!
 !! CHILDREN
-!!      dgemm,ebands_update_occ,ep_el_weights,ep_ph_weights,ftgam,ftgam_init
-!!      gam_mult_displ,ifc_fourq,matrginv,mkqptequiv,phdispl_cart2red
-!!      ebands_prtbltztrp_tau_out,spline,splint,wrtout,xmpi_sum,zgemm
+!!      dgemm,ebands_prtbltztrp_tau_out,ebands_update_occ,ep_el_weights
+!!      ep_ph_weights,ftgam,ftgam_init,gam_mult_displ,ifc_fourq,matrginv
+!!      mkqptequiv,phdispl_cart2red,spline,splint,wrtout,xmpi_sum,zgemm
 !!
 !! SOURCE
 

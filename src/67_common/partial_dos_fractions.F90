@@ -56,8 +56,8 @@
 !!      outscfcv
 !!
 !! CHILDREN
-!!      getkpgnorm,getph,cg_getspin,initylmg,kpgio,metric
-!!      ph1d3d,recip_ylm,sort_dp,splint,xmpi_sum
+!!      cg_getspin,cwtime,destroy_mpi_enreg,getkpgnorm,getph,initmpi_seq
+!!      initylmg,jlspline_free,ph1d3d,recip_ylm,sort_dp,splint,wrtout,xmpi_sum
 !!
 !! SOURCE
 

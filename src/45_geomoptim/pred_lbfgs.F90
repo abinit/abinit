@@ -47,7 +47,7 @@
 !!      mover
 !!
 !! CHILDREN
-!!      lbfgs_init,lbfgs_destroy,lbfgs_execute,hist2var,metric,mkrdim,var2hist
+!!      hist2var,lbfgs_destroy,lbfgs_init,metric,mkrdim,var2hist
 !!      xfh_recover_new,xfpack_f2vout,xfpack_vin2x,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE

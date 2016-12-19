@@ -101,14 +101,15 @@
 !! CHILDREN
 !!      abiforstr_fin,abiforstr_ini,abihist_bcast,abihist_compare,abihist_fin
 !!      abihist_ini,abimover_fin,abimover_ini,abimover_nullify,chkdilatmx
-!!      crystal_free,crystal_init,dtfil_init_time,erlxconv,fcart2fred,fconv
-!!      fred2fcart,hist2var,initylmg,metric,mkradim,mttk_fin,mttk_ini
-!!      prec_simple,pred_bfgs,pred_delocint,pred_diisrelax,pred_isokinetic
-!!      pred_isothermal,pred_langevin,pred_lotf,pred_moldyn,pred_nose
-!!      pred_simple,pred_srkna14,pred_steepdesc,pred_verlet,prtxfase
-!!      read_md_hist,scfcv_run,status,symmetrize_xred,var2hist,vel2hist
-!!      write_md_hist,wrt_moldyn_netcdf,wrtout,wvl_mkrho,wvl_wfsinp_reformat
-!!      xfh_update,xmpi_barrier,xmpi_isum,xmpi_wait,xred2xcart
+!!      crystal_free,crystal_init,dtfil_init_time,effective_potential_evaluate
+!!      erlxconv,fcart2fred,fconv,fred2fcart,hist2var,initylmg,metric,mkradim
+!!      monte_carlo_step,mttk_fin,mttk_ini,prec_simple,pred_bfgs,pred_delocint
+!!      pred_diisrelax,pred_isokinetic,pred_isothermal,pred_langevin,pred_lbfgs
+!!      pred_lotf,pred_moldyn,pred_nose,pred_simple,pred_srkna14,pred_steepdesc
+!!      pred_verlet,prtxfase,read_md_hist,scfcv_run,status,symmetrize_xred
+!!      var2hist,vel2hist,write_md_hist,wrt_moldyn_netcdf,wrtout,wvl_mkrho
+!!      wvl_wfsinp_reformat,xfh_update,xmpi_barrier,xmpi_isum,xmpi_wait
+!!      xred2xcart
 !!
 !! SOURCE
 

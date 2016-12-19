@@ -108,7 +108,7 @@
 !!      pawrhoij_free,pawrhoij_nullify,prteigrs,psddb8,read_rhor,rf2_getidirs
 !!      rotate_rho,set_pert_comm,set_pert_paw,setsym,setsymrhoij,status,symkpt
 !!      timab,transgrid,unset_pert_comm,unset_pert_paw,vlocalstr,wffclose
-!!      wffopen,wfk_open_read,wfk_read_eigenvalues,wrtout,xmpi_sum
+!!      wfk_open_read,wfk_read_eigenvalues,wrtout,xmpi_sum
 !!
 !! SOURCE
 

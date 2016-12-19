@@ -24,10 +24,14 @@
 !!
 !!
 !! PARENTS
-!!      epigine
+!!      multibinit
 !!
 !! CHILDREN
-!!      mover
+!!      alloc_copy,copy_supercell,destroy_mpi_enreg,destroy_results_gs
+!!      destroy_supercell,dtset_free,effective_potential_initmpi_supercell
+!!      effective_potential_printsupercell,init_results_gs,init_supercell,mover
+!!      scfcv_destroy,strain_apply,strain_get,strain_init,strain_print,wrtout
+!!      xcart2xred,xred2xcart
 !!
 !! SOURCE
 

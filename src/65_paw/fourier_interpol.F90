@@ -38,7 +38,7 @@
 !!   rhog_out(2,nfftc)=Fourier transform of output density/potential on the coarse grid
 !!
 !! PARENTS
-!!      m_ioarr,m_qparticles
+!!      m_dvdb,m_ioarr,m_qparticles
 !!
 !! CHILDREN
 !!      indgrid,pawfgr_destroy,transgrid

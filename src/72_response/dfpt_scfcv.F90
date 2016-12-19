@@ -176,12 +176,12 @@
 !!      destroy_efield,dfpt_etot,dfpt_newvtr,dfpt_nselt,dfpt_nstdy,dfpt_nstpaw
 !!      dfpt_rhofermi,dfpt_rhotov,dfpt_vtorho,dfptff_bec,dfptff_die,dfptff_ebp
 !!      dfptff_edie,dfptff_initberry,fftdatar_write_from_hdr,fourdp,getcut
-!!      metric,newfermie1,paw_an_free,paw_an_init,paw_an_nullify
+!!      hdr_update,metric,newfermie1,paw_an_free,paw_an_init,paw_an_nullify
 !!      paw_an_reset_flags,paw_ij_free,paw_ij_init,paw_ij_nullify
 !!      paw_ij_reset_flags,pawcprj_alloc,pawcprj_free,pawcprj_getdim,pawdenpot
 !!      pawdij,pawdijfr,pawmknhat,pawnhatfr,pawrhoij_alloc,pawrhoij_free
-!!      qmatrix,rf2_getidirs,scprqt,status,symdij,timab,wffclose,wfk_close
-!!      wrtout,xmpi_barrier,xmpi_isum,xmpi_sum,xmpi_wait
+!!      qmatrix,rf2_getidirs,scprqt,status,symdij,timab,wfk_close,wrtout
+!!      xmpi_barrier,xmpi_isum,xmpi_sum,xmpi_wait
 !!
 !! SOURCE
 

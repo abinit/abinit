@@ -96,7 +96,7 @@
 !!      pawrhoij_alloc,pawrhoij_bcast,pawrhoij_copy,pawrhoij_free
 !!      pawrhoij_nullify,pawtab_get_lsize,prteigrs,psddb8,pspini,q0dy3_apply
 !!      q0dy3_calc,read_rhor,rhohxc,setsym,setsymrhoij,setup1,status,symdij
-!!      symkchk,symmetrize_xred,timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose
+!!      symmetrize_xred,sytens,timab,transgrid,vdw_dftd2,vdw_dftd3,wffclose
 !!      wings3,wrtloctens,wrtout,xmpi_bcast
 !!
 !! SOURCE

@@ -142,12 +142,12 @@
 !!      dfpt_scfcv
 !!
 !! CHILDREN
-!!      clsopn,destroy_hamiltonian,destroy_rf_hamiltonian,dfpt_vtowfk
-!!      dfptff_gbefd,dfptff_gradberry,fftpac,getgh1c_setup,hdr_skip
-!!      init_hamiltonian,init_rf_hamiltonian,load_spin_hamiltonian
-!!      load_spin_rf_hamiltonian,occeig,pawmkrho,pawrhoij_alloc,pawrhoij_free
-!!      pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,rf_transgrid_and_pack
-!!      sqnorm_v,symrhg,timab,wffreadskipk,xmpi_sum
+!!      destroy_hamiltonian,destroy_rf_hamiltonian,dfpt_vtowfk,dfptff_gbefd
+!!      dfptff_gradberry,fftpac,getgh1c_setup,init_hamiltonian
+!!      init_rf_hamiltonian,load_spin_hamiltonian,load_spin_rf_hamiltonian
+!!      occeig,pawmkrho,pawrhoij_alloc,pawrhoij_free,pawrhoij_init_unpacked
+!!      pawrhoij_mpisum_unpacked,rf_transgrid_and_pack,sqnorm_v,symrhg,timab
+!!      xmpi_sum
 !!
 !! SOURCE
 

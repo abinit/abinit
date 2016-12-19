@@ -569,8 +569,8 @@ CONTAINS  !===========================================================
 !!
 !! PARENTS
 !!      d2frnl,dfpt_nselt,dfpt_nstdy,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho
-!!      dfptnl_resp,energy,forstrnps,gwls_hamiltonian,ks_ddiago,m_io_kss
-!!      m_phgamma,m_shirley,vtorho
+!!      dfptnl_resp,energy,forstrnps,gwls_hamiltonian,ks_ddiago,m_gkk,m_io_kss
+!!      m_phgamma,m_phpi,m_shirley,m_sigmaph,vtorho
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
@@ -719,8 +719,8 @@ end subroutine destroy_hamiltonian
 !!
 !! PARENTS
 !!      d2frnl,dfpt_nselt,dfpt_nstdy,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho
-!!      dfptnl_resp,energy,forstrnps,ks_ddiago,m_io_kss,m_phgamma,m_shirley
-!!      vtorho
+!!      dfptnl_resp,energy,forstrnps,ks_ddiago,m_gkk,m_io_kss,m_phgamma,m_phpi
+!!      m_shirley,m_sigmaph,vtorho
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
@@ -1432,7 +1432,8 @@ end subroutine copy_hamiltonian
 !!
 !! PARENTS
 !!      d2frnl,dfpt_nstdy,dfpt_nstpaw,dfpt_rhofermi,dfpt_vtorho,energy
-!!      forstrnps,ks_ddiago,m_io_kss,m_phgamma,m_shirley,vtorho
+!!      forstrnps,ks_ddiago,m_gkk,m_io_kss,m_phgamma,m_phpi,m_shirley,m_sigmaph
+!!      vtorho
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
@@ -1527,7 +1528,8 @@ end subroutine load_spin_hamiltonian
 !!  rf_Ham<rf_hamiltonian_type>=All dynamic memory defined in the structure is deallocated.
 !!
 !! PARENTS
-!!      dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,dfpt_vtorho,m_phgamma
+!!      dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,dfpt_vtorho,m_gkk,m_phgamma,m_phpi
+!!      m_sigmaph
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
@@ -1597,7 +1599,8 @@ end subroutine destroy_rf_hamiltonian
 !!   * Quantities that do not depend on the k-point or spin are initialized.
 !!
 !! PARENTS
-!!      dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,dfpt_vtorho,m_phgamma
+!!      dfpt_nstpaw,dfpt_nstwf,dfpt_rhofermi,dfpt_vtorho,m_gkk,m_phgamma,m_phpi
+!!      m_sigmaph
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
@@ -1689,7 +1692,7 @@ end subroutine init_rf_hamiltonian
 !!   * Quantities that depend on spin are initialized.
 !!
 !! PARENTS
-!!      dfpt_rhofermi,dfpt_vtorho,m_phgamma
+!!      dfpt_rhofermi,dfpt_vtorho,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
 !!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout

@@ -54,8 +54,8 @@
 !!      invars2m,m_ab7_invars_f90
 !!
 !! CHILDREN
-!!      chkneu,get_kpt_fullbz,ingeo_img,inkpts,intagm,invacuum,matr3inv,smpbz
-!!      sort_int,timab,wrtout
+!!      dtset_chkneu,get_kpt_fullbz,ingeo_img,inkpts,intagm,invacuum,matr3inv
+!!      smpbz,sort_int,timab,wrtout
 !!
 !! SOURCE
 

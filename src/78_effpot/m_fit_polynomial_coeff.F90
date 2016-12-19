@@ -81,9 +81,7 @@ CONTAINS  !=====================================================================
 !!
 !! PARENTS
 !!
-!!
 !! CHILDREN
-!!
 !!
 !! SOURCE
 
@@ -134,10 +132,9 @@ end subroutine fit_polynomial_coeff_init
 !! polynomial_coeff = polynomial_coeff structure to be free
 !!
 !! PARENTS
-!!
+!!      m_fit_polynomial_coeff
 !!
 !! CHILDREN
-!!
 !!
 !! SOURCE
 

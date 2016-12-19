@@ -25,7 +25,7 @@
 !!
 !! PARENTS
 !!      abinit,aim,anaddb,bsepostproc,cut3d,fftprof,ioprof,lapackprof,mrgddb
-!!      mrgdv,mrggkk,mrgscr,optic,ujdet,vdw_kernelgen
+!!      mrgdv,mrggkk,mrgscr,multibinit,optic,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!      date_and_time,wrtout

@@ -127,7 +127,7 @@ CONTAINS  !=====================================================================
 !!      outscfcv
 !!
 !! CHILDREN
-!!      hdr_check
+!!      hdr_check,hdr_fort_read,hdr_free
 !!
 !! SOURCE
 
@@ -676,7 +676,7 @@ end subroutine ioarr
 !!      m_ioarr,outscfcv,sigma
 !!
 !! CHILDREN
-!!      hdr_check
+!!      hdr_check,hdr_fort_read,hdr_free
 !!
 !! SOURCE
 
@@ -897,7 +897,7 @@ end subroutine fftdatar_write
 !!      dfpt_scfcv,scfcv
 !!
 !! CHILDREN
-!!      hdr_check
+!!      hdr_check,hdr_fort_read,hdr_free
 !!
 !! SOURCE
 
@@ -1004,7 +1004,7 @@ end subroutine fftdatar_write_from_hdr
 !!      sigma
 !!
 !! CHILDREN
-!!      hdr_check
+!!      hdr_check,hdr_fort_read,hdr_free
 !!
 !! SOURCE
 

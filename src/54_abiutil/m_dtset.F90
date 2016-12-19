@@ -87,7 +87,6 @@ CONTAINS  !=====================================================================
 !!      invars2
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1190,7 +1189,7 @@ end subroutine dtset_copy
 !!
 !! PARENTS
 !!      calc_vhxc_me,chkinp,dfpt_looppert,driver,gwls_hamiltonian,hybrid_corr
-!!      m_ab7_invars_f90,m_io_kss,m_kxc,xchybrid_ncpp_cc
+!!      m_ab7_invars_f90,m_io_kss,m_kxc,mover_effpot,xchybrid_ncpp_cc
 !!
 !! CHILDREN
 !!

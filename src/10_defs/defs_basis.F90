@@ -417,7 +417,7 @@ CONTAINS  !=====================================================================
 !! PARENTS
 !!      abinit,aim,anaddb,band2eps,bsepostproc,conducti,cut3d,driver,fftprof
 !!      fold2Bloch,initmpi_world,ioprof,lapackprof,m_io_redirect,macroave
-!!      memory_eval,mpi_setup,mrgddb,mrgdv,mrggkk,mrgscr,optic,ujdet
+!!      memory_eval,mpi_setup,mrgddb,mrgdv,mrggkk,mrgscr,multibinit,optic,ujdet
 !!      vdw_kernelgen
 !!
 !! CHILDREN
@@ -464,7 +464,7 @@ CONTAINS  !=====================================================================
 !!   Only printing.
 !!
 !! PARENTS
-!!      abinit,leave_new,m_errors
+!!      abinit,leave_new,m_argparse
 !!
 !! CHILDREN
 !!

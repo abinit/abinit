@@ -573,8 +573,8 @@ CONTAINS  !===========================================================
 !!
 !! PARENTS
 !!      abinit,aim,anaddb,band2eps,bsepostproc,conducti,cut3d,fftprof
-!!      fold2Bloch,ioprof,lapackprof,macroave,mrgddb,mrgdv,mrggkk,mrgscr,optic
-!!      ujdet,vdw_kernelgen
+!!      fold2Bloch,ioprof,lapackprof,macroave,mrgddb,mrgdv,mrggkk,mrgscr
+!!      multibinit,optic,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
@@ -711,7 +711,7 @@ end function xmpi_get_unit
 !!
 !! PARENTS
 !!      aim,anaddb,band2eps,bsepostproc,conducti,cut3d,fold2Bloch,lapackprof
-!!      macroave,mrgddb,mrggkk,optic,ujdet,vdw_kernelgen
+!!      m_sigmaph,macroave,mrggkk,multibinit,optic,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
@@ -901,7 +901,7 @@ end subroutine sys_exit
 !!  unt=Unit number for formatted output.
 !!
 !! PARENTS
-!!      abinit,leave_new,m_errors
+!!      abinit,leave_new,m_argparse
 !!
 !! CHILDREN
 !!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct
@@ -1814,9 +1814,9 @@ end subroutine xmpi_comm_translate_ranks
 !!      datafordmft,denfgr,dfpt_nselt,dfpt_nstpaw,dfpt_scfcv,exc_build_block
 !!      fermisolverec,getcgqphase,gstateimg,iofn1,ks_ddiago,m_bse_io
 !!      m_exc_diago,m_exc_itdiago,m_exc_spectra,m_green,m_haydock,m_hdr
-!!      m_io_kss,m_io_redirect,m_ioarr,m_iowf,m_plowannier,m_slk,m_wfd,m_wffile
-!!      m_wfk,mlwfovlp,mlwfovlp_pw,mover,outkss,pawmkaewf,qmc_prep_ctqmc,sigma
-!!      tddft,vtorho,vtorhorec,wfk_analyze
+!!      m_io_kss,m_io_redirect,m_ioarr,m_iowf,m_plowannier,m_sigmaph,m_slk
+!!      m_wfd,m_wffile,m_wfk,mlwfovlp,mlwfovlp_pw,mover,outkss,pawmkaewf
+!!      qmc_prep_ctqmc,rf2_init,sigma,tddft,vtorho,vtorhorec,wfk_analyze
 !!
 !! CHILDREN
 !!      mpi_type_commit,mpi_type_size,xmpi_abort,xmpio_type_struct

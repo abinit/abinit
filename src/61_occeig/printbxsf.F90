@@ -33,10 +33,10 @@
 !!  BXSF file.
 !!
 !! PARENTS
-!!      m_ebands,m_phonons
+!!      m_ebands,m_ifc
 !!
 !! CHILDREN
-!!      destroy_kptrank,get_rank_1kpt,mkkptrank
+!!      destroy_kptrank,get_rank_1kpt,listkk,mkkptrank
 !!
 !! SOURCE
 

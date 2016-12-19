@@ -108,10 +108,9 @@ CONTAINS  !=====================================================================
 !! eff_pot = effective_potential structure to be initialized
 !!
 !! PARENTS
-!!    multibinit
+!!      m_effective_potential
 !!
 !! CHILDREN
-!!    effective_potential_free
 !!
 !! SOURCE
 
@@ -257,7 +256,7 @@ end subroutine harmonics_terms_init
 !! harmonics_terms = supercell structure with data to be output
 !!
 !! PARENTS
-!!   harmonics_terms_init
+!!      m_effective_potential,m_harmonics_terms
 !!
 !! CHILDREN
 !!
@@ -334,7 +333,7 @@ end subroutine harmonics_terms_free
 !! harmonics_terms = supercell structure with data to be output
 !!
 !! PARENTS
-!!   harmonics_terms_init
+!!      m_effective_potential,m_harmonics_terms
 !!
 !! CHILDREN
 !!
@@ -400,7 +399,7 @@ end subroutine harmonics_terms_setInternalStrain
 !! harmonics_terms = supercell structure with data to be output
 !!
 !! PARENTS
-!!   harmonics_terms_init
+!!      m_effective_potential,m_harmonics_terms
 !!
 !! CHILDREN
 !!
@@ -468,7 +467,7 @@ end subroutine harmonics_terms_setEffectiveCharges
 !! harmonics_terms = supercell structure with data to be output
 !!
 !! PARENTS
-!!   harmonics_terms_init
+!!      m_effective_potential,m_harmonics_terms
 !!
 !! CHILDREN
 !!

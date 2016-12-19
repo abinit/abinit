@@ -39,9 +39,8 @@
 !!      m_exc_spectra,m_haydock
 !!
 !! CHILDREN
-!!      vkbr_free,get_bz_item,vkbr_init,matrginv
-!!      pawcprj_alloc,pawcprj_free,wfd_distribute_bbp,wfd_get_cprj,wrtout
-!!      xmpi_barrier,xmpi_sum
+!!      get_bz_item,matrginv,pawcprj_alloc,pawcprj_free,vkbr_free,vkbr_init
+!!      wfd_distribute_bbp,wfd_get_cprj,wrtout,xmpi_barrier,xmpi_sum
 !!
 !! SOURCE
 
