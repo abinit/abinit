@@ -421,18 +421,16 @@ be taken, for example 200.
 <br><font id="default">Default is *1 (Comment: if <a href="varrlx.html#imgmov">imgmov</a> in [2,5] (String Method, NEB), <b>dynimage(1)</b>=0 and <b>dynimage(<a href="varrlx.html#nimage">nimage</a>)</b>=0.)</font>
 <br><font id="text">
 <p>
-<p>
- This input variable is relevant when sets of images are activated (see
+This input variable is relevant when sets of images are activated (see
 <a href="varrlx.html#imgmov">imgmov</a>). Not all images might be required to evolve from one time step to the other.
+
 Indeed, in the String Method or the Nudged Elastic Band, one might impose that the extremal configurations of the string are fixed.
 In case the <b>dynimage</b>(iimage)=0, the image with index "iimage" will be consider as fixed.
-Thus, there is no need to compute forces and stresses for this image at each time step. The purpose of
-nevertheless defining extremal images is to make the input/output easier.
+Thus, there is no need to compute forces and stresses for this image at each time step. The purpose of defining extremal images is to make the input/output easier.
  <br />
  <br />
  In order to save CPU time, the computation of properties of static images (<b>dynimage</b>(iimage)=0)
 can be avoided: see <a href="varrlx.html#istatimg">istatimg</a> keyword.
-</p>
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -1202,73 +1200,49 @@ See the variable <a href="varrlx.html#iatfix">iatfix</a> for more information.
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
-<p> Control the collective changes of images (see <a href="varrlx.html#nimage">nimage</a>,<a href="varpar.html#npimage">npimage</a>, <a href="varrlx.html#dynimage">dynimage</a>, 
-<a href="varrlx.html#ntimimage">ntimimage</a>, <a href="varrlx.html#tolimg">tolimg</a>, <a href="varrlx.html#istatimg">istatimg</a>, <a href="varfil.html#prtvolimg">prtvolimg</a>).
-<br> Similar to <a href="varrlx.html#ionmov">ionmov</a> in spirit, although here, a population 
-of self-consistent calculations for different geometries is managed, while with <a href="varrlx.html#ionmov">ionmov</a>,
-only one geometry for self-consistent calculation is managed.
-<br> In this respect the maximal number of time step for image propagation is <a href="varrlx.html#ntimimage">ntimimage</a>,
-corresponding to the input variable <a href="varrlx.html#ntime">ntime</a> of the single geometry case.
-Also, the stopping criterion is governed by <a href="varrlx.html#tolimg">tolimg</a>, corresponding to the 
-input variable <a href="varbas.html#toldfe">toldfe</a> of the single geometry case.
-The stopping  condition is crude: the image propagation is stopped when the mean value (over dynamic images)
-of the absolute difference of total energy (previous and current time step) is less than <a href="varrlx.html#tolimg">tolimg</a>.
+Control the collective changes of images (see <a href="varrlx.html#nimage">nimage</a>, <a href="varpar.html#npimage">npimage</a>, <a href="varrlx.html#dynimage">dynimage</a>, <a href="varrlx.html#ntimimage">ntimimage</a>, <a href="varrlx.html#tolimg">tolimg</a>, <a href="varrlx.html#istatimg">istatimg</a>, <a href="varfil.html#prtvolimg">prtvolimg</a>).
+Similar to <a href="varrlx.html#ionmov">ionmov</a> in spirit, although here, a population of self-consistent calculations for different geometries is managed, while with <a href="varrlx.html#ionmov">ionmov</a>, only one geometry for self-consistent calculation is managed.
 
-<p>Actually, there might be combinations of <a href="varrlx.html#ionmov">ionmov</a> and <b>imgmov</b> 
-in which the two mechanisms are at work.
-Usually, however, only one mechanism will be activated 
-(so, usually, either <a href="varrlx.html#ntimimage">ntimimage</a> is bigger than one OR <a href="varrlx.html#ntime">ntime</a> is bigger than one).
-In order for the user to acquire a mental representation of the interplay between <a href="varrlx.html#ionmov">ionmov</a> and <b>imgmov</b>,
-here is a F90 pseudo-code presenting the interplay between the different above-mentioned input variables, 
-as well as with the parallelism (see input variable <a href="varpar.html#npimage">npimage</a>).
-</p>
+In this respect the maximal number of time step for image propagation is <a href="varrlx.html#ntimimage">ntimimage</a>, corresponding to the input variable <a href="varrlx.html#ntime">ntime</a> of the single geometry case. Also, the stopping criterion is governed by <a href="varrlx.html#tolimg">tolimg</a>, corresponding to the input variable <a href="varbas.html#toldfe">toldfe</a> of the single geometry case.
+
+The stopping  condition is crude: the image propagation is stopped when the mean value (over dynamic images) of the absolute difference of total energy (previous and current time step) is less than <a href="varrlx.html#tolimg">tolimg</a>. Actually, there might be combinations of <a href="varrlx.html#ionmov">ionmov</a> and <b>imgmov</b> in which the two mechanisms are at work. Usually, however, only one mechanism will be activated (so, usually, either <a href="varrlx.html#ntimimage">ntimimage</a> is bigger than one OR <a href="varrlx.html#ntime">ntime</a> is bigger than one).
+
+In order for the user to acquire a mental representation of the interplay between <a href="varrlx.html#ionmov">ionmov</a> and <b>imgmov</b>, here is a F90 pseudo-code presenting the interplay between the different above-mentioned input variables, as well as with the parallelism (see input variable <a href="varpar.html#npimage">npimage</a>).
+
 <p><pre>
 do itimimage=1,ntimimage
   do iimage=1,nimage
-    (possibly, parallelisation over images)
-    do itime=1,ntime
-      Compute the forces and stresses for image(iimage)
-      Examine whether the stopping criterion defined by tolmxf is fulfilled
-      Predict the next geometry for image(iimage) using ionmov
-    enddo
-  enddo
-  Examine whether the stopping criterion defined by tolimg is fulfilled
-  Predict the next geometries for all images using imgmov
+     (possibly, parallelisation over images)
+     do itime=1,ntime
+        Compute the forces and stresses for image(iimage)
+        Examine whether the stopping criterion defined by tolmxf is fulfilled
+        Predict the next geometry for image(iimage) using ionmov
+      enddo
+   enddo
+
+   Examine whether the stopping criterion defined by tolimg is fulfilled
+   Predict the next geometries for all images using imgmov
 enddo
-</pre></p>        
+</pre></p>
+
 <ul>
-  <li>    = 0  => simply <b> copy </b> images from previous timimage step.</li>
-  <li>    = 1  => move images according to <b> Steepest Descent </b> 
-                 following the (scaled) forces, the scaling factor being <a href="varrlx.html#fxcartfactor">fxcartfactor</a>. </li>
-  <li>    = 2  => <b> String Method </b> for finding Minimal Energy Path (MEP) 
-       connecting to minima (see PRB 66, 052301 (2002));
-       the algorithm variant can be selected with the <a href="varrlx.html#string_algo">string_algo</a> keyword
-       (Simplified String Method by default).
-       The solver for the Ordinary Differential Equation (ODE) can be selected with <a href="varrlx.html#mep_solver">mep_solver</a>
-       (steepest-descent by default). See also <a href="varrlx.html#mep_mxstep">mep_mxstep</a> keyword.</li>
-  <li>    = 3  => (tentatively, not yet coded) <b> Metadynamics </b>.</li>
-  <li>    = 4  => (tentatively, not yet coded) <b> Genetic Algorithm</b>.</li>
-  <li>    = 5  => <b> Nudged Elastic Band (NEB) </b> for finding Minimal Energy Path (MEP) 
-       connecting two minima;
-       the algorithm variant can be selected with the <a href="varrlx.html#neb_algo">neb_algo</a> keyword 
-       (NEB+improved tangent by default).
-       The solver for the Ordinary Differential Equation (ODE) can be selected with <a href="varrlx.html#mep_solver">mep_solver</a>
-       (steepest-descent by default). 
-       The spring constant connecting images along the path is defined by <a href="varrlx.html#neb_spring">neb_spring</a>.
-       See also <a href="varrlx.html#mep_mxstep">mep_mxstep</a> keyword.</li>
-  <li>    = 9 or 13  => <b> Path-Integral Molecular Dynamics </b>
-       (see e.g. [D. Marx and M. Parrinello, J. Chem. Phys. 104, 4077 (1996)]).
-       Will use 9 for <b>  Langevin thermostat </b> (associated friction coefficient given by <a href="varrlx.html#vis">vis</a>)
-       and 13 for <b>  Nose-Hoover thermostat chains </b>
-       (associated input variables are the number of thermostats in the chains, <a href="varrlx.html#nnos">nnos</a>,
-       and the masses of these thermostats <a href="varrlx.html#qmass">qmass</a>). 
-       <a href="varrlx.html#nimage">nimage</a> is the Trotter number (no use of <a href="varrlx.html#dynimage">dynimage</a>);
-       possible transformations of coordinates are defined by <a href="varrlx.html#pitransform">pitransform</a>;
-       Fictitious masses of the atoms (possibly different from the true masses given by <a href="varrlx.html#amu">amu</a>)
-       can be specified by <a href="varrlx.html#pimass">pimass</a>. 
-       At present, it is only possible to perform calculations in the (N,V,T) ensemble (<a href="varrlx.html#optcell">optcell</a>=0).</li>
-  </ul>
-  No meaning for RF calculations.
+<li> 0  => simply <b> copy </b> images from previous timimage step.</li>
+
+<li> 1  => move images according to <b> Steepest Descent </b> following the (scaled) forces,
+  the scaling factor being <a href="varrlx.html#fxcartfactor">fxcartfactor</a>. </li>
+
+<li> 2  => <b> String Method </b> for finding Minimal Energy Path (MEP) connecting to minima (see PRB 66, 052301 (2002)); the algorithm variant can be selected with the <a href="varrlx.html#string_algo">string_algo</a> keyword (Simplified String Method by default). The solver for the Ordinary Differential Equation (ODE) can be selected with <a href="varrlx.html#mep_solver">mep_solver</a> (steepest-descent by default). See also <a href="varrlx.html#mep_mxstep">mep_mxstep</a> keyword.</li>
+
+<li> 3  => (tentatively, not yet coded) <b> Metadynamics </b>.</li>
+
+<li> 4  => (tentatively, not yet coded) <b> Genetic Algorithm</b>.</li>
+
+<li> 5  => <b> Nudged Elastic Band (NEB) </b> for finding Minimal Energy Path (MEP) connecting two minima; the algorithm variant can be selected with the <a href="varrlx.html#neb_algo">neb_algo</a> keyword (NEB+improved tangent by default). The solver for the Ordinary Differential Equation (ODE) can be selected with <a href="varrlx.html#mep_solver">mep_solver</a> (steepest-descent by default). The spring constant connecting images along the path is defined by <a href="varrlx.html#neb_spring">neb_spring</a>. See also <a href="varrlx.html#mep_mxstep">mep_mxstep</a> keyword.</li>
+
+<li> 9 or 13  => <b> Path-Integral Molecular Dynamics </b> (see e.g. [D. Marx and M. Parrinello, J. Chem. Phys. 104, 4077 (1996)]). Will use 9 for <b>  Langevin thermostat </b> (associated friction coefficient given by <a href="varrlx.html#vis">vis</a>) and 13 for <b>  Nose-Hoover thermostat chains </b> (associated input variables are the number of thermostats in the chains, <a href="varrlx.html#nnos">nnos</a>, and the masses of these thermostats <a href="varrlx.html#qmass">qmass</a>). <a href="varrlx.html#nimage">nimage</a> is the Trotter number (no use of <a href="varrlx.html#dynimage">dynimage</a>); possible transformations of coordinates are defined by <a href="varrlx.html#pitransform">pitransform</a>; Fictitious masses of the atoms (possibly different from the true masses given by <a href="varrlx.html#amu">amu</a>) can be specified by <a href="varrlx.html#pimass">pimass</a>. At present, it is only possible to perform calculations in the (N,V,T) ensemble (<a href="varrlx.html#optcell">optcell</a>=0).</li>
+</ul>
+
+No meaning for RF calculations.
 </p>
 </font>
 
