@@ -571,7 +571,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !  1-Initialize values for several arrays depending only on atomic data
    gnt_option=1
    if (dtset%pawxcdev==2.or.dtset%rfphon/=0.or.dtset%rfstrs/=0.or.dtset%rfelfd==1.or.&
-       dtset%rfelfd==3.or.dtset%rf2_dkde==1) gnt_option=2
+   dtset%rfelfd==3.or.dtset%rf2_dkde==1) gnt_option=2
 
    ! Test if we have to call pawinit
    call paw_gencond(Dtset,gnt_option,"test",call_pawinit)
@@ -1117,8 +1117,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    rfpert_nl(:,natom+2,:,natom+2,:,1:natom) = 1
    call sytens(indsym,natom+2,natom,dtset%nsym,rfpert_nl,symrec,dtset%symrel)
    write(message, '(a,a,a,a,a)' ) ch10, &
-& ' The list of irreducible elements of the Raman and non-linear',&
-& ch10,' optical susceptibility tensors is:',ch10
+&   ' The list of irreducible elements of the Raman and non-linear',&
+&   ch10,' optical susceptibility tensors is:',ch10
    call wrtout(std_out,message,'COLL')
 
    write(message,'(12x,a)')&

@@ -552,7 +552,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! === Open and read pseudopotential files ===
  ! ===========================================
  call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,level40,&
-&  pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
+& pawrad,pawtab,psps,cryst%rprimd,comm_mpi=comm)
 
  ! ====================================================
  ! === This is the real epc stuff once all is ready ===
@@ -569,7 +569,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  case (1)
    ! Compute phonon linewidths in metals.
    call eph_phgamma(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
-    pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
+   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
 
  case (2)
    ! Compute electron-phonon matrix elements
@@ -584,7 +584,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  case (4)
    ! Compute electron self-energy (phonon contribution)
    call sigmaph(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
-                pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
+   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
  case default
    MSG_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))

@@ -261,7 +261,7 @@ subroutine wrtout_myproc(unit,message,do_flush) ! optional argument
 !******************************************************************
 
  print_std_err = (unit == std_out .and. std_out /= std_err .and. &
-&   (index(trim(message),'BUG')/=0.or.index(trim(message),'ERROR')/=0))
+& (index(trim(message),'BUG')/=0.or.index(trim(message),'ERROR')/=0))
 
 !Print message
  call write_lines(unit,message)
@@ -272,8 +272,8 @@ subroutine wrtout_myproc(unit,message,do_flush) ! optional argument
    write(unit, '(a)' ) '  Action: contact ABINIT group (please attach the output of `abinit -b`)'
    write(unit,*)
    if (print_std_err) then
-      write(std_err, '(a)' ) '  Action: contact ABINIT group (please attach the output of `abinit -b`)'
-      write(std_err,*)
+     write(std_err, '(a)' ) '  Action: contact ABINIT group (please attach the output of `abinit -b`)'
+     write(std_err,*)
    end if
  end if
 

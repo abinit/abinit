@@ -146,8 +146,8 @@ program mrgddb
      nfiles_cli = nfiles_cli + 1
      if (nfiles_cli > mddb+1) then
        write(msg, '(a,i0,2a)')&
-         'Number of files should be lower than mddb+1= ',mddb+1,ch10,&
-         'Action: change mddb in mrgddb.f90 and recompile.'
+       'Number of files should be lower than mddb+1= ',mddb+1,ch10,&
+       'Action: change mddb in mrgddb.f90 and recompile.'
        MSG_ERROR(msg)
      end if
      filnam(nfiles_cli) = arg
@@ -248,7 +248,7 @@ program mrgddb
 
  call abinit_doctor("__mrgddb")
 
-100 call xmpi_end()
+  100 call xmpi_end()
 
  end program mrgddb
 !!***

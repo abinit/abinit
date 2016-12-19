@@ -621,19 +621,19 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        ! spline interpolate the vh1 value for current radii
          call sort_dp(pawfgrtab(iatom)%nfgd, radii, isort, tol12)
          call splint(pawrad(itypat)%mesh_size, pawrad(itypat)%rad, &
-&             vh1_corrector, vh1spl, pawfgrtab(iatom)%nfgd, radii,  vh1_interp, ierr)
+&         vh1_corrector, vh1spl, pawfgrtab(iatom)%nfgd, radii,  vh1_interp, ierr)
        end if
 
        norm=SUM(vh1_interp)*ucvol/PRODUCT(ngfft(1:3))
        call xmpi_sum(norm,comm_fft,ierr)
        write(message,'(a,i6,a,E20.10)') ' sum of Hartree correction term on fft grid of atom : ', iatom, &
-&           ' = ', norm
+&       ' = ', norm
        call wrtout(std_out,message,'COLL')
 
        if (pawfgrtab(iatom)%nfgd/=0) then
          vpaw(pawfgrtab(iatom)%ifftsph(isort(1:pawfgrtab(iatom)%nfgd)),ispden) = &
-&             vpaw(pawfgrtab(iatom)%ifftsph(isort(1:pawfgrtab(iatom)%nfgd)),ispden) + &
-&             vh1_interp(1:pawfgrtab(iatom)%nfgd)
+&         vpaw(pawfgrtab(iatom)%ifftsph(isort(1:pawfgrtab(iatom)%nfgd)),ispden) + &
+&         vh1_interp(1:pawfgrtab(iatom)%nfgd)
        end if
 
        ! get integral of correction term in whole sphere
@@ -651,7 +651,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
        ! spline interpolate the vh1 value for current radii
        call splint(pawrad(itypat)%mesh_size, pawrad(itypat)%rad, &
-&           vh1_corrector, vh1spl, nradint, radii,  vh1_interp, ierr)
+&       vh1_corrector, vh1spl, nradint, radii,  vh1_interp, ierr)
 
        do ifgd = 1, nradint
          vh1_interp(ifgd) = vh1_interp(ifgd)*radii(ifgd)**2
@@ -659,7 +659,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
        call simpson_int(nradint, dr, vh1_interp, vh1_integ)
        write(message,'(a,i6,a,E20.10)') ' integral of Hartree correction term in sphere of atom: ', iatom, &
-&           ' = ', vh1_integ(nradint)*four*pi
+&       ' = ', vh1_integ(nradint)*four*pi
        call wrtout(std_out,message,'COLL')
 
        ABI_DEALLOCATE(vh1spl)

@@ -143,7 +143,7 @@ program multibinit
    tmpfilename = filnam(2)
    call isfile(tmpfilename,'new')
    if (open_file(tmpfilename,message,unit=ab_out,form="formatted",status="new",&
-     &              action="write") /= 0) then
+&   action="write") /= 0) then
      MSG_ERROR(message)
    end if
 !   call open_file(unit=ab_out,file=tmpfilename,form='formatted',status='new')
@@ -157,7 +157,7 @@ program multibinit
  end if
 
  write(message, '(a,(80a),a)' ) ch10,&
-&  ('=',ii=1,80),ch10
+& ('=',ii=1,80),ch10
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
@@ -166,7 +166,7 @@ program multibinit
 !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
 !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
  write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
-&    '-',trim(filnam(3)),ch10,' to initialize the multibinit input'
+& '-',trim(filnam(3)),ch10,' to initialize the multibinit input'
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
@@ -206,7 +206,7 @@ program multibinit
    end if
  else
    write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-&                       'There is no file for the coefficients from polynomial fitting'
+&   'There is no file for the coefficients from polynomial fitting'
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
  end if
@@ -223,25 +223,25 @@ program multibinit
 !****************************************************************************************
 !TEST_AM_SECTION
  if(.false.)then
- if (iam_master.and.inp%ncoeff == 0.and.inp%fit_coeff==1) then
-   write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
-&      '-Reading the file ',trim(filnam(5)),ch10,&
-&   ' with NetCDF in order to fit the polynomial coefficients'
-   call wrtout(std_out,message,'COLL') 
-   call wrtout(ab_out,message,'COLL') 
-   if(filnam(5)/=''.or.filnam(5)/='no')then
-     call read_md_hist(filnam(5),hist)
-   else
-     write(message, '(3a)' )&
-&          'There is no MD file to fit the coefficients ',ch10,&
-&          'Action: add MD file'
-        MSG_ERROR(message)
+   if (iam_master.and.inp%ncoeff == 0.and.inp%fit_coeff==1) then
+     write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
+&     '-Reading the file ',trim(filnam(5)),ch10,&
+&     ' with NetCDF in order to fit the polynomial coefficients'
+     call wrtout(std_out,message,'COLL') 
+     call wrtout(ab_out,message,'COLL') 
+     if(filnam(5)/=''.or.filnam(5)/='no')then
+       call read_md_hist(filnam(5),hist)
+     else
+       write(message, '(3a)' )&
+&       'There is no MD file to fit the coefficients ',ch10,&
+&       'Action: add MD file'
+       MSG_ERROR(message)
+     end if
    end if
- end if
 !MPI BROADCAST
- call abihist_bcast(hist,master,comm)
+   call abihist_bcast(hist,master,comm)
 
- 
+   
 !   call fit_polynomial_coeff_init
 !   call fit_polynomial_coeff_init(reference_effective_potential%,filnam,inp,comm)
 
@@ -314,7 +314,7 @@ program multibinit
  tsec(2)=twall-twalli
 
  write(message, '(a,i4,a,f13.1,a,f13.1)' )' Proc.',my_rank,' individual time (sec): cpu=',&
-&                 tsec(1),'  wall=',tsec(2)
+& tsec(1),'  wall=',tsec(2)
  call wrtout(std_out,message,"COLL")
 
  if (iam_master) then
@@ -352,7 +352,7 @@ program multibinit
 
 !Write information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor("__multibinit")
-  
+ 
  call flush_unit(ab_out)
  call flush_unit(std_out)
 
@@ -360,5 +360,5 @@ program multibinit
 
  call xmpi_end()
  
-end program multibinit
+  end program multibinit
 !!***

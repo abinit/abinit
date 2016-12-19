@@ -295,21 +295,21 @@ real(dp) :: strten(6)
 !Initialise the Hessian matrix using gmet
  if (itime==1)then
 
-    ABI_ALLOCATE(diag,(ndim))
-    do ii=1,3*ab_mover%natom
+   ABI_ALLOCATE(diag,(ndim))
+   do ii=1,3*ab_mover%natom
 !      diag(ii) = 1.00_dp / rprimd(MODULO(ii-1,3)+1,MODULO(ii-1,3)+1)**2
-      diag(ii) = gmet(MODULO(ii-1,3)+1,MODULO(ii-1,3)+1)
-    enddo
-    if(ab_mover%optcell/=0)then
+     diag(ii) = gmet(MODULO(ii-1,3)+1,MODULO(ii-1,3)+1)
+   end do
+   if(ab_mover%optcell/=0)then
 !     These values might lead to too large changes in some cases ...
-      do ii=3*ab_mover%natom+1,ndim
-        diag(ii) = ab_mover%strprecon*30.0_dp/ucvol
-        if(ab_mover%optcell==1) diag(ii) = diag(ii) / three
-      end do
-    end if
+     do ii=3*ab_mover%natom+1,ndim
+       diag(ii) = ab_mover%strprecon*30.0_dp/ucvol
+       if(ab_mover%optcell==1) diag(ii) = diag(ii) / three
+     end do
+   end if
 
-    call lbfgs_init(ndim,5,diag)
-    ABI_DEALLOCATE(diag)
+   call lbfgs_init(ndim,5,diag)
+   ABI_DEALLOCATE(diag)
 
    if (ab_mover%restartxf/=0) then
 

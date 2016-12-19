@@ -476,8 +476,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      to_compute_this_pert = 0
      if(ipert<dtset%natom+10 .and. rfpert(ipert)==1 .and. rfdir(idir) == 1 ) then
        if ((pertsy(idir,ipert)==1).or.&
-&         ((dtset%prepanl == 1).and.(ipert == dtset%natom+2)).or.&
-&         ((dtset%prepgkk == 1).and.(ipert <= dtset%natom))  ) then
+&       ((dtset%prepanl == 1).and.(ipert == dtset%natom+2)).or.&
+&       ((dtset%prepgkk == 1).and.(ipert <= dtset%natom))  ) then
          to_compute_this_pert = 1
        else
          write(message, '(a,a,i4,a,i4,a,a,a,a,a,a)' )ch10,&
