@@ -23336,8 +23336,8 @@
         grids are formed by using
         [[nshiftk]]=1 and [[shiftk]] 0.5 0.5 0.5 .
         This is often the preferred k point sampling, as the shift improves the sampling efficiency.
-        However, it can also break symmetry, if the 111 direction is not an axis of rotation, 
-        e.g. in tetragonal or hexagonal systems. Abinit will complain about this breaking, and you 
+        However, it can also break symmetry, if the 111 direction is not an axis of rotation,
+        e.g. in tetragonal or hexagonal systems. Abinit will complain about this breaking, and you
         should adapt [[shiftk]].
         For a non-shifted Monkhorst-Pack grid, use
         [[nshiftk]]=1 and [[shiftk]] 0.0 0.0 0.0 ,
