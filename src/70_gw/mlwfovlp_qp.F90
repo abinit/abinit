@@ -83,6 +83,7 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
  use m_bz_mesh,        only : kmesh_t, kmesh_init, kmesh_free
  use m_ebands,         only : ebands_init, ebands_free
  use m_qparticles,     only : rdqps, rdgw
+ use m_sort,           only : sort_dp
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

@@ -302,15 +302,9 @@ class MainFrame(QtGui.QMainWindow):
 
 
     def closeEvent(self, event):
-         reply = QtGui.QMessageBox.question(self, 'Warning',
-            "Are you sure you want to quit?", QtGui.QMessageBox.Yes |
-            QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+        sys.exit(0)
+        event.accept()
 
-         if reply == QtGui.QMessageBox.Yes:
-             sys.exit(0)
-             event.accept()
-         else:
-             event.ignore()
 
 
     def center(self):

@@ -12,7 +12,7 @@ from .util import create_directory, formatted_array_lines
 
 from .qptanalyzer import QptAnalyzer
 
-from .mpi import comm, size, rank, master_only, mpi_watch, i_am_master
+from .mpi import MPI, comm, size, rank, master_only, mpi_watch, i_am_master
 
 # =========================================================================== #
 
@@ -34,6 +34,7 @@ class EpcAnalyzer(object):
     temperatures = []
     omegase = []
     smearing = None
+    mu = None
 
     qred = None
     omega = None
@@ -50,6 +51,8 @@ class EpcAnalyzer(object):
 
     self_energy = None
     spectral_function = None
+    self_energy_T = None
+    spectral_function_T = None
 
     my_iqpts = [0]
 
@@ -68,6 +71,7 @@ class EpcAnalyzer(object):
                  omega_range=[0,0,1],
                  smearing=0.00367,
                  asr=True,
+                 fermi_level = None,
                  verbose=False,
                  **kwargs):
 
@@ -128,6 +132,7 @@ class EpcAnalyzer(object):
         self.set_omega_range(omega_range)
         self.set_smearing(smearing)
         self.set_output(output)
+        self.set_fermi_level(fermi_level)
 
         self.verbose = verbose
 
@@ -151,6 +156,7 @@ class EpcAnalyzer(object):
     def set_temp_range(self, temp_range=(0, 0, 1)):
         """Set the minimum, makimum and step temperature."""
         self.temperatures = np.arange(*temp_range, dtype=float)
+        self.ntemp = len(self.temperatures)
         self.qptanalyzer.temperatures = self.temperatures
 
     def check_temperatures(self):
@@ -180,6 +186,31 @@ class EpcAnalyzer(object):
             self.wtq = np.array(wtq) / sum(wtq)
         else:
             self.wtq = np.array(wtq)
+
+    def set_fermi_level(self, mu):
+        """Set the Fermi level, in Hartree."""
+        self.mu = mu
+        self.qptanalyzer.mu = mu
+
+    @mpi_watch
+    def find_fermi_level(self):
+        """
+        Find the Fermi level by gathering information from all workers
+        and broadcast the result.
+        """
+        all_max_val = self.gather_qpt_function('get_max_val')
+        all_min_cond = self.gather_qpt_function('get_min_cond')
+        if i_am_master:
+            max_val = np.max(all_max_val)
+            min_cond = np.min(all_min_cond)
+            mu = (max_val + min_cond) / 2.0
+            mu = np.array(mu, dtype=np.float64)
+        else:
+            mu = np.empty(1, dtype=np.float64)
+
+        comm.Bcast([mu, MPI.DOUBLE])
+
+        self.set_fermi_level(mu)
 
     def set_iqpt(self, iqpt):
         """
@@ -516,35 +547,87 @@ class EpcAnalyzer(object):
         self.zero_point_renormalization_modes = self.sum_qpt_function('get_zpr_static_active_modes')
         self.renormalization_is_dynamical = False
 
-    def compute_self_energy(self):
+    def compute_zp_self_energy(self):
         """
         Compute the zp frequency-dependent self-energy from one q-point.
     
-        The self-energy is evaluated on a frequency mesh 'omegase' that is shifted by the bare energies,
-        such that, what is retured is
+        The self-energy is evaluated on a frequency mesh 'omegase'
+        that is shifted by the bare energies, such that, what is retured is
     
             Simga'_kn(omega) = Sigma_kn(omega + E^0_kn)
     
         """
         self.self_energy = self.sum_qpt_function('get_zp_self_energy')
 
+    def compute_td_self_energy(self):
+        """
+        Compute the td frequency-dependent self-energy from one q-point.
+    
+        The self-energy is evaluated on a frequency mesh 'omegase'
+        that is shifted by the bare energies, such that, what is retured is
+    
+            Simga'_kn(omega,T) = Sigma_kn(omega + E^0_kn,T)
+    
+        """
+        # Make sure the fermi level is set
+        if self.mu is None:
+            self.find_fermi_level()
+
+        self.self_energy_T = self.sum_qpt_function('get_td_self_energy')
 
     @master_only
-    def compute_spectral_function(self):
+    def compute_zp_spectral_function(self):
         """
-        Compute the spectral function of all quasiparticles in the semi-static approximation,
-        that is, the 'upper bands' contribution to the self-energy is evaluated at the bare energy.
+        Compute the spectral function of all quasiparticles in the
+        semi-static approximation, that is, the 'upper bands' contribution
+        to the self-energy is evaluated at the bare energy.
 
-        The spectral function is evaluated on a frequency mesh 'omegase' that is shifted by the bare energies,
-        such that, what is retured is
+        The spectral function is evaluated on a frequency mesh 'omegase'
+        that is shifted by the bare energies, such that, what is retured is
 
             A'_kn(omega) = A_kn(omega + E^0_kn)
 
         """
-        self.spectral_function = np.zeros((self.nomegase, self.nkpt, self.nband), dtype=float)
-        omega = np.einsum('ij,m->ijm', np.ones((self.nkpt, self.nband)), self.omegase)
-        self.spectral_function = (1 / np.pi) * np.abs(self.self_energy.imag) / (
-                                (omega - self.self_energy.real) ** 2 + self.self_energy.imag ** 2)
+        nomegase = self.nomegase
+        nkpt = self.nkpt
+        nband = self.nband
+
+        self.spectral_function = np.zeros((nomegase, nkpt, nband), dtype=float)
+
+        omega = np.einsum('kn,l->knl', np.ones((nkpt, nband)), self.omegase)
+
+        self.spectral_function = (
+            (1 / np.pi) * np.abs(self.self_energy.imag) /
+            ((omega - self.self_energy.real) ** 2 + self.self_energy.imag ** 2)
+            )
+
+    @master_only
+    def compute_td_spectral_function(self):
+        """
+        Compute the spectral function of all quasiparticles in the
+        semi-static approximation, that is, the 'upper bands' contribution
+        to the self-energy is evaluated at the bare energy.
+
+        The spectral function is evaluated on a frequency mesh 'omegase'
+        that is shifted by the bare energies, such that, what is retured is
+
+            A'_kn(omega) = A_kn(omega + E^0_kn)
+
+        """
+        nomegase = self.nomegase
+        nkpt = self.nkpt
+        nband = self.nband
+        ntemp = self.ntemp
+
+        self.spectral_function_T = np.zeros((nomegase, ntemp, nkpt, nband),
+                                            dtype=float)
+
+        omega = np.einsum('ijt,l->ijlt', np.ones((nkpt, nband, ntemp)), self.omegase)
+
+        self.spectral_function_T = (
+            (1 / np.pi) * np.abs(self.self_energy_T.imag) /
+            ((omega - self.self_energy_T.real) ** 2 + self.self_energy_T.imag ** 2)
+            )
 
 
     @master_only
@@ -580,11 +663,14 @@ class EpcAnalyzer(object):
         ncfile.createDimension('number_of_frequencies',len(self.omegase))
 
         # Create variable
-        data = ncfile.createVariable('reduced_coordinates_of_kpoints','d',('number_of_kpoints','cartesian'))
+        data = ncfile.createVariable('reduced_coordinates_of_kpoints','d',
+                                     ('number_of_kpoints','cartesian'))
         data[:,:] = root.variables['reduced_coordinates_of_kpoints'][:,:]
-        data = ncfile.createVariable('eigenvalues','d',('number_of_spins','number_of_kpoints','max_number_of_states'))
+        data = ncfile.createVariable('eigenvalues','d',
+                                     ('number_of_spins','number_of_kpoints','max_number_of_states'))
         data[:,:,:] = root.variables['eigenvalues'][:,:,:]
-        data = ncfile.createVariable('occupations','i',('number_of_spins','number_of_kpoints','max_number_of_states'))
+        data = ncfile.createVariable('occupations','i',
+                                     ('number_of_spins','number_of_kpoints','max_number_of_states'))
         data[:,:,:] = root.variables['occupations'][:,:,:]
         data = ncfile.createVariable('primitive_vectors','d',('cartesian','cartesian'))
         data[:,:] = root.variables['primitive_vectors'][:,:]
@@ -639,28 +725,47 @@ class EpcAnalyzer(object):
             data[0,:,:,:] = self.temperature_dependent_broadening[:,:,:].real  # FIXME number of spin
 
         self_energy = ncfile.createVariable('self_energy','d',
-            ('number_of_spins', 'number_of_kpoints', 'max_number_of_states', 'number_of_frequencies', 'cplex'))
+            ('number_of_spins', 'number_of_kpoints', 'max_number_of_states',
+             'number_of_frequencies', 'cplex'))
 
         if self.self_energy is not None:
             self_energy[0,:,:,:,0] = self.self_energy[:,:,:].real  # FIXME number of spin
             self_energy[0,:,:,:,1] = self.self_energy[:,:,:].imag  # FIXME number of spin
 
+        self_energy_T = ncfile.createVariable('self_energy_temperature_dependent','d',
+            ('number_of_spins', 'number_of_kpoints', 'max_number_of_states',
+             'number_of_frequencies', 'number_of_temperature', 'cplex'))
+
+        if self.self_energy_T is not None:
+            self_energy_T[0,:,:,:,:,0] = self.self_energy_T[:,:,:,:].real  # FIXME number of spin
+            self_energy_T[0,:,:,:,:,1] = self.self_energy_T[:,:,:,:].imag  # FIXME number of spin
+
         spectral_function = ncfile.createVariable('spectral_function','d',
-            ('number_of_spins', 'number_of_kpoints', 'max_number_of_states', 'number_of_frequencies'))
+            ('number_of_spins', 'number_of_kpoints', 'max_number_of_states',
+             'number_of_frequencies'))
 
         if self.spectral_function is not None:
             spectral_function[0,:,:,:] = self.spectral_function[:,:,:]  # FIXME number of spin
+
+        spectral_function_T = ncfile.createVariable('spectral_function_temperature_dependent','d',
+            ('number_of_spins', 'number_of_kpoints', 'max_number_of_states',
+             'number_of_frequencies', 'number_of_temperature'))
+
+        if self.spectral_function_T is not None:
+            spectral_function_T[0,:,:,:,:] = self.spectral_function_T[:,:,:,:]  # FIXME number of spin
 
         zpr_modes = ncfile.createVariable('zero_point_renormalization_by_modes','d',
             ('number_of_modes', 'number_of_spins', 'number_of_kpoints', 'max_number_of_states'))
         if self.zero_point_renormalization_modes is not None:
             zpr_modes[:,0,:,:] = self.zero_point_renormalization_modes[:,:,:]
 
-        data = ncfile.createVariable('reduced_coordinates_of_qpoints','d', ('number_of_qpoints', 'cartesian'))
+        data = ncfile.createVariable('reduced_coordinates_of_qpoints','d',
+                                     ('number_of_qpoints', 'cartesian'))
         if self.qred is not None:
             data[...] = self.qred[...]
 
-        data = ncfile.createVariable('phonon_mode_frequencies','d', ('number_of_qpoints', 'number_of_modes'))
+        data = ncfile.createVariable('phonon_mode_frequencies','d',
+                                     ('number_of_qpoints', 'number_of_modes'))
         if self.omega is not None:
             data[...] = self.omega[...]
 

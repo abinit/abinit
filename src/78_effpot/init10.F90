@@ -63,7 +63,7 @@ subroutine init10(filnam,comm)
 !scalars
  integer,intent(in) :: comm
 !arrays
- character(len=*),intent(out) :: filnam(15)
+ character(len=*),intent(out) :: filnam(17)
 
 !Local variables--------------------------
 !scalars
@@ -91,8 +91,17 @@ subroutine init10(filnam,comm)
 &                  ' (DDB or XML file): '
    read(std_in, '(a)',IOSTAT=io) filnam(3)
    write(std_out,'(a,a)' )'-   ',trim(filnam(3))
-   ii = 4
-   do while (io>=0 .and. ii<16)
+   write(std_out,*)' Give name for input coefficients from fitted polynomial',&
+&                  ' (XML file or enter no): '
+   read(std_in, '(a)',IOSTAT=io) filnam(4)
+   write(std_out,'(a,a)' )'-   ',trim(filnam(4))
+   write(std_out,*)' Give name for molecular dynamics',&
+&                  ' (netcdf file or enter no): '
+   read(std_in, '(a)',IOSTAT=io) filnam(5)
+   write(std_out,'(a,a)' )'-   ',trim(filnam(5))
+
+   ii = 6
+   do while (io>=0 .and. ii<18)
      write(std_out,*)' Give name for input derivative database (DDB or XML file): '
      read(std_in, '(a)',IOSTAT=io) filnam(ii)
      write(std_out,'(a,a)' )'-   ',trim(filnam(ii))

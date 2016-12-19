@@ -563,7 +563,9 @@ end subroutine isopress
  expdiag(1)=exp(-veig(1)*dtion/two)
  expdiag(2)=exp(-veig(2)*dtion/two)
  expdiag(3)=exp(-veig(3)*dtion/two)
- write(std_out,*)' isostress : expdiag(:)=',expdiag(:)  ! Do not remove this line : seems to be needed for g95 compilo
+ if(DEBUG) then 
+   write(std_out,*)' isostress : expdiag(:)=',expdiag(:)  ! Do not remove this line : seems to be needed for g95 compilo
+ end if
  do iatom=1,natom
    uv(:)=matmul(tvtemp,vel(:,iatom))
    uv(:)=uv(:)*expdiag(:)
@@ -578,7 +580,9 @@ end subroutine isopress
 !    coordinates, so that this expression is wrong
      if (iatfix(idir,iatom) == 0) then
        ekin=ekin+0.5d0*amass(iatom)*vel(idir,iatom)**2
-       write(std_out,*)'kin',iatom,ekin,vel(idir,iatom)
+       if(DEBUG) then
+         write(std_out,*)'kin',iatom,ekin,vel(idir,iatom)
+       end if
 !      Counts the degrees of freedom
        nfree=nfree+one
      end if
