@@ -1472,7 +1472,6 @@ previous ground state calculation (see the
 <b>
  This variable is experimental. In development.
 </b>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -1698,7 +1697,6 @@ Supported values:
   1 =&gt; read vdW-DF variables
  </li>
 </ul>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -1775,7 +1773,6 @@ previous ground state calculation (see the
 <b>
  This variable is experimental. In development.
 </b>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -2994,7 +2991,6 @@ with PHON, PHONOPY, etc...
 Print out a NetCDF file containing a vdW-DF kernel.
 <!-- See the associated script in
 ~abinit/extras/post_processing/vdw_check_kernel for further details. -->
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3201,7 +3197,7 @@ to the IBZ. In order to prepare <a href="../../users/abinit_help.html#gw">GW</a>
 <br><font id="default">Default is 0</font>
 <br><font id="text">
 <p>
- <ul>
+<ul>
   <li>
    <b>tfkinfunc</b>=1 : <span style="text-decoration: underline;">Thomas-Fermi</span>
 kinetic functional (explicit functional of the density) is used instead of Kohn-Sham kinetic
@@ -3266,7 +3262,6 @@ This input variable has the same definition as <a href="varbas.html#toldfe">told
 It sets a tolerance for absolute differences of total energy that, reached TWICE successively, will cause the
 initialization steps (without gradient correction) to stop and the gradient correction to be added.<br/>
 Can be specified in Ha (the default), Ry, eV or Kelvin, since it has the 'ENERGY' characteristics.
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3317,7 +3312,6 @@ ratio, for historical reasons.
 <p>
  The performance depends crucially on having a good BLAS installed. Provided the BLAS supports OpenMP, this option also yields very good scaling for the nonlocal operator.
 </p>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3337,7 +3331,6 @@ ratio, for historical reasons.
 <p>
  Caveat: Note that very tight convergence of ground state and phonon calculations is necessary to get good GKK matrix elements! <a href="varbas.html#tolwfr">tolwfr</a> = 1.e-24 or so is recommended everywhere. There may be problems using use_nonscf_gkk = 1 with non-symmorphic symmetries - please check (at least) that lifetimes for phonons go to 0 for acoustic modes at Gamma.
 </p>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3666,7 +3659,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build angular meshes for the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3687,7 +3679,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build angular meshes for the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3707,7 +3698,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build angular meshes for the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3727,7 +3717,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build angular meshes for the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3747,7 +3736,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3768,7 +3756,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3788,7 +3775,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3808,7 +3794,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to filter the vdW-DF kernel in reciprocal space.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3828,7 +3813,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3848,7 +3832,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3868,7 +3851,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3888,7 +3870,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to define the sampling of the vdW-DF-kernel in real-space.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3908,7 +3889,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to exponentially smoothen q near q0.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3928,7 +3908,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3948,7 +3927,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3969,7 +3947,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 .
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3989,7 +3966,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to define the vdW-DF kernel cut-off radius.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -4009,7 +3985,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -4034,7 +4009,6 @@ Adjust it to a big value (e.g. 1e12) to enable it all along the SCF
 calculation. Too small values, as well as negative values, will result
 in the vdW-DF energy contributions never being calculated.
 </p>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -4054,7 +4028,6 @@ Only relevant if <a href="vardev.html#vdw_xc">vdw_xc</a>>0
 Used when <a href="vardev.html#vdw_xc">vdw_xc</a>&gt;0,
 to build the vdW-DF kernel.
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -4080,7 +4053,6 @@ to build the vdW-DF kernel.
  </i>
 </b>
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -4104,7 +4076,6 @@ as introduced in
 </a>
 .
 <br />
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
