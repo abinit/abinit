@@ -234,10 +234,13 @@ CONTAINS  !===========================================================
 !!  Deallocate memory for the ifc_type structure
 !!
 !! PARENTS
-!!      anaddb,eph,m_ifc
+!!      anaddb,compute_anharmonics,eph,m_anharmonics_terms
+!!      m_effective_potential,m_effective_potential_file,m_harmonics_terms
+!!      m_ifc
 !!
 !! CHILDREN
-!!      appdig,ifc_fourq,smpbz,symkpt,wrtout
+!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
+!!      skw_free,wrap2_pmhalf,xmpi_sum
 !!
 !! SOURCE
 
@@ -380,10 +383,11 @@ end subroutine ifc_free
 !!   Ifc%wghatm(natom,natom,nrpt)= Weight associated to the couple of atoms and the R vector
 !!
 !! PARENTS
-!!      anaddb,eph
+!!      anaddb,eph,m_effective_potential_file
 !!
 !! CHILDREN
-!!      appdig,ifc_fourq,smpbz,symkpt,wrtout
+!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
+!!      skw_free,wrap2_pmhalf,xmpi_sum
 !!
 !! SOURCE
 
@@ -743,10 +747,12 @@ end subroutine ifc_init
 !!
 !! PARENTS
 !!      get_nv_fs_en,get_tau_k,harmonic_thermo,interpolate_gkk,m_ifc,m_phgamma
-!!      m_phonons,mka2f,mka2f_tr,mka2f_tr_lova,mkph_linwid,read_gkk
+!!      m_phonons,m_phpi,m_sigmaph,mka2f,mka2f_tr,mka2f_tr_lova,mkph_linwid
+!!      read_gkk
 !!
 !! CHILDREN
-!!      appdig,ifc_fourq,smpbz,symkpt,wrtout
+!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
+!!      skw_free,wrap2_pmhalf,xmpi_sum
 !!
 !! SOURCE
 
@@ -972,7 +978,8 @@ end subroutine ifc_get_dwdq
 !!      m_ifc
 !!
 !! CHILDREN
-!!      appdig,ifc_fourq,smpbz,symkpt,wrtout
+!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
+!!      skw_free,wrap2_pmhalf,xmpi_sum
 !!
 !! SOURCE
 
@@ -1092,7 +1099,8 @@ end subroutine corsifc9
 !!      anaddb
 !!
 !! CHILDREN
-!!      appdig,ifc_fourq,matr3inv,mkrdim,smpbz,symkpt,wrtout
+!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
+!!      skw_free,wrap2_pmhalf,xmpi_sum
 !!
 !! SOURCE
 
@@ -1436,7 +1444,8 @@ end subroutine ifc_print
 !!      m_ifc
 !!
 !! CHILDREN
-!!      appdig,ifc_fourq,smpbz,symkpt,wrtout
+!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
+!!      skw_free,wrap2_pmhalf,xmpi_sum
 !!
 !! SOURCE
 
@@ -1757,7 +1766,8 @@ implicit none
 !!      m_ifc
 !!
 !! CHILDREN
-!!      appdig,ifc_fourq,smpbz,symkpt,wrtout
+!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
+!!      skw_free,wrap2_pmhalf,xmpi_sum
 !!
 !! SOURCE
 
@@ -1964,7 +1974,8 @@ end subroutine omega_decomp
 !!      anaddb,eph
 !!
 !! CHILDREN
-!!      appdig,ifc_fourq,smpbz,symkpt,wrtout
+!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
+!!      skw_free,wrap2_pmhalf,xmpi_sum
 !!
 !! SOURCE
 
@@ -2089,6 +2100,8 @@ end subroutine ifc_outphbtrap
 !!      eph
 !!
 !! CHILDREN
+!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
+!!      skw_free,wrap2_pmhalf,xmpi_sum
 !!
 !! SOURCE
 
@@ -2388,6 +2401,8 @@ end function ifc_build_phbspl
 !!      m_ifc
 !!
 !! CHILDREN
+!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
+!!      skw_free,wrap2_pmhalf,xmpi_sum
 !!
 !! SOURCE
 
@@ -2460,8 +2475,11 @@ end subroutine phbspl_evalq
 !!  Free dynamic memory.
 !!
 !! PARENTS
+!!      m_ifc
 !!
 !! CHILDREN
+!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
+!!      skw_free,wrap2_pmhalf,xmpi_sum
 !!
 !! SOURCE
 
@@ -2644,9 +2662,11 @@ end function ifc_build_skw
 !!  Only writing
 !!
 !! PARENTS
-!!      m_ifc
+!!      eph
 !!
 !! CHILDREN
+!!      cwtime,ifc_fourq,phbspl_evalq,phbspl_free,random_number,skw_eval_bks
+!!      skw_free,wrap2_pmhalf,xmpi_sum
 !!
 !! SOURCE
 

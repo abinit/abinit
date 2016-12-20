@@ -106,14 +106,15 @@
 !! CHILDREN
 !!      bonds_lgth_angles,bound_deriv,calc_efg,calc_fc,calcdensph
 !!      compute_coeff_plowannier,crystal_free,crystal_init,datafordmft,denfgr
-!!      destroy_dmft,destroy_oper,destroy_plowannier
-!!      ebands_free,ebands_init,ebands_jdos,fftdatar_write,init_dmft
-!!      init_oper,init_plowannier,ioarr,mag_constr_e,mlwfovlp,mlwfovlp_qp
-!!      multipoles_out,optics_paw,optics_paw_core,optics_vloc,out1dm,outkss
-!!      outwant,partial_dos_fractions,partial_dos_fractions_paw,pawmkaewf
-!!      pawprt,pawrhoij_copy,pawrhoij_nullify,posdoppler,poslifetime,print_dmft
-!!      prt_cif,ebands_prtbltztrp,prtfatbands,read_atomden,simpson_int,skw_free
-!!      skw_init,sort_dp,spline,splint,tetrahedron,timab,wrtout
+!!      destroy_dmft,destroy_oper,destroy_plowannier,dos_calcnwrite,ebands_free
+!!      ebands_init,ebands_prtbltztrp,epjdos_free,fatbands_ncwrite
+!!      fftdatar_write,free_my_atmtab,get_my_atmtab,init_dmft,init_oper
+!!      init_plowannier,ioarr,mag_constr_e,mlwfovlp,mlwfovlp_qp,multipoles_out
+!!      optics_paw,optics_paw_core,optics_vloc,out1dm,outkss,outwant
+!!      partial_dos_fractions,partial_dos_fractions_paw,pawmkaewf,pawprt
+!!      pawrhoij_copy,pawrhoij_nullify,posdoppler,poslifetime,print_dmft
+!!      prt_cif,prtfatbands,read_atomden,simpson_int,sort_dp,spline,splint
+!!      timab,wrtout,xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -620,19 +621,19 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        ! spline interpolate the vh1 value for current radii
          call sort_dp(pawfgrtab(iatom)%nfgd, radii, isort, tol12)
          call splint(pawrad(itypat)%mesh_size, pawrad(itypat)%rad, &
-&             vh1_corrector, vh1spl, pawfgrtab(iatom)%nfgd, radii,  vh1_interp, ierr)
+&         vh1_corrector, vh1spl, pawfgrtab(iatom)%nfgd, radii,  vh1_interp, ierr)
        end if
 
        norm=SUM(vh1_interp)*ucvol/PRODUCT(ngfft(1:3))
        call xmpi_sum(norm,comm_fft,ierr)
        write(message,'(a,i6,a,E20.10)') ' sum of Hartree correction term on fft grid of atom : ', iatom, &
-&           ' = ', norm
+&       ' = ', norm
        call wrtout(std_out,message,'COLL')
 
        if (pawfgrtab(iatom)%nfgd/=0) then
          vpaw(pawfgrtab(iatom)%ifftsph(isort(1:pawfgrtab(iatom)%nfgd)),ispden) = &
-&             vpaw(pawfgrtab(iatom)%ifftsph(isort(1:pawfgrtab(iatom)%nfgd)),ispden) + &
-&             vh1_interp(1:pawfgrtab(iatom)%nfgd)
+&         vpaw(pawfgrtab(iatom)%ifftsph(isort(1:pawfgrtab(iatom)%nfgd)),ispden) + &
+&         vh1_interp(1:pawfgrtab(iatom)%nfgd)
        end if
 
        ! get integral of correction term in whole sphere
@@ -650,7 +651,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
        ! spline interpolate the vh1 value for current radii
        call splint(pawrad(itypat)%mesh_size, pawrad(itypat)%rad, &
-&           vh1_corrector, vh1spl, nradint, radii,  vh1_interp, ierr)
+&       vh1_corrector, vh1spl, nradint, radii,  vh1_interp, ierr)
 
        do ifgd = 1, nradint
          vh1_interp(ifgd) = vh1_interp(ifgd)*radii(ifgd)**2
@@ -658,7 +659,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
        call simpson_int(nradint, dr, vh1_interp, vh1_integ)
        write(message,'(a,i6,a,E20.10)') ' integral of Hartree correction term in sphere of atom: ', iatom, &
-&           ' = ', vh1_integ(nradint)*four*pi
+&       ' = ', vh1_integ(nradint)*four*pi
        call wrtout(std_out,message,'COLL')
 
        ABI_DEALLOCATE(vh1spl)

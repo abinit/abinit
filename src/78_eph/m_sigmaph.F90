@@ -1001,6 +1001,7 @@ end subroutine sigmaph
 !!    by setting the corresponding gkk_nu to zero.
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
 !!
@@ -1630,6 +1631,7 @@ end function sigmaph_new
 !! INPUTS
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
 !!
@@ -1724,6 +1726,7 @@ end subroutine sigmaph_free
 !!  ikcalc=Index of the k-point to compute.
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
 !!
@@ -1794,6 +1797,7 @@ end subroutine sigmaph_setup_kcalc
 !!  ebands<ebands_t>=KS band energies.
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
 !!
@@ -1893,6 +1897,7 @@ end subroutine sigmaph_solve
 !!  ebands<ebands_t>=KS band energies.
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
 !!
@@ -2110,6 +2115,7 @@ end function lgroup_new
 !!  Free memory
 !!
 !! PARENTS
+!!      m_sigmaph
 !!
 !! CHILDREN
 !!

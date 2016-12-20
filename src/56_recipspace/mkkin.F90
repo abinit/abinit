@@ -49,7 +49,7 @@
 !!
 !! PARENTS
 !!      calc_vhxc_me,d2frnl,dfpt_nsteltwf,dfpt_nstpaw,dfpt_rhofermi,energy
-!!      getgh1c,ks_ddiago,m_commutator_vkbr,m_io_kss,mkffnl,vtorho
+!!      getgh1c,ks_ddiago,m_io_kss,m_vkbr,mkffnl,vtorho
 !!
 !! CHILDREN
 !!

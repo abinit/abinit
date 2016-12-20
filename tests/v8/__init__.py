@@ -12,6 +12,7 @@ keywords = [
 inp_files = [
 "t01.in",
 "t02.in",
+"t03.in",
 "t41.in",
 "t42.in",
 "t43.in",

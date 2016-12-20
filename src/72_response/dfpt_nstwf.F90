@@ -68,8 +68,7 @@
 !! CHILDREN
 !!      destroy_rf_hamiltonian,dotprod_g,gaugetransfo,getgh1c
 !!      init_rf_hamiltonian,load_k_hamiltonian,load_k_rf_hamiltonian
-!!      load_kprime_hamiltonian,mkffnl,mkkpg,timab,wffreaddatarec,wffreadnpwrec
-!!      wffreadskiprec,wfk_read_bks
+!!      load_kprime_hamiltonian,mkffnl,mkkpg,timab,wfk_read_bks
 !!
 !! SOURCE
 

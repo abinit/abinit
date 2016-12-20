@@ -1869,11 +1869,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      id_required=4; ikxc=7; dim_kxcg=0
      
      if (dtset%gwgamma>-5) then 
-         approx_type=4  ! full fxc(G,G')
+       approx_type=4  ! full fxc(G,G')
      else if (dtset%gwgamma>-7) then
-         approx_type=5  ! fxc(0,0) one-shot
+       approx_type=5  ! fxc(0,0) one-shot
      else
-         approx_type=6  ! rpa-type bootstrap
+       approx_type=6  ! rpa-type bootstrap
      end if
 
      option_test=MOD(Dtset%gwgamma,2)

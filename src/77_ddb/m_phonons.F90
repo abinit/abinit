@@ -982,7 +982,7 @@ end subroutine mkphdos
 !!  Frequencies are in eV, DOS are in states/eV.
 !!
 !! PARENTS
-!!      anaddb
+!!      anaddb,eph
 !!
 !! CHILDREN
 !!
@@ -1089,7 +1089,7 @@ end subroutine phdos_ncwrite
 !!  Only writing.
 !!
 !! PARENTS
-!!      anaddb
+!!      anaddb,m_effective_potential
 !!
 !! CHILDREN
 !!
@@ -1434,7 +1434,7 @@ end subroutine mkphbs
 !!   to file only
 !!
 !! PARENTS
-!!      m_phonons
+!!      anaddb,eph
 !!
 !! CHILDREN
 !!
@@ -2192,6 +2192,7 @@ end subroutine phonons_writeEPS
 !!  Only writing
 !!
 !! PARENTS
+!!      m_phonons
 !!
 !! CHILDREN
 !!

@@ -40,8 +40,8 @@
 !! Better handling should be provided in further version.
 !!
 !! PARENTS
-!!      get_npert_rbz,m_bz_mesh,m_ddb,m_dvdb,m_dynmat,m_esymm,m_phgamma
-!!      memory_eval,read_gkk,respfn
+!!      get_npert_rbz,m_bz_mesh,m_ddb,m_dvdb,m_dynmat,m_esymm,m_gkk,m_phgamma
+!!      m_sigmaph,memory_eval,read_gkk,respfn
 !!
 !! CHILDREN
 !!      wrap2_pmhalf,wrtout

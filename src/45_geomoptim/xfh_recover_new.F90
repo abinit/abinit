@@ -24,7 +24,7 @@
 !!
 !!
 !! PARENTS
-!!      pred_bfgs
+!!      pred_bfgs,pred_lbfgs
 !!
 !! CHILDREN
 !!      hessupdt,xfpack_f2vout,xfpack_x2vin

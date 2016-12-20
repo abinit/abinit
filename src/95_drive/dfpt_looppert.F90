@@ -108,7 +108,7 @@
 !!      pawrhoij_free,pawrhoij_nullify,prteigrs,psddb8,read_rhor,rf2_getidirs
 !!      rotate_rho,set_pert_comm,set_pert_paw,setsym,setsymrhoij,status,symkpt
 !!      timab,transgrid,unset_pert_comm,unset_pert_paw,vlocalstr,wffclose
-!!      wffopen,wfk_open_read,wfk_read_eigenvalues,wrtout,xmpi_sum
+!!      wfk_open_read,wfk_read_eigenvalues,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -476,8 +476,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      to_compute_this_pert = 0
      if(ipert<dtset%natom+10 .and. rfpert(ipert)==1 .and. rfdir(idir) == 1 ) then
        if ((pertsy(idir,ipert)==1).or.&
-&         ((dtset%prepanl == 1).and.(ipert == dtset%natom+2)).or.&
-&         ((dtset%prepgkk == 1).and.(ipert <= dtset%natom))  ) then
+&       ((dtset%prepanl == 1).and.(ipert == dtset%natom+2)).or.&
+&       ((dtset%prepgkk == 1).and.(ipert <= dtset%natom))  ) then
          to_compute_this_pert = 1
        else
          write(message, '(a,a,i4,a,i4,a,a,a,a,a,a)' )ch10,&

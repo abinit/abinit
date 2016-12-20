@@ -5418,7 +5418,7 @@ end function vdiff_eval
 !!  Print vdiff_t to unit
 !!
 !! PARENTS
-!!      m_dvdb,mrgdv
+!!      m_dvdb
 !!
 !! CHILDREN
 !!
