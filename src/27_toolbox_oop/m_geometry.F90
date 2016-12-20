@@ -613,7 +613,7 @@ end subroutine wigner_seitz
 !!  displ_red(2,3*natom,3*natom)=Phonon displacement in reduded coordinates.
 !!
 !! PARENTS
-!!      get_tau_k,m_phgamma,mka2f,mkph_linwid,read_gkk
+!!      get_tau_k,m_ddb,m_ifc,mka2f,mkph_linwid,read_gkk
 !!
 !! CHILDREN
 !!

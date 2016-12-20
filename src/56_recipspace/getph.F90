@@ -30,9 +30,9 @@
 !!
 !! PARENTS
 !!      afterscfloop,bethe_salpeter,cg_rotate,dfpt_looppert,dfptnl_loop
-!!      extrapwf,gstate,m_cut3d,m_fock,m_hamiltonian,m_phgamma,m_wfd
-!!      partial_dos_fractions,prcref,prcref_PMA,respfn,scfcv,screening,sigma
-!!      update_e_field_vars,wfconv
+!!      extrapwf,gstate,m_cut3d,m_fock,m_gkk,m_hamiltonian,m_phgamma,m_phpi
+!!      m_sigmaph,m_wfd,partial_dos_fractions,prcref,prcref_PMA,respfn,scfcv
+!!      screening,sigma,update_e_field_vars,wfconv
 !!
 !! CHILDREN
 !!

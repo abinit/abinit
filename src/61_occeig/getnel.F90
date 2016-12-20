@@ -217,25 +217,25 @@ subroutine getnel(doccde,dosdeltae,eigen,entropy,fermie,maxocc,mband,nband,&
  else if(option==2)then
   ! evaluate DOS for smearing, half smearing, and double.
 
-  buffer=limit/tsmearinv*.5_dp
+   buffer=limit/tsmearinv*.5_dp
 
   ! A Similar section is present is dos_calcnwrite. Should move all DOS stuff to m_ebands
   ! Choose the lower and upper energies
-  enemax=maxval(eigen(1:bantot))+buffer
-  enemin=minval(eigen(1:bantot))-buffer
+   enemax=maxval(eigen(1:bantot))+buffer
+   enemin=minval(eigen(1:bantot))-buffer
 
   ! Extend the range to a nicer value
-  enemax=0.1_dp*ceiling(enemax*10._dp)
-  enemin=0.1_dp*floor(enemin*10._dp)
+   enemax=0.1_dp*ceiling(enemax*10._dp)
+   enemin=0.1_dp*floor(enemin*10._dp)
 
   ! Choose the energy increment
-  if(abs(dosdeltae)<tol10)then
-    deltaene=0.001_dp
-    if(prtdos1>=2)deltaene=0.0005_dp ! Higher resolution possible (and wanted) for tetrahedron
-  else
-    deltaene=dosdeltae
-  end if
-  nene=nint((enemax-enemin)/deltaene)+1
+   if(abs(dosdeltae)<tol10)then
+     deltaene=0.001_dp
+     if(prtdos1>=2)deltaene=0.0005_dp ! Higher resolution possible (and wanted) for tetrahedron
+   else
+     deltaene=dosdeltae
+   end if
+   nene=nint((enemax-enemin)/deltaene)+1
 
 !  Write the header of the DOS file, and also decides the energy range and increment
    call dos_hdr_write(buffer,deltaene,dosdeltae,eigen,enemax,enemin,fermie,mband,nband,nene,&

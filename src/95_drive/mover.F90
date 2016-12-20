@@ -101,14 +101,15 @@
 !! CHILDREN
 !!      abiforstr_fin,abiforstr_ini,abihist_bcast,abihist_compare,abihist_fin
 !!      abihist_ini,abimover_fin,abimover_ini,abimover_nullify,chkdilatmx
-!!      crystal_free,crystal_init,dtfil_init_time,erlxconv,fcart2fred,fconv
-!!      fred2fcart,hist2var,initylmg,metric,mkradim,mttk_fin,mttk_ini
-!!      prec_simple,pred_bfgs,pred_delocint,pred_diisrelax,pred_isokinetic
-!!      pred_isothermal,pred_langevin,pred_lotf,pred_moldyn,pred_nose
-!!      pred_simple,pred_srkna14,pred_steepdesc,pred_verlet,prtxfase
-!!      read_md_hist,scfcv_run,status,symmetrize_xred,var2hist,vel2hist
-!!      write_md_hist,wrt_moldyn_netcdf,wrtout,wvl_mkrho,wvl_wfsinp_reformat
-!!      xfh_update,xmpi_barrier,xmpi_isum,xmpi_wait,xred2xcart
+!!      crystal_free,crystal_init,dtfil_init_time,effective_potential_evaluate
+!!      erlxconv,fcart2fred,fconv,fred2fcart,hist2var,initylmg,metric,mkradim
+!!      monte_carlo_step,mttk_fin,mttk_ini,prec_simple,pred_bfgs,pred_delocint
+!!      pred_diisrelax,pred_isokinetic,pred_isothermal,pred_langevin,pred_lbfgs
+!!      pred_lotf,pred_moldyn,pred_nose,pred_simple,pred_srkna14,pred_steepdesc
+!!      pred_verlet,prtxfase,read_md_hist,scfcv_run,status,symmetrize_xred
+!!      var2hist,vel2hist,write_md_hist,wrt_moldyn_netcdf,wrtout,wvl_mkrho
+!!      wvl_wfsinp_reformat,xfh_update,xmpi_barrier,xmpi_isum,xmpi_wait
+!!      xred2xcart
 !!
 !! SOURCE
 
@@ -409,8 +410,8 @@ real(dp) :: rmet(3,3)
  if (present(effective_potential)) then
    need_scfcv_cycle = .FALSE.
    write(message,'(a,a,i2,a,a,a,a,80a)')&
-     & ch10,'=== [ionmov=',ab_mover%ionmov,'] ',trim(specs%method),&
-     & ' with effective potential',ch10,('=',kk=1,80)
+&   ch10,'=== [ionmov=',ab_mover%ionmov,'] ',trim(specs%method),&
+&   ' with effective potential',ch10,('=',kk=1,80)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
  else
@@ -485,7 +486,7 @@ real(dp) :: rmet(3,3)
          call xmpi_wait(quitsum_request,ierr)
          if (quitsum_async > 0) then 
            write(message,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),&
-&                               ". Will exit itime loop in mover."
+&           ". Will exit itime loop in mover."
            MSG_COMMENT(message)
            call wrtout(ab_out, message, "COLL")
            timelimit_exit = 1
@@ -533,7 +534,7 @@ real(dp) :: rmet(3,3)
          if (xred(jj,kk)/=xred_tmp(jj,kk)) change=.TRUE.
        end do
      end do
-       
+     
      if (change)then
        call xred2xcart(ab_mover%natom,rprimd,xcart,xred)
        hist%histXF(:,:,1,hist%ihist)=xcart(:,:)
@@ -544,7 +545,7 @@ real(dp) :: rmet(3,3)
        do kk=1,ab_mover%natom
          write(std_out,*) xred(:,kk)-xred_tmp(:,kk)
        end do
-         
+       
        xred_tmp(:,:)=xred(:,:)
      end if
 
@@ -553,12 +554,12 @@ real(dp) :: rmet(3,3)
 !    ### 12. => Call to SCFCV routine and fill history with forces
      if (need_scfcv_cycle) then
        write(message,'(a,3a,33a,44a)')&
-&        ch10,('-',kk=1,3),&
-&        'SELF-CONSISTENT-FIELD CONVERGENCE',('-',kk=1,44)
+&       ch10,('-',kk=1,3),&
+&       'SELF-CONSISTENT-FIELD CONVERGENCE',('-',kk=1,44)
      else
        write(message,'(a,3a,33a,44a)')&
-&        ch10,('-',kk=1,3),&
-&        'EFFECTIVE POTENTIAL CALCULATION',('-',kk=1,44)
+&       ch10,('-',kk=1,3),&
+&       'EFFECTIVE POTENTIAL CALCULATION',('-',kk=1,44)
      end if
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
@@ -569,7 +570,7 @@ real(dp) :: rmet(3,3)
        hist_prev%ihist=hist_prev%ihist+1
        
      else
-         
+       
        scfcv_args%ndtpawuj=0
        iapp=itime
        if(icycle>1.and.icycle/=ncycle) iapp=-1
@@ -591,7 +592,7 @@ real(dp) :: rmet(3,3)
            ABI_DEALLOCATE(rhor)
            
            call wvl_wfsinp_reformat(scfcv_args%dtset, scfcv_args%mpi_enreg,&
-&          scfcv_args%psps, rprimd, scfcv_args%wvl, xred, xred_old)
+&           scfcv_args%psps, rprimd, scfcv_args%wvl, xred, xred_old)
            scfcv_args%nfftf = scfcv_args%dtset%nfft
            
            ABI_ALLOCATE(rhog,(2, scfcv_args%dtset%nfft))
@@ -603,7 +604,7 @@ real(dp) :: rmet(3,3)
 
            call dtfil_init_time(dtfil,iapp)
            call scfcv_run(scfcv_args,electronpositron,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
-             
+           
            if (conv_retcode == -1) then
              message = "Scf cycle returned conv_retcode == -1 (timelimit is approaching), this should not happen inside mover"
              MSG_WARNING(message)
@@ -612,10 +613,10 @@ real(dp) :: rmet(3,3)
 !        every is done in pred_montecarlo
          else if(ab_mover%ionmov /= 31) then
            call effective_potential_evaluate(effective_potential,&
-&                                            scfcv_args%results_gs%etotal,&
-&                                            scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
-&                                            scfcv_args%results_gs%strten,ab_mover%natom,rprimd,&
-&                                            xcart)
+&           scfcv_args%results_gs%etotal,&
+&           scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
+&           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,&
+&           xcart)
          end if
 #if defined HAVE_LOTF
        end if
@@ -639,7 +640,7 @@ real(dp) :: rmet(3,3)
          hist%histA(:,hist%ihist)=acell(:)
          hist%histR(:,:,hist%ihist)=rprimd(:,:)
        end if
-         
+       
 !      ANOMALOUS SITUATIONS
 !      * In ionmov 4 & 5 xred could change inside SCFCV
 !      So we need to take the values from the output
@@ -890,7 +891,7 @@ real(dp) :: rmet(3,3)
      ! check dilatmx here and correct if necessary
      if (scfcv_args%dtset%usewvl == 0) then
        call chkdilatmx(scfcv_args%dtset%dilatmx,rprimd,scfcv_args%dtset%rprimd_orig(1:3,1:3,1),&
-&                      dilatmx_errmsg)
+&       dilatmx_errmsg)
        _IBM6("dilatxm_errmsg: "//TRIM(dilatmx_errmsg))
 
        if (LEN_TRIM(dilatmx_errmsg) /= 0) then

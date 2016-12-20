@@ -101,7 +101,7 @@
 !!      drivexc
 !!
 !! CHILDREN
-!!      invcb,leave_new,wrtout
+!!      invcb
 !!
 !! SOURCE
 

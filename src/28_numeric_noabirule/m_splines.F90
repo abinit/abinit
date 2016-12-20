@@ -80,7 +80,7 @@ contains
 !!        if ider=1, compute the function (contained in fun) and its first derivative (in derfun)
 !!        if ider=2, compute only the second derivative of the function (in derfun)
 !! PARENTS
-!!      gaus_dos,getnel,m_pawpwij,mkffnl,pawgylmg,psp8lo
+!!      getnel,m_pawpwij,mkffnl,pawgylmg,psp8lo
 !!
 !! CHILDREN
 !!
@@ -239,11 +239,11 @@ end subroutine splfit
 !!
 !! PARENTS
 !!      atomden,calc_sigc_cd,calc_sigc_pole_cd,cc_derivatives,denfgr,get_tau_k
-!!      init_bess_spl,init_occ_ent,integrho,m_atom,m_cut3d,m_entropyDMFT
-!!      m_paw_slater,m_splines,outscfcv,pawinit,predict_string,psp10in,psp10nl
-!!      psp11nl,psp1cc,psp1in,psp1nl,psp2in,psp2nl,psp3in,psp3nl,psp4cc,psp5in
-!!      psp5nl,psp6cc,psp6in,psp8in,psp8lo,psp8nl,psp9in,random_stopping_power
-!!      spline_paw_fncs,upf2abinit,vso_realspace_local
+!!      init_occ_ent,integrho,m_atom,m_dens,m_entropyDMFT,m_paw_slater
+!!      m_special_funcs,m_splines,outscfcv,pawinit,predict_string,psp10in
+!!      psp10nl,psp11nl,psp1cc,psp1in,psp1nl,psp2in,psp2nl,psp3in,psp3nl,psp4cc
+!!      psp5in,psp5nl,psp6cc,psp6in,psp8in,psp8lo,psp8nl,psp9in
+!!      random_stopping_power,spline_paw_fncs,upf2abinit,vso_realspace_local
 !!
 !! CHILDREN
 !!
@@ -720,9 +720,10 @@ end subroutine spline_complex
 !!
 !! PARENTS
 !!      atomden,calc_sigc_cd,calc_sigc_pole_cd,cc_derivatives,denfgr,get_tau_k
-!!      m_atom,m_cut3d,m_entropyDMFT,m_paw_slater,m_splines,mkcore_inner
-!!      mklocl_realspace,outscfcv,partial_dos_fractions,predict_string,psp6cc
-!!      random_stopping_power,spline_paw_fncs,vso_realspace_local,wvl_initro
+!!      m_atom,m_cut3d,m_entropyDMFT,m_paw_slater,m_special_funcs,m_splines
+!!      mkcore_inner,mklocl_realspace,outscfcv,partial_dos_fractions
+!!      predict_string,psp6cc,random_stopping_power,spline_paw_fncs
+!!      vso_realspace_local,wvl_initro
 !!
 !! CHILDREN
 !!

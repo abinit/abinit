@@ -22,9 +22,9 @@
 !! PARENTS
 !!      atm2fft,bethe_salpeter,bsepostproc,calc_vhxc_me,cut3d,debug_tools
 !!      dfpt_atm2fft,dfpt_nstpaw,dieltcel,eph,fftprof,ks_ddiago
-!!      linear_optics_paw,m_cut3d,m_ddk,m_dvdb,m_fft,m_fft_prof,m_fftcore
-!!      m_gsphere,m_hamiltonian,m_io_kss,m_ioarr,m_kxc,m_mpinfo,m_pawpwij
-!!      m_ppmodel,m_screening,m_wfd,m_wfk,mlwfovlp_qp,mrgddb,mrggkk,mrgscr
+!!      linear_optics_paw,m_cut3d,m_dvdb,m_fft,m_fft_prof,m_fftcore,m_gsphere
+!!      m_hamiltonian,m_io_kss,m_ioarr,m_kxc,m_mpinfo,m_pawpwij,m_ppmodel
+!!      m_screening,m_wfd,m_wfk,mlwfovlp_qp,mrggkk,mrgscr,partial_dos_fractions
 !!      pawmknhat,pawmknhat_psipsi,pawsushat,posdoppler,scfcv,screening,sigma
 !!      suscep_stat,susk,suskmm,ujdet,vdw_kernelgen,wfk_analyze
 !!

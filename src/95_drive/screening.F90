@@ -1319,14 +1319,14 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    case (-3, -4, -5, -6, -7, -8)
      ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
      if (Dtset%gwgamma>-5) then
-        MSG_WARNING('EXPERIMENTAL: Bootstrap kernel is being added to screening')
-        approx_type=4 
+       MSG_WARNING('EXPERIMENTAL: Bootstrap kernel is being added to screening')
+       approx_type=4 
      else if (Dtset%gwgamma>-7) then
-        MSG_WARNING('EXPERIMENTAL: Bootstrap kernel (head-only) is being added to screening')
-        approx_type=5
+       MSG_WARNING('EXPERIMENTAL: Bootstrap kernel (head-only) is being added to screening')
+       approx_type=5
      else 
-        MSG_WARNING('EXPERIMENTAL: Bootstrap kernel (RPA-type, head-only) is being added to screening')
-        approx_type=6
+       MSG_WARNING('EXPERIMENTAL: Bootstrap kernel (RPA-type, head-only) is being added to screening')
+       approx_type=6
      end if
      dim_kxcg=0
      option_test=MOD(Dtset%gwgamma,2)

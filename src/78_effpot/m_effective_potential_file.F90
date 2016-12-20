@@ -213,12 +213,10 @@ CONTAINS  !=====================================================================
 !! eff_pot = supercell structure with data to be output
 !!
 !! PARENTS
-!!   multibinit
+!!      compute_anharmonics,multibinit
 !!
 !! CHILDREN
-!!  bigbx9,ddb_from_file,effective_potential_file_getType,effective_potential_file_getDimSystem,
-!!  effective_potential_free, effective_potential_init,
-!!  effective_potential_print,system_xml2effpot,wrtout
+!!
 !! SOURCE
  
 subroutine effective_potential_file_read(filename,eff_pot,inp,comm)
@@ -393,10 +391,9 @@ end subroutine effective_potential_file_read
 !!              3 XML with coefficient
 !!
 !! PARENTS
-!!   multibinit
+!!      m_effective_potential_file,multibinit
 !!
 !! CHILDREN
-!!   
 !!
 !! SOURCE
 
@@ -474,10 +471,9 @@ end subroutine effective_potential_file_getType
 !! nrpt  = number of rpt points 
 !!
 !! PARENTS
-!!   multibinit
+!!      m_effective_potential_file,multibinit
 !!
 !! CHILDREN
-!!   ddb_getdims,system_getDimFromXML,effective_potential_file_getType
 !!
 !! SOURCE
 
@@ -609,10 +605,9 @@ end subroutine effective_potential_file_getDimSystem
 !! nrpt  = number of rpt points 
 !!
 !! PARENTS
-!!   multibinit
+!!      m_effective_potential_file
 !!
 !! CHILDREN
-!!   ddb_getdims,system_getDimFromXML,effective_potential_file_getType
 !!
 !! SOURCE
 
@@ -723,10 +718,9 @@ end subroutine effective_potential_file_getDimCoeff
 !! nrpt  = number of rpt points 
 !!
 !! PARENTS
-!!   multibinit
+!!      m_effective_potential_file
 !!
 !! CHILDREN
-!!   ddb_getdims,system_getDimFromXML,effective_potential_file_getType
 !!
 !! SOURCE
 
@@ -835,7 +829,7 @@ end subroutine effective_potential_file_getDimStrainCoupling
 !  nph1l =number of wavevectors for phonon 
 !!
 !! PARENTS
-!!      multibinit
+!!      m_effective_potential_file
 !!
 !! CHILDREN
 !!
@@ -1006,7 +1000,7 @@ end subroutine system_getDimFromXML
 !! eff_pot = effective potential type 
 !!
 !! PARENTS
-!!      multibinit
+!!      m_effective_potential_file
 !!
 !! CHILDREN
 !!
@@ -1864,10 +1858,9 @@ end subroutine system_xml2effpot
 !! effective_potantial = effective_potential structure to be initialized
 !!
 !! PARENTS
-!!    multibinit
+!!      m_effective_potential_file
 !!
 !! CHILDREN
-!!    asria_calc,gtdyn9,ifc_init,ddb_internalstr,gtblk9,dfpt_phfrq,wrtout
 !!
 !! SOURCE
 
@@ -2514,7 +2507,7 @@ end subroutine system_ddb2effpot
 !! eff_pot = effective potential type 
 !!
 !! PARENTS
-!!      multibinit
+!!      m_effective_potential_file
 !!
 !! CHILDREN
 !!
@@ -3019,10 +3012,8 @@ end subroutine coeffs_xml2effpot
 !! disp = array with all the strain
 !!
 !! PARENTS
-!!   multibinit
 !!
 !! CHILDREN
-!!
 !!
 !! SOURCE
  
@@ -3095,10 +3086,8 @@ end subroutine effective_potential_file_readDisplacement
 !! disp = array with all the strain
 !!
 !! PARENTS
-!!   multibinit
 !!
 !! CHILDREN
-!!
 !!
 !! SOURCE
  
@@ -3152,10 +3141,9 @@ end subroutine effective_potential_file_readStrain
 !!  output= (string) value of the keyword
 !!
 !! PARENTS
-!!      system_xml2effpot,coeffs_xml2effpot
+!!      m_effective_potential_file
 !!
 !! CHILDREN
-!!      paw_rdfromline
 !!
 !! SOURCE
 

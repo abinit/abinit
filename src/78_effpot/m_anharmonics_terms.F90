@@ -111,10 +111,9 @@ CONTAINS  !=====================================================================
 !! anharmonics_terms = anharmonics_terms structure to be initialized
 !!
 !! PARENTS
-!!    multibinit
+!!      m_effective_potential
 !!
 !! CHILDREN
-!!    effective_potential_free
 !!
 !! SOURCE
 
@@ -208,7 +207,7 @@ end subroutine anharmonics_terms_init
 !! anharmonics_terms = structure with anharmonics terms
 !!
 !! PARENTS
-!!   anharmonics_terms_init
+!!      m_anharmonics_terms,m_effective_potential
 !!
 !! CHILDREN
 !!
@@ -286,10 +285,9 @@ end subroutine anharmonics_terms_free
 !!
 !!
 !! PARENTS
-!!   multibinit
+!!      m_anharmonics_terms,m_effective_potential
 !!
 !! CHILDREN
-!!   wrtout
 !!
 !! SOURCE
  
@@ -359,10 +357,9 @@ end subroutine anharmonics_terms_setCoeffs
 !!
 !!
 !! PARENTS
-!!   multibinit
+!!      m_anharmonics_terms,m_effective_potential
 !!
 !! CHILDREN
-!!   wrtout
 !!
 !! SOURCE
  
@@ -417,10 +414,9 @@ end subroutine anharmonics_terms_setElastic3rd
 !!
 !!
 !! PARENTS
-!!   multibinit
+!!      m_anharmonics_terms,m_effective_potential
 !!
 !! CHILDREN
-!!   wrtout
 !!
 !! SOURCE
  
@@ -476,10 +472,9 @@ end subroutine anharmonics_terms_setElastic4rd
 !!
 !!
 !! PARENTS
-!!   multibinit
+!!      m_anharmonics_terms,m_effective_potential
 !!
 !! CHILDREN
-!!   wrtout
 !!
 !! SOURCE
  
@@ -568,10 +563,9 @@ end subroutine anharmonics_terms_setStrainPhononCoupling
 !!
 !!
 !! PARENTS
-!!   multibinit
+!!      m_anharmonics_terms,m_effective_potential
 !!
 !! CHILDREN
-!!   wrtout
 !!
 !! SOURCE
  

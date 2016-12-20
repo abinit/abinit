@@ -455,7 +455,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
        if(dt%dmft_solv<6.or.dt%dmft_solv>7) then
          cond_string(1)='usedmft' ; cond_values(1)=1
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwlo',dt%dmft_nwlo,1,iout)
-       endif
+       end if
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwli',dt%dmft_nwli,1,iout)
        cond_string(1)='usedmft' ; cond_values(1)=1
@@ -719,7 +719,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'eph_task',dt%eph_task,5,[0,1,2,3,4],iout)
 
      if (any(dt%ddb_ngqpt <= 0)) then
-        MSG_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
+       MSG_ERROR_NOSTOP("ddb_ngqpt must be specified when performing EPH calculations.", ierr)
      end if
      if (dt%eph_task==2 .and. dt%irdwfq==0 .and. dt%getwfq==0) then
        MSG_ERROR_NOSTOP('Either getwfq or irdwfq must be non-zero in order to compute the gkk', ierr)
@@ -3210,7 +3210,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &       'Action: change your input file and resubmit the job.'
        MSG_ERROR_NOSTOP(message, ierr)
      end if
-  end if
+   end if
 
 
 !  If molecular dynamics or structural optimization is being done

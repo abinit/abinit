@@ -41,7 +41,7 @@
 !! called by one processor only
 !!
 !! PARENTS
-!!      anaddb,m_ifc,m_phonons,respfn
+!!      anaddb,m_effective_potential_file,m_ifc,m_phonons,respfn
 !!
 !! CHILDREN
 !!      wrtout
@@ -226,11 +226,11 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
      if(abs(phfrq(imode))<1.0d-5)tolerance=2.0d-7
      if(phfrq(imode)<1.0d-5)then
        write(message,'(3a)' )' Attention : low frequency mode.',ch10,&
-&                           '   (Could be unstable or acoustic mode)'
+&       '   (Could be unstable or acoustic mode)'
        call wrtout(std_out,message,'COLL')
        if(iout>=0)then
          write(iout, '(3a)' )' Attention : low frequency mode.',ch10,&
-&                            '   (Could be unstable or acoustic mode)'
+&         '   (Could be unstable or acoustic mode)'
        end if
      end if
      do ii=1,natom
@@ -244,7 +244,7 @@ subroutine dfpt_prtph(displ,eivec,enunit,iout,natom,phfrq,qphnrm,qphon)
        call wrtout(std_out,message,'COLL')
        if(iout>=0)then
          write(message,'(a,i3,3es16.8,2a,3x,3es16.8)') metacharacter(imode),ii,vectr(:),ch10,&
-&                                                      metacharacter(imode),   vecti(:)
+&         metacharacter(imode),   vecti(:)
          call wrtout(iout,message,'COLL')
        end if
      end do

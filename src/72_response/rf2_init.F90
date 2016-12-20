@@ -54,8 +54,9 @@
 !!      dfpt_vtowfk
 !!
 !! CHILDREN
-!!      cg_zaxpy,cg_zscal,dotprod_g,rf2_accumulate_bands,rf2_apply_hamiltonian
-!!      rf2_getidirs,wffreaddatarec,wfk_read_bks,wrtout
+!!      cg_zaxpy,dotprod_g,getcprj,pawcprj_alloc,pawcprj_free,pawcprj_get
+!!      rf2_accumulate_bands,rf2_apply_hamiltonian,rf2_getidirs,sqnorm_g
+!!      wfk_read_bks,wrtout,xmpi_allgather,xmpi_barrier
 !!
 !! SOURCE
 
@@ -234,13 +235,13 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
        shift_cprj_band1=(iband-1)*size_cprj
        shift_cprj_dir1=(kdir1-1)*nband_k*size_cprj
        cprj_dudk => dudkprj(:,1+shift_cprj_band1+shift_cprj_dir1: &
-&                           size_cprj+shift_cprj_band1+shift_cprj_dir1)
+&       size_cprj+shift_cprj_band1+shift_cprj_dir1)
        idir_cprj=0;if (dudkprj(1,1)%ncpgr/=3) idir_cprj=idir1
        call getcprj(choice_cprj,cpopt_cprj,ddk_read,cprj_dudk,gs_hamkq%ffnl_k,idir_cprj,&
-&        gs_hamkq%indlmn,gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kpg_k,gs_hamkq%kpt_k,&
-&        gs_hamkq%lmnmax,gs_hamkq%mgfft,mpi_enreg,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
-&        gs_hamkq%nloalg,gs_hamkq%npw_k,gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkxred,&
-&        gs_hamkq%ph1d,gs_hamkq%ph3d_k,gs_hamkq%ucvol,gs_hamkq%useylm)
+&       gs_hamkq%indlmn,gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kpg_k,gs_hamkq%kpt_k,&
+&       gs_hamkq%lmnmax,gs_hamkq%mgfft,mpi_enreg,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
+&       gs_hamkq%nloalg,gs_hamkq%npw_k,gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkxred,&
+&       gs_hamkq%ph1d,gs_hamkq%ph3d_k,gs_hamkq%ucvol,gs_hamkq%useylm)
      end if
    end do
  end do
@@ -378,8 +379,8 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
      icpgr_loc=-1;if(ipert1==natom+1.or.ipert1==natom+2) icpgr_loc=idir1
      call pawcprj_alloc(cprj_jband,ncpgr_loc,gs_hamkq%dimcprj)
      call pawcprj_get(gs_hamkq%atindx1,cprj_jband,cprj,natom,1,ibg,ikpt,iorder_cprj,&
-&      isppol,dtset%mband,mkmem,natom,nband_k,nband_k,gs_hamkq%nspinor,nsppol,dtfil%unpaw,&
-&      mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb,ncpgr=3,icpgr=icpgr_loc)
+&     isppol,dtset%mband,mkmem,natom,nband_k,nband_k,gs_hamkq%nspinor,nsppol,dtfil%unpaw,&
+&     mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb,ncpgr=3,icpgr=icpgr_loc)
    end if
 
 !  LOOP OVER BANDS
@@ -494,7 +495,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
 
        shift_band1=(jband-1)*size_wf
        dsusdu_loc(:,indb+shift_dir1_loc:indb-1+size_wf+shift_dir1_loc) = &
-                   dsusdu(:,1+shift_band1+shift_dir1:size_wf+shift_band1+shift_dir1)
+       dsusdu(:,1+shift_band1+shift_dir1:size_wf+shift_band1+shift_dir1)
        indb = indb + size_wf
      end do
    end do
@@ -512,7 +513,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
          if(iband<=nband_k) then
            shift_band1=(iband-1)*size_wf
            dsusdu(:,1+shift_band1+shift_dir1:size_wf+shift_band1+shift_dir1) = &
-            dsusdu_gather(:,indb+shift_dir1_loc+shift_proc:indb-1+size_wf+shift_dir1_loc+shift_proc)
+           dsusdu_gather(:,indb+shift_dir1_loc+shift_proc:indb-1+size_wf+shift_dir1_loc+shift_proc)
          end if
          indb = indb + size_wf
        end do
@@ -542,8 +543,8 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
      icpgr_loc=-1;if(ipert==natom+1.or.ipert==natom+2) icpgr_loc=idir
      call pawcprj_alloc(cprj_jband,ncpgr_loc,gs_hamkq%dimcprj)
      call pawcprj_get(gs_hamkq%atindx1,cprj_jband,cprj,natom,1,ibg,ikpt,iorder_cprj,&
-&      isppol,dtset%mband,mkmem,natom,nband_k,nband_k,gs_hamkq%nspinor,nsppol,dtfil%unpaw,&
-&      mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb,ncpgr=3,icpgr=icpgr_loc)
+&     isppol,dtset%mband,mkmem,natom,nband_k,nband_k,gs_hamkq%nspinor,nsppol,dtfil%unpaw,&
+&     mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb,ncpgr=3,icpgr=icpgr_loc)
    end if
 
    if (ipert==natom+10) then
@@ -654,8 +655,8 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
      icpgr_loc=-1;if(ipert2==natom+1.or.ipert2==natom+2) icpgr_loc=idir2
      call pawcprj_alloc(cprj_jband,ncpgr_loc,gs_hamkq%dimcprj)
      call pawcprj_get(gs_hamkq%atindx1,cprj_jband,cprj,natom,1,ibg,ikpt,iorder_cprj,&
-&      isppol,dtset%mband,mkmem,natom,nband_k,nband_k,gs_hamkq%nspinor,nsppol,dtfil%unpaw,&
-&      mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb,ncpgr=3,icpgr=icpgr_loc)
+&     isppol,dtset%mband,mkmem,natom,nband_k,nband_k,gs_hamkq%nspinor,nsppol,dtfil%unpaw,&
+&     mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb,ncpgr=3,icpgr=icpgr_loc)
    end if
 
    do jband=1,nband_k
@@ -817,7 +818,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
        cwave_i => cg(:,1+shift_band2+icg:size_wf+shift_band2+icg)
 
        call cg_zaxpy(size_wf,-half*rf2%amn(:,iband+(jband-1)*nband_k), &
-&                    cwave_i,rf2%dcwavef(:,1+shift_band1))
+&       cwave_i,rf2%dcwavef(:,1+shift_band1))
 
        if (abs(occ_k(iband))>tol8 .and. abs(occ_k(jband))>tol8) then
          rf2%lambda_mn(:,iband+(jband-1)*nband_k) = rf2%lambda_mn(:,iband+(jband-1)*nband_k) &
@@ -832,7 +833,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,gs_hamkq,ibg,icg,idir,
  end do ! jband
 
 ! For the following, "rf2%lambda_mn" and "rf2%RHS_Stern" must be computed for every bands
-call xmpi_barrier(mpi_enreg%comm_band)
+  call xmpi_barrier(mpi_enreg%comm_band)
 
 ! **************************************************************************************************
 !  FINAL TEST

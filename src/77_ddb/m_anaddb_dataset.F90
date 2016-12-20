@@ -288,7 +288,7 @@ end subroutine anaddb_dtset_free
 !!    FIXME: move checks to chkin9?
 !!
 !! PARENTS
-!!      anaddb
+!!      anaddb,m_effective_potential
 !!
 !! CHILDREN
 !!

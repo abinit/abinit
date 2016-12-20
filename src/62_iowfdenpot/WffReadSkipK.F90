@@ -32,7 +32,7 @@
 !! NOTES
 !!
 !! PARENTS
-!!      d2frnl,dfpt_nstdy,dfpt_nstpaw,dfpt_vtorho,initwf,newkpt,wfsinp
+!!      initwf,newkpt,wfsinp
 !!
 !! CHILDREN
 !!      rwwf
