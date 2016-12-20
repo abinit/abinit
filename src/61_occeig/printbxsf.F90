@@ -184,7 +184,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
        end if
 
 #else
-       ! TODO:: symafm are not passed in a consisten way.
+       ! TODO:: symafm are not passed in a consistent way.
        call listkk(dksqmax,gmet,indkk_kq,kptirred,kptgrid,nkptirred,1,nsymfm,&
          1,symafm,symrecfm,timrev,use_symrec=.True.)
 
@@ -215,7 +215,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 
  if (ierr/=0) then
    ABI_FREE(fulltoirred)
-   MSG_ERROR("Bug")
+   MSG_WARNING("Bug - unable to print bxsf file - see above") ! I would not halt execution just for this.
    RETURN
  end if
 

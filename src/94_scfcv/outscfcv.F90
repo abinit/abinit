@@ -78,7 +78,7 @@
 !!  usecprj=1 if cprj datastructure has been allocated
 !!  vhartr(nfft)=Hartree potential
 !!  vxc(nfft,nspden)=xc potential
-!!  vtrial(nfft,nspden)=the trial potential
+!!  vtrial(nfft,nspden)=the trial potential = vxc + vpsp + vhartr, roughly speaking
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
