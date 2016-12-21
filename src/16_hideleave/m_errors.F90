@@ -948,9 +948,9 @@ end subroutine msg_hndl
 !!  1 to activate show_backtrace call in msg_hndl. 0 to disable it
 !!
 !! PARENTS
-!!      m_errors
 !!
 !! CHILDREN
+!!      abimem_get_info,abimem_shutdown,show_units,wrtout
 !!
 !! SOURCE
 
@@ -1645,7 +1645,8 @@ end subroutine xlf_set_sighandler
 !!
 !! PARENTS
 !!      abinit,anaddb,conducti,cut3d,fftprof,fold2Bloch,ioprof,lapackprof
-!!      macroave,mrgddb,mrgdv,mrggkk,mrgscr,optic,ujdet,vdw_kernelgen
+!!      macroave,mrgddb,mrgdv,mrggkk,mrgscr,multibinit,optic,ujdet
+!!      vdw_kernelgen
 !!
 !! CHILDREN
 !!      abimem_get_info,abimem_shutdown,show_units,wrtout

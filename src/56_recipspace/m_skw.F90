@@ -384,6 +384,7 @@ end function skw_new
 !!  only writing
 !!
 !! PARENTS
+!!      m_skw
 !!
 !! CHILDREN
 !!
@@ -438,6 +439,7 @@ end subroutine skw_print
 !!  [oder2(3,3)]=Second-order derivatives wrt k in reduced coordinates.
 !!
 !! PARENTS
+!!      m_ifc,m_skw
 !!
 !! CHILDREN
 !!
@@ -522,10 +524,9 @@ end subroutine skw_eval_bks
 !!  Free memory
 !!
 !! PARENTS
-!!      outscfcv
+!!      eph,m_ifc
 !!
 !! CHILDREN
-!!      sort_dp
 !!
 !! SOURCE
 
@@ -588,6 +589,7 @@ end subroutine skw_free
 !!  srk(%nr)=Star function for this k-point.
 !!
 !! PARENTS
+!!      m_skw
 !!
 !! CHILDREN
 !!
@@ -684,6 +686,7 @@ end subroutine mkstar
 !!  srk_dk1(%nr,3)=Derivative of the star function wrt k
 !!
 !! PARENTS
+!!      m_skw
 !!
 !! CHILDREN
 !!
@@ -739,6 +742,7 @@ end subroutine mkstar_dk1
 !!  srk_dk2(%nr,3,3)=2nd derivatives of the star function wrt k
 !!
 !! PARENTS
+!!      m_skw
 !!
 !! CHILDREN
 !!

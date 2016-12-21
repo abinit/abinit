@@ -84,6 +84,13 @@ contains  !=====================================================================
 !! NOTES
 !!
 !! CHILDREN
+!!      appdig,cwtime,destroy_hamiltonian,destroy_rf_hamiltonian,dotprod_g
+!!      dvdb_ftinterp_qpt,dvdb_open_read,dvdb_readsym_allv1,findqg0,get_kg
+!!      getgh1c,getgh1c_setup,getph,gkk_free,gkk_init,gkk_ncwrite
+!!      init_hamiltonian,init_rf_hamiltonian,littlegroup_q
+!!      load_spin_hamiltonian,load_spin_rf_hamiltonian,pawcprj_free
+!!      rf_transgrid_and_pack,wfd_copy_cg,wfd_free,wfd_init,wfd_print
+!!      wfd_read_wfk,wfd_test_ortho,wrtout,xmpi_split_work,xmpi_sum_master
 !!
 !! SOURCE
 

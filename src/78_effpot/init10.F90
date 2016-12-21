@@ -28,9 +28,10 @@
 !!     (4-12) Input Derivative Database (XML format)
 !! 
 !! PARENTS
-!!      anaddb
+!!      multibinit
 !!
 !! CHILDREN
+!!      xmpi_bcast
 !!
 !! SOURCE
 

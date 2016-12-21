@@ -17,11 +17,15 @@
 !! effective_potantial = effective_potential structure with 3rd orders
 !!
 !! PARENTS
-!!    multibinit
+!!      multibinit
 !!
 !! CHILDREN
-!!    check_effpot,effective_potential_check_strain,file_to_effective_potential,get_strain
-!!    free_effective_potential,wrtout
+!!      effective_potential_applysumrule,effective_potential_file_read
+!!      effective_potential_free,effective_potential_setelastic3rd
+!!      effective_potential_setelasticdispcoupling
+!!      effective_potential_setstrainphononcoupling
+!!      effective_potential_writeabiinput,ifc_free,int2char4,isfile,strain_free
+!!      strain_get,strain_init,wrtout,xmpi_bcast
 !!
 !! SOURCE
 

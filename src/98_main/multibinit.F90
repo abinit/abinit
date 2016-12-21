@@ -22,13 +22,13 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,compute_anharmonics,
-!!      effective_potential_free,effective_potential_file_getDimSystem,effective_potential_file_read,
-!!      effective_potential_writeNETCDF,effective_potential_writeXML,flush_unit,herald
-!!      init10,instrng,invars10,inupper, isfile,mover_effpot,multibinit_dtset_fre
-!!      outvars_multibinit,timein,xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum,wrtout
-!!      abi_io_redirec,flush_unit,herald,int2char4,
-!!      init10,timein,xmpi_bcast,wrtout,xmpi_init
+!!      abi_io_redirect,abihist_bcast,abihist_fin,abimem_init,abinit_doctor
+!!      compute_anharmonics,effective_potential_file_getdimsystem
+!!      effective_potential_file_gettype,effective_potential_file_read
+!!      effective_potential_free,effective_potential_writenetcdf
+!!      effective_potential_writexml,flush_unit,herald,init10,instrng,inupper
+!!      invars10,isfile,mover_effpot,multibinit_dtset_free,outvars_multibinit
+!!      read_md_hist,timein,wrtout,xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum
 !!
 !! SOURCE
 
@@ -143,7 +143,7 @@ program multibinit
    tmpfilename = filnam(2)
    call isfile(tmpfilename,'new')
    if (open_file(tmpfilename,message,unit=ab_out,form="formatted",status="new",&
-     &              action="write") /= 0) then
+&   action="write") /= 0) then
      MSG_ERROR(message)
    end if
 !   call open_file(unit=ab_out,file=tmpfilename,form='formatted',status='new')
@@ -157,7 +157,7 @@ program multibinit
  end if
 
  write(message, '(a,(80a),a)' ) ch10,&
-&  ('=',ii=1,80),ch10
+& ('=',ii=1,80),ch10
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
@@ -166,7 +166,7 @@ program multibinit
 !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
 !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
  write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
-&    '-',trim(filnam(3)),ch10,' to initialize the multibinit input'
+& '-',trim(filnam(3)),ch10,' to initialize the multibinit input'
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
@@ -228,25 +228,25 @@ program multibinit
 !****************************************************************************************
 !TEST_AM_SECTION
  if(.false.)then
- if (iam_master.and.inp%ncoeff == 0.and.inp%fit_coeff==1) then
-   write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
-&      '-Reading the file ',trim(filnam(5)),ch10,&
-&   ' with NetCDF in order to fit the polynomial coefficients'
-   call wrtout(std_out,message,'COLL') 
-   call wrtout(ab_out,message,'COLL') 
-   if(filnam(5)/=''.or.filnam(5)/='no')then
-     call read_md_hist(filnam(5),hist)
-   else
-     write(message, '(3a)' )&
-&          'There is no MD file to fit the coefficients ',ch10,&
-&          'Action: add MD file'
-        MSG_ERROR(message)
+   if (iam_master.and.inp%ncoeff == 0.and.inp%fit_coeff==1) then
+     write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
+&     '-Reading the file ',trim(filnam(5)),ch10,&
+&     ' with NetCDF in order to fit the polynomial coefficients'
+     call wrtout(std_out,message,'COLL') 
+     call wrtout(ab_out,message,'COLL') 
+     if(filnam(5)/=''.or.filnam(5)/='no')then
+       call read_md_hist(filnam(5),hist)
+     else
+       write(message, '(3a)' )&
+&       'There is no MD file to fit the coefficients ',ch10,&
+&       'Action: add MD file'
+       MSG_ERROR(message)
+     end if
    end if
- end if
 !MPI BROADCAST
- call abihist_bcast(hist,master,comm)
+   call abihist_bcast(hist,master,comm)
 
- 
+   
 !   call fit_polynomial_coeff_init
 !   call fit_polynomial_coeff_init(reference_effective_potential%,filnam,inp,comm)
 
@@ -319,7 +319,7 @@ program multibinit
  tsec(2)=twall-twalli
 
  write(message, '(a,i4,a,f13.1,a,f13.1)' )' Proc.',my_rank,' individual time (sec): cpu=',&
-&                 tsec(1),'  wall=',tsec(2)
+& tsec(1),'  wall=',tsec(2)
  call wrtout(std_out,message,"COLL")
 
  if (iam_master) then
@@ -357,7 +357,7 @@ program multibinit
 
 !Write information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor("__multibinit")
-  
+ 
  call flush_unit(ab_out)
  call flush_unit(std_out)
 
@@ -365,5 +365,5 @@ program multibinit
 
  call xmpi_end()
  
-end program multibinit
+  end program multibinit
 !!***

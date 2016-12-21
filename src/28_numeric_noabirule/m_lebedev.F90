@@ -129,10 +129,7 @@ CONTAINS  !===========================================================
 !!      m_lebedev
 !!
 !! CHILDREN
-!!      ld0006,ld0014,ld0026,ld0038,ld0050,ld0074,ld0086,ld0110,ld0146,ld0170
-!!      ld0194,ld0230,ld0266,ld0302,ld0350,ld0434,ld0590,ld0770,ld0974,ld1202
-!!      ld1454,ld1730,ld2030,ld2354,ld2702,ld3074,ld3470,ld3890,ld4334,ld4802
-!!      ld5294,ld5810
+!!      gen_oh
 !!
 !! SOURCE
 
@@ -202,10 +199,7 @@ end subroutine init_lebedev_grid
 !!      m_lebedev
 !!
 !! CHILDREN
-!!      ld0006,ld0014,ld0026,ld0038,ld0050,ld0074,ld0086,ld0110,ld0146,ld0170
-!!      ld0194,ld0230,ld0266,ld0302,ld0350,ld0434,ld0590,ld0770,ld0974,ld1202
-!!      ld1454,ld1730,ld2030,ld2354,ld2702,ld3074,ld3470,ld3890,ld4334,ld4802
-!!      ld5294,ld5810
+!!      gen_oh
 !!
 !! SOURCE
 
@@ -259,10 +253,7 @@ end subroutine destroy_lebedev_grid
 !!      m_screening
 !!
 !! CHILDREN
-!!      ld0006,ld0014,ld0026,ld0038,ld0050,ld0074,ld0086,ld0110,ld0146,ld0170
-!!      ld0194,ld0230,ld0266,ld0302,ld0350,ld0434,ld0590,ld0770,ld0974,ld1202
-!!      ld1454,ld1730,ld2030,ld2354,ld2702,ld3074,ld3470,ld3890,ld4334,ld4802
-!!      ld5294,ld5810
+!!      gen_oh
 !!
 !! SOURCE
 
@@ -310,10 +301,7 @@ end subroutine init_lebedev_gridset
 !!      m_screening
 !!
 !! CHILDREN
-!!      ld0006,ld0014,ld0026,ld0038,ld0050,ld0074,ld0086,ld0110,ld0146,ld0170
-!!      ld0194,ld0230,ld0266,ld0302,ld0350,ld0434,ld0590,ld0770,ld0974,ld1202
-!!      ld1454,ld1730,ld2030,ld2354,ld2702,ld3074,ld3470,ld3890,ld4334,ld4802
-!!      ld5294,ld5810
+!!      gen_oh
 !!
 !! SOURCE
 
@@ -410,10 +398,7 @@ end function m_lebedev_is_init
 !!      m_lebedev
 !!
 !! CHILDREN
-!!      ld0006,ld0014,ld0026,ld0038,ld0050,ld0074,ld0086,ld0110,ld0146,ld0170
-!!      ld0194,ld0230,ld0266,ld0302,ld0350,ld0434,ld0590,ld0770,ld0974,ld1202
-!!      ld1454,ld1730,ld2030,ld2354,ld2702,ld3074,ld3470,ld3890,ld4334,ld4802
-!!      ld5294,ld5810
+!!      gen_oh
 !!
 !! SOURCE
 
@@ -639,7 +624,7 @@ end subroutine build_lebedev_grid
 !! OUTPUT
 !!
 !! PARENTS
-!!      lebedev_laikov
+!!      m_lebedev
 !!
 !! CHILDREN
 !!      gen_oh

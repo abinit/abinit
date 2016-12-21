@@ -24,10 +24,14 @@
 !!
 !!
 !! PARENTS
-!!      epigine
+!!      multibinit
 !!
 !! CHILDREN
-!!      mover
+!!      alloc_copy,copy_supercell,destroy_mpi_enreg,destroy_results_gs
+!!      destroy_supercell,dtset_free,effective_potential_initmpi_supercell
+!!      effective_potential_printsupercell,init_results_gs,init_supercell,mover
+!!      scfcv_destroy,strain_apply,strain_get,strain_init,strain_print,wrtout
+!!      xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -141,7 +145,7 @@ implicit none
 !*******************************************************************
 
  write(message, '(a,(80a),a)') ch10,&
-&    ('=',ii=1,80),ch10
+& ('=',ii=1,80),ch10
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
@@ -161,17 +165,17 @@ implicit none
 
 ! check new rprimd
  if(all(rprimd(1,:)==zero).or.&
-&   all(rprimd(2,:)==zero).or.all(rprimd(3,:)==zero)) then
+& all(rprimd(2,:)==zero).or.all(rprimd(3,:)==zero)) then
    write(message, '(3a)' )&
-&         ' There is a problem with rprim',ch10,&
-&         'Action: correct rprim'
+&   ' There is a problem with rprim',ch10,&
+&   'Action: correct rprim'
    MSG_BUG(message)
  end if
 
 !if rprim is different from initial structure, we print warning
  if(any(rprimd-effective_potential%crystal%rprimd>tol10))then
    write(message,'(a)')&
-&    ' WARNING: the structure for the dynamics is different than initiale structure'
+&   ' WARNING: the structure for the dynamics is different than initiale structure'
    call wrtout(std_out,message,"COLL")
    call wrtout(ab_out,message,"COLL")
  end if
@@ -181,15 +185,15 @@ implicit none
 
 !convert new xcart
  call xcart2xred(effective_potential%crystal%natom,effective_potential%crystal%rprimd,&
-&                effective_potential%crystal%xcart,xred)
+& effective_potential%crystal%xcart,xred)
  call xred2xcart(effective_potential%crystal%natom, rprimd, xcart, xred)
 
  call init_supercell(effective_potential%crystal%natom, 0,&
-&     real(inp%n_cell,dp),&
-&     rprimd,&
-&     effective_potential%crystal%typat,&
-&     xcart,&
-&     supercell)
+& real(inp%n_cell,dp),&
+& rprimd,&
+& effective_potential%crystal%typat,&
+& xcart,&
+& supercell)
 
 !Store the information of the supercell of the reference structure into effective potential
  call copy_supercell(supercell,effective_potential%supercell)
@@ -307,7 +311,7 @@ implicit none
 !  Assign masses to each atom (for MD)
    do jj = 1,dtset%natom
      amass(jj)=amu_emass*&
-&      effective_potential%crystal%amu(effective_potential%supercell%typat_supercell(jj))
+&     effective_potential%crystal%amu(effective_potential%supercell%typat_supercell(jj))
    end do
 !  Set the dffil structure
    dtfil%filnam_ds(1:2)=filnam(1:2)
@@ -329,7 +333,7 @@ implicit none
 
    ABI_ALLOCATE(dtset%rprimd_orig,(3,3,1))
    dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd_supercell
- 
+   
    acell(1) = dtset%rprimd_orig(1,1,1)
    acell(2) = dtset%rprimd_orig(2,2,1)
    acell(3) = dtset%rprimd_orig(3,3,1)
@@ -356,12 +360,12 @@ implicit none
      effective_potential%has_strain = .FALSE.
      call strain_print(effective_potential%strain)
      call strain_apply(effective_potential%supercell%rprimd_supercell,dtset%rprimd_orig(:,:,1),&
-&                      effective_potential%strain)
+&     effective_potential%strain)
    end if
- 
+   
    
    call xcart2xred(dtset%natom,effective_potential%supercell%rprimd_supercell,&
-&                  effective_potential%supercell%xcart_supercell,xred)
+&   effective_potential%supercell%xcart_supercell,xred)
 
    xred_old = xred
    vel_cell(:,:) = zero
@@ -404,13 +408,13 @@ implicit none
 !3   Call main routine for monte carlo / molecular dynamics
 !*********************************************************
    write(message, '(a,(80a),3a)' ) ch10,('-',ii=1,80),ch10,&
-&    '-Monte Carlo / Molecular Dynamics ',ch10
+&   '-Monte Carlo / Molecular Dynamics ',ch10
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
    call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
-&    rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,effective_potential)
- 
+&   rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,effective_potential)
+   
 !***************************************************************
 ! 4   Deallocation of array   
 !***************************************************************
@@ -435,7 +439,7 @@ implicit none
  end if
 
  write(message, '(a,(80a),a,a)' ) ch10,&
-&     ('=',ii=1,80),ch10
+& ('=',ii=1,80),ch10
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
@@ -475,7 +479,7 @@ implicit none
 ! !&                                       supercell%natom_supercell,&
 ! !&                                       supercell%rprimd_supercell,&
 ! !&                                       supercell%xcart_supercell,1,disp(1,:,:))
-     
+ 
 !    end do
 
 !    ABI_DEALLOCATE(disp)
@@ -483,7 +487,7 @@ implicit none
 !    ABI_DEALLOCATE(energy)
 !    ABI_DEALLOCATE(fcart)
 !    ABI_DEALLOCATE(fred)
-   
+ 
 !  else if(.false.) then
 
 !    ABI_ALLOCATE(disp,(inp%ntime,3,effective_potential%supercell%natom_supercell))
@@ -528,7 +532,7 @@ implicit none
 !        line=adjustl(readline)  
 !        read(unit=line,fmt=*) (disp_tmp(1,jj),jj=1,3*effective_potential%supercell%natom_supercell)
 !        disp(1,:,:) = reshape(disp_tmp(1,:),(/3,effective_potential%supercell%natom_supercell/))
-       
+ 
 !         do jj=1,(effective_potential%supercell%natom_supercell)
 !           do kk=1,3
 ! !              disp(1,kk,jj) = disp(1,kk,jj) *  effective_potential%supercell%rprimd_supercell(kk,kk)
@@ -549,7 +553,7 @@ implicit none
 !      else if(option==4)then
 !        ABI_ALLOCATE(xred,(3,effective_potential%supercell%natom_supercell))
 !        ABI_ALLOCATE(xcart,(3,effective_potential%supercell%natom_supercell))
-   
+ 
 !        !four version
 !        write(std_out,*),"read position" 
 !        do jj=1,(effective_potential%supercell%natom_supercell)
@@ -568,14 +572,14 @@ implicit none
 !        ABI_DEALLOCATE(xcart)
 
 !      end if
-      
+ 
 ! !!!!!!!!!
 ! 10   continue
 
 !      ABI_ALLOCATE(energy,(inp%ntime))
 !      ABI_ALLOCATE(fcart,(3,effective_potential%supercell%natom_supercell))
 !      ABI_ALLOCATE(fred,(3,effective_potential%supercell%natom_supercell))
-     
+ 
 !      write(111,*) disp(1,:,:)
 !      write(std_out,*),"compute energy",ii
 !      call ifc_contribution(effective_potential,disp(1,:,:),energy_harmonic,fcart)
@@ -594,7 +598,7 @@ implicit none
 !      ABI_DEALLOCATE(energy)
 !      ABI_DEALLOCATE(fcart)
 !      ABI_DEALLOCATE(fred)
-     
+ 
 
 ! !xred_old is xcart!!
 ! !    xred_old = effective_potential%supercell%xcart_supercell + disp
@@ -606,7 +610,7 @@ implicit none
 ! !&                                   comm,displacement=disp)
 
 !    end do
-   
+ 
 !    close(112)
 
 
@@ -615,22 +619,22 @@ implicit none
 !      write(std_out,*) "final check:"
 !      filename="fort.112"
 !      filename2="/home/alex/Desktop/dev/test/CaTiO3/spld_output/result_112/fort.112"
-     
+ 
 !      if (open_file(filename,message,unit=1,form="formatted",&
 !        status="old",action="read") /= 0) then
 !        MSG_ERROR(message)
 !      end if
-     
+ 
 !      if (open_file(filename2,message,unit=2,form="formatted",&
 !        status="old",action="read") /= 0) then
 !        MSG_ERROR(message)
 !      end if
-     
+ 
 !      do ii=1,inp%ntime
 !        read(1,'(a)',err=20,end=20) readline
 !        line=adjustl(readline)
 !        read(unit=line,fmt=*)  (ener1(ii,kk),kk=1,2) 
-       
+ 
 !        read(2,'(a)',err=20,end=20) readline
 !        line=adjustl(readline)
 !        read(unit=line,fmt=*)  (ener2(ii,kk),kk=1,2) 

@@ -25,8 +25,8 @@
 !!
 !! PARENTS
 !!      berryphase_new,d2frnl,dfpt_looppert,dfpt_nstdy,dfpt_nstpaw,dfpt_scfcv
-!!      dfptnl_loop,dtfil_init,intagm,m_ifc,m_io_redirect,mkfilename,prtocc
-!!      prttagm,prttagm_images,uderiv
+!!      dfptnl_loop,dtfil_init,intagm,m_gkk,m_ifc,m_io_redirect,mkfilename
+!!      prtocc,prttagm,prttagm_images,uderiv
 !!
 !! CHILDREN
 !!

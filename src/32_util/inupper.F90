@@ -29,7 +29,8 @@
 !!          (output) same character string mapped to upper case
 !!
 !! PARENTS
-!!      anaddb,chkvars,intagm,invars1,m_ab7_invars_f90,m_exit,parsefile
+!!      anaddb,band2eps,chkvars,intagm,invars1,m_ab7_invars_f90,m_exit
+!!      multibinit,parsefile
 !!
 !! CHILDREN
 !!

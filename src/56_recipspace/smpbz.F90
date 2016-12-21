@@ -50,8 +50,8 @@
 !!  R.A. Evarestov and V.P. Smirnov, Phys. Stat. Sol. (b) 119, 9 (1983)
 !!
 !! PARENTS
-!!      ep_setupqpt,getkgrid,harmonic_thermo,initberry,invars2,m_bz_mesh
-!!      m_ebands,m_fock,m_fstab,m_ifc,m_phgamma,m_phonons
+!!      ep_setupqpt,getkgrid,harmonic_thermo,initberry,invars2,m_fock,m_fstab
+!!      m_ifc
 !!
 !! CHILDREN
 !!      matr3inv,wrap2_pmhalf,wrtout

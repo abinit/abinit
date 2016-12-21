@@ -253,9 +253,9 @@
      optnc=1
      optxc=1
      nkxc_cur=nkxc
-    call dfpt_mkvxc_noncoll(1,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
+     call dfpt_mkvxc_noncoll(1,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
 &     nkxc_cur,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc1val,xccc3d1)
-    else
+   else
      call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,usexcnhat,vxc1val,xccc3d1)
    end if !nspden==4
@@ -320,11 +320,11 @@
    end do
    if(nspden==4)then
 !$OMP PARALLEL DO COLLAPSE(2)
-   do ispden=3,4
-     do ifft=1,cplex*nfft
-       vtrial1(ifft,ispden)=vxc1_(ifft,ispden)
+     do ispden=3,4
+       do ifft=1,cplex*nfft
+         vtrial1(ifft,ispden)=vxc1_(ifft,ispden)
+       end do
      end do
-   end do
    end if
 
  end if

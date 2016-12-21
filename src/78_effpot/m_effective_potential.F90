@@ -192,10 +192,10 @@ CONTAINS  !=====================================================================
 !! eff_pot = effective_potential structure to be initialized
 !!
 !! PARENTS
-!!    multibinit
+!!      m_effective_potential_file
 !!
 !! CHILDREN
-!!    effective_potential_free
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -403,10 +403,10 @@ end subroutine effective_potential_init
 !!  eff_pot%my_index_cells(:,:) = indexes of the cells in the supercell treat by this CPU
 !!
 !! PARENTS
-!!     effective_potential_generateDipDip
+!!      m_effective_potential,mover_effpot
 !!
 !! CHILDREN
-!!     effective_potential_freempi_supercell
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -527,11 +527,11 @@ end subroutine effective_potential_initmpi_supercell
 !! eff_pot = supercell structure with data to be output
 !!
 !! PARENTS
-!! effective_potential_initmpi_supercell
+!!      compute_anharmonics,m_effective_potential,m_effective_potential_file
+!!      multibinit
 !!
 !! CHILDREN
-!! anharmonics_terms_free,crystal_free,destroy_supercell
-!! effective_potential_freempi_supercell,harmonics_terms_free
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -596,9 +596,10 @@ end subroutine effective_potential_free
 !! eff_pot = supercell structure with data to be output
 !!
 !! PARENTS
-!!   effective_potential_initmpi_supercell
+!!      m_effective_potential
 !!
 !! CHILDREN
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -663,12 +664,10 @@ end subroutine effective_potential_freempi_supercell
 !! eff_pot
 !!
 !! PARENTS
-!!   effective_potential_file_read
+!!      m_effective_potential_file
 !!
 !! CHILDREN
-!!   alloc_copy,copy_supercell,destroy_supercell,ewald9,
-!!   effective_potential_initmpi_supercell,find_bound,
-!!   find_bound  init_supercell,matr3inv,metric,xcart2xred,xmpi_gatherv,wrtout
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -1065,10 +1064,10 @@ end subroutine effective_potential_generateDipDip
 !! eff_pot
 !!
 !! PARENTS
-!!   effective_potential_generateDipDip
+!!      compute_anharmonics,m_effective_potential
 !!
 !! CHILDREN
-!!   wrtout
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -1193,10 +1192,9 @@ subroutine effective_potential_applySumRule(asr,ifc,natom,option)
 !! dynmat   = ddb with all information
 !!
 !! PARENTS
-!!   multibinit
 !!
 !! CHILDREN
-!!   effective_potential_getForces,wrtout
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -1349,10 +1347,10 @@ subroutine effective_potential_effpot2dynmat(dynmat,delta,eff_pot,natom,n_cell,o
 !!
 !!
 !! PARENTS
-!!   multibinit
+!!      m_effective_potential,m_effective_potential_file
 !!
 !! CHILDREN
-!!   wrtout
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -1437,10 +1435,10 @@ end subroutine effective_potential_setCoeffs
 !!
 !!
 !! PARENTS
-!!   multibinit
+!!      compute_anharmonics
 !!
 !! CHILDREN
-!!   wrtout
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
  
@@ -1486,10 +1484,9 @@ end subroutine effective_potential_setElastic3rd
 !!
 !!
 !! PARENTS
-!!   multibinit
 !!
 !! CHILDREN
-!!   wrtout
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
  
@@ -1537,10 +1534,10 @@ end subroutine effective_potential_setElastic4rd
 !! eff_pot = effective potential structure
 !!
 !! PARENTS
-!!   multibinit
+!!      compute_anharmonics
 !!
 !! CHILDREN
-!!   wrtout
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
  
@@ -1589,10 +1586,10 @@ end subroutine effective_potential_setStrainPhononCoupling
 !! eff_pot = effective potential structure
 !!
 !! PARENTS
-!!   multibinit
+!!      compute_anharmonics
 !!
 !! CHILDREN
-!!   wrtout
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
  
@@ -1647,10 +1644,10 @@ end subroutine effective_potential_setElasticDispCoupling
 !!
 !!
 !! PARENTS
-!!   multibinit
+!!      m_effective_potential_file
 !!
 !! CHILDREN
-!!   wrtout
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -1780,10 +1777,10 @@ end subroutine effective_potential_print
 !!
 !!
 !! PARENTS
-!!   mover_effpot
+!!      mover_effpot
 !!
 !! CHILDREN
-!!   wrtout,xcart2xred
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -1943,6 +1940,7 @@ end subroutine effective_potential_printSupercell
 !!      multibinit
 !!
 !! CHILDREN
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -2247,6 +2245,7 @@ end subroutine effective_potential_writeXML
 !!      multibinit
 !!
 !! CHILDREN
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -2465,9 +2464,10 @@ end subroutine effective_potential_writeNETCDF
 !! OUTPUT
 !!
 !! PARENTS
-!!      multibinit
+!!      compute_anharmonics
 !!
 !! CHILDREN
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -2647,9 +2647,10 @@ end subroutine effective_potential_writeAbiInput
 !!
 !!
 !! PARENTS
-!!   mover
+!!      m_effective_potential
 !!
 !! CHILDREN
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -2746,11 +2747,10 @@ end subroutine effective_potential_getForces
 !! fred   =  forces in reduced coordinates
 !!
 !! PARENTS
-!!   mover
+!!      mover
 !!
 !! CHILDREN
-!!  effective_potential_distributeResidualForces,fcar2fred,ifc_contribution
-!!  metric,strain_get,strain_print,xmpi_sum,wrtout
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -3222,6 +3222,12 @@ end subroutine effective_potential_evaluate
 !!
 !! CHILDREN
 !!
+!! PARENTS
+!!      m_effective_potential
+!!
+!! CHILDREN
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
+!!
 !! SOURCE
 
 subroutine ifc_contribution(eff_pot,disp,energy,fcart,cells,ncell,index_cells,comm)
@@ -3334,6 +3340,12 @@ end subroutine ifc_contribution
 !!   effective_potential_evaluate
 !!
 !! CHILDREN
+!!
+!! PARENTS
+!!      m_effective_potential
+!!
+!! CHILDREN
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -3449,6 +3461,12 @@ end subroutine ifcStrainCoupling_contribution
 !!   energy = contribution of the ifc to the energy
 !!   fcart(3,natom) = contribution of the ifc to the forces
 !!
+!! PARENTS
+!!      m_effective_potential
+!!
+!! CHILDREN
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
+!!
 !! SOURCE
 !!
 subroutine elastic_contribution(eff_pot,disp,energy,fcart,ncell,strten,strain,&
@@ -3537,6 +3555,12 @@ end subroutine  elastic_contribution
 !! OUTPUT
 !!   energy = contribution of the ifc to the energy
 !!   fcart(3,natom) = contribution of the ifc to the forces
+!!
+!! PARENTS
+!!      m_effective_potential
+!!
+!! CHILDREN
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 !!
@@ -3775,9 +3799,10 @@ end subroutine coefficients_contribution
 !! fcart   = forces in cartesian coordinates
 !!
 !! PARENTS
-!!   mover
+!!      m_effective_potential
 !!
 !! CHILDREN
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -3840,9 +3865,10 @@ end subroutine effective_potential_distributeResidualForces
 !!
 !!
 !! PARENTS
-!!   mover
+!!      m_monte_carlo
 !!
 !! CHILDREN
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -3946,6 +3972,12 @@ end subroutine index_periodic
 !!
 !! OUTPUT
 !!
+!! PARENTS
+!!      m_effective_potential
+!!
+!! CHILDREN
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
+!!
 !! SOURCE
 
 subroutine find_bound(min,max,n_cell)
@@ -4030,10 +4062,10 @@ end function effective_potential_compare
 !! ddb   = ddb with all information
 !!
 !! PARENTS
-!!   multibinit
+!!      m_effective_potential
 !!
 !! CHILDREN
-!!
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 
@@ -4208,10 +4240,9 @@ subroutine effective_potential_effpot2ddb(ddb,crystal,eff_pot,n_cell,nph1l,optio
 !! eff_pot
 !!
 !! PARENTS
-!!   multibinit
 !!
 !! CHILDREN
-!!
+!!      asrq0_free,effective_potential_effpot2ddb,invars9,mkphbs
 !!
 !! SOURCE
 

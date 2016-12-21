@@ -89,10 +89,10 @@ CONTAINS  !=====================================================================
 !! polynomial_coeff = polynomial_coeff structure to be initialized
 !!
 !! PARENTS
-!!
+!!      m_anharmonics_terms,m_effective_potential_file
 !!
 !! CHILDREN
-!!
+!!      isfile,wrtout
 !!
 !! SOURCE
 
@@ -152,10 +152,10 @@ end subroutine polynomial_coeff_init
 !! polynomial_coeff = polynomial_coeff structure to be free
 !!
 !! PARENTS
-!!
+!!      m_anharmonics_terms,m_effective_potential_file,m_polynomial_coeff
 !!
 !! CHILDREN
-!!   
+!!      isfile,wrtout
 !!
 !! SOURCE
 
@@ -209,10 +209,10 @@ end subroutine polynomial_coeff_free
 !! polynomial_coeff = polynomial_coeff structure to be free
 !!
 !! PARENTS
-!!
+!!      m_effective_potential_file
 !!
 !! CHILDREN
-!!   
+!!      isfile,wrtout
 !!
 !! SOURCE
 
@@ -258,9 +258,10 @@ end subroutine polynomial_coeff_setCoefficient
 !!                              other nodes returns with a completely initialized instance.
 !!
 !! PARENTS
-!!
+!!      m_effective_potential_file
 !!
 !! CHILDREN
+!!      isfile,wrtout
 !!
 !! SOURCE
 
@@ -356,9 +357,10 @@ end subroutine polynomial_coeff_broacast
 !! OUTPUT
 !!
 !! PARENTS
-!!
+!!      m_effective_potential
 !!
 !! CHILDREN
+!!      isfile,wrtout
 !!
 !! SOURCE
 

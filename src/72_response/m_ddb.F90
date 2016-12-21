@@ -223,7 +223,8 @@ CONTAINS  !===========================================================
 !!  Clean and deallocate types for the ddb_type structure
 !!
 !! PARENTS
-!!      anaddb,dfpt_looppert,dfptnl_doutput,eph,gstate,mblktyp1,mblktyp5,thmeig
+!!      anaddb,dfpt_looppert,dfptnl_doutput,eph,gstate
+!!      m_effective_potential_file,mblktyp1,mblktyp5,thmeig
 !!
 !! CHILDREN
 !!
@@ -1009,7 +1010,7 @@ end subroutine inprep8
 !! comm=MPI communicator.
 !!
 !! PARENTS
-!!      anaddb,m_ddb,mblktyp1,mblktyp5,mrgddb
+!!      anaddb,m_ddb,m_effective_potential_file,mblktyp1,mblktyp5,mrgddb
 !!
 !! CHILDREN
 !!
@@ -1108,7 +1109,7 @@ end subroutine ddb_getdims
 !! iblok= number of the block that corresponds to the specifications
 !!
 !! PARENTS
-!!      anaddb,m_ddb,m_phonons,thmeig
+!!      anaddb,m_ddb,m_effective_potential_file,m_phonons,thmeig
 !!
 !! CHILDREN
 !!
@@ -3313,7 +3314,7 @@ end subroutine nlopt
 !!   They are needed for legacy code!
 !!
 !! PARENTS
-!!      anaddb,dfpt_looppert,eph
+!!      anaddb,dfpt_looppert,eph,m_effective_potential_file
 !!
 !! CHILDREN
 !!
@@ -4530,6 +4531,7 @@ end subroutine ddb_diagoq
 !!   Output: Changed to enforce ASR.
 !!
 !! PARENTS
+!!      anaddb,m_ddb,m_phonons
 !!
 !! CHILDREN
 !!
@@ -4586,6 +4588,7 @@ end subroutine asrq0_apply
 !!   Free dynamic memory
 !!
 !! PARENTS
+!!      anaddb,m_effective_potential,m_effective_potential_file
 !!
 !! CHILDREN
 !!
