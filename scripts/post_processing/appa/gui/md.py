@@ -65,7 +65,7 @@ class Netcdf_MD(QtGui.QWidget):
         self.box2.setLayout(self.box2layout)        
 
         E_tot = self.units['Energy'][1] * Math.average(self.file1.getE_Tot())
-        deviation = self.file1.getStandardDeviation(self.units['Energy'][1] *self.file1.getE_Tot(), E_tot)        
+        deviation = self.file1.getStandardDeviation(self.units['Energy'][1] *self.file1.getE_Tot(), E_tot)      
         strETOT = self.displayData(E_tot,deviation)
 
         vol = self.units['Volume'][1] * Math.average(self.file1.getVol())
@@ -533,28 +533,28 @@ class Netcdf_MD(QtGui.QWidget):
 
 
     def updateLabel(self):
-        self.lbl4.setText("Total Energy ("+str(self.units['Energy'][0])+"): ")
         E_tot = self.units['Energy'][1] * Math.average(self.file1.getE_Tot())
-        deviation = Math.standard_deviation(self.units['Energy'][1] *self.file1.getE_Tot(), E_tot)
-        self.lblE_tot.setText(self.displayData(E_tot,deviation))
+        deviation = self.file1.getStandardDeviation(self.units['Energy'][1] *self.file1.getE_Tot(), E_tot)      
+        strETOT = self.displayData(E_tot,deviation)
 
+        vol = self.units['Volume'][1] * Math.average(self.file1.getVol())
+        deviation = self.file1.getStandardDeviation(self.units['Volume'][1] *self.file1.getVol(), vol)        
+        strVol = self.displayData(vol,deviation)
 
-        self.lbl5.setText("Volume ("+str(self.units['Volume'][0])+"): ")        
-        Vol = self.units['Volume'][1] * Math.average(self.file1.getVol())
-        deviation = Math.standard_deviation(self.units['Volume'][1] *self.file1.getVol(), Vol)      
-        self.lblVol.setText(self.displayData(Vol,deviation))
-                
-        self.lbl6.setText("Temperature ("+str(self.units['Temperature'][0])+"): ")        
         Temp = self.file1.getTemp()        
         ATemp = Math.average(Temp) - self.units['Temperature'][1]        
         deviation = Math.standard_deviation( Temp - self.units['Temperature'][1] , ATemp)
-        self.lblTemp.setText(self.displayData(ATemp,deviation))
+        strTemp = self.displayData(ATemp,deviation)
 
-        
-        self.lbl7.setText("Pressure ("+str(self.units['Pressure'][0])+"): ")                
-        Press = Math.average( self.file1.getPress()) * self.units['Pressure'][1]        
-        deviation = Math.standard_deviation(self.units['Pressure'][1] * self.file1.getPress(), Press)        
-        self.lblPress.setText(self.displayData(Press,deviation))
+        Press = Math.average( self.file1.getPress() ) * self.units['Pressure'][1]
+        deviation = Math.standard_deviation(self.units['Pressure'][1] * self.file1.getPress(), Press)
+        strPress = self.displayData(Press,deviation)
+
+        self.lbl4.setText("Total Energy ("+str(self.units['Energy'][0])+"): "+strETOT)
+        self.lbl5.setText("Volume ("+str(self.units['Volume'][0])+"): "+strVol)
+        self.lbl6.setText("Temperature ("+str(self.units['Temperature'][0])+")  : "+strTemp)
+        self.lbl7.setText("Pressure ("+str(self.units['Pressure'][0])+")    : "+strPress)
+
         
     def updateGraph(self,units = False):
 

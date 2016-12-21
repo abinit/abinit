@@ -149,7 +149,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   file_usable(:) = .True.
 
   do while (jj < 18) 
-    if (filenames(jj)/="") then
+    if (filenames(jj)/="".and.filenames(jj)/="no") then
       !Read and Intialisation of the effective potential type
       call effective_potential_file_read(filenames(jj),eff_pots(ii),inp,comm)
       !Eventualy print the xml file

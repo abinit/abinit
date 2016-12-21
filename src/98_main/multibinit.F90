@@ -203,10 +203,15 @@ program multibinit
    call effective_potential_file_getType(filnam(4),filetype)
    if(filetype==3) then
      call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
+   else
+     write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+&                       ' There is no file for the coefficients from polynomial fitting'
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
    end if
  else
    write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-&                       'There is no file for the coefficients from polynomial fitting'
+&                       ' There is no file for the coefficients from polynomial fitting'
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
  end if

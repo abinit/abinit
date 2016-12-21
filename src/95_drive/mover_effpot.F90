@@ -85,6 +85,7 @@ implicit none
 !Local variables-------------------------------
 !scalar
  integer :: ii,jj,nproc,my_rank
+ real(dp):: qmass,bmass
  logical :: iam_master
  integer, parameter:: master = 0
 !TEST_AM
@@ -200,7 +201,7 @@ implicit none
  ABI_DEALLOCATE(xred)
  ABI_DEALLOCATE(xcart)
 
- call effective_potential_printSupercell(effective_potential)
+! call effective_potential_printSupercell(effective_potential)
 
  if(inp%dynamics==12.or.inp%dynamics==13) then
 !***************************************************************
@@ -213,7 +214,6 @@ implicit none
 
 !Set the fake abinit dataset 
 !Scalar
-   dtset%bmass = inp%bmass  ! Barostat mass
    dtset%nctime = 0     ! NetCdf TIME between output of molecular dynamics informations 
    dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
    dtset%dilatmx = 1.0  ! DILATation : MaXimal value
@@ -251,10 +251,28 @@ implicit none
    ABI_ALLOCATE(dtset%prtatlist,(dtset%natom)) !PRinT by ATom LIST of ATom
    dtset%prtatlist(:) = zero
 
-   if(dtset%nnos>0) then
-     ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
-     dtset%qmass = inp%qmass
+
+!  Set the barostat and thermonstat if ionmov == 13
+   if(dtset%ionmov == 13)then
+
+     qmass = (dtset%natom* kb_THzK * dtset%mdtemp(1)) / (0.1**2)
+     bmass = (dtset%natom* kb_THzK * dtset%mdtemp(1)) / (0.01**2)
+
+     if(dtset%nnos==0) then
+       dtset%nnos = 1
+       ABI_ALLOCATE(dtset%qmass,(dtset%nnos))
+       dtset%qmass(:)  = qmass
+     else
+       ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
+        dtset%qmass(:) = inp%qmass(:)
+     end if
+     if (inp%bmass == zero) then
+       dtset%bmass = bmass
+     else
+       dtset%bmass = inp%bmass  ! Barostat mass
+     end if
    end if
+
    dtset%strtarget(1:3) = 0.0/29421.033d0 ! STRess TARGET
    dtset%strtarget(4:6) = 0.0 ! STRess TARGET
    ABI_ALLOCATE(symrel,(3,3,dtset%nsym))

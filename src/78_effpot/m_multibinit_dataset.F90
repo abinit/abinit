@@ -306,13 +306,13 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
- multibinit_dtset%bmass=1
+ multibinit_dtset%bmass=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bmass',tread,'DPR')
  if(tread==1) multibinit_dtset%bmass=dprarr(1)
- if(multibinit_dtset%bmass<1)then
+ if(multibinit_dtset%bmass<0)then
    write(message, '(a,f10.2,a,a,a,a,a)' )&
 &   'bmass is',multibinit_dtset%bmass,', but the only allowed values',ch10,&
-&   'is superior to 1.',ch10,&
+&   'is superior to 0.',ch10,&
 &   'Action: correct bmass in your input file.'
    MSG_ERROR(message)
  end if
@@ -542,7 +542,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
- multibinit_dtset%nnos=5
+ multibinit_dtset%nnos=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nnos',tread,'INT')
  if(tread==1) multibinit_dtset%nnos=intarr(1)
  if(multibinit_dtset%nnos<0)then
@@ -757,19 +757,6 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 !B
- ABI_ALLOCATE(multibinit_dtset%qmass,(multibinit_dtset%nnos))
- multibinit_dtset%qmass(:)=multibinit_dtset%nnos * 10
- if(multibinit_dtset%nnos>=1)then
-   if(multibinit_dtset%nnos>marr)then
-     marr=multibinit_dtset%nnos
-     ABI_DEALLOCATE(intarr)
-     ABI_DEALLOCATE(dprarr)
-     ABI_ALLOCATE(intarr,(marr))
-     ABI_ALLOCATE(dprarr,(marr))
-   end if
-   call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%nnos,string(1:lenstr),'qmass',tread,'DPR')
-   if(tread==1) multibinit_dtset%qmass(:)=dprarr(1:multibinit_dtset%nnos)
- end if
 
 !C
  ABI_ALLOCATE(multibinit_dtset%coefficients,(multibinit_dtset%ncoeff))
@@ -863,6 +850,19 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !P
 
 !Q
+ ABI_ALLOCATE(multibinit_dtset%qmass,(multibinit_dtset%nnos))
+ multibinit_dtset%qmass(:)= zero
+ if(multibinit_dtset%nnos>=1)then
+   if(multibinit_dtset%nnos>marr)then
+     marr=multibinit_dtset%nnos
+     ABI_DEALLOCATE(intarr)
+     ABI_DEALLOCATE(dprarr)
+     ABI_ALLOCATE(intarr,(marr))
+     ABI_ALLOCATE(dprarr,(marr))
+   end if
+   call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%nnos,string(1:lenstr),'qmass',tread,'DPR')
+   if(tread==1) multibinit_dtset%qmass(:)=dprarr(1:multibinit_dtset%nnos)
+ end if
 
  if (multibinit_dtset%nqshft/=0)then
    if(3*multibinit_dtset%nqshft>marr)then
@@ -1104,11 +1104,13 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(3x,a9,3I10.1)')'    ntime',multibinit_dtset%ntime
    write(nunit,'(3x,a9,3i10)')  '    ncell',multibinit_dtset%n_cell
    write(nunit,'(3x,a9,3i10)')  '    dtion',multibinit_dtset%dtion
-   write(nunit,'(3x,a9,3i10)')'  optcell',multibinit_dtset%optcell
-   write(nunit,'(3x,a9,3F12.1)')'    bmass',multibinit_dtset%bmass
-   write(nunit,'(3x,a9,3I10)')'     nnos',multibinit_dtset%nnos
-   write(nunit,'(3x,a12)',advance='no')'    qmass  '
-   write(nunit,'(3x,15i10)') (multibinit_dtset%qmass(ii),ii=1,multibinit_dtset%nnos)
+   if(multibinit_dtset%dynamics==13)then
+     write(nunit,'(3x,a9,3i10)')'  optcell',multibinit_dtset%optcell
+     write(nunit,'(3x,a9,3F12.1)')'    bmass',multibinit_dtset%bmass
+     write(nunit,'(3x,a9,3I10)')'     nnos',multibinit_dtset%nnos
+     write(nunit,'(3x,a12)',advance='no')'    qmass  '
+     write(nunit,'(3x,15i10)') (multibinit_dtset%qmass(ii),ii=1,multibinit_dtset%nnos)
+   end if
 
  end if
 
