@@ -44,6 +44,8 @@ sources = [
  "pawdenpot.F90",
  "pawdensities.F90",
  "pawdfptenergy.F90",
+ "paw_dfptnl_energy.F90",
+ "paw_dfptnl_xc.F90",
  "pawgrnl.F90",
  "pawgylmg.F90",
  "pawinit.F90",

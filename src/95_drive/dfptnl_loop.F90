@@ -93,7 +93,7 @@
 subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gsqcut, &
 & hdr,kg,kneigh,kg_neigh,kptindex,kpt3,kxc,k3xc,mband,mgfft,mgfftf,mkmem,mkmem_max,mk1mem,&
 & mpert,mpi_enreg,mpw,mvwtk,natom,nattyp,ngfftf,nfftf,nhat,nkpt,nkpt3,nkxc,nk3xc,nneigh,nspinor,nsppol,&
-& npwarr,occ,paw_an,paw_ij,&
+& npwarr,occ,paw_an0,paw_ij0,&
 & pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
 & ph1d,ph1df,psps,pwind,rfpert,rhog,rhor,rprimd,ucvol,usecprj,vtrial,vxc,xred,&
 & nsym1,indsy1,symaf1,symrc1)
@@ -174,8 +174,8 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  type(pawrhoij_type),intent(in) :: pawrhoij(natom*psps%usepaw)
  type(pawrad_type),intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
- type(paw_an_type),intent(in) :: paw_an(natom*psps%usepaw)
- type(paw_ij_type),intent(in) :: paw_ij(natom*psps%usepaw)
+ type(paw_an_type),intent(in) :: paw_an0(natom*psps%usepaw)
+ type(paw_ij_type),intent(in) :: paw_ij0(natom*psps%usepaw)
 
 !Local variables-------------------------------
 !scalars
@@ -545,7 +545,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                      option=1
                      call pawdenpot(dummy_real,dummy_real,dummy_real,i2pert,dtset%ixc,natom,dtset%natom,&
                 &     nspden,psps%ntypat,dtset%nucdipmom,&
-                &     0,option,paw_an1_i2pert,paw_an,paw_ij1_i2pert,pawang,&
+                &     0,option,paw_an1_i2pert,paw_an0,paw_ij1_i2pert,pawang,&
                 &     dtset%pawprtvol,pawrad,pawrhoij1_i2pert,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
                 &     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp, &
                 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
@@ -636,9 +636,10 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 !                  NOTE : eigen2 equals zero here
                    call dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,i1dir,&
 &                   i2dir,i3dir,i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
-&                   mpsang,mpw,natom,nfftf,nfftotf,nkpt,nk3xc,nspden,nspinor,nsppol,npwarr,occ,paw_ij,paw_ij1_i2pert,&
-&                   pawfgr,ph1d,psps,rf_hamkq,rho1r1,rho2r1,rho3r1,rprimd,ucvol,vtrial,vtrial1,ddk_f,&
-&                   xccc3d1,xccc3d2,xccc3d3,xred)
+&                   mpsang,mpw,natom,nfftf,nfftotf,nkpt,nk3xc,nspden,nspinor,nsppol,npwarr,occ,&
+&                   pawang,pawrad,pawtab,pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij1_i3pert,&
+&                   paw_an0,paw_ij0,paw_ij1_i2pert,pawfgr,ph1d,psps,rf_hamkq,rho1r1,rho2r1,rho3r1,&
+&                   rprimd,ucvol,vtrial,vtrial1,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred)
 !                   call timab(512,2,tsec)
 
                    call status(counter,dtfil%filstat,iexit,level,'after dfptnl_resp')

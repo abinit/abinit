@@ -5660,11 +5660,11 @@ end if
 !1) Pass dvxc, exexch, grho2 and vxcgrho
  if (present(exexch)) then
    call drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,rho,vxcrho,xclevel,&
-&   dvxc=dvxc,exexch=exexch,grho2=grho2,vxcgrho=vxcgrho)
+&   dvxc=dvxc,d2vxc=d2vxc,exexch=exexch,grho2=grho2,vxcgrho=vxcgrho)
  else
 !2) Pass only dvxc, grho2 and vxcgrho
    call drivexc_main(exc,ixc,mgga,ndvxc,nd2vxc,ngr2,npts,nspden,nvxcgrho,order,rho,vxcrho,xclevel,&
-&   dvxc=dvxc,grho2=grho2,vxcgrho=vxcgrho)
+&   dvxc=dvxc,d2vxc=d2vxc,grho2=grho2,vxcgrho=vxcgrho)
  end if
 
 end subroutine pawxc_drivexc_abinit

@@ -390,11 +390,11 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !Computation of third order derivatives from PEAD (pead=1) or full DPFT formalism (pead=0):
  pead = dtset%usepead
  if (pead==0) then
-   write(message, '(a)' ) 'NONLINEAR : PEAD=0, full DFPT computation of third order derivatives'
+   write(message, '(2a)' ) ch10,'NONLINEAR : PEAD=0, full DFPT computation of third order derivatives'
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
  else
-   write(message, '(a)' ) 'NONLINEAR : PEAD/=0, PEAD computation  of third order derivatives'
+   write(message, '(2a)' ) ch10,'NONLINEAR : PEAD/=0, PEAD computation  of third order derivatives'
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
  end if
@@ -806,7 +806,6 @@ end if
  if (psps%usepaw==1)then
    cplex=1;ipert=0;option=1
    nzlmopt=0;if (dtset%pawnzlm>0) nzlmopt=-1
-
    call pawdenpot(compch_sph,epaw,epawdc,ipert,dtset%ixc,my_natom,natom,dtset%nspden,&
 &   ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,&
 &   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,&

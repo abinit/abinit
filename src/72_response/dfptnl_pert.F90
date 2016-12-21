@@ -70,7 +70,8 @@
 
 subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,i1dir,i2dir,i3dir,&
 & i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nfftf,nfftotf,nkpt,nk3xc,&
-& nspden,nspinor,nsppol,npwarr,occ,paw_ij,paw_ij1_i2pert,pawfgr,ph1d,psps,rf_hamkq,rho1r1,rho2r1,rho3r1,rprimd,&
+& nspden,nspinor,nsppol,npwarr,occ,pawang,pawrad,pawtab,pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij1_i3pert,&
+& paw_an0,paw_ij0,paw_ij1_i2pert,pawfgr,ph1d,psps,rf_hamkq,rho1r1,rho2r1,rho3r1,rprimd,&
 & ucvol,vtrial,vtrial1,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred)
 
  use defs_basis
@@ -85,10 +86,13 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
  use m_rf2
 
  use m_cgtools,    only : dotprod_g
+ use m_pawang,     only : pawang_type
+ use m_pawrad,     only : pawrad_type
  use m_pawtab,     only : pawtab_type
  use m_pawcprj,    only : pawcprj_type, pawcprj_free
  use m_pawfgr,     only : pawfgr_type
-! use m_paw_an,     only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify, paw_an_reset_flags
+ use m_pawrhoij,   only : pawrhoij_type
+ use m_paw_an,     only : paw_an_type
  use m_paw_ij,     only : paw_ij_type
 
 !This section has been created automatically by the script Abilint (TD).
@@ -98,6 +102,7 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
  use interfaces_32_util
  use interfaces_53_spacepar
  use interfaces_56_recipspace
+ use interfaces_65_paw
  use interfaces_66_wfs
 !End of the abilint section
 
@@ -114,6 +119,7 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
+ type(pawang_type),intent(inout) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
  type(rf_hamiltonian_type),intent(inout) :: rf_hamkq
  type(wfk_t),intent(inout) :: ddk_f(3)
@@ -130,7 +136,13 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
  real(dp),intent(in) :: rho3r1(cplex*nfftf,dtset%nspden),rprimd(3,3),vtrial(cplex*nfftf,nspden)
  real(dp),intent(in) :: xccc3d1(cplex*nfftf),xccc3d2(cplex*nfftf),xccc3d3(cplex*nfftf),xred(3,natom)
  real(dp),intent(inout) :: vtrial1(cplex*nfftf,nspden),d3etot(2,3,mpert,3,mpert,3,mpert)
- type(paw_ij_type),intent(in) :: paw_ij(natom*psps%usepaw),paw_ij1_i2pert(natom*psps%usepaw)
+ type(pawrad_type),intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
+ type(pawrhoij_type),intent(in) :: pawrhoij1_i1pert(natom*psps%usepaw)
+ type(pawrhoij_type),intent(in) :: pawrhoij1_i2pert(natom*psps%usepaw)
+ type(pawrhoij_type),intent(in) :: pawrhoij1_i3pert(natom*psps%usepaw)
+ type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
+ type(paw_an_type),intent(in) :: paw_an0(natom*psps%usepaw)
+ type(paw_ij_type),intent(in) :: paw_ij0(natom*psps%usepaw),paw_ij1_i2pert(natom*psps%usepaw)
 
 !Local variables-------------------------------
 !scalars
@@ -145,7 +157,7 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
  character(len=500) :: message
 !arrays
  integer,allocatable :: kg_k(:,:),kg1_k(:,:)
- real(dp) :: buffer(2),enlout(3),kpt(3),eig0_k(mband)
+ real(dp) :: buffer(2),d3exc_paw(2),enlout(3),kpt(3),eig0_k(mband)
  real(dp) :: dum_svectout(1,1),dum(1),rmet(3,3),dum_grad_berry(1,1)
  real(dp),allocatable :: cgi(:,:),cgj(:,:),cg_jband(:,:,:),cwavef1(:,:),cwavef3(:,:),dkinpw(:)
  real(dp),allocatable :: eig1_k_tmp(:),eig1_k_stored(:)
@@ -224,7 +236,7 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
 &   gs_hamkq%nvloc,pawfgr,mpi_enreg,vtrial,vtrial1,vlocal,vlocal1)
 
 !  Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij,vlocal=vlocal, &
+   call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij0,vlocal=vlocal, &
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
    call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,paw_ij1=paw_ij1_i2pert,vlocal1=vlocal1, &
@@ -512,6 +524,16 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
  end do   ! end loop over spins
 
 ! **************************************************************************************************
+!    GATHER BAND-BY-BAND AND XC CONTRIBUTIONS
+! **************************************************************************************************
+
+ if (xmpi_paral == 1) then
+   buffer(1) = sumr ; buffer(2) = sumi
+   call xmpi_sum(buffer,spaceComm,ierr)
+   sumr = buffer(1) ; sumi = buffer(2)
+ end if
+
+! **************************************************************************************************
 !      Compute E_xc^(3) (NOTE : E_H^(3) = 0)
 ! **************************************************************************************************
 
@@ -636,17 +658,17 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
  call dotprod_vn(1,rho1r1,exc3,valuei,nfftf,nfftotf,nspden,1,xc_tmp,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
  ABI_DEALLOCATE(xc_tmp)
 
-! **************************************************************************************************
-!    GATHER BAND-BY-BAND AND XC CONTRIBUTIONS
-! **************************************************************************************************
-
- if (xmpi_paral == 1) then
-   buffer(1) = sumr ; buffer(2) = sumi
-   call xmpi_sum(buffer,spaceComm,ierr)
-   sumr = buffer(1) ; sumi = buffer(2)
+ d3exc_paw = zero
+ if (usepaw==1) then
+!LTEST
+   write(91,'(2a)') ch10,' ------ call PAW_DFPTNL_ENERGY : '
+   write(91,'(6(a,i2))') ' ip1 = ',i1pert,' id1 = ',i1dir,' ip2 = ',i2pert,' id2 = ',i2dir,' ip3 = ',i3pert,' id3 = ',i3dir
+!LTEST
+   call paw_dfptnl_energy(d3exc_paw,dtset%ixc,natom,natom,psps%ntypat,paw_an0,pawang,dtset%pawprtvol,pawrad,&
+&   pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij1_i3pert,pawtab,dtset%pawxcdev,mpi_enreg%my_atmtab,mpi_enreg%comm_atom)
  end if
 
- sumr = sumr + sixth*exc3
+ sumr = sumr + sixth * (exc3 + d3exc_paw(1))
 
 ! **************************************************************************************************
 !    ALL TERMS HAVE BEEN COMPUTED
