@@ -205,7 +205,7 @@ implicit none
  ABI_DEALLOCATE(xred)
  ABI_DEALLOCATE(xcart)
 
-! call effective_potential_printSupercell(effective_potential)
+ call effective_potential_printSupercell(effective_potential)
 
  if(inp%dynamics==12.or.inp%dynamics==13) then
 !***************************************************************
