@@ -3452,6 +3452,7 @@ end subroutine ftifc_r2q
 
 subroutine dynmat_dq(qpt,natom,gprim,nrpt,rpt,atmfrc,wghatm,dddq)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -5289,10 +5290,11 @@ end subroutine dfpt_phfrq
 
 subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'dfpt_phfrq'
+#define ABI_FUNC 'massmult_and_breaksym'
 !End of the abilint section
 
  implicit none

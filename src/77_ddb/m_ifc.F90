@@ -415,7 +415,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  type(crystal_t),intent(in) :: Crystal
  type(ddb_type),intent(in) :: ddb
  type(ifc_type),optional,intent(in) :: Ifc_coarse
-
 !arrays
  integer,intent(in) :: ngqpt_in(3)
  real(dp),intent(in) :: q1shft(3,nqshft)
@@ -717,7 +716,6 @@ end subroutine ifc_init
 !!***
 
 !----------------------------------------------------------------------
-
 
 !!****f* m_ifc/ifc_fourq
 !! NAME
@@ -1131,7 +1129,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 !Local variables -------------------------
 !scalars
  integer :: ia,ii,ncerr,iatifc,ifcout1,mu,nu,iout, irpt
-! unit number to print out ifc information for dynamical matrix (AI2PS) 
+! unit number to print out ifc information for dynamical matrix (AI2PS)
  integer :: unit_ifc, unit_tdep
  real(dp) :: detdlt
  character(len=500) :: message
@@ -1309,7 +1307,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
          ! vector part and not full vector, and could be in integers instead of
          ! cartesian vector...
          irpt=(list(ii)-1)/Ifc%natom+1
-         write(unit_tdep,'(3es28.16)') matmul(Ifc%rpt(1:3,irpt),Ifc%gprim) 
+         write(unit_tdep,'(3es28.16)') matmul(Ifc%rpt(1:3,irpt),Ifc%gprim)
 
          !AI2PS
          write(unit_ifc,'(i6,i6)') ia,ii
@@ -1319,10 +1317,10 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
            ! And the actual short ranged forceconstant: TODO: check if
            ! a transpose is needed or a swap between the nu and the mu
            write(unit_tdep,'(3f28.16)') (sriaf(nu,mu,ii)*Ha_eV/amu_emass, mu=1, 3)
-           
+
            !AI2PS
            write(unit_ifc,'(3f28.16)')(rsiaf(nu,mu,ii),mu=1,3)
-         end do     
+         end do
        end do
 
 #ifdef HAVE_NETCDF

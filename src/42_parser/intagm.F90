@@ -310,14 +310,14 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      cs2times=blank//token(1:toklen)//'*'//'?'//blank
 
 !    Map token to all upper case (make case-insensitive):
-     call inupper(cscolon) 
-     call inupper(csplus) 
+     call inupper(cscolon)
+     call inupper(csplus)
      call inupper(cstimes)
-     call inupper(cs1colon) 
-     call inupper(cs1plus) 
+     call inupper(cs1colon)
+     call inupper(cs1plus)
      call inupper(cs1times)
-     call inupper(cs2colon) 
-     call inupper(cs2plus) 
+     call inupper(cs2colon)
+     call inupper(cs2plus)
      call inupper(cs2times)
 
 !    Absolute index of tokens in string:
@@ -584,10 +584,8 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      MSG_ERROR(message)
    end if
    typevar='KEY'
-!  DEBUG
 !  write(std_out,*)' intagm : will read cs=',trim(cs)
 !  stop
-!  ENDDEBUG
  end if
 
 !There is something to be read if opttoken>=1
@@ -618,10 +616,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
  else if(opttoken>=2)then
 
-!  DEBUG
 !  write(std_out,*)' intagm : opttoken>=2 , token has been found, will read '
-!  ENDDEBUG
-
    ABI_ALLOCATE(dpr1,(narr))
    ABI_ALLOCATE(dpr2,(narr))
    ABI_ALLOCATE(int1,(narr))
