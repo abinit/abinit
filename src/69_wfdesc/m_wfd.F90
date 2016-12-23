@@ -840,7 +840,8 @@ end subroutine copy_kdata_1D
 !!    %ur in real space only if keep_ur.
 !!
 !! PARENTS
-!!      bethe_salpeter,m_phgamma,m_shirley,m_wfd,screening,sigma,wfk_analyze
+!!      bethe_salpeter,m_gkk,m_phgamma,m_phpi,m_shirley,m_sigmaph,m_wfd
+!!      screening,sigma,wfk_analyze
 !!
 !! CHILDREN
 !!      fft_ug,get_bz_item
@@ -1124,7 +1125,8 @@ end subroutine wfd_init
 !!  Free the memory allocated in the wfd_t data type.
 !!
 !! PARENTS
-!!      bethe_salpeter,m_phgamma,m_shirley,screening,sigma,wfk_analyze
+!!      bethe_salpeter,m_gkk,m_phgamma,m_phpi,m_shirley,m_sigmaph,screening
+!!      sigma,wfk_analyze
 !!
 !! CHILDREN
 !!      fft_ug,get_bz_item
@@ -1662,7 +1664,7 @@ end subroutine wfd_get_many_ur
 !!  cg(npw_k*nspinor)=The wavefunction in real space in the Abinit cg convention.
 !!
 !! PARENTS
-!!      m_phgamma
+!!      m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
 !!      fft_ug,get_bz_item
@@ -1869,7 +1871,8 @@ end subroutine wfd_nullify
 !!  Only printing
 !!
 !! PARENTS
-!!      bethe_salpeter,m_phgamma,m_shirley,screening,sigma
+!!      bethe_salpeter,m_gkk,m_phgamma,m_phpi,m_shirley,m_sigmaph,screening
+!!      sigma
 !!
 !! CHILDREN
 !!      fft_ug,get_bz_item
@@ -5089,7 +5092,8 @@ end function wfd_iam_master
 !!   Only writing.
 !!
 !! PARENTS
-!!      bethe_salpeter,m_phgamma,m_shirley,screening,sigma,wfk_analyze
+!!      bethe_salpeter,m_gkk,m_phgamma,m_phpi,m_shirley,m_sigmaph,screening
+!!      sigma,wfk_analyze
 !!
 !! CHILDREN
 !!      fft_ug,get_bz_item
@@ -5699,7 +5703,8 @@ end subroutine wfd_write_wfk
 !!  Wfd<wfd_t>=All the states owned by this node whose status is (STORED|ALLOCATED) read.
 !!
 !! PARENTS
-!!      bethe_salpeter,m_phgamma,m_wfd,screening,sigma,wfk_analyze
+!!      bethe_salpeter,m_gkk,m_phgamma,m_phpi,m_sigmaph,m_wfd,screening,sigma
+!!      wfk_analyze
 !!
 !! CHILDREN
 !!      fft_ug,get_bz_item

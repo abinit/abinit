@@ -92,7 +92,7 @@ CONTAINS  !=====================================================================
 !! scell = supercell structure to be initialized
 !!
 !! PARENTS
-!!      freeze_displ_allmodes
+!!      freeze_displ_allmodes,m_effective_potential,mover_effpot
 !!
 !! CHILDREN
 !!
@@ -394,7 +394,7 @@ end subroutine prt_supercell
 !! scell = supercell structure with data to be output
 !!
 !! PARENTS
-!!      freeze_displ_allmodes
+!!      m_effective_potential,mover_effpot
 !!
 !! CHILDREN
 !!
@@ -448,7 +448,8 @@ end subroutine copy_supercell
 !! scell = supercell structure with data to be output
 !!
 !! PARENTS
-!!      freeze_displ_allmodes
+!!      freeze_displ_allmodes,m_effective_potential,m_phonon_supercell
+!!      mover_effpot
 !!
 !! CHILDREN
 !!

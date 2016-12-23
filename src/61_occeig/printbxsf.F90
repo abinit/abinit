@@ -33,10 +33,10 @@
 !!  BXSF file.
 !!
 !! PARENTS
-!!      m_ebands,m_phonons
+!!      m_ebands,m_ifc
 !!
 !! CHILDREN
-!!      destroy_kptrank,get_rank_1kpt,mkkptrank
+!!      destroy_kptrank,get_rank_1kpt,listkk,mkkptrank
 !!
 !! SOURCE
 
@@ -98,7 +98,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 ! for generalization to MP grids, need new version of XCrysDen
 
  if ( kptrlatt(1,2)/=0 .or. kptrlatt(1,3)/=0 .or. kptrlatt(2,1)/=0 .or. &
-&     kptrlatt(2,3)/=0 .or. kptrlatt(3,1)/=0 .or. kptrlatt(3,2)/=0 ) then
+& kptrlatt(2,3)/=0 .or. kptrlatt(3,1)/=0 .or. kptrlatt(3,2)/=0 ) then
    write(msg,'(3a)')&
 &   'kptrlatt should be diagonal, for the FS calculation ',ch10,&
 &   'Action: use an orthogonal k-grid for the GS calculation '
@@ -186,16 +186,16 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 #else
        ! TODO:: symafm are not passed in a consisten way.
        call listkk(dksqmax,gmet,indkk_kq,kptirred,kptgrid,nkptirred,1,nsymfm,&
-         1,symafm,symrecfm,timrev,use_symrec=.True.)
+       1,symafm,symrecfm,timrev,use_symrec=.True.)
 
        if (dksqmax > tol12) then
          write(msg, '(7a,es16.6,4a)' )&
-          'The WFK file cannot be used to start thee present calculation ',ch10,&
-          'It was asked that the wavefunctions be accurate, but',ch10,&
-          'at least one of the k points could not be generated from a symmetrical one.',ch10,&
-          'dksqmax=',dksqmax,ch10,&
-          'Action: check your WFK file and k point input variables',ch10,&
-          '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
+         'The WFK file cannot be used to start thee present calculation ',ch10,&
+         'It was asked that the wavefunctions be accurate, but',ch10,&
+         'at least one of the k points could not be generated from a symmetrical one.',ch10,&
+         'dksqmax=',dksqmax,ch10,&
+         'Action: check your WFK file and k point input variables',ch10,&
+         '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
          MSG_WARNING(msg)
          ierr = ierr + 1
        end if

@@ -176,12 +176,12 @@
 !!      destroy_efield,dfpt_etot,dfpt_newvtr,dfpt_nselt,dfpt_nstdy,dfpt_nstpaw
 !!      dfpt_rhofermi,dfpt_rhotov,dfpt_vtorho,dfptff_bec,dfptff_die,dfptff_ebp
 !!      dfptff_edie,dfptff_initberry,fftdatar_write_from_hdr,fourdp,getcut
-!!      metric,newfermie1,paw_an_free,paw_an_init,paw_an_nullify
+!!      hdr_update,metric,newfermie1,paw_an_free,paw_an_init,paw_an_nullify
 !!      paw_an_reset_flags,paw_ij_free,paw_ij_init,paw_ij_nullify
 !!      paw_ij_reset_flags,pawcprj_alloc,pawcprj_free,pawcprj_getdim,pawdenpot
 !!      pawdij,pawdijfr,pawmknhat,pawnhatfr,pawrhoij_alloc,pawrhoij_free
-!!      qmatrix,rf2_getidirs,scprqt,status,symdij,timab,wffclose,wfk_close
-!!      wrtout,xmpi_barrier,xmpi_isum,xmpi_sum,xmpi_wait
+!!      qmatrix,rf2_getidirs,scprqt,status,symdij,timab,wfk_close,wrtout
+!!      xmpi_barrier,xmpi_isum,xmpi_sum,xmpi_wait
 !!
 !! SOURCE
 
@@ -300,7 +300,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),intent(out) :: eigen1(2*dtset%mband*dtset%mband*nkpt_rbz*dtset%nsppol)
  real(dp),intent(in) :: eigenq(dtset%mband*nkpt_rbz*dtset%nsppol)
  real(dp),intent(in) :: kpt_rbz(3,nkpt_rbz),kxc(nfftf,nkxc)
- real(dp),intent(in) :: nhat(dtset%nfft,dtset%nspden)
+ real(dp),intent(in) :: nhat(nfftf,dtset%nspden)
  real(dp),intent(in) :: occ_rbz(dtset%mband*nkpt_rbz*dtset%nsppol)
  real(dp),intent(in) :: occkq(dtset%mband*nkpt_rbz*dtset%nsppol)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom),ph1df(2,3*(2*mgfftf+1)*dtset%natom)

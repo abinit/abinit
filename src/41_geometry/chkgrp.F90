@@ -25,7 +25,7 @@
 !! SHOULD ALSO CHECK THE tnons !
 !!
 !! PARENTS
-!!      chkinp,gensymspgr,m_bz_mesh,m_esymm,setsym
+!!      chkinp,gensymspgr,m_bz_mesh,m_esymm,m_sigmaph,setsym
 !!
 !! CHILDREN
 !!

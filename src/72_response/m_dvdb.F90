@@ -265,6 +265,8 @@ CONTAINS
 !!      eph,m_dvdb,mrgdv
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -472,9 +474,11 @@ end subroutine dvdb_init
 !!   comm=MPI communicator
 !!
 !! PARENTS
-!!      m_phgamma,mrgdv
+!!      m_dvdb,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -554,6 +558,8 @@ end subroutine dvdb_open_read
 !!      eph,m_dvdb,mrgdv
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -640,9 +646,11 @@ end subroutine dvdb_free
 !!  Only printing.
 !!
 !! PARENTS
-!!      eph,m_dvdb,mrgdv
+!!      eph,m_dvdb,m_sigmaph,mrgdv
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -948,9 +956,11 @@ end function dvdb_read_onev1
 !!  v1scf(cplex, nfft, nspden, 3*natom)= v1scf potentials on the real-space FFT mesh for the 3*natom perturbations.
 !!
 !! PARENTS
-!!      m_dvdb,m_phgamma,mrgdv
+!!      m_dvdb,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -1073,6 +1083,8 @@ end subroutine dvdb_readsym_allv1
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -1314,6 +1326,8 @@ end subroutine v1phq_complete
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -1407,6 +1421,8 @@ end subroutine find_symeq
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -1542,6 +1558,8 @@ end subroutine v1phq_rotate
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -1632,6 +1650,8 @@ end subroutine v1phq_symmetrize
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -1752,9 +1772,11 @@ end subroutine rotate_fqg
 !!  comm=MPI communicator
 !!
 !! PARENTS
-!!      m_phgamma,mrgdv
+!!      m_dvdb,m_phgamma,m_sigmaph
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -2095,9 +2117,11 @@ end subroutine dvdb_ftinterp_setup
 !!  ov1r(2*nfft, nspden, 3*natom)=Interpolated DFPT potentials at the given q-point.
 !!
 !! PARENTS
-!!      m_phgamma,mrgdv
+!!      m_dvdb,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -2257,6 +2281,8 @@ end function dvdb_findq
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -2455,6 +2481,8 @@ end function my_hdr_skip
 !!      eph,m_dvdb,mrgdv
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -2631,6 +2659,8 @@ end subroutine dvdb_list_perts
 !!      mrgdv
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -2819,6 +2849,8 @@ end subroutine dvdb_merge_files
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -2946,8 +2978,11 @@ end function dvdb_check_fform
 !!  Only writing.
 !!
 !! PARENTS
+!!      mrgdv
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -3093,6 +3128,8 @@ end subroutine dvdb_test_v1rsym
 !!      mrgdv
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -3241,6 +3278,8 @@ end subroutine dvdb_test_v1complete
 !!      mrgdv
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 

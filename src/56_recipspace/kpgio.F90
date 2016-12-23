@@ -42,7 +42,7 @@
 !!
 !! PARENTS
 !!      dfpt_looppert,dfptff_initberry,gstate,initmv,inwffil,m_cut3d,nonlinear
-!!      partial_dos_fractions,respfn,scfcv
+!!      respfn,scfcv
 !!
 !! CHILDREN
 !!      kpgsph,wrtout,xmpi_sum

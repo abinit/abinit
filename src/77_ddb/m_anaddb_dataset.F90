@@ -288,7 +288,7 @@ end subroutine anaddb_dtset_free
 !!    FIXME: move checks to chkin9?
 !!
 !! PARENTS
-!!      anaddb
+!!      anaddb,m_effective_potential
 !!
 !! CHILDREN
 !!
@@ -785,9 +785,9 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  anaddb_dtset%ifcout=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ifcout',tread,'INT')
  if(tread==1) anaddb_dtset%ifcout=intarr(1)
- if(anaddb_dtset%ifcout<0)then
+ if(anaddb_dtset%ifcout<-1)then
    write(message, '(a,i0,a,a,a)' )&
-&   'ifcout is',anaddb_dtset%ifcout,', which is lower than 0 .',ch10,&
+&   'ifcout is',anaddb_dtset%ifcout,', which is lower than -1.',ch10,&
 &   'Action: correct ifcout in your input file.'
    MSG_ERROR(message)
  end if
@@ -1398,8 +1398,11 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 !A
 
  ABI_ALLOCATE(anaddb_dtset%atifc,(natom))
- anaddb_dtset%atifc(:)=0
+ anaddb_dtset%atifc(:) = 0
  if(anaddb_dtset%natifc>=1)then
+   ! default to 1 for first natifc atoms
+   anaddb_dtset%atifc(1:anaddb_dtset%natifc)=1
+
    if(anaddb_dtset%natifc>marr)then
      marr=anaddb_dtset%natifc
      ABI_DEALLOCATE(intarr)
