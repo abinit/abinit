@@ -370,6 +370,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
    ! Fourier interpolate of the potential
    ABI_CHECK(any(abs(qpt) > tol12), "qpt cannot be zero if Fourier interpolation is used")
    cplex = 2
+   call dvdb_ftinterp_setup(dvdb,ifc%ngqpt,ifc%nqshft,ifc%qshft,nfft,ngfft,comm,cryst)
    ABI_MALLOC(v1scf, (cplex,nfftf,nspden,natom3))
    call dvdb_ftinterp_qpt(dvdb, qpt, nfftf, ngfftf, v1scf, comm)
  end if
