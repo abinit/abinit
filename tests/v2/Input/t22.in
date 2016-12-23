@@ -3,6 +3,7 @@
 !Flags
  dieflag   1     ! Frequency-dependent Dielectric tensor flag
  ifcflag   1     ! Interatomic force constant flag
+ ifcout    0
 ! eivec    3     ! Output eigenvectors in lwf-formatted file
 
 !Effective charges

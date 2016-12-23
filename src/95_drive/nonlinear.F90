@@ -199,27 +199,27 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
          do i3pert = 1, mpert
            do i3dir = 1, 3
              perm(1) = &
-&              d3e_pert1(i1pert)*dtset%d3e_pert1_dir(i1dir) &
+&             d3e_pert1(i1pert)*dtset%d3e_pert1_dir(i1dir) &
 &             *d3e_pert2(i2pert)*dtset%d3e_pert2_dir(i2dir) &
 &             *d3e_pert3(i3pert)*dtset%d3e_pert3_dir(i3dir)
              perm(2) = &
-&              d3e_pert1(i1pert)*dtset%d3e_pert1_dir(i1dir) &
+&             d3e_pert1(i1pert)*dtset%d3e_pert1_dir(i1dir) &
 &             *d3e_pert2(i3pert)*dtset%d3e_pert2_dir(i3dir) &
 &             *d3e_pert3(i2pert)*dtset%d3e_pert3_dir(i2dir)
              perm(3) = &
-&              d3e_pert1(i2pert)*dtset%d3e_pert1_dir(i2dir) &
+&             d3e_pert1(i2pert)*dtset%d3e_pert1_dir(i2dir) &
 &             *d3e_pert2(i1pert)*dtset%d3e_pert2_dir(i1dir) &
 &             *d3e_pert3(i3pert)*dtset%d3e_pert3_dir(i3dir)
              perm(4) = &
-&              d3e_pert1(i2pert)*dtset%d3e_pert1_dir(i2dir) &
+&             d3e_pert1(i2pert)*dtset%d3e_pert1_dir(i2dir) &
 &             *d3e_pert2(i3pert)*dtset%d3e_pert2_dir(i3dir) &
 &             *d3e_pert3(i1pert)*dtset%d3e_pert3_dir(i1dir)
              perm(5) = &
-&              d3e_pert1(i3pert)*dtset%d3e_pert1_dir(i3dir) &
+&             d3e_pert1(i3pert)*dtset%d3e_pert1_dir(i3dir) &
 &             *d3e_pert2(i2pert)*dtset%d3e_pert2_dir(i2dir) &
 &             *d3e_pert3(i1pert)*dtset%d3e_pert3_dir(i1dir)
              perm(6) = &
-&              d3e_pert1(i3pert)*dtset%d3e_pert1_dir(i3dir) &
+&             d3e_pert1(i3pert)*dtset%d3e_pert1_dir(i3dir) &
 &             *d3e_pert2(i1pert)*dtset%d3e_pert2_dir(i1dir) &
 &             *d3e_pert3(i2pert)*dtset%d3e_pert3_dir(i2dir)
              if (sum(perm(:)) > 0) rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1

@@ -85,7 +85,7 @@ contains
 !!  krank = object containing ranking and inverse ranking
 !!
 !! PARENTS
-!!      get_full_kgrid,m_ddk,m_fstab,m_nesting,m_phgamma,m_tetrahedron
+!!      get_full_kgrid,m_ddk,m_ebands,m_fstab,m_nesting,m_phgamma,m_tetrahedron
 !!      mkfskgrid,mkqptequiv,order_fs_kpts,outelph,printbxsf,read_el_veloc
 !!
 !! CHILDREN
@@ -416,7 +416,7 @@ end subroutine copy_kptrank
 !!  krank = object containing ranking and inverse ranking, to be deallocated
 !!
 !! PARENTS
-!!      defs_elphon,get_full_kgrid,m_ddk,m_fstab,m_nesting,m_phgamma
+!!      defs_elphon,get_full_kgrid,m_ddk,m_ebands,m_fstab,m_nesting,m_phgamma
 !!      m_tetrahedron,mkfskgrid,mkqptequiv,order_fs_kpts,outelph,printbxsf
 !!      read_el_veloc
 !!

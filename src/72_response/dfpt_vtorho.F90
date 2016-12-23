@@ -142,12 +142,12 @@
 !!      dfpt_scfcv
 !!
 !! CHILDREN
-!!      clsopn,destroy_hamiltonian,destroy_rf_hamiltonian,dfpt_vtowfk
-!!      dfptff_gbefd,dfptff_gradberry,fftpac,getgh1c_setup,hdr_skip
-!!      init_hamiltonian,init_rf_hamiltonian,load_spin_hamiltonian
-!!      load_spin_rf_hamiltonian,occeig,pawmkrho,pawrhoij_alloc,pawrhoij_free
-!!      pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,rf_transgrid_and_pack
-!!      sqnorm_v,symrhg,timab,wffreadskipk,xmpi_sum
+!!      destroy_hamiltonian,destroy_rf_hamiltonian,dfpt_vtowfk,dfptff_gbefd
+!!      dfptff_gradberry,fftpac,getgh1c_setup,init_hamiltonian
+!!      init_rf_hamiltonian,load_spin_hamiltonian,load_spin_rf_hamiltonian
+!!      occeig,pawmkrho,pawrhoij_alloc,pawrhoij_free,pawrhoij_init_unpacked
+!!      pawrhoij_mpisum_unpacked,rf_transgrid_and_pack,sqnorm_v,symrhg,timab
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -787,12 +787,12 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !  In order to have the symrhg working in parallel on FFT coefficients, the size
 !  of irzzon1 and phnons1 should be set to nfftot. Therefore, nsym\=1 does not work.
 
- if(nspden==4) then
+   if(nspden==4) then
 ! FR symrhg will manage correctly this rearrangement
-   rhor1(:,2)=rhor1(:,2)+(rhor1(:,1)+rhor1(:,4))    !(n+mx)
-   rhor1(:,3)=rhor1(:,3)+(rhor1(:,1)+rhor1(:,4))    !(n+my)
-   call timab(17,2,tsec)
- end if
+     rhor1(:,2)=rhor1(:,2)+(rhor1(:,1)+rhor1(:,4))    !(n+mx)
+     rhor1(:,3)=rhor1(:,3)+(rhor1(:,1)+rhor1(:,4))    !(n+my)
+     call timab(17,2,tsec)
+   end if
 !
    if (psps%usepaw==0) then
      call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&

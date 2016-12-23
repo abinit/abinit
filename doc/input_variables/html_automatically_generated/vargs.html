@@ -693,8 +693,8 @@ for small (but non-zero) values of the wavevector.
 <br><font id="definition">Mnemonics: model DIElectric MIXing factor</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is 0.7 if <a href="varint.html#usepaw">usepaw</a>==1 or <a href="vargs.html#iprcel">iprcel</a>==0,
-1.0 if <a href="varint.html#usepaw">usepaw</a>==0 or <a href="vargs.html#iprcel">iprcel</a> !=0,
+<br><font id="default">Default is 1.0 if <a href="varint.html#usepaw">usepaw</a>==0 or <a href="vargs.html#iprcel">iprcel</a> !=0,
+0.7 if <a href="varint.html#usepaw">usepaw</a>==1 or <a href="vargs.html#iprcel">iprcel</a>==0,
 None otherwise.
 </font>
 <br><br><font id="requires">
@@ -736,9 +736,9 @@ for self-consistency.
 <br><font id="definition">Mnemonics: model DIElectric MIXing factor for the MAGgnetization</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is <a href="vargs.html#diemix">diemix</a> if <a href="varbas.html#iscf">iscf</a><10,
+<br><font id="default">Default is <a href="vargs.html#diemix">diemix</a> if 70 < <a href="vargs.html#iprcel">iprcel</a> and <a href="vargs.html#iprcel">iprcel</a> < 80,
 <a href="vargs.html#diemix">diemix</a> if <a href="vargs.html#iprcel">iprcel</a>==0,
-<a href="vargs.html#diemix">diemix</a> if 70 < <a href="vargs.html#iprcel">iprcel</a> and <a href="vargs.html#iprcel">iprcel</a> < 80,
+<a href="vargs.html#diemix">diemix</a> if <a href="varbas.html#iscf">iscf</a><10,
 -<a href="vargs.html#diemix">diemix</a> otherwise.
 </font>
 <br><font id="text">
@@ -837,8 +837,8 @@ output of eigenvalues (and eventual phonon frequencies)
 <br><font id="definition">Mnemonics: Factor for the number of BANDs</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#input_only">INPUT_ONLY</a></font>
 <br><font id="vartype">Variable type: real</font>
-<br><font id="default">Default is 0.0 if <a href="varbas.html#usewvl">usewvl</a>==1,
-0.5 if <a href="varbas.html#occopt">occopt</a>>2,
+<br><font id="default">Default is 0.5 if <a href="varbas.html#occopt">occopt</a>>2,
+0.0 if <a href="varbas.html#usewvl">usewvl</a>==1,
 0.125 if <a href="varbas.html#occopt">occopt</a>==1,
 0.0 otherwise.
 </font>
@@ -922,7 +922,6 @@ The radius of these spheres is given by <a href="vargs.html#ratsph">ratsph</a>.
   <b>icoulomb</b>=1 : free boundary conditions are used when the Hartree potential is computed, real space expressions of pseudo-potentials are involved (restricted to GTH pseudo-potentials) and simple coulomb interaction gives the ion-ion energy.
  </li>
 </ul>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -1077,7 +1076,6 @@ and increasing it by one for each dataset (thanks to
  </b>
  ).
 </p>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -1611,7 +1609,6 @@ For a cluster, this procedure will only generate the Gamma point.
 <p>
  This variable gives the amplitude of the constraint imposed on the magnetization vectors on each atom (turned on with flag variable <a href="vargs.html#magconon">magconon</a>). Typical values for lambda are 10 to a few hundred. The energy will vary strongly and convergence will be difficult if lambda is too large. The constraint will be weak and the magnetization will not be close to <a href="vargs.html#spinat">spinat</a> if lambda is too small. See variable <a href="vargs.html#magconon">magconon</a> for more details.
 </p>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -1628,7 +1625,6 @@ For a cluster, this procedure will only generate the Gamma point.
 <p>
  Turns on the imposition of a Lagrangian constraint on the magnetization. For each atom, the magnetization is calculated in a sphere (radius <a href="vargs.html#ratsph">ratsph</a>) and a constraint is applied to bring it closer to the input values of <a href="vargs.html#spinat">spinat</a>. The constraint can be either on the direction only (magconon 1) or on the full vector (magconon 2). The Lagrangian constraint has an amplitude <a href="vargs.html#magcon_lambda">magcon_lambda</a> which should be neither too big (bad or impossible convergence) nor too small (no effect).
 </p>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -1736,7 +1732,6 @@ The radius of these spheres is given by <a href="vargs.html#ratsph">ratsph</a>.
  If <a href="varpaw.html#pawfatbnd">pawfatbnd</a>=1 or 2, it gives the number of atoms around which atom-projected band structure will be
 built (the indices of these atoms are given by  <a href="vargs.html#iatsph">iatsph</a>).
 </p>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -1777,8 +1772,8 @@ built.
 <br><font id="definition">Mnemonics: Number of BanDs for the BUFfer</font>
 <br><font id="characteristic">Characteristic: </font>
 <br><font id="vartype">Variable type: integer</font>
-<br><font id="default">Default is 2*<a href="vargs.html#nspinor">nspinor</a> if <a href="vargs.html#optdriver">optdriver</a>==1 and 3<=<a href="varbas.html#occopt">occopt</a> and <a href="varbas.html#occopt">occopt</a><= 8,
-2*<a href="vargs.html#nspinor">nspinor</a> if <a href="vargs.html#optdriver">optdriver</a>==0 and <a href="varbas.html#iscf">iscf</a><0,
+<br><font id="default">Default is 2*<a href="vargs.html#nspinor">nspinor</a> if <a href="vargs.html#optdriver">optdriver</a>==0 and <a href="varbas.html#iscf">iscf</a><0,
+2*<a href="vargs.html#nspinor">nspinor</a> if <a href="vargs.html#optdriver">optdriver</a>==1 and 3<=<a href="varbas.html#occopt">occopt</a> and <a href="varbas.html#occopt">occopt</a><= 8,
 0 otherwise.
 </font>
 <br><font id="text">
@@ -2347,7 +2342,7 @@ Only relevant if <a href="varint.html#usepaw">usepaw</a> = 1; <a href="varpaw.ht
 </font>
 <br><font id="text">
 <p>
-Places an array of nuclear magnetic dipole moments on the atomic positions, useful for computing the magnetization in the presence of nuclear dipoles and thus the chemical shielding by the converse method. The presence of these dipoles breaks time reversal symmetry and lowers the overall spatial symmetry. 
+Places an array of nuclear magnetic dipole moments on the atomic positions, useful for computing the magnetization in the presence of nuclear dipoles and thus the chemical shielding by the converse method. The presence of these dipoles breaks time reversal symmetry and lowers the overall spatial symmetry.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -2376,7 +2371,6 @@ is used. A typical value is 6. Using a DIIS increases the
 memory required by the program since N previous wavefunctions
 are stored during the electronic minimisation.
 </p>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3047,7 +3041,6 @@ PAW radius of considered atom type (which is read from the PAW dataset file; see
 Radius for extra spheres the DOS is projected into. See <a href="vargs.html#natsph_extra">natsph_extra</a>
 and <a href="vargs.html#xredsph_extra">xredsph_extra</a>
 for the number and positions of the spheres.
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3582,7 +3575,6 @@ in a way similar to the computation of the density.
 This is needed if a meta-GGA is to be used as XC functional. Otherwise (<b>usekden</b>=0), the kinetic energy
 density is not computed during the self-consistency loop.
 </p>
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -3684,7 +3676,6 @@ It is used to compare the results obtained with ABINIT
 with those obtained with BigDFT stand-alone.
 When it is set to 1, ABINIT will follow the workflow as in BigDFT stand-alone.
 Therefore, the results must be exactly the same with the two codes.
-
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>

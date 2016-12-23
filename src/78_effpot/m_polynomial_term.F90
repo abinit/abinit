@@ -93,10 +93,9 @@ CONTAINS  !=====================================================================
 !! polynomial_term = polynomial_term structure to be initialized
 !!
 !! PARENTS
-!!
+!!      m_effective_potential_file,m_polynomial_coeff
 !!
 !! CHILDREN
-!!   
 !!
 !! SOURCE
 
@@ -186,10 +185,9 @@ end subroutine polynomial_term_init
 !! polynomial_term = polynomial_term structure to be free
 !!
 !! PARENTS
-!!
+!!      m_effective_potential_file,m_polynomial_coeff,m_polynomial_term
 !!
 !! CHILDREN
-!!   
 !!
 !! SOURCE
 

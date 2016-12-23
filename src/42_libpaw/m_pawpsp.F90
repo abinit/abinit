@@ -135,7 +135,6 @@ CONTAINS
 !!      m_pawpsp,pawinit
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -310,7 +309,6 @@ end subroutine pawpsp_nl
 !!      m_pawpsp
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -488,7 +486,6 @@ end subroutine pawpsp_lo
 !!      dfpt_eltfrxc,m_pawpsp,m_psps
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -769,7 +766,6 @@ end subroutine pawpsp_cg
 !!      m_pawpsp
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1392,7 +1388,6 @@ end subroutine pawpsp_read
 !!      optics_paw_core,posdoppler
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 subroutine pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,radmesh,phi_cor,&
@@ -1626,7 +1621,6 @@ end subroutine pawpsp_read_corewf
 !!      m_pawpsp
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1757,7 +1751,6 @@ end subroutine pawpsp_rw_atompaw
 !!      m_pawpsp
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2619,7 +2612,6 @@ end subroutine pawpsp_calc
 !!      m_pawpsp
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2710,7 +2702,6 @@ end subroutine pawpsp_calc_d5
 !!      m_pawpsp
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2783,7 +2774,6 @@ end subroutine pawpsp_vhar2rho
 !!      m_pawpsp
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2949,7 +2939,6 @@ end subroutine pawpsp_wvl_calc
 !!      m_pawpsp,pspatm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -3731,7 +3720,6 @@ end subroutine pawpsp_17in
 !!      m_pawpsp,pspatm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -3861,7 +3849,6 @@ end subroutine pawpsp_7in
 !!      m_pawpsp
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -4022,7 +4009,6 @@ end subroutine pawpsp_7in
 !!      m_pawpsp
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -4101,7 +4087,6 @@ end subroutine pawpsp_read_header
 !!      m_pawpsp
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -4173,7 +4158,6 @@ end subroutine pawpsp_read_header_2
 !!      m_pawpsp,pspatm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -4301,7 +4285,6 @@ end subroutine pawpsp_wvl
 !!      m_pawpsp,pawpsxml2ab,pspatm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -4490,7 +4473,6 @@ end subroutine pawpsp_read_header_xml
 !!      m_pawpsp,pawpsxml2ab,pspatm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -4592,7 +4574,6 @@ end subroutine pawpsp_read_pawheader
 !!      m_pawpsp,pspatm
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -4724,7 +4705,6 @@ end subroutine pawpsp_bcast
 !! PARENTS
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -4980,7 +4960,6 @@ end subroutine pawpsp_check_xml_upf
 !!      m_pawpsp
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

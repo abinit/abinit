@@ -109,11 +109,11 @@ contains
 !! deallocate tetrahedra pointers if needed
 !!
 !! PARENTS
-!!      ep_el_weights,ep_fs_weights,ep_ph_weights,gstate,m_ebands,m_fstab
-!!      m_phgamma,m_phonons,tetrahedron,thmeig,wfk_analyze
+!!      ep_el_weights,ep_fs_weights,ep_ph_weights,gstate,m_ebands,m_epjdos
+!!      m_fstab,m_phgamma,m_phonons,thmeig,wfk_analyze
 !!
 !! CHILDREN
-!!      mpi_comm_rank,mpi_comm_size
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -168,11 +168,11 @@ end subroutine destroy_tetra
 !!  tetrahedra%vv = tetrahedron volume divided by full BZ volume
 !!
 !! PARENTS
-!!      ep_el_weights,ep_fs_weights,ep_ph_weights,m_bz_mesh,m_ebands,m_fstab
-!!      m_phgamma,m_phonons,tetrahedron,thmeig
+!!      ep_el_weights,ep_fs_weights,ep_ph_weights,m_fstab,m_kpts,m_phonons
+!!      thmeig
 !!
 !! CHILDREN
-!!      mpi_comm_rank,mpi_comm_size
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -492,7 +492,7 @@ end subroutine init_tetra
 !!      gstate,wfk_analyze
 !!
 !! CHILDREN
-!!      mpi_comm_rank,mpi_comm_size
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -590,10 +590,10 @@ end subroutine tetra_write
 !!  dtweightde(nkpt,nene) = derivative of tweight wrt energy
 !!
 !! PARENTS
-!!      ep_el_weights,ep_fs_weights,ep_ph_weights,m_phonons,tetrahedron,thmeig
+!!      ep_el_weights,ep_fs_weights,ep_ph_weights,m_phonons,thmeig
 !!
 !! CHILDREN
-!!      mpi_comm_rank,mpi_comm_size
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -652,10 +652,10 @@ end subroutine get_tetra_weight
 !! Same API as get_tetra_weight but weights here have shape (nene, nkpt)
 !!
 !! PARENTS
-!!      m_ebands,m_fstab,m_phgamma,m_tetrahedron
+!!      m_fstab,m_tetrahedron
 !!
 !! CHILDREN
-!!      mpi_comm_rank,mpi_comm_size
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -809,7 +809,7 @@ end subroutine tetra_blochl_weights
 !! PARENTS
 !!
 !! CHILDREN
-!!      mpi_comm_rank,mpi_comm_size
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -1318,7 +1318,7 @@ end subroutine get_dbl_tetra_weight
 !!      m_tetrahedron
 !!
 !! CHILDREN
-!!      mpi_comm_rank,mpi_comm_size
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -1482,7 +1482,7 @@ end function tetralib_has_mpi
 !!      m_tetrahedron
 !!
 !! CHILDREN
-!!      mpi_comm_rank,mpi_comm_size
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -1886,8 +1886,10 @@ end subroutine get_onetetra_
 !!    for a given (band, k-point, spin).
 !!
 !! PARENTS
+!!      m_ebands,m_epjdos,m_phgamma
 !!
 !! CHILDREN
+!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 

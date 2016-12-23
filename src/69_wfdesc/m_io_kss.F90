@@ -104,9 +104,7 @@ CONTAINS  !===========================================================
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,fftpac,getghc,init_hamiltonian,load_k_hamiltonian
-!!      load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg,pawcprj_alloc
-!!      pawcprj_free,transgrid,wfk_ncdef_dims_vars,wrtout,xheevx,xhegvx
+!!      metric,mkffnl,mkkin
 !!
 !! SOURCE
 
@@ -323,9 +321,7 @@ end subroutine testkss
 !!      outkss
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,fftpac,getghc,init_hamiltonian,load_k_hamiltonian
-!!      load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg,pawcprj_alloc
-!!      pawcprj_free,transgrid,wfk_ncdef_dims_vars,wrtout,xheevx,xhegvx
+!!      metric,mkffnl,mkkin
 !!
 !! SOURCE
 
@@ -561,9 +557,7 @@ end subroutine write_kss_header
 !!      m_io_kss
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,fftpac,getghc,init_hamiltonian,load_k_hamiltonian
-!!      load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg,pawcprj_alloc
-!!      pawcprj_free,transgrid,wfk_ncdef_dims_vars,wrtout,xheevx,xhegvx
+!!      metric,mkffnl,mkkin
 !!
 !! SOURCE
 
@@ -801,9 +795,7 @@ end subroutine read_kss_header
 !!      m_io_kss
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,fftpac,getghc,init_hamiltonian,load_k_hamiltonian
-!!      load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg,pawcprj_alloc
-!!      pawcprj_free,transgrid,wfk_ncdef_dims_vars,wrtout,xheevx,xhegvx
+!!      metric,mkffnl,mkkin
 !!
 !! SOURCE
 
@@ -942,9 +934,7 @@ end subroutine write_vkb
 !!      outkss
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,fftpac,getghc,init_hamiltonian,load_k_hamiltonian
-!!      load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg,pawcprj_alloc
-!!      pawcprj_free,transgrid,wfk_ncdef_dims_vars,wrtout,xheevx,xhegvx
+!!      metric,mkffnl,mkkin
 !!
 !! SOURCE
 
@@ -1090,9 +1080,7 @@ end subroutine write_kss_wfgk
 !!      outkss
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,fftpac,getghc,init_hamiltonian,load_k_hamiltonian
-!!      load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg,pawcprj_alloc
-!!      pawcprj_free,transgrid,wfk_ncdef_dims_vars,wrtout,xheevx,xhegvx
+!!      metric,mkffnl,mkkin
 !!
 !! SOURCE
 
@@ -1360,9 +1348,7 @@ end function skip_kss_record
 !!      gwls_hamiltonian,setup_screening,setup_sigma
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,fftpac,getghc,init_hamiltonian,load_k_hamiltonian
-!!      load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg,pawcprj_alloc
-!!      pawcprj_free,transgrid,wfk_ncdef_dims_vars,wrtout,xheevx,xhegvx
+!!      metric,mkffnl,mkkin
 !!
 !! SOURCE
 
@@ -1533,9 +1519,7 @@ end subroutine make_gvec_kss
 !!      scfcv
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,fftpac,getghc,init_hamiltonian,load_k_hamiltonian
-!!      load_spin_hamiltonian,metric,mkffnl,mkkin,mkkpg,pawcprj_alloc
-!!      pawcprj_free,transgrid,wfk_ncdef_dims_vars,wrtout,xheevx,xhegvx
+!!      metric,mkffnl,mkkin
 !!
 !! SOURCE
 
@@ -2011,10 +1995,10 @@ end subroutine gshgg_mkncwrite
 !!  *) Spinorial case is not implemented.
 !!
 !! PARENTS
-!!      m_commutator_vkbr,m_io_kss
+!!      m_io_kss
 !!
 !! CHILDREN
-!!      wrtout
+!!      metric,mkffnl,mkkin
 !!
 !! SOURCE
 

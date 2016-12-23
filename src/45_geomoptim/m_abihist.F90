@@ -219,7 +219,7 @@ end subroutine abihist_ini
 !!  hist <type(abihist)> = The hist to deallocate
 !!
 !! PARENTS
-!!      m_abihist,m_abiimages,mover
+!!      m_abihist,m_abiimages,mover,multibinit
 !!
 !! CHILDREN
 !!
@@ -305,7 +305,7 @@ end subroutine abihist_fin
 !!  hist <type(abihist)> = The hist to broadcast
 !!
 !! PARENTS
-!!      mover
+!!      mover,multibinit
 !!
 !! CHILDREN
 !!
@@ -514,9 +514,9 @@ end subroutine abihist_bcast
 !!      | histXF:  Historical record of positions(X) and forces(F)
 !!
 !! PARENTS
-!!      m_pred_lotf,mover,pred_bfgs,pred_delocint,pred_diisrelax
-!!      pred_isokinetic,pred_isothermal,pred_langevin,pred_moldyn,pred_nose
-!!      pred_srkna14,pred_steepdesc,pred_verlet
+!!      m_monte_carlo,m_pred_lotf,mover,pred_bfgs,pred_delocint,pred_diisrelax
+!!      pred_isokinetic,pred_isothermal,pred_langevin,pred_lbfgs,pred_moldyn
+!!      pred_nose,pred_srkna14,pred_steepdesc,pred_verlet
 !!
 !! CHILDREN
 !!
@@ -615,9 +615,9 @@ end subroutine var2hist
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      m_pred_lotf,mover,pred_bfgs,pred_delocint,pred_diisrelax
-!!      pred_isokinetic,pred_isothermal,pred_langevin,pred_moldyn,pred_nose
-!!      pred_srkna14,pred_steepdesc,pred_verlet
+!!      m_monte_carlo,m_pred_lotf,mover,pred_bfgs,pred_delocint,pred_diisrelax
+!!      pred_isokinetic,pred_isothermal,pred_langevin,pred_lbfgs,pred_moldyn
+!!      pred_nose,pred_srkna14,pred_steepdesc,pred_verlet
 !!
 !! CHILDREN
 !!
@@ -1287,7 +1287,7 @@ end subroutine write_md_hist
 !!      | histXF:  Historical record of positions(X) and forces(F)
 !!
 !! PARENTS
-!!      mover
+!!      mover,multibinit
 !!
 !! CHILDREN
 !!

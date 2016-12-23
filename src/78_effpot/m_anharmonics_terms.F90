@@ -37,6 +37,10 @@ module m_anharmonics_terms
  public :: anharmonics_terms_init
  public :: anharmonics_terms_free
  public :: anharmonics_terms_setCoeffs
+ public :: anharmonics_terms_setElastic3rd
+ public :: anharmonics_terms_setElastic4rd
+ public :: anharmonics_terms_setElasticDispCoupling
+ public :: anharmonics_terms_setStrainPhononCoupling
 
 !!***
 
@@ -51,18 +55,34 @@ module m_anharmonics_terms
 
  type, public :: anharmonics_terms_type
 
-   integer :: ncoeff
-!  nterm store the number of coefficients
+   integer :: ncoeff = 0
+!    nterm store the number of coefficients
+
+   logical ::  has_elastic3rd
+!   Flag to know if the 3rd derivatives with respect to strain is present
+
+   logical ::  has_elastic4rd
+!   Flag to know if the 3rd derivatives with respect to strain is present
+
+   logical ::  has_strain_coupling
+!   Flag to know if the 3rd derivatives with respect to strain and 2 atom disp is present
+
+   logical ::  has_elastic_displ
+!   Flag to know if the 3rd derivatives with respect to 2 strain and 3 atom disp is present
 
    type(polynomial_coeff_type),dimension(:),allocatable :: coefficients
-!  array with all the coefficients from fited polynome
+!    array with all the coefficients from fited polynome
 
-   real(dp) :: elastics(6,6,6)
-!     elastic_constant(6,6,6)
-!     Elastic tensor Hartree
+   real(dp) :: elastic3rd(6,6,6)
+!    elastic_constant(6,6,6)
+!    Elastic tensor Hartree
 
-   real(dp), allocatable :: internal_strain(:,:,:,:)    
-!    internal_strain(6,6,natom,3)
+   real(dp) :: elastic4rd(6,6,6,6)
+!    elastic_constant(6,6,6)
+!    Elastic tensor Hartree
+
+   real(dp), allocatable :: elastic_displacement(:,:,:,:)    
+!    elastic_displacement(6,6,3,natom)
 !    internal strain tensor 
 
    type(ifc_type),dimension(:),allocatable :: phonon_strain
@@ -91,15 +111,15 @@ CONTAINS  !=====================================================================
 !! anharmonics_terms = anharmonics_terms structure to be initialized
 !!
 !! PARENTS
-!!    multibinit
+!!      m_effective_potential
 !!
 !! CHILDREN
-!!    effective_potential_free
 !!
 !! SOURCE
 
-subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,nrpt,&
-&                                 elastics,internal_strain,phonon_strain,coeffs)
+subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
+&                                 elastic3rd,elastic4rd,elastic_displacement,&
+&                                 phonon_strain,coeffs)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -112,16 +132,15 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,nrpt,&
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: natom,ncoeff,nrpt
+ integer, intent(in) :: natom,ncoeff
  type(anharmonics_terms_type), intent(out) :: anharmonics_terms
- real(dp),optional,intent(in) :: internal_strain(6,6,natom,3)
- real(dp),optional,intent(in) :: elastics(6,6,6)
+ real(dp),optional,intent(in) :: elastic_displacement(6,6,3,natom)
+ real(dp),optional,intent(in) :: elastic3rd(6,6,6),elastic4rd(6,6,6,6)
  type(polynomial_coeff_type),optional :: coeffs(ncoeff)
- type(ifc_type),intent(in) :: phonon_strain(6)
+ type(ifc_type),optional,intent(in) :: phonon_strain(6)
 !arrays
 !Local variables-------------------------------
 !scalar
- integer :: ii
 !arrays
  character(len=500) :: msg
 
@@ -137,32 +156,29 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,nrpt,&
    MSG_BUG(msg)
  end if
 
- if (nrpt < 1) then
-   write(msg, '(a,a,a,i10,a)' )&
-&   'The cell must have at least one rpt point.',ch10,&
-&   'The number of rpt points is  ',nrpt,'.'
-   MSG_BUG(msg)
- end if
-
- anharmonics_terms%elastics = zero
- if(present(elastics))then
-   anharmonics_terms%elastics = elastics
- end if
- 
 !Allocation of phonon strain coupling array (3rd order)
- ABI_DATATYPE_ALLOCATE(anharmonics_terms%phonon_strain,(6))
- do ii = 1,6
-   ABI_ALLOCATE(anharmonics_terms%phonon_strain(ii)%atmfrc,(2,3,natom,3,natom,nrpt))
-   ABI_ALLOCATE(anharmonics_terms%phonon_strain(ii)%cell,(3,nrpt))
-   anharmonics_terms%phonon_strain(ii)%nrpt   = nrpt
-   anharmonics_terms%phonon_strain(ii)%atmfrc = zero
-   anharmonics_terms%phonon_strain(ii)%cell   = zero
- end do
+ if(present(phonon_strain)) then
+   call anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,phonon_strain)
+ end if
 
-!Allocation of elastic 3rd order
- ABI_ALLOCATE(anharmonics_terms%internal_strain,(6,6,natom,3))
- anharmonics_terms%internal_strain = zero
+!Set the 3rd order elastic tensor
+ anharmonics_terms%elastic3rd = zero
+ if(present(elastic3rd))then
+   call anharmonics_terms_setElastic3rd(anharmonics_terms,elastic3rd)
+ end if
 
+!Set the 3rd order elastic tensor
+ anharmonics_terms%elastic4rd = zero
+ if(present(elastic4rd))then
+   call anharmonics_terms_setElastic4rd(anharmonics_terms,elastic4rd)
+ end if
+
+!Allocation of 3rd order with respecto to 2 strain and 1 atomic displacement
+ if(present(elastic_displacement))then
+   call anharmonics_terms_setElasticDispCoupling(anharmonics_terms,natom,elastic_displacement)
+ end if
+
+ anharmonics_terms%ncoeff = zero
 !Allocation of the coefficient
   if(present(coeffs))then
    if(ncoeff /= size(coeffs))then
@@ -191,7 +207,7 @@ end subroutine anharmonics_terms_init
 !! anharmonics_terms = structure with anharmonics terms
 !!
 !! PARENTS
-!!   anharmonics_terms_init
+!!      m_anharmonics_terms,m_effective_potential
 !!
 !! CHILDREN
 !!
@@ -220,9 +236,13 @@ subroutine anharmonics_terms_free(anharmonics_terms)
 
 ! *************************************************************************
 
-  if(allocated(anharmonics_terms%internal_strain)) then
-    anharmonics_terms%internal_strain=zero
-    ABI_DEALLOCATE(anharmonics_terms%internal_strain)
+   anharmonics_terms%has_elastic3rd = .FALSE.
+   anharmonics_terms%has_strain_coupling  = .FALSE.
+   anharmonics_terms%has_elastic_displ = .FALSE.
+
+  if(allocated(anharmonics_terms%elastic_displacement)) then
+    anharmonics_terms%elastic_displacement=zero
+    ABI_DEALLOCATE(anharmonics_terms%elastic_displacement)
   end if
 
   if(allocated(anharmonics_terms%phonon_strain))then
@@ -239,8 +259,10 @@ subroutine anharmonics_terms_free(anharmonics_terms)
     ABI_DATATYPE_DEALLOCATE(anharmonics_terms%coefficients)
   end if
 
-  anharmonics_terms%elastics = zero
   anharmonics_terms%ncoeff = zero
+
+  anharmonics_terms%elastic3rd = zero
+
 
 end subroutine anharmonics_terms_free
 !!***
@@ -263,14 +285,13 @@ end subroutine anharmonics_terms_free
 !!
 !!
 !! PARENTS
-!!   multibinit
+!!      m_anharmonics_terms,m_effective_potential
 !!
 !! CHILDREN
-!!   wrtout
 !!
 !! SOURCE
  
-subroutine anharmonics_terms_setCoeffs(coeffs,anharmonics,ncoeff)
+subroutine anharmonics_terms_setCoeffs(coeffs,anharmonics_terms,ncoeff)
 
  use m_polynomial_coeff
 
@@ -286,7 +307,7 @@ subroutine anharmonics_terms_setCoeffs(coeffs,anharmonics,ncoeff)
 !scalars
   integer,intent(in) :: ncoeff
 !array
-  type(anharmonics_terms_type),intent(inout) :: anharmonics
+  type(anharmonics_terms_type),intent(inout) :: anharmonics_terms
   type(polynomial_coeff_type),intent(in) :: coeffs(ncoeff)
 !Local variables-------------------------------
 !scalar
@@ -302,22 +323,302 @@ subroutine anharmonics_terms_setCoeffs(coeffs,anharmonics,ncoeff)
   end if
 
 ! 1-deallocation of the previous value
-  if(allocated(anharmonics%coefficients))then
-    do ii=1,anharmonics%ncoeff
-      call polynomial_coeff_free(anharmonics%coefficients(ii))
+  if(allocated(anharmonics_terms%coefficients))then
+    do ii=1,anharmonics_terms%ncoeff
+      call polynomial_coeff_free(anharmonics_terms%coefficients(ii))
     end do
-    ABI_DATATYPE_DEALLOCATE(anharmonics%coefficients)
+    ABI_DATATYPE_DEALLOCATE(anharmonics_terms%coefficients)
   end if
 
 ! Allocation of the new array
-  anharmonics%ncoeff = ncoeff  
-  ABI_DATATYPE_ALLOCATE(anharmonics%coefficients,(ncoeff))
-  do ii=1,anharmonics%ncoeff
+  anharmonics_terms%ncoeff = ncoeff  
+  ABI_DATATYPE_ALLOCATE(anharmonics_terms%coefficients,(ncoeff))
+  do ii=1,anharmonics_terms%ncoeff
     call polynomial_coeff_init(coeffs(ii)%coefficient,coeffs(ii)%name,coeffs(ii)%nterm,&
-&                              anharmonics%coefficients(ii),coeffs(ii)%terms)
+&                              anharmonics_terms%coefficients(ii),coeffs(ii)%terms)
   end do
 
 end subroutine anharmonics_terms_setCoeffs
+!!***
+
+!****f* m_anharmonics_terms/anharmonics_terms_setElastic3rd
+!!
+!! NAME
+!! anharmonics_terms_setElastic3rd
+!!
+!! FUNCTION
+!! Set the 3rd order derivative of with respect to 3 strain
+!!
+!! INPUTS
+!! elastics = 3d order of elastics constant
+!!
+!! OUTPUT
+!! anharmonics = set the coefficient from the fited polynome 
+!!
+!!
+!! PARENTS
+!!      m_anharmonics_terms,m_effective_potential
+!!
+!! CHILDREN
+!!
+!! SOURCE
+ 
+subroutine anharmonics_terms_setElastic3rd(anharmonics_terms,elastics)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'anharmonics_terms_setElastic3rd'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+!array
+  type(anharmonics_terms_type),intent(inout) :: anharmonics_terms
+  real(dp),intent(in) :: elastics(6,6,6)
+!Local variables-------------------------------
+!scalar
+!array
+! *************************************************************************
+
+! 1-reinitialise the previous value
+  anharmonics_terms%elastic3rd(:,:,:) = zero
+
+! 2-Allocation of the new array
+  anharmonics_terms%elastic3rd(:,:,:) = elastics(:,:,:)
+
+! 3-Set the flag
+  if(any(abs(anharmonics_terms%elastic3rd)> tol15)) then
+    anharmonics_terms%has_elastic3rd = .TRUE. 
+  end if
+
+end subroutine anharmonics_terms_setElastic3rd
+!!***
+
+!****f* m_anharmonics_terms/anharmonics_terms_setElastic4rd
+!!
+!! NAME
+!! anharmonics_terms_setElastic4rd
+!!
+!! FUNCTION
+!! Set the 3rd order derivative of with respect to 3 strain
+!!
+!! INPUTS
+!! elastics = 3d order of elastics constant
+!!
+!! OUTPUT
+!! anharmonics = set the coefficient from the fited polynome 
+!!
+!!
+!! PARENTS
+!!      m_anharmonics_terms,m_effective_potential
+!!
+!! CHILDREN
+!!
+!! SOURCE
+ 
+subroutine anharmonics_terms_setElastic4rd(anharmonics_terms,elastics)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'anharmonics_terms_setElastic4rd'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+!array
+  type(anharmonics_terms_type),intent(inout) :: anharmonics_terms
+  real(dp),intent(in) :: elastics(6,6,6,6)
+!Local variables-------------------------------
+!scalar
+!array
+! *************************************************************************
+
+! 1-reinitialise the previous value
+  anharmonics_terms%elastic4rd(:,:,:,:) = zero
+
+! 2-Allocation of the new array
+  anharmonics_terms%elastic4rd(:,:,:,:) = elastics(:,:,:,:)
+
+! 3-Set the flag
+  if(any(abs(anharmonics_terms%elastic4rd)> tol15)) then
+    anharmonics_terms%has_elastic4rd = .TRUE. 
+  end if
+
+end subroutine anharmonics_terms_setElastic4rd
+!!***
+
+
+!****f* m_anharmonics_terms/anharmonics_terms_setStrainPhononCoupling
+!!
+!! NAME
+!! anharmonics_terms_setStrainPhononCoupling
+!!
+!! FUNCTION
+!! Set the coefficients
+!!
+!! INPUTS
+!! strain_phonon = (size 6) array of type ifc
+!!
+!! OUTPUT
+!! anharmonics = set the coefficient from the fited polynome 
+!!
+!!
+!! PARENTS
+!!      m_anharmonics_terms,m_effective_potential
+!!
+!! CHILDREN
+!!
+!! SOURCE
+ 
+subroutine anharmonics_terms_setStrainPhononCoupling(anharmonics_terms,natom,phonon_strain)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'anharmonics_terms_setStrainPhononCoupling'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  integer, intent(in) :: natom
+!array
+  type(anharmonics_terms_type),intent(inout) :: anharmonics_terms
+  type(ifc_type),intent(in) :: phonon_strain(6)
+!Local variables-------------------------------
+!scalar
+  integer :: ii,nrpt
+  character(500) :: msg
+!array
+! *************************************************************************
+
+! 1-Do some check
+  do ii=1,6
+    if(natom /= size(phonon_strain(ii)%atmfrc,3).or.&
+&      phonon_strain(ii)%nrpt < 0)then
+      write(msg, '(a)' )&
+&        ' natom or/and nrpt have not the same size than phonon_strain array. '
+      MSG_BUG(msg)
+    end if
+  end do
+
+! 1-reinitialise the previous value
+  if(allocated(anharmonics_terms%phonon_strain))then
+    do ii = 1,6
+       call ifc_free(anharmonics_terms%phonon_strain(ii))
+    end do
+    ABI_DATATYPE_DEALLOCATE(anharmonics_terms%phonon_strain)
+  end if
+
+! 2-Allocation of the new array and filling
+ ABI_DATATYPE_ALLOCATE(anharmonics_terms%phonon_strain,(6))
+ do ii = 1,6
+   nrpt = phonon_strain(ii)%nrpt
+   ABI_ALLOCATE(anharmonics_terms%phonon_strain(ii)%atmfrc,(2,3,natom,3,natom,nrpt))
+   ABI_ALLOCATE(anharmonics_terms%phonon_strain(ii)%cell,(3,nrpt))
+   anharmonics_terms%phonon_strain(ii)%nrpt   = phonon_strain(ii)%nrpt
+   anharmonics_terms%phonon_strain(ii)%atmfrc(:,:,:,:,:,:) = phonon_strain(ii)%atmfrc(:,:,:,:,:,:)
+   anharmonics_terms%phonon_strain(ii)%cell(:,:)   = phonon_strain(ii)%cell(:,:)
+
+!3-Set the flag
+   if(any(abs(anharmonics_terms%phonon_strain(ii)%atmfrc)> tol15)) then
+     anharmonics_terms%has_strain_coupling  = .TRUE.
+!  If there is no value inside the array,
+!  We don't need to store it
+   else
+     anharmonics_terms%has_strain_coupling  = .FALSE.
+     ABI_DEALLOCATE(anharmonics_terms%phonon_strain(ii)%atmfrc)
+     ABI_DEALLOCATE(anharmonics_terms%phonon_strain(ii)%cell)
+     anharmonics_terms%phonon_strain(ii)%nrpt = zero
+   end if
+ end do
+
+
+end subroutine anharmonics_terms_setStrainPhononCoupling
+!!***
+
+!****f* m_anharmonics_terms/anharmonics_terms_setElasticDispCoupling
+!!
+!! NAME
+!! anharmonics_terms_setElasticDispCoupling
+!!
+!! FUNCTION
+!! Set the coefficients
+!!
+!! INPUTS
+!! strain_phonon = (size 6) array of type ifc
+!!
+!! OUTPUT
+!! anharmonics = set the coefficient from the fited polynome 
+!!
+!!
+!! PARENTS
+!!      m_anharmonics_terms,m_effective_potential
+!!
+!! CHILDREN
+!!
+!! SOURCE
+ 
+subroutine anharmonics_terms_setElasticDispCoupling(anharmonics_terms,natom,elastic_displacement)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'anharmonics_terms_setElasticDispCoupling'
+!End of the abilint section
+
+  implicit none
+
+!Arguments ------------------------------------
+!scalars
+  integer, intent(in) :: natom
+!array
+  type(anharmonics_terms_type),intent(inout) :: anharmonics_terms
+  real(dp),intent(in) :: elastic_displacement(6,6,3,natom)
+!Local variables-------------------------------
+!scalar
+  character(500) :: msg
+!array
+! *************************************************************************
+
+! 1-Do some check
+  if(natom /= size(elastic_displacement,4)) then
+    write(msg, '(a)' )&
+&        ' natom has not the same size elastic_displacement array. '
+    MSG_BUG(msg)
+  end if
+
+! 1-reinitialise the previous value
+  if(allocated(anharmonics_terms%elastic_displacement))then
+    ABI_DATATYPE_DEALLOCATE(anharmonics_terms%elastic_displacement)
+  end if
+
+! 2-Allocation of the new array and filling
+  ABI_ALLOCATE(anharmonics_terms%elastic_displacement,(6,6,3,natom))
+  anharmonics_terms%elastic_displacement(:,:,:,:) = elastic_displacement(:,:,:,:)
+
+! 3-Set the flag
+  if(any(abs(anharmonics_terms%elastic_displacement)> tol15)) then
+    anharmonics_terms%has_elastic_displ = .TRUE.
+  else
+!   If there is no value inside the array,
+!   We don't need to store it
+    anharmonics_terms%has_elastic_displ = .FALSE.
+    ABI_DEALLOCATE(anharmonics_terms%elastic_displacement)
+  end if
+
+end subroutine anharmonics_terms_setElasticDispCoupling
 !!***
 
 end module m_anharmonics_terms

@@ -401,7 +401,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
      ! Write tetrahedron tables.
      tetra = tetra_from_kptrlatt(cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
-        dtset%shiftk, dtset%nkpt, dtset%kptns, msg, ierr)
+     dtset%shiftk, dtset%nkpt, dtset%kptns, msg, ierr)
      if (ierr == 0) then
        call tetra_write(tetra, dtset%nkpt, dtset%kptns, strcat(dtfil%filnam_ds(4), "_TETRA"))
      else

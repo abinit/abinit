@@ -31,7 +31,6 @@
 !!      drivexc
 !!
 !! CHILDREN
-!!      leave_new,wrtout
 !!
 !! SOURCE
 
