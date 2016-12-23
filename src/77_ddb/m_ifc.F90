@@ -601,13 +601,10 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    call asrif9(Ifc%asr,ifc_tmp%atmfrc,natom,ifc_tmp%nrpt,ifc_tmp%rpt,ifc_tmp%wghatm)
  end if
 
-
-
 !*** The interatomic forces have been calculated ! ***
  write(message, '(2a)')ch10,' The interatomic forces have been obtained '
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
-
 
  ! Apply cutoff on ifc if needed
  if (nsphere/=0 .or. rifcsph>tol10) then
@@ -645,18 +642,12 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  write(message,"(2(a,i0))")"ifc%nrpt: ",ifc%nrpt,", nqbz: ",nqbz
  call wrtout(std_out,message,"COLL")
 
- ABI_MALLOC(Ifc%atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
- ABI_MALLOC(Ifc%rpt,(3,Ifc%nrpt))
- ABI_MALLOC(Ifc%cell,(3,Ifc%nrpt))
- ABI_MALLOC(Ifc%wghatm,(natom,natom,Ifc%nrpt))
- ABI_MALLOC(Ifc%short_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
- ABI_MALLOC(Ifc%ewald_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
-
- Ifc%short_atmfrc = zero
- Ifc%ewald_atmfrc = zero
- Ifc%short_atmfrc = zero
- Ifc%ewald_atmfrc = zero
- Ifc%cell = zero
+ ABI_CALLOC(Ifc%atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
+ ABI_CALLOC(Ifc%rpt,(3,Ifc%nrpt))
+ ABI_CALLOC(Ifc%cell,(3,Ifc%nrpt))
+ ABI_CALLOC(Ifc%wghatm,(natom,natom,Ifc%nrpt))
+ ABI_CALLOC(Ifc%short_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
+ ABI_CALLOC(Ifc%ewald_atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
 
  irpt_new = 1
  do irpt = 1, ifc_tmp%nrpt

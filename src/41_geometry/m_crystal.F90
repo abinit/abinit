@@ -523,7 +523,7 @@ end subroutine crystal_free
 !! INPUTS
 !!  Cryst<crystal_t>=The structure.
 !!  [unit]=Unit number for output. Defaults to std_out
-!!  [prtvol]=Verbosity level
+!!  [prtvol]=Verbosity level. If prtvol== -1, only lattice parameters are printed. Defaults to 0
 !!  [mode_paral]=Either "COLL" or "PERS"
 !!  [header]=String to be printed as header for additional info.
 !!
@@ -595,6 +595,7 @@ subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
    MSG_BUG('Wrong value for timrev')
  end if
  call wrtout(my_unt,msg,my_mode)
+ if (prtvol == -1) return
 
  call print_symmetries(Cryst%nsym,Cryst%symrel,Cryst%tnons,Cryst%symafm,unit=my_unt,mode_paral=my_mode)
 

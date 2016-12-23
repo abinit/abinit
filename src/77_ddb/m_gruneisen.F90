@@ -31,6 +31,8 @@ MODULE m_gruneisen
  use m_errors
  use m_profiling_abi
  use m_xmpi
+ use m_crystal
+ use m_tetrahedron
  use m_ddb
  use m_ifc
  use m_cgtools
@@ -39,12 +41,12 @@ MODULE m_gruneisen
  use netcdf
 #endif
 
- use m_io_tools,        only : get_unit
- use m_fstrings,        only : sjoin, itoa
- use m_crystal,         only : crystal_t
- use m_kpts,            only : kpts_ibz_from_kptrlatt
- use m_bz_mesh,         only : kpath_t
- use m_anaddb_dataset,  only : anaddb_dataset_type
+ use m_io_tools,            only : get_unit
+ use m_fstrings,            only : sjoin, itoa, ltoa
+ use m_kpts,                only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt
+ use m_bz_mesh,             only : kpath_t
+ use m_anaddb_dataset,      only : anaddb_dataset_type
+ use m_dynmat,              only : massmult_and_breaksym
 
  implicit none
 
@@ -134,8 +136,10 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
  character(len=*),intent(in) :: ddb_paths(:)
 
 !Local variables-------------------------------
- integer,parameter :: natifc0=0
+ integer,parameter :: natifc0=0,master=0
  integer :: ivol,iblock,msym,dimekb,lmnmax,mband,mblktyp,natom,nblok,nkpt,ntypat,usepaw,ddbun
+ integer :: nprocs,my_rank,ierr
+ character(len=500) :: msg
 !arrays
  integer,allocatable :: atifc0(:)
  real(dp) :: dielt(3,3)
@@ -143,18 +147,26 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
 
 ! ************************************************************************
 
- new%nvols = len(ddb_paths)
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ new%nvols = size(ddb_paths)
  ABI_MALLOC(new%cryst_vol, (new%nvols))
  ABI_MALLOC(new%ddb_vol, (new%nvols))
  ABI_MALLOC(new%ifc_vol, (new%nvols))
 
+ call wrtout(ab_out, "Computation of Gruneisen parameter with central finite difference:")
+
  ddbun = get_unit()
  do ivol=1,new%nvols
+   call wrtout(ab_out, sjoin(" Reading DDB file:", ddb_paths(ivol)))
    call ddb_getdims(dimekb,ddb_paths(ivol),lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,ntypat,ddbun,usepaw,DDB_VERSION,comm)
    ABI_MALLOC(atifc0, (natom))
    atifc0 = 0
    call ddb_from_file(new%ddb_vol(ivol), ddb_paths(ivol), inp%brav, natom, natifc0, atifc0, new%cryst_vol(ivol), comm)
    ABI_FREE(atifc0)
+   if (my_rank == master) then
+     call crystal_print(new%cryst_vol(ivol), header=sjoin("Structure for ivol:", itoa(ivol)), unit=ab_out, prtvol=-1)
+   end if
 
    ! Get Dielectric Tensor and Effective Charges
    ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
@@ -173,12 +185,28 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
    ABI_FREE(zeff)
  end do
 
- new%natom3 = new%cryst_vol(1)%natom * 3
- new%iv0 = 2
+ ! Consistency check
+ ! TODO
+ ABI_CHECK(any(new%nvols == [3, 5, 7, 9]), "Central finite difference requires [3,5,7,9] DDB files")
+
+ new%natom3 = 3 * new%cryst_vol(1)%natom
+ new%iv0 = 1 + new%nvols / 2
  new%v0 = new%cryst_vol(new%iv0)%ucvol
  new%delta_vol = new%cryst_vol(new%iv0+1)%ucvol - new%cryst_vol(new%iv0)%ucvol
- ! TODO
- ! Consistency check
+
+ ierr = 0
+ do ivol=1,new%nvols
+   !write(std_out,*)"ucvol",new%cryst_vol(ivol)%ucvol
+   if (abs(new%cryst_vol(1)%ucvol + new%delta_vol * (ivol-1) - new%cryst_vol(ivol)%ucvol) > tol4) then
+      write(std_out,*)"ucvol, delta_vol, diff_vol", new%cryst_vol(ivol)%ucvol, new%delta_vol, &
+        abs(new%cryst_vol(1)%ucvol + new%delta_vol * (ivol-1) - new%cryst_vol(ivol)%ucvol)
+      ierr = ierr + 1
+   end if
+ end do
+ if (ierr /= 0) then
+   msg = ltoa([(new%cryst_vol(ivol)%ucvol, ivol=1,new%nvols)])
+   MSG_ERROR(sjoin("Gruneisen calculations requires linear mesh of volumes but received:", msg))
+ end if
 
 end function gruns_new
 !!***
@@ -187,6 +215,7 @@ end function gruns_new
 
 !!****f* m_gruneisen/gruns_fourq
 !! NAME
+!!  gruns_fourq
 !!
 !! FUNCTION
 !!
@@ -225,7 +254,7 @@ subroutine gruns_fourq(gruns, qpt, wv0, gvals)
 !arrays
  real(dp) :: wvols(gruns%natom3,gruns%nvols),dot(2)
  real(dp) :: eigvec(2,gruns%natom3,gruns%natom3,gruns%nvols),d2cart(2,gruns%natom3,gruns%natom3,gruns%nvols)
- real(dp) :: dddv(2,gruns%natom3,gruns%natom3),displ_cart(2,gruns%natom3)
+ real(dp) :: dddv(2,gruns%natom3,gruns%natom3),displ_cart(2,gruns%natom3,gruns%natom3)
  real(dp) :: omat(2,gruns%natom3, gruns%natom3)
 
 ! ************************************************************************
@@ -234,15 +263,24 @@ subroutine gruns_fourq(gruns, qpt, wv0, gvals)
  do ivol=1,gruns%nvols
    call ifc_fourq(gruns%ifc_vol(ivol), gruns%cryst_vol(ivol), qpt, wvols(:,ivol), displ_cart, &
                   out_d2cart=d2cart(:,:,:,ivol), out_eigvec=eigvec(:,:,:,ivol))
-   !call massmult_and_breaksym(gruns%cryst_vol(ivol)%natom, gruns%cryst_vol(ivol)%ntypat,
-   !  gruns%cryst_vol(ivol)%cryst%typat, gruns%ifc_vol(ivol)%amu, d2cart(:,:,:,ivol))
+
+   call massmult_and_breaksym(gruns%cryst_vol(ivol)%natom, gruns%cryst_vol(ivol)%ntypat, &
+     gruns%cryst_vol(ivol)%typat, gruns%ifc_vol(ivol)%amu, d2cart(:,:,:,ivol))
  end do
  wv0 = wvols(:, gruns%iv0)
 
  ! Compute dD(q)/dV with finite difference.
+ !do ivol=1,gruns%nvols
+ !  fact = central_finite_difference(ord1, ivol)
+ !  if (fact /= zero) dddv = dddv + fact * d2cart(:,:,:,ivol)
+ !end do
+
  select case (gruns%nvols)
  case (3)
-   dddv = -half*d2cart(:,:,:,1) + half*d2cart(:,:,:,3)
+   dddv = -half * d2cart(:,:,:,1) + half * d2cart(:,:,:,3)
+ !case (5)
+ !case (7)
+ !case (9)
  case default
    MSG_ERROR(sjoin("Finite difference with nvols", itoa(gruns%nvols), "not implemented"))
  end select
@@ -255,6 +293,7 @@ subroutine gruns_fourq(gruns, qpt, wv0, gvals)
      dot = cg_zdotc(natom3, eigvec(1,1,nu, gruns%iv0), omat(1,1,nu))
      gvals(nu) = -gruns%v0 * dot(1) / (two * wv0(nu)**2)
      !write(std_out,*)"dot", dot
+     write(std_out,*)gvals(nu)
    else
      gvals(nu) = zero
    end if
@@ -267,6 +306,7 @@ end subroutine gruns_fourq
 
 !!****f* m_gruneisen/gruns_qpath
 !! NAME
+!!  gruns_qpath
 !!
 !! FUNCTION
 !!
@@ -301,7 +341,6 @@ subroutine gruns_qpath(gruns, qpath, comm)
  integer,parameter :: master=0
  integer :: nprocs,my_rank,iqpt,ierr
 !arrays
- !real(dp) :: qpt(3)
  real(dp),allocatable :: gvals(:,:),wv0(:,:)
 
 ! ************************************************************************
@@ -327,6 +366,7 @@ end subroutine gruns_qpath
 
 !!****f* m_gruneisen/gruns_qmesh
 !! NAME
+!!  gruns_qmesh
 !!
 !! FUNCTION
 !!
@@ -366,14 +406,20 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, comm)
 !scalars
  integer,parameter :: master=0,qptopt1=1
  integer :: nprocs,my_rank,iqibz,nqbz,nqibz,ierr,ii
+ type(t_tetrahedron) :: tetra
+ character(len=500) :: msg
 !arrays
- real(dp),allocatable :: gvals(:,:),wv0(:,:)
  integer :: qptrlatt(3,3)
+ real(dp),allocatable :: gvals(:,:),wv0(:,:)
  real(dp),allocatable :: qibz(:,:),qbz(:,:),wtq(:)
+ !real(dp),allocatable :: wdt(:,:),eig_dos(:,:)
 
 ! ************************************************************************
 
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
  ! Generate the q-mesh by finding the IBZ and the corresponding weights.
+ ABI_CHECK(all(ngqpt > 0), sjoin("invalid ngqpt:", ltoa(ngqpt)))
  qptrlatt = 0
  do ii=1,3
    qptrlatt(ii,ii) = ngqpt(ii)
@@ -383,13 +429,22 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, comm)
  call kpts_ibz_from_kptrlatt(gruns%cryst_vol(gruns%iv0), qptrlatt, qptopt1, nqshift, qshift, &
    nqibz, qibz, wtq, nqbz, qbz)
 
- nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ ! Build tetrahedra
+ tetra = tetra_from_kptrlatt(gruns%cryst_vol(gruns%iv0), qptopt1, qptrlatt, nqshift, qshift, nqibz, qibz, msg, ierr)
+ if (ierr /= 0) MSG_ERROR(msg)
+
  ABI_CALLOC(wv0, (gruns%natom3, nqibz))
  ABI_CALLOC(gvals, (gruns%natom3, nqibz))
+
+ !ABI_MALLOC(wdt, (nene, 2))
+ !ABI_CALLOC(eig_dos, (nene, 2))
 
  do iqibz=1,nqibz
    if (mod(iqibz, nprocs) /= my_rank) cycle ! mpi-parallelism
    call gruns_fourq(gruns, qibz(:,iqibz), wv0(:,iqibz), gvals(:,iqibz))
+   ! Accumulate total DOS.
+   !call tetra_get_onewk(tetra,iqibz,bcorr,nene,nqibz,eig_ibz,enemin,enemax,one,wdt)
+   !eig_dos = eig_dos + wdt
  end do
 
  call xmpi_sum(wv0, comm, ierr)
@@ -400,6 +455,10 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, comm)
  ABI_FREE(qbz)
  ABI_FREE(wv0)
  ABI_FREE(gvals)
+ !ABI_FREE(wdt)
+ !ABI_FREE(eig_dos)
+
+ call destroy_tetra(tetra)
 
 end subroutine gruns_qmesh
 !!***
@@ -408,6 +467,7 @@ end subroutine gruns_qmesh
 
 !!****f* m_gruneisen/gruns_free
 !! NAME
+!!  gruns_free
 !!
 !! FUNCTION
 !!
@@ -439,21 +499,21 @@ subroutine gruns_free(gruns)
 
  if (allocated(gruns%ifc_vol)) then
    do ii=1,size(gruns%cryst_vol)
-    call crystal_free(gruns%cryst_vol(ii))
+     call crystal_free(gruns%cryst_vol(ii))
    end do
    ABI_FREE(gruns%cryst_vol)
  end if
 
  if (allocated(gruns%ddb_vol)) then
    do ii=1,size(gruns%ddb_vol)
-    call crystal_free(gruns%ddb_vol(ii))
+     call ddb_free(gruns%ddb_vol(ii))
    end do
    ABI_FREE(gruns%ddb_vol)
  end if
 
  if (allocated(gruns%ifc_vol)) then
    do ii=1,size(gruns%ifc_vol)
-    call ifc_free(gruns%ifc_vol(ii))
+     call ifc_free(gruns%ifc_vol(ii))
    end do
    ABI_FREE(gruns%ifc_vol)
  end if

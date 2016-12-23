@@ -51,6 +51,7 @@ program anaddb
  use m_ifc
  use m_ddb
  use m_phonons
+ use m_gruneisen
  use iso_c_binding
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -112,6 +113,7 @@ program anaddb
  character(len=24) :: start_datetime
  character(len=strlen) :: string
  character(len=fnlen) :: filnam(7),elph_base_name,tmpfilename,phdos_fname,ec_fname
+ character(len=fnlen) :: ddb_paths(3)
  character(len=500) :: message
  type(anaddb_dataset_type) :: inp
  type(phonon_dos_type) :: Phdos
@@ -119,6 +121,7 @@ program anaddb
  type(ddb_type) :: ddb
  type(asrq0_t) :: asrq0
  type(crystal_t) :: Crystal
+ type(gruns_t) :: gruns
 #ifdef HAVE_NETCDF
  integer :: phdos_ncid, ana_ncid, ec_ncid, ncerr
  integer :: na_dir_varid,na_phmodes_varid, na_phdispl_varid
@@ -256,6 +259,17 @@ program anaddb
    NCF_CHECK(nctk_set_datamode(ana_ncid))
    NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, 'atomic_mass_units'), ddb%amu))
 #endif
+ end if
+
+ if (.True.) then
+ !if (inp%nddb_files /= 0) then
+   ddb_paths(1) = "mp-1367_k666_q888_-0.01_DDB"
+   ddb_paths(2) = "mp-1367_DDB"
+   ddb_paths(3) = "mp-1367_k666_q888_0.01_DDB"
+   gruns = gruns_new(ddb_paths, inp, comm)
+   call gruns_qmesh(gruns, inp%ng2qpt, 1, inp%q2shft, comm)
+   !call gruns_qpath(gruns, qpath, comm)
+   call gruns_free(gruns)
  end if
 
 !**********************************************************************
