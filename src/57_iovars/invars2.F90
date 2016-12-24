@@ -252,6 +252,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwencomp',tread,'ENE')
  if(tread==1) dtset%gwencomp=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwfockmix',tread,'DPR')
+ if(tread==1) dtset%gwfockmix=dprarr(1)
+
  if (usepaw==1) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_sigxcore',tread,'INT')
    if(tread==1) dtset%gw_sigxcore=intarr(1)

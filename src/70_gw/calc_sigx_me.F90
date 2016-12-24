@@ -102,7 +102,7 @@
 
 subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,&
 & Ltg_k,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,allQP_sym,gwx_ngfft,ngfftf,&
-& prtvol,pawcross)
+& prtvol,pawcross,gwfockmix)
 
  use defs_basis
  use defs_datatypes
@@ -149,6 +149,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: sigmak_ibz,ikcalc,prtvol,minbnd,maxbnd,pawcross
+ real(dp), intent(in) :: gwfockmix
  type(crystal_t),intent(in) :: Cryst
  type(ebands_t),target,intent(in) :: QP_BSt
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
@@ -269,11 +270,19 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    alpha_hybrid = 1.0_dp
  else if (Sigp%gwcalctyp>=300) then
    ! B3LYP factor = 0.20
-   alpha_hybrid = 0.2_dp
+   if (gwfockmix>tol8) then
+     alpha_hybrid = gwfockmix
+   else
+     alpha_hybrid = 0.2_dp
+   endif
  else
    ! PBE0  factor = 0.25
    ! HSE06 factor = 0.25
-   alpha_hybrid = 0.25_dp !@WC: change_alpha_here
+   if (gwfockmix>tol8) then
+     alpha_hybrid = gwfockmix
+   else
+     alpha_hybrid = 0.25_dp
+   endif
  endif
 
  if (ANY(gwx_ngfft(1:3) /= Wfd%ngfft(1:3)) ) then
