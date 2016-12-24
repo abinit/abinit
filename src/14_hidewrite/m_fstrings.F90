@@ -2087,6 +2087,7 @@ integer pure function char_count(string, char)
  end do
 
 end function char_count
+!!***
 
 !----------------------------------------------------------------------
 
@@ -2149,6 +2150,7 @@ integer function next_token(string, start, ostr) result(ierr)
  ostr = string(beg:start-1)
 
 end function next_token
+!!***
 
 !----------------------------------------------------------------------
 

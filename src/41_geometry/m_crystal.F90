@@ -595,7 +595,7 @@ subroutine crystal_print(Cryst,header,unit,mode_paral,prtvol)
    MSG_BUG('Wrong value for timrev')
  end if
  call wrtout(my_unt,msg,my_mode)
- if (prtvol == -1) return
+ if (my_prtvol == -1) return
 
  call print_symmetries(Cryst%nsym,Cryst%symrel,Cryst%tnons,Cryst%symafm,unit=my_unt,mode_paral=my_mode)
 
