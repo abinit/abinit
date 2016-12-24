@@ -626,7 +626,11 @@ class MolecularDynamicFile:
         
   def getAcell(self,image = 1):
       if self.goodFile:
-          return self.acell[self.ni:self.nf,image-1]    # Temporarily. (ni-1) for start slicing at 0
+          acell = np.zeros(((self.nf-self.ni),image,3))
+          acell[:,image-1,0] = self.rprimd[self.ni:self.nf,image-1,0,0]
+          acell[:,image-1,1] = self.rprimd[self.ni:self.nf,image-1,1,1]
+          acell[:,image-1,2] = self.rprimd[self.ni:self.nf,image-1,2,2]
+          return acell[:,image-1,:] # Temporarily. (ni-1) for start slicing at 0
       else:
           return 0
 

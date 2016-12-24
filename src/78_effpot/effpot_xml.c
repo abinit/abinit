@@ -81,9 +81,10 @@ void effpot_xml_checkXML(char *filename,char *name_xml){
   xmlFreeDoc(doc);
 }
 
-void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, int *nrpt){
+void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, int *loc_nrpt,\
+                             int *tot_nrpt){
   xmlDocPtr doc;
-  int i,iatom,irpt,iqpt,itypat,present;
+  int i,iatom,irpt1,irpt2,iqpt,itypat,present;
   xmlNodePtr cur,cur2;
   xmlChar *key,*uri;
   Array typat;
@@ -92,7 +93,8 @@ void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, i
 
   present  = 0;
   iatom    = 0;
-  irpt     = 0;
+  irpt1     = 0;
+  irpt2     = 0;
   iqpt    = 0;
   itypat   = 0;
   typat.array[0] = 0;
@@ -125,7 +127,8 @@ void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, i
       xmlFree(uri);
       
    } 
-    if ((!xmlStrcmp(cur->name, (const  xmlChar *) "total_force_constant"))) {irpt++;}
+    if ((!xmlStrcmp(cur->name, (const  xmlChar *) "local_force_constant"))) {irpt1++;}
+    if ((!xmlStrcmp(cur->name, (const  xmlChar *) "total_force_constant"))) {irpt2++;}
     if ((!xmlStrcmp(cur->name, (const  xmlChar *) "phonon"))) {
       cur2 = cur->xmlChildrenNode;
       while (cur2 != NULL) {
@@ -138,8 +141,9 @@ void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, i
   freeArray(&typat);
 
   *natom  = iatom;
-  *nrpt   = irpt;
   *nqpt   = iqpt;
+  *loc_nrpt   = irpt1;
+  *tot_nrpt   = irpt2;
   *ntypat = itypat;
 }
 
@@ -155,12 +159,16 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
                            int typat[*natom],double xcart[*natom][3],double zeff[*natom][3][3]){
   xmlDocPtr doc;
   char *pch;
-  int iatom,iamu,irpt,iqpt,present;
+  double total_atmfrc[*nrpt][*natom][3][*natom][3][2];
+  double local_atmfrc[*nrpt][*natom][3][*natom][3][2];
+  int cell_local[*nrpt][3];
+  int cell_total[*nrpt][3];
+  int iatom,iamu,irpt1,irpt2,irpt3,iqpt,present;
   int ia,ib,mu,nu,voigt;
   int i,j;
   xmlNodePtr cur,cur2,cur3;
   xmlChar *key,*uri;
-
+  
   if (*natom <= 0){ 
     printf(" error: The number of atom must be superior to zero\n");
     exit(0);
@@ -169,9 +177,11 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
   iatom   = 0;
   iamu    = 0;
   present = 0;
-  irpt    = 0;
-  iqpt   = 0;
-  voigt   = 0;
+  irpt1 = 0;
+  irpt2 = 0;
+  irpt3 = 0;
+  iqpt  = 0;
+  voigt = 0;
 
   doc = xmlParseFile(filename);
   if (doc == NULL) printf(" error: could not parse file file.xml\n");
@@ -285,10 +295,10 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
         cur2 = cur2->next;
       }
     }
-    else if ((!xmlStrcmp(cur->name, (const  xmlChar *) "local_force_constant"))) {      
+    else if ((!xmlStrcmp(cur->name, (const  xmlChar *) "local_force_constant"))) { 
       cur2 = cur->xmlChildrenNode;
       while (cur2 != NULL) {
-        if (irpt<=*nrpt) {
+        if (irpt1<=*nrpt) {
           if ((!xmlStrcmp(cur2->name, (const  xmlChar *) "data"))) {
             key = xmlNodeListGetString(doc, cur2->xmlChildrenNode, 1);
             pch = strtok(key,"\t \n");
@@ -297,37 +307,7 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
                 for(ib=0;ib<*natom;ib++){
                   for(nu=0;nu<3;nu++){
                     if (pch != NULL){
-                      short_atmfrc[irpt][ib][nu][ia][mu][0]=strtod(pch,NULL);
-                      pch = strtok(NULL,"\t \n");
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-        else{
-          printf(" error: The number of ifc doesn't match with the XML file %d %d\n",irpt,*nrpt);
-          exit(0);
-        } 
-        cur2 = cur2->next;
-      }
-    }
-    else if ((!xmlStrcmp(cur->name, (const  xmlChar *) "total_force_constant"))) {      
-      cur2 = cur->xmlChildrenNode;
-      while (cur2 != NULL) {
-        if (irpt<=*nrpt) {
-          if ((!xmlStrcmp(cur2->name, (const  xmlChar *) "data"))) {
-            key = xmlNodeListGetString(doc, cur2->xmlChildrenNode, 1);
-            pch = strtok(key,"\t \n");
-            for(ia=0;ia<*natom;ia++){
-              for(mu=0;mu<3;mu++){
-                for(ib=0;ib<*natom;ib++){
-                  for(nu=0;nu<3;nu++){
-                    if (pch != NULL){
-                      atmfrc[irpt][ib][nu][ia][mu][0]=strtod(pch,NULL);
-                      ewald_atmfrc[irpt][ib][nu][ia][mu][0]=strtod(pch,NULL);
-                      ewald_atmfrc[irpt][ib][nu][ia][mu][0]-=short_atmfrc[irpt][ib][nu][ia][mu][0];
+                      local_atmfrc[irpt1][ib][nu][ia][mu][0]=strtod(pch,NULL);
                       pch = strtok(NULL,"\t \n");
                     }
                   }
@@ -339,18 +319,55 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
             key = xmlNodeListGetString(doc, cur2->xmlChildrenNode, 1);
             pch = strtok(key,"\t \n");
             for(i=0;i<3;i++){
-              cell[irpt][i]=atoi(pch);
+              cell_local[irpt1][i]=atoi(pch);
               pch = strtok(NULL,"\t \n");
             }
           }
         }
         else{
-          printf(" error: The number of ifc doesn't match with the XML file %d %d\n",irpt,*nrpt);
+          printf(" error: The number of ifc doesn't match with the XML file %d %d\n",irpt1,*nrpt);
           exit(0);
         } 
         cur2 = cur2->next;
       }
-      irpt++;
+      irpt1++;
+    }
+    else if ((!xmlStrcmp(cur->name, (const  xmlChar *) "total_force_constant"))) {      
+      cur2 = cur->xmlChildrenNode;
+      while (cur2 != NULL) {
+        if (irpt2<=*nrpt) {
+          if ((!xmlStrcmp(cur2->name, (const  xmlChar *) "data"))) {
+            key = xmlNodeListGetString(doc, cur2->xmlChildrenNode, 1);
+            pch = strtok(key,"\t \n");
+            for(ia=0;ia<*natom;ia++){
+              for(mu=0;mu<3;mu++){
+                for(ib=0;ib<*natom;ib++){
+                  for(nu=0;nu<3;nu++){
+                    if (pch != NULL){
+                      total_atmfrc[irpt2][ib][nu][ia][mu][0]=strtod(pch,NULL);
+                      pch = strtok(NULL,"\t \n");
+                    }
+                  }
+                }
+              }
+            }
+          }
+          if ((!xmlStrcmp(cur2->name, (const  xmlChar *) "cell"))) {
+            key = xmlNodeListGetString(doc, cur2->xmlChildrenNode, 1);
+            pch = strtok(key,"\t \n");
+            for(i=0;i<3;i++){
+              cell_total[irpt2][i]=atoi(pch);
+              pch = strtok(NULL,"\t \n");
+            }
+          }
+        }
+        else{
+          printf(" error: The number of ifc doesn't match with the XML file %d %d\n",irpt2,*nrpt);
+          exit(0);
+        } 
+        cur2 = cur2->next;
+      }
+      irpt2++;
     }
     else if ((!xmlStrcmp(cur->name, (const  xmlChar *) "phonon"))){
       cur2 = cur->xmlChildrenNode;
@@ -394,7 +411,7 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
           }
         }
         else{
-          printf(" error: The number of qpoints doesn't match with the XML file %d %d\n",irpt,*nrpt);
+          printf(" error: The number of qpoints doesn't match with the XML file %d %d\n",irpt2,*nrpt);
           exit(0);
         }
         cur2 = cur2->next;
@@ -404,6 +421,85 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
     cur = cur->next;
   }
   xmlFreeDoc(doc);
+
+  //Reorder the ATMFRC
+  //Case 1: only local in the xml
+  if (irpt1>0 && irpt2==0){
+    for(i=0;i<irpt1;i++){
+      for(j=0;j<3;j++){
+        cell[i][j] = cell_local[i][j];        
+      }
+      for(ia=0;ia<*natom;ia++){
+        for(mu=0;mu<3;mu++){
+          for(ib=0;ib<*natom;ib++){
+            for(nu=0;nu<3;nu++){
+              atmfrc[i][ib][nu][ia][mu][0]=local_atmfrc[i][ib][nu][ia][mu][0];
+              short_atmfrc[i][ib][nu][ia][mu][0]=local_atmfrc[i][ib][nu][ia][mu][0];
+              ewald_atmfrc[i][ib][nu][ia][mu][0]=0.0;
+            }
+          }
+        }    
+      }
+    }
+  //Case 2: only total in the xml
+  }else if (irpt1==0 && irpt2>0){
+    for(i=0;i<irpt1;i++){
+      for(j=0;j<3;j++){
+        cell[i][j] = cell_total[i][j];        
+      }
+      for(ia=0;ia<*natom;ia++){
+        for(mu=0;mu<3;mu++){
+          for(ib=0;ib<*natom;ib++){
+            for(nu=0;nu<3;nu++){
+              atmfrc[i][ib][nu][ia][mu][0]=total_atmfrc[i][ib][nu][ia][mu][0];
+              short_atmfrc[i][ib][nu][ia][mu][0]=0.0;
+              ewald_atmfrc[i][ib][nu][ia][mu][0]=total_atmfrc[i][ib][nu][ia][mu][0];
+            }
+          }
+        }    
+      }
+    }
+  //Case 3: local + total in the xml
+  }else if (irpt1>0 && irpt2>0){
+    if (irpt1 <= irpt2){
+      for(i=0;i<irpt2;i++){
+        for(j=0;j<3;j++){
+          cell[i][j] = cell_total[i][j];
+        }
+        for(ia=0;ia<*natom;ia++){
+          for(mu=0;mu<3;mu++){
+            for(ib=0;ib<*natom;ib++){
+              for(nu=0;nu<3;nu++){
+                atmfrc[i][ib][nu][ia][mu][0]=total_atmfrc[i][ib][nu][ia][mu][0];
+                for(j=0;j<irpt1;j++){
+                  if(cell_local[j][0] == cell[i][0] && 
+                     cell_local[j][1] == cell[i][1] &&
+                     cell_local[j][2] == cell[i][2] ){
+                    short_atmfrc[i][ib][nu][ia][mu][0]= local_atmfrc[j][ib][nu][ia][mu][0];
+                    ewald_atmfrc[i][ib][nu][ia][mu][0]= atmfrc[i][ib][nu][ia][mu][0]-
+                                                 short_atmfrc[i][ib][nu][ia][mu][0];
+                    irpt3++;
+                  }
+                }
+              }
+            }
+          }    
+        }
+      }
+      if(irpt3 != irpt1){
+        fprintf(stderr,"error: Probleme between local and total rpt in the XML file:%d %d\n",\
+                irpt1,irpt3);
+        
+      }
+    }
+    else{
+      fprintf(stderr,"error: Local rpt is superior to total rpt in the XML file:%d %d\n",\
+              irpt1,irpt2);
+    }
+  }else{
+    fprintf(stderr,"error: Number of local and total rpt doesn't match with the XML file:%d %d\n",\
+            irpt1,irpt2);
+  }
 }
 
 
@@ -582,7 +678,7 @@ void effpot_xml_readStrainCoupling(char *filename,int *natom,int *nrpt,int *voig
 void effpot_xml_readTerm(char *filename,int*icoeff,int *iterm,int*ndisp,int*nterm,
                          int atindx[*ndisp][2],int cell[*ndisp][2][3],int direction[*ndisp],
                          int power[*ndisp],double *weight){
-  int i,idisp,jterm;
+  int i,idisp,j,jterm;
   xmlDocPtr doc;
   char * pch;
   xmlNodePtr cur,cur2,cur3,cur4;
@@ -677,6 +773,22 @@ void effpot_xml_readTerm(char *filename,int*icoeff,int *iterm,int*ndisp,int*nter
                   }
                   idisp++;
                 }
+                if (!xmlStrcmp(cur3->name, (const  xmlChar *) "strain")){
+                  uri2 = xmlGetProp(cur3, (const  xmlChar *) "power");
+                  power[idisp] = strtod(uri2,NULL);
+                  xmlFree(uri2); 
+                  uri2 = xmlGetProp(cur3, (const  xmlChar *) "voigt");
+                  direction[idisp] = -1 *  strtod(uri2,NULL); 
+                  xmlFree(uri2); 
+                  //Set to -1 the useless quantitiers for strain                       
+                  for(i=0;i<2;i++){
+                    atindx[idisp][i]  = -1 ;
+                    for(j=0;j<3;j++){
+                      cell[idisp][i][j]= -1;
+                    }
+                  }
+                  idisp++;
+                }
                 cur3 = cur3->next;
               }          
             }
@@ -732,6 +844,7 @@ void effpot_xml_getDimTerm(char *filename,int*icoeff,char *name_term,int*ndisp,i
               cur3 = cur2->xmlChildrenNode;
               while (cur3 != NULL){
                 if (!xmlStrcmp(cur3->name, (const  xmlChar *) "displacement_diff")) {idisp ++;}
+                if (!xmlStrcmp(cur3->name, (const  xmlChar *) "strain")) {idisp ++;}
                 cur3 = cur3->next;
               }
             }
