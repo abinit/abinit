@@ -270,19 +270,11 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
    alpha_hybrid = 1.0_dp
  else if (Sigp%gwcalctyp>=300) then
    ! B3LYP factor = 0.20
-   if (gwfockmix>tol8) then
-     alpha_hybrid = gwfockmix
-   else
-     alpha_hybrid = 0.2_dp
-   endif
+   alpha_hybrid = 0.2_dp
  else
-   ! PBE0  factor = 0.25
-   ! HSE06 factor = 0.25
-   if (gwfockmix>tol8) then
-     alpha_hybrid = gwfockmix
-   else
-     alpha_hybrid = 0.25_dp
-   endif
+   ! PBE0 and HSE06 mixing determined by gwfockmix
+   ! default 0.25
+   alpha_hybrid = gwfockmix
  endif
 
  if (ANY(gwx_ngfft(1:3) /= Wfd%ngfft(1:3)) ) then
