@@ -42,9 +42,11 @@ MODULE m_gruneisen
 #endif
 
  use m_io_tools,            only : get_unit
- use m_fstrings,            only : sjoin, itoa, ltoa
+ use m_time,                only : cwtime
+ use m_fstrings,            only : sjoin, itoa, ltoa, ftoa
+ use m_numeric_tools,       only : central_finite_diff
  use m_kpts,                only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt
- use m_bz_mesh,             only : kpath_t
+ use m_bz_mesh,             only : kpath_t, kpath_init, kpath_free
  use m_anaddb_dataset,      only : anaddb_dataset_type
  use m_dynmat,              only : massmult_and_breaksym
 
@@ -99,6 +101,7 @@ MODULE m_gruneisen
  public :: gruns_qpath      ! Compute Grunesein parameters on a q-path
  public :: gruns_qmesh      ! Compute Grunesein parameters on a q-mesh.
  public :: gruns_free       ! Release memory
+ public :: gruns_anaddb
 !!***
 
 contains  !===========================================================
@@ -251,6 +254,7 @@ subroutine gruns_fourq(gruns, qpt, wv0, gvals)
 !Local variables-------------------------------
 !scalars
  integer :: ivol,ii,natom3,nu
+ real(dp) :: fact
 !arrays
  real(dp) :: wvols(gruns%natom3,gruns%nvols),dot(2)
  real(dp) :: eigvec(2,gruns%natom3,gruns%natom3,gruns%nvols),d2cart(2,gruns%natom3,gruns%natom3,gruns%nvols)
@@ -266,24 +270,20 @@ subroutine gruns_fourq(gruns, qpt, wv0, gvals)
 
    call massmult_and_breaksym(gruns%cryst_vol(ivol)%natom, gruns%cryst_vol(ivol)%ntypat, &
      gruns%cryst_vol(ivol)%typat, gruns%ifc_vol(ivol)%amu, d2cart(:,:,:,ivol))
+
+   !call zgemm('N','N',natom3,natom3,natom3,cone,d2cart(:,:,:,ivol),natom3,eigvec(:,:,:,ivol),natom3,czero,omat,natom3)
+   !do nu=1,natom3
+   !  write(std_out,*)"H|psi> - w**2 |psi>",maxval(abs(omat(:,:,nu) - wvols(nu,ivol) ** 2 * eigvec(:,:,nu,ivol)))
+   !end do
  end do
  wv0 = wvols(:, gruns%iv0)
 
  ! Compute dD(q)/dV with finite difference.
- !do ivol=1,gruns%nvols
- !  fact = central_finite_difference(ord1, ivol)
- !  if (fact /= zero) dddv = dddv + fact * d2cart(:,:,:,ivol)
- !end do
-
- select case (gruns%nvols)
- case (3)
-   dddv = -half * d2cart(:,:,:,1) + half * d2cart(:,:,:,3)
- !case (5)
- !case (7)
- !case (9)
- case default
-   MSG_ERROR(sjoin("Finite difference with nvols", itoa(gruns%nvols), "not implemented"))
- end select
+ dddv = zero
+ do ivol=1,gruns%nvols
+   fact = central_finite_diff(1, ivol, gruns%nvols)
+   if (fact /= zero) dddv = dddv + fact * d2cart(:,:,:,ivol)
+ end do
  dddv = dddv / gruns%delta_vol
 
  ! Compute -volume/(2w(q)**2) <u(q)|dD(q)/dq|u(q)>
@@ -292,7 +292,6 @@ subroutine gruns_fourq(gruns, qpt, wv0, gvals)
    if (abs(wv0(nu)) > tol12) then
      dot = cg_zdotc(natom3, eigvec(1,1,nu, gruns%iv0), omat(1,1,nu))
      gvals(nu) = -gruns%v0 * dot(1) / (two * wv0(nu)**2)
-     !write(std_out,*)"dot", dot
      write(std_out,*)gvals(nu)
    else
      gvals(nu) = zero
@@ -390,6 +389,7 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_free'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -404,8 +404,9 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, comm)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0,qptopt1=1
- integer :: nprocs,my_rank,iqibz,nqbz,nqibz,ierr,ii
+ integer,parameter :: master=0,qptopt1=1,bcorr0=0
+ integer :: nprocs,my_rank,iqibz,nqbz,nqibz,ierr,ii,nu
+ real(dp) :: gavg
  type(t_tetrahedron) :: tetra
  character(len=500) :: msg
 !arrays
@@ -436,27 +437,49 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, comm)
  ABI_CALLOC(wv0, (gruns%natom3, nqibz))
  ABI_CALLOC(gvals, (gruns%natom3, nqibz))
 
- !ABI_MALLOC(wdt, (nene, 2))
- !ABI_CALLOC(eig_dos, (nene, 2))
-
+ gavg = zero
  do iqibz=1,nqibz
    if (mod(iqibz, nprocs) /= my_rank) cycle ! mpi-parallelism
    call gruns_fourq(gruns, qibz(:,iqibz), wv0(:,iqibz), gvals(:,iqibz))
-   ! Accumulate total DOS.
-   !call tetra_get_onewk(tetra,iqibz,bcorr,nene,nqibz,eig_ibz,enemin,enemax,one,wdt)
-   !eig_dos = eig_dos + wdt
+   gavg = gavg + wtq(iqibz) * sum(gvals(:,iqibz))
  end do
+ gavg = gavg / gruns%natom3
 
+ call xmpi_sum(gavg, comm, ierr)
  call xmpi_sum(wv0, comm, ierr)
  call xmpi_sum(gvals, comm, ierr)
+
+#if 0
+ !ABI_MALLOC(wv0_ibz, (nqibz))
+ !ABI_MALLOC(wdt, (nene, 2))
+ !ABI_CALLOC(eig_dos, (nene, 2))
+
+ ! Accumulate total DOS.
+ cnt = 0
+ do iqibz=1,nqibz
+   do nu=1,gruns%natom3
+     cnt = cnt + 1
+     if (mod(cnt, nprocs) /= my_rank) cycle ! mpi-parallelism
+     wv0_ibz = wv0(nu,:)
+     !call tetra_get_onewk(tetra,iqibz,bcorr0,nene,nqibz,wv0_ibz,enemin,enemax,one,wdt)
+     !eig_dos = eig_dos + wdt
+     wv0_ibz = gvals(nu,:)
+   end do
+ end do
+ !ABI_FREE(wv0_ibz)
+ !ABI_FREE(wdt)
+ !ABI_FREE(eig_dos)
+#endif
+
+ if (my_rank == master) then
+   call wrtout(ab_out, sjoin(" Average Gruneisen parameter:", ftoa(gavg, fmt="f8.5")))
+ end if
 
  ABI_FREE(qibz)
  ABI_FREE(wtq)
  ABI_FREE(qbz)
  ABI_FREE(wv0)
  ABI_FREE(gvals)
- !ABI_FREE(wdt)
- !ABI_FREE(eig_dos)
 
  call destroy_tetra(tetra)
 
@@ -519,6 +542,84 @@ subroutine gruns_free(gruns)
  end if
 
 end subroutine gruns_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gruneisen/gruns_anaddb
+!! NAME
+!!  gruns_anaddb
+!!
+!! FUNCTION
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine gruns_anaddb(inp, comm)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_free'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+ integer,intent(in) :: comm
+ type(anaddb_dataset_type) :: inp
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii
+ real(dp) :: cpu,wall,gflops
+ type(gruns_t) :: gruns
+ type(kpath_t) :: qpath
+ character(len=500) :: msg
+
+! ************************************************************************
+
+ call cwtime(cpu, wall, gflops, "start")
+
+#ifdef HAVE_NETCDF
+ !NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_GRUNS.nc"), xmpi_comm_self), "Creating GRUNS.nc")
+ !NCF_CHECK(crystal_ncwrite(cryst, ncid))
+ !call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart)
+ !NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")],defmode=.True.))
+ !NCF_CHECK(nctk_set_datamode(ncid))
+ !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'atomic_mass_units'), ddb%amu))
+ !NCF_CHECK(nf90_close(ncid))
+#endif
+
+ gruns = gruns_new(inp%gruns_ddbs, inp, comm)
+
+ ! Compute grunesein on the q-mesh
+ if (all(inp%ng2qpt /= 0)) then
+   call gruns_qmesh(gruns, inp%ng2qpt, 1, inp%q2shft, comm)
+ else
+   MSG_WARNING("Cannot compute Grunesein parameters on q-mesh because ng2qpt == 0")
+ end if
+
+ ! Compute grunesein on the q-path
+ if (inp%nqpath /= 0) then
+   call kpath_init(qpath, inp%qpath, gruns%cryst_vol(gruns%iv0)%gprimd, inp%ndivsm)
+   call gruns_qpath(gruns, qpath, comm)
+   call kpath_free(qpath)
+ else
+   MSG_WARNING("Cannot compute Grunesein parameters on q-path because nqpath == 0")
+ end if
+
+ call gruns_free(gruns)
+
+ call cwtime(cpu,wall,gflops,"stop")
+ write(msg,'(2(a,f8.2))')"gruns_anaddb completed. cpu:",cpu,", wall:",wall
+ call wrtout(std_out, msg, do_flush=.True.)
+
+end subroutine gruns_anaddb
 !!***
 
 !----------------------------------------------------------------------

@@ -24,12 +24,13 @@
 #include "abi_common.h"
 
 module m_anaddb_dataset
-    
+
  use defs_basis
  use m_profiling_abi
  use m_errors
 
- use m_ddb,  only : DDB_QTOL
+ use m_fstrings,  only : next_token, rmquotes, sjoin
+ use m_ddb,       only : DDB_QTOL
 
  implicit none
 
@@ -74,6 +75,7 @@ module m_anaddb_dataset
   integer :: gkk2write
   integer :: gkk_rptwrite
   integer :: gkqwrite
+  integer :: gruns_nddbs
   integer :: iavfrq
   integer :: ifcana
   integer :: ifcflag
@@ -167,17 +169,17 @@ module m_anaddb_dataset
 
   integer, allocatable :: iatprj_bs(:)
 
-! Real arrays 
-  real(dp), allocatable :: qnrml1(:) 
+! Real arrays
+  real(dp), allocatable :: qnrml1(:)
   ! qnrml1(nph1l)
 
   real(dp), allocatable :: qnrml2(:)
   ! qnrml2(nph2l)
 
-  real(dp), allocatable :: qpath(:,:) 
+  real(dp), allocatable :: qpath(:,:)
   ! qpath(3,nqpath)
 
-  real(dp), allocatable :: qph1l(:,:) 
+  real(dp), allocatable :: qph1l(:,:)
   ! qph1l(3,nph1l)
 
   real(dp), allocatable :: qph2l(:,:)
@@ -186,10 +188,13 @@ module m_anaddb_dataset
   real(dp), allocatable :: ep_qptlist(:,:)
   ! qph2l(3,ep_nqpt)
 
+  character(len=fnlen), allocatable :: gruns_ddbs(:)
+  ! gruns_ddbs(gruns_nddbs)
+
  end type anaddb_dataset_type
 !!***
 
-contains 
+contains
 !!***
 
 !!****f* m_anaddb_dataset/anaddb_dtset_free
@@ -228,7 +233,7 @@ subroutine anaddb_dtset_free(anaddb_dtset)
  type(anaddb_dataset_type), intent(inout) :: anaddb_dtset
 
 ! *************************************************************************
- 
+
  if (allocated(anaddb_dtset%atifc))  then
    ABI_DEALLOCATE(anaddb_dtset%atifc)
  end if
@@ -255,6 +260,9 @@ subroutine anaddb_dtset_free(anaddb_dtset)
  end if
  if (allocated(anaddb_dtset%ep_qptlist))  then
    ABI_DEALLOCATE(anaddb_dtset%ep_qptlist)
+ end if
+ if (allocated(anaddb_dtset%gruns_ddbs))  then
+   ABI_DEALLOCATE(anaddb_dtset%gruns_ddbs)
  end if
 
 end subroutine anaddb_dtset_free
@@ -311,15 +319,14 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 !scalars
  integer,intent(in) :: lenstr,natom
  character(len=*),intent(in) :: string
- type(anaddb_dataset_type),intent(inout) :: anaddb_dtset 
+ type(anaddb_dataset_type),intent(inout) :: anaddb_dtset
 
 !Local variables -------------------------
-!Dummy arguments for subroutine 'intagm' to parse input file
-!Set routine version number here:
 !scalars
- integer,parameter :: vrsddb=100401
- integer :: ii,iph1,iph2,jdtset,marr,tread
+ integer,parameter :: vrsddb=100401 !Set routine version number here:
+ integer :: ii,iph1,iph2,jdtset,marr,tread,start
  character(len=500) :: message
+ character(len=fnlen) :: path
 !arrays
  integer,allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:)
@@ -378,7 +385,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 !Target band gap in eV
 !The default value is just a very large number that will not be used in changing
 !the band gap
- anaddb_dtset%band_gap = 999.0d0 
+ anaddb_dtset%band_gap = 999.0d0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'band_gap',tread,'DPR')
  if(tread==1) anaddb_dtset%band_gap=dprarr(1)
 
@@ -484,8 +491,6 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 &   'Action: correct dostol in your input file.'
    MSG_ERROR(message)
  end if
-
-!AHR
 
  anaddb_dtset%dossum=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dossum',tread,'INT')
@@ -733,7 +738,23 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 &   'Action: correct gkqwrite in your input file.'
    MSG_ERROR(message)
  end if
- 
+
+ anaddb_dtset%gruns_nddbs = 0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gruns_nddbs',tread,'INT')
+ if (tread==1) anaddb_dtset%gruns_nddbs = intarr(1)
+
+ if (anaddb_dtset%gruns_nddbs /= 0) then
+   ! Read list of DDB paths.
+   ABI_MALLOC(anaddb_dtset%gruns_ddbs, (anaddb_dtset%gruns_nddbs))
+   start = index(string, "GRUNS_DDBS") + len("GRUNS_DDBS") + 1
+   do ii=1,anaddb_dtset%gruns_nddbs
+     if (next_token(string, start, path) /= 0) then
+       MSG_ERROR(sjoin("Cannot find DDB path in input string:", ch10, string(start:)))
+     end if
+     anaddb_dtset%gruns_ddbs(ii) = rmquotes(path)
+   end do
+ end if
+
 !H
 
 !I
@@ -802,7 +823,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 &   'Action: correct ifltransport in your input file.'
    MSG_ERROR(message)
  end if
- 
+
  anaddb_dtset%instrflag=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'instrflag',tread,'INT')
  if(tread==1) anaddb_dtset%instrflag=intarr(1)
@@ -840,7 +861,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),'kptrlatt_fine',tread,'INT')
  if(tread==1)anaddb_dtset%kptrlatt_fine(1:3,1:3)=reshape(intarr(1:9),(/3,3/))
 
- 
+
 !L
 
 !M
@@ -980,7 +1001,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 &   'Action: correct nph1l in your input file.'
    MSG_ERROR(message)
  end if
- 
+
  anaddb_dtset%nph2l=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nph2l',tread,'INT')
  if(tread==1) anaddb_dtset%nph2l=intarr(1)
@@ -990,7 +1011,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 &   'Action: correct nph2l in your input file.'
    MSG_ERROR(message)
  end if
- 
+
  anaddb_dtset%nqpath=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nqpath',tread,'INT')
  if(tread==1) anaddb_dtset%nqpath=intarr(1)
@@ -1120,7 +1141,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 &   'Action: correct prtdos in your input file.'
    MSG_ERROR(message)
  end if
- 
+
 !Default is no output for the Fermi Surface
  anaddb_dtset%prtfsurf = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfsurf',tread,'INT')
@@ -1619,7 +1640,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 &   'Action: change frmax and/or frmin  in your input file.'
    MSG_ERROR(message)
  end if
- 
+
  if (anaddb_dtset%nqpath==0 .and. anaddb_dtset%elphflag==1) then
    write(message,'(a,a,a,a)' )&
 &   'elphflag is 1 but no nqpath has been specified','for phonon linewidths',ch10,&
@@ -1766,7 +1787,6 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
  type(anaddb_dataset_type),intent(in) :: anaddb_dtset
 
 !Local variables -------------------------
-!Set routine version number here:
 !scalars
  integer :: ii,iph1,iph2,iqpt,iqshft
 
@@ -1979,7 +1999,7 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
      write(nunit, '(a,es16.6,a)' ) ' Maximum temperature for transport outputs: ', &
 &     anaddb_dtset%tempermin+anaddb_dtset%temperinc*anaddb_dtset%ntemper, ' K'
      write(nunit, '(a,i6)' ) ' Number of temperature points for transport outputs: ', anaddb_dtset%ntemper
-     write(nunit, '(a)' ) 
+     write(nunit, '(a)' )
    end if
 
    if (anaddb_dtset%gkqwrite == 1) then
@@ -1994,6 +2014,13 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
      write(nunit,'(a,a)' ) 'Full grid gkk matrix elements ',&
      'will be written to disk. File gkk2file must be absent.'
    end if
+ end if
+
+ if (anaddb_dtset%gruns_nddbs /= 0) then
+   write(nunit,'(a)' ) "Will compute Gruneisen parameters with finite difference method. DDB files:"
+   do ii=1,anaddb_dtset%gruns_nddbs
+     write(nunit, "(2a)")"    ",trim(anaddb_dtset%gruns_ddbs(ii))
+   end do
  end if
 
 !List of vector 1  (reduced coordinates)

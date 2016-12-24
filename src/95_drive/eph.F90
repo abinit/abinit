@@ -481,10 +481,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      call phdos_print(phdos, path)
      !call phdos_print_debye(phdos, crystal%ucvol)
 
-
-!TODO: do we want to pass the temper etc... from anaddb_dtset into the full dtset for abinit? Otherwise just leave these defaults.
+!TODO: do we want to pass the temper etc... from anaddb_dtset into the full dtset for abinit?
+! Otherwise just leave these defaults.
+!MG: Disabled for the time being because of SIGFPE in v8[41]
      path = strcat(dtfil%filnam_ds(4), "_MSQD_T")
-     call phdos_print_msqd(phdos, path, 1000, one, one)
+     !call phdos_print_msqd(phdos, path, 1000, one, one)
 
 #ifdef HAVE_NETCDF
      path = strcat(dtfil%filnam_ds(4), "_PHDOS.nc")

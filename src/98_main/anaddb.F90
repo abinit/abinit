@@ -82,10 +82,7 @@ program anaddb
 
  implicit none
 
-!Arguments -----------------------------------
-
 !Local variables-------------------------------
-! Set array dimensions
  integer :: msym !  msym =maximum number of symmetry elements in space group
 !Define input and output unit numbers (some are defined in defs_basis -all should be there ...):
  integer,parameter :: ddbun=2,master=0 ! FIXME: these should not be reserved unit numbers!
@@ -113,7 +110,6 @@ program anaddb
  character(len=24) :: start_datetime
  character(len=strlen) :: string
  character(len=fnlen) :: filnam(7),elph_base_name,tmpfilename,phdos_fname,ec_fname
- character(len=fnlen) :: ddb_paths(3)
  character(len=500) :: message
  type(anaddb_dataset_type) :: inp
  type(phonon_dos_type) :: Phdos
@@ -121,7 +117,6 @@ program anaddb
  type(ddb_type) :: ddb
  type(asrq0_t) :: asrq0
  type(crystal_t) :: Crystal
- type(gruns_t) :: gruns
 #ifdef HAVE_NETCDF
  integer :: phdos_ncid, ana_ncid, ec_ncid, ncerr
  integer :: na_dir_varid,na_phmodes_varid, na_phdispl_varid
@@ -261,16 +256,8 @@ program anaddb
 #endif
  end if
 
- if (.True.) then
- !if (inp%nddb_files /= 0) then
-   ddb_paths(1) = "mp-1367_k666_q888_-0.01_DDB"
-   ddb_paths(2) = "mp-1367_DDB"
-   ddb_paths(3) = "mp-1367_k666_q888_0.01_DDB"
-   gruns = gruns_new(ddb_paths, inp, comm)
-   call gruns_qmesh(gruns, inp%ng2qpt, 1, inp%q2shft, comm)
-   !call gruns_qpath(gruns, qpath, comm)
-   call gruns_free(gruns)
- end if
+ ! Calculation of Grunesein parameters.
+ if (inp%gruns_nddbs /= 0) call gruns_anaddb(inp, comm)
 
 !**********************************************************************
 !**********************************************************************
