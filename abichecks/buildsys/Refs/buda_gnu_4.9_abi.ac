@@ -675,14 +675,13 @@ with_mpi_prefix="/usr/local/mpich3_gcc49"
 # Transferable I/O (TRIO) connector                                            #
 # ---------------------------------------------------------------------------- #
 
-# Flavor of transferable I/O library to support (default is netcdf+etsf_io)
+# Flavor of transferable I/O library to support (default is netcdf)
 #
 # By transferable I/O (TRIO), we mean that the files produced by Abinit
 # will be transferable seamlessly to other computers and codes
 #
 # Supported libraries:
 #
-#   * etsf_io  : ETSF_IO file format (requires netcdf)
 #   * psml     : XML pseudopotential format io library
 #   * netcdf   : NetCDF file format
 #   * yaml     : YAML output
@@ -690,17 +689,7 @@ with_mpi_prefix="/usr/local/mpich3_gcc49"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="etsf_io+netcdf"
-
-                       # ------------------------------ #
-
-# Include flags for the ETSF_IO library (default is unset)
-#
-with_etsf_io_incs="-I/home/buildbot/local/fb/gnu/4.9/mpi/include"
-
-# Link flags for the ETSF_IO library (default is unset)
-#
-with_etsf_io_libs="-L/home/buildbot/local/fb/gnu/4.9/mpi/lib -letsf_io_utils -letsf_io -letsf_io_low_level"
+with_trio_flavor="netcdf"
 
                        # ------------------------------ #
 
