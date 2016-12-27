@@ -35,6 +35,7 @@ MODULE m_ifc
  use m_cgtools
  use m_bspline
  use m_skw
+ use m_lebedev
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
@@ -175,12 +176,13 @@ MODULE m_ifc
     ! Long-range part of dynmat in q-space
  end type ifc_type
 
- public :: ifc_init        ! Constructor
- public :: ifc_free        ! Release memory
- public :: ifc_fourq       ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
- public :: ifc_print       ! Print the ifc (output, netcdf and text file)
- public :: ifc_outphbtrap  ! Print out phonon frequencies on regular grid for BoltzTrap code.
- public :: ifc_printbxsf   ! Output phonon isosurface in Xcrysden format.
+ public :: ifc_init          ! Constructor
+ public :: ifc_free          ! Release memory
+ public :: ifc_fourq         ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
+ public :: ifc_speedofsound  !
+ public :: ifc_print         ! Print the ifc (output, netcdf and text file)
+ public :: ifc_outphbtrap    ! Print out phonon frequencies on regular grid for BoltzTrap code.
+ public :: ifc_printbxsf     ! Output phonon isosurface in Xcrysden format.
 !!***
 
 !----------------------------------------------------------------------
@@ -934,6 +936,139 @@ end subroutine ifc_get_dwdq
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_ifc/ifc_speedofsound
+!!
+!! NAME
+!! ifc_speedofsound
+!!
+!! FUNCTION
+!!  Calculate the speed of sound by averaging the group velocities of the
+!!  three acoustic modes on a small sphere of radius qrad centered around Gamma.
+!!  Perform spherical integration with Lebedev-Laikov grids
+!!
+!! INPUTS
+!! ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
+!! crystal<crystal_t> = Information on the crystalline structure.
+!! qrad=Radius of the sphere in reciprocal space
+!! atols_ms=Absolute tolerance in meter/second. The code generates spherical meshes
+!!  until the results are converged twice within atols_ms.
+!! comm=MPI communicator.
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_print'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: comm
+ real(dp),intent(in) :: qrad,atol_ms
+ type(ifc_type),intent(in) :: ifc
+ type(crystal_t),intent(in) :: crystal
+!arrays
+
+!Local variables -------------------------
+!scalars
+ integer,parameter :: master=0
+ integer :: ii,nu,npts,igrid,my_rank,nprocs,ierr,converged
+ character(len=500) :: msg
+!arrays
+ real(dp) :: qpt(3),quad(3),prev_quad(3)
+ real(dp) :: vs(4,3)
+ real(dp) :: phfrqs(3*crystal%natom),dwdq(3,3*crystal%natom)
+ real(dp) :: eigvec(2,3*crystal%natom,3*crystal%natom),displ_cart(2,3*crystal%natom,3*crystal%natom)
+ real(dp),allocatable :: xx(:),yy(:),zz(:),ww(:)
+
+! *********************************************************************
+
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ do ii=1,3
+   qpt = zero; qpt(ii) = one
+   qpt = qrad * two_pi * qpt / normv(qpt, crystal%gmet, "G")
+   call ifc_fourq(ifc, crystal, qpt, phfrqs, displ_cart, out_eigvec=eigvec, dwdq=dwdq)
+
+   do nu=1,3
+     vs(ii, nu) = sqrt(sum(dwdq(1:3,nu) ** 2)) * Bohr_meter / Time_Sec
+   end do
+   write(std_out,"(a,3es12.4)")" vs:",vs(ii,:)
+ end do
+
+ ! Compute Spherical average with Lebedev-Laikov grid.
+ converged = 0
+ do igrid=1,32
+   npts = lebedev_npts(igrid)
+   ABI_MALLOC(xx, (npts))
+   ABI_MALLOC(yy, (npts))
+   ABI_MALLOC(zz, (npts))
+   ABI_MALLOC(ww, (npts))
+
+   call build_lebedev_grid(igrid, xx, yy, zz, ww)
+   quad = zero
+   do ii=1,npts
+     if (mod(ii, nprocs) /= my_rank) cycle ! mpi-parallelism
+     ! Build q-point on sphere of radius qrad
+     qpt = two_pi * matmul(crystal%gprimd, [xx(ii), yy(ii), zz(ii)])
+     qpt = qrad * qpt / normv(qpt, crystal%gmet, "G")
+     call ifc_fourq(ifc, crystal, qpt, phfrqs, displ_cart, out_eigvec=eigvec, dwdq=dwdq)
+
+     do nu=1,3
+       quad(nu) = quad(nu) + ww(ii) * sqrt(sum(dwdq(1:3,nu) ** 2))
+       !quad(nu) = quad(nu) + ww(ii)
+     end do
+   end do
+
+   quad = quad * Bohr_meter / Time_Sec
+   call xmpi_sum(quad, comm, ierr)
+
+   ABI_FREE(xx)
+   ABI_FREE(yy)
+   ABI_FREE(zz)
+   ABI_FREE(ww)
+
+   write(std_out,'(2(a,i6),a,3es12.4,a,es12.4)')&
+     " Lebedeb-Laikov grid: ",igrid," npts: ", npts, " quad: ",quad, " <vs>: ",sum(quad)/3
+   if (igrid > 1) then
+     if (abs(sum(quad - prev_quad)/3) < atol_ms) then
+        converged = converged + 1
+        if (converged == 2) exit
+     else
+        converged = 0
+     end if
+   end if
+   prev_quad = quad
+   vs(4, :) = quad
+ end do ! igrid
+
+ if (my_rank == master) then
+   do ii=1,3
+     write(std_out,"(a,3es12.4,a,i1)")" Speed of sound:",vs(ii,:)," [m/s] along reduced direction ",ii
+   end do
+   write(std_out,'(2(a,es12.4),a,i0)')&
+     " Lebedev-Laikov integration with qrad: ", qrad, " atols_ms: ",atol_ms, " [m/s], npts: ", npts
+   write(std_out,"(a,3es12.4,a,es12.4)")" Spherical average:",vs(4,:)," [m/s], ",sum(vs(4,:))/3
+   if (converged /= 2) then
+     write(msg,'(a,es12.4,a)')" Results are not converged within: ",atol_ms, " [m/s]"
+     MSG_WARNING(msg)
+   end if
+ end if
+
+end subroutine ifc_speedofsound
+!!***
 
 !!****f* m_ifc/corsifc9
 !!

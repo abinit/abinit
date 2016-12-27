@@ -581,7 +581,7 @@ pure function round_brackets(istr) result(ostr)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'quote'
+#define ABI_FUNC 'round_brackets'
 !End of the abilint section
 
  character(len=*),intent(in) :: istr
@@ -2111,7 +2111,7 @@ integer function next_token(string, start, ostr) result(ierr)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'char_count'
+#define ABI_FUNC 'next_token'
 !End of the abilint section
 
  implicit none

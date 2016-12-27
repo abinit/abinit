@@ -4,8 +4,8 @@
 !!  m_gruneisen
 !!
 !! FUNCTION
-!!  This module contains the declaration of data types and methods
-!!  to compute Gruneisen parameters.
+!!  Objects and methods to compute Gruneisen parameters with central finite difference
+!!  of dynamical matrices obtained with different unit cell volumes.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2011-2016 ABINIT group (MG)
@@ -32,6 +32,7 @@ MODULE m_gruneisen
  use m_profiling_abi
  use m_xmpi
  use m_crystal
+ use m_crystal_io
  use m_tetrahedron
  use m_ddb
  use m_ifc
@@ -43,7 +44,7 @@ MODULE m_gruneisen
 
  use m_io_tools,            only : get_unit
  use m_time,                only : cwtime
- use m_fstrings,            only : sjoin, itoa, ltoa, ftoa
+ use m_fstrings,            only : sjoin, itoa, ltoa, ftoa, strcat
  use m_numeric_tools,       only : central_finite_diff
  use m_kpts,                only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt
  use m_bz_mesh,             only : kpath_t, kpath_init, kpath_free
@@ -97,11 +98,11 @@ MODULE m_gruneisen
 
  end type gruns_t
 
- public :: gruns_new        ! Constructor
- public :: gruns_qpath      ! Compute Grunesein parameters on a q-path
+ public :: gruns_new        ! Constructor.
+ public :: gruns_qpath      ! Compute Grunesein parameters on a q-path.
  public :: gruns_qmesh      ! Compute Grunesein parameters on a q-mesh.
- public :: gruns_free       ! Release memory
- public :: gruns_anaddb
+ public :: gruns_free       ! Release memory.
+ public :: gruns_anaddb     ! Driver routine called in anaddb.
 !!***
 
 contains  !===========================================================
@@ -123,10 +124,11 @@ contains  !===========================================================
 
 type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ifc_free'
+#define ABI_FUNC 'gruns_new'
  use interfaces_14_hidewrite
 !End of the abilint section
 
@@ -226,7 +228,8 @@ end function gruns_new
 !!  qpt(3)=q-point in reduced coordinates.
 !!
 !! OUTPUT
-!!  phfrq(3*natom) = Gruneisen parameters
+!!  wvols(3*natom, nvols) =
+!!  gvals(3*natom)=Gruneisen parameters
 !!
 !! PARENTS
 !!
@@ -234,12 +237,13 @@ end function gruns_new
 !!
 !! SOURCE
 
-subroutine gruns_fourq(gruns, qpt, wv0, gvals)
+subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ifc_free'
+#define ABI_FUNC 'gruns_fourq'
 !End of the abilint section
 
  implicit none
@@ -249,14 +253,14 @@ subroutine gruns_fourq(gruns, qpt, wv0, gvals)
  type(gruns_t),intent(in) :: gruns
 !arrays
  real(dp),intent(in) :: qpt(3)
- real(dp),intent(out) :: wv0(gruns%natom3),gvals(gruns%natom3)
+ real(dp),intent(out) :: wvols(gruns%natom3,gruns%nvols),gvals(gruns%natom3),dwdq(3,gruns%natom3)
 
 !Local variables-------------------------------
 !scalars
  integer :: ivol,ii,natom3,nu
  real(dp) :: fact
 !arrays
- real(dp) :: wvols(gruns%natom3,gruns%nvols),dot(2)
+ real(dp) :: dot(2)
  real(dp) :: eigvec(2,gruns%natom3,gruns%natom3,gruns%nvols),d2cart(2,gruns%natom3,gruns%natom3,gruns%nvols)
  real(dp) :: dddv(2,gruns%natom3,gruns%natom3),displ_cart(2,gruns%natom3,gruns%natom3)
  real(dp) :: omat(2,gruns%natom3, gruns%natom3)
@@ -265,8 +269,14 @@ subroutine gruns_fourq(gruns, qpt, wv0, gvals)
 
  natom3 = gruns%natom3
  do ivol=1,gruns%nvols
-   call ifc_fourq(gruns%ifc_vol(ivol), gruns%cryst_vol(ivol), qpt, wvols(:,ivol), displ_cart, &
-                  out_d2cart=d2cart(:,:,:,ivol), out_eigvec=eigvec(:,:,:,ivol))
+   if (ivol == gruns%iv0) then
+     ! Compute group velocities as well
+     call ifc_fourq(gruns%ifc_vol(ivol), gruns%cryst_vol(ivol), qpt, wvols(:,ivol), displ_cart, &
+                    out_d2cart=d2cart(:,:,:,ivol), out_eigvec=eigvec(:,:,:,ivol), dwdq=dwdq)
+   else
+     call ifc_fourq(gruns%ifc_vol(ivol), gruns%cryst_vol(ivol), qpt, wvols(:,ivol), displ_cart, &
+                    out_d2cart=d2cart(:,:,:,ivol), out_eigvec=eigvec(:,:,:,ivol))
+   end if
 
    call massmult_and_breaksym(gruns%cryst_vol(ivol)%natom, gruns%cryst_vol(ivol)%ntypat, &
      gruns%cryst_vol(ivol)%typat, gruns%ifc_vol(ivol)%amu, d2cart(:,:,:,ivol))
@@ -276,7 +286,6 @@ subroutine gruns_fourq(gruns, qpt, wv0, gvals)
    !  write(std_out,*)"H|psi> - w**2 |psi>",maxval(abs(omat(:,:,nu) - wvols(nu,ivol) ** 2 * eigvec(:,:,nu,ivol)))
    !end do
  end do
- wv0 = wvols(:, gruns%iv0)
 
  ! Compute dD(q)/dV with finite difference.
  dddv = zero
@@ -289,10 +298,10 @@ subroutine gruns_fourq(gruns, qpt, wv0, gvals)
  ! Compute -volume/(2w(q)**2) <u(q)|dD(q)/dq|u(q)>
  call zgemm('N','N',natom3,natom3,natom3,cone,dddv,natom3,eigvec(:,:,:,gruns%iv0),natom3,czero,omat,natom3)
  do nu=1,natom3
-   if (abs(wv0(nu)) > tol12) then
+   if (abs(wvols(nu, gruns%iv0)) > tol12) then
      dot = cg_zdotc(natom3, eigvec(1,1,nu, gruns%iv0), omat(1,1,nu))
-     gvals(nu) = -gruns%v0 * dot(1) / (two * wv0(nu)**2)
-     write(std_out,*)gvals(nu)
+     gvals(nu) = -gruns%v0 * dot(1) / (two * wvols(nu, gruns%iv0)**2)
+     !write(std_out,*)gvals(nu)
    else
      gvals(nu) = zero
    end if
@@ -319,44 +328,74 @@ end subroutine gruns_fourq
 !!
 !! SOURCE
 
-subroutine gruns_qpath(gruns, qpath, comm)
+subroutine gruns_qpath(gruns, qpath, ncid, comm)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ifc_free'
+#define ABI_FUNC 'gruns_qpath'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: comm
+ integer,intent(in) :: ncid,comm
  type(gruns_t),intent(in) :: gruns
  type(kpath_t),intent(in) :: qpath
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: nprocs,my_rank,iqpt,ierr
+ integer :: nprocs,my_rank,iqpt,ierr,ncerr
 !arrays
- real(dp),allocatable :: gvals(:,:),wv0(:,:)
+ real(dp),allocatable :: gvals_qpath(:,:),wvols_qpath(:,:,:),dwdq_qpath(:,:,:)
 
 ! ************************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
- ABI_CALLOC(wv0, (gruns%natom3, qpath%npts))
- ABI_CALLOC(gvals, (gruns%natom3, qpath%npts))
+
+ ABI_CALLOC(wvols_qpath, (gruns%natom3, gruns%nvols, qpath%npts))
+ ABI_CALLOC(gvals_qpath, (gruns%natom3, qpath%npts))
+ ABI_CALLOC(dwdq_qpath, (3, gruns%natom3, qpath%npts))
 
  do iqpt=1,qpath%npts
    if (mod(iqpt, nprocs) /= my_rank) cycle ! mpi-parallelism
-   call gruns_fourq(gruns, qpath%points(:,iqpt), wv0(:,iqpt), gvals(:,iqpt))
+   call gruns_fourq(gruns, qpath%points(:,iqpt), wvols_qpath(:,:,iqpt), gvals_qpath(:,iqpt), dwdq_qpath(:,:,iqpt))
  end do
 
- call xmpi_sum(wv0, comm, ierr)
- call xmpi_sum(gvals, comm, ierr)
- ABI_FREE(wv0)
- ABI_FREE(gvals)
+ call xmpi_sum(wvols_qpath, comm, ierr)
+ call xmpi_sum(gvals_qpath, comm, ierr)
+ call xmpi_sum(dwdq_qpath, comm, ierr)
+
+#ifdef HAVE_NETCDF
+ if (my_rank == master .and. ncid /= nctk_noid) then
+   ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t("gruns_nvols", gruns%nvols), nctkdim_t("gruns_nqpath", qpath%npts), &
+     nctkdim_t('number_of_phonon_modes', gruns%natom3)], defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_arrays(ncid, [ &
+    nctkarr_t("gruns_qpath", "dp", "three, gruns_nqpath"), &
+    nctkarr_t("gruns_gvals_qpath", "dp", "number_of_phonon_modes, gruns_nqpath"), &
+    nctkarr_t("gruns_wvols_qpath", "dp", "number_of_phonon_modes, gruns_nvols, gruns_nqpath"), &
+    nctkarr_t("gruns_dwdq_qpath", "dp", "three, number_of_phonon_modes, gruns_nqpath") &
+   ])
+   NCF_CHECK(ncerr)
+
+   ! Write data.
+   NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_qpath"), qpath%points))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_gvals_qpath"), gvals_qpath))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_wvols_qpath"), wvols_qpath))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_dwdq_qpath"), dwdq_qpath))
+ end if
+#endif
+
+ ABI_FREE(wvols_qpath)
+ ABI_FREE(gvals_qpath)
+ ABI_FREE(dwdq_qpath)
 
 end subroutine gruns_qpath
 !!***
@@ -383,12 +422,13 @@ end subroutine gruns_qpath
 !!
 !! SOURCE
 
-subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, comm)
+subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, ncid, comm)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ifc_free'
+#define ABI_FUNC 'gruns_qmesh'
  use interfaces_14_hidewrite
 !End of the abilint section
 
@@ -396,7 +436,7 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nqshift,comm
+ integer,intent(in) :: nqshift,ncid,comm
  type(gruns_t),intent(in) :: gruns
 !arrays
  integer,intent(in) :: ngqpt(3)
@@ -405,15 +445,15 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,qptopt1=1,bcorr0=0
- integer :: nprocs,my_rank,iqibz,nqbz,nqibz,ierr,ii,nu
- real(dp) :: gavg
+ integer :: nprocs,my_rank,iqibz,nqbz,nqibz,ierr,ii,nu,ncerr,nomega,cnt
+ real(dp) :: gavg,omega_min,omega_max
  type(t_tetrahedron) :: tetra
  character(len=500) :: msg
 !arrays
  integer :: qptrlatt(3,3)
- real(dp),allocatable :: gvals(:,:),wv0(:,:)
+ real(dp),allocatable :: gvals_qibz(:,:),wvols_qibz(:,:,:),dwdq_qibz(:,:,:)
  real(dp),allocatable :: qibz(:,:),qbz(:,:),wtq(:)
- !real(dp),allocatable :: wdt(:,:),eig_dos(:,:)
+ real(dp),allocatable :: wdt(:,:),wdos(:,:),grdos(:,:),gr2dos(:,:),vdos(:,:),wibz(:)
 
 ! ************************************************************************
 
@@ -434,52 +474,94 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, comm)
  tetra = tetra_from_kptrlatt(gruns%cryst_vol(gruns%iv0), qptopt1, qptrlatt, nqshift, qshift, nqibz, qibz, msg, ierr)
  if (ierr /= 0) MSG_ERROR(msg)
 
- ABI_CALLOC(wv0, (gruns%natom3, nqibz))
- ABI_CALLOC(gvals, (gruns%natom3, nqibz))
+ ABI_CALLOC(wvols_qibz, (gruns%natom3, gruns%nvols, nqibz))
+ ABI_CALLOC(gvals_qibz, (gruns%natom3, nqibz))
+ ABI_CALLOC(dwdq_qibz, (3, gruns%natom3, nqibz))
 
  gavg = zero
  do iqibz=1,nqibz
    if (mod(iqibz, nprocs) /= my_rank) cycle ! mpi-parallelism
-   call gruns_fourq(gruns, qibz(:,iqibz), wv0(:,iqibz), gvals(:,iqibz))
-   gavg = gavg + wtq(iqibz) * sum(gvals(:,iqibz))
+   call gruns_fourq(gruns, qibz(:,iqibz), wvols_qibz(:,:,iqibz), gvals_qibz(:,iqibz), dwdq_qibz(:,:,iqibz))
+   gavg = gavg + wtq(iqibz) * sum(gvals_qibz(:,iqibz))
  end do
  gavg = gavg / gruns%natom3
 
  call xmpi_sum(gavg, comm, ierr)
- call xmpi_sum(wv0, comm, ierr)
- call xmpi_sum(gvals, comm, ierr)
+ call xmpi_sum(wvols_qibz, comm, ierr)
+ call xmpi_sum(gvals_qibz, comm, ierr)
+ call xmpi_sum(dwdq_qibz, comm, ierr)
 
-#if 0
- !ABI_MALLOC(wv0_ibz, (nqibz))
- !ABI_MALLOC(wdt, (nene, 2))
- !ABI_CALLOC(eig_dos, (nene, 2))
+ nomega = 250; omega_min = zero; omega_max = 0.001
+ ABI_MALLOC(wibz, (nqibz))
+ ABI_MALLOC(wdt, (nomega, 2))
+ ABI_CALLOC(wdos, (nomega, 2))
+ ABI_CALLOC(grdos, (nomega, 2))
+ ABI_CALLOC(gr2dos, (nomega, 2))
+ ABI_CALLOC(vdos, (nomega, 2))
 
- ! Accumulate total DOS.
+ ! Compute DOSes.
  cnt = 0
  do iqibz=1,nqibz
    do nu=1,gruns%natom3
-     cnt = cnt + 1
-     if (mod(cnt, nprocs) /= my_rank) cycle ! mpi-parallelism
-     wv0_ibz = wv0(nu,:)
-     !call tetra_get_onewk(tetra,iqibz,bcorr0,nene,nqibz,wv0_ibz,enemin,enemax,one,wdt)
-     !eig_dos = eig_dos + wdt
-     wv0_ibz = gvals(nu,:)
+     cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! mpi-parallelism
+     wibz = wvols_qibz(nu, gruns%iv0, :)
+     call tetra_get_onewk(tetra,iqibz,bcorr0,nomega,nqibz,wibz,omega_min,omega_max,one,wdt)
+     wdos = wdos + wdt
+     grdos = grdos + wdt * gvals_qibz(nu,iqibz)
+     gr2dos = gr2dos + wdt * gvals_qibz(nu,iqibz) ** 2
+     vdos = vdos + wdt * sqrt(sum(dwdq_qibz(1:3,nu,iqibz) ** 2))
    end do
  end do
- !ABI_FREE(wv0_ibz)
- !ABI_FREE(wdt)
- !ABI_FREE(eig_dos)
-#endif
+
+ call xmpi_sum(wdos, comm, ierr)
+ call xmpi_sum(grdos, comm, ierr)
+ call xmpi_sum(gr2dos, comm, ierr)
+ call xmpi_sum(vdos, comm, ierr)
+
+ ABI_FREE(wibz)
+ ABI_FREE(wdt)
+ ABI_FREE(wdos)
+ ABI_FREE(grdos)
+ ABI_FREE(gr2dos)
+ ABI_FREE(vdos)
 
  if (my_rank == master) then
+   call wrtout(std_out, sjoin(" Average Gruneisen parameter:", ftoa(gavg, fmt="f8.5")))
    call wrtout(ab_out, sjoin(" Average Gruneisen parameter:", ftoa(gavg, fmt="f8.5")))
  end if
+
+#ifdef HAVE_NETCDF
+ if (my_rank == master .and. ncid /= nctk_noid) then
+   ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t("gruns_nvols", gruns%nvols), nctkdim_t("gruns_nqibz", nqibz), &
+     nctkdim_t('number_of_phonon_modes', gruns%natom3)], defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_arrays(ncid, [ &
+    nctkarr_t("gruns_qibz", "dp", "three, gruns_nqibz"), &
+    nctkarr_t("gruns_wtq", "dp", "gruns_nqibz"), &
+    nctkarr_t("gruns_gvals_qibz", "dp", "number_of_phonon_modes, gruns_nqibz"), &
+    nctkarr_t("gruns_wvols_qibz", "dp", "number_of_phonon_modes, gruns_nvols, gruns_nqibz"), &
+    nctkarr_t("gruns_dwdq_qibz", "dp", "three, number_of_phonon_modes, gruns_nqibz") &
+   ])
+   NCF_CHECK(ncerr)
+
+   ! Write data.
+   NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_qibz"), qibz))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_wtq"), wtq))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_gvals_qibz"), gvals_qibz))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_wvols_qibz"), wvols_qibz))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_dwdq_qibz"), dwdq_qibz))
+ end if
+#endif
 
  ABI_FREE(qibz)
  ABI_FREE(wtq)
  ABI_FREE(qbz)
- ABI_FREE(wv0)
- ABI_FREE(gvals)
+ ABI_FREE(wvols_qibz)
+ ABI_FREE(gvals_qibz)
+ ABI_FREE(dwdq_qibz)
 
  call destroy_tetra(tetra)
 
@@ -493,6 +575,7 @@ end subroutine gruns_qmesh
 !!  gruns_free
 !!
 !! FUNCTION
+!!  Free dynamic memory.
 !!
 !! PARENTS
 !!
@@ -502,10 +585,11 @@ end subroutine gruns_qmesh
 
 subroutine gruns_free(gruns)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ifc_free'
+#define ABI_FUNC 'gruns_free'
 !End of the abilint section
 
  implicit none
@@ -551,6 +635,12 @@ end subroutine gruns_free
 !!  gruns_anaddb
 !!
 !! FUNCTION
+!!  Driver routine called in anaddb.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!  Only writing.
 !!
 !! PARENTS
 !!
@@ -558,12 +648,13 @@ end subroutine gruns_free
 !!
 !! SOURCE
 
-subroutine gruns_anaddb(inp, comm)
+subroutine gruns_anaddb(inp, prefix, comm)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ifc_free'
+#define ABI_FUNC 'gruns_anaddb'
  use interfaces_14_hidewrite
 !End of the abilint section
 
@@ -571,11 +662,13 @@ subroutine gruns_anaddb(inp, comm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
+ character(len=*),intent(in) :: prefix
  type(anaddb_dataset_type) :: inp
 
 !Local variables-------------------------------
 !scalars
- integer :: ii
+ integer,parameter :: master=0
+ integer :: ii,nprocs,my_rank,ncid
  real(dp) :: cpu,wall,gflops
  type(gruns_t) :: gruns
  type(kpath_t) :: qpath
@@ -583,31 +676,35 @@ subroutine gruns_anaddb(inp, comm)
 
 ! ************************************************************************
 
- call cwtime(cpu, wall, gflops, "start")
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
-#ifdef HAVE_NETCDF
- !NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_GRUNS.nc"), xmpi_comm_self), "Creating GRUNS.nc")
- !NCF_CHECK(crystal_ncwrite(cryst, ncid))
- !call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart)
- !NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")],defmode=.True.))
- !NCF_CHECK(nctk_set_datamode(ncid))
- !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'atomic_mass_units'), ddb%amu))
- !NCF_CHECK(nf90_close(ncid))
-#endif
+ call cwtime(cpu, wall, gflops, "start")
 
  gruns = gruns_new(inp%gruns_ddbs, inp, comm)
 
- ! Compute grunesein on the q-mesh
+ ncid = nctk_noid
+#ifdef HAVE_NETCDF
+ if (my_rank == master) then
+   NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_GRUNS.nc"), xmpi_comm_self), "Creating _GRUNS.nc")
+   NCF_CHECK(crystal_ncwrite(gruns%cryst_vol(gruns%iv0), ncid))
+   !call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart)
+   !NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")],defmode=.True.))
+   !NCF_CHECK(nctk_set_datamode(ncid))
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'atomic_mass_units'), ddb%amu))
+ end if
+#endif
+
+ ! Compute grunesein on q-mesh
  if (all(inp%ng2qpt /= 0)) then
-   call gruns_qmesh(gruns, inp%ng2qpt, 1, inp%q2shft, comm)
+   call gruns_qmesh(gruns, inp%ng2qpt, 1, inp%q2shft, ncid, comm)
  else
    MSG_WARNING("Cannot compute Grunesein parameters on q-mesh because ng2qpt == 0")
  end if
 
- ! Compute grunesein on the q-path
+ ! Compute grunesein on q-path
  if (inp%nqpath /= 0) then
    call kpath_init(qpath, inp%qpath, gruns%cryst_vol(gruns%iv0)%gprimd, inp%ndivsm)
-   call gruns_qpath(gruns, qpath, comm)
+   call gruns_qpath(gruns, qpath, ncid, comm)
    call kpath_free(qpath)
  else
    MSG_WARNING("Cannot compute Grunesein parameters on q-path because nqpath == 0")
@@ -615,9 +712,16 @@ subroutine gruns_anaddb(inp, comm)
 
  call gruns_free(gruns)
 
+#ifdef HAVE_NETCDF
+ if (my_rank == master) then
+   NCF_CHECK(nf90_close(ncid))
+ end if
+#endif
+
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')"gruns_anaddb completed. cpu:",cpu,", wall:",wall
  call wrtout(std_out, msg, do_flush=.True.)
+ stop
 
 end subroutine gruns_anaddb
 !!***

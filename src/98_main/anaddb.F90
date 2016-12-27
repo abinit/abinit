@@ -257,7 +257,7 @@ program anaddb
  end if
 
  ! Calculation of Grunesein parameters.
- if (inp%gruns_nddbs /= 0) call gruns_anaddb(inp, comm)
+ if (inp%gruns_nddbs /= 0) call gruns_anaddb(inp, filnam(2), comm)
 
 !**********************************************************************
 !**********************************************************************
@@ -419,6 +419,9 @@ program anaddb
 &     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,prtfreq=.True.)
    end if
 
+   ! Compute speed of sound.
+   call ifc_speedofsound(ifc, crystal, 0.01_dp, 10._dp, comm)
+
    !Print analysis of the real-space interatomic force constants
    if(inp%ifcout/=0)then
 #ifdef HAVE_NETCDF
@@ -428,14 +431,6 @@ program anaddb
 #endif
    end if
  end if
-
-!**********************************************************************
-!**********************************************************************
-
-!Short-Range/Long-Range decomposition of the phonon frequencies
-!if (inp%prtsrlr == 1) then
-!call wrtout(std_out,' anaddb    : start of the SR/LR decomposition ','COLL')
-!end if
 
 !**********************************************************************
 
