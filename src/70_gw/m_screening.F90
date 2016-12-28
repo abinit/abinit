@@ -2587,14 +2587,14 @@ subroutine lebedev_laikov_int()
  ABI_FREE(vz)
  ABI_FREE(ww)
 
- call init_lebedev_gridset()
+ !call init_lebedev_gridset()
  cplx_pars = RESHAPE(tensor,(/9/)); accuracy=tol10
 
  ! This is the function to be expanded evaluated on the lebedev_laikov grid of index leb_idx
  leb_idx=3; npts=lebedev_npts(leb_idx)
  ABI_MALLOC(ref_func,(npts))
  do ii=1,npts
-   cart_vpt = Lgridset(leb_idx)%versor(:,ii)
+   !cart_vpt = Lgridset(leb_idx)%versor(:,ii)
    ref_func(ii) = one/DOT_PRODUCT(cart_vpt,MATMUL(tensor,cart_vpt))
  end do
 
@@ -2612,7 +2612,7 @@ subroutine lebedev_laikov_int()
      write(std_out,*)ll,mm,ang_int
      !tmp_momenta(mm) = ang_int
      do ii=1,npts
-       cart_vpt = Lgridset(leb_idx)%versor(:,ii)
+       !cart_vpt = Lgridset(leb_idx)%versor(:,ii)
        expd_func(ii) = expd_func(ii) + four_pi*ang_int*ylmc(ll,mm,cart_vpt)
      end do
    end do
@@ -2629,7 +2629,6 @@ subroutine lebedev_laikov_int()
 
  ABI_FREE(expd_func)
  ABI_FREE(ref_func)
- call destroy_lebedev_gridset()
 
  MSG_ERROR("Exiting from lebedev_laikov_int")
 

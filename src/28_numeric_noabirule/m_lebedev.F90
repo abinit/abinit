@@ -31,6 +31,8 @@ MODULE m_lebedev
  use m_profiling_abi
  use m_errors
 
+ use m_fstrings,     only : sjoin, itoa
+
  implicit none
 
  private
@@ -38,31 +40,37 @@ MODULE m_lebedev
 
 !----------------------------------------------------------------------
 
-!!****t* m_lebedev/lebedev_grid_t
+!!****t* m_lebedev/lebedev_t
 !! NAME
-!! lebedev_grid_t
+!! lebedev_t
 !!
 !! FUNCTION
 !! Structure storing the knots and the weights of the lebedev-laikov grid.
 !!
 !! SOURCE
 
- type,public :: lebedev_grid_t
-   integer :: npts=0
-   real(dp),allocatable :: versor(:,:)
-   real(dp),allocatable :: weight(:)
- end type lebedev_grid_t
+ type,public :: lebedev_t
+
+   integer :: npts
+   ! Number of points in the grid
+
+   real(dp),allocatable :: versors(:,:)
+   ! versors(3, npts)
+   ! Points on the sphere.
+
+   real(dp),allocatable :: weights(:)
+   ! weights(npts)
+   ! weights for Spherical integration.
+
+ end type lebedev_t
+
+ public :: lebedev_new
+ public :: lebedev_free
 
 !----------------------------------------------------------------------
 
- integer,private,parameter :: lebedev_ngrids=32
+ integer,public,parameter :: lebedev_ngrids=32
  ! The number of grids available.
-
- logical,save,private :: gridset_is_init=.FALSE.
- ! Flag defining whether the set of angular grids have been already computed and stored.
-
- ! The set of grids stored here so that we do not have to recompute them for each integration.
- type(lebedev_grid_t),save,public :: Lgridset(lebedev_ngrids)
 
  ! The number of points in each grid.
  integer,public,parameter :: lebedev_npts(lebedev_ngrids)=(/ &
@@ -99,32 +107,21 @@ MODULE m_lebedev
 5294,&
 5810/)
 
- public :: init_lebedev_gridset       ! Calculate and save the 32 angular grids.
- public :: destroy_lebedev_gridset    ! Free the grids stored in this module.
- !public :: lebedev_quadrature        ! Integrate a given function on the sphere.
- public :: m_lebedev_is_init          ! Returns true if lebedev-laikov grids are already stored and computed.
- public :: build_lebedev_grid
-
- ! commented because it causes problems to the new version of abilint
- !interface lebedev_quadrature
- !  module procedure lebedev_quadrature_cplx
- !end interface lebedev_quadrature
-
-CONTAINS  !===========================================================
+contains  !===========================================================
 !!***
 
-!!****f* m_lebedev/init_lebedev_grid
+!!****f* m_lebedev/lebedev_new
 !! NAME
-!!  init_lebedev_grid
+!!  lebedev_new
 !!
 !! FUNCTION
-!!  Initialize a lebedev grid.
+!!  Create a lebedev grid.
 !!
 !! INPUTS
 !!  seq_idx=Sequential index comprised between 1 and 32 defining the order of the mesh.
 !!
 !! OUTPUT
-!!  Lgrid<lebedev_grid_t>=The grid fully initialized.
+!!  Lgrid<lebedev_t>=The grid fully initialized.
 !!
 !! PARENTS
 !!      m_lebedev
@@ -134,13 +131,13 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 
-subroutine init_lebedev_grid(Lgrid,seq_idx)
+type(lebedev_t) function lebedev_new(seq_idx) result(new)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'init_lebedev_grid'
+#define ABI_FUNC 'lebedev_new'
 !End of the abilint section
 
  implicit none
@@ -148,53 +145,40 @@ subroutine init_lebedev_grid(Lgrid,seq_idx)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'init_lebedev_grid'
+#define ABI_FUNC 'lebedev_new'
 !End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: seq_idx
- type(lebedev_grid_t),intent(out) :: Lgrid
 
 !Local variables-------------------------------
- integer :: npts,ii
+ integer :: ii
  real(dp),allocatable :: xx(:),yy(:),zz(:)
 ! *********************************************************************
 
- if (seq_idx<1.or.seq_idx>lebedev_ngrids) then
-   MSG_ERROR("seq_idx out of range")
- end if
+ call build_lebedev_grid(seq_idx,new%npts,xx,yy,zz,new%weights)
 
- npts = lebedev_npts(seq_idx)
- ABI_MALLOC(xx,(npts))
- ABI_MALLOC(yy,(npts))
- ABI_MALLOC(zz,(npts))
- ABI_MALLOC(Lgrid%weight,(npts))
-
- call build_lebedev_grid(seq_idx,xx,yy,zz,Lgrid%weight)
-
- Lgrid%npts = lebedev_npts(seq_idx)
- ABI_MALLOC(Lgrid%versor,(3,Lgrid%npts))
-
- do ii=1,Lgrid%npts
-   Lgrid%versor(:,ii) = (/xx(ii),yy(ii),zz(ii)/)
+ ABI_MALLOC(new%versors,(3,new%npts))
+ do ii=1,new%npts
+   new%versors(:,ii) = [xx(ii),yy(ii),zz(ii)]
  end do
 
  ABI_FREE(xx)
  ABI_FREE(yy)
  ABI_FREE(zz)
 
-end subroutine init_lebedev_grid
+end function lebedev_new
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_lebedev/destroy_lebedev_grid
+!!****f* m_lebedev/lebedev_free
 !! NAME
-!!  destroy_lebedev_grid
+!!  lebedev_free
 !!
 !! FUNCTION
-!!  Free an instance of lebedev_grid_t
+!!  Free an instance of lebedev_t
 !!
 !! PARENTS
 !!      m_lebedev
@@ -204,13 +188,13 @@ end subroutine init_lebedev_grid
 !!
 !! SOURCE
 
-subroutine destroy_lebedev_grid(Lgrid)
+subroutine lebedev_free(lgrid)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'destroy_lebedev_grid'
+#define ABI_FUNC 'lebedev_free'
 !End of the abilint section
 
  implicit none
@@ -218,164 +202,24 @@ subroutine destroy_lebedev_grid(Lgrid)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'destroy_lebedev_grid'
+#define ABI_FUNC 'lebedev_free'
 !End of the abilint section
 
 !Arguments ------------------------------------
 !scalars
- type(lebedev_grid_t),intent(inout) :: Lgrid
+ type(lebedev_t),intent(inout) :: lgrid
 
 ! *********************************************************************
 
- Lgrid%npts=0
- if (allocated(Lgrid%versor)) then
-   ABI_FREE(Lgrid%versor)
+ lgrid%npts=0
+ if (allocated(lgrid%versors)) then
+   ABI_FREE(lgrid%versors)
  end if
- if (allocated(Lgrid%weight)) then
-   ABI_FREE(Lgrid%weight)
- end if
-
-end subroutine destroy_lebedev_grid
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_lebedev/init_lebedev_gridset
-!! NAME
-!!  init_lebedev_gridset
-!!
-!! FUNCTION
-!!  Initialize the 32 lebedev-laikov angular grids.
-!!
-!! SIDE EFFECTS
-!!  Lgridset(1:32) are initialized and saved in this module.
-!!
-!! PARENTS
-!!      m_screening
-!!
-!! CHILDREN
-!!      gen_oh
-!!
-!! SOURCE
-
-subroutine init_lebedev_gridset()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_lebedev_gridset'
-!End of the abilint section
-
- implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'init_lebedev_gridset'
-!End of the abilint section
-
-!Local variables-------------------------------
- integer :: igr
-! *********************************************************************
-
- if (.not.gridset_is_init) then
-   do igr=1,lebedev_ngrids
-     call init_lebedev_grid(Lgridset(igr),igr)
-   end do
-   gridset_is_init=.TRUE.
+ if (allocated(lgrid%weights)) then
+   ABI_FREE(lgrid%weights)
  end if
 
-end subroutine init_lebedev_gridset
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_lebedev/destroy_lebedev_gridset
-!! NAME
-!!  destroy_lebedev_gridset
-!!
-!! FUNCTION
-!!  Free the set of grids stored in this module.
-!!
-!! PARENTS
-!!      m_screening
-!!
-!! CHILDREN
-!!      gen_oh
-!!
-!! SOURCE
-
-subroutine destroy_lebedev_gridset()
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_lebedev_gridset'
-!End of the abilint section
-
- implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'destroy_lebedev_gridset'
-!End of the abilint section
-
-!Local variables-------------------------------
- integer :: igr
-! *********************************************************************
-
- if (gridset_is_init) then
-   do igr=1,lebedev_ngrids
-     call destroy_lebedev_grid(Lgridset(igr))
-   end do
-   gridset_is_init=.FALSE.
- end if
-
-end subroutine destroy_lebedev_gridset
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_lebedev/m_lebedev_is_init
-!! NAME
-!!  m_lebedev_is_init
-!!
-!! FUNCTION
-!!  Returns true if lebedev-laikov grids are already stored and computed.
-!!
-!! SOURCE
-
-function m_lebedev_is_init() result(ans)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'm_lebedev_is_init'
-!End of the abilint section
-
- implicit none
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'm_lebedev_is_init'
-!End of the abilint section
-
-!Local variables-------------------------------
- logical :: ans
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-!End of the abilint section
-! *********************************************************************
-
- ans = gridset_is_init
-
-end function m_lebedev_is_init
+end subroutine lebedev_free
 !!***
 
 !----------------------------------------------------------------------
@@ -392,8 +236,9 @@ end function m_lebedev_is_init
 !!  seq_idx=sequential index (must be in [1,32]
 !!
 !! OUTPUT
-!!  xx(:),yy(:),zz(:)=The Cartesian coordinates of the knots.
-!!  ww(:)=The weights.
+!!  npts=Number of points
+!!  xx(npts),yy(npts),zz(npts)=The Cartesian coordinates of the knots.
+!!  ww(npts)=The weights.
 !!
 !! PARENTS
 !!      m_lebedev
@@ -403,8 +248,7 @@ end function m_lebedev_is_init
 !!
 !! SOURCE
 
-subroutine build_lebedev_grid(seq_idx,xx,yy,zz,ww)
-
+subroutine build_lebedev_grid(seq_idx, npts, xx, yy, zz, ww)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -423,20 +267,22 @@ subroutine build_lebedev_grid(seq_idx,xx,yy,zz,ww)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: seq_idx
- real(dp) :: xx(:),yy(:),zz(:),ww(:)
+ integer,intent(out) :: npts
+ real(dp),allocatable,intent(out) :: xx(:),yy(:),zz(:),ww(:)
 
-!Local variables-------------------------------
- integer :: npts,ii
- character(len=500) :: msg
 ! *********************************************************************
 
- ii = assert_eq(SIZE(xx),SIZE(yy),SIZE(zz),SIZE(ww),"Wrong size")
- if (ii /= lebedev_npts(seq_idx)) then
-   MSG_ERROR("wrong size in xx,yy,zz,ww")
+ if (seq_idx<1 .or. seq_idx > lebedev_ngrids) then
+   MSG_ERROR(sjoin("seq_idx ",itoa(seq_idx), "out of range"))
  end if
 
- SELECT CASE (seq_idx)
+ npts = lebedev_npts(seq_idx)
+ ABI_MALLOC(xx, (npts))
+ ABI_MALLOC(yy, (npts))
+ ABI_MALLOC(zz, (npts))
+ ABI_MALLOC(ww, (npts))
 
+ SELECT CASE (seq_idx)
  CASE (1)
    call LD0006(xx,yy,zz,ww,npts)
  CASE (2)
@@ -501,118 +347,14 @@ subroutine build_lebedev_grid(seq_idx,xx,yy,zz,ww)
    call LD5294(xx,yy,zz,ww,npts)
  CASE (32)
    call LD5810(xx,yy,zz,ww,npts)
-
  CASE DEFAULT
-   write(msg,'(a,i0)')"Wrong value for seq_idx: ",seq_idx
-   MSG_ERROR(msg)
+   MSG_ERROR(sjoin("seq_idx ", itoa(seq_idx), "out of range"))
  END SELECT
 
 end subroutine build_lebedev_grid
 !!***
 
 !----------------------------------------------------------------------
-
-!!!!****f* m_lebedev/lebedev_quadrature
-!!!! NAME
-!!!!  lebedev_quadrature
-!!!!
-!!!! FUNCTION
-!!!!  Perform the integration of the complex function cplx_func on the sphere
-!!!!  using lebedev-laikov angular grid in Cartesian coordinates.
-!!!!  The routine improves the resolution of the grid until the required accuracy is reached
-!!!!
-!!!! INPUTS
-!!!!  cplx_func(external)=Tthe function to be integrated
-!!!!  int_pars(:)=integer parameter passed to cplx_func.
-!!!!  real_pars(:)=real parameter passed to cplx_func.
-!!!!  cplx_pars(:)=complex parameter passed to cplx_func.
-!!!!  [accuracy]=fractional accuracy required. tol12 if not specified.
-!!!!
-!!!! OUTPUT
-!!!!  quad=The integral 1/(4\pi) \int_\Omega func(\Omega) d\Omega
-!!!!  ierr=0 if the quadrature converged.
-!!!!
-!!!! NOTES
-!!!!   commented because it causes problems to the new version of abilint
-!!!!   Should work
-!!!!
-!!!! PARENTS
-!!!!
-!!!! CHILDREN
-!!!!
-!!!! SOURCE
-
-!!!!    subroutine lebedev_quadrature_cplx(cplx_func,int_pars,real_pars,cplx_pars,quad,ierr,accuracy)
-!!!!
-!!!!     use defs_basis
-!!!!
-!!!!    !Arguments ------------------------------------
-!!!!    !scalars
-!!!!
-!!!!    !This section has been created automatically by the script Abilint (TD).
-!!!!    !Do not modify the following lines by hand.
-!!!!    #undef ABI_FUNC
-!!!!    #define ABI_FUNC 'lebedev_quadrature_cplx'
-!!!!    !End of the abilint section
-!!!!
-!!!!     integer,intent(out) :: ierr
-!!!!     real(dp),optional,intent(in) :: accuracy
-!!!!     complex(dpc),intent(out) :: quad
-!!!!    !arrays
-!!!!     integer,intent(in) :: int_pars(:)
-!!!!     real(dp),intent(in) :: real_pars(:)
-!!!!     complex(dpc),intent(in) :: cplx_pars(:)
-!!!!     !complex(dpc) :: cplx_func
-!!!!
-!!!!     interface
-!!!!       function cplx_func(vers,int_pars,real_pars,cplx_pars)
-!!!!         use defs_basis
-!!!!         real(dp),intent(in) :: vers(3)
-!!!!         integer,intent(in) :: int_pars(:)
-!!!!         real(dp),intent(in) :: real_pars(:)
-!!!!         complex(dpc),intent(in) :: cplx_pars(:)
-!!!!         complex(dpc) ::  cplx_func ! abilint removes this line thus causing a compilation error
-!!!!       end function cplx_func       ! for the time being, double complex is used to have the correct interface.
-!!!!     end interface
-!!!!
-!!!!    !Local variables-------------------------------
-!!!!    !scalars
-!!!!     integer :: igr,ipt
-!!!!     real(dp) :: EPS,TOL
-!!!!     complex(dpc) :: old_quad,abs_err
-!!!!     character(len=500) :: msg
-!!!!    !arrays
-!!!!     real(dp) :: vers(3)
-!!!!    ! *************************************************************************
-!!!!
-!!!!     ierr=0; TOL=tol12; EPS=tol6; if (PRESENT(accuracy)) EPS=accuracy
-!!!!
-!!!!     do igr=1,lebedev_ngrids
-!!!!       quad = czero
-!!!!       do ipt=1,Lgridset(igr)%npts
-!!!!         vers = Lgridset(igr)%versor(:,ipt)
-!!!!         quad = quad + cplx_func(vers,int_pars,real_pars,cplx_pars) * Lgridset(igr)%weight(ipt)
-!!!!       end do
-!!!!       !write(std_out,'(a,i2,a,2es14.6)')" Lebedeb-Laikov grid # ",igr," quad= ",quad
-!!!!       if (igr>1) then
-!!!!          if (ABS(quad-old_quad)<EPS*ABS(old_quad).or.(ABS(quad)<TOL.and.ABS(old_quad)<TOL)) RETURN
-!!!!       end if
-!!!!       abs_err = quad-old_quad
-!!!!       old_quad = quad
-!!!!     end do
-!!!!
-!!!!     if (ABS(abs_err)<EPS*ABS(old_quad).or.(ABS(quad)<TOL.and.ABS(old_quad)<TOL)) then
-!!!!       write(msg,'(2(a,es14.6),a,2(a,2es14.6))')&
-!!!!    &    " Results are not converged within the given accuracy. EPS= ",EPS,"; TOL= ",TOL,ch10,&
-!!!!    &    " Estimated absolute error= ",abs_err,"; relative error= ",abs_err/(ABS(quad)+tol16)
-!!!!       MSG_WARNING(msg)
-!!!!       ierr = -1
-!!!!     end if
-!!!!
-!!!!    end subroutine lebedev_quadrature_cplx
-!!!!    !!***
-!!!!    !----------------------------------------------------------------------
-
 
 !!****f* m_lebedev/gen_oh
 !! NAME

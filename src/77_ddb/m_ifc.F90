@@ -982,13 +982,13 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ii,nu,npts,igrid,my_rank,nprocs,ierr,converged
+ integer :: ii,nu,igrid,my_rank,nprocs,ierr,converged,npts
  character(len=500) :: msg
+ type(lebedev_t) :: lgrid
 !arrays
  real(dp) :: qpt(3),quad(3),prev_quad(3),vs(4,3)
  real(dp) :: phfrqs(3*crystal%natom),dwdq(3,3*crystal%natom)
  real(dp) :: eigvec(2,3*crystal%natom,3*crystal%natom),displ_cart(2,3*crystal%natom,3*crystal%natom)
- real(dp),allocatable :: xx(:),yy(:),zz(:),ww(:)
 
 ! *********************************************************************
 
@@ -1009,38 +1009,30 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
 
  ! Compute Spherical average with Lebedev-Laikov grid.
  converged = 0
- do igrid=1,32
-   npts = lebedev_npts(igrid)
-   ABI_MALLOC(xx, (npts))
-   ABI_MALLOC(yy, (npts))
-   ABI_MALLOC(zz, (npts))
-   ABI_MALLOC(ww, (npts))
-
-   call build_lebedev_grid(igrid, xx, yy, zz, ww)
+ do igrid=1,lebedev_ngrids
+   lgrid = lebedev_new(igrid)
+   npts = lgrid%npts
    quad = zero
-   do ii=1,npts
+   do ii=1,lgrid%npts
      if (mod(ii, nprocs) /= my_rank) cycle ! mpi-parallelism
      ! Build q-point on sphere of radius qrad
-     qpt = two_pi * matmul(crystal%gprimd, [xx(ii), yy(ii), zz(ii)])
+     qpt = two_pi * matmul(crystal%gprimd, lgrid%versors(:, ii))
      qpt = qrad * qpt / normv(qpt, crystal%gmet, "G")
      call ifc_fourq(ifc, crystal, qpt, phfrqs, displ_cart, out_eigvec=eigvec, dwdq=dwdq)
 
      do nu=1,3
-       quad(nu) = quad(nu) + ww(ii) * sqrt(sum(dwdq(1:3,nu) ** 2))
-       !quad(nu) = quad(nu) + ww(ii)
+       quad(nu) = quad(nu) + lgrid%weights(ii) * sqrt(sum(dwdq(1:3,nu) ** 2))
+       !quad(nu) = quad(nu) + lgrid%weights(ii)
      end do
    end do
 
    quad = quad * Bohr_meter / Time_Sec
    call xmpi_sum(quad, comm, ierr)
-
-   ABI_FREE(xx)
-   ABI_FREE(yy)
-   ABI_FREE(zz)
-   ABI_FREE(ww)
+   call lebedev_free(lgrid)
 
    write(std_out,'(2(a,i6),a,3es12.4,a,es12.4)')&
      " Lebedeb-Laikov grid: ",igrid," npts: ", npts, " quad: ",quad, " <vs>: ",sum(quad)/3
+
    if (igrid > 1) then
      if (abs(sum(quad - prev_quad)/3) < atol_ms) then
         converged = converged + 1
