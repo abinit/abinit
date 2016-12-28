@@ -420,7 +420,8 @@ program anaddb
    end if
 
    ! Compute speed of sound.
-   call ifc_speedofsound(ifc, crystal, 0.01_dp, 10._dp, comm)
+   !call ifc_speedofsound(ifc, crystal, 0.001_dp, 10._dp, comm)
+   !call ifc_speedofsound(ifc, crystal, 0.0001_dp, 10._dp, comm)
 
    !Print analysis of the real-space interatomic force constants
    if(inp%ifcout/=0)then

@@ -45,7 +45,7 @@ MODULE m_gruneisen
  use m_io_tools,            only : get_unit
  use m_time,                only : cwtime
  use m_fstrings,            only : sjoin, itoa, ltoa, ftoa, strcat
- use m_numeric_tools,       only : central_finite_diff
+ use m_numeric_tools,       only : central_finite_diff, arth
  use m_kpts,                only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt
  use m_bz_mesh,             only : kpath_t, kpath_init, kpath_free
  use m_anaddb_dataset,      only : anaddb_dataset_type
@@ -61,9 +61,8 @@ MODULE m_gruneisen
 !! gruns_t
 !!
 !! FUNCTION
-!!  Contains the necessary data to interpolate the
-!!  phonon bandstructure and eigenvectors in reciprocal space (ie.
-!!  interatomic force constants and corresponding real space grid info).
+!!  Contains the interatomic force constants for different volumes.
+!!  Provides methods to compute phonon bandstructures and gruneisen parameters.
 !!
 !! SOURCE
 
@@ -115,6 +114,7 @@ contains  !===========================================================
 !!  gruns_new
 !!
 !! FUNCTION
+!!  Construct new object from a list of DDB files.
 !!
 !! PARENTS
 !!
@@ -223,6 +223,7 @@ end function gruns_new
 !!  gruns_fourq
 !!
 !! FUNCTION
+!!  Compute grunesein parameters at an arbitrary q-point.
 !!
 !! INPUTS
 !!  qpt(3)=q-point in reduced coordinates.
@@ -317,6 +318,7 @@ end subroutine gruns_fourq
 !!  gruns_qpath
 !!
 !! FUNCTION
+!!  Compute gruneisen parameters and group velocities on a q-path
 !!
 !! INPUTS
 !!
@@ -407,6 +409,7 @@ end subroutine gruns_qpath
 !!  gruns_qmesh
 !!
 !! FUNCTION
+!!  Compute gruneisen parameters and group velocities on a q-mesh.
 !!
 !! INPUTS
 !!  ngqpt(3)=q-mesh divisions
@@ -446,14 +449,15 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, ncid, comm)
 !scalars
  integer,parameter :: master=0,qptopt1=1,bcorr0=0
  integer :: nprocs,my_rank,iqibz,nqbz,nqibz,ierr,ii,nu,ncerr,nomega,cnt
- real(dp) :: gavg,omega_min,omega_max
+ real(dp) :: gavg,omega_min,omega_max,v2
  type(t_tetrahedron) :: tetra
  character(len=500) :: msg
 !arrays
  integer :: qptrlatt(3,3)
  real(dp),allocatable :: gvals_qibz(:,:),wvols_qibz(:,:,:),dwdq_qibz(:,:,:)
  real(dp),allocatable :: qibz(:,:),qbz(:,:),wtq(:)
- real(dp),allocatable :: wdt(:,:),wdos(:,:),grdos(:,:),gr2dos(:,:),vdos(:,:),wibz(:)
+ real(dp),allocatable :: wdt(:,:),wdos(:,:),grdos(:,:),gr2dos(:,:),wibz(:),omega_mesh(:)
+ real(dp),allocatable :: vdos(:,:),v2dos(:,:)
 
 ! ************************************************************************
 
@@ -491,12 +495,17 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, ncid, comm)
  call xmpi_sum(gvals_qibz, comm, ierr)
  call xmpi_sum(dwdq_qibz, comm, ierr)
 
- nomega = 250; omega_min = zero; omega_max = 0.001
+ nomega = 500
+ omega_min = zero; omega_max = 0.002
+ !nomega = nint((omega_max - omega_min) / omega_step) + 1
+ ABI_MALLOC(omega_mesh, (nomega))
+ omega_mesh = arth(omega_min, (omega_max-omega_min) / (nomega - 1), nomega)
  ABI_MALLOC(wibz, (nqibz))
  ABI_MALLOC(wdt, (nomega, 2))
  ABI_CALLOC(wdos, (nomega, 2))
  ABI_CALLOC(grdos, (nomega, 2))
  ABI_CALLOC(gr2dos, (nomega, 2))
+ ABI_CALLOC(v2dos, (nomega, 2))
  ABI_CALLOC(vdos, (nomega, 2))
 
  ! Compute DOSes.
@@ -509,21 +518,17 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, ncid, comm)
      wdos = wdos + wdt
      grdos = grdos + wdt * gvals_qibz(nu,iqibz)
      gr2dos = gr2dos + wdt * gvals_qibz(nu,iqibz) ** 2
-     vdos = vdos + wdt * sqrt(sum(dwdq_qibz(1:3,nu,iqibz) ** 2))
+     v2 = sum(dwdq_qibz(1:3,nu,iqibz) ** 2)
+     v2dos = v2dos + wdt * v2
+     vdos = vdos + wdt * sqrt(v2)
    end do
  end do
 
  call xmpi_sum(wdos, comm, ierr)
  call xmpi_sum(grdos, comm, ierr)
  call xmpi_sum(gr2dos, comm, ierr)
+ call xmpi_sum(v2dos, comm, ierr)
  call xmpi_sum(vdos, comm, ierr)
-
- ABI_FREE(wibz)
- ABI_FREE(wdt)
- ABI_FREE(wdos)
- ABI_FREE(grdos)
- ABI_FREE(gr2dos)
- ABI_FREE(vdos)
 
  if (my_rank == master) then
    call wrtout(std_out, sjoin(" Average Gruneisen parameter:", ftoa(gavg, fmt="f8.5")))
@@ -534,7 +539,8 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, ncid, comm)
  if (my_rank == master .and. ncid /= nctk_noid) then
    ncerr = nctk_def_dims(ncid, [ &
      nctkdim_t("gruns_nvols", gruns%nvols), nctkdim_t("gruns_nqibz", nqibz), &
-     nctkdim_t('number_of_phonon_modes', gruns%natom3)], defmode=.True.)
+     nctkdim_t('number_of_phonon_modes', gruns%natom3), &
+     nctkdim_t('gruns_nomega', nomega)], defmode=.True.)
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_arrays(ncid, [ &
@@ -542,7 +548,13 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, ncid, comm)
     nctkarr_t("gruns_wtq", "dp", "gruns_nqibz"), &
     nctkarr_t("gruns_gvals_qibz", "dp", "number_of_phonon_modes, gruns_nqibz"), &
     nctkarr_t("gruns_wvols_qibz", "dp", "number_of_phonon_modes, gruns_nvols, gruns_nqibz"), &
-    nctkarr_t("gruns_dwdq_qibz", "dp", "three, number_of_phonon_modes, gruns_nqibz") &
+    nctkarr_t("gruns_dwdq_qibz", "dp", "three, number_of_phonon_modes, gruns_nqibz"), &
+    nctkarr_t("gruns_omega_mesh", "dp", "gruns_nomega"), &
+    nctkarr_t("gruns_wdos", "dp", "gruns_nomega, two"), &
+    nctkarr_t("gruns_grdos", "dp", "gruns_nomega, two"), &
+    nctkarr_t("gruns_gr2dos", "dp", "gruns_nomega, two"), &
+    nctkarr_t("gruns_v2dos", "dp", "gruns_nomega, two"), &
+    nctkarr_t("gruns_vdos", "dp", "gruns_nomega, two") &
    ])
    NCF_CHECK(ncerr)
 
@@ -553,6 +565,12 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, ncid, comm)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_gvals_qibz"), gvals_qibz))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_wvols_qibz"), wvols_qibz))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_dwdq_qibz"), dwdq_qibz))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_omega_mesh"), omega_mesh))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_wdos"), wdos))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_grdos"), grdos))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_gr2dos"), gr2dos))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_v2dos"), v2dos))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_vdos"), vdos))
  end if
 #endif
 
@@ -562,6 +580,14 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, ncid, comm)
  ABI_FREE(wvols_qibz)
  ABI_FREE(gvals_qibz)
  ABI_FREE(dwdq_qibz)
+ ABI_FREE(omega_mesh)
+ ABI_FREE(wibz)
+ ABI_FREE(wdt)
+ ABI_FREE(wdos)
+ ABI_FREE(grdos)
+ ABI_FREE(gr2dos)
+ ABI_FREE(v2dos)
+ ABI_FREE(vdos)
 
  call destroy_tetra(tetra)
 
@@ -635,7 +661,7 @@ end subroutine gruns_free
 !!  gruns_anaddb
 !!
 !! FUNCTION
-!!  Driver routine called in anaddb.
+!!  Driver routine called in anaddb for the computation of gruneisen parameters.
 !!
 !! INPUTS
 !!
@@ -668,7 +694,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ii,nprocs,my_rank,ncid
+ integer :: ii,nprocs,my_rank,ncid,iv0
  real(dp) :: cpu,wall,gflops
  type(gruns_t) :: gruns
  type(kpath_t) :: qpath
@@ -681,12 +707,13 @@ subroutine gruns_anaddb(inp, prefix, comm)
  call cwtime(cpu, wall, gflops, "start")
 
  gruns = gruns_new(inp%gruns_ddbs, inp, comm)
+ iv0 = gruns%iv0
 
  ncid = nctk_noid
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_GRUNS.nc"), xmpi_comm_self), "Creating _GRUNS.nc")
-   NCF_CHECK(crystal_ncwrite(gruns%cryst_vol(gruns%iv0), ncid))
+   NCF_CHECK(crystal_ncwrite(gruns%cryst_vol(iv0), ncid))
    !call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart)
    !NCF_CHECK(nctk_def_arrays(ncid, [nctkarr_t('atomic_mass_units', "dp", "number_of_atom_species")],defmode=.True.))
    !NCF_CHECK(nctk_set_datamode(ncid))
@@ -694,7 +721,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
  end if
 #endif
 
- ! Compute grunesein on q-mesh
+ ! Compute grunesein parameters on q-mesh
  if (all(inp%ng2qpt /= 0)) then
    call gruns_qmesh(gruns, inp%ng2qpt, 1, inp%q2shft, ncid, comm)
  else
@@ -703,12 +730,14 @@ subroutine gruns_anaddb(inp, prefix, comm)
 
  ! Compute grunesein on q-path
  if (inp%nqpath /= 0) then
-   call kpath_init(qpath, inp%qpath, gruns%cryst_vol(gruns%iv0)%gprimd, inp%ndivsm)
+   call kpath_init(qpath, inp%qpath, gruns%cryst_vol(iv0)%gprimd, inp%ndivsm)
    call gruns_qpath(gruns, qpath, ncid, comm)
    call kpath_free(qpath)
  else
    MSG_WARNING("Cannot compute Grunesein parameters on q-path because nqpath == 0")
  end if
+
+ !call ifc_speedofsound(gruns%ifc_vol(iv0), gruns%cryst_vol(iv0), qrad, atol_ms, comm)
 
  call gruns_free(gruns)
 

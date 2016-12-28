@@ -79,9 +79,6 @@ MODULE m_ifc
    integer :: mpert
      ! Maximum number of ipert.
 
-   !integer :: ifcflag
-   ! 0 if Fourier interpolation should not be used, 1 otherwise
-
    integer :: asr
      ! Option for the treatment of the Acoustic Sum Rule.
 
@@ -179,7 +176,7 @@ MODULE m_ifc
  public :: ifc_init          ! Constructor
  public :: ifc_free          ! Release memory
  public :: ifc_fourq         ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
- public :: ifc_speedofsound  !
+ public :: ifc_speedofsound  ! Compute the speed of sound by averaging phonon group velocities.
  public :: ifc_print         ! Print the ifc (output, netcdf and text file)
  public :: ifc_outphbtrap    ! Print out phonon frequencies on regular grid for BoltzTrap code.
  public :: ifc_printbxsf     ! Output phonon isosurface in Xcrysden format.
@@ -943,7 +940,7 @@ end subroutine ifc_get_dwdq
 !! ifc_speedofsound
 !!
 !! FUNCTION
-!!  Calculate the speed of sound by averaging the group velocities of the
+!!  Calculate the speed of sound by averaging the phonon group velocities of the
 !!  three acoustic modes on a small sphere of radius qrad centered around Gamma.
 !!  Perform spherical integration with Lebedev-Laikov grids
 !!
@@ -969,6 +966,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_print'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -987,8 +985,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
  integer :: ii,nu,npts,igrid,my_rank,nprocs,ierr,converged
  character(len=500) :: msg
 !arrays
- real(dp) :: qpt(3),quad(3),prev_quad(3)
- real(dp) :: vs(4,3)
+ real(dp) :: qpt(3),quad(3),prev_quad(3),vs(4,3)
  real(dp) :: phfrqs(3*crystal%natom),dwdq(3,3*crystal%natom)
  real(dp) :: eigvec(2,3*crystal%natom,3*crystal%natom),displ_cart(2,3*crystal%natom,3*crystal%natom)
  real(dp),allocatable :: xx(:),yy(:),zz(:),ww(:)
@@ -996,6 +993,8 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ if (ifc%asr == 0) MSG_WARNING("Computing speed of sound with asr == 0! Use asr > 0")
 
  do ii=1,3
    qpt = zero; qpt(ii) = one
@@ -1056,13 +1055,14 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
 
  if (my_rank == master) then
    do ii=1,3
-     write(std_out,"(a,3es12.4,a,i1)")" Speed of sound:",vs(ii,:)," [m/s] along reduced direction ",ii
+     write(std_out,"(a,3es12.4,a,i1)")" Speed of sound:",vs(ii,:)," [m/s] along reduced direction: ",ii
    end do
    write(std_out,'(2(a,es12.4),a,i0)')&
-     " Lebedev-Laikov integration with qrad: ", qrad, " atols_ms: ",atol_ms, " [m/s], npts: ", npts
+     " Lebedev-Laikov integration with qradius: ", qrad, " atol_ms: ",atol_ms, " [m/s], npts: ", npts
    write(std_out,"(a,3es12.4,a,es12.4)")" Spherical average:",vs(4,:)," [m/s], ",sum(vs(4,:))/3
    if (converged /= 2) then
      write(msg,'(a,es12.4,a)')" Results are not converged within: ",atol_ms, " [m/s]"
+     call wrtout(ab_out, msg)
      MSG_WARNING(msg)
    end if
  end if

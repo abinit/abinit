@@ -25,7 +25,7 @@
 #include "abi_common.h"
 
 module m_ewald
-    
+
  use defs_basis
  use m_profiling_abi
  use m_errors
@@ -41,7 +41,7 @@ module m_ewald
  public :: ewald9   ! Compute ewald contribution to the dynamical matrix, at a given
                     ! q wavevector, including anisotropic dielectric tensor and effective charges
 
-contains 
+contains
 !!***
 
 !!****f* m_ewald/ewald
@@ -87,11 +87,11 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
  implicit none
 
 !Arguments ------------------------------------
-!scalars 
+!scalars
  integer,intent(in) :: natom,ntypat
  real(dp),intent(in) :: ucvol
  real(dp),intent(out) :: eew
-!arrays 
+!arrays
  integer,intent(in) :: typat(natom)
  real(dp),intent(in) :: gmet(3,3),rmet(3,3),xred(3,natom),zion(ntypat)
  real(dp),intent(out) :: grewtn(3,natom)
@@ -140,7 +140,7 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
    newg=0
    if (ng > 20 .and. mod(ng,10)==0) then
       write (message,'(3a,I10)') "Very large box of G neighbors in ewald: you probably do not want to do this.", ch10,&
-&       " If you have a metal consider setting dipdip 0.  ng = ", ng 
+&       " If you have a metal consider setting dipdip 0.  ng = ", ng
       MSG_WARNING(message)
    end if
 
@@ -170,7 +170,6 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
 !              Note that if reduced atomic coordinates xred drift outside
 !              of unit cell (outside [0,1)) it is irrelevant in the following
 !              term, which only computes a phase.
-!              OCL SCALAR ! by MM for Fujitsu
                do ia=1,natom
                  arg=two_pi*(ig1*xred(1,ia)+ig2*xred(2,ia)+ig3*xred(3,ia))
 !                Sum real and imaginary parts (avoid complex variables)
@@ -178,8 +177,7 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
                  summi=summi+zion(typat(ia))*sin(arg)
                end do
 
-!              The following two checks avoid an annoying
-!              underflow error message
+!              The following two checks avoid an annoying underflow error message
                if (abs(summr)<1.d-16) summr=0.0_dp
                if (abs(summi)<1.d-16) summi=0.0_dp
 
@@ -242,10 +240,10 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
    newr=0
    if (nr > 20 .and. mod(nr,10)==0) then
       write (message,'(3a,I10)') "Very large box of R neighbors in ewald: you probably do not want to do this.", ch10,&
-&       " If you have a metal consider setting dipdip 0.  nr = ", nr 
+&       " If you have a metal consider setting dipdip 0.  nr = ", nr
       MSG_WARNING(message)
    end if
-!  
+!
    do ir3=-nr,nr
      do ir2=-nr,nr
        do ir1=-nr,nr
@@ -274,10 +272,8 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
 !              Avoid zero denominators in 'term':
                if (rsq>=1.0d-24) then
 
-!                Note: erfc(8) is about 1.1e-29,
-!                so do not bother with larger arg.
-!                Also: exp(-64) is about 1.6e-28,
-!                so do not bother with larger arg**2 in exp.
+!                Note: erfc(8) is about 1.1e-29, so do not bother with larger arg.
+!                Also: exp(-64) is about 1.6e-28, so do not bother with larger arg**2 in exp.
                  term=0._dp
                  if (eta*rsq<64.0_dp) then
                    newr=1
@@ -540,10 +536,8 @@ subroutine ewald2(gmet,natom,ntypat,rmet,rprimd,stress,typat,ucvol,xred,zion)
 !              Avoid zero denominators in 'term':
                if (rmagn>=1.0d-12) then
 
-!                Note: erfc(8) is about 1.1e-29,
-!                so do not bother with larger arg.
-!                Also: exp(-64) is about 1.6e-28,
-!                so do not bother with larger arg**2 in exp.
+!                Note: erfc(8) is about 1.1e-29, so do not bother with larger arg.
+!                Also: exp(-64) is about 1.6e-28, so do not bother with larger arg**2 in exp.
                  arg3=reta*rmagn
                  if (arg3<8.0_dp) then
                    newr=1
@@ -673,7 +667,6 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  real(dp) :: direct,eta,fac,fact1,fact2,fact3,gsq,invy,invy2,recip,reta,reta3
  real(dp) :: inv4eta
  real(dp) :: term1,term2,term3,term4,term5,y2,yy
-! real(dp) :: tcpu,tcpui,twall,twalli 
  character(len=500) :: message
 !arrays
  real(dp) :: c1i(2*mr+1),c1r(2*mr+1),c2i(2*mr+1),c2r(2*mr+1),c3i(2*mr+1)
@@ -696,7 +689,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
  ABI_ALLOCATE(dyewt,(2,3,natom,3,natom))
 
-! initialize complex phase factors 
+! initialize complex phase factors
  do ia = 1, natom
    arga = two_pi*( (qphon(1))*xred(1,ia)&
 &                 +(qphon(2))*xred(2,ia)&
@@ -728,8 +721,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  eta=pi*100.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
  inv4eta = one / four / eta
 
- dyew(:,:,:,:,:)=0.0_dp
- dyewt(:,:,:,:,:)=0.0_dp
+ dyew = zero
+ dyewt = zero
 
 !Sum terms over g space:
  ng=0
@@ -743,7 +736,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
      ABI_DEALLOCATE(expx3)
 
      ng_expxq = ng_expxq*2
-! TODO: half of this space is not needed, as it contains the complex conjugate of the other half. 
+! TODO: half of this space is not needed, as it contains the complex conjugate of the other half.
 ! present duplication avoids if statements inside the loop, however
      ABI_ALLOCATE(expx1, (-ng_expxq:ng_expxq, natom))
      ABI_ALLOCATE(expx2, (-ng_expxq:ng_expxq, natom))
@@ -820,8 +813,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                do nu=1,3
                  do ia=1,natom
                    do mu=nu,3
-                     dyewt(1,mu,ia,nu,ia)=dyewt(1,mu,ia,nu,ia)+&
-&                     gpqfac(mu,nu)
+                     dyewt(1,mu,ia,nu,ia)=dyewt(1,mu,ia,nu,ia)+gpqfac(mu,nu)
                    end do
                  end do
                end do
@@ -834,10 +826,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 !                  The most inner loop
                    do nu=1,3
                      do mu=nu,3
-                       dyewt(1,mu,ia,nu,ib)=dyewt(1,mu,ia,nu,ib)+&
-&                       gpqfac(mu,nu)*c123r
-                       dyewt(2,mu,ia,nu,ib)=dyewt(2,mu,ia,nu,ib)+&
-&                       gpqfac(mu,nu)*c123i
+                       dyewt(1,mu,ia,nu,ib)=dyewt(1,mu,ia,nu,ib)+gpqfac(mu,nu)*c123r
+                       dyewt(2,mu,ia,nu,ib)=dyewt(2,mu,ia,nu,ib)+gpqfac(mu,nu)*c123i
                      end do
                    end do
                  end do
@@ -933,13 +923,10 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !      Here, construct the cosine and sine of q*R for
 !      components 2 and 3
-       c23r = c2r(ir2+mr+1) * c3r(ir3+mr+1)&
-&       - c2i(ir2+mr+1) * c3i(ir3+mr+1)
-       c23i = c2i(ir2+mr+1) * c3r(ir3+mr+1)&
-&       + c2r(ir2+mr+1) * c3i(ir3+mr+1)
+       c23r = c2r(ir2+mr+1) * c3r(ir3+mr+1) - c2i(ir2+mr+1) * c3i(ir3+mr+1)
+       c23i = c2i(ir2+mr+1) * c3r(ir3+mr+1) + c2r(ir2+mr+1) * c3i(ir3+mr+1)
 
-!      Also multiplies by fact3, because it is a rather
-!      economical place to do so
+!      Also multiplies by fact3, because it is a rather economical place to do so
        c23r=c23r * fact3
        c23i=c23i * fact3
 
@@ -978,15 +965,13 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !              The atoms should not be too far of each other
                if (y2<64.0_dp) then
-!                Note: erfc(8) is about 1.1e-29,
-!                so dont bother with larger y.
-!                Also: exp(-64) is about 1.6e-28,
-!                do dont bother with larger y**2 in exp.
+!                Note: erfc(8) is about 1.1e-29, so dont bother with larger y.
+!                Also: exp(-64) is about 1.6e-28, do dont bother with larger y**2 in exp.
 
 !                Avoid zero denominators in term:
                  if (y2>=1.0d-24) then
                    newr=1
-! TODO : find a workaround here - the sqrt, erf and exp functions are slow 
+! TODO : find a workaround here - the sqrt, erf and exp functions are slow
 !        and for dense q meshes this takes forever
 !        could tabulate and spline the full function of yy on a very fine grid
 !        and look it up there...
@@ -1025,7 +1010,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                    end if
                  end if ! End the condition for avoiding zero denominators
                end if ! End the condition of too large distance between atoms
-             end do 
+             end do
            end do ! End loop over ia and ib :
          end if ! End triple loop over real space points:
        end do ! ir1
@@ -1065,9 +1050,6 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !Tests
 !write(std_out,*)' ewald9 : take into account the effective charges '
-!call timein(tcpu,twall)
-!write(std_out,1000) tcpu-tcpui,twall-twalli
-!
  do ib=1,natom
    do nu=1,3
      do ia=1,natom

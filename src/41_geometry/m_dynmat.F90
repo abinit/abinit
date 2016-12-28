@@ -4508,11 +4508,9 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
 
 !          DEBUG
 !          if((ia==2 .or. ia==3) .and. ib==1)then
-!          write(std_out,'(5i3,2es16.8)' )&
-!          &       mu,ia,nu,ib,iqpt,dynmat(1:2,mu,ia,nu,ib,iqpt)
+!          write(std_out,'(5i3,2es16.8)' )mu,ia,nu,ib,iqpt,dynmat(1:2,mu,ia,nu,ib,iqpt)
 !          end if
 !          ENDDEBUG
-
 
          end do ! End loop on the coordinates
        end do
@@ -4943,7 +4941,7 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,&
 
 !First zero all the elements
  nsize=2*(3*mpert)**2
- d2cart(:,:,:,:,:)=zero
+ d2cart = zero
 
 !Copy the elements from dq to d2cart
  d2cart(:,:,1:natom,:,1:natom)=dq(:,:,1:natom,:,1:natom)
@@ -5311,6 +5309,7 @@ subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat)
 !scalars
  integer :: i1,i2,idir1,idir2,index,ipert1,ipert2
  real(dp),parameter :: break_symm=1.0d-12
+ !real(dp),parameter :: break_symm=zero
  real(dp) :: fac
 !arrays
  real(dp) :: nearidentity(3,3)
