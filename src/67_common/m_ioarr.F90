@@ -1079,6 +1079,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      end if
 
      call hdr_fort_read(ohdr, unt, fform)
+     ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
      call validate_hdr_den()
 
      ! Read PAW Rhoij
