@@ -123,6 +123,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' gw_invalid_freq '
  list_vars=trim(list_vars)//' gw_qprange gw_nqlwl gw_nstep gw_qlwl'
  list_vars=trim(list_vars)//' gw_sctype gw_sigxcore gw_toldfeig'
+ list_vars=trim(list_vars)//' gwfockmix'
  list_vars=trim(list_vars)//' gwls_sternheimer_kmax gwls_kmax_complement gwls_kmax_poles gwls_kmax_analytic gwls_kmax_numeric'
  list_vars=trim(list_vars)//' gwls_list_proj_freq gwls_nseeds gwls_n_proj_freq gwls_recycle'
  list_vars=trim(list_vars)//' gwls_first_seed gwls_model_parameter gwls_second_model_parameter gwls_npt_gauss_quad'

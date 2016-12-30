@@ -96,7 +96,7 @@
 !!      are set equal to (nfft,ngfft,mgfft) in that case.
 !!
 !! PARENTS
-!!      gstate
+!!      gstate,mover_effpot
 !!
 !! CHILDREN
 !!      abiforstr_fin,abiforstr_ini,abihist_bcast,abihist_compare,abihist_free
@@ -387,8 +387,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
  if (present(effective_potential)) then
    need_scfcv_cycle = .FALSE.
    write(message,'(a,a,i2,a,a,a,a,80a)')&
-     & ch10,'=== [ionmov=',ab_mover%ionmov,'] ',trim(specs%method),&
-     & ' with effective potential',ch10,('=',kk=1,80)
+&   ch10,'=== [ionmov=',ab_mover%ionmov,'] ',trim(specs%method),&
+&   ' with effective potential',ch10,('=',kk=1,80)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
  else
@@ -459,8 +459,9 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      if (have_timelimit_in(ABI_FUNC)) then
        if (itime > 2) then
          call xmpi_wait(quitsum_request,ierr)
-         if (quitsum_async > 0) then
-           write(message,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),". Will exit itime loop in mover."
+         if (quitsum_async > 0) then 
+           write(message,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),&
+&           ". Will exit itime loop in mover."
            MSG_COMMENT(message)
            call wrtout(ab_out, message, "COLL")
            timelimit_exit = 1
@@ -518,12 +519,12 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 !    ### 12. => Call to SCFCV routine and fill history with forces
      if (need_scfcv_cycle) then
        write(message,'(a,3a,33a,44a)')&
-&        ch10,('-',kk=1,3),&
-&        'SELF-CONSISTENT-FIELD CONVERGENCE',('-',kk=1,44)
+&       ch10,('-',kk=1,3),&
+&       'SELF-CONSISTENT-FIELD CONVERGENCE',('-',kk=1,44)
      else
        write(message,'(a,3a,33a,44a)')&
-&        ch10,('-',kk=1,3),&
-&        'EFFECTIVE POTENTIAL CALCULATION',('-',kk=1,44)
+&       ch10,('-',kk=1,3),&
+&       'EFFECTIVE POTENTIAL CALCULATION',('-',kk=1,44)
      end if
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
@@ -631,7 +632,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      end if ! if(hist_prev%mxhist>0.and.ab_mover%restartxf==-1.and.hist_prev%ihist<=hist_prev%mxhist)then
 
 !    Store trajectory in xfh file
-     if(need_scfcv_cycle.and.(ab_xfh%nxfh==0.or.itime/=1)) then
+     if((ab_xfh%nxfh==0.or.itime/=1)) then
        ABI_ALLOCATE(fred_corrected,(3,scfcv_args%dtset%natom))
        call fcart2fred(hist%fcart(:,:,hist%ihist),fred_corrected,rprimd,ab_mover%natom)
 !      Get rid of mean force on whole unit cell,
@@ -652,7 +653,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        ABI_DEALLOCATE(fred_corrected)
      end if
 
-!    write(std_out,*) 'mover 13'
 !    ###########################################################
 !    ### 13. Write the history into the _HIST file
 !    ###
@@ -665,9 +665,9 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      end if
 #endif
 
-!    write(std_out,*) 'mover 14'
 !    ###########################################################
 !    ### 14. Output after SCFCV
+
      write(message,'(a,3a,a,72a)')&
 &     ch10,('-',kk=1,3),'OUTPUT',('-',kk=1,71)
      call wrtout(ab_out,message,'COLL')
@@ -678,7 +678,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        call prtxfase(ab_mover,hist,std_out,mover_AFTER)
      end if
 
-!    write(std_out,*) 'mover 15'
 !    ###########################################################
 !    ### 15. => Test Convergence of forces and stresses
 
@@ -712,7 +711,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 
      if (itime==ntime.and.icycle==ncycle) iexit=1
 
-!    write(std_out,*) 'mover 16'
 !    ###########################################################
 !    ### 16. => Precondition forces, stress and energy
 
@@ -722,7 +720,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
        call prec_simple(ab_mover,preconforstr,hist,icycle,itime,0)
      end if
 
-!    write(std_out,*) 'mover 16'
 !    ###########################################################
 !    ### 17. => Call to each predictor
 
@@ -761,6 +758,8 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
          call pred_diisrelax(ab_mover,hist,itime,ntime,DEBUG,iexit)
        case (21)
          call pred_steepdesc(ab_mover,preconforstr,hist,itime,DEBUG,iexit)
+       case (22)
+         call pred_lbfgs(ab_mover,ab_xfh,preconforstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
 #if defined HAVE_LOTF
        case (23)
          call pred_lotf(ab_mover,hist,itime,icycle,DEBUG,iexit)
@@ -776,16 +775,14 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      end do
 
      ! check dilatmx here and correct if necessary
-     if (need_scfcv_cycle.and.scfcv_args%dtset%usewvl == 0) then
+     if (scfcv_args%dtset%usewvl == 0) then
        call chkdilatmx(scfcv_args%dtset%dilatmx,rprimd,scfcv_args%dtset%rprimd_orig(1:3,1:3,1),&
 &                      dilatmx_errmsg)
        _IBM6("dilatxm_errmsg: "//TRIM(dilatmx_errmsg))
-
        if (LEN_TRIM(dilatmx_errmsg) /= 0) then
          MSG_WARNING(dilatmx_errmsg)
          nerr_dilatmx = nerr_dilatmx+1
          if (nerr_dilatmx > 3) then
-
            ! Write last structure before aborting, so that we can restart from it.
            ! zion is not available, but it's not useful here.
            if (me == master) then
@@ -802,9 +799,7 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
 #endif
              call crystal_free(crystal)
            end if
-
            call xmpi_barrier(comm)
-
            write (dilatmx_errmsg, '(a,i0,3a)') &
 &           'Dilatmx has been exceeded too many times (', nerr_dilatmx, ')',ch10, &
 &           'Restart your calculation from larger lattice vectors and/or a larger dilatmx'
@@ -829,7 +824,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      end if
      if(iexit/=0) exit
 
-!    write(std_out,*) 'mover 17'
 !    ###########################################################
 !    ### 18. Use the history  to extract the new values
 !    ###     acell, rprimd and xred
@@ -890,17 +884,17 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
      call wrtout(std_out,message,'COLL')
      if (skipcycle) exit
 
-!    write(std_out,*) 'mover 18'
 !    ###########################################################
 !    ### 19. End loop icycle
+
    end do ! do icycle=1,ncycle
 
    if(iexit/=0)exit
-!  write(std_out,*) 'mover 19'
+
 !  ###########################################################
 !  ### 20. End loop itime
- end do ! do itime=1,ntime
 
+end do ! do itime=1,ntime
 
  ! Call fconv here if we exited due to wall time limit.
  if (timelimit_exit==1 .and. specs%isFconv) then
@@ -942,7 +936,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
    end do
  end if
 
-!write(std_out,*) 'mover 21'
 !###########################################################
 !### 22. XML Output at the end
 
@@ -953,7 +946,6 @@ real(dp),allocatable :: amu(:),fred_corrected(:,:),xred_prev(:,:)
    write(ab_xml_out, "(3a)") '    </geometryMinimisation>'
  end if
 
-!write(std_out,*) 'mover 22'
 !###########################################################
 !### 23. Deallocate hist and ab_mover datatypes
 

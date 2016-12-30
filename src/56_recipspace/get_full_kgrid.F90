@@ -35,7 +35,7 @@
 !! TODO: This routine should be removed
 !!
 !! PARENTS
-!!      m_ebands,m_phgamma,m_phonons,tetrahedron
+!!      m_phonons
 !!
 !! CHILDREN
 !!      destroy_kptrank,get_kpt_fullbz,get_rank_1kpt,mati3inv,mkkptrank

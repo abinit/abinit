@@ -3677,9 +3677,9 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        defaultval: null
-        '[[usepaw]]==1 or [[iprcel]]==0': 0.7
         '[[usepaw]]==0 or [[iprcel]] !=0': 1.0
+        '[[usepaw]]==1 or [[iprcel]]==0': 0.7
+        defaultval: null
     definition: model DIElectric MIXing factor
     dimensions: scalar
     excludes: null
@@ -3717,10 +3717,10 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        '[[iprcel]]==0': '[[diemix]]'
-        defaultval: -[[diemix]]
-        '[[iscf]]<10': '[[diemix]]'
         70 < [[iprcel]] and [[iprcel]] < 80: '[[diemix]]'
+        '[[iprcel]]==0': '[[diemix]]'
+        '[[iscf]]<10': '[[diemix]]'
+        defaultval: -[[diemix]]
     definition: model DIElectric MIXing factor for the MAGgnetization
     dimensions: scalar
     excludes: null
@@ -5077,8 +5077,8 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        defaultval: 0.0
         '[[optdriver]] in [3, 4]': '[[ecut]]'
+        defaultval: 0.0
     definition: Energy CUT-off for WaveFunctions
     dimensions: scalar
     excludes: null
@@ -5562,8 +5562,8 @@
     excludes: null
     requires: null
     section: vareph
-    text: "Average electron-electron interaction strength, for the computation\
-        \ of the superconducting Tc using Mc-Millan's formula. "
+    text: |-
+        Average electron-electron interaction strength, for the computation of the superconducting Tc using Mc-Millan's formula.
     varname: eph_mustar
     vartype: real
 - !variable
@@ -5791,10 +5791,10 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        defaultval: 0.0
         '[[occopt]]==1': 0.125
-        '[[usewvl]]==1': 0.0
         '[[occopt]]>2': 0.5
+        '[[usewvl]]==1': 0.0
+        defaultval: 0.0
     definition: Factor for the number of BANDs
     dimensions: scalar
     excludes: null
@@ -5855,8 +5855,8 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        '[[paral_kgb]]==1': 401
         '[[FFTW3]] and [[usedmft]]==0': 312
+        '[[paral_kgb]]==1': 401
         defaultval: 112
     definition: Fast Fourier Transform ALGorithm
     dimensions: scalar
@@ -7373,7 +7373,7 @@
     excludes: null
     requires: null
     section: vardev
-    text: |
+    text: |-
         Eventually used when [[ndtset]]&gt;0
         (in the multi-dataset mode), to indicate
         starting wavefunctions, as an alternative to
@@ -7838,7 +7838,7 @@
     excludes: null
     requires: '[[optdriver]]==4 and [[gw_customnfreqsp]] > 0 '
     section: vargw
-    text: |
+    text: |-
         <p>
          [[gw_freqsp]] specifies the grid points for the real frequency axis when the real and imaginary
         (spectral funtion) parts of sigma are calculated explicitly for post-processing or plotting.
@@ -8440,6 +8440,21 @@
     - '[[GW]]'
     commentdefault: null
     commentdims: null
+    defaultval: 0.25
+    definition: GW FOCK exchange MIXing parameter
+    dimensions: scalar
+    excludes: null
+    requires: '[[optdriver]]=4, [[gwcalctyp]] = 1x5 (HSE) or 2x5 (PBE0).'
+    section: vargw
+    text: |-
+        Mixing parameter of Fock exchange for PBE0 and HSE hybrid-functional calculations via the GW self-energy subroutine. [[gwfockmix]] ranges from 0 (essentially PBE) to 1.
+    varname: gwfockmix
+    vartype: real
+- !variable
+    characteristics:
+    - '[[GW]]'
+    commentdefault: null
+    commentdims: null
     defaultval: 0
     definition: GW Gamma
     dimensions: scalar
@@ -8874,7 +8889,7 @@
     excludes: null
     requires: '[[optdriver]] in [3,4]'
     section: varpar
-    text: |
+    text: |-
         <p>
          [[gwpara]] is used to choose between the two different parallelization levels
         available in the [[GW]] code. The available options are:
@@ -9168,7 +9183,7 @@
     excludes: null
     requires: null
     section: vargs
-    text: |
+    text: |-
         <p>
          Defines the type of computation used for Hartree potential, local part of pseudo-potential and ion-ion interaction:
         </p>
@@ -9441,8 +9456,8 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        defaultval: 0
         '[[MPI_IO]] and [[paral_kgb]]==1': 1
+        defaultval: 0
     definition: IO MODE
     dimensions: scalar
     excludes: null
@@ -10177,7 +10192,7 @@
     excludes: null
     requires: null
     section: vargs
-    text: |
+    text: |-
         <p>
          Only used if [[nqpt]]=1, and
         [[qptopt]]=1 to 4.
@@ -10249,8 +10264,8 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        defaultval: 0
         '[[iscf]] < 0': 1
+        defaultval: 0
     definition: Integer that governs the ReaDing of 1st-order DEN file
     dimensions: scalar
     excludes: null
@@ -10485,8 +10500,8 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        defaultval: 0
         '[[iscf]] < 0': '1'
+        defaultval: 0
     definition: Integer that governs the ReaDing of DDB file
     dimensions: scalar
     excludes: null
@@ -10679,8 +10694,8 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        defaultval: 0
         '[[iscf]] < 0': '1'
+        defaultval: 0
     definition: Integer that governs the ReaDing of DEN file
     dimensions: scalar
     excludes: null
@@ -10817,7 +10832,7 @@
     excludes: null
     requires: null
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to read previously calculated vdW-DF variables.
         <br />
@@ -10975,7 +10990,7 @@
     excludes: null
     requires: null
     section: vardev
-    text: |
+    text: |-
         Indicates eventual starting
         wavefunctions. As alternative, one can use the
         input variables [[getwfkfine]].
@@ -11198,9 +11213,9 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        defaultval: 7
         '[[usepaw]]==1': 17
         '[[usewvl]]==1': 0
+        defaultval: 7
     definition: Integer for Self-Consistent-Field cycles
     dimensions: scalar
     excludes: null
@@ -13294,8 +13309,8 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        defaultval: 1
         '[[nspden]]==4': 4
+        defaultval: 1
     definition: KPoinTs OPTion
     dimensions: scalar
     excludes: null
@@ -13509,7 +13524,7 @@
     excludes: null
     requires: null
     section: varfil
-    text: |
+    text: |-
         <p>
          Governs the choice of the format for the file that
         contains the Kohn-Sham electronic structure information,
@@ -13749,7 +13764,7 @@
     excludes: null
     requires: null
     section: vargs
-    text: |
+    text: |-
         <p>
          This variable gives the amplitude of the constraint imposed on the magnetization vectors on each atom (turned on with flag variable [[magconon]]). Typical values for lambda are 10 to a few hundred. The energy will vary strongly and convergence will be difficult if lambda is too large. The constraint will be weak and the magnetization will not be close to [[spinat]] if lambda is too small. See variable [[magconon]] for more details.
         </p>
@@ -13765,7 +13780,7 @@
     excludes: null
     requires: null
     section: vargs
-    text: |
+    text: |-
         <p>
          Turns on the imposition of a Lagrangian constraint on the magnetization. For each atom, the magnetization is calculated in a sphere (radius [[ratsph]]) and a constraint is applied to bring it closer to the input values of [[spinat]]. The constraint can be either on the direction only (magconon 1) or on the full vector (magconon 2). The Lagrangian constraint has an amplitude [[magcon_lambda]] which should be neither too big (bad or impossible convergence) nor too small (no effect).
         </p>
@@ -13985,8 +14000,8 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        defaultval: 100.0
         '[[imgmov]]==5': 0.4
+        defaultval: 100.0
     definition: 'Minimal Energy Path search: MaXimum allowed STEP size'
     dimensions: scalar
     excludes: null
@@ -14504,7 +14519,7 @@
     excludes: null
     requires: '[[prtdos]] == 3 or [[pawfatbnd]] in [1,2]'
     section: vargs
-    text: |
+    text: |-
         <p>
         [[natsph]] gives the number of atoms around which the sphere
         for atom-projected density-of-states will be built,
@@ -14714,9 +14729,9 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
+        '[[optdriver]]==0 and [[iscf]]<0': 2*[[nspinor]]
         '[[optdriver]]==1 and 3<=[[occopt]] and [[occopt]]<= 8': 2*[[nspinor]]
         defaultval: 0
-        '[[optdriver]]==0 and [[iscf]]<0': 2*[[nspinor]]
     definition: Number of BanDs for the BUFfer
     dimensions: scalar
     excludes: null
@@ -15632,8 +15647,8 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        defaultval: 0
         '[[kptopt]]==0': 1
+        defaultval: 0
     definition: Number of K - Points
     dimensions: scalar
     excludes: null
@@ -15800,8 +15815,8 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        defaultval: 1
         '[[usepaw]]==1': 2
+        defaultval: 1
     definition: Non LOCal MEMOry
     dimensions: scalar
     excludes: null
@@ -15895,8 +15910,8 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        defaultval: 0
         '[[usefock]]==1': 1
+        defaultval: 0
     definition: Number of Non-Self Consistent LOops for Fock exact exchange
     dimensions: scalar
     excludes: null
@@ -17059,11 +17074,8 @@
     excludes: null
     requires: '[[usepaw]] = 1; [[pawcpxocc]] = 2; [[kptopt]] > 2'
     section: vargs
-    text: "Places an array of nuclear magnetic dipole moments on the atomic\
-        \ positions, useful for computing the magnetization in the presence\
-        \ of nuclear dipoles and thus the chemical shielding by the converse\
-        \ method. The presence of these dipoles breaks time reversal symmetry\
-        \ and lowers the overall spatial symmetry. "
+    text: |-
+        Places an array of nuclear magnetic dipole moments on the atomic positions, useful for computing the magnetization in the presence of nuclear dipoles and thus the chemical shielding by the converse method. The presence of these dipoles breaks time reversal symmetry and lowers the overall spatial symmetry.
     varname: nucdipmom
     vartype: real
 - !variable
@@ -17076,7 +17088,7 @@
     excludes: null
     requires: null
     section: vargs
-    text: |
+    text: |-
         <p>
          In the wavelet basis set, the ground state is found by direct
         minimisation. The algorithm used can be either the steepest
@@ -17108,7 +17120,7 @@
     requires: |
         '[[nobj]]==1'
     section: vargeo
-    text: |
+    text: |-
         <p>
         Gives the list of atoms in object a. This list is specified by giving, for each atom, its index in the list of coordinates ([[xred]], [[xangst]] or [[xcart]]), that also corresponds to a type of atom (given by the array type).
         These objects can be thought as molecules, or groups
@@ -17789,7 +17801,7 @@
     excludes: null
     requires: null
     section: varrlx
-    text: |
+    text: |-
         Allows to optimize the unit cell shape and dimensions, when [[ionmov]]>=2 or 3.  The configuration for which the stress almost vanishes
         is iteratively determined, by using the same algorithms as for the nuclei positions. Will eventually modify [[acell]]
         and/or [[rprim]].  The ionic positions are ALWAYS updated, according to the forces.
@@ -17884,8 +17896,8 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        defaultval: 2
         '[[toldff]] or [[tolrff]] != 0': 1
+        defaultval: 2
     definition: OPTions for the calculation of FORCES
     dimensions: scalar
     excludes: null
@@ -18168,7 +18180,7 @@
     excludes: null
     requires: null
     section: varpar
-    text: |
+    text: |-
         <p>
          This parameter activates the parallelization over perturbations which can be used during
         RF-Calculation. It is possible to use this type of parallelization in combination to the
@@ -18190,10 +18202,10 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        defaultval: 1
         ? '[[optdriver]]==0 and [[ionmov]]<6 and [[pawspnorb]]==1 and [[iscf]]>=10
             and ([[kptopt]] !=1 or [[kptopt]]!=2) and [[usepaw]]==1'
         : 2
+        defaultval: 1
     definition: PAW - use ComPleX rhoij OCCupancies
     dimensions: scalar
     excludes: null
@@ -18809,8 +18821,7 @@
     excludes: null
     requires: '[[usepaw]]==1'
     section: varpaw
-    text: |4-
-
+    text: |-
         <p>
          This input variable controls the output of the full PAW wave functions including the on-site
         contribution inside each PAW sphere needed to reconstruct the correct nodal shape in the augmentation region.
@@ -18840,15 +18851,14 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        defaultval: 0
         '[[nspinor]]==2': 1
+        defaultval: 0
     definition: PAW - option for SPiN-ORBit coupling
     dimensions: scalar
     excludes: null
     requires: '[[usepaw]]==1'
     section: varpaw
-    text: |4-
-
+    text: |-
         <p>
          When PAW is activated, the
          <b>
@@ -18907,8 +18917,7 @@
     excludes: null
     requires: '[[usepaw]]=1'
     section: varpaw
-    text: |4-
-
+    text: |-
         <p>
          When PAW is activated, the computation of compensation charge density (so called
         "hat" density) requires the computation of g_l(r).Y_lm(r) factors (and cartesian derivatives) at each point
@@ -19811,8 +19820,8 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        defaultval: 0.0
         '[[postoldff]]=0': 1.0E-6
+        defaultval: 0.0
     definition: 'POSITRON calculation: TOLerance on the DiFference of total
         Energy'
     dimensions: scalar
@@ -20167,8 +20176,8 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        defaultval: 1
         '[[nimage]]>1': 0
+        defaultval: 1
     definition: PRinT the DENsity
     dimensions: scalar
     excludes: null
@@ -20927,7 +20936,7 @@
     excludes: null
     requires: null
     section: vareph
-    text: |
+    text: |-
         Print a bxsf file (Xcrysden format) with the (interpolated)
         phonon frequencies computed of the q-mesh determined by [[ph_ngqpt]]. The file can be use to visualize isosurfaces with Xcrysden or other similar tools supporting the bxsf format.
         Note that the (dense) q-mesh must be Gamma-centered, shifted meshs are not supported by Xcrysden.
@@ -21148,7 +21157,7 @@
     excludes: null
     requires: null
     section: vardev
-    text: |
+    text: |-
         Print out a NetCDF file containing a vdW-DF kernel.
         <!-- See the associated script in
         ~abinit/extras/post_processing/vdw_check_kernel for further details. -->
@@ -22296,7 +22305,7 @@
     excludes: null
     requires: null
     section: vargs
-    text: |
+    text: |-
         Radius for extra spheres the DOS is projected into. See [[natsph_extra]]
         and [[xredsph_extra]]
         for the number and positions of the spheres.
@@ -23338,11 +23347,11 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
+        '[[nshiftk]]>1': null
         defaultval:
         - 0.5
         - 0.5
         - 0.5
-        '[[nshiftk]]>1': null
     definition: SHIFT for K points
     dimensions:
     - 3
@@ -23384,13 +23393,17 @@
         </p>
         <p>
          1) When the primitive vectors of the lattice do NOT form
-        a FCC or a BCC lattice, the usual (shifted) Monkhorst-Pack
+        a FCC or a BCC lattice, the default (shifted) Monkhorst-Pack
         grids are formed by using
         [[nshiftk]]=1 and [[shiftk]] 0.5 0.5 0.5 .
-        This is often the preferred k point sampling.
+        This is often the preferred k point sampling, as the shift improves the sampling efficiency.
+        However, it can also break symmetry, if the 111 direction is not an axis of rotation,
+        e.g. in tetragonal or hexagonal systems. Abinit will complain about this breaking, and you
+        should adapt [[shiftk]].
         For a non-shifted Monkhorst-Pack grid, use
         [[nshiftk]]=1 and [[shiftk]] 0.0 0.0 0.0 ,
-        but there is little reason to do that.
+        which will be compatible with all symmetries, and is necessary for some features such as k-point
+        interpolation.
         </p>
         <p>
          2) When the primitive vectors of the lattice form a FCC lattice,
@@ -23450,11 +23463,11 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
+        '[[nshiftq]]>1': null
         defaultval:
         - 0.5
         - 0.5
         - 0.5
-        '[[nshiftq]]>1': null
     definition: SHIFT for Q points
     dimensions:
     - 3
@@ -23489,7 +23502,7 @@
     excludes: null
     requires: null
     section: varrlx
-    text: |
+    text: |-
         +1 favors alternation of species
         -1 favors segregation
     varname: signperm
@@ -23667,7 +23680,7 @@
     excludes: null
     requires: '[[optdriver]]==3 and [[spmeth]]==2'
     section: vargw
-    text: |
+    text: |-
         When a screening calculation ([[optdriver]]==3) uses a spectral representation of the irreducible polarizability in which
         the delta function is replaced by the gaussian approximant ([[spmeth]]==2), the standard deviation of the gaussian
         is given by [[spbroad]].
@@ -23684,7 +23697,7 @@
     excludes: null
     requires: null
     section: vargeo
-    text: |
+    text: |-
         <p>
          It is taken into account only when [[spgroup]]/=0; it
         allows one to define the axes orientation
@@ -23902,12 +23915,12 @@
     defaultval: 0.0
     definition: SPIN for AToms
     dimensions: !valuewithconditions
-        defaultval:
-        - 3
-        - '[[natom]]'
         '[[natrd]]<[[natom]]':
         - 3
         - '[[natrd]]'
+        defaultval:
+        - 3
+        - '[[natom]]'
     excludes: null
     requires: null
     section: vargs
@@ -24274,7 +24287,7 @@
     excludes: null
     requires: null
     section: varrlx
-    text: |
+    text: |-
         The components of the stress tensor must be stored
         according to :
         (1,1)-&gt;1 ; (2,2)-&gt;2 ; (3,3)-&gt;3 ; (2,3)-&gt;4 ; (3,1)-&gt;5 ;
@@ -24410,7 +24423,6 @@
     commentdefault: null
     commentdims: null
     defaultval: !valuewithconditions
-        defaultval: null
         '[[nsym]]==1':
         -   - 1
             - 0
@@ -24421,6 +24433,7 @@
         -   - 0
             - 0
             - 1
+        defaultval: null
     definition: SYMmetry in REaL space
     dimensions:
     - 3
@@ -24569,8 +24582,8 @@
     excludes: null
     requires: null
     section: vardev
-    text: |4-
-         <ul>
+    text: |-
+        <ul>
           <li>
            [[tfkinfunc]]=1 : <span style="text-decoration: underline;">Thomas-Fermi</span>
         kinetic functional (explicit functional of the density) is used instead of Kohn-Sham kinetic
@@ -24629,7 +24642,7 @@
     excludes: null
     requires: '[[tfkinfunc]]=11'
     section: vardev
-    text: |
+    text: |-
         This input variable has the same definition as [[toldfe]] and is only relevant when [[tfkinfunc]]=11.<br/>
         It sets a tolerance for absolute differences of total energy that, reached TWICE successively, will cause the
         initialization steps (without gradient correction) to stop and the gradient correction to be added.<br/>
@@ -25093,7 +25106,7 @@
     excludes: specified([[toldfe]]) or specified([[toldff]]) or specified([[tolrff]]) or specified([[tolvrs]])
     requires: null
     section: varbas
-    text: |
+    text: |-
         <p>
          The signification of this tolerance depends on
         the basis set. In plane waves, it gives a convergence tolerance for the
@@ -25259,12 +25272,12 @@
         defaultval: null
     definition: TYPE of atoms
     dimensions: !valuewithconditions
-        defaultval:
-        - 3
-        - '[[natom]]'
         '[[natrd]]<[[natom]]':
         - 3
         - '[[natrd]]'
+        defaultval:
+        - 3
+        - '[[natom]]'
     excludes: null
     requires: null
     section: varbas
@@ -25493,7 +25506,7 @@
     excludes: null
     requires: null
     section: vardev
-    text: |
+    text: |-
         <p>
          This keyword tells abinit to use a BLAS routine to speed up the computation of the non-local operator. This requires the precomputation of a large matrix, and has a significant memory overhead. In exchange, it provides improved performance when used on several bands at once (Chebyshev or LOBPCG algorithm with [[bandpp]]
         <p>
@@ -25546,7 +25559,7 @@
     excludes: null
     requires: null
     section: vardev
-    text: |
+    text: |-
         <p>
          When this flag is activated during a phonon calculation with abinit, all of the perturbations are cycled through, but only the symmetry-irreducible ones are calculated self-consistently. For the others the perturbed density is rotated by the appropriate symop and the gkk matrix elements are calculated non-self-consistently. As they do not depend on the perturbed wave functions, they are correct from the first iteration, and nstep is set to 1 for those perturbations. Note that the resulting 1DEN files are simply the rotate/symmetric ones and that the resulting 1WF files are garbage (completely unconverged) except the matrix elements in the header (equivalent to GKK files, but please use the latter much smaller files for el-ph calculations). The new default behavior with [[use_nonscf_gkk]] = 1 should be transparent for the user, with the same output files but a much quicker execution.
         </p>
@@ -25729,7 +25742,7 @@
     excludes: null
     requires: null
     section: vargs
-    text: |
+    text: |-
         <p>
          If [[usekden]]=1 the kinetic energy density will be computed during the self-consistency loop,
         in a way similar to the computation of the density.
@@ -26161,8 +26174,8 @@
     commentdims: null
     defaultval: !valuewithconditions
         '[[tfkinfunc]]==1': 1
-        defaultval: 0
         '[[usepaw]]==1': 1
+        defaultval: 0
     definition: USE YLM (the spherical harmonics)
     dimensions: scalar
     excludes: null
@@ -26392,7 +26405,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
         <br />
@@ -26411,7 +26424,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
         <br />
@@ -26428,7 +26441,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
         <br />
@@ -26445,7 +26458,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to build angular meshes for the vdW-DF kernel.
         <br />
@@ -26462,7 +26475,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
@@ -26481,7 +26494,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
@@ -26498,7 +26511,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
@@ -26515,7 +26528,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to filter the vdW-DF kernel in reciprocal space.
         <br />
@@ -26532,7 +26545,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
@@ -26549,7 +26562,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
@@ -26566,7 +26579,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
@@ -26583,7 +26596,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to define the sampling of the vdW-DF-kernel in real-space.
         <br />
@@ -26600,7 +26613,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to exponentially smoothen q near q0.
         <br />
@@ -26617,7 +26630,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
@@ -26634,7 +26647,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
@@ -26653,7 +26666,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         .
         <br />
@@ -26670,7 +26683,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to define the vdW-DF kernel cut-off radius.
         <br />
@@ -26687,7 +26700,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
@@ -26704,7 +26717,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         <p>
         Sets a threshold for the energy gradient that,
         when reached, will cause the vdW-DF interactions to be calculated.
@@ -26726,7 +26739,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
@@ -26743,7 +26756,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         to build the vdW-DF kernel.
         <br />
@@ -26766,7 +26779,7 @@
     excludes: null
     requires: '[[vdw_xc]]>0'
     section: vardev
-    text: |
+    text: |-
         Used when [[vdw_xc]]&gt;0,
         as introduced in
         <a href="http://dx.doi.org/10.1103/PhysRevLett.92.246401">
@@ -27111,7 +27124,7 @@
     excludes: null
     requires: null
     section: varrlx
-    text: |
+    text: |-
         The equation of motion is :
         <br />
         M
@@ -27265,7 +27278,7 @@
     excludes: null
     requires: '[[prtwant]]==2 or [[prtwant]]==3'
     section: varw90
-    text: |
+    text: |-
         <p>
          Defines whether or not the UNKp.s file will be printed.
          <ul>
@@ -27608,7 +27621,7 @@
     excludes: null
     requires: null
     section: vargs
-    text: |
+    text: |-
         This variable is used for the wavelets capabilities of ABINIT (see [[usewvl]]
         </a>
         ).
@@ -27984,7 +27997,7 @@
     excludes: null
     requires: null
     section: vargeo
-    text: |
+    text: |-
         <p>
          Gives the name of a xyz format file, to take
         [[natom]], [[ntypat]], [[typat]], [[znucl]],

@@ -2,6 +2,7 @@
 
 !Flags
  ifcflag   1     ! Interatomic force constant flag
+ ifcout    0
  thmflag   1     ! Thermodynamical properties flag
 
 !Wavevector grid number 1 (coarse grid, from DDB)

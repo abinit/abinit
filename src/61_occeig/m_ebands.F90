@@ -385,11 +385,9 @@ end function get_gaps
 !!  Free the memory allocated in gaps_t
 !!
 !! PARENTS
-!!      setup_sigma
+!!      m_sigmaph,setup_sigma
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -460,11 +458,9 @@ end subroutine gaps_free
 !!  Only writing.
 !!
 !! PARENTS
-!!      setup_sigma
+!!      m_sigmaph,setup_sigma
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -582,8 +578,6 @@ end subroutine gaps_print
 !!      setup_bse,setup_bse_interp,setup_screening,setup_sigma
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -842,12 +836,10 @@ end function ebands_from_dtset
 !!
 !! PARENTS
 !!      bethe_salpeter,dfpt_looppert,eig2tot,elphon,eph,gstate,m_ioarr,m_iowf
-!!      m_shirley,m_wfk,mlwfovlp_qp,nonlinear,optic,outscfcv,respfn,screening
-!!      sigma,wfk_analyze
+!!      m_shirley,m_sigmaph,m_wfk,mlwfovlp_qp,nonlinear,optic,outscfcv,respfn
+!!      screening,sigma,wfk_analyze
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -925,11 +917,9 @@ end subroutine ebands_free
 !!  obands<ebands_t>=The copy.
 !!
 !! PARENTS
-!!      screening,setup_bse,setup_bse_interp,sigma
+!!      m_sigmaph,screening,setup_bse,setup_bse_interp,sigma
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1013,8 +1003,6 @@ end subroutine ebands_copy
 !!      eph,setup_bse,setup_bse_interp,wfk_analyze
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1128,8 +1116,6 @@ end subroutine ebands_print
 !!      cchi0q0_intraband,m_ebands,m_ioarr,m_iowf
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1198,8 +1184,6 @@ end subroutine unpack_eneocc
 !!      cchi0q0_intraband,m_ebands,m_shirley
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1265,8 +1249,6 @@ end subroutine pack_eneocc
 !!      m_ebands
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1337,8 +1319,6 @@ end subroutine get_eneocc_vect
 !!      m_ebands
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1529,8 +1509,6 @@ end function get_valence_idx
 !!      screening,setup_bse,setup_bse_interp
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1694,11 +1672,9 @@ end function get_occupied
 !!    Output: All the denerate states are between ibmin and ibmax
 !!
 !! PARENTS
-!!      setup_sigma
+!!      m_sigmaph,setup_sigma
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2175,8 +2151,6 @@ end function ebands_write_bxsf
 !!      screening,setup_bse,setup_bse_interp,setup_sigma,sigma
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2356,11 +2330,9 @@ end subroutine ebands_update_occ
 !! ebands<ebands_t>=Info on the band structure, see above for side effects
 !!
 !! PARENTS
-!!      eph
+!!      eph,m_sigmaph
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2435,8 +2407,6 @@ end subroutine ebands_set_scheme
 !!      eph
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2533,8 +2503,6 @@ end subroutine ebands_set_fermie
 !! PARENTS
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2605,11 +2573,10 @@ end subroutine ebands_set_nelect
 !!      1.0dp if the gap has been computed.
 !!
 !! PARENTS
-!!      gstate,m_exc_diago,setup_bse,setup_bse_interp,setup_sigma,sigma
+!!      gstate,m_exc_diago,m_sigmaph,setup_bse,setup_bse_interp,setup_sigma
+!!      sigma
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3201,8 +3168,6 @@ end function ebands_get_edos
 !!      eph
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3260,8 +3225,6 @@ end subroutine edos_free
 !!      eph
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3533,8 +3496,6 @@ end function ebands_write_nesting
 !!      m_wfk
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3902,8 +3863,6 @@ end function ebspl_new
 !!      m_ebands
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -3991,8 +3950,6 @@ end subroutine ebspl_eval_bks
 !!      m_ebands
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -4172,11 +4129,8 @@ end function ebands_bspline
 !! OUTPUT
 !!
 !! PARENTS
-!!      outscfcv
 !!
 !! CHILDREN
-!!      destroy_tetra,get_full_kgrid,init_tetra,matr3inv,tetra_blochl_weights
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -4785,6 +4739,7 @@ end subroutine ebands_prtbltztrp_tau_out
 !! OUTPUT
 !!
 !! PARENTS
+!!      eph
 !!
 !! CHILDREN
 !!

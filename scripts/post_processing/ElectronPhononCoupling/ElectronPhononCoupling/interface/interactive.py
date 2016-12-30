@@ -34,6 +34,7 @@ def get_user_input():
         'smearing_eV' : 3.6749e-4,
         'temperature' : False,
         'temp_range' : [0, 0, 1],
+        'omega_range' : [-0.1, 0.1, 0.001],
         'lifetime' : False,
         'DDB_fnames' : list(),
         'eigq_fnames' : list(),
@@ -91,7 +92,7 @@ through ABINIT option 'ieig2rf 4'
     arguments.update(output=output)
     
     # Enter the value of the smearing parameter for dynamic AHC
-    if (calc_type == 2 or calc_type == 3 ):
+    if (calc_type > 1):
       ui = get_user('Enter value of the smearing parameter (in eV)')
       smearing_eV = N.float(ui)
     else:
@@ -111,6 +112,13 @@ through ABINIT option 'ieig2rf 4'
       ui = get_user('Introduce the starting temperature, max temperature and steps. e.g. 0 2000 100')
       temp_range = map(float, ui.split())
       arguments.update(temp_range=temp_range)
+
+
+    # frequency range
+    if calc_type == 4:
+      ui = get_user('Introduce the starting frequency, max frequency and steps. e.g. -1 1 0.05')
+      omega_range = map(float, ui.split())
+      arguments.update(omega_range=omega_range)
     
     # Broadening lifetime of the electron
     ui = get_user('Do you want to compute the lifetime of the electrons? [y/n]')
@@ -178,7 +186,7 @@ through ABINIT option 'ieig2rf 4'
         arguments.update(EIGI2D_fnames=EIGI2D_fnames)
     
     # Get the path of the FAN files from user if dynamical calculation
-    if (calc_type == 2 or calc_type == 3):
+    if (calc_type > 1):
       fnames = []
       for ii in N.arange(nqpt):
         ui = get_user('Enter the name of the %s GKK or FAN file' %ii)

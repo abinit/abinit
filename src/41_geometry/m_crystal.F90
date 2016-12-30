@@ -231,11 +231,12 @@ CONTAINS  !=====================================================================
 !!  6) Likely I will need also info on the electric field and berryopt
 !!
 !! PARENTS
-!!      dfpt_looppert,eig2tot,gwls_hamiltonian,m_crystal_io,m_ddb,mover
-!!      outddbnc,outscfcv,vtorho
+!!      dfpt_looppert,eig2tot,gwls_hamiltonian,m_crystal_io,m_ddb
+!!      m_effective_potential,m_effective_potential_file,mover,outddbnc
+!!      outscfcv,vtorho
 !!
 !! CHILDREN
-!!      atomdata_from_znucl,wrtout
+!!      mati3inv
 !!
 !! SOURCE
 
@@ -422,11 +423,12 @@ end subroutine crystal_init
 !!
 !! PARENTS
 !!      anaddb,bethe_salpeter,dfpt_looppert,eig2tot,eph,gstate,gwls_hamiltonian
-!!      m_ddk,m_dvdb,m_ioarr,m_iowf,m_wfd,m_wfk,mlwfovlp_qp,mover,mrgscr
-!!      outddbnc,outscfcv,screening,sigma,vtorho,wfk_analyze
+!!      m_ddk,m_dvdb,m_effective_potential,m_effective_potential_file,m_ioarr
+!!      m_iowf,m_wfd,m_wfk,mlwfovlp_qp,mover,mrgscr,outddbnc,outscfcv,screening
+!!      sigma,vtorho,wfk_analyze
 !!
 !! CHILDREN
-!!      atomdata_from_znucl,wrtout
+!!      mati3inv
 !!
 !! SOURCE
 
@@ -529,10 +531,11 @@ end subroutine crystal_free
 !!  Only printing
 !!
 !! PARENTS
-!!      eph,gwls_hamiltonian,setup_bse,setup_screening,setup_sigma,wfk_analyze
+!!      eph,gwls_hamiltonian,m_effective_potential,setup_bse,setup_screening
+!!      setup_sigma,wfk_analyze
 !!
 !! CHILDREN
-!!      atomdata_from_znucl,wrtout
+!!      mati3inv
 !!
 !! SOURCE
 
@@ -623,7 +626,7 @@ end subroutine crystal_print
 !!      gensymspgr,hdr_vs_dtset,m_crystal
 !!
 !! CHILDREN
-!!      atomdata_from_znucl,wrtout
+!!      mati3inv
 !!
 !! SOURCE
 
@@ -897,6 +900,9 @@ end function symbol_type
 !!  has_inversion=True if spatial inversion is present in the point group.
 !!
 !! PARENTS
+!!
+!! CHILDREN
+!!      mati3inv
 !!
 !! SOURCE
 

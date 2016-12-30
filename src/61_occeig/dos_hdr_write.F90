@@ -38,7 +38,7 @@
 !!   Only writing.
 !!
 !! PARENTS
-!!      getnel,dos_calcnwrite
+!!      getnel,m_epjdos
 !!
 !! CHILDREN
 !!      wrtout

@@ -95,9 +95,10 @@ CONTAINS  !=====================================================================
 !!  initilisation of monte carlo
 !!
 !! PARENTS
-!!      
 !!
 !! CHILDREN
+!!      effective_potential_getdeltaenergy,hist2var,metric,random_number
+!!      var2hist,xred2xcart
 !!
 !! SOURCE
 
@@ -227,8 +228,8 @@ end subroutine monte_carlo_run
 !!      mover
 !!
 !! CHILDREN
-!!      dsyev,hist2var,isopress,isostress,isotemp,metric,mkrdim,var2hist,wrtout
-!!      xcart2xred,xred2xcart
+!!      effective_potential_getdeltaenergy,hist2var,metric,random_number
+!!      var2hist,xred2xcart
 !!
 !! SOURCE
 

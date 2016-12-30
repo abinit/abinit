@@ -979,9 +979,10 @@ end function abi_derfc
 !! use a rational polynomial approximation.
 !!
 !! PARENTS
-!!      jlspline_new,mlwfovlp_radial,psp1nl
+!!      m_special_funcs,mlwfovlp_radial,psp1nl
 !!
 !! CHILDREN
+!!      splint
 !!
 !! SOURCE
 
@@ -1443,6 +1444,10 @@ end function jlspline_new
 !!  deallocate memory
 !!
 !! PARENTS
+!!      m_cut3d,partial_dos_fractions
+!!
+!! CHILDREN
+!!      splint
 !!
 !! SOURCE
 

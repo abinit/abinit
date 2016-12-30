@@ -2,6 +2,7 @@
 
 !Flags
  ifcflag   1     ! Interatomic force constant flag
+ ifcout 0
  thmflag 3
  telphint 1
 !Wavevector grid number 1 (coarse grid, from DDB)

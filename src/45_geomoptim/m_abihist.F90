@@ -315,7 +315,7 @@ end subroutine abihist_init_1D
 !!  hist <type(abihist)> = The hist to deallocate
 !!
 !! PARENTS
-!!      m_abihist,mover
+!!      m_abihist,m_abiimages,mover,multibinit
 !!
 !! CHILDREN
 !!
@@ -457,7 +457,7 @@ end subroutine abihist_free_1D
 !!  hist <type(abihist)> = The hist to broadcast
 !!
 !! PARENTS
-!!      m_abihist,mover
+!!      mover
 !!
 !! CHILDREN
 !!
