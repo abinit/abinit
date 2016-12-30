@@ -4799,7 +4799,7 @@ subroutine nanal9(dyew,dynmat,iqpt,natom,nqpt,plus)
      do ib=1,natom
        do mu=1,3
          do nu=1,3
-!          The following four lines arethe good ones
+!          The following four lines are the good ones
            dynmat(1,mu,ia,nu,ib,iqpt)=dynmat(1,mu,ia,nu,ib,iqpt) + dyew(1,mu,ia,nu,ib)
            dynmat(2,mu,ia,nu,ib,iqpt)=dynmat(2,mu,ia,nu,ib,iqpt) + dyew(2,mu,ia,nu,ib)
 !          DEBUG
@@ -4932,8 +4932,8 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,&
 
    call ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff)
    call q0dy3_apply(natom,dyewq0,dyew)
-
    call nanal9(dyew,dq,iqpt1,natom,nqpt1,plus1)
+
    ABI_DEALLOCATE(dyew)
  end if
 

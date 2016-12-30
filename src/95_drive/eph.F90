@@ -454,13 +454,14 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  brav1,dtset%asr,dtset%symdynmat,dtset%dipdip,dtset%rfmeth,dtset%ddb_ngqpt,ddb_nqshift,ddb_qshifts,dielt,zeff,&
  nsphere0,rifcsph0,prtsrlr0,dtset%enunit)
  ABI_FREE(ddb_qshifts)
+ call ifc_print_info(ifc, unit=std_out)
 
  ! Compute speed of sound.
  !call ifc_speedofsound(ifc, crystal, 0.001_dp, 10._dp, comm)
 
  ! Test B-spline interpolation of phonons
- if (.False.) then
  !if (.True.) then
+ if (.False.) then
    call ifc_test_phinterp(ifc, cryst, [12,12,12], 1, [zero,zero,zero], [3,3,3], comm)
    !call ifc_set_interpolator(ifc, cryst, nustart, nucount, mode, phspline_ords, phskw_ratio, comm)
    !call ifc_test_intepolator(ifc, dtset, dtfil, comm)

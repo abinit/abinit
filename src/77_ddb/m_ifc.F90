@@ -42,7 +42,7 @@ MODULE m_ifc
 #endif
 
  use m_io_tools,    only : open_file
- use m_fstrings,    only : ktoa
+ use m_fstrings,    only : ktoa, int2char4, sjoin, itoa, ltoa
  use m_time,        only : cwtime
  use m_numeric_tools, only : wrap2_zero_one, wrap2_pmhalf
  use m_copy,        only : alloc_copy
@@ -104,7 +104,7 @@ MODULE m_ifc
     ! Number of division in the Q mesh.
 
    real(dp) :: rprim(3,3),gprim(3,3),acell(3)
-     ! These values are used to call anaddb routines the don't use rprimd, gprimd
+     ! These values are used to call anaddb routines that don't use rprimd, gprimd
 
    ! These values will be stored in ddb but then we have to pass ddb to ifc_fourq
     real(dp) :: dielt(3,3)
@@ -175,6 +175,7 @@ MODULE m_ifc
 
  public :: ifc_init          ! Constructor
  public :: ifc_free          ! Release memory
+ public :: ifc_print_info    ! Print info on the object.
  public :: ifc_fourq         ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
  public :: ifc_speedofsound  ! Compute the speed of sound by averaging phonon group velocities.
  public :: ifc_print         ! Print the ifc (output, netcdf and text file)
@@ -483,8 +484,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    qpt(:)=zero
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
    call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,Crystal%xred,zeff)
-   option=Ifc%asr
-   call q0dy3_calc(natom,dyewq0,dyew,option)
+   call q0dy3_calc(natom,dyewq0,dyew,Ifc%asr)
    ABI_FREE(dyew)
  end if
 
@@ -608,15 +608,12 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ! Apply cutoff on ifc if needed
  if (nsphere/=0 .or. rifcsph>tol10) then
    call wrtout(std_out, 'ifc_init: apply cutoff on IFCs', "COLL")
-
    call corsifc9(ddb%acell,gprim,natom,ifc_tmp%nrpt,nsphere,rifcsph,&
 &   rcan,rprim,ifc_tmp%rpt,ifc_tmp%wghatm)
  end if
 
- !ABI_FREE(dynmat)
-
 !Eventually impose Acoustic Sum Rule to the interatomic forces
-!(Note : here, after the analysis, in which the range
+!(Note: here, after the analysis, in which the range
 !of the short-range IFCs may have been changed
 !That is why it is asked that asr be negative)
 !FIXME: asr < 0 is not tested in abinit suite and does not appear to work
@@ -703,6 +700,89 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ABI_FREE(dynmat_lr)
 
 end subroutine ifc_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ifc/ifc_print_info
+!! NAME
+!!  ifc_print_info
+!!
+!! FUNCTION
+!!  Print info on the object
+!!
+!! INPUTS
+!!  [unit]=Unit number for output. Defaults to std_out
+!!  [prtvol]=Verbosity level.
+!!  [header]=String to be printed as header for additional info.
+!!
+!! OUTPUT
+!!  Only printing
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ifc_print_info(ifc,header,unit,prtvol)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_print_info'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,optional,intent(in) :: unit,prtvol
+ character(len=*),optional,intent(in) :: header
+ type(ifc_type),intent(in) :: ifc
+
+!Local variables-------------------------------
+ integer :: unt,my_prtvol,iatom,ii
+ character(len=500) :: msg
+! *********************************************************************
+
+ unt = std_out; if (present(unit)) unt = unit
+ my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
+
+ msg = ' ==== Info on the ifc% object ==== '
+ if (present(header)) msg = ' ==== '//trim(adjustl(header))//' ==== '
+ call wrtout(unt, msg)
+
+ call wrtout(unt,' Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):')
+ do ii=1,3
+   write(msg,'(1x,a,i1,a,3f11.7,2x,a,i1,a,3f11.7)')&
+    'R(',ii,')=',ifc%rprim(:,ii),'G(',ii,')=',ifc%gprim(:,ii)
+   call wrtout(unt,msg)
+ end do
+ call wrtout(unt, sjoin(" acell:", ltoa(ifc%acell)))
+
+ call wrtout(unt, sjoin(" Acoustic Sum Rule option (asr):", itoa(ifc%asr)))
+ call wrtout(unt, sjoin(" Option for the sampling of the BZ (brav):", itoa(ifc%brav)))
+ call wrtout(unt, sjoin(" Symmetrization flag (symdynmat):", itoa(ifc%symdynmat)))
+ call wrtout(unt, sjoin(" Dipole-dipole interaction flag (dipdip):", itoa(ifc%dipdip)))
+ call wrtout(unt, sjoin(" Dielectric tensor: ", ltoa(reshape(ifc%dielt, [9]), fmt="f5.2")))
+ call wrtout(unt, " Effective charges:")
+ do iatom=1,ifc%natom
+   call wrtout(unt, ltoa(reshape(ifc%zeff(:,:,iatom), [3*3]), fmt="f5.2"))
+ end do
+
+ call wrtout(unt, sjoin(" Mass of the atoms (atomic mass unit): ", ltoa(ifc%amu)))
+ call wrtout(unt, sjoin(" Number of real-space points for IFC(R): ", itoa(ifc%nrpt)))
+ call wrtout(unt, " ")
+
+ call wrtout(unt, " Q-mesh:")
+ call wrtout(unt, sjoin(" ngqpt:", ltoa(ifc%ngqpt),", nqshft:", itoa(ifc%nqshft)))
+ do ii=1,ifc%nqshft
+   call wrtout(unt, sjoin("  ", ktoa(ifc%qshft(:,ii))))
+ end do
+
+end subroutine ifc_print_info
 !!***
 
 !----------------------------------------------------------------------
@@ -887,10 +967,14 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: nqpt1=1,option2=2 !,sumg0=0,plus1=1,iqpt1=1
- integer :: ii,nu,natom3
- real(dp) :: dddq(2,3*cryst%natom,3*cryst%natom,3),dot(2)
+ integer,save :: enough=0
+ integer,parameter :: nqpt1=1,option2=2,sumg0=0 !,plus1=1,iqpt1=1
+ integer :: ii,nu,natom3,jj
+ real(dp) :: hh
+!arrays
+ real(dp) :: dddq(2,3*cryst%natom,3*cryst%natom,3),dot(2),qfd(3)
  real(dp) :: omat(2,3*cryst%natom,3*cryst%natom)
+ real(dp) :: dyew(2,3*cryst%natom,3*cryst%natom)
 
 ! ************************************************************************
 
@@ -907,8 +991,25 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq)
  end do
 
  if (ifc%dipdip==1) then
+   enough = enough + 1
    ! TODO
-   MSG_WARNING("dipdip==1 not yet implemented. Phonon velocities are wrong")
+   if (enough <= 50)  MSG_WARNING("phonon velocitied with dipdip==1 not yet tested.")
+   ! Add the non-analytical part
+   ! Compute dyew(2,3,natom,3,natom)= Ewald part of the dynamical matrix,
+   ! second energy derivative wrt xred(3,natom) in Hartrees
+   hh = 0.001_dp
+   do ii=1,3
+     do jj=-1,1,2
+       qfd = zero; qfd(ii) = jj * hh; qfd = matmul(cryst%rprimd, qfd)
+       qfd = qpt + qfd
+
+       call ewald9(ifc%acell,ifc%dielt,dyew,cryst%gmet,ifc%gprim,cryst%natom,qfd,&
+          cryst%rmet,ifc%rprim,sumg0,cryst%ucvol,cryst%xred,ifc%zeff)
+       call q0dy3_apply(cryst%natom,ifc%dyewq0,dyew)
+       !call nanal9(dyew,dq,iqpt1,cryst%natom,nqpt1,plus1)
+       dddq(:,:,:,ii) = dddq(:,:,:,ii) + (jj * half / hh) * dyew
+     end do
+   end do
  end if
 
  do ii=1,3
@@ -996,6 +1097,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
 
  if (ifc%asr == 0) MSG_WARNING("Computing speed of sound with asr == 0! Use asr > 0")
 
+ ! Speed of sound along reduced directions.
  do ii=1,3
    qpt = zero; qpt(ii) = one
    qpt = qrad * two_pi * qpt / normv(qpt, crystal%gmet, "G")
@@ -1007,7 +1109,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
    write(std_out,"(a,3es12.4)")" vs:",vs(ii,:)
  end do
 
- ! Compute Spherical average with Lebedev-Laikov grid.
+ ! Spherical average with Lebedev-Laikov grids.
  converged = 0
  do igrid=1,lebedev_ngrids
    lgrid = lebedev_new(igrid)
@@ -1221,8 +1323,6 @@ end subroutine corsifc9
 !! SOURCE
 
 subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
-
- use m_fstrings,         only : int2char4
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

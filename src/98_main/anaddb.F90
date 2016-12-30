@@ -419,6 +419,8 @@ program anaddb
 &     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,prtfreq=.True.)
    end if
 
+   call ifc_print_info(ifc, unit=std_out)
+
    ! Compute speed of sound.
    !call ifc_speedofsound(ifc, crystal, 0.001_dp, 10._dp, comm)
    !call ifc_speedofsound(ifc, crystal, 0.0001_dp, 10._dp, comm)

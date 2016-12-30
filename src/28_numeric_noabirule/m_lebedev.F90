@@ -64,8 +64,8 @@ MODULE m_lebedev
 
  end type lebedev_t
 
- public :: lebedev_new
- public :: lebedev_free
+ public :: lebedev_new         ! Create a lebedev grid.
+ public :: lebedev_free        ! Free memory
 
 !----------------------------------------------------------------------
 
@@ -161,7 +161,7 @@ type(lebedev_t) function lebedev_new(seq_idx) result(new)
 
  ABI_MALLOC(new%versors,(3,new%npts))
  do ii=1,new%npts
-   new%versors(:,ii) = [xx(ii),yy(ii),zz(ii)]
+   new%versors(:,ii) = [xx(ii), yy(ii), zz(ii)]
  end do
 
  ABI_FREE(xx)
@@ -272,7 +272,7 @@ subroutine build_lebedev_grid(seq_idx, npts, xx, yy, zz, ww)
 
 ! *********************************************************************
 
- if (seq_idx<1 .or. seq_idx > lebedev_ngrids) then
+ if (seq_idx < 1 .or. seq_idx > lebedev_ngrids) then
    MSG_ERROR(sjoin("seq_idx ",itoa(seq_idx), "out of range"))
  end if
 
@@ -1036,7 +1036,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.1666666666666667D+0
        Call GEN_OH( 1, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -1110,7 +1109,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.7500000000000000D-1
        Call GEN_OH( 3, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -1186,7 +1184,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.3214285714285714D-1
        Call GEN_OH( 3, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -1263,7 +1260,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.2857142857142857D-1
        Call GEN_OH( 5, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -1342,7 +1338,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.2017333553791887D-1
        Call GEN_OH( 4, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -1424,7 +1419,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.1652217099371571D-1
        Call GEN_OH( 5, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -1507,7 +1501,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.1181230374690448D-1
        Call GEN_OH( 5, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -1593,7 +1586,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.9694996361663028D-2
        Call GEN_OH( 5, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -1682,7 +1674,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.6991087353303262D-2
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -1774,7 +1765,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.5968383987681156D-2
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -1869,7 +1859,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.5530248916233094D-2
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -1968,7 +1957,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.4695720972568883D-2
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -2070,7 +2058,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.4071467593830964D-2
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -2176,7 +2163,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.3392312205006170D-2
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -2286,7 +2272,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.2832187403926303D-2
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -2405,7 +2390,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.2236607760437849D-2
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -2539,7 +2523,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.1802239128008525D-2
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -2690,7 +2673,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.1415914757466932D-2
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -2860,7 +2842,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.1121780048519972D-2
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -3051,7 +3032,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.9105760258970126D-3
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -3265,7 +3245,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.7489908329079234D-3
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -3504,7 +3483,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.6375414170333233D-3
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -3770,7 +3748,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.5433312705027845D-3
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -4065,7 +4042,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.4691445539106986D-3
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -4391,7 +4367,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.4087191292799671D-3
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -4750,7 +4725,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.3595855034661997D-3
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -5144,7 +5118,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.3185447944625510D-3
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -5575,7 +5548,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.2843455206008783D-3
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -6045,7 +6017,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.2552114127580376D-3
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -6556,7 +6527,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.2304831913227114D-3
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -7110,7 +7080,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.2090509712889637D-3
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
  end subroutine
 !!***
 
@@ -7709,7 +7678,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
        V=0.1905534498734563D-3
        Call GEN_OH( 6, N, X(N), Y(N), Z(N), W(N), A, B, V)
        N=N-1
-       RETURN
 end subroutine
 !!***
 
