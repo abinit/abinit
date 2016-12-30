@@ -1845,7 +1845,7 @@ subroutine shirley_hks(Wsh,kpt,spin,Ham_k,Cryst,Psps,Pawtab,Pawang,Paw_ij,sh_siz
  ABI_FREE(ylm_k)
  !
  ! Load k-dependent part in the Hamiltonian datastructure
- matblk=NLO_MINCAT ; if (nloalg(1)>0) matblk=natom
+ matblk=min(NLO_MINCAT,maxval(Ham_k%nattyp)) ; if (nloalg(2)>0) matblk=natom
  ABI_MALLOC(ph3d,(2,npw_k,matblk))
  call load_k_hamiltonian(Ham_k,kpt_k=k4intp,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,&
 &                        kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=(Wsh%paral_kgb/=1))
