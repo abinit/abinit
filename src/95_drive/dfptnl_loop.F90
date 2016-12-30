@@ -490,7 +490,16 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                      ABI_DEALLOCATE(work)
 
                    end if
-                   xccc3d2(:)=zero ; vpsp1(:)=zero
+
+                   xccc3d2(:)=zero
+                   if(psps%n1xccc/=0.and.i2pert<=natom) then
+                     call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkcore   ')
+                     call dfpt_mkcore(cplex,i2dir,i2pert,natom,psps%ntypat,n1,psps%n1xccc,&
+&                      n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,&
+&                      psps%xcccrc,psps%xccc1d,xccc3d2,xred)
+                   end if
+
+                   vpsp1(:)=zero
                    !  PAW: compute Vloc(1) and core(1) together in reciprocal space
                    !  --------------------------------------------------------------
                    if (psps%usepaw==1 .or. psps%nc_xccc_gspace==1) then
@@ -515,10 +524,6 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                   &   nattyp,nfftf,ngfftf,psps%ntypat,ngfftf(1),ngfftf(2),ngfftf(3),dtset%paral_kgb,ph1df,psps%qgrid_vl,&
                   &   dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
 
-                     if(psps%n1xccc/=0)then
-                       call dfpt_mkcore(cplex,i2dir,i2pert,dtset%natom,psps%ntypat,ngfftf(1),psps%n1xccc,&
-                  &     ngfftf(2),ngfftf(3),dtset%qptn,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d2,xred)
-                     end if ! psps%n1xccc/=0
                    end if ! usepaw
 
                    call status(counter,dtfil%filstat,iexit,level,'get vtrial1   ')

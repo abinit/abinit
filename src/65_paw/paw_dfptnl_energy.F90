@@ -242,12 +242,6 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    cplex_1=pawrhoij_1(iatom)%cplex
    cplex_2=pawrhoij_2(iatom)%cplex
    cplex_3=pawrhoij_3(iatom)%cplex
-!LTEST
-   write(91,'(a,a,i3)') ch10,' iatom = ',iatom
-   write(91,'(a,i1)'),' cplex_1 = ',cplex_1
-   write(91,'(a,i1)'),' cplex_2 = ',cplex_2
-   write(91,'(a,i1)'),' cplex_3 = ',cplex_3
-!LTEST
    lm_size_all=paw_an0(iatom)%lm_size
 
 !   NOTE : Why lm_size could be dependent of pert?
@@ -271,11 +265,6 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    call pawdensities(compch,cplex_1,iatom_tot,lmselect_tmp,lmselect_1,&
 &   lm_size_all,nhat1_1,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
 &   pawrad(itypat),pawrhoij_1(iatom),pawtab(itypat),rho1_1,trho1_1)
-!LTEST
-   write(91,'(a,es19.10e3)') ' |nhat1_1| = ',sum(abs(nhat1_1))
-   write(91,'(a,es19.10e3)') '  |rho1_1| = ',sum(abs(rho1_1))
-   write(91,'(a,es19.10e3)') ' |trho1_1| = ',sum(abs(trho1_1))
-!LTEST
 !  Compute on-site 1st-order densities (pert2)
    ABI_ALLOCATE(lmselect_2,(lm_size_all))
    lmselect_2(:)=paw_an0(iatom)%lmselect(:)
@@ -285,12 +274,6 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    call pawdensities(compch,cplex_2,iatom_tot,lmselect_tmp,lmselect_2,&
 &   lm_size_all,nhat1_2,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
 &   pawrad(itypat),pawrhoij_2(iatom),pawtab(itypat),rho1_2,trho1_2)
-!LTEST
-   write(91,'(a)') ch10
-   write(91,'(a,es19.10e3)') ' |nhat1_2| = ',sum(abs(nhat1_2))
-   write(91,'(a,es19.10e3)') '  |rho1_2| = ',sum(abs(rho1_2))
-   write(91,'(a,es19.10e3)') ' |trho1_2| = ',sum(abs(trho1_2))
-!LTEST
 !  Compute on-site 1st-order densities (pert3)
    ABI_ALLOCATE(lmselect_3,(lm_size_all))
    lmselect_3(:)=paw_an0(iatom)%lmselect(:)
@@ -300,29 +283,19 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    call pawdensities(compch,cplex_3,iatom_tot,lmselect_tmp,lmselect_3,&
 &   lm_size_all,nhat1_3,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
 &   pawrad(itypat),pawrhoij_3(iatom),pawtab(itypat),rho1_3,trho1_3)
-!LTEST
-   write(91,'(a)') ch10
-   write(91,'(a,es19.10e3)') ' |nhat1_3| = ',sum(abs(nhat1_3))
-   write(91,'(a,es19.10e3)') '  |rho1_3| = ',sum(abs(rho1_3))
-   write(91,'(a,es19.10e3)') ' |trho1_3| = ',sum(abs(trho1_3))
-!LTEST
 
    ABI_DEALLOCATE(lmselect_tmp)
 
-!LTEST
-   write(91,'(a)') ch10
-   write(91,'(a,es19.10e3)') '  |paw_an0%k3xc1| = ',sum(abs(paw_an0(iatom)%k3xc1))
-   write(91,'(a,es19.10e3)') ' |paw_an0%k3xct1| = ',sum(abs(paw_an0(iatom)%k3xct1))
-!LTEST
-
    call paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,paw_an0(iatom)%k3xc1,lm_size_all,&
 &                 lmselect_1,lmselect_2,lmselect_3,nhat1_1,nhat1_2,nhat1_3,&
-&                 paw_an0(iatom)%nk3xc1,mesh_size,nspden,pawang,pawrad(itypat),rho1_1,rho1_2,rho1_3,0)
+&                 paw_an0(iatom)%nk3xc1,mesh_size,nspden,pawang,pawrad(itypat),&
+                  rho1_1,rho1_2,rho1_3,0)
    d3exc = d3exc + d3exc1_iat
 
    call paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,paw_an0(iatom)%k3xc1,lm_size_all,&
 &                 lmselect_1,lmselect_2,lmselect_3,nhat1_1,nhat1_2,nhat1_3,&
-&                 paw_an0(iatom)%nk3xc1,mesh_size,nspden,pawang,pawrad(itypat),trho1_1,trho1_2,rho1_3,usexcnhat)
+&                 paw_an0(iatom)%nk3xc1,mesh_size,nspden,pawang,pawrad(itypat),&
+                  trho1_1,trho1_2,rho1_3,usexcnhat)
    d3exc = d3exc - d3exc1_iat
 
 !   lm_size_eff=min(lm_size_all,pawang%ylm_size)

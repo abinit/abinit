@@ -437,8 +437,8 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 
 !Local variables ---------------------------------------
 !scalars
- integer,parameter :: berryopt=0,optnl=2,tim_getghc=1,tim_getgh1c=1,tim_getgh2c=1 ! to change
- integer :: cpopt,iband,natom,sij_opt,optlocal,opt_gvnl1,usevnl
+ integer,parameter :: berryopt=0,optlocal=1,optnl=2,tim_getghc=1,tim_getgh1c=1,tim_getgh2c=1 ! to change
+ integer :: cpopt,iband,natom,sij_opt,opt_gvnl1,usevnl
  logical :: has_cprj_jband,has_cwaveprj
  real(dp) :: dotr,doti,dotr2,doti2,tol_test
  character(len=500) :: msg
@@ -454,27 +454,29 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 !Check sizes
  if (size(cprj_jband)/=0) then
    if (size(cprj_jband)/=nband_k*gs_hamkq%natom*gs_hamkq%nspinor*gs_hamkq%usecprj) then
-     msg='Wrong cprj size!'
+     write(msg,'(2(a,i10))') &
+     'Wrong cprj size! actual size = ',size(cprj_jband),&
+     ' good size = ',nband_k*gs_hamkq%natom*gs_hamkq%nspinor*gs_hamkq%usecprj
      MSG_BUG(msg)
    end if
  end if
  if (size(cwaveprj)/=0) then
    if (size(cwaveprj)/=gs_hamkq%natom*gs_hamkq%nspinor*gs_hamkq%usecprj) then
-     msg='Wrong cprj size!'
+     write(msg,'(2(a,i10))') &
+     'Wrong cwaveprj size! actual size = ',size(cwaveprj),&
+     ' good size = ',gs_hamkq%natom*gs_hamkq%nspinor*gs_hamkq%usecprj
      MSG_BUG(msg)
    end if
  end if
 
+ natom = gs_hamkq%natom
+
  usevnl     = 0
- optlocal   = 0
  opt_gvnl1  = 0
- if(ipert==gs_hamkq%natom+2.or.(ipert==gs_hamkq%natom+11.and.gs_hamkq%usepaw==1)) then
+ if (ipert==natom+2.or.(ipert==natom+11.and.gs_hamkq%usepaw==1)) then
    usevnl = 1
    opt_gvnl1 = 2
-   if (ipert==gs_hamkq%natom+2) optlocal = 1
  end if
-
- natom = gs_hamkq%natom
  sij_opt=1;if (gs_hamkq%usepaw==0) sij_opt=0
  tol_test=tol8
 
@@ -526,7 +528,7 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 ! *******************************************************************************************
 ! apply H^(1)
 ! *******************************************************************************************
- else if (ipert==natom+1.or.ipert==natom+2) then
+ else if (ipert<=natom+2) then
 
 !  Test if < u^(0) | ( H^(1) - eps^(0) S^(1) ) | u^(0) > = eig^(1)
    if(print_info/=0) then
@@ -544,19 +546,13 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
          dotr = dotr - (eig0(iband)+eig0(jband))*dotr2/two
          doti = doti - (eig0(iband)+eig0(jband))*doti2/two
        end if
-!       if (ipert==natom+2) then
-!         write(msg,'(2(a,es22.13E3))') 'RF2 TEST GETGH1 :  dotr = ',dotr,'  doti = ',doti
-!         call wrtout(std_out,msg)
-!         write(msg,'(2(a,es22.13E3))') 'RF2 TEST GETGH1 : eig1r = ',eig1_k_jband(1+2*(iband-1)),' eig1i = ',eig1_k_jband(2+2*(iband-1))
-!       end if
-       call wrtout(std_out,msg)
        dotr = dotr - eig1_k_jband(1+2*(iband-1))
        doti = doti - eig1_k_jband(2+2*(iband-1))
        dotr = sqrt(dotr**2+doti**2)
        if (dotr > tol_test) then
          write(msg,'(4(a,i2),a,es22.13E3)') 'RF2 TEST GETGH1 : ipert=',ipert,' idir=',idir,&
                                             ' jband=',jband,' iband=',iband,' NOT PASSED dotr = ',dotr
-         call wrtout(std_out,msg)
+         call wrtout(std_out,msg,'COLL')
        end if
      end do ! end iband
      ABI_DEALLOCATE(iddk)
@@ -569,8 +565,15 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 ! apply H^(2)
 ! *******************************************************************************************
  else if (ipert==natom+10.or.ipert==natom+11) then
+
    call getgh2c(cwave,cwaveprj,h_cwave,s_cwave,gs_hamkq,gvnl1,idir,ipert,zero,&
                 mpi_enreg,optlocal,optnl,opt_gvnl1,rf_hamk_idir,sij_opt,tim_getgh2c,usevnl)
+
+ else
+
+   h_cwave = zero
+   MSG_ERROR(" rf2_apply_hamiltonian can be used for ipert=0,<=natom+2,natom+10 or natom+11 only.")
+   return
 
  end if
 
