@@ -1795,13 +1795,13 @@ implicit none
    call ab_define_var(ncid,dim4,rprimd_id,NF90_DOUBLE,&
 &   "rprimd","Real space PRIMitive translations, Dimensional","bohr" )
    call ab_define_var(ncid,dim4,vel_cell_id,NF90_DOUBLE,&
-&   "vel","VELocities of CELl","bohr*Ha/hbar" )
+&   "vel_cell","VELocities of CELl","bohr*Ha/hbar" )
  else
    dim3=(/xyz_id,xyz_id,time_id/)
    call ab_define_var(ncid,dim3,rprimd_id,NF90_DOUBLE,&
 &   "rprimd","Real space PRIMitive translations, Dimensional","bohr" )
    call ab_define_var(ncid,dim3,vel_cell_id,NF90_DOUBLE,&
-&   "vel","VELocities of cell","bohr*Ha/hbar" )
+&   "vel_cell","VELocities of cell","bohr*Ha/hbar" )
  end if
 
 !acell
