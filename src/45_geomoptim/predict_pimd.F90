@@ -117,7 +117,7 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
  if (mpi_enreg%me_cell==0) then
 
    itime=itimimage_eff
-   itime_prev=itime-1;if (itime<1) itime=ntimimage_stored
+   itime_prev=itime-1;if (itime_prev<1) itime_prev=ntimimage_stored
 
    if (mpi_enreg%paral_img==0.or.mpi_enreg%me_img==0) then
      ABI_ALLOCATE(xred,(3,natom,nimage_tot))
@@ -303,7 +303,7 @@ subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,ni
 
 !Store results in final place
  itime=itimimage_eff
- itime_prev=itime-1;if (itime<1) itime=ntimimage_stored
+ itime_prev=itime-1;if (itime_prev<1) itime_prev=ntimimage_stored
  itime_next=itime+1;if (itime_next>ntimimage_stored) itime_next=1
  do ii=1,nimage
    results_img(ii,itime_next)%xred(1:3,1:natom)=mpibuffer(1:3,1:natom,ii)
