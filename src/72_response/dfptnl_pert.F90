@@ -226,9 +226,9 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
    dtset%nkpt,npwarr,dtset%nsppol,option,rprimd,ylm1,ylmgr1)
  end if
 
-!LTEST
- print_info = 1
-!LTEST
+ print_info = 0
+ if (dtset%prtvol==-level) print_info = 1
+
  size_cprj = nspinor
  
  sum_psi1H1psi1 =  zero
@@ -698,7 +698,7 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
 ! **************************************************************************************************
 
  e3tot = sum_psi1H1psi1 + sum_lambda1psi1psi1 + sixth * (exc3 + exc3_paw(1))
- if(print_info/=0) then
+! if(print_info/=0) then
    write(msg,'(2a,3(a,i2,a,i1),5(2a,es19.10e3),a)') ch10,'NONLINEAR : ',&
    ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir,&
    ch10,'      sum_psi1H1psi1 = ',sum_psi1H1psi1,&
@@ -708,7 +708,7 @@ subroutine dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,
    ch10,' >>>>>>>>>>>>> e3tot = ',e3tot,ch10
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
- end if
+! end if
 
  d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = e3tot
 !d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sumi
