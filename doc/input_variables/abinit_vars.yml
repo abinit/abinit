@@ -3218,13 +3218,34 @@
     - 3
     excludes: null
     requires: null
-    section: varrf
+    section: vareph
     text: |-
         This variable is mandatory when [[optdriver]]==7.
         It defines the number of divisions in the (homogeneous) q-mesh
         used to generate the DDB file. See also the description of the [[getddb]] input variable.
     varname: ddb_ngqpt
     vartype: integer
+- !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval:
+    - 0.0
+    - 0.0
+    - 0.0
+    definition: 'Derivative DatabBase: SHIFT of the Q-points '
+    dimensions:
+    - 3
+    excludes: null
+    requires: null
+    section: vareph
+    text: |-
+        Only relevant when [[optdriver]]==7.
+        It defines the shift in the q-mesh used to generate the DDB file,
+        which is defined by the [[ddb_ngqpt]] input variable.
+        See [[shiftk]] for more information on the definition.
+    varname: ddb_shiftq
+    vartype: real
 - !variable
     characteristics: null
     commentdefault: null
@@ -4265,12 +4286,10 @@
            <a href="http://dx.doi.org/10.1016/j.cpc.2015.10.023">
             Comp. Phys. Comm. 200, 274 (2016)
            </a>. Before using it, it has to be installed following
-            instructions at https://triqs.ipht.cnrs.fr/1.4/applications/cthyb/install.html.
+            instructions at https://triqs.ipht.cnrs.fr/1.3/applications/cthyb/install.html.
+            The current interface is valid for TRIQS 1.3 and TRIQS/CTHYB 1.3.
          <br />
-         <br />
-         WARNING: CT-QMC should be used for correlated metals. Even for correlated (Mott) insulators, QMC is expected to be much more precise: Indeed, the Hubbard one neglects the hybridization function.
-         <br />
-         See the usefull variables for CT-QMC solver :
+         See the useful variables for CT-QMC solver :
         [[dmftctqmc_basis]],
         [[dmftctqmc_check]],
         [[dmftctqmc_correl]],
@@ -4280,6 +4299,7 @@
         [[dmftctqmc_mrka]],
         [[dmftctqmc_mov]],
         [[dmftctqmc_order]],
+        [[dmftctqmc_triqs_nleg]],
         [[dmftqmc_l]],
         [[dmftqmc_n]],
         [[dmftqmc_seed]],
@@ -4326,6 +4346,26 @@
         the DMFT Loop needs a better convergence criterion.
         </p>
     varname: dmft_tollc
+    vartype: real
+- !variable
+    characteristics:
+    - '[[DEVELOP]]'
+    commentdefault: null
+    commentdims: null
+    defaultval: 1.0E-4
+    definition: 'Dynamical Mean Fied Theory: Tolerance on LDA correlated electron occupation matrix for the definition of the frequency grid'
+    dimensions: scalar
+    excludes: null
+    requires: null
+    section: vardev
+    text: |-
+        <p>
+         <br />
+         The LDA occupation matrix for correlated electrons can be computed directly. It can be compared to the calculation of the same quantity using LDA Green's function, a sum over Matsubara frequencies and
+         a projection over correlated orbitals.
+         Because the Matsubara grid is finite, the two quantities differ. If this difference is larger than dmft_tolfreq, then the code stops and an error message is given.
+        </p>
+    varname: dmft_tolfreq
     vartype: real
 - !variable
     characteristics:
@@ -4623,6 +4663,28 @@
         The result is written in the "Perturbation.dat" file.
         </p>
     varname: dmftctqmc_order
+    vartype: integer
+- !variable
+    characteristics:
+    - '[[DEVELOP]]'
+    commentdefault: null
+    commentdims: null
+    defaultval: 30 
+    definition: 'Dynamical Mean Fied Theory: Continuous Time Quantum Monte
+        Carlo perturbation of TRIQS, Number of LEGendre polynomials'
+    dimensions: scalar
+    excludes: null
+    requires: '[[dmft_solv]]==6 or 7'
+    section: vardev
+    text: |-
+        <p>
+         <br />
+         Specify the number of Legendre polynomials used for the calculation of Green's function in CTQMC code from the library TRIQS.
+         Default is 30. The value of coefficients are given in file whose name ending is "Legendre_coefficient.dat".
+         (see also <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.84.075145"> Phys. Rev. B 84, 075145 (2010))
+         </a>
+        </p>
+    varname: dmftctqmc_triqs_nleg
     vartype: integer
 - !variable
     characteristics:
@@ -5544,6 +5606,28 @@
         quantities in the eph module of abinit. Value of 1 corresponds to
         elastic LOVA as in the PRB by Savrasov and Savrasov 
     varname: eph_transport
+    vartype: integer
+- !variable
+    characteristics:
+    - '[[DEVELOP]]'
+    commentdefault: null
+    commentdims: null
+    defaultval: 1
+    definition: 'Electron-PHonon: Task'
+    dimensions: scalar
+    excludes: null
+    requires: null
+    section: varrf
+    text: |-
+        <p>
+        When [[optdriver]]==7, select the task to be performed.
+         The choice is among :
+         <br />
+         [[eph_task]]=1 : phonon linewidth
+         <br />
+         [[eph_task]]=2 : electron-phonon coupling elements
+        </p>
+    varname: eph_task
     vartype: integer
 - !variable
     characteristics:
@@ -8374,6 +8458,10 @@
         </p>
         <p>
         [[gwgamma]]=-4 activates the bootstrap kernel of Sharma et al. [Phys. Rev. Lett. 107, 186401 (2011)] in the test-charge-test-charge dielectric function [cf. Chen and Pasquarello, Phys. Rev. B 92, 041115(R) (2015)]. A cheaper one-shot variant can be achieved with [[gwgamma]]=-6 using only the head of the kernel.
+        </p>
+        <p>
+        [[gwgamma]]=-8 uses the RPA bootstrap-like kernel (one-shot) [Phys. Rev.  Lett. 115, 137402 (2015), ibid. 114, 146402 (2015)].
+        </p>
         </p>
     varname: gwgamma
     vartype: integer
@@ -20026,7 +20114,7 @@
     text: |-
         <p>
          Print out geometry (_BLZTRP_GEOM) and eigenenergy (_BLZTRP_EIGEN) files for the
-         <a href="http://www.icams.de/content/departments/cmat/boltztrap/"> BoltzTraP code</a>
+         <a href="http://www.icams.de/content/research/software-development/boltztrap/"> BoltzTraP code</a>
          by Georg Madsen.
         </p>
     varname: prtbltztrp
@@ -20784,6 +20872,24 @@
          If set to 1, the nesting function for the k-point grid is printed. For the moment the path in q space for the nesting function is fixed, but will become an input as well.
         </p>
     varname: prtnest
+    vartype: integer
+- !variable
+    characteristics:
+    - '[[DEVELOP]]'
+    commentdefault: null
+    commentdims: null
+    defaultval: 1
+    definition: PRinT the PHonon Density Of States
+    dimensions: scalar
+    excludes: null
+    requires: null
+    section: vareph
+    text: |-
+        <p>
+        Print the phonon density of states.
+        It is activated by default when [[optdriver]]==7.
+        </p>
+    varname: prtphdos
     vartype: integer
 - !variable
     characteristics:
@@ -21685,6 +21791,24 @@
         [[pvelmax]] is input in Cartesian coordinates.
         </p>
     varname: pvelmax
+    vartype: real
+- !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 40%
+    definition: 'Plane Wave UNBALancing: THRESHold for balancing procedure'
+    dimensions: scalar
+    excludes: null
+    requires: '[[paral_kgb]]==1'
+    section: varpar
+    text: |-
+        <p>
+         This parameter (in %) activates a load balancing procedure when the distribution of plane wave components
+         over MPI processes is not optimal. The balancing procedure is activated when the ratio between the
+         number of plane waves treated by a processor and the ideal one is higher than <i>pw_unbal_thresh</i> %.
+        </p>
+    varname: pw_unbal_thresh
     vartype: real
 - !variable
     characteristics: null
@@ -25472,6 +25596,7 @@
         [[dmft_nwli]],
         [[dmft_nwlo]],
         [[dmft_tollc]],
+        [[dmft_tolfreq]],
         and [[dmft_iter]].
         </p>
         <p>
@@ -27296,7 +27421,7 @@
             performance guide
            </a>
            and the
-           <a href="http://arxiv.org/abs/1406.4350">
+           <a href="https://arxiv.org/abs/1406.4350">
             paper
            </a>
            by A. Levitt and M. Torrent. Status: experimental but usable. Questions and bug reports should be sent to antoine (dot) levitt (at) gmail.com.

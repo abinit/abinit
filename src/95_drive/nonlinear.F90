@@ -91,11 +91,11 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  use m_ddb,         only : psddb8, nlopt, DDB_VERSION
  use m_ioarr,       only : read_rhor
  use m_pawfgr,      only : pawfgr_type,pawfgr_init, pawfgr_destroy
- use m_pawang,      only : pawang_type
+ use m_pawang,      only : pawang_type, pawang_init, pawang_free
  use m_pawrad,      only : pawrad_type
  use m_pawtab,      only : pawtab_type,pawtab_get_lsize
- use m_paw_an,      only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify
- use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
+ use m_paw_an,      only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify, paw_an_print
+ use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_print
  use m_pawfgrtab,   only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, &
 &                          pawrhoij_bcast, pawrhoij_nullify
@@ -145,23 +145,28 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !Local variables-------------------------------
 !scalars
  logical :: paral_atom,call_pawinit,qeq0
+ logical,parameter :: use_nhat_gga=.false.
  integer,parameter :: level=50,formeig=0,response=1,cplex1=1
- integer :: ask_accurate,bantot,choice,cplex,comm_cell,dum_nshiftk,flag
+ integer :: ask_accurate,band_index,bantot,choice,cplex,dum_nshiftk,flag
  integer :: fullinit,gencond,gnt_option,gscase
- integer :: has_dijnd,has_kxc
- integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,iatom,iatom_tot,indx,ider,idir,ierr,ifft,ipert
+ integer :: has_dijnd,has_kxc,has_k3xc
+ integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
+ integer :: iatom,iatom_tot,indx,iband,ider,idir,ierr,ifft,ikpt,ipert,isppol
  integer :: ireadwf0,iscf_eff,ispden,itypat,izero,mcg,me,mgfftf,mkmem_max,mpert,my_natom
- integer :: n1,n2,n3,n3xccc,natom,nblok,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
- integer :: nkpt_max,nkpt3,nkxc,nkxc1,nk3xc,nneigh,ntypat,nspden_rhoij,nzlmopt
+ integer :: n1,n2,n3,n3xccc,natom,nband_k,nblok,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
+ integer :: nkpt_eff,nkpt_max,nkpt3,nkxc,nkxc1,nk3xc,nk3xc1,nneigh,ntypat,nsym1,nspden_rhoij,nzlmopt
  integer :: optcut,optgr0,optgr1,optgr2,optrad,option,optorth
  integer :: optatm,optdyfr,opteltfr,optgr,optstr,optv,optn,optn2
- integer :: psp_gencond,pead,req_cplex_dij,rdwr,rdwrpaw,spaceworld,tim_mkrho,usecprj,usexcnhat
- real(dp) :: boxcut,compch_fft,compch_sph,ecore,ecut_eff,ecutdg_eff
- real(dp) :: eei,epaw,epawdc,enxc,fermie
- real(dp) :: gsqcut,gsqcut_eff,gsqcutdg_eff
+ integer :: psp_gencond,pead,req_cplex_dij,rdwr,rdwrpaw,spaceworld,tim_mkrho,timrev
+ integer :: use_sym,usecprj,usexcnhat
+ real(dp),parameter :: k0(3)=(/zero,zero,zero/)
+ real(dp) :: boxcut,compch_fft,compch_sph,ecore,ecut_eff,ecutdg_eff,ecutf
+ real(dp) :: eei,epaw,epawdc,enxc,etot,fermie
+ real(dp) :: gsqcut,gsqcut_eff,gsqcutc_eff
  real(dp) :: rdum,residm,tolwfr,ucvol,vxcavg
  character(len=500) :: message
  character(len=fnlen) :: dscrpt
+ type(pawang_type) :: pawang1
  type(ebands_t) :: bstruct
  type(hdr_type) :: hdr,hdr_den
  type(wffile_type) :: wffgs,wfftgs
@@ -170,19 +175,21 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  integer :: dum_kptrlatt(3,3),dum_vacuum(3),ngfft(18),ngfftf(18),perm(6),ii
  integer,allocatable :: atindx(:),atindx1(:),blkflg(:,:,:,:,:,:),carflg(:,:,:,:,:,:),cgindex(:,:)
  integer,allocatable :: d3e_pert1(:),d3e_pert2(:),d3e_pert3(:)
- integer,allocatable :: indsym(:,:,:),irrzon(:,:,:),kg(:,:),kneigh(:,:),kg_neigh(:,:,:)
+ integer,allocatable :: indsym(:,:,:),indsy1(:,:,:),irrzon(:,:,:),irrzon1(:,:,:)
+ integer,allocatable :: kg(:,:),kneigh(:,:),kg_neigh(:,:,:)
  integer,allocatable :: kptindex(:,:),l_size_atm(:)
- integer,allocatable :: npwarr(:),nattyp(:),pwind(:,:,:),rfpert(:,:,:,:,:,:),symrec(:,:,:)
+ integer,allocatable :: npwarr(:),nattyp(:),pwind(:,:,:),rfpert(:,:,:,:,:,:)
+ integer,allocatable :: symq(:,:,:),symrec(:,:,:),symaf1(:),symrc1(:,:,:),symrl1(:,:,:)
  real(dp) :: dum_gauss(0),dum_dyfrn(0),dum_dyfrv(0),dum_eltfrxc(0)
  real(dp) :: dum_grn(0),dum_grv(0),dum_rhog(0),dum_vg(0)
- real(dp) :: dum_shiftk(3,210),dummy6(6),gmet(3,3),gprimd(3,3),k0(3)
+ real(dp) :: dum_shiftk(3,210),dummy6(6),gmet(3,3),gprimd(3,3)
  real(dp) :: qphon(3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
  real(dp),allocatable :: amass(:),cg(:,:),d3cart(:,:,:,:,:,:,:)
  real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),dum_kptns(:,:)
  real(dp),allocatable :: dum_wtk(:),dyfrlo(:,:,:),dyfrlo_indx(:,:,:),dyfrx2(:,:,:),eigen0(:) 
  real(dp),allocatable :: grtn_indx(:,:),grxc(:,:),k3xc(:,:),kpt3(:,:),kxc(:,:)
- real(dp),allocatable :: mvwtk(:,:),nhat(:,:),nhatgr(:,:,:),ph1d(:,:),ph1df(:,:),phnons(:,:,:)
- real(dp),allocatable :: rhog(:,:),rhor(:,:),rhowfg(:,:),rhowfr(:,:)
+ real(dp),allocatable :: mvwtk(:,:),nhat(:,:),nhatgr(:,:,:),ph1d(:,:),ph1df(:,:),phnons(:,:,:),phnons1(:,:,:)
+ real(dp),allocatable :: rhog(:,:),rhor(:,:),rhowfg(:,:),rhowfr(:,:),tnons1(:,:)
  real(dp),allocatable :: vhartr(:),vpsp(:),vtrial(:,:),vxc(:,:),work(:),xccc3d(:)
  type(pawfgr_type) :: pawfgr
  type(pawrhoij_type),allocatable :: pawrhoij(:),pawrhoij_read(:)
@@ -196,21 +203,179 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  call timab(501,1,tsec)
  call status(0,dtfil%filstat,iexit,level,'enter         ')
 
- comm_cell = mpi_enreg%comm_cell
-
+!Some data for parallelism
+ nkpt_max=50;if(xmpi_paral==1)nkpt_max=-1
+ my_natom=mpi_enreg%my_natom
+ paral_atom=(my_natom/=dtset%natom)
+!Define FFT grid(s) sizes (be careful !)
 !See NOTES in the comments at the beginning of this file.
  call pawfgr_init(pawfgr,dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfft,ngfftf)
+
+!Structured debugging if dtset%prtvol==-level
+ if(dtset%prtvol==-level)then
+   write(message,'(80a,a,a)')  ('=',ii=1,80),ch10,' nonlinear : enter , debug mode '
+   call wrtout(std_out,message,'COLL')
+ end if
+
  ntypat=psps%ntypat
  natom=dtset%natom
  nfftot=product(ngfft(1:3))
  nfftotf=product(ngfftf(1:3))
 
-!!Init spaceworld
+ call status(0,dtfil%filstat,iexit,level,'call setup1   ')
+
+!Set up for iterations
+ ABI_ALLOCATE(amass,(natom))
+ call setup1(dtset%acell_orig(1:3,1),amass,dtset%amu_orig(:,1),bantot,dtset,&
+& ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
+& natom,ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
+& response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
+
+!Init spaceworld
  spaceworld=mpi_enreg%comm_cell
  me = xmpi_comm_rank(spaceworld)
 
-!Check if the perturbations asked in the input file can be computed
+!Set up the basis sphere of planewaves
+ ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
+ ABI_ALLOCATE(npwarr,(dtset%nkpt))
+ call status(0,dtfil%filstat,iexit,level,'call kpgio(1) ')
+ call kpgio(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kg,&
+& dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,dtset%mpw,npwarr,npwtot,&
+& dtset%nsppol)
 
+ call timab(133,2,tsec)
+ call timab(134,1,tsec)
+
+!Open and read pseudopotential files
+ ecore = 0_dp
+ call status(0,dtfil%filstat,iexit,level,'call pspini(1)')
+ call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,level,pawrad,pawtab,&
+& psps,rprimd,comm_mpi=mpi_enreg%comm_cell)
+
+ call timab(134,2,tsec)
+ call timab(135,1,tsec)
+
+!Initialize band structure datatype
+ bstruct = ebands_from_dtset(dtset, npwarr)
+
+!Initialize PAW atomic occupancies
+ if (psps%usepaw==1) then
+   ABI_DATATYPE_ALLOCATE(pawrhoij,(my_natom))
+   call pawrhoij_nullify(pawrhoij)
+   call initrhoij(dtset%pawcpxocc,dtset%lexexch,dtset%lpawu, &
+&   my_natom,natom,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%ntypat,&
+&   pawrhoij,dtset%pawspnorb,pawtab,dtset%spinat,dtset%typat,&
+&   comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
+ else
+   ABI_DATATYPE_ALLOCATE(pawrhoij,(0))
+ end if
+
+!Initialize header
+ gscase=0
+ call hdr_init(bstruct,codvsn,dtset,hdr,pawtab,gscase,psps,wvl%descr, &
+& comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
+
+!Update header, with evolving variables, when available
+!Here, rprimd, xred and occ are available
+ etot=hdr%etot ; fermie=hdr%fermie ; residm=hdr%residm
+!If parallelism over atom, hdr is distributed
+ call hdr_update(hdr,bantot,etot,fermie,&
+& residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
+& comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
+
+!Clean band structure datatype (should use it more in the future !)
+ call ebands_free(bstruct)
+
+ call status(0,dtfil%filstat,iexit,level,'call inwffil(1')
+
+!Initialize wavefunction files and wavefunctions.
+ ireadwf0=1
+
+ mcg=dtset%mpw*dtset%nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
+ ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
+ ABI_CHECK(ierr==0, "out-of-memory in cg")
+
+ ABI_ALLOCATE(eigen0,(dtset%mband*dtset%nkpt*dtset%nsppol))
+ eigen0(:)=zero ; ask_accurate=1
+ optorth=0
+
+ call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
+& formeig,gmet,hdr,ireadwf0,dtset%istwfk,kg,dtset%kptns,&
+& dtset%localrdwf,dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,&
+& dtset%nband,ngfft,dtset%nkpt,npwarr,dtset%nsppol,dtset%nsym,&
+& occ,optorth,rprimd,dtset%symafm,dtset%symrel,dtset%tnons,&
+& dtfil%unkg,wffgs,wfftgs,dtfil%unwffgs,dtfil%fnamewffk,wvl)
+
+!Close wffgs, if it was ever opened (in inwffil)
+ if (ireadwf0==1) then
+   call WffClose(wffgs,ierr)
+ end if
+
+ if (psps%usepaw==1.and.ireadwf0==1) then
+!  if parallelism, pawrhoij is distributed, hdr%pawrhoij is not
+   call pawrhoij_copy(hdr%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,&
+&   mpi_atmtab=mpi_enreg%my_atmtab)
+ end if
+
+ call timab(135,2,tsec)
+ call timab(136,1,tsec)
+
+!Report on eigen0 values   ! Should use prteigrs.F90
+ write(message, '(a,a)' )
+ call wrtout(std_out,ch10//' respfn : eigen0 array','COLL')
+ nkpt_eff=dtset%nkpt
+ if( (dtset%prtvol==0.or.dtset%prtvol==1.or.dtset%prtvol==2) .and. dtset%nkpt>nkpt_max ) nkpt_eff=nkpt_max
+ band_index=0
+ do isppol=1,dtset%nsppol
+   do ikpt=1,dtset%nkpt
+     nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+     if(ikpt<=nkpt_eff)then
+       write(message, '(a,i2,a,i5)' )'  isppol=',isppol,', k point number',ikpt
+       call wrtout(std_out,message,'COLL')
+       do iband=1,nband_k,4
+         write(message, '(a,4es16.6)')'  ',eigen0(iband+band_index:min(iband+3,nband_k)+band_index)
+         call wrtout(std_out,message,'COLL')
+       end do
+     else if(ikpt==nkpt_eff+1)then
+       write(message,'(a,a)' )'  respfn : prtvol=0, 1 or 2, stop printing eigen0.',ch10
+       call wrtout(std_out,message,'COLL')
+     end if
+     band_index=band_index+nband_k
+   end do
+ end do
+
+!Allocation for forces and atomic positions (should be taken away, also argument ... )
+ ABI_ALLOCATE(grxc,(3,natom))
+
+!Do symmetry stuff
+ ABI_ALLOCATE(irrzon,(nfftot**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
+ ABI_ALLOCATE(phnons,(2,nfftot**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
+ ABI_ALLOCATE(indsym,(4,dtset%nsym,natom))
+ ABI_ALLOCATE(symrec,(3,3,dtset%nsym))
+ irrzon=0;indsym=0;symrec=0;phnons=zero
+!If the density is to be computed by mkrho, need irrzon and phnons
+ iscf_eff=0;if(dtset%getden==0)iscf_eff=1
+ call setsym(indsym,irrzon,iscf_eff,natom,&
+& nfftot,ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
+& phnons,dtset%symafm,symrec,dtset%symrel,dtset%tnons,dtset%typat,xred)
+
+!Symmetrize atomic coordinates over space group elements:
+ call symmetrize_xred(indsym,natom,dtset%nsym,dtset%symrel,dtset%tnons,xred)
+
+!Examine the symmetries of the q wavevector
+ ABI_ALLOCATE(symq,(4,2,dtset%nsym))
+ timrev=1
+
+! By default use symmetries.
+ use_sym = 1
+ if (dtset%prtgkk == 1)then
+   use_sym = 0
+   call littlegroup_q(dtset%nsym,dtset%qptn,symq,symrec,dtset%symafm,timrev,prtvol=dtset%prtvol,use_sym=use_sym)
+ else
+   call littlegroup_q(dtset%nsym,dtset%qptn,symq,symrec,dtset%symafm,timrev,prtvol=dtset%prtvol)
+ end if
+
+!Check if the perturbations asked in the input file can be computed
  if (((dtset%d3e_pert1_phon == 1).and.(dtset%d3e_pert2_phon == 1)).or. &
 & ((dtset%d3e_pert1_phon == 1).and.(dtset%d3e_pert3_phon == 1)).or. &
 & ((dtset%d3e_pert2_phon == 1).and.(dtset%d3e_pert3_phon == 1))) then
@@ -225,11 +390,11 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !Computation of third order derivatives from PEAD (pead=1) or full DPFT formalism (pead=0):
  pead = dtset%usepead
  if (pead==0) then
-   write(message, '(a)' ) 'NONLINEAR : PEAD=0, full DFPT computation of third order derivatives'
+   write(message, '(2a)' ) ch10,'NONLINEAR : PEAD=0, full DFPT computation of third order derivatives'
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
  else
-   write(message, '(a)' ) 'NONLINEAR : PEAD/=0, PEAD computation  of third order derivatives'
+   write(message, '(2a)' ) ch10,'NONLINEAR : PEAD/=0, PEAD computation  of third order derivatives'
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
  end if
@@ -263,22 +428,28 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
        do i2dir = 1, 3
          do i3pert = 1, mpert
            do i3dir = 1, 3
-             perm(1) = d3e_pert1(i1pert)*dtset%d3e_pert1_dir(i1dir) &
+             perm(1) = &
+&              d3e_pert1(i1pert)*dtset%d3e_pert1_dir(i1dir) &
 &             *d3e_pert2(i2pert)*dtset%d3e_pert2_dir(i2dir) &
 &             *d3e_pert3(i3pert)*dtset%d3e_pert3_dir(i3dir)
-             perm(2) = d3e_pert1(i1pert)*dtset%d3e_pert1_dir(i1dir) &
+             perm(2) = &
+&              d3e_pert1(i1pert)*dtset%d3e_pert1_dir(i1dir) &
 &             *d3e_pert2(i3pert)*dtset%d3e_pert2_dir(i3dir) &
 &             *d3e_pert3(i2pert)*dtset%d3e_pert3_dir(i2dir)
-             perm(3) = d3e_pert1(i2pert)*dtset%d3e_pert1_dir(i2dir) &
+             perm(3) = &
+&              d3e_pert1(i2pert)*dtset%d3e_pert1_dir(i2dir) &
 &             *d3e_pert2(i1pert)*dtset%d3e_pert2_dir(i1dir) &
 &             *d3e_pert3(i3pert)*dtset%d3e_pert3_dir(i3dir)
-             perm(4) = d3e_pert1(i2pert)*dtset%d3e_pert1_dir(i2dir) &
+             perm(4) = &
+&              d3e_pert1(i2pert)*dtset%d3e_pert1_dir(i2dir) &
 &             *d3e_pert2(i3pert)*dtset%d3e_pert2_dir(i3dir) &
 &             *d3e_pert3(i1pert)*dtset%d3e_pert3_dir(i1dir)
-             perm(5) = d3e_pert1(i3pert)*dtset%d3e_pert1_dir(i3dir) &
+             perm(5) = &
+&              d3e_pert1(i3pert)*dtset%d3e_pert1_dir(i3dir) &
 &             *d3e_pert2(i2pert)*dtset%d3e_pert2_dir(i2dir) &
 &             *d3e_pert3(i1pert)*dtset%d3e_pert3_dir(i1dir)
-             perm(6) = d3e_pert1(i3pert)*dtset%d3e_pert1_dir(i3dir) &
+             perm(6) = &
+&              d3e_pert1(i3pert)*dtset%d3e_pert1_dir(i3dir) &
 &             *d3e_pert2(i1pert)*dtset%d3e_pert2_dir(i1dir) &
 &             *d3e_pert3(i2pert)*dtset%d3e_pert3_dir(i2dir)
              if (sum(perm(:)) > 0) rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
@@ -289,33 +460,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
    end do
  end do
 
-!Do symmetry stuff
- ABI_ALLOCATE(irrzon,(nfftot**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
- ABI_ALLOCATE(phnons,(2,nfftot**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
- ABI_ALLOCATE(indsym,(4,dtset%nsym,natom))
- ABI_ALLOCATE(symrec,(3,3,dtset%nsym))
- irrzon=0;indsym=0;symrec=0;phnons=zero
-!If the density is to be computed by mkrho, need irrzon and phnons
- iscf_eff=0
- call setsym(indsym,irrzon,iscf_eff,natom,&
-& nfftot,ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
-& phnons,dtset%symafm,symrec,dtset%symrel,dtset%tnons,dtset%typat,xred)
-
-!Symmetrize atomic coordinates over space group elements:
- call symmetrize_xred(indsym,natom,dtset%nsym,dtset%symrel,dtset%tnons,xred)
-
-!!Determine the symmetrical perturbations
-! ABI_ALLOCATE(irrzon,(dtset%nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4)))
-! ABI_ALLOCATE(phnons,(2,dtset%nfft**(1-1/nsym),(nspden/nsppol)-3*(nspden/4)))
-! ABI_ALLOCATE(indsym,(4,nsym,natom))
-! ABI_ALLOCATE(symrec,(3,3,nsym))
-! call status(0,dtfil%filstat,iexit,level,'call setsym   ')
-! call setsym(indsym,irrzon,dtset%iscf,natom,&
-!& nfft,dtset%ngfft,nspden,nsppol,nsym,&
-!& phnons,dtset%symafm,symrec,dtset%symrel,dtset%tnons,dtset%typat,xred)
-
-! call status(0,dtfil%filstat,iexit,level,'call sym_xred ')
-! call symmetrize_xred(indsym,natom,nsym,dtset%symrel,dtset%tnons,xred)
  call status(0,dtfil%filstat,iexit,level,'call sytens   ')
  call sytens(indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel)
 
@@ -323,11 +467,12 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 & ' The list of irreducible elements of the Raman and non-linear',&
 & ch10,' optical susceptibility tensors is:',ch10
  call wrtout(ab_out,message,'COLL')
-
+ call wrtout(std_out,message,'COLL')
+ 
  write(message,'(12x,a)')&
 & 'i1pert  i1dir   i2pert  i2dir   i3pert  i3dir'
  call wrtout(ab_out,message,'COLL')
-
+ call wrtout(std_out,message,'COLL')
  n1 = 0
  do i1pert = 1, natom + 2
    do i1dir = 1, 3
@@ -340,6 +485,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
                write(message,'(2x,i4,a,6(5x,i3))') n1,')', &
 &               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir
                call wrtout(ab_out,message,'COLL')
+               call wrtout(std_out,message,'COLL')
              else if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-2) then
                blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
              end if
@@ -351,141 +497,10 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  end do
  write(message,'(a,a)') ch10,ch10
  call wrtout(ab_out,message,'COLL')
+ call wrtout(std_out,message,'COLL')
 
-!Some data for parallelism
- nkpt_max=50;if(xmpi_paral==1)nkpt_max=-1
- my_natom=mpi_enreg%my_natom
- paral_atom=(my_natom/=dtset%natom)
-!Define FFT grid(s) sizes (be careful !)
 
-!Structured debugging if dtset%prtvol==-level
- if(dtset%prtvol==-level)then
-   write(message,'(80a,a,a)')  ('=',ii=1,80),ch10,' nonlinear : enter , debug mode '
-   call wrtout(std_out,message,'COLL')
- end if
-
-!Set up for iterations
- ecut_eff= (dtset%ecut) * (dtset%dilatmx) **2
- ABI_ALLOCATE(amass,(natom))
- call status(0,dtfil%filstat,iexit,level,'call setup1   ')
- call setup1(dtset%acell_orig(1:3,1),amass,dtset%amu_orig(:,1),bantot,dtset,&
-& ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutdg_eff,&
-& natom,ngfft,ngfftf,dtset%nkpt,dtset%nsppol,&
-& response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
-
-!Set up the basis sphere of planewaves
- ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
- ABI_ALLOCATE(npwarr,(dtset%nkpt))
- call status(0,dtfil%filstat,iexit,level,'call kpgio(1) ')
- call kpgio(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kg,&
-& dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,dtset%mpw,npwarr,npwtot,&
-& dtset%nsppol)
-
-!Initialize band structure datatype
- bstruct = ebands_from_dtset(dtset, npwarr)
-
-!Initialize PAW atomic occupancies
- if (psps%usepaw==1) then
-   ABI_DATATYPE_ALLOCATE(pawrhoij,(my_natom))
-   call pawrhoij_nullify(pawrhoij)
-   call initrhoij(dtset%pawcpxocc,dtset%lexexch,dtset%lpawu, &
-&   my_natom,natom,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%ntypat,&
-&   pawrhoij,dtset%pawspnorb,pawtab,dtset%spinat,dtset%typat,&
-&   comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
- else
-   ABI_DATATYPE_ALLOCATE(pawrhoij,(0))
- end if
-
-!Initialize header
- gscase=0
- call hdr_init(bstruct,codvsn,dtset,hdr,pawtab,gscase,psps,wvl%descr, &
-& comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
-
-!Update header, with evolving variables, when available
-!Here, rprimd, xred and occ are available
- fermie=hdr%fermie ; residm=hdr%residm
-!If parallelism over atom, hdr is distributed
- call hdr_update(hdr,bantot,etotal,fermie,&
-& residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
-& comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
-
-!Clean band structure datatype (should use it more in the future !)
- call ebands_free(bstruct)
-
-! call status(0,dtfil%filstat,iexit,level,'call inwffil(1')
-
-!Initialize wavefunction files and wavefunctions.
- ireadwf0=1
-
- mcg=dtset%mpw*dtset%nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
- ABI_STAT_ALLOCATE(cg,(2,mcg), ierr)
- ABI_CHECK(ierr==0, "out-of-memory in cg")
-
- ABI_ALLOCATE(eigen0,(dtset%mband*dtset%nkpt*dtset%nsppol))
- eigen0(:)=zero ; ask_accurate=1
- optorth=0
-
- call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
-& formeig,gmet,hdr,ireadwf0,dtset%istwfk,kg,dtset%kptns,&
-& dtset%localrdwf,dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,&
-& dtset%nband,ngfft,dtset%nkpt,npwarr,dtset%nsppol,dtset%nsym,&
-& occ,optorth,rprimd,dtset%symafm,dtset%symrel,dtset%tnons,&
-& dtfil%unkg,wffgs,wfftgs,dtfil%unwffgs,dtfil%fnamewffk,wvl)
-
-!Close wffgs, if it was ever opened (in inwffil)
- if (ireadwf0==1) then
-   call WffClose(wffgs,ierr)
- end if
-
- if (psps%usepaw==1.and.ireadwf0==1) then
-!  if parallelism, pawrhoij is distributed, hdr%pawrhoij is not
-   call pawrhoij_copy(hdr%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,&
-&   mpi_atmtab=mpi_enreg%my_atmtab)
- end if
-
-!LBTEST
-! *** TO CALL CTOCPRJ HERE ***
-!LBTEST
-
-! call timab(135,2,tsec)
-! call timab(136,1,tsec)
-
-!!Report on eigen0 values   ! Should use prteigrs.F90
-! write(message, '(a,a)' )
-! call wrtout(std_out,ch10//' respfn : eigen0 array','COLL')
-! nkpt_eff=dtset%nkpt
-! if( (dtset%prtvol==0.or.dtset%prtvol==1.or.dtset%prtvol==2) .and. dtset%nkpt>nkpt_max ) nkpt_eff=nkpt_max
-! band_index=0
-! do isppol=1,dtset%nsppol
-!   do ikpt=1,dtset%nkpt
-!     nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-!     if(ikpt<=nkpt_eff)then
-!       write(message, '(a,i2,a,i5)' )'  isppol=',isppol,', k point number',ikpt
-!       call wrtout(std_out,message,'COLL')
-!       do iband=1,nband_k,4
-!         write(message, '(a,4es16.6)')'  ',eigen0(iband+band_index:min(iband+3,nband_k)+band_index)
-!         call wrtout(std_out,message,'COLL')
-!       end do
-!     else if(ikpt==nkpt_eff+1)then
-!       write(message,'(a,a)' )'  respfn : prtvol=0, 1 or 2, stop printing eigen0.',ch10
-!       call wrtout(std_out,message,'COLL')
-!     end if
-!     band_index=band_index+nband_k
-!   end do
-! end do
-
-!!Examine the symmetries of the q wavevector
-! ABI_ALLOCATE(symq,(4,2,dtset%nsym))
-! timrev=1
-
-!! By default use symmetries.
-! use_sym = 1
-! if (dtset%prtgkk == 1)then
-!   use_sym = 0
-!   call littlegroup_q(dtset%nsym,dtset%qptn,symq,symrec,dtset%symafm,timrev,prtvol=dtset%prtvol,use_sym=use_sym)
-! else
-!   call littlegroup_q(dtset%nsym,dtset%qptn,symq,symrec,dtset%symafm,timrev,prtvol=dtset%prtvol)
-! end if
+ call status(0,dtfil%filstat,iexit,level,'call inwffil(1')
 
 !Generate an index table of atoms, in order for them to be used
 !type after type.
@@ -505,13 +520,6 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
    end do
  end do
 
-!!Here allocation of GPU for fft calculations
-!#if defined HAVE_GPU_CUDA
-! if (dtset%use_gpu_cuda==1) then
-!   call alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,0,psps,dtset%use_gpu_cuda)
-! end if
-!#endif
-
 !Compute structure factor phases for current atomic pos:
  ABI_ALLOCATE(ph1d,(2,3*(2*dtset%mgfft+1)*natom))
  ABI_ALLOCATE(ph1df,(2,3*(2*mgfftf+1)*natom))
@@ -523,24 +531,19 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
    ph1df(:,:)=ph1d(:,:)
  end if
 
-!!Compute occupation numbers and fermi energy, in case occupation scheme is metallic.
-! ABI_ALLOCATE(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
-! if( dtset%occopt>=3.and.dtset%occopt<=8 ) then
-
-!   call newocc(doccde,eigen0,entropy,fermie,dtset%spinmagntarget,dtset%mband,dtset%nband,&
-!&   dtset%nelect,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,dtset%prtvol,dtset%stmbias,&
-!&   dtset%tphysel,dtset%tsmear,dtset%wtk)
-
-!!  Update fermie and occ
-!   etot=hdr%etot ; residm=hdr%residm
-!   call hdr_update(hdr,bantot,etot,fermie,residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
-
-! else
-!!  doccde is irrelevant in this case
-!   doccde(:)=zero
-! end if
-
 qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
+if (.not.qeq0) then
+  MSG_BUG('NONLINEAR with dtset%qptn!=0 is not implemented yet')
+end if
+
+!Recompute first large sphere cut-off gsqcut, without taking into account dilatmx
+ ecutf=dtset%ecut
+ if (psps%usepaw==1) then
+   ecutf=dtset%pawecutdg
+   call wrtout(std_out,ch10//' FFT (fine) grid used in SCF cycle:','COLL')
+ end if
+
+ call getcut(boxcut,ecutf,gmet,gsqcut,dtset%iboxcut,std_out,k0,ngfftf)
 
 !PAW: 1- Initialize values for several arrays depending only on atomic data
 !2- Check overlap
@@ -551,11 +554,7 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
  if(psps%usepaw==1) then
 !  1-Initialize values for several arrays depending only on atomic data
 
-!LBTEST
-! TO UNDERSTAND THAT
-   gnt_option=1
-!   if (dtset%pawxcdev==2.or.dtset%rfphon/=0.or.dtset%rfstrs/=0.or.dtset%rfelfd==1.or.dtset%rfelfd==3) gnt_option=2
-!LBTEST
+   gnt_option=2
 
    ! Test if we have to call pawinit
    call paw_gencond(Dtset,gnt_option,"test",call_pawinit)
@@ -582,14 +581,15 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
    pawtab(:)%usepawu=0
    pawtab(:)%useexexch=0
    pawtab(:)%exchmix=zero
-!  if (dtset%usepawu>0.or.dtset%useexexch>0) then
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
 &   dtset%jpawu,dtset%lexexch,dtset%lpawu,ntypat,pawang,dtset%pawprtvol,pawrad,&
 &   pawtab,dtset%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu)
-!  end if
    compch_fft=-1.d5;compch_sph=-1.d5
    usexcnhat=maxval(pawtab(:)%usexcnhat)
-   usecprj=dtset%pawusecp
+!LTEST
+!   usecprj=dtset%pawusecp
+   usecprj=0
+!LTEST
 !  2-Check overlap
    call chkpawovlp(natom,psps%ntypat,dtset%pawovlp,pawtab,rmet,dtset%typat,xred)
 !  3-Identify FFT points in spheres and compute g_l(r).Y_lm(r) and exp(-i.q.r)
@@ -601,40 +601,13 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
 &     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
      ABI_DEALLOCATE(l_size_atm)
    end if
-!   use_nhat_gga=(dtset%xclevel==2.and.dtset%pawnhatxc>0.and.usexcnhat>0)
    optcut=0;optgr0=dtset%pawstgylm;optgr1=0;optgr2=0;optrad=1-dtset%pawstgylm
-!   if (use_nhat_gga) then
-!     optgr1=dtset%pawstgylm
-!     if (rfphon==1) optgr2=1
-!   end if
-!   if (rfphon==1.or.rfstrs/=0.or.rfelfd==3) then
-!     if (optgr1==0) optgr1=dtset%pawstgylm
-!     if (optgr2==0) optgr2=dtset%pawstgylm
-!     if (optrad==0.and.(.not.qeq0.or.rfstrs/=0.or.rfelfd==3)) optrad=1
-!   end if
-!   if (rfelfd==1.or.rfelfd==3) then
-!     if (optgr1==0) optgr1=dtset%pawstgylm
-!   end if
    optgr1=dtset%pawstgylm
    optgr2=dtset%pawstgylm
    call status(0,dtfil%filstat,iexit,level,'call nhatgrid ')
    call nhatgrid(atindx1,gmet,my_natom,natom,nattyp,ngfftf,psps%ntypat,&
 &   optcut,optgr0,optgr1,optgr2,optrad,pawfgrtab,pawtab,rprimd,dtset%typat,ucvol,xred,&
 &   comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab )
-!  Compute exp(iq.r) factors around the atoms
-   if (.not.qeq0) then
-     do iatom=1,my_natom
-       iatom_tot=iatom; if (paral_atom) iatom_tot=mpi_enreg%my_atmtab(iatom)
-       if (allocated(pawfgrtab(iatom)%expiqr)) then
-         ABI_DEALLOCATE(pawfgrtab(iatom)%expiqr)
-       end if
-       ABI_ALLOCATE(pawfgrtab(iatom)%expiqr,(2,pawfgrtab(iatom)%nfgd))
-       call pawexpiqr(pawfgrtab(iatom)%expiqr,gprimd,pawfgrtab(iatom)%nfgd,dtset%qptn,&
-&       pawfgrtab(iatom)%rfgd,xred(:,iatom_tot))
-       pawfgrtab(iatom)%expiqr_allocated=1
-     end do
-   end if
-!  4-Allocate PAW specific arrays
    ABI_DATATYPE_ALLOCATE(paw_an,(my_natom))
    ABI_DATATYPE_ALLOCATE(paw_ij,(my_natom))
    call paw_an_nullify(paw_an)
@@ -644,21 +617,18 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
    if(any(abs(dtset%nucdipmom)>tol8)) then
      has_dijnd=1; req_cplex_dij=2
    end if
-!   if (rfphon/=0.or.rfelfd==1.or.rfelfd==3.or.rfstrs/=0) then
-     has_kxc=1;nkxc1=2*dtset%nspden-1 ! LDA only
-     if(dtset%xclevel==2.and.dtset%pawxcdev==0) nkxc1=23
-!   end if
-   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,dtset%nspden,cplex,dtset%pawxcdev,&
-&   dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
+   has_kxc=1;nkxc1=2*dtset%nspden-1 ! LDA only
+   has_k3xc=1; nk3xc1=3*min(dtset%nspden,2)-2 ! LDA only
+   if(dtset%xclevel==2.and.dtset%pawxcdev==0) nkxc1=23
+   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,nk3xc1,dtset%nspden,cplex,dtset%pawxcdev,&
+&   dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,has_k3xc=has_k3xc,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
 &   has_dijso=1,has_pawu_occ=1,has_exexch_pot=1,req_cplex_dij=req_cplex_dij,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
-
  else ! PAW vs NCPP
    usexcnhat=0;usecprj=0
-!   use_nhat_gga=.false.
    ABI_DATATYPE_ALLOCATE(paw_an,(0))
    ABI_DATATYPE_ALLOCATE(paw_ij,(0))
    ABI_DATATYPE_ALLOCATE(pawfgrtab,(0))
@@ -688,7 +658,7 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
 !    MT july 2013: Should we read rhoij from the density file ?
    call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor, &
    hdr_den, pawrhoij_read, spaceworld, check_hdr=hdr)
-   etotal = hdr_den%etot; call hdr_free(hdr_den)
+   call hdr_free(hdr_den)
 
    if (rdwrpaw/=0) then
      call pawrhoij_bcast(pawrhoij_read,hdr%pawrhoij,0,spaceworld)
@@ -757,18 +727,6 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
 !!jmb 2012 write(std_out,'(a)')' ' ! needed to make ibm6_xlf12 pass tests. No idea why this works. JWZ 5 Sept 2011
 !!Will compute now the total potential
 
-!Recompute first large sphere cut-off gsqcut,
-!without taking into account dilatmx
- k0(:)=0.0_dp
- call status(0,dtfil%filstat,iexit,level,'call getcut   ')
- call getcut(boxcut,dtset%ecut,gmet,gsqcut,dtset%iboxcut,std_out,k0,dtset%ngfft)
-
-!Open and read pseudopotential files
- ecore = 0_dp
- call status(0,dtfil%filstat,iexit,level,'call pspini   ')
- call pspini(dtset,dtfil,ecore,gencond,gsqcut_eff,gsqcutdg_eff,level,&
-& pawrad,pawtab,psps,rprimd,comm_mpi=mpi_enreg%comm_cell)
-
 !Compute local ionic pseudopotential vpsp and core electron density xccc3d:
  n3xccc=0;if (psps%n1xccc/=0) n3xccc=nfftf
  ABI_ALLOCATE(xccc3d,(n3xccc))
@@ -797,13 +755,11 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
    ABI_DEALLOCATE(grtn_indx)
    if (psps%n1xccc/=0) then
      ABI_ALLOCATE(dyfrx2,(3,3,natom))
-     ABI_ALLOCATE(grxc,(3,natom))
      ABI_ALLOCATE(vxc,(0,0)) ! dummy
      call mkcore(dummy6,dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
 &     ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
 &     psps%xcccrc,psps%xccc1d,xccc3d,xred)
      ABI_DEALLOCATE(dyfrx2)
-     ABI_DEALLOCATE(grxc)
      ABI_DEALLOCATE(vxc) ! dummy
    end if
  end if
@@ -850,7 +806,6 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
  if (psps%usepaw==1)then
    cplex=1;ipert=0;option=1
    nzlmopt=0;if (dtset%pawnzlm>0) nzlmopt=-1
-
    call pawdenpot(compch_sph,epaw,epawdc,ipert,dtset%ixc,my_natom,natom,dtset%nspden,&
 &   ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,&
 &   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
@@ -867,110 +822,39 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
 &   paw_ij,pawang,dtset%pawprtvol,pawtab,rprimd,dtset%symafm,symrec,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call timab(561,2,tsec)
-
  end if
 
-!!Set up the basis sphere of planewaves
-! ABI_ALLOCATE(kg,(3,mpw*dtset%mk1mem))
-! ABI_ALLOCATE(npwarr,(nkpt))
-! call status(0,dtfil%filstat,iexit,level,'call kpgio    ')
-! call kpgio(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kg,&
-!& dtset%kptns,mkmem,dtset%nband,nkpt,'PERS',mpi_enreg,&
-!& mpw,npwarr,npwtot,nsppol)
-
-! OLD NONLINEAR
-!!Initialize band structure datatype
-! bstruct = ebands_from_dtset(dtset, npwarr)
-
-!!Initialize header
-! gscase=0
-! call hdr_init(bstruct,codvsn,dtset,hdr,pawtab,gscase,psps,wvl%descr)
-
-!!Update header, with evolving variables, when available
-!!Here, rprimd, xred and occ are available
-! residm=hdr%residm ; fermie=hdr%fermie
-! call hdr_update(hdr,bantot,etotal,fermie,residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
-
-!!Clean band structure datatype (should use it more in the future !)
-! call ebands_free(bstruct)
-
-!!Read ground-state wavefunctions
-! mcg=dtset%mpw*dtset%nspinor*mband*dtset%mkmem*dtset%nsppol
-! ABI_ALLOCATE(cg,(2,mcg))
-! ABI_ALLOCATE(eigen,(mband*dtset%nkpt*dtset%nsppol))
-! optorth=1;if (psps%usepaw==1) optorth=0
-! ireadwf=1 ; formeig=0
-! eigen(:)=0_dp ; ask_accurate=1
-! call status(0,dtfil%filstat,iexit,level,'call inwffil  ')
-! call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen,dtset%exchn2n3d,&
-!& formeig,gmet,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,&
-!& dtset%localrdwf,mband,mcg,dtset%mkmem,mpi_enreg,mpw,&
-!& dtset%nband,dtset%ngfft,dtset%nkpt,&
-!& npwarr,dtset%nsppol,dtset%nsym,&
-!& occ,optorth,rprimd,dtset%symafm,dtset%symrel,dtset%tnons,&
-!& dtfil%unkg,wffgs,wfftgs,dtfil%unwffgs,&
-!& dtfil%fnamewffk,wvl)
-
-! if (ireadwf==1) then
-!   call WffClose(wffgs,ierr)
-! end if
-
-! ABI_DEALLOCATE(eigen)
-! END OLD
-
-!!Get the ground state charge density
-! if (dtset%getden /= 0 .or. dtset%irdden /= 0) then
-!   rdwrpaw = 0
-!   call status(0,dtfil%filstat,iexit,level,'call ioarr    ')
-
-!   call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfft, dtset%ngfft, rdwrpaw, &
-!   mpi_enreg, rhor, hdr_den, pawrhoij, comm_cell, check_hdr=hdr)
-!   etotal = hdr_den%etot; call hdr_free(hdr_den)
-
-!!  Compute up+down rho(G) by fft
-!   ABI_ALLOCATE(work,(nfft))
-!   work(:)=rhor(:,1)
-!   call status(0,dtfil%filstat,iexit,level,'call fourdp   ')
-!   call fourdp(1,rhog,work,-1,mpi_enreg,nfft,dtset%ngfft,dtset%paral_kgb,0)
-!   ABI_DEALLOCATE(work)
-! end if
-
-!!Compute core electron density xccc3d
-! n1=dtset%ngfft(1) ; n2=dtset%ngfft(2) ; n3=dtset%ngfft(3)
-! ABI_ALLOCATE(grxc,(3,natom))
-! ABI_ALLOCATE(vxc,(nfft,nspden))
-! ABI_ALLOCATE(vhartr,(nfft))
-! n3xccc=0
-! if (psps%n1xccc/=0) n3xccc=nfft
-! ABI_ALLOCATE(xccc3d,(n3xccc))
-! if (psps%n1xccc/=0) then
-!   option=1
-!   ABI_ALLOCATE(dyfrx2,(3,3,natom))
-!   call status(0,dtfil%filstat,iexit,level,'call mkcore   ')
-!   call mkcore(dummy6,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,psps%ntypat,&
-!&   n1,psps%n1xccc,n2,n3,option,rprimd,dtset%typat,ucvol,vxc,&
-!&   psps%xcccrc,psps%xccc1d,xccc3d,xred)
-!   ABI_DEALLOCATE(dyfrx2)
-! end if
-
-!!Comput kxc (second- and third-order exchange-correlation kernel)
-! option=3
-! nkxc=2*nspden-1
-! nk3xc=3*nspden-2
-! if(dtset%xclevel==2) nkxc=23
-! ABI_ALLOCATE(kxc,(nfft,nkxc))
-! ABI_ALLOCATE(k3xc,(nfft,nk3xc))
-
-! call status(0,dtfil%filstat,iexit,level,'call rhohxc   ')
-! ABI_ALLOCATE(work,(0))
-! call rhohxc(dtset,enxc,gsqcut,psps%usepaw,kxc,mpi_enreg,nfft,dtset%ngfft,&
-!& work,0,work,0,nkxc,nk3xc,nspden,n3xccc,option,rhog,rhor,rprimd,strsxc,1,&
-!& vhartr,vxc,vxcavg,xccc3d,k3xc)
-! ABI_DEALLOCATE(work)
-
-! ABI_DEALLOCATE(vhartr)
- ABI_DEALLOCATE(vxc)
  ABI_DEALLOCATE(xccc3d)
+
+!  Determine the subset of symmetry operations (nsym1 operations)
+!  that leaves the perturbation invariant, and initialize corresponding arrays
+!  symaf1, symrl1, tnons1 (and pawang1%zarot, if PAW)..
+ nsym1 = 1
+! symaf1_tmp(1) = 1
+! symrl1_tmp(:,:,1) = dtset%symrel(:,:,1)
+! tnons1_tmp(:,1) = 0_dp
+   ABI_ALLOCATE(indsy1,(4,nsym1,dtset%natom))
+   ABI_ALLOCATE(symrc1,(3,3,nsym1))
+   ABI_ALLOCATE(symaf1,(nsym1))
+   ABI_ALLOCATE(symrl1,(3,3,nsym1))
+   ABI_ALLOCATE(tnons1,(3,nsym1))
+   symaf1(1)= 1 !symaf1_tmp(1:nsym1)
+   symrl1(:,:,1)= dtset%symrel(:,:,1) !symrl1_tmp(:,:,1:nsym1)
+   tnons1(:,1)= 0_dp !tnons1_tmp(:,1:nsym1)
+!   ABI_DEALLOCATE(symaf1_tmp)
+!   ABI_DEALLOCATE(symrl1_tmp)
+!   ABI_DEALLOCATE(tnons1_tmp)
+
+!  Set up corresponding symmetry data
+   ABI_ALLOCATE(irrzon1,(dtset%nfft**(1-1/nsym1),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
+   ABI_ALLOCATE(phnons1,(2,dtset%nfft**(1-1/nsym1),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
+   call setsym(indsy1,irrzon1,1,dtset%natom,dtset%nfft,dtset%ngfft,dtset%nspden,dtset%nsppol,&
+&   nsym1,phnons1,symaf1,symrc1,symrl1,tnons1,dtset%typat,xred)
+   if (psps%usepaw==1) then
+!    Allocate/initialize only zarot in pawang1 datastructure
+     call pawang_init(pawang1,0,pawang%l_max-1,0,nsym1,0,1,0,0,0)
+     call setsymrhoij(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
+   end if
 
  if (pead/=0) then
 !  Initialize finite difference calculation of the ddk
@@ -1021,7 +905,7 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
 &   nkpt3,nneigh,npwarr,dtset%nsppol,occ,pwind)
 
   call status(0,dtfil%filstat,iexit,level,'call pead_nl_loop ')
-  call pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,etotal,gmet,gprimd,gsqcut,&
+  call pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,gmet,gprimd,gsqcut,&
 &  hdr,kg,kneigh,kg_neigh,kptindex,kpt3,kxc,k3xc,dtset%mband,dtset%mgfft,&
 &  dtset%mkmem,mkmem_max,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,mvwtk,natom,nfftf,&
 &  dtset%nkpt,nkpt3,nkxc,nk3xc,nneigh,dtset%nspinor,dtset%nsppol,npwarr,occ,psps,pwind,&
@@ -1030,11 +914,13 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
  else ! pead=0 in this case
 
    call status(0,dtfil%filstat,iexit,level,'call dfptnl_loop ')
-   call dfptnl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,etotal,gmet,gprimd,gsqcut,&
-&   hdr,kg,kneigh,kg_neigh,kptindex,kpt3,kxc,k3xc,dtset%mband,mgfftf,&
-&   dtset%mkmem,mkmem_max,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,mvwtk,natom,nfftf,&
-&   dtset%nkpt,nkpt3,nkxc,nk3xc,nneigh,dtset%nspinor,dtset%nsppol,npwarr,occ,pawfgr,pawtab,psps,pwind,&
-&   rfpert,rhog,rhor,rprimd,ucvol,usecprj,vtrial,xred)
+   call dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gsqcut,&
+&   hdr,kg,kneigh,kg_neigh,kptindex,kpt3,kxc,k3xc,dtset%mband,dtset%mgfft,mgfftf,&
+&   dtset%mkmem,mkmem_max,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,mvwtk,natom,nattyp,ngfftf,nfftf,nhat,&
+&   dtset%nkpt,nkpt3,nkxc,nk3xc,nneigh,dtset%nspinor,dtset%nsppol,npwarr,occ,&
+&   paw_an,paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
+&   ph1d,ph1df,psps,pwind,rfpert,rhog,rhor,rprimd,ucvol,usecprj,vtrial,vxc,xred,&
+&   nsym1,indsy1,symaf1,symrc1)
 
  end if ! end pead/=0
 
@@ -1198,21 +1084,29 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
  ABI_DEALLOCATE(nhat)
  ABI_DEALLOCATE(nhatgr)
  ABI_DEALLOCATE(rfpert)
-! ABI_DEALLOCATE(grxc)
+ ABI_DEALLOCATE(grxc)
  ABI_DEALLOCATE(kg)
  ABI_DEALLOCATE(kxc)
  ABI_DEALLOCATE(k3xc)
  ABI_DEALLOCATE(indsym)
+ ABI_DEALLOCATE(indsy1)
  ABI_DEALLOCATE(nattyp)
  ABI_DEALLOCATE(npwarr)
  ABI_DEALLOCATE(symrec)
-! ABI_DEALLOCATE(irrzon)
-! ABI_DEALLOCATE(phnons)
+ ABI_DEALLOCATE(symrc1)
+ ABI_DEALLOCATE(symaf1)
+ ABI_DEALLOCATE(symrl1)
+ ABI_DEALLOCATE(tnons1)
+ ABI_DEALLOCATE(irrzon1)
+ ABI_DEALLOCATE(phnons1)
+ ABI_DEALLOCATE(symq)
  ABI_DEALLOCATE(ph1d)
  ABI_DEALLOCATE(ph1df)
  ABI_DEALLOCATE(vtrial)
+ ABI_DEALLOCATE(vxc)
  call pawfgr_destroy(pawfgr)
  if (psps%usepaw==1) then
+   call pawang_free(pawang1)
    call pawrhoij_free(pawrhoij)
    call paw_an_free(paw_an)
    call paw_ij_free(paw_ij)
@@ -1225,6 +1119,10 @@ qeq0=(dtset%qptn(1)**2+dtset%qptn(2)**2+dtset%qptn(3)**2<1.d-14)
 
 !Clean the header
  call hdr_free(hdr)
+
+!As the etotal energy has no meaning here, we set it to zero
+!(to avoid meaningless side-effects when comparing ouputs...)
+ etotal = zero
 
  call status(0,dtfil%filstat,iexit,level,' exit         ')
  call timab(501,2,tsec)

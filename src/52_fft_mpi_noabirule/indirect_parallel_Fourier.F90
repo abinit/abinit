@@ -81,7 +81,7 @@ subroutine indirect_parallel_Fourier(index,left,mpi_enreg,ngleft,ngright,nleft,n
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: ngleft(18),ngright(18),nleft,nright,paral_kgb,sizeindex
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: index(sizeindex)
  real(dp),intent(in) :: right(2,nright)

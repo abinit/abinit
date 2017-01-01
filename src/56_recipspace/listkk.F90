@@ -57,7 +57,7 @@
 !!  of the separate vectors.
 !!
 !! PARENTS
-!!      initberry,inwffil,m_bz_mesh,m_dvdb,m_ebands,m_fock,m_phgamma
+!!      initberry,inwffil,m_bz_mesh,m_dvdb,m_ebands,m_fock,m_fstab,m_phgamma
 !!      mlwfovlp_qp
 !!
 !! CHILDREN
@@ -78,13 +78,13 @@ subroutine listkk(dksqmax,gmet,indkk,kptns1,kptns2,nkpt1,nkpt2,nsym,&
  use defs_basis
  use m_errors
  use m_profiling_abi
+ use m_sort
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'listkk'
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

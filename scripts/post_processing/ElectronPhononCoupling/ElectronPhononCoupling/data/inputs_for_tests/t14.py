@@ -45,7 +45,6 @@ fnames = dict(
         DDB_fnames=DDB_fnames,
         EIGR2D_fnames=EIGR2D_fnames,
         EIGI2D_fnames=EIGI2D_fnames,
-        GKK_fnames=GKK_fnames,
         )
 
 # =========================================================================== #

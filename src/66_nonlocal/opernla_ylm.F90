@@ -50,7 +50,7 @@
 !!  kpg(npw,nkpg)=(k+G) components          for ikpg=1...3   (if nkpg=3 or 9)
 !!       [(k+G)_a].[(k+G)_b] quantities for ikpg=4...9   (if nkpg=9)
 !!  matblk=dimension of the array ph3d
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  ndgxdt=second dimension of dgxdt
 !!  nd2gxdt=second dimension of d2gxdt
 !!  nincat=number of atoms in the subset here treated
@@ -135,7 +135,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
  integer,intent(in) :: choice,cplex,dimffnl,ia3,idir,istwf_k,matblk,nd2gxdt
  integer,intent(in) :: ndgxdt,nincat,nkpg,nlmn,npw,nspinor,signs
  real(dp),intent(in) :: ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: indlmn(6,nlmn),nloalg(3)
  integer,intent(out) :: cplex_dgxdt(ndgxdt),cplex_d2gxdt(nd2gxdt)
@@ -182,16 +182,16 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
  if (signs==1) then
 !  signs=1, almost all choices
    check=(choice_==0 .or.choice_==1 .or.choice_==2 .or.choice_==3 .or.choice_==4 .or.&
-&         choice_==23.or.choice_==24.or.choice_==5 .or.choice_==51.or.choice_==52.or.&
-          choice_==53.or.choice_==54.or.choice_==55.or.&
-&         choice_==6 .or.choice_==8 .or.choice_==81)
+&   choice_==23.or.choice_==24.or.choice_==5 .or.choice_==51.or.choice_==52.or.&
+&   choice_==53.or.choice_==54.or.choice_==55.or.&
+&   choice_==6 .or.choice_==8 .or.choice_==81)
    ABI_CHECK(check,'BUG: choice not compatible (for signs=1)')
  end if
  if (signs==2) then
 !  signs=2,less choices
    check=(choice_== 0.or.choice_== 1.or.choice_== 2.or.choice_==3.or.choice_==5.or.&
-&         choice_==23.or.choice_==51.or.choice_==52.or.choice_==54.or.choice_==55.or.&
-&         choice_== 8.or.choice_==81)
+&   choice_==23.or.choice_==51.or.choice_==52.or.choice_==54.or.choice_==55.or.&
+&   choice_== 8.or.choice_==81)
    ABI_CHECK(check,'BUG: signs=2 not compatible with this choice')
  end if
  if (choice_==3.and.signs==2) then
@@ -653,7 +653,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !      --------------------------------------------------------------------
        if ((signs==1).and.&
 &       (choice_==5 .or.choice_==51.or.choice_==52.or.choice_==53.or.&
-&        choice_==54.or.choice_==55.or.choice_==8 .or.choice_==81)) then
+&       choice_==54.or.choice_==55.or.choice_==8 .or.choice_==81)) then
          mu0=1
          if (choice_==54) mu0=4
          if (choice_==55) mu0=7
@@ -727,7 +727,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !      --------------------------------------------------------------------
        if ((signs==2).and.&
 &       (choice_==5.or.choice_==51.or.choice_==52.or.choice_==53.or. &
-&        choice==8.or.choice==81)) then ! Note the use of choice and not choice_=abs(choice)
+&       choice==8.or.choice==81)) then ! Note the use of choice and not choice_=abs(choice)
          mu0=1
          if (choice_==5.or.choice_==51.or.choice_==52) then
 !          We compute the derivative in one direction
@@ -1828,7 +1828,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !      --------------------------------------------------------------------
        if ((signs==1).and.&
 &       (choice_==5 .or.choice_==51.or.choice_==52.or.choice_==53.or.&
-&        choice_==54.or.choice_==55.or.choice_==8 .or.choice_==81)) then
+&       choice_==54.or.choice_==55.or.choice_==8 .or.choice_==81)) then
          mu0=1
          if (choice_==54) mu0=4
          if (choice_==55) mu0=7
@@ -1924,7 +1924,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !      --------------------------------------------------------------------
        if ((signs==2).and.&
 &       (choice_==5.or.choice_==51.or.choice_==52.or.choice_==53.or. &
-&        choice_==8.or.choice_==81)) then
+&       choice_==8.or.choice_==81)) then
          mu0=1
          if (choice_==5.or.choice_==51.or.choice_==52) then
 !          We compute the derivative in one direction

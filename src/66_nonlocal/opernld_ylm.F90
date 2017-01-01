@@ -258,9 +258,9 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
            do ilmn=1,nlmn
              do mu=1,3
                enlj(2*mu-1)=enlj(2*mu-1)+gxfac(1,ilmn,ia,ispinor)*dgxdt(1,mu,ilmn,ia,ispinor) &
-&                                       +gxfac(2,ilmn,ia,ispinor)*dgxdt(2,mu,ilmn,ia,ispinor)
+&               +gxfac(2,ilmn,ia,ispinor)*dgxdt(2,mu,ilmn,ia,ispinor)
                enlj(2*mu  )=enlj(2*mu  )+gxfac(1,ilmn,ia,ispinor)*dgxdt(2,mu,ilmn,ia,ispinor) &
-&                                       -gxfac(2,ilmn,ia,ispinor)*dgxdt(1,mu,ilmn,ia,ispinor)
+&               -gxfac(2,ilmn,ia,ispinor)*dgxdt(1,mu,ilmn,ia,ispinor)
              end do
            end do
          else if (cplex_fac==2) then
@@ -710,9 +710,9 @@ subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d
            do ilmn=1,nlmn
              do mu=1,3
                enlj(2*mu-1)=enlj(2*mu-1)+gxfac_sij(1,ilmn,ia,ispinor)*dgxdt(1,mu,ilmn,ia,ispinor) &
-&                                       +gxfac_sij(2,ilmn,ia,ispinor)*dgxdt(2,mu,ilmn,ia,ispinor)
+&               +gxfac_sij(2,ilmn,ia,ispinor)*dgxdt(2,mu,ilmn,ia,ispinor)
                enlj(2*mu  )=enlj(2*mu  )+gxfac_sij(1,ilmn,ia,ispinor)*dgxdt(2,mu,ilmn,ia,ispinor) &
-&                                       -gxfac_sij(2,ilmn,ia,ispinor)*dgxdt(1,mu,ilmn,ia,ispinor)
+&               -gxfac_sij(2,ilmn,ia,ispinor)*dgxdt(1,mu,ilmn,ia,ispinor)
              end do
            end do
          else if (cplex_fac==2) then

@@ -260,9 +260,11 @@ P           mkmem          29
 - Reading DDK x from file: t88o_DS20_1WF4
 - Reading DDK y from file: t88o_DS20_1WF5
 - Reading DDK z from file: t88o_DS20_1WF6
-- Writing electron DOS to file: t88o_DS1_EDOS
  Fermi level:   7.16066825E+00 [eV]
  Total electron DOS in states/eV :   3.22193685E-01
+- Writing electron DOS to file: t88o_DS1_EDOS
+- Writing Fermi surface to file: t88o_DS1_BXSF
+- Writing nesting factor to file: t88o_DS1_NEST
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
@@ -338,6 +340,7 @@ P           mkmem          29
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
+- Writing phonon dos to file: t88o_DS1_PHDOS
 
  Will write phonon FREQS in BoltzTrap format to file t88o_DS1_BTRAP
 
@@ -432,9 +435,9 @@ extension_switch     1
 - Reading DDK x from file: t88o_DS20_1WF4
 - Reading DDK y from file: t88o_DS20_1WF5
 - Reading DDK z from file: t88o_DS20_1WF6
-- Writing electron DOS to file: t88o_DS2_EDOS
  Fermi level:   7.16066825E+00 [eV]
  Total electron DOS in states/eV :   3.22193685E-01
+- Writing electron DOS to file: t88o_DS2_EDOS
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
@@ -510,6 +513,7 @@ extension_switch     1
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
+- Writing phonon dos to file: t88o_DS2_PHDOS
 --------------------------------------------------------------------------------
 
 
@@ -584,9 +588,9 @@ extension_switch     1
 - Reading DDK x from file: t88o_DS20_1WF4
 - Reading DDK y from file: t88o_DS20_1WF5
 - Reading DDK z from file: t88o_DS20_1WF6
-- Writing electron DOS to file: t88o_DS3_EDOS
  Fermi level:   7.16066825E+00 [eV]
  Total electron DOS in states/eV :   3.22193685E-01
+- Writing electron DOS to file: t88o_DS3_EDOS
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
@@ -662,6 +666,7 @@ extension_switch     1
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
+- Writing phonon dos to file: t88o_DS3_PHDOS
 --------------------------------------------------------------------------------
 
 

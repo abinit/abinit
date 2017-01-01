@@ -17,8 +17,9 @@ and the script "ElectronPhononCoupling/scripts/pp-temperature" in your $PATH
 
 requires
 
-    numpy >= 1.8.1
-    mpi4py >= 2.0.0
+    * numpy >= 1.8.1
+    * mpi4py >= 2.0.0
+    * netCDF4 >= 1.2.1
 
 Usage
 -----

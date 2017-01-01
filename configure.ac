@@ -25,7 +25,7 @@
 
 # Initialize Autoconf
 AC_PREREQ(2.59)
-AC_INIT([ABINIT],[8.1.4],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],[8.1.7],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 7])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
@@ -1210,6 +1210,6 @@ fi
 ABI_MSG_FC_BUGGY(${abi_fc_vendor})
 tmp_etsf_io_in_use=`echo "${lib_trio_flavor}" | grep 'etsf_io'`
 if test "${tmp_etsf_io_in_use}" != ""; then
-  ABI_MSG_NOTICE([etsf_io-deprecated],[Upcoming removal of ETSF_IO])
+  ABI_MSG_NOTICE([etsf_io-deprecated],[Upcoming end of ETSF_IO library support])
 fi
 ABI_MSG_END

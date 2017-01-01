@@ -115,7 +115,7 @@
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(inout) :: ehart01 !vz_i
  real(dp),intent(out) :: vres2
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  real(dp),intent(in) :: gmet(3,3),gprimd(3,3),kxc(nfft,nkxc)
  real(dp),intent(in) :: nhat(nfft,nspden)
@@ -126,7 +126,7 @@
  real(dp),target,intent(in) :: rhor(nfft,nspden),rhor1(cplex*nfft,nspden)
  real(dp),intent(in) :: rprimd(3,3),vpsp1(cplex*nfft)
  real(dp),intent(in) :: xccc3d1(cplex*n3xccc)
- real(dp),intent(inout) :: vtrial1(cplex*nfft,nspden),elpsp1,ehart1,exc1 !vz_d
+ real(dp),intent(inout) :: vtrial1(cplex*nfft,nspden),elpsp1,ehart1,exc1
  real(dp),intent(out) :: vresid1(cplex*nfft,nspden)
  real(dp),target,intent(out) :: vhartr1(:),vxc1(:,:)
 
@@ -148,7 +148,7 @@
 
  !FR EB
  if (nspden==4) then
-   MSG_WARNING('DFPT under development for nspden=4!')
+   MSG_WARNING('DFPT with nspden=4 works just for m quantization axis along z, for insulators and norm-conserving psp!')
  end if
 
 !Get size of FFT grid
@@ -195,6 +195,7 @@
    end if
 !  Note that there is a factor 2.0_dp difference with the similar GS formula
    vhartr1_(:)=vhartr1_(:)+vhartr01(:)
+
    ABI_DEALLOCATE(vhartr01)
  end if
 
@@ -214,8 +215,7 @@
      optnc=1
      optxc=1
      nkxc_cur=nkxc ! TODO: remove nkxc_cur?
-!     print*, 'first time call to mkvxc-noncoll: option= ', option
-     call dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
+     call dfpt_mkvxc_noncoll(1,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
 &     nkxc_cur,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc1_,xccc3d1)
    else
      call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
@@ -253,10 +253,9 @@
      optnc=1
      optxc=1
      nkxc_cur=nkxc
-!     print*, 'second time call to mkvxc-noncoll: option= ', option
-     call dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
+    call dfpt_mkvxc_noncoll(1,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
 &     nkxc_cur,nspden,n3xccc,optnc,option,optxc,paral_kgb,qphon,rhor,rhor1,rprimd,usexcnhat,vxc1val,xccc3d1)
-   else
+    else
      call dfpt_mkvxc(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,usepaw,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,n3xccc,option,paral_kgb,qphon,rhor1,rprimd,usexcnhat,vxc1val,xccc3d1)
    end if !nspden==4
@@ -291,11 +290,19 @@
 
  if (optres==0) then
 !$OMP PARALLEL DO COLLAPSE(2)
-   do ispden=1,nspden
+   do ispden=1,min(nspden,2)
      do ifft=1,cplex*nfft
        vresid1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)-vtrial1(ifft,ispden)
      end do
    end do
+   if(nspden==4)then
+!$OMP PARALLEL DO COLLAPSE(2)
+     do ispden=3,4
+       do ifft=1,cplex*nfft
+         vresid1(ifft,ispden)=vxc1_(ifft,ispden)-vtrial1(ifft,ispden)
+       end do
+     end do
+   end if
 
 !  Compute square norm vres2 of potential residual vresid
    call sqnorm_v(cplex,nfft,vres2,nspden,optres,vresid1)
@@ -306,11 +313,19 @@
 !  (only if requested ; if optres==1)
 
 !$OMP PARALLEL DO COLLAPSE(2)
-   do ispden=1,nspden
+   do ispden=1,min(nspden,2)
      do ifft=1,cplex*nfft
        vtrial1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)
      end do
    end do
+   if(nspden==4)then
+!$OMP PARALLEL DO COLLAPSE(2)
+   do ispden=3,4
+     do ifft=1,cplex*nfft
+       vtrial1(ifft,ispden)=vxc1_(ifft,ispden)
+     end do
+   end do
+   end if
 
  end if
 

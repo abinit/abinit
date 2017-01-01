@@ -51,10 +51,10 @@ double precision,parameter  :: tol6 = 1.d-6, tol14 = 1.d-14, zero = 0.d0
 !!****t* m_tetrahedron/t_tetrahedron
 !! NAME
 !! t_tetrahedron
-!! 
+!!
 !! FUNCTION
 !! tetrahedron geometry object
-!! 
+!!
 !! SOURCE
 
 type, public :: t_tetrahedron
@@ -62,20 +62,20 @@ type, public :: t_tetrahedron
   integer :: ntetra=0
   ! Number of tetrahedra
 
-  double precision  :: vv  
+  double precision  :: vv
   ! volume of the tetrahedra
 
-  integer,allocatable :: tetra_full(:,:,:) 
+  integer,allocatable :: tetra_full(:,:,:)
   !(4,2,ntetra)
   ! For each tetra
   !   (:,1,itetra) indices of the vertex in IBZ (symmetrical image)
   !   (:,2,itetra) indices of the vertexes in the BZ
 
-  integer,allocatable :: tetra_mult(:)     
+  integer,allocatable :: tetra_mult(:)
   !(ntetra)
   ! multiplicity of each irred tetrahedron
 
-  integer,allocatable :: tetra_wrap(:,:,:) 
+  integer,allocatable :: tetra_wrap(:,:,:)
   !(3,4,ntetra)
   ! flag to wrap tetrahedron summit into IBZ
 
@@ -84,14 +84,15 @@ end type t_tetrahedron
 public :: init_tetra           ! Initialize the object.
 public :: get_tetra_weight     ! Calculate integration weights and their derivatives. shape (nkpt,nene)
 public :: tetra_blochl_weights ! Same as in get_tetra_weight but weights have shape (nene,nkpt)
-public :: get_dbl_tetra_weight ! Calculate integration weights for double tetrahedron 
-                               !  integration of delta functions (NB these correspond 
+public :: get_dbl_tetra_weight ! Calculate integration weights for double tetrahedron
+                               !  integration of delta functions (NB these correspond
                                !  to the derivative terms in normal tetrahedron).
 public :: destroy_tetra        ! Free memory.
 
 public :: tetra_write          ! Write text file with tetra info.
 
 public :: tetralib_has_mpi     ! Return True if the library has been compiled with MPI support
+public :: tetra_get_onewk      ! Calculate integration weights and their derivatives for a single k-point in the IBZ.
 !!***
 
 contains
@@ -107,8 +108,8 @@ contains
 !! deallocate tetrahedra pointers if needed
 !!
 !! PARENTS
-!!      ep_el_weights,ep_fs_weights,ep_ph_weights,gstate,m_ebands,m_phgamma
-!!      m_phonons,tetrahedron,thmeig,wfk_analyze
+!!      ep_el_weights,ep_fs_weights,ep_ph_weights,gstate,m_ebands,m_fstab
+!!      m_phgamma,m_phonons,tetrahedron,thmeig,wfk_analyze
 !!
 !! CHILDREN
 !!      mpi_comm_rank,mpi_comm_size
@@ -166,8 +167,8 @@ end subroutine destroy_tetra
 !!  tetrahedra%vv = tetrahedron volume divided by full BZ volume
 !!
 !! PARENTS
-!!      ep_el_weights,ep_fs_weights,ep_ph_weights,m_bz_mesh,m_ebands,m_phgamma
-!!      m_phonons,tetrahedron,thmeig
+!!      ep_el_weights,ep_fs_weights,ep_ph_weights,m_bz_mesh,m_ebands,m_fstab
+!!      m_phgamma,m_phonons,tetrahedron,thmeig
 !!
 !! CHILDREN
 !!      mpi_comm_rank,mpi_comm_size
@@ -199,17 +200,15 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetrahedra,ier
 ! 3 dimensions, 4 summits, and 6 tetrahedra / kpoint box
 !scalars
  integer :: ialltetra,ikpt2,ikpt_full,isummit,itetra,jalltetra,jsummit
- integer :: symrankkpt,mtetra,itmp
- integer :: ntetra_irred
- double precision  :: shift1,shift2,shift3, rcvol
- double precision :: hashfactor
+ integer :: symrankkpt,mtetra,itmp,ntetra_irred
+ double precision  :: shift1,shift2,shift3, rcvol,hashfactor
  type(kptrank_type) :: kptrank_t
 !arrays
  integer :: tetra_shifts(3,4,6)
  double precision  :: k1(3),k2(3),k3(3)
- integer,allocatable :: tetra_full_(:,:,:) !(4,2,mtetra)
- integer,allocatable :: tetra_mult_(:)     !(ntetra)
- integer,allocatable :: tetra_wrap_(:,:,:) !(3,4,ntetra)
+ integer,allocatable :: tetra_full_(:,:,:)
+ integer,allocatable :: tetra_mult_(:)
+ integer,allocatable :: tetra_wrap_(:,:,:)
  integer, allocatable :: reforder(:)
  integer, allocatable :: irred_itetra(:)
  double precision, allocatable :: tetra_hash(:)
@@ -228,9 +227,9 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetrahedra,ier
  TETRA_ALLOCATE(tetra_mult_, (mtetra))
  TETRA_ALLOCATE(tetra_wrap_, (3,4,mtetra))
 
- tetra_mult_(:) = 1
- tetra_full_(:,:,:) = 0
- tetra_wrap_(:,:,:) = 0
+ tetra_mult_ = 1
+ tetra_full_ = 0
+ tetra_wrap_ = 0
 
 ! tetra_shifts(:,1,1) = (/0,0,0/)
 ! tetra_shifts(:,2,1) = (/0,1,0/)
@@ -299,7 +298,7 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetrahedra,ier
 !      Find full kpoint which is summit isummit of tetrahedron itetra around full kpt ikpt_full !
        call get_rank_1kpt (k1,symrankkpt,kptrank_t)
        ikpt2 = kptrank_t%invrank(symrankkpt)
-       if (ikpt2 < 1) then 
+       if (ikpt2 < 1) then
          errorstring='Error in ranking k-points - exiting with un-initialized tetrahedra.'
          ierr = 2
          call destroy_kptrank (kptrank_t)
@@ -360,10 +359,10 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetrahedra,ier
      end do !  loop isummit
 
      if (ialltetra > mtetra) then
-       write (errorstring, '(3a,i6,a,i6)' ) &
+       write (errorstring, '(3a,i0,a,i0)' ) &
 &       ' init_tetra: BUG - ',&
 &       '  ialltetra > mtetra ',&
-&       '  ialltetra=  ',ialltetra,', mtetra=',mtetra
+&       '  ialltetra=  ',ialltetra,', mtetra= ',mtetra
        ierr = 1
        return
      end if
@@ -380,15 +379,9 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetrahedra,ier
 !Volume of all tetrahedra should be the same as that of tetra 1
 !this is the volume of 1 tetrahedron, should be coherent with
 !notation in Lehmann & Taut
- k1(:) = gprimd(:,1)*klatt(1,1) &
-& +  gprimd(:,2)*klatt(2,1) &
-& +  gprimd(:,3)*klatt(3,1)
- k2(:) = gprimd(:,1)*klatt(1,2) &
-& +  gprimd(:,2)*klatt(2,2) &
-& +  gprimd(:,3)*klatt(3,2)
- k3(:) = gprimd(:,1)*klatt(1,3) &
-& +  gprimd(:,2)*klatt(2,3) &
-& +  gprimd(:,3)*klatt(3,3)
+ k1(:) = gprimd(:,1)*klatt(1,1) +  gprimd(:,2)*klatt(2,1) +  gprimd(:,3)*klatt(3,1)
+ k2(:) = gprimd(:,1)*klatt(1,2) +  gprimd(:,2)*klatt(2,2) +  gprimd(:,3)*klatt(3,2)
+ k3(:) = gprimd(:,1)*klatt(1,3) +  gprimd(:,2)*klatt(2,3) +  gprimd(:,3)*klatt(3,3)
  tetrahedra%vv  = abs (k1(1)*(k2(2)*k3(3)-k2(3)*k3(2)) &
 & -k1(2)*(k2(1)*k3(3)-k2(3)*k3(1)) &
 & +k1(3)*(k2(1)*k3(2)-k2(2)*k3(1))) / 6.d0 / rcvol
@@ -408,14 +401,15 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetrahedra,ier
  TETRA_ALLOCATE(tetra_hash, (tetrahedra%ntetra))
  TETRA_ALLOCATE(reforder, (tetrahedra%ntetra))
 
+!MG: In principle the order of the indices should not matter.
  do ialltetra=1, tetrahedra%ntetra
    tetra_hash(ialltetra) = tetra_full_(1,1,ialltetra)*hashfactor**3+&
 &      tetra_full_(2,1,ialltetra)*hashfactor**2+&
 &      tetra_full_(3,1,ialltetra)*hashfactor**1+&
 &      tetra_full_(4,1,ialltetra)
-   reforder(ialltetra) = ialltetra 
+   reforder(ialltetra) = ialltetra
  end do
- 
+
  call sort_tetra(tetrahedra%ntetra, tetra_hash, reforder, tol6)
 
 ! determine number of tetra after reduction
@@ -432,7 +426,7 @@ subroutine init_tetra (indkpt,gprimd,klatt,kpt_fullbz,nkpt_fullbz,tetrahedra,ier
 ! reset number of tetrahedra
  ntetra_irred = jalltetra
 
-! allocate definitive tetra arrays 
+! allocate definitive tetra arrays
  ! transfer to new arrays
  TETRA_ALLOCATE(tetrahedra%tetra_full, (4,2,ntetra_irred))
  TETRA_ALLOCATE(tetrahedra%tetra_mult, (ntetra_irred))
@@ -484,7 +478,7 @@ end subroutine init_tetra
 !! FUNCTION
 !!  Write text file with tetra info.
 !!
-!! INPUTS 
+!! INPUTS
 !!  tetra<t_tetrahedron>=tetrahedron geometry object
 !!  nkibz=Number of k-points in the IBZ used to generate tetra
 !!  kibz(3,nkibz)=Reduced coordinates of the IBZ
@@ -521,12 +515,12 @@ subroutine tetra_write(tetra, nkibz, kibz, path)
  double precision,intent(in) :: kibz(3,nkibz)
 
 !Local variables-------------------------------
- integer,parameter :: version=1,unt=95
- integer :: ik,it
+ integer,parameter :: version=1
+ integer :: ik,it,unt
 
 ! *********************************************************************
 
- open(file=trim(path), unit=unt, form="formatted", status="unknown", action="write")
+ open(file=trim(path), newunit=unt, form="formatted", status="unknown", action="write")
 
  write(unt,*)version, " # version number"
 
@@ -602,6 +596,9 @@ end subroutine tetra_write
 !!
 !! SOURCE
 
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! THIS FUNCTION IS DEPRECATED, USE tetra_blochl_weights
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 subroutine get_tetra_weight(eigen_in,enemin,enemax,max_occ,nene,nkpt,tetrahedra,&
   bcorr,tweight,dtweightde,comm)
 
@@ -645,7 +642,7 @@ end subroutine get_tetra_weight
 
 !----------------------------------------------------------------------
 
-!!****f* m_tetrahedron/tetra_blochl_weights 
+!!****f* m_tetrahedron/tetra_blochl_weights
 !! NAME
 !! tetra_blochl_weights
 !!
@@ -654,7 +651,7 @@ end subroutine get_tetra_weight
 !! Same API as get_tetra_weight but weights here have shape (nene, nkpt)
 !!
 !! PARENTS
-!!      m_ebands,m_phgamma,m_tetrahedron
+!!      m_ebands,m_fstab,m_phgamma,m_tetrahedron
 !!
 !! CHILDREN
 !!      mpi_comm_rank,mpi_comm_size
@@ -683,39 +680,21 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
  double precision ,intent(out) :: dtweightde_t(nene,nkpt),tweight_t(nene,nkpt)
 
 !Local variables-------------------------------
-!  needed for gaussian replacement of Dirac functions
-!  the three coefficients of the DOS as quadratic form,
-!    in the interval [eig(ikpt-1), eig(ikpt)]
-!    for ikpt = 1 we add a point below eigen(1) which doesnt
-!    contribute to the DOS in any tetrahedron
 !scalars
- integer :: ieps,itetra,nn1,nn2,nn3,nn4,nprocs,my_start,my_stop,ierr
- double precision  :: cc,cc1,cc2,cc3,dcc1de,dcc2de,dcc3de,dccde,deltaene,eps
- double precision  :: epsilon21,epsilon31,epsilon32,epsilon41,epsilon42,epsilon43
- double precision  :: gau_prefactor,gau_width,gau_width2,inv_epsilon21,inv_epsilon31
- double precision  :: inv_epsilon32,inv_epsilon41,inv_epsilon42,inv_epsilon43
- double precision  :: deleps1, deleps2, deleps3, deleps4 
- double precision  :: invepsum, cc_pre, dccde_pre
- double precision  :: cc1_pre, cc2_pre, cc3_pre
- double precision  :: cc_tmp, dccde_tmp
- double precision  :: dcc1de_pre, dcc2de_pre, dcc3de_pre
- double precision  :: tmp,volconst,volconst_mult
- double precision ,parameter :: sqrtpi = 1.7724538509055159d0
+ integer :: itetra,nprocs,my_start,my_stop,ierr
+ double precision :: deltaene,volconst,volconst_mult
 !arrays
- integer :: ind_dum(4)
+ integer :: ind_ibz(4)
  !character(len=500) :: msg
- double precision , allocatable :: tweight_tmp(:,:)
- double precision , allocatable :: dtweightde_tmp(:,:)
  double precision  :: eigen_1tetra(4)
- double precision , allocatable :: buffer(:,:) 
+ double precision , allocatable :: tweight_tmp(:,:),dtweightde_tmp(:,:)
+ double precision , allocatable :: buffer(:,:)
 
 ! *********************************************************************
 
  TETRA_ALLOCATE(tweight_tmp, (nene, 4))
  TETRA_ALLOCATE(dtweightde_tmp, (nene, 4))
-
- tweight_t = zero
- dtweightde_t = zero
+ tweight_t = zero; dtweightde_t = zero
 
  volconst = tetrahedra%vv/4.d0
  if (nene <= 1) then
@@ -727,10 +706,7 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
  call split_work(tetrahedra%ntetra,comm,nprocs,my_start,my_stop,ierr)
  if (ierr /= 0) TETRA_ERROR("Error in MPI layer")
 
-!
-!for each tetrahedron
-!
- !do itetra=1,tetrahedra%ntetra
+ ! for each tetrahedron
  do itetra=my_start,my_stop
    tweight_tmp = zero
    dtweightde_tmp = zero
@@ -738,318 +714,39 @@ subroutine tetra_blochl_weights(tetrahedra,eigen_in,enemin,enemax,max_occ,nene,n
    volconst_mult = max_occ*volconst*float(tetrahedra%tetra_mult(itetra))
 
 !  Here we need the original ordering to reference the correct irred kpoints
-   ind_dum(1) = tetrahedra%tetra_full(1,1,itetra)
-   ind_dum(2) = tetrahedra%tetra_full(2,1,itetra)
-   ind_dum(3) = tetrahedra%tetra_full(3,1,itetra)
-   ind_dum(4) = tetrahedra%tetra_full(4,1,itetra)
-   eigen_1tetra(1) = eigen_in(ind_dum(1))
-   eigen_1tetra(2) = eigen_in(ind_dum(2))
-   eigen_1tetra(3) = eigen_in(ind_dum(3))
-   eigen_1tetra(4) = eigen_in(ind_dum(4))
-   call sort_tetra(4,eigen_1tetra,ind_dum,tol14)
+   ind_ibz(1) = tetrahedra%tetra_full(1,1,itetra)
+   ind_ibz(2) = tetrahedra%tetra_full(2,1,itetra)
+   ind_ibz(3) = tetrahedra%tetra_full(3,1,itetra)
+   ind_ibz(4) = tetrahedra%tetra_full(4,1,itetra)
 
-!  
-!  all notations are from Blochl PRB 49 16223 Appendix B
-!  
-   epsilon21 = eigen_1tetra(2)-eigen_1tetra(1)
-   epsilon31 = eigen_1tetra(3)-eigen_1tetra(1)
-   epsilon41 = eigen_1tetra(4)-eigen_1tetra(1)
-   epsilon32 = eigen_1tetra(3)-eigen_1tetra(2)
-   epsilon42 = eigen_1tetra(4)-eigen_1tetra(2)
-   epsilon43 = eigen_1tetra(4)-eigen_1tetra(3)
-   inv_epsilon21 = zero
-   inv_epsilon31 = zero
-   inv_epsilon41 = zero
-   inv_epsilon32 = zero
-   inv_epsilon42 = zero
-   inv_epsilon43 = zero
-   if (epsilon21 > tol6) then
-     inv_epsilon21 = 1.d0 / epsilon21
-   end if
-   if (epsilon31 > tol6) then
-     inv_epsilon31 = 1.d0 / epsilon31
-   end if
-   if (epsilon41 > tol6) then
-     inv_epsilon41 = 1.d0 / epsilon41
-   end if
-   if (epsilon32 > tol6) then
-     inv_epsilon32 = 1.d0 / epsilon32
-   end if
-   if (epsilon42 > tol6) then
-     inv_epsilon42 = 1.d0 / epsilon42
-   end if
-   if (epsilon43 > tol6) then
-     inv_epsilon43 = 1.d0 / epsilon43
-   end if
-   nn1 = int((eigen_1tetra(1)-enemin)/deltaene)+1
-   nn2 = int((eigen_1tetra(2)-enemin)/deltaene)+1
-   nn3 = int((eigen_1tetra(3)-enemin)/deltaene)+1
-   nn4 = int((eigen_1tetra(4)-enemin)/deltaene)+1
+   ! Sort energies before calling get_onetetra_
+   eigen_1tetra(1) = eigen_in(ind_ibz(1))
+   eigen_1tetra(2) = eigen_in(ind_ibz(2))
+   eigen_1tetra(3) = eigen_in(ind_ibz(3))
+   eigen_1tetra(4) = eigen_in(ind_ibz(4))
+   call sort_tetra(4,eigen_1tetra,ind_ibz,tol14)
 
-   nn1 = max(1,nn1)
-   nn1 = min(nn1,nene)
-   nn2 = max(1,nn2)
-   nn2 = min(nn2,nene)
-   nn3 = max(1,nn3)
-   nn3 = min(nn3,nene)
-   nn4 = max(1,nn4)
-   nn4 = min(nn4,nene)
-
-   eps = enemin+nn1*deltaene
-!  
-!  interval enemin < eps < e1 nothing to do
-!  
-!  
-!  interval e1 < eps < e2
-!  
-   deleps1 = eps-eigen_1tetra(1)
-   cc_pre = volconst_mult*inv_epsilon21*inv_epsilon31*inv_epsilon41
-   invepsum = inv_epsilon21+inv_epsilon31+inv_epsilon41
-   dccde_pre = 3.d0*volconst_mult*inv_epsilon21*inv_epsilon31*inv_epsilon41
-   do ieps=nn1+1,nn2
-     cc = cc_pre * deleps1*deleps1*deleps1
-     tweight_tmp(ieps,1) = tweight_tmp(ieps,1) + cc*(4.d0-deleps1*invepsum)
-     tweight_tmp(ieps,2) = tweight_tmp(ieps,2) + cc*deleps1*inv_epsilon21
-     tweight_tmp(ieps,3) = tweight_tmp(ieps,3) + cc*deleps1*inv_epsilon31
-     tweight_tmp(ieps,4) = tweight_tmp(ieps,4) + cc*deleps1*inv_epsilon41
-
-     dccde = dccde_pre * deleps1*deleps1
-     dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) + &
-&     dccde*(4.d0 - deleps1*invepsum) -cc*invepsum
-     dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) + &
-&     (dccde*deleps1 + cc) * inv_epsilon21
-     dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) + &
-&     (dccde*deleps1 + cc) * inv_epsilon31
-     dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + &
-&     (dccde*deleps1 + cc) * inv_epsilon41
-
-     if (bcorr == 1) then
-! bxu, correction terms based on Bloechl's paper
-       tweight_tmp(ieps,1) = tweight_tmp(ieps,1) + &
-&       4.d0*dccde_pre*deleps1*deleps1*(epsilon21+epsilon31+epsilon41)/40.d0
-       tweight_tmp(ieps,2) = tweight_tmp(ieps,2) + &
-&       4.d0*dccde_pre*deleps1*deleps1*(-epsilon21+epsilon32+epsilon42)/40.d0
-       tweight_tmp(ieps,3) = tweight_tmp(ieps,3) + &
-&       4.d0*dccde_pre*deleps1*deleps1*(-epsilon31-epsilon32+epsilon43)/40.d0
-       tweight_tmp(ieps,4) = tweight_tmp(ieps,4) + &
-&       4.d0*dccde_pre*deleps1*deleps1*(-epsilon41-epsilon42-epsilon43)/40.d0
-
-       dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) + &
-&       8.d0*dccde_pre*deleps1*(epsilon21+epsilon31+epsilon41)/40.d0
-       dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) + &
-&       8.d0*dccde_pre*deleps1*(-epsilon21+epsilon32+epsilon42)/40.d0
-       dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) + &
-&       8.d0*dccde_pre*deleps1*(-epsilon31-epsilon32+epsilon43)/40.d0
-       dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + &
-&       8.d0*dccde_pre*deleps1*(-epsilon41-epsilon42-epsilon43)/40.d0
-     end if
-
-     deleps1 = deleps1 + deltaene
-   end do
-   eps = eps + (nn2-nn1)*deltaene
-!  
-!  interval e2 < eps < e3
-!  
-   deleps1 = eps-eigen_1tetra(1)
-   deleps2 = eps-eigen_1tetra(2)
-   deleps3 = eigen_1tetra(3)-eps
-   deleps4 = eigen_1tetra(4)-eps
-
-   cc1_pre = volconst_mult*inv_epsilon31*inv_epsilon41
-   cc2_pre = volconst_mult*inv_epsilon41*inv_epsilon32*inv_epsilon31
-   cc3_pre = volconst_mult*inv_epsilon42*inv_epsilon32*inv_epsilon41
-
-   dcc1de_pre = 2.d0*cc1_pre
-   dcc2de_pre = cc2_pre
-   dcc3de_pre = cc3_pre
-   do ieps=nn2+1,nn3
-     cc1 = cc1_pre * deleps1*deleps1
-     cc2 = cc2_pre * deleps1*deleps2*deleps3
-     cc3 = cc3_pre * deleps2*deleps2*deleps4
-
-     tweight_tmp(ieps,1) = tweight_tmp(ieps,1) + &
-&     cc1 + (cc1+cc2)*deleps3*inv_epsilon31 + &
-&     (cc1+cc2+cc3)*deleps4*inv_epsilon41
-     tweight_tmp(ieps,2) = tweight_tmp(ieps,2) + &
-&     cc1+cc2+cc3+(cc2+cc3)*deleps3*inv_epsilon32 +&
-&     cc3*deleps4*inv_epsilon42
-     tweight_tmp(ieps,3) = tweight_tmp(ieps,3) + &
-&     (cc1+cc2)*deleps1*inv_epsilon31 + &
-&     (cc2+cc3)*deleps2*inv_epsilon32
-     tweight_tmp(ieps,4) = tweight_tmp(ieps,4) + &
-&     (cc1+cc2+cc3)*deleps1*inv_epsilon41 + &
-&     cc3*deleps2*inv_epsilon42
-
-
-     dcc1de = dcc1de_pre * deleps1
-     dcc2de = dcc2de_pre * (-deleps1*deleps2  +deleps1*deleps3  +deleps2*deleps3)
-     dcc3de = dcc3de_pre * (2.d0*deleps2*deleps4  -deleps2*deleps2)
-
-     dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) &
-&     + dcc1de &
-&     + ((dcc1de+dcc2de)*deleps3 -(cc1+cc2)) * inv_epsilon31 &
-&     + ((dcc1de+dcc2de+dcc3de)*deleps4 -(cc1+cc2+cc3)) * inv_epsilon41
-     dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) &
-&     + dcc1de+dcc2de+dcc3de &
-&     + ((dcc2de+dcc3de)*deleps3 -(cc2+cc3) ) * inv_epsilon32 &
-&     + (dcc3de*deleps4  -cc3 ) * inv_epsilon42
-     dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) &
-&     + ((dcc1de+dcc2de)*deleps1 + (cc1+cc2) ) * inv_epsilon31 &
-&     + ((dcc2de+dcc3de)*deleps2 + (cc2+cc3) ) * inv_epsilon32
-     dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) &
-&     + ((dcc1de+dcc2de+dcc3de)*deleps1 + (cc1+cc2+cc3) ) * inv_epsilon41 &
-&     + (dcc3de*deleps2 + cc3) * inv_epsilon42
-
-     if (bcorr == 1) then
-! bxu, correction terms based on Bloechl's paper
-! The correction terms may cause the dtweightde become negative
-       tweight_tmp(ieps,1) = tweight_tmp(ieps,1) + &
-&       4.d0*cc1_pre* &
-&       (3.d0*epsilon21+6.d0*deleps2-3.d0*(epsilon31+epsilon42)*deleps2**2.d0*inv_epsilon32*inv_epsilon42)* &
-&       (epsilon21+epsilon31+epsilon41)/40.d0
-       tweight_tmp(ieps,2) = tweight_tmp(ieps,2) + &
-&       4.d0*cc1_pre* &
-&       (3.d0*epsilon21+6.d0*deleps2-3.d0*(epsilon31+epsilon42)*deleps2**2.d0*inv_epsilon32*inv_epsilon42)* &
-&       (-epsilon21+epsilon32+epsilon42)/40.d0
-       tweight_tmp(ieps,3) = tweight_tmp(ieps,3) + &
-&       4.d0*cc1_pre* &
-&       (3.d0*epsilon21+6.d0*deleps2-3.d0*(epsilon31+epsilon42)*deleps2**2.d0*inv_epsilon32*inv_epsilon42)* &
-&       (-epsilon31-epsilon32+epsilon43)/40.d0
-       tweight_tmp(ieps,4) = tweight_tmp(ieps,4) + &
-&       4.d0*cc1_pre* &
-&       (3.d0*epsilon21+6.d0*deleps2-3.d0*(epsilon31+epsilon42)*deleps2**2.d0*inv_epsilon32*inv_epsilon42)* &
-&       (-epsilon41-epsilon42-epsilon43)/40.d0
-
-       dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) + &
-&       4.d0*cc1_pre* &
-&       (6.d0-6.d0*(epsilon31+epsilon42)*deleps2*inv_epsilon32*inv_epsilon42)* &
-&       (epsilon21+epsilon31+epsilon41)/40.d0
-       dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) + &
-&       4.d0*cc1_pre* &
-&       (6.d0-6.d0*(epsilon31+epsilon42)*deleps2*inv_epsilon32*inv_epsilon42)* &
-&       (-epsilon21+epsilon32+epsilon42)/40.d0
-       dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) + &
-&       4.d0*cc1_pre* &
-&       (6.d0-6.d0*(epsilon31+epsilon42)*deleps2*inv_epsilon32*inv_epsilon42)* &
-&       (-epsilon31-epsilon32+epsilon43)/40.d0
-       dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + &
-&       4.d0*cc1_pre* &
-&       (6.d0-6.d0*(epsilon31+epsilon42)*deleps2*inv_epsilon32*inv_epsilon42)* &
-&       (-epsilon41-epsilon42-epsilon43)/40.d0
-     end if
-
-     deleps1 = deleps1 + deltaene
-     deleps2 = deleps2 + deltaene
-     deleps3 = deleps3 - deltaene
-     deleps4 = deleps4 - deltaene
-   end do
-   eps = eps + (nn3-nn2)*deltaene
-!  
-!  interval e3 < eps < e4
-!  
-   deleps4 = eigen_1tetra(4)-eps
-   cc_pre = volconst_mult*inv_epsilon41*inv_epsilon42*inv_epsilon43
-   invepsum = inv_epsilon41+inv_epsilon42+inv_epsilon43
-   dccde_pre = -3.d0*cc_pre
-   do ieps=nn3+1,nn4
-     cc = cc_pre * deleps4*deleps4*deleps4
-     cc_tmp = cc * deleps4
-     tweight_tmp(ieps,1) = tweight_tmp(ieps,1) + volconst_mult - cc_tmp*inv_epsilon41
-     tweight_tmp(ieps,2) = tweight_tmp(ieps,2) + volconst_mult - cc_tmp*inv_epsilon42
-     tweight_tmp(ieps,3) = tweight_tmp(ieps,3) + volconst_mult - cc_tmp*inv_epsilon43
-     tweight_tmp(ieps,4) = tweight_tmp(ieps,4) + volconst_mult - cc*4.d0 + cc_tmp*invepsum
-
-
-     dccde = dccde_pre * deleps4*deleps4
-     dccde_tmp = -dccde*deleps4 + cc
-     dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) + dccde_tmp * inv_epsilon41
-     dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) + dccde_tmp * inv_epsilon42
-     dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) + dccde_tmp * inv_epsilon43
-     dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) - dccde*4.d0 - dccde_tmp*invepsum
-
-     if (bcorr == 1) then
-! bxu, correction terms based on Bloechl's paper
-! The correction terms may cause the dtweightde become negative
-       tweight_tmp(ieps,1) = tweight_tmp(ieps,1) + &
-&       12.d0*cc_pre*deleps4*deleps4*(epsilon21+epsilon31+epsilon41)/40.d0
-       tweight_tmp(ieps,2) = tweight_tmp(ieps,2) + &
-&       12.d0*cc_pre*deleps4*deleps4*(-epsilon21+epsilon32+epsilon42)/40.d0
-       tweight_tmp(ieps,3) = tweight_tmp(ieps,3) + &
-&       12.d0*cc_pre*deleps4*deleps4*(-epsilon31-epsilon32+epsilon43)/40.d0
-       tweight_tmp(ieps,4) = tweight_tmp(ieps,4) + &
-&       12.d0*cc_pre*deleps4*deleps4*(-epsilon41-epsilon42-epsilon43)/40.d0
-
-       dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) - &
-&       24.d0*cc_pre*deleps4*(epsilon21+epsilon31+epsilon41)/40.d0
-       dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) - &
-&       24.d0*cc_pre*deleps4*(-epsilon21+epsilon32+epsilon42)/40.d0
-       dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) - &
-&       24.d0*cc_pre*deleps4*(-epsilon31-epsilon32+epsilon43)/40.d0
-       dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) - &
-&       24.d0*cc_pre*deleps4*(-epsilon41-epsilon42-epsilon43)/40.d0
-     end if 
-
-     deleps4 = deleps4 - deltaene
-   end do
-   eps = eps + (nn4-nn3)*deltaene
-!  
-!  
-!  interval e4 < eps < enemax
-!  
-   do ieps=nn4+1,nene
-     tweight_tmp(ieps,1) = tweight_tmp(ieps,1) + volconst_mult
-     tweight_tmp(ieps,2) = tweight_tmp(ieps,2) + volconst_mult
-     tweight_tmp(ieps,3) = tweight_tmp(ieps,3) + volconst_mult
-     tweight_tmp(ieps,4) = tweight_tmp(ieps,4) + volconst_mult
-!    dtweightde unchanged by this tetrahedron
-   end do
-
-!  
-!  if we have a fully degenerate tetrahedron,
-!  1) the tweight is a Heaviside (step) function, which is correct above, but
-!  2) the dtweightde should contain a Dirac function: add a Gaussian here
-!  
-   if (epsilon41 < tol6) then
-
-!    to ensure the gaussian will integrate properly:
-!    WARNING: this smearing could be problematic if too large
-!    and doesnt integrate well if its too small
-     gau_width = 10.0d0*deltaene
-     gau_width2 = 1.0 / gau_width / gau_width
-     gau_prefactor = volconst_mult / gau_width / sqrtpi
-!    
-!    average position since bracket for epsilon41 is relatively large
-     cc = (eigen_1tetra(1)+eigen_1tetra(2)+eigen_1tetra(3)+eigen_1tetra(4))/4.d0
-     eps = enemin
-     do ieps=1,nene
-       tmp = eps - cc
-       dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + &
-&       gau_prefactor*exp(-tmp*tmp*gau_width2)
-       eps = eps + deltaene
-     end do
-   end if
-!  end degenerate tetrahedron if
+   call get_onetetra_(tetrahedra,itetra,eigen_1tetra,enemin,enemax,max_occ,nene,nkpt,bcorr,tweight_tmp,dtweightde_tmp)
 
 ! NOTE: the following blas calls are not working systematically, or do not give speed ups, strange...
-!   call daxpy (nene, 1.d0,    tweight_tmp(:,1), 1,    tweight_t(:,ind_dum(1)), 1)
-!   call daxpy (nene, 1.d0,    tweight_tmp(:,2), 1,    tweight_t(:,ind_dum(2)), 1)
-!   call daxpy (nene, 1.d0,    tweight_tmp(:,3), 1,    tweight_t(:,ind_dum(3)), 1)
-!   call daxpy (nene, 1.d0,    tweight_tmp(:,4), 1,    tweight_t(:,ind_dum(4)), 1)
-!   call daxpy (nene, 1.d0, dtweightde_tmp(:,1), 1, dtweightde_t(:,ind_dum(1)), 1)
-!   call daxpy (nene, 1.d0, dtweightde_tmp(:,2), 1, dtweightde_t(:,ind_dum(2)), 1)
-!   call daxpy (nene, 1.d0, dtweightde_tmp(:,3), 1, dtweightde_t(:,ind_dum(3)), 1)
-!   call daxpy (nene, 1.d0, dtweightde_tmp(:,4), 1, dtweightde_t(:,ind_dum(4)), 1)
-   tweight_t(:,ind_dum(1)) = tweight_t(:,ind_dum(1)) + tweight_tmp(:,1)
-   tweight_t(:,ind_dum(2)) = tweight_t(:,ind_dum(2)) + tweight_tmp(:,2)
-   tweight_t(:,ind_dum(3)) = tweight_t(:,ind_dum(3)) + tweight_tmp(:,3)
-   tweight_t(:,ind_dum(4)) = tweight_t(:,ind_dum(4)) + tweight_tmp(:,4)
-   dtweightde_t(:,ind_dum(1)) = dtweightde_t(:,ind_dum(1)) + dtweightde_tmp(:,1)
-   dtweightde_t(:,ind_dum(2)) = dtweightde_t(:,ind_dum(2)) + dtweightde_tmp(:,2)
-   dtweightde_t(:,ind_dum(3)) = dtweightde_t(:,ind_dum(3)) + dtweightde_tmp(:,3)
-   dtweightde_t(:,ind_dum(4)) = dtweightde_t(:,ind_dum(4)) + dtweightde_tmp(:,4)
+!   call daxpy (nene, 1.d0,    tweight_tmp(:,1), 1,    tweight_t(:,ind_ibz(1)), 1)
+!   call daxpy (nene, 1.d0,    tweight_tmp(:,2), 1,    tweight_t(:,ind_ibz(2)), 1)
+!   call daxpy (nene, 1.d0,    tweight_tmp(:,3), 1,    tweight_t(:,ind_ibz(3)), 1)
+!   call daxpy (nene, 1.d0,    tweight_tmp(:,4), 1,    tweight_t(:,ind_ibz(4)), 1)
+!   call daxpy (nene, 1.d0, dtweightde_tmp(:,1), 1, dtweightde_t(:,ind_ibz(1)), 1)
+!   call daxpy (nene, 1.d0, dtweightde_tmp(:,2), 1, dtweightde_t(:,ind_ibz(2)), 1)
+!   call daxpy (nene, 1.d0, dtweightde_tmp(:,3), 1, dtweightde_t(:,ind_ibz(3)), 1)
+!   call daxpy (nene, 1.d0, dtweightde_tmp(:,4), 1, dtweightde_t(:,ind_ibz(4)), 1)
+   tweight_t(:,ind_ibz(1)) = tweight_t(:,ind_ibz(1)) + tweight_tmp(:,1)
+   tweight_t(:,ind_ibz(2)) = tweight_t(:,ind_ibz(2)) + tweight_tmp(:,2)
+   tweight_t(:,ind_ibz(3)) = tweight_t(:,ind_ibz(3)) + tweight_tmp(:,3)
+   tweight_t(:,ind_ibz(4)) = tweight_t(:,ind_ibz(4)) + tweight_tmp(:,4)
+   dtweightde_t(:,ind_ibz(1)) = dtweightde_t(:,ind_ibz(1)) + dtweightde_tmp(:,1)
+   dtweightde_t(:,ind_ibz(2)) = dtweightde_t(:,ind_ibz(2)) + dtweightde_tmp(:,2)
+   dtweightde_t(:,ind_ibz(3)) = dtweightde_t(:,ind_ibz(3)) + dtweightde_tmp(:,3)
+   dtweightde_t(:,ind_ibz(4)) = dtweightde_t(:,ind_ibz(4)) + dtweightde_tmp(:,4)
 
- end do
-!end do itetra
+ end do ! itetra
 
  TETRA_DEALLOCATE(tweight_tmp)
  TETRA_DEALLOCATE(dtweightde_tmp)
@@ -1078,10 +775,10 @@ end subroutine tetra_blochl_weights
 !! FUNCTION
 !! calculate integration weights and their derivatives
 !! for double tetrahedron method from Allen Phys Stat Sol B 120 529 (1983)
-!! the k-points and tetrahedra must be the same for both grids, of course, 
+!! the k-points and tetrahedra must be the same for both grids, of course,
 !! but the range of energies is arbitrary
 !!
-!! Omega is called eigen1 here 
+!! Omega is called eigen1 here
 !! E is called eigen2 here
 !! indexing goes from 1 to 4 for the tetrahedron corners, in order of increasing eigen1
 !!  in Allen, from 0 to 3...
@@ -1154,7 +851,7 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
 
  double precision  :: deltaene1,eps1
  double precision  :: deltaene2,eps2
-! double precision  :: gau_prefactor,gau_width,gau_width2 
+! double precision  :: gau_prefactor,gau_width,gau_width2
  double precision  :: epsilon1(4,4)
  double precision  :: epsilon2(4,4)
  double precision  :: inv_epsilon1(4,4)
@@ -1264,7 +961,7 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
    nn1_4 = min(nn1_4,nene1)
 
    ! calculate Allen a_i b_i and c_i parameters
-   ! sort the a_i b_i c_i 
+   ! sort the a_i b_i c_i
    !
    ! NOTE: indices here go from 1 to 4 instead of 0 to 3 as in Allen...
    aa(1) = epsilon2(2,1) * inv_epsilon1(2,1)
@@ -1293,7 +990,7 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
    if(delbb(1)> tol6) inv_delbb(1)= 1.0d0 / delbb(1)
    if(delbb(2)> tol6) inv_delbb(2)= 1.0d0 / delbb(2)
    if(delbb(3)> tol6) inv_delbb(3)= 1.0d0 / delbb(3)
-    
+
    cc(1) = epsilon2(1,4) * inv_epsilon1(1,4)
    cc(2) = epsilon2(2,4) * inv_epsilon1(2,4)
    cc(3) = epsilon2(3,4) * inv_epsilon1(3,4)
@@ -1311,12 +1008,12 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
 ! start main loop A B C over eps1
 !----------------------------------------------------------------------
 
-!  
+!
 !  interval enemin1 < eps1 < e1 nothing to do
-!  
-!  
+!
+!
 !  interval e1 < eps1 < e3   CASE A in Allen + first term in B
-!  
+!
 ! NB: eps1 is not updated inside the loop, only between the loops
    eps1 = enemin1+nn1_1*deltaene1
    deleps1 = eps1-eigen1_1tetra(1) ! this is Omega - omega_0
@@ -1395,9 +1092,9 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
    end do
 
 
-!  
+!
 !  interval e2 < eps < e3
-!  
+!
    eps1 = eps1 + (nn1_2-nn1_1)*deltaene1
 
    deleps1 = eps1-eigen1_1tetra(2) ! Omega - omega_1
@@ -1476,9 +1173,9 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
      deleps1 = deleps1 + deltaene1
    end do
 
-!  
+!
 !  interval e3 < eps < e4
-!  
+!
    eps1 = eps1 + (nn1_3-nn1_2)*deltaene1
    deleps1 = eps1-eigen1_1tetra(4)
    dccde1_pre = 6.d0*volconst_mult*inv_epsilon1(4,1)*inv_epsilon1(4,2)*inv_epsilon1(4,3)
@@ -1554,27 +1251,27 @@ subroutine get_dbl_tetra_weight(eigen1_in,eigen2_in,enemin1,enemax1,enemin2,enem
    end do
 
    eps1 = eps1 + (nn1_4-nn1_3)*deltaene1
-!  
-!  
+!
+!
 !  interval e4 < eps < enemax
-!  
+!
    do ieps1=nn1_4+1,nene1
 !    dtweightde unchanged by this tetrahedron
    end do
 
-!  
+!
 !  if we have a fully degenerate tetrahedron,
 !  1) the tweight is a Heaviside (step) function, which is correct above, but
 !  2) the dtweightde should contain a Dirac function: add a Gaussian here
 
-! TODO : add treatment in double tetra case  
+! TODO : add treatment in double tetra case
 !  end degenerate tetrahedron if
 
 ! NOTE: the following blas calls are not working systematically, or do not give speed ups, strange...
-!   call daxpy (nene, 1.d0, dtweightde_tmp(:,1), 1, dtweightde_t(:,ind_dum(1)), 1)
-!   call daxpy (nene, 1.d0, dtweightde_tmp(:,2), 1, dtweightde_t(:,ind_dum(2)), 1)
-!   call daxpy (nene, 1.d0, dtweightde_tmp(:,3), 1, dtweightde_t(:,ind_dum(3)), 1)
-!   call daxpy (nene, 1.d0, dtweightde_tmp(:,4), 1, dtweightde_t(:,ind_dum(4)), 1)
+!   call daxpy (nene, 1.d0, dtweightde_tmp(:,1), 1, dtweightde_t(:,ind_ibz(1)), 1)
+!   call daxpy (nene, 1.d0, dtweightde_tmp(:,2), 1, dtweightde_t(:,ind_ibz(2)), 1)
+!   call daxpy (nene, 1.d0, dtweightde_tmp(:,3), 1, dtweightde_t(:,ind_ibz(3)), 1)
+!   call daxpy (nene, 1.d0, dtweightde_tmp(:,4), 1, dtweightde_t(:,ind_ibz(4)), 1)
 
    do ieps2 = 1, nene2
      dtweightde(ind_k(1),:,ieps2) = dtweightde(ind_k(1),:,ieps2) + dtweightde_tmp(1,ieps2,:)
@@ -1600,7 +1297,7 @@ end subroutine get_dbl_tetra_weight
 !! NAME
 !!  sort_tetra
 !!
-!! FUNCTION 
+!! FUNCTION
 !!  Sort double precision array list(n) into ascending numerical order using Heapsort
 !!  algorithm, while making corresponding rearrangement of the integer
 !!  array iperm. Consider that two double precision numbers
@@ -1692,7 +1389,7 @@ subroutine sort_tetra(n,list,iperm,tol)
    i=l
    j=l+l
 
-   do while (j<=ir) 
+   do while (j<=ir)
     if (j<ir) then
      if ( list(j)<list(j+1)-tol .or.  &
 &        (list(j)<list(j+1)+tol.and.iperm(j)<iperm(j+1))) j=j+1
@@ -1828,6 +1525,444 @@ subroutine split_work(ntasks,comm,nprocs,my_start,my_stop,ierr)
  ierr = 0
 
 end subroutine split_work
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_tetrahedron/get_onetetra_
+!! NAME
+!! get_onetetra_
+!!
+!! FUNCTION
+!! Private function to calculate the contributions to the weights due to a single tetrahedron.
+!! Extracted from get_tetra_weight
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure subroutine get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,nene,nkpt,bcorr, &
+&  tweight_tmp,dtweightde_tmp)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'get_onetetra_'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nene,nkpt,bcorr,itetra
+ type(t_tetrahedron), intent(in) :: tetra
+ double precision ,intent(in) :: enemax,enemin,max_occ
+!arrays
+ ! MGTODO: This layout is not optimal (lots of cache thrashing, I will optimize it later on)
+ double precision, intent(out) ::  tweight_tmp(nene, 4)
+ double precision, intent(out) :: dtweightde_tmp(nene, 4)
+ double precision,intent(in)  :: eigen_1tetra(4)
+
+!Local variables-------------------------------
+!  needed for gaussian replacement of Dirac functions
+!  the three coefficients of the DOS as quadratic form,
+!    in the interval [eig(ikpt-1), eig(ikpt)]
+!    for ikpt = 1 we add a point below eigen(1) which doesnt
+!    contribute to the DOS in any tetrahedron
+!scalars
+ integer :: ieps,nn1,nn2,nn3,nn4,my_start,my_stop
+ double precision  :: cc,cc1,cc2,cc3,dcc1de,dcc2de,dcc3de,dccde,deltaene,eps
+ double precision  :: epsilon21,epsilon31,epsilon32,epsilon41,epsilon42,epsilon43
+ double precision  :: gau_prefactor,gau_width,gau_width2,inv_epsilon21,inv_epsilon31
+ double precision  :: inv_epsilon32,inv_epsilon41,inv_epsilon42,inv_epsilon43
+ double precision  :: deleps1, deleps2, deleps3, deleps4
+ double precision  :: invepsum, cc_pre, dccde_pre
+ double precision  :: cc1_pre, cc2_pre, cc3_pre
+ double precision  :: cc_tmp, dccde_tmp
+ double precision  :: dcc1de_pre, dcc2de_pre, dcc3de_pre
+ double precision  :: tmp,volconst,volconst_mult
+ double precision ,parameter :: sqrtpi = 1.7724538509055159d0
+
+! *********************************************************************
+
+ volconst = tetra%vv/4.d0
+
+ deltaene = (enemax-enemin) / (nene-1)
+
+ ! This is output
+ tweight_tmp = zero; dtweightde_tmp = zero
+
+ volconst_mult = max_occ*volconst*float(tetra%tetra_mult(itetra))
+
+!all notations are from Blochl PRB 49 16223 Appendix B
+ epsilon21 = eigen_1tetra(2)-eigen_1tetra(1)
+ epsilon31 = eigen_1tetra(3)-eigen_1tetra(1)
+ epsilon41 = eigen_1tetra(4)-eigen_1tetra(1)
+ epsilon32 = eigen_1tetra(3)-eigen_1tetra(2)
+ epsilon42 = eigen_1tetra(4)-eigen_1tetra(2)
+ epsilon43 = eigen_1tetra(4)-eigen_1tetra(3)
+ inv_epsilon21 = zero
+ inv_epsilon31 = zero
+ inv_epsilon41 = zero
+ inv_epsilon32 = zero
+ inv_epsilon42 = zero
+ inv_epsilon43 = zero
+ if (epsilon21 > tol6) inv_epsilon21 = 1.d0 / epsilon21
+ if (epsilon31 > tol6) inv_epsilon31 = 1.d0 / epsilon31
+ if (epsilon41 > tol6) inv_epsilon41 = 1.d0 / epsilon41
+ if (epsilon32 > tol6) inv_epsilon32 = 1.d0 / epsilon32
+ if (epsilon42 > tol6) inv_epsilon42 = 1.d0 / epsilon42
+ if (epsilon43 > tol6) inv_epsilon43 = 1.d0 / epsilon43
+ nn1 = int((eigen_1tetra(1)-enemin)/deltaene)+1
+ nn2 = int((eigen_1tetra(2)-enemin)/deltaene)+1
+ nn3 = int((eigen_1tetra(3)-enemin)/deltaene)+1
+ nn4 = int((eigen_1tetra(4)-enemin)/deltaene)+1
+
+ nn1 = max(1,nn1)
+ nn1 = min(nn1,nene)
+ nn2 = max(1,nn2)
+ nn2 = min(nn2,nene)
+ nn3 = max(1,nn3)
+ nn3 = min(nn3,nene)
+ nn4 = max(1,nn4)
+ nn4 = min(nn4,nene)
+
+ eps = enemin+nn1*deltaene
+!
+!interval enemin < eps < e1 nothing to do
+!
+!
+!interval e1 < eps < e2
+!
+ deleps1 = eps-eigen_1tetra(1)
+ cc_pre = volconst_mult*inv_epsilon21*inv_epsilon31*inv_epsilon41
+ invepsum = inv_epsilon21+inv_epsilon31+inv_epsilon41
+ dccde_pre = 3.d0*volconst_mult*inv_epsilon21*inv_epsilon31*inv_epsilon41
+ do ieps=nn1+1,nn2
+   cc = cc_pre * deleps1*deleps1*deleps1
+   tweight_tmp(ieps,1) = tweight_tmp(ieps,1) + cc*(4.d0-deleps1*invepsum)
+   tweight_tmp(ieps,2) = tweight_tmp(ieps,2) + cc*deleps1*inv_epsilon21
+   tweight_tmp(ieps,3) = tweight_tmp(ieps,3) + cc*deleps1*inv_epsilon31
+   tweight_tmp(ieps,4) = tweight_tmp(ieps,4) + cc*deleps1*inv_epsilon41
+
+   dccde = dccde_pre * deleps1*deleps1
+   dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) + dccde*(4.d0 - deleps1*invepsum) -cc*invepsum
+   dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) + (dccde*deleps1 + cc) * inv_epsilon21
+   dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) + (dccde*deleps1 + cc) * inv_epsilon31
+   dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + (dccde*deleps1 + cc) * inv_epsilon41
+
+   if (bcorr == 1) then
+     ! bxu, correction terms based on Bloechl's paper
+     tweight_tmp(ieps,1) = tweight_tmp(ieps,1) + &
+&     4.d0*dccde_pre*deleps1*deleps1*(epsilon21+epsilon31+epsilon41)/40.d0
+     tweight_tmp(ieps,2) = tweight_tmp(ieps,2) + &
+&     4.d0*dccde_pre*deleps1*deleps1*(-epsilon21+epsilon32+epsilon42)/40.d0
+     tweight_tmp(ieps,3) = tweight_tmp(ieps,3) + &
+&     4.d0*dccde_pre*deleps1*deleps1*(-epsilon31-epsilon32+epsilon43)/40.d0
+     tweight_tmp(ieps,4) = tweight_tmp(ieps,4) + &
+&     4.d0*dccde_pre*deleps1*deleps1*(-epsilon41-epsilon42-epsilon43)/40.d0
+
+     dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) + &
+&     8.d0*dccde_pre*deleps1*(epsilon21+epsilon31+epsilon41)/40.d0
+     dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) + &
+&     8.d0*dccde_pre*deleps1*(-epsilon21+epsilon32+epsilon42)/40.d0
+     dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) + &
+&     8.d0*dccde_pre*deleps1*(-epsilon31-epsilon32+epsilon43)/40.d0
+     dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + &
+&     8.d0*dccde_pre*deleps1*(-epsilon41-epsilon42-epsilon43)/40.d0
+   end if
+
+   deleps1 = deleps1 + deltaene
+  end do
+   eps = eps + (nn2-nn1)*deltaene
+!
+!  interval e2 < eps < e3
+!
+ deleps1 = eps-eigen_1tetra(1)
+ deleps2 = eps-eigen_1tetra(2)
+ deleps3 = eigen_1tetra(3)-eps
+ deleps4 = eigen_1tetra(4)-eps
+
+ cc1_pre = volconst_mult*inv_epsilon31*inv_epsilon41
+ cc2_pre = volconst_mult*inv_epsilon41*inv_epsilon32*inv_epsilon31
+ cc3_pre = volconst_mult*inv_epsilon42*inv_epsilon32*inv_epsilon41
+
+ dcc1de_pre = 2.d0*cc1_pre
+ dcc2de_pre = cc2_pre
+ dcc3de_pre = cc3_pre
+ do ieps=nn2+1,nn3
+   cc1 = cc1_pre * deleps1*deleps1
+   cc2 = cc2_pre * deleps1*deleps2*deleps3
+   cc3 = cc3_pre * deleps2*deleps2*deleps4
+
+   tweight_tmp(ieps,1) = tweight_tmp(ieps,1) + &
+&   cc1 + (cc1+cc2)*deleps3*inv_epsilon31 + (cc1+cc2+cc3)*deleps4*inv_epsilon41
+   tweight_tmp(ieps,2) = tweight_tmp(ieps,2) + &
+&   cc1+cc2+cc3+(cc2+cc3)*deleps3*inv_epsilon32 + cc3*deleps4*inv_epsilon42
+   tweight_tmp(ieps,3) = tweight_tmp(ieps,3) + &
+&   (cc1+cc2)*deleps1*inv_epsilon31 + (cc2+cc3)*deleps2*inv_epsilon32
+   tweight_tmp(ieps,4) = tweight_tmp(ieps,4) + &
+&   (cc1+cc2+cc3)*deleps1*inv_epsilon41 + cc3*deleps2*inv_epsilon42
+
+
+   dcc1de = dcc1de_pre * deleps1
+   dcc2de = dcc2de_pre * (-deleps1*deleps2  +deleps1*deleps3  +deleps2*deleps3)
+   dcc3de = dcc3de_pre * (2.d0*deleps2*deleps4  -deleps2*deleps2)
+
+   dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) &
+&   + dcc1de &
+&   + ((dcc1de+dcc2de)*deleps3 -(cc1+cc2)) * inv_epsilon31 &
+&   + ((dcc1de+dcc2de+dcc3de)*deleps4 -(cc1+cc2+cc3)) * inv_epsilon41
+   dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) &
+&   + dcc1de+dcc2de+dcc3de &
+&   + ((dcc2de+dcc3de)*deleps3 -(cc2+cc3) ) * inv_epsilon32 &
+&   + (dcc3de*deleps4  -cc3 ) * inv_epsilon42
+   dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) &
+&   + ((dcc1de+dcc2de)*deleps1 + (cc1+cc2) ) * inv_epsilon31 &
+&   + ((dcc2de+dcc3de)*deleps2 + (cc2+cc3) ) * inv_epsilon32
+   dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) &
+&   + ((dcc1de+dcc2de+dcc3de)*deleps1 + (cc1+cc2+cc3) ) * inv_epsilon41 &
+&   + (dcc3de*deleps2 + cc3) * inv_epsilon42
+
+ if (bcorr == 1) then
+   ! bxu, correction terms based on Bloechl's paper
+   ! The correction terms may cause the dtweightde become negative
+   tweight_tmp(ieps,1) = tweight_tmp(ieps,1) + &
+&   4.d0*cc1_pre* &
+&   (3.d0*epsilon21+6.d0*deleps2-3.d0*(epsilon31+epsilon42)*deleps2**2.d0*inv_epsilon32*inv_epsilon42)* &
+&   (epsilon21+epsilon31+epsilon41)/40.d0
+   tweight_tmp(ieps,2) = tweight_tmp(ieps,2) + &
+&   4.d0*cc1_pre* &
+&   (3.d0*epsilon21+6.d0*deleps2-3.d0*(epsilon31+epsilon42)*deleps2**2.d0*inv_epsilon32*inv_epsilon42)* &
+&   (-epsilon21+epsilon32+epsilon42)/40.d0
+   tweight_tmp(ieps,3) = tweight_tmp(ieps,3) + &
+&   4.d0*cc1_pre* &
+&   (3.d0*epsilon21+6.d0*deleps2-3.d0*(epsilon31+epsilon42)*deleps2**2.d0*inv_epsilon32*inv_epsilon42)* &
+&   (-epsilon31-epsilon32+epsilon43)/40.d0
+   tweight_tmp(ieps,4) = tweight_tmp(ieps,4) + &
+&   4.d0*cc1_pre* &
+&   (3.d0*epsilon21+6.d0*deleps2-3.d0*(epsilon31+epsilon42)*deleps2**2.d0*inv_epsilon32*inv_epsilon42)* &
+&   (-epsilon41-epsilon42-epsilon43)/40.d0
+
+   dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) + &
+&   4.d0*cc1_pre* &
+&   (6.d0-6.d0*(epsilon31+epsilon42)*deleps2*inv_epsilon32*inv_epsilon42)* &
+&   (epsilon21+epsilon31+epsilon41)/40.d0
+   dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) + &
+&   4.d0*cc1_pre* &
+&   (6.d0-6.d0*(epsilon31+epsilon42)*deleps2*inv_epsilon32*inv_epsilon42)* &
+&   (-epsilon21+epsilon32+epsilon42)/40.d0
+   dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) + &
+&   4.d0*cc1_pre* &
+&   (6.d0-6.d0*(epsilon31+epsilon42)*deleps2*inv_epsilon32*inv_epsilon42)* &
+&   (-epsilon31-epsilon32+epsilon43)/40.d0
+   dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + &
+&   4.d0*cc1_pre* &
+&   (6.d0-6.d0*(epsilon31+epsilon42)*deleps2*inv_epsilon32*inv_epsilon42)* &
+&   (-epsilon41-epsilon42-epsilon43)/40.d0
+  end if
+
+  deleps1 = deleps1 + deltaene
+  deleps2 = deleps2 + deltaene
+  deleps3 = deleps3 - deltaene
+  deleps4 = deleps4 - deltaene
+ end do
+
+ eps = eps + (nn3-nn2)*deltaene
+!
+!  interval e3 < eps < e4
+!
+ deleps4 = eigen_1tetra(4)-eps
+ cc_pre = volconst_mult*inv_epsilon41*inv_epsilon42*inv_epsilon43
+ invepsum = inv_epsilon41+inv_epsilon42+inv_epsilon43
+ dccde_pre = -3.d0*cc_pre
+ do ieps=nn3+1,nn4
+   cc = cc_pre * deleps4*deleps4*deleps4
+   cc_tmp = cc * deleps4
+   tweight_tmp(ieps,1) = tweight_tmp(ieps,1) + volconst_mult - cc_tmp*inv_epsilon41
+   tweight_tmp(ieps,2) = tweight_tmp(ieps,2) + volconst_mult - cc_tmp*inv_epsilon42
+   tweight_tmp(ieps,3) = tweight_tmp(ieps,3) + volconst_mult - cc_tmp*inv_epsilon43
+   tweight_tmp(ieps,4) = tweight_tmp(ieps,4) + volconst_mult - cc*4.d0 + cc_tmp*invepsum
+
+
+   dccde = dccde_pre * deleps4*deleps4
+   dccde_tmp = -dccde*deleps4 + cc
+   dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) + dccde_tmp * inv_epsilon41
+   dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) + dccde_tmp * inv_epsilon42
+   dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) + dccde_tmp * inv_epsilon43
+   dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) - dccde*4.d0 - dccde_tmp*invepsum
+
+   if (bcorr == 1) then
+     ! bxu, correction terms based on Bloechl's paper
+     ! The correction terms may cause the dtweightde become negative
+     tweight_tmp(ieps,1) = tweight_tmp(ieps,1) + &
+&     12.d0*cc_pre*deleps4*deleps4*(epsilon21+epsilon31+epsilon41)/40.d0
+     tweight_tmp(ieps,2) = tweight_tmp(ieps,2) + &
+&     12.d0*cc_pre*deleps4*deleps4*(-epsilon21+epsilon32+epsilon42)/40.d0
+     tweight_tmp(ieps,3) = tweight_tmp(ieps,3) + &
+&     12.d0*cc_pre*deleps4*deleps4*(-epsilon31-epsilon32+epsilon43)/40.d0
+     tweight_tmp(ieps,4) = tweight_tmp(ieps,4) + &
+&     12.d0*cc_pre*deleps4*deleps4*(-epsilon41-epsilon42-epsilon43)/40.d0
+
+     dtweightde_tmp(ieps,1) = dtweightde_tmp(ieps,1) - &
+&     24.d0*cc_pre*deleps4*(epsilon21+epsilon31+epsilon41)/40.d0
+     dtweightde_tmp(ieps,2) = dtweightde_tmp(ieps,2) - &
+&     24.d0*cc_pre*deleps4*(-epsilon21+epsilon32+epsilon42)/40.d0
+     dtweightde_tmp(ieps,3) = dtweightde_tmp(ieps,3) - &
+&     24.d0*cc_pre*deleps4*(-epsilon31-epsilon32+epsilon43)/40.d0
+     dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) - &
+&     24.d0*cc_pre*deleps4*(-epsilon41-epsilon42-epsilon43)/40.d0
+   end if
+
+   deleps4 = deleps4 - deltaene
+ end do
+ eps = eps + (nn4-nn3)*deltaene
+!
+!
+!  interval e4 < eps < enemax
+!
+ do ieps=nn4+1,nene
+   tweight_tmp(ieps,1) = tweight_tmp(ieps,1) + volconst_mult
+   tweight_tmp(ieps,2) = tweight_tmp(ieps,2) + volconst_mult
+   tweight_tmp(ieps,3) = tweight_tmp(ieps,3) + volconst_mult
+   tweight_tmp(ieps,4) = tweight_tmp(ieps,4) + volconst_mult
+!  dtweightde unchanged by this tetrahedron
+ end do
+
+!
+!  if we have a fully degenerate tetrahedron,
+!  1) the tweight is a Heaviside (step) function, which is correct above, but
+!  2) the dtweightde should contain a Dirac function: add a Gaussian here
+!
+ if (epsilon41 < tol6) then
+
+!  to ensure the gaussian will integrate properly:
+!  WARNING: this smearing could be problematic if too large
+!  and doesnt integrate well if its too small
+   gau_width = 10.0d0*deltaene
+   gau_width2 = 1.0 / gau_width / gau_width
+   gau_prefactor = volconst_mult / gau_width / sqrtpi
+!
+!  average position since bracket for epsilon41 is relatively large
+   cc = (eigen_1tetra(1)+eigen_1tetra(2)+eigen_1tetra(3)+eigen_1tetra(4))/4.d0
+   eps = enemin
+   do ieps=1,nene
+     tmp = eps - cc
+     dtweightde_tmp(ieps,4) = dtweightde_tmp(ieps,4) + gau_prefactor*exp(-tmp*tmp*gau_width2)
+     eps = eps + deltaene
+   end do
+ end if ! end degenerate tetrahedron if
+
+end subroutine get_onetetra_
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_tetrahedron/tetra_get_onewk
+!! NAME
+!! tetra_get_onewk
+!!
+!! FUNCTION
+!! Calculate integration weights and their derivatives for a single k-point in the IBZ.
+!!
+!! INPUTS
+!! tetra<t_tetrahedron>=Object with tables for tetrahedron method.
+!! ik_ibz=Index of the k-point in the IBZ array
+!! bcorr=1 to include Blochl correction else 0.
+!! nene=number of energies for DOS
+!! nibz=number of irreducible kpoints
+!! eigen_ibz(nkibz)=eigenenergies for each k point
+!! enemin=minimal energy for DOS
+!! enemax=maximal energy for DOS
+!! max_occ=maximal occupation number (2 for nsppol=1, 1 for nsppol=2)
+!!
+!! OUTPUT
+!!  weights(nene,2) = integration weights for
+!!    Dirac delta (derivative of theta wrt energy) and Theta (Heaviside function)
+!!    for a given (band, k-point, spin).
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,max_occ,weights)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'tetra_get_onewk'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ik_ibz,nene,nkibz,bcorr
+ type(t_tetrahedron), intent(in) :: tetra
+ double precision ,intent(in) :: enemin,enemax,max_occ
+!arrays
+ double precision ,intent(in) :: eig_ibz(nkibz)
+ double precision ,intent(out) :: weights(nene,2)
+
+!Local variables-------------------------------
+!scalars
+ integer :: itetra,ii
+ double precision :: deltaene,volconst,volconst_mult
+!arrays
+ integer :: ind_ibz(4)
+ double precision :: tweight_tmp(nene,4),dtweightde_tmp(nene,4)
+ double precision :: eigen_1tetra(4)
+
+! *********************************************************************
+
+ !volconst = tetra%vv/4.d0
+ if (nene <= 1) then
+   TETRA_ERROR('tetra_blochl_weights: nene must be at least 2')
+ else
+   deltaene = (enemax-enemin) / (nene-1)
+ end if
+
+ weights = zero
+
+ ! For each tetrahedron
+ do itetra=1,tetra%ntetra
+   !volconst_mult = max_occ*volconst*float(tetra%tetra_mult(itetra))
+
+   ! Here we need the original ordering to reference the correct irred kpoints
+   ind_ibz(1) = tetra%tetra_full(1,1,itetra)
+   ind_ibz(2) = tetra%tetra_full(2,1,itetra)
+   ind_ibz(3) = tetra%tetra_full(3,1,itetra)
+   ind_ibz(4) = tetra%tetra_full(4,1,itetra)
+   ! Cycle if this tetra does not contribute to this k-point.
+   if (all(ind_ibz /= ik_ibz)) cycle
+
+   ! Sort energies before calling get_onetetra_
+   eigen_1tetra(1) = eig_ibz(ind_ibz(1))
+   eigen_1tetra(2) = eig_ibz(ind_ibz(2))
+   eigen_1tetra(3) = eig_ibz(ind_ibz(3))
+   eigen_1tetra(4) = eig_ibz(ind_ibz(4))
+   call sort_tetra(4,eigen_1tetra,ind_ibz,tol14)
+
+   call get_onetetra_(tetra,itetra,eigen_1tetra,enemin,enemax,max_occ,&
+&   nene,nkibz,bcorr,tweight_tmp,dtweightde_tmp)
+
+   ! Accumulate contributions to ik_ibz
+   ! (there might be multiple vertexes that map onto ik_ibz)
+   do ii=1,4
+     if (ind_ibz(ii) == ik_ibz) then
+       weights(:,1) = weights(:,1) + dtweightde_tmp(:,ii)
+       weights(:,2) = weights(:,2) + tweight_tmp(:,ii)
+     end if
+   end do
+ end do ! itetra
+
+end subroutine tetra_get_onewk
 !!***
 
 end module m_tetrahedron

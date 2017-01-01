@@ -79,7 +79,7 @@ abiauty:
 	@$(PERL) ../developers/maintainers/abiauty.pl -d 56_xc >> tmp-abiauty.log
 	@$(PERL) ../developers/maintainers/abiauty.pl -d 57_iopsp_parser >> tmp-abiauty.log
 	@$(PERL) ../developers/maintainers/abiauty.pl -d 57_iovars >> tmp-abiauty.log
-	@$(PERL) ../developers/maintainers/abiauty.pl -d 61_ionetcdf >> tmp-abiauty.log
+	@$(PERL) ../developers/maintainers/abiauty.pl -d 59_ionetcdf >> tmp-abiauty.log
 	@$(PERL) ../developers/maintainers/abiauty.pl -d 61_occeig >> tmp-abiauty.log
 	@$(PERL) ../developers/maintainers/abiauty.pl -d 62_ctqmc >> tmp-abiauty.log
 	@$(PERL) ../developers/maintainers/abiauty.pl -d 62_iowfdenpot >> tmp-abiauty.log
