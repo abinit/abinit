@@ -377,8 +377,7 @@ program anaddb
    ABI_ALLOCATE(dchidt,(natom,3,3,3))
 
    if (ddb_get_dchidet(ddb,inp%ramansr,dchide,dchidt) == 0) then
-     message = "Cannot find block corresponding to non-linear optical susceptibilities in DDB file"
-     MSG_ERROR(message)
+     MSG_ERROR("Cannot find block corresponding to non-linear optical susceptibilities in DDB file")
    end if
  end if ! nlflag
 
@@ -441,7 +440,7 @@ program anaddb
 
 !Electron-phonon section
  if (inp%elphflag == 1) then
-   call elphon(inp,Crystal,Ifc,filnam)
+   call elphon(inp,Crystal,Ifc,filnam,comm)
  end if
 
 !**********************************************************************

@@ -58,6 +58,7 @@
 !!     nrpt =number of real space points used to integrate IFC (for interpolation of dynamical matrices)
 !!     wghatm(natom,natom,nrpt) =Weight for the pair of atoms and the R vector
 !! filnam(7)=character strings giving file names
+!! comm=MPI communicator.
 !!
 !! OUTPUT
 !!
@@ -95,7 +96,7 @@
 
 #include "abi_common.h"
 
-subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
+subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 
  use defs_basis
  use defs_datatypes
@@ -133,6 +134,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
  type(anaddb_dataset_type),intent(inout) :: anaddb_dtset
  type(crystal_t),intent(in) :: Cryst
  type(ifc_type),intent(inout) :: Ifc
+ integer,intent(in) :: comm
 !arrays
  character(len=fnlen),intent(in) :: filnam(7)
 
@@ -145,7 +147,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
  integer :: timrev,unitfskgrid,qtor,idir,iFSkpq,symrankkpt,ikpt_irr
  integer :: ep_prt_wtk ! eventually to be made into an input variable
  integer :: fform,ie,ie1,ie2,i_start,i_end
- integer :: ssp,s1,s2,comm,tmp_nenergy, top_vb,nproc,me
+ integer :: ssp,s1,s2,tmp_nenergy, top_vb,nproc,me
  integer :: nkpt_tmp
  real(dp) :: max_occ,realdp_ex,res !,ss
  real(dp) :: tcpu, twall, tcpui, twalli
@@ -187,7 +189,6 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam)
 & '-begin elphon at tcpu',tcpui,'  and twall',twalli,' sec'
  call wrtout(std_out,message,'COLL')
 
- comm = xmpi_world
  nproc = xmpi_comm_size(comm); me = xmpi_comm_rank(comm)
 
  write(message, '(a,i0,a,i0)' )'- running on ', nproc,'  cpus me = ', me
