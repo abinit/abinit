@@ -19,8 +19,6 @@
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
 !! PARENTS
 !!      abinit
 !!
@@ -304,7 +302,6 @@ subroutine chkvars (string)
 
 !      Find the index of the potential variable name in the list of variables
        index_list_vars=index(list_vars,blank//string(index_current:index_endword)//blank)
-
      end if
 
      if(index_list_vars==0)then

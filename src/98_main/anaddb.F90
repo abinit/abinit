@@ -152,7 +152,7 @@ program anaddb
 
  start_datetime = asctime()
 
- ! Initialise the code : write heading, and read names of files.
+ ! Initialise the code: write heading, and read names of files.
  if (iam_master) then
    call anaddb_init(filnam)
  end if
@@ -186,7 +186,7 @@ program anaddb
  if (iam_master) then
    call instrng (filnam(1),lenstr,option,strlen,string)
 
-   !To make case-insensitive, map characters to upper case:
+   ! To make case-insensitive, map characters to upper case.
    call inupper(string(1:lenstr))
  end if
 
@@ -326,11 +326,8 @@ program anaddb
 
    ! Extract the block with the gradients
    ABI_ALLOCATE(fred,(3,natom))
-   qphon(:,:) = zero
-   qphnrm(:) = zero
-   rfphon(:) = 0
-   rfstrs(:) = 0
-   rfelfd(:) = 2
+   qphon(:,:) = zero; qphnrm(:) = zero
+   rfphon(:) = 0; rfstrs(:) = 0; rfelfd(:) = 2
    if (inp%relaxat == 1) rfphon(:) = 1
    if (inp%relaxstr == 1) rfstrs(:) = 3
 
@@ -422,7 +419,7 @@ program anaddb
 
    ! Compute speed of sound.
    !if (inp%vs_qrad > tol12) call ifc_speedofsound(ifc, crystal, inp%vs_qrad, inp%vs_atolms, ana_ncid, comm)
-   !call ifc_speedofsound(ifc, crystal, 0.001_dp, 10._dp, comm)
+   call ifc_speedofsound(ifc, crystal, 0.001_dp, 10._dp, nctk_noid, comm)
    !call ifc_speedofsound(ifc, crystal, 0.0001_dp, 10._dp, comm)
    !call ifc_test_phinterp(ifc, crystal, [8,8,8], 1, [zero,zero,zero], [3,3,3], comm, test_dwdq=.True.)
 
@@ -494,13 +491,11 @@ program anaddb
      call harmonic_thermo(Ifc,Crystal,ddb%amu,inp,ab_out,filnam(2),tcpui,twalli,comm)
 
    else if (inp%thmflag==2) then
-     write(message, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,&
-&     ch10,' Entering thm9 routine with thmflag=2 ',ch10
+     write(message, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,' Entering thm9 routine with thmflag=2 ',ch10
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
 
-     call harmonic_thermo(Ifc,Crystal,ddb%amu,inp,ab_out,filnam(2),tcpui,twalli,comm,&
-&     thmflag=inp%thmflag)
+     call harmonic_thermo(Ifc,Crystal,ddb%amu,inp,ab_out,filnam(2),tcpui,twalli,comm,thmflag=inp%thmflag)
    end if
  end if
 
@@ -565,8 +560,7 @@ program anaddb
    call wrtout(ab_out,message,'COLL')
 
    ! Before examining every direction or the dielectric tensor, generates the dynamical matrix at gamma
-   qphon(:,1)=zero
-   qphnrm(1)=zero
+   qphon(:,1)=zero; qphnrm(1)=zero
 
    ! Generation of the dynamical matrix in cartesian coordinates
    if (inp%ifcflag==1) then
@@ -581,9 +575,7 @@ program anaddb
    else if (inp%ifcflag==0) then
 
      ! Look after the information in the DDB
-     rfphon(1:2)=1
-     rfelfd(1:2)=2
-     rfstrs(1:2)=0
+     rfphon(1:2)=1; rfelfd(1:2)=2; rfstrs(1:2)=0
      call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
 
      ! Copy the dynamical matrix in d2cart
@@ -679,8 +671,7 @@ program anaddb
      call wrtout(std_out,message,'COLL')
 
      ! Initialisation of the phonon wavevector
-     qphon(:,1)=zero
-     qphnrm(1)=zero
+     qphon(:,1)=zero; qphnrm(1)=zero
 
      ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
      call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,Crystal%indsym,&
@@ -715,14 +706,9 @@ program anaddb
    ! Look after the second derivative matrix at gamma in the DDB
    ! Note that the information on the dielectric tensor is completely
    ! independent of the interatomic force constant calculation
-   qphon(:,1)=zero
-   qphnrm(1)=zero
-   rfphon(1:2)=0
-   rfelfd(1:2)=2
-   rfstrs(1:2)=0
-
+   qphon(:,1)=zero; qphnrm(1)=zero
+   rfphon(1:2)=0; rfelfd(1:2)=2; rfstrs(1:2)=0
    call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
-
    d2cart(:,1:msize)=ddb%val(:,:,iblok)
 
    ! Print the electronic dielectric tensor
@@ -735,8 +721,7 @@ program anaddb
  if (inp%nlflag == 1) then
    ! In case dieflag = 2, recompute phonon frequencies and eigenvectors without non-analyticity
    if (inp%dieflag == 2) then
-     qphon(:,1)=zero
-     qphnrm(1)=zero
+     qphon(:,1)=zero; qphnrm(1)=zero
      call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,Crystal%indsym,&
 &     mpert,msym,natom,nsym,ntypat,phfrq,qphnrm(1),qphon,&
 &     Crystal%rprimd,inp%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
@@ -774,11 +759,8 @@ program anaddb
      call wrtout(std_out,'instrflag=1, so extract the internal strain constant from the 2DTE','COLL')
 
      ! looking after the no. of blok that contains the internal strain tensor
-     qphon(:,1)=zero
-     qphnrm(1)=zero
-     rfphon(1:2)=0
-     rfelfd(1:2)=0
-     rfstrs(1:2)=3
+     qphon(:,1)=zero; qphnrm(1)=zero
+     rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=3
 
      call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
      ! then print the internal stain tensor
@@ -804,21 +786,15 @@ program anaddb
      call wrtout(std_out,'so extract the elastic constant from the 2DTE','COLL')
 
      ! look after the blok no. that contains the stress tensor
-     qphon(:,1)=zero
-     qphnrm(1)=zero
-     rfphon(1:2)=0
-     rfelfd(1:2)=0
-     rfstrs(1:2)=0
+     qphon(:,1)=zero; qphnrm(1)=zero
+     rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=0
 
      call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp4)
      iblok_stress=iblok
 
      ! look after the blok no.iblok that contains the elastic tensor
-     qphon(:,1)=zero
-     qphnrm(1)=zero
-     rfphon(1:2)=0
-     rfelfd(1:2)=0
-     rfstrs(1:2)=3
+     qphon(:,1)=zero; qphnrm(1)=zero
+     rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=3
 
      ! for both diagonal and shear parts
      call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)
@@ -859,11 +835,8 @@ program anaddb
      call wrtout(std_out,'extract the piezoelectric constant from the 2DTE','COLL')
 
      ! looking for the gamma point block
-     qphon(:,1)=zero
-     qphnrm(1)=zero
-     rfphon(1:2)=0
-     rfelfd(1:2)=0
-     rfstrs(1:2)=3
+     qphon(:,1)=zero; qphnrm(1)=zero
+     rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=3
      ! for both diagonal and shear parts
 
      call gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,inp%rfmeth)

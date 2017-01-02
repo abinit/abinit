@@ -1730,6 +1730,8 @@ implicit none
  real(dp) :: rcart(3),rdiff(3),rsloc(3,3)
  real(dp) :: srloc(3,3),vect1(3),vect2(3),vect3(3),work(3),xx(3)
 
+! *********************************************************************
+
  if(ifcana==1)then
    ! Generate the local coordinate system for the atom ia
    index=list(2)
@@ -1984,8 +1986,8 @@ implicit none
      end if ! Further analysis finished
    end if ! End the condition on dipdip
  end do ! End loop over all atoms in BigBox:
- end subroutine ifc_getiaf
 
+end subroutine ifc_getiaf
 !!***
 
 !----------------------------------------------------------------------
