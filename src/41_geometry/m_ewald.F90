@@ -186,7 +186,6 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
                t1=term*(summr*summr+summi*summi)
                gsum=gsum+t1
 
-!              OCL SCALAR ! by MM for Fujitsu
                do ia=1,natom
 !                Again only phase is computed so xred may fall outside [0,1).
                  arg=two_pi*(ig1*xred(1,ia)+ig2*xred(2,ia)+ig3*xred(3,ia))
@@ -258,7 +257,7 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
              drdta1=0.0_dp
              drdta2=0.0_dp
              drdta3=0.0_dp
-!            OCL SCALAR ! by MM for Fujitsu
+
              do ib=1,natom
                fracb1=xred(1,ib)-aint(xred(1,ib))+0.5_dp-sign(0.5_dp,xred(1,ib))
                fracb2=xred(2,ib)-aint(xred(2,ib))+0.5_dp-sign(0.5_dp,xred(2,ib))
@@ -623,7 +622,7 @@ end subroutine ewald2
 !! 2. Because this routine can be used many times in the
 !! evaluation of phonons in ppddb9, it has been
 !! optimized carefully. There is still possibility
-!! for improvement, by using bloking on g s and r s !
+!! for improvement, by using bloking on G and R!
 !! 3. There can be small numerical variations due to the
 !! fact that the input dielectric tensor is usually
 !! not perfectly symmetric ....
@@ -762,7 +761,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 &           gprimbyacell(2,2)+(ig3+qphon(3))*gprimbyacell(2,3)
            gpq(3)=(ig1+qphon(1))*gprimbyacell(3,1)+(ig2+qphon(2))*&
 &           gprimbyacell(3,2)+(ig3+qphon(3))*gprimbyacell(3,3)
-           gsq=0.0_dp
+           gsq=zero
            do jj=1,3
              do ii=1,3
                gpqgpq(ii,jj)=gpq(ii)*gpq(jj)
@@ -796,13 +795,6 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                  end do
                end do
 
-!               do ia=1,natom
-!                 arga=two_pi*( (ig1+qphon(1))*xred(1,ia)&
-!&                 +(ig2+qphon(2))*xred(2,ia)&
-!&                 +(ig3+qphon(3))*xred(3,ia) )
-!                 cosqxred(ia)=cos(arga)
-!                 sinqxred(ia)=sin(arga)
-!               end do
 ! MJV: replaced old calls to cos and sin. Checked for 10 tests in v2 that max error is about 6.e-15, usually < 2.e-15
                do ia=1,natom
                  cosqxred(ia)=real(exp2piqx(ia)*expx1(ig1, ia)*expx2(ig2, ia)*expx3(ig3, ia))
@@ -921,8 +913,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    do ir3=-nr,nr
      do ir2=-nr,nr
 
-!      Here, construct the cosine and sine of q*R for
-!      components 2 and 3
+!      Here, construct the cosine and sine of q*R for components 2 and 3
        c23r = c2r(ir2+mr+1) * c3r(ir3+mr+1) - c2i(ir2+mr+1) * c3i(ir3+mr+1)
        c23i = c2i(ir2+mr+1) * c3r(ir3+mr+1) + c2r(ir2+mr+1) * c3i(ir3+mr+1)
 
@@ -933,8 +924,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
        do ir1=-nr,nr
          if( abs(ir3)==nr .or. abs(ir2)==nr .or. abs(ir1)==nr .or. nr==1 )then
 
-!          This is the real part and imaginary
-!          part of the phase factor exp(iq*R)
+!          This is the real part and imaginary part of the phase factor exp(iq*R)
            c123r = c1r(ir1+mr+1) * c23r - c1i(ir1+mr+1) * c23i
            c123i = c1i(ir1+mr+1) * c23r + c1r(ir1+mr+1) * c23i
 
@@ -994,7 +984,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                  else
 !                  If zero denominator, the atoms should be identical
                    if (ia/=ib)then
-                     write(message, '(a,a,a,a,a,i5,a,i5,a)' )&
+                     write(message, '(5a,i0,a,i0,a)' )&
 &                     'The distance between two atoms seem to vanish.',ch10,&
 &                     'This is not allowed.',ch10,&
 &                     'Action : check the input for the atoms number',ia,' and',ib,'.'
@@ -1019,10 +1009,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !  Check if new shell must be calculated
    if(newr==0)exit
-   if(newr==1 .and. nr==mr)then
-     MSG_BUG('mr is too small')
-   end if
-
+   if(newr==1 .and. nr==mr) MSG_BUG('mr is too small')
  end do
 
 !Now, symmetrizes
@@ -1055,11 +1042,11 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
      do ia=1,natom
        do mu=1,3
          do i2=1,2
-           dyew(i2,mu,ia,nu,ib)=0.0_dp
+           dyew(i2,mu,ia,nu,ib)=zero
            do jj=1,3
              do ii=1,3
-               dyew(i2,mu,ia,nu,ib)=dyew(i2,mu,ia,nu,ib)+zeff(ii,mu,ia)*&
-&               zeff(jj,nu,ib)*dyewt(i2,ii,ia,jj,ib)
+               dyew(i2,mu,ia,nu,ib)=dyew(i2,mu,ia,nu,ib) + &
+                zeff(ii,mu,ia)*zeff(jj,nu,ib)*dyewt(i2,ii,ia,jj,ib)
              end do
            end do
          end do

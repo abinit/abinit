@@ -422,6 +422,7 @@ program anaddb
    call ifc_print_info(ifc, unit=std_out)
 
    ! Compute speed of sound.
+   !if (inp%vs_qrad > tol12) call ifc_speedofsound(ifc, crystal, inp%vs_qrad, inp%vs_atolms, comm)
    !call ifc_speedofsound(ifc, crystal, 0.001_dp, 10._dp, comm)
    !call ifc_speedofsound(ifc, crystal, 0.0001_dp, 10._dp, comm)
 

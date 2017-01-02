@@ -179,9 +179,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  !type(paw_ij_type),allocatable :: paw_ij(:)
  !type(paw_an_type),allocatable :: paw_an(:)
 
- integer :: nshiftk_spl
- integer :: kptrlatt_spl(3,3)
- real(dp),allocatable :: shiftk_spl(:,:)
+ integer :: nshiftk_fine
+ integer :: kptrlatt_fine(3,3)
+ real(dp),allocatable :: shiftk_fine(:,:)
 
 !************************************************************************
 
@@ -395,16 +395,24 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  !call ebands_set_interpolator(ebands, cryst, bstart, bcount, mode, espline_ords, eskw_ratio, comm)
  !call ebands_test_intepolator(ebands, dtset, dtfil%filnam_ds(4), comm)
  ! Test the interpolation of electronic bands.
- skw = skw_new(cryst, 1, 1, ebands%mband, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, comm)
- call skw_free(skw)
+ !skw = skw_new(cryst, 1,  ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, [0, 0], [0, 0], comm)
+ !call skw_free(skw)
+ !stop
 
  ! Interpolate bands on dense k-mesh.
- kptrlatt_spl = reshape([8,0,0,0,8,0,0,0,8], [3,3])
- kptrlatt_spl = 8 * kptrlatt_spl; nshiftk_spl = 1
- ABI_CALLOC(shiftk_spl, (3,nshiftk_spl))
- ebands_bspl = ebands_bspline(ebands, cryst, [3,3,3], kptrlatt_spl, nshiftk_spl, shiftk_spl, comm)
- ABI_FREE(shiftk_spl)
+ kptrlatt_fine = reshape([4,0,0,0,4,0,0,0,4], [3,3])
+ kptrlatt_fine = 4 * kptrlatt_fine; nshiftk_fine = 1
+ ABI_CALLOC(shiftk_fine, (3,nshiftk_fine))
+ ebands_bspl = ebands_interp(ebands, cryst, "bspline", [3,3,3], kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+ !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
  if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(dtfil%filnam_ds(4), "_BSPLINE"))
+
+ call ebands_free(ebands_bspl)
+ ebands_bspl = ebands_interp(ebands, cryst, "skw", [3,3,3], kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+ !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
+ if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(dtfil%filnam_ds(4), "_SKW"))
+ MSG_ERROR("interpolation done")
+ ABI_FREE(shiftk_fine)
 
  edos = ebands_get_edos(ebands_bspl, cryst, edos_intmeth, edos_step, edos_broad, comm)
  !call ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
@@ -462,7 +470,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Test B-spline interpolation of phonons
  !if (.True.) then
  if (.False.) then
-   call ifc_test_phinterp(ifc, cryst, [12,12,12], 1, [zero,zero,zero], [3,3,3], comm)
+   call ifc_test_phinterp(ifc, cryst, [8,8,8], 1, [zero,zero,zero], [3,3,3], comm)
    !call ifc_set_interpolator(ifc, cryst, nustart, nucount, mode, phspline_ords, phskw_ratio, comm)
    !call ifc_test_intepolator(ifc, dtset, dtfil, comm)
    call xmpi_end()
@@ -478,7 +486,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! TODO: Parallelize this routine.
    call mkphdos(phdos,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,dtset%ph_smear,dtset%ph_ngqpt,dtset%ph_qshift)
 
-   !call phdos_print_debye(phdos, cryst%ucvol)
    if (my_rank == master) then
      path = strcat(dtfil%filnam_ds(4), "_PHDOS")
      call wrtout(ab_out, sjoin("- Writing phonon DOS to file:", path))

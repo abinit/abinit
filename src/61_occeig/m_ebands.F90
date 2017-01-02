@@ -43,6 +43,7 @@ MODULE m_ebands
 #endif
  use m_hdr
  use m_kptrank
+ use m_skw
  use m_kpts
 
  use defs_datatypes,   only : ebands_t
@@ -86,7 +87,7 @@ MODULE m_ebands
  public :: ebands_has_metal_scheme ! .True. if metallic occupation scheme is used.
  public :: ebands_write_bxsf       ! Write 3D energies for Fermi surface visualization (XSF format)
  public :: ebands_update_occ       ! Update the occupation numbers.
- public :: ebands_set_scheme       ! set the occupation scheme.
+ public :: ebands_set_scheme       ! Set the occupation scheme.
  public :: ebands_set_fermie       ! Change the fermi level (assume metallic scheme).
  public :: ebands_set_nelect       ! Change the number of electrons (assume metallic scheme).
  public :: ebands_report_gap       ! Print info on the fundamental and optical gap.
@@ -95,7 +96,7 @@ MODULE m_ebands
  public :: ebands_write_nesting    ! Calculate the nesting function and output data to file.
  public :: ebands_expandk          ! Build a new ebands_t in the full BZ.
  public :: ebands_get_jdos         ! Compute the joint density of states.
- public :: ebands_bspline
+ public :: ebands_interp
 
  public :: ebands_prtbltztrp          ! Output files for BoltzTraP code.
  public :: ebands_prtbltztrp_tau_out  ! Output files for BoltzTraP code,
@@ -2305,9 +2306,9 @@ subroutine ebands_update_occ(ebands,spinmagntarget,stmbias,prtvol)
  end if
 
  if (ABS(ndiff)>5.d-2*ebands%nelect) then
-   write(msg,'(2a,2(a,f6.2))')&
-&    'Too large difference in no. of electrons:,',ch10,&
-&    'Expected= ',ebands%nelect,' Calculated= ',SUM(nelect_spin)
+   write(msg,'(2a,2(a,es12.4))')&
+    'Too large difference in no. of electrons:,',ch10,&
+    'Expected= ',ebands%nelect,' Calculated= ',sum(nelect_spin)
    MSG_ERROR(msg)
  end if
 
@@ -4006,9 +4007,9 @@ end subroutine ebspl_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/ebands_bspline
+!!****f* m_ebands/ebands_interp
 !! NAME
-!! ebands_bspline
+!! ebands_interp
 !!
 !! FUNCTION
 !!
@@ -4022,31 +4023,32 @@ end subroutine ebspl_free
 !!
 !! SOURCE
 
-type(ebands_t) function ebands_bspline(ebands, cryst, ords, bspl_kptrlatt, bspl_nshiftk, bspl_shiftk, comm) result(new)
-
+type(ebands_t) function ebands_interp(ebands, cryst, itype, ords, intp_kptrlatt, intp_nshiftk, intp_shiftk, comm) result(new)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ebands_bspline'
+#define ABI_FUNC 'ebands_interp'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: bspl_nshiftk,comm
+ integer,intent(in) :: intp_nshiftk,comm
+ character(len=*),intent(in) :: itype
  type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
 !arrays
- integer,intent(in) :: ords(3),bspl_kptrlatt(3,3)
- real(dp),intent(in) :: bspl_shiftk(3,bspl_nshiftk)
+ integer,intent(in) :: ords(3),intp_kptrlatt(3,3)
+ real(dp),intent(in) :: intp_shiftk(3,intp_nshiftk)
 
 !Local variables-------------------------------
 !scalars
- integer :: ik_ibz,spin,new_bantot,new_mband,kptopt
+ integer :: ik_ibz,spin,new_bantot,new_mband,cplex
  integer :: nprocs,my_rank,cnt,ierr,band,new_nkbz,new_nkibz,new_nshiftk
  type(ebspl_t) :: ebspl
+ type(skw_t) :: skw
 !arrays
  integer :: new_kptrlatt(3,3)
  integer,allocatable :: new_istwfk(:),new_nband(:,:),new_npwarr(:)
@@ -4057,10 +4059,8 @@ type(ebands_t) function ebands_bspline(ebands, cryst, ords, bspl_kptrlatt, bspl_
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- kptopt = ebands%kptopt
-
  ! Get ibz, new shifts and new kptrlatt.
- call kpts_ibz_from_kptrlatt(cryst, bspl_kptrlatt, ebands%kptopt, bspl_nshiftk, bspl_shiftk, &
+ call kpts_ibz_from_kptrlatt(cryst, intp_kptrlatt, ebands%kptopt, intp_nshiftk, intp_shiftk, &
    new_nkibz, new_kibz, new_wtk, new_nkbz, new_kbz, new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
  new_nshiftk = size(new_shiftk, dim=2)
 
@@ -4079,7 +4079,7 @@ type(ebands_t) function ebands_bspline(ebands, cryst, ords, bspl_kptrlatt, bspl_
  call ebands_init(new_bantot,new,ebands%nelect,new_doccde,new_eig,new_istwfk,new_kibz,&
    new_nband,new_nkibz,new_npwarr,ebands%nsppol,ebands%nspinor,ebands%tphysel,ebands%tsmear,&
    ebands%occopt,new_occ,new_wtk,&
-   ebands%charge, kptopt, bspl_kptrlatt, bspl_nshiftk, bspl_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
+   ebands%charge, ebands%kptopt, intp_kptrlatt, intp_nshiftk, intp_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
 
  ABI_FREE(new_kibz)
  ABI_FREE(new_wtk)
@@ -4092,24 +4092,37 @@ type(ebands_t) function ebands_bspline(ebands, cryst, ords, bspl_kptrlatt, bspl_
  ABI_FREE(new_eig)
  ABI_FREE(new_occ)
 
- ! Build B-spline object for all bands
- ebspl = ebspl_new(ebands, cryst, ords, [1, ebands%mband], [0,0])
+ ! Build (B-spline|SKW) object for all bands
+ select case (itype)
+ case ("bspline")
+   ebspl = ebspl_new(ebands, cryst, ords, [0,0], [0,0])
+ case ("skw")
+   cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
+   skw = skw_new(cryst, cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, [0, 0], [0, 0], comm)
+ case default
+   MSG_ERROR(sjoin("Wrong itype:", itype))
+ end select
 
- ! Spline eigenvalues.
+ ! Interpolate eigenvalues.
  new%eig = zero; cnt = 0
  do spin=1,new%nsppol
    do ik_ibz=1,new%nkpt
      do band=1,new%nband(ik_ibz+(spin-1)*new%nkpt)
        cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle  ! Mpi parallelism.
-       call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
+       if (itype == "bspline") then
+         call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
+       else
+         call skw_eval_bks(skw, cryst, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
+       end if
      end do
    end do
  end do
  call xmpi_sum(new%eig, comm, ierr)
 
  call ebspl_free(ebspl)
+ call skw_free(skw)
 
-end function ebands_bspline
+end function ebands_interp
 !!***
 
 !----------------------------------------------------------------------

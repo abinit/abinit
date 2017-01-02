@@ -1100,6 +1100,8 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
  ! Speed of sound along reduced directions.
  do ii=1,3
    qpt = zero; qpt(ii) = one
+   !if (ii >= 4 .and. ii <= 6) qpt = matmul(crystal%rprimd, qpt) ! Cartesian directions.
+   !if (ii >= 7 .and. ii <= 9) qpt = matmul(crystal%rprimd, qpt) ! Cartesian directions.
    qpt = qrad * two_pi * qpt / normv(qpt, crystal%gmet, "G")
    call ifc_fourq(ifc, crystal, qpt, phfrqs, displ_cart, out_eigvec=eigvec, dwdq=dwdq)
 
@@ -1113,10 +1115,10 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
  converged = 0
  do igrid=1,lebedev_ngrids
    lgrid = lebedev_new(igrid)
-   npts = lgrid%npts
-   quad = zero
-   do ii=1,lgrid%npts
+   npts = lgrid%npts; quad = zero
+   do ii=1,npts
      if (mod(ii, nprocs) /= my_rank) cycle ! mpi-parallelism
+
      ! Build q-point on sphere of radius qrad
      qpt = two_pi * matmul(crystal%gprimd, lgrid%versors(:, ii))
      qpt = qrad * qpt / normv(qpt, crystal%gmet, "G")
@@ -1133,12 +1135,11 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
    call lebedev_free(lgrid)
 
    write(std_out,'(2(a,i6),a,3es12.4,a,es12.4)')&
-     " Lebedeb-Laikov grid: ",igrid," npts: ", npts, " quad: ",quad, " <vs>: ",sum(quad)/3
+     " Lebedeb-Laikov grid: ",igrid,", npts: ", npts, " vs_sphavg(mode=1,3): ",quad, " <vs>: ",sum(quad)/3
 
    if (igrid > 1) then
      if (abs(sum(quad - prev_quad)/3) < atol_ms) then
-        converged = converged + 1
-        if (converged == 2) exit
+        converged = converged + 1; if (converged == 2) exit
      else
         converged = 0
      end if
@@ -2888,6 +2889,7 @@ end function ifc_build_skw
 
 subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
 
+ use m_bz_mesh,  only : kpath_t, kpath_init, kpath_free
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -2916,6 +2918,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
  real(dp) :: cpu_bspl,wall_bspl,gflops_bspl,cpu_skw,wall_skw,gflops_skw
  type(phbspl_t) :: phbspl
  type(skw_t) :: skw
+ type(kpath_t) :: qpath
 !arrays
  integer :: imax(1)
  real(dp) :: phfrq(3*cryst%natom),ofreqs(3*cryst%natom),qpt(3),wnext(3*cryst%natom)
@@ -2923,12 +2926,14 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),qvers_cart(3),qvers_red(3),qstep(3)
  real(dp) :: qred(3),shift(3),vals4(4),dwdq(3,3*cryst%natom)
  real(dp) :: q1(3),q2(3)
+ real(dp) :: bounds(3,5)
  real(dp),allocatable :: winterp(:,:),wdata(:,:)
 
 ! *********************************************************************
 
- !call make_path(Kpath%nbounds,bounds,Kpath%gmet,"G",ndiv_small,Kpath%ndivs,Kpath%npts,pts,unit=dev_null)
- !call kpath_init(Kpath,bounds,gprimd,ndiv_small)
+ bounds = reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5])
+ call kpath_init(qpath, bounds, cryst%gprimd, 10)
+
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
@@ -2945,6 +2950,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
  mae_skw = zero; mare_skw = zero
 
  ! Test computation of group velocites
+#if 0
  q1 = zero; q2 = [half, zero, zero]
  q1 = -q2
  !q1 = [0.01_dp, zero, zero]; q2 = [half, zero, zero]
@@ -2980,17 +2986,19 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
  end do
  ABI_FREE(wdata)
  ABI_FREE(winterp)
- stop
+ MSG_ERROR("Test phonon group velocities done")
+#endif
 
- nq = 1000
- !call random_seed(put=my_rank*100)
+ !nq = 100
+ nq = qpath%npts
  do iq=1,nq
-   if (mod(iq, nprocs) /= my_rank) cycle ! mpi parallelism
-   !call random_number(qpt)
-   call random_number(qred)
-   qred = qred + (0.1_dp * my_rank / nprocs)
-   !call wrap2_zero_one(qred, qpt, shift)
-   call wrap2_pmhalf(qred, qpt, shift)
+   !if (mod(iq, nprocs) /= my_rank) cycle ! mpi parallelism
+   !call random_number(qred)
+   !qred = qred + (0.1_dp * my_rank / nprocs)
+   !call wrap2_pmhalf(qred, qpt, shift)
+
+   if (my_rank /= master) cycle
+   qpt = qpath%points(:,iq)
 
    ! Fourier interpolation
    call cwtime(cpu, wall, gflops, "start")
@@ -3011,10 +3019,11 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
    rel_err = 100 * rel_err; adiff_meV = adiff_meV * Ha_meV
    mae_bspl = mae_bspl + sum(adiff_meV) / natom3
    mare_bspl = mare_bspl + sum(rel_err) / natom3
-   !if (my_rank == master)
-   !write(std_out,*)maxval(adiff_meV), maxval(rel_err), trim(ktoa(qpt))
-   !write(456, *)phfrq; write(457, *)ofreqs
-   !end if
+   if (my_rank == master) then
+     !write(std_out,*)maxval(adiff_meV), maxval(rel_err), trim(ktoa(qpt))
+     write(456, *)phfrq
+     write(457, *)ofreqs
+   end if
 
    ! SKW interpolation
    call cwtime(cpu, wall, gflops, "start")
@@ -3031,10 +3040,10 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
    rel_err = 100 * rel_err; adiff_meV = adiff_meV * Ha_meV
    mae_skw = mae_skw + sum(adiff_meV) / natom3
    mare_skw = mare_skw + sum(rel_err) / natom3
-   !if (my_rank == master) then
-   !write(std_out,*)maxval(adiff_meV), maxval(rel_err), trim(ktoa(qpt))
-   !write(456, *)phfrq; write(457, *)ofreqs
-   !endif
+   if (my_rank == master) then
+     !write(std_out,*)maxval(adiff_meV), maxval(rel_err), trim(ktoa(qpt))
+     write(458, *)ofreqs
+   endif
  end do
 
  vals4 = [mae_bspl, mare_bspl, mae_skw, mare_skw]
@@ -3054,6 +3063,8 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
 
  call phbspl_free(phbspl)
  call skw_free(skw)
+ call kpath_free(qpath)
+ MSG_ERROR("ifc_test_phinterp done")
 
 end subroutine ifc_test_phinterp
 !!***

@@ -84,7 +84,7 @@ MODULE m_skw
 
   integer,allocatable :: rpts(:,:)
    ! rpts(3, nr)
-   ! Real-space lattice points (reduced coordinates) ordered with non-decreasing length.
+   ! Real-space lattice points (in reduced coordinates) ordered with non-decreasing length.
 
   complex(dpc),allocatable :: coefs(:,:,:)
    ! coefs(nr, mband, nsppol)
@@ -128,13 +128,13 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!  cryst<crystal_t>=Crystalline structure.
 !!  cplex=1 if time reversal can be used, 2 otherwise.
-!!  nband=Total Number of bands in eig array.
+!!  nband=Total Number of bands in the eig array.
 !!  nkpt=Number of ab-initio k-points.
 !!  nsppol=Number of independent spin polarizations.
 !!  kpts(3,nkpt)=ab-initio k-points in reduced coordinates.
 !!  eig(nband,nkpt,nsppol)=ab-initio eigenvalues.
-!!  band_block(2)=Initial and final band index. If [0,0], all bands are used
-!!  spin_block(2)=Initial and final spin index. If [0,0], all bands are used
+!!  band_block(2)=Initial and final band index to interpolate. If [0,0], all bands are used
+!!  spin_block(2)=Initial and final spin index to interpolate. If [0,0], all bands are used
 !!  comm=MPI communicator
 !!
 !! PARENTS
@@ -176,8 +176,8 @@ type(skw_t) function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_
  character(len=500) :: fmt
 !arrays
  integer :: rmax(3) !,ngmax(3),ngmin(3)
- integer,allocatable :: ipiv(:),iperm(:)
- real(dp),allocatable :: rtmp(:,:),r2vals(:),rhor(:),oeig(:)
+ integer,allocatable :: ipiv(:),iperm(:),rtmp(:,:)
+ real(dp),allocatable :: r2vals(:),rhor(:),oeig(:)
  complex(dpc),allocatable :: srk(:,:),hmat(:,:),lambda(:,:,:)
 
 ! *********************************************************************
@@ -231,13 +231,13 @@ type(skw_t) function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_
  iperm = [(i1, i1=1,msize)]
  call sort_dp(msize, r2vals, iperm, tolr)
 
- ! Initial guess for nr
+ ! Initial guess for nr.
  do i1=1,msize
    if (i1 > nkpt * ratio) exit
  end do
  nr = i1 - 1
 
- ! Find nr closing the shell
+ ! Find nr closing the shell.
  do i1=nr+1,msize
    if (abs(r2vals(i1) - r2vals(nr)) > tolr) exit
  end do
@@ -295,10 +295,6 @@ type(skw_t) function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_
  ! Solve system of linear equations to get lambda coeffients (eq. 10 of PRB 38 2721)
  ! Solve all bands and spins at once
  ABI_MALLOC(ipiv, (nkpt-1))
-
- !call DGETRF(nkpt-1,nkpt-1,hmat,nkpt-1,ipiv,ierr)
- !CALL DGETRS('N',bs%nkpt-1,bs%icut2-bs%icut1+1,hmat,bs%nkpt-1,ipiv,lambda(1,bs%icut1),bs%nkpt-1,inf)
-
  call zgesv(nkpt-1, bcount*nsppol, hmat, nkpt-1, ipiv, lambda, nkpt-1, ierr)
  !call zhesv(nkpt-1, bcount*nsppol, hmat, nkpt-1, ipiv, lambda, nkpt-1, ierr)
  ABI_CHECK(ierr == 0, sjoin("ZGESV returned info:", itoa(ierr)))
@@ -336,12 +332,13 @@ type(skw_t) function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_
 
  ! Compare ab-initio data with interpolated results.
  ABI_MALLOC(oeig, (bcount))
- fmt = sjoin("(a,",itoa(bcount),"(f8.3))")
+ fmt = sjoin("(a,", itoa(bcount), "(es12.4))")
  bstop = bstart + bcount - 1
- mare = zero; mae = zero
+ mare = zero; mae = zero; cnt = 0
  do spin=1,nsppol
    do ik=1,nkpt
      do ib=1,bcount
+       !cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! mpi parallelism.
        band = ib + new%band_block(1) - 1
        call skw_eval_bks(new, cryst, band, kpts(:,ik), spin, oeig(ib))
 
@@ -351,19 +348,26 @@ type(skw_t) function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_
        mae = mae + adiff_meV; mare = mare + rel_err
      end do
 
-     write(std_out,fmt)"-- ref ", eig(bstart:bstop,ik,spin) * Ha_meV
-     write(std_out,fmt)"-- int ", oeig * Ha_meV
-     write(std_out,*)"maxerr:", maxval(eig(bstart:bstop,ik,spin) - oeig) * Ha_meV, " [meV], ", trim(ktoa(kpts(:,ik)))
+     !write(std_out,fmt)"-- ref ", eig(bstart:bstop,ik,spin) * Ha_meV
+     !write(std_out,fmt)"-- int ", oeig * Ha_meV
+     write(std_out,*)"SKW maxerr:", maxval(eig(bstart:bstop,ik,spin) - oeig) * Ha_meV, " [meV], ", trim(ktoa(kpts(:,ik)))
      !call vdiff_print(vdiff_eval(1, bcount, eig(bstart:bstop,ik,spin), oeig, one))
    end do
  end do
+ ABI_FREE(oeig)
 
- !list2 = [mare/cnt, mae/cnt]
+ ! Issue warning if error too large.
+ !list2 = [mare, mae]
  !call xmpi_sum(list2, comm, ierr)
+ !mare = list2(1); mae = list(2)
+ cnt = bcount * nkpt * nsppol
+ mare = mare / cnt; mae = mae / cnt
+ write(std_out,*)"MARE: ",mare, "MAE:" mae, "[meV]"
+ !if (mare > .or. mae > ) then
+ !  MSG_WARNING("Large error detected in SKW interpolation!")
+ !end if
 
  if (my_rank == master) call skw_print(new, std_out)
-
- ABI_FREE(oeig)
 
 end function skw_new
 !!***
@@ -408,9 +412,9 @@ subroutine skw_print(skw, unt)
 
 ! *********************************************************************
 
+ write(unt,"(a)")sjoin("nsppol", itoa(skw%nsppol), "cplex:", itoa(skw%cplex))
  write(unt,"(a)")sjoin("Number of real-space lattice points:", itoa(skw%nr))
  write(unt,"(a)")sjoin("Number of ab-initio k-points:", itoa(skw%nkpt))
- write(unt,"(a)")sjoin("nsppol", itoa(skw%nsppol), "cplex:", itoa(skw%cplex))
 
 end subroutine skw_print
 !!***

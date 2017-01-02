@@ -209,13 +209,13 @@ MODULE m_bz_mesh
 
 type,public :: kpath_t
 
-  integer :: nbounds
+  integer :: nbounds=0
     ! Number of extrema defining the path.
 
-  integer :: ndiv_small
+  integer :: ndiv_small=0
     ! ndiv_small=Number of divisions used to sample the smallest segment.
 
-  integer :: npts
+  integer :: npts=0
     ! Number of points in the path
 
   real(dp) :: gprimd(3,3)
@@ -233,7 +233,7 @@ type,public :: kpath_t
 
   real(dp),allocatable :: points(:,:)
     ! points(3,npts)
-    ! The points in reduced coordinates.
+    ! The points of the path in reduced coordinates.
 
  end type kpath_t
 
