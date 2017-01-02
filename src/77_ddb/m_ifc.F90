@@ -1053,6 +1053,7 @@ end subroutine ifc_get_dwdq
 !! qrad=Radius of the sphere in reciprocal space
 !! atols_ms=Absolute tolerance in meter/second. The code generates spherical meshes
 !!  until the results are converged twice within atols_ms.
+!! ncid=the id of the open NetCDF file. Use nctk_noid to disable netcdf output.
 !! comm=MPI communicator.
 !!
 !! OUTPUT
@@ -1063,7 +1064,7 @@ end subroutine ifc_get_dwdq
 !!
 !! SOURCE
 
-subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
+subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, ncid, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1077,7 +1078,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: comm
+ integer,intent(in) :: comm,ncid
  real(dp),intent(in) :: qrad,atol_ms
  type(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: crystal
@@ -1169,6 +1170,22 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
      write(msg,'(a,i0,a)')" Detected ",num_negw, " negative frequencies. Speed of sound could be wrong"
      call wrtout(ab_out, msg)
      MSG_WARNING(msg)
+   end if
+
+   ! Dump results to netcdf file.
+   if (ncid /= nctk_noid) then
+#ifdef HAVE_NETCDF
+    !ncerr = nctk_def_arrays(ncid, [ &
+    !  nctkarr_t("speedofsound", "dp", "number_of_cartesian_directions, number_of_vectors"), &
+    !], defmode=.True.)
+    !NCF_CHECK(ncerr)
+    !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
+    !  'ecutwfn', 'ecuteps', 'ecutsigx', 'omegasrdmax', 'deltae', 'omegasrmax', 'scissor_ene'])
+    ! NCF_CHECK(ncerr)
+    !! Write data.
+    !NCF_CHECK(nctk_set_datamode(ncid))
+    !NCF_CHECK(nf90_put_var(ncid, nctk_idname("space_group", ncid), cryst%space_group))
+#endif
    end if
  end if
 
@@ -1313,7 +1330,7 @@ end subroutine corsifc9
 !!  has to be done for atom ia; otherwise 0.
 !! ifcout= Number of interatomic force constants written in the output file
 !! prt_ifc = flag to print out ifc information for dynamical matrix (AI2PS)
-!! ncid=the unit of the open NetCDF file.
+!! ncid=the id of the open NetCDF file.
 !!
 !! OUTPUT
 !!   written in the output file and in the NetCDF file

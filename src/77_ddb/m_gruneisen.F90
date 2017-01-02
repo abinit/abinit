@@ -737,7 +737,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
    MSG_WARNING("Cannot compute Grunesein parameters on q-path because nqpath == 0")
  end if
 
- !call ifc_speedofsound(gruns%ifc_vol(iv0), gruns%cryst_vol(iv0), qrad, atol_ms, comm)
+ !call ifc_speedofsound(gruns%ifc_vol(iv0), gruns%cryst_vol(iv0), qrad, atol_ms, ncid, comm)
 
  call gruns_free(gruns)
 

@@ -421,7 +421,7 @@ program anaddb
    call ifc_print_info(ifc, unit=std_out)
 
    ! Compute speed of sound.
-   !if (inp%vs_qrad > tol12) call ifc_speedofsound(ifc, crystal, inp%vs_qrad, inp%vs_atolms, comm)
+   !if (inp%vs_qrad > tol12) call ifc_speedofsound(ifc, crystal, inp%vs_qrad, inp%vs_atolms, ana_ncid, comm)
    !call ifc_speedofsound(ifc, crystal, 0.001_dp, 10._dp, comm)
    !call ifc_speedofsound(ifc, crystal, 0.0001_dp, 10._dp, comm)
    !call ifc_test_phinterp(ifc, crystal, [8,8,8], 1, [zero,zero,zero], [3,3,3], comm, test_dwdq=.True.)
@@ -447,8 +447,7 @@ program anaddb
 
 !Phonon density of states calculation, Start if interatomic forces have been calculated
  if (inp%ifcflag==1 .and. any(inp%prtdos==[1,2])) then
-   write(message,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,&
-&   ' Calculation of phonon density of states ',ch10
+   write(message,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of phonon density of states ',ch10
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
