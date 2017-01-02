@@ -119,7 +119,7 @@ program anaddb
  type(crystal_t) :: Crystal
 #ifdef HAVE_NETCDF
  integer :: phdos_ncid, ana_ncid, ec_ncid, ncerr
- integer :: na_dir_varid,na_phmodes_varid, na_phdispl_varid
+ integer :: na_phmodes_varid, na_phdispl_varid
 #endif
 
 !******************************************************************
@@ -131,8 +131,7 @@ program anaddb
  call xmpi_init()
 
  ! MPI variables
- comm = xmpi_world
- nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ comm = xmpi_world; nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  iam_master = (my_rank == master)
 
 !Initialize memory profiling if it is activated !if a full abimem.mocc report is desired,
@@ -419,11 +418,10 @@ program anaddb
 
    ! Compute speed of sound.
    !if (inp%vs_qrad > tol12) call ifc_speedofsound(ifc, crystal, inp%vs_qrad, inp%vs_atolms, ana_ncid, comm)
-   call ifc_speedofsound(ifc, crystal, 0.001_dp, 10._dp, nctk_noid, comm)
-   !call ifc_speedofsound(ifc, crystal, 0.0001_dp, 10._dp, comm)
+   call ifc_speedofsound(ifc, crystal, 0.001_dp, 10._dp, ana_ncid, comm)
    !call ifc_test_phinterp(ifc, crystal, [8,8,8], 1, [zero,zero,zero], [3,3,3], comm, test_dwdq=.True.)
 
-   !Print analysis of the real-space interatomic force constants
+   ! Print analysis of the real-space interatomic force constants
    if(inp%ifcout/=0)then
 #ifdef HAVE_NETCDF
      call ifc_print(Ifc,dielt,zeff,inp%ifcana,inp%atifc,inp%ifcout,inp%prt_ifc,ncid=ana_ncid)
@@ -605,9 +603,7 @@ program anaddb
        NCF_CHECK(ncerr)
 
        NCF_CHECK(nctk_set_datamode(ana_ncid))
-
-       NCF_CHECK(nf90_inq_varid(ana_ncid, "non_analytical_directions", na_dir_varid))
-       NCF_CHECK(nf90_put_var(ana_ncid,na_dir_varid,inp%qph2l))
+       NCF_CHECK(nf90_put_var(ana_ncid, nctk_idname(ana_ncid, "non_analytical_directions") ,inp%qph2l))
 #endif
      end if
 
@@ -684,7 +680,6 @@ program anaddb
      ! Evaluation of the oscillator strengths and frequency-dependent dielectric tensor.
      call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
 &     ab_out,lst,mpert,natom,nph2l,phfrq)
-
      ! write(std_out,*)'after ddb_diel, dielt_rlx(:,:)=',dielt_rlx(:,:)
    end if
 
@@ -695,7 +690,7 @@ program anaddb
 &     ab_out,lst,mpert,natom,nph2l,phfrq)
    end if
 
- end if ! End the condition of either nph2l/=0  or  dieflag==1
+ end if ! either nph2l/=0  or  dieflag==1
 
 !**********************************************************************
 
@@ -910,7 +905,7 @@ program anaddb
    call flush_unit(std_out)
  end if
 
-!Write information on file about the memory before ending mpi module, if memory profiling is enabled
+ ! Write information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor(filnam(2))
 
  call flush_unit(ab_out)

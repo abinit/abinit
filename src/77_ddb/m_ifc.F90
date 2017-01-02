@@ -1087,7 +1087,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, ncid, comm)
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ii,nu,igrid,my_rank,nprocs,ierr,converged,npts,num_negw
+ integer :: ii,nu,igrid,my_rank,nprocs,ierr,converged,npts,num_negw,vs_ierr,ncerr
  character(len=500) :: msg
  type(lebedev_t) :: lgrid
 !arrays
@@ -1155,19 +1155,23 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, ncid, comm)
  end do ! igrid
 
  if (my_rank == master) then
+   ! vs_err: 1 if not converged, < 0 if negative freqs, == 0 if success.
+   vs_ierr = 0
    do ii=1,3
-     write(std_out,"(a,3es12.4,a,i1)")" Speed of sound:",vs(ii,:)," [m/s] along reduced direction: ",ii
+     write(ab_out,"(a,3es12.4,a,i1)")" Speed of sound:",vs(ii,:)," [m/s] along reduced direction: ",ii
    end do
-   write(std_out,'(2(a,es12.4),a,i0)') &
+   write(ab_out,'(2(a,es12.4),a,i0)') &
      " Lebedev-Laikov integration with qradius: ", qrad, " atol_ms: ",atol_ms, " [m/s], npts: ", npts
-   write(std_out,"(a,3es12.4,a,es12.4)")" Spherical average:",vs(4,:)," [m/s], ",sum(vs(4,:))/3
+   write(ab_out,"(a,3es12.4,a,es12.4)")" Spherical average:",vs(4,:)," [m/s], ",sum(vs(4,:))/3
    if (converged /= 2) then
-     write(msg,'(a,es12.4,a)')" Results are not converged within: ",atol_ms, " [m/s]"
+     vs_ierr = 1
+     write(msg,'(a,es12.4,a)')" WARNING: Results are not converged within: ",atol_ms, " [m/s]"
      call wrtout(ab_out, msg)
      MSG_WARNING(msg)
    end if
    if (num_negw > 0) then
-     write(msg,'(a,i0,a)')" Detected ",num_negw, " negative frequencies. Speed of sound could be wrong"
+     vs_ierr = -num_negw
+     write(msg,'(a,i0,a)')" WARNING: Detected ",num_negw, " negative frequencies. Speed of sound could be wrong"
      call wrtout(ab_out, msg)
      MSG_WARNING(msg)
    end if
@@ -1175,16 +1179,18 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, ncid, comm)
    ! Dump results to netcdf file.
    if (ncid /= nctk_noid) then
 #ifdef HAVE_NETCDF
-    !ncerr = nctk_def_arrays(ncid, [ &
-    !  nctkarr_t("speedofsound", "dp", "number_of_cartesian_directions, number_of_vectors"), &
-    !], defmode=.True.)
-    !NCF_CHECK(ncerr)
-    !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-    !  'ecutwfn', 'ecuteps', 'ecutsigx', 'omegasrdmax', 'deltae', 'omegasrmax', 'scissor_ene'])
-    ! NCF_CHECK(ncerr)
-    !! Write data.
-    !NCF_CHECK(nctk_set_datamode(ncid))
-    !NCF_CHECK(nf90_put_var(ncid, nctk_idname("space_group", ncid), cryst%space_group))
+     ncerr = nctk_def_arrays(ncid, [nctkarr_t("vsound", "dp", "four, three")], defmode=.True.)
+     NCF_CHECK(ncerr)
+     ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "vsound_ierr"])
+     NCF_CHECK(ncerr)
+     ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: 'vsound_qrad', 'vsound_atol_ms'])
+     NCF_CHECK(ncerr)
+     ! Write data.
+     NCF_CHECK(nctk_set_datamode(ncid))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_ierr"), vs_ierr))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_qrad"), qrad))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_atol_ms"), atol_ms))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound"), vs))
 #endif
    end if
  end if
