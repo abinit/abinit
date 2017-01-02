@@ -362,7 +362,7 @@ type(skw_t) function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_
  !mare = list2(1); mae = list(2)
  cnt = bcount * nkpt * nsppol
  mare = mare / cnt; mae = mae / cnt
- write(std_out,*)"MARE: ",mare, "MAE:" mae, "[meV]"
+ write(std_out,*)"MARE: ",mare, "MAE:", mae, "[meV]"
  !if (mare > .or. mae > ) then
  !  MSG_WARNING("Large error detected in SKW interpolation!")
  !end if

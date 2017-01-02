@@ -811,7 +811,7 @@ end subroutine ifc_print_info
 !!  [out_d2cart(2,3,3*natom,3,3*natom)] = The (interpolated) dynamical matrix for this q-point
 !!  [out_eigvec(2*3*natom*3*natom) = The (interpolated) eigenvectors of the dynamical matrix.
 !!  [out_displ_red(2*3*natom*3*natom) = The (interpolated) displacement in reduced coordinates.
-!!  [dwdq(3,3*natom)] = Group velocities e.g. d(omega(q))/dq in Cartesian coordinates.
+!!  [dwdq(3,3*natom)] = Group velocities i.e. d(omega(q))/dq in Cartesian coordinates.
 !!
 !! PARENTS
 !!      get_nv_fs_en,get_tau_k,harmonic_thermo,interpolate_gkk,m_ifc,m_phgamma
@@ -946,7 +946,6 @@ end subroutine ifc_fourq
 
 subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq)
 
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -992,16 +991,17 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq)
 
  if (ifc%dipdip==1) then
    enough = enough + 1
-   ! TODO
    if (enough <= 50)  MSG_WARNING("phonon velocitied with dipdip==1 not yet tested.")
-   ! Add the non-analytical part
-   ! Compute dyew(2,3,natom,3,natom)= Ewald part of the dynamical matrix,
-   ! second energy derivative wrt xred(3,natom) in Hartrees
+   ! Add the gradient of the non-analytical part.
+   ! Note that we dddq is in cartesian cordinates.
+   ! TODO: For the time being, the gradient is computed with finite difference.
+   ! should generalize ewald9 to compute dq.
    hh = 0.001_dp
    do ii=1,3
      do jj=-1,1,2
-       qfd = zero; qfd(ii) = jj * hh; qfd = matmul(cryst%rprimd, qfd)
-       qfd = qpt + qfd
+       qfd = zero; qfd(ii) = jj
+       qfd = matmul(cryst%rprimd, qfd); qfd = two_pi * qfd / normv(qfd, cryst%gmet, "G")
+       qfd = qpt + hh * qfd
 
        call ewald9(ifc%acell,ifc%dielt,dyew,cryst%gmet,ifc%gprim,cryst%natom,qfd,&
           cryst%rmet,ifc%rprim,sumg0,cryst%ucvol,cryst%xred,ifc%zeff)
@@ -1083,7 +1083,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ii,nu,igrid,my_rank,nprocs,ierr,converged,npts
+ integer :: ii,nu,igrid,my_rank,nprocs,ierr,converged,npts,num_negw
  character(len=500) :: msg
  type(lebedev_t) :: lgrid
 !arrays
@@ -1115,7 +1115,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
  converged = 0
  do igrid=1,lebedev_ngrids
    lgrid = lebedev_new(igrid)
-   npts = lgrid%npts; quad = zero
+   npts = lgrid%npts; quad = zero; num_negw = 0
    do ii=1,npts
      if (mod(ii, nprocs) /= my_rank) cycle ! mpi-parallelism
 
@@ -1123,6 +1123,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
      qpt = two_pi * matmul(crystal%gprimd, lgrid%versors(:, ii))
      qpt = qrad * qpt / normv(qpt, crystal%gmet, "G")
      call ifc_fourq(ifc, crystal, qpt, phfrqs, displ_cart, out_eigvec=eigvec, dwdq=dwdq)
+     if (any(phfrqs < -tol8)) num_negw = num_negw + 1
 
      do nu=1,3
        quad(nu) = quad(nu) + lgrid%weights(ii) * sqrt(sum(dwdq(1:3,nu) ** 2))
@@ -1132,6 +1133,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
 
    quad = quad * Bohr_meter / Time_Sec
    call xmpi_sum(quad, comm, ierr)
+   call xmpi_sum(num_negw, comm, ierr)
    call lebedev_free(lgrid)
 
    write(std_out,'(2(a,i6),a,3es12.4,a,es12.4)')&
@@ -1152,11 +1154,16 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
    do ii=1,3
      write(std_out,"(a,3es12.4,a,i1)")" Speed of sound:",vs(ii,:)," [m/s] along reduced direction: ",ii
    end do
-   write(std_out,'(2(a,es12.4),a,i0)')&
+   write(std_out,'(2(a,es12.4),a,i0)') &
      " Lebedev-Laikov integration with qradius: ", qrad, " atol_ms: ",atol_ms, " [m/s], npts: ", npts
    write(std_out,"(a,3es12.4,a,es12.4)")" Spherical average:",vs(4,:)," [m/s], ",sum(vs(4,:))/3
    if (converged /= 2) then
      write(msg,'(a,es12.4,a)')" Results are not converged within: ",atol_ms, " [m/s]"
+     call wrtout(ab_out, msg)
+     MSG_WARNING(msg)
+   end if
+   if (num_negw > 0) then
+     write(msg,'(a,i0,a)')" Detected ",num_negw, " negative frequencies. Speed of sound could be wrong"
      call wrtout(ab_out, msg)
      MSG_WARNING(msg)
    end if
@@ -2887,7 +2894,7 @@ end function ifc_build_skw
 !!
 !! SOURCE
 
-subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
+subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, test_dwdq)
 
  use m_bz_mesh,  only : kpath_t, kpath_init, kpath_free
 
@@ -2895,6 +2902,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_test_phinterp'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -2904,9 +2912,9 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
  integer,intent(in) :: comm,nshiftq
  type(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: cryst
+ logical,optional,intent(in) :: test_dwdq
 !arrays
- integer,intent(in) :: ngqpt(3)
- integer,intent(in) :: ords(3)
+ integer,intent(in) :: ngqpt(3),ords(3)
  real(dp),intent(in) :: shiftq(3,nshiftq)
 
 !local variables-------------------------------
@@ -2916,6 +2924,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
  real(dp) :: mare_bspl,mae_bspl,mare_skw,mae_skw,dq
  real(dp) :: cpu,wall,gflops,cpu_fourq,wall_fourq,gflops_fourq
  real(dp) :: cpu_bspl,wall_bspl,gflops_bspl,cpu_skw,wall_skw,gflops_skw
+ logical :: do_dwdq
  type(phbspl_t) :: phbspl
  type(skw_t) :: skw
  type(kpath_t) :: qpath
@@ -2934,10 +2943,51 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
  bounds = reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5])
  call kpath_init(qpath, bounds, cryst%gprimd, 10)
 
-
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  natom3 = 3 * cryst%natom
+
+ ! Test computation of group velocities
+ do_dwdq = .False.; if (present(test_dwdq)) do_dwdq = test_dwdq
+ if (do_dwdq) then
+   call wrtout(std_out, "Testing computation of group velocities.")
+   q1 = zero; q2 = [half, zero, zero]
+   !q1 = -q2
+   !q1 = [0.01_dp, zero, zero]; q2 = [half, zero, zero]
+   !q1 = [0.01_dp, zero, zero]; q2 = [half, half, half]
+   !q2 = [0.01_dp, zero, zero]; q1 = [half, zero, zero]
+   !q2 = [0.01_dp, zero, zero]; q1 = [half, zero, zero]
+   nq = 50
+   dq = normv(q2 - q1, cryst%gmet, "G") / (nq - 1)
+   qvers_red = (q2 -q1) / normv(q2 - q1, cryst%gmet, "G")
+   qvers_cart = matmul(cryst%gprimd, qvers_red) * two_pi
+   ABI_MALLOC(wdata, (natom3, nq))
+   ABI_MALLOC(winterp, (natom3, nq))
+
+   do iq=1,nq
+      qpt = q1 + (iq - 1) * dq * qvers_red
+      call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, dwdq=dwdq)
+      wdata(:,iq) = phfrq
+      if (iq == 1) winterp(:,iq) = phfrq
+      if (iq > 1) then
+        do nu=1,natom3
+           winterp(nu, iq) = winterp(nu, iq-1) + dq * dot_product(ifc%acell(:) * dwdq(:, nu), qvers_cart)
+        end do
+        !imax = maxloc(abs(phfrq - wnext)); ii = imax(1)
+        !write(*,*)ii, phfrq(ii), wnext(ii), (phfrq(ii) - wnext(ii)) * Ha_meV
+        !write(std_out,*)"wvel:", qpt, minval(abs(phfrq - wnext)) * Ha_meV, maxval(abs(phfrq - wnext)) * Ha_meV, imax
+        !write(std_out,*)"dwdq:",dwdq
+      end if
+      write(100,*)wdata(:,iq) * Ha_meV
+      write(101,*)winterp(:,iq) * Ha_meV
+      !do nu=1,natom3
+      !  wnext(nu) = phfrq(nu) + dq * dot_product(dwdq(:, nu), qvers_cart)
+      !end do
+   end do
+   ABI_FREE(wdata)
+   ABI_FREE(winterp)
+   MSG_ERROR("Test phonon group velocities done")
+ end if
 
  ! Build interpolator objects.
  phbspl = ifc_build_phbspl(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
@@ -2948,46 +2998,6 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm)
  cpu_skw = zero; wall_skw = zero; gflops_skw = zero
  mae_bspl = zero; mare_bspl = zero
  mae_skw = zero; mare_skw = zero
-
- ! Test computation of group velocites
-#if 0
- q1 = zero; q2 = [half, zero, zero]
- q1 = -q2
- !q1 = [0.01_dp, zero, zero]; q2 = [half, zero, zero]
- !q1 = [0.01_dp, zero, zero]; q2 = [half, half, half]
- !q2 = [0.01_dp, zero, zero]; q1 = [half, zero, zero]
- !q2 = [0.01_dp, zero, zero]; q1 = [half, zero, zero]
- nq = 100
- dq = normv(q2 - q1, cryst%gmet, "G") / (nq - 1)
- qvers_red = (q2 -q1) / normv(q2 - q1, cryst%gmet, "G")
- qvers_cart = matmul(cryst%gprimd, qvers_red) * two_pi
- ABI_MALLOC(wdata, (natom3, nq))
- ABI_MALLOC(winterp, (natom3, nq))
-
- do iq=1,nq
-    qpt = q1 + (iq - 1) * dq * qvers_red
-    call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, dwdq=dwdq)
-    wdata(:,iq) = phfrq
-    if (iq == 1) winterp(:,iq) = phfrq
-    if (iq > 1) then
-      do nu=1,natom3
-         winterp(nu, iq) = winterp(nu, iq-1) + dq * dot_product(ifc%acell(:) * dwdq(:, nu), qvers_cart)
-      end do
-      !imax = maxloc(abs(phfrq - wnext)); ii = imax(1)
-      !write(*,*)ii, phfrq(ii), wnext(ii), (phfrq(ii) - wnext(ii)) * Ha_meV
-      !write(std_out,*)"wvel:", qpt, minval(abs(phfrq - wnext)) * Ha_meV, maxval(abs(phfrq - wnext)) * Ha_meV, imax
-      !write(std_out,*)"dwdq:",dwdq
-    end if
-    write(100,*)wdata(:,iq) * Ha_meV
-    write(101,*)winterp(:,iq) * Ha_meV
-    !do nu=1,natom3
-    !  wnext(nu) = phfrq(nu) + dq * dot_product(dwdq(:, nu), qvers_cart)
-    !end do
- end do
- ABI_FREE(wdata)
- ABI_FREE(winterp)
- MSG_ERROR("Test phonon group velocities done")
-#endif
 
  !nq = 100
  nq = qpath%npts

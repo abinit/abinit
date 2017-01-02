@@ -425,6 +425,7 @@ program anaddb
    !if (inp%vs_qrad > tol12) call ifc_speedofsound(ifc, crystal, inp%vs_qrad, inp%vs_atolms, comm)
    !call ifc_speedofsound(ifc, crystal, 0.001_dp, 10._dp, comm)
    !call ifc_speedofsound(ifc, crystal, 0.0001_dp, 10._dp, comm)
+   !call ifc_test_phinterp(ifc, crystal, [8,8,8], 1, [zero,zero,zero], [3,3,3], comm, test_dwdq=.True.)
 
    !Print analysis of the real-space interatomic force constants
    if(inp%ifcout/=0)then

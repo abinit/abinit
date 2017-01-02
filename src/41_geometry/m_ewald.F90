@@ -658,7 +658,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !Local variables -------------------------
 !scalars
- integer,parameter :: matom=10000,mr=10000
+ integer,parameter :: mr=10000
  integer :: i2,ia,ib,ig1,ig2,ig3,ii,ir,ir1,ir2,ir3,jj,mu,newg,newr,ng,nr,nu
  integer :: ng_expxq
  real(dp) :: arg1,arg2,arg3,arga,c123i,c123r,c23i,c23r,derfc_yy
@@ -669,22 +669,15 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  character(len=500) :: message
 !arrays
  real(dp) :: c1i(2*mr+1),c1r(2*mr+1),c2i(2*mr+1),c2r(2*mr+1),c3i(2*mr+1)
- real(dp) :: c3r(2*mr+1),cosqxred(matom),gpq(3),gpqfac(3,3),gpqgpq(3,3)
- real(dp) :: invdlt(3,3),ircar(3),ircax(3),rr(3),sinqxred(matom)
- real(dp) :: xredcar(3,matom),xredcax(3,matom),xredicar(3),xredicax(3),xx(3)
+ real(dp) :: c3r(2*mr+1),cosqxred(natom),gpq(3),gpqfac(3,3),gpqgpq(3,3)
+ real(dp) :: invdlt(3,3),ircar(3),ircax(3),rr(3),sinqxred(natom)
+ real(dp) :: xredcar(3,natom),xredcax(3,natom),xredicar(3),xredicax(3),xx(3)
  real(dp) :: gprimbyacell(3,3)
  complex(dpc) :: exp2piqx(natom)
  real(dp),allocatable :: dyewt(:,:,:,:,:)
  complex(dpc),allocatable :: expx1(:,:), expx2(:,:), expx3(:,:)
 
 ! *********************************************************************
-
- if(matom<natom)then
-   write(message, '(a,i0,a,i0,a,a)' )&
-&   'matom= ',matom,' is smaller than natom= ',natom,ch10,&
-&   'Action: raise matom in ewald9.F90, and recompile the program.'
-   MSG_ERROR(message)
- end if
 
  ABI_ALLOCATE(dyewt,(2,3,natom,3,natom))
 
@@ -834,7 +827,6 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !  Check if new shell must be calculated
    if(newg==0)exit
-
  end do
 
 !Multiplies by common factor
