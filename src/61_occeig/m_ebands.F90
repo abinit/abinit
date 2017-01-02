@@ -4025,6 +4025,7 @@ end subroutine ebspl_free
 
 type(ebands_t) function ebands_interp(ebands, cryst, itype, ords, intp_kptrlatt, intp_nshiftk, intp_shiftk, comm) result(new)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

@@ -727,6 +727,7 @@ end subroutine ifc_init
 
 subroutine ifc_print_info(ifc,header,unit,prtvol)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -946,6 +947,7 @@ end subroutine ifc_fourq
 
 subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1063,10 +1065,11 @@ end subroutine ifc_get_dwdq
 
 subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, comm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ifc_print'
+#define ABI_FUNC 'ifc_speedofsound'
  use interfaces_14_hidewrite
 !End of the abilint section
 
@@ -1331,6 +1334,7 @@ end subroutine corsifc9
 !! SOURCE
 
 subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

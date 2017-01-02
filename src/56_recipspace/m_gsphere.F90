@@ -1866,7 +1866,6 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setshells'
- use interfaces_14_hidewrite
  use interfaces_51_manage_mpi
 !End of the abilint section
 
