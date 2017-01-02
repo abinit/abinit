@@ -455,7 +455,6 @@ program anaddb
    call mkphdos(Phdos,Crystal,Ifc, inp%prtdos,inp%dosdeltae,inp%dossmear, inp%ng2qpt, inp%q2shft)
 
    if (iam_master) then
-#ifdef HAVE_NETCDF
      phdos_fname = TRIM(filnam(2))//"_MSQD_T"
      call phdos_print_msqd(Phdos, phdos_fname, inp%ntemper, inp%tempermin, inp%temperinc)
 
@@ -464,6 +463,7 @@ program anaddb
 
      call phdos_print_debye(Phdos, Crystal%ucvol)
 
+#ifdef HAVE_NETCDF
      ncerr = nctk_open_create(phdos_ncid, trim(phdos_fname)//".nc", xmpi_comm_self)
      NCF_CHECK_MSG(ncerr, "Creating PHDOS.nc file")
      NCF_CHECK(crystal_ncwrite(Crystal, phdos_ncid))
