@@ -403,19 +403,19 @@ program anaddb
      ngqpt_coarse(1:3) = inp%ngqpt(1:3)/inp%qrefine
      call ifc_init(Ifc_coarse,Crystal,ddb,&
 &     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,ngqpt_coarse,inp%nqshft,inp%q1shft,dielt,zeff,&
-&     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,prtfreq=.True.)
+&     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit)
 
      ! And now use the coarse q-mesh to fill the entries in dynmat(q)
      ! on the dense q-mesh that cannot be obtained from the DDB file.
      call ifc_init(Ifc,Crystal,ddb,&
 &     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
-&     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,prtfreq=.True.,Ifc_coarse=Ifc_coarse)
+&     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,Ifc_coarse=Ifc_coarse)
      call ifc_free(Ifc_coarse)
 
    else
      call ifc_init(Ifc,Crystal,ddb,&
 &     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
-&     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,prtfreq=.True.)
+&     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit)
    end if
 
    call ifc_print_info(ifc, unit=std_out)
