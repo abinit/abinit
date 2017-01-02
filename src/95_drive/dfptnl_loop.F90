@@ -368,12 +368,20 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
        end if
 
        xccc3d1(:) = zero
-       if ((psps%n1xccc/=0).and.(i1pert <= natom)) then
-         call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkcore   ')
-         call dfpt_mkcore(cplex,i1dir,i1pert,natom,psps%ntypat,n1,psps%n1xccc,&
-&         n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,&
-&         psps%xcccrc,psps%xccc1d,xccc3d1,xred)
-       end if ! psps%n1xccc/=0
+       if (psps%usepaw==1 .or. psps%nc_xccc_gspace==1) then
+         ndir=1
+         call dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,i1dir,i1pert,&
+    &     mgfftf,psps%mqgrid_vl,dtset%natom,ndir,nfftf,ngfftf,psps%ntypat,&
+    &     ph1df,psps%qgrid_vl,dtset%qptn,dtset%typat,ucvol,psps%usepaw,xred,psps,pawtab,&
+    &     atmrhor1=xccc3d1,optn_in=n3xccc/nfftf,optn2_in=1,optv_in=0,vspl=psps%vlspl)
+       else
+    !    Norm-conserving psp: compute Vloc(1) in reciprocal sp. and core(1) in real sp.
+    !    ------------------------------------------------------------------------------
+         if(psps%n1xccc/=0)then
+           call dfpt_mkcore(cplex,i1dir,i1pert,dtset%natom,psps%ntypat,n1,psps%n1xccc,&
+    &       n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d1,xred)
+         end if ! psps%n1xccc/=0
+       end if ! usepaw
 
        do i3pert = 1, mpert
          do i3dir = 1, 3
@@ -411,12 +419,20 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
              end if
 
              xccc3d3(:) = zero
-             if ((psps%n1xccc/=0).and.(i3pert <= natom)) then
-               call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkcore   ')
-               call dfpt_mkcore(cplex,i3dir,i3pert,natom,psps%ntypat,n1,psps%n1xccc,&
-&               n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,&
-&               psps%xcccrc,psps%xccc1d,xccc3d3,xred)
-             end if ! psps%n1xccc/=0
+             if (psps%usepaw==1 .or. psps%nc_xccc_gspace==1) then
+               ndir=1
+               call dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,i3dir,i3pert,&
+          &     mgfftf,psps%mqgrid_vl,dtset%natom,ndir,nfftf,ngfftf,psps%ntypat,&
+          &     ph1df,psps%qgrid_vl,dtset%qptn,dtset%typat,ucvol,psps%usepaw,xred,psps,pawtab,&
+          &     atmrhor1=xccc3d3,optn_in=n3xccc/nfftf,optn2_in=1,optv_in=0,vspl=psps%vlspl)
+               else
+            !    Norm-conserving psp: compute Vloc(1) in reciprocal sp. and core(1) in real sp.
+            !    ------------------------------------------------------------------------------
+               if(psps%n1xccc/=0)then
+                 call dfpt_mkcore(cplex,i3dir,i3pert,dtset%natom,psps%ntypat,n1,psps%n1xccc,&
+          &       n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d3,xred)
+               end if ! psps%n1xccc/=0
+             end if ! usepaw
 
              do i2pert = 1, mpert
 
@@ -491,15 +507,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 
                    end if
 
-                   xccc3d2(:)=zero
-                   if(psps%n1xccc/=0.and.i2pert<=natom) then
-                     call status(counter,dtfil%filstat,iexit,level,'call dfpt_mkcore   ')
-                     call dfpt_mkcore(cplex,i2dir,i2pert,natom,psps%ntypat,n1,psps%n1xccc,&
-&                      n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,&
-&                      psps%xcccrc,psps%xccc1d,xccc3d2,xred)
-                   end if
-
-                   vpsp1(:)=zero
+                   xccc3d2(:)=zero ; vpsp1(:)=zero
                    !  PAW: compute Vloc(1) and core(1) together in reciprocal space
                    !  --------------------------------------------------------------
                    if (psps%usepaw==1 .or. psps%nc_xccc_gspace==1) then
@@ -517,11 +525,15 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 &                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
                    else
 
-                  !  Norm-conserving psp: compute Vloc(1) in reciprocal sp. and core(1) in real sp.
-                  !  ------------------------------------------------------------------------------
+                  !    Norm-conserving psp: compute Vloc(1) in reciprocal sp. and core(1) in real sp.
+                  !    ------------------------------------------------------------------------------
+                     if(psps%n1xccc/=0)then
+                       call dfpt_mkcore(cplex,i2dir,i2pert,dtset%natom,psps%ntypat,n1,psps%n1xccc,&
+                &       n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d2,xred)
+                     end if ! psps%n1xccc/=0
 
                      call dfpt_vlocal(atindx,cplex,gmet,gsqcut,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
-                  &   nattyp,nfftf,ngfftf,psps%ntypat,ngfftf(1),ngfftf(2),ngfftf(3),dtset%paral_kgb,ph1df,psps%qgrid_vl,&
+                  &   nattyp,nfftf,ngfftf,psps%ntypat,n1,n2,n3,dtset%paral_kgb,ph1df,psps%qgrid_vl,&
                   &   dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
 
                    end if ! usepaw
