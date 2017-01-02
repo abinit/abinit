@@ -1455,7 +1455,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
 !scalars
  integer, intent(in) :: ntemper
  type(phonon_dos_type),intent(in) :: PHdos
- character(len=fnlen) :: fname
+ character(len=*),intent(in) :: fname
  real(dp), intent(in) :: tempermin, temperinc
 
 !arrays
