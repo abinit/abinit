@@ -817,12 +817,33 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 #define ABI_FUNC 'converged'
 !End of the abilint section
 
-   converged = .not.(                             &
-&   (ttolwfr==1 .and. residm > tolwfr) .or.       &
-&   (ttoldff==1 .and. diffor > toldff) .or.       &
-&   (ttolrff==1 .and. diffor > tolrff*maxfor .and. maxfor > tol16) .or.&
-&   (ttoldfe==1 .and. abs(deltae) > toldfe) .or.  &
-&   (ttolvrs==1 .and. res2  > tolvrs) ) 
+!   converged = .not.(                             &
+!&   (ttolwfr==1 .and. residm > tolwfr) .or.       &
+!&   (ttoldff==1 .and. diffor > toldff) .or.       &
+!&   (ttolrff==1 .and. diffor > tolrff*maxfor .and. maxfor > tol16) .or.&
+!&   (ttoldfe==1 .and. abs(deltae) > toldfe) .or.  &
+!&   (ttolvrs==1 .and. res2  > tolvrs) )
+
+   ! LB-02/01/2017 :
+   ! This code avoids evaluation of undefined variables (which could happen in respfn, apparently)
+   logical :: loc_conv
+   loc_conv = .true.
+   if (ttolwfr==1) then
+     if (residm > tolwfr) loc_conv=.false.
+   end if
+   if (ttoldff==1) then
+     if (diffor > toldff) loc_conv=.false.
+   end if
+   if (ttolrff==1) then
+     if (diffor > tolrff*maxfor .and. maxfor > tol16) loc_conv=.false.
+   end if
+   if (ttoldfe==1) then
+     if (abs(deltae) > toldfe) loc_conv=.false.
+   end if
+   if (ttolvrs==1) then
+     if (res2  > tolvrs) loc_conv=.false.
+   end if
+   converged = loc_conv
 
  end function converged
 
