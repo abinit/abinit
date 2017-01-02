@@ -659,12 +659,9 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 !Local variables -------------------------
 !scalars
  integer,parameter :: mr=10000
- integer :: i2,ia,ib,ig1,ig2,ig3,ii,ir,ir1,ir2,ir3,jj,mu,newg,newr,ng,nr,nu
- integer :: ng_expxq
- real(dp) :: arg1,arg2,arg3,arga,c123i,c123r,c23i,c23r,derfc_yy
- real(dp) :: detdlt, inv_detdlt
- real(dp) :: direct,eta,fac,fact1,fact2,fact3,gsq,invy,invy2,recip,reta,reta3
- real(dp) :: inv4eta
+ integer :: i2,ia,ib,ig1,ig2,ig3,ii,ir,ir1,ir2,ir3,jj,mu,newg,newr,ng,nr,nu,ng_expxq
+ real(dp) :: arg1,arg2,arg3,arga,c123i,c123r,c23i,c23r,derfc_yy,detdlt, inv_detdlt
+ real(dp) :: direct,eta,fac,fact1,fact2,fact3,gsq,invy,invy2,recip,reta,reta3,inv4eta
  real(dp) :: term1,term2,term3,term4,term5,y2,yy
  character(len=500) :: message
 !arrays
