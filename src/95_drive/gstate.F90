@@ -142,8 +142,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  use m_hdr
  use m_ebands
 
- use m_fstrings,         only : strcat
- use m_bz_mesh,          only : tetra_from_kptrlatt
+ use m_fstrings,         only : strcat, sjoin
+ use m_kpts,             only : tetra_from_kptrlatt
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type
  use m_pawtab,           only : pawtab_type
@@ -669,8 +669,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    wff1%unwff=dtfil%unwff1
    optorth=1   !if (psps%usepaw==1) optorth=0
    if(psps%usepaw==1 .and. dtfil%ireadwf==1)optorth=0
-   ! NEW LOBPCG : don't need to orthonormalize WF since it is done inside LOBPCG
-   if(dtset%wfoptalg == 14 .and. dtset%useric == 666999  ) optorth = 0
    call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen,&
 &   dtset%exchn2n3d,formeig,gmet,hdr,dtfil%ireadwf,dtset%istwfk,kg,&
 &   dtset%kptns,dtset%localrdwf,dtset%mband,mcg,dtset%mkmem,mpi_enreg,&
@@ -1294,16 +1292,17 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call wfk_tofullbz(filnam, dtset, psps, pawtab, wfkfull_path)
 
    ! Write tetrahedron tables.
-   if (dtset%nkpt >= 4 .and. .not. all(dtset%kptrlatt == 0)) then
-     call crystal_from_hdr(cryst,hdr,2)
-     call tetra_from_kptrlatt(tetra, cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
-     dtset%shiftk, dtset%nkpt, dtset%kptns)
+   call crystal_from_hdr(cryst, hdr, 2)
+   tetra = tetra_from_kptrlatt(cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
+   dtset%shiftk, dtset%nkpt, dtset%kptns, message, ierr)
+   if (ierr == 0) then
      call tetra_write(tetra, dtset%nkpt, dtset%kptns, strcat(dtfil%filnam_ds(4), "_TETRA"))
-     call destroy_tetra(tetra)
-     call crystal_free(cryst)
    else
-     MSG_WARNING("nkpt < 4 or kptrlatt == 0, cannot produce TETRA file")
+     MSG_WARNING(sjoin("Cannot produce TETRA file", ch10, message))
    end if
+
+   call destroy_tetra(tetra)
+   call crystal_free(cryst)
  end if
 
  call clnup1(acell,dtset,eigen,results_gs%energies%e_fermie,&

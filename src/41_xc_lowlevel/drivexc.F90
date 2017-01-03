@@ -119,11 +119,11 @@
 !!  [fxcT(npts)]=XC free energy of the electron gaz at finite temperature (to be used for plasma systems)
 !!
 !! PARENTS
-!!      pawxc,pawxcsph,rhohxc
+!!      drivexc_main
 !!
 !! CHILDREN
-!!      invcb,leave_new,libxc_functionals_getvxc,wrtout,xchcth,xchelu,xclb
-!!      xcpbe,xcpzca,xcspol,xctetr,xcwign,xcxalp
+!!      invcb,libxc_functionals_getvxc,xchcth,xchelu,xciit,xclb,xcpbe,xcpzca
+!!      xcspol,xctetr,xcwign,xcxalp
 !!
 !! SOURCE
 

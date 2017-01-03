@@ -261,6 +261,7 @@ end subroutine skw_init
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_skw
 !!
 !! CHILDREN
 !!
@@ -318,6 +319,7 @@ end subroutine skw_mkstar
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_ifc,m_skw
 !!
 !! CHILDREN
 !!
@@ -371,10 +373,9 @@ end subroutine skw_evalk
 !!  Free memory
 !!
 !! PARENTS
-!!      outscfcv
+!!      eph,m_ifc
 !!
 !! CHILDREN
-!!      sort_dp
 !!
 !! SOURCE
 
@@ -419,6 +420,7 @@ end subroutine skw_free
 !! OUTPUT
 !!
 !! PARENTS
+!!      m_skw
 !!
 !! CHILDREN
 !!      sort_dp
@@ -487,6 +489,8 @@ subroutine skw_genrpts(cryst, rmax, nr, rpts)
    if (abs(r2(i1) - r2(nr)) > tolr) exit
  end do
  nr = (i1 - 1)
+!!      m_skw
+!!      m_skw
 
  ! Copy lattice points sorted by norm.
  ABI_MALLOC(rpts, (3, nr))

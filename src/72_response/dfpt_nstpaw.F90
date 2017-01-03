@@ -131,20 +131,18 @@
 !!      dfpt_scfcv
 !!
 !! CHILDREN
-!!      appdig,clsopn,destroy_hamiltonian,destroy_mpi_enreg
-!!      destroy_rf_hamiltonian,dfpt_accrho,dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc
-!!      dfpt_mkvxc_noncoll,dfpt_mkvxcstr,dfpt_sygra,dfpt_vlocal,dotprod_g
-!!      dotprod_vn,fftpac,getcprj,getdc1,getgh1c,hartrestr,hdr_skip
-!!      init_hamiltonian,init_rf_hamiltonian,initmpi_seq,initylmg,kpgstr
-!!      load_k_hamiltonian,load_k_rf_hamiltonian,load_kprime_hamiltonian
-!!      load_spin_hamiltonian,mkffnl,mkkin,mkkpg,occeig,paw_an_reset_flags
-!!      paw_ij_free,paw_ij_init,paw_ij_nullify,paw_ij_reset_flags,pawcprj_alloc
-!!      pawcprj_copy,pawcprj_free,pawcprj_get,pawdfptenergy,pawdij2e1kb
-!!      pawdijfr,pawmkrho,pawnhatfr,pawrhoij_alloc,pawrhoij_free
-!!      pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,projbd,stresssym,symrhg
-!!      timab,vlocalstr,wffclose,wffopen,wffreaddatarec,wffreadnpwrec
-!!      wffreadskipk,wffreadskiprec,wfk_close,wfk_open_read,wfk_read_bks,wrtout
-!!      xmpi_barrier,xmpi_sum
+!!      appdig,destroy_hamiltonian,destroy_mpi_enreg,destroy_rf_hamiltonian
+!!      dfpt_accrho,dfpt_atm2fft,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll
+!!      dfpt_mkvxcstr,dfpt_sygra,dfpt_vlocal,dotprod_g,dotprod_vn,fftpac
+!!      getcprj,getdc1,getgh1c,hartrestr,init_hamiltonian,init_rf_hamiltonian
+!!      initmpi_seq,initylmg,kpgstr,load_k_hamiltonian,load_k_rf_hamiltonian
+!!      load_kprime_hamiltonian,load_spin_hamiltonian,mkffnl,mkkin,mkkpg,occeig
+!!      paw_an_reset_flags,paw_ij_free,paw_ij_init,paw_ij_nullify
+!!      paw_ij_reset_flags,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get
+!!      pawdfptenergy,pawdij2e1kb,pawdijfr,pawmkrho,pawnhatfr,pawrhoij_alloc
+!!      pawrhoij_free,pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,projbd
+!!      stresssym,symrhg,timab,vlocalstr,wfk_close,wfk_open_read,wfk_read_bks
+!!      wrtout,xmpi_barrier,xmpi_sum
 !!
 !! SOURCE
 

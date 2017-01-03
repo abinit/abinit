@@ -1048,6 +1048,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    end do
  end do
 
+ if (Dtset%gwfockmix < 0.0_dp .or. (Dtset%gwfockmix-1.0_dp) > tol8) then
+    MSG_ERROR('gwfockmix is invalid.')
+ end if
+
  call calc_vhxc_me(Wfd,KS_mflags,KS_me,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 & ks_vtrial,ks_vhartr,ks_vxc,Psps,Pawtab,KS_paw_an,Pawang,Pawfgrtab,KS_paw_ij,dijexc_core,&
 & ks_rhor,ks_rhog,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taug=ks_taug,taur=ks_taur)
@@ -1841,7 +1845,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
 
 !  @WC: bootstrap --
-   case (-3, -4)
+   case (-3, -4, -5, -6, -7, -8)
 !    ABI_CHECK(Dtset%usepaw==0,"GWGamma=1 or 2 + PAW not available")
      ABI_CHECK(Er%ID==0,"Er%ID should be 0")
 
@@ -1865,40 +1869,20 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        call pawrhoij_free(tmp_pawrhoij)
        ABI_DT_FREE(tmp_pawrhoij)
      end if ! Dtset%usepaw==1
+     
+     id_required=4; ikxc=7; dim_kxcg=0
+     
+     if (dtset%gwgamma>-5) then 
+       approx_type=4  ! full fxc(G,G')
+     else if (dtset%gwgamma>-7) then
+       approx_type=5  ! fxc(0,0) one-shot
+     else
+       approx_type=6  ! rpa-type bootstrap
+     end if
 
-     id_required=4; ikxc=7; approx_type=4; dim_kxcg=0
-     if (Dtset%gwgamma==-3) option_test=1 ! TESTELECTRON, vertex in chi0 *and* sigma
-     if (Dtset%gwgamma==-4) option_test=0 ! TESTPARTICLE, vertex in chi0 only
-     ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
-     ! --@WC
-
-   case (-5, -6) !@WC bootstrap --
-!    ABI_CHECK(Dtset%usepaw==0,"GWGamma=1 or 2 + PAW not available")
-     ABI_CHECK(Er%ID==0,"Er%ID should be 0")
-
-     if (Dtset%usepaw==1) then ! If we have PAW, we need the full density on the fine grid
-       ABI_MALLOC(ks_aepaw_rhor,(nfftf,Wfd%nspden))
-       if (Dtset%getpawden==0.and.Dtset%irdpawden==0) then
-         MSG_ERROR("Must use get/irdpawden to provide a _PAWDEN file!")
-       end if
-       call wrtout(std_out,sjoin('Checking for existence of: ',Dtfil%filpawdensin),"COLL")
-       if (.not. file_exists(dtfil%filpawdensin)) then
-         MSG_ERROR(sjoin("Missing file:", dtfil%filpawdensin))
-       end if
-
-       ABI_DT_MALLOC(tmp_pawrhoij,(cryst%natom*wfd%usepaw))
-
-       call read_rhor(Dtfil%filpawdensin, cplex1, nfftf_tot, Wfd%nspden, ngfftf, 1, MPI_enreg_seq, &
-       ks_aepaw_rhor, hdr_rhor, tmp_pawrhoij, wfd%comm)
-
-       call hdr_free(hdr_rhor)
-       call pawrhoij_free(tmp_pawrhoij)
-       ABI_DT_FREE(tmp_pawrhoij)
-     end if ! Dtset%usepaw==1
-
-     id_required=4; ikxc=7; approx_type=5; dim_kxcg=0
-     if (Dtset%gwgamma==-5) option_test=1 ! TESTELECTRON, vertex in chi0 *and* sigma
-     if (Dtset%gwgamma==-6) option_test=0 ! TESTPARTICLE, vertex in chi0 only
+     option_test=MOD(Dtset%gwgamma,2)
+     ! 1 -> TESTELECTRON, vertex in chi0 *and* sigma
+     ! 0 -> TESTPARTICLE, vertex in chi0 only
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
      ! --@WC
 
@@ -2197,7 +2181,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
      call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_bst,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&
 &     Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
-&     gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
+&     gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross,Dtset%gwfockmix)
    end do
 
 !  for the time being, do not remove this barrier!

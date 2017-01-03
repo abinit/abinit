@@ -87,7 +87,6 @@ CONTAINS  !=====================================================================
 !!      invars2
 !!
 !! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -555,6 +554,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%gwpara             = dtin%gwpara
  dtout%gwgamma            = dtin%gwgamma
  dtout%gwrpacorr          = dtin%gwrpacorr
+ dtout%gwfockmix          = dtin%gwfockmix
  dtout%gw_customnfreqsp   = dtin%gw_customnfreqsp
  dtout%gw_nqlwl           = dtin%gw_nqlwl
  dtout%gw_nstep           = dtin%gw_nstep
@@ -1187,7 +1187,7 @@ end subroutine dtset_copy
 !!
 !! PARENTS
 !!      calc_vhxc_me,chkinp,dfpt_looppert,driver,gwls_hamiltonian,hybrid_corr
-!!      m_ab7_invars_f90,m_io_kss,m_kxc,xchybrid_ncpp_cc
+!!      m_ab7_invars_f90,m_io_kss,m_kxc,mover_effpot,xchybrid_ncpp_cc
 !!
 !! CHILDREN
 !!

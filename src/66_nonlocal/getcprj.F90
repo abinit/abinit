@@ -67,6 +67,7 @@
 !!
 !! PARENTS
 !!      cgwf,ctocprj,debug_tools,dfpt_accrho,dfpt_nstpaw,ks_ddiago,m_wfd
+!!      rf2_init
 !!
 !! CHILDREN
 !!      mkkpg,opernla_ylm,ph1d3d

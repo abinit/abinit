@@ -111,7 +111,7 @@ contains
 !! the acoustic sum rule.
 !!
 !! PARENTS
-!!      anaddb,dfpt_gatherdy,m_ddb
+!!      dfpt_gatherdy,m_ddb,m_effective_potential_file
 !!
 !! CHILDREN
 !!
@@ -291,7 +291,7 @@ end subroutine asria_calc
 !! d2cart=matrix of second derivatives of total energy, in cartesian coordinates
 !!
 !! PARENTS
-!!      anaddb,ddb_elast,ddb_internalstr,dfpt_gatherdy,m_ddb,m_phonons,thmeig
+!!      ddb_elast,ddb_internalstr,dfpt_gatherdy,m_ddb,thmeig
 !!
 !! CHILDREN
 !!
@@ -371,7 +371,7 @@ end subroutine asria_corr
 !! minvers=inverse of the supermatrix for future application of the corrections
 !!
 !! PARENTS
-!!      anaddb,m_ddb,m_phonons
+!!      m_ddb
 !!
 !! CHILDREN
 !!
@@ -2004,7 +2004,7 @@ end subroutine q0dy3_calc
 !! A full description of the equations should be included
 !!
 !! PARENTS
-!!      dfpt_phfrq,m_phgamma,relaxpol
+!!      m_dynmat,m_phgamma,relaxpol
 !!
 !! CHILDREN
 !!
@@ -2483,7 +2483,7 @@ end subroutine make_bigbox
 !!  (output only if choice=1)
 !!
 !! PARENTS
-!!      m_dynmat
+!!      m_dynmat,m_effective_potential_file
 !!
 !! CHILDREN
 !!
@@ -4914,7 +4914,7 @@ end subroutine nanal9
 !! d2cart(2,3,mpert,3,mpert)=dynamical matrix obtained for the wavevector qpt (normalized using qphnrm)
 !!
 !! PARENTS
-!!      anaddb,m_effective_potential,m_ifc,m_phonons
+!!      anaddb,m_effective_potential_file,m_ifc,m_phonons
 !!
 !! CHILDREN
 !!
@@ -5032,6 +5032,7 @@ end subroutine gtdyn9
 !!****f* ABINIT/ftgam
 !!
 !! NAME
+!!      anaddb,m_ddb,m_effective_potential_file,m_ifc,m_phonons,respfn,thmeig
 !! ftgam
 !!
 !! FUNCTION

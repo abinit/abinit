@@ -183,7 +183,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
        rhor1_diag(ifft,1)=rhor1(ifft,1) !FR it is already the tr[rhor1] see symrhg.F90
        m_norm(ifft)=sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2+rhor(ifft,4)**2)
        m_dot_m1=rhor(ifft,2)*rhor1(ifft,2)+rhor(ifft,3)*rhor1(ifft,3) &
-&              +rhor(ifft,4)*rhor1(ifft,4)
+&       +rhor(ifft,4)*rhor1(ifft,4)
 
        if (optxc /= -1) then 
          if(m_norm(ifft)>m_norm_min)then

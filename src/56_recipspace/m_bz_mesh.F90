@@ -374,7 +374,6 @@ CONTAINS  !=====================================================================
 !!      setup_bse,setup_bse_interp,setup_screening,setup_sigma
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -551,7 +550,6 @@ end subroutine kmesh_init
 !!      mrgscr,screening,sigma
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -639,7 +637,6 @@ end subroutine kmesh_free
 !!      setup_sigma
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -765,7 +762,6 @@ end subroutine kmesh_print
 !!      m_bz_mesh
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -931,7 +927,6 @@ end subroutine setup_k_rotation
 !!      setup_bse,setup_screening,setup_sigma
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -1005,7 +1000,6 @@ end subroutine get_bz_item
 !!      paw_symcprj
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -1069,7 +1063,6 @@ end subroutine get_IBZ_item
 !!      cchi0
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -1459,7 +1452,6 @@ end function bz_mesh_isirred
 !!      m_shirley,setup_bse,setup_bse_interp
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -1620,7 +1612,6 @@ end subroutine make_mesh
 !!      m_bz_mesh
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -1822,7 +1813,6 @@ end subroutine identk
 !!      setup_bse,setup_screening,setup_sigma
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -1965,7 +1955,6 @@ end subroutine get_ng0sh
 !!      m_bz_mesh
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -2032,7 +2021,6 @@ end subroutine getkptnorm_bycomponent
 !!      m_bz_mesh,m_nesting,m_phgamma,m_phonons,mkph_linwid
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -2149,7 +2137,6 @@ end subroutine make_path
 !!      setup_sigma
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -2220,7 +2207,6 @@ end subroutine find_qmesh
 !!      m_bz_mesh
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -2327,7 +2313,6 @@ end subroutine findnq
 !!      m_bz_mesh
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -2433,11 +2418,10 @@ end subroutine findq
 !!  g0(3)=reciprocal space vector, to be used in igfft
 !!
 !! PARENTS
-!!      calc_sigc_me,calc_sigx_me,cohsex_me,exc_build_block,gw_tools
-!!      prep_calc_ucrpa
+!!      calc_sigc_me,calc_sigx_me,cohsex_me,exc_build_block,gw_tools,m_gkk
+!!      m_phpi,prep_calc_ucrpa
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -2628,7 +2612,6 @@ end subroutine findqg0
 !!      cchi0q0_intraband,setup_screening,sigma
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -2966,7 +2949,6 @@ end subroutine littlegroup_init
 !!      m_bz_mesh
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -3042,7 +3024,6 @@ end subroutine littlegroup_free_0D
 !! PARENTS
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -3095,7 +3076,6 @@ end subroutine littlegroup_free_1D
 !!      calc_sigc_me,calc_sigx_me,cchi0,cchi0q0,cchi0q0_intraband,cohsex_me
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -3278,7 +3258,6 @@ end function box_len
 !!      wfk_analyze
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 
@@ -3341,7 +3320,6 @@ end subroutine kpath_init
 !!      wfk_analyze
 !!
 !! CHILDREN
-!!      init_tetra,listkk,smpbz
 !!
 !! SOURCE
 

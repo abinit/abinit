@@ -61,6 +61,7 @@ to perform electron-phonon calculations.
  <a href="#ph_smear">ph_smear</a>&nbsp;&nbsp;
  <a href="#ph_wstep">ph_wstep</a>&nbsp;&nbsp;
  <a href="#prtphdos">prtphdos</a>&nbsp;&nbsp;
+ <a href="#prtphsurf">prtphsurf</a>&nbsp;&nbsp;
  <br>Q.
  <br>R.
  <br>S.
@@ -241,7 +242,7 @@ See also <a href="vareph.html#eph_fsewin">eph_fsewin</a>, <a href="vareph.html#e
 <br><font id="default">Default is 0.1</font>
 <br><font id="text">
 <p>
-Average electron-electron interaction strength, for the computation of the superconducting Tc using Mc-Millan's formula. 
+Average electron-electron interaction strength, for the computation of the superconducting Tc using Mc-Millan's formula.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -277,7 +278,7 @@ If eph_ngqpt_fine is not given, the EPH code uses the list of irreducible q-poin
 NB - this does not work yet.
 This variable can be used to turn on the calculation of transport
 quantities in the eph module of abinit. Value of 1 corresponds to
-elastic LOVA as in the PRB by Savrasov and Savrasov 
+elastic LOVA as in the PRB by Savrasov and Savrasov.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -343,8 +344,8 @@ This integer defines the number of points in the <a href="varrf.html#ph_qpath">p
 <p>
 This variable defines the number of shifts in the q-mesh used
 for the phonon DOS and for the Eliashberg functions (see <a href="varrf.html#ph_ngqpt">ph_ngqpt</a>).
-If not given, the code assumes a Gamma-centered mesh. The shifts
-are specified by <a href="vareph.html#ph_qshift">ph_qshift</a>. 
+If not given, the code assumes a Gamma-centered mesh.
+The shifts are specified by <a href="vareph.html#ph_qshift">ph_qshift</a>.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -379,8 +380,8 @@ Only relevant if <a href="vareph.html#ph_intmeth">ph_intmeth</a>==1
 </font>
 <br><font id="text">
 <p>
-The gaussian broadening used for the integration of the phonon
-DOS and the Eliashberg function. See also <a href="vareph.html#ph_intmeth">ph_intmeth</a> and <a href="varrf.html#ph_ngqpt">ph_ngqpt</a>. 
+The gaussian broadening used for the integration of the phononDOS and the Eliashberg function.
+See also <a href="vareph.html#ph_intmeth">ph_intmeth</a> and <a href="varrf.html#ph_ngqpt">ph_ngqpt</a>.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>
@@ -413,6 +414,23 @@ The extrema of the mesh are automatically computed by the code.
 Print the phonon density of states.
 It is activated by default when <a href="vargs.html#optdriver">optdriver</a>==7.
 </p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="prtphsurf">prtphsurf</a></font>
+<br><font id="definition">Mnemonics: PRinT PHonon iso-SURFace</font>
+<br><font id="characteristic">Characteristic: </font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 0</font>
+<br><font id="text">
+<p>
+Print a bxsf file (Xcrysden format) with the (interpolated)
+phonon frequencies computed of the q-mesh determined by <a href="varrf.html#ph_ngqpt">ph_ngqpt</a>. The file can be use to visualize isosurfaces with Xcrysden or other similar tools supporting the bxsf format.
+Note that the (dense) q-mesh must be Gamma-centered, shifted meshs are not supported by Xcrysden.
+This variable requires <a href="vargs.html#optdriver">optdriver</a>==7.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>

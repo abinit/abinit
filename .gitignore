@@ -327,6 +327,7 @@ tests/TestBot_MPI*/*
 /src/98_main/mrgdv
 /src/98_main/mrggkk
 /src/98_main/mrgscr
+/src/98_main/multibinit
 /src/98_main/newsp
 /src/98_main/optic
 /src/98_main/ujdet

@@ -34,7 +34,7 @@
 !! sum rule is applied on the internal strain tensor
 !!
 !! PARENTS
-!!      anaddb
+!!      anaddb,m_effective_potential_file
 !!
 !! CHILDREN
 !!      asria_corr,wrtout,zhpev

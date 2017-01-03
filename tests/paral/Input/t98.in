@@ -6,7 +6,7 @@ prt_effpot = 3
 
 dipdip = 0
 n_cell =   2 2 2
-dynamics =  1
+dynamics =  12
 temperature = 1000
 ntime  = 50
 

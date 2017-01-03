@@ -22,13 +22,13 @@
 !! PARENTS
 !!
 !! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,compute_anharmonics,
-!!      effective_potential_free,effective_potential_file_getDim,effective_potential_file_read,
-!!      effective_potential_writeNETCDF,effective_potential_writeXML,flush_unit,herald
-!!      init10,instrng,invars10,inupper, isfile,mover_effpot,multibinit_dtset_fre
-!!      outvars_multibinit,timein,xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum,wrtout
-!!      abi_io_redirec,flush_unit,herald,int2char4,
-!!      init10,timein,xmpi_bcast,wrtout,xmpi_init
+!!      abi_io_redirect,abihist_bcast,abihist_fin,abimem_init,abinit_doctor
+!!      compute_anharmonics,effective_potential_file_getdimsystem
+!!      effective_potential_file_gettype,effective_potential_file_read
+!!      effective_potential_free,effective_potential_writenetcdf
+!!      effective_potential_writexml,flush_unit,herald,init10,instrng,inupper
+!!      invars10,isfile,mover_effpot,multibinit_dtset_free,outvars_multibinit
+!!      read_md_hist,timein,wrtout,xmpi_bcast,xmpi_end,xmpi_init,xmpi_sum
 !!
 !! SOURCE
 
@@ -50,7 +50,7 @@ program multibinit
  use m_effective_potential
  use m_multibinit_dataset
  use m_effective_potential_file
-
+ use m_abihist
  use m_io_tools,   only : get_unit, flush_unit,open_file
  use m_fstrings,   only : int2char4
  use m_time ,      only : asctime
@@ -75,7 +75,7 @@ program multibinit
 !Local variables-------------------------------
 ! Set array dimensions
  integer,parameter :: ddbun=2,master=0 ! FIXME: these should not be reserved unit numbers!
- integer :: comm,ii,ierr,lenstr
+ integer :: comm,filetype,ii,ierr,lenstr
  integer :: natom,nph1l,nrpt,ntypat,nproc,my_rank
  integer :: option
  logical :: iam_master
@@ -83,10 +83,11 @@ program multibinit
  real(dp) :: tsec(2)
  character(len=24) :: codename,start_datetime
  character(len=strlen) :: string
- character(len=fnlen) :: filnam(15),tmpfilename,name
+ character(len=fnlen) :: filnam(17),tmpfilename,name
  character(len=500) :: message
  type(multibinit_dataset_type) :: inp
- type(effective_potential_type),target :: reference_effective_potential
+ type(effective_potential_type) :: reference_effective_potential
+ type(abihist) :: hist
 !TEST_AM
 ! integer :: natom_sp
 ! real(dp),allocatable :: dynmat(:,:,:,:,:)
@@ -142,7 +143,7 @@ program multibinit
    tmpfilename = filnam(2)
    call isfile(tmpfilename,'new')
    if (open_file(tmpfilename,message,unit=ab_out,form="formatted",status="new",&
-     &              action="write") /= 0) then
+&   action="write") /= 0) then
      MSG_ERROR(message)
    end if
 !   call open_file(unit=ab_out,file=tmpfilename,form='formatted',status='new')
@@ -156,20 +157,20 @@ program multibinit
  end if
 
  write(message, '(a,(80a),a)' ) ch10,&
-&  ('=',ii=1,80),ch10
+& ('=',ii=1,80),ch10
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
 
-!To automate a maximum calculation, epigine reads the number of atoms 
+!To automate a maximum calculation, multibinit reads the number of atoms 
 !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
 !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
  write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
-&    '-',trim(filnam(3)),ch10,' to initialize the multibinit input'
+& '-',trim(filnam(3)),ch10,' to initialize the multibinit input'
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
- call effective_potential_file_getDim(filnam(3),natom,ntypat,nph1l,nrpt,comm)
+ call effective_potential_file_getDimSystem(filnam(3),natom,ntypat,nph1l,nrpt,comm)
  
 !Read the input file, and store the information in a long string of characters
 !strlen from defs_basis module
@@ -192,25 +193,74 @@ program multibinit
    call outvars_multibinit(inp,ab_out)
  end if
 
-! First step: Read and treat the reference structure 
-!****************************************************************************************
- call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
+! Read and treat the reference structure 
 !****************************************************************************************
 
-!Second step: Compute the third order derivative with finite differences
+!Read the harmonics parts
+ call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
+!Read the coefficient from fit
+ if(filnam(4)/=''.and.filnam(4)/='no')then
+   call effective_potential_file_getType(filnam(4),filetype)
+   if(filetype==3) then
+     call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
+   else
+     write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+&                       ' There is no file for the coefficients from polynomial fitting'
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,message,'COLL')
+   end if
+ else
+   write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
+&                       ' There is no file for the coefficients from polynomial fitting'
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+ end if
 !****************************************************************************************
- if (inp%prt_3rd > 0) then 
+
+! Compute the third order derivative with finite differences
+!****************************************************************************************
+ if (inp%strcpling > 0) then 
    call compute_anharmonics(reference_effective_potential,filnam,inp,comm)
  end if
 !****************************************************************************************
 
+!If needed, fit the anharmonic part
 !****************************************************************************************
-!Print the effective potential (only master CPU)
+!TEST_AM_SECTION
+ if(.false.)then
+   if (iam_master.and.inp%ncoeff == 0.and.inp%fit_coeff==1) then
+     write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
+&     '-Reading the file ',trim(filnam(5)),ch10,&
+&     ' with NetCDF in order to fit the polynomial coefficients'
+     call wrtout(std_out,message,'COLL') 
+     call wrtout(ab_out,message,'COLL') 
+     if(filnam(5)/=''.or.filnam(5)/='no')then
+       call read_md_hist(filnam(5),hist)
+     else
+       write(message, '(3a)' )&
+&       'There is no MD file to fit the coefficients ',ch10,&
+&       'Action: add MD file'
+       MSG_ERROR(message)
+     end if
+   end if
+!MPI BROADCAST
+   call abihist_bcast(hist,master,comm)
+
+   
+!   call fit_polynomial_coeff_init
+!   call fit_polynomial_coeff_init(reference_effective_potential%,filnam,inp,comm)
+
+ end if
+!END_TEST_AM_SECTION
+!****************************************************************************************
+
+!****************************************************************************************
+!Print the effective potential system + coefficients (only master CPU)
  if(iam_master.and.(inp%prt_effpot<=-1.or.inp%prt_effpot>=3)) then
    select case(inp%prt_effpot)
    case (-1)  
      name = "system.xml"
-     call effective_potential_writeXML(reference_effective_potential,1,filename=name)
+     call effective_potential_writeXML(reference_effective_potential,-1,filename=name)
    case(-2)
      name = "system.nc"
      call effective_potential_writeNETCDF(reference_effective_potential,1,filename=name)
@@ -257,6 +307,7 @@ program multibinit
 !**************************************************************************************** 
  call effective_potential_free(reference_effective_potential)
  call multibinit_dtset_free(inp)
+ call abihist_fin(hist)
 !****************************************************************************************
 
  write(message,'(a,a,a,(80a))') ch10,('=',ii=1,80),ch10
@@ -268,7 +319,7 @@ program multibinit
  tsec(2)=twall-twalli
 
  write(message, '(a,i4,a,f13.1,a,f13.1)' )' Proc.',my_rank,' individual time (sec): cpu=',&
-&                 tsec(1),'  wall=',tsec(2)
+& tsec(1),'  wall=',tsec(2)
  call wrtout(std_out,message,"COLL")
 
  if (iam_master) then
@@ -306,7 +357,7 @@ program multibinit
 
 !Write information on file about the memory before ending mpi module, if memory profiling is enabled
  call abinit_doctor("__multibinit")
-  
+ 
  call flush_unit(ab_out)
  call flush_unit(std_out)
 
@@ -314,5 +365,5 @@ program multibinit
 
  call xmpi_end()
  
-end program multibinit
+  end program multibinit
 !!***

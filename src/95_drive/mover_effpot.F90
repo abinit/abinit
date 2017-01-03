@@ -24,10 +24,14 @@
 !!
 !!
 !! PARENTS
-!!      epigine
+!!      multibinit
 !!
 !! CHILDREN
-!!      mover
+!!      alloc_copy,copy_supercell,destroy_mpi_enreg,destroy_results_gs
+!!      destroy_supercell,dtset_free,effective_potential_initmpi_supercell
+!!      effective_potential_printsupercell,init_results_gs,init_supercell,mover
+!!      scfcv_destroy,strain_apply,strain_get,strain_init,strain_print,wrtout
+!!      xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -68,6 +72,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'mover_effpot'
  use interfaces_14_hidewrite
+ use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
  use interfaces_95_drive, except_this_one => mover_effpot
 !End of the abilint section
@@ -84,8 +89,13 @@ implicit none
 !Local variables-------------------------------
 !scalar
  integer :: ii,jj,nproc,my_rank
+ real(dp):: qmass,bmass
  logical :: iam_master
  integer, parameter:: master = 0
+!TEST_AM
+! integer :: ia,mu,rand_seed = 5
+! real(dp):: mass_ia,rescale_vel,sum_mass,v2gauss
+!TEST_AM
 ! Set array dimensions
  character(len=500) :: message
  type(MPI_type),target :: mpi_enreg
@@ -135,7 +145,7 @@ implicit none
 !*******************************************************************
 
  write(message, '(a,(80a),a)') ch10,&
-&    ('=',ii=1,80),ch10
+& ('=',ii=1,80),ch10
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
@@ -143,7 +153,7 @@ implicit none
 !a new supercell is compute
  acell = one
  rprimd = effective_potential%crystal%rprimd
- 
+
  if(all(inp%acell > one))then   
    acell = inp%acell
  end if
@@ -155,17 +165,17 @@ implicit none
 
 ! check new rprimd
  if(all(rprimd(1,:)==zero).or.&
-&   all(rprimd(2,:)==zero).or.all(rprimd(3,:)==zero)) then
+& all(rprimd(2,:)==zero).or.all(rprimd(3,:)==zero)) then
    write(message, '(3a)' )&
-&         ' There is a problem with rprim',ch10,&
-&         'Action: correct rprim'
+&   ' There is a problem with rprim',ch10,&
+&   'Action: correct rprim'
    MSG_BUG(message)
  end if
 
 !if rprim is different from initial structure, we print warning
  if(any(rprimd-effective_potential%crystal%rprimd>tol10))then
    write(message,'(a)')&
-&    ' WARNING: the structure for the dynamics is different than initiale structure'
+&   ' WARNING: the structure for the dynamics is different than initiale structure'
    call wrtout(std_out,message,"COLL")
    call wrtout(ab_out,message,"COLL")
  end if
@@ -175,15 +185,15 @@ implicit none
 
 !convert new xcart
  call xcart2xred(effective_potential%crystal%natom,effective_potential%crystal%rprimd,&
-&                effective_potential%crystal%xcart,xred)
+& effective_potential%crystal%xcart,xred)
  call xred2xcart(effective_potential%crystal%natom, rprimd, xcart, xred)
 
  call init_supercell(effective_potential%crystal%natom, 0,&
-&     real(inp%n_cell,dp),&
-&     rprimd,&
-&     effective_potential%crystal%typat,&
-&     xcart,&
-&     supercell)
+& real(inp%n_cell,dp),&
+& rprimd,&
+& effective_potential%crystal%typat,&
+& xcart,&
+& supercell)
 
 !Store the information of the supercell of the reference structure into effective potential
  call copy_supercell(supercell,effective_potential%supercell)
@@ -197,7 +207,7 @@ implicit none
 
  call effective_potential_printSupercell(effective_potential)
 
- if(inp%dynamics==1) then
+ if(inp%dynamics==12.or.inp%dynamics==13) then
 !***************************************************************
 !1 Convert some parameters into the structures used by mover.F90
 !***************************************************************
@@ -208,28 +218,25 @@ implicit none
 
 !Set the fake abinit dataset 
 !Scalar
-   dtset%bmass = 10     ! Barostat mass
    dtset%nctime = 0     ! NetCdf TIME between output of molecular dynamics informations 
    dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
-   dtset%dilatmx = 1    ! DILATation : MaXimal value
-   dtset%dtion = 100     ! Delta Time for IONs
+   dtset%dilatmx = 1.0  ! DILATation : MaXimal value
+   dtset%dtion = inp%dtion  ! Delta Time for IONs
    dtset%diismemory = 8 ! Direct Inversion in the Iterative Subspace MEMORY
    dtset%friction = 0.0001 ! internal FRICTION coefficient
    dtset%goprecon = 0   ! Geometry Optimization PREconditioner equations
-   if(inp%dynamics==1)then
-     dtset%ionmov = 12  ! Number for the dynamics
-   end if
+   dtset%ionmov = inp%dynamics  ! Number for the dynamic
    dtset%jellslab = 0   ! include a JELLium SLAB in the cell
    dtset%mdwall = 10000 ! Molecular Dynamics WALL location
    dtset%natom = effective_potential%supercell%natom_supercell
    dtset%ntypat = effective_potential%crystal%ntypat
    dtset%nconeq = 0     ! Number of CONstraint EQuations
    dtset%noseinert = 1.d-5 ! NOSE INERTia factor
-   dtset%nnos = 5       ! Number of nose masses Characteristic
+   dtset%nnos = inp%nnos       ! Number of nose masses Characteristic
    dtset%ntime = inp%ntime  ! Number of TIME steps 
    dtset%nsym = 1       ! Number of SYMmetry operations
    dtset%prtxml = 0     ! print the xml
-   dtset%optcell = 0    ! OPTimize the CELL shape and dimensions Characteristic
+   dtset%optcell = inp%optcell    ! OPTimize the CELL shape and dimensions Characteristic
    dtset%restartxf = 0  ! RESTART from (X,F) history
    dtset%signperm = 1   ! SIGN of PERMutation potential      
    dtset%strprecon = 1  ! STRess PRECONditioner
@@ -248,11 +255,30 @@ implicit none
    ABI_ALLOCATE(dtset%prtatlist,(dtset%natom)) !PRinT by ATom LIST of ATom
    dtset%prtatlist(:) = zero
 
-   if(dtset%nnos>0) then
-     ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
-     dtset%qmass = dtset%nnos * 10 
+
+!  Set the barostat and thermonstat if ionmov == 13
+   if(dtset%ionmov == 13)then
+
+     qmass = (dtset%natom* kb_THzK * dtset%mdtemp(1)) / (0.1**2)
+     bmass = (dtset%natom* kb_THzK * dtset%mdtemp(1)) / (0.01**2)
+
+     if(dtset%nnos==0) then
+       dtset%nnos = 1
+       ABI_ALLOCATE(dtset%qmass,(dtset%nnos))
+       dtset%qmass(:)  = qmass
+     else
+       ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
+        dtset%qmass(:) = inp%qmass(:)
+     end if
+     if (inp%bmass == zero) then
+       dtset%bmass = bmass
+     else
+       dtset%bmass = inp%bmass  ! Barostat mass
+     end if
    end if
-   dtset%strtarget = zero ! STRess TARGET
+
+   dtset%strtarget(1:3) = 0.0/29421.033d0 ! STRess TARGET
+   dtset%strtarget(4:6) = 0.0 ! STRess TARGET
    ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
    symrel = one
    call alloc_copy(symrel,dtset%symrel)
@@ -285,9 +311,8 @@ implicit none
 !  Assign masses to each atom (for MD)
    do jj = 1,dtset%natom
      amass(jj)=amu_emass*&
-&      effective_potential%crystal%amu(effective_potential%supercell%typat_supercell(jj))
+&     effective_potential%crystal%amu(effective_potential%supercell%typat_supercell(jj))
    end do
-
 !  Set the dffil structure
    dtfil%filnam_ds(1:2)=filnam(1:2)
    dtfil%filnam_ds(3)=""
@@ -300,15 +325,29 @@ implicit none
 !  Initialize xf history (should be put in inwffil)
    ab_xfh%nxfh=0
    ab_xfh%mxfh=(ab_xfh%nxfh-dtset%restartxf+1)+dtset%ntime+5 
+   ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
 
 !***************************************************************
 !2  initialization of the structure for the dynamics
 !***************************************************************
 
+   ABI_ALLOCATE(dtset%rprimd_orig,(3,3,1))
+   dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd_supercell
+   
+   acell(1) = dtset%rprimd_orig(1,1,1)
+   acell(2) = dtset%rprimd_orig(2,2,1)
+   acell(3) = dtset%rprimd_orig(3,3,1)
+
+   ABI_ALLOCATE(xred,(3,dtset%natom))
+   ABI_ALLOCATE(xred_old,(3,dtset%natom))
+   ABI_ALLOCATE(vel,(3,dtset%natom))
+   ABI_ALLOCATE(fred,(3,dtset%natom))
+   ABI_ALLOCATE(fcart,(3,dtset%natom))
+
 ! Fill the strain from input file
    call strain_init(strain)
    if (any(inp%strain /= zero)) then
-     write(message,'(a)') ' Strain is imposed during the simulation'
+     write(message,'(2a)') ch10, ' Strain is imposed during the simulation'
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
 !    convert strain into matrix
@@ -318,47 +357,64 @@ implicit none
      mat_strain(1,2) = half * inp%strain(6) ; mat_strain(2,1) = half * inp%strain(6)
      call strain_get(strain,mat_delta = mat_strain)
      effective_potential%strain = strain
-     effective_potential%has_strain = .TRUE.
+     effective_potential%has_strain = .FALSE.
      call strain_print(effective_potential%strain)
+     call strain_apply(effective_potential%supercell%rprimd_supercell,dtset%rprimd_orig(:,:,1),&
+&     effective_potential%strain)
    end if
- 
-   ABI_ALLOCATE(dtset%rprimd_orig,(3,3,1))
-   dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd_supercell
- 
-   ABI_ALLOCATE(xred,(3,dtset%natom))
-   ABI_ALLOCATE(xred_old,(3,dtset%natom))
-   ABI_ALLOCATE(vel,(3,dtset%natom))
-   ABI_ALLOCATE(fred,(3,dtset%natom))
-   ABI_ALLOCATE(fcart,(3,dtset%natom))
+   
    
    call xcart2xred(dtset%natom,effective_potential%supercell%rprimd_supercell,&
-&                  effective_potential%supercell%xcart_supercell,xred)
+&   effective_potential%supercell%xcart_supercell,xred)
 
    xred_old = xred
-   vel = zero
-   if(dtset%ionmov==9)then
-     do ii=1,dtset%natom
-       do jj=1,3
-         call random_number(vel(jj,ii))
-         vel(jj,ii) = vel(jj,ii) / 10000
-       end do
-     end do
-   else
-     vel = zero
-   end if
-   vel_cell = zero
+   vel_cell(:,:) = zero
+   vel(:,:)      = zero
+
+!TEST_AM
+!  Random initilisation of the velocitie and scale to the temperature 
+!  with Maxwell-Boltzman distribution
+!     do ia=1,dtset%natom
+!       do mu=1,3
+!         vel(mu,ia)=sqrt(kb_HaK*dtset%mdtemp(1)/amass(ia))*cos(two_pi*uniformrandom(rand_seed))
+!         vel(mu,ia)=vel(mu,ia)*sqrt(-2._dp*log(uniformrandom(rand_seed)))
+!       end do
+!     end do
+
+! ! !  Get rid of center-of-mass velocity
+!     sum_mass=sum(amass(:))
+!     do mu=1,3
+!       mass_ia=sum(amass(:)*vel(mu,:))
+!       vel(mu,:)=vel(mu,:)-mass_ia/sum_mass
+!     end do
+
+! ! !  Compute v2gauss
+!     v2gauss = zero
+!     do ia=1,dtset%natom
+!       do mu=1,3
+!         v2gauss=v2gauss+vel(mu,ia)*vel(mu,ia)*amass(ia)
+!       end do
+!     end do
+!  !  Now rescale the velocities to give the exact temperature
+!     rescale_vel=sqrt(3._dp*dtset%natom*kb_HaK*dtset%mdtemp(1)/v2gauss)
+!     vel(:,:)=vel(:,:)*rescale_vel
+
+   vel_cell(:,:) = zero
+   vel(:,:)      = zero
+
+!TEST_AM
 
 !*********************************************************
 !3   Call main routine for monte carlo / molecular dynamics
 !*********************************************************
    write(message, '(a,(80a),3a)' ) ch10,('-',ii=1,80),ch10,&
-&    '-Monte Carlo / Molecular Dynamics ',ch10
+&   '-Monte Carlo / Molecular Dynamics ',ch10
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
    call mover(scfcv_args,ab_xfh,acell,amass,dtfil,electronpositron,&
-&    rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,effective_potential)
- 
+&   rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,effective_potential)
+   
 !***************************************************************
 ! 4   Deallocation of array   
 !***************************************************************
@@ -374,7 +430,7 @@ implicit none
    ABI_DEALLOCATE(vel)
    ABI_DEALLOCATE(xred)
    ABI_DEALLOCATE(xred_old)
-!   ABI_DEALLOCATE(ab_xfh%xfhist)
+   ABI_DEALLOCATE(ab_xfh%xfhist)
 
    call dtset_free(dtset)
    call destroy_results_gs(results_gs)
@@ -383,12 +439,12 @@ implicit none
  end if
 
  write(message, '(a,(80a),a,a)' ) ch10,&
-&     ('=',ii=1,80),ch10
+& ('=',ii=1,80),ch10
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
 
-!  if(inp%dynamics == 2) then
+!  if(inp%dynamics == 3) then
 ! !*************************************************************
 ! !   Call the routine for calculation of the energy for specific 
 ! !   partern of displacement or strain for the effective 
@@ -423,7 +479,7 @@ implicit none
 ! !&                                       supercell%natom_supercell,&
 ! !&                                       supercell%rprimd_supercell,&
 ! !&                                       supercell%xcart_supercell,1,disp(1,:,:))
-     
+ 
 !    end do
 
 !    ABI_DEALLOCATE(disp)
@@ -431,7 +487,7 @@ implicit none
 !    ABI_DEALLOCATE(energy)
 !    ABI_DEALLOCATE(fcart)
 !    ABI_DEALLOCATE(fred)
-   
+ 
 !  else if(.false.) then
 
 !    ABI_ALLOCATE(disp,(inp%ntime,3,effective_potential%supercell%natom_supercell))
@@ -476,7 +532,7 @@ implicit none
 !        line=adjustl(readline)  
 !        read(unit=line,fmt=*) (disp_tmp(1,jj),jj=1,3*effective_potential%supercell%natom_supercell)
 !        disp(1,:,:) = reshape(disp_tmp(1,:),(/3,effective_potential%supercell%natom_supercell/))
-       
+ 
 !         do jj=1,(effective_potential%supercell%natom_supercell)
 !           do kk=1,3
 ! !              disp(1,kk,jj) = disp(1,kk,jj) *  effective_potential%supercell%rprimd_supercell(kk,kk)
@@ -497,7 +553,7 @@ implicit none
 !      else if(option==4)then
 !        ABI_ALLOCATE(xred,(3,effective_potential%supercell%natom_supercell))
 !        ABI_ALLOCATE(xcart,(3,effective_potential%supercell%natom_supercell))
-   
+ 
 !        !four version
 !        write(std_out,*),"read position" 
 !        do jj=1,(effective_potential%supercell%natom_supercell)
@@ -516,14 +572,14 @@ implicit none
 !        ABI_DEALLOCATE(xcart)
 
 !      end if
-      
+ 
 ! !!!!!!!!!
 ! 10   continue
 
 !      ABI_ALLOCATE(energy,(inp%ntime))
 !      ABI_ALLOCATE(fcart,(3,effective_potential%supercell%natom_supercell))
 !      ABI_ALLOCATE(fred,(3,effective_potential%supercell%natom_supercell))
-     
+ 
 !      write(111,*) disp(1,:,:)
 !      write(std_out,*),"compute energy",ii
 !      call ifc_contribution(effective_potential,disp(1,:,:),energy_harmonic,fcart)
@@ -542,7 +598,7 @@ implicit none
 !      ABI_DEALLOCATE(energy)
 !      ABI_DEALLOCATE(fcart)
 !      ABI_DEALLOCATE(fred)
-     
+ 
 
 ! !xred_old is xcart!!
 ! !    xred_old = effective_potential%supercell%xcart_supercell + disp
@@ -554,7 +610,7 @@ implicit none
 ! !&                                   comm,displacement=disp)
 
 !    end do
-   
+ 
 !    close(112)
 
 
@@ -563,22 +619,22 @@ implicit none
 !      write(std_out,*) "final check:"
 !      filename="fort.112"
 !      filename2="/home/alex/Desktop/dev/test/CaTiO3/spld_output/result_112/fort.112"
-     
+ 
 !      if (open_file(filename,message,unit=1,form="formatted",&
 !        status="old",action="read") /= 0) then
 !        MSG_ERROR(message)
 !      end if
-     
+ 
 !      if (open_file(filename2,message,unit=2,form="formatted",&
 !        status="old",action="read") /= 0) then
 !        MSG_ERROR(message)
 !      end if
-     
+ 
 !      do ii=1,inp%ntime
 !        read(1,'(a)',err=20,end=20) readline
 !        line=adjustl(readline)
 !        read(unit=line,fmt=*)  (ener1(ii,kk),kk=1,2) 
-       
+ 
 !        read(2,'(a)',err=20,end=20) readline
 !        line=adjustl(readline)
 !        read(unit=line,fmt=*)  (ener2(ii,kk),kk=1,2) 

@@ -51,14 +51,18 @@ class MolecularDynamicFile:
                   stats = os.stat(files)
                   fic_tuple = time.localtime(stats[8]), files
                   lili = string.split(files, '.')
-                  if files.find('_OUT.nc') == len(files)-7 and len(files)>7 :
+#                  if files.find('_OUT.nc') == len(files)-7 and len(files)>7 :
+#                      OUT_list.append(fic_tuple)
+                  if files.find('HIST.nc') == len(files)-7 and len(files)>7 :
                       OUT_list.append(fic_tuple)
               if len(OUT_list) > 0 :
                   OUT_list.sort() ; OUT_list.reverse()
                   fic_HIST=OUT_list[0][1].replace('_OUT.nc','_HIST')
+                  fic_HIST=OUT_list[0][1]
                   if os.path.exists(fic_HIST) :
                       self.namefile1 = fic_HIST
-                      self.namefile2 = fic_HIST.replace('_HIST','_OUT.nc')
+                      self.namefile2 = fic_HIST
+#                      self.namefile2 = fic_HIST.replace('_HIST','_OUT.nc')
                       self.type_of_file = 'netcdf'
       # or the file in parameter :
       else:
@@ -622,7 +626,11 @@ class MolecularDynamicFile:
         
   def getAcell(self,image = 1):
       if self.goodFile:
-          return self.acell[self.ni:self.nf,image-1]    # Temporarily. (ni-1) for start slicing at 0
+          acell = np.zeros(((self.nf-self.ni),image,3))
+          acell[:,image-1,0] = self.rprimd[self.ni:self.nf,image-1,0,0]
+          acell[:,image-1,1] = self.rprimd[self.ni:self.nf,image-1,1,1]
+          acell[:,image-1,2] = self.rprimd[self.ni:self.nf,image-1,2,2]
+          return acell[:,image-1,:] # Temporarily. (ni-1) for start slicing at 0
       else:
           return 0
 

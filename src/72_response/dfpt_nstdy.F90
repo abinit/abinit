@@ -83,9 +83,9 @@
 !!
 !! CHILDREN
 !!      appdig,destroy_hamiltonian,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll
-!!      dfpt_nstwf,dfpt_sygra,dfpt_vlocal,dotprod_vn,hdr_skip,init_hamiltonian
-!!      load_spin_hamiltonian,mati3inv,timab,wffclose,wffopen,wffreadnpwrec
-!!      wffreadskipk,wffreadskiprec,wfk_close,wfk_open_read,wrtout,xmpi_sum
+!!      dfpt_nstwf,dfpt_sygra,dfpt_vlocal,dotprod_vn,init_hamiltonian
+!!      load_spin_hamiltonian,mati3inv,timab,wfk_close,wfk_open_read,wrtout
+!!      xmpi_sum
 !!
 !! SOURCE
 

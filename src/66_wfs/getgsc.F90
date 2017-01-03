@@ -122,6 +122,8 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
 !Keep track of total time spent in getgsc:
  call timab(565,1,tsec)
 
+ gsc = zero
+
 !Prepare some data
  ABI_ALLOCATE(cwavef,(2,npw_k*my_nspinor))
  ABI_ALLOCATE(scwavef,(2,npw_k*my_nspinor))

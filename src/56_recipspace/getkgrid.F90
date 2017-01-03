@@ -46,8 +46,8 @@
 !! shiftk(3,210)=shift vectors for k point generation
 !!
 !! PARENTS
-!!      ep_setupqpt,getshell,inkpts,inqpt,m_ab7_kpoints,m_bz_mesh,m_dvdb
-!!      m_ebands,m_phgamma,nonlinear,testkgrid,thmeig
+!!      ep_setupqpt,getshell,inkpts,inqpt,m_ab7_kpoints,m_bz_mesh,m_kpts
+!!      nonlinear,testkgrid,thmeig
 !!
 !! CHILDREN
 !!      mati3inv,matr3inv,metric,smallprim,smpbz,symkpt

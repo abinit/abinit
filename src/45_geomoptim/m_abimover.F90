@@ -813,6 +813,14 @@ character(len=fnlen), target, intent(in) :: filnam_ds(:)   ! dtfil%filnam_ds(5)
    specs%crit4xml='tolmxf'
 !  Name of specs%method
    specs%method = 'Steepest descend algorithm'
+!  This is the initialization for ionmov==22
+!  -------------------------------------------
+ case (22)
+!  Values use in XML Output
+   specs%type4xml='lbfgs'
+   specs%crit4xml='tolmxf'
+!  Name of specs%method
+   specs%method = 'Limited-memory Broyden-Fletcher-Goldfard-Shanno method'
 !  This is the initialization for ionmov==23
 !  -------------------------------------------
  case (23)

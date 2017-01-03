@@ -28,7 +28,7 @@
 !! When aprim=gprimd and bprim=rprimd, the routine operates in reciprocal space (on a real space symmetry)
 !!
 !! PARENTS
-!!      m_matlu,symrhg
+!!      m_matlu,m_phonons,symrhg
 !!
 !! CHILDREN
 !!

@@ -82,14 +82,13 @@
 !!      respfn
 !!
 !! CHILDREN
-!!      appdig,check_degeneracies,clsopn,destroy_hamiltonian,dotprod_g,hdr_skip
+!!      appdig,check_degeneracies,destroy_hamiltonian,dotprod_g
 !!      init_hamiltonian,load_k_hamiltonian,load_spin_hamiltonian,metric,mkffnl
 !!      mkkin,mkkpg,nonlop,paw_ij_free,paw_ij_init,paw_ij_nullify
 !!      paw_ij_reset_flags,pawaccrhoij,pawcprj_alloc,pawcprj_free,pawdij2e1kb
 !!      pawdijfr,pawfgrtab_free,pawfgrtab_init,pawgrnl,pawrhoij_free
 !!      pawrhoij_gather,pawrhoij_nullify,pawtab_get_lsize,strconv,symrhoij
-!!      timab,wffclose,wffopen,wffreaddatarec,wffreadnpwrec,wffreadskipk
-!!      wffreadskiprec,wfk_close,wfk_open_read,wfk_read_bks,wrtout,xmpi_sum
+!!      timab,wfk_close,wfk_open_read,wfk_read_bks,wrtout,xmpi_sum
 !!
 !! SOURCE
 

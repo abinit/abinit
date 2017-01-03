@@ -1343,7 +1343,7 @@ end function nctk_def_basedims
 !!  (only writing)
 !!
 !! PARENTS
-!!      m_abihist,m_bse_io,write_eig
+!!      m_abihist,m_bse_io,m_effective_potential,write_eig
 !!
 !! CHILDREN
 !!      var_from_id

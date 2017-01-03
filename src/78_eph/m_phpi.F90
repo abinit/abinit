@@ -665,7 +665,7 @@ end subroutine eph_phpi
 !! OUTPUT
 !!
 !! PARENTS
-!!      eph_phpi
+!!      m_phpi
 !!
 !! NOTES
 !!
@@ -727,7 +727,7 @@ end subroutine out_phpi
 !! OUTPUT
 !!
 !! PARENTS
-!!      eph_phpi
+!!      m_phpi
 !!
 !! NOTES
 !!

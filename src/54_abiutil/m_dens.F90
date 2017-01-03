@@ -70,9 +70,10 @@ contains
 !!  hcharge(natom), hden(natom), hweight(natom)= Hirshfeld charges, densities, weights.
 !!
 !! PARENTS
-!!      cut3d
+!!      m_cut3d
 !!
 !! CHILDREN
+!!      metric,spline,xcart2xred
 !!
 !! SOURCE
 

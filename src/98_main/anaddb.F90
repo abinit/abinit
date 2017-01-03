@@ -23,13 +23,13 @@
 !!
 !! CHILDREN
 !!      abi_io_redirect,abimem_init,abinit_doctor,anaddb_dtset_free,anaddb_init
-!!      asria_calc,asria_corr,asrprs,crystal_free,ddb_diel,ddb_elast,ddb_free
+!!      asrq0_apply,asrq0_free,crystal_free,ddb_diel,ddb_elast,ddb_free
 !!      ddb_from_file,ddb_getdims,ddb_internalstr,ddb_piezo,dfpt_phfrq
 !!      dfpt_prtph,dfpt_symph,elast_ncwrite,electrooptic,elphon,flush_unit
 !!      gtblk9,gtdyn9,harmonic_thermo,herald,ifc_free,ifc_init,ifc_outphbtrap
-!!      ifc_print,instrng,int2char4,inupper,invars9,isfile,mkherm,mkphbs
-!!      mkphdos,outvars_anaddb,phdos_free,phdos_ncwrite,phdos_print
-!!      phdos_print_debye,ramansus,relaxpol,thmeig,timein,wrtout,xmpi_bcast
+!!      ifc_print,instrng,int2char4,inupper,invars9,isfile,mkphbs,mkphdos
+!!      outvars_anaddb,phdos_free,phdos_ncwrite,phdos_print,phdos_print_debye
+!!      phdos_print_msqd,ramansus,relaxpol,thmeig,timein,wrtout,xmpi_bcast
 !!      xmpi_end,xmpi_init,xmpi_sum
 !!
 !! SOURCE
@@ -507,8 +507,12 @@ program anaddb
 
    call mkphdos(Phdos,Crystal,Ifc, inp%prtdos,inp%dosdeltae,inp%dossmear, inp%ng2qpt, inp%q2shft)
 
+   phdos_fname = TRIM(filnam(2))//"_MSQD_T"
+   call phdos_print_msqd(Phdos, phdos_fname, inp%ntemper, inp%tempermin, inp%temperinc)
+
    phdos_fname = TRIM(filnam(2))//"_PHDOS"
    call phdos_print(Phdos,phdos_fname)
+
    call phdos_print_debye(Phdos, Crystal%ucvol)
 
    if (iam_master) then

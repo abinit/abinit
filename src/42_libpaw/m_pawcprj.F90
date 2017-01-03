@@ -124,11 +124,12 @@ CONTAINS
 !!      dfpt_looppert,dfpt_nstpaw,dfpt_scfcv,dfpt_vtowfk,dfpt_wfkfermi,energy
 !!      exc_build_block,exc_build_ham,exc_plot,extrapwf,forstrnps,getgh1c
 !!      getgh2c,getghc,getgsc,initberry,ks_ddiago,m_electronpositron,m_fock
-!!      m_invovl,m_io_kss,m_pawcprj,m_plowannier,m_rf2,m_shirley,m_wfd
+!!      m_invovl,m_io_kss,m_pawcprj,m_plowannier,m_shirley,m_wfd
 !!      make_grad_berry,nonlop,optics_paw,optics_paw_core,outkss
 !!      partial_dos_fractions_paw,paw_symcprj,pawmkaewf,pawmkrhoij,posdoppler
-!!      prep_calc_ucrpa,scfcv,setup_positron,sigma,smatrix_pawinit,suscep_stat
-!!      update_e_field_vars,vtorho,vtowfk,wfd_pawrhoij,wfd_vnlpsi,wvl_hpsitopsi
+!!      prep_calc_ucrpa,rf2_init,scfcv,setup_positron,sigma,smatrix_pawinit
+!!      suscep_stat,update_e_field_vars,vtorho,vtowfk,wfd_pawrhoij,wfd_vnlpsi
+!!      wvl_hpsitopsi
 !!
 !! CHILDREN
 !!      xmpi_sum
@@ -208,11 +209,12 @@ end subroutine pawcprj_alloc
 !!      dfpt_looppert,dfpt_nstpaw,dfpt_scfcv,dfpt_vtowfk,dfpt_wfkfermi,energy
 !!      exc_build_block,exc_build_ham,exc_plot,extrapwf,forstrnps,getgh1c
 !!      getgh2c,getghc,getgsc,ks_ddiago,m_efield,m_electronpositron,m_fock
-!!      m_invovl,m_io_kss,m_pawcprj,m_phgamma,m_plowannier,m_rf2,m_scf_history
-!!      m_shirley,m_wfd,make_grad_berry,nonlop,optics_paw,optics_paw_core
-!!      outkss,partial_dos_fractions_paw,paw_symcprj,pawmkaewf,pawmkrhoij
-!!      posdoppler,prep_calc_ucrpa,scfcv,setup_positron,sigma,smatrix_pawinit
-!!      suscep_stat,update_e_field_vars,vtorho,vtowfk,wfd_pawrhoij,wfd_vnlpsi
+!!      m_gkk,m_invovl,m_io_kss,m_pawcprj,m_phgamma,m_phpi,m_plowannier
+!!      m_scf_history,m_shirley,m_sigmaph,m_wfd,make_grad_berry,nonlop
+!!      optics_paw,optics_paw_core,outkss,partial_dos_fractions_paw,paw_symcprj
+!!      pawmkaewf,pawmkrhoij,posdoppler,prep_calc_ucrpa,rf2_init,scfcv
+!!      setup_positron,sigma,smatrix_pawinit,suscep_stat,update_e_field_vars
+!!      vtorho,vtowfk,wfd_pawrhoij,wfd_vnlpsi
 !!
 !! CHILDREN
 !!      xmpi_sum
@@ -1175,8 +1177,9 @@ end subroutine pawcprj_output
 !!
 !! PARENTS
 !!      berryphase_new,cgwf,datafordmft,dfpt_nstpaw,dfpt_vtowfk,dfpt_wfkfermi
-!!      extrapwf,forstrnps,m_plowannier,m_rf2,make_grad_berry,optics_paw
-!!      optics_paw_core,pawmkrhoij,posdoppler,smatrix_pawinit,suscep_stat
+!!      extrapwf,forstrnps,m_plowannier,make_grad_berry,optics_paw
+!!      optics_paw_core,pawmkrhoij,posdoppler,rf2_init,smatrix_pawinit
+!!      suscep_stat
 !!
 !! CHILDREN
 !!      xmpi_sum

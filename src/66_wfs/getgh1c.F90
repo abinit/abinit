@@ -62,7 +62,8 @@
 !!  gs1c(2,npw1*nspinor)=<G|S^(1)|C> (S=overlap) on the k+q sphere.
 !!
 !! PARENTS
-!!      dfpt_cgwf,dfpt_nstpaw,dfpt_nstwf,dfpt_wfkfermi,m_phgamma,m_rf2
+!!      dfpt_cgwf,dfpt_nstpaw,dfpt_nstwf,dfpt_wfkfermi,m_gkk,m_phgamma,m_phpi
+!!      m_rf2,m_sigmaph
 !!
 !! CHILDREN
 !!      kpgstr,load_k_hamiltonian,load_k_rf_hamiltonian,load_kprime_hamiltonian
@@ -768,7 +769,7 @@ end subroutine getgh1c
 !!  vlocal1(cplex*n4,n5,n6,nvloc)= RF local potential in real space, on the augmented coarse fft grid
 !!
 !! PARENTS
-!!      dfpt_vtorho,m_phgamma
+!!      dfpt_vtorho,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
 !!      kpgstr,load_k_hamiltonian,load_k_rf_hamiltonian,load_kprime_hamiltonian
@@ -883,7 +884,7 @@ end subroutine rf_transgrid_and_pack
 !! OUTPUT
 !!
 !! PARENTS
-!!      dfpt_vtorho,m_phgamma
+!!      dfpt_vtorho,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
 !!      kpgstr,load_k_hamiltonian,load_k_rf_hamiltonian,load_kprime_hamiltonian
