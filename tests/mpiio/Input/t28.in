@@ -33,7 +33,9 @@ znucl  31 33
 xred 3*0 3*1/4
 
 # === SCF cycle options
-nstep 20  tolvrs 1.d-7
+nstep 100  tolvrs 1.d-7
+nline 5
+bandpp 50
 ecut 5. pawecutdg 10.
 diemac 8.0
 
