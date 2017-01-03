@@ -235,10 +235,9 @@ end function lbfgs_execute
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      lbfgs_execute
+!!      m_lbfgs
 !!
 !! CHILDREN
-!!      mcsrch
 !!
 !! SOURCE
 
@@ -416,10 +415,9 @@ end subroutine lbfgs
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      lbfgs
+!!      m_lbfgs
 !!
 !! CHILDREN
-!!      mcstep
 !!
 !! SOURCE
 
@@ -647,7 +645,7 @@ end subroutine mcsrch
 !! SIDE EFFECTS
 !!
 !! PARENTS
-!!      mcsrch
+!!      m_lbfgs
 !!
 !! CHILDREN
 !!

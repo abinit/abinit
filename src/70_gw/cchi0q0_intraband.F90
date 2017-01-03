@@ -62,14 +62,13 @@
 !!      screening
 !!
 !! CHILDREN
-!!      assemblychi0_sym,clib_progress_bar,vkbr_free,get_bz_item
-!!      getnel,gsph_fft_tabs,vkbr_init,kmesh_free,kmesh_init
-!!      littlegroup_free,littlegroup_init,littlegroup_print,pack_eneocc
-!!      paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawhur_free,pawhur_init,pawpwij_free,pawpwij_init,print_arr,rho_tw_g
-!!      rotate_fft_mesh,symmetrize_afm_chi0,unpack_eneocc,wfd_barrier
-!!      wfd_change_ngfft,wfd_distribute_bands,wfd_get_cprj,wfd_get_ur,wrtout
-!!      xmpi_sum
+!!      assemblychi0_sym,clib_progress_bar,get_bz_item,getnel,gsph_fft_tabs
+!!      kmesh_free,kmesh_init,littlegroup_free,littlegroup_init
+!!      littlegroup_print,pack_eneocc,paw_rho_tw_g,paw_symcprj,pawcprj_alloc
+!!      pawcprj_copy,pawcprj_free,pawhur_free,pawhur_init,pawpwij_free
+!!      pawpwij_init,print_arr,rho_tw_g,rotate_fft_mesh,symmetrize_afm_chi0
+!!      unpack_eneocc,vkbr_free,vkbr_init,wfd_barrier,wfd_change_ngfft
+!!      wfd_distribute_bands,wfd_get_cprj,wfd_get_ur,wrtout,xmpi_sum
 !!
 !! SOURCE
 

@@ -32,8 +32,8 @@
 !!   and for atoms in the range iatom to jatom with respect to ph1d
 !!
 !! PARENTS
-!!      cg_rotate,ctocprj,dens_in_sph,getcprj,m_cut3d,m_fock,m_hamiltonian
-!!      m_wfd,nonlop_pl,nonlop_ylm,partial_dos_fractions,suscep_stat,wfconv
+!!      cg_rotate,ctocprj,getcprj,m_cut3d,m_epjdos,m_fock,m_hamiltonian,m_wfd
+!!      nonlop_pl,nonlop_ylm,partial_dos_fractions,suscep_stat,wfconv
 !!
 !! CHILDREN
 !!

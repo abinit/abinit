@@ -127,7 +127,7 @@ CONTAINS  !=====================================================================
 !!      outscfcv
 !!
 !! CHILDREN
-!!      hdr_check
+!!      hdr_check,hdr_fort_read,hdr_free
 !!
 !! SOURCE
 
@@ -676,7 +676,7 @@ end subroutine ioarr
 !!      m_ioarr,outscfcv,sigma
 !!
 !! CHILDREN
-!!      hdr_check
+!!      hdr_check,hdr_fort_read,hdr_free
 !!
 !! SOURCE
 
@@ -897,7 +897,7 @@ end subroutine fftdatar_write
 !!      dfpt_scfcv,scfcv
 !!
 !! CHILDREN
-!!      hdr_check
+!!      hdr_check,hdr_fort_read,hdr_free
 !!
 !! SOURCE
 
@@ -1004,7 +1004,7 @@ end subroutine fftdatar_write_from_hdr
 !!      sigma
 !!
 !! CHILDREN
-!!      hdr_check
+!!      hdr_check,hdr_fort_read,hdr_free
 !!
 !! SOURCE
 
@@ -1079,6 +1079,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      end if
 
      call hdr_fort_read(ohdr, unt, fform)
+     ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
      call validate_hdr_den()
 
      ! Read PAW Rhoij

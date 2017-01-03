@@ -635,7 +635,7 @@ end subroutine ewald2
 !! not perfectly symmetric ....
 !!
 !! PARENTS
-!!      ddb_hybrid,effective_potential_generateDipDip,m_dynmat,m_ifc
+!!      ddb_hybrid,m_dynmat,m_effective_potential,m_ifc
 !!
 !! CHILDREN
 !!      matr3inv

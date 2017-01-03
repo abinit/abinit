@@ -349,22 +349,22 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
      !GS wfk Fourrier Tranform
      ! EB FR in the fourwf calls rhoaug(:,:,:,2) is a dummy argument
      call fourwf(1,rhoaug(:,:,:,2),cwave0_up,dummy,wfraug_up,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
-  &   gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-  &   gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
-  &   weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&     gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+&     gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
+&     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
      call fourwf(1,rhoaug(:,:,:,2),cwave0_down,dummy,wfraug_down,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
-  &   gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-  &   gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
-  &   weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&     gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+&     gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
+&     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
      !1st order wfk Fourrier Transform
      call fourwf(1,rhoaug1(:,:,:,2),cwave1_up,dummy,wfraug1_up,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
-  &   gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-  &   gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
-  &   weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&     gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+&     gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
+&     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
      call fourwf(1,rhoaug1(:,:,:,2),cwave1_down,dummy,wfraug1_down,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
-  &   gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
-  &   gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
-  &   weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&     gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+&     gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,mpi_enreg%paral_kgb,tim_fourwf,&
+&     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
 !    Accumulate 1st-order density (x component)
      re0_up=zero;im0_up=zero;re1_up=zero;im1_up=zero;re0_down=zero;im0_down=zero
      re1_down=zero;im1_down=zero
@@ -381,10 +381,10 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
              rhoaug1(2*i1-1,i2,i3,4)=rhoaug1(2*i1-1,i2,i3,4)+weight*(re0_down*re1_down+im0_down*im1_down) ! n_dndn
              rhoaug1(2*i1  ,i2,i3,4)=zero ! imag part of n_dndn at k
              rhoaug1(2*i1-1,i2,i3,2)=rhoaug1(2*i1-1,i2,i3,2)+weight*(re1_up*re0_down+re0_up*re1_down &
-&                             +im0_up*im1_down+im0_down*im1_up)! mx; the factor two is inside weight
+&             +im0_up*im1_down+im0_down*im1_up) ! mx; the factor two is inside weight
              rhoaug1(2*i1  ,i2,i3,2)=zero ! imag part of mx
              rhoaug1(2*i1-1,i2,i3,3)=rhoaug1(2*i1-1,i2,i3,3)+weight*(re1_up*im0_down-im1_up*re0_down &
-&                             +re0_up*im1_down-im0_up*re1_down) ! my; the factor two is inside weight
+&             +re0_up*im1_down-im0_up*re1_down) ! my; the factor two is inside weight
              rhoaug1(2*i1  ,i2,i3,3)=zero ! imag part of my at k
            end do
          end do
@@ -402,9 +402,9 @@ subroutine dfpt_accrho(counter,cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
              rhoaug1(i1,i2,i3,1)=rhoaug1(i1,i2,i3,1)+weight*(re0_up*re1_up+im0_up*im1_up) ! n_upup
              rhoaug1(i1,i2,i3,4)=rhoaug1(i1,i2,i3,4)+weight*(re0_down*re1_down+im0_down*im1_down) ! n_dndn
              rhoaug1(i1,i2,i3,2)=rhoaug1(i1,i2,i3,2)+weight*(re1_up*re0_down+re0_up*re1_down &
-&                             +im0_up*im1_down+im0_down*im1_up) !mx; the factor two is inside weight
+&             +im0_up*im1_down+im0_down*im1_up) !mx; the factor two is inside weight
              rhoaug1(i1,i2,i3,3)=rhoaug1(i1,i2,i3,3)+weight*(re1_up*im0_down-im1_up*re0_down &
-&                             +re0_up*im1_down-im0_up*re1_down) !my; the factor two is inside weight
+&             +re0_up*im1_down-im0_up*re1_down) !my; the factor two is inside weight
            end do
          end do
        end do

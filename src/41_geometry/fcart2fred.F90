@@ -30,7 +30,7 @@
 !!    on all atoms is zero.
 !!
 !! PARENTS
-!!      m_mep,mover,prec_simple
+!!      m_effective_potential,m_mep,mover,prec_simple
 !!
 !! CHILDREN
 !!

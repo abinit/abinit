@@ -1294,7 +1294,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ! Write tetrahedron tables.
    call crystal_from_hdr(cryst, hdr, 2)
    tetra = tetra_from_kptrlatt(cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
-     dtset%shiftk, dtset%nkpt, dtset%kptns, message, ierr)
+   dtset%shiftk, dtset%nkpt, dtset%kptns, message, ierr)
    if (ierr == 0) then
      call tetra_write(tetra, dtset%nkpt, dtset%kptns, strcat(dtfil%filnam_ds(4), "_TETRA"))
    else

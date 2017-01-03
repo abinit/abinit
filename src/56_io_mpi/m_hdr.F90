@@ -850,11 +850,11 @@ end subroutine hdr_init
 !!
 !! PARENTS
 !!      bethe_salpeter,conducti_nc,conducti_paw,conducti_paw_core,cut3d
-!!      dfpt_looppert,elphon,emispec_paw,eph,finddistrproc,gstate,initaim
-!!      inpgkk,inwffil,ioprof,linear_optics_paw,m_bse_io,m_cut3d,m_ddk,m_dvdb
-!!      m_hdr,m_io_kss,m_io_screening,m_ioarr,m_wfd,m_wfk,macroave,mrggkk
-!!      mrgscr,nonlinear,optic,read_el_veloc,read_gkk,respfn,screening,sigma
-!!      wfk_analyze
+!!      dfpt_looppert,dfptnl_loop,elphon,emispec_paw,eph,finddistrproc,gstate
+!!      initaim,inpgkk,inwffil,ioprof,linear_optics_paw,m_bse_io,m_cut3d,m_ddk
+!!      m_dvdb,m_hdr,m_io_kss,m_io_screening,m_ioarr,m_wfd,m_wfk,macroave
+!!      mrggkk,mrgscr,nonlinear,optic,read_el_veloc,read_gkk,respfn,screening
+!!      sigma,wfk_analyze
 !!
 !! CHILDREN
 !!
@@ -1466,7 +1466,7 @@ subroutine hdr_read_from_fname(Hdr,fname,fform,comm)
      end if
 
      call hdr_fort_read(Hdr,fh,fform,rewind=(rdwr1==1))
-     ABI_CHECK(fform /= 0, sjoin("Error while reading:", my_fname))
+     ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
      close(fh)
 
    else
@@ -2436,8 +2436,8 @@ end subroutine hdr_skip_wfftype
 !!   it, contain its definite values, except for evolving variables
 !!
 !! PARENTS
-!!      afterscfloop,dfpt_looppert,gstate,nonlinear,respfn,scfcv,setup_bse
-!!      setup_screening,setup_sigma
+!!      afterscfloop,dfpt_looppert,dfpt_scfcv,gstate,nonlinear,respfn,scfcv
+!!      setup_bse,setup_screening,setup_sigma
 !!
 !! CHILDREN
 !!
@@ -2522,8 +2522,8 @@ end subroutine hdr_update
 !! This routine is called only in the case of MPI version of the code.
 !!
 !! PARENTS
-!!      elphon,initaim,m_ddk,m_dvdb,m_hdr,m_io_kss,m_io_screening,m_ioarr,m_wfk
-!!      optic,read_gkk
+!!      elphon,initaim,m_dvdb,m_hdr,m_io_kss,m_io_screening,m_ioarr,m_wfk,optic
+!!      read_gkk
 !!
 !! CHILDREN
 !!

@@ -111,7 +111,7 @@
 !!      cg_zcopy,corrmetalwf1,dfpt_accrho,dfpt_cgwf,dotprod_g,getgsc
 !!      matrixelmt_g,meanvalue_g,pawcprj_alloc,pawcprj_copy,pawcprj_free
 !!      pawcprj_get,pawcprj_put,rf2_destroy,rf2_init,sqnorm_g,status,timab
-!!      wffreaddatarec,wffreadnpwrec,wffreadskiprec,wfk_read_bks,wrtout
+!!      wfk_read_bks,wrtout
 !!
 !! SOURCE
 

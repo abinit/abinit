@@ -35,7 +35,8 @@
 !!   strten, depending on the value of optcell, and taking care ot strtarget
 !!
 !! PARENTS
-!!      pred_bfgs,pred_delocint,pred_verlet,xfh_recover_deloc,xfh_recover_new
+!!      pred_bfgs,pred_delocint,pred_lbfgs,pred_verlet,xfh_recover_deloc
+!!      xfh_recover_new
 !!
 !! CHILDREN
 !!

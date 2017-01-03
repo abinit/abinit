@@ -31,7 +31,7 @@
 !!  work(2,work_ngfft(4),work_ngfft(5),work_ngfft(6)) !*ndat),
 !!
 !! PARENTS
-!!      m_phgamma,m_wfk
+!!      m_phgamma,m_sigmaph,m_wfk
 !!
 !! NOTES
 !!  Inspired to wfconv.
