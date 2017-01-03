@@ -166,6 +166,9 @@
 
  DBG_ENTER('COLL')
 
+!Nothing to do if current MPI process does treat kpoints or plane-waves
+ if (mcg==0.or.mcprj==0) return
+
 !Preliminary tests
  if (psps%useylm==0) then
    msg='Not available for useylm=0!'
@@ -188,9 +191,6 @@
    msg=' Ylm gradients have to be in memory for choice=3, 5, or 23!'
    MSG_BUG(msg)
  end if
-
-!Nothing to do if current MPI process does treat kpoints
- if (mcg==0.or.mcprj==0) return
 
 !Init parallelism
  if (paral_kgb==1) then
