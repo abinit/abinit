@@ -368,7 +368,7 @@ end subroutine scfcv_init
 !! NOTES
 !!
 !! PARENTS
-!!      gstate
+!!      gstate,mover_effpot
 !!
 !! CHILDREN
 !!      scfcv

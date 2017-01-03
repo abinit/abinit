@@ -437,7 +437,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
    phr_ini=(x1*x2-y1*y2)*x3-(y1*x2+x1*y2)*y3
  end function phr_ini
 
- function phi_ini(x1,y1,x2,y2,x3,y3)
+   function phi_ini(x1,y1,x2,y2,x3,y3)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -451,7 +451,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
    phi_ini=(x1*x2-y1*y2)*y3+(y1*x2+x1*y2)*x3
  end function phi_ini
 
- function ph1_ini(nri,ig1,ia)
+   function ph1_ini(nri,ig1,ia)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -465,7 +465,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
    ph1_ini=ph1d(nri,ig1+1+n1+(ia-1)*(2*n1+1))
  end function ph1_ini
 
- function ph2_ini(nri,ig2,ia)
+   function ph2_ini(nri,ig2,ia)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -479,7 +479,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
    ph2_ini=ph1d(nri,ig2+1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1))
  end function ph2_ini
 
- function ph3_ini(nri,ig3,ia)
+   function ph3_ini(nri,ig3,ia)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -493,7 +493,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
    ph3_ini=ph1d(nri,ig3+1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1))
  end function ph3_ini
 
- function phre_ini(ig1,ig2,ig3,ia)
+   function phre_ini(ig1,ig2,ig3,ia)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -508,7 +508,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 &   ph2_ini(re,ig2,ia),ph2_ini(im,ig2,ia),ph3_ini(re,ig3,ia),ph3_ini(im,ig3,ia))
  end function phre_ini
 
- function phimag_ini(ig1,ig2,ig3,ia)
+   function phimag_ini(ig1,ig2,ig3,ia)
 
 
 !This section has been created automatically by the script Abilint (TD).

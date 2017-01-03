@@ -3877,8 +3877,8 @@ end subroutine kpgcount
 !!   output: kg_k(3,npw_k) contains the list of G-vectors.
 !!
 !! PARENTS
-!!      fftprof,m_ebands,m_fft,m_fft_prof,m_io_kss,m_phgamma,m_shirley,m_wfd
-!!      m_wfk,outkss
+!!      fftprof,m_ebands,m_fft,m_fft_prof,m_gkk,m_io_kss,m_phgamma,m_phpi
+!!      m_shirley,m_sigmaph,m_wfd,m_wfk,outkss
 !!
 !! CHILDREN
 !!      xmpi_sum,xmpi_sum_master

@@ -265,6 +265,8 @@ CONTAINS
 !!      eph,m_dvdb,mrgdv
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -472,9 +474,11 @@ end subroutine dvdb_init
 !!   comm=MPI communicator
 !!
 !! PARENTS
-!!      m_phgamma,mrgdv
+!!      m_dvdb,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -554,6 +558,8 @@ end subroutine dvdb_open_read
 !!      eph,m_dvdb,mrgdv
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -640,9 +646,11 @@ end subroutine dvdb_free
 !!  Only printing.
 !!
 !! PARENTS
-!!      eph,m_dvdb,mrgdv
+!!      eph,m_dvdb,m_sigmaph,mrgdv
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -948,9 +956,11 @@ end function dvdb_read_onev1
 !!  v1scf(cplex, nfft, nspden, 3*natom)= v1scf potentials on the real-space FFT mesh for the 3*natom perturbations.
 !!
 !! PARENTS
-!!      m_dvdb,m_phgamma,mrgdv
+!!      m_dvdb,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -1073,6 +1083,8 @@ end subroutine dvdb_readsym_allv1
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -1314,6 +1326,8 @@ end subroutine v1phq_complete
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -1407,6 +1421,8 @@ end subroutine find_symeq
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -1542,6 +1558,8 @@ end subroutine v1phq_rotate
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -1632,6 +1650,8 @@ end subroutine v1phq_symmetrize
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -1752,13 +1772,15 @@ end subroutine rotate_fqg
 !!  comm=MPI communicator
 !!
 !! PARENTS
-!!      m_phgamma,mrgdv
+!!      m_dvdb,m_phgamma,m_sigmaph
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
-subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
+subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1779,6 +1801,7 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
 !arrays
  integer,intent(in) :: ngqpt(3),ngfft(18)
  real(dp),intent(in) :: qshift(3,nqshift)
+ type(crystal_t),intent(in),target,optional :: cryst_op
 
 !Local variables-------------------------------
 !scalars
@@ -1788,12 +1811,12 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
  integer :: iqst,nqst,itimrev,tsign,isym,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3
  integer :: nproc,my_rank,ifft,cnt,ierr
  real(dp) :: dksqmax,phre,phim
- logical :: isirr_q
+ logical :: isirr_q, found
  type(crystal_t),pointer :: cryst
  type(mpi_type) :: mpi_enreg_seq
 !arrays
  integer :: qptrlatt(3,3),g0q(3),ngfft_qspace(18)
- integer,allocatable :: indqq(:,:),iperm(:),bz2ibz_sort(:)
+ integer,allocatable :: indqq(:,:),iperm(:),bz2ibz_sort(:),nqsts(:),iqs_dvdb(:)
  real(dp) :: qpt_bz(3),shift(3) !,qpt_ibz(3)
  real(dp),allocatable :: qibz(:,:),qbz(:,:),wtq(:),emiqr(:,:)
  real(dp),allocatable :: v1r_qibz(:,:,:,:),v1r_qbz(:,:,:,:) !,all_v1qr(:,:,:,:)
@@ -1809,7 +1832,11 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
 
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- cryst => db%cryst
+ if (present(cryst_op)) then
+   cryst => cryst_op
+ else
+   cryst => db%cryst
+ end if
  nq1 = ngqpt(1); nq2 = ngqpt(2); nq3 = ngqpt(3); my_qptopt = 1 !; if (present(qptopt)) my_qptopt = qptopt
 
  ! Generate the q-mesh by finding the IBZ and the corresponding weights.
@@ -1880,6 +1907,55 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
  bz2ibz_sort = indqq(:,1)
  call sort_int(nqbz,bz2ibz_sort,iperm)
 
+ ! Reconstruct the IBZ according to what is present in the DVDB .
+ ABI_MALLOC(nqsts, (nqibz))
+ ABI_MALLOC(iqs_dvdb, (nqibz))
+
+ iqst = 0
+ do iq_ibz=1,nqibz
+
+   ! In each q-point star, count the number of q-points
+   ! and find the one present in DVDB.
+   nqst = 0
+   found = .false.
+   do ii=iqst+1,nqbz
+     if (bz2ibz_sort(ii) /= iq_ibz) exit
+     nqst = nqst + 1
+
+     iq_bz = iperm(ii)
+     if (.not. found) then
+       iq_dvdb = dvdb_findq(db, qbz(:,iq_bz))
+       if (iq_dvdb /= -1) then
+         qibz(:,iq_ibz) = qbz(:,iq_bz)
+         iqs_dvdb(iq_ibz) = iq_dvdb
+         found = .true.
+       end if
+     end if
+   end do
+
+   ! Check that nqst has been counted properly.
+   ABI_CHECK(nqst > 0 .and. bz2ibz_sort(iqst+1) == iq_ibz, "Wrong iqst")
+   if (abs(nqst - wtq(iq_ibz) * nqbz) > tol12) then
+     write(std_out,*)nqst, wtq(iq_ibz) * nqbz
+     MSG_ERROR("Error in counting q-point star or in the weights.")
+   end if
+
+   ! Check that the q-point has been found in DVDB.
+   if (.not. found) then
+     MSG_ERROR(sjoin("Cannot find symmetric q-point of:", ktoa(qibz(:,iq_ibz)), "in DVDB file"))
+   end if
+   !write(std_out,*)sjoin("qpt irred:",ktoa(qibz(:,iq_ibz)))
+
+   iqst = iqst + nqst
+   nqsts(iq_ibz) = nqst
+
+ end do
+
+ ! Redo the mapping with the new IBZ
+ call listkk(dksqmax,cryst%gmet,indqq,qibz,qbz,nqibz,nqbz,cryst%nsym,&
+   sppoldbl1,cryst%symafm,cryst%symrec,timrev1,use_symrec=.True.)
+
+
  ABI_MALLOC(emiqr, (2,db%nrpt))
  ABI_STAT_MALLOC(db%v1scf_rpt,(2,db%nrpt, nfft, db%nspden, db%natom3), ierr)
  ABI_CHECK(ierr==0, 'out of memory in db%v1scf_rpt')
@@ -1891,31 +1967,13 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
  iqst = 0
  do iq_ibz=1,nqibz
 
-   iq_dvdb = dvdb_findq(db, qibz(:,iq_ibz))
-   if (iq_dvdb == -1) then
-     MSG_ERROR(sjoin("Cannot find q-point:", ktoa(qibz(:,iq_ibz)), "in DVDB file"))
-   end if
-   !write(std_out,*)sjoin("qpt irred:",ktoa(qibz(:,iq_ibz)))
-
    ! Get potentials for this IBZ q-point on the real-space FFT mesh.
    ! This call allocates v1r_qibz(cplex_qibz, nfft, nspden, 3*natom)
-   call dvdb_readsym_allv1(db, iq_dvdb, cplex_qibz, nfft, ngfft, v1r_qibz, comm)
-
-   ! Find number of symmetric q-points associated to iq_ibz
-   nqst = 0
-   do ii=iqst+1,nqbz
-     if (bz2ibz_sort(ii) /= iq_ibz) exit
-     nqst = nqst + 1
-   end do
-   ABI_CHECK(nqst > 0 .and. bz2ibz_sort(iqst+1) == iq_ibz, "Wrong iqst")
-   if (abs(nqst - wtq(iq_ibz) * nqbz) > tol12) then
-     write(std_out,*)nqst, wtq(iq_ibz) * nqbz
-     MSG_ERROR("Stop")
-   end if
+   call dvdb_readsym_allv1(db, iqs_dvdb(iq_ibz), cplex_qibz, nfft, ngfft, v1r_qibz, comm)
 
    ! Reconstruct by symmetry the potentials for the star of this q-point, perform FT and accumulate
    ! Be careful with the gamma point.
-   do ii=1,nqst
+   do ii=1,nqsts(iq_ibz)
      iqst = iqst + 1
      iq_bz = iperm(iqst)
      ABI_CHECK(iq_ibz == indqq(iq_bz,1), "iq_ibz !/ ind qq(1)")
@@ -1929,7 +1987,7 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
 
      if (cplex_qibz == 1) then
        ! Gamma point.
-       ABI_CHECK(nqst == 1, "cplex_qibz == 1 and nq nqst /= 1 (should be gamma)")
+       ABI_CHECK(nqsts(iq_ibz) == 1, "cplex_qibz == 1 and nq nqst /= 1 (should be gamma)")
        ABI_CHECK(all(g0q == 0), "gamma point with g0q /= 0")
 
        ! Slow FT.
@@ -2032,6 +2090,8 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm)
  ABI_FREE(indqq)
  ABI_FREE(iperm)
  ABI_FREE(bz2ibz_sort)
+ ABI_FREE(iqs_dvdb)
+ ABI_FREE(nqsts)
  ABI_FREE(v1r_qbz)
 
 end subroutine dvdb_ftinterp_setup
@@ -2057,9 +2117,11 @@ end subroutine dvdb_ftinterp_setup
 !!  ov1r(2*nfft, nspden, 3*natom)=Interpolated DFPT potentials at the given q-point.
 !!
 !! PARENTS
-!!      m_phgamma,mrgdv
+!!      m_dvdb,m_gkk,m_phgamma,m_phpi,m_sigmaph
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -2219,6 +2281,8 @@ end function dvdb_findq
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -2417,6 +2481,8 @@ end function my_hdr_skip
 !!      eph,m_dvdb,mrgdv
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -2593,6 +2659,8 @@ end subroutine dvdb_list_perts
 !!      mrgdv
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -2781,6 +2849,8 @@ end subroutine dvdb_merge_files
 !!      m_dvdb
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -2908,8 +2978,11 @@ end function dvdb_check_fform
 !!  Only writing.
 !!
 !! PARENTS
+!!      mrgdv
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -3055,6 +3128,8 @@ end subroutine dvdb_test_v1rsym
 !!      mrgdv
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
@@ -3203,6 +3278,8 @@ end subroutine dvdb_test_v1complete
 !!      mrgdv
 !!
 !! CHILDREN
+!!      dvdb_free,dvdb_ftinterp_qpt,dvdb_ftinterp_setup,dvdb_init
+!!      dvdb_open_read,dvdb_print,dvdb_readsym_allv1,ngfft_seq,vdiff_print
 !!
 !! SOURCE
 
