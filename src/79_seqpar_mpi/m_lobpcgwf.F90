@@ -183,17 +183,19 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  end do
 
  ! Memory info
- lobpcgMem = lobpcg_memInfo(nband,l_icplx*l_npw*l_nspinor,blockdim,space)
- localMem = (l_npw+2*l_npw*l_nspinor*blockdim+2*nband)*kind(1.d0)
- write(std_out,'(1x,A,F10.6,1x,A)') "Each MPI process calling lobpcg should need around ", &
- (localMem+sum(lobpcgMem))/1e9, &
- "GB of peak memory as follows :"
- write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in lobpcgwf : ", &
- (localMem)/1e9, "GB"
- write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in m_lobpcg : ", &
- (lobpcgMem(1))/1e9, "GB"
- write(std_out,'(4x,A,F10.6,1x,A)') "Temporary memory in m_lobpcg : ", &
- (lobpcgMem(2))/1e9, "GB"
+ if ( prtvol >= 3 ) then
+   lobpcgMem = lobpcg_memInfo(nband,l_icplx*l_npw*l_nspinor,blockdim,space)
+   localMem = (l_npw+2*l_npw*l_nspinor*blockdim+2*nband)*kind(1.d0)
+   write(std_out,'(1x,A,F10.6,1x,A)') "Each MPI process calling lobpcg should need around ", &
+   (localMem+sum(lobpcgMem))/1e9, &
+   "GB of peak memory as follows :"
+   write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in lobpcgwf : ", &
+   (localMem)/1e9, "GB"
+   write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in m_lobpcg : ", &
+   (lobpcgMem(1))/1e9, "GB"
+   write(std_out,'(4x,A,F10.6,1x,A)') "Temporary memory in m_lobpcg : ", &
+   (lobpcgMem(2))/1e9, "GB"
+ end if
 
 
 
@@ -222,7 +224,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !###########################################################################
  
  ! Run lobpcg
- call lobpcg_run(lobpcg,xgx0,getghc_gsc,precond,xgeigen,xgresidu)
+ call lobpcg_run(lobpcg,xgx0,getghc_gsc,precond,xgeigen,xgresidu,prtvol)
 
  ! Free preconditionning since not needed anymore
  ABI_FREE(l_pcon)
@@ -281,11 +283,13 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  call timab(tim_lobpcgwf2,2,tsec)
  cputime = abi_cpu_time() - cputime
  walltime = abi_wtime() - walltime
- write(std_out,'(a)',advance='no') sjoin(" Lobpcg took", sec2str(cputime), "of cpu time")
- write(std_out,*) sjoin("for a wall time of", sec2str(walltime))
- write(std_out,'(a,f6.2)') " -> Ratio of ", cputime/walltime
  nthreads = xomp_get_num_threads(open_parallel = .true.)
  if ( cputime/walltime/dble(nthreads) < 0.75 .and. (int(cputime/walltime)+1) /= nthreads) then
+   if ( prtvol >= 3 ) then
+     write(std_out,'(a)',advance='no') sjoin(" Lobpcg took", sec2str(cputime), "of cpu time")
+     write(std_out,*) sjoin("for a wall time of", sec2str(walltime))
+     write(std_out,'(a,f6.2)') " -> Ratio of ", cputime/walltime
+   end if
    MSG_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
  end if
 

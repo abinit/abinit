@@ -75,6 +75,7 @@ module m_multibinit_dataset
   integer :: dynamics
   integer :: natifc
   integer :: natom
+  integer :: ncoeff
   integer :: ntime
   integer :: nnos
   integer :: nph1l
@@ -116,7 +117,10 @@ module m_multibinit_dataset
   integer, allocatable :: qmass(:)
   ! qmass(nnos)
 
-! Real arrays 
+! Real arrays
+  real(dp), allocatable :: coefficients(:) 
+  ! coefficients(ncoeff)
+ 
   real(dp), allocatable :: qnrml1(:) 
   ! qnrml1(nph1l)
 
@@ -177,6 +181,9 @@ subroutine multibinit_dtset_free(multibinit_dtset)
  end if
  if (allocated(multibinit_dtset%qmass))  then
    ABI_DEALLOCATE(multibinit_dtset%qmass)
+ end if
+ if (allocated(multibinit_dtset%coefficients))  then
+   ABI_DEALLOCATE(multibinit_dtset%coefficients)
  end if
  if (allocated(multibinit_dtset%qnrml1))  then
    ABI_DEALLOCATE(multibinit_dtset%qnrml1)
@@ -454,6 +461,16 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'The number of atom ifc in the input files',multibinit_dtset%natifc,',',ch10,&
 &   'is larger than the number of atoms',natom,'.',ch10,&
 &   'Action: change natifc in the input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%ncoeff=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ncoeff',tread,'INT')
+ if(tread==1) multibinit_dtset%ncoeff=intarr(1)
+ if(multibinit_dtset%ncoeff<0)then
+   write(message, '(a,i0,a,a,a)' )&
+&   'ncoeff is',multibinit_dtset%ncoeff,', which is lower than 0 .',ch10,&
+&   'Action: correct natifc in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -742,7 +759,24 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !B
 
 !C
-
+ ABI_ALLOCATE(multibinit_dtset%coefficients,(multibinit_dtset%ncoeff))
+ if (multibinit_dtset%ncoeff/=0)then
+   if(multibinit_dtset%ncoeff>marr)then
+     marr=multibinit_dtset%ncoeff
+     ABI_DEALLOCATE(intarr)
+     ABI_DEALLOCATE(dprarr)
+     ABI_ALLOCATE(intarr,(marr))
+     ABI_ALLOCATE(dprarr,(marr))
+   end if
+   multibinit_dtset%coefficients(:)=zero
+   call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%ncoeff,&
+&              string(1:lenstr),'coefficients',tread,'DPR')
+   if(tread==1)then
+     do ii=1,multibinit_dtset%ncoeff
+       multibinit_dtset%coefficients(ii)=dprarr(ii)
+     end do
+   end if
+ end if
 !D
 
 !E

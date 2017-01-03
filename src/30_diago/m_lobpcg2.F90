@@ -145,7 +145,7 @@ module m_lobpcg2
     double precision :: tsec(2)
     double precision :: advice
     double precision :: advice_target
-    character(len=255) :: mkl_threads
+    character(len=255) :: linalg_threads
     integer :: ierr
     integer :: iadvice, nthread
 #ifdef HAVE_LINALG_MKL_THREADS
@@ -165,8 +165,8 @@ module m_lobpcg2
 #ifdef HAVE_LINALG_MKL_THREADS
     nthread =  mkl_get_max_threads()
 #elif defined HAVE_FC_GETENV
-    call getenv("MKL_NUM_THREADS",mkl_threads)
-    read(mkl_threads,'(i5)',iostat=ierr) nthread
+    call getenv("OMP_NUM_THREADS",linalg_threads)
+    read(linalg_threads,'(i5)',iostat=ierr) nthread
     if ( ierr /= 0 ) nthread = 1
     if ( nthread == 0 ) nthread = 1
 #endif
@@ -186,7 +186,7 @@ module m_lobpcg2
         write(std_out,'(1x,A,i5)') "You should try to get npband*bandpp=", neigenpairs/iadvice
         write(std_out,'(1x,A,i8)',advance="no") "For information matrix size is ", spacedim*blockdim
         if ( nthread > 1 ) then
-          write(std_out,'(1x,A,i3,1x,A)') "and MKL will use", nthread, "threads"
+          write(std_out,'(1x,A,i3,1x,A)') "and linalg will use", nthread, "threads"
         else
           write(std_out,*)
         end if
@@ -316,7 +316,7 @@ module m_lobpcg2
   end function lobpcg_memInfo
 
 
-  subroutine lobpcg_run(lobpcg, X0, getAX_BX, pcond, eigen, residu)
+  subroutine lobpcg_run(lobpcg, X0, getAX_BX, pcond, eigen, residu, prtvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -330,6 +330,7 @@ module m_lobpcg2
     type(xgBlock_t), intent(inout) :: X0   ! Full initial vectors
     type(xgBlock_t), intent(inout) :: eigen   ! Full initial eigen values
     type(xgBlock_t), intent(inout) :: residu
+    integer        , intent(in   ) :: prtvol
 
     type(xg_t) :: eigenvalues3N   ! eigen values for Rayleight-Ritz
     type(xgBlock_t) :: eigenvaluesN   ! eigen values for Rayleight-Ritz
@@ -400,7 +401,7 @@ module m_lobpcg2
 
     !! Start big loop over blocks
     do iblock = 1, nblock
-      write(std_out,*) "  -- Block ", iblock
+      if ( prtvol == 4 ) write(std_out,*) "  -- Block ", iblock
       nrestart = 0
 
       call lobpcg_getX0(lobpcg,iblock)
@@ -446,16 +447,18 @@ module m_lobpcg2
         call xgBlock_colwiseNorm2(lobpcg%W,residuBlock,max_val=maxResidu,max_elt=eigResiduMax,&
                                                        min_val=minResidu,min_elt=eigResiduMin)
         call timab(tim_maxres,2,tsec)
-        write(std_out,'(2x,a1,es10.3,a1,es10.3,a,i4,a,i4,a)') &
-          "(",minResidu,",",maxResidu, ") for eigen vectors (", &
-          eigResiduMin,",",eigResiduMax,")"
-        if ( maxResidu < lobpcg%tolerance ) then
-          write(std_out,*) "Block ", iblock, "converged at iline =", iline
-          exit
-        else if ( 10.d0*prevMaxResidu < maxResidu .and. iline > 1) then
-          write(std_out,*) "Block ", iblock, "stopped at iline =", iline
-          exit
-        endif
+        if ( prtvol == 4 ) then 
+          write(std_out,'(2x,a1,es10.3,a1,es10.3,a,i4,a,i4,a)') &
+            "(",minResidu,",",maxResidu, ") for eigen vectors (", &
+            eigResiduMin,",",eigResiduMax,")"
+          if ( maxResidu < lobpcg%tolerance ) then
+            write(std_out,*) "Block ", iblock, "converged at iline =", iline
+            exit
+          else if ( 10.d0*prevMaxResidu < maxResidu .and. iline > 1) then
+            write(std_out,*) "Block ", iblock, "stopped at iline =", iline
+            exit
+          endif
+        end if
         prevMaxResidu = maxResidu
 
         ! Orthonormalize with respect to previous blocks
@@ -503,7 +506,7 @@ module m_lobpcg2
         RR_eig = eigenvalues3N%self 
         call lobpcg_rayleighRitz(lobpcg,RR_var,RR_eig,ierr,2*dlamch('E'))
         if ( ierr /= 0 ) then
-          write(std_out,*) "I'm so so sorry I could not make it, I did my best but I failed. Sorry. I'm gonna suicide"
+          MSG_ERROR_NOSTOP("I'm so so sorry I could not make it, I did my best but I failed. Sorry. I'm gonna suicide",ierr)
           exit
         end if
 
@@ -537,7 +540,7 @@ module m_lobpcg2
     call xg_free(eigenvalues3N)
 
     if ( ierr /= 0 ) then
-      write(std_out,*) "But before that, I want to recalculate H|Psi> and S|Psi>"
+      MSG_COMMENT("But before that, I want to recalculate H|Psi> and S|Psi>")
       call timab(tim_ax_bx,1,tsec)
       call getAX_BX(X0,lobpcg%AllAX0%self,lobpcg%AllBX0%self)
       call timab(tim_ax_bx,2,tsec)
