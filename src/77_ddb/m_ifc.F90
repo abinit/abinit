@@ -1102,7 +1102,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
  integer :: asnu(3)
  real(dp) :: qred(3),qvers_cart(3),qvers_red(3),quad(3),prev_quad(3),vs(4,3)
  real(dp) :: phfrqs(3*crystal%natom),dwdq(3,3*crystal%natom)
- real(dp) :: eigvec(2,3*crystal%natom,3*crystal%natom),displ_cart(2,3*crystal%natom,3*crystal%natom)
+ real(dp) :: displ_cart(2,3*crystal%natom,3*crystal%natom)
 
 ! *********************************************************************
 
@@ -1143,7 +1143,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
    qvers_red = (qred / normv(qred, crystal%gmet, "G"))
    qred = qrad * qvers_red
    !write(std_out,*)"dir",normv(qred, crystal%gmet, "G"), qrad
-   call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart, out_eigvec=eigvec, dwdq=dwdq)
+   call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart, dwdq=dwdq)
 
    do nu=1,3
      vs(ii, nu) = sqrt(sum(dwdq(1:3,asnu(nu)) ** 2)) * Bohr_meter / Time_Sec
@@ -1174,14 +1174,14 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
      qred = matmul(crystal%rprimd, lgrid%versors(:, ii))
      qred = qrad * (qred / normv(qred, crystal%gmet, "G"))
      !write(std_out,*)"lebe",normv(qred, crystal%gmet, "G"), qrad
-     call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart, out_eigvec=eigvec, dwdq=dwdq)
+     call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart, dwdq=dwdq)
      if (any(phfrqs(asnu) < -tol8)) then
        num_negw = num_negw + 1; min_negw = min(min_negw, minval(phfrqs(asnu)))
      end if
 
      do nu=1,3
        quad(nu) = quad(nu) + lgrid%weights(ii) * sqrt(sum(dwdq(1:3,asnu(nu)) ** 2))
-       !quad(nu) = quad(nu) + lgrid%weights(ii) * abs(dot_product(dwdq(:,asnu(nu)), lgrid%versors(:,ii)))
+       !quad(nu) = quad(nu) + lgrid%weights(ii) * abs(dot_product(lgrid%versors(:,ii), dwdq(:,asnu(nu))))
      end do
    end do
 
@@ -3069,7 +3069,8 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, tes
    end do
    ABI_FREE(wdata)
    ABI_FREE(winterp)
-   MSG_ERROR("Test phonon group velocities done")
+   MSG_COMMENT("Test phonon group velocities done")
+   return
  end if
 
  ! Build interpolator objects.
@@ -3157,7 +3158,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, tes
  call phbspl_free(phbspl)
  call skw_free(skw)
  call kpath_free(qpath)
- MSG_ERROR("ifc_test_phinterp done")
+ MSG_COMMENT("ifc_test_phinterp done")
 
 end subroutine ifc_test_phinterp
 !!***

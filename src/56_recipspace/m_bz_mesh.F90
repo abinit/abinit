@@ -2051,6 +2051,7 @@ subroutine make_path(nbounds,bounds,met,space,ndiv_small,ndivs,npts,path,unit)
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: prtvol=0
  integer :: idx,ii,jp,ount
  real(dp) :: nfact
  character(len=500) :: msg
@@ -2095,21 +2096,24 @@ subroutine make_path(nbounds,bounds,met,space,ndiv_small,ndivs,npts,path,unit)
  ! Allocate and construct the path.
  ABI_MALLOC(path,(3,npts))
 
- call wrtout(ount,' Normalized Path: ','COLL')
+ if (prtvol > 0) call wrtout(ount,' Normalized Path: ','COLL')
  idx=0
  do ii=1,nbounds-1
    do jp=1,ndivs(ii)
      idx=idx+1
      path(:,idx)=bounds(:,ii)+(jp-1)*(bounds(:,ii+1)-bounds(:,ii))/ndivs(ii)
-     write(msg,'(i4,4x,3(f8.5,1x))')idx,path(:,idx)
-     call wrtout(ount,msg,'COLL')
+     if (prtvol > 0) then
+       write(msg,'(i4,4x,3(f8.5,1x))')idx,path(:,idx)
+       call wrtout(ount,msg,'COLL')
+     end if
    end do
  end do
-
  path(:,npts)=bounds(:,nbounds)
 
- write(msg,'(i4,4x,3(f8.5,1x))')npts,path(:,npts)
- call wrtout(ount,msg,'COLL')
+ if (prtvol > 0) then
+   write(msg,'(i4,4x,3(f8.5,1x))')npts,path(:,npts)
+   call wrtout(ount,msg,'COLL')
+ end if
 
 end subroutine make_path
 !!***

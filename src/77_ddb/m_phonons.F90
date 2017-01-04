@@ -42,6 +42,7 @@ module m_phonons
 
  use m_fstrings,        only : itoa, ftoa, sjoin, ktoa, strcat, basename
  use m_numeric_tools,   only : simpson_int, wrap2_pmhalf
+ use m_time,            only : cwtime
  use m_io_tools,        only : open_file
  use defs_abitypes,     only : dataset_type
  use m_dynmat,          only : gtdyn9, dfpt_phfrq
@@ -558,7 +559,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  integer :: nmesh,nqbz,nqpt_max,nqshft,option,timrev,ierr,natom,nomega
  integer :: jdir, idispl, jdispl, isym
  real(dp) :: dum,gaussfactor,gaussprefactor,gaussval,low_bound,max_occ,pnorm
- real(dp) :: upr_bound,xx,gaussmaxarg
+ real(dp) :: upr_bound,xx,gaussmaxarg,wall,cpu,gflops
  logical :: out_of_bounds
  character(len=500) :: msg
  character(len=80) :: errstr
@@ -592,6 +593,8 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  if (prtdos==1.and.dossmear<=zero) then
    MSG_BUG(sjoin('dossmear should be positive but received',ftoa(dossmear)))
  end if
+
+ call cwtime(cpu, wall, gflops, "start")
 
  natom = Crystal%natom
  gaussmaxarg = sqrt(-log(1.d-90))
@@ -637,11 +640,11 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
    gaussprefactor=one/(dossmear*sqrt(two_pi))
    gaussfactor=one/(sqrt2*dossmear)
    write(msg,'(4a,f8.5,2a,f8.5)')ch10,&
-&   'mkphdos: calculating phonon DOS using gaussian method :',ch10,&
-&   '   gaussian smearing [meV] = ',dossmear*Ha_meV,ch10,&
-&   '   frequency step    [meV] = ',PHdos%omega_step*Ha_meV
+&   ' mkphdos: calculating phonon DOS using gaussian method :',ch10,&
+&   '    gaussian smearing [meV] = ',dossmear*Ha_meV,ch10,&
+&   '    frequency step    [meV] = ',PHdos%omega_step*Ha_meV
  else if (prtdos==2) then
-   write(msg,'(2a)')ch10,'mkphdos: calculating phonon DOS using tetrahedron method'
+   write(msg,'(2a)')ch10,' mkphdos: calculating phonon DOS using tetrahedron method'
  end if
  call wrtout(std_out,msg,'COLL')
 
@@ -726,7 +729,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
      if (allocated(PHdos%msqd_dos_atom)) then
        ABI_FREE(PHdos%msqd_dos_atom)
      end if
-     !
 
      ! Frequency mesh.
      PHdos%omega_min=low_bound; if (ABS(PHdos%omega_min)<tol5) PHdos%omega_min=-tol5
@@ -908,7 +910,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 ! normalize by nsym : symmetrization is used in all prtdos cases
  PHdos%msqd_dos_atom = PHdos%msqd_dos_atom / Crystal%nsym
 
-
  ABI_FREE(symcart)
  ABI_FREE(invmass)
  !
@@ -956,6 +957,10 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
    ABI_FREE(full_eigvec)
    call destroy_tetra(tetraq)
  end if
+
+ call cwtime(cpu,wall,gflops,"stop")
+ write(msg,'(2(a,f8.2))')" mkphdos completed. cpu:",cpu,", wall:",wall
+ call wrtout(std_out, msg, do_flush=.True.)
 
  DBG_EXIT("COLL")
 
@@ -1080,8 +1085,6 @@ end subroutine phdos_ncwrite
 !! asrq0<asrq0_t>=Object for the treatment of the ASR based on the q=0 block found in the DDB file.
 !! prefix=Prefix for output files.
 !! dielt(3,3)=dielectric tensor
-!! tcpui=initial cpu time
-!! twalli=initial wall clock time
 !! zeff(3,3,natom)=effective charge on each atom, versus electric field and atomic displacement
 !! comm=MPI communicator
 !!
@@ -1095,7 +1098,7 @@ end subroutine phdos_ncwrite
 !!
 !! SOURCE
 
-subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
+subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,zeff,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1103,7 +1106,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'mkphbs'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_72_response
  use interfaces_77_ddb
 !End of the abilint section
@@ -1113,7 +1115,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: comm
- real(dp),intent(in) :: tcpui,twalli
  character(len=*),intent(in) :: prefix
  type(ifc_type),intent(in) :: Ifc
  type(crystal_t),intent(in) :: Crystal
@@ -1176,11 +1177,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
  end if
 
  write(msg, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,' Treat the first list of vectors ',ch10
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
-
- call timein(tcpu,twall)
- write(msg, '(a,f11.3,a,f11.3,a)' )'-begin at tcpu',tcpu-tcpui,'  and twall',twall-twalli,' sec'
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
 
@@ -1458,13 +1454,11 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
  character(len=*),intent(in) :: fname
  real(dp), intent(in) :: tempermin, temperinc
 
-!arrays
-
 !Local variables -------------------------
  integer :: io, iomin, itemp, iunit, iatom
  real(dp) :: temper
  character(len=500) :: msg
-
+!arrays
  real(dp), allocatable :: bose(:,:), tmp_msqd(:,:), integ(:,:)
 
 ! *********************************************************************
@@ -1795,7 +1789,6 @@ subroutine phonons_writeEPS(natom,nqpts,ntypat,qpoints,typat,weights,phfreq,phdi
  real(dp),intent(in) :: phdispl_cart(2,3*natom,3*natom,nqpts)
 
 !Local variables-------------------------------
-!no_abirules
 !scalars
  integer :: cunits,EmaxN,EminN,gradRes,kmaxN,kminN,lastPos,pos,posk
  integer :: iatom,ii,imode,iqpt,jj,nqpt

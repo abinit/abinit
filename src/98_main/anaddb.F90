@@ -169,10 +169,6 @@ program anaddb
 
 !******************************************************************
 
- call timein(tcpu,twall)
- write(message, '(a,f11.3,a,f11.3,a)' )'-begin at tcpu',tcpu-tcpui,'  and twall',twall-twalli,' sec'
- call wrtout(std_out,message,'COLL')
-
  ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
  call ddb_getdims(dimekb,filnam(3),lmnmax,mband,mtyp,msym,natom,nblok,nkpt,ntypat,ddbun,usepaw,DDB_VERSION,comm)
 
@@ -221,11 +217,6 @@ program anaddb
 
  ! Read the DDB information, also perform some checks, and symmetrize partially the DDB
  write(message, '(a,a)' )' read the DDB information and perform some checks',ch10
- call wrtout(std_out,message,'COLL')
- call wrtout(ab_out,message,'COLL')
-
- call timein(tcpu,twall)
- write(message, '(a,f11.3,a,f11.3,a,a)' )'-begin at tcpu',tcpu-tcpui,'  and twall',twall-twalli,' sec',ch10
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
 
@@ -394,11 +385,6 @@ program anaddb
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
 
-   call timein(tcpu,twall)
-   write(message, '(a,f11.3,a,f11.3,a)' )'-begin at tcpu',tcpu-tcpui,'  and twall',twall-twalli,' sec'
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
-
    if (inp%qrefine > 1) then
      ! Gaal-Nagy's algorithm in PRB 73 014117.
 
@@ -425,8 +411,9 @@ program anaddb
 
    ! Compute speed of sound.
    if (inp%vs_qrad_tolms(1) > zero) then
-      call ifc_speedofsound(ifc, crystal, inp%vs_qrad_tolms, ana_ncid, comm)
-      call ifc_test_phinterp(ifc, crystal, [8,8,8], 1, [zero,zero,zero], [3,3,3], comm, test_dwdq=.True.)
+     call ifc_speedofsound(ifc, crystal, inp%vs_qrad_tolms, ana_ncid, comm)
+     !call ifc_test_phinterp(ifc, crystal, [8,8,8], 1, [zero,zero,zero], [3,3,3], comm, test_dwdq=.True.)
+     !stop
    end if
 
    ! Print analysis of the real-space interatomic force constants
@@ -473,7 +460,7 @@ program anaddb
    call phdos_free(Phdos)
  end if
 
- if (iam_master.and.inp%ifcflag==1 .and. inp%outboltztrap==1) then
+ if (iam_master .and. inp%ifcflag==1 .and. inp%outboltztrap==1) then
    call ifc_outphbtrap(Ifc,Crystal,inp%ng2qpt,1,inp%q2shft,filnam(2))
  end if
 
@@ -488,27 +475,22 @@ program anaddb
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
-   call timein(tcpu,twall)
-   write(message, '(a,f11.3,a,f11.3,a)' )'-begin at tcpu',tcpu-tcpui,'  and twall',twall-twalli,' sec'
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
-
    if (inp%thmflag==1) then
-     call harmonic_thermo(Ifc,Crystal,ddb%amu,inp,ab_out,filnam(2),tcpui,twalli,comm)
+     call harmonic_thermo(Ifc,Crystal,ddb%amu,inp,ab_out,filnam(2),comm)
 
    else if (inp%thmflag==2) then
      write(message, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,' Entering thm9 routine with thmflag=2 ',ch10
      call wrtout(std_out,message,'COLL')
      call wrtout(ab_out,message,'COLL')
 
-     call harmonic_thermo(Ifc,Crystal,ddb%amu,inp,ab_out,filnam(2),tcpui,twalli,comm,thmflag=inp%thmflag)
+     call harmonic_thermo(Ifc,Crystal,ddb%amu,inp,ab_out,filnam(2),comm,thmflag=inp%thmflag)
    end if
  end if
 
 !**********************************************************************
 
  ! Now treat the first list of vectors (without non-analyticities)
- call mkphbs(Ifc,Crystal,inp,ddb,asrq0,filnam(2),tcpui,twalli,zeff,comm)
+ call mkphbs(Ifc,Crystal,inp,ddb,asrq0,filnam(2),zeff,comm)
 
 !***********************************************************************
 
@@ -556,12 +538,6 @@ program anaddb
 
    write(message, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,&
 &   ch10,' Treat the second list of vectors ',ch10
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
-
-   call timein(tcpu,twall)
-   write(message, '(a,f11.3,a,f11.3,a)' )&
-&   '-begin at tcpu',tcpu-tcpui,'  and twall',twall-twalli,' sec'
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
 
@@ -753,11 +729,6 @@ program anaddb
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
 
-   call timein(tcpu,twall)
-   write(message,'(a,f11.3,a,f11.3,a)')'-begin at tcpu',tcpu-tcpui,'   and twall',twall-twalli,'sec'
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
-
    if (inp%instrflag==1) then
      call wrtout(std_out,'instrflag=1, so extract the internal strain constant from the 2DTE','COLL')
 
@@ -777,11 +748,6 @@ program anaddb
  if (inp%elaflag/=0) then
    write(message, '(a,a,(80a),a,a,a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
 &   ' Calculation of the elastic and compliances tensor (Voigt notation)',ch10
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
-
-   call timein(tcpu,twall)
-   write(message,'(a,f11.3,a,f11.3,a)')'-begin at tcpu',tcpu-tcpui,'   and twall',twall-twalli,'sec'
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
 
@@ -829,11 +795,6 @@ program anaddb
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
 
-   call timein(tcpu,twall)
-   write(message,'(a,f11.3,a,f11.3,a)')'-begin at tcpu',tcpu-tcpui,'   and twall',twall-twalli,'sec'
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
-
    if (any(inp%piezoflag == [1,2,3,4,5,6,7]) .or. inp%dieflag==4 .or.inp%elaflag==4) then
      call wrtout(std_out,'extract the piezoelectric constant from the 2DTE','COLL')
 
@@ -874,9 +835,7 @@ program anaddb
  end if
 
  call timein(tcpu,twall)
- tsec(1)=tcpu-tcpui
- tsec(2)=twall-twalli
-
+ tsec(1)=tcpu-tcpui; tsec(2)=twall-twalli
  write(message, '(a,i4,a,f13.1,a,f13.1)' )' Proc.',my_rank,' individual time (sec): cpu=',tsec(1),'  wall=',tsec(2)
  call wrtout(std_out,message,"COLL")
 

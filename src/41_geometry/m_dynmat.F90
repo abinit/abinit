@@ -129,7 +129,6 @@ subroutine asria_calc(asr,d2asr,d2cart,mpert,natom)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'asria_calc'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -160,9 +159,7 @@ subroutine asria_calc(asr,d2asr,d2cart,mpert,natom)
 
  if (asr==0) return
 
- write(message, '(a)' )&
-& ' asria_calc : calculation of the correction to the ASR for the interatomic forces.'
- call wrtout(std_out,message,'COLL')
+ !call wrtout(std_out,' asria_calc: calculation of the correction to the ASR for the interatomic forces.')
  do ipert1=1,natom
    do idir1=1,3
      do idir2=1,3

@@ -2898,11 +2898,6 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
 & pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
 & typat,usepaw,wtk,xred,zion,znucl)
 
- !if (nsym /= msym) then
- !  write(message,"(2(a,i0))")"mismatch: msym: ",msym,", nsym: ",nsym
- !  MSG_WARNING(message)
- !end if
-
 !Compute different matrices in real and reciprocal space, also
 !checks whether ucvol is positive.
  call mkrdim(acell,rprim,rprimd)
@@ -2934,8 +2929,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
  call chkin9(atifc,natifc,natom)
 
 !Read the blocks from the input database, and close it.
- write(message, '(a,a,a,i5,a)' )ch10,ch10,&
-& ' rdddb9 : read ',ddb%nblok,' blocks from the input DDB '
+ write(message, '(3a,i0,a)' )ch10,ch10,' rdddb9: read ',ddb%nblok,' blocks from the input DDB '
  call wrtout(std_out,message,'COLL')
  nunit=ddbun
 
