@@ -1694,7 +1694,7 @@ end subroutine pawcprj_put
      cprj(kk,jj)%cp(:,:)=cprj_tmp(ii,jj)%cp(:,:)
      if (ncpgr>0) then
        LIBPAW_ALLOCATE(cprj(kk,jj)%dcp,(2,ncpgr,nlmn(ii)))
-       cprj(kk,jj)%dcp(:,:,:)=cprj_tmp(kk,jj)%dcp(:,:,:)
+       cprj(kk,jj)%dcp(:,:,:)=cprj_tmp(ii,jj)%dcp(:,:,:)
      end if
    end do
  end do
@@ -3005,8 +3005,8 @@ function paw_overlap(cprj1,cprj2,typat,pawtab,spinor_comm) result(onsite)
 &           +cprj1(iatom,isp)%cp(2,jlmn) * cprj2(iatom,isp)%cp(2,ilmn) &
 &           )
 
-           onsite(2)=onsite(2) + sij*(                                  &
-&           cprj1(iatom,isp)%cp(1,ilmn) * cprj2(iatom,isp)%cp(2,jlmn) &
+           onsite(2)=onsite(2) + sij*(                                 &
+&           cprj1(iatom,isp)%cp(1,ilmn) * cprj2(iatom,isp)%cp(2,jlmn)  &
 &           -cprj1(iatom,isp)%cp(2,ilmn) * cprj2(iatom,isp)%cp(1,jlmn) &
 &           +cprj1(iatom,isp)%cp(1,jlmn) * cprj2(iatom,isp)%cp(2,ilmn) &
 &           -cprj1(iatom,isp)%cp(2,jlmn) * cprj2(iatom,isp)%cp(1,ilmn) &

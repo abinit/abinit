@@ -34,7 +34,8 @@ module m_dynmat
  use m_errors
  use m_linalg_interfaces
 
- use m_numeric_tools,   only : wrap2_pmhalf
+ use m_numeric_tools,   only : wrap2_pmhalf, mkherm
+ use m_cgtools,        only : fxphas_seq
  use m_ewald,           only : ewald9
 
  implicit none
@@ -62,7 +63,6 @@ module m_dynmat
  public :: asrif9               ! Imposes the Acoustic Sum Rule to Interatomic Forces
  public :: make_bigbox          ! Generates a Big Box of R points for the Fourier Transforms the dynamical matrix
  public :: bigbx9               ! Helper functions that faciliates the generation  of a Big Box containing
- public :: cell9                ! reorder cell of rpt point 
  public :: canat9               ! From reduced to canonical coordinates
  public :: canct9               ! Convert from canonical coordinates to cartesian coordinates
  public :: chkrp9               ! Check if the rprim used for the definition of the unit cell (in the
@@ -79,7 +79,10 @@ module m_dynmat
                                 !   the ifc matrix in cartesian coordinates
  public :: dymfz9               ! Multiply the dynamical matrix by a phase shift to account for normalized canonical coordinates.
  public :: nanal9               ! Subtract/Add the non-analytical part from one dynamical matrix with number iqpt.
- public :: gtdyn9               ! Generates a dynamical matrix from interatomic force constants and long-range electrostatic interactions.
+ public :: gtdyn9               ! Generates a dynamical matrix from interatomic force constants and
+                                ! long-range electrostatic interactions.
+ public :: dfpt_phfrq           ! Diagonalize IFC(q), return phonon frequencies and eigenvectors.
+                                ! If q is Gamma, the non-analytical behaviour can be included.
 
  ! TODO: Change name,
  public :: ftgam
@@ -276,7 +279,7 @@ end subroutine asria_calc
 !!
 !! FUNCTION
 !! Imposition of the Acoustic sum rule on the InterAtomic Forces
-!!  or on the dynamical matrix directly from the previously calculated d2asr
+!! or on the dynamical matrix directly from the previously calculated d2asr
 !!
 !! INPUTS
 !! asr=(0 => no ASR, 1 or 2=> the diagonal element is modified to give the ASR,
@@ -2393,7 +2396,7 @@ end subroutine asrif9
 !! rprim(3,3)= Normalized coordinates in real space  !!! IS THIS CORRECT?
 !!
 !! OUTPUT
-!! cell= (nrpt,3) Give the index of the the cell and irpt 
+!! cell= (nrpt,3) Give the index of the the cell and irpt
 !! nprt= Number of R points in the Big Box
 !! rpt(3,nrpt)= Canonical coordinates of the R points in the unit cell
 !!  These coordinates are normalized (=> * acell(3)!!)
@@ -2476,7 +2479,7 @@ end subroutine make_bigbox
 !! rprim(3,3)= Normalized coordinates in real space  !!! IS THIS CORRECT?
 !!
 !! OUTPUT
-!! cell= (nrpt,3) Give the index of the the cell and irpt 
+!! cell= (nrpt,3) Give the index of the the cell and irpt
 !! nprt= Number of R points in the Big Box
 !! rpt(3,mrpt)= Canonical coordinates of the R points in the unit cell
 !!  These coordinates are normalized (=> * acell(3)!!)
@@ -3366,7 +3369,7 @@ subroutine ftifc_r2q(atmfrc,dynmat,gprim,natom,nqpt,nrpt,rpt,spqpt,wghatm)
 
 ! *********************************************************************
 
- dynmat(:,:,:,:,:,:)=zero
+ dynmat = zero
 
  do iqpt=1,nqpt
    do irpt=1,nrpt
@@ -3868,158 +3871,6 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,wghatm)
 
 end subroutine wght9
 !!***
-
-!!****f* m_dynmat/cell9
-!! NAME
-!! wght9
-!!
-!! FUNCTION
-!! ifc_init use canonical coordinates and cell(irpt,:) is not 
-!! more usable with reduced coordinates. This routine reordone
-!! the cell and the Weight associated to the couple of atoms and the R vector
-!! for reduced coordinates
-!!
-!! INPUTS
-!! brav = Bravais lattice (1=S.C.;2=F.C.C.;4=Hex.)
-!! gprim(3,3)= Normalized coordinates in reciprocal space
-!! natom= Number of atoms in the unit cell
-!! nrpt=Number of R points in the Big Box
-!! rcan(3,natom)= Reduced coordinates of atomic position
-!! rpt(3,nprt)=Canonical coordinates of the R points in the unit cell
-!!  These coordinates are normalized (=> * acell(3))
-!!
-!! OUTPUT
-!! cell= (nrpt,3) Give the index of the the cell and irpt
-!! wghatm(natom,natom,nrpt)= Weight associated to the couple of atoms and the R vector
-!!  The vector r(atom2)-r(atom1)+rpt should be inside the moving box
-!!
-!! PARENTS
-!!      ddb_to_effective_potential
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine cell9(atmfrc,brav,cell,gprim,natom,nrpt,rcan,rpt,wghatm,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'cell9'
-!End of the abilint section
-
- implicit none
-
-!Arguments -------------------------------
-!scalars
- integer,intent(in) :: brav,natom,nrpt
-!arrays
- real(dp),intent(in) :: gprim(3,3),rcan(3,natom),rpt(3,nrpt),xred(3,natom)
- real(dp),intent(inout) :: atmfrc(2,3,natom,3,natom,nrpt),wghatm(natom,natom,nrpt)
- integer, intent(in) :: cell(3,nrpt)
-!Local variables -------------------------
-!scalars
- integer :: ia,ib,ii,irpt,irpt2,icount
- integer :: min1,min2,min3,max1,max2,max3
-!arrays
- integer :: cell_number(3),cell2(3)
- integer  :: shift(3)
- real(dp) :: red(3,3)
- real(dp),allocatable :: atmfrc_tmp(:,:,:,:,:,:),wghatm_tmp(:,:,:)
- character(500) :: msg
-
-! *********************************************************************
-
- ABI_ALLOCATE(atmfrc_tmp,(2,3,natom,3,natom,nrpt))
- ABI_ALLOCATE(wghatm_tmp,(natom,natom,nrpt))
-
- wghatm_tmp(:,:,:) = zero
- atmfrc_tmp(:,:,:,:,:,:) =  zero
-
-!Set the maximum and the miminum for the bound of the cell
- max1 = maxval(cell(1,:));  min1 = minval(cell(1,:))
- max2 = maxval(cell(2,:));  min2 = minval(cell(2,:))
- max3 = maxval(cell(3,:));  min3 = minval(cell(3,:))
- cell_number(1) = max1 - min1 +1
- cell_number(2) = max2 - min2 +1
- cell_number(3) = max3 - min3 +1
-
-!Begin the big loop on ia and ib
- do ia=1,natom
-   do ib=1,natom
-
-!    Simple Lattice
-     if (brav==1) then
-!      In this case, it is better to work in reduced coordinates
-!      As rcan is in canonical coordinates, => multiplication by gprim
-       do ii=1,3
-         red(1,ii)=  rcan(1,ia)*gprim(1,ii) +rcan(2,ia)*gprim(2,ii) +rcan(3,ia)*gprim(3,ii)
-         red(2,ii)=  rcan(1,ib)*gprim(1,ii) +rcan(2,ib)*gprim(2,ii) +rcan(3,ib)*gprim(3,ii)
-       end do
-     end if
-
-     shift(:) = anint(red(2,:) - xred(:,ib)) - anint(red(1,:) - xred(:,ia))
- 
-     icount = 0
-     do irpt=1,nrpt
-!      Compute the difference vector
-       if (brav==1) then
-         do ii=1,3 
-           red(3,ii)=  rpt(1,irpt)*gprim(1,ii) +rpt(2,irpt)*gprim(2,ii) +rpt(3,irpt)*gprim(3,ii)
-         end do
-         cell2(:)= int(red(3,:) + shift(:))
-
-!         Use boundary condition to get the right cell
-          if (cell2(1) < min1 .and. cell2(1) < max1) then
-            cell2(1) = cell2(1) + cell_number(1)
-          else if (cell2(1) > min1 .and. cell2(1) > max1) then
-            cell2(1) = cell2(1) - cell_number(1)
-          end if
-
-          if (cell2(2) < min2 .and. cell2(2) < max2) then
-            cell2(2) = cell2(2) + cell_number(2)
-          else if (cell2(2) > min2 .and. cell2(2) > max2) then
-            cell2(2) = cell2(2) - cell_number(2)
-          end if
-
-          if (cell2(3) < min3 .and. cell2(3) < max3) then
-            cell2(3) = cell2(3) + cell_number(3)
-          else if (cell2(3) > min3 .and. cell2(3) > max3) then
-            cell2(3) = cell2(3) - cell_number(3)
-          end if
-
-         do irpt2=1,nrpt
-           if (cell(1,irpt2) == cell2(1)  .and.&
-               cell(2,irpt2) == cell2(2)  .and.&
-               cell(3,irpt2) == cell2(3)) then
-             wghatm_tmp(ia,ib,irpt2) =  wghatm(ia,ib,irpt)
-             atmfrc_tmp(:,:,ia,:,ib,irpt2) = atmfrc(:,:,ia,:,ib,irpt)
-             icount = icount + 1
-           end if
-         end do
-       end if
-     end do
-!    Check if everything is fill
-     if (icount /= nrpt) then
-       write(msg,'(a,a)')' cell is missing in short range'
-       MSG_BUG(msg)
-     end if
-   end do
- end do
-
- atmfrc(:,:,:,:,:,:) = zero
- wghatm(:,:,:)       = zero
-
- atmfrc(:,:,:,:,:,:) = atmfrc_tmp(:,:,:,:,:,:)
- wghatm(:,:,:) = wghatm_tmp(:,:,:)
-
- ABI_DEALLOCATE(atmfrc_tmp)
- ABI_DEALLOCATE(wghatm_tmp)
-
-end subroutine cell9
-!!***
-
 
 !----------------------------------------------------------------------
 
@@ -5029,10 +4880,333 @@ end subroutine gtdyn9
 
 !----------------------------------------------------------------------
 
-!!****f* ABINIT/ftgam
+!!****f* m_dynmat/dfpt_phfrq
 !!
 !! NAME
+!! dfpt_phfrq
+!!
+!! FUNCTION
+!! Get the phonon frequencies and eigenvectors (as well as the corresponding displacements)
+!! If q is at Gamma, the non-analytical behaviour can be included.
+!! Then, the effective dielectric tensor, the effective charges
+!! and oscillator strengths for the limiting direction are also returned
+!!
+!! INPUTS
+!!  amu(ntypat)=mass of the atoms (atomic mass unit) matrix (diagonal in the atoms)
+!!  d2cart(2,3,mpert,3,mpert)=
+!!   dynamical matrix, effective charges, dielectric tensor,.... all in cartesian coordinates
+!!  indsym(4,msym*natom)=indirect indexing array : for each
+!!   isym,iatom, fourth element is label of atom into which iatom is sent by
+!!   INVERSE of symmetry operation isym; first three elements are the primitive
+!!   translations which must be subtracted after the transformation to get back to the original unit cell.
+!!  mpert =maximum number of ipert
+!!  msym=maximum number of symmetries
+!!  natom=number of atoms in unit cell
+!!  nsym=number of space group symmetries
+!!  ntypat=number of atom types
+!!  qphnrm=(described above)
+!!  qphon(3)= to be divided by qphnrm, give the phonon wavevector;
+!!     if qphnrm==0.0_dp, then the wavevector is zero (Gamma point)
+!!     and qphon gives the direction of the induced electric field in **CARTESIAN** coordinates.
+!!     in the latter case, if qphon is zero, no non-analytical contribution is included.
+!!  rprimd(3,3)=dimensional primitive translations (bohr)
+!!  symdynmat=if 1, (re)symmetrize the dynamical matrix, except if Gamma wavevector with electric field added.
+!!  symrel(3,3,nsym)=matrices of the group symmetries (real space)
+!!  typat(natom)=integer label of each type of atom (1,2,...)
+!!  ucvol=unit cell volume
+!!
+!! OUTPUT
+!!  displ(2*3*natom*3*natom)= at the end, contains the displacements of atoms in cartesian coordinates.
+!!    The first index means either the real or the imaginary part,
+!!    The second index runs on the direction and the atoms displaced
+!!    The third index runs on the modes.
+!!  eigval(3*natom)=contains the eigenvalues of the dynamical matrix
+!!  eigvec(2*3*natom*3*natom)= at the end, contains the eigenvectors of the dynamical matrix.
+!!  phfrq(3*natom)=phonon frequencies (square root of the dynamical matrix eigenvalues,
+!!    except if these are negative, and in this case, give minus the square root of the absolute value
+!!    of the matrix eigenvalues). Hartree units.
+!!
+!! NOTES
+!!   1) One makes the dynamical matrix hermitian...
+!!   2) In case of q=Gamma, only the real part is used.
+!!
+!! PARENTS
 !!      anaddb,m_ddb,m_effective_potential_file,m_ifc,m_phonons,respfn,thmeig
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
+& mpert,msym,natom,nsym,ntypat,phfrq,qphnrm,qphon,rprimd,&
+& symdynmat,symrel,symafm,typat,ucvol)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dfpt_phfrq'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: mpert,msym,natom,nsym,ntypat,symdynmat
+ real(dp),intent(in) :: qphnrm,ucvol
+!arrays
+ integer,intent(in) :: indsym(4,msym*natom),symrel(3,3,nsym),typat(natom)
+ integer,intent(in) :: symafm(nsym)
+ real(dp),intent(in) :: amu(ntypat),d2cart(2,3,mpert,3,mpert),rprimd(3,3)
+ real(dp),intent(inout) :: qphon(3)
+ real(dp),intent(out) :: displ(2*3*natom*3*natom),eigval(3*natom)
+ real(dp),intent(out) :: eigvec(2*3*natom*3*natom),phfrq(3*natom)
+
+!Local variables -------------------------
+!scalars
+ integer :: analyt,i1,i2,idir1,idir2,ier,ii,imode,index,ipert1,ipert2
+!integer :: jmode,indexi,indexj
+ real(dp),parameter :: break_symm=1.0d-12
+ real(dp) :: epsq,fac,norm,qphon2
+!real(dp) :: sc_prod
+!character(len=500) :: message
+!arrays
+ real(dp) :: nearidentity(3,3),qptn(3),dum(2,0)
+ real(dp),allocatable :: matrx(:,:),zeff(:,:),zhpev1(:,:),zhpev2(:)
+
+! *********************************************************************
+
+!Prepare the diagonalisation : analytical part.
+!Note: displ is used as work space here
+ i1=0
+ do ipert1=1,natom
+   do idir1=1,3
+     i1=i1+1
+     i2=0
+     do ipert2=1,natom
+       do idir2=1,3
+         i2=i2+1
+         index=i1+3*natom*(i2-1)
+         displ(2*index-1)=d2cart(1,idir1,ipert1,idir2,ipert2)
+         displ(2*index  )=d2cart(2,idir1,ipert1,idir2,ipert2)
+       end do
+     end do
+   end do
+ end do
+
+!Determine the analyticity of the matrix.
+ analyt=1
+ if(abs(qphnrm)<tol8) analyt=0
+ if(abs(qphon(1))<tol8.and.abs(qphon(2))<tol8.and.abs(qphon(3))<tol8) analyt=2
+
+!In case of q=Gamma, only the real part is used
+ if(analyt==0 .or. analyt==2)then
+   do i1=1,3*natom
+     do i2=1,3*natom
+       index=i1+3*natom*(i2-1)
+       displ(2*index)=zero
+     end do
+   end do
+ end if
+
+!In the case the non-analyticity is required :
+! MG: the tensor is in cartesian coordinates and this means that qphon must be in
+!     given in Cartesian coordinates.
+ if(analyt==0)then
+
+!  Normalize the limiting direction
+   qphon2=qphon(1)**2+qphon(2)**2+qphon(3)**2
+   qphon(:)=qphon(:)/sqrt(qphon2)
+
+!  Get the dielectric constant for the limiting direction
+   epsq=zero
+   do idir1=1,3
+     do idir2=1,3
+       epsq= epsq + qphon(idir1)*qphon(idir2) * d2cart(1,idir1,natom+2,idir2,natom+2)
+     end do
+   end do
+
+   ABI_ALLOCATE(zeff,(3,natom))
+
+!  Get the effective charges for the limiting direction
+   do idir1=1,3
+     do ipert1=1,natom
+       zeff(idir1,ipert1)=zero
+       do idir2=1,3
+         zeff(idir1,ipert1) = zeff(idir1,ipert1) + qphon(idir2)* d2cart(1,idir1,ipert1,idir2,natom+2)
+       end do
+     end do
+   end do
+
+!  Get the non-analytical part of the dynamical matrix, and suppress its imaginary part.
+   i1=0
+   do ipert1=1,natom
+     do idir1=1,3
+       i1=i1+1
+       i2=0
+       do ipert2=1,natom
+         do idir2=1,3
+           i2=i2+1
+           index=i1+3*natom*(i2-1)
+           displ(2*index-1)=displ(2*index-1)+four_pi/ucvol*&
+&           zeff(idir1,ipert1)*zeff(idir2,ipert2)/epsq
+           displ(2*index  )=0.0_dp
+         end do
+       end do
+     end do
+   end do
+
+   ABI_DEALLOCATE(zeff)
+ end if !  End of the non-analyticity treatment :
+
+!This slight breaking of the symmetry allows the
+!results to be more portable between machines
+ nearidentity(:,:)=one
+ nearidentity(1,1)=one+break_symm
+ nearidentity(3,3)=one-break_symm
+
+!Include the masses in the dynamical matrix
+ do ipert1=1,natom
+   do ipert2=1,natom
+     fac=1.0_dp/sqrt(amu(typat(ipert1))*amu(typat(ipert2)))/amu_emass
+     do idir1=1,3
+       do idir2=1,3
+         i1=idir1+(ipert1-1)*3
+         i2=idir2+(ipert2-1)*3
+         index=i1+3*natom*(i2-1)
+         displ(2*index-1)=displ(2*index-1)*fac*nearidentity(idir1,idir2)
+         displ(2*index  )=displ(2*index  )*fac*nearidentity(idir1,idir2)
+!        This is to break slightly the translation invariance, and make
+!        the automatic tests more portable
+         if(ipert1==ipert2 .and. idir1==idir2)then
+           displ(2*index-1)=displ(2*index-1)+break_symm*natom/amu_emass/idir1*0.01_dp
+         end if
+       end do
+     end do
+   end do
+ end do
+
+!Make the dynamical matrix hermitian
+ call mkherm(displ,3*natom)
+
+!***********************************************************************
+!Diagonalize the dynamical matrix
+
+!Symmetrize the dynamical matrix
+!FIXME: swap the next 2 lines and update test files to include symmetrization for Gamma point too (except in non-analytic case)
+!if (symdynmat==1 .and. analyt > 0) then
+ if (symdynmat==1 .and. analyt == 1) then
+   qptn(:)=qphon(:)
+   if (analyt==1) then
+     qptn(:)=qphon(:)/qphnrm
+   end if
+   call symdyma(displ,indsym,natom,nsym,qptn,rprimd,symrel,symafm)
+ end if
+
+ ier=0; ii=1
+ ABI_ALLOCATE(matrx,(2,(3*natom*(3*natom+1))/2))
+ do i2=1,3*natom
+   do i1=1,i2
+     matrx(1,ii)=displ(1+2*(i1-1)+2*(i2-1)*3*natom)
+     matrx(2,ii)=displ(2+2*(i1-1)+2*(i2-1)*3*natom)
+     ii=ii+1
+   end do
+ end do
+
+ ABI_ALLOCATE(zhpev1,(2,2*3*natom-1))
+ ABI_ALLOCATE(zhpev2,(3*3*natom-2))
+
+ call ZHPEV ('V','U',3*natom,matrx,eigval,eigvec,3*natom,zhpev1,zhpev2,ier)
+
+ ABI_DEALLOCATE(matrx)
+ ABI_DEALLOCATE(zhpev1)
+ ABI_DEALLOCATE(zhpev2)
+
+!Check the orthonormality of the eigenvectors
+!do imode=1,3*natom
+!  do jmode=imode,3*natom
+!    indexi=2*3*natom*(imode-1)
+!    indexj=2*3*natom*(jmode-1)
+!    sc_prod=sum(eigvec(indexi+1:indexi+6*natom)*eigvec(indexj+1:indexj+6*natom))
+!    write(std_out,'(a,2i4,a,es16.6)')' imode,jmode=',imode,jmode,' real scalar product =',sc_prod
+!  enddo
+!enddo
+
+!***********************************************************************
+
+!Get the phonon frequencies (negative by convention, if
+!the eigenvalue of the dynamical matrix is negative)
+ do imode=1,3*natom
+   if(eigval(imode)>=1.0d-16)then
+     phfrq(imode)=sqrt(eigval(imode))
+   else if(eigval(imode)>=-1.0d-16)then
+     phfrq(imode)=zero
+   else
+     phfrq(imode)=-sqrt(-eigval(imode))
+   end if
+ end do
+
+!Fix the phase of the eigenvectors
+ call fxphas_seq(eigvec,dum,0,0,1,3*natom*3*natom,0,3*natom,3*natom,0)
+
+!Normalise the eigenvectors
+ do imode=1,3*natom
+   norm=zero
+   do idir1=1,3
+     do ipert1=1,natom
+       i1=idir1+(ipert1-1)*3
+       index=i1+3*natom*(imode-1)
+       norm=norm+eigvec(2*index-1)**2+eigvec(2*index)**2
+     end do
+   end do
+   norm=sqrt(norm)
+   do idir1=1,3
+     do ipert1=1,natom
+       i1=idir1+(ipert1-1)*3
+       index=i1+3*natom*(imode-1)
+       eigvec(2*index-1)=eigvec(2*index-1)/norm
+       eigvec(2*index)=eigvec(2*index)/norm
+     end do
+   end do
+ end do
+
+!Get the phonon displacements
+ do imode=1,3*natom
+   do idir1=1,3
+     do ipert1=1,natom
+       i1=idir1+(ipert1-1)*3
+       index=i1+3*natom*(imode-1)
+       displ(2*index-1)=eigvec(2*index-1) / sqrt(amu(typat(ipert1))*amu_emass)
+       displ(2*index  )=eigvec(2*index  ) / sqrt(amu(typat(ipert1))*amu_emass)
+     end do
+   end do
+ end do
+
+!DEBUG
+!  write(std_out,'(a)')' Phonon eigenvectors and displacements '
+!  do imode=1,3*natom
+!    indexi=2*3*natom*(imode-1)
+!   write(std_out,'(a,i4,a,12es16.6)')' imode=',imode,' eigvec(1:6*natom)=',eigvec(indexi+1:indexi+6*natom)
+!    write(std_out,'(a,i4,a,12es16.6)')' imode=',imode,' displ(1:6*natom)=',displ(indexi+1:indexi+6*natom)
+!  enddo
+!ENDDEBUG
+
+!Check the orthonormality of the eigenvectors
+!do imode=1,3*natom
+!  do jmode=imode,3*natom
+!    indexi=2*3*natom*(imode-1)
+!    indexj=2*3*natom*(jmode-1)
+!    sc_prod=sum(eigvec(indexi+1:indexi+6*natom)*eigvec(indexj+1:indexj+6*natom))
+!    write(std_out,'(a,2i4,a,es16.6)')' imode,jmode=',imode,jmode,' real scalar product =',sc_prod
+!  enddo
+!enddo
+
+end subroutine dfpt_phfrq
+!!***
+
+!!****f* m_dynmat/ftgam
+!!
+!! NAME
 !! ftgam
 !!
 !! FUNCTION
@@ -5112,8 +5286,8 @@ subroutine ftgam (wghatm,gam_qpt,gam_rpt,natom,nqpt,nrpt,qtor,coskr, sinkr)
 
 ! *********************************************************************
 
- select case (qtor) 
-!  
+ select case (qtor)
+!
    case (1)  !Recip to real space
      gam_rpt(:,:,:) = zero
      do irpt=1,nrpt
@@ -5133,7 +5307,7 @@ subroutine ftgam (wghatm,gam_qpt,gam_rpt,natom,nqpt,nrpt,qtor,coskr, sinkr)
        end do
      end do
      gam_rpt = gam_rpt/nqpt
-!    
+!
    case (0) ! Recip space from real space
 
      gam_qpt(:,:,:)=zero
@@ -5179,7 +5353,7 @@ subroutine ftgam (wghatm,gam_qpt,gam_rpt,natom,nqpt,nrpt,qtor,coskr, sinkr)
 end subroutine ftgam
 !!***
 
-!!****f* ABINIT/ftgam_init
+!!****f* m_dynmat/ftgam_init
 !!
 !! NAME
 !! ftgam_init
@@ -5197,7 +5371,7 @@ end subroutine ftgam
 !!           if qtor=0 these vectors are read in the input file
 !!
 !! OUTPUT
-!! coskr, sinkr = cosine and sine of phase factors for given r and q points 
+!! coskr, sinkr = cosine and sine of phase factors for given r and q points
 !!
 !! PARENTS
 !!      elphon,get_tau_k,integrate_gamma_alt,m_phgamma,mka2f,mka2f_tr

@@ -1221,7 +1221,7 @@ end function cdp2rdp_1D
 !!  cdp2rdp_2D
 !!
 !! FUNCTION
-!! 
+!!
 !! INPUTS
 !!
 !! OUTPUT
