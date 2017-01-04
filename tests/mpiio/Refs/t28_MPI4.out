@@ -130,6 +130,7 @@ P           mkmem2          4
         pawspnorb           1
            prtdos           3
            prtpot           1
+         prtvclmb           1
            prtvha           1
           prtvhxc           1
           prtvpsp           1
@@ -268,6 +269,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      79.500      79.495
   sigma(2 2)=  5.31051120E-01  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.31051120E-01  sigma(2 1)=  0.00000000E+00
 
+ io1dm : about to open file t28_MPI4o_DS1_VCLMB_1DM
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Note:      this is a rough approximation of local magnetic moments
@@ -882,6 +884,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      79.500      79.495
   sigma(2 2)=  5.31049446E-01  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.31049446E-01  sigma(2 1)=  0.00000000E+00
 
+ io1dm : about to open file t28_MPI4o_DS2_VCLMB_1DM
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Note:      this is a rough approximation of local magnetic moments
@@ -1513,6 +1516,7 @@ P           mkmem2          4
         pawspnorb           1
            prtdos           3
            prtpot           1
+         prtvclmb           1
            prtvha           1
           prtvhxc           1
           prtvpsp           1

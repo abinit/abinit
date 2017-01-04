@@ -19,7 +19,7 @@ prtvxc 1
 prtnabla 1
 #prtefg 1
 prtvpsp 1
-#prtvclmb 1   # Buggy if MPI-FFT
+prtvclmb 1
 prtfc 1
 #prtkden 1
 #prtelf 1
