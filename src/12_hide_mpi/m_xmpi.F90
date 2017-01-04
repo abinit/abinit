@@ -740,6 +740,11 @@ subroutine xmpi_end()
  call MPI_FINALIZE(mpierr)
 #endif
 
+#ifndef FC_IBM
+ ! IBM8 returns 260. 320 ...
+ call sys_exit(0)
+#endif
+
 end subroutine xmpi_end
 !!***
 
@@ -2662,7 +2667,7 @@ pure function xmpi_distrib_with_replicas(itask,ntasks,rank,nprocs) result(bool)
 
 ! *************************************************************************
 
- ! If the number of processors is less than ntasks, we have max one task per processor, 
+ ! If the number of processors is less than ntasks, we have max one task per processor,
  ! else we replicate the tasks inside a pool of max size mnp_pool
  if (nprocs <= ntasks) then
    bool = (MODULO(itask-1, nprocs)==rank)
@@ -4240,7 +4245,7 @@ subroutine xmpio_write_frmarkers(fh,offset,sc_mode,nfrec,bsize_frecord,ierr)
    block_displ(jj+1)     = displ + bsize_frm + bsize_frecord(irec)
    jj=jj+2
    displ = displ + bsize_frecord(irec) + 2*bsize_frm ! Move to the beginning of the next column.
-   if (xmpio_max_address(displ)) then ! Check for wraparound. 
+   if (xmpio_max_address(displ)) then ! Check for wraparound.
       ierr = -1; return
    end if
  end do
