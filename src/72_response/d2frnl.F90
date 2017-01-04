@@ -111,7 +111,6 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use m_errors
  use m_cgtools
  use m_nctk
- use m_wffile
  use m_hamiltonian
  use m_efmas_defs
  use m_wfk
@@ -130,7 +129,6 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get,&
 &                       pawcprj_copy, pawcprj_free
  use m_pawdij,   only : pawdijfr
- use m_nonlop
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -141,7 +139,6 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_56_recipspace
- use interfaces_62_iowfdenpot
  use interfaces_65_paw
  use interfaces_66_nonlocal
 !End of the abilint section
@@ -189,10 +186,10 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  integer :: bdtot_index,bufdim,choice_bec2,choice_bec54,choice_efmas,choice_phon,choice_strs,choice_piez3,choice_piez55
  integer :: cplex,cplx,cpopt,cpopt_bec,ddkcase
  integer :: dimffnl,dimffnl_str,dimnhat,ia,iatom,iashift,iband,jband,ibg,icg,icplx,ideg,ider,idir
- integer :: ider_str,idir_ffnl,idir_str,ielt,ieltx,ierr,ii,ikg,ikpt,ikpt_,ilm,ipw
+ integer :: ider_str,idir_ffnl,idir_str,ielt,ieltx,ierr,ii,ikg,ikpt,ilm,ipw
  integer :: ispinor,isppol,istwf_k,isub,itypat,jj,jsub,klmn,master,me,mu
- integer :: my_comm_atom,n1,n2,n3,nband_,nband_k,ncpgr,nfftot,nskip,ngrhoij,nkpg,nnlout_bec1,nnlout_bec2,nnlout_efmas
- integer :: nnlout_piez1,nnlout_piez2,nnlout_phon,nnlout_strs,npw_,npw_k,nsp,nspinor_,nsploop,nu
+ integer :: my_comm_atom,n1,n2,n3,nband_k,ncpgr,nfftot,ngrhoij,nkpg,nnlout_bec1,nnlout_bec2,nnlout_efmas
+ integer :: nnlout_piez1,nnlout_piez2,nnlout_phon,nnlout_strs,npw_,npw_k,nsp,nsploop,nu
  integer :: optgr,optgr2,option,option_rhoij,optstr,optstr2,paw_opt,paw_opt_1,paw_opt_3,paw_opt_efmas
  integer :: shift_rhoij,signs,signs_field,spaceworld,sz2,sz3,tim_nonlop
  real(dp) :: arg,eig_k,enl,enlk,occ_k,ucvol,wtk_k
@@ -200,7 +197,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  character(len=500) :: msg
  type(gs_hamiltonian_type) :: gs_ham
 !arrays
- integer :: ik_ddk(3),ddkfil(3),ikpt_fbz(3),ikpt_fbz_previous(3),skipddk(3)
+ integer :: ik_ddk(3),ddkfil(3)
  integer,allocatable :: dimlmn(:),kg_k(:,:),l_size_atm(:)
  integer,pointer :: my_atmtab(:)
  real(dp) :: dotprod(2),dummy(0),gmet(3,3),gprimd(3,3),grhoij(3),kpoint(3),nonlop_dum(1,1)
@@ -218,14 +215,11 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  type(pawcprj_type),allocatable,target :: cwaveprj(:,:)
  type(pawfgrtab_type),allocatable :: pawfgrtab_tmp(:)
  type(pawrhoij_type),pointer :: pawrhoij_tot(:)
- type(wffile_type) :: wffddk(3)
  type(wfk_t) :: ddkfiles(3)
 
 ! *************************************************************************
 
  DBG_ENTER("COLL")
-
- ABI_UNUSED((/ikpt_, nband_, nspinor_, wffddk%unwff/))
 
  call timab(159,1,tsec)
 
@@ -451,22 +445,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        write(msg, '(a,a)') '-open ddk wf file :',trim(fiwfddk(ii))
        call wrtout(std_out,msg,'COLL')
        call wrtout(ab_out,msg,'COLL')
-#ifndef DEV_MG_WFK
-       call WffOpen(dtset%iomode,spaceworld,fiwfddk(ii),ierr,wffddk(ii),master,me,ddkfil(ii))
-     end if
-   end do
- end if
-
-!Prepare DDK files for reading
- skipddk(:)=0;ikpt_fbz(1:3)=0;ikpt_fbz_previous(1:3)=0
- if (need_becfr.or.need_piezofr) then
-   do ii=1,3 ! Loop over elect. field directions
-     if (ddkfil(ii)/=0) then
-       call clsopn(wffddk(ii))
-       call hdr_skip(wffddk(ii),ierr)
-#else
        call wfk_open_read(ddkfiles(ii),fiwfddk(ii),formeig1,dtset%iomode,ddkfil(ii),spaceworld)
-#endif
      end if
    end do
  end if
@@ -479,21 +458,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
 !  Rewind (k+G) data if needed
-   ikg=0;ikg=0;ikpt_fbz(1:3)=0
-
-#ifndef DEV_MG_WFK
-!  DDK files: skip the remaining isppol=1 records
-   if (isppol==2.and.(need_becfr.or.need_piezofr)) then
-     do ii=1,3 ! Loop over elect. field directions
-       if (ddkfil(ii)/=0.and.(skipddk(ii)<dtset%nkpt)) then
-         do ikpt=1,(dtset%nkpt-skipddk(ii))
-           call WffReadNpwRec(ierr,ikpt,isppol,nband_,npw_,nspinor_,wffddk(ii))
-           call WffReadSkipRec(ierr,1+2*nband_,wffddk(ii))
-         end do
-       end if
-     end do
-   end if
-#endif
+   ikg=0
 
 !  Loop over k points
    do ikpt=1,dtset%nkpt
@@ -513,26 +478,10 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      if (need_becfr.or.need_piezofr) then
        do ii=1,3 ! Loop over elect. field directions
          if (ddkfil(ii)/=0)then
-!        Skip records in ddk file
-           ikpt_fbz_previous(ii)=ikpt_fbz(ii)
-           ikpt_fbz(ii)=ikpt
 !        Number of k points to skip in the full set of k pointsp
-           nskip=ikpt_fbz(ii)-ikpt_fbz_previous(ii)-1
-           skipddk(ii)=skipddk(ii)+nskip+1
-#ifndef DEV_MG_WFK
-           if (nskip/=0) then
-             do ikpt_=1+ikpt_fbz_previous(ii),ikpt_fbz(ii)-1
-               call WffReadSkipK(1,0,ikpt_,isppol,mpi_enreg,wffddk(ii))
-             end do
-           end if
-!          Begin to read current record (k+G)
-           call WffReadNpwRec(ierr,ikpt,isppol,nband_,npw_,nspinor_,wffddk(ii))
-           call WffReadSkipRec(ierr,1,wffddk(ii))
-#else
            ik_ddk(ii) = wfk_findk(ddkfiles(ii), kpoint)
            ABI_CHECK(ik_ddk(ii) /= -1, "Cannot find k-point in DDK")
            npw_ = ddkfiles(ii)%hdr%npwarr(ik_ddk(ii))
-#endif
            if (npw_/=npw_k) then
              write(unit=msg,fmt='(a,i3,a,i5,a,i3,a,a,i5,a,a,i5)')&
 &             'For isppol = ',isppol,', ikpt = ',ikpt,' and idir = ',ii,ch10,&
@@ -666,16 +615,6 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      do iband=1,nband_k
 
        if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me)) then
-#ifndef DEV_MG_WFK
-         if (need_becfr.or.need_piezofr) then
-           do ii=1,3
-             if (ddkfil(ii)/=0) then
-!              Skip band if not to be treated by this proc
-               call WffReadSkipRec(ierr,2,wffddk(ii))
-             end if
-           end do
-         end if
-#endif
          cycle
        end if
 
@@ -733,12 +672,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !            Read ddk wave function
            ABI_ALLOCATE(ddk,(2,npw_k*dtset%nspinor))
            if (ddkfil(ii)/=0) then
-#ifndef DEV_MG_WFK
-             call WffReadSkipRec(ierr,1,wffddk(ii))
-             call WffReadDataRec(ddk,ierr,2,npw_k*dtset%nspinor,wffddk(ii))
-#else
              call wfk_read_bks(ddkfiles(ii), iband, ik_ddk(ii), isppol, xmpio_single, cg_bks=ddk)
-#endif
 !            Multiply ddk by +i
              do jj=1,npw_k*dtset%nspinor
                arg=ddk(1,jj)
@@ -823,8 +757,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
                1,nnlout_efmas,paw_opt_efmas,signs,gs2c,tim_nonlop,cwavef,gh2c)
                do ispinor=1,dtset%nspinor
                  do icplx=1,2
-                   gh2c(icplx,1+(ispinor-1)*npw_k:ispinor*npw_k) = gh2c(icplx,1+(ispinor-1)*npw_k:ispinor*npw_k) +  & 
-&                   ddkinpw(1:npw_k,mu,nu)*cwavef(icplx,1+(ispinor-1)*npw_k:ispinor*npw_k) 
+                   gh2c(icplx,1+(ispinor-1)*npw_k:ispinor*npw_k) = gh2c(icplx,1+(ispinor-1)*npw_k:ispinor*npw_k) +  &
+&                   ddkinpw(1:npw_k,mu,nu)*cwavef(icplx,1+(ispinor-1)*npw_k:ispinor*npw_k)
                  end do
                end do
                gh2c = gh2c - eig_k*gs2c
@@ -1101,19 +1035,9 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  end if
 
 !Close the ddk files
-#ifndef DEV_MG_WFK
- if (need_becfr.or.need_piezofr) then
-   do ii=1,3
-     if (ddkfil(ii)/=0)then
-       call WffClose(wffddk(ii),ierr)
-     end if
-   end do
- end if
-#else
  do ii=1,3
    call wfk_close(ddkfiles(ii))
  end do
-#endif
 
 !Release now useless memory
  if (psps%usepaw==1) then

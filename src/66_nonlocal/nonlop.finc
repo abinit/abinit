@@ -304,7 +304,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  real(dp),intent(in) :: lambda(ndat)
  real(dp),intent(in),target,optional :: enl(:,:,:)
  real(dp),intent(inout),target :: vectin(:,:)
- real(dp),intent(out),target :: enlout(:),svectout(:,:)
+ real(dp),intent(out),target :: enlout(nnlout*ndat),svectout(:,:)
  real(dp),intent(inout),target :: vectout(:,:)
  type(pawcprj_type),intent(inout),target :: cprjin(:,:)
 

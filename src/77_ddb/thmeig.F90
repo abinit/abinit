@@ -51,7 +51,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  use m_sort
 
  use m_io_tools,       only : open_file
- use m_dynmat,         only : asria_corr
+ use m_dynmat,         only : asria_corr, dfpt_phfrq
  use m_anaddb_dataset, only : anaddb_dataset_type
  use m_pawtab,         only : pawtab_type,pawtab_nullify,pawtab_free
 
@@ -63,7 +63,6 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_56_recipspace
- use interfaces_72_response
 !End of the abilint section
 
  implicit none
@@ -71,7 +70,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mpert,msize,ntemper,telphint,thmflag,comm
- real(dp),intent(in) :: g2fsmear,temperinc,tempermin 
+ real(dp),intent(in) :: g2fsmear,temperinc,tempermin
  character(len=*),intent(in) :: filnam
  real(dp),intent(out) :: ucvol !new
  integer,intent(in) :: ddbun,dimekb,iout,lmnmax,msym
@@ -192,7 +191,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
  ABI_ALLOCATE(eigvec,(2,3,natom,3*natom))
  ABI_ALLOCATE(phfreq,(3*natom,ddb%nblok))
 
-!Open Derivative DataBase then r/w Derivative DataBase preliminary information.    
+!Open Derivative DataBase then r/w Derivative DataBase preliminary information.
 
  write(std_out, '(a)' )  '- thmeig: Initialize the second-order electron-phonon file with name :'
  write(std_out, '(a,a)' )'-         ',trim(filnam5)
@@ -281,7 +280,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 !    write(std_out,*)'-thmeig : iblok2,ddb_eig2%typ(iblok2)=',iblok2,ddb_eig2%typ(iblok2)
 !    call flush(6)
 !    ENDDEBUG
-     
+
      qnrm = ddb_eig2%qpt(1,iblok2)*ddb_eig2%qpt(1,iblok2)+ &
 &     ddb_eig2%qpt(2,iblok2)*ddb_eig2%qpt(2,iblok2)+ &
 &     ddb_eig2%qpt(3,iblok2)*ddb_eig2%qpt(3,iblok2)
@@ -375,7 +374,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 !  ----NEW CODING
 !  Prepare to compute the q-point grid in the ZB or IZB
    iscf_fake=5 ! Need the weights
-   chksymbreak=0 
+   chksymbreak=0
    vacuum=0
    shiftq(:,1:nqshft)=anaddb_dtset%q1shft(:,1:nqshft)
 !  Compute the final number of q points
@@ -436,7 +435,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
    ABI_DEALLOCATE(symafm_new)
    ABI_DEALLOCATE(symrel_new)
    ABI_DEALLOCATE(tnons_new)
-   
+
  end if
 
  write(message,'(a,a)')ch10,' thmeig : list of q wavevectors, with integration weights '
@@ -509,11 +508,12 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
    !write (100,*) d2cart(:,1:msize)
 
 !  Eventually impose the acoustic sum rule based on previously calculated d2asr
+   !call asrq0_apply(asrq0, natom, mpert, msize, crystal%xcart, d2cart)
    if (anaddb_dtset%asr==1 .or. anaddb_dtset%asr==2 .or. anaddb_dtset%asr==5) then
      call asria_corr(anaddb_dtset%asr,d2asr,d2cart,mpert,natom)
    end if
 
-!  DEBUG 
+!  DEBUG
 !  do ii=1,msize
 !  write(std_out,*)' thmeig : d2cart(:,ii)=',d2cart(:,ii)
 !  enddo
@@ -551,7 +551,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 
 !  Usually, the q points come in the right order. However, this is not always the case...
    if(found==0)then
-     
+
 !    If the EIG2 database file has to be read again, close it, then search for the right q point,
 !    from the beginning of the file
      close(ddbun)
@@ -570,10 +570,10 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 &     nblok2,ntypat,nunit,pawtab,pspso,usepaw,useylm,vrsddb)
 
 !    And examine again the EIG2 file. Still, not beyond the previously examined value.
-     found=0 
+     found=0
      do iqpt2=1,iqpt2_previous
        call read_blok8(ddb_eig2,iqpt2,mband,mpert_eig2,msize2,&
-&       nkpt,nunit,blkval2(:,:,:,:),kpnt(:,:,1)) 
+&       nkpt,nunit,blkval2(:,:,:,:),kpnt(:,:,1))
        diff_qpt(:)=ddb_eig2%qpt(1:3,iqpt2)/ddb_eig2%nrm(1,iqpt2)-spqpt(:,iqpt)
        if(diff_qpt(1)**2+diff_qpt(2)**2+diff_qpt(3)**2 < DDB_QTOL )then
          found=1
@@ -611,7 +611,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
            else
              factr=one/sqrt(amu(typat(iatom1))*amu(typat(iatom2)))/phfreq(imod,iqpt)/amu_emass
            end if
-           
+
            do idir2=1,3
              index = idir1 + 3*((iatom1 - 1) + natom * ((idir2-1)+3*(iatom2-1)))
 
@@ -630,7 +630,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 &             eigvec(2,idir1,iatom2,imod)*eigvec(2,idir2,iatom2,imod)
              vec2i = eigvec(2,idir1,iatom2,imod)*eigvec(1,idir2,iatom2,imod)-&
 &             eigvec(1,idir1,iatom2,imod)*eigvec(2,idir2,iatom2,imod)
-             
+
 !            Compute factor for DW term
              if(phfreq(imod,iqpt)<tol6)then
                fact2r = zero
@@ -666,12 +666,12 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
        end do !idir1
      end do !iatom1
 !    Eigenvalue derivative or broadening
-     if(thmflag==3 .or. thmflag==5 .or. thmflag==7) then  
+     if(thmflag==3 .or. thmflag==5 .or. thmflag==7) then
        dednr(1:mband,1:nkpt,imod,iqpt) = deigr(1:mband,1:nkpt) + dwtermr(1:mband,1:nkpt)
        dedni(1:mband,1:nkpt,imod,iqpt) = deigi(1:mband,1:nkpt) + dwtermi(1:mband,1:nkpt)
      else if(thmflag==4 .or. thmflag==6 .or. thmflag==8) then
-       dednr(1:mband,1:nkpt,imod,iqpt) = pi*deigr(1:mband,1:nkpt) 
-       dedni(1:mband,1:nkpt,imod,iqpt) = pi*deigi(1:mband,1:nkpt) 
+       dednr(1:mband,1:nkpt,imod,iqpt) = pi*deigr(1:mband,1:nkpt)
+       dedni(1:mband,1:nkpt,imod,iqpt) = pi*deigi(1:mband,1:nkpt)
      end if
 
    end do ! imod
@@ -688,7 +688,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 
 
 !=============================================================================
-!3) Evaluation of the Eliashberg type spectral function 
+!3) Evaluation of the Eliashberg type spectral function
 !and phonon DOS via gaussian broadning
 !=============================================================================
 
@@ -711,11 +711,11 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
    write(std_out,'(a,es13.6)') 'omega_min :', omega_min
    write(std_out,'(a,es13.6)') 'omega_max :', omega_max
    write(std_out,'(a,i8)') 'ng2f :', ng2f
-   
-   omega_max = omega_max + 0.1 * omega_max
-   domega = (omega_max-omega_min)/(ng2f-one)   
 
-   gaussprefactor = sqrt(piinv) / g2fsmear    
+   omega_max = omega_max + 0.1 * omega_max
+   domega = (omega_max-omega_min)/(ng2f-one)
+
+   gaussprefactor = sqrt(piinv) / g2fsmear
    gaussfactor = one / g2fsmear
 
    g2f(:,:,:) = zero
@@ -723,7 +723,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 
    do iqpt=1,nqpt
      do imod=1,3*natom
-       omega = omega_min     
+       omega = omega_min
        tmpg2f(:,:,:) = zero
        tmpphondos(:) = zero
        do iomega=1,ng2f
@@ -741,7 +741,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
    end do !iqpt
 
    dos_phon(:) = dos_phon(:) / nqpt
-   
+
 !  output the g2f
    unit_g2f = 108
    call outg2f(domega,omega_min,omega_max,filnam,g2f,g2fsmear,kpnt,mband,ng2f,nkpt,nqpt,1,telphint,unit_g2f)
@@ -750,17 +750,17 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
    unit_phdos = 108
    call outphdos(domega,dos_phon,omega_min,omega_max,filnam,g2fsmear,ng2f,nqpt,1,telphint,unit_g2f)
 
-   
+
    ABI_DEALLOCATE(dos_phon)
    ABI_DEALLOCATE(g2f)
    ABI_DEALLOCATE(tmpg2f)
    ABI_DEALLOCATE(tmpphondos)
-   
+
  end if !telphint
 
 !=======================================================================
 !4) Evaluation of the Eliashberg type spectral function
-!and phonon DOS via improved tetrahedron method 
+!and phonon DOS via improved tetrahedron method
 !=======================================================================
 
  if(telphint==0)then
@@ -796,7 +796,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
            ilatt = 1
            qlatt(:,:) = mesh(:,:)
            exit
-         end if            
+         end if
        end do
        if(ilatt==1) exit
      end do
@@ -816,7 +816,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
    if(invdet < 0) then
      tempqlatt(:) = qlatt(:,2)
      qlatt(:,2) = qlatt(:,1)
-     qlatt(:,1) = tempqlatt(:)    
+     qlatt(:,1) = tempqlatt(:)
    end if
 
    write(std_out,*) 'qlatt',qlatt
@@ -829,7 +829,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
    call init_tetra(indqpt,gprimd,qlatt,qpt_full,nqpt,&
 &   tetrahedra, ierr, errstr)
    ABI_CHECK(ierr==0,errstr)
-   
+
    rcvol = abs (gprimd(1,1)*(gprimd(2,2)*gprimd(3,3)-gprimd(3,2)*gprimd(2,3)) &
 &   -gprimd(2,1)*(gprimd(1,2)*gprimd(3,3)-gprimd(3,2)*gprimd(1,3)) &
 &   +gprimd(3,1)*(gprimd(1,2)*gprimd(2,3)-gprimd(2,2)*gprimd(1,3)))
@@ -840,8 +840,8 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 !  Non-analyticity must be taken out and treated separatly.
 
    nene = 100     !nene=number of energies for DOS
-   enemin = minval(phfreq) 
-   enemax = maxval(phfreq) 
+   enemin = minval(phfreq)
+   enemax = maxval(phfreq)
    deltaene = (enemax-enemin)/dble(nene-1)
 !  redefine enemin enemax to be at rounded multiples of deltaene
 !  enemin = elph_ds%fermie - dble(ifermi)*deltaene
@@ -851,7 +851,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
    ABI_ALLOCATE(dtweightde,(nqpt,nene))
    ABI_ALLOCATE(intweight,(3*natom,nqpt,nene))
    ABI_ALLOCATE(indtweightde,(3*natom,nqpt,nene))
-   
+
    do iband=1,3*natom
      eigen_in(:) = phfreq(iband,:)
 
@@ -862,9 +862,9 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 
      intweight(iband,:,:) = tweight(:,:)
      indtweightde(iband,:,:) = dtweightde(:,:)
-     
+
    end do !iband
-   
+
 !  intdtweightse(nband,nqpt,nene) represents the weight in each energy bin for every kpt and every band
 !  So phonon DOS is calculated (neglecting the non-analyticity contribution for now !!!)
 
@@ -912,13 +912,13 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 !5) direct evaluation of thermal corrections
 !=======================================================================
 
-!open TBS file 
+!open TBS file
  outfile = trim(filnam)//"_TBS"
  if (open_file(outfile,message,newunit=unitout,form='formatted',status='unknown') /= 0) then
    MSG_ERROR(message)
  end if
  write(unitout,'(a)')'thmeig: Thermal Eigenvalue corrections (eV)'
- 
+
  slope(:,:,:) = zero
  zeropoint(:,:,:) = zero
 !Loop on temperatures
@@ -930,12 +930,12 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
    do iqpt=1,nqpt
      do imod=1,3*natom
 
-!      Bose-Einstein distribution 
+!      Bose-Einstein distribution
 ! jmb overflow with exp(). So, select bosein to be still significant wrt half
        if(phfreq(imod,iqpt)<tol6 .or. (phfreq(imod,iqpt)/(kb_HaK*tmp)) > -log(tol16))then
          bosein = zero
        else
-         bosein = one/(exp(phfreq(imod,iqpt)/(kb_HaK*tmp))-one) 
+         bosein = one/(exp(phfreq(imod,iqpt)/(kb_HaK*tmp))-one)
        end if
 
 !      Calculate total
@@ -945,8 +945,8 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
        if(itemper==1)then
 !        Calculate slope of linear regime
          if(phfreq(imod,iqpt)<tol6)then
-           slope(1,1:mband,1:nkpt) = slope(1,1:mband,1:nkpt) 
-           slope(2,1:mband,1:nkpt) = slope(2,1:mband,1:nkpt) 
+           slope(1,1:mband,1:nkpt) = slope(1,1:mband,1:nkpt)
+           slope(2,1:mband,1:nkpt) = slope(2,1:mband,1:nkpt)
          else
            slope(1,1:mband,1:nkpt) = slope(1,1:mband,1:nkpt) + dednr(1:mband,1:nkpt,imod,iqpt)*(kb_HaK/phfreq(imod,iqpt))
            slope(2,1:mband,1:nkpt) = slope(2,1:mband,1:nkpt) + dedni(1:mband,1:nkpt,imod,iqpt)*(kb_HaK/phfreq(imod,iqpt))
@@ -984,10 +984,10 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
      end do
    end do
  end do !itemper
- 
+
  close(unitout)
 
-!Write temperature-independent results to the main output file 
+!Write temperature-independent results to the main output file
  write(iout,'(a)')' '
  write(iout,'(80a)') ('-',ii=1,80)
  write(iout,'(a)')' '
@@ -1154,7 +1154,7 @@ subroutine outphdos(deltaene,dos_phon,enemin,enemax,filnam,g2fsmear,nene,nqpt,nt
      write (unit_phdos, '(i10,es18.6,es18.6)')iomega, omega, dos_effective
      omega=omega+deltaene
    end do
-   
+
    close (unit=unit_phdos)
 
  end subroutine outphdos

@@ -19,9 +19,12 @@
 !! blkval(2,3,mpert,3,mpert,nblok)=
 !!   second derivatives of total energy with respect to electric fields
 !!   atom displacements,strain,...... all in cartesian coordinates
+!! crystal<crystal_t>=Crystalline structure info.
+!! asrq0<asrq0_t>=Object for the treatment of the ASR based on the q=0 block found in the DDB file.
 !! iblok= bolk number in DDB file
 !! iout=out file number
 !! mpert=maximum number of ipert
+!! msize=Maximum size of dynamical matrices and other perturbations (ddk, dde...)
 !! natom=number of atoms in unit cell
 !! nblok=number of total bloks in DDB file
 !!
@@ -48,11 +51,13 @@
 #include "abi_common.h"
 
 
-subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblok)
+subroutine ddb_internalstr(asr,crystal,blkval,asrq0,d2asr,iblok,instrain,iout,mpert,msize,natom,nblok)
 
  use defs_basis
  use m_profiling_abi
  use m_errors
+ use m_crystal
+ use m_ddb
 
  use m_dynmat,       only : asria_corr
 
@@ -67,7 +72,9 @@ subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblo
 
 !Arguments----------------------------------------------
 !scalars
- integer,intent(in) :: asr,iblok,iout,mpert,natom,nblok
+ integer,intent(in) :: asr,iblok,iout,mpert,msize,natom,nblok
+ type(crystal_t),intent(in) :: crystal
+ type(asrq0_t),intent(inout) :: asrq0
 !arrays
  real(dp),intent(in) :: d2asr(2,3,natom,3,natom)
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
@@ -154,7 +161,7 @@ subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblo
 
  write(message,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
 & 'strainyy','strainzz','strainyz','strainxz','strainxy'
- call wrtout(std_out,message,'COLL') 
+ call wrtout(std_out,message,'COLL')
  do ii1=1,3*natom
    if(mod(ii1,3)==1)then
      direction='x'
@@ -211,6 +218,7 @@ subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblo
 !Eventually impose the acoustic sum rule
 !FIXME: this might depend on ifcflag: impose that it is 0 or generalize
  call asria_corr(asr,d2asr,d2cart,natom,natom)
+ !call asrq0_apply(asrq0, natom, mpert, msize, crystal%xcart, d2cart)
  kmatrix = d2cart(1,:,:)
  Apmatr(:,:)=kmatrix(:,:)
 
@@ -223,7 +231,7 @@ subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblo
 !end do
 !end do
 !ENDDEBUG
- 
+
  Nmatr(:,:)=0.0_dp
  do ivarA=1,3*natom
    do ivarB=1,3*natom
@@ -445,11 +453,11 @@ subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblo
  write(message,'(a,a,a,a)')ch10,&
 & ' Displacement-response internal strain ', 'tensor (Unit:Bohr)',ch10
  call wrtout(std_out,message,'COLL')
- call wrtout(iout,message,'COLL') 
+ call wrtout(iout,message,'COLL')
  write(message,'(a5,a4,a11,a12,a12,a12,a12,a12)')' Atom',' dir','strainxx',&
 & 'strainyy','strainzz','strainyz','strainxz','strainxy'
  call wrtout(std_out,message,'COLL')
- call wrtout(iout,message,'COLL')  
+ call wrtout(iout,message,'COLL')
  do ivarA=1,3*natom
    if(mod(ivarA,3)==1)then
      direction='x'
@@ -463,7 +471,7 @@ subroutine ddb_internalstr(asr,blkval,d2asr,iblok,instrain,iout,mpert,natom,nblo
 &   instrain_dis(3,ivarA),instrain_dis(4,ivarA),instrain_dis(5,ivarA),&
 &   instrain_dis(6,ivarA)
    call wrtout(std_out,message,'COLL')
-   call wrtout(iout,message,'COLL')  
+   call wrtout(iout,message,'COLL')
  end do
 
 end subroutine ddb_internalstr

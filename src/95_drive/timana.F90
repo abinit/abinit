@@ -1614,7 +1614,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 #endif
            end if
            if(ncount(isort)/=0)then
-             if(times(2,isort)*wallnm>0.02d0 .and. ilist==1)then   ! Does not write a slot if the wall time ratio is below a threshold
+             if(times(2,isort)*wallnm>0.02d0 .or. ilist==1)then   ! Does not write a slot if the wall time ratio is below a threshold
                write(ount,format01040)names(isort),&
 &               times(1,isort),times(1,isort)*cpunm,&
 &               times(2,isort),times(2,isort)*wallnm,ncount(isort), &

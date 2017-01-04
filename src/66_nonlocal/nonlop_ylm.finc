@@ -318,24 +318,24 @@
  logical,optional,intent(in) :: hermdij
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
- integer,intent(in) :: atindx1(:),kgin(:,:)
- integer,intent(in),target :: indlmn(:,:,:)
- integer,intent(in) :: kgout(:,:),nattyp(:),ngfft(:),nloalg(:)
- real(dp),intent(in) :: enl(:,:,:)
- real(dp),intent(in),target :: ffnlin(:,:,:,:)
- real(dp),intent(in),target :: ffnlout(:,:,:,:)
- real(dp),intent(in) :: gprimd(:,:)
- real(dp),intent(in),target :: kpgin(:,:),kpgout(:,:)
- real(dp),intent(in) :: kptin(3),kptout(3),ph1d(:,:)
- real(dp),intent(in) :: phkxredin(:,:),phkxredout(:,:)
- real(dp),intent(in) :: sij(:,:)
- real(dp),intent(inout) :: ph3din(:,:,:),ph3dout(:,:,:)
- real(dp),intent(inout) :: vectin(:,:)
- real(dp),intent(out) :: enlout(:)
- real(dp),intent(out) :: svectout(:,:)
+ integer,intent(in) :: atindx1(natom),kgin(3,npwin)
+ integer,intent(in),target :: indlmn(6,lmnmax,ntypat)
+ integer,intent(in) :: kgout(3,npwout),nattyp(ntypat),ngfft(18),nloalg(3)
+ real(dp),intent(in) :: enl(dimenl1,dimenl2,nspinortot**2)
+ real(dp),intent(in),target :: ffnlin(npwin,dimffnlin,lmnmax,ntypat)
+ real(dp),intent(in),target :: ffnlout(npwout,dimffnlout,lmnmax,ntypat)
+ real(dp),intent(in) :: gprimd(3,3)
+ real(dp),intent(in),target :: kpgin(npwin,nkpgin),kpgout(npwout,nkpgout)
+ real(dp),intent(in) :: kptin(3),kptout(3),ph1d(2,3*(2*mgfft+1)*natom)
+ real(dp),intent(in) :: phkxredin(2,natom),phkxredout(2,natom)
+ real(dp),intent(in) :: sij(dimenl1,ntypat*((paw_opt+1)/3))
+ real(dp),intent(inout) :: ph3din(2,npwin,matblk),ph3dout(2,npwout,matblk)
+ real(dp),intent(inout) :: vectin(2,npwin*nspinor)
+ real(dp),intent(out) :: enlout(nnlout)
+ real(dp),intent(out) :: svectout(2,npwout*nspinor*(paw_opt/3))
  real(dp),intent(inout) :: vectout (2,npwout*nspinor)
- type(pawcprj_type),intent(inout) :: cprjin(:,:)
- type(pawcprj_type),optional,intent(in) :: cprjin_left(:,:)
+ type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5))
+ type(pawcprj_type),optional,intent(in) :: cprjin_left(natom,nspinor)
 
 !Local variables-------------------------------
 !scalars
@@ -714,7 +714,7 @@
                if (ndgxdt_stored==ndgxdt.or.(ndgxdt_stored>ndgxdt.and.choice==2)) then
                  dgxdt(1:2,1:ndgxdt,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,1+ishift:ndgxdt+ishift,1:nlmn)
                else if (signs==2.and.ndgxdt_stored==3) then
-                 if (choice==5) then ! ndgxdt=1
+                 if (choice==5.or.choice==51.or.choice==52) then ! ndgxdt=1
                    dgxdt(1:2,1,1:nlmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(1:2,idir,1:nlmn)
                  else if (choice==8) then ! ndgxdt=2
                    idir1=(idir-1)/3+1; idir2=mod((idir-1),3)+1
@@ -737,7 +737,7 @@
                      dgxdt(1,ii,ilmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(ic,ii+ishift,ilmn)
                    end do
                  else if (signs==2.and.ndgxdt_stored==3) then
-                   if (choice==5) then ! ndgxdt=1
+                   if (choice==5.or.choice==51.or.choice==52) then ! ndgxdt=1
                      dgxdt(1,1,ilmn,ia,ispinor)=cprjin(iatm+ia,ispinor)%dcp(cplex_dgxdt(1),idir,ilmn)
                    else if (choice==8) then ! ndgxdt=2
                      idir1=(idir-1)/3+1; idir2=mod((idir-1),3)+1

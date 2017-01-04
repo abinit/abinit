@@ -473,7 +473,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
      end if
 
      ABI_ALLOCATE(kg_k,(3,mpw))
-!!$OMP PARALLEL DO
+!$OMP PARALLEL DO
      do ipw=1,npw_k
        kg_k(:,ipw)=kg(:,ipw+ikg)
      end do
@@ -485,14 +485,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
        ABI_ALLOCATE(ylmgr_k,(0,0,0))
      end if
      if (psps%useylm==1) then
-!!$OMP PARALLEL DO COLLAPSE(2)
+!$OMP PARALLEL DO COLLAPSE(2)
        do ilm=1,mpsang*mpsang
          do ipw=1,npw_k
            ylm_k(ipw,ilm)=ylm(ipw+ikg,ilm)
          end do
        end do
        if (stress_needed==1) then
-!!$OMP PARALLEL DO COLLAPSE(2)
+!$OMP PARALLEL DO COLLAPSE(2)
          do ilm=1,mpsang*mpsang
            do ii=1,3
              do ipw=1,npw_k

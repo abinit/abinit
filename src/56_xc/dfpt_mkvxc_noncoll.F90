@@ -138,7 +138,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
 ! acts only on the electronic density (i.e., NOT on the magnetization density).
 ! Then, the corrections on vxc1(:,3:4) are ZERO.
 
-   dvdn=zero; dvdz=zero; dum=zero; fact=zero
+   dvdn=zero; dvdz=zero; dum=zero; fact=zero; vxc1(:,:)=zero
    if (option==0) then
      if (n3xccc==0) then
        vxc1(:,:)=zero
@@ -184,7 +184,6 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
        m_norm(ifft)=sqrt(rhor(ifft,2)**2+rhor(ifft,3)**2+rhor(ifft,4)**2)
        m_dot_m1=rhor(ifft,2)*rhor1(ifft,2)+rhor(ifft,3)*rhor1(ifft,3) &
 &       +rhor(ifft,4)*rhor1(ifft,4)
-
        if (optxc /= -1) then 
          if(m_norm(ifft)>m_norm_min)then
            rhor1_diag(ifft,2)=half*(rhor1_diag(ifft,1)+m_dot_m1/m_norm(ifft)) !rhor1_upup
@@ -219,6 +218,7 @@ subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat1,nhat1dim,
            vxc1(ifft,2)=dvdn-dum
            vxc1(ifft,3)= rhor(ifft,2)*fact
            vxc1(ifft,4)=-rhor(ifft,3)*fact
+!
          else
            vxc1(ifft,1:2)=dvdn
            vxc1(ifft,3:4)=zero

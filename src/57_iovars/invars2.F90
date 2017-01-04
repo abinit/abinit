@@ -473,6 +473,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf2_dkde',tread,'INT')
  if(tread==1) dtset%rf2_dkde=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rf2_pert1_dir',tread,'INT')
+ if(tread==1) dtset%rf2_pert1_dir(1:3)=intarr(1:3)
+
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rf2_pert2_dir',tread,'INT')
+ if(tread==1) dtset%rf2_pert2_dir(1:3)=intarr(1:3)
+
 !Set value of response to 1 and also set rfdir to 1 1 1 if we are doing
 !response calculation but rfdir was left at default 0 0 0 value.
 !For rf2_dkdk and rf2_dkde, we do the same for rf2_pert1_dir and rf2_pert2_dir
@@ -561,6 +567,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 &     'Action: change to the d3e_pertx_*** input parameters!'
      MSG_WARNING(message)
    end if
+
  end if
 
  response=0
@@ -1106,7 +1113,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    ABI_MALLOC(dtset%ph_qpath, (3, dtset%ph_nqpath))
    ABI_CHECK(3 * dtset%ph_nqpath <= marr, "3 * dtset%ph_nqpath > marr!")
    call intagm(dprarr,intarr,jdtset,marr,3*dtset%ph_nqpath,string(1:lenstr),'ph_qpath',tread,'DPR')
-   if (tread==0) then 
+   if (tread==0) then
      MSG_ERROR("When ph_nqpath > 0, ph_qpath should be specified")
    end if
    dtset%ph_qpath = reshape(dprarr(1:3*dtset%ph_nqpath), [3, dtset%ph_nqpath])
@@ -1121,7 +1128,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if (tread == 1) then
      ABI_CHECK(3 * dtset%ph_nqshift <= marr, "3 * dtset%ph_nqshift > marr!")
      call intagm(dprarr,intarr,jdtset,marr,3*dtset%ph_nqshift,string(1:lenstr),'ph_qshift',tread,'DPR')
-     if (tread == 0) then 
+     if (tread == 0) then
        MSG_ERROR("When ph_nqshift > 0, ph_qshift should be specified")
      end if
      dtset%ph_qshift = reshape(dprarr(1:3*dtset%ph_nqshift), [3, dtset%ph_nqshift])
@@ -1673,6 +1680,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if(tread==1) dtset%dmft_solv=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_t2g',tread,'INT')
    if(tread==1) dtset%dmft_t2g=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_tolfreq',tread,'DPR')
+   if(tread==1) dtset%dmft_tolfreq=dprarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_tollc',tread,'DPR')
    if(tread==1) dtset%dmft_tollc=dprarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftbandi',tread,'INT')
@@ -1737,6 +1746,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
        if(tread==1) dtset%dmftctqmc_mov    =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_order',tread,'INT')
        if(tread==1) dtset%dmftctqmc_order  =intarr(1)
+     end if
+     if(dtset%dmft_solv>=6.and.dtset%dmft_solv<=7) then
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_nleg',tread,'INT')
+       if(tread==1) dtset%dmftctqmc_triqs_nleg  =intarr(1)
      end if
    end if
  end if
@@ -2003,6 +2016,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtphdos',tread,'INT')
  if(tread==1) dtset%prtphdos=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtphsurf',tread,'INT')
+ if(tread==1) dtset%prtphsurf=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtposcar',tread,'INT')
  if(tread==1) dtset%prtposcar=intarr(1)

@@ -109,7 +109,8 @@ character(len=500) :: msg
  end if
 
  pos=INDEX(fname,"_") 
- read(fname(1:pos-1),*) seedname ! File name root
+ !read(fname(1:pos-1),*) seedname ! File name root
+ write(seedname,*) fname(1:pos-1) 
 !folds=(/1,2,3/)
 
  write(std_out,*) '         '//achar(27)//'[97m ***********************' !print program header in pearl white

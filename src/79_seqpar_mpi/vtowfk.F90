@@ -230,8 +230,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  !if (mpi_enreg%paral_kgb==1) then
    nblockbd=nband_k/(mpi_enreg%nproc_band*mpi_enreg%bandpp)
  !else
-   !nblockbd=nband_k/mpi_enreg%nproc_fft
-   !if (nband_k/=nblockbd*mpi_enreg%nproc_fft) nblockbd=nblockbd+1
+ !  nblockbd=nband_k/mpi_enreg%nproc_fft
+ !  if (nband_k/=nblockbd*mpi_enreg%nproc_fft) nblockbd=nblockbd+1
  !end if
  blocksize=nband_k/nblockbd
 
