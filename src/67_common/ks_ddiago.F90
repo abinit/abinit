@@ -258,11 +258,11 @@ subroutine ks_ddiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
 !
 !Initialize the Hamiltonian datatype on the coarse FFT mesh.
  if (PRESENT(Electronpositron)) then
-   call init_hamiltonian(gs_hamk,Psps,pawtab,nspinor,nspden,natom,typat,xred,nfftc,mgfftc,ngfftc,&
-&   rprimd,nloalg,usecprj=0,Electronpositron=Electronpositron)
+   call init_hamiltonian(gs_hamk,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,xred,nfftc,&
+&   mgfftc,ngfftc,rprimd,nloalg,paw_ij=Paw_ij,usecprj=0,Electronpositron=Electronpositron)
  else
-   call init_hamiltonian(gs_hamk,Psps,pawtab,nspinor,nspden,natom,typat,xred,nfftc,mgfftc,ngfftc,&
-&   rprimd,nloalg,usecprj=0)
+   call init_hamiltonian(gs_hamk,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,xred,nfftc,&
+&   mgfftc,ngfftc,rprimd,nloalg,paw_ij=Paw_ij,usecprj=0)
  end if
 
 !Check on the number of stored bands.
@@ -294,6 +294,7 @@ subroutine ks_ddiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
    call wrtout(std_out,msg,'COLL')
  end if
 !
+
 !* Set up local potential vlocal with proper dimensioning, from vtrial.
 !* Select spin component of interest if nspden<=2 as nvloc==1, for nspden==4, nvloc==4
 !* option=2: vtrial(n1*n2*n3,ispden) --> vlocal(nd1,nd2,nd3) real case

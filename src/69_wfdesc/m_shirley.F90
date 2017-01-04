@@ -2193,7 +2193,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
    ! ==== Loop over the interpolated k-points ====
    ! =============================================
 
-   call init_hamiltonian(Ham_k,Psps,Pawtab,nspinor,nspden,natom,&
+   call init_hamiltonian(Ham_k,Psps,Pawtab,nspinor,nsppol,nspden,natom,&
 &    Cryst%typat,Cryst%xred,Wsh%nfft,Wsh%mgfft,Wsh%ngfft,Cryst%rprimd,nloalg)
 
    ABI_MALLOC(hk_ij, (sh_size,sh_size))

@@ -303,10 +303,12 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  end if
 
 !Initialize most of the Hamiltonian (arrays and quantities that do not depend on k + nl form factors)
- call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nspden,natom,&
-& dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,&
-& dtset%nloalg,usecprj=usecprj,ph1d=ph1d,use_gpu_cuda=dtset%use_gpu_cuda)
- call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq)
+ call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nsppol,nspden,natom,&
+& dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
+& paw_ij=paw_ij,usecprj=usecprj,ph1d=ph1d,use_gpu_cuda=dtset%use_gpu_cuda,&
+& mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+ call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,paw_ij1=paw_ij1fr,&
+& mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
 !PAW:has to compute frozen part of Dij^(1) (without Vpsp(1) contribution)
  if (psps%usepaw==1) then
@@ -343,11 +345,8 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    ikg=0;ikg1=0
 
 !  Continue to initialize the Hamiltonian at k+q
-   call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij,&
-&   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
-
-   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,paw_ij1=paw_ij1fr,&
-&   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+   call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij)
+   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,paw_ij1=paw_ij1fr)
 
 !  Nullify contribution to density at EFermi from this k-point
    rhoaug(:,:,:)=zero

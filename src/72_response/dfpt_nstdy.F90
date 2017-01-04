@@ -277,7 +277,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !1) Allocate all arrays and initialize quantities that do not depend on k and spin.
 !2) Perform the setup needed for the non-local factors:
 !3) Constant kleimann-Bylander energies are copied from psps to gs_hamk.
- call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nspden,dtset%natom,&
+ call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nsppol,nspden,dtset%natom,&
 & dtset%typat,xred,nfft,dtset%mgfft,ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
 & use_gpu_cuda=dtset%use_gpu_cuda)
 

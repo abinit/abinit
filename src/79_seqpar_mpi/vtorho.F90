@@ -469,9 +469,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !==== Initialize most of the Hamiltonian ====
 !Allocate all arrays and initialize quantities that do not depend on k and spin.
- call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nspden,natom,&
+ call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
-& usecprj=usecprj_local,ph1d=ph1d,electronpositron=electronpositron,fock=fock,&
+& paw_ij=paw_ij,ph1d=ph1d,usecprj=usecprj_local,electronpositron=electronpositron,fock=fock,&
+& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 & nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
 
 !Initializations for PAW (projected wave functions)
@@ -647,8 +648,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      rhoaug(:,:,:,:)=zero
 
 !    Continue to initialize the Hamiltonian
-     call load_spin_hamiltonian(gs_hamk,isppol,paw_ij=paw_ij,vlocal=vlocal,&
-&     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+     call load_spin_hamiltonian(gs_hamk,isppol,paw_ij=paw_ij,vlocal=vlocal)
      if (with_vxctau) then
        call load_spin_hamiltonian(gs_hamk,isppol,vxctaulocal=vxctaulocal)
      end if

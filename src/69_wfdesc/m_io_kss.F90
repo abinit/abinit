@@ -1703,11 +1703,13 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
 !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
  if (PRESENT(Electronpositron)) then
-   call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nspden,natom,dtset%typat,xred,nfftc,mgfftc,ngfftc,&
-&   rprimd,dtset%nloalg,usecprj=0,electronpositron=electronpositron)
+   call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,dtset%nsppol,nspden,natom,dtset%typat,xred,nfftc,&
+&   mgfftc,ngfftc,rprimd,dtset%nloalg,paw_ij=paw_ij,usecprj=0,electronpositron=electronpositron,&
+&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  else
-   call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nspden,natom,dtset%typat,xred,nfftc,mgfftc,ngfftc,&
-&   rprimd,dtset%nloalg,usecprj=0)
+   call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,dtset%nsppol,nspden,natom,dtset%typat,xred,nfftc,&
+&   mgfftc,ngfftc,rprimd,dtset%nloalg,paw_ij=paw_ij,usecprj=0,&
+&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
  ! Set up local potential vlocal with proper dimensioning, from vtrial.
@@ -1752,8 +1754,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
    end if
 
    !Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamk,isppol,paw_ij=paw_ij,vlocal=vlocal, &
-     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call load_spin_hamiltonian(gs_hamk,isppol,paw_ij=paw_ij,vlocal=vlocal)
 
    do ikpt=1,dtset%nkpt
      nband_k = dtset%nband(ikpt+(isppol-1)*dtset%nkpt)

@@ -261,9 +261,10 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
 !Initialize Hamiltonian (k-independent terms)
 
 
- call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nspden,natom,&
+ call init_hamiltonian(gs_hamk,psps,pawtab,nspinor,nsppol,nspden,natom,&
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj_local,&
-& ph1d=ph1d,electronpositron=electronpositron,fock=fock,&
+& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+& paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,fock=fock,&
 & nucdipmom=nucdipmom,use_gpu_cuda=use_gpu_cuda)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
 
@@ -420,8 +421,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
  do isppol=1,nsppol
 
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
-   call load_spin_hamiltonian(gs_hamk,isppol,paw_ij=paw_ij, &
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call load_spin_hamiltonian(gs_hamk,isppol,paw_ij=paw_ij)
 
 !  Loop over k points
    ikg=0

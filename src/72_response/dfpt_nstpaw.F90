@@ -302,13 +302,13 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),allocatable :: dnhat1(:,:),drhoaug1(:,:,:,:)
  real(dp),allocatable :: drhor1(:,:),drho1wfg(:,:),drho1wfr(:,:,:)
  real(dp),allocatable :: d2nl_elfd(:,:),dkinpw(:)
- real(dp),allocatable :: d2nl_k(:,:),d2ovl_drho(:,:,:,:,:),d2ovl_k(:,:),e1kbfr(:,:,:,:)
+ real(dp),allocatable :: d2nl_k(:,:),d2ovl_drho(:,:,:,:,:),d2ovl_k(:,:)
  real(dp),allocatable :: eig_k(:),eig_kq(:),eig1_k(:)
- real(dp),allocatable,target :: ffnlk(:,:,:,:),ffnl1(:,:,:,:)
+ real(dp),allocatable,target :: e1kbfr_spin(:,:,:,:,:),ffnlk(:,:,:,:),ffnl1(:,:,:,:)
  real(dp),allocatable :: gh1(:,:),gs1(:,:),gvnl1(:,:),kinpw1(:),kpg_k(:,:),kpg1_k(:,:)
  real(dp),allocatable :: occ_k(:),occ_kq(:),ph3d(:,:,:),ph3d1(:,:,:),rhotmp(:,:),rocceig(:,:)
  real(dp),allocatable :: ylm_k(:,:),ylm1_k(:,:),ylmgr1_k(:,:,:),vtmp1(:,:),vxc10(:,:),work(:,:,:)
- real(dp),pointer :: ffnl1_idir1(:,:,:,:),vhartr01(:),vpsp1_idir1(:),xccc3d1_idir1(:)
+ real(dp),pointer :: e1kbfr(:,:,:,:),ffnl1_idir1(:,:,:,:),vhartr01(:),vpsp1_idir1(:),xccc3d1_idir1(:)
  type(pawcprj_type),allocatable :: dcwaveprj(:,:)
  type(pawcprj_type),allocatable,target :: cwaveprj0(:,:)
  type(pawcprj_type),pointer :: cwaveprj0_idir1(:,:)
@@ -485,8 +485,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !Initialize most of the (1st-order) Hamiltonian
 !1) Allocate all arrays and initialize quantities that do not depend on k and spin.
 !2) Perform the setup needed for the non-local factors:
- call init_hamiltonian(gs_hamkq,psps,pawtab,nspinor,nspden,dtset%natom,&
+ call init_hamiltonian(gs_hamkq,psps,pawtab,nspinor,nsppol,nspden,dtset%natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
+& paw_ij=paw_ij,mpi_atmtab=my_atmtab,comm_atom=my_comm_atom,&
 & usecprj=usecprj,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
 
 !Variables common to all perturbations
@@ -561,7 +562,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      need_pawij10=(usepaw==1)
      if (need_pawij10) then
        ABI_DATATYPE_ALLOCATE(paw_ij10,(my_natom,mdir1))
-       ABI_ALLOCATE(e1kbfr,(rf_hamkq%dime1kb1,rf_hamkq%dime1kb2,nspinor**2,mdir1))
+       ABI_ALLOCATE(e1kbfr_spin,(rf_hamkq%dime1kb1,rf_hamkq%dime1kb2,nspinor**2,mdir1,nsppol))
      else
        ABI_DATATYPE_ALLOCATE(paw_ij10,(0,0))
      end if
@@ -729,7 +730,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        nspden_rhoij=dtset%nspden;if (dtset%pawspnorb>0.and.dtset%nspinor==2) nspden_rhoij=4
        call pawrhoij_alloc(pawdrhoij1(:,idir1),cplex_rhoij,nspden_rhoij,dtset%nspinor,&
 &       dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=1,use_rhoij_=0,&
-&       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=my_atmtab)
        if (paral_atom) then
          call pawrhoij_alloc(pawdrhoij1_unsym(:,idir1),cplex_rhoij,nspden_rhoij,dtset%nspinor,&
 &         dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
@@ -746,6 +747,18 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    ibg1=0;icg1=0
    ibgq=0;icgq=0
 
+!  Has to 1st-order non-local factors before the loop over spins
+!  because this needs a communication over comm_atom (=comm_spinkpt)
+   if (need_pawij10) then
+     do isppol=1,nsppol
+       do kdir1=1,mdir1
+         idir1=jdir1(kdir1)
+         call pawdij2e1kb(paw_ij10(:,idir1),isppol,my_comm_atom,&
+&             e1kbfr=e1kbfr_spin(:,:,:,idir1,isppol),mpi_atmtab=my_atmtab)
+       end do
+     end do
+   end if
+
 !  LOOP OVER SPINS
    do isppol=1,nsppol
 
@@ -756,19 +769,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      ikg=0;ikg1=0
 
 !    Continue to initialize the GS/RF Hamiltonian
-     call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij,&
-&     mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
-    !call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol, &
-    !&              mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
-
-!    Continue to initialize the RF Hamiltonian
-     if (need_pawij10) then
-       do kdir1=1,mdir1
-         idir1=jdir1(kdir1)
-         call pawdij2e1kb(paw_ij10(:,idir1),isppol,my_atmtab,my_comm_atom,&
-&         e1kbfr=e1kbfr(:,:,:,idir1))
-       end do
-     end if
+     call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij)
+     if (need_pawij10) e1kbfr => e1kbfr_spin(:,:,:,:,isppol)
 
 !    Initialize accumulation of density
      if (has_drho) drhoaug1(:,:,:,:)=zero
@@ -1411,7 +1413,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        idir1=jdir1(kdir1)
        call paw_ij_free(paw_ij10(:,idir1))
      end do
-     ABI_DEALLOCATE(e1kbfr)
+     ABI_DEALLOCATE(e1kbfr_spin)
    end if
    ABI_DATATYPE_DEALLOCATE(paw_ij10)
 
