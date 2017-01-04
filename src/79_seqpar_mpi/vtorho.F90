@@ -648,7 +648,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      rhoaug(:,:,:,:)=zero
 
 !    Continue to initialize the Hamiltonian
-     call load_spin_hamiltonian(gs_hamk,isppol,paw_ij=paw_ij,vlocal=vlocal)
+     call load_spin_hamiltonian(gs_hamk,isppol,paw_ij=paw_ij,vlocal=vlocal,&
+&              comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
      if (with_vxctau) then
        call load_spin_hamiltonian(gs_hamk,isppol,vxctaulocal=vxctaulocal)
      end if

@@ -1754,7 +1754,8 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
    end if
 
    !Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamk,isppol,paw_ij=paw_ij,vlocal=vlocal)
+   call load_spin_hamiltonian(gs_hamk,isppol,paw_ij=paw_ij,vlocal=vlocal,&
+&            comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
    do ikpt=1,dtset%nkpt
      nband_k = dtset%nband(ikpt+(isppol-1)*dtset%nkpt)

@@ -437,10 +437,13 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 &   gs_hamkq%nvloc,pawfgr,mpi_enreg,vtrial,vtrial1,vlocal,vlocal1)
 
 !  Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij,vlocal=vlocal)
-   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,paw_ij1=paw_ij1,vlocal1=vlocal1)
+   call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij,vlocal=vlocal,&
+&            comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,paw_ij1=paw_ij1,vlocal1=vlocal1,&
+&            comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
-     call load_spin_rf_hamiltonian(rf_hamk_dir2,gs_hamkq,isppol,paw_ij1=paw_ij1)
+     call load_spin_rf_hamiltonian(rf_hamk_dir2,gs_hamkq,isppol,paw_ij1=paw_ij1,&
+&              comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
      if (ipert==natom+11) then ! load vlocal1
        call load_spin_rf_hamiltonian(rf_hamk_dir2,gs_hamkq,isppol,vlocal1=vlocal1)
      end if

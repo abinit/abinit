@@ -410,7 +410,8 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      !end do
 
      ! Continue to initialize the Hamiltonian
-     call load_spin_hamiltonian(gs_hamkq,spin,vlocal=vlocal)
+     call load_spin_hamiltonian(gs_hamkq,spin,vlocal=vlocal,&
+&      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
      ! Allocate workspace for wavefunctions. Make npw larger than expected.
      ABI_MALLOC(bras, (2, mpw*nspinor, mband))
@@ -420,10 +421,10 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
      ! GKA : This little block used to be right after the perturbation loop
      ! Prepare application of the NL part.
-     call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=1,&
-&         comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-!         paw_ij1=paw_ij1,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+     call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=1)
+         !paw_ij1=paw_ij1,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
      call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc))
+         !paw_ij1=paw_ij1,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
      do ik=1,nkpt
 

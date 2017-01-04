@@ -948,7 +948,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
        end if
      end do
    else
-     ABI_ALLOCATE(ham%ekb,(psps%dimekb,ham%dimekb2,nspinor**2))
+     ABI_ALLOCATE(ham%ekb,(ham%dimekb1,ham%dimekb2,nspinor**2))
    end if
  end if
 
@@ -1557,7 +1557,7 @@ subroutine load_spin_hamiltonian(Ham,isppol,paw_ij,vlocal,vxctaulocal, &
      Ham%ekb=zero ! Need otherwise valgrind complains ... (even if I knwow it is an output argument...)
      if (present(mpi_atmtab)) then
        call pawdij2ekb(Ham%ekb,paw_ij,isppol,my_comm_atom,mpi_atmtab=mpi_atmtab)
-     else
+    else
        call pawdij2ekb(Ham%ekb,paw_ij,isppol,my_comm_atom)
      end if
    end if
@@ -2020,7 +2020,7 @@ subroutine pawdij2ekb(ekb,paw_ij,isppol,comm_atom,mpi_atmtab)
  nullify(my_atmtab);if (present(mpi_atmtab)) my_atmtab => mpi_atmtab
  call get_my_atmtab(comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
-!Retrieve PAW Dij coefficients for this spin component
+ !Retrieve PAW Dij coefficients for this spin component
  if (my_natom>0) then
    if (allocated(paw_ij(1)%dij)) then
      dimekb1=size(ekb,1) ; dimekb3=size(ekb,3)

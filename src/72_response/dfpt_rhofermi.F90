@@ -345,8 +345,10 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    ikg=0;ikg1=0
 
 !  Continue to initialize the Hamiltonian at k+q
-   call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij)
-   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,paw_ij1=paw_ij1fr)
+   call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij,&
+&       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,paw_ij1=paw_ij1fr,&
+&       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
 !  Nullify contribution to density at EFermi from this k-point
    rhoaug(:,:,:)=zero

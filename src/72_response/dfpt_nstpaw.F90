@@ -769,7 +769,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      ikg=0;ikg1=0
 
 !    Continue to initialize the GS/RF Hamiltonian
-     call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij)
+     call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij,&
+&              mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
      if (need_pawij10) e1kbfr => e1kbfr_spin(:,:,:,:,isppol)
 
 !    Initialize accumulation of density

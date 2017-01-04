@@ -455,7 +455,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  do isppol=1,dtset%nsppol
 
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
-   call load_spin_hamiltonian(gs_ham,isppol,paw_ij=paw_ij)
+   call load_spin_hamiltonian(gs_ham,isppol,paw_ij=paw_ij,&
+&    comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
 !  Rewind (k+G) data if needed
    ikg=0

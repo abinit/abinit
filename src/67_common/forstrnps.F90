@@ -421,7 +421,8 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass,eigen,electronpositron,fock,&
  do isppol=1,nsppol
 
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
-   call load_spin_hamiltonian(gs_hamk,isppol,paw_ij=paw_ij)
+   call load_spin_hamiltonian(gs_hamk,isppol,paw_ij=paw_ij,&
+&    comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
 !  Loop over k points
    ikg=0
