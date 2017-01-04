@@ -334,7 +334,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(gs_hamiltonian_type) :: gs_hamk
 !arrays
  integer,allocatable :: kg_k(:,:)
- real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(1)
+ real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0)
  real(dp),allocatable :: EigMin(:,:),buffer1(:),buffer2(:),cgq(:,:)
  real(dp),allocatable :: cgrkxc(:,:),cgrvtrial(:,:),doccde(:)
  real(dp),allocatable :: dphasek(:,:),eig_k(:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:)
@@ -1545,8 +1545,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call ctocprj(atindx,cg,1,cprj_tmp,gmet,gprimd,0,0,0,dtset%istwfk,kg,dtset%kptns,&
 &       dtset%mband,mcg,mcprj_tmp,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
 &       dtset%natom,nattyp,dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,dtset%nloalg,&
-&       npwarr,dtset%nspinor,dtset%nsppol,ntypat,0,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
-&       ucvol,dtfil%unpaw,0,xred,ylm,ylmgr_dum)
+&       npwarr,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
+&       ucvol,dtfil%unpaw,xred,ylm,ylmgr_dum)
        call pawmkrhoij(atindx,atindx1,cprj_tmp,gs_hamk%dimcprj,dtset%istwfk,dtset%kptopt,&
 &       dtset%mband,mband_cprj,mcprj_tmp,dtset%mkmem,mpi_enreg,natom,dtset%nband,dtset%nkpt,&
 &       dtset%nspinor,dtset%nsppol,occ,dtset%paral_kgb,paw_dmft,dtset%pawprtvol,pawrhoij_unsym,&

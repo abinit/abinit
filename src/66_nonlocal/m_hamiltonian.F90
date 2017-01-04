@@ -808,7 +808,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nspden,natom,typat,&
  ham%nfft       =nfft
  ham%ngfft(:)   =ngfft(:)
  ham%nloalg(:)  =nloalg(:)
- ham%matblk=NLO_MINCAT; if (nloalg(2)>0) ham%matblk=natom
+ ham%matblk=min(NLO_MINCAT,maxval(ham%nattyp)); if (nloalg(2)>0) ham%matblk=natom
  ham%nspinor    =nspinor
  ham%ntypat     =psps%ntypat
  ham%typat      =typat(1:natom)
