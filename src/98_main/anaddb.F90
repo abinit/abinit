@@ -89,7 +89,7 @@ program anaddb
  integer,parameter :: rftyp4=4
  integer :: dimekb,comm,iatom,iblok,iblok_stress,idir,ii,index
  integer :: ierr,iphl2,lenstr,lmnmax,mband,mtyp,mpert,msize,natom,nblok,nblok2
- integer :: nkpt,nph2l,nsym,ntypat,option,usepaw,nproc,my_rank
+ integer :: nkpt,nph2l,nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid
  logical :: iam_master
  integer :: rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
  integer,allocatable :: d2flg(:)
@@ -118,7 +118,7 @@ program anaddb
  type(asrq0_t) :: asrq0
  type(crystal_t) :: Crystal
 #ifdef HAVE_NETCDF
- integer :: phdos_ncid, ana_ncid, ec_ncid, ncerr
+ integer :: phdos_ncid, ec_ncid, ncerr
  integer :: na_phmodes_varid, na_phdispl_varid
 #endif
 
@@ -242,6 +242,7 @@ program anaddb
  ABI_ALLOCATE(zeff,(3,3,natom))
 
  ! Open the netcdf file that will contain the anaddb results
+ ana_ncid = nctk_noid
  if (iam_master) then
 #ifdef HAVE_NETCDF
    NCF_CHECK_MSG(nctk_open_create(ana_ncid, "anaddb.nc", xmpi_comm_self), "Creating anaddb.nc")

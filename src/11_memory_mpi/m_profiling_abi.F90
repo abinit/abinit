@@ -605,7 +605,7 @@ subroutine abimem_check(nalloc, ndealloc)
 
  if (abimem_level==2 .and. nalloc /= ndealloc) then
    write(std_out,"(3a)")"Use the python script 'abimem.py' in ~abinit/tests/scripts to check ",trim(abimem_file)," file"
-   write(std_ot,"(a)")"Note that one can use the command line option `abinit --abimem-level=2"
+   write(std_out,"(a)")"Note that one can use the command line option `abinit --abimem-level=2"
  end if
 
 end subroutine abimem_check
