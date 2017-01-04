@@ -4799,15 +4799,8 @@ subroutine nanal9(dyew,dynmat,iqpt,natom,nqpt,plus)
      do ib=1,natom
        do mu=1,3
          do nu=1,3
-!          The following four lines are the good ones
            dynmat(1,mu,ia,nu,ib,iqpt)=dynmat(1,mu,ia,nu,ib,iqpt) + dyew(1,mu,ia,nu,ib)
            dynmat(2,mu,ia,nu,ib,iqpt)=dynmat(2,mu,ia,nu,ib,iqpt) + dyew(2,mu,ia,nu,ib)
-!          DEBUG
-!          dynmat(1,mu,ia,nu,ib,iqpt)=dyew(1,mu,ia,nu,ib)
-!          dynmat(2,mu,ia,nu,ib,iqpt)=dyew(2,mu,ia,nu,ib)
-!          dynmat(1,mu,ia,nu,ib,iqpt)=dynmat(1,mu,ia,nu,ib,iqpt)
-!          dynmat(2,mu,ia,nu,ib,iqpt)=dynmat(2,mu,ia,nu,ib,iqpt)
-!          ENDDEBUG
          end do
        end do
      end do
@@ -5081,8 +5074,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
  end do
 
 !Determine the analyticity of the matrix.
- analyt=1
- if(abs(qphnrm)<tol8) analyt=0
+ analyt=1; if(abs(qphnrm)<tol8) analyt=0
  if(abs(qphon(1))<tol8.and.abs(qphon(2))<tol8.and.abs(qphon(3))<tol8) analyt=2
 
 !In case of q=Gamma, only the real part is used
@@ -5248,7 +5240,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
      write(std_out,'(a,i4,a,12es16.6)')' imode=',imode,' displ(1:6*natom)=',displ(indexi+1:indexi+6*natom)
    end do
 
-   !Check the orthonormality of the eigenvectors
+   ! Check the orthonormality of the eigenvectors
    do imode=1,3*natom
      do jmode=imode,3*natom
        indexi=2*3*natom*(imode-1)

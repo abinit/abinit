@@ -4,7 +4,7 @@
 !!  m_gruneisen
 !!
 !! FUNCTION
-!!  Objects and methods to compute Gruneisen parameters with central finite difference
+!!  Objects and methods to compute Gruneisen parameters with central finite differences
 !!  of dynamical matrices obtained with different unit cell volumes.
 !!
 !! COPYRIGHT
@@ -115,6 +115,11 @@ contains  !===========================================================
 !!
 !! FUNCTION
 !!  Construct new object from a list of DDB files.
+!!
+!! INPUTS
+!!  ddb_paths(:)=Paths of the DDB files (must be ordered by volume)
+!!  inp<anaddb_dataset_type>=Anaddb dataset with input variables
+!!  comm=MPI communicator
 !!
 !! PARENTS
 !!
@@ -229,8 +234,19 @@ end function gruns_new
 !!  qpt(3)=q-point in reduced coordinates.
 !!
 !! OUTPUT
-!!  wvols(3*natom, nvols) =
-!!  gvals(3*natom)=Gruneisen parameters
+!!  wvols(3*natom, nvols) = Phonon frequencies for the different volumen.
+!!  gvals(3*natom)=Gruneisen parameters evaluated at V0.
+!!  dwdq(3,3*natom)=Group velocities at V0 in Cartesian coordinates.
+!!
+!! NOTES
+!!
+!!  The Grunesein parameter is given by:
+!!
+!!     gamma = - (V / w) d w / dV
+!!
+!!  Using w*2 = <u|D|u> and the Hellman-Feynmann theorem, one obtains:
+!!
+!!     gamma = - (V / 2 w**2) <u|dD/dV|u>
 !!
 !! PARENTS
 !!
@@ -296,13 +312,13 @@ subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq)
  end do
  dddv = dddv / gruns%delta_vol
 
- ! Compute -volume/(2w(q)**2) <u(q)|dD(q)/dq|u(q)>
+ ! Compute -V0/(2w(q)**2) <u(q)|dD(q)/dq|u(q)>
  call zgemm('N','N',natom3,natom3,natom3,cone,dddv,natom3,eigvec(:,:,:,gruns%iv0),natom3,czero,omat,natom3)
  do nu=1,natom3
    if (abs(wvols(nu, gruns%iv0)) > tol12) then
      dot = cg_zdotc(natom3, eigvec(1,1,nu, gruns%iv0), omat(1,1,nu))
-     gvals(nu) = -gruns%v0 * dot(1) / (two * wvols(nu, gruns%iv0)**2)
-     !write(std_out,*)gvals(nu)
+     ! must change sign if we have a purely imaginary solution i.e. z = iw
+     gvals(nu) = -sign(one, wvols(nu, gruns%iv0)) * gruns%v0 * dot(1) / (two * wvols(nu, gruns%iv0)**2)
    else
      gvals(nu) = zero
    end if
@@ -319,10 +335,15 @@ end subroutine gruns_fourq
 !!
 !! FUNCTION
 !!  Compute gruneisen parameters and group velocities on a q-path
+!!  Write results to file.
 !!
 !! INPUTS
+!!  qpath<kpath_t>=Object describing the q-path.
+!!  ncid=netcdf file id.
+!!  comm=MPI communicator.
 !!
 !! OUTPUT
+!!  Only writing
 !!
 !! PARENTS
 !!
@@ -371,6 +392,15 @@ subroutine gruns_qpath(gruns, qpath, ncid, comm)
  call xmpi_sum(gvals_qpath, comm, ierr)
  call xmpi_sum(dwdq_qpath, comm, ierr)
 
+ ! For the automatic tests.
+ !if (my_rank == master) then
+ !  write(ab_out, "(a)") &
+ !   "Gruneisen parameters for the first 6 modes and the first 6 q-points of the path (for automatic tests):"
+ !  do iqpt=min(6, qpath%npts)
+ !    write(ab_out, "(6es16.8)")gvals_qpath(1:min(6, gruns%natom3), iqpt)
+ !  end do
+ !end if
+
 #ifdef HAVE_NETCDF
  if (my_rank == master .and. ncid /= nctk_noid) then
    ncerr = nctk_def_dims(ncid, [ &
@@ -410,11 +440,13 @@ end subroutine gruns_qpath
 !!
 !! FUNCTION
 !!  Compute gruneisen parameters and group velocities on a q-mesh.
+!!  Save results to file.
 !!
 !! INPUTS
 !!  ngqpt(3)=q-mesh divisions
 !!  nqshift=Number of shifts used to generated the ab-initio q-mesh.
 !!  qshift(3,nqshift)=The shifts of the ab-initio q-mesh.
+!!  ncid=netcdf file id.
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -495,6 +527,7 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, ncid, comm)
  call xmpi_sum(gvals_qibz, comm, ierr)
  call xmpi_sum(dwdq_qibz, comm, ierr)
 
+ ! TODO: Find a way to select an optimal mesh for DOSes. See also mkphdos.
  nomega = 500
  omega_min = zero; omega_max = 0.002
  !nomega = nint((omega_max - omega_min) / omega_step) + 1
@@ -533,6 +566,15 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, ncid, comm)
  if (my_rank == master) then
    call wrtout(std_out, sjoin(" Average Gruneisen parameter:", ftoa(gavg, fmt="f8.5")))
    call wrtout(ab_out, sjoin(" Average Gruneisen parameter:", ftoa(gavg, fmt="f8.5")))
+
+   ! For the automatic tests.
+   !if (my_rank == master) then
+   !  write(ab_out, "(a)") &
+   !   "Gruneisen parameters for the first 6 modes and the first 6 q-points of the path (for automatic tests):"
+   !  do iqpt=min(6, qpath%npts)
+   !    write(ab_out, "(6es16.8)")gvals_qpath(1:min(6, gruns%natom3), iqpt)
+   !  end do
+   !end if
  end if
 
 #ifdef HAVE_NETCDF
@@ -737,7 +779,10 @@ subroutine gruns_anaddb(inp, prefix, comm)
    MSG_WARNING("Cannot compute Grunesein parameters on q-path because nqpath == 0")
  end if
 
- !call ifc_speedofsound(gruns%ifc_vol(iv0), gruns%cryst_vol(iv0), qrad, atol_ms, ncid, comm)
+ ! Compute speed of sound for V0
+ if (inp%vs_qrad_tolms(1) > zero) then
+   call ifc_speedofsound(gruns%ifc_vol(iv0), gruns%cryst_vol(iv0), inp%vs_qrad_tolms, ncid, comm)
+ end if
 
  call gruns_free(gruns)
 
@@ -748,9 +793,8 @@ subroutine gruns_anaddb(inp, prefix, comm)
 #endif
 
  call cwtime(cpu,wall,gflops,"stop")
- write(msg,'(2(a,f8.2))')"gruns_anaddb completed. cpu:",cpu,", wall:",wall
+ write(msg,'(2(a,f8.2))')" gruns_anaddb completed. cpu:",cpu,", wall:",wall
  call wrtout(std_out, msg, do_flush=.True.)
- stop
 
 end subroutine gruns_anaddb
 !!***

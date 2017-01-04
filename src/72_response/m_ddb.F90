@@ -1152,10 +1152,6 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
  mpert = ddb%mpert
  natom = ddb%natom
 
- if (ddb%prtvol > 1) then
-   call wrtout(std_out,'gtblk9: enter gtblk9 ','COLL')
- end if
-
 !Get the number of derivative
  if(rftyp==1.or.rftyp==2)then
    nder=2
@@ -1350,8 +1346,8 @@ subroutine gtblk9(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
    end if
  end if
 
- if(ok==1 .and. ddb%prtvol > 1)then
-   write(message,'(a,i0,a,a)')'gtblk9: found block number ',iblok,' agree with',' specifications '
+ if (ok==1 .and. ddb%prtvol > 1) then
+   write(message,'(a,i0,a,a)')' gtblk9: found block number ',iblok,' agree with',' specifications '
    call wrtout(std_out,message,'COLL')
  end if
 
@@ -2943,8 +2939,6 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
  call wrtout(std_out,message,'COLL')
  nunit=ddbun
 
- !ddb%prtvol = prtvol
-
  do iblok=1,ddb%nblok
    call read_blok8(ddb,iblok,mband,mpert,msize,nkpt,nunit)
 
@@ -3552,6 +3546,7 @@ subroutine carttransf(blkflg,blkval2,carflg,gprimd,iqpt,mband,&
  integer,intent(out) :: carflg(3,mpert,3,mpert)
  real(dp),intent(in) :: gprimd(3,3),rprimd(3,3)
  real(dp),intent(inout) :: blkval2(2,msize,mband,nkpt)
+
 !Local variables-------------------------------
 !scalars
 integer :: iatom1,iatom2,iband,idir1,idir2,ikpt
@@ -3616,7 +3611,6 @@ end subroutine carttransf
 !!****f* m_ddb/carteig2d
 !! NAME
 !! carteig2d
-!!
 !!
 !! FUNCTION
 !! Transform a second-derivative matrix (EIG2D) from reduced

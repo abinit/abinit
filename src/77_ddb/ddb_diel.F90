@@ -233,7 +233,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
      if (3*natom-imode<5) then
        write(iout, '(1x,5es14.6)') (sqrt(modez(1,1,ii)**2+modez(1,2,ii)**2+modez(1,3,ii)**2),ii=imode,3*natom)
      else
-       write(iout, '(1x,5es14.6)') (sqrt(modez(1,1,ii)**2+modez(1,2,ii)**2+modez(1,3,ii)**2),ii=imode,imode+4) 
+       write(iout, '(1x,5es14.6)') (sqrt(modez(1,1,ii)**2+modez(1,2,ii)**2+modez(1,3,ii)**2),ii=imode,imode+4)
      end if
    end do
 
@@ -415,12 +415,10 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 &           /(sqrt(frdiel(idir1,idir1,ifreq)) +one) )**2
          end if
        end do
-       write(iout, '(7es12.4)' )&
-&       afreq,(frdiel(idir1,idir1,ifreq),idir1=1,3),(refl(idir1),idir1=1,3)
+       write(iout, '(7es12.4)' )afreq,(frdiel(idir1,idir1,ifreq),idir1=1,3),(refl(idir1),idir1=1,3)
 
      else
-       write(iout, '(a,es12.4,a)' )&
-&       ' Full dielectric tensor at frequency',afreq,' Hartree'
+       write(iout, '(a,es12.4,a)' )' Full dielectric tensor at frequency',afreq,' Hartree'
        do idir1=1,3
          write(iout, '(3es16.8)' ) (frdiel(idir1,idir2,ifreq),idir2=1,3)
        end do

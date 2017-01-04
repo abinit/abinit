@@ -333,9 +333,7 @@ subroutine dtset_chkneu(charge,dtset,occopt)
      end if
 
    end if
-
-!  End the condition dtset%iscf>0 or -1 or -3 .
- end if
+ end if !  End the condition dtset%iscf>0 or -1 or -3 .
 
 end subroutine dtset_chkneu
 !!***
@@ -590,7 +588,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%inclvkb            = dtin%inclvkb
  dtout%intxc              = dtin%intxc
  dtout%ionmov             = dtin%ionmov
- dtout%densfor_pred             = dtin%densfor_pred
+ dtout%densfor_pred       = dtin%densfor_pred
  dtout%iprcel             = dtin%iprcel
  dtout%iprcfc             = dtin%iprcfc
  dtout%irandom            = dtin%irandom

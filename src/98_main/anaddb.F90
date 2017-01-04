@@ -109,7 +109,7 @@ program anaddb
  character(len=24) :: codename
  character(len=24) :: start_datetime
  character(len=strlen) :: string
- character(len=fnlen) :: filnam(7),elph_base_name,tmpfilename,ec_fname
+ character(len=fnlen) :: filnam(7),elph_base_name,tmpfilename
  character(len=500) :: message
  type(anaddb_dataset_type) :: inp
  type(phonon_dos_type) :: Phdos
@@ -232,7 +232,7 @@ program anaddb
  ABI_ALLOCATE(instrain,(3*natom,6))
  ABI_ALLOCATE(d2cart,(2,msize))
 
- call ddb_from_file(ddb,filnam(3),inp%brav,natom,inp%natifc,inp%atifc,Crystal,comm)
+ call ddb_from_file(ddb,filnam(3),inp%brav,natom,inp%natifc,inp%atifc,Crystal,comm, prtvol=inp%prtvol)
  nsym = Crystal%nsym
 
  ABI_ALLOCATE(displ,(2*3*natom*3*natom))
@@ -276,6 +276,12 @@ program anaddb
  ! Get Dielectric Tensor and Effective Charges
  ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
  iblok = ddb_get_dielt_zeff(ddb,crystal,inp%rfmeth,inp%chneut,inp%selectz,dielt,zeff)
+ !if (iblok == 0) then
+ !  call wrtout(std_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", filnam(3)))
+ !  call wrtout(std_out, "Values initialized with zeros")
+ !else
+ !  call wrtout(std_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", filnam(3)))
+ !end if
 
  if (my_rank == master) then
 #ifdef HAVE_NETCDF
@@ -417,9 +423,10 @@ program anaddb
    call ifc_print_info(ifc, unit=std_out)
 
    ! Compute speed of sound.
-   !if (inp%vs_qrad > tol12) call ifc_speedofsound(ifc, crystal, inp%vs_qrad, inp%vs_atolms, ana_ncid, comm)
-   call ifc_speedofsound(ifc, crystal, 0.001_dp, 10._dp, ana_ncid, comm)
-   !call ifc_test_phinterp(ifc, crystal, [8,8,8], 1, [zero,zero,zero], [3,3,3], comm, test_dwdq=.True.)
+   if (inp%vs_qrad_tolms(1) > zero) then
+      call ifc_speedofsound(ifc, crystal, inp%vs_qrad_tolms, ana_ncid, comm)
+      call ifc_test_phinterp(ifc, crystal, [8,8,8], 1, [zero,zero,zero], [3,3,3], comm, test_dwdq=.True.)
+   end if
 
    ! Print analysis of the real-space interatomic force constants
    if(inp%ifcout/=0)then
@@ -798,10 +805,10 @@ program anaddb
      call ddb_elast(inp,crystal,ddb%val,compl,compl_clamped,compl_stress,asrq0%d2asr,&
 &     elast,elast_clamped,elast_stress,iblok,iblok_stress,&
 &     instrain,ab_out,mpert,msize,natom,ddb%nblok)
-     ec_fname = TRIM(filnam(2))//"_EC.nc"
+
 #ifdef HAVE_NETCDF
      if (iam_master) then
-       ncerr = nctk_open_create(ec_ncid, ec_fname, xmpi_comm_self)
+       ncerr = nctk_open_create(ec_ncid, strcat(filnam(2), "_EC.nc"), xmpi_comm_self)
        NCF_CHECK_MSG(ncerr, "Creating EC.nc file")
        NCF_CHECK(crystal_ncwrite(crystal, ec_ncid))
        call elast_ncwrite(compl,compl_clamped,compl_stress,elast,elast_clamped,elast_stress,ec_ncid)

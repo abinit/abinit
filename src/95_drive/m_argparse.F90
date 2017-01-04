@@ -287,9 +287,6 @@ subroutine args_print(args)
 !Arguments ------------------------------------
  type(args_t),intent(in) :: args
 
-!Local variables-------------------------------
-! character(len=500) :: arg,msg
-
 ! *************************************************************************
 
  call wrtout(std_out, sjoin("Command line:", args%cmdline))

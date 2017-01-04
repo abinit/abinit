@@ -391,41 +391,42 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
  if (my_rank == master) call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
 
-#if 0
- !call ebands_set_interpolator(ebands, cryst, bstart, bcount, mode, espline_ords, eskw_ratio, comm)
- !call ebands_test_intepolator(ebands, dtset, dtfil%filnam_ds(4), comm)
- ! Test the interpolation of electronic bands.
- !skw = skw_new(cryst, 1,  ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, [0, 0], [0, 0], comm)
- !call skw_free(skw)
- !stop
+ if (.False.) then
+ !if (.True.) then
+   !call ebands_set_interpolator(ebands, cryst, bstart, bcount, mode, espline_ords, eskw_ratio, comm)
+   !call ebands_test_intepolator(ebands, dtset, dtfil%filnam_ds(4), comm)
+   ! Test the interpolation of electronic bands.
+   !skw = skw_new(cryst, 1,  ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, [0, 0], [0, 0], comm)
+   !call skw_free(skw)
+   !stop
 
- ! Interpolate bands on dense k-mesh.
- kptrlatt_fine = reshape([4,0,0,0,4,0,0,0,4], [3,3])
- kptrlatt_fine = 4 * kptrlatt_fine; nshiftk_fine = 1
- ABI_CALLOC(shiftk_fine, (3,nshiftk_fine))
- ebands_bspl = ebands_interp(ebands, cryst, "bspline", [3,3,3], kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
- !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
- if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(dtfil%filnam_ds(4), "_BSPLINE"))
+   ! Interpolate bands on dense k-mesh.
+   kptrlatt_fine = reshape([4,0,0,0,4,0,0,0,4], [3,3])
+   kptrlatt_fine = 4 * kptrlatt_fine; nshiftk_fine = 1
+   ABI_CALLOC(shiftk_fine, (3,nshiftk_fine))
+   ebands_bspl = ebands_interp(ebands, cryst, "bspline", [3,3,3], kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+   !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
+   if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(dtfil%filnam_ds(4), "_BSPLINE"))
 
- call ebands_free(ebands_bspl)
- ebands_bspl = ebands_interp(ebands, cryst, "skw", [3,3,3], kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
- !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
- if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(dtfil%filnam_ds(4), "_SKW"))
- MSG_ERROR("interpolation done")
- ABI_FREE(shiftk_fine)
+   call ebands_free(ebands_bspl)
+   ebands_bspl = ebands_interp(ebands, cryst, "skw", [3,3,3], kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+   !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
+   if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(dtfil%filnam_ds(4), "_SKW"))
+   MSG_ERROR("interpolation done")
+   ABI_FREE(shiftk_fine)
 
- edos = ebands_get_edos(ebands_bspl, cryst, edos_intmeth, edos_step, edos_broad, comm)
- !call ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
+   edos = ebands_get_edos(ebands_bspl, cryst, edos_intmeth, edos_step, edos_broad, comm)
+   !call ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
 
- if (my_rank == master) then
-   call edos_print(edos, unit=ab_out)
-   path = strcat(dtfil%filnam_ds(4), "_BSPLINE_EDOS")
-   call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
-   call edos_write(edos, path)
+   if (my_rank == master) then
+     call edos_print(edos, unit=ab_out)
+     path = strcat(dtfil%filnam_ds(4), "_BSPLINE_EDOS")
+     call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
+     call edos_write(edos, path)
+   end if
+   call edos_free(edos)
+   call ebands_free(ebands_bspl)
  end if
- call edos_free(edos)
- call ebands_free(ebands_bspl)
-#endif
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')"eph%edos: cpu:",cpu,", wall: ",wall
@@ -435,7 +436,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Read the DDB file.
  ABI_CALLOC(dummy_atifc, (cryst%natom))
 
- call ddb_from_file(ddb,ddb_path,brav1,cryst%natom,natifc0,dummy_atifc,cryst_ddb,comm)
+ call ddb_from_file(ddb,ddb_path,brav1,cryst%natom,natifc0,dummy_atifc,cryst_ddb,comm, prtvol=dtset%prtvol)
  call crystal_free(cryst_ddb)
  ABI_FREE(dummy_atifc)
 

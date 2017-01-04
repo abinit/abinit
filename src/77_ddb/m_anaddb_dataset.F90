@@ -108,6 +108,7 @@ module m_anaddb_dataset
   integer :: prtfsurf
   integer :: prtnest
   integer :: prtsrlr  ! print the short-range/long-range decomposition of phonon freq.
+  integer :: prtvol = 0
   integer :: qrefine
   integer :: ramansr
   integer :: relaxat
@@ -156,6 +157,7 @@ module m_anaddb_dataset
   real(dp) :: q1shft(3,4)
   real(dp) :: q2shft(3)
   real(dp) :: targetpol(3)
+  real(dp) :: vs_qrad_tolms(2) = 0
 
   !real(dp) :: phdos_mesh(3)=-one
 
@@ -383,8 +385,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 !B
 
 !Target band gap in eV
-!The default value is just a very large number that will not be used in changing
-!the band gap
+!The default value is just a very large number that will not be used in changing the band gap
  anaddb_dtset%band_gap = 999.0d0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'band_gap',tread,'DPR')
  if(tread==1) anaddb_dtset%band_gap=dprarr(1)
@@ -1183,6 +1184,10 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+ anaddb_dtset%prtvol = 0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtvol',tread,'INT')
+ if(tread==1) anaddb_dtset%prtvol = intarr(1)
+
 !Q
 
  anaddb_dtset%q2shft(:)=zero
@@ -1399,7 +1404,13 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
 
 !V
-
+ anaddb_dtset%vs_qrad_tolms(:) = zero
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'vs_qrad_tolms',tread,'DPR')
+ if (tread==1) then
+    anaddb_dtset%vs_qrad_tolms(:) = dprarr(1:2)
+    ABI_CHECK(dprarr(1) >= zero, "vs_qrad must be >= 0")
+    ABI_CHECK(dprarr(2) > zero, "vs_tolms must be > zero")
+ end if
 !W
 
 !X
@@ -1834,6 +1845,7 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    if(anaddb_dtset%selectz/=0)write(nunit,'(3x,a9,3i10)')'  selectz',anaddb_dtset%selectz
    if(anaddb_dtset%symdynmat/=1)write(nunit,'(3x,a9,3i10)')'symdynmat',anaddb_dtset%symdynmat
  end if
+ if(anaddb_dtset%prtvol/=0) write(nunit,'(3x,a9,i10)')'   prtvol',anaddb_dtset%prtvol
 
 !Frequency information
  if(anaddb_dtset%dieflag==1)then
@@ -1867,6 +1879,10 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    end if
    if (anaddb_dtset%qrefine > 1) then
      write(nunit,'(3x,a9,i10)')'  qrefine', anaddb_dtset%qrefine
+   end if
+   ! Speed of sound
+   if (anaddb_dtset%vs_qrad_tolms(1) > zero) then
+      write(nunit,'(a,2es16.8)')"vs_qrad_tolms", (anaddb_dtset%vs_qrad_tolms(:))
    end if
  end if
 

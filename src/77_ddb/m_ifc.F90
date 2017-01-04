@@ -635,8 +635,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      Ifc%nrpt = Ifc%nrpt+1
    end if
  end do
- write(message,"(2(a,i0))")"ifc%nrpt: ",ifc%nrpt,", nqbz: ",nqbz
- call wrtout(std_out,message,"COLL")
 
  ABI_CALLOC(Ifc%atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
  ABI_CALLOC(Ifc%rpt,(3,Ifc%nrpt))
@@ -746,6 +744,7 @@ subroutine ifc_print_info(ifc,header,unit,prtvol)
 !Local variables-------------------------------
  integer :: unt,my_prtvol,iatom,ii
  character(len=500) :: msg
+ real(dp) :: angdeg(3)
 ! *********************************************************************
 
  unt = std_out; if (present(unit)) unt = unit
@@ -762,6 +761,12 @@ subroutine ifc_print_info(ifc,header,unit,prtvol)
    call wrtout(unt,msg)
  end do
  call wrtout(unt, sjoin(" acell:", ltoa(ifc%acell)))
+
+ !angdeg(1)=ACOS(ifc%rmet(2,3)/SQRT(ifc%rmet(2,2)*ifc%rmet(3,3)))/two_pi*360.0d0
+ !angdeg(2)=ACOS(ifc%rmet(1,3)/SQRT(ifc%rmet(1,1)*ifc%rmet(3,3)))/two_pi*360.0d0
+ !angdeg(3)=ACOS(ifc%rmet(1,2)/SQRT(ifc%rmet(1,1)*ifc%rmet(2,2)))/two_pi*360.0d0
+ !write(msg,'(a,3es16.8,a)')' Angles (23,13,12)=',angdeg(1:3),' degrees'
+ !call wrtout(unt, msg)
 
  call wrtout(unt, sjoin(" Acoustic Sum Rule option (asr):", itoa(ifc%asr)))
  call wrtout(unt, sjoin(" Option for the sampling of the BZ (brav):", itoa(ifc%brav)))
@@ -880,7 +885,7 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
    case ("cart")
      continue
    case default
-     MSG_ERROR("Wrong value for nanaqdir: "//trim(nanaqdir))
+     MSG_ERROR(sjoin("Wrong value for nanaqdir:", nanaqdir))
    end select
  end if
 
@@ -894,9 +899,7 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
 &  Crystal%rprimd,Ifc%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
 
  ! OmegaSRLR: Perform decomposition of dynamical matrix
- !if (srlr==1)then
- !  call omega_decomp(amu,natom,ntypat,typat,dynmatfull,dynmatsr,dynmatlr,iqpt,nqpt,eigvec)
- !end if
+ !if (srlr==1) call omega_decomp(amu,natom,ntypat,typat,dynmatfull,dynmatsr,dynmatlr,iqpt,nqpt,eigvec)
 
  ! Return the interpolated dynamical matrix and the eigenvector for this q-point
  if (present(out_d2cart)) out_d2cart = d2cart(:,:,:natom,:,:natom)
@@ -968,8 +971,8 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq)
 
 !Local variables-------------------------------
 !scalars
- integer,save :: enough=0
- integer,parameter :: nqpt1=1,option2=2,sumg0=0 !,plus1=1,iqpt1=1
+ !integer,save :: enough=0
+ integer,parameter :: nqpt1=1,option2=2,sumg0=0
  integer :: ii,nu,natom3,jj
  real(dp) :: hh
 !arrays
@@ -989,26 +992,28 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq)
  ! phase is modified, in order to recover the usual (xred) coordinate of atoms.
  do ii=1,3
    call dymfz9(dddq(:,:,:,ii), cryst%natom, nqpt1, ifc%gprim, option2, qpt, ifc%trans)
+   dddq(:,:,:,ii) = dddq(:,:,:,ii) * ifc%acell(ii)
  end do
 
- if (ifc%dipdip==1) then
-   enough = enough + 1
-   if (enough <= 50)  MSG_WARNING("phonon velocitied with dipdip==1 not yet tested.")
+ if (ifc%dipdip == 1) then
+   !enough = enough + 1
+   !if (enough <= 5)  MSG_WARNING("phonon velocities with dipdip==1 not yet tested.")
    ! Add the gradient of the non-analytical part.
    ! Note that we dddq is in cartesian cordinates.
-   ! TODO: For the time being, the gradient is computed with finite difference.
-   ! should generalize ewald9 to compute dq.
+   ! For the time being, the gradient is computed with finite difference and step hh.
+   ! TODO: should generalize ewald9 to compute dq.
    hh = 0.001_dp
    do ii=1,3
      do jj=-1,1,2
+       ! qcart --> qred
        qfd = zero; qfd(ii) = jj
-       qfd = matmul(cryst%rprimd, qfd); qfd = two_pi * qfd / normv(qfd, cryst%gmet, "G")
+       qfd = matmul(cryst%rprimd, qfd); qfd = qfd / normv(qfd, cryst%gmet, "G")
+       !write(std_out,*)"normv:",normv(qfd, cryst%gmet, "G")
        qfd = qpt + hh * qfd
 
        call ewald9(ifc%acell,ifc%dielt,dyew,cryst%gmet,ifc%gprim,cryst%natom,qfd,&
           cryst%rmet,ifc%rprim,sumg0,cryst%ucvol,cryst%xred,ifc%zeff)
        call q0dy3_apply(cryst%natom,ifc%dyewq0,dyew)
-       !call nanal9(dyew,dq,iqpt1,cryst%natom,nqpt1,plus1)
        dddq(:,:,:,ii) = dddq(:,:,:,ii) + (jj * half / hh) * dyew
      end do
    end do
@@ -1024,8 +1029,8 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq)
    do nu=1,natom3
      if (abs(phfrq(nu)) > tol12) then
        dot = cg_zdotc(natom3, eigvec(1,1,nu), omat(1,1,nu))
-       dwdq(ii, nu) = dot(1) / (two * phfrq(nu))
-       !write(std_out,*)"dot", dot
+       ! abs(w) is needed to get the correct derivative if we have a purely imaginary solution)
+       dwdq(ii, nu) = dot(1) / (two * abs(phfrq(nu)))
      else
        dwdq(ii, nu) = zero
      end if
@@ -1050,9 +1055,10 @@ end subroutine ifc_get_dwdq
 !! INPUTS
 !! ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
 !! crystal<crystal_t> = Information on the crystalline structure.
-!! qrad=Radius of the sphere in reciprocal space
-!! atols_ms=Absolute tolerance in meter/second. The code generates spherical meshes
-!!  until the results are converged twice within atols_ms.
+!! qrad_tolms(2):
+!!   qrad=Radius of the sphere in reciprocal space
+!!   atols_ms=Absolute tolerance in meter/second. The code generates spherical meshes
+!!     until the results are converged twice within atols_ms.
 !! ncid=the id of the open NetCDF file. Use nctk_noid to disable netcdf output.
 !! comm=MPI communicator.
 !!
@@ -1064,7 +1070,7 @@ end subroutine ifc_get_dwdq
 !!
 !! SOURCE
 
-subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, ncid, comm)
+subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1079,19 +1085,22 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, ncid, comm)
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: comm,ncid
- real(dp),intent(in) :: qrad,atol_ms
  type(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: crystal
 !arrays
+ real(dp),intent(in) :: qrad_tolms(2)
 
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
  integer :: ii,nu,igrid,my_rank,nprocs,ierr,converged,npts,num_negw,vs_ierr,ncerr
+ real(dp) :: min_negw,cpu,wall,gflops
+ real(dp) :: qrad,tolms
  character(len=500) :: msg
  type(lebedev_t) :: lgrid
 !arrays
- real(dp) :: qpt(3),quad(3),prev_quad(3),vs(4,3)
+ integer :: asnu(3)
+ real(dp) :: qred(3),qvers_cart(3),qvers_red(3),quad(3),prev_quad(3),vs(4,3)
  real(dp) :: phfrqs(3*crystal%natom),dwdq(3,3*crystal%natom)
  real(dp) :: eigvec(2,3*crystal%natom,3*crystal%natom),displ_cart(2,3*crystal%natom,3*crystal%natom)
 
@@ -1100,38 +1109,79 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, ncid, comm)
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  if (ifc%asr == 0) MSG_WARNING("Computing speed of sound with asr == 0! Use asr > 0")
+ qrad = qrad_tolms(1); tolms = qrad_tolms(2)
+ ABI_CHECK(qrad > zero, "vs_qrad <= 0")
+ ABI_CHECK(tolms > zero, "vs_tolms <= 0")
+
+ call cwtime(cpu, wall, gflops, "start")
+
+ ! Find the index of the first acoustic modes (needed to handle systems with unstable branches at Gamma
+ ! In this case, indeed, we end up computing derivatives for the wrong branches, the integration becomes
+ ! unstable and difficult to converge.
+ qred = zero
+ call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart)
+ !write(std_out,*)"omega(q==Gamma): ",phfrqs
+ asnu = [1, 2, 3]
+ do nu=1,3*crystal%natom
+   if (abs(phfrqs(nu)) < tol8) then
+     asnu = [nu, nu+1, nu+2]; exit
+   end if
+ end do
+
+ if (asnu(1) /= 1) then
+   MSG_WARNING(sjoin("Found unstable modes at Gamma. The first acoustic mode has index:", itoa(asnu(1))))
+ end if
+ if (asnu(3) > 3 * crystal%natom) then
+   MSG_ERROR(sjoin("Something wrong while computing index of acoustic modes. asnu:", ltoa(asnu)))
+ end if
 
  ! Speed of sound along reduced directions.
  do ii=1,3
-   qpt = zero; qpt(ii) = one
-   !if (ii >= 4 .and. ii <= 6) qpt = matmul(crystal%rprimd, qpt) ! Cartesian directions.
-   !if (ii >= 7 .and. ii <= 9) qpt = matmul(crystal%rprimd, qpt) ! Cartesian directions.
-   qpt = qrad * two_pi * qpt / normv(qpt, crystal%gmet, "G")
-   call ifc_fourq(ifc, crystal, qpt, phfrqs, displ_cart, out_eigvec=eigvec, dwdq=dwdq)
+   qred = zero; qred(ii) = one
+   !if (ii >= 4 .and. ii <= 6) qred = matmul(crystal%rprimd, qred) ! Cartesian directions.
+   !if (ii >= 7 .and. ii <= 9) qred = matmul(crystal%rprimd, qred) ! Cartesian directions.
+   qvers_red = (qred / normv(qred, crystal%gmet, "G"))
+   qred = qrad * qvers_red
+   !write(std_out,*)"dir",normv(qred, crystal%gmet, "G"), qrad
+   call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart, out_eigvec=eigvec, dwdq=dwdq)
 
    do nu=1,3
-     vs(ii, nu) = sqrt(sum(dwdq(1:3,nu) ** 2)) * Bohr_meter / Time_Sec
+     vs(ii, nu) = sqrt(sum(dwdq(1:3,asnu(nu)) ** 2)) * Bohr_meter / Time_Sec
    end do
-   write(std_out,"(a,3es12.4)")" vs:",vs(ii,:)
+   write(std_out,"(a,3es12.4,a)")" ||vs(nu)||:",vs(ii,:), " [m/s]"
+
+   qvers_cart = matmul(crystal%gprimd, qvers_red) * two_pi
+   do nu=1,3
+     vs(ii, nu) = dot_product(dwdq(1:3,asnu(nu)), qvers_cart) * Bohr_meter / Time_Sec
+   end do
+   write(std_out,"(a,3es12.4,a)")" <q|vs(nu)>:",vs(ii,:), " [m/s]"
+
+   !do nu=1,3
+   !  write(std_out,"(a,3es12.4,a)")" vs(nu)_vect_red:",&
+   !     matmul(crystal%gprimd, dwdq(1:3,asnu(nu))) * Bohr_meter / Time_Sec, " [m/s]"
+   !end do
  end do
 
  ! Spherical average with Lebedev-Laikov grids.
  converged = 0
  do igrid=1,lebedev_ngrids
    lgrid = lebedev_new(igrid)
-   npts = lgrid%npts; quad = zero; num_negw = 0
+   npts = lgrid%npts; quad = zero; num_negw = 0; min_negw = zero
    do ii=1,npts
      if (mod(ii, nprocs) /= my_rank) cycle ! mpi-parallelism
 
-     ! Build q-point on sphere of radius qrad
-     qpt = two_pi * matmul(crystal%gprimd, lgrid%versors(:, ii))
-     qpt = qrad * qpt / normv(qpt, crystal%gmet, "G")
-     call ifc_fourq(ifc, crystal, qpt, phfrqs, displ_cart, out_eigvec=eigvec, dwdq=dwdq)
-     if (any(phfrqs < -tol8)) num_negw = num_negw + 1
+     ! Build q-point on sphere of radius qrad. qcart --> qred
+     qred = matmul(crystal%rprimd, lgrid%versors(:, ii))
+     qred = qrad * (qred / normv(qred, crystal%gmet, "G"))
+     !write(std_out,*)"lebe",normv(qred, crystal%gmet, "G"), qrad
+     call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart, out_eigvec=eigvec, dwdq=dwdq)
+     if (any(phfrqs(asnu) < -tol8)) then
+       num_negw = num_negw + 1; min_negw = min(min_negw, minval(phfrqs(asnu)))
+     end if
 
      do nu=1,3
-       quad(nu) = quad(nu) + lgrid%weights(ii) * sqrt(sum(dwdq(1:3,nu) ** 2))
-       !quad(nu) = quad(nu) + lgrid%weights(ii)
+       quad(nu) = quad(nu) + lgrid%weights(ii) * sqrt(sum(dwdq(1:3,asnu(nu)) ** 2))
+       !quad(nu) = quad(nu) + lgrid%weights(ii) * abs(dot_product(dwdq(:,asnu(nu)), lgrid%versors(:,ii)))
      end do
    end do
 
@@ -1140,11 +1190,11 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, ncid, comm)
    call xmpi_sum(num_negw, comm, ierr)
    call lebedev_free(lgrid)
 
-   write(std_out,'(2(a,i6),a,3es12.4,a,es12.4)')&
-     " Lebedeb-Laikov grid: ",igrid,", npts: ", npts, " vs_sphavg(mode=1,3): ",quad, " <vs>: ",sum(quad)/3
+   write(std_out,'(2(a,i6),a,3es12.4,a,es12.4)') &
+     " Lebedev-Laikov grid: ",igrid,", npts: ", npts, " vs_sphavg(ac_modes): ",quad, " <vs>: ",sum(quad)/3
 
    if (igrid > 1) then
-     if (abs(sum(quad - prev_quad)/3) < atol_ms) then
+     if (abs(sum(quad - prev_quad)/3) < tolms) then
         converged = converged + 1; if (converged == 2) exit
      else
         converged = 0
@@ -1161,17 +1211,19 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, ncid, comm)
      write(ab_out,"(a,3es12.4,a,i1)")" Speed of sound:",vs(ii,:)," [m/s] along reduced direction: ",ii
    end do
    write(ab_out,'(2(a,es12.4),a,i0)') &
-     " Lebedev-Laikov integration with qradius: ", qrad, " atol_ms: ",atol_ms, " [m/s], npts: ", npts
+     " Lebedev-Laikov integration with qradius: ", qrad, " tolms: ",tolms, " [m/s], npts: ", npts
    write(ab_out,"(a,3es12.4,a,es12.4)")" Spherical average:",vs(4,:)," [m/s], ",sum(vs(4,:))/3
    if (converged /= 2) then
      vs_ierr = 1
-     write(msg,'(a,es12.4,a)')" WARNING: Results are not converged within: ",atol_ms, " [m/s]"
+     write(msg,'(a,es12.4,a)')" WARNING: Results are not converged within: ",tolms, " [m/s]"
      call wrtout(ab_out, msg)
      MSG_WARNING(msg)
    end if
    if (num_negw > 0) then
      vs_ierr = -num_negw
-     write(msg,'(a,i0,a)')" WARNING: Detected ",num_negw, " negative frequencies. Speed of sound could be wrong"
+     write(msg,'(a,i0,a,es12.4,3a)') &
+       " WARNING: Detected ",num_negw, " negative frequencies. Minimum was: ",min_negw * Ha_meV, "[meV]",ch10,&
+       " Speed of sound could be wrong"
      call wrtout(ab_out, msg)
      MSG_WARNING(msg)
    end if
@@ -1183,17 +1235,20 @@ subroutine ifc_speedofsound(ifc, crystal, qrad, atol_ms, ncid, comm)
      NCF_CHECK(ncerr)
      ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "vsound_ierr"])
      NCF_CHECK(ncerr)
-     ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: 'vsound_qrad', 'vsound_atol_ms'])
+     ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "vsound_qrad", "vsound_tolms"])
      NCF_CHECK(ncerr)
      ! Write data.
      NCF_CHECK(nctk_set_datamode(ncid))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_ierr"), vs_ierr))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_qrad"), qrad))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_atol_ms"), atol_ms))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound_tolms"), tolms))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vsound"), vs))
 #endif
    end if
  end if
+
+ call cwtime(cpu, wall, gflops, "stop")
+ write(std_out,"(2(a,f6.2))")"ifc_speedofsound: cpu: ",cpu,", wall: ",wall
 
 end subroutine ifc_speedofsound
 !!***
@@ -2973,7 +3028,6 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, tes
  call kpath_init(qpath, bounds, cryst%gprimd, 10)
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
-
  natom3 = 3 * cryst%natom
 
  ! Test computation of group velocities
@@ -2982,10 +3036,10 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, tes
    call wrtout(std_out, "Testing computation of group velocities.")
    q1 = zero; q2 = [half, zero, zero]
    !q1 = -q2
-   !q1 = [0.01_dp, zero, zero]; q2 = [half, zero, zero]
+   !q1 = [-0.1_dp, zero, zero]; q2 = [half, zero, zero]
    !q1 = [0.01_dp, zero, zero]; q2 = [half, half, half]
    !q2 = [0.01_dp, zero, zero]; q1 = [half, zero, zero]
-   !q2 = [0.01_dp, zero, zero]; q1 = [half, zero, zero]
+   !q2 = [-0.1_dp, zero, zero]; q1 = [half, zero, zero]
    nq = 50
    dq = normv(q2 - q1, cryst%gmet, "G") / (nq - 1)
    qvers_red = (q2 -q1) / normv(q2 - q1, cryst%gmet, "G")
@@ -3000,7 +3054,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, tes
       if (iq == 1) winterp(:,iq) = phfrq
       if (iq > 1) then
         do nu=1,natom3
-           winterp(nu, iq) = winterp(nu, iq-1) + dq * dot_product(ifc%acell(:) * dwdq(:, nu), qvers_cart)
+          winterp(nu, iq) = winterp(nu, iq-1) + dq * dot_product(dwdq(:, nu), qvers_cart)
         end do
         !imax = maxloc(abs(phfrq - wnext)); ii = imax(1)
         !write(*,*)ii, phfrq(ii), wnext(ii), (phfrq(ii) - wnext(ii)) * Ha_meV
