@@ -4,15 +4,12 @@
 !! symkpt
 !!
 !! FUNCTION
-!! Determines the weights of the k-points for sampling
-!! the Brillouin Zone, starting from a first set
-!! of weights wtk, and folding it to a new set, by
-!! taking into account the symmetries described
+!! Determines the weights of the k-points for sampling the Brillouin Zone, starting from a first set
+!! of weights wtk, and folding it to a new set, by taking into account the symmetries described
 !! by symrc1, and eventually the time-reversal symmetry.
 !! Also compute the number of k points in the reduced set
-!! This routine is also used for sampling the q vectors in the
-!! Brillouin zone for the computation of thermodynamical
-!! properties (from the routine thm9).
+!! This routine is also used for sampling the q vectors in the Brillouin zone for the computation
+!! of thermodynamical properties (from the routine thm9).
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2016 ABINIT group (XG,LSI)

@@ -459,19 +459,6 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
-! anaddb_dtset%phdos_mesh=-one
-! call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'phdos_mesh',tread,'DPR')
-! if (tread==1) then
-!   ! Store (start, stop, step) in anaddb_datset.
-!   anaddb_dtset%phdos_mesh=dprarr(1:3)
-!   if (dprarr(3) <= zero .or. dprarr(2) <= dprarr(1)) then
-!     write(message, '(a,3es14.4,2a)' )&
-!&     'Invalid parameters for (start, stop, step) in phdos_mesh',anaddb_dtset%phdos_mesh,ch10,&
-!&     'Action: correct phdos_mesh in your input file.'
-!     MSG_ERROR(message)
-!   end if
-! end if
-
 !FIXME : should probably be smaller
  anaddb_dtset%dossmear=5.0/Ha_cmm1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dossmear',tread,'DPR')

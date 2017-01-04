@@ -106,9 +106,12 @@ MODULE m_ifc
    real(dp) :: rprim(3,3),gprim(3,3),acell(3)
      ! These values are used to call anaddb routines that don't use rprimd, gprimd
 
-   ! These values will be stored in ddb but then we have to pass ddb to ifc_fourq
-    real(dp) :: dielt(3,3)
+   real(dp) :: dielt(3,3)
      ! Dielectric tensor
+
+   real(dp) :: omega_minmax(2)
+     ! Min and max frequency obtained on the initial ab-initio q-mesh (-+ 30 cmm1)
+     ! Used to generate frequency meshes for DOSes.
 
    real(dp),allocatable :: amu(:)
      ! amu(ntypat)
@@ -171,6 +174,7 @@ MODULE m_ifc
    !real(dp),allocatable :: dynmat_lr(:,:,:,:,:,:)
     ! dynmat_lr(2,3,natom,3,natom,nqpt))
     ! Long-range part of dynmat in q-space
+
  end type ifc_type
 
  public :: ifc_init          ! Constructor
@@ -338,49 +342,34 @@ end subroutine ifc_free
 !! crystal<type(crystal_t)> = Information on the crystalline structure.
 !! ddb<type(ddb_type)> = Database with derivatives.
 !! brav=bravais lattice (1=simple lattice,2=face centered lattice, 3=centered lattice,4=hexagonal lattice)
-!! nqshft=Number of shifths in q-grid.
-!! q1shft(3,nqshft)=Shifts for q-grid
 !! asr= Option for the imposition of the ASR
 !!   0 => no ASR,
 !!   1 => modify "asymmetrically" the diagonal element
 !!   2 => modify "symmetrically" the diagonal element
 !! symdynmat=if 1, (re)symmetrize the dynamical matrix, except if Gamma wavevector with electric field added.
-!! dipdip= if 0, no dipole-dipole interaction was subtracted in atmfrc
+!! dipdip=
+!!   if 0, no dipole-dipole interaction was subtracted in atmfrc
 !!   if 1, atmfrc has been build without dipole-dipole part
-!! rfmeth = 1 if non-stationary block
-!!  2 if stationary block
-!!  3 if third order derivatives
-!! dielt(3,3)=dielectric tensor TODO: Should be computed from DDB
+!! rfmeth =
+!!   1 if non-stationary block
+!!   2 if stationary block
+!!   3 if third order derivatives
+!! dielt(3,3)=dielectric tensor.
 !! zeff(3,3,natom)=effective charge on each atom, versus electric field and atomic displacement
-!! anaddb_dtset variables TODO: TO BE REMOVED
-!!    anaddb_dtset%nsphere
-!!    anaddb_dtset%prt_ifc
-!!    anaddb_dtset%ifcana
-!!    anaddb_dtset%rifcsph
-!!    atifc(natom)
-!!    anaddb_dtset%ifcout
-!!    anaddb_dtset%prtsrlr
-!!    anaddb_dtset%enunit
-!! ddb = storage object for ddb information read in from DDB file
+!! prtsrlr: TODO: TO BE REMOVED
+!! enunit: TODO: TO BE REMOVED
 !! dielt(3,3)=dielectric tensor
 !! ngqpt_in = input values of ngqpt
+!! nqshft=Number of shifths in q-grid.
+!! q1shft(3,nqshft)=Shifts for q-grid
 !! nsphere=number of atoms to be included in the cut-off sphere for interatomic
 !!  force constant; if = 0 : maximum extent allowed by the grid.
 !! rifcsph=radius for cutoff of IFC
+!! comm=MPI communicator.
 !! [Ifc_coarse]=Optional.
-!! [prtfreq]=True if phonon frequencies should be printed (default: false)
 !!
 !! OUTPUT
 !! Ifc<type(ifc_type)>=Object containing the dynamical matrix and the IFCs.
-!!   dyewq0(3,3,natom)=atomic self-interaction correction to the dynamical matrix. (only when dipdip=1)
-!!   rcan(3,natom) = Atomic position in canonical coordinates
-!!   trans(3,natom) = Atomic translations : xred = rcan + trans
-!!   Ifc%nrpt = number of vectors of the lattice in real space
-!!   Ifc%atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space
-!!   Ifc%short_atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space
-!!   Ifc%ewlad_atmfrc(2,3,natom,3,natom,nrpt)= Interatomic Forces in real space
-!!   Ifc%rpt(3,nprt) = Canonical coordinates of the R points in the unit cell
-!!   Ifc%wghatm(natom,natom,nrpt)= Weight associated to the couple of atoms and the R vector
 !!
 !! PARENTS
 !!      anaddb,eph,m_effective_potential_file
@@ -393,8 +382,9 @@ end subroutine ifc_free
 
 subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
   rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,nsphere,rifcsph,&
-  prtsrlr,enunit,& ! TO BE REMOVED
-  prtfreq,Ifc_coarse) ! Optional
+  prtsrlr,enunit, & ! TODO: TO BE REMOVED
+  comm, &
+  Ifc_coarse) ! Optional
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -409,7 +399,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  implicit none
 
 !Arguments ------------------------------------
- integer,intent(in) :: asr,brav,dipdip,symdynmat,nqshft,rfmeth,nsphere
+ integer,intent(in) :: asr,brav,dipdip,symdynmat,nqshft,rfmeth,nsphere,comm
  real(dp),intent(in) :: rifcsph
  type(ifc_type),intent(inout) :: Ifc
  type(crystal_t),intent(in) :: Crystal
@@ -419,33 +409,35 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  integer,intent(in) :: ngqpt_in(3)
  real(dp),intent(in) :: q1shft(3,nqshft)
  real(dp),intent(in) :: dielt(3,3),zeff(3,3,Crystal%natom)
-
 !anaddb variables (TO BE REMOVED)
  integer,intent(in) :: prtsrlr,enunit
- logical,optional,intent(in) :: prtfreq
 !end anaddb variables
 
 !Local variables -------------------------
 !scalars
- integer :: mpert,iout,iqpt,mqpt,nsym,ntypat,iq_bz,ii,natom
- integer :: nqbz,option,plus,sumg0,irpt,irpt_new
+ integer,parameter :: timrev1=1,iout0=0,chksymbreak0=0
+ integer :: mpert,iout,iqpt,mqpt,nsym,ntypat,iq_ibz,iq_bz,ii,natom
+ integer :: nqbz,option,plus,sumg0,irpt,irpt_new,nqibz
+ integer :: nprocs,my_rank,ierr
  real(dp),parameter :: qphnrm=one
+ real(dp) :: xval
  character(len=500) :: message
- logical :: do_prtfreq
  type(ifc_type) :: ifc_tmp
 !arrays
  integer :: ngqpt(9),qptrlatt(3,3)
- integer,allocatable :: qmissing(:)
+ integer,allocatable :: qmissing(:),ibz2bz(:)
  real(dp) :: gprim(3,3),rprim(3,3),qpt(3),rprimd(3,3)
  real(dp):: rcan(3,Crystal%natom),trans(3,Crystal%natom),dyewq0(3,3,Crystal%natom)
  real(dp) :: displ_cart(2*3*Crystal%natom*3*Crystal%natom)
- real(dp) :: phfrq(3*Crystal%natom) !eigval(3,Crystal%natom),
+ real(dp) :: phfrq(3*Crystal%natom)
  real(dp) :: eigvec(2,3,Crystal%natom,3,Crystal%natom)
- real(dp),allocatable :: dyew(:,:,:,:,:),spqpt(:,:)
+ real(dp),allocatable :: dyew(:,:,:,:,:),out_d2cart(:,:,:,:,:)
  real(dp),allocatable :: dynmatfull(:,:,:,:,:,:),dynmat_sr(:,:,:,:,:,:),dynmat_lr(:,:,:,:,:,:) ! for OmegaSRLR
- real(dp),allocatable :: out_d2cart(:,:,:,:,:)
+ real(dp),allocatable :: wtq(:),wtq_folded(:),qbz(:,:),qibz(:,:)
 
 !******************************************************************
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  ! This dimension should be encapsulated somewhere. We don't want to
  ! change the entire code if someone adds a new kind of perturbation.
@@ -490,16 +482,30 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  ! Sample the Brillouin zone
  option=1
- qptrlatt(:,:)=0
- qptrlatt(1,1)=ngqpt(1)
- qptrlatt(2,2)=ngqpt(2)
- qptrlatt(3,3)=ngqpt(3)
+ qptrlatt = 0; qptrlatt(1,1)=ngqpt(1); qptrlatt(2,2)=ngqpt(2); qptrlatt(3,3)=ngqpt(3)
  mqpt=ngqpt(1)*ngqpt(2)*ngqpt(3)*nqshft
  if (Ifc%brav==2) mqpt=mqpt/2
  if (Ifc%brav==3) mqpt=mqpt/4
 
- ABI_MALLOC(spqpt,(3,mqpt))
- call smpbz(Ifc%brav,ab_out,qptrlatt,mqpt,nqbz,nqshft,option,q1shft,spqpt)
+ ABI_MALLOC(qbz,(3,mqpt))
+ call smpbz(Ifc%brav,ab_out,qptrlatt,mqpt,nqbz,nqshft,option,q1shft,qbz)
+
+ ! Find the irreducible zone (qibz)
+ ABI_MALLOC(ibz2bz, (nqbz))
+ ABI_MALLOC(wtq_folded, (nqbz))
+ ABI_MALLOC(wtq, (nqbz))
+ wtq = one / nqbz ! Weights sum up to one
+
+ call symkpt(chksymbreak0,crystal%gmet,ibz2bz,iout0,qbz,nqbz,nqibz,crystal%nsym,&
+   crystal%symrec,timrev1,wtq,wtq_folded)
+
+ ABI_MALLOC(qibz, (3,nqibz))
+ do iq_ibz=1,nqibz
+   qibz(:,iq_ibz) = qbz(:, ibz2bz(iq_ibz))
+ end do
+ ABI_FREE(ibz2bz)
+ ABI_FREE(wtq_folded)
+ ABI_FREE(wtq)
 
  ABI_MALLOC(Ifc%dynmat,(2,3,natom,3,natom,nqbz))
 
@@ -508,7 +514,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
    ! Each q-point in the BZ mush be the symmetrical of one of the qpts in the ddb file.
    call symdm9(ddb%flg,ddb%nrm,ddb%qpt,ddb%typ,ddb%val,&
-&    Ifc%dynmat,gprim,Crystal%indsym,mpert,natom,ddb%nblok,nqbz,nsym,rfmeth,rprim,spqpt,&
+&    Ifc%dynmat,gprim,Crystal%indsym,mpert,natom,ddb%nblok,nqbz,nsym,rfmeth,rprim,qbz,&
 &    Crystal%symrec,Crystal%symrel)
 
  else
@@ -524,7 +530,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    call wrtout(std_out,"Will fill missing qpoints in the full BZ using the coarse q-mesh","COLL")
 
    call symdm9(ddb%flg,ddb%nrm,ddb%qpt,ddb%typ,ddb%val,&
-&    Ifc%dynmat,gprim,Crystal%indsym,mpert,natom,ddb%nblok,nqbz,nsym,rfmeth,rprim,spqpt,&
+&    Ifc%dynmat,gprim,Crystal%indsym,mpert,natom,ddb%nblok,nqbz,nsym,rfmeth,rprim,qbz,&
 &    Crystal%symrec,Crystal%symrel,qmissing=qmissing)
 
    ! Compute dynamical matrix with Fourier interpolation on the coarse q-mesh.
@@ -534,7 +540,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    ABI_MALLOC(out_d2cart, (2,3,natom,3,natom))
    do ii=1,size(qmissing)
      iq_bz = qmissing(ii)
-     qpt = spqpt(:,iq_bz)
+     qpt = qbz(:,iq_bz)
      ! TODO: check dipdip option and phase, but I think this is correct!
      call ifc_fourq(Ifc_coarse,Crystal,qpt,phfrq,displ_cart,out_d2cart=out_d2cart)
      Ifc%dynmat(:,:,:,:,:,iq_bz) = out_d2cart
@@ -558,7 +564,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
 
    do iqpt=1,nqbz
-     qpt(:)=spqpt(:,iqpt)
+     qpt(:)=qbz(:,iqpt)
      sumg0=0
      call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,Crystal%xred,zeff)
      call q0dy3_apply(natom,dyewq0,dyew)
@@ -581,7 +587,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
 ! Multiply the dynamical matrix by a phase shift
  option=1
- call dymfz9(Ifc%dynmat,natom,nqbz,gprim,option,spqpt,trans)
+ call dymfz9(Ifc%dynmat,natom,nqbz,gprim,option,qbz,trans)
 
 ! Create the Big Box of R vectors in real space and compute the number of points (cells) in real space
  call make_bigbox(Ifc%brav,ifc_tmp%cell,ngqpt,nqshft,rprim,ifc_tmp%nrpt,ifc_tmp%rpt)
@@ -593,7 +599,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
 ! Fourier transformation of the dynamical matrices (q-->R)
  ABI_MALLOC(ifc_tmp%atmfrc,(2,3,natom,3,natom,ifc_tmp%nrpt))
- call ftifc_q2r(ifc_tmp%atmfrc,Ifc%dynmat,gprim,natom,nqbz,ifc_tmp%nrpt,ifc_tmp%rpt,spqpt)
+ call ftifc_q2r(ifc_tmp%atmfrc,Ifc%dynmat,gprim,natom,nqbz,ifc_tmp%nrpt,ifc_tmp%rpt,qbz)
 
 ! Eventually impose Acoustic Sum Rule to the interatomic forces
  if (Ifc%asr>0) then
@@ -608,18 +614,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ! Apply cutoff on ifc if needed
  if (nsphere/=0 .or. rifcsph>tol10) then
    call wrtout(std_out, 'ifc_init: apply cutoff on IFCs', "COLL")
-   call corsifc9(ddb%acell,gprim,natom,ifc_tmp%nrpt,nsphere,rifcsph,&
-&   rcan,rprim,ifc_tmp%rpt,ifc_tmp%wghatm)
+   call corsifc9(ddb%acell,gprim,natom,ifc_tmp%nrpt,nsphere,rifcsph,rcan,rprim,ifc_tmp%rpt,ifc_tmp%wghatm)
  end if
-
-!Eventually impose Acoustic Sum Rule to the interatomic forces
-!(Note: here, after the analysis, in which the range
-!of the short-range IFCs may have been changed
-!That is why it is asked that asr be negative)
-!FIXME: asr < 0 is not tested in abinit suite and does not appear to work
-!(I get frequencies of 10^105 Hartree...) Modifying this 12/6/2011
-!if(asr<0)then
-!asr=-asr
 
  ! Be careful here: if I move this call to anaddb, several tests will fail
  ! due to the different number of points in the big box (see code below.)
@@ -661,15 +657,28 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  call alloc_copy(rcan, Ifc%rcan)
  call alloc_copy(trans, Ifc%trans)
  call alloc_copy(dyewq0, Ifc%dyewq0)
- call alloc_copy(spqpt(:,1:nqbz), Ifc%qbz)
+ call alloc_copy(qbz(:,1:nqbz), Ifc%qbz)
  call alloc_copy(zeff, Ifc%zeff)
  call alloc_copy(ddb%amu, Ifc%amu)
 
  call ifc_free(ifc_tmp)
 
+ ! Compute min/max omega with ab-initio q-mesh.
+ ifc%omega_minmax(1) = huge(one); ifc%omega_minmax(2) = -huge(one)
+ do iq_ibz=1,nqibz
+   if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
+   call ifc_fourq(ifc, crystal, qibz(:,iq_ibz), phfrq, displ_cart)
+   ifc%omega_minmax(1) = min(ifc%omega_minmax(1), minval(phfrq))
+   ifc%omega_minmax(2) = max(ifc%omega_minmax(2), maxval(phfrq))
+ end do
+ xval = ifc%omega_minmax(1); call xmpi_min(xval, ifc%omega_minmax(1), comm, ierr)
+ xval = ifc%omega_minmax(2); call xmpi_max(xval, ifc%omega_minmax(2), comm, ierr)
+ ! Enlarge boundaries by 30 cm-1
+ ifc%omega_minmax(1) = ifc%omega_minmax(1) - 30.0_dp/Ha_cmm1
+ ifc%omega_minmax(2) = ifc%omega_minmax(2) + 30.0_dp/Ha_cmm1
+
  ! TODO (This is to be suppressed in a future version)
- do_prtfreq = .False.; if (present(prtfreq)) do_prtfreq = prtfreq
- if (do_prtfreq .or. prtsrlr == 1) then
+ if (prtsrlr == 1) then
    ! Check that the starting values are well reproduced.
    write(message, '(2a)' )' mkifc9 : now check that the starting values ',&
      ' are reproduced after the use of interatomic forces '
@@ -690,12 +699,13 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    end do
  end if
 
- ABI_FREE(spqpt)
-
-!OmegaSRLR: deallocate memory used by dynmat decomposition
+ ! OmegaSRLR: deallocate memory used by dynmat decomposition
  ABI_FREE(dynmatfull)
  ABI_FREE(dynmat_sr)
  ABI_FREE(dynmat_lr)
+
+ ABI_FREE(qbz)
+ ABI_FREE(qibz)
 
 end subroutine ifc_init
 !!***

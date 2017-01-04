@@ -191,7 +191,7 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
 
    call ifc_init(new%ifc_vol(ivol), new%cryst_vol(ivol), new%ddb_vol(ivol),&
      inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
-     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit)
+     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
    ABI_FREE(zeff)
  end do
 
@@ -443,6 +443,7 @@ end subroutine gruns_qpath
 !!  Save results to file.
 !!
 !! INPUTS
+!!  dosdeltae=Step for the frequency mesh.
 !!  ngqpt(3)=q-mesh divisions
 !!  nqshift=Number of shifts used to generated the ab-initio q-mesh.
 !!  qshift(3,nqshift)=The shifts of the ab-initio q-mesh.
@@ -457,7 +458,7 @@ end subroutine gruns_qpath
 !!
 !! SOURCE
 
-subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, ncid, comm)
+subroutine gruns_qmesh(gruns, dosdeltae, ngqpt, nqshift, qshift, ncid, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -472,6 +473,7 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, ncid, comm)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nqshift,ncid,comm
+ real(dp),intent(in) :: dosdeltae !,dossmear
  type(gruns_t),intent(in) :: gruns
 !arrays
  integer,intent(in) :: ngqpt(3)
@@ -527,12 +529,15 @@ subroutine gruns_qmesh(gruns, ngqpt, nqshift, qshift, ncid, comm)
  call xmpi_sum(gvals_qibz, comm, ierr)
  call xmpi_sum(dwdq_qibz, comm, ierr)
 
- ! TODO: Find a way to select an optimal mesh for DOSes. See also mkphdos.
- nomega = 500
- omega_min = zero; omega_max = 0.002
- !nomega = nint((omega_max - omega_min) / omega_step) + 1
+ omega_min = gruns%ifc_vol(gruns%iv0)%omega_minmax(1)
+ omega_max = gruns%ifc_vol(gruns%iv0)%omega_minmax(2)
+ nomega = nint((omega_max - omega_min) / dosdeltae) + 1
+ nomega = max(6, nomega) ! Ensure Simpson integration will be ok
+
  ABI_MALLOC(omega_mesh, (nomega))
- omega_mesh = arth(omega_min, (omega_max-omega_min) / (nomega - 1), nomega)
+ omega_mesh = arth(omega_min, dosdeltae, nomega)
+ omega_max = omega_mesh(nomega)
+ !write(std_out,*)"hello",omega_min,omega_max,dosdeltae,(omega_max-omega_min) / (nomega-1)
  ABI_MALLOC(wibz, (nqibz))
  ABI_MALLOC(wdt, (nomega, 2))
  ABI_CALLOC(wdos, (nomega, 2))
@@ -765,7 +770,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
 
  ! Compute grunesein parameters on q-mesh
  if (all(inp%ng2qpt /= 0)) then
-   call gruns_qmesh(gruns, inp%ng2qpt, 1, inp%q2shft, ncid, comm)
+   call gruns_qmesh(gruns, inp%dosdeltae, inp%ng2qpt, 1, inp%q2shft, ncid, comm)
  else
    MSG_WARNING("Cannot compute Grunesein parameters on q-mesh because ng2qpt == 0")
  end if

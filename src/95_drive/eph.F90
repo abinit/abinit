@@ -461,7 +461,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Build the inter-atomic force constants.
  call ifc_init(ifc,cryst,ddb,&
  brav1,dtset%asr,dtset%symdynmat,dtset%dipdip,dtset%rfmeth,dtset%ddb_ngqpt,ddb_nqshift,ddb_qshifts,dielt,zeff,&
- nsphere0,rifcsph0,prtsrlr0,dtset%enunit)
+ nsphere0,rifcsph0,prtsrlr0,dtset%enunit,comm)
  ABI_FREE(ddb_qshifts)
  call ifc_print_info(ifc, unit=std_out)
 
