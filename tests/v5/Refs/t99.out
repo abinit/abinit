@@ -62,8 +62,6 @@
 
  read the DDB information and perform some checks
 
--begin at tcpu      0.018  and twall      0.018 sec
-
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.5000000  3.5000000  G(1)= -0.1428571  0.1428571  0.1428571
  R(2)=  3.5000000  0.0000000  3.5000000  G(2)=  0.1428571 -0.1428571  0.1428571
@@ -76,7 +74,6 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.020  and twall      0.021 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -226,7 +223,6 @@
 
  Treat the first list of vectors 
 
--begin at tcpu      0.182  and twall      0.184 sec
  
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :

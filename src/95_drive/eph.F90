@@ -485,7 +485,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    ! Phonon Density of States.
    ! FIXME: mkphdos expects qshift(3) instead of qshift(3, nqshift)
    ! TODO: Parallelize this routine.
-   call mkphdos(phdos,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,dtset%ph_smear,dtset%ph_ngqpt,dtset%ph_qshift)
+   call mkphdos(phdos,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,dtset%ph_smear,dtset%ph_ngqpt,dtset%ph_qshift,comm)
 
    if (my_rank == master) then
      path = strcat(dtfil%filnam_ds(4), "_PHDOS")

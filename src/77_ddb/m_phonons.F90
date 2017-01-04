@@ -505,6 +505,7 @@ end subroutine phdos_free
 !! dossmear=Gaussian broadening used if prtdos==1.
 !! dos_ngqpt(3)=Divisions of the q-mesh used for computing the DOS
 !! dos_qshift(3)=Shift of the q-mesh.
+!! comm=MPI communicator
 !!
 !! OUTPUT
 !! PHdos<phonon_dos_type>=Container with phonon DOS, IDOS and atom-projected DOS.
@@ -527,7 +528,7 @@ end subroutine phdos_free
 !!
 !! SOURCE
 
-subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qshift)
+subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qshift,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -543,7 +544,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: prtdos
+ integer,intent(in) :: prtdos,comm
  real(dp),intent(in) :: dosdeltae,dossmear
  type(crystal_t),intent(in) :: Crystal
  type(ifc_type),intent(in) :: Ifc
@@ -554,10 +555,10 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 
 !Local variables -------------------------
 !scalars
- integer,parameter :: brav1=1,chksymbreak0=0,bcorr0=0,qptopt1=1
+ integer,parameter :: brav1=1,chksymbreak0=0,bcorr0=0,qptopt1=1,master=0
  integer :: facbrv,iat,jat,idir,imesh,imode,io,iq_ibz,itype,nkpt_fullbz
  integer :: nmesh,nqbz,nqpt_max,nqshft,option,timrev,ierr,natom,nomega
- integer :: jdir, idispl, jdispl, isym
+ integer :: jdir, idispl, jdispl, isym, my_rank, nprocs
  real(dp) :: dum,gaussfactor,gaussprefactor,gaussval,low_bound,max_occ,pnorm
  real(dp) :: upr_bound,xx,gaussmaxarg,wall,cpu,gflops
  logical :: out_of_bounds
@@ -581,15 +582,15 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 
  DBG_ENTER("COLL")
 
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
  ! Consistency check.
  if (ALL(prtdos /= [1,2])) then
    MSG_BUG(sjoin('prtdos should be 1 or 2, but received',itoa(prtdos)))
  end if
-
  if (dosdeltae<=zero) then
    MSG_BUG(sjoin('dosdeltae should be positive, but received',ftoa(dosdeltae)))
  end if
-
  if (prtdos==1.and.dossmear<=zero) then
    MSG_BUG(sjoin('dossmear should be positive but received',ftoa(dossmear)))
  end if
@@ -692,7 +693,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
      nkpt_fullbz=nqbz
      ABI_MALLOC(bz2ibz,(nkpt_fullbz))
      ABI_MALLOC(kpt_fullbz,(3,nkpt_fullbz))
-     !
+
      ! Make full kpoint grid and get equivalence to irred kpoints.
      ! This routines scales **very badly** wrt nkpt_fullbz, should introduce check on the norm.
      call get_full_kgrid(bz2ibz,qibz,kpt_fullbz,qptrlatt,PHdos%nqibz,&
@@ -711,7 +712,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
      ABI_STAT_MALLOC(full_eigvec,(2,3,natom,3*natom,PHdos%nqibz), ierr)
      ABI_CHECK(ierr==0, 'out-of-memory in full_eigvec')
    end if  ! prtdos==2.and.imesh==2
-   !
+
    ! This infinite loop is used to be sure that the frequency mesh is large enough to contain
    ! the entire phonon spectrum. The mesh is enlarged if, during the Fourier interpolation,
    ! a phonon frequency turns out to be outside the interval [omega_min:omega_max]
@@ -741,17 +742,13 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
        PHdos%omega(io)=PHdos%omega_min+PHdos%omega_step*(io-1)
      end do
 
-     !if (imesh/=1) then
-     !  write(std_out,*)&
-     !   'nomega = ',PHdos%nomega,' omega_min [cm-1] =',PHdos%omega_min*Ha_cmm1,' omega_max [cm-1] =',PHdos%omega_max*Ha_cmm1
-     !end if
-
      ABI_CALLOC(PHdos%phdos,(PHdos%nomega))
      ABI_CALLOC(PHdos%pjdos,(PHdos%nomega,3,natom))
      ABI_CALLOC(PHdos%msqd_dos_atom,(PHdos%nomega,3,3,natom))
-     !
+
      ! === Sum over irreducible q-points ===
      do iq_ibz=1,PHdos%nqibz
+       !if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
 
        ! Fourier interpolation.
        call ifc_fourq(Ifc,Crystal,qibz(:,iq_ibz),phfrq,displ,out_eigvec=eigvec)
@@ -763,7 +760,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
        if (imesh>1.and..not.out_of_bounds) then
          select case (prtdos)
          case (1)
-           !
            ! Accumulate PHDOS and PJDOS with gaussian method.
            do imode=1,3*natom
              do io=1,PHdos%nomega
@@ -805,17 +801,19 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
                end do ! iat
              end do ! io
            end do ! imode
+
          case (2)
            ! === Tetrahedrons ===
            !  * Save phonon frequencies and eigenvectors.
            !  * Sum is done after the loops over the two meshes.
            full_phfrq(:,iq_ibz)=phfrq(:)
            full_eigvec(:,:,:,:,iq_ibz)=eigvec
+
          case default
            MSG_ERROR(sjoin("Wrong value for prtdos:", itoa(prtdos)))
          end select
-       end if !Second mesh and not out of boundaries
 
+       end if !Second mesh and not out of boundaries
      end do !irred q-points
 
      if (out_of_bounds) then
@@ -912,7 +910,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 
  ABI_FREE(symcart)
  ABI_FREE(invmass)
- !
+
  ! =======================
  ! === calculate IPDOS ===
  ! =======================
@@ -942,7 +940,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
      end do
    end if
  end do
- !
+
  ! Evaluate IDOS using simple simpson integration
  ! TODO should avoid the simpson rule using derf.F90, just to be consistent
  if (prtdos==1) then
@@ -1215,11 +1213,8 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,zeff,comm)
      !                out_eigvec=eigvec)
 
      ! Look for the information in the DDB (no interpolation here!)
-     rfphon(1:2)=1
-     rfelfd(1:2)=0
-     rfstrs(1:2)=0
-     qphon_padded = zero
-     qphon_padded(:,1) = qphon
+     rfphon(1:2)=1; rfelfd(1:2)=0; rfstrs(1:2)=0
+     qphon_padded = zero; qphon_padded(:,1) = qphon
 
      call gtblk9(ddb,iblok,qphon_padded,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
