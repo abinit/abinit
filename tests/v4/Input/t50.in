@@ -78,7 +78,7 @@
 #%%   t50.out, tolnlines = 1, tolabs=  2.000e-05, tolrel=  2.000e-09
 #%% extra_inputs = t50.ddb.in.gz
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% authors =  M. Veithen
 #%% keywords = 

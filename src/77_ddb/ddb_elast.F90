@@ -630,11 +630,13 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 &     elast_stress(ivarA,3)/100.00_dp,elast_stress(ivarA,4)/100.00_dp,&
 &     elast_stress(ivarA,5)/100.00_dp,elast_stress(ivarA,6)/100.00_dp
    end do
-   do ivarA=1,6
-     write(iout,'(6f12.7)')elast_stress(ivarA,1)/100.00_dp,elast_stress(ivarA,2)/100.00_dp,&
-&     elast_stress(ivarA,3)/100.00_dp,elast_stress(ivarA,4)/100.00_dp,&
-&     elast_stress(ivarA,5)/100.00_dp,elast_stress(ivarA,6)/100.00_dp
-   end do
+   if (iwrite) then
+     do ivarA=1,6
+       write(iout,'(6f12.7)')elast_stress(ivarA,1)/100.00_dp,elast_stress(ivarA,2)/100.00_dp,&
+&       elast_stress(ivarA,3)/100.00_dp,elast_stress(ivarA,4)/100.00_dp,&
+&       elast_stress(ivarA,5)/100.00_dp,elast_stress(ivarA,6)/100.00_dp
+     end do
+   end if
 
 !  then the complinace tensors with stress correction
    write(message,'(5a)')ch10,&

@@ -34,7 +34,7 @@
 #%%   t85.out,   tolnlines=    0,   tolabs=  0.0,         tolrel= 0.0
 #%% psp_files = 
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = E. Bousquet
 #%% keywords = 

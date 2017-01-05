@@ -51,7 +51,7 @@ qph1l  0.00000000E+00  0.00000000E+00  0.00000000E+00    1.0
 #%%   t28.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% extra_inputs =  t26o.gz
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = P. Boulanger
 #%% keywords =  
