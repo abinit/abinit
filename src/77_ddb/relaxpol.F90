@@ -111,6 +111,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 !scalars
  integer :: flag,iatom,idir,ii,index,index1,index_tild,info,ipert,istrain
  integer :: itypat,jdir,job,jpert,polunit,posi,posj,sizef
+ logical :: iwrite
  real(dp) :: e1,fmax,poltmp,sigmax,tol,value,ucvol
  character(len=500) :: message
 !arrays
@@ -128,6 +129,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 
  rprimd = Crystal%rprimd
  ucvol = Crystal%ucvol
+ iwrite = iout > 0
 
 !Check if some degrees of freedom remain fixed during the optimization
 
@@ -193,7 +195,6 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
    end do
  end if
 
-
  ABI_ALLOCATE(fcmat,(2,sizef,sizef))
  ABI_ALLOCATE(ifcmat,(2,sizef,sizef))
  ABI_ALLOCATE(vec,(sizef))
@@ -206,7 +207,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 
 !Build the vector that stores the forces, sigma and the polarization
 
- vec(:) = 0._dp
+ vec(:) = zero
  posi = 0
 
  if (relaxat == 1) then
@@ -366,8 +367,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
                end if
              end if
 !            DEBUG
-!            write(100,'(4(2x,i3),5x,f16.9)')idir,ipert,jdir,jpert,&
-!            & fcmat(1,posi,posj)
+!            write(100,'(4(2x,i3),5x,f16.9)')idir,ipert,jdir,jpert,fcmat(1,posi,posj)
 !            ENDDEBUG
            end if
          end do
@@ -417,7 +417,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 !  ENDDEBUG
 
 !  Compute \delta R, \delta \eta and \lambda
-   delta(:) = 0._dp
+   delta(:) = zero
    do ipert = 1, sizef
      do jpert = 1, sizef
        delta(ipert) = delta(ipert) + ifcmat(1,ipert,jpert)*vec(jpert)
@@ -429,8 +429,8 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
    posi = 0
    if (relaxat == 1) then
 
-     delta_xcart(:,:) = 0._dp
-     xcart_new(:,:) = 0._dp
+     delta_xcart(:,:) = zero
+     xcart_new(:,:) = zero
      do iatom = 1, natom
        if (irelaxat(iatom) == 1) then
          do idir = 1, 3
@@ -448,9 +448,9 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
          ii = log10(abs(value))
          if (ii <= 0) then
            ii = abs(ii) + 1
-           value = 1._dp*int(tol*value*10.0_dp**ii)/(tol*10.0_dp**ii) !vz_d
+           value = one*int(tol*value*10.0_dp**ii)/(tol*10.0_dp**ii) !vz_d
          else
-           value = 1._dp*int(tol*value/(10.0_dp**ii))*(10.0_dp**ii)/tol !vz_d
+           value = one*int(tol*value/(10.0_dp**ii))*(10.0_dp**ii)/tol !vz_d
          end if
          delta_xcart(idir,iatom) = value
        end do
@@ -471,8 +471,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 
 !  Update cell parameters
    if (relaxstr == 1) then
-
-     delta_eta(:) = 0._dp
+     delta_eta(:) = zero
      do istrain = 1, 6
        if (irelaxstrain(istrain) == 1) then
          posi = posi + 1
@@ -498,7 +497,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
      end do
      rprimd_new(:,:) = rprimd_new(:,:) + rprimd(:,:)
 
-     acell_new(:) = 0._dp
+     acell_new(:) = zero
      do idir = 1, 3
        do jdir = 1, 3
          acell_new(idir) = acell_new(idir) + &
@@ -512,19 +511,20 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 
 !  Write out the results
 
-   write(iout,*)
-   write(iout,'(a,80a,a)') ch10,('=',ii=1,80),ch10
-   write(iout,*)
-   write(iout,*)'Relaxation of the geometry at fixed polarization:'
-   write(iout,*)
-
-   write(iout,'(a,3(2x,f16.9))')' Lambda = ',(lambda(idir),idir = 1, 3)
-   write(iout,'(a,e16.9)')' Value of the energy functional E_1 = ',e1
-   write(iout,*)
-   write(iout,*)'Difference between actual value of the Polarization (C/m^2)'
-   write(iout,*)'and the target value:'
+   if (iwrite) then
+     write(iout,*)
+     write(iout,'(a,80a,a)') ch10,('=',ii=1,80),ch10
+     write(iout,*)
+     write(iout,*)'Relaxation of the geometry at fixed polarization:'
+     write(iout,*)
+     write(iout,'(a,3(2x,f16.9))')' Lambda = ',(lambda(idir),idir = 1, 3)
+     write(iout,'(a,e16.9)')' Value of the energy functional E_1 = ',e1
+     write(iout,*)
+     write(iout,*)'Difference between actual value of the Polarization (C/m^2)'
+     write(iout,*)'and the target value:'
+   end if
    diffpol(:) = (ptot_cart(:) - targetpol(:))*e_Cb/((Bohr_Ang*1.0d-10)**2)
-   write(iout,'(3(3x,f16.9))')(diffpol(idir),idir = 1, 3)
+   if (iwrite) write(iout,'(3(3x,f16.9))')(diffpol(idir),idir = 1, 3)
 
    if (relaxat == 1) then
 !    Compute the forces induced on the atoms by the electric field
@@ -542,36 +542,40 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 !    Compute remaining forces and write them out
 
      fdiff(:,:) = fcart(:,:) - felfd(:,:)
-     write(iout,*)
-     write(iout,*)'Difference between the Hellmann-Feynman forces'
-     write(iout,*)'and the forces induced by the electric field'
-     write(iout,*)'(cartesian coordinates, hartree/bohr)'
+     if (iwrite) then
+       write(iout,*)
+       write(iout,*)'Difference between the Hellmann-Feynman forces'
+       write(iout,*)'and the forces induced by the electric field'
+       write(iout,*)'(cartesian coordinates, hartree/bohr)'
+     end if
      fmax = zero
      do iatom = 1, natom
-       write(iout,'(3(3x,es16.9))')(fdiff(idir,iatom),idir = 1, 3)
+       if (iwrite) write(iout,'(3(3x,es16.9))')(fdiff(idir,iatom),idir = 1, 3)
        do idir = 1, 3
          if (abs(fdiff(idir,iatom)) > fmax) fmax = abs(fdiff(idir,iatom))
        end do
      end do
-     write(iout,'(a,3x,es16.9)')' fmax = ',fmax
 
-     write(iout,*)
-     write(iout,*)'Change of cartesian coordinates (delta_xcart):'
-     do iatom = 1, natom
-       write(iout,'(5x,i3,3(2x,f16.9))')iatom,(delta_xcart(idir,iatom),idir = 1, 3)
-     end do
-     write(iout,*)
-     write(iout,*)'New cartesian coordinates (xcart_new):'
-     write(iout,*)'  xcart'
-     do iatom = 1, natom
-       write(iout,'(3(3x,d22.14))')(xcart_new(idir,iatom),idir = 1, 3)
-     end do
-     write(iout,*)
-     write(iout,*)'New reduced coordinates (xred_new):'
-     write(iout,*)'  xred'
-     do iatom = 1, natom
-       write(iout,'(3(3x,d22.14))')(xred_new(idir,iatom),idir = 1, 3)
-     end do
+     if (iwrite) then
+       write(iout,'(a,3x,es16.9)')' fmax = ',fmax
+       write(iout,*)
+       write(iout,*)'Change of cartesian coordinates (delta_xcart):'
+       do iatom = 1, natom
+         write(iout,'(5x,i3,3(2x,f16.9))')iatom,(delta_xcart(idir,iatom),idir = 1, 3)
+       end do
+       write(iout,*)
+       write(iout,*)'New cartesian coordinates (xcart_new):'
+       write(iout,*)'  xcart'
+       do iatom = 1, natom
+         write(iout,'(3(3x,d22.14))')(xcart_new(idir,iatom),idir = 1, 3)
+       end do
+       write(iout,*)
+       write(iout,*)'New reduced coordinates (xred_new):'
+       write(iout,*)'  xred'
+       do iatom = 1, natom
+         write(iout,'(3(3x,d22.14))')(xred_new(idir,iatom),idir = 1, 3)
+       end do
+     end if
 
    end if         ! relaxat == 1
 
@@ -598,40 +602,31 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
      do istrain = 1, 6
        if (abs(diffsig(istrain)) > sigmax) sigmax = abs(diffsig(istrain))
      end do
-     write(iout,*)
-     write(iout,*)'Difference between the Hellmann-Feynman stresses'
-     write(iout,*)'and the stresses induced by the electric field'
-     write(iout,*)'(cartesian coordinates, hartree/bohr^3)'
-     write(iout,'(2x,a,f16.9,5x,a,f16.9)')'diffsig(1) = ',diffsig(1),'diffsig(4) = ',diffsig(4)
-     write(iout,'(2x,a,f16.9,5x,a,f16.9)')'diffsig(2) = ',diffsig(2),'diffsig(5) = ',diffsig(5)
-     write(iout,'(2x,a,f16.9,5x,a,f16.9)')'diffsig(3) = ',diffsig(3),'diffsig(6) = ',diffsig(6)
-     write(iout,'(a,3x,es16.9)')' sigmax = ',sigmax
-
-!    DEBUG
-!    do istrain = 1, 6
-!    write(std_out,'(2(5x,e16.9))')strten(istrain),sigelfd(istrain)
-!    end do
-!    stop
-!    ENDDEBUG
-
-     write(iout,*)
-     write(iout,*)'Induced strain (delta_eta):'
-     write(iout,'(2x,a,f16.9,5x,a,f16.9)')'delta_eta(1) = ',delta_eta(1),'delta_eta(4) = ',delta_eta(4)
-     write(iout,'(2x,a,f16.9,5x,a,f16.9)')'delta_eta(2) = ',delta_eta(2),'delta_eta(5) = ',delta_eta(5)
-     write(iout,'(2x,a,f16.9,5x,a,f16.9)')'delta_eta(3) = ',delta_eta(3),'delta_eta(6) = ',delta_eta(6)
-
-     write(iout,*)
-     write(iout,*)'New lattice constants (acell_new):'
-     write(iout,*)'  acell'
-     write(iout,'(3(2x,d22.14))')(acell_new(idir),idir = 1, 3)
-
-     write(iout,*)
-     write(iout,*)'New primitive vectors (rprim_new):'
-     write(iout,*)'  rprim'
-     write(iout,'(3(2x,d22.14))')(rprim(idir,1),idir = 1, 3)
-     write(iout,'(3(2x,d22.14))')(rprim(idir,2),idir = 1, 3)
-     write(iout,'(3(2x,d22.14))')(rprim(idir,3),idir = 1, 3)
-
+     if (iwrite) then
+       write(iout,*)
+       write(iout,*)'Difference between the Hellmann-Feynman stresses'
+       write(iout,*)'and the stresses induced by the electric field'
+       write(iout,*)'(cartesian coordinates, hartree/bohr^3)'
+       write(iout,'(2x,a,f16.9,5x,a,f16.9)')'diffsig(1) = ',diffsig(1),'diffsig(4) = ',diffsig(4)
+       write(iout,'(2x,a,f16.9,5x,a,f16.9)')'diffsig(2) = ',diffsig(2),'diffsig(5) = ',diffsig(5)
+       write(iout,'(2x,a,f16.9,5x,a,f16.9)')'diffsig(3) = ',diffsig(3),'diffsig(6) = ',diffsig(6)
+       write(iout,'(a,3x,es16.9)')' sigmax = ',sigmax
+       write(iout,*)
+       write(iout,*)'Induced strain (delta_eta):'
+       write(iout,'(2x,a,f16.9,5x,a,f16.9)')'delta_eta(1) = ',delta_eta(1),'delta_eta(4) = ',delta_eta(4)
+       write(iout,'(2x,a,f16.9,5x,a,f16.9)')'delta_eta(2) = ',delta_eta(2),'delta_eta(5) = ',delta_eta(5)
+       write(iout,'(2x,a,f16.9,5x,a,f16.9)')'delta_eta(3) = ',delta_eta(3),'delta_eta(6) = ',delta_eta(6)
+       write(iout,*)
+       write(iout,*)'New lattice constants (acell_new):'
+       write(iout,*)'  acell'
+       write(iout,'(3(2x,d22.14))')(acell_new(idir),idir = 1, 3)
+       write(iout,*)
+       write(iout,*)'New primitive vectors (rprim_new):'
+       write(iout,*)'  rprim'
+       write(iout,'(3(2x,d22.14))')(rprim(idir,1),idir = 1, 3)
+       write(iout,'(3(2x,d22.14))')(rprim(idir,2),idir = 1, 3)
+       write(iout,'(3(2x,d22.14))')(rprim(idir,3),idir = 1, 3)
+     end if
    end if         ! relaxstr /= 0
 
  end if    !  (relaxat /= 0).or.(relaxstr /= 0)
