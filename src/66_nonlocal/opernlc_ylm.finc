@@ -173,8 +173,8 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
        end do
      end do
    end do
-!$OMP END DO
-!$OMP END PARALLEL 
+!!$OMP END DO
+!!$OMP END PARALLEL 
  end if
 
 !Accumulate gxfac related to nonlocal operator (PAW)

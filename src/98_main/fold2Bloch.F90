@@ -89,7 +89,7 @@ character(len=500) :: msg
 #endif
 
  if (xmpi_comm_size(comm) /= 1) then
-   MSG_ERROR("flod2block not programmed for parallel execution.")
+   MSG_ERROR("fold2bloch not programmed for parallel execution.")
  end if
 
  ! Test if the netcdf library supports MPI-IO
@@ -110,7 +110,7 @@ character(len=500) :: msg
 
  pos=INDEX(fname,"_") 
  !read(fname(1:pos-1),*) seedname ! File name root
- write(seedname,*) fname(1:pos-1) 
+ write(seedname,'(a)') fname(1:pos-1) 
 !folds=(/1,2,3/)
 
  write(std_out,*) '         '//achar(27)//'[97m ***********************' !print program header in pearl white
