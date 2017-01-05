@@ -812,6 +812,7 @@ program anaddb
 
 !**********************************************************************
 
+ ! Free memory
  ABI_DEALLOCATE(displ)
  ABI_DEALLOCATE(d2cart)
  ABI_DEALLOCATE(eigval)

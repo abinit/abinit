@@ -420,7 +420,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  integer :: nqbz,option,plus,sumg0,irpt,irpt_new,nqibz
  integer :: nprocs,my_rank,ierr
  real(dp),parameter :: qphnrm=one
- real(dp) :: xval
+ real(dp) :: xval,cpu,wall,gflops
  character(len=500) :: message
  type(ifc_type) :: ifc_tmp
 !arrays
@@ -438,6 +438,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 !******************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ call cwtime(cpu, wall, gflops, "start")
 
  ! This dimension should be encapsulated somewhere. We don't want to
  ! change the entire code if someone adds a new kind of perturbation.
@@ -564,6 +565,9 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
 
    do iqpt=1,nqbz
+     !if (mod(iqpt, nprocs) /= my_rank) then ! mpi-parallelism
+     !  ifc%dynmat(:,:,:,:,:,iqpt) = zero; cycle
+     !end if
      qpt(:)=qbz(:,iqpt)
      sumg0=0
      call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,Crystal%xred,zeff)
@@ -572,6 +576,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      call nanal9(dyew,Ifc%dynmat,iqpt,natom,nqbz,plus)
    end do
 
+   !call xmpi_sum_mpi(ifc%dynmat, comm, ierr)
    ABI_FREE(dyew)
  end if
 
@@ -627,9 +632,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ! In the case of effective potential, we need to keep all the points
  Ifc%nrpt = 0
  do irpt=1,ifc_tmp%nrpt
-   if (sum(ifc_tmp%wghatm(:,:,irpt)) /= 0) then
-     Ifc%nrpt = Ifc%nrpt+1
-   end if
+   if (sum(ifc_tmp%wghatm(:,:,irpt)) /= 0) Ifc%nrpt = Ifc%nrpt+1
  end do
 
  ABI_CALLOC(Ifc%atmfrc,(2,3,natom,3,natom,Ifc%nrpt))
@@ -707,6 +710,9 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ABI_FREE(qbz)
  ABI_FREE(qibz)
 
+ call cwtime(cpu, wall, gflops, "stop")
+ write(std_out,"(2(a,f6.2))")" ifc_init: cpu: ",cpu,", wall: ",wall
+
 end subroutine ifc_init
 !!***
 
@@ -771,12 +777,6 @@ subroutine ifc_print_info(ifc,header,unit,prtvol)
    call wrtout(unt,msg)
  end do
  call wrtout(unt, sjoin(" acell:", ltoa(ifc%acell)))
-
- !angdeg(1)=ACOS(ifc%rmet(2,3)/SQRT(ifc%rmet(2,2)*ifc%rmet(3,3)))/two_pi*360.0d0
- !angdeg(2)=ACOS(ifc%rmet(1,3)/SQRT(ifc%rmet(1,1)*ifc%rmet(3,3)))/two_pi*360.0d0
- !angdeg(3)=ACOS(ifc%rmet(1,2)/SQRT(ifc%rmet(1,1)*ifc%rmet(2,2)))/two_pi*360.0d0
- !write(msg,'(a,3es16.8,a)')' Angles (23,13,12)=',angdeg(1:3),' degrees'
- !call wrtout(unt, msg)
 
  call wrtout(unt, sjoin(" Acoustic Sum Rule option (asr):", itoa(ifc%asr)))
  call wrtout(unt, sjoin(" Option for the sampling of the BZ (brav):", itoa(ifc%brav)))
@@ -1039,7 +1039,7 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq)
    do nu=1,natom3
      if (abs(phfrq(nu)) > tol12) then
        dot = cg_zdotc(natom3, eigvec(1,1,nu), omat(1,1,nu))
-       ! abs(w) is needed to get the correct derivative if we have a purely imaginary solution)
+       ! abs(w) is needed to get the correct derivative if we have a purely imaginary solution.
        dwdq(ii, nu) = dot(1) / (two * abs(phfrq(nu)))
      else
        dwdq(ii, nu) = zero
@@ -1716,9 +1716,7 @@ contains
 #endif
 
 end subroutine ifc_print
-
 !!***
-
 
 !----------------------------------------------------------------------
 
@@ -2190,7 +2188,6 @@ subroutine omega_decomp(amu,natom,ntypat,typat,dynmatfl,dynmatsr,dynmatlr,iqpt,n
    end do
  end do
 
-
 !Calculation of <eigvec|Dyn_tot,Dyn_SR,Dyn_LR|eigenvec>=omega**2
 
 !write(ab_out,*)''
@@ -2205,10 +2202,7 @@ subroutine omega_decomp(amu,natom,ntypat,typat,dynmatfl,dynmatsr,dynmatlr,iqpt,n
 !write(std_out,'(a12,2x,a10,2x,a10,2x,a10,2x,a16,2x,a16,2x,a16)') 'Mode number.','tot','SR','LR','tot**2','SR**2','LR**2'
 
  do imode=1,3*natom
-
-   sumfl=0.0d0
-   sumlr=0.0d0
-   sumsr=0.0d0
+   sumfl=zero; sumlr=zero; sumsr=zero
 
    do ipert1=1,natom
      do ipert2=1,natom
@@ -2382,7 +2376,7 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
    end do
 
  end do !irred q-points
- close (unit=unit_btrap)
+ close (unit_btrap)
 
  ABI_DEALLOCATE(qibz)
  ABI_DEALLOCATE(qbz)

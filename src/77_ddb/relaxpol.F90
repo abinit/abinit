@@ -72,15 +72,16 @@
 
 
 subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
-& mpert,msize,natfix,natom,nstrfix,pel,red_ptot,relaxat,relaxstr,&  
+& mpert,msize,natfix,natom,nstrfix,pel,red_ptot,relaxat,relaxstr,&
 & strten,targetpol,usepaw)
 
  use defs_basis
  use m_profiling_abi
  use m_errors
 
- use m_dynmat,  only : symdyma
- use m_crystal, only : crystal_t
+ use m_fstrings,  only : sjoin, itoa
+ use m_dynmat,    only : symdyma
+ use m_crystal,   only : crystal_t
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -103,7 +104,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
  integer,intent(in) :: blkflg(msize),iatfix(natom)
  integer,intent(in) :: istrfix(6)
  real(dp),intent(in) :: fred(3,natom),pel(3),strten(6)
- real(dp),intent(in) :: red_ptot(3) 
+ real(dp),intent(in) :: red_ptot(3)
  real(dp),intent(inout) :: blkval(2,msize),targetpol(3)
 
 !Local variables -------------------------
@@ -267,7 +268,7 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 !Transform the polarization to cartesian coordinates
  polunit = 3
  pelev=zero
- call polcart(red_ptot,pel,pel_cart,pelev,pion,pion_cart,polunit,&  
+ call polcart(red_ptot,pel,pel_cart,pelev,pion,pion_cart,polunit,&
 & ptot_cart,rprimd,ucvol,iout,usepaw)
 
  do idir = 1, 3
@@ -336,8 +337,8 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
  fcmat(:,:,:) = zero
 
  posi = 0
- flag = 0  
-! When fcmat has been build, flag = 0 if all elements were available. 
+ flag = 0
+! When fcmat has been build, flag = 0 if all elements were available.
 ! Otherwise, it will be 1. In case one element is missing, check if
 ! it can be obtained by changing the order of the perturbations
 
@@ -392,8 +393,11 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 
    job = 1          ! compute inverse only
    ifcmat(:,:,:) = fcmat(:,:,:)
+
    call dzgefa(ifcmat,sizef,sizef,ipvt,info)
+   ABI_CHECK(info == 0, sjoin("dzgefa returned:", itoa(info)))
    call dzgedi(ifcmat,sizef,sizef,ipvt,det,zgwork,job)
+   ABI_CHECK(job == 0, sjoin("dzgedi returned:", itoa(job)))
 
 !  DEBUG
 !  write(100,*)'relaxat = ',relaxat
@@ -599,12 +603,9 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
      write(iout,*)'Difference between the Hellmann-Feynman stresses'
      write(iout,*)'and the stresses induced by the electric field'
      write(iout,*)'(cartesian coordinates, hartree/bohr^3)'
-     write(iout,'(2x,a,f16.9,5x,a,f16.9)')'diffsig(1) = ',diffsig(1),&
-&     'diffsig(4) = ',diffsig(4)
-     write(iout,'(2x,a,f16.9,5x,a,f16.9)')'diffsig(2) = ',diffsig(2),&
-&     'diffsig(5) = ',diffsig(5)
-     write(iout,'(2x,a,f16.9,5x,a,f16.9)')'diffsig(3) = ',diffsig(3),&
-&     'diffsig(6) = ',diffsig(6)
+     write(iout,'(2x,a,f16.9,5x,a,f16.9)')'diffsig(1) = ',diffsig(1),'diffsig(4) = ',diffsig(4)
+     write(iout,'(2x,a,f16.9,5x,a,f16.9)')'diffsig(2) = ',diffsig(2),'diffsig(5) = ',diffsig(5)
+     write(iout,'(2x,a,f16.9,5x,a,f16.9)')'diffsig(3) = ',diffsig(3),'diffsig(6) = ',diffsig(6)
      write(iout,'(a,3x,es16.9)')' sigmax = ',sigmax
 
 !    DEBUG
@@ -616,12 +617,9 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
 
      write(iout,*)
      write(iout,*)'Induced strain (delta_eta):'
-     write(iout,'(2x,a,f16.9,5x,a,f16.9)')'delta_eta(1) = ',delta_eta(1),&
-&     'delta_eta(4) = ',delta_eta(4)
-     write(iout,'(2x,a,f16.9,5x,a,f16.9)')'delta_eta(2) = ',delta_eta(2),&
-&     'delta_eta(5) = ',delta_eta(5)
-     write(iout,'(2x,a,f16.9,5x,a,f16.9)')'delta_eta(3) = ',delta_eta(3),&
-&     'delta_eta(6) = ',delta_eta(6)
+     write(iout,'(2x,a,f16.9,5x,a,f16.9)')'delta_eta(1) = ',delta_eta(1),'delta_eta(4) = ',delta_eta(4)
+     write(iout,'(2x,a,f16.9,5x,a,f16.9)')'delta_eta(2) = ',delta_eta(2),'delta_eta(5) = ',delta_eta(5)
+     write(iout,'(2x,a,f16.9,5x,a,f16.9)')'delta_eta(3) = ',delta_eta(3),'delta_eta(6) = ',delta_eta(6)
 
      write(iout,*)
      write(iout,*)'New lattice constants (acell_new):'

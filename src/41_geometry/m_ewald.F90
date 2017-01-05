@@ -612,7 +612,7 @@ end subroutine ewald2
 !! OUTPUT
 !! dyew(2,3,natom,3,natom)= Ewald part of the dynamical matrix,
 !!  second energy derivative wrt xred(3,natom) in Hartrees
-!!  (Denoted A-bar in the notes)
+!! Set to zero if all(zeff == zero)
 !!
 !! NOTES
 !! 1. The q=0 part should be subtracted, by another call to
@@ -675,6 +675,12 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  complex(dpc),allocatable :: expx1(:,:), expx2(:,:), expx3(:,:)
 
 ! *********************************************************************
+
+ ! This routine is expensive so skip the calculation and return zeros if zeff == zero.
+ ! Typically this happens when the DDB file does not contains zeff but dipdip = 1 is used (default).
+ !if (all(zeff == zero)) then
+ !  dyewt = zero; return
+ !end if
 
  ABI_ALLOCATE(dyewt,(2,3,natom,3,natom))
 
