@@ -88,7 +88,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
  type(anaddb_dataset_type),intent(in) :: anaddb_dtset
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok),instrain(3*natom,6)
- real(dp),intent(inout) :: d2asr(2,3,natom,3,natom)
+ real(dp),intent(in) :: d2asr(2,3,natom,3,natom)
  real(dp),intent(out) :: compl(6,6), compl_clamped(6,6),compl_stress(6,6)
  real(dp),intent(out) :: elast(6,6), elast_clamped(6,6),elast_stress(6,6)
 
@@ -267,7 +267,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
      end do
    end do
 
-   Apmatr(:,:)=0.0_dp
+   Apmatr(:,:)=zero
    do ivarA=1,3*natom
      do ivarB=1,3*natom
        do ii1=1,3*natom
@@ -375,8 +375,8 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 
 !  so now the inverse of the reduced matrix is in the matrixC
 !  now do another mulplication to get the pseudoinverse of the original
-   Cpmatr(:,:)=0.0_dp
-   Apmatr(:,:)=0.0_dp
+   Cpmatr(:,:)=zero
+   Apmatr(:,:)=zero
    do ivarA=1,3*natom-3
      do ivarB=1,3*natom-3
        Cpmatr(ivarA,ivarB)=Cmatr(ivarA,ivarB)
@@ -408,7 +408,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 !  so now the inverse of k matrix is in the kmatrix
 !  ending the part for pseudoinversing the K matrix
 !  then do the first matrix mulplication
-   new1(:,:)=0.0_dp
+   new1(:,:)=zero
    do ii1=1,6
      do ii2=1,3*natom
        do ivarA=1,3*natom
@@ -418,7 +418,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
      end do
    end do
 !  then do the second matrix mulplication, and change the value of kmatrix
-   new2(:,:)=0.0_dp
+   new2(:,:)=zero
    do ii1=1,6
      do ii2=1,6
        do ivarB=1,3*natom

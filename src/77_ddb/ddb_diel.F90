@@ -37,6 +37,7 @@
 !!  matrix eigenvalues, except if these are negative, and in this
 !!  case, give minus the square root of the absolute value
 !!  of the matrix eigenvalues). Hartree units.
+!! comm=MPI communicator.
 !!
 !! OUTPUT
 !! fact_oscstr(2,3,3*natom)=oscillator strengths for the different eigenmodes,
@@ -68,7 +69,7 @@
 
 
 subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-& iout,lst,mpert,natom,nph2l,phfrq)
+& iout,lst,mpert,natom,nph2l,phfrq,comm)
 
  use defs_basis
  use m_errors
@@ -90,7 +91,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iout,mpert,natom,nph2l
+ integer,intent(in) :: iout,mpert,natom,nph2l,comm
  type(crystal_t),intent(in) :: Crystal
  type(anaddb_dataset_type),intent(in) :: anaddb_dtset
 !arrays
@@ -394,8 +395,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 !          the possible imaginary parts of degenerate modes
 !          will cancel.
            frdiel(idir1,idir2,ifreq)=frdiel(idir1,idir2,ifreq)+&
-&           oscstr(1,idir1,idir2,imode) /&
-&           (phfrq(imode)**2-afreq**2)*four_pi/ucvol
+&           oscstr(1,idir1,idir2,imode) / (phfrq(imode)**2-afreq**2)*four_pi/ucvol
          end do
        end do
      end do

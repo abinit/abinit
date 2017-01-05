@@ -559,16 +559,13 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  if (Ifc%dipdip==1) then
    ! Take off the dipole-dipole part of the dynamical matrix
-   write(message, '(3a)' )' mkifc9 : will extract the dipole-dipole part,',ch10,&
-&                         ' using ewald9, q0dy3 and nanal9 for every wavevector.'
-   call wrtout(std_out,message,"COLL")
-
+   call wrtout(std_out, "Will extract the dipole-dipole part for every wavevector")
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
 
    do iqpt=1,nqbz
-     !if (mod(iqpt, nprocs) /= my_rank) then ! mpi-parallelism
-     !  ifc%dynmat(:,:,:,:,:,iqpt) = zero; cycle
-     !end if
+     if (mod(iqpt, nprocs) /= my_rank) then ! mpi-parallelism
+       ifc%dynmat(:,:,:,:,:,iqpt) = zero; cycle
+     end if
      qpt(:)=qbz(:,iqpt)
      sumg0=0
      call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,Crystal%xred,zeff)
@@ -577,7 +574,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      call nanal9(dyew,Ifc%dynmat,iqpt,natom,nqbz,plus)
    end do
 
-   !call xmpi_sum_mpi(ifc%dynmat, comm, ierr)
+   call xmpi_sum(ifc%dynmat, comm, ierr)
    ABI_FREE(dyew)
  end if
 

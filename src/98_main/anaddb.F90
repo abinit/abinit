@@ -663,7 +663,7 @@ program anaddb
 
      ! Evaluation of the oscillator strengths and frequency-dependent dielectric tensor.
      call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-&     ab_out,lst,mpert,natom,nph2l,phfrq)
+&     ab_out,lst,mpert,natom,nph2l,phfrq,comm)
      ! write(std_out,*)'after ddb_diel, dielt_rlx(:,:)=',dielt_rlx(:,:)
    end if
 
@@ -671,7 +671,7 @@ program anaddb
    if (inp%dieflag==2.or.inp%dieflag==3.or. inp%dieflag==4) then
 !    Everything is already in place...
      call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-&     ab_out,lst,mpert,natom,nph2l,phfrq)
+&     ab_out,lst,mpert,natom,nph2l,phfrq,comm)
    end if
 
  end if ! either nph2l/=0  or  dieflag==1
@@ -691,7 +691,8 @@ program anaddb
    d2cart(:,1:msize)=ddb%val(:,:,iblok)
 
    ! Print the electronic dielectric tensor
-   call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,ab_out,lst,mpert,natom,nph2l,phfrq)
+   call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
+     ab_out,lst,mpert,natom,nph2l,phfrq,comm)
  end if
 
 !**********************************************************************
