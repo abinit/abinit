@@ -331,7 +331,7 @@ subroutine ks_ddiago(Diago_ctl,nband_k,nfftc,mgfftc,ngfftc,natom,&
  end if
 
 !Continue to initialize the Hamiltonian (spin-dependent part)
- call load_spin_hamiltonian(gs_hamk,isppol,paw_ij=Paw_ij,vlocal=vlocal)
+ call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
 !
 !* Calculate G-vectors, for this k-point.
 !* Count the number of planewaves as a check.

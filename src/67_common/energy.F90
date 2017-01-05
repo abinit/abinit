@@ -474,9 +474,8 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
 !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
  call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,&
-& dtset%natom,dtset%typat,xred,dtset%nfft,&
-& dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
-& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
+& dtset%natom,dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
+& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,&
 & nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
 
@@ -551,8 +550,7 @@ subroutine energy(cg,compch_fft,dtset,electronpositron,&
    end if
 
 !  Continue Hamlitonian initializaton
-   call load_spin_hamiltonian(gs_hamk,isppol,paw_ij=paw_ij,vlocal=vlocal,&
-&            comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
    if (with_vxctau) then
      call load_spin_hamiltonian(gs_hamk,isppol,vxctaulocal=vxctaulocal)
    end if

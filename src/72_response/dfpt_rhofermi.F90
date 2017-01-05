@@ -238,7 +238,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  type(rf_hamiltonian_type) :: rf_hamkq
 !arrays
  integer,allocatable :: kg1_k(:,:),kg_k(:,:)
- integer,pointer :: my_atmtab(:)
  real(dp) :: kpoint(3),kpq(3),tsec(2)
  real(dp) :: ylmgr_dum(1,1,1)
  real(dp),allocatable :: buffer1(:),dkinpw(:),doccde_k(:)
@@ -272,7 +271,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  spaceworld=mpi_enreg%comm_cell
  me=mpi_enreg%me_kpt
  paral_atom=(my_natom/=dtset%natom)
- my_atmtab=>mpi_enreg%my_atmtab
 
 !Initialize output variables
  fe1fixed=zero
@@ -301,14 +299,6 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  else
    mcprjq=0;mcprjq_disk=0
  end if
-
-!Initialize most of the Hamiltonian (arrays and quantities that do not depend on k + nl form factors)
- call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nsppol,nspden,natom,&
-& dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
-& paw_ij=paw_ij,usecprj=usecprj,ph1d=ph1d,use_gpu_cuda=dtset%use_gpu_cuda,&
-& mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
- call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,paw_ij1=paw_ij1fr,&
-& mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
 !PAW:has to compute frozen part of Dij^(1) (without Vpsp(1) contribution)
  if (psps%usepaw==1) then
@@ -340,15 +330,21 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    end if
  end if
 
+!Initialize most of the Hamiltonian (arrays and quantities that do not depend on k + nl form factors)
+ call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nsppol,nspden,natom,&
+& dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
+& paw_ij=paw_ij,usecprj=usecprj,ph1d=ph1d,use_gpu_cuda=dtset%use_gpu_cuda,&
+& mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,mpi_spintab=mpi_enreg%my_isppoltab)
+ call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,paw_ij1=paw_ij1fr,&
+& mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,mpi_spintab=mpi_enreg%my_isppoltab)
+
 !LOOP OVER SPINS
  do isppol=1,nsppol
    ikg=0;ikg1=0
 
 !  Continue to initialize the Hamiltonian at k+q
-   call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij,&
-&       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
-   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,paw_ij1=paw_ij1fr,&
-&       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+   call load_spin_hamiltonian(gs_hamkq,isppol,with_nonlocal=.true.)
+   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,with_nonlocal=.true.)
 
 !  Nullify contribution to density at EFermi from this k-point
    rhoaug(:,:,:)=zero

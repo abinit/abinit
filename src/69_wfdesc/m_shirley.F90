@@ -1753,7 +1753,7 @@ subroutine shirley_hks(Wsh,kpt,spin,Ham_k,Cryst,Psps,Pawtab,Pawang,Paw_ij,sh_siz
  call wrap2_pmhalf(kpt(:),k4intp(:),shifts(:))
 
  ! Continue to prepare the GS Hamiltonian.
- call load_spin_hamiltonian(Ham_k,spin,paw_ij=Paw_ij)
+ call load_spin_hamiltonian(Ham_k,spin,with_nonlocal=.true.)
 
  call kdata_init(Kdata,Cryst,Psps,k4intp,istwf_k,Wsh%ngfft,Wsh%MPI_enreg,kg_k=kg_k)
 

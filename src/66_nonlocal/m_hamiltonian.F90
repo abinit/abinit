@@ -159,8 +159,8 @@ module m_hamiltonian
   integer:: nspinor
    ! Number of spinorial components
 
-  integer:: nsppol
-   ! 1 for unpolarized, 2 for spin-polarized
+  integer :: nsppol
+   ! Total number of spin components (1=non-polarized, 2=polarized)
 
   integer :: ntypat
    ! Number of types of pseudopotentials same as dtset%ntypat
@@ -261,12 +261,10 @@ module m_hamiltonian
 
 ! ===== Real arrays
 
-  real(dp), allocatable :: ekb_preload(:,:,:,:)
-   ! ekb_preload(dimekb1,dimekb2,nspinor**2,nsppol)
-   ! See ekb description
-   ! In some cases, spin-dependent non-local foactors ekb have to
-   ! be preloaded before the loop over spins. In this case, ekb(:,:,:)
-   ! will point to ekb_preload(:,:,:,isppol) in the loop over spins.
+  real(dp), allocatable :: ekb_spin(:,:,:,:)
+   ! ekb_spin(dimekb1,dimekb2,nspinor**2,my_nsppol)
+   ! Contains the values of ekb array for all spins treated by current process
+   ! See ekb description ; ekb is pointer to ekb_spin(:,:,:,my_isppol)
 
   real(dp), allocatable :: sij(:,:)
    ! sij(dimekb1,ntypat*usepaw) = overlap matrix for paw calculation
@@ -309,6 +307,7 @@ module m_hamiltonian
    !          and number of atom (natom)
    !          dimekb1=lmnmax*(lmnmax+1)/2 ; dimekb2=natom
    ! ekb is spin dependent in the case of PAW calculations.
+   ! For each spin component, ekb points to ekb_spin(:,:,:,my_isppol)
 
   real(dp), ABI_CONTIGUOUS pointer :: ffnl_k(:,:,:,:) => null()
    ! ffnl_k(npw_fft_k,2,dimffnl_k,ntypat)
@@ -412,8 +411,8 @@ module m_hamiltonian
   integer:: nspinor
    ! Number of spinorial components
 
-  integer:: nsppol
-   ! 1 for unpolarized, 2 for spin-polarized
+  integer :: nsppol
+   ! Total number of spin components (1=non-polarized, 2=polarized)
 
   integer :: nvloc
    ! Number of components of vloc
@@ -424,19 +423,15 @@ module m_hamiltonian
 
 ! ===== Real arrays
 
-  real(dp), allocatable :: e1kbfr_preload(:,:,:,:)
-   ! e1kbfr_preload(dime1kb1,dime1kb2,nspinor**2,nsppol)
-   ! See e1kbfr description
-   ! In some cases, spin-dependent non-local foactors e1kbfr have to
-   ! be preloaded before the loop over spins. In this case, e1kbfr(:,:,:)
-   ! will point to e1kbfr_preload(:,:,:,isppol) in the loop over spins.
+  real(dp), allocatable :: e1kbfr_spin(:,:,:,:)
+   ! e1kbfr_spin(dimekb1,dimekb2,nspinor**2,my_nsppol)
+   ! Contains the values of e1kbfr array for all spins treated by current process
+   ! See e1kbfr description ; e1kbfr is pointer to e1kbfr_spin(:,:,:,isppol)
 
-  real(dp), allocatable :: e1kbsc_preload(:,:,:,:)
-   ! e1kbsc_preload(dime1kb1,dime1kb2,nspinor**2,nsppol)
-   ! See e1kbsc description
-   ! In some cases, spin-dependent non-local foactors e1kbsc have to
-   ! be preloaded before the loop over spins. In this case, e1kbsc(:,:,:)
-   ! will point to e1kbsc_preload(:,:,:,isppol) in the loop over spins.
+  real(dp), allocatable :: e1kbsc_spin(:,:,:,:)
+   ! e1kbsc_spin(dimekb1,dimekb2,nspinor**2,my_nsppol)
+   ! Contains the values of e1kbsc array for all spins treated by current process
+   ! See e1kbsc description ; e1kbsc is pointer to e1kbsc_spin(:,:,:,isppol)
 
 ! ===== Real pointers
 
@@ -460,11 +455,13 @@ module m_hamiltonian
    ! Frozen part of 1st derivative of ekb
    ! for the considered perturbation (not depending on VHxc^(1))
    ! e1kbfr(dime1kb1,dime1kb2,nspinor**2)
+   ! For each spin component, e1kbfr points to e1kbfr_spin(:,:,:,my_isppol)
 
   real(dp), ABI_CONTIGUOUS pointer :: e1kbsc(:,:,:) => null()
    ! Self-consistent part of 1st derivative of ekb
    ! for the considered perturbation (depending on VHxc^(1))
    ! e1kbsc(dime1kb1,dime1kb2,nspinor**2)
+   ! For each spin component, e1kbfr points to e1kbfr_spin(:,:,:,my_isppol)
 
   real(dp), ABI_CONTIGUOUS pointer :: vlocal1(:,:,:,:) => null()
    ! vlocal1(cplex*n4,n5,n6,nvloc)
@@ -665,6 +662,7 @@ subroutine destroy_hamiltonian(Ham)
  if (allocated(Ham%phkxred))   then
    ABI_DEALLOCATE(Ham%phkxred)
  end if
+ if (associated(Ham%ekb)) nullify(Ham%ekb)
  if (associated(Ham%vlocal)) nullify(Ham%vlocal)
  if (associated(Ham%vxctaulocal)) nullify(Ham%vxctaulocal)
  if (associated(Ham%xred)) nullify(Ham%xred)
@@ -680,11 +678,8 @@ subroutine destroy_hamiltonian(Ham)
  if (associated(Ham%ph3d_kp)) nullify(Ham%ph3d_kp)
 
 ! Real arrays
- if (allocated(Ham%ekb_preload))   then
-   ABI_DEALLOCATE(Ham%ekb_preload)
-   nullify(Ham%ekb)
- else if (associated(Ham%ekb))   then
-   ABI_DEALLOCATE(Ham%ekb)
+ if (allocated(Ham%ekb_spin))   then
+   ABI_DEALLOCATE(Ham%ekb_spin)
  end if
  if (allocated(Ham%sij))   then
    ABI_DEALLOCATE(Ham%sij)
@@ -730,6 +725,9 @@ end subroutine destroy_hamiltonian
 !!  nspden=Number of spin density components.
 !!  mgfft=Maximum size for 1D FFTs i.e., MAXVAL(ngfft(1:3))
 !!  [mpi_atmtab(:)]=optional, indexes of the atoms treated by current proc
+!!  [mpi_spintab(2)]=optional, flags defining the spin(s) treated be current process:
+!!                   mpi_spintab(1)=1 if non-polarized or spin-up treated
+!!                   mpi_spintab(2)=1 if polarized and spin-dn treated
 !!  psps<pseudopotential_type>=structure datatype gathering data on the pseudopotentials.
 !!  [electronpositron<electronpositron_type>]=Structured datatype storing data for the
 !!    electron-positron two-component DFT (optional).
@@ -762,8 +760,8 @@ end subroutine destroy_hamiltonian
 !! SOURCE
 
 subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
-&                           xred,nfft,mgfft,ngfft,rprimd,nloalg,&
-&                           comm_atom,mpi_atmtab,paw_ij,ph1d,usecprj,&
+&                           xred,nfft,mgfft,ngfft,rprimd,nloalg,ph1d,usecprj,&
+&                           comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&
 &                           electronpositron,fock,nucdipmom,use_gpu_cuda)
 
 
@@ -787,7 +785,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  type(pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: ngfft(18),nloalg(3),typat(natom)
- integer,optional,target,intent(in)  :: mpi_atmtab(:)
+ integer,optional,intent(in)  :: mpi_atmtab(:),mpi_spintab(2)
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(in),target :: xred(3,natom)
  real(dp),optional,intent(in) :: nucdipmom(3,natom),ph1d(2,3*(2*mgfft+1)*natom)
@@ -796,9 +794,10 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 
 !Local variables-------------------------------
 !scalars
- integer :: my_comm_atom,itypat,iat,ilmn,indx,isppol,cplex,cplex_dij,req_cplex_dij
+ integer :: my_comm_atom,my_nsppol,itypat,iat,ilmn,indx,isp,cplex,cplex_dij,jsp,req_cplex_dij
  real(dp) :: ucvol
 !arrays
+ integer :: my_spintab(2)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
 
 ! *************************************************************************
@@ -806,6 +805,11 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  DBG_ENTER("COLL")
 
  !@gs_hamiltonian_type
+
+ my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
+ my_spintab=0;my_spintab(1:nsppol)=1;if (present(mpi_spintab)) my_spintab(1:2)=mpi_spintab(1:2)
+ my_nsppol=count(my_spintab==1);if(my_nsppol<1) my_nsppol=1
+
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  ABI_CHECK(mgfft==MAXVAL(ngfft(1:3)),"Wrong mgfft")
@@ -846,8 +850,8 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  ham%ngfft(:)   =ngfft(:)
  ham%nloalg(:)  =nloalg(:)
  ham%matblk=min(NLO_MINCAT,maxval(ham%nattyp)); if (nloalg(2)>0) ham%matblk=natom
- ham%nspinor    =nspinor
  ham%nsppol     =nsppol
+ ham%nspinor    =nspinor
  ham%ntypat     =psps%ntypat
  ham%typat      =typat(1:natom)
  ham%nvloc=1; if(nspden==4)ham%nvloc=4
@@ -892,10 +896,12 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 ! ==== Non-local factors ====
 ! ===========================
 
+
  if (ham%usepaw==0) then ! Norm-conserving: use constant Kleimann-Bylander energies.
    ham%dimekb1=psps%dimekb
    ham%dimekb2=psps%ntypat
-   ABI_ALLOCATE(ham%ekb,(psps%dimekb,psps%ntypat,nspinor**2))
+   ABI_ALLOCATE(ham%ekb_spin,(psps%dimekb,psps%ntypat,nspinor**2,1))
+   ham%ekb => ham%ekb_spin(:,:,:,1)
    ABI_ALLOCATE(ham%sij,(0,0))
    ham%ekb(:,:,1)=psps%ekb(:,:)
    if (nspinor==2) then
@@ -933,22 +939,24 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
        ham%sij(cplex_dij*pawtab(itypat)%lmn2_size+1:ham%dimekb1,itypat)=zero
      end if
    end do
-   !In case of spin-polarized systems and parallelization over atoms, it is
-   !better to preload PAW non-local factors to avoid a communication over atoms.
-   !Otherwise, PAW non-local factors are loaded inside the loop over spins.
-   my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
-   if (present(paw_ij).and.nsppol==2.and.xmpi_comm_size(my_comm_atom)>1) then
-     ABI_ALLOCATE(ham%ekb_preload,(ham%dimekb1,ham%dimekb2,nspinor**2,nsppol))
-     do isppol=1,nsppol
-       if (present(mpi_atmtab)) then
-         call pawdij2ekb(Ham%ekb_preload(:,:,:,isppol),paw_ij,isppol,my_comm_atom,&
-&                        mpi_atmtab=mpi_atmtab)
-       else
-         call pawdij2ekb(Ham%ekb_preload(:,:,:,isppol),paw_ij,isppol,my_comm_atom)
+   !We preload here PAW non-local factors in order to avoid a communication over atoms
+   ! inside the loop over spins.
+   ABI_ALLOCATE(ham%ekb_spin,(ham%dimekb1,ham%dimekb2,nspinor**2,my_nsppol))
+   ham%ekb_spin=zero
+   ham%ekb => ham%ekb_spin(:,:,:,1)
+   if (present(paw_ij)) then
+     jsp=0
+     do isp=1,ham%nsppol
+       if (my_spintab(isp)==1) then
+         jsp=jsp+1
+         if (present(mpi_atmtab)) then
+           call pawdij2ekb(ham%ekb_spin(:,:,:,jsp),paw_ij,isp,my_comm_atom,&
+&                          mpi_atmtab=mpi_atmtab)
+         else
+           call pawdij2ekb(ham%ekb_spin(:,:,:,jsp),paw_ij,isp,my_comm_atom)
+         end if
        end if
      end do
-   else
-     ABI_ALLOCATE(ham%ekb,(ham%dimekb1,ham%dimekb2,nspinor**2))
    end if
  end if
 
@@ -1412,20 +1420,13 @@ implicit none
  gs_hamk_out%ph1d = gs_hamk_in%ph1d
  ABI_ALLOCATE(gs_hamk_out%pspso,(gs_hamk_out%ntypat))
  gs_hamk_out%pspso = gs_hamk_in%pspso
+ tmp2i(1:4)=shape(gs_hamk_in%ekb_spin)
+ ABI_ALLOCATE(gs_hamk_out%ekb_spin,(tmp2i(1),tmp2i(2),tmp2i(3),tmp2i(4)))
+ gs_hamk_out%ekb_spin = gs_hamk_in%ekb_spin
+ gs_hamk_out%ekb => gs_hamk_out%ekb_spin(:,:,:,1)
  tmp2i(1:2)=shape(gs_hamk_in%sij)
  ABI_ALLOCATE(gs_hamk_out%sij,(tmp2i(1),tmp2i(2)))
  gs_hamk_out%sij = gs_hamk_in%sij
-
- if (allocated(gs_hamk_in%ekb_preload)) then
-   tmp2i(1:4)=shape(gs_hamk_in%ekb_preload)
-   ABI_ALLOCATE(gs_hamk_out%ekb_preload,(tmp2i(1),tmp2i(2),tmp2i(3),tmp2i(4)))
-   gs_hamk_out%ekb_preload = gs_hamk_in%ekb_preload
-   nullify(gs_hamk_out%ekb)
- else if (associated(gs_hamk_in%ekb)) then
-   tmp2i(1:3)=shape(gs_hamk_in%ekb)
-   ABI_ALLOCATE(gs_hamk_out%ekb,(tmp2i(1),tmp2i(2),tmp2i(3)))
-   gs_hamk_out%ekb = gs_hamk_in%ekb
- end if
 
  if (associated(gs_hamk_in%gbound_kp,gs_hamk_in%gbound_k)) then
    gs_hamk_out%gbound_kp => gs_hamk_out%gbound_k
@@ -1479,13 +1480,11 @@ end subroutine copy_hamiltonian
 !!  load_spin_hamiltonian
 !!
 !! INPUTS
-!!  [comm_atom]=optional, MPI communicator over atoms
 !!  isppol=index of current spin
-!!  [mpi_atmtab(:)]=optional, indexes of the atoms treated by current proc
-!!  [paw_ij(:) <type(paw_ij_type)>]=optional, paw arrays given on (i,j) channels
 !!  [vlocal(n4,n5,n6,nvloc)]=optional, local potential in real space
 !!  [vxctaulocal(n4,n5,n6,nvloc,4)]=optional, derivative of XC energy density with respect
 !!                                  to kinetic energy density in real space
+!!  [with_nonlocal]=optional, true if non-local factors have to be loaded
 !!
 !! FUNCTION
 !!  Setup of the spin-dependent part of the GS Hamiltonian.
@@ -1504,8 +1503,7 @@ end subroutine copy_hamiltonian
 !!
 !! SOURCE
 
-subroutine load_spin_hamiltonian(Ham,isppol,paw_ij,vlocal,vxctaulocal, &
-&          mpi_atmtab,comm_atom) ! optional arguments (parallelism)
+subroutine load_spin_hamiltonian(Ham,isppol,vlocal,vxctaulocal,with_nonlocal)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1519,24 +1517,20 @@ subroutine load_spin_hamiltonian(Ham,isppol,paw_ij,vlocal,vxctaulocal, &
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: isppol
- integer,optional,intent(in) :: comm_atom
+ logical,optional,intent(in) :: with_nonlocal
  type(gs_hamiltonian_type),intent(inout),target :: Ham
 !arrays
- integer,optional,target,intent(in)  :: mpi_atmtab(:)
  real(dp),optional,intent(in),target :: vlocal(:,:,:,:),vxctaulocal(:,:,:,:,:)
- type(paw_ij_type),optional,intent(in) :: paw_ij(:)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_comm_atom
+ integer :: jsppol
 
 ! *************************************************************************
 
  DBG_ENTER("COLL")
 
 !@gs_hamiltonian_type
-
- my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
 
  if (present(vlocal)) then
    ABI_CHECK(size(vlocal)==Ham%n4*Ham%n5*Ham%n6*Ham%nvloc,"Wrong vlocal")
@@ -1547,21 +1541,13 @@ subroutine load_spin_hamiltonian(Ham,isppol,paw_ij,vlocal,vxctaulocal, &
    Ham%vxctaulocal => vxctaulocal
  end if
 
-!Retrieve PAW Dij coefficients for this spin component
- if (Ham%usepaw==1) then
-   !1-Ekb have been preloaded
-   if (allocated(Ham%ekb_preload)) then
-     Ham%ekb => Ham%ekb_preload(:,:,:,isppol)
-   !2-Ekb have to be loaded here (needs a communication)
-   else if(present(paw_ij).and.associated(Ham%ekb)) then
-     Ham%ekb=zero ! Need otherwise valgrind complains ... (even if I knwow it is an output argument...)
-     if (present(mpi_atmtab)) then
-       call pawdij2ekb(Ham%ekb,paw_ij,isppol,my_comm_atom,mpi_atmtab=mpi_atmtab)
-    else
-       call pawdij2ekb(Ham%ekb,paw_ij,isppol,my_comm_atom)
-     end if
+!Retrieve non-local factors for this spin component
+ if (present(with_nonlocal)) then
+   if (with_nonlocal) then
+     jsppol=min(isppol,size(Ham%ekb_spin,4))
+     Ham%ekb => Ham%ekb_spin(:,:,:,jsppol)
    end if
- end if ! PAW
+ end if
 
 !Update enl and sij on GPU
 #if defined HAVE_GPU_CUDA
@@ -1616,17 +1602,11 @@ subroutine destroy_rf_hamiltonian(rf_Ham)
 !@rf_hamiltonian_type
 
 ! Real arrays
- if (allocated(rf_Ham%e1kbfr_preload))   then
-   ABI_DEALLOCATE(rf_Ham%e1kbfr_preload)
-   nullify(rf_Ham%e1kbfr)
- else if (associated(rf_Ham%e1kbfr))   then
-   ABI_DEALLOCATE(rf_Ham%e1kbfr)
+ if (allocated(rf_Ham%e1kbfr_spin))   then
+   ABI_DEALLOCATE(rf_Ham%e1kbfr_spin)
  end if
- if (allocated(rf_Ham%e1kbsc_preload))   then
-   ABI_DEALLOCATE(rf_Ham%e1kbsc_preload)
-   nullify(rf_Ham%e1kbsc)
- else if (associated(rf_Ham%e1kbsc))   then
-   ABI_DEALLOCATE(rf_Ham%e1kbsc)
+ if (allocated(rf_Ham%e1kbsc_spin))   then
+   ABI_DEALLOCATE(rf_Ham%e1kbsc_spin)
  end if
 
 ! Real pointers
@@ -1635,6 +1615,8 @@ subroutine destroy_rf_hamiltonian(rf_Ham)
  if (associated(rf_Ham%ddkinpw_k)) nullify(rf_Ham%ddkinpw_k)
  if (associated(rf_Ham%ddkinpw_kp)) nullify(rf_Ham%ddkinpw_kp)
  if (associated(rf_Ham%vlocal1)) nullify(rf_Ham%vlocal1)
+ if (associated(rf_Ham%e1kbfr)) nullify(rf_Ham%e1kbfr)
+ if (associated(rf_Ham%e1kbsc)) nullify(rf_Ham%e1kbsc)
 
  DBG_EXIT("COLL")
 
@@ -1655,10 +1637,13 @@ end subroutine destroy_rf_hamiltonian
 !!  [comm_atom]=optional, MPI communicator over atoms
 !!  cplex_paw=1 if all on-site PAW quantities are real (GS), 2 if they are complex (RF)
 !!  gs_Ham<gs_hamiltonian_type>=Structured datatype containing data for ground-state Hamiltonian at (k+q)
-!!  has_e1kbsc= -optional- if 1, rf_Ham%e1kbsc is allocated (if necessary); otherwise not allocated.
-!!             e1kbsc contains the self-consistent part of 1st-order PAW Dij coefficients.
+!!  [has_e1kbsc]=optional, true if rf_Ham%e1kbsc has to be initialized.
+!!               e1kbsc contains the self-consistent part of 1st-order PAW Dij coefficients.
 !!  ipert=index of perturbation
 !!  [mpi_atmtab(:)]=optional, indexes of the atoms treated by current proc
+!!  [mpi_spintab(2)]=optional, flags defining the spin(s) treated be current process:
+!!                    mpi_spintab(1)=1 if non-polarized or spin-up treated
+!!                    mpi_spintab(2)=1 if polarized and spin-dn treated
 !!  [paw_ij1(:)<paw_ij_type>]=Various 1st-order arrays given on (i,j) (partial waves)
 !!                            channels (paw_ij1%dij and paw_ij1%difr only used here).
 !!
@@ -1678,7 +1663,7 @@ end subroutine destroy_rf_hamiltonian
 !! SOURCE
 
 subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
-&          comm_atom,mpi_atmtab,paw_ij1,has_e1kbsc) ! optional arguments
+&          comm_atom,mpi_atmtab,mpi_spintab,paw_ij1,has_e1kbsc) ! optional arguments
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1692,17 +1677,20 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,ipert
- integer,intent(in),optional :: comm_atom,has_e1kbsc
+ integer,intent(in),optional :: comm_atom
+ logical,intent(in),optional :: has_e1kbsc
  type(gs_hamiltonian_type),intent(in) :: gs_Ham
- type(rf_hamiltonian_type),intent(inout) :: rf_Ham
+ type(rf_hamiltonian_type),intent(inout),target :: rf_Ham
 !arrays
- integer,optional,target,intent(in)  :: mpi_atmtab(:)
+ integer,optional,intent(in)  :: mpi_atmtab(:),mpi_spintab(2)
  type(paw_ij_type),optional,intent(in) :: paw_ij1(:)
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex_dij1,has_e1kbsc_,isppol,my_comm_atom
- logical :: to_be_preloaded
+ integer :: cplex_dij1,isp,jsp,my_comm_atom,my_nsppol
+ logical :: has_e1kbsc_
+!arrays
+ integer :: my_spintab(2)
 
 ! *************************************************************************
 
@@ -1710,16 +1698,21 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
 
 !@rf_hamiltonian_type
 
- has_e1kbsc_=0;if (present(has_e1kbsc)) has_e1kbsc_=has_e1kbsc
+ has_e1kbsc_=.false.;if (present(has_e1kbsc)) has_e1kbsc_=has_e1kbsc
+
+ my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
+ my_spintab=0;my_spintab(1:rf_Ham%nsppol)=1
+ if (present(mpi_spintab)) my_spintab(1:2)=mpi_spintab(1:2)
+ my_nsppol=count(my_spintab==1);if(my_nsppol<1) my_nsppol=1
 
  rf_Ham%cplex  =cplex
 
- rf_Ham%n4     =gs_Ham%n4
- rf_Ham%n5     =gs_Ham%n5
- rf_Ham%n6     =gs_Ham%n6
- rf_Ham%nvloc  =gs_Ham%nvloc
- rf_Ham%nspinor=gs_Ham%nspinor
- rf_Ham%nsppol =gs_Ham%nsppol
+ rf_Ham%n4       =gs_Ham%n4
+ rf_Ham%n5       =gs_Ham%n5
+ rf_Ham%n6       =gs_Ham%n6
+ rf_Ham%nvloc    =gs_Ham%nvloc
+ rf_Ham%nsppol   =gs_Ham%nsppol
+ rf_Ham%nspinor  =gs_Ham%nspinor
 
  rf_Ham%dime1kb1=0
  rf_Ham%dime1kb2=gs_Ham%dimekb2
@@ -1728,53 +1721,57 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
    rf_Ham%dime1kb1=cplex_dij1*(gs_Ham%lmnmax*(gs_Ham%lmnmax+1))/2
  end if
 
- nullify(rf_Ham%e1kbfr)
- nullify(rf_Ham%e1kbsc)
-
 !Allocate the arrays of the 1st-order Hamiltonian
-!  In case of spin-polarized systems and parallelization over atoms, it is
-!  better to preload PAW non-local factors to avoid a communication over atoms.
-!  Otherwise, PAW non-local factors are loaded inside the loop over spins.
+!  We preload here 1st-order non-local factors in order to avoid
+!  a communication over atoms inside the loop over spins.
  if (gs_Ham%usepaw==1.and.rf_Ham%dime1kb1>0) then
-   to_be_preloaded=.false.
    if ((ipert>=1.and.ipert<=gs_Ham%natom).or.ipert==gs_Ham%natom+2.or.&
 &    ipert==gs_Ham%natom+3.or.ipert==gs_Ham%natom+4.or.ipert==gs_Ham%natom+11) then
 
-     my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
-     if (present(paw_ij1).and.rf_Ham%nsppol==2.and.xmpi_comm_size(my_comm_atom)>1) then
+     ABI_ALLOCATE(rf_Ham%e1kbfr_spin,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,my_nsppol))
+     rf_Ham%e1kbfr_spin=zero
+     if (has_e1kbsc_) then
+       ABI_ALLOCATE(rf_Ham%e1kbsc_spin,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,my_nsppol))
+       rf_Ham%e1kbsc_spin=zero
+     end if
 
-       to_be_preloaded=.true.
+     if (present(paw_ij1)) then
 
-       ABI_ALLOCATE(rf_Ham%e1kbfr_preload,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,rf_Ham%nsppol))
-       do isppol=1,rf_Ham%nsppol
-         if (present(mpi_atmtab)) then
-           call pawdij2e1kb(paw_ij1,isppol,my_comm_atom,e1kbfr=rf_Ham%e1kbfr_preload(:,:,:,isppol),&
-&                           mpi_atmtab=mpi_atmtab)
-         else
-           call pawdij2e1kb(paw_ij1,isppol,my_comm_atom,e1kbfr=rf_Ham%e1kbfr_preload(:,:,:,isppol))
-         end if
-       end do
-       if (has_e1kbsc_==1) then
-         ABI_ALLOCATE(rf_Ham%e1kbsc_preload,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2,rf_Ham%nsppol))
-         do isppol=1,rf_Ham%nsppol
+       jsp=0
+       do isp=1,rf_Ham%nsppol
+         if (my_spintab(isp)==1) then
+           jsp=jsp+1
            if (present(mpi_atmtab)) then
-             call pawdij2e1kb(paw_ij1,isppol,my_comm_atom,e1kbsc=rf_Ham%e1kbsc_preload(:,:,:,isppol),&
+             call pawdij2e1kb(paw_ij1,isp,my_comm_atom,e1kbfr=rf_Ham%e1kbfr_spin(:,:,:,jsp),&
 &                             mpi_atmtab=mpi_atmtab)
            else
-             call pawdij2e1kb(paw_ij1,isppol,my_comm_atom,e1kbsc=rf_Ham%e1kbsc_preload(:,:,:,isppol))
+             call pawdij2e1kb(paw_ij1,isp,my_comm_atom,e1kbfr=rf_Ham%e1kbfr_spin(:,:,:,jsp))
            end if
-         end do
-       end if
+           if (has_e1kbsc_) then
+             if (present(mpi_atmtab)) then
+               call pawdij2e1kb(paw_ij1,isp,my_comm_atom,e1kbsc=rf_Ham%e1kbsc_spin(:,:,:,jsp),&
+  &                             mpi_atmtab=mpi_atmtab)
+             else
+               call pawdij2e1kb(paw_ij1,isp,my_comm_atom,e1kbsc=rf_Ham%e1kbsc_spin(:,:,:,jsp))
+             end if
+           end if
+         end if
+       end do
 
      end if
-   end if
-   if (.not.to_be_preloaded) then
-     ABI_ALLOCATE(rf_Ham%e1kbfr,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2))
-     if (has_e1kbsc_==1) then
-       ABI_ALLOCATE(rf_Ham%e1kbsc,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2))
-     end if
+
    end if
  end if
+
+ if (.not.allocated(rf_Ham%e1kbfr_spin)) then
+   ABI_ALLOCATE(rf_Ham%e1kbfr_spin,(0,0,0,1))
+ end if
+ if (.not.allocated(rf_Ham%e1kbsc_spin)) then
+   ABI_ALLOCATE(rf_Ham%e1kbsc_spin,(0,0,0,1))
+ end if
+
+ rf_Ham%e1kbfr => rf_Ham%e1kbfr_spin(:,:,:,1)
+ if (has_e1kbsc_) rf_Ham%e1kbsc => rf_Ham%e1kbsc_spin(:,:,:,1)
 
  DBG_EXIT("COLL")
 
@@ -1791,13 +1788,10 @@ end subroutine init_rf_hamiltonian
 !!  Setup of the spin-dependent part of the 1st- and 2nd- order Hamiltonian.
 !!
 !! INPUTS
-!!  [comm_atom]=optional, MPI communicator over atoms
 !!  gs_Ham<gs_hamiltonian_type>=structured datatype containing data for ground-state Hamiltonian
 !!  isppol=index of current spin
-!!  [mpi_atmtab(:)]=optional, indexes of the atoms treated by current proc
-!!  [paw_ij1(:)<paw_ij_type>]=Various 1st-order arrays given on (i,j) (partial waves)
-!!                            channels (paw_ij1%dij and paw_ij1%difr only used here).
 !!  [vlocal1(cplex*n4,n5,n6,nvloc)]=optional, 1st-order local potential in real space
+!!  [with_nonlocal]=optional, true if non-local factors have to be loaded
 !!
 !! SIDE EFFECTS
 !!  rf_Ham<rf_hamiltonian_type>=Structured datatype initialization phase:
@@ -1811,8 +1805,7 @@ end subroutine init_rf_hamiltonian
 !!
 !! SOURCE
 
-subroutine load_spin_rf_hamiltonian(rf_Ham,gs_Ham,isppol,paw_ij1,vlocal1, &
-&          mpi_atmtab,comm_atom) ! optional arguments (parallelism)
+subroutine load_spin_rf_hamiltonian(rf_Ham,gs_Ham,isppol,vlocal1,with_nonlocal)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1826,17 +1819,15 @@ subroutine load_spin_rf_hamiltonian(rf_Ham,gs_Ham,isppol,paw_ij1,vlocal1, &
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: isppol
- integer,optional,intent(in) :: comm_atom
+ logical,optional,intent(in) :: with_nonlocal
  type(gs_hamiltonian_type),intent(in) :: gs_Ham
  type(rf_hamiltonian_type),intent(inout),target :: rf_Ham
 !arrays
- integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),optional,target,intent(in) :: vlocal1(:,:,:,:)
- type(paw_ij_type),optional,intent(in) :: paw_ij1(:)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_comm_atom
+ integer :: jsppol
 
 ! *************************************************************************
 
@@ -1844,42 +1835,23 @@ subroutine load_spin_rf_hamiltonian(rf_Ham,gs_Ham,isppol,paw_ij1,vlocal1, &
 
 !@rf_hamiltonian_type
 
- my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
-
  if (present(vlocal1)) then
    ABI_CHECK(size(vlocal1)==rf_Ham%cplex*rf_Ham%n4*rf_Ham%n5*rf_Ham%n6*rf_Ham%nvloc,"Wrong vlocal1")
    rf_Ham%vlocal1 => vlocal1
  end if
 
-!Retrieve PAW Dij(1) coefficients for this spin component
- if (gs_Ham%usepaw==1) then
-
-   !1-E1kb_fr have been preloaded
-   if (allocated(rf_Ham%e1kbfr_preload)) then
-     rf_Ham%e1kbfr => rf_Ham%e1kbfr_preload(:,:,:,isppol)
-   !2-Ekb have to be loaded here (need a communication)
-   else if (associated(rf_Ham%e1kbfr).and.present(paw_ij1)) then
-     if (present(mpi_atmtab)) then
-       call pawdij2e1kb(paw_ij1,isppol,my_comm_atom,e1kbfr=rf_Ham%e1kbfr,&
-&                       mpi_atmtab=mpi_atmtab)
-     else
-       call pawdij2e1kb(paw_ij1,isppol,my_comm_atom,e1kbfr=rf_Ham%e1kbfr)
+!Retrieve non-local factors for this spin component
+ if (present(with_nonlocal)) then
+   if (with_nonlocal) then
+     if (size(rf_Ham%e1kbfr_spin)>0) then
+       jsppol=min(isppol,size(rf_Ham%e1kbfr_spin,4))
+       rf_Ham%e1kbfr => rf_Ham%e1kbfr_spin(:,:,:,jsppol)
+     end if
+     if (size(rf_Ham%e1kbsc_spin)>0) then
+       jsppol=min(isppol,size(rf_Ham%e1kbsc_spin,4))
+       rf_Ham%e1kbsc => rf_Ham%e1kbsc_spin(:,:,:,jsppol)
      end if
    end if
-
-   !1-E1kb_sc have been preloaded
-   if (allocated(rf_Ham%e1kbsc_preload)) then
-     rf_Ham%e1kbsc => rf_Ham%e1kbsc_preload(:,:,:,isppol)
-   !2-E1kb_sc have to be loaded here (need a communication)
-   else if (associated(rf_Ham%e1kbfr).and.present(paw_ij1)) then
-     if (present(mpi_atmtab)) then
-       call pawdij2e1kb(paw_ij1,isppol,my_comm_atom,e1kbsc=rf_Ham%e1kbsc,&
-&                       mpi_atmtab=mpi_atmtab)
-     else
-       call pawdij2e1kb(paw_ij1,isppol,my_comm_atom,e1kbsc=rf_Ham%e1kbsc)
-     end if
-   end if
-
  end if
 
  DBG_EXIT("COLL")
