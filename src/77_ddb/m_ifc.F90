@@ -1442,6 +1442,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
  integer,intent(in) :: atifc(Ifc%natom)
  real(dp),intent(in) :: dielt(3,3)
  real(dp),intent(in) :: zeff(3,3,Ifc%natom)
+
 !Local variables -------------------------
 !scalars
  integer :: ia,ii,ncerr,iatifc,ifcout1,mu,nu,iout, irpt

@@ -3834,7 +3834,6 @@ end subroutine dtech9
 !!                   of the electronic susceptibility with respect
 !!                   to atomic displacements
 !!
-!!
 !! OUTPUT
 !! dchide(3,3,3) = non-linear optical coefficients
 !! dchidt(natom,3,3,3) = first-order change of the electronic dielectric
@@ -3868,6 +3867,7 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr)
 !Local variables -------------------------
 !scalars
  integer :: depl,elfd1,elfd2,elfd3,iatom,ivoigt
+ logical :: iwrite
  real(dp) :: wttot
 !arrays
  integer :: voigtindex(6,2)
@@ -3913,13 +3913,13 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr)
    end do
  end do
 
- wghtat(:) = 0._dp
+ wghtat(:) = zero
  if (ramansr == 1) then
-   wghtat(:) = 1._dp/dble(natom)
+   wghtat(:) = one/dble(natom)
 
  else if (ramansr == 2) then
 
-   wttot = 0._dp
+   wttot = zero
    do iatom = 1, natom
      do depl = 1,3
        do elfd1 = 1,3
@@ -3934,20 +3934,26 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr)
    wghtat(:) = wghtat(:)/wttot
  end if
 
- write(ab_out,*)ch10
- write(ab_out,*)'Non-linear optical coefficients d (pm/V)'
- write(ab_out,'(6f12.6)')dvoigt(1,:)
- write(ab_out,'(6f12.6)')dvoigt(2,:)
- write(ab_out,'(6f12.6)')dvoigt(3,:)
+ iwrite = ab_out > 0
+
+ if (iwrite) then
+   write(ab_out,*)ch10
+   write(ab_out,*)'Non-linear optical coefficients d (pm/V)'
+   write(ab_out,'(6f12.6)')dvoigt(1,:)
+   write(ab_out,'(6f12.6)')dvoigt(2,:)
+   write(ab_out,'(6f12.6)')dvoigt(3,:)
+ end if
 
  if (ramansr /= 0) then
-   write(ab_out,*)ch10
-   write(ab_out,*)'The violation of the Raman sum rule'
-   write(ab_out,*)'by the first-order electronic dielectric tensors ','is as follows'
-   write(ab_out,*)'    atom'
-   write(ab_out,*)' displacement'
+   if (iwrite) then
+     write(ab_out,*)ch10
+     write(ab_out,*)'The violation of the Raman sum rule'
+     write(ab_out,*)'by the first-order electronic dielectric tensors ','is as follows'
+     write(ab_out,*)'    atom'
+     write(ab_out,*)' displacement'
+   end if
 
-   sumrule(:,:,:) = 0._dp
+   sumrule(:,:,:) = zero
    do elfd2 = 1,3
      do elfd1 = 1,3
        do depl = 1,3
@@ -3963,32 +3969,36 @@ subroutine dtchi(blkval,dchide,dchidt,mpert,natom,ramansr)
      end do
    end do
 
-   do depl = 1,3
-     write(ab_out,'(6x,i2,3(3x,f16.9))') depl,sumrule(depl,1,1:3)
-     write(ab_out,'(8x,3(3x,f16.9))') sumrule(depl,2,1:3)
-     write(ab_out,'(8x,3(3x,f16.9))') sumrule(depl,3,1:3)
-     write(ab_out,*)
-   end do
+   if (iwrite) then
+     do depl = 1,3
+       write(ab_out,'(6x,i2,3(3x,f16.9))') depl,sumrule(depl,1,1:3)
+       write(ab_out,'(8x,3(3x,f16.9))') sumrule(depl,2,1:3)
+       write(ab_out,'(8x,3(3x,f16.9))') sumrule(depl,3,1:3)
+       write(ab_out,*)
+     end do
+    end if
  end if    ! ramansr
 
- write(ab_out,*)ch10
- write(ab_out,*)' First-order change in the electronic dielectric '
- write(ab_out,*)' susceptibility tensor (Bohr^-1)'
- write(ab_out,*)' induced by an atomic displacement'
- if (ramansr /= 0) then
-   write(ab_out,*)' (after imposing the sum over all atoms to vanish)'
- end if
- write(ab_out,*)'  atom  displacement'
+ if (iwrite) then
+   write(ab_out,*)ch10
+   write(ab_out,*)' First-order change in the electronic dielectric '
+   write(ab_out,*)' susceptibility tensor (Bohr^-1)'
+   write(ab_out,*)' induced by an atomic displacement'
+   if (ramansr /= 0) then
+     write(ab_out,*)' (after imposing the sum over all atoms to vanish)'
+   end if
+   write(ab_out,*)'  atom  displacement'
 
- do iatom = 1,natom
-   do depl = 1,3
-     write(ab_out,'(1x,i4,9x,i2,3(3x,f16.9))')iatom,depl,dchidt(iatom,depl,1,:)
-     write(ab_out,'(16x,3(3x,f16.9))')dchidt(iatom,depl,2,:)
-     write(ab_out,'(16x,3(3x,f16.9))')dchidt(iatom,depl,3,:)
+   do iatom = 1,natom
+     do depl = 1,3
+       write(ab_out,'(1x,i4,9x,i2,3(3x,f16.9))')iatom,depl,dchidt(iatom,depl,1,:)
+       write(ab_out,'(16x,3(3x,f16.9))')dchidt(iatom,depl,2,:)
+       write(ab_out,'(16x,3(3x,f16.9))')dchidt(iatom,depl,3,:)
+     end do
+
+     write(ab_out,*)
    end do
-
-   write(ab_out,*)
- end do
+ end if
 
 !DEBUG
 !sumrule(:,:,:) = 0._dp

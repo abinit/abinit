@@ -73,6 +73,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 
  use defs_basis
  use m_errors
+ use m_xmpi
  use m_profiling_abi
  use m_ddb
 
