@@ -1289,8 +1289,7 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
  end do
 
 !Zero the imaginary part of the dynamical matrix
- write(message, '(a)' )&
-& ' Now, the imaginary part of the dynamical matrix is zeroed '
+ write(message, '(a)' )' Now, the imaginary part of the dynamical matrix is zeroed '
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 

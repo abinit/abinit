@@ -210,9 +210,6 @@ program anaddb
    ab_out = dev_null
  end if
 
- nph2l=inp%nph2l
- ABI_ALLOCATE(lst,(nph2l))
-
 !******************************************************************
 
  ! Read the DDB information, also perform some checks, and symmetrize partially the DDB
@@ -220,17 +217,8 @@ program anaddb
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
 
- ABI_ALLOCATE(instrain,(3*natom,6))
- ABI_ALLOCATE(d2cart,(2,msize))
-
  call ddb_from_file(ddb,filnam(3),inp%brav,natom,inp%natifc,inp%atifc,Crystal,comm, prtvol=inp%prtvol)
  nsym = Crystal%nsym
-
- ABI_ALLOCATE(displ,(2*3*natom*3*natom))
- ABI_ALLOCATE(eigval,(3,natom))
- ABI_ALLOCATE(eigvec,(2,3,natom,3,natom))
- ABI_ALLOCATE(phfrq,(3*natom))
- ABI_ALLOCATE(zeff,(3,3,natom))
 
  ! Open the netcdf file that will contain the anaddb results
  ana_ncid = nctk_noid
@@ -249,6 +237,16 @@ program anaddb
 
  ! Calculation of Grunesein parameters.
  if (inp%gruns_nddbs /= 0) call gruns_anaddb(inp, filnam(2), comm)
+
+ ABI_ALLOCATE(instrain,(3*natom,6))
+ ABI_ALLOCATE(d2cart,(2,msize))
+ ABI_ALLOCATE(displ,(2*3*natom*3*natom))
+ ABI_ALLOCATE(eigval,(3,natom))
+ ABI_ALLOCATE(eigvec,(2,3,natom,3,natom))
+ ABI_ALLOCATE(phfrq,(3*natom))
+ ABI_ALLOCATE(zeff,(3,3,natom))
+ nph2l=inp%nph2l
+ ABI_ALLOCATE(lst,(nph2l))
 
 !**********************************************************************
 !**********************************************************************

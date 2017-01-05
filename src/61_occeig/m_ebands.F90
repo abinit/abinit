@@ -5070,21 +5070,6 @@ subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
   end if
  write(gpl_unt, "(a)")"pause -1"
 
- !write(gpl_unt,701) xval(total_pts),emin,emax
- !do i = 1, num_paths-1
- !  write(gpl_unt,705) sum(kpath_len(1:i)),emin,sum(kpath_len(1:i)),emax
- !enddo
- !write(gpl_unt,702, advance="no") glabel(1),0.0_dp,(glabel(i+1),sum(kpath_len(1:i)),i=1,bands_num_spec_points/2-1)
- !write(gpl_unt,703) glabel(1+bands_num_spec_points/2),sum(kpath_len(:))
- !write(gpl_unt,*) 'plot ','"'//trim(seedname)//'_band.dat','"'
- ! write(gpl_unt,702, advance="no") glabel(1),0.0_dp,(glabel(i+1),sum(kpath_len(1:i)),i=1,bands_num_spec_points/2-1)
- ! write(gpl_unt,703) glabel(1+bands_num_spec_points/2),sum(kpath_len(:))
- ! write(gpl_unt,'(a,a,a,a)') 'splot ','"'//trim(seedname)//'_band.dat','"',' u 1:2:3 w p pt 13 palette'
-!701 format('set style data dots',/,'set nokey',/, 'set xrange [0:',F8.5,']',/,'set yrange [',F9.5,' :',F9.5,']')
-!702 format('set xtics (',:20('"',A3,'" ',F8.5,','))
-!703 format(A3,'" ',F8.5,')')
-!705 format('set arrow from ',F8.5,',',F10.5,' to ',F8.5,',',F10.5, ' nohead')
-
  close(unt)
  close(gpl_unt)
 
