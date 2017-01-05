@@ -34,8 +34,6 @@
 !!     zero, no non-analytical contribution is included.
 !!  rsus
 !!
-!! NOTES
-!!
 !! PARENTS
 !!      anaddb
 !!
@@ -80,7 +78,7 @@ subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,&
 !scalars
  integer :: analyt,i1,i1dir,i1pert,i2dir,iatom,idir,imode
  real(dp) :: epsq,fac,g0,g1,g2,qphon2
- logical :: t_degenerate
+ logical :: t_degenerate,iwrite
  character(len=500) :: message
 !arrays
  real(dp) :: dijk_q(3,3)
@@ -89,12 +87,14 @@ subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,&
 
 ! *********************************************************************
 
+ iwrite = ab_out > 0
+
  ABI_ALLOCATE(zeff,(3,natom))
 
- rsus(:,:,:) = 0._dp
- epsq        = 0._dp
- zeff(:,:)   = 0._dp
- dijk_q(:,:) = 0._dp
+ rsus(:,:,:) = zero
+ epsq        = zero
+ zeff(:,:)   = zero
+ dijk_q(:,:) = zero
 
 !Determine the analyticity of the matrix.
  analyt=1
@@ -127,7 +127,7 @@ subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,&
 !  Get the effective charges for the limiting direction
    do i1dir=1,3
      do i1pert=1,natom
-       zeff(i1dir,i1pert)=0.0_dp
+       zeff(i1dir,i1pert)=zero
        do i2dir=1,3
          zeff(i1dir,i1pert)=zeff(i1dir,i1pert)+qphon(i2dir)*&
 &         d2cart(1,i1dir,i1pert,i2dir,natom+2)
@@ -137,12 +137,11 @@ subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,&
 
 !  Get the NLO tensor for the limiting direction !$\sum_{k} d_{ijk} \cdot q_k$
 
-   dijk_q(:,:) = 0._dp
+   dijk_q(:,:) = zero
    do i1dir = 1, 3
      do i2dir = 1, 3
        do idir = 1, 3
-         dijk_q(i1dir,i2dir) = dijk_q(i1dir,i2dir) + &
-&         dchide(i1dir,i2dir,idir)*qphon(idir)
+         dijk_q(i1dir,i2dir) = dijk_q(i1dir,i2dir) + dchide(i1dir,i2dir,idir)*qphon(idir)
        end do
      end do
    end do
@@ -173,19 +172,23 @@ subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,&
  end if      ! analyt == 0
 
  if (analyt == 0) then
-   write(ab_out,*) ch10
-   write(ab_out, '(a,/,a,3f9.5)' )&
-&   ' Raman susceptibility of zone-center phonons, with non-analyticity in the',&
-&   '  direction (cartesian coordinates)',qphon(1:3)+tol10
-   write(ab_out,'(a)')&
-&   ' -----------------------------------------------------------------------'
-   write(ab_out,*) ch10
+   if (iwrite) then
+     write(ab_out,*) ch10
+     write(ab_out, '(a,/,a,3f9.5)' )&
+&     ' Raman susceptibility of zone-center phonons, with non-analyticity in the',&
+&     '  direction (cartesian coordinates)',qphon(1:3)+tol10
+     write(ab_out,'(a)')&
+&     ' -----------------------------------------------------------------------'
+     write(ab_out,*) ch10
+   end if
 
  else
-   write(ab_out,*) ch10
-   write(ab_out,*)' Raman susceptibilities of transverse zone-center phonon modes'
-   write(ab_out,*)' -------------------------------------------------------------'
-   write(ab_out,*) ch10
+  if (iwrite) then
+    write(ab_out,*) ch10
+    write(ab_out,*)' Raman susceptibilities of transverse zone-center phonon modes'
+    write(ab_out,*)' -------------------------------------------------------------'
+    write(ab_out,*) ch10
+   end if
  end if
 
 !Examine the degeneracy of each mode. The portability of the echo of the Raman susceptibility
@@ -206,10 +209,12 @@ subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,&
  end do
 
  do imode = 1, 3*natom
-   write(ab_out,'(a4,i3,2x,a2,f7.2,a6)')' Mode',imode,' (',phfrq(imode)*Ha_cmm1,' cm-1)'
-   do idir = 1,3
-     write(ab_out,'(a,4x,3(f16.9,2x))')metacharacter(imode),rsus(imode,idir,:)
-   end do
+   if (iwrite) then
+     write(ab_out,'(a4,i3,2x,a2,f7.2,a6)')' Mode',imode,' (',phfrq(imode)*Ha_cmm1,' cm-1)'
+     do idir = 1,3
+       write(ab_out,'(a,4x,3(f16.9,2x))')metacharacter(imode),rsus(imode,idir,:)
+     end do
+   end if
 !  See R. Caracas and X. Gonze, Thermodynamic Properties of Solids : experiment and modeling, Wiley-VCH,
 !  Ed. S. Chaplot and R. Mittal and N. Choudhury , chap. 8, pp 291-312.
    g0=(rsus(imode,1,1)+rsus(imode,2,2)+rsus(imode,3,3))**2*third
@@ -222,8 +227,10 @@ subroutine ramansus(d2cart,dchide,dchidt,displ,mpert,&
 &   ((rsus(imode,1,1)-rsus(imode,2,2))**2+&
 &   (rsus(imode,2,2)-rsus(imode,3,3))**2+&
 &   (rsus(imode,3,3)-rsus(imode,1,1))**2)*third
-   write(ab_out,'(3(a,f16.9))')' Spherical averages : G0=',g0,'    G1=',g1,'    G2=',g2
-   write(ab_out,*)
+   if (iwrite) then
+     write(ab_out,'(3(a,f16.9))')' Spherical averages : G0=',g0,'    G1=',g1,'    G2=',g2
+     write(ab_out,*)
+   end if
  end do
 
  ABI_DEALLOCATE(metacharacter)
