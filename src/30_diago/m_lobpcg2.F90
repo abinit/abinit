@@ -69,6 +69,7 @@ module m_lobpcg2
     integer :: nline                         ! Number of line to perform
     integer :: spacecom                      ! Communicator for MPI
     double precision :: tolerance            ! Tolerance on the residu to stop the minimization
+    integer :: prtvol
     type(xgBlock_t) :: AllX0 ! Block of initial and final solution.
     type(xgBlock_t) :: X0 ! Block of initial and final solution.
                                              ! Dim is (cplx*spacedim,neigenpair)
@@ -368,6 +369,8 @@ module m_lobpcg2
     end interface
 
     call timab(tim_run,1,tsec)
+
+    lobpcg%prtvol = prtvol
 
     blockdim = lobpcg%blockdim
     blockdim2 = 2*blockdim
@@ -905,16 +908,16 @@ module m_lobpcg2
     ! Solve Hermitian eigen problem
       select case (eigenSolver)
       case (EIGENEVD)
-        write(std_out,'(A,1x)',advance="no") "Using heevd"
+        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using heevd"
         call xgBlock_heevd('v','u',subA%self,eigenvalues,info) 
       case (EIGENEV)
-        write(std_out,'(A,1x)',advance="no") "Using heev"
+        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using heev"
         call xgBlock_heev('v','u',subA%self,eigenvalues,info) 
       case (EIGENPEVD)
-        write(std_out,'(A,1x)',advance="no") "Using hpevd"
+        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hpevd"
         call xgBlock_hpevd('v','u',subA%self,eigenvalues,vec%self,info) 
       case (EIGENPEV)
-        write(std_out,'(A,1x)',advance="no") "Using hpev"
+        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hpev"
         call xgBlock_hpev('v','u',subA%self,eigenvalues,vec%self,info) 
       case default
         MSG_ERROR("Error for Eigen Solver HEEV")
@@ -923,24 +926,24 @@ module m_lobpcg2
       ! Solve Hermitian general eigen problem only for first blockdim eigenvalues
       select case (eigenSolver)
       case (EIGENVX)
-        write(std_out,'(A,1x)',advance="no") "Using hegvx"
+        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hegvx"
         call xgBlock_hegvx(1,'v','i','u',subA%self,subB%self,0.d0,0.d0,1,blockdim,abstol,&
           eigenvalues,vec%self,info) 
       case (EIGENVD)
-        write(std_out,'(A,1x)',advance="no") "Using hegvd"
+        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hegvd"
         call xgBlock_hegvd(1,'v','u',subA%self,subB%self,eigenvalues,info) 
       case (EIGENV)
-        write(std_out,'(A,1x)',advance="no") "Using hegv"
+        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hegv"
         call xgBlock_hegv(1,'v','u',subA%self,subB%self,eigenvalues,info) 
       case (EIGENPVX)
-        write(std_out,'(A,1x)',advance="no") "Using hpgvx"
+        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hpgvx"
         call xgBlock_hpgvx(1,'v','i','u',subA%self,subB%self,0.d0,0.d0,1,blockdim,abstol,&
           eigenvalues,vec%self,info) 
       case (EIGENPVD)
-        write(std_out,'(A,1x)',advance="no") "Using hpgvd"
+        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hpgvd"
         call xgBlock_hpgvd(1,'v','u',subA%self,subB%self,eigenvalues,vec%self,info) 
       case (EIGENPV)
-        write(std_out,'(A,1x)',advance="no") "Using hpgv"
+        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hpgv"
         call xgBlock_hpgv(1,'v','u',subA%self,subB%self,eigenvalues,vec%self,info) 
       case default
         MSG_ERROR("Error for Eigen Solver HEGV")
@@ -951,7 +954,7 @@ module m_lobpcg2
 !      eigenSolverTime(eigenSolver) = (eigenSolverTime(eigenSolver)*eigenSolverCount(eigenSolver) + tsec(2))/(eigenSolverCount(eigenSolver)+1)
 !      eigenSolverCount(eigenSolver) = eigenSolverCount(eigenSolver)+1
 !    end if
-    write(std_out,*) tsec(2)
+    if ( lobpcg%prtvol == 4 ) write(std_out,*) tsec(2)
     call timab(tim_hegv,2,tsec)
 
     if ( eigenSolver == EIGENVX .or. EIGPACK(eigenSolver)) then
