@@ -179,10 +179,10 @@ MODULE m_ifc
 
  public :: ifc_init          ! Constructor
  public :: ifc_free          ! Release memory
- public :: ifc_print_info    ! Print info on the object.
+ public :: ifc_print         ! Print info on the object.
  public :: ifc_fourq         ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
  public :: ifc_speedofsound  ! Compute the speed of sound by averaging phonon group velocities.
- public :: ifc_print         ! Print the ifc (output, netcdf and text file)
+ public :: ifc_write          ! Print the ifc (output, netcdf and text file)
  public :: ifc_outphbtrap    ! Print out phonon frequencies on regular grid for BoltzTrap code.
  public :: ifc_printbxsf     ! Output phonon isosurface in Xcrysden format.
 !!***
@@ -716,9 +716,9 @@ end subroutine ifc_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_ifc/ifc_print_info
+!!****f* m_ifc/ifc_print
 !! NAME
-!!  ifc_print_info
+!!  ifc_print
 !!
 !! FUNCTION
 !!  Print info on the object
@@ -737,13 +737,13 @@ end subroutine ifc_init
 !!
 !! SOURCE
 
-subroutine ifc_print_info(ifc,header,unit,prtvol)
+subroutine ifc_print(ifc,header,unit,prtvol)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ifc_print_info'
+#define ABI_FUNC 'ifc_print'
  use interfaces_14_hidewrite
 !End of the abilint section
 
@@ -796,7 +796,7 @@ subroutine ifc_print_info(ifc,header,unit,prtvol)
    call wrtout(unt, sjoin("  ", ktoa(ifc%qshft(:,ii))))
  end do
 
-end subroutine ifc_print_info
+end subroutine ifc_print
 !!***
 
 !----------------------------------------------------------------------
@@ -1378,10 +1378,10 @@ end subroutine corsifc9
 
 !----------------------------------------------------------------------
 
-!!****f* m_ifc/ifc_print
+!!****f* m_ifc/ifc_write
 !!
 !! NAME
-!! ifc_print
+!! ifc_write
 !!
 !! FUNCTION
 !! Adds the real-space interatomic force constants to:
@@ -1392,23 +1392,23 @@ end subroutine corsifc9
 !!
 !! INPUTS
 !! Ifc<type(ifc_type)>=Object containing the dynamical matrix and the IFCs.
-!! dielt(3,3)=dielectric tensor
-!! zeff(3,3,natom)=effective charge on each atom, versus electric field and atomic displacement
 !! ifcana= 0 => no analysis of ifc ; 1 => full analysis
-!! atifc(natom) =  atifc(ia) equals 1 if the analysis of ifc
-!!  has to be done for atom ia; otherwise 0.
+!! atifc(natom) =  atifc(ia) equals 1 if the analysis of ifc has to be done for atom ia; otherwise 0.
 !! ifcout= Number of interatomic force constants written in the output file
 !! prt_ifc = flag to print out ifc information for dynamical matrix (AI2PS)
-!! ncid=the id of the open NetCDF file.
+!! ncid=the id of the open NetCDF file. Set to nctk_noid if netcdf output is not wanted.
 !!
 !! OUTPUT
 !!   written in the output file and in the NetCDF file
 !!
 !! NOTES
 !! This routine should be executed by one processor only
-!!  NB: this is unreadable and horrible - 3/4 different file formats for the
-!!  same stuff. We should make different subroutines, even if it duplicates some
-!!  code
+!!
+!! TODO:
+!!  1) ifc_write should not have side effects
+!!
+!!  2) the code is unreadable and horrible - 3/4 different file formats for the
+!!  same stuff. We should make different subroutines, even if it duplicates some code
 !!
 !! PARENTS
 !!      anaddb
@@ -1419,13 +1419,12 @@ end subroutine corsifc9
 !!
 !! SOURCE
 
-subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
-
+subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ifc_print'
+#define ABI_FUNC 'ifc_write'
  use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
@@ -1434,14 +1433,10 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: ifcout,ifcana
- integer,intent(in) :: prt_ifc
- integer,optional,intent(in) :: ncid
+ integer,intent(in) :: ifcout,ifcana,prt_ifc,ncid
  type(ifc_type),intent(inout) :: Ifc
 !arrays
  integer,intent(in) :: atifc(Ifc%natom)
- real(dp),intent(in) :: dielt(3,3)
- real(dp),intent(in) :: zeff(3,3,Ifc%natom)
 
 !Local variables -------------------------
 !scalars
@@ -1452,9 +1447,8 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
  character(len=500) :: message
  character(len=4) :: str1, str2
 !arrays
- integer,allocatable :: list(:)
- integer,allocatable :: indngb(:)
- real(dp) :: invdlt(3,3),ra(3),xred(3)
+ integer,allocatable :: list(:),indngb(:)
+ real(dp) :: invdlt(3,3),ra(3),xred(3),dielt(3,3)
  real(dp),allocatable :: dist(:,:,:),wkdist(:),rsiaf(:,:,:),sriaf(:,:,:),vect(:,:,:)
  real(dp),allocatable :: posngb(:,:)
  real(dp) :: gprimd(3,3),rprimd(3,3)
@@ -1462,6 +1456,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 ! *********************************************************************
 
  iout = ab_out
+ dielt = ifc%dielt
 
  ! Compute the distances between atoms
  ABI_MALLOC(dist,(Ifc%natom,Ifc%natom,Ifc%nrpt))
@@ -1481,7 +1476,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
 & dielt(1,2)*dielt(2,1)*dielt(3,3)
 
 ! echo to log file
- write(std_out,'(a)' )' ifc_print : analysis of interatomic force constants '
+ write(std_out,'(a)' )' ifc_write: analysis of interatomic force constants '
  call mkrdim(Ifc%acell,Ifc%rprim,rprimd)
  call matr3inv(rprimd,gprimd)
 
@@ -1538,7 +1533,8 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
  end if
 
 #ifdef HAVE_NETCDF
-  ! initialize netcdf variables
+ if (ncid /= nctk_noid) then
+   ! initialize netcdf variables
    ncerr = nctk_def_dims(ncid, [nctkdim_t("natifc", SUM(atifc)), nctkdim_t("number_of_r_points_big_box", Ifc%nrpt), &
      nctkdim_t("number_of_atoms_big_box", Ifc%natom*Ifc%nrpt), nctkdim_t("ifcout", ifcout1)], defmode=.True.)
    NCF_CHECK(ncerr)
@@ -1564,6 +1560,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
    end if
 
    NCF_CHECK(nctk_set_datamode(ncid))
+ end if
 #endif
 
  ABI_MALLOC(rsiaf,(3,3,ifcout1))
@@ -1605,7 +1602,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
        write(iout, '(a)' )
      end if
 
-     call ifc_getiaf(Ifc,ifcana,ifcout1,iout,zeff,ia,ra,list,dist,invdlt,&
+     call ifc_getiaf(Ifc,ifcana,ifcout1,iout,ifc%zeff,ia,ra,list,dist,invdlt,&
 &                    detdlt,rsiaf,sriaf,vect,indngb,posngb)
 
 
@@ -1641,21 +1638,21 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
        end do
 
 #ifdef HAVE_NETCDF
-       NCF_CHECK(nf90_put_var(ncid, vid("ifc_atoms_indices"), ia, start=(/iatifc/)))
-       NCF_CHECK(nf90_put_var(ncid, vid("ifc_neighbours_indices"), indngb, start=(/1,iatifc/), count=(/ifcout1,1/)))
-       NCF_CHECK(nf90_put_var(ncid, vid("ifc_distances"), wkdist(:ifcout1), start=(/1,iatifc/),count=(/ifcout1,1/)))
-       ncerr = nf90_put_var(ncid, vid("ifc_matrix_cart_coord"), rsiaf, &
-         start=(/1,1,1,iatifc/), count=(/3,3,ifcout1,1/))
-       NCF_CHECK(ncerr)
-       if (Ifc%dipdip==1) then
-         ncerr = nf90_put_var(ncid, vid("ifc_matrix_cart_coord_short_range"), sriaf, &
-           start=(/1,1,1,iatifc/), count=(/3,3,ifcout1,1/))
+       if (ncid /= nctk_noid) then
+         NCF_CHECK(nf90_put_var(ncid, vid("ifc_atoms_indices"), ia, start=[iatifc]))
+         NCF_CHECK(nf90_put_var(ncid, vid("ifc_neighbours_indices"), indngb, start=[1,iatifc], count=[ifcout1,1]))
+         NCF_CHECK(nf90_put_var(ncid, vid("ifc_distances"), wkdist(:ifcout1), start=[1,iatifc],count=[ifcout1,1]))
+         ncerr = nf90_put_var(ncid, vid("ifc_matrix_cart_coord"), rsiaf, start=[1,1,1,iatifc], count=[3,3,ifcout1,1])
          NCF_CHECK(ncerr)
-       end if
-       if (ifcana==1) then
-         ncerr = nf90_put_var(ncid, vid("ifc_local_vectors"), vect, &
-           start=(/1,1,1,iatifc/), count=(/3,3,ifcout1,1/))
-         NCF_CHECK(ncerr)
+         if (Ifc%dipdip==1) then
+           ncerr = nf90_put_var(ncid, vid("ifc_matrix_cart_coord_short_range"), sriaf, &
+             start=[1,1,1,iatifc], count=[3,3,ifcout1,1])
+           NCF_CHECK(ncerr)
+         end if
+         if (ifcana==1) then
+           ncerr = nf90_put_var(ncid, vid("ifc_local_vectors"), vect, start=[1,1,1,iatifc], count=[3,3,ifcout1,1])
+           NCF_CHECK(ncerr)
+         end if
        end if
 #endif
      end if
@@ -1690,7 +1687,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
    write(unit_tdep,'(3es28.16)') dielt(:,3)
    do ia = 1, Ifc%natom
      do ii = 1, 3
-       write(unit_tdep,'(3es28.16)') zeff(:,ii,ia)
+       write(unit_tdep,'(3es28.16)') ifc%zeff(:,ii,ia)
      end do
    end do
    close(unit_tdep)
@@ -1714,7 +1711,7 @@ contains
  end function vid
 #endif
 
-end subroutine ifc_print
+end subroutine ifc_write
 !!***
 
 !----------------------------------------------------------------------

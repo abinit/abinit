@@ -27,7 +27,7 @@
 !!      ddb_from_file,ddb_getdims,ddb_internalstr,ddb_piezo,dfpt_phfrq
 !!      dfpt_prtph,dfpt_symph,elast_ncwrite,electrooptic,elphon,flush_unit
 !!      gtblk9,gtdyn9,harmonic_thermo,herald,ifc_free,ifc_init,ifc_outphbtrap
-!!      ifc_print,instrng,int2char4,inupper,invars9,isfile,mkphbs,mkphdos
+!!      ifc_write,instrng,int2char4,inupper,invars9,isfile,mkphbs,mkphdos
 !!      outvars_anaddb,phdos_free,phdos_ncwrite,phdos_print,phdos_print_debye
 !!      phdos_print_msqd,ramansus,relaxpol,thmeig,timein,wrtout,xmpi_bcast
 !!      xmpi_end,xmpi_init,xmpi_sum
@@ -407,7 +407,7 @@ program anaddb
 &     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
    end if
 
-   call ifc_print_info(ifc, unit=std_out)
+   call ifc_print(ifc, unit=std_out)
 
    ! Compute speed of sound.
    if (inp%vs_qrad_tolms(1) > zero) then
@@ -417,12 +417,9 @@ program anaddb
    end if
 
    ! Print analysis of the real-space interatomic force constants
-   if(inp%ifcout/=0)then
-#ifdef HAVE_NETCDF
-     call ifc_print(Ifc,dielt,zeff,inp%ifcana,inp%atifc,inp%ifcout,inp%prt_ifc,ncid=ana_ncid)
-#else
-     call ifc_print(Ifc,dielt,zeff,inp%ifcana,inp%atifc,inp%ifcout,inp%prt_ifc)
-#endif
+   ! TODO: ifc_out should not have side effects
+   if (my_rank == master .and. inp%ifcout/=0) then
+     call ifc_write(Ifc,inp%ifcana,inp%atifc,inp%ifcout,inp%prt_ifc,ana_ncid)
    end if
  end if
 

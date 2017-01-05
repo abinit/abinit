@@ -463,7 +463,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  brav1,dtset%asr,dtset%symdynmat,dtset%dipdip,dtset%rfmeth,dtset%ddb_ngqpt,ddb_nqshift,ddb_qshifts,dielt,zeff,&
  nsphere0,rifcsph0,prtsrlr0,dtset%enunit,comm)
  ABI_FREE(ddb_qshifts)
- call ifc_print_info(ifc, unit=std_out)
+ call ifc_print(ifc, unit=std_out)
 
  ! Compute speed of sound.
  !call ifc_speedofsound(ifc, crystal, 0.001_dp, 10._dp, nctk_noid, comm)
