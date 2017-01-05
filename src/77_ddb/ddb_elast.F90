@@ -67,6 +67,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
  use m_crystal
  use m_ddb
 
+ use m_fstrings,       only : itoa, sjoin
  use m_dynmat,         only : asria_corr
  use m_anaddb_dataset, only : anaddb_dataset_type
 
@@ -236,8 +237,8 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 !  Is the usage just to get out the translational modes? We know what the eigenvectors look like already!
 !  The translational modes are the last 3 with eigenvalue 6
 !
-   call ZHPEV ('V','U',3*natom,Bpmatr,eigvalp,eigvecp,3*natom,&
-&   zhpev1p,zhpev2p,ier)
+   call ZHPEV ('V','U',3*natom,Bpmatr,eigvalp,eigvecp,3*natom,zhpev1p,zhpev2p,ier)
+   ABI_CHECK(ier == 0, sjoin("ZHPEV returned:", itoa(ier)))
 
 !  DEBUG
 !  the eigenval and eigenvec
@@ -322,10 +323,9 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
      end do
    end do
    Bmatr(2,:)=0.0_dp
-!  then call the subroutines CHPEV and ZHPEV to get the eigenvectors and the
-!  eigenvalues
-   call ZHPEV ('V','U',3*natom-3,Bmatr,eigval,eigvec,3*natom-3,&
-&   zhpev1,zhpev2,ier)
+!  then call the subroutines CHPEV and ZHPEV to get the eigenvectors and the eigenvalues
+   call ZHPEV ('V','U',3*natom-3,Bmatr,eigval,eigvec,3*natom-3,zhpev1,zhpev2,ier)
+   ABI_CHECK(ier == 0, sjoin("ZHPEV returned:", itoa(ier)))
 
 !  check the unstable phonon modes, if the first is negative then print
 !  warning message
@@ -456,8 +456,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 !*******************************************************************
  if(anaddb_dtset%elaflag==1.or. anaddb_dtset%elaflag==3)then
 !  print out the clamped-ion elastic constants to output file
-   write(message,'(3a)')ch10,&
-&   ' Elastic Tensor (clamped ion) (unit:10^2GP):',ch10
+   write(message,'(3a)')ch10,' Elastic Tensor (clamped ion) (unit:10^2GP):',ch10
    call wrtout(std_out,message,'COLL')
    do ivarA=1,6
      write(std_out,'(6f12.7)')elast(ivarA,1)/100.00_dp,elast(ivarA,2)/100.00_dp,&
@@ -511,8 +510,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 !  compl(:,:)=elast_clamped(:,:) !convert the elastic tensor
    compl_clamped(:,:)=elast_clamped(:,:)
    call matrginv(compl_clamped,6,6)
-   write(message,'(a,a,a)')ch10,&
-&   ' Compliance Tensor (clamped ion) (unit: 10^-2GP^-1):',ch10
+   write(message,'(a,a,a)')ch10,' Compliance Tensor (clamped ion) (unit: 10^-2GP^-1):',ch10
    call wrtout(std_out,message,'COLL')
 
    do ivarB=1,6
@@ -571,10 +569,6 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 
  end if
 
-!DEBUG
-!write(std_out,'(/,6es16.6,/)')ucvol
-!ENDDEBUG
-
 !befor the end , make sure the tensor elast(6,6)
 !will have the relaxed ion values and tensor elast_clamped has the clamped ion
 !values, and similarily for the corresponding compliance tensors
@@ -594,8 +588,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 !  write(std_out,*)'',blkval(1,:,7,1,1,iblok_stress)
 !  ENDDEBUG
 
-!  firts give the corect stress values
-!  diagonal parts
+!  firts give the corect stress values diagonal parts
    stress(1)=blkval(1,1,natom+3,1,1,iblok_stress)
    stress(2)=blkval(1,2,natom+3,1,1,iblok_stress)
    stress(3)=blkval(1,3,natom+3,1,1,iblok_stress)
@@ -670,4 +663,3 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 
 end subroutine ddb_elast
 !!***
-

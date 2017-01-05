@@ -34,6 +34,7 @@ module m_dynmat
  use m_errors
  use m_linalg_interfaces
 
+ use m_fstrings,        only : itoa, sjoin
  use m_numeric_tools,   only : wrap2_pmhalf, mkherm
  use m_cgtools,         only : fxphas_seq
  use m_ewald,           only : ewald9
@@ -144,7 +145,7 @@ subroutine asria_calc(asr,d2asr,d2cart,mpert,natom)
 !scalars
  integer :: idir1,idir2,ii,ipert1,ipert2
  integer :: constrank, imatelem, iconst, nconst, nd2_packed, info
- character(len=500) :: message
+ !character(len=500) :: message
 !arrays
  integer, allocatable :: packingindex(:,:,:,:)
  real(dp), allocatable :: constraints(:,:,:)
@@ -238,9 +239,7 @@ subroutine asria_calc(asr,d2asr,d2cart,mpert,natom)
 !  lwork = 3*nd2_packed
    call zgelss (nconst,nd2_packed,1,constraints,nconst,constr_rhs,nd2_packed,&
 &   singvals,-one,constrank,work,3*nd2_packed,rwork,info)
-
-   write(message,"(a,i0)")'zgelss returned info: ', info
-   ABI_CHECK(info /=0, message)
+   ABI_CHECK(info == 0, sjoin('zgelss returned:', itoa(info)))
 
 !  unpack
    do ipert2=1,natom
@@ -545,6 +544,7 @@ subroutine asrprs(asr,asrflag,rotinv,uinvers,vtinvers,singular,d2cart,mpert,nato
 
    call dgesvd('A','O',superdim,superdim,superm,superdim,singular,umatrix,superdim, &
 &   vtmatrix, 1, work,6*superdim,info)
+   ABI_CHECK(info == 0, sjoin('dgesvd returned:', itoa(info)))
 
    ABI_DEALLOCATE(vtmatrix)
    ABI_DEALLOCATE(work)
@@ -2709,17 +2709,15 @@ subroutine canat9(brav,natom,rcan,rprim,trans,xred)
 
  DBG_ENTER("COLL")
 
-
 !Normalization of the cartesian atomic coordinates
 !If not normalized : rcan(i) <- rcan(i) * acell(i)
-
  do iatom=1,natom
    rcan(:,iatom)=xred(1,iatom)*rprim(:,1)+&
 &   xred(2,iatom)*rprim(:,2)+&
 &   xred(3,iatom)*rprim(:,3)
  end do
 
-!Study of the different cases for the Bravais lattice :
+!Study of the different cases for the Bravais lattice:
 
 !Simple Cubic Lattice
  if (brav==1) then
@@ -2957,9 +2955,7 @@ subroutine canct9(acell,gprim,ib,index,irpt,natom,nrpt,rcan,rcart,rprim,rpt)
 &   +gprim(3,jj)*(rpt(3,irpt)+rcan(3,ib))
  end do
 
-!Then to cartesian coordinates (here the position of
-!the atom b)
-
+!Then to cartesian coordinates (here the position of the atom b)
  do jj=1,3
    rcart(jj)=xred(1)*acell(1)*rprim(jj,1)+&
 &   xred(2)*acell(2)*rprim(jj,2)+&
@@ -3133,7 +3129,6 @@ subroutine dist9(acell,dist,gprim,natom,nrpt,rcan,rprim,rpt)
  implicit none
 
 !Arguments -------------------------------
-! real(dp),intent(in) :: ucvol
 !scalars
  integer,intent(in) :: natom,nrpt
 !arrays
@@ -3663,7 +3658,6 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,wghatm)
 
  DBG_ENTER("COLL")
 
-
 !First analyze the vectors qshft
  if(nqshft/=1)then
 
@@ -3725,11 +3719,6 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,wghatm)
  end if
  if(nqshft/=1)factor=factor*2
 
-!DEBUG
-!write(std_out,*)'factor,ngqpt',factor,ngqpt(1:3)
-!ENDDEBUG
-
-
 !Begin the big loop on ia and ib
  do ia=1,natom
    do ib=1,natom
@@ -3763,10 +3752,6 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,wghatm)
          do ii=1,3
            rdiff(ii)=rcan(ii,ib)-rcan(ii,ia)+rpt(ii,irpt)
          end do
-!        DEBUG
-!        if(ia==1 .and. ib==10)&
-!        &     write(std_out,'(a,i5,a,3es16.6)' )' irpt=',irpt,'  rdiff=',rdiff(1:3)
-!        ENDDEBUG
        end if
 
 !      ***************************************************************
@@ -3785,11 +3770,6 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,wghatm)
              wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/2
            end if
          end do
-
-!        DEBUG
-!        if(ia==1 .and. ib==2)&
-!        &     write(std_out,*)' wghatm(ia,ib,irpt)=',wghatm(ia,ib,irpt)
-!        ENDDEBUG
 
        else if(brav==4)then
 !        Hexagonal
@@ -3909,10 +3889,6 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,wghatm)
              wghatm(ia,ib,irpt)=zero
 !            If the point is in a boundary position increment nbord(1)
            else if (abs(abs(rdiff(ii))-factor*ngqpt(ii)) <=1.0d-10) then
-!            DEBUG
-!            write(std_out,*)'ia,ib,irpt,ii,nbord(1)'
-!            write(std_out,*)ia,ib,irpt,ii,nbord(1)
-!            ENDDEBUG
              nbord(1)=nbord(1)+1
            end if
          end do
@@ -3948,11 +3924,9 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,wghatm)
      do irpt=1,nrpt
 !      Check if the sum of the weights is equal to the number of q points
        sum=sum+wghatm(ia,ib,irpt)
-!      DEBUG
 !      write(std_out,'(a,3i5)' )' atom1, atom2, irpt ; rpt ; wghatm ',ia,ib,irpt
 !      write(std_out,'(3es16.6,es18.6)' )&
 !      &    rpt(1,irpt),rpt(2,irpt),rpt(3,irpt),wghatm(ia,ib,irpt)
-!      ENDDEBUG
      end do
      if (abs(sum-nqpt)>1.0d-10) then
        write(message, '(a,a,a,2i4,a,a,es14.4,a,a,i4,a,a,a,a,a,a)' )&
@@ -4042,8 +4016,7 @@ subroutine d3sym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 !do i1dir = 1, 3
 !do i2dir = 1, 3
 !do i3dir = 1, 3
-!write(std_out,*)i1dir,i2dir,i3dir,&
-!&   blkflg(i1dir,natom+2,i2dir,natom+2,i3dir,natom+2)
+!write(std_out,*)i1dir,i2dir,i3dir,blkflg(i1dir,natom+2,i2dir,natom+2,i3dir,natom+2)
 !end do
 !end do
 !end do
@@ -5162,6 +5135,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
  ABI_ALLOCATE(zhpev2,(3*3*natom-2))
 
  call ZHPEV ('V','U',3*natom,matrx,eigval,eigvec,3*natom,zhpev1,zhpev2,ier)
+ ABI_CHECK(ier == 0, sjoin('zhpev returned:', itoa(ier)))
 
  ABI_DEALLOCATE(matrx)
  ABI_DEALLOCATE(zhpev1)

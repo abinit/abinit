@@ -146,9 +146,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 !DEBUG
 ! write(std_out,'(a)')' Enter ddb_diel : displ ='
 ! do imode=1,3*natom
-!   write(std_out,'(a,i4,a,12es16.6)')'imode=',imode,&
-!&    ' displ(:,:,imode)',&
-!&    displ(:,:,imode)
+!   write(std_out,'(a,i4,a,12es16.6)')'imode=',imode,' displ(:,:,imode)',displ(:,:,imode)
 ! enddo
 !ENDDEBUG
 
@@ -192,11 +190,9 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 
 !DEBUG
 !           write(std_out,'(a,i4,a,12es16.6)')'imode=',imode,&
-!&           ' displ(:,:,imode)',&
-!&            displ(:,:,imode)
+!&           ' displ(:,:,imode)',displ(:,:,imode)
 !           write(std_out,'(a,i4,a,6es16.6)')'imode=',imode,&
-!&           ' fact_oscstr(:,:,imode)=',&
-!&            fact_oscstr(:,:,imode)
+!&           ' fact_oscstr(:,:,imode)=',fact_oscstr(:,:,imode)
 !ENDDEBUG
 
    end do
