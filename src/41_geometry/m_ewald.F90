@@ -678,9 +678,9 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
  ! This routine is expensive so skip the calculation and return zeros if zeff == zero.
  ! Typically this happens when the DDB file does not contains zeff but dipdip = 1 is used (default).
- !if (all(zeff == zero)) then
- !  dyewt = zero; return
- !end if
+ if (all(zeff == zero)) then
+   dyew = zero; return
+ end if
 
  ABI_ALLOCATE(dyewt,(2,3,natom,3,natom))
 

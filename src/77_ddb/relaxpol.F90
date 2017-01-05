@@ -397,7 +397,6 @@ subroutine relaxpol(Crystal,blkflg,blkval,etotal,fred,iatfix,iout,istrfix,&
    call dzgefa(ifcmat,sizef,sizef,ipvt,info)
    ABI_CHECK(info == 0, sjoin("dzgefa returned:", itoa(info)))
    call dzgedi(ifcmat,sizef,sizef,ipvt,det,zgwork,job)
-   ABI_CHECK(job == 0, sjoin("dzgedi returned:", itoa(job)))
 
 !  DEBUG
 !  write(100,*)'relaxat = ',relaxat

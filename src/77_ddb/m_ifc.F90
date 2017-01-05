@@ -392,6 +392,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_init'
  use interfaces_14_hidewrite
+ use interfaces_41_geometry
  use interfaces_56_recipspace
  use interfaces_72_response
 !End of the abilint section
