@@ -111,6 +111,7 @@ subroutine elphon(anaddb_dtset,Cryst,Ifc,filnam,comm)
 
  use m_io_tools,        only : open_file, is_open
  use m_numeric_tools,   only : wrap2_pmhalf
+ use m_pptools,         only : printvtk
  use m_dynmat,          only : ftgam_init, ftgam
  use m_crystal,         only : crystal_t
  use m_ifc,             only : ifc_type

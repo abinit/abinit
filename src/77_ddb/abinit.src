@@ -88,7 +88,6 @@ sources = [
  "order_fs_kpts.F90",
  "outelph.F90",
  "ddb_piezo.F90",
- "printvtk.F90",
  "prt_gkk_yambo.F90",
  "ramansus.F90",
  "rchkgsheader.F90",

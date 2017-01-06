@@ -56,6 +56,7 @@ MODULE m_ebands
  use m_special_funcs,  only : dirac_delta
  use m_geometry,       only : normv
  use m_cgtools,        only : set_istwfk
+ use m_pptools,        only : printbxsf
  use m_nesting,        only : mknesting
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : isamek
@@ -2097,7 +2098,6 @@ integer function ebands_write_bxsf(ebands, crystal, fname) result(ierr)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_write_bxsf'
- use interfaces_61_occeig
 !End of the abilint section
 
  implicit none

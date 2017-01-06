@@ -46,6 +46,7 @@ MODULE m_ifc
  use m_time,        only : cwtime
  use m_numeric_tools, only : wrap2_zero_one, wrap2_pmhalf
  use m_copy,        only : alloc_copy
+ use m_pptools,     only : printbxsf
  use m_ewald,       only : ewald9
  use m_crystal,     only : crystal_t
  use m_geometry,    only : phdispl_cart2red, normv
@@ -2422,7 +2423,6 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_printbxsf'
  use interfaces_14_hidewrite
- use interfaces_61_occeig
 !End of the abilint section
 
  implicit none
