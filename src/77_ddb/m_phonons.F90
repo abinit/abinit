@@ -1276,11 +1276,21 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 #endif
 
    call phonons_write_phfrq(strcat(prefix, "_PHFRQ"), natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart)
-   call phonons_write_xmgrace(strcat(prefix, "_PHBANDS.agr"), natom, nfineqpath, save_qpoints, save_phfrq)
-   !call phonons_write_gnuplot(prefix, natom, nfinepath, save_qpoints, save_phfrq)
 
-   !call phonons_writeEPS(natom,nfineqpath,Crystal%ntypat,save_qpoints,Crystal%typat, &
-   !  weights,save_phfrq,save_phdispl_cart)
+   select case (inp%prtphbands)
+   case (0)
+     continue
+   case (1)
+     call phonons_write_xmgrace(strcat(prefix, "_PHBANDS.agr"), natom, nfineqpath, save_qpoints, save_phfrq)
+   case (2)
+     call phonons_write_gnuplot(prefix, natom, nfineqpath, save_qpoints, save_phfrq)
+   !case (3)
+     !call phonons_writeEPS(natom,nfineqpath,Crystal%ntypat,save_qpoints,Crystal%typat, &
+     !  weights,save_phfrq,save_phdispl_cart)
+   case default
+     MSG_WARNING(sjoin("Don't know how to handle prtphbands:", itoa(inp%prtphbands)))
+   end select
+
    ABI_FREE(weights)
  end if
 

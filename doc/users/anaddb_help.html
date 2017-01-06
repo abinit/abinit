@@ -21,18 +21,17 @@ The user is not supposed to know how the Derivative
 DataBase (DBB) has been generated. He/she should simply know what
 material is described by the DDB he/she wants to use.
 <br>
-If he/she is interested in the generation of DDB, and wants to
-know more about this
-topic, he/she will read different help files of the ABINIT package,
-related to the
+If he/she is interested in the generation of DDB, and wants to know more about this
+topic, he/she will read different help files of the ABINIT package, related to the
 <A href="abinit_help.html"><B>main code</B></A>, to the
 <A href="respfn_help.html"><B>response-function features of the main code</B></A>,
 to the <A href="mrgddb_help.html"><B>merging code</B></A>.
 </h3>
 
-<p> It will be easier to discover the
-  present file with the help of the <a href="../tutorial/welcome.html">tutorial</a>, especially
- the <a href="../tutorial/lesson_rf2.html">second lesson on response functions</a>.
+<p> 
+It will be easier to discover the
+present file with the help of the <a href="../tutorial/welcome.html">tutorial</a>, especially
+the <a href="../tutorial/lesson_rf2.html">second lesson on response functions</a>.
 <br>It is worthwhile to print this help file, for ease of reading.
 
 <h5>Copyright (C) 1998-2016 ABINIT group (XG,DCA)
@@ -62,13 +61,13 @@ In short, a Derivative DataBase contains a list of derivatives
 of the total energy with respect to three kind of perturbations:
 phonons, electric field and stresses. The present code analyses
 the DDB, and directly gives properties of the material under
-investigation, like phonon spectrum, frequency-dependent dielectric
-tensor, thermal properties.
+investigation, like phonon spectrum, frequency-dependent dielectric tensor, thermal properties.
 
-<p>Given an input file (parameters described below),
-  the user must create a "files" file which lists names for the files
-  the job will require, including the main input file, the main output file,
-  the name of the DDB, and some other file names optionally used for selected capabilities of the code.
+<p>
+Given an input file (parameters described below),
+the user must create a "files" file which lists names for the files
+the job will require, including the main input file, the main output file,
+the name of the DDB, and some other file names optionally used for selected capabilities of the code.
 
 <p>The files file (called for example ab.files) could look like: </p>
 <p>
@@ -84,8 +83,7 @@ tensor, thermal properties.
   - the file name for ddk reference files: these are the GKK files generated in k-point derivative runs, using the <a href="../input_variables/html_automatically_generated/varfil.html#prtgkk"><b>prtgkk</b></a> abinit input variable (used only for electron-phonon transport calculations)
   Other examples are given in the ~abinit/test/v2 directory. The latter three filename information
   is often not used by anaddb.
-  The maximal length
-  of names for the main input or output files is presently 132 characters.
+  The maximal length of names for the main input or output files is presently 264 characters.
 
   <p>The main executable file is called anaddb.
     Supposing that the "files" file is called anaddb.files,
@@ -102,13 +100,10 @@ tensor, thermal properties.
 <p> where standard out and standard error are piped
 to the log file called "log"
 (piping the standard error, thanks to the '&' sign placed after '>'
-is <b>really important</b>
-for the analysis of eventual failures, when not due
+is <b>really important</b> for the analysis of eventual failures, when not due
 to ABINIT, but to other sources, like disk full problem ...).
-The user can specify
-any names he/she wishes for any of these files.
-Variations of the above commands
-could be needed,
+The user can specify any names he/she wishes for any of these files.
+Variations of the above commands could be needed,
 depending on the flavor of UNIX that is used on the platform
 that is considered for running the code.
 </p>
@@ -226,6 +221,7 @@ you can go back to the tutorial window.</i>
  <a href="anaddb_help.html#prtmbm">prtmbm</a>&nbsp;&nbsp;
  <a href="anaddb_help.html#prtdos">prtdos</a>&nbsp;&nbsp;
  <a href="anaddb_help.html#prtnest">prtnest</a>&nbsp;&nbsp;
+ <a href="anaddb_help.html#prtphbands">prtphbands</a>&nbsp;&nbsp;
  <a href="anaddb_help.html#prtvol">prtvol</a>&nbsp;&nbsp;
  <br>Q.
  <a href="anaddb_help.html#qgrid_type">qgrid_type</a>&nbsp;&nbsp;
@@ -272,8 +268,7 @@ you can go back to the tutorial window.</i>
 In case <b>alphon</b> is set to 1, ANADDB will compute linear combinations of
 the eigendisplacements of modes that are degenerate (twice or three times),
 in order to align the mode effective charges along the cartesian axes.
-This option is useful in the mode-by-mode decomposition of the
-electrooptic tensor, and to compute
+This option is useful in the mode-by-mode decomposition of the electrooptic tensor, and to compute
 the Raman susceptibilities of individual phonon modes.
 In case of uniaxial crystals, the z-axis should be chosen along the optical axis.
 </font>
@@ -293,11 +288,11 @@ Govern the imposition of the Acoustic Sum Rule (ASR).
  <li>  0 => no ASR for interatomic force constants is imposed.</li>
  <li>  1 or 2 => the ASR for interatomic force constants
   is imposed by modifying the on-site interatomic force constants,
-  in a symmetric way (asr=2), or in the more general case,
-  unconstrained way (asr=1).</li>
+  in a symmetric way (asr=2), or in the more general case, unconstrained way (asr=1).</li>
 </ul>
 <p>
-<font id="text">More detailed explanations: the total energy should be
+<font id="text">
+More detailed explanations: the total energy should be
 invariant under translation of the crystal as a whole. This
 would guarantee that the three lowest phonon modes at Gamma
 have zero frequency (Acoustic Sum Rule - ASR).
@@ -308,22 +303,19 @@ slightly breaks the translational invariance.
 Well, in some pathological cases, the breaking can be rather important.
 </font></p>
 <p><font id="text">Two quantities are affected: the interatomic forces
-(or
-dynamical matrices), and the effective charges.
+(or dynamical matrices), and the effective charges.
 The ASR for the effective charges is called the charge
 neutrality sum rule, and will be dealt with by the variable
 <a href="anaddb_help.html#chneut">chneut</a>.
 The ASR for the interatomic forces can be restored,
 by modifying the interatomic force of the atom on itself,
-(called self-IFC), as soon as the dynamical matrix at Gamma
-is known. This quantity
-should be equal to minus the sum of all interatomic
+(called self-IFC), as soon as the dynamical matrix at Gamma is known. 
+This quantity should be equal to minus the sum of all interatomic
 forces generated by all others atoms (action-reaction law!),
 which is determined by the dynamical matrix at Gamma.
 <p>
 So, if <b>asr</b> is non-zero, the correction to the self-force
-will be determined, and the self-force will be imposed
-to be consistent with the ASR.
+will be determined, and the self-force will be imposed to be consistent with the ASR.
 This correction will work if IFCs are computed
 (<a href="anaddb_help.html#ifcflag">ifcflag</a>/=0),
 as well as if the IFCs are not computed
@@ -331,15 +323,13 @@ as well as if the IFCs are not computed
 In both cases, the phonon frequencies will not be the same
 as the ones determined by the output of abinit, RF case.
 If you want to check that the DDB is correct, by comparing
-phonon frequencies from abinit and anaddb, you should turn off
-both <b>asr</b> and
+phonon frequencies from abinit and anaddb, you should turn off both <b>asr</b> and
 <a href="anaddb_help.html#chneut">chneut</a>.
 </font></p>
-<p><font id="text">Until now, we have not explained the difference
-between
-<b>asr</b>=1 and <b>asr</b>=2. This is rather subtle.
-In some local low-symmetry
-cases (basically the effective charges should be anisotropic),
+<p><font id="text">Until now, we have not explained the difference between
+<b>asr</b>=1 and <b>asr</b>=2. 
+This is rather subtle.
+In some local low-symmetry cases (basically the effective charges should be anisotropic),
 when the dipole-dipole contribution is evaluated and subtracted,
 the ASR cannot be imposed without breaking the
 symmetry of the on-site interatomic forces. That explains why two
@@ -348,20 +338,16 @@ entirely impose the ASR, but simply the part that keeps the on-site
 interatomic forces symmetric (which means that the acoustic frequencies
 do not go to zero exactly), the first case (<b>asr</b>=1, asym)
 imposes the ASR, but breaks the symmetry.
-<b>asr</b>=2 is to be preferred for the analysis of the interatomic
-force
-constant in real space, while <b>asr</b>=1 should be used to get
-the phonon band structure.
+<b>asr</b>=2 is to be preferred for the analysis of the interatomic force
+constant in real space, while <b>asr</b>=1 should be used to get the phonon band structure.
 </font></p>
 <p><font id="text">(NOTE: in order to confuse even more the situation,
 it seems that the acoustic phonon frequencies generated by the code
 for both the sym and asym options are exactly the same ...
 likely due to an extra symmetrisation in the diagonalisation routine.
-Of course, when
-the matrix at Gamma has been generated from IFCs coming from dynamical
-matrices none of which are Gamma, the breaking of the ASR is rather
-severe. In order to clear the situation, one should use
-a diagonalisation
+Of course, when the matrix at Gamma has been generated from IFCs coming from dynamical
+matrices none of which are Gamma, the breaking of the ASR is rather severe. 
+In order to clear the situation, one should use a diagonalisation
 routine for non-hermitian matrices. So, at the present status of
 understanding, one should always use the <b>asr</b>=2 option ).
 </font><br>
@@ -383,38 +369,31 @@ variables</a>
 <font id="default">Default: 0.05</font>
 <br>
 <br>
-<font id="text">The relative tolerance on the atomic temperature
-factors.
+<font id="text">The relative tolerance on the atomic temperature factors.
 This number will determine when the series of channel widths
 with which the DOS is calculated can be stopped, i.e.
 the mean of the relative change going from one grid
 to the next bigger is smaller than <b>wtol2</b>.
-</font><br>
-<br>
-<br>
-<br>
-<a href="#top">Go to the top</a>
-<b> | </b><a href="anaddb_help.html#list">List of ANADDB input
-variables</a>
-<hr><font id="title"><a name="atifc">atifc</a></font>
-<br>
-<font id="definition">Mnemonics: AToms for IFC analysis</font>
-<br>
-<font id="category">Characteristic: </font>
-<br>
-<font id="vartype">Variable type: integer array <b>atifc</b>(
-<a href="anaddb_help.html#natifc">natifc</a>) </font>
-<br>
-<font id="default">Default: 0 </font>
-<br>
-<br>
-<font id="text">The actual numbers of the atoms for which the
-interatomic
+</font>
+
+<br><br><br><br><a href="#top">Go to the top</a>
+<b> | </b><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<hr>
+
+<font id="title"><a name="atifc">atifc</a></font>
+<br><font id="definition">Mnemonics: AToms for IFC analysis</font>
+<br><font id="category">Characteristic: </font>
+<br><font id="vartype">Variable type: integer array <b>atifc</b>(<a href="anaddb_help.html#natifc">natifc</a>) </font>
+<br><font id="default">Default: 0 </font>
+<br><br><font id="text">
+The actual numbers of the atoms for which the interatomic
 force constant have to be written and eventually analysed.
 <br>
 WARNING: there will be an in-place change of meaning of atifc (this is
 confusing, and should be taken away in one future version - sorry for this).
-</font><br>
+</font>
+
+<br>
 <br><br><br><a href=#top>Go to the top</a>
 <B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
 <hr>
@@ -519,8 +498,7 @@ More detailed explanation: the sum of the effective charges
 in the unit cell should be equal to zero. It is not the case
 in the DDB, and this sum rule is sometimes strongly violated.
 In particular, this will make the lowest frequencies at Gamma
-non-zero. There is no "best" way of imposing the ASR
-on effective charges. 
+non-zero. There is no "best" way of imposing the ASR on effective charges. 
 </font>
 <br><br><br><br><a href=#top>Go to the top</a>
 <B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
@@ -2161,20 +2139,42 @@ Control the volume of printed output.
 <b> | </b><a href="anaddb_help.html#list">List of ANADDB input variables</a>
 <hr>
 
+<font id="title"><a name="prtphbands">prtphbands</a></font>
+<br><font id="definition">Mnemonics: PRinT PHonon BANDS</font>
+<br><font id="category">Characteristic: </font>
+<br><font id="vartype">Variable type: integer </font>
+<br><font id="default">Default: 1</font>
+<br><br><font id="text"> 
+
+Only if <a href="anaddb_help.html#ifcflag">ifcflag</a>=1. 
+
+This option specifies the file format for the phonon band structure.
+Possible values:
+
+<ul>
+<!--
+<li>0 Disable the output of the phonon frequencies.</li>
+-->
+
+<li>1 Write frequencies in xmgrace format.  A file with extension `PHBANDS.agr` is produced.
+Use `xmgrace file_PHBANDS.agr` to visualize the data</li>
+
+<li>2 Write frequencies in gnuplot format. 
+The code produces a `PHBANDS.dat` file with the eigenvalues and a `PHBANDS.gnuplot` script.
+Use `gnuplot file_PHBANDS.gnuplot` to visualize the phonon band structure.</li>
+</ul>
+</font>
+
+<br><br><br><br><a href="#top">Go to the top</a>
+<B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
+<hr>
 
 <font id="title"><a name="prtsrlr">prtsrlr</a></font>
-<br>
-<font id="definition">Mnemonics: PRinT the Short-Range/Long-Range 
-decomposition of phonon FREQuencies</font>
-<br>
-<font id="category">Characteristic: </font>
-<br>
-<font id="vartype">Variable type: integer </font>
-<br>
-<font id="default">Default: 0</font>
-<br>
-<br>
-<font id="text"> 
+<br><font id="definition">Mnemonics: PRinT the Short-Range/Long-Range  decomposition of phonon FREQuencies</font>
+<br><font id="category">Characteristic: </font>
+<br><font id="vartype">Variable type: integer </font>
+<br><font id="default">Default: 0</font>
+<br><br><font id="text"> 
 Only if <a href="anaddb_help.html#ifcflag">ifcflag</a>=1. 
 The available options are:
 </font>
@@ -2189,12 +2189,8 @@ See also <a href="anaddb_help.html#ifcflag">ifcflag</a>,
 <a href="anaddb_help.html#ifcflag">ifcflag</a> and
 <a href="anaddb_help.html#dipdip">dipdip</a>.
  </font>
-<br>
-<br>
-<br>
-<br>
-<a href="#top">Go to the top</a>
 
+<br> <br> <br> <br> <a href="#top">Go to the top</a>
 <B> | </B><a href="anaddb_help.html#list">List of ANADDB input variables</a>
 <hr>
 

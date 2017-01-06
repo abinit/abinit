@@ -606,7 +606,7 @@ program anaddb
          NCF_CHECK(nf90_inq_varid(ana_ncid, "non_analytical_phonon_modes", na_phmodes_varid))
          NCF_CHECK(nf90_put_var(ana_ncid,na_phmodes_varid,phfrq*Ha_eV,start=[1, iphl2], count=[3*natom, 1]))
          NCF_CHECK(nf90_inq_varid(ana_ncid, "non_analytical_phdispl_cart", na_phdispl_varid))
-         ncerr = nf90_put_var(ana_ncid,na_phdispl_varid,RESHAPE(displ,(/2, 3*natom, 3*natom/))*Bohr_Ang,&
+         ncerr = nf90_put_var(ana_ncid,na_phdispl_varid,RESHAPE(displ,[2, 3*natom, 3*natom])*Bohr_Ang,&
          start=[1,1,1,iphl2], count=[2,3*natom,3*natom, 1])
          NCF_CHECK(ncerr)
 #endif

@@ -465,9 +465,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ABI_FREE(ddb_qshifts)
  call ifc_print(ifc, unit=std_out)
 
- ! Compute speed of sound.
- !call ifc_speedofsound(ifc, crystal, 0.001_dp, 10._dp, nctk_noid, comm)
-
  ! Test B-spline interpolation of phonons
  !if (.True.) then
  if (.False.) then

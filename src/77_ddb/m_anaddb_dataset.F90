@@ -107,6 +107,7 @@ module m_anaddb_dataset
   integer :: prtmbm
   integer :: prtfsurf
   integer :: prtnest
+  integer :: prtphbands
   integer :: prtsrlr  ! print the short-range/long-range decomposition of phonon freq.
   integer :: prtvol = 0
   integer :: qrefine
@@ -753,16 +754,6 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
- anaddb_dtset%prtsrlr=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtsrlr',tread,'INT')
- if(tread==1) anaddb_dtset%prtsrlr=intarr(1)
- if(anaddb_dtset%prtsrlr<0.or.anaddb_dtset%prtsrlr>1)then
-   write(message, '(a,i0,5a)' )&
-&   'prtsrlr is ',anaddb_dtset%prtsrlr,', but the only allowed values',ch10,&
-&   'are 0 or 1.',ch10,'Action: correct prtsrlr in your input file.'
-   MSG_ERROR(message)
- end if
-
  anaddb_dtset%ifcout=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ifcout',tread,'INT')
  if(tread==1) anaddb_dtset%ifcout=intarr(1)
@@ -1129,6 +1120,25 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 &   'prtnest is ',anaddb_dtset%prtnest,' The only allowed values',ch10,&
 &   'are 0 (no nesting), 1 (XY format) or 2 (XY + Xcrysden format)',ch10,&
 &   'Action: correct prtnest in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ anaddb_dtset%prtphbands=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtphbands',tread,'INT')
+ if (tread==1) anaddb_dtset%prtphbands=intarr(1)
+ if (all(anaddb_dtset%prtphbands /= [0,1,2])) then
+   write(message, '(a,i0,a)' )&
+&   'prtphbands is ',anaddb_dtset%prtphbands,', but the only allowed values are [0, 1, 2].'
+   MSG_ERROR(message)
+ end if
+
+ anaddb_dtset%prtsrlr=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtsrlr',tread,'INT')
+ if(tread==1) anaddb_dtset%prtsrlr=intarr(1)
+ if(anaddb_dtset%prtsrlr<0.or.anaddb_dtset%prtsrlr>1)then
+   write(message, '(a,i0,5a)' )&
+&   'prtsrlr is ',anaddb_dtset%prtsrlr,', but the only allowed values',ch10,&
+&   'are 0 or 1.',ch10,'Action: correct prtsrlr in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1741,8 +1751,7 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
 
 !Write the heading
  write(nunit,'(a,80a,a)') ch10,('=',ii=1,80),ch10
- write(nunit, '(a,a)' )&
-& ' -outvars_anaddb: echo values of input variables ----------------------',ch10
+ write(nunit, '(2a)' )' -outvars_anaddb: echo values of input variables ----------------------',ch10
 
 !The flags
  if(anaddb_dtset%dieflag/=0 .or. anaddb_dtset%ifcflag/=0 .or. &
@@ -2009,7 +2018,6 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    write(nunit,'(a)') ' Chosen atoms for projection = '
    write(nunit,'(10I6)') anaddb_dtset%iatprj_bs
  end if
-
 
  write(nunit,'(a,80a,a)') ch10,('=',ii=1,80),ch10
 
