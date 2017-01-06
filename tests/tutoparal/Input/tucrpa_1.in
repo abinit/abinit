@@ -42,7 +42,7 @@ nsym 1
 nband 30
 
 #==================================================================================
-############ FIRST DATASET: First dataset with all the symetries to compute DEnsity
+############ SECOND DATASET: Compute band structure with fatbands
 #==================================================================================
 
 getden2    1
@@ -65,10 +65,10 @@ kptbounds2  1/4 1/4 1/4 #R'
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = tdmft_1.in
+#%% test_chain = tucrpa_1.in
 #%% [files]
 #%% files_to_test = 
-#%%   tdmft_1.out, tolnlines=   12,   tolabs=  2.0e-3,  tolrel= 2.0e-3, fld_options = -medium
+#%%   tucrpa_1.out, tolnlines=   12,   tolabs=  2.0e-3,  tolrel= 2.0e-3, fld_options = -medium
 #%% psp_files= 23v.paw, 38sr.paw, 8o.paw 
 #%% [shell] 
 #%% [paral_info]
