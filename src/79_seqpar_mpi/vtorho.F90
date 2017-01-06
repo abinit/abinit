@@ -808,8 +808,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &         kinpw_k  =my_bandfft_kpt%kinpw_gather, &
 &         kg_k     =my_bandfft_kpt%kg_k_gather, &
 &         kpg_k    =my_bandfft_kpt%kpg_k_gather, &
-         ffnl_k   =my_bandfft_kpt%ffnl_gather, &
-         ph3d_k   =my_bandfft_kpt%ph3d_gather)
+          ffnl_k   =my_bandfft_kpt%ffnl_gather, &
+          ph3d_k   =my_bandfft_kpt%ph3d_gather)
        end if
 
 !      Build inverse of overlap matrix for chebfi

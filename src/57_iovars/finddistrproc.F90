@@ -198,7 +198,7 @@
          write(ount,"(a,i0)")"      mpi_ncpus: ",ii
          write(ount,"(a,i0)")"      omp_ncpus: ",omp_ncpus
          write(ount,"(a,f12.9)")"      efficiency: ",eff
-         !write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb 
+         !write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb
        end do
      end do
      write(ount,'(a)')"..."
@@ -338,12 +338,12 @@
    npf_max=min(nproc,NPFMAX)
    if (tread(6)==1) then
      npf_max=dtset%npfft
-     if (npf_max>ngmin(2)) then
-       write(message,'(3a)') &
-&       "Value of npfft given in input file is too high for the FFT grid!",ch10,&
-&       "Action: decrease npfft or increase FFT grid (ecut, ngfft, ...)."
-       MSG_ERROR(message)
-     end if
+      if (npf_max>ngmin(2)) then
+        write(message,'(3a)') &
+ &       "Value of npfft given in input file is too high for the FFT grid!",ch10,&
+ &       "Action: decrease npfft or increase FFT grid (ecut, ngfft, ...)."
+        MSG_ERROR(message)
+      end if
    end if
    npf_max=min(npf_max,ngmin(2))
    if (dtset%use_gpu_cuda==1) then
@@ -511,13 +511,13 @@
              do bpp=bpp_min,bpp_max
                if (modulo(mband/npb,bpp)>0) cycle
                if ((bpp>1).and.(modulo(bpp,2)>0)) cycle
-               if (one*npb*bpp >max(1.,mband/3.)) cycle
+               if (one*npb*bpp >max(1.,mband/3.).and.(mband>30)) cycle
                if (npb*npf<=4.and.(.not.first_bpp)) cycle
                first_bpp=.false.
 
                acc_kgb=acc_kgb_0
 !              Promote bpp*npb>mband/3
-               if (npb*npf>4) acc_kgb=acc_kgb*(one-(three*bpp*npb)/(one*mband))
+               if (npb*npf>4.and.mband>30) acc_kgb=acc_kgb*(one-(three*bpp*npb)/(one*mband))
 
 !              Resulting speedup
 !              weight0=acc_c*acc_k*acc_s*acc_kgb
@@ -702,7 +702,7 @@
      write(ount,"(a)")"#Autoparal section for GS calculations with paral_kgb"
    else if (optdriver==RUNL_RESPFN) then
      write(ount,"(a)")'#Autoparal section for DFPT calculations'
-   else 
+   else
      MSG_ERROR("Unsupported optdriver")
    end if
 
@@ -729,7 +729,7 @@
        write(ount,"(a,i0)")"      mpi_ncpus: ",tot_ncpus
        !write(ount,"(a,i0)")"      omp_ncpus: ",omp_ncpus !OMP not supported  (yet)
        write(ount,"(a,f12.9)")"      efficiency: ",eff
-       !write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb 
+       !write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb
 
        ! list of variables to use.
        !'npimage','|','npkpt','|','npspinor','|','npfft','|','npband','|',' bandpp ' ,'|','nproc','|','weight','|'
@@ -754,7 +754,7 @@
        write(ount,"(a,i0)")"      mpi_ncpus: ",tot_ncpus
        !write(ount,"(a,i0)")"      omp_ncpus: ",omp_ncpus !OMP not supported  (yet)
        write(ount,"(a,f12.9)")"      efficiency: ",eff
-       !write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb 
+       !write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb
        ! list of variables to use.
        !'nppert','|','npkpt','|','nproc','|','weight','|',
        write(ount,"(a)"   )"      vars: {"

@@ -1593,8 +1593,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
 !  np_slk
    call chkint_ge(0,0,cond_string,cond_values,ierr,'np_slk',dt%np_slk,0,iout)
-   if(dt%np_slk <= dt%npfft*dt%npband*dt%npspinor .and. MOD(dt%npfft*dt%npband*dt%npspinor, dt%np_slk) /= 0) then
-     MSG_ERROR_NOSTOP('np_slk must divide npfft*npband*npspinor.',ierr)
+   if (dt%np_slk>0) then
+     if(dt%np_slk <= dt%npfft*dt%npband*dt%npspinor .and. MOD(dt%npfft*dt%npband*dt%npspinor, dt%np_slk) /= 0) then
+       MSG_ERROR_NOSTOP('np_slk must divide npfft*npband*npspinor.',ierr)
+     end if
    end if
 
 !  nqpt
