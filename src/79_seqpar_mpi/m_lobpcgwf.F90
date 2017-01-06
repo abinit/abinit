@@ -121,7 +121,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  real(dp), pointer :: resid_ptr(:,:) => NULL()
 
  ! Stupid things for NC
- integer,parameter :: choice=1, paw_opt=0, signs=2
+ integer,parameter :: choice=1, paw_opt=0, signs=1
  type(pawcprj_type) :: cprj_dum(gs_hamk%natom,0)
  integer :: iband, shift
  real(dp) :: dprod_i
@@ -240,9 +240,11 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  ! lobpcg algorithm
  if ( .not. l_paw ) then
    !Check l_gvnlc size
-   if ( size(l_gvnlc) < 2*nband*l_npw*l_nspinor ) then
+   !if ( size(l_gvnlc) < 2*nband*l_npw*l_nspinor ) then
+   if ( size(l_gvnlc) /= 0 ) then
      ABI_FREE(l_gvnlc)
-     ABI_MALLOC(l_gvnlc,(2,nband*l_npw*l_nspinor))
+     !ABI_MALLOC(l_gvnlc,(2,nband*l_npw*l_nspinor))
+     ABI_MALLOC(l_gvnlc,(0,0))
    end if
    !Call nonlop
    if (mpi_enreg%paral_kgb==0) then
@@ -258,16 +260,17 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 &       eig((iband-1)*blockdim+1:iband*blockdim),blockdim,mpi_enreg,1,paw_opt,signs,&
 &       gsc_dummy,l_tim_getghc, &
 &       cg(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
-&       l_gvnlc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
+!&       l_gvnlc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
+&       l_gvnlc(:,:),&
 &       already_transposed=.false.)
      end do
    end if
    !Compute enlout
-   do iband=1,nband
-     shift = npw*nspinor*(iband-1)
-       call dotprod_g(enl_out(iband),dprod_i,l_gs_hamk%istwf_k,npw*nspinor,1,cg(:, shift+1:shift+npw*nspinor),&
-  &     l_gvnlc(:, shift+1:shift+npw*nspinor),mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
-   end do
+!   do iband=1,nband
+!     shift = npw*nspinor*(iband-1)
+!       call dotprod_g(enl_out(iband),dprod_i,l_gs_hamk%istwf_k,npw*nspinor,1,cg(:, shift+1:shift+npw*nspinor),&
+!  &     l_gvnlc(:, shift+1:shift+npw*nspinor),mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
+!   end do
  end if
 
  ABI_FREE(l_gvnlc)
