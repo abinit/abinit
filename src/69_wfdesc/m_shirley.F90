@@ -1753,7 +1753,7 @@ subroutine shirley_hks(Wsh,kpt,spin,Ham_k,Cryst,Psps,Pawtab,Pawang,Paw_ij,sh_siz
  call wrap2_pmhalf(kpt(:),k4intp(:),shifts(:))
 
  ! Continue to prepare the GS Hamiltonian.
- call load_spin_hamiltonian(Ham_k,spin,paw_ij=Paw_ij)
+ call load_spin_hamiltonian(Ham_k,spin,with_nonlocal=.true.)
 
  call kdata_init(Kdata,Cryst,Psps,k4intp,istwf_k,Wsh%ngfft,Wsh%MPI_enreg,kg_k=kg_k)
 
@@ -2193,7 +2193,7 @@ subroutine shirley_interp(Wsh,jobz,Dtset,Cryst,Psps,Pawtab,Pawfgr,Pawang,Pawrad,
    ! ==== Loop over the interpolated k-points ====
    ! =============================================
 
-   call init_hamiltonian(Ham_k,Psps,Pawtab,nspinor,nspden,natom,&
+   call init_hamiltonian(Ham_k,Psps,Pawtab,nspinor,nsppol,nspden,natom,&
 &    Cryst%typat,Cryst%xred,Wsh%nfft,Wsh%mgfft,Wsh%ngfft,Cryst%rprimd,nloalg)
 
    ABI_MALLOC(hk_ij, (sh_size,sh_size))

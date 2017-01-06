@@ -237,7 +237,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  nfftot=n1*n2*n3
 
 !Initialize Hamiltonian (k-independent terms) - NCPP only
- call init_hamiltonian(gs_hamk,psps,pawtab_dum,nspinor,nspden,natom,&
+ call init_hamiltonian(gs_hamk,psps,pawtab_dum,nspinor,nsppol,nspden,natom,&
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,ph1d=ph1d)
 
  bantot = 0
