@@ -1,6 +1,6 @@
 
 .Version 8.3.0 of ANADDB 
-.(MPI version, prepared for a x86_64_darwin15.6.0_gnu6.0 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2016 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -15,7 +15,7 @@
  For more information, see http://www.abinit.org .
 
 .Starting date : Fri  6 Jan 2017.
-- ( at 00h45 )
+- ( at 01h00 )
   
 
 ================================================================================
@@ -84,15 +84,15 @@ Computation of Gruneisen parameter with central finite difference:
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.825965E+00    0.000000E+00   -2.416039E-21
-         1         2    0.000000E+00    1.825965E+00   -2.416039E-21
-         1         3    0.000000E+00    0.000000E+00    1.825965E+00
-         2         1    1.825965E+00    0.000000E+00   -2.416039E-21
-         2         2    0.000000E+00    1.825965E+00   -2.416039E-21
-         2         3    0.000000E+00    0.000000E+00    1.825965E+00
-         3         1   -3.672457E+00    0.000000E+00   -2.661926E-19
-         3         2    0.000000E+00   -3.672457E+00   -2.661926E-19
-         3         3    0.000000E+00    0.000000E+00   -3.672457E+00
+         1         1    1.825965E+00    6.443406E-18    6.440990E-18
+         1         2    6.443406E-18    1.825965E+00   -6.445822E-18
+         1         3   -6.443406E-18   -6.443406E-18    1.825965E+00
+         2         1    1.825965E+00    6.443406E-18    6.440990E-18
+         2         2    6.443406E-18    1.825965E+00   -6.445822E-18
+         2         3   -6.443406E-18   -6.443406E-18    1.825965E+00
+         3         1   -3.672457E+00   -6.467873E-17   -6.494492E-17
+         3         2   -6.467873E-17   -3.672457E+00    6.441254E-17
+         3         3    6.467873E-17    6.467873E-17   -3.672457E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t45_Mg2Si_k666_q888_-0.01_DDB
        Homogeneous q point set in the B.Z.
@@ -149,15 +149,15 @@ Computation of Gruneisen parameter with central finite difference:
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.838808E+00    0.000000E+00   -6.209662E-21
-         1         2    0.000000E+00    1.838808E+00   -6.209662E-21
-         1         3    0.000000E+00    0.000000E+00    1.838808E+00
-         2         1    1.838808E+00    0.000000E+00   -6.209662E-21
-         2         2    0.000000E+00    1.838808E+00   -6.209662E-21
-         2         3    0.000000E+00    0.000000E+00    1.838808E+00
-         3         1   -3.698728E+00    0.000000E+00    3.962556E-19
-         3         2    0.000000E+00   -3.698728E+00    3.962556E-19
-         3         3    0.000000E+00    0.000000E+00   -3.698728E+00
+         1         1    1.838808E+00   -2.263711E-18   -2.269921E-18
+         1         2   -2.263711E-18    1.838808E+00    2.257502E-18
+         1         3    2.263711E-18    2.263711E-18    1.838808E+00
+         2         1    1.838808E+00   -2.263711E-18   -2.269921E-18
+         2         2   -2.263711E-18    1.838808E+00    2.257502E-18
+         2         3    2.263711E-18    2.263711E-18    1.838808E+00
+         3         1   -3.698728E+00    1.143384E-16    1.147346E-16
+         3         2    1.143384E-16   -3.698728E+00   -1.139421E-16
+         3         3   -1.143384E-16   -1.143384E-16   -3.698728E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t45_Mg2Si_k666_q888_DDB
        Homogeneous q point set in the B.Z.
@@ -214,15 +214,15 @@ Computation of Gruneisen parameter with central finite difference:
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.851728E+00    0.000000E+00   -9.813475E-22
-         1         2    0.000000E+00    1.851728E+00   -9.813475E-22
-         1         3    0.000000E+00    0.000000E+00    1.851728E+00
-         2         1    1.851728E+00    0.000000E+00   -9.813475E-22
-         2         2    0.000000E+00    1.851728E+00   -9.813475E-22
-         2         3    0.000000E+00    0.000000E+00    1.851728E+00
-         3         1   -3.725297E+00    0.000000E+00   -2.768088E-20
-         3         2    0.000000E+00   -3.725297E+00   -2.768088E-20
-         3         3    0.000000E+00    0.000000E+00   -3.725297E+00
+         1         1    1.851728E+00   -3.493521E-18   -3.494502E-18
+         1         2   -3.493521E-18    1.851728E+00    3.492540E-18
+         1         3    3.493521E-18    3.493521E-18    1.851728E+00
+         2         1    1.851728E+00   -3.493521E-18   -3.494502E-18
+         2         2   -3.493521E-18    1.851728E+00    3.492540E-18
+         2         3    3.493521E-18    3.493521E-18    1.851728E+00
+         3         1   -3.725297E+00    1.388654E-16    1.388377E-16
+         3         2    1.388654E-16   -3.725297E+00   -1.388931E-16
+         3         3   -1.388654E-16   -1.388654E-16   -3.725297E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t45_Mg2Si_k666_q888_0.01_DDB
        Homogeneous q point set in the B.Z.
@@ -251,10 +251,10 @@ Computation of Gruneisen parameter with central finite difference:
 
  The interatomic forces have been obtained
  Speed of sound:  2.3877E+03  2.3880E+03  8.8304E+03 [m/s] along reduced direction: 1
- Speed of sound:  2.3876E+03  2.3881E+03  8.8304E+03 [m/s] along reduced direction: 2
+ Speed of sound:  2.3880E+03  2.3877E+03  8.8304E+03 [m/s] along reduced direction: 2
  Speed of sound:  2.3881E+03  2.3876E+03  8.8304E+03 [m/s] along reduced direction: 3
  Lebedev-Laikov integration with qradius:   1.0000E-03 tolms:   3.0000E+02 [m/s], npts: 38
- Spherical average:  5.7297E+03  4.9382E+03  8.8001E+03 [m/s],   6.4894E+03
+ Spherical average:  5.6482E+03  5.0177E+03  8.8001E+03 [m/s],   6.4887E+03
 
 ================================================================================
 
@@ -268,15 +268,15 @@ Computation of Gruneisen parameter with central finite difference:
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.838808E+00    0.000000E+00   -6.209662E-21
-         1         2    0.000000E+00    1.838808E+00   -6.209662E-21
-         1         3    0.000000E+00    0.000000E+00    1.838808E+00
-         2         1    1.838808E+00    0.000000E+00   -6.209662E-21
-         2         2    0.000000E+00    1.838808E+00   -6.209662E-21
-         2         3    0.000000E+00    0.000000E+00    1.838808E+00
-         3         1   -3.698728E+00    0.000000E+00    3.962556E-19
-         3         2    0.000000E+00   -3.698728E+00    3.962556E-19
-         3         3    0.000000E+00    0.000000E+00   -3.698728E+00
+         1         1    1.838808E+00   -2.263711E-18   -2.269921E-18
+         1         2   -2.263711E-18    1.838808E+00    2.257502E-18
+         1         3    2.263711E-18    2.263711E-18    1.838808E+00
+         2         1    1.838808E+00   -2.263711E-18   -2.269921E-18
+         2         2   -2.263711E-18    1.838808E+00    2.257502E-18
+         2         3    2.263711E-18    2.263711E-18    1.838808E+00
+         3         1   -3.698728E+00    1.143384E-16    1.147346E-16
+         3         2    1.143384E-16   -3.698728E+00   -1.139421E-16
+         3         3   -1.143384E-16   -1.143384E-16   -3.698728E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 
 ================================================================================
@@ -309,10 +309,10 @@ Computation of Gruneisen parameter with central finite difference:
 
  The interatomic forces have been obtained
  Speed of sound:  2.3877E+03  2.3880E+03  8.8304E+03 [m/s] along reduced direction: 1
- Speed of sound:  2.3876E+03  2.3881E+03  8.8304E+03 [m/s] along reduced direction: 2
+ Speed of sound:  2.3880E+03  2.3877E+03  8.8304E+03 [m/s] along reduced direction: 2
  Speed of sound:  2.3881E+03  2.3876E+03  8.8304E+03 [m/s] along reduced direction: 3
  Lebedev-Laikov integration with qradius:   1.0000E-03 tolms:   3.0000E+02 [m/s], npts: 38
- Spherical average:  5.7297E+03  4.9382E+03  8.8001E+03 [m/s],   6.4894E+03
+ Spherical average:  5.6482E+03  5.0177E+03  8.8001E+03 [m/s],   6.4887E+03
 
 ================================================================================
 
@@ -331,18 +331,18 @@ Computation of Gruneisen parameter with central finite difference:
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
   3.0  3.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0
-  0.0  0.0  0.0  0.0 -0.0 -0.0 -0.0 -0.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0
-  0.0  0.0 -0.0 -0.0 -0.0 -0.0  0.0  0.0  1.0  1.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0
+  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0
+  0.0  0.0  0.0  0.0 -0.0 -0.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0
  Symmetry characters of vibration mode #   7
        degenerate with vibration modes #   8 to    9
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
  -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+ -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 
   Phonon wavevector (reduced coordinates) :  0.05000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -700,18 +700,18 @@ Computation of Gruneisen parameter with central finite difference:
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
   3.0  3.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0
-  0.0  0.0  0.0  0.0 -0.0 -0.0 -0.0 -0.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0
-  0.0  0.0 -0.0 -0.0 -0.0 -0.0  0.0  0.0  1.0  1.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0
+  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0
+  0.0  0.0  0.0  0.0 -0.0 -0.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0
  Symmetry characters of vibration mode #   7
        degenerate with vibration modes #   8 to    9
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
  -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+ -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.05000  0.00000
  Phonon energies in Hartree :
@@ -1069,23 +1069,23 @@ Computation of Gruneisen parameter with central finite difference:
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
   3.0  3.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0
-  0.0  0.0  0.0  0.0 -0.0 -0.0 -0.0 -0.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0
-  0.0  0.0 -0.0 -0.0 -0.0 -0.0  0.0  0.0  1.0  1.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0
+  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0
+  0.0  0.0  0.0  0.0 -0.0 -0.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0
  Symmetry characters of vibration mode #   7
        degenerate with vibration modes #   8 to    9
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
  -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+ -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 -
-- Proc.   0 individual time (sec): cpu=         57.0  wall=         57.6
+- Proc.   0 individual time (sec): cpu=         87.3  wall=         87.3
 
 ================================================================================
 
-+Total cpu time     56.957  and wall time     57.584 sec
++Total cpu time     87.330  and wall time     87.286 sec
 
  anaddb : the run completed succesfully.
