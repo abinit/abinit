@@ -799,6 +799,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 !arrays
  integer :: my_spintab(2)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
+ real(dp),allocatable,target :: ekb_tmp(:,:,:)
 
 ! *************************************************************************
 
@@ -806,9 +807,10 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 
  !@gs_hamiltonian_type
 
+!Manage optional parameters
  my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
  my_spintab=0;my_spintab(1:nsppol)=1;if (present(mpi_spintab)) my_spintab(1:2)=mpi_spintab(1:2)
- my_nsppol=count(my_spintab==1);if(my_nsppol<1) my_nsppol=1
+ my_nsppol=count(my_spintab==1)
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -925,7 +927,6 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
    ham%dimekb1=psps%dimekb*cplex_dij
    ham%dimekb2=natom
    ABI_ALLOCATE(ham%sij,(ham%dimekb1,psps%ntypat))
-   nullify(ham%ekb)
    do itypat=1,psps%ntypat
      if (cplex_dij==1) then
        ham%sij(1:pawtab(itypat)%lmn2_size,itypat)=pawtab(itypat)%sij(:)
@@ -943,21 +944,28 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
    ! inside the loop over spins.
    ABI_ALLOCATE(ham%ekb_spin,(ham%dimekb1,ham%dimekb2,nspinor**2,my_nsppol))
    ham%ekb_spin=zero
-   ham%ekb => ham%ekb_spin(:,:,:,1)
    if (present(paw_ij)) then
+     if (my_nsppol<ham%nsppol) then
+       ABI_ALLOCATE(ekb_tmp,(ham%dimekb1,ham%dimekb2,nspinor**2))
+     end if
      jsp=0
      do isp=1,ham%nsppol
        if (my_spintab(isp)==1) then
-         jsp=jsp+1
-         if (present(mpi_atmtab)) then
-           call pawdij2ekb(ham%ekb_spin(:,:,:,jsp),paw_ij,isp,my_comm_atom,&
-&                          mpi_atmtab=mpi_atmtab)
-         else
-           call pawdij2ekb(ham%ekb_spin(:,:,:,jsp),paw_ij,isp,my_comm_atom)
-         end if
+         jsp=jsp+1 ; ham%ekb => ham%ekb_spin(:,:,:,jsp)
+       else
+         ham%ekb => ekb_tmp
+       end if
+       if (present(mpi_atmtab)) then
+         call pawdij2ekb(ham%ekb,paw_ij,isp,my_comm_atom,mpi_atmtab=mpi_atmtab)
+       else
+         call pawdij2ekb(ham%ekb,paw_ij,isp,my_comm_atom)
        end if
      end do
+     if (my_nsppol<ham%nsppol) then
+       ABI_DEALLOCATE(ekb_tmp)
+     end if
    end if
+   nullify(ham%ekb)
  end if
 
  DBG_EXIT("COLL")
@@ -1545,7 +1553,7 @@ subroutine load_spin_hamiltonian(Ham,isppol,vlocal,vxctaulocal,with_nonlocal)
  if (present(with_nonlocal)) then
    if (with_nonlocal) then
      jsppol=min(isppol,size(Ham%ekb_spin,4))
-     Ham%ekb => Ham%ekb_spin(:,:,:,jsppol)
+     if (jsppol>0) Ham%ekb => Ham%ekb_spin(:,:,:,jsppol)
    end if
  end if
 
@@ -1691,6 +1699,7 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
  logical :: has_e1kbsc_
 !arrays
  integer :: my_spintab(2)
+ real(dp),allocatable,target :: e1kb_tmp(:,:,:)
 
 ! *************************************************************************
 
@@ -1698,12 +1707,11 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
 
 !@rf_hamiltonian_type
 
+!Manage optional parameters
  has_e1kbsc_=.false.;if (present(has_e1kbsc)) has_e1kbsc_=has_e1kbsc
-
  my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
- my_spintab=0;my_spintab(1:rf_Ham%nsppol)=1
- if (present(mpi_spintab)) my_spintab(1:2)=mpi_spintab(1:2)
- my_nsppol=count(my_spintab==1);if(my_nsppol<1) my_nsppol=1
+ my_spintab=0;my_spintab(1:gs_Ham%nsppol)=1;if(present(mpi_spintab)) my_spintab=mpi_spintab
+ my_nsppol=count(my_spintab==1)
 
  rf_Ham%cplex  =cplex
 
@@ -1737,41 +1745,58 @@ subroutine init_rf_hamiltonian(cplex,gs_Ham,ipert,rf_Ham,&
 
      if (present(paw_ij1)) then
 
+       if (my_nsppol<rf_Ham%nsppol) then
+         ABI_ALLOCATE(e1kb_tmp,(rf_Ham%dime1kb1,rf_Ham%dime1kb2,rf_Ham%nspinor**2))
+       end if
+
+!      === Frozen term
        jsp=0
        do isp=1,rf_Ham%nsppol
          if (my_spintab(isp)==1) then
-           jsp=jsp+1
-           if (present(mpi_atmtab)) then
-             call pawdij2e1kb(paw_ij1,isp,my_comm_atom,e1kbfr=rf_Ham%e1kbfr_spin(:,:,:,jsp),&
-&                             mpi_atmtab=mpi_atmtab)
-           else
-             call pawdij2e1kb(paw_ij1,isp,my_comm_atom,e1kbfr=rf_Ham%e1kbfr_spin(:,:,:,jsp))
-           end if
-           if (has_e1kbsc_) then
-             if (present(mpi_atmtab)) then
-               call pawdij2e1kb(paw_ij1,isp,my_comm_atom,e1kbsc=rf_Ham%e1kbsc_spin(:,:,:,jsp),&
-  &                             mpi_atmtab=mpi_atmtab)
-             else
-               call pawdij2e1kb(paw_ij1,isp,my_comm_atom,e1kbsc=rf_Ham%e1kbsc_spin(:,:,:,jsp))
-             end if
-           end if
+           jsp=jsp+1 ; rf_Ham%e1kbfr => rf_Ham%e1kbfr_spin(:,:,:,jsp)
+         else
+           rf_Ham%e1kbfr => e1kb_tmp
+         end if
+         if (present(mpi_atmtab)) then
+           call pawdij2e1kb(paw_ij1,isp,my_comm_atom,e1kbfr=rf_Ham%e1kbfr,mpi_atmtab=mpi_atmtab)
+         else
+           call pawdij2e1kb(paw_ij1,isp,my_comm_atom,e1kbfr=rf_Ham%e1kbfr)
          end if
        end do
 
-     end if
+!      === Self-consistent term
+       if (has_e1kbsc_) then
+         jsp=0
+         do isp=1,rf_Ham%nsppol
+           if (my_spintab(isp)==1) then
+             jsp=jsp+1 ; rf_Ham%e1kbsc => rf_Ham%e1kbsc_spin(:,:,:,jsp)
+           else
+             rf_Ham%e1kbsc => e1kb_tmp
+           end if
+           if (present(mpi_atmtab)) then
+             call pawdij2e1kb(paw_ij1,isp,my_comm_atom,e1kbsc=rf_Ham%e1kbsc,mpi_atmtab=mpi_atmtab)
+           else
+             call pawdij2e1kb(paw_ij1,isp,my_comm_atom,e1kbsc=rf_Ham%e1kbsc)
+           end if
+         end do
+       end if
 
+       if (my_nsppol<rf_Ham%nsppol) then
+         ABI_DEALLOCATE(e1kb_tmp)
+       end if
+
+     end if
    end if
  end if
 
  if (.not.allocated(rf_Ham%e1kbfr_spin)) then
-   ABI_ALLOCATE(rf_Ham%e1kbfr_spin,(0,0,0,1))
+   ABI_ALLOCATE(rf_Ham%e1kbfr_spin,(0,0,0,0))
  end if
  if (.not.allocated(rf_Ham%e1kbsc_spin)) then
-   ABI_ALLOCATE(rf_Ham%e1kbsc_spin,(0,0,0,1))
+   ABI_ALLOCATE(rf_Ham%e1kbsc_spin,(0,0,0,0))
  end if
-
- rf_Ham%e1kbfr => rf_Ham%e1kbfr_spin(:,:,:,1)
- if (has_e1kbsc_) rf_Ham%e1kbsc => rf_Ham%e1kbsc_spin(:,:,:,1)
+ nullify(rf_Ham%e1kbfr)
+ nullify(rf_Ham%e1kbsc)
 
  DBG_EXIT("COLL")
 
@@ -1845,11 +1870,11 @@ subroutine load_spin_rf_hamiltonian(rf_Ham,gs_Ham,isppol,vlocal1,with_nonlocal)
    if (with_nonlocal) then
      if (size(rf_Ham%e1kbfr_spin)>0) then
        jsppol=min(isppol,size(rf_Ham%e1kbfr_spin,4))
-       rf_Ham%e1kbfr => rf_Ham%e1kbfr_spin(:,:,:,jsppol)
+       if (jsppol>0) rf_Ham%e1kbfr => rf_Ham%e1kbfr_spin(:,:,:,jsppol)
      end if
      if (size(rf_Ham%e1kbsc_spin)>0) then
        jsppol=min(isppol,size(rf_Ham%e1kbsc_spin,4))
-       rf_Ham%e1kbsc => rf_Ham%e1kbsc_spin(:,:,:,jsppol)
+       if (jsppol>0) rf_Ham%e1kbsc => rf_Ham%e1kbsc_spin(:,:,:,jsppol)
      end if
    end if
  end if

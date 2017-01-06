@@ -306,8 +306,10 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),allocatable,target :: e1kbfr_spin(:,:,:,:,:),ffnlk(:,:,:,:),ffnl1(:,:,:,:)
  real(dp),allocatable :: gh1(:,:),gs1(:,:),gvnl1(:,:),kinpw1(:),kpg_k(:,:),kpg1_k(:,:)
  real(dp),allocatable :: occ_k(:),occ_kq(:),ph3d(:,:,:),ph3d1(:,:,:),rhotmp(:,:),rocceig(:,:)
- real(dp),allocatable :: ylm_k(:,:),ylm1_k(:,:),ylmgr1_k(:,:,:),vtmp1(:,:),vxc10(:,:),work(:,:,:)
- real(dp),pointer :: e1kbfr(:,:,:,:),ffnl1_idir1(:,:,:,:),vhartr01(:),vpsp1_idir1(:),xccc3d1_idir1(:)
+ real(dp),allocatable :: ylm_k(:,:),ylm1_k(:,:),ylmgr1_k(:,:,:),vtmp1(:,:),vxc10(:,:)
+ real(dp),allocatable,target :: work(:,:,:)
+ real(dp),pointer :: e1kbfr(:,:,:,:),e1kb_ptr(:,:,:)
+ real(dp),pointer :: ffnl1_idir1(:,:,:,:),vhartr01(:),vpsp1_idir1(:),xccc3d1_idir1(:)
  type(pawcprj_type),allocatable :: dcwaveprj(:,:)
  type(pawcprj_type),allocatable,target :: cwaveprj0(:,:)
  type(pawcprj_type),pointer :: cwaveprj0_idir1(:,:)
@@ -546,7 +548,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    need_wf1=(.true.)
 
 !  Initialize data for NL 1st-order (j1) hamiltonian
-   call init_rf_hamiltonian(cplex,gs_hamkq,ipert1,rf_hamkq,mpi_spintab=[1,0])
+   call init_rf_hamiltonian(cplex,gs_hamkq,ipert1,rf_hamkq,mpi_spintab=[0,0])
 
 !  The following contributions are needed only for non-DDK perturbation:
 !  - Frozen part of 1st-order Dij
@@ -751,17 +753,22 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !  Has to 1st-order non-local factors before the loop over spins
 !  because this needs a communication over comm_atom (=comm_spinkpt)
    if (need_pawij10) then
+     if (my_nsppol<nsppol) then
+       ABI_ALLOCATE(work,(rf_hamkq%dime1kb1,rf_hamkq%dime1kb2,nspinor**2))
+     end if
      ii=0
      do isppol=1,nsppol
-       if (my_spintab(isppol)==1) then
-         ii=ii+1
-         do kdir1=1,mdir1
-           idir1=jdir1(kdir1)
-           call pawdij2e1kb(paw_ij10(:,idir1),isppol,my_comm_atom,&
-&               e1kbfr=e1kbfr_spin(:,:,:,idir1,ii),mpi_atmtab=my_atmtab)
-         end do
-       end if
+       if (my_spintab(isppol)==1) ii=ii+1
+       if (my_spintab(isppol)/=1) e1kb_ptr => work
+       do kdir1=1,mdir1
+         idir1=jdir1(kdir1)
+         if (my_spintab(isppol)==1) e1kb_ptr => e1kbfr_spin(:,:,:,idir1,ii)
+         call pawdij2e1kb(paw_ij10(:,idir1),isppol,my_comm_atom,e1kbfr=e1kb_ptr,mpi_atmtab=my_atmtab)
+       end do
      end do
+      if (my_nsppol<nsppol) then
+       ABI_DEALLOCATE(work)
+     end if
    end if
 
 !  LOOP OVER SPINS
@@ -776,8 +783,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !    Continue to initialize the GS/RF Hamiltonian
      call load_spin_hamiltonian(gs_hamkq,isppol,with_nonlocal=.true.)
      if (need_pawij10) then
-       ii=min(isppol,size(e1kbfr_spin,4))
-       e1kbfr => e1kbfr_spin(:,:,:,:,ii)
+       ii=min(isppol,size(e1kbfr_spin,5))
+       if (ii>0) e1kbfr => e1kbfr_spin(:,:,:,:,ii)
      end if
 
 !    Initialize accumulation of density
@@ -1128,7 +1135,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
            end if
 
 !          Finalize initialization of 1st-order NL hamiltonian
-           if (need_pawij10) rf_hamkq%e1kbfr(:,:,:)=e1kbfr(:,:,:,idir1)
+           if (need_pawij10) rf_hamkq%e1kbfr => e1kbfr(:,:,:,idir1)
 
 !          Read DDK wave function (if ipert1=electric field)
            if (ipert1==dtset%natom+2) then
