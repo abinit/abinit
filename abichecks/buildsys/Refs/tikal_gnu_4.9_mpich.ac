@@ -515,7 +515,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/usr/local/mpich3_gcc49"
+with_mpi_prefix="${MPI_HOME}"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -695,11 +695,11 @@ with_trio_flavor="netcdf+psml"
 
 # Include flags for the psml library (default is unset)
 #
-with_psml_incs="-I/usr/local/psml-0.8/include"
+with_psml_incs="-I/usr/local/psml-0.8_gcc49/include"
 
 # Link flags for the psml library (default is unset)
 #
-with_psml_libs="-L/usr/local/psml-0.8/lib -lpsml"
+with_psml_libs="-L/usr/local/psml-0.8_gcc49/lib -lpsml"
 
                        # ------------------------------ #
 

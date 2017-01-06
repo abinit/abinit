@@ -315,7 +315,7 @@
 
 # Fortran compiler additional custom flags
 #
-FCFLAGS_EXTRA="-qopenmp"
+#FCFLAGS_EXTRA="-O2"
 
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -332,7 +332,7 @@ FCFLAGS_EXTRA="-qopenmp"
 
 # Fortran linker custom flags
 #
-FC_LDFLAGS_EXTRA="-qopenmp"
+#FC_LDFLAGS_EXTRA="-Bstatic"
 
 # Forced Fortran linker flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -705,11 +705,11 @@ with_trio_flavor="netcdf"
 
 # Include flags for the NetCDF library (default is unset)
 #
-#with_netcdf_incs="-I/usr/local/include/netcdf"
+with_netcdf_incs="-I/usr/local/fallbacks/intel/16.0/mpi/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-#with_netcdf_libs="-L/usr/local/lib/netcdf -lnetcdff -lnetcdf"
+with_netcdf_libs="-L/usr/local/fallbacks/intel/16.0/mpi/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,

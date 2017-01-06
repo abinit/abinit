@@ -676,7 +676,7 @@ with_mpi_prefix="/usr/local/openmpi_intel13"
 # ---------------------------------------------------------------------------- #
 
 # Flavor of transferable I/O library to support (default is netcdf)
-
+#
 # By transferable I/O (TRIO), we mean that the files produced by Abinit
 # will be transferable seamlessly to other computers and codes
 #

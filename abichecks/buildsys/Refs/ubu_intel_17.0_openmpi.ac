@@ -757,11 +757,11 @@ with_fft_flavor="fftw3"
 
 # Include flags for the FFT library (default is unset)
 #
-#with_fft_incs="-I/usr/local/include/fftw"
+with_fft_incs="-I${MKLROOT}/include"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L/opt/intel/mkl/lib/intel64 -Wl,--start-group  -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
+with_fft_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread -lm -ldl"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -840,11 +840,11 @@ with_linalg_flavor="mkl"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
-#with_linalg_incs="-I/usr/local/include"
+with_linalg_incs="-I${MKLROOT}/include"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/opt/intel/mkl/lib/intel64 -Wl,--start-group  -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
+with_linalg_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread -lm -ldl"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
