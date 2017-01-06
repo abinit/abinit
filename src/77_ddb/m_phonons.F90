@@ -572,11 +572,10 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  real(dp) :: eigvec(2,3,Crystal%natom,3*Crystal%natom),phfrq(3*Crystal%natom)
  real(dp) :: qlatt(3,3),qphon(3),rlatt(3,3)
  real(dp) :: msqd_atom_tmp(3,3)
- real(dp),allocatable :: symcart(:,:,:)
+ real(dp) :: symcart(3,3,crystal%nsym),invmass(crystal%natom)
  real(dp),allocatable :: dtweightde(:,:),full_eigvec(:,:,:,:,:),full_phfrq(:,:),Prf3D(:,:,:)
  real(dp),allocatable :: kpt_fullbz(:,:),qbz(:,:),qibz(:,:),qshft(:,:),tmp_phfrq(:),tweight(:,:)
  real(dp),allocatable :: qibz2(:,:),qshft2(:,:),wtq(:),wtq_folded(:),wtqibz(:)
- real(dp),allocatable :: invmass(:)
 
 ! *********************************************************************
 
@@ -600,41 +599,34 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  natom = Crystal%natom
  gaussmaxarg = sqrt(-log(1.d-90))
 
- ABI_ALLOCATE (symcart, (3,3,Crystal%nsym))
  do isym = 1, Crystal%nsym
    call symredcart(Crystal%rprimd,Crystal%gprimd,symcart(:,:,isym),Crystal%symrel(:,:,isym))
  end do
-
- ABI_ALLOCATE (invmass, (natom))
  do iat = 1, natom
    invmass(iat) = one / Crystal%amu(Crystal%typat(iat))/amu_emass
  end do
 
- ! Initialize container type, but with minimal values
- !call init_phondos(PHdos,Crystal%ntypat,natom,prtdos,1,1,1,smallest_real,greatest_real,dosdeltae,dossmear)
  nomega = 1
  PHdos%ntypat     = crystal%ntypat
  PHdos%natom      = natom
  PHdos%prtdos     = prtdos
  PHdos%nomega     = 1
  PHdos%nqibz      = 1
-
  PHdos%omega_max  = smallest_real
  PHdos%omega_min  = greatest_real
  PHdos%omega_step = dosdeltae
  PHdos%dossmear   = dossmear
 
- ABI_MALLOC(PHdos%omega,(nomega))
- ABI_MALLOC(PHdos%phdos,(nomega))
- ABI_MALLOC(PHdos%phdos_int,(nomega))
- ABI_MALLOC(PHdos%pjdos,(nomega,3,natom))
- ABI_MALLOC(PHdos%pjdos_int,(nomega,3,natom))
- ABI_MALLOC(PHdos%pjdos_type,(nomega,crystal%ntypat))
- ABI_MALLOC(PHdos%pjdos_type_int,(nomega,crystal%ntypat))
- ABI_MALLOC(PHdos%pjdos_rc_type,(nomega,3,crystal%ntypat))
- ABI_MALLOC(PHdos%msqd_dos_atom,(nomega,3,3,natom))
+ ABI_MALLOC(PHdos%omega, (nomega))
+ ABI_MALLOC(PHdos%phdos, (nomega))
+ ABI_MALLOC(PHdos%phdos_int, (nomega))
+ ABI_MALLOC(PHdos%pjdos, (nomega,3,natom))
+ ABI_MALLOC(PHdos%pjdos_int, (nomega,3,natom))
+ ABI_MALLOC(PHdos%pjdos_type, (nomega,crystal%ntypat))
+ ABI_MALLOC(PHdos%pjdos_type_int, (nomega,crystal%ntypat))
+ ABI_MALLOC(PHdos%pjdos_rc_type, (nomega,3,crystal%ntypat))
+ ABI_MALLOC(PHdos%msqd_dos_atom, (nomega,3,3,natom))
 
- !
  ! === Parameters defining the gaussian approximant ===
  if (prtdos==1) then
    ! TODO: use dirac_delta and update reference files.
@@ -858,7 +850,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 
    do imode=1,3*natom
      tmp_phfrq(:)=full_phfrq(imode,:)
-     !
+
      ! Calculate general integration weights at each irred kpoint as in Blochl et al PRB 49 16223.
      call get_tetra_weight(tmp_phfrq, low_bound, upr_bound,max_occ, PHdos%nomega, PHdos%nqibz, tetraq, bcorr0,&
 &      tweight,dtweightde,xmpi_comm_self)
@@ -908,9 +900,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 ! normalize by nsym : symmetrization is used in all prtdos cases
  PHdos%msqd_dos_atom = PHdos%msqd_dos_atom / Crystal%nsym
 
- ABI_FREE(symcart)
- ABI_FREE(invmass)
-
  ! =======================
  ! === calculate IPDOS ===
  ! =======================
@@ -924,9 +913,9 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
    ABI_FREE(PHdos%pjdos_type_int)
  end if
 
- ABI_CALLOC(PHdos%pjdos_rc_type,(PHdos%nomega,3,Crystal%ntypat))
- ABI_CALLOC(PHdos%pjdos_type,(PHdos%nomega,Crystal%ntypat))
- ABI_CALLOC(PHdos%pjdos_type_int,(PHdos%nomega,Crystal%ntypat))
+ ABI_CALLOC(PHdos%pjdos_rc_type, (PHdos%nomega,3,Crystal%ntypat))
+ ABI_CALLOC(PHdos%pjdos_type, (PHdos%nomega,Crystal%ntypat))
+ ABI_CALLOC(PHdos%pjdos_type_int, (PHdos%nomega,Crystal%ntypat))
 
  do iat=1,natom
    itype=Crystal%typat(iat)
@@ -1031,7 +1020,9 @@ subroutine phdos_ncwrite(phdos,ncid)
    nctkarr_t('phdos', "dp", 'number_of_frequencies'),&
    nctkarr_t('pjdos', "dp", 'number_of_frequencies, three, number_of_atoms'),&
    nctkarr_t('pjdos_type', "dp", 'number_of_frequencies, number_of_atom_species'),&
-   nctkarr_t('pjdos_rc_type', "dp", 'number_of_frequencies, three, number_of_atom_species')])
+   nctkarr_t('pjdos_rc_type', "dp", 'number_of_frequencies, three, number_of_atom_species'), &
+   nctkarr_t('msqd_dos_atom', "dp", 'number_of_frequencies, three, three, number_of_atom_species') &
+ ])
  NCF_CHECK(ncerr)
 
  ! Write variables. Note unit conversion.
@@ -1043,6 +1034,7 @@ subroutine phdos_ncwrite(phdos,ncid)
  NCF_CHECK(nf90_put_var(ncid, vid('pjdos'), phdos%pjdos/Ha_eV))
  NCF_CHECK(nf90_put_var(ncid, vid('pjdos_type'), phdos%pjdos_type/Ha_eV))
  NCF_CHECK(nf90_put_var(ncid, vid('pjdos_rc_type'), phdos%pjdos_rc_type/Ha_eV))
+ NCF_CHECK(nf90_put_var(ncid, vid('msqd_dos_atom'), phdos%msqd_dos_atom/Ha_eV))
 
 #else
  MSG_ERROR("netcdf support not enabled")
@@ -1083,7 +1075,6 @@ end subroutine phdos_ncwrite
 !! asrq0<asrq0_t>=Object for the treatment of the ASR based on the q=0 block found in the DDB file.
 !! prefix=Prefix for output files.
 !! dielt(3,3)=dielectric tensor
-!! zeff(3,3,natom)=effective charge on each atom, versus electric field and atomic displacement
 !! comm=MPI communicator
 !!
 !! OUTPUT
@@ -1096,7 +1087,7 @@ end subroutine phdos_ncwrite
 !!
 !! SOURCE
 
-subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,zeff,comm)
+subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1119,23 +1110,20 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,zeff,comm)
  type(anaddb_dataset_type),target,intent(in) :: inp
  type(ddb_type),intent(in) :: ddb
  type(asrq0_t),intent(inout) :: asrq0
-!arrays
- real(dp),intent(in) :: zeff(3,3,ddb%natom)
 
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
  integer :: iphl1,iblok,rftyp, ii,nfineqpath,nsym,natom,ncid,nprocs,my_rank
  integer :: natprj_bs,eivec,enunit,ifcflag
- real(dp) :: tcpu,twall
- real(dp) :: freeze_displ
+ real(dp) :: tcpu,twall,freeze_displ
  character(500) :: msg
 !arrays
  integer :: rfphon(4),rfelfd(4),rfstrs(4)
  integer,allocatable :: ndiv(:)
  real(dp) :: qphnrm(3), qphon(3), qphon_padded(3,3),res(3)
  real(dp) :: d2cart(2,ddb%msize),real_qphon(3)
- real(dp) :: displ(2*3*ddb%natom*3*ddb%natom),eigval(3,ddb%natom)
+ real(dp) :: displ(2*3*crystal%natom*3*crystal%natom),eigval(3,crystal%natom)
  real(dp),allocatable :: phfrq(:),eigvec(:,:,:,:,:),save_phfrq(:,:),save_phdispl_cart(:,:,:,:),save_qpoints(:,:)
  real(dp),allocatable :: weights(:)
  real(dp),allocatable,target :: alloc_path(:,:)
@@ -1205,7 +1193,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,zeff,comm)
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
      call gtdyn9(ddb%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,ddb%mpert,natom,&
-&     Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,zeff)
+&     Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,ifc%zeff)
 
    else if (ifcflag == 0) then
 
@@ -1289,6 +1277,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,zeff,comm)
 
    call phonons_write_phfrq(strcat(prefix, "_PHFRQ"), natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart)
    call phonons_write_xmgrace(strcat(prefix, "_PHBANDS.agr"), natom, nfineqpath, save_qpoints, save_phfrq)
+   !call phonons_write_gnuplot(prefix, natom, nfinepath, save_qpoints, save_phfrq)
 
    !call phonons_writeEPS(natom,nfineqpath,Crystal%ntypat,save_qpoints,Crystal%typat, &
    !  weights,save_phfrq,save_phdispl_cart)

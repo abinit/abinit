@@ -4225,8 +4225,7 @@ subroutine effective_potential_printPDOS(eff_pot,filename,n_cell,nph1l,option,qp
    end if
 
   !MG: Note that I'm passing xmpi_comm_self here.
-  call mkphbs(eff_pot%harmonics_terms%ifcs,Crystal,inp,ddb,asrq0,filename,&
-&  eff_pot%harmonics_terms%zeff, xmpi_comm_self)
+  call mkphbs(eff_pot%harmonics_terms%ifcs,Crystal,inp,ddb,asrq0,filename,xmpi_comm_self)
 
   call asrq0_free(asrq0)
 

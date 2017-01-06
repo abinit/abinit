@@ -485,7 +485,7 @@ program anaddb
 !**********************************************************************
 
  ! Now treat the first list of vectors (without non-analyticities)
- call mkphbs(Ifc,Crystal,inp,ddb,asrq0,filnam(2),zeff,comm)
+ call mkphbs(Ifc,Crystal,inp,ddb,asrq0,filnam(2),comm)
 
 !***********************************************************************
 

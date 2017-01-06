@@ -726,6 +726,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 ! if needed, update the complex phases for larger G vectors
    if (ng > ng_expxq) then
+     !write(std_out,*)"have to realloc"
      ABI_DEALLOCATE(expx1)
      ABI_DEALLOCATE(expx2)
      ABI_DEALLOCATE(expx3)
