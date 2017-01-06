@@ -60,7 +60,6 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'printbxsf'
- use interfaces_56_recipspace
 !End of the abilint section
 
  implicit none
@@ -171,7 +170,6 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
        kptgrid(3)=DBLE(ik3)/kptrlatt(3,3)
 
        ! Find correspondence between the Xcrysden grid and the IBZ ===
-#if 1
        call get_rank_1kpt (kptgrid, symkptrank, kptrank_t)
        fulltoirred(ikgrid) = kptrank_t%invrank(symkptrank)
 
@@ -182,30 +180,6 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
          ierr=ierr + 1
          MSG_WARNING(msg)
        end if
-
-#else
-       ! TODO:: symafm are not passed in a consisten way.
-       call listkk(dksqmax,gmet,indkk_kq,kptirred,kptgrid,nkptirred,1,nsymfm,&
-       1,symafm,symrecfm,timrev,use_symrec=.True.)
-
-       if (dksqmax > tol12) then
-         write(msg, '(7a,es16.6,4a)' )&
-         'The WFK file cannot be used to start thee present calculation ',ch10,&
-         'It was asked that the wavefunctions be accurate, but',ch10,&
-         'at least one of the k points could not be generated from a symmetrical one.',ch10,&
-         'dksqmax=',dksqmax,ch10,&
-         'Action: check your WFK file and k point input variables',ch10,&
-         '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
-         MSG_WARNING(msg)
-         ierr = ierr + 1
-       end if
-       fulltoirred(ikgrid) = indkk_kq(1,1)
-
-       !ikq_ibz = indkk_kq(1,1); isym_kq = indkk_kq(1,2)
-       !trev_kq = indkk_kq(1, 6); g0_kq = indkk_kq(1, 3:5)
-       !isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
-       !kq_ibz = ebands%kptns(:,ikq_ibz)
-#endif
 
      end do !ik1
    end do !ik2

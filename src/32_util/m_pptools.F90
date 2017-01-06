@@ -39,7 +39,7 @@ MODULE m_pptools
  public :: printxsf             ! Write a generic array in the XSF format (XCrysden format)
  public :: print_fofr_ri        ! Print the [real, imaginary] part of an array
  public :: print_fofr_xyzri     ! Print the Cartesian coordinates and the [real,imaginary] part of an array
- public :: print_fofr_cube      ! Print ||fofr|| in the CUBE format.
+ public :: print_fofr_cube      ! Print ||fofr|| in CUBE format.
 
 
 CONTAINS  !===========================================================
@@ -105,7 +105,7 @@ subroutine prmat (mat, ni, nj, mi, unitm)
  do  jstart = 1, nj, nline
    jstop = min(nj, jstart+nline-1)
    write(message, '(3x,10(i4,8x))' ) (jj,jj=jstart,jstop)
-   call wrtout(unitn,message,'COLL') 
+   call wrtout(unitn,message,'COLL')
  end do
 
  do ii = 1,ni
@@ -275,7 +275,7 @@ end subroutine printxsf
 !!  Print the [real,imaginary] part of fofr on unit unit
 !!
 !! INPUTS
-!!  ri_mode = 
+!!  ri_mode =
 !!    "RI" if both real and imag part are wanted
 !!    "R"  for real part
 !!    "I"  for imaginary part
@@ -367,7 +367,7 @@ end subroutine print_fofr_ri
 !!  Print the Cartesian coordinates and the [real,imaginary] part of fofr on unit unit
 !!
 !! INPUTS
-!!  ri_mode = 
+!!  ri_mode =
 !!    "RI" if both real and imag part are wanted
 !!    "R"  for real part
 !!    "I"  for imaginary part
@@ -471,7 +471,7 @@ end subroutine print_fofr_xyzri
 !!  print_fofr_cube
 !!
 !! FUNCTION
-!!  Print array fofr in the cube file format 
+!!  Print array fofr in the cube file format
 !!
 !! INPUTS
 !!  nx,ny,nz,ldx,ldy,ldz = Logical and physical dimensions of the array.
@@ -544,7 +544,7 @@ subroutine print_fofr_cube(nx,ny,nz,ldx,ldy,ldz,fofr,rprimd,natom,znucl_atom,xca
    write(ount,'(i9,4(3X,ES17.10))') znucl_atom(iatom),0.d0,xcart(1:3,iatom)
  end do
 
-! Note C ordering of the indexes 
+! Note C ordering of the indexes
  if (cplx==2) then
    do ix=1,nx
      do iy=1,ny

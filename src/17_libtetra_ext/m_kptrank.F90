@@ -127,12 +127,9 @@ subroutine mkkptrank (kpt,nkpt,krank,nsym,symrec, time_reversal)
 ! find smallest linear length
  smallestlen = one
  do ikpt=1, nkpt
-   if (abs(kpt(1,ikpt)) > tol10) &
-&     smallestlen = min(smallestlen, abs(kpt(1,ikpt)))
-   if (abs(kpt(2,ikpt)) > tol10) &
-&     smallestlen = min(smallestlen, abs(kpt(2,ikpt)))
-   if (abs(kpt(3,ikpt)) > tol10) &
-&     smallestlen = min(smallestlen, abs(kpt(3,ikpt)))
+   if (abs(kpt(1,ikpt)) > tol10) smallestlen = min(smallestlen, abs(kpt(1,ikpt)))
+   if (abs(kpt(2,ikpt)) > tol10) smallestlen = min(smallestlen, abs(kpt(2,ikpt)))
+   if (abs(kpt(3,ikpt)) > tol10) smallestlen = min(smallestlen, abs(kpt(3,ikpt)))
  end do
 
  krank%max_linear_density = int(one/smallestlen)+1
