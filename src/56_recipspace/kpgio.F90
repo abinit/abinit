@@ -193,6 +193,8 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 !DEBUG
 !write(std_out,*)' kpgio : exit '
 !ENDDEBUG
+write(100+mpi_enreg%me,*) npwarr
+flush(100+mpi_enreg%me)
 
 end subroutine kpgio
 
