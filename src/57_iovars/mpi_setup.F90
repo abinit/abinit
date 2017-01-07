@@ -389,12 +389,16 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if(dtsets(idtset)%paral_kgb>0.and.dtsets(idtset)%np_slk>0) then
      np=min(dtsets(idtset)%np_slk,dtsets(idtset)%npband*dtsets(idtset)%npfft*dtsets(idtset)%npspinor)
      irow=int(sqrt(float(np)))
-     do while(mod(np,irow)/=0);irow=irow-1;end do
+     do while(mod(np,irow)/=0)
+       irow=irow-1
+     end do
      icol=nproc/irow
      if (icol>mband_lower) then
        do while(icol>mband_lower)
          icol=icol-1
-         do while(mod(np,icol)/=0);icol=icol-1;end do
+         do while(mod(np,icol)/=0)
+           icol=icol-1
+         end do
        end do
        dtsets(idtset)%np_slk=icol
        write(message,'(5a,i6,a)')&

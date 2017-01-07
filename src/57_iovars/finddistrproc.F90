@@ -338,12 +338,12 @@
    npf_max=min(nproc,NPFMAX)
    if (tread(6)==1) then
      npf_max=dtset%npfft
-      if (npf_max>ngmin(2)) then
-        write(message,'(3a)') &
- &       "Value of npfft given in input file is too high for the FFT grid!",ch10,&
- &       "Action: decrease npfft or increase FFT grid (ecut, ngfft, ...)."
-        MSG_ERROR(message)
-      end if
+     if (npf_max>ngmin(2)) then
+       write(message,'(3a)') &
+ &      "Value of npfft given in input file is too high for the FFT grid!",ch10,&
+ &      "Action: decrease npfft or increase FFT grid (ecut, ngfft, ...)."
+       MSG_ERROR(message)
+     end if
    end if
    npf_max=min(npf_max,ngmin(2))
    if (dtset%use_gpu_cuda==1) then
