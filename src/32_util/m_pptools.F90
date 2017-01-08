@@ -33,6 +33,7 @@ MODULE m_pptools
  use m_kptrank
 
  use m_io_tools,        only : open_file
+ use m_fstrings,        only : sjoin, itoa
  use m_numeric_tools,   only : wrap2_pmhalf
 
  implicit none
@@ -184,7 +185,6 @@ subroutine printxsf(n1,n2,n3,datagrid,basis,origin,natom,ntypat,typat,xcart,znuc
 !scalars
  integer :: ix,iy,iz,nslice,nsym,iatom
  real(dp) :: fact
- character(len=500) :: msg
 !arrays
  real(dp) :: tau(3,natom)
 
@@ -192,9 +192,8 @@ subroutine printxsf(n1,n2,n3,datagrid,basis,origin,natom,ntypat,typat,xcart,znuc
 
  DBG_ENTER("COLL")
 
- if ( ALL(realrecip/=(/0,1/)) )then
-   write(msg,'(a,i6)')' The argument realrecip should be 0 or 1; however, realrecip= ',realrecip
-   MSG_BUG(msg)
+ if (all(realrecip/= [0,1])) then
+   MSG_BUG(sjoin('The argument realrecip should be 0 or 1, received:', itoa(realrecip)))
  end if
 
 !conversion between ABINIT default units and XCrysden units
@@ -881,7 +880,7 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
  integer,intent(out) :: ierr
  real(dp),intent(in) :: ewind,fermie
  logical,intent(in) :: use_afm,use_tr
- character(len=fnlen),intent(in) :: fname
+ character(len=*),intent(in) :: fname
 !arrays
  integer,intent(in) :: kptrlatt(3,3),symafm(nsym),symrec(3,3,nsym)
  real(dp),intent(in) :: eigen(mband,nkptirred,nsppol),gprimd(3,3)

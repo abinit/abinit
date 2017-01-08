@@ -42,12 +42,12 @@ MODULE m_gruneisen
  use netcdf
 #endif
 
- use m_io_tools,            only : get_unit
+ use m_io_tools,            only : get_unit, open_file
  use m_time,                only : cwtime
  use m_fstrings,            only : sjoin, itoa, ltoa, ftoa, strcat
  use m_numeric_tools,       only : central_finite_diff, arth
  use m_kpts,                only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt
- use m_bz_mesh,             only : kpath_t, kpath_init, kpath_free
+ use m_bz_mesh,             only : kpath_t, kpath_init, kpath_free, kpath_print
  use m_anaddb_dataset,      only : anaddb_dataset_type
  use m_dynmat,              only : massmult_and_breaksym
 
@@ -317,7 +317,7 @@ subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq)
  do nu=1,natom3
    if (abs(wvols(nu, gruns%iv0)) > tol12) then
      dot = cg_zdotc(natom3, eigvec(1,1,nu, gruns%iv0), omat(1,1,nu))
-     ! must change sign if we have a purely imaginary solution i.e. z = iw
+     ! Must change sign if we have a purely imaginary solution i.e. z = iw
      gvals(nu) = -sign(one, wvols(nu, gruns%iv0)) * gruns%v0 * dot(1) / (two * wvols(nu, gruns%iv0)**2)
    else
      gvals(nu) = zero
@@ -338,6 +338,7 @@ end subroutine gruns_fourq
 !!  Write results to file.
 !!
 !! INPUTS
+!!  prefix=Prefix for output files.
 !!  qpath<kpath_t>=Object describing the q-path.
 !!  ncid=netcdf file id.
 !!  comm=MPI communicator.
@@ -351,13 +352,14 @@ end subroutine gruns_fourq
 !!
 !! SOURCE
 
-subroutine gruns_qpath(gruns, qpath, ncid, comm)
+subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gruns_qpath'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -367,11 +369,13 @@ subroutine gruns_qpath(gruns, qpath, ncid, comm)
  integer,intent(in) :: ncid,comm
  type(gruns_t),intent(in) :: gruns
  type(kpath_t),intent(in) :: qpath
+ character(len=*),intent(in) :: prefix
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: nprocs,my_rank,iqpt,ierr,ncerr
+ integer :: nprocs,my_rank,iqpt,ierr,ncerr,unt,iv0,nu,ii
+ character(len=500) :: msg
 !arrays
  real(dp),allocatable :: gvals_qpath(:,:),wvols_qpath(:,:,:),dwdq_qpath(:,:,:)
 
@@ -379,6 +383,11 @@ subroutine gruns_qpath(gruns, qpath, ncid, comm)
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
+ write(msg,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of Grunesein parameters along q-path ',ch10
+ call wrtout(std_out, msg)
+ !call wrtout(ab_out, msg)
+
+ iv0 = gruns%iv0
  ABI_CALLOC(wvols_qpath, (gruns%natom3, gruns%nvols, qpath%npts))
  ABI_CALLOC(gvals_qpath, (gruns%natom3, qpath%npts))
  ABI_CALLOC(dwdq_qpath, (3, gruns%natom3, qpath%npts))
@@ -392,14 +401,25 @@ subroutine gruns_qpath(gruns, qpath, ncid, comm)
  call xmpi_sum(gvals_qpath, comm, ierr)
  call xmpi_sum(dwdq_qpath, comm, ierr)
 
- ! For the automatic tests.
- !if (my_rank == master) then
- !  write(ab_out, "(a)") &
- !   "Gruneisen parameters for the first 6 modes and the first 6 q-points of the path (for automatic tests):"
- !  do iqpt=min(6, qpath%npts)
- !    write(ab_out, "(6es16.8)")gvals_qpath(1:min(6, gruns%natom3), iqpt)
- !  end do
- !end if
+ ! Write text files with phonon frequencies and grunesein on the path.
+ if (my_rank == master) then
+   if (open_file(strcat(prefix, "_GRUNS_QPATH"), msg, newunit=unt, form="formatted", action="write") /= 0) then
+     MSG_ERROR(msg)
+   end if
+   write(unt,'(a)')'# Phonon band structure, Gruneseinen parameters and group velocity'
+   write(unt,'(a)')"# Energy in Hartree, DOS in states/Hartree"
+   call kpath_print(qpath, unit=unt, pre="#")
+   write(unt,'(5a)')&
+     "# phfreq(mode=1) grunesein(mode=1) velocity(mode=1) phfreq(mode=2) grunesein(mode=2) velocity(mode=2)"
+   do iqpt=1,qpath%npts
+     do nu=1,gruns%natom3
+       write(unt, "(3es17.8)", advance="no") &
+         wvols_qpath(nu, iv0, iqpt), gvals_qpath(nu, iqpt), sum(dwdq_qpath(1:3, nu, iqpt) ** 2)
+     end do
+     write(unt, "(a)")" "
+   end do
+   close(unt)
+ end if
 
 #ifdef HAVE_NETCDF
  if (my_rank == master .and. ncid /= nctk_noid) then
@@ -443,6 +463,7 @@ end subroutine gruns_qpath
 !!  Save results to file.
 !!
 !! INPUTS
+!!  prefix=Prefix for output files.
 !!  dosdeltae=Step for the frequency mesh.
 !!  ngqpt(3)=q-mesh divisions
 !!  nqshift=Number of shifts used to generated the ab-initio q-mesh.
@@ -458,7 +479,7 @@ end subroutine gruns_qpath
 !!
 !! SOURCE
 
-subroutine gruns_qmesh(gruns, dosdeltae, ngqpt, nqshift, qshift, ncid, comm)
+subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nqshift, qshift, ncid, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -475,6 +496,7 @@ subroutine gruns_qmesh(gruns, dosdeltae, ngqpt, nqshift, qshift, ncid, comm)
  integer,intent(in) :: nqshift,ncid,comm
  real(dp),intent(in) :: dosdeltae !,dossmear
  type(gruns_t),intent(in) :: gruns
+ character(len=*),intent(in) :: prefix
 !arrays
  integer,intent(in) :: ngqpt(3)
  real(dp),intent(in) :: qshift(3,nqshift)
@@ -482,7 +504,7 @@ subroutine gruns_qmesh(gruns, dosdeltae, ngqpt, nqshift, qshift, ncid, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,qptopt1=1,bcorr0=0
- integer :: nprocs,my_rank,iqibz,nqbz,nqibz,ierr,ii,nu,ncerr,nomega,cnt
+ integer :: nprocs,my_rank,iqibz,nqbz,nqibz,ierr,ii,nu,ncerr,nomega,cnt,unt,io
  real(dp) :: gavg,omega_min,omega_max,v2
  type(t_tetrahedron) :: tetra
  character(len=500) :: msg
@@ -496,6 +518,10 @@ subroutine gruns_qmesh(gruns, dosdeltae, ngqpt, nqshift, qshift, ncid, comm)
 ! ************************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ write(msg,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of Grunesein DOSes ',ch10
+ call wrtout(std_out, msg)
+ !call wrtout(ab_out, msg)
 
  ! Generate the q-mesh by finding the IBZ and the corresponding weights.
  ABI_CHECK(all(ngqpt > 0), sjoin("invalid ngqpt:", ltoa(ngqpt)))
@@ -543,8 +569,8 @@ subroutine gruns_qmesh(gruns, dosdeltae, ngqpt, nqshift, qshift, ncid, comm)
  ABI_CALLOC(wdos, (nomega, 2))
  ABI_CALLOC(grdos, (nomega, 2))
  ABI_CALLOC(gr2dos, (nomega, 2))
- ABI_CALLOC(v2dos, (nomega, 2))
  ABI_CALLOC(vdos, (nomega, 2))
+ ABI_CALLOC(v2dos, (nomega, 2))
 
  ! Compute DOSes.
  cnt = 0
@@ -557,32 +583,41 @@ subroutine gruns_qmesh(gruns, dosdeltae, ngqpt, nqshift, qshift, ncid, comm)
      grdos = grdos + wdt * gvals_qibz(nu,iqibz)
      gr2dos = gr2dos + wdt * gvals_qibz(nu,iqibz) ** 2
      v2 = sum(dwdq_qibz(1:3,nu,iqibz) ** 2)
-     v2dos = v2dos + wdt * v2
      vdos = vdos + wdt * sqrt(v2)
+     v2dos = v2dos + wdt * v2
    end do
  end do
 
  call xmpi_sum(wdos, comm, ierr)
  call xmpi_sum(grdos, comm, ierr)
  call xmpi_sum(gr2dos, comm, ierr)
- call xmpi_sum(v2dos, comm, ierr)
  call xmpi_sum(vdos, comm, ierr)
+ call xmpi_sum(v2dos, comm, ierr)
 
  if (my_rank == master) then
    call wrtout(std_out, sjoin(" Average Gruneisen parameter:", ftoa(gavg, fmt="f8.5")))
    call wrtout(ab_out, sjoin(" Average Gruneisen parameter:", ftoa(gavg, fmt="f8.5")))
 
-   ! For the automatic tests.
-   !if (my_rank == master) then
-   !  write(ab_out, "(a)") &
-   !   "Gruneisen parameters for the first 6 modes and the first 6 q-points of the path (for automatic tests):"
-   !  do iqpt=min(6, qpath%npts)
-   !    write(ab_out, "(6es16.8)")gvals_qpath(1:min(6, gruns%natom3), iqpt)
-   !  end do
-   !end if
+   ! Write text files with Grunesein and DOSes.
+   if (open_file(strcat(prefix, "_GRUNS_DOS"), msg, newunit=unt, form="formatted", action="write") /= 0) then
+     MSG_ERROR(msg)
+   end if
+   write(unt,'(a)')'# Phonon density of states, Gruneseinen DOS and phonon group velocity DOS'
+   write(unt,'(a)')"# Energy in Hartree, DOS in states/Hartree"
+   write(unt,'(a,i0)')'# Tetrahedron method with nqibz= ',nqibz
+   write(unt,"(a,f8.5)")"# Average Gruneisen parameter:", gavg
+   write(unt,'(5a)') &
+     "# omega PH_DOS Gruns_DOS Gruns**2_DOS Vel_DOS  Vel**2_DOS  PH_IDOS Gruns_IDOS Gruns**2_IDOS Vel_IDOS Vel**2_IDOS"
+   do io=1,nomega
+     write(unt, "(11es17.8)")omega_mesh, &
+       wdos(io,1), grdos(io,1), gr2dos(io,1), vdos(io,1), v2dos(io,1), &
+       wdos(io,2), grdos(io,2), gr2dos(io,2), vdos(io,2), v2dos(io,2)
+   end do
+   close(unt)
  end if
 
 #ifdef HAVE_NETCDF
+ ! Write netcdf files.
  if (my_rank == master .and. ncid /= nctk_noid) then
    ncerr = nctk_def_dims(ncid, [ &
      nctkdim_t("gruns_nvols", gruns%nvols), nctkdim_t("gruns_nqibz", nqibz), &
@@ -711,6 +746,9 @@ end subroutine gruns_free
 !!  Driver routine called in anaddb for the computation of gruneisen parameters.
 !!
 !! INPUTS
+!!  inp<anaddb_dataset_type: :: anaddb input variables.
+!!  prefix=Prefix for output files
+!!  comm=MPI communicator
 !!
 !! OUTPUT
 !!  Only writing.
@@ -770,7 +808,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
 
  ! Compute grunesein parameters on q-mesh
  if (all(inp%ng2qpt /= 0)) then
-   call gruns_qmesh(gruns, inp%dosdeltae, inp%ng2qpt, 1, inp%q2shft, ncid, comm)
+   call gruns_qmesh(gruns, prefix, inp%dosdeltae, inp%ng2qpt, 1, inp%q2shft, ncid, comm)
  else
    MSG_WARNING("Cannot compute Grunesein parameters on q-mesh because ng2qpt == 0")
  end if
@@ -778,7 +816,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
  ! Compute grunesein on q-path
  if (inp%nqpath /= 0) then
    call kpath_init(qpath, inp%qpath, gruns%cryst_vol(iv0)%gprimd, inp%ndivsm)
-   call gruns_qpath(gruns, qpath, ncid, comm)
+   call gruns_qpath(gruns, prefix, qpath, ncid, comm)
    call kpath_free(qpath)
  else
    MSG_WARNING("Cannot compute Grunesein parameters on q-path because nqpath == 0")

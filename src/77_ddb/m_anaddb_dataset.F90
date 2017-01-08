@@ -38,6 +38,7 @@ module m_anaddb_dataset
 
  public :: anaddb_dataset_type
  public :: anaddb_dtset_free
+ public :: anaddb_init
  public :: outvars_anaddb
  public :: invars9
 !!***
@@ -1648,6 +1649,14 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+ if (anaddb_dtset%gruns_nddbs /=0 .and. anaddb_dtset%ifcflag /=1) then
+   MSG_ERROR("ifcflag must be 1 for Grunesein calculation")
+ end if
+
+ if (anaddb_dtset%vs_qrad_tolms(1) /= zero .and. anaddb_dtset%ifcflag /=1) then
+   MSG_ERROR("ifcflag must be 1 to calculate speed of sound")
+ end if
+
  if(anaddb_dtset%prtdos/=0 .and. sum(abs(anaddb_dtset%ng2qpt(:))) < 3 ) then
    write(message, '(3a)' )&
 &   'ng2qpt must be specified when the calculation of the phonon DOS is required ',ch10,&
@@ -2025,6 +2034,80 @@ end subroutine outvars_anaddb
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_anaddb_dataset/anaddb_init
+!!
+!! NAME
+!! anaddb_init
+!!
+!! FUNCTION
+!! Initialize the code ppddb9: write heading and make the first i/os
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!! character(len=fnlen) filnam(7)=character strings giving file names
+!!
+!! NOTES
+!! 1. Should be executed by one processor only.
+!! 2. File names refer to following files, in order:
+!!     (1) Formatted input file
+!!     (2) Formatted output file
+!!     (3) Input Derivative Database
+!!     (4) Output Molecular Dynamics
+!!     (5) Input electron-phonon matrix elements
+!!     (6) Root name for electron-phonon file names
+!!     (7) Name of file containing the 3 ddk filenames and the GS wf file name
+!!
+!! PARENTS
+!!      anaddb
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine anaddb_init(filnam)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'anaddb_init'
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!arrays
+ character(len=*),intent(out) :: filnam(7)
+
+! *********************************************************************
+
+!Read the file names
+ write(std_out,*)' Give name for formatted input file: '
+ read(std_in, '(a)' ) filnam(1)
+ write(std_out,'(a,a)' )'-   ',trim(filnam(1))
+ write(std_out,*)' Give name for formatted output file: '
+ read(std_in, '(a)' ) filnam(2)
+ write(std_out,'(a,a)' )'-   ',trim(filnam(2))
+ write(std_out,*)' Give name for input derivative database: '
+ read(std_in, '(a)' ) filnam(3)
+ write(std_out,'(a,a)' )'-   ',trim(filnam(3))
+ write(std_out,*)' Give name for output molecular dynamics: '
+ read(std_in, '(a)' ) filnam(4)
+ write(std_out,'(a,a)' )'-   ',trim(filnam(4))
+ write(std_out,*)' Give name for input elphon matrix elements (GKK file): '
+ read(std_in, '(a)' ) filnam(5)
+ write(std_out,'(a,a)' )'-   ',trim(filnam(5))
+ write(std_out,*)' Give root name for elphon output files: '
+ read(std_in, '(a)' ) filnam(6)
+ write(std_out,'(a,a)' )'-   ',trim(filnam(6))
+ write(std_out,*)' Give name for file containing ddk filenames for elphon/transport: '
+ read(std_in, '(a)' ) filnam(7)
+ write(std_out,'(a,a)' )'-   ',trim(filnam(7))
+
+end subroutine anaddb_init
+!!***
 
 end module m_anaddb_dataset
 !!***

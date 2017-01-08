@@ -52,7 +52,7 @@ MODULE m_bz_mesh
  use m_profiling_abi
  use m_sort
 
- use m_fstrings,       only : ltoa, itoa, sjoin
+ use m_fstrings,       only : ltoa, itoa, sjoin, ktoa
  use m_numeric_tools,  only : is_zero, isinteger, imin_loc, imax_loc, bisect, wrap2_pmhalf
  use m_geometry,       only : normv
  use m_crystal,        only : crystal_t
@@ -216,7 +216,7 @@ type,public :: kpath_t
     ! ndiv_small=Number of divisions used to sample the smallest segment.
 
   integer :: npts=0
-    ! Number of points in the path
+    ! Number of points in the path.
 
   real(dp) :: gprimd(3,3)
    ! Reciprocal lattice vectors.
@@ -225,7 +225,11 @@ type,public :: kpath_t
    ! gmet(3,3)=Metric matrix in G space.
 
   integer,allocatable :: ndivs(:)
-  ! ndivs(nbounds-1)=Number of division for each segment.
+   ! ndivs(nbounds-1)=Number of division for each segment.
+
+  integer,allocatable :: bounds2kpt(:)
+   ! bounds2kpt(nbounds)
+   ! bounds2kpt(i): Index of the i-th extrema in the pts(:) array.
 
   real(dp),allocatable :: bounds(:,:)
     ! bounds(3,nbounds)
@@ -235,11 +239,16 @@ type,public :: kpath_t
     ! points(3,npts)
     ! The points of the path in reduced coordinates.
 
+  real(dp),allocatable :: dl(:)
+    ! dl(npts)
+    ! dl(i) = Distance between the (i-1)-th and the i-th k-point. dl(1) = zero
+
  end type kpath_t
 
- public :: kpath_init   ! Construct the path
- public :: kpath_free   ! Free memory
- public :: make_path    ! Construct a normalized path.
+ public :: kpath_init       ! Construct a new path
+ public :: kpath_free       ! Free memory
+ public :: make_path        ! Construct a normalized path.
+ public :: kpath_print      ! Print the path.
 !!***
 
 !----------------------------------------------------------------------
@@ -2003,7 +2012,7 @@ end subroutine getkptnorm_bycomponent
 !! make_path
 !!
 !! FUNCTION
-!!  Create a normalized path given the extrema.
+!!  Generate a normalized path given the extrema.
 !!
 !! INPUTS
 !!  nbounds=Number of extrema defining the path.
@@ -2021,6 +2030,9 @@ end subroutine getkptnorm_bycomponent
 !!
 !! PARENTS
 !!      m_bz_mesh,m_nesting,m_phgamma,m_phonons,mkph_linwid
+!!
+!! TODO:
+!!   Replace this routine with kpath_t
 !!
 !! CHILDREN
 !!
@@ -2111,7 +2123,7 @@ subroutine make_path(nbounds,bounds,met,space,ndiv_small,ndivs,npts,path,unit)
  path(:,npts)=bounds(:,nbounds)
 
  if (prtvol > 0) then
-   write(msg,'(i4,4x,3(f8.5,1x))')npts,path(:,npts)
+   write(msg,'(i0,4x,3(f8.5,1x))')npts,path(:,npts)
    call wrtout(ount,msg,'COLL')
  end if
 
@@ -3286,7 +3298,9 @@ subroutine kpath_init(Kpath,bounds,gprimd,ndiv_small)
  real(dp),intent(in) :: bounds(:,:),gprimd(3,3)
 
 !Local variables-------------------------------
+ integer :: ii
 !arrays
+ real(dp) :: dk(3)
  real(dp),allocatable :: pts(:,:)
 
 ! *************************************************************************
@@ -3295,12 +3309,10 @@ subroutine kpath_init(Kpath,bounds,gprimd,ndiv_small)
  Kpath%nbounds = size(bounds, dim=2)
  Kpath%ndiv_small = ndiv_small
 
-!Compute reciprocal space metric.
- Kpath%gprimd = gprimd
- Kpath%gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
+ ! Compute reciprocal space metric.
+ Kpath%gprimd = gprimd; Kpath%gmet = matmul(transpose(gprimd), gprimd)
 
  ABI_MALLOC(Kpath%ndivs, (Kpath%nbounds-1))
-
  call make_path(Kpath%nbounds,bounds,Kpath%gmet,"G",ndiv_small,Kpath%ndivs,Kpath%npts,pts,unit=dev_null)
 
  ABI_MALLOC(Kpath%bounds, (3,Kpath%nbounds))
@@ -3309,6 +3321,20 @@ subroutine kpath_init(Kpath,bounds,gprimd,ndiv_small)
  ABI_MALLOC(Kpath%points, (3,Kpath%npts))
  Kpath%points = pts
  ABI_FREE(pts)
+
+ ! Compute distance between point i-1 and i
+ ABI_CALLOC(kpath%dl, (kpath%npts))
+ do ii=2,kpath%npts
+   dk = kpath%points(:, ii-1) - kpath%points(:,ii)
+   kpath%dl(ii) = normv(dk, kpath%gmet, "G")
+ end do
+
+ ! Mapping bounds --> points
+ ABI_MALLOC(kpath%bounds2kpt, (kpath%nbounds))
+ kpath%bounds2kpt(1) = 1
+ do ii=1,kpath%nbounds-1
+   kpath%bounds2kpt(ii+1) = sum(kpath%ndivs(:ii)) + 1
+ end do
 
 end subroutine kpath_init
 !!***
@@ -3350,6 +3376,10 @@ subroutine kpath_free(Kpath)
    ABI_FREE(Kpath%ndivs)
  end if
 
+ if (allocated(Kpath%bounds2kpt)) then
+   ABI_FREE(Kpath%bounds2kpt)
+ end if
+
  if (allocated(Kpath%bounds)) then
    ABI_FREE(Kpath%bounds)
  end if
@@ -3358,7 +3388,79 @@ subroutine kpath_free(Kpath)
    ABI_FREE(Kpath%points)
  end if
 
+ if (allocated(Kpath%dl)) then
+   ABI_FREE(Kpath%dl)
+ end if
+
 end subroutine kpath_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_bz_mesh/kpath_print
+!! NAME
+!! kpath_print
+!!
+!! FUNCTION
+!!  Print info on the path.
+!!
+!! INPUTS
+!!  [unit]=Unit number for output. Defaults to std_out
+!!  [prtvol]=Verbosity level.
+!!  [header]=String to be printed as header for additional info.
+!!  [pre]=Optional string prepended to output e.g. #. Default: " "
+!!
+!! OUTPUT
+!!  Only printing
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine kpath_print(kpath, header, unit, prtvol, pre)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'kpath_print'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,optional,intent(in) :: unit,prtvol
+ character(len=*),optional,intent(in) :: header,pre
+ type(kpath_t),intent(in) :: kpath
+
+!Local variables-------------------------------
+ integer :: unt,my_prtvol,ii
+ character(len=500) :: msg,my_pre
+
+! *************************************************************************
+
+ unt = std_out; if (present(unit)) unt = unit
+ my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
+ my_pre = " "; if (present(pre)) my_pre = pre
+ if (unt <= 0) return
+
+ if (present(header)) write(unt,"(a)") sjoin(pre, '==== '//trim(adjustl(header))//' ==== ')
+ write(unt, "(a)") sjoin(pre, "Number of points:", itoa(kpath%npts), ", ndivsmall:", itoa(kpath%ndiv_small))
+ write(unt, "(a)") sjoin(pre, "Boundaries and corresponding index in the k-points array:")
+ do ii=1,kpath%nbounds
+   write(unt, "(a)") sjoin(pre, itoa(kpath%bounds2kpt(ii)), ktoa(kpath%bounds(:,ii)))
+ end do
+ write(unt, "(a)") sjoin(pre, " ")
+
+ if (my_prtvol > 10) then
+   do ii=1,kpath%npts
+     write(unt, "(a)") sjoin(pre, ktoa(kpath%points(:,ii)))
+   end do
+ end if
+
+end subroutine kpath_print
 !!***
 
 !----------------------------------------------------------------------

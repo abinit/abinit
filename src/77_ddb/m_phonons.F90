@@ -247,8 +247,7 @@ subroutine phdos_print(PHdos,fname)
  case (2)
    write(msg,'(a,i0)')'# Tetrahedron method, nqibz= ',PHdos%nqibz
  case default
-   write(msg,'(a,i0)')" Wrong prtdos = ",PHdos%prtdos
-   MSG_ERROR(msg)
+   MSG_ERROR(sjoin(" Wrong prtdos: ",itoa(PHdos%prtdos)))
  end select
  call wrtout(unt,msg,'COLL')
  call wrtout(unt_by_atom,msg,'COLL')
@@ -1021,7 +1020,7 @@ subroutine phdos_ncwrite(phdos,ncid)
    nctkarr_t('pjdos', "dp", 'number_of_frequencies, three, number_of_atoms'),&
    nctkarr_t('pjdos_type', "dp", 'number_of_frequencies, number_of_atom_species'),&
    nctkarr_t('pjdos_rc_type', "dp", 'number_of_frequencies, three, number_of_atom_species'), &
-   nctkarr_t('msqd_dos_atom', "dp", 'number_of_frequencies, three, three, number_of_atom_species') &
+   nctkarr_t('msqd_dos_atom', "dp", 'number_of_frequencies, three, three, number_of_atoms') &
  ])
  NCF_CHECK(ncerr)
 

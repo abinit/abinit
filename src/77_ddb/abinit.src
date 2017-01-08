@@ -51,7 +51,6 @@ sources = [
  "get_tau_k.F90",
  "harmonic_thermo.F90",
  "ddb_hybrid.F90",
- "anaddb_init.F90",
  "ddb_internalstr.F90",
  "integrate_gamma.F90",
  "integrate_gamma_alt.F90",

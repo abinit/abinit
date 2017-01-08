@@ -62,7 +62,7 @@ program anaddb
  use m_io_tools,       only : open_file, flush_unit
  use m_fstrings,       only : int2char4, itoa, sjoin, strcat
  use m_time,           only : asctime
- use m_anaddb_dataset, only : anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
+ use m_anaddb_dataset, only : anaddb_init, anaddb_dataset_type, anaddb_dtset_free, outvars_anaddb, invars9
  use m_crystal,        only : crystal_t, crystal_free
  use m_crystal_io,     only : crystal_ncwrite
  use m_dynmat,         only : gtdyn9, dfpt_phfrq
@@ -152,9 +152,7 @@ program anaddb
  start_datetime = asctime()
 
  ! Initialise the code: write heading, and read names of files.
- if (iam_master) then
-   call anaddb_init(filnam)
- end if
+ if (iam_master) call anaddb_init(filnam)
  call xmpi_bcast (filnam, master, comm, ierr)
 
  ! make log file for non-master procs
@@ -431,7 +429,7 @@ program anaddb
 !**********************************************************************
 
 !Phonon density of states calculation, Start if interatomic forces have been calculated
- if (inp%ifcflag==1 .and. any(inp%prtdos==[1,2])) then
+ if (inp%ifcflag==1 .and. any(inp%prtdos==[1, 2])) then
    write(message,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,' Calculation of phonon density of states ',ch10
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
@@ -808,6 +806,13 @@ program anaddb
 
 !**********************************************************************
 
+ ! Close files
+ if (iam_master) then
+#ifdef HAVE_NETCDF
+   NCF_CHECK(nf90_close(ana_ncid))
+#endif
+ end if
+
  ! Free memory
  ABI_DEALLOCATE(displ)
  ABI_DEALLOCATE(d2cart)
@@ -818,18 +823,12 @@ program anaddb
  ABI_DEALLOCATE(zeff)
  ABI_DEALLOCATE(instrain)
 
- call anaddb_dtset_free(inp)
  call ddb_free(ddb)
  call asrq0_free(asrq0)
  call crystal_free(Crystal)
  call ifc_free(Ifc)
 
- ! Close files
- if (iam_master) then
-#ifdef HAVE_NETCDF
-   NCF_CHECK(nf90_close(ana_ncid))
-#endif
- end if
+ call anaddb_dtset_free(inp)
 
  call timein(tcpu,twall)
  tsec(1)=tcpu-tcpui; tsec(2)=twall-twalli

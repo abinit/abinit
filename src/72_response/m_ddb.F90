@@ -76,12 +76,6 @@ MODULE m_ddb
 
  type,public :: ddb_type
 
-  !integer :: ifcflag
-  ! 1 if IFC are calculated, 0 otherwise
-
-  !type(crystal_t) :: crystal
-  ! Crystal structure.
-
   integer :: msize
   ! Maximum size of dynamical matrices and other perturbations (ddk, dde...)
 
@@ -526,8 +520,8 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
  character(len=*),intent(in) :: filnam
 
 !Local variables -------------------------
-!Set routine version number here:
 !scalars
+!Set routine version number here:
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
  integer :: bantot,basis_size0,blktyp,ddbvrs,iband,iblok,iekb,ii,ikpt,iline,im,ios,iproj
  integer :: itypat,itypat0,jekb,lmn_size0,mproj,mpsang,nekb,nelmts,nsppol
@@ -546,15 +540,14 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
 
 !Check inprep8 version number (vrsio8) against mkddb version number (vrsddb)
  if (vrsio8/=vrsddb) then
-   write(message, '(a,i10,a,a,i10,a)' )&
-&   'The input/output DDB version number=',vrsio8,ch10,&
-&   'is not equal to the DDB version number=',vrsddb,'.'
+   write(message, '(a,i0,2a,i0)' )&
+&   'The input/output DDB version number= ',vrsio8,ch10,&
+&   'is not equal to the DDB version number= ',vrsddb
    MSG_BUG(message)
  end if
 
 !Open the input derivative database.
- write(message,'(a,a)') ' inprep8 : open file ',trim(filnam)
- call wrtout(std_out,message,'COLL')
+ call wrtout(std_out, sjoin(" Opening DDB file:", filnam), 'COLL')
  if (open_file(filnam,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
    MSG_ERROR(message)
  end if

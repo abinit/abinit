@@ -1011,7 +1011,7 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq)
    ! Note that we dddq is in cartesian cordinates.
    ! For the time being, the gradient is computed with finite difference and step hh.
    ! TODO: should generalize ewald9 to compute dq.
-   hh = 0.001_dp
+   hh = 0.01_dp
    do ii=1,3
      do jj=-1,1,2
        ! qcart --> qred
