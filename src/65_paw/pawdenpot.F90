@@ -657,7 +657,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !  Electron-positron calculation: compute Dij due to fixed particles (elec. or pos. depending on calctype)
    if (ipositron/=0) then
      ABI_ALLOCATE(dij_ep,(cplex*lmn2_size))
-     call pawdijhartree(cplex,dij_ep,nspden,electronpositron%pawrhoij_ep(iatom),pawtab(itypat))
+     call pawdijhartree(paw_ij(iatom)%cplex,dij_ep,nspden,electronpositron%pawrhoij_ep(iatom),pawtab(itypat))
      if (option/=1) then
        do ispden=1,nspdiag
          jrhoij=1
@@ -675,7 +675,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
 !  Hartree Dij computation
    if (ipositron/=1) then
-     call pawdijhartree(cplex,paw_ij(iatom)%dijhartree,nspden,pawrhoij(iatom),pawtab(itypat))
+     call pawdijhartree(paw_ij(iatom)%cplex,paw_ij(iatom)%dijhartree,nspden,pawrhoij(iatom),pawtab(itypat))
    else
      paw_ij(iatom)%dijhartree(:)=zero
    end if

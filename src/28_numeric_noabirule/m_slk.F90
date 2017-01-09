@@ -344,7 +344,7 @@ subroutine build_processor_scalapack(processor,grid,myproc,comm)
 & processor%coords(2))
 
 !These values are the same as those computed by BLACS_GRIDINFO
-!except in the case where the mmyproc argument is not the local proc
+!except in the case where the myproc argument is not the local proc
  processor%coords(1) = INT((myproc) / grid%dims(2))
  processor%coords(2) = MOD((myproc), grid%dims(2))
 

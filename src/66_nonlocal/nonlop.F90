@@ -456,6 +456,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    istwf_k=hamk%istwf_kp
  end if
 
+ if (npwin==0.or.npwout==0) return
  dimffnlin=size(ffnlin,2);dimffnlout=size(ffnlout,2)
  kpgin_allocated=(.not.associated(kpgin))
  if (kpgin_allocated) then
