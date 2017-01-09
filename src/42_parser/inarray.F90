@@ -180,7 +180,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 &   ' inarray : ',ch10,&
 &   '  An error occurred reading data for keyword "',trim(cs),'",',ch10,&
 &   '  looking for ',narr,' array elements.'
-   call wrtout(std_err,message,do_flush=.true.)
+   call wrtout(std_out,message,do_flush=.true.)
 
    write(message,'(8a)')&
 &   'There is a problem with the input file : maybe  ',ch10,&
