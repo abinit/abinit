@@ -296,6 +296,7 @@
  use m_errors
 
  use m_pawcprj, only : pawcprj_type
+ use m_opernl_ylm, only : opernla_ylm, opernlb_ylm, opernlc_ylm, opernld_ylm
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -303,7 +304,7 @@
 #define ABI_FUNC 'nonlop_ylm'
  use interfaces_41_geometry
  use interfaces_56_recipspace
- use interfaces_66_nonlocal, except_this_one => nonlop_ylm
+ use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none
@@ -365,6 +366,7 @@
 !Check consistency of arguments
 !==============================================================
 
+ ABI_UNUSED(mgfft)
  hermdij_=.FALSE.; if(present(hermdij)) hermdij_=hermdij
 
 !signs=1, almost all choices

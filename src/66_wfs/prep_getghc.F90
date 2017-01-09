@@ -260,7 +260,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
    end if
 
    call timab(635,3,tsec)
-   call getghc(cpopt,cwavef_alltoall2,cwaveprj,gwavef_alltoall2,swavef_alltoall2(:,1:nbval),&
+   call multithreaded_getghc(cpopt,cwavef_alltoall2,cwaveprj,gwavef_alltoall2,swavef_alltoall2(:,1:nbval),&
 &   gs_hamk,gvnlc_alltoall2,lambda,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
    call timab(635,2,tsec)
 
@@ -293,7 +293,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  Fourier transformation
 !  ----------------------
    call timab(636,3,tsec)
-   call getghc(cpopt,cwavef_alltoall2,cwaveprj,gwavef_alltoall2,swavef_alltoall2,gs_hamk,&
+   call multithreaded_getghc(cpopt,cwavef_alltoall2,cwaveprj,gwavef_alltoall2,swavef_alltoall2,gs_hamk,&
 &   gvnlc_alltoall2,lambda,mpi_enreg,bandpp,prtvol,sij_opt,tim_getghc,0)
    call timab(636,2,tsec)
 
@@ -359,7 +359,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
 !  Fourier calculation
 !  ------------------------------------------------------------
    call timab(637,3,tsec)
-   call getghc(cpopt,ewavef_alltoall_sym,cwaveprj,gwavef_alltoall_sym,swavef_alltoall_sym,gs_hamk,&
+   call multithreaded_getghc(cpopt,ewavef_alltoall_sym,cwaveprj,gwavef_alltoall_sym,swavef_alltoall_sym,gs_hamk,&
 &   gvnlc_alltoall_sym,lambda,mpi_enreg,bandpp_sym,prtvol,sij_opt,tim_getghc,1,&
 &   kg_fft_k=kg_k_gather_sym)
    call timab(637,2,tsec)
@@ -418,7 +418,7 @@ subroutine prep_getghc(cwavef,gs_hamk,gvnlc,gwavef,swavef,lambda,blocksize,&
    call timab(633,2,tsec)
 
    call timab(638,3,tsec)
-   call getghc(cpopt,cwavef_alltoall2,cwaveprj,gwavef_alltoall2,swavef_alltoall2,gs_hamk,&
+   call multithreaded_getghc(cpopt,cwavef_alltoall2,cwaveprj,gwavef_alltoall2,swavef_alltoall2,gs_hamk,&
 &   gvnlc_alltoall2,lambda,mpi_enreg,bandpp,prtvol,sij_opt,tim_getghc,2)
    call timab(638,2,tsec)
 

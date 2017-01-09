@@ -772,7 +772,7 @@ subroutine thmeig(g2fsmear,acell,amu,anaddb_dtset,d2asr,&
 !  Q point Grid
    qpt_full(:,:) = ddb%qpt(1:3,:)
 
-!  Trivial Q point index
+!  Trivial Q point index  
    do iqpt=1,nqpt
      indqpt(iqpt)=iqpt
      qptnrm(iqpt)= qpt_full(1,iqpt)*qpt_full(1,iqpt)+qpt_full(2,iqpt)*qpt_full(2,iqpt)+qpt_full(3,iqpt)*qpt_full(3,iqpt)

@@ -432,6 +432,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !       if (dtsets(idtset)%nphf>1) mpi_enregs(idtset)%paral_hf=1
 !     end if
    else
+     mpi_enregs(idtset)%bandpp = dtsets(idtset)%bandpp
 !    Additional setting in case of a Fock exchange of PBE0 calculation
      if (dtsets(idtset)%usefock==1) then 
        if (dtsets(idtset)%nphf>1) mpi_enregs(idtset)%paral_hf=1
@@ -704,6 +705,17 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
                MSG_WARNING(message)
              end if
            end if
+         else
+           do iikpt=1,nkpt*nsppol
+             iikpt_modulo = modulo(iikpt,nkpt)+1
+             if(modulo(dtsets(idtset)%nband(iikpt),mpi_enregs(idtset)%nproc_band*mpi_enregs(idtset)%bandpp)/=0)then
+               write(message,'(3a,i0,a,i0)') &
+&               'The number of band for the k-point, nband_k, should be a multiple of npband*bandpp.',ch10,&
+&               'However, nband_k=',dtsets(idtset)%nband(iikpt),' and npband*bandpp=', &
+&               mpi_enregs(idtset)%nproc_band* mpi_enregs(idtset)%bandpp
+               MSG_BUG(message)
+             end if
+           end do
          end if
        end if
        nproc_fft=mpi_enregs(idtset)%nproc_fft

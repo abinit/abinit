@@ -56,6 +56,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
  use m_pawcprj
  use m_pawdij, only : pawdijhat
+ use m_nonlop
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -66,7 +67,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  use interfaces_53_ffts
  use interfaces_56_xc
  use interfaces_65_paw
- use interfaces_66_nonlocal
 !End of the abilint section
 
  implicit none

@@ -272,12 +272,6 @@
 !!
 !! SOURCE
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
-
 
 subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnlout,&
 &                 paw_opt,signs,svectout,tim_nonlop,vectin,vectout,&
@@ -296,7 +290,6 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 #undef ABI_FUNC
 #define ABI_FUNC 'nonlop'
  use interfaces_18_timing
- use interfaces_66_nonlocal, except_this_one => nonlop
 !End of the abilint section
 
  implicit none
@@ -328,13 +321,14 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  integer, ABI_CONTIGUOUS pointer :: atindx1_(:),indlmn_(:,:,:),nattyp_(:)
  real(dp) :: tsec(2)
  real(dp),pointer :: ffnlin(:,:,:,:),ffnlin_(:,:,:,:),ffnlout(:,:,:,:),ffnlout_(:,:,:,:)
- real(dp),pointer :: kpgin(:,:),kpgout(:,:),kptin(:),kptout(:)
+ real(dp),pointer :: kpgin(:,:),kpgout(:,:)
+ real(dp) :: kptin(3),kptout(3)
  real(dp),pointer :: ph3din(:,:,:),ph3din_(:,:,:),ph3dout(:,:,:),ph3dout_(:,:,:)
  real(dp),pointer :: phkxredin(:,:),phkxredin_(:,:),phkxredout(:,:),phkxredout_(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: enl_(:,:,:),enl_ptr(:,:,:),ph1d_(:,:),sij_(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: vectin_idat(:,:), vectout_idat(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: svectout_idat(:,:), enlout_idat(:)
- type(pawcprj_type),pointer :: cprjin_(:,:),cprjin_idat(:,:)
+ type(pawcprj_type),pointer :: cprjin_(:,:)
+  integer :: useylm
+  integer :: b0,b1,b2,b3,b4,e0,e1,e2,e3,e4
 
 ! **********************************************************************
 
@@ -350,7 +344,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  force_recompute_ph3d=.false.
 
 !Error(s) on incorrect input
- if (hamk%useylm==0) then
+useylm = hamk%useylm
+ if (useylm==0) then
    if (paw_opt>0) then
      msg = 'When paw_opt>0 you must use ylm version of nonlop! Set useylm 1.'
      MSG_BUG(msg)
@@ -387,7 +382,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  nullify(ph3din);nullify(ph3dout)
  if (select_k_==KPRIME_H_K) then
 !  ===== <k^prime|Vnl|k> =====
-   kptin => hamk%kpt_k ; kptout => hamk%kpt_kp
+   kptin = hamk%kpt_k ; kptout = hamk%kpt_kp
    npwin=hamk%npw_fft_k ; npwout=hamk%npw_fft_kp
    kgin => hamk%kg_k ; kgout => hamk%kg_kp
    if (associated(hamk%kpg_k)) then
@@ -404,7 +399,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    istwf_k=hamk%istwf_k
  else if (select_k_==K_H_KPRIME) then
 !  ===== <k|Vnl|k^prime> =====
-   kptin => hamk%kpt_kp ; kptout => hamk%kpt_k
+   kptin = hamk%kpt_kp ; kptout = hamk%kpt_k
    npwin=hamk%npw_fft_kp ; npwout=hamk%npw_fft_k
    kgin => hamk%kg_kp ; kgout => hamk%kg_k
    if (associated(hamk%kpg_kp)) then
@@ -421,7 +416,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    istwf_k=hamk%istwf_kp
  else if (select_k_==K_H_K) then
 !  ===== <k|Vnl|k> =====
-   kptin => hamk%kpt_k ; kptout => hamk%kpt_k
+   kptin = hamk%kpt_k ; kptout = hamk%kpt_k
    npwin=hamk%npw_fft_k ; npwout=hamk%npw_fft_k
    kgin => hamk%kg_k ; kgout => hamk%kg_k
    if (associated(hamk%kpg_k)) then
@@ -438,7 +433,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    istwf_k=hamk%istwf_k
  else if (select_k_==KPRIME_H_KPRIME) then
 !  ===== <k^prime|Vnl|k^prime> =====
-   kptin => hamk%kpt_kp ; kptout => hamk%kpt_kp
+   kptin = hamk%kpt_kp ; kptout = hamk%kpt_kp
    npwin=hamk%npw_fft_kp ; npwout=hamk%npw_fft_kp
    kgin => hamk%kg_kp ; kgout => hamk%kg_kp
    if (associated(hamk%kpg_kp)) then
@@ -617,7 +612,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 !But there are several restrictions
  use_gemm_nonlop= ( gemm_nonlop_use_gemm .and. &
 & signs == 2 .and. paw_opt /= 2 .and. hamk%nspinor == 1 .and. &
-& cpopt < 3 .and. hamk%useylm /= 0 .and. &
+& cpopt < 3 .and. useylm /= 0 .and. &
 & (choice < 2 .or. choice == 7) )
  if(use_gemm_nonlop) then
    call gemm_nonlop(atindx1_,choice,cpopt,cprjin_,dimenl1,dimenl2_,&
@@ -630,58 +625,83 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &   tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,hamk%use_gpu_cuda)
 
  else
+   !$omp parallel do default(shared), &
+   !$omp& firstprivate(ndat,npwin,my_nspinor,choice,signs,paw_opt,npwout,cpopt,useylm,nnlout), &
+   !$omp& private(b0,b1,b2,b3,b4,e0,e1,e2,e3,e4)
+   !!$omp& schedule(static), if(hamk%use_gpu_cuda==0)
    do idat=1, ndat
-     vectin_idat => vectin(:,1+npwin*my_nspinor*(idat-1):npwin*my_nspinor*idat)
+     !vectin_idat => vectin(:,1+npwin*my_nspinor*(idat-1):npwin*my_nspinor*idat)
+     b0 = 1+npwin*my_nspinor*(idat-1)
+     e0 = npwin*my_nspinor*idat
      if (choice/=0.and.signs==2.and.paw_opt/=3) then
-       vectout_idat => vectout(:,1+npwout*my_nspinor*(idat-1):npwout*my_nspinor*idat)
+       !vectout_idat => vectout(:,1+npwout*my_nspinor*(idat-1):npwout*my_nspinor*idat)
+      b1 = 1+npwout*my_nspinor*(idat-1)
+      e1 = npwout*my_nspinor*idat
      else
-       vectout_idat => vectout
-     end if
-     if (choice/=0.and.signs==2.and.paw_opt>=3) then
-       svectout_idat => svectout(:,1+npwout*my_nspinor*(idat-1):npwout*my_nspinor*idat)
-     else
-       svectout_idat => svectout
-     end if
-     if (cpopt>=0) then
-       cprjin_idat => cprjin_(:,my_nspinor*(idat-1)+1:my_nspinor*(idat))
-     else
-       cprjin_idat => cprjin_
-     end if
-     if (nnlout>0) then
-       enlout_idat => enlout((idat-1)*nnlout+1:(idat*nnlout))
-     else
-       enlout_idat => enlout
+       !vectout_idat => vectout
+      b1 = lbound(vectout,dim=2)
+      e1 = ubound(vectout,dim=2)
      end if
 
-!    Legendre Polynomials version
-     if (hamk%useylm==0) then
+     if (choice/=0.and.signs==2.and.paw_opt>=3) then
+       !svectout_idat => svectout(:,1+npwout*my_nspinor*(idat-1):npwout*my_nspinor*idat)
+      b2 = 1+npwout*my_nspinor*(idat-1)
+      e2 = npwout*my_nspinor*idat
+     else
+       !svectout_idat => svectout
+      b2 = lbound(svectout,dim=2)
+      e2 = ubound(svectout,dim=2)
+     end if
+
+     if (nnlout>0) then
+      b3 = (idat-1)*nnlout+1
+      e3 = (idat*nnlout)
+     else
+      !enlout_idat => enlout
+      b3 = lbound(enlout,dim=1)
+      e3 = ubound(enlout,dim=1)
+     end if
+
+     if (cpopt>=0) then
+       !cprjin_idat => cprjin_(:,my_nspinor*(idat-1)+1:my_nspinor*(idat))
+      b4 = my_nspinor*(idat-1)+1
+      e4 = my_nspinor*(idat)
+     else
+       !cprjin_idat => cprjin_
+      b4 = lbound(cprjin_,dim=2)
+      e4 = ubound(cprjin_,dim=2)
+     end if
+
+     !Legendre Polynomials version
+     if (useylm==0) then
        call nonlop_pl(choice,dimenl1,dimenl2_,dimffnlin,dimffnlout,enl_,&
-&       enlout_idat,ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,idir,indlmn_,istwf_k,&
+&       enlout(b3:e3),ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,idir,indlmn_,istwf_k,&
 &       kgin,kgout,kpgin,kpgout,kptin,kptout,hamk%lmnmax,matblk_,hamk%mgfft,&
 &       mpi_enreg,hamk%mpsang,hamk%mpssoang,natom_,nattyp_,hamk%ngfft,&
 &       nkpgin,nkpgout,nloalg_,nnlout,npwin,npwout,my_nspinor,hamk%nspinor,&
 &       ntypat_,only_SO_,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,hamk%ucvol,&
-&       vectin_idat,vectout_idat)
-!    Spherical Harmonics version
-     else if (hamk%use_gpu_cuda==0) then
-       call nonlop_ylm(atindx1_,choice,cpopt,cprjin_idat,dimenl1,dimenl2_,&
-&       dimffnlin,dimffnlout,enl_,enlout_idat,ffnlin_,ffnlout_,hamk%gprimd,idir,&
+&       vectin(:,b0:e0),vectout(:,b1:e1))
+     !Spherical Harmonics version
+     else if (hamk%use_gpu_cuda==0 .and. useylm==1) then
+       call nonlop_ylm(atindx1_,choice,cpopt,cprjin_(:,b4:e4),dimenl1,dimenl2_,&
+&       dimffnlin,dimffnlout,enl_,enlout(b3:e3),ffnlin_,ffnlout_,hamk%gprimd,idir,&
 &       indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda(idat),&
 &       hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,natom_,nattyp_,hamk%ngfft,&
 &       nkpgin,nkpgout,nloalg_,nnlout,npwin,npwout,my_nspinor,hamk%nspinor,&
 &       ntypat_,paw_opt,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,&
-&       svectout_idat,hamk%ucvol,vectin_idat,vectout_idat,hermdij=hermdij)
+&       svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1),hermdij=hermdij)
 !    GPU version
      else
-       call nonlop_gpu(atindx1_,choice,cpopt,cprjin_idat,dimenl1,dimenl2_,&
-&       dimffnlin,dimffnlout,enl_,enlout_idat,ffnlin_,ffnlout_,hamk%gprimd,idir,&
+       call nonlop_gpu(atindx1_,choice,cpopt,cprjin(:,b4:e4),dimenl1,dimenl2_,&
+&       dimffnlin,dimffnlout,enl_,enlout(b3:e3),ffnlin_,ffnlout_,hamk%gprimd,idir,&
 &       indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda(idat),&
 &       hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,natom_,nattyp_,hamk%ngfft,&
 &       nkpgin,nkpgout,nloalg_,nnlout,npwin,npwout,my_nspinor,hamk%nspinor,&
 &       ntypat_,paw_opt,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,&
-&       svectout_idat,hamk%ucvol,vectin_idat,vectout_idat)
+&       svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1))
      end if
    end do
+   !$omp end parallel do
  end if
 
 !Release temporary storage

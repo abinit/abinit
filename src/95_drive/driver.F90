@@ -98,6 +98,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 #if defined DEV_YP_VDWXC
  use m_xc_vdw
 #endif
+ use m_xg, only : xg_finalize
 
  use m_libpaw_tools, only : libpaw_write_comm_set
  use m_pawang,       only : pawang_type, pawang_free
@@ -806,6 +807,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    ABI_DEALLOCATE(npwtot)
 
    call abi_linalg_finalize()
+   call xg_finalize()
 
    ! Check whether exiting was required by the user.
    ! If found then beat a hasty exit from time steps

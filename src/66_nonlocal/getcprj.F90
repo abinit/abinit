@@ -91,6 +91,7 @@
  use m_errors
 
  use m_pawcprj, only : pawcprj_type
+ use m_opernl_ylm, only : opernla_ylm
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

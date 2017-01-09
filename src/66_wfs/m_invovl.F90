@@ -40,6 +40,7 @@ MODULE m_invovl
  use defs_abitypes
  use m_errors
  use m_xmpi
+ use m_nonlop
 
  implicit none
 
@@ -482,7 +483,6 @@ end subroutine make_invovl
 #undef ABI_FUNC
 #define ABI_FUNC 'apply_invovl'
  use interfaces_18_timing
- use interfaces_66_nonlocal
  use interfaces_66_wfs
 !End of the abilint section
 

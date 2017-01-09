@@ -144,6 +144,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
  real(dp),allocatable :: d2gxdtfac_(:,:,:,:,:),dgxdtfac_(:,:,:,:,:),gxfac_(:,:,:,:),gxfj(:,:) 
 
 ! *************************************************************************
+#undef HAVE_OPENMP
 
  DBG_ENTER("COLL")
 
@@ -159,9 +160,9 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
  if (paw_opt==0) then                  ! Enl is E(Kleinman-Bylander)
    ABI_CHECK(cplex_enl/=2,"BUG: invalid cplex_enl=2!")
    ABI_CHECK(cplex_fac==cplex,"BUG: invalid cplex_fac/=cplex!")
-!$OMP PARALLEL &
-!$OMP PRIVATE(ispinor,ispinor_index,ia,ilmn,iln,enl_)
-!$OMP DO COLLAPSE(3)
+!!$OMP PARALLEL &
+!!$OMP PRIVATE(ispinor,ispinor_index,ia,ilmn,iln,enl_)
+!!$OMP DO COLLAPSE(3)
    do ispinor=1,nspinor
      do ia=1,nincat
        do ilmn=1,nlmn
@@ -172,8 +173,8 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
        end do
      end do
    end do
-!$OMP END DO
-!$OMP END PARALLEL 
+!!$OMP END DO
+!!$OMP END PARALLEL 
  end if
 
 !Accumulate gxfac related to nonlocal operator (PAW)

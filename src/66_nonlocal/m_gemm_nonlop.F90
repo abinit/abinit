@@ -198,9 +198,8 @@ contains
 !!      dgemm,opernlc_ylm,xmpi_sum,zgemm
 !!
 !! SOURCE
- subroutine make_gemm_nonlop(ikpt, ham)
+ subroutine make_gemm_nonlop(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k,ph3d_k)
   use defs_basis
-  use m_hamiltonian, only : gs_hamiltonian_type
   use m_profiling_abi
   use defs_abitypes
   use m_xmpi
@@ -214,22 +213,27 @@ contains
 
   implicit none
 
-  type(gs_hamiltonian_type),intent(inout) :: ham
+  integer, intent(in) :: ikpt
+  integer, intent(in) :: npw, lmnmax,ntypat
+  integer, intent(in) :: indlmn(:,:,:)
+  integer, intent(in) :: nattyp(ntypat)
+  integer, intent(in) :: istwf_k
+  real(dp), intent(in) :: ucvol
+  real(dp), intent(in) :: ffnl_k(:,:,:,:)
+  real(dp), intent(in) :: ph3d_k(:,:,:)
 
   integer :: nprojs
 
-  real(dp) :: atom_projs(2, ham%npw_fft_k, ham%lmnmax)
-  real(dp) :: temp(ham%npw_fft_k)
+  real(dp) :: atom_projs(2, npw, lmnmax)
+  real(dp) :: temp(npw)
 
-  integer :: itypat, ilmn, nlmn, npw, ia, iaph3d, shift
+  integer :: itypat, ilmn, nlmn, ia, iaph3d, shift
   integer :: il, ipw
   logical :: parity
-  integer :: ikpt
 
 ! *************************************************************************
   
   iaph3d = 1
-  npw = ham%npw_fft_k
 
   if(gemm_nonlop_kpt(ikpt)%nprojs /= -1) then
     ! We have been here before, cleanup before remaking
@@ -241,15 +245,15 @@ contains
 
   ! build nprojs
   nprojs = 0
-  do itypat=1,ham%ntypat
-    nprojs = nprojs + count(ham%indlmn(3,:,itypat)>0)*ham%nattyp(itypat)
+  do itypat=1,ntypat
+    nprojs = nprojs + count(indlmn(3,:,itypat)>0)*nattyp(itypat)
   end do
 
   gemm_nonlop_kpt(ikpt)%nprojs = nprojs
 
   ABI_ALLOCATE(gemm_nonlop_kpt(ikpt)%projs, (2, npw, gemm_nonlop_kpt(ikpt)%nprojs))
   gemm_nonlop_kpt(ikpt)%projs = zero
-  if(ham%istwf_k > 1) then
+  if(istwf_k > 1) then
     ! We still allocate the complex matrix, in case we need it for spinors. TODO could be avoided
     ABI_ALLOCATE(gemm_nonlop_kpt(ikpt)%projs_r, (1, npw, gemm_nonlop_kpt(ikpt)%nprojs))
     ABI_ALLOCATE(gemm_nonlop_kpt(ikpt)%projs_i, (1, npw, gemm_nonlop_kpt(ikpt)%nprojs))
@@ -262,10 +266,10 @@ contains
   end if
 
   shift = 0
-  do itypat = 1, ham%ntypat
-    nlmn = count(ham%indlmn(3,:,itypat)>0)
+  do itypat = 1, ntypat
+    nlmn = count(indlmn(3,:,itypat)>0)
 
-    do ia = 1, ham%nattyp(itypat)
+    do ia = 1, nattyp(itypat)
 
       !! build atom_projs, from opernlb
       !! P = 4pi/sqrt(ucvol)* conj(diag(ph3d)) * ffnl * diag(parity), with parity = (-i)^l
@@ -275,12 +279,12 @@ contains
       ! atom_projs(1, :, 1:nlmn) = four_pi/sqrt(ham%ucvol) * ham%ffnl_k(:, 1, 1:nlmn)
       ! TODO vectorize (DCOPY with stride)
       do ipw=1, npw
-        atom_projs(1,ipw, 1:nlmn) = four_pi/sqrt(ham%ucvol) * ham%ffnl_k(ipw, 1, 1:nlmn, itypat)
+        atom_projs(1,ipw, 1:nlmn) = four_pi/sqrt(ucvol) * ffnl_k(ipw, 1, 1:nlmn, itypat)
       end do
 
       ! multiply by (-i)^l
       do ilmn=1,nlmn
-        il=mod(ham%indlmn(1,ilmn, itypat),4);
+        il=mod(indlmn(1,ilmn, itypat),4);
         parity=(mod(il,2)==0)
         if (il>1) then
           ! multiply by -1
@@ -297,15 +301,15 @@ contains
       ! multiply by conj(ph3d)
       do ilmn=1,nlmn
         temp = atom_projs(1, :, ilmn)
-        atom_projs(1, :, ilmn) = atom_projs(1, :, ilmn) * ham%ph3d_k(1, :, iaph3d) &
-&                              + atom_projs(2, :, ilmn) * ham%ph3d_k(2, :, iaph3d)
-        atom_projs(2, :, ilmn) = atom_projs(2, :, ilmn) * ham%ph3d_k(1, :, iaph3d) &
-&                              - temp                   * ham%ph3d_k(2, :, iaph3d)
+        atom_projs(1, :, ilmn) = atom_projs(1, :, ilmn) * ph3d_k(1, :, iaph3d) &
+&                              + atom_projs(2, :, ilmn) * ph3d_k(2, :, iaph3d)
+        atom_projs(2, :, ilmn) = atom_projs(2, :, ilmn) * ph3d_k(1, :, iaph3d) &
+&                              - temp                   * ph3d_k(2, :, iaph3d)
       end do
 
       !! atom_projs is built, copy to projs
       gemm_nonlop_kpt(ikpt)%projs(:, :, shift+1:shift+nlmn) = atom_projs(:, :, 1:nlmn)
-      if(ham%istwf_k > 1) then
+      if(istwf_k > 1) then
         gemm_nonlop_kpt(ikpt)%projs_r(1, :, shift+1:shift+nlmn) = atom_projs(1, :, 1:nlmn)
         gemm_nonlop_kpt(ikpt)%projs_i(1, :, shift+1:shift+nlmn) = atom_projs(2, :, 1:nlmn)
       end if
@@ -345,18 +349,17 @@ contains
 &                 use_gpu_cuda)
   use defs_basis
   use defs_abitypes
-  use m_hamiltonian, only : gs_hamiltonian_type
   use m_profiling_abi
   use defs_abitypes
   use m_xmpi
   use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby
   use m_time,          only : cwtime
+  use m_opernl_ylm, only : opernlc_ylm
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'gemm_nonlop'
- use interfaces_66_nonlocal
 !End of the abilint section
 
   implicit none
