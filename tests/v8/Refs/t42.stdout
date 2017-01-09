@@ -29,27 +29,27 @@
  t41o_DS4_DDB
   Give name for derivative database number           3  : 
  t41o_DS5_DDB
- inprep8 : open file t41o_DS3_DDB
+ Opening DDB file: t41o_DS3_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- inprep8 : open file t41o_DS4_DDB
+ Opening DDB file: t41o_DS4_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- inprep8 : open file t41o_DS5_DDB
+ Opening DDB file: t41o_DS5_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- inprep8 : open file t41o_DS3_DDB
+ Opening DDB file: t41o_DS3_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- inprep8 : open file t41o_DS4_DDB
+ Opening DDB file: t41o_DS4_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- inprep8 : open file t41o_DS5_DDB
+ Opening DDB file: t41o_DS5_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01

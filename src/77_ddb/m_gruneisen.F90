@@ -196,7 +196,7 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
  end do
 
  ! Consistency check
- ! TODO
+ ! TODO: Add more tests.
  ABI_CHECK(any(new%nvols == [3, 5, 7, 9]), "Central finite difference requires [3,5,7,9] DDB files")
 
  new%natom3 = 3 * new%cryst_vol(1)%natom
@@ -206,7 +206,6 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
 
  ierr = 0
  do ivol=1,new%nvols
-   !write(std_out,*)"ucvol",new%cryst_vol(ivol)%ucvol
    if (abs(new%cryst_vol(1)%ucvol + new%delta_vol * (ivol-1) - new%cryst_vol(ivol)%ucvol) > tol4) then
       write(std_out,*)"ucvol, delta_vol, diff_vol", new%cryst_vol(ivol)%ucvol, new%delta_vol, &
         abs(new%cryst_vol(1)%ucvol + new%delta_vol * (ivol-1) - new%cryst_vol(ivol)%ucvol)
@@ -287,7 +286,7 @@ subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq)
  natom3 = gruns%natom3
  do ivol=1,gruns%nvols
    if (ivol == gruns%iv0) then
-     ! Compute group velocities as well
+     ! Compute group velocities for V=V0
      call ifc_fourq(gruns%ifc_vol(ivol), gruns%cryst_vol(ivol), qpt, wvols(:,ivol), displ_cart, &
                     out_d2cart=d2cart(:,:,:,ivol), out_eigvec=eigvec(:,:,:,ivol), dwdq=dwdq)
    else
@@ -595,7 +594,6 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nqshift, qshift, ncid, c
  call xmpi_sum(v2dos, comm, ierr)
 
  if (my_rank == master) then
-   call wrtout(std_out, sjoin(" Average Gruneisen parameter:", ftoa(gavg, fmt="f8.5")))
    call wrtout(ab_out, sjoin(" Average Gruneisen parameter:", ftoa(gavg, fmt="f8.5")))
 
    ! Write text files with Grunesein and DOSes.
@@ -743,7 +741,7 @@ end subroutine gruns_free
 !!  gruns_anaddb
 !!
 !! FUNCTION
-!!  Driver routine called in anaddb for the computation of gruneisen parameters.
+!!  Driver routine called in anaddb to computate Gruneisen parameters.
 !!
 !! INPUTS
 !!  inp<anaddb_dataset_type: :: anaddb input variables.

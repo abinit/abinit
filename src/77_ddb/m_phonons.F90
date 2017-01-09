@@ -584,13 +584,13 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 
  ! Consistency check.
  if (ALL(prtdos /= [1,2])) then
-   MSG_BUG(sjoin('prtdos should be 1 or 2, but received',itoa(prtdos)))
+   MSG_BUG(sjoin('prtdos should be 1 or 2, but received', itoa(prtdos)))
  end if
  if (dosdeltae<=zero) then
-   MSG_BUG(sjoin('dosdeltae should be positive, but received',ftoa(dosdeltae)))
+   MSG_BUG(sjoin('dosdeltae should be positive, but received', ftoa(dosdeltae)))
  end if
  if (prtdos==1.and.dossmear<=zero) then
-   MSG_BUG(sjoin('dossmear should be positive but received',ftoa(dossmear)))
+   MSG_BUG(sjoin('dossmear should be positive but received', ftoa(dossmear)))
  end if
 
  call cwtime(cpu, wall, gflops, "start")

@@ -213,19 +213,20 @@ type,public :: kpath_t
     ! Number of extrema defining the path.
 
   integer :: ndiv_small=0
-    ! ndiv_small=Number of divisions used to sample the smallest segment.
+    ! Number of divisions used to sample the smallest segment.
 
   integer :: npts=0
-    ! Number of points in the path.
+    ! Total number of points in the path.
 
   real(dp) :: gprimd(3,3)
    ! Reciprocal lattice vectors.
 
   real(dp) :: gmet(3,3)
-   ! gmet(3,3)=Metric matrix in G space.
+   ! Metric matrix in G space.
 
   integer,allocatable :: ndivs(:)
-   ! ndivs(nbounds-1)=Number of division for each segment.
+   ! ndivs(nbounds-1)
+   ! Number of division for each segment.
 
   integer,allocatable :: bounds2kpt(:)
    ! bounds2kpt(nbounds)
