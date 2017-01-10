@@ -26,7 +26,6 @@ module m_phpi
 
  use defs_basis
  use defs_abitypes
- use defs_datatypes
  use m_profiling_abi
  use m_xmpi
  use m_errors
