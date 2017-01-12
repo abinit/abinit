@@ -46,7 +46,6 @@ module m_phpi
  use m_hamiltonian
  use m_pawcprj
 
- use defs_datatypes,    only : ebands_t
  use m_time,            only : cwtime
  use m_fstrings,        only : sjoin, itoa, ftoa, ktoa, ltoa, strcat
  use m_io_tools,        only : iomode_from_fname
