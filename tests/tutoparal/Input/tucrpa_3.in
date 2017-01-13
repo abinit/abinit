@@ -1,0 +1,134 @@
+# ----------------------------------------------------------------------------------
+#   Tutorial on cRPA: convergence studies (symmetry is not used)
+#   B. Amadon
+# ----------------------------------------------------------------------------------
+ndtset 16
+udtset  4 4
+paral_kgb 0
+pawprtvol 3
+#==================================================================================
+############ Parameters common to all DATASETS
+#==================================================================================
+##### CONVERGENCE PARAMETERS
+nstep    40 
+nline     5          #Number of LINE minimisations
+nnsclo    2          #Number of Non-Self Consistent LOops
+tolvrs   1.0d-15
+
+occopt    3          #OCCupation OPTion
+tsmear    0.1 eV     #Temperature of SMEARing
+#
+##### PHYSICAL PARAMETERS
+
+acell   3*7.2605
+rprim 1.0 0.0 0.0    #Real space PRIMitive translations
+      0.0 1.0 0.0
+      0.0 0.0 1.0
+natom 5 ntypat 3 typat 1 2 3 3 3
+# V Sr O*3
+xred 0.00 0.00 0.00  #vectors (X) of atom positions in REDuced coordinates
+     0.50 0.50 0.50
+     0.50 0.00 0.00
+     0.00 0.50 0.00
+     0.00 0.00 0.50
+znucl  23.0 38.0 8.0
+
+ngkpt  4 4 4           #K - PoinTs grid : Real space LATTice
+nshiftk 1            #No shift
+shiftk
+      0.5 0.5 0.5
+istwfk *1
+
+#For all the dataset
+nsym     0
+icutcoul 6
+symchi   0
+
+#----------------------------------------------------------------------------
+#-- Parameters for screening for different datasets
+#-- Except for the structure , only the parameters below should be changed
+#----------------------------------------------------------------------------
+nband 30
+ecut        12.0    # Maximal kinetic energy cut-off, in Hartree
+pawecutdg   20.0    # PAW - Energy CUToff for the Double Grid ( need only when usepaw=1=)
+ecutwfn     12.0
+pawoptosc 1       # Choose the Shishkin Kresse way to compute oscillator matrix. In general Arnaud Alouani is much better, but too time consuming for this simple test.
+
+# -- LDAU: 1st dataset and definition of correlated angular momentum
+usepawu    1        # LDA+U is used just for printing usefull quantities.
+dmatpuopt  1        # choose expression of the density matrix
+lpawu      2 -1 -1
+jpawu      0.0 0.0 0.0 eV
+upawu      0.0 0.0 0.0 eV
+
+# -- Activate calculation of U and J
+ucrpa 1              # The screening will use the Wannier weights to suppress transitions.
+
+##----------------------------------------------------------------------------#
+# DO not change parameters below this line unless you know what you do.
+#----------------------------------------------------------------------------
+#
+#==================================================================================
+############ FIRST DATASET: Read Wfc, produce KSS file and Wannier file
+#==================================================================================
+tolvrs?1   1.0d-13
+
+#==================================================================================
+############ SECOND DATASET: Read Wfc, produce KSS file and Wannier file
+#==================================================================================
+getden?2        -1
+# == Compute empty bands precisely
+iscf?2          -2
+nbandkss?2 -1         # Number of bands in KSS file (-1 means the maximum possible)
+kssform?2 3
+nbdbuf?2         4
+tolwfr?2   1.0d-18     # Will stop when this tolerance is achieved
+
+# == Compute Projected Wannier functions (as used in DMFT)
+usedmft?2    1       # useful to compute Wannier functions.
+dmftbandi?2 21       # Precise the definition of Wannier functions (also used for DMFT calculations)
+dmftbandf?2 25       # Precise the definition of Wannier functions (also used for DMFT calculations)
+
+#==================================================================================
+############ SECOND DATASET:  Calculation of the screening (epsilon^-1 matrix)
+#==================================================================================
+ optdriver?3     3     # Screening calculation
+ gwcalctyp?3 2         
+ getwfk?3       -1     # Obtain WFK file from previous dataset
+ ecuteps:?      3.0   # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
+ ecuteps+?      2.0   # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
+
+# -- Frequencies for dielectric matrix
+ nfreqre?3 1
+ freqremax?3 10 eV
+ freqremin?3 0 eV
+ nfreqim?3   0
+
+# -- Ucrpa: screening
+ ucrpa_bands?3  21 25  # In principle, it is useless for ucrpa=2. It is however still necessary for technical reasons even if is redundant with dmftbandi and dmftbandf.
+
+# -- Parallelism
+ gwpara?3 1
+
+#==================================================================================
+############ THIRD DATASET: Calculation of the Self-Energy matrix elements (GW corrections)
+#==================================================================================
+ optdriver?4  4      # Self-Energy calculation
+ gwcalctyp?4  2      # activate HF or ucrpa
+ getwfk?4     -2      # Obtain WFK file from dataset 1
+ getscr?4     -1      # Obtain SCR file from previous dataset
+ ecutsigx?4   30.0   # Dimension of the G sum in Sigma_x. It would be better to keep the default ecut value.
+# irdscr3     1
+# irdwfk3     1
+
+# -- Frequencies for dielectric matrix
+ nfreqsp?4    1
+ freqspmax?4 10 eV
+ freqspmin?4  0 eV
+# ppmodel  2         # in order to use only one frequency
+ nkptgw?4      0     # number of k-point where to calculate the GW correction: all BZ
+ mqgrid?4 300        # Reduced but fine at least for SrVO3
+ mqgriddg?4 300      # Reduced but fine at least for SrVO3
+
+# -- Parallelism
+ gwpara?4 2        # necessary for dataset 3 DO NOT CHANGE IT if nsppol=2

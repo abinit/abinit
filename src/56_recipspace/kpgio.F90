@@ -94,7 +94,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
  character(len=500) :: message
 !arrays
  real(dp) :: kpoint(3)
- 
+
 ! *************************************************************************
 
 !DEBUG
