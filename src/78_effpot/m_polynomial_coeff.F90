@@ -437,28 +437,36 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename)
         WRITE(unit_xml,'("    <term weight=""",F9.6,""">")') &
           coeffs(icoeff)%terms(iterm)%weight
         do idisp=1,coeffs(icoeff)%terms(iterm)%ndisp           
-          select case(coeffs(icoeff)%terms(iterm)%direction(idisp))
-          case(1)
-            direction ="x"
-          case(2)
-            direction ="y"
-          case(3)
-            direction ="z"
-          end select
-          WRITE(unit_xml,'("      <displacement_diff atom_a=""",i2,""" atom_b=""",i2,""" direction=""",&
-&                          a,""" power=""",i2,""">")')&
-            coeffs(icoeff)%terms(iterm)%atindx(1,idisp)-1,&
-            coeffs(icoeff)%terms(iterm)%atindx(2,idisp)-1,direction,&
-&           coeffs(icoeff)%terms(iterm)%power(idisp)
-          WRITE(unit_xml,'("        <cell_a>")',advance='no')
-          WRITE(unit_xml,'(3(I4))',advance='no')&
+          if(coeffs(icoeff)%terms(iterm)%direction(idisp) < 0) then
+!           Strain case
+            WRITE(unit_xml,'("      <strain power=""",i2,""" voigt=""",i2,"""/>")')&
+&                   coeffs(icoeff)%terms(iterm)%power(idisp),&
+&                   -1 * coeffs(icoeff)%terms(iterm)%direction(idisp)
+          else
+!           Atomic displacement case
+            select case(coeffs(icoeff)%terms(iterm)%direction(idisp))
+            case(1)
+              direction ="x"
+            case(2)
+              direction ="y"
+            case(3)
+              direction ="z"
+            end select
+            WRITE(unit_xml,'("      <displacement_diff atom_a=""",i2,""" atom_b=""",i2,&
+&                            """ direction=""",a,""" power=""",i2,""">")')&
+                    coeffs(icoeff)%terms(iterm)%atindx(1,idisp)-1,&
+&                   coeffs(icoeff)%terms(iterm)%atindx(2,idisp)-1,direction,&
+&                   coeffs(icoeff)%terms(iterm)%power(idisp)
+            WRITE(unit_xml,'("        <cell_a>")',advance='no')
+            WRITE(unit_xml,'(3(I4))',advance='no')&
 &           coeffs(icoeff)%terms(iterm)%cell(:,1,idisp)
-          WRITE(unit_xml,'("</cell_a>")')
-          WRITE(unit_xml,'("        <cell_b>")',advance='no')
-          WRITE(unit_xml,'(3(I4))',advance='no')&
-&            coeffs(icoeff)%terms(iterm)%cell(:,2,idisp)
-          WRITE(unit_xml,'("</cell_b>")')
-          WRITE(unit_xml,'("      </displacement_diff>")')
+            WRITE(unit_xml,'("</cell_a>")')
+            WRITE(unit_xml,'("        <cell_b>")',advance='no')
+            WRITE(unit_xml,'(3(I4))',advance='no')&
+&                coeffs(icoeff)%terms(iterm)%cell(:,2,idisp)
+            WRITE(unit_xml,'("</cell_b>")')
+            WRITE(unit_xml,'("      </displacement_diff>")')
+          end if
         end do
         WRITE(unit_xml,'("    </term>")') 
       end do

@@ -206,6 +206,7 @@ module defs_basis
  real(dp), parameter :: Ha_J=4.35974394d-18    !1 Hartree, in J
  real(dp), parameter :: e_Cb=1.602176487d-19 ! minus the electron charge, in Coulomb
  real(dp), parameter :: kb_HaK=8.617343d-5/Ha_eV ! Boltzmann constant in Ha/K
+ real(dp), parameter :: kb_THzK=kb_HaK*Ha_THz ! Boltzmann constant in THz/K
  real(dp), parameter :: amu_emass=1.660538782d-27/9.10938215d-31 ! 1 atomic mass unit, in electronic mass
  real(dp), parameter :: HaBohr3_GPa=Ha_eV/Bohr_Ang**3*e_Cb*1.0d+21 ! 1 Ha/Bohr^3, in GPa
  real(dp), parameter :: Avogadro=6.02214179d23 ! per mole

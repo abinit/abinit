@@ -8444,6 +8444,21 @@
     - '[[GW]]'
     commentdefault: null
     commentdims: null
+    defaultval: 0.25
+    definition: GW FOCK exchange MIXing parameter
+    dimensions: scalar
+    excludes: null
+    requires: '[[optdriver]]=4, [[gwcalctyp]] = 1x5 (HSE) or 2x5 (PBE0).'
+    section: vargw
+    text: |-
+        Mixing parameter of Fock exchange for PBE0 and HSE hybrid-functional calculations via the GW self-energy subroutine. [[gwfockmix]] ranges from 0 (essentially PBE) to 1.
+    varname: gwfockmix
+    vartype: real
+- !variable
+    characteristics:
+    - '[[GW]]'
+    commentdefault: null
+    commentdims: null
     defaultval: 0
     definition: GW Gamma
     dimensions: scalar

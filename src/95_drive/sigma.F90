@@ -1048,6 +1048,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    end do
  end do
 
+ if (Dtset%gwfockmix < 0.0_dp .or. (Dtset%gwfockmix-1.0_dp) > tol8) then
+    MSG_ERROR('gwfockmix is invalid.')
+ end if
+
  call calc_vhxc_me(Wfd,KS_mflags,KS_me,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
 & ks_vtrial,ks_vhartr,ks_vxc,Psps,Pawtab,KS_paw_an,Pawang,Pawfgrtab,KS_paw_ij,dijexc_core,&
 & ks_rhor,ks_rhog,usexcnhat,ks_nhat,ks_nhatgr,nhatgrdim,tmp_kstab,taug=ks_taug,taur=ks_taur)
@@ -2177,7 +2181,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
      call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_bst,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&
 &     Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
-&     gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
+&     gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross,Dtset%gwfockmix)
    end do
 
 !  for the time being, do not remove this barrier!

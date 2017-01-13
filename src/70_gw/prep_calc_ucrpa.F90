@@ -705,17 +705,17 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
            if(iq_bz==1) then
              if((ib_sum/=jb).and.(abs(rhotwg_ki(1,jb))>tol8)) then
                if((ib_sum/=jb).and.(abs(rhotwg_ki(1,jb))>0.01_dp)) then
-                 write(std_out,*) "Warning2: oscillator strengh",rhotwg_ki(1,jb)
-               else
-                 write(std_out,*) "Warning1: oscillator strengh",rhotwg_ki(1,jb)
+                 write(std_out,*) "Warning: precision is low, oscillator strengh should be zero and is :",rhotwg_ki(1,jb)
+               !else
+               !  write(std_out,*) "Warning1: oscillator strengh",rhotwg_ki(1,jb)
                endif
              endif
              if((ib_sum==jb).and.(abs(rhotwg_ki(1,jb)-1_dp)>tol8)) then
                if((ib_sum==jb).and.(abs(rhotwg_ki(1,jb)-1_dp)>0.01_dp))  then
-                 write(std_out,*) "Warning2: oscillator strengh",rhotwg_ki(1,jb)
-               else
-                 write(std_out,*) "Warning1: oscillator strengh",rhotwg_ki(1,jb)
-               endif
+                 write(std_out,*) "Warning: precision is low, oscillator strengh should be one and is :",rhotwg_ki(1,jb)
+               !else
+               !  write(std_out,*) "Warning1: oscillator strengh",rhotwg_ki(1,jb)
+               endif 
              endif
            endif
            if (Psps%usepaw==1.and.pawcross==1) then ! Add paw cross term

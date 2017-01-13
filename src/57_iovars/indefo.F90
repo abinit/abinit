@@ -97,6 +97,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
  dtsets(0)%shiftk(:,:)=half
  dtsets(0)%tolsym=tol8
  dtsets(0)%znucl(:)=zero
+ dtsets(0)%ucrpa=0
  dtsets(0)%usedmft=0
 
  paral_atom_default=0
@@ -202,6 +203,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%dmft_read_occnd=0
    dtsets(idtset)%dmft_rslf=0
    dtsets(idtset)%dmft_solv=5
+   if(dtsets(idtset)%ucrpa>0.and.dtsets(idtset)%usedmft==1) dtsets(idtset)%dmft_solv=0
    dtsets(idtset)%dmft_t2g=0
    dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
@@ -325,6 +327,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%gwmem=11
    dtsets(idtset)%gwpara=2
    dtsets(idtset)%gwrpacorr=0
+   dtsets(idtset)%gwfockmix=0.25_dp
    dtsets(idtset)%gwls_sternheimer_kmax=1
    dtsets(idtset)%gwls_model_parameter=1.0_dp
    dtsets(idtset)%gwls_second_model_parameter=0.0_dp
@@ -694,7 +697,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%tolwfr=zero
    dtsets(idtset)%tsmear=0.01_dp
 !  U
-   dtsets(idtset)%ucrpa=0
    dtsets(idtset)%ucrpa_bands(:)=-1
    dtsets(idtset)%ucrpa_window(:)=-1.0_dp
    dtsets(idtset)%upawu(:,:)=zero
