@@ -1972,15 +1972,14 @@ end subroutine get_ng0sh
 
 subroutine getkptnorm_bycomponent(vect,factor,norm)
 
-!Arguments ------------------------------------
-!scalars
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'getkptnorm_bycomponent'
 !End of the abilint section
 
+!Arguments ------------------------------------
+!scalars
  integer,intent(in) :: factor
  real(dp),intent(out):: norm
 !arrays

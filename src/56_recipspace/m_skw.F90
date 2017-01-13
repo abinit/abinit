@@ -193,7 +193,7 @@ type(skw_t) function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_
 
  new%cplex = cplex; new%nkpt = nkpt; new%nsppol = nsppol
 
- ! Get list of point group operations.
+ ! Get point group operations.
  !call crystal_point_group(cryst, new%ptg_nsym, new%ptg_symrel, new%ptg_symrec, has_inversion)
 
  ! -----------------------------------------------
