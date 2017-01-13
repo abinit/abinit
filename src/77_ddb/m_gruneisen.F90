@@ -47,7 +47,7 @@ MODULE m_gruneisen
  use m_fstrings,            only : sjoin, itoa, ltoa, ftoa, strcat
  use m_numeric_tools,       only : central_finite_diff, arth
  use m_kpts,                only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt
- use m_bz_mesh,             only : kpath_t, kpath_init, kpath_free, kpath_print
+ use m_bz_mesh,             only : kpath_t, kpath_new, kpath_free, kpath_print
  use m_anaddb_dataset,      only : anaddb_dataset_type
  use m_dynmat,              only : massmult_and_breaksym
 
@@ -75,25 +75,25 @@ MODULE m_gruneisen
     ! Number of volumes.
 
    integer :: iv0
-    ! Index of the DDB file associated to the equilibrium volume
+    ! Index of the DDB file corresponding to the equilibrium volume V0.
 
    real(dp) :: v0
     ! Equilibrium volume.
 
    real(dp) :: delta_vol
-    ! Uniform grid spacing for finite difference
+    ! Uniform grid spacing for finite difference.
 
    type(crystal_t),allocatable :: cryst_vol(:)
     ! cryst_vol(nvols)
-    ! crystalline structure for the different volumes
+    ! crystalline structure for the different volumes.
 
    type(ddb_type),allocatable :: ddb_vol(:)
     ! dbb_vol(nvols)
-    ! DDB objects for the different volumes
+    ! DDB objects for the different volumes.
 
    type(ifc_type),allocatable :: ifc_vol(:)
     ! ifc_vol(nvols)
-    ! interatomic force constants for the different volumes
+    ! interatomic force constants for the different volumes.
 
  end type gruns_t
 
@@ -241,11 +241,13 @@ end function gruns_new
 !!
 !!  The Grunesein parameter is given by:
 !!
-!!     gamma = - (V / w) d w / dV
+!!     gamma(q,nu) = - (V / w(q,nu)) dw(q,nu)/dV
 !!
-!!  Using w*2 = <u|D|u> and the Hellman-Feynmann theorem, one obtains:
+!!  Using w*2 = <u|D|u> and the Hellmann-Feynmann theorem, one obtains:
 !!
-!!     gamma = - (V / 2 w**2) <u|dD/dV|u>
+!!     gamma(q,nu) = - (V / 2 w(q,nu)**2) <u(q,nu)|dD(q)/dV|u(q,nu)>
+!!
+!!  The derivative dD/dV is computed via central finite difference.
 !!
 !! PARENTS
 !!
@@ -465,8 +467,8 @@ end subroutine gruns_qpath
 !!  prefix=Prefix for output files.
 !!  dosdeltae=Step for the frequency mesh.
 !!  ngqpt(3)=q-mesh divisions
-!!  nqshift=Number of shifts used to generated the ab-initio q-mesh.
-!!  qshift(3,nqshift)=The shifts of the ab-initio q-mesh.
+!!  nshiftq=Number of shifts used to generated the ab-initio q-mesh.
+!!  shiftq(3,nshiftq)=The shifts of the ab-initio q-mesh.
 !!  ncid=netcdf file id.
 !!  comm=MPI communicator
 !!
@@ -478,7 +480,7 @@ end subroutine gruns_qpath
 !!
 !! SOURCE
 
-subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nqshift, qshift, ncid, comm)
+subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nshiftq, shiftq, ncid, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -492,13 +494,13 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nqshift, qshift, ncid, c
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nqshift,ncid,comm
+ integer,intent(in) :: nshiftq,ncid,comm
  real(dp),intent(in) :: dosdeltae !,dossmear
  type(gruns_t),intent(in) :: gruns
  character(len=*),intent(in) :: prefix
 !arrays
  integer,intent(in) :: ngqpt(3)
- real(dp),intent(in) :: qshift(3,nqshift)
+ real(dp),intent(in) :: shiftq(3,nshiftq)
 
 !Local variables-------------------------------
 !scalars
@@ -530,11 +532,11 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nqshift, qshift, ncid, c
  end do
 
  ! Get IBZ and BZ.
- call kpts_ibz_from_kptrlatt(gruns%cryst_vol(gruns%iv0), qptrlatt, qptopt1, nqshift, qshift, &
+ call kpts_ibz_from_kptrlatt(gruns%cryst_vol(gruns%iv0), qptrlatt, qptopt1, nshiftq, shiftq, &
    nqibz, qibz, wtq, nqbz, qbz)
 
  ! Build tetrahedra
- tetra = tetra_from_kptrlatt(gruns%cryst_vol(gruns%iv0), qptopt1, qptrlatt, nqshift, qshift, nqibz, qibz, msg, ierr)
+ tetra = tetra_from_kptrlatt(gruns%cryst_vol(gruns%iv0), qptopt1, qptrlatt, nshiftq, shiftq, nqibz, qibz, msg, ierr)
  if (ierr /= 0) MSG_ERROR(msg)
 
  ABI_CALLOC(wvols_qibz, (gruns%natom3, gruns%nvols, nqibz))
@@ -600,7 +602,7 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nqshift, qshift, ncid, c
    if (open_file(strcat(prefix, "_GRUNS_DOS"), msg, newunit=unt, form="formatted", action="write") /= 0) then
      MSG_ERROR(msg)
    end if
-   write(unt,'(a)')'# Phonon density of states, Gruneseinen DOS and phonon group velocity DOS'
+   write(unt,'(a)')'# Phonon density of states, Gruneisen DOS and phonon group velocity DOS'
    write(unt,'(a)')"# Energy in Hartree, DOS in states/Hartree"
    write(unt,'(a,i0)')'# Tetrahedron method with nqibz= ',nqibz
    write(unt,"(a,f8.5)")"# Average Gruneisen parameter:", gavg
@@ -619,11 +621,14 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nqshift, qshift, ncid, c
  if (my_rank == master .and. ncid /= nctk_noid) then
    ncerr = nctk_def_dims(ncid, [ &
      nctkdim_t("gruns_nvols", gruns%nvols), nctkdim_t("gruns_nqibz", nqibz), &
+     nctkdim_t('gruns_nshiftq', nshiftq), &
      nctkdim_t('number_of_phonon_modes', gruns%natom3), &
      nctkdim_t('gruns_nomega', nomega)], defmode=.True.)
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_arrays(ncid, [ &
+    nctkarr_t("gruns_qptrlatt", "int", "three, three"), &
+    nctkarr_t("gruns_shiftq", "dp", "three, gruns_nshiftq"), &
     nctkarr_t("gruns_qibz", "dp", "three, gruns_nqibz"), &
     nctkarr_t("gruns_wtq", "dp", "gruns_nqibz"), &
     nctkarr_t("gruns_gvals_qibz", "dp", "number_of_phonon_modes, gruns_nqibz"), &
@@ -640,6 +645,8 @@ subroutine gruns_qmesh(gruns, prefix, dosdeltae, ngqpt, nqshift, qshift, ncid, c
 
    ! Write data.
    NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_qptrlatt"), qptrlatt))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_shiftq"), shiftq))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_qibz"), qibz))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_wtq"), wtq))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gruns_gvals_qibz"), gvals_qibz))
@@ -804,23 +811,23 @@ subroutine gruns_anaddb(inp, prefix, comm)
  end if
 #endif
 
- ! Compute grunesein parameters on q-mesh
+ ! Compute grunesein parameters on the q-mesh.
  if (all(inp%ng2qpt /= 0)) then
    call gruns_qmesh(gruns, prefix, inp%dosdeltae, inp%ng2qpt, 1, inp%q2shft, ncid, comm)
  else
    MSG_WARNING("Cannot compute Grunesein parameters on q-mesh because ng2qpt == 0")
  end if
 
- ! Compute grunesein on q-path
+ ! Compute grunesein on the q-path.
  if (inp%nqpath /= 0) then
-   call kpath_init(qpath, inp%qpath, gruns%cryst_vol(iv0)%gprimd, inp%ndivsm)
+   qpath = kpath_new(inp%qpath, gruns%cryst_vol(iv0)%gprimd, inp%ndivsm)
    call gruns_qpath(gruns, prefix, qpath, ncid, comm)
    call kpath_free(qpath)
  else
    MSG_WARNING("Cannot compute Grunesein parameters on q-path because nqpath == 0")
  end if
 
- ! Compute speed of sound for V0
+ ! Compute speed of sound for V0.
  if (inp%vs_qrad_tolms(1) > zero) then
    call ifc_speedofsound(gruns%ifc_vol(iv0), gruns%cryst_vol(iv0), inp%vs_qrad_tolms, ncid, comm)
  end if

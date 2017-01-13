@@ -54,7 +54,7 @@ MODULE m_skw
 !!  reciprocal lattice and satisfying F(k) = F(Sk) for each rotation S
 !!  belonging to the point group of the crystal. For readability reason,
 !!  the names of the variables are chosen assuming we are interpolating electronic eigenvalues
-!!  but the same object can be use to interpolate phonons as well. Just use nsppol=1 and nband = 3 * natom
+!!  but the same object can be used to interpolate phonons as well. Just use nsppol=1 and nband = 3 * natom
 !!
 !! SOURCE
 
@@ -71,13 +71,13 @@ MODULE m_skw
    ! Number of real-space lattice points.
 
   integer :: nkpt
-   ! Number of ab-initio k-points
+   ! Number of ab-initio k-points.
 
   integer :: band_block(2)
-   ! Initial and final band index treated by this processor
+   ! Initial and final band index treated by this processor.
 
   integer :: spin_block(2)
-   ! Initial and final spin index treated by this processor
+   ! Initial and final spin index treated by this processor.
 
   integer :: nsppol
    ! Number of independent spin polarizations.

@@ -417,7 +417,6 @@ subroutine print_fofr_xyzri(ri_mode,nx,ny,nz,ldx,ldy,ldz,fofr,rprimd,conv_fact,u
 !scalars
  integer :: ount,ix,iy,iz
  real(dp) :: xnow,ynow,znow,my_cfact
-!arrays
 
 ! *************************************************************************
 
@@ -729,7 +728,7 @@ subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
        fulltoirred(ikgrid) = kptrank_t%invrank(symkptrank)
 
        if (fulltoirred(ikgrid) < 1) then
-         write(msg,'(a,3es16.8,2a,I8,2a)')&
+         write(msg,'(a,3es16.8,2a,i0,2a)')&
 &         'kpt = ',kptgrid,ch10,' with rank ', symkptrank, ch10,&
 &         'has no symmetric among the k-points used in the GS calculation '
          ierr=ierr + 1

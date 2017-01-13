@@ -665,7 +665,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  call ifc_free(ifc_tmp)
 
- ! Compute min/max omega with ab-initio q-mesh.
+ ! Compute min/max ph frequency with ab-initio q-mesh.
  ifc%omega_minmax(1) = huge(one); ifc%omega_minmax(2) = -huge(one)
  do iq_ibz=1,nqibz
    if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
@@ -1005,12 +1005,12 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq)
  end do
 
  if (ifc%dipdip == 1) then
-   !enough = enough + 1
-   !if (enough <= 5)  MSG_WARNING("phonon velocities with dipdip==1 not yet tested.")
    ! Add the gradient of the non-analytical part.
    ! Note that we dddq is in cartesian cordinates.
    ! For the time being, the gradient is computed with finite difference and step hh.
    ! TODO: should generalize ewald9 to compute dq.
+   !enough = enough + 1
+   !if (enough <= 5)  MSG_WARNING("phonon velocities with dipdip==1 not yet tested.")
    hh = 0.01_dp
    do ii=1,3
      do jj=-1,1,2
@@ -1287,9 +1287,6 @@ end subroutine ifc_speedofsound
 !! wghatm(natom,natom,nrpt) = Weights associated to a pair of atoms and to a R vector
 !!  with the required cutoff applied.
 !!
-!! NOTES
-!! This routine should be executed by one processor only
-!!
 !! PARENTS
 !!      m_ifc
 !!
@@ -1353,7 +1350,7 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,wghatm
        index=list(ii)
        irpt=(index-1)/natom+1
        ib=index-natom*(irpt-1)
-       wghatm(ia,ib,irpt)=0._dp
+       wghatm(ia,ib,irpt)=zero
      end do
    end if
 
@@ -1364,7 +1361,7 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,wghatm
        if (wkdist(ii) < rifcsph) cycle
        irpt=(index-1)/natom+1
        ib=index-natom*(irpt-1)
-       wghatm(ia,ib,irpt)=0._dp
+       wghatm(ia,ib,irpt)=zero
      end do
    end if
 
@@ -2461,7 +2458,7 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
  ABI_CALLOC(freqs_qibz, (3*cryst%natom, nqibz))
 
  do iq_ibz=1,nqibz
-   if (mod(iq_ibz, nprocs) /= my_rank) cycle
+   if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi parallelism.
    call ifc_fourq(ifc, cryst, qibz(:,iq_ibz), freqs_qibz(:,iq_ibz), displ_cart)
  end do
  call xmpi_sum(freqs_qibz, comm, ierr)
@@ -2981,7 +2978,7 @@ end function ifc_build_skw
 
 subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, test_dwdq)
 
- use m_bz_mesh,  only : kpath_t, kpath_init, kpath_free
+ use m_bz_mesh,  only : kpath_t, kpath_new, kpath_free
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -3026,7 +3023,7 @@ subroutine ifc_test_phinterp(ifc, cryst, ngqpt, nshiftq, shiftq, ords, comm, tes
 ! *********************************************************************
 
  bounds = reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5])
- call kpath_init(qpath, bounds, cryst%gprimd, 10)
+ qpath = kpath_new(bounds, cryst%gprimd, 10)
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  natom3 = 3 * cryst%natom

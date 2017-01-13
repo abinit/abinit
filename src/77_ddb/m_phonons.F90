@@ -47,7 +47,7 @@ module m_phonons
  use defs_abitypes,     only : dataset_type
  use m_dynmat,          only : gtdyn9, dfpt_phfrq
  use m_crystal,         only : crystal_t
- use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_init, kpath_free
+ use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new, kpath_free
  use m_ifc,             only : ifc_type, ifc_fourq
  use m_anaddb_dataset,  only : anaddb_dataset_type
  use m_kpts,            only : kpts_ibz_from_kptrlatt
@@ -2341,7 +2341,8 @@ subroutine phonons_write_gnuplot(prefix, natom, nqpts, qpts, phfreqs, qptbounds)
 !Local variables-------------------------------
 !scalars
  integer :: unt,iq,ii,start,nqbounds,gpl_unt
- character(len=500) :: msg,fmt,datafile
+ character(len=500) :: msg,fmt
+ character(len=fnlen) :: datafile
 !arrays
  integer :: g0(3)
  integer,allocatable :: bounds2qpt(:)
@@ -2489,7 +2490,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  natom = cryst%natom
 
- call kpath_init(qpath, dtset%ph_qpath(:,1:dtset%ph_nqpath), cryst%gprimd, dtset%ph_ndivsm)
+ qpath = kpath_new(dtset%ph_qpath(:,1:dtset%ph_nqpath), cryst%gprimd, dtset%ph_ndivsm)
  nqpts = qpath%npts
 
  ABI_CALLOC(phfrqs, (3*natom,nqpts))

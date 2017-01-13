@@ -246,9 +246,9 @@ type,public :: kpath_t
 
  end type kpath_t
 
- public :: kpath_init       ! Construct a new path
+ public :: kpath_new        ! Construct a new path
  public :: kpath_free       ! Free memory
- public :: make_path        ! Construct a normalized path.
+ public :: make_path        ! Construct a normalized path. TODO: Remove
  public :: kpath_print      ! Print the path.
 !!***
 
@@ -2014,6 +2014,7 @@ end subroutine getkptnorm_bycomponent
 !!
 !! FUNCTION
 !!  Generate a normalized path given the extrema.
+!!  See also kpath_t and kpath_new (recommended API).
 !!
 !! INPUTS
 !!  nbounds=Number of extrema defining the path.
@@ -2030,10 +2031,7 @@ end subroutine getkptnorm_bycomponent
 !!    contain the path in reduced coordinates.
 !!
 !! PARENTS
-!!      m_bz_mesh,m_nesting,m_phgamma,m_phonons,mkph_linwid
-!!
-!! TODO:
-!!   Replace this routine with kpath_t
+!!      m_bz_mesh,m_nesting,m_phonons,mkph_linwid
 !!
 !! CHILDREN
 !!
@@ -3258,9 +3256,9 @@ end function box_len
 
 !----------------------------------------------------------------------
 
-!!****f* m_bz_mesh/kpath_init
+!!****f* m_bz_mesh/kpath_new
 !! NAME
-!! kpath_init
+!! kpath_new
 !!
 !! FUNCTION
 !!  Create a normalized path given the extrema.
@@ -3280,20 +3278,19 @@ end function box_len
 !!
 !! SOURCE
 
-subroutine kpath_init(Kpath,bounds,gprimd,ndiv_small)
+type(kpath_t) function kpath_new(bounds,gprimd,ndiv_small) result(kpath)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'kpath_init'
+#define ABI_FUNC 'kpath_new'
 !End of the abilint section
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- type(kpath_t),intent(out) :: Kpath
  integer,intent(in) :: ndiv_small
 !!arrays
  real(dp),intent(in) :: bounds(:,:),gprimd(3,3)
@@ -3337,7 +3334,7 @@ subroutine kpath_init(Kpath,bounds,gprimd,ndiv_small)
    kpath%bounds2kpt(ii+1) = sum(kpath%ndivs(:ii)) + 1
  end do
 
-end subroutine kpath_init
+end function kpath_new
 !!***
 
 !----------------------------------------------------------------------

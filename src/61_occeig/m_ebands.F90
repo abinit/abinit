@@ -4988,7 +4988,8 @@ subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
 !Local variables-------------------------------
 !scalars
  integer :: unt,gpl_unt,ik,spin,band,ii,start,nkbounds
- character(len=500) :: msg,fmt,datafile
+ character(len=500) :: msg,fmt
+ character(len=fnlen) :: datafile
 !arrays
  integer :: g0(3)
  integer,allocatable :: bounds2kpt(:)
