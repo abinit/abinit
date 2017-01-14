@@ -59,7 +59,7 @@ MODULE m_ebands
  use m_pptools,        only : printbxsf
  use m_nesting,        only : mknesting
  use m_crystal,        only : crystal_t
- use m_bz_mesh,        only : isamek
+ use m_bz_mesh,        only : isamek, kpath_t, kpath_new, kpath_free
  use m_fftcore,        only : get_kg
 
  implicit none
@@ -97,7 +97,9 @@ MODULE m_ebands
  public :: ebands_write_nesting    ! Calculate the nesting function and output data to file.
  public :: ebands_expandk          ! Build a new ebands_t in the full BZ.
  public :: ebands_get_jdos         ! Compute the joint density of states.
- public :: ebands_interp
+ public :: ebands_interp_kmesh     ! Interpolate energies on a k-mesh.
+ public :: ebands_interp_kpath     ! Interpolate energies on a k-path.
+ public :: ebands_test_interpolator
 
  public :: ebands_prtbltztrp          ! Output files for BoltzTraP code.
  public :: ebands_prtbltztrp_tau_out  ! Output files for BoltzTraP code,
@@ -4007,15 +4009,25 @@ end subroutine ebspl_free
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/ebands_interp
+!!****f* m_ebands/ebands_interp_kmesh
 !! NAME
-!! ebands_interp
+!! ebands_interp_kmesh
 !!
 !! FUNCTION
+!!  Interpolate energies on a k-mesh.
 !!
 !! INPUTS
+!!  ebands<ebands_t> = Object with input energies.
+!!  cryst<crystal_t> = Crystalline structure.
+!!  itype
+!!  ords(3)
+!!  intp_kptrlatt(3,3) = New k-mesh
+!!  intp_nshiftk= Number of shifts in new k-mesh.
+!!  intp_shiftk(3,intp_nshiftk) = Shifts in new k-mesh.
+!!  comm=MPI communicator
 !!
 !! OUTPUT
+!!  New ebands_t object with interpolated energies.
 !!
 !! PARENTS
 !!
@@ -4023,13 +4035,13 @@ end subroutine ebspl_free
 !!
 !! SOURCE
 
-type(ebands_t) function ebands_interp(ebands, cryst, itype, ords, intp_kptrlatt, intp_nshiftk, intp_shiftk, comm) result(new)
 
+function ebands_interp_kmesh(ebands, cryst, itype, ords, intp_kptrlatt, intp_nshiftk, intp_shiftk, comm) result(new)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ebands_interp'
+#define ABI_FUNC 'ebands_interp_kmesh'
 !End of the abilint section
 
  implicit none
@@ -4040,6 +4052,7 @@ type(ebands_t) function ebands_interp(ebands, cryst, itype, ords, intp_kptrlatt,
  character(len=*),intent(in) :: itype
  type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
+ type(ebands_t) :: new
 !arrays
  integer,intent(in) :: ords(3),intp_kptrlatt(3,3)
  real(dp),intent(in) :: intp_shiftk(3,intp_nshiftk)
@@ -4123,7 +4136,130 @@ type(ebands_t) function ebands_interp(ebands, cryst, itype, ords, intp_kptrlatt,
  call ebspl_free(ebspl)
  call skw_free(skw)
 
-end function ebands_interp
+end function ebands_interp_kmesh
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/ebands_interp_kpath
+!! NAME
+!! ebands_interp_kpath
+!!
+!! FUNCTION
+!!  Interpolate energies on a k-path
+
+!! INPUTS
+!!  ebands<ebands_t> = Object with input energies.
+!!  cryst<crystal_t> = Crystalline structure.
+!!  itype
+!!  ords(3)
+!!  kpath<kpath_t> = Object describing the k-path
+!!  comm=MPI communicator
+!!
+!! OUTPUT
+!!  New ebands_t object with interpolated energies.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type(ebands_t) function ebands_interp_kpath(ebands, cryst, itype, ords, kpath, comm) result(new)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ebands_interp_kpath'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: comm
+ character(len=*),intent(in) :: itype
+ type(ebands_t),intent(in) :: ebands
+ type(crystal_t),intent(in) :: cryst
+ type(kpath_t),intent(in) :: kpath
+!arrays
+ integer,intent(in) :: ords(3)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: new_nshiftk=1
+ integer :: ik_ibz,spin,new_bantot,new_mband,cplex
+ integer :: nprocs,my_rank,cnt,ierr,band,new_nkibz
+ type(ebspl_t) :: ebspl
+ type(skw_t) :: skw
+!arrays
+ integer,parameter :: new_kptrlatt(3,3)=0
+ integer,allocatable :: new_istwfk(:),new_nband(:,:),new_npwarr(:)
+ real(dp),parameter :: new_shiftk(3,1) = zero
+ real(dp),allocatable :: new_wtk(:),new_doccde(:),new_eig(:),new_occ(:)
+
+! *********************************************************************
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ ! Initialize new ebands_t.
+ new_nkibz = kpath%npts
+ ABI_MALLOC(new_istwfk, (new_nkibz))
+ new_istwfk = 1
+ ABI_MALLOC(new_nband, (new_nkibz, ebands%nsppol))
+ new_nband = ebands%mband
+ ABI_MALLOC(new_npwarr, (new_nkibz))
+ new_npwarr = maxval(ebands%npwarr)
+ new_bantot = sum(new_nband); new_mband = maxval(new_nband)
+ ABI_MALLOC(new_doccde, (new_bantot))
+ ABI_MALLOC(new_eig, (new_bantot))
+ ABI_MALLOC(new_occ, (new_bantot))
+ ABI_CALLOC(new_wtk, (new_nkibz))
+
+ call ebands_init(new_bantot,new,ebands%nelect,new_doccde,new_eig,new_istwfk,kpath%points,&
+   new_nband,new_nkibz,new_npwarr,ebands%nsppol,ebands%nspinor,ebands%tphysel,ebands%tsmear,&
+   ebands%occopt,new_occ,new_wtk,&
+   ebands%charge, ebands%kptopt, new_kptrlatt, new_nshiftk, new_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
+
+ ABI_FREE(new_wtk)
+ ABI_FREE(new_istwfk)
+ ABI_FREE(new_nband)
+ ABI_FREE(new_npwarr)
+ ABI_FREE(new_doccde)
+ ABI_FREE(new_eig)
+ ABI_FREE(new_occ)
+
+ ! Build (B-spline|SKW) object for all bands
+ select case (itype)
+ case ("bspline")
+   ebspl = ebspl_new(ebands, cryst, ords, [0,0], [0,0])
+ case ("skw")
+   cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
+   skw = skw_new(cryst, cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, [0, 0], [0, 0], comm)
+ case default
+   MSG_ERROR(sjoin("Wrong itype:", itype))
+ end select
+
+ ! Interpolate eigenvalues.
+ new%eig = zero; cnt = 0
+ do spin=1,new%nsppol
+   do ik_ibz=1,new%nkpt
+     do band=1,new%nband(ik_ibz+(spin-1)*new%nkpt)
+       cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle  ! Mpi parallelism.
+       if (itype == "bspline") then
+         call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
+       else
+         call skw_eval_bks(skw, cryst, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
+       end if
+     end do
+   end do
+ end do
+ call xmpi_sum(new%eig, comm, ierr)
+
+ call ebspl_free(ebspl)
+ call skw_free(skw)
+
+end function ebands_interp_kpath
 !!***
 
 !----------------------------------------------------------------------
@@ -5079,6 +5215,96 @@ subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
  end if
 
 end subroutine ebands_write_gnuplot
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ebands/ebands_test_interpolator
+!! NAME
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!  dtset<dataset_type>=Abinit dataset
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ebands_test_interpolator(ebands, dtset, cryst, prefix, comm)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ebands_test_interpolator'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(ebands_t),intent(in) :: ebands
+ type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: comm
+ character(len=*),intent(in) :: prefix
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master=0
+ integer :: my_rank,nshiftk_fine
+ type(ebands_t) :: ebands_bspl
+ type(kpath_t) :: kpath
+ !character(len=500) :: msg
+!arrays
+ integer :: kptrlatt_fine(3,3)
+ real(dp),allocatable :: shiftk_fine(:,:)
+
+! *********************************************************************
+
+ my_rank = xmpi_comm_rank(comm)
+
+ ! Interpolate bands on dense k-mesh.
+ kptrlatt_fine = reshape([4,0,0,0,4,0,0,0,4], [3,3])
+ kptrlatt_fine = 4 * kptrlatt_fine; nshiftk_fine = 1
+ ABI_CALLOC(shiftk_fine, (3,nshiftk_fine))
+
+ ! Interpolate bands on k-path.
+ kpath = kpath_new( &
+    reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5]), &
+    cryst%gprimd, 20)
+
+ !ebands_bspl = ebands_interp_kmesh(ebands, cryst, "bspline", [3,3,3], kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+ !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
+ ebands_bspl = ebands_interp_kpath(ebands, cryst, "bspline", [3,3,3], kpath, comm)
+ if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(prefix, "_BSPLINE"))
+ call ebands_free(ebands_bspl)
+
+ !ebands_bspl = ebands_interp_kmesh(ebands, cryst, "skw", [3,3,3], kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+ !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
+ ebands_bspl = ebands_interp_kpath(ebands, cryst, "skw", [3,3,3], kpath, comm)
+ if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(prefix, "_SKW"))
+
+ ABI_FREE(shiftk_fine)
+
+ !edos = ebands_get_edos(ebands_bspl, cryst, edos_intmeth, edos_step, edos_broad, comm)
+ !call ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
+ !if (my_rank == master) then
+ !  call edos_print(edos, unit=ab_out)
+ !  path = strcat(prefix, "_BSPLINE_EDOS")
+ !  call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
+ !  call edos_write(edos, path)
+ !end if
+ !call edos_free(edos)
+
+ call ebands_free(ebands_bspl)
+ call kpath_free(kpath)
+
+end subroutine ebands_test_interpolator
 !!***
 
 end module m_ebands

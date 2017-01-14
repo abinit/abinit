@@ -350,7 +350,8 @@ type(skw_t) function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_
 
      !write(std_out,fmt)"-- ref ", eig(bstart:bstop,ik,spin) * Ha_meV
      !write(std_out,fmt)"-- int ", oeig * Ha_meV
-     write(std_out,*)"SKW maxerr:", maxval(eig(bstart:bstop,ik,spin) - oeig) * Ha_meV, " [meV], ", trim(ktoa(kpts(:,ik)))
+     write(std_out,"(a,es12.4,2a))") &
+       "SKW maxerr: ", maxval(eig(bstart:bstop,ik,spin) - oeig) * Ha_meV, " [meV], kpt: ", trim(ktoa(kpts(:,ik)))
      !call vdiff_print(vdiff_eval(1, bcount, eig(bstart:bstop,ik,spin), oeig, one))
    end do
  end do
@@ -362,9 +363,11 @@ type(skw_t) function skw_new(cryst, cplex, nband, nkpt, nsppol, kpts, eig, band_
  !mare = list2(1); mae = list(2)
  cnt = bcount * nkpt * nsppol
  mare = mare / cnt; mae = mae / cnt
- write(std_out,*)"MARE: ",mare, "MAE:", mae, "[meV]"
+ write(std_out,"(2(a,es12.4))")"MARE: ",mare, ", MAE: ", mae, "[meV]"
  !if (mare > .or. mae > ) then
- !  MSG_WARNING("Large error detected in SKW interpolation!")
+ !   msg = "Large error detected in SKW interpolation!"
+ !   call wrtout(ab_out, msg)
+ !  MSG_WARNING(msg)
  !end if
 
  if (my_rank == master) call skw_print(new, std_out)
@@ -412,9 +415,10 @@ subroutine skw_print(skw, unt)
 
 ! *********************************************************************
 
- write(unt,"(a)")sjoin("nsppol", itoa(skw%nsppol), "cplex:", itoa(skw%cplex))
- write(unt,"(a)")sjoin("Number of real-space lattice points:", itoa(skw%nr))
+ write(unt,"(a)")" === Shankland-Koelling-Wood Fourier interpolation scheme ==="
+ write(unt,"(a)")sjoin("nsppol", itoa(skw%nsppol), ", cplex:", itoa(skw%cplex))
  write(unt,"(a)")sjoin("Number of ab-initio k-points:", itoa(skw%nkpt))
+ write(unt,"(a)")sjoin("Number of real-space lattice points:", itoa(skw%nr))
 
 end subroutine skw_print
 !!***

@@ -281,7 +281,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(ebands_t) :: ebands
  type(epjdos_t) :: dos
  type(plowannier_type) :: wan
- !type(skw_t) :: skw
 
 ! *************************************************************************
 
@@ -1157,6 +1156,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (dtset%prtbltztrp == 1 .and. me==master) then
    call ebands_prtbltztrp(ebands, crystal, dtfil%filnam_ds(4))
  end if
+
+ !call ebands_test_interpolator(ebands, dtset, crystal, dtfil%filnam_ds(4), spacecomm)
 
  call crystal_free(crystal)
  call ebands_free(ebands)

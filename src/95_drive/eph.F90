@@ -91,7 +91,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_phonons
  use m_nctk
  use m_wfk
- use m_skw
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -101,6 +100,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
  use m_mpinfo,          only : destroy_mpi_enreg
+ !use m_bz_mesh,         only : kpath_t, kpath_free, kpath_new
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
  use m_pawtab,          only : pawtab_type, pawtab_print, pawtab_get_lsize
@@ -157,8 +157,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  character(len=fnlen) :: ddk_path(3)
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
- type(ebands_t) :: ebands, ebands_kq, ebands_bspl
- type(skw_t) :: skw
+ type(ebands_t) :: ebands, ebands_kq
  type(edos_t) :: edos
  type(ddb_type) :: ddb
  type(dvdb_t) :: dvdb
@@ -178,10 +177,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  !type(pawfgrtab_type),allocatable :: pawfgrtab(:)
  !type(paw_ij_type),allocatable :: paw_ij(:)
  !type(paw_an_type),allocatable :: paw_an(:)
-
- integer :: nshiftk_fine
- integer :: kptrlatt_fine(3,3)
- real(dp),allocatable :: shiftk_fine(:,:)
 
 !************************************************************************
 
@@ -394,38 +389,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  if (.False.) then
  !if (.True.) then
    !call ebands_set_interpolator(ebands, cryst, bstart, bcount, mode, espline_ords, eskw_ratio, comm)
-   !call ebands_test_intepolator(ebands, dtset, dtfil%filnam_ds(4), comm)
-   ! Test the interpolation of electronic bands.
-   !skw = skw_new(cryst, 1,  ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, [0, 0], [0, 0], comm)
-   !call skw_free(skw)
-   !stop
-
-   ! Interpolate bands on dense k-mesh.
-   kptrlatt_fine = reshape([4,0,0,0,4,0,0,0,4], [3,3])
-   kptrlatt_fine = 4 * kptrlatt_fine; nshiftk_fine = 1
-   ABI_CALLOC(shiftk_fine, (3,nshiftk_fine))
-   ebands_bspl = ebands_interp(ebands, cryst, "bspline", [3,3,3], kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
-   !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
-   if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(dtfil%filnam_ds(4), "_BSPLINE"))
-
-   call ebands_free(ebands_bspl)
-   ebands_bspl = ebands_interp(ebands, cryst, "skw", [3,3,3], kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
-   !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
-   if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(dtfil%filnam_ds(4), "_SKW"))
+   call ebands_test_interpolator(ebands, dtset, cryst, dtfil%filnam_ds(4), comm)
    MSG_ERROR("interpolation done")
-   ABI_FREE(shiftk_fine)
-
-   edos = ebands_get_edos(ebands_bspl, cryst, edos_intmeth, edos_step, edos_broad, comm)
-   !call ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
-
-   if (my_rank == master) then
-     call edos_print(edos, unit=ab_out)
-     path = strcat(dtfil%filnam_ds(4), "_BSPLINE_EDOS")
-     call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
-     call edos_write(edos, path)
-   end if
-   call edos_free(edos)
-   call ebands_free(ebands_bspl)
  end if
 
  call cwtime(cpu,wall,gflops,"stop")

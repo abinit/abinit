@@ -637,7 +637,7 @@ program anaddb
 
    ! The frequency-dependent dielectric tensor (and oscillator strength).
    if (inp%dieflag==1)then
-     write(message, '(a,a,a,a,a,a)' )&
+     write(message, '(6a)' )&
 &     ' the frequency-dependent dielectric tensor (and also once more',ch10,&
 &     ' the phonons at gamma - without non-analytic part )',ch10,ch10,&
 &     ' The frequency-dependent dielectric tensor'
