@@ -6,16 +6,24 @@
 !! This directory contains routines used to treat the effective potential within MULTIBINIT,
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2015 ABINIT group (MG)
+!! Copyright (C) 2016-2016 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! CHILDREN
-!! ddb_to_effective_potential.F90
-!! strain_phonon_coupling.F90
-!! effpot2xml.F90
+!! compute_anharmonics.F90
 !! init10.F90
+!! interfaces_78_effpot.F90
+!! m_anharmonics_terms.F90
+!! m_effective_potential.F90
+!! m_effective_potential_file.F90
+!! m_fit_polynomial_coeff.F90
+!! m_harmonics_terms.F90
+!! m_monte_carlo.F90
+!! m_multibinit_dataset.F90
+!! m_polynomial_coeff.F90
+!! m_polynomial_term.F90
 !!
 !!***
