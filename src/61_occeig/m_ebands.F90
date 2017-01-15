@@ -4112,7 +4112,8 @@ function ebands_interp_kmesh(ebands, cryst, itype, ords, intp_kptrlatt, intp_nsh
    ebspl = ebspl_new(ebands, cryst, ords, [0,0], [0,0])
  case ("skw")
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
-   skw = skw_new(cryst, cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, [0, 0], [0, 0], comm)
+   skw = skw_new(cryst, ords(1), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, &
+                [0, 0], [0, 0], comm)
  case default
    MSG_ERROR(sjoin("Wrong itype:", itype))
  end select
@@ -4235,7 +4236,8 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, itype, ords, kpath, c
    ebspl = ebspl_new(ebands, cryst, ords, [0,0], [0,0])
  case ("skw")
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
-   skw = skw_new(cryst, cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, [0, 0], [0, 0], comm)
+   skw = skw_new(cryst, ords(1), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, &
+                 [0, 0], [0, 0], comm)
  case default
    MSG_ERROR(sjoin("Wrong itype:", itype))
  end select
@@ -5261,7 +5263,7 @@ subroutine ebands_test_interpolator(ebands, dtset, cryst, prefix, comm)
  type(kpath_t) :: kpath
  !character(len=500) :: msg
 !arrays
- integer :: kptrlatt_fine(3,3)
+ integer :: kptrlatt_fine(3,3),bspl_ords(3),skw_ords(3)
  real(dp),allocatable :: shiftk_fine(:,:)
 
 ! *********************************************************************
@@ -5278,15 +5280,20 @@ subroutine ebands_test_interpolator(ebands, dtset, cryst, prefix, comm)
     reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5]), &
     cryst%gprimd, 20)
 
- !ebands_bspl = ebands_interp_kmesh(ebands, cryst, "bspline", [3,3,3], kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
- !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
- ebands_bspl = ebands_interp_kpath(ebands, cryst, "bspline", [3,3,3], kpath, comm)
- if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(prefix, "_BSPLINE"))
- call ebands_free(ebands_bspl)
+ ! B-spline interpolation
+ ! TODO: shifts do not work!
+ bspl_ords = [3,3,3]
+ !!ebands_bspl = ebands_interp_kmesh(ebands, cryst, "bspline", bspl_ords, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+ !!call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
+ !ebands_bspl = ebands_interp_kpath(ebands, cryst, "bspline", bspl_ords, kpath, comm)
+ !if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(prefix, "_BSPLINE"))
+ !call ebands_free(ebands_bspl)
 
- !ebands_bspl = ebands_interp_kmesh(ebands, cryst, "skw", [3,3,3], kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+ ! SKW interpolation
+ skw_ords = [120, 0, 0]
+ !ebands_bspl = ebands_interp_kmesh(ebands, cryst, "skw", skw_ords, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
  !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
- ebands_bspl = ebands_interp_kpath(ebands, cryst, "skw", [3,3,3], kpath, comm)
+ ebands_bspl = ebands_interp_kpath(ebands, cryst, "skw", skw_ords, kpath, comm)
  if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(prefix, "_SKW"))
 
  ABI_FREE(shiftk_fine)

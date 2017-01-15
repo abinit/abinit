@@ -309,7 +309,6 @@ module defs_basis
  integer,parameter :: identity_3d(3,3) = reshape([1,0,0,0,1,0,0,0,1], [3,3])
  integer,parameter :: inversion_3d(3,3) = reshape([-1,0,0,0,-1,0,0,0,-1], [3,3])
 
-
 !A collection of small datatypes for ragged arrays
 !A small datatype for ragged real 1D-arrays
  type coeff1_type

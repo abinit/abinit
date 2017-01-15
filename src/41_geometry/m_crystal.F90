@@ -894,6 +894,10 @@ end function symbol_type
 !! FUNCTION
 !!  Return the symmetries of the point group of the crystal.
 !!
+!! INPUTS
+!!  [include_timrev]=If True, time-reversal symmetry is included in the point group unless
+!!    the system has spatial inversion. Default: False
+!!
 !! OUTPUT
 !!  ptg_nsym=Number of symmetries in the point group
 !!  ptg_symrel(3,3,ptg_nsym)=Rotations in real space
@@ -907,7 +911,7 @@ end function symbol_type
 !!
 !! SOURCE
 
-subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inversion)
+subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inversion, include_timrev)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -915,6 +919,7 @@ subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inve
 #undef ABI_FUNC
 #define ABI_FUNC 'crystal_point_group'
  use interfaces_32_util
+ use interfaces_41_geometry
 !End of the abilint section
 
  implicit none
@@ -923,41 +928,72 @@ subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inve
 !scalars
  type(crystal_t),intent(in) :: cryst
  integer,intent(out) :: ptg_nsym
+ logical,optional,intent(in) :: include_timrev
  logical,intent(out) :: has_inversion
 !arrays
  integer,allocatable,intent(out) :: ptg_symrel(:,:,:),ptg_symrec(:,:,:)
 
 !Local variables-------------------------------
 !scalars
- integer :: isym,search
- logical :: found
+ logical :: debug
+ integer :: isym,search,tmp_nsym,ierr
+ logical :: found,my_include_timrev
 !arrays
  integer :: work_symrel(3,3,cryst%nsym)
+ integer,allocatable :: symafm(:)
+ real(dp),allocatable :: tnons(:,:)
 
 ! *************************************************************************
 
- ptg_nsym = 1; work_symrel(:,:,1) = cryst%symrel(:,:,1)
- do isym=1,cryst%nsym
+ my_include_timrev = .False.; if (present(include_timrev)) my_include_timrev = include_timrev
+
+ tmp_nsym = 1; work_symrel(:,:,1) = cryst%symrel(:,:,1)
+ do isym=2,cryst%nsym
    if (cryst%symafm(isym) == -1) cycle
-   do search=1,ptg_nsym
+   do search=1,tmp_nsym
      found = all(work_symrel(:,:,search) == cryst%symrel(:,:,isym))
      if (found) exit
    end do
    if (.not. found) then
-     ptg_nsym = ptg_nsym + 1
-     work_symrel(:,:,ptg_nsym) = cryst%symrel(:,:,isym)
+     tmp_nsym = tmp_nsym + 1
+     work_symrel(:,:,tmp_nsym) = cryst%symrel(:,:,isym)
+   end if
+ end do
+
+ has_inversion = .False.
+ do isym=1,tmp_nsym
+   if (all(work_symrel(:,:,isym) == inversion_3d) ) then
+     has_inversion = .True.; exit
    end if
  end do
 
  ! Now we know the symmetries of the point group.
+ ptg_nsym = tmp_nsym; if (.not. has_inversion .and. my_include_timrev) ptg_nsym = 2 * tmp_nsym
  ABI_MALLOC(ptg_symrel, (3,3,ptg_nsym))
  ABI_MALLOC(ptg_symrec, (3,3,ptg_nsym))
- ptg_symrel = work_symrel(:,:,1:ptg_nsym)
- has_inversion = .False.
- do isym=1,ptg_nsym
-   if (all(ptg_symrel(:,:,isym) == inversion_3d) ) has_inversion = .True.
+
+ ptg_symrel(:,:,1:tmp_nsym) = work_symrel(:,:,1:tmp_nsym)
+ do isym=1,tmp_nsym
    call mati3inv(ptg_symrel(:,:,isym), ptg_symrec(:,:,isym))
  end do
+
+ if (.not. has_inversion .and. my_include_timrev) then
+   ptg_symrel(:,:,tmp_nsym+1:) = -work_symrel(:,:,1:tmp_nsym)
+   do isym=tmp_nsym+1,ptg_nsym
+     call mati3inv(ptg_symrel(:,:,isym), ptg_symrec(:,:,isym))
+   end do
+ end if
+
+ debug = .True.
+ if (debug) then
+   ABI_CALLOC(tnons, (3, ptg_nsym))
+   ABI_MALLOC(symafm, (ptg_nsym))
+   symafm = 1
+   call sg_multable(ptg_nsym, symafm, ptg_symrel, tnons, tol12, ierr)
+   ABI_CHECK(ierr == 0, "point group is not a group! See messages above")
+   ABI_FREE(tnons)
+   ABI_FREE(symafm)
+ end if
 
 end subroutine crystal_point_group
 !!***
