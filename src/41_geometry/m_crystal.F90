@@ -984,7 +984,7 @@ subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inve
    end do
  end if
 
- debug = .True.
+ debug = .False.
  if (debug) then
    ABI_CALLOC(tnons, (3, ptg_nsym))
    ABI_MALLOC(symafm, (ptg_nsym))

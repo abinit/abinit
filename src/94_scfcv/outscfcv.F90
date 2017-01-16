@@ -1158,9 +1158,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  end if
 
  ! DEBUG: Testing band interpolation.
- if (dtset%kptopt > 0) then
-   call ebands_test_interpolator(ebands, dtset, crystal, dtfil%filnam_ds(4), spacecomm)
- end if
+ !if (dtset%kptopt > 0) call ebands_test_interpolator(ebands, dtset, crystal, dtfil%filnam_ds(4), spacecomm)
 
  call crystal_free(crystal)
  call ebands_free(ebands)

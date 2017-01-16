@@ -117,7 +117,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use m_crystal,       only : crystal_free, crystal_t
  use m_crystal_io,    only : crystal_ncwrite
  use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, get_valence_idx, get_bandenergy, &
-&                            ebands_free, ebands_init, ebands_ncwrite
+&                            ebands_free, ebands_init, ebands_ncwrite, ebands_test_interpolator
  use m_energies,      only : energies_type, energies_init
  use m_bz_mesh,       only : kmesh_t, kmesh_free, littlegroup_t, littlegroup_init, littlegroup_free
  use m_gsphere,       only : gsphere_t, gsph_free
@@ -1869,10 +1869,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        call pawrhoij_free(tmp_pawrhoij)
        ABI_DT_FREE(tmp_pawrhoij)
      end if ! Dtset%usepaw==1
-     
+
      id_required=4; ikxc=7; dim_kxcg=0
-     
-     if (dtset%gwgamma>-5) then 
+
+     if (dtset%gwgamma>-5) then
        approx_type=4  ! full fxc(G,G')
      else if (dtset%gwgamma>-7) then
        approx_type=5  ! fxc(0,0) one-shot
@@ -2298,6 +2298,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      !
      ! * Report the QP gaps (Fundamental and Optical)
      call ebands_report_gap(QP_BSt,header='QP Band Gaps',unit=ab_out)
+
+     call wrtout(std_out, "Interpolating QP energies.")
+     call ebands_test_interpolator(QP_BSt, dtset, cryst, dtfil%filnam_ds(4), comm)
    end if ! Sigp%nkptgw==Kmesh%nibz
    !
    ! === Write SCF data in case of self-consistent calculation ===

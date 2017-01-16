@@ -221,7 +221,8 @@ type(skw_t) function skw_new(cryst, lpratio, cplex, nband, nkpt, nsppol, kpts, e
  ! -----------------------------------------------
  ABI_CHECK(lpratio > 0, "lpratio must be > 0")
  !rmax = 1 + (lpratio * new%nkpt) / two
- rmax = [20, 20, 20]
+ rmax = nint((one + (lpratio * new%nkpt * cryst%nsym) / two) ** third)
+ !rmax = [20, 20, 20]
  msize = product(2*rmax + 1)
  write(std_out,*)"msize",msize," rmax:",rmax
  ABI_MALLOC(rtmp, (3, msize))
@@ -647,7 +648,7 @@ subroutine skw_eval_fft(skw, cryst, ngfft, nfft, band, spin, oeig_mesh, oder1_me
  end do
 
  !call fourdp(cplex, fofg, fofr, +1, skw%mpi_enreg, nfft, ngfft, paral_kgb0, tim_fourdp0)
- fofr = fofr / skw%ptg_nsym
+ !fofr = fofr / skw%ptg_nsym
  if (cplex == 1) oeig_mesh = fofr
  if (cplex == 2) oeig_mesh = fofr(1::2)
 

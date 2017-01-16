@@ -5258,13 +5258,13 @@ subroutine ebands_test_interpolator(ebands, dtset, cryst, prefix, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: my_rank,nshiftk_fine
+ integer :: my_rank,nshiftk_fine,ndivsm,ii,unt,nbounds
  type(ebands_t) :: ebands_bspl
  type(kpath_t) :: kpath
- !character(len=500) :: msg
+ character(len=500) :: msg
 !arrays
  integer :: kptrlatt_fine(3,3),bspl_ords(3),skw_ords(3)
- real(dp),allocatable :: shiftk_fine(:,:)
+ real(dp),allocatable :: shiftk_fine(:,:),bounds(:,:)
 
 ! *********************************************************************
 
@@ -5276,25 +5276,52 @@ subroutine ebands_test_interpolator(ebands, dtset, cryst, prefix, comm)
  ABI_CALLOC(shiftk_fine, (3,nshiftk_fine))
 
  ! Interpolate bands on k-path.
- kpath = kpath_new( &
-    reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5]), &
-    cryst%gprimd, 20)
+ ndivsm = 20
+ if (file_exists("bounds.txt")) then
+    if (open_file("bounds.txt", msg, newunit=unt, status="old", action="read", form="formatted") /= 0) then
+      MSG_ERROR(msg)
+    end if
+    read(unt,*)ndivsm
+    read(unt,*)nbounds
+    ABI_MALLOC(bounds, (3, nbounds))
+    do ii=1,nbounds
+      read(unt,*)bounds(:,ii)
+    end do
+    close(unt)
+ else
+   ABI_MALLOC(bounds, (3,5))
+   bounds = reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5])
+ end if
 
- ! B-spline interpolation
- ! TODO: shifts do not work!
- bspl_ords = [3,3,3]
- !!ebands_bspl = ebands_interp_kmesh(ebands, cryst, "bspline", bspl_ords, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
- !!call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
- !ebands_bspl = ebands_interp_kpath(ebands, cryst, "bspline", bspl_ords, kpath, comm)
- !if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(prefix, "_BSPLINE"))
- !call ebands_free(ebands_bspl)
+ kpath = kpath_new(bounds, cryst%gprimd, ndivsm)
+ ABI_FREE(bounds)
 
  ! SKW interpolation
- skw_ords = [120, 0, 0]
+ !skw_ords = [120, 0, 0]
+ !skw_ords = [5, 0, 0]
+ !skw_ords = [20, 0, 0]
+ skw_ords = [80, 0, 0]
  !ebands_bspl = ebands_interp_kmesh(ebands, cryst, "skw", skw_ords, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
  !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
  ebands_bspl = ebands_interp_kpath(ebands, cryst, "skw", skw_ords, kpath, comm)
  if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(prefix, "_SKW"))
+ call ebands_free(ebands_bspl)
+
+ ! B-spline interpolation
+ ! TODO: shifts do not work!
+ bspl_ords = [3,3,3]
+ !ebands_bspl = ebands_interp_kmesh(ebands, cryst, "bspline", bspl_ords, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+ !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
+ if (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1) then
+   ebands_bspl = ebands_interp_kpath(ebands, cryst, "bspline", bspl_ords, kpath, comm)
+   if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(prefix, "_BSPLINE"))
+   call ebands_free(ebands_bspl)
+ else
+   write(msg,"(3a)") &
+      "Cannot interpolate energies with B-spline because:",ch10,&
+      ".not. (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1)"
+   MSG_WARNING(msg)
+ end if
 
  ABI_FREE(shiftk_fine)
 
@@ -5308,7 +5335,6 @@ subroutine ebands_test_interpolator(ebands, dtset, cryst, prefix, comm)
  !end if
  !call edos_free(edos)
 
- call ebands_free(ebands_bspl)
  call kpath_free(kpath)
 
 end subroutine ebands_test_interpolator
