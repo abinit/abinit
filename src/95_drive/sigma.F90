@@ -117,7 +117,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  use m_crystal,       only : crystal_free, crystal_t
  use m_crystal_io,    only : crystal_ncwrite
  use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, get_valence_idx, get_bandenergy, &
-&                            ebands_free, ebands_init, ebands_ncwrite, ebands_test_interpolator
+&                            ebands_free, ebands_init, ebands_ncwrite, ebands_interpolate_kpath
  use m_energies,      only : energies_type, energies_init
  use m_bz_mesh,       only : kmesh_t, kmesh_free, littlegroup_t, littlegroup_init, littlegroup_free
  use m_gsphere,       only : gsphere_t, gsph_free
@@ -2300,7 +2300,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      call ebands_report_gap(QP_BSt,header='QP Band Gaps',unit=ab_out)
 
      call wrtout(std_out, "Interpolating QP energies.")
-     call ebands_test_interpolator(QP_BSt, dtset, cryst, dtfil%filnam_ds(4), comm)
+     call ebands_interpolate_kpath(QP_BSt, dtset, cryst, dtfil%filnam_ds(4), comm)
    end if ! Sigp%nkptgw==Kmesh%nibz
    !
    ! === Write SCF data in case of self-consistent calculation ===

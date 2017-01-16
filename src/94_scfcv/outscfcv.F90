@@ -1157,8 +1157,10 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    call ebands_prtbltztrp(ebands, crystal, dtfil%filnam_ds(4))
  end if
 
- ! DEBUG: Testing band interpolation.
- !if (dtset%kptopt > 0) call ebands_test_interpolator(ebands, dtset, crystal, dtfil%filnam_ds(4), spacecomm)
+ ! Band structure interpolation from eigenvalues computed on k-mesh.
+ if (dtset%kptopt > 0) then ! (.and. any(dtset%einterp /= 0)
+   call ebands_interpolate_kpath(ebands, dtset, crystal, dtfil%filnam_ds(4), spacecomm)
+ end if
 
  call crystal_free(crystal)
  call ebands_free(ebands)

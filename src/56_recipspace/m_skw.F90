@@ -34,6 +34,7 @@ MODULE m_skw
  use m_sort
 
  use m_fstrings,       only : itoa, sjoin, ktoa, yesno, ftoa
+ use m_special_funcs,  only : abi_derfc
  use m_time,           only : cwtime
  use m_numeric_tools,  only : vdiff_t, vdiff_eval, vdiff_print
  use m_bz_mesh,        only : isamek
@@ -187,7 +188,7 @@ type(skw_t) function skw_new(cryst, lpratio, cplex, nband, nkpt, nsppol, kpts, e
  integer :: my_rank,nprocs,cnt,bstop,bstart,bcount,lwork
  integer :: ir,ik,ib,ii,jj,nr,band,spin,isym,ierr,i1,i2,i3,msize
  real(dp),parameter :: tolr=tol12,c1=0.25_dp,c2=0.25_dp
- real(dp) :: r2,r2min,mare,mae_meV,adiff_meV,rel_err
+ real(dp) :: r2,r2min,mare,mae_meV,adiff_meV,rel_err,rcut,rsigma
  real(dp) :: cpu_tot,wall_tot,gflops_tot,cpu,wall,gflops
  character(len=500) :: fmt,msg
 !arrays
@@ -271,13 +272,9 @@ type(skw_t) function skw_new(cryst, lpratio, cplex, nband, nkpt, nsppol, kpts, e
  do ir=1,nr
    r2 = dot_product(new%rpts(:,ir), matmul(cryst%rmet, new%rpts(:,ir)))
    ! TODO: Test the two versions.
-   rhor(ir) = (one - c1 * r2/r2min)**2 + c2 * (r2 / r2min)**3
    !rhor(ir) = c1 * r2 + c2 * r2**2
+   rhor(ir) = (one - c1 * r2/r2min)**2 + c2 * (r2 / r2min)**3
  end do
-
- ABI_FREE(iperm)
- ABI_FREE(rtmp)
- ABI_FREE(r2vals)
 
  ! Construct star functions for the ab-initio k-points.
  ABI_MALLOC(srk, (nr, nkpt))
@@ -348,7 +345,12 @@ type(skw_t) function skw_new(cryst, lpratio, cplex, nband, nkpt, nsppol, kpts, e
    end do
  end do
 
- ! Filter coefficients.
+ ! Filter coefficients
+ !call wrtout(std_out," Applying filter (Eq 9 of PhysRevB.61.1639)")
+ !rcut = half * sqrt(r2vals(new%nr)); rsigma = one
+ !do ir=2,nr
+ !  new%coefs(ir,:,:) = new%coefs(ir,:,:) * half * abi_derfc((sqrt(r2vals(ir)) - rcut) / rsigma)
+ !end do
 
  ! Prepare workspace arrays for star functions.
  new%cached_kpt = huge(one)
@@ -358,6 +360,9 @@ type(skw_t) function skw_new(cryst, lpratio, cplex, nband, nkpt, nsppol, kpts, e
  new%cached_kpt_dk2 = huge(one)
  ABI_MALLOC(new%cached_srk_dk2, (new%nr, 3, 3))
 
+ ABI_FREE(iperm)
+ ABI_FREE(rtmp)
+ ABI_FREE(r2vals)
  ABI_FREE(srk)
  ABI_FREE(rhor)
  ABI_FREE(hmat)

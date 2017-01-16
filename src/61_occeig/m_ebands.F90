@@ -99,7 +99,7 @@ MODULE m_ebands
  public :: ebands_get_jdos         ! Compute the joint density of states.
  public :: ebands_interp_kmesh     ! Interpolate energies on a k-mesh.
  public :: ebands_interp_kpath     ! Interpolate energies on a k-path.
- public :: ebands_test_interpolator
+ public :: ebands_interpolate_kpath
 
  public :: ebands_prtbltztrp          ! Output files for BoltzTraP code.
  public :: ebands_prtbltztrp_tau_out  ! Output files for BoltzTraP code,
@@ -5221,8 +5221,9 @@ end subroutine ebands_write_gnuplot
 
 !----------------------------------------------------------------------
 
-!!****f* m_ebands/ebands_test_interpolator
+!!****f* m_ebands/ebands_interpolate_kpath
 !! NAME
+!!  ebands_interpolate_kpath
 !!
 !! FUNCTION
 !!
@@ -5237,12 +5238,13 @@ end subroutine ebands_write_gnuplot
 !!
 !! SOURCE
 
-subroutine ebands_test_interpolator(ebands, dtset, cryst, prefix, comm)
+subroutine ebands_interpolate_kpath(ebands, dtset, cryst, prefix, comm)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'ebands_test_interpolator'
+#define ABI_FUNC 'ebands_interpolate_kpath'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -5259,7 +5261,7 @@ subroutine ebands_test_interpolator(ebands, dtset, cryst, prefix, comm)
 !scalars
  integer,parameter :: master=0
  integer :: my_rank,nshiftk_fine,ndivsm,ii,unt,nbounds
- type(ebands_t) :: ebands_bspl
+ type(ebands_t) :: ebands_bspl,ebands_skw
  type(kpath_t) :: kpath
  character(len=500) :: msg
 !arrays
@@ -5270,18 +5272,13 @@ subroutine ebands_test_interpolator(ebands, dtset, cryst, prefix, comm)
 
  my_rank = xmpi_comm_rank(comm)
 
- ! Interpolate bands on dense k-mesh.
- kptrlatt_fine = reshape([4,0,0,0,4,0,0,0,4], [3,3])
- kptrlatt_fine = 4 * kptrlatt_fine; nshiftk_fine = 1
- ABI_CALLOC(shiftk_fine, (3,nshiftk_fine))
-
  ! Interpolate bands on k-path.
- ndivsm = 20
+ ndivsm = 20; if (dtset%useria /= 0) ndivsm = dtset%useria
  if (file_exists("bounds.txt")) then
+    call wrtout(std_out, "Reading k-path from bounds.txt")
     if (open_file("bounds.txt", msg, newunit=unt, status="old", action="read", form="formatted") /= 0) then
       MSG_ERROR(msg)
     end if
-    read(unt,*)ndivsm
     read(unt,*)nbounds
     ABI_MALLOC(bounds, (3, nbounds))
     do ii=1,nbounds
@@ -5297,21 +5294,14 @@ subroutine ebands_test_interpolator(ebands, dtset, cryst, prefix, comm)
  ABI_FREE(bounds)
 
  ! SKW interpolation
- !skw_ords = [120, 0, 0]
- !skw_ords = [5, 0, 0]
- !skw_ords = [20, 0, 0]
- skw_ords = [80, 0, 0]
- !ebands_bspl = ebands_interp_kmesh(ebands, cryst, "skw", skw_ords, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
- !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
- ebands_bspl = ebands_interp_kpath(ebands, cryst, "skw", skw_ords, kpath, comm)
- if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(prefix, "_SKW"))
- call ebands_free(ebands_bspl)
+ skw_ords = [80, 0, 0]; if (dtset%userib /= 0) skw_ords = [dtset%userib, 0, 0]
+ ebands_skw = ebands_interp_kpath(ebands, cryst, "skw", skw_ords, kpath, comm)
+ if (my_rank == master) call ebands_write(ebands_skw, dtset%prtebands, strcat(prefix, "_SKW"))
+ call ebands_free(ebands_skw)
 
  ! B-spline interpolation
  ! TODO: shifts do not work!
- bspl_ords = [3,3,3]
- !ebands_bspl = ebands_interp_kmesh(ebands, cryst, "bspline", bspl_ords, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
- !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
+ bspl_ords = [3,3,3]; if (dtset%useric /= 0) bspl_ords = dtset%useric
  if (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1) then
    ebands_bspl = ebands_interp_kpath(ebands, cryst, "bspline", bspl_ords, kpath, comm)
    if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(prefix, "_BSPLINE"))
@@ -5323,7 +5313,39 @@ subroutine ebands_test_interpolator(ebands, dtset, cryst, prefix, comm)
    MSG_WARNING(msg)
  end if
 
+ ! Interpolate bands on dense k-mesh.
+ !kptrlatt_fine = reshape([1,0,0,0,1,0,0,0,1], [3,3]); kptrlatt_fine = 12 * kptrlatt_fine
+ kptrlatt_fine = 2 * ebands%kptrlatt
+ nshiftk_fine = ebands%nshiftk
+ !nshiftk_fine = 5
+ ABI_CALLOC(shiftk_fine, (3,nshiftk_fine))
+ shiftk_fine = ebands%shiftk
+ !shiftk_fine = half * reshape([1,0,0,0,1,0,0,0,1,1,1,1,0,0,0], [3,5])
+
+ if (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1) then
+   ebands_bspl = ebands_interp_kmesh(ebands, cryst, "bspline", bspl_ords, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+   !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
+   !ebands_skw = ebands_interp_kmesh(ebands_bspl, cryst, "skw", skw_ords, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+   !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
+   ebands_skw = ebands_interp_kpath(ebands_bspl, cryst, "skw", skw_ords, kpath, comm)
+   if (my_rank == master) call ebands_write(ebands_skw, dtset%prtebands, strcat(prefix, "_SKW_BSPL"))
+   call ebands_free(ebands_bspl)
+   call ebands_free(ebands_skw)
+ else
+   write(msg,"(3a)") &
+      "Cannot interpolate energies with B-spline because:",ch10,&
+      ".not. (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1)"
+   MSG_WARNING(msg)
+ end if
+
  ABI_FREE(shiftk_fine)
+
+ !ebands_bspl = ebands_interp_kmesh(ebands, cryst, "bspline", bspl_ords, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+ !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
+ !ebands_skw = ebands_interp_kmesh(ebands, cryst, "skw", skw_ords, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+ !call ebands_update_occ(ebands_skw, dtset%spinmagntarget, prtvol=dtset%prtvol)
+ !call ebands_free(ebands_bspl)
+ !call ebands_free(ebands_skw)
 
  !edos = ebands_get_edos(ebands_bspl, cryst, edos_intmeth, edos_step, edos_broad, comm)
  !call ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
@@ -5337,7 +5359,7 @@ subroutine ebands_test_interpolator(ebands, dtset, cryst, prefix, comm)
 
  call kpath_free(kpath)
 
-end subroutine ebands_test_interpolator
+end subroutine ebands_interpolate_kpath
 !!***
 
 end module m_ebands
