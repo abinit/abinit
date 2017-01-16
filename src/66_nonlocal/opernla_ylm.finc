@@ -1241,42 +1241,42 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !  Parallelization OpenMP on npw loops
  else
 
-!$OMP PARALLEL PRIVATE(il,ilmn,ipw,jpw,parity,ndir,ffnl_dir), &
-!$OMP PRIVATE(mu,mua,mub,nua1,nua2,nub1,nub2), &
-!$OMP PRIVATE(kpga,kpgb,kpgc,kpgd), &
-!$OMP PRIVATE(scale,scale2,mu0), &
-!$OMP PRIVATE(ispinor,ipwshft,ia,iaph3d)
+!*!$OMP PARALLEL PRIVATE(il,ilmn,ipw,jpw,parity,ndir,ffnl_dir), &
+!*!$OMP PRIVATE(mu,mua,mub,nua1,nua2,nub1,nub2), &
+!*!$OMP PRIVATE(kpga,kpgb,kpgc,kpgd), &
+!*!$OMP PRIVATE(scale,scale2,mu0), &
+!*!$OMP PRIVATE(ispinor,ipwshft,ia,iaph3d)
 
 !  Loop on spinorial components
    do ispinor =1,nspinor
      ipwshft=(ispinor-1)*npw
 
 !    Allocate work space
-!$OMP SECTIONS
-!$OMP SECTION
+!*!$OMP SECTIONS
+!*!$OMP SECTION
      ABI_ALLOCATE(scali,(npw))
-!$OMP SECTION
+!*!$OMP SECTION
      ABI_ALLOCATE(scalr,(npw))
-!$OMP END SECTIONS
+!*!$OMP END SECTIONS
 
 !    Loop on atoms (blocking)
      do ia=1,nincat
        iaph3d=ia;if (nloalg(2)>0) iaph3d=ia+ia3-1
 
 !      Compute Sum_g[c(g).exp(2pi.i.g.R)]
-!$OMP DO
+!*!$OMP DO
        do ipw=ipw0,npw
          jpw=ipw+ipwshft
          scalr(ipw)=(vect(1,jpw)*ph3d(1,ipw,iaph3d)-vect(2,jpw)*ph3d(2,ipw,iaph3d))
          scali(ipw)=(vect(2,jpw)*ph3d(1,ipw,iaph3d)+vect(1,jpw)*ph3d(2,ipw,iaph3d))
        end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
        if (ipw0==2) then
          scalr(1)=half*vect(1,1+ipwshft)*ph3d(1,1,iaph3d)
          scali(1)=half*vect(1,1+ipwshft)*ph3d(2,1,iaph3d)
        end if
-!$OMP END SINGLE
+!*!$OMP END SINGLE
 
 !      --------------------------------------------------------------------
 !      ALL CHOICES
@@ -1287,50 +1287,50 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
            if (cplex==2) then
-!$OMP SINGLE
+!*!$OMP SINGLE
              buffer_r1 = zero ; buffer_i1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1,buffer_i1)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1,buffer_i1)
              do ipw=1,npw
                buffer_r1 = buffer_r1 + scalr(ipw)*ffnl(ipw,1,ilmn)
                buffer_i1 = buffer_i1 + scali(ipw)*ffnl(ipw,1,ilmn)
              end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
              if (parity) then
                gx(1,ilmn,ia,ispinor) = scale*buffer_r1 ; gx(2,ilmn,ia,ispinor) = scale*buffer_i1
              else
                gx(1,ilmn,ia,ispinor) =-scale*buffer_i1 ; gx(2,ilmn,ia,ispinor) = scale*buffer_r1
              end if
-!$OMP END SINGLE
+!*!$OMP END SINGLE
            else
              if (parity) then
-!$OMP SINGLE
+!*!$OMP SINGLE
                buffer_r1 =  zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1)
                do ipw=1,npw
                  buffer_r1 = buffer_r1 + scalr(ipw)*ffnl(ipw,1,ilmn)
                end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                gx(1,ilmn,ia,ispinor) = scale*buffer_r1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              else
-!$OMP SINGLE
+!*!$OMP SINGLE
                buffer_i1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_i1)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_i1)
                do ipw=1,npw
                  buffer_i1 = buffer_i1 + scali(ipw)*ffnl(ipw,1,ilmn)
                end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                gx(1,ilmn,ia,ispinor) =-scale*buffer_i1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              end if
            end if
          end do
@@ -1348,14 +1348,14 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
            scale=wt;if (il>1) scale=-scale
            scale2=two_pi*scale
            if (cplex==2) then
-!$OMP SINGLE
+!*!$OMP SINGLE
              buffer_r1 = zero ; buffer_r2 = zero
              buffer_r3 = zero ; buffer_i1 = zero
              buffer_i2 = zero ; buffer_i3 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1,buffer_r2,buffer_r3,buffer_i1,buffer_i2,buffer_i3),&
-!$OMP PRIVATE(aux_r,aux_i)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1,buffer_r2,buffer_r3,buffer_i1,buffer_i2,buffer_i3),&
+!*!$OMP PRIVATE(aux_r,aux_i)
              do ipw=1,npw
                aux_r = scalr(ipw)*ffnl(ipw,1,ilmn)
                aux_i = scali(ipw)*ffnl(ipw,1,ilmn)
@@ -1366,8 +1366,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                buffer_i2 = buffer_i2 + aux_r*kpg(ipw,2)
                buffer_i3 = buffer_i3 + aux_r*kpg(ipw,3)
              end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
              if (parity) then
                dgxdt(1,mu0  ,ilmn,ia,ispinor) = scale2*buffer_r1
                dgxdt(2,mu0  ,ilmn,ia,ispinor) = scale2*buffer_i1
@@ -1383,15 +1383,15 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                dgxdt(1,mu0+2,ilmn,ia,ispinor) =-scale2*buffer_i3
                dgxdt(2,mu0+2,ilmn,ia,ispinor) = scale2*buffer_r3
              end if
-!$OMP END SINGLE
+!*!$OMP END SINGLE
            else
              if (parity) then
-!$OMP SINGLE
+!*!$OMP SINGLE
                buffer_r1 = zero ; buffer_r2 = zero ; buffer_r3 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1,buffer_r2,buffer_r3), &
-!$OMP PRIVATE(aux_r,aux_i)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1,buffer_r2,buffer_r3), &
+!*!$OMP PRIVATE(aux_r,aux_i)
                do ipw=1,npw
                  aux_r = scalr(ipw)*ffnl(ipw,1,ilmn)
                  aux_i = scali(ipw)*ffnl(ipw,1,ilmn)
@@ -1399,19 +1399,19 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                  buffer_r2 = buffer_r2 - aux_i*kpg(ipw,2)
                  buffer_r3 = buffer_r3 - aux_i*kpg(ipw,3)
                end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                dgxdt(1,mu0  ,ilmn,ia,ispinor) = scale2*buffer_r1
                dgxdt(1,mu0+1,ilmn,ia,ispinor) = scale2*buffer_r2
                dgxdt(1,mu0+2,ilmn,ia,ispinor) = scale2*buffer_r3
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              else
-!$OMP SINGLE
+!*!$OMP SINGLE
                buffer_i1 = zero ; buffer_i2 = zero ; buffer_i3 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_i1,buffer_i2,buffer_i3), &
-!$OMP PRIVATE(aux_r,aux_i)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_i1,buffer_i2,buffer_i3), &
+!*!$OMP PRIVATE(aux_r,aux_i)
                do ipw=1,npw
                  aux_r = scalr(ipw)*ffnl(ipw,1,ilmn)
                  aux_i = scali(ipw)*ffnl(ipw,1,ilmn)
@@ -1419,11 +1419,11 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                  buffer_i2 = buffer_i2 + aux_r*kpg(ipw,2)
                  buffer_i3 = buffer_i3 + aux_r*kpg(ipw,3)
                end do
-!$OMP SINGLE
+!*!$OMP SINGLE
                dgxdt(1,mu0  ,ilmn,ia,ispinor) =-scale2*buffer_i1
                dgxdt(1,mu0+1,ilmn,ia,ispinor) =-scale2*buffer_i2
                dgxdt(1,mu0+2,ilmn,ia,ispinor) =-scale2*buffer_i3
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              end if
            end if
          end do
@@ -1440,20 +1440,20 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
            scale=wt;if (il>1) scale=-scale
            scale2=two_pi*scale
            if (cplex==2) then
-!$OMP SINGLE
+!*!$OMP SINGLE
              buffer_r1 = zero ; buffer_i1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1,buffer_i1), &
-!$OMP PRIVATE(aux_r,aux_i)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1,buffer_i1), &
+!*!$OMP PRIVATE(aux_r,aux_i)
              do ipw=1,npw
                aux_r = scalr(ipw)*ffnl(ipw,1,ilmn)
                aux_i = scali(ipw)*ffnl(ipw,1,ilmn)
                buffer_r1 = buffer_r1 - aux_i*kpg(ipw,idir)
                buffer_i1 = buffer_i1 + aux_r*kpg(ipw,idir)
              end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
              if (parity) then
                dgxdt(1,mu0,ilmn,ia,ispinor) = scale2*buffer_r1
                dgxdt(2,mu0,ilmn,ia,ispinor) = scale2*buffer_i1
@@ -1461,34 +1461,34 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                dgxdt(1,mu0,ilmn,ia,ispinor) =-scale2*buffer_i1
                dgxdt(2,mu0,ilmn,ia,ispinor) = scale2*buffer_r1
              end if
-!$OMP END SINGLE
+!*!$OMP END SINGLE
            else
              if (parity) then
-!$OMP SINGLE
+!*!$OMP SINGLE
                buffer_r1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1)
                do ipw=1,npw
                  buffer_r1 = buffer_r1 - scali(ipw)*ffnl(ipw,1,ilmn)*kpg(ipw,idir)
                end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                dgxdt(1,mu0,ilmn,ia,ispinor) = scale2*buffer_r1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              else
-!$OMP SINGLE
+!*!$OMP SINGLE
                buffer_i1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_i1)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_i1)
                do ipw=1,npw
                  buffer_i1 = buffer_i1 + scalr(ipw)*ffnl(ipw,1,ilmn)*kpg(ipw,idir)
                end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                dgxdt(1,mu0,ilmn,ia,ispinor) =-scale2*buffer_i1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              end if
            end if
          end do
@@ -1505,18 +1505,18 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
            scale=wt;if (il>1) scale=-scale
            scale2=half*scale
            if (cplex==2) then
-!$OMP SINGLE
+!*!$OMP SINGLE
              buffer_r1 = zero ; buffer_r2 = zero
              buffer_r3 = zero ; buffer_r4 = zero
              buffer_r5 = zero ; buffer_r6 = zero
              buffer_i1 = zero ; buffer_i2 = zero
              buffer_i3 = zero ; buffer_i4 = zero
              buffer_i5 = zero ; buffer_i6 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1,buffer_r2,buffer_r3,buffer_r4,buffer_r5,buffer_r6), &
-!$OMP REDUCTION(+:buffer_i1,buffer_i2,buffer_i3,buffer_i4,buffer_i5,buffer_i6), &
-!$OMP PRIVATE(aux_r2,aux_r3,aux_r4,aux_i2,aux_i3,aux_i4)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1,buffer_r2,buffer_r3,buffer_r4,buffer_r5,buffer_r6), &
+!*!$OMP REDUCTION(+:buffer_i1,buffer_i2,buffer_i3,buffer_i4,buffer_i5,buffer_i6), &
+!*!$OMP PRIVATE(aux_r2,aux_r3,aux_r4,aux_i2,aux_i3,aux_i4)
              do ipw=1,npw
                aux_r2 = scalr(ipw)*ffnl(ipw,2,ilmn)
                aux_r3 = scalr(ipw)*ffnl(ipw,3,ilmn)
@@ -1537,8 +1537,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                buffer_i5 = buffer_i5 + aux_i4*kpg(ipw,1) + aux_i2*kpg(ipw,3)
                buffer_i6 = buffer_i6 + aux_i3*kpg(ipw,1) + aux_i2*kpg(ipw,2)
              end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
              if (parity) then
                dgxdt(1,mu0  ,ilmn,ia,ispinor) =-scale*buffer_r1
                dgxdt(2,mu0  ,ilmn,ia,ispinor) =-scale*buffer_i1
@@ -1566,17 +1566,17 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                dgxdt(1,mu0+5,ilmn,ia,ispinor) = scale2*buffer_i6
                dgxdt(2,mu0+5,ilmn,ia,ispinor) =-scale2*buffer_r6
              end if
-!$OMP END SINGLE
+!*!$OMP END SINGLE
            else
              if (parity) then
-!$OMP SINGLE
+!*!$OMP SINGLE
                buffer_r1 = zero ; buffer_r2 = zero
                buffer_r3 = zero ; buffer_r4 = zero
                buffer_r5 = zero ; buffer_r6 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1,buffer_r2,buffer_r3,buffer_r4,buffer_r5,buffer_r6), &
-!$OMP PRIVATE(aux_r2,aux_r3,aux_r4)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1,buffer_r2,buffer_r3,buffer_r4,buffer_r5,buffer_r6), &
+!*!$OMP PRIVATE(aux_r2,aux_r3,aux_r4)
                do ipw=1,npw
                  aux_r2 = scalr(ipw)*ffnl(ipw,2,ilmn)
                  aux_r3 = scalr(ipw)*ffnl(ipw,3,ilmn)
@@ -1588,23 +1588,23 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                  buffer_r5 = buffer_r5 + aux_r4*kpg(ipw,1) + aux_r2*kpg(ipw,3)
                  buffer_r6 = buffer_r6 + aux_r3*kpg(ipw,1) + aux_r2*kpg(ipw,2)
                end do
-!$OMP SINGLE
+!*!$OMP SINGLE
                dgxdt(1,mu0  ,ilmn,ia,ispinor) =-scale*buffer_r1
                dgxdt(1,mu0+1,ilmn,ia,ispinor) =-scale*buffer_r2
                dgxdt(1,mu0+2,ilmn,ia,ispinor) =-scale*buffer_r3
                dgxdt(1,mu0+3,ilmn,ia,ispinor) =-scale2*buffer_r4
                dgxdt(1,mu0+4,ilmn,ia,ispinor) =-scale2*buffer_r5
                dgxdt(1,mu0+5,ilmn,ia,ispinor) =-scale2*buffer_r6
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              else
-!$OMP SINGLE
+!*!$OMP SINGLE
                buffer_i1 = zero ; buffer_i2 = zero
                buffer_i3 = zero ; buffer_i4 = zero
                buffer_i5 = zero ; buffer_i6 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_i1,buffer_i2,buffer_i3,buffer_i4,buffer_i5,buffer_i6), &
-!$OMP PRIVATE(aux_i2,aux_i3,aux_i4)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_i1,buffer_i2,buffer_i3,buffer_i4,buffer_i5,buffer_i6), &
+!*!$OMP PRIVATE(aux_i2,aux_i3,aux_i4)
                do ipw=1,npw
                  aux_i2 = scali(ipw)*ffnl(ipw,2,ilmn)
                  aux_i3 = scali(ipw)*ffnl(ipw,3,ilmn)
@@ -1616,15 +1616,15 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                  buffer_i5 = buffer_i5 + aux_i4*kpg(ipw,1) + aux_i2*kpg(ipw,3)
                  buffer_i6 = buffer_i6 + aux_i3*kpg(ipw,1) + aux_i2*kpg(ipw,2)
                end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                dgxdt(1,mu0  ,ilmn,ia,ispinor) = scale*buffer_i1
                dgxdt(1,mu0+1,ilmn,ia,ispinor) = scale*buffer_i2
                dgxdt(1,mu0+2,ilmn,ia,ispinor) = scale*buffer_i3
                dgxdt(1,mu0+3,ilmn,ia,ispinor) = scale2*buffer_i4
                dgxdt(1,mu0+4,ilmn,ia,ispinor) = scale2*buffer_i5
                dgxdt(1,mu0+5,ilmn,ia,ispinor) = scale2*buffer_i6
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              end if
            end if
          end do
@@ -1640,17 +1640,17 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
            if (cplex==2) then
-!$OMP SINGLE
+!*!$OMP SINGLE
              buffer_r1 = zero ; buffer_i1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1,buffer_i1)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1,buffer_i1)
              do ipw=1,npw
                buffer_r1 = buffer_r1 - scalr(ipw)*ffnl(ipw,1+ffnl_dir(1),ilmn)
                buffer_i1 = buffer_i1 - scali(ipw)*ffnl(ipw,1+ffnl_dir(1),ilmn)
              end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
              if (parity) then
                dgxdt(1,mu0,ilmn,ia,ispinor) = scale*buffer_r1
                dgxdt(2,mu0,ilmn,ia,ispinor) = scale*buffer_i1
@@ -1658,34 +1658,34 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                dgxdt(1,mu0,ilmn,ia,ispinor) =-scale*buffer_i1
                dgxdt(2,mu0,ilmn,ia,ispinor) = scale*buffer_r1
              end if
-!$OMP END SINGLE
+!*!$OMP END SINGLE
            else
              if (parity) then
-!$OMP SINGLE
+!*!$OMP SINGLE
                buffer_r1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1)
                do ipw=1,npw
                  buffer_r1 = buffer_r1 - scalr(ipw)*ffnl(ipw,1+ffnl_dir(1),ilmn)
                end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                dgxdt(1,mu0,ilmn,ia,ispinor) = scale*buffer_r1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              else
-!$OMP SINGLE
+!*!$OMP SINGLE
                buffer_i1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_i1)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_i1)
                do ipw=1,npw
                  buffer_i1 = buffer_i1 - scali(ipw)*ffnl(ipw,1+ffnl_dir(1),ilmn)
                end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                dgxdt(1,mu0,ilmn,ia,ispinor) =-scale*buffer_i1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              end if
            end if
          end do
@@ -1702,18 +1702,18 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
            scale=wt;if (il>1) scale=-scale
            scale2=two_pi2*scale
            if (cplex==2) then
-!$OMP SINGLE
+!*!$OMP SINGLE
              buffer_ra = zero ; buffer_rb = zero
              buffer_rc = zero ; buffer_rd = zero
              buffer_re = zero ; buffer_rf = zero
              buffer_ia = zero ; buffer_ib = zero
              buffer_ic = zero ; buffer_id = zero
              buffer_ie = zero ; buffer_if = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP PRIVATE(aux_r,aux_i), &
-!$OMP REDUCTION(+:buffer_ra,buffer_rb,buffer_rc,buffer_rd,buffer_re,buffer_rf),&
-!$OMP REDUCTION(+:buffer_ia,buffer_ib,buffer_ic,buffer_id,buffer_ie,buffer_if)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP PRIVATE(aux_r,aux_i), &
+!*!$OMP REDUCTION(+:buffer_ra,buffer_rb,buffer_rc,buffer_rd,buffer_re,buffer_rf),&
+!*!$OMP REDUCTION(+:buffer_ia,buffer_ib,buffer_ic,buffer_id,buffer_ie,buffer_if)
              do ipw=1,npw
                aux_r = scalr(ipw)*ffnl(ipw,1,ilmn)
                aux_i = scali(ipw)*ffnl(ipw,1,ilmn)
@@ -1730,8 +1730,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                buffer_ie = buffer_ie - aux_i*kpg(ipw,8)
                buffer_if = buffer_if - aux_i*kpg(ipw,9)
              end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
              if (parity) then
                d2gxdt(1,mu0  ,ilmn,ia,ispinor) = scale2*buffer_ra
                d2gxdt(2,mu0  ,ilmn,ia,ispinor) = scale2*buffer_ia
@@ -1759,17 +1759,17 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                d2gxdt(1,mu0+5,ilmn,ia,ispinor) =-scale2*buffer_if
                d2gxdt(2,mu0+5,ilmn,ia,ispinor) = scale2*buffer_rf
              end if
-!$OMP END SINGLE
+!*!$OMP END SINGLE
            else
              if (parity) then
-!$OMP SINGLE
+!*!$OMP SINGLE
                buffer_ra = zero ; buffer_rb = zero
                buffer_rc = zero ; buffer_rd = zero
                buffer_re = zero ; buffer_rf = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP PRIVATE(aux_r,aux_i), &
-!$OMP REDUCTION(+:buffer_ra,buffer_rb,buffer_rc,buffer_rd,buffer_re,buffer_rf)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP PRIVATE(aux_r,aux_i), &
+!*!$OMP REDUCTION(+:buffer_ra,buffer_rb,buffer_rc,buffer_rd,buffer_re,buffer_rf)
                do ipw=1,npw
                  aux_r = scalr(ipw)*ffnl(ipw,1,ilmn)
                  aux_i = scali(ipw)*ffnl(ipw,1,ilmn)
@@ -1780,24 +1780,24 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                  buffer_re = buffer_re - aux_r*kpg(ipw,8)
                  buffer_rf = buffer_rf - aux_r*kpg(ipw,9)
                end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                d2gxdt(1,mu0  ,ilmn,ia,ispinor) = scale2*buffer_ra
                d2gxdt(1,mu0+1,ilmn,ia,ispinor) = scale2*buffer_rb
                d2gxdt(1,mu0+2,ilmn,ia,ispinor) = scale2*buffer_rc
                d2gxdt(1,mu0+3,ilmn,ia,ispinor) = scale2*buffer_rd
                d2gxdt(1,mu0+4,ilmn,ia,ispinor) = scale2*buffer_re
                d2gxdt(1,mu0+5,ilmn,ia,ispinor) = scale2*buffer_rf
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              else
-!$OMP SINGLE
+!*!$OMP SINGLE
                buffer_ia = zero ; buffer_ib = zero
                buffer_ic = zero ; buffer_id = zero
                buffer_ie = zero ; buffer_if = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP PRIVATE(aux_i,aux_r), &
-!$OMP REDUCTION(+:buffer_ia,buffer_ib,buffer_ic,buffer_id,buffer_ie,buffer_if)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP PRIVATE(aux_i,aux_r), &
+!*!$OMP REDUCTION(+:buffer_ia,buffer_ib,buffer_ic,buffer_id,buffer_ie,buffer_if)
                do ipw=1,npw
                  aux_r = scalr(ipw)*ffnl(ipw,1,ilmn)
                  aux_i = scali(ipw)*ffnl(ipw,1,ilmn)
@@ -1808,15 +1808,15 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                  buffer_ie = buffer_ie - aux_i*kpg(ipw,8)
                  buffer_if = buffer_if - aux_i*kpg(ipw,9)
                end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                d2gxdt(1,mu0  ,ilmn,ia,ispinor) =-scale2*buffer_ia
                d2gxdt(1,mu0+1,ilmn,ia,ispinor) =-scale2*buffer_ib
                d2gxdt(1,mu0+2,ilmn,ia,ispinor) =-scale2*buffer_ic
                d2gxdt(1,mu0+3,ilmn,ia,ispinor) =-scale2*buffer_id
                d2gxdt(1,mu0+4,ilmn,ia,ispinor) =-scale2*buffer_ie
                d2gxdt(1,mu0+5,ilmn,ia,ispinor) =-scale2*buffer_if
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              end if
            end if
          end do
@@ -1836,15 +1836,15 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
            if (cplex==2) then
-!$OMP SINGLE
+!*!$OMP SINGLE
              buffer_r1 = zero ; buffer_r2 = zero
              buffer_r3 = zero
              buffer_i1 = zero ; buffer_i2 = zero
              buffer_i3 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1,buffer_r2,buffer_r3), &
-!$OMP REDUCTION(+:buffer_i1,buffer_i2,buffer_i3)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1,buffer_r2,buffer_r3), &
+!*!$OMP REDUCTION(+:buffer_i1,buffer_i2,buffer_i3)
              do ipw=1,npw
                buffer_r1 = buffer_r1 + scalr(ipw)*ffnl(ipw,2,ilmn)
                buffer_r2 = buffer_r2 + scalr(ipw)*ffnl(ipw,3,ilmn)
@@ -1853,8 +1853,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                buffer_i2 = buffer_i2 + scali(ipw)*ffnl(ipw,3,ilmn)
                buffer_i3 = buffer_i3 + scali(ipw)*ffnl(ipw,4,ilmn)
              end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
              if (parity) then
                dgxdt(1,mu0  ,ilmn,ia,ispinor) = scale*buffer_r1
                dgxdt(2,mu0  ,ilmn,ia,ispinor) = scale*buffer_i1
@@ -1870,45 +1870,45 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                dgxdt(1,mu0+2,ilmn,ia,ispinor) =-scale*buffer_i3
                dgxdt(2,mu0+2,ilmn,ia,ispinor) = scale*buffer_r3
              end if
-!$OMP END SINGLE
+!*!$OMP END SINGLE
            else
              cplex_dgxdt(mu0:mu0+2) = 2 ! Warning dgxdt is here pure imaginary
              if (parity) then
-!$OMP SINGLE
+!*!$OMP SINGLE
                buffer_i1 = zero ; buffer_i2 = zero
                buffer_i3 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_i1,buffer_i2,buffer_i3)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_i1,buffer_i2,buffer_i3)
                do ipw=1,npw
                  buffer_i1 = buffer_i1 + scali(ipw)*ffnl(ipw,2,ilmn)
                  buffer_i2 = buffer_i2 + scali(ipw)*ffnl(ipw,3,ilmn)
                  buffer_i3 = buffer_i3 + scali(ipw)*ffnl(ipw,4,ilmn)
                end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                dgxdt(1,mu0  ,ilmn,ia,ispinor) = scale*buffer_i1
                dgxdt(1,mu0+1,ilmn,ia,ispinor) = scale*buffer_i2
                dgxdt(1,mu0+2,ilmn,ia,ispinor) = scale*buffer_i3
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              else
-!$OMP SINGLE
+!*!$OMP SINGLE
                buffer_r1 = zero ; buffer_r2 = zero
                buffer_r3 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1,buffer_r2,buffer_r3)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1,buffer_r2,buffer_r3)
                do ipw=1,npw
                  buffer_r1 = buffer_r1 + scalr(ipw)*ffnl(ipw,2,ilmn)
                  buffer_r2 = buffer_r2 + scalr(ipw)*ffnl(ipw,3,ilmn)
                  buffer_r3 = buffer_r3 + scalr(ipw)*ffnl(ipw,4,ilmn)
                end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                dgxdt(1,mu0  ,ilmn,ia,ispinor) = scale*buffer_r1
                dgxdt(1,mu0+1,ilmn,ia,ispinor) = scale*buffer_r2
                dgxdt(1,mu0+2,ilmn,ia,ispinor) = scale*buffer_r3
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              end if
            end if
          end do
@@ -1957,17 +1957,17 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
              il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
              scale=wt;if (il>1) scale=-scale
              if (cplex==2) then
-!$OMP SINGLE
+!*!$OMP SINGLE
                buffer_r1 = zero ; buffer_i1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1,buffer_i1)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1,buffer_i1)
                do ipw=1,npw
                  buffer_r1 = buffer_r1 + scalr(ipw)*ffnl(ipw,1+ffnl_dir(mua),ilmn)
                  buffer_i1 = buffer_i1 + scali(ipw)*ffnl(ipw,1+ffnl_dir(mua),ilmn)
                end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                if (parity) then
                  dgxdt(1,mu,ilmn,ia,ispinor) = scale*buffer_r1
                  dgxdt(2,mu,ilmn,ia,ispinor) = scale*buffer_i1
@@ -1975,36 +1975,36 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                  dgxdt(1,mu,ilmn,ia,ispinor) =-scale*buffer_i1
                  dgxdt(2,mu,ilmn,ia,ispinor) = scale*buffer_r1
                end if
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              else
-!$OMP SINGLE
+!*!$OMP SINGLE
                cplex_dgxdt(mu) = 2 ! Warning dgxdt is here pure imaginary
-!$OMP END SINGLE
+!*!$OMP END SINGLE
                if (parity) then
-!$OMP SINGLE
+!*!$OMP SINGLE
                  buffer_i1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_i1)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_i1)
                  do ipw=1,npw
                    buffer_i1 = buffer_i1 + scali(ipw)*ffnl(ipw,1+ffnl_dir(mua),ilmn)
                  end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                  dgxdt(1,mu,ilmn,ia,ispinor) = scale*buffer_i1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
                else
-!$OMP SINGLE
+!*!$OMP SINGLE
                  buffer_r1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1)
                  do ipw=1,npw
                    buffer_r1 = buffer_r1 + scalr(ipw)*ffnl(ipw,1+ffnl_dir(mua),ilmn)
                  end do
-!$OMP SINGLE
+!*!$OMP SINGLE
                  dgxdt(1,mu,ilmn,ia,ispinor) = scale*buffer_r1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
                end if
              end if
            end do
@@ -2025,17 +2025,17 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
              do mua=1,3 ! atm. pos
                do mub=1,3 ! k
                  mu=mu0+(mub-1)+3*(mua-1)
-!$OMP SINGLE
+!*!$OMP SINGLE
                  buffer_r1 = zero ; buffer_i1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1,buffer_i1)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1,buffer_i1)
                  do ipw=1,npw
                    buffer_r1 = buffer_r1 + scalr(ipw)*ffnl(ipw,1+mub,ilmn)*kpg(ipw,mua)
                    buffer_i1 = buffer_i1 + scali(ipw)*ffnl(ipw,1+mub,ilmn)*kpg(ipw,mua)
                  end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                  if (parity) then
                    d2gxdt(1,mu,ilmn,ia,ispinor) =-scale2*buffer_i1
                    d2gxdt(2,mu,ilmn,ia,ispinor) = scale2*buffer_r1
@@ -2043,47 +2043,47 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                    d2gxdt(1,mu,ilmn,ia,ispinor) =-scale2*buffer_r1
                    d2gxdt(2,mu,ilmn,ia,ispinor) =-scale2*buffer_i1
                  end if
-!$OMP END SINGLE
+!*!$OMP END SINGLE
                end do
              end do
            else
-!$OMP SINGLE
+!*!$OMP SINGLE
              cplex_d2gxdt(mu0:mu0+8) = 2 ! Warning dgxdt is here pure imaginary
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              if (parity) then
                do mua=1,3 ! atm. pos
                  do mub=1,3 ! k
                    mu=mu0+(mub-1)+3*(mua-1)
-!$OMP SINGLE
+!*!$OMP SINGLE
                    buffer_r1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1)
                    do ipw=1,npw
                      buffer_r1 = buffer_r1 + scalr(ipw)*ffnl(ipw,1+mub,ilmn)*kpg(ipw,mua)
                    end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                    d2gxdt(1,mu,ilmn,ia,ispinor) = scale2*buffer_r1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
                  end do
                end do
              else
                do mua=1,3 ! atm. pos
                  do mub=1,3 ! k
                    mu=mu0+(mub-1)+3*(mua-1)
-!$OMP SINGLE
+!*!$OMP SINGLE
                    buffer_i1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_i1)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_i1)
                    do ipw=1,npw
                      buffer_i1 = buffer_i1 + scali(ipw)*ffnl(ipw,1+mub,ilmn)*kpg(ipw,mua)
                    end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                    d2gxdt(1,mu,ilmn,ia,ispinor) = -scale2*buffer_i1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
                  end do
                end do
              end if
@@ -2104,19 +2104,19 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
              do mua=1,6 ! strain
                do mub=1,3 ! k
                  mu=mu0+(mub-1)+3*(mua-1)
-!$OMP SINGLE
+!*!$OMP SINGLE
                  buffer_r1 = zero ; buffer_i1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1,buffer_i1),&
-!$OMP PRIVATE(aux_r)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1,buffer_i1),&
+!*!$OMP PRIVATE(aux_r)
                  do ipw=1,npw
                    aux_r=ffnl(ipw,4+mua ,ilmn)*kpg(ipw,mub)
                    buffer_r1 = buffer_r1 + aux_r*scalr(ipw)
                    buffer_i1 = buffer_i1 + aux_r*scali(ipw)
                  end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                  if (parity) then
                    d2gxdt(1,mu,ilmn,ia,ispinor) =-scale*buffer_r1
                    d2gxdt(2,mu,ilmn,ia,ispinor) =-scale*buffer_i1
@@ -2124,47 +2124,47 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                    d2gxdt(1,mu,ilmn,ia,ispinor) = scale*buffer_i1
                    d2gxdt(2,mu,ilmn,ia,ispinor) =-scale*buffer_r1
                  end if
-!$OMP END SINGLE
+!*!$OMP END SINGLE
                end do
              end do
            else
-!$OMP SINGLE
+!*!$OMP SINGLE
              cplex_d2gxdt(mu0:mu0+17) = 2 ! Warning d2gxdt is here pure imaginary
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              if (parity) then
                do mua=1,6 ! strain
                  do mub=1,3 ! k
                    mu=mu0+(mub-1)+3*(mua-1)
-!$OMP SINGLE
+!*!$OMP SINGLE
                    buffer_i1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_i1)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_i1)
                    do ipw=1,npw
                      buffer_i1 = buffer_i1 + scali(ipw)*ffnl(ipw,4+mua ,ilmn)*kpg(ipw,mub)
                    end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                    d2gxdt(1,mu,ilmn,ia,ispinor) =-scale*buffer_i1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
                  end do
                end do
              else
                do mua=1,6 ! strain
                  do mub=1,3 ! k
                    mu=mu0+(mub-1)+3*(mua-1)
-!$OMP SINGLE
+!*!$OMP SINGLE
                    buffer_r1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1)
                    do ipw=1,npw
                      buffer_r1 = buffer_r1 + scalr(ipw)*ffnl(ipw,4+mua ,ilmn)*kpg(ipw,mub)
                    end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                    d2gxdt(1,mu,ilmn,ia,ispinor) =-scale*buffer_r1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
                  end do
                end do
              end if
@@ -2185,12 +2185,12 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
            scale=wt;if (il>1) scale=-scale
            scale2=pi*scale
            do mu=1,4
-!$OMP SINGLE
+!*!$OMP SINGLE
              do ipw=1,npw
                scalarr(ipw,mu)=scalr(ipw)*ffnl(ipw,mu,ilmn)
                scalari(ipw,mu)=scali(ipw)*ffnl(ipw,mu,ilmn)
              end do
-!$OMP END SINGLE
+!*!$OMP END SINGLE
            end do
            if(cplex==2) then
              do mub=1,6
@@ -2198,25 +2198,25 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                do mua=1,3
                  mu=mu0+(mua-1)+3*(mub-1)
                  buffer_r1 = zero ; buffer_i1 = zero
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1,buffer_i1)
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1,buffer_i1)
                  do ipw=1,npw
                    buffer_i1 = buffer_i1 + kpg(ipw,mua)*(scalari(ipw,1+nub1)*kpg(ipw,nub2) + &
 &                   scalari(ipw,1+nub2)*kpg(ipw,nub1))
                    buffer_r1 = buffer_r1 + kpg(ipw,mua)*(scalarr(ipw,1+nub1)*kpg(ipw,nub2) + &
 &                   scalarr(ipw,1+nub2)*kpg(ipw,nub1))
                  end do
-!$OMP END DO
+!*!$OMP END DO
                  if (parity) then
-!$OMP SINGLE
+!*!$OMP SINGLE
                    d2gxdt(1,mu,ilmn,ia,ispinor) = scale2*buffer_i1
                    d2gxdt(2,mu,ilmn,ia,ispinor) =-scale2*buffer_r1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
                  else
-!$OMP SINGLE
+!*!$OMP SINGLE
                    d2gxdt(1,mu,ilmn,ia,ispinor) = scale2*buffer_r1
                    d2gxdt(2,mu,ilmn,ia,ispinor) = scale2*buffer_i1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
                  end if
                end do
              end do
@@ -2227,16 +2227,16 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                  do mua=1,3
                    mu=mu0+(mua-1)+3*(mub-1)
                    buffer_i1 = zero
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1)
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1)
                    do ipw=1,npw
                      buffer_i1 = buffer_i1 + kpg(ipw,mua)*(scalari(ipw,1+nub1)*kpg(ipw,nub2) + &
 &                     scalari(ipw,1+nub2)*kpg(ipw,nub1))
                    end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                    d2gxdt(1,mu,ilmn,ia,ispinor) = scale2*buffer_i1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
                  end do
                end do
              else
@@ -2245,16 +2245,16 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                  do mua=1,3
                    mu=mu0+(mua-1)+3*(mub-1)
                    buffer_r1 = zero
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1)
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1)
                    do ipw=1,npw
                      buffer_r1 = buffer_r1 + kpg(ipw,mua)*(scalarr(ipw,1+nub1)*kpg(ipw,nub2) + &
 &                     scalarr(ipw,1+nub2)*kpg(ipw,nub1))
                    end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                    d2gxdt(1,mu,ilmn,ia,ispinor) = scale2*buffer_r1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
                  end do
                end do
              end if
@@ -2277,12 +2277,12 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
            scale=wt;if (il>1) scale=-scale
            scale2=quarter*scale
            do mu=1,10
-!$OMP SINGLE
+!*!$OMP SINGLE
              do ipw=1,npw
                scalarr(ipw,mu)=scalr(ipw)*ffnl(ipw,mu,ilmn)
                scalari(ipw,mu)=scali(ipw)*ffnl(ipw,mu,ilmn)
              end do
-!$OMP END SINGLE
+!*!$OMP END SINGLE
            end do
            if(cplex==2) then
              do mub=1,6
@@ -2295,9 +2295,9 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                  gamc=gamma(nub1,nua2)
                  gamd=gamma(nub2,nua2)
                  buffer_r1 = zero ; buffer_i1 = zero
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1,buffer_i1), &
-!$OMP PRIVATE(kpga,kpgb,kpgc,kpgd)
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1,buffer_i1), &
+!*!$OMP PRIVATE(kpga,kpgb,kpgc,kpgd)
                  do ipw=1,npw
                    kpga=kpg(ipw,nub1)
                    kpgb=kpg(ipw,nub2)
@@ -2308,17 +2308,17 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                    buffer_i1 = buffer_i1 + scalari(ipw,4+gama)*kpgb*kpgd+scalari(ipw,4+gamb)*kpga*kpgd &
 &                   + scalari(ipw,4+gamc)*kpgb*kpgc+scalari(ipw,4+gamd)*kpga*kpgc
                  end do
-!$OMP END DO
+!*!$OMP END DO
                  if (parity) then
-!$OMP SINGLE
+!*!$OMP SINGLE
                    d2gxdt(1,mu,ilmn,ia,ispinor) = scale2*buffer_r1
                    d2gxdt(2,mu,ilmn,ia,ispinor) = scale2*buffer_i1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
                  else
-!$OMP SINGLE
+!*!$OMP SINGLE
                    d2gxdt(1,mu,ilmn,ia,ispinor) =-scale2*buffer_i1
                    d2gxdt(2,mu,ilmn,ia,ispinor) = scale2*buffer_r1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
                  end if
                end do
              end do
@@ -2334,9 +2334,9 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                    gamc=gamma(nub1,nua2)
                    gamd=gamma(nub2,nua2)
                    buffer_r1 = zero
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1), &
-!$OMP PRIVATE(kpga,kpgb,kpgc,kpgd)
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1), &
+!*!$OMP PRIVATE(kpga,kpgb,kpgc,kpgd)
                    do ipw=1,npw
                      kpga=kpg(ipw,nub1)
                      kpgb=kpg(ipw,nub2)
@@ -2345,10 +2345,10 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                      buffer_r1 = buffer_r1 + scalarr(ipw,4+gama)*kpgb*kpgd+scalarr(ipw,4+gamb)*kpga*kpgd &
 &                     + scalarr(ipw,4+gamc)*kpgb*kpgc+scalarr(ipw,4+gamd)*kpga*kpgc
                    end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                    d2gxdt(1,mu,ilmn,ia,ispinor) = scale2*buffer_r1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
                  end do
                end do
              else
@@ -2362,8 +2362,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                    gamc=gamma(nub1,nua2)
                    gamd=gamma(nub2,nua2)
                    buffer_i1 = zero
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1)
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1)
                    do ipw=1,npw
                      kpga=kpg(ipw,nub1)
                      kpgb=kpg(ipw,nub2)
@@ -2372,10 +2372,10 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                      buffer_i1 = buffer_i1 + scalari(ipw,4+gama)*kpgb*kpgd+scalari(ipw,4+gamb)*kpga*kpgd &
 &                     + scalari(ipw,4+gamc)*kpgb*kpgc+scalari(ipw,4+gamd)*kpga*kpgc
                    end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                    d2gxdt(1,mu,ilmn,ia,ispinor) =-scale2*buffer_i1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
                  end do
                end do
              end if
@@ -2395,19 +2395,19 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
            if (cplex==2) then
-!$OMP SINGLE
+!*!$OMP SINGLE
              buffer_ra = zero ; buffer_rb = zero
              buffer_rc = zero ; buffer_rd = zero
              buffer_re = zero ; buffer_rf = zero
              buffer_ia = zero ; buffer_ib = zero
              buffer_ic = zero ; buffer_id = zero
              buffer_ie = zero ; buffer_if = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_ra,buffer_rb,buffer_rc), &
-!$OMP REDUCTION(+:buffer_rd,buffer_re,buffer_rf), &
-!$OMP REDUCTION(+:buffer_ia,buffer_ib,buffer_ic), &
-!$OMP REDUCTION(+:buffer_id,buffer_ie,buffer_if)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_ra,buffer_rb,buffer_rc), &
+!*!$OMP REDUCTION(+:buffer_rd,buffer_re,buffer_rf), &
+!*!$OMP REDUCTION(+:buffer_ia,buffer_ib,buffer_ic), &
+!*!$OMP REDUCTION(+:buffer_id,buffer_ie,buffer_if)
              do ipw=1,npw
                buffer_ra = buffer_ra + scalr(ipw)*ffnl(ipw,5,ilmn)
                buffer_rb = buffer_rb + scalr(ipw)*ffnl(ipw,6,ilmn)
@@ -2422,8 +2422,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                buffer_ie = buffer_ie + scali(ipw)*ffnl(ipw,9,ilmn)
                buffer_if = buffer_if + scali(ipw)*ffnl(ipw,10,ilmn)
              end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
              if (parity) then
                d2gxdt(1,mu0  ,ilmn,ia,ispinor) = scale*buffer_ra
                d2gxdt(2,mu0  ,ilmn,ia,ispinor) = scale*buffer_ia
@@ -2451,17 +2451,17 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                d2gxdt(1,mu0+5,ilmn,ia,ispinor) =-scale*buffer_if
                d2gxdt(2,mu0+5,ilmn,ia,ispinor) = scale*buffer_rf
              end if
-!$OMP END SINGLE
+!*!$OMP END SINGLE
            else
              if (parity) then
-!$OMP SINGLE
+!*!$OMP SINGLE
                buffer_ra = zero ; buffer_rb = zero
                buffer_rc = zero ; buffer_rd = zero
                buffer_re = zero ; buffer_rf = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_ra,buffer_rb,buffer_rc), &
-!$OMP REDUCTION(+:buffer_rd,buffer_re,buffer_rf)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_ra,buffer_rb,buffer_rc), &
+!*!$OMP REDUCTION(+:buffer_rd,buffer_re,buffer_rf)
                do ipw=1,npw
                  buffer_ra = buffer_ra + scalr(ipw)*ffnl(ipw,5,ilmn)
                  buffer_rb = buffer_rb + scalr(ipw)*ffnl(ipw,6,ilmn)
@@ -2470,24 +2470,24 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                  buffer_re = buffer_re + scalr(ipw)*ffnl(ipw,9,ilmn)
                  buffer_rf = buffer_rf + scalr(ipw)*ffnl(ipw,10,ilmn)
                end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                d2gxdt(1,mu0  ,ilmn,ia,ispinor) = scale*buffer_ra
                d2gxdt(1,mu0+1,ilmn,ia,ispinor) = scale*buffer_rb
                d2gxdt(1,mu0+2,ilmn,ia,ispinor) = scale*buffer_rc
                d2gxdt(1,mu0+3,ilmn,ia,ispinor) = scale*buffer_rd
                d2gxdt(1,mu0+4,ilmn,ia,ispinor) = scale*buffer_re
                d2gxdt(1,mu0+5,ilmn,ia,ispinor) = scale*buffer_rf
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              else
-!$OMP SINGLE
+!*!$OMP SINGLE
                buffer_ia = zero ; buffer_ib = zero
                buffer_ic = zero ; buffer_id = zero
                buffer_ie = zero ; buffer_if = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_ia,buffer_ib,buffer_ic), &
-!$OMP REDUCTION(+:buffer_id,buffer_ie,buffer_if)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_ia,buffer_ib,buffer_ic), &
+!*!$OMP REDUCTION(+:buffer_id,buffer_ie,buffer_if)
                do ipw=1,npw
                  buffer_ia = buffer_ia + scali(ipw)*ffnl(ipw,5,ilmn)
                  buffer_ib = buffer_ib + scali(ipw)*ffnl(ipw,6,ilmn)
@@ -2496,15 +2496,15 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                  buffer_ie = buffer_ie + scali(ipw)*ffnl(ipw,9,ilmn)
                  buffer_if = buffer_if + scali(ipw)*ffnl(ipw,10,ilmn)
                end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                d2gxdt(1,mu0  ,ilmn,ia,ispinor) =-scale*buffer_ia
                d2gxdt(1,mu0+1,ilmn,ia,ispinor) =-scale*buffer_ib
                d2gxdt(1,mu0+2,ilmn,ia,ispinor) =-scale*buffer_ic
                d2gxdt(1,mu0+3,ilmn,ia,ispinor) =-scale*buffer_id
                d2gxdt(1,mu0+4,ilmn,ia,ispinor) =-scale*buffer_ie
                d2gxdt(1,mu0+5,ilmn,ia,ispinor) =-scale*buffer_if
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              end if
            end if
          end do
@@ -2524,17 +2524,17 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
            if (cplex==2) then
-!$OMP SINGLE
+!*!$OMP SINGLE
              buffer_r1 = zero ; buffer_i1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1,buffer_i1)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1,buffer_i1)
              do ipw=1,npw
                buffer_r1 = buffer_r1 + scalr(ipw)*ffnl(ipw,4+ffnl_dir(1),ilmn)
                buffer_i1 = buffer_i1 + scali(ipw)*ffnl(ipw,4+ffnl_dir(1),ilmn)
              end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
              if (parity) then
                d2gxdt(1,mu0,ilmn,ia,ispinor) = scale*buffer_r1
                d2gxdt(2,mu0,ilmn,ia,ispinor) = scale*buffer_i1
@@ -2542,33 +2542,33 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                d2gxdt(1,mu0,ilmn,ia,ispinor) =-scale*buffer_i1
                d2gxdt(2,mu0,ilmn,ia,ispinor) = scale*buffer_r1
              end if
-!$OMP END SINGLE
+!*!$OMP END SINGLE
            else
              if (parity) then
-!$OMP SINGLE
+!*!$OMP SINGLE
                buffer_r1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_r1)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_r1)
                do ipw=1,npw
                  buffer_r1 = buffer_r1 + scalr(ipw)*ffnl(ipw,4+ffnl_dir(1),ilmn)
                end do
-!$OMP END DO
-!$OMP SINGLE
+!*!$OMP END DO
+!*!$OMP SINGLE
                d2gxdt(1,mu0,ilmn,ia,ispinor) = scale*buffer_r1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              else
-!$OMP SINGLE
+!*!$OMP SINGLE
                buffer_i1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_i1)
+!*!$OMP END SINGLE
+!*!$OMP DO &
+!*!$OMP REDUCTION(+:buffer_i1)
                do ipw=1,npw
                  buffer_i1 = buffer_i1 + scali(ipw)*ffnl(ipw,4+ffnl_dir(1),ilmn)
                end do
-!$OMP SINGLE
+!*!$OMP SINGLE
                d2gxdt(1,mu0,ilmn,ia,ispinor) =-scale*buffer_i1
-!$OMP END SINGLE
+!*!$OMP END SINGLE
              end if
            end if
          end do
@@ -2581,15 +2581,15 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
      end do ! End loop on atoms
 
 !    Deallocate temporary space
-!$OMP SECTIONS
-!$OMP SECTION
+!*!$OMP SECTIONS
+!*!$OMP SECTION
      ABI_DEALLOCATE(scali)
-!$OMP SECTION
+!*!$OMP SECTION
      ABI_DEALLOCATE(scalr)
-!$OMP END SECTIONS
+!*!$OMP END SECTIONS
 
    end do !  End loop on spinorial components
-!$OMP END PARALLEL
+!*!$OMP END PARALLEL
 
 !  ==========================================================================
  end if

@@ -632,8 +632,8 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 
 !      Scale gxfac with 4pi/sqr(omega).(-i)^l
        if (paw_opt/=3) then
-!$OMP PARALLEL PRIVATE(ilmn,il,parity,scale,ii,ic,jc)
-!$OMP DO
+!*!$OMP PARALLEL PRIVATE(ilmn,il,parity,scale,ii,ic,jc)
+!*!$OMP DO
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
@@ -649,9 +649,9 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
              end if
            end if
          end do
-!$OMP END DO
+!*!$OMP END DO
          if (choice>1) then
-!$OMP DO
+!*!$OMP DO
            do ilmn=1,nlmn
              il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
              scale=wt;if (il>1) scale=-scale
@@ -684,10 +684,10 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
                end if
              end if
            end do
-!$OMP END DO
+!*!$OMP END DO
          end if
          if (choice==8.or.choice==81) then
-!$OMP DO
+!*!$OMP DO
            do ilmn=1,nlmn
              il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
              scale=wt;if (il>1) scale=-scale
@@ -720,15 +720,15 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
                end if
              end if
            end do
-!$OMP END DO
+!*!$OMP END DO
          end if
-!$OMP END PARALLEL
+!*!$OMP END PARALLEL
        end if
 
 !      Scale gxfac_sij with 4pi/sqr(omega).(-i)^l
        if (paw_opt>=3) then
-!$OMP PARALLEL PRIVATE(ilmn,il,parity,scale,ii,ic,jc)
-!$OMP DO
+!*!$OMP PARALLEL PRIVATE(ilmn,il,parity,scale,ii,ic,jc)
+!*!$OMP DO
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
@@ -744,9 +744,9 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
              end if
            end if
          end do
-!$OMP END DO
+!*!$OMP END DO
          if (choice>1) then
-!$OMP DO
+!*!$OMP DO
            do ilmn=1,nlmn
              il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
              scale=wt;if (il>1) scale=-scale
@@ -779,10 +779,10 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
                end if
              end if
            end do
-!$OMP END DO
+!*!$OMP END DO
          end if
          if (choice==8.or.choice==81) then
-!$OMP DO
+!*!$OMP DO
            do ilmn=1,nlmn
              il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
              scale=wt;if (il>1) scale=-scale
@@ -815,29 +815,29 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
                end if
              end if
            end do
-!$OMP END DO
+!*!$OMP END DO
          end if
-!$OMP END PARALLEL
+!*!$OMP END PARALLEL
        end if
 
 !      Compute <g|Vnl|c> (or derivatives) for each plane wave:
        if (paw_opt/=3) then
-!$OMP PARALLEL PRIVATE(ipw,ilmn,fdf,fdb,ffnl_dir1)
+!*!$OMP PARALLEL PRIVATE(ipw,ilmn,fdf,fdb,ffnl_dir1)
 
 !        ------
          if (choice==1) then ! <g|Vnl|c>
-!$OMP DO
+!*!$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero
              do ilmn=1,nlmn
                ztab(ipw)=ztab(ipw)+ffnl(ipw,1,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
              end do
            end do
-!$OMP END DO
+!*!$OMP END DO
 
 !        ------
          else if (choice==2) then ! derivative w.r.t. atm. pos
-!$OMP DO
+!*!$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero
              do ilmn=1,nlmn
@@ -848,13 +848,13 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
                ztab(ipw)=ztab(ipw)+ffnl(ipw,1,ilmn)*cmplx(dgxdtfac_(1,1,ilmn),dgxdtfac_(2,1,ilmn),kind=dp)
              end do
            end do
-!$OMP END DO
+!*!$OMP END DO
 
 !        ------
          else if (choice==3) then ! derivative w.r.t. strain
            ffnl_dir1=2; if(dimffnl>2) ffnl_dir1=1+idir
            if (idir<=3) then
-!$OMP DO
+!*!$OMP DO
              do ipw=1,npw
                ztab(ipw)=czero
                do ilmn=1,nlmn
@@ -863,9 +863,9 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &                 -ffnl(ipw,ffnl_dir1,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
                end do
              end do
-!$OMP END DO
+!*!$OMP END DO
            else
-!$OMP DO
+!*!$OMP DO
              do ipw=1,npw
                ztab(ipw)=czero
                do ilmn=1,nlmn
@@ -873,14 +873,14 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &                 -ffnl(ipw,ffnl_dir1,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
                end do
              end do
-!$OMP END DO
+!*!$OMP END DO
            end if
 
 
 !        ------
          else if (choice==5) then ! full derivative w.r.t. k
            ffnl_dir1=2; if(dimffnl>2) ffnl_dir1=1+idir
-!$OMP DO
+!*!$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero
              do ilmn=1,nlmn
@@ -888,37 +888,37 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &               +ffnl(ipw,ffnl_dir1,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
              end do
            end do
-!$OMP END DO
+!*!$OMP END DO
 
 !        ------
          else if (choice==51) then ! right derivative: <G|p>V<dp/dk|psi>
-!$OMP DO
+!*!$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero
              do ilmn=1,nlmn
                ztab(ipw)=ztab(ipw)+ffnl(ipw,1,ilmn)*cmplx(dgxdtfac_(1,1,ilmn),dgxdtfac_(2,1,ilmn),kind=dp)
              end do
            end do
-!$OMP END DO
+!*!$OMP END DO
 
 !        ------
          else if (choice==52) then ! left derivative: <G|dp/dk>V<p|psi>
            ffnl_dir1=2; if(dimffnl>2) ffnl_dir1=1+idir
-!$OMP DO
+!*!$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero
              do ilmn=1,nlmn
                ztab(ipw)=ztab(ipw)+ffnl(ipw,ffnl_dir1,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
              end do
            end do
-!$OMP END DO
+!*!$OMP END DO
 
 !        ------
          else if (choice==53) then ! twist derivative: <G|dp/dk_(idir+1)>V<dp/dk_(idir-1)|psi>
 !                                                     -<G|dp/dk_(idir-1)>V<dp/dk_(idir+1)|psi>
            fdf = ffnl_dir_dat(2*idir-1)
            fdb = ffnl_dir_dat(2*idir)
-!$OMP DO
+!*!$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero
              do ilmn=1,nlmn
@@ -927,14 +927,14 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &               -ffnl(ipw,fdb,ilmn)*cmplx(dgxdtfac_(1,1,ilmn),dgxdtfac_(2,1,ilmn),kind=dp)
              end do
            end do
-!$OMP END DO
+!*!$OMP END DO
 
 !        ------
          else if (choice==8) then ! full second order derivative w.r.t. k
            !idir= (xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9)
            ffnl_dir(1)=(idir-1)/3+1; ffnl_dir(2)=mod((idir-1),3)+1
            ffnl_dir(3) = gamma(ffnl_dir(1),ffnl_dir(2))
-!$OMP DO
+!*!$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero
              do ilmn=1,nlmn
@@ -945,14 +945,14 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &               +ffnl(ipw,1+ffnl_dir(2),ilmn)*cmplx( dgxdtfac_(1,1,ilmn), dgxdtfac_(2,1,ilmn),kind=dp)
              end do
            end do
-!$OMP END DO
+!*!$OMP END DO
 
 !        ------
          else if (choice==81) then ! partial second order derivative w.r.t. k
                               ! full derivative w.r.t. k1, right derivative w.r.t. k2
            !idir= (xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9)
            ffnl_dir(1)=(idir-1)/3+1
-!$OMP DO
+!*!$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero
              do ilmn=1,nlmn
@@ -961,46 +961,46 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &               +ffnl(ipw,1+ffnl_dir(1),ilmn)*cmplx( dgxdtfac_(1,1,ilmn), dgxdtfac_(2,1,ilmn),kind=dp)
              end do
            end do
-!$OMP END DO
+!*!$OMP END DO
 
 !        ------
          else
-!$OMP WORKSHARE
+!*!$OMP WORKSHARE
            ztab(:)=czero
-!$OMP END WORKSHARE
+!*!$OMP END WORKSHARE
          end if
 
 
 !        ------
-!$OMP DO
+!*!$OMP DO
          do ipw=1,npw
            ztab(ipw)=ztab(ipw)*cmplx(ph3d(1,ipw,iaph3d),-ph3d(2,ipw,iaph3d),kind=dp)
            vect(1,ipw+ipwshft)=vect(1,ipw+ipwshft)+real(ztab(ipw))
            vect(2,ipw+ipwshft)=vect(2,ipw+ipwshft)+aimag(ztab(ipw))
          end do
-!$OMP END DO
+!*!$OMP END DO
 
-!$OMP END PARALLEL
+!*!$OMP END PARALLEL
        end if
 
 !      Compute <g|S|c> (or derivatives) for each plane wave:
        if (paw_opt>=3) then
-!$OMP PARALLEL PRIVATE(ilmn,ipw,fdf,fdb,ffnl_dir1)
+!*!$OMP PARALLEL PRIVATE(ilmn,ipw,fdf,fdb,ffnl_dir1)
 
 !        ------
          if (choice==1) then ! <g|S|c>
-!$OMP DO
+!*!$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero
              do ilmn=1,nlmn
                ztab(ipw)=ztab(ipw)+ffnl(ipw,1,ilmn)*cmplx(gxfacs_(1,ilmn),gxfacs_(2,ilmn),kind=dp)
              end do
            end do
-!$OMP END DO
+!*!$OMP END DO
 
 !        ------
          else if (choice==2) then ! derivative w.r.t. atm. pos
-!$OMP DO
+!*!$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero
              do ilmn=1,nlmn
@@ -1011,13 +1011,13 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
                ztab(ipw)=ztab(ipw)+ffnl(ipw,1,ilmn)*cmplx(dgxdtfacs_(1,1,ilmn),dgxdtfacs_(2,1,ilmn),kind=dp)
              end do
            end do
-!$OMP END DO
+!*!$OMP END DO
 
 !        ------
          else if (choice==3) then ! derivative w.r.t. strain
            ffnl_dir1=2; if(dimffnl>2) ffnl_dir1=1+idir
            if (idir<=3) then
-!$OMP DO
+!*!$OMP DO
              do ipw=1,npw
                ztab(ipw)=czero
                do ilmn=1,nlmn
@@ -1026,9 +1026,9 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &                 -ffnl(ipw,ffnl_dir1,ilmn)*cmplx(gxfacs_(1,ilmn),gxfacs_(2,ilmn),kind=dp)
                end do
              end do
-!$OMP END DO
+!*!$OMP END DO
            else
-!$OMP DO
+!*!$OMP DO
              do ipw=1,npw
                ztab(ipw)=czero
                do ilmn=1,nlmn
@@ -1036,13 +1036,13 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &                 -ffnl(ipw,ffnl_dir1,ilmn)*cmplx(gxfacs_(1,ilmn),gxfacs_(2,ilmn),kind=dp)
                end do
              end do
-!$OMP END DO
+!*!$OMP END DO
            end if
 
 !        ------
          else if (choice==5) then ! full derivative w.r.t. k
            ffnl_dir1=2; if(dimffnl>2) ffnl_dir1=1+idir
-!$OMP DO
+!*!$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero
              do ilmn=1,nlmn
@@ -1050,37 +1050,37 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &               +ffnl(ipw,ffnl_dir1,ilmn)*cmplx(gxfacs_(1,ilmn),gxfacs_(2,ilmn),kind=dp)
              end do
            end do
-!$OMP END DO
+!*!$OMP END DO
 
 !        ------
          else if (choice==51) then ! right derivative: <G|p>S<dp/dk|psi>
-!$OMP DO
+!*!$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero
              do ilmn=1,nlmn
                ztab(ipw)=ztab(ipw)+ffnl(ipw,1,ilmn)*cmplx(dgxdtfacs_(1,1,ilmn),dgxdtfacs_(2,1,ilmn),kind=dp)
              end do
            end do
-!$OMP END DO
+!*!$OMP END DO
 
 !        ------
          else if (choice==52) then ! left derivative: <G|dp/dk>S<p|psi>
            ffnl_dir1=2; if(dimffnl>2) ffnl_dir1=1+idir
-!$OMP DO
+!*!$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero
              do ilmn=1,nlmn
                ztab(ipw)=ztab(ipw)+ffnl(ipw,ffnl_dir1,ilmn)*cmplx(gxfacs_(1,ilmn),gxfacs_(2,ilmn),kind=dp)
              end do
            end do
-!$OMP END DO
+!*!$OMP END DO
 
 !        ------
          else if (choice==53) then ! twist derivative: <G|dp/dk_(idir+1)>S<dp/dk_(idir-1)|psi> -
 !          <G|dp/dk_(idir-1)>V<dp/dk_(idir+1)|psi>
            fdf = ffnl_dir_dat(2*idir-1)
            fdb = ffnl_dir_dat(2*idir)
-!$OMP DO
+!*!$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero
              do ilmn=1,nlmn
@@ -1089,14 +1089,14 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &               -ffnl(ipw,fdb,ilmn)*cmplx(dgxdtfacs_(1,1,ilmn),dgxdtfacs_(2,1,ilmn),kind=dp)
              end do
            end do
-!$OMP END DO
+!*!$OMP END DO
 
 !        ------
          else if (choice==8) then ! full second order derivative w.r.t. k
            !idir= (xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9)
            ffnl_dir(1)=(idir-1)/3+1; ffnl_dir(2)=mod((idir-1),3)+1
            ffnl_dir(3) = gamma(ffnl_dir(1),ffnl_dir(2))
-!$OMP DO
+!*!$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero
              do ilmn=1,nlmn
@@ -1107,14 +1107,14 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &               +ffnl(ipw,1+ffnl_dir(2),ilmn)*cmplx( dgxdtfacs_(1,1,ilmn), dgxdtfacs_(2,1,ilmn),kind=dp)
              end do
            end do
-!$OMP END DO
+!*!$OMP END DO
 
 !        ------
          else if (choice==81) then ! partial second order derivative w.r.t. k
                               ! full derivative w.r.t. k1, right derivative w.r.t. k2
            !idir= (xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9)
            ffnl_dir(1)=(idir-1)/3+1
-!$OMP DO
+!*!$OMP DO
            do ipw=1,npw
              ztab(ipw)=czero
              do ilmn=1,nlmn
@@ -1123,33 +1123,33 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &               +ffnl(ipw,1+ffnl_dir(1),ilmn)*cmplx( dgxdtfacs_(1,1,ilmn), dgxdtfacs_(2,1,ilmn),kind=dp)
              end do
            end do
-!$OMP END DO
+!*!$OMP END DO
 
 !        ------
          else
-!$OMP WORKSHARE
+!*!$OMP WORKSHARE
            ztab(:)=czero
-!$OMP END WORKSHARE
+!*!$OMP END WORKSHARE
          end if
 
 
 !        ------
 !        The OMP WORKSHARE directive doesn't have a good performance with Intel Compiler
-!        !$OMP WORKSHARE
+!        !*!$OMP WORKSHARE
 !        ztab(:)=ztab(:)*cmplx(ph3d(1,:,iaph3d),-ph3d(2,:,iaph3d),kind=dp)
-!        !$OMP END WORKSHARE
-!        !$OMP WORKSHARE
+!        !*!$OMP END WORKSHARE
+!        !*!$OMP WORKSHARE
 !        svect(1,1+ipwshft:npw+ipwshft)=svect(1,1+ipwshft:npw+ipwshft)+real(ztab(:))
 !        svect(2,1+ipwshft:npw+ipwshft)=svect(2,1+ipwshft:npw+ipwshft)+aimag(ztab(:))
-!        !$OMP END WORKSHARE
-!$OMP DO
+!        !*!$OMP END WORKSHARE
+!*!$OMP DO
          do ipw=1,npw
            ztab(ipw)=ztab(ipw)*cmplx(ph3d(1,ipw,iaph3d),-ph3d(2,ipw,iaph3d),kind=dp)
            svect(1,ipw+ipwshft)=svect(1,ipw+ipwshft)+real(ztab(ipw))
            svect(2,ipw+ipwshft)=svect(2,ipw+ipwshft)+aimag(ztab(ipw))
          end do
-!$OMP END DO
-!$OMP END PARALLEL
+!*!$OMP END DO
+!*!$OMP END PARALLEL
        end if
 
 !      End loop on atoms
