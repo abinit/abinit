@@ -200,6 +200,8 @@ type(skw_t) function skw_new(cryst, lpratio, cplex, nband, nkpt, nsppol, kpts, e
 
 ! *********************************************************************
 
+ ABI_CHECK(nkpt > 1, sjoin("nkpt must be > 1 but got:", itoa(nkpt)))
+
  call cwtime(cpu_tot, wall_tot, gflops_tot, "start")
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)

@@ -4086,9 +4086,9 @@ function ebands_interp_kmesh(ebands, cryst, itype, ords, intp_kptrlatt, intp_nsh
  ABI_MALLOC(new_npwarr, (new_nkibz))
  new_npwarr = maxval(ebands%npwarr)
  new_bantot = sum(new_nband); new_mband = maxval(new_nband)
- ABI_MALLOC(new_doccde, (new_bantot))
- ABI_MALLOC(new_eig, (new_bantot))
- ABI_MALLOC(new_occ, (new_bantot))
+ ABI_CALLOC(new_doccde, (new_bantot))
+ ABI_CALLOC(new_eig, (new_bantot))
+ ABI_CALLOC(new_occ, (new_bantot))
 
  call ebands_init(new_bantot,new,ebands%nelect,new_doccde,new_eig,new_istwfk,new_kibz,&
    new_nband,new_nkibz,new_npwarr,ebands%nsppol,ebands%nspinor,ebands%tphysel,ebands%tsmear,&
@@ -4212,9 +4212,9 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, itype, ords, kpath, c
  ABI_MALLOC(new_npwarr, (new_nkibz))
  new_npwarr = maxval(ebands%npwarr)
  new_bantot = sum(new_nband); new_mband = maxval(new_nband)
- ABI_MALLOC(new_doccde, (new_bantot))
- ABI_MALLOC(new_eig, (new_bantot))
- ABI_MALLOC(new_occ, (new_bantot))
+ ABI_CALLOC(new_eig, (new_bantot))
+ ABI_CALLOC(new_doccde, (new_bantot))
+ ABI_CALLOC(new_occ, (new_bantot))
  ABI_CALLOC(new_wtk, (new_nkibz))
 
  call ebands_init(new_bantot,new,ebands%nelect,new_doccde,new_eig,new_istwfk,kpath%points,&

@@ -2300,7 +2300,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      call ebands_report_gap(QP_BSt,header='QP Band Gaps',unit=ab_out)
 
      call wrtout(std_out, "Interpolating QP energies.")
-     call ebands_interpolate_kpath(QP_BSt, dtset, cryst, dtfil%filnam_ds(4), comm)
+     if (QP_BSt%nkpt > 1) then
+       call ebands_interpolate_kpath(QP_BSt, dtset, cryst, dtfil%filnam_ds(4), comm)
+     end if
    end if ! Sigp%nkptgw==Kmesh%nibz
    !
    ! === Write SCF data in case of self-consistent calculation ===
