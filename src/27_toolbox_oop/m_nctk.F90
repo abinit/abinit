@@ -513,8 +513,6 @@ subroutine nctk_test_mpiio()
    apath = pick_aname()
    ncerr = nf90_create(apath, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), ncid=ncid, &
      comm=xmpi_comm_self, info=xmpio_info)
-   ncerr = nf90_close(ncid)
-   call delete_file(apath, ierr)
 
    if (ncerr == nf90_noerr) then
      nctk_has_mpiio = .True.
@@ -528,6 +526,9 @@ subroutine nctk_test_mpiio()
      MSG_WARNING(sjoin("Strange, netcdf seems to support MPI-IO but: ", nf90_strerror(ncerr)))
      nctk_has_mpiio = .False.
    end if
+
+   ncerr = nf90_close(ncid)
+   call delete_file(apath, ierr)
  end if
 
  ! Master broadcast nctk_has_mpiio
