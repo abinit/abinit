@@ -402,10 +402,11 @@ type(skw_t) function skw_new(cryst, lpratio, cplex, nband, nkpt, nsppol, kpts, e
  ! Issue warning if error too large.
  list2 = [mare, mae_meV]; call xmpi_sum(list2, comm, ierr); mare = list2(1); mae_meV = list2(2)
  cnt = bcount * nkpt * nsppol; mare = mare / cnt; mae_meV = mae_meV / cnt
- write(std_out,"(2(a,es12.4),a)")"MARE: ",mare, ", MAE: ", mae_meV, "[meV]"
+ write(std_out,"(2(a,es12.4),a)")" MARE: ",mare, ", MAE: ", mae_meV, "[meV]"
  if (mae_meV > tol6) then
-   msg = "Large error detected in SKW interpolation!"
-   call wrtout(ab_out, msg)
+   write(msg,"(2a,2(a,es12.4),a)") &
+     "Large error detected in SKW interpolation!",ch10," MARE: ",mare, ", MAE: ", mae_meV, "[meV]"
+   !call wrtout(ab_out, msg)
    MSG_WARNING(msg)
  end if
 

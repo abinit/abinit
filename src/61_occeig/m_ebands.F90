@@ -3703,12 +3703,13 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block, spin_block) re
 !scalars
  integer,parameter :: sppoldbl1=1
  integer :: kxord,kyord,kzord,nxknot,nyknot,nzknot,ierr,nkfull,ikf
- integer :: spin,band,ik_ibz,timrev,ix,iy,iz,nkx,nky,nkz
+ integer :: spin,band,ik_ibz,timrev,ix,iy,iz,nkx,nky,nkz,ii
  real(dp) :: dksqmax
  character(len=500) :: msg
 !arrays
  integer :: ngkpt(3)
  integer,allocatable :: bz2ibz(:,:)
+ logical :: shifted(3)
  real(dp),allocatable :: xvec(:),yvec(:),zvec(:),xyzdata(:,:,:),kfull(:,:)
 
 ! *********************************************************************
@@ -3736,27 +3737,33 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block, spin_block) re
    return
  end if
 
- ! Build BZ mesh Note that:
+ ! Build BZ mesh Note that in the simplest case of unshifted mesh:
  ! 1) k-point coordinates are in [0, 1]
- ! 2) The mesh is closed e.g. (0,0,0) and (1,1,1) are included
+ ! 2) The mesh is closed i.e. (0,0,0) and (1,1,1) are included
  ngkpt(1)=ebands%kptrlatt(1,1)
  ngkpt(2)=ebands%kptrlatt(2,2)
  ngkpt(3)=ebands%kptrlatt(3,3)
 
- nkx = ngkpt(1)+1; nky = ngkpt(2)+1; nkz = ngkpt(3)+1
+ ! Multiple shifts are not supported here.
+ shifted(:) = abs(ebands%shiftk(:,1)) > tol8
+ nkx = ngkpt(1)+1; if (shifted(1)) nkx = nkx + 1
+ nky = ngkpt(2)+1; if (shifted(2)) nky = nky + 1
+ nkz = ngkpt(3)+1; if (shifted(3)) nkz = nkz + 1
  ABI_MALLOC(xvec, (nkx))
  ABI_MALLOC(yvec, (nky))
  ABI_MALLOC(zvec, (nkz))
 
- ! Multiple shifts are not supported here.
  do ix=1,nkx
-   xvec(ix) = (ix-one+ebands%shiftk(1,1)) / ngkpt(1)
+   ii = ix; if (shifted(1)) ii = ii - 1
+   xvec(ix) = (ii-one+ebands%shiftk(1,1)) / ngkpt(1)
  end do
  do iy=1,nky
-   yvec(iy) = (iy-one+ebands%shiftk(2,1)) / ngkpt(2)
+   ii = iy; if (shifted(2)) ii = ii - 1
+   yvec(iy) = (ii-one+ebands%shiftk(2,1)) / ngkpt(2)
  end do
  do iz=1,nkz
-   zvec(iz) = (iz-one+ebands%shiftk(3,1)) / ngkpt(3)
+   ii = iz; if (shifted(3)) ii = ii - 1
+   zvec(iz) = (ii-one+ebands%shiftk(3,1)) / ngkpt(3)
  end do
 
  ! Build list of k-points in full BZ (ordered as required by B-spline routines)
