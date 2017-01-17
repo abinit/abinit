@@ -3567,6 +3567,8 @@ end subroutine  elastic_contribution
 subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,strain,strten,cells,ncell,&
 &                                    index_cells,comm)
 
+!Arguments ------------------------------------
+! scalar
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -3574,8 +3576,6 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,stra
 !End of the abilint section
 
 
-!Arguments ------------------------------------
-! scalar
   real(dp),intent(out):: energy
   integer, intent(in) :: natom,ncell,ncoeff
   integer, intent(in) :: comm
