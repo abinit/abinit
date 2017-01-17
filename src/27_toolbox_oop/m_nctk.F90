@@ -534,13 +534,19 @@ subroutine nctk_test_mpiio()
  ! Master broadcast nctk_has_mpiio
  call xmpi_bcast(nctk_has_mpiio,master,xmpi_world,ierr)
 
-  if (.not. nctk_has_mpiio) then
-    write(msg,"(5a)")&
-       "The netcdf library does not support parallel IO, see message above",ch10,&
-       "Abinit won't be able to produce files in parallel e.g. when paral_kgb==1 is used.",ch10,&
-       "Action: install a netcdf4+HDF5 library with MPI-IO support."
-    MSG_WARNING(msg)
-  end if
+ if (.not. nctk_has_mpiio) then
+   write(msg,"(5a)")&
+      "The netcdf library does not support parallel IO, see message above",ch10,&
+      "Abinit won't be able to produce files in parallel e.g. when paral_kgb==1 is used.",ch10,&
+      "Action: install a netcdf4+HDF5 library with MPI-IO support."
+   MSG_WARNING(msg)
+ end if
+#endif
+
+#ifdef HAVE_NETCDF_DEFAULT
+ if (.not. nctk_has_mpiio) then
+   MSG_ERROR("--netcdf-default is on but netcdf library does not support MPI-IO. Aborting now")
+ end if
 #endif
 
 end subroutine nctk_test_mpiio
