@@ -2621,6 +2621,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    else
      MSG_ERROR("When nkpath /= 0 or kptopt < 0, kptbounds must be defined in the input file.")
    end if
+ else
+   ABI_MALLOC(dtset%kptbounds, (0,0))
  end if
 #endif
 

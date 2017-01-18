@@ -827,8 +827,8 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%ndivsm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ndivsm','INT',0)
 
- intarr(1,:)=dtsets(:)%nkpath
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nkpath','INT',0)
+ !intarr(1,:)=dtsets(:)%nkpath
+ !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nkpath','INT',0)
 
  intarr(1,:)=dtsets(:)%ndynimage
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ndynimage','INT',0)
