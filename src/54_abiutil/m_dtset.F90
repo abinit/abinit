@@ -1173,6 +1173,11 @@ subroutine dtset_copy(dtout, dtin)
 
  DBG_EXIT("COLL")
 
+ dtout%ndivsm = dtin%ndivsm
+ dtout%nkpath = dtin%nkpath
+ dtout%einterp = dtin%einterp
+ call alloc_copy(dtin%kptbounds, dtout%kptbounds)
+
 end subroutine dtset_copy
 !!***
 
@@ -1337,6 +1342,9 @@ subroutine dtset_free(dtset)
  if (allocated(dtset%kpt))         then
    ABI_DEALLOCATE(dtset%kpt)
  end if
+ if (allocated(dtset%kptbounds)) then
+   ABI_DEALLOCATE(dtset%kptbounds)
+ end if
  if (allocated(dtset%kptgw))       then
    ABI_DEALLOCATE(dtset%kptgw)
  end if
@@ -1409,7 +1417,7 @@ subroutine dtset_free(dtset)
  if (allocated(dtset%ziontypat))   then
    ABI_DEALLOCATE(dtset%ziontypat)
  end if
- if (allocated(dtset%znucl))       then
+ if (allocated(dtset%znucl)) then
    ABI_DEALLOCATE(dtset%znucl)
  end if
 

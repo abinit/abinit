@@ -907,9 +907,13 @@ type dataset_type
  real(dp) :: ddb_shiftq(3)
 !END EPH
 
+ integer :: ndivsm=0
+ integer :: nkpath=0
+ real(dp) :: einterp(4)=zero
+ real(dp),allocatable :: kptbounds(:,:)
+
  end type dataset_type
 !!***
-
 
 !----------------------------------------------------------------------
 

@@ -41,6 +41,7 @@ MODULE m_fstrings
  public :: removesp        ! Removes spaces, tabs, and control characters in string str
  public :: replace_ch0     ! Replace final '\0' with whitespaces
  public :: lstrip          ! Remove leading spaces from string
+ public :: replace         ! Replace chars in string.
  public :: ljust           ! Return a left-justified string of length width.
  public :: lpad            ! Pad a string adding repeat characters fillchar on the left side.
  public :: round_brackets  ! Return a new string enclosed in parentheses if not already present.
@@ -431,6 +432,48 @@ elemental subroutine replace_ch0(string)
   end if
 
 end subroutine replace_ch0
+!!***
+
+!!****m* m_fstrings/replace
+!! NAME
+!!  replace
+!!
+!! FUNCTION
+!!  Replace `text` with `rep` in string `s`. Return new string.
+!!
+!! NOTES:
+!!  The length of the output string is increased by 500 but this could not be enough
+!!  if len_trim(text) > len_trim(re) and there are several occurrences of `text` in s.
+!!
+!! SOURCE
+
+function replace(s, text, rep)  result(outs)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'replace'
+!End of the abilint section
+
+ character(len=*),intent(in) :: s,text,rep
+ character(len(s)+500) :: outs     ! provide outs with extra 500 char len
+
+!Local variables-------------------------------
+ integer :: i, j, nt, nr, last
+! *********************************************************************
+
+ outs = s; nt = len_trim(text); nr = len_trim(rep); last = 1
+ do
+   i = index(outs(last:), text(1:nt)); if (i == 0) exit
+   j = last + i - 1; last = j + nr
+   if (j - 1 < 1) then
+     outs = rep(:nr) // outs(j+nt:)
+   else
+     outs = outs(:j-1) // rep(:nr) // outs(j+nt:)
+   end if
+ end do
+
+end function replace
 !!***
 
 !----------------------------------------------------------------------

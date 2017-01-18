@@ -143,7 +143,9 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !!  cryst<crystal_t>=Crystalline structure.
-!!  lpratio=Ratio between lattice vectors and ab-initio k-points.
+!!  params(:)
+!!     params(1): Ratio between lattice vectors and ab-initio k-points.
+!!     params(2:3): Activate Fourier filter.
 !!  cplex=1 if time reversal can be used, 2 otherwise.
 !!  nband=Total Number of bands in the eig array.
 !!  nkpt=Number of ab-initio k-points.
@@ -161,7 +163,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-type(skw_t) function skw_new(cryst, lpratio, cplex, nband, nkpt, nsppol, kpts, eig, band_block, spin_block, comm) result(new)
+type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, eig, band_block, spin_block, comm) result(new)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -175,7 +177,8 @@ type(skw_t) function skw_new(cryst, lpratio, cplex, nband, nkpt, nsppol, kpts, e
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: lpratio,cplex,nband,nkpt,nsppol,comm
+ integer,intent(in) :: cplex,nband,nkpt,nsppol,comm
+ real(dp),intent(in) :: params(:)
  type(crystal_t),intent(in) :: cryst
 !arrays
  integer,intent(in) :: band_block(2),spin_block(2)
@@ -184,9 +187,9 @@ type(skw_t) function skw_new(cryst, lpratio, cplex, nband, nkpt, nsppol, kpts, e
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0
+ integer,parameter :: master=0,prtvol=1
  integer :: my_rank,nprocs,cnt,bstop,bstart,bcount,lwork
- integer :: ir,ik,ib,ii,jj,nr,band,spin,isym,ierr,i1,i2,i3,msize
+ integer :: ir,ik,ib,ii,jj,nr,band,spin,isym,ierr,i1,i2,i3,msize,lpratio
  real(dp),parameter :: tolr=tol12,c1=0.25_dp,c2=0.25_dp
  real(dp) :: r2,r2min,mare,mae_meV,adiff_meV,rel_err,rcut,rsigma
  real(dp) :: cpu_tot,wall_tot,gflops_tot,cpu,wall,gflops
@@ -222,6 +225,7 @@ type(skw_t) function skw_new(cryst, lpratio, cplex, nband, nkpt, nsppol, kpts, e
  ! -----------------------------------------------
  ! Select R-points and order them according to |R|
  ! -----------------------------------------------
+ lpratio = abs(params(1))
  ABI_CHECK(lpratio > 0, "lpratio must be > 0")
  !rmax = 1 + (lpratio * new%nkpt) / two
  rmax = nint((one + (lpratio * new%nkpt * cryst%nsym) / two) ** third)
@@ -274,7 +278,7 @@ type(skw_t) function skw_new(cryst, lpratio, cplex, nband, nkpt, nsppol, kpts, e
  do ir=1,nr
    r2 = dot_product(new%rpts(:,ir), matmul(cryst%rmet, new%rpts(:,ir)))
    ! TODO: Test the two versions.
-   !rhor(ir) = c1 * r2 + c2 * r2**2
+   !if (params(1) < zero) rhor(ir) = c1 * r2 + c2 * r2**2
    rhor(ir) = (one - c1 * r2/r2min)**2 + c2 * (r2 / r2min)**3
  end do
 
@@ -348,11 +352,13 @@ type(skw_t) function skw_new(cryst, lpratio, cplex, nband, nkpt, nsppol, kpts, e
  end do
 
  ! Filter coefficients
- !call wrtout(std_out," Applying filter (Eq 9 of PhysRevB.61.1639)")
- !rcut = half * sqrt(r2vals(new%nr)); rsigma = one
- !do ir=2,nr
- !  new%coefs(ir,:,:) = new%coefs(ir,:,:) * half * abi_derfc((sqrt(r2vals(ir)) - rcut) / rsigma)
- !end do
+ if (params(2) > tol6) then
+   call wrtout(std_out," Applying filter (Eq 9 of PhysRevB.61.1639)")
+   rcut = params(2) * sqrt(r2vals(new%nr)); rsigma = params(3)
+   do ir=2,nr
+     new%coefs(ir,:,:) = new%coefs(ir,:,:) * half * abi_derfc((sqrt(r2vals(ir)) - rcut) / rsigma)
+   end do
+ end if
 
  ! Prepare workspace arrays for star functions.
  new%cached_kpt = huge(one)
@@ -379,6 +385,7 @@ type(skw_t) function skw_new(cryst, lpratio, cplex, nband, nkpt, nsppol, kpts, e
  call wrtout(std_out, ch10//"Comparing ab-initio energies with SKW interpolated results...")
  do spin=1,nsppol
    do ik=1,nkpt
+
      do ib=1,bcount
        cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! mpi parallelism.
        band = ib + new%band_block(1) - 1
@@ -390,11 +397,14 @@ type(skw_t) function skw_new(cryst, lpratio, cplex, nband, nkpt, nsppol, kpts, e
        mae_meV = mae_meV + adiff_meV; mare = mare + rel_err
      end do
 
-     write(std_out,"(a,es12.4,2a)") &
-       "SKW maxerr: ", maxval(eig(bstart:bstop,ik,spin) - oeig) * Ha_meV, " [meV], kpt: ", trim(ktoa(kpts(:,ik)))
-     !write(std_out,fmt)"-- ref ", eig(bstart:bstop,ik,spin) * Ha_meV
-     !write(std_out,fmt)"-- int ", oeig * Ha_meV
-     !call vdiff_print(vdiff_eval(1, bcount, eig(bstart:bstop,ik,spin), oeig, one))
+     if (prtvol > 0) then
+       write(std_out,"(a,es12.4,4a)") &
+         " SKW maxerr: ", maxval(eig(bstart:bstop,ik,spin) - oeig) * Ha_meV, &
+         " [meV], kpt: ", sjoin(ktoa(kpts(:,ik)), ", spin:", itoa(spin))
+       !write(std_out,fmt)"-- ref ", eig(bstart:bstop,ik,spin) * Ha_meV
+       !write(std_out,fmt)"-- int ", oeig * Ha_meV
+       !call vdiff_print(vdiff_eval(1, bcount, eig(bstart:bstop,ik,spin), oeig, one))
+     end if
    end do
  end do
  ABI_FREE(oeig)

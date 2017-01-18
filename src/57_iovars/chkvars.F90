@@ -97,7 +97,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' ecut ecuteps ecutsigx ecutsm ecutwfn effmass efmas'
  list_vars=trim(list_vars)//' efmas_bands efmas_calc_dirs efmas_deg efmas_deg_tol'
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
- list_vars=trim(list_vars)//' efield elph2_imagden enunit eshift esmear exchmix exchn2n3d extrapwf'
+ list_vars=trim(list_vars)//' efield einterp elph2_imagden enunit eshift esmear exchmix exchn2n3d extrapwf'
  list_vars=trim(list_vars)//' eph_intmeth eph_extrael eph_fermie eph_fsmear eph_fsewin eph_mustar '
  list_vars=trim(list_vars)//' eph_ngqpt_fine eph_task eph_transport'
 !F
@@ -157,7 +157,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' nbdblock nbdbuf nberry nconeq nc_xccc_gspace'
  list_vars=trim(list_vars)//' nctime ndivk ndivsm ndtset neb_algo neb_spring'
  list_vars=trim(list_vars)//' nfreqim nfreqre nfreqsp ngfft ngfftdg'
- list_vars=trim(list_vars)//' ngkpt ngqpt nimage nkpt nkptgw nkpthf'
+ list_vars=trim(list_vars)//' ngkpt ngqpt nimage nkpath nkpt nkptgw nkpthf'
  list_vars=trim(list_vars)//' nline nloc_alg nloc_mem nnos nnsclo nnsclohf'
  list_vars=trim(list_vars)//' nobj nomegasf nomegasi nomegasrd noseinert npband'
  list_vars=trim(list_vars)//' npfft nphf npimage npkpt nppert npsp npspinor'

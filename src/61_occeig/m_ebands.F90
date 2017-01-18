@@ -50,7 +50,7 @@ MODULE m_ebands
  use defs_abitypes,    only : hdr_type, dataset_type
  use m_copy,           only : alloc_copy
  use m_io_tools,       only : file_exists, open_file
- use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename
+ use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename, replace
  use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson_int, wrap2_zero_one,&
                               isdiagmat
  use m_special_funcs,  only : dirac_delta
@@ -59,7 +59,7 @@ MODULE m_ebands
  use m_pptools,        only : printbxsf
  use m_nesting,        only : mknesting
  use m_crystal,        only : crystal_t
- use m_bz_mesh,        only : isamek, kpath_t, kpath_new, kpath_free
+ use m_bz_mesh,        only : isamek, kpath_t, kpath_new, kpath_free, kpath_print
  use m_fftcore,        only : get_kg
 
  implicit none
@@ -3746,9 +3746,9 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block, spin_block) re
 
  ! Multiple shifts are not supported here.
  shifted(:) = abs(ebands%shiftk(:,1)) > tol8
- nkx = ngkpt(1)+1; if (shifted(1)) nkx = nkx + 1
- nky = ngkpt(2)+1; if (shifted(2)) nky = nky + 1
- nkz = ngkpt(3)+1; if (shifted(3)) nkz = nkz + 1
+ nkx = ngkpt(1) + 1; if (shifted(1)) nkx = nkx + 1
+ nky = ngkpt(2) + 1; if (shifted(2)) nky = nky + 1
+ nkz = ngkpt(3) + 1; if (shifted(3)) nkz = nkz + 1
  ABI_MALLOC(xvec, (nkx))
  ABI_MALLOC(yvec, (nky))
  ABI_MALLOC(zvec, (nkz))
@@ -4026,8 +4026,7 @@ end subroutine ebspl_free
 !! INPUTS
 !!  ebands<ebands_t> = Object with input energies.
 !!  cryst<crystal_t> = Crystalline structure.
-!!  itype
-!!  ords(3)
+!!  params(:)
 !!  intp_kptrlatt(3,3) = New k-mesh
 !!  intp_nshiftk= Number of shifts in new k-mesh.
 !!  intp_shiftk(3,intp_nshiftk) = Shifts in new k-mesh.
@@ -4043,7 +4042,8 @@ end subroutine ebspl_free
 !! SOURCE
 
 
-function ebands_interp_kmesh(ebands, cryst, itype, ords, intp_kptrlatt, intp_nshiftk, intp_shiftk, comm) result(new)
+function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, comm) result(new)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -4056,22 +4056,22 @@ function ebands_interp_kmesh(ebands, cryst, itype, ords, intp_kptrlatt, intp_nsh
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: intp_nshiftk,comm
- character(len=*),intent(in) :: itype
  type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
  type(ebands_t) :: new
 !arrays
- integer,intent(in) :: ords(3),intp_kptrlatt(3,3)
+ integer,intent(in) :: intp_kptrlatt(3,3)
+ real(dp),intent(in) :: params(:)
  real(dp),intent(in) :: intp_shiftk(3,intp_nshiftk)
 
 !Local variables-------------------------------
 !scalars
- integer :: ik_ibz,spin,new_bantot,new_mband,cplex
+ integer :: ik_ibz,spin,new_bantot,new_mband,cplex,itype
  integer :: nprocs,my_rank,cnt,ierr,band,new_nkbz,new_nkibz,new_nshiftk
  type(ebspl_t) :: ebspl
  type(skw_t) :: skw
 !arrays
- integer :: new_kptrlatt(3,3)
+ integer :: new_kptrlatt(3,3),bspl_ords(3)
  integer,allocatable :: new_istwfk(:),new_nband(:,:),new_npwarr(:)
  real(dp),allocatable :: new_shiftk(:,:),new_kibz(:,:),new_kbz(:,:),new_wtk(:)
  real(dp),allocatable :: new_doccde(:),new_eig(:),new_occ(:)
@@ -4079,6 +4079,7 @@ function ebands_interp_kmesh(ebands, cryst, itype, ords, intp_kptrlatt, intp_nsh
 ! *********************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ itype = nint(params(1))
 
  ! Get ibz, new shifts and new kptrlatt.
  call kpts_ibz_from_kptrlatt(cryst, intp_kptrlatt, ebands%kptopt, intp_nshiftk, intp_shiftk, &
@@ -4101,6 +4102,7 @@ function ebands_interp_kmesh(ebands, cryst, itype, ords, intp_kptrlatt, intp_nsh
    new_nband,new_nkibz,new_npwarr,ebands%nsppol,ebands%nspinor,ebands%tphysel,ebands%tsmear,&
    ebands%occopt,new_occ,new_wtk,&
    ebands%charge, ebands%kptopt, intp_kptrlatt, intp_nshiftk, intp_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
+ new%fermie = ebands%fermie
 
  ABI_FREE(new_kibz)
  ABI_FREE(new_wtk)
@@ -4115,14 +4117,16 @@ function ebands_interp_kmesh(ebands, cryst, itype, ords, intp_kptrlatt, intp_nsh
 
  ! Build (B-spline|SKW) object for all bands
  select case (itype)
- case ("bspline")
-   ebspl = ebspl_new(ebands, cryst, ords, [0,0], [0,0])
- case ("skw")
+ case (1)
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
-   skw = skw_new(cryst, ords(1), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, &
+   skw = skw_new(cryst, params(2:), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, &
                 [0, 0], [0, 0], comm)
+ case (2)
+   bspl_ords = nint(params(2:4))
+   ebspl = ebspl_new(ebands, cryst, bspl_ords, [0,0], [0,0])
+
  case default
-   MSG_ERROR(sjoin("Wrong itype:", itype))
+   MSG_ERROR(sjoin("Wrong params(1):", itoa(itype)))
  end select
 
  ! Interpolate eigenvalues.
@@ -4131,11 +4135,14 @@ function ebands_interp_kmesh(ebands, cryst, itype, ords, intp_kptrlatt, intp_nsh
    do ik_ibz=1,new%nkpt
      do band=1,new%nband(ik_ibz+(spin-1)*new%nkpt)
        cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle  ! Mpi parallelism.
-       if (itype == "bspline") then
-         call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
-       else
+       select case (itype)
+       case (1)
          call skw_eval_bks(skw, cryst, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
-       end if
+       case (2)
+         call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
+       case default
+         MSG_ERROR(sjoin("Wrong params(1):", itoa(itype)))
+       end select
      end do
    end do
  end do
@@ -4155,12 +4162,12 @@ end function ebands_interp_kmesh
 !!
 !! FUNCTION
 !!  Interpolate energies on a k-path
-
+!!
 !! INPUTS
 !!  ebands<ebands_t> = Object with input energies.
 !!  cryst<crystal_t> = Crystalline structure.
-!!  itype
-!!  ords(3)
+!!  params(:)
+!!    params(1): 1 for SKW, 2 for B-spline.
 !!  kpath<kpath_t> = Object describing the k-path
 !!  comm=MPI communicator
 !!
@@ -4173,7 +4180,8 @@ end function ebands_interp_kmesh
 !!
 !! SOURCE
 
-type(ebands_t) function ebands_interp_kpath(ebands, cryst, itype, ords, kpath, comm) result(new)
+type(ebands_t) function ebands_interp_kpath(ebands, cryst, params, kpath, comm) result(new)
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -4186,22 +4194,22 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, itype, ords, kpath, c
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
- character(len=*),intent(in) :: itype
  type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
  type(kpath_t),intent(in) :: kpath
 !arrays
- integer,intent(in) :: ords(3)
+ real(dp),intent(in) :: params(:)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: new_nshiftk=1
  integer :: ik_ibz,spin,new_bantot,new_mband,cplex
- integer :: nprocs,my_rank,cnt,ierr,band,new_nkibz
+ integer :: nprocs,my_rank,cnt,ierr,band,new_nkibz,itype
  type(ebspl_t) :: ebspl
  type(skw_t) :: skw
 !arrays
  integer,parameter :: new_kptrlatt(3,3)=0
+ integer :: bspl_ords(3)
  integer,allocatable :: new_istwfk(:),new_nband(:,:),new_npwarr(:)
  real(dp),parameter :: new_shiftk(3,1) = zero
  real(dp),allocatable :: new_wtk(:),new_doccde(:),new_eig(:),new_occ(:)
@@ -4209,6 +4217,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, itype, ords, kpath, c
 ! *********************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ itype = nint(params(1))
 
  ! Initialize new ebands_t.
  new_nkibz = kpath%npts
@@ -4228,6 +4237,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, itype, ords, kpath, c
    new_nband,new_nkibz,new_npwarr,ebands%nsppol,ebands%nspinor,ebands%tphysel,ebands%tsmear,&
    ebands%occopt,new_occ,new_wtk,&
    ebands%charge, ebands%kptopt, new_kptrlatt, new_nshiftk, new_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
+ new%fermie = ebands%fermie
 
  ABI_FREE(new_wtk)
  ABI_FREE(new_istwfk)
@@ -4239,14 +4249,16 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, itype, ords, kpath, c
 
  ! Build (B-spline|SKW) object for all bands
  select case (itype)
- case ("bspline")
-   ebspl = ebspl_new(ebands, cryst, ords, [0,0], [0,0])
- case ("skw")
+ case (1)
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
-   skw = skw_new(cryst, ords(1), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, &
+   skw = skw_new(cryst, params(2:), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, &
                  [0, 0], [0, 0], comm)
+ case (2)
+   bspl_ords = nint(params(2:4))
+   ebspl = ebspl_new(ebands, cryst, bspl_ords, [0,0], [0,0])
+
  case default
-   MSG_ERROR(sjoin("Wrong itype:", itype))
+   MSG_ERROR(sjoin("Wrong params(1):", itoa(itype)))
  end select
 
  ! Interpolate eigenvalues.
@@ -4255,11 +4267,14 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, itype, ords, kpath, c
    do ik_ibz=1,new%nkpt
      do band=1,new%nband(ik_ibz+(spin-1)*new%nkpt)
        cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle  ! Mpi parallelism.
-       if (itype == "bspline") then
-         call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
-       else
+       select case (itype)
+       case (1)
          call skw_eval_bks(skw, cryst, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
-       end if
+       case (2)
+         call ebspl_eval_bks(ebspl, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
+       case default
+         MSG_ERROR(sjoin("Wrong params(1):", itoa(itype)))
+       end select
      end do
    end do
  end do
@@ -4939,13 +4954,21 @@ subroutine ebands_write(ebands, prtebands, prefix, kptbounds)
  case (0)
     return
  case (1)
-   call ebands_write_xmgrace(ebands, strcat(prefix, "_EBANDS.agr"))
+   if (present(kptbounds)) then
+     call ebands_write_xmgrace(ebands, strcat(prefix, "_EBANDS.agr"), kptbounds=kptbounds)
+   else
+     call ebands_write_xmgrace(ebands, strcat(prefix, "_EBANDS.agr"))
+   end if
  case (2)
-   call ebands_write_gnuplot(ebands, prefix)
+   if (present(kptbounds)) then
+     call ebands_write_gnuplot(ebands, prefix, kptbounds=kptbounds)
+   else
+     call ebands_write_gnuplot(ebands, prefix)
+   end if
  !case (3)
  !  call ebands_write_eigfile(ebands, strcat(prefix, "_EIG"))
  case default
-   MSG_WARNING(sjoin("Unsupported value of prtebands:", itoa(prtebands)))
+   MSG_WARNING(sjoin("Unsupported value for prtebands:", itoa(prtebands)))
  end select
 
 end subroutine ebands_write
@@ -4962,10 +4985,11 @@ end subroutine ebands_write
 !!  Use the driver `ebands_write` to support different formats.
 !!
 !! INPUTS
-!!  path=Filename
+!!  filename=Filename
 !!  [kptbounds(:,:)]=Optional argument giving the extrema of the k-path.
 !!
 !! OUTPUT
+!!  Only writing
 !!
 !! PARENTS
 !!      eph
@@ -4974,7 +4998,7 @@ end subroutine ebands_write
 !!
 !! SOURCE
 
-subroutine ebands_write_xmgrace(ebands, path, kptbounds)
+subroutine ebands_write_xmgrace(ebands, filename, kptbounds)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -4988,7 +5012,7 @@ subroutine ebands_write_xmgrace(ebands, path, kptbounds)
 !Arguments ------------------------------------
 !scalars
  type(ebands_t),intent(in) :: ebands
- character(len=*),intent(in) :: path
+ character(len=*),intent(in) :: filename
  real(dp),optional,intent(in) :: kptbounds(:,:)
 
 !Local variables-------------------------------
@@ -5006,9 +5030,8 @@ subroutine ebands_write_xmgrace(ebands, path, kptbounds)
    ! Find correspondence between kptbounds and k-points in ebands.
    nkbounds = size(kptbounds, dim=2)
    ABI_MALLOC(bounds2kpt, (nkbounds))
-   bounds2kpt = 1
+   bounds2kpt = 1; start = 1
    do ii=1,nkbounds
-      start = 1
       do ik=start,ebands%nkpt
         if (isamek(ebands%kptns(:, ik), kptbounds(:, ii), g0)) then
           bounds2kpt(ii) = ik; start = ik + 1; exit
@@ -5017,7 +5040,7 @@ subroutine ebands_write_xmgrace(ebands, path, kptbounds)
    end do
  end if
 
- if (open_file(path, msg, newunit=unt, form="formatted", action="write") /= 0) then
+ if (open_file(filename, msg, newunit=unt, form="formatted", action="write") /= 0) then
    MSG_ERROR(msg)
  end if
 
@@ -5049,12 +5072,11 @@ subroutine ebands_write_xmgrace(ebands, path, kptbounds)
  write(unt,'(a)') '@xaxis  tick major grid on'
  write(unt,'(a)') '@xaxis  tick spec type both'
  write(unt,'(a)') '@xaxis  tick major 0, 0'
- ! TODO: Test whether this is ok.
  if (nkbounds /= 0) then
    write(unt,'(a,i0)') '@xaxis  tick spec ',nkbounds
    do ik=1,nkbounds
-      write(unt,'(a,i0,a,a)') '@xaxis  ticklabel ',ik-1,',', "foo"
-      write(unt,'(a,i0,a,i0)') '@xaxis  tick major ',ik-1,' , ',bounds2kpt(ik)
+     !write(unt,'(a,i0,a,a)') '@xaxis  ticklabel ',ik-1,',', "foo"
+     write(unt,'(a,i0,a,i0)') '@xaxis  tick major ',ik-1,' , ',bounds2kpt(ik) - 1
    end do
  end if
  write(unt,'(a)') '@xaxis  ticklabel char size 1.500000'
@@ -5106,6 +5128,7 @@ end subroutine ebands_write_xmgrace
 !!  [kptbounds(:,:)]=Optional argument giving the extrema of the k-path.
 !!
 !! OUTPUT
+!!  Only writing
 !!
 !! PARENTS
 !!
@@ -5134,7 +5157,7 @@ subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
 !scalars
  integer :: unt,gpl_unt,ik,spin,band,ii,start,nkbounds
  character(len=500) :: msg,fmt
- character(len=fnlen) :: datafile
+ character(len=fnlen) :: datafile,basefile
 !arrays
  integer :: g0(3)
  integer,allocatable :: bounds2kpt(:)
@@ -5146,9 +5169,8 @@ subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
    ! Find correspondence between kptbounds and k-points in ebands.
    nkbounds = size(kptbounds, dim=2)
    ABI_MALLOC(bounds2kpt, (nkbounds))
-   bounds2kpt = 1
+   bounds2kpt = 1; start = 1
    do ii=1,nkbounds
-      start = 1
       do ik=start,ebands%nkpt
         if (isamek(ebands%kptns(:, ik), kptbounds(:, ii), g0)) then
           bounds2kpt(ii) = ik; start = ik + 1; exit
@@ -5164,6 +5186,7 @@ subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
  if (open_file(strcat(prefix, "_EBANDS.gnuplot"), msg, newunit=gpl_unt, form="formatted", action="write") /= 0) then
    MSG_ERROR(msg)
  end if
+ basefile = basename(datafile)
 
  write(unt,'(a)') "# Electron band structure data file"
  write(unt,'(a)') "# Generated by Abinit"
@@ -5176,14 +5199,7 @@ subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
  do ik=1,ebands%nkpt
    write(unt, "(a)")sjoin("#", itoa(ik-1), ktoa(ebands%kptns(:,ik)))
  end do
-! ! TODO: Test whether this is ok.
-! if (nkbounds /= 0) then
-!   write(unt,'(a,i0)') '@xaxis  tick spec ',nkbounds
-!   do ik=1,nkbounds
-!      write(unt,'(a,i0,a,a)') '@xaxis  ticklabel ',ik-1,',', "foo"
-!      write(unt,'(a,i0,a,i0)') '@xaxis  tick major ',ik-1,' , ',bounds2kpt(ik)
-!   end do
-! end if
+
  fmt = sjoin("(i0,1x,", itoa(ebands%mband), "(es16.8,1x))")
  write(unt,'(a)') ' '
  do spin=1,ebands%nsppol
@@ -5195,24 +5211,54 @@ subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
  end do
 
  ! gnuplot script file
-  write(gpl_unt,'(a)') '# File to plot bandstructure with gnuplot'
+!set terminal postscript eps enhanced color font 'Times-Roman,26' lw 2
+!set output "Mos2_band.eps"
+!# set line style and point type
+!set style line 1 lt 1 ps 2 pt 1 lc rgb "black"
+!set style line 2 lt 1 ps 2 pt 1 lc rgb "red"
+!# set axes labels
+!set xtics("{/Symbol G}" 0, "M" 100, "K" 200, "H" 250,"A" 350,"{/Symbol G}" 400)
+!set yrange [-10:5]
+!set ytics -10,5,5
+!set xrange [0:400]
+!set ylabel "Energy -{/Symbol m} (eV)"
+!set xlabel "Momentum"
+!shift =-1.8
+!#Determine plot parameters
+!plot 'Mos2_band' using 1:($2 + shift) ls 1 w lines notitle,\
+
+  write(gpl_unt,'(a)') '# File to plot phonon bandstructure with gnuplot'
+  write(gpl_unt,'(a)') "#set terminal postscript eps enhanced color font 'Times-Roman,26' lw 2"
+  write(gpl_unt,'(a)') '#use the next lines to make a nice figure for a paper'
+  write(gpl_unt,'(a)') '#set term postscript enhanced eps color lw 0.5 dl 0.5'
+  write(gpl_unt,'(a)') '#set pointsize 0.275'
   write(gpl_unt,'(a)') 'set palette defined ( 0 "blue", 3 "green", 6 "yellow", 10 "red" )'
-  write(gpl_unt,'(a)') 'unset ztics'
   write(gpl_unt,'(a)') 'unset key'
   write(gpl_unt,'(a)') '# can make pointsize smaller (~0.5). Too small and nothing is printed'
   write(gpl_unt,'(a)') 'set pointsize 0.8'
-  write(gpl_unt,'(a)') 'set grid xtics'
   write(gpl_unt,'(a)') 'set view 0,0'
   write(gpl_unt,'(a,i0,a)') 'set xrange [0:',ebands%nkpt-1,']'
   write(gpl_unt,'(2(a,es16.8),a)')&
     'set yrange [',minval((ebands%eig - ebands%fermie) * Ha_eV),':',maxval((ebands%eig - ebands%fermie) * Ha_eV),']'
-  write(gpl_unt,'(a)') '#use the next lines to make a nice figure for a paper'
-  write(gpl_unt,'(a)') '#set term postscript enhanced eps color lw 0.5 dl 0.5'
-  write(gpl_unt,'(a)') '#set pointsize 0.275'
+  write(gpl_unt,'(a)') 'set xlabel "Momentum"'
+  write(gpl_unt,'(a)') 'set ylabel "Energy [eV]"'
+  write(gpl_unt,'(a)') strcat('set title "', replace(basefile, "_", "\\_"), '"')
+  if (nkbounds == 0) then
+    write(gpl_unt,'(a)') 'set grid xtics'
+  else
+    write(gpl_unt,"(a)")"# Add vertical lines in correspondence of high-symmetry points."
+    write(gpl_unt,'(a)') 'unset xtics'
+    do ii=1,nkbounds
+      write(gpl_unt,"(a,2(i0,a))") &
+        "set arrow from ",bounds2kpt(ii)-1,",graph(0,0) to ",bounds2kpt(ii)-1,",graph(1,1) nohead ls 'dashed'"
+      !write(gpl_unt,"(a)")sjoin("set xtics add('kname'", itoa(bounds2kpt(ii)-1), ")")
+    end do
+
+  end if
   write(gpl_unt,"(a)")sjoin("mband =", itoa(ebands%mband))
-  write(gpl_unt,"(a)")strcat('plot for [i=2:mband] "', basename(datafile), '" u 1:i every :1 with lines linetype -1')
+  write(gpl_unt,"(a)")strcat('plot for [i=2:mband] "', basefile, '" u 1:i every :1 with lines linetype -1')
   if (ebands%nsppol == 2) then
-    write(gpl_unt,"(a)")strcat('replot for [i=2:mband] "', basename(datafile), '" u 1:i every :2 with lines linetype 4')
+    write(gpl_unt,"(a)")strcat('replot for [i=2:mband] "', basefile, '" u 1:i every :2 with lines linetype 4')
   end if
  write(gpl_unt, "(a)")"pause -1"
 
@@ -5247,6 +5293,7 @@ end subroutine ebands_write_gnuplot
 
 subroutine ebands_interpolate_kpath(ebands, dtset, cryst, prefix, comm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -5267,12 +5314,13 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, prefix, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: my_rank,nshiftk_fine,ndivsm,ii,unt,nbounds
+ integer :: my_rank,nshiftk_fine,ndivsm,nbounds
  type(ebands_t) :: ebands_bspl,ebands_skw
  type(kpath_t) :: kpath
  character(len=500) :: msg
 !arrays
- integer :: kptrlatt_fine(3,3),bspl_ords(3),skw_ords(3)
+ integer :: kptrlatt_fine(3,3)
+ real(dp) :: bspl_params(4),skw_params(4)
  real(dp),allocatable :: shiftk_fine(:,:),bounds(:,:)
 
 ! *********************************************************************
@@ -5280,38 +5328,36 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, prefix, comm)
  my_rank = xmpi_comm_rank(comm)
 
  ! Interpolate bands on k-path.
- ndivsm = 20; if (dtset%useria /= 0) ndivsm = dtset%useria
- if (file_exists("bounds.txt")) then
-    call wrtout(std_out, "Reading k-path from bounds.txt")
-    if (open_file("bounds.txt", msg, newunit=unt, status="old", action="read", form="formatted") /= 0) then
-      MSG_ERROR(msg)
-    end if
-    read(unt,*)nbounds
-    ABI_MALLOC(bounds, (3, nbounds))
-    do ii=1,nbounds
-      read(unt,*)bounds(:,ii)
-    end do
-    close(unt)
- else
+ ndivsm = dtset%ndivsm; if (ndivsm <= 0) ndivsm = 10
+ nbounds = dtset%nkpath
+ if (nbounds <= 0) then
+   MSG_WARNING("Using hard-coded k-path because nkpath == 0 in input file.")
+   nbounds = 5
    ABI_MALLOC(bounds, (3,5))
    bounds = reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5])
+ else
+   call alloc_copy(dtset%kptbounds, bounds)
  end if
 
  kpath = kpath_new(bounds, cryst%gprimd, ndivsm)
+ call kpath_print(kpath, header="Interpolating energies on k-path", unit=std_out)
  ABI_FREE(bounds)
 
  ! SKW interpolation
- skw_ords = [80, 0, 0]; if (dtset%userib /= 0) skw_ords = [dtset%userib, 0, 0]
- ebands_skw = ebands_interp_kpath(ebands, cryst, "skw", skw_ords, kpath, comm)
- if (my_rank == master) call ebands_write(ebands_skw, dtset%prtebands, strcat(prefix, "_SKW"))
+ skw_params = one * [1, 80, 0, 0]
+ ebands_skw = ebands_interp_kpath(ebands, cryst, skw_params, kpath, comm)
+ if (my_rank == master) then
+    call ebands_write(ebands_skw, dtset%prtebands, strcat(prefix, "_SKW"), kptbounds=kpath%bounds)
+ end if
  call ebands_free(ebands_skw)
 
  ! B-spline interpolation
- ! TODO: shifts do not work!
- bspl_ords = [3,3,3]; if (dtset%useric /= 0) bspl_ords = dtset%useric
+ bspl_params = one * [2, 3, 3, 3]; if (dtset%useric /= 0) bspl_params(2:) = dtset%useric
  if (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1) then
-   ebands_bspl = ebands_interp_kpath(ebands, cryst, "bspline", bspl_ords, kpath, comm)
-   if (my_rank == master) call ebands_write(ebands_bspl, dtset%prtebands, strcat(prefix, "_BSPLINE"))
+   ebands_bspl = ebands_interp_kpath(ebands, cryst, bspl_params, kpath, comm)
+   if (my_rank == master) then
+     call ebands_write(ebands_bspl, dtset%prtebands, strcat(prefix, "_BSPLINE"), kptbounds=kpath%bounds)
+   end if
    call ebands_free(ebands_bspl)
  else
    write(msg,"(3a)") &
@@ -5329,27 +5375,38 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, prefix, comm)
  shiftk_fine = ebands%shiftk
  !shiftk_fine = half * reshape([1,0,0,0,1,0,0,0,1,1,1,1,0,0,0], [3,5])
 
- if (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1) then
-   ebands_bspl = ebands_interp_kmesh(ebands, cryst, "bspline", bspl_ords, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
-   !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
-   !ebands_skw = ebands_interp_kmesh(ebands_bspl, cryst, "skw", skw_ords, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
-   !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
-   ebands_skw = ebands_interp_kpath(ebands_bspl, cryst, "skw", skw_ords, kpath, comm)
-   if (my_rank == master) call ebands_write(ebands_skw, dtset%prtebands, strcat(prefix, "_SKW_BSPL"))
+ ! Bspline followed by SKW.
+ if (.False. .and. isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1) then
+   ebands_bspl = ebands_interp_kmesh(ebands, cryst, bspl_params, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+   ebands_skw = ebands_interp_kpath(ebands_bspl, cryst, skw_params, kpath, comm)
+   if (my_rank == master) then
+      call ebands_write(ebands_skw, dtset%prtebands, strcat(prefix, "_SKW_BSPL"), kptbounds=kpath%bounds)
+   end if
    call ebands_free(ebands_bspl)
    call ebands_free(ebands_skw)
  else
    write(msg,"(3a)") &
-      "Cannot interpolate energies with B-spline because:",ch10,&
-      ".not. (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1)"
-   MSG_WARNING(msg)
+    "Cannot interpolate energies with B-spline because:",ch10,&
+    ".not. (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1)"
+   !MSG_WARNING(msg)
+ end if
+
+ ! SKW followed by Bspline.
+ if (.False.) then
+   ebands_skw = ebands_interp_kmesh(ebands, cryst, skw_params, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+   ebands_bspl = ebands_interp_kpath(ebands_skw, cryst, bspl_params, kpath, comm)
+   if (my_rank == master) then
+     call ebands_write(ebands_bspl, dtset%prtebands, strcat(prefix, "_BSPL_SKW"), kptbounds=kpath%bounds)
+   end if
+   call ebands_free(ebands_bspl)
+   call ebands_free(ebands_skw)
  end if
 
  ABI_FREE(shiftk_fine)
 
- !ebands_bspl = ebands_interp_kmesh(ebands, cryst, "bspline", bspl_ords, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+ !ebands_bspl = ebands_interp_kmesh(ebands, cryst, bspl_params, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
  !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
- !ebands_skw = ebands_interp_kmesh(ebands, cryst, "skw", skw_ords, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+ !ebands_skw = ebands_interp_kmesh(ebands, cryst, skw_params, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
  !call ebands_update_occ(ebands_skw, dtset%spinmagntarget, prtvol=dtset%prtvol)
  !call ebands_free(ebands_bspl)
  !call ebands_free(ebands_skw)

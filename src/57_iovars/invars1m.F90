@@ -81,7 +81,6 @@ subroutine invars1m(dmatpuflag,dtsets,iout,lenstr,mband_upper_,&
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'invars1m'
- use interfaces_14_hidewrite
  use interfaces_57_iovars, except_this_one => invars1m
 !End of the abilint section
 

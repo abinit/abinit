@@ -2299,8 +2299,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ! * Report the QP gaps (Fundamental and Optical)
      call ebands_report_gap(QP_BSt,header='QP Band Gaps',unit=ab_out)
 
-     call wrtout(std_out, "Interpolating QP energies.")
-     if (QP_BSt%nkpt > 1) then
+     if (QP_BSt%nkpt > 1) then ! (.and. nint(dtset%einterp(1)) /= 0)
        call ebands_interpolate_kpath(QP_BSt, dtset, cryst, dtfil%filnam_ds(4), comm)
      end if
    end if ! Sigp%nkptgw==Kmesh%nibz

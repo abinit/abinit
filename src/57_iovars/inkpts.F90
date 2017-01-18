@@ -257,6 +257,13 @@ subroutine inkpts(bravais,chksymbreak,iout,iscf,istwfk,jdtset,&
      ndivk(1:nsegment)=intarr(1:nsegment)
 !    The 1 stand for the first point
      nkpt_computed=1+sum(ndivk(1:nsegment))
+
+     ! ndivk and ndivsm are mutually exclusive
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ndivsm',tread,'INT')
+     if (tread == 1) then
+       MSG_ERROR("ndivk and ndivsm are mutually exclusive. Choose only one variable")
+     end if
+
    else
 !    Calculate ndivk such as the path is normalized
 !    Note that if both ndivk and ndivsm are defined in in input file, only ndivk is used !
@@ -327,7 +334,7 @@ subroutine inkpts(bravais,chksymbreak,iout,iscf,istwfk,jdtset,&
      ngkpt(1:3)=intarr(1:3)
      do ii=1,3
        if(ngkpt(ii)<1)then
-         write(message,  '(a,i0,3a,i0,3a)' ) &
+         write(message,'(a,i0,3a,i0,3a)') &
 &         'The input variable ngkpt(',ii,') must be strictly positive,',ch10,&
 &         'while it is found to be',ngkpt(ii),'.',ch10,&
 &         'Action: change it in your input file, or change kptopt.'

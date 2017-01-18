@@ -119,6 +119,8 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  use m_profiling_abi
  use m_errors
 
+ use m_fstrings,        only : sjoin, itoa
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -163,6 +165,8 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  real(dp),allocatable :: dpr1(:),dpr2(:)
 
 ! *************************************************************************
+
+ ABI_CHECK(marr >= narr, sjoin("marr", itoa(marr)," < narr ", itoa(narr)))
 
  ds_input_ = -1
 

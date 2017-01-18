@@ -1120,7 +1120,11 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  ! Output electron bands.
  if (me == master .and. dtset%tfkinfunc==0) then
-   call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
+   if (size(dtset%kptbounds, dim=2) > 0) then
+     call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4), kptbounds=dtset%kptbounds)
+   else
+     call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
+   end if
  end if
 
 !Optionally provide Xcrysden output for the Fermi surface (Only master writes)
@@ -1157,8 +1161,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    call ebands_prtbltztrp(ebands, crystal, dtfil%filnam_ds(4))
  end if
 
- ! Band structure interpolation from eigenvalues computed on k-mesh.
- if (dtset%kptopt > 0 .and. ebands%nkpt > 1 .and. dtset%tfkinfunc==0) then ! (.and. any(dtset%einterp /= 0)
+ ! Band structure interpolation from eigenvalues computed on the k-mesh.
+ !if (nint(dtset%einterp(1)) /= 0 .and. dtset%kptopt > 0 .and. ebands%nkpt > 1 .and. dtset%tfkinfunc == 0) then
+ if (dtset%kptopt > 0 .and. ebands%nkpt > 1 .and. dtset%tfkinfunc == 0) then
    call ebands_interpolate_kpath(ebands, dtset, crystal, dtfil%filnam_ds(4), spacecomm)
  end if
 

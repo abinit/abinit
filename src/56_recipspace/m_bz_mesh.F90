@@ -212,7 +212,7 @@ type,public :: kpath_t
   integer :: nbounds=0
     ! Number of extrema defining the path.
 
-  integer :: ndiv_small=0
+  integer :: ndivsm=0
     ! Number of divisions used to sample the smallest segment.
 
   integer :: npts=0
@@ -2021,7 +2021,7 @@ end subroutine getkptnorm_bycomponent
 !!  bounds(3,nbounds)=The points defining the path in reduced coordinates.
 !!  met(3,3)=Metric matrix.
 !!  space='R' for real space, G for reciprocal space.
-!!  ndiv_small=Number of divisions to be used for the smallest segment.
+!!  ndivsm=Number of divisions to be used for the smallest segment.
 !!  [unit]=Fortran unit for formatted output. Default: dev_null
 !!
 !! OUTPUT
@@ -2037,7 +2037,7 @@ end subroutine getkptnorm_bycomponent
 !!
 !! SOURCE
 
-subroutine make_path(nbounds,bounds,met,space,ndiv_small,ndivs,npts,path,unit)
+subroutine make_path(nbounds,bounds,met,space,ndivsm,ndivs,npts,path,unit)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2051,7 +2051,7 @@ subroutine make_path(nbounds,bounds,met,space,ndiv_small,ndivs,npts,path,unit)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nbounds,ndiv_small
+ integer,intent(in) :: nbounds,ndivsm
  integer,optional,intent(in) :: unit
  integer,intent(out) :: npts
  character(len=1),intent(in) :: space
@@ -2071,7 +2071,7 @@ subroutine make_path(nbounds,bounds,met,space,ndiv_small,ndivs,npts,path,unit)
 
 ! *************************************************************************
 
- ABI_CHECK(ndiv_small>0,'ndiv_small <=0')
+ ABI_CHECK(ndivsm > 0, sjoin('ndivsm', itoa(ndivsm)))
 
  ount = dev_null; if (present(unit)) ount = unit
 
@@ -2089,7 +2089,7 @@ subroutine make_path(nbounds,bounds,met,space,ndiv_small,ndivs,npts,path,unit)
    MSG_ERROR(msg)
  end if
 
- nfact=nfact/ndiv_small
+ nfact=nfact/ndivsm
  ndivs(:)=NINT(lng(:)/nfact)
  npts=SUM(ndivs)+1 !1 for the first point
 
@@ -3266,7 +3266,7 @@ end function box_len
 !! INPUTS
 !!  bounds(3,nbounds)=The points defining the path in reduced coordinates.
 !!  gprimd(3,3)=Reciprocal lattice vectors
-!!  ndiv_small=Number of divisions to be used for the smallest segment.
+!!  ndivsm=Number of divisions to be used for the smallest segment.
 !!
 !! OUTPUT
 !!  Kpath<type(kpath_t)>=Object with the normalized path.
@@ -3278,7 +3278,7 @@ end function box_len
 !!
 !! SOURCE
 
-type(kpath_t) function kpath_new(bounds,gprimd,ndiv_small) result(kpath)
+type(kpath_t) function kpath_new(bounds, gprimd, ndivsm) result(kpath)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3291,7 +3291,7 @@ type(kpath_t) function kpath_new(bounds,gprimd,ndiv_small) result(kpath)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ndiv_small
+ integer,intent(in) :: ndivsm
 !!arrays
  real(dp),intent(in) :: bounds(:,:),gprimd(3,3)
 
@@ -3304,14 +3304,15 @@ type(kpath_t) function kpath_new(bounds,gprimd,ndiv_small) result(kpath)
 ! *************************************************************************
 
  ABI_CHECK(size(bounds, dim=1) == 3, "Wrong dim1 in bounds")
+ ABI_CHECK(ndivsm > 0, sjoin("ndivsm:", itoa(ndivsm)))
  Kpath%nbounds = size(bounds, dim=2)
- Kpath%ndiv_small = ndiv_small
+ Kpath%ndivsm = ndivsm
 
  ! Compute reciprocal space metric.
  Kpath%gprimd = gprimd; Kpath%gmet = matmul(transpose(gprimd), gprimd)
 
  ABI_MALLOC(Kpath%ndivs, (Kpath%nbounds-1))
- call make_path(Kpath%nbounds,bounds,Kpath%gmet,"G",ndiv_small,Kpath%ndivs,Kpath%npts,pts,unit=dev_null)
+ call make_path(Kpath%nbounds,bounds,Kpath%gmet,"G",ndivsm,Kpath%ndivs,Kpath%npts,pts,unit=dev_null)
 
  ABI_MALLOC(Kpath%bounds, (3,Kpath%nbounds))
  Kpath%bounds = bounds
@@ -3446,7 +3447,7 @@ subroutine kpath_print(kpath, header, unit, prtvol, pre)
  if (unt <= 0) return
 
  if (present(header)) write(unt,"(a)") sjoin(pre, '==== '//trim(adjustl(header))//' ==== ')
- write(unt, "(a)") sjoin(pre, "Number of points:", itoa(kpath%npts), ", ndivsmall:", itoa(kpath%ndiv_small))
+ write(unt, "(a)") sjoin(pre, "Number of points:", itoa(kpath%npts), ", ndivsmall:", itoa(kpath%ndivsm))
  write(unt, "(a)") sjoin(pre, "Boundaries and corresponding index in the k-points array:")
  do ii=1,kpath%nbounds
    write(unt, "(a)") sjoin(pre, itoa(kpath%bounds2kpt(ii)), ktoa(kpath%bounds(:,ii)))

@@ -2884,12 +2884,13 @@ type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) res
 !scalars
  integer,parameter :: sppoldbl1=1,timrev1=1,master=0,qptopt1=1
  integer :: nqibz,nqbz,iq_ibz,iq_bz,natom3,ierr,nu
- integer :: my_rank,nprocs,cnt,lpratio
+ integer :: my_rank,nprocs,cnt
  real(dp) :: dksqmax
  character(len=500) :: msg
 !arrays
  integer :: qptrlatt(3,3)
  integer,allocatable :: bz2ibz(:,:)
+ real(dp) :: params(4)
  real(dp) :: phfrq(3*cryst%natom),displ_cart(2,3,cryst%natom,3*cryst%natom)
  real(dp),allocatable :: ibz_freqs(:,:),wtq(:),qbz(:,:),qibz(:,:)
 
@@ -2912,8 +2913,8 @@ type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) res
  end do
  call xmpi_sum(ibz_freqs, comm, ierr)
 
- lpratio = 120
- new = skw_new(cryst, lpratio, 1, natom3, nqibz, 1, qibz, ibz_freqs, [0,0], [0,0], comm)
+ params = zero; params(1) = 120
+ new = skw_new(cryst, params, 1, natom3, nqibz, 1, qibz, ibz_freqs, [0,0], [0,0], comm)
 
  if (.False. .and. my_rank == master) then
    ! Test whether SKW preserves symmetries.
