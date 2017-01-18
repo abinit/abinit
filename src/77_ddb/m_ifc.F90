@@ -589,7 +589,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 ! Weights associated to these R points and to atomic pairs
 ! MG FIXME: Why ngqpt is intent(inout)?
  ABI_MALLOC(ifc_tmp%wghatm,(natom,natom,ifc_tmp%nrpt))
- call wght9(Ifc%brav,gprim,natom,ngqpt,nqbz,nqshft,ifc_tmp%nrpt,q1shft,rcan,ifc_tmp%rpt,rprimd,ifc_tmp%wghatm)
+ call wght9(Ifc%brav,gprim,natom,ngqpt,nqbz,nqshft,ifc_tmp%nrpt,q1shft,rcan,ifc_tmp%rpt,rprimd,0,ifc_tmp%wghatm)
 
 ! Fourier transformation of the dynamical matrices
  ABI_MALLOC(ifc_tmp%atmfrc,(2,3,natom,3,natom,ifc_tmp%nrpt))

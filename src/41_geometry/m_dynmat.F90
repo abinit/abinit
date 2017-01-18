@@ -2530,16 +2530,9 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
 
 !Simple Cubic Lattice
  if (brav==1) then
-   ! new weights
-   if (.TRUE.) then
-     lim1=((ngqpt(1)/2)+1)*lqshft+buffer
-     lim2=((ngqpt(2)/2)+1)*lqshft+buffer
-     lim3=((ngqpt(3)/2)+1)*lqshft+buffer
-   else
-     lim1=((ngqpt(1))+1)*lqshft+buffer
-     lim2=((ngqpt(2))+1)*lqshft+buffer
-     lim3=((ngqpt(3))+1)*lqshft+buffer
-   end if
+   lim1=((ngqpt(1))+1)*lqshft+buffer
+   lim2=((ngqpt(2))+1)*lqshft+buffer
+   lim3=((ngqpt(3))+1)*lqshft+buffer
    nrpt=(2*lim1+1)*(2*lim2+1)*(2*lim3+1)
    if(choice/=0)then
      if (nrpt/=mrpt) then
@@ -3525,6 +3518,7 @@ end subroutine ifclo9
 !! rpt(3,nprt)=Canonical coordinates of the R points in the unit cell
 !!  These coordinates are normalized (=> * acell(3))
 !! rprimd(3,3)=dimensional primitive translations for real space (bohr)
+!! new_wght=Activates new weights for brav=1 (0=old versionr, 1=new version)
 !!
 !! OUTPUT
 !! wghatm(natom,natom,nrpt)= Weight associated to the couple of atoms and the R vector
@@ -3538,7 +3532,7 @@ end subroutine ifclo9
 !!
 !! SOURCE
 
-subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,wghatm)
+subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,new_wght,wghatm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3551,7 +3545,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,w
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: brav,natom,nqpt,nqshft,nrpt
+ integer,intent(in) :: brav,natom,nqpt,nqshft,nrpt,new_wght
 !arrays
  integer,intent(inout) :: ngqpt(9)
  real(dp),intent(in) :: gprim(3,3),qshft(3,4),rcan(3,natom),rpt(3,nrpt),rprimd(3,3)
@@ -3632,9 +3626,8 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,w
  end if
  if(nqshft/=1)factor=factor*2
 
- if (.FALSE.) then
-   ! new weights
-   ! Does no support multiple shifts
+ if (new_wght==1) then
+   ! Does not support multiple shifts
    if (nqshft/=1) then
      write(message, '(a)' ) 'This version of the weights does not support nqshft/=1.'
      MSG_ERROR(message)
@@ -3691,10 +3684,9 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,w
 !        Change of rpt to reduced coordinates
          do ii=1,3
            red(3,ii)=  rpt(1,irpt)*gprim(1,ii) +rpt(2,irpt)*gprim(2,ii) +rpt(3,irpt)*gprim(3,ii)
-           if (.TRUE.) then
+           if (new_wght==0) then
              rdiff(ii)=red(2,ii)-red(1,ii)+red(3,ii)
            else 
-             ! new weights
              ! rdiff in cartesian coordinates
              rdiff(ii)=(red(2,1)-red(1,1)+red(3,1))*rprimd(ii,1)+(red(2,2)-red(1,2) & 
                        +red(3,2))*rprimd(ii,2)+(red(2,3)-red(1,3)+red(3,3))*rprimd(ii,3)
@@ -3717,7 +3709,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,w
 
        if(nqshft==1 .and. brav/=4)then
 
-         if (brav/=1 .or. .TRUE.) then
+         if (brav/=1 .or. new_wght==0) then
            do ii=1,3
 !            If the rpt vector is greater than
 !            the allowed space => weight = 0.0
