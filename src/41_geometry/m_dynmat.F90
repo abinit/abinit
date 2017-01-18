@@ -2530,9 +2530,16 @@ subroutine bigbx9(brav,cell,choice,mrpt,ngqpt,nqshft,nrpt,rprim,rpt)
 
 !Simple Cubic Lattice
  if (brav==1) then
-   lim1=((ngqpt(1)/2)+1)*lqshft+buffer
-   lim2=((ngqpt(2)/2)+1)*lqshft+buffer
-   lim3=((ngqpt(3)/2)+1)*lqshft+buffer
+   ! new weights
+   if (.TRUE.) then
+     lim1=((ngqpt(1)/2)+1)*lqshft+buffer
+     lim2=((ngqpt(2)/2)+1)*lqshft+buffer
+     lim3=((ngqpt(3)/2)+1)*lqshft+buffer
+   else
+     lim1=((ngqpt(1))+1)*lqshft+buffer
+     lim2=((ngqpt(2))+1)*lqshft+buffer
+     lim3=((ngqpt(3))+1)*lqshft+buffer
+   end if
    nrpt=(2*lim1+1)*(2*lim2+1)*(2*lim3+1)
    if(choice/=0)then
      if (nrpt/=mrpt) then
@@ -3517,6 +3524,7 @@ end subroutine ifclo9
 !! rcan(3,natom)=Atomic position in canonical coordinates
 !! rpt(3,nprt)=Canonical coordinates of the R points in the unit cell
 !!  These coordinates are normalized (=> * acell(3))
+!! rprimd(3,3)=dimensional primitive translations for real space (bohr)
 !!
 !! OUTPUT
 !! wghatm(natom,natom,nrpt)= Weight associated to the couple of atoms and the R vector
@@ -3530,7 +3538,7 @@ end subroutine ifclo9
 !!
 !! SOURCE
 
-subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,wghatm)
+subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,wghatm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3546,17 +3554,17 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,wghatm)
  integer,intent(in) :: brav,natom,nqpt,nqshft,nrpt
 !arrays
  integer,intent(inout) :: ngqpt(9)
- real(dp),intent(in) :: gprim(3,3),qshft(3,4),rcan(3,natom),rpt(3,nrpt)
+ real(dp),intent(in) :: gprim(3,3),qshft(3,4),rcan(3,natom),rpt(3,nrpt),rprimd(3,3)
  real(dp),intent(out) :: wghatm(natom,natom,nrpt)
 
 !Local variables -------------------------
 !scalars
- integer :: ia,ib,ii,iqshft,irpt,jqshft,nbordh,tok
- real(dp) :: factor,sum
+ integer :: ia,ib,ii,jj,kk,iqshft,irpt,jqshft,nbordh,tok,nptws,nreq
+ real(dp) :: factor,sum,normsq,proj
  character(len=500) :: message
 !arrays
  integer :: nbord(9)
- real(dp) :: rdiff(9),red(3,3)
+ real(dp) :: rdiff(9),red(3,3),ptws(4, 729),pp(3)
 
 ! *********************************************************************
 
@@ -3624,6 +3632,34 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,wghatm)
  end if
  if(nqshft/=1)factor=factor*2
 
+ if (.FALSE.) then
+   ! new weights
+   ! Does no support multiple shifts
+   if (nqshft/=1) then
+     write(message, '(a)' ) 'This version of the weights does not support nqshft/=1.'
+     MSG_ERROR(message)
+   end if
+   
+   ! Find the points of the lattice given by ngqpt*acell. These are used to define
+   ! a Wigner-Seitz cell around the origin. The origin is excluded from the list.
+   nptws=0
+   do ii=-4,4
+     do jj=-4,4
+       do kk=-4,4
+         do ia=1,3
+           pp(ia)=ii*ngqpt(1)*rprimd(ia,1)+ jj*ngqpt(2)*rprimd(ia,2)+ kk*ngqpt(3)*rprimd(ia,3)
+         end do
+         normsq = pp(1)*pp(1)+pp(2)*pp(2)+pp(3)*pp(3)
+         if (normsq > tol6) then
+           nptws = nptws + 1 
+           ptws(:3,nptws) = pp(:)
+           ptws(4,nptws) = half*normsq
+         end if
+       end do
+     end do
+   end do
+ end if 
+
 !DEBUG
 !write(std_out,*)'factor,ngqpt',factor,ngqpt(1:3)
 !ENDDEBUG
@@ -3655,7 +3691,14 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,wghatm)
 !        Change of rpt to reduced coordinates
          do ii=1,3
            red(3,ii)=  rpt(1,irpt)*gprim(1,ii) +rpt(2,irpt)*gprim(2,ii) +rpt(3,irpt)*gprim(3,ii)
-           rdiff(ii)=red(2,ii)-red(1,ii)+red(3,ii)
+           if (.TRUE.) then
+             rdiff(ii)=red(2,ii)-red(1,ii)+red(3,ii)
+           else 
+             ! new weights
+             ! rdiff in cartesian coordinates
+             rdiff(ii)=(red(2,1)-red(1,1)+red(3,1))*rprimd(ii,1)+(red(2,2)-red(1,2) & 
+                       +red(3,2))*rprimd(ii,2)+(red(2,3)-red(1,3)+red(3,3))*rprimd(ii,3)
+           end if
          end do
 !        Other lattices
        else
@@ -3674,16 +3717,37 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,wghatm)
 
        if(nqshft==1 .and. brav/=4)then
 
-         do ii=1,3
-!          If the rpt vector is greater than
-!          the allowed space => weight = 0.0
-           if (abs(rdiff(ii))-tol10>factor*ngqpt(ii)) then
-             wghatm(ia,ib,irpt)=zero
-           else if (abs(abs(rdiff(ii))-factor*ngqpt(ii)) <=1.0d-10) then
-!            If the point is in a boundary position => weight/2
-             wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/2
+         if (brav/=1 .or. .TRUE.) then
+           do ii=1,3
+!            If the rpt vector is greater than
+!            the allowed space => weight = 0.0
+             if (abs(rdiff(ii))-tol10>factor*ngqpt(ii)) then
+               wghatm(ia,ib,irpt)=zero
+             else if (abs(abs(rdiff(ii))-factor*ngqpt(ii)) <=1.0d-10) then
+!              If the point is in a boundary position => weight/2
+               wghatm(ia,ib,irpt)=wghatm(ia,ib,irpt)/2
+             end if
+           end do
+         else
+           ! new weights
+           wghatm(ia,ib,irpt)=zero
+           nreq = 1
+           do ii=1,nptws
+             proj = rdiff(1)*ptws(1,ii)+rdiff(2)*ptws(2,ii)+rdiff(3)*ptws(3,ii)
+             ! if rdiff closer to ptws than the origin the weight is zero
+             ! if rdiff close to the origin with respect to all the other ptws the weight is 1
+             ! if rdiff is equidistant from the origin and N other ptws the weight is 1/(N+1)
+             if (proj-ptws(4,ii)>tol6) then
+               nreq = 0
+               EXIT
+             else if(abs(proj-ptws(4,ii))<=tol6) then
+               nreq=nreq+1
+             end if
+           end do
+           if (nreq>0) then
+             wghatm(ia,ib,irpt)=one/DBLE(nreq)         
            end if
-         end do
+         end if
 
 !        DEBUG
 !        if(ia==1 .and. ib==2)&
