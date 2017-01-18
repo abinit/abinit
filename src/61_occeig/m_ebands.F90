@@ -3755,15 +3755,15 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block, spin_block) re
 
  do ix=1,nkx
    ii = ix; if (shifted(1)) ii = ii - 1
-   xvec(ix) = (ii-one+ebands%shiftk(1,1)) / ngkpt(1)
+   xvec(ix) = (ii-1+ebands%shiftk(1,1)) / ngkpt(1)
  end do
  do iy=1,nky
    ii = iy; if (shifted(2)) ii = ii - 1
-   yvec(iy) = (ii-one+ebands%shiftk(2,1)) / ngkpt(2)
+   yvec(iy) = (ii-1+ebands%shiftk(2,1)) / ngkpt(2)
  end do
  do iz=1,nkz
    ii = iz; if (shifted(3)) ii = ii - 1
-   zvec(iz) = (ii-one+ebands%shiftk(3,1)) / ngkpt(3)
+   zvec(iz) = (ii-1+ebands%shiftk(3,1)) / ngkpt(3)
  end do
 
  ! Build list of k-points in full BZ (ordered as required by B-spline routines)
@@ -3792,7 +3792,7 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block, spin_block) re
    'At least one of the k points could not be generated from a symmetrical one.',ch10,&
    'dksqmax=',dksqmax,ch10,&
    'Action: check k-point input variables',ch10,&
-   '        (e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
+   '        e.g. kptopt or shiftk might be wrong in the present dataset or the preparatory one.'
    MSG_ERROR(msg)
  end if
 

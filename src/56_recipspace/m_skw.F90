@@ -145,7 +145,8 @@ CONTAINS  !=====================================================================
 !!  cryst<crystal_t>=Crystalline structure.
 !!  params(:)
 !!     params(1): Ratio between lattice vectors and ab-initio k-points.
-!!     params(2:3): Activate Fourier filter.
+!!     params(2:3): Activate Fourier filtering (Eq 9 of PhysRevB.61.1639) if params(2) > tol6
+!!       params(2)=rcut, params(3) = rsigma
 !!  cplex=1 if time reversal can be used, 2 otherwise.
 !!  nband=Total Number of bands in the eig array.
 !!  nkpt=Number of ab-initio k-points.
