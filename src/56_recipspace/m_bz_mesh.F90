@@ -3446,17 +3446,17 @@ subroutine kpath_print(kpath, header, unit, prtvol, pre)
  my_pre = " "; if (present(pre)) my_pre = pre
  if (unt <= 0) return
 
- if (present(header)) write(unt,"(a)") sjoin(pre, '==== '//trim(adjustl(header))//' ==== ')
- write(unt, "(a)") sjoin(pre, "Number of points:", itoa(kpath%npts), ", ndivsmall:", itoa(kpath%ndivsm))
- write(unt, "(a)") sjoin(pre, "Boundaries and corresponding index in the k-points array:")
+ if (present(header)) write(unt,"(a)") sjoin(my_pre, '==== '//trim(adjustl(header))//' ==== ')
+ write(unt, "(a)") sjoin(my_pre, "Number of points:", itoa(kpath%npts), ", ndivsmall:", itoa(kpath%ndivsm))
+ write(unt, "(a)") sjoin(my_pre, "Boundaries and corresponding index in the k-points array:")
  do ii=1,kpath%nbounds
-   write(unt, "(a)") sjoin(pre, itoa(kpath%bounds2kpt(ii)), ktoa(kpath%bounds(:,ii)))
+   write(unt, "(a)") sjoin(my_pre, itoa(kpath%bounds2kpt(ii)), ktoa(kpath%bounds(:,ii)))
  end do
- write(unt, "(a)") sjoin(pre, " ")
+ write(unt, "(a)") sjoin(my_pre, " ")
 
  if (my_prtvol > 10) then
    do ii=1,kpath%npts
-     write(unt, "(a)") sjoin(pre, ktoa(kpath%points(:,ii)))
+     write(unt, "(a)") sjoin(my_pre, ktoa(kpath%points(:,ii)))
    end do
  end if
 
