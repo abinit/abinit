@@ -836,7 +836,7 @@ with_fft_libs="-L/opt/local/lib -lfftw3 -lfftw3f"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="goto"
+with_linalg_flavor="custom"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
