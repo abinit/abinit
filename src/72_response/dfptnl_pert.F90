@@ -830,17 +830,17 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0
 !      Compute E_Hxc^(2:1)
 ! **************************************************************************************************
 
-! if (compute_rho21) then
-!     call pawmkrho(arg,cplex,gs_hamkq%gprimd,idir_phon,indsy1,ipert_phon,mpi_enreg,&
-!&     natom,natom,nspden,nsym1,psps%ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
-!&     dtset%pawprtvol,pawrhoij21,pawrhoij21_unsym,pawtab,dtset%qptn,dummy_array2,dummy_array2,&
-!&     dummy_array2,rprimd,symaf1,symrc1,dtset%typat,ucvol,dtset%usewvl,xred,&
-!&     pawang_sym=pawang1,pawnhat=nhat21,pawrhoij0=pawrhoij)
-!!     if (paral_atom) then
-!!       call pawrhoij_free(pawrhoij21_unsym)
-!!       ABI_DATATYPE_DEALLOCATE(pawrhoij21_unsym)
-!!     end if
-! end if
+ if (compute_rho21) then
+     call pawmkrho(0,arg,cplex,gs_hamkq%gprimd,idir_phon,indsy1,ipert_phon,mpi_enreg,&
+&     natom,natom,nspden,nsym1,psps%ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
+&     dtset%pawprtvol,pawrhoij21,pawrhoij21_unsym,pawtab,dtset%qptn,dummy_array2,dummy_array2,&
+&     dummy_array2,rprimd,symaf1,symrc1,dtset%typat,ucvol,dtset%usewvl,xred,&
+&     pawang_sym=pawang1,pawnhat=nhat21,pawrhoij0=pawrhoij)
+!     if (paral_atom) then
+!       call pawrhoij_free(pawrhoij21_unsym)
+!       ABI_DATATYPE_DEALLOCATE(pawrhoij21_unsym)
+!     end if
+ end if
 
 ! **************************************************************************************************
 !    ALL TERMS HAVE BEEN COMPUTED

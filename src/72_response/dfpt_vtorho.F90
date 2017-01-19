@@ -827,7 +827,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !  Compute and add the 1st-order compensation density to rho1wfr
 !  to get the total 1st-order density
    if (psps%usepaw==1) then
-     call pawmkrho(arg,cplex,gprimd,idir,indsy1,ipert,mpi_enreg,&
+     call pawmkrho(1,arg,cplex,gprimd,idir,indsy1,ipert,mpi_enreg,&
 &     my_natom,natom,nspden,nsym1,ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
 &     dtset%pawprtvol,pawrhoij1,pawrhoij1_unsym,pawtab,dtset%qptn,rho1wfg,rho1wfr,&
 &     rhor1,rprimd,symaf1,symrc1,dtset%typat,ucvol,dtset%usewvl,xred,&

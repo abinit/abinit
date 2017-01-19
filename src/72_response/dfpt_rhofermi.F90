@@ -707,13 +707,13 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 !Compute and add the compensation density to rhowfr to get the total density
  if (psps%usepaw == 1) then
    if (size(nhatfermi)>0) then
-     call pawmkrho(arg,cplex,gprimd,0,indsy1,0,mpi_enreg,&
+     call pawmkrho(1,arg,cplex,gprimd,0,indsy1,0,mpi_enreg,&
 &     my_natom,natom,nspden,nsym1,dtset%ntypat,dtset%paral_kgb,pawang,pawfgr,&
 &     pawfgrtab,-10001,pawrhoijfermi,pawrhoijfermi_unsym,pawtab,dtset%qptn,&
 &     rhogfermi,rhowfr,rhorfermi,rprimd,symaf1,symrc1,dtset%typat,ucvol,&
 &     dtset%usewvl,xred,pawang_sym=pawang1,pawnhat=nhatfermi)
    else
-     call pawmkrho(arg,cplex,gprimd,0,indsy1,0,mpi_enreg,&
+     call pawmkrho(1,arg,cplex,gprimd,0,indsy1,0,mpi_enreg,&
 &     my_natom,natom,nspden,nsym1,dtset%ntypat,dtset%paral_kgb,pawang,pawfgr,&
 &     pawfgrtab,-10001,pawrhoijfermi,pawrhoijfermi_unsym,pawtab,dtset%qptn,&
 &     rhogfermi,rhowfr,rhorfermi,rprimd,symaf1,symrc1,dtset%typat,ucvol,&

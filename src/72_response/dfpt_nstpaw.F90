@@ -1458,7 +1458,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &         pawang,pawfgrtab,pawrhoij,pawtab,rprimd,&
 &         mpi_atmtab=my_atmtab,comm_atom=my_comm_atom)
        end if
-       call pawmkrho(arg,cplex,gprimd,idir1,indsy1,ipert1,&
+       call pawmkrho(1,arg,cplex,gprimd,idir1,indsy1,ipert1,&
 &       mpi_enreg,my_natom,dtset%natom,nspden,nsym1,dtset%ntypat,dtset%paral_kgb,pawang,&
 &       pawfgr,pawfgrtab,-10001,pawdrhoij1(:,idir1),pawdrhoij1_unsym(:,idir1),pawtab,&
 &       dtset%qptn,drho1wfg,drho1wfr(:,:,idir1),drhor1,rprimd,symaf1,symrc1,dtset%typat,&
