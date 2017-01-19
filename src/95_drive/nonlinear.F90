@@ -207,6 +207,9 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
  nkpt_max=50;if(xmpi_paral==1)nkpt_max=-1
  my_natom=mpi_enreg%my_natom
  paral_atom=(my_natom/=dtset%natom)
+ if (paral_atom) then
+   MSG_BUG(" Nonlinear routine is not available yet with parallelization over atoms...")
+ end if
 !Define FFT grid(s) sizes (be careful !)
 !See NOTES in the comments at the beginning of this file.
  call pawfgr_init(pawfgr,dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfft,ngfftf)

@@ -116,7 +116,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                            init_hamiltonian,init_rf_hamiltonian,rf_hamiltonian_type
  use m_pawdij,      only : pawdij, pawdijfr, symdij
  use m_pawfgr,      only : pawfgr_type
- use m_pawfgrtab,   only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
+ use m_pawfgrtab,   only : pawfgrtab_type
  use m_paw_an,      only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify, paw_an_reset_flags
  use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags, paw_ij_print
  use m_pawang,      only : pawang_type
@@ -184,7 +184,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  integer :: has_dijfr
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,iatom,idir_dkde,ierr,iexit,ifft,ii,index,ir
  integer :: ireadwf,itypat
- integer :: mcg,mpsang,n1,n2,n3,n3xccc,ndir,nfftotf,nhat1grdim,nspden,nspden_rhoij,nwffile
+ integer :: mcg,mpsang,n1,n2,n3,n3xccc,ndir,nfftotf,nhat1grdim,npert_phon,nspden,nspden_rhoij,nwffile
  integer :: option,optene,optfr,optorth,pert1case,pert2case,pert3case
  integer :: rdwrpaw,second_idir,timrev,usexcnhat
  real(dp) :: dummy_real,ecut_eff
@@ -468,9 +468,17 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                do i2dir = 1, 3
 
                  if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
-                   pert2case = i2dir + (i2pert-1)*3
 
+                   pert2case = i2dir + (i2pert-1)*3
                    blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
+
+                   npert_phon = 0
+                   if(i1pert<=dtset%natom) npert_phon = npert_phon + 1
+                   if(i2pert<=dtset%natom) npert_phon = npert_phon + 1
+                   if(i3pert<=dtset%natom) npert_phon = npert_phon + 1
+                   if (npert_phon>1) then
+                     MSG_ERROR("dfptnl_loop is available with at most one phonon perturbation. Change your input!")
+                   end if
 
                    call status(counter,dtfil%filstat,iexit,level,'call inwffil  ')
                    call inwffil(ask_accurate,cg2,dtset,dtset%ecut,ecut_eff,eigen2,dtset%exchn2n3d,&
@@ -604,12 +612,13 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                      nwffile = 3
                      file_index(2) = i2dir+natom*3
                      idir_dkde = i2dir
+!                    As npert_phon<=1 and i2pert==natom+2, i1pert or i3pert is necessarly equal to natom+2
                      if (i3pert==natom+2) then
                        second_idir = i3dir
                      else if (i1pert==natom+2) then
                        second_idir = i1dir
                      else
-                       MSG_ERROR("dfptnl_loop with two phonon perturbations is not available yet. Change your input!")
+                       MSG_BUG(" i1pert or i3pert is supposed to be equal to natom+2, which is unexpected.")
                      end if
                      if (second_idir/=i2dir) then ! see m_rf2.F90 => getidirs
                        if (i2dir==2.and.second_idir==3) idir_dkde = 4
@@ -651,12 +660,12 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 !                   call timab(512,1,tsec)
                    call status(counter,dtfil%filstat,iexit,level,'call dfptnl_resp ')
 !                  NOTE : eigen2 equals zero here
-                   call dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,i1dir,&
+                   call dfptnl_pert(atindx,atindx1,cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,indsy1,i1dir,&
 &                   i2dir,i3dir,i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
-&                   mpsang,mpw,natom,nfftf,nfftotf,nkpt,nk3xc,nspden,nspinor,nsppol,npwarr,occ,&
-&                   pawang,pawrad,pawtab,pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij1_i3pert,&
+&                   mpsang,mpw,natom,nattyp,nfftf,nfftotf,nkpt,nk3xc,nspden,nspinor,nsppol,nsym1,npwarr,occ,&
+&                   pawang,pawang1,pawfgrtab,pawrad,pawtab,pawrhoij,pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij1_i3pert,&
 &                   paw_an0,paw_ij0,paw_ij1_i2pert,pawfgr,ph1d,psps,rf_hamkq,rho1r1,rho2r1,rho3r1,&
-&                   rprimd,ucvol,vtrial,vtrial1,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred)
+&                   rprimd,symaf1,symrc1,ucvol,vtrial,vtrial1,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred)
 !                   call timab(512,2,tsec)
 
                    call status(counter,dtfil%filstat,iexit,level,'after dfptnl_resp')
