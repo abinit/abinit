@@ -1162,8 +1162,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  end if
 
  ! Band structure interpolation from eigenvalues computed on the k-mesh.
- if (nint(dtset%einterp(1)) /= 0 .and. dtset%kptopt > 0 .and. ebands%nkpt > 1 .and. dtset%tfkinfunc == 0) then
- !if (dtset%kptopt > 0 .and. ebands%nkpt > 1 .and. dtset%tfkinfunc == 0) then
+ if (nint(dtset%einterp(1)) /= 0) then
    call ebands_interpolate_kpath(ebands, dtset, crystal, dtfil%filnam_ds(4), spacecomm)
  end if
 

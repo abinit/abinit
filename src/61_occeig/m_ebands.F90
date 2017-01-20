@@ -3733,8 +3733,7 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block, spin_block) re
    ierr = ierr + 1
  end if
  if (ierr /= 0) then
-   MSG_WARNING("bspline interpolation cannot be performed. See warnings above. Returning")
-   return
+   MSG_ERROR("bspline interpolation cannot be performed. See messages above.")
  end if
 
  ! Build BZ mesh Note that in the simplest case of unshifted mesh:
@@ -4209,7 +4208,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, params, kpath, comm) 
  type(skw_t) :: skw
 !arrays
  integer,parameter :: new_kptrlatt(3,3)=0
- integer :: bspl_ords(3)
+ integer :: bspl_ords(3),band_block(2),spin_block(2)
  integer,allocatable :: new_istwfk(:),new_nband(:,:),new_npwarr(:)
  real(dp),parameter :: new_shiftk(3,1) = zero
  real(dp),allocatable :: new_wtk(:),new_doccde(:),new_eig(:),new_occ(:)
@@ -4218,6 +4217,11 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, params, kpath, comm) 
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  itype = nint(params(1))
+
+ if (ebands%nkpt == 1) then
+   MSG_WARNING("Cannot interpolate band energies when nkpt = 1. Returning")
+   return
+ end if
 
  ! Initialize new ebands_t.
  new_nkibz = kpath%npts
@@ -4247,15 +4251,16 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, params, kpath, comm) 
  ABI_FREE(new_eig)
  ABI_FREE(new_occ)
 
- ! Build (B-spline|SKW) object for all bands
+ ! Build (B-spline|SKW) object for all bands.
+ band_block = [0, 0]; spin_block = [0, 0]
  select case (itype)
  case (1)
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
    skw = skw_new(cryst, params(2:), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, &
-                 [0, 0], [0, 0], comm)
+                 band_block, spin_block, comm)
  case (2)
    bspl_ords = nint(params(2:4))
-   ebspl = ebspl_new(ebands, cryst, bspl_ords, [0,0], [0,0])
+   ebspl = ebspl_new(ebands, cryst, bspl_ords, band_block, spin_block)
 
  case default
    MSG_ERROR(sjoin("Wrong params(1):", itoa(itype)))
@@ -5313,21 +5318,25 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, prefix, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: my_rank,nshiftk_fine,ndivsm,nbounds
+ integer :: my_rank,ndivsm,nbounds !nshiftk_fine,
  type(ebands_t) :: ebands_bspl,ebands_skw
  type(kpath_t) :: kpath
  character(len=500) :: msg
 !arrays
- integer :: kptrlatt_fine(3,3)
+ !integer :: kptrlatt_fine(3,3)
  real(dp) :: bspl_params(4),skw_params(4)
- real(dp),allocatable :: shiftk_fine(:,:),bounds(:,:)
+ real(dp),allocatable :: bounds(:,:) !shiftk_fine(:,:),
 
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm)
 
- ! Interpolate bands on k-path.
- ndivsm = dtset%ndivsm; if (ndivsm <= 0) ndivsm = 10
+ ! Generate k-path
+ ndivsm = dtset%ndivsm
+ if (ndivsm <= 0) then
+   MSG_WARNING("Setting ndivms to 10 because variable is not given in input file")
+   ndivsm = 10
+ end if
  nbounds = dtset%nkpath
  if (nbounds <= 0) then
    MSG_WARNING("Using hard-coded k-path because nkpath == 0 in input file.")
@@ -5342,67 +5351,48 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, prefix, comm)
  call kpath_print(kpath, header="Interpolating energies on k-path", unit=std_out)
  ABI_FREE(bounds)
 
- ! SKW interpolation
- skw_params = one * [1, 80, 0, 0]
- ebands_skw = ebands_interp_kpath(ebands, cryst, skw_params, kpath, comm)
- if (my_rank == master) then
-    call ebands_write(ebands_skw, dtset%prtebands, strcat(prefix, "_SKW"), kptbounds=kpath%bounds)
- end if
- call ebands_free(ebands_skw)
-
- ! B-spline interpolation
- bspl_params = one * [2, 3, 3, 3]; if (dtset%useric /= 0) bspl_params(2:) = dtset%useric
- if (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1) then
-   ebands_bspl = ebands_interp_kpath(ebands, cryst, bspl_params, kpath, comm)
+ ! Interpolate bands on k-path.
+ select case(nint(dtset%einterp(1)))
+ case (1)
+   ! SKW interpolation
+   skw_params = dtset%einterp
+   ebands_skw = ebands_interp_kpath(ebands, cryst, skw_params, kpath, comm)
    if (my_rank == master) then
-     call ebands_write(ebands_bspl, dtset%prtebands, strcat(prefix, "_BSPLINE"), kptbounds=kpath%bounds)
+      call ebands_write(ebands_skw, dtset%prtebands, strcat(prefix, "_SKW"), kptbounds=kpath%bounds)
    end if
-   call ebands_free(ebands_bspl)
- else
-   write(msg,"(3a)") &
-      "Cannot interpolate energies with B-spline because:",ch10,&
-      ".not. (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1)"
-   MSG_WARNING(msg)
- end if
+   call ebands_free(ebands_skw)
+
+ case (2)
+   ! B-spline interpolation
+   bspl_params = dtset%einterp
+   if (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1) then
+     ebands_bspl = ebands_interp_kpath(ebands, cryst, bspl_params, kpath, comm)
+     if (my_rank == master) then
+       call ebands_write(ebands_bspl, dtset%prtebands, strcat(prefix, "_BSPLINE"), kptbounds=kpath%bounds)
+     end if
+     call ebands_free(ebands_bspl)
+   else
+     write(msg,"(3a)") &
+        "Cannot interpolate energies with B-spline because:",ch10,&
+        ".not. (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1)"
+     MSG_WARNING(msg)
+   end if
+
+ case default
+   MSG_ERROR("Wrong itype.")
+ end select
+
+ call kpath_free(kpath)
 
  ! Interpolate bands on dense k-mesh.
- !kptrlatt_fine = reshape([1,0,0,0,1,0,0,0,1], [3,3]); kptrlatt_fine = 12 * kptrlatt_fine
- kptrlatt_fine = 2 * ebands%kptrlatt
- nshiftk_fine = ebands%nshiftk
- !nshiftk_fine = 5
- ABI_CALLOC(shiftk_fine, (3,nshiftk_fine))
- shiftk_fine = ebands%shiftk
- !shiftk_fine = half * reshape([1,0,0,0,1,0,0,0,1,1,1,1,0,0,0], [3,5])
-
- ! Bspline followed by SKW.
- if (.False. .and. isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1) then
-   ebands_bspl = ebands_interp_kmesh(ebands, cryst, bspl_params, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
-   ebands_skw = ebands_interp_kpath(ebands_bspl, cryst, skw_params, kpath, comm)
-   if (my_rank == master) then
-      call ebands_write(ebands_skw, dtset%prtebands, strcat(prefix, "_SKW_BSPL"), kptbounds=kpath%bounds)
-   end if
-   call ebands_free(ebands_bspl)
-   call ebands_free(ebands_skw)
- else
-   write(msg,"(3a)") &
-    "Cannot interpolate energies with B-spline because:",ch10,&
-    ".not. (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1)"
-   !MSG_WARNING(msg)
- end if
-
- ! SKW followed by Bspline.
- if (.False.) then
-   ebands_skw = ebands_interp_kmesh(ebands, cryst, skw_params, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
-   ebands_bspl = ebands_interp_kpath(ebands_skw, cryst, bspl_params, kpath, comm)
-   if (my_rank == master) then
-     call ebands_write(ebands_bspl, dtset%prtebands, strcat(prefix, "_BSPL_SKW"), kptbounds=kpath%bounds)
-   end if
-   call ebands_free(ebands_bspl)
-   call ebands_free(ebands_skw)
- end if
-
- ABI_FREE(shiftk_fine)
-
+ !!kptrlatt_fine = reshape([1,0,0,0,1,0,0,0,1], [3,3]); kptrlatt_fine = 12 * kptrlatt_fine
+ !kptrlatt_fine = 2 * ebands%kptrlatt
+ !nshiftk_fine = ebands%nshiftk
+ !!nshiftk_fine = 5
+ !ABI_CALLOC(shiftk_fine, (3,nshiftk_fine))
+ !shiftk_fine = ebands%shiftk
+ !!shiftk_fine = half * reshape([1,0,0,0,1,0,0,0,1,1,1,1,0,0,0], [3,5])
+ !ABI_FREE(shiftk_fine)
  !ebands_bspl = ebands_interp_kmesh(ebands, cryst, bspl_params, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
  !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
  !ebands_skw = ebands_interp_kmesh(ebands, cryst, skw_params, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
@@ -5419,8 +5409,6 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, prefix, comm)
  !  call edos_write(edos, path)
  !end if
  !call edos_free(edos)
-
- call kpath_free(kpath)
 
 end subroutine ebands_interpolate_kpath
 !!***

@@ -36,7 +36,7 @@ MODULE m_skw
  use m_fstrings,       only : itoa, sjoin, ktoa, yesno, ftoa
  use m_special_funcs,  only : abi_derfc
  use m_time,           only : cwtime
- use m_numeric_tools,  only : vdiff_t, vdiff_eval, vdiff_print
+ use m_numeric_tools,  only : imax_loc, vdiff_t, vdiff_eval, vdiff_print
  use m_bz_mesh,        only : isamek
 
  implicit none
@@ -174,6 +174,8 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  use interfaces_14_hidewrite
 !End of the abilint section
 
+ use m_gsphere,  only : get_irredg
+
  implicit none
 
 !Arguments ------------------------------------
@@ -189,17 +191,17 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,prtvol=1
- integer :: my_rank,nprocs,cnt,bstop,bstart,bcount,lwork
+ integer :: my_rank,nprocs,cnt,bstop,bstart,bcount,lwork,nstars
  integer :: ir,ik,ib,ii,jj,nr,band,spin,isym,ierr,i1,i2,i3,msize,lpratio
  real(dp),parameter :: tolr=tol12,c1=0.25_dp,c2=0.25_dp
  real(dp) :: r2,r2min,mare,mae_meV,adiff_meV,rel_err,rcut,rsigma
- real(dp) :: cpu_tot,wall_tot,gflops_tot,cpu,wall,gflops
+ real(dp) :: cpu_tot,wall_tot,gflops_tot,cpu,wall,gflops,rval
  character(len=500) :: fmt,msg
 !arrays
  integer :: rmax(3)
- integer,allocatable :: ipiv(:),iperm(:),rtmp(:,:)
+ integer,allocatable :: ipiv(:),iperm(:),rtmp(:,:),rgen(:,:)
  real(dp) :: list2(2)
- real(dp),allocatable :: r2vals(:),rhor(:),oeig(:)
+ real(dp),allocatable :: r2vals(:),inv_rhor(:),oeig(:),cnorm(:)
  complex(dpc),allocatable :: srk(:,:),hmat(:,:),lambda(:,:,:),work(:)
 
 ! *********************************************************************
@@ -230,9 +232,9 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  ABI_CHECK(lpratio > 0, "lpratio must be > 0")
  !rmax = 1 + (lpratio * new%nkpt) / two
  rmax = nint((one + (lpratio * new%nkpt * cryst%nsym) / two) ** third)
- !rmax = [20, 20, 20]
+ !rmax = nint((one + (lpratio * new%nkpt) / two) ** third)
  msize = product(2*rmax + 1)
- write(std_out,*)"msize",msize," rmax:",rmax
+ write(std_out,*)"lpratio",lpratio,"msize",msize," rmax:",rmax
  ABI_MALLOC(rtmp, (3, msize))
  ABI_MALLOC(r2vals, (msize))
 
@@ -247,49 +249,53 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
    end do
  end do
 
+ !ecut = zero, npw = 0
+ !call setshells(ecut, npw, nsh, nsym, gmet, gprimd, symrel, "skw", ucvol)
+
+ call cwtime(cpu, wall, gflops, "start")
  ! Sort r2vals
  ABI_MALLOC(iperm, (msize))
  iperm = [(i1, i1=1,msize)]
  call sort_dp(msize, r2vals, iperm, tolr)
 
- ! Initial guess for nr.
+ ! Find R-points generating the stars
+ ABI_MALLOC(rgen, (3, msize))
+ ABI_MALLOC(cnorm, (msize))
  do i1=1,msize
-   if (i1 > nkpt * lpratio) exit
+   rgen(:,i1) = rtmp(:,iperm(i1))
  end do
- nr = i1 - 1
+ rtmp = rgen
 
- ! Find nr closing the shell.
- do i1=nr+1,msize
-   if (abs(r2vals(i1) - r2vals(nr)) > tolr) exit
- end do
- nr = i1 - 1
+ call get_irredg(msize, new%ptg_nsym, +1, cryst%rprimd, new%ptg_symrel, rtmp, nstars, rgen, cnorm)
+ call cwtime(cpu, wall, gflops, "stop")
+ write(std_out,"(2(a,f6.2))")" skw_new setup: cpu: ",cpu,", wall: ",wall
 
- ! Copy lattice points sorted by norm.
- new%nr = nr
+ ABI_CHECK(nstars >= lpratio * nkpt, "nstars < lpratio * nkpt")
+ new%nr = lpratio * nkpt
  ABI_MALLOC(new%rpts, (3, nr))
- do i1=1,nr
-   new%rpts(:,i1) = rtmp(:,iperm(i1))
- end do
- r2min = r2vals(2)
+ new%rpts = rgen(:,1:nr)
+ ABI_FREE(rgen)
+ ABI_FREE(cnorm)
 
  if (my_rank == master) call skw_print(new, std_out)
 
- ! Compute roughness function.
- ABI_MALLOC(rhor, (nr))
+ ! Compute (inverse) roughness function.
+ r2min = r2vals(2)
+ ABI_MALLOC(inv_rhor, (nr))
  do ir=1,nr
    r2 = dot_product(new%rpts(:,ir), matmul(cryst%rmet, new%rpts(:,ir)))
+   inv_rhor(ir) = one / ((one - c1 * r2/r2min)**2 + c2 * (r2 / r2min)**3)
    ! TODO: Test the two versions.
-   !if (params(1) < zero) rhor(ir) = c1 * r2 + c2 * r2**2
-   rhor(ir) = (one - c1 * r2/r2min)**2 + c2 * (r2 / r2min)**3
+   !if (params(1) < zero) inv_rhor(ir) = one / (c1 * r2 + c2 * r2**2)
  end do
 
  ! Construct star functions for the ab-initio k-points.
  ABI_MALLOC(srk, (nr, nkpt))
  do ik=1,nkpt
-   call mkstar(new, cryst, kpts(:,ik), srk(:,ik))
+   call mkstar(new, kpts(:,ik), srk(:,ik))
  end do
 
- ! Build H(k,k') matrix.
+ ! Build H(k,k') matrix (Hermitian)
  ABI_CALLOC(hmat, (nkpt-1, nkpt-1))
  cnt = 0
  do jj=1,nkpt-1
@@ -298,7 +304,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
      cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! mpi parallelism.
      do ir=2,nr
        hmat(ii, jj) = hmat(ii, jj) + &
-         (srk(ir, ii) - srk(ir, nkpt)) * conjg(srk(ir, jj) - srk(ir, nkpt)) / rhor(ir)
+         (srk(ir, ii) - srk(ir, nkpt)) * conjg(srk(ir, jj) - srk(ir, nkpt)) * inv_rhor(ir)
      end do
    end do
  end do
@@ -324,6 +330,9 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
    ABI_CHECK(ierr == 0, sjoin("ZGESV returned:", itoa(ierr)))
  else
    ! Hermitian version
+   do ii=1,nkpt-1
+      hmat(ii, ii) = real(hmat(ii, ii))
+   end do
    lwork = -1
    ABI_MALLOC(work, (1))
    call zhesv("U", nkpt-1, bcount*nsppol, hmat, nkpt-1, ipiv, lambda, nkpt-1, work, lwork, ierr)
@@ -344,18 +353,20 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
    do ib=1,bcount
      band = ib + bstart - 1
      do ir=2,nr
-       new%coefs(ir,ib,spin) = (one/rhor(ir)) * dot_product(srk(ir,:nkpt-1) - srk(ir,nkpt), lambda(:nkpt-1, ib, spin))
-       !new%coefs(ir,ib,spin) = (one/rhor(ir)) * dot_product(lambda(:nkpt-1, ib, spin), conjg(srk(ir,:) - srk(ir,nkpt)))
-       !new%coefs(ir,ib,spin) = (one/rhor(ir)) * dot_product(lambda(:nkpt-1, ib, spin), conjg(srk(ir,:) - srk(ir,1)))
+       new%coefs(ir,ib,spin) = inv_rhor(ir) * dot_product(srk(ir,:nkpt-1) - srk(ir,nkpt), lambda(:nkpt-1, ib, spin))
+       !new%coefs(ir,ib,spin) = inv_rhor(ir) * dot_product(lambda(:nkpt-1, ib, spin), conjg(srk(ir,:) - srk(ir,nkpt)))
+       !new%coefs(ir,ib,spin) = inv_rhor(ir) * dot_product(lambda(:nkpt-1, ib, spin), conjg(srk(ir,:) - srk(ir,1)))
      end do
      new%coefs(1,ib,spin) = eig(band,nkpt,spin) - dot_product(conjg(new%coefs(2:nr, ib,spin)), srk(2:nr, nkpt))
    end do
  end do
 
- ! Filter coefficients
+ ! Filter high-frequency.
  if (params(2) > tol6) then
+   rcut = params(2) * sqrt(r2vals(new%nr))
+   rsigma = params(3); if (rsigma <= zero) rsigma = five
    call wrtout(std_out," Applying filter (Eq 9 of PhysRevB.61.1639)")
-   rcut = params(2) * sqrt(r2vals(new%nr)); rsigma = params(3)
+   !call wrtout(std_out," cut sigma
    do ir=2,nr
      new%coefs(ir,:,:) = new%coefs(ir,:,:) * half * abi_derfc((sqrt(r2vals(ir)) - rcut) / rsigma)
    end do
@@ -373,7 +384,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  ABI_FREE(rtmp)
  ABI_FREE(r2vals)
  ABI_FREE(srk)
- ABI_FREE(rhor)
+ ABI_FREE(inv_rhor)
  ABI_FREE(hmat)
  ABI_FREE(lambda)
  ABI_FREE(ipiv)
@@ -399,9 +410,11 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
      end do
 
      if (prtvol > 0) then
-       write(std_out,"(a,es12.4,4a)") &
-         " SKW maxerr: ", maxval(eig(bstart:bstop,ik,spin) - oeig) * Ha_meV, &
-         " [meV], kpt: ", sjoin(ktoa(kpts(:,ik)), ", spin:", itoa(spin))
+       ib = imax_loc(eig(bstart:bstop,ik,spin) - oeig)
+       rval = (eig(bstart+ib-1,ik,spin) - oeig(ib)) * Ha_meV
+       write(std_out,"(a,es12.4,2a)") &
+         " SKW maxerr: ", rval, &
+         " [meV], kpt: ", sjoin(ktoa(kpts(:,ik)), "band:",itoa(bstart+ib-1),", spin:", itoa(spin))
        !write(std_out,fmt)"-- ref ", eig(bstart:bstop,ik,spin) * Ha_meV
        !write(std_out,fmt)"-- int ", oeig * Ha_meV
        !call vdiff_print(vdiff_eval(1, bcount, eig(bstart:bstop,ik,spin), oeig, one))
@@ -414,7 +427,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  list2 = [mare, mae_meV]; call xmpi_sum(list2, comm, ierr); mare = list2(1); mae_meV = list2(2)
  cnt = bcount * nkpt * nsppol; mare = mare / cnt; mae_meV = mae_meV / cnt
  write(std_out,"(2(a,es12.4),a)")" MARE: ",mare, ", MAE: ", mae_meV, "[meV]"
- if (mae_meV > tol6) then
+ if (mae_meV > ten) then
    write(msg,"(2a,2(a,es12.4),a)") &
      "Large error detected in SKW interpolation!",ch10," MARE: ",mare, ", MAE: ", mae_meV, "[meV]"
    !call wrtout(ab_out, msg)
@@ -470,8 +483,8 @@ subroutine skw_print(skw, unt)
  write(unt,"(a)")" === Shankland-Koelling-Wood Fourier interpolation scheme ==="
  write(unt,"(a)")sjoin(" nsppol", itoa(skw%nsppol), ", cplex:", itoa(skw%cplex))
  write(unt,"(a)")sjoin(" Number of ab-initio k-points:", itoa(skw%nkpt))
- write(unt,"(a)")sjoin(" Number of real-space lattice points:", itoa(skw%nr))
- write(unt,"(a)")sjoin(" L/k ratio:", ftoa(skw%nr * one / skw%nkpt))
+ write(unt,"(a)")sjoin(" Number of star functions:", itoa(skw%nr))
+ write(unt,"(a)")sjoin(" Stars/Nk ratio:", ftoa(skw%nr * one / skw%nkpt))
  write(unt,"(a)")sjoin(" Has spatial inversion:", yesno(skw%has_inversion))
 
 end subroutine skw_print
@@ -538,7 +551,7 @@ subroutine skw_eval_bks(skw, cryst, band, kpt, spin, oeig, oder1, oder2)
 
  ! Compute star function for this k-point (if not already in memory)
  if (any(kpt /= skw%cached_kpt)) then
-   call mkstar(skw, cryst, kpt, skw%cached_srk)
+   call mkstar(skw, kpt, skw%cached_srk)
    skw%cached_kpt = kpt
  end if
 
@@ -788,7 +801,6 @@ end subroutine skw_free
 !!  Compute the star function for k-point kpt
 !!
 !! INPUTS
-!!  cryst<crystal_t>=Crystalline structure.
 !!  kpt(3)=K-point in reduced coordinates.
 !!
 !! OUTPUT
@@ -801,7 +813,7 @@ end subroutine skw_free
 !!
 !! SOURCE
 
-subroutine mkstar(skw, cryst, kpt, srk)
+subroutine mkstar(skw, kpt, srk)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -815,24 +827,20 @@ subroutine mkstar(skw, cryst, kpt, srk)
 !Arguments ------------------------------------
 !scalars
  type(skw_t),intent(in) :: skw
- type(crystal_t),intent(in) :: cryst
 !arrays
  real(dp),intent(in) :: kpt(3)
  complex(dpc),intent(out) :: srk(skw%nr)
 
 !Local variables-------------------------------
 !scalars
- integer :: ik,ir,isym,nkstar !my_nsym,
+ integer :: ir,isym
  logical :: found
 !arrays
- integer :: g0(3) !,mit(3,3)
- real(dp) :: kstar(3,cryst%nsym),sk(3)
+ real(dp) :: sk(3)
 
 ! *********************************************************************
 
  srk = zero
-
-#if 1
  do isym=1,skw%ptg_nsym
    sk = two_pi * matmul(transpose(skw%ptg_symrel(:,:,isym)), kpt)
    do ir=1,skw%nr
@@ -840,41 +848,6 @@ subroutine mkstar(skw, cryst, kpt, srk)
    end do
  end do
  srk = srk / skw%ptg_nsym
-
-#else
- nkstar = 1; kstar(:, 1) = kpt
- do isym=1,cryst%nsym
-   if (cryst%symafm(isym) == -1) cycle
-   !call mati3inv(cryst%symrel(:,:,isym), mit)
-   !sk = matmul(transpose(mit), kpt)
-   sk = matmul(transpose(cryst%symrel(:,:,isym)), kpt)
-   do ik=1,nkstar
-     found = isamek(sk, kstar(:,ik), g0)
-     if (any(g0 /= 0)) found = .False.
-     if (found) exit
-   end do
-   if (.not. found) then
-      nkstar = nkstar + 1; kstar(:, nkstar) = sk
-   end if
- end do
-
- do ir=1,skw%nr
-   do ik=1,nkstar
-     srk(ir) = srk(ir) + exp(j_dpc * two_pi * dot_product(kstar(:,ik), skw%rpts(:,ir)))
-   end do
-   srk(ir) = srk(ir) / nkstar
-   !srk(ir) = srk(ir) / cryst%nsym
- end do
-
- !my_nsym = count(cryst%symafm == 1)
- !do ir=1,skw%nr
- !  do isym=1,cryst%nsym
- !    if (cryst%symafm(isym) == -1) cycle
- !    srk(ir) = srk(ir) + exp(j_dpc * two_pi * dot_product(kpt, matmul(cryst%symrel(:,:,isym), skw%rpts(:,ir))))
- !  end do
- !  srk(ir) = srk(ir) / my_nsym
- !end do
-#endif
 
 end subroutine mkstar
 !!***

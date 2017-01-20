@@ -36,6 +36,7 @@ MODULE m_gsphere
  use m_sort
 
  use defs_abitypes,   only : MPI_type
+ use m_fstrings,      only : sjoin, itoa
  use m_numeric_tools, only : bisect
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
@@ -52,7 +53,7 @@ MODULE m_gsphere
  public :: get_irredg          ! Given a set of G vectors, find the set of G"s generating the others by symmetry.
  public :: merge_kgirr         ! Merge a list of irreducible G vectors (see routine for more info)
  public :: setshells           ! Set consistently the number of shells, the number of plane-waves,  and the energy cut-off
- public :: kg_map              !  Compute the mapping between two lists of g-vectors.
+ public :: kg_map              ! Compute the mapping between two lists of g-vectors.
  public :: make_istwfk_table
 !!***
 
@@ -1625,6 +1626,10 @@ end subroutine getfullg
 !!  cnormk(npw_k)=first nbasek elements are the norm of each irreducible G-vector
 !!  gbasek(3,npw_k)=first nbasek elements are the irreducible G vectors
 !!
+!! NOTES
+!!  This routine is deprecated.
+!!  The search can be optimized by looping inside the shell.
+!!
 !! PARENTS
 !!      m_gsphere
 !!
@@ -1659,7 +1664,6 @@ subroutine get_irredg(npw_k,nsym,pinv,gprimd,symrec,gcurr,nbasek,gbasek,cnormk)
  integer :: ig,irr,isym,jj
  real(dp) :: eps,norm
  logical :: found
- character(len=500) :: msg
 !arrays
  integer :: gbas(3),gcur(3),geq(3)
  real(dp) :: gcar(3)
@@ -1669,38 +1673,33 @@ subroutine get_irredg(npw_k,nsym,pinv,gprimd,symrec,gcurr,nbasek,gbasek,cnormk)
  DBG_ENTER("COLL")
 
  if (pinv/=1.and.pinv/=-1) then
-   write(msg,'(a,i6)')&
-&   'The argument pinv should be -1 or 1, however, pinv =',pinv
-   MSG_BUG(msg)
+   MSG_BUG(sjoin('pinv should be -1 or 1, however, pinv =', itoa(pinv)))
  end if
- !
- ! === zero irred G vectors found, zeroing output arrays ===
- nbasek=0 ; cnormk(:)=zero ; gbasek(:,:)=0
+
+ ! Zero irred G vectors found, zeroing output arrays.
+ nbasek = 0; cnormk(:) = zero; gbasek(:,:) = 0
 
  do ig=1,npw_k
-   gcur(:)=gcurr(:,ig) ; norm=zero
+   gcur(:) = gcurr(:,ig); norm = zero
    do jj=1,3
      gcar(jj)=gcur(1)*gprimd(jj,1)+gcur(2)*gprimd(jj,2)+gcur(3)*gprimd(jj,3)
      norm=norm+gcar(jj)**2
    end do
-   eps=tol8*norm ; found=.FALSE. ; irr=1
-   do while ((.not.found).and.(irr<=nbasek))
-     if (ABS(norm-cnormk(irr))<=eps) then
-       gbas(:)=gbasek(:,irr)
-       isym=1
-       do while ((.not.found).and.(isym<=nsym))
-         geq(:)=MATMUL(symrec(:,:,isym),gcur)
-         found=ALL(geq(:)==gbas(:))
-         if (pinv==-1) found=(found.or.ALL(geq==-gbas)) ! For time-reversal
-         isym=isym+1
+   eps = tol8 * norm; found = .False.; irr = 1
+   do while (.not.found .and. irr <= nbasek)  ! This loop can be optimized by looping inside the shell.
+     if (abs(norm - cnormk(irr)) <= eps) then
+       gbas(:) = gbasek(:,irr); isym = 1
+       do while (.not.found .and. isym <= nsym)
+         geq(:) = matmul(symrec(:,:,isym),gcur)
+         found = all(geq(:) == gbas(:))
+         if (pinv == -1) found = (found .or. all(geq == -gbas)) ! For time-reversal
+         isym = isym + 1
        end do
      end if
-     irr=irr+1
+     irr = irr + 1
    end do
-   if (.not.found) then
-     nbasek=nbasek+1
-     cnormk(nbasek)=norm
-     gbasek(:,nbasek)=gcur(:)
+   if (.not. found) then
+     nbasek = nbasek + 1; cnormk(nbasek) = norm; gbasek(:,nbasek) = gcur(:)
    end if
  end do
 

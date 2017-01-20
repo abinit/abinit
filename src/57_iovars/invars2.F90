@@ -2596,14 +2596,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  end if
 
  ! Read variables defining the k-path
+ ! If kptopt < 0  --> Band structure and kptbounds size is given by abs(kptopt)
+ ! If kptopt >= 0 --> We may have a k-path specified by nkpath and kptbounds (used by post-processing tools)
  ! TODO: ndivk?
-#if 1
- !dtset%ndivsm = 20
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ndivsm',tread,'INT')
  if (tread == 1) dtset%ndivsm = intarr(1)
 
- ! If kptopt < 0  --> Band structure and kptbounds size is given by abs(kptopt)
- ! If kptopt >= 0 --> We may have a k-path specified by nkpath and kptbounds (used by post-processing tools)
  if (dtset%kptopt < 0) then
    dtset%nkpath = abs(dtset%kptopt)
  else
@@ -2624,7 +2623,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  else
    ABI_MALLOC(dtset%kptbounds, (0,0))
  end if
-#endif
 
 ! This part has been commented out as get_kpt_fullbz is not able to handle kptrlatt with shifts e.g.
 ! kptrlatt
