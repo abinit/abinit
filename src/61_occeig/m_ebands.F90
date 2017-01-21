@@ -5304,6 +5304,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, prefix, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ebands_interpolate_kpath'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -5342,6 +5343,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, prefix, comm)
      return
    end if
  end if
+ tag = "_INTERP"
 
  ! Generate k-path
  ndivsm = dtset%ndivsm
