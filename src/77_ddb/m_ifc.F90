@@ -705,7 +705,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ABI_FREE(dynmatfull)
  ABI_FREE(dynmat_sr)
  ABI_FREE(dynmat_lr)
-
  ABI_FREE(qbz)
  ABI_FREE(qibz)
 

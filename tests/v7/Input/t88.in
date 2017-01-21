@@ -110,10 +110,10 @@ znucl  13
 #%%   t88o_DS2_PHGAMMA, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_NOINTP_A2FW, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_A2FW, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
-#%%   t88o_DS2_EBANDS.data, tolnlines=1, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
-#%%   t88o_DS2_EBANDS.gnuplot, tolnlines=0, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
-#%%   t88o_DS2_PHBANDS.data, tolnlines=1, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
-#%%   t88o_DS2_PHBANDS.gnuplot, tolnlines=0, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t88o_DS2_EBANDS.data, tolnlines=0, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t88o_DS2_EBANDS.gnuplot, tolnlines=1, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t88o_DS2_PHBANDS.data, tolnlines=0, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t88o_DS2_PHBANDS.gnuplot, tolnlines=1, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%% psp_files = Al-psval.psp8
 #%% [paral_info]
 #%% max_nprocs = 8
