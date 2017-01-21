@@ -174,8 +174,6 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  use interfaces_14_hidewrite
 !End of the abilint section
 
- use m_gsphere,  only : get_irredg
-
  implicit none
 
 !Arguments ------------------------------------
@@ -191,17 +189,17 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,prtvol=1
- integer :: my_rank,nprocs,cnt,bstop,bstart,bcount,lwork,nstars
- integer :: ir,ik,ib,ii,jj,nr,band,spin,isym,ierr,i1,i2,i3,msize,lpratio
- real(dp),parameter :: tolr=tol12,c1=0.25_dp,c2=0.25_dp
+ integer :: my_rank,nprocs,cnt,bstop,bstart,bcount,lwork
+ integer :: ir,ik,ib,ii,jj,nr,band,spin,isym,ierr,i1,i2,i3,lpratio,nrwant
+ real(dp),parameter :: c1=0.25_dp,c2=0.25_dp
  real(dp) :: r2,r2min,mare,mae_meV,adiff_meV,rel_err,rcut,rsigma
  real(dp) :: cpu_tot,wall_tot,gflops_tot,cpu,wall,gflops,rval
  character(len=500) :: fmt,msg
 !arrays
  integer :: rmax(3)
- integer,allocatable :: ipiv(:),iperm(:),rtmp(:,:),rgen(:,:)
+ integer,allocatable :: ipiv(:)
  real(dp) :: list2(2)
- real(dp),allocatable :: r2vals(:),inv_rhor(:),oeig(:),cnorm(:)
+ real(dp),allocatable :: r2vals(:),inv_rhor(:),oeig(:)
  complex(dpc),allocatable :: srk(:,:),hmat(:,:),lambda(:,:,:),work(:)
 
 ! *********************************************************************
@@ -225,57 +223,30 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  call crystal_point_group(cryst, new%ptg_nsym, new%ptg_symrel, new%ptg_symrec, new%has_inversion, &
    include_timrev=cplex==1)
 
- ! -----------------------------------------------
- ! Select R-points and order them according to |R|
- ! -----------------------------------------------
+ ! -----------------------
+ ! Find nrwant star points
+ ! -----------------------
  lpratio = abs(params(1))
  ABI_CHECK(lpratio > 0, "lpratio must be > 0")
+ rmax = nint((one + (lpratio * new%nkpt * new%ptg_nsym) / two) ** third)
  !rmax = 1 + (lpratio * new%nkpt) / two
- rmax = nint((one + (lpratio * new%nkpt * cryst%nsym) / two) ** third)
- !rmax = nint((one + (lpratio * new%nkpt) / two) ** third)
- msize = product(2*rmax + 1)
- write(std_out,*)"lpratio",lpratio,"msize",msize," rmax:",rmax
- ABI_MALLOC(rtmp, (3, msize))
- ABI_MALLOC(r2vals, (msize))
-
- cnt = 0
- do i3=-rmax(3),rmax(3)
-   do i2=-rmax(2),rmax(2)
-     do i1=-rmax(1),rmax(1)
-       cnt = cnt + 1
-       rtmp(:, cnt) = [i1,i2,i3]
-       r2vals(cnt) = dot_product(rtmp(:,cnt), matmul(cryst%rmet, rtmp(:,cnt)))
-     end do
-   end do
- end do
-
- !ecut = zero, npw = 0
- !call setshells(ecut, npw, nsh, nsym, gmet, gprimd, symrel, "skw", ucvol)
+ nrwant = lpratio * new%nkpt
 
  call cwtime(cpu, wall, gflops, "start")
- ! Sort r2vals
- ABI_MALLOC(iperm, (msize))
- iperm = [(i1, i1=1,msize)]
- call sort_dp(msize, r2vals, iperm, tolr)
-
- ! Find R-points generating the stars
- ABI_MALLOC(rgen, (3, msize))
- ABI_MALLOC(cnorm, (msize))
- do i1=1,msize
-   rgen(:,i1) = rtmp(:,iperm(i1))
+ do
+   call find_rstar_gen(new, cryst, nrwant, rmax, r2vals)
+   if (new%nr >= nrwant) then
+     write(std_out,*)"Entered with rmax",rmax,"abs(skw%rpts(last)): ",abs(new%rpts(:,new%nr))
+     exit
+   end if
+   write(std_out,*)"rmax: ",rmax," was not large enough to find ",nrwant," R-star points."
+   rmax = 2 * rmax
+   write(std_out,*)"Will try again with enlarged rmax: ",rmax
+   ABI_FREE(r2vals)
  end do
- rtmp = rgen
-
- call get_irredg(msize, new%ptg_nsym, +1, cryst%rprimd, new%ptg_symrel, rtmp, nstars, rgen, cnorm)
+ nr = new%nr
  call cwtime(cpu, wall, gflops, "stop")
- write(std_out,"(2(a,f6.2))")" skw_new setup: cpu: ",cpu,", wall: ",wall
-
- ABI_CHECK(nstars >= lpratio * nkpt, "nstars < lpratio * nkpt")
- new%nr = lpratio * nkpt
- ABI_MALLOC(new%rpts, (3, nr))
- new%rpts = rgen(:,1:nr)
- ABI_FREE(rgen)
- ABI_FREE(cnorm)
+ write(std_out,"(2(a,f6.2))")" find_rstar_gen: cpu: ",cpu,", wall: ",wall
 
  if (my_rank == master) call skw_print(new, std_out)
 
@@ -283,7 +254,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  r2min = r2vals(2)
  ABI_MALLOC(inv_rhor, (nr))
  do ir=1,nr
-   r2 = dot_product(new%rpts(:,ir), matmul(cryst%rmet, new%rpts(:,ir)))
+   r2 = r2vals(ir)
    inv_rhor(ir) = one / ((one - c1 * r2/r2min)**2 + c2 * (r2 / r2min)**3)
    ! TODO: Test the two versions.
    !if (params(1) < zero) inv_rhor(ir) = one / (c1 * r2 + c2 * r2**2)
@@ -380,8 +351,6 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  new%cached_kpt_dk2 = huge(one)
  ABI_MALLOC(new%cached_srk_dk2, (new%nr, 3, 3))
 
- ABI_FREE(iperm)
- ABI_FREE(rtmp)
  ABI_FREE(r2vals)
  ABI_FREE(srk)
  ABI_FREE(inv_rhor)
@@ -397,9 +366,9 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  call wrtout(std_out, ch10//"Comparing ab-initio energies with SKW interpolated results...")
  do spin=1,nsppol
    do ik=1,nkpt
+     cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! mpi parallelism.
 
      do ib=1,bcount
-       cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! mpi parallelism.
        band = ib + new%band_block(1) - 1
        call skw_eval_bks(new, cryst, band, kpts(:,ik), spin, oeig(ib))
 
@@ -429,8 +398,8 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  write(std_out,"(2(a,es12.4),a)")" MARE: ",mare, ", MAE: ", mae_meV, "[meV]"
  if (mae_meV > ten) then
    write(msg,"(2a,2(a,es12.4),a)") &
-     "Large error detected in SKW interpolation!",ch10," MARE: ",mare, ", MAE: ", mae_meV, "[meV]"
-   !call wrtout(ab_out, msg)
+     "Large error in SKW interpolation!",ch10," MARE: ",mare, ", MAE: ", mae_meV, "[meV]"
+   call wrtout(ab_out, msg)
    MSG_WARNING(msg)
  end if
 
@@ -992,6 +961,132 @@ end subroutine mkstar_dk2
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_skw/find_rstar_gen
+!! NAME
+!!  find_rstar_gen
+!!
+!! FUNCTION
+!!  Find the R-space points generating the stars.
+!!  Set skw%nr and skw%rpts
+!!
+!! INPUTS
+!!  cryst<crystal_t>=Crystalline structure.
+!!  nrwant=Number of R-space points wanted
+!!  rmax(3)=Max reduced components of supercell.
+!!
+!! OUTPUT
+!!  or2vals(skw%nr)=||R||**2
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'skw_print'
+!End of the abilint section
+
+ use m_gsphere,  only : get_irredg
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(skw_t),intent(inout) :: skw
+ type(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: nrwant
+!arrays
+ integer,intent(in) :: rmax(3)
+ real(dp),allocatable,intent(out) :: or2vals(:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: cnt,nstars,i1,i2,i3,msize,ir,nsh,ish,ss,ee,nst
+ real(dp) :: r2_prev
+!arrays
+ integer,allocatable :: iperm(:),rtmp(:,:),rgen(:,:),r2sh(:),shlim(:)
+ real(dp),allocatable :: r2tmp(:),cnorm(:)
+
+! *********************************************************************
+
+ msize = product(2*rmax + 1)
+ ABI_MALLOC(rtmp, (3, msize))
+ ABI_MALLOC(r2tmp, (msize))
+
+ cnt = 0
+ do i3=-rmax(3),rmax(3)
+   do i2=-rmax(2),rmax(2)
+     do i1=-rmax(1),rmax(1)
+       cnt = cnt + 1
+       rtmp(:, cnt) = [i1,i2,i3]
+       r2tmp(cnt) = dot_product(rtmp(:,cnt), matmul(cryst%rmet, rtmp(:,cnt)))
+     end do
+   end do
+ end do
+
+ ! Sort r2tmp
+ ABI_MALLOC(iperm, (msize))
+ iperm = [(i1, i1=1,msize)]
+ call sort_dp(msize, r2tmp, iperm, tol12)
+
+ ! Find R-points generating the stars.
+ ABI_MALLOC(rgen, (3, msize))
+ do ir=1,msize
+   rgen(:,ir) = rtmp(:,iperm(ir))
+ end do
+ rtmp = rgen
+
+ ABI_MALLOC(r2sh, (msize))     ! Correspondence between R and the shell index.
+ ABI_MALLOC(shlim, (msize+1))  ! For each shell, the index of the initial G-vector.
+ nsh = 1; r2sh(1) = 1; shlim(1) = 1; r2_prev = zero
+ do ir=2,msize
+   if (abs(r2tmp(ir) - r2_prev) > r2tmp(ir) * tol8) then
+     r2_prev = r2tmp(ir); nsh = nsh + 1; shlim(nsh) = ir
+   end if
+   r2sh(ir) = nsh
+ end do
+ shlim(nsh+1) = msize + 1
+
+ ABI_MALLOC(cnorm, (msize))
+
+ !call get_irredg(msize, skw%ptg_nsym, +1, cryst%rprimd, skw%ptg_symrel, rtmp, nstars, rgen, cnorm)
+ !write(66,*)nstars; do ish=1,nstars; write(66,*)rgen(:,ish); end do
+ nstars = 0
+ do ish=1,nsh
+   ss = shlim(ish); ee = shlim(ish+1) - 1; msize = ee - ss + 1
+   call get_irredg(msize, skw%ptg_nsym, + 1, cryst%rprimd, skw%ptg_symrel, rtmp(:,ss:), &
+     nst, rgen(:,nstars+1:), cnorm(nstars+1:))
+   nstars = nstars + nst
+ end do
+ !write(67,*)nstars; do ish=1,nstars; write(67,*)rgen(:,ish); end do
+
+ skw%nr = min(nstars, nrwant)
+ if (allocated(skw%rpts)) then
+   ABI_FREE(skw%rpts)
+ end if
+ ABI_MALLOC(skw%rpts, (3, skw%nr))
+ skw%rpts = rgen(:,1:skw%nr)
+ ABI_MALLOC(or2vals, (skw%nr))
+ do ir=1,skw%nr
+   or2vals(ir) = dot_product(skw%rpts(:,ir), matmul(cryst%rmet, skw%rpts(:,ir)))
+ end do
+
+ ABI_FREE(rtmp)
+ ABI_FREE(r2tmp)
+ ABI_FREE(iperm)
+ ABI_FREE(rgen)
+ ABI_FREE(r2sh)
+ ABI_FREE(shlim)
+ ABI_FREE(cnorm)
+
+end subroutine find_rstar_gen
+!!***
 
 end module m_skw
 !!***

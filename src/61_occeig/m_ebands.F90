@@ -4070,7 +4070,7 @@ function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk,
  type(ebspl_t) :: ebspl
  type(skw_t) :: skw
 !arrays
- integer :: new_kptrlatt(3,3),bspl_ords(3)
+ integer :: new_kptrlatt(3,3),bspl_ords(3),band_block(2),spin_block(2)
  integer,allocatable :: new_istwfk(:),new_nband(:,:),new_npwarr(:)
  real(dp),allocatable :: new_shiftk(:,:),new_kibz(:,:),new_kbz(:,:),new_wtk(:)
  real(dp),allocatable :: new_doccde(:),new_eig(:),new_occ(:)
@@ -4114,15 +4114,16 @@ function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk,
  ABI_FREE(new_eig)
  ABI_FREE(new_occ)
 
- ! Build (B-spline|SKW) object for all bands
+ ! Build (B-spline|SKW) object for all bands.
+ band_block = [0, 0]; spin_block = [0, 0]
  select case (itype)
  case (1)
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
    skw = skw_new(cryst, params(2:), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, &
-                [0, 0], [0, 0], comm)
+                 band_block, spin_block, comm)
  case (2)
    bspl_ords = nint(params(2:4))
-   ebspl = ebspl_new(ebands, cryst, bspl_ords, [0,0], [0,0])
+   ebspl = ebspl_new(ebands, cryst, bspl_ords, band_block, spin_block)
 
  case default
    MSG_ERROR(sjoin("Wrong params(1):", itoa(itype)))
@@ -5318,28 +5319,39 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, prefix, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: my_rank,ndivsm,nbounds !nshiftk_fine,
- type(ebands_t) :: ebands_bspl,ebands_skw
+ integer :: my_rank,ndivsm,nbounds,itype
+ type(ebands_t) :: ebands_kpath
  type(kpath_t) :: kpath
- character(len=500) :: msg
+ character(len=500) :: msg,tag
 !arrays
- !integer :: kptrlatt_fine(3,3)
- real(dp) :: bspl_params(4),skw_params(4)
- real(dp),allocatable :: bounds(:,:) !shiftk_fine(:,:),
+ real(dp),allocatable :: bounds(:,:)
 
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm)
 
+ itype = nint(dtset%einterp(1)); tag =  "_SKW"
+ if (itype == 2) then
+   tag = "_BSPLINE"
+   if (.not. (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1)) then
+     write(msg,"(5a)") &
+        "Cannot interpolate energies with B-spline because:",ch10,&
+        ".not. (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1)",ch10,&
+        "Returning to caller!"
+     MSG_WARNING(msg)
+     return
+   end if
+ end if
+
  ! Generate k-path
  ndivsm = dtset%ndivsm
  if (ndivsm <= 0) then
-   MSG_WARNING("Setting ndivms to 10 because variable is not given in input file")
+   MSG_WARNING("Setting ndivsm to 10 because variable is not given in input file")
    ndivsm = 10
  end if
  nbounds = dtset%nkpath
  if (nbounds <= 0) then
-   MSG_WARNING("Using hard-coded k-path because nkpath == 0 in input file.")
+   MSG_WARNING("Using hard-coded k-path because nkpath not present in input file.")
    nbounds = 5
    ABI_MALLOC(bounds, (3,5))
    bounds = reshape([zero, zero, zero, half, zero, zero, zero, half, zero, zero, zero, zero, zero, zero, half], [3,5])
@@ -5352,36 +5364,12 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, prefix, comm)
  ABI_FREE(bounds)
 
  ! Interpolate bands on k-path.
- select case(nint(dtset%einterp(1)))
- case (1)
-   ! SKW interpolation
-   skw_params = dtset%einterp
-   ebands_skw = ebands_interp_kpath(ebands, cryst, skw_params, kpath, comm)
-   if (my_rank == master) then
-      call ebands_write(ebands_skw, dtset%prtebands, strcat(prefix, "_SKW"), kptbounds=kpath%bounds)
-   end if
-   call ebands_free(ebands_skw)
-
- case (2)
-   ! B-spline interpolation
-   bspl_params = dtset%einterp
-   if (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1) then
-     ebands_bspl = ebands_interp_kpath(ebands, cryst, bspl_params, kpath, comm)
-     if (my_rank == master) then
-       call ebands_write(ebands_bspl, dtset%prtebands, strcat(prefix, "_BSPLINE"), kptbounds=kpath%bounds)
-     end if
-     call ebands_free(ebands_bspl)
-   else
-     write(msg,"(3a)") &
-        "Cannot interpolate energies with B-spline because:",ch10,&
-        ".not. (isdiagmat(ebands%kptrlatt) .and. ebands%nshiftk == 1 .and. ebands%nkpt > 1)"
-     MSG_WARNING(msg)
-   end if
-
- case default
-   MSG_ERROR("Wrong itype.")
- end select
-
+ ebands_kpath = ebands_interp_kpath(ebands, cryst, dtset%einterp, kpath, comm)
+ if (my_rank == master) then
+   call wrtout(ab_out, sjoin("- Writing interpolate bands to file:", strcat(prefix, tag)))
+   call ebands_write(ebands_kpath, dtset%prtebands, strcat(prefix, tag), kptbounds=kpath%bounds)
+ end if
+ call ebands_free(ebands_kpath)
  call kpath_free(kpath)
 
  ! Interpolate bands on dense k-mesh.
@@ -5393,9 +5381,9 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, prefix, comm)
  !shiftk_fine = ebands%shiftk
  !!shiftk_fine = half * reshape([1,0,0,0,1,0,0,0,1,1,1,1,0,0,0], [3,5])
  !ABI_FREE(shiftk_fine)
- !ebands_bspl = ebands_interp_kmesh(ebands, cryst, bspl_params, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+ !ebands_bspl = ebands_interp_kmesh(ebands, cryst, dtset%einter, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
  !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
- !ebands_skw = ebands_interp_kmesh(ebands, cryst, skw_params, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+ !ebands_skw = ebands_interp_kmesh(ebands, cryst, dtset%einterp, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
  !call ebands_update_occ(ebands_skw, dtset%spinmagntarget, prtvol=dtset%prtvol)
  !call ebands_free(ebands_bspl)
  !call ebands_free(ebands_skw)

@@ -429,8 +429,7 @@ subroutine gsph_init(Gsph,Cryst,ng,gvec,ecut)
    norm=two_pi*SQRT(DOT_PRODUCT(Gsph%gvec(:,ig),MATMUL(Cryst%gmet,Gsph%gvec(:,ig))))
    eps=norm*tol8
    if (ABS(norm-norm_old)>eps) then
-     norm_old=norm
-     nsh=nsh+1
+     norm_old = norm; nsh = nsh + 1
      shlim(nsh)=ig
      shlen(nsh)=norm
    end if
@@ -1627,8 +1626,7 @@ end subroutine getfullg
 !!  gbasek(3,npw_k)=first nbasek elements are the irreducible G vectors
 !!
 !! NOTES
-!!  This routine is deprecated.
-!!  The search can be optimized by looping inside the shell.
+!!  The search can be optimized by looping over shells. See m_skw for a faster algo
 !!
 !! PARENTS
 !!      m_gsphere
@@ -1830,8 +1828,7 @@ end subroutine merge_kgirr
 !! setshells
 !!
 !! FUNCTION
-!! Set consistently the number of shells, the number of plane-waves,
-!! and the energy cut-off
+!! Set consistently the number of shells, the number of plane-waves, and the energy cut-off
 !!
 !! INPUTS
 !!  nsym=number of symmetry operations
