@@ -986,13 +986,13 @@ end subroutine mkstar_dk2
 
 subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals)
 
+ use m_gsphere,  only : get_irredg
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'skw_print'
+#define ABI_FUNC 'find_rstar_gen'
 !End of the abilint section
-
- use m_gsphere,  only : get_irredg
 
  implicit none
 
