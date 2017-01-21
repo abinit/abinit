@@ -705,11 +705,11 @@ with_trio_flavor="netcdf"
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I/usr/local/netcdf/include"
+with_netcdf_incs="-I${FALLBACKS_PATH}/netcdf/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L/usr/local/netcdf/lib -lnetcdff -lnetcdf"
+with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -907,7 +907,7 @@ with_linalg_libs="-L/usr/local/fallbacks_nag/lib -llapack -lblas"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="none"
+with_dft_flavor="libxc"
 
                        # ------------------------------ #
 
@@ -937,11 +937,11 @@ with_dft_flavor="none"
 
 # Include flags for the LibXC library (default is unset)
 #
-#with_libxc_incs="-I/opt/etsf/include"
+with_libxc_incs="-I${FALLBACKS_PATH}/libxc/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-#with_libxc_libs="-L/opt/etsf/lib -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/lib -lxcf90 -lxc"
 
                        # ------------------------------ #
 

@@ -705,11 +705,11 @@ with_trio_flavor="netcdf"
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I/usr/local/fallbacks/intel/14.0/mpi/include"
+with_netcdf_incs="-I${FALLBACKS_PATH}/netcdf/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L/usr/local/fallbacks/intel/14.0/mpi/lib -lnetcdf"
+with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -937,11 +937,11 @@ with_dft_flavor="libxc"
 
 # Include flags for the LibXC library (default is unset)
 #
-with_libxc_incs="-I/usr/local/fallbacks/intel/14.0/mpi/include"
+with_libxc_incs="-I${FALLBACKS_PATH}/libxc/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L/usr/local/fallbacks/intel/14.0/mpi/lib -lxcf90 -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/lib -lxcf90 -lxc"
 
                        # ------------------------------ #
 
