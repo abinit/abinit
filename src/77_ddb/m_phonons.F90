@@ -1280,13 +1280,26 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
    select case (inp%prtphbands)
    case (0)
      continue
+
    case (1)
-     call phonons_write_xmgrace(strcat(prefix, "_PHBANDS.agr"), natom, nfineqpath, save_qpoints, save_phfrq)
+     if (inp%nph1l == 0) then
+       call phonons_write_xmgrace(strcat(prefix, "_PHBANDS.agr"), natom, nfineqpath, save_qpoints, save_phfrq, &
+          qptbounds=inp%qpath)
+     else
+       call phonons_write_xmgrace(strcat(prefix, "_PHBANDS.agr"), natom, nfineqpath, save_qpoints, save_phfrq)
+     end if
+
    case (2)
-     call phonons_write_gnuplot(prefix, natom, nfineqpath, save_qpoints, save_phfrq)
+     if (inp%nph1l == 0) then
+       call phonons_write_gnuplot(prefix, natom, nfineqpath, save_qpoints, save_phfrq, qptbounds=inp%qpath)
+     else
+       call phonons_write_gnuplot(prefix, natom, nfineqpath, save_qpoints, save_phfrq)
+     end if
+
    !case (3)
      !call phonons_writeEPS(natom,nfineqpath,Crystal%ntypat,save_qpoints,Crystal%typat, &
      !  weights,save_phfrq,save_phdispl_cart)
+
    case default
      MSG_WARNING(sjoin("Don't know how to handle prtphbands:", itoa(inp%prtphbands)))
    end select
@@ -2216,17 +2229,19 @@ subroutine phonons_write_xmgrace(filename, natom, nqpts, qpts, phfreqs, qptbound
 
  nqbounds = 0
  if (present(qptbounds)) then
-   ! Find correspondence between qptbounds and k-points in ebands.
-   nqbounds = size(qptbounds, dim=2)
-   ABI_MALLOC(bounds2qpt, (nqbounds))
-   bounds2qpt = 1; start = 1
-   do ii=1,nqbounds
-      do iq=start,nqpts
-        if (isamek(qpts(:, iq), qptbounds(:, ii), g0)) then
-          bounds2qpt(ii) = iq; start = iq + 1; exit
-        end if
-      end do
-   end do
+   if (product(shape(qptbounds)) > 0 ) then
+     ! Find correspondence between qptbounds and k-points in ebands.
+     nqbounds = size(qptbounds, dim=2)
+     ABI_MALLOC(bounds2qpt, (nqbounds))
+     bounds2qpt = 1; start = 1
+     do ii=1,nqbounds
+        do iq=start,nqpts
+          if (isamek(qpts(:, iq), qptbounds(:, ii), g0)) then
+            bounds2qpt(ii) = iq; start = iq + 1; exit
+          end if
+        end do
+     end do
+   end if
  end if
 
  if (open_file(filename, msg, newunit=unt, form="formatted", action="write") /= 0) then
@@ -2350,17 +2365,19 @@ subroutine phonons_write_gnuplot(prefix, natom, nqpts, qpts, phfreqs, qptbounds)
 
  nqbounds = 0
  if (present(qptbounds)) then
-   ! Find correspondence between qptbounds and k-points in ebands.
-   nqbounds = size(qptbounds, dim=2)
-   ABI_MALLOC(bounds2qpt, (nqbounds))
-   bounds2qpt = 1; start = 1
-   do ii=1,nqbounds
-      do iq=start,nqpts
-        if (isamek(qpts(:, iq), qptbounds(:, ii), g0)) then
-          bounds2qpt(ii) = iq; start = iq + 1; exit
-        end if
-      end do
-   end do
+   if (product(shape(qptbounds)) > 0 ) then
+     ! Find correspondence between qptbounds and k-points in ebands.
+     nqbounds = size(qptbounds, dim=2)
+     ABI_MALLOC(bounds2qpt, (nqbounds))
+     bounds2qpt = 1; start = 1
+     do ii=1,nqbounds
+        do iq=start,nqpts
+          if (isamek(qpts(:, iq), qptbounds(:, ii), g0)) then
+            bounds2qpt(ii) = iq; start = iq + 1; exit
+          end if
+        end do
+     end do
+   end if
  end if
 
  datafile = strcat(prefix, "_PHBANDS.data")

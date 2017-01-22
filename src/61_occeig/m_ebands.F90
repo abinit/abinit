@@ -5033,17 +5033,19 @@ subroutine ebands_write_xmgrace(ebands, filename, kptbounds)
 
  nkbounds = 0
  if (present(kptbounds)) then
-   ! Find correspondence between kptbounds and k-points in ebands.
-   nkbounds = size(kptbounds, dim=2)
-   ABI_MALLOC(bounds2kpt, (nkbounds))
-   bounds2kpt = 1; start = 1
-   do ii=1,nkbounds
-      do ik=start,ebands%nkpt
-        if (isamek(ebands%kptns(:, ik), kptbounds(:, ii), g0)) then
-          bounds2kpt(ii) = ik; start = ik + 1; exit
-        end if
-      end do
-   end do
+   if (product(shape(kptbounds)) > 0 ) then
+     ! Find correspondence between kptbounds and k-points in ebands.
+     nkbounds = size(kptbounds, dim=2)
+     ABI_MALLOC(bounds2kpt, (nkbounds))
+     bounds2kpt = 1; start = 1
+     do ii=1,nkbounds
+        do ik=start,ebands%nkpt
+          if (isamek(ebands%kptns(:, ik), kptbounds(:, ii), g0)) then
+            bounds2kpt(ii) = ik; start = ik + 1; exit
+          end if
+        end do
+     end do
+   end if
  end if
 
  if (open_file(filename, msg, newunit=unt, form="formatted", action="write") /= 0) then
@@ -5172,17 +5174,19 @@ subroutine ebands_write_gnuplot(ebands, prefix, kptbounds)
 
  nkbounds = 0
  if (present(kptbounds)) then
-   ! Find correspondence between kptbounds and k-points in ebands.
-   nkbounds = size(kptbounds, dim=2)
-   ABI_MALLOC(bounds2kpt, (nkbounds))
-   bounds2kpt = 1; start = 1
-   do ii=1,nkbounds
-      do ik=start,ebands%nkpt
-        if (isamek(ebands%kptns(:, ik), kptbounds(:, ii), g0)) then
-          bounds2kpt(ii) = ik; start = ik + 1; exit
-        end if
-      end do
-   end do
+   if (product(shape(kptbounds)) > 0 ) then
+     ! Find correspondence between kptbounds and k-points in ebands.
+     nkbounds = size(kptbounds, dim=2)
+     ABI_MALLOC(bounds2kpt, (nkbounds))
+     bounds2kpt = 1; start = 1
+     do ii=1,nkbounds
+        do ik=start,ebands%nkpt
+          if (isamek(ebands%kptns(:, ik), kptbounds(:, ii), g0)) then
+            bounds2kpt(ii) = ik; start = ik + 1; exit
+          end if
+        end do
+     end do
+   end if
  end if
 
  datafile = strcat(prefix, "_EBANDS.data")

@@ -95,6 +95,9 @@ MODULE m_ifc
    integer :: nqshft
      ! Number of shifts in the q-mesh (usually 1 since the mesh is gamma-centered!)
 
+   integer :: nqibz
+     ! Number of points in the IBZ
+
    integer :: nqbz
      ! Number of points in the full BZ
 
@@ -162,18 +165,22 @@ MODULE m_ifc
      ! zeff(3,3,natom)
      ! Effective charge on each atom, versus electric field and atomic displacement.
 
+   real(dp),allocatable :: qibz(:,:)
+     ! qibz(3,nqibz))
+     ! List of q-points in the IBZ
+
    real(dp),allocatable :: qbz(:,:)
-     ! qbz(3,nqpt))
+     ! qbz(3,nqbz))
      ! List of q-points in the full BZ
 
    real(dp),allocatable :: dynmat(:,:,:,:,:,:)
-     ! dynmat(2,3,natom,3,natom,nqpt))
+     ! dynmat(2,3,natom,3,natom,nqbz))
      ! dynamical matrices relative to the q points of the B.Z. sampling
      ! Note that the long-range dip-dip part has been removed if dipdip=1
      ! Moreover the array is multiplied by a phase shift in mkifc9.
 
    !real(dp),allocatable :: dynmat_lr(:,:,:,:,:,:)
-    ! dynmat_lr(2,3,natom,3,natom,nqpt))
+    ! dynmat_lr(2,3,natom,3,natom,nqbz))
     ! Long-range part of dynmat in q-space
 
  end type ifc_type
@@ -269,55 +276,45 @@ subroutine ifc_free(ifc)
  if (allocated(ifc%amu)) then
    ABI_FREE(ifc%amu)
  end if
-
  if (allocated(ifc%atmfrc)) then
    ABI_FREE(ifc%atmfrc)
  end if
-
  if (allocated(ifc%cell)) then
    ABI_FREE(ifc%cell)
  end if
-
  if (allocated(ifc%ewald_atmfrc)) then
    ABI_FREE(ifc%ewald_atmfrc)
  end if
-
  if (allocated(ifc%short_atmfrc)) then
    ABI_FREE(ifc%short_atmfrc)
  end if
-
  if (allocated(ifc%qshft)) then
    ABI_FREE(ifc%qshft)
  end if
-
  if (allocated(ifc%rpt)) then
    ABI_FREE(ifc%rpt)
  end if
-
  if (allocated(ifc%wghatm)) then
    ABI_FREE(ifc%wghatm)
  end if
-
  if (allocated(ifc%rcan)) then
    ABI_FREE(ifc%rcan)
  end if
-
  if (allocated(ifc%trans)) then
    ABI_FREE(ifc%trans)
  end if
-
  if (allocated(ifc%dyewq0)) then
    ABI_FREE(ifc%dyewq0)
  end if
-
+ if (allocated(ifc%qibz)) then
+   ABI_FREE(ifc%qibz)
+ end if
  if (allocated(ifc%qbz)) then
    ABI_FREE(ifc%qbz)
  end if
-
  if (allocated(ifc%zeff))then
    ABI_FREE(ifc%zeff)
  end if
-
  if (allocated(ifc%dynmat)) then
    ABI_FREE(ifc%dynmat)
  end if
@@ -370,7 +367,7 @@ end subroutine ifc_free
 !! [Ifc_coarse]=Optional.
 !!
 !! OUTPUT
-!! Ifc<type(ifc_type)>=Object containing the dynamical matrix and the IFCs.
+!! Ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
 !!
 !! PARENTS
 !!      anaddb,eph,m_effective_potential_file
@@ -419,7 +416,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 !scalars
  integer,parameter :: timrev1=1,iout0=0,chksymbreak0=0
  integer :: mpert,iout,iqpt,mqpt,nsym,ntypat,iq_ibz,iq_bz,ii,natom
- integer :: nqbz,option,plus,sumg0,irpt,irpt_new,nqibz
+ integer :: nqbz,option,plus,sumg0,irpt,irpt_new
  integer :: nprocs,my_rank,ierr
  real(dp),parameter :: qphnrm=one
  real(dp) :: xval,cpu,wall,gflops
@@ -435,7 +432,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  real(dp) :: eigvec(2,3,Crystal%natom,3,Crystal%natom)
  real(dp),allocatable :: dyew(:,:,:,:,:),out_d2cart(:,:,:,:,:)
  real(dp),allocatable :: dynmatfull(:,:,:,:,:,:),dynmat_sr(:,:,:,:,:,:),dynmat_lr(:,:,:,:,:,:) ! for OmegaSRLR
- real(dp),allocatable :: wtq(:),wtq_folded(:),qbz(:,:),qibz(:,:)
+ real(dp),allocatable :: wtq(:),wtq_folded(:),qbz(:,:)
 
 !******************************************************************
 
@@ -499,12 +496,12 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ABI_MALLOC(wtq, (nqbz))
  wtq = one / nqbz ! Weights sum up to one
 
- call symkpt(chksymbreak0,crystal%gmet,ibz2bz,iout0,qbz,nqbz,nqibz,crystal%nsym,&
+ call symkpt(chksymbreak0,crystal%gmet,ibz2bz,iout0,qbz,nqbz,ifc%nqibz,crystal%nsym,&
    crystal%symrec,timrev1,wtq,wtq_folded)
 
- ABI_MALLOC(qibz, (3,nqibz))
- do iq_ibz=1,nqibz
-   qibz(:,iq_ibz) = qbz(:, ibz2bz(iq_ibz))
+ ABI_MALLOC(ifc%qibz, (3,ifc%nqibz))
+ do iq_ibz=1,ifc%nqibz
+   ifc%qibz(:,iq_ibz) = qbz(:, ibz2bz(iq_ibz))
  end do
  ABI_FREE(ibz2bz)
  ABI_FREE(wtq_folded)
@@ -667,9 +664,9 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  ! Compute min/max ph frequency with ab-initio q-mesh.
  ifc%omega_minmax(1) = huge(one); ifc%omega_minmax(2) = -huge(one)
- do iq_ibz=1,nqibz
+ do iq_ibz=1,ifc%nqibz
    if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
-   call ifc_fourq(ifc, crystal, qibz(:,iq_ibz), phfrq, displ_cart)
+   call ifc_fourq(ifc, crystal, ifc%qibz(:,iq_ibz), phfrq, displ_cart)
    ifc%omega_minmax(1) = min(ifc%omega_minmax(1), minval(phfrq))
    ifc%omega_minmax(2) = max(ifc%omega_minmax(2), maxval(phfrq))
  end do
@@ -706,7 +703,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ABI_FREE(dynmat_sr)
  ABI_FREE(dynmat_lr)
  ABI_FREE(qbz)
- ABI_FREE(qibz)
+
+ !call ifc_autocutoff(ifc, crystal, 0.6_dp, 0.1_dp / Ha_meV, comm)
 
  call cwtime(cpu, wall, gflops, "stop")
  write(std_out,"(2(a,f6.2))")" ifc_init: cpu: ",cpu,", wall: ",wall
@@ -1260,6 +1258,141 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolms, ncid, comm)
 
 end subroutine ifc_speedofsound
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ifc/ifc_autocutoff
+!! NAME
+!!  ifc_autocutoff
+!!
+!! FUNCTION
+!!   Applies a cutoff on the ifc in real space
+!!
+!! INPUTS
+!!  crystal<crystal_t> = Information on the crystalline structure.
+!!  rmin
+!!  atol
+!!  comm=MPI communicator
+!!
+!! SIDE EFFECTS
+!!   ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine ifc_autocutoff(ifc, crystal, rmin, atol, comm)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'ifc_autocutoff'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(ifc_type),intent(inout) :: ifc
+ type(crystal_t),intent(in) :: crystal
+ real(dp),intent(in) :: rmin,atol
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+!scalars
+ integer :: iq_ibz,ierr,my_rank,nprocs,ii,nsphere,nsphere_step,num_negw
+ real(dp) :: adiff,rifcsph,qrad,min_negw
+ character(len=500) :: msg
+ type(lebedev_t) :: lgrid
+!arrays
+ real(dp) :: displ_cart(2*3*ifc%natom*3*ifc%natom)
+ real(dp) :: qred(3),phfrqs(3*crystal%natom)
+ real(dp),allocatable :: ref_phfrq(:,:),new_phfrq(:,:)
+! *********************************************************************
+
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+
+ ! Compute frequencies on the ab-initio q-mesh.
+ ABI_CALLOC(ref_phfrq, (3*ifc%natom, ifc%nqibz))
+ do iq_ibz=1,ifc%nqibz
+   if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
+   call ifc_fourq(ifc, crystal, ifc%qibz(:,iq_ibz), ref_phfrq(:,iq_ibz), displ_cart)
+ end do
+ call xmpi_sum(ref_phfrq, comm, ierr)
+
+ call wrtout(std_out, 'Apply cutoff on IFCs')
+ rifcsph = zero; nsphere_step = 5 * ifc%natom
+ nsphere = ifc%natom * ifc%nrpt - nsphere_step - 1
+ !nsphere = 100
+ ABI_MALLOC(new_phfrq, (3*ifc%natom, ifc%nqibz))
+ lgrid = lebedev_new(6) ! 74 points
+
+ write(std_out, "(a)")"nsphere   adiff[meV]   num_negw   min_negw[meV]"
+ do
+   call corsifc9(ifc%acell,ifc%gprim,ifc%natom,ifc%nrpt,nsphere,rifcsph,ifc%rcan,ifc%rprim,ifc%rpt,ifc%wghatm)
+   if (ifc%asr > 0) call asrif9(ifc%asr,ifc%atmfrc,ifc%natom,ifc%nrpt,ifc%rpt,ifc%wghatm)
+
+   new_phfrq = zero
+   do iq_ibz=1,ifc%nqibz
+     if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
+     call ifc_fourq(ifc, crystal, ifc%qibz(:,iq_ibz), new_phfrq(:,iq_ibz), displ_cart)
+     !write(std_out,*)new_phfrq(1,iq_ibz),ref_phfrq(1,iq_ibz)
+   end do
+   call xmpi_sum(new_phfrq, comm, ierr)
+
+   ! Test wether there are negative frequencies around gamma
+   qrad = 0.1
+   num_negw = 0; min_negw = zero
+   do ii=1,lgrid%npts+3
+     if (ii <= 3) then
+       qred = zero; qred(ii) = one
+     else
+       qred = matmul(crystal%rprimd, lgrid%versors(:, ii-3))
+     end if
+     qred = qrad * (qred / normv(qred, crystal%gmet, "G"))
+     call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart)
+     if (any(phfrqs < -tol8)) then
+       num_negw = num_negw + 1; min_negw = min(min_negw, minval(phfrqs))
+     end if
+   end do
+
+   adiff = sum(abs(new_phfrq - ref_phfrq)) / (ifc%nqibz * 3 * ifc%natom)
+   write(std_out,"(2(i0,1x,es16.8,1x))")nsphere, adiff * Ha_meV, num_negw, min_negw * Ha_meV
+
+   !if (num_negw > 0) then
+   !  write(std_out,'(a,i0,a,es12.4,a)') &
+   !    " Detected ",num_negw, " negative frequencies. Minimum was: ",min_negw * Ha_meV, "[meV]"
+   !end if
+
+   if (adiff > atol) then
+     write(std_out,*)"Reached adiff, exiting now"
+     exit
+   end if
+
+   nsphere = nsphere - nsphere_step - 1
+   if (nsphere <= 0) then
+     MSG_WARNING("nsphere <= 0")
+     exit
+   end if
+   !if (nsphere <= rmin * ifc%natom * ifc%nrpt) then
+   !  MSG_WARNING("nsphere <= 0")
+   !  exit
+   !end if
+   !exit
+ end do
+
+ ABI_FREE(ref_phfrq)
+ ABI_FREE(new_phfrq)
+ call lebedev_free(lgrid)
+
+end subroutine ifc_autocutoff
+!!***
+
+!----------------------------------------------------------------------
 
 !!****f* m_ifc/corsifc9
 !!
