@@ -169,6 +169,10 @@ MODULE m_ifc
      ! qibz(3,nqibz))
      ! List of q-points in the IBZ
 
+   real(dp),allocatable :: wtq(:)
+     ! wtq(nqibz))
+     ! q-point Weights.
+
    real(dp),allocatable :: qbz(:,:)
      ! qbz(3,nqbz))
      ! List of q-points in the full BZ
@@ -308,6 +312,9 @@ subroutine ifc_free(ifc)
  end if
  if (allocated(ifc%qibz)) then
    ABI_FREE(ifc%qibz)
+ end if
+ if (allocated(ifc%wtq)) then
+   ABI_FREE(ifc%wtq)
  end if
  if (allocated(ifc%qbz)) then
    ABI_FREE(ifc%qbz)
@@ -500,8 +507,10 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    crystal%symrec,timrev1,wtq,wtq_folded)
 
  ABI_MALLOC(ifc%qibz, (3,ifc%nqibz))
+ ABI_MALLOC(ifc%wtq, (ifc%nqibz))
  do iq_ibz=1,ifc%nqibz
    ifc%qibz(:,iq_ibz) = qbz(:, ibz2bz(iq_ibz))
+   ifc%wtq(iq_ibz) = wtq_folded(ibz2bz(iq_ibz))
  end do
  ABI_FREE(ibz2bz)
  ABI_FREE(wtq_folded)
@@ -1352,7 +1361,7 @@ subroutine ifc_autocutoff(ifc, crystal, rmin, atol, comm)
    call xmpi_sum(new_phfrq, comm, ierr)
 
    ! Test wether there are negative frequencies around gamma
-   qrad = 0.1
+   qrad = 0.01
    num_negw = 0; min_negw = zero
    do ii=1,lgrid%npts+3
      if (ii <= 3) then
