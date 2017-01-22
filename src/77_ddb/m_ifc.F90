@@ -1312,6 +1312,8 @@ subroutine ifc_autocutoff(ifc, crystal, rmin, atol, comm)
  real(dp) :: displ_cart(2*3*ifc%natom*3*ifc%natom)
  real(dp) :: qred(3),phfrqs(3*crystal%natom)
  real(dp),allocatable :: ref_phfrq(:,:),new_phfrq(:,:)
+ real(dp),allocatable :: save_wghatm(:,:,:),save_atmfrc(:,:,:,:,:,:)
+
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
@@ -1325,6 +1327,10 @@ subroutine ifc_autocutoff(ifc, crystal, rmin, atol, comm)
  call xmpi_sum(ref_phfrq, comm, ierr)
 
  call wrtout(std_out, 'Apply cutoff on IFCs')
+ ABI_MALLOC(save_wghatm, (ifc%natom,ifc%natom,ifc%nrpt))
+ ABI_MALLOC(save_atmfrc, (2,3,ifc%natom,3,ifc%natom,ifc%nrpt))
+ save_wghatm = ifc%wghatm; save_atmfrc = ifc%atmfrc
+
  rifcsph = zero; nsphere_step = 5 * ifc%natom
  nsphere = ifc%natom * ifc%nrpt - nsphere_step - 1
  !nsphere = 100
@@ -1333,6 +1339,7 @@ subroutine ifc_autocutoff(ifc, crystal, rmin, atol, comm)
 
  write(std_out, "(a)")"nsphere   adiff[meV]   num_negw   min_negw[meV]"
  do
+   ifc%wghatm = save_wghatm; ifc%atmfrc = save_atmfrc
    call corsifc9(ifc%acell,ifc%gprim,ifc%natom,ifc%nrpt,nsphere,rifcsph,ifc%rcan,ifc%rprim,ifc%rpt,ifc%wghatm)
    if (ifc%asr > 0) call asrif9(ifc%asr,ifc%atmfrc,ifc%natom,ifc%nrpt,ifc%rpt,ifc%wghatm)
 
@@ -1387,6 +1394,8 @@ subroutine ifc_autocutoff(ifc, crystal, rmin, atol, comm)
 
  ABI_FREE(ref_phfrq)
  ABI_FREE(new_phfrq)
+ ABI_FREE(save_wghatm)
+ ABI_FREE(save_atmfrc)
  call lebedev_free(lgrid)
 
 end subroutine ifc_autocutoff
