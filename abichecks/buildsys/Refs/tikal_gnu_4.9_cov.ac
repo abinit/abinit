@@ -931,7 +931,7 @@ with_bigdft_incs="-I${FALLBACKS_PATH}/bigdft/include"
 
 # Link flags for the BigDFT library (default is unset)
 #
-with_bigdft_libs="-L${FALLBACKS_PATH}/bigdft/lib -lbigdft-1 -labinit -lyaml"
+with_bigdft_libs="-L${FALLBACKS_PATH}/bigdft/lib -lbigdft-1 -labinit -lyaml -lrt"
 
                        # ------------------------------ #
 
@@ -941,7 +941,7 @@ with_libxc_incs="-I${FALLBACKS_PATH}/libxc/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L${FALLBACKS_PATH}/libxc/lib  -lxcf90 -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/lib -lxcf90 -lxc"
 
                        # ------------------------------ #
 
