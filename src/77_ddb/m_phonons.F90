@@ -1235,7 +1235,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
    end if
 
    ! Write the phonon frequencies
-   call dfpt_prtph(displ,eivec,enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
+   !call dfpt_prtph(displ,eivec,enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
 
    save_phfrq(:,iphl1) = phfrq
    save_phdispl_cart(:,:,:,iphl1) = RESHAPE(displ, [2, 3*natom, 3*natom])

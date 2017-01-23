@@ -1671,7 +1671,7 @@ pure function bisect_int(AA,xx) result(loc)
  jl=0 ; ju=nn+1
  do
   if (ju-jl<=1) EXIT
-  jm=(ju+jl)/2  ! Compute a midpoint,
+  jm=(ju+jl)/2  ! Compute a midpoint
   if (ascnd.EQV.(xx>=AA(jm))) then
    jl=jm ! Replace lower limit
   else

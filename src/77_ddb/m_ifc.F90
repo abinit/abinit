@@ -42,7 +42,8 @@ MODULE m_ifc
 #endif
 
  use m_io_tools,    only : open_file
- use m_fstrings,    only : ktoa, int2char4, sjoin, itoa, ltoa
+ use m_fstrings,    only : ktoa, int2char4, sjoin, itoa, ltoa, ftoa
+ use m_special_funcs,  only : abi_derfc
  use m_time,        only : cwtime
  use m_numeric_tools, only : wrap2_zero_one, wrap2_pmhalf
  use m_copy,        only : alloc_copy
@@ -426,7 +427,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  integer :: nqbz,option,plus,sumg0,irpt,irpt_new
  integer :: nprocs,my_rank,ierr
  real(dp),parameter :: qphnrm=one
- real(dp) :: xval,cpu,wall,gflops
+ real(dp) :: xval,cpu,wall,gflops,rcut_min
  character(len=500) :: message
  type(ifc_type) :: ifc_tmp
 !arrays
@@ -566,7 +567,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  if (Ifc%dipdip==1) then
    ! Take off the dipole-dipole part of the dynamical matrix
-   call wrtout(std_out, "Will extract the dipole-dipole part for every wavevector")
+   call wrtout(std_out, " Will extract the dipole-dipole part for every wavevector")
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
 
    do iqpt=1,nqbz
@@ -622,15 +623,14 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  call wrtout(std_out,message,'COLL')
 
  ! Apply cutoff on ifc if needed
- if (nsphere/=0 .or. rifcsph>tol10) then
-   call wrtout(std_out, 'ifc_init: apply cutoff on IFCs', "COLL")
-   call corsifc9(ddb%acell,gprim,natom,ifc_tmp%nrpt,nsphere,rifcsph,rcan,rprim,ifc_tmp%rpt,ifc_tmp%wghatm)
- end if
-
- ! Be careful here: if I move this call to anaddb, several tests will fail
- ! due to the different number of points in the big box (see code below.)
- if (Ifc%asr > 0 .and. (nsphere/=0 .or. rifcsph>tol10)) then
-   call asrif9(Ifc%asr,ifc_tmp%atmfrc,natom,ifc_tmp%nrpt,ifc_tmp%rpt,ifc_tmp%wghatm)
+ if (nsphere > 0 .or. abs(rifcsph) > tol10) then
+   call wrtout(std_out, ' Apply cutoff on IFCs.')
+   call wrtout(std_out, sjoin(" nsphere:", itoa(nsphere), ", rifcsph:", ftoa(rifcsph)))
+   call corsifc9(ddb%acell,gprim,natom,ifc_tmp%nrpt,nsphere,rifcsph,rcan,rprim,ifc_tmp%rpt,rcut_min,ifc_tmp%wghatm)
+   if (Ifc%asr > 0) then
+     call wrtout(std_out, ' Enforcing ASR on cutoffed IFCs.')
+     call asrif9(Ifc%asr,ifc_tmp%atmfrc,natom,ifc_tmp%nrpt,ifc_tmp%rpt,ifc_tmp%wghatm)
+   end if
  end if
 
  ! Only conserve the necessary points in rpt: in the FT algorithm the order of the points is unimportant
@@ -713,7 +713,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ABI_FREE(dynmat_lr)
  ABI_FREE(qbz)
 
- !call ifc_autocutoff(ifc, crystal, 0.6_dp, 0.1_dp / Ha_meV, comm)
+ if (nsphere == -1) call ifc_autocutoff(ifc, crystal, comm)
 
  call cwtime(cpu, wall, gflops, "stop")
  write(std_out,"(2(a,f6.2))")" ifc_init: cpu: ",cpu,", wall: ",wall
@@ -1275,16 +1275,19 @@ end subroutine ifc_speedofsound
 !!  ifc_autocutoff
 !!
 !! FUNCTION
-!!   Applies a cutoff on the ifc in real space
+!! Find the value of nsphere that gives non-negative frequencies around Gamma
+!! in a small sphere of radius qrad.
+!! Use bisection to reduce the number of attemps although there's no guarantee
+!! that the number of negative frequencies is monotonic
 !!
 !! INPUTS
 !!  crystal<crystal_t> = Information on the crystalline structure.
-!!  rmin
-!!  atol
 !!  comm=MPI communicator
 !!
 !! SIDE EFFECTS
-!!   ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
+!!  ifc%wghatm(natom,natom,nrpt) = Weights associated to a pair of atoms and to a R vector
+!!    with the last cutoff found by the bisection algorithm applied.
+!!  ifc%atmfrc(2,3,natom,3,natom,nrpt)= ASR-imposed Interatomic Forces
 !!
 !! PARENTS
 !!
@@ -1292,7 +1295,7 @@ end subroutine ifc_speedofsound
 !!
 !! SOURCE
 
-subroutine ifc_autocutoff(ifc, crystal, rmin, atol, comm)
+subroutine ifc_autocutoff(ifc, crystal, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1308,101 +1311,111 @@ subroutine ifc_autocutoff(ifc, crystal, rmin, atol, comm)
 !scalars
  type(ifc_type),intent(inout) :: ifc
  type(crystal_t),intent(in) :: crystal
- real(dp),intent(in) :: rmin,atol
  integer,intent(in) :: comm
 
 !Local variables-------------------------------
 !scalars
- integer :: iq_ibz,ierr,my_rank,nprocs,ii,nsphere,nsphere_step,num_negw
- real(dp) :: adiff,rifcsph,qrad,min_negw
+ integer,parameter :: master=0
+ integer :: iq_ibz,ierr,my_rank,nprocs,ii,nsphere,num_negw,jl,ju,jm,jj,natom,nrpt
+ real(dp) :: adiff,rifcsph,qrad,min_negw,xval,rcut_min
  character(len=500) :: msg
  type(lebedev_t) :: lgrid
 !arrays
  real(dp) :: displ_cart(2*3*ifc%natom*3*ifc%natom)
- real(dp) :: qred(3),phfrqs(3*crystal%natom)
- real(dp),allocatable :: ref_phfrq(:,:),new_phfrq(:,:)
+ real(dp) :: qred(3),qred_vers(3),phfrqs(3*ifc%natom) !,dwdq(3,3*ifc%natom)
+ real(dp),allocatable :: ref_phfrq(:,:),cut_phfrq(:,:)
  real(dp),allocatable :: save_wghatm(:,:,:),save_atmfrc(:,:,:,:,:,:)
 
 ! *********************************************************************
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+ natom = ifc%natom; nrpt = ifc%nrpt
 
- ! Compute frequencies on the ab-initio q-mesh.
- ABI_CALLOC(ref_phfrq, (3*ifc%natom, ifc%nqibz))
+ ! Compute frequencies on the ab-initio q-mesh without cutoff.
+ ABI_CALLOC(ref_phfrq, (3*natom, ifc%nqibz))
  do iq_ibz=1,ifc%nqibz
    if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
    call ifc_fourq(ifc, crystal, ifc%qibz(:,iq_ibz), ref_phfrq(:,iq_ibz), displ_cart)
  end do
  call xmpi_sum(ref_phfrq, comm, ierr)
 
- call wrtout(std_out, 'Apply cutoff on IFCs')
- ABI_MALLOC(save_wghatm, (ifc%natom,ifc%natom,ifc%nrpt))
- ABI_MALLOC(save_atmfrc, (2,3,ifc%natom,3,ifc%natom,ifc%nrpt))
+ ABI_MALLOC(save_wghatm, (natom,natom,nrpt))
+ ABI_MALLOC(save_atmfrc, (2,3,natom,3,natom,ifc%nrpt))
  save_wghatm = ifc%wghatm; save_atmfrc = ifc%atmfrc
 
- rifcsph = zero; nsphere_step = 5 * ifc%natom
- nsphere = ifc%natom * ifc%nrpt - nsphere_step - 1
- !nsphere = 100
- ABI_MALLOC(new_phfrq, (3*ifc%natom, ifc%nqibz))
- lgrid = lebedev_new(6) ! 74 points
+ rifcsph = zero; nsphere = natom * nrpt - 1
+ ABI_MALLOC(cut_phfrq, (3*natom, ifc%nqibz))
+ qrad = 0.01; lgrid = lebedev_new(16)
 
- write(std_out, "(a)")"nsphere   adiff[meV]   num_negw   min_negw[meV]"
+ if (my_rank == master) then
+   write(std_out, "(a)")" Apply cutoff on IFCs"
+   write(std_out, "(a,i0)")" Maximum nuber of atom-centered spheres: ",natom * nrpt
+   write(std_out, "(a,i0,a,f5.3)")" Using Lebedev-Laikov grid with npts: ",lgrid%npts, ", qrad: ",qrad
+   write(std_out, "(/,a)")" <adiff>: Average diff between ab-initio frequencies and frequencies with cutoff."
+   write(std_out, "(a)")" num_negw: Number of negative freqs detected in small sphere around Gamma."
+   write(std_out, "(a)")" min_negw: Min negative frequency on the small sphere."
+   write(std_out, "(a,/,/)")" rifcsph: Effective cutoff radius corresponding to nsphere."
+   write(std_out, "(a)")" nsphere   <adiff>[meV]   num_negw   min_negw[meV]   rifcsph"
+ end if
+
+ jl = 0; ju = natom * nrpt + 1 ! Initialize lower and upper limits.
  do
+   if (ju - jl <= 1) then
+     exit
+   end if
+   jm = (ju + jl) / 2  ! Compute a midpoint
+   nsphere = jm
+
    ifc%wghatm = save_wghatm; ifc%atmfrc = save_atmfrc
-   call corsifc9(ifc%acell,ifc%gprim,ifc%natom,ifc%nrpt,nsphere,rifcsph,ifc%rcan,ifc%rprim,ifc%rpt,ifc%wghatm)
+   call corsifc9(ifc%acell,ifc%gprim, natom, nrpt,nsphere,rifcsph,ifc%rcan,ifc%rprim,ifc%rpt,rcut_min,ifc%wghatm)
    if (ifc%asr > 0) call asrif9(ifc%asr,ifc%atmfrc,ifc%natom,ifc%nrpt,ifc%rpt,ifc%wghatm)
 
-   new_phfrq = zero
+   cut_phfrq = zero
    do iq_ibz=1,ifc%nqibz
      if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
-     call ifc_fourq(ifc, crystal, ifc%qibz(:,iq_ibz), new_phfrq(:,iq_ibz), displ_cart)
-     !write(std_out,*)new_phfrq(1,iq_ibz),ref_phfrq(1,iq_ibz)
+     call ifc_fourq(ifc, crystal, ifc%qibz(:,iq_ibz), cut_phfrq(:,iq_ibz), displ_cart)
+     !write(std_out,*)cut_phfrq(1,iq_ibz),ref_phfrq(1,iq_ibz)
    end do
-   call xmpi_sum(new_phfrq, comm, ierr)
+   call xmpi_sum(cut_phfrq, comm, ierr)
 
-   ! Test wether there are negative frequencies around gamma
-   qrad = 0.01
+   ! Test wether there are negative frequencies around gamma, including reciprocal lattice vectors.
    num_negw = 0; min_negw = zero
    do ii=1,lgrid%npts+3
+     if (mod(ii, nprocs) /= my_rank) cycle ! mpi-parallelism
      if (ii <= 3) then
        qred = zero; qred(ii) = one
      else
        qred = matmul(crystal%rprimd, lgrid%versors(:, ii-3))
      end if
-     qred = qrad * (qred / normv(qred, crystal%gmet, "G"))
-     call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart)
-     if (any(phfrqs < -tol8)) then
+     qred_vers = (qred / normv(qred, crystal%gmet, "G"))
+     qred = qrad * qred_vers
+     call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart) !, dwdq=dwdq)
+     if (any(phfrqs < +tol8)) then
        num_negw = num_negw + 1; min_negw = min(min_negw, minval(phfrqs))
      end if
+     !do jj=1,3
+     !  xval = dot_product(dwdq(:,jj), matmul(crystal%gprimd, qred_vers))
+     !  if (xval < zero) num_negw = num_negw + 1
+     !end do
    end do
+   call xmpi_sum(num_negw, comm, ierr)
+   xval = min_negw; call xmpi_min(xval, min_negw, comm, ierr)
 
-   adiff = sum(abs(new_phfrq - ref_phfrq)) / (ifc%nqibz * 3 * ifc%natom)
-   write(std_out,"(2(i0,1x,es16.8,1x))")nsphere, adiff * Ha_meV, num_negw, min_negw * Ha_meV
-
-   !if (num_negw > 0) then
-   !  write(std_out,'(a,i0,a,es12.4,a)') &
-   !    " Detected ",num_negw, " negative frequencies. Minimum was: ",min_negw * Ha_meV, "[meV]"
-   !end if
-
-   if (adiff > atol) then
-     write(std_out,*)"Reached adiff, exiting now"
-     exit
+   adiff = sum(abs(cut_phfrq - ref_phfrq)) / (ifc%nqibz * 3 * natom)
+   if (my_rank == master) then
+     write(std_out,"(i8,1x,es13.4,4x,i8,1x,es13.4,2x,es13.4)") &
+       nsphere, adiff * Ha_meV, num_negw, min_negw * Ha_meV, rcut_min
    end if
 
-   nsphere = nsphere - nsphere_step - 1
-   if (nsphere <= 0) then
-     MSG_WARNING("nsphere <= 0")
-     exit
+   if (num_negw == 0) then
+     jl = jm ! Replace lower limit
+   else
+     ju = jm ! Replace upper limit
    end if
-   !if (nsphere <= rmin * ifc%natom * ifc%nrpt) then
-   !  MSG_WARNING("nsphere <= 0")
-   !  exit
-   !end if
-   !exit
  end do
 
  ABI_FREE(ref_phfrq)
- ABI_FREE(new_phfrq)
+ ABI_FREE(cut_phfrq)
  ABI_FREE(save_wghatm)
  ABI_FREE(save_atmfrc)
  call lebedev_free(lgrid)
@@ -1436,6 +1449,7 @@ end subroutine ifc_autocutoff
 !! OUTPUT
 !! wghatm(natom,natom,nrpt) = Weights associated to a pair of atoms and to a R vector
 !!  with the required cutoff applied.
+!! rcut_min=Effective cutoff. Defined by the minimum cutoff radius over the natom sites.
 !!
 !! PARENTS
 !!      m_ifc
@@ -1446,13 +1460,14 @@ end subroutine ifc_autocutoff
 !!
 !! SOURCE
 
-subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,wghatm)
+subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,rcut_min,wghatm)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'corsifc9'
+ use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1461,6 +1476,7 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,wghatm
 !scalars
  integer,intent(in) :: natom,nrpt,nsphere
  real(dp),intent(in) :: rifcsph
+ real(dp),intent(out) :: rcut_min
 !arrays
  real(dp),intent(in) :: acell(3)
  real(dp),intent(in) :: gprim(3,3),rcan(3,natom)
@@ -1470,6 +1486,7 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,wghatm
 !Local variables -------------------------
 !scalars
  integer :: ia,ib,ii,index,irpt
+ real(dp) :: rmax,rsigma,r0
 !arrays
  integer,allocatable :: list(:)
  real(dp),allocatable :: dist(:,:,:),wkdist(:)
@@ -1477,25 +1494,28 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,wghatm
 ! *********************************************************************
 
  ! Compute the distances between atoms
+ ! dist(ia,ib,irpt) contains the distance from atom ia to atom ib in unit cell irpt.
  ABI_MALLOC(dist,(natom,natom,nrpt))
  call dist9(acell,dist,gprim,natom,nrpt,rcan,rprim,rpt)
- ! Now dist(ia,ib,irpt) contains the distance from atom ia to atom ib in unit cell irpt.
 
  ABI_MALLOC(list,(natom*nrpt))
  ABI_MALLOC(wkdist,(natom*nrpt))
 
  ! loop on all generic atoms.
+ rcut_min = huge(one)
  do ia=1,natom
 
-   wkdist(:)=reshape(dist(ia,:,:),(/natom*nrpt/))
+   wkdist = reshape(dist(ia,:,:), [natom*nrpt])
    do ii=1,natom*nrpt
      list(ii)=ii
    end do
    ! This sorting algorithm is slow ...
    call sort_dp(natom*nrpt,wkdist,list,tol14)
+   rmax = wkdist(natom*nrpt)
 
-   ! zero the outside IFCs : act on wghatm
+   ! zero the outside IFCs: act on wghatm
    if(nsphere/=0.and.nsphere<natom*nrpt)then
+     rcut_min = min(rcut_min, wkdist(nsphere+1))
      do ii=nsphere+1,natom*nrpt
        index=list(ii)
        irpt=(index-1)/natom+1
@@ -1509,9 +1529,22 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,wghatm
        index=list(ii)
        ! preserve weights for atoms inside sphere of radius rifcsph
        if (wkdist(ii) < rifcsph) cycle
+       rcut_min = min(rcut_min, wkdist(ii))
        irpt=(index-1)/natom+1
        ib=index-natom*(irpt-1)
        wghatm(ia,ib,irpt)=zero
+     end do
+   end if
+
+   if (rifcsph < -tol10) then
+     ! Use different filter
+     r0 = abs(rifcsph) * rmax; rsigma = one
+     rcut_min = r0 ! Set it to r0
+     do ii=nsphere+1,natom*nrpt
+       index=list(ii)
+       irpt=(index-1)/natom+1
+       ib=index-natom*(irpt-1)
+       wghatm(ia,ib,irpt) = wghatm(ia,ib,irpt) * half * abi_derfc((wkdist(ii) - r0) / rsigma)
      end do
    end if
 

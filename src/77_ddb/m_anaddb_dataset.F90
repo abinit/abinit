@@ -982,9 +982,9 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  anaddb_dtset%nsphere=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nsphere',tread,'INT')
  if(tread==1) anaddb_dtset%nsphere=intarr(1)
- if(anaddb_dtset%nsphere<0)then
+ if(anaddb_dtset%nsphere < -1)then
    write(message, '(a,i0,3a)' )&
-&   'nsphere is ',anaddb_dtset%nsphere,', which is lower than 0',ch10,&
+&   'nsphere is ',anaddb_dtset%nsphere,', while it must be >= 0 or equal to -1',ch10,&
 &   'Action: correct nsphere in your input file.'
    MSG_ERROR(message)
  end if
