@@ -690,6 +690,19 @@ with_mpi_prefix="${MPI_HOME}"
 # You may specify any combination, using '+' as a separator
 #
 with_trio_flavor="netcdf"
+<<<<<<< HEAD
+=======
+
+                       # ------------------------------ #
+
+# Include flags for the ETSF_IO library (default is unset)
+#
+#with_etsf_io_incs="-I/opt/etsf/include"
+
+# Link flags for the ETSF_IO library (default is unset)
+#
+#with_etsf_io_libs="-L/opt/etsf/lib -letsf_io"
+>>>>>>> release-8.2.0
 
                        # ------------------------------ #
 
