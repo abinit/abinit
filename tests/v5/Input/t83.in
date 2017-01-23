@@ -3,7 +3,7 @@
 ifcflag 0
 
 brav 1
-nqgpt 1 1 11
+ngqpt 1 1 11
 nqshft 1
 q1shft 3*0.0
 
