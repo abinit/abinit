@@ -52,21 +52,17 @@ subroutine chkvars (string)
  character(len=*),intent(in) :: string
 
 !Local variables-------------------------------
- character :: blank=' '
 !scalars
- integer :: index_blank,index_current,index_endword,index_endwordnow,index_list_vars
  character(len=100) :: list_logicals,list_strings
  character(len=10000) :: list_vars
- character(len=500) :: message
 
 !************************************************************************
-
 
 !Here, list all admitted variable names (max 10 per line, to fix the ideas)
 !Note: Do not use "double quotation mark" for the string since it triggers a bug in docchk.py (abirules script)
 !<ABINIT_VARS>
 !A
- list_vars=                 ' iomode accuracy acell adpimd adpimd_gamma algalch amu angdeg asr atvshift autoparal awtr'
+ list_vars=                 ' accuracy acell adpimd adpimd_gamma algalch amu angdeg asr atvshift autoparal awtr'
 !B
  list_vars=trim(list_vars)//' bandpp bdberry bdeigrf bdgw berryopt berrysav berrystep bfield bmass'
  list_vars=trim(list_vars)//' boxcenter boxcutmin brvltt builtintest'
@@ -130,7 +126,7 @@ subroutine chkvars (string)
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
- list_vars=trim(list_vars)//' imgmov inclvkb intxc ionmov iqpt'
+ list_vars=trim(list_vars)//' imgmov inclvkb intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
  list_vars=trim(list_vars)//' irdbseig irdbsreso irdddb irdddk irdden'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
@@ -263,6 +259,60 @@ subroutine chkvars (string)
  call inupper(list_logicals)
  call inupper(list_strings)
 
+ call chkvars_in_string(list_vars, list_logicals, list_strings, string)
+
+end subroutine chkvars
+!!***
+
+!!****f* ABINIT/chkvars_in_string
+!! NAME
+!!  chkvars_in_string
+!!
+!! FUNCTION
+!!  Analyze variable names in string. Abort if name is not recognized.
+!!
+!! INPUTS
+!!  list_vars(len=*)=string with the (upper case) names of the variables (excluding logicals and chars).
+!!  list_logicals(len=*)=string with the (upper case) names of the logical variables.
+!!  list_strings(len=*)=string with the (upper case) names of the character variables.
+!!  string(len=*)=string (with upper case) from the input file.
+!!
+!! OUTPUT
+!!  Abort if variable name is not recognized.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine chkvars_in_string(list_vars, list_logicals, list_strings, string)
+
+ use defs_basis
+ use m_errors
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'chkvars'
+ use interfaces_32_util
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: string
+ character(len=*),intent(in) :: list_logicals,list_strings,list_vars
+
+!Local variables-------------------------------
+ character,parameter :: blank=' '
+!scalars
+ integer :: index_blank,index_current,index_endword,index_endwordnow,index_list_vars
+ character(len=500) :: message
+
+!************************************************************************
+
  index_current=1
  do ! Infinite do-loop, to identify the presence of each potential variable names
 
@@ -276,6 +326,7 @@ subroutine chkvars (string)
      do index_endword=index_blank-1,index_current,-1
        if(index('ABCDEFGHIJKLMNOPQRSTUVWXYZ',string(index_endword:index_endword))/=0)exit
      end do
+     !write(std_out,*)"Will analyze:", string(index_current:index_endword)
 
 !    Find the index of the potential variable name in the list of variables
      index_list_vars=index(list_vars,blank//string(index_current:index_endword)//blank)
@@ -309,6 +360,7 @@ subroutine chkvars (string)
 
 !      Treat possible logical input variables
        if(index(list_logicals,blank//string(index_current:index_endword)//blank)/=0)then
+         !write(std_out,*)"Found logical variable: ",string(index_current:index_endword)
          index_blank=index(string(index_current:),blank)+index_current-1
          if(index(' F T ',string(index_blank:index_blank+2))==0)then
            write(message, '(8a)' )&
@@ -323,8 +375,11 @@ subroutine chkvars (string)
 !        Treat possible string input variables
        else if(index(list_strings,blank//string(index_current:index_endword)//blank)/=0)then
 !        Every following string is accepted
+         !write(std_out,*)"Found string variable: ",string(index_current:index_endword)
+         !write(std_out,*)"in string: ",trim(string(index_current:))
          index_current=index(string(index_current:),blank)+index_current
          index_blank=index(string(index_current:),blank)+index_current-1
+         !write(std_out,*)"next:: ",string(index_current:index_endword)
 
 !        If still not admitted, then there is a problem
        else
@@ -340,5 +395,5 @@ subroutine chkvars (string)
    index_current=index_blank+1
  end do
 
-end subroutine chkvars
+end subroutine chkvars_in_string
 !!***

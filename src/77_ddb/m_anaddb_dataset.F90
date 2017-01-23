@@ -161,8 +161,6 @@ module m_anaddb_dataset
   real(dp) :: targetpol(3)
   real(dp) :: vs_qrad_tolms(2) = 0
 
-  !real(dp) :: phdos_mesh(3)=-one
-
 ! Integer arrays
   integer, allocatable :: atifc(:)
    ! atifc(natom) WARNING : there is a transformation of this input variable, in chkin9
@@ -1705,6 +1703,9 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+ ! Check for possible typos.
+ call anaddb_chkvars(string)
+
 end subroutine invars9
 !!***
 
@@ -2107,6 +2108,127 @@ subroutine anaddb_init(filnam)
  write(std_out,'(a,a)' )'-   ',trim(filnam(7))
 
 end subroutine anaddb_init
+!!***
+
+!!****f* m_anaddb_dataset/anaddb_chkvars
+!! NAME
+!! anaddb_chkvars
+!!
+!! FUNCTION
+!!  Examines the input string, to check whether all names are allowed.
+!!
+!! INPUTS
+!!  string*(*)=string of character
+!!   the string (with upper case) from the input file, to which the XYZ data is (possibly) appended
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine anaddb_chkvars(string)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'anaddb_chkvars'
+ use interfaces_32_util
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ character(len=*),intent(in) :: string
+
+!Local variables-------------------------------
+!scalars
+ character(len=100) :: list_logicals,list_strings
+ character(len=10000) :: list_vars
+
+!************************************************************************
+
+!Here, list all admitted variable names (max 10 per line, to fix the ideas)
+!Note: Do not use "double quotation mark" for the string since it triggers a bug in docchk.py (abirules script)
+!<ANADDB_VARS>
+!A
+ list_vars=                 ' alphon asr a2fsmear atifc'
+!B
+ list_vars=trim(list_vars)//' brav band_gap'
+!C
+ list_vars=trim(list_vars)//' chneut'
+!D
+ list_vars=trim(list_vars)//' dieflag dipdip dossum dosdeltae dossmear dostol'
+!E
+ list_vars=trim(list_vars)//' ep_scalprod eivec elaflag elphflag enunit'
+ list_vars=trim(list_vars)//' ep_b_min ep_b_max ep_int_gkk ep_keepbands ep_nqpt ep_nspline ep_prt_yambo'
+ list_vars=trim(list_vars)//' elphsmear elph_fermie ep_extrael ep_qptlist'
+!F
+ list_vars=trim(list_vars)//' freeze_displ frmax frmin'
+!G
+ list_vars=trim(list_vars)//' gkk2write gkk_rptwrite gkqwrite gruns_nddbs'
+!H
+!I
+ list_vars=trim(list_vars)//' iavfrq ifcana ifcflag ifcout ifltransport instrflag istrfix iatfix iatprj_bs'
+!J
+!K
+ list_vars=trim(list_vars)//' kptrlatt kptrlatt_fine'
+!L
+!M
+ list_vars=trim(list_vars)//' mustar'
+!N
+ list_vars=trim(list_vars)//' natfix natifc natom natprj_bs nchan ndivsm nfreq ngrids nlflag nph1l nph2l'
+ list_vars=trim(list_vars)//' nqpath nqshft nsphere nstrfix ntemper nwchan ngqpt ng2qpt'
+!O
+ list_vars=trim(list_vars)//' outboltztrap'
+!P
+ list_vars=trim(list_vars)//' piezoflag polflag prtdos prt_ifc prtmbm prtfsurf prtnest prtphbands'
+ list_vars=trim(list_vars)//' prtsrlr prtvol prtbltztrp'
+!Q
+ list_vars=trim(list_vars)//' qrefine qgrid_type q1shft q2shft qnrml1 qnrml2 qpath qph1l qph2l'
+!R
+ list_vars=trim(list_vars)//' ramansr relaxat relaxstr rfmeth rifcsph'
+!S
+ list_vars=trim(list_vars)//' selectz symdynmat symgkq'
+!T
+ list_vars=trim(list_vars)//' targetpol telphint thmflag temperinc tempermin thmtol'
+!U
+ list_vars=trim(list_vars)//' use_k_fine'
+!V
+ list_vars=trim(list_vars)//' vs_qrad_tolms'
+!W
+!X
+!Y
+!Z
+
+!Logical input variables
+ list_logicals=' '
+
+!String input variables
+ list_strings=' gruns_ddbs'
+!</ANADDB_VARS>
+
+!Extra token, also admitted:
+!<ANADDB_UNITS>
+ list_vars=trim(list_vars)//' au Angstr Angstrom Angstroms Bohr Bohrs eV Ha'
+ list_vars=trim(list_vars)//' Hartree Hartrees K Ry Rydberg Rydbergs T Tesla'
+!</ANADDB_UNITS>
+
+!<ANADDB_OPERATORS>
+ list_vars=trim(list_vars)//' sqrt '
+!</ANADDB_OPERATORS>
+
+!Transform to upper case
+ call inupper(list_vars)
+ call inupper(list_logicals)
+ call inupper(list_strings)
+
+ call chkvars_in_string(list_vars, list_logicals, list_strings, string)
+
+end subroutine anaddb_chkvars
 !!***
 
 end module m_anaddb_dataset
