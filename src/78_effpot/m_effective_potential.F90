@@ -3569,7 +3569,6 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,stra
 
 !Arguments ------------------------------------
 ! scalar
-
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC

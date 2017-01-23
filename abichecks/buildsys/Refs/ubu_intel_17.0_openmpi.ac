@@ -146,7 +146,7 @@
 # Forced C compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-CFLAGS="-O2 -g"
+#CFLAGS="-O2"
 
 # C linker custom debug flags (when enable_debug=yes)
 #
@@ -230,7 +230,7 @@ CFLAGS="-O2 -g"
 # Forced C++ compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-CXXFLAGS="-O2 -g"
+#CXXFLAGS="-O2"
 
 # C++ linker custom debug flags (when enable_debug=yes)
 #
@@ -320,7 +320,7 @@ CXXFLAGS="-O2 -g"
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-FCFLAGS="-O2 -g -ffree-line-length-none"
+#FCFLAGS="-O2"
 
 # Fortran linker custom debug flags (when enable_debug=yes)
 #
@@ -515,7 +515,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/opt/local"
+with_mpi_prefix="${MPI_HOME}"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -675,14 +675,13 @@ with_mpi_prefix="/opt/local"
 # Transferable I/O (TRIO) connector                                            #
 # ---------------------------------------------------------------------------- #
 
-# Flavor of transferable I/O library to support (default is netcdf+etsf_io)
+# Flavor of transferable I/O library to support (default is netcdf)
 #
 # By transferable I/O (TRIO), we mean that the files produced by Abinit
 # will be transferable seamlessly to other computers and codes
 #
 # Supported libraries:
 #
-#   * etsf_io  : ETSF_IO file format (requires netcdf)
 #   * psml     : XML pseudopotential format io library
 #   * netcdf   : NetCDF file format
 #   * yaml     : YAML output
@@ -690,43 +689,33 @@ with_mpi_prefix="/opt/local"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf+etsf_io"
-
-                       # ------------------------------ #
-
-# Include flags for the ETSF_IO library (default is unset)
-#
-with_etsf_io_incs="-I/opt/local/include/gcc"
-
-# Link flags for the ETSF_IO library (default is unset)
-#
-#with_etsf_io_libs="-L/opt/etsf/lib -letsf_io"
+with_trio_flavor="netcdf+psml"
 
                        # ------------------------------ #
 
 # Include flags for the psml library (default is unset)
 #
-#with_psml_incs="-I/usr/local/include/psml"
+with_psml_incs="-I/usr/local/psml-ifort17/include"
 
 # Link flags for the psml library (default is unset)
 #
-#with_psml_libs="-L/usr/local/lib/psml -lpsml"
+with_psml_libs="-L/usr/local/psml-ifort17/lib -lpsml"
 
                        # ------------------------------ #
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I/opt/local/include"
+with_netcdf_incs="-I/usr/local/netcdf4411/include -I/usr/local/hdf5-1.8.18_openmpi2/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L/opt/local/lib -lnetcdf -lnetcdff"
+with_netcdf_libs="-L/usr/local/netcdf4411/lib -lnetcdff -lnetcdf -L/usr/local/hdf5-1.8.18_openmpi2/lib -lhdf5_hl -lhdf5"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
 # change the default values of accesswff)   
 #
-#enable_netcdf_default="no"
+enable_netcdf_default="yes"
 
                        # ------------------------------ #
 
@@ -768,11 +757,11 @@ with_fft_flavor="fftw3"
 
 # Include flags for the FFT library (default is unset)
 #
-#with_fft_incs="-I/usr/local/include/fftw"
+with_fft_incs="-I${MKLROOT}/include"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L/opt/local/lib -lfftw3 -lfftw3f"
+with_fft_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread -lm -ldl"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -847,15 +836,15 @@ with_fft_libs="-L/opt/local/lib -lfftw3 -lfftw3f"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="atlas+scalapack"
+with_linalg_flavor="mkl"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_incs="-I/opt/local/include"
+with_linalg_incs="-I${MKLROOT}/include"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/opt/local/lib -lscalapack -llapack -lf77blas -lcblas -latlas"
+with_linalg_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group -lpthread -lm -ldl"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -918,55 +907,55 @@ with_linalg_libs="-L/opt/local/lib -lscalapack -llapack -lf77blas -lcblas -latla
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="libxc+wannier90"
+with_dft_flavor="atompaw+libxc+wannier90+bigdft"
 
                        # ------------------------------ #
 
 # Full path to the AtomPAW executables (default is unset)
 #
-#with_atompaw_bins="/usr/local/bin"
+with_atompaw_bins="${FALLBACKS_PATH}/atompaw/bin"
 
 # Include flags for the AtomPAW library (default is unset)
 #
-#with_atompaw_incs="-I/usr/local/include/atompaw"
+with_atompaw_incs="-I${FALLBACKS_PATH}/atompaw/include"
 
 # Link flags for the AtomPAW library (default is unset)
 #
-#with_atompaw_libs="-L/usr/local/lib/atompaw -latompaw"
+with_atompaw_libs="-L${FALLBACKS_PATH}/atompaw/lib -latompaw"
 
                        # ------------------------------ #
 
 # Include flags for the BigDFT library (default is unset)
 #
-#with_bigdft_incs="-I/usr/local/include/bigdft"
+with_bigdft_incs="-I${FALLBACKS_PATH}/bigdft/include"
 
 # Link flags for the BigDFT library (default is unset)
 #
-#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft -lpoissonsolver -labinit"
+with_bigdft_libs="-L${FALLBACKS_PATH}/bigdft/lib -lbigdft-1 -labinit -lyaml -lrt"
 
                        # ------------------------------ #
 
 # Include flags for the LibXC library (default is unset)
 #
-#with_libxc_incs="-I/opt/etsf/include"
+with_libxc_incs="-I${FALLBACKS_PATH}/libxc/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-#with_libxc_libs="-L/opt/etsf/lib -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/lib -lxcf90 -lxc"
 
                        # ------------------------------ #
 
 # Full path to the Wannier90 executables (default is unset)
 #
-#with_wannier90_bins="/usr/local/bin"
+with_wannier90_bins="${FALLBACKS_PATH}/wannier90/bin"
 
 # Include flags for the Wannier90 library (default is unset)
 #
-#with_wannier90_incs="-I/usr/local/include/wannier90"
+with_wannier90_incs="-I${FALLBACKS_PATH}/wannier90/include"
 
 # Link flags for the Wannier90 library (default is unset)
 #
-#with_wannier90_libs="-L${HOME}/lib/wannier90 -lwannier90"
+with_wannier90_libs="-L${FALLBACKS_PATH}/wannier90/lib -lwannier90"
 
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
 #
@@ -1039,7 +1028,7 @@ with_dft_flavor="libxc+wannier90"
 
 # Enable double precision for GW calculations (gmatteo)
 #
-#enable_gw_dpc="yes"
+enable_gw_dpc="yes"
 
 # Enable memory profiling (waroquiers)
 #
