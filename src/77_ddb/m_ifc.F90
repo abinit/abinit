@@ -1302,7 +1302,6 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'ifc_autocutoff'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
@@ -1467,7 +1466,6 @@ subroutine corsifc9(acell,gprim,natom,nrpt,nsphere,rifcsph,rcan,rprim,rpt,rcut_m
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'corsifc9'
- use interfaces_14_hidewrite
 !End of the abilint section
 
  implicit none
