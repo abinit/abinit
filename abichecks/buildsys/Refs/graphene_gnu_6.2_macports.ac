@@ -146,7 +146,7 @@
 # Forced C compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-#CFLAGS="-O2"
+CFLAGS="-O2 -g"
 
 # C linker custom debug flags (when enable_debug=yes)
 #
@@ -230,7 +230,7 @@
 # Forced C++ compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-#CXXFLAGS="-O2"
+CXXFLAGS="-O2 -g"
 
 # C++ linker custom debug flags (when enable_debug=yes)
 #
@@ -315,12 +315,12 @@
 
 # Fortran compiler additional custom flags
 #
-FCFLAGS_EXTRA="-fopenmp"
+#FCFLAGS_EXTRA="-O2"
 
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-#FCFLAGS="-O2"
+FCFLAGS="-O2 -g -ffree-line-length-none"
 
 # Fortran linker custom debug flags (when enable_debug=yes)
 #
@@ -332,7 +332,7 @@ FCFLAGS_EXTRA="-fopenmp"
 
 # Fortran linker custom flags
 #
-FC_LDFLAGS_EXTRA="-fopenmp"
+#FC_LDFLAGS_EXTRA="-Bstatic"
 
 # Forced Fortran linker flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -452,7 +452,7 @@ FC_LDFLAGS_EXTRA="-fopenmp"
 # it. If set to "yes", the configure script will stop if it does not find
 # a working MPI environment.
 #
-enable_mpi="no"
+enable_mpi="yes"
 
 # Activate the MPI_IN_PLACE option whenever possible (default is no)
 # WARNING: this feature requires MPI2, ignored if the MPI library
@@ -473,7 +473,7 @@ enable_mpi="no"
 # it. If set to "yes", the configure script will stop if it does not find
 # a working MPI I/O environment.
 #
-enable_mpi_io="no"
+enable_mpi_io="yes"
 
 # Enable MPI-IO mode in Abinit (use MPI-IO as default IO library,
 # change the default values of accesswff)   
@@ -515,7 +515,7 @@ enable_mpi_io="no"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-#with_mpi_prefix="/usr/local/openmpi-gcc"
+with_mpi_prefix="/opt/local"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -690,7 +690,7 @@ enable_mpi_io="no"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="etsf_io+netcdf"
+with_trio_flavor="netcdf"
 
                        # ------------------------------ #
 
@@ -716,11 +716,11 @@ with_trio_flavor="etsf_io+netcdf"
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I/usr/include -I/usr/lib64/gfortran/modules"
+with_netcdf_incs="-I/opt/local/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L/usr/lib64 -lnetcdf -lnetcdff"
+with_netcdf_libs="-L/opt/local/lib -lnetcdf -lnetcdff"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -764,7 +764,7 @@ with_netcdf_libs="-L/usr/lib64 -lnetcdf -lnetcdff"
 #   * By default, Abinit will use the internal Goedecker FFT library
 #   * This connector is highly experimental - USE AT YOUR OWN RISKS!
 #
-#with_fft_flavor="fftw3"
+with_fft_flavor="fftw3"
 
 # Include flags for the FFT library (default is unset)
 #
@@ -772,7 +772,7 @@ with_netcdf_libs="-L/usr/lib64 -lnetcdf -lnetcdff"
 
 # Link flags for the FFT library (default is unset)
 #
-#with_fft_libs="-L/usr/local/lib/fftw -lfftw3"
+with_fft_libs="-L/opt/local/lib -lfftw3 -lfftw3f"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -847,15 +847,15 @@ with_netcdf_libs="-L/usr/lib64 -lnetcdf -lnetcdff"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="atlas"
+with_linalg_flavor="custom"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_incs="-I/usr/include/atlas"
+with_linalg_incs="-I/opt/local/include"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/usr/lib64 -llapack -L/usr/lib64/atlas -lf77blas -lcblas -latlas"
+with_linalg_libs="-L/opt/local/lib -lopenblas"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -918,21 +918,21 @@ with_linalg_libs="-L/usr/lib64 -llapack -L/usr/lib64/atlas -lf77blas -lcblas -la
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="none"
+with_dft_flavor="libxc+wannier90+atompaw"
 
                        # ------------------------------ #
 
 # Full path to the AtomPAW executables (default is unset)
 #
-#with_atompaw_bins="/usr/local/bin"
+with_atompaw_bins="/opt/local/bin"
 
 # Include flags for the AtomPAW library (default is unset)
 #
-#with_atompaw_incs="-I/usr/local/include/atompaw"
+with_atompaw_incs="-I/opt/local/include"
 
 # Link flags for the AtomPAW library (default is unset)
 #
-#with_atompaw_libs="-L/usr/local/lib/atompaw -latompaw"
+with_atompaw_libs="-L/opt/local/lib -latompaw"
 
                        # ------------------------------ #
 
@@ -948,25 +948,25 @@ with_dft_flavor="none"
 
 # Include flags for the LibXC library (default is unset)
 #
-#with_libxc_incs="-I/opt/etsf/include"
+with_libxc_incs="-I/opt/local/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-#with_libxc_libs="-L/opt/etsf/lib -lxc"
+with_libxc_libs="-L/opt/local/lib -lxcf90 -lxc"
 
                        # ------------------------------ #
 
 # Full path to the Wannier90 executables (default is unset)
 #
-#with_wannier90_bins="/usr/local/bin"
+with_wannier90_bins="/opt/local/bin"
 
 # Include flags for the Wannier90 library (default is unset)
 #
-#with_wannier90_incs="-I/usr/local/include/wannier90"
+with_wannier90_incs="-I/opt/local/include"
 
 # Link flags for the Wannier90 library (default is unset)
 #
-#with_wannier90_libs="-L${HOME}/lib/wannier90 -lwannier90"
+with_wannier90_libs="-L/opt/local/lib -lwannier"
 
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
 #
@@ -1051,7 +1051,7 @@ enable_memory_profiling="no"
 
 # Enable OpenMP (gmatteo, torrent)
 #
-enable_openmp="yes"
+#enable_openmp="yes"
 
 # Enable ZDOTC and ZDOTU bugfix (gmatteo)
 #
