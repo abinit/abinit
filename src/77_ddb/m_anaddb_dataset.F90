@@ -2146,6 +2146,7 @@ subroutine anaddb_chkvars(string)
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: protocol0=0
  character(len=100) :: list_logicals,list_strings
  character(len=10000) :: list_vars
 
@@ -2226,7 +2227,7 @@ subroutine anaddb_chkvars(string)
  call inupper(list_logicals)
  call inupper(list_strings)
 
- call chkvars_in_string(list_vars, list_logicals, list_strings, string)
+ call chkvars_in_string(protocol0, list_vars, list_logicals, list_strings, string)
 
 end subroutine anaddb_chkvars
 !!***

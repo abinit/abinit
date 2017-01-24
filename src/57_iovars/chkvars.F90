@@ -53,6 +53,7 @@ subroutine chkvars (string)
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: protocol1=1
  character(len=100) :: list_logicals,list_strings
  character(len=10000) :: list_vars
 
@@ -259,7 +260,7 @@ subroutine chkvars (string)
  call inupper(list_logicals)
  call inupper(list_strings)
 
- call chkvars_in_string(list_vars, list_logicals, list_strings, string)
+ call chkvars_in_string(protocol1, list_vars, list_logicals, list_strings, string)
 
 end subroutine chkvars
 !!***
@@ -272,6 +273,10 @@ end subroutine chkvars
 !!  Analyze variable names in string. Abort if name is not recognized.
 !!
 !! INPUTS
+!!  protocol=
+!!    0 if parser does not accept multiple datasets and +* syntax (e.g. anaddb)
+!!    1 if parser accepts multiple datasets and +* syntax (e.g. abinit)
+!!
 !!  list_vars(len=*)=string with the (upper case) names of the variables (excluding logicals and chars).
 !!  list_logicals(len=*)=string with the (upper case) names of the logical variables.
 !!  list_strings(len=*)=string with the (upper case) names of the character variables.
@@ -286,7 +291,7 @@ end subroutine chkvars
 !!
 !! SOURCE
 
-subroutine chkvars_in_string(list_vars, list_logicals, list_strings, string)
+subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, string)
 
  use defs_basis
  use m_errors
@@ -302,6 +307,7 @@ subroutine chkvars_in_string(list_vars, list_logicals, list_strings, string)
 
 !Arguments ------------------------------------
 !scalars
+ integer,intent(in) :: protocol
  character(len=*),intent(in) :: string
  character(len=*),intent(in) :: list_logicals,list_strings,list_vars
 
@@ -321,44 +327,47 @@ subroutine chkvars_in_string(list_vars, list_logicals, list_strings, string)
 
    if(index('ABCDEFGHIJKLMNOPQRSTUVWXYZ',string(index_current:index_current))/=0)then
 
-!    Skip characters like : + or the digits at the end of the word
-!    Start from the blank that follows the end of the word
-     do index_endword=index_blank-1,index_current,-1
-       if(index('ABCDEFGHIJKLMNOPQRSTUVWXYZ',string(index_endword:index_endword))/=0)exit
-     end do
+     index_endword = index_blank -1
+     if (protocol == 1) then
+       ! Skip characters like : + or the digits at the end of the word
+       ! Start from the blank that follows the end of the word
+       do index_endword=index_blank-1,index_current,-1
+         if(index('ABCDEFGHIJKLMNOPQRSTUVWXYZ',string(index_endword:index_endword))/=0)exit
+       end do
+     end if
      !write(std_out,*)"Will analyze:", string(index_current:index_endword)
 
-!    Find the index of the potential variable name in the list of variables
+     ! Find the index of the potential variable name in the list of variables
      index_list_vars=index(list_vars,blank//string(index_current:index_endword)//blank)
 
-!    Treat the complications due to the possibility of images
-     if(index_list_vars==0)then
+     ! Treat the complications due to the possibility of images
+     if (index_list_vars==0 .and. protocol==1) then
 
-!      Treat possible LASTIMG appendix
+       ! Treat possible LASTIMG appendix
        if(index_endword-6>=1)then
          if(string(index_endword-6:index_endword)=='LASTIMG')index_endword=index_endword-7
        end if
 
-!      Treat possible IMG appendix
+       ! Treat possible IMG appendix
        if(index_endword-2>=1)then
          if(string(index_endword-2:index_endword)=='IMG')index_endword=index_endword-3
        end if
 
        index_endwordnow=index_endword
 
-!      Again skip characters like : + or the digits before IMG
-!      Start from the blank that follows the end of the word
+       ! Again skip characters like : + or the digits before IMG
+       ! Start from the blank that follows the end of the word
        do index_endword=index_endwordnow,index_current,-1
          if(index('ABCDEFGHIJKLMNOPQRSTUVWXYZ',string(index_endword:index_endword))/=0)exit
        end do
 
-!      Find the index of the potential variable name in the list of variables
+       ! Find the index of the potential variable name in the list of variables
        index_list_vars=index(list_vars,blank//string(index_current:index_endword)//blank)
      end if
 
      if(index_list_vars==0)then
 
-!      Treat possible logical input variables
+       ! Treat possible logical input variables
        if(index(list_logicals,blank//string(index_current:index_endword)//blank)/=0)then
          !write(std_out,*)"Found logical variable: ",string(index_current:index_endword)
          index_blank=index(string(index_current:),blank)+index_current-1
@@ -385,7 +394,7 @@ subroutine chkvars_in_string(list_vars, list_logicals, list_strings, string)
        else
          write(message, '(7a)' )&
 &         'Found the token ',string(index_current:index_endword),' in the input file.',ch10,&
-&         'This name is not one of the registered input variable names (see the Web list of input variables).',ch10,&
+&         'This name is not one of the registered input variable names (see http://www.abinit.org/doc).',ch10,&
 &         'Action: check your input file. You likely mistyped the input variable.'
          MSG_ERROR(message)
        end if
