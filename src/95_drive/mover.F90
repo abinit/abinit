@@ -409,9 +409,9 @@ real(dp) :: rmet(3,3)
  ! forces will be compute with it
  if (present(effective_potential)) then
    need_scfcv_cycle = .FALSE.
-   write(message,'(a,a,i2,a,a,a,a,80a)')&
-&   ch10,'=== [ionmov=',ab_mover%ionmov,'] ',trim(specs%method),&
-&   ' with effective potential',ch10,('=',kk=1,80)
+   write(message,'(2a,i2,5a,80a)')&
+&   ch10,'=== [ionmov=',ab_mover%ionmov,'] ',trim(specs%method),' with effective potential',&
+&   ch10,('=',kk=1,80)
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
  else

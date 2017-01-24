@@ -34,6 +34,7 @@ module m_polynomial_coeff
  public :: polynomial_coeff_broacast
  public :: polynomial_coeff_free
  public :: polynomial_coeff_init
+ public :: polynomial_coeff_getName
  public :: polynomial_coeff_setCoefficient
  public :: polynomial_coeff_writeXML
 !!***
@@ -51,7 +52,7 @@ module m_polynomial_coeff
 
  type, public :: polynomial_coeff_type
 
-   character(200) :: name
+   character(40) :: name
 !     Name of the polynomial_coeff (Sr_y-O1_y)^3) for example
 
    integer :: nterm
@@ -112,7 +113,7 @@ subroutine polynomial_coeff_init(coefficient,name,nterm,polynomial_coeff,terms)
  integer, intent(in) :: nterm
  real(dp),intent(in) :: coefficient
 !arrays
- character(200),intent(in) :: name
+ character(40),intent(in) :: name
  type(polynomial_term_type),intent(in) :: terms(nterm)
  type(polynomial_coeff_type), intent(out) :: polynomial_coeff
 !Local variables-------------------------------
@@ -240,6 +241,64 @@ subroutine polynomial_coeff_setCoefficient(coefficient,polynomial_coeff)
  polynomial_coeff%coefficient = coefficient
 
 end subroutine polynomial_coeff_setCoefficient
+!!***
+
+
+!!****f* m_polynomial_coeff/polynomial_coeff_getName
+!!
+!! NAME
+!! polynomial_coeff_getName
+!!
+!! FUNCTION
+!! set the coefficient for this  polynomial_coeff type
+!!
+!! INPUTS
+!! coefficient = coefficient of this coefficient 
+!! 
+!! OUTPUT
+!! polynomial_coeff = polynomial_coeff structure to be free
+!!
+!! PARENTS
+!!      m_effective_potential_file
+!!
+!! CHILDREN
+!!      isfile,wrtout
+!!
+!! SOURCE
+
+subroutine polynomial_coeff_getName(name,atm1,atm2,dir,power,polynomial_coeff)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'polynomial_coeff_getName'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+!arrays
+ character(len=1),optional,intent(in) :: dir,power
+ character(len=5),optional,intent(in) :: atm1,atm2
+ character(len=40),optional,intent(out):: name
+ type(polynomial_coeff_type),optional, intent(in) :: polynomial_coeff
+!Local variables-------------------------------
+!scalar
+!arrays
+! *************************************************************************
+ name=""
+ if (present(polynomial_coeff)) then
+   name = polynomial_coeff%name
+ else
+   if (present(dir).and.present(power).and.present(atm1).and.present(atm2)) then
+     name="("//trim(atm1)//"_"//dir//"-"//trim(atm2)//"_"//dir//")^"//power
+   end if
+ end if
+
+
+end subroutine polynomial_coeff_getName
 !!***
 
 !!****f* m_polynomial_coeff/polynomial_coeff_broacast
@@ -431,7 +490,7 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename)
 
 !   Close header
     do icoeff = 1, ncoeff
-      WRITE(unit_xml,'("  <coefficient number=""",i3,""" text=""",a,""">")') &
+      WRITE(unit_xml,'("  <coefficient number=""",I0,""" text=""",a,""">")') &
         icoeff,trim(coeffs(icoeff)%name)
       do iterm = 1,coeffs(icoeff)%nterm
         WRITE(unit_xml,'("    <term weight=""",F9.6,""">")') &

@@ -31,6 +31,7 @@ module m_polynomial_term
 
  public :: polynomial_term_init
  public :: polynomial_term_free
+ public :: polynomial_term_dot
 !!***
 
 !!****t* m_polynomial_term/polynomial_term_type
@@ -70,6 +71,10 @@ module m_polynomial_term
 
  end type polynomial_term_type
 !!***
+
+interface operator (==)
+  module procedure terms_compare
+end interface
 
 CONTAINS  !===========================================================================================
 
@@ -238,6 +243,141 @@ subroutine polynomial_term_free(polynomial_term)
 
 end subroutine polynomial_term_free
 !!***
+
+!!****f* m_polynomial_term/polynomial_term_dot
+!!
+!! NAME
+!! polynomial_term_dot
+!!
+!! FUNCTION
+!! Return the multiplication of two terms
+!!
+!! INPUTS
+!! term1_in = Firts term
+!! term2_in = Second term
+!!
+!! OUTPUT
+!! term_out = multiplication of the two input terms
+!!
+!! PARENTS
+!!
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine polynomial_term_dot(term_out,term1_in,term2_in)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'polynomial_term_dot'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+!arrays
+ type(polynomial_term_type), intent(in) :: term1_in
+ type(polynomial_term_type), intent(in) :: term2_in
+ type(polynomial_term_type), intent(out):: term_out
+!Local variables-------------------------------
+!scalar
+ integer :: idisp1,idisp2,ndisp,new_ndisp
+!arrays
+
+! *************************************************************************
+
+!Get the number of displacement for this new term
+ new_ndisp = term1_in%ndisp + term2_in%ndisp
+
+ ndisp = 0
+
+! do while (ndisp < new_ndisp)
+   do idisp1=1,term1_in%ndisp
+     do idisp2=1,term2_in%ndisp
+       if (term1_in%atindx(1,idisp1)/=&
+&          term2_in%atindx(1,idisp2).or.&
+&          term1_in%atindx(2,idisp1)/=&
+&          term2_in%atindx(2,idisp2).or.&
+&          term1_in%direction(idisp1)/=&
+&          term2_in%direction(idisp2))  then
+         ndisp = ndisp + 1
+       end if
+     end do
+   end do
+! end do
+
+end subroutine polynomial_term_dot
+!!***
+
+!!****f* m_effective_potential/equal
+!! NAME
+!!  equal
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+pure function terms_compare(t1,t2) result (res)
+!Arguments ------------------------------------
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'effective_potential_compare'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+  type(polynomial_term_type), intent(in) :: t1,t2
+  logical :: res
+!local
+  integer :: ndisp
+  integer :: ia,idisp1,idisp2,mu
+  logical :: found
+! *************************************************************************
+  res = .false.
+
+  ndisp = 0
+  if(t1%ndisp==t2%ndisp)then
+    do idisp1=1,t1%ndisp
+      do idisp2=1,t2%ndisp
+        if(t1%atindx(1,idisp1) ==  t2%atindx(1,idisp2).and.&
+&          t1%atindx(2,idisp1) ==  t2%atindx(2,idisp2).and.&
+&          t1%direction(idisp1) == t2%direction(idisp2).and.&
+&          t1%power(idisp1) == t2%power(idisp2).and.&
+&          t1%weight == t2%weight)then
+          found = .true.
+          do ia=1,2
+            do mu=1,3
+              if(t1%cell(mu,ia,idisp1) /= t2%cell(mu,ia,idisp2))then
+                found = .false.
+                cycle
+              end if
+            end do
+          end do
+          if (found)then
+            ndisp = ndisp +1 
+          end if
+        end if
+      end do
+    end do
+
+    if(ndisp == t1%ndisp)then
+      res = .true.
+    end if
+  end if
+
+end function terms_compare
+!!***
+
 
 end module m_polynomial_term
 !!***

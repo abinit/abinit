@@ -2046,25 +2046,16 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   blkval = reshape(ddb%val,(/2,3,mpert,3,mpert,nblok/))
 
 !**********************************************************************
-! Transfert basics values 
+! Transfert crystal values 
 !**********************************************************************
-
-  effective_potential%crystal%natom  = crystal%natom
-  effective_potential%crystal%ntypat = crystal%ntypat
-  effective_potential%crystal%rprimd = crystal%rprimd
-  effective_potential%crystal%ucvol  = crystal%ucvol
-
-  ABI_ALLOCATE(effective_potential%crystal%amu,(crystal%ntypat))
-  effective_potential%crystal%amu(:)    = ddb%amu(:)
-
-  ABI_ALLOCATE(effective_potential%crystal%typat,(crystal%natom))
-  effective_potential%crystal%typat(:)  = crystal%typat(:)
-
-  ABI_ALLOCATE(effective_potential%crystal%xcart,(3,crystal%natom))
-  effective_potential%crystal%xcart(:,:)  = crystal%xcart(:,:)
-
-  ABI_ALLOCATE(effective_potential%crystal%znucl,(crystal%ntypat))
-  effective_potential%crystal%znucl(:)  = crystal%znucl(:)
+  call crystal_init(ddb%amu,effective_potential%crystal,&
+&                   crystal%space_group,crystal%natom,crystal%npsp,&
+&                   crystal%ntypat,crystal%nsym,crystal%rprimd,&
+&                   crystal%typat,crystal%xred,crystal%zion,&
+&                   crystal%znucl,crystal%timrev,crystal%use_antiferro,&
+&                   .FALSE.,crystal%title,&
+&                   symrel=crystal%symrel,tnons=crystal%tnons,&
+&                   symafm=crystal%symafm)
 
 !**********************************************************************
 ! Transfert energy from input file

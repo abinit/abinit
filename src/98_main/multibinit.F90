@@ -48,6 +48,7 @@ program multibinit
  use m_profiling_abi
  use m_errors
  use m_effective_potential
+ use m_fit_polynomial_coeff
  use m_multibinit_dataset
  use m_effective_potential_file
  use m_abihist
@@ -109,7 +110,7 @@ program multibinit
 !set the argument of abimem_init to "2" instead of "0"
 !note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
+ call abimem_init(2)
 #endif
 
 !Initialisation of the timing
@@ -146,7 +147,7 @@ program multibinit
 &   action="write") /= 0) then
      MSG_ERROR(message)
    end if
-!   call open_file(unit=ab_out,file=tmpfilename,form='formatted',status='new')
+!  Call open_file(unit=ab_out,file=tmpfilename,form='formatted',status='new')
    rewind (unit=ab_out)
    call herald(codename,abinit_version,ab_out)
 !  Print the number of cpus in output
@@ -228,28 +229,54 @@ program multibinit
 !****************************************************************************************
 !TEST_AM_SECTION
  if(.false.)then
-   if (iam_master.and.inp%ncoeff == 0.and.inp%fit_coeff==1) then
-     write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
-&     '-Reading the file ',trim(filnam(5)),ch10,&
-&     ' with NetCDF in order to fit the polynomial coefficients'
-     call wrtout(std_out,message,'COLL') 
-     call wrtout(ab_out,message,'COLL') 
-     if(filnam(5)/=''.or.filnam(5)/='no')then
-       call read_md_hist(filnam(5),hist)
-     else
-       write(message, '(3a)' )&
-&       'There is no MD file to fit the coefficients ',ch10,&
-&       'Action: add MD file'
-       MSG_ERROR(message)
+   if (inp%fit_coeff/=0) then
+     if(iam_master) then
+!      Read the MD file
+       write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
+&       '-Reading the file ',trim(filnam(5)),ch10,&
+&       ' with NetCDF in order to fit the polynomial coefficients'
+       call wrtout(std_out,message,'COLL') 
+       call wrtout(ab_out,message,'COLL') 
+       if(filnam(5)/=''.and.filnam(5)/='no')then
+         call read_md_hist(filnam(5),hist)
+       else
+         write(message, '(3a)' )&
+&         'There is no MD file to fit the coefficients ',ch10,&
+&         'Action: add MD file'
+         MSG_ERROR(message)
+       end if
      end if
+
+     option=inp%fit_coeff
+!    MPI BROADCAST the history of the MD
+     call abihist_bcast(hist,master,comm)
+
+     select case(option)
+     case (-1)
+!      option == -1
+!      Print the file in the specific format for the script of carlos
+!      Born_Charges  
+!      Dielectric_Tensor
+!      harmonic.xml
+!      Reference_structure
+!      Strain_Tensor
+!      symmetry_operations (only cubic)
+       if (iam_master) then
+         if(hist%mxhist >0)then
+           call fit_polynomial_printSystemFiles(reference_effective_potential,hist)
+         else
+           write(message, '(3a)' )&
+&          'There is no step in the MD file ',ch10,&
+&          'Action: add MD file'
+           MSG_ERROR(message)
+         end if
+       end if
+     case (1)
+       call fit_polynomial_coeff_get(reference_effective_potential,1)
+!       call fit_polynomial_coeff_init
+!       call fit_polynomial_coeff_init(reference_effective_potential%,filnam,inp,comm)
+     end select
    end if
-!MPI BROADCAST
-   call abihist_bcast(hist,master,comm)
-
-   
-!   call fit_polynomial_coeff_init
-!   call fit_polynomial_coeff_init(reference_effective_potential%,filnam,inp,comm)
-
  end if
 !END_TEST_AM_SECTION
 !****************************************************************************************

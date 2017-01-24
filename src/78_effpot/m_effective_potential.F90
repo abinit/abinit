@@ -1904,6 +1904,10 @@ subroutine effective_potential_printSupercell(eff_pot,supercell)
     call wrtout(std_out,message,'COLL')
   end do
 
+  write (message, '(a)') ''
+  call wrtout(ab_out,message,'COLL')
+  call wrtout(std_out,message,'COLL')
+
 ! Deallocation array
   ABI_DEALLOCATE(xred)
 
@@ -3607,7 +3611,7 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,stra
   do icell = 1,ncell
     ii = (cells(icell)-1)*eff_pot%crystal%natom
     i1=index_cells(icell,1); i2=index_cells(icell,2); i3=index_cells(icell,3)
-!   Loop over coefficient
+!   Loop over coefficients
     do icoeff=1,ncoeff
 !     Set the value of the coefficient
       coeff = eff_pot%anharmonics_terms%coefficients(icoeff)%coefficient

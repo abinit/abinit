@@ -266,17 +266,25 @@ implicit none
        dtset%nnos = 1
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos))
        dtset%qmass(:)  = qmass
+       write(message,'(3a,F12.1,a)')&
+&      ' WARNING: nnos is set to zero in the input',ch10,&
+&      '          value by default for qmass: ',dtset%qmass(:),ch10
+       call wrtout(std_out,message,"COLL")
      else
        ABI_ALLOCATE(dtset%qmass,(dtset%nnos)) ! Q thermostat mass
         dtset%qmass(:) = inp%qmass(:)
      end if
      if (inp%bmass == zero) then
        dtset%bmass = bmass
+       write(message,'(3a,F12.1,a)')&
+&      ' WARNING: bmass is set to zero in the input',ch10,&
+&       '          value by default for bmass: ',dtset%bmass,ch10
+       call wrtout(std_out,message,"COLL")
      else
        dtset%bmass = inp%bmass  ! Barostat mass
      end if
    end if
-
+   
    dtset%strtarget(1:3) = 0.0/29421.033d0 ! STRess TARGET
    dtset%strtarget(4:6) = 0.0 ! STRess TARGET
    ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
@@ -407,7 +415,7 @@ implicit none
 !*********************************************************
 !3   Call main routine for monte carlo / molecular dynamics
 !*********************************************************
-   write(message, '(a,(80a),3a)' ) ch10,('-',ii=1,80),ch10,&
+   write(message, '((80a),3a)' ) ('-',ii=1,80), ch10,&
 &   '-Monte Carlo / Molecular Dynamics ',ch10
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
