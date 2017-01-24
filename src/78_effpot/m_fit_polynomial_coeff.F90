@@ -433,7 +433,7 @@ subroutine fit_polynomial_coeff_get(eff_pot,option)
  end do
  ABI_DEALLOCATE(sym_coeff_tmp)
 
- write(message,'(a)')," Irreductible coefficient and associated atom 1, atom 2 and direction:"
+ write(message,'(a)') " Irreductible coefficient and associated atom 1, atom 2 and direction:"
  call wrtout(std_out,message,'COLL') 
  
 !Construct the coeffcients
@@ -473,10 +473,10 @@ subroutine fit_polynomial_coeff_get(eff_pot,option)
              call polynomial_coeff_getName(text,atm1=symbols(ia),atm2=symbols(ib),&
 &                                        dir=dir_char(1),power=trim(powerchar))
              name = trim(name)//trim(text)
-             write(message,'(2a)'),' ',trim(name)
+             write(message,'(2a)')' ',trim(name)
              call wrtout(std_out,message,'COLL') 
              call polynomial_term_init(atindx,cell,dir_int,ndisp,terms(1),powers,weight)
-             write(message,'(a,I0,a,I0,2a)'),'    Atom ',ia,' and atom ',ib&
+             write(message,'(a,I0,a,I0,2a)')'    Atom ',ia,' and atom ',ib&
 &                                             ," in the direction ",dir_char(1)
              call wrtout(std_out,message,'COLL')
 !           else
@@ -507,7 +507,7 @@ subroutine fit_polynomial_coeff_get(eff_pot,option)
                        powers(:) = one
                        write(powerchar,'(I0)') 1
                        call polynomial_term_init(atindx,cell,dir_int,ndisp,terms(iterm),powers,weight)
-                       write(message,'(a,I0,a,I0,3a)'),'    Atom ',ipesy1,' and atom ',ipesy2&
+                       write(message,'(a,I0,a,I0,3a)')'    Atom ',ipesy1,' and atom ',ipesy2&
 &                                                     ," in the direction ",dir_char(1)
                        call wrtout(std_out,message,'COLL')
                        found=0
@@ -549,7 +549,7 @@ subroutine fit_polynomial_coeff_get(eff_pot,option)
 
   filename = "test1.xml"
   call polynomial_coeff_writeXML(coeffs1,ncoeff1,filename=filename)
-  write(message,'(a,I0,a)'),&
+  write(message,'(a,I0,a)')&
  &       ' with ',ncoeff1,' for the 1st order '
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL') 
@@ -560,7 +560,7 @@ subroutine fit_polynomial_coeff_get(eff_pot,option)
  call fit_polynomial_getNextOrder(coeffs1,coeffs1,coeffs2,natom,ncoeff1,ncoeff1,ncoeff2,symbols)
  filename = "test2.xml"
  call polynomial_coeff_writeXML(coeffs2,ncoeff2,filename=filename)
- write(message,'(a,I0,a)'),&
+ write(message,'(a,I0,a)')&
 &       ' with ',ncoeff2,' for the 2nd order '
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL') 
@@ -570,7 +570,7 @@ subroutine fit_polynomial_coeff_get(eff_pot,option)
  call fit_polynomial_getNextOrder(coeffs2,coeffs1,coeffs3,natom,ncoeff2,ncoeff1,ncoeff3,symbols)
  filename = "test3.xml"
  call polynomial_coeff_writeXML(coeffs3,ncoeff3,filename=filename)
- write(message,'(a,I0,a)'),&
+ write(message,'(a,I0,a)')&
 &       ' with ',ncoeff3,' for the 3rd order '
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL') 
@@ -580,7 +580,7 @@ subroutine fit_polynomial_coeff_get(eff_pot,option)
  call fit_polynomial_getNextOrder(coeffs3,coeffs1,coeffs4,natom,ncoeff3,ncoeff1,ncoeff4,symbols)
  filename = "test4.xml"
  call polynomial_coeff_writeXML(coeffs4,ncoeff4,filename=filename)
- write(message,'(a,I0,a)'),&
+ write(message,'(a,I0,a)')&
 &       ' with ',ncoeff4,' for the 4th order '
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL') 
@@ -809,6 +809,7 @@ subroutine fit_polynomial_getNextOrder(coeffs1,coeffs2,coeffs3,natom,ncoeff1,nco
  end do
 
 end subroutine fit_polynomial_getNextOrder
+!!***
 
 !!****f* m_fit_polynomial_coeff/fit_polynomial_getNcoeffNextOrder
 !!
@@ -865,6 +866,7 @@ subroutine fit_polynomial_getNcoeffNextOrder(coeffs1,coeffs2,ncoeff1,ncoeff2,nco
  end do
 
 end subroutine fit_polynomial_getNcoeffNextOrder
+!!***
 
 !!****f* m_fit_polynomial_coeff/fit_polynomial_printSystemFiles
 !!

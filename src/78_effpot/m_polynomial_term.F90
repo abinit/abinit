@@ -312,7 +312,7 @@ subroutine polynomial_term_dot(term_out,term1_in,term2_in)
 end subroutine polynomial_term_dot
 !!***
 
-!!****f* m_effective_potential/equal
+!!****f* m_polynomial_term/terms_compare
 !! NAME
 !!  equal
 !!
