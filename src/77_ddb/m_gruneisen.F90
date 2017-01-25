@@ -305,7 +305,7 @@ subroutine gruns_fourq(gruns, qpt, wvols, gvals, dwdq)
    !end do
  end do
 
- ! Compute dD(q)/dV with finite difference.
+ ! Compute dD(q)/dV with central finite difference.
  dddv = zero
  do ivol=1,gruns%nvols
    fact = central_finite_diff(1, ivol, gruns%nvols)

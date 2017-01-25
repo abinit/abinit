@@ -3613,7 +3613,7 @@ end subroutine ifclo9
 !! rpt(3,nprt)=Canonical coordinates of the R points in the unit cell
 !!  These coordinates are normalized (=> * acell(3))
 !! rprimd(3,3)=dimensional primitive translations for real space (bohr)
-!! new_wght=Activates new weights for brav=1 (0=old versionr, 1=new version)
+!! new_wght=Activates new weights for brav=1 (0=old version, 1=new version)
 !!
 !! OUTPUT
 !! wghatm(natom,natom,nrpt)= Weight associated to the couple of atoms and the R vector
@@ -3666,7 +3666,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,n
      write(message,'(a,a,a,i5,a,a,a)' )&
 &     'For the time being, only nqshft=1',ch10,&
 &     'is allowed with brav=4, while it is nqshft=',nqshft,'.',ch10,&
-&     'Action : in the input file, correct either brav or nqshft.'
+&     'Action: in the input file, correct either brav or nqshft.'
      MSG_ERROR(message)
    end if
 
@@ -3887,7 +3887,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,n
 &           'In the BCC case, the three ngqpt numbers ',ch10,&
 &           '    ',ngqpt(1),ngqpt(2),ngqpt(3),ch10,&
 &           'should be equal.',ch10,&
-&           'Action : use identical ngqpt(1:3) in your input file.'
+&           'Action: use identical ngqpt(1:3) in your input file.'
            MSG_ERROR(message)
          end if
          do ii=4,9
@@ -3933,7 +3933,7 @@ subroutine wght9(brav,gprim,natom,ngqpt,nqpt,nqshft,nrpt,qshft,rcan,rpt,rprimd,n
 &           'In the FCC case, the three ngqpt numbers ',ch10,&
 &           '    ',ngqpt(1),ngqpt(2),ngqpt(3),ch10,&
 &           'should be equal.',ch10,&
-&           'Action : use identical ngqpt(1:3) in your input file.'
+&           'Action: use identical ngqpt(1:3) in your input file.'
            MSG_ERROR(message)
          end if
          do ii=4,7
@@ -4482,7 +4482,7 @@ subroutine symdm9(blkflg,blknrm,blkqpt,blktyp,blkval,&
 &             'Informations are missing in the DDB.',ch10,&
 &             'In block',q1,' the following element is missing :',ch10,&
 &             'idir1,ipert1,idir2,ipert2=',idir1,ipert1,idir2,ipert2,ch10,&
-&             'Action : add the required information in the DDB,',ch10,&
+&             'Action: add the required information in the DDB,',ch10,&
 &             'or modify your input file.'
              MSG_ERROR(message)
            end if

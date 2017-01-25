@@ -368,9 +368,12 @@ end subroutine ifc_free
 !! ngqpt_in = input values of ngqpt
 !! nqshft=Number of shifths in q-grid.
 !! q1shft(3,nqshft)=Shifts for q-grid
-!! nsphere=number of atoms to be included in the cut-off sphere for interatomic
-!!  force constant; if = 0 : maximum extent allowed by the grid.
-!! rifcsph=radius for cutoff of IFC
+!! nsphere=number of atoms to be included in the cut-off sphere for interatomic force constant.
+!!    0: maximum extent allowed by the grid.
+!!  > 0: Apply cutoff
+!!   -1: Analyze the effect of different nsphere values on the phonon spectrum, in particular the
+!!       frequencies around gamma.
+!! rifcsph=radius for cutoff of IFC.
 !! comm=MPI communicator.
 !! [Ifc_coarse]=Optional.
 !!
@@ -424,7 +427,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 !scalars
  integer,parameter :: timrev1=1,iout0=0,chksymbreak0=0
  integer :: mpert,iout,iqpt,mqpt,nsym,ntypat,iq_ibz,iq_bz,ii,natom
- integer :: nqbz,option,plus,sumg0,irpt,irpt_new
+ integer :: nqbz,option,plus,sumg0,irpt,irpt_new,new_wght
  integer :: nprocs,my_rank,ierr
  real(dp),parameter :: qphnrm=one
  real(dp) :: xval,cpu,wall,gflops,rcut_min
@@ -606,7 +609,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 ! Weights associated to these R points and to atomic pairs
 ! MG FIXME: Why ngqpt is intent(inout)?
  ABI_MALLOC(ifc_tmp%wghatm,(natom,natom,ifc_tmp%nrpt))
- call wght9(Ifc%brav,gprim,natom,ngqpt,nqbz,nqshft,ifc_tmp%nrpt,q1shft,rcan,ifc_tmp%rpt,rprimd,0,ifc_tmp%wghatm)
+ new_wght = 0
+ call wght9(Ifc%brav,gprim,natom,ngqpt,nqbz,nqshft,ifc_tmp%nrpt,q1shft,rcan,ifc_tmp%rpt,rprimd,new_wght,ifc_tmp%wghatm)
 
 ! Fourier transformation of the dynamical matrices (q-->R)
  ABI_MALLOC(ifc_tmp%atmfrc,(2,3,natom,3,natom,ifc_tmp%nrpt))
@@ -1278,7 +1282,7 @@ end subroutine ifc_speedofsound
 !! Find the value of nsphere that gives non-negative frequencies around Gamma
 !! in a small sphere of radius qrad.
 !! Use bisection to reduce the number of attemps although there's no guarantee
-!! that the number of negative frequencies is monotonic
+!! that the number of negative frequencies is monotonic.
 !!
 !! INPUTS
 !!  crystal<crystal_t> = Information on the crystalline structure.
@@ -1296,7 +1300,6 @@ end subroutine ifc_speedofsound
 !! SOURCE
 
 subroutine ifc_autocutoff(ifc, crystal, comm)
-
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1316,7 +1319,8 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
 !scalars
  integer,parameter :: master=0
  integer :: iq_ibz,ierr,my_rank,nprocs,ii,nsphere,num_negw,jl,ju,jm,jj,natom,nrpt
- real(dp) :: adiff,rifcsph,qrad,min_negw,xval,rcut_min
+ real(dp),parameter :: rifcsph0=zero
+ real(dp) :: adiff,qrad,min_negw,xval,rcut_min
  character(len=500) :: msg
  type(lebedev_t) :: lgrid
 !arrays
@@ -1342,19 +1346,18 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
  ABI_MALLOC(save_atmfrc, (2,3,natom,3,natom,ifc%nrpt))
  save_wghatm = ifc%wghatm; save_atmfrc = ifc%atmfrc
 
- rifcsph = zero; nsphere = natom * nrpt - 1
  ABI_MALLOC(cut_phfrq, (3*natom, ifc%nqibz))
  qrad = 0.01; lgrid = lebedev_new(16)
 
  if (my_rank == master) then
-   write(std_out, "(a)")" Apply cutoff on IFCs"
-   write(std_out, "(a,i0)")" Maximum nuber of atom-centered spheres: ",natom * nrpt
-   write(std_out, "(a,i0,a,f5.3)")" Using Lebedev-Laikov grid with npts: ",lgrid%npts, ", qrad: ",qrad
-   write(std_out, "(/,a)")" <adiff>: Average diff between ab-initio frequencies and frequencies with cutoff."
-   write(std_out, "(a)")" num_negw: Number of negative freqs detected in small sphere around Gamma."
-   write(std_out, "(a)")" min_negw: Min negative frequency on the small sphere."
-   write(std_out, "(a,/,/)")" rifcsph: Effective cutoff radius corresponding to nsphere."
-   write(std_out, "(a)")" nsphere   <adiff>[meV]   num_negw   min_negw[meV]   rifcsph"
+   write(ab_out, "(a)")" Apply cutoff on IFCs. Using bisection algorithm to find initial guess for nsphere."
+   write(ab_out, "(a,i0)")" Maximum nuber of atom-centered spheres: ",natom * nrpt
+   write(ab_out, "(a,i0,a,f5.3)")" Using Lebedev-Laikov grid with npts: ",lgrid%npts, ", qrad: ",qrad
+   write(ab_out, "(/,a)")" <adiff>: Average difference between ab-initio frequencies and frequencies with cutoff."
+   write(ab_out, "(a)")" num_negw: Number of negative freqs detected in small sphere around Gamma."
+   write(ab_out, "(a)")" min_negw: Min negative frequency on the small sphere."
+   write(ab_out, "(a,/,/)")" rifcsph: Effective cutoff radius corresponding to nsphere."
+   write(ab_out, "(a)")" nsphere   <adiff>[meV]   num_negw   min_negw[meV]   rifcsph"
  end if
 
  jl = 0; ju = natom * nrpt + 1 ! Initialize lower and upper limits.
@@ -1366,7 +1369,7 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
    nsphere = jm
 
    ifc%wghatm = save_wghatm; ifc%atmfrc = save_atmfrc
-   call corsifc9(ifc%acell,ifc%gprim, natom, nrpt,nsphere,rifcsph,ifc%rcan,ifc%rprim,ifc%rpt,rcut_min,ifc%wghatm)
+   call corsifc9(ifc%acell,ifc%gprim, natom, nrpt,nsphere,rifcsph0,ifc%rcan,ifc%rprim,ifc%rpt,rcut_min,ifc%wghatm)
    if (ifc%asr > 0) call asrif9(ifc%asr,ifc%atmfrc,ifc%natom,ifc%nrpt,ifc%rpt,ifc%wghatm)
 
    cut_phfrq = zero
@@ -1402,7 +1405,7 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
 
    adiff = sum(abs(cut_phfrq - ref_phfrq)) / (ifc%nqibz * 3 * natom)
    if (my_rank == master) then
-     write(std_out,"(i8,1x,es13.4,4x,i8,1x,es13.4,2x,es13.4)") &
+     write(ab_out,"(i8,1x,es13.4,4x,i8,1x,es13.4,2x,es13.4)") &
        nsphere, adiff * Ha_meV, num_negw, min_negw * Ha_meV, rcut_min
    end if
 

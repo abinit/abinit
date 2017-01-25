@@ -1689,9 +1689,16 @@ variables</a>
 <br>
 <br>
 <font id="text">Number of atoms included in the cut-off sphere for
-interatomic force constant, see also the alternative <a
- href="anaddb_help.html#rifcsph">rifcsph</a>.
-If <b>nsphere</b>= 0: maximum extent allowed by the grid .
+interatomic force constant, see also the alternative <a href="anaddb_help.html#rifcsph">rifcsph</a>.
+If <b>nsphere</b>= 0: maximum extent allowed by the grid.
+If <b>nsphere</b>= -1: the code analyzes different values of nsphere and
+find the value that does not lead to unstable frequencies in a small sphere around Gamma.
+The truncated IFCs are then used for further post-processing.  
+The results of the test are reported in the main output file.
+This option is useful to obtain a initial guess of nsphere: the value that
+leads to stable frequencies and gives linear dispersion for the acoustic modes around Gamma 
+is usually smaller that the one reported by nsphere -1.
+
 </font>
 <p><font id="text">This number defines the atoms for which the
 short range part of the interatomic force constants, after
