@@ -1301,6 +1301,7 @@ end subroutine ifc_speedofsound
 
 subroutine ifc_autocutoff(ifc, crystal, comm)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -1405,8 +1406,8 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
 
    adiff = sum(abs(cut_phfrq - ref_phfrq)) / (ifc%nqibz * 3 * natom)
    if (my_rank == master) then
-     write(ab_out,"(i8,1x,es13.4,4x,i8,1x,es13.4,2x,es13.4)") &
-       nsphere, adiff * Ha_meV, num_negw, min_negw * Ha_meV, rcut_min
+     write(ab_out,"(a,i7,1x,es13.4,4x,i8,1x,es13.4,2x,es13.4)") &
+       "-",nsphere, adiff * Ha_meV, num_negw, min_negw * Ha_meV, rcut_min
    end if
 
    if (num_negw == 0) then

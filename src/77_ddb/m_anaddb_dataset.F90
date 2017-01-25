@@ -2131,11 +2131,13 @@ end subroutine anaddb_init
 
 subroutine anaddb_chkvars(string)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'anaddb_chkvars'
  use interfaces_32_util
+ use interfaces_57_iovars
 !End of the abilint section
 
  implicit none

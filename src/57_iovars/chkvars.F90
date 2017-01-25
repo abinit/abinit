@@ -43,6 +43,7 @@ subroutine chkvars (string)
 #undef ABI_FUNC
 #define ABI_FUNC 'chkvars'
  use interfaces_32_util
+ use interfaces_57_iovars, except_this_one => chkvars
 !End of the abilint section
 
  implicit none
@@ -299,8 +300,7 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'chkvars'
- use interfaces_32_util
+#define ABI_FUNC 'chkvars_in_string'
 !End of the abilint section
 
  implicit none
