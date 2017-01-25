@@ -659,7 +659,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !Local variables -------------------------
 !scalars
- integer,parameter :: mr=10000,ny2_spline=1024*5
+ integer,parameter :: mr=10000,ny2_spline=1024*10
  integer :: i2,ia,ib,ig1,ig2,ig3,ii,ir,ir1,ir2,ir3,jj,mu,newg,newr,ng,nr,nu,ng_expxq
  real(dp),parameter :: fac=4.0_dp/3.0_dp/sqrt(pi)
  real(dp),parameter :: fact2=2.0_dp/sqrt(pi)
@@ -712,12 +712,12 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
      term5=(3.0_dp*term2+term3*(3.0_dp+2.0_dp*y2))*invy2
      t4spl(ii,1) = term4
      t5spl(ii,1) = term5
-     !write(345,*)term4,term5
+     !write(345,*)y2,term4,term5
    end do
 
    call spline(y2vals, t4spl(:,1), ny2_spline, zero, zero, t4spl(:,2))
    call spline(y2vals, t5spl(:,1), ny2_spline, zero, zero, t5spl(:,2))
-   write(std_out,*)"spline tables created"
+   !write(std_out,*)"spline tables created"
  end if
 #endif
 
@@ -1000,14 +1000,29 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 !        and look it up there...
 
 #ifdef DEV_USESPLINE
-                   jspl = 1 + int((y2 - y2min) * stepm1); dd = y2 - y2vals(jspl)
-                   bb = dd * stepm1
-                   aa = one - bb
-                   cc = aa*(aa**2-one) * step2div6
-                   dd = bb*(bb**2-one) * step2div6
+                   if (y2 > 1.0_dp) then
+                     ! Spline function
+                     jspl = 1 + int((y2 - y2min) * stepm1); dd = y2 - y2vals(jspl)
+                     bb = dd * stepm1
+                     aa = one - bb
+                     cc = aa*(aa**2-one) * step2div6
+                     dd = bb*(bb**2-one) * step2div6
 
-                   term4 = aa*t4spl(jspl,1) + bb*t4spl(jspl+1,1) + cc*t4spl(jspl,2) + dd*t4spl(jspl+1,2)
-                   term5 = aa*t5spl(jspl,1) + bb*t5spl(jspl+1,1) + cc*t5spl(jspl,2) + dd*t5spl(jspl+1,2)
+                     term4 = aa*t4spl(jspl,1) + bb*t4spl(jspl+1,1) + cc*t4spl(jspl,2) + dd*t4spl(jspl+1,2)
+                     term5 = aa*t5spl(jspl,1) + bb*t5spl(jspl+1,1) + cc*t5spl(jspl,2) + dd*t5spl(jspl+1,2)
+                   else
+                     ! Evaluate values (the function increases quickly for x --> 0, the spline
+                     ! is unstable and this leads to SIGFPE.
+                     yy=sqrt(y2)
+                     invy=1.0_dp/yy
+                     invy2=invy**2
+                     derfc_yy = abi_derfc(yy)
+                     term2=derfc_yy*invy*invy2
+                     term3=fact2*exp(-y2)*invy2
+                     term4=-(term2+term3)
+                     term5=(3.0_dp*term2+term3*(3.0_dp+2.0_dp*y2))*invy2
+                   end if
+
 #else
                    yy=sqrt(y2)
                    invy=1.0_dp/yy
