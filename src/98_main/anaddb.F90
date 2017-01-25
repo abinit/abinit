@@ -234,7 +234,10 @@ program anaddb
  end if
 
  ! Calculation of Grunesein parameters.
- if (inp%gruns_nddbs /= 0) call gruns_anaddb(inp, filnam(2), comm)
+ if (inp%gruns_nddbs /= 0) then
+   call gruns_anaddb(inp, filnam(2), comm)
+   goto 50
+ end if
 
  ABI_ALLOCATE(instrain,(3*natom,6))
  ABI_ALLOCATE(d2cart,(2,msize))
@@ -806,13 +809,6 @@ program anaddb
 
 !**********************************************************************
 
- ! Close files
- if (iam_master) then
-#ifdef HAVE_NETCDF
-   NCF_CHECK(nf90_close(ana_ncid))
-#endif
- end if
-
  ! Free memory
  ABI_DEALLOCATE(displ)
  ABI_DEALLOCATE(d2cart)
@@ -823,12 +819,19 @@ program anaddb
  ABI_DEALLOCATE(zeff)
  ABI_DEALLOCATE(instrain)
 
- call ddb_free(ddb)
+50 continue
  call asrq0_free(asrq0)
- call crystal_free(Crystal)
  call ifc_free(Ifc)
-
+ call crystal_free(Crystal)
+ call ddb_free(ddb)
  call anaddb_dtset_free(inp)
+
+ ! Close files
+ if (iam_master) then
+#ifdef HAVE_NETCDF
+   NCF_CHECK(nf90_close(ana_ncid))
+#endif
+ end if
 
  call timein(tcpu,twall)
  tsec(1)=tcpu-tcpui; tsec(2)=twall-twalli
