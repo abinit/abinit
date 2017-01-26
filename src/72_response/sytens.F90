@@ -78,7 +78,7 @@ subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 !scalars
  integer :: flag,found,i1dir,i1dir_,i1pert,i1pert_,i2dir,i2dir_,i2pert,i2pert_
  integer :: i3dir,i3dir_,i3pert,i3pert_,idisy1,idisy2,idisy3,ipesy1,ipesy2
- integer :: ipesy3,isym
+ integer :: ipesy3,isym,pert1,pert2,pert3
 !arrays
  integer :: sym1(3,3),sym2(3,3),sym3(3,3)
  integer,allocatable :: pertsy(:,:,:,:,:,:)
@@ -239,6 +239,9 @@ subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 !Now, take into account the permutation of (i1pert,i1dir)
 !and (i3pert,i3dir)
 
+!LTEST
+ if (nsym>1) then
+!LTEST
  do i1pert = 1, mpert
    do i2pert = 1, mpert
      do i3pert = 1, mpert
@@ -263,6 +266,9 @@ subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
      end do
    end do
  end do
+!LTEST
+ end if
+!LTEST
 
  rfpert(:,:,:,:,:,:) = pertsy(:,:,:,:,:,:)
 

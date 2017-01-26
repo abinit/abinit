@@ -71,8 +71,8 @@
 subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,indsy1,i1dir,i2dir,i3dir,&
 & i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,nfftf,nfftotf,nkpt,nk3xc,&
 & nspden,nspinor,nsppol,nsym1,npwarr,occ,pawang,pawang1,pawfgrtab,pawrad,pawtab,&
-& pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij,pawrhoij1_i3pert,&
-& paw_an0,paw_ij0,paw_ij1_i2pert,pawfgr,ph1d,psps,rf_hamkq,rho1r1,rho2r1,rho3r1,rprimd,symaf1,symrc1,&
+& pawrhoij0,pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij1_i3pert,&
+& paw_an0,paw_an1_i2pert,paw_ij0,paw_ij1_i2pert,pawfgr,ph1d,psps,rf_hamkq,rho1r1,rho2r1,rho3r1,rprimd,symaf1,symrc1,&
 & ucvol,vtrial,vtrial1,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred)
 
  use defs_basis
@@ -144,39 +144,41 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0
  real(dp),intent(inout) :: vtrial1(cplex*nfftf,nspden),d3etot(2,3,mpert,3,mpert,3,mpert)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(natom*psps%usepaw)
  type(pawrad_type),intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
- type(pawrhoij_type),intent(in) :: pawrhoij(natom*psps%usepaw)
+ type(pawrhoij_type),intent(in) :: pawrhoij0(natom*psps%usepaw)
  type(pawrhoij_type),intent(in) :: pawrhoij1_i1pert(natom*psps%usepaw)
  type(pawrhoij_type),intent(in) :: pawrhoij1_i2pert(natom*psps%usepaw)
  type(pawrhoij_type),intent(in) :: pawrhoij1_i3pert(natom*psps%usepaw)
  type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
  type(paw_an_type),intent(in) :: paw_an0(natom*psps%usepaw)
- type(paw_ij_type),intent(in) :: paw_ij0(natom*psps%usepaw),paw_ij1_i2pert(natom*psps%usepaw)
+ type(paw_an_type),intent(inout) :: paw_an1_i2pert(natom*psps%usepaw)
+ type(paw_ij_type),intent(in) :: paw_ij0(natom*psps%usepaw)
+ type(paw_ij_type),intent(inout) :: paw_ij1_i2pert(natom*psps%usepaw)
 
 !Local variables-------------------------------
 !scalars
- logical :: has_cprj_jband,compute_rho21,usetimerev
+ logical :: has_cprj_jband,compute_conjugate,compute_rho21,usetimerev
  integer,parameter :: level=52
  integer :: bandtot,choice,counter,cplex_rhoij,cpopt,dimffnl,iband,icg0,ider,ierr,iexit
  integer :: ipert_phon,ipert_elfd,idir_phon,idir_elfd
  integer :: ia,iatm,ibg,ii,igs,ikg,ikg1,ikpt,ifft,ilm,ipw,isppol,ispinor,istwf_k,jband,jj
- integer :: me,n1,n2,n3,n4,n5,n6,nband_k,ncpgr,nkpg,nkpg1,nnlout,nspden_rhoij,npert_phon,npw_k,npw1_k
+ integer :: me,n1,n2,n3,n4,n5,n6,nband_k,ncpgr,nkpg,nkpg1,nnlout,nspden_rhoij,npert_phon,npw_k,npw1_k,nzlmopt
  integer :: offset_cgi,offset_cgj,offset_eigen,offset_eig0,option,paw_opt,print_info,esigns
  integer :: size_wf,size_cprj,spaceComm,tim_fourwf,tim_nonlop,usepaw,useylmgr1
- real(dp) :: arg,dot1i,dot1r,dot2i,dot2r,doti,dotr,exc3,e3tot,lagi,lagr,sumi
- real(dp) :: sum_psi1H1psi1,sum_lambda1psi1psi1
+ real(dp) :: arg,dot1i,dot1r,dot2i,dot2r,doti,dotr,exc3,e3tot,lagi,lagr,rho2r_re,rho2r_im,rho3r_re,rho3r_im
+ real(dp) :: sumi,sum_psi1H1psi1,sum_lambda1psi1psi1
  real(dp) :: tol_test,valuei,weight
  character(len=500) :: msg
 !arrays
  integer,allocatable :: kg_k(:,:),kg1_k(:,:)
 ! real(dp) :: buffer(2)
- real(dp) :: buffer(3),exc3_paw(2),enlout(3),kpt(3),eig0_k(mband)
+ real(dp) :: buffer(3),eHxc21_paw(2),exc3_paw(2),enlout(3),kpt(3),eig0_k(mband)
  real(dp) :: dum_svectout(1,1),dum(1),rmet(3,3),dum_grad_berry(1,1),wtk_k
  real(dp),allocatable :: cgi(:,:),cgj(:,:),cg_jband(:,:,:),cwavef1(:,:),cwavef3(:,:),dkinpw(:)
  real(dp),allocatable :: eig1_k_tmp(:),eig1_k_stored(:)
  real(dp),allocatable :: cwave_right(:,:),cwave_left(:,:),dudk(:,:),dudkde(:,:),dummy_array(:),dummy_array2(:,:)
  real(dp),allocatable :: ffnl1(:,:,:,:),ffnlk(:,:,:,:),gh0(:,:),gh1(:,:),gvnl(:,:)
  real(dp),allocatable :: h_cwave(:,:),iddk(:,:),kinpw1(:),kpg_k(:,:),kpg1_k(:,:),nhat21(:,:),occ_k(:)
- real(dp),allocatable :: phkxred(:,:),ph3d(:,:,:),ph3d1(:,:,:),s_cwave(:,:)
+ real(dp),allocatable :: phkxred(:,:),ph3d(:,:,:),ph3d1(:,:,:),rho1r1_tot(:,:),s_cwave(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:),vlocal1(:,:,:,:),wfraug(:,:,:,:)
  real(dp),allocatable :: ylm(:,:),ylm1(:,:),ylmgr(:,:,:),ylmgr1(:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylm1_k(:,:),ylmgr1_k(:,:,:)
@@ -188,7 +190,6 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0
  type(pawrhoij_type),allocatable,target :: pawrhoij21(:)
  type(pawrhoij_type),pointer :: pawrhoij21_unsym(:)
  type(rf_hamiltonian_type) :: rf_ham_dum
-
 !***********************************************************************
 
  me = mpi_enreg%me
@@ -222,7 +223,6 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0
      idir_phon   = i3dir
      ipert_elfd = i1pert
      idir_elfd  = i1dir
-     cwave_right = cwavef1
    end if
    cplex_rhoij=max(cplex,dtset%pawcpxocc);nspden_rhoij=dtset%nspden
    ABI_DATATYPE_ALLOCATE(pawrhoij21,(natom))
@@ -299,11 +299,12 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0
 
  sum_psi1H1psi1 =  zero
  sum_lambda1psi1psi1 = zero
-
-!LTEST
-! write(93,'(2a,3(a,i2,a,i1))') ch10,'DFPTNL_PERT : ',&
-! ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir
-!LTEST
+ compute_conjugate = .false.
+!We have to compute < u^(ip1) | H^(ip2) | u^(ip3) >
+!For some cases, we want to apply H^(ip2) on < u^(ip1) |, not on | u^(ip3) > (see below)
+ if (i3pert<=natom) then ! As npert_phon<=1, this implies that i1pert=natom+2 and i2pert=natom+2
+   compute_conjugate = .true.
+ end if
 
 !Loop over spins
  do isppol = 1, nsppol
@@ -491,18 +492,15 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0
          iddk(:,:) = zero
        end if
 
-!      Compute : < u^(ip1) | ( H^(ip2) - eps^(0) S^(ip2) ) | u^(ip3) >
-!           or : < u^(ip3) | ( H^(ip2) - eps^(0) S^(ip2) ) | u^(ip1) >
-       if (i3pert==natom+2) then
-         cwave_right(:,:) = cwavef3(:,:)
-         cwave_left(:,:)  = cwavef1(:,:)
-       else if (i1pert==natom+2) then
+       cwave_right(:,:) = cwavef3(:,:)
+       cwave_left(:,:)  = cwavef1(:,:)
+       if (compute_conjugate) then
          cwave_right(:,:) = cwavef1(:,:)
          cwave_left(:,:)  = cwavef3(:,:)
-       else
-         MSG_ERROR("dfptnl_pert with two phonon perturbations is not available yet. Change your input!")
        end if
 
+!      Compute : < u^(ip1) | ( H^(ip2) - eps^(0) S^(ip2) ) | u^(ip3) >
+!           or : < u^(ip3) | ( H^(ip2) - eps^(0) S^(ip2) ) | u^(ip1) >
        call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_right,cprj_empty,h_cwave,s_cwave,eig0_k,eig1_k_tmp,&
 &                                jband,gs_hamkq,iddk,i2dir,i2pert,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
                                  print_info,dtset%prtvol,rf_hamkq,size_cprj,size_wf)
@@ -513,7 +511,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0
          dotr = dotr - eig0_k(jband)*dot2r
          doti = doti - eig0_k(jband)*dot2i
        end if
-       if (i1pert==natom+2) doti = -doti ! We want the conjugate
+       if (compute_conjugate) doti = -doti ! We want the conjugate
 
 ! **************************************************************************************************
 !      Compute sum_i Lambda_ij^(1) < u_i^(1) | u_j^(1)>
@@ -578,10 +576,10 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0
 
        if (compute_rho21) then
 
-         if (i1pert<=natom) then
-           cwave_right = cwavef3
-         else if (i3pert<=natom) then
-           cwave_right = cwavef1
+         if (i1pert<=natom) then ! If true, i3pert==natom+2
+           cwave_right = cg3(:,1+offset_cgj:size_wf+offset_cgj)
+         else if (i3pert<=natom) then  ! If true, i1pert==natom+2
+           cwave_right = cg1(:,1+offset_cgj:size_wf+offset_cgj)
          end if
          choice = 2
          cpopt = 0
@@ -594,43 +592,14 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0
 &         mgfft,mpi_enreg,natom,nattyp,dtset%ngfft,dtset%nloalg,&
 &         npw_k,nspinor,psps%ntypat,phkxred,ph1d,ph3d,ucvol,psps%useylm)
 
-!LTEST
-!!        TEST cwaveprj0 :
-!         if (ikpt<=2.and.jband<=2) then
-!           write(93,'(3(a,i3))') ' isppol = ',isppol,' ikpt = ',ikpt,' jband = ',jband
-!           do ia=1,natom
-!             iatm = 0
-!             do ilmn=1,cwaveprj0(ia,1)%nlmn
-!               if (iatm<3) then
-!                 re = cwaveprj0(ia,1)%cp(1,ilmn)
-!                 im = cwaveprj0(ia,1)%cp(2,ilmn)
-!                 if (abs(re)<tol12) re = zero
-!                 if (abs(im)<tol12) im = zero
-!                 if (re*re+im+im>tol14) then
-!                   iatm = iatm + 1
-!                   write(93,'(2(a,i3),2(a,es19.10e3))') ' cwaveprj0(',ia,',1)%cp(',ilmn,') = ',re,',',im
-!                 end if
-!               end if
-!             end do
-!             do ilmn=1,cwaveprj0(ia,1)%nlmn
-!               if (iatm<3) then
-!                 re = cwaveprj0(ia,1)%dcp(1,1,ilmn)
-!                 im = cwaveprj0(ia,1)%dcp(2,1,ilmn)
-!                 if (abs(re)<tol12) re = zero
-!                 if (abs(im)<tol12) im = zero
-!                 if (re*re+im+im>tol14) then
-!                   iatm = iatm + 1
-!                   write(93,'(3(a,i3),2(a,es19.10e3))') ' cwaveprj0(',ia,',1)%dcp(',idir_phon,',',ilmn,') = ',re,',',im
-!                 end if
-!               end if
-!             end do
-!           end do
-!         end if
-!LTEST
          usetimerev=(dtset%kptopt>0.and.dtset%kptopt<3)
-         call paw_dfptnl_accrhoij(atindx,cplex,cwaveprj0,cwaveprj1,isppol,natom,natom,&
-&          nspinor,occ_k(iband),pawrhoij21_unsym,usetimerev,wtk_k)
+         call paw_dfptnl_accrhoij(atindx,cplex,cwaveprj0,cwaveprj0,cwaveprj1,cwaveprj1,i1pert,i3pert,isppol,natom,natom,&
+&          nspinor,occ_k(jband),pawrhoij21_unsym,usetimerev,wtk_k)
 !&         comm_atom=my_comm_atom,mpi_atmtab=my_atmtab)
+
+! >>>>>>> TO DO
+!       5) Calculer < psi^(0) | H_KV^(pert1pert2) | Psi^(pert3) > et < psi^(pert1) | H_KV^(pert2pert3) | Psi^(0) >
+
 
        end if ! end if compute_rho21
 
@@ -702,21 +671,64 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0
 !      multiplication for rho1 will be done by dotprod_vn later
 
 !!     in the non spin polarized case xc_tmp has only 1 component
+! if (nspden==1)then
+
+!   ABI_ALLOCATE(xc_tmp,(cplex*nfftf,1))
+
+!   if (cplex==1) then
+!     do ifft=1,nfftf
+!       xc_tmp(ifft,1)= k3xc(ifft,1)*rho2r1(ifft,1)*rho3r1(ifft,1)
+!     end do
+!   else
+!     do ifft=1,nfftf   ! 2*ifft-1 denotes the real part, 2*ifft the imaginary part
+!       xc_tmp(2*ifft-1,1)= k3xc(ifft,1)*( rho2r1(2*ifft-1,1)*rho3r1(2*ifft-1,1) &
+!&      - rho2r1(2*ifft,1)*rho3r1(2*ifft,1) )
+!       xc_tmp(2*ifft,1)= k3xc(ifft,1)*( rho2r1(2*ifft-1,1)*rho3r1(2*ifft,1) &
+!&      +rho2r1(2*ifft,1)*rho3r1(2*ifft-1,1) )
+!     end do
+!   end if
+
+! else
+!   MSG_BUG('NONLINEAR with nspden==2 is not implemented yet')
+! end if
+
+!!     in the non spin polarized case xc_tmp has only 1 component
+
+ ABI_ALLOCATE(xc_tmp,(cplex*nfftf,nspden))
+ ABI_ALLOCATE(rho1r1_tot,(cplex*nfftf,nspden))
  if (nspden==1)then
 
-   ABI_ALLOCATE(xc_tmp,(cplex*nfftf,1))
+!   if (cplex==1) then
+!!    This, and the next lines, have to be changed in case cplex=2
+!     do ifft=1,nfftf
+!       xc_tmp(ifft,1)= k3xc(ifft,1)*(rho2r1(ifft,1)+3*xccc3d2(ifft))*rho3r1(ifft,1)
+!     end do
+!   else
+!     do ifft=1,nfftf   ! 2*ifft-1 denotes the real part, 2*ifft the imaginary part
+!       xc_tmp(2*ifft-1,1)= k3xc(ifft,1)*( (rho2r1(2*ifft-1,1)+3*xccc3d2(2*ifft-1))*rho3r1(2*ifft-1,1) &
+!&      -( rho2r1(2*ifft,1)+3*xccc3d2(2*ifft))*rho3r1(2*ifft,1))
+!       xc_tmp(2*ifft,1)= k3xc(ifft,1)*( (rho2r1(2*ifft-1,1)+3*xccc3d2(2*ifft-1))*rho3r1(2*ifft,1) &
+!&      +( rho2r1(2*ifft,1)+3*xccc3d2(2*ifft))*rho3r1(2*ifft-1,1))
+!     end do
+!   end if
 
    if (cplex==1) then
-!    This, and the next lines, have to be changed in case cplex=2
      do ifft=1,nfftf
-       xc_tmp(ifft,1)= k3xc(ifft,1)*(rho2r1(ifft,1)+3*xccc3d2(ifft))*rho3r1(ifft,1)
+       rho1r1_tot(ifft,1) = rho1r1(ifft,1) + xccc3d1(ifft)
+       rho2r_re = rho2r1(ifft,1)+xccc3d2(ifft)
+       rho3r_re = rho3r1(ifft,1)+xccc3d3(ifft)
+       xc_tmp(ifft,1)= k3xc(ifft,1)*rho2r_re*rho3r_re
      end do
    else
      do ifft=1,nfftf   ! 2*ifft-1 denotes the real part, 2*ifft the imaginary part
-       xc_tmp(2*ifft-1,1)= k3xc(ifft,1)*( (rho2r1(2*ifft-1,1)+3*xccc3d2(2*ifft-1))*rho3r1(2*ifft-1,1) &
-&      -( rho2r1(2*ifft,1)+3*xccc3d2(2*ifft))*rho3r1(2*ifft,1))
-       xc_tmp(2*ifft,1)= k3xc(ifft,1)*( (rho2r1(2*ifft-1,1)+3*xccc3d2(2*ifft-1))*rho3r1(2*ifft,1) &
-&      +( rho2r1(2*ifft,1)+3*xccc3d2(2*ifft))*rho3r1(2*ifft-1,1))
+       rho1r1_tot(2*ifft-1,1) = rho1r1(2*ifft-1,1) + xccc3d1(2*ifft-1)
+       rho1r1_tot(2*ifft  ,1) = rho1r1(2*ifft  ,1) + xccc3d1(2*ifft  )
+       rho2r_re = rho2r1(2*ifft-1,1)+xccc3d2(2*ifft-1)
+       rho2r_im = rho2r1(2*ifft  ,1)+xccc3d2(2*ifft  )
+       rho3r_re = rho3r1(2*ifft-1,1)+xccc3d3(2*ifft-1)
+       rho3r_im = rho3r1(2*ifft  ,1)+xccc3d3(2*ifft  )
+       xc_tmp(2*ifft-1,1)= k3xc(ifft,1)*(rho2r_re*rho3r_re-rho2r_im*rho3r_im)
+       xc_tmp(2*ifft  ,1)= k3xc(ifft,1)*(rho2r_re*rho3r_im+rho2r_im*rho3r_re)
      end do
    end if
 
@@ -808,21 +820,17 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0
 !!                    fab: this is the enf if over nspden
 !                   end if
 
- call dotprod_vn(1,rho1r1,exc3,valuei,nfftf,nfftotf,nspden,1,xc_tmp,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
+ 
+ call dotprod_vn(1,rho1r1_tot,exc3,valuei,nfftf,nfftotf,nspden,1,xc_tmp,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
  ABI_DEALLOCATE(xc_tmp)
+ ABI_DEALLOCATE(rho1r1_tot)
 
  exc3_paw = zero
  if (usepaw==1) then
 
    call paw_dfptnl_energy(exc3_paw,dtset%ixc,natom,natom,psps%ntypat,paw_an0,pawang,dtset%pawprtvol,pawrad,&
 &   pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij1_i3pert,pawtab,dtset%pawxcdev,mpi_enreg%my_atmtab,mpi_enreg%comm_atom)
-   sumi = sumi + exc3_paw(2)
-
-!  TO DO: if pert1 ou pert3 <= natom :
-!    2) call pawdfptenergy avec pawrhoij1_i2pert et pawrhoij^(2:1)
-!    3) calcul de nhat^(2:1) : pawmknhat + pawmknhatfr
-!    4) récupérer V_Hxc^(pert2) et faire l'intégrale avec nhat^(2:1)
-!    5) Calculer < psi^(0) | H_KV^(pert1pert2) | Psi^(pert3) > et < psi^(pert1) | H_KV^(pert2pert3) | Psi^(0) >
+   sumi = sumi + sixth*exc3_paw(2)
 
  end if
 
@@ -830,30 +838,47 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0
 !      Compute E_Hxc^(2:1)
 ! **************************************************************************************************
 
+ eHxc21_paw = zero
  if (compute_rho21) then
-     call pawmkrho(0,arg,cplex,gs_hamkq%gprimd,idir_phon,indsy1,ipert_phon,mpi_enreg,&
-&     natom,natom,nspden,nsym1,psps%ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
-&     dtset%pawprtvol,pawrhoij21,pawrhoij21_unsym,pawtab,dtset%qptn,dummy_array2,dummy_array2,&
-&     dummy_array2,rprimd,symaf1,symrc1,dtset%typat,ucvol,dtset%usewvl,xred,&
-&     pawang_sym=pawang1,pawnhat=nhat21,pawrhoij0=pawrhoij)
-!     if (paral_atom) then
-!       call pawrhoij_free(pawrhoij21_unsym)
-!       ABI_DATATYPE_DEALLOCATE(pawrhoij21_unsym)
-!     end if
+
+! ************** TO DO : TO LOOK AT PAWMKNHATFR ************************
+!  2) calcul de nhat^(2:1) : pawmknhatfr
+   call pawmkrho(0,arg,cplex,gs_hamkq%gprimd,idir_phon,indsy1,ipert_phon,mpi_enreg,&
+&   natom,natom,nspden,nsym1,psps%ntypat,dtset%paral_kgb,pawang,pawfgr,pawfgrtab,&
+&   dtset%pawprtvol,pawrhoij21,pawrhoij21_unsym,pawtab,dtset%qptn,dummy_array2,dummy_array2,&
+&   dummy_array2,rprimd,symaf1,symrc1,dtset%typat,ucvol,dtset%usewvl,xred,&
+&   pawang_sym=pawang1,pawnhat=nhat21,pawrhoij0=pawrhoij0)
+
+!   if (paral_atom) then
+!     call pawrhoij_free(pawrhoij21_unsym)
+!     ABI_DATATYPE_DEALLOCATE(pawrhoij21_unsym)
+!   end if
+   nzlmopt = 0
+
+!  3) call pawdfptenergy avec pawrhoij1_i2pert et pawrhoij^(2:1)
+   call pawdfptenergy(eHxc21_paw,i2pert,ipert_phon,dtset%ixc,natom,dtset%natom,dtset%ntypat,&
+&   nzlmopt,nzlmopt,paw_an0,paw_an1_i2pert,paw_ij1_i2pert,pawang,dtset%pawprtvol,&
+&   pawrad,pawrhoij1_i2pert,pawrhoij21,pawtab,dtset%pawxcdev,dtset%xclevel)
+!&   mpi_atmtab=my_atmtab,comm_atom=my_comm_atom
+
+   sumi = sumi + half*eHxc21_paw(2)
+!  4) récupérer V_Hxc^(pert2) (sur grille fft) et faire l'intégrale avec nhat^(2:1)
+
  end if
 
 ! **************************************************************************************************
 !    ALL TERMS HAVE BEEN COMPUTED
 ! **************************************************************************************************
 
- e3tot = sum_psi1H1psi1 + sum_lambda1psi1psi1 + sixth * (exc3 + exc3_paw(1))
+ e3tot = sum_psi1H1psi1 + sum_lambda1psi1psi1 + sixth * (exc3 + exc3_paw(1)) + half * eHxc21_paw(1)
 ! if(print_info/=0) then
-   write(msg,'(2a,3(a,i2,a,i1),5(2a,es19.10e3),a)') ch10,'NONLINEAR : ',&
+   write(msg,'(2a,3(a,i2,a,i1),6(2a,es16.7e3),a)') ch10,'NONLINEAR : ',&
    ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir,&
    ch10,'      sum_psi1H1psi1 = ',sum_psi1H1psi1,&
    ch10,' sum_lambda1psi1psi1 = ',sum_lambda1psi1psi1,&
    ch10,'              exc3/6 = ',sixth*exc3,&
    ch10,'          exc3_paw/6 = ',sixth*exc3_paw(1),&
+   ch10,'        eHxc21_paw/2 = ',half*eHxc21_paw(1),&
    ch10,' >>>>>>>>>>>>> e3tot = ',e3tot,ch10
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')

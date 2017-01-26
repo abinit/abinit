@@ -3951,7 +3951,9 @@ subroutine d3sym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 
 !First, take into account the permutations symmetry of
 !(i1pert,i1dir) and (i3pert,i3dir)
-
+!LTEST
+ if (nsym>1) then
+!LTEST
  do i1pert = 1, mpert
    do i2pert = 1, mpert
 
@@ -3978,6 +3980,9 @@ subroutine d3sym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
      end do
    end do
  end do
+!LTEST
+ end if
+!LTEST
 
 !Big Big Loop : symmetrize three times, because
 !of some cases in which one element is not yet available

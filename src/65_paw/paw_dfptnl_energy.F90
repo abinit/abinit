@@ -283,7 +283,6 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    call pawdensities(compch,cplex_3,iatom_tot,lmselect_tmp,lmselect_3,&
 &   lm_size_all,nhat1_3,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
 &   pawrad(itypat),pawrhoij_3(iatom),pawtab(itypat),rho1_3,trho1_3)
-
    ABI_DEALLOCATE(lmselect_tmp)
 
    call paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,paw_an0(iatom)%k3xc1,lm_size_all,&
@@ -295,7 +294,7 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    call paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,paw_an0(iatom)%k3xc1,lm_size_all,&
 &                 lmselect_1,lmselect_2,lmselect_3,nhat1_1,nhat1_2,nhat1_3,&
 &                 paw_an0(iatom)%nk3xc1,mesh_size,nspden,pawang,pawrad(itypat),&
-                  trho1_1,trho1_2,rho1_3,usexcnhat)
+                  trho1_1,trho1_2,trho1_3,usexcnhat)
    d3exc = d3exc - d3exc1_iat
 
 !   lm_size_eff=min(lm_size_all,pawang%ylm_size)
