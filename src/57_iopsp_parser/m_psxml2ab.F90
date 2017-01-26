@@ -147,7 +147,7 @@ subroutine psxml2abheader(psxmlfile, psphead, iwrite)
 !    Find the number of projectors per angular momentum shell
  psphead%nproj(:)=0
  if (ps_Number_Of_Projectors(psxml, SET_NONREL) > 0) then
-   idx_sr = ps_Projector_Indexes(psxml, SET_NONREL)
+   call ps_Get_Projector_Indexes(psxml, SET_NONREL, idx_sr)
    do iproj = 1, ps_Number_Of_Projectors(psxml, SET_NONREL)
      if (iwrite == 1) then
        write (message,'(a,2I5)') 'iproj, idx for nonrel ', iproj, idx_sr(iproj)
@@ -158,7 +158,7 @@ subroutine psxml2abheader(psxmlfile, psphead, iwrite)
      psphead%nproj(il) = psphead%nproj(il) + 1
    end do
  else if (ps_Number_Of_Projectors(psxml, SET_SREL) > 0) then
-   idx_sr = ps_Projector_Indexes(psxml, SET_SREL)
+   call ps_Get_Projector_Indexes(psxml, SET_SREL, idx_sr)
    do iproj = 1, ps_Number_Of_Projectors(psxml, SET_SREL)
      if (iwrite == 1) then
        write (message,'(a,2I5)') 'iproj, idx for srel ', iproj, idx_sr(iproj)
@@ -173,7 +173,7 @@ subroutine psxml2abheader(psxmlfile, psphead, iwrite)
  end if
 
  psphead%nprojso(:)=0
- idx_so = ps_Projector_Indexes(psxml, SET_SO)
+ call ps_Get_Projector_Indexes(psxml, SET_SO, idx_so)
  do iproj = 1, ps_Number_of_Projectors(psxml, SET_SO)
    if (iwrite == 1) then
      write (message,'(a,2I5)') 'iproj, idx for soc ', iproj, idx_so(iproj)
