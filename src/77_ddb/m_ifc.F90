@@ -3099,7 +3099,7 @@ type(skw_t) function ifc_build_skw(ifc, cryst, ngqpt, nshiftq, shiftq, comm) res
  call xmpi_sum(ibz_freqs, comm, ierr)
 
  params = zero; params(1) = 120
- new = skw_new(cryst, params, 1, natom3, nqibz, 1, qibz, ibz_freqs, [0,0], [0,0], comm)
+ new = skw_new(cryst, params, 1, natom3, nqibz, 1, qibz, ibz_freqs, [0,0], comm)
 
  if (.False. .and. my_rank == master) then
    ! Test whether SKW preserves symmetries.
