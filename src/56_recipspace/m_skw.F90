@@ -24,7 +24,7 @@
 
 #include "abi_common.h"
 
-MODULE m_skw
+module m_skw
 
  use defs_basis
  use m_errors
@@ -59,10 +59,6 @@ MODULE m_skw
 !!  but the same object can be used to interpolate phonons as well. Just use nsppol=1 and nband = 3 * natom
 !!
 !! SOURCE
-
- !type :: skwcoefs_t
- !  complex(dpc),allocatable :: vals(:,:,:)
- !end type skwcoefs_t
 
  type,public :: skw_t
 
@@ -226,7 +222,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
 
  call cwtime(cpu, wall, gflops, "start")
  do
-   call find_rstar_gen(new, cryst, nrwant, rmax, r2vals)
+   call find_rstar_gen(new, cryst, nrwant, rmax, r2vals, comm)
    if (new%nr >= nrwant) then
      write(std_out,*)"Entered with rmax",rmax,"abs(skw%rpts(last)): ",abs(new%rpts(:,new%nr))
      exit
@@ -294,7 +290,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  else
    ! Hermitian version
    do ii=1,nkpt-1
-      hmat(ii, ii) = real(hmat(ii, ii))
+     hmat(ii, ii) = real(hmat(ii, ii))
    end do
    lwork = -1
    ABI_MALLOC(work, (1))
@@ -960,12 +956,13 @@ end subroutine mkstar_dk2
 !!
 !! FUNCTION
 !!  Find the R-space points generating the stars.
-!!  Set skw%nr and skw%rpts
+!!  Set skw%nr and skw%rpts.
 !!
 !! INPUTS
 !!  cryst<crystal_t>=Crystalline structure.
 !!  nrwant=Number of R-space points wanted
 !!  rmax(3)=Max reduced components of supercell.
+!!  comm=MPI communicator.
 !!
 !! OUTPUT
 !!  or2vals(skw%nr)=||R||**2
@@ -976,7 +973,7 @@ end subroutine mkstar_dk2
 !!
 !! SOURCE
 
-subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals)
+subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals, comm)
 
  use m_gsphere,  only : get_irredg
 
@@ -992,20 +989,24 @@ subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals)
 !scalars
  type(skw_t),intent(inout) :: skw
  type(crystal_t),intent(in) :: cryst
- integer,intent(in) :: nrwant
+ integer,intent(in) :: nrwant,comm
 !arrays
  integer,intent(in) :: rmax(3)
  real(dp),allocatable,intent(out) :: or2vals(:)
 
 !Local variables-------------------------------
 !scalars
- integer :: cnt,nstars,i1,i2,i3,msize,ir,nsh,ish,ss,ee,nst
+ integer :: cnt,nstars,i1,i2,i3,msize,ir,nsh,ish,ss,ee,nst,ierr,nprocs,my_rank,ii
  real(dp) :: r2_prev
+ character(len=500) :: msg
 !arrays
- integer,allocatable :: iperm(:),rtmp(:,:),rgen(:,:),r2sh(:),shlim(:)
+ integer,allocatable :: iperm(:),rtmp(:,:),rgen(:,:),r2sh(:),shlim(:),sh_start(:),sh_stop(:)
+ integer,allocatable :: recvcounts(:),displs(:),recvbuf(:,:)
  real(dp),allocatable :: r2tmp(:),cnorm(:)
 
 ! *********************************************************************
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  msize = product(2*rmax + 1)
  ABI_MALLOC(rtmp, (3, msize))
@@ -1033,6 +1034,7 @@ subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals)
    rgen(:,ir) = rtmp(:,iperm(ir))
  end do
  rtmp = rgen
+ ABI_FREE(iperm)
 
  ABI_MALLOC(r2sh, (msize))     ! Correspondence between R and the shell index.
  ABI_MALLOC(shlim, (msize+1))  ! For each shell, the index of the initial G-vector.
@@ -1040,24 +1042,62 @@ subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals)
  do ir=2,msize
    if (abs(r2tmp(ir) - r2_prev) > r2tmp(ir) * tol8) then
      r2_prev = r2tmp(ir); nsh = nsh + 1; shlim(nsh) = ir
+     !write(std_out,*)"nsh: ",shlim(nsh) - shlim(nsh-1)
    end if
    r2sh(ir) = nsh
  end do
  shlim(nsh+1) = msize + 1
-
- ABI_MALLOC(cnorm, (msize))
+ ABI_FREE(r2tmp)
+ ABI_FREE(r2sh)
 
  !call get_irredg(msize, skw%ptg_nsym, +1, cryst%rprimd, skw%ptg_symrel, rtmp, nstars, rgen, cnorm)
  !write(66,*)nstars; do ish=1,nstars; write(66,*)rgen(:,ish); end do
+
+ ! Distribute shells among processor so that we can parallelize the search algorithm.
+ ! Each proc works on a contigous block of shells, then we have to gather the results.
+ ABI_MALLOC(sh_start, (0:nprocs-1))
+ ABI_MALLOC(sh_stop, (0:nprocs-1))
+ call xmpi_split_work2_i4b(nsh, nprocs, sh_start, sh_stop, msg, ierr)
+
+ ABI_MALLOC(cnorm, (msize))
  nstars = 0
- do ish=1,nsh
+ do ish=sh_start(my_rank),sh_stop(my_rank)
    ss = shlim(ish); ee = shlim(ish+1) - 1; msize = ee - ss + 1
    call get_irredg(msize, skw%ptg_nsym, + 1, cryst%rprimd, skw%ptg_symrel, rtmp(:,ss:), &
      nst, rgen(:,nstars+1:), cnorm(nstars+1:))
    nstars = nstars + nst
  end do
- !write(67,*)nstars; do ish=1,nstars; write(67,*)rgen(:,ish); end do
 
+ ABI_FREE(cnorm)
+ ABI_FREE(sh_start)
+ ABI_FREE(sh_stop)
+ ABI_FREE(rtmp)
+ ABI_FREE(shlim)
+
+ if (nprocs > 1) then
+   ! Collect star functions.
+   ABI_MALLOC(recvcounts, (nprocs))
+   recvcounts = 0; recvcounts(my_rank+1) = 3 * nstars
+   call xmpi_sum(recvcounts, comm, ierr)
+   ABI_MALLOC(displs, (nprocs))
+   displs(1) = 0
+   do ii=2,nprocs
+     displs(ii) = sum(recvcounts(:ii-1))
+   end do
+   call xmpi_sum(nstars, nst, comm, ierr)   ! Now nst is the total number of star functions.
+   ABI_MALLOC(recvbuf, (3, nst))
+   call xmpi_allgatherv(rgen, 3*nstars, recvbuf, recvcounts, displs, comm, ierr)
+   ABI_FREE(recvcounts)
+   ABI_FREE(displs)
+   nstars = nst
+   rgen(:,1:nstars) = recvbuf
+   ABI_FREE(recvbuf)
+ end if
+ !if (my_rank == 0) then
+ !  write(67,*)"nstars",nstars,"nsh",nsh; do ish=1,nstars; write(67,*)rgen(:,ish); end do
+ !end if
+
+ ! Store rpts and compute ||R||**2.
  skw%nr = min(nstars, nrwant)
  if (allocated(skw%rpts)) then
    ABI_FREE(skw%rpts)
@@ -1069,13 +1109,7 @@ subroutine find_rstar_gen(skw, cryst, nrwant, rmax, or2vals)
    or2vals(ir) = dot_product(skw%rpts(:,ir), matmul(cryst%rmet, skw%rpts(:,ir)))
  end do
 
- ABI_FREE(rtmp)
- ABI_FREE(r2tmp)
- ABI_FREE(iperm)
  ABI_FREE(rgen)
- ABI_FREE(r2sh)
- ABI_FREE(shlim)
- ABI_FREE(cnorm)
 
 end subroutine find_rstar_gen
 !!***
