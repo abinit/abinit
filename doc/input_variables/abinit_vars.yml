@@ -5413,19 +5413,29 @@
         einterp consists of 4 entries.
         The first element specificies the interpolation method.
 
-        0 --> No interpolation (default)
-        1 --> Star-function interpolation
-        2 --> B-spline interpolation.
+        <ul>
+        <li> 0 --> No interpolation (default) </li>
+        <li> 1 --> Star-function interpolation (Shankland-Koelling-Wood Fourier interpolation scheme,
+            see <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.38.2721"> PRB 38 2721</a>
+        </li>
+        <li> 2 --> B-spline interpolation. </li>
+        </ul>
 
         The meaning of the other entries depend on the interpolation technique selected.
+        <br>
 
         In the case of star-function interpolation:
 
-        einterp(2): Number of star-functions per ab-initio k-point
-        einterp(3): Activate filter if /= 0
-        einterp(4):
+        <ul>
+        <li> einterp(2): Number of star-functions per ab-initio k-point </li>
+        <li> einterp(3): If non-zero, activate Fourier filtering according to Eq 9 of
+        <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.61.1639"> PRB 61 1639</a>.
+        In this case, rcut is given by einterp(2) * Rmax where Rmax is the maximum length of the lattice vectors included in the star expansion </li>
+        <li> einterp(4): Used if einterp(2) /= 0. It defines rsigma in Eq 9</li>
+        </ul>
+        <br>
 
-        For B-spline interpolation
+        For B-spline interpolation:
 
         einterp(2:4): Order of B-spline for the three reduced directions. Cubic spline (3) is the recomended value.
     varname: einterp
