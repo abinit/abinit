@@ -238,10 +238,7 @@ MODULE m_ebands
    ! Order of the spline.
 
    integer :: band_block(2)
-    ! Initial and final band index treated by this processor
-
-   integer :: spin_block(2)
-    ! Initial and final spin index treated by this processor
+    ! Initial and final band index.
 
    !real(dp),allocatable :: xvec(:),yvec(:),zvec(:)
    real(dp),allocatable :: xknot(:),yknot(:),zknot(:)
@@ -3667,7 +3664,7 @@ end subroutine ebands_expandk
 !!  ords(3)=order of the spline for the three directions. ord(1) must be in [0, nkx] where
 !!    nkx is the number of points along the x-axis.
 !!  band_block(2)=Initial and final band index. If [0,0], all bands are used
-!!  spin_block(2)=Initial and final spin index. If [0,0], all bands are used
+!!    This is a global variable i.e. all MPI procs must call the routine with the same value.
 !!
 !! OUTPUT
 !!
@@ -3680,7 +3677,7 @@ end subroutine ebands_expandk
 !!
 !! SOURCE
 
-type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block, spin_block) result(new)
+type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block) result(new)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3697,7 +3694,7 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block, spin_block) re
  type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
 !arrays
- integer,intent(in) :: ords(3), band_block(2),spin_block(2)
+ integer,intent(in) :: ords(3), band_block(2)
 
 !Local variables-------------------------------
 !scalars
@@ -3815,10 +3812,8 @@ type(ebspl_t) function ebspl_new(ebands, cryst, ords, band_block, spin_block) re
  ABI_MALLOC(xyzdata,(nkx,nky,nkz))
  ABI_DT_MALLOC(new%coeff, (ebands%mband,ebands%nsppol))
  new%band_block = band_block; if (all(band_block == 0)) new%band_block = [1, ebands%mband]
- new%spin_block = spin_block; if (all(spin_block == 0)) new%spin_block = [1, ebands%nsppol]
 
  do spin=1,ebands%nsppol
-   if (spin < new%spin_block(1) .or. spin > new%spin_block(2)) cycle
    do band=1,ebands%mband
      if (band < new%band_block(1) .or. band > new%band_block(2)) cycle
 
@@ -4029,6 +4024,8 @@ end subroutine ebspl_free
 !!  intp_kptrlatt(3,3) = New k-mesh
 !!  intp_nshiftk= Number of shifts in new k-mesh.
 !!  intp_shiftk(3,intp_nshiftk) = Shifts in new k-mesh.
+!!  band_block(2)=Initial and final band index. If [0,0], all bands are used
+!!    This is a global variable i.e. all MPI procs must call the routine with the same value.
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -4041,7 +4038,7 @@ end subroutine ebspl_free
 !! SOURCE
 
 
-function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, comm) result(new)
+function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, band_block, comm) result(new)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -4059,18 +4056,18 @@ function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk,
  type(crystal_t),intent(in) :: cryst
  type(ebands_t) :: new
 !arrays
- integer,intent(in) :: intp_kptrlatt(3,3)
+ integer,intent(in) :: intp_kptrlatt(3,3),band_block(2)
  real(dp),intent(in) :: params(:)
  real(dp),intent(in) :: intp_shiftk(3,intp_nshiftk)
 
 !Local variables-------------------------------
 !scalars
- integer :: ik_ibz,spin,new_bantot,new_mband,cplex,itype
+ integer :: ik_ibz,spin,new_bantot,new_mband,cplex,itype,nb,ib
  integer :: nprocs,my_rank,cnt,ierr,band,new_nkbz,new_nkibz,new_nshiftk
  type(ebspl_t) :: ebspl
  type(skw_t) :: skw
 !arrays
- integer :: new_kptrlatt(3,3),bspl_ords(3),band_block(2),spin_block(2)
+ integer :: new_kptrlatt(3,3),bspl_ords(3),my_bblock(2)
  integer,allocatable :: new_istwfk(:),new_nband(:,:),new_npwarr(:)
  real(dp),allocatable :: new_shiftk(:,:),new_kibz(:,:),new_kbz(:,:),new_wtk(:)
  real(dp),allocatable :: new_doccde(:),new_eig(:),new_occ(:)
@@ -4079,6 +4076,8 @@ function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk,
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  itype = nint(params(1))
+ my_bblock = band_block; if (all(band_block == 0)) my_bblock = [1, ebands%mband]
+ nb = my_bblock(2) - my_bblock(1) + 1
 
  ! Get ibz, new shifts and new kptrlatt.
  call kpts_ibz_from_kptrlatt(cryst, intp_kptrlatt, ebands%kptopt, intp_nshiftk, intp_shiftk, &
@@ -4089,7 +4088,7 @@ function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk,
  ABI_MALLOC(new_istwfk, (new_nkibz))
  new_istwfk = 1
  ABI_MALLOC(new_nband, (new_nkibz, ebands%nsppol))
- new_nband = ebands%mband
+ new_nband = nb
  ABI_MALLOC(new_npwarr, (new_nkibz))
  new_npwarr = maxval(ebands%npwarr)
  new_bantot = sum(new_nband); new_mband = maxval(new_nband)
@@ -4115,15 +4114,14 @@ function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk,
  ABI_FREE(new_occ)
 
  ! Build (B-spline|SKW) object for all bands.
- band_block = [0, 0]; spin_block = [0, 0]
  select case (itype)
  case (1)
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
    skw = skw_new(cryst, params(2:), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, &
-                 band_block, spin_block, comm)
+                 band_block, comm)
  case (2)
    bspl_ords = nint(params(2:4))
-   ebspl = ebspl_new(ebands, cryst, bspl_ords, band_block, spin_block)
+   ebspl = ebspl_new(ebands, cryst, bspl_ords, band_block)
 
  case default
    MSG_ERROR(sjoin("Wrong params(1):", itoa(itype)))
@@ -4133,8 +4131,9 @@ function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk,
  new%eig = zero; cnt = 0
  do spin=1,new%nsppol
    do ik_ibz=1,new%nkpt
-     do band=1,new%nband(ik_ibz+(spin-1)*new%nkpt)
+     do ib=1,nb
        cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle  ! Mpi parallelism.
+       band = my_bblock(1) + ib - 1
        select case (itype)
        case (1)
          call skw_eval_bks(skw, cryst, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
@@ -4166,9 +4165,11 @@ end function ebands_interp_kmesh
 !! INPUTS
 !!  ebands<ebands_t> = Object with input energies.
 !!  cryst<crystal_t> = Crystalline structure.
-!!  params(:)
-!!    params(1): 1 for SKW, 2 for B-spline.
 !!  kpath<kpath_t> = Object describing the k-path
+!!  params(:):
+!!    params(1): 1 for SKW, 2 for B-spline.
+!!  band_block(2)=Initial and final band index to be interpolated. [0,0] if all bands are used.
+!!    This is a global variable i.e. all MPI procs must call the routine with the same value.
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -4180,7 +4181,7 @@ end function ebands_interp_kmesh
 !!
 !! SOURCE
 
-type(ebands_t) function ebands_interp_kpath(ebands, cryst, params, kpath, comm) result(new)
+type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_block, comm) result(new)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -4198,18 +4199,19 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, params, kpath, comm) 
  type(crystal_t),intent(in) :: cryst
  type(kpath_t),intent(in) :: kpath
 !arrays
+ integer,intent(in) :: band_block(2)
  real(dp),intent(in) :: params(:)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: new_nshiftk=1
  integer :: ik_ibz,spin,new_bantot,new_mband,cplex
- integer :: nprocs,my_rank,cnt,ierr,band,new_nkibz,itype
+ integer :: nprocs,my_rank,cnt,ierr,band,new_nkibz,itype,nb,ib
  type(ebspl_t) :: ebspl
  type(skw_t) :: skw
 !arrays
  integer,parameter :: new_kptrlatt(3,3)=0
- integer :: bspl_ords(3),band_block(2),spin_block(2)
+ integer :: bspl_ords(3),my_bblock(2)
  integer,allocatable :: new_istwfk(:),new_nband(:,:),new_npwarr(:)
  real(dp),parameter :: new_shiftk(3,1) = zero
  real(dp),allocatable :: new_wtk(:),new_doccde(:),new_eig(:),new_occ(:)
@@ -4218,6 +4220,8 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, params, kpath, comm) 
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  itype = nint(params(1))
+ my_bblock = band_block; if (all(band_block == 0)) my_bblock = [1, ebands%mband]
+ nb = my_bblock(2) - my_bblock(1) + 1
 
  if (ebands%nkpt == 1) then
    MSG_WARNING("Cannot interpolate band energies when nkpt = 1. Returning")
@@ -4229,7 +4233,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, params, kpath, comm) 
  ABI_MALLOC(new_istwfk, (new_nkibz))
  new_istwfk = 1
  ABI_MALLOC(new_nband, (new_nkibz, ebands%nsppol))
- new_nband = ebands%mband
+ new_nband = nb
  ABI_MALLOC(new_npwarr, (new_nkibz))
  new_npwarr = maxval(ebands%npwarr)
  new_bantot = sum(new_nband); new_mband = maxval(new_nband)
@@ -4253,15 +4257,14 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, params, kpath, comm) 
  ABI_FREE(new_occ)
 
  ! Build (B-spline|SKW) object for all bands.
- band_block = [0, 0]; spin_block = [0, 0]
  select case (itype)
  case (1)
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
    skw = skw_new(cryst, params(2:), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, &
-                 band_block, spin_block, comm)
+                 my_bblock, comm)
  case (2)
    bspl_ords = nint(params(2:4))
-   ebspl = ebspl_new(ebands, cryst, bspl_ords, band_block, spin_block)
+   ebspl = ebspl_new(ebands, cryst, bspl_ords, my_bblock)
 
  case default
    MSG_ERROR(sjoin("Wrong params(1):", itoa(itype)))
@@ -4271,8 +4274,9 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, params, kpath, comm) 
  new%eig = zero; cnt = 0
  do spin=1,new%nsppol
    do ik_ibz=1,new%nkpt
-     do band=1,new%nband(ik_ibz+(spin-1)*new%nkpt)
+     do ib=1,nb
        cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle  ! Mpi parallelism.
+       band = my_bblock(1) + ib - 1
        select case (itype)
        case (1)
          call skw_eval_bks(skw, cryst, band, new%kptns(:,ik_ibz), spin, new%eig(band,ik_ibz,spin))
@@ -5285,6 +5289,7 @@ end subroutine ebands_write_gnuplot
 !----------------------------------------------------------------------
 
 !!****f* m_ebands/ebands_interpolate_kpath
+!!
 !! NAME
 !!  ebands_interpolate_kpath
 !!
@@ -5292,6 +5297,8 @@ end subroutine ebands_write_gnuplot
 !!
 !! INPUTS
 !!  dtset<dataset_type>=Abinit dataset
+!!  band_block(2)=Initial and final band index to be interpolated. [0,0] if all bands are used.
+!!    This is a global variable i.e. all MPI procs must call the routine with the same value.
 !!
 !! OUTPUT
 !!
@@ -5301,7 +5308,7 @@ end subroutine ebands_write_gnuplot
 !!
 !! SOURCE
 
-subroutine ebands_interpolate_kpath(ebands, dtset, cryst, prefix, comm)
+subroutine ebands_interpolate_kpath(ebands, dtset, cryst, band_block, prefix, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -5320,6 +5327,8 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, prefix, comm)
  type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: comm
  character(len=*),intent(in) :: prefix
+!arrays
+ integer,intent(in) :: band_block(2)
 
 !Local variables-------------------------------
 !scalars
@@ -5370,9 +5379,9 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, prefix, comm)
  ABI_FREE(bounds)
 
  ! Interpolate bands on k-path.
- ebands_kpath = ebands_interp_kpath(ebands, cryst, dtset%einterp, kpath, comm)
+ ebands_kpath = ebands_interp_kpath(ebands, cryst, kpath, dtset%einterp, band_block, comm)
  if (my_rank == master) then
-   call wrtout(ab_out, sjoin("- Writing interpolate bands to file:", strcat(prefix, tag)))
+   call wrtout(ab_out, sjoin("- Writing interpolated bands to file:", strcat(prefix, tag)))
    call ebands_write(ebands_kpath, dtset%prtebands, strcat(prefix, tag), kptbounds=kpath%bounds)
  end if
  call ebands_free(ebands_kpath)
@@ -5387,7 +5396,7 @@ subroutine ebands_interpolate_kpath(ebands, dtset, cryst, prefix, comm)
  !shiftk_fine = ebands%shiftk
  !!shiftk_fine = half * reshape([1,0,0,0,1,0,0,0,1,1,1,1,0,0,0], [3,5])
  !ABI_FREE(shiftk_fine)
- !ebands_bspl = ebands_interp_kmesh(ebands, cryst, dtset%einter, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
+ !ebands_bspl = ebands_interp_kmesh(ebands, cryst, dtset%einterp, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
  !call ebands_update_occ(ebands_bspl, dtset%spinmagntarget, prtvol=dtset%prtvol)
  !ebands_skw = ebands_interp_kmesh(ebands, cryst, dtset%einterp, kptrlatt_fine, nshiftk_fine, shiftk_fine, comm)
  !call ebands_update_occ(ebands_skw, dtset%spinmagntarget, prtvol=dtset%prtvol)

@@ -70,22 +70,19 @@ MODULE m_skw
    ! 1 if time-reversal symmetry can be used, 2 otherwise.
 
   integer :: nr
-   ! Number of real-space lattice points.
+   ! Number of star functions.
 
   integer :: nkpt
    ! Number of ab-initio k-points.
 
   integer :: ptg_nsym
-   ! Number of operations of the point group.
+   ! Number of operations in the point group.
 
   logical :: has_inversion
    ! True if the point group contains spatial inversion.
 
   integer :: band_block(2)
-   ! Initial and final band index treated by this processor.
-
-  integer :: spin_block(2)
-   ! Initial and final spin index treated by this processor.
+   ! Initial and final band index.
 
   integer :: nsppol
    ! Number of independent spin polarizations.
@@ -96,31 +93,31 @@ MODULE m_skw
 
   integer,allocatable :: ptg_symrel(:,:,:)
     ! ptg_symrel(3,3,ptg_nsym)
-    ! operations of the point group (real space)
+    ! operations of the point group (real space).
 
   integer,allocatable :: ptg_symrec(:,:,:)
     ! ptg_symrec(3,3,ptg_nsym)
-    ! operations of the point group (reciprocal space)
+    ! operations of the point group (reciprocal space).
 
   complex(dpc),allocatable :: coefs(:,:,:)
-   ! coefs(nr, mband, nsppol)
+   ! coefs(nr, nbcount, nsppol).
 
    !type(skcoefs_t),allocatable :: coefs(:,:)
    ! coefs(mband, nsppol)
 
   complex(dpc),allocatable :: cached_srk(:)
-   ! cached_srk(skw%nr)
-   ! The star function for cached_kpt (used in skw_eval_bks)
+   ! cached_srk(%nr)
+   ! The star function for cached_kpt (used in skw_eval_bks).
   real(dp) :: cached_kpt(3)
 
   complex(dpc),allocatable :: cached_srk_dk1(:,:)
-   ! cached_srk_dk1(skw%nr, 3)
-   ! The 1d derivative wrt k of the star function for cached_kpt_dk1 (used in skw_eval_bks)
+   ! cached_srk_dk1(%nr, 3)
+   ! The 1d derivative wrt k of the star function for cached_kpt_dk1 (used in skw_eval_bks).
   real(dp) :: cached_kpt_dk1(3)
 
   complex(dpc),allocatable :: cached_srk_dk2(:,:,:)
-   ! cached_srk_dk2(skw%nr,3,3)
-   ! The 2d derivatives wrt k of the star function for cached_kpt_dk2 (used in skw_eval_bks)
+   ! cached_srk_dk2(%nr,3,3)
+   ! The 2d derivatives wrt k of the star function for cached_kpt_dk2 (used in skw_eval_bks).
   real(dp) :: cached_kpt_dk2(3)
 
  end type skw_t
@@ -144,7 +141,7 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!  cryst<crystal_t>=Crystalline structure.
 !!  params(:)
-!!     params(1): Ratio between lattice vectors and ab-initio k-points.
+!!     params(1): Ratio between star functions and ab-initio k-points.
 !!     params(2:3): Activate Fourier filtering (Eq 9 of PhysRevB.61.1639) if params(2) > tol6
 !!       params(2)=rcut, params(3) = rsigma
 !!  cplex=1 if time reversal can be used, 2 otherwise.
@@ -154,7 +151,7 @@ CONTAINS  !=====================================================================
 !!  kpts(3,nkpt)=ab-initio k-points in reduced coordinates.
 !!  eig(nband,nkpt,nsppol)=ab-initio eigenvalues.
 !!  band_block(2)=Initial and final band index to interpolate. If [0,0], all bands are used
-!!  spin_block(2)=Initial and final spin index to interpolate. If [0,0], all bands are used
+!!    This is a global variable i.e. all MPI procs must call the routine with the same value.
 !!  comm=MPI communicator
 !!
 !! PARENTS
@@ -164,7 +161,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, eig, band_block, spin_block, comm) result(new)
+type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, eig, band_block, comm) result(new)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -182,7 +179,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  real(dp),intent(in) :: params(:)
  type(crystal_t),intent(in) :: cryst
 !arrays
- integer,intent(in) :: band_block(2),spin_block(2)
+ integer,intent(in) :: band_block(2)
  real(dp),intent(in) :: kpts(3,nkpt)
  real(dp),intent(in) :: eig(nband,nkpt,nsppol)
 
@@ -212,11 +209,7 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
 
  ! Get slice of bands to be treated.
  new%band_block = band_block; if (all(band_block == 0)) new%band_block = [1, nband]
- new%spin_block = spin_block; if (all(spin_block == 0)) new%spin_block = [1, nsppol]
- call xmpi_min(new%band_block(1), bstart, comm, ierr)
- call xmpi_max(new%band_block(2), bstop, comm, ierr)
- bcount = bstop - bstart + 1
-
+ bstart = new%band_block(1); bstop = new%band_block(2); bcount = bstop - bstart + 1
  new%cplex = cplex; new%nkpt = nkpt; new%nsppol = nsppol
 
  ! Get point group operations.
@@ -229,7 +222,6 @@ type(skw_t) function skw_new(cryst, params, cplex, nband, nkpt, nsppol, kpts, ei
  lpratio = abs(params(1))
  ABI_CHECK(lpratio > 0, "lpratio must be > 0")
  rmax = nint((one + (lpratio * new%nkpt * new%ptg_nsym) / two) ** third)
- !rmax = 1 + (lpratio * new%nkpt) / two
  nrwant = lpratio * new%nkpt
 
  call cwtime(cpu, wall, gflops, "start")
@@ -512,10 +504,10 @@ subroutine skw_eval_bks(skw, cryst, band, kpt, spin, oeig, oder1, oder2)
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,jj
+ integer :: ii,jj,ib
 ! *********************************************************************
 
- !DBG_CHECK(allocated(ebspl%coefs(band, spin)%vals), sjoin("Unallocated (band, spin):", ltoa([band, spin])))
+ ib = band - skw%band_block(1) + 1
  !DBG_CHECK(ib >= 1 .and. ib <= skw%bcount, sjoin("out of range band:", itoa(band)))
 
  ! Compute star function for this k-point (if not already in memory)
@@ -524,7 +516,7 @@ subroutine skw_eval_bks(skw, cryst, band, kpt, spin, oeig, oder1, oder2)
    skw%cached_kpt = kpt
  end if
 
- oeig = dot_product(conjg(skw%coefs(:,band,spin)), skw%cached_srk)
+ oeig = dot_product(conjg(skw%coefs(:,ib,spin)), skw%cached_srk)
 
  ! TODO: Test Derivatives
  if (present(oder1)) then
@@ -535,7 +527,7 @@ subroutine skw_eval_bks(skw, cryst, band, kpt, spin, oeig, oder1, oder2)
    end if
 
    do ii=1,3
-     oder1(ii) = dot_product(conjg(skw%coefs(:,band,spin)), skw%cached_srk_dk1(:,ii))
+     oder1(ii) = dot_product(conjg(skw%coefs(:,ib,spin)), skw%cached_srk_dk1(:,ii))
    end do
  end if
 
@@ -549,7 +541,7 @@ subroutine skw_eval_bks(skw, cryst, band, kpt, spin, oeig, oder1, oder2)
    oder2 = zero
    do jj=1,3
      do ii=1,jj
-       oder2(ii, jj) = dot_product(conjg(skw%coefs(:,band,spin)), skw%cached_srk_dk2(:,ii,jj))
+       oder2(ii, jj) = dot_product(conjg(skw%coefs(:,ib,spin)), skw%cached_srk_dk2(:,ii,jj))
        if (ii /= jj) oder2(jj, ii) = oder2(ii, jj)
      end do
    end do

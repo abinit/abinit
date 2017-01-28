@@ -205,7 +205,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
  complex(dpc) :: max_degw,cdummy
- logical :: use_paw_aeur,pawden_exists,dbg_mode,pole_screening,call_pawinit
+ logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname,pawden_fname,fname
  type(kmesh_t) :: Kmesh,Qmesh
@@ -1940,9 +1940,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ! Check if input density file is available, otherwise compute
      pawden_fname = strcat(Dtfil%filnam_ds(3), '_PAWDEN')
      call wrtout(std_out,sjoin('Checking for existence of:',pawden_fname))
-     pawden_exists = file_exists(pawden_fname)
-
-     if (pawden_exists) then
+     if (file_exists(pawden_fname)) then
        ! Read density from file
        ABI_DT_MALLOC(tmp_pawrhoij,(cryst%natom*wfd%usepaw))
 
@@ -2300,8 +2298,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      call ebands_report_gap(QP_BSt,header='QP Band Gaps',unit=ab_out)
 
      ! Band structure interpolation from QP energies computed on the k-mesh.
-     if (nint(dtset%einterp(1)) /= 0) then
-       call ebands_interpolate_kpath(QP_BSt, dtset, cryst, dtfil%filnam_ds(4), comm)
+     if (nint(dtset%einterp(1)) /= 0 .and. all(sigp%minbdgw == sigp%minbnd) .and. all(sigp%maxbdgw == sigp%maxbnd)) then
+       call ebands_interpolate_kpath(QP_BSt, dtset, cryst, [sigp%minbdgw, sigp%maxbdgw], dtfil%filnam_ds(4), comm)
      end if
    end if ! Sigp%nkptgw==Kmesh%nibz
    !

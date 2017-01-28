@@ -674,11 +674,11 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  real(dp) :: invdlt(3,3),ircar(3),ircax(3),rr(3),sinqxred(natom)
  real(dp) :: xredcar(3,natom),xredcax(3,natom),xredicar(3),xredicax(3),xx(3)
  real(dp) :: gprimbyacell(3,3)
- complex(dpc) :: exp2piqx(natom)
  real(dp),allocatable :: dyewt(:,:,:,:,:)
+ complex(dpc) :: exp2piqx(natom)
  complex(dpc),allocatable :: expx1(:,:), expx2(:,:), expx3(:,:)
 
-#define DEV_USESPLINE
+!#define DEV_USESPLINE
 #ifdef DEV_USESPLINE
  integer :: jspl
  real(dp) :: aa,bb,cc,dd,step,stepm1,step2div6
@@ -712,12 +712,14 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
      term5=(3.0_dp*term2+term3*(3.0_dp+2.0_dp*y2))*invy2
      t4spl(ii,1) = term4
      t5spl(ii,1) = term5
-     !write(345,*)y2,term4,term5
    end do
 
    call spline(y2vals, t4spl(:,1), ny2_spline, zero, zero, t4spl(:,2))
    call spline(y2vals, t5spl(:,1), ny2_spline, zero, zero, t5spl(:,2))
-   !write(std_out,*)"spline tables created"
+   !do ii=1,ny2_spline
+   !  write(345,*)y2vals(ii),t4spl(ii,:),t5spl(ii,:)
+   !end do
+   !write(std_out,*)"spline tables created"; stop
  end if
 #endif
 
@@ -1047,7 +1049,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                      write(message, '(5a,i0,a,i0,a)' )&
 &                     'The distance between two atoms seem to vanish.',ch10,&
 &                     'This is not allowed.',ch10,&
-&                     'Action : check the input for the atoms number',ia,' and',ib,'.'
+&                     'Action: check the input for the atoms number',ia,' and',ib,'.'
                      MSG_ERROR(message)
                    else
 !                    This is the correction when the atoms are identical
