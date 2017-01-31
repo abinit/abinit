@@ -14,7 +14,7 @@
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!
 !! OUTPUT
 !!  vxc(nfft,nspden)=exchange-correlation potential (hartree)

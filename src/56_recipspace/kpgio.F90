@@ -42,7 +42,7 @@
 !!
 !! PARENTS
 !!      dfpt_looppert,dfptff_initberry,gstate,initmv,inwffil,m_cut3d,nonlinear
-!!      partial_dos_fractions,respfn,scfcv
+!!      respfn,scfcv
 !!
 !! CHILDREN
 !!      kpgsph,wrtout,xmpi_sum
@@ -94,7 +94,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
  character(len=500) :: message
 !arrays
  real(dp) :: kpoint(3)
- 
+
 ! *************************************************************************
 
 !DEBUG

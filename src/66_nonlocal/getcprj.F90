@@ -67,6 +67,7 @@
 !!
 !! PARENTS
 !!      cgwf,ctocprj,debug_tools,dfpt_accrho,dfpt_nstpaw,ks_ddiago,m_wfd
+!!      rf2_init
 !!
 !! CHILDREN
 !!      mkkpg,opernla_ylm,ph1d3d
@@ -105,8 +106,8 @@
 !scalars
  integer,intent(in) :: choice,cpopt,idir,istwf_k,lmnmax
  integer,intent(in) :: mgfft,natom,npw_k,nspinor,ntypat,useylm
- real(dp) :: ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ real(dp),intent(in) :: ucvol
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),kg_k(3,npw_k),nattyp(ntypat)
  integer,intent(in) :: ngfft(18),nloalg(3)
@@ -198,20 +199,20 @@
    kpg_ => kpg
  end if
 
-!Eventually allocate temporary array for ph3d
- if (nloalg(2)<=0) then
-   matblk=NLO_MINCAT
-   ABI_ALLOCATE(ph3d_,(2,npw_k,matblk))
- else
-   matblk=size(ph3d,3)
-   ph3d_ => ph3d
- end if
-
 !Some other dims
  mincat=min(NLO_MINCAT,maxval(nattyp))
  cplex=2;if (istwf_k>1) cplex=1
  choice_=choice;if (cpopt==1) choice_=-choice
  signs=1;if (idir>0) signs=2
+
+!Eventually allocate temporary array for ph3d
+ if (nloalg(2)<=0) then
+   matblk=mincat
+   ABI_ALLOCATE(ph3d_,(2,npw_k,matblk))
+ else
+   matblk=size(ph3d,3)
+   ph3d_ => ph3d
+ end if
 
 !Loop over atom types
  ia1=1;iatm=0

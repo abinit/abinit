@@ -24,7 +24,7 @@
 !!   in case headform=0, use the default (current) format and headform
 !!  ikpt=index of current k point (only needed for error message)
 !!  isppol=spin polarization currently treated (only needed for error message)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  wff=structured info for wavefunction file
 !!
 !! OUTPUT
@@ -32,7 +32,7 @@
 !! NOTES
 !!
 !! PARENTS
-!!      d2frnl,dfpt_nstdy,dfpt_nstpaw,dfpt_vtorho,initwf,newkpt,wfsinp
+!!      initwf,newkpt,wfsinp
 !!
 !! CHILDREN
 !!      rwwf
@@ -64,7 +64,7 @@ subroutine WffReadSkipK(formeig,headform,ikpt,isppol,mpi_enreg,wff)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: formeig,headform,ikpt,isppol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(wffile_type),intent(inout) :: wff
 
 !Local variables-------------------------------

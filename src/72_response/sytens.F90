@@ -41,7 +41,7 @@
 !!      -2   ->   element is zero by symmetry
 !!
 !! PARENTS
-!!      nonlinear
+!!      nonlinear,respfn
 !!
 !! CHILDREN
 !!

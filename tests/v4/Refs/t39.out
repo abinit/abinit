@@ -1,5 +1,5 @@
 
-.Version 8.0.3 of CUT3D 
+.Version 8.1.5 of CUT3D 
 .(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2016 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 08h12 )
+.Starting date : Mon 19 Sep 2016.
+- ( at 22h25 )
   
 
   What is the name of the 3D function (density, potential or wavef) file ?
@@ -27,7 +27,7 @@
  ECHO of the ABINIT file header 
  
  First record :
-.codvsn,headform,fform = 8.0.3    80    2
+.codvsn,headform,fform = 8.1.5    80    2
  
  Second record :
  bantot,intxc,ixc,natom  =    24     0     1     2
@@ -120,7 +120,7 @@
   lmnmax  =  2
  
  Last record :
- residm,etot,fermie=    8.341247E-17   -8.866223895987E+00    1.938279E-01
+ residm,etot,fermie=    8.340956E-17   -8.866223895987E+00    1.938279E-01
  xred =
             0.000000E+00    0.000000E+00    0.000000E+00
             2.500000E-01    2.500000E-01    2.500000E-01
@@ -166,20 +166,20 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     2.828427E+00    4.630000E+01   463
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Si, in-sphere charge =  0.417726
  l=0, charge= 0.413230, m=-l,l splitting: 0.413
  l=1, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000
  l=2, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
- l=3, charge= 0.004066, m=-l,l splitting: 0.000 0.002 0.000 0.000 0.000 0.002 0.000
+ l=3, charge= 0.004066, m=-l,l splitting: 0.000 0.004 0.000 0.000 0.000 0.000 0.000
  l=4, charge= 0.000430, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
  
  Atom #   2 is  Si, in-sphere charge =  0.417726
  l=0, charge= 0.413230, m=-l,l splitting: 0.413
  l=1, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000
  l=2, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
- l=3, charge= 0.004066, m=-l,l splitting: 0.000 0.002 0.000 0.000 0.000 0.002 0.000
+ l=3, charge= 0.004066, m=-l,l splitting: 0.000 0.004 0.000 0.000 0.000 0.000 0.000
  l=4, charge= 0.000430, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
 
  Sum of angular contributions for all atomic spheres 
@@ -253,20 +253,20 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     2.828427E+00    4.980000E+01   498
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Si, in-sphere charge =  0.491888
  l=0, charge= 0.484165, m=-l,l splitting: 0.484
  l=1, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000
  l=2, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
- l=3, charge= 0.006908, m=-l,l splitting: 0.000 0.003 0.000 0.000 0.000 0.003 0.000
+ l=3, charge= 0.006908, m=-l,l splitting: 0.000 0.007 0.000 0.000 0.000 0.000 0.000
  l=4, charge= 0.000815, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
  
  Atom #   2 is  Si, in-sphere charge =  0.491888
  l=0, charge= 0.484165, m=-l,l splitting: 0.484
  l=1, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000
  l=2, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
- l=3, charge= 0.006908, m=-l,l splitting: 0.000 0.003 0.000 0.000 0.000 0.003 0.000
+ l=3, charge= 0.006908, m=-l,l splitting: 0.000 0.007 0.000 0.000 0.000 0.000 0.000
  l=4, charge= 0.000815, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
 
  Sum of angular contributions for all atomic spheres 
@@ -340,21 +340,21 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     2.828427E+00    5.340000E+01   534
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Si, in-sphere charge =  0.570911
  l=0, charge= 0.558530, m=-l,l splitting: 0.559
  l=1, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000
  l=2, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
- l=3, charge= 0.010972, m=-l,l splitting: 0.000 0.005 0.000 0.000 0.000 0.005 0.000
- l=4, charge= 0.001409, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.001 0.000 0.000 0.000 0.000
+ l=3, charge= 0.010972, m=-l,l splitting: 0.000 0.011 0.000 0.000 0.000 0.000 0.000
+ l=4, charge= 0.001409, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.001 0.000 0.000 0.000 0.001
  
  Atom #   2 is  Si, in-sphere charge =  0.570911
  l=0, charge= 0.558530, m=-l,l splitting: 0.559
  l=1, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000
  l=2, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
- l=3, charge= 0.010972, m=-l,l splitting: 0.000 0.005 0.000 0.000 0.000 0.005 0.000
- l=4, charge= 0.001409, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.001 0.000 0.000 0.000 0.000
+ l=3, charge= 0.010972, m=-l,l splitting: 0.000 0.011 0.000 0.000 0.000 0.000 0.000
+ l=4, charge= 0.001409, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.001 0.000 0.000 0.000 0.001
 
  Sum of angular contributions for all atomic spheres 
  l=0, charge = 1.117061 proportion = 0.978314
@@ -427,19 +427,19 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     2.828427E+00    4.980000E+01   498
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Si, in-sphere charge =  0.594569
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
- l=1, charge= 0.463971, m=-l,l splitting: 0.215 0.035 0.215
- l=2, charge= 0.126271, m=-l,l splitting: 0.005 0.058 0.000 0.058 0.005
+ l=1, charge= 0.463971, m=-l,l splitting: 0.184 0.035 0.245
+ l=2, charge= 0.126271, m=-l,l splitting: 0.009 0.067 0.000 0.050 0.000
  l=3, charge= 0.004284, m=-l,l splitting: 0.001 0.000 0.001 0.000 0.001 0.000 0.001
  l=4, charge= 0.000042, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
  
  Atom #   2 is  Si, in-sphere charge =  0.594569
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
- l=1, charge= 0.463971, m=-l,l splitting: 0.215 0.035 0.215
- l=2, charge= 0.126271, m=-l,l splitting: 0.005 0.058 0.000 0.058 0.005
+ l=1, charge= 0.463971, m=-l,l splitting: 0.184 0.035 0.245
+ l=2, charge= 0.126271, m=-l,l splitting: 0.009 0.067 0.000 0.050 0.000
  l=3, charge= 0.004284, m=-l,l splitting: 0.001 0.000 0.001 0.000 0.001 0.000 0.001
  l=4, charge= 0.000042, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
 
@@ -453,8 +453,8 @@
  Total over all atoms and l=0 to 4 :  1.189137
  
  Charge in the sphere around each atom 
- Atom number    1 :  charge =    0.57633954
- Atom number    2 :  charge =    0.57633953
+ Atom number    1 :  charge =    0.57634050
+ Atom number    2 :  charge =    0.57634050
 
   3D wave function was read. Ready for further treatment.
 
@@ -514,20 +514,20 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     2.828427E+00    4.980000E+01   498
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Si, in-sphere charge =  0.594569
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
- l=1, charge= 0.463971, m=-l,l splitting: 0.140 0.184 0.140
- l=2, charge= 0.126271, m=-l,l splitting: 0.025 0.038 0.000 0.038 0.025
- l=3, charge= 0.004284, m=-l,l splitting: 0.001 0.000 0.000 0.002 0.000 0.000 0.001
+ l=1, charge= 0.463971, m=-l,l splitting: 0.095 0.184 0.184
+ l=2, charge= 0.126271, m=-l,l splitting: 0.050 0.050 0.000 0.026 0.000
+ l=3, charge= 0.004284, m=-l,l splitting: 0.001 0.000 0.000 0.002 0.001 0.000 0.001
  l=4, charge= 0.000042, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
  
  Atom #   2 is  Si, in-sphere charge =  0.594569
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
- l=1, charge= 0.463971, m=-l,l splitting: 0.140 0.184 0.140
- l=2, charge= 0.126271, m=-l,l splitting: 0.025 0.038 0.000 0.038 0.025
- l=3, charge= 0.004284, m=-l,l splitting: 0.001 0.000 0.000 0.002 0.000 0.000 0.001
+ l=1, charge= 0.463971, m=-l,l splitting: 0.095 0.184 0.184
+ l=2, charge= 0.126271, m=-l,l splitting: 0.050 0.050 0.000 0.026 0.000
+ l=3, charge= 0.004284, m=-l,l splitting: 0.001 0.000 0.000 0.002 0.001 0.000 0.001
  l=4, charge= 0.000042, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
 
  Sum of angular contributions for all atomic spheres 
@@ -540,8 +540,8 @@
  Total over all atoms and l=0 to 4 :  1.189137
  
  Charge in the sphere around each atom 
- Atom number    1 :  charge =    0.56271490
- Atom number    2 :  charge =    0.56271490
+ Atom number    1 :  charge =    0.56271292
+ Atom number    2 :  charge =    0.56271292
 
   3D wave function was read. Ready for further treatment.
 
@@ -601,20 +601,20 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     2.828427E+00    4.980000E+01   498
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Si, in-sphere charge =  0.594569
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
- l=1, charge= 0.463971, m=-l,l splitting: 0.109 0.245 0.109
- l=2, charge= 0.126271, m=-l,l splitting: 0.033 0.030 0.000 0.030 0.033
- l=3, charge= 0.004284, m=-l,l splitting: 0.001 0.000 0.000 0.002 0.000 0.000 0.001
+ l=1, charge= 0.463971, m=-l,l splitting: 0.184 0.245 0.035
+ l=2, charge= 0.126271, m=-l,l splitting: 0.067 0.009 0.000 0.050 0.000
+ l=3, charge= 0.004284, m=-l,l splitting: 0.001 0.000 0.001 0.002 0.000 0.000 0.000
  l=4, charge= 0.000042, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
  
  Atom #   2 is  Si, in-sphere charge =  0.594569
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
- l=1, charge= 0.463971, m=-l,l splitting: 0.109 0.245 0.109
- l=2, charge= 0.126271, m=-l,l splitting: 0.033 0.030 0.000 0.030 0.033
- l=3, charge= 0.004284, m=-l,l splitting: 0.001 0.000 0.000 0.002 0.000 0.000 0.001
+ l=1, charge= 0.463971, m=-l,l splitting: 0.184 0.245 0.035
+ l=2, charge= 0.126271, m=-l,l splitting: 0.067 0.009 0.000 0.050 0.000
+ l=3, charge= 0.004284, m=-l,l splitting: 0.001 0.000 0.001 0.002 0.000 0.000 0.000
  l=4, charge= 0.000042, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
 
  Sum of angular contributions for all atomic spheres 
@@ -627,8 +627,8 @@
  Total over all atoms and l=0 to 4 :  1.189137
  
  Charge in the sphere around each atom 
- Atom number    1 :  charge =    0.58491858
- Atom number    2 :  charge =    0.58491858
+ Atom number    1 :  charge =    0.58491960
+ Atom number    2 :  charge =    0.58491960
 
   3D wave function was read. Ready for further treatment.
 
@@ -688,21 +688,21 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     2.828427E+00    4.980000E+01   498
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Si, in-sphere charge =  0.446877
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
- l=1, charge= 0.293892, m=-l,l splitting: 0.111 0.072 0.111
- l=2, charge= 0.132441, m=-l,l splitting: 0.016 0.050 0.000 0.050 0.016
- l=3, charge= 0.016459, m=-l,l splitting: 0.004 0.000 0.002 0.004 0.002 0.000 0.004
- l=4, charge= 0.004086, m=-l,l splitting: 0.000 0.001 0.001 0.000 0.000 0.000 0.001 0.001 0.000
+ l=1, charge= 0.293892, m=-l,l splitting: 0.147 0.072 0.075
+ l=2, charge= 0.132441, m=-l,l splitting: 0.033 0.034 0.000 0.066 0.000
+ l=3, charge= 0.016459, m=-l,l splitting: 0.005 0.000 0.003 0.004 0.002 0.000 0.003
+ l=4, charge= 0.004086, m=-l,l splitting: 0.000 0.001 0.001 0.000 0.000 0.000 0.000 0.002 0.000
  
  Atom #   2 is  Si, in-sphere charge =  0.446877
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
- l=1, charge= 0.293892, m=-l,l splitting: 0.111 0.072 0.111
- l=2, charge= 0.132441, m=-l,l splitting: 0.016 0.050 0.000 0.050 0.016
- l=3, charge= 0.016459, m=-l,l splitting: 0.004 0.000 0.002 0.004 0.002 0.000 0.004
- l=4, charge= 0.004086, m=-l,l splitting: 0.000 0.001 0.001 0.000 0.000 0.000 0.001 0.001 0.000
+ l=1, charge= 0.293892, m=-l,l splitting: 0.147 0.072 0.075
+ l=2, charge= 0.132441, m=-l,l splitting: 0.033 0.034 0.000 0.066 0.000
+ l=3, charge= 0.016459, m=-l,l splitting: 0.005 0.000 0.003 0.004 0.002 0.000 0.003
+ l=4, charge= 0.004086, m=-l,l splitting: 0.000 0.001 0.001 0.000 0.000 0.000 0.000 0.002 0.000
 
  Sum of angular contributions for all atomic spheres 
  l=0, charge = 0.000000 proportion = 0.000000
@@ -714,8 +714,8 @@
  Total over all atoms and l=0 to 4 :  0.893755
  
  Charge in the sphere around each atom 
- Atom number    1 :  charge =    0.43348410
- Atom number    2 :  charge =    0.43348410
+ Atom number    1 :  charge =    0.43348380
+ Atom number    2 :  charge =    0.43348380
 
   3D wave function was read. Ready for further treatment.
 
@@ -775,21 +775,21 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     2.828427E+00    4.980000E+01   498
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Si, in-sphere charge =  0.446877
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
- l=1, charge= 0.293892, m=-l,l splitting: 0.073 0.147 0.073
- l=2, charge= 0.132441, m=-l,l splitting: 0.033 0.033 0.000 0.033 0.033
- l=3, charge= 0.016459, m=-l,l splitting: 0.003 0.000 0.002 0.008 0.002 0.000 0.003
- l=4, charge= 0.004086, m=-l,l splitting: 0.000 0.001 0.001 0.000 0.000 0.000 0.001 0.001 0.000
+ l=1, charge= 0.293892, m=-l,l splitting: 0.000 0.147 0.147
+ l=2, charge= 0.132441, m=-l,l splitting: 0.066 0.066 0.000 0.000 0.000
+ l=3, charge= 0.016459, m=-l,l splitting: 0.000 0.000 0.000 0.008 0.003 0.000 0.005
+ l=4, charge= 0.004086, m=-l,l splitting: 0.000 0.002 0.002 0.000 0.000 0.000 0.000 0.000 0.000
  
  Atom #   2 is  Si, in-sphere charge =  0.446877
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
- l=1, charge= 0.293892, m=-l,l splitting: 0.073 0.147 0.073
- l=2, charge= 0.132441, m=-l,l splitting: 0.033 0.033 0.000 0.033 0.033
- l=3, charge= 0.016459, m=-l,l splitting: 0.003 0.000 0.002 0.008 0.002 0.000 0.003
- l=4, charge= 0.004086, m=-l,l splitting: 0.000 0.001 0.001 0.000 0.000 0.000 0.001 0.001 0.000
+ l=1, charge= 0.293892, m=-l,l splitting: 0.000 0.147 0.147
+ l=2, charge= 0.132441, m=-l,l splitting: 0.066 0.066 0.000 0.000 0.000
+ l=3, charge= 0.016459, m=-l,l splitting: 0.000 0.000 0.000 0.008 0.003 0.000 0.005
+ l=4, charge= 0.004086, m=-l,l splitting: 0.000 0.002 0.002 0.000 0.000 0.000 0.000 0.000 0.000
 
  Sum of angular contributions for all atomic spheres 
  l=0, charge = 0.000000 proportion = 0.000000
@@ -801,8 +801,8 @@
  Total over all atoms and l=0 to 4 :  0.893755
  
  Charge in the sphere around each atom 
- Atom number    1 :  charge =    0.44004251
- Atom number    2 :  charge =    0.44004251
+ Atom number    1 :  charge =    0.44004277
+ Atom number    2 :  charge =    0.44004277
 
   3D wave function was read. Ready for further treatment.
 
@@ -862,21 +862,21 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     2.828427E+00    4.980000E+01   498
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Si, in-sphere charge =  0.514847
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
- l=1, charge= 0.488739, m=-l,l splitting: 0.122 0.244 0.122
- l=2, charge= 0.012606, m=-l,l splitting: 0.003 0.003 0.000 0.003 0.003
- l=3, charge= 0.010518, m=-l,l splitting: 0.001 0.003 0.001 0.000 0.001 0.003 0.001
- l=4, charge= 0.002984, m=-l,l splitting: 0.000 0.000 0.001 0.000 0.000 0.000 0.001 0.000 0.000
+ l=1, charge= 0.488739, m=-l,l splitting: 0.244 0.244 0.000
+ l=2, charge= 0.012606, m=-l,l splitting: 0.006 0.000 0.000 0.006 0.000
+ l=3, charge= 0.010518, m=-l,l splitting: 0.003 0.000 0.002 0.000 0.000 0.005 0.000
+ l=4, charge= 0.002984, m=-l,l splitting: 0.000 0.000 0.001 0.000 0.000 0.001 0.000 0.001 0.000
  
  Atom #   2 is  Si, in-sphere charge =  0.514847
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
- l=1, charge= 0.488739, m=-l,l splitting: 0.122 0.244 0.122
- l=2, charge= 0.012606, m=-l,l splitting: 0.003 0.003 0.000 0.003 0.003
- l=3, charge= 0.010518, m=-l,l splitting: 0.001 0.003 0.001 0.000 0.001 0.003 0.001
- l=4, charge= 0.002984, m=-l,l splitting: 0.000 0.000 0.001 0.000 0.000 0.000 0.001 0.000 0.000
+ l=1, charge= 0.488739, m=-l,l splitting: 0.244 0.244 0.000
+ l=2, charge= 0.012606, m=-l,l splitting: 0.006 0.000 0.000 0.006 0.000
+ l=3, charge= 0.010518, m=-l,l splitting: 0.003 0.000 0.002 0.000 0.000 0.005 0.000
+ l=4, charge= 0.002984, m=-l,l splitting: 0.000 0.000 0.001 0.000 0.000 0.001 0.000 0.001 0.000
 
  Sum of angular contributions for all atomic spheres 
  l=0, charge = 0.000000 proportion = 0.000000
@@ -949,19 +949,19 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     2.828427E+00    4.980000E+01   498
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
- Atom #   1 is  Si, in-sphere charge =  0.331406
- l=0, charge= 0.070326, m=-l,l splitting: 0.070
- l=1, charge= 0.070915, m=-l,l splitting: 0.035 0.000 0.035
- l=2, charge= 0.189562, m=-l,l splitting: 0.031 0.053 0.021 0.053 0.031
+ Atom #   1 is  Si, in-sphere charge =  0.331405
+ l=0, charge= 0.070328, m=-l,l splitting: 0.070
+ l=1, charge= 0.070913, m=-l,l splitting: 0.000 0.000 0.071
+ l=2, charge= 0.189561, m=-l,l splitting: 0.000 0.106 0.021 0.000 0.063
  l=3, charge= 0.000549, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000
  l=4, charge= 0.000054, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
  
  Atom #   2 is  Si, in-sphere charge =  0.331408
- l=0, charge= 0.070321, m=-l,l splitting: 0.070
- l=1, charge= 0.070920, m=-l,l splitting: 0.035 0.000 0.035
- l=2, charge= 0.189564, m=-l,l splitting: 0.031 0.053 0.021 0.053 0.031
+ l=0, charge= 0.070319, m=-l,l splitting: 0.070
+ l=1, charge= 0.070922, m=-l,l splitting: 0.000 0.000 0.071
+ l=2, charge= 0.189564, m=-l,l splitting: 0.000 0.106 0.021 0.000 0.063
  l=3, charge= 0.000549, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000
  l=4, charge= 0.000054, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
 
@@ -975,8 +975,8 @@
  Total over all atoms and l=0 to 4 :  0.662813
  
  Charge in the sphere around each atom 
- Atom number    1 :  charge =    0.32518984
- Atom number    2 :  charge =    0.32519080
+ Atom number    1 :  charge =    0.32518948
+ Atom number    2 :  charge =    0.32519116
 
   3D wave function was read. Ready for further treatment.
 
@@ -1036,20 +1036,20 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     2.828427E+00    4.980000E+01   498
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Si, in-sphere charge =  0.566645
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
- l=1, charge= 0.498136, m=-l,l splitting: 0.238 0.022 0.238
- l=2, charge= 0.054707, m=-l,l splitting: 0.005 0.022 0.001 0.022 0.005
- l=3, charge= 0.011708, m=-l,l splitting: 0.000 0.003 0.003 0.000 0.003 0.003 0.000
+ l=1, charge= 0.498136, m=-l,l splitting: 0.166 0.022 0.310
+ l=2, charge= 0.054707, m=-l,l splitting: 0.002 0.028 0.001 0.015 0.008
+ l=3, charge= 0.011708, m=-l,l splitting: 0.000 0.000 0.004 0.000 0.002 0.005 0.001
  l=4, charge= 0.002093, m=-l,l splitting: 0.000 0.001 0.000 0.000 0.000 0.000 0.000 0.001 0.000
  
  Atom #   2 is  Si, in-sphere charge =  0.566645
  l=0, charge= 0.000000, m=-l,l splitting: 0.000
- l=1, charge= 0.498136, m=-l,l splitting: 0.238 0.022 0.238
- l=2, charge= 0.054707, m=-l,l splitting: 0.005 0.022 0.001 0.022 0.005
- l=3, charge= 0.011708, m=-l,l splitting: 0.000 0.003 0.003 0.000 0.003 0.003 0.000
+ l=1, charge= 0.498136, m=-l,l splitting: 0.166 0.022 0.310
+ l=2, charge= 0.054707, m=-l,l splitting: 0.002 0.028 0.001 0.015 0.008
+ l=3, charge= 0.011708, m=-l,l splitting: 0.000 0.000 0.004 0.000 0.002 0.005 0.001
  l=4, charge= 0.002093, m=-l,l splitting: 0.000 0.001 0.000 0.000 0.000 0.000 0.000 0.001 0.000
 
  Sum of angular contributions for all atomic spheres 
@@ -1062,8 +1062,8 @@
  Total over all atoms and l=0 to 4 :  1.133290
  
  Charge in the sphere around each atom 
- Atom number    1 :  charge =    0.53938897
- Atom number    2 :  charge =    0.53938897
+ Atom number    1 :  charge =    0.53938873
+ Atom number    2 :  charge =    0.53938873
 
   3D wave function was read. Ready for further treatment.
 
@@ -1123,20 +1123,20 @@
  Atomic sphere analysis 
 
  wffile : kpgmax, bessargmax, nradint =     2.828427E+00    4.980000E+01   498
- Angular analysis 
+ Angular analysis (real spherical harmonics)
  
  Atom #   1 is  Si, in-sphere charge =  0.432518
  l=0, charge= 0.242833, m=-l,l splitting: 0.243
  l=1, charge= 0.035575, m=-l,l splitting: 0.012 0.012 0.012
- l=2, charge= 0.135336, m=-l,l splitting: 0.023 0.045 0.000 0.045 0.023
- l=3, charge= 0.018082, m=-l,l splitting: 0.003 0.001 0.002 0.005 0.002 0.001 0.003
+ l=2, charge= 0.135336, m=-l,l splitting: 0.045 0.045 0.000 0.045 0.000
+ l=3, charge= 0.018082, m=-l,l splitting: 0.003 0.002 0.002 0.005 0.002 0.000 0.003
  l=4, charge= 0.000691, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
  
  Atom #   2 is  Si, in-sphere charge =  0.432518
  l=0, charge= 0.242833, m=-l,l splitting: 0.243
  l=1, charge= 0.035575, m=-l,l splitting: 0.012 0.012 0.012
- l=2, charge= 0.135336, m=-l,l splitting: 0.023 0.045 0.000 0.045 0.023
- l=3, charge= 0.018082, m=-l,l splitting: 0.003 0.001 0.002 0.005 0.002 0.001 0.003
+ l=2, charge= 0.135336, m=-l,l splitting: 0.045 0.045 0.000 0.045 0.000
+ l=3, charge= 0.018082, m=-l,l splitting: 0.003 0.002 0.002 0.005 0.002 0.000 0.003
  l=4, charge= 0.000691, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
 
  Sum of angular contributions for all atomic spheres 

@@ -89,10 +89,10 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !Local variables -------------------------------
 !scalars
- integer :: blocksize,exchn2n3d,iband,idtset,iexit,ii,iikpt,iikpt_modulo
- integer :: isppol,jdtset,marr,mband_upper
+ integer :: blocksize,exchn2n3d,iband,idtset,iexit,icol,ii,iikpt,iikpt_modulo
+ integer :: irow,isppol,jdtset,marr,mband_lower,mband_upper
  integer :: me_fft,mgfft,mgfftdg,mkmem,mpw,mpw_k,optdriver
- integer :: nfft,nfftdg,nkpt,nkpt_me,npert,nproc,nproc_fft,nqpt
+ integer :: nfft,nfftdg,nkpt,nkpt_me,npert,np,nproc,nproc_fft,nqpt
  integer :: nspink,nsppol,nsym,paral_fft,response,tnband,tread0,usepaw,vectsize
  integer :: fftalg,fftalga,fftalgc
  logical :: fftalg_read,ortalg_read,wfoptalg_read,do_check
@@ -132,6 +132,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
    usepaw=dtsets(idtset)%usepaw
    mband_upper=maxval(dtsets(idtset)%nband(1:nkpt*nsppol))
+   mband_lower=minval(dtsets(idtset)%nband(1:nkpt*nsppol))
 
 !  Compute metric for this dataset
    call mkrdim(dtsets(idtset)%acell_orig(1:3,1),dtsets(idtset)%rprim_orig(1:3,1:3,1),rprimd)
@@ -193,11 +194,16 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'np_slk',tread(10),'INT')
    if(tread(10)==1) dtsets(idtset)%np_slk=intarr(1)
 
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pw_unbal_thresh',tread0,'DPR')
+   if(tread0==1) dtsets(idtset)%pw_unbal_thresh=dprarr(1)
+   mpi_enregs(idtset)%pw_unbal_thresh=dtsets(idtset)%pw_unbal_thresh
+
    call intagm(dprarr,intarr,jdtset,marr,5,string(1:lenstr),'gpu_devices',tread0,'INT')
    if(tread0==1) dtsets(idtset)%gpu_devices(1:5)=intarr(1:5)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_linalg_limit',tread(11),'INT')
    if(tread(11)==1) dtsets(idtset)%gpu_linalg_limit=intarr(1)
+
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nphf',tread0,'INT')
    if(tread0==1) dtsets(idtset)%nphf=intarr(1)
@@ -378,29 +384,55 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      end if
    end if
 
+!  Check size of Scalapack communicator
+#ifdef HAVE_LINALG_ELPA
+   if(dtsets(idtset)%paral_kgb>0.and.dtsets(idtset)%np_slk>0) then
+     np=min(dtsets(idtset)%np_slk,dtsets(idtset)%npband*dtsets(idtset)%npfft*dtsets(idtset)%npspinor)
+     irow=int(sqrt(float(np)))
+     do while(mod(np,irow)/=0)
+       irow=irow-1
+     end do
+     icol=nproc/irow
+     if (icol>mband_lower) then
+       do while(icol>mband_lower)
+         icol=icol-1
+         do while(mod(np,icol)/=0)
+           icol=icol-1
+         end do
+       end do
+       dtsets(idtset)%np_slk=icol
+       write(message,'(5a,i6,a)')&
+&       'The number of band*fft*spinor processors was not consistent with',ch10,&
+&       'the size of communicator used for ELPA library (np_slk).',ch10,&
+&       'np_slk value has been adjusted to ',dtsets(idtset)%np_slk,'.'
+       MSG_COMMENT(message)
+     end if
+   end if
+#endif
+
    !Additional check in case of a parallelized Hartree-Fock calculation
-   !   %usefock == option to perform Fock exchange calculation  
+   !   %usefock == option to perform Fock exchange calculation
    !   %nphf   == number of processors for Fock exchange calculation
    if ((dtsets(idtset)%usefock==1).and.(dtsets(idtset)%nphf/=1)) then
 
-     if ((dtsets(idtset)%nphf<0).or.(dtsets(idtset)%nphf==0)) then 
+     if ((dtsets(idtset)%nphf<0).or.(dtsets(idtset)%nphf==0)) then
        MSG_ERROR('The value of variable nphf should be a non negative integer.')
-     end if 
+     end if
      if (dtsets(idtset)%paral_kgb/=0) then
        message = 'Option paral_kgb should be turned off (value 0) for a parallelized Hartree-Fock calculation.'
        MSG_ERROR(message)
-     end if 
+     end if
      if (response/=0) then
        message = 'A response function calculation is not yet possible with a parallelized Hartree-Fock calculation.'
        MSG_ERROR(message)
-     end if 
+     end if
      if (dtsets(idtset)%npspinor>1) then
        message = 'The parallelism on spinors is not supported by a parallelized Hartree-Fock calculation.'
        MSG_ERROR(message)
-     end if 
+     end if
      if (dtsets(idtset)%npkpt*dtsets(idtset)%nphf > nproc )then
        write(message,'(a,3(a,i0))') ch10,&
-&       'The product of variables npkpt and nphf is bigger than the number of processors: nkpt= ',& 
+&       'The product of variables npkpt and nphf is bigger than the number of processors: nkpt= ',&
 &       dtsets(idtset)%npkpt,' nphf= ',dtsets(idtset)%nphf  ,' and nproc= ', nproc
        MSG_ERROR(message)
      end if
@@ -422,13 +454,13 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      mpi_enregs(idtset)%nproc_spinor=min(dtsets(idtset)%npspinor,dtsets(idtset)%nspinor)
      mpi_enregs(idtset)%bandpp=dtsets(idtset)%bandpp
 !    Additional setting in case of hybrid functional calculation => not yet tested (CMartins)
-!     if (dtsets(idtset)%usefock==1) then 
+!     if (dtsets(idtset)%usefock==1) then
 !       mpi_enregs(idtset)%nproc_hf = dtsets(idtset)%nphf
 !       if (dtsets(idtset)%nphf>1) mpi_enregs(idtset)%paral_hf=1
 !     end if
    else
 !    Additional setting in case of a Fock exchange of PBE0 calculation
-     if (dtsets(idtset)%usefock==1) then 
+     if (dtsets(idtset)%usefock==1) then
        if (dtsets(idtset)%nphf>1) mpi_enregs(idtset)%paral_hf=1
        mpi_enregs(idtset)%nproc_hf = dtsets(idtset)%nphf
        if (dtsets(idtset)%npkpt/=1) then
@@ -770,7 +802,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if (dtsets(idtset)%usewvl == 0) then
      call getmpw(ecut_eff,exchn2n3d,gmet,istwfk,kpt_with_shift,mpi_enregs(idtset),mpw,nkpt)
      ! Allocate tables for parallel IO of the wavefunctions.
-     if( xmpi_mpiio==1 .and. mpi_enregs(idtset)%paral_kgb == 1 .and. & 
+     if( xmpi_mpiio==1 .and. mpi_enregs(idtset)%paral_kgb == 1 .and. &
 &     any(dtsets(idtset)%iomode == [IO_MODE_MPI, IO_MODE_ETSF])) then
        ABI_ALLOCATE(mpi_enregs(idtset)%my_kgtab,(mpw,dtsets(idtset)%mkmem))
      end if

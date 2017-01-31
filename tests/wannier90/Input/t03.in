@@ -133,7 +133,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t03.out, tolnlines = 27, tolabs = 1.40e-03, tolrel = 1.05e-00
+#%%   t03.out, tolnlines = 27, tolabs = 7.0e-03, tolrel = 1.05e-00
 #%% extra_inputs = t03o_DS7_w90.win
 #%% psp_files = 14si.pspnc
 #%% [paral_info]

@@ -10,7 +10,8 @@ nband   5
 tolwfr  1.0d-14
 
 getwfk   20      # Read GS wavefunctions from DS20_WFK
-getddb   20      # Read DDB files from DS20_DDB
+getddb   20      # Read DDB and DVDB files from DS20_DDB and _DVDB
+getddk   20      # read DDK files from DS20_DDKxx where xx is natom+1 +2 +3
 ddb_ngqpt 4 4 4  # q-mesh used to produce the DDB file (must be consisten with DDB data)
 
 # These are the default values.
@@ -32,6 +33,7 @@ eph_fsewin  0.8 eV   # Energy window around Ef
 #eph_extrael 0.0
 #eph_fermie 0.0
 eph_mustar 0.12      # mustar parameter
+eph_transport 1
 
 # q-path for phonons and phonon linewidths.
 ph_ndivsm 20
@@ -56,6 +58,7 @@ ph_qshift
 prtfsurf1 1           # Output BXSF file with Fermi surface in Xcrysden format.
 prtnest1  1           # Output nesting factor file.
 prtbltztrp1 1         # Output data for Bolztrap code. 
+prtphsurf   1         # Output BXSF with Phonon frequencies
 
 ###############
 ## DATASET 2 ##
@@ -93,6 +96,7 @@ znucl  13
 #%%   t88.out, tolnlines= 100, tolabs=5.000e-02, tolrel=5.0e-02, fld_options= -easy;
 #%%   t88o_DS1_EDOS, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_BXSF, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t88o_DS1_PH.bxsf, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_NEST, tolnlines=50, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS1_PHDOS, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%%   t88o_DS2_PHDOS, tolnlines=200, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;

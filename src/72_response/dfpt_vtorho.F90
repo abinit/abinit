@@ -84,7 +84,7 @@
 !!  prtvol=control print volume and debugging output
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  pwindall(max(mpw,mpw1)*mkmem,8,3) = array used to compute the overlap matrices
-!!  qmat(2,dtefield%nband_occ,dtefield%nband_occ,nkpt,2,3) =
+!!  qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3) =
 !!  inverse of the overlap matrix
 !!  rmet(3,3)=real space metric (bohr**2)
 !!  rprimd(3,3)=dimensional real space primitive translations
@@ -94,7 +94,6 @@
 !!  ucvol=unit cell volume in bohr**3.
 !!  usecprj= 1 if cprj, cprjq, cprj1 arrays are stored in memory
 !!  useylmgr1= 1 if ylmgr1 array is allocated
-!!  wffddk=struct info for wf dot (ddk) file.
 !!  ddk<wfk_t)=struct info DDK file
 !!  vtrial(nfftf,nspden)=GS Vtrial(r).
 !!  vtrial1(cplex*nfftf,nspden)=INPUT RF Vtrial(r).
@@ -136,7 +135,6 @@
 !!    nhat1(cplex*nfftf,nspden*psps%usepaw)=1st-order compensation charge density
 !!
 !! SIDE EFFECTS
-!!  mpi_enreg=information about MPI parallelization
 !!  pawrhoij1(natom) <type(pawrhoij_type)>= 1st-order paw rhoij occupancies and related data
 !!  rhor1(cplex*nfftf,nspden)=RF electron density in electrons/bohr**3.
 !!
@@ -144,12 +142,12 @@
 !!      dfpt_scfcv
 !!
 !! CHILDREN
-!!      clsopn,destroy_hamiltonian,destroy_rf_hamiltonian,dfpt_vtowfk
-!!      dfptff_gbefd,dfptff_gradberry,fftpac,getgh1c_setup,hdr_skip
-!!      init_hamiltonian,init_rf_hamiltonian,load_spin_hamiltonian
-!!      load_spin_rf_hamiltonian,occeig,pawmkrho,pawrhoij_alloc,pawrhoij_free
-!!      pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked,rf_transgrid_and_pack
-!!      sqnorm_v,symrhg,timab,wffreadskipk,xmpi_sum
+!!      destroy_hamiltonian,destroy_rf_hamiltonian,dfpt_vtowfk,dfptff_gbefd
+!!      dfptff_gradberry,fftpac,getgh1c_setup,init_hamiltonian
+!!      init_rf_hamiltonian,load_spin_hamiltonian,load_spin_rf_hamiltonian
+!!      occeig,pawmkrho,pawrhoij_alloc,pawrhoij_free,pawrhoij_init_unpacked
+!!      pawrhoij_mpisum_unpacked,rf_transgrid_and_pack,sqnorm_v,symrhg,timab
+!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -169,7 +167,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 & nsppol,nsym1,ntypat,nvresid1,occkq,occ_rbz,optres,&
 & paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,pawrhoij1,pawtab,&
 & phnons1,ph1d,prtvol,psps,pwindall,qmat,resid,residm,rhog1,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,&
-& usecprj,useylmgr1,wffddk,ddk_f,vtrial,vtrial1,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out)
+& usecprj,useylmgr1,ddk_f,vtrial,vtrial1,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out)
 
  use defs_basis
  use defs_datatypes
@@ -177,7 +175,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  use m_profiling_abi
  use m_xmpi
  use m_errors
- use m_wffile
  use m_efield
  use m_hamiltonian
  use m_wfk
@@ -202,7 +199,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  use interfaces_32_util
  use interfaces_53_ffts
  use interfaces_61_occeig
- use interfaces_62_iowfdenpot
  use interfaces_65_paw
  use interfaces_66_wfs
  use interfaces_67_common
@@ -219,7 +215,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer,optional,intent(in) :: cg1_out
  real(dp),intent(in) :: fermie1,ucvol
  real(dp),intent(out) :: edocc,eeig0,ek0,ek1,eloc0,enl0,enl1,nres2,residm
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(efield_type),intent(in) :: dtefield
@@ -260,7 +256,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  real(dp),intent(in) :: ylm1(mpw1*mk1mem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr1(mpw1*mk1mem,3+6*((ipert-natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
  integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
- real(dp),intent(in) :: qmat(2,dtefield%nband_occ,dtefield%nband_occ,nkpt_rbz,2,3)
+ real(dp),intent(in) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt_rbz,2,3)
  type(pawcprj_type),intent(in) :: cprj (natom,dtset%nspinor*mband*mkmem *nsppol*usecprj)
  type(pawcprj_type),intent(in) :: cprjq(natom,dtset%nspinor*mband*mkqmem*nsppol*usecprj)
  type(pawcprj_type),intent(inout) :: cprj1(natom,dtset%nspinor*mband*mk1mem*nsppol*usecprj)
@@ -269,7 +265,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  type(pawrhoij_type),intent(in) :: pawrhoij(my_natom*psps%usepaw)
  type(pawrhoij_type),target,intent(inout) :: pawrhoij1(my_natom*psps%usepaw)
  type(pawtab_type), intent(in) :: pawtab(ntypat*psps%usepaw)
- type(wffile_type),intent(inout) :: wffddk(4)
  type(wfk_t),intent(inout) :: ddk_f(4)
 
 !Local variables-------------------------------
@@ -280,7 +275,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer :: ii,ikg,ikg1,ikpt,ilm,index1,ispden,iscf_mod,isppol,istwf_k
  integer :: mbd2kpsp,mbdkpsp,mcgq,mcgq_disk,mcprjq
  integer :: mcprjq_disk,me,n1,n2,n3,n4,n5,n6,nband_k,nband_kq,nkpg,nkpg1
- integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,spaceworld,test_dot,tim_rwwf
+ integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,spaceworld,test_dot
  logical :: paral_atom,qne0
  real(dp) :: arg,wtk_k
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -320,7 +315,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
  if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 & dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17) then
-   ABI_ALLOCATE(grad_berry,(2,mpw1,dtefield%nband_occ))
+   ABI_ALLOCATE(grad_berry,(2,mpw1,dtefield%mband_occ))
  else
    ABI_ALLOCATE(grad_berry,(0,0,0))
  end if
@@ -382,29 +377,13 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
    mcprjq=0;mcprjq_disk=0
  end if
 
-!Initialisation of the wfdot file in case of electric field (or 2nd order Sternheimer equation) 
+!Initialisation of the wfdot file in case of electric field (or 2nd order Sternheimer equation)
  test_dot=0
  if (ipert==natom+2.and.sum((dtset%qptn(1:3))**2 )<=tol7.and.&
 & (dtset%berryopt/= 4.and.dtset%berryopt/= 6.and.dtset%berryopt/= 7.and.&
 & dtset%berryopt/=14.and.dtset%berryopt/=16.and.dtset%berryopt/=17).or.&
 & (ipert==natom+10.or.ipert==natom+11)) then
    test_dot=1
-#ifndef DEV_MG_WFK
-   call clsopn(wffddk(1))
-   call hdr_skip(wffddk(1),ierr)
-   if((ipert==natom+10 .and. ipert>3).or.ipert==natom+11) then
-     call clsopn(wffddk(2))
-     call hdr_skip(wffddk(2),ierr)
-   end if
-   if((ipert==natom+11) then
-     call clsopn(wffddk(3))
-     call hdr_skip(wffddk(3),ierr)
-     if(idir>3) then
-       call clsopn(wffddk(4))
-       call hdr_skip(wffddk(4),ierr)
-     end if
-   end if
-#endif
  end if
 
 !==== Initialize most of the Hamiltonian (and derivative) ====
@@ -413,13 +392,16 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !* Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
 !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
- call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nspden,natom,&
+ call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nsppol,nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
+& paw_ij=paw_ij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
 
- call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=1)
+ call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=.true.,paw_ij1=paw_ij1,&
+&     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
  if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
-   call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamk_dir2)
+   call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamk_dir2,has_e1kbsc=.true.,paw_ij1=paw_ij1,&
+&     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
  end if
 
 !PAW:allocate memory for non-symetrized 1st-order occupancies matrix (pawrhoij1)
@@ -455,17 +437,12 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 &   gs_hamkq%nvloc,pawfgr,mpi_enreg,vtrial,vtrial1,vlocal,vlocal1)
 
 !  Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamkq,isppol,paw_ij=paw_ij,vlocal=vlocal, &
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-
-   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,paw_ij1=paw_ij1,vlocal1=vlocal1, &
-   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call load_spin_hamiltonian(gs_hamkq,isppol,vlocal=vlocal,with_nonlocal=.true.)
+   call load_spin_rf_hamiltonian(rf_hamkq,gs_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
    if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
-     call load_spin_rf_hamiltonian(rf_hamk_dir2,gs_hamkq,isppol,paw_ij1=paw_ij1,&
-     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-     if (ipert==natom+11) then
-       call load_spin_rf_hamiltonian(rf_hamk_dir2,gs_hamkq,isppol,vlocal1=vlocal1,&
-       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+     call load_spin_rf_hamiltonian(rf_hamk_dir2,gs_hamkq,isppol,with_nonlocal=.true.)
+     if (ipert==natom+11) then ! load vlocal1
+       call load_spin_rf_hamiltonian(rf_hamk_dir2,gs_hamkq,isppol,vlocal1=vlocal1)
      end if
    end if
 
@@ -493,19 +470,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
        bdtot_index=bdtot_index+nband_k
        bd2tot_index=bd2tot_index+2*nband_k**2
 
-       if (test_dot==1) then
-!        Skip the wavefunction block for ikpt,isppol
-         tim_rwwf=0
-#ifndef DEV_MG_WFK
-         call WffReadSkipK(1,0,ikpt,isppol,mpi_enreg,wffddk(1))
-         if((ipert==natom+10 .and. ipert>3).or.ipert==natom+11) WffReadSkipK(1,0,ikpt,isppol,mpi_enreg,wffddk(2))
-         if(ipert==natom+11) then
-           call WffReadSkipK(1,0,ikpt,isppol,mpi_enreg,wffddk(3))
-           if(idir>3) call WffReadSkipK(1,0,ikpt,isppol,mpi_enreg,wffddk(4))
-         end if
-#endif
-!        End the treatment of the dot file
-       end if
        cycle ! Skip the rest of the k-point loop
      end if
 
@@ -582,7 +546,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      kpoint,kpq,idir,ipert,natom,rmet,gprimd,gmet,istwf_k,&                         ! In
      npw_k,npw1_k,useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,&                      ! In
      dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&                 ! Out
-     ddkinpw,dkinpw2,rf_hamk_dir2)                                                  ! Out
+     ddkinpw=ddkinpw,dkinpw2=dkinpw2,rf_hamk_dir2=rf_hamk_dir2)                     ! Out
 
 !    Compute the gradient of the Berry-phase term
      if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
@@ -614,7 +578,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 &     gh0c1_set,gh1c_set,grad_berry,gs_hamkq,ibg,ibgq,ibg1,icg,icgq,icg1,idir,ikpt,ipert,isppol,&
 &     mband,mcgq,mcprjq,mkmem,mk1mem,mpi_enreg,mpw,mpw1,natom,nband_k,ncpgr,nnsclo_now,&
 &     npw_k,npw1_k,dtset%nspinor,nsppol,n4,n5,n6,occ_k,pawrhoij1_unsym,prtvol,psps,resid_k,&
-&     rf_hamkq,rf_hamk_dir2,rhoaug1,rocceig,wffddk,ddk_f,wtk_k,nlines_done,cg1_out)
+&     rf_hamkq,rf_hamk_dir2,rhoaug1,rocceig,ddk_f,wtk_k,nlines_done,cg1_out)
 
 !    Free temporary storage
      ABI_DEALLOCATE(kinpw1)
@@ -713,9 +677,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
            call fftpac(ispden,mpi_enreg,nspden,cplex*n1,n2,n3,cplex*n4,n5,n6,dtset%ngfft,rho1wfr,rhoaug1(:,:,:,ispden),1)
          end do
        end if
-
      end if
-
    end if
 
  end do !  End loop over spins
@@ -822,6 +784,14 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
 !  In order to have the symrhg working in parallel on FFT coefficients, the size
 !  of irzzon1 and phnons1 should be set to nfftot. Therefore, nsym\=1 does not work.
+
+   if(nspden==4) then
+! FR symrhg will manage correctly this rearrangement
+     rhor1(:,2)=rhor1(:,2)+(rhor1(:,1)+rhor1(:,4))    !(n+mx)
+     rhor1(:,3)=rhor1(:,3)+(rhor1(:,1)+rhor1(:,4))    !(n+my)
+     call timab(17,2,tsec)
+   end if
+!
    if (psps%usepaw==0) then
      call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
 &     nspden,nsppol,nsym1,dtset%paral_kgb,phnons1,rhog1  ,rhor1  ,rprimd,symaf1,symrl1)

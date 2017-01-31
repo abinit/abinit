@@ -124,7 +124,7 @@ subroutine rwwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enr
  integer,intent(inout),target :: kg_k(3,optkg*npw)
  real(dp),intent(inout),target :: cg(2,mcg),eigen((2*mband)**formeig*mband),occ(mband)
  type(wffile_type),intent(inout) :: wff
- type(MPI_type), intent(inout) :: mpi_enreg
+ type(MPI_type), intent(in) :: mpi_enreg
 
 !Local variables-------------------------------
 !scalars
@@ -269,7 +269,7 @@ subroutine readwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_e
  integer,intent(inout) :: nband_disk
  integer,intent(inout),target :: kg_k(3,optkg*npw)
  real(dp),intent(inout),target :: cg(2,mcg),eigen((2*mband)**formeig*mband),occ(mband)
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(wffile_type),intent(inout) :: wff
 
 !Local variables-------------------------------
@@ -788,7 +788,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
  integer,intent(in) :: formeig,icg,ikpt,isppol,mband,mcg,nband,nband_disk,npw,nspinor,option,optkg
  integer,intent(in),target :: kg_k(3,optkg*npw)
  real(dp),intent(in),target :: cg(2,mcg),eigen((2*mband)**formeig*mband),occ(mband)
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(wffile_type),intent(inout) :: wff
 
 !Local variables-------------------------------

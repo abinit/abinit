@@ -148,7 +148,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  integer,intent(in) :: nkxc,nspden,nspinor,nsppol,nsym1,ntypat
  integer,intent(in) :: paral_kgb,prtbbb
  real(dp),intent(in) :: ecut,ecutsm,effmass,gsqcut,ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: istwfk_rbz(nkpt_rbz)
@@ -237,7 +237,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
  nfftot=n1*n2*n3
 
 !Initialize Hamiltonian (k-independent terms) - NCPP only
- call init_hamiltonian(gs_hamk,psps,pawtab_dum,nspinor,nspden,natom,&
+ call init_hamiltonian(gs_hamk,psps,pawtab_dum,nspinor,nsppol,nspden,natom,&
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,ph1d=ph1d)
 
  bantot = 0

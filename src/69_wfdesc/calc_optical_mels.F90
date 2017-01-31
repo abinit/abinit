@@ -39,9 +39,8 @@
 !!      m_exc_spectra,m_haydock
 !!
 !! CHILDREN
-!!      destroy_kb_potential,get_bz_item,init_kb_potential,matrginv
-!!      pawcprj_alloc,pawcprj_free,wfd_distribute_bbp,wfd_get_cprj,wrtout
-!!      xmpi_barrier,xmpi_sum
+!!      get_bz_item,matrginv,pawcprj_alloc,pawcprj_free,vkbr_free,vkbr_init
+!!      wfd_distribute_bbp,wfd_get_cprj,wrtout,xmpi_barrier,xmpi_sum
 !!
 !! SOURCE
 
@@ -62,7 +61,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
  use defs_datatypes,      only : ebands_t, pseudopotential_type
  use m_bz_mesh,           only : kmesh_t, get_BZ_item
  use m_crystal,           only : crystal_t
- use m_commutator_vkbr,   only : kb_potential,  destroy_kb_potential, init_kb_potential, nc_ihr_comm
+ use m_vkbr,              only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
  use m_wfd,               only : wfd_t, wfd_get_cprj, wfd_distribute_bbp
  use m_pawtab,            only : pawtab_type
  use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free
@@ -99,7 +98,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
  integer :: ik_bz,ik_ibz,itim_k,isym_k,ib_c,ib_v,ierr,my_rank
  real(dp) :: ediff
  complex(dpc) :: emcvk
- type(kb_potential) :: KBgrad_k
+ type(vkbr_t) :: vkbr
 !arrays
  integer,allocatable :: bbp_distrb(:,:)
  integer,ABI_CONTIGUOUS pointer :: kg_k(:,:)
@@ -153,7 +152,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
     kg_k  => Wfd%Kdata(ik_ibz)%kg_k
 
     if (inclvkb/=0.and.usepaw==0) then ! Prepare term i <n,k|[Vnl,r]|n"k>
-      call init_kb_potential(KBgrad_k,Cryst,Psps,inclvkb,istwf_k,npw_k,Kmesh%ibz(:,ik_ibz),kg_k)
+      call vkbr_init(vkbr,Cryst,Psps,inclvkb,istwf_k,npw_k,Kmesh%ibz(:,ik_ibz),kg_k)
     end if
 
     ! Note: spinorial case is not coded therefore we work with ihrc(:,1).
@@ -169,10 +168,12 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
        if (bbp_distrb(ib_v,ib_c)/=my_rank) CYCLE
        ug_c => Wfd%Wave(ib_c,ik_ibz,spin)%ug
 
-       if (usepaw==0) then  ! Calculate matrix elements of i[H,r] for NC pseudopotentials.        
-         ihrc = nc_ihr_comm(nspinor,npw_k,istwf_k,inclvkb,Kmesh%ibz(:,ik_ibz),KBgrad_k,ug_c,ug_v,kg_k) 
+       if (usepaw==0) then  
+         ! Calculate matrix elements of i[H,r] for NC pseudopotentials.        
+         ihrc = nc_ihr_comm(vkbr,cryst,psps,npw_k,nspinor,istwf_k,inclvkb,Kmesh%ibz(:,ik_ibz),ug_c,ug_v,kg_k) 
 
-       else ! Matrix elements of i[H,r] for PAW.
+       else 
+         ! Matrix elements of i[H,r] for PAW.
          call wfd_get_cprj(Wfd,ib_c,ik_ibz,spin,Cryst,Cp_c,sorted=.FALSE.)
 
          ihrc = paw_ihr(spin,nspinor,npw_k,istwf_k,Kmesh%ibz(:,ik_ibz),Cryst,Pawtab,ug_c,ug_v,kg_k,Cp_c,Cp_v,HUr)
@@ -186,8 +187,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
       end do !ib_c
     end do !ib_v
 
-    call destroy_kb_potential(KBgrad_k)
-
+    call vkbr_free(vkbr)
    end do !spin
  end do !ik_ibz
 

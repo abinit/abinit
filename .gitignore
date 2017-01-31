@@ -1,3 +1,4 @@
+config.h.in~
 .DS_Store
 .deps
 .directory
@@ -24,6 +25,8 @@ robodoc.err
 robodoc.log
 tags
 testf.ac
+abiref.ac
+rafael.ac
 tmp
 tmp2
 auto-*.m4
@@ -291,6 +294,7 @@ tests/TestBot_MPI*/*
 /scripts/post_processing/appa/birch/fit.dat
 /scripts/post_processing/appa/birch/fit.res
 /src/.abilint
+/src/*/*~
 /src/abilint.log
 /src/abirules.log
 /src/error_make_abiauty
@@ -323,6 +327,7 @@ tests/TestBot_MPI*/*
 /src/98_main/mrgdv
 /src/98_main/mrggkk
 /src/98_main/mrgscr
+/src/98_main/multibinit
 /src/98_main/newsp
 /src/98_main/optic
 /src/98_main/ujdet
@@ -396,7 +401,6 @@ m_paw_atom.F90_OK
 42_libpaw/m_paw_finegrid.F90_OK
 m_paw_finegrid.F90_O
 m_paw_finegrid.F90_OK
-build1
 src/tags
 build2-debug-s
 .prev_run.pickle
@@ -409,3 +413,9 @@ tests/testbot.cfg
 tests/testbot_summary.json
 tests/testbot_summary.shelve
 !.gitkeep
+src/*/*dSYM/
+src/*/*log
+src/*/test_*
+!tests_*F90
+build1
+build2

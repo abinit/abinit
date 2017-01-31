@@ -38,7 +38,7 @@ MODULE m_io_tools
  public :: is_open            ! .TRUE. if file is open
  public :: is_connected       ! .TRUE. if file is connected to a logical unit number
  public :: prompt             ! Simple prompt
- public :: read_line          ! Read line from unit ignoring blank lines and deleting comments beginning with !
+ public :: read_string        ! Read string from unit ignoring blank lines and deleting comments beginning with ! or #
  public :: flush_unit         ! Wrapper to the intrinsic flush routine, not implemented by every compiler
  public :: pick_aname         ! Returns the name of a non-existent file to be used for temporary storage.
  public :: isncfile           ! .TRUE. if we have a NETCDF file.
@@ -845,13 +845,13 @@ end subroutine prompt_exit
 
 !----------------------------------------------------------------------
 
-!!****f* m_io_tools/read_line
+!!****f* m_io_tools/read_string
 !! NAME
-!!  read_line
+!!  read_string
 !!
 !! FUNCTION
-!!  Reads line from unit=std_in_ or unit if specified, ignoring blank lines
-!!  and deleting comments beginning with !
+!!  Reads string from unit=std_in_ or unit if specified, ignoring blank lines
+!!  and deleting comments beginning with `!`. Return exit code.
 !!
 !! INPUTS
 !!
@@ -863,39 +863,35 @@ end subroutine prompt_exit
 !!
 !! SOURCE
 
-subroutine read_line(line,ios,unit,comment)
+integer function read_string(string, unit) result(ios)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'read_line'
+#define ABI_FUNC 'read_string'
 !End of the abilint section
 
- character(len=*),intent(out):: line
- character(len=1),optional,intent(in) :: comment
+ character(len=*),intent(out):: string
  integer,optional,intent(in) :: unit
- integer,intent(out) :: ios
 
 !Local variables-------------------------------
  integer :: ipos,unt
 ! *********************************************************************
 
- unt=STDIN ; if (PRESENT(unit)) unt=unit
+ unt=STDIN; if (present(unit)) unt=unit
 
- do
-   read(unt,'(a)',iostat=ios) line  ! read input line
-   if (ios/=0) RETURN
-   line=ADJUSTL(line)
-   if (PRESENT(comment)) then
-     ipos=INDEX(line,comment)
-     if (ipos==1) CYCLE
-     if (ipos/=0) line=line(:ipos-1)
-   end if
-   if (LEN_TRIM(line)/=0) EXIT
- end do
+ read(unt,'(a)', iostat=ios) string  ! read input line
+ if (ios/=0) return
+ string = ADJUSTL(string)
 
-end subroutine read_line
+ ! Ignore portion after comments
+ ipos = INDEX(string, "!")
+ if (ipos /= 0) string=string(:ipos-1)
+ ipos = INDEX(string, "#")
+ if (ipos /= 0) string=string(:ipos-1)
+
+end function read_string
 !!***
 
 !----------------------------------------------------------------------
@@ -918,7 +914,7 @@ end subroutine read_line
 !! PARENTS
 !!      abinit,anaddb,bsepostproc,cchi0,cchi0q0,cut3d,fftprof,impurity_solve
 !!      m_errors,m_hdr,m_io_redirect,m_io_tools,m_matlu,m_shirley,m_xc_vdw
-!!      mrgddb,mrggkk,mrgscr,optic,pawmkaewf,prep_calc_ucrpa,qmc_prep_ctqmc
+!!      mrggkk,mrgscr,multibinit,optic,pawmkaewf,prep_calc_ucrpa,qmc_prep_ctqmc
 !!      scprqt,vdw_kernelgen,vtorho,wrtout
 !!
 !! CHILDREN

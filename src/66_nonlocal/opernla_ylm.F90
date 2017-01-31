@@ -50,7 +50,7 @@
 !!  kpg(npw,nkpg)=(k+G) components          for ikpg=1...3   (if nkpg=3 or 9)
 !!       [(k+G)_a].[(k+G)_b] quantities for ikpg=4...9   (if nkpg=9)
 !!  matblk=dimension of the array ph3d
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  ndgxdt=second dimension of dgxdt
 !!  nd2gxdt=second dimension of d2gxdt
 !!  nincat=number of atoms in the subset here treated
@@ -135,7 +135,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
  integer,intent(in) :: choice,cplex,dimffnl,ia3,idir,istwf_k,matblk,nd2gxdt
  integer,intent(in) :: ndgxdt,nincat,nkpg,nlmn,npw,nspinor,signs
  real(dp),intent(in) :: ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: indlmn(6,nlmn),nloalg(3)
  integer,intent(out) :: cplex_dgxdt(ndgxdt),cplex_d2gxdt(nd2gxdt)
@@ -181,29 +181,27 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !Check compatibility of options
  if (signs==1) then
 !  signs=1, almost all choices
-   check=(choice_==0.or.choice_==1.or.choice_==2.or.choice_==3.or.choice_==4.or.&
-&   choice_==23.or.choice_==24.or.choice_==5.or.choice_==51.or.choice_==52.or.&
-&   choice_==53.or.choice_==54.or.choice_==55.or.choice_==6.or.choice_==8)
+   check=(choice_==0 .or.choice_==1 .or.choice_==2 .or.choice_==3 .or.choice_==4 .or.&
+&   choice_==23.or.choice_==24.or.choice_==5 .or.choice_==51.or.choice_==52.or.&
+&   choice_==53.or.choice_==54.or.choice_==55.or.&
+&   choice_==6 .or.choice_==8 .or.choice_==81)
    ABI_CHECK(check,'BUG: choice not compatible (for signs=1)')
  end if
  if (signs==2) then
-!  signs=2, only "single derivative" choices (except choice=8)
-   check=(choice_==0.or.choice_==1.or.choice_==2.or.choice_==3.or.choice_==5.or.&
-&   choice_==8.or.choice_==51.or.choice_==52.or.choice_==53)
+!  signs=2,less choices
+   check=(choice_== 0.or.choice_== 1.or.choice_== 2.or.choice_==3.or.choice_==5.or.&
+&   choice_==23.or.choice_==51.or.choice_==52.or.choice_==54.or.choice_==55.or.&
+&   choice_== 8.or.choice_==81)
    ABI_CHECK(check,'BUG: signs=2 not compatible with this choice')
  end if
  if (choice_==3.and.signs==2) then
 !  1<=idir<=6 is  required when choice=3 and signs=2
    check=(idir>=1.and.idir<=6)
    ABI_CHECK(check,'BUG: choice=3 and signs=2 requires 1<=idir<=6')
- else if (choice_==8.and.signs==2) then
+ else if ((choice_==8.or.choice_==81).and.signs==2) then
 !  1<=idir<=9 is required when choice=8 and signs=2
    check=(idir>=1.and.idir<=9)
-   ABI_CHECK(check,'BUG: choice=8 and signs=2 requires 1<=idir<=9')
- else if (choice_==6.and.signs==1) then
-!  idir=0 is required when choice=3 and signs=2
-   check=(idir==0)
-   ABI_CHECK(check,'BUG: choice=6 and signs=1 requires idir = 0')
+   ABI_CHECK(check,'BUG: choice=8/81 and signs=2 requires 1<=idir<=9')
  else
 !  signs=2 requires 1<=idir<=3 when choice>1
    check=(signs/=2.or.choice<=1.or.(idir>=1.and.idir<=3))
@@ -508,15 +506,15 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !      Accumulate dGxdt --- derivative wrt strain --- for direction IDIR
 !      --------------------------------------------------------------------
        if ((signs==2).and.(choice_==3)) then
-         mu0=1
+         mu0=1;ffnl_dir(1)=1;if (dimffnl>2) ffnl_dir(1)=idir
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
            if (cplex==2) then
              buffer_r1 = zero ; buffer_i1 = zero
              do ipw=1,npw
-               buffer_r1 = buffer_r1 - scalr(ipw)*ffnl(ipw,2,ilmn)
-               buffer_i1 = buffer_i1 - scali(ipw)*ffnl(ipw,2,ilmn)
+               buffer_r1 = buffer_r1 - scalr(ipw)*ffnl(ipw,1+ffnl_dir(1),ilmn)
+               buffer_i1 = buffer_i1 - scali(ipw)*ffnl(ipw,1+ffnl_dir(1),ilmn)
              end do
              if (parity) then
                dgxdt(1,mu0,ilmn,ia,ispinor) = scale*buffer_r1
@@ -529,13 +527,13 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
              if (parity) then
                buffer_r1 = zero
                do ipw=1,npw
-                 buffer_r1 = buffer_r1 - scalr(ipw)*ffnl(ipw,2,ilmn)
+                 buffer_r1 = buffer_r1 - scalr(ipw)*ffnl(ipw,1+ffnl_dir(1),ilmn)
                end do
                dgxdt(1,mu0,ilmn,ia,ispinor) = scale*buffer_r1
              else
                buffer_i1 = zero
                do ipw=1,npw
-                 buffer_i1 = buffer_i1 - scali(ipw)*ffnl(ipw,2,ilmn)
+                 buffer_i1 = buffer_i1 - scali(ipw)*ffnl(ipw,1+ffnl_dir(1),ilmn)
                end do
                dgxdt(1,mu0,ilmn,ia,ispinor) =-scale*buffer_i1
              end if
@@ -650,11 +648,12 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
        end if
 
 !      --------------------------------------------------------------------
-!      CHOICE= 5, 8, 53, 54, 55  --  SIGNS= 1
+!      CHOICE= 5, 51, 52, 53, 54, 55, 8, 81  --  SIGNS= 1
 !      Accumulate dGxdt --- derivative wrt k --- for all directions
 !      --------------------------------------------------------------------
        if ((signs==1).and.&
-&       (choice_==5.or.choice_==8.or.choice_==53.or.choice_==54.or.choice_==55)) then
+&       (choice_==5 .or.choice_==51.or.choice_==52.or.choice_==53.or.&
+&       choice_==54.or.choice_==55.or.choice_==8 .or.choice_==81)) then
          mu0=1
          if (choice_==54) mu0=4
          if (choice_==55) mu0=7
@@ -719,14 +718,16 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
        end if
 
 !      --------------------------------------------------------------------
-!      CHOICE= 5, 8, 51, 52, 53  --  SIGNS= 2
+!      CHOICE= 5, 51, 52, 53, 8, 81  --  SIGNS= 2
 !      Accumulate dGxdt --- derivative wrt k ---
 !                            for direction IDIR (CHOICE=5,51,52)
+!                            for direction MOD(IDIR-1)/3+1 (CHOICE=81), only if choice > 0
 !                            for directions IDIR-1 & IDIR+1 (CHOICE=53)
-!                            for 2 directions (CHOICE=8)
+!                            for 2 directions (CHOICE=8), only if choice > 0
 !      --------------------------------------------------------------------
        if ((signs==2).and.&
-&       (choice_==5.or.choice_==8.or.choice_==51.or.choice_==52.or.choice_==53)) then
+&       (choice_==5.or.choice_==51.or.choice_==52.or.choice_==53.or. &
+&       choice==8.or.choice==81)) then ! Note the use of choice and not choice_=abs(choice)
          mu0=1
          if (choice_==5.or.choice_==51.or.choice_==52) then
 !          We compute the derivative in one direction
@@ -747,6 +748,11 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !          depending on the input idir argument
            ffnl_dir(1)=(idir-1)/3+1;ffnl_dir(2)=mod((idir-1),3)+1
            ndir=2
+         end if
+         if (choice_==81) then
+!          We compute the derivative in one direction (the second one)
+           ffnl_dir(1)=mod((idir-1),3)+1
+           ndir=1
          end if
          do mua=1,ndir
            mu=mu0+mua-1
@@ -1074,10 +1080,10 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
        end if
 
 !      --------------------------------------------------------------------
-!      CHOICE= 8  --  SIGNS= 1
+!      CHOICE= 8, 81  --  SIGNS= 1
 !      Accumulate d2Gxdt --- 2nd derivative wrt 2 k wave vect. --- for all dirs
 !      --------------------------------------------------------------------
-       if ((signs==1).and.(choice_==8)) then
+       if ((signs==1).and.(choice_==8.or.choice_==81)) then
          mu0=1
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
@@ -1173,13 +1179,14 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
        end if
 
 !      --------------------------------------------------------------------
-!      CHOICE= 8 -- SIGNS= 2
-!      Accumulate dGxdt --- 2nd derivative wrt k --- for direction IDIR (Voigt not.)
+!      CHOICE= 8, 81 -- SIGNS= 2
+!      Accumulate d2Gxdt --- 2nd derivative wrt k --- for direction IDIR (Voigt not.)
 !      --------------------------------------------------------------------
-       if ((signs==2).and.(choice_==8)) then
+       if ((signs==2).and.(choice_==8.or.choice_==81)) then
          mu0=1
-         !From mkffnl.F90: |idir|->(alpha,beta) (1->11,2->22,3->33,4->32,5->31,6->21)
+         !idir= (xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9)
          mua=(idir-1)/3+1;mub=mod((idir-1),3)+1
+         !idir->(Voigt) (11->1,22->2,33->3,32->4,31->5,21->6)
          ffnl_dir(1)=gamma(mua,mub)
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
@@ -1199,17 +1206,17 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
              end if
            else
              if (parity) then
-               buffer_i1 = zero
-               do ipw=1,npw
-                 buffer_i1 = buffer_i1 + scali(ipw)*ffnl(ipw,4+ffnl_dir(1),ilmn)
-               end do
-               d2gxdt(1,mu0,ilmn,ia,ispinor) = scale*buffer_i1
-             else
                buffer_r1 = zero
                do ipw=1,npw
                  buffer_r1 = buffer_r1 + scalr(ipw)*ffnl(ipw,4+ffnl_dir(1),ilmn)
                end do
                d2gxdt(1,mu0,ilmn,ia,ispinor) = scale*buffer_r1
+             else
+               buffer_i1 = zero
+               do ipw=1,npw
+                 buffer_i1 = buffer_i1 + scali(ipw)*ffnl(ipw,4+ffnl_dir(1),ilmn)
+               end do
+               d2gxdt(1,mu0,ilmn,ia,ispinor) =-scale*buffer_i1
              end if
            end if
          end do
@@ -1628,7 +1635,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !      Accumulate dGxdt --- derivative wrt strain --- for direction IDIR
 !      --------------------------------------------------------------------
        if ((signs==2).and.(choice_==3)) then
-         mu0=1
+         mu0=1;ffnl_dir(1)=1;if(dimffnl>2) ffnl_dir(1)=idir
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
            scale=wt;if (il>1) scale=-scale
@@ -1639,8 +1646,8 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !$OMP DO &
 !$OMP REDUCTION(+:buffer_r1,buffer_i1)
              do ipw=1,npw
-               buffer_r1 = buffer_r1 - scalr(ipw)*ffnl(ipw,2,ilmn)
-               buffer_i1 = buffer_i1 - scali(ipw)*ffnl(ipw,2,ilmn)
+               buffer_r1 = buffer_r1 - scalr(ipw)*ffnl(ipw,1+ffnl_dir(1),ilmn)
+               buffer_i1 = buffer_i1 - scali(ipw)*ffnl(ipw,1+ffnl_dir(1),ilmn)
              end do
 !$OMP END DO
 !$OMP SINGLE
@@ -1660,7 +1667,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !$OMP DO &
 !$OMP REDUCTION(+:buffer_r1)
                do ipw=1,npw
-                 buffer_r1 = buffer_r1 - scalr(ipw)*ffnl(ipw,2,ilmn)
+                 buffer_r1 = buffer_r1 - scalr(ipw)*ffnl(ipw,1+ffnl_dir(1),ilmn)
                end do
 !$OMP END DO
 !$OMP SINGLE
@@ -1673,7 +1680,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !$OMP DO &
 !$OMP REDUCTION(+:buffer_i1)
                do ipw=1,npw
-                 buffer_i1 = buffer_i1 - scali(ipw)*ffnl(ipw,2,ilmn)
+                 buffer_i1 = buffer_i1 - scali(ipw)*ffnl(ipw,1+ffnl_dir(1),ilmn)
                end do
 !$OMP END DO
 !$OMP SINGLE
@@ -1816,11 +1823,12 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
        end if
 
 !      --------------------------------------------------------------------
-!      CHOICE= 5, 8, 53, 54, 55  --  SIGNS= 1
+!      CHOICE= 5, 51, 52, 53, 54, 55, 8, 81  --  SIGNS= 1
 !      Accumulate dGxdt --- derivative wrt k --- for all directions
 !      --------------------------------------------------------------------
        if ((signs==1).and.&
-&       (choice_==5.or.choice_==8.or.choice_==53.or.choice_==54.or.choice_==55)) then
+&       (choice_==5 .or.choice_==51.or.choice_==52.or.choice_==53.or.&
+&       choice_==54.or.choice_==55.or.choice_==8 .or.choice_==81)) then
          mu0=1
          if (choice_==54) mu0=4
          if (choice_==55) mu0=7
@@ -1907,14 +1915,16 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
        end if
 
 !      --------------------------------------------------------------------
-!      CHOICE= 5, 8, 51, 52, 53  --  SIGNS= 2
+!      CHOICE= 5, 51, 52, 53, 8, 81  --  SIGNS= 2
 !      Accumulate dGxdt --- derivative wrt k ---
 !                            for direction IDIR (CHOICE=5,51,52)
+!                            for direction MOD(IDIR-1)/3+1 (CHOICE=81)
 !                            for directions IDIR-1 & IDIR+1 (CHOICE=53)
 !                            for 2 directions (CHOICE=8)
 !      --------------------------------------------------------------------
        if ((signs==2).and.&
-&       (choice_==5.or.choice_==8.or.choice_==51.or.choice_==52.or.choice_==53)) then
+&       (choice_==5.or.choice_==51.or.choice_==52.or.choice_==53.or. &
+&       choice_==8.or.choice_==81)) then
          mu0=1
          if (choice_==5.or.choice_==51.or.choice_==52) then
 !          We compute the derivative in one direction
@@ -1935,6 +1945,11 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !          depending on the input idir argument
            ffnl_dir(1)=(idir-1)/3+1;ffnl_dir(2)=mod((idir-1),3)+1
            ndir=2
+         end if
+         if (choice_==81) then
+!          We compute the derivative in one direction (the second one)
+           ffnl_dir(1)=mod((idir-1),3)+1
+           ndir=1
          end if
          do mua=1,ndir
            mu=mu0+mua-1
@@ -2193,7 +2208,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                  end do
 !$OMP END DO
                  if (parity) then
-!$OMP SINGLE            
+!$OMP SINGLE
                    d2gxdt(1,mu,ilmn,ia,ispinor) = scale2*buffer_i1
                    d2gxdt(2,mu,ilmn,ia,ispinor) =-scale2*buffer_r1
 !$OMP END SINGLE
@@ -2221,7 +2236,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !$OMP END DO
 !$OMP SINGLE
                    d2gxdt(1,mu,ilmn,ia,ispinor) = scale2*buffer_i1
-!$OMP END SINGLE                
+!$OMP END SINGLE
                  end do
                end do
              else
@@ -2371,10 +2386,10 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
        end if
 
 !      --------------------------------------------------------------------
-!      CHOICE= 8  --  SIGNS= 1
+!      CHOICE= 8, 81  --  SIGNS= 1
 !      Accumulate d2Gxdt --- 2nd derivative wrt 2 k wave vect. --- for all dirs
 !      --------------------------------------------------------------------
-       if ((signs==1).and.(choice_==8)) then
+       if ((signs==1).and.(choice_==8.or.choice_==81)) then
          mu0=1
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
@@ -2496,13 +2511,14 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
        end if
 
 !      --------------------------------------------------------------------
-!      CHOICE= 8 -- SIGNS= 2
+!      CHOICE= 8, 81 -- SIGNS= 2
 !      Accumulate dGxdt --- 2nd derivative wrt k --- for direction IDIR (Voigt not.)
 !      --------------------------------------------------------------------
        if ((signs==2).and.(choice_==8)) then
          mu0=1
-         !From mkffnl.F90: |idir|->(alpha,beta) (1->11,2->22,3->33,4->32,5->31,6->21)
+         !idir= (xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9)
          mua=(idir-1)/3+1;mub=mod((idir-1),3)+1
+         !idir->(Voigt) (11->1,22->2,33->3,32->4,31->5,21->6)
          ffnl_dir(1)=gamma(mua,mub)
          do ilmn=1,nlmn
            il=mod(indlmn(1,ilmn),4);parity=(mod(il,2)==0)
@@ -2530,19 +2546,6 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
            else
              if (parity) then
 !$OMP SINGLE
-               buffer_i1 = zero
-!$OMP END SINGLE
-!$OMP DO &
-!$OMP REDUCTION(+:buffer_i1)
-               do ipw=1,npw
-                 buffer_i1 = buffer_i1 + scali(ipw)*ffnl(ipw,4+ffnl_dir(1),ilmn)
-               end do
-!$OMP END DO
-!$OMP SINGLE
-               d2gxdt(1,mu0,ilmn,ia,ispinor) = scale*buffer_i1
-!$OMP END SINGLE
-             else
-!$OMP SINGLE
                buffer_r1 = zero
 !$OMP END SINGLE
 !$OMP DO &
@@ -2550,8 +2553,21 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                do ipw=1,npw
                  buffer_r1 = buffer_r1 + scalr(ipw)*ffnl(ipw,4+ffnl_dir(1),ilmn)
                end do
+!$OMP END DO
 !$OMP SINGLE
                d2gxdt(1,mu0,ilmn,ia,ispinor) = scale*buffer_r1
+!$OMP END SINGLE
+             else
+!$OMP SINGLE
+               buffer_i1 = zero
+!$OMP END SINGLE
+!$OMP DO &
+!$OMP REDUCTION(+:buffer_i1)
+               do ipw=1,npw
+                 buffer_i1 = buffer_i1 + scali(ipw)*ffnl(ipw,4+ffnl_dir(1),ilmn)
+               end do
+!$OMP SINGLE
+               d2gxdt(1,mu0,ilmn,ia,ispinor) =-scale*buffer_i1
 !$OMP END SINGLE
              end if
            end if
@@ -2584,7 +2600,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
    if (choice>=0) then
      call xmpi_sum(gx,mpi_enreg%comm_fft,ierr)
    end if
-   if (choice>1) then
+   if (choice_>1) then
      if (ndgxdt>0) then
        call xmpi_sum(dgxdt,mpi_enreg%comm_fft,ierr)
      end if

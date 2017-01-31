@@ -93,8 +93,8 @@ contains
 !!
 !! PARENTS
 !!      bonds_lgth_angles,fresid,ingeo,invars1,m_abimover,m_atomdata,m_crystal
-!!      m_crystal_io,mlwfovlp_setup,out1dm,prt_cif,prtfatbands,prtposcar
-!!      randomcellpos,recip_ylm,vdw_dftd2,vdw_dftd3
+!!      m_crystal_io,m_effective_potential_file,m_epjdos,mlwfovlp_setup,out1dm
+!!      prt_cif,prtposcar,randomcellpos,vdw_dftd2,vdw_dftd3
 !!
 !! CHILDREN
 !!

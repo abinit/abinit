@@ -26,7 +26,7 @@
 !!  indsym(4,nsym,natom)=index showing transformation of atom labels
 !!   under symmetry operations (computed in symatm)
 !!  mgfft=maximum size of 1D FFTs
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mqgrid=dimensioned number of q grid points for local psp spline
 !!  natom=number of atoms in unit cell
 !!  nattyp(ntypat)=number of atoms of each type
@@ -127,7 +127,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
  integer,intent(in) :: nsym,ntypat,paral_kgb,usepaw
  real(dp),intent(in) :: gsqcut,ucvol
  type(pseudopotential_type),intent(in) :: psps
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: atindx1(natom),indsym(4,nsym,natom),nattyp(ntypat)
  integer,intent(in) :: ngfft(18),symq(4,2,nsym),symrec(3,3,nsym),typat(natom)
@@ -157,7 +157,7 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
 ! *************************************************************************
 
  if(nspden==4)then
-   MSG_WARNING('dfpt_dyfro : under development for nspden=4!')
+   MSG_WARNING('dfpt_dyfro : DFPT with nspden=4 works at the moment just for insulators and norm-conserving psp!')
  end if
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)

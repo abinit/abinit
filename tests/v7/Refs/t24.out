@@ -61,7 +61,6 @@ _ WF disk file :      0.318 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -          fftalg         312
             fftgw           0
         f4of2_sla      0.00000000E+00  0.00000000E+00  0.00000000E+00
-           getwfk          -1
           inclvkb           0
            istwfk        1    1    1    1    1    1    1    1
               ixc           7
@@ -714,7 +713,6 @@ P           mkmem           8
 -          fftalg         312
             fftgw           0
         f4of2_sla      0.00000000E+00  0.00000000E+00  0.00000000E+00
-           getwfk          -1
           inclvkb           0
            istwfk        1    1    1    1    1    1    1    1
               ixc           7

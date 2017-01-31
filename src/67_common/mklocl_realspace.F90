@@ -21,7 +21,7 @@
 !!
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables in this dataset
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in unit cell.
 !!  nattyp(ntypat)=number of atoms of each type in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
@@ -99,7 +99,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg, natom, nattyp, nfft, ngfft,
 !scalars
  integer,intent(in) :: natom,nfft,nspden,ntypat,option
  real(dp),intent(in) :: ucvol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
  type(pawtab_type),intent(in)  :: pawtab(ntypat*psps%usepaw)
 !arrays

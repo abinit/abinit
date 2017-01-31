@@ -96,7 +96,7 @@ subroutine initylmg(gprimd,kg,kptns,mkmem,mpi_enreg,mpsang,mpw,&
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mkmem,mpsang,mpw,nkpt,nsppol,optder
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: kg(3,mpw*mkmem),nband(nkpt*nsppol)
  integer,intent(in) :: npwarr(nkpt)

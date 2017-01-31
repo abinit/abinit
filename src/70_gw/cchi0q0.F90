@@ -100,13 +100,13 @@
 !! CHILDREN
 !!      accumulate_chi0_q0,accumulate_chi0sumrule,accumulate_sfchi0_q0
 !!      approxdelta,calc_wfwfg,chi0_bbp_mask,completechi0_deltapart,cwtime
-!!      destroy_kb_potential,flush_unit,get_bz_item,get_gftt,get_uug
-!!      gsph_fft_tabs,gsph_free,gsph_in_fftbox,hilbert_transform
-!!      hilbert_transform_headwings,init_kb_potential,littlegroup_print
-!!      make_transitions,paw_cross_ihr_comm,paw_cross_rho_tw_g,paw_rho_tw_g
-!!      paw_symcprj,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawhur_free
-!!      pawhur_init,pawpwij_free,pawpwij_init,print_gsphere,read_plowannier
-!!      rho_tw_g,setup_spectral,symmetrize_afm_chi0,wfd_change_ngfft
+!!      flush_unit,get_bz_item,get_gftt,get_uug,gsph_fft_tabs,gsph_free
+!!      gsph_in_fftbox,hilbert_transform,hilbert_transform_headwings
+!!      littlegroup_print,make_transitions,paw_cross_ihr_comm
+!!      paw_cross_rho_tw_g,paw_rho_tw_g,paw_symcprj,pawcprj_alloc,pawcprj_copy
+!!      pawcprj_free,pawhur_free,pawhur_init,pawpwij_free,pawpwij_init
+!!      print_gsphere,read_plowannier,rho_tw_g,setup_spectral
+!!      symmetrize_afm_chi0,vkbr_free,vkbr_init,wfd_change_ngfft
 !!      wfd_distribute_bbp,wfd_get_cprj,wfd_get_ur,wfd_paw_get_aeur,wfd_sym_ur
 !!      wrtout,xmpi_sum
 !!
@@ -141,7 +141,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  use m_wfd,             only : wfd_get_ur, wfd_t, wfd_distribute_bbp, wfd_get_cprj, &
 &                              wfd_barrier, wfd_change_ngfft,wfd_paw_get_aeur, wfd_sym_ur
  use m_oscillators,     only : rho_tw_g, calc_wfwfg, get_uug
- use m_commutator_vkbr, only : kb_potential, destroy_kb_potential, init_kb_potential, nc_ihr_comm
+ use m_vkbr,            only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
  use m_chi0,            only : hilbert_transform, setup_spectral, symmetrize_afm_chi0, approxdelta,&
                                accumulate_chi0_q0, accumulate_sfchi0_q0, hilbert_transform_headwings
  use m_pawang,          only : pawang_type
@@ -245,7 +245,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
  type(pawcprj_type),allocatable :: Cprj1_ibz(:,:),Cprj2_ibz(:,:)
  type(pawpwij_t),allocatable :: Pwij(:),Pwij_fft(:)
  type(pawhur_t),allocatable :: Hur(:)
- type(kb_potential),allocatable :: KBgrad_k(:)
+ type(vkbr_t),allocatable :: vkbr(:)
 !************************************************************************
 
 #define DEV_USE_OLDRHOTWG 1
@@ -533,7 +533,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
    call littlegroup_print(Ltg_q,std_out,Dtset%prtvol,'COLL')
  end if
 
- ABI_DT_MALLOC(KBgrad_k,(Kmesh%nibz))
+ ABI_DT_MALLOC(vkbr,(Kmesh%nibz))
  gradk_not_done=.TRUE.
 
  write(msg,'(a,i6,a)')' Calculation status ( ',nkpt_summed,' to be completed):'
@@ -572,7 +572,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      kg_k    => Wfd%Kdata(ik_ibz)%kg_k
 
      if (Psps%usepaw==0.and.Ep%inclvkb/=0.and.gradk_not_done(ik_ibz)) then ! Include term <n,k|[Vnl,iqr]|n"k>' for q->0.
-       call init_kb_potential(KBgrad_k(ik_ibz),Cryst,Psps,Ep%inclvkb,istwf_k,npw_k,Kmesh%ibz(:,ik_ibz),kg_k)
+       call vkbr_init(vkbr(ik_ibz),Cryst,Psps,Ep%inclvkb,istwf_k,npw_k,Kmesh%ibz(:,ik_ibz),kg_k)
        gradk_not_done(ik_ibz)=.FALSE.
      end if
 
@@ -723,7 +723,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 #endif
 
          if (Psps%usepaw==0) then  ! Matrix elements of i[H,r] for NC pseudopotentials.        
-           rhotwx = nc_ihr_comm(nspinor,npw_k,istwf_k,Ep%inclvkb,Kmesh%ibz(:,ik_ibz),KBgrad_k(ik_ibz),ug1,ug2,kg_k) 
+           rhotwx = nc_ihr_comm(vkbr(ik_ibz),cryst,psps,npw_k,nspinor,istwf_k,Ep%inclvkb,Kmesh%ibz(:,ik_ibz),ug1,ug2,kg_k) 
 
          else 
            ! 1) Add PAW onsite contribution, projectors are already in the BZ.
@@ -863,15 +863,15 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
      end do !band1
 
      if (Psps%usepaw==0.and.Ep%inclvkb/=0.and.Ep%symchi==1) then
-       call destroy_kb_potential(KBgrad_k(ik_ibz)) ! Not need anymore as we loop only over IBZ.
+       call vkbr_free(vkbr(ik_ibz)) ! Not need anymore as we loop only over IBZ.
      end if
    end do !ik_bz
  end do !spin
 
  ABI_FREE(igffteps0)
  
- call destroy_kb_potential(KBgrad_k)
- ABI_DT_FREE(KBgrad_k)
+ call vkbr_free(vkbr)
+ ABI_DT_FREE(vkbr)
  !
  ! === After big fat loop over transitions, now MPI ===
  ! * Master took care of the contribution in case of (metallic|spin) polarized systems.

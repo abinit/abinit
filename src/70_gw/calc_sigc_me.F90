@@ -136,7 +136,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  use m_time
 
  use m_blas,          only : xdotc, xgemv
- use m_numeric_tools, only : hermitianize, imin_loc
+ use m_numeric_tools, only : hermitianize, imin_loc, coeffs_gausslegint
  use m_fstrings,      only : sjoin, itoa
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
@@ -164,7 +164,6 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 #define ABI_FUNC 'calc_sigc_me'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
  use interfaces_65_paw
  use interfaces_70_gw, except_this_one => calc_sigc_me
 !End of the abilint section
@@ -673,7 +672,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      end do
    end if
 
-   write(msg,'(2(a,i4),a,i3)')' csigme : ik_bz ',ik_bz,'/',Kmesh%nbz,' done by processor ',Wfd%my_rank
+   write(msg,'(3(a,i0),a,i0)')'Sigma_c: ik_bz ',ik_bz,'/',Kmesh%nbz,", spin:",spin,' done by rank: ',Wfd%my_rank
    call wrtout(std_out,msg,'PERS')
    !
    ! === Find the corresponding irred q-point ===

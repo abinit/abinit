@@ -18,7 +18,7 @@ def compute_epc(
         lifetime = False,
         smearing_eV = 0.01,
         temp_range = [0, 0, 1],
-        omega_range=[0,0,1],
+        omega_range=[-0.1,0.1,0.001],
         eig0_fname = '',
         eigq_fnames = list(),
         DDB_fnames = list(),
@@ -59,6 +59,9 @@ def compute_epc(
 
     temp_range: [0,0,1]
         Minimum, maximum and step temperature for eigenvalues dependance.
+
+    omega_range: [0,0,1]
+        Minimum, maximum and step frequency for the self-energy.
 
     lifetime: (False)
         Compute broadening
@@ -140,8 +143,12 @@ def compute_epc(
             epc.compute_static_control_zp_renormalization()
 
     elif calc_type == 4:
-        epc.compute_self_energy()
-        epc.compute_spectral_function()
+        if temperature:
+            epc.compute_td_self_energy()
+            epc.compute_td_spectral_function()
+        else:
+            epc.compute_zp_self_energy()
+            epc.compute_zp_spectral_function()
 
     else:
         raise Exception('Calculation type must be 1, 2, 3 or 4')

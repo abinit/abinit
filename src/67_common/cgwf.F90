@@ -26,7 +26,7 @@
 !!  filnam_ds1=name of input file (used for exit checking)
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
 !!  icg=shift to be applied on the location of data in the array cg
-!!  igsc=shift to be applied on the location of data in the array cg
+!!  igsc=shift to be applied on the location of data in the array gsc
 !!  ikpt=number of the k-point
 !!  inonsc=index of non self-consistent loop
 !!  isppol=spin polarization currently treated
@@ -148,7 +148,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  integer,intent(in) :: quit
  real(dp),intent(in) :: cpus,tolrde,tolwfr
  character(len=*),intent(in) :: filnam_ds1
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(efield_type),intent(inout) :: dtefield
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
 !arrays
@@ -458,7 +458,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
        dphase_aux1(:) = zero
        phase_end(:) = zero
        bcut(:,:) = zero
-       hel(:,:) = zero
+       hel(:,:) = 0
      end if
 
      ! Extraction of the vector that is iteratively updated
@@ -640,7 +640,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            direc(:,:) = direc(:,:) + grad_berry(:,:)
            grad_total(:,:) = direc(:,:)
 !          DEBUG: check that grad_berry is orthogonal to the occupied manifold at k
-!          do jband = 1, dtefield%nband_occ
+!          do jband = 1, dtefield%mband_occ
 !          dotr = zero  ;  doti = zero
 !          do ipw = 1, npw*nspinor
 !          if(.not.gen_eigenpb) then
@@ -939,14 +939,14 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
                if (mpi_enreg%nproc_cell > 1) then
                  icg1 = dtefield%cgqindex(2,ifor+2*(idir-1),ikpt+(isppol-1)*nkpt)
-                 cgq_k(:,1:dtefield%nband_occ*nspinor*npw_k2) = &
-&                 cgq(:,icg1+1:icg1+dtefield%nband_occ*nspinor*npw_k2)
+                 cgq_k(:,1:dtefield%mband_occ*nspinor*npw_k2) = &
+&                 cgq(:,icg1+1:icg1+dtefield%mband_occ*nspinor*npw_k2)
                  idum1 = dtefield%cgqindex(3,ifor+2*(idir-1),ikpt+(isppol-1)*nkpt)
                  pwnsfac_k(3:4,1:npw_k2) = pwnsfacq(1:2,idum1+1:idum1+npw_k2)
                else
                  icg1 = dtefield%cgindex(ikpt2,isppol)
-                 cgq_k(:,1:dtefield%nband_occ*nspinor*npw_k2) = &
-&                 cg(:,icg1+1:icg1+dtefield%nband_occ*nspinor*npw_k2)
+                 cgq_k(:,1:dtefield%mband_occ*nspinor*npw_k2) = &
+&                 cg(:,icg1+1:icg1+dtefield%mband_occ*nspinor*npw_k2)
                  idum1=dtefield%fkgindex(ikpt2f)
                  pwnsfac_k(3:4,1:npw_k2) = pwnsfac(1:2,idum1+1:idum1+npw_k2)
                end if
@@ -971,7 +971,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 &                 ikpt,1,isppol,mband,1,gs_hamk%natom,1,mband,dimlmn,gs_hamk%nspinor,nsppol,0,&
 &                 mpicomm=spaceComm_distrb,proc_distrb=mpi_enreg%proc_distrb)
 
-!                icp1=dtefield%nband_occ*(ikptf-1)
+!                icp1=dtefield%mband_occ*(ikptf-1)
                  icp2=mband*nspinor*(ikpt2-1)
                  call pawcprj_get(gs_hamk%atindx,cprj_kb,dtefield%cprj,natom,1,icp2,ikpt,0,isppol,&
 &                 mband,dtefield%fnkpt,natom,mband,mband,nspinor,nsppol,0,&
@@ -982,7 +982,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
                    call pawcprj_symkn(cprj_fkn,cprj_ikn,dtefield%atom_indsym,dimlmn,-1,gs_hamk%indlmn,&
 &                   dtefield%indkk_f2ibz(ikpt2f,2),dtefield%indkk_f2ibz(ikpt2f,6),&
 &                   dtefield%fkptns(:,dtefield%i2fbz(ikpt2)),&
-&                   dtefield%lmax,dtefield%lmnmax,mband,natom,dtefield%nband_occ,nspinor,&
+&                   dtefield%lmax,dtefield%lmnmax,mband,natom,dtefield%mband_occ,nspinor,&
 &                   dtefield%nsym,gs_hamk%ntypat,gs_hamk%typat,dtefield%zarot)
                    call pawcprj_copy(cprj_fkn,cprj_kb)
                  end if
@@ -991,13 +991,13 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
 
                  call smatrix(direc_tmp,cgq_k,cg1_k,ddkflag,dtm_k,icg1,icg1,&
 &                 itrs,job,iband,npw*nspinor,mcg_q,mpw,iband,&
-&                 mpw,dtefield%nband_occ,&
+&                 mpw,dtefield%mband_occ,dtefield%nband_occ(isppol),&
 &                 npw,npw_k2,nspinor,pwind_k,pwnsfac_k,sflag_k,&
 &                 shiftbd,smat_inv,smat_k,smat_k_paw,gs_hamk%usepaw)
                else
                  call smatrix(direc,cgq_k,cg1_k,ddkflag,dtm_k,icg1,icg1,&
 &                 itrs,job,iband,npw*nspinor,mcg_q,mpw,iband,&
-&                 mpw,dtefield%nband_occ,&
+&                 mpw,dtefield%mband_occ,dtefield%nband_occ(isppol),&
 &                 npw,npw_k2,nspinor,pwind_k,pwnsfac_k,sflag_k,&
 &                 shiftbd,smat_inv,smat_k,smat_k_paw,gs_hamk%usepaw)
                end if

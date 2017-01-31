@@ -23,7 +23,7 @@
 !!   idtset are already initalized
 !!  filnam(5)=character strings giving file names
 !!  idtset=number of the current dataset
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  mband=maximum number of bands.
 !!  ndtset_alloc=number of datasets, corrected for allocation of at least one data set
 !!  tread(11)=flags indicating wether parallel input parameters were read from input file
@@ -74,6 +74,7 @@
  use m_xmpi
  use m_xomp
  use m_hdr
+ use m_sort
 
  use m_fftcore, only : kpgcount
 
@@ -82,7 +83,6 @@
 #undef ABI_FUNC
 #define ABI_FUNC 'finddistrproc'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
  use interfaces_41_geometry
  use interfaces_51_manage_mpi
  use interfaces_54_abiutil
@@ -131,11 +131,6 @@
  real(dp),allocatable :: weight(:)
  real(dp),pointer :: nband_rbz(:,:)
  type(dataset_type),pointer :: dtset
-
-!no abirules
-!Statement functions are obsolete
-!Expected linear speedup for a nn-sized problem and mm processes
-! speedup(nn,mm)=(one*nn)/(one*((nn/mm)+merge(0,1,mod(nn,mm)==0)))
 !Cut-off function for npfft
 ! cutoff(nn)= &
 !&    0.2_dp+(one-0.2_dp)*(sin((pi*(nn-NPF_CUTOFF))/(one*(NPFMAX-NPF_CUTOFF))) &
@@ -203,7 +198,7 @@
          write(ount,"(a,i0)")"      mpi_ncpus: ",ii
          write(ount,"(a,i0)")"      omp_ncpus: ",omp_ncpus
          write(ount,"(a,f12.9)")"      efficiency: ",eff
-         !write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb 
+         !write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb
        end do
      end do
      write(ount,'(a)')"..."
@@ -345,8 +340,8 @@
      npf_max=dtset%npfft
      if (npf_max>ngmin(2)) then
        write(message,'(3a)') &
-&       "Value of npfft given in input file is too high for the FFT grid!",ch10,&
-&       "Action: decrease npfft or increase FFT grid (ecut, ngfft, ...)."
+ &      "Value of npfft given in input file is too high for the FFT grid!",ch10,&
+ &      "Action: decrease npfft or increase FFT grid (ecut, ngfft, ...)."
        MSG_ERROR(message)
      end if
    end if
@@ -516,13 +511,13 @@
              do bpp=bpp_min,bpp_max
                if (modulo(mband/npb,bpp)>0) cycle
                if ((bpp>1).and.(modulo(bpp,2)>0)) cycle
-               if (one*npb*bpp >max(1.,mband/3.)) cycle
+               if (one*npb*bpp >max(1.,mband/3.).and.(mband>30)) cycle
                if (npb*npf<=4.and.(.not.first_bpp)) cycle
                first_bpp=.false.
 
                acc_kgb=acc_kgb_0
 !              Promote bpp*npb>mband/3
-               if (npb*npf>4) acc_kgb=acc_kgb*(one-(three*bpp*npb)/(one*mband))
+               if (npb*npf>4.and.mband>30) acc_kgb=acc_kgb*(one-(three*bpp*npb)/(one*mband))
 
 !              Resulting speedup
 !              weight0=acc_c*acc_k*acc_s*acc_kgb
@@ -707,7 +702,7 @@
      write(ount,"(a)")"#Autoparal section for GS calculations with paral_kgb"
    else if (optdriver==RUNL_RESPFN) then
      write(ount,"(a)")'#Autoparal section for DFPT calculations'
-   else 
+   else
      MSG_ERROR("Unsupported optdriver")
    end if
 
@@ -734,7 +729,7 @@
        write(ount,"(a,i0)")"      mpi_ncpus: ",tot_ncpus
        !write(ount,"(a,i0)")"      omp_ncpus: ",omp_ncpus !OMP not supported  (yet)
        write(ount,"(a,f12.9)")"      efficiency: ",eff
-       !write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb 
+       !write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb
 
        ! list of variables to use.
        !'npimage','|','npkpt','|','npspinor','|','npfft','|','npband','|',' bandpp ' ,'|','nproc','|','weight','|'
@@ -759,7 +754,7 @@
        write(ount,"(a,i0)")"      mpi_ncpus: ",tot_ncpus
        !write(ount,"(a,i0)")"      omp_ncpus: ",omp_ncpus !OMP not supported  (yet)
        write(ount,"(a,f12.9)")"      efficiency: ",eff
-       !write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb 
+       !write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb
        ! list of variables to use.
        !'nppert','|','npkpt','|','nproc','|','weight','|',
        write(ount,"(a)"   )"      vars: {"
@@ -919,8 +914,8 @@
 #define ABI_FUNC 'speedup_fdp'
 !End of the abilint section
 
-   real(dp)::speedup_fdp
-   integer :: nn,mm
+   real(dp) :: speedup_fdp
+   integer,intent(in) :: nn,mm
    speedup_fdp=(one*nn)/(one*((nn/mm)+merge(0,1,mod(nn,mm)==0)))
  end function speedup_fdp
 

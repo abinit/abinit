@@ -59,7 +59,7 @@ subroutine wvl_nl_gradient(grnl, mpi_enreg, natom, rprimd, wvl, xcart)
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(wvl_data),intent(inout) :: wvl
 !arrays
  real(dp),intent(in) :: xcart(3,natom),rprimd(3,3)

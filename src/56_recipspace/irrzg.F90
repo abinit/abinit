@@ -62,13 +62,13 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
  use defs_basis
  use m_profiling_abi
  use m_errors
+ use m_sort
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'irrzg'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none
@@ -94,11 +94,6 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
  integer,allocatable :: class(:),iperm(:),symafm_used(:),symrel_used(:,:,:)
  integer,allocatable :: work1(:)
  real(dp),allocatable :: tnons_used(:,:),work2(:,:)
-!no_abirules
-!Statement functions are obsolete
-!Define a modulus function (want result in [0,n1-1])
-!Use of two mod calls handles both i1>=n1 AND i1<0:
-!map(i1,n1)=mod(n1+mod(i1,n1),n1)
 
 ! *************************************************************************
 

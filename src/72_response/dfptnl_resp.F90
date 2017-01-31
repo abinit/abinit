@@ -103,7 +103,7 @@ subroutine dfptnl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
  integer,intent(in) :: cplex,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,mband,mgfft
  integer,intent(in) :: mk1mem,mkmem,mpert,mpsang,mpw,natom,nfft,nkpt,nspden
  integer,intent(in) :: nspinor,nsppol
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
@@ -153,8 +153,10 @@ subroutine dfptnl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
  ABI_ALLOCATE(wfraug,(2,n4,n5,n6))
 
 !Initialize Hamiltonian (k-independent terms) - NCPP only
- call init_hamiltonian(gs_hamk,psps,pawtab_dum,nspinor,nspden,natom,&
-& dtset%typat,xred,nfft,mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d)
+ call init_hamiltonian(gs_hamk,psps,pawtab_dum,nspinor,nsppol,nspden,natom,&
+& dtset%typat,xred,nfft,mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
+& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
+!& paw_ij=paw_ij)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
 
  sumr = zero ; sumi = zero

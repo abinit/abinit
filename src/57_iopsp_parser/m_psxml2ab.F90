@@ -36,6 +36,8 @@
 
 module m_psxml2ab
 
+ use m_fstrings,     only : yesno
+
 implicit none
 
 private
@@ -304,15 +306,15 @@ subroutine psxml2abheader(psxmlfile, psphead, iwrite)
      call wrtout(std_out,  message,'COLL')
    end do
 
-   write(message,'(a,l3)') &
+   write(message,'(2a)') &
 &   ' psxml2ab: Relativistically generated pseudopotential (not necessarily SOC!):   ', &
-&   ps_Relativity(psxml)
+&   trim(ps_Relativity(psxml))
    call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
 
-   write(message,'(a,l3)') &
+   write(message,'(2a)') &
 &   ' psxml2ab: Spin-polarized pseudopotential:     ', &
-&   ps_IsSpinPolarized(psxml)
+&   yesno(ps_IsSpinPolarized(psxml))
    call wrtout(ab_out,  message,'COLL')
    call wrtout(std_out,  message,'COLL')
 

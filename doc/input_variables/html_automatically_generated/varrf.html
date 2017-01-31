@@ -41,7 +41,6 @@ variables to be used in the main input file of the abinit code.
  <a href="#d3e_pert3_dir">d3e_pert3_dir</a>&nbsp;&nbsp;
  <a href="#d3e_pert3_elfd">d3e_pert3_elfd</a>&nbsp;&nbsp;
  <a href="#d3e_pert3_phon">d3e_pert3_phon</a>&nbsp;&nbsp;
- <a href="#ddb_ngqpt">ddb_ngqpt</a>&nbsp;&nbsp;
  <a href="#dfpt_sciss">dfpt_sciss</a>&nbsp;&nbsp;
  <br>E.
  <a href="#efmas">efmas</a>&nbsp;&nbsp;
@@ -54,6 +53,7 @@ variables to be used in the main input file of the abinit code.
  <a href="#efmas_n_dirs">efmas_n_dirs</a>&nbsp;&nbsp;
  <a href="#efmas_ntheta">efmas_ntheta</a>&nbsp;&nbsp;
  <a href="#elph2_imagden">elph2_imagden</a>&nbsp;&nbsp;
+ <a href="#eph_task">eph_task</a>&nbsp;&nbsp;
  <a href="#esmear">esmear</a>&nbsp;&nbsp;
  <br>F.
  <a href="#frzfermi">frzfermi</a>&nbsp;&nbsp;
@@ -384,22 +384,6 @@ See <a href="varrf.html#rfphon">rfphon</a> for additional details.
 <B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
 
 
-<br><font id="title"><a name="ddb_ngqpt">ddb_ngqpt</a></font>
-<br><font id="definition">Mnemonics: Derivative DatabBase: Number of Grid points for Q-PoinTs</font>
-<br><font id="characteristic">Characteristic: </font>
-<br><font id="vartype">Variable type: integer(3)</font>
-<br><font id="default">Default is [0, 0, 0]</font>
-<br><font id="text">
-<p>
-This variable is mandatory when <a href="vargs.html#optdriver">optdriver</a>==7.
-It defines the number of divisions in the (homogeneous) q-mesh
-used to generate the DDB file. See also the description of the <a href="varfil.html#getddb">getddb</a> input variable.
-</font>
-
-<br><br><br><br><a href=#top>Go to the top</a>
-<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
-
-
 <br><font id="title"><a name="dfpt_sciss">dfpt_sciss</a></font>
 <br><font id="definition">Mnemonics: DFPT SCISSor operator</font>
 <br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#respfn">RESPFN</a>, <a href="../../users/abinit_help.html#energy">ENERGY</a></font>
@@ -685,6 +669,31 @@ specified in Ha (the default), Ry, eV or Kelvin, since
 '<a href="../../users/abinit_help.html#energy">ENERGY</a>' characteristics.
 (1 Ha=27.2113845 eV)
 </p>
+</font>
+
+<br><br><br><br><a href=#top>Go to the top</a>
+<B> | </B><a href="allvariables.html#top">Complete list of input variables</a><hr>
+
+
+<br><font id="title"><a name="eph_task">eph_task</a></font>
+<br><font id="definition">Mnemonics: Electron-PHonon: Task</font>
+<br><font id="characteristic">Characteristic: <a href="../../users/abinit_help.html#develop">DEVELOP</a></font>
+<br><font id="vartype">Variable type: integer</font>
+<br><font id="default">Default is 1</font>
+<br><font id="text">
+<p>
+When <a href="vargs.html#optdriver">optdriver</a>==7, select the task to be performed.
+The choice is among:
+
+<ul>
+  <li> 1: phonon linewidth </li>
+  <li> 2: electron-phonon coupling elements </li>
+</ul>
+
+The special value eph_task 0 corresponds to a fake task in which
+the code returns after the initial pre-processing of the input data.
+This option could be useful if you want to access the post-processing tools in the EPH code
+(Fermi surface, Phonon DOS ...) without running any task.
 </font>
 
 <br><br><br><br><a href=#top>Go to the top</a>

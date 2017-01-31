@@ -28,9 +28,9 @@
 !!      elphon
 !!
 !! CHILDREN
-!!      dgemm,ebands_update_occ,ep_el_weights,ep_ph_weights,ftgam,ftgam_init
-!!      gam_mult_displ,ifc_fourq,matrginv,mkqptequiv,phdispl_cart2red
-!!      prtbltztrp_tau_out,spline,splint,wrtout,xmpi_sum,zgemm
+!!      dgemm,ebands_prtbltztrp_tau_out,ebands_update_occ,ep_el_weights
+!!      ep_ph_weights,ftgam,ftgam_init,gam_mult_displ,ifc_fourq,matrginv
+!!      mkqptequiv,phdispl_cart2red,spline,splint,wrtout,xmpi_sum,zgemm
 !!
 !! SOURCE
 
@@ -51,12 +51,12 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
  use m_xmpi
  use m_splines
  use m_ifc
+ use m_ebands
 
  use m_io_tools,   only : open_file
  use m_geometry,   only : phdispl_cart2red
  use m_dynmat,     only : ftgam_init, ftgam
  use m_crystal,    only : crystal_t
- use m_ebands,     only : ebands_update_occ
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -64,7 +64,6 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 #define ABI_FUNC 'get_tau_k'
  use interfaces_14_hidewrite
  use interfaces_32_util
- use interfaces_61_occeig
  use interfaces_77_ddb, except_this_one => get_tau_k
 !End of the abilint section
 
@@ -655,7 +654,7 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
 !BoltzTraP output files in SIESTA format
  if (elph_ds%prtbltztrp == 1) then
-   call prtbltztrp_tau_out (tmp_eigenGS(elph_ds%minFSband:elph_ds%maxFSband,:,:),&
+   call ebands_prtbltztrp_tau_out (tmp_eigenGS(elph_ds%minFSband:elph_ds%maxFSband,:,:),&
 &   elph_ds%tempermin,elph_ds%temperinc,ntemper,fermie, &
 &   elph_ds%elph_base_name,elph_ds%k_phon%new_kptirr,natom,nband,elph_ds%nelect,new_nkptirr, &
 &   elph_ds%nspinor,nsppol,Cryst%nsym,Cryst%rprimd,Cryst%symrel,tmp_tau_k)

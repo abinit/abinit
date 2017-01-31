@@ -190,13 +190,12 @@
 !!   for more details about notations please see pdf in /doc/theory/MGGA/
 !!
 !! PARENTS
-!!      afterscfloop,calc_vhxc_me,cvxclda,energy,kxc_alda,nonlinear
-!!      nres2vres,odamix,prcref,prcref_PMA,prctfvw2,respfn,rhotov,scfcv,setvtr
-!!      xc_kernel,xc_kernel_ADA
+!!      calc_vhxc_me,energy,hybrid_corr,m_kxc,nonlinear,nres2vres,odamix,prcref
+!!      prcref_PMA,respfn,rhotov,scfcv,setvtr,xchybrid_ncpp_cc
 !!
 !! CHILDREN
-!!      dotprod_vn,drivexc_main,hartre,leave_new,mean_fftr,metric,mkdenpos,size_dvxc
-!!      timab,wrtout,xcden,xcmult,xcpositron,xcpot,xmpi_sum
+!!      dotprod_vn,drivexc_main,hartre,mean_fftr,metric,mkdenpos,size_dvxc
+!!      timab,xc_vdw_aggregate,xcden,xcmult,xcpositron,xcpot,xctfw,xmpi_sum
 !!
 !! SOURCE
 
@@ -465,7 +464,7 @@ subroutine rhohxc(dtset,enxc,gsqcut,izero,kxc,mpi_enreg,nfft,ngfft, &
 
 !  Non-collinear magnetism: store norm of magnetization
 !   m_norm_min= EPSILON(0.0_dp)**2 ! EB: TOO SMALL!!!
-   m_norm_min=tol14 ! EB: it is still too small, tests are underway
+   m_norm_min=tol8  ! EB: tol14 is still too small, tests are underway
    if (nspden==4) then
      ABI_ALLOCATE(m_norm,(nfft))
      m_norm(:)=sqrt(rhor_(:,2)**2+rhor_(:,3)**2+rhor_(:,4)**2)

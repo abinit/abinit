@@ -25,12 +25,12 @@
 !!      berryphase,chkdilatmx,conducti_nc,ddb_hybrid,dfpt_mkvxc,dfpt_mkvxcstr
 !!      dfpt_symph,electrooptic,ep_el_weights,ep_fs_weights,ep_ph_weights
 !!      get_kpt_fullbz,getghcnd,getkgrid,getspinrot,gstate,harmonic_thermo
-!!      invars2,inwffil,m_cut3d,m_ddb,m_double_grid,m_dvdb,m_dynmat,m_ebands
-!!      m_esymm,m_ewald,m_fock,m_ifc,m_phgamma,m_phonon_supercell,m_phonons
-!!      m_psps,make_efg_el,make_efg_ion,metric,optic,outwant,pimd_langevin_npt
-!!      prtxf,relaxpol,smpbz,stresssym,symbrav,symlatt,symmetrize_rprimd
-!!      symrelrot,symrhg,tddft,testkgrid,tetrahedron,thmeig,uderiv,xcart2xred
-!!      xfpack_x2vin
+!!      invars2,inwffil,m_cut3d,m_ddb,m_ddk,m_double_grid,m_dynmat
+!!      m_effective_potential,m_esymm,m_ewald,m_fock,m_fstab,m_ifc
+!!      m_phonon_supercell,m_psps,m_strain,make_efg_el,make_efg_ion,metric
+!!      optic,outwant,pimd_langevin_npt,prtxf,relaxpol,smpbz,stresssym,symbrav
+!!      symlatt,symmetrize_rprimd,symrelrot,symrhg,tddft,testkgrid,thmeig
+!!      uderiv,xcart2xred,xfpack_x2vin
 !!
 !! CHILDREN
 !!

@@ -64,7 +64,7 @@ program mrggkk
 #endif
  use m_hdr
 
- use m_fstrings,        only : endswith
+ use m_fstrings,        only : endswith, sjoin
  use m_io_tools,        only : flush_unit, open_file, file_exists
  use m_mpinfo,          only : destroy_mpi_enreg
 
@@ -158,7 +158,7 @@ program mrggkk
  iomode = IO_MODE_MPI
 #endif
  !iomode = IO_MODE_FORTRAN
- 
+
  ! Trick needed so that we can run the automatic tests with both Fortran and netcdf
  if (.not. file_exists(filegs) .and. file_exists(nctk_ncify(filegs))) then
    write(message, "(3a)")"- File: ",trim(filegs)," does not exist but found netcdf file with similar name."
@@ -198,8 +198,8 @@ program mrggkk
  call wfk_open_read(GS_wfk,filegs,formeig0,iomode,unitgs,comm)
 
 !Copy header of GS file to output.
- if (binascii /= 2) then 
-   if (rdwrout == 4) then 
+ if (binascii /= 2) then
+   if (rdwrout == 4) then
      call hdr_echo(GS_wfk%Hdr, GS_wfk%fform, rdwrout)
    else
      call hdr_fort_write(GS_wfk%Hdr, unitout, GS_wfk%fform, ierr)
@@ -261,7 +261,7 @@ program mrggkk
 
 !  copy header of 1WF file to output
    if (binascii /= 2) then
-     if (rdwrout == 4) then 
+     if (rdwrout == 4) then
        call hdr_echo(hdr1, PH_wfk%fform, rdwrout)
      else
        call hdr_fort_write(hdr1, unitout, PH_wfk%fform, ierr)
@@ -305,18 +305,18 @@ program mrggkk
                write(unitout,'(E18.7, 2x)', ADVANCE='NO') eig_k(2*nband_k*(iband-1)+2*(jband-1)+1)
              else
                write(unitout,'(I18, 2x)', ADVANCE='NO') 0
-             end if 
+             end if
              if (abs(eig_k(2*nband_k*(iband-1)+2*(jband-1)+2))>tolgkk) then
                write(unitout,'(E18.7, 2x)', ADVANCE='NO') eig_k(2*nband_k*(iband-1)+2*(jband-1)+2)
-             else 
+             else
                write(unitout,'(I18, 2x)', ADVANCE='NO') 0
-             end if 
+             end if
            end do
            write(unitout,*)
          end do
          write(unitout,*)
        end if
-!      
+!
      end do
      if (binascii==2) write(unitout,'(2a)') ch10, ch10
    end do
@@ -333,7 +333,7 @@ program mrggkk
 !now read and write information for small GKK files
 !-------------------------------------------------------
  do igkk=1,ngkk
-!  
+!
 !  for each gkk file, get name...
    read(*,'(a)') filegkk
    ipos=INDEX(filegkk,comment)
@@ -350,6 +350,7 @@ program mrggkk
 !  read in header of GS file and eigenvalues
 !  could force a comparison of header with global header above for consistency
    call hdr_fort_read(hdr, unitgkk, fform)
+   ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", filegkk))
 
    mband = maxval(hdr%nband)
    ABI_MALLOC(eig_k,(mband))
@@ -378,7 +379,7 @@ program mrggkk
 
 !    copy header of 1WF file to output
      if (binascii /= 2) then
-       if (rdwrout == 4) then 
+       if (rdwrout == 4) then
          call hdr_echo(hdr1, fform, rdwrout)
        else
          call hdr_fort_write(hdr1, unitout, fform, ierr)
@@ -407,18 +408,18 @@ program mrggkk
                  write(unitout,'(E18.7, 2x)', ADVANCE='NO') eig_k(2*nband_k*(iband-1)+2*(jband-1)+1)
                else
                  write(unitout,'(I18, 2x)', ADVANCE='NO') 0
-               end if 
+               end if
                if (abs(eig_k(2*nband_k*(iband-1)+2*(jband-1)+2))>tolgkk) then
                  write(unitout,'(E18.7, 2x)', ADVANCE='NO') eig_k(2*nband_k*(iband-1)+2*(jband-1)+2)
-               else 
+               else
                  write(unitout,'(I18, 2x)', ADVANCE='NO') 0
-               end if 
+               end if
              end do
              write(unitout,*)
            end do
            write(unitout,*)
          end if
-!        
+!
        end do
        if (binascii==2) write(unitout,'(2a)') ch10, ch10
      end do

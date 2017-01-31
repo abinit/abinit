@@ -209,7 +209,7 @@ CONTAINS
 !!  results_gs=<type(results_gs_type)>=results_gs datastructure
 !!
 !! PARENTS
-!!      m_results_img
+!!      m_results_img,mover_effpot
 !!
 !! CHILDREN
 !!      energies_copy,energies_ncwrite
@@ -403,7 +403,7 @@ end subroutine init_results_gs_array
 !!  results_gs(:)=<type(results_gs_type)>=results_gs datastructure
 !!
 !! PARENTS
-!!      m_results_img
+!!      m_results_img,mover_effpot
 !!
 !! CHILDREN
 !!      energies_copy,energies_ncwrite
@@ -776,6 +776,7 @@ integer function results_gs_ncwrite(res,ncid,ecut,pawecutdg) result(ncerr)
 
 contains
  integer function vid(vname) 
+
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.

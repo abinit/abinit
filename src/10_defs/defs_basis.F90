@@ -29,6 +29,10 @@
 
 module defs_basis
 
+!#ifdef HAVE_FC_ISO_FORTRAN_2008
+! use ISO_FORTRAN_ENV, only : input_unit, output_unit, error_unit
+!#endif
+
  implicit none
 
 !Keyword 'integer' stands for default integer type
@@ -85,9 +89,17 @@ module defs_basis
 ! it makes the code more readable and easier to change.
 
 !Default values
- integer, parameter :: std_in=5,ab_in=5
- integer, parameter :: std_out_default=6,ab_out_default=7
+ !integer, parameter :: std_in = input_unit
+ !integer, parameter :: ab_in = input_unit
+ !integer, parameter :: std_out_default = output_unit
+ !integer, parameter :: ab_out_default=7
+ !integer, parameter :: std_err = error_unit
+ integer, parameter :: std_in=5
+ integer, parameter :: ab_in=5
+ integer, parameter :: std_out_default=6
+ integer, parameter :: ab_out_default=7    ! TODO: This should be initialized at run-time.
  integer, parameter :: std_err=0
+
  integer, parameter :: dev_null=-1       ! Fake unit number used to skip the printing in wrtout.
  integer, parameter :: ab_xml_out = 50   ! this unit is used to print output into an XML file
  integer, parameter :: tmp_unit=9,tmp_unit2=10
@@ -292,18 +304,19 @@ module defs_basis
  character(len=fnlen),parameter :: ABI_MAIN_LOG_FILE="_MAINLOG"
 
 ! Arrays
- integer,parameter :: identity_3d(3,3)=reshape([1,0,0,0,1,0,0,0,1], [3,3])
+ integer,parameter :: identity_3d(3,3) = reshape([1,0,0,0,1,0,0,0,1], [3,3])
+ integer,parameter :: inversion_3d(3,3) = reshape([-1,0,0,0,-1,0,0,0,-1], [3,3])
 
 
 !A collection of small datatypes for ragged arrays
 !A small datatype for ragged real 1D-arrays
  type coeff1_type
-  real(dp), allocatable :: value(:) 
+  real(dp), allocatable :: value(:)
  end type coeff1_type
 !A small datatype for ragged integer 1D-arrays
  type coeffi1_type
   !integer :: size
-  integer, allocatable :: value(:) 
+  integer, allocatable :: value(:)
  end type coeffi1_type
 !A small datatype for ragged integer 2D-arrays
  type coeffi2_type
@@ -312,23 +325,23 @@ module defs_basis
  end type coeffi2_type
 !A small datatype for ragged real 2D-arrays
  type coeff2_type
-  real(dp), allocatable :: value(:,:)  
+  real(dp), allocatable :: value(:,:)
  end type coeff2_type
 !A small datatype for ragged complex 2D-arrays
  type coeff2c_type
-  complex(dpc), allocatable :: value(:,:) 
+  complex(dpc), allocatable :: value(:,:)
  end type coeff2c_type
 !A small datatype for ragged real 3D-arrays
  type coeff3_type
-  real(dp), allocatable :: value(:,:,:) 
+  real(dp), allocatable :: value(:,:,:)
  end type coeff3_type
 !A small datatype for ragged real 4D-arrays
  type coeff4_type
-  real(dp), allocatable :: value(:,:,:,:)  
+  real(dp), allocatable :: value(:,:,:,:)
  end type coeff4_type
 !A small datatype for ragged real 5D-arrays
  type coeff5_type
-  real(dp), allocatable :: value(:,:,:,:,:)  
+  real(dp), allocatable :: value(:,:,:,:,:)
  end type coeff5_type
 !A small datatype for ragged real 6D-arrays
  type coeff6_type
@@ -404,7 +417,7 @@ CONTAINS  !=====================================================================
 !! PARENTS
 !!      abinit,aim,anaddb,band2eps,bsepostproc,conducti,cut3d,driver,fftprof
 !!      fold2Bloch,initmpi_world,ioprof,lapackprof,m_io_redirect,macroave
-!!      memory_eval,mpi_setup,mrgddb,mrgdv,mrggkk,mrgscr,optic,ujdet
+!!      memory_eval,mpi_setup,mrgddb,mrgdv,mrggkk,mrgscr,multibinit,optic,ujdet
 !!      vdw_kernelgen
 !!
 !! CHILDREN
@@ -451,7 +464,7 @@ CONTAINS  !=====================================================================
 !!   Only printing.
 !!
 !! PARENTS
-!!      abinit,leave_new,m_errors
+!!      abinit,leave_new,m_argparse
 !!
 !! CHILDREN
 !!

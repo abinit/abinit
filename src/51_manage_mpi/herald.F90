@@ -25,7 +25,7 @@
 !!
 !! PARENTS
 !!      abinit,aim,anaddb,bsepostproc,cut3d,fftprof,ioprof,lapackprof,mrgddb
-!!      mrgdv,mrggkk,mrgscr,optic,ujdet,vdw_kernelgen
+!!      mrgdv,mrggkk,mrgscr,multibinit,optic,ujdet,vdw_kernelgen
 !!
 !! CHILDREN
 !!      date_and_time,wrtout
@@ -73,8 +73,8 @@ subroutine herald(code_name,code_version,iout)
 ! *************************************************************************
 
 !RELEASE TIME FROM ABIRULES
- year_rel=2016
- mm_rel=07
+ year_rel=2017
+ mm_rel=01
 !END OF RELEASE TIME
 
 !The technique used hereafter is the only one that we have found to obtain
