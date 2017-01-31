@@ -465,7 +465,7 @@ subroutine sequential_fitting(omega,refval,imfval,nomega,nfreqre,coeff,&
       startcoeff(idx:idx+2) = thiscoeff(1:3) 
     end if
     ! Make fit
-#ifdef HAVE_ALGO_LEVMAR
+#ifdef HAVE_LEVMAR
     call dfit_re_and_im_screening(re_zvals,im_zvals,imfval,refval,&
 &    nomega,3,thiscoeff,prtvol)
 #else

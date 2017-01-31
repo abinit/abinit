@@ -1119,7 +1119,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
    write(unit_tdep,"(1X,F20.15,5X,'Realspace cutoff (A)')") maxval(dist)*Bohr_Ang+1E-5_dp
  end if
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
   ! initialize netcdf variables
    ncerr = nctk_def_dims(ncid, [nctkdim_t("natifc", SUM(atifc)), nctkdim_t("number_of_r_points_big_box", Ifc%nrpt), &
      nctkdim_t("number_of_atoms_big_box", Ifc%natom*Ifc%nrpt), nctkdim_t("ifcout", ifcout1)], defmode=.True.)
@@ -1222,7 +1222,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
          end do     
        end do
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
        NCF_CHECK(nf90_put_var(ncid, vid("ifc_atoms_indices"), ia, start=(/iatifc/)))
        NCF_CHECK(nf90_put_var(ncid, vid("ifc_neighbours_indices"), indngb, start=(/1,iatifc/), count=(/ifcout1,1/)))
        NCF_CHECK(nf90_put_var(ncid, vid("ifc_distances"), wkdist(:ifcout1), start=(/1,iatifc/),count=(/ifcout1,1/)))
@@ -1287,7 +1287,7 @@ subroutine ifc_print(Ifc,dielt,zeff,ifcana,atifc,ifcout,prt_ifc,ncid)
  ABI_FREE(list)
  ABI_FREE(wkdist)
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
 contains
  integer function vid(vname)
 

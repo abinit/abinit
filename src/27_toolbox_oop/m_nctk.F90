@@ -37,7 +37,7 @@ MODULE m_nctk
  use m_errors
  use iso_c_binding
  use m_xmpi
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -63,7 +63,7 @@ MODULE m_nctk
  ! This is clearly wrong because one should use strings instad of floats that cannot be represented exactly
  ! but, unfortunately, it's in the specifications and we have to live with it!
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer,public,parameter :: nctk_max_dims = NF90_MAX_DIMS
  ! Maximum number of dimensions
 
@@ -87,7 +87,7 @@ MODULE m_nctk
 !! SOURCE
 !!
  type,private :: nctkerr_t
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    integer :: ncerr = nf90_noerr
 #else
    integer :: ncerr = 0
@@ -183,7 +183,7 @@ MODULE m_nctk
  public :: nctk_try_fort_or_ncfile  ! Return fortran or netcdf filename depending on the existence of the file.
  public :: nctk_test_mpiio          ! Test at run-time whether the netcdf library supports parallel IO.
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  public :: ab_define_var            ! Helper function used to declare a netcdf variable.
 
  ! Helper functions
@@ -279,7 +279,7 @@ integer function nctk_idname(ncid, varname) result(varid)
 
 ! *********************************************************************
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  ! nctk_idname must be available outside CPP blocks due to a bug in abilint.
  ncerr = nf90_inq_varid(ncid, varname, varid)
 
@@ -496,7 +496,7 @@ subroutine nctk_test_mpiio()
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
  integer,parameter :: master=0
  integer :: ierr,ncid,ncerr
  character(len=500) :: msg
@@ -507,7 +507,7 @@ subroutine nctk_test_mpiio()
 
  nctk_has_mpiio = .False.
 
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
  if (xmpi_comm_rank(xmpi_world) == master) then
    ! Try to open a file with hdf5.
    apath = pick_aname()
@@ -552,7 +552,7 @@ subroutine nctk_test_mpiio()
 end subroutine nctk_test_mpiio
 !!***
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
 
 !!****f* m_nctk/str2xtype
 !! NAME
@@ -766,7 +766,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  ! Always use mpiio mode (i.e. hdf5) if available so that one perform parallel parallel IO
  if (nctk_has_mpiio) then
    ncerr = nf90_einval
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
    call wrtout(std_out, sjoin("Creating HDf5 file: ", path), "COLL")
    ! Believe it or not, I have to use xmpi_comm_self even in sequential to avoid weird SIGSEV in the MPI layer!
    ncerr = nf90_create(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), ncid=ncid, &
@@ -840,7 +840,7 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
  end if
 
  if (xmpi_comm_size(comm) > 1) then
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
    ncerr = nf90_open_par(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
      comm=comm, info=xmpio_info, ncid=ncid)
    NCF_CHECK_MSG(ncerr, sjoin("nf90_open_par: ", path))
@@ -1085,7 +1085,7 @@ integer function nctk_set_collective(ncid, varid) result(ncerr)
 ! *********************************************************************
 
   ncerr = nf90_einval
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
   ncerr = nf90_var_par_access(ncid, varid, nf90_collective)
 #else
   MSG_ERROR("nctk_set_collective should not be called if NETCDF does not support MPI-IO")
@@ -1390,7 +1390,7 @@ subroutine ab_define_var(ncid, var_dim_id, var_id, var_type, var_name, var_mnemo
 
 ! *************************************************************************
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  ncerr = nf90_def_var(ncid, trim(var_name), var_type, var_dim_id, var_id)
  NCF_CHECK_MSG(ncerr," define variable "//trim(var_name))
 
@@ -2211,7 +2211,7 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
      call wrtout(std_out, strcat("nctk_write_datar: using MPI-IO to write ", varname, path), "COLL")
 
      ncerr = nf90_einval
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
      select case(my_action)
      case ("open")
        ncerr = nf90_open(path, mode=nf90_write, comm=comm_fft, info=xmpio_info, ncid=ncid)
@@ -2409,7 +2409,7 @@ integer function nctk_read_datar(path,varname,ngfft,cplex,nfft,nspden,&
      !ncerr = nf90_open_par(path, nf90_nowrite,
      ! Don't know why but the format is not autodected!
      ncerr = nf90_einval
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
      ncerr = nf90_open(path, mode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_nowrite),&
                        comm=comm_fft, info=xmpio_info, ncid=ncid)
 #endif

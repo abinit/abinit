@@ -1423,7 +1423,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
    close(dtfil%unddb)
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    ! Output dynamical matrix in NetCDF format.
    call outddbnc(dtfil, dtset, hdr, psps, natom, mpert, rprimd, xred, dtset%qptn, d2matr, blkflg)
 #endif

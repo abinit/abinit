@@ -143,7 +143,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_errors
  use m_xmpi
  use m_mpinfo
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_abi_etsf
@@ -568,7 +568,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  call timab(953,1,tsec)
 
  ! Output of the GSR file (except when we are inside mover)
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  if (me == master .and. dtset%prtgsr==1 .and. dtset%usewvl == 0) then
    !.and. (dtset%ionmov /= 0 .or. dtset%optcell /= 0)) then
    fname = strcat(dtfil%filnam_ds(4), "_GSR.nc")

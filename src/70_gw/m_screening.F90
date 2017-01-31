@@ -36,7 +36,7 @@ MODULE m_screening
  use m_profiling_abi
  use m_lebedev
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -1024,7 +1024,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
 
      if (my_rank==master) then
        if (iomode == IO_MODE_ETSF) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
           ofname = nctk_ncify(ofname)
           NCF_CHECK(nctk_open_create(unt_dump, ofname, xmpi_comm_self))
 #endif
@@ -1096,7 +1096,7 @@ subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
        end do
 
        if (iomode == IO_MODE_ETSF) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
          NCF_CHECK(nf90_close(unt_dump))
 #endif
        else
@@ -3288,7 +3288,7 @@ subroutine lwl_write(path, cryst, vcp, npwe, nomega, gvec, chi0, chi0_head, chi0
    if (iomode == IO_MODE_FORTRAN) then
      close(unt)
    else
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(unt))
 #endif
    end if

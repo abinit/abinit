@@ -47,7 +47,7 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
  use m_profiling_abi
 
  use m_energies, only : energies_type
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
   use BigDFT_API, only: CalculateTailCorrection
 #endif
 
@@ -72,7 +72,7 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
  real(dp),intent(in) :: xcart(3,dtset%natom)
 
 !Local variables-------------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 !scalars
  integer :: ierr,me,nbuf,nproc,nsize,spaceComm
  real(dp) :: ekin_sum,epot_sum,eproj_sum
@@ -85,7 +85,7 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
 
 ! *************************************************************************
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
  spaceComm=mpi_enreg%comm_wvl
  me=xmpi_comm_rank(spaceComm)
@@ -147,7 +147,7 @@ subroutine wvl_tail_corrections(dtset, energies, etotal, mpi_enreg, psps, wvl, x
  energies%e_localpsp = epot_sum - two * energies%e_hartree
  energies%e_nonlocalpsp = eproj_sum
  energies%e_corepsp = zero
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  energies%e_localpsp = energies%e_localpsp - wvl%e%energs%evxc
 #endif
  etotal = energies%e_kinetic + energies%e_localpsp + energies%e_nonlocalpsp + &

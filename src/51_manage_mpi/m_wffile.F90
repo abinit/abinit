@@ -40,7 +40,7 @@ MODULE m_wffile
  use mpi
 #endif
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -1274,7 +1274,7 @@ subroutine WffOpen(iomode,spaceComm,filename,ier,wff,master,me,unwff,&
    end if
 #endif
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  else if (wff%iomode==IO_MODE_ETSF)then
    fildata = nctk_ncify(filename)
    NCF_CHECK(nctk_open_modify(wff%unwff, fildata, xmpi_comm_self))
@@ -1342,7 +1342,7 @@ subroutine WffClose(wff,ier)
  if(wff%iomode==IO_MODE_FORTRAN) then ! All processors see a local file
    close(unit=wff%unwff)
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  else if(wff%iomode == IO_MODE_ETSF)then
    NCF_CHECK(nf90_close(wff%unwff))
 #endif
@@ -1733,7 +1733,7 @@ subroutine WffReadNpwRec(ierr,ikpt,isppol,nband_disk,npw,nspinor,wff)
 
 !Local variables-------------------------------
  !character(len=500) :: msg
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
  integer :: vid
 #endif
 
@@ -1755,7 +1755,7 @@ subroutine WffReadNpwRec(ierr,ikpt,isppol,nband_disk,npw,nspinor,wff)
 
  else if (wff%iomode == IO_MODE_ETSF) then
 
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
    !write(std_out,*)"readnpwrec: ikpt, spin", ikpt, spin
    NCF_CHECK(nctk_get_dim(wff%unwff, "number_of_spinor_components", nspinor))
    vid = nctk_idname(wff%unwff, "number_of_coefficients")

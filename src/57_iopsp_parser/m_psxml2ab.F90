@@ -42,7 +42,7 @@ implicit none
 
 private
 
-#ifdef HAVE_TRIO_PSML
+#ifdef HAVE_PSML
 public :: psxml2abheader
 !public :: psxml2abfull
 

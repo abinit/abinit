@@ -32,7 +32,7 @@ MODULE m_exc_spectra
  use m_xmpi
  use m_errors
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_ebands
@@ -237,7 +237,7 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
    call wrtout(std_out," Checking f-sum rule on GW NLF Macroscopic Epsilon","COLL")
    call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_gwnlf(:,1)),drude_plsmf)
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      path = strcat(BS_files%out_basename, "_MDF.nc")
      NCF_CHECK_MSG(nctk_open_create(ncid, path, xmpi_comm_self), sjoin("Creating MDF file:", path))
      ! Write structure
@@ -1156,7 +1156,7 @@ subroutine mdfs_ncwrite(ncid,Bsp,eps_exc,eps_rpanlf,eps_gwnlf)
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: ncerr
  real(dp), ABI_CONTIGUOUS pointer :: rvals(:,:,:)
 

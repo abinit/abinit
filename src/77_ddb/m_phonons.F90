@@ -36,7 +36,7 @@ module m_phonons
  use m_atprj
  use m_sortph
  use m_ddb
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -1005,7 +1005,7 @@ subroutine phdos_ncwrite(phdos,ncid)
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: ncerr
 
 ! *************************************************************************
@@ -1595,7 +1595,7 @@ subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: nphmodes,ncerr
 
 ! *************************************************************************

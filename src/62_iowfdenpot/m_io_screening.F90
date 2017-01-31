@@ -36,7 +36,7 @@ MODULE m_io_screening
  use m_nctk
  use m_errors
  use iso_c_binding
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_hdr
@@ -351,7 +351,7 @@ subroutine hscr_from_file(hscr,path,fform,comm)
      close(unt)
    else
      ! Netcdf format
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_read(unt, path, xmpi_comm_self))
      call hscr_io(hscr,fform,rdwr5,unt,xmpi_comm_self,master,IO_MODE_ETSF)
      NCF_CHECK(nf90_close(unt))
@@ -505,7 +505,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
        end select
 
      else if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
        ncid = unt
 
        select case (fform)
@@ -606,7 +606,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
      end if
 
    else if (iomode == IO_MODE_ETSF) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      ncid = unt
      ! Write the abinit header, rewinding of the file (if any) is done here.
      NCF_CHECK(hdr_ncwrite(hscr%hdr, ncid, fform, nc_define=.True.))
@@ -1503,7 +1503,7 @@ subroutine write_screening(varname,unt,iomode,npwe,nomega,iqibz,epsm1)
  character(len=500) :: errmsg
 !arrays
  complex(dpc),allocatable :: epsm1d(:,:)
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: varid,ncerr
 #endif
 #ifdef HAVE_GW_DPC
@@ -1529,7 +1529,7 @@ subroutine write_screening(varname,unt,iomode,npwe,nomega,iqibz,epsm1)
    end do
    ABI_FREE(epsm1d)
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  case (IO_MODE_ETSF)
    ! netcdf does not support complex datatypes. Here I use some C-magic to  associate the memory 
    ! to a Fortran real pointer with the correct type and shape. Note that the data on file is always in double precision. 
@@ -1621,7 +1621,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
 !scalars
  integer,parameter :: master=0
  integer :: ipwe,fform,iomega,iqibz,unt,rdwr,my_rank,nprocs,my_iomode
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: varid,ncerr
 #endif
 #ifdef HAVE_MPI_IO
@@ -1701,7 +1701,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
    call hscr_io(hscr,fform,rdwr,unt,comm,master,my_iomode)
 
  case (IO_MODE_ETSF)
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_read(unt, fname, xmpi_comm_self))
    call hscr_io(hscr,fform,rdwr,unt,comm,master,my_iomode)
 #endif
@@ -1858,7 +1858,7 @@ subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
    close(unt)
 
  case (IO_MODE_ETSF)
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    ! netcdf does not support complex datatypes. Here I use some C-magic to  associate the memory 
    ! to a Fortran real pointer with the correct type and shape. Note that the data on file is always in double precision. 
    ! nf90_get_var will automatically convert from double to single if the GW code is in single precision mode.
@@ -2105,7 +2105,7 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
      MSG_ERROR(msg)
    end if
  else
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_create(ount, fname_out, comm))
 #endif
  end if
@@ -2144,7 +2144,7 @@ subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
  if (iomode == IO_MODE_FORTRAN) then
    close(ount)
  else
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    NCF_CHECK(nf90_close(ount))
 #endif
  end if
@@ -2223,7 +2223,7 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
  ! Find iomode from file extension and open output file.
  if (endswith(fname_out, ".nc")) then
    iomode = IO_MODE_ETSF
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_create(unt, fname_out, comm))
 #else
    MSG_ERROR("Netcdf support is not available")
@@ -2276,7 +2276,7 @@ subroutine ioscr_qrecover(ipath, nqrec, fname_out)
  end do
 
  if (iomode == IO_MODE_FORTRAN) close(unt)
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  if (iomode == IO_MODE_ETSF) then
    NCF_CHECK(nf90_close(unt))
  end if
@@ -2511,7 +2511,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
 
  if (endswith(fname_out, ".nc")) then
    iomode = IO_MODE_ETSF
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_create(ount, fname_out, comm))
 #else
    MSG_ERROR("netcdf support is not activated")
@@ -2584,7 +2584,7 @@ subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohsc
  if (iomode == IO_MODE_FORTRAN) then
    close(ount)
  else
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    NCF_CHECK(nf90_close(ount))
 #endif
  end if
@@ -2683,7 +2683,7 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
  ! Open output file.
  if (endswith(fname_out, ".nc")) then
    iomode = IO_MODE_ETSF
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    NCF_CHECK(nctk_open_create(ount, fname_out, comm))
 #else
    MSG_ERROR("Netcdf support is not available")
@@ -2738,7 +2738,7 @@ subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
  if (iomode == IO_MODE_FORTRAN) then
    close(ount)
  else
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    NCF_CHECK(nf90_close(ount))
 #endif
  end if

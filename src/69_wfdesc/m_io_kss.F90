@@ -37,7 +37,7 @@ MODULE m_io_kss
  use m_errors
  use m_abi_etsf
  use m_nctk
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  use etsf_io
 #endif
  use m_hdr
@@ -131,7 +131,7 @@ subroutine testkss(filkss,iomode,nsym_out,nbnds_kss,ng_kss,mpsang,gvec_p,energie
  real(dp),pointer :: energies_p(:,:,:)
 
 !Local variables-------------------------------
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  type(ETSF_io_low_error) :: error
  type(ETSF_electrons),target :: Electrons_folder
  logical :: ok
@@ -154,7 +154,7 @@ subroutine testkss(filkss,iomode,nsym_out,nbnds_kss,ng_kss,mpsang,gvec_p,energie
    write(msg,'(3a)')&
 &   ' when iomode==3, support for the ETSF I/O library ',ch10,&
 &   ' must be compiled. Use --enable-etsf-io when configuring '
-#if !defined HAVE_TRIO_ETSF_IO
+#if !defined HAVE_ETSF_IO
    MSG_ERROR(msg)
 #endif
  end if
@@ -224,7 +224,7 @@ subroutine testkss(filkss,iomode,nsym_out,nbnds_kss,ng_kss,mpsang,gvec_p,energie
        end do !ikpt
      end do !isppol
 
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
    else if (iomode==IO_MODE_ETSF) then
      ABI_ALLOCATE(eigen,(nbnds_kss))
      eigen(:)=zero
@@ -253,7 +253,7 @@ subroutine testkss(filkss,iomode,nsym_out,nbnds_kss,ng_kss,mpsang,gvec_p,energie
 
    if (iomode==IO_MODE_FORTRAN) close(kss_unt)
    if (iomode==IO_MODE_ETSF) then
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
      NCF_CHECK(nf90_close(kss_unt))
 #endif
    end if
@@ -362,7 +362,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
  character(len=500) :: msg
  type(hdr_type) :: my_Hdr
  type(dataset_type) :: Dtset_cpy
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  logical :: ok
  type(etsf_gwdata) :: GW_data
  type(wvl_wf_type) :: Dummy_wfs
@@ -477,7 +477,7 @@ subroutine write_kss_header(filekss,kss_npw,ishm,nbandksseff,mband,nsym2,symrel2
      ABI_DEALLOCATE(vkbsign)
    end if
 
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  CASE (IO_MODE_ETSF)
 !  We currently use the dataset symmetries, as defined in the Hdr structure instead of the symmetries recomputed in outkss.
    call abi_etsf_init(Dtset_cpy, filekss, 4, .false., my_Hdr%lmn_size, Psps, Dummy_wfs)
@@ -590,7 +590,7 @@ subroutine read_kss_header(kss_unt,filkss,iomode,prtvol,nsym_out,nbnds_kss,ng_ks
  character(len=80) :: title(2)
  character(len=500) :: msg
  logical :: ltest
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  logical :: ok
  type(etsf_io_low_error) :: error
  type(ETSF_dims) :: Dims
@@ -603,7 +603,7 @@ subroutine read_kss_header(kss_unt,filkss,iomode,prtvol,nsym_out,nbnds_kss,ng_ks
 
  DBG_ENTER("COLL")
 
-#if !defined HAVE_TRIO_ETSF_IO
+#if !defined HAVE_ETSF_IO
  if (iomode==IO_MODE_ETSF) then
    write(msg,'(3a)')&
 &   ' When iomode==3, support for the ETSF I/O library ',ch10,&
@@ -630,7 +630,7 @@ subroutine read_kss_header(kss_unt,filkss,iomode,prtvol,nsym_out,nbnds_kss,ng_ks
 
  CASE (IO_MODE_ETSF) ! * NETCDF-ETSF file format
 
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
    write(msg,'(2a)')' read_kss_header : reading NETCDF-ETSF Kohn-Sham structure file ',TRIM(filkss)
    call wrtout(std_out,msg,'COLL')
 
@@ -710,7 +710,7 @@ subroutine read_kss_header(kss_unt,filkss,iomode,prtvol,nsym_out,nbnds_kss,ng_ks
    if (Hdr%usepaw==0) read(kss_unt)   !((vkbsignd(il,is),il=1,mpsang),is=1,Hdr%ntypat)
 
  CASE (IO_MODE_ETSF) ! TODO spin-orbit not treated, number of projectors not treated
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
    call etsf_io_dims_get(kss_unt,Dims,ok,error)
    nsym_kss =Dims%number_of_symmetry_operations
    nbnds_kss=Dims%max_number_of_states
@@ -825,7 +825,7 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,trsl,rprimd,Psps,iomode)
 !array
  real(dp),allocatable :: vkb(:,:,:),vkbd(:,:,:)
  real(dp),allocatable :: dum_vkbsign(:,:)
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  logical :: ok
  real(dp),allocatable,target :: vkb_tgt(:,:,:), vkbd_tgt(:,:,:)
  type(etsf_io_low_error) :: error
@@ -856,7 +856,7 @@ subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,trsl,rprimd,Psps,iomode)
     end do
   end do
 
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  CASE (IO_MODE_ETSF)
    ABI_ALLOCATE(vkb_tgt ,(kss_npw,mpsang,ntypat))
    ABI_ALLOCATE(vkbd_tgt,(kss_npw,mpsang,ntypat))
@@ -969,7 +969,7 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,npw_k,kg_k,
  integer :: ib,ibsp,ig,ispinor,iatom,ii,master,my_rank,ierr
  type(MPI_type) :: MPI_enreg_seq
  character(len=500) :: msg
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  type(wffile_type) :: Wff
 #endif
 !arrays
@@ -1015,7 +1015,7 @@ subroutine write_kss_wfgk(kss_unt,ikpt,isppol,kpoint,nspinor,kss_npw,npw_k,kg_k,
      end if
    end do
 
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  CASE (IO_MODE_ETSF) ! When ETSF, use the rwwf routine (should always be done like that)
    if (Psps%usepaw==1) then
      MSG_WARNING("PAW output with ETSF-IO: cprj won't be written")
@@ -1542,7 +1542,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
  use m_hamiltonian
  use m_nctk
  use m_wfk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_electronpositron
@@ -1637,7 +1637,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
  end if
 
  path = strcat(dtfil%filnam_ds(4), "_HGG.nc")
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  if (istep == 1) then
    ! Open netcdf file, define dims and variables.
    NCF_CHECK(nctk_open_create(ncid, path, comm))
@@ -1903,7 +1903,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
          end do
        end if
 
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
        ncerr = nf90_put_var(ncid, eigdiago_varid, eig_ene, start=[1,ikpt,isppol,istep], count=[nband_k,1,1,1])
        NCF_CHECK(ncerr)
 #endif
@@ -1912,7 +1912,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
        ABI_FREE(eig_vec)
      end if
 
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
      !write(std_out,*)"Writing H_GG slice for ikpt",ikpt
      if (isppol == 1) then
        ncerr = nf90_put_var(ncid, kg_varid, kg_k, start=[1,1,ikpt], count=[3,npw_k,1])
@@ -1954,7 +1954,7 @@ subroutine gshgg_mkncwrite(istep, dtset, dtfil, psps, hdr, pawtab, pawfgr, paw_i
 
  call destroy_hamiltonian(gs_hamk)
 
-#ifdef HAVE_TRIO_ETSF_IO
+#ifdef HAVE_ETSF_IO
  NCF_CHECK(nf90_close(ncid))
 #endif
 

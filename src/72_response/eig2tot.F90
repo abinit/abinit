@@ -95,7 +95,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  use m_xmpi
  use m_nctk
  use m_errors
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_ebands
@@ -566,7 +566,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
    if(ieig2rf == 4 .or. ieig2rf == 5 ) then
      call eigr2d_init(eig2nkq_tmp,eigr2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
    end if
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EIGR2D file")
    NCF_CHECK(crystal_ncwrite(Crystal,ncid))
    NCF_CHECK(ebands_ncwrite(Bands, ncid))
@@ -580,7 +580,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 !  abinit is compiled with netcdf.
    if(ieig2rf == 4 ) then
 !    Output of the Fan.nc file.
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      fname = strcat(dtfil%filnam_ds(4),"_FAN.nc")
      call fan_init(fan,fan2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating FAN file")
@@ -599,7 +599,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 !  abinit is compiled with netcdf.
    if(ieig2rf == 5 ) then
 !    Output of the GKK.nc file.
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      fname = strcat(dtfil%filnam_ds(4),"_GKK.nc")
      call gkk_init(gkk,gkk2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom,3)
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
@@ -643,7 +643,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
        fname = strcat(dtfil%filnam_ds(4),"_EIGI2D.nc")
 !      Broadening EIGI2D (real and Im)
        call eigr2d_init(eigbrd,eigi2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
        NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EIGI2D file")
        NCF_CHECK(crystal_ncwrite(Crystal, ncid))
        NCF_CHECK(ebands_ncwrite(Bands, ncid))

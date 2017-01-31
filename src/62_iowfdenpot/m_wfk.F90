@@ -70,7 +70,7 @@ MODULE m_wfk
  use m_pawrhoij
  use m_wffile
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -402,7 +402,7 @@ subroutine wfk_open_read(Wfk,fname,formeig,iomode,funt,comm,Hdr_out)
    end if
 #endif
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  case (IO_MODE_ETSF)
    NCF_CHECK(nctk_open_read(wfk%fh, wfk%fname, wfk%comm))
 #endif
@@ -477,7 +477,7 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
  integer(XMPI_OFFSET_KIND) :: offset
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecords(:)
 #endif
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: ncerr
 #endif
 
@@ -608,12 +608,12 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
    end if
 #endif
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  CASE (IO_MODE_ETSF)
    !NCF_CHECK(nctk_open_modify(wfk%fh, wfk%fname, wfk%comm))
 
    if (nctk_has_mpiio) then
-#ifdef HAVE_TRIO_NETCDF_MPI
+#ifdef HAVE_NETCDF_MPI
      ncerr = nf90_create(wfk%fname, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
          comm=wfk%comm, info=xmpio_info, ncid=wfk%fh)
 
@@ -723,7 +723,7 @@ subroutine wfk_close(Wfk, delete)
      end if
 #endif
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    case (IO_MODE_ETSF)
      NCF_CHECK(nf90_close(wfk%fh))
 #endif
@@ -1000,7 +1000,7 @@ subroutine wfk_ncdef_dims_vars(ncid, hdr, fform, write_hdr)
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  character(len=500) :: title,history
  logical :: do_write_hdr
  integer :: ivar,mpw,ncerr
@@ -1220,7 +1220,7 @@ subroutine wfk_read_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_
  integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad
  integer :: sizes(2),subsizes(2),starts(2),types(2)
 #endif
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr,h1_varid,idx,ib1,ib2
  real(dp),allocatable :: h1mat(:,:,:)
 #endif
@@ -1469,7 +1469,7 @@ subroutine wfk_read_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_
    end select
 #endif
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  case (IO_MODE_ETSF)
    if (present(kg_k)) then
      ! Read the reduced_coordinates_of_plane_waves for this k point.
@@ -1616,7 +1616,7 @@ subroutine wfk_read_bks(wfk, band, ik_ibz, spin, sc_mode, cg_bks, eig1_bks)
  integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad
  integer :: sizes(2),types(2)
 #endif
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: h1_varid,cg_varid,ncerr
 #endif
  character(len=500) :: errmsg
@@ -1779,7 +1779,7 @@ subroutine wfk_read_bks(wfk, band, ik_ibz, spin, sc_mode, cg_bks, eig1_bks)
 #endif
 #endif
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    case (IO_MODE_ETSF)
      ! Read h1 matrix elements. The netcdf array has shape:
      ! [complex, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins]
@@ -1885,7 +1885,7 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
  integer(XMPI_OFFSET_KIND) :: bsize_rec(1)
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecords(:)
 #endif
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr
 #endif
 
@@ -2153,7 +2153,7 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
    end if
 #endif
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  case (IO_MODE_ETSF)
    if (present(kg_k)) then
      ! Write the reduced_coordinates_of_plane_waves for this k point.
@@ -2297,7 +2297,7 @@ subroutine wfk_read_bmask(Wfk,bmask,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
  integer,allocatable :: block_length(:),block_type(:)
  integer(XMPI_ADDRESS_KIND),allocatable :: block_displ(:)
  real(dp),allocatable :: buffer(:,:)
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr
  integer,allocatable :: blocks(:,:)
 #endif
@@ -2656,7 +2656,7 @@ subroutine wfk_read_bmask(Wfk,bmask,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_k,occ_k)
    end if
 #endif
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  case (IO_MODE_ETSF)
    ABI_CHECK(wfk%formeig == 0, "formeig != 0 not coded")
    !write(std_out,*)"bmask: ",bmask

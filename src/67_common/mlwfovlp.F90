@@ -1079,7 +1079,7 @@
 
 
 
-#if defined HAVE_DFT_WANNIER90
+#if defined HAVE_WANNIER90
    do isppol=1,nsppol
      if(spin.ne.0 .and. spin.ne.isppol) cycle
 !    when nsppol>1, master runs isppol 1 and rank==1 runs isppol 2

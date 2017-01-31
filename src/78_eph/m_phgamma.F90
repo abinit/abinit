@@ -35,7 +35,7 @@ module m_phgamma
  use m_fstab
  use iso_c_binding
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
 
@@ -1170,7 +1170,7 @@ subroutine phgamma_linwid(gams,cryst,ifc,ndivsm,nvert,qverts,basename,ncid,wminm
  integer,parameter :: master=0
  integer :: natom,ii,mu,indx,iqpt,natom3,nsppol,ierr
  integer :: spin,unt,nqpt,nrpt,cnt,nproc,my_rank
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: ncerr
 #endif
  real(dp) :: omega_min,omega_max,wtmp,omega
@@ -1297,7 +1297,7 @@ subroutine phgamma_linwid(gams,cryst,ifc,ndivsm,nvert,qverts,basename,ncid,wminm
 
    ! Write data to netcdf file
    if (ncid /= nctk_noid) then
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
      ncerr = nctk_def_dims(ncid, [&
        nctkdim_t("natom3", 3*natom), nctkdim_t("nqpath", nqpt), nctkdim_t("number_of_spins", nsppol) &
        ], defmode=.True.)
@@ -2212,7 +2212,7 @@ subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,pr
  end do
  ABI_CHECK(nwm /= 0, "Empy list of Matsubara frequencies, increase wcut")
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  ! Open the netcdf file used to store the results of the calculation.
  if (my_rank == master) then
    NCF_CHECK(nctk_open_create(ncid, strcat(prefix, "_ELIASHBERG.nc"), xmpi_comm_self))
@@ -2330,7 +2330,7 @@ subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,pr
    write(std_out,*)"T=",tmesh(it)," [K], gap ",gap*Ha_eV," [eV]"
 
    ! Write data to netcd file.
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
    if (my_rank == master) then
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "zeta_imag_axis"), zin, start=[1,it]))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "delta_imag_axis"), din, start=[1,it]))
@@ -2354,7 +2354,7 @@ subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,pr
 
  ABI_FREE(tmesh)
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK(nf90_close(ncid))
  end if
@@ -3097,7 +3097,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  call phgamma_finalize(gams,cryst,ifc)
 
  ncid = nctk_noid
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  ! Open the netcdf file used to store the results of the calculation.
  if (my_rank == master) then
    NCF_CHECK(nctk_open_create(ncid, strcat(dtfil%filnam_ds(4), "_EPH.nc"), xmpi_comm_self))
@@ -3134,7 +3134,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  !if (my_rank == master) call a2fw_write(a2fw, strcat(dtfil%filnam_ds(4), "_A2FW_QPTOPT3"))
  !call a2fw_free(a2fw)
 
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK(nf90_close(ncid))
  end if

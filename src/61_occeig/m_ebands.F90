@@ -38,7 +38,7 @@ MODULE m_ebands
  use m_tetrahedron
  use m_bspline
  use m_nctk
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_hdr
@@ -2730,7 +2730,7 @@ integer function ebands_ncwrite(ebands,ncid) result(ncerr)
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  integer :: ii,nelect_int
  logical :: write_ngkpt
  character(len=etsfio_charlen) :: smearing,k_dependent
@@ -2943,7 +2943,7 @@ integer function ebands_ncwrite_path(ebands,path) result(ncerr)
 ! *************************************************************************
 
  ncerr = -1
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  ncerr = nf90_noerr
  if (file_exists(path)) then
     NCF_CHECK(nctk_open_modify(ncid, path, xmpi_comm_self))

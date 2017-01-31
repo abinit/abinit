@@ -42,7 +42,7 @@ subroutine write_eig(eigen,filename,kptns,mband,nband,nkpt,nsppol)
  use defs_basis
  use m_profiling_abi
  use m_errors
-#ifdef HAVE_TRIO_NETCDF
+#ifdef HAVE_NETCDF
  use netcdf
  use m_nctk,         only : ab_define_var
 #endif
@@ -79,7 +79,7 @@ implicit none
 
 ! *********************************************************************
 
-#if defined HAVE_TRIO_NETCDF
+#if defined HAVE_NETCDF
 
  convrt=1.0_dp
 

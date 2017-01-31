@@ -75,7 +75,7 @@ subroutine mklocl_realspace(grtn,icoulomb,mpi_enreg, natom, nattyp, nfft, ngfft,
  use m_mpinfo,      only : ptabs_fourdp
  use m_pawtab,      only : pawtab_type
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
  use BigDFT_API,    only : coulomb_operator,deallocate_coulomb_operator
  use defs_PSolver
 #else
@@ -635,7 +635,7 @@ type(pawtab_type),intent(in)  :: pawtab(ntypes*usepaw)
 type(coulomb_operator), intent(in) :: kernel
 
 !Local variables -------------------------
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 logical :: perx,pery,perz,gox,goy,goz
 integer :: iat,i1,i2,i3,j1,j2,j3,isx,isy,isz,iex,iey,iez,ierr,ityp
 integer :: ind,nloc,iloc,i3loc
@@ -648,7 +648,7 @@ real(kind=8) :: raux1(1),rr1(1)
 
 ! *********************************************************************
 
-#if defined HAVE_DFT_BIGDFT
+#if defined HAVE_BIGDFT
 
  if(nproc<0)then
    MSG_ERROR('nproc should not be negative')
