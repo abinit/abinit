@@ -4,7 +4,7 @@
 !! m_special_funcs
 !!
 !! FUNCTION
-!! This module contains routines and functions used to 
+!! This module contains routines and functions used to
 !! evaluate special functions frequently needed in Abinit.
 !!
 !! COPYRIGHT
@@ -21,14 +21,15 @@
 
 #include "abi_common.h"
 
-MODULE m_special_funcs
+module m_special_funcs
 
  use defs_basis
  use m_profiling_abi
  use m_errors
  use m_splines
 
- use m_numeric_tools, only : arth, simpson
+ use m_fstrings,        only : sjoin, ftoa
+ use m_numeric_tools,   only : arth, simpson
 
  implicit none
 
@@ -38,9 +39,9 @@ MODULE m_special_funcs
  public :: factorial         ! Calculates N! returning a real.
  public :: permutations      ! Returns N!/(N-k) if N>=0 and N-k>0 else 0.
  public :: binomcoeff        ! Binominal coefficient n!/(n-k)!
- public :: laguerre          ! Laguerre Polynomial(x,n,a). 
+ public :: laguerre          ! Laguerre Polynomial(x,n,a).
  public :: RadFnH            ! Atomic radial function(r,n,l,Z).
- public :: iradfnh           ! Norm of atomic radial function(a,b,n,l,Z).  
+ public :: iradfnh           ! Norm of atomic radial function(a,b,n,l,Z).
  public :: dirac_delta       ! Approximate Dirac delta with normal distribution.
  public :: gaussian          ! Normalized Gaussian distribution.
  public :: abi_derf          ! Evaluates the error function in real(dp).
@@ -67,11 +68,11 @@ MODULE m_special_funcs
    ! max arg value.
 
    real(dp),allocatable :: xx(:)
-   ! xx(nx) 
+   ! xx(nx)
    ! coordinates of points belonging to the grid
 
    real(dp),allocatable :: bess_spl(:,:)
-   ! bess_spl(nx,mlang) 
+   ! bess_spl(nx,mlang)
    ! bessel functions computed on the linear mesh
 
    real(dp),allocatable :: bess_spl_der(:,:)
@@ -83,6 +84,49 @@ MODULE m_special_funcs
  public :: jlspline_new         ! Create new object.
  public :: jlspline_free        ! Free memory.
  public :: jlspline_integral    ! Compute integral.
+
+!!****t* m_special_funcs/gspline_t
+!! NAME
+!! gspline_t
+!!
+!! FUNCTION
+!!  Object used to interpolate the gaussian approximant and its primitive with cubic spline.
+!!  Particularly useful if we are computing DOSes with many k-points/bands
+!!  because one can significantly decrease the number of calls to exponential functions.
+!!
+!! SOURCE
+
+ type,public :: gspline_t
+
+   integer :: nspline
+    ! Number of points used in spline table.
+
+   real(dp) :: sigma
+    ! Broadening parameter.
+
+   real(dp) :: xmin,xmax
+    ! Min and max x in spline mesh. Only positive xs are stored in memory
+    ! The values at -x are reconstructed by symmetry.
+    ! xmin is usually zero, xmax is the point where the gaussian == tol16.
+    ! g(x) is set to zero if x > xmin.
+
+   real(dp) :: step, stepm1, step2div6
+    ! Step of the linear mesh used in spline and associated coeffients.
+
+   real(dp),allocatable :: xvals(:)
+    ! xvals(nspline)
+    ! The xvalues used in the spline
+
+   real(dp),allocatable :: svals(:,:)
+    ! svals(nspline,4)
+    ! Internal tables with spline data.
+
+ end type gspline_t
+!!***
+
+ public :: gspline_new       ! Creation method.
+ public :: gspline_eval      ! Evaluate interpolant
+ public :: gspline_free      ! Free memory.
 
 CONTAINS  !===========================================================
 !!***
@@ -264,7 +308,7 @@ end function permutations
 !!   binomcoeff= n!/( k!* (n-k)!)  (real dp)
 !!
 !! PARENTS
-!!      
+!!
 !!
 !! CHILDREN
 !!
@@ -305,20 +349,20 @@ end function binomcoeff
 !! INPUTS
 !!   x position
 !!   n order of laguerre polynomial
-!!   a 
+!!   a
 !!
 !! OUTPUT
 !!   Laguerre(x,n,a) (dp)
 !!
 !! PARENTS
-!!   
+!!
 !!
 !! CHILDREN
 !!   factorial
 !!
 !! SOURCE
 
-function laguerre(x,n,a) 
+function laguerre(x,n,a)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -338,7 +382,7 @@ function laguerre(x,n,a)
 !Local variables ---------------------------------------
 !scalars
  integer :: ii, nn, aa
- 
+
 !arrays
  real(dp),allocatable :: ff(:)
 
@@ -359,7 +403,7 @@ function laguerre(x,n,a)
  ff=0.0_dp
  ff=(/ (binomcoeff(nn+aa,nn-ii)*((-1.0_dp)*x)**ii/factorial(ii) ,ii=0,nn) /)
  laguerre=sum(ff)
- 
+
  ABI_DEALLOCATE(ff)
 
 end function laguerre
@@ -372,8 +416,8 @@ end function laguerre
 !! RadFnH
 !!
 !! FUNCTION
-!!  RadFnH(r,n,l,Z) radial function of atomic wavefunction with nuclear charge Z. 
-!!  for quantum number n, and l. 
+!!  RadFnH(r,n,l,Z) radial function of atomic wavefunction with nuclear charge Z.
+!!  for quantum number n, and l.
 !!  Default: Fe 3d function. Returns a (dp) real.
 !!
 !! INPUTS
@@ -385,7 +429,7 @@ end function laguerre
 !!  RadFnH(r,n,l,Z) (dp)
 !!
 !! PARENTS
-!!   
+!!
 !!
 !! CHILDREN
 !!  Laguerre
@@ -418,7 +462,7 @@ function RadFnH(r,n,l,Z)
  real(dp)  :: ff,rr,ZZ
 
 ! *********************************************************************
- 
+
  if (present(n)) then
    nn=n
  else
@@ -436,7 +480,7 @@ function RadFnH(r,n,l,Z)
  else
    ZZ=28.0_dp
  end if
- 
+
  rr=ZZ*r/nn
  ff=exp(log(ZZ*1.0_dp)*(3.0_dp/2.0_dp))*2/nn**2
  ff=ff*sqrt(factorial(nn-ll-1)/factorial(nn+ll))*(2*rr)**ll
@@ -453,7 +497,7 @@ end function RadFnH
 !!
 !! FUNCTION
 !!  IRadFnH(a,b,n,l,Z): Integral of radial function of atomic wavefunction between a and b.
-!!  recursive programming using simpson's rule 
+!!  recursive programming using simpson's rule
 !!  iteration depth of m=8 corresponds to relative error of 10^(-12).
 !!
 !! INPUTS
@@ -467,7 +511,7 @@ end function RadFnH
 !!  IRadFnH(a,b,n,l,Z) (dp)
 !!
 !! PARENTS
-!!   
+!!
 !!
 !! CHILDREN
 !!  Laguerre
@@ -499,7 +543,7 @@ recursive function IRadFnH(a,b,n,l,Z,m) result(x)
  real(dp)  :: h,bb,ZZ,x
 
 ! *********************************************************************
- 
+
  if (present(n)) then
    nn=n
  else
@@ -534,10 +578,10 @@ recursive function IRadFnH(a,b,n,l,Z,m) result(x)
  if (mm<8) then
   !h=2*h/exp(1.0_dp)
   x=IRadFnH(a,a+h,nn,ll,ZZ,mm+1)+IRadFnH(a+h,bb,nn,ll,ZZ,mm+1)
- else 
+ else
   x=RadFnH(a,nn,ll,ZZ)**2*a**2+4.0_dp*RadFnH(a+h,nn,ll,ZZ)**2*(a+h)**2
   x=h/3.0_dp*(x+RadFnH(bb,nn,ll,ZZ)**2*bb**2)
- end if 
+ end if
 
 end function IRadFnH
 !!***
@@ -597,12 +641,12 @@ end function dirac_delta
 !! gaussian
 !!
 !! FUNCTION
-!!  Return the values of the normalized Gaussian distribution 
+!!  Return the values of the normalized Gaussian distribution
 !!    Gauss(arg,sigma) =  1/(sigma SQRT(2*pi)) e^{-arg**2/(2*sigma**2)}
 !!
 !! INPUTS
 !!   arg=Argument of the Gaussian.
-!!   sigma=Standard deviation 
+!!   sigma=Standard deviation
 !!
 !! PARENTS
 !!
@@ -641,7 +685,7 @@ end function gaussian
 !----------------------------------------------------------------------
 
 !!****f* m_special_funcs/abi_derf
-!! NAME 
+!! NAME
 !! abi_derf
 !!
 !! FUNCTION
@@ -801,7 +845,7 @@ end function abi_derf
 !----------------------------------------------------------------------
 
 !!****f* m_special_funcs/abi_derfc
-!! NAME 
+!! NAME
 !! abi_derfc
 !!
 !! FUNCTION
@@ -1364,7 +1408,7 @@ end function k_thfermi
 !!
 !! SOURCE
 
-type(jlspline_t) function jlspline_new(nx, delta, mlang) result(new) 
+type(jlspline_t) function jlspline_new(nx, delta, mlang) result(new)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1530,7 +1574,7 @@ real(dp) function jlspline_integral(jlspl, il, qq, powr, nr, rcut)  result(res)
    write(std_out,*)"minval xfit: ",minval(xfit)
    write(std_out,*)"maxval xfit: ",maxval(xfit)
    MSG_ERROR("splint returned ierr != 0")
- end if 
+ end if
 
  if (powr /= 1) yfit = yfit * (rr ** powr)
  res = simpson(step, yfit)
@@ -1538,5 +1582,197 @@ real(dp) function jlspline_integral(jlspl, il, qq, powr, nr, rcut)  result(res)
 end function jlspline_integral
 !!***
 
-END MODULE m_special_funcs
+!!****f* m_special_funcs/gspline_new
+!! NAME
+!!  gspline_new
+!!
+!! FUNCTION
+!!  Build object to spline the gaussian approximant and its primitive.
+!!
+!! INPUTS
+!!  sigma=Broadening parameter.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+type (gspline_t) function gspline_new(sigma) result(new)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'lgroup_new'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: sigma
+
+!Local variables ------------------------------
+!scalars
+ integer :: ii
+ real(dp) :: ybcbeg, ybcend
+! *************************************************************************
+
+ new%nspline = 5 * 1024; new%sigma = sigma
+ ABI_CHECK(sigma > zero, sjoin("invalid sigma:", ftoa(sigma)))
+ new%xmin = zero
+ new%xmax = sigma * sqrt(-log(sigma * sqrt(pi) * tol12)) ! gauss(xmax) = tol12
+ new%step = (new%xmax - new%xmin) / (new%nspline - 1)
+ new%stepm1 = one / new%step; new%step2div6 = new%step**2 / six
+
+ ABI_MALLOC(new%xvals, (new%nspline))
+ do ii=1,new%nspline
+   new%xvals(ii) = new%xmin + (ii-1) * new%step
+ end do
+ new%xmax = new%xvals(new%nspline)
+
+ ! Spline the gaussian approximant.
+ ABI_MALLOC(new%svals, (new%nspline, 4))
+ new%svals(:, 1) = dirac_delta(new%xvals, sigma)
+ ybcbeg = - (two * new%xmin / sigma**2) * new%svals(1,1)
+ ybcend = - (two * new%xmax / sigma**2) * new%svals(new%nspline,1)
+ call spline(new%xvals, new%svals(:,1), new%nspline, ybcbeg, ybcend, new%svals(:,2))
+
+ ! Spline the primitive: 1/2 [1 + erf(x/sigma)]
+ new%svals(:, 3) = half * (one + abi_derf(new%xvals / new%sigma))
+ call spline(new%xvals, new%svals(:,3), new%nspline, new%svals(1,1), new%svals(new%nspline, 1), new%svals(:,4))
+ !do ii=1,new%nspline; write(98,*)new%xvals(ii),new%svals(ii,3),new%svals(ii,4); end do
+
+end function gspline_new
+!!***
+
+!!****f* m_special_funcs/gspline_eval
+!! NAME
+!!  gspline_eval
+!!
+!! FUNCTION
+!!  Evaluate the gaussian approximant and its primitive at (xmesh - x0)
+!!
+!! INPUTS
+!!  self<gspline_t>=Object used to spline the gaussian approximant
+!!  x0=Shift to be given to xmesh
+!!  nx=Number of points in input mesh.
+!!  xmesh(nx)=Frequency points (not necessarly linear).
+!!
+!! OUTPUT
+!!  weights(nx,2)=First slice contains the gaussian approximant on xmesh.
+!!   The second slice stores the primitive.
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+pure subroutine gspline_eval(self, x0, nx, xmesh, weights)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'lgroup_new'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nx
+ real(dp),intent(in) :: x0
+ type(gspline_t),intent(in) :: self
+!arrays
+ real(dp),intent(in) :: xmesh(nx)
+ real(dp),intent(out) :: weights(nx,2)
+
+!Local variables ------------------------------
+!scalars
+ integer :: ix,jspl
+ real(dp) :: xx,absx,aa,bb,cc,dd
+ logical :: isneg
+ !real(dp) :: int_values(nx)
+
+! *************************************************************************
+
+ do ix=1,nx
+   xx = xmesh(ix) - x0; absx = abs(xx); isneg = xx < zero
+   if (absx >= self%xmax) then
+     ! Region in which gauss(x) is negligible.
+     weights(ix,1) = zero
+     if (isneg) then
+       weights(ix,2) = zero
+     else
+       weights(ix,2) = one
+     end if
+   else
+     ! Spline functions at |x| and recover the value at x:
+     ! g(x) = g(-x); G(-x) = 1 - G(x)
+     jspl = 1 + int((absx - self%xmin) * self%stepm1); dd = absx - self%xvals(jspl)
+     bb = dd * self%stepm1
+     aa = one - bb
+     cc = aa*(aa**2-one) * self%step2div6
+     dd = bb*(bb**2-one) * self%step2div6
+
+     weights(ix,1) = aa*self%svals(jspl,1) + bb*self%svals(jspl+1,1) + cc*self%svals(jspl,2) + dd*self%svals(jspl+1,2)
+     weights(ix,2) = aa*self%svals(jspl,3) + bb*self%svals(jspl+1,3) + cc*self%svals(jspl,4) + dd*self%svals(jspl+1,4)
+     if (isneg) weights(ix,2) = one - weights(ix,2)
+   end if
+ end do
+
+ !call simpson_int(nx,xmesh(2) - xmesh(1),weights(:,1),int_values)
+ !do ix=1,nx
+ !  write(99,*)xmesh(ix), weights(ix,1), dirac_delta(xx, self%sigma), weights(ix,2), int_values(ix)
+ !end do
+
+end subroutine gspline_eval
+!!***
+
+!!****f* m_special_funcs/gspline_free
+!! NAME
+!!  gspline_free
+!!
+!! FUNCTION
+!!  Free dynamic memory
+!!
+!! INPUTS
+!!  self<gspline_t>=Object used to spline the gaussian approximant
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine gspline_free(self)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'lgroup_new'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(gspline_t),intent(inout) :: self
+
+! *************************************************************************
+
+ if (allocated(self%xvals)) then
+   ABI_FREE(self%xvals)
+ end if
+ if (allocated(self%svals)) then
+   ABI_FREE(self%svals)
+ end if
+
+end subroutine gspline_free
+!!***
+
+end module m_special_funcs
 !!***

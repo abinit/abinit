@@ -24824,6 +24824,25 @@
     characteristics: null
     commentdefault: null
     commentdims: null
+    defaultval:
+    - 5.0
+    - 59.0
+    - 6
+    definition: Temperature MESH
+    dimensions: 3
+    excludes: null
+    requires: null
+    section: varbas
+    text: |-
+        This variable defines the linear mesh of temperatures used
+        in the EPH code ([[optdriver]] = 7).
+        The first entry gives the initial temperature in Kelvin, the second entry the linear step in Kelvin, the third entry is the number of points in the mesh. The default value corresponds to 6 points between 5 K and 300 K.
+    varname: tmesh
+    vartype: real
+- !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
     defaultval: null
     definition: Translation NON-Symmorphic vectors
     dimensions:

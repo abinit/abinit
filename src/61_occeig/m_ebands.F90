@@ -1671,6 +1671,10 @@ end function get_occupied
 !!
 !! OUTPUT
 !!  changed=.TRUE. if ibmin or ibmax has been changed.
+!!  [degblock(2,ndeg)]=Table allocated by the routine containing the index
+!!    of the bands in the `ndeg` degenerate sub-sets
+!!    degblock(1, ii) = first band index in the ii-th degenerate subset.
+!!    degblock(2, ii) = last band index in the ii-th degenerate subset.
 !!
 !! SIDE EFFECTS
 !!  ibmin,ibmax=
@@ -1684,7 +1688,7 @@ end function get_occupied
 !!
 !! SOURCE
 
-subroutine enclose_degbands(ebands,ikibz,spin,ibmin,ibmax,changed,tol_enedif)
+subroutine enclose_degbands(ebands,ikibz,spin,ibmin,ibmax,changed,tol_enedif,degblock)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1702,17 +1706,20 @@ subroutine enclose_degbands(ebands,ikibz,spin,ibmin,ibmax,changed,tol_enedif)
  real(dp),intent(in) :: tol_enedif
  logical,intent(out) :: changed
  type(ebands_t),intent(in) :: ebands
+!arrays
+ integer,allocatable,optional,intent(out) :: degblock(:,:)
 
 !Local variables-------------------------------
 !scalars
- integer :: ib,ibmin_bkp,ibmax_bkp
+ integer :: ib,ibmin_bkp,ibmax_bkp,ndeg
  real(dp) :: emin,emax
+
 
 ! *************************************************************************
 
  ibmin_bkp = ibmin; ibmax_bkp = ibmax
 
- emin =  ebands%eig(ibmin,ikibz,spin)
+ emin = ebands%eig(ibmin,ikibz,spin)
  do ib=ibmin-1,1,-1
    if ( ABS(ebands%eig(ib,ikibz,spin) - emin) > tol_enedif) then
      ibmin = ib +1
@@ -1733,6 +1740,26 @@ subroutine enclose_degbands(ebands,ikibz,spin,ibmin,ibmax,changed,tol_enedif)
  end do
 
  changed = (ibmin /= ibmin_bkp) .or. (ibmax /= ibmax_bkp)
+
+ ! Compute degeneracy table.
+ if (present(degblock)) then
+   ! Count number of degeneracies.
+   ndeg = 1
+   do ib=ibmin+1,ibmax
+     if ( abs(ebands%eig(ib,ikibz,spin) - ebands%eig(ib-1,ikibz,spin) ) > tol_enedif) ndeg = ndeg + 1
+   end do
+   ! Build degblock table.
+   ABI_MALLOC(degblock, (2, ndeg))
+   ndeg = 1; degblock(1, 1) = ibmin
+   do ib=ibmin+1,ibmax
+     if ( abs(ebands%eig(ib,ikibz,spin) - ebands%eig(ib-1,ikibz,spin) ) > tol_enedif) then
+       degblock(2, ndeg) = ib - 1
+       ndeg = ndeg + 1
+       degblock(1, ndeg) = ib
+     end if
+   end do
+   degblock(2, ndeg) = ibmax
+ end if
 
 end subroutine enclose_degbands
 !!***
@@ -1998,7 +2025,7 @@ type(stats_t) function ebands_edstats(ebands) result(stats)
 
 ! *************************************************************************
 
-! Compute energy difference between b+1 and b.
+ ! Compute energy difference between b+1 and b.
  ABI_CALLOC(ediffs, (ebands%mband-1,ebands%nkpt,ebands%nsppol))
 
  do spin=1,ebands%nsppol

@@ -1177,6 +1177,7 @@ subroutine dtset_copy(dtout, dtin)
  dtout%nkpath = dtin%nkpath
  dtout%einterp = dtin%einterp
  call alloc_copy(dtin%kptbounds, dtout%kptbounds)
+ dtout%tmesh = dtin%tmesh
 
 end subroutine dtset_copy
 !!***

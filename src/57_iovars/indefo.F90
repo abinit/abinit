@@ -695,6 +695,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%tolmxf=5.0d-5
    dtsets(idtset)%tolvrs=zero
    dtsets(idtset)%tolwfr=zero
+   dtsets(idtset)%tmesh=[5._dp, 59._dp, 6._dp]
    dtsets(idtset)%tsmear=0.01_dp
 !  U
    dtsets(idtset)%ucrpa_bands(:)=-1

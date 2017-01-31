@@ -79,7 +79,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  use netcdf
 #endif
 
- use m_fstrings,  only : sjoin, itoa, tolower, rmquotes
+ use m_fstrings,  only : sjoin, itoa, ltoa, tolower, rmquotes
  use m_ingeo_img, only : ingeo_img
  use m_dtset,     only : dtset_chkneu
 
@@ -621,6 +621,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dfpt_sciss',tread,'ENE')
  if(tread==1) dtset%dfpt_sciss=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'tmesh',tread,'DPR')
+ if(tread==1) dtset%tmesh=dprarr(1:3)
+ ABI_CHECK(all(dtset%tmesh >= zero), sjoin("Invalid tmesh:", ltoa(dtset%tmesh)))
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tsmear',tread,'ENE')
  if(tread==1) dtset%tsmear=dprarr(1)
 
@@ -731,11 +735,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  if(tread==1) dtset%ecuteps=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ecutsigx',tread,'ENE')
- if(tread==1) then
-   dtset%ecutsigx=dprarr(1)
-!  else
-!  if(dtset%optdriver==RUNL_SIGMA) dtset%ecutsigx=dtset%ecut
- end if
+ if(tread==1) dtset%ecutsigx=dprarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ecutwfn',tread,'ENE')
  if(tread==1) then
    dtset%ecutwfn=dprarr(1)

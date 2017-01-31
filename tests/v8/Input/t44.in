@@ -29,6 +29,7 @@ optdriver  7
 nband     54
 eph_task   4
 #gw_qprange -2
+tmesh 5 59 6
 
 nkptgw   2
 kptgw 

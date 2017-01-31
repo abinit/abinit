@@ -2116,8 +2116,7 @@ end subroutine a2fw_write
 !!
 !! INPUTS
 !!  a2f<a2fw_t>=Container storing the Eliashberg functions.
-!!  ntemp=Number of temperatures
-!!  temp_range
+!!  tmesh(3)=start, step, ntemp
 !!  wcut
 !!  mustar= mustar parameter
 !!  nstep=Max number of SCF steps
@@ -2143,7 +2142,7 @@ end subroutine a2fw_write
 !!
 !! SOURCE
 
-subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,prefix,comm)
+subroutine a2fw_solve_gap(a2f,cryst,tmesh,wcut,mustar,nstep,reltol,prefix,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2156,23 +2155,23 @@ subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,pr
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ntemp,nstep,comm
+ integer,intent(in) :: nstep,comm
  real(dp),intent(in) :: wcut,mustar,reltol
  character(len=*),intent(in) :: prefix
  type(a2fw_t),intent(inout) :: a2f
  type(crystal_t),intent(in) :: cryst
 !arrays
- real(dp),intent(in) :: temp_range(2)
+ real(dp),intent(in) :: tmesh(3)
 
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
  integer :: istep,ii,jj,it,spin,iwn,nwm,conv !iw,
- integer :: my_rank,nproc,ncid,ncerr
- real(dp) :: summ,kT,tstep,abs_delta,rel_delta,alpha,gap
+ integer :: my_rank,nproc,ncid,ncerr,ntemp
+ real(dp) :: summ,kT,abs_delta,rel_delta,alpha,gap
  !character(len=500) :: msg
 !arrays
- real(dp),allocatable :: wmts(:),lambda_ij(:,:),tmesh(:)
+ real(dp),allocatable :: wmts(:),lambda_ij(:,:),tvals(:)
  real(dp),allocatable :: din(:),dout(:),zin(:),zout(:)
 
 ! *********************************************************************
@@ -2182,13 +2181,14 @@ subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,pr
  where (a2f%vals < zero) a2f%vals = zero
 
  ! Build linear mesh of temperatures.
+ ! TODO: Use KT mesh instead of T but read T from input.
+ ntemp = nint(tmesh(3))
  ABI_CHECK(ntemp > 1, "ntemp cannot be 1")
- tstep = (temp_range(2) - temp_range(1)) / (ntemp - 1)
- ABI_MALLOC(tmesh, (ntemp))
- tmesh = arth(temp_range(1), tstep, ntemp)
+ ABI_MALLOC(tvals, (ntemp))
+ tvals = arth(tmesh(1), tmesh(2), ntemp) !* kb_HaK
 
  ! Matsubara frequencies: i w_n = i (2n+1) pi T
- kT = kb_HaK * tmesh(1)
+ kT = kb_HaK * tvals(1)
  nwm = 0
  do
    if ((2*nwm + 1) * pi * kT > wcut) exit
@@ -2218,12 +2218,12 @@ subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,pr
    NCF_CHECK(ncerr)
 
    NCF_CHECK(nctk_set_datamode(ncid))
-   NCF_CHECK(nf90_put_var(ncid, vid("temperatures"), tmesh))
+   NCF_CHECK(nf90_put_var(ncid, vid("temperatures"), tvals))
  end if
 #endif
 
  do it=1,ntemp
-   kT = kb_HaK * tmesh(it)
+   kT = kb_HaK * tvals(it)
 
    ! Matsubara frequencies: i w_n = i (2n+1) pi T
    nwm = 0
@@ -2311,7 +2311,7 @@ subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,pr
    else
      write(std_out,*)"Not converged",rel_delta / abs_delta
    end if
-   write(std_out,*)"T=",tmesh(it)," [K], gap ",gap*Ha_eV," [eV]"
+   write(std_out,*)"T=",tvals(it)," [K], gap ",gap*Ha_eV," [eV]"
 
    ! Write data to netcd file.
 #ifdef HAVE_NETCDF
@@ -2336,7 +2336,7 @@ subroutine a2fw_solve_gap(a2f,cryst,ntemp,temp_range,wcut,mustar,nstep,reltol,pr
    ABI_FREE(lambda_ij)
  end do ! it
 
- ABI_FREE(tmesh)
+ ABI_FREE(tvals)
 
 #ifdef HAVE_NETCDF
  if (my_rank == master) then
@@ -2525,9 +2525,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  !real(dp),allocatable :: cwave0(:,:),gvnl1(:,:)
 
  ! for the Eliashberg solver
- integer :: ntemp
  real(dp) :: reltol,wcut
- real(dp) :: temp_range(2)
 
 !************************************************************************
 
@@ -3103,12 +3101,8 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    dtset%ph_ngqpt,dtset%ph_nqshift,dtset%ph_qshift,comm,qptopt=1)
  if (my_rank == master) call a2fw_write(a2fw, dtfil%filnam_ds(4))
 
- ! TODO: Use KT mesh instead of T but read T from input.
- ntemp = 6
- temp_range = [0.6_dp, 1.2_dp]
- wcut = 10 * wminmax(2)
- reltol = 0.001
- !call a2fw_solve_gap(a2fw,cryst,ntemp,temp_range,wcut,dtset%eph_mustar,dtset%nstep,reltol,dtfil%filnam_ds(4),comm)
+ wcut = 10 * wminmax(2); reltol = 0.001
+ call a2fw_solve_gap(a2fw,cryst,dtset%tmesh,wcut,dtset%eph_mustar,dtset%nstep,reltol,dtfil%filnam_ds(4),comm)
  call a2fw_free(a2fw)
 
  ! Compute A2fw using Fourier interpolation and full BZ for debugging purposes.
