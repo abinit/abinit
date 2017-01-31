@@ -245,7 +245,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
      nproj(il+1) = nproj(il+1) + 1
    end do
  else if (ps_Number_Of_Projectors(psxml,SET_SREL) > 0) then
-   call ps_Projector_Indexes(psxml,SET_SREL,idx_sr)
+   call ps_Get_Projector_Indexes(psxml,SET_SREL,idx_sr)
    do iproj = 1, ps_Number_Of_Projectors(psxml,SET_SREL)
      il = ps_Projector_L(psxml, idx_sr(iproj))
      nproj(il+1) = nproj(il+1) + 1
