@@ -297,7 +297,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0
  end if
 
  print_info = 0
- if (dtset%prtvol==-level) print_info = 1
+ if (dtset%prtvol==-level.or.dtset%prtvol==-21) print_info = 1
 
  sum_psi1H1psi1 =  zero
  sum_lambda1psi1psi1 = zero
