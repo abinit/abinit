@@ -204,7 +204,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  real(dp),allocatable :: rho1r1(:,:)
  real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:),rho3r1(:,:),vhartr1(:)
  real(dp),allocatable :: vpsp1(:),vxc1(:,:),work(:),xc_tmp(:,:)
- real(dp),allocatable,target :: vtrial1(:,:)
+ real(dp),allocatable,target :: vtrial1_i2pert(:,:)
  real(dp),pointer :: vtrial1_tmp(:,:)
  real(dp),allocatable :: xccc3d1(:),xccc3d2(:),xccc3d3(:)
  type(pawrhoij_type),allocatable :: pawrhoij1_i1pert(:),pawrhoij1_i2pert(:),pawrhoij1_i3pert(:)
@@ -258,7 +258,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  ABI_ALLOCATE(xccc3d3,(cplex*nfftf))
  ABI_ALLOCATE(vhartr1,(cplex*nfftf))
  ABI_ALLOCATE(vxc1,(cplex*nfftf,dtset%nspden))
- ABI_ALLOCATE(vtrial1,(cplex*nfftf,dtset%nspden))
+ ABI_ALLOCATE(vtrial1_i2pert,(cplex*nfftf,dtset%nspden))
 
  ABI_ALLOCATE(vresid_dum,(0,0))
 ! PAW stuff
@@ -527,10 +527,25 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                      !    PAW only: we sometimes have to compute 1st-order compensation density
                      !    and eventually add it to density from 1st-order WFs
                      !    ----------------------------------------------------------------------
-                     call pawmknhat(dummy_real,cplex,0,i2dir,i2pert,0,gprimd,natom,dtset%natom,&
-&                     nfftf,ngfftf,nhat1grdim,nspden,psps%ntypat,pawang,pawfgrtab,nhat1gr,nhat1_i2pert,&
-&                     pawrhoij1_i2pert,pawrhoij,pawtab,qphon,rprimd,ucvol,dtset%usewvl,xred,&
-&                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+                     if (psps%usepaw==1) then
+
+                       !Force the computation of nhatfr
+                       do iatom=1,dtset%natom
+                         pawfgrtab(iatom)%nhatfr_allocated = 0
+                         pawfgrtab(iatom)%nhatfr = zero
+                       end do
+
+                       if (i2pert<=natom) then
+                         call pawnhatfr(0,i2dir,i2pert,1,dtset%natom,nspden,psps%ntypat,&
+                    &       pawang,pawfgrtab(i2pert),pawrhoij(i2pert),pawtab,rprimd,&
+                    &       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+                       end if
+                       call pawmknhat(dummy_real,cplex,0,i2dir,i2pert,0,gprimd,natom,dtset%natom,&
+  &                     nfftf,ngfftf,nhat1grdim,nspden,psps%ntypat,pawang,pawfgrtab,nhat1gr,nhat1_i2pert,&
+  &                     pawrhoij1_i2pert,pawrhoij,pawtab,qphon,rprimd,ucvol,dtset%usewvl,xred,&
+  &                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+                     end if
+
                    else
 
                   !    Norm-conserving psp: compute Vloc(1) in reciprocal sp. and core(1) in real sp.
@@ -552,7 +567,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 &                   gsqcut,i2dir,i2pert,dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,&
 &                   nhat1_i2pert,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,optene,option,dtset%paral_kgb,&
 &                   dtset%qptn,rhog,rho2g1,rhor,rho2r1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,&
-&                   vpsp1,vresid_dum,dummy_real,vtrial1,vxc1,xccc3d2)
+&                   vpsp1,vresid_dum,dummy_real,vtrial1_i2pert,vxc1,xccc3d2)
 
                    if (psps%usepaw==1)then
                      call paw_an_reset_flags(paw_an1_i2pert) ! Force the recomputation of on-site potentials
@@ -562,9 +577,6 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                 &     psps%ntypat,optfr,paw_ij1_i2pert,pawang,pawfgrtab,pawrad,pawtab,qphon,&
                 &     rprimd,ucvol,vpsp1,vtrial,vxc,xred,&
                 &     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
-                     call pawnhatfr(0,i2dir,i2pert,natom,dtset%natom,nspden,psps%ntypat,&
-                &       pawang,pawfgrtab,pawrhoij,pawtab,rprimd,&
-                &       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
 !                    Computation of "on-site" first-order potentials, first-order densities
                      option=1
@@ -579,12 +591,12 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                      if (has_dijfr>0) then
                        !vpsp1 contribution to Dij already stored in frozen part of Dij
                        ABI_ALLOCATE(vtrial1_tmp,(cplex*nfftf,nspden))
-                       vtrial1_tmp=vtrial1
+                       vtrial1_tmp=vtrial1_i2pert
                        do ii=1,min(nspden,2)
                          vtrial1_tmp(:,ii)=vtrial1_tmp(:,ii)-vpsp1(:)
                        end do
                      else
-                       vtrial1_tmp => vtrial1
+                       vtrial1_tmp => vtrial1_i2pert
                      end if
                      call pawdij(cplex,dtset%enunit,gprimd,i2pert,natom,dtset%natom,&
                 &     nfftf,nfftotf,dtset%nspden,psps%ntypat,paw_an1_i2pert,paw_ij1_i2pert,pawang,&
@@ -599,6 +611,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                 &     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,&
                 &     qphon=qphon)
 !                     call timab(561,2,tsec)
+
                    end if ! end usepaw section
 
                    call init_rf_hamiltonian(cplex,gs_hamkq,i2pert,rf_hamkq,has_e1kbsc=1)
@@ -665,7 +678,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 &                   mpsang,mpw,natom,nattyp,nfftf,nfftotf,nkpt,nk3xc,nspden,nspinor,nsppol,nsym1,npwarr,occ,&
 &                   pawang,pawang1,pawfgrtab,pawrad,pawtab,pawrhoij,pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij1_i3pert,&
 &                   paw_an0,paw_an1_i2pert,paw_ij0,paw_ij1_i2pert,pawfgr,ph1d,psps,rf_hamkq,rho1r1,rho2r1,rho3r1,&
-&                   rprimd,symaf1,symrc1,ucvol,vtrial,vtrial1,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred)
+&                   rprimd,symaf1,symrc1,ucvol,vtrial,vtrial1_i2pert,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred)
 !                   call timab(512,2,tsec)
 
                    call status(counter,dtfil%filstat,iexit,level,'after dfptnl_resp')
@@ -712,6 +725,12 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 
                    call destroy_rf_hamiltonian(rf_hamkq)
 
+!                   if (psps%usepaw==1) then
+!                     do ii=1,natom
+!                       pawfgrtab(ii)%nhatfr = zero
+!                     end do
+!                   end if
+
                  end if   !rfpert
                end do    !i2dir
              end do     ! i2pert
@@ -741,7 +760,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  ABI_DEALLOCATE(rho3r1)
  ABI_DEALLOCATE(nhat1gr)
  ABI_DEALLOCATE(vresid_dum)
- ABI_DEALLOCATE(vtrial1)
+ ABI_DEALLOCATE(vtrial1_i2pert)
  ABI_DEALLOCATE(vxc1)
  ABI_DEALLOCATE(vhartr1)
  ABI_DEALLOCATE(vpsp1)
