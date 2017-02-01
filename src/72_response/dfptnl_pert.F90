@@ -414,16 +414,16 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0
          call wfk_read_bks(ddk_f(2), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_tmp)
          offset_cgi = (iband-1)*size_wf+icg0
          cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
-         if (usepaw==0) then
-           call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgi,cgi,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
-           if (abs(dotr-1)>tol10.or.abs(doti)>tol10) then
-             print '(2(a,es19.10E3))','       |cgi|^2 = ',dotr,',',doti
-           end if
-           call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgi,cwave_right,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
-           if (abs(dotr)>tol10.or.abs(doti)>tol10) then
-             print '(2(a,es19.10E3))',' < cgi | ddk > = ',dotr,',',doti
-           end if
-         end if
+!         if (usepaw==0) then
+!           call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgi,cgi,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+!           if (abs(dotr-1)>tol10.or.abs(doti)>tol10) then
+!             print '(2(a,es19.10E3))','       |cgi|^2 = ',dotr,',',doti
+!           end if
+!           call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgi,cwave_right,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+!           if (abs(dotr)>tol10.or.abs(doti)>tol10) then
+!             print '(2(a,es19.10E3))',' < cgi | ddk > = ',dotr,',',doti
+!           end if
+!         end if
 !        Copy cwave_right in "dudk"
          dudk(:,1+(iband-1)*size_wf:iband*size_wf)=cwave_right(:,:)
 
@@ -431,12 +431,12 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0
          call wfk_read_bks(ddk_f(3), iband, ikpt, isppol, xmpio_single, cg_bks=cwave_right,eig1_bks=eig1_k_tmp)
          offset_cgi = (iband-1)*size_wf+icg0
          cgi(:,:) = cg(:,1+offset_cgi:size_wf+offset_cgi)
-         if (usepaw==0) then
-           call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgi,cgi,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
-           if (abs(dotr-1)>tol10.or.abs(doti)>tol10) then
-             print '(2(a,es19.10E3))','       |cgi|^2 = ',dotr,',',doti
-           end if
-         end if
+!         if (usepaw==0) then
+!           call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cgi,cgi,mpi_enreg%me_g0, mpi_enreg%comm_spinorfft)
+!           if (abs(dotr-1)>tol10.or.abs(doti)>tol10) then
+!             print '(2(a,es19.10E3))','       |cgi|^2 = ',dotr,',',doti
+!           end if
+!         end if
 !        Copy cwave_right in "dudkde"
          dudkde(:,1+(iband-1)*size_wf:iband*size_wf)=cwave_right(:,:)
        end if
