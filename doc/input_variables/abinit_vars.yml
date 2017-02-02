@@ -22717,7 +22717,7 @@
     defaultval:
     - 1
     - 1
-    definition: 'Response Function : Acoustic Sum Rule'
+    definition: 'Response Function : ATomic POLarisation'
     dimensions:
     - 2
     excludes: null
