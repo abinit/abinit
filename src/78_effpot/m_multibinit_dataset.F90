@@ -88,7 +88,6 @@ module m_multibinit_dataset
   integer :: prt_ifc
   integer :: prt_3rd  ! Print the 3rd order in xml file
   integer :: prtsrlr  ! print the short-range/long-range decomposition of phonon freq.
-  integer :: qrefine
   integer :: rfmeth
   integer :: symdynmat
 
@@ -98,6 +97,7 @@ module m_multibinit_dataset
   integer :: ng2qpt(3)
   integer :: kptrlatt(3,3)
   integer :: kptrlatt_fine(3,3)
+  integer :: qrefine(3)
 
 ! Real(dp)
   real(dp) :: bmass
@@ -626,15 +626,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
 !Q
  multibinit_dtset%qrefine=1 ! default is no refinement
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'qrefine',tread,'INT')
- if(tread==1) multibinit_dtset%qrefine = intarr(1)
- if(multibinit_dtset%qrefine < 1) then
-   write(message, '(a,i0,a,a,a,a,a)' )&
-&   'qrefine is',multibinit_dtset%qrefine,' The only allowed values',ch10,&
-&   'are integers >= 1 giving the refinement of the ngqpt grid',ch10,&
-&   'Action: correct qrefine in your input file.'
-   MSG_ERROR(message)
- end if
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'qrefine',tread,'INT')
+ if(tread==1) multibinit_dtset%qrefine = intarr(1:3)
+ do ii=1,3
+   if(multibinit_dtset%qrefine(ii) < 1) then
+     write(message, '(a,3i0,a,a,a,a,a)' )&
+&     'qrefine is',multibinit_dtset%qrefine,' The only allowed values',ch10,&
+&     'are integers >= 1 giving the refinement of the ngqpt grid',ch10,&
+&     'Action: correct qrefine in your input file.'
+     MSG_ERROR(message)
+   end if
+ end do
 
 !R
  multibinit_dtset%rfmeth=1
@@ -1012,8 +1014,9 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 !check that q-grid refinement is a divisor of ngqpt in each direction
- if(multibinit_dtset%qrefine > 1 .and. sum(abs(dmod(multibinit_dtset%ngqpt/dble(multibinit_dtset%qrefine),one))) > tol10) then
-   write(message, '(a,i0,a,a,a,3i8,a,a)' )&
+ if(any(multibinit_dtset%qrefine(:) > 1) .and. &
+&    any(abs(dmod(dble(multibinit_dtset%ngqpt(1:3))/dble(multibinit_dtset%qrefine(:)),one)) > tol10)) then
+   write(message, '(a,3i0,a,a,a,3i8,a,a)' )&
 &   'qrefine is',multibinit_dtset%qrefine,' The only allowed values',ch10,&
 &   'are integers which are divisors of the ngqpt grid', multibinit_dtset%ngqpt,ch10,&
 &   'Action: correct qrefine in your input file.'
@@ -1158,8 +1161,8 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
        write(nunit,'(19x,4es16.8)') (multibinit_dtset%q1shft(ii,iqshft),ii=1,3)
      end do
    end if
-   if (multibinit_dtset%qrefine > 1) then
-     write(nunit,'(3x,a9,i10)')'  qrefine', multibinit_dtset%qrefine
+   if (any(multibinit_dtset%qrefine(:) > 1)) then
+     write(nunit,'(3x,a9,3i10)')'  qrefine', multibinit_dtset%qrefine
    end if
  end if
 

@@ -106,7 +106,6 @@ module m_anaddb_dataset
   integer :: prtfsurf
   integer :: prtnest
   integer :: prtsrlr  ! print the short-range/long-range decomposition of phonon freq.
-  integer :: qrefine
   integer :: ramansr
   integer :: relaxat
   integer :: relaxstr
@@ -130,6 +129,7 @@ module m_anaddb_dataset
   integer :: ngqpt(9)             ! ngqpt(9) instead of ngqpt(3) is needed in wght9.f
   integer :: istrfix(6)
   integer :: ng2qpt(3)
+  integer :: qrefine(3)
   integer :: kptrlatt(3,3)
   integer :: kptrlatt_fine(3,3)
 
@@ -1181,15 +1181,17 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  end if
 
  anaddb_dtset%qrefine=1 ! default is no refinement
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'qrefine',tread,'INT')
- if(tread==1) anaddb_dtset%qrefine = intarr(1)
- if(anaddb_dtset%qrefine < 1) then
-   write(message, '(a,i0,a,a,a,a,a)' )&
-&   'qrefine is',anaddb_dtset%qrefine,' The only allowed values',ch10,&
-&   'are integers >= 1 giving the refinement of the ngqpt grid',ch10,&
-&   'Action: correct qrefine in your input file.'
-   MSG_ERROR(message)
- end if
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'qrefine',tread,'INT')
+ if(tread==1) anaddb_dtset%qrefine = intarr(1:3)
+ do ii=1,3
+   if(anaddb_dtset%qrefine(ii) < 1) then
+     write(message, '(a,3i0,a,a,a,a,a)' )&
+&     'qrefine is',anaddb_dtset%qrefine,' The only allowed values',ch10,&
+&     'are integers >= 1 giving the refinement of the ngqpt grid',ch10,&
+&     'Action: correct qrefine in your input file.'
+     MSG_ERROR(message)
+   end if
+ end do
 
 !R
 
@@ -1701,8 +1703,9 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
  end if
 
 !check that q-grid refinement is a divisor of ngqpt in each direction
- if(anaddb_dtset%qrefine > 1 .and. sum(abs(dmod(anaddb_dtset%ngqpt/dble(anaddb_dtset%qrefine),one))) > tol10) then
-   write(message, '(a,i0,a,a,a,3i8,a,a)' )&
+ if(any(anaddb_dtset%qrefine(:) > 1) .and. &
+&   any(abs(dmod(dble(anaddb_dtset%ngqpt(1:3))/dble(anaddb_dtset%qrefine(:)),one)) > tol10) ) then
+   write(message, '(a,3i0,a,a,a,3i8,a,a)' )&
 &   'qrefine is',anaddb_dtset%qrefine,' The only allowed values',ch10,&
 &   'are integers which are divisors of the ngqpt grid', anaddb_dtset%ngqpt,ch10,&
 &   'Action: correct qrefine in your input file.'
@@ -1845,8 +1848,8 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
        write(nunit,'(19x,4es16.8)') (anaddb_dtset%q1shft(ii,iqshft),ii=1,3)
      end do
    end if
-   if (anaddb_dtset%qrefine > 1) then
-     write(nunit,'(3x,a9,i10)')'  qrefine', anaddb_dtset%qrefine
+   if (any(anaddb_dtset%qrefine(:) > 1)) then
+     write(nunit,'(3x,a9,3i10)')'  qrefine', anaddb_dtset%qrefine
    end if
  end if
 

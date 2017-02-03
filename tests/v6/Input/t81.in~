@@ -4,7 +4,7 @@
 ! start with preliminary grid which is ngqpt / qrefine, then substitute any additional q found in ddb
 !   to the full ngqpt grid of dynamical matrices obtained through interpolation
 !   in the present test this is trivial, since the ngqpt grid points in the DDB file are complete.
-qrefine 2 2 2
+qrefine 2  
 
 !Flags
  ifcflag   1     ! Interatomic force constant flag
