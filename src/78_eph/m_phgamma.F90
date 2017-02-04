@@ -2383,7 +2383,6 @@ end subroutine a2fw_solve_gap
 !! pawrad(ntypat*usepaw)<pawrad_type>=Paw radial mesh and related data.
 !! pawtab(ntypat*usepaw)<pawtab_type>=Paw tabulated starting data.
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
-!! n0(nsppol)=Electronic density at the Fermi level for each spin.
 !! comm=MPI communicator.
 !!
 !! OUTPUT
@@ -2406,7 +2405,7 @@ end subroutine a2fw_solve_gap
 !! SOURCE
 
 subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
-                       pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
+                       pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
  use defs_basis
  use defs_datatypes
@@ -2471,7 +2470,6 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  type(mpi_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18),ngfftf(18)
- real(dp),intent(in) :: n0(ebands%nsppol)
  type(pawrad_type),intent(in) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
  type(ddk_t),intent(inout) :: ddk
@@ -2488,8 +2486,9 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  integer :: ii,ipw,mpw,my_mpw,mnb,ierr,my_kstart,my_kstop,cnt,ncid
  integer :: isig,n1,n2,n3,n4,n5,n6,nspden,eph_scalprod,do_ftv1q
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnl1
- integer :: nfft,nfftf,mgfft,mgfftf,kqcount,nkpg,nkpg1
+ integer :: nfft,nfftf,mgfft,mgfftf,kqcount,nkpg,nkpg1,edos_intmeth
  real(dp) :: cpu,wall,gflops
+ real(dp) :: edos_step,edos_broad
  real(dp) :: ecut,eshift,eig0nk,dotr,doti,dksqmax
  logical,parameter :: have_ktimerev=.True.
  logical :: isirr_k,isirr_kq,gen_eigenpb
@@ -2497,9 +2496,11 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  type(fstab_t),pointer :: fs
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
+ type(edos_t) :: edos
  type(phgamma_t) :: gams
  type(a2fw_t) :: a2fw
  character(len=500) :: msg
+ character(len=fnlen) :: path
 !arrays
  integer :: g0_k(3),g0bz_kq(3),g0_kq(3),symq(4,2,cryst%nsym),dummy_gvec(3,dummy_npw)
  integer :: work_ngfft(18),gmax(3),my_gmax(3),gamma_ngqpt(3) !g0ibz_kq(3),
@@ -2509,6 +2510,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  real(dp) :: displ_cart(2,3,cryst%natom,3*cryst%natom),displ_red(2,3,cryst%natom,3*cryst%natom)
  real(dp) :: temp_tgam(2,3*cryst%natom,3*cryst%natom)
  real(dp) :: sigmas(2),wminmax(2)
+ real(dp) :: n0(ebands%nsppol),edos_enewin(2)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: v1scf(:,:,:,:),tgam(:,:,:,:),gvals_qibz(:,:,:,:,:,:),gkk_atm(:,:,:,:)
@@ -2544,6 +2546,27 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  n4=ngfft(4); n5=ngfft(5); n6=ngfft(6)
+
+ ! Compute electron DOS.
+ ! TODO: Optimize this part. Really slow if tetra and lots of points and/or bands
+ ! Could just get DOS around efermi but then I cannot compute ef from IDOS.
+ edos_intmeth = 2; if (dtset%prtdos == 1) edos_intmeth = 1
+ !edos_intmeth = 1
+ edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
+ edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
+ edos_enewin = [one, zero]
+ edos_enewin = [ebands%fermie - dtset%eph_fsewin, ebands%fermie + dtset%eph_fsewin]
+ edos = ebands_get_edos(ebands,cryst,edos_intmeth,edos_step,edos_broad,edos_enewin,comm)
+
+ ! Store DOS per spin channels
+ n0(:) = edos%gef(1:edos%nsppol)
+ if (my_rank == master) then
+   call edos_print(edos, unit=ab_out)
+   path = strcat(dtfil%filnam_ds(4), "_EDOS")
+   call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
+   call edos_write(edos, path)
+ end if
+ call edos_free(edos)
 
  ! Find Fermi surface.
  sigmas = [dtset%eph_fsmear, 2*dtset%eph_fsmear] !* eV_Ha

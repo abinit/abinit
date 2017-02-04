@@ -57,7 +57,7 @@
 !!      ddb_from_file,ddk_free,ddk_init,destroy_mpi_enreg,dvdb_free,dvdb_init
 !!      dvdb_list_perts,dvdb_print,ebands_free,ebands_print,ebands_prtbltztrp
 !!      ebands_set_fermie,ebands_set_scheme,ebands_update_occ
-!!      edos_free,edos_print,edos_write,eph_gkk
+!!      eph_gkk
 !!      eph_phgamma,eph_phpi,hdr_free,hdr_vs_dtset,ifc_free,ifc_init
 !!      ifc_outphbtrap,ifc_printbxsf,ifc_test_phinterp,init_distribfft_seq
 !!      initmpi_seq,mkphdos,pawfgr_destroy,pawfgr_init,phdos_free,phdos_ncwrite
@@ -142,13 +142,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer,parameter :: master=0,level40=40,natifc0=0,brav1=1,timrev2=2,selectz0=0
  integer,parameter :: nsphere0=0,prtsrlr0=0
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf !,nfftf_tot
- integer :: iblock,ddb_nqshift,ierr,edos_intmeth
+ integer :: iblock,ddb_nqshift,ierr
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
 #endif
  real(dp),parameter :: rifcsph0=zero
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
- real(dp) :: edos_step,edos_broad
  real(dp) :: cpu,wall,gflops
  logical :: use_wfq,use_dvdb
  character(len=500) :: msg
@@ -157,7 +156,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
  type(ebands_t) :: ebands, ebands_kq
- type(edos_t) :: edos
  type(ddb_type) :: ddb
  type(dvdb_t) :: dvdb
  type(ddk_t) :: ddk
@@ -169,7 +167,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer :: ngfftc(18),ngfftf(18)
  integer,allocatable :: dummy_atifc(:)
  real(dp),parameter :: k0(3)=zero
- real(dp) :: dielt(3,3),zeff(3,3,dtset%natom),n0(dtset%nsppol),edos_enewin(2)
+ real(dp) :: dielt(3,3),zeff(3,3,dtset%natom)
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
  !real(dp) :: tsec(2)
@@ -335,27 +333,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  write(msg,'(2(a,f8.2))')"eph%init: cpu: ",cpu,", wall: ",wall
  call wrtout(std_out, msg, do_flush=.True.)
  call cwtime(cpu,wall,gflops,"start")
-
- ! Compute electron DOS.
- ! TODO: Optimize this part. Really slow if tetra and lots of points and/or bands
- ! Could just get DOS around efermi
- edos_intmeth = 2; if (dtset%prtdos == 1) edos_intmeth = 1
- !edos_intmeth = 1
- edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
- edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
- edos_enewin = [one, zero]
- edos_enewin = [ebands%efermi - dtset%eph_fsewin, ebands%efermi + dtset%eph_fsewin]
- edos = ebands_get_edos(ebands,cryst,edos_intmeth,edos_step,edos_broad,edos_enewin,comm)
-
- ! Store DOS per spin channels
- n0(:) = edos%gef(1:edos%nsppol)
- if (my_rank == master) then
-   call edos_print(edos, unit=ab_out)
-   path = strcat(dtfil%filnam_ds(4), "_EDOS")
-   call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
-   call edos_write(edos, path)
- end if
- call edos_free(edos)
 
  ! =======================================
  ! Output useful info on electronic bands
@@ -536,7 +513,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  case (1)
    ! Compute phonon linewidths in metals.
    call eph_phgamma(wfk0_path,dtfil,ngfftc,ngfftf,dtset,cryst,ebands,dvdb,ddk,ifc,&
-   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,n0,comm)
+   pawfgr,pawang,pawrad,pawtab,psps,mpi_enreg,comm)
 
  case (2)
    ! Compute electron-phonon matrix elements
