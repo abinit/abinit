@@ -4,12 +4,12 @@
 !!  m_blas
 !!
 !! FUNCTION
-!! This module defines interfaces for overloading BLAS routines. 
-!! whose goal is twofold. On one hand, using generic interfaces renders 
-!! the code more readable, especially when the routine can be compiled with 
+!! This module defines interfaces for overloading BLAS routines.
+!! whose goal is twofold. On one hand, using generic interfaces renders
+!! the code more readable, especially when the routine can be compiled with
 !! different precision type (single-precision or double precision as done for example in the GW code)
-!! On the other hand, the generic interfaces defined here introduce a programming 
-!! layer that can be exploited for interfacing non-standard libraries such as for 
+!! On the other hand, the generic interfaces defined here introduce a programming
+!! layer that can be exploited for interfacing non-standard libraries such as for
 !! example CUBLAS routines for GPU computations.
 !!
 !! COPYRIGHT
@@ -21,7 +21,7 @@
 !!
 !! NOTES
 !!
-!! The convention about names of interfaced routine is: x<name>, 
+!! The convention about names of interfaced routine is: x<name>,
 !! where <name> is usually equal to the name of the standard routine
 !! without the first character specifying the type and kind.
 !! The full list of names is reported below.
@@ -42,7 +42,7 @@
 !! * SUBROUTINE scopy dcopy ccopy  zcopy   ---> XCOPY(n,cx,incx,cy,incy)
 !! SUBROUTINE srotg drotg crotg  zrotg   ---> XROTG(a,b,c,s)
 !! SUBROUTINE srot  drot  csrot  zdrot   ---> XROT(n,x,incx,y,incy,c,s)
-!! * SUBROUTINE sscal dscal cscal  zscal  
+!! * SUBROUTINE sscal dscal cscal  zscal
 !!                        csscal zdscal  ---> XSCAL(n,a,x,incx)
 !! SUBROUTINE sswap dswap cswap  zswap   ---> XSWAP(n,x,incx,y,incy)
 !!
@@ -95,7 +95,7 @@
 #include "config.h"
 #endif
 
-#include "abi_common.h" 
+#include "abi_common.h"
 
 MODULE m_blas
 
@@ -133,7 +133,7 @@ MODULE m_blas
 
 !----------------------------------------------------------------------
 
-interface xnrm2  
+interface xnrm2
   !
   function snrm2 ( n, x, incx )
     use defs_basis
@@ -167,7 +167,7 @@ end interface xnrm2
 
 !-------------------------------------------------------------------------------
 
-interface xscal  
+interface xscal
   !
   subroutine sscal(n,sa,sx,incx)
     use defs_basis
@@ -229,7 +229,7 @@ end interface xscal
 
 interface xdotu
   !
-#ifdef HAVE_LINALG_ZDOTU_BUG 
+#ifdef HAVE_LINALG_ZDOTU_BUG
   module procedure cdotu
   module procedure zdotu
 #else
@@ -461,7 +461,7 @@ end interface xherk
 
 !-------------------------------------------------------------------------------
 
-interface blas_cholesky_ortho      
+interface blas_cholesky_ortho
   module procedure blas_cholesky_ortho_spc
   module procedure blas_cholesky_ortho_dpc
 end interface blas_cholesky_ortho
@@ -524,7 +524,7 @@ CONTAINS  !=====================================================================
 
 !!***
 
-!!****f* m_blas/blas_cholesky_ortho_spc  
+!!****f* m_blas/blas_cholesky_ortho_spc
 !! NAME
 !!  blas_cholesky_ortho_spc
 !!
@@ -581,7 +581,7 @@ subroutine blas_cholesky_ortho_spc(vec_size,nvec,iomat,cf_ovlp,use_gemm)
 
  if (my_usegemm) then
    call xgemm("Conjugate","Normal",nvec,nvec,vec_size,cone_spc,iomat,vec_size,iomat,vec_size,czero_spc,cf_ovlp,nvec)
- else 
+ else
    call xherk("U","C", nvec, vec_size, one_sp, iomat, vec_size, zero_sp, cf_ovlp, nvec)
  end if
  !
@@ -590,7 +590,7 @@ subroutine blas_cholesky_ortho_spc(vec_size,nvec,iomat,cf_ovlp,use_gemm)
  if (ierr/=0)  then
    write(msg,'(a,i0)')' ZPOTRF returned info= ',ierr
    MSG_ERROR(msg)
- end if 
+ end if
  !
  ! 3) Solve X U = io_mat. On exit iomat is orthonormalized.
  call CTRSM('Right','Upper','Normal','Normal',vec_size,nvec,cone_spc,cf_ovlp,nvec,iomat,vec_size)
@@ -600,7 +600,7 @@ end subroutine blas_cholesky_ortho_spc
 
 !----------------------------------------------------------------------
 
-!!****f* m_blas/blas_cholesky_ortho_dpc  
+!!****f* m_blas/blas_cholesky_ortho_dpc
 !! NAME
 !!  blas_cholesky_ortho_dpc
 !!
@@ -656,7 +656,7 @@ subroutine blas_cholesky_ortho_dpc(vec_size,nvec,iomat,cf_ovlp,use_gemm)
 
  if (my_usegemm) then
    call xgemm("Conjugate","Normal",nvec,nvec,vec_size,cone_dpc,iomat,vec_size,iomat,vec_size,czero_dpc,cf_ovlp,nvec)
- else 
+ else
    call xherk("U","C", nvec, vec_size, one_dp, iomat, vec_size, zero_dp, cf_ovlp, nvec)
  end if
  !
@@ -665,7 +665,7 @@ subroutine blas_cholesky_ortho_dpc(vec_size,nvec,iomat,cf_ovlp,use_gemm)
  if (ierr/=0)  then
    write(msg,'(a,i0)')' ZPOTRF returned info= ',ierr
    MSG_ERROR(msg)
- end if 
+ end if
  !
  ! 3) Solve X U = io_mat. On exit io_mat is orthonormalized.
  call ZTRSM('Right','Upper','Normal','Normal',vec_size,nvec,cone_dpc,cf_ovlp,nvec,iomat,vec_size)
@@ -683,7 +683,7 @@ end subroutine blas_cholesky_ortho_dpc
 !!  Compute alpha * mat^T in place. target: single precision real matrix.
 !!
 !! INPUTS
-!!  n=size of the matrix 
+!!  n=size of the matrix
 !!  [alpha]=scalar, set to 1.0 if not present
 !!
 !! SIDE EFFECTS
@@ -719,16 +719,16 @@ subroutine sqmat_itranspose_sp(n,mat,alpha)
 #if defined HAVE_LINALG_MKL_IMATCOPY
   if (PRESENT(alpha)) then
     call mkl_simatcopy("Column", "Trans", n, n, alpha, mat, n, n)
-  else 
+  else
     call mkl_simatcopy("Column", "Trans", n, n, one_sp, mat, n, n)
   end if
-#else 
+#else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
 !$OMP PARALLEL WORKSHARE
     mat = alpha * TRANSPOSE(mat)
 !$OMP END PARALLEL WORKSHARE
-  else 
+  else
 !$OMP PARALLEL WORKSHARE
     mat = TRANSPOSE(mat)
 !$OMP END PARALLEL WORKSHARE
@@ -748,7 +748,7 @@ end subroutine sqmat_itranspose_sp
 !!  Compute alpha * mat^T in place. target: double precision real matrix.
 !!
 !! INPUTS
-!!  n=size of the matrix 
+!!  n=size of the matrix
 !!  [alpha]=scalar, set to 1.0 if not present
 !!
 !! SIDE EFFECTS
@@ -784,16 +784,16 @@ subroutine sqmat_itranspose_dp(n,mat,alpha)
 #if defined HAVE_LINALG_MKL_IMATCOPY
   if (PRESENT(alpha)) then
     call mkl_dimatcopy("Column", "Trans", n, n, alpha, mat, n, n)
-  else 
+  else
     call mkl_dimatcopy("Column", "Trans", n, n, one_dp, mat, n, n)
   end if
-#else 
+#else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
 !$OMP PARALLEL WORKSHARE
     mat = alpha * TRANSPOSE(mat)
 !$OMP END PARALLEL WORKSHARE
-  else 
+  else
 !$OMP PARALLEL WORKSHARE
     mat = TRANSPOSE(mat)
 !$OMP END PARALLEL WORKSHARE
@@ -813,7 +813,7 @@ end subroutine sqmat_itranspose_dp
 !!  Compute alpha * mat^T in place. target: single precision complex matrix.
 !!
 !! INPUTS
-!!  n=size of the matrix 
+!!  n=size of the matrix
 !!  [alpha]=scalar, set to 1.0 if not present
 !!
 !! SIDE EFFECTS
@@ -849,16 +849,16 @@ subroutine sqmat_itranspose_spc(n,mat,alpha)
 #if defined HAVE_LINALG_MKL_IMATCOPY
   if (PRESENT(alpha)) then
     call mkl_cimatcopy("Column", "Trans", n, n, alpha, mat, n, n)
-  else 
+  else
     call mkl_cimatcopy("Column", "Trans", n, n, cone_spc, mat, n, n)
   end if
-#else 
+#else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
 !$OMP PARALLEL WORKSHARE
     mat = alpha * TRANSPOSE(mat)
 !$OMP END PARALLEL WORKSHARE
-  else 
+  else
 !$OMP PARALLEL WORKSHARE
     mat = TRANSPOSE(mat)
 !$OMP END PARALLEL WORKSHARE
@@ -878,7 +878,7 @@ end subroutine sqmat_itranspose_spc
 !!  Compute alpha * mat^T in place. target: double precision complex matrix.
 !!
 !! INPUTS
-!!  n=size of the matrix 
+!!  n=size of the matrix
 !!  [alpha]=scalar, set to 1.0 if not present
 !!
 !! SIDE EFFECTS
@@ -914,16 +914,16 @@ subroutine sqmat_itranspose_dpc(n,mat,alpha)
 #if defined  HAVE_LINALG_MKL_IMATCOPY
   if (PRESENT(alpha)) then
     call mkl_zimatcopy("Column", "Trans", n, n, alpha, mat, n, n)
-  else 
+  else
     call mkl_zimatcopy("Column", "Trans", n, n, cone_dpc, mat, n, n)
   end if
-#else 
+#else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
 !$OMP PARALLEL WORKSHARE
     mat = alpha * TRANSPOSE(mat)
 !$OMP END PARALLEL WORKSHARE
-  else 
+  else
 !$OMP PARALLEL WORKSHARE
     mat = TRANSPOSE(mat)
 !$OMP END PARALLEL WORKSHARE
@@ -943,7 +943,7 @@ end subroutine sqmat_itranspose_dpc
 !!  Compute alpha * mat^T out-of-place. target: single precision real matrix.
 !!
 !! INPUTS
-!!  n=size of the matrix 
+!!  n=size of the matrix
 !!  [alpha]=scalar, set to 1.0 if not present
 !!  imat(n,n)=Input matrix.
 !!
@@ -981,16 +981,16 @@ subroutine sqmat_otranspose_sp(n,imat,omat,alpha)
 #if defined  HAVE_LINALG_MKL_OMATCOPY
   if (PRESENT(alpha)) then
     call mkl_somatcopy("Column", "Transpose", n, n, alpha, imat, n, omat, n)
-  else 
+  else
     call mkl_somatcopy("Column", "Transpose", n, n, one_sp, imat, n, omat, n)
   end if
-#else 
+#else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
 !$OMP PARALLEL WORKSHARE
     omat = alpha * TRANSPOSE(imat)
 !$OMP END PARALLEL WORKSHARE
-  else 
+  else
 !$OMP PARALLEL WORKSHARE
     omat = TRANSPOSE(imat)
 !$OMP END PARALLEL WORKSHARE
@@ -1010,7 +1010,7 @@ end subroutine sqmat_otranspose_sp
 !!  Compute alpha * mat^T out-of-place. target: double precision real matrix.
 !!
 !! INPUTS
-!!  n=size of the matrix 
+!!  n=size of the matrix
 !!  [alpha]=scalar, set to 1.0 if not present
 !!  imat(n,n)=Input matrix.
 !!
@@ -1048,16 +1048,16 @@ subroutine sqmat_otranspose_dp(n,imat,omat,alpha)
 #if defined  HAVE_LINALG_MKL_OMATCOPY
   if (PRESENT(alpha)) then
     call mkl_domatcopy("Column", "Transpose", n, n, alpha, imat, n, omat, n)
-  else 
+  else
     call mkl_domatcopy("Column", "Transpose", n, n, one_dp, imat, n, omat, n)
   end if
-#else 
+#else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
 !$OMP PARALLEL WORKSHARE
     omat = alpha * TRANSPOSE(imat)
 !$OMP END PARALLEL WORKSHARE
-  else 
+  else
 !$OMP PARALLEL WORKSHARE
     omat = TRANSPOSE(imat)
 !$OMP END PARALLEL WORKSHARE
@@ -1077,7 +1077,7 @@ end subroutine sqmat_otranspose_dp
 !!  Compute alpha * mat^T out-of-place. target: single precision complex matrix.
 !!
 !! INPUTS
-!!  n=size of the matrix 
+!!  n=size of the matrix
 !!  [alpha]=scalar, set to 1.0 if not present
 !!  imat(n,n)=Input matrix.
 !!
@@ -1115,16 +1115,16 @@ subroutine sqmat_otranspose_spc(n,imat,omat,alpha)
 #if defined  HAVE_LINALG_MKL_OMATCOPY
   if (PRESENT(alpha)) then
     call mkl_comatcopy("Column", "Transpose", n, n, alpha, imat, n, omat, n)
-  else 
+  else
     call mkl_comatcopy("Column", "Transpose", n, n, cone_spc, imat, n, omat, n)
   end if
-#else 
+#else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
 !$OMP PARALLEL WORKSHARE
     omat = alpha * TRANSPOSE(imat)
 !$OMP END PARALLEL WORKSHARE
-  else 
+  else
 !$OMP PARALLEL WORKSHARE
     omat = TRANSPOSE(imat)
 !$OMP END PARALLEL WORKSHARE
@@ -1144,7 +1144,7 @@ end subroutine sqmat_otranspose_spc
 !!  Compute alpha * mat^T out-of-place. target: double precision complex matrix.
 !!
 !! INPUTS
-!!  n=size of the matrix 
+!!  n=size of the matrix
 !!  [alpha]=scalar, set to 1.0 if not present
 !!  imat(n,n)=Input matrix.
 !!
@@ -1182,16 +1182,16 @@ subroutine sqmat_otranspose_dpc(n,imat,omat,alpha)
 #if defined  HAVE_LINALG_MKL_OMATCOPY
   if (PRESENT(alpha)) then
     call mkl_zomatcopy("Column", "Transpose", n, n, alpha, imat, n, omat, n)
-  else 
+  else
     call mkl_zomatcopy("Column", "Transpose", n, n, cone_dpc, imat, n, omat, n)
   end if
-#else 
+#else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
 !$OMP PARALLEL WORKSHARE
     omat = alpha * TRANSPOSE(imat)
 !$OMP END PARALLEL WORKSHARE
-  else 
+  else
 !$OMP PARALLEL WORKSHARE
     omat = TRANSPOSE(imat)
 !$OMP END PARALLEL WORKSHARE
@@ -1211,7 +1211,7 @@ end subroutine sqmat_otranspose_dpc
 !!  Compute alpha * CONJG(mat^T) in place. target: single precision complex matrix.
 !!
 !! INPUTS
-!!  n=size of the matrix 
+!!  n=size of the matrix
 !!  [alpha]=scalar, set to 1.0 if not present
 !!
 !! SIDE EFFECTS
@@ -1247,16 +1247,16 @@ subroutine sqmat_iconjgtrans_spc(n,mat,alpha)
 #if defined  HAVE_LINALG_MKL_IMATCOPY
   if (PRESENT(alpha)) then
     call mkl_cimatcopy("Column", "C", n, n, alpha, mat, n, n)
-  else 
+  else
     call mkl_cimatcopy("Column", "C", n, n, cone_spc, mat, n, n)
   end if
-#else 
+#else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
 !$OMP PARALLEL WORKSHARE
     mat = alpha * TRANSPOSE(CONJG(mat))
 !$OMP END PARALLEL WORKSHARE
-  else 
+  else
 !$OMP PARALLEL WORKSHARE
     mat = TRANSPOSE(CONJG(mat))
 !$OMP END PARALLEL WORKSHARE
@@ -1276,7 +1276,7 @@ end subroutine sqmat_iconjgtrans_spc
 !!  Compute alpha * CONJG(mat^T) in place. target: double precision complex matrix.
 !!
 !! INPUTS
-!!  n=size of the matrix 
+!!  n=size of the matrix
 !!  [alpha]=scalar, set to 1.0 if not present
 !!
 !! SIDE EFFECTS
@@ -1312,16 +1312,16 @@ subroutine sqmat_iconjgtrans_dpc(n,mat,alpha)
 #if defined  HAVE_LINALG_MKL_IMATCOPY
   if (PRESENT(alpha)) then
     call mkl_zimatcopy("Column", "C", n, n, alpha, mat, n, n)
-  else 
+  else
     call mkl_zimatcopy("Column", "C", n, n, cone_dpc, mat, n, n)
   end if
-#else 
+#else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
 !$OMP PARALLEL WORKSHARE
     mat = alpha * TRANSPOSE(CONJG(mat))
 !$OMP END PARALLEL WORKSHARE
-  else 
+  else
 !$OMP PARALLEL WORKSHARE
     mat = TRANSPOSE(CONJG(mat))
 !$OMP END PARALLEL WORKSHARE
@@ -1341,7 +1341,7 @@ end subroutine sqmat_iconjgtrans_dpc
 !!  Compute alpha * CONJG(mat^T) out-of-place. target: single precision complex matrix.
 !!
 !! INPUTS
-!!  n=size of the matrix 
+!!  n=size of the matrix
 !!  [alpha]=scalar, set to 1.0 if not present
 !!  imat(n,n)=Input matrix.
 !!
@@ -1379,16 +1379,16 @@ subroutine sqmat_oconjgtrans_spc(n,imat,omat,alpha)
 #if defined  HAVE_LINALG_MKL_OMATCOPY
   if (PRESENT(alpha)) then
     call mkl_comatcopy("Column", "C", n, n, alpha, imat, n, omat, n)
-  else 
+  else
     call mkl_comatcopy("Column", "C", n, n, cone_spc, imat, n, omat, n)
   end if
-#else 
+#else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
 !$OMP PARALLEL WORKSHARE
     omat = alpha * TRANSPOSE(CONJG(imat))
 !$OMP END PARALLEL WORKSHARE
-  else 
+  else
 !$OMP PARALLEL WORKSHARE
     omat = TRANSPOSE(CONJG(imat))
 !$OMP END PARALLEL WORKSHARE
@@ -1408,7 +1408,7 @@ end subroutine sqmat_oconjgtrans_spc
 !!  Compute alpha * CONJG(mat^T) out-of-place. target: double precision complex matrix.
 !!
 !! INPUTS
-!!  n=size of the matrix 
+!!  n=size of the matrix
 !!  [alpha]=scalar, set to 1.0 if not present
 !!  imat(n,n)=Input matrix.
 !!
@@ -1446,16 +1446,16 @@ subroutine sqmat_oconjgtrans_dpc(n,imat,omat,alpha)
 #if defined  HAVE_LINALG_MKL_OMATCOPY
   if (PRESENT(alpha)) then
     call mkl_zomatcopy("Column", "C", n, n, alpha, imat, n, omat, n)
-  else 
+  else
     call mkl_zomatcopy("Column", "C", n, n, cone_dpc, imat, n, omat, n)
   end if
-#else 
+#else
   ! Fallback to Fortran.
   if (PRESENT(alpha)) then
 !$OMP PARALLEL WORKSHARE
     omat = alpha * TRANSPOSE(CONJG(imat))
 !$OMP END PARALLEL WORKSHARE
-  else 
+  else
 !$OMP PARALLEL WORKSHARE
     omat = TRANSPOSE(CONJG(imat))
 !$OMP END PARALLEL WORKSHARE
