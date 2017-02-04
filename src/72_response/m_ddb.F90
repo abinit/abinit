@@ -39,7 +39,8 @@ MODULE m_ddb
  use m_geometry,       only : phdispl_cart2red
  use m_crystal,        only : crystal_t, crystal_init
  use m_pawtab,         only : pawtab_type,pawtab_nullify,pawtab_free
- use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, dfpt_phfrq
+ use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, &
+&                             dfpt_phfrq, sytens
 
  implicit none
 
@@ -2842,6 +2843,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
  integer :: mtypat,mkpt,matom
  integer :: choice,fullinit,iblok,intxc,iscf,isym,ixc
  integer :: nsize,nspden,nspinor,nsppol,nunit,timrev,useylm,vrsddb
+ integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  real(dp),parameter :: tolsym8=tol8
  real(dp) :: dilatmx,ecut,ecutsm,kptnrm,pawecutdg,dfpt_sciss,tolwfr
  real(dp) :: tphysel,tsmear
@@ -2849,7 +2851,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
 !arrays
  integer :: ngfft(18),symq(4,2,msym)
  integer,allocatable :: car3flg(:,:,:,:,:,:),carflg(:,:,:,:),indlmn(:,:,:)
- integer,allocatable :: nband(:),pspso(:),tmpflg(:,:,:,:,:,:)
+ integer,allocatable :: nband(:),pspso(:),tmpflg(:,:,:,:,:,:),rfpert(:,:,:,:,:,:)
  real(dp) :: gprimd(3,3),qpt(3),rprimd(3,3)
  real(dp),allocatable :: d2cart(:,:,:,:,:),d3cart(:,:,:,:,:,:,:),ekb(:,:)
  real(dp),allocatable :: kpt(:,:),occ(:),spinat(:,:),tmpval(:,:,:,:,:,:,:)
@@ -2970,10 +2972,35 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
      nsize=3*mpert*3*mpert*3*mpert
      ABI_MALLOC(tmpflg,(3,mpert,3,mpert,3,mpert))
      ABI_MALLOC(tmpval,(2,3,mpert,3,mpert,3,mpert))
+     ABI_MALLOC(rfpert,(3,mpert,3,mpert,3,mpert))
 
      tmpflg(:,:,:,:,:,:) = reshape(ddb%flg(1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
      tmpval(1,:,:,:,:,:,:) = reshape(ddb%val(1,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
      tmpval(2,:,:,:,:,:,:) = reshape(ddb%val(2,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
+     rfpert = 1
+
+     call sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
+
+     do i1pert = 1,mpert
+       do i2pert = 1,mpert
+         do i3pert = 1,mpert
+           do i1dir=1,3
+             do i2dir=1,3
+               do i3dir=1,3
+
+!                Set the elements that are zero by symmetry as if they were calculated.
+                 if ((rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-2) .and. &
+&                  (tmpflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)/=1)) then
+                   tmpval(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = zero
+                   tmpflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=1
+                 end if
+
+               end do
+             end do
+           end do
+         end do
+       end do
+     end do
 
      call d3sym(tmpflg,tmpval,indsym,mpert,natom,nsym,symrec,symrel)
 
@@ -2990,6 +3017,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,&
      ABI_FREE(car3flg)
      ABI_FREE(tmpflg)
      ABI_FREE(tmpval)
+     ABI_FREE(rfpert)
    end if
  end do ! iblok
 
