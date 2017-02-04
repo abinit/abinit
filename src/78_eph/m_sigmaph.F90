@@ -1049,6 +1049,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
              !gdw2_mn(ibsum, ib_k)
              !write(std_out,*)"gdw2_mn: ",gdw2_mn(ibsum, ib_k)
              !gdw2_mn(ibsum, ib_k) = zero
+             gdw2_mn(ibsum, ib_k) = gdw2_mn(ibsum, ib_k) * two
 
              do it=1,sigma%ntemp
                rfact = - weigth_q * gdw2_mn(ibsum, ib_k) * (two * nqnu_tlist(it) + one)  / ediff
@@ -2194,9 +2195,9 @@ subroutine sigmaph_print(self, ikcalc, spin, unt, what, ebands)
 
 !Local variables-------------------------------
 !integer
- integer :: ikc,is,ibc,band,ik_ibz,it
- real(dp) :: kse,kse_prev,dw,fan
- complex(dpc) :: sig0c,zc,qpe,qpe_prev
+ integer :: ikc,is,ibc,band,ik_ibz,it,ib_val,ib_cond
+ real(dp) :: kse,kse_prev,dw,fan,qp_gap,kse_val,kse_cond
+ complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond
 
 ! *************************************************************************
 
@@ -2224,8 +2225,8 @@ subroutine sigmaph_print(self, ikcalc, spin, unt, what, ebands)
    write(unt,"(a)")repeat("=", 80)
    write(unt,"(a)")"Final results in eV."
    write(unt,"(a)")"Notations:"
-   write(unt,"(a)")"   eKS: Kohn-Sham energy."
-   write(unt,"(a)")"   eQP: quasi-particle energy."
+   write(unt,"(a)")"   eKS: Kohn-Sham energy. eQP: quasi-particle energy."
+   write(unt,"(a)")"   eQP-eKS: Difference between the QP and the KS energy."
    write(unt,"(a)")"   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part."
    write(unt,"(a)")"   Z(eKS): Renormalization factor."
    write(unt,"(a)")"   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term."
@@ -2237,12 +2238,14 @@ subroutine sigmaph_print(self, ikcalc, spin, unt, what, ebands)
  if (index(what, "results") /= 0) then
    ! Write results for the first temperature.
    it = 1; ikc = ikcalc; is = spin
+   ib_val = nint(ebands%nelect / two); ib_cond = ib_val + 1
+   kse_val = huge(one); kse_cond = huge(one)
    if (self%nsppol == 1) then
       write(unt,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ikc)))
    else
       write(unt,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ikc)), ", spin:", itoa(is))
    end if
-   write(unt,"(a)")"   B    eKS     eQP    SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
+   write(unt,"(a)")"   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
    ik_ibz = self%kcalc2ibz(ikc,1)
    do ibc=1,self%nbcalc_ks(ikc,is)
      band = self%bstart_ks(ikc,is) + ibc - 1
@@ -2257,12 +2260,30 @@ subroutine sigmaph_print(self, ikcalc, spin, unt, what, ebands)
      if (ibc == 1) then
        kse_prev = kse; qpe_prev = qpe
      end if
-     write(unt, "(i4,9(f8.3,1x))") &
-       band, kse, real(qpe), real(sig0c), aimag(sig0c), real(zc), fan, dw, kse - kse_prev, real(qpe - qpe_prev)
+     if (band == ib_val) then
+       kse_val = kse; qpe_val = qpe
+     end if
+     if (band == ib_cond) then
+       kse_cond = kse; qpe_cond = qpe
+     end if
+     write(unt, "(i4,10(f8.3,1x))") &
+       band, kse, real(qpe), real(qpe) - kse, real(sig0c), aimag(sig0c), real(zc), &
+       fan, dw, kse - kse_prev, real(qpe - qpe_prev)
      if (ibc > 1) then
        kse_prev = kse; qpe_prev = qpe
      end if
-   end do
+   end do ! ibc
+
+   ! Print KS and QP gap
+   !if (self%bstart_ks(ikc,is) <= ib_val .and. self%bstart_ks(ikc,is) + selg%nbcalc_ks(ikc, is) + 1 >= ib_cond) then
+   if (kse_val /= huge(one) .and. kse_cond /= huge(one)) then
+     write(unt, "(a)")" "
+     write(unt, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",kse_cond - kse_val, "(assuming bval:",ib_val," ==> bcond:",ib_cond,")"
+     write(unt, "(a,f8.3)")" QP gap: ",real(qpe_cond - qpe_val)
+     write(unt, "(a,f8.3)")" QP_gap - KS_gap: ",real(qpe_cond - qpe_val) - (kse_cond - kse_val)
+     write(unt, "(a)")" "
+   end if
+
    write(unt, "(a)")" "
  end if
 
