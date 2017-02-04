@@ -2555,7 +2555,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
  edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
  edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
  edos_enewin = [one, zero]
- edos_enewin = [ebands%fermie - dtset%eph_fsewin, ebands%fermie + dtset%eph_fsewin]
+ !edos_enewin = [ebands%fermie - dtset%eph_fsewin, ebands%fermie + dtset%eph_fsewin]
  edos = ebands_get_edos(ebands,cryst,edos_intmeth,edos_step,edos_broad,edos_enewin,comm)
 
  ! Store DOS per spin channels

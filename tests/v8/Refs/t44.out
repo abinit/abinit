@@ -202,9 +202,6 @@ P           mkmem           8
 - Reading GS states from WFK file: t44o_DS20_WFK
 - Reading DDB from file: t44o_DS20_DDB
 - Reading DVDB from file: t44o_DS20_DVDB
- Fermi level:   1.25921644E+01 [eV]
- Total electron DOS in states/eV :   1.69125269E-03
-- Writing electron DOS to file: t44o_DS1_EDOS
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
@@ -345,9 +342,6 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
 - Reading GS states from WFK file: t44o_DS20_WFK
 - Reading DDB from file: t44o_DS20_DDB
 - Reading DVDB from file: t44o_DS20_DVDB
- Fermi level:   1.25921644E+01 [eV]
- Total electron DOS in states/eV :   1.69125269E-03
-- Writing electron DOS to file: t44o_DS2_EDOS
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
