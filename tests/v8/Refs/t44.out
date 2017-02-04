@@ -1,6 +1,6 @@
 
-.Version 8.1.7 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin15.6.0_gnu6.0 computer) 
+.Version 8.3.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
 
 .Copyright (C) 1998-2016 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date : Sat 10 Dec 2016.
-- ( at 22h08 )
+.Starting date : Sat  4 Feb 2017.
+- ( at 14h02 )
   
 - input  file    -> t44.in
 - output file    -> t44.out
@@ -34,7 +34,7 @@
 -    mband =          54        mffmem =           1         mkmem =           8
        mpw =         332          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       5.174 Mbytes of memory.
+P This job should need less than                       5.134 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          54        mffmem =           1         mkmem =           8
        mpw =         332          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       5.174 Mbytes of memory.
+P This job should need less than                       5.134 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -61,7 +61,7 @@ _ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -78,7 +78,7 @@ _ WF disk file :      2.190 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
         ddb_ngqpt        2    2    2
         ph_nqpath           3
          ph_ngqpt       16   16   16
--          fftalg         112
+-          fftalg         312
            getddb          20
            getwfk          20
            istwfk        1    0    1    0    0    0    1    0
@@ -257,8 +257,8 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit_eph/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -292,12 +292,12 @@ Notations:
    eQP: quasi-particle energy.
    SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
    Z(eKS): Renormalization factor.
-   FAN: Fan term at eKS. DW: Debye-Waller term.
+   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
    DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
  
  
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   B    eKS     eQP    SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)    DW    DeKS     DeQP
+   B    eKS     eQP    SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -8.789   -8.868   -0.079    0.001    0.994   -0.088    0.009    0.000    0.000
    2  12.800   13.015    0.215    0.333    0.172    0.053    0.162   21.589   21.883
    3  12.800   12.985    0.185    0.333    0.172    0.053    0.132    0.000   -0.030
@@ -308,7 +308,7 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    8  26.686   26.322   -0.364    0.008    0.928   -0.371    0.007    8.260    8.574
  
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
-   B    eKS     eQP    SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)    DW    DeKS     DeQP
+   B    eKS     eQP    SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -2.827   -2.821    0.007    0.115    0.458   -0.011    0.017    0.000    0.000
    2  -0.746   -0.886   -0.140    0.102    0.541   -0.195    0.055    2.081    1.934
    3   9.967   10.277    0.310    0.476    0.106    0.162    0.148   10.714   11.163
@@ -407,12 +407,12 @@ Notations:
    eQP: quasi-particle energy.
    SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
    Z(eKS): Renormalization factor.
-   FAN: Fan term at eKS. DW: Debye-Waller term.
+   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
    DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
  
  
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   B    eKS     eQP    SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)    DW    DeKS     DeQP
+   B    eKS     eQP    SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -8.789   -8.849   -0.060    0.001    0.994   -0.088    0.028    0.000    0.000
    2  12.800   13.309    0.509    0.333    0.172    0.053    0.455   21.589   22.158
    3  12.800   13.309    0.509    0.333    0.172    0.053    0.455    0.000    0.000
@@ -423,7 +423,7 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    8  26.686   26.337   -0.350    0.008    0.928   -0.371    0.021    8.260    8.321
  
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
-   B    eKS     eQP    SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)    DW    DeKS     DeQP
+   B    eKS     eQP    SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1  -2.827   -2.786    0.041    0.115    0.458   -0.011    0.052    0.000    0.000
    2  -0.746   -0.776   -0.030    0.102    0.541   -0.195    0.165    2.081    2.010
    3   9.967   10.536    0.568    0.476    0.106    0.163    0.406   10.714   11.311
@@ -455,7 +455,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00]
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         112
+-          fftalg         312
            getddb          20
            getwfk          20
            istwfk        1    0    1    0    0    0    1    0
@@ -632,10 +632,10 @@ P           mkmem           8
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
 - Comment : the original paper describing the ABINIT project.
 -
-- Proc.   0 individual time (sec): cpu=          8.9  wall=          8.9
+- Proc.   0 individual time (sec): cpu=         50.6  wall=         55.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.9  wall=          8.9
+.Delivered   2 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=         50.6  wall=         55.4

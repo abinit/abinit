@@ -1604,7 +1604,7 @@ type (gspline_t) function gspline_new(sigma) result(new)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'lgroup_new'
+#define ABI_FUNC 'gspline_new'
 !End of the abilint section
 
  implicit none
@@ -1672,10 +1672,11 @@ end function gspline_new
 
 pure subroutine gspline_eval(self, x0, nx, xmesh, weights)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'lgroup_new'
+#define ABI_FUNC 'gspline_eval'
 !End of the abilint section
 
  implicit none
@@ -1753,7 +1754,7 @@ subroutine gspline_free(self)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'lgroup_new'
+#define ABI_FUNC 'gspline_free'
 !End of the abilint section
 
  implicit none
