@@ -24829,7 +24829,8 @@
     - 59.0
     - 6
     definition: Temperature MESH
-    dimensions: 3
+    dimensions:
+    - 3
     excludes: null
     requires: null
     section: varbas

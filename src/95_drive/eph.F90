@@ -169,7 +169,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  integer :: ngfftc(18),ngfftf(18)
  integer,allocatable :: dummy_atifc(:)
  real(dp),parameter :: k0(3)=zero
- real(dp) :: dielt(3,3),zeff(3,3,dtset%natom),n0(dtset%nsppol)
+ real(dp) :: dielt(3,3),zeff(3,3,dtset%natom),n0(dtset%nsppol),edos_enewin(2)
  real(dp),pointer :: gs_eigen(:,:,:) !,gs_occ(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:)
  !real(dp) :: tsec(2)
@@ -337,13 +337,15 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call cwtime(cpu,wall,gflops,"start")
 
  ! Compute electron DOS.
- ! TODO: Optimize this part. Really slow if tetra and lots of points
- ! Could just do DOS around efermi
+ ! TODO: Optimize this part. Really slow if tetra and lots of points and/or bands
+ ! Could just get DOS around efermi
  edos_intmeth = 2; if (dtset%prtdos == 1) edos_intmeth = 1
  !edos_intmeth = 1
  edos_step = dtset%dosdeltae; edos_broad = dtset%tsmear
  edos_step = 0.01 * eV_Ha; edos_broad = 0.3 * eV_Ha
- edos = ebands_get_edos(ebands,cryst,edos_intmeth,edos_step,edos_broad,comm)
+ edos_enewin = [one, zero]
+ edos_enewin = [ebands%efermi - dtset%eph_fsewin, ebands%efermi + dtset%eph_fsewin]
+ edos = ebands_get_edos(ebands,cryst,edos_intmeth,edos_step,edos_broad,edos_enewin,comm)
 
  ! Store DOS per spin channels
  n0(:) = edos%gef(1:edos%nsppol)
@@ -353,7 +355,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
    call edos_write(edos, path)
  end if
-
  call edos_free(edos)
 
  ! =======================================

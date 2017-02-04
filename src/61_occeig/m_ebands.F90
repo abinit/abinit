@@ -52,7 +52,7 @@ MODULE m_ebands
  use m_io_tools,       only : file_exists, open_file
  use m_fstrings,       only : tolower, itoa, sjoin, ftoa, ltoa, ktoa, strcat, basename, replace
  use m_numeric_tools,  only : arth, imin_loc, imax_loc, bisect, stats_t, stats_eval, simpson_int, wrap2_zero_one,&
-                              isdiagmat
+                              isdiagmat, isinside
  use m_special_funcs,  only : dirac_delta
  use m_geometry,       only : normv
  use m_cgtools,        only : set_istwfk
@@ -3008,6 +3008,8 @@ end function ebands_ncwrite_path
 !!  broad=Gaussian broadening, If <0, the routine will use a default
 !!    value for the broadening computed from the mean of the energy level spacing.
 !!    No meaning for tetrahedrons
+!!  enewin(2)=Energy window for DOS. only bands whose energy is in [enewin(1), enenwin(2)] are included.
+!!    Ignored if enewin(2) <= enenwin(1).
 !!  comm=MPI communicator
 !!
 !! OUTPUT
@@ -3022,7 +3024,7 @@ end function ebands_ncwrite_path
 !!
 !! SOURCE
 
-type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) result(edos)
+type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,enewin,comm) result(edos)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3039,12 +3041,15 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
  real(dp),intent(in) :: step,broad
  type(ebands_t),target,intent(in)  :: ebands
  type(crystal_t),intent(in) :: cryst
+!arrays
+ real(dp),intent(in) :: enewin(2)
 
 !Local variables-------------------------------
 !scalars
  integer :: iw,nw,spin,band,ikpt,ief,nproc,my_rank,mpierr,cnt,ierr,bcorr
  real(dp) :: max_ene,min_ene,wtk,max_occ
  character(len=500) :: msg
+ logical :: has_ewin
  type(stats_t) :: ediffs
  type(t_tetrahedron) :: tetra
 !arrays
@@ -3056,6 +3061,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  ierr = 0
 
+ has_ewin = (enewin(2) > enewin(1))
  edos%nkibz = ebands%nkpt; edos%intmeth = intmeth; edos%nsppol = ebands%nsppol
 
  edos%broad = broad; edos%step = step
@@ -3067,7 +3073,11 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
  end if
 
  ! Compute the linear mesh so that it encloses all bands.
- eminmax_spin = get_minmax(ebands, "eig")
+ if (has_ewin) then
+   eminmax_spin(1,:) = enewin(1); eminmax_spin(2,:) = enewin(2)
+ else
+   eminmax_spin = get_minmax(ebands, "eig")
+ end if
  min_ene = minval(eminmax_spin(1,:)); min_ene = min_ene - 0.1_dp * abs(min_ene)
  max_ene = maxval(eminmax_spin(2,:)); max_ene = max_ene + 0.1_dp * abs(max_ene)
 
@@ -3090,6 +3100,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
        cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
        wtk = ebands%wtk(ikpt)
        do band=1,ebands%nband(ikpt+(spin-1)*ebands%nkpt)
+          if (has_ewin .and. .not. isinside(ebands%eig(band, ikpt, spin), enewin)) cycle
           wme0 = edos%mesh - ebands%eig(band, ikpt, spin)
           edos%dos(:, spin) = edos%dos(:, spin) + wtk * dirac_delta(wme0, edos%broad)
        end do
@@ -3120,6 +3131,7 @@ type(edos_t) function ebands_get_edos(ebands,cryst,intmeth,step,broad,comm) resu
        tmp_eigen = ebands%eig(band,:,spin)
        do ikpt=1,ebands%nkpt
          cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! mpi parallelism.
+         if (has_ewin .and. .not. isinside(ebands%eig(band, ikpt, spin), enewin)) cycle
 
          ! Calculate integration weights at each irred k-point (Blochl et al PRB 49 16223)
          call tetra_get_onewk(tetra, ikpt, bcorr, nw, ebands%nkpt, tmp_eigen, min_ene, max_ene, one, wdt)

@@ -53,6 +53,15 @@ module m_special_funcs
  public :: k_fermi           ! Fermi wave vector corresponding to the local value of the real space density rhor.
  public :: k_thfermi         ! Thomas-Fermi wave vector corresponding to the local value of the real space density rhor
 
+!!****t* m_special_funcs/jlspline_t
+!! NAME
+!! jlspline_t
+!!
+!! FUNCTION
+!!  Object used to interpolate Bessel functions
+!!
+!! SOURCE
+
  type,public :: jlspline_t
 
    integer :: nx
@@ -80,6 +89,7 @@ module m_special_funcs
    ! the second derivatives of the cubic spline.
 
  end type jlspline_t
+!!***
 
  public :: jlspline_new         ! Create new object.
  public :: jlspline_free        ! Free memory.

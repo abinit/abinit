@@ -45,9 +45,10 @@ MODULE m_numeric_tools
  public :: get_diag              ! Return the diagonal of a matrix as a vector
  public :: isdiagmat             ! True if matrix is diagonal
  public :: r2c,c2r               ! Transfer complex data stored in a real array to a complex array and vice versa
- public :: iseven                ! Return .TRUE. if int is even
- public :: isinteger             ! Return .TRUE. if all elements of rr differ from an integer by less than tol
- public :: is_zero               ! Return .TRUE. if all elements of rr differ from zero by less than tol
+ public :: iseven                ! True if int is even
+ public :: isinteger             ! True if all elements of rr differ from an integer by less than tol
+ public :: is_zero               ! True if all elements of rr differ from zero by less than tol
+ public :: isinside              ! True if float is inside an interval.
  public :: bisect                ! Given a monotonic array A and x find j such that A(j)>x>A(j+1) using bisection
  public :: imax_loc              ! Index of maxloc on an array returned as scalar instead of array-valued quantity
  public :: imin_loc              ! Index of minloc on an array returned as scalar instead of array-valued quantity
@@ -1567,6 +1568,35 @@ end function is_zero_rdp_1d
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/isinside
+!! NAME
+!!  isinside
+!!
+!! FUNCTION
+!!  True if float `xval` is inside the interval [win(1), win(2)]
+!!
+!! SOURCE
+
+pure logical function isinside(xval, win)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'isinside'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: xval,win(2)
+! *************************************************************************
+
+ isinside = (xval >= win(1) .and. xval <= win(2))
+
+end function isinside
+!!***
 
 !!****f* m_numeric_tools/bisect_rdp
 !! NAME
