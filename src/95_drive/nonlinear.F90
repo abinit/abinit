@@ -76,7 +76,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,&
  use m_hdr
  use m_ebands
 
- use m_dynmat,   only : d3sym
+ use m_dynmat,   only : d3sym, sytens
  use m_ddb,      only : psddb8, nlopt, DDB_VERSION
  use m_ioarr,    only : read_rhor
  use m_pawrad,   only : pawrad_type
