@@ -1048,7 +1048,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
              end do
              !gdw2_mn(ibsum, ib_k)
              !write(std_out,*)"gdw2_mn: ",gdw2_mn(ibsum, ib_k)
-             gdw2_mn(ibsum, ib_k) = zero
+             !gdw2_mn(ibsum, ib_k) = zero
 
              do it=1,sigma%ntemp
                rfact = - weigth_q * gdw2_mn(ibsum, ib_k) * (two * nqnu_tlist(it) + one)  / ediff
@@ -1392,7 +1392,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
  ! Build (linear) mesh of temperatures. tsmesh(1:3) = [start, step, num]
  new%ntemp = nint(dtset%tmesh(3))
- ABI_CHECK(new%ntemp > 1, "ntemp cannot be 1")
  ABI_MALLOC(new%kTmesh, (new%ntemp))
  new%kTmesh = arth(dtset%tmesh(1), dtset%tmesh(2), new%ntemp) * kb_HaK
 
@@ -1687,7 +1686,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    ABI_MALLOC(new%gfw_vals, (new%gfw_nomega, new%ntemp, 2, new%max_nbcalc))
  end if
 
- new%has_nuq_terms = .True.
+ new%has_nuq_terms = .False.
  if (new%has_nuq_terms) then
    ABI_CALLOC(new%vals_nuq, (new%ntemp, new%max_nbcalc, 3*cryst%natom, new%nqbz, 2))
  end if
@@ -2196,7 +2195,7 @@ subroutine sigmaph_print(self, ikcalc, spin, unt, what, ebands)
 !Local variables-------------------------------
 !integer
  integer :: ikc,is,ibc,band,ik_ibz,it
- real(dp) :: kse,kse_prev,dw
+ real(dp) :: kse,kse_prev,dw,fan
  complex(dpc) :: sig0c,zc,qpe,qpe_prev
 
 ! *************************************************************************
@@ -2228,7 +2227,8 @@ subroutine sigmaph_print(self, ikcalc, spin, unt, what, ebands)
    write(unt,"(a)")"   eKS: Kohn-Sham energy."
    write(unt,"(a)")"   eQP: quasi-particle energy."
    write(unt,"(a)")"   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part."
-   write(unt,"(a)")"   Z1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part."
+   write(unt,"(a)")"   Z(eKS): Renormalization factor."
+   write(unt,"(a)")"   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term."
    write(unt,"(a)")"   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP."
    write(unt,"(a)")" "
    write(unt,"(a)")" "
@@ -2242,13 +2242,13 @@ subroutine sigmaph_print(self, ikcalc, spin, unt, what, ebands)
    else
       write(unt,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ikc)), ", spin:", itoa(is))
    end if
-   write(unt,"(a)")"   B    eKS     eQP    SE1(eKS)  SE2(eKS)  Z1(eKS)  Z2(eKS)  DeKS     DeQP"
+   write(unt,"(a)")"   B    eKS     eQP    SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
    ik_ibz = self%kcalc2ibz(ikc,1)
    do ibc=1,self%nbcalc_ks(ikc,is)
      band = self%bstart_ks(ikc,is) + ibc - 1
      sig0c = self%vals_e0ks(it, ibc) * Ha_eV
      dw = self%dw_vals(it, ibc) * Ha_eV
-     write(std_out,*)"fan: ",sig0c - dw, "dw: ",dw
+     fan = real(sig0c) - dw
      ! Note that here I use the full Sigma including the imaginary part
      zc = one / (one - self%dvals_de0ks(it, ibc))
      !zc = one / (one - real(self%dvals_de0ks(it, ibc))
@@ -2257,9 +2257,8 @@ subroutine sigmaph_print(self, ikcalc, spin, unt, what, ebands)
      if (ibc == 1) then
        kse_prev = kse; qpe_prev = qpe
      end if
-     write(unt, "(i4,8(f8.3,1x))") &
-       band, kse, real(qpe), real(sig0c), aimag(sig0c), real(zc), aimag(zc), &
-       kse - kse_prev, real(qpe - qpe_prev)
+     write(unt, "(i4,9(f8.3,1x))") &
+       band, kse, real(qpe), real(sig0c), aimag(sig0c), real(zc), fan, dw, kse - kse_prev, real(qpe - qpe_prev)
      if (ibc > 1) then
        kse_prev = kse; qpe_prev = qpe
      end if
