@@ -222,7 +222,8 @@ MODULE m_dvdb
 
  public :: dvdb_init              ! Initialize the object.
  public :: dvdb_open_read         ! Open the file in read-only mode.
- public :: dvdb_free              ! Close the file and release the memory allocated.
+ public :: dvdb_close             ! Close file.
+ public :: dvdb_free              ! Release the memory allocated and close the file.
  public :: dvdb_print             ! Release memory.
  public :: dvdb_findq             ! Returns the index of the q-point.
  public :: dvdb_read_onev1        ! Read and return the DFPT potential for given (idir, ipert, iqpt).
@@ -541,6 +542,49 @@ end subroutine dvdb_open_read
 
 !----------------------------------------------------------------------
 
+!!****f* m_dvdb/dvdb_close
+!! NAME
+!!  dvdb_close
+!!
+!! FUNCTION
+!! Close the file
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dvdb_close(db)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'dvdb_close'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ type(dvdb_t),intent(inout) :: db
+
+!************************************************************************
+
+ select case (db%iomode)
+ case (IO_MODE_FORTRAN)
+   close(db%fh)
+ case default
+   MSG_ERROR(sjoin("Unsupported iomode:", itoa(db%iomode)))
+ end select
+
+ db%rw_mode = DVDB_NOMODE
+
+end subroutine dvdb_close
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_dvdb/dvdb_free
 !! NAME
 !!  dvdb_free
@@ -611,13 +655,7 @@ subroutine dvdb_free(db)
 
  ! Close the file but only if we have performed IO.
  if (db%rw_mode == DVDB_NOMODE) return
-
- select case (db%iomode)
- case (IO_MODE_FORTRAN)
-   close(db%fh)
- case default
-   MSG_ERROR(sjoin("Unsupported iomode:", itoa(db%iomode)))
- end select
+ call dvdb_close(db)
 
 end subroutine dvdb_free
 !!***

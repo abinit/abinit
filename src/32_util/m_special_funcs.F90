@@ -52,6 +52,7 @@ module m_special_funcs
                              !                       1                        , if m=0
  public :: k_fermi           ! Fermi wave vector corresponding to the local value of the real space density rhor.
  public :: k_thfermi         ! Thomas-Fermi wave vector corresponding to the local value of the real space density rhor
+!!***
 
 !!****t* m_special_funcs/jlspline_t
 !! NAME

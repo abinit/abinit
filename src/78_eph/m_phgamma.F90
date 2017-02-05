@@ -2612,7 +2612,7 @@ subroutine eph_phgamma(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ddk,
    write(msg, "(2(a,i0),a)")"Will use Fourier interpolation of DFPT potentials [",do_ftv1q,"/",gams%nqibz,"]"
    call wrtout(std_out, msg)
    call wrtout(std_out, sjoin("From ngqpt", ltoa(ifc%ngqpt), "to", ltoa(gamma_ngqpt)))
-   call dvdb_ftinterp_setup(dvdb,ifc%ngqpt,1,[zero,zero,zero],nfft,ngfft,comm)
+   call dvdb_ftinterp_setup(dvdb,ifc%ngqpt,1,[zero,zero,zero],nfftf,ngfftf,comm)
  end if
 
  ! Initialize the wave function descriptor.

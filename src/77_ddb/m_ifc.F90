@@ -2242,6 +2242,7 @@ end subroutine ifc_getiaf
 !----------------------------------------------------------------------
 
 !!****f* m_ifc/omega_decomp
+!!
 !! NAME
 !!  omega_decomp
 !!

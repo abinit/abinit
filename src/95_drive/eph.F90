@@ -109,7 +109,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free, symrhoij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_phgamma,         only : eph_phgamma
- use m_gkk,             only : eph_gkk
+ use m_gkk,             only : eph_gkk, ncwrite_v1qnu
  use m_phpi,            only : eph_phpi
  use m_sigmaph,         only : sigmaph
 
@@ -434,7 +434,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
 !TODO: do we want to pass the temper etc... from anaddb_dtset into the full dtset for abinit?
 ! Otherwise just leave these defaults.
-!MG: Disabled for the time being because of SIGFPE in v8[41]
+!MG: 1) Disabled for the time being because of SIGFPE in v8[41]
+!    2) I've addeded a new abinit variable (tmesh) to specifiy the list of temperatures.
      path = strcat(dtfil%filnam_ds(4), "_MSQD_T")
      !call phdos_print_msqd(phdos, path, 1000, one, one)
 
@@ -476,7 +477,11 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      call dvdb_print(dvdb)
      call dvdb_list_perts(dvdb, [-1,-1,-1], unit=ab_out)
    end if
-   ! TODO: Routine to compute \delta V_{q,nu)(r) and dump the results in XSF format/netcdf.
+
+   ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
+   if (.False. .and. my_rank == master) then
+     call ncwrite_v1qnu(dvdb, cryst, ifc, dvdb%nqpt, dvdb%qpts, dtset%prtvol, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))
+   end if
  end if
 
  ! TODO Recheck getng, should use same trick as that used in screening and sigma.
