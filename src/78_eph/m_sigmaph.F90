@@ -304,7 +304,7 @@ module m_sigmaph
    ! kibz_q(3, nkibz_q)
 
    real(dp),allocatable :: wtk_q(:)
-   ! Weights
+   ! Weights in the IBZ(q)
    ! wtk_q(nkibz_q)
 
  end type lgroup_t
@@ -386,7 +386,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 !scalars
  integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1
- integer :: my_rank,nproc,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
+ integer :: my_rank,nprocs,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor
  integer :: ibsum_kq,ib_k,band,num_smallw,ibsum,ii,im,in
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
@@ -412,7 +412,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  integer :: g0_k(3),g0bz_kq(3),g0_kq(3),symq(4,2,cryst%nsym),dummy_gvec(3,dummy_npw)
  integer :: work_ngfft(18),gmax(3) !!g0ibz_kq(3),
  integer :: indkk_kq(1,6)
- integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:)
+ integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:),distrib_bq(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom),sqrt_phfrq0(3*cryst%natom)
  real(dp) :: lf(2),rg(2),res(2)
  real(dp) :: wqnu,nqnu,gkk2,eig0nk,eig0mk,eig0mkq,ediff,f_mkq
@@ -440,7 +440,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    ABI_UNUSED((/pawang%nsym, pawrad(1)%mesh_size/))
  end if
 
- my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  ! Copy important dimensions
@@ -468,7 +468,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  gmax = gmax + 4 ! FIXME: this is to account for umklapp
  gmax = 2*gmax + 1
  call ngfft_seq(work_ngfft, gmax)
- write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
+ !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
  ABI_MALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)))
 
  ! Initialize the wave function descriptor (read up to mband states where mband is defined by dtset%nband)
@@ -584,7 +584,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      call wrtout(std_out, sjoin("From ngqpt", ltoa(ifc%ngqpt), "to", ltoa(sigma%ngqpt)))
      call dvdb_ftinterp_setup(dvdb, ifc%ngqpt, 1, [zero,zero,zero], nfft, ngfft, comm)
    end if
-   !write(std_out,*)"after dbvb"
 
    ! Allocate PW-arrays dimensioned with mpw
    ABI_MALLOC(kg_k, (3, npw_k))
@@ -595,7 +594,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
    ABI_MALLOC(ylm_k,(mpw, psps%mpsang**2 * psps%useylm))
    ABI_MALLOC(ylm_kq,(mpw, psps%mpsang**2 * psps%useylm))
    ABI_MALLOC(ylmgr_kq,(mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr1))
-   !write(std_out,*)"after alloc ylm"
 
    do spin=1,nsppol
      ! Bands in Sigma_nk to compute and number of bands in sum over states.
@@ -626,7 +624,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      ABI_MALLOC(gkk0_atm, (2, nbcalc_ks, nbsum, natom3))
      ABI_CHECK(ierr == 0, "oom in gkk0_atm")
      gkk0_atm = zero
-     !write(std_out,*)"after alloc"
 
      ! Load ground-state wavefunctions for which corrections are wanted (available on each node)
      ! TODO: symmetrize them if kk is not irred
@@ -635,17 +632,28 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        band = ib_k + bstart_ks - 1
        call wfd_copy_cg(wfd, band, ik_ibz, spin, kets_k(1,1,ib_k))
      end do
-     !write(std_out,*)"after copy"
 
      ! Continue to initialize the Hamiltonian
      call load_spin_hamiltonian(gs_hamkq,spin,vlocal=vlocal,with_nonlocal=.true.)
-     !write(std_out,*)"after load_spin"
+
+     ! Distribute q-points and bands.
+     ABI_MALLOC(distrib_bq, (nbsum, sigma%nqibz_k))
+     if (sigma%nqibz_k >= nprocs .and. mod(sigma%nqibz_k, nprocs) == 0) then
+       do iq_ibz=1,sigma%nqibz_k
+         distrib_bq(:, iq_ibz) = mod(iq_ibz, nprocs)
+       end do
+     else
+       do it=1,nbsum*sigma%nqibz_k
+         ibsum_kq = mod(it-1, nbsum) + 1; iq_ibz = (it - ibsum_kq) / nbsum + 1
+         distrib_bq(ibsum_kq, iq_ibz) = mod(it, nprocs)
+       end do
+     end if
 
      ! Integrations over q-points in the IBZ(k)
      do iq_ibz=1,sigma%nqibz_k
        ! Quick-parallelization over q-points
-       if (mod(iq_ibz, nproc) /= my_rank) cycle
-       !write(std_out,*)"in q-point loopq",iq_ibz,sigma%nqibz_k
+       !if (mod(iq_ibz, nprocs) /= my_rank) cycle
+       if (all(distrib_bq(1:nbsum, iq_ibz) /= my_rank)) cycle
 
        qpt = sigma%qibz_k(:,iq_ibz)
        isqzero = (sum(qpt**2) < tol14) !; if (isqzero) cycle
@@ -804,6 +812,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
        ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
 
        do ibsum_kq=1,nbsum
+         if (distrib_bq(ibsum_kq, iq_ibz) /= my_rank) cycle
+
          ! This is to check whether the gkk elements in the degenerate subspace break symmetry
          !if (ibsum_kq >= bstart_ks .and. ibsum_kq <= bstart_ks + nbcalc_ks - 1) cycle
 
@@ -923,8 +933,8 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
      ABI_FREE(kets_k)
      ABI_FREE(gkk_atm)
-
      ABI_FREE(gkk_nu)
+     ABI_FREE(distrib_bq)
 
      ! =========================
      ! Compute Debye-Waller term
@@ -957,7 +967,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
      ! symsigma == 0 activates sum over full BZ for debugging purpose.
      nq = sigma%nqibz; if (sigma%symsigma == 0) nq = sigma%nqbz
      do iq_ibz=1,sigma%nqibz
-       if (mod(iq_ibz, nproc) /= my_rank) cycle
+       if (mod(iq_ibz, nprocs) /= my_rank) cycle
        if (abs(sigma%symsigma) == 1) then
          qpt = sigma%qibz(:,iq_ibz); weigth_q = sigma%wtq(iq_ibz)
        else
@@ -1361,7 +1371,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master=0,brav1=1,occopt3=3,qptopt1=1
- integer :: my_rank,ik,my_nshiftq,nct,my_mpw,cnt,nproc,iq_ibz,ik_ibz,ndeg
+ integer :: my_rank,ik,my_nshiftq,nct,my_mpw,cnt,nprocs,iq_ibz,ik_ibz,ndeg
  integer :: onpw,ii,ipw,ierr,it,timerev_k,spin,gap_err,ikcalc,gw_qprange,ibstop
  integer :: nk_found,ifo,jj
 #ifdef HAVE_NETCDF
@@ -1381,7 +1391,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
 ! *************************************************************************
 
- my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  ! Copy important dimensions.
  new%nsppol = ebands%nsppol; new%nspinor = ebands%nspinor
@@ -1617,7 +1627,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
        ndeg = size(degblock, dim=2)
        ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids, (ndeg))
        do ii=1,ndeg
-         !write(std_out,*)"degblock:",degblock(:,ii)," ndeg: ",ndeg
          cnt = degblock(2, ii) - degblock(1, ii) + 1
          ABI_DT_MALLOC(new%degtab(ikcalc, spin)%bids(ii)%vals, (cnt))
          new%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj=degblock(1, ii), degblock(2, ii))]
@@ -1641,7 +1650,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    !call sigmaph_setup_kcalc(self, crystal, ik)
    do iq_ibz=1,new%nqbz
    !do iq_ibz=1,new%nqibz_k
-     cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
+     cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle
      !kq = kk + qibz_k(:,iq_ibz)
      kq = kk + new%qbz(:,iq_ibz)
 
@@ -1677,8 +1686,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  end if
 
  ! Prepare calculation of generalized Eliashberg functions.
- new%gfw_nomega = 0
- ph_wstep = one/Ha_cmm1
+ new%gfw_nomega = 0; ph_wstep = one/Ha_cmm1
 
  if (ph_wstep > zero) then
    new%gfw_nomega = nint((ifc%omega_minmax(2) - ifc%omega_minmax(1) ) / ph_wstep) + 1
@@ -1760,6 +1768,13 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      NCF_CHECK(ncerr)
    end if
 
+   if (new%nwr > 1) then
+     ! Make room for the spectral function.
+     ncerr = nctk_def_arrays(ncid, [ &
+        nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol")])
+     NCF_CHECK(ncerr)
+   end if
+
    ! ======================================================
    ! Write data that do not depend on the (kpt, spin) loop.
    ! ======================================================
@@ -1771,43 +1786,18 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      [real(new%ieta), new%wr_step])
    NCF_CHECK(ncerr)
 
-   NCF_CHECK(nf90_put_var(ncid, vid("ngqpt"), new%ngqpt))
-   NCF_CHECK(nf90_put_var(ncid, vid("bstart_ks"), new%bstart_ks))
-   NCF_CHECK(nf90_put_var(ncid, vid("nbcalc_ks"), new%nbcalc_ks))
-   NCF_CHECK(nf90_put_var(ncid, vid("kcalc"), new%kcalc))
-   NCF_CHECK(nf90_put_var(ncid, vid("kTmesh"), new%kTmesh))
-   NCF_CHECK(nf90_put_var(ncid, vid("mu_e"), new%mu_e))
-
-   !if (new%nwr > 1) then
-   !  ! Make room for the spectral function on file.
-   !  ncerr = nctk_def_arrays(ncid, [ &
-   !     nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol")])
-   !  NCF_CHECK(ncerr)
-   !end if
-
-   NCF_CHECK(nctk_set_datamode(new%ncid))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(new%ncid, "ngqpt"), new%ngqpt))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(new%ncid, "bstart_ks"), new%bstart_ks))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(new%ncid, "nbcalc_ks"), new%nbcalc_ks))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(new%ncid, "kcalc"), new%kcalc))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(new%ncid, "kTmesh"), new%kTmesh))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(new%ncid, "mu_e"), new%mu_e))
  end if ! master
 
  ! Now reopen the file in parallel.
  !call xmpi_barrier(comm)
  !NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGMAPH.nc"), comm))
- !NCF_CHECK(nctk_open_modify(new%ncid, strcat(dtfil%filnam_ds(4), "_SIGMAPH.nc"), xmpi_comm_self))
  !NCF_CHECK(nctk_set_datamode(new%ncid))
-
-contains
-
- integer function vid(vname)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'vid'
-!End of the abilint section
-
-   character(len=*),intent(in) :: vname
-   vid = nctk_idname(ncid, vname)
- end function vid
-!!***
 #endif
 
 end function sigmaph_new
@@ -2041,14 +2031,15 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
 
 !Local variables-------------------------------
  integer,parameter :: master=0
- integer :: ideg,ib,it,ii,iw,nstates,ierr,my_rank
- real(dp) :: ravg
+ integer :: ideg,ib,it,ii,iw,nstates,ierr,my_rank,band,ik_ibz
+ real(dp) :: ravg,kse
  complex(dpc) :: cavg1,cavg2
  character(len=500) :: what
 !arrays
  integer :: shape3(3),shape4(4),shape5(5),shape6(6)
  integer, ABI_CONTIGUOUS pointer :: bids(:)
  real(dp), ABI_CONTIGUOUS pointer :: rdata3(:,:,:),rdata4(:,:,:,:),rdata5(:,:,:,:,:),rdata6(:,:,:,:,:,:)
+ real(dp),allocatable :: aw(:,:,:)
 
 ! *************************************************************************
 
@@ -2061,6 +2052,8 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  if (self%gfw_nomega > 0) call xmpi_sum_master(self%gfw_vals, master, comm, ierr)
  if (self%has_nuq_terms) call xmpi_sum_master(self%vals_nuq, master, comm, ierr)
  if (my_rank /= master) return
+
+ ik_ibz = self%kcalc2ibz(ikcalc, 1)
 
  if (self%symsigma == +1) then
    ! Average self-energy matrix elements in the degenerate subspace.
@@ -2097,10 +2090,6 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
    end do ! ideg
  end if ! symsigma == +1
 
- ! Compute spectral functions.
- !if (self%nwr > 0) then
- !end if
-
  what = "results"; if (ikcalc == 1 .and. spin == 1) what = "legend+results"
  call sigmaph_print(self, ikcalc, spin, std_out, what, ebands)
  call sigmaph_print(self, ikcalc, spin, ab_out, what, ebands)
@@ -2129,11 +2118,20 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
    call c_f_pointer(c_loc(self%vals_wr), rdata4, shape4)
    NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_wr"), rdata4, start=[1,1,1,1,ikcalc,spin]))
 
-   !nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol")])
-   !shape4(2:) = shape(self%spfunc_wr)
-   !call c_f_pointer(c_loc(self%spfunc_wr), rdata4, shape4)
-   !NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "spfunc_dwr"), rdata4, start=[1,1,ikcalc,spin]))
-   !NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_qwr"), self%vals_qwr))
+   ! Compute spectral function.
+   ! A = 1/pi [Im Sigma(ww)] / ([ww - ee - Re Sigma(ww)] **2 + Im Sigma(ww) ** 2])
+   ABI_MALLOC(aw, (self%nwr, self%ntemp, self%max_nbcalc))
+
+   do ib=1,self%nbcalc_ks(ikcalc,spin)
+     band = self%bstart_ks(ikcalc, spin) + ib - 1
+     kse = ebands%eig(band, ik_ibz, spin)
+     do it=1,self%ntemp
+       aw(:, it, ib) = piinv * aimag(self%vals_wr(:, it, ib)) / &
+         ((self%wrmesh_b(:, ib) - kse - real(self%vals_wr(:, it, ib))) ** 2 + aimag(self%vals_wr(:, it, ib) ** 2))
+     end do
+   end do
+   NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "spfunc_wr"), aw, start=[1,1,1,ikcalc,spin]))
+   ABI_FREE(aw)
  end if
 
  ! Write Eliashberg functions
@@ -2148,7 +2146,6 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
    call c_f_pointer(c_loc(self%vals_nuq), rdata6, shape6)
    NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_nuq"), rdata6, start=[1,1,1,1,1,1,ikcalc,spin]))
  end if
-
 #endif
 #endif
 
@@ -2275,7 +2272,6 @@ subroutine sigmaph_print(self, ikcalc, spin, unt, what, ebands)
    end do ! ibc
 
    ! Print KS and QP gap
-   !if (self%bstart_ks(ikc,is) <= ib_val .and. self%bstart_ks(ikc,is) + selg%nbcalc_ks(ikc, is) + 1 >= ib_cond) then
    if (kse_val /= huge(one) .and. kse_cond /= huge(one)) then
      write(unt, "(a)")" "
      write(unt, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",kse_cond - kse_val, "(assuming bval:",ib_val," ==> bcond:",ib_cond,")"
