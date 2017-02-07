@@ -229,6 +229,18 @@ module m_sigmaph
   !  dw_vals(ntemp, max_nbcalc) for fixed (kcalc, spin)
   !  Debye-Waller term (static).
 
+  real(dp),allocatable :: qpadb_enes(:,:)
+  ! qp_adbenes(ntemp, max_nbcalc)
+  ! (Real) QP energies computed with the adiabatic formalism.
+
+  complex(dpc),allocatable :: qp_enes(:,:)
+  ! qp_enes(ntemp, max_nbcalc)
+  ! (Complex) QP energies computed with the non-adiabatic formalism.
+
+  real(dp),allocatable :: ks_gaps(:), qpadb_gaps(:,:), qp_gaps(:,:)
+  ! ks_gaps(max_nbcalc)l qpadb_gaps(ntemp, max_nbcalc); qp_gaps(ntemp, max_nbcalc)
+  ! KS, QP_adiabatic and QP gaps. Set to -one if cannot be computed.
+
   complex(dpc),allocatable :: vals_wr(:,:,:)
    ! vals_wr(nwr, ntemp, max_nbcalc)
    ! Sigma_ph(omega, kT, band) for given (k, spin).
@@ -260,7 +272,7 @@ module m_sigmaph
  private :: sigmaph_new               ! Creation method (allocates memory, initialize data from input vars).
  private :: sigmaph_free              ! Free memory.
  private :: sigmaph_setup_kcalc       ! Return tables used to perform the sum over q-points for given k-point.
- private :: sigmaph_gather_and_write   ! Compute the QP corrections.
+ private :: sigmaph_gather_and_write  ! Compute the QP corrections.
  private :: sigmaph_print             ! Print results to main output file.
 
 !!****t* m_sigmaph/lgroup_t
@@ -459,7 +471,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  ! Construct object to store final results.
  ecut = dtset%ecut ! dtset%dilatmx
  sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
- if (my_rank == master) call sigmaph_print(sigma, 0, 0, ab_out, "dims", ebands)
+ if (my_rank == master) call sigmaph_print(sigma, ab_out)
 
  ! This is the maximum number of PWs for all possible k+q treated.
  mpw = sigma%mpw; gmax = sigma%gmax
@@ -1679,6 +1691,12 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ABI_CALLOC(new%dvals_de0ks, (new%ntemp, new%max_nbcalc))
  ABI_CALLOC(new%dw_vals, (new%ntemp, new%max_nbcalc))
 
+ ABI_MALLOC(new%qpadb_enes, (new%ntemp, new%max_nbcalc))
+ ABI_MALLOC(new%qp_enes, (new%ntemp, new%max_nbcalc))
+ ABI_MALLOC(new%ks_gaps, (new%max_nbcalc))
+ ABI_MALLOC(new%qpadb_gaps, (new%ntemp, new%max_nbcalc))
+ ABI_MALLOC(new%qp_gaps, (new%ntemp, new%max_nbcalc))
+
  ! Frequency dependent stuff
  if (new%nwr > 0) then
    ABI_CALLOC(new%vals_wr, (new%nwr, new%ntemp, new%max_nbcalc))
@@ -1712,11 +1730,8 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
    ! Add sigma_ph dimensions.
    ncerr = nctk_def_dims(ncid, [ &
-     nctkdim_t("nkcalc", new%nkcalc), &
-     nctkdim_t("max_nbcalc", new%max_nbcalc), &
-     nctkdim_t("nsppol", new%nsppol), &
-     nctkdim_t("ntemp", new%ntemp), &
-     nctkdim_t("natom3", 3 * cryst%natom), &
+     nctkdim_t("nkcalc", new%nkcalc), nctkdim_t("max_nbcalc", new%max_nbcalc), &
+     nctkdim_t("nsppol", new%nsppol), nctkdim_t("ntemp", new%ntemp), nctkdim_t("natom3", 3 * cryst%natom), &
      nctkdim_t("nqbz", new%nqbz)], &
      defmode=.True.)
    NCF_CHECK(ncerr)
@@ -1742,7 +1757,12 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      nctkarr_t("mu_e", "dp", "ntemp"), &
      nctkarr_t("vals_e0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("dvals_de0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("dw_vals", "dp", "ntemp, max_nbcalc, nkcalc, nsppol") &
+     nctkarr_t("dw_vals", "dp", "ntemp, max_nbcalc, nkcalc, nsppol"), &
+     nctkarr_t("qpadb_enes", "dp", "ntemp, max_nbcalc, nkcalc, nsppol"), &
+     nctkarr_t("qp_enes", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
+     nctkarr_t("ks_gaps", "dp", "max_nbcalc, nkcalc, nsppol"), &
+     nctkarr_t("qpadb_gaps", "dp", "ntemp, max_nbcalc, nkcalc, nsppol"), &
+     nctkarr_t("qp_gaps", "dp", "ntemp, max_nbcalc, nkcalc, nsppol") &
    ])
    NCF_CHECK(ncerr)
 
@@ -1792,6 +1812,10 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(new%ncid, "kcalc"), new%kcalc))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(new%ncid, "kTmesh"), new%kTmesh))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(new%ncid, "mu_e"), new%mu_e))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(new%ncid, "eta"), real(new%ieta)))
+   if (new%gfw_nomega > 0) then
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(new%ncid, "gfw_mesh"), new%gfw_mesh))
+   end if
  end if ! master
 
  ! Now reopen the file in parallel.
@@ -1899,6 +1923,22 @@ subroutine sigmaph_free(self)
  end if
  if (allocated(self%vals_nuq)) then
    ABI_FREE(self%vals_nuq)
+ end if
+
+ if (allocated(self%qpadb_enes)) then
+   ABI_FREE(self%qpadb_enes)
+ end if
+ if (allocated(self%qp_enes)) then
+   ABI_FREE(self%qp_enes)
+ end if
+ if (allocated(self%ks_gaps)) then
+   ABI_FREE(self%ks_gaps)
+ end if
+ if (allocated(self%qpadb_gaps)) then
+   ABI_FREE(self%qpadb_gaps)
+ end if
+ if (allocated(self%qp_gaps)) then
+   ABI_FREE(self%qp_gaps)
  end if
 
  ! types.
@@ -2031,10 +2071,9 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
 
 !Local variables-------------------------------
  integer,parameter :: master=0
- integer :: ideg,ib,it,ii,iw,nstates,ierr,my_rank,band,ik_ibz
- real(dp) :: ravg,kse
- complex(dpc) :: cavg1,cavg2
- character(len=500) :: what
+ integer :: ideg,ib,it,ii,iw,nstates,ierr,my_rank,band,ik_ibz,ibc,ib_val,ib_cond
+ real(dp) :: ravg,kse,kse_prev,dw,fan,qp_gap,kse_val,kse_cond
+ complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2
 !arrays
  integer :: shape3(3),shape4(4),shape5(5),shape6(6)
  integer, ABI_CONTIGUOUS pointer :: bids(:)
@@ -2051,6 +2090,8 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  if (self%nwr > 0) call xmpi_sum_master(self%vals_wr, master, comm, ierr)
  if (self%gfw_nomega > 0) call xmpi_sum_master(self%gfw_vals, master, comm, ierr)
  if (self%has_nuq_terms) call xmpi_sum_master(self%vals_nuq, master, comm, ierr)
+
+ ! Only master writes
  if (my_rank /= master) return
 
  ik_ibz = self%kcalc2ibz(ikcalc, 1)
@@ -2090,16 +2131,93 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
    end do ! ideg
  end if ! symsigma == +1
 
- what = "results"; if (ikcalc == 1 .and. spin == 1) what = "legend+results"
- call sigmaph_print(self, ikcalc, spin, std_out, what, ebands)
- call sigmaph_print(self, ikcalc, spin, ab_out, what, ebands)
+ ! Compute QP energies and Gaps.
+ ib_val = nint(ebands%nelect / two); ib_cond = ib_val + 1
+ kse_val = huge(one); kse_cond = huge(one)
+ self%ks_gaps = -one; self%qpadb_gaps = -one; self%qp_gaps = -one
+
+ ! Write legend.
+ if (ikcalc == 1 .and. spin == 1) then
+   write(ab_out,"(a)")repeat("=", 80)
+   write(ab_out,"(a)")"Final results in eV."
+   write(ab_out,"(a)")"Notations:"
+   write(ab_out,"(a)")"   eKS: Kohn-Sham energy. eQP: quasi-particle energy."
+   write(ab_out,"(a)")"   eQP-eKS: Difference between the QP and the KS energy."
+   write(ab_out,"(a)")"   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part."
+   write(ab_out,"(a)")"   Z(eKS): Renormalization factor."
+   write(ab_out,"(a)")"   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term."
+   write(ab_out,"(a)")"   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP."
+   write(ab_out,"(a)")" "
+   write(ab_out,"(a)")" "
+ end if
+
+ !do it=1,self%ntemp
+ do it=1,1
+   if (self%nsppol == 1) then
+     write(ab_out,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ikcalc)))
+   else
+     write(ab_out,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ikcalc)), ", spin:", itoa(spin))
+   end if
+   write(ab_out,"(a)")"   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
+
+   do ibc=1,self%nbcalc_ks(ikcalc,spin)
+     band = self%bstart_ks(ikcalc,spin) + ibc - 1
+     sig0c = self%vals_e0ks(it, ibc)
+     dw = self%dw_vals(it, ibc)
+     fan = real(sig0c) - dw
+     ! Note that here I use the full Sigma including the imaginary part
+     zc = one / (one - self%dvals_de0ks(it, ibc))
+     !zc = one / (one - real(self%dvals_de0ks(it, ibc))
+     kse = ebands%eig(band,ik_ibz,spin)
+     qpe = kse + sig0c
+     if (ibc == 1) then
+       kse_prev = kse; qpe_prev = qpe
+     end if
+     if (band == ib_val) then
+       kse_val = kse; qpe_val = qpe
+     end if
+     if (band == ib_cond) then
+       kse_cond = kse; qpe_cond = qpe
+     end if
+     write(ab_out, "(i4,10(f8.3,1x))") &
+       band, kse * Ha_eV, real(qpe) * Ha_eV, (real(qpe) - kse) * Ha_eV, &
+       real(sig0c) * Ha_eV, aimag(sig0c) * Ha_eV, real(zc), &
+       fan * Ha_eV, dw * Ha_eV, (kse - kse_prev) * Ha_eV, real(qpe - qpe_prev) * Ha_eV
+     if (ibc > 1) then
+       kse_prev = kse; qpe_prev = qpe
+     end if
+     !write(unt, "(i4,10(f8.3,1x))") &
+     !  band, kse, real(qpe), real(qpe) - kse, real(sig0c), aimag(sig0c), real(zc), &
+     !  fan, dw, kse - kse_prev, real(qpe - qpe_prev)
+     self%qpadb_enes(it, ibc) = real(qpe)
+     self%qp_enes(it, ibc) = qpe
+     if (kse_val /= huge(one) .and. kse_cond /= huge(one)) then
+       ! We have anough states to compute the gap
+       if (it == 1) self%ks_gaps(ibc) = kse_cond - kse_val
+       self%qpadb_gaps(it, ibc) = real(qpe_cond - qpe_val)
+       self%qp_gaps(it, ibc) = real(qpe_cond - qpe_val)
+     end if
+   end do ! ibc
+
+   ! Print KS and QP gap
+   if (kse_val /= huge(one) .and. kse_cond /= huge(one)) then
+     write(ab_out, "(a)")" "
+     write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",(kse_cond - kse_val) * Ha_eV, &
+       "(assuming bval:",ib_val," ==> bcond:",ib_cond,")"
+     write(ab_out, "(a,f8.3)")" QP gap: ",real(qpe_cond - qpe_val) * Ha_eV
+     write(ab_out, "(a,f8.3)")" QP_gap - KS_gap: ",(real(qpe_cond - qpe_val) - (kse_cond - kse_val)) * Ha_eV
+     write(ab_out, "(a)")" "
+   end if
+ end do ! it
+
+ ! Write data to netcdf file
+ ! (use iso_c_binding to associate a real pointer to complex data because netcdf does not support complex types).
 
 #ifdef HAVE_NETCDF
  shape3(1) = 2; shape4(1) = 2; shape5(1) = 2; shape6(1) = 2
 
- ! Write data (use iso_c_binding to associate a real pointer to complex data because
- ! netcdf does not support complex types).
 #if 1
+ ! Dump self-energy matrix elements for this (kpt, spin)
  shape3(2:) = shape(self%vals_e0ks)
  call c_f_pointer(c_loc(self%vals_e0ks), rdata3, shape3)
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), rdata3, start=[1,1,1,ikcalc,spin]))
@@ -2108,7 +2226,17 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  call c_f_pointer(c_loc(self%dvals_de0ks), rdata3, shape3)
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "dvals_de0ks"), rdata3, start=[1,1,1,ikcalc,spin]))
 
- NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "dw_vals"),self%dw_vals, start=[1,1,ikcalc,spin]))
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "dw_vals"), self%dw_vals, start=[1,1,ikcalc,spin]))
+
+ ! Dump QP energies and gaps for this (kpt, spin)
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qpadb_enes"), self%qpadb_enes, start=[1,1,ikcalc,spin]))
+ shape3(2:) = shape(self%qp_enes)
+ call c_f_pointer(c_loc(self%qp_enes), rdata3, shape3)
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_enes"), rdata3, start=[1,1,1,ikcalc,spin]))
+
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "ks_gaps"), self%ks_gaps, start=[1,ikcalc,spin]))
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qpadb_gaps"), self%qpadb_gaps, start=[1,1,ikcalc,spin]))
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_gaps"), self%qp_gaps, start=[1,1,ikcalc,spin]))
 
  ! Write frequency dependent data.
  if (self%nwr > 0) then
@@ -2157,14 +2285,10 @@ end subroutine sigmaph_gather_and_write
 !!  sigmaph_print
 !!
 !! FUNCTION
+!!  Print self-energy and QP corrections for given (k-point, spin).
 !!
 !! INPUTS
-!!  ikcalc=Index of the computed k-point
-!!  spin=Spin index.
 !!  unt=Fortran unit number
-!!  what: "dims" to print dims, "legend" if legend is wanted, "results" to print QP corrections.
-!!    Options can be concatenated e.g. "dims+results"
-!!  ebands<ebands_t>=KS band energies.
 !!
 !! PARENTS
 !!      m_sigmaph
@@ -2173,7 +2297,7 @@ end subroutine sigmaph_gather_and_write
 !!
 !! SOURCE
 
-subroutine sigmaph_print(self, ikcalc, spin, unt, what, ebands)
+subroutine sigmaph_print(self, unt)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2185,103 +2309,32 @@ subroutine sigmaph_print(self, ikcalc, spin, unt, what, ebands)
  implicit none
 
 !Arguments ------------------------------------
- integer,intent(in) :: ikcalc, spin,unt
- character(len=*),intent(in) :: what
+ integer,intent(in) :: unt
  type(sigmaph_t),intent(in) :: self
- type(ebands_t),intent(in) :: ebands
 
 !Local variables-------------------------------
 !integer
- integer :: ikc,is,ibc,band,ik_ibz,it,ib_val,ib_cond
- real(dp) :: kse,kse_prev,dw,fan,qp_gap,kse_val,kse_cond
- complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond
+ integer :: ikc,is
 
 ! *************************************************************************
 
  ! Write dimensions
- if (index(what, "dims") /= 0) then
-   write(unt,"(a)")sjoin("Number of bands in sum:", itoa(self%nbsum))
-   write(unt,"(a)")sjoin("Symsigma: ",itoa(self%symsigma), "Timrev:",itoa(self%timrev))
-   write(unt,"(a)")sjoin("delta shift: ", ftoa(aimag(self%ieta) * Ha_eV), "[eV]")
-   write(unt,"(a)")sjoin("Number of real frequencies:", itoa(self%nwr), ", Step:", ftoa(self%wr_step*Ha_eV), "[eV]")
-   write(unt,"(a)")sjoin("Number of temperatures:", itoa(self%ntemp), &
-     "From:", ftoa(self%kTmesh(1) / kb_HaK), "to", ftoa(self%kTmesh(self%ntemp) / kb_HaK), "[K]")
-   write(unt,"(a)")sjoin("ngqpt:", ltoa(self%ngqpt))
-   write(unt,"(a)")sjoin("Number of q-points in the BZ:", itoa(self%nqbz))
-   write(unt,"(a)")"List of K-points for self-energy corrections:"
-   do ikc=1,self%nkcalc
-     do is=1,self%nsppol
-     if (self%nsppol == 2) write(unt,"(a,i1)")"... For spin: ",is
-       write(unt, "(2(i4,2x),a,2(i4,1x))")&
-         ikc, is, trim(ktoa(self%kcalc(:,ikc))), self%bstart_ks(ikc,is), self%bstart_ks(ikc,is) + self%nbcalc_ks(ikc,is) - 1
-     end do
+ write(unt,"(a)")sjoin("Number of bands in sum:", itoa(self%nbsum))
+ write(unt,"(a)")sjoin("Symsigma: ",itoa(self%symsigma), "Timrev:",itoa(self%timrev))
+ write(unt,"(a)")sjoin("delta shift: ", ftoa(aimag(self%ieta) * Ha_eV), "[eV]")
+ write(unt,"(a)")sjoin("Number of real frequencies:", itoa(self%nwr), ", Step:", ftoa(self%wr_step*Ha_eV), "[eV]")
+ write(unt,"(a)")sjoin("Number of temperatures:", itoa(self%ntemp), &
+   "From:", ftoa(self%kTmesh(1) / kb_HaK), "to", ftoa(self%kTmesh(self%ntemp) / kb_HaK), "[K]")
+ write(unt,"(a)")sjoin("ngqpt:", ltoa(self%ngqpt))
+ write(unt,"(a)")sjoin("Number of q-points in the BZ:", itoa(self%nqbz))
+ write(unt,"(a)")"List of K-points for self-energy corrections:"
+ do ikc=1,self%nkcalc
+   do is=1,self%nsppol
+   if (self%nsppol == 2) write(unt,"(a,i1)")"... For spin: ",is
+     write(unt, "(2(i4,2x),a,2(i4,1x))")&
+       ikc, is, trim(ktoa(self%kcalc(:,ikc))), self%bstart_ks(ikc,is), self%bstart_ks(ikc,is) + self%nbcalc_ks(ikc,is) - 1
    end do
- end if
-
- if (index(what, "legend") /= 0) then
-   write(unt,"(a)")repeat("=", 80)
-   write(unt,"(a)")"Final results in eV."
-   write(unt,"(a)")"Notations:"
-   write(unt,"(a)")"   eKS: Kohn-Sham energy. eQP: quasi-particle energy."
-   write(unt,"(a)")"   eQP-eKS: Difference between the QP and the KS energy."
-   write(unt,"(a)")"   SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part."
-   write(unt,"(a)")"   Z(eKS): Renormalization factor."
-   write(unt,"(a)")"   FAN: Real part of the Fan term at eKS. DW: Debye-Waller term."
-   write(unt,"(a)")"   DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP."
-   write(unt,"(a)")" "
-   write(unt,"(a)")" "
- end if
-
- if (index(what, "results") /= 0) then
-   ! Write results for the first temperature.
-   it = 1; ikc = ikcalc; is = spin
-   ib_val = nint(ebands%nelect / two); ib_cond = ib_val + 1
-   kse_val = huge(one); kse_cond = huge(one)
-   if (self%nsppol == 1) then
-      write(unt,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ikc)))
-   else
-      write(unt,"(a)")sjoin("K-point:", ktoa(self%kcalc(:,ikc)), ", spin:", itoa(is))
-   end if
-   write(unt,"(a)")"   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP"
-   ik_ibz = self%kcalc2ibz(ikc,1)
-   do ibc=1,self%nbcalc_ks(ikc,is)
-     band = self%bstart_ks(ikc,is) + ibc - 1
-     sig0c = self%vals_e0ks(it, ibc) * Ha_eV
-     dw = self%dw_vals(it, ibc) * Ha_eV
-     fan = real(sig0c) - dw
-     ! Note that here I use the full Sigma including the imaginary part
-     zc = one / (one - self%dvals_de0ks(it, ibc))
-     !zc = one / (one - real(self%dvals_de0ks(it, ibc))
-     kse = ebands%eig(band,ik_ibz,is) * Ha_eV
-     qpe = kse + sig0c
-     if (ibc == 1) then
-       kse_prev = kse; qpe_prev = qpe
-     end if
-     if (band == ib_val) then
-       kse_val = kse; qpe_val = qpe
-     end if
-     if (band == ib_cond) then
-       kse_cond = kse; qpe_cond = qpe
-     end if
-     write(unt, "(i4,10(f8.3,1x))") &
-       band, kse, real(qpe), real(qpe) - kse, real(sig0c), aimag(sig0c), real(zc), &
-       fan, dw, kse - kse_prev, real(qpe - qpe_prev)
-     if (ibc > 1) then
-       kse_prev = kse; qpe_prev = qpe
-     end if
-   end do ! ibc
-
-   ! Print KS and QP gap
-   if (kse_val /= huge(one) .and. kse_cond /= huge(one)) then
-     write(unt, "(a)")" "
-     write(unt, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",kse_cond - kse_val, "(assuming bval:",ib_val," ==> bcond:",ib_cond,")"
-     write(unt, "(a,f8.3)")" QP gap: ",real(qpe_cond - qpe_val)
-     write(unt, "(a,f8.3)")" QP_gap - KS_gap: ",real(qpe_cond - qpe_val) - (kse_cond - kse_val)
-     write(unt, "(a)")" "
-   end if
-
-   write(unt, "(a)")" "
- end if
+ end do
 
 end subroutine sigmaph_print
 !!***
