@@ -229,7 +229,8 @@ subroutine mkffnl(dimekb,dimffnl,ekb,ffnl,ffspl,gmet,gprimd,ider,idir,indlmn,&
    end if
  end if
  if (iffnl/=dimffnl) then
-   message = 'Incompatibility between ider, idir and dimffnl !'
+   write(message,'(2(a,i1),a,i2)') 'Incompatibility between ider, idir and dimffnl : ider = ',ider,&
+&                                    ' idir = ',idir,' dimffnl = ',dimffnl
    MSG_BUG(message)
  end if
  if (useylm==1) then

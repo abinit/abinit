@@ -487,10 +487,10 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 
  if (print_info/=0) then
    if (ipert/=0) then
-     write(msg,'(3(a,i2))') 'RF2 TEST rf2_apply_hamiltonian ipert = ',ipert,' idir =',idir,&
-     & ' jband = ',jband
+     write(msg,'(4(a,i4))') 'RF2 TEST rf2_apply_hamiltonian ipert = ',ipert,' idir =',idir,&
+     & ' ikpt = ',ikpt,' jband = ',jband
    else
-     write(msg,'(a,i2)') 'RF2 TEST rf2_apply_hamiltonian ipert = 0 idir = 0 jband = ',jband
+     write(msg,'(2(a,i4))') 'RF2 TEST rf2_apply_hamiltonian ipert =    0 idir =    0 ikpt = ',ikpt,' jband = ',jband
    end if
    call wrtout(std_out,msg)
  end if

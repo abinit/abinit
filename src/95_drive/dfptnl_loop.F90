@@ -189,15 +189,14 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  integer :: rdwrpaw,second_idir,timrev,usexcnhat
  real(dp) :: dummy_real,ecut_eff
  character(len=500) :: message
- character(len=fnlen) :: fiden1i,fiwf1i,fiwf3i,fiwfddk,fnamewff(3)
+ character(len=fnlen) :: fiden1i,fiwf1i,fiwf3i,fiwfddk,fnamewff(4)
  type(gs_hamiltonian_type) :: gs_hamkq
- type(rf_hamiltonian_type) :: rf_hamkq
- type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3,wffddk(3)
- type(wfk_t) :: ddk_f(3)
+ type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3
+ type(wfk_t) :: ddk_f(4)
  type(wvl_data) :: wvl
  type(hdr_type) :: hdr_den
 !arrays
- integer :: file_index(3)
+ integer :: file_index(4)
  real(dp) :: rho_dum(1),qphon(3),tsec(2)
  real(dp),allocatable :: cg1(:,:),cg2(:,:),cg3(:,:),eigen1(:),eigen2(:),eigen3(:)
  real(dp),allocatable :: nhat1_i2pert(:,:),nhat1gr(:,:,:),vresid_dum(:,:)
@@ -614,8 +613,6 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 
                    end if ! end usepaw section
 
-                   call init_rf_hamiltonian(cplex,gs_hamkq,i2pert,rf_hamkq,has_e1kbsc=1)
-
                    nwffile = 1
                    file_index(1) = i2dir + 3*(i2pert-1)
                    fnamewff(1) = dtfil%fnamewff1
@@ -624,6 +621,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 
                      nwffile = 3
                      file_index(2) = i2dir+natom*3
+                     fnamewff(2) = dtfil%fnamewffddk
                      idir_dkde = i2dir
 !                    As npert_phon<=1 and i2pert==natom+2, i1pert or i3pert is necessarly equal to natom+2
                      if (i3pert==natom+2) then
@@ -631,7 +629,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                      else if (i1pert==natom+2) then
                        second_idir = i1dir
                      else
-                       MSG_BUG(" i1pert or i3pert is supposed to be equal to natom+2, which is unexpected.")
+                       MSG_BUG(" i1pert or i3pert is supposed to be equal to natom+2, which is not the case here.")
                      end if
                      if (second_idir/=i2dir) then ! see m_rf2.F90 => getidirs
                        if (i2dir==2.and.second_idir==3) idir_dkde = 4
@@ -642,8 +640,13 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                        if (i2dir==2.and.second_idir==1) idir_dkde = 9
                      end if
                      file_index(3) = idir_dkde+9+(dtset%natom+6)*3
-                     fnamewff(2) = dtfil%fnamewffddk
                      fnamewff(3) = dtfil%fnamewffdkde
+
+                     if (npert_phon==1.and.psps%usepaw==1.and.second_idir/=i2dir) then
+                       nwffile = 4
+                       file_index(4) = second_idir+natom*3
+                       fnamewff(4) = dtfil%fnamewffddk
+                     end if
 
                    end if
 
@@ -673,11 +676,11 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 !                   call timab(512,1,tsec)
                    call status(counter,dtfil%filstat,iexit,level,'call dfptnl_resp ')
 !                  NOTE : eigen2 equals zero here
-                   call dfptnl_pert(atindx,atindx1,cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,indsy1,i1dir,&
+                   call dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,indsy1,i1dir,&
 &                   i2dir,i3dir,i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
-&                   mpsang,mpw,natom,nattyp,nfftf,nfftotf,nkpt,nk3xc,nspden,nspinor,nsppol,nsym1,npwarr,occ,&
+&                   mpsang,mpw,natom,nattyp,nfftf,nfftotf,ngfftf,nkpt,nk3xc,nspden,nspinor,nsppol,nsym1,npwarr,occ,&
 &                   pawang,pawang1,pawfgrtab,pawrad,pawtab,pawrhoij,pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij1_i3pert,&
-&                   paw_an0,paw_an1_i2pert,paw_ij0,paw_ij1_i2pert,pawfgr,ph1d,psps,rf_hamkq,rho1r1,rho2r1,rho3r1,&
+&                   paw_an0,paw_an1_i2pert,paw_ij0,paw_ij1_i2pert,pawfgr,ph1d,psps,rho1r1,rho2r1,rho3r1,&
 &                   rprimd,symaf1,symrc1,ucvol,vtrial,vtrial1_i2pert,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred)
 !                   call timab(512,2,tsec)
 
@@ -717,13 +720,9 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 !&                   d3etot(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
 
 !                  Eventually close the dot file
-                   call wfk_close(ddk_f(1))
-                   if (i2pert==dtset%natom+2) then
-                     call wfk_close(ddk_f(2))
-                     call wfk_close(ddk_f(3)) ! TO CHANGE
-                   end if
-
-                   call destroy_rf_hamiltonian(rf_hamkq)
+                   do ii=1,nwffile
+                     call wfk_close(ddk_f(ii))
+                   end do
 
 !                   if (psps%usepaw==1) then
 !                     do ii=1,natom
@@ -731,8 +730,8 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 !                     end do
 !                   end if
 
-                 end if   !rfpert
-               end do    !i2dir
+                 end if   ! rfpert
+               end do    ! i2dir
              end do     ! i2pert
 
            end if   ! rfpert
