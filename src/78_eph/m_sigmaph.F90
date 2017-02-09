@@ -229,17 +229,13 @@ module m_sigmaph
   !  dw_vals(ntemp, max_nbcalc) for fixed (kcalc, spin)
   !  Debye-Waller term (static).
 
-  real(dp),allocatable :: qpadb_enes(:,:)
+  !real(dp),allocatable :: qpadb_enes(:,:)
   ! qp_adbenes(ntemp, max_nbcalc)
   ! (Real) QP energies computed with the adiabatic formalism.
 
-  complex(dpc),allocatable :: qp_enes(:,:)
+  !complex(dpc),allocatable :: qp_enes(:,:)
   ! qp_enes(ntemp, max_nbcalc)
   ! (Complex) QP energies computed with the non-adiabatic formalism.
-
-  real(dp),allocatable :: ks_gaps(:), qpadb_gaps(:,:), qp_gaps(:,:)
-  ! ks_gaps(max_nbcalc)l qpadb_gaps(ntemp, max_nbcalc); qp_gaps(ntemp, max_nbcalc)
-  ! KS, QP_adiabatic and QP gaps. Set to -one if cannot be computed.
 
   complex(dpc),allocatable :: vals_wr(:,:,:)
    ! vals_wr(nwr, ntemp, max_nbcalc)
@@ -1691,12 +1687,6 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
  ABI_CALLOC(new%dvals_de0ks, (new%ntemp, new%max_nbcalc))
  ABI_CALLOC(new%dw_vals, (new%ntemp, new%max_nbcalc))
 
- ABI_MALLOC(new%qpadb_enes, (new%ntemp, new%max_nbcalc))
- ABI_MALLOC(new%qp_enes, (new%ntemp, new%max_nbcalc))
- ABI_MALLOC(new%ks_gaps, (new%max_nbcalc))
- ABI_MALLOC(new%qpadb_gaps, (new%ntemp, new%max_nbcalc))
- ABI_MALLOC(new%qp_gaps, (new%ntemp, new%max_nbcalc))
-
  ! Frequency dependent stuff
  if (new%nwr > 0) then
    ABI_CALLOC(new%vals_wr, (new%nwr, new%ntemp, new%max_nbcalc))
@@ -1758,11 +1748,11 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
      nctkarr_t("vals_e0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("dvals_de0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("dw_vals", "dp", "ntemp, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("qpadb_enes", "dp", "ntemp, max_nbcalc, nkcalc, nsppol"), &
+     nctkarr_t("qpadb_enes", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
      nctkarr_t("qp_enes", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("ks_gaps", "dp", "max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("qpadb_gaps", "dp", "ntemp, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("qp_gaps", "dp", "ntemp, max_nbcalc, nkcalc, nsppol") &
+     nctkarr_t("ks_gaps", "dp", "nkcalc, nsppol"), &
+     nctkarr_t("qpadb_gaps", "dp", "ntemp, nkcalc, nsppol"), &
+     nctkarr_t("qp_gaps", "dp", "ntemp, nkcalc, nsppol") &
    ])
    NCF_CHECK(ncerr)
 
@@ -1790,8 +1780,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, co
 
    if (new%nwr > 1) then
      ! Make room for the spectral function.
-     ncerr = nctk_def_arrays(ncid, [ &
-        nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol")])
+     ncerr = nctk_def_arrays(ncid, [nctkarr_t("spfunc_wr", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol")])
      NCF_CHECK(ncerr)
    end if
 
@@ -1925,22 +1914,6 @@ subroutine sigmaph_free(self)
    ABI_FREE(self%vals_nuq)
  end if
 
- if (allocated(self%qpadb_enes)) then
-   ABI_FREE(self%qpadb_enes)
- end if
- if (allocated(self%qp_enes)) then
-   ABI_FREE(self%qp_enes)
- end if
- if (allocated(self%ks_gaps)) then
-   ABI_FREE(self%ks_gaps)
- end if
- if (allocated(self%qpadb_gaps)) then
-   ABI_FREE(self%qpadb_gaps)
- end if
- if (allocated(self%qp_gaps)) then
-   ABI_FREE(self%qp_gaps)
- end if
-
  ! types.
  if (allocated(self%degtab)) then
     do jj=1,size(self%degtab, dim=2)
@@ -2072,13 +2045,15 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
 !Local variables-------------------------------
  integer,parameter :: master=0
  integer :: ideg,ib,it,ii,iw,nstates,ierr,my_rank,band,ik_ibz,ibc,ib_val,ib_cond
- real(dp) :: ravg,kse,kse_prev,dw,fan,qp_gap,kse_val,kse_cond
+ real(dp) :: ravg,kse,kse_prev,dw,fan0,ks_gap,kse_val,kse_cond
  complex(dpc) :: sig0c,zc,qpe,qpe_prev,qpe_val,qpe_cond,cavg1,cavg2
 !arrays
  integer :: shape3(3),shape4(4),shape5(5),shape6(6)
  integer, ABI_CONTIGUOUS pointer :: bids(:)
  real(dp), ABI_CONTIGUOUS pointer :: rdata3(:,:,:),rdata4(:,:,:,:),rdata5(:,:,:,:,:),rdata6(:,:,:,:,:,:)
+ real(dp) :: qp_gaps(self%ntemp),qpadb_gaps(self%ntemp)
  real(dp),allocatable :: aw(:,:,:)
+ complex(dpc),target :: qpadb_enes(self%ntemp, self%max_nbcalc),qp_enes(self%ntemp, self%max_nbcalc)
 
 ! *************************************************************************
 
@@ -2134,7 +2109,8 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  ! Compute QP energies and Gaps.
  ib_val = nint(ebands%nelect / two); ib_cond = ib_val + 1
  kse_val = huge(one); kse_cond = huge(one)
- self%ks_gaps = -one; self%qpadb_gaps = -one; self%qp_gaps = -one
+ qp_enes = huge(one); qpadb_enes = huge(one)
+ ks_gap = -one; qpadb_gaps = -one; qp_gaps = -one
 
  ! Write legend.
  if (ikcalc == 1 .and. spin == 1) then
@@ -2151,6 +2127,7 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
    write(ab_out,"(a)")" "
  end if
 
+ ! FIXME
  !do it=1,self%ntemp
  do it=1,1
    if (self%nsppol == 1) then
@@ -2162,13 +2139,13 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
 
    do ibc=1,self%nbcalc_ks(ikcalc,spin)
      band = self%bstart_ks(ikcalc,spin) + ibc - 1
+     kse = ebands%eig(band,ik_ibz,spin)
      sig0c = self%vals_e0ks(it, ibc)
      dw = self%dw_vals(it, ibc)
-     fan = real(sig0c) - dw
+     fan0 = real(sig0c) - dw
      ! Note that here I use the full Sigma including the imaginary part
      zc = one / (one - self%dvals_de0ks(it, ibc))
      !zc = one / (one - real(self%dvals_de0ks(it, ibc))
-     kse = ebands%eig(band,ik_ibz,spin)
      qpe = kse + sig0c
      if (ibc == 1) then
        kse_prev = kse; qpe_prev = qpe
@@ -2182,30 +2159,27 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
      write(ab_out, "(i4,10(f8.3,1x))") &
        band, kse * Ha_eV, real(qpe) * Ha_eV, (real(qpe) - kse) * Ha_eV, &
        real(sig0c) * Ha_eV, aimag(sig0c) * Ha_eV, real(zc), &
-       fan * Ha_eV, dw * Ha_eV, (kse - kse_prev) * Ha_eV, real(qpe - qpe_prev) * Ha_eV
+       fan0 * Ha_eV, dw * Ha_eV, (kse - kse_prev) * Ha_eV, real(qpe - qpe_prev) * Ha_eV
      if (ibc > 1) then
        kse_prev = kse; qpe_prev = qpe
      end if
-     !write(unt, "(i4,10(f8.3,1x))") &
-     !  band, kse, real(qpe), real(qpe) - kse, real(sig0c), aimag(sig0c), real(zc), &
-     !  fan, dw, kse - kse_prev, real(qpe - qpe_prev)
-     self%qpadb_enes(it, ibc) = real(qpe)
-     self%qp_enes(it, ibc) = qpe
+     qpadb_enes(it, ibc) = qpe
+     qp_enes(it, ibc) = qpe
      if (kse_val /= huge(one) .and. kse_cond /= huge(one)) then
-       ! We have anough states to compute the gap
-       if (it == 1) self%ks_gaps(ibc) = kse_cond - kse_val
-       self%qpadb_gaps(it, ibc) = real(qpe_cond - qpe_val)
-       self%qp_gaps(it, ibc) = real(qpe_cond - qpe_val)
+       ! We have enough states to compute the gap.
+       if (it == 1) ks_gap = kse_cond - kse_val
+       qpadb_gaps(it) = real(qpe_cond - qpe_val)
+       qp_gaps(it) = real(qpe_cond - qpe_val)
      end if
    end do ! ibc
 
    ! Print KS and QP gap
    if (kse_val /= huge(one) .and. kse_cond /= huge(one)) then
      write(ab_out, "(a)")" "
-     write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",(kse_cond - kse_val) * Ha_eV, &
+     write(ab_out, "(a,f8.3,1x,2(a,i0),a)")" KS gap: ",ks_gap * Ha_eV, &
        "(assuming bval:",ib_val," ==> bcond:",ib_cond,")"
-     write(ab_out, "(a,f8.3)")" QP gap: ",real(qpe_cond - qpe_val) * Ha_eV
-     write(ab_out, "(a,f8.3)")" QP_gap - KS_gap: ",(real(qpe_cond - qpe_val) - (kse_cond - kse_val)) * Ha_eV
+     write(ab_out, "(a,f8.3)")" QP gap: ",qp_gaps(it) * Ha_eV
+     write(ab_out, "(a,f8.3)")" QP_gap - KS_gap: ",(qp_gaps(it) - ks_gap) * Ha_eV
      write(ab_out, "(a)")" "
    end if
  end do ! it
@@ -2229,14 +2203,16 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "dw_vals"), self%dw_vals, start=[1,1,ikcalc,spin]))
 
  ! Dump QP energies and gaps for this (kpt, spin)
- NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qpadb_enes"), self%qpadb_enes, start=[1,1,ikcalc,spin]))
- shape3(2:) = shape(self%qp_enes)
- call c_f_pointer(c_loc(self%qp_enes), rdata3, shape3)
+ shape3(2:) = shape(qpadb_enes)
+ call c_f_pointer(c_loc(qpadb_enes), rdata3, shape3)
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qpadb_enes"), rdata3, start=[1,1,1,ikcalc,spin]))
+ shape3(2:) = shape(qp_enes)
+ call c_f_pointer(c_loc(qp_enes), rdata3, shape3)
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_enes"), rdata3, start=[1,1,1,ikcalc,spin]))
 
- NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "ks_gaps"), self%ks_gaps, start=[1,ikcalc,spin]))
- NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qpadb_gaps"), self%qpadb_gaps, start=[1,1,ikcalc,spin]))
- NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_gaps"), self%qp_gaps, start=[1,1,ikcalc,spin]))
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "ks_gaps"), ks_gap, start=[ikcalc,spin]))
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qpadb_gaps"), qpadb_gaps, start=[1,ikcalc,spin]))
+ NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "qp_gaps"), qp_gaps, start=[1,ikcalc,spin]))
 
  ! Write frequency dependent data.
  if (self%nwr > 0) then
@@ -2254,8 +2230,8 @@ subroutine sigmaph_gather_and_write(self, ebands, ikcalc, spin, comm)
      band = self%bstart_ks(ikcalc, spin) + ib - 1
      kse = ebands%eig(band, ik_ibz, spin)
      do it=1,self%ntemp
-       aw(:, it, ib) = piinv * aimag(self%vals_wr(:, it, ib)) / &
-         ((self%wrmesh_b(:, ib) - kse - real(self%vals_wr(:, it, ib))) ** 2 + aimag(self%vals_wr(:, it, ib) ** 2))
+       aw(:, it, ib) = piinv * abs(aimag(self%vals_wr(:, it, ib))) / &
+         ((self%wrmesh_b(:, ib) - kse - real(self%vals_wr(:, it, ib))) ** 2 + aimag(self%vals_wr(:, it, ib)) ** 2)
      end do
    end do
    NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "spfunc_wr"), aw, start=[1,1,1,ikcalc,spin]))
