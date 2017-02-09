@@ -22857,7 +22857,7 @@
     defaultval:
     - 1
     - 1
-    definition: 'Response Function : Acoustic Sum Rule'
+    definition: 'Response Function : ATomic POLarisation'
     dimensions:
     - 2
     excludes: null
@@ -28025,7 +28025,7 @@
           R_cartesian = xred1*rprimd1+xred2*rprimd2+xred3*rprimd3
          </tele>
          <br />
-         where (t1,t2,t3) are the "reduced coordinates" given in
+         where (xred1,xred2,xred3) are the "reduced coordinates" given in
         columns of "[[xred]]", (rprimd1,rprimd2,rprimd3) are the columns of
         primitive vectors array "[[rprimd]]" in Bohr.
          <br />
