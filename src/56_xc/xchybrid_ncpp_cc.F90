@@ -127,13 +127,6 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Dirty trick: as rhohxc needs dtset, create a temporary copy if it
  call dtset_copy(dtLocal,dtset)
 
-!Initialize GGA functional
- dtLocal%ixc=ixc_gga
- if (dtLocal%ixc<0) then
-   call libxc_functionals_end()
-   call libxc_functionals_init(dtLocal%ixc,dtLocal%nspden)
- end if
-
 !Initialize args for rhohxc
  option=0 ! XC only
  nkxc=0;ndim=0;izero=0;usexcnhat=0;n3xccc_null=0
@@ -146,6 +139,13 @@ subroutine xchybrid_ncpp_cc(dtset,enxc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,s
 !Compute Vxc^Hybrid(rho_val)
  call rhohxc(dtset,enxc,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
 & dtset%nspden,n3xccc_null,option,rhog_dum,rhor,rprimd,strsxc,usexcnhat,vhartr_dum,vxc,vxcavg,xccc3d_null)
+
+!Initialize GGA functional
+ dtLocal%ixc=ixc_gga
+ if (dtLocal%ixc<0) then
+   call libxc_functionals_end()
+   call libxc_functionals_init(dtLocal%ixc,dtLocal%nspden)
+ end if
 
 !Add Vxc^GGA(rho_core+rho_val)
  call rhohxc(dtLocal,enxc_corr,zero,izero,kxc_dum,mpi_enreg,nfft,ngfft,nhat,ndim,nhatgr,ndim,nkxc,nkxc,&
