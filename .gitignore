@@ -1,4 +1,5 @@
 config.h.in~
+.gitignore~
 .DS_Store
 .deps
 .directory
@@ -166,6 +167,7 @@ tests/TestBot_MPI*/*
 /doc/*/*.dvi
 /doc/*/*.log
 /doc/*/*.toc
+/doc/*/*/*~
 /fallbacks/aclocal.m4
 /fallbacks/autom4te.cache
 /fallbacks/configure
@@ -337,6 +339,7 @@ tests/TestBot_MPI*/*
 /tests/ListOfTests.html
 /tests/ListOfTests.txt
 /tests/Test_suite
+/tests/*/*/*/*~
 /tests/Tmp
 /tests/test_suite.cpkl
 /tests/aclocal.m4

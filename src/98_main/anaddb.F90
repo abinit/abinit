@@ -396,11 +396,13 @@ program anaddb
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
 
-   if (inp%qrefine > 1) then
+   if (any(inp%qrefine(:) > 1)) then
      ! Gaal-Nagy's algorithm in PRB 73 014117.
 
      ! Build the IFCs using the coarse q-mesh.
-     ngqpt_coarse(1:3) = inp%ngqpt(1:3)/inp%qrefine
+     do ii = 1, 3
+       ngqpt_coarse(ii) = inp%ngqpt(ii)/inp%qrefine(ii)
+     end do
      call ifc_init(Ifc_coarse,Crystal,ddb,&
 &     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,ngqpt_coarse,inp%nqshft,inp%q1shft,dielt,zeff,&
 &     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,prtfreq=.True.)

@@ -42,7 +42,7 @@
                      0.00000000E+00  5.00000000E-01  5.00000000E-01
                      5.00000000E-01  0.00000000E+00  5.00000000E-01
                      5.00000000E-01  5.00000000E-01  0.00000000E+00
-     qrefine         2
+     qrefine         2         2         2
  First list of wavevector (reduced coord.) :
        nph1l        17
        qph1l
