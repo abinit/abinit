@@ -189,14 +189,14 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  integer :: rdwrpaw,second_idir,timrev,usexcnhat
  real(dp) :: dummy_real,ecut_eff
  character(len=500) :: message
- character(len=fnlen) :: fiden1i,fiwf1i,fiwf3i,fiwfddk,fnamewff(4)
+ character(len=fnlen) :: fiden1i,fiwf1i,fiwf3i,fiwfddk,fnamewff(5)
  type(gs_hamiltonian_type) :: gs_hamkq
  type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3
- type(wfk_t) :: ddk_f(4)
+ type(wfk_t) :: ddk_f(5)
  type(wvl_data) :: wvl
  type(hdr_type) :: hdr_den
 !arrays
- integer :: file_index(4)
+ integer :: file_index(5)
  real(dp) :: rho_dum(1),qphon(3),tsec(2)
  real(dp),allocatable :: cg1(:,:),cg2(:,:),cg3(:,:),eigen1(:),eigen2(:),eigen3(:)
  real(dp),allocatable :: nhat1_i2pert(:,:),nhat1gr(:,:,:),vresid_dum(:,:)
@@ -643,9 +643,20 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                      fnamewff(3) = dtfil%fnamewffdkde
 
                      if (npert_phon==1.and.psps%usepaw==1.and.second_idir/=i2dir) then
-                       nwffile = 4
+!                       nwffile = 4
+!                       file_index(4) = second_idir+natom*3
+!                       fnamewff(4) = dtfil%fnamewffddk
+                       nwffile = 5
                        file_index(4) = second_idir+natom*3
                        fnamewff(4) = dtfil%fnamewffddk
+                       if (i2dir==2.and.second_idir==3) idir_dkde = 7 ! 4
+                       if (i2dir==1.and.second_idir==3) idir_dkde = 8 ! 5
+                       if (i2dir==1.and.second_idir==2) idir_dkde = 9 ! 6
+                       if (i2dir==3.and.second_idir==2) idir_dkde = 4 ! 7
+                       if (i2dir==3.and.second_idir==1) idir_dkde = 5 ! 8
+                       if (i2dir==2.and.second_idir==1) idir_dkde = 6 ! 9
+                       file_index(5) = idir_dkde+9+(dtset%natom+6)*3
+                       fnamewff(5) = dtfil%fnamewffdkde
                      end if
 
                    end if

@@ -126,7 +126,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(pawang_type),intent(inout) :: pawang,pawang1
  type(pawfgr_type),intent(in) :: pawfgr
- type(wfk_t),intent(inout) :: ddk_f(4)
+ type(wfk_t),intent(inout) :: ddk_f(5)
 
 !arrays
  integer,intent(in) :: atindx(natom),atindx1(natom),kg(3,mpw*mkmem),nattyp(psps%ntypat),ngfftf(18),npwarr(nkpt)
@@ -166,16 +166,17 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  integer :: offset_cgi,offset_cgj,offset_eigen,offset_eig0,option,paw_opt,print_info,esigns
  integer :: signs,size_wf,size_cprj,spaceComm,tim_fourwf,tim_nonlop,usepaw,useylmgr1
  real(dp) :: arg,dot1i,dot1r,dot2i,dot2r,doti,dotr,exc3,e3tot,lagi,lagr,rho2r_re,rho2r_im,rho3r_re,rho3r_im
- real(dp) :: sumi,sum_psi1H1psi1,sum_lambda1psi1psi1
+ real(dp) :: sumi,sum_enlout_im,sum_enlout_re,sum_psi1H1psi1,sum_lambda1psi1psi1,sum_psi0H2psi1
  real(dp) :: tol_test,valuei,weight
  character(len=500) :: msg
 !arrays
  integer,allocatable :: kg_k(:,:),kg1_k(:,:)
 ! real(dp) :: buffer(2)
  real(dp) :: buffer(3),eHxc21_paw(2),exc3_paw(2),enlout(3),kpt(3),eig0_k(mband)
- real(dp) :: dum_svectout(1,1),dum(1),enlout_1(2),enlout_2(2),enlout_3(2),rmet(3,3),dum_grad_berry(1,1),wtk_k
+ real(dp) :: dum_svectout(1,1),dum(1),enlout_11(2),enlout_12(2),enlout_21(2),enlout_22(2),enlout_31(2),enlout_32(2)
+ real(dp) :: rmet(3,3),dum_grad_berry(1,1),wtk_k
  real(dp) :: ylmgr_dum(1,1,1)
- real(dp),allocatable :: cgi(:,:),cgj(:,:),cg_jband(:,:,:),cwavef1(:,:),cwavef3(:,:),dkinpw(:)
+ real(dp),allocatable :: cgi(:,:),cgj(:,:),cg_jband(:,:,:),cwavef1(:,:),cwavef2(:,:),cwavef3(:,:),dkinpw(:)
  real(dp),allocatable :: eig1_k_tmp(:),eig1_k_stored(:)
  real(dp),allocatable :: chi_ij(:,:,:),cwave_right(:,:),cwave_left(:,:),dudk(:,:),dudkde(:,:),dummy_array(:),dummy_array2(:,:)
  real(dp),allocatable :: ffnl1(:,:,:,:),ffnl1_idir_elfd(:,:,:,:),ffnlk(:,:,:,:),gh0(:,:),gh1(:,:),gvnl(:,:)
@@ -216,7 +217,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 
 !Acivate computation of rho^(2:1) and related energy derivatives if needed
  compute_rho21 = .false.
- if (usepaw==1.and.npert_phon==1.and.(i1pert<=natom.or.i3pert<=natom)) then
+ if (usepaw==1.and.npert_phon==1.and.(i1pert<=natom.or.i3pert<=natom)) then ! so i2pert==natom+2
    compute_rho21 = .true.
    if (i1pert<=natom) then
      ipert_phon  = i1pert
@@ -322,6 +323,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 
  sum_psi1H1psi1 =  zero
  sum_lambda1psi1psi1 = zero
+ sum_psi0H2psi1 = zero
  compute_conjugate = .false.
 !We have to compute < u^(ip1) | H^(ip2) | u^(ip3) >
 !For some cases, we want to apply H^(ip2) on < u^(ip1) |, not on | u^(ip3) > (see below)
@@ -371,6 +373,9 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 
      ABI_ALLOCATE(cwavef1,(2,npw_k*nspinor))
      ABI_ALLOCATE(cwavef3,(2,npw_k*nspinor))
+     if (compute_rho21) then
+       ABI_ALLOCATE(cwavef2,(2,npw_k*nspinor))
+     end if
      ABI_ALLOCATE(gh0,(2,npw_k*nspinor))
      ABI_ALLOCATE(gvnl,(2,npw_k*nspinor))
      ABI_ALLOCATE(gh1,(2,npw_k*nspinor))
@@ -463,8 +468,8 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 !       if (ipert==natom+4) istr=idir+3
 !       ider=1;idir0=-istr
      end if
-     if (compute_rho21) then
-       ider=1; idir0=4 ! For debbugging with d2frnl : idir0=0
+     if (compute_rho21.and.i2dir/=idir_elfd) then ! compute_rho21 implies i2pert==natom+2
+       ider=1; idir0=4
      end if
 
 !    Compute nonlocal form factors ffnl1 at (k+q+G), for all atoms
@@ -758,18 +763,41 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 &            nspinor,occ_k(jband),pawrhoij21_unsym,usetimerev,wtk_k)
 !&           comm_atom=my_comm_atom,mpi_atmtab=my_atmtab)
 
-!          Compute < psi^(0) | H_KV^(pert1pert3) | Psi^(pert2) > and < psi^(pert2) | H_KV^(pert1pert3) | Psi^(0) >
-           enlout_1 = zero ; enlout_2 = zero ; enlout_3 = zero
+!          Compute < psi^(0) | H_KV^(pert1pert3) | psi^(pert2) > + < psi^(pert2) | H_KV^(pert1pert3) | psi^(0) >
+           cwavef2(:,:) = cg2(:,1+offset_cgj:size_wf+offset_cgj)
+
+           cpopt   = 0 ! TO CHANGE
+           signs   = 2
 
            choice  = 2
-           cpopt   = 0 ! TO CHANGE
            paw_opt = 1
-           signs   = 2
+!          Compute : < psi^(0)     | sum_{i,j} chi_{i,j} d(|p_i><p_j|)/dtau | psi^(pert2) >
+           call nonlop(choice,cpopt,cwaveprj0,dum,gs_hamkq,idir_phon,(/zero/),mpi_enreg,1,1,&
+&            paw_opt,signs,dummy_array2,tim_nonlop,cwavef2,s_cwave,enl=chi_ij,iatom_only=ipert_phon)
+           call dotprod_g(enlout_11(1),enlout_11(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cgj,s_cwave,&
+&                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+!          Compute : < psi^(pert2) | sum_{i,j} chi_ij d(|p_i><p_j|)/dtau | psi^(0)     >
            call nonlop(choice,cpopt,cwaveprj0,dum,gs_hamkq,idir_phon,(/zero/),mpi_enreg,1,1,&
 &            paw_opt,signs,dummy_array2,tim_nonlop,cgj,s_cwave,enl=chi_ij,iatom_only=ipert_phon)
-           call dotprod_g(enlout_1(1),enlout_1(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cgj,s_cwave,&
+           call dotprod_g(enlout_12(1),enlout_12(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cwavef2,s_cwave,&
 &                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
+           choice  = 2
+           paw_opt = 3
+!          Read dkde file
+           if(idir_elfd==i2dir) then
+             call wfk_read_bks(ddk_f(3), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
+           else
+             call wfk_read_bks(ddk_f(5), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
+           end if
+           s_cwave = iddk
+           iddk(1,:) = -s_cwave(2,:)
+           iddk(2,:) =  s_cwave(1,:)
+!          Compute : < psi^(0)    | sum_{i,j} s_ij d(|p_i><p_j|)/dtau | i*psi^(k,pert2) >
+           call nonlop(choice,cpopt,cwaveprj0,dum,gs_hamkq,idir_phon,(/zero/),mpi_enreg,1,1,&
+&            paw_opt,signs,s_cwave,tim_nonlop,iddk,cgj,iatom_only=ipert_phon)
+           call dotprod_g(enlout_21(1),enlout_21(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cgj,s_cwave,&
+&                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 !          Read ddk file
            if(idir_elfd==i2dir) then
              call wfk_read_bks(ddk_f(2), jband, ikpt, isppol, xmpio_single, cg_bks=iddk)
@@ -779,28 +807,42 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
            s_cwave = iddk
            iddk(1,:) = -s_cwave(2,:)
            iddk(2,:) =  s_cwave(1,:)
-           choice  = 2
-           cpopt   = 0 ! TO CHANGE
-           paw_opt = 3
-           signs   = 2
+!          Compute : < psi^(pert2) | sum_{i,j} s_ij d(|p_i><p_j|)/dtau | i*psi^(k)     >
            call nonlop(choice,cpopt,cwaveprj0,dum,gs_hamkq,idir_phon,(/zero/),mpi_enreg,1,1,&
-&            paw_opt,signs,s_cwave,tim_nonlop,cgj,cgj,iatom_only=ipert_phon)
-           call dotprod_g(enlout_2(1),enlout_2(2),gs_hamkq%istwf_k,npw_k*nspinor,2,s_cwave,iddk,&
+&            paw_opt,signs,s_cwave,tim_nonlop,iddk,cgj,iatom_only=ipert_phon)
+           call dotprod_g(enlout_22(1),enlout_22(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cwavef2,s_cwave,&
 &                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
            choice  = 54
-           cpopt   = 0 ! TO CHANGE
            paw_opt = 3
-           signs   = 2
            idir_54 = 3*(idir_phon-1)+idir_elfd
+!          Compute : i * < psi^(0)    | sum_{i,j} s_ij d(|p_i><dp_j/dk|)/dtau | psi^(pert2) >
            call nonlop(choice,cpopt,cwaveprj0,dum,gs_hamkq,idir_54,(/zero/),mpi_enreg,1,1,&
-&            paw_opt,signs,s_cwave,tim_nonlop,cgj,cgj,iatom_only=ipert_phon)
-           call dotprod_g(enlout_3(1),enlout_3(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cgj,s_cwave,&
+&            paw_opt,signs,s_cwave,tim_nonlop,cwavef2,cgj,iatom_only=ipert_phon)
+           call dotprod_g(enlout_31(1),enlout_31(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cgj,s_cwave,&
 &                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
            ! Multiply enlout_3 by i :
-           buffer(1) = enlout_3(1)
-           enlout_3(1) = - enlout_3(2)
-           enlout_3(2) =   buffer(1)
+           buffer(1) = enlout_31(1)
+           enlout_31(1) = - enlout_31(2)
+           enlout_31(2) =   buffer(1)
+!          Compute : i * < psi^(pert2) | sum_{i,j} s_ij d(|p_i><dp_j/dk|)/dtau | psi^(0)    >
+           call nonlop(choice,cpopt,cwaveprj0,dum,gs_hamkq,idir_54,(/zero/),mpi_enreg,1,1,&
+&            paw_opt,signs,s_cwave,tim_nonlop,cgj,cgj,iatom_only=ipert_phon)
+           call dotprod_g(enlout_32(1),enlout_32(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cwavef2,s_cwave,&
+&                 mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+           ! Multiply enlout_3 by i :
+           buffer(1) = enlout_32(1)
+           enlout_32(1) = - enlout_32(2)
+           enlout_32(2) =   buffer(1)
+
+           sum_enlout_re = enlout_11(1)+enlout_12(1)+enlout_21(1)+enlout_22(1)+enlout_31(1)+enlout_32(1)
+           sum_enlout_im = enlout_11(2)+enlout_12(2)+enlout_21(2)+enlout_22(2)+enlout_31(2)+enlout_32(2)
+           if (compute_conjugate) sum_enlout_im  = -sum_enlout_im
+!           if (abs(sum_enlout_im)>tol10) then
+!             write(msg,'(a,es16.7e3)') 'im(enlout) = ',sum_enlout_im
+!             MSG_ERROR(msg)
+!           end if
+           sum_psi0H2psi1 = sum_psi0H2psi1 + dtset%wtk(ikpt)*occ_k(jband)*sum_enlout_re
 
          end if ! end if compute_rho21
 
@@ -824,6 +866,9 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
      ikg1 = ikg1 + npw1_k
 
      ABI_DEALLOCATE(cwavef1)
+     if (compute_rho21) then
+       ABI_DEALLOCATE(cwavef2)
+     end if
      ABI_DEALLOCATE(cwavef3)
      ABI_DEALLOCATE(dkinpw)
      ABI_DEALLOCATE(gh0)
@@ -1079,12 +1124,13 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 ! **************************************************************************************************
 
  e3tot =         sum_psi1H1psi1 + sum_lambda1psi1psi1 + sixth * (exc3 + exc3_paw(1))
- e3tot = e3tot + half * eHxc21_paw(1)
+ e3tot = e3tot + half * eHxc21_paw(1) + sum_psi0H2psi1
 ! if(print_info/=0) then
-   write(msg,'(2a,3(a,i2,a,i1),6(2a,es16.7e3),a)') ch10,'NONLINEAR : ',&
+   write(msg,'(2a,3(a,i2,a,i1),7(2a,es16.7e3),a)') ch10,'NONLINEAR : ',&
    ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir,&
    ch10,'      sum_psi1H1psi1 = ',sum_psi1H1psi1,&
    ch10,' sum_lambda1psi1psi1 = ',sum_lambda1psi1psi1,&
+   ch10,'      sum_psi0H2psi1 = ',sum_psi0H2psi1,&
    ch10,'              exc3/6 = ',sixth*exc3,&
    ch10,'          exc3_paw/6 = ',sixth*exc3_paw(1),&
    ch10,'        eHxc21_paw/2 = ',half*eHxc21_paw(1),&
