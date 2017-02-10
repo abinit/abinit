@@ -1144,6 +1144,10 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 &   'Action: correct prt_ifc in your input file.'
    MSG_ERROR(message)
  end if
+! check that ifcout is set
+ if (anaddb_dtset%prt_ifc /= 0 .and. anaddb_dtset%ifcout == 0) then
+   anaddb_dtset%ifcout = -1 ! this forces output of all IFC
+ end if
 
  anaddb_dtset%prtmbm=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtmbm',tread,'INT')
@@ -1967,7 +1971,7 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    end if
 
    if (anaddb_dtset%prt_ifc == 1) then
-     write(nunit, '(a)') ' Will output real space IFC in AI2PS format'
+     write(nunit, '(a)') ' Will output real space IFC in AI2PS and TDEP format'
    end if
 
    if (anaddb_dtset%prtnest == 1) then
