@@ -387,7 +387,7 @@
 !signs=2, less choices
  if (signs==2) then
    check=(choice==0.or.choice==1.or.choice==2.or.choice==3 .or.&
-&   choice==5.or.choice==51.or.choice==52.or.choice==53.or.&
+&   choice==5.or.choice==51.or.choice==52.or.choice==53.or.choice==54.or.&
 &   choice==7.or.choice==8.or.choice==81)
    ABI_CHECK(check,'BUG: choice not compatible (for signs=2)')
  end if
@@ -396,7 +396,7 @@
    check=(idir>=1.and.idir<=6)
    ABI_CHECK(check,'BUG: choice=3 and signs=2 requires 1<=idir<=6')
 !1<=idir<=9 is required when choice==8/81 and signs=2
- else if ((choice==8.or.choice==81).and.signs==2) then
+ else if ((choice==8.or.choice==81.or.choice==54).and.signs==2) then
    check=(idir>=1.and.idir<=9)
    ABI_CHECK(check,'BUG: choice=8/81 and signs=2 requires 1<=idir<=9')
  else
@@ -491,6 +491,10 @@
    if(signs==1) ndgxdt=6
    if(signs==1) ndgxdtfac=6
    if(signs==1) nd2gxdt=9
+   if(signs==2) ndgxdt=1
+   if(signs==2) nd2gxdt=1
+   if(signs==2) ndgxdtfac=1
+   if(signs==2) nd2gxdtfac=1
  end if
  if (choice==55) then
    if(signs==1) ndgxdt=9
@@ -561,11 +565,11 @@
 
 !Eventually re-compute (k+G) vectors (and related data)
  nkpgin_=0
- if (choice==2) nkpgin_=3
+ if (choice==2.or.choice==54) nkpgin_=3
  if (signs==1) then
    if (choice==4.or.choice==24) nkpgin_=9
    if (choice==3.or.choice==23.or.choice==6) nkpgin_=3
-   if (choice==54.or.choice==55) nkpgin_=3
+   if (choice==55) nkpgin_=3
  end if
  if (nkpgin<nkpgin_) then
    ABI_ALLOCATE(kpgin_,(npwin,nkpgin_))
@@ -575,7 +579,7 @@
    kpgin_  => kpgin
  end if
  nkpgout_=0
- if (choice==2.and.signs==2) nkpgout_=3
+ if ((choice==2.or.choice==54).and.signs==2) nkpgout_=3
  if (nkpgout<nkpgout_) then
    ABI_ALLOCATE(kpgout_,(npwout,nkpgout_))
    call mkkpg(kgout,kpgout_,kptout,nkpgout_,npwout)
