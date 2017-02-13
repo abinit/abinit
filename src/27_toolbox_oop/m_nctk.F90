@@ -2759,8 +2759,7 @@ subroutine var_from_name(ncid, name, var)
 
 !Local variables-------------------------------
 !scalars
- integer :: varid !ncerr
-!arrays
+ integer :: varid
 
 ! *********************************************************************
 
@@ -2771,8 +2770,6 @@ end subroutine var_from_name
 !!***
 
 #endif
-
-!----------------------------------------------------------------------
 
 END MODULE m_nctk
 !!***

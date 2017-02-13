@@ -15,24 +15,14 @@
 !! PARENTS
 !!
 !! CHILDREN
-!! dos_degeneratewfs.F90
 !! dos_hdr_write.F90
-!! gaus_dos.F90
-!! get_dos_1band.F90
-!! get_dos_1band_m.F90
 !! getnel.F90
-!! init_bess_spl.F90
 !! init_occ_ent.F90
 !! interfaces_61_occeig.F90
 !! m_ebands.F90
+!! m_fstab.F90
 !! newocc.F90
 !! occeig.F90
 !! pareigocc.F90
-!! printbxsf.F90
-!! prtbltztrp_out.F90
-!! prtbltztrp_tau_out.F90
-!! recip_ylm.F90
-!! sphericaldens.F90
-!! tetrahedron.F90
 !!
 !!***

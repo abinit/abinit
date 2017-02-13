@@ -78,7 +78,7 @@ _ WF disk file :      2.553 Mbytes ; DEN or POT disk file :      0.051 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -211,6 +211,9 @@ P           mkmem3         50
            nbdbuf2          2
            nbdbuf3          2
            ndtset           3
+           ndivsm1          0
+           ndivsm2          4
+           ndivsm3          0
             ngfft          18      18      20
              nkpt1          2
              nkpt2         33
@@ -1157,6 +1160,9 @@ P           mkmem3         50
            nbdbuf2          2
            nbdbuf3          2
            ndtset           3
+           ndivsm1          0
+           ndivsm2          4
+           ndivsm3          0
             ngfft          18      18      20
              nkpt1          2
              nkpt2         33

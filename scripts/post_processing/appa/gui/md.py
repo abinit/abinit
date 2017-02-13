@@ -64,48 +64,38 @@ class Netcdf_MD(QtGui.QWidget):
         self.box2layout = QtGui.QGridLayout()
         self.box2.setLayout(self.box2layout)        
 
-        self.lbl1 = QtGui.QLabel("Number of cell(s): ", self)
-        self.lbl1.setFixedWidth(120)
-        self.lblnbimage = QtGui.QLabel(str(self.file1.getNImage()), self)        
-                
-        self.lbl2 = QtGui.QLabel("Number of atoms: ", self)
-        self.lbl2.setFixedWidth(120)
-        self.lblnbatom = QtGui.QLabel(str(self.file1.getNatom()), self)        
-        
-        self.lbl3 = QtGui.QLabel("Number of steps: ", self)
-        self.lblNbTime = QtGui.QLabel(str(self.file1.getNbTime()), self)
-                
-        
-        self.lbl4 = QtGui.QLabel("Total Energy ("+str(self.units['Energy'][0])+"): ", self)
-        self.lbl4.setFixedWidth(120)                
         E_tot = self.units['Energy'][1] * Math.average(self.file1.getE_Tot())
-        deviation = self.file1.getStandardDeviation(self.units['Energy'][1] *self.file1.getE_Tot(), E_tot)        
-        self.lblE_tot = QtGui.QLabel(self.displayData(E_tot,deviation),self)
-        self.lblE_tot.setFixedWidth(150);
-        
-        
-        self.lbl5 = QtGui.QLabel("Volume ("+str(self.units['Volume'][0])+"): ", self)
-        self.lbl5.setFixedWidth(140)        
-        
+        deviation = self.file1.getStandardDeviation(self.units['Energy'][1] *self.file1.getE_Tot(), E_tot)      
+        strETOT = self.displayData(E_tot,deviation)
+
         vol = self.units['Volume'][1] * Math.average(self.file1.getVol())
         deviation = self.file1.getStandardDeviation(self.units['Volume'][1] *self.file1.getVol(), vol)        
-        self.lblVol = QtGui.QLabel(self.displayData(vol,deviation),self)
-        self.lblVol.setFixedWidth(150);
+        strVol = self.displayData(vol,deviation)
 
-        
-        self.lbl6 = QtGui.QLabel("Temperature ("+str(self.units['Temperature'][0])+"): ", self)
-        self.lbl6.setFixedWidth(120)
         Temp = self.file1.getTemp()        
         ATemp = Math.average(Temp) - self.units['Temperature'][1]        
         deviation = Math.standard_deviation( Temp - self.units['Temperature'][1] , ATemp)
-        self.lblTemp = QtGui.QLabel(self.displayData(ATemp,deviation), self)
-        
-                
-        self.lbl7 = QtGui.QLabel("Pressure ("+str(self.units['Pressure'][0])+"): ", self)        
-        self.lbl7.setFixedWidth(140)                
+        strTemp = self.displayData(ATemp,deviation)
+
         Press = Math.average( self.file1.getPress() ) * self.units['Pressure'][1]
         deviation = Math.standard_deviation(self.units['Pressure'][1] * self.file1.getPress(), Press)
-        self.lblPress = QtGui.QLabel(self.displayData(Press,deviation), self)
+        strPress = self.displayData(Press,deviation)
+
+        self.lbl1 = QtGui.QLabel("Number of cell(s)  : "+str(self.file1.getNImage()), self)
+        self.lbl2 = QtGui.QLabel("Number of atoms  : "+str(self.file1.getNatom()), self)
+        self.lbl3 = QtGui.QLabel("Number of steps  : "+str(self.file1.getNbTime()), self)
+        self.lbl4 = QtGui.QLabel("Total Energy ("+str(self.units['Energy'][0])+"): "+strETOT, self)                
+        self.lbl5 = QtGui.QLabel("Volume ("+str(self.units['Volume'][0])+"): "+strVol, self)
+        self.lbl6 = QtGui.QLabel("Temperature ("+str(self.units['Temperature'][0])+")  : "+strTemp, self)
+        self.lbl7 = QtGui.QLabel("Pressure ("+str(self.units['Pressure'][0])+")    : "+strPress, self)        
+
+        self.lbl1.setFixedWidth(300)
+        self.lbl2.setFixedWidth(300)
+        self.lbl3.setFixedWidth(300)
+        self.lbl4.setFixedWidth(300)
+        self.lbl5.setFixedWidth(300)
+        self.lbl6.setFixedWidth(300)
+        self.lbl7.setFixedWidth(300)
                 
         self.box2layout.addWidget(self.lbl1,1,0)
         self.box2layout.addWidget(self.lbl2,2,0)
@@ -114,22 +104,13 @@ class Netcdf_MD(QtGui.QWidget):
         self.box2layout.addWidget(self.lbl5,5,0)
         self.box2layout.addWidget(self.lbl6,6,0)
         self.box2layout.addWidget(self.lbl7,7,0)
-        
-        self.box2layout.addWidget(self.lblnbimage,1,1)
-        self.box2layout.addWidget(self.lblnbatom ,2,1)
-        self.box2layout.addWidget(self.lblNbTime ,3,1)
-        self.box2layout.addWidget(self.lblE_tot  ,4,1)
-        self.box2layout.addWidget(self.lblVol    ,5,1)
-        self.box2layout.addWidget(self.lblTemp   ,6,1)
-        self.box2layout.addWidget(self.lblPress  ,7,1)        
-                
-                
+
         self.box3 = QtGui.QGroupBox("Option")
         self.box3layout = QtGui.QGridLayout()
         self.box3.setLayout(self.box3layout)
         
         self.lbl3_1 = QtGui.QLabel('Choose the initial and final step\nfor the molecular dynamics :')
-        self.lbl3_1.setFixedSize(240,50)
+        self.lbl3_1.setFixedSize(300,50)
         self.lblni = QtGui.QLabel('initial step')
         self.lblnf = QtGui.QLabel('final step')
         self.sbni = QtGui.QSpinBox()
@@ -138,8 +119,8 @@ class Netcdf_MD(QtGui.QWidget):
         self.sbnf.setMaximum(self.file1.getNbTime()) 
         self.sbni.setMinimum(1)
         self.sbnf.setMinimum(1) 
-        self.sbni.setFixedSize(140,20)
-        self.sbnf.setFixedSize(140,20)
+        self.sbni.setFixedSize(150,20)
+        self.sbnf.setFixedSize(150,20)
         self.sbni.setValue(self.ni)
         self.sbnf.setValue(self.nf)
         self.connect(self.sbni,QtCore.SIGNAL('keyPressed'),self.verifStep)
@@ -552,28 +533,28 @@ class Netcdf_MD(QtGui.QWidget):
 
 
     def updateLabel(self):
-        self.lbl4.setText("Total Energy ("+str(self.units['Energy'][0])+"): ")
         E_tot = self.units['Energy'][1] * Math.average(self.file1.getE_Tot())
-        deviation = Math.standard_deviation(self.units['Energy'][1] *self.file1.getE_Tot(), E_tot)
-        self.lblE_tot.setText(self.displayData(E_tot,deviation))
+        deviation = self.file1.getStandardDeviation(self.units['Energy'][1] *self.file1.getE_Tot(), E_tot)      
+        strETOT = self.displayData(E_tot,deviation)
 
+        vol = self.units['Volume'][1] * Math.average(self.file1.getVol())
+        deviation = self.file1.getStandardDeviation(self.units['Volume'][1] *self.file1.getVol(), vol)        
+        strVol = self.displayData(vol,deviation)
 
-        self.lbl5.setText("Volume ("+str(self.units['Volume'][0])+"): ")        
-        Vol = self.units['Volume'][1] * Math.average(self.file1.getVol())
-        deviation = Math.standard_deviation(self.units['Volume'][1] *self.file1.getVol(), Vol)      
-        self.lblVol.setText(self.displayData(Vol,deviation))
-                
-        self.lbl6.setText("Temperature ("+str(self.units['Temperature'][0])+"): ")        
         Temp = self.file1.getTemp()        
         ATemp = Math.average(Temp) - self.units['Temperature'][1]        
         deviation = Math.standard_deviation( Temp - self.units['Temperature'][1] , ATemp)
-        self.lblTemp.setText(self.displayData(ATemp,deviation))
+        strTemp = self.displayData(ATemp,deviation)
 
-        
-        self.lbl7.setText("Pressure ("+str(self.units['Pressure'][0])+"): ")                
-        Press = Math.average( self.file1.getPress()) * self.units['Pressure'][1]        
-        deviation = Math.standard_deviation(self.units['Pressure'][1] * self.file1.getPress(), Press)        
-        self.lblPress.setText(self.displayData(Press,deviation))
+        Press = Math.average( self.file1.getPress() ) * self.units['Pressure'][1]
+        deviation = Math.standard_deviation(self.units['Pressure'][1] * self.file1.getPress(), Press)
+        strPress = self.displayData(Press,deviation)
+
+        self.lbl4.setText("Total Energy ("+str(self.units['Energy'][0])+"): "+strETOT)
+        self.lbl5.setText("Volume ("+str(self.units['Volume'][0])+"): "+strVol)
+        self.lbl6.setText("Temperature ("+str(self.units['Temperature'][0])+")  : "+strTemp)
+        self.lbl7.setText("Pressure ("+str(self.units['Pressure'][0])+")    : "+strPress)
+
         
     def updateGraph(self,units = False):
 
@@ -696,14 +677,17 @@ class Netcdf_MD(QtGui.QWidget):
             event.accept()
             
     def displayData(self,data,deviation):
-        if(abs(data) < 1e-03 and deviation < 1e-03):
-            return str("%.3g" %data) + ' +/- ' + str("%.2g" %deviation)
-        if(abs(data) > 1e+03 and deviation < 1e-03 ):
-            return str("%.4g" %data) + ' +/- ' + str("%.2g" %deviation)
-        if(abs(data) > 1e+03 and deviation > 1e-03 ):
-            return str("%.4g" %data) + ' +/- ' + str(round(deviation,2))
-        if(abs(data) > 1e-03 and deviation < 1e-03 ):
-            return str(round(data,2)) + ' +/- ' + str("%.2g" %deviation)
-        if(abs(data) > 1e-03 and deviation > 1e-03 ):
-            return str(round(data,2)) + ' +/- ' + str(round(deviation,2))
-        return ''	
+        return str("%.4e" %data) + ' +/- ' + str("%.1e" %deviation)
+        # if(abs(data) < 1e-03 and deviation < 1e-03):
+        #     return str("%.3g" %data) + ' +/- ' + str("%.2g" %deviation)
+        # if(abs(data) < 1e-03 and deviation > 1e-03):
+        #     return str("%.4g" %data) + ' +/- ' + str("%.2g" %deviation)
+        # if(abs(data) > 1e+03 and deviation < 1e-03 ):
+        #     return str("%.4g" %data) + ' +/- ' + str("%.2g" %deviation)
+        # if(abs(data) > 1e+03 and deviation > 1e-03 ):
+        #     return str("%.4g" %data) + ' +/- ' + str(round(deviation,2))
+        # if(abs(data) > 1e-03 and deviation < 1e-03 ):
+        #     return str(round(data,2)) + ' +/- ' + str("%.2g" %deviation)
+        # if(abs(data) > 1e-03 and deviation > 1e-03 ):
+        #     return str(round(data,2)) + ' +/- ' + str(round(deviation,2))
+        # return ''	

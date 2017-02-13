@@ -1724,10 +1724,6 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 
    end if
 
-!DEBUG
-!write(std_out,*)' setup2 : leave '
-!ENDDEBUG
-
 #if !defined HAVE_BIGDFT
    if (.false.) write(std_out,*) wfs%ks
 #endif

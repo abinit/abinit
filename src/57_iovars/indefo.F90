@@ -327,6 +327,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%gwmem=11
    dtsets(idtset)%gwpara=2
    dtsets(idtset)%gwrpacorr=0
+   dtsets(idtset)%gwfockmix=0.25_dp
    dtsets(idtset)%gwls_sternheimer_kmax=1
    dtsets(idtset)%gwls_model_parameter=1.0_dp
    dtsets(idtset)%gwls_second_model_parameter=0.0_dp
@@ -587,6 +588,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prtdipole=0
    dtsets(idtset)%prtdos=0
    dtsets(idtset)%prtdosm=0
+   dtsets(idtset)%prtebands=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtebands=0
    dtsets(idtset)%prtefg=0
    dtsets(idtset)%prteig=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
    dtsets(idtset)%prtelf=0

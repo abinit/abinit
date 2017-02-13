@@ -85,6 +85,7 @@ subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsu
 !scalars
  integer :: flag,i1,i2,ii,imode,jj,kk
  real(dp) :: dtm,fac
+ logical :: iwrite
  character(len=500) :: message
 !arrays
  integer :: voigtindex(6,2)
@@ -95,6 +96,7 @@ subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsu
 
 !rijk(1:3*natom,:,:,:) = mode by mode decomposition of the electrooptic tensor
 !rijk(3*natom+1,:,:,:) = electronic contribution
+ iwrite = ab_out > 0
 
  voigtindex(1,1) = 1 ; voigtindex(1,2) = 1
  voigtindex(2,1) = 2 ; voigtindex(2,2) = 2
@@ -156,32 +158,30 @@ subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsu
 
    call matr3inv(epsinf,eta)
 
-   write(ab_out,*)ch10
-   write(ab_out,*)'Output of the EO tensor (pm/V) in Voigt notations'
-   write(ab_out,*)'================================================='
-   write(ab_out,*)
-   if (prtmbm == 1) then
-     write(ab_out,*)'Mode by mode decomposition'
+   if (iwrite) then
+     write(ab_out,*)ch10
+     write(ab_out,*)'Output of the EO tensor (pm/V) in Voigt notations'
+     write(ab_out,*)'================================================='
      write(ab_out,*)
+     if (prtmbm == 1) then
+       write(ab_out,*)'Mode by mode decomposition'
+       write(ab_out,*)
+     end if
    end if
 
 !  Compute the ionic contribution to the EO tensor
 
    do imode = 4, 3*natom
 
-     if (prtmbm == 1) then
+     if (prtmbm == 1 .and. iwrite) then
        write(ab_out,*)
-       write(ab_out,'(a4,i3,2x,a2,f7.2,a6)')'Mode',imode,&
-&       ' (',phfrq(imode)*Ha_cmm1,' cm-1)'
+       write(ab_out,'(a4,i3,2x,a2,f7.2,a6)')'Mode',imode,' (',phfrq(imode)*Ha_cmm1,' cm-1)'
      end if
 
      do ii = 1, 3
        do jj = 1, 3
          do kk = 1, 3
-
-           rijk(imode,ii,jj,kk) = rsus(imode,ii,jj)*&
-&           fact_oscstr(1,kk,imode)/(phfrq(imode)**2)
-
+           rijk(imode,ii,jj,kk) = rsus(imode,ii,jj)*fact_oscstr(1,kk,imode)/(phfrq(imode)**2)
          end do
        end do
      end do
@@ -193,14 +193,12 @@ subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsu
 
            do i1 = 1, 3
              do i2 = 1, 3
-               work(ii,jj,kk) = work(ii,jj,kk) + &
-&               eta(ii,i1)*rijk(imode,i1,i2,kk)*eta(i2,jj)
+               work(ii,jj,kk) = work(ii,jj,kk) + eta(ii,i1)*rijk(imode,i1,i2,kk)*eta(i2,jj)
              end do  ! i2
            end do   ! i1
 
            rijk(imode,ii,jj,kk) = fac*work(ii,jj,kk)
            rijk_tot(ii,jj,kk) = rijk_tot(ii,jj,kk) + rijk(imode,ii,jj,kk)
-
          end do
 
        end do
@@ -214,7 +212,7 @@ subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsu
          do kk = 1, 3
            rvoigt(i1,kk) = (rijk(imode,ii,jj,kk) + rijk(imode,jj,ii,kk))/2._dp
          end do
-         write(ab_out,'(5x,3(2x,f16.9))')rvoigt(i1,:)
+         if (iwrite) write(ab_out,'(5x,3(2x,f16.9))')rvoigt(i1,:)
        end do
      end if
 
@@ -222,7 +220,7 @@ subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsu
 
 !  Compute the electronic contribution to the EO tensor
 
-   if (prtmbm == 1) then
+   if (prtmbm == 1 .and. iwrite) then
      write(ab_out,*)
      write(ab_out,*)'Electronic contribution to the EO tensor'
    end if
@@ -256,12 +254,12 @@ subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsu
        do kk = 1, 3
          rvoigt(i1,kk) = (rijk(3*natom+1,ii,jj,kk) + rijk(3*natom+1,jj,ii,kk))/2._dp
        end do
-       write(ab_out,'(5x,3(2x,f16.9))')rvoigt(i1,:)
+       if (iwrite) write(ab_out,'(5x,3(2x,f16.9))')rvoigt(i1,:)
      end do
-     write(ab_out,*)ch10
+     if (iwrite) write(ab_out,*)ch10
    end if
 
-   write(ab_out,*)'Total EO tensor (pm/V) in Voigt notations'
+   if (iwrite) write(ab_out,*)'Total EO tensor (pm/V) in Voigt notations'
    rvoigt(:,:) = 0._dp
    do i1 = 1, 6
      ii = voigtindex(i1,1)
@@ -269,7 +267,7 @@ subroutine electrooptic(dchide,dieflag,epsinf,fact_oscstr,natom,phfrq,prtmbm,rsu
      do kk = 1, 3
        rvoigt(i1,kk) = (rijk_tot(ii,jj,kk) + rijk_tot(jj,ii,kk))/2._dp
      end do
-     write(ab_out,'(5x,3(2x,f16.9))')rvoigt(i1,:)
+     if (iwrite) write(ab_out,'(5x,3(2x,f16.9))')rvoigt(i1,:)
    end do
 
  end if  ! flag

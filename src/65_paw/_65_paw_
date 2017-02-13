@@ -37,7 +37,6 @@
 !! nhatgrid.F90
 !! optics_paw.F90
 !! optics_paw_core.F90
-!! partial_dos_fractions_paw.F90
 !! paw_mknewh0.F90
 !! paw_symcprj.F90
 !! pawaccrhoij.F90
@@ -64,7 +63,6 @@
 !! pawuj_red.F90
 !! pawuj_utils.F90
 !! pawxenergy.F90
-!! prtfatbands.F90
 !! qijb_kk.F90
 !! read_atomden.F90
 !! setnoccmmp.F90

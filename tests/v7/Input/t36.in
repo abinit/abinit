@@ -30,7 +30,7 @@ prtwf_full1 1
 ############################
 # Dataset 2: 
 # invoke ABINIT --> LOBSTER converter
-# Read previsou WFK in IBZ and use symmetries
+# Read previous WFK in IBZ and use symmetries
 # to produce new WFK in full BZ with istwfk == 1
 ############################
 optdriver2 8

@@ -5391,6 +5391,56 @@
     varname: efmas_ntheta
     vartype: integer
 - !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval:
+    - 0
+    - 0
+    - 0
+    - 0
+    definition: Electron bands INTERPOolation
+    dimensions:
+    - 4
+    excludes: null
+    requires: null
+    section: varbas
+    text: |-
+        This variable activates the interpolation of the electronic eigenvalues.
+        It can be used to interpolate KS eigenvalues at the end of the GS run or to interpolate GW energies in sigma calculations ([[optdriver]] = 4).
+        The k-path can be specified with [[kptbounds]] and [[nkpath]].
+
+        einterp consists of 4 entries.
+        The first element specificies the interpolation method.
+
+        <ul>
+        <li> 0 --> No interpolation (default) </li>
+        <li> 1 --> Star-function interpolation (Shankland-Koelling-Wood Fourier interpolation scheme,
+            see <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.38.2721"> PRB 38 2721</a>
+        </li>
+        <li> 2 --> B-spline interpolation. </li>
+        </ul>
+
+        The meaning of the other entries depend on the interpolation technique selected.
+        <br>
+
+        In the case of star-function interpolation:
+
+        <ul>
+        <li> einterp(2): Number of star-functions per ab-initio k-point </li>
+        <li> einterp(3): If non-zero, activate Fourier filtering according to Eq 9 of
+        <a href="http://journals.aps.org/prb/abstract/10.1103/PhysRevB.61.1639"> PRB 61 1639</a>.
+        In this case, rcut is given by einterp(2) * Rmax where Rmax is the maximum length of the lattice vectors included in the star expansion </li>
+        <li> einterp(4): Used if einterp(2) /= 0. It defines rsigma in Eq 9</li>
+        </ul>
+        <br>
+
+        For B-spline interpolation:
+
+        einterp(2:4): Order of B-spline for the three reduced directions. Cubic spline (3) is the recomended value.
+    varname: einterp
+    vartype: real
+- !variable
     characteristics:
     - '[[RESPFN]]'
     - '[[ENERGY]]'
@@ -8438,6 +8488,21 @@
          See F. Bruneval, X. Gonze, Phys. Rev. B 78, 085125 (2008) for a description of the methodology.
         </p>
     varname: gwencomp
+    vartype: real
+- !variable
+    characteristics:
+    - '[[GW]]'
+    commentdefault: null
+    commentdims: null
+    defaultval: 0.25
+    definition: GW FOCK exchange MIXing parameter
+    dimensions: scalar
+    excludes: null
+    requires: '[[optdriver]]=4, [[gwcalctyp]] = 1x5 (HSE) or 2x5 (PBE0).'
+    section: vargw
+    text: |-
+        Mixing parameter of Fock exchange for PBE0 and HSE hybrid-functional calculations via the GW self-energy subroutine. [[gwfockmix]] ranges from 0 (essentially PBE) to 1.
+    varname: gwfockmix
     vartype: real
 - !variable
     characteristics:
@@ -15611,6 +15676,31 @@
     characteristics: null
     commentdefault: null
     commentdims: null
+    defaultval: 0
+    definition: Number of K-points defining the PATH
+    dimensions: scalar
+    excludes: null
+    requires: null
+    section: varbas
+    text: |-
+        This variable is used to define the number of high-symmetry k-points in the [[kptbounds]] array when [[kptopt]] > 0.
+        Historically, [[kptbounds]] is used in conjuction with a negative
+        value of [[kptopt]] when performing a NSCF band structure calculation. In this case, the number of k-points in kptbounds
+        is given by abs(kptopt) + 1.
+
+        There are, however, other cases in which one has to specify a k-path in the input file in order to activate some kind of post-processing tool.
+        Typical examples are the interpolation of
+        the GW corrections at the end of the sigma run or the interpolation
+        of the KS eigenvalues along a path at the end of the SCF run (see
+        also [[einterp]])
+        In a nutshell, nkpath replaces [[kptopt]] when we are not performing a NSCF calculation.
+        Note that, unlike [[kptopt]], nkpath represents the total number of points in the [[kptbounds]] array.
+    varname: nkpath
+    vartype: integer
+- !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
     defaultval: !valuewithconditions
         '[[kptopt]]==0': 1
         defaultval: 0
@@ -20447,6 +20537,31 @@
     characteristics: null
     commentdefault: null
     commentdims: null
+    defaultval: !valuewithconditions
+        '[[nimage]] > 1': 0
+        defaultval: 1
+    definition: PRinT Electron BANDS
+    dimensions: scalar
+    excludes: null
+    requires: null
+    section: vargs
+    text: |-
+        This option activates the output of the electron eigenvalues.
+        Possible values:
+
+        <ul>
+        <li>0 Disable the output of the band energies.</li>
+        <li>1 Write eigenvalues in xmgrace format.  A file with extension `EBANDS.agr` is produced at the end of the run.
+        Use `xmgrace file_EBANDS.agr` to visualize the band energies</li>
+        <li>2 Write eigenvalues in gnuplot format. The code produces a `EBANDS.dat` file with the eigenvalues and a `EBANDS.gnuplot` script.
+        Use `gnuplot file_EBANDS.gnuplot` to visualize the band energies.</li>
+        </ul>
+    varname: prtebands
+    vartype: integer
+- !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
     defaultval: 0
     definition: PRint Electric Field Gradient
     dimensions: scalar
@@ -20846,6 +20961,31 @@
          If set to 1, the nesting function for the k-point grid is printed. For the moment the path in q space for the nesting function is fixed, but will become an input as well.
         </p>
     varname: prtnest
+    vartype: integer
+- !variable
+    characteristics: null
+    commentdefault: null
+    commentdims: null
+    defaultval: 1
+    definition: PRinT PHonon BANDS
+    dimensions: scalar
+    excludes: null
+    requires: null
+    section: vareph
+    text: |-
+        This option activates the output of the phonon frequencies in the EPH code.
+        Possible values:
+
+        <ul>
+        <li>0 Disable the output of the phonon frequencies.</li>
+
+        <li>1 Write frequencies in xmgrace format.  A file with extension `PHBANDS.agr` is produced.
+        Use `xmgrace file_PHBANDS.agr` to visualize the data</li>
+
+        <li>2 Write frequencies in gnuplot format. The code produces a `PHBANDS.dat` file with the eigenvalues and a `PHBANDS.gnuplot` script.
+        Use `gnuplot file_PHBANDS.gnuplot` to visualize the phonon band structure.</li>
+        </ul>
+    varname: prtphbands
     vartype: integer
 - !variable
     characteristics:

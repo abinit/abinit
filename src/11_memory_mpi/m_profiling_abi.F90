@@ -3,7 +3,7 @@
 !! m_profiling_abi
 !!
 !! FUNCTION
-!!  This module is used for tracing memory allocations/deallocations 
+!!  This module is used for tracing memory allocations/deallocations
 !!  when we compile the code with --enable-memory-profiling="yes" that, in turns, defines HAVE_MEM_PROFILE.
 !!
 !! COPYRIGHT
@@ -13,7 +13,7 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!  *  This module is not thread-safe. However, this should not represent 
+!!  *  This module is not thread-safe. However, this should not represent
 !!     a significant limitation since memory-tracing is only enabled in debug mode.
 
 #if defined HAVE_CONFIG_H
@@ -41,15 +41,15 @@ module m_profiling_abi
 #ifdef HAVE_MEM_PROFILING
 
 #define _ABORT(msg) call abimem_abort(msg, __FILE__, ABI_FUNC, __LINE__)
-                                                     
+
  public :: abimem_get_info
  public :: abimem_init
  public :: abimem_shutdown
  public :: abimem_set_opts
  public :: abimem_report
  public :: abimem_record               ! Central routine to be used for allocation/deallocation
- !public :: abimem_enable      
- !public :: abimem_disable      
+ !public :: abimem_enable
+ !public :: abimem_disable
  !public :: abimem_reset
 
  integer,private,parameter :: slen = 500
@@ -57,10 +57,10 @@ module m_profiling_abi
 !!****t* m_profiling_abi/abimem_t
 !! NAME
 !!  minfo_t
-!! 
+!!
 !! FUNCTION
 !!  Store information on the memory allocated at run-time
-!! 
+!!
 !! SOURCE
 
  !Memory profiling
@@ -75,7 +75,7 @@ module m_profiling_abi
  ! PRIVATE STUFF
  ! Selective memory tracing
  character(fnlen),parameter :: NONE_STRING = "__NONE_STRING__"
- character(fnlen),save :: select_file = NONE_STRING 
+ character(fnlen),save :: select_file = NONE_STRING
  character(fnlen),save :: select_func = NONE_STRING
 
  ! Save values for memocc_abi.
@@ -92,11 +92,11 @@ module m_profiling_abi
  !logical,save :: abimem_ilog = .False.
  integer,save :: abimem_level = 0
 
- !real(dp),private,save :: start_time         
+ !real(dp),private,save :: start_time
 ! Origin of time in seconds.
- real(dp),private,save :: last_snapshot = -one     
+ real(dp),private,save :: last_snapshot = -one
 ! time of the last snapshot in seconds.
- real(dp),private,save :: dt_snapshot = -one       
+ real(dp),private,save :: dt_snapshot = -one
 ! time between two consecutive snapshots in seconds.
 
 contains
@@ -157,7 +157,7 @@ contains
  write(abimem_file,"(a,i0,a)")"abimem_rank",my_rank,".mocc"
 
  ! Optionally, selects functions or files to be profiled.
- if (present(filename)) then 
+ if (present(filename)) then
    if (len_trim(filename) > 0) select_file = filename
  end if
  if (present(funcname)) then
@@ -187,15 +187,15 @@ contains
 
  case (1)
    open(unit=logunt, file=abimem_file, status='unknown', action='write', iostat=ierr)
-   if (ierr /= 0) then 
+   if (ierr /= 0) then
      _ABORT("Opening abimem file")
    end if
    write(logunt,'(a,t60,a,t90,4(1x,a12))')&
       '(Data in KB) Routine','Array name    ','Array size','Total Memory'
 
- case (2) 
+ case (2)
    open(unit=logunt, file=abimem_file, status='unknown', action='write', iostat=ierr)
-   if (ierr /= 0) then 
+   if (ierr /= 0) then
      _ABORT("Opening abimem file")
    end if
    write(logunt,'(a,t60,a,t90,4(1x,a12))')&
@@ -291,7 +291,7 @@ subroutine abimem_set_opts(level, limit, deltat, filename, funcname)
  if (present(limit)) abimem_limit = limit
 
  ! Optionally, selects functions or files to be profiles.
- if (present(filename)) then 
+ if (present(filename)) then
    if (len_trim(filename) > 0) select_file = filename
  end if
  if (present(funcname)) then
@@ -468,7 +468,7 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, func, line)
  !   'problem of allocation of variable: ',trim(arr_name),&
  !   'Error code = ',istat,' Aborting now...'
  !  call abimem_abort(istat, msg, filename, funcname, line)
- ! end if 
+ ! end if
 
  !control of the allocation/deallocation status
  if (istat /= 0) then
@@ -507,7 +507,7 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, func, line)
  !end if
 
  ! Check on memory limit.
- if (abimem_limit /= zero .and. memtot_abi%memory > int(real(abimem_limit,kind=8)*1073741824.d0,kind=8)) then 
+ if (abimem_limit /= zero .and. memtot_abi%memory > int(real(abimem_limit,kind=8)*1073741824.d0,kind=8)) then
    ! memory limit is in GB
    write(msg,'(a,f7.3,2(a,i0),a,2(a,i0))')&
      'Memory limit of ',abimem_limit,' GB reached for rank ',my_rank,', total memory is ',memtot_abi%memory,' B.',&
@@ -562,7 +562,7 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, func, line)
 
    case (2)
      !to be used for inspecting a variable which is not deallocated
-     write(logunt,'(a,t60,a,1x,2(i0,1x),2(a,1x),2(i0,1x))')&  
+     write(logunt,'(a,t60,a,1x,2(i0,1x),2(a,1x),2(i0,1x))')&
        trim(vname), trim(act), addr, isize, trim(abimem_basename(file)), trim(func), line, memtot_abi%memory
 
    case default
@@ -604,8 +604,8 @@ subroutine abimem_check(nalloc, ndealloc)
 ! *************************************************************************
 
  if (abimem_level==2 .and. nalloc /= ndealloc) then
-   write(std_out,"(3a)") &
-     "Use the python script 'abimem.py' in tests/scripts to check ",trim(abimem_file)," file"
+   write(std_out,"(3a)")"Use the python script 'abimem.py' in ~abinit/tests/scripts to check ",trim(abimem_file)," file"
+   write(std_out,"(a)")"Note that one can use the command line option `abinit --abimem-level=2"
  end if
 
 end subroutine abimem_check
@@ -623,7 +623,7 @@ end subroutine abimem_check
 !!  Stop the code if an error occurs.
 !!
 !! INPUT
-!!  msg=Error message 
+!!  msg=Error message
 !!  file=File name
 !!  func=Function name.
 !!  line=Line number
@@ -651,7 +651,7 @@ subroutine abimem_abort(msg, file, func, line)
  character(len=*),intent(in) :: msg,file,func
 
 !Local variables-------------------------------
- integer :: ierr                                     
+ integer :: ierr
 
 !Local variables-------------------------------
  integer :: unt_found

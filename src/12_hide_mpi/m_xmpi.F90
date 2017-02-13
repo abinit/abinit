@@ -2441,11 +2441,11 @@ subroutine xmpi_split_work2_i4b(ntasks,nprocs,istart,istop,warn_msg,ierr)
 
  do irank=0,nprocs-1
    if (irank<res) then
-     istart(irank+1)= irank   *block+1
-     istop (irank+1)=(irank+1)*block
+     istart(irank+1) = irank    *block+1
+     istop (irank+1) = (irank+1)*block
    else
-     istart(irank+1)=res*block+(irank-res  )*block_tmp+1
-     istop (irank+1)=res*block+(irank-res+1)*block_tmp
+     istart(irank+1) = res*block + (irank-res  )*block_tmp+1
+     istop (irank+1) = res*block + (irank-res+1)*block_tmp
    end if
  end do
 

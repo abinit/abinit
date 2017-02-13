@@ -1738,6 +1738,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &     dtset%symrel,dtset%tnons,dtset%symafm)
 
      ! Initialize Bands to write in the GKK.nc file
+     ! MG FIXME: Here there's a bug because eigen0 is dimensioned with nkpt_rbz i.e. IBZ(q)
+     ! but the ebands_t object is constructed with dimensions taken from hdr0 i.e. the IBZ(q=0).
      bantot= dtset%mband*dtset%nkpt*dtset%nsppol
      call ebands_init(bantot,Bands,dtset%nelect,doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
 &     hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
