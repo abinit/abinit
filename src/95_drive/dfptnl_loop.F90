@@ -123,6 +123,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  use m_pawrad,      only : pawrad_type
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_nullify, pawrhoij_io
  use m_pawtab,      only : pawtab_type
+ use m_rf2,         only : rf2_getidir
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -622,7 +623,6 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                      nwffile = 3
                      file_index(2) = i2dir+natom*3
                      fnamewff(2) = dtfil%fnamewffddk
-                     idir_dkde = i2dir
 !                    As npert_phon<=1 and i2pert==natom+2, i1pert or i3pert is necessarly equal to natom+2
                      if (i3pert==natom+2) then
                        second_idir = i3dir
@@ -631,30 +631,15 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                      else
                        MSG_BUG(" i1pert or i3pert is supposed to be equal to natom+2, which is not the case here.")
                      end if
-                     if (second_idir/=i2dir) then ! see m_rf2.F90 => getidirs
-                       if (i2dir==2.and.second_idir==3) idir_dkde = 4
-                       if (i2dir==1.and.second_idir==3) idir_dkde = 5
-                       if (i2dir==1.and.second_idir==2) idir_dkde = 6
-                       if (i2dir==3.and.second_idir==2) idir_dkde = 7
-                       if (i2dir==3.and.second_idir==1) idir_dkde = 8
-                       if (i2dir==2.and.second_idir==1) idir_dkde = 9
-                     end if
+                     call rf2_getidir(i2dir,second_idir,idir_dkde)
                      file_index(3) = idir_dkde+9+(dtset%natom+6)*3
                      fnamewff(3) = dtfil%fnamewffdkde
 
                      if (npert_phon==1.and.psps%usepaw==1.and.second_idir/=i2dir) then
-!                       nwffile = 4
-!                       file_index(4) = second_idir+natom*3
-!                       fnamewff(4) = dtfil%fnamewffddk
                        nwffile = 5
                        file_index(4) = second_idir+natom*3
                        fnamewff(4) = dtfil%fnamewffddk
-                       if (i2dir==2.and.second_idir==3) idir_dkde = 7 ! 4
-                       if (i2dir==1.and.second_idir==3) idir_dkde = 8 ! 5
-                       if (i2dir==1.and.second_idir==2) idir_dkde = 9 ! 6
-                       if (i2dir==3.and.second_idir==2) idir_dkde = 4 ! 7
-                       if (i2dir==3.and.second_idir==1) idir_dkde = 5 ! 8
-                       if (i2dir==2.and.second_idir==1) idir_dkde = 6 ! 9
+                       call rf2_getidir(second_idir,i2dir,idir_dkde) ! i2dir and second_idir are reversed
                        file_index(5) = idir_dkde+9+(dtset%natom+6)*3
                        fnamewff(5) = dtfil%fnamewffdkde
                      end if

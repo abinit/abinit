@@ -882,6 +882,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
                d2gxdt(2,mu0,ilmn,ia,ispinor) =-scale2*buffer_i1
              end if
            else
+             cplex_d2gxdt(mu0) = 2 ! Warning d2gxdt is here pure imaginary
              if (parity) then
                buffer_r1 = zero
                do ipw=1,npw
@@ -2179,6 +2180,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
              end if
 !$OMP END SINGLE
            else
+             cplex_d2gxdt(mu0) = 2 ! Warning d2gxdt is here pure imaginary
              if (parity) then
 !$OMP SINGLE
                buffer_r1 = zero
