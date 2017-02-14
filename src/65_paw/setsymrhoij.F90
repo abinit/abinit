@@ -64,17 +64,17 @@
 
 subroutine setsymrhoij(gprimd,lmax,nsym,pawprtvol,rprimd,sym,zarot)
 
- use m_profiling_abi
-
  use defs_basis
  use m_errors
+ use m_profiling_abi
+
+ use m_special_funcs, only : phim
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'setsymrhoij'
  use interfaces_14_hidewrite
- use interfaces_32_util
  use interfaces_41_geometry
 !End of the abilint section
 

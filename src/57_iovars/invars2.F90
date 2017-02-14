@@ -73,6 +73,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  use m_profiling_abi
  use m_errors
  use m_nctk
+ use m_sort
  use libxc_functionals
 #ifdef HAVE_NETCDF
  use netcdf
@@ -80,6 +81,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  use m_fstrings,  only : sjoin, itoa, tolower, rmquotes
  use m_ingeo_img, only : ingeo_img
+ use m_dtset,     only : dtset_chkneu
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -87,7 +89,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 #define ABI_FUNC 'invars2'
  use interfaces_14_hidewrite
  use interfaces_18_timing
- use interfaces_28_numeric_noabirule
  use interfaces_32_util
  use interfaces_42_parser
  use interfaces_56_recipspace
@@ -469,6 +470,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf2_dkde',tread,'INT')
  if(tread==1) dtset%rf2_dkde=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rf2_pert1_dir',tread,'INT')
+ if(tread==1) dtset%rf2_pert1_dir(1:3)=intarr(1:3)
+
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rf2_pert2_dir',tread,'INT')
+ if(tread==1) dtset%rf2_pert2_dir(1:3)=intarr(1:3)
+
 !Set value of response to 1 and also set rfdir to 1 1 1 if we are doing
 !response calculation but rfdir was left at default 0 0 0 value.
 !For rf2_dkdk and rf2_dkde, we do the same for rf2_pert1_dir and rf2_pert2_dir
@@ -557,7 +564,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 &     'Action: change to the d3e_pertx_*** input parameters!'
      MSG_WARNING(message)
    end if
-   
+
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepead',tread,'INT')
    if(tread==1) dtset%usepead=intarr(1)
 
@@ -752,6 +759,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'inclvkb',tread,'INT')
  if(tread==1) dtset%inclvkb=intarr(1)
+ if (dtset%inclvkb == 1) then
+   MSG_ERROR("inclvkb == 1 is not allowed anymore. Choose between 0 and 1.")
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nomegasf',tread,'INT')
  if(tread==1) dtset%nomegasf=intarr(1)
@@ -1071,6 +1081,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'eph_ngqpt_fine',tread,'INT')
  if(tread==1) dtset%eph_ngqpt_fine=intarr(1:3)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_task',tread,'INT')
+ if(tread==1) dtset%eph_task=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_transport',tread,'INT')
  if(tread==1) dtset%eph_transport=intarr(1)
 
@@ -1085,6 +1098,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ddb_ngqpt',tread,'INT')
  if(tread==1) dtset%ddb_ngqpt=intarr(1:3)
+
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'ddb_shiftq',tread,'DPR')
+ if(tread==1) dtset%ddb_shiftq=dprarr(1:3)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_ndivsm',tread,'INT')
  if(tread==1) dtset%ph_ndivsm=intarr(1)
@@ -1664,6 +1680,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    if(tread==1) dtset%dmft_solv=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_t2g',tread,'INT')
    if(tread==1) dtset%dmft_t2g=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_tolfreq',tread,'DPR')
+   if(tread==1) dtset%dmft_tolfreq=dprarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_tollc',tread,'DPR')
    if(tread==1) dtset%dmft_tollc=dprarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftbandi',tread,'INT')
@@ -1728,6 +1746,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
        if(tread==1) dtset%dmftctqmc_mov    =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_order',tread,'INT')
        if(tread==1) dtset%dmftctqmc_order  =intarr(1)
+     end if
+     if(dtset%dmft_solv>=6.and.dtset%dmft_solv<=7) then
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_triqs_nleg',tread,'INT')
+       if(tread==1) dtset%dmftctqmc_triqs_nleg  =intarr(1)
      end if
    end if
  end if
@@ -1991,6 +2013,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtnest',tread,'INT')
  if(tread==1) dtset%prtnest=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtphdos',tread,'INT')
+ if(tread==1) dtset%prtphdos=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtposcar',tread,'INT')
  if(tread==1) dtset%prtposcar=intarr(1)
@@ -2599,7 +2624,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    call intagm(dprarr,intarr,jdtset,marr,2*dtset%nkptgw*dtset%nsppol,string(1:lenstr),'bdgw',tread,'INT')
    if(tread==1) then
      dtset%bdgw(1:2,1:dtset%nkptgw,1:dtset%nsppol) =  &
-       reshape(intarr(1:2*dtset%nkptgw*dtset%nsppol),[2,dtset%nkptgw,dtset%nsppol])
+&    reshape(intarr(1:2*dtset%nkptgw*dtset%nsppol),[2,dtset%nkptgw,dtset%nsppol])
    end if
 
    ! Test bdgw values.
@@ -2664,7 +2689,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 !If iscf>0, check the charge of the system, and compute nelect.
  occopt_tmp=occopt
  if(getocc/=0)occopt_tmp=1
- call chkneu(charge,dtset,occopt_tmp)
+ call dtset_chkneu(charge,dtset,occopt_tmp)
 
 !Initialize Berry phase vectors
 !Should check that nberry is smaller than 20

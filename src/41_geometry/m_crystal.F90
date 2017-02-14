@@ -67,7 +67,7 @@ MODULE m_crystal
   integer :: natom     
   ! Number of atoms
 
-  integer :: nsym   
+  integer :: nsym
   ! Number of symmetry operations
 
   integer :: ntypat   
@@ -151,7 +151,7 @@ MODULE m_crystal
   ! spinor rotation matrices.
 
   ! Useful quantities that might be added in the future
-  !real(dp),allocatable :: amu(:)                
+  real(dp),allocatable :: amu(:)                
   !  amu(ntypat)
   !  mass of the atoms (atomic mass unit)
 
@@ -238,7 +238,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine crystal_init(Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
+subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
 & zion,znucl,timrev,use_antiferro,remove_inv,title,&
 & symrel,tnons,symafm) ! Optional
 
@@ -261,9 +261,9 @@ subroutine crystal_init(Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xr
 !arrays
  integer,intent(in) :: typat(natom)
  integer,optional,intent(in) :: symrel(3,3,nsym),symafm(nsym)
- real(dp),intent(in) :: xred(3,natom),rprimd(3,3),zion(ntypat),znucl(npsp)
+ real(dp),intent(in) :: amu(ntypat),xred(3,natom),rprimd(3,3),zion(ntypat),znucl(npsp)
  real(dp),optional,intent(in) :: tnons(3,nsym)
- character(len=*),intent(in) :: title(ntypat) 
+ character(len=*),intent(in) :: title(ntypat)
 
 !Local variables-------------------------------
 !scalars
@@ -302,7 +302,9 @@ subroutine crystal_init(Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xr
  ABI_MALLOC(Cryst%xcart,(3,natom))
  ABI_MALLOC(Cryst%zion,(ntypat))
  ABI_MALLOC(Cryst%znucl,(npsp))
+ ABI_MALLOC(Cryst%amu, (ntypat))
 
+ Cryst%amu   = amu
  Cryst%typat = typat 
  Cryst%xred  = xred 
  Cryst%zion  = zion
@@ -405,7 +407,6 @@ subroutine crystal_init(Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xr
  do isym=1,Cryst%nsym
    call getspinrot(Cryst%rprimd,Cryst%spinrot(:,isym),Cryst%symrel(:,:,isym))
  end do
-
 end subroutine crystal_init
 !!***
 
@@ -420,8 +421,8 @@ end subroutine crystal_init
 !!
 !! PARENTS
 !!      anaddb,bethe_salpeter,dfpt_looppert,eig2tot,eph,gstate,gwls_hamiltonian
-!!      m_dvdb,m_ioarr,m_iowf,m_wfd,m_wfk,mlwfovlp_qp,mover,mrgscr,outddbnc
-!!      outscfcv,screening,sigma,vtorho,wfk_analyze
+!!      m_ddk,m_dvdb,m_ioarr,m_iowf,m_wfd,m_wfk,mlwfovlp_qp,mover,mrgscr
+!!      outddbnc,outscfcv,screening,sigma,vtorho,wfk_analyze
 !!
 !! CHILDREN
 !!      atomdata_from_znucl,wrtout
@@ -489,6 +490,9 @@ subroutine crystal_free(Cryst)
  end if
  if (allocated(Cryst%znucl))  then
    ABI_FREE(Cryst%znucl)
+ end if
+ if (allocated(Cryst%amu))  then
+   ABI_FREE(Cryst%amu)
  end if
  if (allocated(Cryst%spinrot)) then
     ABI_FREE(Cryst%spinrot)

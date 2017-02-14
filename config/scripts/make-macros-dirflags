@@ -6,11 +6,18 @@
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser,NoOptionError
+try:
+    from ConfigParser import ConfigParser,NoOptionError
+except ImportError:
+    from configparser import ConfigParser,NoOptionError
 from time import gmtime,strftime
 
-import commands
+try:
+    from commands import getoutput
+except:
+    from subprocess import getoutput
 import os
 import re
 import sys
@@ -111,14 +118,14 @@ my_output = "config/m4/auto-dirflags.m4"
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
      not os.path.exists("src/98_main/abinit.F90") ):
-  print "%s: You must be in the top of an ABINIT source tree." % my_name
-  print "%s: Aborting now." % my_name
+  print("%s: You must be in the top of an ABINIT source tree." % my_name)
+  print("%s: Aborting now." % my_name)
   sys.exit(1)
 
 # Read config file(s)
 if ( not os.path.exists(my_config) ):
-  print "%s: Could not find config file (%s)." % (my_name,cnf_file)
-  print "%s: Aborting now." % my_name
+  print("%s: Could not find config file (%s)." % (my_name,cnf_file))
+  print("%s: Aborting now." % my_name)
   sys.exit(2)
 
 # What time is it?
@@ -153,7 +160,7 @@ for lib in ext_libs + abinit_corelibs + ["98_main"]:
   mac += macro_optflags(lib)
 
 # Write configuration dumper (for debugging)
-dumper = file("config.dump.in","a")
+dumper = open("config.dump.in","a")
 dumper.write("# Fallbacks variables (script: %s)\n" % (my_name))
 for fbk in ext_libs:
   dumper.write("FCFLAGS_%s_EXT=\"@FCFLAGS@ @fcflags_opt_%s@\"\n" % \
@@ -163,10 +170,10 @@ dumper.close()
 
 # The end
 mac = re.sub("@OPTFLAGS@",mac,macro_header(my_name,now))
-m4 = file(my_output,"w")
+m4 = open(my_output, "wt")
 m4.write(mac)
 m4.close()
 
-tmp = commands.getoutput("./config/scripts/add-header-typed Autoconf %s" % (my_output))
+tmp = getoutput("./config/scripts/add-header-typed Autoconf %s" % (my_output))
 if ( tmp != "" ):
-  print tmp
+  print(tmp)

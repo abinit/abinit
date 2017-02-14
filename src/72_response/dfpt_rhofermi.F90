@@ -57,7 +57,7 @@
 !!  ngfftf(1:18)=integer array with FFT box dimensions and other for the "fine" grid
 !!  nhatfermi(nfft,nspden)=array for fermi-level compensation charge density (PAW only)
 !!  nkpt_rbz=number of k points in the IBZ for this perturbation
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  npwarr(nkpt_rbz)=number of planewaves in basis at this GS k point
 !!  npwar1(nkpt_rbz)=number of planewaves in basis at this RF k+q point
@@ -103,9 +103,6 @@
 !!   (nonlocal and kinetic in the case of strain)
 !!  nhatfermi(cplex*nfftf,nspden)=fermi-level compensation charge density (PAW only)
 !!  rhorfermi(cplex*nfftf,nspden)=fermi-level electronic density
-!!
-!! SIDE EFFECTS
-!!  mpi_enreg=information about MPI parallelization
 !!
 !! NOTES
 !!  This routine will NOT work with nspden==4:
@@ -187,7 +184,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  integer,intent(in) :: prtvol,usecprj,useylmgr1
  real(dp),intent(in) :: ucvol
  real(dp),intent(out) :: fe1fixed
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(pawang_type),intent(in) :: pawang,pawang1
@@ -710,13 +707,13 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 !Compute and add the compensation density to rhowfr to get the total density
  if (psps%usepaw == 1) then
    if (size(nhatfermi)>0) then
-     call pawmkrho(arg,cplex,gprimd,0,indsy1,0,mpi_enreg,&
+     call pawmkrho(1,arg,cplex,gprimd,0,indsy1,0,mpi_enreg,&
 &     my_natom,natom,nspden,nsym1,dtset%ntypat,dtset%paral_kgb,pawang,pawfgr,&
 &     pawfgrtab,-10001,pawrhoijfermi,pawrhoijfermi_unsym,pawtab,dtset%qptn,&
 &     rhogfermi,rhowfr,rhorfermi,rprimd,symaf1,symrc1,dtset%typat,ucvol,&
 &     dtset%usewvl,xred,pawang_sym=pawang1,pawnhat=nhatfermi)
    else
-     call pawmkrho(arg,cplex,gprimd,0,indsy1,0,mpi_enreg,&
+     call pawmkrho(1,arg,cplex,gprimd,0,indsy1,0,mpi_enreg,&
 &     my_natom,natom,nspden,nsym1,dtset%ntypat,dtset%paral_kgb,pawang,pawfgr,&
 &     pawfgrtab,-10001,pawrhoijfermi,pawrhoijfermi_unsym,pawtab,dtset%qptn,&
 &     rhogfermi,rhowfr,rhorfermi,rprimd,symaf1,symrc1,dtset%typat,ucvol,&

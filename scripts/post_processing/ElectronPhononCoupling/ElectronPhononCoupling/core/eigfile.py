@@ -24,10 +24,14 @@ class EigFile(EpcFile):
         """Open the Eig.nc file and read it."""
         fname = fname if fname else self.fname
 
+        super(EigFile, self).read_nc(fname)
+
         with nc.Dataset(fname, 'r') as root:
 
             self.EIG = root.variables['Eigenvalues'][:,:,:] 
             self.Kptns = root.variables['Kptns'][:,:]
+
+            self.nspin, self.nkpt, self.nband = self.EIG.shape
 
     @mpi_watch
     def broadcast(self):
@@ -39,6 +43,7 @@ class EigFile(EpcFile):
             dim = np.array([nspin, nkpt, nband], dtype=np.int)
         else:
             dim = np.empty(3, dtype=np.int)
+            self.nspin, self.nkpt, self.nband = dim
 
         comm.Bcast([dim, MPI.INT])
 

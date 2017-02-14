@@ -24,7 +24,7 @@
 !!  ipert=index of perturbation if pawrhoij is a pertubed rhoij
 !!        no meaning for ground-state calculations (should be 0)
 !!  idir=direction of atomic displacement (in case of atomic displ. perturb.)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  natom=number of atoms in cell
 !!  nspden=number of spin-density components
@@ -86,7 +86,7 @@
 
 #include "abi_common.h"
 
-subroutine pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
+subroutine pawmkrho(compute_rhor_rhog,compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
 &          my_natom,natom,nspden,nsym,ntypat,paral_kgb,pawang,pawfgr,pawfgrtab,pawprtvol,&
 &          pawrhoij,pawrhoij_unsym,&
 &          pawtab,qphon,rhopsg,rhopsr,rhor,rprimd,symafm,symrec,typat,ucvol,usewvl,xred,&
@@ -117,11 +117,11 @@ subroutine pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,idir,ipert,my_natom,natom,nspden,nsym,ntypat,paral_kgb,pawprtvol
+ integer,intent(in) :: compute_rhor_rhog,cplex,idir,ipert,my_natom,natom,nspden,nsym,ntypat,paral_kgb,pawprtvol
  integer,intent(in) :: usewvl
  real(dp),intent(in) :: ucvol
  real(dp),intent(out) :: compch_fft
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(pawang_type),intent(in) :: pawang
  type(pawang_type),intent(in),optional :: pawang_sym
  type(pawfgr_type),intent(in) :: pawfgr
@@ -130,9 +130,9 @@ subroutine pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
  integer,intent(in) :: symafm(nsym),symrec(3,3,nsym),typat(natom)
  real(dp),intent(in) :: gprimd(3,3),qphon(3),rprimd(3,3),xred(3,natom)
  real(dp),intent(inout),target,optional :: pawnhat(cplex*pawfgr%nfft,nspden) !vz_i
- real(dp),intent(inout) :: rhor(cplex*pawfgr%nfft,nspden)
- real(dp),intent(out),optional :: rhog(2,pawfgr%nfft)
- real(dp),intent(inout) :: rhopsg(2,pawfgr%nfftc),rhopsr(cplex*pawfgr%nfftc,nspden)
+ real(dp),intent(inout) :: rhor(cplex*pawfgr%nfft,nspden*compute_rhor_rhog)
+ real(dp),intent(out),optional :: rhog(2,pawfgr%nfft*compute_rhor_rhog)
+ real(dp),intent(inout) :: rhopsg(2,pawfgr%nfftc*compute_rhor_rhog),rhopsr(cplex*pawfgr%nfftc,nspden*compute_rhor_rhog)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom)
  type(pawrhoij_type),intent(inout),target :: pawrhoij(:)
  type(pawrhoij_type),intent(inout) :: pawrhoij_unsym(:)
@@ -166,7 +166,7 @@ subroutine pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
    msg='  pawrhoij0 must be present when ipert>0 !'
    MSG_BUG(msg)
  end if
-
+ 
 !Symetrize PAW occupation matrix and store it in packed storage
  call timab(557,1,tsec)
  option=1;choice=1
@@ -215,13 +215,20 @@ subroutine pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
 & comm_fft=mpi_enreg%comm_fft,paral_kgb=paral_kgb,me_g0=mpi_enreg%me_g0,&
 & distribfft=mpi_enreg%distribfft,mpi_comm_wvl=mpi_enreg%comm_wvl) 
 
-!Transfer pseudo density from coarse grid to fine grid
- if(usewvl==0) then
-   call transgrid(cplex,mpi_enreg,nspden,+1,1,0,paral_kgb,pawfgr,rhopsg,rhodum,rhopsr,rhor)
- end if
+ if (compute_rhor_rhog/=0) then
+!  Transfer pseudo density from coarse grid to fine grid
+   if(usewvl==0) then
+     call transgrid(cplex,mpi_enreg,nspden,+1,1,0,paral_kgb,pawfgr,rhopsg,rhodum,rhopsr,rhor)
+   end if
 
-!Add pseudo density and compensation charge density (on fine grid)
- rhor(:,:)=rhor(:,:)+pawnhat_ptr(:,:)
+!  Add pseudo density and compensation charge density (on fine grid)
+   rhor(:,:)=rhor(:,:)+pawnhat_ptr(:,:)
+
+!  Compute compensated pseudo density in reciprocal space
+   if (present(rhog)) then
+     call fourdp(cplex,rhog,rhor(:,1),-1,mpi_enreg,pawfgr%nfft,pawfgr%ngfft,paral_kgb,0)
+   end if
+ end if
 
 !Free temporary memory spaces
  if (.not.present(pawnhat)) then
@@ -233,11 +240,6 @@ subroutine pawmkrho(compch_fft,cplex,gprimd,idir,indsym,ipert,mpi_enreg,&
  end if
  nullify(pawnhat_ptr)
  nullify(pawrhoij_ptr)
-
-!Compute compensated pseudo density in reciprocal space
- if (present(rhog)) then
-   call fourdp(cplex,rhog,rhor(:,1),-1,mpi_enreg,pawfgr%nfft,pawfgr%ngfft,paral_kgb,0)
- end if
 
  call timab(556,2,tsec)
 

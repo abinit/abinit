@@ -484,7 +484,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  case(2)
      ! No need to include the PspCore energy since it is already included in the
      ! local pseudopotential  (vpsp)
-   energies%e_corepsp   = zero 
+   energies%e_corepsp   = zero
    energies%e_corepspdc = zero
  end select
 
@@ -508,6 +508,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    if (dtset%prtnabla>0) usecprj=1
    if (dtset%extrapwf>0) usecprj=1
    if (dtset%usewvl==1)  usecprj=1
+   if (dtset%pawfatbnd>0)usecprj=1
+   if (dtset%prtdos==3)  usecprj=1
    if (nstep==0) usecprj=0
    if (usefock==1)  usecprj=1
  end if
@@ -627,7 +629,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    if(any(abs(dtset%nucdipmom)>tol8)) then
      has_dijnd=1; req_cplex_dij=2
    end if
-   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,0,dtset%nspden,cplex,dtset%pawxcdev,&
+   call paw_an_init(paw_an,dtset%natom,dtset%ntypat,0,0,dtset%nspden,cplex,dtset%pawxcdev,&
 &   dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_vhartree=has_vhartree,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,&
@@ -664,7 +666,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        ABI_DATATYPE_DEALLOCATE(cprj)
      end if
      ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj))
-     ncpgr=0 
+     ncpgr=0
      if (usefock==1) then
        ctocprj_choice = 1 ; useylmgr = 0
        if (dtset%optforces /= 0 .and. dtset%optstress == 0) then
@@ -1876,7 +1878,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
  if (recompute_cprj) then
    usecprj=1
-   mband_cprj=dtset%mband
+   mband_cprj=dtset%mband/mpi_enreg%nproc_band
    mcprj=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
    call pawcprj_free(cprj)
    ABI_DATATYPE_DEALLOCATE(cprj) ! Was previously allocated (event if size = 0,0)

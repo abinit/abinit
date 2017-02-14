@@ -643,7 +643,7 @@ pure function rmquotes(istr) result(ostr)
 ! *********************************************************************
 
  ostr = ""; cnt = 0
- do ii=1,len_trim(istr) 
+ do ii=1,len_trim(istr)
    if (any(istr(ii:ii) == ["'", '"'])) cycle
    cnt = cnt + 1
    ostr(cnt:cnt) = istr(ii:ii)
@@ -1226,7 +1226,7 @@ end function ftoa
 !! ktoa
 !!
 !! FUNCTION
-!!  Convert an vector into a string using format fmt  (es.16.6 if fmt is not given).
+!!  Convert an k-point into a string using format fmt  (es.16.6 if fmt is not given).
 !!
 !! PARENTS
 !!
@@ -1357,7 +1357,7 @@ pure function ltoa_dp(list, fmt) result(str)
  character(len=MAX_SLEN) :: temp,myfmt,fa
 
 ! *********************************************************************
- 
+
  myfmt = "es13.4"; if (present(fmt)) myfmt = fmt
  sz = size(list)
 
@@ -1940,7 +1940,7 @@ integer pure function char_count(string, char)
  do i=1,len(string)
    if (string(i:i) == char) char_count = char_count + 1
  end do
-    
+
 end function char_count
 
 !----------------------------------------------------------------------

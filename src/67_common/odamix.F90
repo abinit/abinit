@@ -42,7 +42,7 @@
 !!   | xclevel= XC functional level
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  gsqcut=cutoff on (k+G)^2 (bohr^-2)
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  my_natom=number of atoms treated by current processor
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/input_variables/vargs.htm#ngfft
@@ -175,7 +175,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(inout) :: elast
  real(dp),intent(out) :: deltae,etotal,vxcavg
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(energies_type),intent(inout) :: energies
  type(pawang_type),intent(in) :: pawang

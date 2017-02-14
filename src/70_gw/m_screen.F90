@@ -35,6 +35,7 @@ MODULE m_screen
  use m_kxc
  use m_screening
  use m_nctk
+ use m_sort
 
  use m_gwdefs,         only : GW_TOLQ0, czero_gw
  use m_fstrings,       only : firstchar, endswith, strcat, itoa, sjoin
@@ -925,7 +926,6 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
 #undef ABI_FUNC
 #define ABI_FUNC 'screen_init'
  use interfaces_14_hidewrite
- use interfaces_28_numeric_noabirule
 !End of the abilint section
 
  implicit none

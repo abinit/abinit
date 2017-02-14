@@ -6,11 +6,14 @@
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
 from time import gmtime,strftime
 
-import commands
 import os
 import re
 import sys
@@ -49,7 +52,7 @@ def makefile_subdirs(filename,prefix):
   ret       = ""
   re_begin  = re.compile("^## BEGIN BUILD$")
   re_end    = re.compile("^## END BUILD$")
-  tmp       = file(filename,"r").readlines()
+  tmp       = open(filename, "rt").readlines()
   save_line = False
 
   for line in tmp:
@@ -61,7 +64,7 @@ def makefile_subdirs(filename,prefix):
       save_line = True
 
   ret = re.sub("#","",ret).strip().split()
-  ret = map(lambda x: "$(%s%s)" % (prefix,x), ret)
+  ret = ["$(%s%s)" % (prefix,x) for x in ret]
 
   return ret
 
@@ -83,18 +86,18 @@ sep = "# -----------------------------------------------------------------------
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
      not os.path.exists("src/98_main/abinit.F90") ):
-  print "%s: You must be in the top of an ABINIT source tree." % my_name
-  print "%s: Aborting now." % my_name
+  print("%s: You must be in the top of an ABINIT source tree." % my_name)
+  print("%s: Aborting now." % my_name)
   sys.exit(1)
 
 # Read config file(s)
 for cnf_file in my_configs.values():
   if ( os.path.exists(cnf_file) ):
     if ( re.search("\.cf$",cnf_file) ):
-      execfile(cnf_file)
+      exec(compile(open(cnf_file).read(), cnf_file, 'exec'))
   else:
-    print "%s: Could not find config file (%s)." % (my_name,cnf_file)
-    print "%s: Aborting now." % my_name
+    print("%s: Could not find config file (%s)." % (my_name,cnf_file))
+    print("%s: Aborting now." % my_name)
     sys.exit(2)
 
 # What time is it?
@@ -165,29 +168,29 @@ for root,dirs,files in os.walk("src/incs"):
   for dat in files:
     makefile += " \\\n\t%s" % (dat)
 makefile += "\n"
-mf = file("src/incs/Makefile.am","w")
+mf = open("src/incs/Makefile.am", "wt")
 mf.write(makefile_header(my_name,now))
 mf.write(makefile)
 add = "config/makefiles/incs.am"
 if ( os.path.exists(add) ):
-  mf.write(sep+file(add,"r").read())
+  mf.write(sep + open(add,"rt").read())
 mf.close()
 
 # Write Makefile.am for modules
-mf = file("src/mods/Makefile.am","w")
+mf = open("src/mods/Makefile.am", "wt")
 mf.write(makefile_header(my_name,now))
 mf.write("all-local:\n\t@echo \"There is no buildable file here\"\n\n")
 add = "config/makefiles/mods.am"
 if ( os.path.exists(add) ):
-  mf.write(sep+file(add,"r").read())
+  mf.write(sep + open(add, "rt").read())
 mf.close()
 
 # Write intermediate Makefile.am for core source
-mf = file("src/Makefile.am","w")
+mf = open("src/Makefile.am", "wt")
 mf.write(makefile_header(my_name,now))
 mf.write(opt_list+src_list)
 mf.write(sep+tgt_abirules)
 add = "config/makefiles/src.am"
 if ( os.path.exists(add) ):
-  mf.write(sep+file(add,"r").read())
+  mf.write(sep + open(add, "rt").read())
 mf.close()

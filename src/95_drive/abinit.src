@@ -34,6 +34,7 @@ sources = [
  "dfpt_looppert.F90",
 #"m_scfcv.F90",
  "mover.F90",
+ "mover_effpot.F90",
  "m_argparse.F90",
  "nonlinear.F90",
 #"outscfcv.F90",

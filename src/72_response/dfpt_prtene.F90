@@ -115,10 +115,10 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
  if (ipert>=1.and.ipert<=natom) nn=13
  if (ipert==natom+3.or.ipert==natom+4) nn=17
  if (ipert==natom+2.and.berry_activated) nn=nn+1
- if (usepaw==1) nn=nn+1
- if (usevdw==1) nn=nn+1
  if (ipert==natom+10.or.ipert==natom+11) nn=1 ! means nothing,
 ! because we do not compute derivatives of the energy in this case
+ if (usepaw==1) nn=nn+1
+ if (usevdw==1) nn=nn+1
  write(message, '(4a)' ) ch10,&
 & ' ',trim(numbstr(nn)),' components of 2nd-order total energy (hartree) are '
  call wrtout(iout,message,'COLL')

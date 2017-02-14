@@ -356,7 +356,6 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  call psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,&
 & vlspl(:,1),rad,vloc,yp1,ypn,zion)
 
-
 !Fit spline to q^2 V(q) (Numerical Recipes subroutine)
  ABI_ALLOCATE(work_space,(mqgrid))
  ABI_ALLOCATE(work_spl,(mqgrid))

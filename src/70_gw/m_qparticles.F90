@@ -37,7 +37,7 @@ MODULE m_qparticles
  use m_nctk
 
  use m_io_tools,       only : open_file, file_exists, isncfile
- use m_fstrings,       only : int2char10
+ use m_fstrings,       only : int2char10, itoa, sjoin
  use m_numeric_tools,  only : linfit, c2r, set2unit, interpol3d
  use m_gwdefs,         only : sigparams_t
  use m_crystal,        only : crystal_t
@@ -156,7 +156,7 @@ subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,
 
  DBG_ENTER("COLL")
 
- if (nscf>=0) then
+ if (nscf >= 0) then
    write(msg,'(3a)')ch10,' writing QP data on file : ',TRIM(fname)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
@@ -173,21 +173,19 @@ subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,
 
  ABI_MALLOC(mtmp,(Sigp%nbnds,Sigp%nbnds))
 
-! call updt_m_lda_to_qp(Sigp,Kmesh,nscf,Sr,m_lda_to_qp) ! Calculate the new  m_lda_to_qp
-
- if (nscf>=0) then ! Write the new m_lda_to_qp on file.
+ if (nscf>=0) then 
+   ! Write the new m_lda_to_qp on file.
    do is=1,Sigp%nsppol
      do ik=1,Kmesh%nibz
        write(unqps,*)Kmesh%ibz(:,ik)
-       !mtmp(:,:)=MATMUL(m_lda_to_qp(:,:,ik,is),Sr%eigvec_qp(:,:,ik,is))
        do ib=1,Sigp%nbnds
          write(unqps,*)Sr%en_qp_diago(ib,ik,is)
-         !write(unqps,*)mtmp(:,ib)
          write(unqps,*)m_lda_to_qp(:,ib,ik,is)
        end do
      end do
    end do
- else if (nscf==-1) then ! Write fake QPS file with KS band structure (Mainly used for G0W)
+ else if (nscf==-1) then 
+   ! Write fake QPS file with KS band structure (Mainly used for G0W)
    call set2unit(mtmp)
    do is=1,Sigp%nsppol
      do ik=1,Kmesh%nibz
@@ -199,17 +197,17 @@ subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,
      end do
    end do
  else
-   write(msg,'(a,i0)')" Wrong nscf= ",nscf
-   MSG_ERROR(msg)
+   MSG_ERROR(sjoin("Wrong nscf ",itoa(nscf)))
  end if
 
  ABI_FREE(mtmp)
- !
+
  ! === Write FFT dimensions and QP density ===
  write(unqps,*)ngfftf(1:3)
  write(unqps,*)rho_qp(:,:)
 
- if (Psps%usepaw==1) then ! Write QP rhoij to be used for on-site density mixing.
+ if (Psps%usepaw==1) then 
+   ! Write QP rhoij to be used for on-site density mixing.
    ABI_MALLOC(nlmn_type,(Cryst%ntypat))
    do itypat=1,Cryst%ntypat
      nlmn_type(itypat)=Pawtab(itypat)%lmn_size
@@ -310,7 +308,8 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
 
 !Local variables-------------------------------
 !scalars
- integer :: ib,ii,ik,isppol,nbandR,nkibzR,nsppolR,unqps,my_rank,ispden,master
+ integer,parameter :: master=0
+ integer :: ib,ii,ik,isppol,nbandR,nkibzR,nsppolR,unqps,my_rank,ispden
  integer :: ifft,n1,n2,n3,ir1,ir2,ir3,ios
  integer :: cplex_fft,optin,optout,nfft_found
  integer :: iatom,natomR,nspdenR,ntypatR,itypat
@@ -335,9 +334,8 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
 
  ! This does not work in parallel !!?
  !% my_rank = xmpi_comm_rank(MPI_enreg%spaceComm)
- my_rank=MPI_enreg%me_kpt
- master=0
- !
+ my_rank = MPI_enreg%me_kpt
+
  ! * Check whether file exists or not.
  write(msg,'(5a)')ch10,&
 &  ' rdqps: reading QP wavefunctions of the previous step ',ch10,&
@@ -464,7 +462,9 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
 
          call fourier_interpol(cplex_fft,nspden,optin,optout,nfft_found,ngfft_found,nfftot,ngfftf,&
 &          paral_kgb,MPI_enreg,rhor_tmp,rhor_out,rhogdum,rhogdum)
-       else ! * Linear interpolation.
+
+       else 
+         ! Linear interpolation.
          do ispden=1,nspden
            do ir3=0,ngfftf(3)-1
              rr(3)=DBLE(ir3)/n3
@@ -494,7 +494,8 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
        !!rhor_out(:,:)=ratio*rhor_out(:,:)
      end if
 
-     if (usepaw==1) then ! Write QP_rhoij for on-site density mixing.
+     if (usepaw==1) then 
+       ! Write QP_rhoij for on-site density mixing.
        read(unqps,*,iostat=ios)natomR,ntypatR
        if (ios/=0) then
          msg="Old version of QPS file found. DO NOT USE rhoqpmix for this run."
@@ -538,7 +539,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
    close(unqps)
 
  else
-   MSG_ERROR("ETSF-IO support is missing")
+   MSG_ERROR("netdf format not implemented")
  end if
 
  DBG_EXIT("COLL")

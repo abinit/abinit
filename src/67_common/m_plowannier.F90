@@ -667,7 +667,7 @@ end subroutine destroy_orbital
 !!  mband=maximum number of bands
 !!  mbandcprj=
 !!  mkmem =number of k points treated by this node
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nkpt=number of k points.
 !!  my_nspinor=number of spinorial components of the wavefunctions (on current proc)
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
@@ -732,7 +732,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  type(plowannier_type),intent(inout) :: wan
  integer,intent(in) :: unpaw,usecprj
  real(dp),intent(in) :: fermie
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(crystal_t),intent(in) :: cryst_struc
@@ -1074,6 +1074,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  end do
  dimpsichi = 2*dimpsichi !for complex
  ABI_ALLOCATE(buffer1,(dimpsichi))
+ buffer1 = zero
  nnn = 0
  do ikpt = 1,wan%nkpt
    do ibandc = 1,wan%bandf_wan-wan%bandi_wan+1

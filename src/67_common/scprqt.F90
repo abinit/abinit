@@ -60,7 +60,7 @@
 !!  kpt(3,nkpt)=reduced coordinates of k points.
 !!  maxfor=maximum absolute value of fcart
 !!  moved_atm_inside: if==1, the atoms are allowed to move.
-!!  mpi_enreg=informations about MPI parallelization
+!!  mpi_enreg=information about MPI parallelization
 !!  nband(nkpt*nsppol)=number of bands at each k point, for each polarization
 !!  nkpt=number of k points
 !!  nstep=number of steps expected in iterations.
@@ -142,7 +142,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  real(dp),intent(in) :: vxcavg
  character(len=fnlen),intent(in) :: fname_eig,filnam1
  type(electronpositron_type),pointer,optional :: electronpositron
- type(MPI_type),intent(inout) :: mpi_enreg
+ type(MPI_type),intent(in) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
 !arrays
  integer,intent(in) :: nband(nkpt*dtset%nsppol)
@@ -197,6 +197,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
  case (1)
 !  Examine tolerance criteria
+! NB: The tests on tolwfr and the presence of tolerances in the SCF case are 
+! also done at the level of the parser in chkinp.
    tolwfr=tollist(2)
    toldff=tollist(3)
    toldfe=tollist(4)
@@ -204,13 +206,12 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    tolrff=tollist(7)
    vdw_df_threshold=tollist(8)
    ttolwfr=0 ; ttoldff=0 ; ttoldfe=0 ; ttolvrs=0; ttolrff=0;
-   if(abs(tolwfr)>tiny(0.0_dp))ttolwfr=1
-   if(abs(toldff)>tiny(0.0_dp))ttoldff=1
-   if(abs(tolrff)>tiny(0.0_dp))ttolrff=1
-   if(abs(toldfe)>tiny(0.0_dp))ttoldfe=1
-   if(abs(tolvrs)>tiny(0.0_dp))ttolvrs=1
+   if(abs(tolwfr)>tiny(zero))ttolwfr=1
+   if(abs(toldff)>tiny(zero))ttoldff=1
+   if(abs(tolrff)>tiny(zero))ttolrff=1
+   if(abs(toldfe)>tiny(zero))ttoldfe=1
+   if(abs(tolvrs)>tiny(zero))ttolvrs=1
 !  If non-scf calculations, tolwfr must be defined
-!  FIXME: MJV 26/3/2010: this should be just after initialization, not here.
    if(ttolwfr /= 1 .and. (iscf<0 .and. iscf/=-3) )then
      write(message,'(a,a,a,es14.6,a,a)')&
 &     'when iscf <0 and /= -3, tolwfr must be strictly',ch10,&
@@ -221,11 +222,9 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 !  toldff only allowed when prtfor==1
 !  FIXME: this test should be done on input, not during calculation
    if((ttoldff == 1 .or. ttolrff == 1) .and. prtfor==0 )then
-     write (message, '(a)') 'toldff only allowed when prtfor=1 !'
-     MSG_ERROR(message)
+     MSG_ERROR('toldff only allowed when prtfor=1!')
    end if
 !  If SCF calculations, one and only one of these can differ from zero
-!  FIXME: this test should be done on input, not during calculation
    if(ttolwfr+ttoldff+ttoldfe+ttolvrs+ttolrff /= 1 .and. (iscf>0 .or. iscf==-3))then
      write(message,'(6a,es14.6,a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,a,a)' )&
 &     'For the SCF case, one and only one of the input tolerance criteria ',ch10,&
@@ -811,6 +810,15 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
    logical function converged()
 
+!   converged = .not.(                             &
+!&   (ttolwfr==1 .and. residm > tolwfr) .or.       &
+!&   (ttoldff==1 .and. diffor > toldff) .or.       &
+!&   (ttolrff==1 .and. diffor > tolrff*maxfor .and. maxfor > tol16) .or.&
+!&   (ttoldfe==1 .and. abs(deltae) > toldfe) .or.  &
+!&   (ttolvrs==1 .and. res2  > tolvrs) )
+
+   ! LB-02/01/2017 :
+   ! This code avoids evaluation of undefined variables (which could happen in respfn, apparently)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -818,12 +826,24 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 #define ABI_FUNC 'converged'
 !End of the abilint section
 
-   converged = .not.(                             &
-&   (ttolwfr==1 .and. residm > tolwfr) .or.       &
-&   (ttoldff==1 .and. diffor > toldff) .or.       &
-&   (ttolrff==1 .and. diffor > tolrff*maxfor .and. maxfor > tol16) .or.&
-&   (ttoldfe==1 .and. abs(deltae) > toldfe) .or.  &
-&   (ttolvrs==1 .and. res2  > tolvrs) ) 
+   logical :: loc_conv
+   loc_conv = .true.
+   if (ttolwfr==1) then
+     if (residm > tolwfr) loc_conv=.false.
+   end if
+   if (ttoldff==1) then
+     if (diffor > toldff) loc_conv=.false.
+   end if
+   if (ttolrff==1) then
+     if (diffor > tolrff*maxfor .and. maxfor > tol16) loc_conv=.false.
+   end if
+   if (ttoldfe==1) then
+     if (abs(deltae) > toldfe) loc_conv=.false.
+   end if
+   if (ttolvrs==1) then
+     if (res2  > tolvrs) loc_conv=.false.
+   end if
+   converged = loc_conv
 
  end function converged
 
