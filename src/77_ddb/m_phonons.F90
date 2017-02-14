@@ -555,8 +555,11 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  integer :: facbrv,iat,jat,idir,imesh,imode,io,iq_ibz,itype,nkpt_fullbz
  integer :: nmesh,nqbz,nqpt_max,nqshft,option,timrev,ierr,natom,nomega
  integer :: jdir, idispl, jdispl, isym
+ real(dp) :: nsmallq
  real(dp) :: dum,gaussfactor,gaussprefactor,gaussval,low_bound,max_occ,pnorm
  real(dp) :: upr_bound,xx,gaussmaxarg
+ real(dp) :: max_smallq = 0.0625_dp
+ real(dp) :: normq
  logical :: out_of_bounds
  character(len=500) :: msg
  character(len=80) :: errstr
@@ -564,6 +567,9 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 !arrays
  integer :: qptrlatt(3,3)
  integer,allocatable :: bz2ibz(:),ngqpt(:,:)
+ real(dp) :: speedofsound(3)
+ real(dp) :: speedofsound_(3)
+ real(dp) :: debyefreq
  real(dp) :: displ(2*3*Crystal%natom*3*Crystal%natom)
  real(dp) :: eigvec(2,3,Crystal%natom,3*Crystal%natom),phfrq(3*Crystal%natom)
  real(dp) :: qlatt(3,3),qphon(3),rlatt(3,3)
@@ -650,6 +656,9 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  nmesh=2
  ABI_MALLOC(ngqpt,(3,nmesh))
  do imesh=1,nmesh
+
+   write(msg,'(a,I6)') ' Mesh number ', imesh
+   call wrtout(std_out,msg,'COLL')
 
    if (imesh==1) then
      ! Coarse q-mesh used in RF calculation.
@@ -748,6 +757,8 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
      PHdos%msqd_dos_atom = zero
      !
      ! === Sum over irreducible q-points ===
+     nsmallq = zero
+     speedofsound = zero
      do iq_ibz=1,PHdos%nqibz
 
        ! Fourier interpolation.
@@ -756,6 +767,13 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
        dum=MINVAL(phfrq); PHdos%omega_min=MIN(PHdos%omega_min,dum)
        dum=MAXVAL(phfrq); PHdos%omega_max=MAX(PHdos%omega_max,dum)
        out_of_bounds = (PHdos%omega_min<low_bound .or. PHdos%omega_max>upr_bound)
+
+       normq = sum(qibz(:,iq_ibz)**2)
+       if (normq < max_smallq .and. normq > tol6) then
+          call phdos_print_vsound(ab_out,eigvec, Crystal%gmet, natom, phfrq, qibz(:,iq_ibz), Crystal%ucvol, 0, speedofsound_)
+         speedofsound = speedofsound + speedofsound_*wtqibz(iq_ibz)
+         nsmallq = nsmallq + wtqibz(iq_ibz)
+       end if
 
        if (imesh>1.and..not.out_of_bounds) then
          select case (prtdos)
@@ -814,6 +832,26 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
        end if !Second mesh and not out of boundaries
 
      end do !irred q-points
+
+     if (nsmallq > tol10) then
+       speedofsound = speedofsound/nsmallq
+
+       write (msg,'(a,E20.10,a,F16.4,2a)') '- Average speed of sound partial sums: ', third*sum(speedofsound), ' (at units) = ', &
+&          third*sum(speedofsound) * Bohr_Ang * 1.d-10 / Time_Sec, ' (m/s)',ch10
+       call wrtout (ab_out,msg,"COLL")
+       call wrtout (std_out,msg,"COLL")
+
+! Debye frequency = vs * (6 pi^2 natom / ucvol)**1/3
+       debyefreq = third*sum(speedofsound) * (six*pi**2/Crystal%ucvol)**(1./3.)
+       write (msg,'(a,E20.10,a,E20.10,a)') ' Debye frequency from partial sums: ', debyefreq, ' (Ha) = ', debyefreq*Ha_THz, ' (THz)'
+       call wrtout (ab_out,msg,"COLL")
+       call wrtout (std_out,msg,"COLL")
+
+! Debye temperature = hbar * Debye frequency / kb
+       write (msg,'(a,E20.10,2a)') ' Debye temperature from partial sums: ', debyefreq*Ha_K, ' (K)', ch10
+       call wrtout (ab_out,msg,"COLL")
+       call wrtout (std_out,msg,"COLL")
+     end if
 
      if (out_of_bounds) then
        upr_bound=PHdos%omega_max+ABS(PHdos%omega_max/ten)
@@ -1272,7 +1310,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
    call wrap2_pmhalf(qphon, real_qphon, res)
    if (sqrt(real_qphon(1)**2+real_qphon(2)**2+real_qphon(3)**2) < quarter .and. &
 &   sqrt(real_qphon(1)**2+real_qphon(2)**2+real_qphon(3)**2) > tol6) then
-     call phdos_print_vsound(ab_out,eigvec, Crystal%gmet, natom, phfrq, real_qphon, Crystal%ucvol)
+     call phdos_print_vsound(ab_out,eigvec, Crystal%gmet, natom, phfrq, real_qphon, Crystal%ucvol, 1)
    end if
 
  end do ! iphl1
@@ -1312,8 +1350,9 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
    ABI_FREE(alloc_path)
  end if
 
-contains
+end subroutine mkphbs
 !!***
+
 
 !!****f* m_phonons/phdos_print_vsound
 !!
@@ -1341,7 +1380,8 @@ contains
 !!
 !! SOURCE
 
-subroutine phdos_print_vsound(unit,eigvec,gmet,natom,phfrq,qphon,ucvol)
+subroutine phdos_print_vsound(unit,eigvec,gmet,natom,phfrq,qphon,ucvol, &
+&   tprint, speedofsound)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1357,18 +1397,23 @@ subroutine phdos_print_vsound(unit,eigvec,gmet,natom,phfrq,qphon,ucvol)
 !scalras
  integer, intent(in) :: natom,unit
  real(dp), intent(in) :: ucvol
+ integer, intent(in) :: tprint ! to print or not
 !arrays
  real(dp), intent(in) :: gmet(3,3),qphon(3)
  real(dp), intent(in) :: phfrq(3*natom),eigvec(2,3*natom,3*natom)
 
+ real(dp), intent(out), optional :: speedofsound(3)
+
 !Local variables -------------------------
- integer :: iatref,imode, iatom, isacoustic
+ integer :: iatref,imode, iatom, isacoustic, imode_acoustic
  character(len=500) :: msg
- real(dp) :: qnormcart, speedofsound, tdebye
+ real(dp) :: qnormcart
  real(dp) :: qtmp(3)
+ real(dp) :: tdebye
 
 ! *********************************************************************
 
+ imode_acoustic = 0
  do imode = 1, 3*natom
 
 !  Check if this mode is acoustic like: scalar product of all displacement vectors are collinear
@@ -1382,36 +1427,41 @@ subroutine phdos_print_vsound(unit,eigvec,gmet,natom,phfrq,qphon,ucvol)
      if (sum(eigvec(:,(iatom-1)*3+1:(iatom-1)*3+3, imode)*eigvec(:,(iatref-1)*3+1:(iatref-1)*3+3, imode)) < tol16 ) isacoustic = 0
    end do
    if (isacoustic == 0) cycle
+   imode_acoustic = imode_acoustic + 1
 
-   write (msg, '(a,I6,a,3F12.4)') ' Found acoustic mode ', imode, ' for |q| in red coord < 0.25 ; q = ', qphon
-   call wrtout(unit,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+   if (tprint > 0) then
+     write (msg, '(a,I6,a,3F12.4)') ' Found acoustic mode ', imode, ' for |q| in red coord < 0.25 ; q = ', qphon
+     call wrtout(unit,msg,'COLL')
+     call wrtout(std_out,msg,'COLL')
+   end if
 
    qtmp = matmul(gmet, qphon)
    qnormcart = two * pi * sqrt(sum(qphon*qtmp))
-   speedofsound = phfrq(imode) / qnormcart
+   speedofsound(imode_acoustic) = phfrq(imode) / qnormcart
 
 !  from phonon frequency, estimate speed of sound by linear interpolation from Gamma
-   write (msg, '(2a,a,E20.10,a,a,F20.5)') &
-&   ' Speed of sound for this q and mode:',ch10,&
-&   '   in atomic units: ', speedofsound, ch10,&
-&   '   in SI units m/s: ', speedofsound * Bohr_Ang * 1.d-10 / Time_Sec
-   call wrtout(unit,msg,'COLL')
+   if (tprint > 0) then
+     write (msg, '(2a,a,E20.10,a,a,F20.5)') &
+&     ' Speed of sound for this q and mode:',ch10,&
+&     '   in atomic units: ', speedofsound(imode_acoustic), ch10,&
+&     '   in SI units m/s: ', speedofsound(imode_acoustic) * Bohr_Ang * 1.d-10 / Time_Sec
+     call wrtout(unit,msg,'COLL')
+     call wrtout(std_out,msg,'COLL')
 
 !  also estimate partial Debye temperature, = energy if this band went to zone edge
-   tdebye = speedofsound * pi * (six / pi / ucvol)**(third)
-   write (msg, '(2a,a,E20.10,a,a,F20.5)') &
-&   ' Partial Debye temperature for this q and mode:',ch10,&
-&   '   in atomic units: ', tdebye, ch10,&
-&   '   in SI units K  : ', tdebye * Ha_K
-   call wrtout(unit,msg,'COLL')
-   call wrtout(unit,"",'COLL')
+     tdebye = speedofsound(imode_acoustic) * pi * (six / pi / ucvol)**(third)
+     write (msg, '(2a,a,E20.10,a,a,F20.5)') &
+&     ' Partial Debye temperature for this q and mode:',ch10,&
+&     '   in atomic units: ', tdebye, ch10,&
+&     '   in SI units K  : ', tdebye * Ha_K
+     call wrtout(unit,msg,'COLL')
+     call wrtout(unit,"",'COLL')
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,"",'COLL')
+   end if
  end do
 
 end subroutine phdos_print_vsound
-!!***
-
-end subroutine mkphbs
 !!***
 
 !----------------------------------------------------------------------
