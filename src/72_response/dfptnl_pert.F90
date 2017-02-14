@@ -174,7 +174,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 !arrays
  integer,allocatable :: kg_k(:,:),kg1_k(:,:)
 ! real(dp) :: buffer(2)
- real(dp) :: buffer(4),eHxc21_paw(2),exc3_paw(2),enlout(3),kpt(3),eig0_k(mband),dum_svectout(1,1),dum(1)
+ real(dp) :: buffer(4),eHxc21_paw(2),eHxc21_nhat,exc3_paw(2),enlout(3),kpt(3),eig0_k(mband),dum_svectout(1,1),dum(1)
  real(dp) :: enlout1(2),enlout2(2),enlout_11(2),enlout_12(2),enlout_21(2),enlout_22(2),enlout_31(2),enlout_32(2)
  real(dp) :: rmet(3,3),dum_grad_berry(1,1),wtk_k
  real(dp) :: ylmgr_dum(1,1,1)
@@ -639,6 +639,8 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 
 !    Loop over bands
      do jband = 1,nband_k
+       !  Skip bands not treated by current proc
+       if((mpi_enreg%proc_distrb(ikpt,jband,isppol)/=me)) cycle
        if (occ_k(jband)>tol10) then
 
   !      tol_test = tol8
@@ -742,6 +744,10 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
          sum_psi1H1psi1 = sum_psi1H1psi1 + dtset%wtk(ikpt)*occ_k(jband)*dotr
          sum_lambda1psi1psi1 = sum_lambda1psi1psi1 - dtset%wtk(ikpt)*occ_k(jband)*lagr
 
+! **************************************************************************************************
+!        If compute_rho21 : accumulate rhoij and compute term with H_KV^(2)
+! **************************************************************************************************
+
          if (compute_rho21) then
 
            if (i1pert<=natom) then ! If true, i3pert==natom+2
@@ -810,11 +816,16 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 !             MSG_ERROR(msg)
 !           end if
            sum_psi0H2psi1 = sum_psi0H2psi1 + dtset%wtk(ikpt)*occ_k(jband)*sum_enlout_re
+           sumi           = sumi           + dtset%wtk(ikpt)*occ_k(jband)*sum_enlout_im
 
          end if ! end if compute_rho21
 
        end if
      end do   ! end loop over bands
+
+! **************************************************************************************************
+!    END OF BAND LOOP
+! **************************************************************************************************
 
      ABI_DEALLOCATE(cgi)
      ABI_DEALLOCATE(cgj)
@@ -1045,6 +1056,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 ! **************************************************************************************************
 
  eHxc21_paw = zero
+ eHxc21_nhat = zero
  if (compute_rho21) then
 
    if (pawfgr%nfft/=nfftf) then
@@ -1057,7 +1069,6 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 &   dtset%pawprtvol,pawrhoij21,pawrhoij21_unsym,pawtab,dtset%qptn,dummy_array2,dummy_array2,&
 &   dummy_array2,rprimd,symaf1,symrc1,dtset%typat,ucvol,dtset%usewvl,xred,&
 &   pawang_sym=pawang1,pawnhat=nhat21,pawrhoij0=pawrhoij0)
-
 !   if (paral_atom) then
 !     call pawrhoij_free(pawrhoij21_unsym)
 !     ABI_DATATYPE_DEALLOCATE(pawrhoij21_unsym)
@@ -1087,7 +1098,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
      end if
    end do
    nhat21 = nhat21 + nhatfr21
-   call dotprod_vn(1,nhat21,eHxc21_paw(1),valuei,nfftf,nfftotf,nspden,1,vtrial1_i2pert,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
+   call dotprod_vn(1,nhat21,eHxc21_nhat,valuei,nfftf,nfftotf,nspden,1,vtrial1_i2pert,ucvol,mpi_comm_sphgrid=mpi_enreg%comm_fft)
 
    ABI_DEALLOCATE(nhat21)
    ABI_DEALLOCATE(nhatfr21)
@@ -1098,10 +1109,10 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 !    ALL TERMS HAVE BEEN COMPUTED
 ! **************************************************************************************************
 
- e3tot =         sum_psi1H1psi1 + sum_lambda1psi1psi1 + sixth * (exc3 + exc3_paw(1))
- e3tot = e3tot + half * eHxc21_paw(1) + sum_psi0H2psi1
+ e3tot =         sum_psi1H1psi1 + sum_lambda1psi1psi1 + sum_psi0H2psi1
+ e3tot = e3tot + half * (eHxc21_paw(1)+eHxc21_nhat) + sixth * (exc3 + exc3_paw(1))
 ! if(print_info/=0) then
-   write(msg,'(2a,3(a,i2,a,i1),7(2a,es16.7e3),a)') ch10,'NONLINEAR : ',&
+   write(msg,'(2a,3(a,i2,a,i1),8(2a,es16.7e3),a)') ch10,'NONLINEAR : ',&
    ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir,&
    ch10,'      sum_psi1H1psi1 = ',sum_psi1H1psi1,&
    ch10,' sum_lambda1psi1psi1 = ',sum_lambda1psi1psi1,&
@@ -1109,6 +1120,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
    ch10,'              exc3/6 = ',sixth*exc3,&
    ch10,'          exc3_paw/6 = ',sixth*exc3_paw(1),&
    ch10,'        eHxc21_paw/2 = ',half*eHxc21_paw(1),&
+   ch10,'       eHxc21_nhat/2 = ',half*eHxc21_nhat,&
    ch10,' >>>>>>>>>>>>> e3tot = ',e3tot,ch10
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
