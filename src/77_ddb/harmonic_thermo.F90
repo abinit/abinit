@@ -100,12 +100,16 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
  integer :: iqpt2,isym,itemper,iwchan,jjj,mqpt2,nchan,ngrids,natom
  integer :: nqpt2,nspqpt,ntemper,nwchan,option,timrev
  integer :: thermal_unit
+ integer :: bij_unit
+ integer :: vij_unit
  real(dp) :: change,cothx,diffbb,dosinc,expm2x,factor,factorw,factorv,gerr
  real(dp) :: ggsum,ggsumsum,ggrestsum
  real(dp) :: gijerr,gijsum,gnorm,ln2shx,qphnrm,relchg,tcpu,tmp,twall,wovert,thmtol
  logical :: part1,part2
  character(len=500) :: msg
  character(len=fnlen) :: thermal_filename
+ character(len=fnlen) :: bij_filename
+ character(len=fnlen) :: vij_filename
 !arrays
  integer :: symrec(3,3,Crystal%nsym),symrel(3,3,Crystal%nsym)
  integer :: igqpt2(3),ii(6),jj(6),qptrlatt(3,3)
@@ -145,6 +149,16 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
  write(thermal_unit,*) '#'
  write(thermal_unit,*) '#  Thermodynamical quantities calculated by ANADDB'
  write(thermal_unit,*) '#'
+
+ bij_filename=trim(outfilename_radix)//"_DEBYE_WALLER"
+ if (open_file(bij_filename, msg, newunit=bij_unit) /= 0) then
+   MSG_ERROR(msg)
+ end if
+
+ vij_filename=trim(outfilename_radix)//"_VELOC_SQUARED"
+ if (open_file(vij_filename, msg, newunit=vij_unit) /= 0) then
+   MSG_ERROR(msg)
+ end if
 
  thmtol = anaddb_dtset%thmtol
  nchan=anaddb_dtset%nchan
@@ -809,55 +823,46 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
            end do
          end if
 
+         bij=bbij ! save for next iteration
+
          !Update Bij(k) and write them. B matrix printed in angstrom^2
+         !TODO : get rid of this version in the log and output file. Prefer
+         !external files
          if (convth==1) then
            write(msg, '(a,a,a)' )&
 &           ' B matrix elements as a function of T',ch10,&
 &           '    Angstrom^2, cartesian coordinates'
            call wrtout(std_out,msg,'COLL')
            call wrtout(iout,msg,'COLL')
-         end if
-
-         do itemper=1,ntemper
-
-!          tmp in K
-           tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*dble(itemper-1)
-           do iatom=1,natom
-
-             do ij=1,6
-               bij(ij,iatom,itemper)=bbij(ij,iatom,itemper)
-             end do
-
-             if(convth==1)then
-               write(iout,'(2i3,es11.3,6es12.4)')&
-&               iwchan,iatom,tmp+tol10,&
-&               Bohr_Ang**2*bij(1,iatom,itemper)+tol10,&
-&               Bohr_Ang**2*bij(2,iatom,itemper)+tol10,&
-&               Bohr_Ang**2*bij(3,iatom,itemper)+tol10,&
-&               Bohr_Ang**2*bij(4,iatom,itemper)+tol10,&
-&               Bohr_Ang**2*bij(5,iatom,itemper)+tol10,&
-&               Bohr_Ang**2*bij(6,iatom,itemper)+tol10
-             end if
-
-           end do ! end loop over natom
-         end do ! end loop over ntemper
+         
+           do itemper=1,ntemper
+!            tmp in K
+             tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*dble(itemper-1)
+             do iatom=1,natom
+                 write(iout,'(2i3,es11.3,6es12.4)')&
+&                 iwchan,iatom,tmp+tol10,&
+&                 Bohr_Ang**2*bij(1,iatom,itemper)+tol10,&
+&                 Bohr_Ang**2*bij(2,iatom,itemper)+tol10,&
+&                 Bohr_Ang**2*bij(3,iatom,itemper)+tol10,&
+&                 Bohr_Ang**2*bij(4,iatom,itemper)+tol10,&
+&                 Bohr_Ang**2*bij(5,iatom,itemper)+tol10,&
+&                 Bohr_Ang**2*bij(6,iatom,itemper)+tol10
+             end do ! end loop over natom
+           end do ! end loop over ntemper
 
 !        Mean square velocity matrix printed in angstrom^2/picosec^2
-         if(convth==1)then
            write(msg, '(a,a,a)' )&
 &           ' <vel^2> matrix elements as a function of T',ch10,&
 &           '    Angstrom^2/(picosec)^2, cartesian coordinates'
            call wrtout(std_out,msg,'COLL')
            call wrtout(iout,msg,'COLL')
-         end if
 
-         do itemper=1,ntemper
-!          tmp in K
-           tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*float(itemper-1)
-           do iatom=1,natom
-             if(convth==1)then
+           do itemper=1,ntemper
+!            tmp in K
+             tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*float(itemper-1)
+             do iatom=1,natom
                vij(:,iatom,itemper)=Bohr_Ang**2*vij(:,iatom,itemper)/(Time_Sec*1.0e12)**2
-
+  
 !              The following check zeros out <v^2> if it is very small, in order to 
 !              avoid numerical noise being interpreted by the automatic tests as
 !              something real. Note also that we compare it in
@@ -874,9 +879,68 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
 &               vij(4,iatom,itemper),&
 &               vij(5,iatom,itemper),&
 &               vij(6,iatom,itemper)
-             end if ! end check on convergence
+             end do ! end loop over natom
+           end do ! end loop over ntemper
+         end if ! end check on convergence
+
+
+         ! keep this one !!!!!!!!!!!!!!!!!!
+         if (convth==1 .and. iwchan == 1) then
+           write(msg, '(a,a,a)' )&
+&           '# B matrix elements as a function of T, for each atom, and smallest omega channel width',ch10,&
+&           '#    Angstrom^2, cartesian coordinates'
+           call wrtout(bij_unit,msg,'COLL')
+           do iatom=1,natom
+             write(msg, '(2a,i10)' ) ch10, '# for atom ', iatom
+             call wrtout(bij_unit,msg,'COLL')
+             do itemper=1,ntemper
+!              tmp in K
+               tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*dble(itemper-1)
+               write(msg,'(es11.3,6es12.4)')&
+&               tmp,&
+&               Bohr_Ang**2*bij(1,iatom,itemper),&
+&               Bohr_Ang**2*bij(2,iatom,itemper),&
+&               Bohr_Ang**2*bij(3,iatom,itemper),&
+&               Bohr_Ang**2*bij(4,iatom,itemper),&
+&               Bohr_Ang**2*bij(5,iatom,itemper),&
+&               Bohr_Ang**2*bij(6,iatom,itemper)
+               call wrtout(bij_unit,msg,'COLL')
+             end do ! end loop over ntemper
            end do ! end loop over natom
-         end do ! end loop over ntemper
+
+!        Mean square velocity matrix printed in angstrom^2/picosec^2
+           write(msg, '(a,a,a)' )&
+&           '# <vel^2> matrix elements as a function of T, for each atom, and smallest channel width',ch10,&
+&           '#    Angstrom^2/(picosec)^2, cartesian coordinates'
+           call wrtout(vij_unit,msg,'COLL')
+
+           do iatom=1,natom
+             write(msg, '(2a,i10)' ) ch10, '# for atom ', iatom
+             call wrtout(vij_unit,msg,'COLL')
+             do itemper=1,ntemper
+!            tmp in K
+             tmp=anaddb_dtset%tempermin+anaddb_dtset%temperinc*float(itemper-1)
+             vij(:,iatom,itemper)=Bohr_Ang**2*vij(:,iatom,itemper)/(Time_Sec*1.0e12)**2
+
+!            The following check zeros out <v^2> if it is very small, in order to 
+!            avoid numerical noise being interpreted by the automatic tests as
+!            something real. Note also that we compare it in
+!            absolute value, that's because if any of the phonon frequencies are
+!            computed as negative, <v^2> can take a negative value.      
+             do icomp=1, 6
+               if (abs(vij(icomp,iatom,itemper)) < 1.0e-12) vij(icomp,iatom,itemper)=zero
+             end do
+             write(vij_unit,'(es11.3,6es12.4)')&
+&             tmp,&
+&             vij(1,iatom,itemper),&
+&             vij(2,iatom,itemper),&
+&             vij(3,iatom,itemper),&
+&             vij(4,iatom,itemper),&
+&             vij(5,iatom,itemper),&
+&             vij(6,iatom,itemper)
+             end do ! end loop over ntemper
+           end do ! end loop over natom
+         end if ! end check on convergence
 
          if(convth==1)part2=.true.
 
@@ -959,6 +1023,8 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
  end if
 
  close (thermal_unit)
+ close (bij_unit)
+ close (vij_unit)
 
 end subroutine harmonic_thermo
 !!***
