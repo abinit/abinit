@@ -810,13 +810,6 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
    logical function converged()
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'converged'
-!End of the abilint section
-
 !   converged = .not.(                             &
 !&   (ttolwfr==1 .and. residm > tolwfr) .or.       &
 !&   (ttoldff==1 .and. diffor > toldff) .or.       &
@@ -826,6 +819,13 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
    ! LB-02/01/2017 :
    ! This code avoids evaluation of undefined variables (which could happen in respfn, apparently)
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'converged'
+!End of the abilint section
+
    logical :: loc_conv
    loc_conv = .true.
    if (ttolwfr==1) then

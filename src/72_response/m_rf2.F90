@@ -107,6 +107,7 @@ MODULE m_rf2
 
  end type rf2_t
 
+ public :: rf2_getidir
  public :: rf2_getidirs
  public :: rf2_accumulate_bands
  public :: rf2_apply_hamiltonian
@@ -117,6 +118,55 @@ MODULE m_rf2
 !----------------------------------------------------------------------
 
 CONTAINS  !==============================================================================
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_rf2/rf2_getidir
+!! NAME
+!! rf2_getidir
+!!
+!! FUNCTION
+!!  Get the direction of the 1st and 2nd perturbations according to inputs idir1 and idir2
+!!
+!! INPUTS
+!!  idir1 : index of the 1st direction (1<=idir1<=3)
+!!  idir2 : index of the 2nd direction (1<=idir2<=3)
+
+!! OUTPUT
+!!  idir : integer between 1 and 9
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      dfpt_looppert,dfpt_scfcv,rf2_init
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine rf2_getidir(idir1,idir2,idir)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'rf2_getidir'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: idir1,idir2
+ integer,intent(out) :: idir
+ integer :: dir_from_dirs(9) = (/1,6,5,9,2,4,8,7,3/)
+
+! *************************************************************************
+
+ idir = dir_from_dirs(3*(idir1-1)+idir2)
+
+end subroutine rf2_getidir
 !!***
 
 !----------------------------------------------------------------------
@@ -487,10 +537,10 @@ subroutine rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave,cwaveprj,h_cwave,s_cw
 
  if (print_info/=0) then
    if (ipert/=0) then
-     write(msg,'(3(a,i2))') 'RF2 TEST rf2_apply_hamiltonian ipert = ',ipert,' idir =',idir,&
-     & ' jband = ',jband
+     write(msg,'(4(a,i4))') 'RF2 TEST rf2_apply_hamiltonian ipert = ',ipert,' idir =',idir,&
+     & ' ikpt = ',ikpt,' jband = ',jband
    else
-     write(msg,'(a,i2)') 'RF2 TEST rf2_apply_hamiltonian ipert = 0 idir = 0 jband = ',jband
+     write(msg,'(2(a,i4))') 'RF2 TEST rf2_apply_hamiltonian ipert =    0 idir =    0 ikpt = ',ikpt,' jband = ',jband
    end if
    call wrtout(std_out,msg)
  end if

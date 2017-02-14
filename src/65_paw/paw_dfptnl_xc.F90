@@ -458,7 +458,7 @@ subroutine paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,kxc,lm_size,lmse
 !       end if ! cplex_vxc and cplex_den
 !     end if ! nspden
 
-     ff(:)=ff(:)*pawrad%rad(:)**2
+     ff(1:nrad)=ff(1:nrad)*pawrad%rad(1:nrad)**2
      call simp_gen(d3exc1_int,ff,pawrad)
      d3exc1_iat(1)=d3exc1_iat(1)+d3exc1_int*pawang%angwgth(ipts)
 

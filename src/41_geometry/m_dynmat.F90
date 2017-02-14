@@ -3951,33 +3951,38 @@ subroutine d3sym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 
 !First, take into account the permutations symmetry of
 !(i1pert,i1dir) and (i3pert,i3dir)
+!LTEST
+! if (nsym>1) then
+!!LTEST
+! do i1pert = 1, mpert
+!   do i2pert = 1, mpert
 
- do i1pert = 1, mpert
-   do i2pert = 1, mpert
+!     do i3pert = 1, mpert
 
-     do i3pert = 1, mpert
+!       do i1dir = 1, 3
+!         do i2dir = 1, 3
+!           do i3dir = 1, 3
 
-       do i1dir = 1, 3
-         do i2dir = 1, 3
-           do i3dir = 1, 3
+!             if ((blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1).and. &
+!&             (blkflg(i3dir,i3pert,i2dir,i2pert,i1dir,i1pert)/=1)) then
 
-             if ((blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1).and. &
-&             (blkflg(i3dir,i3pert,i2dir,i2pert,i1dir,i1pert)/=1)) then
+!               d3(:,i3dir,i3pert,i2dir,i2pert,i1dir,i1pert) = &
+!&              d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
 
-               d3(:,i3dir,i3pert,i2dir,i2pert,i1dir,i1pert) = &
-&              d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+!               blkflg(i3dir,i3pert,i2dir,i2pert,i1dir,i1pert) = 1
 
-               blkflg(i3dir,i3pert,i2dir,i2pert,i1dir,i1pert) = 1
+!             end if
 
-             end if
+!           end do
+!         end do
+!       end do
 
-           end do
-         end do
-       end do
-
-     end do
-   end do
- end do
+!     end do
+!   end do
+! end do
+!!LTEST
+! end if
+!LTEST
 
 !Big Big Loop : symmetrize three times, because
 !of some cases in which one element is not yet available

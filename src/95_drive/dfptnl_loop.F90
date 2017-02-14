@@ -116,13 +116,14 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                            init_hamiltonian,init_rf_hamiltonian,rf_hamiltonian_type
  use m_pawdij,      only : pawdij, pawdijfr, symdij
  use m_pawfgr,      only : pawfgr_type
- use m_pawfgrtab,   only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
+ use m_pawfgrtab,   only : pawfgrtab_type
  use m_paw_an,      only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify, paw_an_reset_flags
  use m_paw_ij,      only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags, paw_ij_print
  use m_pawang,      only : pawang_type
  use m_pawrad,      only : pawrad_type
  use m_pawrhoij,    only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_nullify, pawrhoij_io
  use m_pawtab,      only : pawtab_type
+ use m_rf2,         only : rf2_getidir
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -184,27 +185,26 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  integer :: has_dijfr
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,iatom,idir_dkde,ierr,iexit,ifft,ii,index,ir
  integer :: ireadwf,itypat
- integer :: mcg,mpsang,n1,n2,n3,n3xccc,ndir,nfftotf,nhat1grdim,nspden,nspden_rhoij,nwffile
+ integer :: mcg,mpsang,n1,n2,n3,n3xccc,ndir,nfftotf,nhat1grdim,npert_phon,nspden,nspden_rhoij,nwffile
  integer :: option,optene,optfr,optorth,pert1case,pert2case,pert3case
  integer :: rdwrpaw,second_idir,timrev,usexcnhat
  real(dp) :: dummy_real,ecut_eff
  character(len=500) :: message
- character(len=fnlen) :: fiden1i,fiwf1i,fiwf3i,fiwfddk,fnamewff(3)
+ character(len=fnlen) :: fiden1i,fiwf1i,fiwf3i,fiwfddk,fnamewff(5)
  type(gs_hamiltonian_type) :: gs_hamkq
- type(rf_hamiltonian_type) :: rf_hamkq
- type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3,wffddk(3)
- type(wfk_t) :: ddk_f(3)
+ type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3
+ type(wfk_t) :: ddk_f(5)
  type(wvl_data) :: wvl
  type(hdr_type) :: hdr_den
 !arrays
- integer :: file_index(3)
+ integer :: file_index(5)
  real(dp) :: rho_dum(1),qphon(3),tsec(2)
  real(dp),allocatable :: cg1(:,:),cg2(:,:),cg3(:,:),eigen1(:),eigen2(:),eigen3(:)
  real(dp),allocatable :: nhat1_i2pert(:,:),nhat1gr(:,:,:),vresid_dum(:,:)
  real(dp),allocatable :: rho1r1(:,:)
  real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:),rho3r1(:,:),vhartr1(:)
  real(dp),allocatable :: vpsp1(:),vxc1(:,:),work(:),xc_tmp(:,:)
- real(dp),allocatable,target :: vtrial1(:,:)
+ real(dp),allocatable,target :: vtrial1_i2pert(:,:)
  real(dp),pointer :: vtrial1_tmp(:,:)
  real(dp),allocatable :: xccc3d1(:),xccc3d2(:),xccc3d3(:)
  type(pawrhoij_type),allocatable :: pawrhoij1_i1pert(:),pawrhoij1_i2pert(:),pawrhoij1_i3pert(:)
@@ -258,7 +258,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  ABI_ALLOCATE(xccc3d3,(cplex*nfftf))
  ABI_ALLOCATE(vhartr1,(cplex*nfftf))
  ABI_ALLOCATE(vxc1,(cplex*nfftf,dtset%nspden))
- ABI_ALLOCATE(vtrial1,(cplex*nfftf,dtset%nspden))
+ ABI_ALLOCATE(vtrial1_i2pert,(cplex*nfftf,dtset%nspden))
 
  ABI_ALLOCATE(vresid_dum,(0,0))
 ! PAW stuff
@@ -468,9 +468,17 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                do i2dir = 1, 3
 
                  if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
-                   pert2case = i2dir + (i2pert-1)*3
 
+                   pert2case = i2dir + (i2pert-1)*3
                    blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
+
+                   npert_phon = 0
+                   if(i1pert<=dtset%natom) npert_phon = npert_phon + 1
+                   if(i2pert<=dtset%natom) npert_phon = npert_phon + 1
+                   if(i3pert<=dtset%natom) npert_phon = npert_phon + 1
+                   if (npert_phon>1) then
+                     MSG_ERROR("dfptnl_loop is available with at most one phonon perturbation. Change your input!")
+                   end if
 
                    call status(counter,dtfil%filstat,iexit,level,'call inwffil  ')
                    call inwffil(ask_accurate,cg2,dtset,dtset%ecut,ecut_eff,eigen2,dtset%exchn2n3d,&
@@ -519,10 +527,25 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                      !    PAW only: we sometimes have to compute 1st-order compensation density
                      !    and eventually add it to density from 1st-order WFs
                      !    ----------------------------------------------------------------------
-                     call pawmknhat(dummy_real,cplex,0,i2dir,i2pert,0,gprimd,natom,dtset%natom,&
-&                     nfftf,ngfftf,nhat1grdim,nspden,psps%ntypat,pawang,pawfgrtab,nhat1gr,nhat1_i2pert,&
-&                     pawrhoij1_i2pert,pawrhoij,pawtab,qphon,rprimd,ucvol,dtset%usewvl,xred,&
-&                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+                     if (psps%usepaw==1) then
+
+                       !Force the computation of nhatfr
+                       do iatom=1,dtset%natom
+                         pawfgrtab(iatom)%nhatfr_allocated = 0
+                         pawfgrtab(iatom)%nhatfr = zero
+                       end do
+
+                       if (i2pert<=natom) then
+                         call pawnhatfr(0,i2dir,i2pert,1,dtset%natom,nspden,psps%ntypat,&
+                    &       pawang,pawfgrtab(i2pert),pawrhoij(i2pert),pawtab,rprimd,&
+                    &       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+                       end if
+                       call pawmknhat(dummy_real,cplex,0,i2dir,i2pert,0,gprimd,natom,dtset%natom,&
+  &                     nfftf,ngfftf,nhat1grdim,nspden,psps%ntypat,pawang,pawfgrtab,nhat1gr,nhat1_i2pert,&
+  &                     pawrhoij1_i2pert,pawrhoij,pawtab,qphon,rprimd,ucvol,dtset%usewvl,xred,&
+  &                     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+                     end if
+
                    else
 
                   !    Norm-conserving psp: compute Vloc(1) in reciprocal sp. and core(1) in real sp.
@@ -544,7 +567,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 &                   gsqcut,i2dir,i2pert,dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,&
 &                   nhat1_i2pert,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,optene,option,dtset%paral_kgb,&
 &                   dtset%qptn,rhog,rho2g1,rhor,rho2r1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,&
-&                   vpsp1,vresid_dum,dummy_real,vtrial1,vxc1,xccc3d2)
+&                   vpsp1,vresid_dum,dummy_real,vtrial1_i2pert,vxc1,xccc3d2)
 
                    if (psps%usepaw==1)then
                      call paw_an_reset_flags(paw_an1_i2pert) ! Force the recomputation of on-site potentials
@@ -554,9 +577,6 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                 &     psps%ntypat,optfr,paw_ij1_i2pert,pawang,pawfgrtab,pawrad,pawtab,qphon,&
                 &     rprimd,ucvol,vpsp1,vtrial,vxc,xred,&
                 &     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
-                     call pawnhatfr(0,i2dir,i2pert,natom,dtset%natom,nspden,psps%ntypat,&
-                &       pawang,pawfgrtab,pawrhoij,pawtab,rprimd,&
-                &       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
 !                    Computation of "on-site" first-order potentials, first-order densities
                      option=1
@@ -571,12 +591,12 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                      if (has_dijfr>0) then
                        !vpsp1 contribution to Dij already stored in frozen part of Dij
                        ABI_ALLOCATE(vtrial1_tmp,(cplex*nfftf,nspden))
-                       vtrial1_tmp=vtrial1
+                       vtrial1_tmp=vtrial1_i2pert
                        do ii=1,min(nspden,2)
                          vtrial1_tmp(:,ii)=vtrial1_tmp(:,ii)-vpsp1(:)
                        end do
                      else
-                       vtrial1_tmp => vtrial1
+                       vtrial1_tmp => vtrial1_i2pert
                      end if
                      call pawdij(cplex,dtset%enunit,gprimd,i2pert,natom,dtset%natom,&
                 &     nfftf,nfftotf,dtset%nspden,psps%ntypat,paw_an1_i2pert,paw_ij1_i2pert,pawang,&
@@ -591,9 +611,8 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
                 &     mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,&
                 &     qphon=qphon)
 !                     call timab(561,2,tsec)
-                   end if ! end usepaw section
 
-                   call init_rf_hamiltonian(cplex,gs_hamkq,i2pert,rf_hamkq,has_e1kbsc=1)
+                   end if ! end usepaw section
 
                    nwffile = 1
                    file_index(1) = i2dir + 3*(i2pert-1)
@@ -603,25 +622,27 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 
                      nwffile = 3
                      file_index(2) = i2dir+natom*3
-                     idir_dkde = i2dir
+                     fnamewff(2) = dtfil%fnamewffddk
+!                    As npert_phon<=1 and i2pert==natom+2, i1pert or i3pert is necessarly equal to natom+2
                      if (i3pert==natom+2) then
                        second_idir = i3dir
                      else if (i1pert==natom+2) then
                        second_idir = i1dir
                      else
-                       MSG_ERROR("dfptnl_loop with two phonon perturbations is not available yet. Change your input!")
+                       MSG_BUG(" i1pert or i3pert is supposed to be equal to natom+2, which is not the case here.")
                      end if
-                     if (second_idir/=i2dir) then ! see m_rf2.F90 => getidirs
-                       if (i2dir==2.and.second_idir==3) idir_dkde = 4
-                       if (i2dir==1.and.second_idir==3) idir_dkde = 5
-                       if (i2dir==1.and.second_idir==2) idir_dkde = 6
-                       if (i2dir==3.and.second_idir==2) idir_dkde = 7
-                       if (i2dir==3.and.second_idir==1) idir_dkde = 8
-                       if (i2dir==2.and.second_idir==1) idir_dkde = 9
-                     end if
+                     call rf2_getidir(i2dir,second_idir,idir_dkde)
                      file_index(3) = idir_dkde+9+(dtset%natom+6)*3
-                     fnamewff(2) = dtfil%fnamewffddk
                      fnamewff(3) = dtfil%fnamewffdkde
+
+                     if (npert_phon==1.and.psps%usepaw==1.and.second_idir/=i2dir) then
+                       nwffile = 5
+                       file_index(4) = second_idir+natom*3
+                       fnamewff(4) = dtfil%fnamewffddk
+                       call rf2_getidir(second_idir,i2dir,idir_dkde) ! i2dir and second_idir are reversed
+                       file_index(5) = idir_dkde+9+(dtset%natom+6)*3
+                       fnamewff(5) = dtfil%fnamewffdkde
+                     end if
 
                    end if
 
@@ -651,12 +672,12 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 !                   call timab(512,1,tsec)
                    call status(counter,dtfil%filstat,iexit,level,'call dfptnl_resp ')
 !                  NOTE : eigen2 equals zero here
-                   call dfptnl_pert(cg,cg1,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,i1dir,&
+                   call dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,indsy1,i1dir,&
 &                   i2dir,i3dir,i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
-&                   mpsang,mpw,natom,nfftf,nfftotf,nkpt,nk3xc,nspden,nspinor,nsppol,npwarr,occ,&
-&                   pawang,pawrad,pawtab,pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij1_i3pert,&
-&                   paw_an0,paw_ij0,paw_ij1_i2pert,pawfgr,ph1d,psps,rf_hamkq,rho1r1,rho2r1,rho3r1,&
-&                   rprimd,ucvol,vtrial,vtrial1,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred)
+&                   mpsang,mpw,natom,nattyp,nfftf,nfftotf,ngfftf,nkpt,nk3xc,nspden,nspinor,nsppol,nsym1,npwarr,occ,&
+&                   pawang,pawang1,pawfgrtab,pawrad,pawtab,pawrhoij,pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij1_i3pert,&
+&                   paw_an0,paw_an1_i2pert,paw_ij0,paw_ij1_i2pert,pawfgr,ph1d,psps,rho1r1,rho2r1,rho3r1,&
+&                   rprimd,symaf1,symrc1,ucvol,vtrial,vtrial1_i2pert,ddk_f,xccc3d1,xccc3d2,xccc3d3,xred)
 !                   call timab(512,2,tsec)
 
                    call status(counter,dtfil%filstat,iexit,level,'after dfptnl_resp')
@@ -695,16 +716,18 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 !&                   d3etot(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
 
 !                  Eventually close the dot file
-                   call wfk_close(ddk_f(1))
-                   if (i2pert==dtset%natom+2) then
-                     call wfk_close(ddk_f(2))
-                     call wfk_close(ddk_f(3)) ! TO CHANGE
-                   end if
+                   do ii=1,nwffile
+                     call wfk_close(ddk_f(ii))
+                   end do
 
-                   call destroy_rf_hamiltonian(rf_hamkq)
+!                   if (psps%usepaw==1) then
+!                     do ii=1,natom
+!                       pawfgrtab(ii)%nhatfr = zero
+!                     end do
+!                   end if
 
-                 end if   !rfpert
-               end do    !i2dir
+                 end if   ! rfpert
+               end do    ! i2dir
              end do     ! i2pert
 
            end if   ! rfpert
@@ -732,7 +755,7 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
  ABI_DEALLOCATE(rho3r1)
  ABI_DEALLOCATE(nhat1gr)
  ABI_DEALLOCATE(vresid_dum)
- ABI_DEALLOCATE(vtrial1)
+ ABI_DEALLOCATE(vtrial1_i2pert)
  ABI_DEALLOCATE(vxc1)
  ABI_DEALLOCATE(vhartr1)
  ABI_DEALLOCATE(vpsp1)

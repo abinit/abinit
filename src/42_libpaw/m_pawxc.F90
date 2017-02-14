@@ -1213,7 +1213,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
          ff(:)=half*(vxc(:,ipts,1)*(rhoarr(:,1)+rhoarr(:,4))+vxc(:,ipts,2)*(rhoarr(:,1)-rhoarr(:,4))) &
 &         +vxc(:,ipts,3)*rhoarr(:,2)-vxc(:,ipts,4)*rhoarr(:,3)
        end if
-       ff(:)=ff(:)*pawrad%rad(:)**2
+       ff(1:nrad)=ff(1:nrad)*pawrad%rad(1:nrad)**2
        call simp_gen(vxcrho,ff,pawrad)
        enxcdc=enxcdc+vxcrho*pawang%angwgth(ipts)
        LIBPAW_DEALLOCATE(ff)
@@ -1305,7 +1305,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
          ff(:)=half*(vxc(:,ipts,1)*(rhoarr(:,1)+rhoarr(:,4))+vxc(:,ipts,2)*(rhoarr(:,1)-rhoarr(:,4))) &
 &         +vxc(:,ipts,3)*rhoarr(:,2)-vxc(:,ipts,4)*rhoarr(:,3)
        end if
-       ff(:)=ff(:)*pawrad%rad(:)**2
+       ff(1:nrad)=ff(1:nrad)*pawrad%rad(1:nrad)**2
        call simp_gen(vxcrho,ff,pawrad)
        enxcdc=enxcdc+vxcrho*pawang%angwgth(ipts)
      end do ! End of the loop on npts (angular part)
@@ -1581,7 +1581,7 @@ subroutine pawxcpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmselec
 !  ----- Calculate Exc term
    if (option/=1) then
      LIBPAW_ALLOCATE(ff,(nrad))
-     ff(:)=fxci(:)*pawrad%rad(:)**2
+     ff(1:nrad)=fxci(1:nrad)*pawrad%rad(1:nrad)**2
      call simp_gen(enxcr,ff,pawrad)
      LIBPAW_DEALLOCATE(ff)
      if (option/=4) enxc=enxc+enxcr*pawang%angwgth(ipts)
@@ -1598,7 +1598,7 @@ subroutine pawxcpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmselec
        end do
      end if
      LIBPAW_ALLOCATE(ff,(nrad))
-     ff(:)=vxci(:)*rhoarrdc(:)*pawrad%rad(:)**2
+     ff(1:nrad)=vxci(1:nrad)*rhoarrdc(1:nrad)*pawrad%rad(1:nrad)**2
      call simp_gen(vxcrho,ff,pawrad)
      LIBPAW_DEALLOCATE(ff)
      enxcdc=enxcdc+vxcrho*pawang%angwgth(ipts)
@@ -2427,13 +2427,13 @@ subroutine pawxc3_gga(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselec
        end if ! cplex_vxc and cplex_den
      end if ! nspden
 
-     ff(:)=ff(:)*pawrad%rad(:)**2
+     ff(1:nrad)=ff(1:nrad)*pawrad%rad(1:nrad)**2
      call simp_gen(vxcrho,ff,pawrad)
      d2enxc=d2enxc+vxcrho*pawang%angwgth(ipts)
      LIBPAW_DEALLOCATE(ff)
 
      if (need_impart) then
-       gg(:)=gg(:)*pawrad%rad(:)**2
+       gg(1:nrad)=gg(1:nrad)*pawrad%rad(1:nrad)**2
        call simp_gen(vxcrho,gg,pawrad)
        d2enxc_im=d2enxc_im+vxcrho*pawang%angwgth(ipts)
        LIBPAW_DEALLOCATE(gg)
@@ -2863,13 +2863,13 @@ subroutine pawxc3(corexc1,cplex_den,cplex_vxc,d2enxc,ixc,kxc,lm_size,lmselect,nh
        end if ! cplex_vxc and cplex_den
      end if ! nspden
 
-     ff(:)=ff(:)*pawrad%rad(:)**2
+     ff(1:nrad)=ff(1:nrad)*pawrad%rad(1:nrad)**2
      call simp_gen(vxcrho,ff,pawrad)
      d2enxc=d2enxc+vxcrho*pawang%angwgth(ipts)
      LIBPAW_DEALLOCATE(ff)
 
      if (need_impart) then
-       gg(:)=gg(:)*pawrad%rad(:)**2
+       gg(1:nrad)=gg(1:nrad)*pawrad%rad(1:nrad)**2
        call simp_gen(vxcrho,gg,pawrad)
        d2enxc_im=d2enxc_im+vxcrho*pawang%angwgth(ipts)
        LIBPAW_DEALLOCATE(gg)
@@ -5010,13 +5010,13 @@ end subroutine pawxcsphpositron
      end if ! cplex_vxc and cplex_den
    end do ! ii=1,nspden
 
-   ff(:)=ff(:)*pawrad%rad(:)**2
+   ff(1:nrad)=ff(1:nrad)*pawrad%rad(1:nrad)**2
    call simp_gen(vxcrho,ff,pawrad)
    d2enxc=d2enxc+vxcrho
    LIBPAW_DEALLOCATE(ff)
 
    if (need_impart) then
-     gg(:)=gg(:)*pawrad%rad(:)**2
+     gg(1:nrad)=gg(1:nrad)*pawrad%rad(1:nrad)**2
      call simp_gen(vxcrho,gg,pawrad)
      d2enxc_im=d2enxc_im+vxcrho
      LIBPAW_DEALLOCATE(gg)
@@ -5502,7 +5502,7 @@ subroutine pawxcmpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmsele
 
    end if ! option/=4
 
-   ff(:)=ff(:)*pawrad%rad(:)**2
+   ff(1:nrad)=ff(1:nrad)*pawrad%rad(1:nrad)**2
    call simp_gen(enxc,ff,pawrad)
    LIBPAW_DEALLOCATE(ff)
  end if ! option/=1
@@ -5533,7 +5533,7 @@ subroutine pawxcmpositron(calctype,corexc,enxc,enxcdc,ixcpositron,lm_size,lmsele
    do ilm=1,lm_size
      if (lmselect(ilm)) ff(:)=ff(:)+vxc(:,ilm,1)*rhotot(:,ilm)
    end do
-   ff(:)=ff(:)*pawrad%rad(:)**2
+   ff(1:nrad)=ff(1:nrad)*pawrad%rad(1:nrad)**2
    call simp_gen(enxcdc,ff,pawrad)
    LIBPAW_DEALLOCATE(ff)
  end if ! option
