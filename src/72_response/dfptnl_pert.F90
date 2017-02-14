@@ -95,7 +95,8 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
  use m_paw_ij,     only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify,paw_ij_reset_flags
  use m_pawdij,     only : pawdijfr
  use m_pawfgr,     only : pawfgr_type
- use m_pawrhoij,   only : pawrhoij_type, pawrhoij_alloc , pawrhoij_nullify, pawrhoij_free, pawrhoij_init_unpacked
+ use m_pawrhoij,   only : pawrhoij_type, pawrhoij_alloc , pawrhoij_nullify, pawrhoij_free,&
+&                         pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked
  use m_paw_an,     only : paw_an_type
 
 !This section has been created automatically by the script Abilint (TD).
@@ -173,7 +174,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 !arrays
  integer,allocatable :: kg_k(:,:),kg1_k(:,:)
 ! real(dp) :: buffer(2)
- real(dp) :: buffer(3),eHxc21_paw(2),exc3_paw(2),enlout(3),kpt(3),eig0_k(mband),dum_svectout(1,1),dum(1)
+ real(dp) :: buffer(4),eHxc21_paw(2),exc3_paw(2),enlout(3),kpt(3),eig0_k(mband),dum_svectout(1,1),dum(1)
  real(dp) :: enlout1(2),enlout2(2),enlout_11(2),enlout_12(2),enlout_21(2),enlout_22(2),enlout_31(2),enlout_32(2)
  real(dp) :: rmet(3,3),dum_grad_berry(1,1),wtk_k
  real(dp) :: ylmgr_dum(1,1,1)
@@ -869,9 +870,17 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 ! **************************************************************************************************
 
  if (xmpi_paral == 1) then
-   buffer(1) = sum_psi1H1psi1 ; buffer(2) = sum_lambda1psi1psi1 ; buffer(3) = sumi
+   buffer(1) = sum_psi1H1psi1 ; buffer(2) = sum_lambda1psi1psi1
+   buffer(3) = sum_psi0H2psi1 ; buffer(4) = sumi
    call xmpi_sum(buffer,spaceComm,ierr)
-   sum_psi1H1psi1 = buffer(1) ; sum_lambda1psi1psi1 = buffer(2) ; sumi = buffer(3)
+   sum_psi1H1psi1 = buffer(1) ; sum_lambda1psi1psi1 = buffer(2)
+   sum_psi0H2psi1 = buffer(3) ; sumi = buffer(4)
+
+!  Accumulate PAW occupancies
+   if (compute_rho21) then
+     call pawrhoij_mpisum_unpacked(pawrhoij21_unsym,spaceComm)
+   end if
+
  end if
 
 ! **************************************************************************************************
