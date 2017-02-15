@@ -334,8 +334,9 @@ subroutine anharmonics_terms_setCoeffs(coeffs,anharmonics_terms,ncoeff)
   anharmonics_terms%ncoeff = ncoeff  
   ABI_DATATYPE_ALLOCATE(anharmonics_terms%coefficients,(ncoeff))
   do ii=1,anharmonics_terms%ncoeff
-    call polynomial_coeff_init(coeffs(ii)%coefficient,coeffs(ii)%name,coeffs(ii)%nterm,&
-&                              anharmonics_terms%coefficients(ii),coeffs(ii)%terms)
+    call polynomial_coeff_init(coeffs(ii)%coefficient,coeffs(ii)%nterm,&
+&                              anharmonics_terms%coefficients(ii),&
+&                              coeffs(ii)%terms,name=coeffs(ii)%name)
   end do
 
 end subroutine anharmonics_terms_setCoeffs

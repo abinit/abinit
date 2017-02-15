@@ -103,6 +103,7 @@ module m_multibinit_dataset
   real(dp) :: bmass
   real(dp) :: delta_df
   real(dp) :: energy_reference
+  real(dp) :: fit_cutoff
   real(dp) :: temperature
   real(dp) :: rifcsph
 
@@ -800,6 +801,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'fit_coeff is',multibinit_dtset%fit_coeff,', but the only allowed values',ch10,&
 &   'are 0 or 1 for multibinit.',ch10,&
 &   'Action: correct fit_coeff in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%fit_cutoff=15
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_cutoff',tread,'DPR')
+ if(tread==1) multibinit_dtset%fit_cutoff=dprarr(1)
+ if(multibinit_dtset%fit_cutoff<0)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'fit_cutoff is',multibinit_dtset%fit_cutoff,', but the only allowed values',ch10,&
+&   'are positives for multibinit.',ch10,&
+&   'Action: correct fit_cutoff in your input file.'
    MSG_ERROR(message)
  end if
 

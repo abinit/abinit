@@ -57,7 +57,7 @@ module m_polynomial_term
 !     direction(ndisp)
 !     direction of the displacement
 
-   integer :: ndisp
+   integer :: ndisp = zero
 !     Number of displacement for this terms
 !     1 for (X_y-O_y)^3, 2 for (X_y-O_y)(X_x-O_y)^2...
 
@@ -65,7 +65,7 @@ module m_polynomial_term
 !     power(ndisp)
 !     power of the displacement 2 (X_z-O_z)^2 or 1 for (X_y-O_y)^1
 
-   real(dp) :: weight
+   real(dp) :: weight = zero
 !     weight of the term
 
 
@@ -126,7 +126,9 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,polynomial_term,powe
  type(polynomial_term_type), intent(out) :: polynomial_term
 !Local variables-------------------------------
 !scalar
+ integer :: idisp1,idisp2,ndisp_tmp
 !arrays
+ integer :: power_tmp(ndisp)
  character(500) :: msg
 
 ! *************************************************************************
@@ -155,22 +157,53 @@ subroutine polynomial_term_init(atindx,cell,direction,ndisp,polynomial_term,powe
 !First free structure before init
  call polynomial_term_free(polynomial_term)
 
+!Check if displacement are identical, in this case
+!increase the power 
+ power_tmp(:) = power(:)
+
+ do idisp1=1,ndisp
+   do idisp2=idisp1,ndisp
+     if (idisp1/=idisp2.and.&
+&        atindx(1,idisp1)   == atindx(1,idisp2).and.&
+&        atindx(2,idisp1)   == atindx(2,idisp2).and.&
+&        direction(idisp1)  == direction(idisp2).and.&
+&         all(cell(:,1,idisp1)==cell(:,1,idisp2)).and.&
+&         all(cell(:,2,idisp1)==cell(:,2,idisp2)).and.&
+&        power_tmp(idisp2) > 0 )then
+       power_tmp(idisp1) = power_tmp(idisp1) + 1
+       power_tmp(idisp2) = 0
+     end if
+   end do
+ end do
+
+!Count the number of power avec the previous check
+!or just remove the power equal to zero
+ ndisp_tmp=zero
+ do idisp1=1,ndisp
+   if(power_tmp(idisp1) > zero) then
+     ndisp_tmp = ndisp_tmp + 1
+   end if
+ end do
+
 !init the values
- polynomial_term%ndisp  = ndisp
+ polynomial_term%ndisp  = ndisp_tmp
  polynomial_term%weight = weight
 
  ABI_ALLOCATE(polynomial_term%atindx,(2,polynomial_term%ndisp))
- polynomial_term%atindx(:,:) = atindx(:,:) 
-
  ABI_ALLOCATE(polynomial_term%direction,(polynomial_term%ndisp))
- polynomial_term%direction(:) = direction(:)
-
  ABI_ALLOCATE(polynomial_term%cell,(3,2,polynomial_term%ndisp))
- polynomial_term%cell(:,:,:) = cell(:,:,:)
-
  ABI_ALLOCATE(polynomial_term%power,(polynomial_term%ndisp))
- polynomial_term%power(:) = power(:)
 
+ idisp2 = zero
+ do idisp1=1,ndisp
+   if(power_tmp(idisp1) > zero)then
+     idisp2 =  idisp2 + 1
+     polynomial_term%atindx(:,idisp2) = atindx(:,idisp1) 
+     polynomial_term%direction(idisp2) = direction(idisp1)
+     polynomial_term%cell(:,:,idisp2) = cell(:,:,idisp1)
+     polynomial_term%power(idisp2) = power_tmp(idisp2)
+   end if
+ end do
 
 end subroutine polynomial_term_init
 !!***
@@ -268,6 +301,7 @@ end subroutine polynomial_term_free
 
 subroutine polynomial_term_dot(term_out,term1_in,term2_in)
 
+
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
@@ -330,7 +364,7 @@ pure function terms_compare(t1,t2) result (res)
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'effective_potential_compare'
+#define ABI_FUNC 'terms_compare'
 !End of the abilint section
 
  implicit none
@@ -339,22 +373,27 @@ pure function terms_compare(t1,t2) result (res)
   type(polynomial_term_type), intent(in) :: t1,t2
   logical :: res
 !local
+!variable
   integer :: ndisp
   integer :: ia,idisp1,idisp2,mu
   logical :: found
+!array
+  integer :: blkval(2,t1%ndisp)
 ! *************************************************************************
-  res = .false.
-
+  res = .true.
+  blkval = zero
   ndisp = 0
   if(t1%ndisp==t2%ndisp)then
     do idisp1=1,t1%ndisp
+      if(blkval(1,idisp1)==one)cycle!already found
       do idisp2=1,t2%ndisp
-        if(t1%atindx(1,idisp1) ==  t2%atindx(1,idisp2).and.&
-&          t1%atindx(2,idisp1) ==  t2%atindx(2,idisp2).and.&
-&          t1%direction(idisp1) == t2%direction(idisp2).and.&
-&          t1%power(idisp1) == t2%power(idisp2).and.&
-&          t1%weight == t2%weight)then
-          found = .true.
+        if(blkval(2,idisp2)==one)cycle!already found
+        found = .false.
+        if(t1%atindx(1,idisp1)  ==  t2%atindx(1,idisp2).and.&
+&          t1%atindx(2,idisp1)  ==  t2%atindx(2,idisp2).and.&
+&          t1%direction(idisp1) ==  t2%direction(idisp2).and.&
+&          t1%power(idisp1) == t2%power(idisp2))then
+          found=.true.
           do ia=1,2
             do mu=1,3
               if(t1%cell(mu,ia,idisp1) /= t2%cell(mu,ia,idisp2))then
@@ -363,17 +402,45 @@ pure function terms_compare(t1,t2) result (res)
               end if
             end do
           end do
-          if (found)then
-            ndisp = ndisp +1 
+          if(found)then
+            blkval(1,idisp1)=one
+            blkval(2,idisp2)=one
           end if
         end if
       end do
     end do
-
-    if(ndisp == t1%ndisp)then
-      res = .true.
-    end if
+   if(any(blkval(:,:)==zero))res = .false.
+  else
+    res = .false.
   end if
+
+!     do idisp1=1,t1%ndisp
+!       do idisp2=1,t2%ndisp
+!         if(t1%atindx(1,idisp1) ==  t2%atindx(1,idisp2).and.&
+! &          t1%atindx(2,idisp1) ==  t2%atindx(2,idisp2).and.&
+! &          t1%direction(idisp1) == t2%direction(idisp2).and.&
+! &          t1%power(idisp1) == t2%power(idisp2))then!.and.&
+! !&          t1%weight == t2%weight)then
+!           found = .true.
+!           do ia=1,2
+!             do mu=1,3
+!               if(t1%cell(mu,ia,idisp1) /= t2%cell(mu,ia,idisp2))then
+!                 found = .false.
+!                 cycle
+!               end if
+!             end do
+!           end do
+!           if (found)then
+!             ndisp = ndisp +1 
+!           end if
+!         end if
+!       end do
+!     end do
+
+!     if(ndisp == t1%ndisp)then
+!       res = .true.
+!     end if
+!  end if
 
 end function terms_compare
 !!***

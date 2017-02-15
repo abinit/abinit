@@ -3022,7 +3022,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
 !    7-Initialisation of the polynomial_coefficent structure with the values from the 
 !      previous step
-     call polynomial_coeff_init(coefficient,name,nterm,coeffs(ii),terms)
+     call polynomial_coeff_init(coefficient,nterm,coeffs(ii),terms,name=name)
 
 !    8-Deallocation of the terms array for this coefficient
      do jj=1,nterm

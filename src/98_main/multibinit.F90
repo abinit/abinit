@@ -263,7 +263,7 @@ program multibinit
 !      symmetry_operations (only cubic)
        if (iam_master) then
          if(hist%mxhist >0)then
-           call fit_polynomial_printSystemFiles(reference_effective_potential,hist)
+!           call fit_polynomial_printSystemFiles(reference_effective_potential,hist)
          else
            write(message, '(3a)' )&
 &          'There is no step in the MD file ',ch10,&
@@ -272,7 +272,7 @@ program multibinit
          end if
        end if
      case (1)
-       call fit_polynomial_coeff_get(reference_effective_potential,1)
+       call fit_polynomial_coeff_get(inp%fit_cutoff,reference_effective_potential,1)
 !       call fit_polynomial_coeff_init
 !       call fit_polynomial_coeff_init(reference_effective_potential%,filnam,inp,comm)
      end select
