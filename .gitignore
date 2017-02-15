@@ -420,3 +420,4 @@ src/*/test_*
 !tests_*F90
 build1
 build2
+tests/built-in/Input/abinit
