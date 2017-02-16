@@ -15585,7 +15585,7 @@
     section: varrlx
     text: |-
         <p>
-         Gives the number of thermostats in the Martyna et al. chain of oscillators thermostats. 
+         Gives the number of thermostats in the Martyna et al. chain of oscillators thermostats.
          The thermostat chains can be used either to perform Molecular Dynamics (MD) ([[ionmov]]=13) or to perform Path Integral Molecular Dynamics (PIMD) ([[imgmov]]=13). <br />
          The mass of these thermostats is given by [[qmass]].  <br />
         </p>
