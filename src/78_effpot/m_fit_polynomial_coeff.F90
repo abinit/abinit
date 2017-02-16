@@ -423,7 +423,7 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
 !arrays
  integer :: sym(3,3)
  integer :: transl(3)
- integer,allocatable :: list(:),list_symcoeff_tmp(:,:,:),list_symcoeff_tmp2(:,:,:)
+ integer,allocatable :: list(:),list_symcoeff_tmp(:,:,:)
  integer,allocatable :: indsym(:,:,:) ,symrec(:,:,:)
  real(dp),allocatable :: blkval(:,:,:,:,:),tnons(:,:)
  real(dp),allocatable :: wkdist(:),xcart(:,:),xred(:,:)
@@ -447,10 +447,10 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
 !Found the ref cell
  irpt_ref = one 
  do irpt=1,nrpt
-   write(100,*)"tutu",irpt,'=>',cell(:,irpt)
+!   write(100,*)"tutu",irpt,'=>',cell(:,irpt)
    if(all(cell(:,irpt)==0))then
      irpt_ref = irpt
-!     exit
+     exit
    end if
  end do
 
@@ -528,9 +528,6 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
 !            For atom 1
              ipesy1 = indsym(4,isym,ia)
              shift_atm1 = indsym(1:3,isym,ia)
-             if(ia==1.and.ib==3.and.mu==1.and.irpt==1)then
-!               write(800,*)isym,"atm1",ipesy1,shift_atm1,"atm2",indsym(4,isym,ib),indsym(1:3,isym,ib)
-             end if
 !            And atom 2
              do jj=1,3 ! Apply transformation to original coordinates.
                tratom(jj) = dble(sym(1,jj))*(xred(1,ib)+cell(1,irpt)-tnons(1,isym))&
@@ -576,17 +573,9 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
                        blkval(idisy2,ipesy2,idisy1,ipesy1,irpt_sym) = 0
                        cycle
                      else
-                       if(ia==1.and.ib==3.and.mu==1.and.irpt==1)then
-!                         write(800,*)sym(mu,idisy1),sym(nu,idisy2)
-                       end if
-
-!                        Fill the list with the coeff and symetric (need all symetrics)
-                         list_symcoeff_tmp(1:4,icoeff,isym)=(/idisy1,ipesy1,ipesy2,irpt_sym/)
-                         if(sym(mu,idisy1)/=sym(nu,idisy2)) then
-                           print*,"tata bug"
-                           stop
-                         end if
-                         list_symcoeff_tmp(5,icoeff,isym)= sym(mu,idisy1)
+!                      Fill the list with the coeff and symetric (need all symetrics)
+                       list_symcoeff_tmp(1:4,icoeff,isym)=(/idisy1,ipesy1,ipesy2,irpt_sym/)
+                       list_symcoeff_tmp(5,icoeff,isym)= sym(mu,idisy1)
                      end if
                    end if
                  end if
@@ -629,80 +618,46 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
    end if
  end do
 
- ABI_ALLOCATE(list_symcoeff_tmp2,(6,ncoeff,nsym))
+ ABI_ALLOCATE(list_symcoeff,(6,ncoeff,nsym))
 
- list_symcoeff_tmp2 = zero
+ list_symcoeff = zero
  icoeff = zero
  do icoeff_tmp = 1,ncoeff_max
    if(.not.(all(list_symcoeff_tmp(:,icoeff_tmp,1)==zero)))then
 !    Don't take into acount if it's opposite
      icoeff = icoeff + 1
-     list_symcoeff_tmp2(1:5,icoeff,:) = list_symcoeff_tmp(1:5,icoeff_tmp,:)
+     list_symcoeff(1:5,icoeff,:) = list_symcoeff_tmp(1:5,icoeff_tmp,:)
    end if
  end do
 
-!set the dimension six of list_symcoeff_tmp2(6,icoeffs,1)
+!set the dimension six of list_symcoeff(6,icoeffs,1)
  ncoeff_max = zero
  do icoeff = 1,ncoeff
 !  found the index of each coeff in list_fullcoeff
    do isym = 1,nsym
-     icoeff2 = getCoeffFromList(list_symcoeff_tmp2(:,:,1),&
-&                               list_symcoeff_tmp2(2,icoeff,isym),&
-&                               list_symcoeff_tmp2(3,icoeff,isym),&
-&                               list_symcoeff_tmp2(4,icoeff,isym),&
-&                               list_symcoeff_tmp2(1,icoeff,isym),&
-&                               real(list_symcoeff_tmp2(5,icoeff,isym),dp),ncoeff)
-     list_symcoeff_tmp2(6,icoeff,isym) = icoeff2
+     icoeff2 = getCoeffFromList(list_symcoeff(:,:,1),&
+&                               list_symcoeff(2,icoeff,isym),&
+&                               list_symcoeff(3,icoeff,isym),&
+&                               list_symcoeff(4,icoeff,isym),&
+&                               list_symcoeff(1,icoeff,isym),&
+&                               real(list_symcoeff(5,icoeff,isym),dp),ncoeff)
+     list_symcoeff(6,icoeff,isym) = icoeff2
 
 !    Check if the opposite is not already compute
 !    In this case, we set the 6 dimention to the opposite
-     icoeff_tmp = getCoeffFromList(list_symcoeff_tmp2(:,:,1),&
-&                                  list_symcoeff_tmp2(3,icoeff,isym),&
-&                                  list_symcoeff_tmp2(2,icoeff,isym),&
-&                                  list_symcoeff_tmp2(4,icoeff,isym),&
-&                                  list_symcoeff_tmp2(1,icoeff,isym),&
-&                                  real(list_symcoeff_tmp2(5,icoeff,isym),dp),ncoeff)
-     if(icoeff_tmp/=zero.and.icoeff_tmp<icoeff2) list_symcoeff_tmp2(6,icoeff,isym) = icoeff_tmp
+     icoeff_tmp = getCoeffFromList(list_symcoeff(:,:,1),&
+&                                  list_symcoeff(3,icoeff,isym),&
+&                                  list_symcoeff(2,icoeff,isym),&
+&                                  list_symcoeff(4,icoeff,isym),&
+&                                  list_symcoeff(1,icoeff,isym),&
+&                                  real(list_symcoeff(5,icoeff,isym),dp),ncoeff)
+     if(icoeff_tmp/=zero.and.icoeff_tmp<icoeff2) list_symcoeff(6,icoeff,isym) = icoeff_tmp
      if(icoeff2 > ncoeff_max) ncoeff_max = icoeff2
-
-!      do icoeff2=1,ncoeff
-!        if (list_symcoeff_tmp2(1,icoeff,isym)==list_symcoeff_tmp2(1,icoeff2,1).and.&
-! &          list_symcoeff_tmp2(2,icoeff,isym)==list_symcoeff_tmp2(2,icoeff2,1).and.&
-! &          list_symcoeff_tmp2(3,icoeff,isym)==list_symcoeff_tmp2(3,icoeff2,1).and.&
-! &          list_symcoeff_tmp2(4,icoeff,isym)==list_symcoeff_tmp2(4,icoeff2,1).and.&
-! &          list_symcoeff_tmp2(5,icoeff,isym)==list_symcoeff_tmp2(5,icoeff2,1))then
-!          list_symcoeff_tmp2(6,icoeff,isym) = icoeff2
-
-!          if(icoeff_tmp/=zero.and.icoeff_tmp<icoeff2) list_symcoeff_tmp2(6,icoeff,isym) = icoeff_tmp
-! !        Get the maximum number of coefficient
-!          if(icoeff2 > ncoeff_max) ncoeff_max = icoeff2
-          write(100,*),"lala",icoeff,isym,"=>",list_symcoeff_tmp2(:,icoeff,isym)
-!          exit
-!        end if
-!      end do
+!     write(100,*),"lala",icoeff,isym,"=>",list_symcoeff(:,icoeff,isym)
    end do
  end do
 
-!Remove opposite coefficient (Sr_x-Ru_x) and (Ru_x-Sr_x)
- ncoeff_sym = zero
- do icoeff_tmp = 1,ncoeff
-!   if(icoeff_tmp == list_symcoeff_tmp2(5,icoeff_tmp,1))then
-     ncoeff_sym = ncoeff_sym + 1
-!   end if
- end do
-
- ABI_ALLOCATE(list_symcoeff,(6,ncoeff_sym,nsym))
- icoeff = zero
- do icoeff_tmp = 1,ncoeff_sym
-!  found the index of each coeff in list_fullcoeff
-!   if(icoeff_tmp == list_symcoeff_tmp2(5,icoeff_tmp,1))then
-     icoeff = icoeff + 1
-     list_symcoeff(:,icoeff,:) = list_symcoeff_tmp2(1:6,icoeff_tmp,:)
- !  end if
- end do
- print*,icoeff,ncoeff_sym
-
- close(100)
+! close(100)
 
 
 !Set the max number of coeff inside list_symcoeff
@@ -754,7 +709,6 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
  ABI_DEALLOCATE(blkval)
  ABI_DEALLOCATE(list)
  ABI_DEALLOCATE(list_symcoeff_tmp)
- ABI_DEALLOCATE(list_symcoeff_tmp2)
  ABI_DEALLOCATE(indsym) 
  ABI_DEALLOCATE(symrec)
  ABI_DEALLOCATE(tnons)
@@ -813,7 +767,7 @@ subroutine fit_polynomial_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,&
 !Local variables-------------------------------
 !scalar
  integer :: ia,ib,icoeff,icoeff1_opp,icoeff_tmp,irpt,irpt_ref
- integer :: isym,iterm,ii,jj,mu,ncoeff_max,ndisp,nterm_max
+ integer :: isym,iterm,mu,ncoeff_max,ndisp,nterm_max
  real(dp):: coefficient,weight
 !arrays
  integer,allocatable :: atindx(:,:),cells(:,:,:),dir_int(:)
@@ -872,14 +826,13 @@ subroutine fit_polynomial_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,&
         atindx(1,:) = ia; atindx(2,:) = ib; dir_char(:) = mutodir(mu);
         dir_int(:)  = mu
         ndisp  = 1 
-
         powers(:)   = one
         cells(:,1,1) = (/0,0,0/)
         cells(:,2,1) = cell(:,irpt)
-         
-        iterm = iterm + 1
-        call polynomial_term_init(atindx,cells,dir_int,ndisp,terms(iterm),powers,weight)
-          
+        if(blkval(list_symcoeff(6,icoeff,isym))==1)then
+          iterm = iterm + 1
+          call polynomial_term_init(atindx,cells,dir_int,ndisp,terms(iterm),powers,weight)
+        end if
       end do!end do sym
 
       if(iterm > 0)then
@@ -888,7 +841,7 @@ subroutine fit_polynomial_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,&
         call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),terms(1:iterm))
       end if
 
-! !    Deallocate the terms
+!     Deallocate the terms
       do iterm=1,nterm_max
         call polynomial_term_free(terms(iterm))
       end do
@@ -903,6 +856,9 @@ subroutine fit_polynomial_getOrder1(cell,coeffs_out,cut_off,list_symcoeff,&
       ia   = list_symcoeff(2,icoeff,isym)
       ib   = list_symcoeff(3,icoeff,isym)
       irpt = list_symcoeff(4,icoeff,isym)
+!     find the opposite if the to atoms are in the same cell (ref cell)
+!     Can not have the opposite of (Sr-O1[100]) because 1st atom is always 
+!     in the unit cell
       if(irpt==irpt_ref) then
         icoeff1_opp = getCoeffFromList(list_symcoeff(:,:,1),ib,ia,irpt,mu,weight,ncoeff)
         blkval(icoeff1_opp) = zero
@@ -1028,7 +984,7 @@ subroutine fit_polynomial_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
 !Local variables-------------------------------
 !scalar
  integer :: ia,ib,icoeff1,icoeff2,icoeff_tmp
- integer :: ii,jj,jsym,kk,idisp,irpt,irpt_ref,isym,iterm
+ integer :: ii,jj,kk,idisp,irpt,irpt_ref,isym,iterm
  integer :: mu,ncoeff_max,ndisp,nterm_max,power
  real(dp):: coefficient,weight
  logical :: compatible
@@ -1077,13 +1033,13 @@ subroutine fit_polynomial_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
  
  do icoeff1=1,ncoeff
 !TEST_AM
-   do isym=1,nsym
-     if(list_coeff(6,icoeff1,isym)==0)then
-       print*,"problem tutu",icoeff1,isym,":",list_coeff(:,icoeff1,isym)
-       stop
-     end if
-   end do
-   !TEST_AM
+!   do isym=1,nsym
+!     if(list_coeff(6,icoeff1,isym)==0)then
+!       print*,"problem....",icoeff1,isym,":",list_coeff(:,icoeff1,isym)
+!       stop
+!     end if
+!   end do
+!TEST_AM
    do icoeff2=icoeff1,ncoeff
 
      if(blkval(icoeff1,icoeff2)==1)then 
@@ -1097,13 +1053,14 @@ subroutine fit_polynomial_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
 
          if(blkval(list_coeff(6,coeffs(1),isym),list_coeff(6,coeffs(2),isym))==1)then 
 !          Treat this coeff
+           weight = 1
            do idisp=1,ndisp
 !            Get index of this displacement term
              mu   = list_coeff(1,coeffs(idisp),isym)
              ia   = list_coeff(2,coeffs(idisp),isym)
              ib   = list_coeff(3,coeffs(idisp),isym)
              irpt = list_coeff(4,coeffs(idisp),isym)
-             weight = list_coeff(5,coeffs(idisp),isym)
+             weight = weight*list_coeff(5,coeffs(idisp),isym)
 !            Fill First term arrays 
              atindx(1,idisp) = ia; atindx(2,idisp) = ib;
              dir_char(idisp) = mutodir(mu); dir_int(idisp) = mu
@@ -1120,7 +1077,7 @@ subroutine fit_polynomial_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
              end if
            end do
            compatible = .true.
-! !          Check the cut off and if the coeff is valid
+!          Check the cut off and if the coeff is valid
            do ii=1,power
              do jj=ii+1,power
                 do kk=2,3
@@ -1138,57 +1095,53 @@ subroutine fit_polynomial_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
               end do
             end do
 
-           if(compatible.and.blkval(coeffs_sym(1),coeffs_sym(2))==1)then
+           if(compatible)then
              iterm = iterm + 1
              call polynomial_term_init(atindx,cells,dir_int,ndisp,terms(iterm),powers,weight)
            end if
 
-!          This coeff is now computed and opposite
-           blkval(coeffs_sym(1),coeffs_sym(2)) = 0
-           blkval(coeffs_sym(2),coeffs_sym(1)) = 0
-           blkval(coeffs_opp(1),coeffs_opp(2)) = 0
-           blkval(coeffs_opp(2),coeffs_opp(1)) = 0
-           blkval(coeffs_sym(1),coeffs_opp(2)) = 0
-           blkval(coeffs_opp(1),coeffs_sym(2)) = 0
-           blkval(coeffs_sym(2),coeffs_opp(1)) = 0
-           blkval(coeffs_opp(2),coeffs_sym(1)) = 0
          end if!end if blkval==1
        end do!end do sym
 
        if(iterm > 0)then
 !        Get the name of this coefficient if the term is the first         
-         name = ""
 !         write(name,'(I0,a,I0)') icoeff1," and ",icoeff2
-         do idisp=1,terms(1)%ndisp
-           write(powerchar,'(I0)') terms(1)%power(idisp)
-           call polynomial_coeff_getName(text,atm1=symbols(terms(1)%atindx(1,idisp)),&
-&                                             atm2=symbols(terms(1)%atindx(2,idisp)),&
-&                                             dir=mutodir(terms(1)%direction(idisp)),&
-&                                             power=trim(powerchar),&
-&                                             cell_atm1=terms(1)%cell(:,1,idisp),&
-&                                             cell_atm2=terms(1)%cell(:,2,idisp))
-           name = trim(name)//trim(text)          
-         end do
 !        increase coefficients and set it
          icoeff_tmp = icoeff_tmp + 1
-         call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),terms(1:iterm),name=name)
+         call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),terms(1:iterm))
        end if
 
 !      Deallocate the terms
        do iterm=1,nterm_max
          call polynomial_term_free(terms(iterm))
        end do
-!     This coeff is now computed
-       blkval(icoeff1,icoeff2)=0
-       blkval(icoeff2,icoeff1)=0
-     else
-!      Set this coeff and all symetric to 0 
-!      because already computed
-       do isym=1,nsym
-         blkval(list_coeff(6,icoeff1,isym),list_coeff(6,icoeff2,isym))=zero
-         blkval(list_coeff(6,icoeff2,isym),list_coeff(6,icoeff1,isym))=zero
-       end do
      end if!end if blkval==1
+!    Set this coeff and all symetric to 0 
+!    because already computed
+     do isym=1,nsym
+       do idisp=1,ndisp
+!        Get index of this displacement term
+         mu   = list_coeff(1,coeffs(idisp),isym)
+         ia   = list_coeff(2,coeffs(idisp),isym)
+         ib   = list_coeff(3,coeffs(idisp),isym)
+         irpt = list_coeff(4,coeffs(idisp),isym)
+!        Set the coefficient number of this symetric and opposite
+         coeffs_sym(idisp) = list_coeff(6,coeffs(idisp),isym)
+         if(irpt==irpt_ref)then
+           coeffs_opp(idisp) = getCoeffFromList(list_coeff(:,:,1),ib,ia,irpt,mu,weight,ncoeff)
+         else
+           coeffs_opp(idisp) = list_coeff(6,coeffs(idisp),isym)
+         end if
+       end do
+       blkval(coeffs_sym(1),coeffs_sym(2)) = 0
+       blkval(coeffs_sym(2),coeffs_sym(1)) = 0
+       blkval(coeffs_opp(1),coeffs_opp(2)) = 0
+       blkval(coeffs_opp(2),coeffs_opp(1)) = 0
+       blkval(coeffs_sym(1),coeffs_opp(2)) = 0
+       blkval(coeffs_opp(1),coeffs_sym(2)) = 0
+       blkval(coeffs_sym(2),coeffs_opp(1)) = 0
+       blkval(coeffs_opp(2),coeffs_sym(1)) = 0
+     end do
    end do!end do coeff_sym1
  end do!end do coeff_sym2
 
@@ -1215,11 +1168,24 @@ subroutine fit_polynomial_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
  icoeff1 = zero
  do icoeff_tmp=1,ncoeff_max
    if (coeffs_tmp(icoeff_tmp)%coefficient/=zero)then
+     name = ''
+     do idisp=1,coeffs_tmp(icoeff_tmp)%terms(1)%ndisp
+       write(powerchar,'(I0)') coeffs_tmp(icoeff_tmp)%terms(1)%power(idisp)
+       call polynomial_coeff_getName(text,atm1=symbols(coeffs_tmp(icoeff_tmp)%terms(1)%atindx(1,idisp)),&
+&                                         atm2=symbols(coeffs_tmp(icoeff_tmp)%terms(1)%atindx(2,idisp)),&
+&                                         dir=mutodir(coeffs_tmp(icoeff_tmp)%terms(1)%direction(idisp)),&
+&                                         power=trim(powerchar),&
+&                                         cell_atm1=coeffs_tmp(icoeff_tmp)%terms(1)%cell(:,1,idisp),&
+&                                         cell_atm2=coeffs_tmp(icoeff_tmp)%terms(1)%cell(:,2,idisp))
+       name = trim(name)//trim(text)          
+     end do
      icoeff1 = icoeff1 + 1
      call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
 &                               coeffs_out(icoeff1),coeffs_tmp(icoeff_tmp)%terms,&
-&                               name=coeffs_tmp(icoeff_tmp)%name)
-     write(300,*)icoeff1,coeffs_tmp(icoeff_tmp)%nterm
+&                               name=name)
+!TEST_AM
+!     write(300,*)icoeff1,coeffs_tmp(icoeff_tmp)%nterm
+!TEST_AM
    end if
  end do
 
@@ -1236,8 +1202,9 @@ subroutine fit_polynomial_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
  end do
  ABI_DEALLOCATE(coeffs_tmp)
 
- close(300)
- close(200)
+!TEST_AM
+! close(300)
+!TEST_AM
 end subroutine fit_polynomial_getOrder2
 !!***
 
