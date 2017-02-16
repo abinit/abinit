@@ -68,8 +68,8 @@ subroutine chkvars (string)
 !Note: Do not use "double quotation mark" for the string since it triggers a bug in docchk.py (abirules script)
 !<ABINIT_VARS>
 !A
- list_vars=                 ' iomode accuracy acell adpimd adpimd_gamma'
- list_vars=                 ' algalch amu angdeg asr atvshift autoparal awtr'
+ list_vars=                 ' accuracy acell adpimd adpimd_gamma'
+ list_vars=trim(list_vars)//' algalch amu angdeg asr atvshift autoparal awtr'
 !B
  list_vars=trim(list_vars)//' bandpp bdberry bdeigrf bdgw berryopt berrysav berrystep bfield bmass'
  list_vars=trim(list_vars)//' boxcenter boxcutmin brvltt builtintest'
@@ -131,11 +131,10 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' gwls_list_proj_freq gwls_nseeds gwls_n_proj_freq gwls_recycle'
  list_vars=trim(list_vars)//' gwls_first_seed gwls_model_parameter gwls_second_model_parameter gwls_npt_gauss_quad'
  list_vars=trim(list_vars)//' gwls_dielectric_model gwls_print_debug gwls_band_index gwls_exchange gwls_correlation'
-
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
- list_vars=trim(list_vars)//' imgmov inclvkb intxc ionmov iqpt'
+ list_vars=trim(list_vars)//' imgmov inclvkb intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
  list_vars=trim(list_vars)//' irdbseig irdbsreso irdddb irdddk irdden'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
