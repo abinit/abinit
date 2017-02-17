@@ -481,7 +481,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
    ! FIXME: mkphdos expects qshift(3) instead of qshift(3, nqshift)
    ! TODO: Parallelize this routine.
-   call mkphdos(phdos,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,dtset%ph_smear,dtset%ph_ngqpt,dtset%ph_qshift)
+   call mkphdos(phdos,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,dtset%ph_smear,dtset%ph_ngqpt,dtset%ph_qshift,comm)
 
    !call phdos_print_debye(phdos, cryst%ucvol)
    if (my_rank == master) then

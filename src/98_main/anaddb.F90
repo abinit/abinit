@@ -454,7 +454,7 @@ program anaddb
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,message,'COLL')
 
-   call mkphdos(Phdos,Crystal,Ifc, inp%prtdos,inp%dosdeltae,inp%dossmear, inp%ng2qpt, inp%q2shft)
+   call mkphdos(Phdos,Crystal,Ifc, inp%prtdos,inp%dosdeltae,inp%dossmear, inp%ng2qpt, inp%q2shft, comm)
 
    phdos_fname = TRIM(filnam(2))//"_MSQD_T"
    call phdos_print_msqd(Phdos, phdos_fname, inp%ntemper, inp%tempermin, inp%temperinc)

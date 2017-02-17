@@ -524,7 +524,7 @@ end subroutine phdos_free
 !!
 !! SOURCE
 
-subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qshift)
+subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qshift,comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -541,6 +541,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: prtdos
+ integer,intent(in) :: comm
  real(dp),intent(in) :: dosdeltae,dossmear
  type(crystal_t),intent(in) :: Crystal
  type(ifc_type),intent(in) :: Ifc
@@ -555,6 +556,8 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  integer :: facbrv,iat,jat,idir,imesh,imode,io,iq_ibz,itype,nkpt_fullbz
  integer :: nmesh,nqbz,nqpt_max,nqshft,option,timrev,ierr,natom,nomega
  integer :: jdir, idispl, jdispl, isym
+ integer :: nprocs, my_rank
+ integer,parameter :: master=0
  real(dp) :: nsmallq
  real(dp) :: dum,gaussfactor,gaussprefactor,gaussval,low_bound,max_occ,pnorm
  real(dp) :: upr_bound,xx,gaussmaxarg
@@ -583,6 +586,10 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 ! *********************************************************************
 
  DBG_ENTER("COLL")
+
+! nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+! if (my_rank /= master) return
+
 
  ! Consistency check.
  if (ALL(prtdos /= [1,2])) then
@@ -761,6 +768,17 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
      speedofsound = zero
      do iq_ibz=1,PHdos%nqibz
 
+!TODO: this is where the mpi distribution should happen.
+! then sync the following integrals:
+!   speedofsound
+!   nsmallq
+!   PHdos%phdos
+!   PHdos%msqd_dos_atom
+!   full_phfrq
+!   full_eigvec
+
+
+
        ! Fourier interpolation.
        call ifc_fourq(Ifc,Crystal,qibz(:,iq_ibz),phfrq,displ,out_eigvec=eigvec)
 
@@ -770,7 +788,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 
        normq = sum(qibz(:,iq_ibz)**2)
        if (normq < max_smallq .and. normq > tol6) then
-          call phdos_print_vsound(ab_out,eigvec, Crystal%gmet, natom, phfrq, qibz(:,iq_ibz), Crystal%ucvol, 0, speedofsound_)
+          call phdos_calc_vsound(eigvec, Crystal%gmet, natom, phfrq, qibz(:,iq_ibz), speedofsound_)
          speedofsound = speedofsound + speedofsound_*wtqibz(iq_ibz)
          nsmallq = nsmallq + wtqibz(iq_ibz)
        end if
@@ -1172,6 +1190,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
 !arrays
  integer :: rfphon(4),rfelfd(4),rfstrs(4)
  integer,allocatable :: ndiv(:)
+ real(dp) :: speedofsound(3)
  real(dp) :: qphnrm(3), qphon(3), qphon_padded(3,3),res(3)
  real(dp) :: d2cart(2,ddb%msize),real_qphon(3)
  real(dp) :: displ(2*3*ddb%natom*3*ddb%natom),eigval(3,ddb%natom)
@@ -1310,7 +1329,8 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
    call wrap2_pmhalf(qphon, real_qphon, res)
    if (sqrt(real_qphon(1)**2+real_qphon(2)**2+real_qphon(3)**2) < quarter .and. &
 &   sqrt(real_qphon(1)**2+real_qphon(2)**2+real_qphon(3)**2) > tol6) then
-     call phdos_print_vsound(ab_out,eigvec, Crystal%gmet, natom, phfrq, real_qphon, Crystal%ucvol, 1)
+     call phdos_calc_vsound(eigvec, Crystal%gmet, natom, phfrq, real_qphon, speedofsound)
+     if (my_rank == master) call phdos_print_vsound(ab_out, Crystal%ucvol, speedofsound)
    end if
 
  end do ! iphl1
@@ -1353,17 +1373,15 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,tcpui,twalli,zeff,comm)
 end subroutine mkphbs
 !!***
 
-
-!!****f* m_phonons/phdos_print_vsound
+!!****f* m_phonons/phdos_calc_vsound
 !!
 !! NAME
-!! phdos_print_vsound
+!! phdos_calc_vsound
 !!
 !! FUNCTION
-!!  From the frequencies for acoustic modes at small q, estimate speed of sound and Debye temperature
+!!  From the frequencies for acoustic modes at small q, estimate speed of sound (which also gives Debye temperature)
 !!
 !! INPUTS
-!! unit=Fortran unit number
 !! eigvec(2,3*natom,3*natom) = phonon eigenvectors at present q-point
 !! gmet(3,3) = metric tensor in reciprocal space.
 !! natom = number of atoms in the unit cell
@@ -1380,14 +1398,14 @@ end subroutine mkphbs
 !!
 !! SOURCE
 
-subroutine phdos_print_vsound(unit,eigvec,gmet,natom,phfrq,qphon,ucvol, &
-&   tprint, speedofsound)
+subroutine phdos_calc_vsound(eigvec,gmet,natom,phfrq,qphon, &
+&   speedofsound)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'phdos_print_vsound'
+#define ABI_FUNC 'phdos_calc_vsound'
  use interfaces_14_hidewrite
 !End of the abilint section
 
@@ -1395,21 +1413,18 @@ subroutine phdos_print_vsound(unit,eigvec,gmet,natom,phfrq,qphon,ucvol, &
 
 !Arguments -------------------------------
 !scalras
- integer, intent(in) :: natom,unit
- real(dp), intent(in) :: ucvol
- integer, intent(in) :: tprint ! to print or not
+ integer, intent(in) :: natom
 !arrays
  real(dp), intent(in) :: gmet(3,3),qphon(3)
  real(dp), intent(in) :: phfrq(3*natom),eigvec(2,3*natom,3*natom)
 
- real(dp), intent(out), optional :: speedofsound(3)
+ real(dp), intent(out) :: speedofsound(3)
 
 !Local variables -------------------------
  integer :: iatref,imode, iatom, isacoustic, imode_acoustic
  character(len=500) :: msg
  real(dp) :: qnormcart
  real(dp) :: qtmp(3)
- real(dp) :: tdebye
 
 ! *********************************************************************
 
@@ -1424,45 +1439,97 @@ subroutine phdos_print_vsound(unit,eigvec,gmet,natom,phfrq,qphon,ucvol, &
    enddo
 !  Now compute scalar product, and check they are all positive
    do iatom = 1, natom
-     if (sum(eigvec(:,(iatom-1)*3+1:(iatom-1)*3+3, imode)*eigvec(:,(iatref-1)*3+1:(iatref-1)*3+3, imode)) < tol16 ) isacoustic = 0
+     if (sum(eigvec(:,(iatom-1)*3+1:(iatom-1)*3+3, imode)&
+&           *eigvec(:,(iatref-1)*3+1:(iatref-1)*3+3, imode)) < tol16 ) isacoustic = 0
    end do
    if (isacoustic == 0) cycle
    imode_acoustic = imode_acoustic + 1
 
-   if (tprint > 0) then
-     write (msg, '(a,I6,a,3F12.4)') ' Found acoustic mode ', imode, ' for |q| in red coord < 0.25 ; q = ', qphon
-     call wrtout(unit,msg,'COLL')
-     call wrtout(std_out,msg,'COLL')
-   end if
+!   write (msg, '(a,I6,a,3F12.4)') ' Found acoustic mode ', imode, ' for |q| in red coord < 0.25 ; q = ', qphon
+!   call wrtout(std_out,msg,'COLL')
 
    qtmp = matmul(gmet, qphon)
    qnormcart = two * pi * sqrt(sum(qphon*qtmp))
    speedofsound(imode_acoustic) = phfrq(imode) / qnormcart
+ end do
 
+end subroutine phdos_calc_vsound
+!!***
+
+!!****f* m_phonons/phdos_print_vsound
+!!
+!! NAME
+!! phdos_print_vsound
+!!
+!! FUNCTION
+!!  Print out estimate speed of sound and Debye temperature at this (small) q
+!!  should only be called by master proc for the hard unit number
+!!
+!! INPUTS
+!! unit=Fortran unit number
+!! speedofsound(3) 
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      m_phonons
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine phdos_print_vsound(iunit,ucvol,speedofsound)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'phdos_print_vsound'
+ use interfaces_14_hidewrite
+!End of the abilint section
+
+ implicit none
+
+!Arguments -------------------------------
+!scalras
+ integer, intent(in) :: iunit
+ real(dp), intent(in) :: ucvol
+!arrays
+ real(dp), intent(in) :: speedofsound(3)
+
+!Local variables -------------------------
+ integer :: imode_acoustic
+ character(len=500) :: msg
+ real(dp) :: tdebye
+
+! *********************************************************************
+
+ do imode_acoustic = 1, 3
 !  from phonon frequency, estimate speed of sound by linear interpolation from Gamma
-   if (tprint > 0) then
-     write (msg, '(2a,a,E20.10,a,a,F20.5)') &
-&     ' Speed of sound for this q and mode:',ch10,&
-&     '   in atomic units: ', speedofsound(imode_acoustic), ch10,&
-&     '   in SI units m/s: ', speedofsound(imode_acoustic) * Bohr_Ang * 1.d-10 / Time_Sec
-     call wrtout(unit,msg,'COLL')
-     call wrtout(std_out,msg,'COLL')
+   write (msg, '(2a,a,E20.10,a,a,F20.5)') &
+&   ' Speed of sound for this q and mode:',ch10,&
+&   '   in atomic units: ', speedofsound(imode_acoustic), ch10,&
+&   '   in SI units m/s: ', speedofsound(imode_acoustic) * Bohr_Ang * 1.d-10 / Time_Sec
+   call wrtout(iunit,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
 
 !  also estimate partial Debye temperature, = energy if this band went to zone edge
-     tdebye = speedofsound(imode_acoustic) * pi * (six / pi / ucvol)**(third)
-     write (msg, '(2a,a,E20.10,a,a,F20.5)') &
-&     ' Partial Debye temperature for this q and mode:',ch10,&
-&     '   in atomic units: ', tdebye, ch10,&
-&     '   in SI units K  : ', tdebye * Ha_K
-     call wrtout(unit,msg,'COLL')
-     call wrtout(unit,"",'COLL')
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(std_out,"",'COLL')
-   end if
+   tdebye = speedofsound(imode_acoustic) * pi * (six / pi / ucvol)**(third)
+   write (msg, '(2a,a,E20.10,a,a,F20.5)') &
+&   ' Partial Debye temperature for this q and mode:',ch10,&
+&   '   in atomic units: ', tdebye, ch10,&
+&   '   in SI units K  : ', tdebye * Ha_K
+   call wrtout(iunit,msg,'COLL')
+   call wrtout(iunit,"",'COLL')
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,"",'COLL')
  end do
 
 end subroutine phdos_print_vsound
 !!***
+
+
+
 
 !----------------------------------------------------------------------
 
