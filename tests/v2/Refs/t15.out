@@ -1193,7 +1193,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 -  5.436913E+02  6.358871E+02  7.394145E+02  7.849365E+02  7.850696E+02
 -  7.934695E+02  1.041859E+03  1.049616E+03  1.060853E+03  1.103126E+03
 -  1.154676E+03  1.213308E+03
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.2000
  Speed of sound for this q and mode:
    in atomic units:     0.1474358297E-02
    in SI units m/s:           3225.44075
@@ -1201,7 +1200,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
    in atomic units:     0.6408674567E-03
    in SI units K  :            202.36970
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.2000
  Speed of sound for this q and mode:
    in atomic units:     0.2350255611E-02
    in SI units m/s:           5141.63364
@@ -1209,7 +1207,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
    in atomic units:     0.1021598576E-02
    in SI units K  :            322.59493
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.2000
  Speed of sound for this q and mode:
    in atomic units:     0.2821676181E-02
    in SI units m/s:           6172.95630
@@ -1233,7 +1230,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 -  5.422747E+02  6.493571E+02  7.282629E+02  7.847894E+02  7.863491E+02
 -  7.931571E+02  1.042598E+03  1.048456E+03  1.061166E+03  1.108829E+03
 -  1.147984E+03  1.215240E+03
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.1500
  Speed of sound for this q and mode:
    in atomic units:     0.1667874348E-02
    in SI units m/s:           3648.79412
@@ -1241,7 +1237,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
    in atomic units:     0.7249841465E-03
    in SI units K  :            228.93162
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.1500
  Speed of sound for this q and mode:
    in atomic units:     0.2281099681E-02
    in SI units m/s:           4990.34182
@@ -1249,7 +1244,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
    in atomic units:     0.9915381858E-03
    in SI units K  :            313.10262
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.1500
  Speed of sound for this q and mode:
    in atomic units:     0.2890145152E-02
    in SI units m/s:           6322.74527
@@ -1273,7 +1267,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 -  5.413209E+02  6.630178E+02  7.162118E+02  7.846183E+02  7.877943E+02
 -  7.925364E+02  1.043415E+03  1.047337E+03  1.061380E+03  1.114913E+03
 -  1.141243E+03  1.216624E+03
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.1000
  Speed of sound for this q and mode:
    in atomic units:     0.1851310015E-02
    in SI units m/s:           4050.09473
@@ -1281,7 +1274,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
    in atomic units:     0.8047191401E-03
    in SI units K  :            254.10990
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.1000
  Speed of sound for this q and mode:
    in atomic units:     0.2185286520E-02
    in SI units m/s:           4780.73221
@@ -1289,7 +1281,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
    in atomic units:     0.9498905504E-03
    in SI units K  :            299.95136
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.1000
  Speed of sound for this q and mode:
    in atomic units:     0.2935930823E-02
    in SI units m/s:           6422.91018
@@ -1313,7 +1304,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 -  5.407696E+02  6.767018E+02  7.034737E+02  7.845288E+02  7.892034E+02
 -  7.916373E+02  1.044303E+03  1.046269E+03  1.061505E+03  1.121275E+03
 -  1.134506E+03  1.217456E+03
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.0500
  Speed of sound for this q and mode:
    in atomic units:     0.2022166952E-02
    in SI units m/s:           4423.87695
@@ -1321,7 +1311,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
    in atomic units:     0.8789864676E-03
    in SI units K  :            277.56164
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.0500
  Speed of sound for this q and mode:
    in atomic units:     0.2044370271E-02
    in SI units m/s:           4472.45096
@@ -1329,7 +1318,6 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
    in atomic units:     0.8886377072E-03
    in SI units K  :            280.60926
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.0000      0.0000      0.0500
  Speed of sound for this q and mode:
    in atomic units:     0.2947557361E-02
    in SI units m/s:           6448.34546

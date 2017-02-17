@@ -162,7 +162,6 @@
  Phonon frequencies in cm-1    :
 -  2.540899E+01  2.540899E+01  5.835898E+01  2.705455E+02  2.705455E+02
 -  5.790855E+02  5.864652E+02  5.864652E+02  6.700702E+02
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.0500      0.0000      0.0500
  Speed of sound for this q and mode:
    in atomic units:     0.1749498374E-02
    in SI units m/s:           3827.36229
@@ -170,7 +169,6 @@
    in atomic units:     0.1140057643E-02
    in SI units K  :            360.00130
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.0500      0.0000      0.0500
  Speed of sound for this q and mode:
    in atomic units:     0.1749498374E-02
    in SI units m/s:           3827.36229
@@ -178,7 +176,6 @@
    in atomic units:     0.1140057643E-02
    in SI units K  :            360.00130
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.0500      0.0000      0.0500
  Speed of sound for this q and mode:
    in atomic units:     0.4018221664E-02
    in SI units m/s:           8790.62839
@@ -194,7 +191,6 @@
  Phonon frequencies in cm-1    :
 -  4.966880E+01  4.966880E+01  1.150770E+02  2.739506E+02  2.739506E+02
 -  5.555446E+02  5.850137E+02  5.850137E+02  6.717498E+02
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.1000      0.0000      0.1000
  Speed of sound for this q and mode:
    in atomic units:     0.1709935976E-02
    in SI units m/s:           3740.81198
@@ -202,7 +198,6 @@
    in atomic units:     0.1114276873E-02
    in SI units K  :            351.86039
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.1000      0.0000      0.1000
  Speed of sound for this q and mode:
    in atomic units:     0.1709935976E-02
    in SI units m/s:           3740.81198
@@ -210,7 +205,6 @@
    in atomic units:     0.1114276873E-02
    in SI units K  :            351.86039
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.1000      0.0000      0.1000
  Speed of sound for this q and mode:
    in atomic units:     0.3961730139E-02
    in SI units m/s:           8667.04238
@@ -226,7 +220,6 @@
  Phonon frequencies in cm-1    :
 -  7.177596E+01  7.177596E+01  1.685751E+02  2.795055E+02  2.795055E+02
 -  5.166465E+02  5.827785E+02  5.827785E+02  6.744351E+02
- Found acoustic mode      1 for |q| in red coord < 0.25 ; q =       0.1500      0.0000      0.1500
  Speed of sound for this q and mode:
    in atomic units:     0.1647342753E-02
    in SI units m/s:           3603.87733
@@ -234,7 +227,6 @@
    in atomic units:     0.1073488106E-02
    in SI units K  :            338.98033
 
- Found acoustic mode      2 for |q| in red coord < 0.25 ; q =       0.1500      0.0000      0.1500
  Speed of sound for this q and mode:
    in atomic units:     0.1647342753E-02
    in SI units m/s:           3603.87733
@@ -242,7 +234,6 @@
    in atomic units:     0.1073488106E-02
    in SI units K  :            338.98033
 
- Found acoustic mode      3 for |q| in red coord < 0.25 ; q =       0.1500      0.0000      0.1500
  Speed of sound for this q and mode:
    in atomic units:     0.3868995894E-02
    in SI units m/s:           8464.16848

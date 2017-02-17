@@ -1141,7 +1141,6 @@
 - -1.344440E+02 -1.344440E+02 -5.508829E+01  3.510362E+01  3.510362E+01
 -  5.085657E+01  1.213243E+02  1.213243E+02  1.296226E+02  1.891411E+02
 -  1.891411E+02  3.300142E+02  6.046845E+02  6.046845E+02  7.507611E+02
- Found acoustic mode      4 for |q| in red coord < 0.25 ; q =       0.1250      0.1250      0.1250
  Speed of sound for this q and mode:
    in atomic units:     0.9154079440E-03
    in SI units m/s:           2002.62995
@@ -1149,7 +1148,6 @@
    in atomic units:     0.4582832773E-03
    in SI units K  :            144.71424
 
- Found acoustic mode      5 for |q| in red coord < 0.25 ; q =       0.1250      0.1250      0.1250
  Speed of sound for this q and mode:
    in atomic units:     0.9154079440E-03
    in SI units m/s:           2002.62995
@@ -1157,7 +1155,6 @@
    in atomic units:     0.4582832773E-03
    in SI units K  :            144.71424
 
- Found acoustic mode      9 for |q| in red coord < 0.25 ; q =       0.1250      0.1250      0.1250
  Speed of sound for this q and mode:
    in atomic units:     0.3380208185E-02
    in SI units m/s:           7394.85188
