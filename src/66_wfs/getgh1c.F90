@@ -149,15 +149,15 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 
 !Compatibility tests
  if(gs_hamkq%usepaw==1.and.(ipert>=0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4))) then
-   if ((optnl>=1.and.(.not.allocated(rf_hamkq%e1kbfr))).or. &
-&   (optnl>=2.and.(.not.allocated(rf_hamkq%e1kbsc))))then
+   if ((optnl>=1.and.(.not.associated(rf_hamkq%e1kbfr))).or. &
+&   (optnl>=2.and.(.not.associated(rf_hamkq%e1kbsc))))then
      msg='ekb derivatives must be allocated for ipert<=natom or natom+3/4 !'
      MSG_BUG(msg)
    end if
  end if
  if(gs_hamkq%usepaw==1.and.(ipert==natom+2)) then
-   if ((optnl>=1.and.(.not.allocated(rf_hamkq%e1kbfr))).or. &
-&   (optnl>=2.and.(.not.allocated(rf_hamkq%e1kbsc))))then
+   if ((optnl>=1.and.(.not.associated(rf_hamkq%e1kbfr))).or. &
+&   (optnl>=2.and.(.not.associated(rf_hamkq%e1kbsc))))then
      msg='ekb derivatives must be allocated for ipert=natom+2 !'
      MSG_BUG(msg)
    end if

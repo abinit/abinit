@@ -785,7 +785,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 &                       + (displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+1) &
 &                       -  displ(2*(idispl-1)+2)* displ(2*(jdispl-1)+2) &
 &                       +  displ(2*(idispl-1)+2)* displ(2*(jdispl-1)+1) &
-&                       -  displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+2)) * wtqibz(iq_ibz) * gaussval 
+&                       -  displ(2*(idispl-1)+1)* displ(2*(jdispl-1)+2)) * wtqibz(iq_ibz) * gaussval
                    end do ! jdir
                  end do ! idir
                  ! msqd_atom_tmp is in cartesian coordinates
@@ -881,7 +881,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
 &                -  full_eigvec(2,idir,iat,imode,iq_ibz)* full_eigvec(2,jdir,iat,imode,iq_ibz) &
 &                +  full_eigvec(2,idir,iat,imode,iq_ibz)* full_eigvec(1,jdir,iat,imode,iq_ibz) &
 &                -  full_eigvec(1,idir,iat,imode,iq_ibz)* full_eigvec(2,jdir,iat,imode,iq_ibz)) &
-&                * dtweightde(iq_ibz,io) 
+&                * dtweightde(iq_ibz,io)
              end do
            end do
 
@@ -905,7 +905,7 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
  end if ! prtdos 2 = tetrahedra
 
 ! normalize by nsym : symmetrization is used in all prtdos cases
- PHdos%msqd_dos_atom = PHdos%msqd_dos_atom / Crystal%nsym 
+ PHdos%msqd_dos_atom = PHdos%msqd_dos_atom / Crystal%nsym
 
 
  ABI_FREE(symcart)
@@ -1453,7 +1453,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
 !scalars
  integer, intent(in) :: ntemper
  type(phonon_dos_type),intent(in) :: PHdos
- character(len=fnlen) :: fname
+ character(len=*),intent(in) :: fname
  real(dp), intent(in) :: tempermin, temperinc
 
 !arrays
@@ -1474,7 +1474,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
 ! write a header
    write (msg, '(2a)') '# mean square displacement for each atom as a function of T'
 
-! NB: this call to wrtout does not seem to work from the eph executable, even in sequential, and whether within or outside a clause for me==master. 
+! NB: this call to wrtout does not seem to work from the eph executable, even in sequential, and whether within or outside a clause for me==master.
 !  Do not change this to wrtout without checking extensively.
    !call wrtout(iunit, msg, 'COLL')
    write (iunit, '(a)') trim(msg)

@@ -1466,7 +1466,7 @@ subroutine hdr_read_from_fname(Hdr,fname,fform,comm)
      end if
 
      call hdr_fort_read(Hdr,fh,fform,rewind=(rdwr1==1))
-     ABI_CHECK(fform /= 0, sjoin("Error while reading:", my_fname))
+     ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
      close(fh)
 
    else

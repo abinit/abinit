@@ -452,7 +452,7 @@
 # it. If set to "yes", the configure script will stop if it does not find
 # a working MPI environment.
 #
-enable_mpi="yes"
+enable_mpi="no"
 
 # Activate the MPI_IN_PLACE option whenever possible (default is no)
 # WARNING: this feature requires MPI2, ignored if the MPI library
@@ -473,7 +473,7 @@ enable_mpi="yes"
 # it. If set to "yes", the configure script will stop if it does not find
 # a working MPI I/O environment.
 #
-enable_mpi_io="yes"
+enable_mpi_io="no"
 
 # Enable MPI-IO mode in Abinit (use MPI-IO as default IO library,
 # change the default values of accesswff)   
@@ -515,7 +515,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/usr"
+#with_mpi_prefix="/usr/local/openmpi-gcc"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -675,14 +675,13 @@ with_mpi_prefix="/usr"
 # Transferable I/O (TRIO) connector                                            #
 # ---------------------------------------------------------------------------- #
 
-# Flavor of transferable I/O library to support (default is netcdf+etsf_io)
+# Flavor of transferable I/O library to support (default is netcdf)
 #
 # By transferable I/O (TRIO), we mean that the files produced by Abinit
 # will be transferable seamlessly to other computers and codes
 #
 # Supported libraries:
 #
-#   * etsf_io  : ETSF_IO file format (requires netcdf)
 #   * psml     : XML pseudopotential format io library
 #   * netcdf   : NetCDF file format
 #   * yaml     : YAML output
@@ -690,17 +689,7 @@ with_mpi_prefix="/usr"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf+etsf_io"
-
-                       # ------------------------------ #
-
-# Include flags for the ETSF_IO library (default is unset)
-#
-#with_etsf_io_incs="-I/opt/etsf/include"
-
-# Link flags for the ETSF_IO library (default is unset)
-#
-#with_etsf_io_libs="-L/opt/etsf/lib -letsf_io"
+with_trio_flavor="netcdf"
 
                        # ------------------------------ #
 
@@ -716,11 +705,11 @@ with_trio_flavor="netcdf+etsf_io"
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I/usr/include"
+with_netcdf_incs="-I/usr/local/fallbacks/intel/16.0/mpi/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L/usr/lib -lnetcdf -lnetcdff"
+with_netcdf_libs="-L/usr/local/fallbacks/intel/16.0/mpi/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -764,15 +753,15 @@ with_netcdf_libs="-L/usr/lib -lnetcdf -lnetcdff"
 #   * By default, Abinit will use the internal Goedecker FFT library
 #   * This connector is highly experimental - USE AT YOUR OWN RISKS!
 #
-with_fft_flavor="fftw3"
+with_fft_flavor="dfti"
 
 # Include flags for the FFT library (default is unset)
 #
-with_fft_incs="-I/usr/include/"
+#with_fft_incs="-I/usr/local/include/fftw"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L/usr/lib/x86_64-linux-gnu -lfftw3 -lfftw3f"
+with_fft_libs="-L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -847,7 +836,7 @@ with_fft_libs="-L/usr/lib/x86_64-linux-gnu -lfftw3 -lfftw3f"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="atlas"
+with_linalg_flavor="mkl"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
@@ -855,7 +844,7 @@ with_linalg_flavor="atlas"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/usr/lib -llapack -lf77blas -lcblas -latlas"
+with_linalg_libs="-L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -918,7 +907,7 @@ with_linalg_libs="-L/usr/lib -llapack -lf77blas -lcblas -latlas"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="atompaw+bigdft+libxc+wannier90"
+with_dft_flavor="none"
 
                        # ------------------------------ #
 
@@ -1051,7 +1040,7 @@ enable_memory_profiling="no"
 
 # Enable OpenMP (gmatteo, torrent)
 #
-#enable_openmp="yes"
+enable_openmp="yes"
 
 # Enable ZDOTC and ZDOTU bugfix (gmatteo)
 #

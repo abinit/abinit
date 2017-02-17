@@ -200,8 +200,6 @@ subroutine fit_polynomial_coeff_get(cut_off,eff_pot,option)
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
 #define ABI_FUNC 'fit_polynomial_coeff_get'
- use interfaces_14_hidewrite
- use interfaces_41_geometry
 !End of the abilint section
 
  implicit none

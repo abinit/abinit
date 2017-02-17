@@ -1041,17 +1041,17 @@
  end do
  
  
- do i=m_inf,m_sup
-   do j=m_inf,m_sup
-     if (i.EQ.j) cycle
-     if (abs(Interaction(i,j,j,j))>tol) then
-       BUG=.TRUE.
-       write(message,*) "Warning in the symetry U(i,j,j,j) should vanish (in the Ylm basis) for",&
-&       i,j,abs(Interaction(i,j,j,j))
-       call wrtout(std_out,message,'COLL')
-     end if
-   end do
- end do
+! do i=m_inf,m_sup
+!   do j=m_inf,m_sup
+!     if (i.EQ.j) cycle
+!     if (abs(Interaction(i,j,j,j))>tol) then
+!       BUG=.TRUE.
+!       write(message,*) "Warning in the symetry U(i,j,j,j) should vanish (in the Ylm basis) for",&
+!&       i,j,abs(Interaction(i,j,j,j))
+!       call wrtout(std_out,message,'COLL')
+!     end if
+!   end do
+! end do
  
 ! if (.not.BUG) then
 !    call wrtout(std_out,'Calcul is possibly correct','COLL')

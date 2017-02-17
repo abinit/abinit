@@ -1397,7 +1397,7 @@ pure function ltoa_int(list) result(str)
    if (ii == 1) then
      write(temp, "(a,i0,a)")"[",list(1),","
    else if (ii == sz) then
-     write(temp, "(i0,a)")list(1),"]"
+     write(temp, "(i0,a)")list(ii),"]"
    else
      write(temp, "(i0,a)")list(ii),","
    end if
@@ -1465,7 +1465,7 @@ pure function ltoa_dp(list, fmt) result(str)
    if (ii == 1) then
      write(temp, sjoin("(a,",myfmt,",a)")) "[",list(1),","
    else if (ii == sz) then
-     write(temp, fa)list(1),"]"
+     write(temp, fa)list(ii),"]"
    else
      write(temp, fa) list(ii),","
    end if

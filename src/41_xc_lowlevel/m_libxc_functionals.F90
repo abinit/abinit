@@ -211,6 +211,22 @@ module libxc_functionals
      type(C_PTR) :: xc_func
    end subroutine xc_mgga
  end interface
+!PBE0
+ interface
+   subroutine xc_hyb_gga_xc_pbeh_set_params(xc_func, exx_alpha) bind(C)
+     use iso_c_binding, only : C_DOUBLE,C_PTR
+     real(C_DOUBLE),value :: exx_alpha
+     type(C_PTR) :: xc_func
+   end subroutine xc_hyb_gga_xc_pbeh_set_params
+ end interface
+!HSE
+ interface
+   subroutine xc_hyb_gga_xc_hse_set_params(xc_func, exx_alpha, exx_omega) bind(C)
+     use iso_c_binding, only : C_DOUBLE,C_PTR
+     real(C_DOUBLE),value :: exx_alpha, exx_omega
+     type(C_PTR) :: xc_func
+   end subroutine xc_hyb_gga_xc_hse_set_params
+ end interface
 !
  interface
    subroutine xc_lda_c_xalpha_set_params(xc_func,alpha) bind(C)
@@ -467,7 +483,8 @@ contains
 !!
 !! SOURCE
 
- subroutine libxc_functionals_init(ixc,nspden,xc_functionals)
+! subroutine libxc_functionals_init(ixc,nspden,xc_functionals)
+subroutine libxc_functionals_init(ixc,nspden,xc_functionals,exx_alpha,exx_omega)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -483,6 +500,7 @@ contains
  integer, intent(in) :: nspden
  integer, intent(in) :: ixc
  type(libxc_functional_type),intent(inout),optional,target :: xc_functionals(2)
+ real(dp), intent(in), optional :: exx_alpha, exx_omega !WC
 !Local variables-------------------------------
  integer :: ii,nspden_eff
  character(len=500) :: msg
@@ -568,6 +586,15 @@ contains
    if (xc_func%id==libxc_functionals_getid('XC_LDA_C_XALPHA')) then
      alpha_c=real(zero,kind=C_DOUBLE)
      call xc_lda_c_xalpha_set_params(xc_func%conf,alpha_c);
+   end if
+
+!  Mixing parameter for PBE0 and HSE 
+   if (xc_func%id==libxc_functionals_getid('HYB_GGA_XC_PBEH')) then
+     call xc_hyb_gga_xc_pbeh_set_params(xc_func%conf, exx_alpha)
+   end if
+
+   if (xc_func%id==libxc_functionals_getid('HYB_GGA_XC_HSE06')) then
+     call xc_hyb_gga_xc_hse_set_params(xc_func%conf, exx_alpha, exx_omega)
    end if
 
 !  Get functional kind
