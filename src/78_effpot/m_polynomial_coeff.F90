@@ -123,15 +123,12 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name)
  type(polynomial_coeff_type), intent(out) :: polynomial_coeff
 !Local variables-------------------------------
 !scalar
- integer :: idisp,iterm1,iterm2
+ integer :: iterm1,iterm2
  integer :: ii,nterm_tmp
  real(dp):: coefficient_tmp
- character(len=1) :: powerchar
 !arrays
  real(dp) :: weights(nterm)
- character(len=1) :: mutodir(3) = (/"x","y","z"/)
- character(len=5),allocatable :: symbols(:)
- character(len=100) :: name_tmp,text
+ character(len=100) :: name_tmp
 ! *************************************************************************
  
 !First free before initilisation
@@ -349,7 +346,7 @@ subroutine polynomial_coeff_getName(name,atm1,atm2,dir,power,polynomial_coeff,ce
    if (present(dir).and.present(power).and.present(atm1).and.present(atm2)) then
      if(present(cell_atm1))then
        if (any(cell_atm1(:) /= zero) )then
-         write(atm1_tmp,'(4a,I0,aI0,a,I0,a)')  trim(atm1),"_",dir,"[",cell_atm1(1)," ",&
+         write(atm1_tmp,'(4a,I0,I0,a,I0,a)')  trim(atm1),"_",dir,"[",cell_atm1(1)," ",&
 &                                      cell_atm1(2)," ",cell_atm1(3),"]"
        else
          atm1_tmp = trim(atm1)//"_"//dir
@@ -359,7 +356,7 @@ subroutine polynomial_coeff_getName(name,atm1,atm2,dir,power,polynomial_coeff,ce
      end if
      if(present(cell_atm2))then
        if(any(cell_atm2(:) /= zero))then
-         write(atm2_tmp,'(4a,I0,aI0,a,I0,a)')  trim(atm2),"_",dir,"[",cell_atm2(1)," ",&
+         write(atm2_tmp,'(4a,I0,I0,a,I0,a)')  trim(atm2),"_",dir,"[",cell_atm2(1)," ",&
 &                                      cell_atm2(2)," ",cell_atm2(3),"]"
        else
          atm2_tmp = trim(atm2)//"_"//dir

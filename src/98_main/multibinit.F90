@@ -200,7 +200,7 @@ program multibinit
 !Read the harmonics parts
  call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
 !Read the coefficient from fit
- if(filnam(4)/=''.and.filnam(4)/='no')then
+ if(inp%fit_option/=0.and.filnam(4)/=''.and.filnam(4)/='no')then
    call effective_potential_file_getType(filnam(4),filetype)
    if(filetype==3) then
      call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
