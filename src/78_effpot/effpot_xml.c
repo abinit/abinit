@@ -487,8 +487,9 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
         }
       }
       if(irpt3 != irpt1){
-        fprintf(stderr,"\n error: Problem between local and total rpt in the XML file:%d %d\n",\
-                irpt1,irpt3);
+        fprintf(stdout,"\n WARNING: The number of local and total rpt are not equivalent\n");
+        fprintf(stdout,"          in the XML file :%d %d\n",irpt1,irpt3);
+        fprintf(stdout,"          The missing local IFC will be set to zero\n");
         
       }
     }
