@@ -1030,17 +1030,9 @@ subroutine fit_polynomial_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
  end do
  
  do icoeff1=1,ncoeff
-!TEST_AM
-!   do isym=1,nsym
-!     if(list_coeff(6,icoeff1,isym)==0)then
-!       print*,"problem....",icoeff1,isym,":",list_coeff(:,icoeff1,isym)
-!       stop
-!     end if
-!   end do
-!TEST_AM
    do icoeff2=icoeff1,ncoeff
 
-     if(blkval(icoeff1,icoeff2)==1)then 
+     if(blkval(icoeff1,icoeff2)==1.and.blkval(icoeff2,icoeff1)==1)then 
 !      Reset counter
        iterm = zero
        coefficient = one
@@ -1049,7 +1041,8 @@ subroutine fit_polynomial_getOrder2(cell,coeffs_out,cut_off,list_coeff,&
 
        do isym=1,nsym
 
-         if(blkval(list_coeff(6,coeffs(1),isym),list_coeff(6,coeffs(2),isym))==1)then 
+         if(blkval(list_coeff(6,coeffs(1),isym),list_coeff(6,coeffs(2),isym))==1.and.&
+&           blkval(list_coeff(6,coeffs(2),isym),list_coeff(6,coeffs(1),isym))==1)then 
 !          Treat this coeff
            weight = 1
            do idisp=1,ndisp

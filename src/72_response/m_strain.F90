@@ -581,7 +581,7 @@ subroutine strain_print(strain)
    call wrtout(std_out,message,'COLL')
  else
    if(strain%name /= "") then 
-     write(message,'(4a,I2,a,(ES10.2),a)') ch10,&
+     write(message,'(3a,I2,a,(ES10.2),a)') &
 &      ' The strain is ',trim(strain%name),' type in the direction ',&
 &      strain%direction,' with delta of ',strain%delta, ':'
      call wrtout(std_out,message,'COLL')
@@ -591,7 +591,7 @@ subroutine strain_print(strain)
        call wrtout(std_out,message,'COLL')
      end do
    else
-     write(message,'(a,a,a)') ch10,' Strain does not correspond to standard strain:'
+     write(message,'(a)') ' Strain does not correspond to standard strain:'
      call wrtout(std_out,message,'COLL')
      do ii = 1,3
        write(message,'(3es12.2)') strain%strain(ii,1),strain%strain(ii,2),strain%strain(ii,3)

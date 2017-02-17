@@ -200,7 +200,7 @@ program multibinit
 !Read the harmonics parts
  call effective_potential_file_read(filnam(3),reference_effective_potential,inp,comm)
 !Read the coefficient from fit
- if(inp%fit_option/=0.and.filnam(4)/=''.and.filnam(4)/='no')then
+ if(inp%ncoeff/=0.and.filnam(4)/=''.and.filnam(4)/='no')then
    call effective_potential_file_getType(filnam(4),filetype)
    if(filetype==3) then
      call effective_potential_file_read(filnam(4),reference_effective_potential,inp,comm)
@@ -228,7 +228,7 @@ program multibinit
 !If needed, fit the anharmonic part
 !****************************************************************************************
 !TEST_AM_SECTION
- if(.true.)then
+ if(.false.)then
    if (inp%fit_coeff/=0) then
      if(iam_master) then
 !      Read the MD file
@@ -272,7 +272,11 @@ program multibinit
          end if
        end if
      case (1)
-       call fit_polynomial_coeff_get(inp%fit_cutoff,reference_effective_potential,1)
+       if(iam_master)then
+         call fit_polynomial_coeff_get(inp%fit_cutoff,reference_effective_potential,1)
+       end if
+!        call polynomial_coeff_broacast(reference_effective_potential%anharmonics_terms%coefficients,&
+! &                                     master,comm)
 !       call fit_polynomial_coeff_init
 !       call fit_polynomial_coeff_init(reference_effective_potential%,filnam,inp,comm)
      end select

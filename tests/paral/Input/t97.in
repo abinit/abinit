@@ -19,18 +19,22 @@ ntime  = 50
 #%% nprocs_to_test = 1, 2, 4, 10
 #%% max_nprocs = 10
 #%% [NCPU_1]
+#%% system_xml = t96_sys.xml
 #%% files_to_test = 
 #%%   t97_MPI1.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [NCPU_2]
+#%% system_xml = t96_sys.xml
 #%% files_to_test = 
 #%%   t97_MPI2.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [NCPU_4]
+#%% system_xml = t96_sys.xml
 #%% files_to_test = 
 #%%   t97_MPI4.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [NCPU_10]
+#%% system_xml = t96_sys.xml
 #%% files_to_test = 
 #%%   t97_MPI10.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;
 #%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy

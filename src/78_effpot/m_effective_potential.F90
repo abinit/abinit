@@ -2212,7 +2212,7 @@ subroutine effective_potential_writeXML(eff_pot,option,filename)
 
 !Print only the coefficients into XML file
  if (option==  -1 .or. option == 2) then
-   namefile='coefficients.xml'
+   namefile='coeffs.xml'
    if(eff_pot%anharmonics_terms%ncoeff > 0) then
      call polynomial_coeff_writeXML(eff_pot%anharmonics_terms%coefficients,&
 &                                 eff_pot%anharmonics_terms%ncoeff,namefile)
@@ -2906,7 +2906,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,fred,strten,natom,r
   strten(:)      = zero
 
 
-  write(message, '(2a,80a,2a)' ) ch10,('-',mu=1,80),&
+  write(message, '(80a,2a)' ) ('-',mu=1,80),&
 &     ch10,' Components of total energy (in Hartree) :'
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')

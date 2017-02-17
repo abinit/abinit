@@ -754,11 +754,12 @@ real(dp) :: rmet(3,3)
 !    write(std_out,*) 'mover 14'
 !    ###########################################################
 !    ### 14. Output after SCFCV
-     write(message,'(a,3a,a,72a)')&
-&     ch10,('-',kk=1,3),'OUTPUT',('-',kk=1,71)
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
-
+     if(need_scfcv_cycle)then
+       write(message,'(a,3a,a,72a)')&
+&       ch10,('-',kk=1,3),'OUTPUT',('-',kk=1,71)
+       call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,message,'COLL')
+     end if
      if (useprtxfase) then
        call prtxfase(ab_mover,hist,ab_out,mover_AFTER)
        call prtxfase(ab_mover,hist,std_out,mover_AFTER)

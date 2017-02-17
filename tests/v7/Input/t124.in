@@ -15,7 +15,7 @@ ntime  = 50
 #%% [setup]
 #%% executable = multibinit
 #%% test_chain = t120.in,t121.in,t122.in,t123.in,t124.in
-#%% input_xml = system.xml
+#%% system_xml = t123_sys.xml
 #%% [files]
 #%% files_to_test = 
 #%%   t124.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy;

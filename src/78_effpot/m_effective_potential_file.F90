@@ -875,7 +875,7 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 
 !Open the atomicdata XML file for reading
  write(message,'(5a)') ' system_getDimFromXML :',&
-&    ' Opening the file ',trim(filename),' to read dimensions',&
+&    '-Opening the file ',trim(filename),' to read dimensions',&
 &    ' (before initialisation)'
 
  call wrtout(std_out,message,'COLL')
@@ -1096,7 +1096,7 @@ end subroutine system_getDimFromXML
 
 
  !Open the atomicdata XML file for reading
- write(message,'(a,a)')' Opening the file ',filename
+ write(message,'(a,a)')'-Opening the file ',filename
 
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
@@ -2662,7 +2662,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
 
  !Open the atomicdata XML file for reading
- write(message,'(a,a)')' Opening the file ',filename
+ write(message,'(a,a)')'-Opening the file ',filename
 
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
