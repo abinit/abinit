@@ -20,15 +20,9 @@ Moreover, most of them are also described in the Computer Physics Communications
 doi:10.1016/j.cpc.2016.04.003
 
 The list of contributors includes :
-<TO BE UPDATED>
-F. Abreu, B. Amadon, G. Antonius, F. Arnardi, L. Baguet, J.-M. Beuken, J. Bieder, 
-A. Bokhanchuk, E. Bousquet, F.Bruneval, D. Caliste, W. Chen, M. C&ocirc;t&eacute;, J.F. Danel,
-M. Delaveau, C. Espejo, A. Gerossier, M. Giantomassi, Y. Gillet, X. Gonze, F. Jollet,
-J. Laflamme Janssen, R. Laasner, A. Martin, C. Martins, A. Pasquarello, V. Planes, 
-S. Ponc&eacute;, Y. Pouillon, T. Rangel, V. Recoules, F. Ricci, G.-M. Rignanese, B. Rousseau,
-O. Rubel, A. Shukri, M. Torrent, M. Van Setten, B. van Troeye, M. Verstraete, 
-D. Waroquiers, J. Wiktor, Bin Xu, J. Zwanziger
-<END OF TO BE UPDATED/>
+B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, F. Bruneval,
+W. Chen, M. Giantomassi, Y. Gillet, X. Gonze, G. Petretto, F. Jollet, A. Martin,
+V. Planes, Y. Pouillon, T. Rangel, F. Ricci, M. Torrent , M. Verstraete
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases ...
@@ -56,7 +50,7 @@ A.  WARNINGS AND IMPORTANT REMARKS
 A.0 The 2016 article by the ABINIT group is now mentioned in the acknowledgments :
     "Recent developments in the ABINIT software package. Computer. Phys. Communications 205, 106 (2016)".
     See http://www.abinit.org/doc/helpfiles/for-v8.2/users/acknowledgments.html , as well as
-    the notic at the end of ABINIT runs.
+    the notice at the end of ABINIT runs.
    
 A.1 inclvkb 1 has been removed. Now the possible values are either 0 or 2
 
@@ -109,6 +103,7 @@ C.3 The v8 directory for tests has been initialized.
     By Matteo Giantomassi.
 
 C.4 Python 3 >= 3.4 is now supported in build system scripts (compatibility with py2_ version >= is maintained).
+    By Matteo Giantomassi.
 __________________________________________________________________
 
 D.  Other changes
@@ -144,7 +139,7 @@ D.5 More systematic tests of the IO in parallel (different files) have been set 
 D.6 The load balancing for the repartition of the plane waves among procs is now monitored,
     and a dynamical equilibration is made possible thanks to the new input variable pw_unbal_thresh.
     See test mpiio#26.
-    Work by M. Giantomassi
+    Work by M. Torrent
 
 D.7 The capability to output spin-resolved DOS in case of spin-orbit NC pseudopotential
     calculations has been checked, and a test has been set-up (test v7#17).
@@ -174,6 +169,7 @@ D.13 MBPT : support for the commutator [Vnl r] in the case of NC pseudos with mo
      The KSS file continues to use the old implementation to maintain backward compatibility 
      hence outkss won't produce the file if multiple-projectors are detected
      inclvkb 1 has been removed. Now the possible values are either 0 or 2
+     By M Giantomassi
 
 D.14 For Hirshfeld and Bader : doc and warning.
      For Hirshfeld charges the output was unclear: the density integral (electrons only) was called the hirshfeld charge, 
