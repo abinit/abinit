@@ -513,8 +513,6 @@ subroutine nctk_test_mpiio()
    apath = pick_aname()
    ncerr = nf90_create(apath, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), ncid=ncid, &
      comm=xmpi_comm_self, info=xmpio_info)
-   ncerr = nf90_close(ncid)
-   call delete_file(apath, ierr)
 
    if (ncerr == nf90_noerr) then
      nctk_has_mpiio = .True.
@@ -528,18 +526,27 @@ subroutine nctk_test_mpiio()
      MSG_WARNING(sjoin("Strange, netcdf seems to support MPI-IO but: ", nf90_strerror(ncerr)))
      nctk_has_mpiio = .False.
    end if
+
+   ncerr = nf90_close(ncid)
+   call delete_file(apath, ierr)
  end if
 
  ! Master broadcast nctk_has_mpiio
  call xmpi_bcast(nctk_has_mpiio,master,xmpi_world,ierr)
 
-  if (.not. nctk_has_mpiio) then
-    write(msg,"(5a)")&
-       "The netcdf library does not support parallel IO, see message above",ch10,&
-       "Abinit won't be able to produce files in parallel e.g. when paral_kgb==1 is used.",ch10,&
-       "Action: install a netcdf4+HDF5 library with MPI-IO support."
-    MSG_WARNING(msg)
-  end if
+ if (.not. nctk_has_mpiio) then
+   write(msg,"(5a)")&
+      "The netcdf library does not support parallel IO, see message above",ch10,&
+      "Abinit won't be able to produce files in parallel e.g. when paral_kgb==1 is used.",ch10,&
+      "Action: install a netcdf4+HDF5 library with MPI-IO support."
+   MSG_WARNING(msg)
+ end if
+#endif
+
+#ifdef HAVE_NETCDF_DEFAULT
+ if (.not. nctk_has_mpiio) then
+   MSG_ERROR("--netcdf-default is on but netcdf library does not support MPI-IO. Aborting now")
+ end if
 #endif
 
 end subroutine nctk_test_mpiio
@@ -2752,8 +2759,7 @@ subroutine var_from_name(ncid, name, var)
 
 !Local variables-------------------------------
 !scalars
- integer :: varid !ncerr
-!arrays
+ integer :: varid
 
 ! *********************************************************************
 
@@ -2764,8 +2770,6 @@ end subroutine var_from_name
 !!***
 
 #endif
-
-!----------------------------------------------------------------------
 
 END MODULE m_nctk
 !!***

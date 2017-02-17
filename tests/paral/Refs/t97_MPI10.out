@@ -32,15 +32,12 @@
  Flags :
      ifcflag         1
    prt_effpo         3
+     strcpli        -1
  Molecular Dynamics :
         temp    1000.0
        ntime        50
        ncell         2         2         2
        dtion       100
-     optcell         0
-       bmass         1.0
-        nnos         5
-        qmass             50        50        50        50        50
  Miscellaneous information :
          asr         2
  Interatomic Force Constants Inputs :
@@ -138,7 +135,7 @@
 
 ================================================================================
 
-There is no file for the coefficients from polynomial fitting
+ There is no file for the coefficients from polynomial fitting
 
 ================================================================================
 

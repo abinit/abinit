@@ -37,6 +37,7 @@
 !!  matrix eigenvalues, except if these are negative, and in this
 !!  case, give minus the square root of the absolute value
 !!  of the matrix eigenvalues). Hartree units.
+!! comm=MPI communicator.
 !!
 !! OUTPUT
 !! fact_oscstr(2,3,3*natom)=oscillator strengths for the different eigenmodes,
@@ -68,10 +69,11 @@
 
 
 subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
-& iout,lst,mpert,natom,nph2l,phfrq)
+& iout,lst,mpert,natom,nph2l,phfrq,comm)
 
  use defs_basis
  use m_errors
+ use m_xmpi
  use m_profiling_abi
  use m_ddb
 
@@ -90,7 +92,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iout,mpert,natom,nph2l
+ integer,intent(in) :: iout,mpert,natom,nph2l,comm
  type(crystal_t),intent(in) :: Crystal
  type(anaddb_dataset_type),intent(in) :: anaddb_dtset
 !arrays
@@ -101,7 +103,9 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 
 !Local variables -------------------------
 !scalars
+ integer,parameter :: master=0
  integer :: dieflag,i1,idir1,idir2,ifreq,ii,imode,ipert1,iphl2,nfreq
+ integer :: nprocs,my_rank
  real(dp) :: afreq,difffr,eps,lst0,q2,usquare,ucvol
  character(len=500) :: message
  logical :: t_degenerate
@@ -111,6 +115,8 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
  character(len=1),allocatable :: metacharacter(:)
 
 ! *********************************************************************
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  dieflag=anaddb_dtset%dieflag
  nfreq=anaddb_dtset%nfreq
@@ -143,14 +149,10 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 !the definition Eq.(54) in PRB55, 10355 (1997)
  ABI_ALLOCATE(oscstr,(2,3,3,3*natom))
 
-!DEBUG
 ! write(std_out,'(a)')' Enter ddb_diel : displ ='
 ! do imode=1,3*natom
-!   write(std_out,'(a,i4,a,12es16.6)')'imode=',imode,&
-!&    ' displ(:,:,imode)',&
-!&    displ(:,:,imode)
-! enddo
-!ENDDEBUG
+!   write(std_out,'(a,i4,a,12es16.6)')'imode=',imode,' displ(:,:,imode)',displ(:,:,imode)
+! end do
 
 !In case the frequency-dependent dielectric tensor is asked
  if(dieflag==1 .or. dieflag==3 .or. dieflag==4)then
@@ -170,9 +172,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
      do idir1=1,3
        do ipert1=1,natom
          i1=idir1+(ipert1-1)*3
-         usquare=usquare+&
-&         displ(1,i1,imode)*displ(1,i1,imode)+&
-&         displ(2,i1,imode)*displ(2,i1,imode)
+         usquare=usquare+displ(1,i1,imode)*displ(1,i1,imode)+displ(2,i1,imode)*displ(2,i1,imode)
        end do
      end do
      do idir2=1,3
@@ -192,11 +192,9 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 
 !DEBUG
 !           write(std_out,'(a,i4,a,12es16.6)')'imode=',imode,&
-!&           ' displ(:,:,imode)',&
-!&            displ(:,:,imode)
+!&           ' displ(:,:,imode)',displ(:,:,imode)
 !           write(std_out,'(a,i4,a,6es16.6)')'imode=',imode,&
-!&           ' fact_oscstr(:,:,imode)=',&
-!&            fact_oscstr(:,:,imode)
+!&           ' fact_oscstr(:,:,imode)=',fact_oscstr(:,:,imode)
 !ENDDEBUG
 
    end do
@@ -325,7 +323,6 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
    write(message, '(a)' )' '
    call wrtout(std_out,message,'COLL')
    call wrtout(iout,message,'COLL')
-
  end if
 
 !Only in case the frequency-dependent dielectric tensor is needed
@@ -356,8 +353,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 !        the possible imaginary parts of degenerate modes
 !        will cancel.
          dielt_rlx(idir1,idir2)=dielt_rlx(idir1,idir2)+&
-&         oscstr(1,idir1,idir2,imode) /&
-&         (phfrq(imode)**2)*four_pi/ucvol
+&         oscstr(1,idir1,idir2,imode) / (phfrq(imode)**2)*four_pi/ucvol
 !DEBUG
 !         if(idir1==1 .and. idir2==2)then
 !           write(std_out,'(a,i4,a,3es16.6)')'imode=',imode,' dielt_rlx(idir1,idir2),oscstr(1,idir1,idir2,imode),phfrq(imode)=',&
@@ -380,7 +376,6 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
    write(message,'(a)')' '
    call wrtout(std_out,message,'COLL')
    call wrtout(iout,message,'COLL')
-
  end if
 
 !Only in case the frequency-dependent dielectric tensor is needed
@@ -420,8 +415,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 !          the possible imaginary parts of degenerate modes
 !          will cancel.
            frdiel(idir1,idir2,ifreq)=frdiel(idir1,idir2,ifreq)+&
-&           oscstr(1,idir1,idir2,imode) /&
-&           (phfrq(imode)**2-afreq**2)*four_pi/ucvol
+&           oscstr(1,idir1,idir2,imode) / (phfrq(imode)**2-afreq**2)*four_pi/ucvol
          end do
        end do
      end do
@@ -433,8 +427,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
            refl(idir1)=one
          else
 !          See Gervais and Piriou PRB11,3944(1975).
-           refl(idir1)=( (sqrt(frdiel(idir1,idir1,ifreq)) -one)&
-&           /(sqrt(frdiel(idir1,idir1,ifreq)) +one) )**2
+           refl(idir1)=( (sqrt(frdiel(idir1,idir1,ifreq)) -one) /(sqrt(frdiel(idir1,idir1,ifreq)) +one) )**2
          end if
        end do
        write(message, '(7es12.4)' )&
@@ -460,7 +453,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
  if(anaddb_dtset%nph2l/=0 .and.dieflag==1)then
 
 !  Get the log of product of the square of the frequencies without non-analyticities.
-   lst0=0.0_dp
+   lst0=zero
    do imode=4,3*natom
      lst0=lst0+2*log(phfrq(imode))
    end do

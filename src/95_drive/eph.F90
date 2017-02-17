@@ -57,7 +57,7 @@
 !!      ddb_from_file,ddk_free,ddk_init,destroy_mpi_enreg,dvdb_free,dvdb_init
 !!      dvdb_list_perts,dvdb_print,ebands_free,ebands_print,ebands_prtbltztrp
 !!      ebands_set_fermie,ebands_set_scheme,ebands_update_occ
-!!      ebands_write_xmgrace,edos_free,edos_print,edos_write,eph_gkk
+!!      edos_free,edos_print,edos_write,eph_gkk
 !!      eph_phgamma,eph_phpi,hdr_free,hdr_vs_dtset,ifc_free,ifc_init
 !!      ifc_outphbtrap,ifc_printbxsf,ifc_test_phinterp,init_distribfft_seq
 !!      initmpi_seq,mkphdos,pawfgr_destroy,pawfgr_init,phdos_free,phdos_ncwrite
@@ -91,7 +91,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_phonons
  use m_nctk
  use m_wfk
- use m_skw
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -101,6 +100,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
  use m_mpinfo,          only : destroy_mpi_enreg
+ !use m_bz_mesh,         only : kpath_t, kpath_free, kpath_new
  use m_pawang,          only : pawang_type
  use m_pawrad,          only : pawrad_type
  use m_pawtab,          only : pawtab_type, pawtab_print, pawtab_get_lsize
@@ -147,7 +147,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 #ifdef HAVE_NETCDF
  integer :: ncid,ncerr
 #endif
- real(dp),parameter :: rifcsph0=zero,spinmagntarget=-99.99_dp
+ real(dp),parameter :: rifcsph0=zero
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: edos_step,edos_broad
  real(dp) :: cpu,wall,gflops
@@ -157,8 +157,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  character(len=fnlen) :: ddk_path(3)
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst,cryst_ddb
- type(ebands_t) :: ebands, ebands_kq, ebands_bspl
- type(skw_t) :: skw
+ type(ebands_t) :: ebands, ebands_kq
  type(edos_t) :: edos
  type(ddb_type) :: ddb
  type(dvdb_t) :: dvdb
@@ -178,10 +177,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  !type(pawfgrtab_type),allocatable :: pawfgrtab(:)
  !type(paw_ij_type),allocatable :: paw_ij(:)
  !type(paw_an_type),allocatable :: paw_an(:)
-
- integer :: nshiftk_spl
- integer :: kptrlatt_spl(3,3)
- real(dp),allocatable :: shiftk_spl(:,:)
 
 !************************************************************************
 
@@ -282,10 +277,6 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  call hdr_free(wfk0_hdr)
  ABI_FREE(gs_eigen)
 
- ! TODO:
- ! Make sure everything is OK if WFK comes from a NSCF run since occ are set to zero
- ! fermie is set to 0 if nscf!
-
  ! Read WFQ and construct ebands on the shifted grid.
  if (use_wfq) then
    call wfk_read_eigenvalues(wfq_path,gs_eigen,wfq_hdr,comm) !,gs_occ)
@@ -305,9 +296,9 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    "   From WFK file: occopt = ",ebands%occopt,", tsmear = ",ebands%tsmear,ch10,&
    "   From input:    occopt = ",dtset%occopt,", tsmear = ",dtset%tsmear,ch10
    call wrtout(ab_out,msg)
-   call ebands_set_scheme(ebands,dtset%occopt,dtset%tsmear,spinmagntarget,dtset%prtvol)
+   call ebands_set_scheme(ebands,dtset%occopt,dtset%tsmear,dtset%spinmagntarget,dtset%prtvol)
    if (use_wfq) then
-     call ebands_set_scheme(ebands_kq,dtset%occopt,dtset%tsmear,spinmagntarget,dtset%prtvol)
+     call ebands_set_scheme(ebands_kq,dtset%occopt,dtset%tsmear,dtset%spinmagntarget,dtset%prtvol)
    end if
  end if
 
@@ -324,19 +315,21 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  else if (abs(dtset%eph_extrael) > tol12) then
    NOT_IMPLEMENTED_ERROR()
    ! TODO: Be careful with the trick used in elphon for passing the concentration
-   !call ebands_set_nelect(ebands, dtset%eph_extrael, spinmagntarget, msg)
+   !call ebands_set_nelect(ebands, dtset%eph_extrael, dtset%spinmagntarget, msg)
    !call wrtout(ab_out,msg)
    !if (use_wfq) then
-   !  call ebands_set_nelect(ebands_kq, dtset%eph_extrael, spinmagntarget, msg)
+   !  call ebands_set_nelect(ebands_kq, dtset%eph_extrael, dtset%spinmagntarget, msg)
    !  call wrtout(ab_out,msg)
    !end if
  end if
 
- call ebands_update_occ(ebands, spinmagntarget)
+ ! Recompute occupations. This is needed if WFK files have been produced in a NSCF run
+ ! since occ are set to zero, and fermie is taken from the previous density.
+ call ebands_update_occ(ebands, dtset%spinmagntarget, prtvol=dtset%prtvol)
  call ebands_print(ebands,header="Ground state energies",prtvol=dtset%prtvol)
  if (use_wfq) then
-   call ebands_update_occ(ebands_kq, spinmagntarget)
-   call ebands_print(ebands_kq,header="Ground state energies (K+Q)",prtvol=dtset%prtvol)
+   call ebands_update_occ(ebands_kq, dtset%spinmagntarget, prtvol=dtset%prtvol)
+   call ebands_print(ebands_kq,header="Ground state energies (K+Q)", prtvol=dtset%prtvol)
  end if
 
  call cwtime(cpu,wall,gflops,"stop")
@@ -391,40 +384,14 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    end if
  end if ! master
 
- if (my_rank == master) then ! .and. (ebands%mband < 100 .or. dtset%printxmgr == 1)
-   call ebands_write_xmgrace(ebands, strcat(dtfil%filnam_ds(4), "_EBANDS.xmgr"))
+ if (my_rank == master) call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
+
+ if (.False.) then
+ !if (.True.) then
+   !call ebands_set_interpolator(ebands, cryst, bstart, bcount, mode, espline_ords, eskw_ratio, comm)
+   call ebands_test_interpolator(ebands, dtset, cryst, dtfil%filnam_ds(4), comm)
+   MSG_ERROR("interpolation done")
  end if
-
-#if 0
- !call ebands_set_interpolator(ebands, cryst, bstart, bcount, mode, espline_ords, eskw_ratio, comm)
- !call ebands_test_intepolator(ebands, dtset, dtfil%filnam_ds(4), comm)
- ! Test the interpolation of electronic bands.
- skw = skw_new(cryst, 1, 1, ebands%mband, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, comm)
- call skw_free(skw)
-
- ! Interpolate bands on dense k-mesh.
- kptrlatt_spl = reshape([8,0,0,0,8,0,0,0,8], [3,3])
- kptrlatt_spl = 8 * kptrlatt_spl; nshiftk_spl = 1
- ABI_CALLOC(shiftk_spl, (3,nshiftk_spl))
- ebands_bspl = ebands_bspline(ebands, cryst, [3,3,3], kptrlatt_spl, nshiftk_spl, shiftk_spl, comm)
- ABI_FREE(shiftk_spl)
-
- if (my_rank == master) then ! .and. (ebands%mband < 100 .or. dtset%prtebands == 1)
-   call ebands_write_xmgrace(ebands_bspl, strcat(dtfil%filnam_ds(4), "_EBANDS_BSPLINE.xmgr"))
- end if
-
- edos = ebands_get_edos(ebands_bspl, cryst, edos_intmeth, edos_step, edos_broad, comm)
- !call ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
-
- if (my_rank == master) then
-   call edos_print(edos, unit=ab_out)
-   path = strcat(dtfil%filnam_ds(4), "_BSPLINE_EDOS")
-   call wrtout(ab_out, sjoin("- Writing electron DOS to file:", path))
-   call edos_write(edos, path)
- end if
- call edos_free(edos)
- call ebands_free(ebands_bspl)
-#endif
 
  call cwtime(cpu,wall,gflops,"stop")
  write(msg,'(2(a,f8.2))')"eph%edos: cpu:",cpu,", wall: ",wall
@@ -434,7 +401,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Read the DDB file.
  ABI_CALLOC(dummy_atifc, (cryst%natom))
 
- call ddb_from_file(ddb,ddb_path,brav1,cryst%natom,natifc0,dummy_atifc,cryst_ddb,comm)
+ call ddb_from_file(ddb,ddb_path,brav1,cryst%natom,natifc0,dummy_atifc,cryst_ddb,comm, prtvol=dtset%prtvol)
  call crystal_free(cryst_ddb)
  ABI_FREE(dummy_atifc)
 
@@ -459,41 +426,40 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
  ! Build the inter-atomic force constants.
  call ifc_init(ifc,cryst,ddb,&
  brav1,dtset%asr,dtset%symdynmat,dtset%dipdip,dtset%rfmeth,dtset%ddb_ngqpt,ddb_nqshift,ddb_qshifts,dielt,zeff,&
- nsphere0,rifcsph0,prtsrlr0,dtset%enunit)
+ nsphere0,rifcsph0,prtsrlr0,dtset%enunit,comm)
  ABI_FREE(ddb_qshifts)
+ call ifc_print(ifc, unit=std_out)
 
  ! Test B-spline interpolation of phonons
- if (.False.) then
  !if (.True.) then
-   call ifc_test_phinterp(ifc, cryst, [12,12,12], 1, [zero,zero,zero], [3,3,3], comm)
-
+ if (.False.) then
+   call ifc_test_phinterp(ifc, cryst, [8,8,8], 1, [zero,zero,zero], [3,3,3], comm)
    !call ifc_set_interpolator(ifc, cryst, nustart, nucount, mode, phspline_ords, phskw_ratio, comm)
    !call ifc_test_intepolator(ifc, dtset, dtfil, comm)
-   !call xmpi_end()
+   call xmpi_end()
  end if
+
+ ! Output phonon band structure (requires qpath)
+ if (dtset%prtphbands /= 0) call ifc_mkphbs(ifc, cryst, dtset, dtfil%filnam_ds(4), comm)
 
  if (dtset%prtphdos == 1) then
 
-   ! TODO: Phonon band structure.
-   !call mkphbs(ifc, cryst, inp, ddb, asrq0, prefix, tcpui, twalli, zeff, comm)
-
    ! Phonon Density of States.
-
    ! FIXME: mkphdos expects qshift(3) instead of qshift(3, nqshift)
    ! TODO: Parallelize this routine.
    call mkphdos(phdos,cryst,ifc,dtset%ph_intmeth,dtset%ph_wstep,dtset%ph_smear,dtset%ph_ngqpt,dtset%ph_qshift,comm)
 
-   !call phdos_print_debye(phdos, cryst%ucvol)
    if (my_rank == master) then
      path = strcat(dtfil%filnam_ds(4), "_PHDOS")
-     call wrtout(ab_out, sjoin("- Writing phonon dos to file:", path))
+     call wrtout(ab_out, sjoin("- Writing phonon DOS to file:", path))
      call phdos_print(phdos, path)
      !call phdos_print_debye(phdos, crystal%ucvol)
 
-
-!TODO: do we want to pass the temper etc... from anaddb_dtset into the full dtset for abinit? Otherwise just leave these defaults.
+!TODO: do we want to pass the temper etc... from anaddb_dtset into the full dtset for abinit?
+! Otherwise just leave these defaults.
+!MG: Disabled for the time being because of SIGFPE in v8[41]
      path = strcat(dtfil%filnam_ds(4), "_MSQD_T")
-     call phdos_print_msqd(phdos, path, 1000, one, one)
+     !call phdos_print_msqd(phdos, path, 1000, one, one)
 
 #ifdef HAVE_NETCDF
      path = strcat(dtfil%filnam_ds(4), "_PHDOS.nc")
@@ -533,7 +499,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      call dvdb_print(dvdb)
      call dvdb_list_perts(dvdb, [-1,-1,-1], unit=ab_out)
    end if
-   ! TODO: Routine to compute \delta V_{q,nu)(r) and dumpt the results in XSF format.
+   ! TODO: Routine to compute \delta V_{q,nu)(r) and dump the results in XSF format/netcdf.
  end if
 
  ! TODO Recheck getng, should use same trick as that used in screening and sigma.
@@ -562,6 +528,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 !  otherwise there will be tons of duplicated code
 
  ! TODO: Make sure that all subdrivers work with useylm == 1
+ ABI_CHECK(dtset%useylm == 0, "useylm != 0 not implemented/tested")
  select case (dtset%eph_task)
  case (0)
    continue

@@ -43,8 +43,9 @@
 subroutine isfile(filnam,status)
 
  use defs_basis
- use m_clib, only : clib_rename
  use m_errors
+
+ use m_clib, only : clib_rename
  use m_fstrings, only : int2char4
 
 !This section has been created automatically by the script Abilint (TD).
@@ -76,13 +77,13 @@ subroutine isfile(filnam,status)
    inquire(file=filnam,iostat=ios,exist=ex)
 
    if (ios/=0) then
-     write(message,'(a,a,a,a,i8,a,a)')&
+     write(message,'(4a,i0,2a)')&
 &     'Checks for existence of file  ',trim(filnam),ch10,&
 &     'but INQUIRE statement returns error code',ios,ch10,&
 &     'Action: identify which problem appears with this file.'
      MSG_ERROR(message)
    else if (.not.ex) then
-     write(message, '(a,a,a,a,a)' )&
+     write(message, '(5a)' )&
 &     'Checks for existence of file  ',trim(filnam),ch10,&
 &     'but INQUIRE finds file does not exist.',&
 &     'Action: check file name and re-run.'
@@ -91,13 +92,13 @@ subroutine isfile(filnam,status)
 
  else if (status=='new') then
 
+   ! Check that new output file does NOT exist
    ioserr = 0
-!      Check that new output file does NOT exist
    trialnam = filnam
    ii = 0
    inquire(file=trim(trialnam),iostat=ios,exist=ex)
    if ( ios /= 0 ) then
-     write(message,'(a)') 'Something is wrong with permissions for ', &
+     write(message,'(4a)') 'Something is wrong with permissions for ', &
 &     'reading/writing on this filesystem.',ch10,&
 &     'Action : Check permissions.'
      MSG_ERROR(message)
@@ -119,7 +120,7 @@ subroutine isfile(filnam,status)
        if ( ios /= 0 )  ioserr=ioserr+1
        if ( ioserr > 10 ) then
 !        There is a problem => stop
-         write(message, '(a,a,a,a,i8,a,a)' )&
+         write(message, '(2a,i0,2a)' )&
 &         'Check for permissions of reading/writing files on the filesystem', &
 &         '10 INQUIRE statements returned an error code like ',ios,ch10,&
 &         'Action: Check permissions'
@@ -132,12 +133,11 @@ subroutine isfile(filnam,status)
        MSG_COMMENT(message)
        call clib_rename(filnam,trialnam,ioserr)
        if ( ioserr /= 0 ) then
-         write(message,'(a,a,a,a)') 'Failed to rename file ', &
-&         trim(filnam),' to ',trim(trialnam)
+         write(message,'(4a)') 'Failed to rename file ', trim(filnam),' to ',trim(trialnam)
          MSG_ERROR(message)
        end if
      else
-       write(message,'(a,a,a)')&
+       write(message,'(3a)')&
 &       'Have used all names of the form filenameXXXX, X in [0-9]',ch10,&
 &       'Action: clean up your directory and start over.'
        MSG_ERROR(message)
@@ -145,7 +145,7 @@ subroutine isfile(filnam,status)
    end if
 
    ! if ii > 0 we iterated so rename abi_out to abi_outXXXX
-   ! and just write to abi_out 
+   ! and just write to abi_out
  else ! status not recognized
    write(message,'(3a)')'  Input status= ',status,' not recognized.'
    MSG_BUG(message)

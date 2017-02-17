@@ -32,7 +32,7 @@
 #%%   t18.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% extra_inputs = t18.ddb.in.gz
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% keywords = 
 #%% authors = Unknown

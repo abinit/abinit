@@ -14,7 +14,9 @@
 !!
 !! CHILDREN
 !! interfaces_78_eph.F90
-!! m_phgamma.F90
 !! m_gkk.F90
+!! m_phgamma.F90
+!! m_phpi.F90
+!! m_sigmaph.F90
 !!
 !!***

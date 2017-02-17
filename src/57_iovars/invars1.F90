@@ -894,6 +894,20 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usedmft',tread,'INT')
  if(tread==1) dtset%usedmft=intarr(1)
 
+!Some ucrpa keywords
+ dtset%ucrpa=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ucrpa',tread,'INT')
+ if(tread==1) dtset%ucrpa=intarr(1)
+
+ if (dtset%ucrpa > 0 .and. dtset%usedmft > 0) then
+   write(message, '(7a)' )&
+&   'usedmft and ucrpa are both activated in the input file ',ch10,&
+&   'In the following, abinit assume you are doing a ucrpa calculation and ',ch10,&
+&   'you define Wannier functions as in DFT+DMFT calculation',ch10,&
+&   'If instead, you want to do a full dft+dmft calculation and not only the Wannier construction, use ucrpa=0'
+   MSG_WARNING(message)
+ end if
+ 
 !Some PAW+U keywords
  dtset%usepawu=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepawu',tread,'INT')

@@ -67,6 +67,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
  use m_crystal
  use m_ddb
 
+ use m_fstrings,       only : itoa, sjoin
  use m_dynmat,         only : asria_corr
  use m_anaddb_dataset, only : anaddb_dataset_type
 
@@ -87,7 +88,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
  type(anaddb_dataset_type),intent(in) :: anaddb_dtset
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok),instrain(3*natom,6)
- real(dp),intent(inout) :: d2asr(2,3,natom,3,natom)
+ real(dp),intent(in) :: d2asr(2,3,natom,3,natom)
  real(dp),intent(out) :: compl(6,6), compl_clamped(6,6),compl_stress(6,6)
  real(dp),intent(out) :: elast(6,6), elast_clamped(6,6),elast_stress(6,6)
 
@@ -95,6 +96,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 !scalars
  integer :: ier,ii1,ii2,ipert1,ipert2,ivarA,ivarB
  real(dp) :: ucvol
+ logical :: iwrite
  character(len=500) :: message
 !arrays
  real(dp) :: Amatr(3*natom-3,3*natom-3),Apmatr(3*natom,3*natom)
@@ -112,14 +114,14 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 !***************************************************************************
 
  ucvol = crystal%ucvol
+ iwrite = iout > 0
 
 !extraction of the elastic constants from the blkvals
 
  do ivarA=1,6
    do ivarB=1,6
 !    because the elastic constant is 6*6,
-!    so we should judge if the idir is larger than 3
-!    or not
+!    so we should judge if the idir is larger than 3 or not
      if(ivarA>3) then
        ii1=ivarA-3
        ipert1=natom+4  !for the shear modulus
@@ -192,18 +194,12 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
    Apmatr(:,:)=kmatrix(:,:)
 
 !  NOTE: MJV 13/3/2011 This is just the 3x3 unit matrix copied throughout the dynamical matrix
-   Nmatr(:,:)=0.0_dp
+   Nmatr(:,:)=zero
    do ivarA=1,3*natom
      do ivarB=1,3*natom
-       if (mod(ivarA,3)==0 .and. mod(ivarB,3)==0)then
-         Nmatr(ivarA,ivarB)=one
-       end if
-       if (mod(ivarA,3)==1 .and. mod(ivarB,3)==1)then
-         Nmatr(ivarA,ivarB)=one
-       end if
-       if (mod(ivarA,3)==2 .and. mod(ivarB,3)==2)then
-         Nmatr(ivarA,ivarB)=one
-       end if
+       if (mod(ivarA,3)==0 .and. mod(ivarB,3)==0) Nmatr(ivarA,ivarB)=one
+       if (mod(ivarA,3)==1 .and. mod(ivarB,3)==1) Nmatr(ivarA,ivarB)=one
+       if (mod(ivarA,3)==2 .and. mod(ivarB,3)==2) Nmatr(ivarA,ivarB)=one
      end do
    end do
 
@@ -229,15 +225,15 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
        ii1=ii1+1
      end do
    end do
-   Bpmatr(2,:)=0.0_dp  !the imaginary part of the force matrix
+   Bpmatr(2,:)=zero  !the imaginary part of the force matrix
 !  then call the subroutines CHPEV and ZHPEV to get the eigenvectors
 !  NOTE: MJV there is a huge indeterminacy in this matrix, which has all identical 3x3 block lines
 !  this means the orientation of the 0-eigenvalue eigenvectors is kind of random...
 !  Is the usage just to get out the translational modes? We know what the eigenvectors look like already!
 !  The translational modes are the last 3 with eigenvalue 6
 !
-   call ZHPEV ('V','U',3*natom,Bpmatr,eigvalp,eigvecp,3*natom,&
-&   zhpev1p,zhpev2p,ier)
+   call ZHPEV ('V','U',3*natom,Bpmatr,eigvalp,eigvecp,3*natom,zhpev1p,zhpev2p,ier)
+   ABI_CHECK(ier == 0, sjoin("ZHPEV returned:", itoa(ier)))
 
 !  DEBUG
 !  the eigenval and eigenvec
@@ -256,7 +252,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 
 !  do the multiplication to get the reduced matrix,in two steps
 !  rotate to eigenbasis constructed above to isolate acoustic modes
-   Cpmatr(:,:)=0.0_dp
+   Cpmatr(:,:)=zero
    do ivarA=1,3*natom
      do ivarB=1,3*natom
        do ii1=1,3*natom
@@ -266,7 +262,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
      end do
    end do
 
-   Apmatr(:,:)=0.0_dp
+   Apmatr(:,:)=zero
    do ivarA=1,3*natom
      do ivarB=1,3*natom
        do ii1=1,3*natom
@@ -291,9 +287,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 !  check the last three eigenvalues whether too large
    ivarB=0
    do ivarA=3*natom-2,3*natom
-     if (ABS(Apmatr(ivarA,ivarA))>tol6)then
-       ivarB=1
-     end if
+     if (ABS(Apmatr(ivarA,ivarA))>tol6) ivarB=1
    end do
    if(ivarB==1)then
      write(message,'(a,a,a,a,a,a,a,a,3es16.6)')ch10,&
@@ -321,14 +315,12 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
        ii1=ii1+1
      end do
    end do
-   Bmatr(2,:)=0.0_dp
-!  then call the subroutines CHPEV and ZHPEV to get the eigenvectors and the
-!  eigenvalues
-   call ZHPEV ('V','U',3*natom-3,Bmatr,eigval,eigvec,3*natom-3,&
-&   zhpev1,zhpev2,ier)
+   Bmatr(2,:)=zero
+!  then call the subroutines CHPEV and ZHPEV to get the eigenvectors and the eigenvalues
+   call ZHPEV ('V','U',3*natom-3,Bmatr,eigval,eigvec,3*natom-3,zhpev1,zhpev2,ier)
+   ABI_CHECK(ier == 0, sjoin("ZHPEV returned:", itoa(ier)))
 
-!  check the unstable phonon modes, if the first is negative then print
-!  warning message
+!  check the unstable phonon modes, if the first is negative then print warning message
    if(eigval(1)<-1.0*tol8)then
      write(message,'(a,a,a,a)') ch10,&
 &     'Unstable eigenvalue detected in force constant matrix at Gamma point.',ch10,&
@@ -338,8 +330,8 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
    end if
 
 !  the do the matrix muplication to get pseudoinverse inverse matrix
-   Cmatr(:,:)=0.0_dp
-   Amatr(:,:)=0.0_dp
+   Cmatr(:,:)=zero
+   Amatr(:,:)=zero
    do ivarA=1,3*natom-3
      Cmatr(ivarA,ivarA)=1.0_dp/eigval(ivarA)
    end do
@@ -353,7 +345,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
    end do
 
 !  then the second mulplication
-   Cmatr(:,:)=0.0_dp
+   Cmatr(:,:)=zero
    do ivarA=1,3*natom-3
      do ivarB=1,3*natom-3
        do ii1=1,3*natom-3
@@ -375,8 +367,8 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 
 !  so now the inverse of the reduced matrix is in the matrixC
 !  now do another mulplication to get the pseudoinverse of the original
-   Cpmatr(:,:)=0.0_dp
-   Apmatr(:,:)=0.0_dp
+   Cpmatr(:,:)=zero
+   Apmatr(:,:)=zero
    do ivarA=1,3*natom-3
      do ivarB=1,3*natom-3
        Cpmatr(ivarA,ivarB)=Cmatr(ivarA,ivarB)
@@ -392,7 +384,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
        end do
      end do
    end do
-   Cpmatr(:,:)=0.0_dp
+   Cpmatr(:,:)=zero
    do ivarA=1,3*natom
      do ivarB=1,3*natom
        do ii1=1,3*natom
@@ -408,7 +400,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 !  so now the inverse of k matrix is in the kmatrix
 !  ending the part for pseudoinversing the K matrix
 !  then do the first matrix mulplication
-   new1(:,:)=0.0_dp
+   new1(:,:)=zero
    do ii1=1,6
      do ii2=1,3*natom
        do ivarA=1,3*natom
@@ -418,7 +410,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
      end do
    end do
 !  then do the second matrix mulplication, and change the value of kmatrix
-   new2(:,:)=0.0_dp
+   new2(:,:)=zero
    do ii1=1,6
      do ii2=1,6
        do ivarB=1,3*natom
@@ -456,8 +448,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 !*******************************************************************
  if(anaddb_dtset%elaflag==1.or. anaddb_dtset%elaflag==3)then
 !  print out the clamped-ion elastic constants to output file
-   write(message,'(3a)')ch10,&
-&   ' Elastic Tensor (clamped ion) (unit:10^2GP):',ch10
+   write(message,'(3a)')ch10,' Elastic Tensor (clamped ion) (unit:10^2GP):',ch10
    call wrtout(std_out,message,'COLL')
    do ivarA=1,6
      write(std_out,'(6f12.7)')elast(ivarA,1)/100.00_dp,elast(ivarA,2)/100.00_dp,&
@@ -466,11 +457,13 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
    end do
 
    call wrtout(iout,message,'COLL')
-   do ivarA=1,6
-     write(iout,'(6f12.7)')elast(ivarA,1)/100.00_dp,elast(ivarA,2)/100.00_dp,&
-&     elast(ivarA,3)/100.00_dp,elast(ivarA,4)/100.00_dp,&
-&     elast(ivarA,5)/100.00_dp,elast(ivarA,6)/100.00_dp
-   end do
+   if (iwrite) then
+     do ivarA=1,6
+       write(iout,'(6f12.7)')elast(ivarA,1)/100.00_dp,elast(ivarA,2)/100.00_dp,&
+&       elast(ivarA,3)/100.00_dp,elast(ivarA,4)/100.00_dp,&
+&       elast(ivarA,5)/100.00_dp,elast(ivarA,6)/100.00_dp
+     end do
+   end if
  end if
 
  if(anaddb_dtset%elaflag==2.or.anaddb_dtset%elaflag==3&
@@ -497,12 +490,14 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
    end do
 
    call wrtout(iout,message,'COLL')
-   do ivarA=1,6
-     write(iout,'(6f12.7)')elast_relaxed(ivarA,1)/100.00_dp,&
-&     elast_relaxed(ivarA,2)/100.00_dp,elast_relaxed(ivarA,3)/100.00_dp,&
-&     elast_relaxed(ivarA,4)/100.00_dp,elast_relaxed(ivarA,5)/100.00_dp,&
-&     elast_relaxed(ivarA,6)/100.00_dp
-   end do
+   if (iwrite) then
+     do ivarA=1,6
+       write(iout,'(6f12.7)')elast_relaxed(ivarA,1)/100.00_dp,&
+&       elast_relaxed(ivarA,2)/100.00_dp,elast_relaxed(ivarA,3)/100.00_dp,&
+&       elast_relaxed(ivarA,4)/100.00_dp,elast_relaxed(ivarA,5)/100.00_dp,&
+&       elast_relaxed(ivarA,6)/100.00_dp
+     end do
+   end if
  end if
 
 !then print the corresponding compliances
@@ -511,8 +506,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 !  compl(:,:)=elast_clamped(:,:) !convert the elastic tensor
    compl_clamped(:,:)=elast_clamped(:,:)
    call matrginv(compl_clamped,6,6)
-   write(message,'(a,a,a)')ch10,&
-&   ' Compliance Tensor (clamped ion) (unit: 10^-2GP^-1):',ch10
+   write(message,'(a,a,a)')ch10,' Compliance Tensor (clamped ion) (unit: 10^-2GP^-1):',ch10
    call wrtout(std_out,message,'COLL')
 
    do ivarB=1,6
@@ -525,13 +519,15 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 
    call wrtout(iout,message,'COLL')
 
-   do ivarB=1,6
-     write(iout,'(6f12.7)')compl_clamped(ivarB,1)*100.00_dp,&
-&     compl_clamped(ivarB,2)*100.00_dp,&
-&     compl_clamped(ivarB,3)*100.00_dp,compl_clamped(ivarB,4)*100.00_dp,&
-&     compl_clamped(ivarB,5)*100.00_dp,&
-&     compl_clamped(ivarB,6)*100.00_dp
-   end do
+   if (iwrite) then
+     do ivarB=1,6
+       write(iout,'(6f12.7)')compl_clamped(ivarB,1)*100.00_dp,&
+&       compl_clamped(ivarB,2)*100.00_dp,&
+&       compl_clamped(ivarB,3)*100.00_dp,compl_clamped(ivarB,4)*100.00_dp,&
+&       compl_clamped(ivarB,5)*100.00_dp,&
+&       compl_clamped(ivarB,6)*100.00_dp
+     end do
+   end if
  end if
 
  if(anaddb_dtset%elaflag==2.or.anaddb_dtset%elaflag==3&
@@ -561,19 +557,16 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
    end do
    call wrtout(iout,message,'COLL')
 
-   do ivarB=1,6
-     write(iout,'(6f12.7)')compl_relaxed(ivarB,1)*100.00,&
-&     compl_relaxed(ivarB,2)*100.00_dp,&
-&     compl_relaxed(ivarB,3)*100.00_dp,compl_relaxed(ivarB,4)*100.00_dp,&
-&     compl_relaxed(ivarB,5)*100.00_dp,&
-&     compl_relaxed(ivarB,6)*100.00_dp
-   end do
-
+   if (iwrite) then
+     do ivarB=1,6
+       write(iout,'(6f12.7)')compl_relaxed(ivarB,1)*100.00,&
+&       compl_relaxed(ivarB,2)*100.00_dp,&
+&       compl_relaxed(ivarB,3)*100.00_dp,compl_relaxed(ivarB,4)*100.00_dp,&
+&       compl_relaxed(ivarB,5)*100.00_dp,&
+&       compl_relaxed(ivarB,6)*100.00_dp
+     end do
+   end if
  end if
-
-!DEBUG
-!write(std_out,'(/,6es16.6,/)')ucvol
-!ENDDEBUG
 
 !befor the end , make sure the tensor elast(6,6)
 !will have the relaxed ion values and tensor elast_clamped has the clamped ion
@@ -594,8 +587,7 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 !  write(std_out,*)'',blkval(1,:,7,1,1,iblok_stress)
 !  ENDDEBUG
 
-!  firts give the corect stress values
-!  diagonal parts
+!  firts give the corect stress values diagonal parts
    stress(1)=blkval(1,1,natom+3,1,1,iblok_stress)
    stress(2)=blkval(1,2,natom+3,1,1,iblok_stress)
    stress(3)=blkval(1,3,natom+3,1,1,iblok_stress)
@@ -638,11 +630,13 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 &     elast_stress(ivarA,3)/100.00_dp,elast_stress(ivarA,4)/100.00_dp,&
 &     elast_stress(ivarA,5)/100.00_dp,elast_stress(ivarA,6)/100.00_dp
    end do
-   do ivarA=1,6
-     write(iout,'(6f12.7)')elast_stress(ivarA,1)/100.00_dp,elast_stress(ivarA,2)/100.00_dp,&
-&     elast_stress(ivarA,3)/100.00_dp,elast_stress(ivarA,4)/100.00_dp,&
-&     elast_stress(ivarA,5)/100.00_dp,elast_stress(ivarA,6)/100.00_dp
-   end do
+   if (iwrite) then
+     do ivarA=1,6
+       write(iout,'(6f12.7)')elast_stress(ivarA,1)/100.00_dp,elast_stress(ivarA,2)/100.00_dp,&
+&       elast_stress(ivarA,3)/100.00_dp,elast_stress(ivarA,4)/100.00_dp,&
+&       elast_stress(ivarA,5)/100.00_dp,elast_stress(ivarA,6)/100.00_dp
+     end do
+   end if
 
 !  then the complinace tensors with stress correction
    write(message,'(5a)')ch10,&
@@ -657,17 +651,18 @@ subroutine ddb_elast(anaddb_dtset,crystal,blkval,compl,compl_clamped,compl_stres
 &     compl_stress(ivarB,5)*100.00_dp,&
 &     compl_stress(ivarB,6)*100.00_dp
    end do
-   do ivarB=1,6
-     write(iout,'(6f12.7)')compl_stress(ivarB,1)*100.00_dp,&
-&     compl_stress(ivarB,2)*100.00_dp,&
-&     compl_stress(ivarB,3)*100.00_dp,compl_stress(ivarB,4)*100.00_dp,&
-&     compl_stress(ivarB,5)*100.00_dp,&
-&     compl_stress(ivarB,6)*100.00_dp
-   end do
+   if (iwrite) then
+     do ivarB=1,6
+       write(iout,'(6f12.7)')compl_stress(ivarB,1)*100.00_dp,&
+&       compl_stress(ivarB,2)*100.00_dp,&
+&       compl_stress(ivarB,3)*100.00_dp,compl_stress(ivarB,4)*100.00_dp,&
+&       compl_stress(ivarB,5)*100.00_dp,&
+&       compl_stress(ivarB,6)*100.00_dp
+     end do
+   end if
  end if
 !end the if 510th line
 !end the part of stress corrected elastic and compliance tensors
 
 end subroutine ddb_elast
 !!***
-

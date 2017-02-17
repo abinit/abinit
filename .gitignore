@@ -423,3 +423,12 @@ src/*/test_*
 !tests_*F90
 build1
 build2
+abichecks/special.py
+abienv.txt
+fallbacks/make.stderr
+make.stderr
+makefile.sed
+tests/testcfg.py
+CheckFB.py
+tests/built-in/Input/abinit
+u-tsumura.ac

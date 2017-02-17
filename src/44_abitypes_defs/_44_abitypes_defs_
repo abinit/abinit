@@ -14,7 +14,6 @@
 !!
 !! CHILDREN
 !! defs_abitypes.F90
-!! defs_xc.F90
 !! interfaces_44_abitypes_defs.F90
 !! m_args_gs.F90
 !! m_distribfft.F90

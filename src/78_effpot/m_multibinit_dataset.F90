@@ -86,7 +86,7 @@ module m_multibinit_dataset
   integer :: prt_effpot
   integer :: prt_phfrq
   integer :: prt_ifc
-  integer :: prt_3rd  ! Print the 3rd order in xml file
+  integer :: strcpling  ! Print the 3rd order in xml file
   integer :: prtsrlr  ! print the short-range/long-range decomposition of phonon freq.
   integer :: rfmeth
   integer :: symdynmat
@@ -306,13 +306,13 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
- multibinit_dtset%bmass=1
+ multibinit_dtset%bmass=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bmass',tread,'DPR')
  if(tread==1) multibinit_dtset%bmass=dprarr(1)
- if(multibinit_dtset%bmass<1)then
+ if(multibinit_dtset%bmass<0)then
    write(message, '(a,f10.2,a,a,a,a,a)' )&
 &   'bmass is',multibinit_dtset%bmass,', but the only allowed values',ch10,&
-&   'is superior to 1.',ch10,&
+&   'is superior to 0.',ch10,&
 &   'Action: correct bmass in your input file.'
    MSG_ERROR(message)
  end if
@@ -542,7 +542,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
- multibinit_dtset%nnos=5
+ multibinit_dtset%nnos=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nnos',tread,'INT')
  if(tread==1) multibinit_dtset%nnos=intarr(1)
  if(multibinit_dtset%nnos<0)then
@@ -612,15 +612,15 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 !Default is no output of the 3rd derivative
- multibinit_dtset%prt_3rd = 0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_3rd',tread,'INT')
- if(tread==1) multibinit_dtset%prt_3rd = intarr(1)
- if(multibinit_dtset%prt_3rd < 0 .or. multibinit_dtset%prt_3rd > 2) then
+ multibinit_dtset%strcpling = -1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'strcpling',tread,'INT')
+ if(tread==1) multibinit_dtset%strcpling = intarr(1)
+ if(multibinit_dtset%strcpling < -1 .or. multibinit_dtset%strcpling > 2) then
    write(message, '(a,i0,a,a,a,a,a,a,a)' )&
-&   'prtf_3rd is ',multibinit_dtset%prt_3rd,'. The only allowed values',ch10,&
+&   'prtf_3rd is ',multibinit_dtset%strcpling,'. The only allowed values',ch10,&
 &   'are 0 (no computation), 1 (only computation)',ch10,&
 &   'or 2 (computation and print in xml file)',ch10,  &
-&   'Action: correct prt_3rd in your input file.'
+&   'Action: correct strcpling in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -759,19 +759,6 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 !B
- ABI_ALLOCATE(multibinit_dtset%qmass,(multibinit_dtset%nnos))
- multibinit_dtset%qmass(:)=multibinit_dtset%nnos * 10
- if(multibinit_dtset%nnos>=1)then
-   if(multibinit_dtset%nnos>marr)then
-     marr=multibinit_dtset%nnos
-     ABI_DEALLOCATE(intarr)
-     ABI_DEALLOCATE(dprarr)
-     ABI_ALLOCATE(intarr,(marr))
-     ABI_ALLOCATE(dprarr,(marr))
-   end if
-   call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%nnos,string(1:lenstr),'qmass',tread,'DPR')
-   if(tread==1) multibinit_dtset%qmass(:)=dprarr(1:multibinit_dtset%nnos)
- end if
 
 !C
  ABI_ALLOCATE(multibinit_dtset%coefficients,(multibinit_dtset%ncoeff))
@@ -865,6 +852,19 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !P
 
 !Q
+ ABI_ALLOCATE(multibinit_dtset%qmass,(multibinit_dtset%nnos))
+ multibinit_dtset%qmass(:)= zero
+ if(multibinit_dtset%nnos>=1)then
+   if(multibinit_dtset%nnos>marr)then
+     marr=multibinit_dtset%nnos
+     ABI_DEALLOCATE(intarr)
+     ABI_DEALLOCATE(dprarr)
+     ABI_ALLOCATE(intarr,(marr))
+     ABI_ALLOCATE(dprarr,(marr))
+   end if
+   call intagm(dprarr,intarr,jdtset,marr,multibinit_dtset%nnos,string(1:lenstr),'qmass',tread,'DPR')
+   if(tread==1) multibinit_dtset%qmass(:)=dprarr(1:multibinit_dtset%nnos)
+ end if
 
  if (multibinit_dtset%nqshft/=0)then
    if(3*multibinit_dtset%nqshft>marr)then
@@ -1097,8 +1097,8 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    if(multibinit_dtset%ifcflag/=0)write(nunit,'(3x,a9,3i10)')'  ifcflag',multibinit_dtset%ifcflag
    if(multibinit_dtset%prt_effpot/=0)write(nunit,'(3x,a9,3i10)')'prt_effpot',multibinit_dtset%prt_effpot
    if(multibinit_dtset%prt_phfrq/=0)write(nunit,'(3x,a9,3i10)')'prt_phfrq',multibinit_dtset%prt_phfrq
-   if(multibinit_dtset%prt_3rd/=0)write(nunit,'(3x,a9,3i10)')'  prt_3rd',multibinit_dtset%prt_3rd
-   if(multibinit_dtset%prt_3rd==2)write(nunit,'(3x,a9,3es8.2)')'delta_df',multibinit_dtset%delta_df
+   if(multibinit_dtset%strcpling/=0)write(nunit,'(3x,a9,3i10)')'  strcpling',multibinit_dtset%strcpling
+   if(multibinit_dtset%strcpling==2)write(nunit,'(3x,a9,3es8.2)')'delta_df',multibinit_dtset%delta_df
  end if
 
  if(multibinit_dtset%dynamics/=0)then
@@ -1107,11 +1107,13 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(3x,a9,3I10.1)')'    ntime',multibinit_dtset%ntime
    write(nunit,'(3x,a9,3i10)')  '    ncell',multibinit_dtset%n_cell
    write(nunit,'(3x,a9,3i10)')  '    dtion',multibinit_dtset%dtion
-   write(nunit,'(3x,a9,3i10)')'  optcell',multibinit_dtset%optcell
-   write(nunit,'(3x,a9,3F12.1)')'    bmass',multibinit_dtset%bmass
-   write(nunit,'(3x,a9,3I10)')'     nnos',multibinit_dtset%nnos
-   write(nunit,'(3x,a12)',advance='no')'    qmass  '
-   write(nunit,'(3x,15i10)') (multibinit_dtset%qmass(ii),ii=1,multibinit_dtset%nnos)
+   if(multibinit_dtset%dynamics==13)then
+     write(nunit,'(3x,a9,3i10)')'  optcell',multibinit_dtset%optcell
+     write(nunit,'(3x,a9,3F12.1)')'    bmass',multibinit_dtset%bmass
+     write(nunit,'(3x,a9,3I10)')'     nnos',multibinit_dtset%nnos
+     write(nunit,'(3x,a12)',advance='no')'    qmass  '
+     write(nunit,'(3x,15i10)') (multibinit_dtset%qmass(ii),ii=1,multibinit_dtset%nnos)
+   end if
 
  end if
 
