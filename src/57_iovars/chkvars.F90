@@ -64,7 +64,8 @@ subroutine chkvars (string)
 !Note: Do not use "double quotation mark" for the string since it triggers a bug in docchk.py (abirules script)
 !<ABINIT_VARS>
 !A
- list_vars=                 ' accuracy acell adpimd adpimd_gamma algalch amu angdeg asr atvshift autoparal awtr'
+ list_vars=                 ' accuracy acell adpimd adpimd_gamma'
+ list_vars=trim(list_vars)//' algalch amu angdeg asr atvshift autoparal awtr'
 !B
  list_vars=trim(list_vars)//' bandpp bdberry bdeigrf bdgw berryopt berrysav berrystep bfield bmass'
  list_vars=trim(list_vars)//' boxcenter boxcutmin brvltt builtintest'
@@ -83,9 +84,11 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
  list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dmatpawu dmatpuopt dmatudiag'
  list_vars=trim(list_vars)//' dmft_entropy dmft_nlambda'
- list_vars=trim(list_vars)//' dmft_dc dmft_iter dmft_mxsf dmft_nwli dmft_nwlo dmft_read_occnd dmft_rslf dmft_solv dmft_t2g'
+ list_vars=trim(list_vars)//' dmft_dc dmft_iter dmft_mxsf dmft_nwli dmft_nwlo'
+ list_vars=trim(list_vars)//' dmft_read_occnd dmft_rslf dmft_solv dmft_t2g'
  list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmftbandi dmftbandf dmftctqmc_basis'
- list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove dmftctqmc_grnns dmftctqmc_meas dmftctqmc_mrka'
+ list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
+ list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_meas dmftctqmc_mrka' 
  list_vars=trim(list_vars)//' dmftctqmc_mov dmftctqmc_order dmftctqmc_triqs_nleg'
  list_vars=trim(list_vars)//' dmftcheck dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm dosdeltae dtion dynimage'
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'
@@ -120,11 +123,11 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' gw_qprange gw_nqlwl gw_nstep gw_qlwl'
  list_vars=trim(list_vars)//' gw_sctype gw_sigxcore gw_toldfeig'
  list_vars=trim(list_vars)//' gwfockmix'
- list_vars=trim(list_vars)//' gwls_sternheimer_kmax gwls_kmax_complement gwls_kmax_poles gwls_kmax_analytic gwls_kmax_numeric'
+ list_vars=trim(list_vars)//' gwls_sternheimer_kmax gwls_kmax_complement gwls_kmax_poles'
+ list_vars=trim(list_vars)//' gwls_kmax_analytic gwls_kmax_numeric'
  list_vars=trim(list_vars)//' gwls_list_proj_freq gwls_nseeds gwls_n_proj_freq gwls_recycle'
  list_vars=trim(list_vars)//' gwls_first_seed gwls_model_parameter gwls_second_model_parameter gwls_npt_gauss_quad'
  list_vars=trim(list_vars)//' gwls_dielectric_model gwls_print_debug gwls_band_index gwls_exchange gwls_correlation'
-
 !I
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
@@ -170,7 +173,7 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' optnlxccc optstress ortalg'
 !P
  list_vars=trim(list_vars)//' paral_atom paral_kgb paral_rf pawcpxocc pawcross'
- list_vars=trim(list_vars)//' pawecutdg pawfatbnd pawlcutd pawlmix '
+ list_vars=trim(list_vars)//' pawecutdg pawfatbnd pawlcutd pawlmix'
  list_vars=trim(list_vars)//' pawmixdg pawnhatxc pawnphi pawntheta pawnzlm pawoptmix pawoptosc pawovlp'
  list_vars=trim(list_vars)//' pawprtdos pawprtvol pawprtwf pawprt_b pawprt_k pawspnorb pawstgylm'
  list_vars=trim(list_vars)//' pawsushat pawujat pawujrad pawujv pawusecp pawxcdev pimass pitransform'
@@ -201,17 +204,17 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' rf2atpol rf2dir rf2elfd rf2phon'
  list_vars=trim(list_vars)//' rf3atpol rf3dir rf3elfd rf3phon'
 !S
- list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm '
- list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend smdelta so_psp '
+ list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
+ list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend smdelta so_psp'
  list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma spinat spinmagntarget spmeth '
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget supercell'
  list_vars=trim(list_vars)//' symafm symchi symdynmat symmorphi symrel symsigma'
 !T
- list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc tfw_toldfe timopt tl_nprccg tl_radius '
+ list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc tfw_toldfe timopt tl_nprccg tl_radius'
  list_vars=trim(list_vars)//' tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
  list_vars=trim(list_vars)//' tolvrs tolwfr tphysel tsmear typat'
 !U
- list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usedmatpu '
+ list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usedmatpu'
  list_vars=trim(list_vars)//' usedmft useexexch usekden use_nonscf_gkk usepawu usepotzero'
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
@@ -234,13 +237,13 @@ subroutine chkvars (string)
  list_vars=trim(list_vars)//' wvl_bigdft_comp wvl_crmult wvl_frmult wvl_hgrid wvl_ngauss wvl_nprccg'
  list_vars=trim(list_vars)//' w90iniprj w90prtunk'
 !X
- list_vars=trim(list_vars)//' xangst xcart xc_denpos xc_tb09_c xred xredsph_extra xyzfile '
+ list_vars=trim(list_vars)//' xangst xcart xc_denpos xc_tb09_c xred xredsph_extra xyzfile'
 !Y
 !Z
  list_vars=trim(list_vars)//' zcut zeemanfield znucl'
 
 !Logical input variables
- list_logicals=' SpinPolarized '
+ list_logicals=' SpinPolarized'
 
 !String input variables
  list_strings=' XCname wfk_task'
