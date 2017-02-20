@@ -429,6 +429,8 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
       for(j=0;j<3;j++){
         cell[i][j] = cell_local[i][j];        
       }
+    }
+    for(i=0;i<irpt1;i++){
       for(ia=0;ia<*natom;ia++){
         for(mu=0;mu<3;mu++){
           for(ib=0;ib<*natom;ib++){
@@ -436,6 +438,10 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
               atmfrc[i][ib][nu][ia][mu][0]=local_atmfrc[i][ib][nu][ia][mu][0];
               short_atmfrc[i][ib][nu][ia][mu][0]=local_atmfrc[i][ib][nu][ia][mu][0];
               ewald_atmfrc[i][ib][nu][ia][mu][0]=0.0;
+              //Set imaginary part to 0
+              short_atmfrc[i][ib][nu][ia][mu][1]= 0.0;
+              atmfrc[i][ib][nu][ia][mu][1] = 0.0;      
+              ewald_atmfrc[i][ib][nu][ia][mu][1]= 0.0;
             }
           }
         }    
@@ -447,6 +453,8 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
       for(j=0;j<3;j++){
         cell[i][j] = cell_total[i][j];        
       }
+    }
+    for(i=0;i<irpt1;i++){
       for(ia=0;ia<*natom;ia++){
         for(mu=0;mu<3;mu++){
           for(ib=0;ib<*natom;ib++){
@@ -454,6 +462,11 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
               atmfrc[i][ib][nu][ia][mu][0]=total_atmfrc[i][ib][nu][ia][mu][0];
               short_atmfrc[i][ib][nu][ia][mu][0]=0.0;
               ewald_atmfrc[i][ib][nu][ia][mu][0]=total_atmfrc[i][ib][nu][ia][mu][0];
+              //Set imaginary part to 0
+              short_atmfrc[i][ib][nu][ia][mu][1]= 0.0;
+              atmfrc[i][ib][nu][ia][mu][1] = 0.0;      
+              ewald_atmfrc[i][ib][nu][ia][mu][1]= 0.0;
+
             }
           }
         }    
@@ -466,31 +479,36 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
         for(j=0;j<3;j++){
           cell[i][j] = cell_total[i][j];
         }
+      }
+      for(i=0;i<irpt2;i++){
         for(ia=0;ia<*natom;ia++){
           for(mu=0;mu<3;mu++){
             for(ib=0;ib<*natom;ib++){
               for(nu=0;nu<3;nu++){
-                atmfrc[i][ib][nu][ia][mu][0]=total_atmfrc[i][ib][nu][ia][mu][0];
+                atmfrc[i][ib][nu][ia][mu][0] = total_atmfrc[i][ib][nu][ia][mu][0];
+                ewald_atmfrc[i][ib][nu][ia][mu][0]= atmfrc[i][ib][nu][ia][mu][0]-
+                                                    short_atmfrc[i][ib][nu][ia][mu][0];
+                //Set imaginary part to 0
+                atmfrc[i][ib][nu][ia][mu][1] = 0.0; 
+                ewald_atmfrc[i][ib][nu][ia][mu][1]= 0.0;
                 for(j=0;j<irpt1;j++){
                   if(cell_local[j][0] == cell[i][0] && 
                      cell_local[j][1] == cell[i][1] &&
                      cell_local[j][2] == cell[i][2] ){
+                    if(ia==0 && ib==0 && mu==0 && nu==0){irpt3++;}
                     short_atmfrc[i][ib][nu][ia][mu][0]= local_atmfrc[j][ib][nu][ia][mu][0];
-                    ewald_atmfrc[i][ib][nu][ia][mu][0]= atmfrc[i][ib][nu][ia][mu][0]-
-                                                 short_atmfrc[i][ib][nu][ia][mu][0];
-                    irpt3++;
+                    short_atmfrc[i][ib][nu][ia][mu][1]= 0.0;
                   }
                 }
-              }
+              }    
             }
-          }    
+          }
         }
       }
       if(irpt3 != irpt1){
         fprintf(stdout,"\n WARNING: The number of local and total rpt are not equivalent\n");
         fprintf(stdout,"          in the XML file :%d %d\n",irpt1,irpt3);
-        fprintf(stdout,"          The missing local IFC will be set to zero\n");
-        
+        fprintf(stdout,"          The missing local IFC will be set to zero\n");        
       }
     }
     else{

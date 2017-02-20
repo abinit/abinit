@@ -31,7 +31,7 @@ module m_polynomial_coeff
 
  implicit none
 
- public :: polynomial_coeff_broacast
+ public :: polynomial_coeff_broadcast
  public :: polynomial_coeff_dot
  public :: polynomial_coeff_free
  public :: polynomial_coeff_init
@@ -372,9 +372,9 @@ subroutine polynomial_coeff_getName(name,atm1,atm2,dir,power,polynomial_coeff,ce
 end subroutine polynomial_coeff_getName
 !!***
 
-!!****f* m_polynomial_coeff/polynomial_coeff_broacast
+!!****f* m_polynomial_coeff/polynomial_coeff_broadcast
 !! NAME
-!! polynomial_coeff_broacast
+!! polynomial_coeff_broadcast
 !!
 !! FUNCTION
 !!  MPI broadcast all types for the polynomial_coefficent structure
@@ -395,13 +395,13 @@ end subroutine polynomial_coeff_getName
 !!
 !! SOURCE
 
-subroutine polynomial_coeff_broacast(coefficients, master, comm)
+subroutine polynomial_coeff_broadcast(coefficients, master, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
 #undef ABI_FUNC
-#define ABI_FUNC 'polynomial_coeff_broacast'
+#define ABI_FUNC 'polynomial_coeff_broadcast'
 !End of the abilint section
 
  implicit none
@@ -461,7 +461,7 @@ subroutine polynomial_coeff_broacast(coefficients, master, comm)
 
  DBG_EXIT("COLL")
 
-end subroutine polynomial_coeff_broacast
+end subroutine polynomial_coeff_broadcast
 !!***
 
 !!****f*m_polynomial_coeff/polynomial_coeff_writeXML

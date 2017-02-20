@@ -983,13 +983,13 @@ subroutine system_getDimFromXML(filename,natom,ntypat,nph1l,nrpt)
 &   '          Dipdip must be set to zero',ch10
      call wrtout(std_out,message,'COLL')
    else if (nrpt2 > nrpt1) then
-     write(message, '(2a,I5,3a,I5,5a)' )ch10,&
+     write(message, '(2a,I0,3a,I0,5a)' )ch10,&
 &   ' WARNING: the number of total IFC  (',nrpt2,') is not equal to the  ',ch10,&
 &   '          the number of short range IFC (',nrpt1,') in ',filename,ch10,&
 &   '          the missing ifc will be set to zero',ch10
      call wrtout(std_out,message,'COLL')
    else if(nrpt1>nrpt2)then
-     write(message, '(2a,I5,3a,I5,5a)' )ch10,&
+     write(message, '(2a,I0,3a,I0,5a)' )ch10,&
 &   ' The number of total IFC  (',nrpt2,') is inferior to  ',ch10,&
 &   ' the number of short range IFC (',nrpt1,') in ',filename,ch10,&
 &   ' This is not possible',ch10
@@ -3036,10 +3036,9 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
    end do
  end if !End if master
  
-
 !9-MPI BROADCAST
  do ii=1,ncoeff
-   call polynomial_coeff_broacast(coeffs(ii),master, comm)
+   call polynomial_coeff_broadcast(coeffs(ii),master, comm)
  end do
 
 !10-checks
