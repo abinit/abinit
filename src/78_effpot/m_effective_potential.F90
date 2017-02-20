@@ -3636,12 +3636,19 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,stra
 !         Strain case idir => -6, -5, -4, -3, -2 or -1
           if (idir1 < zero)then
 
-!           Accumulate energy fo each displacement (\sum ((A_x-O_x)^Y(A_y-O_c)^Z))
-            tmp1 = tmp1 * (strain(abs(idir1)))**power
-           
-!           Accumulate stress for each strain (\sum (Y(eta_2)^Y-1(eta_2)^Z+...))
-            tmp3 = tmp3 *  power*(strain(abs(idir1)))**(power-1)
-
+            if(abs(strain(abs(idir1))) > tol10)then
+!             Accumulate energy fo each displacement (\sum ((A_x-O_x)^Y(A_y-O_c)^Z))
+              tmp1 = tmp1 * (strain(abs(idir1)))**power           
+              if(power > 1) then
+!             Accumulate stress for each strain (\sum (Y(eta_2)^Y-1(eta_2)^Z+...))
+                tmp3 = tmp3 *  power*(strain(abs(idir1)))**(power-1)
+              end if
+            else
+              tmp1 = zero
+              if(power > 1) then
+                tmp3 = zero
+              end if
+            end if
           else
 !           Displacement case idir = 1, 2  or 3
 !           indexes of the cell of the atom a
@@ -3688,11 +3695,19 @@ subroutine coefficients_contribution(eff_pot,disp,energy,fcart,natom,ncoeff,stra
             disp1 = disp(idir1,ia1)
             disp2 = disp(idir1,ib1)
 
+            if(abs(disp1) > tol10 .or. abs(disp2)> tol10)then
 !           Accumulate energy fo each displacement (\sum ((A_x-O_x)^Y(A_y-O_c)^Z))
-            tmp1 = tmp1 * (disp1-disp2)**power
-!           Accumulate forces for each displacement (\sum (Y(A_x-O_x)^Y-1(A_y-O_c)^Z+...))
-            tmp2 = tmp2 * power*(disp1-disp2)**(power-1)
-
+              tmp1 = tmp1 * (disp1-disp2)**power
+              if(power > 1) then
+!               Accumulate forces for each displacement (\sum (Y(A_x-O_x)^Y-1(A_y-O_c)^Z+...))
+                tmp2 = tmp2 * power*(disp1-disp2)**(power-1)
+              end if
+            else
+              tmp1 = zero
+              if(power > 1) then
+                tmp2 = zero
+              end if
+            end if
           end if
 
           do idisp2=1,eff_pot%anharmonics_terms%coefficients(icoeff)%terms(iterm)%ndisp
