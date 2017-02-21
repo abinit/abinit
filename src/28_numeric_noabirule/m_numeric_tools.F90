@@ -31,6 +31,8 @@ MODULE m_numeric_tools
  use m_profiling_abi
  use m_linalg_interfaces
 
+ use m_fstrings,   only : itoa, sjoin
+
  implicit none
 
  private
@@ -82,6 +84,7 @@ MODULE m_numeric_tools
  public :: rhophi                ! Compute the phase and the module of a complex number.
  public :: smooth                ! Smooth data.
  public :: nderiv                ! Compute first or second derivative of input function y(x) on a regular grid.
+ public :: central_finite_diff   ! Coefficients of the central differences, for several orders of accuracy.
 
  interface arth
    module procedure arth_int
@@ -1668,7 +1671,7 @@ pure function bisect_int(AA,xx) result(loc)
  jl=0 ; ju=nn+1
  do
   if (ju-jl<=1) EXIT
-  jm=(ju+jl)/2  ! Compute a midpoint,
+  jm=(ju+jl)/2  ! Compute a midpoint
   if (ascnd.EQV.(xx>=AA(jm))) then
    jl=jm ! Replace lower limit
   else
@@ -5630,6 +5633,108 @@ end subroutine nderiv
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/central_finite_diff
+!! NAME
+!! central_finite_diff
+!!
+!! FUNCTION
+!! Coefficients of the central differences, for several orders of accuracy.
+!! See: https://en.wikipedia.org/wiki/Finite_difference_coefficient
+!!
+!! INPUTS
+!!  order=Derivative order.
+!!  ipos=Index of the point must be in [1,npts]
+!!  npts=Number of points used in finite difference, origin at npts/2 + 1
+!!
+!! OUTPUT
+!!  coeffient for central finite difference
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+real(dp) function central_finite_diff(order, ipos, npts) result(fact)
+
+
+!This section has been created automatically by the script Abilint (TD).
+!Do not modify the following lines by hand.
+#undef ABI_FUNC
+#define ABI_FUNC 'central_finite_diff'
+!End of the abilint section
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: ipos,order,npts
+
+!Local variables ---------------------------------------
+!scalars
+ real(dp),parameter :: empty=huge(one)
+! 1st derivative.
+ real(dp),parameter :: d1(9,4) = reshape([ &
+  [-1/2._dp, 0._dp, 1/2._dp, empty, empty, empty, empty, empty, empty], &
+  [ 1/12._dp, -2/3._dp, 0._dp, 2/3._dp, -1/12._dp, empty, empty, empty, empty], &
+  [-1/60._dp, 3/20._dp, -3/4._dp, 0._dp, 3/4._dp, -3/20._dp, 1/60._dp, empty, empty], &
+  [ 1/280._dp, -4/105._dp, 1/5._dp, -4/5._dp, 0._dp, 4/5._dp, -1/5._dp, 4/105._dp, -1/280._dp]], [9,4])
+! 2nd derivative.
+ real(dp),parameter :: d2(9,4) = reshape([ &
+   [ 1._dp, -2._dp, 1._dp, empty, empty, empty, empty, empty, empty], &
+   [-1/12._dp, 4/3._dp, -5/2._dp, 4/3._dp, -1/12._dp, empty, empty, empty, empty], &
+   [ 1/90._dp, -3/20._dp, 3/2._dp, -49/18._dp, 3/2._dp, -3/20._dp, 1/90._dp, empty, empty], &
+   [-1/560._dp, 8/315._dp, -1/5._dp, 8/5._dp, -205/72._dp, 8/5._dp, -1/5._dp, 8/315._dp, -1/560._dp]], [9,4])
+! 3th derivative.
+ real(dp),parameter :: d3(9,3) = reshape([ &
+   [-1/2._dp, 1._dp, 0._dp, -1._dp, 1/2._dp, empty, empty, empty, empty], &
+   [ 1/8._dp, -1._dp, 13/8._dp, 0._dp, -13/8._dp, 1._dp, -1/8._dp, empty, empty], &
+   [ -7/240._dp, 3/10._dp, -169/120._dp, 61/30._dp, 0._dp, -61/30._dp, 169/120._dp, -3/10._dp, 7/240._dp]], &
+   [9,3])
+! 4th derivative.
+ real(dp),parameter :: d4(9,3) = reshape([ &
+   [ 1._dp, -4._dp, 6._dp, -4._dp, 1._dp, empty, empty, empty, empty], &
+   [ -1/6._dp, 2._dp, -13/2._dp, 28/3._dp, -13/2._dp, 2._dp, -1/6._dp, empty, empty], &
+   [ 7/240._dp, -2/5._dp, 169/60._dp, -122/15._dp, 91/8._dp, -122/15._dp, 169/60._dp, -2/5._dp, 7/240._dp]], [9,3])
+! 5th derivative.
+ real(dp),parameter :: d5(7) = [ -1/2._dp, 2._dp, -5/2._dp, 0._dp, 5/2._dp, -2._dp, 1/2._dp]
+! 6th derivative.
+ real(dp),parameter :: d6(7) = [ 1._dp, -6._dp, 15._dp, -20._dp, 15._dp, -6._dp, 1._dp]
+! *********************************************************************
+
+ select case (order)
+ case (1)
+   if (ipos < 1 .or. ipos > 9 .or. npts < 1 .or. npts > 9) goto 10
+   fact = d1(ipos, npts/2)
+ case (2)
+   if (ipos < 1 .or. ipos > 9 .or. npts < 1 .or. npts > 9) goto 10
+   fact = d2(ipos, npts/2)
+ case (3)
+   if (ipos < 1 .or. ipos > 9 .or. npts < 1 .or. npts > 9) goto 10
+   fact = d3(ipos, npts/2)
+ case (4)
+   if (ipos < 1 .or. ipos > 9 .or. npts < 1 .or. npts > 9) goto 10
+   fact = d4(ipos, npts/2 - 1)
+ case (5)
+   if (ipos < 1 .or. ipos > 7 .or. npts /= 7) goto 10
+   fact = d5(ipos)
+ case (6)
+   if (ipos < 1 .or. ipos > 7 .or. npts /= 7) goto 10
+   fact = d6(ipos)
+ case default
+   MSG_ERROR(sjoin("No entry for ipos:",itoa(ipos),"order", itoa(order), "npts", itoa(npts)))
+ end select
+
+ if (fact == empty) then
+   MSG_ERROR(sjoin("Invalid ipos:",itoa(ipos),"for order", itoa(order), "npts", itoa(npts)))
+ end if
+ return
+
+10 MSG_ERROR(sjoin("No entry for ipos:",itoa(ipos),"order", itoa(order), "npts", itoa(npts)))
+
+end function central_finite_diff
+!!***
 
 END MODULE m_numeric_tools
 !!***

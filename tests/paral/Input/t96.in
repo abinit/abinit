@@ -1,5 +1,5 @@
 ##############################################################################
-#Test for multibinit, reed DDB and generate the effective potential into XML file
+#Test for multibinit, read DDB and generate the effective potential into XML file
 ##############################################################################
 prt_effpot = -1
 energy_reference = -1.7145176622E+01

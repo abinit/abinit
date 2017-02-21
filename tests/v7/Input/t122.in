@@ -1,5 +1,5 @@
 ##############################################################################
-#Test for multibinit, reed DDB and generate the effective potential into XML file
+#Test for multibinit, read DDB and generate the effective potential into XML file
 ##############################################################################
 prt_effpot = -1
 energy_reference = -1.7145176622E+01
@@ -41,5 +41,5 @@ ntime  = 50
 #%% authors = A. MARTIN
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%   reed ddb and generate effective potential in XML file
+#%%   read ddb and generate effective potential in XML file
 #%%<END TEST_INFO>

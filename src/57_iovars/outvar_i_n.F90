@@ -505,14 +505,12 @@ subroutine outvar_i_n (dtsets,iout,&
      narrm(idtset)=3*dtsets(idtset)%nberry
      if (narrm(idtset)>0)&
 &     intarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%kberry(1:3,1:dtsets(idtset)%nberry),&
-&     (/ narrm(idtset) /) )
+&     reshape(dtsets(idtset)%kberry(1:3,1:dtsets(idtset)%nberry), [narrm(idtset)] )
    else
      narrm(idtset)=3*mxvals%nberry
      if (narrm(idtset)>0)&
 &     intarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%kberry(1:3,1:mxvals%nberry),&
-&     (/ narrm(idtset) /) )
+&     reshape(dtsets(idtset)%kberry(1:3,1:mxvals%nberry), [narrm(idtset)] )
    end if
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'kberry','INT',multivals%nberry)
@@ -530,8 +528,7 @@ subroutine outvar_i_n (dtsets,iout,&
    narrm(idtset)=3*dtsets(idtset)%nkpt
    if (narrm(idtset)>0) then
      dprarr(1:narrm(idtset),idtset)=reshape(&
-&     dtsets(idtset)%kpt(1:3,1:dtsets(idtset)%nkpt),&
-&     (/ narrm(idtset) /) )
+&     dtsets(idtset)%kpt(1:3,1:dtsets(idtset)%nkpt), [narrm(idtset)] )
    end if
 
    if(prtvol_glob==0 .and. narrm(idtset)>3*nkpt_max)then
@@ -543,8 +540,10 @@ subroutine outvar_i_n (dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,&
 & narrm,ncid,ndtset_alloc,'kpt','DPR',multivals%nkpt)
 
- if(tnkpt==1) write(iout,'(23x,a,i3,a)' ) &
-& 'outvar_i_n : Printing only first ',nkpt_max,' k-points.'
+ if(tnkpt==1) write(iout,'(23x,a,i3,a)' ) 'outvar_i_n : Printing only first ',nkpt_max,' k-points.'
+
+ !intarr(1,:)=dtsets(:)%kptbounds
+ !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'kptbounds','INT',0)
 
 !kptgw
  narr=3*dtsets(1)%nkptgw ! default size for all datasets
@@ -553,14 +552,12 @@ subroutine outvar_i_n (dtsets,iout,&
      narrm(idtset)=3*dtsets(idtset)%nkptgw
      if (narrm(idtset)>0)&
 &     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%kptgw(1:3,1:dtsets(idtset)%nkptgw),&
-&     (/ narrm(idtset) /) )
+&     reshape(dtsets(idtset)%kptgw(1:3,1:dtsets(idtset)%nkptgw), [narrm(idtset)])
    else
      narrm(idtset)=mxvals%nkptgw
      if (narrm(idtset)>0)&
 &     dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%kptgw(1:3,1:mxvals%nkptgw),&
-&     (/ narrm(idtset) /) )
+&     reshape(dtsets(idtset)%kptgw(1:3,1:mxvals%nkptgw), [narrm(idtset)] )
    end if
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'kptgw','DPR',multivals%nkptgw)
@@ -574,7 +571,7 @@ subroutine outvar_i_n (dtsets,iout,&
 !kptrlatt
  if(sum((dtsets(1:ndtset_alloc)%kptopt)**2)/=0)then
    ndtset_kptopt=0
-   intarr(1:9,0)=reshape( dtsets(0)%kptrlatt(:,:) , (/9/) )
+   intarr(1:9,0)=reshape( dtsets(0)%kptrlatt, [9] )
    ABI_ALLOCATE(jdtset_kptopt,(0:ndtset_alloc))
 !  Define the set of datasets for which kptopt>0
    do idtset=1,ndtset_alloc
@@ -582,7 +579,7 @@ subroutine outvar_i_n (dtsets,iout,&
      if(kptopt>0)then
        ndtset_kptopt=ndtset_kptopt+1
        jdtset_kptopt(ndtset_kptopt)=jdtset_(idtset)
-       intarr(1:9,ndtset_kptopt)=reshape( dtsets(idtset)%kptrlatt(:,:) , (/9/) )
+       intarr(1:9,ndtset_kptopt)=reshape( dtsets(idtset)%kptrlatt , [9] )
      end if
    end do
    if(ndtset_kptopt>0)then
@@ -706,7 +703,7 @@ subroutine outvar_i_n (dtsets,iout,&
    do iimage=1,nimagem(idtset)
      if (narrm(idtset)>0) then
        dprarr_images(1:narrm(idtset),iimage,idtset)=&
-&       reshape(results_out(idtset)%mixalch(1:size1,1:size2,iimage), (/ narrm(idtset) /) )
+&       reshape(results_out(idtset)%mixalch(1:size1,1:size2,iimage), [narrm(idtset)] )
      end if
    end do
  end do
@@ -826,6 +823,12 @@ subroutine outvar_i_n (dtsets,iout,&
    intarr(1,0)=0
    call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ndtset','INT',0)
  end if
+
+ intarr(1,:)=dtsets(:)%ndivsm
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ndivsm','INT',0)
+
+ !intarr(1,:)=dtsets(:)%nkpath
+ !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nkpath','INT',0)
 
  intarr(1,:)=dtsets(:)%ndynimage
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ndynimage','INT',0)
@@ -1008,16 +1011,12 @@ subroutine outvar_i_n (dtsets,iout,&
    narrm(idtset)=3*dtsets(idtset)%natom
    if (narrm(idtset)>0) then
      dprarr(1:narrm(idtset),idtset)=&
-&     reshape(dtsets(idtset)%nucdipmom(1:3,1:dtsets(idtset)%natom),&
-&     (/ narrm(idtset) /) )
+&     reshape(dtsets(idtset)%nucdipmom(1:3,1:dtsets(idtset)%natom), [narrm(idtset)])
    end if
-   if(sum(abs( dtsets(idtset)%nucdipmom(1:3,1:dtsets(idtset)%natom))) < tol12 )then
-     narrm(idtset)=0
-   end if
+   if(sum(abs( dtsets(idtset)%nucdipmom(1:3,1:dtsets(idtset)%natom))) < tol12 ) narrm(idtset)=0
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,&
-& narrm,ncid,ndtset_alloc,'nucdipmom','DPR',&
-& multivals%natom)
+& narrm,ncid,ndtset_alloc,'nucdipmom','DPR',multivals%natom)
 
  intarr(1,:)=dtsets(:)%nwfshist
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nwfshist','INT',0)

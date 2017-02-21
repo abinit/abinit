@@ -44,8 +44,6 @@
 
  read the DDB information and perform some checks
 
--begin at tcpu      0.017  and twall      0.016 sec
-
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
  R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
@@ -92,7 +90,6 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.021  and twall      0.021 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00

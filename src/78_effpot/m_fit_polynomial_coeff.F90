@@ -584,6 +584,7 @@ subroutine fit_polynomial_coeff_getList(cell,cut_off,dist,eff_pot,list_symcoeff,
          end if
 !        This coeff is now computed 
          blkval(mu,ia,nu,ib,irpt)= zero 
+         if(irpt==irpt_ref) blkval(nu,ib,mu,ia,irpt)= zero 
        end do ! end loop nu
      end do ! end loop mu
    end do ! end loop ii

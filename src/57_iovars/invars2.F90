@@ -7,7 +7,7 @@
 !! FUNCTION
 !! Initialize variables for the ABINIT code, for one particular
 !! dataset, characterized by jdtset.
-!! Note : some parameters have already been read in invars0 and invars1,
+!! Note: some parameters have already been read in invars0 and invars1,
 !! and were used to dimension the arrays needed here.
 !!
 !! COPYRIGHT
@@ -605,6 +605,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ecut',tread,'ENE')
  if(tread==1) dtset%ecut=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,size(dtset%einterp),string(1:lenstr),'einterp',tread,'DPR')
+ if(tread==1) dtset%einterp=dprarr(1:size(dtset%einterp))
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'elph2_imagden',tread,'ENE')
  if(tread==1) dtset%elph2_imagden=dprarr(1)
@@ -1985,6 +1988,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtdosm',tread,'INT')
  if(tread==1) dtset%prtdosm=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtebands',tread,'INT')
+ if(tread==1) dtset%prtebands=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtefg',tread,'INT')
  if(tread==1) dtset%prtefg=intarr(1)
 
@@ -2023,6 +2029,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtnest',tread,'INT')
  if(tread==1) dtset%prtnest=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtphbands',tread,'INT')
+ if(tread==1) dtset%prtphbands=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtphdos',tread,'INT')
  if(tread==1) dtset%prtphdos=intarr(1)
@@ -2584,6 +2593,35 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,&
    dtset%kptns(1,1:nkpt)=dtset%kptns(1,1:nkpt)+dtset%qptn(1)
    dtset%kptns(2,1:nkpt)=dtset%kptns(2,1:nkpt)+dtset%qptn(2)
    dtset%kptns(3,1:nkpt)=dtset%kptns(3,1:nkpt)+dtset%qptn(3)
+ end if
+
+ ! Read variables defining the k-path
+ ! If kptopt < 0  --> Band structure and kptbounds size is given by abs(kptopt)
+ ! If kptopt >= 0 --> We may have a k-path specified by nkpath and kptbounds (used by post-processing tools)
+ ! TODO: ndivk?
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ndivsm',tread,'INT')
+ if (tread == 1) dtset%ndivsm = intarr(1)
+
+ if (dtset%kptopt < 0) then
+   dtset%nkpath = abs(dtset%kptopt)
+ else
+   dtset%nkpath = 0
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nkpath',tread,'INT')
+   if (tread==1) dtset%nkpath = intarr(1)
+ end if
+
+ if (dtset%nkpath /= 0) then
+   call intagm(dprarr,intarr,jdtset,marr,3*dtset%nkpath,string(1:lenstr),'kptbounds',tread,'DPR')
+
+   if (tread == 1) then
+     ABI_MALLOC(dtset%kptbounds, (3, dtset%nkpath))
+     dtset%kptbounds = reshape(dprarr(1:3*dtset%nkpath), [3, dtset%nkpath])
+   else
+     MSG_ERROR("When nkpath /= 0 or kptopt < 0, kptbounds must be defined in the input file.")
+   end if
+ else
+   ABI_MALLOC(dtset%kptbounds, (0,0))
  end if
 
 ! This part has been commented out as get_kpt_fullbz is not able to handle kptrlatt with shifts e.g.

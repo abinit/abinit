@@ -228,7 +228,7 @@ program multibinit
 !If needed, fit the anharmonic part
 !****************************************************************************************
 !TEST_AM_SECTION
- if(.false.)then
+ if(.true.)then
    if (inp%fit_coeff/=0) then
      if(iam_master) then
 !      Read the MD file

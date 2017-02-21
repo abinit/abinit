@@ -88,8 +88,7 @@ subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat)
 ! *********************************************************************
 
 !DEBUG
- write(std_out,*)'alignph : enter'
-!stop
+! write(std_out,*)'alignph : enter'
 !ENDDEBUG
 
 !Get the oscillator strength and mode effective charge for each mode
@@ -204,7 +203,7 @@ subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat)
      zvec(:,2)=modez(1,:,imodey)
      zvec(:,3)=modez(1,:,imodez)
 
-     
+
 !    Optimize along x : does the first vector has a component along x ?
      if (abs(zvec(1,1)) > tol8) then
 !      Optimize on the (1,2) pair of modes along x
@@ -217,7 +216,7 @@ subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat)
        vec(:,2) = sin(theta)*vect(:,1) + cos(theta)*vect(:,2)
 !      Optimize on the (1,3) pair of modes along x
        theta = atan(-zvec(1,3)/zvec(1,1))
-       zvect(:,:)=zvec(:,:) 
+       zvect(:,:)=zvec(:,:)
        zvec(:,1) = cos(theta)*zvect(:,1) - sin(theta)*zvect(:,3)
        zvec(:,3) = sin(theta)*zvect(:,1) + cos(theta)*zvect(:,3)
        vect(:,:)=vec(:,:)
@@ -256,7 +255,7 @@ subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat)
        end if
 !    We are left with the pair of vectors (2,3)
      else if (abs(zvec(2,2)) > tol8) then
-!      Optimize on the (2,3) pair of modes along y 
+!      Optimize on the (2,3) pair of modes along y
        theta = atan(-zvec(2,3)/zvec(2,2))
        zvect(:,:)=zvec(:,:)
        zvec(:,2) = cos(theta)*zvect(:,2) - sin(theta)*zvect(:,3)

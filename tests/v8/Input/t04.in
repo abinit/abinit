@@ -1,45 +1,97 @@
-##############################################################################
-#Test for multibinit, just read xml and generate the effective potential into XML file
-# without regeneration of dipole-dipole just reading xml
-##############################################################################
-prt_effpot = -1
+# Interpolation of electronic bands.
+ndtset 3
 
-#---------------------------------------------------------------
-#Generation of the IFC
-#---------------------------------------------------------------
-dipdip = 0
+prtebands 2    # Output bands in gnuplot format.
+ndivsm   20    # The variables below define the k-path 
+nkpath   12
+kptbounds 
+0.     0.     0.   
+0.5    0.     0.5  
+0.5    0.25   0.75 
+0.375  0.375  0.75 
+0.     0.     0.   
+0.5    0.5    0.5  
+0.625  0.25   0.625
+0.5    0.25   0.75 
+0.5    0.5    0.5  
+0.375  0.375  0.75 
+0.625  0.25   0.625
+0.5    0.     0.5  
 
-#---------------------------------------------------------------
-#Inputs for the fitted coefficients
-#---------------------------------------------------------------
-ncoeff = 4
-coefficients =  4.57647e-02 -2.02737e-03 -4.88691e-02 2.09467e-03
+#################
+### DATASET 1 ###
+#################
+# SCF run on homogeneous gamma-centered k-mesh.
+# The SCF eigenvalues are then used to interpolate the band structure along the k-path
+# defined by nkpath, kptbounds and ndivsm. 
+ngkpt1        8 8 8 
+#ngkpt1        32 32 32
+nshiftk1      1
+shiftk1       0.0 0.0 0.0
+tolvrs1       1.0d-10
+einterp1      1 5 0 0  # Activate Fourier interpolation at the end of the SCF cycle.
+                       # Use 5 star functions per k-point. 
 
-#--------------------------------------------------------------
-#Monte carlo / molecular dynamics
-#--------------------------------------------------------------
-dynamics =  13
-n_cell =   3 3 3
-temperature = 1000
-ntime  = 50
-optcell = 2
+#################
+### DATASET 2 ###
+#################
+# Standard NSCF band structure calculation (mainly used to analyze the quality of the interpolation).
+# Note that here we have to use kptopt instead of nkpath.
+kptopt2   -11
+iscf2    -2
+tolwfr2   1e-14
+getwfk2   1
+getden2   1
 
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#################
+### DATASET 3 ###
+#################
+# Use B-spline to interpolate the eigenvalues 
+# along the path defined by nkpath, kptbounds and ndivsm. 
+ngkpt3        8 8 8 
+#ngkpt3       32 32 32
+nshiftk3      1
+shiftk3       0.0 0.0 0.0
+getwfk3    1
+getden3    1
+einterp3   2 3 3 3   # (cubic) B-spline interpolation 
+iscf3     -2
+tolwfr3   1e-14
+
+# Common data
+ecut   8.0
+nband  8
+occopt 7    # include metallic occupation function with a small smearing
+tsmear 0.04
+nstep  70
+
+# Geometry
+acell 3*7.5
+rprim
+  0.0 0.5 0.5
+  0.5 0.0 0.5
+  0.5 0.5 0.0
+
+natom  1
+typat  1
+xred   0.00 0.00 0.00
+ntypat 1
+znucl  13
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
-#%% executable = multibinit
-#%% system_xml = t04_sys.xml
-#%% coeff_xml = t04_coeff.xml
+#%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t04.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
-#%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
-#%%   coeffs.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t04.out, tolnlines=50, tolabs=5.0e-02, tolrel=1.0e-02;
+#%%   t04o_DS1_INTERP_EBANDS.data, tolnlines=50, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%%   t04o_DS3_INTERP_EBANDS.data, tolnlines=50, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
+#%% psp_files = Al-psval.psp8
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 8
 #%% [extra_info]
-#%% authors = A. MARTIN
-#%% keywords = Effective potential, multibinit
+#%% authors = M. Giantomassi 
+#%% keywords = NC
 #%% description = 
-#%%   read xml and generate effective potential in XML file
+#%%   Interpolation of electronic bands with two different techniques (star functions and B-spline interpolation)
 #%%<END TEST_INFO>

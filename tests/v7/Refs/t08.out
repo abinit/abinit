@@ -147,7 +147,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 = 10
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -205,6 +205,7 @@ P           mkmem           1
       pitransform5          1
       pitransform6          2
            prtden           0
+        prtebands           0
            prteig           0
             prtwf           0
           spgroup           1
@@ -29085,6 +29086,7 @@ P           mkmem           1
       pitransform5          1
       pitransform6          2
            prtden           0
+        prtebands           0
            prteig           0
             prtwf           0
           spgroup           1
