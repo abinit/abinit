@@ -1141,8 +1141,6 @@ end subroutine system_getDimFromXML
    phonon_strain(ii)%cell   = zero
  end do
 
- 
-
  all_amu(:) = zero
  dynmat(:,:,:,:,:,:)  = zero
  cell_local(:,:) = 99D99

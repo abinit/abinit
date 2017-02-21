@@ -84,7 +84,7 @@ void effpot_xml_checkXML(char *filename,char *name_xml){
 void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, int *loc_nrpt,\
                              int *tot_nrpt){
   xmlDocPtr doc;
-  int i,iatom,irpt1,irpt2,iqpt,itypat,present;
+  int i,iatom,irpt1,irpt2,iqpt,itypat,j,present;
   xmlNodePtr cur,cur2;
   xmlChar *key,*uri;
   Array typat;
@@ -113,20 +113,9 @@ void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, i
     if ((!xmlStrcmp(cur->name, (const  xmlChar *) "atom"))) {
       iatom++;
       uri = xmlGetProp(cur, (const  xmlChar *) "mass");
-      present = 0;
-      for(i=0;i<=sizeof(typat.array);i++){
-        if (typat.array[i] == strtod(uri,NULL)){
-          present = 1;
-          break;
-        }
-      }
-      if(present==0){
-        itypat++;
-        insertArray(&typat,strtod(uri,NULL)); 
-      }
-      xmlFree(uri);
-      
-   } 
+      insertArray(&typat,strtod(uri,NULL)); 
+      xmlFree(uri);      
+    } 
     if ((!xmlStrcmp(cur->name, (const  xmlChar *) "local_force_constant"))) {irpt1++;}
     if ((!xmlStrcmp(cur->name, (const  xmlChar *) "total_force_constant"))) {irpt2++;}
     if ((!xmlStrcmp(cur->name, (const  xmlChar *) "phonon"))) {
@@ -138,6 +127,19 @@ void effpot_xml_getDimSystem(char *filename,int *natom,int *ntypat, int *nqpt, i
     }
     cur = cur->next;
   }
+  for(i=0;i<typat.used;i++){
+    present = 0;
+    for(j=i+1;j<typat.used;j++){
+      if (typat.array[i] == typat.array[j] && typat.array[i] != 0){
+        present = 1;
+        break;
+      }
+    }
+    if(present==0 && typat.array[i] !=0){
+      itypat++;
+    }
+  }
+ 
   freeArray(&typat);
 
   *natom  = iatom;
@@ -514,10 +516,12 @@ void effpot_xml_readSystem(char *filename,int *natom,int *ntypat,int *nrpt,int *
     else{
       fprintf(stderr,"error: Local rpt is superior to total rpt in the XML file:%d %d\n",\
               irpt1,irpt2);
+      exit(0);
     }
   }else{
     fprintf(stderr,"error: Number of local and total rpt doesn't match with the XML file:%d %d\n",\
             irpt1,irpt2);
+    exit(0);
   }
 }
 

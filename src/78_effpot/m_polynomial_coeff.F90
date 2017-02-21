@@ -582,11 +582,11 @@ subroutine polynomial_coeff_writeXML(coeffs,ncoeff,filename)
             case(3)
               direction ="z"
             end select
-            WRITE(unit_xml,'("      <displacement_diff atom_a=""",I0,""" atom_b=""",I0,&
-&                            """ direction=""",a,""" power=""",I0,""">")')&
-                    coeffs(icoeff)%terms(iterm)%atindx(1,idisp)-1,&
-&                   coeffs(icoeff)%terms(iterm)%atindx(2,idisp)-1,direction,&
-&                   coeffs(icoeff)%terms(iterm)%power(idisp)
+            WRITE(unit_xml,'(a,I0,a,I0,3a,I0,a)') "      <displacement_diff atom_a=""",&
+&                           coeffs(icoeff)%terms(iterm)%atindx(1,idisp)-1,""" atom_b=""",&
+&                           coeffs(icoeff)%terms(iterm)%atindx(2,idisp)-1,""" direction=""",&
+&                           direction,""" power=""",coeffs(icoeff)%terms(iterm)%power(idisp),&
+&                           """>"
             WRITE(unit_xml,'("        <cell_a>")',advance='no')
             WRITE(unit_xml,'(3(I0,a,I0,a,I0))',advance='no')&
 &           coeffs(icoeff)%terms(iterm)%cell(1,1,idisp)," ",&
