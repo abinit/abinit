@@ -512,9 +512,18 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
  call timab(12,2,tsec)
 
  contains
+!!***
+
+!!****f* ABINIT/cross_mkcore
+!! NAME
+!!  cross_mkcore
+!!
+!! FUNCTION
+!!  Define magnitude of cross product of two vectors
+!!
+!! SOURCE
 
    function cross_mkcore(xx,yy,zz,aa,bb,cc)
-!    Define magnitude of cross product of two vectors
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -532,7 +541,6 @@ end subroutine mkcore
 
 !--------------------------------------------------------------------------------------
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/mkcore_alt
 !! NAME
 !! mkcore_alt
@@ -1059,10 +1067,20 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
  call timab(12,2,tsec)
 
  contains
+!!***
 
 !--------------------------------------------------------------
+
+!!****f* ABINIT/cross_mkcore_alt
+!! NAME
+!!  cross_mkcore_alt
+!!
+!! FUNCTION
+!!  Define magnitude of cross product of two vectors
+!!
+!! SOURCE
+
    function cross_mkcore_alt(xx,yy,zz,aa,bb,cc)
-!    Define magnitude of cross product of two vectors
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -1074,8 +1092,20 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
     real(dp),intent(in) :: xx,yy,zz,aa,bb,cc
     cross_mkcore_alt=sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
    end function cross_mkcore_alt
+!!***
 
 !--------------------------------------------------------------
+
+!!****f* ABINIT/indpos_mkcore_alt
+!! NAME
+!!  indpos_mkcore_alt
+!!
+!! FUNCTION
+!!  Find the grid index of a given position in the cell according to the BC
+!!  Determine also whether the index is inside or outside the box for free BC
+!!
+!! SOURCE
+
    subroutine indpos_mkcore_alt(periodic,ii,nn,jj,inside)
 !    Find the grid index of a given position in the cell according to the BC
 !    Determine also whether the index is inside or outside the box for free BC

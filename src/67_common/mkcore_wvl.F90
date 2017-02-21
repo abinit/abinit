@@ -312,7 +312,6 @@ subroutine mkcore_wvl(atindx1,corstr,grxc,natom,nattyp,nfft,nspden,ntypat,n1xccc
        end do
        if (npts==0) cycle
        if (npts>npts12) then
-       print *,npts,npts12,isx,iex,isy,iey
          msg='npts>npts12!'
          MSG_BUG(msg)
        end if
