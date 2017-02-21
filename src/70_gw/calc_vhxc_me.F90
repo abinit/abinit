@@ -155,6 +155,7 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
  integer :: rank,comm,master,nprocs
  integer :: isp1,isp2,iab,nsploop,nkxc,option,n3xccc_,nk3xc,my_nbbp,my_nmels
  real(dp) :: nfftfm1,fact,DijH,enxc_val,enxc_hybrid_val,vxcval_avg,vxcval_hybrid_avg,h0dij,vxc1,vxc1_val,re_p,im_p,dijsigcx
+ real(dp) :: omega ! HSE Fock exchange screening parameter
  logical :: ltest
  character(len=500) :: msg
  type(MPI_type) :: MPI_enreg_seq
@@ -291,7 +292,22 @@ subroutine calc_vhxc_me(Wfd,Mflags,Mels,Cryst,Dtset,gsqcutf_eff,nfftf,ngfftf,&
      if(Dtset%ixc<0) then
        call libxc_functionals_end()
      end if
-     call libxc_functionals_init(Dtset_dummy%ixc,Dtset_dummy%nspden)
+     if (Dtset_dummy%ixc==-428) then !HSE06
+       if (Dtset_dummy%rcut>tol8) then
+         omega = 1.0_dp/Dtset_dummy%rcut
+         call wrtout(std_out, msg, 'COLL')
+       else
+         omega = 0.11_dp !HSE06 default
+       end if
+     end if
+     !
+     call libxc_functionals_init(Dtset_dummy%ixc,Dtset_dummy%nspden, &
+&           exx_alpha=Dtset_dummy%gwfockmix,exx_omega=omega)
+
+     write(msg, '(a, f4.2)') ' Fock fraction = ', Dtset_dummy%gwfockmix
+     call wrtout(std_out,msg,'COLL')
+     write(msg, '(a, f5.2, a)') ' Fock inverse screening length = ', omega, ' (bohr^-1)'
+     call wrtout(std_out,msg,'COLL')
 
      ABI_MALLOC(vxc_val_hybrid,(nfftf,nspden))
 

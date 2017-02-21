@@ -96,8 +96,8 @@
 !!   The string passed to fftdatar_write (first argument) gives the name used to store the data in the netcdf file
 !!   The function  varname_from_fname defined in the module m_hdr.F90 gives the mapping between the Abinit
 !!   file extension and the netcdf name e.g. foo_VHXC.nc --> vxc
-!!   This function is used in cut3d so that we can immediately select the data to analyze without having 
-!!   to prompt the user. Remember to update varname_from_fname if you add a new file or if you change the 
+!!   This function is used in cut3d so that we can immediately select the data to analyze without having
+!!   to prompt the user. Remember to update varname_from_fname if you add a new file or if you change the
 !!   name of the variable.
 !!
 !! PARENTS
@@ -106,14 +106,15 @@
 !! CHILDREN
 !!      bonds_lgth_angles,bound_deriv,calc_efg,calc_fc,calcdensph
 !!      compute_coeff_plowannier,crystal_free,crystal_init,datafordmft,denfgr
-!!      destroy_dmft,destroy_oper,destroy_plowannier,dos_degeneratewfs
-!!      ebands_free,ebands_init,ebands_jdos,fftdatar_write,gaus_dos,init_dmft
-!!      init_oper,init_plowannier,ioarr,mag_constr_e,mlwfovlp,mlwfovlp_qp
-!!      multipoles_out,optics_paw,optics_paw_core,optics_vloc,out1dm,outkss
-!!      outwant,partial_dos_fractions,partial_dos_fractions_paw,pawmkaewf
-!!      pawprt,pawrhoij_copy,pawrhoij_nullify,posdoppler,poslifetime,print_dmft
-!!      prt_cif,ebands_prtbltztrp,prtfatbands,read_atomden,simpson_int,skw_free
-!!      skw_init,sort_dp,spline,splint,tetrahedron,timab,wrtout
+!!      destroy_dmft,destroy_oper,destroy_plowannier,dos_calcnwrite,ebands_free
+!!      ebands_init,ebands_prtbltztrp,epjdos_free,fatbands_ncwrite
+!!      fftdatar_write,free_my_atmtab,get_my_atmtab,init_dmft,init_oper
+!!      init_plowannier,ioarr,mag_constr_e,mlwfovlp,mlwfovlp_qp,multipoles_out
+!!      optics_paw,optics_paw_core,optics_vloc,out1dm,outkss,outwant
+!!      partial_dos_fractions,partial_dos_fractions_paw,pawmkaewf,pawprt
+!!      pawrhoij_copy,pawrhoij_nullify,posdoppler,poslifetime,print_dmft
+!!      prt_cif,prtfatbands,read_atomden,simpson_int,sort_dp,spline,splint
+!!      timab,wrtout,xmpi_sum,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -171,8 +172,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft
  use m_numeric_tools,    only : simpson_int
- use m_epjdos,           only : tetrahedron, gaus_dos, dos_degeneratewfs, &
+ use m_epjdos,           only : dos_calcnwrite, &
                                 epjdos_t, epjdos_new, epjdos_free, prtfatbands, fatbands_ncwrite
+ use m_paral_atom,       only : get_my_atmtab, free_my_atmtab
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -235,18 +237,20 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,cplex1=1,fform_den=52,rdwr2=2,rdwrpaw0=0
- integer :: bantot,fform,collect
+ integer :: bantot,fform,collect,timrev
  integer :: accessfil,coordn
- integer :: ii,ierr,ifft,ikpt,ispden,isppol
+ integer :: ii,ierr,ifft,ikpt,ispden,isppol,itypat
+ integer :: jfft
  integer :: me_fft,n1,n2,n3
- integer :: ifgd, iatom, nradint
+ integer :: ifgd, iatom, iatom_, iatom_tot,nradint
  integer :: me,my_natom_tmp
  integer :: occopt
  integer :: prtnabla
- integer :: pawprtden  
+ integer :: pawprtden
  integer :: iband,nocc,spacecomm,comm_fft,tmp_unt,nfft_tot
+ integer :: my_comm_atom
 #ifdef HAVE_NETCDF
- integer :: ncid 
+ integer :: ncid
 #endif
  real(dp) :: norm,occ_norm,unocc_norm
  real(dp) :: rate_dum,rate_dum2
@@ -255,10 +259,11 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  character(len=fnlen) :: fname
 !arrays
  integer, allocatable :: isort(:)
+ integer, pointer :: my_atmtab(:)
  real(dp) :: tsec(2),nt_ntone_norm(nspden)
  real(dp),allocatable :: eigen2(:)
  real(dp),allocatable :: elfr_down(:,:),elfr_up(:,:)
- real(dp),allocatable :: rhor_paw(:,:),rhor_paw_core(:,:),rhor_paw_val(:,:),vwork(:,:)
+ real(dp),allocatable :: rhor_paw(:,:),rhor_paw_core(:,:),rhor_paw_val(:,:),vpaw(:,:),vwork(:,:)
  real(dp),allocatable :: rhor_n_one(:,:),rhor_nt_one(:,:),ps_norms(:,:,:)
  real(dp), allocatable :: doccde(:)
  real(dp), allocatable :: vh1spl(:)
@@ -269,13 +274,13 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(pawrhoij_type) :: pawrhoij_dum(0)
  type(pawrhoij_type),pointer :: pawrhoij_all(:)
  logical :: remove_inv
+ logical :: paral_atom, paral_fft, my_atmtab_allocated
  real(dp) :: e_fermie
  type(oper_type) :: lda_occup
  type(crystal_t) :: crystal
  type(ebands_t) :: ebands
  type(epjdos_t) :: dos
  type(plowannier_type) :: wan
- !type(skw_t) :: skw
 
 ! *************************************************************************
 
@@ -300,8 +305,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  remove_inv=.false.
  if(dtset%nspden==4 .and. dtset%usedmft==1) remove_inv=.true. ! MG: why this?
 
+ timrev = 2; if (any(dtset%kptopt == [3, 4])) timrev= 1
  call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,natom,dtset%npsp,ntypat, &
-& dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
+& dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,timrev,&
 & dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
 & dtset%symrel,dtset%tnons,dtset%symafm)
 
@@ -327,7 +333,23 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  ! Parameters for MPI-FFT
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3); nfft_tot = product(ngfft(1:3))
- me_fft = xmpi_comm_rank(mpi_enreg%comm_fft)
+ comm_fft = mpi_enreg%comm_fft
+ me_fft = xmpi_comm_rank(comm_fft)
+ paral_fft = (mpi_enreg%paral_kgb==1)
+
+ spacecomm = mpi_enreg%comm_cell
+ me = xmpi_comm_rank(spacecomm)
+
+ paral_atom=(my_natom/=natom)
+ my_comm_atom = mpi_enreg%comm_atom
+ nullify(my_atmtab)
+ if (paral_atom) then
+   call get_my_atmtab(mpi_enreg%comm_atom, my_atmtab, my_atmtab_allocated, paral_atom,natom,my_natom_ref=my_natom)
+ else
+   ABI_ALLOCATE(my_atmtab, (natom))
+   my_atmtab = (/ (iatom, iatom=1, natom) /)
+   my_atmtab_allocated = .true.
+ end if
 
 !wannier interface
  call timab(951,1,tsec)
@@ -369,6 +391,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  spacecomm=mpi_enreg%comm_cell; me=xmpi_comm_rank(spacecomm)
  comm_fft=mpi_enreg%comm_fft
+ paral_atom=(my_natom/=natom)
 
 !Warnings :
 !- core charge is excluded from the charge density;
@@ -445,6 +468,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
      if (prtvol>9) then  ! Check normalisation
        norm = SUM(rhor_paw(:,1))*ucvol/PRODUCT(pawfgr%ngfft(1:3))
+       call xmpi_sum(norm,comm_fft,ierr)
        write(message,'(a,F8.4)') '  PAWDEN - NORM OF DENSITY: ',norm
        call wrtout(std_out,message,'COLL')
      end if
@@ -457,6 +481,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
      if (prtvol>9) then  ! Check normalisation
        norm = SUM(rhor_paw_core(:,1))*ucvol/PRODUCT(pawfgr%ngfft(1:3))
+       call xmpi_sum(norm,comm_fft,ierr)
        write(message,'(a,F8.4)') '  ATMDEN - NORM OF CORE DENSITY: ', norm
        call wrtout(std_out,message,'COLL')
      end if
@@ -469,6 +494,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
      if (prtvol>9) then ! Check normalisation
        norm = SUM(rhor_paw_val(:,1))*ucvol/PRODUCT(pawfgr%ngfft(1:3))
+       call xmpi_sum(norm,comm_fft,ierr)
        write(message,'(a,F8.4)') '  ATMDEN - NORM OF VALENCE PROTODENSITY: ', norm
        call wrtout(std_out,message,'COLL')
      end if
@@ -556,6 +582,98 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    NCF_CHECK(nf90_close(ncid))
  end if
 #endif
+
+ ! Output of VCLMB file
+ ! The PAW correction has to be computed here (all processors contribute)
+ if (psps%usepaw > 0 .AND. dtset%prtvclmb>0) then
+   nradint = 1000 ! radial integration grid density
+   ABI_ALLOCATE(vpaw,(nfft,nspden))
+   vpaw(:,:)=zero
+
+   do ispden=1,nspden
+     ! for points inside spheres, replace with full AE hartree potential.
+     ! In principle the correction could be more subtle (not spherical)
+     do iatom=1,my_natom
+       iatom_tot=iatom;if (paral_atom) iatom_tot=mpi_enreg%my_atmtab(iatom)
+       itypat=dtset%typat(iatom_tot)
+
+       ABI_ALLOCATE(vh1spl,(paw_an(iatom)%mesh_size))
+       ABI_ALLOCATE(vh1_corrector,(paw_an(iatom)%mesh_size))
+       ABI_ALLOCATE(vh1_interp,(pawfgrtab(iatom)%nfgd))
+       ABI_ALLOCATE(radii,(pawfgrtab(iatom)%nfgd))
+       ABI_ALLOCATE(isort,(pawfgrtab(iatom)%nfgd))
+       vh1_corrector(:) = paw_an(iatom)%vh1(:,1,ispden)-paw_an(iatom)%vht1(:,1,ispden)
+       ! get end point derivatives
+       call bound_deriv(vh1_corrector, pawrad(itypat), pawrad(itypat)%mesh_size, yp1, ypn)
+       ! spline the vh1 function
+       ! NB for second argument of vh1: only first moment lm_size appears to be used
+       ! NB2: vh1 can in principle be complex - not sure what to do with the imaginary part. Ignored for now.
+       call spline(pawrad(itypat)%rad, vh1_corrector, paw_an(iatom)%mesh_size, yp1, ypn, vh1spl)
+
+       do ifgd = 1, pawfgrtab(iatom)%nfgd
+         ! get radii for this point
+         isort(ifgd) = ifgd
+         radii(ifgd) = sqrt(sum(pawfgrtab(iatom)%rfgd(:,ifgd)**2))
+       end do
+
+       if (pawfgrtab(iatom)%nfgd/=0) then
+       ! spline interpolate the vh1 value for current radii
+         call sort_dp(pawfgrtab(iatom)%nfgd, radii, isort, tol12)
+         call splint(pawrad(itypat)%mesh_size, pawrad(itypat)%rad, &
+&         vh1_corrector, vh1spl, pawfgrtab(iatom)%nfgd, radii,  vh1_interp, ierr)
+       end if
+
+       norm=SUM(vh1_interp)*ucvol/PRODUCT(ngfft(1:3))
+       call xmpi_sum(norm,comm_fft,ierr)
+       write(message,'(a,i6,a,E20.10)') ' sum of Hartree correction term on fft grid of atom : ', iatom, &
+&       ' = ', norm
+       call wrtout(std_out,message,'COLL')
+
+       if (pawfgrtab(iatom)%nfgd/=0) then
+         vpaw(pawfgrtab(iatom)%ifftsph(isort(1:pawfgrtab(iatom)%nfgd)),ispden) = &
+&         vpaw(pawfgrtab(iatom)%ifftsph(isort(1:pawfgrtab(iatom)%nfgd)),ispden) + &
+&         vh1_interp(1:pawfgrtab(iatom)%nfgd)
+       end if
+
+       ! get integral of correction term in whole sphere
+       ABI_DEALLOCATE(radii)
+       ABI_DEALLOCATE(vh1_interp)
+
+       ABI_ALLOCATE(radii,(nradint))
+       ABI_ALLOCATE(vh1_interp,(nradint))
+
+       ABI_ALLOCATE(vh1_integ,(nradint))
+       dr = pawrad(itypat)%rad(paw_an(iatom)%mesh_size) / dble(nradint)
+       do ifgd = 1, nradint
+         radii(ifgd) = dble(ifgd-1)*dr
+       end do
+
+       ! spline interpolate the vh1 value for current radii
+       call splint(pawrad(itypat)%mesh_size, pawrad(itypat)%rad, &
+&       vh1_corrector, vh1spl, nradint, radii,  vh1_interp, ierr)
+
+       do ifgd = 1, nradint
+         vh1_interp(ifgd) = vh1_interp(ifgd)*radii(ifgd)**2
+       end do
+
+       call simpson_int(nradint, dr, vh1_interp, vh1_integ)
+       write(message,'(a,i6,a,E20.10)') ' integral of Hartree correction term in sphere of atom: ', iatom, &
+&       ' = ', vh1_integ(nradint)*four*pi
+       call wrtout(std_out,message,'COLL')
+
+       ABI_DEALLOCATE(vh1spl)
+       ABI_DEALLOCATE(vh1_corrector)
+       ABI_DEALLOCATE(vh1_interp)
+       ABI_DEALLOCATE(vh1_integ)
+       ABI_DEALLOCATE(radii)
+       ABI_DEALLOCATE(isort)
+     end do ! iatom
+   end do !ispden
+   call xmpi_sum_master(vpaw,master,mpi_enreg%comm_atom,ierr)
+   if (.not.iwrite_fftdatar(mpi_enreg)) then
+     ABI_DEALLOCATE(vpaw)
+   end if
+ end if ! if paw - add all electron vhartree in spheres
 
  if (iwrite_fftdatar(mpi_enreg)) then
 
@@ -685,90 +803,16 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 ! VCouLoMB
    if (dtset%prtvclmb>0) then
 
-!    set to 1 for netcdf output
      ABI_ALLOCATE(vwork,(nfft,nspden))
      do ispden=1,nspden
        vwork(:,ispden)=vpsp(:)+vhartr(:)
      end do
-
-     if (psps%usepaw > 0 .AND. dtset%prtvclmb==1) then
-       nradint = 1000 ! radial integration grid density
-
-       ! FIXME: MG I got a SIGSEV here if I run with npfft=4 and prtvclmb==1
-       ! Could someome check this code, in particular the way we access the vwork array below
-       ! when MPI-FFT is used?
-
+     if (psps%usepaw==1) then
        do ispden=1,nspden
-         ! for points inside spheres, replace with full AE hartree potential.
-         ! In principle the correction could be more subtle (not spherical)
-         do iatom = 1, natom
-           ABI_ALLOCATE(vh1spl,(paw_an(iatom)%mesh_size))
-           ABI_ALLOCATE(vh1_corrector,(paw_an(iatom)%mesh_size))
-           ABI_ALLOCATE(vh1_interp,(pawfgrtab(iatom)%nfgd))
-           ABI_ALLOCATE(radii,(pawfgrtab(iatom)%nfgd))
-           ABI_ALLOCATE(isort,(pawfgrtab(iatom)%nfgd))
-           vh1_corrector(:) = paw_an(iatom)%vh1(:,1,ispden)-paw_an(iatom)%vht1(:,1,ispden)
-           ! get end point derivatives
-           call bound_deriv(vh1_corrector, pawrad(dtset%typat(iatom)), pawrad(dtset%typat(iatom))%mesh_size, yp1, ypn)
-           ! spline the vh1 function
-           ! NB for second argument of vh1: only first moment lm_size appears to be used
-           ! NB2: vh1 can in principle be complex - not sure what to do with the imaginary part. Ignored for now.
-           call spline(pawrad(dtset%typat(iatom))%rad, vh1_corrector, paw_an(iatom)%mesh_size, yp1, ypn, vh1spl)
-
-           do ifgd = 1, pawfgrtab(iatom)%nfgd
-             ! get radii for this point
-             isort(ifgd) = ifgd
-             radii(ifgd) = sqrt(sum(pawfgrtab(iatom)%rfgd(:,ifgd)**2))
-           end do
-           call sort_dp(pawfgrtab(iatom)%nfgd, radii, isort, tol12)
-
-           ! spline interpolate the vh1 value for current radii
-           call splint(pawrad(dtset%typat(iatom))%mesh_size, pawrad(dtset%typat(iatom))%rad, &
-&           vh1_corrector, vh1spl, pawfgrtab(iatom)%nfgd, radii,  vh1_interp, ierr)
-
-           write(message,'(a,i6,a,E20.10)') ' sum of Hartree correction term on fft grid of atom : ', iatom, &
-&           ' = ', sum(vh1_interp)*ucvol/ngfft(1)/ngfft(2)/ngfft(3)
-           call wrtout(std_out,message,'COLL')
-
-           vwork(pawfgrtab(iatom)%ifftsph(isort(1:pawfgrtab(iatom)%nfgd)), ispden) = &
-&           vwork(pawfgrtab(iatom)%ifftsph(isort(1:pawfgrtab(iatom)%nfgd)), ispden) + &
-&           vh1_interp(1:pawfgrtab(iatom)%nfgd)
-
-           ! get integral of correction term in whole sphere
-           ABI_DEALLOCATE(radii)
-           ABI_DEALLOCATE(vh1_interp)
-
-           ABI_ALLOCATE(radii,(nradint))
-           ABI_ALLOCATE(vh1_interp,(nradint))
-
-           ABI_ALLOCATE(vh1_integ,(nradint))
-           dr = pawrad(dtset%typat(iatom))%rad(paw_an(iatom)%mesh_size) / dble(nradint)
-           do ifgd = 1, nradint
-             radii(ifgd) = dble(ifgd-1)*dr
-           end do
-
-           ! spline interpolate the vh1 value for current radii
-           call splint(pawrad(dtset%typat(iatom))%mesh_size, pawrad(dtset%typat(iatom))%rad, &
-&           vh1_corrector, vh1spl, nradint, radii,  vh1_interp, ierr)
-
-           do ifgd = 1, nradint
-             vh1_interp(ifgd) = vh1_interp(ifgd)*radii(ifgd)**2
-           end do
-
-           call simpson_int(nradint, dr, vh1_interp, vh1_integ)
-           write(message,'(a,i6,a,E20.10)') ' integral of Hartree correction term in sphere of atom: ', iatom, &
-&           ' = ', vh1_integ(nradint)*four*pi
-           call wrtout(std_out,message,'COLL')
-
-           ABI_DEALLOCATE(vh1spl)
-           ABI_DEALLOCATE(vh1_corrector)
-           ABI_DEALLOCATE(vh1_interp)
-           ABI_DEALLOCATE(vh1_integ)
-           ABI_DEALLOCATE(radii)
-           ABI_DEALLOCATE(isort)
-         end do ! iatom
-       end do !ispden
-     end if ! if paw - add all electron vhartree in spheres
+         vwork(:,ispden)=vwork(:,ispden)+vpaw(:,ispden)
+       end do
+       ABI_DEALLOCATE(vpaw)
+     end if
 
      call fftdatar_write("vhartree_vloc",dtfil%fnameabo_app_vclmb,dtset%iomode,hdr,&
      crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
@@ -795,7 +839,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      end do
 
      call fftdatar_write("vhxc",dtfil%fnameabo_app_vhxc,dtset%iomode,hdr,&
-     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
+&     crystal,ngfft,cplex1,nfft,nspden,vwork,mpi_enreg,ebands=ebands)
 
      ABI_DEALLOCATE(vwork)
    end if
@@ -807,7 +851,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    end if
 
    call timab(958,2,tsec)
- end if ! if master
+ end if ! if iwrite_fftdatar
 
  call timab(959,1,tsec)
 
@@ -818,7 +862,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
    if (dos%partial_dos_flag>=1 .or. dos%fatbands_flag==1)then
      ! Generate fractions for partial DOSs if needed partial_dos 1,2,3,4  give different decompositions
-     collect = 1 ; if (psps%usepaw==1 .and. dos%partial_dos_flag /= 2) collect = 0
+     collect = 1 !; if (psps%usepaw==1 .and. dos%partial_dos_flag /= 2) collect = 0
      if ((psps%usepaw==0.or.dtset%pawprtdos/=2) .and. dos%partial_dos_flag>=1) then
        call partial_dos_fractions(dos,crystal,dtset,npwarr,kg,cg,mcg,collect,mpi_enreg)
      end if
@@ -827,12 +871,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !      TODO: update partial_dos_fractions_paw for extra atoms - no PAW contribution normally, but check bounds and so on.
        call partial_dos_fractions_paw(dos,cprj,dimcprj,dtset,mcprj,mkmem,mpi_enreg,pawrad,pawtab)
      end if
-     ! MG: fractions_average_m has been removed because dos_degeneratewfs was already deactivated.
-     ! Note that fractions_m could be large hence dos_degeneratewfs should perform the average in-place.
-     !if (dos%prtdosm>=1) then
-     !  call dos_degeneratewfs(dos%fractions_m,dos%fractions_average_m,&
-     !    eigen,mband,dtset%nband,dos%ndosfraction*dos%mbesslang,dtset%nkpt,dtset%nsppol)
-     !end if
 
    else
      dos%fractions(:,:,:,1)=one
@@ -844,12 +882,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    end if
 
 !  Here, computation and output of DOS and partial DOS  _DOS
-   if (me == master .and. dos%fatbands_flag==0) then
-     if (dos%prtdos/=4) then
-       call tetrahedron(dos,dtset,crystal,ebands,dtfil%fnameabo_app_dos)
-     else
-!      this option is not documented in input variables: is it working?
-       call gaus_dos(dos, dtset, ebands, eigen, dtfil%fnameabo_app_dos)
+   if (dos%fatbands_flag == 0) then
+     if (dos%prtdos /= 4) then
+       call dos_calcnwrite(dos,dtset,crystal,ebands,dtfil%fnameabo_app_dos,spacecomm)
      end if
    end if
 
@@ -1083,10 +1118,21 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    call timab(967,2,tsec)
  end if
 
+ ! Output electron bands.
+ if (me == master .and. dtset%tfkinfunc==0) then
+   if (size(dtset%kptbounds, dim=2) > 0) then
+     call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4), kptbounds=dtset%kptbounds)
+   else
+     call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
+   end if
+ end if
+
 !Optionally provide Xcrysden output for the Fermi surface (Only master writes)
- if (dtset%prtfsurf==1.and.me==master) then
+ if (me == master .and. dtset%prtfsurf == 1) then
    if (ebands_write_bxsf(ebands,crystal,dtfil%fnameabo_app_bxsf) /= 0) then
-     MSG_WARNING("Cannot produce file for Fermi surface, see log file for more info")
+     message = "Cannot produce BXSF file with Fermi surface, see log file for more info"
+     MSG_WARNING(message)
+     call wrtout(ab_out, message)
    end if
  end if ! prtfsurf==1
 
@@ -1113,24 +1159,18 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  ! BoltzTraP output files in GENEric format
  if (dtset%prtbltztrp == 1 .and. me==master) then
    call ebands_prtbltztrp(ebands, crystal, dtfil%filnam_ds(4))
- end if 
+ end if
 
-#if 0
- ! Gaussian
- call ebands_jdos(ebands,crystal,1,zero,zero,spacecomm,ierr)
- ! Tetra
- call ebands_jdos(ebands,crystal,2,zero,zero,spacecomm,ierr)
-
- !new_ebands = ebands_bspline(ebands, cryst, new_kptrlatt, new_nshiftk, new_shiftk)
- !call ebands_jdos(new_bands,crystal,2,zero,zero,spacecomm,ierr)
- !call ebands_free(new_bands)
-
- call skw_init(skw, crystal, 1, bands%mband, bands%nkpt, bands%nsppol, bands%kptns, bands%eig)
- call skw_free(skw)
-#endif 
+ ! Band structure interpolation from eigenvalues computed on the k-mesh.
+ if (nint(dtset%einterp(1)) /= 0) then
+   call ebands_interpolate_kpath(ebands, dtset, crystal, [0,0], dtfil%filnam_ds(4), spacecomm)
+ end if
 
  call crystal_free(crystal)
  call ebands_free(ebands)
+
+!Destroy atom table used for parallelism
+ call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
  call timab(969,2,tsec)
  call timab(950,2,tsec) ! outscfcv

@@ -226,11 +226,6 @@ P           mkmem5          3
                        2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
            occopt           7
--      paral_atom1          0
--      paral_atom2          0
--      paral_atom3          1
--      paral_atom4          1
--      paral_atom5          0
         paral_kgb1          1
         paral_kgb2          1
         paral_kgb3          1
@@ -251,11 +246,13 @@ P           mkmem5          3
            prtgeo           1
          prtnabla           1
            prtpot           1
+         prtvclmb           1
            prtvha           1
           prtvhxc           1
           prtvpsp           1
            prtvxc           1
            prt1dm           1
+  pw_unbal_thresh      1.00000000E+01
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -433,6 +430,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.844     117.836
  bonds_lgth_angles : about to open file t26_MPI4o_DS1_GEO
 
  io1dm : about to open file t26_MPI4o_DS1_1DM
+ io1dm : about to open file t26_MPI4o_DS1_VCLMB_1DM
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -638,6 +636,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      58.969      58.934
  bonds_lgth_angles : about to open file t26_MPI4o_DS2_GEO
 
  io1dm : about to open file t26_MPI4o_DS2_1DM
+ io1dm : about to open file t26_MPI4o_DS2_VCLMB_1DM
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -843,6 +842,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      60.000      59.998
  bonds_lgth_angles : about to open file t26_MPI4o_DS3_GEO
 
  io1dm : about to open file t26_MPI4o_DS3_1DM
+ io1dm : about to open file t26_MPI4o_DS3_VCLMB_1DM
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1058,6 +1058,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      59.125      59.121
  bonds_lgth_angles : about to open file t26_MPI4o_DS4_GEO
 
  io1dm : about to open file t26_MPI4o_DS4_1DM
+ io1dm : about to open file t26_MPI4o_DS4_VCLMB_1DM
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1263,6 +1264,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     238.094     238.088
  bonds_lgth_angles : about to open file t26_MPI4o_DS5_GEO
 
  io1dm : about to open file t26_MPI4o_DS5_1DM
+ io1dm : about to open file t26_MPI4o_DS5_VCLMB_1DM
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1520,11 +1522,6 @@ P           mkmem5          3
                        2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
            occopt           7
--      paral_atom1          0
--      paral_atom2          0
--      paral_atom3          1
--      paral_atom4          1
--      paral_atom5          0
         paral_kgb1          1
         paral_kgb2          1
         paral_kgb3          1
@@ -1545,11 +1542,13 @@ P           mkmem5          3
            prtgeo           1
          prtnabla           1
            prtpot           1
+         prtvclmb           1
            prtvha           1
           prtvhxc           1
           prtvpsp           1
            prtvxc           1
            prt1dm           1
+  pw_unbal_thresh      1.00000000E+01
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00

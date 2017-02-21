@@ -863,7 +863,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 &   +two*(dble(i1*i2)*gmet(1,2)+dble(i2*i3)*gmet(2,3)+dble(i3*i1)*gmet(3,1))
  end function gsq_atm
 
- function dgsqds_atm(i1,i2,i3,is)
+   function dgsqds_atm(i1,i2,i3,is)
 !Define dG^2/ds based on G space metric derivative
 
 !This section has been created automatically by the script Abilint (TD).
@@ -881,7 +881,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 &   dble(i2*i3)*(dgm(2,3,is)+dgm(3,2,is))
  end function dgsqds_atm
 
- function d2gsqds_atm(i1,i2,i3,is1,is2)
+   function d2gsqds_atm(i1,i2,i3,is1,is2)
 !  Define 2dG^2/ds1ds2  based on G space metric derivative
 
 !This section has been created automatically by the script Abilint (TD).

@@ -4,7 +4,7 @@
 # Energy in Ha , DOS in states/Ha
 # Gaussian method with smearing =   3.67493254E-05Ha , nqibz =145
 # 
-# omega     PHDOS    INT_PHDOS   PJDOS[atom_type=1]  INT_PJDOS[atom_type1] ...  
+# omega     PHDOS    INT_PHDOS   PJDOS[atom_type=1]  INT_PJDOS[atom_type=1] ...
 #
   -4.09808283E-04   4.29298065E+01   5.91615536E-05   4.29298065E+01   5.91615536E-05  
   -4.06133350E-04   4.82552500E+01   2.66052140E-04   4.82552500E+01   2.66052140E-04  

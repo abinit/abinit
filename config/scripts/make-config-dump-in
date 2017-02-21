@@ -6,11 +6,14 @@
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser,NoOptionError
+try:
+    from ConfigParser import ConfigParser,NoOptionError
+except ImportError:
+    from configparser import ConfigParser,NoOptionError
 from time import gmtime,strftime
 
-import commands
 import os
 import re
 import sys
@@ -36,15 +39,15 @@ my_output  = "config.dump.in"
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
      not os.path.exists("src/98_main/abinit.F90") ):
-  print "%s: You must be in the top of an ABINIT source tree." % my_name
-  print "%s: Aborting now." % my_name
+  print("%s: You must be in the top of an ABINIT source tree." % my_name)
+  print("%s: Aborting now." % my_name)
   sys.exit(1)
 
 # Read config file(s)
 for cnf_file in my_configs:
   if ( not os.path.exists(cnf_file) ):
-    print "%s: Could not find config file (%s)." % (my_name,cnf_file)
-    print "%s: Aborting now." % my_name
+    print("%s: Could not find config file (%s)." % (my_name,cnf_file))
+    print("%s: Aborting now." % my_name)
     sys.exit(2)
 
 # What time is it?
@@ -57,7 +60,7 @@ abinit_int_vars = cnf.sections()
 abinit_int_vars.sort()
 
 # Write configuration dumper (for debugging)
-dumper = file("config.dump.in","w")
+dumper = open("config.dump.in","wt")
 dumper.write("""\
 #
 # Configuration dumper

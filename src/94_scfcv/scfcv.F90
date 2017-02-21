@@ -304,7 +304,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  integer :: optgr1,optgr2,optgr1_hf,optgr2_hf,option,optrad,optrad_hf,optres,optxc,prtfor,prtxml,quit
  integer :: quit_sum,req_cplex_dij,rdwrpaw,shft,spaceComm,spaceComm_fft,spaceComm_wvl,spaceComm_grid
  integer :: stress_needed,sz1,sz2,unit_out
- integer :: usecprj,usexcnhat,useylmgr
+ integer :: usecprj,usexcnhat
  integer :: my_quit,quitsum_request,timelimit_exit
  integer ABI_ASYNC :: quitsum_async
  real(dp) :: boxcut,compch_fft,compch_sph,deltae,diecut,diffor,ecut
@@ -487,7 +487,7 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
  case(2)
      ! No need to include the PspCore energy since it is already included in the
      ! local pseudopotential  (vpsp)
-   energies%e_corepsp   = zero 
+   energies%e_corepsp   = zero
    energies%e_corepspdc = zero
  end select
  if(wvlbigdft) energies%e_corepsp = zero
@@ -512,6 +512,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
    if (dtset%prtnabla>0) usecprj=1
    if (dtset%extrapwf>0) usecprj=1
    if (dtset%usewvl==1)  usecprj=1
+   if (dtset%pawfatbnd>0)usecprj=1
+   if (dtset%prtdos==3)  usecprj=1
    if (nstep==0) usecprj=0
    if (usefock==1)  usecprj=1
  end if
@@ -666,13 +668,13 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
        ABI_DATATYPE_DEALLOCATE(cprj)
      end if
      ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj))
-     ncpgr=0 
+     ncpgr=0
      if (usefock==1) then
-       ctocprj_choice = 1 ; useylmgr = 0
+       ctocprj_choice = 1
        if (dtset%optforces /= 0 .and. dtset%optstress == 0) then
          ncpgr = 3 ; ctocprj_choice = 2
  !        else if (dtset%optstress /= 0) then
- !       ncpgr = 9 ; ctocprj_choice = 23 ; useylmgr = 1
+ !       ncpgr = 9 ; ctocprj_choice = 23
        end if
      end if
      call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
@@ -1069,8 +1071,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
          call ctocprj(atindx,cg,ctocprj_choice,cprj,gmet,gprimd,iatom,idir,&
 &         iorder_cprj,dtset%istwfk,kg,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &         dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft, dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
-&         dtset%nsppol,dtset%ntypat,3,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
-&         useylmgr,xred,ylm,ylmgr)
+&         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
+&         xred,ylm,ylmgr)
        end if
      end if
      if (fock%optfor) then
@@ -1873,19 +1875,19 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 
  if (recompute_cprj) then
    usecprj=1
-   mband_cprj=dtset%mband
+   mband_cprj=dtset%mband/mpi_enreg%nproc_band
    mcprj=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
    call pawcprj_free(cprj)
    ABI_DATATYPE_DEALLOCATE(cprj) ! Was previously allocated (event if size = 0,0)
    ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj))
-   ncpgr = 0 ; ctocprj_choice = 1 ; useylmgr = 0
+   ncpgr = 0 ; ctocprj_choice = 1
    if (finite_efield_flag) then
      if (forces_needed /= 0 .and. stress_needed == 0) then
        ncpgr = 3 ; ctocprj_choice = 2
      else if (forces_needed /= 0 .and. stress_needed /= 0) then
-       ncpgr = 9 ; ctocprj_choice = 23 ; useylmgr = 1
+       ncpgr = 9 ; ctocprj_choice = 23
      else if (forces_needed == 0 .and. stress_needed /= 0) then
-       ncpgr = 6 ; ctocprj_choice = 3 ; useylmgr = 1
+       ncpgr = 6 ; ctocprj_choice = 3
      end if
    end if
    call pawcprj_alloc(cprj,ncpgr,dimcprj)
@@ -1895,8 +1897,8 @@ subroutine scfcv(atindx,atindx1,cg,cpus,dmatpawu,dtefield,dtfil,dtpawuj,&
 &   dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &   dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft,&
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,dtset%nsppol,&
-&   dtset%ntypat,3,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
-&   ucvol,dtfil%unpaw,useylmgr,xred,ylm,ylmgr)
+&   dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
+&   ucvol,dtfil%unpaw,xred,ylm,ylmgr)
  end if
 
  call timab(246,2,tsec)

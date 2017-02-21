@@ -4,7 +4,7 @@
 !! inupper
 !!
 !! FUNCTION
-!! Maps all characters in string to uppercase.
+!! Maps all characters in string to uppercase except for tokes between quotation marks.
 !! Uses fortran90 character string manipulation but should work
 !! independent of EBCDIC or ASCII assumptions--only relies on
 !! 'index' intrinsic character string matching function.
@@ -29,7 +29,8 @@
 !!          (output) same character string mapped to upper case
 !!
 !! PARENTS
-!!      anaddb,chkvars,intagm,invars1,m_ab7_invars_f90,m_exit,parsefile
+!!      anaddb,band2eps,chkvars,intagm,invars1,m_ab7_invars_f90,m_exit
+!!      multibinit,parsefile
 !!
 !! CHILDREN
 !!
@@ -60,7 +61,7 @@ subroutine inupper(string)
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,indx,stringlen
+ integer :: ii,indx,inquotes
  logical,save :: first=.true.
  character(len=1) :: cc
  character(len=500) :: message
@@ -87,17 +88,22 @@ subroutine inupper(string)
    end do
    first=.false.
  end if
-!
- stringlen=len(string)
- do ii=1,stringlen
+
+ inquotes = 0
+ do ii=1,len_trim(string)
 !  Pick off single character of string (one byte):
    cc=string(ii:ii)
-!  determine whether a lowercase letter:
-   indx=index(lolett,cc)
-   if (indx>0) then
-!    Map to uppercase:
-     string(ii:ii)=uplett(indx:indx)
+
+   ! Ignore tokens between quotation marks.
+   if (cc == "'" .or. cc == '"') inquotes = inquotes + 1
+   if (inquotes == 1) cycle
+   if (inquotes == 2) then
+     inquotes = 0; cycle
    end if
+   ! determine whether a lowercase letter:
+   indx=index(lolett,cc)
+   ! Map to uppercase:
+   if (indx>0) string(ii:ii)=uplett(indx:indx)
  end do
 
 end subroutine inupper

@@ -114,11 +114,11 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  use m_geometry,      only : normv
  use m_crystal,       only : crystal_t
  use m_fft_mesh,      only : rotate_FFT_mesh
- use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, littlegroup_t, littlegroup_print, has_IBZ_item
+ use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, has_IBZ_item
  use m_gsphere,       only : gsphere_t, gsph_fft_tabs
  use m_io_tools,      only : flush_unit, open_file
  use m_vcoul,         only : vcoul_t
- use m_pawpwij,      only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
+ use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
  use m_pawang,        only : pawang_type
  use m_pawtab,        only : pawtab_type
@@ -181,7 +181,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  logical :: iscompatibleFFT,q_is_gamma
  character(len=500) :: msg
 !arrays
- integer :: g0(3),spinor_padx(2,4) 
+ integer :: g0(3),spinor_padx(2,4)
  integer,pointer :: igfftxg0(:),igfftfxg0(:)
  integer,allocatable :: gwx_gfft(:,:),gwx_gbound(:,:),gboundf(:,:)
  integer,allocatable ::  ktabr(:,:),irottb(:,:),ktabrf(:,:)
@@ -220,7 +220,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 
  mod100=MOD(Sigp%gwcalctyp,100)
  !
- ! === Initialize MPI variables === 
+ ! === Initialize MPI variables ===
  comm = Wfd%comm
 
  !
@@ -228,7 +228,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  nspinor = Wfd%nspinor
  nsppol  = Wfd%nsppol
  spinor_padx(:,:)=RESHAPE((/0,0,Sigp%npwx,Sigp%npwx,0,Sigp%npwx,Sigp%npwx,0/),(/2,4/))
-                                                                                      
+
  qp_ene => QP_BSt%eig(:,:,:)
  qp_occ => QP_BSt%occ(:,:,:)
 
@@ -277,12 +277,12 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  if (ANY(gwx_ngfft(1:3) /= Wfd%ngfft(1:3)) ) then
    call wfd_change_ngfft(Wfd,Cryst,Psps,gwx_ngfft)
  end if
- gwx_mgfft   = MAXVAL(gwx_ngfft(1:3)) 
+ gwx_mgfft   = MAXVAL(gwx_ngfft(1:3))
  gwx_fftalga = gwx_ngfft(7)/100
  gwx_fftalgb = MOD(gwx_ngfft(7),100)/10
 
  if (pawcross==1) then
-   mgfftf = MAXVAL(ngfftf(1:3)) 
+   mgfftf = MAXVAL(ngfftf(1:3))
  end if
 
  can_symmetrize = .FALSE.
@@ -327,7 +327,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
    do ik_bz=1,Kmesh%nbz
      ik_ibz = Kmesh%tab(ik_bz)
      do ib_sum=1,Sigp%nbnds
-       bks_mask(ib_sum,ik_bz,spin) = (qp_occ(ib_sum,ik_ibz,spin)>=tol_empty) 
+       bks_mask(ib_sum,ik_bz,spin) = (qp_occ(ib_sum,ik_ibz,spin)>=tol_empty)
      end do
    end do
  end do
@@ -335,7 +335,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 ! ABI_ALLOCATE(proc_distrb,(Wfd%mband,Kmesh%nbz,nsppol))
 ! call sigma_distribution(Wfd,Kmesh,Ltg_k,Qmesh,nsppol,can_symmetrize,kgw,Sigp%mg0,my_nbks,proc_distrb,bks_mask=bks_mask)
 ! call sigma_distribute_bks(Wfd,Kmesh,Ltg_k,Qmesh,nsppol,can_symmetrize,kgw,Sigp%mg0,my_nbks,proc_distrb,bks_mask=bks_mask)
-! write(6,*)"lim", ib1,ib2 
+! write(6,*)"lim", ib1,ib2
 ! do ib_sum= ib1,ib2
 !   do ik_bz=1, Kmesh%nbz
 !     write(6,*) ib_sum,ik_bz, proc_distrb(ib_sum,ik_bz,1),Wfd%my_rank
@@ -400,7 +400,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
    end if
  end if ! usepaw==1
  !
- 
+
  if (Sigp%symsigma>0) then
    !call littlegroup_print(Ltg_k,std_out,prtvol,'COLL')
    !
@@ -411,12 +411,12 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !     write(msg,'(a,3f8.3,a)')' Degenerate states at k-point = ( ',kgw(:),' ).'
 !     call wrtout(std_out,msg,'COLL')
 !     do spin=1,nsppol
-!       do ib=ib1,ib2 
-!         do jb=ib+1,ib2 
+!       do ib=ib1,ib2
+!         do jb=ib+1,ib2
 !           if (degtab(ib,jb,spin)==1) then
 !             write(msg,'(a,i2,a,i4,a,i4)')' (spin ',spin,')',ib,' <====> ',jb
 !             call wrtout(std_out,msg,'COLL')
-!             if (ABS(Sr%vxcme(ib,jk_ibz,spin)-Sr%vxcme(jb,jk_ibz,spin))>ABS(tol6*Sr%vxcme(jb,jk_ibz,spin))) then 
+!             if (ABS(Sr%vxcme(ib,jk_ibz,spin)-Sr%vxcme(jb,jk_ibz,spin))>ABS(tol6*Sr%vxcme(jb,jk_ibz,spin))) then
 !               write(msg,'(7a)')&
 !&                ' It seems that an accidental degeneracy is occurring at this k-point ',ch10,&
 !&                ' In this case, using symsigma=1 might lead to spurious results as the algorithm ',ch10,&
@@ -449,7 +449,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !          call get_BZ_item(Kmesh,ik_bz,&
 !                               kbz_coord,ik_ibz,isym_kgw,iik,ph_mkt)
 !          write(2011,*) ik_bz,kbz_coord(:)
-!    end do 
+!    end do
 !    close(2011)
 
 !   if (prtvol>10.and.jk_bz==1) then ! probably just to print one time.
@@ -459,7 +459,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !         end if
 !         write(2022,*) 1,real(CMPLX(SQRT(Vcp%i_sz),0.0_gwp)),real((4*3.14159265)**(0.5)/CMPLX(SQRT(Vcp%i_sz),0.0_gwp))
 !            write G=0 term for the potential computed elsewhere.
-!   
+!
 !         do ig=2,Sigp%npwx
 !               write(2022,*) ig,real(Vcp%vc_sqrt(ig,1)),real((4*3.14159265)**(0.5)/Vcp%vc_sqrt(ig,1))
 !         end do
@@ -504,7 +504,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
      dimcprj_gw=nspinor*(ib2-ib1+1)
      ABI_DATATYPE_ALLOCATE(Cprj_kgw,(Cryst%natom,ib1:ib1+dimcprj_gw-1))
      call pawcprj_alloc(Cprj_kgw,0,Wfd%nlmn_atm)
-     ibsp=ib1  
+     ibsp=ib1
      do jb=ib1,ib2
 !           write(6,*) "has_cprj",Wfd%Wave(jb,jk_ibz,spin)%has_cprj
            Wfd%Wave(jb,jk_ibz,spin)%has_cprj=1
@@ -604,7 +604,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 
      if ( ANY(gwx_fftalga == (/2,4/)) ) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
      !use_padfft=0
-     if (use_padfft==0) then 
+     if (use_padfft==0) then
        ABI_DEALLOCATE(gwx_gbound)
        ABI_ALLOCATE(gwx_gbound,(2*gwx_mgfft+8,2*use_padfft))
      end if
@@ -614,7 +614,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
        ABI_ALLOCATE(igfftfxg0,(Gsph_x%ng))
        call gsph_fft_tabs(Gsph_x,g0,mgfftf,ngfftf,use_padfftf,gboundf,igfftfxg0)
        if ( ANY(gwx_fftalga == (/2,4/)) ) use_padfftf=0
-       if (use_padfftf==0) then 
+       if (use_padfftf==0) then
          ABI_DEALLOCATE(gboundf)
          ABI_ALLOCATE(gboundf,(2*mgfftf+8,2*use_padfftf))
        end if
@@ -671,7 +671,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !        if(ib_sum.ne.1.and.ib_sum.ne.10) cycle
 !        write(6,*) "jb",jb
 
-         if (Psps%usepaw==1.and.use_pawnhat==1) then 
+         if (Psps%usepaw==1.and.use_pawnhat==1) then
            i2=jb; if (nspinor==2) i2=(2*jb-1)
            spad=(nspinor-1)
 
@@ -705,16 +705,16 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
            if(iq_bz==1) then
              if((ib_sum/=jb).and.(abs(rhotwg_ki(1,jb))>tol8)) then
                if((ib_sum/=jb).and.(abs(rhotwg_ki(1,jb))>0.01_dp)) then
-                 write(std_out,*) "Warning2: oscillator strengh",rhotwg_ki(1,jb)
-               else
-                 write(std_out,*) "Warning1: oscillator strengh",rhotwg_ki(1,jb)
+                 write(std_out,*) "Warning: precision is low, oscillator strengh should be zero and is :",rhotwg_ki(1,jb)
+               !else
+               !  write(std_out,*) "Warning1: oscillator strengh",rhotwg_ki(1,jb)
                endif
              endif
              if((ib_sum==jb).and.(abs(rhotwg_ki(1,jb)-1_dp)>tol8)) then
                if((ib_sum==jb).and.(abs(rhotwg_ki(1,jb)-1_dp)>0.01_dp))  then
-                 write(std_out,*) "Warning2: oscillator strengh",rhotwg_ki(1,jb)
-               else
-                 write(std_out,*) "Warning1: oscillator strengh",rhotwg_ki(1,jb)
+                 write(std_out,*) "Warning: precision is low, oscillator strengh should be one and is :",rhotwg_ki(1,jb)
+               !else
+               !  write(std_out,*) "Warning1: oscillator strengh",rhotwg_ki(1,jb)
                endif 
              endif
            endif
@@ -729,7 +729,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !  ************************************8
 !    Compute M Matrix in Wannier basis
 !  ************************************8
-    
+
          if (ib_sum.GE.ib1.AND.ib_sum.LE.ib2) then
            call flush_unit(std_out)
            call flush_unit(ab_out)
@@ -773,9 +773,9 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
              cg_sum  => Wfd%Wave(ib,ik_ibz,spin)%ug
              cg_jb   => Wfd%Wave(jb,jk_ibz,spin)%ug
 
-             ctmp = xdotc(Wfd%npwwfn*Wfd%nspinor,cg_sum,1,cg_jb,1) 
-             ovlp(1) = REAL(ctmp) 
-             ovlp(2) = AIMAG(ctmp) 
+             ctmp = xdotc(Wfd%npwwfn*Wfd%nspinor,cg_sum,1,cg_jb,1)
+             ovlp(1) = REAL(ctmp)
+             ovlp(2) = AIMAG(ctmp)
 
              if (Psps%usepaw==1) then
                i2=(2*jb-1)

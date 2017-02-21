@@ -1,6 +1,0 @@
- Eigenvalues (hartree) for nkpt=   1  k points:
- kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.5000  0.5000  0.0000 (reduced coord)
-  -1.48158  -0.02334   0.09881   0.09881   0.59930   0.60432   0.82571   0.93696
- Eigenvalues (   eV  ) for nkpt=   1  k points:
- kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.5000  0.5000  0.0000 (reduced coord)
- -40.31596  -0.63522   2.68863   2.68863  16.30789  16.44451  22.46875  25.49600

@@ -106,7 +106,7 @@
 
 # C preprocessor (should not be set in most cases)
 #
-#CPP="/usr/bin/cpp"
+CPP="cpp"
 
 # C preprocessor custom debug flags (when enable_debug=yes)
 #
@@ -230,7 +230,7 @@
 # Forced C++ compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-#CXXFLAGS="-O2"
+CXXFLAGS="-std=c++1y"
 
 # C++ linker custom debug flags (when enable_debug=yes)
 #
@@ -515,7 +515,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/usr/local/mpich3_gcc49"
+with_mpi_prefix="${MPI_HOME}"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -675,14 +675,13 @@ with_mpi_prefix="/usr/local/mpich3_gcc49"
 # Transferable I/O (TRIO) connector                                            #
 # ---------------------------------------------------------------------------- #
 
-# Flavor of transferable I/O library to support (default is netcdf+etsf_io)
+# Flavor of transferable I/O library to support (default is netcdf)
 #
 # By transferable I/O (TRIO), we mean that the files produced by Abinit
 # will be transferable seamlessly to other computers and codes
 #
 # Supported libraries:
 #
-#   * etsf_io  : ETSF_IO file format (requires netcdf)
 #   * psml     : XML pseudopotential format io library
 #   * netcdf   : NetCDF file format
 #   * yaml     : YAML output
@@ -690,17 +689,7 @@ with_mpi_prefix="/usr/local/mpich3_gcc49"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf+etsf_io"
-
-                       # ------------------------------ #
-
-# Include flags for the ETSF_IO library (default is unset)
-#
-with_etsf_io_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
-
-# Link flags for the ETSF_IO library (default is unset)
-#
-with_etsf_io_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -letsf_io_low_level -letsf_io_utils -letsf_io"
+with_trio_flavor="netcdf"
 
                        # ------------------------------ #
 
@@ -987,15 +976,15 @@ with_libxc_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -lxcf90 -lxc"
 # Link with TRIQS library (for CTQMC and rotationally invariant interaction)
 #    (default is no)
 #
-#enable_triqs="no"
+enable_triqs="yes"
 #
 # Include flags for the TRIQS library (default is unset)
 #
-#with_triqs_incs="-I/usr/local/triqs/include -I/usr/local/cthyb/src/c++/"
+with_triqs_incs="-I/usr/local/src/TRIQS/cthyb-1.3/c++ -I${BOOST_PATH}/include -I${TRIQS_PATH}/include -I/usr/include/python2.7 -I/usr/include/hdf5/serial"
 
 # Link flags for the TRIQS library (default is unset)
 #
-#with_triqs_libs="-L/usr/local/triqs/lib -ltriqs -lcthyb_c"
+with_triqs_libs="-L${TRIQS_PATH}/lib -lcthyb_c -ltriqs -L/usr/local/boost_gcc/lib -lboost_mpi -lboost_mpi_python -lboost_python -L/usr/lib/x86_64-linux-gnu -lpython2.7 -lmpicxx -lstdc++"
 
 # ---------------------------------------------------------------------------- #
 # Fallbacks                                                                    #

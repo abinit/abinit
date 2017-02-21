@@ -1133,7 +1133,7 @@ end subroutine pawgylm
 !! pawexpiqr
 !!
 !! FUNCTION
-!! Compute exp(i.q.(r-R)) for each point of the (fine) rectangular grid
+!! Compute exp(i.q.r) for each point of the (fine) rectangular grid
 !! around a given atomic site. R is the position of the atom.
 !! Used for the determination of phonons at non-zero q wavevector.
 !!
@@ -1145,7 +1145,7 @@ end subroutine pawgylm
 !!  xred(3)= reduced atomic coordinates
 !!
 !! OUTPUT
-!!  expiqr(2,nfgd)= exp(i.q.(r-R)) around the current atom
+!!  expiqr(2,nfgd)= exp(i.q.r) around the current atom
 !!                                 Not allocated if q=0 !
 !!
 !! PARENTS
@@ -1199,7 +1199,7 @@ subroutine pawexpiqr(expiqr,gprimd,nfgd,qphon,rfgd,xred)
    phase_xred=two_pi*(qphon(1)*xred(1)+qphon(2)*xred(2)+qphon(3)*xred(3))
  end if
 
-!Compute exp(i.q.(r-R))
+!Compute exp(i.q.r)
  if (qne0) then
    do ic=1,nfgd
      phase=two_pi*(qx*rfgd(1,ic)+qy*rfgd(2,ic)+qz*rfgd(3,ic)) + phase_xred

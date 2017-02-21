@@ -3,6 +3,7 @@
 !Flags
  dieflag   1     ! Frequency-dependent Dielectric tensor flag
  ifcflag   1     ! Interatomic force constant flag
+ ifcout    0
 ! eivec    3     ! Output eigenvectors in lwf-formatted file
 
 !Effective charges
@@ -48,7 +49,7 @@
 #%%   t22.out, tolnlines = 2, tolabs = 4.0e-10, tolrel = 1.1e+00
 #%% extra_inputs = t22.ddb.in.gz
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% keywords = 
 #%% authors = F. Detraux 

@@ -6,11 +6,14 @@
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser,NoOptionError
+try:
+    from ConfigParser import ConfigParser,NoOptionError
+except ImportError:
+    from configparser import ConfigParser,NoOptionError
 from time import gmtime,strftime
 
-import commands
 import os
 import re
 import sys
@@ -95,7 +98,7 @@ EXTRA_DIST = built-docs.tgz config/gnu config/m4 config/util rules.am
 %s
 """
 
-doc_rules = file("rules.am","r").read()
+doc_rules = open("rules.am", "rt").read()
 
 # ---------------------------------------------------------------------------- #
 
@@ -127,7 +130,7 @@ def makefile_src(name,stamp,dir_name,files,docs=None,flags=None):
     if ( not flags is None ):
       doc_flags = "TEXFLAGS_EXTRA = %s\n\n" % (flags)
 
-    tmp_docs = docs.keys()
+    tmp_docs = list(docs.keys())
     tmp_docs.sort()
 
     for doc in tmp_docs:
@@ -143,7 +146,7 @@ def makefile_src(name,stamp,dir_name,files,docs=None,flags=None):
           (doc_name,doc_name,doc_name)
         doc_clean2 += "\n\trm -f %s.dvi" %  (doc_name)
       else:
-        print "Error: unknown document type '%s'" % (doc_type)
+        print("Error: unknown document type '%s'" % (doc_type))
         sys.exit(1)
       doc_files += " \\\n  %s.%s" % (doc_name,doc_ext)
       doc_tgts += " \\\n  %s.%s" % (doc_name,doc_ext)
@@ -189,18 +192,18 @@ my_doctypes = {
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
      not os.path.exists("config/specs/documents.conf") ):
-  print "%s: You must be in the top of an Abinit Documentation source tree." % my_name
-  print "%s: Aborting now." % my_name
+  print("%s: You must be in the top of an Abinit Documentation source tree." % my_name)
+  print("%s: Aborting now." % my_name)
   sys.exit(1)
 
 # Read config file(s)
 for cnf_file in my_configs:
   if ( os.path.exists(cnf_file) ):
     if ( re.search("\.cf$",cnf_file) ):
-      execfile(cnf_file)
+      exec(compile(open(cnf_file).read(), cnf_file, 'exec'))
   else:
-    print "%s: Could not find config file (%s)." % (my_name,cnf_file)
-    print "%s: Aborting now." % my_name
+    print("%s: Could not find config file (%s)." % (my_name,cnf_file))
+    print("%s: Aborting now." % my_name)
     sys.exit(2)
 
 # What time is it?
@@ -273,11 +276,11 @@ for doc_dir in doc_list:
     makefile_data = man_makefile % (my_name,now,my_name,cnf.get(doc_dir,"mans"))
 
   else:
-    raise ValueError,"processing of document type '%s' not implemented" % \
-      (dir_type)
+    raise ValueError("processing of document type '%s' not implemented" % \
+      (dir_type))
 
   # Write makefile
-  file("Makefile.am","w").write(makefile_data)
+  open("Makefile.am", "wt").write(makefile_data)
 
   # Got back one level
   os.chdir("..")
@@ -294,5 +297,5 @@ for doc_dir in doc_list:
     tar_files += " \\\n\t  %s" % (os.path.join(doc_dir,doc_file))
 doc_tarball = "if DO_BUILD_TEX\n\nbuilt-docs-tarball:%s\n\ttar czf built-docs.tgz%s\n%s\nelse\n\nall-local: built-docs-stamp\n\ninstall-data-local: built-docs-stamp\n\nbuilt-docs-stamp: built-docs.tgz\n\ttar xmzf $(top_srcdir)/built-docs.tgz\n\ttouch built-docs-stamp\n\nbuilt-docs-tarball:\n\t@echo \"Please install Graphviz and LaTeX to build the documentation\"\n\nCLEANFILES = built-docs-stamp\n\nendif" % \
   (tar_deps,tar_files,tar_tgts)
-file("Makefile.am","w").write(top_makefile % \
+open("Makefile.am", "wt").write(top_makefile % \
   (my_name,now,my_name," \\\n  " + " \\\n  ".join(doc_list),doc_tarball))

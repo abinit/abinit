@@ -25,10 +25,11 @@
 #include "abi_common.h"
 
 module m_ewald
-    
+
  use defs_basis
  use m_profiling_abi
  use m_errors
+ use m_splines
 
  use m_special_funcs,  only : abi_derfc
 
@@ -41,7 +42,7 @@ module m_ewald
  public :: ewald9   ! Compute ewald contribution to the dynamical matrix, at a given
                     ! q wavevector, including anisotropic dielectric tensor and effective charges
 
-contains 
+contains
 !!***
 
 !!****f* m_ewald/ewald
@@ -87,11 +88,11 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
  implicit none
 
 !Arguments ------------------------------------
-!scalars 
+!scalars
  integer,intent(in) :: natom,ntypat
  real(dp),intent(in) :: ucvol
  real(dp),intent(out) :: eew
-!arrays 
+!arrays
  integer,intent(in) :: typat(natom)
  real(dp),intent(in) :: gmet(3,3),rmet(3,3),xred(3,natom),zion(ntypat)
  real(dp),intent(out) :: grewtn(3,natom)
@@ -140,7 +141,7 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
    newg=0
    if (ng > 20 .and. mod(ng,10)==0) then
       write (message,'(3a,I10)') "Very large box of G neighbors in ewald: you probably do not want to do this.", ch10,&
-&       " If you have a metal consider setting dipdip 0.  ng = ", ng 
+&       " If you have a metal consider setting dipdip 0.  ng = ", ng
       MSG_WARNING(message)
    end if
 
@@ -170,7 +171,6 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
 !              Note that if reduced atomic coordinates xred drift outside
 !              of unit cell (outside [0,1)) it is irrelevant in the following
 !              term, which only computes a phase.
-!              OCL SCALAR ! by MM for Fujitsu
                do ia=1,natom
                  arg=two_pi*(ig1*xred(1,ia)+ig2*xred(2,ia)+ig3*xred(3,ia))
 !                Sum real and imaginary parts (avoid complex variables)
@@ -178,8 +178,7 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
                  summi=summi+zion(typat(ia))*sin(arg)
                end do
 
-!              The following two checks avoid an annoying
-!              underflow error message
+!              The following two checks avoid an annoying underflow error message
                if (abs(summr)<1.d-16) summr=0.0_dp
                if (abs(summi)<1.d-16) summi=0.0_dp
 
@@ -188,7 +187,6 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
                t1=term*(summr*summr+summi*summi)
                gsum=gsum+t1
 
-!              OCL SCALAR ! by MM for Fujitsu
                do ia=1,natom
 !                Again only phase is computed so xred may fall outside [0,1).
                  arg=two_pi*(ig1*xred(1,ia)+ig2*xred(2,ia)+ig3*xred(3,ia))
@@ -242,10 +240,10 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
    newr=0
    if (nr > 20 .and. mod(nr,10)==0) then
       write (message,'(3a,I10)') "Very large box of R neighbors in ewald: you probably do not want to do this.", ch10,&
-&       " If you have a metal consider setting dipdip 0.  nr = ", nr 
+&       " If you have a metal consider setting dipdip 0.  nr = ", nr
       MSG_WARNING(message)
    end if
-!  
+!
    do ir3=-nr,nr
      do ir2=-nr,nr
        do ir1=-nr,nr
@@ -260,7 +258,7 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
              drdta1=0.0_dp
              drdta2=0.0_dp
              drdta3=0.0_dp
-!            OCL SCALAR ! by MM for Fujitsu
+
              do ib=1,natom
                fracb1=xred(1,ib)-aint(xred(1,ib))+0.5_dp-sign(0.5_dp,xred(1,ib))
                fracb2=xred(2,ib)-aint(xred(2,ib))+0.5_dp-sign(0.5_dp,xred(2,ib))
@@ -274,10 +272,8 @@ subroutine ewald(eew,gmet,grewtn,natom,ntypat,rmet,typat,ucvol,xred,zion)
 !              Avoid zero denominators in 'term':
                if (rsq>=1.0d-24) then
 
-!                Note: erfc(8) is about 1.1e-29,
-!                so do not bother with larger arg.
-!                Also: exp(-64) is about 1.6e-28,
-!                so do not bother with larger arg**2 in exp.
+!                Note: erfc(8) is about 1.1e-29, so do not bother with larger arg.
+!                Also: exp(-64) is about 1.6e-28, so do not bother with larger arg**2 in exp.
                  term=0._dp
                  if (eta*rsq<64.0_dp) then
                    newr=1
@@ -540,10 +536,8 @@ subroutine ewald2(gmet,natom,ntypat,rmet,rprimd,stress,typat,ucvol,xred,zion)
 !              Avoid zero denominators in 'term':
                if (rmagn>=1.0d-12) then
 
-!                Note: erfc(8) is about 1.1e-29,
-!                so do not bother with larger arg.
-!                Also: exp(-64) is about 1.6e-28,
-!                so do not bother with larger arg**2 in exp.
+!                Note: erfc(8) is about 1.1e-29, so do not bother with larger arg.
+!                Also: exp(-64) is about 1.6e-28, so do not bother with larger arg**2 in exp.
                  arg3=reta*rmagn
                  if (arg3<8.0_dp) then
                    newr=1
@@ -619,7 +613,7 @@ end subroutine ewald2
 !! OUTPUT
 !! dyew(2,3,natom,3,natom)= Ewald part of the dynamical matrix,
 !!  second energy derivative wrt xred(3,natom) in Hartrees
-!!  (Denoted A-bar in the notes)
+!! Set to zero if all(zeff == zero)
 !!
 !! NOTES
 !! 1. The q=0 part should be subtracted, by another call to
@@ -629,13 +623,13 @@ end subroutine ewald2
 !! 2. Because this routine can be used many times in the
 !! evaluation of phonons in ppddb9, it has been
 !! optimized carefully. There is still possibility
-!! for improvement, by using bloking on g s and r s !
+!! for improvement, by using bloking on G and R!
 !! 3. There can be small numerical variations due to the
 !! fact that the input dielectric tensor is usually
 !! not perfectly symmetric ....
 !!
 !! PARENTS
-!!      ddb_hybrid,effective_potential_generateDipDip,m_dynmat,m_ifc
+!!      ddb_hybrid,m_dynmat,m_effective_potential,m_ifc
 !!
 !! CHILDREN
 !!      matr3inv
@@ -665,38 +659,73 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !Local variables -------------------------
 !scalars
- integer,parameter :: matom=10000,mr=10000
- integer :: i2,ia,ib,ig1,ig2,ig3,ii,ir,ir1,ir2,ir3,jj,mu,newg,newr,ng,nr,nu
- integer :: ng_expxq
- real(dp) :: arg1,arg2,arg3,arga,c123i,c123r,c23i,c23r,derfc_yy
- real(dp) :: detdlt, inv_detdlt
- real(dp) :: direct,eta,fac,fact1,fact2,fact3,gsq,invy,invy2,recip,reta,reta3
- real(dp) :: inv4eta
- real(dp) :: term1,term2,term3,term4,term5,y2,yy
-! real(dp) :: tcpu,tcpui,twall,twalli 
+ integer,parameter :: mr=10000,ny2_spline=1024*10
+ integer :: i2,ia,ib,ig1,ig2,ig3,ii,ir,ir1,ir2,ir3,jj,mu,newg,newr,ng,nr,nu,ng_expxq
+ real(dp),parameter :: fac=4.0_dp/3.0_dp/sqrt(pi)
+ real(dp),parameter :: fact2=2.0_dp/sqrt(pi)
+ real(dp),parameter :: y2max=64.0_dp, y2min=1.0d-24
+ real(dp) :: arg1,arg2,arg3,arga,c123i,c123r,c23i,c23r,detdlt,inv_detdlt
+ real(dp) :: direct,eta,fact1,fact3,gsq,recip,reta,reta3,inv4eta
+ real(dp) :: term1,term2,term3,term4,term5,y2,yy,invy,invy2,derfc_yy
  character(len=500) :: message
 !arrays
  real(dp) :: c1i(2*mr+1),c1r(2*mr+1),c2i(2*mr+1),c2r(2*mr+1),c3i(2*mr+1)
- real(dp) :: c3r(2*mr+1),cosqxred(matom),gpq(3),gpqfac(3,3),gpqgpq(3,3)
- real(dp) :: invdlt(3,3),ircar(3),ircax(3),rr(3),sinqxred(matom)
- real(dp) :: xredcar(3,matom),xredcax(3,matom),xredicar(3),xredicax(3),xx(3)
+ real(dp) :: c3r(2*mr+1),cosqxred(natom),gpq(3),gpqfac(3,3),gpqgpq(3,3)
+ real(dp) :: invdlt(3,3),ircar(3),ircax(3),rr(3),sinqxred(natom)
+ real(dp) :: xredcar(3,natom),xredcax(3,natom),xredicar(3),xredicax(3),xx(3)
  real(dp) :: gprimbyacell(3,3)
- complex(dpc) :: exp2piqx(natom)
  real(dp),allocatable :: dyewt(:,:,:,:,:)
+ complex(dpc) :: exp2piqx(natom)
  complex(dpc),allocatable :: expx1(:,:), expx2(:,:), expx3(:,:)
+
+!#define DEV_USESPLINE
+#ifdef DEV_USESPLINE
+ integer :: jspl
+ real(dp) :: aa,bb,cc,dd,step,stepm1,step2div6
+ logical,save :: first_call=.True.
+ real(dp),save :: t4spl(ny2_spline,2),t5spl(ny2_spline,2),y2vals(ny2_spline)
+#endif
 
 ! *********************************************************************
 
- if(matom<natom)then
-   write(message, '(a,i0,a,i0,a,a)' )&
-&   'matom= ',matom,' is smaller than natom= ',natom,ch10,&
-&   'Action: raise matom in ewald9.F90, and recompile the program.'
-   MSG_ERROR(message)
+ ! This routine is expensive so skip the calculation and return zeros if zeff == zero.
+ ! Typically this happens when the DDB file does not contains zeff but dipdip = 1 is used (default).
+ if (all(zeff == zero)) then
+   dyew = zero; return
  end if
+
+#ifdef DEV_USESPLINE
+ step = (0.1_dp + y2max - y2min) / (ny2_spline - 1)
+ stepm1 = one / step; step2div6 = step**2/six
+ if (first_call) then
+   first_call = .False.
+   do ii=1,ny2_spline
+     y2 = y2min + (ii-1) * step
+     y2vals(ii) = y2
+     yy=sqrt(y2)
+     invy=1.0_dp/yy
+     invy2=invy**2
+     derfc_yy = abi_derfc(yy)
+     term2=derfc_yy*invy*invy2
+     term3=fact2*exp(-y2)*invy2
+     term4=-(term2+term3)
+     term5=(3.0_dp*term2+term3*(3.0_dp+2.0_dp*y2))*invy2
+     t4spl(ii,1) = term4
+     t5spl(ii,1) = term5
+   end do
+
+   call spline(y2vals, t4spl(:,1), ny2_spline, zero, zero, t4spl(:,2))
+   call spline(y2vals, t5spl(:,1), ny2_spline, zero, zero, t5spl(:,2))
+   !do ii=1,ny2_spline
+   !  write(345,*)y2vals(ii),t4spl(ii,:),t5spl(ii,:)
+   !end do
+   !write(std_out,*)"spline tables created"; stop
+ end if
+#endif
 
  ABI_ALLOCATE(dyewt,(2,3,natom,3,natom))
 
-! initialize complex phase factors 
+! initialize complex phase factors
  do ia = 1, natom
    arga = two_pi*( (qphon(1))*xred(1,ia)&
 &                 +(qphon(2))*xred(2,ia)&
@@ -728,8 +757,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  eta=pi*100.0_dp/33.0_dp*sqrt(1.69_dp*recip/direct)
  inv4eta = one / four / eta
 
- dyew(:,:,:,:,:)=0.0_dp
- dyewt(:,:,:,:,:)=0.0_dp
+ dyew = zero
+ dyewt = zero
 
 !Sum terms over g space:
  ng=0
@@ -738,12 +767,13 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 ! if needed, update the complex phases for larger G vectors
    if (ng > ng_expxq) then
+     !write(std_out,*)"have to realloc"
      ABI_DEALLOCATE(expx1)
      ABI_DEALLOCATE(expx2)
      ABI_DEALLOCATE(expx3)
 
      ng_expxq = ng_expxq*2
-! TODO: half of this space is not needed, as it contains the complex conjugate of the other half. 
+! TODO: half of this space is not needed, as it contains the complex conjugate of the other half.
 ! present duplication avoids if statements inside the loop, however
      ABI_ALLOCATE(expx1, (-ng_expxq:ng_expxq, natom))
      ABI_ALLOCATE(expx2, (-ng_expxq:ng_expxq, natom))
@@ -769,7 +799,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 &           gprimbyacell(2,2)+(ig3+qphon(3))*gprimbyacell(2,3)
            gpq(3)=(ig1+qphon(1))*gprimbyacell(3,1)+(ig2+qphon(2))*&
 &           gprimbyacell(3,2)+(ig3+qphon(3))*gprimbyacell(3,3)
-           gsq=0.0_dp
+           gsq=zero
            do jj=1,3
              do ii=1,3
                gpqgpq(ii,jj)=gpq(ii)*gpq(jj)
@@ -803,13 +833,6 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                  end do
                end do
 
-!               do ia=1,natom
-!                 arga=two_pi*( (ig1+qphon(1))*xred(1,ia)&
-!&                 +(ig2+qphon(2))*xred(2,ia)&
-!&                 +(ig3+qphon(3))*xred(3,ia) )
-!                 cosqxred(ia)=cos(arga)
-!                 sinqxred(ia)=sin(arga)
-!               end do
 ! MJV: replaced old calls to cos and sin. Checked for 10 tests in v2 that max error is about 6.e-15, usually < 2.e-15
                do ia=1,natom
                  cosqxred(ia)=real(exp2piqx(ia)*expx1(ig1, ia)*expx2(ig2, ia)*expx3(ig3, ia))
@@ -820,8 +843,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                do nu=1,3
                  do ia=1,natom
                    do mu=nu,3
-                     dyewt(1,mu,ia,nu,ia)=dyewt(1,mu,ia,nu,ia)+&
-&                     gpqfac(mu,nu)
+                     dyewt(1,mu,ia,nu,ia)=dyewt(1,mu,ia,nu,ia)+gpqfac(mu,nu)
                    end do
                  end do
                end do
@@ -834,10 +856,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 !                  The most inner loop
                    do nu=1,3
                      do mu=nu,3
-                       dyewt(1,mu,ia,nu,ib)=dyewt(1,mu,ia,nu,ib)+&
-&                       gpqfac(mu,nu)*c123r
-                       dyewt(2,mu,ia,nu,ib)=dyewt(2,mu,ia,nu,ib)+&
-&                       gpqfac(mu,nu)*c123i
+                       dyewt(1,mu,ia,nu,ib)=dyewt(1,mu,ia,nu,ib)+gpqfac(mu,nu)*c123r
+                       dyewt(2,mu,ia,nu,ib)=dyewt(2,mu,ia,nu,ib)+gpqfac(mu,nu)*c123i
                      end do
                    end do
                  end do
@@ -852,7 +872,6 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !  Check if new shell must be calculated
    if(newg==0)exit
-
  end do
 
 !Multiplies by common factor
@@ -870,8 +889,6 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
  reta=sqrt(eta)
  reta3=-eta*reta
- fac=4.0_dp/3.0_dp/sqrt(pi)
- fact2=2.0_dp/sqrt(pi)
 
 !Calculating the inverse (transpose) of the dielectric tensor
  call matr3inv(dielt,invdlt)
@@ -931,23 +948,18 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
    do ir3=-nr,nr
      do ir2=-nr,nr
 
-!      Here, construct the cosine and sine of q*R for
-!      components 2 and 3
-       c23r = c2r(ir2+mr+1) * c3r(ir3+mr+1)&
-&       - c2i(ir2+mr+1) * c3i(ir3+mr+1)
-       c23i = c2i(ir2+mr+1) * c3r(ir3+mr+1)&
-&       + c2r(ir2+mr+1) * c3i(ir3+mr+1)
+!      Here, construct the cosine and sine of q*R for components 2 and 3
+       c23r = c2r(ir2+mr+1) * c3r(ir3+mr+1) - c2i(ir2+mr+1) * c3i(ir3+mr+1)
+       c23i = c2i(ir2+mr+1) * c3r(ir3+mr+1) + c2r(ir2+mr+1) * c3i(ir3+mr+1)
 
-!      Also multiplies by fact3, because it is a rather
-!      economical place to do so
+!      Also multiplies by fact3, because it is a rather economical place to do so
        c23r=c23r * fact3
        c23i=c23i * fact3
 
        do ir1=-nr,nr
          if( abs(ir3)==nr .or. abs(ir2)==nr .or. abs(ir1)==nr .or. nr==1 )then
 
-!          This is the real part and imaginary
-!          part of the phase factor exp(iq*R)
+!          This is the real part and imaginary part of the phase factor exp(iq*R)
            c123r = c1r(ir1+mr+1) * c23r - c1i(ir1+mr+1) * c23i
            c123i = c1i(ir1+mr+1) * c23r + c1r(ir1+mr+1) * c23i
 
@@ -977,19 +989,43 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                y2=rr(1)*xx(1)+rr(2)*xx(2)+rr(3)*xx(3)
 
 !              The atoms should not be too far of each other
-               if (y2<64.0_dp) then
-!                Note: erfc(8) is about 1.1e-29,
-!                so dont bother with larger y.
-!                Also: exp(-64) is about 1.6e-28,
-!                do dont bother with larger y**2 in exp.
+               if (y2 < y2max) then
+!                Note: erfc(8) is about 1.1e-29, so dont bother with larger y.
+!                Also: exp(-64) is about 1.6e-28, do dont bother with larger y**2 in exp.
 
 !                Avoid zero denominators in term:
-                 if (y2>=1.0d-24) then
+                 if (y2 >= y2min) then
                    newr=1
-! TODO : find a workaround here - the sqrt, erf and exp functions are slow 
+! TODO : find a workaround here - the sqrt, erf and exp functions are slow
 !        and for dense q meshes this takes forever
 !        could tabulate and spline the full function of yy on a very fine grid
 !        and look it up there...
+
+#ifdef DEV_USESPLINE
+                   if (y2 > 1.0_dp) then
+                     ! Spline function
+                     jspl = 1 + int((y2 - y2min) * stepm1); dd = y2 - y2vals(jspl)
+                     bb = dd * stepm1
+                     aa = one - bb
+                     cc = aa*(aa**2-one) * step2div6
+                     dd = bb*(bb**2-one) * step2div6
+
+                     term4 = aa*t4spl(jspl,1) + bb*t4spl(jspl+1,1) + cc*t4spl(jspl,2) + dd*t4spl(jspl+1,2)
+                     term5 = aa*t5spl(jspl,1) + bb*t5spl(jspl+1,1) + cc*t5spl(jspl,2) + dd*t5spl(jspl+1,2)
+                   else
+                     ! Evaluate values (the function increases quickly for x --> 0, the spline
+                     ! is unstable and this leads to SIGFPE.
+                     yy=sqrt(y2)
+                     invy=1.0_dp/yy
+                     invy2=invy**2
+                     derfc_yy = abi_derfc(yy)
+                     term2=derfc_yy*invy*invy2
+                     term3=fact2*exp(-y2)*invy2
+                     term4=-(term2+term3)
+                     term5=(3.0_dp*term2+term3*(3.0_dp+2.0_dp*y2))*invy2
+                   end if
+
+#else
                    yy=sqrt(y2)
                    invy=1.0_dp/yy
                    invy2=invy**2
@@ -998,6 +1034,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                    term3=fact2*exp(-y2)*invy2
                    term4=-(term2+term3)
                    term5=(3.0_dp*term2+term3*(3.0_dp+2.0_dp*y2))*invy2
+#endif
                    do nu=1,3
                      do mu=nu,3
                        dyewt(1,mu,ia,nu,ib)=dyewt(1,mu,ia,nu,ib)+&
@@ -1009,10 +1046,10 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                  else
 !                  If zero denominator, the atoms should be identical
                    if (ia/=ib)then
-                     write(message, '(a,a,a,a,a,i5,a,i5,a)' )&
+                     write(message, '(5a,i0,a,i0,a)' )&
 &                     'The distance between two atoms seem to vanish.',ch10,&
 &                     'This is not allowed.',ch10,&
-&                     'Action : check the input for the atoms number',ia,' and',ib,'.'
+&                     'Action: check the input for the atoms number',ia,' and',ib,'.'
                      MSG_ERROR(message)
                    else
 !                    This is the correction when the atoms are identical
@@ -1025,7 +1062,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                    end if
                  end if ! End the condition for avoiding zero denominators
                end if ! End the condition of too large distance between atoms
-             end do 
+             end do
            end do ! End loop over ia and ib :
          end if ! End triple loop over real space points:
        end do ! ir1
@@ -1034,10 +1071,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !  Check if new shell must be calculated
    if(newr==0)exit
-   if(newr==1 .and. nr==mr)then
-     MSG_BUG('mr is too small')
-   end if
-
+   if(newr==1 .and. nr==mr) MSG_BUG('mr is too small')
  end do
 
 !Now, symmetrizes
@@ -1065,19 +1099,16 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !Tests
 !write(std_out,*)' ewald9 : take into account the effective charges '
-!call timein(tcpu,twall)
-!write(std_out,1000) tcpu-tcpui,twall-twalli
-!
  do ib=1,natom
    do nu=1,3
      do ia=1,natom
        do mu=1,3
          do i2=1,2
-           dyew(i2,mu,ia,nu,ib)=0.0_dp
+           dyew(i2,mu,ia,nu,ib)=zero
            do jj=1,3
              do ii=1,3
-               dyew(i2,mu,ia,nu,ib)=dyew(i2,mu,ia,nu,ib)+zeff(ii,mu,ia)*&
-&               zeff(jj,nu,ib)*dyewt(i2,ii,ia,jj,ib)
+               dyew(i2,mu,ia,nu,ib)=dyew(i2,mu,ia,nu,ib) + &
+                zeff(ii,mu,ia)*zeff(jj,nu,ib)*dyewt(i2,ii,ia,jj,ib)
              end do
            end do
          end do

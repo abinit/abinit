@@ -44,6 +44,27 @@ optdriver3  4
 optdriver4  4
    getqps4 -1
 
+# Interpolate energis at the end of the sigma run.
+# Use k-path specified by nkpath, ndivsm, kptbounds and write energies in gnuplot format.
+#
+prtebands4 2      # gnuplot format.
+einterp4 1 5 0 0  # Star function interpolation with 5 star functions per k-point
+ndivsm4 20        # k-path
+nkpath4 12
+kptbounds4
+0.     0.     0.
+0.5    0.     0.5
+0.5    0.25   0.75
+0.375  0.375  0.75
+0.     0.     0.
+0.5    0.5    0.5
+0.625  0.25   0.625
+0.5    0.25   0.75
+0.5    0.5    0.5
+0.375  0.375  0.75
+0.625  0.25   0.625
+0.5    0.     0.5
+
 
 # Definition of the unit cell: fcc
 acell 3*6.7406530878521345  #Same parameters as Shiskin
@@ -66,7 +87,7 @@ xred              # Reduced coordinate of atoms
 ecut 12.0          # Maximal kinetic energy cut-off, in Hartree
 
 # Definition of the SCF procedure
-nstep   250        # Maximal number of SCF cycles
+nstep   250       # Maximal number of SCF cycles
 diemac  12.0      # Although this is not mandatory, it is worth to
                   # precondition the SCF cycle. The model dielectric
                   # function used as the standard preconditioner
@@ -80,7 +101,8 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t42.out, tolnlines=   10,   tolabs=  1.1e-3,      tolrel= 5.0e-5, fld_options = -medium
+#%%   t42.out, tolnlines=10, tolabs=  1.1e-3, tolrel= 5.0e-5, fld_options = -medium;
+#%%   t42o_DS4_INTERP_EBANDS.data, tolnlines=50, tolabs=5.0e-02, tolrel=5.0e-02, fld_options= -ridiculous;
 #%% psp_files = 6c.pspnc
 #%% [paral_info]
 #%% max_nprocs = 6
@@ -91,5 +113,4 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%%   Diamond: hybrid functional calculation with the GW code
 #%%   Self-consistent approach to the HSE06 band structure
 #%%   based on a unitary transform of a subset of LDA wavefunctions
-#%%   (note : test temporarily disabled, waiting for the next version of the libxc)
 #%%<END TEST_INFO>

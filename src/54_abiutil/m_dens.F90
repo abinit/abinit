@@ -38,7 +38,7 @@ MODULE m_dens
  public :: dens_hirsh      ! Compute the Hirshfeld charges
 !!***
 
-contains 
+contains
 
 !----------------------------------------------------------------------
 
@@ -70,13 +70,14 @@ contains
 !!  hcharge(natom), hden(natom), hweight(natom)= Hirshfeld charges, densities, weights.
 !!
 !! PARENTS
-!!      cut3d
+!!      m_cut3d
 !!
 !! CHILDREN
+!!      metric,spline,xcart2xred
 !!
 !! SOURCE
 
-subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, & 
+subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
   natom,nrx,nry,nrz,ntypat,rprimd,xcart,typat,zion,znucl,prtcharge,hcharge,hden,hweight)
 
 
@@ -108,7 +109,7 @@ subroutine dens_hirsh(mpoint,radii,aeden,npoint,minimal_den,grid_den, &
  real(dp) :: aa,bb,coeff1,coeff2,coeff3,den,factor,h_inv,hh,maxrad
  real(dp) :: rr,rr2,total_charge,total_weight,total_zion,ucvol
  real(dp) :: yp1,ypn
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer :: highest(3),lowest(3)
  integer,allocatable :: ncells(:)

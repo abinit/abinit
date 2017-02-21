@@ -29,14 +29,16 @@ D. For the first merge of a production version (possibly for the first release a
 ------------------------------------------------------------------------------------
 Prepare release notes ...
 D.1 Find the starting revision of the corresponding development version
-D.2 bzr status to find the list of NEW input files, 
+D.2 Identify new tests : git status to find the list of NEW input files and refs files, 
     and identify corresponding capability
-D.3 bzr diff  of the src/*/chkvars.F90 file, to identify new input variables
-D.4 Scan the bzr log file.
-D.5 Identify lacking or incomplete documentation and testing !
-D.6 Check and update contributor file
-D.7 Contact the relevant people
-D.8 (Obsolete - should be replaced by automatic generation on another machine)
+D.3 Identify new input variables : git diff  of the src/*/chkvars.F90 file
+D.4 Identify new tutorial doc files.
+D.5 From the developers : scan the merge requests
+D.6 Scan the git log file.
+D.7 Identify lacking or incomplete documentation and testing !
+D.8 Check and update contributor file
+D.9 Contact the relevant people
+D.10 (Obsolete - should be replaced by automatic generation on another machine)
 Run the green_intel12 slave on the trunk PUBLIC branch => static binary for the group.
 
 Also update install notes, features, doc/maintainers/statistics.txt
@@ -49,3 +51,4 @@ E.1 Make available the files tar.gz, infos.html, robodoc (from shiva)
 E.2 Also update install notes, features. 
 (The delivery of binary packages has been disabled, as of v7.11.5)
 *******************************************************************
+[This file can be found at doc/maintainers/check_list.txt]

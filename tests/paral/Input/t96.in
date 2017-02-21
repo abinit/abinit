@@ -1,5 +1,5 @@
 ##############################################################################
-#Test for multibinit, reed DDB and generate the effective potential into XML file
+#Test for multibinit, read DDB and generate the effective potential into XML file
 ##############################################################################
 prt_effpot = -1
 energy_reference = -1.7145176622E+01
@@ -21,7 +21,7 @@ qph1l  =      0.00000000E+00  0.00000000E+00  0.00000000E+00    1.000E+00
               0.50000000E+00  0.50000000E+00  0.50000000E+00    1.000E+00
 
 n_cell =   2 2 2
-dynamics =  1
+dynamics =  12
 temperature = 1000
 ntime  = 50
 
@@ -52,7 +52,7 @@ ntime  = 50
 #%% [NCPU_10]
 #%% input_ddb  = t95_MPI10o_DS3_DDB 
 #%% files_to_test = 
-#%%   t95_MPI10.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
+#%%   t96_MPI10.out, tolnlines = 0, tolabs = 0, tolrel = 0, fld_options = -easy;
 #%%   system.xml, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -easy
 #%% [extra_info]
 #%% authors = A. MARTIN

@@ -675,14 +675,13 @@ with_mpi_prefix="/usr/local/openmpi-1.6.5_nag5.3.1"
 # Transferable I/O (TRIO) connector                                            #
 # ---------------------------------------------------------------------------- #
 
-# Flavor of transferable I/O library to support (default is netcdf+etsf_io)
+# Flavor of transferable I/O library to support (default is netcdf)
 #
 # By transferable I/O (TRIO), we mean that the files produced by Abinit
 # will be transferable seamlessly to other computers and codes
 #
 # Supported libraries:
 #
-#   * etsf_io  : ETSF_IO file format (requires netcdf)
 #   * psml     : XML pseudopotential format io library
 #   * netcdf   : NetCDF file format
 #   * yaml     : YAML output
@@ -690,17 +689,7 @@ with_mpi_prefix="/usr/local/openmpi-1.6.5_nag5.3.1"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf+etsf_io"
-
-                       # ------------------------------ #
-
-# Include flags for the ETSF_IO library (default is unset)
-#
-with_etsf_io_incs="-I/usr/local/etsfio/include"
-
-# Link flags for the ETSF_IO library (default is unset)
-#
-with_etsf_io_libs="-L/usr/local/etsfio/lib -letsf_io_low_level -letsf_io_utils -letsf_io"
+with_trio_flavor="netcdf"
 
                        # ------------------------------ #
 
@@ -716,11 +705,11 @@ with_etsf_io_libs="-L/usr/local/etsfio/lib -letsf_io_low_level -letsf_io_utils -
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I/usr/local/netcdf/include"
+with_netcdf_incs="-I${FALLBACKS_PATH}/netcdf/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L/usr/local/netcdf/lib -lnetcdff -lnetcdf"
+with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -918,7 +907,7 @@ with_linalg_libs="-L/usr/local/fallbacks_nag/lib -llapack -lblas"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="none"
+with_dft_flavor="libxc"
 
                        # ------------------------------ #
 
@@ -948,11 +937,11 @@ with_dft_flavor="none"
 
 # Include flags for the LibXC library (default is unset)
 #
-#with_libxc_incs="-I/opt/etsf/include"
+with_libxc_incs="-I${FALLBACKS_PATH}/libxc/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-#with_libxc_libs="-L/opt/etsf/lib -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/lib -lxcf90 -lxc"
 
                        # ------------------------------ #
 

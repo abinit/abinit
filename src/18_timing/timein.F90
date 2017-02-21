@@ -26,10 +26,13 @@
 !!  For CPU time, contains machine-dependent code (choice will be selected
 !!  by C preprocessor, see abi_cpu_time).
 !!
+!! TODO
+!!  Should be replaced by cwtime
+!!
 !! PARENTS
 !!      abinit,aim,aim_follow,anaddb,bsepostproc,conducti,cpdrv,cut3d,drvaim
-!!      elphon,first_rec,harmonic_thermo,m_exit,m_phonons,mrgddb,mrgscr,optic
-!!      rsurf,surf,timab
+!!      elphon,first_rec,harmonic_thermo,m_exit,m_phonons,mrgddb,mrgscr
+!!      multibinit,optic,rsurf,surf,timab
 !!
 !! CHILDREN
 !!

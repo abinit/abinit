@@ -1,3 +1,4 @@
+config.h.in~
 .DS_Store
 .deps
 .directory
@@ -327,6 +328,7 @@ tests/TestBot_MPI*/*
 /src/98_main/mrgdv
 /src/98_main/mrggkk
 /src/98_main/mrgscr
+/src/98_main/multibinit
 /src/98_main/newsp
 /src/98_main/optic
 /src/98_main/ujdet
@@ -418,3 +420,12 @@ src/*/test_*
 !tests_*F90
 build1
 build2
+abichecks/special.py
+abienv.txt
+fallbacks/make.stderr
+make.stderr
+makefile.sed
+tests/testcfg.py
+CheckFB.py
+tests/built-in/Input/abinit
+u-tsumura.ac

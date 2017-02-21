@@ -107,7 +107,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: nkpt_max=50
- integer :: idtset,ii,iimage,ga_n_rules
+ integer :: idtset,ii,iimage,ga_n_rules,nn
  integer :: lpawu1,narr,mxnsp
  integer :: natom,nimfrqs,nimage
  integer :: ntypalch,ntypat,size1,size2,tmpimg0
@@ -576,6 +576,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%dmft_solv
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_solv','INT',0)
 
+ dprarr(1,:)=dtsets(:)%dmft_tolfreq
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_tolfreq','DPR',0)
+
  dprarr(1,:)=dtsets(:)%dmft_tollc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'dmft_tollc','DPR',0)
 
@@ -667,6 +670,12 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(2,:)=dtsets(:)%efield(2)
  dprarr(3,:)=dtsets(:)%efield(3)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'efield','DPR',0)
+
+ nn = size(dtsets(0)%einterp)
+ do ii=1,nn
+   dprarr(ii,:)=dtsets(:)%einterp(ii)
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,nn,narrm,ncid,ndtset_alloc,'einterp','DPR',0)
 
  dprarr(1,:)=dtsets(:)%elph2_imagden
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'elph2_imagden','ENE',0)
@@ -1004,6 +1013,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  dprarr(1,:)=dtsets(:)%gwencomp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwencomp','ENE',0)
+
+ dprarr(1,:)=dtsets(:)%gwfockmix
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwfockmix','DPR',0)
 
  intarr(1,:)=dtsets(:)%gwgamma
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwgamma','INT',0)

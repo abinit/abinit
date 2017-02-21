@@ -19,16 +19,17 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
     "compute_anharmonics.F90",
-    "ddb_to_effective_potential.F90",
     "effpot_xml.c",
     "init10.F90",
     "m_anharmonics_terms.F90",
     "m_effective_potential.F90",
     "m_effective_potential_file.F90",
-    "m_multibinit_dataset.F90",
+    "m_fit_polynomial_coeff.F90",
     "m_harmonics_terms.F90",
-    "m_effpot_xml.F90",
+    "m_multibinit_dataset.F90",
     "m_monte_carlo.F90",
+    "m_polynomial_coeff.F90",
+    "m_polynomial_term.F90",
  ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

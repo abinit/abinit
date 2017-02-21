@@ -334,7 +334,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(gs_hamiltonian_type) :: gs_hamk
 !arrays
  integer,allocatable :: kg_k(:,:)
- real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(1)
+ real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0)
  real(dp),allocatable :: EigMin(:,:),buffer1(:),buffer2(:),cgq(:,:)
  real(dp),allocatable :: cgrkxc(:,:),cgrvtrial(:,:),doccde(:)
  real(dp),allocatable :: dphasek(:,:),eig_k(:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:)
@@ -481,9 +481,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !==== Initialize most of the Hamiltonian ====
 !Allocate all arrays and initialize quantities that do not depend on k and spin.
- call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nspden,natom,&
+ call init_hamiltonian(gs_hamk,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
-& usecprj=usecprj_local,ph1d=ph1d,electronpositron=electronpositron,fock=fock,&
+& paw_ij=paw_ij,ph1d=ph1d,usecprj=usecprj_local,electronpositron=electronpositron,fock=fock,&
+& comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
 
 !Initializations for PAW (projected wave functions)
@@ -650,8 +651,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      rhoaug(:,:,:,:)=zero
 
 !    Continue to initialize the Hamiltonian
-     call load_spin_hamiltonian(gs_hamk,isppol,paw_ij=paw_ij,vlocal=vlocal,&
-&     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+     call load_spin_hamiltonian(gs_hamk,isppol,vlocal=vlocal,with_nonlocal=.true.)
      if (with_vxctau) then
        call load_spin_hamiltonian(gs_hamk,isppol,vxctaulocal=vxctaulocal)
      end if
@@ -807,8 +807,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &         kinpw_k  =my_bandfft_kpt%kinpw_gather, &
 &         kg_k     =my_bandfft_kpt%kg_k_gather, &
 &         kpg_k    =my_bandfft_kpt%kpg_k_gather, &
-         ffnl_k   =my_bandfft_kpt%ffnl_gather, &
-         ph3d_k   =my_bandfft_kpt%ph3d_gather)
+          ffnl_k   =my_bandfft_kpt%ffnl_gather, &
+          ph3d_k   =my_bandfft_kpt%ph3d_gather)
        end if
 
 !      Build inverse of overlap matrix for chebfi
@@ -1532,8 +1532,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call ctocprj(atindx,cg,1,cprj_tmp,gmet,gprimd,0,0,0,dtset%istwfk,kg,dtset%kptns,&
 &       dtset%mband,mcg,mcprj_tmp,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
 &       dtset%natom,nattyp,dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,dtset%nloalg,&
-&       npwarr,dtset%nspinor,dtset%nsppol,ntypat,0,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
-&       ucvol,dtfil%unpaw,0,xred,ylm,ylmgr_dum)
+&       npwarr,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
+&       ucvol,dtfil%unpaw,xred,ylm,ylmgr_dum)
        call pawmkrhoij(atindx,atindx1,cprj_tmp,gs_hamk%dimcprj,dtset%istwfk,dtset%kptopt,&
 &       dtset%mband,mband_cprj,mcprj_tmp,dtset%mkmem,mpi_enreg,natom,dtset%nband,dtset%nkpt,&
 &       dtset%nspinor,dtset%nsppol,occ,dtset%paral_kgb,paw_dmft,dtset%pawprtvol,pawrhoij_unsym,&

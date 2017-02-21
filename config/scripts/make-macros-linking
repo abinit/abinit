@@ -6,11 +6,14 @@
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
+from __future__ import print_function, division, absolute_import #, unicode_literals
 
-from ConfigParser import ConfigParser,NoOptionError
+try:
+    from ConfigParser import ConfigParser,NoOptionError
+except ImportError:
+    from configparser import ConfigParser,NoOptionError
 from time import gmtime,strftime
 
-import commands
 import os
 import re
 import sys
@@ -68,7 +71,7 @@ AC_DEFUN([ABI_FALLBACKS_PARAMS],[
 
   # Set include specs
   macro += "\n  dnl Include flags\n"
-  pkg_names = incs.keys()
+  pkg_names = list(incs.keys())
   pkg_names.sort()
   for pkg in pkg_names:
     macro += "  if test \"${enable_%s}\" = \"yes\"; then\n" % (pkg)
@@ -77,7 +80,7 @@ AC_DEFUN([ABI_FALLBACKS_PARAMS],[
 
   # Set library specs
   macro += "\n  dnl Library flags\n"
-  pkg_names = libs.keys()
+  pkg_names = list(libs.keys())
   pkg_names.sort()
   for pkg in pkg_names:
     macro += "  if test \"${enable_%s}\" = \"yes\"; then\n" % (pkg)
@@ -90,7 +93,7 @@ AC_DEFUN([ABI_FALLBACKS_PARAMS],[
 
   # Set binary specs
   macro += "\n  dnl Binary command lines"
-  pkg_names = bins.keys()
+  pkg_names = list(bins.keys())
   pkg_names.sort()
   for pkg in pkg_names:
     macro += "\n  if test \"${enable_%s}\" = \"yes\"; then\n" % (pkg)
@@ -128,15 +131,15 @@ my_output  = "config/m4/auto-linking.m4"
 # Check if we are in the top of the ABINIT source tree
 if ( not os.path.exists("configure.ac") or
      not os.path.exists("src/98_main/abinit.F90") ):
-  print "%s: You must be in the top of an ABINIT source tree." % my_name
-  print "%s: Aborting now." % my_name
+  print("%s: You must be in the top of an ABINIT source tree." % my_name)
+  print("%s: Aborting now." % my_name)
   sys.exit(1)
 
 # Read config file(s)
 for cnf_file in my_configs.values():
   if ( not os.path.exists(cnf_file) ):
-    print "%s: Could not find config file (%s)." % (my_name,cnf_file)
-    print "%s: Aborting now." % my_name
+    print("%s: Could not find config file (%s)." % (my_name,cnf_file))
+    print("%s: Aborting now." % my_name)
     sys.exit(2)
 
 # What time is it?
@@ -153,7 +156,7 @@ incs = dict()
 libs = dict()
 
 # Start writing macro
-m4 = file(my_output,"w")
+m4 = open(my_output, "wt")
 m4.write(macro_header(my_name,now))
 
 # Process fallbacks

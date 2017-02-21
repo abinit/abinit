@@ -20,6 +20,7 @@
 !! calcdensph.F90
 !! find_getdtset.F90
 !! interfaces_54_abiutil.F90
+!! m_dens.F90
 !! m_dtset.F90
 !! m_results_out.F90
 !! m_scf_history.F90

@@ -914,7 +914,7 @@ end function read_string
 !! PARENTS
 !!      abinit,anaddb,bsepostproc,cchi0,cchi0q0,cut3d,fftprof,impurity_solve
 !!      m_errors,m_hdr,m_io_redirect,m_io_tools,m_matlu,m_shirley,m_xc_vdw
-!!      mrgddb,mrggkk,mrgscr,optic,pawmkaewf,prep_calc_ucrpa,qmc_prep_ctqmc
+!!      mrggkk,mrgscr,multibinit,optic,pawmkaewf,prep_calc_ucrpa,qmc_prep_ctqmc
 !!      scprqt,vdw_kernelgen,vtorho,wrtout
 !!
 !! CHILDREN

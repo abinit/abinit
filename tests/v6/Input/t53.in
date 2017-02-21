@@ -2,6 +2,7 @@
 
 !Flags
  ifcflag   1     ! Interatomic force constant flag
+ ifcout 0
  thmflag 5
 !Wavevector grid number 1 (coarse grid, from DDB)
   brav    1      ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
@@ -37,7 +38,7 @@
 #%% files_to_test = 
 #%%   t53.out, tolnlines = 1, tolabs = 4.0e-5, tolrel = 2.0e-7
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = 
