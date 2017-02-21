@@ -41,4 +41,5 @@ optcell = 2
 #%% authors = A. MARTIN
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%   read xml and generate effective potential in XML file
+#%%   read xml and generate effective potential and run NPT simulation
+#%%<END TEST_INFO>
