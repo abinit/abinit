@@ -230,7 +230,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,c
 !Loops on the q point grids
  do igrid=1,ngrids
 
-   igqpt2(:)=(anaddb_dtset%ng2qpt(:)*igrid)/ngrids
+   igqpt2(:)=max((anaddb_dtset%ng2qpt(:)*igrid)/ngrids, 1)
    mqpt2=(igqpt2(1)*igqpt2(2)*igqpt2(3))/facbrv
    ABI_ALLOCATE(qpt2,(3,mqpt2))
    ABI_ALLOCATE(spqpt2,(3,mqpt2))
