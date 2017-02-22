@@ -14623,6 +14623,7 @@
     defaultval: !valuewithconditions
         '[[usepaw]]==0': 0
         '[[usepaw]]==1': 1
+        defaultval: 0
     definition: use XC Core-Correction in G-space
     dimensions: scalar
     excludes: null
