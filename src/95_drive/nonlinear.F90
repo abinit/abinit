@@ -490,7 +490,16 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
                call wrtout(ab_out,message,'COLL')
                call wrtout(std_out,message,'COLL')
              else if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-2) then
+!               write(message,'(2x,i4,a,6(5x,i3),a)') n1,')', &
+!&               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir,' => must be zero, not computed'
+!               call wrtout(ab_out,message,'COLL')
+!               call wrtout(std_out,message,'COLL')
                blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
+!             else if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-1) then
+!               write(message,'(2x,i4,a,6(5x,i3),a)') n1,')', &
+!&               i1pert,i1dir,i2pert,i2dir,i3pert,i3dir,' => symmetric of an other element, not computed'
+!               call wrtout(ab_out,message,'COLL')
+!               call wrtout(std_out,message,'COLL')
              end if
            end do
          end do
