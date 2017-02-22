@@ -840,26 +840,6 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
        end if !Second mesh and not out of boundaries
      end do !irred q-points
 
-     if (nsmallq > tol10) then
-       speedofsound = speedofsound/nsmallq
-
-       write (msg,'(a,E20.10,a,F16.4,2a)') '- Average speed of sound partial sums: ', third*sum(speedofsound), ' (at units) = ', &
-&          third*sum(speedofsound) * Bohr_Ang * 1.d-10 / Time_Sec, ' (m/s)',ch10
-       call wrtout (ab_out,msg,"COLL")
-       call wrtout (std_out,msg,"COLL")
-
-! Debye frequency = vs * (6 pi^2 natom / ucvol)**1/3
-       debyefreq = third*sum(speedofsound) * (six*pi**2/Crystal%ucvol)**(1./3.)
-       write (msg,'(a,E20.10,a,E20.10,a)') ' Debye frequency from partial sums: ', debyefreq, ' (Ha) = ', debyefreq*Ha_THz, ' (THz)'
-       call wrtout (ab_out,msg,"COLL")
-       call wrtout (std_out,msg,"COLL")
-
-! Debye temperature = hbar * Debye frequency / kb
-       write (msg,'(a,E20.10,2a)') ' Debye temperature from partial sums: ', debyefreq*Ha_K, ' (K)', ch10
-       call wrtout (ab_out,msg,"COLL")
-       call wrtout (std_out,msg,"COLL")
-     end if
-
      if (out_of_bounds) then
        upr_bound=PHdos%omega_max+ABS(PHdos%omega_max/ten)
        low_bound=PHdos%omega_min-ABS(PHdos%omega_min/ten)
@@ -873,6 +853,26 @@ subroutine mkphdos(PHdos,Crystal,Ifc,prtdos,dosdeltae,dossmear,dos_ngqpt,dos_qsh
        EXIT !infinite loop
      end if
    end do !infinite loop
+
+   if (nsmallq > tol10) then
+     speedofsound = speedofsound/nsmallq
+
+     write (msg,'(a,E20.10,a,F16.4,2a)') ' Average speed of sound partial sums: ', third*sum(speedofsound), ' (at units) = ', &
+&        third*sum(speedofsound) * Bohr_Ang * 1.d-10 / Time_Sec, ' (m/s)',ch10
+     call wrtout (ab_out,msg,"COLL")
+     call wrtout (std_out,msg,"COLL")
+
+! Debye frequency = vs * (6 pi^2 natom / ucvol)**1/3
+     debyefreq = third*sum(speedofsound) * (six*pi**2/Crystal%ucvol)**(1./3.)
+     write (msg,'(a,E20.10,a,E20.10,a)') ' Debye frequency from partial sums: ', debyefreq, ' (Ha) = ', debyefreq*Ha_THz, ' (THz)'
+     call wrtout (ab_out,msg,"COLL")
+     call wrtout (std_out,msg,"COLL")
+
+! Debye temperature = hbar * Debye frequency / kb
+     write (msg,'(a,E20.10,2a)') ' Debye temperature from partial sums: ', debyefreq*Ha_K, ' (K)', ch10
+     call wrtout (ab_out,msg,"COLL")
+     call wrtout (std_out,msg,"COLL")
+   end if
 
    ABI_FREE(qibz)
    ABI_FREE(qbz)
