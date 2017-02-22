@@ -521,6 +521,10 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 !! FUNCTION
 !!  Define magnitude of cross product of two vectors
 !!
+!! PARENTS
+!! CHILDREN
+!!
+!! CHILDREN
 !! SOURCE
 
    function cross_mkcore(xx,yy,zz,aa,bb,cc)
@@ -533,6 +537,7 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 
    real(dp) :: cross_mkcore
    real(dp),intent(in) :: xx,yy,zz,aa,bb,cc
+! *************************************************************************
    cross_mkcore=sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
  end function cross_mkcore
 
@@ -1078,6 +1083,9 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !! FUNCTION
 !!  Define magnitude of cross product of two vectors
 !!
+!! PARENTS
+!! CHILDREN
+!!
 !! SOURCE
 
    function cross_mkcore_alt(xx,yy,zz,aa,bb,cc)
@@ -1090,6 +1098,7 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 
     real(dp) :: cross_mkcore_alt
     real(dp),intent(in) :: xx,yy,zz,aa,bb,cc
+! *************************************************************************
     cross_mkcore_alt=sqrt((yy*cc-zz*bb)**2+(zz*aa-xx*cc)**2+(xx*bb-yy*aa)**2)
    end function cross_mkcore_alt
 !!***
@@ -1103,6 +1112,9 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !! FUNCTION
 !!  Find the grid index of a given position in the cell according to the BC
 !!  Determine also whether the index is inside or outside the box for free BC
+!!
+!! PARENTS
+!! CHILDREN
 !!
 !! SOURCE
 
@@ -1120,6 +1132,7 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
     integer, intent(out) :: jj
     logical, intent(in) :: periodic
     logical, intent(out) :: inside
+! *************************************************************************
     if (periodic) then
       inside=.true. ; jj=modulo(ii-1,nn)+1
     else

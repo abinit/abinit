@@ -14620,7 +14620,7 @@
     - '[[DEVELOP]]'
     commentdefault: 0 when [[usepaw]]=0, 1 when [[usepaw]]=1
     commentdims: null
-    defaultval: 0
+    defaultval: !valuewithconditions
         '[[usepaw]]==0': 0
         '[[usepaw]]==1': 1
     definition: use XC Core-Correction in G-space
