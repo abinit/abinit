@@ -160,7 +160,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 !scalars
  logical :: has_cprj_jband,compute_conjugate,compute_rho21,usetimerev
  integer,parameter :: level=52
- integer :: bandtot,choice,counter,cplex_loc,cplex_rhoij,cpopt,dimffnl1,dimffnlk,iband,icg0,ider,ierr,iexit
+ integer :: bandtot,choice,counter,cplex_cprj,cplex_loc,cplex_rhoij,cpopt,dimffnl1,dimffnlk,iband,icg0,ider,ierr,iexit
  integer :: ic,jc,kc,idir0,idir_getgh2c,idir_phon,idir_elfd,ipert_phon,idir_54,ipert_elfd,ispden
  integer :: ia,iatm,ibg,ii,igs,ikg,ikg1,ikpt,ifft,ilm,ipw,isppol,ispinor,istwf_k,jband,jj
  integer :: me,n1,n2,n3,n4,n5,n6,nband_k,ncpgr,nkpg,nkpg1,nnlout,nsp,nspden_rhoij,npert_phon,npw_k,npw1_k,nzlmopt
@@ -767,7 +767,8 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 &           npw_k,nspinor,psps%ntypat,phkxred,ph1d,ph3d,ucvol,psps%useylm)
 
            usetimerev=(dtset%kptopt>0.and.dtset%kptopt<3)
-           call paw_dfptnl_accrhoij(atindx,cplex,cwaveprj0,cwaveprj0,cwaveprj1,cwaveprj1,i1pert,i3pert,isppol,natom,natom,&
+           cplex_cprj=2;if (gs_hamkq%istwf_k>1) cplex_cprj=1
+           call paw_dfptnl_accrhoij(atindx,cplex_cprj,cwaveprj0,cwaveprj0,cwaveprj1,cwaveprj1,i1pert,i3pert,isppol,natom,natom,&
 &            nspinor,occ_k(jband),pawrhoij21_unsym,usetimerev,wtk_k)
 !&           comm_atom=my_comm_atom,mpi_atmtab=my_atmtab)
 
@@ -1069,6 +1070,7 @@ subroutine dfptnl_pert(atindx,atindx1,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,ei
 &   dtset%pawprtvol,pawrhoij21,pawrhoij21_unsym,pawtab,dtset%qptn,dummy_array2,dummy_array2,&
 &   dummy_array2,rprimd,symaf1,symrc1,dtset%typat,ucvol,dtset%usewvl,xred,&
 &   pawang_sym=pawang1,pawnhat=nhat21,pawrhoij0=pawrhoij0)
+
 !   if (paral_atom) then
 !     call pawrhoij_free(pawrhoij21_unsym)
 !     ABI_DATATYPE_DEALLOCATE(pawrhoij21_unsym)

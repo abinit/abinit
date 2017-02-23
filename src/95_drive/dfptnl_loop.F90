@@ -436,35 +436,6 @@ subroutine dfptnl_loop(atindx,atindx1,blkflg,cg,cgindex,dtfil,dtset,d3etot,eigen
 
              do i2pert = 1, mpert
 
-               if (mpi_enreg%me == 0) then
-
-                 if(sum(rfpert(i1dir,i1pert,:,i2pert,i3dir,i3pert))>0)then
-                   write(message,'(a,a,a,a,a,a)')ch10,ch10,&
-&                   ' Decomposition of the third-order energy for the set of perturbations',ch10
-                   call wrtout(std_out,message,'COLL')
-                   call wrtout(ab_out,message,'COLL')
-                   if (i1pert < natom + 1) then
-                     write(message,'(a,i3,a,i3)') &
-&                     ' j1 : displacement of atom ',i1pert,' along direction ', i1dir
-                   end if
-                   if (i1pert == dtset%natom + 2) then
-                     write(message,'(a,i4)')' j1 : homogeneous electric field along direction ',i1dir
-                   end if
-                   call wrtout(std_out,message,'COLL')
-                   call wrtout(ab_out,message,'COLL')
-                   if (i3pert < natom + 1) then
-                     write(message,'(a,i3,a,i3,a)') &
-&                     ' j3 : displacement of atom ',i3pert,' along direction ', i3dir,ch10
-                   end if
-                   if (i3pert == dtset%natom + 2) then
-                     write(message,'(a,i4,a)')' j3 : homogeneous electric field along direction ',i3dir,ch10
-                   end if
-                   call wrtout(std_out,message,'COLL')
-                   call wrtout(ab_out,message,'COLL')
-                 end if
-
-               end if ! mpi_enreg%me == 0
-
                do i2dir = 1, 3
 
                  if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
