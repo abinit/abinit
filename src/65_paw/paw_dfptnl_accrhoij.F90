@@ -171,7 +171,7 @@
 !!  === Accumulate (n,k) contribution to partial 2nd-order rhoij   ===
 !!  ==================================================================
 
-!compute_impart=(pawrhoij(1)%cplex==2)
+ compute_impart=(pawrhoij(1)%cplex==2)
  compute_impart_cplex=((pawrhoij(1)%cplex==2).and.(cplex==2))
 !substract_diagonal=(ipert==natom+3)
 
@@ -218,13 +218,14 @@
      do iatom=1,my_natom
        iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
        iatm=atindx(iatom1)
+       if (iatom/=ipert2) cycle ! To move atom "ipert2" does not change projectors of other atoms
        cplex_rhoij=pawrhoij(iatom)%cplex
        do jlmn=1,pawrhoij(iatom)%lmn_size
          j0lmn=jlmn*(jlmn-1)/2
-         cpj0(1:2,1)  =cwaveprj0_pert2 (iatm,1)% cp(1:2,  jlmn) ! < p_j^(0)     | Psi^(0)     >
-         d2cpj0(1:2,1)=cwaveprj0_pert2 (iatm,1)%dcp(1:2,1,jlmn) ! < p_j^(pert2) | Psi^(0)     >
-         cpj1(1:2,1)  =cwaveprj1_pert12(iatm,1)% cp(1:2,  jlmn) ! < p_j^(0)     | Psi^(pert1) >
-         d2cpj1(1:2,1)=cwaveprj1_pert12(iatm,1)%dcp(1:2,1,jlmn) ! < p_j^(pert2) | Psi^(pert1) >
+         cpj0(1:2,1)  =cwaveprj0_pert2 (iatm,1)% cp(1:2,  jlmn)   ! < p_j^(0)     | Psi^(0)     >
+         d2cpj0(1:2,1)=cwaveprj0_pert2 (iatm,1)%dcp(1:2,1,jlmn)   ! < p_j^(pert2) | Psi^(0)     >
+         cpj1(1:2,1)  =cwaveprj1_pert12(iatm,1)% cp(1:2,  jlmn)   ! < p_j^(0)     | Psi^(pert1) >
+         d2cpj1(1:2,1)=cwaveprj1_pert12(iatm,1)%dcp(1:2,1,jlmn)   ! < p_j^(pert2) | Psi^(pert1) >
          do ilmn=1,jlmn
            klmn=j0lmn+ilmn
            klmn_re=cplex_rhoij*(klmn-1)+1
@@ -256,29 +257,30 @@
    end if
  end if
 
-!Accumulate : < Psi^(0)     | p_i^(pert1) > < p_j^(0)     | Psi^(pert2) >
-!           + < Psi^(pert2) | p_i^(pert1) > < p_j^(0)     | Psi^(0)     >
+!Accumulate : < Psi^(pert2) | p_i^(pert1) > < p_j^(0)     | Psi^(0)     >
+!           + < Psi^(pert2) | p_i^(0)     > < p_j^(pert1) | Psi^(0)     >
 !           + < Psi^(0)     | p_i^(pert1) > < p_j^(0)     | Psi^(pert2) >
-!           + < Psi^(pert2) | p_i^(pert1) > < p_j^(0)     | Psi^(0)     >
+!           + < Psi^(0)     | p_i^(0) >     < p_j^(pert1) | Psi^(pert2) >
  if (ipert1>0.and.ipert1<=natom) then
    if (nspinor==1) then
      do iatom=1,my_natom
        iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
        iatm=atindx(iatom1)
        cplex_rhoij=pawrhoij(iatom)%cplex
+       if (iatom/=ipert1) cycle ! To move atom "ipert1" does not change projectors of other atoms
        do jlmn=1,pawrhoij(iatom)%lmn_size
          j0lmn=jlmn*(jlmn-1)/2
-         cpj0(1:2,1)  =cwaveprj0_pert1 (iatm,1)% cp(1:2,  jlmn) ! < p_j^(0)     | Psi^(0)     >
-         d1cpj0(1:2,1)=cwaveprj0_pert1 (iatm,1)%dcp(1:2,1,jlmn) ! < p_j^(pert1) | Psi^(0)     >
-         cpj2(1:2,1)  =cwaveprj1_pert21(iatm,1)% cp(1:2,  jlmn) ! < p_j^(0)     | Psi^(pert2) >
-         d1cpj2(1:2,1)=cwaveprj1_pert21(iatm,1)%dcp(1:2,1,jlmn) ! < p_j^(pert1) | Psi^(pert2) >
+         cpj0(1:2,1)  =cwaveprj0_pert1 (iatm,1)% cp(1:2,  jlmn)   ! < p_j^(0)     | Psi^(0)     >
+         d1cpj0(1:2,1)=cwaveprj0_pert1 (iatm,1)%dcp(1:2,1,jlmn)   ! < p_j^(pert1) | Psi^(0)     >
+         cpj2(1:2,1)  =cwaveprj1_pert21(iatm,1)% cp(1:2,  jlmn)   ! < p_j^(0)     | Psi^(pert2) >
+         d1cpj2(1:2,1)=cwaveprj1_pert21(iatm,1)%dcp(1:2,1,jlmn)   ! < p_j^(pert1) | Psi^(pert2) >
          do ilmn=1,jlmn
            klmn=j0lmn+ilmn
            klmn_re=cplex_rhoij*(klmn-1)+1
-           cpi0(1:2,1)  =cwaveprj0_pert2 (iatm,1)% cp(1:2,  ilmn) ! < p_i^(0)     | Psi^(0)     >
-           d1cpi0(1:2,1)=cwaveprj0_pert2 (iatm,1)%dcp(1:2,1,ilmn) ! < p_i^(pert1) | Psi^(0)     >
-           cpi2(1:2,1)  =cwaveprj1_pert12(iatm,1)% cp(1:2,  ilmn) ! < p_i^(0)     | Psi^(pert2) >
-           d1cpi2(1:2,1)=cwaveprj1_pert12(iatm,1)%dcp(1:2,1,ilmn) ! < p_i^(pert1) | Psi^(pert2) >
+           cpi0(1:2,1)  =cwaveprj0_pert1 (iatm,1)% cp(1:2,  ilmn) ! < p_i^(0)     | Psi^(0)     >
+           d1cpi0(1:2,1)=cwaveprj0_pert1 (iatm,1)%dcp(1:2,1,ilmn) ! < p_i^(pert1) | Psi^(0)     >
+           cpi2(1:2,1)  =cwaveprj1_pert21(iatm,1)% cp(1:2,  ilmn) ! < p_i^(0)     | Psi^(pert2) >
+           d1cpi2(1:2,1)=cwaveprj1_pert21(iatm,1)%dcp(1:2,1,ilmn) ! < p_i^(pert1) | Psi^(pert2) >
            ro11_re=zero
            do iplex=1,cplex
              ro11_re=ro11_re+d1cpi2(iplex,1)*  cpj0(iplex,1)
@@ -311,6 +313,7 @@
      do iatom=1,my_natom
        iatom1=iatom;if (paral_atom) iatom1=my_atmtab(iatom)
        iatm=atindx(iatom1)
+       if (iatom/=ipert1.or.iatom/=ipert2) cycle ! To move atom "ipert" does not change projectors of other atoms
        cplex_rhoij=pawrhoij(iatom)%cplex
        do jlmn=1,pawrhoij(iatom)%lmn_size
          j0lmn=jlmn*(jlmn-1)/2
