@@ -322,6 +322,22 @@ FC="/usr/lpp/ppe.poe/bin/mpxlf90_r"
 #
 FCFLAGS="-g -O2 -q64 -lxlopt -bmaxdata:2000000000 -qarch=pwr6 -qtune=auto -qstrict -qsuppress=1520-031:1520-003 -qmaxmem=-1 -qcache=auto -qspillsize=1664"
 
+# Fortran flags for fixed-form source files
+#
+#FCFLAGS_FIXEDFORM="-ffixed-form"
+
+# Fortran flags for free-form source files
+#
+#FCFLAGS_FREEFORM="-ffree-form"
+
+# Fortran compiler flags to use a module directory
+#
+#FCFLAGS_MODDIR=="-J$(abinit_moddir)"
+
+# Tricky Fortran compiler flags
+#
+#FCFLAGS_HINTS="-ffree-line-length-none"
+
 # Fortran linker custom debug flags (when enable_debug=yes)
 #
 #FC_LDFLAGS_DEBUG="-Wl,-debug"
