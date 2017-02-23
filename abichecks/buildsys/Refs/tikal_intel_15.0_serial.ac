@@ -705,11 +705,11 @@ with_trio_flavor="netcdf"
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I/usr/local/fallbacks/intel/15.0/serial/include"
+with_netcdf_incs="-I${FALLBACKS_PATH}/netcdf/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L/usr/local/fallbacks/intel/15.0/serial/lib -lnetcdf"
+with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -721,11 +721,11 @@ with_netcdf_libs="-L/usr/local/fallbacks/intel/15.0/serial/lib -lnetcdf"
 
 # Include flags for the YAML library (default is unset)
 #
-#with_yaml_incs="-I/opt/etsf/include"
+#with_yaml_incs="-I${FALLBACKS_PATH}/yaml/include"
 
 # Link flags for the YAML library (default is unset)
 #
-#with_yaml_libs="-L/opt/etsf/lib -lyaml_fortran"
+#with_yaml_libs="-L${FALLBACKS_PATH}/yaml/lib -lyaml_fortran"
 
 # ---------------------------------------------------------------------------- #
 # FFT connector                                                                #
@@ -913,49 +913,49 @@ with_dft_flavor="atompaw+bigdft+libxc+wannier90"
 
 # Full path to the AtomPAW executables (default is unset)
 #
-with_atompaw_bins="/usr/local/fallbacks/intel/15.0/serial/bin"
+with_atompaw_bins="${FALLBACKS_PATH}/atompaw/bin"
 
 # Include flags for the AtomPAW library (default is unset)
 #
-with_atompaw_incs="-I/usr/local/fallbacks/intel/15.0/serial/include"
+with_atompaw_incs="-I${FALLBACKS_PATH}/atompaw/include"
 
 # Link flags for the AtomPAW library (default is unset)
 #
-with_atompaw_libs="-L/usr/local/fallbacks/intel/15.0/serial/lib -latompaw"
+with_atompaw_libs="-L${FALLBACKS_PATH}/atompaw/lib -latompaw"
 
                        # ------------------------------ #
 
 # Include flags for the BigDFT library (default is unset)
 #
-with_bigdft_incs="-I/usr/local/fallbacks/intel/15.0/serial/include"
+with_bigdft_incs="-I${FALLBACKS_PATH}/bigdft-1.7.1.24/include"
 
 # Link flags for the BigDFT library (default is unset)
 #
-with_bigdft_libs="-L/usr/local/fallbacks/intel/15.0/serial/lib -lbigdft-1 -labinit -lyaml -lrt"
+with_bigdft_libs="-L${FALLBACKS_PATH}/bigdft-1.7.1.24/lib -lbigdft-1 -labinit -lyaml -lrt"
 
                        # ------------------------------ #
 
 # Include flags for the LibXC library (default is unset)
 #
-with_libxc_incs="-I/usr/local/fallbacks/intel/15.0/serial/include"
+with_libxc_incs="-I${FALLBACKS_PATH}/libxc/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L/usr/local/fallbacks/intel/15.0/serial/lib -lxcf90 -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/lib -lxcf90 -lxc"
 
                        # ------------------------------ #
 
 # Full path to the Wannier90 executables (default is unset)
 #
-with_wannier90_bins="/usr/local/fallbacks/intel/15.0/serial/bin"
+with_wannier90_bins="${FALLBACKS_PATH}/wannier90/bin"
 
 # Include flags for the Wannier90 library (default is unset)
 #
-with_wannier90_incs="-I/usr/local/fallbacks/intel/15.0/serial/include"
+with_wannier90_incs="-I${FALLBACKS_PATH}/wannier90/include"
 
 # Link flags for the Wannier90 library (default is unset)
 #
-with_wannier90_libs="-L/usr/local/fallbacks/intel/15.0/serial/lib -lwannier90"
+with_wannier90_libs="-L${FALLBACKS_PATH}/wannier90/lib -lwannier90"
 
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
 #
