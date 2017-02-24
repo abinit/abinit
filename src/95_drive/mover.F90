@@ -878,6 +878,8 @@ real(dp) :: rmet(3,3)
        case (23)
          call pred_lotf(ab_mover,hist,itime,icycle,DEBUG,iexit)
 #endif
+       case (24)
+         call pred_velverlet(ab_mover,hist,itime,ntime,DEBUG,iexit)
        case (31)         
          call monte_carlo_step(ab_mover,effective_potential,hist,itime,ntime,DEBUG,iexit)
          write(std_out,*) "Developpement Monte carlo"
