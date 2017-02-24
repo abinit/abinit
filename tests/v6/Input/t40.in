@@ -35,7 +35,7 @@ qph1l
 #%% files_to_test = 
 #%%   t40.out, tolnlines = 6, tolabs = 2.0e-7, tolrel = 5.0e-6, fld_options = -medium
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = 

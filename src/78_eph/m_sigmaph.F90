@@ -54,7 +54,7 @@ module m_sigmaph
  use m_cgtools,        only : dotprod_g !set_istwfk
  use m_crystal,        only : crystal_t
  use m_crystal_io,     only : crystal_ncwrite
- use m_kpts,           only : kpts_ibz_from_kptrlatt
+ use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt
  use m_fftcore,        only : get_kg
  use m_pawang,         only : pawang_type
  use m_pawrad,         only : pawrad_type
@@ -359,7 +359,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 !scalars
  integer,parameter :: dummy_npw=1,tim_getgh1c=1,berryopt0=0
  integer,parameter :: useylmgr=0,useylmgr1=0,master=0,ndat1=1
- integer :: my_rank,nproc,iomode,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
+ integer :: my_rank,nproc,mband,my_minb,my_maxb,nsppol,nkpt,iq_ibz
  integer :: cplex,db_iqpt,natom,natom3,ipc,ipc1,ipc2,nspinor
  integer :: ibsum_kq,ib_k,band,num_smallw,ibsum
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
@@ -429,7 +429,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  sigma = sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm)
  if (my_rank == master) call sigmaph_print(sigma, std_out, "dims", ebands)
 
- ! This is the maximum number of PWs for all possible k+q
+ ! This is the maximum number of PWs for all possible k+q treated.
  mpw = sigma%mpw; gmax = sigma%gmax
 
  ! Init work_ngfft
@@ -457,8 +457,7 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  ABI_FREE(bks_mask)
  ABI_FREE(keep_ur)
 
- iomode = iomode_from_fname(wfk0_path)
- call wfd_read_wfk(wfd,wfk0_path,iomode)
+ call wfd_read_wfk(wfd, wfk0_path, iomode_from_fname(wfk0_path))
  if (.False.) call wfd_test_ortho(wfd, cryst, pawtab, unit=std_out, mode_paral="PERS")
 
  ! TODO FOR PAW
@@ -890,9 +889,9 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
            do ip1=1,natom3
              idir1 = mod(ip1-1, 3) + 1; ipert1 = (ip1 - idir1) / 3 + 1
              ! (k,a)* (k,a') + (k',a)* (k',a')
-             uka = dcmplx(displ_red(1, idir1, ipert1, nu), displ_red(2, idir1, ipert1, nu))
-             ukap = dcmplx(displ_red(1, idir2, ipert1, nu), displ_red(2, idir2, ipert1, nu))
-             ukpa = dcmplx(displ_red(1, idir1, ipert2, nu), displ_red(2, idir1, ipert2, nu))
+             uka   = dcmplx(displ_red(1, idir1, ipert1, nu), displ_red(2, idir1, ipert1, nu))
+             ukap  = dcmplx(displ_red(1, idir2, ipert1, nu), displ_red(2, idir2, ipert1, nu))
+             ukpa  = dcmplx(displ_red(1, idir1, ipert2, nu), displ_red(2, idir1, ipert2, nu))
              ukpap = dcmplx(displ_red(1, idir2, ipert2, nu), displ_red(2, idir2, ipert2, nu))
              tpp(ip1,ip2) = conjg(uka) * ukap + conjg(ukpa) * ukpap
            end do
@@ -901,12 +900,13 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
          ! Compute hmn_nu-matrix (nbcalc_ks, nbsum, natom3))
          !dbwl_nu, (2, nbsum, nbcalc_ks, natom3))
          !do ii=1,natom3
+           !wqnu = phfrq(ii); if (wqnu < tol6) cycle
          !end do
 
          ! H* T H
          !gdw2 = H* T H
          gdw2 = zero
-         !call adagger_b_a(nbsum*nbcalc_ks, natom3, hmn_nu, tpp, gdw2)
+         !call adagger_b_a(nbsum*nbcalc_ks, natom3, tpp, hmn_nu, gdw2)
          gdw2 = gdw2 / (two * wqnu)
 
          ! Get phonon occupation for all temperatures.
@@ -953,7 +953,10 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
 
  call xmpi_sum_master(sigma%vals_e0ks, master, comm, ierr)
  call xmpi_sum_master(sigma%dvals_de0ks, master, comm, ierr)
- if (my_rank == master) call sigmaph_print(sigma, std_out, "dims+results", ebands)
+ if (my_rank == master) then
+   call sigmaph_print(sigma, std_out, "dims+results", ebands)
+   call sigmaph_print(sigma, ab_out, "dims+results", ebands)
+ end if
 
  ! Free memory
  ABI_FREE(gvnl1)
@@ -972,8 +975,6 @@ subroutine sigmaph(wfk0_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands,dvdb,ifc,&
  call wfd_free(wfd)
  call pawcprj_free(cwaveprj0)
  ABI_DT_FREE(cwaveprj0)
-
- call xmpi_end()
 
 end subroutine sigmaph
 !!***
@@ -1247,7 +1248,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  new%ieta = j_dpc * 0.1_dp * eV_Ha
 
  ! Build (linear) mesh of temperatures.
- ! TODO: Will become input eph_tsmesh start stop num
+ ! TODO: Will become input tsmesh with `start step num`
  new%ntemp = 5
  ABI_CHECK(new%ntemp > 1, "ntemp cannot be 1")
  temp_range = [5, 300]
@@ -1298,7 +1299,7 @@ type (sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, dtfil, comm) r
  ! k-point and bands where corrections are wanted
  ! We initialize IBZ(k) here so that we have all the basic dimensions of the run and it's possible
  ! to distribuite the calculations among the processors.
- new%symsigma = dtset%symsigma; new%timrev = 1
+ new%symsigma = dtset%symsigma; new%timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  if (dtset%nkptgw /= 0) then
    ! Treat the k-points and bands specified in the input file.
@@ -1762,21 +1763,14 @@ subroutine sigmaph_setup_kcalc(self, cryst, ikcalc)
 
  if (self%symsigma == 0) then
    ! Do not use symmetries in BZ sum_q --> nqibz_k == nqbz
-#if 1
    self%nqibz_k = self%nqbz
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
    ABI_MALLOC(self%wtq_k, (self%nqibz_k))
    self%qibz_k = self%qbz; self%wtq_k = one / self%nqbz
-#else
-   self%nqibz_k = self%nqibz
-   ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
-   ABI_MALLOC(self%wtq_k, (self%nqibz_k))
-   self%qibz_k = self%qibz; self%wtq_k = self%wtq
-#endif
 
  else if (self%symsigma == 1) then
    ! Use symmetries of the little group
-   lgk = lgroup_new(cryst, self%kcalc(:, ikcalc), self%nqbz, self%qbz, self%nqibz, self%qibz)
+   lgk = lgroup_new(cryst, self%kcalc(:, ikcalc), self%timrev, self%nqbz, self%qbz, self%nqibz, self%qibz)
 
    self%nqibz_k = lgk%nkibz_q
    ABI_MALLOC(self%qibz_k, (3, self%nqibz_k))
@@ -2013,6 +2007,7 @@ end subroutine sigmaph_print
 !! INPUTS
 !!  cryst(crystal_t)=Crystalline structure
 !!  kpoint(3)=External k-point defining the little-group
+!!  timrev=1 if time-reversal symmetry can be used, 0 otherwise.
 !!  nkbz=Number of k-points in the BZ.
 !!  kbz(3,nkbz)=K-points in the BZ.
 !!  nkibz=Number of k-points in the IBZ
@@ -2024,7 +2019,7 @@ end subroutine sigmaph_print
 !!
 !! SOURCE
 
-type (lgroup_t) function lgroup_new(cryst, kpoint, nkbz, kbz, nkibz, kibz) result(new)
+type (lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz) result(new)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -2039,7 +2034,7 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, nkbz, kbz, nkibz, kibz) resul
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nkibz,nkbz
+ integer,intent(in) :: timrev,nkibz,nkbz
  type(crystal_t),intent(in) :: cryst
 !arrays
  real(dp),intent(in) :: kpoint(3),kbz(3,nkbz),kibz(3,nkibz)
@@ -2062,6 +2057,7 @@ type (lgroup_t) function lgroup_new(cryst, kpoint, nkbz, kbz, nkibz, kibz) resul
  ABI_MALLOC(new%symq, (4, 2, cryst%nsym))
  call littlegroup_q(cryst%nsym, kpoint, new%symq, cryst%symrec, cryst%symafm, otimrev_k, prtvol=0)
 
+ ABI_CHECK(timrev==1, "timrev == 0 not coded")
  nsym_lg = 0
  do itim=1,2
    do isym=1,cryst%nsym

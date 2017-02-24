@@ -49,7 +49,7 @@ MODULE m_dvdb
  use m_mpinfo,        only : destroy_mpi_enreg
  use m_fftcore,       only : ngfft_seq
  use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft
- use m_crystal,       only : crystal_t, crystal_free
+ use m_crystal,       only : crystal_t, crystal_free, crystal_print
  use m_crystal_io,    only : crystal_from_hdr
  use m_kpts,          only : kpts_ibz_from_kptrlatt
 
@@ -213,16 +213,10 @@ MODULE m_dvdb
   ! in (polar) semiconductors
 
   type(crystal_t) :: cryst
-  ! Crystalline structure read from the the DVDV
+  ! Crystalline structure read from the the DVDB file.
 
   type(mpi_type) :: mpi_enreg
   ! Internal object used to call fourdp
-
-  ! Stuff needed for pawrhoij1
-  !integer :: ntypat
-
-  !integer,allocatable :: nlmn_type(:)
-  !  nlmn_type(ntypat)= Number of (l,m,n) elements for the paw basis for each type of atom. Only used for reading.
 
  end type dvdb_t
 
@@ -699,9 +693,8 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
    write(std_out,"(a)")sjoin("[", itoa(iq),"]", ktoa(db%qpts(:,iq)))
  end do
 
- !call crystal_print(db%cryst,header,unit,mode_paral,prtvol)
-
  if (my_prtvol > 0) then
+   call crystal_print(db%cryst, header="Crystal structure in DVDB file")
    write(std_out,"(a)")"FFT mesh for potentials on file:"
    write(std_out,"(a)")"q-point, idir, ipert, ngfft(:3)"
    do iv1=1,db%numv1
@@ -872,8 +865,7 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
  if (ierr /= 0) return
 
  ! Read v1 from file.
- nfftot_out = product(ngfft(:3))
- nfftot_file = product(db%ngfft3_v1(:3, iv1))
+ nfftot_out = product(ngfft(:3)); nfftot_file = product(db%ngfft3_v1(:3, iv1))
 
  if (all(ngfft(:3) == db%ngfft3_v1(:3, iv1))) then
    do ispden=1,db%nspden
@@ -1025,7 +1017,6 @@ subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
          db%nspden,db%nsppol,db%mpi_enreg,v1scf(:,:,:,mu))
      end do
    end if
-
    if (db%debug) write(std_out,*)ABI_FUNC,": All perts available. Returning"
    return
  end if
@@ -1465,8 +1456,7 @@ subroutine v1phq_rotate(cryst,qpt_ibz,isym,itimrev,g0q,ngfft,cplex,nfft,nspden,n
  ABI_UNUSED(nsppol)
  ABI_CHECK(cplex == 2, "cplex != 2")
 
- natom3 = 3 * cryst%natom
- tsign = 3-2*itimrev
+ natom3 = 3 * cryst%natom; tsign = 3-2*itimrev
 
  ! Compute IBZ potentials in G-space (results in v1g_qibz)
  ABI_MALLOC(v1g_qibz, (2*nfft,nspden,natom3))
@@ -1890,7 +1880,7 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
  end do
 
  ! Find correspondence BZ --> IBZ. Note:
- !   * time-reversal is always used for phonons
+ !   * q --> -q symmetry is always used for phonons.
  !   * we use symrec instead of symrel
  ABI_MALLOC(indqq, (nqbz*sppoldbl1,6))
  call listkk(dksqmax,cryst%gmet,indqq,qibz,qbz,nqibz,nqbz,cryst%nsym,&
@@ -2013,8 +2003,7 @@ subroutine dvdb_ftinterp_setup(db,ngqpt,nqshift,qshift,nfft,ngfft,comm,cryst_op)
        else
          call v1phq_rotate(cryst, qibz(:,iq_ibz), isym, itimrev, g0q,&
            ngfft, cplex_qibz, nfft, db%nspden, db%nsppol, db%mpi_enreg, v1r_qibz, v1r_qbz)
-         !v1r_qbz = zero
-         !v1r_qbz = v1r_qibz
+         !v1r_qbz = zero; v1r_qbz = v1r_qibz
 
          !call times_eigr(-tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
          !call times_eigr(+tsign * g0q, ngfft, nfft, db%nspden*db%natom3, v1r_qbz)
@@ -2175,8 +2164,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm)
    idir = mod(mu-1, 3) + 1; ipert = (mu - idir) / 3 + 1
    do ispden=1,db%nspden
      do ifft=1,nfft
-       ! MPI-parallelism
-       cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle
+       cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI-parallelism
 
        do ir=1,db%nrpt
          wr = db%v1scf_rpt(1, ir,ifft,ispden,mu)
@@ -3119,7 +3107,8 @@ end subroutine dvdb_test_v1rsym
 !!  Debugging tool used to test the symmetrization of the DFPT potentials.
 !!
 !! INPUTS
-!!  db_path=Filename
+!!  db_path=Filename of the DVDB file.
+!!  dump_path=File used to dump potentials (empty string to disable output)
 !!  comm=MPI communicator.
 !!
 !! OUTPUT
@@ -3134,7 +3123,7 @@ end subroutine dvdb_test_v1rsym
 !!
 !! SOURCE
 
-subroutine dvdb_test_v1complete(db_path, comm)
+subroutine dvdb_test_v1complete(db_path, dump_path, comm)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -3148,13 +3137,14 @@ subroutine dvdb_test_v1complete(db_path, comm)
  implicit none
 
 !Arguments ------------------------------------
- character(len=*),intent(in) :: db_path
+ character(len=*),intent(in) :: db_path,dump_path
  integer,intent(in) :: comm
 
 !Local variables-------------------------------
 !scalars
- integer :: iqpt,pcase,idir,ipert,cplex,nfft,ispden,timerev_q !,ifft
- !character(len=500) :: msg
+ integer,parameter :: master=0
+ integer :: iqpt,pcase,idir,ipert,cplex,nfft,ispden,timerev_q,ifft,unt,my_rank
+ character(len=500) :: msg
  type(crystal_t),pointer :: cryst
  type(dvdb_t),target :: db
 !arrays
@@ -3166,11 +3156,13 @@ subroutine dvdb_test_v1complete(db_path, comm)
 
 ! *************************************************************************
 
+ my_rank = xmpi_comm_rank(comm)
+
  call dvdb_init(db, db_path, comm)
  db%debug = .True.
- db%symv1 = .True.
- db%symv1 = .False.
+ db%symv1 = .False. !; db%symv1 = .True.
  call dvdb_print(db)
+ call dvdb_list_perts(db, [-1,-1,-1])
 
  call ngfft_seq(ngfft, db%ngfft3_v1(:,1))
  nfft = product(ngfft(1:3))
@@ -3189,6 +3181,14 @@ subroutine dvdb_test_v1complete(db_path, comm)
 
  ABI_MALLOC(symq, (4,2,cryst%nsym))
  ABI_MALLOC(pertsy, (3,db%mpert))
+
+ unt = -1
+ if (len_trim(dump_path) /= 0 .and. my_rank == master) then
+   if (open_file(dump_path, msg, newunit=unt, action="write", status="unknown", form="formatted") /= 0) then
+     MSG_ERROR(msg)
+   end if
+   write(std_out,"(a)")sjoin("Will write potentials to:", dump_path)
+ end if
 
  do iqpt=1,db%nqpt
    qpt = db%qpts(:,iqpt)
@@ -3227,19 +3227,32 @@ subroutine dvdb_test_v1complete(db_path, comm)
 
      write(std_out,"(2(a,i0),2a)")"For idir: ",idir, ", ipert: ", ipert, ", qpt: ",trim(ktoa(qpt))
      do ispden=1,db%nspden
-       write(std_out,"(a,es10.3)")"  max(abs(f1-f2))",maxval(abs(file_v1scf(:,:,ispden,pcase) - symm_v1scf(:,:,ispden,pcase)))
+       !write(std_out,"(a,es10.3)")"  max(abs(f1-f2))", &
+       ! maxval(abs(file_v1scf(:,:,ispden,pcase) - symm_v1scf(:,:,ispden,pcase)))
        call vdiff_print(vdiff_eval(cplex,nfft,file_v1scf(:,:,ispden,pcase),symm_v1scf(:,:,ispden,pcase),cryst%ucvol))
 
-       !if (cplex == 1) then
-       !  do ifft=1,nfft
-       !    write(std_out,*)file_v1scf(1,ifft,ispden,pcase),symm_v1scf(1,ifft,ispden,pcase)
-       !  end do
-       !else
-       !  do ifft=1,nfft
-       !    write(std_out,*)file_v1scf(1,ifft,ispden,pcase),symm_v1scf(1,ifft,ispden,pcase),&
-       !                    file_v1scf(2,ifft,ispden,pcase),symm_v1scf(2,ifft,ispden,pcase)
-       !  end do
-       !end if
+       ! Debug: Write potentials to file.
+       if (unt /= -1) then
+         write(unt,*)"# q-point:", trim(ktoa(qpt))
+         write(unt,*)"# idir: ",idir,", ipert: ",ipert,", ispden:", ispden
+         write(unt,*)"# file_v1scf, symmetrized_v1scf, diff"
+         if (cplex == 1) then
+           do ifft=1,nfft
+             write(unt,"(3(es12.4,2x))") &
+               file_v1scf(1,ifft,ispden,pcase), symm_v1scf(1,ifft,ispden,pcase), &
+               file_v1scf(1,ifft,ispden,pcase) - symm_v1scf(1,ifft,ispden,pcase)
+           end do
+         else
+           do ifft=1,nfft
+             write(unt, "(6(es12.4,2x))") &
+               file_v1scf(1,ifft,ispden,pcase), symm_v1scf(1,ifft,ispden,pcase),   &
+               file_v1scf(1,ifft,ispden,pcase) - symm_v1scf(1,ifft,ispden,pcase), &
+               file_v1scf(2,ifft,ispden,pcase), symm_v1scf(2,ifft,ispden,pcase),   &
+               file_v1scf(2,ifft,ispden,pcase) - symm_v1scf(2,ifft,ispden,pcase)
+           end do
+         end if
+       end if
+
      end do
      write(std_out,*)""
    end do
@@ -3254,6 +3267,8 @@ subroutine dvdb_test_v1complete(db_path, comm)
  ABI_FREE(pertsy)
 
  call dvdb_free(db)
+
+ if (unt /= -1) close(unt)
 
 end subroutine dvdb_test_v1complete
 !!***

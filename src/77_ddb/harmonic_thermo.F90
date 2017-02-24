@@ -29,8 +29,6 @@
 !! iout =unit number for output
 !! natom=number of atoms in the unit cell
 !! outfilename_radix=radix of anaddb output file name: append _THERMO for thermodynamic quantities
-!! tcpui=initial cpu time
-!! twalli=initial wall clock time
 !! comm=MPI communicator
 !!
 !! OUTPUT
@@ -42,7 +40,7 @@
 !!      anaddb
 !!
 !! CHILDREN
-!!      end_sortph,ifc_fourq,matr3inv,mkrdim,smpbz,sortph,symkpt,timein,wrtout
+!!      end_sortph,ifc_fourq,matr3inv,mkrdim,smpbz,sortph,symkpt,wrtout
 !!
 !! SOURCE
 
@@ -53,7 +51,7 @@
 #include "abi_common.h"
 
 
-subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,tcpui,twalli,comm,&
+subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,comm,&
 & thmflag)
 
  use defs_basis
@@ -73,7 +71,6 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
 #undef ABI_FUNC
 #define ABI_FUNC 'harmonic_thermo'
  use interfaces_14_hidewrite
- use interfaces_18_timing
  use interfaces_32_util
  use interfaces_41_geometry
  use interfaces_56_recipspace
@@ -85,7 +82,6 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
 !scalars
  integer,intent(in) :: iout,comm
  integer,intent(in),optional :: thmflag
- real(dp),intent(in) :: tcpui,twalli
  character(len=*),intent(in) :: outfilename_radix
  type(anaddb_dataset_type),intent(in) :: anaddb_dtset
  type(crystal_t),intent(in) :: Crystal
@@ -102,7 +98,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
  integer :: thermal_unit
  real(dp) :: change,cothx,diffbb,dosinc,expm2x,factor,factorw,factorv,gerr
  real(dp) :: ggsum,ggsumsum,ggrestsum
- real(dp) :: gijerr,gijsum,gnorm,ln2shx,qphnrm,relchg,tcpu,tmp,twall,wovert,thmtol
+ real(dp) :: gijerr,gijsum,gnorm,ln2shx,qphnrm,relchg,tmp,wovert,thmtol
  logical :: part1,part2
  character(len=500) :: msg
  character(len=fnlen) :: thermal_filename
@@ -125,13 +121,6 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
 
  ! For the time being, this routine can use only 1 MPI process
  if (xmpi_comm_rank(comm) /= master) return
-
-!If timing is needed at some point ...
- call timein(tcpu,twall)
- write(msg, '(a,f11.4,a,f11.4,a)' )&
-& ' harmonic_thermo : begin at tcpu',tcpu-tcpui,&
-& '  and twall',twall-twalli,' sec'
- call wrtout(std_out,msg,'COLL')
 
  natom = Crystal%natom
  symrel = Crystal%symrel
@@ -246,7 +235,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
 !  Reduce the number of such points by symmetrization
    wtq(:)=1.0_dp
 
-   timrev=1 
+   timrev=1
    call symkpt(0,Crystal%gmet,indqpt1,ab_out,spqpt2,nspqpt,nqpt2,Crystal%nsym,symrec,timrev,wtq,wtq_folded)
    ABI_ALLOCATE(wtq2,(nqpt2))
    do iqpt2=1,nqpt2
@@ -255,12 +244,6 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
      !write(std_out,*)' harmonic_thermo : iqpt2, wtq2 :',iqpt2,wtq2(iqpt2)
    end do
    ABI_DEALLOCATE(wtq_folded)
-   call timein(tcpu,twall)
-
-   write(msg, '(a,a,a,f11.4,a,f11.4,a)' )&
-&   ' harmonic_thermo : in the loop over grids, after symkpt',ch10,&
-&   '  tcpu',tcpu-tcpui,' twall',twall-twalli,' sec'
-   call wrtout(std_out,msg,'COLL')
 
 !  Temporary counters are put zero.
 
@@ -519,7 +502,7 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
              write(msg,'(a25,i5,a16)') ' DOS  with channel width=  ',iwchan,' newly converged'
            end if
          end if
-         
+
          call wrtout(std_out,msg,'COLL')
          call wrtout(iout,msg,'COLL')
          do ichan=1,nchan2(iwchan)
@@ -765,9 +748,9 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
            end do
 
            dosinc=dble(iwchan)
-!          
+!
            do ichan=1,nchan2(iwchan)
-!            
+!
 !$wovert= \hbar*w / 2kT$, dimensionless
              wovert=dosinc*(dble(ichan)-0.5_dp)/Ha_cmm1/(2.*kb_HaK*tmp)
              expm2x=exp(-2.0_dp*wovert)
@@ -858,11 +841,11 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
              if(convth==1)then
                vij(:,iatom,itemper)=Bohr_Ang**2*vij(:,iatom,itemper)/(Time_Sec*1.0e12)**2
 
-!              The following check zeros out <v^2> if it is very small, in order to 
+!              The following check zeros out <v^2> if it is very small, in order to
 !              avoid numerical noise being interpreted by the automatic tests as
 !              something real. Note also that we compare it in
 !              absolute value, that's because if any of the phonon frequencies are
-!              computed as negative, <v^2> can take a negative value.      
+!              computed as negative, <v^2> can take a negative value.
                do icomp=1, 6
                  if (abs(vij(icomp,iatom,itemper)) < 1.0e-12) vij(icomp,iatom,itemper)=zero
                end do
@@ -883,10 +866,6 @@ subroutine harmonic_thermo(Ifc,Crystal,amu,anaddb_dtset,iout,outfilename_radix,t
        end if ! End of test on wgijcnv
      end do ! End of loop over iwchan
    end if ! End of part2
-
-   call timein(tcpu,twall)
-   write(msg, '(a,f11.4,a,f11.4,a)' )' tcpu',tcpu-tcpui,' twall',twall-twalli,' sec'
-   call wrtout(std_out,msg,'COLL')
 
    if(part1.and.part2)exit
 

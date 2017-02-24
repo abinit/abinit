@@ -515,7 +515,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/usr/local/mpich3_gcc49"
+with_mpi_prefix="${MPI_HOME}"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -675,14 +675,13 @@ with_mpi_prefix="/usr/local/mpich3_gcc49"
 # Transferable I/O (TRIO) connector                                            #
 # ---------------------------------------------------------------------------- #
 
-# Flavor of transferable I/O library to support (default is netcdf+etsf_io)
+# Flavor of transferable I/O library to support (default is netcdf)
 #
 # By transferable I/O (TRIO), we mean that the files produced by Abinit
 # will be transferable seamlessly to other computers and codes
 #
 # Supported libraries:
 #
-#   * etsf_io  : ETSF_IO file format (requires netcdf)
 #   * psml     : XML pseudopotential format io library
 #   * netcdf   : NetCDF file format
 #   * yaml     : YAML output
@@ -690,17 +689,7 @@ with_mpi_prefix="/usr/local/mpich3_gcc49"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf+etsf_io"
-
-                       # ------------------------------ #
-
-# Include flags for the ETSF_IO library (default is unset)
-#
-with_etsf_io_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
-
-# Link flags for the ETSF_IO library (default is unset)
-#
-with_etsf_io_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -letsf_io_low_level -letsf_io_utils -letsf_io"
+with_trio_flavor="netcdf"
 
                        # ------------------------------ #
 
@@ -716,11 +705,11 @@ with_etsf_io_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -letsf_io_low_level -l
 
 # Include flags for the NetCDF library (default is unset)
 #
-with_netcdf_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
+with_netcdf_incs="-I${FALLBACKS_PATH}/netcdf/include"
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -lnetcdf"
+with_netcdf_libs="-L${FALLBACKS_PATH}/netcdf/lib -lnetcdf"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
@@ -772,7 +761,7 @@ with_fft_flavor="fftw3"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L/opt/intel/composerxe_14/mkl/lib/intel64 -Wl,--start-group  -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
+with_fft_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -855,7 +844,7 @@ with_linalg_flavor="mkl"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/opt/intel/composerxe_14/mkl/lib/intel64 -Wl,--start-group  -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
+with_linalg_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -924,49 +913,49 @@ with_dft_flavor="atompaw+libxc+wannier90+bigdft"
 
 # Full path to the AtomPAW executables (default is unset)
 #
-with_atompaw_bins="/usr/local/fallbacks/gnu/4.9/mpi/bin"
+with_atompaw_bins="${FALLBACKS_PATH}/atompaw/bin"
 
 # Include flags for the AtomPAW library (default is unset)
 #
-with_atompaw_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
+with_atompaw_incs="-I${FALLBACKS_PATH}/atompaw/include"
 
 # Link flags for the AtomPAW library (default is unset)
 #
-with_atompaw_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -latompaw"
+with_atompaw_libs="-L${FALLBACKS_PATH}/atompaw/lib -latompaw"
 
                        # ------------------------------ #
 
 # Include flags for the BigDFT library (default is unset)
 #
-with_bigdft_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
+with_bigdft_incs="-I${FALLBACKS_PATH}/bigdft/include"
 
 # Link flags for the BigDFT library (default is unset)
 #
-with_bigdft_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -lbigdft-1 -labinit -lyaml"
+with_bigdft_libs="-L${FALLBACKS_PATH}/bigdft/lib -lbigdft-1 -labinit -lyaml -lrt"
 
                        # ------------------------------ #
 
 # Include flags for the LibXC library (default is unset)
 #
-with_libxc_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
+with_libxc_incs="-I${FALLBACKS_PATH}/libxc/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-with_libxc_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib  -lxcf90 -lxc"
+with_libxc_libs="-L${FALLBACKS_PATH}/libxc/lib -lxcf90 -lxc"
 
                        # ------------------------------ #
 
 # Full path to the Wannier90 executables (default is unset)
 #
-with_wannier90_bins="/usr/local/fallbacks/gnu/4.9/mpi/bin"
+with_wannier90_bins="${FALLBACKS_PATH}/wannier90/bin"
 
 # Include flags for the Wannier90 library (default is unset)
 #
-with_wannier90_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
+with_wannier90_incs="-I${FALLBACKS_PATH}/wannier90/include"
 
 # Link flags for the Wannier90 library (default is unset)
 #
-with_wannier90_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -lwannier90"
+with_wannier90_libs="-L${FALLBACKS_PATH}/wannier90/lib -lwannier90"
 
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
 #

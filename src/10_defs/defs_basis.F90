@@ -196,6 +196,7 @@ module defs_basis
 !Revised fundamental constants from http://physics.nist.gov/cuu/Constants/index.html
 !(from 2006 least squares adjustment)
  real(dp), parameter :: Bohr_Ang=0.52917720859_dp    ! 1 Bohr, in Angstrom
+ real(dp), parameter :: Bohr_meter=Bohr_Ang * 1.d-10 ! 1 Bohr in meter
  real(dp), parameter :: Ha_cmm1=219474.6313705_dp  ! 1 Hartree, in cm^-1
  real(dp), parameter :: Ha_eV=27.21138386_dp ! 1 Hartree, in eV
  real(dp), parameter :: eV_Ha=one/Ha_eV      ! 1 eV in Hartree
@@ -307,7 +308,6 @@ module defs_basis
 ! Arrays
  integer,parameter :: identity_3d(3,3) = reshape([1,0,0,0,1,0,0,0,1], [3,3])
  integer,parameter :: inversion_3d(3,3) = reshape([-1,0,0,0,-1,0,0,0,-1], [3,3])
-
 
 !A collection of small datatypes for ragged arrays
 !A small datatype for ragged real 1D-arrays

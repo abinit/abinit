@@ -515,7 +515,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/usr/local/mpich3_gcc49"
+with_mpi_prefix="${MPI_HOME}"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -675,14 +675,13 @@ with_mpi_prefix="/usr/local/mpich3_gcc49"
 # Transferable I/O (TRIO) connector                                            #
 # ---------------------------------------------------------------------------- #
 
-# Flavor of transferable I/O library to support (default is netcdf+etsf_io)
+# Flavor of transferable I/O library to support (default is netcdf)
 #
 # By transferable I/O (TRIO), we mean that the files produced by Abinit
 # will be transferable seamlessly to other computers and codes
 #
 # Supported libraries:
 #
-#   * etsf_io  : ETSF_IO file format (requires netcdf)
 #   * psml     : XML pseudopotential format io library
 #   * netcdf   : NetCDF file format
 #   * yaml     : YAML output
@@ -690,27 +689,17 @@ with_mpi_prefix="/usr/local/mpich3_gcc49"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf+etsf_io+psml"
-
-                       # ------------------------------ #
-
-# Include flags for the ETSF_IO library (default is unset)
-#
-with_etsf_io_incs="-I/usr/local/fallbacks/gnu/4.9/mpi/include"
-
-# Link flags for the ETSF_IO library (default is unset)
-#
-with_etsf_io_libs="-L/usr/local/fallbacks/gnu/4.9/mpi/lib -letsf_io_low_level -letsf_io_utils -letsf_io"
+with_trio_flavor="netcdf+psml"
 
                        # ------------------------------ #
 
 # Include flags for the psml library (default is unset)
 #
-with_psml_incs="-I/usr/local/psml-0.8/include"
+with_psml_incs="-I/usr/local/psml-0.8_gcc49/include"
 
 # Link flags for the psml library (default is unset)
 #
-with_psml_libs="-L/usr/local/psml-0.8/lib -lpsml"
+with_psml_libs="-L/usr/local/psml-0.8_gcc49/lib -lpsml"
 
                        # ------------------------------ #
 

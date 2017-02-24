@@ -478,6 +478,7 @@ type dataset_type
  integer :: prtdipole
  integer :: prtdos
  integer :: prtdosm
+ integer :: prtebands=1
  integer :: prtefg
  integer :: prteig
  integer :: prtelf
@@ -495,6 +496,7 @@ type dataset_type
  integer :: prtpmp
  integer :: prtposcar
  integer :: prtphdos
+ integer :: prtphbands=1
  integer :: prtphsurf=0
  integer :: prtpot
  integer :: prtpsps=0
@@ -558,11 +560,11 @@ type dataset_type
  integer :: usepawu
  integer :: usepotzero
  integer :: userec
- integer :: useria
- integer :: userib
- integer :: useric
- integer :: userid
- integer :: userie
+ integer :: useria=0
+ integer :: userib=0
+ integer :: useric=0
+ integer :: userid=0
+ integer :: userie=0
  integer :: usewvl
  integer :: usexcnhat_orig
  integer :: useylm
@@ -740,11 +742,11 @@ type dataset_type
  real(dp) :: tolwfr
  real(dp) :: tphysel
  real(dp) :: tsmear
- real(dp) :: userra
- real(dp) :: userrb
- real(dp) :: userrc
- real(dp) :: userrd
- real(dp) :: userre
+ real(dp) :: userra=zero
+ real(dp) :: userrb=zero
+ real(dp) :: userrc=zero
+ real(dp) :: userrd=zero
+ real(dp) :: userre=zero
  real(dp) :: vacwidth
  real(dp) :: vdw_tol
  real(dp) :: vdw_tol_3bt
@@ -905,9 +907,13 @@ type dataset_type
  real(dp) :: ddb_shiftq(3)
 !END EPH
 
+ integer :: ndivsm=0
+ integer :: nkpath=0
+ real(dp) :: einterp(4)=zero
+ real(dp),allocatable :: kptbounds(:,:)
+
  end type dataset_type
 !!***
-
 
 !----------------------------------------------------------------------
 
