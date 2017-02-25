@@ -4,19 +4,33 @@
 !!  pred_velverlet
 !!
 !! FUNCTION
-!!  FIXME: add description.
+!!  Velocity Verlet (VV) predictor of ionic positions (ionmov = 24).
+!!  In constrast to Verlet algorithm, Velocity Verlet is a
+!!  SYMPLECTIC integrator (for small enough step sizes "dtion",
+!!  it better conserves the total energy and time-reversibility).
+!!  VV is a second order integration scheme that requires a single
+!!  evaluatoin of forces per time step. These properties make VV
+!!  a good candidate integrator for use in Hybrid Monte Carlo 
+!!  simulation scheme.
+!!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017 ABINIT group (FIXME: add author)
+!!  Copyright (C) 2017 ABINIT group (DCA, XG, GMR, JCC, SE,SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
-!!  argin(sizein)=description
+!!  ab_mover =  Data structure containing information about
+!!              input variables related to MD, e.g dtion, masses, etc. 
+!!  hist     =  history of ionic positions, forces, 
+!!  itime    =  index of current time step
+!!  ntime    =  total number of time steps
+!!  iexit    =  flag indicating finilization of mover loop
+!!  zDEBUG   =  flag indicating whether to print debug info 
 !!
 !! OUTPUT
-!!  argout(sizeout)=description
+!!  hist =  history of ionic positions, forces etc. is updated
 !!
 !! SIDE EFFECTS
 !!
@@ -62,17 +76,18 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 
 !Local variables-------------------------------
 
- integer  :: ii,jj
- real(dp) :: amass_tot,favg,etotal,epot,ekin,ekin_tmp
- real(dp) :: xcart(3,ab_mover%natom),xcart_next(3,ab_mover%natom)
- real(dp) :: xred(3,ab_mover%natom),xred_next(3,ab_mover%natom)
- real(dp) :: vel(3,ab_mover%natom),vel_nexthalf(3,ab_mover%natom)
- real(dp) :: fcart(3,ab_mover%natom),fred(3,ab_mover%natom)
+ integer  :: ii,jj                                                              ! dummy integers for loop indexes
+ real(dp) :: etotal,epot,ekin,ekin_tmp                                          ! total, potential (electronic), kinetic (ionic) energies  
+ real(dp) :: xcart(3,ab_mover%natom),xcart_next(3,ab_mover%natom)               ! Cartesian coordinates of all ions
+ real(dp) :: xred(3,ab_mover%natom),xred_next(3,ab_mover%natom)                 ! reduced coordinates of all ions
+ real(dp) :: vel(3,ab_mover%natom),vel_nexthalf(3,ab_mover%natom)               ! ionic velocities in Cartesian coordinates
+ real(dp) :: fcart(3,ab_mover%natom),fred(3,ab_mover%natom)                     ! forces, Cartesian and reduced coordinates
  real(dp) :: fred_corrected(3,ab_mover%natom),fcart_corrected(3,ab_mover%natom)
+ real(dp) :: factor                                                             ! factor, indicating change of time step at last iteration
 
- real(dp) :: acell(3)
- real(dp) :: rprimd(3,3),rprim(3,3)
-!real(dp),allocatable,save :: vin_prev(:)
+ real(dp) :: acell(3)                                                           ! lattice parameters
+ real(dp) :: rprimd(3,3),rprim(3,3)                                             ! lattice vectors
+ real(dp),allocatable,save :: vel_prev(:,:)                                     ! velocities at the end of each time step (half time step ahead of coordinates)
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -94,18 +109,29 @@ subroutine pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit)
  DBG_EXIT("COLL")
 
 if(iexit/=0)then
-  return
+   if (allocated(vel_prev))  then
+     ABI_DEALLOCATE(vel_prev)
+   end if
+   return
 end if
 
- ! Start preparation for velocity verlet
+if(itime==1)then
+   if (allocated(vel_prev))  then
+     ABI_DEALLOCATE(vel_prev)
+   end if
+   ABI_ALLOCATE(vel_prev,(3,ab_mover%natom))
+endif
 
+
+
+ ! Start preparation for velocity verlet, get information about current ionic positions, forces, velocities, etc.
  call hist2var(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
 
- fcart(:,:) = hist%histXF(:,:,3,hist%ihist)
- fred(:,:)  = hist%histXF(:,:,4,hist%ihist)
- vel(:,:)   = hist%histV(:,:,hist%ihist)               
- epot       = hist%histE(hist%ihist)                   ! electronic sub-system energy
- ekin       = hist%histE(hist%ihist)                   ! kinetic energy
+ fcart(:,:) = hist%histXF(:,:,3,hist%ihist)             ! forces in Cartesian coordinates
+ fred(:,:)  = hist%histXF(:,:,4,hist%ihist)             ! forces in reduced coordinates
+ vel(:,:)   = hist%histV(:,:,hist%ihist)                ! velocities of all ions, not needed in reality
+ epot       = hist%histE(hist%ihist)                    ! electronic sub-system energy, not needed
+ ekin       = hist%histEk(hist%ihist)                   ! kinetic energy, not needed
 
 
  if(zDEBUG)then
@@ -129,52 +155,104 @@ end if
  end if
 
 
- do ii=1,ab_mover%natom ! propagate velocities half time step forward
-   do jj=1,3
-     vel(jj,ii) = vel(jj,ii) + 0.5_dp * ab_mover%dtion*fcart(jj,ii)/ab_mover%amass(ii)
-   enddo
- enddo
+ if(itime==1)then
 
- if(itime/=1)then
-    ! Here, the time moments of velocities and coordinates coincide
-    ! Compute the kinetic energy
-    ekin_tmp=0.0
-    do ii=1,ab_mover%natom
-      do jj=1,3
-        ekin_tmp=ekin_tmp+0.5_dp*ab_mover%amass(ii)*vel(jj,ii)**2
-      end do
-    end do
-    !and print it out for debug (full energy, i.e. kinetic + potential should not drift)
-    if(zDEBUG)then
-          write (std_out,*) 'epot,ekin:', epot,ekin_tmp
-    endif 
 
-    if(itime/=ntime)then
-     do ii=1,ab_mover%natom ! propagate velocities another half time step forward 
-        do jj=1,3           ! "if" condition established a shift of half time step between velocity and coordinates time grids
-           vel(jj,ii) = vel(jj,ii) + 0.5_dp * ab_mover%dtion*fcart(jj,ii)/ab_mover%amass(ii)
-        enddo
+  !the following breakdown of single time step in two halfs is needed for initialization.
+  !half step velocities "vel_prev" are saved to be used in the next iteration
+  !the velocities "vel" are only used to estimate kinetic energy at correct time instances
+
+  do ii=1,ab_mover%natom ! propagate velocities half time step forward
+     do jj=1,3
+       vel_prev(jj,ii) = vel(jj,ii) + 0.5_dp * ab_mover%dtion*fcart(jj,ii)/ab_mover%amass(ii)
      enddo
-    endif
- endif
-
-
- if(itime/=ntime)then
+  enddo
+  do ii=1,ab_mover%natom ! propagate velocities half time step forward
+     do jj=1,3
+       vel(jj,ii) = vel_prev(jj,ii) + 0.5_dp * ab_mover%dtion*fcart(jj,ii)/ab_mover%amass(ii)
+     enddo
+  enddo
+  ! use half-step behind velocity values!!!! 
   do ii=1,ab_mover%natom ! propagate coordinates one time step forward
     do jj=1,3
-      xcart(jj,ii) = xcart(jj,ii) + ab_mover%dtion*vel(jj,ii)
+      xcart(jj,ii) = xcart(jj,ii) + ab_mover%dtion*vel_prev(jj,ii)
     enddo
   enddo
+  ! now, at this 1st iteration, "vel_prev" correspond to a time instance half-step behind
+  ! that of "xcart"
+ 
+  write(239,*) 'end of the 1 vv iteration, vel_prev:'
+  write(239,*) vel_prev(1,:)
+  write(239,*) vel_prev(2,:)
+  write(239,*) vel_prev(3,:)
+  write(239,*) ''
+
+ else !i.e. itime/=1
+
+  write(239,*) 'beg of the ',itime,' vv iteration, vel_prev:'
+  write(239,*) vel_prev(1,:)
+  write(239,*) vel_prev(2,:)
+  write(239,*) vel_prev(3,:)
+
+
+  !at this moment "vel_prev" is behind "xcart" by half of a time step 
+  !(saved from the previous iteration) and these are the velocity values to be propagated
+  !using forces that are evaluated at the same time instance as xcart
+  do ii=1,ab_mover%natom ! propagate velocities one time step forward
+     do jj=1,3
+       vel_prev(jj,ii) = vel_prev(jj,ii) + ab_mover%dtion*fcart(jj,ii)/ab_mover%amass(ii)
+     enddo
+  enddo
+  !now, the "vel_prev" velocities are half of a time step ahead and can be used to propagate xcart
+
+  if(itime==ntime-1)then
+    factor=0.5_dp
+  else
+    factor=one
+  endif
+
+  do ii=1,ab_mover%natom ! propagate coordinates 
+    do jj=1,3
+      xcart(jj,ii) = xcart(jj,ii) + factor*ab_mover%dtion*vel_prev(jj,ii)
+    enddo
+  enddo
+  !to estimate kinetic energy at the same time instance as the potential (electronic sub-system) energy
+  !propagate "vel" another half-time forward (these values are not to be used in the next time-step)
+  do ii=1,ab_mover%natom ! propagate velocities half time step forward
+     do jj=1,3
+       vel(jj,ii) = vel_prev(jj,ii) + (factor-0.5_dp) * ab_mover%dtion*fcart(jj,ii)/ab_mover%amass(ii)
+     enddo
+  enddo
+
+  ekin=0.0
+   do ii=1,ab_mover%natom
+      do jj=1,3
+        ekin=ekin+0.5_dp*ab_mover%amass(ii)*vel(jj,ii)**2
+      end do
+   end do 
+  ekin_tmp=0.0
+   do ii=1,ab_mover%natom
+      do jj=1,3
+        ekin_tmp=ekin_tmp+0.5_dp*ab_mover%amass(ii)*vel_prev(jj,ii)**2
+      end do
+   end do
+  write(238,*) itime,ekin_tmp,ekin,epot,factor 
+
+  write(239,*) 'end of the ',itime,' vv iteration, vel_prev:'
+  write(239,*) vel_prev(1,:)
+  write(239,*) vel_prev(2,:)
+  write(239,*) vel_prev(3,:)
+  write(239,*) ''
+
  endif
 
-! convert new xcart to xred to set correct output values 
-! update the history with the new coordinates, velocities, etc.
+!Convert new xcart to xred to set correct output values 
+!Update the history with the new coordinates, velocities, etc.
 
 !Increase indexes
  hist%ihist=hist%ihist+1
 
  call xcart2xred(ab_mover%natom,rprimd,xcart,xred)
-
  call var2hist(acell,hist,ab_mover%natom,rprim,rprimd,xcart,xred,zDEBUG)
 
  hist%histV(:,:,hist%ihist)=vel(:,:)
