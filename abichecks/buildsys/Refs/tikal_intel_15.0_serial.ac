@@ -721,11 +721,11 @@ with_netcdf_libs="-L/usr/local/fallbacks/intel/15.0/serial/lib -lnetcdf"
 
 # Include flags for the YAML library (default is unset)
 #
-#with_yaml_incs="-I/usr/local/fallbacks/intel/15.0/serial/include"
+#with_yaml_incs="-I/opt/etsf/include"
 
 # Link flags for the YAML library (default is unset)
 #
-#with_yaml_libs="-L/usr/local/fallbacks/intel/15.0/serial/lib -lyaml_fortran"
+#with_yaml_libs="-L/opt/etsf/lib -lyaml_fortran"
 
 # ---------------------------------------------------------------------------- #
 # FFT connector                                                                #
@@ -917,7 +917,7 @@ with_atompaw_bins="/usr/local/fallbacks/intel/15.0/serial/bin"
 
 # Include flags for the AtomPAW library (default is unset)
 #
-with_atompaw_incs="-I/usr/local/fallbacks/intel/15.0/serial/$include"
+with_atompaw_incs="-I/usr/local/fallbacks/intel/15.0/serial/include"
 
 # Link flags for the AtomPAW library (default is unset)
 #
